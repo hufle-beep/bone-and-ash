@@ -2,7 +2,7 @@
  * Scene art: public-domain ink paintings (art/bg) behind code-drawn figures, or fully drawn in code, in ink wash: grey stone pillars and floating rocks in mist, sumi-e pines, ink spirals, one red accent.
  * Every scene key returns one SVG (viewBox 400×250). Seeded, so a scene always looks the same.
  */
-import { meiPortrait, yukiPortrait, hatch, cloud } from './portrait.js';
+import { meiPortrait, yukiPortrait, hatch, cloud, smoke, butterfly, shadeDefs, vignette as darkEdges } from './portrait.js';
 
 /** 'clamp': stark black-and-white line art over screentone (the current look). 'ink': the v0.2.0 ink-wash look. */
 const STYLE = 'clamp';
@@ -44,8 +44,11 @@ function sky(top, bottom, id = 'sk') {
     if (STYLE === 'clamp') {
         const r = rng(Math.round(lum(top) * 997 + lum(bottom) * 131));
         let c = '';
-        for (let i = 0; i < 3; i++) c += cloud(40 + i * 140 + r() * 60, 24 + r() * 50, 0.55 + r() * 0.35, r() < 0.5 ? 1 : -1);
-        return hatch(night ? 2.2 : 3.1, night ? 0.8 : 0.55, night ? 0.9 : 0.7) + c;
+        for (let i = 0; i < 2; i++) c += cloud(60 + i * 200 + r() * 60, 24 + r() * 40, 0.55 + r() * 0.3, r() < 0.5 ? 1 : -1);
+        const y0 = 50 + r() * 50;
+        c += smoke([[-10, y0], [90, y0 - 40], [170, y0 + 40], [250, y0 - 6]], 6);
+        c += butterfly(40 + r() * 320, 30 + r() * 70, 0.6 + r() * 0.3, (r() - 0.5) * 40);
+        return hatch(night ? 2 : 2.6, night ? 0.85 : 0.6, night ? 0.95 : 0.8) + c;
     }
     const t = night ? 0.55 : 0.88;
     return `<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${wash(top, t, true)}"/><stop offset="0.7" stop-color="${wash(bottom, Math.min(0.95, t + 0.06), true)}"/><stop offset="1" stop-color="${wash(bottom, t, true)}"/></linearGradient></defs><rect width="${W}" height="${H}" fill="url(#${id})"/>` + cloudWash(night);
@@ -444,8 +447,8 @@ export function sceneArt(key) {
             // every filled shape gets a clean black outline (not soft mist, not the screentone)
             .replace(/<(path|ellipse|circle|rect)\b(?![^>]*\b(stroke|filter)=)(?![^>]*width="400")/g, `<$1 stroke="${K}" stroke-width="0.7" stroke-linejoin="round"`)
             .replace(/opacity="0\.\d+"/g, (m) => (Number(m.slice(9, -1)) < 0.3 ? 'opacity="0"' : m));
-        return `${open}${FILTERS}<rect width="${W}" height="${H}" fill="${Wt}"/>${body}</svg>`
-            .replace(/id="(sk|vg|gr|ink|bl|sh|gw|tl\d+)"/g, `id="$1-${id}"`).replace(/url\(#(sk|vg|gr|ink|bl|sh|gw|tl\d+)\)/g, `url(#$1-${id})`);
+        return `${open}${FILTERS}${shadeDefs('cl')}<rect width="${W}" height="${H}" fill="${Wt}"/>${body}${darkEdges('cl')}</svg>`
+            .replace(/id="(sk|vg|gr|ink|bl|sh|gw|cldh|clvg|tl\d+)"/g, `id="$1-${id}"`).replace(/url\(#(sk|vg|gr|ink|bl|sh|gw|cldh|clvg|tl\d+)\)/g, `url(#$1-${id})`);
     }
     const painted = PAINTED[key];
     const raw = painted ? painted.fg() : (SCENES[key] || SCENES.forest_dawn)();
