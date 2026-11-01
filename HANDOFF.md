@@ -1,12 +1,13 @@
 # Bone and Ash — handoff (read this first in a new chat)
 
-**Saved:** 2026-11-01 (Europe/Budapest). **Version:** prologue 0.1.1 (`sw.js` VERSION `bone-ash-0.1.1`). **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
+**Saved:** 2026-11-02 (Europe/Budapest). **Version:** prologue 0.2.0 (`sw.js` VERSION `bone-ash-0.2.0`). **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
 Built in the SillyTavern chat as a spin-off. That chat stays for SillyTavern; this game continues in its own chat.
 
 ## What it is
 
 A standalone, offline text RPG for Gábor's Android phone: a **web app (PWA)** first; a real Android app (.apk) later.
-- **No AI narrator.** The story is a hand-written branching story with stylized illustrations drawn in code (SVG). No photos and no AI images.
+- **No AI narrator.** The story is a hand-written branching story. Art: code-drawn manhua-style figures (SVG) over public-domain Chinese ink paintings.
+- **Images:** public-domain pictures are fine, and Gábor has **no rule against AI images**. His only image limits are the content boundaries below. Reference images he sends from other artists (watermarked/signed) are style references only, never put in the game.
 - **Same Qi rules as the SillyTavern game** (Rules Engine C). `js/core/formulas.js` is the engine's own file, copied unchanged from `hufle-beep/Shared-ST` at `st/rules-engine-c/lib/formulas.js`, engine 0.1.219.
 - **New rule:** every check is **value + d6 vs DC**. A 6 always succeeds; a 1 needs DC + 2.
 
@@ -63,6 +64,8 @@ They carry over from the SillyTavern project:
 | `js/core/game.js` | State (`newGame`), the numbers (HP, Qi Max, Convergence ×1.25), d6 from the save's own seed (a reload does not reroll), XP (`awardXp`), time and regen (`advance`, `sleepUntil`), hunger, condensation, inventory, relationships, **combat** (`COMBAT_ACTIONS`, `startCombat`, `combatStep`, `combatFlee`), save/load. |
 | `js/core/story.js` | The scene runner (`sceneView`, `choose`, `goTo`). |
 | `js/story/prologue.js` | `SCENES` (52), `ITEMS`, and the encounters (jackals, Gao Feng, boar, collectors). |
+| `js/art/portrait.js` | Close-ups in manhua style: `meiPortrait()`, `yukiPortrait()` (clean lines, flat cel tone, big eyes, glossy-hair highlights). |
+| `art/bg/*.jpg`, `art/bg/CREDITS.md` | Six background crops of public-domain paintings (Dong Qichang, Wen Zhengming, the Met's *Misty Landscape*), toned to the paper. Made with `tools/bg.py` (crop → 1200×750 → luminance mapped to ink `#23211e`…paper `#ece8df`, reds kept). |
 | `js/art/art.js` | `sceneArt(key)`: 26 scene illustrations from shared primitives (sky, sun/moon, mountains, treeline, mist, person, cat, beast, boar, hut, fire, shards, lotus) plus vignette and grain. |
 | `js/main.js` | The UI. Autosave key `boneash.auto`, slots `boneash.slot1–3`, save-file export/import. |
 | `sw.js`, `manifest.webmanifest`, `icons/` | Offline install. Game files: network first, cache when offline. Google Fonts: cached on first use. |
@@ -138,17 +141,22 @@ Endings reached: fought / bluff / paid / lost.
 - `romance`, `healed`, `boar`, `ignored`;
 - Mei Lin relationship values in `rel`.
 
-## Design notes (visual)
+## Design notes (visual) — v0.2.0 "ink and manhua"
 
-- **Palette:** moss-black `#1b2421` (background), surfaces `#24312c`, paper text `#d9d4c7`, bone `#f2efe6` (titles and accents), crimson `#b23a45` (HP, danger, sect), jade `#6fa58f` (Qi), ember `#d9673a`.
+- **Look:** ink on rice paper. Backgrounds are public-domain Chinese ink paintings (12 scenes, `PAINTED` in art.js) or code-drawn ink wash (stone pillars, floating rocks, sumi-e pines, ink spirals). Figures and Yuki are **clean manhua line art**: black lines, one flat grey tone, simple manga eyes. Close-ups (`PORTRAITS`: `mei_lin`, `yuki_close`) are full manhua portraits.
+- **One accent colour:** cinnabar red (the sun, the Sect, blood, fire, seals, tassels). Yuki's eyes stay gold.
+- **Palette:** paper `#ece8df`, ink `#23211e`, dim ink `#77716a`, red `#a02c2c`, cel tone `#d9d3c8`. `inkOf()` in art.js maps any old scene colour to ink of the same weight (reds stay red).
+- **Figures** (`person()` in art.js): about 7½ heads tall; styles `james` (lab coat), `mei` (high-waisted ruqun, pibo shawl, bun and pin), `sect` (red robe, crown, sword), `man` (tunic, trousers), `plain`.
+- **UI:** paper background, red 骨 seal by every title, choices marked with brushed ink circles (red for fights), brush-stroke bars and tab underline, ink-circle dice.
 - **Fonts:** Shippori Mincho for titles, Literata for body text.
-- **Layout:**
-  - The scene title sits under the art plate. It used to sit on the art, but the figures collided with it.
-  - Choices are slips with a bone-white left edge, crimson for fights. The check line on a slip is jade.
-- **Art IDs** are made unique per scene key (`sk-<key>`), so several images can share a page.
+- **Art IDs** are made unique per scene key (`sk-<key>`, `gw-<key>` …), so several images can share a page.
+- **Deferred (Gábor, 2026-11-02):** he'll likely want a more serious tone later, so the art should become **less cutesy** (smaller eyes, sharper faces, less blush). Do this after he has played the prologue.
 
 ## Next steps (proposed, not built)
 
 1. **Act 1**, following on from the epilogue: the dead tree's heart, the Crimson Lotus invitation or retaliation (depending on the ending), the first breakthrough to Foundation (Saturation 100%, no tribulation), growing his people's tech again, more hunting and foraging, and more companions or romance.
 2. **Android .apk:** wrap the web app with Capacitor and build it in GitHub Actions. The Android SDK can't be downloaded in the cloud session.
-3. **Quality:** sound effects (optional), more art variety (a portrait per new character), and a settings page (text size, reduce motion).
+3. **Art:** less cutesy manhua (see Design notes); close-ups for James and the Sect; manhua treatment for the remaining plain interiors (elder, healer, dinner); more paintings (Wang Hui *Landscape*, Cleveland 1915.105; Wang Shimin *Mountain Village*, Cleveland 1997.104 — Gábor downloads and attaches, the cloud session can't fetch images).
+4. **Quality:** sound effects (optional), a settings page (text size, reduce motion).
+
+**Session quirk:** in the cloud clone the `origin` remote sometimes resets to the old `James-rpg-test` URL. Before pushing: `git remote set-url origin https://github.com/hufle-beep/bone-and-ash`.
