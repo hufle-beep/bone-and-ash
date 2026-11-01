@@ -17,6 +17,7 @@ Same rules as the SillyTavern game (Rules Engine C): Qi, Convergence (Qi + Bones
 - `js/core/story.js` — the scene runner.
 - `js/story/prologue.js` — the prologue (52 scenes).
 - `js/art/art.js` — the illustrations, drawn in code.
+- `HANDOFF.md` — everything a new chat needs (spec, rules, story map, next steps).
 - `tests/` — `node tests/rules.test.mjs` (engine numbers) and `node tests/story.test.mjs` (every scene reachable, 2,000 random playthroughs).
 
 When you change files, bump `VERSION` in `sw.js` so installed copies pick up the update.
