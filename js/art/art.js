@@ -163,14 +163,14 @@ function swirl(x, y, r, n = 3) {
 function person(x, y, s = 1, { coat = C.paper, skin = '#c9a98a', hair = '#c9b27a', robe = false, sword = false, style } = {}) {
     const st = style || (robe ? 'sect' : 'plain');
     const male = st !== 'mei' && st !== 'plain';
-    const L = '#2a2826';
+    const L = '#1b1917';
     const w = (n) => f(n / Math.sqrt(Math.max(1, s * 1.2)) * 100) / 100;
-    const line = `stroke="${L}" stroke-width="${w(0.42)}" stroke-linejoin="round" stroke-linecap="round"`;
+    const line = `stroke="${L}" stroke-width="${w(0.55)}" stroke-linejoin="round" stroke-linecap="round"`;
     const thin = `stroke="${L}" stroke-width="${w(0.26)}" fill="none" stroke-linecap="round"`;
     const fold = `stroke="${L}" stroke-width="${w(0.24)}" fill="none" opacity="0.5" stroke-linecap="round"`;
     /** A garment piece: wash fill, a shadow wash from the right, then the ink outline. */
-    const piece = (d, fill, shade = 1) => `<path d="${d}" fill="${fill}"/><path d="${d}" fill="url(#sh)" opacity="${shade}"/><path d="${d}" fill="none" ${line}/>`;
-    const sk = inkOf(skin);
+    const piece = (d, fill) => `<path d="${d}" fill="${fill}"/><path d="${d}" fill="none" ${line}/>`;
+    const sk = '#f7f2ea';
     const hairC = inkOf(hair);
     const robeC = st === 'sect' ? coat : wash(coat, st === 'james' ? 0.12 : 0.45);
     const innerC = st === 'sect' ? '#ebe5da' : wash(coat, 0.78);
@@ -253,16 +253,14 @@ function person(x, y, s = 1, { coat = C.paper, skin = '#c9a98a', hair = '#c9b27a
     const hw = male ? 3.3 : 3.1;
     const headD = `M-${hw} -58.4 C-${hw} -61 -1.8 -62.3 0 -62.3 C1.8 -62.3 ${hw} -61 ${hw} -58.4 ${jaw} Z`;
     if (st !== 'mei') head += `<path d="M-${hw - 0.05} -58.6 Q-${hw + 0.7} -58 -${hw - 0.1} -56.4 M${hw - 0.05} -58.6 Q${hw + 0.7} -58 ${hw - 0.1} -56.4" fill="${sk}" ${line}/>`;
-    head += `<path d="${headD}" fill="${sk}"/><path d="${headD}" fill="url(#sh)" opacity="0.6"/><path d="${headD}" fill="none" ${line}/>`;
+    head += `<path d="${headD}" fill="${sk}"/><path d="${headD}" fill="none" ${line}/>`;
     const lip = st === 'mei' ? '#a8443f' : '#7a6660';
-    const face = `<path d="M-2.05 -58.05 Q-1.35 -58.6 -0.65 -58.1 M0.65 -58.1 Q1.35 -58.6 2.05 -58.05" stroke="${L}" stroke-width="${w(0.34)}" fill="none" stroke-linecap="round"/>`
-        + `<path d="M-1.95 -57.9 Q-1.35 -57.55 -0.75 -57.95 M0.75 -57.95 Q1.35 -57.55 1.95 -57.9" stroke="${L}" stroke-width="${w(0.14)}" fill="none" opacity="0.5"/>`
-        + `<circle cx="-1.33" cy="-58" r="0.3" fill="${L}"/><circle cx="1.37" cy="-58" r="0.3" fill="${L}"/><circle cx="-1.25" cy="-58.1" r="0.08" fill="#f6f2ea"/><circle cx="1.45" cy="-58.1" r="0.08" fill="#f6f2ea"/>`
-        + (st === 'mei' ? `<path d="M-2.05 -58.05 L-2.4 -58.4 M2.05 -58.05 L2.4 -58.4" stroke="${L}" stroke-width="${w(0.16)}"/>` : '')
-        + `<path d="M-2.3 -59.2 Q-1.4 -59.8 -0.5 -59.35 M0.5 -59.35 Q1.4 -59.8 2.3 -59.2" stroke="${L}" stroke-width="${w(male ? 0.34 : 0.22)}" fill="none" stroke-linecap="round"/>`
-        + `<path d="M0.15 -57.6 Q0.45 -56.6 0.3 -56.2 M-0.35 -56.15 Q0 -55.95 0.35 -56.15" stroke="${L}" stroke-width="${w(0.15)}" fill="none" opacity="0.75"/><path d="M0.3 -57.4 Q0.55 -56.7 0.35 -56.3" stroke="${L}" stroke-width="${w(0.5)}" opacity="0.08" fill="none"/>`
-        + `<path d="M-0.8 -55.05 Q-0.4 -55.25 0 -55.1 Q0.4 -55.25 0.8 -55.05" stroke="${lip}" stroke-width="${w(0.22)}" fill="none" stroke-linecap="round"/><path d="M-0.5 -54.9 Q0 -54.5 0.5 -54.9" stroke="${lip}" stroke-width="${w(st === 'mei' ? 0.32 : 0.14)}" fill="none" opacity="${st === 'mei' ? 0.85 : 0.5}"/>`
-        + `<ellipse cx="-1.9" cy="-56.2" rx="0.8" ry="0.45" fill="#b0706a" opacity="${st === 'mei' ? 0.08 : 0.04}"/><ellipse cx="1.9" cy="-56.2" rx="0.8" ry="0.45" fill="#b0706a" opacity="${st === 'mei' ? 0.08 : 0.04}"/>`;
+    const face = [-1, 1].map((d) => `<path d="M${f(d * 2.2)} -58.3 Q${f(d * 1.35)} -59.1 ${f(d * 0.55)} -58.4" stroke="${L}" stroke-width="${w(0.45)}" fill="none" stroke-linecap="round"/>`
+        + `<ellipse cx="${f(d * 1.35)}" cy="-57.75" rx="0.5" ry="0.68" fill="${L}"/><circle cx="${f(d * 1.35 - 0.18)}" cy="-58" r="0.16" fill="#fff"/>`
+        + `<path d="M${f(d * 2.3)} -59.9 Q${f(d * 1.4)} -60.4 ${f(d * 0.6)} -60" stroke="${L}" stroke-width="${w(0.25)}" fill="none" stroke-linecap="round"/>`).join('')
+        + `<path d="M0.15 -56.5 L0.4 -55.9 L0.05 -55.8" stroke="${L}" stroke-width="${w(0.18)}" fill="none"/>`
+        + `<path d="M-0.55 -54.6 Q0 -54.35 0.55 -54.6" stroke="${st === 'mei' ? '#a02c2c' : L}" stroke-width="${w(0.25)}" fill="none" stroke-linecap="round"/>`
+        + `<path d="M-2.8 -53.9 Q0 -51.8 2.8 -53.9 L2.2 -52.6 Q0 -51.6 -2.2 -52.6 Z" fill="#d9d3c8" opacity="0.9"/>`;
 
     // ---- hair ----
     let hairS = '';
@@ -292,10 +290,10 @@ function person(x, y, s = 1, { coat = C.paper, skin = '#c9a98a', hair = '#c9b27a
 }
 /** Yuki: a small white cat, sitting, at real cat proportions, in fine ink with soft shading. */
 function cat(x, y, s = 1, color = C.bone) {
-    const L = '#2a2826';
+    const L = '#1b1917';
     const w = (n) => f(n / Math.sqrt(Math.max(1, s)) * 100) / 100;
     const c = inkOf(color);
-    const line = `stroke="${L}" stroke-width="${w(0.42)}" stroke-linejoin="round" stroke-linecap="round"`;
+    const line = `stroke="${L}" stroke-width="${w(0.55)}" stroke-linejoin="round" stroke-linecap="round"`;
     const fur = `stroke="${L}" stroke-width="${w(0.18)}" fill="none" opacity="0.45" stroke-linecap="round"`;
     const tail = 'M-10.6 -1.6 C-14.8 -0.4 -14.6 2.4 -10.2 2.5 C-4.4 2.7 2.6 2.2 7.6 0.9';
     const bodyD = 'M1.2 -19.6 C-3.4 -18.8 -8.8 -14.6 -11.2 -8.6 C-12.8 -4.4 -11.8 -0.6 -7.8 0 L6.6 0 C7.4 0 7.6 -0.9 7 -1.4 C6.6 -5 6.4 -9 6.7 -12.4 C7 -15.4 6.6 -18.2 5.2 -19.8 Z';
@@ -303,12 +301,12 @@ function cat(x, y, s = 1, color = C.bone) {
     return `<g transform="translate(${x} ${y}) scale(${f(s * 1.05)})">`
         + `<ellipse cx="-2" cy="0.6" rx="11" ry="1.1" fill="${L}" opacity="0.12"/>`
         + `<path d="${tail}" stroke="${L}" stroke-width="${f(2.5 + 0.9 / Math.sqrt(Math.max(1, s)))}" fill="none" stroke-linecap="round"/><path d="${tail}" stroke="${c}" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M-6 2.4 C-2 2.4 2 2.1 5 1.4" stroke="${L}" stroke-width="1.2" opacity="0.08" fill="none"/>`
-        + `<path d="${bodyD}" fill="${c}"/><path d="${bodyD}" fill="url(#sh)" opacity="0.4"/><path d="${bodyD}" fill="none" ${line}/>`
+        + `<path d="${bodyD}" fill="${c}"/><path d="${bodyD}" fill="none" ${line}/>`
         + `<path d="M-10.4 -2.2 C-9.2 -8 -4 -9.8 -1.6 -4.6 C-1 -3 -1 -1.4 -1.4 0" ${fur}/><ellipse cx="-6.4" cy="-3.6" rx="4.2" ry="2.6" fill="${L}" opacity="0.06"/>`
         + `<path d="M3.2 -11.4 C3.1 -7 3.2 -3 3.4 -0.4 M5 -0.1 C4.8 -0.6 5.4 -1 6.4 -0.9" fill="none" ${line}/><path d="M2.2 -0.1 C2.2 -0.8 3 -1.1 4.2 -0.9 C4.6 -0.6 4.6 -0.2 4.4 0" fill="${c}" ${line}/>`
         + `<path d="M5.6 -18.6 l0.5 0.7 l-0.5 0.4 l0.6 0.8 l-0.4 0.4 M6.2 -15.2 l0.5 0.6 M-8.6 -12.6 l-0.6 -0.5 M-10.6 -8.4 l-0.6 -0.3 M-4 -17.2 l-0.3 -0.7" ${fur}/>`
         + `<path d="M0.4 -24.4 L0.7 -28.4 L2.8 -26.3 Z M4.6 -26.4 L6.8 -28.5 L7.1 -24.4 Z" fill="${c}" ${line}/><path d="M1.1 -27.2 L1.3 -25.4 M6.4 -27.4 L6.3 -25.4" stroke="#c2a7a2" stroke-width="0.7" stroke-linecap="round"/><path d="M0.9 -27.6 l0.6 0.8 M6.8 -27.8 l-0.5 0.9" ${fur}/>`
-        + `<path d="${headD}" fill="${c}"/><path d="${headD}" fill="url(#sh)" opacity="0.3"/><path d="${headD}" fill="none" ${line}/>`
+        + `<path d="${headD}" fill="${c}"/><path d="${headD}" fill="none" ${line}/>`
         + `<path d="M1.65 -23.25 Q2.35 -24 3.05 -23.25 Q2.35 -22.75 1.65 -23.25 Z M4.35 -23.25 Q5.05 -24 5.75 -23.25 Q5.05 -22.75 4.35 -23.25 Z" fill="#e2c13a" stroke="${L}" stroke-width="${w(0.24)}"/><path d="M2.35 -23.85 L2.35 -22.8 M5.05 -23.85 L5.05 -22.8" stroke="${L}" stroke-width="${w(0.36)}" stroke-linecap="round"/><circle cx="2.15" cy="-23.45" r="0.1" fill="#fff"/><circle cx="4.85" cy="-23.45" r="0.1" fill="#fff"/>`
         + `<path d="M3.3 -21.7 L4.1 -21.7 L3.7 -21.2 Z" fill="#c2a7a2"/><path d="M3.7 -21.2 L3.7 -20.8 M3.7 -20.8 Q3.2 -20.3 2.7 -20.6 M3.7 -20.8 Q4.2 -20.3 4.7 -20.6" stroke="${L}" stroke-width="${w(0.2)}" fill="none"/>`
         + `<path d="M2.6 -21.2 L-2.6 -22 M2.6 -20.9 L-2.4 -20.2 M2.7 -20.6 L-1.8 -19 M4.8 -21.2 L10 -22.2 M4.8 -20.9 L9.8 -20.4 M4.7 -20.6 L9 -19.2" stroke="${L}" stroke-width="${w(0.12)}" opacity="0.55"/>`
@@ -354,7 +352,7 @@ const grain = '<rect width="400" height="250" filter="url(#gr)"/>';
 const vignette = '<rect width="400" height="250" fill="url(#vg)"/>';
 
 const JAMES = { coat: C.bone, hair: '#c9b27a', style: 'james' };
-const MEI = { coat: '#8a7a6a', hair: C.ink, skin: '#c99f7f', style: 'mei' };
+const MEI = { coat: '#8a7a6a', hair: '#1f1d1b', skin: '#c99f7f', style: 'mei' };
 const SECT = { coat: C.crimson, hair: C.ink, skin: '#c9a184', robe: true, style: 'sect' };
 
 const SCENES = {
