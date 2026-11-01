@@ -16,7 +16,7 @@ const jackals = (g) => ({
     band: 'standard',
     enemies: [
         { name: 'Ashfang jackal', hp: g.flags.stakes ? 4 : 7, dc: 3, atk: 5, dmg: 4, prefersSmall: true },
-        { name: 'Ashfang bitch', hp: 7, dc: 3, atk: g.flags.watch ? 4 : 5, dmg: 4, prefersSmall: true },
+        { name: 'Ashfang matriarch', hp: 7, dc: 3, atk: g.flags.watch ? 4 : 5, dmg: 4, prefersSmall: true },
     ],
     win: 'jackals_won', lose: 'jackals_lost', flee: 'jackals_fled',
 });

@@ -1,0 +1,16 @@
+{
+  "name": "Bone and Ash",
+  "short_name": "Bone and Ash",
+  "description": "A text RPG: a young cultivator and his cat, stranded in a world that eats its own.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1b2421",
+  "theme_color": "#1b2421",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
