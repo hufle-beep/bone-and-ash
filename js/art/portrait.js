@@ -8,6 +8,8 @@ const K = '#111010';
 const W = '#fbfaf7';
 const RED = '#a02c2c';
 const DARKRED = '#7a1d24';
+const SMOKE = '#a7a29a';
+const G2 = '#c8c3bb';
 const ln = (w = 1.2) => `stroke="${K}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"`;
 function rng(seed) {
     let x = seed >>> 0 || 1;
@@ -44,7 +46,7 @@ export function smoke(pts, w = 7) {
     const [p0, p1, p2, p3] = pts;
     const d = (o) => `M${f(p0[0])} ${f(p0[1] + o)} C${f(p1[0])} ${f(p1[1] + o)} ${f(p2[0])} ${f(p2[1] + o)} ${f(p3[0])} ${f(p3[1] + o)}`;
     const curl = `M${f(p3[0])} ${f(p3[1])} c6 -2 10 -10 4 -14 c-5 -3 -10 2 -6 6`;
-    return `<path d="${d(0)}" stroke="${W}" stroke-width="${w}" fill="none" stroke-linecap="round" opacity="0.92"/>`
+    return `<path d="${d(0)}" stroke="${SMOKE}" stroke-width="${w}" fill="none" stroke-linecap="round"/><path d="${d(-w / 6)}" stroke="${W}" stroke-width="${f(w / 4)}" fill="none" stroke-linecap="round"/>`
         + `<path d="${d(-w / 2)} ${d(w / 2)}" stroke="${K}" stroke-width="0.6" fill="none" opacity="0.8"/>`
         + `<path d="${d(-w / 6)} ${d(w / 6)}" stroke="${K}" stroke-width="0.3" fill="none" opacity="0.45"/>`
         + `<path d="${curl}" stroke="${K}" stroke-width="0.7" fill="none"/>`;
@@ -160,7 +162,9 @@ export function meiPortrait(id = 'pm') {
     s += ribbons(r, cx - 24, 110, 40, 150, -46, 12, 1.9) + ribbons(r, cx + 26, 110, 36, 150, -10, 10, 1.6);
     // ---- robe: black with white peonies, a white inner collar, a flowing sleeve ----
     s += `<path d="M${cx - 92} 262 C${cx - 80} 222 ${cx - 46} 196 ${cx - 10} 186 L${cx + 10} 186 C${cx + 46} 196 ${cx + 84} 222 ${cx + 98} 262 Z" fill="${K}"/>`;
-    s += peony(cx - 58, 236, 0.9) + peony(cx + 62, 232, 1) + peony(cx + 30, 254, 0.7) + peony(cx - 26, 258, 0.6);
+    const sw = (x, y, r) => `<path d="M${f(x + r)} ${f(y)} A${f(r)} ${f(r)} 0 1 0 ${f(x)} ${f(y + r)} A${f(r * 0.55)} ${f(r * 0.55)} 0 1 0 ${f(x + r * 0.25)} ${f(y + r * 0.2)} M${f(x + r)} ${f(y)} C${f(x + r * 2)} ${f(y + r * 0.6)} ${f(x + r * 2.6)} ${f(y - r * 0.2)} ${f(x + r * 3.6)} ${f(y + r * 0.3)} C${f(x + r * 4.6)} ${f(y + r * 0.8)} ${f(x + r * 5.4)} ${f(y)} ${f(x + r * 6)} ${f(y - r * 0.4)}" stroke="${G2}" stroke-width="1.4" fill="none" stroke-linecap="round"/>`;
+    s += sw(cx - 80, 236, 7) + sw(cx - 50, 216, 5) + sw(cx + 34, 226, 6) + sw(cx - 34, 250, 5) + sw(cx + 56, 248, 4.4);
+    s += `<path d="M${cx + 70} 206 A18 18 0 1 0 ${cx + 70} 242 A14 18 0 1 1 ${cx + 70} 206 Z" fill="${RED}"/>`;
     s += `<path d="M${cx + 40} 202 C${cx + 70} 214 ${cx + 92} 236 ${cx + 100} 262" stroke="${W}" stroke-width="0.8" fill="none"/><path d="M${cx - 40} 204 C${cx - 66} 214 ${cx - 84} 236 ${cx - 90} 262" stroke="${W}" stroke-width="0.8" fill="none"/>`;
     s += `<path d="M${cx - 12} 185 L${cx + 10} 262 L${cx + 22} 262 L${cx - 2} 185 Z" fill="${W}" ${ln(1)}/><path d="M${cx + 12} 185 L${cx + 1} 210 L${cx + 6} 214 L${cx + 20} 187 Z" fill="${W}" ${ln(1)}/>`;
     s += `<path d="M${cx - 12} 185 L${cx + 10} 262 L${cx + 14} 262 L${cx - 8} 185 Z" fill="url(#${id}dh)"/>`;

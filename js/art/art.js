@@ -2,6 +2,7 @@
  * Scene art: public-domain ink paintings (art/bg) behind code-drawn figures, or fully drawn in code, in ink wash: grey stone pillars and floating rocks in mist, sumi-e pines, ink spirals, one red accent.
  * Every scene key returns one SVG (viewBox 400×250). Seeded, so a scene always looks the same.
  */
+import { clampPerson, clampCat, KEEP } from './figures-clamp.js';
 import { meiPortrait, yukiPortrait, hatch, cloud, smoke, butterfly, shadeDefs, vignette as darkEdges } from './portrait.js';
 
 /** 'clamp': stark black-and-white line art over screentone (the current look). 'ink': the v0.2.0 ink-wash look. */
@@ -174,6 +175,7 @@ function swirl(x, y, r, n = 3) {
  */
 function person(x, y, s = 1, { coat = C.paper, skin = '#c9a98a', hair = '#c9b27a', robe = false, sword = false, style } = {}) {
     const st = style || (robe ? 'sect' : 'plain');
+    if (STYLE === 'clamp') return clampPerson(x, y, s, { style: st, sword, coat });
     const male = st !== 'mei' && st !== 'plain';
     const L = '#1b1917';
     const w = (n) => f(n / Math.sqrt(Math.max(1, s * 1.2)) * 100) / 100;
@@ -302,6 +304,7 @@ function person(x, y, s = 1, { coat = C.paper, skin = '#c9a98a', hair = '#c9b27a
 }
 /** Yuki: a small white cat, sitting, at real cat proportions, in fine ink with soft shading. */
 function cat(x, y, s = 1, color = C.bone) {
+    if (STYLE === 'clamp') return clampCat(x, y, s);
     const L = '#1b1917';
     const w = (n) => f(n / Math.sqrt(Math.max(1, s)) * 100) / 100;
     const c = inkOf(color);
@@ -435,7 +438,7 @@ export function sceneArt(key) {
         const Wt = '#fbfaf7';
         const flat = (h) => {
             const k = h.toLowerCase();
-            if (k === '#e2c13a' || k === '#e7c34a' || k === '#e2bd45') return k;
+            if (KEEP.includes(k)) return k;
             const [r, g, b] = hex2rgb(k);
             if (r > g + 55 && r > b + 45) return '#a02c2c';
             return lum(k) < 0.36 ? K : Wt;
