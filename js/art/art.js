@@ -1,7 +1,9 @@
 /**
- * Scene art, drawn in code, in ink wash: grey stone pillars and floating rocks in mist, sumi-e pines, ink spirals, one red accent.
+ * Scene art: public-domain ink paintings (art/bg) behind code-drawn figures, or fully drawn in code, in ink wash: grey stone pillars and floating rocks in mist, sumi-e pines, ink spirals, one red accent.
  * Every scene key returns one SVG (viewBox 400×250). Seeded, so a scene always looks the same.
  */
+import { meiPortrait, yukiPortrait } from './portrait.js';
+
 const W = 400;
 const H = 250;
 const C = {
@@ -384,14 +386,49 @@ const SCENES = {
     hairpin: () => sky('#1f2420', '#33403a') + `<circle cx="200" cy="125" r="90" fill="${C.bone}" opacity="0.06"/><g transform="translate(200 125) rotate(-28)"><path d="M-110 0 L100 0" stroke="${C.bone}" stroke-width="6" stroke-linecap="round"/>${Array.from({ length: 9 }, (_, i) => `<path d="M${-80 + i * 20} 0 Q${-70 + i * 20} -16 ${-60 + i * 20} 0 Q${-70 + i * 20} 16 ${-80 + i * 20} 0 Z" fill="${C.bone}" opacity="${0.6 + (i % 3) * 0.12}"/>`).join('')}<circle cx="100" cy="0" r="9" fill="${C.bone}"/></g>`,
 };
 
+/**
+ * Scenes painted over public-domain ink paintings (cropped and toned to the paper; see art/bg/CREDITS.md).
+ * img: the background; dark: a dusk/night wash over it; fg: what's drawn on top.
+ */
+const GROUND = '<defs><linearGradient id="gw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ece8df" stop-opacity="0"/><stop offset="0.55" stop-color="#ece8df" stop-opacity="0.7"/><stop offset="1" stop-color="#e3ded3" stop-opacity="0.92"/></linearGradient></defs><rect y="165" width="400" height="85" fill="url(#gw)"/>';
+const MEDITATOR = `<g transform="translate(200 205)"><path d="M-40 0 Q-30 -20 0 -18 Q30 -20 40 0 Z" fill="${C.bone}" stroke="#2a2826" stroke-width="0.8"/><path d="M-14 -18 L-16 -52 Q0 -60 16 -52 L14 -18 Z" fill="${C.bone}" stroke="#2a2826" stroke-width="0.8"/><circle cy="-62" r="8" fill="#c9a98a" stroke="#2a2826" stroke-width="0.7"/></g>`;
+const BANNER = (x, top) => `<path d="M${x} ${top + 90} L${x} ${top}" stroke="#3a2a22" stroke-width="4"/><path d="M${x} ${top + 4} L${x + 35} ${top + 7} L${x + 32} ${top + 44} L${x} ${top + 39} Z" fill="${C.crimson}"/>`;
+const PAINTED = {
+    forest_dawn: { img: 'forest', fg: () => sun(330, 46, 13) + GROUND + cat(170, 232, 1.1) + person(200, 236, 1, JAMES) },
+    clearing: { img: 'peaks', fg: () => sun(80, 52, 11, C.crimson, 0.25) + GROUND + person(205, 232, 0.9, JAMES) + cat(225, 234, 0.8) },
+    stream: { img: 'cliffs', fg: () => GROUND + person(150, 238, 0.8, JAMES) + cat(300, 238, 0.9) },
+    meditation: { img: 'peaks', fg: () => GROUND + MEDITATOR + swirl(110, 90, 40) + swirl(300, 70, 28) + swirl(200, 150, 70, 2) },
+    herb_girl: { img: 'forest', fg: () => sun(345, 40, 12) + GROUND + person(90, 232, 0.9, MEI) + person(220, 234, 1, SECT) + person(270, 236, 1.15, { coat: '#4a3a32', hair: C.ink, skin: '#b88d6c', style: 'man' }) },
+    camp: { img: 'pine', dark: 0.32, fg: () => GROUND + fire(200, 224, 1) + person(160, 232, 0.85, JAMES) + cat(240, 232, 0.8) + `<g stroke="${C.bone}" stroke-width="2.5" stroke-linecap="round">${[60, 100, 300, 340].map((x) => `<path d="M${x} 238 L${x + (x < 200 ? -8 : 8)} 216"/>`).join('')}</g>` },
+    forest_night: { img: 'pine', dark: 0.55, fg: () => moon(330, 40, 12) + fire(200, 236, 0.6) },
+    jackals: { img: 'pine', dark: 0.55, fg: () => GROUND + beast(90, 232, 1.4) + beast(320, 236, -1.4) + fire(200, 234, 0.55) + person(200, 238, 0.85, JAMES) + cat(226, 240, 0.7) },
+    boar: { img: 'forest', fg: () => GROUND + boarShape(250, 234, 1.5) + person(100, 236, 0.85, JAMES) + shards(71, 180, 204, 10, 40) },
+    village: { img: 'village', fg: () => GROUND + BANNER(300, 120) + person(210, 238, 0.85, JAMES) + cat(228, 240, 0.6) },
+    ridge: { img: 'mountain', dark: 0.12, fg: () => sun(70, 60, 14, C.ember, 0.3) + GROUND + person(110, 240, 0.8, JAMES) + cat(128, 228, 0.6) },
+    collectors: { img: 'village', fg: () => sun(150, 40, 16) + GROUND + BANNER(330, 110) + person(130, 232, 1.15, { ...SECT, coat: '#6e1c25', sword: true }) + person(180, 228, 0.95, SECT) + person(84, 230, 0.95, SECT) + person(52, 232, 0.9, SECT) + person(270, 238, 1, JAMES) + cat(292, 238, 0.6) },
+};
+/** Close-ups drawn as realistic portraits (no ink wobble, true colours), over a faint painted backdrop. */
+const PORTRAITS = { mei_lin: { img: 'peaks', draw: meiPortrait }, yuki_close: { img: 'peaks', draw: yukiPortrait } };
+export const BG_IMAGES = ['forest', 'peaks', 'cliffs', 'pine', 'village', 'mountain'];
+const bgImage = (img, opacity = 1) => `<image href="art/bg/${img}.jpg" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="xMidYMid slice" opacity="${opacity}"/>`;
+
 /** SVG markup for a scene's art key (unknown keys get a quiet forest). */
 export function sceneArt(key) {
-    const raw = (SCENES[key] || SCENES.forest_dawn)();
+    const id = String(key || 'x').replace(/\W/g, '');
+    const open = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${id.replace(/_/g, ' ')}" preserveAspectRatio="xMidYMid slice">`;
+    if (PORTRAITS[key]) {
+        const pt = PORTRAITS[key];
+        return `${open}<rect width="${W}" height="${H}" fill="#ece8df"/>${bgImage(pt.img, 0.35)}<rect width="${W}" height="${H}" fill="#ece8df" opacity="0.35"/>${pt.draw(`p${id}`)}</svg>`;
+    }
+    const painted = PAINTED[key];
+    const raw = painted ? painted.fg() : (SCENES[key] || SCENES.forest_dawn)();
     const body = raw
         .replace(/fill="(#d9673a|#f1c26a)" opacity="0\.(0\d|1\d)"/g, 'fill="#fffaf0" opacity="0.45" filter="url(#bl)"')
         .replace(/#[0-9a-fA-F]{6}\b/g, (h) => inkOf(h));
-    const id = String(key || 'x').replace(/\W/g, '');
-    return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${id.replace(/_/g, ' ')}" preserveAspectRatio="xMidYMid slice">${FILTERS}<rect width="${W}" height="${H}" fill="#ece8df"/><g filter="url(#ink)">${body}</g>${vignette}${grain}</svg>`
-        .replace(/id="(sk|vg|gr|ink|bl|sh|tl\d+)"/g, `id="$1-${id}"`).replace(/url\(#(sk|vg|gr|ink|bl|sh|tl\d+)\)/g, `url(#$1-${id})`);
+    const base = painted
+        ? bgImage(painted.img) + `<rect width="${W}" height="${H}" fill="#ece8df" opacity="${painted.img === 'forest' || painted.img === 'cliffs' ? 0.3 : 0.12}"/>` + (painted.dark ? `<rect width="${W}" height="${H}" fill="#1e1c1a" opacity="${painted.dark}"/>` : '')
+        : '';
+    return `${open}${FILTERS}<rect width="${W}" height="${H}" fill="#ece8df"/>${base}<g filter="url(#ink)">${body}</g>${vignette}${grain}</svg>`
+        .replace(/id="(sk|vg|gr|ink|bl|sh|gw|tl\d+)"/g, `id="$1-${id}"`).replace(/url\(#(sk|vg|gr|ink|bl|sh|gw|tl\d+)\)/g, `url(#$1-${id})`);
 }
 export const ART_KEYS = Object.keys(SCENES);
