@@ -1,5 +1,5 @@
 /* Bone and Ash — offline cache. Bump VERSION on every release so phones pick up the new files. */
-const VERSION = 'bone-ash-0.1.0';
+const VERSION = 'bone-ash-0.1.1';
 const FILES = [
     './', 'index.html', 'manifest.webmanifest', 'css/style.css',
     'js/main.js', 'js/core/game.js', 'js/core/story.js', 'js/core/formulas.js', 'js/story/prologue.js', 'js/art/art.js',

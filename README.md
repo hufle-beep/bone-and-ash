@@ -6,7 +6,7 @@ Same rules as the SillyTavern game (Rules Engine C): Qi, Convergence (Qi + Bones
 
 ## Play
 
-- **On the phone (Termux):** `cd ~/James-rpg-test && git pull && python -m http.server 8080`, then open `http://localhost:8080` in Chrome. Menu → *Add to Home screen* installs it; after the first load it works offline.
+- **On the phone:** open **https://hufle-beep.github.io/bone-and-ash/** in Chrome. Menu → *Add to Home screen* installs it; after the first load it works offline. New versions arrive on their own (reopen the game once or twice).
 - **On the PC:** run `python -m http.server 8080` in this folder and open `http://localhost:8080`.
 - The game saves itself after every choice (in the browser). The Saves tab has 3 slots and a save file you can move between devices.
 

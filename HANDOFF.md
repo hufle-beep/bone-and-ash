@@ -1,6 +1,6 @@
 # Bone and Ash — handoff (read this first in a new chat)
 
-**Saved:** 2026-11-01 (Europe/Budapest). **Version:** prologue 0.1.0 (`sw.js` VERSION `bone-ash-0.1.0`). **Repo:** `hufle-beep/James-rpg-test` (private), branch `main`.
+**Saved:** 2026-11-01 (Europe/Budapest). **Version:** prologue 0.1.1 (`sw.js` VERSION `bone-ash-0.1.1`). **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
 Built in the SillyTavern chat as a spin-off. That chat stays for SillyTavern; this game continues in its own chat.
 
 ## What it is
@@ -45,22 +45,14 @@ A standalone, offline text RPG for Gábor's Android phone: a **web app (PWA)** f
 They carry over from the SillyTavern project:
 - **Propose first, build after his OK.**
 - **Show numbers** before any one-time change to a save or a balance.
-- Push every change. Tell him how to update: `git pull` in the game folder, then reload.
+- Push every change. The Pages site updates in 1–2 minutes; tell him to reopen the game (once or twice, for the offline cache). Gábor is not a programmer: give him tap-by-tap steps for anything he must do on GitHub.
 - **Bump `VERSION` in `sw.js` on every release**, or installed copies keep the old files.
 - Short answers. A list of choices when there is something to decide.
 
 ## How to play / run
 
-- **Phone (Termux):**
-  ```
-  cd ~/James-rpg-test && git pull && python -m http.server 8080
-  ```
-  Or `npx http-server -p 8080`. Then open `http://localhost:8080` in Chrome and choose *Add to Home screen*. It works offline after the first load.
-- **PC:** run the same server in the folder and open the same address.
-- **GitHub Pages** could not be turned on from the cloud session (API blocked). For a private repo it also needs a paid GitHub plan. Options:
-  - Gábor makes the repo public and enables Pages himself.
-  - Publish it as a claude.ai page.
-  - Build the .apk (see Next steps).
+- **Phone:** https://hufle-beep.github.io/bone-and-ash/ in Chrome, then *Add to Home screen*. Works offline after the first load.
+- **Local (Termux or PC):** `python -m http.server 8080` in the folder, open `http://localhost:8080`.
 
 ## Files
 
@@ -159,5 +151,4 @@ Endings reached: fought / bluff / paid / lost.
 
 1. **Act 1**, following on from the epilogue: the dead tree's heart, the Crimson Lotus invitation or retaliation (depending on the ending), the first breakthrough to Foundation (Saturation 100%, no tribulation), growing his people's tech again, more hunting and foraging, and more companions or romance.
 2. **Android .apk:** wrap the web app with Capacitor and build it in GitHub Actions. The Android SDK can't be downloaded in the cloud session.
-3. **A way to play without Termux:** a public repo with Pages, or a claude.ai page.
-4. **Quality:** sound effects (optional), more art variety (a portrait per new character), and a settings page (text size, reduce motion).
+3. **Quality:** sound effects (optional), more art variety (a portrait per new character), and a settings page (text size, reduce motion).
