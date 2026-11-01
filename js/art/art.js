@@ -2,7 +2,10 @@
  * Scene art: public-domain ink paintings (art/bg) behind code-drawn figures, or fully drawn in code, in ink wash: grey stone pillars and floating rocks in mist, sumi-e pines, ink spirals, one red accent.
  * Every scene key returns one SVG (viewBox 400×250). Seeded, so a scene always looks the same.
  */
-import { meiPortrait, yukiPortrait } from './portrait.js';
+import { meiPortrait, yukiPortrait, hatch, cloud } from './portrait.js';
+
+/** 'clamp': stark black-and-white line art over screentone (the current look). 'ink': the v0.2.0 ink-wash look. */
+const STYLE = 'clamp';
 
 const W = 400;
 const H = 250;
@@ -38,6 +41,12 @@ function wash(h, t, grey = false) { const [r, g, b] = hex2rgb(inkOf(h, grey)); r
 
 function sky(top, bottom, id = 'sk') {
     const night = lum(top) < 0.16;
+    if (STYLE === 'clamp') {
+        const r = rng(Math.round(lum(top) * 997 + lum(bottom) * 131));
+        let c = '';
+        for (let i = 0; i < 3; i++) c += cloud(40 + i * 140 + r() * 60, 24 + r() * 50, 0.55 + r() * 0.35, r() < 0.5 ? 1 : -1);
+        return hatch(night ? 2.2 : 3.1, night ? 0.8 : 0.55, night ? 0.9 : 0.7) + c;
+    }
     const t = night ? 0.55 : 0.88;
     return `<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${wash(top, t, true)}"/><stop offset="0.7" stop-color="${wash(bottom, Math.min(0.95, t + 0.06), true)}"/><stop offset="1" stop-color="${wash(bottom, t, true)}"/></linearGradient></defs><rect width="${W}" height="${H}" fill="url(#${id})"/>` + cloudWash(night);
 }
@@ -416,7 +425,27 @@ export function sceneArt(key) {
     const open = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${id.replace(/_/g, ' ')}" preserveAspectRatio="xMidYMid slice">`;
     if (PORTRAITS[key]) {
         const pt = PORTRAITS[key];
-        return `${open}<rect width="${W}" height="${H}" fill="#ece8df"/>${bgImage(pt.img, 0.35)}<rect width="${W}" height="${H}" fill="#ece8df" opacity="0.35"/>${pt.draw(`p${id}`)}</svg>`;
+        return `${open}${pt.draw(`p${id}`)}</svg>`;
+    }
+    if (STYLE === 'clamp') {
+        const K = '#111010';
+        const Wt = '#fbfaf7';
+        const flat = (h) => {
+            const k = h.toLowerCase();
+            if (k === '#e2c13a' || k === '#e7c34a' || k === '#e2bd45') return k;
+            const [r, g, b] = hex2rgb(k);
+            if (r > g + 55 && r > b + 45) return '#a02c2c';
+            return lum(k) < 0.36 ? K : Wt;
+        };
+        const raw = (SCENES[key] || SCENES.forest_dawn)();
+        const body = raw
+            .replace(/<stop [^>]*>/g, (m) => m) // gradients keep their stops (mapped below)
+            .replace(/#[0-9a-fA-F]{6}\b/g, (h) => flat(h))
+            // every filled shape gets a clean black outline (not soft mist, not the screentone)
+            .replace(/<(path|ellipse|circle|rect)\b(?![^>]*\b(stroke|filter)=)(?![^>]*width="400")/g, `<$1 stroke="${K}" stroke-width="0.7" stroke-linejoin="round"`)
+            .replace(/opacity="0\.\d+"/g, (m) => (Number(m.slice(9, -1)) < 0.3 ? 'opacity="0"' : m));
+        return `${open}${FILTERS}<rect width="${W}" height="${H}" fill="${Wt}"/>${body}</svg>`
+            .replace(/id="(sk|vg|gr|ink|bl|sh|gw|tl\d+)"/g, `id="$1-${id}"`).replace(/url\(#(sk|vg|gr|ink|bl|sh|gw|tl\d+)\)/g, `url(#$1-${id})`);
     }
     const painted = PAINTED[key];
     const raw = painted ? painted.fg() : (SCENES[key] || SCENES.forest_dawn)();

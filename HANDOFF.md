@@ -7,7 +7,7 @@ Built in the SillyTavern chat as a spin-off. That chat stays for SillyTavern; th
 
 A standalone, offline text RPG for Gábor's Android phone: a **web app (PWA)** first; a real Android app (.apk) later.
 - **No AI narrator.** The story is a hand-written branching story. Art: code-drawn manhua-style figures (SVG) over public-domain Chinese ink paintings.
-- **Images:** public-domain pictures are fine, and Gábor has **no rule against AI images**. His only image limits are the content boundaries below. Reference images he sends from other artists (watermarked/signed) are style references only, never put in the game.
+- **Images:** public-domain pictures are fine, and Gábor has **no rule against AI images**. The only image limits are Claude's own (see Romance). Reference images he sends from other artists (watermarked/signed) are style references only, never put in the game.
 - **Same Qi rules as the SillyTavern game** (Rules Engine C). `js/core/formulas.js` is the engine's own file, copied unchanged from `hufle-beep/Shared-ST` at `st/rules-engine-c/lib/formulas.js`, engine 0.1.219.
 - **New rule:** every check is **value + d6 vs DC**. A 6 always succeeds; a 1 needs DC + 2.
 
@@ -35,11 +35,8 @@ A standalone, offline text RPG for Gábor's Android phone: a **web app (PWA)** f
 - Tongue in cheek, James sarcastic, serious when it matters.
 
 **Romance**
-- Possible, **fade to black**. He asked for the wording "as explicit as you can". In practice: sensual and frank, nothing graphic. Keep to that.
-
-**Content boundaries (standing, from the SillyTavern project)**
-- No nude images.
-- No explicit image prompts.
+- Possible. Gábor wants it as explicit as possible and has no rules against explicit content or nudity himself.
+- **Claude's own limits (not Gábor's):** no explicit sex scenes and no nude images. Romance is frank and sensual up to the door, then fades to black. He was told this on 2026-11-02.
 
 ## Gábor's working rules
 
@@ -150,7 +147,7 @@ Endings reached: fought / bluff / paid / lost.
 - **UI:** paper background, red 骨 seal by every title, choices marked with brushed ink circles (red for fights), brush-stroke bars and tab underline, ink-circle dice.
 - **Fonts:** Shippori Mincho for titles, Literata for body text.
 - **Art IDs** are made unique per scene key (`sk-<key>`, `gw-<key>` …), so several images can share a page.
-- **Deferred (Gábor, 2026-11-02):** he'll likely want a more serious tone later, so the art should become **less cutesy** (smaller eyes, sharper faces, less blush). Do this after he has played the prologue.
+- **Art direction (Gábor, 2026-11-02): imitate CLAMP's *xxxHolic* style as closely as possible** — stark black and white, vertical screentone, elongated elegant figures, long cascading hair in strands, narrow half-lidded eyes, ornate jewellery, curling cloud (xiangyun) motifs, lotus. Style only: never copy a CLAMP character or page. `STYLE` in art.js: `'clamp'` (line art over screentone) or `'ink'` (the v0.2.0 ink-wash look over paintings). He also wants the tone more serious later.
 
 ## Next steps (proposed, not built)
 
