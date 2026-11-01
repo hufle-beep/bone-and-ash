@@ -2,7 +2,7 @@
 const VERSION = 'bone-ash-0.3.0';
 const FILES = [
     './', 'index.html', 'manifest.webmanifest', 'css/style.css',
-    'js/main.js', 'js/core/game.js', 'js/core/story.js', 'js/core/formulas.js', 'js/story/prologue.js', 'js/art/art.js', 'js/art/portrait.js',
+    'js/main.js', 'js/core/game.js', 'js/core/story.js', 'js/core/formulas.js', 'js/story/prologue.js', 'js/art/art.js', 'js/art/portrait.js', 'js/art/figures-clamp.js',
     'art/bg/forest.jpg', 'art/bg/peaks.jpg', 'art/bg/cliffs.jpg', 'art/bg/pine.jpg', 'art/bg/village.jpg', 'art/bg/mountain.jpg',
     'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png',
 ];
