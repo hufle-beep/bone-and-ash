@@ -1,5 +1,5 @@
 /**
- * Stylized scene art, drawn in code: flat ink layers, mist bands, a red sun, bone-white accents.
+ * Scene art, drawn in code, in ink wash: grey stone pillars and floating rocks in mist, sumi-e pines, ink spirals, one red accent.
  * Every scene key returns one SVG (viewBox 400×250). Seeded, so a scene always looks the same.
  */
 const W = 400;
@@ -15,62 +15,155 @@ function rng(seed) {
 }
 const f = (n) => Math.round(n * 10) / 10;
 
+/* ---- ink-wash helpers ---- */
+const PAPER = [236, 232, 223];
+const hex2rgb = (h) => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+const rgb2hex = (r, g, b) => '#' + [r, g, b].map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
+const lum = (h) => { const [r, g, b] = hex2rgb(h); return (0.3 * r + 0.59 * g + 0.11 * b) / 255; };
+/** Any colour → ink of the same weight, on warm paper. Reds stay red (the one accent); Yuki's eyes stay gold. */
+function inkOf(h, grey = false) {
+    const k = h.toLowerCase();
+    if (k === '#e2c13a') return k;
+    if (k === '#f1c26a') return '#f4eee2';
+    const [r, g, b] = hex2rgb(k);
+    if (!grey && r > g + 55 && r > b + 45) { const L = lum(k); return rgb2hex(110 + L * 110, 30 + L * 40, 34 + L * 40); }
+    const L = Math.pow(lum(k), 0.85);
+    const v = 26 + L * 222;
+    return rgb2hex(v + 2, v, v - 4);
+}
+/** Lighten toward paper (0 = ink as is, 1 = paper). */
+function wash(h, t, grey = false) { const [r, g, b] = hex2rgb(inkOf(h, grey)); return rgb2hex(r + (PAPER[0] - r) * t, g + (PAPER[1] - g) * t, b + (PAPER[2] - b) * t); }
+
 function sky(top, bottom, id = 'sk') {
-    return `<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${top}"/><stop offset="1" stop-color="${bottom}"/></linearGradient></defs><rect width="${W}" height="${H}" fill="url(#${id})"/>`;
+    const night = lum(top) < 0.16;
+    const t = night ? 0.55 : 0.88;
+    return `<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${wash(top, t, true)}"/><stop offset="0.7" stop-color="${wash(bottom, Math.min(0.95, t + 0.06), true)}"/><stop offset="1" stop-color="${wash(bottom, t, true)}"/></linearGradient></defs><rect width="${W}" height="${H}" fill="url(#${id})"/>` + cloudWash(night);
+}
+function cloudWash(night) {
+    const c = night ? '#9a968c' : '#ffffff';
+    return `<g filter="url(#bl)" opacity="${night ? 0.25 : 0.55}"><ellipse cx="90" cy="60" rx="120" ry="22" fill="${c}"/><ellipse cx="320" cy="40" rx="110" ry="16" fill="${c}"/><ellipse cx="230" cy="110" rx="160" ry="18" fill="${c}"/></g>`;
 }
 function sun(x, y, r, color = C.crimson, glow = 0.35) {
-    return `<circle cx="${x}" cy="${y}" r="${r * 2.4}" fill="${color}" opacity="${glow * 0.4}"/><circle cx="${x}" cy="${y}" r="${r}" fill="${color}"/>`;
+    return `<circle cx="${x}" cy="${y}" r="${r * 2.2}" fill="${color}" opacity="${glow * 0.25}" filter="url(#bl)"/><circle cx="${x}" cy="${y}" r="${r}" fill="${color}" opacity="0.92"/>`;
 }
 function moon(x, y, r) {
-    return `<circle cx="${x}" cy="${y}" r="${r * 3}" fill="${C.paper}" opacity="0.06"/><circle cx="${x}" cy="${y}" r="${r}" fill="${C.paper}" opacity="0.85"/><circle cx="${x + r * 0.45}" cy="${y - r * 0.2}" r="${r * 0.9}" fill="${C.night}" opacity="0.9"/>`;
+    return `<circle cx="${x}" cy="${y}" r="${r * 3}" fill="#f4efe4" opacity="0.18" filter="url(#bl)"/><circle cx="${x}" cy="${y}" r="${r}" fill="#f4efe4" opacity="0.95"/>`;
 }
+/** A stone pillar: grey wash body, dark ink on the shadow side, vertical strata. */
+function pillar(x, base, w, h, tone, seed) {
+    const r = rng(seed);
+    const top = base - h;
+    const lean = (r() - 0.5) * w * 0.4;
+    const d = `M${f(x - w / 2)} ${base} C${f(x - w * 0.62)} ${f(base - h * 0.5)} ${f(x - w * 0.55 + lean)} ${f(top + w * 0.3)} ${f(x - w * 0.2 + lean)} ${f(top)} Q${f(x + lean)} ${f(top - w * 0.12)} ${f(x + w * 0.25 + lean)} ${f(top + 2)} C${f(x + w * 0.6 + lean)} ${f(top + w * 0.4)} ${f(x + w * 0.58)} ${f(base - h * 0.45)} ${f(x + w / 2)} ${base} Z`;
+    let strata = '';
+    for (let i = 0; i < 4 + w / 8; i++) {
+        const sx = x - w * 0.35 + r() * w * 0.7 + lean * 0.5;
+        const sy = top + h * (0.1 + r() * 0.35);
+        strata += `<path d="M${f(sx)} ${f(sy)} q${f((r() - 0.5) * 4)} ${f(h * 0.18)} ${f((r() - 0.5) * 6)} ${f(h * (0.2 + r() * 0.35))}" stroke="${wash(tone, 0.05)}" stroke-width="${f(0.6 + r() * 1.2)}" opacity="0.55" fill="none" stroke-linecap="round"/>`;
+    }
+    return `<g><path d="${d}" fill="${wash(tone, 0.55)}"/><path d="M${f(x - w / 2)} ${base} C${f(x - w * 0.62)} ${f(base - h * 0.5)} ${f(x - w * 0.55 + lean)} ${f(top + w * 0.3)} ${f(x - w * 0.2 + lean)} ${f(top)} L${f(x - w * 0.05 + lean)} ${f(top + 4)} C${f(x - w * 0.35 + lean)} ${f(top + h * 0.3)} ${f(x - w * 0.3)} ${f(base - h * 0.3)} ${f(x - w * 0.15)} ${base} Z" fill="${wash(tone, 0.25)}" opacity="0.7"/>${strata}<path d="${d}" fill="none" stroke="${wash(tone, 0)}" stroke-width="1.3" opacity="0.8"/></g>`;
+}
+/** A floating rock (wide top, tapering underside), sometimes with a little pine. */
+function floatRock(x, y, s, tone, seed, withPine) {
+    const r = rng(seed);
+    const k = (n) => f(n * s);
+    const tip = 22 + r() * 16;
+    const d = `M${k(-26)} ${k(-2)} Q${k(-27)} ${k(-11)} ${k(-14)} ${k(-13)} L${k(-2)} ${k(-15)} Q${k(14)} ${k(-15)} ${k(24)} ${k(-9)} Q${k(29)} ${k(-3)} ${k(23)} ${k(6)} Q${k(16)} ${k(14)} ${k(10)} ${k(tip * 0.7)} Q${k(5)} ${k(tip)} ${k(1)} ${k(tip)} Q${k(-6)} ${k(tip * 0.8)} ${k(-10)} ${k(14)} Q${k(-22)} ${k(8)} ${k(-26)} ${k(-2)} Z`;
+    let strata = '';
+    for (let i = 0; i < 5; i++) { const sx = -16 + i * 7 + r() * 3; strata += `<path d="M${k(sx)} ${k(-6 + r() * 4)} q${k(1)} ${k(8)} ${k(2 + r() * 2)} ${k(12 + r() * 10)}" stroke="${wash(tone, 0)}" stroke-width="${f(0.5 + r())}" opacity="0.5" fill="none" stroke-linecap="round"/>`; }
+    return `<g transform="translate(${f(x)} ${f(y)})"><path d="${d}" fill="${wash(tone, 0.5)}"/><path d="M${k(-26)} ${k(-2)} Q${k(-22)} ${k(8)} ${k(-10)} ${k(14)} Q${k(-6)} ${k(tip * 0.8)} ${k(1)} ${k(tip)} Q${k(-4)} ${k(16)} ${k(-14)} ${k(4)} Z" fill="${wash(tone, 0.15)}" opacity="0.75"/><path d="M${k(-24)} ${k(-6)} Q${k(0)} ${k(-2)} ${k(25)} ${k(-6)}" stroke="${wash(tone, 0.2)}" stroke-width="0.8" fill="none" opacity="0.6"/>${strata}<path d="${d}" fill="none" stroke="${wash(tone, 0)}" stroke-width="1" opacity="0.8"/>${withPine ? pine(-6 * s, -13 * s, 22 * s, C.ink) : ''}</g>`;
+}
+/** Distant range: karst pillars in mist, with stones hanging in the air where the Qi pools. */
 function mountains(seed, base, amp, color, opacity = 1) {
     const r = rng(seed);
-    let d = `M0 ${H} L0 ${base}`;
-    for (let x = 0; x <= W; x += 20 + r() * 25) {
-        const peak = base - amp * (0.3 + r() * 0.7);
-        d += ` L${f(x)} ${f(peak)} L${f(x + 10 + r() * 10)} ${f(base - amp * r() * 0.3)}`;
+    let s = '';
+    for (let x = -10; x <= W + 10; x += 26 + r() * 34) {
+        const w = 18 + r() * 26;
+        s += pillar(x, base + 30, w, amp * (0.8 + r() * 1.2) + 30, color, seed * 31 + Math.round(x));
     }
-    d += ` L${W} ${base} L${W} ${H} Z`;
-    return `<path d="${d}" fill="${color}" opacity="${opacity}"/>`;
+    for (let i = 0; i < 3; i++) s += floatRock(40 + i * 120 + r() * 80, 28 + r() * Math.max(10, base - 100), 0.55 + r() * 0.55, color, seed * 7 + i, r() < 0.5);
+    return `<g opacity="${opacity}">${s}</g><rect y="${base}" width="${W}" height="40" fill="#f4f1ea" opacity="0.6" filter="url(#bl)"/>`;
 }
+/** A sumi-e pine: crooked trunk, a few branches ending in clustered pads of needles. */
 function pine(x, y, h, color) {
-    const w = h * 0.32;
-    return `<path d="M${f(x)} ${f(y - h)} L${f(x - w * 0.5)} ${f(y - h * 0.55)} L${f(x - w * 0.25)} ${f(y - h * 0.55)} L${f(x - w)} ${f(y - h * 0.1)} L${f(x - w * 0.15)} ${f(y - h * 0.1)} L${f(x - w * 0.15)} ${f(y)} L${f(x + w * 0.15)} ${f(y)} L${f(x + w * 0.15)} ${f(y - h * 0.1)} L${f(x + w)} ${f(y - h * 0.1)} L${f(x + w * 0.25)} ${f(y - h * 0.55)} L${f(x + w * 0.5)} ${f(y - h * 0.55)} Z" fill="${color}"/>`;
+    const r = rng(Math.round(x * 13 + h * 7) + 1);
+    const ink = inkOf(color);
+    const lean = (r() - 0.5) * h * 0.45;
+    const tw = h / 22 + 0.7;
+    const mx = x - lean * 0.5 + (r() - 0.5) * h * 0.15;
+    let out = `<path d="M${f(x - tw)} ${f(y)} Q${f(mx)} ${f(y - h * 0.55)} ${f(x + lean)} ${f(y - h)} Q${f(mx + tw * 1.4)} ${f(y - h * 0.55)} ${f(x + tw)} ${f(y)} Z" fill="${ink}"/>`;
+    const n = 2 + Math.floor(r() * 3);
+    for (let i = 0; i < n; i++) {
+        const t = 0.45 + r() * 0.5;
+        const bx = x + lean * t * t;
+        const by = y - h * t;
+        const dir = i % 2 ? 1 : -1;
+        const len = h * (0.18 + r() * 0.22) * (1.1 - t * 0.5);
+        const ex = bx + dir * len;
+        const ey = by - len * (0.1 + r() * 0.3);
+        out += `<path d="M${f(bx)} ${f(by)} Q${f(bx + dir * len * 0.5)} ${f(by + len * 0.15)} ${f(ex)} ${f(ey)}" stroke="${ink}" stroke-width="${f(tw * 0.55)}" fill="none" stroke-linecap="round"/>`;
+        out += pad(ex, ey, len * 0.9, ink, r);
+    }
+    return `<g>${out}${pad(x + lean, y - h, h * 0.2, ink, r)}</g>`;
+}
+function pad(x, y, w, ink, r) {
+    let s = '';
+    const k = 3 + Math.floor(r() * 3);
+    for (let i = 0; i < k; i++) {
+        const ox = (r() - 0.5) * w * 1.1;
+        const oy = (r() - 0.5) * w * 0.25 - i * w * 0.04;
+        const rw = w * (0.35 + r() * 0.3);
+        s += `<ellipse cx="${f(x + ox)}" cy="${f(y + oy)}" rx="${f(rw)}" ry="${f(rw * (0.22 + r() * 0.12))}" fill="${ink}" opacity="${f(0.55 + r() * 0.35)}"/>`;
+    }
+    return s;
 }
 function deadTree(x, y, h, color, sw = 3) {
-    return `<g stroke="${color}" stroke-width="${sw}" fill="none" stroke-linecap="round"><path d="M${x} ${y} L${x} ${y - h}"/><path d="M${x} ${y - h * 0.55} L${x - h * 0.25} ${y - h * 0.8}"/><path d="M${x} ${y - h * 0.7} L${x + h * 0.22} ${y - h * 0.95}"/><path d="M${x} ${y - h * 0.35} L${x + h * 0.18} ${y - h * 0.5}"/></g>`;
+    const c = inkOf(color);
+    return `<g stroke="${c}" stroke-width="${sw}" fill="none" stroke-linecap="round"><path d="M${x} ${y} Q${x - 3} ${y - h * 0.5} ${x + 2} ${y - h}"/><path d="M${x} ${y - h * 0.55} Q${x - h * 0.12} ${y - h * 0.62} ${x - h * 0.25} ${y - h * 0.8}"/><path d="M${x + 1} ${y - h * 0.7} Q${x + h * 0.12} ${y - h * 0.78} ${x + h * 0.22} ${y - h * 0.95}"/><path d="M${x} ${y - h * 0.35} L${x + h * 0.18} ${y - h * 0.5}" stroke-width="${sw * 0.6}"/></g>`;
 }
-function treeline(seed, baseY, count, minH, maxH, color) {
+function treeline(seed, baseY, count, minH, maxH, color0) {
     const r = rng(seed);
+    const far = Math.max(0, Math.min(0.75, (228 - baseY) / 70));
+    const color = wash(color0, far);
+    count = Math.max(3, Math.round(count * 0.6));
     let s = '';
     for (let i = 0; i < count; i++) {
         const x = (i + r() * 0.8) * (W / count);
         const h = minH + r() * (maxH - minH);
         s += r() < 0.18 ? deadTree(x, baseY, h, color, 2 + h / 40) : pine(x, baseY + 2, h, color);
     }
-    return s + `<rect y="${baseY}" width="${W}" height="${H - baseY}" fill="${color}"/>`;
+    const id = `tl${seed}`;
+    return `<g opacity="${f(1 - far * 0.35)}">` + s + `</g><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${wash(color, 0.45)}" stop-opacity="0.1"/><stop offset="0.3" stop-color="${wash(color, 0.5)}"/><stop offset="1" stop-color="${wash(color, 0.35)}"/></linearGradient></defs><path d="M0 ${baseY - 4} Q${W * 0.3} ${baseY + 4} ${W * 0.6} ${baseY - 2} T${W} ${baseY} L${W} ${H} L0 ${H} Z" fill="url(#${id})"/>`;
 }
-function mist(y, opacity = 0.25, color = C.paper) {
-    return `<rect x="-20" y="${y}" width="${W + 40}" height="14" rx="7" fill="${color}" opacity="${opacity}"/><rect x="60" y="${y + 10}" width="${W - 40}" height="8" rx="4" fill="${color}" opacity="${opacity * 0.6}"/>`;
+function mist(y, opacity = 0.25) {
+    return `<g filter="url(#bl)"><ellipse cx="200" cy="${y + 6}" rx="260" ry="12" fill="#f6f3ec" opacity="${Math.min(0.9, opacity * 3)}"/></g>`;
 }
 function ground(y, color) {
-    return `<path d="M0 ${y} Q${W * 0.3} ${y - 8} ${W * 0.55} ${y + 2} T${W} ${y - 4} L${W} ${H} L0 ${H} Z" fill="${color}"/>`;
+    const c = wash(color, 0.3);
+    return `<path d="M0 ${y} Q${W * 0.3} ${y - 8} ${W * 0.55} ${y + 2} T${W} ${y - 4} L${W} ${H} L0 ${H} Z" fill="${c}"/><path d="M30 ${y + 22} q40 6 80 -2 M210 ${y + 30} q30 8 70 2 q20 -2 40 6 M120 ${y + 44} q50 4 90 -4" stroke="${wash(color, 0)}" stroke-width="1" opacity="0.45" fill="none"/>`;
 }
-/** A standing person in a long coat (James) or robe. */
+/** Ink spirals: Qi made visible. */
+function swirl(x, y, r, n = 3) {
+    let s = '';
+    for (let i = 0; i < n; i++) {
+        const rr = r * (1 - i * 0.22);
+        s += `<path d="M${f(x + rr)} ${y} A${f(rr)} ${f(rr * 0.92)} 0 1 0 ${f(x + rr * 0.2)} ${f(y - rr * 0.98)}" stroke="#2a2826" stroke-width="${f(1.4 - i * 0.3)}" fill="none" opacity="${0.75 - i * 0.15}" stroke-linecap="round"/>`;
+    }
+    return s;
+}
 function person(x, y, s = 1, { coat = C.paper, skin = '#c9a98a', hair = '#c9b27a', robe = false, sword = false } = {}) {
     const k = (n) => f(n * s);
     return `<g transform="translate(${x} ${y})">
-<path d="M${k(-9)} 0 L${k(-12)} ${k(-38)} Q0 ${k(-46)} ${k(12)} ${k(-38)} L${k(9)} 0 Z" fill="${coat}"/>
+<path d="M${k(-9)} 0 L${k(-12)} ${k(-38)} Q0 ${k(-46)} ${k(12)} ${k(-38)} L${k(9)} 0 Z" fill="${coat}" stroke="#2a2826" stroke-width="${k(0.9)}"/>
 ${robe ? `<path d="M${k(-12)} ${k(-38)} L${k(-16)} ${k(-20)} L${k(-7)} ${k(-30)} Z M${k(12)} ${k(-38)} L${k(16)} ${k(-20)} L${k(7)} ${k(-30)} Z" fill="${coat}"/>` : `<path d="M${k(-2)} ${k(-40)} L0 ${k(-4)} L${k(2)} ${k(-40)} Z" fill="${C.ink}" opacity="0.35"/>`}
-<circle cx="0" cy="${k(-46)}" r="${k(6.5)}" fill="${skin}"/>
+<circle cx="0" cy="${k(-46)}" r="${k(6.5)}" fill="${skin}" stroke="#2a2826" stroke-width="${k(0.7)}"/>
 <path d="M${k(-6.5)} ${k(-47)} Q0 ${k(-56)} ${k(6.5)} ${k(-47)} Q${k(4)} ${k(-51)} 0 ${k(-50)} Q${k(-4)} ${k(-51)} ${k(-6.5)} ${k(-47)} Z" fill="${hair}"/>
 ${sword ? `<path d="M${k(-8)} ${k(-50)} L${k(10)} ${k(-14)}" stroke="${C.ash}" stroke-width="${k(1.6)}"/>` : ''}
 </g>`;
 }
 function cat(x, y, s = 1, color = C.bone) {
     const k = (n) => f(n * s);
-    return `<g transform="translate(${x} ${y})" fill="${color}"><ellipse cx="0" cy="${k(-6)}" rx="${k(10)}" ry="${k(6)}"/><circle cx="${k(9)}" cy="${k(-13)}" r="${k(5)}"/><path d="M${k(5.5)} ${k(-16)} L${k(6.5)} ${k(-22)} L${k(9)} ${k(-17)} Z M${k(9.5)} ${k(-17)} L${k(12.5)} ${k(-22)} L${k(13)} ${k(-15)} Z"/><path d="M${k(-9)} ${k(-6)} Q${k(-20)} ${k(-8)} ${k(-17)} ${k(-20)}" stroke="${color}" stroke-width="${k(2.6)}" fill="none" stroke-linecap="round"/><circle cx="${k(11)}" cy="${k(-13.5)}" r="${k(0.9)}" fill="#e2c13a"/></g>`;
+    return `<g transform="translate(${x} ${y})" fill="${color}" stroke="#2a2826" stroke-width="${k(0.7)}"><ellipse cx="0" cy="${k(-6)}" rx="${k(10)}" ry="${k(6)}"/><circle cx="${k(9)}" cy="${k(-13)}" r="${k(5)}"/><path d="M${k(5.5)} ${k(-16)} L${k(6.5)} ${k(-22)} L${k(9)} ${k(-17)} Z M${k(9.5)} ${k(-17)} L${k(12.5)} ${k(-22)} L${k(13)} ${k(-15)} Z"/><path d="M${k(-9)} ${k(-6)} Q${k(-20)} ${k(-8)} ${k(-17)} ${k(-20)}" stroke="${color}" stroke-width="${k(2.6)}" fill="none" stroke-linecap="round"/><circle cx="${k(11)}" cy="${k(-13.5)}" r="${k(0.9)}" fill="#e2c13a"/></g>`;
 }
 function beast(x, y, s0 = 1, color = C.ash, eye = C.ember) {
     const s = Math.abs(s0);
@@ -87,7 +180,7 @@ function hut(x, y, w, color, roof = C.ink2, lit = false) {
 }
 function fire(x, y, s = 1) {
     const k = (n) => f(n * s);
-    return `<g transform="translate(${x} ${y})"><circle r="${k(60)}" fill="${C.ember}" opacity="0.10"/><circle r="${k(28)}" fill="${C.ember}" opacity="0.16"/><path d="M${k(-10)} 0 Q${k(-12)} ${k(-14)} 0 ${k(-30)} Q${k(4)} ${k(-16)} ${k(10)} ${k(-20)} Q${k(14)} ${k(-8)} ${k(10)} 0 Z" fill="${C.ember}"/><path d="M${k(-4)} 0 Q${k(-4)} ${k(-10)} ${k(2)} ${k(-18)} Q${k(6)} ${k(-8)} ${k(5)} 0 Z" fill="#f1c26a"/><path d="M${k(-16)} ${k(3)} L${k(16)} ${k(-1)} M${k(-14)} ${k(-1)} L${k(14)} ${k(4)}" stroke="${C.ink}" stroke-width="${k(3)}"/></g>`;
+    return `<g transform="translate(${x} ${y})"><circle r="${k(55)}" fill="#fffaf0" opacity="0.5" filter="url(#bl)"/><path d="M${k(-10)} 0 Q${k(-12)} ${k(-14)} 0 ${k(-30)} Q${k(4)} ${k(-16)} ${k(10)} ${k(-20)} Q${k(14)} ${k(-8)} ${k(10)} 0 Z" fill="${C.ember}"/><path d="M${k(-4)} 0 Q${k(-4)} ${k(-10)} ${k(2)} ${k(-18)} Q${k(6)} ${k(-8)} ${k(5)} 0 Z" fill="#f1c26a"/><path d="M${k(-16)} ${k(3)} L${k(16)} ${k(-1)} M${k(-14)} ${k(-1)} L${k(14)} ${k(4)}" stroke="${C.ink}" stroke-width="${k(3)}"/></g>`;
 }
 function shards(seed, cx, cy, n, spread, color = C.bone) {
     const r = rng(seed);
@@ -106,8 +199,9 @@ function lotus(x, y, s = 1, color = C.crimson) {
     const k = (n) => f(n * s);
     return `<g transform="translate(${x} ${y})" fill="${color}"><path d="M0 0 Q${k(-6)} ${k(-12)} 0 ${k(-20)} Q${k(6)} ${k(-12)} 0 0 Z"/><path d="M0 0 Q${k(-16)} ${k(-6)} ${k(-14)} ${k(-16)} Q${k(-4)} ${k(-12)} 0 0 Z"/><path d="M0 0 Q${k(16)} ${k(-6)} ${k(14)} ${k(-16)} Q${k(4)} ${k(-12)} 0 0 Z"/></g>`;
 }
-const grain = '<filter id="gr"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.09 0"/></filter><rect width="400" height="250" filter="url(#gr)"/>';
-const vignette = '<defs><radialGradient id="vg" cx="0.5" cy="0.45" r="0.75"><stop offset="0.6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.55"/></radialGradient></defs><rect width="400" height="250" fill="url(#vg)"/>';
+const FILTERS = '<defs><filter id="ink" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="2.6"/></filter><filter id="bl" x="-30%" y="-80%" width="160%" height="260%"><feGaussianBlur stdDeviation="7"/></filter><filter id="gr"><feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 0.16  0 0 0 0 0.15  0 0 0 0 0.13  0 0 0 0.14 0"/></filter><radialGradient id="vg" cx="0.5" cy="0.48" r="0.72"><stop offset="0.62" stop-color="#ece8df" stop-opacity="0"/><stop offset="1" stop-color="#ece8df" stop-opacity="0.85"/></radialGradient></defs>';
+const grain = '<rect width="400" height="250" filter="url(#gr)"/>';
+const vignette = '<rect width="400" height="250" fill="url(#vg)"/>';
 
 const JAMES = { coat: C.bone, hair: '#c9b27a' };
 const MEI = { coat: '#6b4f3a', hair: C.ink, skin: '#c99f7f' };
@@ -115,11 +209,11 @@ const SECT = { coat: C.crimson, hair: C.ink, skin: '#c9a184', robe: true };
 
 const SCENES = {
     forest_dawn: () => sky('#3b2c38', '#9c5a4a') + sun(300, 95, 18) + mountains(3, 140, 60, C.dusk, 0.8) + mist(128, 0.18) + treeline(7, 175, 14, 60, 120, C.moss) + mist(170, 0.12) + treeline(11, 215, 10, 70, 150, C.ink) + cat(170, 232, 1.1) + person(200, 236, 1, JAMES),
-    yuki_close: () => sky('#2a3330', '#46544c') + `<circle cx="200" cy="140" r="110" fill="${C.jade}" opacity="0.10"/>` + cat(205, 205, 5.2) + shards(4, 200, 140, 18, 150, C.paper),
+    yuki_close: () => sky('#2a3330', '#46544c') + `<circle cx="200" cy="140" r="110" fill="${C.jade}" opacity="0.10"/>` + cat(205, 205, 5.2) + shards(4, 200, 140, 18, 150, C.ink) + swirl(70, 70, 34) + swirl(335, 180, 26),
     omnitool: () => sky('#1e2a2a', '#2f3d38') + treeline(5, 230, 9, 80, 170, C.ink) + `<g transform="translate(200 128)"><rect x="-120" y="-70" width="240" height="140" rx="14" fill="${C.jade}" opacity="0.10" stroke="${C.jade}" stroke-opacity="0.6"/><path d="M-100 30 Q-60 -40 -20 10 T60 -10 T100 -40" stroke="${C.jade}" stroke-width="2.5" fill="none"/><circle cx="-60" cy="-35" r="3" fill="${C.ember}"/><circle cx="-10" cy="-30" r="3" fill="${C.ember}"/><circle cx="40" cy="-45" r="3" fill="${C.ember}"/><circle cx="85" cy="20" r="3" fill="${C.ember}"/><path d="M-100 52 L100 52" stroke="${C.jade}" stroke-opacity="0.5"/></g>`,
-    clearing: () => sky('#4a3f48', '#9d7b66') + sun(80, 70, 12, C.crimson, 0.25) + treeline(13, 190, 16, 50, 110, C.moss) + ground(195, '#5d6056') + `<g fill="${C.ash}"><ellipse cx="120" cy="215" rx="22" ry="9"/><ellipse cx="300" cy="225" rx="30" ry="11"/><ellipse cx="250" cy="206" rx="12" ry="6"/></g>` + person(205, 228, 0.9, JAMES) + cat(225, 230, 0.8),
+    clearing: () => sky('#4a3f48', '#9d7b66') + sun(80, 70, 12, C.crimson, 0.25) + floatRock(250, 60, 1.1, C.ash, 5, true) + floatRock(340, 100, 0.6, C.ash, 6, false) + treeline(13, 190, 16, 50, 110, C.moss) + ground(195, '#5d6056') + `<g fill="${C.ash}"><ellipse cx="120" cy="215" rx="22" ry="9"/><ellipse cx="300" cy="225" rx="30" ry="11"/><ellipse cx="250" cy="206" rx="12" ry="6"/></g>` + person(205, 228, 0.9, JAMES) + cat(225, 230, 0.8),
     bone_needle: () => sky('#26302c', '#3a4741') + `<g transform="translate(200 150)"><path d="M-90 60 Q-40 10 0 0 Q30 -6 60 -20" stroke="#c9a98a" stroke-width="34" fill="none" stroke-linecap="round"/><path d="M10 -14 L150 -78" stroke="${C.bone}" stroke-width="5" stroke-linecap="round"/><circle cx="150" cy="-78" r="18" fill="${C.bone}" opacity="0.15"/></g>` + shards(9, 300, 80, 10, 40),
-    meditation: () => sky('#1f2a33', '#3c4950') + `<circle cx="200" cy="140" r="90" fill="${C.jade}" opacity="0.12"/><circle cx="200" cy="140" r="60" fill="${C.jade}" opacity="0.12"/>` + mountains(21, 200, 40, C.ink2) + `<g transform="translate(200 205)"><path d="M-40 0 Q-30 -20 0 -18 Q30 -20 40 0 Z" fill="${C.bone}"/><path d="M-14 -18 L-16 -52 Q0 -60 16 -52 L14 -18 Z" fill="${C.bone}"/><circle cy="-62" r="8" fill="#c9a98a"/></g>` + shards(31, 200, 120, 24, 120, C.ember),
+    meditation: () => sky('#1f2a33', '#3c4950') + `<circle cx="200" cy="140" r="90" fill="${C.jade}" opacity="0.12"/><circle cx="200" cy="140" r="60" fill="${C.jade}" opacity="0.12"/>` + mountains(21, 200, 40, C.ink2) + `<g transform="translate(200 205)"><path d="M-40 0 Q-30 -20 0 -18 Q30 -20 40 0 Z" fill="${C.bone}"/><path d="M-14 -18 L-16 -52 Q0 -60 16 -52 L14 -18 Z" fill="${C.bone}"/><circle cy="-62" r="8" fill="#c9a98a"/></g>` + shards(31, 200, 120, 24, 120, C.ink) + swirl(110, 90, 40) + swirl(300, 70, 28) + swirl(200, 150, 70, 2),
     stream: () => sky('#3c3a46', '#8a6f63') + mountains(17, 120, 40, C.dusk, 0.7) + treeline(19, 160, 14, 50, 100, C.moss) + `<path d="M150 160 Q120 190 190 205 T150 250 L250 250 Q210 220 260 200 T230 160 Z" fill="#2d3c44"/><path d="M175 175 Q160 190 200 200" stroke="${C.paper}" stroke-opacity="0.4" fill="none"/>` + treeline(23, 230, 6, 60, 130, C.ink) + cat(300, 238, 0.9),
     forage: () => sky('#384236', '#6f7a5e') + treeline(27, 200, 10, 80, 140, C.moss) + ground(205, C.ink2) + `<path d="M60 215 L200 205" stroke="#5a4a3a" stroke-width="14" stroke-linecap="round"/>` + `<g fill="#c8d6b9"><path d="M90 207 Q105 196 120 207 Z"/><path d="M128 205 Q146 192 162 205 Z"/><path d="M168 204 Q180 196 192 204 Z"/></g>` + `<g fill="${C.crimson}">${[0, 1, 2, 3, 4, 5, 6, 7].map((i) => `<circle cx="${290 + (i % 4) * 9}" cy="${190 + Math.floor(i / 4) * 10}" r="4"/>`).join('')}</g><path d="M280 220 L300 180 L320 220 M300 200 L330 180" stroke="${C.moss}" stroke-width="3" fill="none"/>` + person(240, 232, 0.8, JAMES),
     hunt: () => sky('#433e3a', '#7d6b55') + treeline(29, 175, 12, 40, 90, C.moss) + `<g stroke="#6b7a55" stroke-width="2">${Array.from({ length: 40 }, (_, i) => `<path d="M${i * 10} 250 L${i * 10 + 4} ${200 - (i % 5) * 6}"/>`).join('')}</g>` + `<g transform="translate(250 212)"><ellipse rx="16" ry="9" fill="${C.ash}"/><path d="M-12 -6 L-6 -14 L0 -7 L6 -15 L12 -6" fill="${C.jade}" opacity="0.8"/><path d="M14 -4 L18 -18 M18 -4 L23 -16" stroke="${C.ash}" stroke-width="3"/></g>` + cat(120, 236, 1.2) + `<path d="M60 120 L230 205" stroke="${C.bone}" stroke-width="2" stroke-dasharray="4 6"/>`,
@@ -144,9 +238,12 @@ const SCENES = {
 
 /** SVG markup for a scene's art key (unknown keys get a quiet forest). */
 export function sceneArt(key) {
-    const body = (SCENES[key] || SCENES.forest_dawn)();
+    const raw = (SCENES[key] || SCENES.forest_dawn)();
+    const body = raw
+        .replace(/fill="(#d9673a|#f1c26a)" opacity="0\.(0\d|1\d)"/g, 'fill="#fffaf0" opacity="0.45" filter="url(#bl)"')
+        .replace(/#[0-9a-fA-F]{6}\b/g, (h) => inkOf(h));
     const id = String(key || 'x').replace(/\W/g, '');
-    return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${id.replace(/_/g, ' ')}" preserveAspectRatio="xMidYMid slice">${body}${vignette}${grain}</svg>`
-        .replace(/id="(sk|vg|gr)"/g, `id="$1-${id}"`).replace(/url\(#(sk|vg|gr)\)/g, `url(#$1-${id})`);
+    return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${id.replace(/_/g, ' ')}" preserveAspectRatio="xMidYMid slice">${FILTERS}<rect width="${W}" height="${H}" fill="#ece8df"/><g filter="url(#ink)">${body}</g>${vignette}${grain}</svg>`
+        .replace(/id="(sk|vg|gr|ink|bl|tl\d+)"/g, `id="$1-${id}"`).replace(/url\(#(sk|vg|gr|ink|bl|tl\d+)\)/g, `url(#$1-${id})`);
 }
 export const ART_KEYS = Object.keys(SCENES);
