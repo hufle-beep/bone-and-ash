@@ -224,6 +224,15 @@ The bible and the contract between the four part files are at the top of `js/sto
 - Cap: every skill (James's and Yuki's) stops at T10 L10, XP past it is lost (`SKILL_MAX_TIER`, `atSkillCap`); enemies' DC and attack cap at 50 (`ENEMY_CAP` in power.js).
 - Normal runs: no change ≥3 points (Convergence Use stays T1 through Act 1).
 
+## v0.8.4 — Yuki's path, every romance arrangement
+
+- `js/story/yuki_path.js`: the first time Yuki is human (one-button Long Forest → `yk_choice`; normal run → after `yuki_human_after`) she asks: sister or lover (`g.flags.yk_path`). One-button Long Forest also sets Yuki friendship/affection 150/150.
+- Sister: sassy, protective, pushes James toward Mei Lin and Ya (`yk_sister_talk` at Blackroot camps: +affection to both). Lover: open to sharing; `yk_camp` nights at Blackroot camps (human form only) raise `yk_mei` when James likes Mei Lin — Yuki wears down Mei Lin's resistance alongside Ya (`meiOpen` = trio ≥ 3 or yk_mei ≥ 2).
+- Beats appended to lf_exit, mei_lin, romance, epilogue, ya_meets, log_comfort, rt_camp, rt_evening, rt_quiet_night.
+- Last night of Act 1 (`rt_evening`) offers every arrangement the hearts allow: Mei Lin · Ya · Yuki alone; Mei Lin + Ya (`rt_trio`); Yuki + Mei Lin (`yk_night_mei`); Yuki + Ya (`yk_night_ya`); all four (`yk_night_all`). `g.flags.final_night` records it; `loveLine()` writes the Act 1 epilogue line (a1_end).
+- Romance with Yuki only in her human form (adult; bonded to James since he was six, 34 years); fade to black.
+- Tests: 240 extra walks over the last night; combat round cap in the random runs raised to 400 (a rare long stalemate vs the Guardian at True Core).
+
 ## Next steps (proposed, not built)
 
 1. **Act 2** (open).

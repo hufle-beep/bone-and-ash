@@ -6,6 +6,7 @@
 import { addItem, hasItem, eat, condense, advance, clockParts, jamesQiMax } from '../core/game.js';
 import { condensationSatGain } from '../core/formulas.js';
 import { set, daily, markDaily, eatBest } from './common.js';
+import { loveLine } from './yuki_path.js';
 import { encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil, hour } from './act1_common.js';
 
 const P = 'Ashfall Hamlet';
@@ -722,11 +723,7 @@ You go down the road between the crimson robes. Behind you, faint, under the sou
         id: 'a1_end', title: 'End of Act 1', art: 'a1_end', place: (g) => (g.flags.a1_outcome === 'taken' ? 'The road to the Crimson Lotus' : P),
         text: (g) => {
             const o = g.flags.a1_outcome;
-            const love = g.flags.throuple
-                ? 'At night the three of you sleep in the herb loft, a tangle of limbs and hair and one aggrieved cat. Mei Lin\'s mother has stopped saying anything about it, which in Ashfall is roughly the same as a blessing. Ya still goes out to the grove some nights to sleep under the stars. More and more often, Mei Lin goes with her.'
-                : g.flags.ya_romance && !g.flags.romance ? 'Ya sleeps in the grove most nights, and most nights you sleep there too. The village has given up pretending not to notice.'
-                    : g.flags.romance ? 'Mei Lin\'s mother sets four places at the table now: three and a saucer. She has stopped asking when you\'ll leave.'
-                        : 'You sleep by the stove with Yuki. It\'s enough. For now, it\'s enough.';
+            const love = loveLine(g);
             const head = o === 'taken'
                 ? `The Sect's road climbs into the mountains for three days. On the second night, from a high switchback, you look back and see, far below in the black sea of the Blackroot, a single point of pale light where Ashfall is. The grove is growing.
 

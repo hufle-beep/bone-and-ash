@@ -19,6 +19,7 @@ import { HEART, BREAK_HUBS as B3 } from './act1_heart.js';
 import { RETURN, BREAK_HUBS as B4 } from './act1_return.js';
 import { LONGFOREST, BREAK_HUBS as B0 } from './longforest.js';
 import { MERIDIANS, canAnyMeridian } from './meridians.js';
+import { installYukiPath } from './yuki_path.js';
 
 const once = (flag) => (g) => !g.flags[flag];
 const set = (...flags) => (g) => { for (const f of flags) g.flags[f] = true; return []; };
@@ -803,10 +804,12 @@ export function longForestInstant(g) {
     g.james.gu = top(); g.james.skills['Convergence Use'] = top(); g.yuki.fight = top(); g.yuki.qiUse = top();
     Object.assign(g.james, { extra8: 8, extraCollaterals: 28, junctions: 10 });
     for (const id of LF_STOCK) g.inventory[id] = itemCap(id);
+    g.rel.Yuki = { f: 150, a: 150 }; g.flags.yk_back = 'lf_exit';
     g.james.satiety = 100; g.james.hp = null; g.james.qi = null; g.yuki.hp = null; g.yuki.qi = null;
     return ['Seasons pass. You stop counting them.', `Realm: ${realmName(7)}. GU, Convergence Use, Yuki's Fight and Qi Use: T10 L10.`, 'Extraordinary 8/8, their collaterals 28/28, junctions 10/10.', 'The hammerspace is full.'];
 }
-SCENES.clearing.choices.push({ text: 'Stay lost. (The Long Forest, in one step: Nascent Soul, every meridian open, everything T10 L10, the hammerspace full.)', do: longForestInstant, to: 'lf_exit' });
+SCENES.clearing.choices.push({ text: 'Stay lost. (The Long Forest, in one step: Nascent Soul, every meridian open, everything T10 L10, the hammerspace full.)', do: longForestInstant, to: 'yk_choice' });
+installYukiPath(SCENES);
 
 /* ---------- breakthrough: offered at calm moments whenever Saturation is 100% ---------- */
 const VILLAGE_SCENES = ['village', 'ashfall', 'supper'];

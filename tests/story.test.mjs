@@ -37,7 +37,7 @@ for (let run = 0; run < 2000; run++) {
         const r = choose(g, SCENES, pick.index);
         if (r.combat) {
             startCombat(g, r.combat(g));
-            for (let t = 0; t < 200 && g.combat; t++) {
+            for (let t = 0; t < 400 && g.combat; t++) {
                 const acts = Object.keys(COMBAT_ACTIONS);
                 const id = g.combat.id;
                 const smart = run % 2 === 0;
@@ -78,6 +78,14 @@ for (let run = 0; run < 300; run++) {
     Object.assign(g.flags, { long: true, forest_day: 3, vday: 3, ending: 'bluff', mei_party: true, ya_party: true, ya_met: true });
     g.rel = { 'Mei Lin': { f: 20, a: 5 }, Ya: { f: 40, a: 60 + (run % 40) }, Village: { f: 30, a: 0 } }; g.james.gu.level = 7; g.james.skills['Convergence Use'].level = 5; ensureBars(g);
     walkFrom(g, 'bl_start', new Set(['ht_start']), 1500);
+}
+// Yuki's path: every last-night arrangement (lover / sister, with Mei Lin and Ya at different heats)
+for (let run = 0; run < 240; run++) {
+    const g = ensureBars(newGame(run + 44444)); g.minutes = 18 * 1440 + 360;
+    Object.assign(g.flags, { long: true, forest_day: 3, vday: 3, ending: 'bluff', mei_party: true, ya_party: true, ya_met: true, yk_path: run % 4 === 3 ? 'sister' : 'lover', trio: run % 3, yk_mei: run % 3 });
+    g.rel = { 'Mei Lin': { f: 40, a: run % 2 ? 80 : 10 }, Ya: { f: 40, a: (run >> 1) % 2 ? 95 : 10 }, Yuki: { f: 150, a: 150 }, Village: { f: 30, a: 0 } };
+    g.james.gu.level = 9; g.james.skills['Convergence Use'].level = 6; ensureBars(g);
+    walkFrom(g, run % 2 ? 'rt_start' : 'bl_start', new Set(['a1_end']), 2500);
 }
 // a full hammerspace: every common item at its cap — no dead ends from hidden gathering choices
 const COMMON = ['jade_bracket', 'ghost_gill', 'river_cress', 'honeycomb', 'spirit_grass', 'beast_core', 'fowl_raw', 'crow_feather', 'hare_raw', 'bone_meal', 'venison', 'crimson_berry', 'crab_meat', 'lizard_egg'];
