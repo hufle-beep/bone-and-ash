@@ -5,21 +5,35 @@
  * That is going to be a problem — for them.
  */
 import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, clockParts } from '../core/game.js';
+import { forestScale, villageScale, grow, NEW_ITEMS } from './common.js';
+import { WILDS, nightNext } from './wilds.js';
+import { ASHFALL, hubOf, nextEvening } from './ashfall.js';
 
 const once = (flag) => (g) => !g.flags[flag];
 const set = (...flags) => (g) => { for (const f of flags) g.flags[f] = true; return []; };
 
 /* ---------- encounters ---------- */
-const jackals = (g) => ({
-    id: 'jackals',
-    intro: 'Two shapes peel off the dark: ash-grey, too many teeth, eyes like coals that forgot to go out.',
-    band: 'standard',
-    enemies: [
-        { name: 'Ashfang jackal', hp: g.flags.stakes ? 4 : 7, dc: 3, atk: 5, dmg: 4, prefersSmall: true },
+const jackals = (g) => {
+    const s = forestScale(g);
+    const stake = g.flags.stakes ? (g.flags.stakes_hard ? 4 : 3) : 0;
+    const enemies = [
+        { name: 'Ashfang jackal', hp: 7 - stake, dc: 3, atk: 5, dmg: 4, prefersSmall: true },
         { name: 'Ashfang matriarch', hp: 7, dc: 3, atk: g.flags.watch ? 4 : 5, dmg: 4, prefersSmall: true },
-    ],
-    win: 'jackals_won', lose: 'jackals_lost', flee: 'jackals_fled',
-});
+        ...(s >= 2 ? [{ name: 'Ashfang yearling', hp: 5, dc: 3, atk: 4, dmg: 3, prefersSmall: true }] : []),
+    ];
+    return {
+        id: 'jackals',
+        intro: s >= 2 ? 'Three shapes peel off the dark — the ones that have been circling your camp for two nights: ash-grey, too many teeth, eyes like coals that forgot to go out.' : 'Two shapes peel off the dark: ash-grey, too many teeth, eyes like coals that forgot to go out.',
+        band: 'standard',
+        enemies: enemies.map((e) => grow(e, s, JACKAL_GROWTH)),
+        win: 'jackals_won', lose: 'jackals_lost', flee: 'jackals_fled',
+    };
+};
+/* Growth per extra day of training (tuned by simulation, tests/story.test.mjs). */
+const JACKAL_GROWTH = { hp: 0.15, dc: 0.45, atk: 0.6 };
+const GAO_GROWTH = { hp: 0.15, dc: 0.45, atk: 0.6 };
+const BOAR_GROWTH = { hp: 0.15, dc: 0.45, atk: 0.6 };
+const LU_GROWTH = { hp: 0.05, dc: 0.35, atk: 0.5 };
 const gaoFight = (g) => ({
     id: 'gao',
     intro: 'Gao Feng\'s sleeve snaps out and Qi crackles along it, red as a fresh cut. His lackey grins and draws a hatchet.',
@@ -27,19 +41,28 @@ const gaoFight = (g) => ({
     enemies: [
         { name: 'Gao Feng', hp: g.flags.gao_hand ? 6 : 9, dc: 4, atk: 5, dmg: 4, dr: 1 },
         { name: 'Lackey Pock-Face', hp: 6, dc: 3, atk: 4, dmg: 3 },
-    ],
+    ].map((e) => grow(e, forestScale(g), GAO_GROWTH)),
     win: 'gao_won', lose: 'gao_lost',
 });
-const collectorsFight = (g) => ({
-    id: 'collectors',
-    intro: 'Inner Disciple Lu Han does not hurry. People who are used to winning never do.',
-    band: 'major',
-    enemies: [
+const collectorsFight = (g) => {
+    const s = forestScale(g) + villageScale(g);
+    const militia = Math.min(2, g.flags.militia || 0) + (g.flags.spears ? 1 : 0);
+    const enemies = [
         { name: 'Lu Han', hp: 12, dc: 5, atk: 6, dmg: 5, dr: 1 },
-        ...(g.flags.gao_dead ? [] : [{ name: 'Gao Feng', hp: g.flags.gao_beaten ? 5 : 8, dc: 4, atk: 5, dmg: 4, dr: 1 }]),
-    ],
-    win: 'collectors_won', lose: 'collectors_lost',
-});
+        ...(g.flags.gao_dead || g.flags.gao_turned ? [] : [{ name: 'Gao Feng', hp: g.flags.gao_beaten ? 5 : 8, dc: 4, atk: 5, dmg: 4, dr: 1 }]),
+        
+    ].map((e) => grow(e, s, LU_GROWTH));
+    // the hunters you drilled hold the others off and wear Lu Han down
+    if (militia) enemies[0].hp = Math.max(6, enemies[0].hp - 2 * militia);
+    return {
+        id: 'collectors',
+        intro: militia ? 'Inner Disciple Lu Han does not hurry. Behind you, eight hunters with white bone spearheads step up and don\'t kneel. That, finally, makes him hurry.' : 'Inner Disciple Lu Han does not hurry. People who are used to winning never do.',
+        band: 'major',
+        enemies,
+        win: 'collectors_won', lose: 'collectors_lost',
+    };
+};
+const tributeDc = (g, base) => base + Math.floor((forestScale(g) + villageScale(g)) / 2);
 
 const cookMeal = (g) => {
     const out = [];
@@ -57,6 +80,7 @@ export const ITEMS = {
     hairpin: { name: 'Wraithbone hairpin', note: 'Too pretty for a man who was eating raw hare yesterday.' },
     jackal_fang: { name: 'Ashfang fangs', note: 'Trophies. Yuki keeps trying to bury them.' },
     beast_core: { name: 'Murky beast core', note: 'Locals swallow these to cultivate. You\'d rather swallow a battery.' },
+    ...NEW_ITEMS,
 };
 
 export const SCENES = {
@@ -247,11 +271,11 @@ ${g.flags.fire ? 'The fire crackles.' : 'No fire yet.'} ${g.flags.stakes ? 'A ri
 
 ${g.flags.fire ? 'The fire makes a small, defiant room in the dark.' : 'Without fire, the dark comes right up to your knees.'} Yuki climbs into your lap, which she only does when she thinks one of you needs it.
 
-Your Parallel Cognition offers, unprompted, to spin up a thread for watch-keeping. Nine threads, and one of them never sleeps unless you tell it to.`,
+${(g.flags.forest_day || 1) > 1 ? 'Another night in the Blackroot. Your watch-thread is already spinning up before you ask.' : 'Your Parallel Cognition offers, unprompted, to spin up a thread for watch-keeping. Nine threads, and one of them never sleeps unless you tell it to.'}`,
         choices: [
-            { text: 'Leave a thread on watch and sleep.', do: set('watch'), to: 'night_attack' },
-            { text: 'Cultivate first — one sit — then sleep.', req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`] : []; }, to: 'night_attack' },
-            { text: 'Just sleep. You\'ve earned it.', to: 'night_attack' },
+            { text: 'Leave a thread on watch and sleep.', do: set('watch'), to: nightNext },
+            { text: 'Cultivate first — one sit — then sleep.', req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`] : []; }, to: nightNext },
+            { text: 'Just sleep. You\'ve earned it.', to: nightNext },
         ],
     },
     night_attack: {
@@ -303,7 +327,7 @@ You are cold, wet, alive and furious, and Yuki — perched on your shoulder, dry
 
     /* ================= DAY 2 ================= */
     dawn: {
-        id: 'dawn', title: 'Day Two', art: 'forest_dawn', place: 'Blackroot Wilds',
+        id: 'dawn', title: (g) => (g.flags.long ? 'Day Four' : 'Day Two'), art: 'forest_dawn', place: 'Blackroot Wilds',
         text: (g) => `Morning comes red. You eat ${foodCount(g) ? 'what\'s left' : 'nothing, which is a meal you are getting very good at'}, and you're working out which way is *away* when the scream comes.
 
 Human. Female. Furious more than frightened — the kind of scream that has a lot of swearing folded into it. A few hundred metres east, down the slope.
@@ -322,7 +346,7 @@ Yuki is already looking at you. You are already moving. Apparently you have a ty
 
 A woman in a patched brown jacket, maybe mid-twenties, has her back to a boulder and a herb-knife in her fist. Her basket is on the ground, spilling something that glows faintly green. In front of her: a young man in crimson robes, sleeves embroidered with a lotus that looks like it's bleeding, and a pock-faced hulk carrying a hatchet.
 
-"The tribute is due tomorrow," Crimson Robes is saying, bored. "This is *my* tribute, Mei Lin. The Ninefold grass, and you serve tea in my quarters tonight. Or the Elder learns your mother's been hiding a spirit root in that house."
+"The tribute is due ${g.flags.long ? 'in three days' : 'tomorrow'}," Crimson Robes is saying, bored. "This is *my* tribute, Mei Lin. The Ninefold grass, and you serve tea in my quarters tonight. Or the Elder learns your mother's been hiding a spirit root in that house."
 
 "My mother is *sixty*—"
 
@@ -487,19 +511,19 @@ Yuki doesn't look at you for a long time.`,
     },
     village: {
         id: 'village', title: 'Ashfall', art: 'village', place: 'Ashfall Hamlet',
-        enter: (g) => (g.flags.ignored ? (g.flags.mei_bruised = true, []) : []),
+        enter: (g) => { if (g.flags.ignored) g.flags.mei_bruised = true; if (g.flags.long && !g.flags.vday) g.flags.vday = 1; return []; },
         text: (g) => `Ashfall Hamlet is forty houses of grey stone around a well, a shrine to a god whose face has been chiselled off, and a tall wooden post hung with red lotus banners. The tribute post. People move around it the way you'd move around a sleeping dog.
 
 ${g.flags.ignored
         ? 'A woman in a patched brown jacket limps past you with a split lip and an empty basket, and the whole street goes quiet around her. Someone mutters "Gao Feng". Nobody looks at you, the stranger who came down from the ridge at exactly the wrong time.'
         : 'Mei Lin walks you in like a stray she has decided to keep. "He\'s with me," she tells the street, and the street, visibly, decides to deal with that later.'}
 
-The tribute is due at dawn tomorrow. You can feel the whole village holding its breath about it.`,
+${g.flags.long ? 'The tribute is due in three days, at dawn. You can feel the whole village counting them.' : 'The tribute is due at dawn tomorrow. You can feel the whole village holding its breath about it.'}`,
         choices: [
             { text: 'Ask for the village elder.', show: once('elder'), time: 30, do: set('elder'), to: 'elder' },
             { text: 'There\'s a sick child — you can hear the coughing. Offer to help.', show: once('healed_try'), time: 60, to: 'heal' },
             { text: 'Offer to hunt for the village. You need food; so do they.', show: once('village_hunt'), time: 120, to: 'village_hunt' },
-            { text: (g) => (g.flags.ignored ? 'Find the woman with the split lip and apologise.' : 'Evening. Mei Lin said something about dinner.'), time: 30, to: 'evening' },
+            { text: (g) => (g.flags.ignored ? 'Find the woman with the split lip and apologise.' : 'Evening. Mei Lin said something about dinner.'), time: 30, to: nextEvening },
         ],
     },
     elder: {
@@ -510,10 +534,10 @@ The tribute is due at dawn tomorrow. You can feel the whole village holding its 
 
 "That seems to be the consensus."
 
-"Then let me give you an old man's advice." He sets his cup down. "Tomorrow, the collectors come. If you're here, they'll see you. If they see you, they'll want you. You can run tonight. Nobody would blame you." A pause. "Or you can stand in front of us. Nobody has done that in forty years."
+"Then let me give you an old man's advice." He sets his cup down. "${g.flags.long ? 'In three days' : 'Tomorrow'}, the collectors come. If you're here, they'll see you. If they see you, they'll want you. You can run ${g.flags.long ? 'before then' : 'tonight'}. Nobody would blame you." A pause. "Or you can stand in front of us. Nobody has done that in forty years."
 
 ${g.flags.gao_beaten || g.flags.gao_humiliated ? '"Also," he adds mildly, "I hear you\'ve already introduced yourself to Gao Feng. So running may be academic."' : ''}`,
-        choices: [{ text: 'Thank him. Think about it.', to: 'village' }],
+        choices: [{ text: 'Thank him. Think about it.', to: hubOf }],
     },
     heal: {
         id: 'heal', title: 'The Coughing House', art: 'healer', place: 'Ashfall Hamlet — the coughing house',
@@ -522,15 +546,15 @@ ${g.flags.gao_beaten || g.flags.gao_humiliated ? '"Also," he adds mildly, "I hea
 
 You are not a doctor. You are, however, a man who has spent fifteen years thinking about what fungi do to bacteria, and ${g.inventory.jade_bracket ? 'you have a pocket full of a bracket fungus that your omnitool swears is quietly, beautifully antibiotic.' : 'you saw a bracket fungus by the stream that might have been the answer, and you didn\'t pick it.'}`,
         choices: [
-            { text: 'Clean it with a bone lancet, dress it with the jade bracket.', show: (g) => (g.inventory.jade_bracket || 0) > 0, check: { skill: 'GU', dc: 3, bonus: () => 2 }, time: 60, do: (g) => { addItem(g, 'jade_bracket', -1); g.flags.healed = true; bumpRel(g, 'Village', 15, 0); return ['The fever breaks before dark. The village will remember.']; }, failDo: (g) => { addItem(g, 'jade_bracket', -1); g.flags.healed = 'partly'; bumpRel(g, 'Village', 6, 0); return ['It helps — slowly. He\'ll live, probably.']; }, to: 'village' },
-            { text: 'Drain and clean it, and ask what herbs they have that don\'t taste of death.', check: { skill: 'GU', dc: 4 }, time: 60, do: (g) => { g.flags.healed = 'partly'; bumpRel(g, 'Village', 8, 0); return ['Better. Not well. But better.']; }, to: 'village' },
+            { text: 'Clean it with a bone lancet, dress it with the jade bracket.', show: (g) => (g.inventory.jade_bracket || 0) > 0, check: { skill: 'GU', dc: 3, bonus: () => 2 }, time: 60, do: (g) => { addItem(g, 'jade_bracket', -1); g.flags.healed = true; bumpRel(g, 'Village', 15, 0); return ['The fever breaks before dark. The village will remember.']; }, failDo: (g) => { addItem(g, 'jade_bracket', -1); g.flags.healed = 'partly'; bumpRel(g, 'Village', 6, 0); return ['It helps — slowly. He\'ll live, probably.']; }, to: hubOf },
+            { text: 'Drain and clean it, and ask what herbs they have that don\'t taste of death.', check: { skill: 'GU', dc: 4 }, time: 60, do: (g) => { g.flags.healed = 'partly'; bumpRel(g, 'Village', 8, 0); return ['Better. Not well. But better.']; }, to: hubOf },
             { text: 'Go back to the stream for the fungus. It\'s two hours there and back.', show: (g) => !(g.inventory.jade_bracket > 0), time: 120, do: (g) => { addItem(g, 'jade_bracket', 2); return ['+2 Jade bracket fungus.']; }, to: 'heal_again' },
         ],
     },
     heal_again: {
         id: 'heal_again', title: 'The Coughing House', art: 'healer', place: 'Ashfall Hamlet — the coughing house',
         text: `You come back muddy to the knees with two shelves of pale green fungus, and the mother looks at you like you've brought her the moon.`,
-        choices: [{ text: 'Get to work.', check: { skill: 'GU', dc: 3, bonus: () => 2 }, time: 60, do: (g) => { addItem(g, 'jade_bracket', -1); g.flags.healed = true; bumpRel(g, 'Village', 15, 0); return ['The fever breaks before dark. The village will remember.']; }, failDo: (g) => { addItem(g, 'jade_bracket', -1); g.flags.healed = 'partly'; bumpRel(g, 'Village', 6, 0); return ['It helps — slowly.']; }, to: 'village' }],
+        choices: [{ text: 'Get to work.', check: { skill: 'GU', dc: 3, bonus: () => 2 }, time: 60, do: (g) => { addItem(g, 'jade_bracket', -1); g.flags.healed = true; bumpRel(g, 'Village', 15, 0); return ['The fever breaks before dark. The village will remember.']; }, failDo: (g) => { addItem(g, 'jade_bracket', -1); g.flags.healed = 'partly'; bumpRel(g, 'Village', 6, 0); return ['It helps — slowly.']; }, to: hubOf }],
     },
     village_hunt: {
         id: 'village_hunt', title: 'Ironhide', art: 'boar', place: 'Blackroot Wilds — the oak hollow',
@@ -539,28 +563,28 @@ You are not a doctor. You are, however, a man who has spent fifteen years thinki
 
 It finds you before you find it. It is the size of a small car and it has *opinions*.`,
         choices: [
-            { text: 'Darts to the eyes, then the blade.', combat: (g) => ({ id: 'boar', intro: 'The boar paws the black earth. The ground shakes when it does.', band: 'challenging', enemies: [{ name: 'Ironhide boar', hp: 10, dc: 4, atk: 4, dmg: 5, dr: 1 }], win: 'boar_won', lose: 'boar_lost', flee: 'village' }), to: 'boar_won' },
-            { text: 'A pit and a bed of bone spikes. Make it come to you.', qi: 6, check: { skill: 'Convergence Use', dc: 4 }, time: 60, to: 'boar_won', fail: 'boar_lost' },
+            { text: 'Darts to the eyes, then the blade.', combat: (g) => ({ id: 'boar', intro: 'The boar paws the black earth. The ground shakes when it does.', band: 'challenging', enemies: [grow({ name: 'Ironhide boar', hp: 10, dc: 4, atk: 4, dmg: 5, dr: 1 }, forestScale(g), BOAR_GROWTH)], win: 'boar_won', lose: 'boar_lost', flee: hubOf(g) }), to: 'boar_won' },
+            { text: 'A pit and a bed of bone spikes. Make it come to you.', qi: 6, check: { skill: 'Convergence Use', dc: 4, bonus: (g) => -Math.floor(forestScale(g) / 2) }, time: 60, to: 'boar_won', fail: 'boar_lost' },
         ],
     },
     boar_won: {
         id: 'boar_won', title: 'Meat for Forty Houses', art: 'boar', place: 'Ashfall Hamlet',
         enter: (g) => { addItem(g, 'beast_core', 1); eat(g, 40); bumpRel(g, 'Village', 12, 0); g.flags.boar = true; return ['+1 Murky beast core. You eat with the village: +40 satiety.']; },
         text: `They come out with carts. By sunset half of Ashfall is grilling ironhide, children are fighting over the tusks, and a hunter old enough to be your grandfather tries to give you his daughter, two goats and a hat. You accept the hat.`,
-        choices: [{ text: 'Evening.', time: 30, to: 'evening' }],
+        choices: [{ text: (g) => (g.flags.long && clockParts(g.minutes).hh < 16 ? 'Back to the village.' : 'Evening.'), time: 30, to: (g) => (g.flags.long ? (clockParts(g.minutes).hh >= 16 ? nextEvening(g) : hubOf(g)) : 'evening') }],
     },
     boar_lost: {
         id: 'boar_lost', title: 'Ironhide Wins', art: 'boar', place: 'Blackroot Wilds — the oak hollow',
         enter: (g) => { g.james.hp = Math.max(1, Math.floor(g.james.hp * 0.7)); return []; },
         text: `You end up up a tree. The boar ends up bored. You both agree to call it a draw, and you limp back to Ashfall with bark in places bark should not go.`,
-        choices: [{ text: 'Evening.', time: 30, to: 'evening' }],
+        choices: [{ text: (g) => (g.flags.long && clockParts(g.minutes).hh < 16 ? 'Back to the village.' : 'Evening.'), time: 30, to: (g) => (g.flags.long ? (clockParts(g.minutes).hh >= 16 ? nextEvening(g) : hubOf(g)) : 'evening') }],
     },
     evening: {
         id: 'evening', title: 'Dinner', art: 'dinner', place: 'Ashfall Hamlet — Mei Lin\'s house',
         enter: (g) => { const p = clockParts(g.minutes); if (p.hh < 19) g.minutes = (p.day - 1) * 1440 + 19 * 60; if (!g.flags.ate_dinner) { eat(g, 30); g.flags.ate_dinner = true; return ['Millet, greens and a little smoked fish: +30 satiety.']; } return []; },
         text: (g) => `${g.flags.ignored
         ? 'You find her house by asking. You apologise on her doorstep, properly, no sarcasm. She lets you in, which you did not deserve, and puts a bowl in front of you, which you deserved even less.'
-        : 'Mei Lin\'s house is two rooms and a herb loft, and her mother is a tiny fierce woman who looks at you once and starts adding more millet to the pot.'}
+        : g.flags.long ? 'Third supper at Mei Lin\'s. Her mother serves you first now, which in Ashfall is roughly the same as a signed adoption certificate.' : 'Mei Lin\'s house is two rooms and a herb loft, and her mother is a tiny fierce woman who looks at you once and starts adding more millet to the pot.'}
 
 Afterwards the mother goes to bed with pointed loudness, and it's just Mei Lin, a clay lamp, a jar of something that might once have been plum wine, and you. Yuki has claimed the warmest spot on the stove and is pretending to be asleep in a way that fools nobody.
 
@@ -636,8 +660,8 @@ Lu Han's gaze passes over the baskets, over the people, and stops on you. On Yuk
 "I've been offered worse," you say. "Not recently."`,
         choices: [
             { text: 'Step forward. "I\'m not kneeling, and nobody\'s paying you today."', combat: collectorsFight, to: 'collectors_won' },
-            { text: 'Bluff: a wandering senior of a hidden sect, testing the Crimson Lotus\'s manners. Let a little bone show.', qi: 4, check: { skill: 'GU', dc: 6, bonus: (g) => (g.flags.healed === true ? 1 : 0) + (g.flags.boar ? 1 : 0) + (g.flags.gao_beaten ? 1 : 0) }, to: 'bluff_win', fail: 'bluff_fail' },
-            { text: 'Offer tribute they\'ve never seen: sing a wraithbone hairpin, flawless, and pay the village\'s due with it.', qi: 8, check: { skill: 'Convergence Use', dc: 4 }, do: (g) => { addItem(g, 'hairpin', 1); return []; }, to: 'tribute_paid', fail: 'bluff_fail' },
+            { text: 'Bluff: a wandering senior of a hidden sect, testing the Crimson Lotus\'s manners. Let a little bone show.', qi: 4, check: { skill: 'GU', dc: 6, bonus: (g) => (g.flags.healed === true ? 1 : 0) + (g.flags.boar ? 1 : 0) + (g.flags.gao_beaten ? 1 : 0) + (g.flags.scouted ? 1 : 0) + (g.flags.gao_turned || g.flags.gao_warned ? 1 : 0) + (g.flags.token_silenced ? 1 : 0) + ((g.rel.Village?.f || 0) >= 40 ? 1 : 0) - Math.floor((forestScale(g) + villageScale(g)) / 2) }, to: 'bluff_win', fail: 'bluff_fail' },
+            { text: 'Offer tribute they\'ve never seen: sing a wraithbone hairpin, flawless, and pay the village\'s due with it.', qi: 8, check: { skill: 'Convergence Use', dc: 4, bonus: (g) => -Math.floor((forestScale(g) + villageScale(g)) / 2) }, do: (g) => { addItem(g, 'hairpin', 1); return []; }, to: 'tribute_paid', fail: 'bluff_fail' },
         ],
     },
     bluff_fail: {
@@ -736,6 +760,8 @@ function cookMealMorning(g) {
     else if (hasItem(g, 'crimson_berry', 3)) { addItem(g, 'crimson_berry', -3); eat(g, 8, { yuki: false }); out.push('Breakfast: berries, +8 satiety.'); }
     return out;
 }
+
+Object.assign(SCENES, WILDS, ASHFALL);
 
 export const START_SCENE = 'arrival';
 export const SCENE_COUNT = Object.keys(SCENES).length;

@@ -366,6 +366,38 @@ const FILTERS = '<defs><filter id="ink" x="-5%" y="-5%" width="110%" height="110
 const grain = '<rect width="400" height="250" filter="url(#gr)"/>';
 const vignette = '<rect width="400" height="250" fill="url(#vg)"/>';
 
+/* ---- creatures and props for the forest and village days ---- */
+function bird(x, y, s = 1, flip = 1) {
+    const k = (n) => f(n * s);
+    return `<g transform="translate(${x} ${y}) scale(${flip} 1)"><path d="M0 0 C${k(-6)} ${k(-10)} ${k(-18)} ${k(-12)} ${k(-26)} ${k(-6)} C${k(-16)} ${k(-6)} ${k(-10)} ${k(-2)} ${k(-6)} ${k(2)} C${k(-2)} ${k(4)} ${k(4)} ${k(4)} ${k(8)} ${k(1)} L${k(14)} ${k(-1)} L${k(8)} ${k(-2)} C${k(14)} ${k(-12)} ${k(24)} ${k(-14)} ${k(30)} ${k(-10)} C${k(20)} ${k(-6)} ${k(10)} ${k(-2)} 0 0 Z" fill="#1d1b19"/><circle cx="${k(6)}" cy="${k(-0.5)}" r="${k(0.9)}" fill="#e8e2d6"/></g>`;
+}
+function lizardShape(x, y, s = 1, flip = 1) {
+    const k = (n) => f(n * s);
+    let spines = '';
+    for (let i = 0; i < 9; i++) spines += `<path d="M${k(-30 + i * 7)} ${k(-12 + Math.abs(i - 4) * 0.8)} L${k(-27 + i * 7)} ${k(-24 + Math.abs(i - 4) * 1.4)} L${k(-24 + i * 7)} ${k(-12 + Math.abs(i - 4) * 0.8)} Z" fill="#1d1b19"/>`;
+    return `<g transform="translate(${x} ${y}) scale(${flip} 1)">${spines}<path d="M${k(-60)} ${k(-4)} C${k(-48)} ${k(-8)} ${k(-40)} ${k(-14)} ${k(-26)} ${k(-14)} C${k(-6)} ${k(-16)} ${k(14)} ${k(-14)} ${k(28)} ${k(-10)} L${k(40)} ${k(-8)} L${k(44)} ${k(-4)} L${k(30)} ${k(-2)} L${k(26)} ${k(0)} L${k(22)} ${k(0)} L${k(18)} ${k(-4)} L${k(-14)} ${k(-4)} L${k(-18)} 0 L${k(-22)} 0 L${k(-24)} ${k(-5)} C${k(-38)} ${k(-4)} ${k(-50)} ${k(-1)} ${k(-60)} ${k(-4)} Z" fill="#55514d"/><circle cx="${k(34)}" cy="${k(-8)}" r="${k(1.4)}" fill="#e2c13a"/></g>`;
+}
+function ribs(x, y, s = 1) {
+    const k = (n) => f(n * s);
+    let r = `<path d="M${k(-90)} 0 C${k(-60)} ${k(-8)} ${k(60)} ${k(-8)} ${k(90)} 0" stroke="#2a2826" stroke-width="${k(5)}" fill="none"/>`;
+    for (let i = 0; i < 7; i++) { const dx = -72 + i * 24; r += `<path d="M${k(dx)} ${k(-4)} C${k(dx - 14)} ${k(-50)} ${k(dx + 10)} ${k(-86)} ${k(dx + 22)} ${k(-90)}" stroke="#2a2826" stroke-width="${k(7)}" fill="none" stroke-linecap="round"/><path d="M${k(dx)} ${k(-4)} C${k(dx - 14)} ${k(-50)} ${k(dx + 10)} ${k(-86)} ${k(dx + 22)} ${k(-90)}" stroke="${C.bone}" stroke-width="${k(5)}" fill="none" stroke-linecap="round"/>`; }
+    return `<g transform="translate(${x} ${y})">${r}</g>`;
+}
+function skull(x, y, s = 1) {
+    const k = (n) => f(n * s);
+    return `<g transform="translate(${x} ${y})"><path d="M${k(-40)} 0 C${k(-44)} ${k(-30)} ${k(-24)} ${k(-50)} ${k(4)} ${k(-50)} C${k(30)} ${k(-50)} ${k(52)} ${k(-34)} ${k(60)} ${k(-14)} L${k(66)} 0 Z" fill="${C.bone}" stroke="#2a2826" stroke-width="${k(1.2)}"/><ellipse cx="${k(-6)}" cy="${k(-24)}" rx="${k(9)}" ry="${k(7)}" fill="#1d1b19"/><ellipse cx="${k(26)}" cy="${k(-24)}" rx="${k(8)}" ry="${k(7)}" fill="#1d1b19"/><circle cx="${k(10)}" cy="${k(-40)}" r="${k(3)}" fill="#1d1b19"/></g>`;
+}
+function roots(seed, y, n, color = C.bone) {
+    const r = rng(seed);
+    let d = '';
+    for (let i = 0; i < n; i++) { const y0 = y + r() * 40; const w = 6 + r() * 10; d += `<path d="M-20 ${f(y0)} C${f(80 + r() * 60)} ${f(y0 - 30 + r() * 20)} ${f(200 + r() * 60)} ${f(y0 + 10 - r() * 30)} 420 ${f(y0 - 20 + r() * 30)}" stroke="#2a2826" stroke-width="${f(w + 2)}" fill="none"/><path d="M-20 ${f(y0)} C${f(80 + r() * 60)} ${f(y0 - 30 + r() * 20)} ${f(200 + r() * 60)} ${f(y0 + 10 - r() * 30)} 420 ${f(y0 - 20 + r() * 30)}" stroke="${color}" stroke-width="${f(w)}" fill="none"/>`; }
+    return d;
+}
+const orbs = (pts) => pts.map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r * 2.4}" fill="#fffaf0" opacity="0.35"/><circle cx="${x}" cy="${y}" r="${r}" fill="#fbfaf7" stroke="#2a2826" stroke-width="0.5"/>`).join('');
+const rainLines = (seed) => { const r = rng(seed); let d = ''; for (let i = 0; i < 90; i++) { const x = r() * 420; const y = r() * 250; d += `M${f(x)} ${f(y)} l-4 12`; } return `<path d="${d}" stroke="#8c8781" stroke-width="0.8"/>`; };
+const VILLAGER = { style: 'plain' };
+const HUNTER = { style: 'man', coat: '#4a3a32' };
+
 const JAMES = { coat: C.bone, hair: '#c9b27a', style: 'james' };
 const MEI = { coat: '#8a7a6a', hair: '#1f1d1b', skin: '#c99f7f', style: 'mei' };
 const SECT = { coat: C.crimson, hair: C.ink, skin: '#c9a184', robe: true, style: 'sect' };
@@ -397,6 +429,24 @@ const SCENES = {
     collectors: () => sky('#4a3036', '#b06a4e') + sun(200, 70, 20) + ground(195, '#4d4842') + `<path d="M330 205 L330 110" stroke="#3a2a22" stroke-width="5"/><path d="M330 114 L365 117 L362 160 L330 154 Z" fill="${C.crimson}"/>` + person(130, 230, 1.15, { ...SECT, coat: '#6e1c25', sword: true }) + person(180, 226, 0.95, SECT) + person(84, 228, 0.95, SECT) + person(52, 230, 0.9, SECT) + person(270, 236, 1, JAMES) + cat(292, 214, 0.6),
     collectors_down: () => sky('#3a2a30', '#8a5a4a') + ground(195, '#4d4842') + shards(73, 200, 210, 40, 190) + `<g fill="${C.crimson}" opacity="0.7">${[0, 1, 2, 3, 4, 5].map((i) => `<circle cx="${120 + i * 33}" cy="${218 + (i % 2) * 6}" r="2.5"/>`).join('')}</g>` + `<g transform="translate(150 236)">${person(0, 0, 0.75, { ...SECT, coat: '#6e1c25' })}</g>` + person(240, 236, 1, JAMES) + `<path d="M228 190 L180 205" stroke="${C.bone}" stroke-width="3" stroke-linecap="round"/>`,
     hairpin: () => sky('#1f2420', '#33403a') + `<circle cx="200" cy="125" r="90" fill="${C.bone}" opacity="0.06"/><g transform="translate(200 125) rotate(-28)"><path d="M-110 0 L100 0" stroke="${C.bone}" stroke-width="6" stroke-linecap="round"/>${Array.from({ length: 9 }, (_, i) => `<path d="M${-80 + i * 20} 0 Q${-70 + i * 20} -16 ${-60 + i * 20} 0 Q${-70 + i * 20} 16 ${-80 + i * 20} 0 Z" fill="${C.bone}" opacity="${0.6 + (i % 3) * 0.12}"/>`).join('')}<circle cx="100" cy="0" r="9" fill="${C.bone}"/></g>`,
+    lights: () => sky(C.night, '#1f2a35') + treeline(91, 200, 12, 70, 140, '#1a232a') + deadTree(330, 170, 120, '#2a2826', 6) + orbs([[60, 190, 3], [110, 182, 3.4], [160, 176, 2.6], [215, 170, 3], [262, 164, 2.4], [300, 158, 2]]) + ground(215, '#10161b') + person(70, 240, 0.85, JAMES) + cat(92, 242, 0.7),
+    rain: () => sky('#3a3f44', '#5a5f5c') + treeline(93, 190, 10, 60, 120, C.moss) + ground(212, C.ink2) + rainLines(94) + fire(200, 228, 0.5) + person(165, 236, 0.85, JAMES) + cat(228, 238, 0.75),
+    crows: () => sky(C.night, '#251e2a') + moon(330, 50, 11) + treeline(95, 200, 10, 70, 130, '#141b20') + `<path d="M40 196 L360 186" stroke="#2a2826" stroke-width="10" stroke-linecap="round"/>` + bird(120, 120, 1.4) + bird(210, 92, 1.1, -1) + bird(290, 140, 1.3, -1) + ground(215, '#10161b') + fire(200, 234, 0.5) + person(160, 238, 0.85, JAMES) + cat(240, 240, 0.7),
+    rats: () => sky(C.night, '#1f2a35') + treeline(97, 190, 12, 60, 130, '#141b20') + `<path d="M0 222 Q120 206 220 220 T400 214 L400 250 L0 250 Z" fill="#2d3c44"/>` + beast(90, 222, 0.8, '#2a2826', C.crimson) + beast(310, 226, -0.75, '#2a2826', C.crimson) + person(200, 240, 0.85, JAMES) + cat(226, 242, 0.7),
+    lizard: () => sky(C.night, '#251e2a') + treeline(99, 196, 10, 60, 130, '#141b20') + ground(212, '#10161b') + lizardShape(270, 230, 1.6, -1) + `<g fill="${C.bone}" stroke="#2a2826" stroke-width="0.8"><ellipse cx="330" cy="236" rx="7" ry="5"/><ellipse cx="345" cy="238" rx="7" ry="5"/><ellipse cx="338" cy="230" rx="6" ry="4.5"/></g>` + fire(110, 236, 0.5) + person(150, 240, 0.9, JAMES) + cat(175, 242, 0.7),
+    gift: () => sky(C.night, '#2a2430') + moon(320, 50, 12) + treeline(101, 196, 10, 60, 120, '#1a232a') + ground(214, '#10161b') + fire(120, 232, 0.55) + `<g transform="translate(230 238) rotate(80)">${bird(0, 0, 1.2)}</g>` + cat(260, 240, 1.2) + person(170, 238, 0.85, JAMES),
+    bone_field: () => sky('#4a4248', '#9a8270') + mountains(103, 140, 40, C.dusk, 0.6) + ground(190, '#7d786d') + ribs(150, 210, 1.1) + skull(310, 214, 0.9) + `<path d="M0 230 C80 220 160 236 400 226" stroke="${C.bone}" stroke-width="4" fill="none"/>` + person(250, 240, 0.85, JAMES) + cat(180, 120, 0.7),
+    mire: () => sky('#3a3f40', '#6a6e66') + treeline(105, 170, 12, 40, 90, C.moss) + `<rect y="175" width="400" height="75" fill="#2d3c44"/>` + `<g fill="#55514d">${[[60, 200, 34], [170, 214, 26], [300, 196, 40], [380, 230, 24]].map(([x, y, w]) => `<ellipse cx="${x}" cy="${y}" rx="${w}" ry="7"/>`).join('')}</g>` + deadTree(90, 200, 60, '#2a2826', 4) + deadTree(310, 196, 70, '#2a2826', 4) + orbs([[96, 186, 1.6], [104, 176, 1.4], [316, 180, 1.8]]) + person(200, 232, 0.85, JAMES) + cat(170, 210, 0.6),
+    hollow: () => sky('#2b2436', '#7a6a6a') + deadTree(320, 120, 110, '#2a2826', 7) + mist(110, 0.3) + roots(107, 150, 6) + person(150, 236, 0.9, JAMES) + cat(176, 238, 0.75),
+    roof: () => sky(C.night, '#2a2430') + moon(80, 50, 12) + `<path d="M0 250 L0 200 L200 150 L400 200 L400 250 Z" fill="#2a2826"/><path d="M0 200 L200 150 L400 200" stroke="${C.bone}" stroke-width="1.2" fill="none"/>` + person(180, 184, 0.75, JAMES) + person(214, 182, 0.72, MEI) + cat(240, 192, 0.5),
+    village_night: () => sky(C.night, '#1f2a35') + moon(320, 46, 12) + mountains(109, 130, 40, '#2e2a3d', 0.7) + ground(200, '#2a2826') + hut(90, 210, 60, '#55514d', C.ink2) + hut(200, 206, 56, '#55514d', C.ink2, true) + hut(320, 212, 64, '#55514d', C.ink2),
+    token: () => sky('#141210', '#2a2420') + `<circle cx="200" cy="130" r="70" fill="#fffaf0" opacity="0.18"/><circle cx="200" cy="130" r="44" fill="none" stroke="${C.bone}" stroke-width="1"/><circle cx="200" cy="130" r="58" fill="none" stroke="${C.bone}" stroke-width="0.6"/><ellipse cx="200" cy="130" rx="22" ry="28" fill="#8c8781" stroke="#2a2826" stroke-width="1.4"/><path d="M190 120 Q200 108 210 120 M188 136 L212 136" stroke="#2a2826" stroke-width="1.4" fill="none"/>` + person(110, 250, 1.1, MEI) + person(300, 252, 1.1, JAMES),
+    gao_window: () => sky(C.night, '#1f2a35') + moon(80, 44, 11) + ground(206, '#2a2826') + hut(290, 214, 110, '#55514d', C.ink2, true) + person(150, 236, 1, { ...SECT }),
+    arson: () => sky(C.night, '#2a1f24') + ground(206, '#2a2826') + hut(300, 214, 110, '#55514d', C.ink2) + fire(250, 196, 0.45) + fire(120, 214, 0.35) + person(90, 236, 1, HUNTER) + person(130, 238, 0.95, HUNTER) + person(170, 236, 0.95, HUNTER) + person(240, 238, 1, JAMES) + cat(262, 240, 0.7),
+    herb_slope: () => sky('#4c4040', '#a77a5c') + sun(330, 50, 12) + mountains(111, 130, 40, C.dusk, 0.6) + `<path d="M0 250 L0 170 Q200 140 400 200 L400 250 Z" fill="#7d786d"/>` + `<g stroke="#2a2826" stroke-width="1.2">${Array.from({ length: 30 }, (_, i) => `<path d="M${10 + i * 13} ${f(176 + i * 1.1)} l-3 -10 M${10 + i * 13} ${f(176 + i * 1.1)} l3 -9"/>`).join('')}</g>` + person(170, 226, 0.9, MEI) + person(230, 232, 0.95, JAMES) + cat(260, 236, 0.7),
+    workshop: () => sky('#2a2622', '#4a3e34') + `<rect y="180" width="400" height="70" fill="#3a3028"/><rect x="120" y="186" width="160" height="12" fill="#55514d" stroke="#2a2826"/>` + `<g stroke="${C.bone}" stroke-width="2" stroke-linecap="round"><path d="M140 184 l10 -12 M160 184 l4 -14 M180 184 l12 -10 M220 184 l-6 -14 M250 184 l8 -12"/></g>` + person(200, 238, 1, JAMES) + person(80, 244, 0.55, VILLAGER) + person(100, 246, 0.5, VILLAGER) + person(330, 244, 0.6, VILLAGER),
+    drill: () => sky('#4a4248', '#9a8270') + ground(196, '#7d786d') + Array.from({ length: 6 }, (_, i) => person(60 + i * 46, 232 + (i % 2) * 4, 0.85, HUNTER) + `<path d="M${74 + i * 46} ${244 + (i % 2) * 4} L${84 + i * 46} ${170 + (i % 2) * 4}" stroke="#2a2826" stroke-width="2"/><path d="M${84 + i * 46} ${170 + (i % 2) * 4} l-3 -10 l6 2 Z" fill="${C.bone}" stroke="#2a2826" stroke-width="0.6"/>`).join('') + person(350, 238, 1, JAMES) + cat(372, 240, 0.7),
+    wolves: () => sky('#3a3a33', '#6a6450') + treeline(113, 180, 10, 60, 130, C.moss) + ground(200, C.ink2) + beast(260, 230, 1.5, '#55514d', C.crimson) + beast(330, 236, 1.3, '#55514d', C.crimson) + person(100, 236, 0.9, JAMES) + cat(124, 238, 0.7),
 };
 
 /**

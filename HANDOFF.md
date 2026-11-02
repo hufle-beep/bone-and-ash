@@ -1,6 +1,6 @@
 # Bone and Ash — handoff (read this first in a new chat)
 
-**Saved:** 2026-11-02 (Europe/Budapest). **Version:** prologue 0.2.0 (`sw.js` VERSION `bone-ash-0.2.0`). **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
+**Saved:** 2026-11-02 (Europe/Budapest). **Version:** prologue 0.4.0 (`sw.js` VERSION `bone-ash-0.4.0`). **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
 Built in the SillyTavern chat as a spin-off. That chat stays for SillyTavern; this game continues in its own chat.
 
 ## What it is
@@ -60,6 +60,9 @@ They carry over from the SillyTavern project:
 | `js/core/formulas.js` | Rules Engine C formulas, unchanged. |
 | `js/core/game.js` | State (`newGame`), the numbers (HP, Qi Max, Convergence ×1.25), d6 from the save's own seed (a reload does not reroll), XP (`awardXp`), time and regen (`advance`, `sleepUntil`), hunger, condensation, inventory, relationships, **combat** (`COMBAT_ACTIONS`, `startCombat`, `combatStep`, `combatFlee`), save/load. |
 | `js/core/story.js` | The scene runner (`sceneView`, `choose`, `goTo`). |
+| `js/story/common.js` | Shared helpers: daily flags, `forestScale` / `villageScale`, `grow()` (enemy growth), food table and `eatBest()`, new items. |
+| `js/story/wilds.js` | Forest Days 2–3 and the random nights (v0.4.0). |
+| `js/story/ashfall.js` | Village Days 5–6, suppers, the night-5 Gao event (v0.4.0). |
 | `js/story/prologue.js` | `SCENES` (52), `ITEMS`, and the encounters (jackals, Gao Feng, boar, collectors). |
 | `js/art/portrait.js` | Close-ups in manhua style: `meiPortrait()`, `yukiPortrait()` (clean lines, flat cel tone, big eyes, glossy-hair highlights). |
 | `art/bg/*.jpg`, `art/bg/CREDITS.md` | Six background crops of public-domain paintings (Dong Qichang, Wen Zhengming, the Met's *Misty Landscape*), toned to the paper. Made with `tools/bg.py` (crop → 1200×750 → luminance mapped to ink `#23211e`…paper `#ece8df`, reds kept). |
@@ -96,33 +99,36 @@ node tests/rules.test.mjs && node tests/story.test.mjs
   Losing a fight never ends the game; it leads to a "lost" branch.
 - **Bonesinger ladder:** a T1 rung was added for this game: antler-hard bone, needles, darts, a knife-length blade, thrown to about 15 m. T2+ text is from the SillyTavern james3 preset (`BONESINGER_TIERS` in game.js has T1–T3).
 
-**Balance** (2,000 runs; "smart" = blade and needle used well):
-- jackals: 99% win;
-- Gao Feng: 92%;
-- boar: 98%;
-- **collectors (boss): about 40%** — hard by design.
-
-Endings reached: fought / bluff / paid / lost.
+**Balance (v0.4.0, smart combat, random hub choices; `s` = extra days trained):**
+- Enemies grow per extra day with `grow()` in `js/story/common.js`: HP +15%, DC to hit +0.45, attack +0.6 (to the half point). Lu Han: HP +5%, DC +0.35, attack +0.5. That tracks the average gain per day, so a player who trains harder than average wins more.
+- Jackals (night 3 adds a yearling): ~99%. Gao Feng: 84% (s1) / 95% (s2). Boar: 91% / 99%. Collectors: 37% (s3) / 58% (s4). Night fights (crows, rats, lizard): 97–100%. Far hunt (wolves, thornback bull): ~80%. Arson: ~97%.
+- Player at the jackals: GU check ~2.8, Convergence Use ~1.7 after two full forest days (was 1.2 / 0.6 on night 1).
+- Old saves (no `long` flag) keep the original numbers and route.
+- Re-tune with the balance script pattern: random hub choices, smart combat, group win rate by `s` (see git history, `bal.mjs` in the session that built v0.4.0).
 
 ## Story map (prologue)
 
+The **long route** (v0.4.0, flag `long`, set on the first forest night) runs 7 days. Old saves without the flag keep the original 3-day route.
+
 **Day 1:**
-- `arrival` leads to `yuki_check`, `scan_ok` / `scan_bad`, or `clearing`.
-- `clearing` → `first_bone` (Bonesinger tutorial) or `meditate1` (tasting the poisoned Qi), then `stream`.
-- `stream` is the hub: drink, `forage` (fungus gets a +2 mycology bonus; berries), `hunt` (glassback hare: dart, or let Yuki herd it), then `camp`.
-- `camp`: fire, cook, bone stakes, then `night` (leave a thread on watch, or cultivate).
-- `night_attack`: **jackals** fight → `jackals_won` / `jackals_lost` / `jackals_fled`.
+- `arrival` → `yuki_check`, `scan_ok` / `scan_bad`, or `clearing` → `first_bone` / `meditate1` → `stream` hub (drink, `forage`, `hunt`) → `camp` → `night`.
+- `night` → `nightNext()`: `night_event` on nights 1–2, `night_attack` on night 3 or the night after `stream_out`.
 
-**Day 2:**
-- `dawn` (scream) → `herb_girl`: Gao Feng is extorting Mei Lin. Talk / needle his hand / fight → `gao_*`, then `mei_lin`, then `lore`.
-- `ridge_alone`: James ignored the scream; Mei Lin is hurt later.
-- `village` (Ashfall Hamlet) → `elder` (Old Wen), `heal` (fungus as antibiotic), `village_hunt` (**ironhide boar**).
-- `evening` → `evening2` → `romance` (needs Mei Lin affection 8+) / `tribute_dawn_talk` / `tribute_dawn_sleep`.
+**Nights 1–2 (`js/story/wilds.js`):** `night_event` rolls one of six (seeded, no repeat in a row): `lights` (lore flag `saw_lights`), `rain`, `gift` (Yuki brings a fowl) — quiet; `crows`, `rats`, `lizard` — fights → `night_won` / `night_lost` / `night_fled`. Then `morning` (sleeps, `forest_day` +1, breakfast).
 
-**Day 3:**
-- `tribute`: Inner Disciple Lu Han and the collectors. Fight / bluff (GU DC 6 with bonuses for healing, the boar, beating Gao) / pay with a wraithbone hairpin (Convergence Use DC 4, 8 Qi).
-- Outcomes: `collectors_won`, `bluff_win`, `tribute_paid`, `collectors_lost`.
-- `epilogue`: the dead giant tree at the forest's heart that his Convergence "sings" to, probably a dead Hearth Tree. That's the hook for Act 1.
+**Days 2–3 (`wilds` hub):** `wild_forage` (mushroom ring, river cress, honey tree, berries — once a day each), `wild_hunt` (hare, mire fowl, stone-shell crab, Yuki alone), `wild_train` (darts, blade, footwork with Yuki, needles), `wild_explore` once a day → `bone_field` (`bone_sung`, bone-meal → `stakes_hard`), `mire` (ghost-gill heals 8 HP; optional rat fight), `hollow` (free condensation, `roots` foreshadowing the dead tree); cultivate, rest, eat, make camp (from 15:00), or `stream_out` (leave early: jackals that night).
+
+**Night 3:** `night_attack` → jackals (a third, the yearling, on night 3) → `jackals_won` / `lost` / `fled` → `dawn` (Day 4).
+
+**Day 4:** as before: `herb_girl` (Gao Feng) → `gao_*` → `mei_lin` → `lore` / `village` (`vday` 1). `ridge_alone` if ignored. Village: `elder`, `heal`, `village_hunt` (boar). Evening → `nextEvening()`: `supper` on village days 1–2, `evening` on the last.
+
+**Days 4–6 nights (`js/story/ashfall.js`):** `supper` → `supper_roof` / `village_night`. On night 5 `village_night` depends on Gao: **dead** → his jade token pulses (silence it: `token_silenced`); **spared** → he comes to warn you (`gao_turned` removes him from the final fight, or `gao_warned`); **otherwise** → Pock-Face tries to burn the herb loft (`arson` fight or wake the street; lost → `loft_burned`). → `village_morning` (`vday` +1).
+
+**Days 5–6 (`ashfall` hub):** leftover elder/heal/boar; `herb_slopes` (Mei Lin, spirit grass); `clinic` (`clinics`); `workshop` (needles, `spears`, `plough`); `drill` (`militia` count); `wen_lesson` (`lore_realms`, `lore_tree`); `far_hunt` (wolves / thornback bull / ash-deer); `scout` (day 6, `scouted`); `mei_walk` (sunset); communal pot; cultivate; rest; evening from 16:00.
+
+**Day 6 night:** `evening` → `evening2` → `romance` / `tribute_dawn_talk` / `tribute_dawn_sleep`.
+
+**Day 7:** `tribute`. Fight: militia and spears take up to 6 HP off Lu Han; `gao_turned` removes Gao. Bluff (GU, DC 6, minus half the days trained): +1 each for healed, boar, Gao beaten, scouted, Gao warned/turned, token silenced, Village friendship 40+. Hairpin: Convergence Use DC 4 minus the same. Outcomes as before → `epilogue`.
 
 **Characters:**
 - Mei Lin: 26, herb-gatherer, sharp-tongued.
@@ -132,7 +138,7 @@ Endings reached: fought / bluff / paid / lost.
 - Lu Han: inner disciple.
 - The Crimson Lotus Sect.
 
-**Flags that matter for Act 1:**
+**Flags that matter for Act 1** (v0.4.0 adds `saw_lights`, `roots`, `bone_sung`, `lore_tree`, `token_silenced`, `gao_turned`, `loft_burned`, `militia`, `plough`, `clinics`):
 - `ending` (fought / bluff / paid / lost);
 - `gao_dead`, `gao_spared`, `gao_humiliated`;
 - `romance`, `healed`, `boar`, `ignored`;

@@ -26,6 +26,8 @@ const md = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replac
 const paras = (t) => String(t).split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean).map((p) => (p === '*' ? '<p class="end-mark" aria-hidden="true">⁂</p>' : `<p>${md(p).replace(/\n/g, '<br>')}</p>`)).join('');
 const pct = (a, b) => `${Math.max(0, Math.min(100, (a / b) * 100)).toFixed(1)}%`;
 const n1 = (x) => (Math.round(x * 10) / 10).toString();
+const val = (v) => (typeof v === 'function' ? v(g) : v);
+const sceneTitle = (id) => val(SCENES[id]?.title) || id;
 const dieHtml = (line) => md(line).replace(/🎲(\d)/g, '<span class="die" aria-label="rolled $1">$1</span>');
 
 function autosave() { if (g) store.set(AUTO, serialize(g)); }
@@ -75,8 +77,8 @@ function renderCombat() {
     const foes = c.enemies.map((e) => `<div class="foe${e.hp <= 0 ? ' down' : ''}"><span>${esc(e.name)}${e.staggered ? ' (reeling)' : ''}</span><div class="stroke"><i style="width:${pct(Math.max(0, e.hp), e.hpMax)}"></i></div></div>`).join('');
     const yuki = `<div class="foe"><span>Yuki</span><div class="stroke" style="background:rgba(242,239,230,0.08)"><i style="width:${pct(g.yuki.hp, yukiHpMax(g))};background:var(--bone)"></i></div></div>`;
     view.innerHTML = `<section>
-<div class="plate">${sceneArt(SCENES[g.scene].art)}</div>
-<header class="head"><div class="place">${esc(SCENES[g.scene].title)}</div><h1 class="title">Round ${c.round}</h1></header>
+<div class="plate">${sceneArt(val(SCENES[g.scene].art))}</div>
+<header class="head"><div class="place">${esc(sceneTitle(g.scene))}</div><h1 class="title">Round ${c.round}</h1></header>
 ${statusHtml()}
 <div class="foes">${foes}${yuki}</div>
 <div class="round">${(combatLog || c.log).map((l) => dieHtml(l)).join('<br>')}</div>
@@ -123,14 +125,14 @@ ${items.map(([id, n]) => `<div class="row"><span>${esc(ITEMS[id]?.name || id)}</
 </section>`;
 }
 function renderJournal() {
-    const entries = g.log.slice().reverse().slice(0, 60).map((e) => `<div class="entry"><time>${clockLabel(e.at)}</time>${esc(SCENES[e.scene]?.title || e.scene)}${e.lines.length ? `<div class="note">${e.lines.map((l) => dieHtml(l)).join('<br>')}</div>` : ''}</div>`).join('');
+    const entries = g.log.slice().reverse().slice(0, 60).map((e) => `<div class="entry"><time>${clockLabel(e.at)}</time>${esc(sceneTitle(e.scene))}${e.lines.length ? `<div class="note">${e.lines.map((l) => dieHtml(l)).join('<br>')}</div>` : ''}</div>`).join('');
     view.innerHTML = `<section class="page"><h1>Journal</h1><p class="lede">${g.stats.checks} checks rolled, ${g.stats.wins} passed · ${g.stats.kills} things that wanted to eat you, didn't · ${g.stats.meals} meals.</p>${entries || '<p class="note">Nothing yet. Give it a minute.</p>'}</section>`;
 }
 function renderSaves() {
     const slot = (n) => {
         const raw = store.get(SLOT(n));
         let desc = 'Empty';
-        if (raw) { try { const s = JSON.parse(raw); desc = `${SCENES[s.scene]?.title || s.scene} — ${clockLabel(s.minutes)}`; } catch { desc = 'Unreadable'; } }
+        if (raw) { try { const s = JSON.parse(raw); desc = `${sceneTitle(s.scene)} — ${clockLabel(s.minutes)}`; } catch { desc = 'Unreadable'; } }
         return `<div class="row"><span>Slot ${n}</span><span class="note">${esc(desc)}</span><div class="btns sub"><button class="btn" data-save="${n}">Save here</button>${raw ? `<button class="btn" data-load="${n}">Load</button>` : ''}</div></div>`;
     };
     view.innerHTML = `<section class="page"><h1>Saves</h1>
