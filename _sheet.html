@@ -1,0 +1,5 @@
+<!doctype html><body style="margin:0;display:grid;grid-template-columns:repeat(4,400px);gap:4px;background:#888"><script type="module">
+import { sceneArt } from '/js/art/art.js';
+const ks = new URLSearchParams(location.search).get('k').split(',');
+document.body.innerHTML = ks.map((k) => `<div style="width:400px;height:250px;position:relative">${sceneArt(k)}<span style="position:absolute;left:4px;top:2px;font:11px sans-serif;background:#fff">${k}</span></div>`).join('');
+</script></body>

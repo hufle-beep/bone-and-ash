@@ -42,8 +42,8 @@ const elderFight = (g) => {
         id: 'elder', tier: 'climax',
         intro: 'Outer Elder Shen Qiu draws no sword. He lifts one hand, palm out, and the air between you goes red and heavy as wet silk.',
         enemies: [
-            { name: 'Outer Elder Shen Qiu', hp: 36, dc: 7, atk: 8, dmg: 6, dr: 2 },
-            ...(luHanHere(g) && !g.flags.a1_militia ? [{ name: 'Lu Han', hp: 14, dc: 6, atk: 7, dmg: 5, dr: 1 }] : []),
+            { name: 'Outer Elder Shen Qiu', hp: 28, dc: 6, atk: 7, dmg: 5, dr: 1 },
+            ...(luHanHere(g) && !g.flags.a1_militia ? [{ name: 'Lu Han', hp: 10, dc: 5, atk: 6, dmg: 4, dr: 1 }] : []),
         ],
         win: 'rt_duel_won', lose: 'rt_duel_lost',
     });
