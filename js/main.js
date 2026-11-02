@@ -5,6 +5,7 @@ import {
 } from './core/game.js';
 import { sceneView, choose, goTo } from './core/story.js';
 import { SCENES, ITEMS } from './story/prologue.js';
+import { meridianRow } from './story/meridians.js';
 import * as ART from './art/art.js';
 const sceneArt = (key) => { ART.setArtState?.({ yukiForm: yukiForm(g) }); return ART.sceneArt(key); };
 
@@ -101,7 +102,7 @@ function renderSheet() {
 <p class="lede">Forty, a doctorate three days old (mycology and computational biology). From a civilisation that grows its cities, tools and ships from qi-attuned wood. Now: here.</p>
 <div class="row"><span>HP</span><span>${n1(j.hp)} / ${jamesHpMax(g)} · DR ${j.dr}</span></div>
 <div class="row"><span>Convergence (Qi + Bonesinger)</span><span>${n1(j.qi)} / ${n1(jamesQiMax(g))}</span></div>
-<div class="row"><span>Realm</span><span>${esc(realmName(j.realm))} · Saturation ${n1(j.saturation)}%</span><span class="sub">Primaries ${j.primaries}/12 · collaterals ${j.collaterals}/66. No herbs, no pills, no tribulation: the Ouroboros Axiom composts this world's poisoned Qi.</span></div>
+<div class="row"><span>Realm</span><span>${esc(realmName(j.realm))} · Saturation ${n1(j.saturation)}%</span><span class="sub">Primaries ${j.primaries}/12 · collaterals ${j.collaterals}/66 · ${meridianRow(g)}. No herbs, no pills, no tribulation: the Ouroboros Axiom composts this world's poisoned Qi.</span></div>
 <h2>Skills</h2>
 ${skillRow('GU', j.gu, 'General Use: anything he has no skill for, and his defence')}
 ${skillRow('Convergence Use', cu, 'darts, needles, the wraithbone blade')}

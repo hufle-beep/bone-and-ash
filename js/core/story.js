@@ -22,7 +22,7 @@ export function choiceTag(g, c) {
     if (c.check) {
         const bonus = c.check.bonus ? c.check.bonus(g) : 0;
         const v = Math.round((actingCheck(g, c.check.skill) + bonus) * 10) / 10;
-        bits.push(`${actingName(g, c.check.skill)} ${v} + d6 vs DC ${c.check.dc}`);
+        bits.push(`${actingName(g, c.check.skill)} ${v} + d6 vs DC ${asText(c.check.dc, g)}`);
     }
     if (c.qi) bits.push(`${c.qi} Qi`);
     if (c.combat) bits.push('fight');
@@ -138,7 +138,7 @@ export function choose(g, scenes, index) {
     let roll = null;
     let ok = true;
     if (c.check) {
-        roll = rollCheck(g, c.check.skill, c.check.dc, c.check.bonus ? c.check.bonus(g) : 0);
+        roll = rollCheck(g, c.check.skill, asText(c.check.dc, g), c.check.bonus ? c.check.bonus(g) : 0);
         ok = roll.success;
         lines.push(`${roll.skill} ${roll.value} + 🎲${roll.die} = ${roll.total} vs DC ${roll.dc} — ${ok ? 'success' : 'failure'}${roll.crit ? ' (critical!)' : roll.six ? ' (six!)' : roll.fumble ? ' (one…)' : ''}`);
         if (c.xp !== false) lines.push(...awardXp(g, c.check.skill, c.check.band || 'standard', { fail: !ok }));

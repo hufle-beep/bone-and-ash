@@ -38,6 +38,9 @@ export function newGame(seed = Date.now()) {
             saturation: 0,
             primaries: 12,
             collaterals: 66,
+            extra8: 0,
+            extraCollaterals: 0,
+            junctions: 0,
             hp: null,
             qi: null,
             satiety: 70,
@@ -72,6 +75,19 @@ export const xpToNext = (n) => skillXpCost(K, n.tier, n.level);
 export function jamesHpMax(g) {
     return maxHp({ body: skillCheck(g.james.gu), realmIndex: g.james.realm });
 }
+/**
+ * The extra meridians (v0.8): Extraordinary 8 (Foundation → Soul Embryo; closes at Nascent Soul), their 28 collaterals
+ * and 10 junctions (Nascent Soul+). Gábor 2026-11-02: each raises the Qi regen percentage per Cycle — Extraordinary
+ * +0.5, collateral +0.1 (engine), junction +0.3 (all 46: +9.8 points). Yuki opens the same ones through the bond.
+ * Old saves: all 0.
+ */
+export const extraMeridians = (g) => ({ extra8: g.james.extra8 || 0, extraCollaterals: g.james.extraCollaterals || 0, junctions: g.james.junctions || 0 });
+export function extraRegen(g) {
+    const m = extraMeridians(g);
+    return Math.round((0.5 * m.extra8 + 0.1 * m.extraCollaterals + 0.3 * m.junctions) * 10) / 10;
+}
+/** Qi regen % per Cycle: 5 + 0.1 per collateral (66) + the extra meridians. */
+export const qiRegenPct = (g, collaterals) => Math.round((qiRegenPercent({ openedCollaterals: collaterals }) + extraRegen(g)) * 10) / 10;
 export function jamesQiMax(g) {
     const base = qiPoolMax({ useCheck: skillCheck(g.james.skills['Convergence Use']), openedPrimaries: g.james.primaries, realmBonusValue: realmBonus(g.james.realm) });
     return Math.round(base * CONVERGENCE_MULTIPLIER * 2) / 2;
@@ -217,11 +233,11 @@ export function advance(g, minutes, { resting = false } = {}) {
     const ticks = Math.floor(g.regenCarry / cycle);
     g.regenCarry -= ticks * cycle;
     if (ticks > 0 && g.james.satiety > 0) {
-        const qiPct = qiRegenPercent({ openedCollaterals: g.james.collaterals });
+        const qiPct = qiRegenPct(g, g.james.collaterals);
         g.james.hp = Math.min(jamesHpMax(g), g.james.hp + (jamesHpMax(g) * 5 * ticks) / 100);
         g.james.qi = Math.min(jamesQiMax(g), g.james.qi + (jamesQiMax(g) * qiPct * ticks) / 100);
         g.yuki.hp = Math.min(yukiHpMax(g), g.yuki.hp + (yukiHpMax(g) * 5 * ticks) / 100);
-        g.yuki.qi = Math.min(yukiQiMax(g), g.yuki.qi + (yukiQiMax(g) * qiRegenPercent({ openedCollaterals: g.yuki.collaterals }) * ticks) / 100);
+        g.yuki.qi = Math.min(yukiQiMax(g), g.yuki.qi + (yukiQiMax(g) * qiRegenPct(g, g.yuki.collaterals) * ticks) / 100);
     }
     ensureBars(g);
     return notes;

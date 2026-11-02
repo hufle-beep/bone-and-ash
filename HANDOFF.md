@@ -198,6 +198,14 @@ The bible and the contract between the four part files are at the top of `js/sto
 
 - Choices you can't take right now (not enough Qi, a `req` not met) are hidden instead of greyed out (`lockReason`/`visible` in story.js); they come back when they're possible. A menu entry whose sub-menu has only "Back" left (after hiding) disappears too. If hiding would leave a scene empty, everything shows as before.
 
+## v0.8.0 — the extra meridians
+
+- `js/story/meridians.js`: Extraordinary 8 (Governing, Conception, Thrusting, Girdle, Yin/Yang Linking, Yin/Yang Heel), their 28 collaterals, 10 junctions — engine windows: Extraordinary realm 1–6 (seal at Nascent Soul); collaterals NS+ after all 8; junctions NS+.
+- Menu `meridians` ("Open a meridian." on every breakthrough hub; hidden when nothing can be opened). Each: 2 Qi, 1 hour, Convergence Use vs DC (Extraordinary 4→11, collaterals 6→12, junctions 8→12), challenging XP; one opening per group per day.
+- **Effect (Gábor 2026-11-02): Qi regen % per Cycle** +0.5 per Extraordinary, +0.1 per collateral, +0.3 per junction (`extraRegen`/`qiRegenPct` in game.js): 11.6% → 21.4% with all 46. Not capacity. Combined with tier-shortened Cycles (T1 30 min … T6+ 1 min) = the endless battery. Yuki mirrors James through the bond.
+- `ns_warn`: the breakthrough to Nascent Soul with fewer than 8 Extraordinary open warns first and lets you back out.
+- Check DCs may now be functions (`check.dc(g)`).
+
 ## Next steps (proposed, not built)
 
 1. **Act 2** (open).

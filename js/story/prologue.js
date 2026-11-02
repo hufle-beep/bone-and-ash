@@ -18,6 +18,7 @@ import { BLACKROOT, BREAK_HUBS as B2 } from './act1_blackroot.js';
 import { HEART, BREAK_HUBS as B3 } from './act1_heart.js';
 import { RETURN, BREAK_HUBS as B4 } from './act1_return.js';
 import { LONGFOREST, BREAK_HUBS as B0 } from './longforest.js';
+import { MERIDIANS, canAnyMeridian } from './meridians.js';
 
 const once = (flag) => (g) => !g.flags[flag];
 const set = (...flags) => (g) => { for (const f of flags) g.flags[f] = true; return []; };
@@ -786,7 +787,7 @@ function cookMealMorning(g) {
     return out;
 }
 
-Object.assign(SCENES, WILDS, ASHFALL, FALLOUT, BLACKROOT, HEART, RETURN, LONGFOREST);
+Object.assign(SCENES, MERIDIANS, WILDS, ASHFALL, FALLOUT, BLACKROOT, HEART, RETURN, LONGFOREST);
 
 /* the way into the Long Forest (pre-prologue): from the Day 1 clearing */
 SCENES.clearing.choices.push({ text: 'Stay lost. (The Long Forest — uncounted days to grow as strong as you like. You can leave whenever you want.)', to: 'lf_enter' });
@@ -867,7 +868,13 @@ for (const id of ['stream', 'wilds', 'camp', 'night', 'village', 'ashfall', 'sup
         text: (g) => `Break through to ${realmName(g.james.realm + 1)}. (Saturation 100%.)`,
         show: canBreakThrough,
         do: (g) => { g.flags.bt_return = g.scene; return []; },
-        to: 'breakthrough',
+        to: (g) => (g.james.realm === 6 && (g.james.extra8 || 0) < 8 ? 'ns_warn' : 'breakthrough'),
+    });
+    SCENES[id].choices.push({
+        text: 'Open a meridian. (The Extraordinary net.)',
+        show: canAnyMeridian,
+        do: (g) => { g.flags.mer_return = g.scene; return []; },
+        to: 'meridians',
     });
     SCENES[id].choices.push({
         text: 'Yuki: change form.',
