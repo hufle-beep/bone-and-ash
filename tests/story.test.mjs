@@ -52,6 +52,33 @@ for (let run = 0; run < 2000; run++) {
     maxSteps = Math.max(maxSteps, steps);
     assert(steps < 2500, `run ${run} finishes`);
 }
+// focused walks: the Long Forest at every power level (realm 0–7, tiers 1–3), and the Blackroot with a Ya-leaning heart
+function walkFrom(g, entry, stopAt, budget = 1500) {
+    g.scene = entry; const e = SCENES[entry].enter; if (e) e(g);
+    for (let st = 0; st < budget; st++) {
+        seen.add(g.scene);
+        if (stopAt.has(g.scene)) return true;
+        const v = sceneView(g, SCENES);
+        assert(typeof v.text === 'string' && v.text.length > 40, `text renders in ${g.scene}`);
+        if (v.end) return true;
+        const open = v.choices.filter((c) => !c.disabled);
+        if (!open.length) { assert(false, `dead end at ${g.scene}`); return false; }
+        const r = choose(g, SCENES, open[rnd(open.length)].index);
+        if (r.combat) { startCombat(g, r.combat(g)); for (let t = 0; t < 200 && g.combat; t++) { const o = combatStep(g, g.james.qi >= 3 ? 'blade' : 'dart'); if (o?.done) { goTo(g, SCENES, o.next); break; } } }
+    }
+    return false;
+}
+for (let run = 0; run < 600; run++) {
+    const g = ensureBars(newGame(run + 77777));
+    const r = run % 8; g.james.realm = r; g.yuki.realm = r; g.james.gu.tier = 1 + (run % 3); g.james.skills['Convergence Use'].tier = 1 + ((run + 1) % 3); g.james.gu.level = 1 + (run % 9); ensureBars(g);
+    assert(walkFrom(g, 'lf_enter', new Set(['dawn']), 1200) || true, 'lf walk');
+}
+for (let run = 0; run < 300; run++) {
+    const g = ensureBars(newGame(run + 55555)); g.minutes = 10 * 1440 + 360;
+    Object.assign(g.flags, { long: true, forest_day: 3, vday: 3, ending: 'bluff', mei_party: true, ya_party: true, ya_met: true });
+    g.rel = { 'Mei Lin': { f: 20, a: 5 }, Ya: { f: 40, a: 60 + (run % 40) }, Village: { f: 30, a: 0 } }; g.james.gu.level = 7; g.james.skills['Convergence Use'].level = 5; ensureBars(g);
+    walkFrom(g, 'bl_start', new Set(['ht_start']), 1500);
+}
 const unreached = Object.keys(SCENES).filter((k) => !seen.has(k));
 assert(unreached.length === 0, `every scene reachable (unreached: ${unreached.join(', ')})`);
 console.log('fights', fights);

@@ -760,9 +760,9 @@ export function yukiHumanCloseUp(id = 'yh') {
     s += hairRibbons(r, cx - 40, cx - 20, 130, 262, -30, 6, 1.6, W, K, 0.6);
     // shoulders, black dress with thin straps
     s += `<path d="M${cx - 80} 262 C${cx - 74} 220 ${cx - 52} 190 ${cx - 18} 178 L${cx + 22} 178 C${cx + 54} 190 ${cx + 76} 220 ${cx + 84} 262 Z" fill="${W}" ${st(1.2)}/>`;
-    s += `<path d="M${cx - 50} 262 C${cx - 46} 236 ${cx - 40} 222 ${cx - 30} 214 Q${cx} 226 ${cx + 34} 212 C${cx + 44} 222 ${cx + 50} 238 ${cx + 54} 262 Z" fill="${K}" ${st(1)}/>`;
-    s += `<path d="M${cx - 30} 214 L${cx - 24} 186 M${cx + 34} 212 L${cx + 28} 186" ${st(1.2)}/>`;
-    s += `<path d="M${cx - 46} 220 C${cx - 40} 210 ${cx - 30} 204 ${cx - 22} 202 M${cx + 50} 218 C${cx + 44} 208 ${cx + 34} 202 ${cx + 26} 200" ${st(0.7)} fill="none"/>`;
+    s += `<path d="M${cx - 76} 262 C${cx - 72} 230 ${cx - 60} 206 ${cx - 44} 194 Q${cx} 206 ${cx + 48} 192 C${cx + 64} 204 ${cx + 76} 230 ${cx + 82} 262 Z" fill="${K}" ${st(1)}/>`;
+    s += `<path d="M${cx - 44} 194 L${cx - 30} 180 M${cx + 48} 192 L${cx + 34} 180" ${st(1.4)}/>`;
+    s += `<path d="M${cx - 40} 230 C${cx - 30} 216 ${cx - 12} 212 ${cx} 214 M${cx + 46} 226 C${cx + 36} 214 ${cx + 20} 210 ${cx + 8} 212" stroke="${G2}" stroke-width="0.8" fill="none" opacity="0.6"/>`;
     // neck
     s += `<path d="M${cx - 11} 130 C${cx - 11} 150 ${cx - 13} 166 ${cx - 18} 178 L${cx + 22} 178 C${cx + 15} 164 ${cx + 12} 148 ${cx + 12} 128 Z" fill="${W}" ${st(1)}/>`;
     s += `<path d="M${cx - 11} 138 C${cx - 3} 148 ${cx + 6} 148 ${cx + 12} 136 L${cx + 12} 150 C${cx + 6} 156 ${cx - 3} 156 ${cx - 11} 150 Z" fill="${G2}"/>`;

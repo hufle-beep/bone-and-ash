@@ -413,7 +413,7 @@ export function combatStep(g, actionId, targetIdx = 0) {
         const hit = yv + die >= yt.dc;
         const verb = { cat: ['claws find a mark', 'a hiss and a swipe at air'], tiger: ['a paw the size of a shovel lands', 'jaws close on air'], human: ['a white blur and a strike', 'a sidestep, nothing more'] }[yukiForm(g)];
         lines.push(`${form.name}: Fight ${yv} + 🎲${die} vs DC ${yt.dc} — ${hit ? verb[0] : verb[1]}`);
-        if (hit) { const [lo, hi] = form.dmg; const dmg = Math.max(0, lo + ((die - 1) % (hi - lo + 1)) - (yt.dr || 0)); yt.hp -= dmg; lines.push(`  ${yt.name} takes ${dmg}.`); }
+        if (hit) { const [lo, hi] = form.dmg; const raw = yukiForm(g) === 'cat' ? 1 + (die >= 5 ? 1 : 0) : lo + ((die - 1) % (hi - lo + 1)); const dmg = Math.max(0, raw - (yt.dr || 0)); yt.hp -= dmg; lines.push(`  ${yt.name} takes ${dmg}.`); }
     }
     // enemies
     for (const e of c.enemies) {

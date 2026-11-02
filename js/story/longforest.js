@@ -227,6 +227,9 @@ Through the bond, a single, weary image: a very long nap.
             { text: 'Stand under the cold falls until something gives.', show: (g) => !late(g) && daily('lf_falls')(g), time: 20, to: 'lf_falls' },
             { text: 'Ride Yuki through the canopy.', show: (g) => yukiForms(g).includes('tiger') && !late(g) && daily('lf_ride')(g), time: 60, to: 'lf_ride' },
             { text: 'Climb the high spur and look at the dead tree.', show: (g) => !late(g) && !g.flags.lf_tree_seen, time: 90, to: 'lf_tree_view' },
+            { text: 'Yuki is bored. Yuki would like that addressed.', show: (g) => lfDays(g) >= 1 && daily('lf_bored')(g) && !late(g), time: 30, to: 'lf_bored' },
+            { text: 'Wash in the river. You have been in a forest for a long time.', show: (g) => !late(g) && daily('lf_bathe')(g), time: 30, to: 'lf_bathe' },
+            { text: 'Something white moves between the trees, and doesn\'t run.', show: (g) => lfDays(g) >= 3 && !g.flags.lf_stag && hour(g) < 17, time: 60, to: 'lf_white_stag' },
             { text: 'Take stock. Write it down.', show: (g) => lfDays(g) >= 2 && daily('lf_notes')(g), to: 'lf_notes' },
             { text: 'Cultivate: one sit, 10 Qi toward Saturation.', show: (g) => !late(g), req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`] : []; }, to: 'lf_hub' },
             { text: 'Rest an hour.', show: (g) => !late(g), do: (g) => advance(g, 60, { resting: true }).concat(['An hour of rest.']), to: 'lf_hub' },
@@ -367,6 +370,37 @@ You don't go to it. Not yet. Something tells you the story will take you there w
 
 Yuki, reading over your shoulder, adds her own entry with one claw: a single scratch, which you decide means *agreed.*`,
         choices: [{ text: 'Close the notebook.', to: 'lf_hub' }],
+    },
+
+    lf_bored: {
+        id: 'lf_bored', title: 'Entertainment', art: (g) => (yukiForm(g) === 'human' ? 'yuki_human' : yukiForm(g) === 'tiger' ? 'yuki_tiger' : 'clearing'), place: P,
+        enter: (g) => { markDaily(g, 'lf_bored'); return []; },
+        text: (g) => `${yukiForm(g) === 'human' ? '"I am bored," Yuki announces, sitting on a root with her chin in her hand. "Do something."' : 'Yuki sits directly in front of you and stares. Through the bond, with no ambiguity whatsoever: *bored.*'}
+
+You are, technically, the most powerful thing within a week\'s walk. You have a doctorate. You can sing bone out of the air. None of this impresses a cat.
+
+You try a bone mouse on a thread. She looks at it, and at you, with pity. You try a bone mouse that runs on its own, a little clockwork thing your Convergence works out on the spot. She considers it for a long moment, then destroys it with a single surgical swipe and walks off with the pieces.
+
+You have, apparently, invented a toy. Your threads file the design under *publishable*.`,
+        choices: [{ text: 'Make her another one. Then three more.', do: (g) => { bumpRel(g, 'Yuki', 2, 0); return awardXp(g, 'Convergence Use', 'standard'); }, time: 30, to: 'lf_hub' }],
+    },
+    lf_bathe: {
+        id: 'lf_bathe', title: 'The River', art: 'stream', place: `${P} — the river`,
+        enter: (g) => { markDaily(g, 'lf_bathe'); return []; },
+        text: (g) => `Cold black water, a flat rock to leave your coat on, and, for once, nothing trying to eat you. You scrub off what feels like several weeks of forest. Your body, you notice, has changed: leaner, harder, a fighter's body grown over a scholar's bones without asking permission.
+
+${yukiForm(g) === 'cat' ? 'Yuki watches from the rock with the horror of a cat watching someone get into water voluntarily.' : yukiForm(g) === 'tiger' ? 'Yuki, in her great form, wades in up to her chest, discovers she hates it at that size too, and gets out with enormous dignity, soaking you in the process.' : 'Yuki sits on the bank in her human form with her tail wrapped round her ankles and refuses, flatly, to discuss water.'}`,
+        choices: [{ text: 'Dry off. Back to camp.', do: (g) => advance(g, 30, { resting: true }), to: 'lf_hub' }],
+    },
+    lf_white_stag: {
+        id: 'lf_white_stag', title: 'The White Stag', art: 'bone_elk', place: `${P} — a glade`,
+        enter: (g) => { g.flags.lf_stag = true; return []; },
+        text: `A stag as white as Yuki stands in a glade where the light comes down in a single shaft, antlers like a winter tree, eyes the colour of old honey. It isn't afraid of you. It's the first thing in this forest that isn't afraid of you and isn't trying to eat you either.
+
+It looks at you for a long time. Then it turns its head toward the heart of the forest, toward the dead tree, the way a guide points, and walks away into the trees without hurrying.
+
+Yuki says nothing at all. That, from her, is the loudest thing she\'s ever said.`,
+        choices: [{ text: 'Remember the direction.', do: (g) => { g.flags.saw_stag = true; return awardXp(g, 'GU', 'challenging'); }, to: 'lf_hub' }],
     },
 
     /* ---------- seclusion ---------- */

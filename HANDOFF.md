@@ -170,9 +170,20 @@ The bible and the contract between the four part files are at the top of `js/sto
 - **Fights:** `encounter()` in act1_common; `a1Scale` is 0 and every fight is tuned in absolute terms by `js/story/act1_tune.js` (per id, t raises DC and attack by t and HP by 10%·t), set by 7 rounds of 500 full-game simulations. Targets (smart combat, random story choices): small ~93%, region bosses ~80%, Ya brawl ~80%, Guardian ~55%, Shen Qiu ~40%. James grows a lot during the act (GU check ~3.6 at Day 8 → ~7.6 at Day 21).
 - **Tests:** `node tests/part.test.mjs <fallout|blackroot|heart|return>` tests one part alone; `tests/story.test.mjs` runs 2,000 full games (step cap 2,500, 200 combat rounds).
 
+## v0.7.0 — The Long Forest, power degrees, Yuki's forms
+
+- **The Long Forest** (`js/story/longforest.js`, 31 scenes): an optional, uncounted pre-prologue. In the clearing: "Stay lost." → `lf_enter` → hub `lf_hub` (seclusion with big XP and Saturation, hunting/foraging, trials in 4 zones, wanderers). The clock shows "The Long Forest" (`g.flags.lf_active`). Exit: "Follow the smoke…" → `lf_exit` sets Day 4 06:00 (`long`, `forest_day = 3`) → `dawn` → the scream → Mei Lin. ~30 seclusions reach realm 6–7 with GU check ~35+. A cheat mode on purpose.
+- **Power degrees** (`js/story/power.js`): `jp = max(GU, CU check) + 0.3·realm`, `ep = max(DC, atk − 1)` of the strongest enemy; gap ≥ 4 → degree 3, ≥ 1 → 2, else 1. Degree 2/3 swap in STOMP texts (posture before the fight, a funnier win scene with groveling or revenge-swearing). Degree 3 adds "End it in one move." (choice index 1000+i; `instantWin`). After a Long Forest run, every later fight is degree 3.
+- **Scaling with a ceiling:** with `g.flags.longforest`, enemies are lifted toward James (DC ≈ GU + 1.5, atk ≈ GU + 3) but never past `DC_CAP` 7 / `ATK_CAP` 9. Past that, a massacre. Normal runs untouched.
+- **STOMP texts:** `js/story/stomp_prologue.js` (11 fights), `stomp_act1.js` (20), plus 10 in longforest.js.
+- **Unseen cultivation:** locals can't sense James's cultivation and treat him as a mortal; postures are written that way.
+- **Never kills humans** (global): he breaks them — knocked out, very nearly crippled. The Gao event is now "Break him" (`gao_broken`).
+- **Yuki's forms** (`YUKI_FORMS` in game.js): cat; tiger-sized root-kin from realm 2 (Core Formation); humanoid (white hair, cat ears, black dress) from realm 7 (Nascent Soul). Awakening scenes `yuki_tiger_awaken` / `yuki_human_awaken` after the breakthrough; then "Yuki: change form." on hubs (`yuki_form`). Art: `yukiCat`/`yukiTiger`/`yukiHuman` in clamp2.js.
+- **Tune after v0.7:** `act1_tune.js` re-picked (ya_brawl 2, root_wyrm 1, guardian 7.5, elder 4.5). Normal-run smart win rates: Ya brawl ~83%, wyrm ~85%, Guardian ~50%, Shen Qiu ~46%.
+
 ## Next steps (proposed, not built)
 
-1. **Act 1**, following on from the epilogue: the dead tree's heart, the Crimson Lotus invitation or retaliation (depending on the ending), the first breakthrough to Foundation (Saturation 100%, no tribulation), growing his people's tech again, more hunting and foraging, and more companions or romance.
+1. **Act 2** (open).
 2. **Android .apk:** wrap the web app with Capacitor and build it in GitHub Actions. The Android SDK can't be downloaded in the cloud session.
 3. **Art:** less cutesy manhua (see Design notes); close-ups for James and the Sect; manhua treatment for the remaining plain interiors (elder, healer, dinner); more paintings (Wang Hui *Landscape*, Cleveland 1915.105; Wang Shimin *Mountain Village*, Cleveland 1997.104 — Gábor downloads and attaches, the cloud session can't fetch images).
 4. **Quality:** sound effects (optional), a settings page (text size, reduce motion).

@@ -17,6 +17,7 @@ import { FALLOUT, BREAK_HUBS as B1 } from './act1_fallout.js';
 import { BLACKROOT, BREAK_HUBS as B2 } from './act1_blackroot.js';
 import { HEART, BREAK_HUBS as B3 } from './act1_heart.js';
 import { RETURN, BREAK_HUBS as B4 } from './act1_return.js';
+import { LONGFOREST, BREAK_HUBS as B0 } from './longforest.js';
 
 const once = (flag) => (g) => !g.flags[flag];
 const set = (...flags) => (g) => { for (const f of flags) g.flags[f] = true; return []; };
@@ -784,7 +785,10 @@ function cookMealMorning(g) {
     return out;
 }
 
-Object.assign(SCENES, WILDS, ASHFALL, FALLOUT, BLACKROOT, HEART, RETURN);
+Object.assign(SCENES, WILDS, ASHFALL, FALLOUT, BLACKROOT, HEART, RETURN, LONGFOREST);
+
+/* the way into the Long Forest (pre-prologue): from the Day 1 clearing */
+SCENES.clearing.choices.push({ text: 'Stay lost. (The Long Forest — uncounted days to grow as strong as you like. You can leave whenever you want.)', to: 'lf_enter' });
 
 /* ---------- breakthrough: offered at calm moments whenever Saturation is 100% ---------- */
 const VILLAGE_SCENES = ['village', 'ashfall', 'supper'];
@@ -857,7 +861,7 @@ ${seen
         return back;
     } }],
 };
-for (const id of ['stream', 'wilds', 'camp', 'night', 'village', 'ashfall', 'supper', ...B1, ...B2, ...B3, ...B4]) {
+for (const id of ['stream', 'wilds', 'camp', 'night', 'village', 'ashfall', 'supper', ...B0, ...B1, ...B2, ...B3, ...B4]) {
     SCENES[id].choices.unshift({
         text: (g) => `Break through to ${realmName(g.james.realm + 1)}. (Saturation 100%.)`,
         show: canBreakThrough,
