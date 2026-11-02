@@ -610,6 +610,267 @@ export function cinderHawk(x, y, s = 1, face = 1) {
 /** The guardian: a tall construct of grown wood and bone, branch-crowned, hollow-eyed. */
 export function guardian(x, y, s = 1, face = 1) {
     let grain = '';
+    for (let i = 0; i < 11; i++) grain += `M${-12 + i * 2.4} -16 C${-14 + i * 2.6} -50 ${-10 + i * 2.2} -84 ${-8 + i * 1.6} -112 `;
+    let crown = '';
+    for (let i = 0; i < 9; i++) { const a = -Math.PI * (0.08 + 0.84 * (i / 8)); const len = 26 + (i % 3) * 10; crown += `M${f(Math.cos(a) * 6)} ${f(-136 + Math.sin(a) * 6)} L${f(Math.cos(a) * len)} ${f(-136 + Math.sin(a) * len)} l${f(Math.cos(a - 0.7) * 8)} ${f(Math.sin(a - 0.7) * 8)} `; }
+    const arm = (d) => `M${d * 14} -96 C${d * 26} -84 ${d * 32} -60 ${d * 34} -30 C${d * 35} -20 ${d * 36} -12 ${d * 38} -6 M${d * 38} -6 l${d * 6} 6 M${d * 38} -6 l${d * 1} 8 M${d * 38} -6 l${d * -4} 7 M${d * 34} -40 l${d * 8} -6`;
+    return C(x, y, s, face, `<ellipse cx="0" cy="0.8" rx="40" ry="2.4" fill="${K}" opacity="0.45"/>`
+        + `<path d="${arm(-1)} ${arm(1)}" ${st(7, G1)} fill="none"/><path d="${arm(-1)} ${arm(1)}" ${st(0.8)} fill="none"/>`
+        + `<path d="M-16 0 C-14 -12 -18 -24 -14 -36 C-22 -56 -26 -86 -18 -104 C-14 -112 -6 -116 0 -116 C6 -116 14 -112 18 -104 C26 -86 22 -56 14 -36 C18 -24 14 -12 16 0 L5 0 L3 -24 L-3 -24 L-5 0 Z" fill="${G1}" ${st(1.4)}/>`
+        + `<path d="${grain}" ${st(0.6, G3)} fill="none"/>`
+        + `<path d="M-12 -96 C-6 -92 6 -92 12 -96 M-14 -88 C-6 -84 6 -84 14 -88 M-14 -80 C-6 -76 6 -76 14 -80 M-13 -72 C-6 -68 6 -68 13 -72" ${st(2.4, W)} fill="none"/><path d="M0 -98 L0 -66" ${st(2.6, W)}/>`
+        + `<path d="M-11 -114 C-14 -128 -8 -140 0 -140 C8 -140 14 -128 11 -114 C9 -108 4 -106 0 -106 C-4 -106 -9 -108 -11 -114 Z" fill="${W}" ${st(1.2)}/>`
+        + `<path d="${crown}" ${st(2.6, G3)} fill="none"/><path d="${crown}" ${st(0.5)} fill="none"/>`
+        + `<path d="M-8 -126 C-9 -121 -6 -118 -3 -119 C-2 -123 -4 -127 -8 -126 Z M8 -126 C9 -121 6 -118 3 -119 C2 -123 4 -127 8 -126 Z" fill="${K}"/><circle cx="-5" cy="-122" r="0.9" fill="${RED}"/><circle cx="5" cy="-122" r="0.9" fill="${RED}"/>`
+        + `<path d="M-1.4 -116 L1.4 -116 L0 -113 Z" fill="${K}"/><path d="M-6 -110 L-4 -108 L-2 -110 L0 -108 L2 -110 L4 -108 L6 -110" ${st(0.7)} fill="none"/>`);
+}
+
+/* ================================================================== props =================================================== */
+
+/** An interior: shoji lattice with butterfly shadows, a dark floor, an optional lamp. */
+export function shoji(lamp = true, dark = 0) {
+    let s = `<rect width="400" height="250" fill="${W}"/>`;
+    let d = '';
+    for (let x = 0; x <= 400; x += 40) d += `M${x} 0 V180 `;
+    for (let y = 0; y <= 180; y += 30) d += `M0 ${y} H400 `;
+    s += `<path d="${d}" ${st(2.4, G3)}/>`;
+    s += [[60, 50, 1.6, -20], [150, 110, 1.2, 15], [260, 40, 1.8, 10], [330, 120, 1.3, -14], [110, 150, 0.9, 6]].map(([x, y, sc, rot]) => `<g opacity="0.55">${butterfly(x, y, sc, rot).replace(new RegExp(K, 'g'), G1)}</g>`).join('');
+    s += `<rect y="180" width="400" height="70" fill="${K}"/><path d="M0 180 H400" ${st(3, G3)}/>`;
+    if (lamp) s += `<circle cx="200" cy="150" r="70" fill="${W}" opacity="0.5"/><rect x="194" y="150" width="12" height="24" fill="${W}" ${st(0.8)}/><circle cx="200" cy="146" r="4" fill="${W}" ${st(0.6)}/>`;
+    if (dark) s += `<rect width="400" height="250" fill="${K}" opacity="${dark}"/>`;
+    return s;
+}
+
+/* ================================================================== Ya, the feral huntress ================================== */
+
+/** Ya at scene size: a mane of unbound black hair, fur wrap, leather, bone necklace, scarred bare arms, barefoot, spear. */
+function yaFigure(x, y, s = 1, opts = {}) {
+    const { face = 1, sway = 8, spear = true } = opts;
+    const r = rng(271 + Math.round(x));
+    const top = -100;
+    let back = '';
+    let body = '';
+    let front = '';
+    // the mane: wide, wild, falling past the hips, loose strands flying
+    back += `<path d="M-6 ${top + 2} C-16 ${top + 10} -18 ${top + 30} -16 ${top + 50} C-15 ${top + 60} -12 ${top + 64} -8 ${top + 66} L9 ${top + 64} C14 ${top + 58} 18 ${top + 36} 14 ${top + 14} C12 ${top + 6} 9 ${top + 1} 6 ${top + 1} Z" fill="${K}"/>`;
+    back += hairRibbons(r, -13, 12, top + 26, top + 74, sway, 12, 1.5);
+    let flyD = '';
+    for (let i = 0; i < 9; i++) { const sx = -12 + i * 3; flyD += `M${sx} ${top + 8 + (i % 3) * 6} q${f(-6 + i * 1.6)} ${-4 + (i % 2) * 2} ${f(-10 + i * 2.6)} ${-2 + (i % 3) * 3} `; }
+    back += `<path d="${flyD}" ${st(0.8)} fill="none"/>`;
+    if (spear) back += `<path d="M13 4 L19 ${top - 18}" ${st(1.3, G3)}/><path d="M19 ${top - 18} l-2 -9 l4.4 1.4 Z" fill="${W}" ${st(0.5)}/><path d="M18.4 ${top - 14} l-2.4 3 M18.6 ${top - 13} l2.6 2.6" ${st(0.5, RED)}/>`;
+    // legs: bare below the knee, wrapped ankles, barefoot
+    body += `<path d="M-4.4 -40 L-4.6 -2 L-1.4 -1.4 L-0.6 -40 Z M4.4 -40 L5 -2 L1.8 -1.4 L0.6 -40 Z" fill="${W}" ${st(0.45)}/>`;
+    body += `<path d="M-4.6 -8 L-1.2 -7 M-4.6 -6 L-1.2 -5 M1.8 -7 L5 -8 M1.8 -5 L5 -6" ${st(0.4)}/><path d="M-5.4 0 Q-5 -1.6 -1.2 -1.4 L-0.6 0 Z M5.8 0 Q5.4 -1.6 1.8 -1.4 L1.2 0 Z" fill="${W}" ${st(0.4)}/>`;
+    // leather wrap skirt with a ragged hem, a belt of cord and teeth
+    body += `<path d="M-7 -58 C-8 -50 -9 -44 -8.6 -36 L-6 -38.6 L-4 -35 L-1.6 -38 L0.6 -34.6 L3 -38 L5 -35.4 L7.4 -38 L9 -36 C9 -44 8 -50 7 -58 Z" fill="${G3}" ${st(0.5)}/><path d="M-3 -56 L-4 -40 M2.6 -56 L3.4 -40" ${st(0.3, K)}/>`;
+    body += `<path d="M-7.4 -58 Q0 -56.6 7.4 -58" ${st(1.1, RED)} fill="none"/>` + [-5, -2, 1, 4].map((dx) => `<path d="M${dx} -57.4 l0.6 3.4 l0.6 -3.4" fill="${W}" ${st(0.25)}/>`).join('');
+    // torso: bound chest wrap of fur, bare midriff
+    body += `<path d="M-6.4 -80 C-7.6 -74 -7 -66 -6 -58 L6 -58 C7 -66 7.6 -74 6.4 -80 Q0 -82 -6.4 -80 Z" fill="${W}" ${st(0.5)}/>`;
+    body += `<path d="M-7.6 -82 C-8.4 -77 -7.6 -72 -6.6 -69 Q0 -67 6.6 -69 C7.6 -72 8.4 -77 7.6 -82 Q0 -85 -7.6 -82 Z" fill="${G1}" ${st(0.5)}/>`;
+    let fur = '';
+    for (let i = 0; i < 12; i++) fur += `M${f(-7 + i * 1.3)} -69.6 l${f((r() - 0.5) * 1.2)} ${f(1.4 + r())} `;
+    body += `<path d="${fur}" ${st(0.35)}/><path d="M-6 -82 C-4 -79 -2 -77 0 -76 M6 -82 C4 -79 2 -77 0 -76" ${st(0.35)} fill="none"/>`;
+    body += `<path d="M-1 -64 L1 -62" ${st(0.3)}/>`;
+    // bare arms with scars; left hangs, right grips the spear
+    body += `<path d="M-7.4 -81 C-10 -72 -10.6 -64 -10.4 -54 L-8 -54 C-8 -63 -7.6 -71 -6 -77 Z" fill="${W}" ${st(0.45)}/><path d="M-9.6 -70 l1.4 -1.2 M-9.8 -66 l1.6 -1 M-9.8 -62 l1.4 -1.4" ${st(0.3, RED)}/>` + hand(-9.2, -54, -1, 1);
+    body += `<path d="M7.4 -81 C10 -74 12 -68 13.6 -62 L15.6 -63.6 C14 -70 11.6 -76 8.6 -82 Z" fill="${W}" ${st(0.45)}/><path d="M11.4 -73 l1.4 -1 M12.4 -69.6 l1.4 -1" ${st(0.3, RED)}/><ellipse cx="15" cy="-62" rx="1.6" ry="1.2" fill="${W}" ${st(0.4)}/>`;
+    // neck, head, a grin; bone necklace
+    front += `<path d="M-1.4 -88.8 L-1.6 -82.6 L1.6 -82.6 L1.4 -88.8 Z" fill="${W}" ${st(0.4)}/>`;
+    front += `<path d="${headShape(top, 11.5, 4)}" fill="${W}" ${st(0.5)}/>`;
+    front += `<path d="M-3.4 ${top + 6.2} L-0.8 ${top + 5.2} L-0.9 ${top + 5.9} Z M3.4 ${top + 6.2} L0.8 ${top + 5.2} L0.9 ${top + 5.9} Z" fill="${K}"/><circle cx="-2" cy="${top + 5.9}" r="0.4" fill="${GOLD}"/><circle cx="2" cy="${top + 5.9}" r="0.4" fill="${GOLD}"/>`;
+    front += `<path d="M-3.4 ${top + 3.6} L-0.8 ${top + 4.2} M0.8 ${top + 4.2} L3.4 ${top + 3.6}" ${st(0.5)}/>`;
+    front += `<path d="M-1.8 ${top + 9.4} Q0 ${top + 11} 1.9 ${top + 9.2} Z" fill="${W}" ${st(0.45)}/><path d="M-1.4 ${top + 9.6} L1.6 ${top + 9.6}" ${st(0.15)}/>`;
+    front += `<path d="M2.6 ${top + 4.4} L3.6 ${top + 8}" ${st(0.35, RED)}/>`;
+    front += `<path d="M-3.4 -85 Q0 -81.6 3.4 -85" ${st(0.35)} fill="none"/>` + [-2.4, -1.2, 0, 1.2, 2.4].map((dx, i) => `<path d="M${dx} ${-83.6 + Math.abs(dx) * -0.3} l${dx * 0.1} ${i === 2 ? 3 : 2}" ${st(0.7, W)}/>`).join('');
+    // the wild fringe, uneven, falling into her eyes
+    front += `<path d="M-4.6 ${top + 7} C-6 ${top - 1} -2.6 ${top - 4} 0.6 ${top - 3.6} C4 ${top - 3.6} 6.2 ${top} 4.6 ${top + 7} L3.6 ${top + 3} L2.8 ${top + 6.4} L1.6 ${top + 2.4} L0.4 ${top + 5} L-0.8 ${top + 2} L-2 ${top + 5.6} L-3.2 ${top + 2.6} Z" fill="${K}"/>`;
+    front += `<path d="M-4.6 ${top + 2} C-6 ${top + 10} -6 ${top + 18} -7 ${top + 26} M4.6 ${top + 2} C6 ${top + 10} 6.4 ${top + 20} 8 ${top + 28}" ${st(1.4)} fill="none"/>`;
+    front += `<path d="M-5.6 ${top + 1} C-6.6 ${top + 8} -6.4 ${top + 16} -7.4 ${top + 24}" ${st(0.6, RED)} fill="none"/>`;
+    const shadow = `<ellipse cx="1" cy="0.4" rx="10" ry="1.4" fill="${K}" opacity="0.4"/>`;
+    return `<g transform="translate(${f(x)} ${f(y)}) scale(${f(s * face)} ${f(s)})">${shadow}${back}${body}${front}</g>`;
+}
+
+/** Ya, close: three-quarter the other way from Mei Lin, a wide grin with teeth, gold eyes, a scar, a mane of hair. */
+export function yaCloseUp(id = 'yac') {
+    const r = rng(9001);
+    const cx = 196;
+    let s = '';
+    s += smoke([[410, 200], [340, 160], [300, 230], [250, 200]], 6) + butterfly(330, 60, 1.1, 14) + butterfly(70, 160, 0.9, -18);
+    // the mane: enormous, flying out to both sides
+    s += `<path d="M${cx - 60} 90 C${cx - 70} 30 ${cx - 30} 0 ${cx + 6} 2 C${cx + 46} 4 ${cx + 76} 30 ${cx + 70} 96 C${cx + 80} 150 ${cx + 100} 200 ${cx + 130} 262 L${cx - 140} 262 C${cx - 100} 200 ${cx - 76} 140 ${cx - 60} 90 Z" fill="${K}"/>`;
+    s += hairRibbons(r, cx - 56, cx - 10, 110, 262, -60, 12, 2.1) + hairRibbons(r, cx + 14, cx + 66, 110, 262, 60, 12, 2.1);
+    let fly = '';
+    for (let i = 0; i < 18; i++) { const a = -Math.PI * (0.1 + 0.8 * (i / 17)); const x0 = cx + Math.cos(a) * 58; const y0 = 70 + Math.sin(a) * 60; fly += `M${f(x0)} ${f(y0)} q${f(Math.cos(a) * 18 + (r() - 0.5) * 10)} ${f(Math.sin(a) * 10)} ${f(Math.cos(a) * 30 + (r() - 0.5) * 16)} ${f(Math.sin(a) * 18 + 8)} `; }
+    s += `<path d="${fly}" ${st(1.4)} fill="none"/><path d="M${cx - 66} 60 C${cx - 74} 110 ${cx - 70} 170 ${cx - 90} 230" ${st(4, RED)} fill="none"/>`;
+    // shoulders: fur wrap, bare shoulder with a scar
+    s += `<path d="M${cx - 96} 262 C${cx - 84} 210 ${cx - 50} 184 ${cx - 16} 176 L${cx + 22} 176 C${cx + 60} 186 ${cx + 92} 212 ${cx + 104} 262 Z" fill="${W}" ${st(1.2)}/>`;
+    s += `<path d="M${cx - 100} 262 C${cx - 70} 214 ${cx - 30} 200 ${cx + 10} 214 C${cx + 40} 224 ${cx + 70} 230 ${cx + 106} 262 Z" fill="${G1}" ${st(1.2)}/>`;
+    let fur = '';
+    for (let i = 0; i < 30; i++) { const x = cx - 80 + i * 6; const y0 = 214 + Math.sin(i / 3) * 6 + (x > cx ? (x - cx) * 0.14 : (cx - x) * 0.05); fur += `M${f(x)} ${f(y0)} l${f((r() - 0.5) * 3)} ${f(6 + r() * 6)} `; }
+    s += `<path d="${fur}" ${st(0.8)}/><path d="M${cx + 58} 196 l10 6 M${cx + 62} 192 l8 7" ${st(1.2, RED)}/>`;
+    // necklace of teeth and small bones
+    s += `<path d="M${cx - 30} 182 Q${cx + 4} 214 ${cx + 38} 182" ${st(1)} fill="none"/>` + Array.from({ length: 9 }, (_, i) => { const t = i / 8; const x = cx - 26 + t * 60; const y0 = 186 + Math.sin(t * Math.PI) * 22; return `<path d="M${f(x - 2)} ${f(y0)} L${f(x)} ${f(y0 + (i === 4 ? 14 : 8))} L${f(x + 2)} ${f(y0)} Z" fill="${i === 4 ? RED : W}" ${st(0.6)}/>`; }).join('');
+    // neck
+    s += `<path d="M${cx - 14} 130 C${cx - 14} 150 ${cx - 16} 166 ${cx - 22} 178 L${cx + 26} 178 C${cx + 18} 164 ${cx + 15} 148 ${cx + 15} 128 Z" fill="${W}" ${st(1)}/>`;
+    // face, three-quarter to the right
+    const face = `M${cx + 32} 72 C${cx + 33} 98 ${cx + 28} 116 ${cx + 16} 132 C${cx + 11} 138 ${cx + 8} 141 ${cx + 5} 141.5 C${cx - 2} 140 ${cx - 12} 132 ${cx - 22} 118 C${cx - 31} 104 ${cx - 34} 88 ${cx - 33} 70 Z`;
+    s += `<path d="${face}" fill="${W}"/><clipPath id="${id}f"><path d="${face}"/></clipPath><g clip-path="url(#${id}f)"><path d="M${cx - 20} 70 C${cx - 28} 92 ${cx - 24} 116 ${cx - 6} 142 L${cx - 40} 142 L${cx - 40} 70 Z" fill="${G2}"/></g><path d="${face}" fill="none" ${st(1.2)}/>`;
+    // fierce eyes: gold, narrowed, strong lower lid
+    const eye = (ex, ey, w, h, k) => {
+        const o = `M${ex - w} ${ey - h * 0.1} C${ex - w * 0.4} ${ey - h * 0.6} ${ex + w * 0.5} ${ey - h * 0.5} ${ex + w} ${ey + h * 0.05} C${ex + w * 0.5} ${ey + h * 0.5} ${ex - w * 0.4} ${ey + h * 0.5} ${ex - w} ${ey - h * 0.1} Z`;
+        return `<clipPath id="${id}e${k}"><path d="${o}"/></clipPath><path d="${o}" fill="${W}"/><g clip-path="url(#${id}e${k})"><circle cx="${ex + w * 0.12}" cy="${ey + h * 0.05}" r="${h * 0.62}" fill="${GOLD}"/><circle cx="${ex + w * 0.12}" cy="${ey + h * 0.05}" r="${h * 0.26}" fill="${K}"/><path d="M${ex - w} ${ey - h} L${ex + w} ${ey - h} L${ex + w} ${ey - h * 0.05} Q${ex} ${ey - h * 0.4} ${ex - w} ${ey} Z" fill="${K}"/><circle cx="${ex - w * 0.08}" cy="${ey - h * 0.08}" r="${h * 0.14}" fill="${W}"/></g>`
+            + `<path d="M${ex - w * 1.1} ${ey - h * 0.2} C${ex - w * 0.4} ${ey - h * 0.8} ${ex + w * 0.5} ${ey - h * 0.75} ${ex + w * 1.15} ${ey - h * 0.05} L${ex + w * 1.6} ${ey - h * 0.5} L${ex + w * 1.1} ${ey + h * 0.2} C${ex + w * 0.5} ${ey - h * 0.4} ${ex - w * 0.4} ${ey - h * 0.45} ${ex - w} ${ey} Z" fill="${K}"/>`
+            + `<path d="M${ex - w * 0.9} ${ey + h * 0.15} C${ex - w * 0.3} ${ey + h * 0.6} ${ex + w * 0.5} ${ey + h * 0.55} ${ex + w} ${ey + h * 0.15}" ${st(1)} fill="none"/>`;
+    };
+    s += eye(cx - 13, 98, 9.4, 7, 1) + eye(cx + 19, 98, 7.2, 6, 2);
+    // brows: low, angled, fierce
+    s += `<path d="M${cx - 26} 86 L${cx - 4} 90 M${cx + 8} 89.6 L${cx + 28} 86.4" ${st(2)} fill="none"/>`;
+    // a scar through the left brow and cheek
+    s += `<path d="M${cx - 22} 80 L${cx - 14} 112" ${st(1.4, RED)}/>`;
+    // nose
+    s += `<path d="M${cx + 6} 100 C${cx + 7} 108 ${cx + 9} 113 ${cx + 8} 118 L${cx + 4} 118.6" ${st(0.8)} fill="none"/>`;
+    // the grin: wide, teeth, one canine
+    s += `<path d="M${cx - 12} 124 Q${cx + 2} 136 ${cx + 18} 123 Q${cx + 4} 128 ${cx - 12} 124 Z" fill="${K}"/><path d="M${cx - 10} 124.6 Q${cx + 2} 129.6 ${cx + 16} 123.8 L${cx + 15} 126 Q${cx + 2} 131 ${cx - 9} 126.6 Z" fill="${W}"/><path d="M${cx + 10} 126 l1.4 3.6 l1.2 -3.8" fill="${W}" ${st(0.5)}/><path d="M${cx - 12} 124 Q${cx + 2} 136 ${cx + 18} 123 l2 -2" ${st(0.9)} fill="none"/>`;
+    // the fringe: ragged, into her eyes
+    s += `<path d="M${cx - 38} 92 C${cx - 44} 40 ${cx - 16} 16 ${cx + 8} 16 C${cx + 34} 16 ${cx + 46} 40 ${cx + 40} 92 L${cx + 34} 80 L${cx + 28} 94 L${cx + 20} 78 L${cx + 12} 90 L${cx + 4} 76 L${cx - 4} 88 L${cx - 12} 76 L${cx - 20} 90 L${cx - 28} 78 L${cx - 32} 92 Z" fill="${K}"/>`;
+    s += `<path d="${Array.from({ length: 12 }, (_, i) => { const x = cx - 30 + i * 6; return `M${f(cx + (x - cx) * 0.3)} 24 Q${f(x)} 48 ${f(x + (r() - 0.5) * 4)} 74`; }).join(' ')}" ${st(0.6, W)} fill="none" opacity="0.85"/>`;
+    s += `<path d="M${cx - 38} 70 C${cx - 46} 110 ${cx - 46} 150 ${cx - 54} 190 M${cx + 40} 70 C${cx + 48} 110 ${cx + 50} 150 ${cx + 60} 196" ${st(6)} fill="none"/>`;
+    // a red feather and a bone tied into the hair
+    s += `<path d="M${cx + 44} 30 C${cx + 60} 18 ${cx + 74} 18 ${cx + 84} 6 C${cx + 76} 22 ${cx + 62} 30 ${cx + 46} 36 Z" fill="${RED}" ${st(0.8)}/><path d="M${cx + 46} 34 L${cx + 82} 8" ${st(0.6)}/>`;
+    s += `<path d="M${cx - 50} 40 L${cx - 30} 22" ${st(4, W)}/><path d="M${cx - 50} 40 L${cx - 30} 22" ${st(0.6)} fill="none" stroke-dasharray="0.1 22"/><circle cx="${cx - 51}" cy="41" r="3" fill="${W}" ${st(0.8)}/><circle cx="${cx - 29}" cy="21" r="3" fill="${W}" ${st(0.8)}/>`;
+    return s;
+}
+
+/* ================================================================== creatures ================================================ */
+// Elegant and graphic: black masses with white line detail, a touch of red in the eyes. Unit space: feet at 0, facing right.
+const C = (x, y, s, face, body) => `<g transform="translate(${f(x)} ${f(y)}) scale(${f(s * face)} ${f(s)})">${body}</g>`;
+const eyeR = (x, y, r = 1.2) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${RED}"/><circle cx="${f(x + r * 0.3)}" cy="${f(y - r * 0.3)}" r="${f(r * 0.35)}" fill="${W}"/>`;
+const furLines = (pts, w = 0.5) => `<path d="${pts.map(([x, y, dx, dy]) => `M${x} ${y} l${dx} ${dy}`).join(' ')}" ${st(w, W)} fill="none"/>`;
+const shadowC = (rx) => `<ellipse cx="0" cy="0.6" rx="${rx}" ry="1.2" fill="${K}" opacity="0.4"/>`;
+
+export function jackal(x, y, s = 1, face = 1) {
+    return C(x, y, s, face, shadowC(22)
+        + `<path d="M-14 -11 L-12 -4 L-13.4 0 L-11 0 L-9.6 -5 L-8 -9 Z M8 -9 L10 -4 L9.4 0 L11.6 0 L12.4 -5 L12 -9 Z" fill="${G3}"/>`
+        + `<path d="M-16 -12 C-10 -17 4 -17 11 -14 L14 -18 C16 -22 20 -24 24 -22 L31 -18.6 L29.6 -16.6 L24.4 -15.6 C20.6 -14 18 -11.6 16 -9.6 L14.4 -5.6 L15.6 0 L13 0 L11 -5.8 L8 -8.4 C2 -8 -6 -8 -10 -8.4 L-11.6 -4 L-10.6 0 L-13.2 0 L-15.2 -5 C-17 -8 -18 -10 -16 -12 Z" fill="${K}"/>`
+        + `<path d="M17.6 -21 L18.4 -30 L22.2 -22.4 Z" fill="${K}"/><path d="M18.8 -22 L19 -27 L21 -22.6 Z" fill="${G3}"/>`
+        + `<path d="M-16 -12 C-24 -15 -31 -9 -34 -1 C-30 -4 -26 -6 -22 -7 C-26 -3 -27 0 -27 2 C-22 -4 -18 -8 -15.4 -9.6 Z" fill="${K}"/>`
+        + furLines([[-10, -15.6, 1.4, -2.6], [-6, -16.2, 1.2, -3], [-2, -16.4, 1.2, -3.2], [2, -16.2, 1, -2.8], [6, -15.4, 1, -2.4], [-30, -6, 2, -2], [-26, -8, 2, -1.6], [-4, -11, 3, 0.4], [2, -11.4, 3, 0.4]])
+        + `<path d="M25 -16 l1 1.6 l1 -1.6 l1 1.6 l1 -1.8" ${st(0.4, W)} fill="none"/>` + eyeR(23.4, -20.4, 1.1));
+}
+export function wolf(x, y, s = 1, face = 1) {
+    return C(x, y, s, face, shadowC(26)
+        + `<path d="M-17 -14 L-15 -5 L-16 0 L-13 0 L-11.6 -6 L-10 -11 Z M9 -11 L11 -5 L10.4 0 L13 0 L13.8 -6 L13 -11 Z" fill="${G3}"/>`
+        + `<path d="M-20 -14 C-12 -21 4 -22 12 -19 C14 -25 20 -28 25 -27 L34 -22 L32.4 -19.4 L26 -18.4 C22 -16 19 -12.6 17 -10 L15.6 -5.6 L17 0 L14 0 L12 -6 L9 -9.6 C2 -9 -6 -9 -12 -9.6 L-13.6 -4.6 L-12.6 0 L-15.4 0 L-17.6 -5 C-20 -8.6 -21.6 -11.6 -20 -14 Z" fill="${K}"/>`
+        + `<path d="M12 -19 C10 -14 11 -10 13.4 -8 C15 -12 16 -16 15 -20 Z" fill="${G3}"/>`
+        + `<path d="M19 -26 L19.6 -34 L23.6 -26.6 Z" fill="${K}"/>`
+        + `<path d="M-20 -14 C-30 -17 -36 -10 -39 -2 C-34 -6 -30 -8 -26 -9 C-28 -5 -30 -2 -30 1 C-24 -5 -20 -10 -18 -11.6 Z" fill="${K}"/>`
+        + furLines([[-14, -18.6, 1.4, -2.8], [-10, -19.6, 1.4, -3], [-6, -20, 1.2, -3.2], [-2, -20, 1, -3], [2, -19.6, 1, -2.6], [12, -20, -1.4, 4], [13.4, -17, -1.4, 4], [-34, -6, 2, -2], [-30, -8, 2, -1.6]])
+        + `<path d="M27 -18.4 l1 1.6 l1 -1.6 l1 1.6 l1 -1.8" ${st(0.4, W)} fill="none"/>` + eyeR(25.2, -24, 1.3));
+}
+export function boar(x, y, s = 1, face = 1) {
+    let br = '';
+    for (let i = 0; i < 14; i++) { const t = i / 13; const bx = -22 + t * 46; const by = -30 - Math.sin(t * Math.PI) * 6; br += `M${f(bx)} ${f(by + 3)} l${f(1 - t * 2)} -6 `; }
+    return C(x, y, s, face, shadowC(30)
+        + `<path d="M-20 -8 L-21 0 L-17 0 L-15.6 -7 Z M14 -8 L15 0 L19 0 L19.4 -8 Z" fill="${G3}"/>`
+        + `<path d="M-26 -8 C-30 -24 -18 -34 0 -35 C16 -36 26 -28 30 -20 L38 -16 L39 -10.6 L32 -8.6 L27 -7.6 L26 0 L21 0 L19.6 -6.6 L-13 -6.6 L-14 0 L-19 0 L-21 -4.6 C-24 -5 -26 -6 -26 -8 Z" fill="${K}"/>`
+        + `<path d="${br}" ${st(1.4)} fill="none"/><path d="${br}" ${st(0.4, W)} fill="none"/>`
+        + furLines([[-18, -22, 4, 6], [-10, -26, 4, 7], [-2, -28, 4, 8], [6, -28, 4, 8], [14, -25, 3, 7], [24, -20, -1, 5]], 0.6)
+        + `<path d="M33 -11 C38 -15 38 -21 33.6 -24" ${st(2.2, W)} fill="none"/><path d="M33 -11 C38 -15 38 -21 33.6 -24" ${st(0.5)} fill="none"/>`
+        + `<path d="M26 -24 L28 -30 L30.6 -24 Z" fill="${K}"/>` + eyeR(29, -20, 1.4));
+}
+export function rat(x, y, s = 1, face = 1) {
+    return C(x, y, s, face, shadowC(14)
+        + `<path d="M-10 -4 C-20 -2 -28 -6 -34 -2" ${st(1.2, G1)} fill="none"/>`
+        + `<path d="M-11 -4 C-12 -10 -4 -13 4 -12 C8 -12 11 -10 13 -8 L17 -6.6 L13 -5 L10 -3 L10.6 0 L8.6 0 L7.6 -2.6 L-4 -2.6 L-5.4 0 L-7.6 0 L-8 -2.6 C-10 -2.4 -11 -3 -11 -4 Z" fill="${K}"/>`
+        + `<circle cx="7.6" cy="-12" r="2.2" fill="${K}"/><circle cx="7.6" cy="-12" r="1" fill="${G3}"/>`
+        + furLines([[-8, -9, 1, -1.6], [-4, -10.6, 1, -1.8], [0, -11.4, 1, -1.8], [4, -11.4, 1, -1.4]], 0.4) + `<path d="M15 -6.4 l5 -1 M15 -6 l5 1" ${st(0.25, W)}/>` + eyeR(11.4, -8.6, 0.8));
+}
+export function crow(x, y, s = 1, face = 1) {
+    let tips = '';
+    for (let i = 0; i < 5; i++) tips += `M${-14 - i * 3} ${-8 - i * 2.4} l${-4 - i * 0.4} ${-4 + i * 0.6} `;
+    return C(x, y, s, face,
+        `<path d="M-2 0 C-8 -6 -14 -10 -18 -12 L-24 -16 L-21 -12.6 L-28 -16.4 L-24 -12 L-31 -14.4 L-26 -10.6 L-32 -11 L-25 -7.6 C-18 -6 -10 -2 -4 2 Z" fill="${K}"/>`
+        + `<path d="M-2 0 C-6 -6 -8 -14 -6 -22 L-2 -28 L-2.6 -22 L2 -27 L0.4 -21 L5 -24 L2 -18 L6 -18 L1.6 -12 C1 -6 0 -2 -2 0 Z" fill="${K}"/>`
+        + `<path d="M-6 2 C-2 -2 4 -3 9 -1 L13 -1.4 L16 0.2 L12.6 1 C8 3 2 4 -4 4 L-10 7 L-8 3 Z" fill="${K}"/>`
+        + `<path d="M-12 -7 C-16 -9 -20 -10 -24 -11 M-4 -10 C-3 -16 -3 -20 -2 -24" ${st(0.4, W)} fill="none"/>` + eyeR(10, -0.6, 0.8));
+}
+export function lizard(x, y, s = 1, face = 1) {
+    let spines = '';
+    for (let i = 0; i < 10; i++) { const sx = -28 + i * 6.4; const h = 10 - Math.abs(i - 4.5) * 1.4; spines += `<path d="M${f(sx)} ${f(-11 + Math.abs(i - 4.5) * 0.5)} L${f(sx + 2.4)} ${f(-11 - h)} L${f(sx + 4.6)} ${f(-11 + Math.abs(i - 4.5) * 0.5)} Z" fill="${K}"/><path d="M${f(sx + 2.4)} ${f(-11 - h + 2)} L${f(sx + 2.4)} ${f(-12)}" ${st(0.3, W)}/>`; }
+    return C(x, y, s, face, shadowC(40) + spines
+        + `<path d="M-60 -4 C-48 -8 -38 -12 -26 -12 C-6 -14 14 -13 28 -9 L40 -8 L45 -4.4 L32 -2.4 L27 -1.2 L28 2 L24 2 L22 -2 C14 -3 -8 -3 -14 -3 L-16 1.6 L-20 1.6 L-20 -3 C-34 -3 -48 -1 -60 -4 Z" fill="${K}"/>`
+        + `<path d="M-50 -5 C-38 -7 -24 -8 -12 -7.6 M0 -8 C12 -8 22 -7 30 -5.6" ${st(0.4, W)} fill="none"/><path d="M33 -4.6 l2 1.4 l2 -1.4 l2 1.4" ${st(0.35, W)} fill="none"/>`
+        + `<circle cx="36" cy="-7" r="1.4" fill="${GOLD}"/><path d="M36 -8.2 L36 -5.8" ${st(0.5)}/>`);
+}
+export function hare(x, y, s = 1, face = 1) {
+    let plates = '';
+    for (let i = 0; i < 5; i++) plates += `<path d="M${-8 + i * 3.6} ${-9 - Math.sin((i / 4) * Math.PI) * 2} L${-6 + i * 3.6} ${-15 - Math.sin((i / 4) * Math.PI) * 3} L${-4 + i * 3.6} ${-9 - Math.sin((i / 4) * Math.PI) * 2} Z" fill="${G2}" ${st(0.4)}/>`;
+    return C(x, y, s, face, shadowC(12)
+        + `<path d="M-10 -2 C-12 -8 -8 -12 0 -12 C6 -12 9 -10 10 -7 L14 -8 C16 -8 17 -6 16 -5 L12 -3.6 L11 0 L8.6 0 L8 -2 L-6 -2 L-7.6 0 L-10 0 Z" fill="${W}" ${st(0.7)}/>`
+        + plates + `<path d="M10 -10 L9 -20 L12 -11 M12 -10 L13 -19 L14 -10" fill="${W}" ${st(0.6)}/><circle cx="12.6" cy="-7.4" r="0.8" fill="${K}"/>`);
+}
+export function fowl(x, y, s = 1, face = 1) {
+    return C(x, y, s, face, shadowC(12)
+        + `<path d="M-12 -6 C-12 -12 -4 -14 4 -12 C8 -14 10 -20 10 -26 C10 -30 13 -31 15 -29 L19 -28 L15 -27 C14 -22 13 -16 11 -10 C10 -5 6 -2 0 -2 L-6 -2 C-9 -2 -11 -3 -12 -6 Z" fill="${G3}" ${st(0.6)}/>`
+        + `<path d="M-10 -7 C-6 -9 0 -9 4 -8 M-8 -5 C-4 -6 0 -6 3 -5" ${st(0.4, W)} fill="none"/><path d="M-1 -2 L-2 0 M3 -2 L4 0" ${st(0.6)}/><circle cx="14" cy="-28.6" r="0.7" fill="${RED}"/>`);
+}
+
+/* new creatures for Act 1 */
+export function boneElk(x, y, s = 1, face = 1) {
+    const ant = (d) => `<path d="M${d * 2} -38 C${d * 4} -48 ${d * 10} -54 ${d * 18} -62 M${d * 6} -46 C${d * 10} -48 ${d * 14} -46 ${d * 18} -48 M${d * 10} -52 C${d * 8} -58 ${d * 9} -62 ${d * 10} -66 M${d * 14} -56 C${d * 20} -56 ${d * 24} -54 ${d * 26} -50" ${st(3)} fill="none"/><path d="M${d * 2} -38 C${d * 4} -48 ${d * 10} -54 ${d * 18} -62 M${d * 6} -46 C${d * 10} -48 ${d * 14} -46 ${d * 18} -48 M${d * 10} -52 C${d * 8} -58 ${d * 9} -62 ${d * 10} -66 M${d * 14} -56 C${d * 20} -56 ${d * 24} -54 ${d * 26} -50" ${st(1.8, W)} fill="none"/>`;
+    let ribs = '';
+    for (let i = 0; i < 6; i++) ribs += `M${-14 + i * 4.6} -30 C${-15 + i * 4.6} -26 ${-14 + i * 4.6} -22 ${-12 + i * 4.6} -19 `;
+    return C(x, y, s, face, shadowC(26)
+        + `<path d="M-14 -20 L-15 0 L-12.6 0 L-11 -18 Z M12 -20 L13 0 L15.4 0 L15.6 -20 Z" fill="${G3}"/>`
+        + `<path d="M-20 -24 C-20 -32 -10 -34 4 -33 C10 -33 13 -36 16 -42 L20 -40 L28 -36 L27 -32.6 L20 -32 C17 -28 18 -22 16 -18 L17 0 L14.6 0 L12.6 -16 L-12 -16 L-14 0 L-16.4 0 L-17 -18 C-19 -19 -20 -21 -20 -24 Z" fill="${K}"/>`
+        + `<path d="${ribs}" ${st(0.8, W)} fill="none"/><path d="M-18 -26 C-10 -29 0 -30 8 -30" ${st(0.6, W)} fill="none"/>`
+        + `<path d="M17 -40 C19 -36 22 -35 26 -35" ${st(0.6, W)} fill="none"/>` + ant(1) + ant(-0.6) + eyeR(20.6, -37.4, 1.1));
+}
+export function rootWyrm(x, y, s = 1, face = 1) {
+    let seg = '';
+    for (let i = 0; i < 9; i++) { const t = i / 8; const sx = -60 + t * 70; const sy = -Math.sin(t * Math.PI) * 46; seg += `<path d="M${f(sx - 5)} ${f(sy - 7)} Q${f(sx)} ${f(sy - 11)} ${f(sx + 5)} ${f(sy - 7)}" ${st(0.6, W)} fill="none"/>`; }
+    return C(x, y, s, face,
+        `<path d="M-70 4 C-66 -30 -50 -62 -20 -60 C4 -58 10 -30 14 -18 C16 -10 22 -12 26 -18 L34 -28 L44 -26 L40 -18 L46 -16 L36 -10 C28 -2 16 2 8 -6 C4 -12 2 -30 -14 -36 C-34 -42 -46 -20 -52 4 Z" fill="${G3}" ${st(1)}/>`
+        + seg + `<path d="M-66 2 C-64 -4 -60 -8 -58 -2 M-52 4 C-50 -2 -46 -2 -44 4" ${st(1.4)} fill="none"/>`
+        + `<path d="M34 -28 C30 -36 26 -40 20 -40 M40 -26 C42 -34 46 -38 52 -38 M38 -27 C38 -36 36 -44 32 -48" ${st(1.2)} fill="none"/>`
+        + `<path d="M36 -16 l2 3 l2 -3 l2 3" ${st(0.5, W)} fill="none"/>` + eyeR(36, -22, 1.6) + eyeR(31, -21, 1.1));
+}
+export function drowned(x, y, s = 1, face = 1, n = 0) {
+    const hair = `<path d="M-4 -46 C-7 -40 -7 -30 -9 -18 M-2 -46 C-3 -38 -4 -28 -5 -16 M2 -46 C3 -38 3 -30 2 -20 M4 -46 C7 -40 8 -30 9 -22" ${st(0.9)} fill="none"/>`;
+    return C(x, y, s, face,
+        `<path d="M-6 0 C-7 -14 -7 -28 -6 -38 C-7 -42 -6 -46 -4 -48 C-2 -51 2 -51 4 -48 C6 -46 7 -42 6 -38 C7 -28 7 -14 6 0 Z" fill="${G1}" ${st(0.7)}/>`
+        + `<path d="M-6 -38 C-12 -30 -14 -18 -16 -6 L-14 -6 C-12 -16 -10 -26 -5 -32 M6 -38 C12 -32 16 -24 18 -14 L16 -14 C14 -22 10 -28 5 -32" fill="${G1}" ${st(0.6)}/>`
+        + `<path d="M-16 -6 l-1.4 4 M-15 -6 l0 4.4 M-14 -6 l1 4" ${st(0.4)}/>` + hair
+        + `<ellipse cx="-1.6" cy="-43" rx="1" ry="1.4" fill="${W}"/><ellipse cx="1.6" cy="-43" rx="1" ry="1.4" fill="${W}"/><path d="M-1 -39.6 Q0 -38.6 1 -39.6" ${st(0.5)} fill="none"/>`
+        + `<rect x="-12" y="-4" width="24" height="5" fill="${G3}" opacity="0.8"/>`);
+}
+export function serpent(x, y, s = 1, face = 1) {
+    return C(x, y, s, face,
+        `<path d="M-50 2 C-40 -10 -30 -10 -24 -2 C-18 6 -10 4 -6 -10 C-2 -26 0 -46 10 -56 C18 -62 28 -60 32 -54 L40 -52 L34 -46 C28 -48 22 -48 18 -42 C12 -32 12 -10 4 4 C-4 16 -16 14 -26 6 C-32 0 -40 0 -46 6 Z" fill="${K}"/>`
+        + `<path d="M8 -52 C4 -44 2 -30 0 -16 M14 -50 L20 -60 L22 -50 M-28 0 L-34 -8 L-36 2" ${st(0.6, W)} fill="none"/><path d="M33 -52 l1.6 2 l1.6 -2" ${st(0.4, W)} fill="none"/>` + eyeR(28, -55, 1.3)
+        + `<path d="M-60 4 Q-30 0 0 4 T60 4" ${st(1, W)} fill="none"/>`);
+}
+export function rotApe(x, y, s = 1, face = 1) {
+    let fur = '';
+    for (let i = 0; i < 16; i++) fur += `M${-14 + i * 1.8} ${-44 + Math.abs(i - 8) * 1.4} l${1 - (i % 3)} 5 `;
+    return C(x, y, s, face, shadowC(22)
+        + `<path d="M-16 -8 C-20 -24 -18 -40 -10 -48 C-4 -54 6 -54 12 -48 C18 -42 20 -30 18 -16 L22 -4 L24 0 L18 0 L14 -10 L6 -12 L4 0 L-2 0 L-2 -10 C-8 -10 -12 -8 -16 -8 Z" fill="${K}"/>`
+        + `<path d="M-14 -40 C-24 -32 -28 -16 -28 2 L-24 2 C-24 -12 -20 -24 -12 -32 Z M14 -42 C24 -36 30 -22 30 -2 L34 2 L28 2 C26 -14 22 -26 14 -34 Z" fill="${K}"/>`
+        + `<path d="M0 -50 C-4 -54 -4 -60 0 -62 C6 -64 10 -60 10 -54 C10 -50 6 -48 2 -48 Z" fill="${K}"/>`
+        + `<path d="${fur}" ${st(0.5, W)} fill="none"/><path d="M2 -55 l6 0" ${st(0.4, W)}/>` + eyeR(3, -57, 1.1) + eyeR(7.6, -57, 1.1)
+        + `<path d="M4 -52 l1 1.4 l1 -1.4 l1 1.4" ${st(0.4, W)} fill="none"/>`);
+}
+export function cinderHawk(x, y, s = 1, face = 1) {
+    return C(x, y, s, face,
+        `<path d="M0 0 C-6 -8 -16 -12 -30 -14 L-24 -10 L-34 -10 L-26 -6 L-36 -4 L-26 -2 C-16 0 -8 2 -2 4 Z" fill="${K}"/>`
+        + `<path d="M0 0 C4 -8 6 -18 2 -30 L8 -24 L8 -34 L12 -24 L14 -32 L14 -20 C12 -10 8 -4 4 2 Z" fill="${K}"/>`
+        + `<path d="M-4 2 C2 -2 8 -2 12 0 L16 -1 L14 2 C10 4 4 6 -2 6 L-10 10 L-8 5 Z" fill="${K}"/>`
+        + `<path d="M-30 -14 L-36 -10 M-34 -10 L-38 -5 M-36 -4 L-39 0 M8 -34 L10 -38 M14 -32 L17 -35" ${st(1.4, RED)}/>`
+        + `<circle cx="-40" cy="-2" r="0.8" fill="${RED}"/><circle cx="18" cy="-38" r="0.7" fill="${RED}"/><circle cx="-36" cy="-16" r="0.6" fill="${RED}"/>` + eyeR(12.6, -0.6, 0.7));
+}
+/** The guardian: a tall construct of grown wood and bone, branch-crowned, hollow-eyed. */
+export function guardian(x, y, s = 1, face = 1) {
+    let grain = '';
     for (let i = 0; i < 9; i++) grain += `M${-8 + i * 2} -20 C${-9 + i * 2} -50 ${-7 + i * 2.2} -80 ${-6 + i * 1.6} -110 `;
     let crown = '';
     for (let i = 0; i < 7; i++) { const a = -Math.PI * (0.15 + 0.7 * (i / 6)); crown += `M0 -150 L${f(Math.cos(a) * 30)} ${f(-150 + Math.sin(a) * 34)} l${f(Math.cos(a - 0.6) * 8)} ${f(Math.sin(a - 0.6) * 8)} `; }

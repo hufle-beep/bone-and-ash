@@ -30,7 +30,7 @@ export { day, hour };
 export const a1Day = (g) => clockParts(g.minutes).day - 7;
 
 /** Training-days scale for Act 1 fights: the prologue's days plus one step per two Act 1 days. Tuned by simulation. */
-export const a1Scale = (g) => forestScale(g) + villageScale(g) + Math.floor(Math.max(0, a1Day(g) - 1) / 2);
+export const a1Scale = () => 0; // Act 1 fights are tuned in absolute numbers by full-game simulation (no growth on top).
 
 /** Allies who fight beside James in the story (Mei Lin with a knife, Ya with a spear): they wear the first enemy down. */
 export function allies(g) {
