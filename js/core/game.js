@@ -7,7 +7,7 @@
  */
 import {
     checkFromTierLevel, skillXpCost, maxHp, qiPoolMax, qiRegenPercent, cycleTimeMinutes,
-    realmBonus, realmStepLabel, condensationSatGain, CONDENSE_SIT_COST, FAIL_XP_FRACTION, realmDr, realmShockHpBonus,
+    realmBonus, realmStepLabel, condensationSatGain, CONDENSE_SIT_COST, FAIL_XP_FRACTION, realmDr, realmShockHpBonus, dampenMultiplier,
 } from './formulas.js';
 
 export const K = 0.5;
@@ -83,7 +83,7 @@ export const xpToNext = (n) => skillXpCost(K, n.tier, n.level);
  */
 export const HP_REGEN = [5, 6, 7, 8, 9, 10, 11, 15, 20, 30, 50, 100, 100, 100, 100];
 export const hpRegenPct = (realm) => HP_REGEN[Math.max(0, Math.min(HP_REGEN.length - 1, realm || 0))];
-export const jamesDr = (g) => (g.james.dr || 0) + realmDr(g.james.realm || 0);
+export const jamesDr = (g) => (g.james.dr || 0) + realmDr(g.james.realm || 0) + armourDr(g);
 export const yukiDr = (g) => realmDr(g.yuki.realm || 0);
 /** Damage after the realm gap and DR. */
 export function hitDamage(dmg, enemyRealm, realm, dr) {
@@ -157,10 +157,16 @@ export function actingName(g, name) {
     return getSkill(g, name) ? name : 'GU';
 }
 
+/** Every skill (James's, Yuki's) stops at T10 L10; XP past the cap is lost (engine: lost-at-cap). */
+export const SKILL_MAX_TIER = 10;
+export const atSkillCap = (n) => n.tier >= SKILL_MAX_TIER && n.level >= 10;
 function addXp(n, amount) {
     const ups = [];
+    if (n.tier > SKILL_MAX_TIER) { n.tier = SKILL_MAX_TIER; n.level = 10; }
+    if (atSkillCap(n)) { n.xp = 0; return ups; }
     n.xp += amount;
     for (;;) {
+        if (atSkillCap(n)) { n.xp = 0; break; }
         const need = xpToNext(n);
         if (n.xp < need) break;
         n.xp -= need;
@@ -185,21 +191,21 @@ export function awardXp(g, skillName, band = 'standard', { fail = false } = {}) 
     const heads = name === 'GU' ? 1 : 2;
     const share = Math.floor(pool / heads);
     const up1 = addXp(n, share);
-    out.push(`${name} +${share} XP${up1.length ? ` → ${up1.at(-1)}` : ''}`);
+    out.push(atSkillCap(n) && !up1.length ? `${name} at T10 L10 (cap)` : `${name} +${share} XP${up1.length ? ` → ${up1.at(-1)}` : ''}`);
     if (name !== 'GU') {
         const up2 = addXp(g.james.gu, share);
-        out.push(`GU +${share} XP${up2.length ? ` → ${up2.at(-1)}` : ''}`);
+        out.push(atSkillCap(g.james.gu) && !up2.length ? 'GU at T10 L10 (cap)' : `GU +${share} XP${up2.length ? ` → ${up2.at(-1)}` : ''}`);
     }
     const yShare = Math.floor(pool / 2);
     const up3 = addXp(g.yuki.qiUse, yShare);
-    out.push(`Yuki (bond) Qi Use +${yShare}${up3.length ? ` → ${up3.at(-1)}` : ''}`);
+    out.push(atSkillCap(g.yuki.qiUse) && !up3.length ? 'Yuki (bond) Qi Use at T10 L10 (cap)' : `Yuki (bond) Qi Use +${yShare}${up3.length ? ` → ${up3.at(-1)}` : ''}`);
     ensureBars(g);
     return out;
 }
 export function awardYukiFightXp(g, band = 'standard') {
     const pool = (XP_BANDS[band] ?? 30) * g.yuki.fight.tier;
     const ups = addXp(g.yuki.fight, pool);
-    return [`Yuki Fight +${pool}${ups.length ? ` → ${ups.at(-1)}` : ''}`];
+    return [atSkillCap(g.yuki.fight) && !ups.length ? 'Yuki Fight at T10 L10 (cap)' : `Yuki Fight +${pool}${ups.length ? ` → ${ups.at(-1)}` : ''}`];
 }
 
 /**
@@ -322,13 +328,36 @@ export function breakthrough(g) {
     ] };
 }
 
-/** Bonesinger at Convergence Use tier (the T1 rung added for this game; T2+ as in the SillyTavern preset). */
+/**
+ * Bonesinger at Convergence Use tier, T1–T10 (v0.8.3). Gábor's james3/james3b ladder (T2–T9) rearranged to ten rungs:
+ * the T1 rung was added for this game; "T9 L10: conceptual mastery" became T10.
+ */
 export const BONESINGER_TIERS = [
     null,
-    'T1: bone as hard as fresh antler; needles, darts and a knife-length wraithbone blade; thrown to about 15 m; a few pieces at once.',
-    'T2: natural bone and tough fabric, rising to mild steel by L10; arm-length pieces; simple shapes.',
-    'T3: hardened steel that holds an edge; body-volume pieces within 2-3 m; fine detail and moving parts.',
+    'T1 — as hard as fresh antler. Needles, darts and a knife-length wraithbone blade; thrown to about 15 m; a few pieces at once.',
+    'T2 — natural bone and tough fabric, rising to mild steel by L10. Hand-sized to arm-length pieces; simple shapes (tools, splints, simple blades, clothing).',
+    'T3 — hardened steel that holds an edge. Up to his own body\'s volume within 2–3 m; fine detail and moving parts (armour plates, mechanisms).',
+    'T4 — ceramic and tungsten-carbide. Room-sized pieces within about 10 m; several pieces at once; load-bearing structures (walls, a bridge, a shelter).',
+    'T5 — diamond-hard but tough, not brittle. Within about 30 m; many pieces at once; it conducts his Qi, so techniques can run through it.',
+    'T6 — harder than diamond, like the rarest natural crystals. Building-sized within about 100 m; damaged bone knits back when he touches it.',
+    'T7 — Qi-bone beyond any natural material, flexing without breaking. Area-scale at line of sight; simple constructs that follow simple orders.',
+    'T8 — living bone. Grows, heals itself unattended and lasts when he leaves; battlefield-scale; constructs act on their own judgement.',
+    'T9 — near-indestructible. He sets its density from feather-light to crushing mass; whole structures at a thought.',
+    'T10 — conceptual mastery. It ignores basic physical laws: it holds its shape in vacuum or fire, and cuts what should not be cut.',
 ];
+/**
+ * What the tier does in a fight (Convergence Use tier; all three attacks are Bonesinger constructs, even the GU-swung blade):
+ *   damage × tier (darts 2–4 → T10 20–40); Qi cost × engine dampen max(0.25, 1 − 0.0375·(T−1));
+ *   T3+ pierces enemy DR (hardened steel) and James wears wraithbone plates: +1 DR per tier from T3 (T10: +8);
+ *   T4+ darts strike two enemies (several pieces), T5+ every enemy (many pieces);
+ *   T7+ a bone construct fights beside him (tier × 1–3 a round on the first enemy standing);
+ *   T8+ the construct, on its own judgement, steps into the first blow aimed at him each round;
+ *   T10 his constructs never miss (they cut what should not be cut).
+ */
+export const boneTier = (g) => Math.min(SKILL_MAX_TIER, g.james.skills['Convergence Use'].tier);
+export const actionCost = (g, a) => (a.qi ? Math.round(a.qi * dampenMultiplier(boneTier(g)) * 10) / 10 : 0);
+export const actionDmg = (g, a) => [a.dmg[0] * boneTier(g), a.dmg[1] * boneTier(g)];
+export const armourDr = (g) => Math.max(0, boneTier(g) - 2);
 
 /* ---------------- inventory and food ---------------- */
 
@@ -380,7 +409,7 @@ export function bumpRel(g, who, f = 0, a = 0) {
  * minus DR 1 (Ouroboros).
  */
 export const COMBAT_ACTIONS = {
-    dart: { label: 'Bone darts', skill: 'Convergence Use', qi: 2, dmg: [2, 4], dcMod: 0 },
+    dart: { id: 'dart', label: 'Bone darts', skill: 'Convergence Use', qi: 2, dmg: [2, 4], dcMod: 0 },
     blade: { label: 'Wraithbone blade', skill: 'GU', qi: 3, dmg: [3, 6], dcMod: 1, keeps: 'blade' },
     needle: { label: 'Needle to a joint', skill: 'Convergence Use', qi: 4, dmg: [1, 2], dcMod: 2, stagger: true },
     guard: { label: 'Guard and give ground', skill: 'GU', qi: 0, dmg: [0, 0], dcMod: -1, guard: true },
@@ -438,7 +467,7 @@ export function combatStep(g, actionId, targetIdx = 0) {
     const living = c.enemies.filter((e) => e.hp > 0);
     const target = living[Math.min(targetIdx, living.length - 1)];
     let guard = false;
-    const qiNeed = act.keeps === 'blade' && c.bladeFormed ? 0 : act.qi;
+    const qiNeed = act.keeps === 'blade' && c.bladeFormed ? 0 : actionCost(g, act);
     if (qiNeed && !spendQi(g, qiNeed)) {
         lines.push(`Not enough Qi for ${act.label} — you fall back on guarding.`);
         guard = true;
@@ -448,18 +477,26 @@ export function combatStep(g, actionId, targetIdx = 0) {
             guard = true;
             lines.push('You give ground, watching for the opening.');
         } else {
-            const dc = target.dc + act.dcMod;
-            const r = rollCheck(g, act.skill, dc);
-            lines.push(`${act.label}: ${r.skill} ${r.value} + 🎲${r.die} = ${r.total} vs DC ${dc} — ${r.success ? 'hit' : 'miss'}`);
-            if (r.success) {
-                let dmg = dmgRoll(g, act.dmg) * (r.crit ? 2 : 1);
-                dmg = Math.max(0, dmg - (target.dr || 0));
-                target.hp -= dmg;
-                lines.push(`  ${target.name} takes ${dmg}${r.crit ? ' (critical — double damage)' : ''}.`);
-                if (act.stagger && target.hp > 0) { target.staggered = true; lines.push(`  ${target.name} staggers.`); }
+            const T = boneTier(g);
+            const targets = act.id === 'dart' && T >= 4 ? living.slice(0, T >= 5 ? living.length : 2) : [target];
+            for (const tg of targets) {
+                const dc = tg.dc + act.dcMod;
+                const r = rollCheck(g, act.skill, dc);
+                const hit = r.success || T >= 10;
+                lines.push(`${act.label}${targets.length > 1 ? ` → ${tg.name}` : ''}: ${r.skill} ${r.value} + 🎲${r.die} = ${r.total} vs DC ${dc} — ${hit ? 'hit' : 'miss'}${!r.success && hit ? ' (it cuts what should not be cut)' : ''}`);
+                if (!hit) continue;
+                let dmg = dmgRoll(g, actionDmg(g, act)) * (r.crit ? 2 : 1);
+                dmg = Math.max(0, dmg - (T >= 3 ? 0 : (tg.dr || 0)));
+                tg.hp -= dmg;
+                lines.push(`  ${tg.name} takes ${dmg}${r.crit ? ' (critical — double damage)' : ''}.`);
+                if (act.stagger && tg.hp > 0) { tg.staggered = true; lines.push(`  ${tg.name} staggers.`); }
             }
         }
     }
+    // T7+: a bone construct fights beside him
+    const ct = boneTier(g) >= 7 ? c.enemies.find((e) => e.hp > 0) : null;
+    if (ct) { const dmg = boneTier(g) * (1 + ((d6(g) - 1) % 3)); ct.hp -= dmg; lines.push(`Your bone construct strikes ${ct.name}: ${dmg}.`); }
+    let shield = boneTier(g) >= 8;
     // Yuki
     const yt = c.enemies.find((e) => e.hp > 0);
     if (yt && g.yuki.hp > 0) {
@@ -483,6 +520,7 @@ export function combatStep(g, actionId, targetIdx = 0) {
             if (!dodge) g.yuki.hp = Math.max(1, g.yuki.hp - hitDamage(e.dmg, e.realm, g.yuki.realm, yukiDr(g)));
             continue;
         }
+        if (shield) { shield = false; lines.push(`${e.name} attacks — your construct steps into the blow.`); continue; }
         const r = rollCheck(g, 'GU', e.atk, guard ? 2 : 0);
         if (r.success) {
             lines.push(`${e.name} attacks: you defend (GU ${r.value} + 🎲${r.die} = ${r.total} vs ${e.atk}) — avoided.`);

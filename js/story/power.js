@@ -27,6 +27,8 @@ import { HP_TUNE } from './fight_tune.js';
 
 /** Cultivators' realms (for the realm-gap rule; everyone else is realm 0). Locals can't sense James; he can sense them. */
 export const ENEMY_REALM = { 'Outer Elder Shen Qiu': 2, 'Gao Feng': 1, 'Lu Han': 1, 'Fang Wei, Outer Disciple (lapsed)': 1, 'Sect watcher': 1 };
+/** The skill ceiling (T10 L10 = check 50) applies to enemies too. */
+export const ENEMY_CAP = 50;
 export const DC_CAP = 7;
 export const ATK_CAP = 9;
 export const STOMP = {};
@@ -57,7 +59,10 @@ export function prepare(g, enc) {
     if (enc._prepared) return enc;
     const f = HP_TUNE[enc.id] || 1;
     const tuned = f !== 1 ? enc.enemies.map((e) => ({ ...e, hp: Math.max(1, Math.round(e.hp * f)) })) : enc.enemies;
-    const enemies = lfScale(g, tuned).map((e) => (e.realm == null && ENEMY_REALM[e.name] != null ? { ...e, realm: ENEMY_REALM[e.name] } : e));
+    const enemies = lfScale(g, tuned)
+        .map((e) => (e.realm == null && ENEMY_REALM[e.name] != null ? { ...e, realm: ENEMY_REALM[e.name] } : e))
+        // enemies share the T10 L10 ceiling: no defence or attack above a check of 50
+        .map((e) => (e.dc > ENEMY_CAP || e.atk > ENEMY_CAP ? { ...e, dc: Math.min(e.dc, ENEMY_CAP), atk: Math.min(e.atk, ENEMY_CAP) } : e));
     const degree = degreeOf(g, enemies);
     const st = STOMP[enc.id];
     const keepTail = enc.intro?.includes('Ashfall does not kneel') ? ' Behind you, Ashfall does not kneel.' : '';

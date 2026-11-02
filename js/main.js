@@ -1,7 +1,7 @@
 /** Bone and Ash — UI. Renders the story, combat, sheet, hammerspace, journal and saves. */
 import {
     newGame, ensureBars, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, skillCheck, xpToNext, clockLabel, clockLabelG, realmName, yukiForm,
-    startCombat, combatStep, combatFlee, COMBAT_ACTIONS, serialize, deserialize, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct,
+    startCombat, combatStep, combatFlee, COMBAT_ACTIONS, serialize, deserialize, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg,
 } from './core/game.js';
 import { sceneView, choose, goTo } from './core/story.js';
 import { SCENES, ITEMS } from './story/prologue.js';
@@ -72,10 +72,11 @@ ${v.end ? `<ul class="choices"><li><button class="choice" data-new="1">Start a n
 function renderCombat() {
     const c = g.combat;
     const acts = Object.entries(COMBAT_ACTIONS).map(([id, a]) => {
-        const cost = a.keeps === 'blade' && c.bladeFormed ? 0 : a.qi;
+        const cost = a.keeps === 'blade' && c.bladeFormed ? 0 : actionCost(g, a);
+        const d = actionDmg(g, a);
         const off = cost > g.james.qi;
         const val = n1(skillCheck(a.skill === 'GU' ? g.james.gu : g.james.skills[a.skill]));
-        return `<li><button class="choice fightish" data-act="${id}" ${off ? 'disabled' : ''}>${esc(a.label)}<span class="tag">${a.guard ? 'GU defence +2 this round' : `${a.skill} ${val} + d6 · ${a.dmg[0]}–${a.dmg[1]} dmg`}${cost ? ` · ${cost} Qi` : ''}${a.stagger ? ' · staggers' : ''}${off ? ' · not enough Qi' : ''}</span></button></li>`;
+        return `<li><button class="choice fightish" data-act="${id}" ${off ? 'disabled' : ''}>${esc(a.label)}<span class="tag">${a.guard ? 'GU defence +2 this round' : `${a.skill} ${val} + d6 · ${d[0]}–${d[1]} dmg`}${cost ? ` · ${cost} Qi` : ''}${a.stagger ? ' · staggers' : ''}${off ? ' · not enough Qi' : ''}</span></button></li>`;
     }).join('');
     const foes = c.enemies.map((e) => `<div class="foe${e.hp <= 0 ? ' down' : ''}"><span>${esc(e.name)}${e.staggered ? ' (reeling)' : ''}</span><div class="stroke"><i style="width:${pct(Math.max(0, e.hp), e.hpMax)}"></i></div></div>`).join('');
     const yuki = `<div class="foe"><span>Yuki</span><div class="stroke" style="background:rgba(242,239,230,0.08)"><i style="width:${pct(g.yuki.hp, yukiHpMax(g))};background:var(--bone)"></i></div></div>`;

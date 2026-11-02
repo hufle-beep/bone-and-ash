@@ -217,6 +217,13 @@ The bible and the contract between the four part files are at the top of `js/sto
 - The clearing's "Stay lost." now runs `longForestInstant` (prologue.js): realm Nascent Soul (James and Yuki), GU / Convergence Use / Yuki's Fight / Qi Use T10 L10 (check 50), all 46 extra meridians open, every stock item (`LF_STOCK`) at its cap, flags `longforest` (enemy scaling to the cap, stomp texts) and `lf_instant`; Yuki's tiger and human forms unlocked. Goes straight to `lf_exit` → Day 4. Result: HP 60, Convergence 117.5, Qi regen 21.4%.
 - The walkable Long Forest (`lf_enter`, `lf_hub` …) has no entrance any more; the tests still walk it from `lf_enter`.
 
+## v0.8.3 — Bonesinger tiers T1–T10, skill cap
+
+- `BONESINGER_TIERS` (game.js): Gábor's james3/james3b ladder rearranged to ten rungs (T1 added for this game; the old "T9 L10 conceptual mastery" is T10).
+- In fights (Convergence Use tier): damage × tier; Qi cost × engine `dampenMultiplier`; T3+ pierces enemy DR and wraithbone plates give +1 DR per tier from T3 (`armourDr`, T10 +8); T4+ darts hit 2 enemies, T5+ all; T7+ a construct strikes each round (tier × 1–3); T8+ it takes the first blow aimed at James each round; T10 constructs never miss.
+- Cap: every skill (James's and Yuki's) stops at T10 L10, XP past it is lost (`SKILL_MAX_TIER`, `atSkillCap`); enemies' DC and attack cap at 50 (`ENEMY_CAP` in power.js).
+- Normal runs: no change ≥3 points (Convergence Use stays T1 through Act 1).
+
 ## Next steps (proposed, not built)
 
 1. **Act 2** (open).
