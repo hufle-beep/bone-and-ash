@@ -9,7 +9,7 @@ import { forestScale, villageScale, grow, NEW_ITEMS } from './common.js';
 import './power.js';
 import './stomp_prologue.js';
 import './stomp_act1.js';
-import { yukiForms, itemNames } from '../core/game.js';
+import { yukiForms, itemNames, itemCap } from '../core/game.js';
 import { WILDS, nightNext } from './wilds.js';
 import { ASHFALL, hubOf, nextEvening } from './ashfall.js';
 import { ACT1_ITEMS } from './act1_common.js';
@@ -790,7 +790,23 @@ function cookMealMorning(g) {
 Object.assign(SCENES, MERIDIANS, WILDS, ASHFALL, FALLOUT, BLACKROOT, HEART, RETURN, LONGFOREST);
 
 /* the way into the Long Forest (pre-prologue): from the Day 1 clearing */
-SCENES.clearing.choices.push({ text: 'Stay lost. (The Long Forest — uncounted days to grow as strong as you like. You can leave whenever you want.)', to: 'lf_enter' });
+/**
+ * The Long Forest, one button (v0.8.2, Gábor): Nascent Soul, all 46 extra meridians open, GU / Convergence Use and Yuki's
+ * Fight / Qi Use at T10 L10, the hammerspace full of every stock item. Then straight to the exit (Day 4, the scream).
+ * The old walkable Long Forest (lf_enter, lf_hub …) stays in the code for the tests but has no entrance.
+ */
+export const LF_STOCK = ['hare_raw', 'jade_bracket', 'crimson_berry', 'spirit_grass', 'beast_core', 'fowl_raw', 'crab_meat', 'honeycomb', 'lizard_egg', 'river_cress', 'venison', 'ghost_gill', 'bone_meal', 'crow_feather'];
+export function longForestInstant(g) {
+    const top = () => ({ tier: 10, level: 10, xp: 0 });
+    Object.assign(g.flags, { lf_active: true, longforest: true, lf_instant: true, yuki_tiger_seen: true, yuki_human_seen: true });
+    g.james.realm = 7; g.yuki.realm = 7; g.james.saturation = 0;
+    g.james.gu = top(); g.james.skills['Convergence Use'] = top(); g.yuki.fight = top(); g.yuki.qiUse = top();
+    Object.assign(g.james, { extra8: 8, extraCollaterals: 28, junctions: 10 });
+    for (const id of LF_STOCK) g.inventory[id] = itemCap(id);
+    g.james.satiety = 100; g.james.hp = null; g.james.qi = null; g.yuki.hp = null; g.yuki.qi = null;
+    return ['Seasons pass. You stop counting them.', `Realm: ${realmName(7)}. GU, Convergence Use, Yuki's Fight and Qi Use: T10 L10.`, 'Extraordinary 8/8, their collaterals 28/28, junctions 10/10.', 'The hammerspace is full.'];
+}
+SCENES.clearing.choices.push({ text: 'Stay lost. (The Long Forest, in one step: Nascent Soul, every meridian open, everything T10 L10, the hammerspace full.)', do: longForestInstant, to: 'lf_exit' });
 
 /* ---------- breakthrough: offered at calm moments whenever Saturation is 100% ---------- */
 const VILLAGE_SCENES = ['village', 'ashfall', 'supper'];

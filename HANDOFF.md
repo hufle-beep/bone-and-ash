@@ -212,6 +212,11 @@ The bible and the contract between the four part files are at the top of `js/sto
 - Enemy realms: `ENEMY_REALM` in power.js (Shen Qiu 2, Gao Feng / Lu Han / Fang Wei / Sect watcher 1, everyone else 0). With today's enemies James takes ~0 damage from Nascent Soul on.
 - Normal runs: no change beyond noise (bal1, 3000 games).
 
+## v0.8.2 — the Long Forest in one button
+
+- The clearing's "Stay lost." now runs `longForestInstant` (prologue.js): realm Nascent Soul (James and Yuki), GU / Convergence Use / Yuki's Fight / Qi Use T10 L10 (check 50), all 46 extra meridians open, every stock item (`LF_STOCK`) at its cap, flags `longforest` (enemy scaling to the cap, stomp texts) and `lf_instant`; Yuki's tiger and human forms unlocked. Goes straight to `lf_exit` → Day 4. Result: HP 60, Convergence 117.5, Qi regen 21.4%.
+- The walkable Long Forest (`lf_enter`, `lf_hub` …) has no entrance any more; the tests still walk it from `lf_enter`.
+
 ## Next steps (proposed, not built)
 
 1. **Act 2** (open).
