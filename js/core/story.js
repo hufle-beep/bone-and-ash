@@ -4,7 +4,7 @@
  *             to | to(g), fail?, do?(g, r) → lines, failDo?(g, r) → lines, combat?: encounter, xp?: false }.
  * A check pays standard XP (25% on a fail) unless xp: false. Pure — no DOM.
  */
-import { rollCheck, awardXp, spendQi, advance, ensureBars, actingCheck, actingName, instantWin, itemFull, takeCapNotes, itemNames } from './game.js';
+import { rollCheck, awardXp, spendQi, advance, ensureBars, actingCheck, actingName, instantWin, itemFull, takeCapNotes, itemNames, setLootMult } from './game.js';
 import { STOMP, degreeForChoice } from '../story/power.js';
 
 const ONE_MOVE = 1000; // virtual choice index offset: "End it in one move."
@@ -139,7 +139,17 @@ export function choose(g, scenes, index) {
     }
     if (c.time) lines.push(...advance(g, c.time));
     takeCapNotes();
-    if (ok && c.do) lines.push(...(c.do(g, roll) || []));
+    if (ok && c.do) {
+        // a six on a hunt or forage: a double haul
+        const crit = roll?.crit && gives(c).length > 0;
+        const before = crit ? { ...g.inventory } : null;
+        if (crit) setLootMult(2);
+        try { lines.push(...(c.do(g, roll) || [])); } finally { setLootMult(1); }
+        if (crit) {
+            const extra = Object.keys(g.inventory).map((id) => [id, (g.inventory[id] || 0) - (before[id] || 0)]).filter(([, d]) => d > 0);
+            if (extra.length) lines.push(`Six! A double haul — in total: ${extra.map(([id, d]) => `+${d} ${itemNames[id]?.name || id}`).join(', ')}.`);
+        }
+    }
     for (const id of new Set(takeCapNotes())) lines.push(`Hammerspace: ${itemNames[id]?.name || id} is full — the rest stays behind.`);
     if (!ok && c.failDo) lines.push(...(c.failDo(g, roll) || []));
     if (c.combat && ok) {

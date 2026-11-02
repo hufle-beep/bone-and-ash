@@ -187,6 +187,10 @@ The bible and the contract between the four part files are at the top of `js/sto
 - **Hammerspace caps** (`game.js`): 99 of every item, 999 of `beast_core` and `spirit_grass` (`BIG_CAP`). `addItem` stops at the cap and the turn shows "Hammerspace: X is full". A gathering choice whose items are all at cap is hidden (items read from its `do` source), unless that would empty the scene. Old saves above a cap keep their pieces.
 - Test: 200 walks with every common item at its cap (no dead ends).
 
+## v0.7.2 — critical hauls
+
+- A natural 6 on any hunt or forage check (a choice with a check whose `do` adds items) doubles every item it gives: `setLootMult(2)` around the `do` in story.js; the turn shows "Six! A double haul — in total: …". Caps still apply. Average loot +17%.
+
 ## Next steps (proposed, not built)
 
 1. **Act 2** (open).

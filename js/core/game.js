@@ -306,9 +306,13 @@ const capNotes = [];
 export const itemNames = {};
 /** Notes about items that didn't fit, gathered since the last call. */
 export const takeCapNotes = () => capNotes.splice(0);
+let lootMult = 1;
+/** While a critical hunt or forage resolves, every item gained is multiplied (story.js sets it around the choice). */
+export const setLootMult = (m) => { lootMult = m; };
 export function addItem(g, id, n = 1) {
     const have = g.inventory[id] || 0;
     if (n > 0) {
+        n *= lootMult;
         const room = Math.max(0, itemCap(id) - have);
         if (room < n) capNotes.push(id);
         n = Math.min(n, room);
