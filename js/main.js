@@ -1,11 +1,12 @@
 /** Bone and Ash — UI. Renders the story, combat, sheet, hammerspace, journal and saves. */
 import {
     newGame, ensureBars, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, skillCheck, xpToNext, clockLabel, clockLabelG, realmName, yukiForm,
-    startCombat, combatStep, combatFlee, COMBAT_ACTIONS, serialize, deserialize, BONESINGER_TIERS, itemCap,
+    startCombat, combatStep, combatFlee, COMBAT_ACTIONS, serialize, deserialize, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct,
 } from './core/game.js';
 import { sceneView, choose, goTo } from './core/story.js';
 import { SCENES, ITEMS } from './story/prologue.js';
 import { meridianRow } from './story/meridians.js';
+import { realmShockHpBonus } from './core/formulas.js';
 import * as ART from './art/art.js';
 const sceneArt = (key) => { ART.setArtState?.({ yukiForm: yukiForm(g) }); return ART.sceneArt(key); };
 
@@ -100,7 +101,7 @@ function renderSheet() {
     view.innerHTML = `<section class="page">
 <h1>James Green</h1>
 <p class="lede">Forty, a doctorate three days old (mycology and computational biology). From a civilisation that grows its cities, tools and ships from qi-attuned wood. Now: here.</p>
-<div class="row"><span>HP</span><span>${n1(j.hp)} / ${jamesHpMax(g)} · DR ${j.dr}</span></div>
+<div class="row"><span>HP</span><span>${n1(j.hp)} / ${jamesHpMax(g)} · DR ${jamesDr(g)}</span><span class="sub">HP regen ${hpRegenPct(j.realm)}% per Cycle${j.realm >= 9 ? ` · heals ${realmShockHpBonus(j.realm)} HP every round in a fight` : ''}${j.realm >= 7 ? ' · blows from lower realms lose force' : ''}${j.realm >= 11 ? '; two realms below can\'t hurt you at all' : ''}.</span></div>
 <div class="row"><span>Convergence (Qi + Bonesinger)</span><span>${n1(j.qi)} / ${n1(jamesQiMax(g))}</span></div>
 <div class="row"><span>Realm</span><span>${esc(realmName(j.realm))} · Saturation ${n1(j.saturation)}%</span><span class="sub">Primaries ${j.primaries}/12 · collaterals ${j.collaterals}/66 · ${meridianRow(g)}. No herbs, no pills, no tribulation: the Ouroboros Axiom composts this world's poisoned Qi.</span></div>
 <h2>Skills</h2>

@@ -206,6 +206,12 @@ The bible and the contract between the four part files are at the top of `js/sto
 - `ns_warn`: the breakthrough to Nascent Soul with fewer than 8 Extraordinary open warns first and lets you back out.
 - Check DCs may now be functions (`check.dc(g)`).
 
+## v0.8.1 — realm toughness (option C, engine DR)
+
+- game.js: `HP_REGEN` by realm (MV 5% … Soul Embryo 11%, NS 15, ST 20, IA 30, Mahayana 50, Earth Immortal+ 100% per Cycle); `jamesDr` = Ouroboros 1 + engine `realmDr` (IA 2 … HI 64), Yuki gets realm DR; in fights from IA both heal `realmShockHpBonus` (2, 4, 8…) per round; `hitDamage`: from Nascent Soul, damage from a lower-realm enemy halves per realm of gap; from Earth Immortal, 2+ realms below = 0. HP limit unchanged.
+- Enemy realms: `ENEMY_REALM` in power.js (Shen Qiu 2, Gao Feng / Lu Han / Fang Wei / Sect watcher 1, everyone else 0). With today's enemies James takes ~0 damage from Nascent Soul on.
+- Normal runs: no change beyond noise (bal1, 3000 games).
+
 ## Next steps (proposed, not built)
 
 1. **Act 2** (open).

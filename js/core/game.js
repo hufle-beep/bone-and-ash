@@ -7,7 +7,7 @@
  */
 import {
     checkFromTierLevel, skillXpCost, maxHp, qiPoolMax, qiRegenPercent, cycleTimeMinutes,
-    realmBonus, realmStepLabel, condensationSatGain, CONDENSE_SIT_COST, FAIL_XP_FRACTION,
+    realmBonus, realmStepLabel, condensationSatGain, CONDENSE_SIT_COST, FAIL_XP_FRACTION, realmDr, realmShockHpBonus,
 } from './formulas.js';
 
 export const K = 0.5;
@@ -72,6 +72,26 @@ export function newGame(seed = Date.now()) {
 export const skillCheck = (n) => checkFromTierLevel(n.tier, n.level);
 export const xpToNext = (n) => skillXpCost(K, n.tier, n.level);
 
+/**
+ * Realm toughness (v0.8.1, Gábor's option C with the engine DR). The HP limit stays (60 by Immortal Ascension).
+ *   HP regen % per Cycle (out of fights) by realm: MV 5, +1 per realm to Soul Embryo 11, NS 15, ST 20, IA 30, Mahayana 50,
+ *   Earth Immortal+ 100 (full every Cycle).
+ *   DR = Ouroboros 1 + engine realm DR (Immortal Ascension 2, then ×2 a realm … Heavenly Immortal 64). Yuki: realm DR.
+ *   In fights, from Immortal Ascension: heal the engine's shock bonus (2, 4, 8 …) every round, James and Yuki.
+ *   Realm gap (from Nascent Soul): damage from an enemy below your realm is halved per realm of difference; from
+ *   Earth Immortal, anyone two or more realms below does nothing. Enemies are realm 0 unless tagged (power.js).
+ */
+export const HP_REGEN = [5, 6, 7, 8, 9, 10, 11, 15, 20, 30, 50, 100, 100, 100, 100];
+export const hpRegenPct = (realm) => HP_REGEN[Math.max(0, Math.min(HP_REGEN.length - 1, realm || 0))];
+export const jamesDr = (g) => (g.james.dr || 0) + realmDr(g.james.realm || 0);
+export const yukiDr = (g) => realmDr(g.yuki.realm || 0);
+/** Damage after the realm gap and DR. */
+export function hitDamage(dmg, enemyRealm, realm, dr) {
+    let f = 1;
+    const gap = (realm || 0) - (enemyRealm || 0);
+    if ((realm || 0) >= 7 && gap > 0) f = (realm >= 11 && gap >= 2) ? 0 : 0.5 ** gap;
+    return Math.max(0, Math.floor(dmg * f - dr));
+}
 export function jamesHpMax(g) {
     return maxHp({ body: skillCheck(g.james.gu), realmIndex: g.james.realm });
 }
@@ -234,9 +254,9 @@ export function advance(g, minutes, { resting = false } = {}) {
     g.regenCarry -= ticks * cycle;
     if (ticks > 0 && g.james.satiety > 0) {
         const qiPct = qiRegenPct(g, g.james.collaterals);
-        g.james.hp = Math.min(jamesHpMax(g), g.james.hp + (jamesHpMax(g) * 5 * ticks) / 100);
+        g.james.hp = Math.min(jamesHpMax(g), g.james.hp + (jamesHpMax(g) * hpRegenPct(g.james.realm) * ticks) / 100);
         g.james.qi = Math.min(jamesQiMax(g), g.james.qi + (jamesQiMax(g) * qiPct * ticks) / 100);
-        g.yuki.hp = Math.min(yukiHpMax(g), g.yuki.hp + (yukiHpMax(g) * 5 * ticks) / 100);
+        g.yuki.hp = Math.min(yukiHpMax(g), g.yuki.hp + (yukiHpMax(g) * hpRegenPct(g.yuki.realm) * ticks) / 100);
         g.yuki.qi = Math.min(yukiQiMax(g), g.yuki.qi + (yukiQiMax(g) * qiRegenPct(g, g.yuki.collaterals) * ticks) / 100);
     }
     ensureBars(g);
@@ -460,18 +480,23 @@ export function combatStep(g, actionId, targetIdx = 0) {
             const die = d6(g);
             const dodge = skillCheck(g.yuki.fight) + die + 1 >= e.atk;
             lines.push(`${e.name} lunges at Yuki — ${dodge ? 'she is not there' : 'it connects'}.`);
-            if (!dodge) g.yuki.hp = Math.max(1, g.yuki.hp - e.dmg);
+            if (!dodge) g.yuki.hp = Math.max(1, g.yuki.hp - hitDamage(e.dmg, e.realm, g.yuki.realm, yukiDr(g)));
             continue;
         }
         const r = rollCheck(g, 'GU', e.atk, guard ? 2 : 0);
         if (r.success) {
             lines.push(`${e.name} attacks: you defend (GU ${r.value} + 🎲${r.die} = ${r.total} vs ${e.atk}) — avoided.`);
         } else {
-            const dmg = Math.max(0, e.dmg - g.james.dr);
+            const dmg = hitDamage(e.dmg, e.realm, g.james.realm, jamesDr(g));
             g.james.hp = Math.max(0, g.james.hp - dmg);
-            lines.push(`${e.name} attacks: you defend (GU ${r.value} + 🎲${r.die} = ${r.total} vs ${e.atk}) — hit for ${dmg} (DR ${g.james.dr}).`);
+            lines.push(`${e.name} attacks: you defend (GU ${r.value} + 🎲${r.die} = ${r.total} vs ${e.atk}) — hit for ${dmg} (DR ${jamesDr(g)}${(g.james.realm || 0) >= 7 && (g.james.realm || 0) > (e.realm || 0) ? ', realm gap' : ''}).`);
         }
     }
+    // immortal flesh: from Immortal Ascension, wounds close mid-fight
+    const hj = realmShockHpBonus(g.james.realm || 0);
+    if (hj > 0 && g.james.hp > 0 && g.james.hp < jamesHpMax(g)) { const before = g.james.hp; g.james.hp = Math.min(jamesHpMax(g), g.james.hp + hj); lines.push(`Your flesh closes: +${Math.round((g.james.hp - before) * 10) / 10} HP.`); }
+    const hy = realmShockHpBonus(g.yuki.realm || 0);
+    if (hy > 0 && g.yuki.hp > 0) g.yuki.hp = Math.min(yukiHpMax(g), g.yuki.hp + hy);
     c.round += 1;
     advance(g, 1);
     c.log = lines;
@@ -506,7 +531,8 @@ export function combatFlee(g) {
         advance(g, 10);
         return { lines, done: 'flee', next };
     }
-    const dmg = Math.max(0, Math.max(...c.enemies.filter((e) => e.hp > 0).map((e) => e.dmg)) - g.james.dr);
+    const biter = c.enemies.filter((e) => e.hp > 0).reduce((a, e) => (e.dmg > a.dmg ? e : a));
+    const dmg = hitDamage(biter.dmg, biter.realm, g.james.realm, jamesDr(g));
     g.james.hp = Math.max(0, g.james.hp - dmg);
     lines.push(`Something bites on the way out: −${dmg} HP.`);
     if (g.james.hp <= 0) { const next = c.lose; g.combat = null; g.james.hp = 1; return { lines, done: 'lose', next }; }
