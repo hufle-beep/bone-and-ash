@@ -1,6 +1,6 @@
 // Run: node tests/story.test.mjs — story graph integrity + 2,000 random playthroughs (no crash, no dead end, always reaches the end)
 import { SCENES, START_SCENE } from '../js/story/prologue.js';
-import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS } from '../js/core/game.js';
+import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, itemCap } from '../js/core/game.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
 
 let pass = 0, fail = 0;
@@ -78,6 +78,15 @@ for (let run = 0; run < 300; run++) {
     Object.assign(g.flags, { long: true, forest_day: 3, vday: 3, ending: 'bluff', mei_party: true, ya_party: true, ya_met: true });
     g.rel = { 'Mei Lin': { f: 20, a: 5 }, Ya: { f: 40, a: 60 + (run % 40) }, Village: { f: 30, a: 0 } }; g.james.gu.level = 7; g.james.skills['Convergence Use'].level = 5; ensureBars(g);
     walkFrom(g, 'bl_start', new Set(['ht_start']), 1500);
+}
+// a full hammerspace: every common item at its cap — no dead ends from hidden gathering choices
+const COMMON = ['jade_bracket', 'ghost_gill', 'river_cress', 'honeycomb', 'spirit_grass', 'beast_core', 'fowl_raw', 'crow_feather', 'hare_raw', 'bone_meal', 'venison', 'crimson_berry', 'crab_meat', 'lizard_egg'];
+for (let run = 0; run < 200; run++) {
+    const g = ensureBars(newGame(run + 33333));
+    for (const id of COMMON) g.inventory[id] = itemCap(id);
+    const r = run % 8; g.james.realm = r; g.yuki.realm = r; ensureBars(g);
+    walkFrom(g, run % 2 ? 'lf_enter' : 'arrival', new Set(['fo_start']), 1500);
+    for (const id of COMMON) assert(g.inventory[id] <= itemCap(id) || !g.inventory[id], `cap holds for ${id}`);
 }
 const unreached = Object.keys(SCENES).filter((k) => !seen.has(k));
 assert(unreached.length === 0, `every scene reachable (unreached: ${unreached.join(', ')})`);

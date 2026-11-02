@@ -296,8 +296,24 @@ export const BONESINGER_TIERS = [
 
 /* ---------------- inventory and food ---------------- */
 
+/** Hammerspace caps: 99 of anything, 999 of crafting stock. Old saves above a cap keep their pieces; they just can't add more. */
+export const ITEM_CAP = 99;
+export const BIG_CAP = { beast_core: 999, spirit_grass: 999 };
+export const itemCap = (id) => BIG_CAP[id] || ITEM_CAP;
+export const itemFull = (g, id) => (g.inventory[id] || 0) >= itemCap(id);
+const capNotes = [];
+/** Item names for messages (filled by the story: Object.assign(itemNames, ITEMS)). */
+export const itemNames = {};
+/** Notes about items that didn't fit, gathered since the last call. */
+export const takeCapNotes = () => capNotes.splice(0);
 export function addItem(g, id, n = 1) {
-    g.inventory[id] = (g.inventory[id] || 0) + n;
+    const have = g.inventory[id] || 0;
+    if (n > 0) {
+        const room = Math.max(0, itemCap(id) - have);
+        if (room < n) capNotes.push(id);
+        n = Math.min(n, room);
+    }
+    g.inventory[id] = have + n;
     if (g.inventory[id] <= 0) delete g.inventory[id];
 }
 export const hasItem = (g, id, n = 1) => (g.inventory[id] || 0) >= n;

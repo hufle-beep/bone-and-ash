@@ -1,7 +1,7 @@
 /** Bone and Ash — UI. Renders the story, combat, sheet, hammerspace, journal and saves. */
 import {
     newGame, ensureBars, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, skillCheck, xpToNext, clockLabel, clockLabelG, realmName, yukiForm,
-    startCombat, combatStep, combatFlee, COMBAT_ACTIONS, serialize, deserialize, BONESINGER_TIERS,
+    startCombat, combatStep, combatFlee, COMBAT_ACTIONS, serialize, deserialize, BONESINGER_TIERS, itemCap,
 } from './core/game.js';
 import { sceneView, choose, goTo } from './core/story.js';
 import { SCENES, ITEMS } from './story/prologue.js';
@@ -121,8 +121,8 @@ ${rel ? `<h2>People</h2>${rel}` : ''}
 function renderBag() {
     const items = Object.entries(g.inventory).filter(([, n]) => n > 0);
     view.innerHTML = `<section class="page"><h1>Hammerspace</h1>
-<p class="lede">Folded space grown into his omnitool at birth. Infinite. ${items.length ? 'Slightly less embarrassing than it was.' : 'Currently: a lab coat\'s worth of nothing.'}</p>
-${items.map(([id, n]) => `<div class="row"><span>${esc(ITEMS[id]?.name || id)}</span><span>× ${n}</span><span class="sub">${esc(ITEMS[id]?.note || '')}</span></div>`).join('') || '<p class="note">Go and find something. Preferably edible.</p>'}
+<p class="lede">Folded space grown into his omnitool at birth. Infinite, in theory. In practice it refuses a hundredth of anything (a thousandth, for cores and spirit grass), which James has filed as a design flaw. ${items.length ? 'Slightly less embarrassing than it was.' : 'Currently: a lab coat\'s worth of nothing.'}</p>
+${items.map(([id, n]) => `<div class="row"><span>${esc(ITEMS[id]?.name || id)}</span><span>× ${n}${n >= itemCap(id) ? ' · full' : ''}</span><span class="sub">${esc(ITEMS[id]?.note || '')}</span></div>`).join('') || '<p class="note">Go and find something. Preferably edible.</p>'}
 </section>`;
 }
 function renderJournal() {

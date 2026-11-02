@@ -9,7 +9,7 @@ import { forestScale, villageScale, grow, NEW_ITEMS } from './common.js';
 import './power.js';
 import './stomp_prologue.js';
 import './stomp_act1.js';
-import { yukiForms } from '../core/game.js';
+import { yukiForms, itemNames } from '../core/game.js';
 import { WILDS, nightNext } from './wilds.js';
 import { ASHFALL, hubOf, nextEvening } from './ashfall.js';
 import { ACT1_ITEMS } from './act1_common.js';
@@ -93,6 +93,7 @@ export const ITEMS = {
     ...NEW_ITEMS,
     ...ACT1_ITEMS,
 };
+Object.assign(itemNames, ITEMS);
 
 export const SCENES = {
     /* ================= DAY 1 ================= */

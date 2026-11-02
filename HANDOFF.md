@@ -181,6 +181,12 @@ The bible and the contract between the four part files are at the top of `js/sto
 - **Yuki's forms** (`YUKI_FORMS` in game.js): cat; tiger-sized root-kin from realm 2 (Core Formation); humanoid (white hair, cat ears, black dress) from realm 7 (Nascent Soul). Awakening scenes `yuki_tiger_awaken` / `yuki_human_awaken` after the breakthrough; then "Yuki: change form." on hubs (`yuki_form`). Art: `yukiCat`/`yukiTiger`/`yukiHuman` in clamp2.js.
 - **Tune after v0.7:** `act1_tune.js` re-picked (ya_brawl 2, root_wyrm 1, guardian 7.5, elder 4.5). Normal-run smart win rates: Ya brawl ~83%, wyrm ~85%, Guardian ~50%, Shen Qiu ~46%.
 
+## v0.7.1 — tidy menus, item caps
+
+- **Ghost menus hidden** (`js/core/story.js`): a plain menu entry (Hunt, Forage, Train…) is hidden when its sub-menu (no `enter`) has nothing left today but a plain "Back" choice. Comes back the next day.
+- **Hammerspace caps** (`game.js`): 99 of every item, 999 of `beast_core` and `spirit_grass` (`BIG_CAP`). `addItem` stops at the cap and the turn shows "Hammerspace: X is full". A gathering choice whose items are all at cap is hidden (items read from its `do` source), unless that would empty the scene. Old saves above a cap keep their pieces.
+- Test: 200 walks with every common item at its cap (no dead ends).
+
 ## Next steps (proposed, not built)
 
 1. **Act 2** (open).

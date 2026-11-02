@@ -4,7 +4,7 @@
  *             to | to(g), fail?, do?(g, r) → lines, failDo?(g, r) → lines, combat?: encounter, xp?: false }.
  * A check pays standard XP (25% on a fail) unless xp: false. Pure — no DOM.
  */
-import { rollCheck, awardXp, spendQi, advance, ensureBars, actingCheck, actingName, instantWin } from './game.js';
+import { rollCheck, awardXp, spendQi, advance, ensureBars, actingCheck, actingName, instantWin, itemFull, takeCapNotes, itemNames } from './game.js';
 import { STOMP, degreeForChoice } from '../story/power.js';
 
 const ONE_MOVE = 1000; // virtual choice index offset: "End it in one move."
@@ -29,12 +29,47 @@ export function choiceTag(g, c) {
     return bits.join(' · ');
 }
 
+/** The common items a choice's `do` adds (read once from its source; quoted ids in addItem(g, …, n > 0)). */
+const givesCache = new WeakMap();
+function gives(c) {
+    if (!c.do) return [];
+    if (!givesCache.has(c)) {
+        const ids = new Set();
+        for (const m of c.do.toString().matchAll(/addItem\(g,\s*([^,]+?),\s*(-?)/g)) if (!m[2]) for (const q of m[1].matchAll(/'([a-z_]+)'/g)) ids.add(q[1]);
+        givesCache.set(c, [...ids]);
+    }
+    return givesCache.get(c);
+}
+/** A gathering choice whose every item is already at its cap. */
+const allFull = (g, c) => { const ids = gives(c); return ids.length > 0 && ids.every((id) => itemFull(g, id)); };
+const shown = (g, c) => !c.show || c.show(g);
+/** Choices still worth showing: hide full-stock gathering, unless that would leave nothing at all. */
+function visible(g, s) {
+    const list = (s.choices || []).map((c, i) => ({ c, i })).filter(({ c }) => shown(g, c));
+    const kept = list.filter(({ c }) => !allFull(g, c));
+    return kept.length ? kept : list;
+}
+/** A plain "go back" choice: no effects, leads to `home`. */
+const isBack = (g, c, home) => !c.do && !c.check && !c.combat && !c.qi && !c.req && (typeof c.to === 'function' ? c.to(g) : c.to) === home;
+/**
+ * A ghost: a plain menu entry (Hunt, Forage, Train…) whose sub-menu has nothing left today but "Back".
+ * Only for sub-menus without an enter() (so nothing is skipped by hiding them).
+ */
+function isGhost(g, scenes, s, c) {
+    if (typeof c.to !== 'string' || c.to === s.id || c.do || c.check || c.combat || c.qi) return false;
+    const t = scenes[c.to];
+    if (!t || t.enter || !t.choices?.length) return false;
+    const inner = visible(g, t);
+    return inner.length > 0 && inner.every(({ c: x }) => isBack(g, x, s.id));
+}
+
 /** What the UI shows for the current scene. */
 export function sceneView(g, scenes) {
     const s = currentScene(g, scenes);
-    const choices = (s.choices || [])
-        .map((c, i) => ({ c, i }))
-        .filter(({ c }) => !c.show || c.show(g))
+    let vis = visible(g, s);
+    const noGhosts = vis.filter(({ c }) => !isGhost(g, scenes, s, c));
+    if (noGhosts.length) vis = noGhosts;
+    const choices = vis
         .map(({ c, i }) => {
             let reason = c.req ? c.req(g) : true;
             if (reason === true && c.qi && g.james.qi < c.qi) reason = `needs ${c.qi} Qi`;
@@ -103,7 +138,9 @@ export function choose(g, scenes, index) {
         if (c.xp !== false) lines.push(...awardXp(g, c.check.skill, c.check.band || 'standard', { fail: !ok }));
     }
     if (c.time) lines.push(...advance(g, c.time));
+    takeCapNotes();
     if (ok && c.do) lines.push(...(c.do(g, roll) || []));
+    for (const id of new Set(takeCapNotes())) lines.push(`Hammerspace: ${itemNames[id]?.name || id} is full — the rest stays behind.`);
     if (!ok && c.failDo) lines.push(...(c.failDo(g, roll) || []));
     if (c.combat && ok) {
         return { lines, roll, combat: c.combat };
