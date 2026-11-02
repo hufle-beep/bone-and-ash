@@ -305,22 +305,18 @@ Ya laughs so hard she has to put her face in her bedroll. Mei Lin tells her to b
 
 ${pick(d, 'Somewhere under the revulsion, you\'re angry. These are eating your people\'s house.', 'They\'re eating your people\'s house. You\'re going to have words.', 'They\'re eating your people\'s house, and you are, it turns out, the landlord.')}`,
         win: {
-            2: (g) => (g.scene === 'ring_won'
-                ? `It's brief and thorough. When it's over, the fourth ring is quiet and full of pale bits of grub. Behind the shelf they were eating, grown into the wall, there's a hollow with a cup in it — a plain wooden cup, a thousand years old, with a name burned into the base in a script you learned before you could walk.
+            2: (g) => `It's brief and thorough. When it's over, the fourth ring is quiet and full of pale bits of grub. Behind the shelf they were eating, grown into the wall, there's a hollow with a cup in it — a plain wooden cup, a thousand years old, with a name burned into the base in a script you learned before you could walk.
 
 *Tamsin.*
 
-You stand there holding it for longer than you'd like anyone to see. Ya sees. She doesn't say anything. She just bumps your shoulder with hers, hard, on the way past, which may be the kindest thing she has ever done.`
-                : 'It\'s brief and thorough. The grubs go back into the wood in pieces.'),
-            3: (g) => (g.scene === 'ring_won'
-                ? `You put your palm flat on the wall, and the tree — dead, but not deaf — remembers what it was for, just for a moment. The grey wood clenches like a fist around every grub in it. When it opens again, the fourth ring is quiet and very, very clean.
+You stand there holding it for longer than you'd like anyone to see. Ya sees. She doesn't say anything. She just bumps your shoulder with hers, hard, on the way past, which may be the kindest thing she has ever done.`,
+            3: (g) => `You put your palm flat on the wall, and the tree — dead, but not deaf — remembers what it was for, just for a moment. The grey wood clenches like a fist around every grub in it. When it opens again, the fourth ring is quiet and very, very clean.
 
 Behind the shelf they were eating, grown into the wall, there's a hollow with a cup in it — a plain wooden cup, a thousand years old, with a name burned into the base in a script you learned before you could walk.
 
 *Tamsin.*
 
-You stand there holding it for longer than you'd like anyone to see. Ya sees. She doesn't say anything about the wall, either, which for Ya is restraint on a heroic scale. She just bumps your shoulder with hers, hard, on the way past, which may be the kindest thing she has ever done.`
-                : 'You ask the wood to close. It does. The grubs are not consulted.'),
+You stand there holding it for longer than you'd like anyone to see. Ya sees. She doesn't say anything about the wall, either, which for Ya is restraint on a heroic scale. She just bumps your shoulder with hers, hard, on the way past, which may be the kindest thing she has ever done.`,
         },
         one: () => 'A palm on the wall. The dead tree remembers, for one heartbeat, how to make a fist.',
     },

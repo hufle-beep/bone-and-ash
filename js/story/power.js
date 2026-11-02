@@ -55,7 +55,8 @@ export function prepare(g, enc) {
     const enemies = lfScale(g, enc.enemies);
     const degree = degreeOf(g, enemies);
     const st = STOMP[enc.id];
-    const intro = st?.posture ? st.posture(g, degree) : enc.intro;
+    const keepTail = enc.intro?.includes('Ashfall does not kneel') ? ' Behind you, Ashfall does not kneel.' : '';
+    const intro = st?.posture ? st.posture(g, degree) + keepTail : enc.intro;
     return { ...enc, enemies, degree, intro, _prepared: true };
 }
 combatHooks.before = prepare;

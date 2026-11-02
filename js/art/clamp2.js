@@ -676,27 +676,36 @@ export function yuki(x, y, s = 1, face = 1, form = YUKI_FORM) {
     return yukiCat(x, y, s, face);
 }
 
-/** The great form: a root-kin the size of a Bengal tiger, standing in profile. Unit space: feet at 0, ~62 tall. */
+/** The great form: a root-kin the size of a Bengal tiger, lying like a sphinx, head up, tail curled round. Ground at 0. */
 export function yukiTiger(x, y, s = 1, face = 1) {
-    const k = s * 0.9;
-    let c = `<ellipse cx="0" cy="0.6" rx="46" ry="2" fill="${K}" opacity="0.4"/>`;
-    // tail: long S-curve behind
-    const tail = 'M-34 -38 C-48 -40 -56 -30 -54 -18 C-52 -8 -60 -2 -66 -6';
-    c += `<path d="${tail}" ${st(6.4)} fill="none"/><path d="${tail}" ${st(4.6, W)} fill="none"/><path d="M-62 -4.6 C-64 -6 -66 -8 -66 -6" ${st(4.4)} fill="none"/>`;
-    // far legs (grey), then body, near legs
-    c += `<path d="M-26 -30 L-28 -1 L-21 -1 L-19 -26 Z M18 -30 L20 -1 L27 -1 L26 -28 Z" fill="${G2}" ${st(0.8)}/>`;
-    const body = 'M-36 -40 C-38 -50 -26 -56 -10 -55 C6 -54 18 -54 28 -50 C34 -48 38 -44 38 -38 C38 -32 34 -28 28 -27 L-30 -26 C-36 -28 -38 -34 -36 -40 Z';
-    c += `<path d="${body}" fill="${W}" ${st(1)}/>`;
-    // brush stripes, a few, like ink flicks
-    c += [[-24, -54, -20, -44], [-14, -55, -12, -45], [-4, -55, -3, -46], [8, -54, 6, -45], [-30, -46, -24, -40]].map(([a, b, cc, d]) => `<path d="M${a} ${b} Q${(a + cc) / 2 + 2} ${(b + d) / 2} ${cc} ${d}" ${st(1.4)} fill="none"/>`).join('');
-    c += `<path d="M-30 -34 L-32 -1 L-24 -1 L-22 -28 Z M22 -32 L24 -1 L31 -1 L31 -30 Z" fill="${W}" ${st(0.9)}/>`;
-    c += `<path d="M-32 -1 q-1 -2 1 -3 M-26 -1 q0 -2 1 -3 M24 -1 q-1 -2 1 -3 M29 -1 q0 -2 1 -3" ${st(0.5)} fill="none"/>`;
-    // neck and head
-    c += `<path d="M26 -50 C30 -60 36 -66 44 -66 C54 -66 60 -60 60 -52 C60 -46 56 -42 50 -41 C46 -40 40 -40 36 -38 Z" fill="${W}" ${st(1)}/>`;
-    c += `<path d="M40 -64 L38 -76 L46 -67 Z M50 -66 L54 -77 L57 -64 Z" fill="${W}" ${st(0.9)}/><path d="M40.6 -66 L39.6 -73 L44 -67.6 Z M51.4 -66.6 L53.6 -73.6 L55.4 -65.4 Z" fill="${G2}"/>`;
-    c += `<path d="M47 -57 Q51 -60 55 -57 Q51 -55.6 47 -57 Z" fill="${GOLD}" ${st(0.6)}/><path d="M51 -59.2 L51 -55.6" ${st(0.9)}/><path d="M46 -58.4 L56 -58.6" ${st(1)}/>`;
-    c += `<path d="M59 -50 L61 -50 L60 -48.6 Z" fill="${K}"/><path d="M60 -48.6 Q58 -46 55 -46.6" ${st(0.6)} fill="none"/><path d="M57 -49 L72 -52 M57 -48 L72 -47 M56 -47 L70 -43" ${st(0.3)}/>`;
-    c += `<path d="M30 -52 Q36 -44 42 -42" ${st(2.4, RED)} fill="none"/><path d="M38 -44 L41 -40 L38 -36 L35 -40 Z" fill="${RED}" ${st(0.5)}/><path d="M37.6 -36 L37 -29 M38.6 -36 L39 -30" ${st(0.7, RED)}/>`;
+    const k = s * 0.95;
+    let c = `<ellipse cx="-4" cy="0.6" rx="62" ry="2.4" fill="${K}" opacity="0.4"/>`;
+    // tail sweeping round the front along the ground, tip curling up
+    const tail = 'M-56 -10 C-70 -4 -66 2 -40 1.5 C-10 1 6 1 14 -2 C18 -4 18 -9 14 -10';
+    c += `<path d="${tail}" ${st(7.4)} fill="none"/><path d="${tail}" ${st(5.6, W)} fill="none"/>`;
+    // body: long low back, round haunch, deep chest
+    const body = 'M24 -26 C20 -36 14 -42 4 -43 C-14 -44 -30 -42 -42 -38 C-54 -34 -60 -24 -58 -12 C-56 -4 -50 -1 -40 -1 L14 -1 C24 -1 30 -5 30 -12 C30 -18 28 -22 24 -26 Z';
+    c += `<path d="${body}" fill="${W}" ${st(1.1)}/>`;
+    c += `<path d="M-46 -32 C-38 -26 -34 -16 -36 -4 M-30 -6 C-26 -4 -20 -3 -14 -3" ${st(0.8)} fill="none"/>`;
+    // root-kin markings: a few grey ink flicks along the back and haunch
+    c += [[-34, -41, -30, -33], [-24, -43, -21, -35], [-14, -43.5, -12, -36], [-50, -32, -44, -27], [-54, -22, -47, -20]].map(([a1, b1, c1, d1]) => `<path d="M${a1} ${b1} Q${(a1 + c1) / 2 + 2} ${(b1 + d1) / 2} ${c1} ${d1}" ${st(1.6, G1)} fill="none"/>`).join('');
+    // front legs stretched forward, big paws
+    c += `<path d="M14 -16 C22 -12 34 -8 48 -6 C54 -5.4 56 -2 53 -0.6 L18 -0.6 C12 -2 10 -10 14 -16 Z" fill="${W}" ${st(1)}/>`;
+    c += `<path d="M20 -10 C28 -7 38 -5 46 -3.6 C52 -3 53 -1 50 0 L22 0" ${st(0.8)} fill="none"/><path d="M48 -2.6 l0.4 2.4 M51 -2.6 l0.4 2.4" ${st(0.6)}/>`;
+    // chest ruff
+    c += `<path d="M22 -30 l3 4 l1 -4 l3 5 l1 -4 l2 4" ${st(0.7)} fill="none"/>`;
+    // neck and raised head
+    c += `<path d="M6 -40 C10 -50 18 -58 28 -60 L36 -44 C30 -38 24 -32 22 -28 Z" fill="${W}" ${st(1)}/>`;
+    const head = 'M22 -62 C22 -72 30 -78 39 -78 C48 -78 55 -72 55 -64 C55 -60 58 -57 62 -55 C60 -51 55 -49 50 -49 C44 -48 38 -48 32 -50 C26 -52 22 -56 22 -62 Z';
+    c += `<path d="${head}" fill="${W}" ${st(1.1)}/>`;
+    c += `<path d="M28 -74 L25 -90 L36 -78 Z M42 -78 L47 -93 L52 -75 Z" fill="${W}" ${st(1)}/><path d="M28.6 -76 L27 -86 L33.6 -78 Z M43.6 -78.6 L46.8 -88 L50 -76.4 Z" fill="${G2}"/>`;
+    // half-lidded gold eyes with slits
+    c += `<path d="M36 -66 Q40.6 -69.4 45 -66.6 Q40.6 -64.6 36 -66 Z M47.6 -66.6 Q51 -69.2 54 -66.4 Q51 -64.8 47.6 -66.6 Z" fill="${GOLD}" ${st(0.6)}/><path d="M40.6 -68.2 L40.6 -64.8 M51 -68 L51 -65" ${st(1)}/>`;
+    c += `<path d="M35.4 -67 Q40.6 -70.6 45.6 -67.2 M47.2 -67.4 Q51 -70.4 54.6 -67" ${st(1.4)} fill="none"/>`;
+    // nose, mouth, whiskers
+    c += `<path d="M59.6 -57.6 L62.4 -57.4 L61 -55.6 Z" fill="${K}"/><path d="M61 -55.6 Q59 -52.6 55.6 -53.2" ${st(0.7)} fill="none"/><path d="M57 -56 L76 -60 M57 -55 L77 -54 M56.6 -54 L74 -48.6" ${st(0.35)}/>`;
+    // red cord and knot at the throat
+    c += `<path d="M24 -54 Q31 -46 38 -47" ${st(2.6, RED)} fill="none"/><path d="M33 -48 L36 -44 L33 -40 L30 -44 Z" fill="${RED}" ${st(0.5)}/><path d="M32.6 -40 L32 -33 M33.6 -40 L34 -34" ${st(0.7, RED)}/>`;
     return `<g transform="translate(${f(x)} ${f(y)}) scale(${f(k * face)} ${f(k)})">${c}</g>`;
 }
 

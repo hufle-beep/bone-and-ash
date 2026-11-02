@@ -7,6 +7,9 @@
 import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, clockParts, canBreakThrough, breakthrough, realmName } from '../core/game.js';
 import { forestScale, villageScale, grow, NEW_ITEMS } from './common.js';
 import './power.js';
+import './stomp_prologue.js';
+import './stomp_act1.js';
+import { yukiForms } from '../core/game.js';
 import { WILDS, nightNext } from './wilds.js';
 import { ASHFALL, hubOf, nextEvening } from './ashfall.js';
 import { ACT1_ITEMS } from './act1_common.js';
@@ -846,7 +849,13 @@ ${seen
         ? 'Ashfall watches it go in total silence. Then, one by one, people bow — not to the sky. To you. You would very much prefer they didn\'t.'
         : night ? 'Yuki doesn\'t even open her eyes. Somewhere in the dark, something large decides not to come any closer.' : 'Yuki doesn\'t even open her eyes.'}`;
     },
-    choices: [{ text: 'Get up.', to: (g) => g.flags.bt_return || 'stream' }],
+    choices: [{ text: 'Get up.', to: (g) => {
+        const back = g.flags.bt_return || 'stream';
+        g.flags.yuki_return = back;
+        if (g.james.realm >= 2 && !g.flags.yuki_tiger_seen && SCENES.yuki_tiger_awaken) { g.flags.yuki_tiger_seen = true; return 'yuki_tiger_awaken'; }
+        if (g.james.realm >= 7 && !g.flags.yuki_human_seen && SCENES.yuki_human_awaken) { g.flags.yuki_human_seen = true; return 'yuki_human_awaken'; }
+        return back;
+    } }],
 };
 for (const id of ['stream', 'wilds', 'camp', 'night', 'village', 'ashfall', 'supper', ...B1, ...B2, ...B3, ...B4]) {
     SCENES[id].choices.unshift({
@@ -854,6 +863,12 @@ for (const id of ['stream', 'wilds', 'camp', 'night', 'village', 'ashfall', 'sup
         show: canBreakThrough,
         do: (g) => { g.flags.bt_return = g.scene; return []; },
         to: 'breakthrough',
+    });
+    SCENES[id].choices.push({
+        text: 'Yuki: change form.',
+        show: (g) => yukiForms(g).length > 1 && !!SCENES.yuki_form,
+        do: (g) => { g.flags.yuki_return = g.scene; return []; },
+        to: (g) => (SCENES.yuki_form ? 'yuki_form' : g.scene),
     });
 }
 
