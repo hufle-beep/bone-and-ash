@@ -28,12 +28,12 @@ const husks = (g, win, lose) => encounter(g, {
 const rootThings = (g) => encounter(g, {
     id: 'root_husks', tier: 'region', win: 'roots_won', lose: 'roots_lost', flee: 'heart_hub',
     intro: 'Down here, where the light never came, the rot has had four hundred years to grow ambitious. It has arms now. Several.',
-    enemies: [{ name: 'Root-husk', hp: 7, dc: 2.5, atk: 3, dmg: 5 }, { name: 'Hollow-grub', hp: 4, dc: 2, atk: 2.5, dmg: 4 }],
+    enemies: [{ name: 'Root-husk', hp: 6, dc: 2, atk: 2, dmg: 4 }, { name: 'Hollow-grub', hp: 4, dc: 2, atk: 2, dmg: 4 }],
 });
 const guardianFight = (g) => encounter(g, {
     id: 'guardian', tier: 'boss', win: 'guardian_won', lose: 'guardian_lost',
     intro: 'The guardian unfolds: grown wood and old white bone, three times your height, and somewhere inside it a voice that is still, faintly, singing.',
-    enemies: [{ name: 'The Gardeners\' Guardian', hp: g.flags.guardian_weak ? 12 : 15, dc: 3, atk: 4, dmg: 6, dr: 1 }],
+    enemies: [{ name: 'The Gardeners\' Guardian', hp: g.flags.guardian_weak ? 10 : 12, dc: 3, atk: 3, dmg: 5, dr: 1 }],
 });
 
 /** Morning inside the trunk (also handles the sleep). */
