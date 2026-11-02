@@ -6,6 +6,7 @@
  */
 import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, clockParts, canBreakThrough, breakthrough, realmName } from '../core/game.js';
 import { forestScale, villageScale, grow, NEW_ITEMS } from './common.js';
+import './power.js';
 import { WILDS, nightNext } from './wilds.js';
 import { ASHFALL, hubOf, nextEvening } from './ashfall.js';
 import { ACT1_ITEMS } from './act1_common.js';

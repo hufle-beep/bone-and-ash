@@ -4,7 +4,10 @@
  *             to | to(g), fail?, do?(g, r) → lines, failDo?(g, r) → lines, combat?: encounter, xp?: false }.
  * A check pays standard XP (25% on a fail) unless xp: false. Pure — no DOM.
  */
-import { rollCheck, awardXp, spendQi, advance, ensureBars, actingCheck, actingName } from './game.js';
+import { rollCheck, awardXp, spendQi, advance, ensureBars, actingCheck, actingName, instantWin } from './game.js';
+import { STOMP, degreeForChoice } from '../story/power.js';
+
+const ONE_MOVE = 1000; // virtual choice index offset: "End it in one move."
 
 const asText = (v, g) => (typeof v === 'function' ? v(g) : v);
 
@@ -37,7 +40,21 @@ export function sceneView(g, scenes) {
             if (reason === true && c.qi && g.james.qi < c.qi) reason = `needs ${c.qi} Qi`;
             return { index: i, label: asText(c.text, g), tag: choiceTag(g, c), disabled: reason !== true, reason: reason === true ? '' : reason };
         });
-    return { id: s.id, title: asText(s.title, g) || '', art: asText(s.art, g), place: asText(s.place, g), text: asText(s.text, g), choices, end: !!s.end };
+    // a crushing power gap offers the one-move finish next to the fight choice
+    for (let k = choices.length - 1; k >= 0; k--) {
+        const c = s.choices[choices[k].index];
+        if (c.combat && !choices[k].disabled && degreeForChoice(g, c.combat) >= 3) {
+            choices.splice(k + 1, 0, { index: ONE_MOVE + choices[k].index, label: 'End it in one move.', tag: 'fight · crushing', disabled: false, reason: '' });
+        }
+    }
+    // after a lopsided win, the win scene reads differently
+    let text = asText(s.text, g);
+    const lw = g.lastWin;
+    if (lw && lw.next === s.id && lw.degree >= 2) {
+        const w = STOMP[lw.id]?.win?.[lw.degree];
+        if (w) text = typeof w === 'function' ? w(g) : w;
+    }
+    return { id: s.id, title: asText(s.title, g) || '', art: asText(s.art, g), place: asText(s.place, g), text, choices, end: !!s.end };
 }
 
 function go(g, scenes, to) {
@@ -56,6 +73,21 @@ function go(g, scenes, to) {
  */
 export function choose(g, scenes, index) {
     const s = currentScene(g, scenes);
+    g.lastWin = null;
+    if (index >= ONE_MOVE) {
+        const c = (s.choices || [])[index - ONE_MOVE];
+        if (!c || !c.combat) throw new Error('No fight to finish');
+        const r = instantWin(g, c.combat(g));
+        const st = STOMP[r.enc.id];
+        const lines = [];
+        if (st?.posture) lines.push(st.posture(g, 3));
+        lines.push(st?.one ? st.one(g) : 'One move. It is over before it starts.', ...r.lines);
+        const keep = g.lastWin;
+        lines.push(...go(g, scenes, r.next));
+        g.lastWin = keep;
+        g.log.push({ at: g.minutes, scene: g.scene, lines: lines.slice(0, 12) });
+        return { lines, roll: null, combat: null };
+    }
     const c = (s.choices || [])[index];
     if (!c) throw new Error(`No choice ${index} in ${s.id}`);
     if (c.show && !c.show(g)) throw new Error('Choice not available');

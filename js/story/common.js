@@ -10,8 +10,8 @@ export const daily = (key) => (g) => !g.flags[`${key}@${day(g)}`];
 export const markDaily = (g, key) => { g.flags[`${key}@${day(g)}`] = true; };
 
 /** Days of training beyond the original pace: 0 on the old route, up to 2 in the forest and 2 in Ashfall. */
-export const forestScale = (g) => Math.max(0, Math.min(2, (g.flags.forest_day || 1) - 1));
-export const villageScale = (g) => Math.max(0, Math.min(2, (g.flags.vday || 1) - 1));
+export const forestScale = (g) => g.flags.longforest ? 0 : Math.max(0, Math.min(2, (g.flags.forest_day || 1) - 1));
+export const villageScale = (g) => g.flags.longforest ? 0 : Math.max(0, Math.min(2, (g.flags.vday || 1) - 1));
 
 /**
  * An enemy grown by s extra days of training: HP ×(1 + hp·s), DC to hit +dc·s, attack +atk·s (to the half point).

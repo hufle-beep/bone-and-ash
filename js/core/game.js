@@ -187,6 +187,9 @@ export function clockParts(minutes) {
     const m = ((minutes % 1440) + 1440) % 1440;
     return { day, hh: Math.floor(m / 60), mm: m % 60 };
 }
+export function clockLabelG(g, minutes = g.minutes) {
+    return g.flags?.lf_active ? 'The Long Forest' : clockLabel(minutes);
+}
 export function clockLabel(minutes) {
     const p = clockParts(minutes);
     return `Day ${p.day}, ${String(p.hh).padStart(2, '0')}:${String(p.mm).padStart(2, '0')}`;
@@ -332,13 +335,37 @@ function dmgRoll(g, [lo, hi]) {
     return lo + ((d6(g) - 1) % (hi - lo + 1));
 }
 
-export function startCombat(g, enc) {
+/** Story-layer hooks: `before(g, enc)` may adjust an encounter (Long Forest scaling, posture text, degree). */
+export const combatHooks = { before: null };
+
+/** Yuki's forms: 'cat' always; 'tiger' (a root-kin the size of a Bengal tiger) from Core Formation; 'human' from Nascent Soul. */
+export const YUKI_FORMS = {
+    cat: { label: 'cat', hit: 0, dmg: [1, 2], name: 'Yuki' },
+    tiger: { label: 'great root-kin', hit: 2, dmg: [3, 6], name: 'Yuki (great form)' },
+    human: { label: 'human form', hit: 1, dmg: [2, 4], name: 'Yuki' },
+};
+export const yukiForms = (g) => ['cat', ...(g.yuki.realm >= 2 ? ['tiger'] : []), ...(g.yuki.realm >= 7 ? ['human'] : [])];
+export const yukiForm = (g) => (yukiForms(g).includes(g.yuki.form) ? g.yuki.form : 'cat');
+
+/** Win a fight outright (the one-move finish): XP and kills as a normal win, no combat screen. */
+export function instantWin(g, enc) {
+    const e = combatHooks.before ? (combatHooks.before(g, enc) || enc) : enc;
+    g.stats.kills += e.enemies.length;
+    const xp = awardXp(g, 'Convergence Use', e.band || 'standard').concat(awardYukiFightXp(g, e.band || 'standard'));
+    g.lastWin = { id: e.id, degree: e.degree || 3, next: e.win };
+    advance(g, 1);
+    return { lines: xp, next: e.win, enc: e };
+}
+
+export function startCombat(g, enc0) {
+    const enc = combatHooks.before ? (combatHooks.before(g, enc0) || enc0) : enc0;
     g.combat = {
         id: enc.id,
         round: 1,
         win: enc.win,
         lose: enc.lose,
         flee: enc.flee || null,
+        degree: enc.degree || 1,
         band: enc.band || 'standard',
         bladeFormed: false,
         enemies: enc.enemies.map((e) => ({ ...e, hpMax: e.hp, staggered: false })),
@@ -380,11 +407,13 @@ export function combatStep(g, actionId, targetIdx = 0) {
     // Yuki
     const yt = c.enemies.find((e) => e.hp > 0);
     if (yt && g.yuki.hp > 0) {
-        const yv = skillCheck(g.yuki.fight);
+        const form = YUKI_FORMS[yukiForm(g)];
+        const yv = skillCheck(g.yuki.fight) + form.hit;
         const die = d6(g);
         const hit = yv + die >= yt.dc;
-        lines.push(`Yuki: Fight ${yv} + 🎲${die} vs DC ${yt.dc} — ${hit ? 'claws find a mark' : 'a hiss and a swipe at air'}`);
-        if (hit) { const dmg = Math.max(0, 1 + (die >= 5 ? 1 : 0) - (yt.dr || 0)); yt.hp -= dmg; lines.push(`  ${yt.name} takes ${dmg}.`); }
+        const verb = { cat: ['claws find a mark', 'a hiss and a swipe at air'], tiger: ['a paw the size of a shovel lands', 'jaws close on air'], human: ['a white blur and a strike', 'a sidestep, nothing more'] }[yukiForm(g)];
+        lines.push(`${form.name}: Fight ${yv} + 🎲${die} vs DC ${yt.dc} — ${hit ? verb[0] : verb[1]}`);
+        if (hit) { const [lo, hi] = form.dmg; const dmg = Math.max(0, lo + ((die - 1) % (hi - lo + 1)) - (yt.dr || 0)); yt.hp -= dmg; lines.push(`  ${yt.name} takes ${dmg}.`); }
     }
     // enemies
     for (const e of c.enemies) {
@@ -414,6 +443,7 @@ export function combatStep(g, actionId, targetIdx = 0) {
     if (down) {
         g.stats.kills += c.enemies.length;
         const xp = awardXp(g, 'Convergence Use', c.band).concat(awardYukiFightXp(g, c.band));
+        g.lastWin = { id: c.id, degree: c.degree || 1, next: c.win };
         lines.push('', 'It is over.', ...xp);
         const next = c.win;
         g.combat = null;
