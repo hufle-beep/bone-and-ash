@@ -37,7 +37,7 @@ for (let run = 0; run < 2000; run++) {
         const r = choose(g, SCENES, pick.index);
         if (r.combat) {
             startCombat(g, r.combat(g));
-            for (let t = 0; t < 60 && g.combat; t++) {
+            for (let t = 0; t < 200 && g.combat; t++) {
                 const acts = Object.keys(COMBAT_ACTIONS);
                 const id = g.combat.id;
                 const smart = run % 2 === 0;

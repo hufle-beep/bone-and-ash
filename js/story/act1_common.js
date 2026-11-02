@@ -23,6 +23,7 @@
  */
 import { clockParts, bumpRel, sleepUntil } from '../core/game.js';
 import { forestScale, villageScale, grow, day, hour } from './common.js';
+import { TUNE } from './act1_tune.js';
 
 export { day, hour };
 
@@ -48,7 +49,9 @@ export function encounter(g, { id, intro, enemies, win, lose, flee = null, tier 
     const s = a1Scale(g);
     const growth = { small: { hp: 0.12, dc: 0.4, atk: 0.5 }, region: { hp: 0.12, dc: 0.4, atk: 0.5 }, boss: { hp: 0.1, dc: 0.35, atk: 0.45 }, climax: { hp: 0.08, dc: 0.35, atk: 0.45 } }[tier];
     const band = { small: 'standard', region: 'challenging', boss: 'major', climax: 'major' }[tier];
-    const list = enemies.map((e) => grow(e, s, growth));
+    const t = TUNE[id] || 0;
+    const half = (n) => Math.round(n * 2) / 2;
+    const list = enemies.map((e) => grow(e, s, growth)).map((e) => (t ? { ...e, hp: Math.round(e.hp * (1 + 0.1 * t)), dc: half(e.dc + t), atk: half(e.atk + t) } : e));
     const a = allies(g);
     if (a && list[0]) list[0] = { ...list[0], hp: Math.max(3, list[0].hp - 2 * a) };
     return { id, intro, band, enemies: list, win, lose, flee };
@@ -56,8 +59,8 @@ export function encounter(g, { id, intro, enemies, win, lose, flee = null, tier 
 
 /** Romance helpers. */
 export const rel = (g, who) => g.rel[who] || { f: 0, a: 0 };
-export const likesMei = (g) => !!g.flags.romance || rel(g, 'Mei Lin').a >= 15;
-export const likesYa = (g) => !!g.flags.ya_romance || rel(g, 'Ya').a >= 15;
+export const likesMei = (g) => !!g.flags.romance || rel(g, 'Mei Lin').a >= 60;
+export const likesYa = (g) => !!g.flags.ya_romance || rel(g, 'Ya').a >= 85;
 /** The throuple track: 0 none … 4 together. Advances only when James is drawn to both. */
 export const trio = (g) => g.flags.trio || 0;
 export function trioStep(g, to) { if (likesMei(g) && likesYa(g) && trio(g) < to) g.flags.trio = to; return []; }

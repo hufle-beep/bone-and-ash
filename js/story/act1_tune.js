@@ -1,0 +1,2 @@
+/** Act 1 fight tuning (set by simulation, 500 full playthroughs per round): per encounter id, t raises DC and attack by t and HP by 10%·t. */
+export const TUNE = { ya_brawl: 2.5, rt_brawl: 5.5, guardian: 6.5, elder: 4.5, root_wyrm: 1.5, rot_ape: 1.5, root_husks: 5, sect_watcher: 2, palisade_wolf: 1.5, bone_elk: 1.5, mire_serpent: 3, drowned: 2, cinder_hawks: 2.5, night_drowned: 2, night_hawks: 2.5, night_serpent: 3, night_wolves: 2, husks: 3.5, rt_wolves: 2, rt_serpent: -1 };

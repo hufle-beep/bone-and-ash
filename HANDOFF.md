@@ -1,6 +1,6 @@
 # Bone and Ash — handoff (read this first in a new chat)
 
-**Saved:** 2026-11-02 (Europe/Budapest). **Version:** prologue 0.5.0 (`sw.js` VERSION `bone-ash-0.5.0`). **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
+**Saved:** 2026-11-02 (Europe/Budapest). **Version:** 0.6.0 — prologue + Act 1 (`sw.js` VERSION `bone-ash-0.6.0`). 271 scenes. **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
 Built in the SillyTavern chat as a spin-off. That chat stays for SillyTavern; this game continues in its own chat.
 
 ## What it is
@@ -157,6 +157,18 @@ The **long route** (v0.4.0, flag `long`, set on the first forest night) runs 7 d
 - **Art IDs** are made unique per scene key (`sk-<key>`, `gw-<key>` …), so several images can share a page.
 - **v0.5 look (`STYLE = 'clamp2'`, `js/art/clamp2.js`):** redrawn from scratch after the CLAMP references, on the public-domain paintings (`art/bg`). `figure(kind, x, y, s, {face, sway, sword, spear, sit, shut})` with kinds mei, woman, mother, james, sect, lu, man, thug, elder; `yuki()`; close-ups `meiCloseUp()` (three-quarter view) and `yukiCloseUp()`; `shoji()` interiors with butterfly shadows; `smoke()`, `butterfly()`, `curl()`, `crescent()`. Scene table `SCENES2` in art.js (background image, wash, night darkness, interior). Older looks (`clamp`, `ink`) still switchable.
 - **Art direction (Gábor, 2026-11-02): imitate CLAMP's *xxxHolic* style as closely as possible** — stark black and white, vertical screentone, elongated elegant figures, long cascading hair in strands, narrow half-lidded eyes, ornate jewellery, curling cloud (xiangyun) motifs, lotus. Style only: never copy a CLAMP character or page. Palette for it: black, white, greys, red (Gábor OK'd greys 2026-11-02). Full-body figures: `js/art/figures-clamp.js` (`clampPerson`, `clampCat`; ~9 heads tall, rope hair, hanging sleeves, robes with grey cloud swirls and a red crescent). `STYLE` in art.js: `'clamp'` (line art over screentone) or `'ink'` (the v0.2.0 ink-wash look over paintings). He also wants the tone more serious later.
+
+## Act 1 — "The Hearth Tree" (v0.6.0, Days 8–21, 182 scenes)
+
+The bible and the contract between the four part files are at the top of `js/story/act1_common.js` (cast, tone, lore, entry/exit ids, helpers, art keys). The epilogue now continues with "Act 1: The Hearth Tree." → `fo_start`.
+- **Part 1, Fallout** (`act1_fallout.js`, 40 scenes, Days 8–10): the Sect's answer by prologue ending (letter / envoy / Lu Han / ultimatum) → Outer Elder Shen Qiu named for Day 21; hub `fo_ashfall` (palisade, council, drill, clinic, Mei Lin, mother); Ya arrives Day 9 (optional brawl `ya_brawl`); Day 10 the plan, Ya's price, Mei Lin insists; depart.
+- **Part 2, Into the Blackroot** (`act1_blackroot.js`, 59 scenes, Days 11–15): Root Road (bone-elk, root-wyrm boss), Drowned Wood (drowned dead, mire serpent, hot spring), Ashen Hills (cinder hawks, rot-ape boss); camp nights with random events; the triangle (`trio` 2–3), Ya romance (`ya_romance`).
+- **Part 3, The Heart** (`act1_heart.js`, 38 scenes, Days 16–18): inside the dead Hearth Tree; the seed-ship *Patient Root*, Head Gardener Wren Aldous's log (the Crimson Lotus founder cut out the tree's heart ~400 years ago; since then the Qi is poisoned); the Guardian (fight or calm with Convergence); seed-sliver.
+- **Part 4, Return** (`act1_return.js`, 45 scenes, Days 19–21): the road home, planting the seed (a singing grove), the night of Day 20 (throuple if `likesMei && likesYa && trio ≥ 3`, else single romance or none), Shen Qiu on Day 21: duel / parley / show him the truth → `a1_outcome` victory / accord / revelation / taken → `a1_end`.
+- **Ya** (27): the feral huntress; crude, funny, aggressive flirt, easily offended, picks fights, open to sharing; second romance; she wears down Mei Lin's resistance if James is drawn to both. Romance always fades to black (Claude's limit).
+- **Attraction:** `likesMei` = prologue romance or Mei Lin affection ≥ 60; `likesYa` = `ya_romance` or Ya affection ≥ 85. Random-play outcomes: throuple ~39%, Ya ~40%, Mei Lin ~16%, none ~2%.
+- **Fights:** `encounter()` in act1_common; `a1Scale` is 0 and every fight is tuned in absolute terms by `js/story/act1_tune.js` (per id, t raises DC and attack by t and HP by 10%·t), set by 7 rounds of 500 full-game simulations. Targets (smart combat, random story choices): small ~93%, region bosses ~80%, Ya brawl ~80%, Guardian ~55%, Shen Qiu ~40%. James grows a lot during the act (GU check ~3.6 at Day 8 → ~7.6 at Day 21).
+- **Tests:** `node tests/part.test.mjs <fallout|blackroot|heart|return>` tests one part alone; `tests/story.test.mjs` runs 2,000 full games (step cap 2,500, 200 combat rounds).
 
 ## Next steps (proposed, not built)
 
