@@ -4,7 +4,7 @@
  * corpses of their rivals, and where Heaven answers every breakthrough with lightning. James needs none of it.
  * That is going to be a problem — for them.
  */
-import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, clockParts } from '../core/game.js';
+import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, clockParts, canBreakThrough, breakthrough, realmName } from '../core/game.js';
 import { forestScale, villageScale, grow, NEW_ITEMS } from './common.js';
 import { WILDS, nightNext } from './wilds.js';
 import { ASHFALL, hubOf, nextEvening } from './ashfall.js';
@@ -762,6 +762,58 @@ function cookMealMorning(g) {
 }
 
 Object.assign(SCENES, WILDS, ASHFALL);
+
+/* ---------- breakthrough: offered at calm moments whenever Saturation is 100% ---------- */
+const VILLAGE_SCENES = ['village', 'ashfall', 'supper'];
+SCENES.breakthrough = {
+    id: 'breakthrough', title: (g) => realmName(g.james.realm), art: 'tribulation', place: (g) => g.location,
+    enter: (g) => {
+        const r = breakthrough(g);
+        if (VILLAGE_SCENES.includes(g.flags.bt_return)) g.flags.sky_witness = (g.flags.sky_witness || 0) + 1;
+        if (r.ok && r.realm === 1) g.flags.foundation_day = clockParts(g.minutes).day;
+        return r.ok ? r.lines : [];
+    },
+    text: (g) => {
+        const seen = VILLAGE_SCENES.includes(g.flags.bt_return);
+        if (g.james.realm === 1) {
+            return `You sit, and you let the loop close.
+
+Saturation has been pressing at the inside of you for a day like a held breath, and now you let it go — not out, but *down*, into the foundations. The Ouroboros Axiom turns once, slowly, like a great wheel finding its rest. Everything you've eaten from this world's poisoned Qi, composted, made clean, settles into you like bedrock.
+
+Then the sky notices.
+
+Clouds come from nowhere: black, low, piling over you, humming with a sound you feel in your back teeth. Lightning walks around inside them, looking. This is the thing Mei Lin told you about. The Heaven that burns cultivators clean. It has come to burn you.
+
+It looks.
+
+It looks for a long time.
+
+And then — you would swear to this in any court — the storm sort of *shrugs*. There's nothing impure to burn. Nothing to punish. A single bolt drops, wanders down to the ground beside you, fizzles out in the moss with a sound like a disappointed sigh, and the clouds come apart and drift away in embarrassed directions.
+
+"Huh," you say.
+
+Yuki, who rose with you — you felt her meridians widen in the same breath as yours — opens one eye, sees the clear sky, and goes back to sleep.
+
+${seen ? 'Ashfall saw it. Every soul in the village was standing in the street, looking up at a tribulation that came, stared at the stranger, and *left*. Nobody says anything. Old Wen, in his doorway, very slowly takes his pipe out of his mouth. Somewhere, you suspect, someone is already running up the road to the Crimson Lotus.' : 'Nobody saw it but the trees. Out here, you suspect, that\'s the best kind of miracle.'}
+
+*Foundation.* Mortal Vessel no longer. You feel heavier, and steadier, and exactly the same amount of sarcastic.`;
+        }
+        return `The loop closes again, one rung higher. ${realmName(g.james.realm)}.
+
+The sky tries again, as the sky apparently must: clouds, humming, lightning looking for something to burn. It finds nothing. It leaves faster this time, as if it's learning.
+
+${seen ? 'Ashfall watches it go. Nobody pretends any more that you are an ordinary stranger.' : 'Yuki doesn\'t even open her eyes.'}`;
+    },
+    choices: [{ text: 'Get up.', to: (g) => g.flags.bt_return || 'stream' }],
+};
+for (const id of ['stream', 'wilds', 'camp', 'night', 'village', 'ashfall', 'supper']) {
+    SCENES[id].choices.unshift({
+        text: (g) => `Break through to ${realmName(g.james.realm + 1)}. (Saturation 100%.)`,
+        show: canBreakThrough,
+        do: (g) => { g.flags.bt_return = g.scene; return []; },
+        to: 'breakthrough',
+    });
+}
 
 export const START_SCENE = 'arrival';
 export const SCENE_COUNT = Object.keys(SCENES).length;

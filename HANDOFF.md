@@ -1,6 +1,6 @@
 # Bone and Ash — handoff (read this first in a new chat)
 
-**Saved:** 2026-11-02 (Europe/Budapest). **Version:** prologue 0.4.0 (`sw.js` VERSION `bone-ash-0.4.0`). **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
+**Saved:** 2026-11-02 (Europe/Budapest). **Version:** prologue 0.4.1 (`sw.js` VERSION `bone-ash-0.4.1`). **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
 Built in the SillyTavern chat as a spin-off. That chat stays for SillyTavern; this game continues in its own chat.
 
 ## What it is
@@ -88,6 +88,7 @@ node tests/rules.test.mjs && node tests/story.test.mjs
   - Yuki: HP 30 (body 5), Qi 32.5.
 - **Regen:** one Cycle is 30 minutes at T1. Each Cycle gives HP +5% and Qi +11.6% (5% + 0.1 × 66 collaterals). `sleepUntil` fills both bars.
 - **Hunger:** "Fed" drops 3 an hour. Below 30, −1 on every check; at 0, another −1 and HP loss over time.
+- **Breakthrough (v0.4.1):** at 100% Saturation a choice "Break through to <next realm>" appears in `stream`, `wilds`, `camp`, `night`, `village`, `ashfall`, `supper` (added in prologue.js after the scene list). `breakthrough(g)` in game.js: 2 hours, realm +1, Saturation 0, both bars full; Yuki rises with James (root-kin). Scene `breakthrough`: the tribulation comes, finds nothing to burn, leaves. In the village it sets `sky_witness` (Act 1 hook: the Sect hears). Each rung ≈ +3–4 HP, +1–1.5 Convergence. Fights scale by days, not realm.
 - **Condensation:** 10 Qi per sit, 0 XP, raises Saturation. It never refills Qi.
 - **Combat:** each round James acts, Yuki attacks automatically, then the enemies attack. James defends with GU + d6 vs their attack DC; DR 1 reduces hits. His actions:
   - **darts:** Convergence Use, 2 Qi, 2–4 damage;
@@ -138,7 +139,7 @@ The **long route** (v0.4.0, flag `long`, set on the first forest night) runs 7 d
 - Lu Han: inner disciple.
 - The Crimson Lotus Sect.
 
-**Flags that matter for Act 1** (v0.4.0 adds `saw_lights`, `roots`, `bone_sung`, `lore_tree`, `token_silenced`, `gao_turned`, `loft_burned`, `militia`, `plough`, `clinics`):
+**Flags that matter for Act 1** (v0.4.0 adds `sky_witness`, `foundation_day`, `saw_lights`, `roots`, `bone_sung`, `lore_tree`, `token_silenced`, `gao_turned`, `loft_burned`, `militia`, `plough`, `clinics`):
 - `ending` (fought / bluff / paid / lost);
 - `gao_dead`, `gao_spared`, `gao_humiliated`;
 - `romance`, `healed`, `boar`, `ignored`;

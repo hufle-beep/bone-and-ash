@@ -257,6 +257,32 @@ export function condense(g) {
     return { ok: true, gain, saturation: g.james.saturation };
 }
 
+/**
+ * Breakthrough: at 100% Saturation, the next realm. Saturation resets, both bars refill to the new Max.
+ * Yuki is root-kin and rises with James. No herbs, no pills, no tribulation (the Ouroboros Axiom).
+ */
+export const MAX_REALM = 14;
+export const canBreakThrough = (g) => g.james.saturation >= 100 && g.james.realm < MAX_REALM;
+export function breakthrough(g) {
+    if (!canBreakThrough(g)) return { ok: false };
+    const before = { hp: jamesHpMax(g), qi: jamesQiMax(g), yhp: yukiHpMax(g), yqi: yukiQiMax(g) };
+    advance(g, 120, { resting: true });
+    g.james.realm += 1;
+    g.james.saturation = 0;
+    g.yuki.realm = Math.max(g.yuki.realm, g.james.realm);
+    g.james.hp = jamesHpMax(g);
+    g.james.qi = jamesQiMax(g);
+    g.yuki.hp = yukiHpMax(g);
+    g.yuki.qi = yukiQiMax(g);
+    ensureBars(g);
+    const r1 = (n) => Math.round(n * 10) / 10;
+    return { ok: true, realm: g.james.realm, lines: [
+        `Realm: ${realmName(g.james.realm)}. Saturation 0%.`,
+        `HP ${r1(before.hp)} → ${r1(jamesHpMax(g))}, Convergence ${r1(before.qi)} → ${r1(jamesQiMax(g))}. Both full.`,
+        `Yuki rises with you: HP ${r1(before.yhp)} → ${r1(yukiHpMax(g))}, Qi ${r1(before.yqi)} → ${r1(yukiQiMax(g))}.`,
+    ] };
+}
+
 /** Bonesinger at Convergence Use tier (the T1 rung added for this game; T2+ as in the SillyTavern preset). */
 export const BONESINGER_TIERS = [
     null,
