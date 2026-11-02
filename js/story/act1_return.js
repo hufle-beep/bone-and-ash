@@ -571,13 +571,19 @@ Toward dawn Yuki puts her nose against your chin. *Stop thinking,* says the bond
     rt_elder: {
         id: 'rt_elder', title: 'Outer Elder Shen Qiu', art: 'elder_arrives', place: `${P} — the tribute post`,
         enter: (g) => { toHour(g, 8); return []; },
-        text: (g) => `He comes up the road at the hour of the snake, on foot, with twelve disciples behind him in crimson ${luHanHere(g) ? 'and Lu Han at his right hand, face like a frozen pond' : 'and, conspicuously, no Lu Han'}.
+        text: (g) => `He comes up the road at the hour of the snake, on foot, with twelve disciples behind him in crimson ${luHanHere(g) ? 'and Lu Han at his right hand, face like a frozen pond' : 'and, conspicuously, no Lu Han'}.${g.flags.gao_broken || g.flags.gao_dead ? ' At the very back, carried in an open litter, sword arm still bound to his chest, rides Gao Feng. He has come to watch. His lips move the whole time, the same few words over and over, and you are fairly sure they are your name.' : ''}
 
 Outer Elder Shen Qiu is old in the way mountains are old. His hair is white and bound up under a red jade crown. His robe is the deep red of dried blood, embroidered with a single lotus. He walks slowly, and the air walks with him: heavy, sweet, rotten, the poisoned Qi of this world drawn so thick around him that the grass at the roadside greys as he passes.
 
 He stops at the tribute post. He looks at Ashfall — ${g.flags.a1_palisade ? 'at the white palisade, ' : ''}${g.flags.a1_militia ? 'at the hunters standing in their line with their spears grounded, ' : ''}at the people who have not knelt. Then he turns his face, slowly, toward the grove, and for the first time something moves in it.
 
-"So," he says. His voice is soft and courteous and absolutely without warmth. "It is true. Someone has planted a song in my mountains." His eyes come to you. "And the sky came for you, and went away ashamed. I have lived three hundred years, and I did not think I would see that." He inclines his head, exactly one degree. "Tell me what you are, young man, and I will decide what to do with it."
+"So," he says. His voice is soft and courteous and absolutely without warmth. "It is true. Someone has planted a song in my mountains." His eyes come to you. "And the sky came for you, and went away ashamed. I have lived three hundred years, and I did not think I would see that." He inclines his head, exactly one degree.
+
+Then he does what they all do: he reaches for you with his Qi-sense. An Outer Elder's sense — you feel it like weather, like pressure before a storm, sweeping over you, through you, into every corner.
+
+And it finds nothing. No root. No sea. No core. A mortal in a strange coat.
+
+For the first time, Shen Qiu's face changes. It is not anger. It is something much older and much colder: the expression of a man who has spent three hundred years knowing exactly what everything in front of him is, and has just met the exception. "I cannot feel you," he says, very softly. "Do you understand? Not hidden. Not sealed. *Absent.* As if Heaven had forgotten to write you down." His sleeves settle. "Tell me what you are, young man, and I will decide what to do with it."
 
 Behind you, Mei Lin's hand closes on her knife. Ya's lips draw back from her teeth. Yuki, on your shoulder, goes very still.`,
         choices: [

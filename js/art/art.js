@@ -559,6 +559,22 @@ const SCENES2 = {
     ship_bridge: { base: () => C2.shipHull(140, 0.9) + `<path d="M180 200 L180 160 Q200 150 220 160 L220 200 Z" fill="#c8c3bb" stroke="#111010"/><circle cx="200" cy="148" r="12" fill="#fbfaf7" opacity="0.8"/>`, fg: () => FIG('james', 260, 242, 1.15, { face: -1 }) + FIG('mei', 320, 242, 1.0, { face: -1 }) + FIG('ya', 100, 242, 1.05) + YU(150, 242, 0.75) },
     ship_log: { base: () => C2.shipHull(200, 0.7), fg: () => `<circle cx="200" cy="120" r="54" fill="#fbfaf7" opacity="0.3"/><path d="M190 140 C186 120 196 104 210 100 C214 116 210 132 200 142 Z" fill="#c8c3bb" stroke="#111010"/>` + `<g opacity="0.75">${FIG('woman', 160, 150, 0.55)}${FIG('james', 240, 150, 0.58)}</g>` + FIG('james', 200, 246, 1.25) },
     guardian: { base: () => C2.hollowInside(true), fg: () => C2.guardian(270, 236, 1.3, -1) + FIG('james', 110, 240, 1.15) + YU(150, 240, 0.8) + FIG('ya', 60, 240, 1.05) },
+    // ---------------- v0.7: Yuki's forms and the Long Forest ----------------
+    yuki_tiger: { bg: 'peaks', fg: () => SUN(330, 40, 12) + ground2() + C2.smoke([[-10, 120], [80, 80], [150, 150], [210, 110]], 6) + C2.yukiTiger(230, 240, 1.5, -1) + FIG('james', 110, 244, 1.2) },
+    yuki_form: { bg: 'pine', night: 0.62, fg: () => ground2(220) + C2.smoke([[-10, 70], [90, 30], [170, 110], [260, 70]], 6) + C2.butterfly(330, 60, 1, 14) + C2.yukiForms3() },
+    lf_hub: { bg: 'forest', wash: 0.08, fg: () => ground2() + C2.smoke([[-10, 90], [90, 50], [170, 130], [250, 96]], 5) + C2.curl(330, 60, 10, '#111010', 1) + FIG('james', 190, 242, 1.15) + YU(226, 242, 0.9) },
+    lf_seclusion: { bg: 'cliffs', wash: 0.2, fg: () => {
+        let snow = '';
+        for (let i = 0; i < 60; i++) snow += `<circle cx="${(i * 47) % 200}" cy="${(i * 31) % 230}" r="${1 + (i % 3) * 0.5}" fill="#fbfaf7" stroke="#111010" stroke-width="0.3"/>`;
+        let petals = '';
+        for (let i = 0; i < 26; i++) petals += `<ellipse cx="${210 + (i * 53) % 190}" cy="${(i * 37) % 220}" rx="2.4" ry="1.4" transform="rotate(${(i * 40) % 180} ${210 + (i * 53) % 190} ${(i * 37) % 220})" fill="#fbfaf7" stroke="#a02c2c" stroke-width="0.5"/>`;
+        return `<path d="M120 250 L120 150 C130 96 170 80 200 80 C230 80 270 96 280 150 L280 250 Z" fill="#111010"/>` + snow + petals + `<path d="M200 0 L200 250" stroke="#55514d" stroke-width="1" stroke-dasharray="3 4"/>` + FIG('james', 200, 236, 1.2, { sit: true, shut: true }) + YU(244, 236, 0.85, -1);
+    } },
+    lf_bone_depths: { bg: 'peaks', wash: 0.1, night: 0.2, fg: () => ground2(200) + ribs(110, 220, 1.4) + skull(300, 214, 1.3) + `<g transform="translate(250 120) scale(1.4)">${ribs(0, 0, 0.5)}</g>` + FIG('james', 220, 244, 1.1) + YU(250, 244, 0.85) },
+    lf_black_mire: { bg: 'cliffs', night: 0.5, fg: () => `<rect y="180" width="400" height="70" fill="#111010"/>` + `<g fill="#55514d">${[[60, 200, 34], [180, 214, 28], [310, 196, 40]].map(([x, y, w]) => `<ellipse cx="${x}" cy="${y}" rx="${w}" ry="6"/>`).join('')}</g>` + C2.serpent(320, 214, 1.1, -1) + [[90, 170, 2], [130, 160, 1.6], [260, 166, 2.2]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r * 3}" fill="#fbfaf7" opacity="0.35"/><circle cx="${x}" cy="${y}" r="${r}" fill="#fbfaf7"/>`).join('') + FIG('james', 160, 244, 1.15) + YU(190, 214, 0.75) },
+    lf_thunder_ridge: { bg: 'mountain', night: 0.4, fg: () => `<g fill="#111010">${[[90, 34, 100, 30], [260, 24, 130, 34], [370, 50, 70, 24]].map(([x, y, rx, ry]) => `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}"/>`).join('')}</g><path d="M300 60 L286 100 L302 104 L278 160 L296 158 L270 214" stroke="#fbfaf7" stroke-width="3.4" fill="none" stroke-linejoin="round"/><path d="M300 60 L286 100 L302 104 L278 160 L296 158 L270 214" stroke="#111010" stroke-width="0.8" fill="none"/>` + `<path d="M0 250 L0 214 L120 196 L230 210 L400 190 L400 250 Z" fill="#55514d" stroke="#111010"/><path d="M150 202 l14 10 l-6 8 l12 10 M60 214 l10 12" stroke="#111010" stroke-width="1.6" fill="none"/>` + FIG('james', 160, 244, 1.15) + YU(196, 244, 0.85) },
+    lf_old_roots: { bg: 'mountain', wash: 0.12, fg: () => roots(411, 130, 9) + ground2(236) + C2.curl(320, 70, 12, '#111010', 1) + FIG('james', 180, 244, 1.15) + YU(214, 244, 0.85) },
+    lf_bandits: { bg: 'forest', fg: () => ground2() + FIG('thug', 250, 242, 1.2, { face: -1 }) + FIG('man', 300, 244, 1.15, { face: -1, spear: true }) + `<path d="M232 170 L214 150" stroke="#111010" stroke-width="2"/><path d="M214 150 l-6 -4 l4 7 Z" fill="#fbfaf7" stroke="#111010" stroke-width="0.6"/>` + FIG('james', 120, 244, 1.2) + YU(150, 244, 0.85) },
     seed: { base: () => `<rect width="400" height="250" fill="#111010"/>`, fg: () => C2.seedSliver(200, 125, 1.4) + C2.curl(80, 60, 14, '#55514d', 1.2) + C2.curl(320, 190, 12, '#55514d', 1.2, -1) },
     heart_core: { base: () => C2.hollowInside(true), fg: () => `<circle cx="200" cy="110" r="70" fill="#55514d" stroke="#111010" stroke-width="2"/><path d="M160 70 L200 110 L190 160 M200 110 L250 90 M200 110 L236 150" stroke="#111010" stroke-width="3" fill="none"/><circle cx="200" cy="110" r="20" fill="#111010"/><circle cx="200" cy="110" r="6" fill="#a02c2c"/>` + FIG('james', 200, 240, 0.8) + YU(222, 240, 0.55) },
     return_road: { bg: 'forest', fg: () => ground2() + FIG('james', 160, 244, 1.1, { face: -1 }) + FIG('mei', 210, 242, 1.05, { face: -1 }) + FIG('ya', 270, 242, 1.1, { face: -1 }) + YU(130, 244, 0.75, -1) },
@@ -570,7 +586,14 @@ const SCENES2 = {
     a1_end: { bg: 'village', night: 0.55, fg: () => MOON(320, 40, 13) + ground2(212) + C2.sapling(200, 236, 1.1) + FIG('mei', 130, 240, 1.0) + FIG('james', 90, 242, 1.1) + FIG('ya', 280, 240, 1.05, { face: -1 }) + YU(240, 242, 0.8, -1) + C2.butterfly(260, 90, 0.8, 10) },
     trio: { interior: true, dark: 0.4, fg: () => C2.smoke([[-10, 70], [90, 30], [150, 110], [210, 80]], 6) + C2.butterfly(330, 60, 1.1, 14) + C2.butterfly(70, 150, 0.8, -12) + FIG('mei', 160, 250, 1.5) + FIG('ya', 250, 250, 1.55, { face: -1 }) + FIG('james', 205, 252, 1.62) },
 };
-const CLOSEUPS2 = { mei_lin: { bg: 'peaks', draw: C2.meiCloseUp }, yuki_close: { bg: 'peaks', draw: C2.yukiCloseUp }, ya_close: { bg: 'forest', draw: C2.yaCloseUp } };
+const CLOSEUPS2 = {
+    mei_lin: { bg: 'peaks', draw: C2.meiCloseUp },
+    yuki_close: { bg: 'peaks', draw: (id) => (C2.getYukiForm() === 'human' ? C2.yukiHumanCloseUp(id) : C2.yukiCloseUp(id)), night: () => C2.getYukiForm() === 'human' },
+    ya_close: { bg: 'forest', draw: C2.yaCloseUp },
+    yuki_human: { bg: 'pine', draw: C2.yukiHumanCloseUp, night: () => true },
+};
+/** Art state set by the UI before each render (Yuki's current form). */
+export function setArtState(state = {}) { if (state.yukiForm) C2.setYukiForm(state.yukiForm); }
 const bgImg = (img) => `<image href="art/bg/${img}.jpg" x="0" y="0" width="400" height="250" preserveAspectRatio="xMidYMid slice"/>`;
 function scene2(key, id) {
     const open = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${id.replace(/_/g, ' ')}" preserveAspectRatio="xMidYMid slice">`;
@@ -578,7 +601,9 @@ function scene2(key, id) {
     const fix = (svg) => svg.replace(/id="(g2|v2)"/g, `id="$1-${id}"`).replace(/url\(#(g2|v2)\)/g, `url(#$1-${id})`);
     if (CLOSEUPS2[key]) {
         const c = CLOSEUPS2[key];
-        return fix(`${open}<rect width="400" height="250" fill="#ece8df"/>${bgImg(c.bg)}<rect width="400" height="250" fill="#ece8df" opacity="0.55"/>${c.draw(`c${id}`)}${vg}</svg>`);
+        const dark = c.night && c.night();
+        const wash = dark ? `<rect width="400" height="250" fill="#111010" opacity="0.88"/>` : `<rect width="400" height="250" fill="#ece8df" opacity="0.55"/>`;
+        return fix(`${open}<rect width="400" height="250" fill="#ece8df"/>${bgImg(c.bg)}${wash}${c.draw(`c${id}`)}${vg}</svg>`);
     }
     const sc = SCENES2[key] || SCENES2.forest_dawn;
     const base = sc.base ? sc.base() : sc.interior ? C2.shoji(sc.lamp !== false, sc.dark || 0) : `${bgImg(sc.bg)}<rect width="400" height="250" fill="#ece8df" opacity="${sc.wash ?? 0.18}"/>${sc.night ? `<rect width="400" height="250" fill="#111010" opacity="${sc.night}"/>` : ''}`;

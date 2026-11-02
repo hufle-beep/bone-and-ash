@@ -159,6 +159,8 @@ You ask around, carefully, about Shen Qiu. People lower their voices. They descr
 
 ${g.flags.elder_intel ? 'He has never lost a duel. He has never needed to hurry one.' : ''}
 
+And one more thing, which Old Wen tells you over tea in a voice so low you have to lean in: the envoys, the watchers, Lu Han — every one of them has reported the same impossible thing. *They cannot sense him.* A man who refuses tribulation, who sings bone out of air, and to every cultivator's sense he is an empty chair. "To us, that is not a mystery," Old Wen says. "It is an insult. The Elder will not come to talk to a mortal. He will come to find out what is hiding inside one."
+
 Meanwhile, every time the wind comes from the north, your Convergence turns its head like a dog hearing its name. North, past the Hollow, past the roots. The dead tree. It hasn't stopped singing at you since the tribute. If anything, it's getting louder.
 
 Thirteen days. You can spend them building walls. Or you can go and find out what's calling.`,

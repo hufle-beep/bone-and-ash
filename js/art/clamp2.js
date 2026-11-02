@@ -45,7 +45,7 @@ export function butterfly(x, y, s = 1, rot = 0) {
 /* ================================================================== figures ================================================ */
 
 /** Long hair falling as ribbons from (x0..x1 at y0) down to around yEnd, swaying by `sway`. */
-function hairRibbons(r, x0, x1, y0, yEnd, sway, n, spread = 1.4) {
+function hairRibbons(r, x0, x1, y0, yEnd, sway, n, spread = 1.4, fillC = K, lineC = W, lw = 0.35) {
     let fill = '';
     let lines = '';
     for (let i = 0; i < n; i++) {
@@ -62,7 +62,7 @@ function hairRibbons(r, x0, x1, y0, yEnd, sway, n, spread = 1.4) {
         fill += `M${f(sx - bw / 2)} ${f(y0)} C${f(c1x - bw / 2)} ${f(cy1)} ${f(c2x - bw * 0.4)} ${f(cy2)} ${f(ex)} ${f(ey)} C${f(c2x + bw * 0.4)} ${f(cy2)} ${f(c1x + bw / 2)} ${f(cy1)} ${f(sx + bw / 2)} ${f(y0)} Z `;
         if (i % 2 === 0) lines += `M${f(sx)} ${f(y0 + 3)} C${f(c1x)} ${f(cy1)} ${f(c2x)} ${f(cy2)} ${f(ex)} ${f(ey - 4)} `;
     }
-    return `<path d="${fill}" fill="${K}" stroke="none"/><path d="${lines}" stroke="${W}" stroke-width="0.35" fill="none" opacity="0.85"/>`;
+    return `<path d="${fill}" fill="${fillC}" stroke="${fillC === K ? 'none' : K}" stroke-width="${fillC === K ? 0 : 0.25}"/><path d="${lines}" stroke="${lineC}" stroke-width="${lw}" fill="none" opacity="0.85"/>`;
 }
 
 /** Small face at figure scale. kind: 'f' (woman, red lips), 'm' (man), 'old'. eyesShut for meditation. */
@@ -246,7 +246,7 @@ export function figure(kind, x, y, s = 1, opts = {}) {
 }
 
 /** Yuki at scene size: a slender white cat sitting, tall ears, long tail, gold almond eyes, red cord and knot. */
-export function yuki(x, y, s = 1, face = 1) {
+export function yukiCat(x, y, s = 1, face = 1) {
     let c = `<ellipse cx="2" cy="0.4" rx="11" ry="1.1" fill="${K}" opacity="0.4"/>`;
     c += `<path d="M6 -0.6 C15 -0.6 17 -10 12 -16 C10 -19 11 -23 14 -24" ${st(3.2)} fill="none"/><path d="M6 -0.6 C15 -0.6 17 -10 12 -16 C10 -19 11 -23 14 -24" ${st(2, W)} fill="none"/>`;
     c += `<path d="M-6.4 0 C-8.6 -7 -8 -15 -4.2 -20.6 L-3.6 -25 L4 -25 L4.6 -20.6 C8 -15 8.4 -7 6.4 0 Z" fill="${W}" ${st(0.6)}/>`;
@@ -659,4 +659,130 @@ export function seedSliver(cx = 200, cy = 125, s = 1) {
 /** A white sapling with a faint glow: the first grown thing in Ashfall. */
 export function sapling(x, y, s = 1) {
     return `<g transform="translate(${x} ${y}) scale(${s})"><circle cy="-40" r="40" fill="${W}" opacity="0.3"/><path d="M0 0 C-2 -20 2 -40 0 -64 M0 -30 C-10 -36 -16 -44 -18 -52 M0 -44 C8 -50 14 -58 16 -66 M0 -56 C-6 -62 -8 -70 -8 -76" ${st(2.4, W)} fill="none"/><path d="M0 0 C-2 -20 2 -40 0 -64" ${st(0.6)} fill="none"/>${[[-18, -52], [16, -66], [-8, -76], [0, -64], [10, -40], [-12, -34]].map(([lx, ly]) => `<ellipse cx="${lx}" cy="${ly}" rx="4.4" ry="2.4" fill="${W}" ${st(0.5)} transform="rotate(${lx > 0 ? -30 : 30} ${lx} ${ly})"/>`).join('')}<path d="M-12 0 Q0 -4 12 0" ${st(1.4, G3)} fill="none"/></g>`;
+}
+
+
+/* ================================================================== Yuki's forms ========================================== */
+
+/** Which form scenes draw Yuki in: 'cat' | 'tiger' | 'human' (set by art.js setArtState). */
+let YUKI_FORM = 'cat';
+export const setYukiForm = (form) => { YUKI_FORM = ['cat', 'tiger', 'human'].includes(form) ? form : 'cat'; };
+export const getYukiForm = () => YUKI_FORM;
+
+/** Yuki in the current form, standing where the small cat would sit. */
+export function yuki(x, y, s = 1, face = 1, form = YUKI_FORM) {
+    if (form === 'tiger') return yukiTiger(x, y, s, face);
+    if (form === 'human') return yukiHuman(x, y, s * 1.25, face);
+    return yukiCat(x, y, s, face);
+}
+
+/** The great form: a root-kin the size of a Bengal tiger, standing in profile. Unit space: feet at 0, ~62 tall. */
+export function yukiTiger(x, y, s = 1, face = 1) {
+    const k = s * 0.9;
+    let c = `<ellipse cx="0" cy="0.6" rx="46" ry="2" fill="${K}" opacity="0.4"/>`;
+    // tail: long S-curve behind
+    const tail = 'M-34 -38 C-48 -40 -56 -30 -54 -18 C-52 -8 -60 -2 -66 -6';
+    c += `<path d="${tail}" ${st(6.4)} fill="none"/><path d="${tail}" ${st(4.6, W)} fill="none"/><path d="M-62 -4.6 C-64 -6 -66 -8 -66 -6" ${st(4.4)} fill="none"/>`;
+    // far legs (grey), then body, near legs
+    c += `<path d="M-26 -30 L-28 -1 L-21 -1 L-19 -26 Z M18 -30 L20 -1 L27 -1 L26 -28 Z" fill="${G2}" ${st(0.8)}/>`;
+    const body = 'M-36 -40 C-38 -50 -26 -56 -10 -55 C6 -54 18 -54 28 -50 C34 -48 38 -44 38 -38 C38 -32 34 -28 28 -27 L-30 -26 C-36 -28 -38 -34 -36 -40 Z';
+    c += `<path d="${body}" fill="${W}" ${st(1)}/>`;
+    // brush stripes, a few, like ink flicks
+    c += [[-24, -54, -20, -44], [-14, -55, -12, -45], [-4, -55, -3, -46], [8, -54, 6, -45], [-30, -46, -24, -40]].map(([a, b, cc, d]) => `<path d="M${a} ${b} Q${(a + cc) / 2 + 2} ${(b + d) / 2} ${cc} ${d}" ${st(1.4)} fill="none"/>`).join('');
+    c += `<path d="M-30 -34 L-32 -1 L-24 -1 L-22 -28 Z M22 -32 L24 -1 L31 -1 L31 -30 Z" fill="${W}" ${st(0.9)}/>`;
+    c += `<path d="M-32 -1 q-1 -2 1 -3 M-26 -1 q0 -2 1 -3 M24 -1 q-1 -2 1 -3 M29 -1 q0 -2 1 -3" ${st(0.5)} fill="none"/>`;
+    // neck and head
+    c += `<path d="M26 -50 C30 -60 36 -66 44 -66 C54 -66 60 -60 60 -52 C60 -46 56 -42 50 -41 C46 -40 40 -40 36 -38 Z" fill="${W}" ${st(1)}/>`;
+    c += `<path d="M40 -64 L38 -76 L46 -67 Z M50 -66 L54 -77 L57 -64 Z" fill="${W}" ${st(0.9)}/><path d="M40.6 -66 L39.6 -73 L44 -67.6 Z M51.4 -66.6 L53.6 -73.6 L55.4 -65.4 Z" fill="${G2}"/>`;
+    c += `<path d="M47 -57 Q51 -60 55 -57 Q51 -55.6 47 -57 Z" fill="${GOLD}" ${st(0.6)}/><path d="M51 -59.2 L51 -55.6" ${st(0.9)}/><path d="M46 -58.4 L56 -58.6" ${st(1)}/>`;
+    c += `<path d="M59 -50 L61 -50 L60 -48.6 Z" fill="${K}"/><path d="M60 -48.6 Q58 -46 55 -46.6" ${st(0.6)} fill="none"/><path d="M57 -49 L72 -52 M57 -48 L72 -47 M56 -47 L70 -43" ${st(0.3)}/>`;
+    c += `<path d="M30 -52 Q36 -44 42 -42" ${st(2.4, RED)} fill="none"/><path d="M38 -44 L41 -40 L38 -36 L35 -40 Z" fill="${RED}" ${st(0.5)}/><path d="M37.6 -36 L37 -29 M38.6 -36 L39 -30" ${st(0.7, RED)}/>`;
+    return `<g transform="translate(${f(x)} ${f(y)}) scale(${f(k * face)} ${f(k)})">${c}</g>`;
+}
+
+/** The human form: an adult woman, CLAMP-tall, long white hair, white cat ears and tail, a simple black dress, barefoot. */
+export function yukiHuman(x, y, s = 1, face = 1) {
+    const r = rng(1312);
+    const top = -100;
+    let back = '';
+    let body = '';
+    let front = '';
+    // white hair falling far down, drifting with the wind
+    back += `<path d="M-5 ${top + 4} C-10 ${top + 20} -12 ${top + 44} -15 -34 C-16 -20 -14 -10 -10 -6 L10 -12 C13 -32 11 ${top + 44} 6 ${top + 4} Z" fill="${W}" ${st(0.5)}/>`;
+    back += hairRibbons(r, -9, 9, top + 18, -4, 14, 12, 1.7, W, K, 0.3);
+    // tail
+    back += `<path d="M3 -46 C14 -40 18 -26 12 -14 C8 -6 14 2 22 -2" ${st(3)} fill="none"/><path d="M3 -46 C14 -40 18 -26 12 -14 C8 -6 14 2 22 -2" ${st(2, W)} fill="none"/>`;
+    // legs (bare), feet
+    body += `<path d="M-3.6 -40 L-3.4 -1 L-1.4 -1 L-0.6 -40 Z M3.6 -40 L3.2 -1 L1.2 -1 L0.6 -40 Z" fill="${W}" ${st(0.45)}/><path d="M-3.8 0 Q-4 -1.4 -1.6 -1.4 L-0.8 -1 L-0.8 0 Z M3.6 0 Q3.8 -1.4 1.4 -1.4 L0.8 -1 L0.8 0 Z" fill="${W}" ${st(0.35)}/>`;
+    // dress: a black slip with thin straps, the skirt flaring and swinging
+    const dress = `M-5.6 ${top + 22} L-6 ${top + 40} C-8 -46 -12 -36 -16 -28 C-8 -24 6 -24 14 -30 C11 -38 7 -46 6 ${top + 40} L5.6 ${top + 22} Q0 ${top + 25} -5.6 ${top + 22} Z`;
+    body += `<path d="${dress}" fill="${K}" ${st(0.6)}/><path d="M-9 -34 C-6 -40 -4 -48 -3 ${top + 40} M5 -32 C4 -40 3 -48 2 ${top + 40}" ${st(0.4, G3)} fill="none"/>`;
+    body += `<path d="M-4.6 ${top + 22} L-4.4 ${top + 16.8} M4.6 ${top + 22} L4.4 ${top + 16.8}" ${st(0.35)}/>`;
+    // shoulders and bare arms, hands hanging
+    body += `<path d="M-1.6 ${top + 16.6} C-4 ${top + 16.2} -6 ${top + 17} -7 ${top + 19} L-7.4 ${top + 22} L-5.4 ${top + 22.4} Z M1.6 ${top + 16.6} C4 ${top + 16.2} 6 ${top + 17} 7 ${top + 19} L7.4 ${top + 22} L5.4 ${top + 22.4} Z" fill="${W}" ${st(0.45)}/>`;
+    for (const d of [-1, 1]) {
+        const X = (n) => f(d * n);
+        body += `<path d="M${X(7)} ${top + 19} C${X(8.6)} ${top + 30} ${X(8.8)} ${top + 42} ${X(8.2)} ${top + 54} L${X(6.4)} ${top + 54} C${X(6.6)} ${top + 42} ${X(6.2)} ${top + 30} ${X(5.4)} ${top + 22.4} Z" fill="${W}" ${st(0.45)}/>` + hand(d * 7.3, top + 54, d, 0.9);
+    }
+    // neck, head, face: gold eyes, half-lidded
+    front += `<path d="M-1.3 ${top + 10.9} L-1.5 ${top + 16.8} L1.5 ${top + 16.8} L1.3 ${top + 10.9} Z" fill="${W}" ${st(0.4)}/>`;
+    front += `<path d="${headShape(top, 11.5, 3.9)}" fill="${W}" ${st(0.5)}/>`;
+    front += smallFace(top + 5.6, 'f', { iris: GOLD });
+    // fringe and side locks, ears
+    front += `<path d="M-4.3 ${top + 5.6} C-4.8 ${top - 1} -2.4 ${top - 3} 0 ${top - 3} C2.4 ${top - 3} 4.8 ${top - 1} 4.3 ${top + 5.6} L3.4 ${top + 3.2} L2.4 ${top + 4.6} L1.2 ${top + 2.8} L0 ${top + 4.4} L-1.2 ${top + 2.8} L-2.4 ${top + 4.6} L-3.4 ${top + 3.2} Z" fill="${W}" ${st(0.45)}/>`;
+    front += `<path d="M-4.4 ${top + 3} C-5 ${top + 14} -5.4 ${top + 26} -6.6 ${top + 40} M4.4 ${top + 3} C5 ${top + 14} 5.4 ${top + 26} 6.6 ${top + 40}" ${st(1.6)} fill="none"/><path d="M-4.4 ${top + 3} C-5 ${top + 14} -5.4 ${top + 26} -6.6 ${top + 40} M4.4 ${top + 3} C5 ${top + 14} 5.4 ${top + 26} 6.6 ${top + 40}" ${st(1, W)} fill="none"/>`;
+    front += `<path d="M-3.8 ${top - 0.6} L-5.2 ${top - 7.4} L-1.2 ${top - 2.4} Z M3.8 ${top - 0.6} L5.2 ${top - 7.4} L1.2 ${top - 2.4} Z" fill="${W}" ${st(0.45)}/><path d="M-3.6 ${top - 1.6} L-4.4 ${top - 5.6} L-2.2 ${top - 2.6} Z M3.6 ${top - 1.6} L4.4 ${top - 5.6} L2.2 ${top - 2.6} Z" fill="${G2}"/>`;
+    // the red cord, now a choker with a knot
+    front += `<path d="M-1.5 ${top + 15.2} Q0 ${top + 16.2} 1.5 ${top + 15.2}" ${st(0.6, RED)} fill="none"/><path d="M0 ${top + 15.6} L0.8 ${top + 16.6} L0 ${top + 17.6} L-0.8 ${top + 16.6} Z" fill="${RED}"/>`;
+    const shadow = `<ellipse cx="0" cy="0.4" rx="14" ry="1.4" fill="${K}" opacity="0.4"/>`;
+    return `<g transform="translate(${f(x)} ${f(y)}) scale(${f(s * face)} ${f(s)})">${shadow}${back}${body}${front}</g>`;
+}
+
+/** Yuki in human form, close: three-quarter view, white hair streaming, cat ears, gold half-lidded eyes, black dress. */
+export function yukiHumanCloseUp(id = 'yh') {
+    const r = rng(2718);
+    const cx = 196;
+    let s = '';
+    // motes of light in the dark, like the reference
+    s += [[40, 60, 2.4], [70, 190, 1.6], [330, 40, 2], [360, 150, 2.6], [300, 220, 1.4], [120, 30, 1.2], [380, 90, 1.2]].map(([x, y, rr]) => `<circle cx="${x}" cy="${y}" r="${rr}" fill="${W}"/>`).join('');
+    // hair: a great white fall streaming to the right
+    s += `<path d="M${cx - 40} 74 C${cx - 46} 30 ${cx - 20} 8 ${cx + 6} 8 C${cx + 34} 8 ${cx + 50} 30 ${cx + 46} 76 C${cx + 70} 120 ${cx + 120} 150 ${cx + 210} 170 L${cx + 210} 262 L${cx - 70} 262 C${cx - 56} 200 ${cx - 46} 140 ${cx - 40} 74 Z" fill="${W}" ${st(1)}/>`;
+    s += hairRibbons(r, cx + 10, cx + 46, 90, 250, 150, 14, 2.2, W, K, 0.6);
+    s += hairRibbons(r, cx - 40, cx - 20, 130, 262, -30, 6, 1.6, W, K, 0.6);
+    // shoulders, black dress with thin straps
+    s += `<path d="M${cx - 80} 262 C${cx - 74} 220 ${cx - 52} 190 ${cx - 18} 178 L${cx + 22} 178 C${cx + 54} 190 ${cx + 76} 220 ${cx + 84} 262 Z" fill="${W}" ${st(1.2)}/>`;
+    s += `<path d="M${cx - 50} 262 C${cx - 46} 236 ${cx - 40} 222 ${cx - 30} 214 Q${cx} 226 ${cx + 34} 212 C${cx + 44} 222 ${cx + 50} 238 ${cx + 54} 262 Z" fill="${K}" ${st(1)}/>`;
+    s += `<path d="M${cx - 30} 214 L${cx - 24} 186 M${cx + 34} 212 L${cx + 28} 186" ${st(1.2)}/>`;
+    s += `<path d="M${cx - 46} 220 C${cx - 40} 210 ${cx - 30} 204 ${cx - 22} 202 M${cx + 50} 218 C${cx + 44} 208 ${cx + 34} 202 ${cx + 26} 200" ${st(0.7)} fill="none"/>`;
+    // neck
+    s += `<path d="M${cx - 11} 130 C${cx - 11} 150 ${cx - 13} 166 ${cx - 18} 178 L${cx + 22} 178 C${cx + 15} 164 ${cx + 12} 148 ${cx + 12} 128 Z" fill="${W}" ${st(1)}/>`;
+    s += `<path d="M${cx - 11} 138 C${cx - 3} 148 ${cx + 6} 148 ${cx + 12} 136 L${cx + 12} 150 C${cx + 6} 156 ${cx - 3} 156 ${cx - 11} 150 Z" fill="${G2}"/>`;
+    s += `<path d="M${cx - 13} 160 Q${cx} 168 ${cx + 15} 158" ${st(2.2, RED)} fill="none"/><path d="M${cx + 1} 162 L${cx + 6} 168 L${cx + 1} 174 L${cx - 4} 168 Z" fill="${RED}" ${st(0.6)}/>`;
+    // face, three-quarter; eyes closed-soft, half-lidded gold
+    const face = `M${cx - 28} 74 C${cx - 29} 98 ${cx - 24} 116 ${cx - 13} 132 C${cx - 8} 138 ${cx - 5} 141 ${cx - 2} 141.5 C${cx + 5} 140 ${cx + 14} 132 ${cx + 23} 118 C${cx + 31} 104 ${cx + 34} 88 ${cx + 33} 72 Z`;
+    s += `<path d="${face}" fill="${W}"/><clipPath id="${id}f"><path d="${face}"/></clipPath><g clip-path="url(#${id}f)"><path d="M${cx + 21} 72 C${cx + 29} 92 ${cx + 25} 116 ${cx + 8} 142 L${cx + 40} 142 L${cx + 40} 72 Z" fill="${G2}"/></g><path d="${face}" fill="none" ${st(1.2)}/>`;
+    const eye = (ex, ey, w, h, n) => {
+        const o = `M${ex - w} ${ey} C${ex - w * 0.5} ${ey - h * 0.35} ${ex + w * 0.4} ${ey - h * 0.4} ${ex + w} ${ey - h * 0.1} C${ex + w * 0.6} ${ey + h * 0.5} ${ex - w * 0.4} ${ey + h * 0.55} ${ex - w} ${ey} Z`;
+        const cid = `${id}e${n}`;
+        return `<clipPath id="${cid}"><path d="${o}"/></clipPath><path d="${o}" fill="${W}"/><g clip-path="url(#${cid})"><circle cx="${ex - w * 0.1}" cy="${ey + h * 0.2}" r="${h * 0.8}" fill="${GOLD}"/><path d="M${ex - w} ${ey - h} L${ex + w} ${ey - h} L${ex + w} ${ey + h * 0.05} Q${ex} ${ey - h * 0.25} ${ex - w} ${ey + h * 0.15} Z" fill="#b48a1c"/><ellipse cx="${ex - w * 0.1}" cy="${ey + h * 0.25}" rx="${h * 0.16}" ry="${h * 0.55}" fill="${K}"/><circle cx="${ex - w * 0.34}" cy="${ey + h * 0.05}" r="${h * 0.14}" fill="${W}"/></g>`
+            + `<path d="M${ex + w * 1.05} ${ey - h * 0.05} C${ex + w * 0.4} ${ey - h * 0.65} ${ex - w * 0.5} ${ey - h * 0.55} ${ex - w * 1.15} ${ey + h * 0.05} L${ex - w * 1.6} ${ey - h * 0.2} L${ex - w * 1.1} ${ey + h * 0.35} C${ex - w * 0.5} ${ey - h * 0.25} ${ex + w * 0.4} ${ey - h * 0.35} ${ex + w} ${ey + h * 0.1} Z" fill="${K}"/>`
+            + `<path d="M${ex - w * 0.8} ${ey + h * 0.4} C${ex - w * 0.3} ${ey + h * 0.7} ${ex + w * 0.4} ${ey + h * 0.6} ${ex + w * 0.75} ${ey + h * 0.3}" ${st(0.6)} fill="none"/>`;
+    };
+    s += eye(cx - 15, 99, 7, 6, 1) + eye(cx + 15, 99, 9, 7, 2);
+    s += `<path d="M${cx - 25} 84 C${cx - 19} 81.4 ${cx - 12} 81.4 ${cx - 7} 83 M${cx + 4} 82.6 C${cx + 12} 80 ${cx + 21} 80 ${cx + 28} 82.6" ${st(0.8)} fill="none"/>`;
+    s += `<path d="M${cx - 3} 102 C${cx - 4} 110 ${cx - 6} 114 ${cx - 5} 118 L${cx - 1} 118.6" ${st(0.8)} fill="none"/>`;
+    s += `<path d="M${cx - 10} 127 Q${cx - 4} 129 ${cx + 4} 126.4" ${st(1)} fill="none"/><path d="M${cx - 6} 129.6 Q${cx - 3} 131 ${cx} 129.6" ${st(1.4, '#b48a1c')} fill="none" opacity="0.5"/>`;
+    // white fringe with black strand lines, side locks
+    s += `<path d="M${cx - 32} 86 C${cx - 36} 40 ${cx - 16} 18 ${cx + 6} 18 C${cx + 30} 18 ${cx + 42} 40 ${cx + 38} 86 L${cx + 30} 76 L${cx + 22} 86 L${cx + 14} 72 L${cx + 4} 84 L${cx - 6} 72 L${cx - 14} 86 L${cx - 22} 74 Z" fill="${W}" ${st(1)}/>`;
+    s += `<path d="${Array.from({ length: 12 }, (_, i) => { const x = cx - 26 + i * 5.2; return `M${f(cx + (x - cx) * 0.3)} 24 Q${f(x)} 50 ${f(x + (r() - 0.5) * 3)} 74`; }).join(' ')}" ${st(0.5)} fill="none" opacity="0.7"/>`;
+    s += `<path d="M${cx - 32} 76 C${cx - 36} 112 ${cx - 34} 150 ${cx - 30} 180 L${cx - 20} 178 C${cx - 22} 148 ${cx - 24} 112 ${cx - 24} 86 Z M${cx + 36} 74 C${cx + 42} 112 ${cx + 42} 150 ${cx + 38} 182 L${cx + 28} 180 C${cx + 32} 148 ${cx + 32} 112 ${cx + 28} 86 Z" fill="${W}" ${st(0.9)}/>`;
+    // ears
+    s += `<path d="M${cx - 30} 34 L${cx - 46} -6 L${cx - 12} 22 Z M${cx + 32} 30 L${cx + 52} -8 L${cx + 16} 20 Z" fill="${W}" ${st(1.2)}/><path d="M${cx - 30} 28 L${cx - 40} 4 L${cx - 18} 22 Z M${cx + 30} 26 L${cx + 44} 2 L${cx + 22} 20 Z" fill="${G2}"/>`;
+    s += `<path d="M${cx - 34} 22 l-4 -8 M${cx + 36} 20 l4 -8" ${st(0.6)}/>`;
+    return s;
+}
+
+/** Yuki's three forms together, ghosted: cat, great root-kin, woman. Scene-space (400×250). */
+export function yukiForms3() {
+    return `<g opacity="0.55">${yukiTiger(250, 238, 1.5, -1)}</g>` + `<g opacity="0.85">${yukiCat(90, 236, 1.5)}</g>` + yukiHuman(170, 244, 1.5, 1);
 }
