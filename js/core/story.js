@@ -44,9 +44,16 @@ function gives(c) {
 const allFull = (g, c) => { const ids = gives(c); return ids.length > 0 && ids.every((id) => itemFull(g, id)); };
 const shown = (g, c) => !c.show || c.show(g);
 /** Choices still worth showing: hide full-stock gathering, unless that would leave nothing at all. */
+/** Why a choice can't be taken right now ('' if it can). */
+function lockReason(g, c) {
+    let reason = c.req ? c.req(g) : true;
+    if (reason === true && c.qi && g.james.qi < c.qi) reason = `needs ${c.qi} Qi`;
+    return reason === true ? '' : reason;
+}
+/** Choices still worth showing: hide full-stock gathering and anything unaffordable right now, unless that would leave nothing at all. */
 function visible(g, s) {
     const list = (s.choices || []).map((c, i) => ({ c, i })).filter(({ c }) => shown(g, c));
-    const kept = list.filter(({ c }) => !allFull(g, c));
+    const kept = list.filter(({ c }) => !allFull(g, c) && !lockReason(g, c));
     return kept.length ? kept : list;
 }
 /** A plain "go back" choice: no effects, leads to `home`. */
@@ -71,9 +78,8 @@ export function sceneView(g, scenes) {
     if (noGhosts.length) vis = noGhosts;
     const choices = vis
         .map(({ c, i }) => {
-            let reason = c.req ? c.req(g) : true;
-            if (reason === true && c.qi && g.james.qi < c.qi) reason = `needs ${c.qi} Qi`;
-            return { index: i, label: asText(c.text, g), tag: choiceTag(g, c), disabled: reason !== true, reason: reason === true ? '' : reason };
+            const reason = lockReason(g, c);
+            return { index: i, label: asText(c.text, g), tag: choiceTag(g, c), disabled: !!reason, reason };
         });
     // a crushing power gap offers the one-move finish next to the fight choice
     for (let k = choices.length - 1; k >= 0; k--) {

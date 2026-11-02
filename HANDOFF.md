@@ -194,6 +194,10 @@ The bible and the contract between the four part files are at the top of `js/sto
 - Combat: a critical hit does double damage (replaces the old +2 on a 6).
 - Re-balance: enemy HP factors per fight in `js/story/fight_tune.js` (`HP_TUNE`, applied in power.js `prepare`, HP only so DCs and crit odds stay). Tuned back to the v0.7.1 win rates (bal1 sim): collectors ~54%, thornback ~85%, wolves ~87%, Ya brawl ~84%, root-wyrm ~85%, Guardian ~63%, Shen Qiu ~57%.
 
+## v0.7.4 — no greyed-out choices
+
+- Choices you can't take right now (not enough Qi, a `req` not met) are hidden instead of greyed out (`lockReason`/`visible` in story.js); they come back when they're possible. A menu entry whose sub-menu has only "Back" left (after hiding) disappears too. If hiding would leave a scene empty, everything shows as before.
+
 ## Next steps (proposed, not built)
 
 1. **Act 2** (open).
