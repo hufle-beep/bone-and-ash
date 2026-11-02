@@ -55,7 +55,7 @@ const collectorsFight = (g) => {
     const militia = Math.min(2, g.flags.militia || 0) + (g.flags.spears ? 1 : 0);
     const enemies = [
         { name: 'Lu Han', hp: 12, dc: 5, atk: 6, dmg: 5, dr: 1 },
-        ...(g.flags.gao_dead || g.flags.gao_turned ? [] : [{ name: 'Gao Feng', hp: g.flags.gao_beaten ? 5 : 8, dc: 4, atk: 5, dmg: 4, dr: 1 }]),
+        ...(g.flags.gao_dead || g.flags.gao_broken || g.flags.gao_turned ? [] : [{ name: 'Gao Feng', hp: g.flags.gao_beaten ? 5 : 8, dc: 4, atk: 5, dmg: 4, dr: 1 }]),
         
     ].map((e) => grow(e, s, LU_GROWTH));
     // the hunters you drilled hold the others off and wear Lu Han down
@@ -359,7 +359,9 @@ A woman in a patched brown jacket, maybe mid-twenties, has her back to a boulder
 
 "Then she will serve the Sect for as many years as Heaven leaves her," he says, without heat. "That is the law. You should have thought of her before you laughed."
 
-Your Parallel Cognition is already labelling him. Qi like a coal under ash: a few rungs past your own. A cultivator. Of the local kind, and of the kind that likes it.`,
+Your Parallel Cognition is already labelling him. Qi like a coal under ash: a few rungs past your own. A cultivator.
+
+He glances at you once, the quick appraising glance cultivators here give everyone — *root? realm? threat?* — and finds nothing. No root. No Qi. Not a flicker. His eyes slide off you the way they'd slide off a fence post. You, apparently, do not register. Of the local kind, and of the kind that likes it.`,
         choices: [
             { text: '"Morning. Is this a private extortion or can anyone join?"', check: { skill: 'GU', dc: 4 }, to: 'gao_talked', fail: 'gao_fight_start' },
             { text: 'A bone needle through the back of his hand, before he knows you\'re here.', show: (g) => !!g.flags.sneak, qi: 3, check: { skill: 'Convergence Use', dc: 3 }, do: set('gao_hand'), to: 'gao_hand', fail: 'gao_fight_start' },
@@ -394,7 +396,9 @@ Crimson Robes — *Gao Feng, Outer Disciple of the Crimson Lotus Sect*, he infor
     },
     gao_fight_start: {
         id: 'gao_fight_start', title: 'Crimson Lotus', art: 'herb_girl', place: 'Blackroot Wilds — the herb slope',
-        text: `Gao Feng decides that whatever you are, you are alone, unarmed, and wearing a lab coat. All of that is true. None of it is the whole truth.`,
+        text: `Gao Feng decides that whatever you are, you are alone, unarmed, and wearing a lab coat. He has looked at you with his Qi-sense and felt nothing at all: a mortal. "Pock-Face," he says, without turning his head, "teach the peasant to kneel." The lackey grins and cracks his knuckles at you, which is the first time anyone has done that outside a film.
+
+All of it is true. None of it is the whole truth.`,
         choices: [{ text: 'Fight.', combat: gaoFight, to: 'gao_won' }],
     },
     gao_fled: {
@@ -415,7 +419,7 @@ The needle dissolves in his mouth halfway down the hill. You can hear him spit f
 
 That isn't sarcasm. You check. It isn't.`,
         choices: [
-            { text: 'Kill him. This world has rules and you\'ve just learned the first one.', do: (g) => { g.flags.gao_dead = true; bumpRel(g, 'Mei Lin', 6, 2); g.stats.kills += 1; return ['Gao Feng is dead. Something in you goes very quiet.']; }, to: 'gao_dead' },
+            { text: 'Break him. Not dead — you don\'t do that. Just finished.', do: (g) => { g.flags.gao_broken = true; bumpRel(g, 'Mei Lin', 6, 2); return ['Gao Feng will live. He will not cultivate again for a long time, and he will never forget who did it.']; }, to: 'gao_dead' },
             { text: 'Let him crawl home. You\'re a biologist, not an executioner.', do: (g) => { g.flags.gao_spared = true; return []; }, to: 'gao_spared' },
         ],
     },
@@ -436,14 +440,24 @@ By the time he's untangled himself, the three of you are fifty metres down the s
         choices: [{ text: 'Keep running. Then walk. Then breathe.', time: 20, to: 'mei_lin' }],
     },
     gao_dead: {
-        id: 'gao_dead', title: 'The First Rule', art: 'gao_down', place: 'Blackroot Wilds — the herb slope',
-        text: `It's quick. You make sure it's quick. The bone blade dissolves afterwards and leaves your hand clean, which feels obscene.
+        id: 'gao_dead', title: 'The First Rule, Amended', art: 'gao_down', place: 'Blackroot Wilds — the herb slope',
+        text: `You don't kill him. You're a biologist; you know exactly how much of a body you can break without ending it, and you go right up to that line and stop.
 
-Mei Lin goes through his sleeves with practised efficiency and comes up with a pouch of rough grey pills and a jade token. She hands you the pouch. "Qi-gathering pills. Outer sect garbage. You'll want them."
+A needle through each of the three meridian knots in his sword arm, precise as a lab protocol. You feel the Qi in them crack like ice on a puddle. Then you take the arm itself, at the elbow, the wrong way, and the sound he makes is not dignified at all. He'll heal. He will not hold a sword, or gather Qi into that arm, for a very long time.
 
-"I really won't," you say. And then, because she's watching you with an expression you can't read: "I'll explain. It's a long story. It has a cat in it."`,
-        enter: (g) => { addItem(g, 'beast_core', 1); return ['+1 Murky beast core (from Gao Feng\'s pouch).']; },
-        choices: [{ text: 'Go with her.', to: 'mei_lin' }],
+He lies in the herbs, white, sweating, staring at you. "Mortal," he whispers, as if the word has betrayed him. "You're a *mortal*. I'd feel it if you weren't. There's nothing in you. *Nothing.*"
+
+"Yes," you agree. "Think about that on the way home."
+
+Mei Lin goes through his sleeves while he lies there and takes a pouch of rough grey pills and a jade token. She hands you the pouch. Her hands are not quite steady.
+
+"I told you to kill him," she says, very quietly. "Now he goes home alive, and broken, and he tells them a mortal did this. Do you understand what you've *done*?" She looks at you as if you've grown a second head. "In this world, the dead stay quiet. The shamed never do."
+
+"I'll take my chances with loud," you say. "I don't do the other thing. Not to people."
+
+She stares at you for a long moment. Then, under her breath, something that might be *idiot* and might, possibly, be *thank you*.`,
+        enter: (g) => { g.flags.gao_broken = true; addItem(g, 'beast_core', 1); return ['+1 Murky beast core (from Gao Feng\'s pouch). Mei Lin keeps his jade token.']; },
+        choices: [{ text: 'Go with her. Behind you, Gao Feng is still swearing — slowly, and in great detail — what his Sect will do to you.', to: 'mei_lin' }],
     },
     gao_spared: {
         id: 'gao_spared', title: 'Mercy, Probably a Mistake', art: 'gao_down', place: 'Blackroot Wilds — the herb slope',
@@ -461,7 +475,7 @@ She looks at you for a long moment, and something in her face shifts — not agr
         enter: (g) => { addItem(g, 'spirit_grass', 1); return ['+1 Ninefold spirit grass (a thank-you, or a test).']; },
         text: `Up close she's all edges: sharp cheekbones, sharp eyes, a sharp mouth that has clearly been getting her into trouble for years. Her hands are scarred from herb-knives and her jacket has been patched by someone who cared more about warmth than looks. She is studying you like you're a plant she can't classify.
 
-"You have no spirit root," she says. "I'd feel it. You eat no pills — I can smell pill-eaters a li away. And you made *bone* out of *air*." She holds out a stem of the glowing grass. "Eat this."
+"You have no spirit root," she says. "I'd feel it. I can't feel *anything* in you — no root, no Qi, not even the dirt-level hum every farmer has. To my senses you're a stone in a coat. You eat no pills — I can smell pill-eaters a li away. And you made *bone* out of *air*." She says it like an accusation. "That isn't possible. Mortals can't do that. And you are a mortal. I'd stake my life on it, and I'd lose." She holds out a stem of the glowing grass. "Eat this."
 
 You take it. It hums against your skin, a little hungry, a little vicious — Qi packed tight with the same foul residue as everything else, bound up in something that wants to be swallowed.
 
@@ -537,7 +551,7 @@ ${g.flags.long ? 'The tribute is due in three days, at dawn. You can feel the wh
         id: 'elder', title: 'Old Wen', art: 'elder', place: 'Ashfall Hamlet — the elder\'s house',
         text: (g) => `Old Wen is ninety, blind in one eye, and pours tea with the steadiness of a man who has outlived three sect masters and plans to outlive a fourth.
 
-"You don't eat pills," he says, before you've finished sitting down. "You don't smell of grass. And the beast on your shoulder has twelve meridians open. In ninety years I have seen that only in the heirs of great sects." He sips. "I would know what you are before the Crimson Lotus does. They will want to cut you open to learn it."
+"You don't eat pills," he says, before you've finished sitting down. "You don't smell of grass. And when I reach for you with what little sense ninety years have left me, I find nothing. No root. No sea of Qi. As if there were no one sitting in that chair." He frowns at the chair. "Yet Mei Lin says you made a needle out of air. One of those things is untrue, and I am too old to think it is her. And the beast on your shoulder has twelve meridians open. In ninety years I have seen that only in the heirs of great sects." He sips. "I would know what you are before the Crimson Lotus does. They will want to cut you open to learn it."
 
 "That seems to be the consensus."
 
@@ -656,13 +670,13 @@ Much later, the lamp is out, the hay is everywhere, and Mei Lin is asleep with h
     /* ================= DAY 3 ================= */
     tribute: {
         id: 'tribute', title: 'The Collectors', art: 'collectors', place: 'Ashfall Hamlet — the tribute post',
-        text: (g) => `They come with the sun: four men in crimson, walking up the road like they own it, because they do. At their head, a tall man in deeper red with a sword on his back and a face as calm as a frozen pond — *Inner Disciple Lu Han*, the whisper goes round. ${g.flags.gao_dead ? 'Gao Feng is not with them, and they have noticed.' : `Beside him, ${g.flags.gao_beaten ? 'bandaged, his face a mask of cold, formal hatred' : 'his face carefully blank, his eyes not'}, is Gao Feng.`}
+        text: (g) => `They come with the sun: four men in crimson, walking up the road like they own it, because they do. At their head, a tall man in deeper red with a sword on his back and a face as calm as a frozen pond — *Inner Disciple Lu Han*, the whisper goes round. ${g.flags.gao_dead || g.flags.gao_broken ? 'Gao Feng is with them — carried in a litter at the back, his sword arm bound to his chest, his face grey. He sees you and says nothing. His eyes say everything.' : `Beside him, ${g.flags.gao_beaten ? 'bandaged, his face a mask of cold, formal hatred' : 'his face carefully blank, his eyes not'}, is Gao Feng.`}
 
 The village is lined up at the tribute post with its baskets of grass and grain. ${g.flags.healed === true ? 'The mother of the boy you healed is standing very close behind you. So is half the street.' : ''}
 
 Lu Han's gaze passes over the baskets, over the people, and stops on you. On Yuki. It stays there.
 
-"Interesting," he says. "No root. No pill-smell. And yet the beast on your shoulder has its meridians open like a sect heir's." He tilts his head. "Kneel, stranger, and come with us. The Sect Master will wish to dissect you personally. It is an honour. Few are offered it."
+"Interesting," he says. He reaches for you with his Qi-sense — you feel it pass over you like a draught under a door — and finds nothing. "No root. No pill-smell. No cultivation at all. A mortal." His gaze moves to Yuki, and sharpens. "And yet the beast on your shoulder has its meridians open like a sect heir's. A mortal holding a treasure he cannot possibly understand." He tilts his head. "Kneel, stranger, and come with us. The Sect Master will wish to dissect you personally. It is an honour. Few are offered it."
 
 "I've been offered worse," you say. "Not recently."`,
         choices: [
@@ -790,7 +804,9 @@ SCENES.breakthrough = {
                 ? `You know what this is. Mei Lin told you, in her flat weather-report voice: *the sky decides you're impure and tries to burn you clean. Most people it just burns.* Tribulation. Heaven's verdict. It has come for you.`
                 : `You have no word for this. Your nine threads cross-reference everything you know about weather, atmospheric charge and the physics of a world you landed on less than a week ago, and come back with nothing. But the shape of it is obvious enough. The lightning isn't wandering. It's *aiming*. This is a judgment, and the defendant is you.`;
             const witness = seen
-                ? `Ashfall saw it. Every soul in the village is standing in the street with their faces turned up, and nobody is speaking. Somebody's grandmother is on her knees in the dust, forehead to the ground, praying in a fast, shaking whisper. The hunters have their hands on their spears as if a spear could help. Old Wen stands in his doorway with his pipe gone cold in his hand, and when he finally looks at you, it is the look of a man revising, very carefully, everything he thought he knew about Heaven.
+                ? `Ashfall saw it. Every soul in the village is standing in the street with their faces turned up, and nobody is speaking. Somebody's grandmother is on her knees in the dust, forehead to the ground, praying in a fast, shaking whisper. The hunters have their hands on their spears as if a spear could help. And the thing that frightens them most is this: they can't *feel* you. Every cultivator in the village is reaching for you with their Qi-sense right now — you can feel the brush of it, a dozen nervous fingertips — and finding exactly what they've always found. Nothing. A mortal, sitting in the dust, while Heaven argues with him and loses.
+
+Old Wen stands in his doorway with his pipe gone cold in his hand, and when he finally looks at you, it is the look of a man revising, very carefully, everything he thought he knew about Heaven.
 
 "A tribulation that refuses its own judgment," he says to no one, quietly and formally, the way you'd read out a death in the family. "This has not happened in the history of the mountain."
 

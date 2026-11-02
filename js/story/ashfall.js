@@ -82,14 +82,14 @@ Then she's quiet for a long time, and then she leans her shoulder against yours,
 
     /* ---------- the night: quiet, or Gao Feng's doing (night 5) ---------- */
     village_night: {
-        id: 'village_night', title: 'Night in Ashfall', art: (g) => (vday(g) === 2 && !g.flags.night5_done ? (g.flags.gao_dead ? 'token' : g.flags.gao_spared ? 'gao_window' : 'arson') : 'village_night'), place: `${P} — the herb loft`,
+        id: 'village_night', title: 'Night in Ashfall', art: (g) => (vday(g) === 2 && !g.flags.night5_done ? ((g.flags.gao_dead || g.flags.gao_broken) ? 'token' : g.flags.gao_spared ? 'gao_window' : 'arson') : 'village_night'), place: `${P} — the herb loft`,
         text: (g) => {
             if (vday(g) !== 2 || g.flags.night5_done) return 'The herb loft smells of mint and drying ginseng. Below, the house breathes. Yuki takes the exact centre of your chest and the exact centre of your sleep, and you let her.';
-            if (g.flags.gao_dead) return `Mei Lin shakes you awake in the dark. She has something in her fist, wrapped in cloth: Gao Feng's jade token, the one she took from his sleeve.
+            if (g.flags.gao_dead || g.flags.gao_broken) return `Mei Lin shakes you awake in the dark. She has something in her fist, wrapped in cloth: Gao Feng's jade token, the one she took from his sleeve while he lay in the herbs with his arm on backwards.
 
 It's warm. It's *pulsing*, faint and slow, like something with a heartbeat.
 
-"Sect tokens talk to each other," she whispers. "If Lu Han carries the other half, he'll know where Gao died. And he'll know who was standing next to him."`;
+"Sect tokens talk to each other," she whispers. "Gao reached home today. They'll have heard what he says happened — a mortal, no root, no Qi, broke a disciple of the Crimson Lotus like a twig." She doesn't smile. "Nobody will believe him. That's worse. They'll want to see for themselves. And this thing will show them exactly where to look."`;
             if (g.flags.gao_spared) return `A pebble hits the shutter. Then another.
 
 Below in the lane, in the moonlight, alone, stands Gao Feng. His hand is bandaged. His crimson robe is grey with road dust. He looks younger than he did on the herb slope, and much more frightened.
@@ -103,15 +103,15 @@ Gao Feng's lackey has come to settle Gao Feng's grudge. With a torch. At night. 
         },
         choices: [
             { text: 'Sleep.', show: (g) => vday(g) !== 2 || !!g.flags.night5_done, to: 'village_morning' },
-            // Gao dead: the token
-            { text: 'Crush the token in a fist of bone. Silence it.', show: (g) => vday(g) === 2 && !g.flags.night5_done && !!g.flags.gao_dead, qi: 4, check: { skill: 'Convergence Use', dc: 4 }, do: (g) => { g.flags.night5_done = true; g.flags.token_silenced = true; return ['The jade cracks with a sound like a bell underwater. The pulse stops. Lu Han won\'t know where Gao died.']; }, failDo: (g) => { g.flags.night5_done = true; addItem(g, 'sect_token', 1); return ['The bone slides off it. It keeps pulsing. You put it in the hammerspace and hope folded space muffles it.']; }, to: 'village_morning' },
-            { text: 'Carry it far into the forest and bury it in the mire.', show: (g) => vday(g) === 2 && !g.flags.night5_done && !!g.flags.gao_dead, time: 120, check: { skill: 'GU', dc: 3 }, do: (g) => { g.flags.night5_done = true; g.flags.token_silenced = true; return ['Let Lu Han look for his cousin in a swamp.']; }, failDo: (g) => { g.flags.night5_done = true; g.james.hp -= 3; return ['You bury it, but something in the mire bites you for the trouble: −3 HP.']; }, to: 'village_morning' },
+            // Gao broken (or dead, old saves): the token
+            { text: 'Crush the token in a fist of bone. Silence it.', show: (g) => vday(g) === 2 && !g.flags.night5_done && !!(g.flags.gao_dead || g.flags.gao_broken), qi: 4, check: { skill: 'Convergence Use', dc: 4 }, do: (g) => { g.flags.night5_done = true; g.flags.token_silenced = true; return ['The jade cracks with a sound like a bell underwater. The pulse stops. Lu Han won\'t be able to follow it here.']; }, failDo: (g) => { g.flags.night5_done = true; addItem(g, 'sect_token', 1); return ['The bone slides off it. It keeps pulsing. You put it in the hammerspace and hope folded space muffles it.']; }, to: 'village_morning' },
+            { text: 'Carry it far into the forest and bury it in the mire.', show: (g) => vday(g) === 2 && !g.flags.night5_done && !!(g.flags.gao_dead || g.flags.gao_broken), time: 120, check: { skill: 'GU', dc: 3 }, do: (g) => { g.flags.night5_done = true; g.flags.token_silenced = true; return ['Let Lu Han look for his cousin in a swamp.']; }, failDo: (g) => { g.flags.night5_done = true; g.james.hp -= 3; return ['You bury it, but something in the mire bites you for the trouble: −3 HP.']; }, to: 'village_morning' },
             // Gao spared: the visit
             { text: '"Because I\'m not from here. Where I\'m from, we don\'t kill people for being stupid. Go home, Gao."', show: (g) => vday(g) === 2 && !g.flags.night5_done && !!g.flags.gao_spared, check: { skill: 'GU', dc: 3 }, do: (g) => { g.flags.night5_done = true; g.flags.gao_turned = true; return ['He stares at you for a long time. Then he tells you everything: Lu Han is bringing four men, not two. He wants you alive. He thinks you\'re a hidden sect\'s heir. "Let him keep thinking it," Gao says, and is gone.']; }, failDo: (g) => { g.flags.night5_done = true; g.flags.gao_warned = true; return ['He doesn\'t believe you, but he warns you anyway: Lu Han wants you alive. Then he\'s gone.']; }, to: 'village_morning' },
             { text: 'A bone needle into the post an inch from his ear. "Ask me again and I\'ll explain it slower."', show: (g) => vday(g) === 2 && !g.flags.night5_done && !!g.flags.gao_spared, qi: 3, do: (g) => { g.flags.night5_done = true; g.flags.gao_warned = true; return ['He goes white and tells you, very fast, that Lu Han wants you alive. Then he runs.']; }, to: 'village_morning' },
             // Gao alive and humiliated: arson
-            { text: 'Drop out of the loft into the middle of them.', show: (g) => vday(g) === 2 && !g.flags.night5_done && !g.flags.gao_dead && !g.flags.gao_spared, combat: arson, to: 'arson_won' },
-            { text: 'Wake the street. Let forty houses deal with three men.', show: (g) => vday(g) === 2 && !g.flags.night5_done && !g.flags.gao_dead && !g.flags.gao_spared, check: { skill: 'GU', dc: 4, bonus: (g) => ((g.rel.Village?.f || 0) >= 20 ? 2 : 0) }, do: (g) => { g.flags.night5_done = true; bumpRel(g, 'Village', 6, 0); return ['Shutters bang open all down the lane. Pock-Face and his friends find themselves facing pitchforks, and leave with fewer teeth.']; }, fail: 'arson_start', to: 'village_morning' },
+            { text: 'Drop out of the loft into the middle of them.', show: (g) => vday(g) === 2 && !g.flags.night5_done && !(g.flags.gao_dead || g.flags.gao_broken) && !g.flags.gao_spared, combat: arson, to: 'arson_won' },
+            { text: 'Wake the street. Let forty houses deal with three men.', show: (g) => vday(g) === 2 && !g.flags.night5_done && !(g.flags.gao_dead || g.flags.gao_broken) && !g.flags.gao_spared, check: { skill: 'GU', dc: 4, bonus: (g) => ((g.rel.Village?.f || 0) >= 20 ? 2 : 0) }, do: (g) => { g.flags.night5_done = true; bumpRel(g, 'Village', 6, 0); return ['Shutters bang open all down the lane. Pock-Face and his friends find themselves facing pitchforks, and leave with fewer teeth.']; }, fail: 'arson_start', to: 'village_morning' },
         ],
     },
     arson_start: {

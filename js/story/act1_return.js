@@ -678,7 +678,7 @@ Nobody in Ashfall breathes. Nobody on the road breathes. Three hundred years, an
 
 He considers you. "Then I go home in disgrace, and the Sect Master comes anyway, a little later, a little angrier, and I am a laughing-stock for the rest of my life." His mouth moves, very slightly. "I think you will let me live. You have that face."
 
-You let him live. ${likesYa(g) ? 'Ya swears at you for an hour about it.' : ''} His disciples carry him down the road. He does not look back. ${luHanHere(g) ? 'Lu Han does — once, at you, with an expression you can\'t read.' : ''}
+You let him live. You don't let him leave whole: three needles, very precise, through the meridian knots of his right arm while he watches, and one more through the tendon of the hand that holds the fan. He will cultivate again. Not this season. "I do not kill people," you tell him. "I find it lets them think about things." ${likesYa(g) ? 'Ya swears at you for an hour about it.' : ''} His disciples carry him down the road. He does not look back. ${luHanHere(g) ? 'Lu Han does — once, at you, with an expression you can\'t read.' : ''}
 
 Ashfall has just declared war on the Crimson Lotus. Everyone in the street knows it. Nobody says it. Old Wen lights his pipe with steady hands.`,
         choices: [{ text: 'Breathe out.', to: 'a1_end' }],
