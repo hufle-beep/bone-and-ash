@@ -134,20 +134,20 @@ export function choose(g, scenes, index) {
     if (c.check) {
         roll = rollCheck(g, c.check.skill, c.check.dc, c.check.bonus ? c.check.bonus(g) : 0);
         ok = roll.success;
-        lines.push(`${roll.skill} ${roll.value} + 🎲${roll.die} = ${roll.total} vs DC ${roll.dc} — ${ok ? 'success' : 'failure'}${roll.crit ? ' (six!)' : roll.fumble ? ' (one…)' : ''}`);
+        lines.push(`${roll.skill} ${roll.value} + 🎲${roll.die} = ${roll.total} vs DC ${roll.dc} — ${ok ? 'success' : 'failure'}${roll.crit ? ' (critical!)' : roll.six ? ' (six!)' : roll.fumble ? ' (one…)' : ''}`);
         if (c.xp !== false) lines.push(...awardXp(g, c.check.skill, c.check.band || 'standard', { fail: !ok }));
     }
     if (c.time) lines.push(...advance(g, c.time));
     takeCapNotes();
     if (ok && c.do) {
-        // a six on a hunt or forage: a double haul
+        // a critical hunt or forage (total ≥ 2 × DC): a double haul
         const crit = roll?.crit && gives(c).length > 0;
         const before = crit ? { ...g.inventory } : null;
         if (crit) setLootMult(2);
         try { lines.push(...(c.do(g, roll) || [])); } finally { setLootMult(1); }
         if (crit) {
             const extra = Object.keys(g.inventory).map((id) => [id, (g.inventory[id] || 0) - (before[id] || 0)]).filter(([, d]) => d > 0);
-            if (extra.length) lines.push(`Six! A double haul — in total: ${extra.map(([id, d]) => `+${d} ${itemNames[id]?.name || id}`).join(', ')}.`);
+            if (extra.length) lines.push(`Critical! A double haul — in total: ${extra.map(([id, d]) => `+${d} ${itemNames[id]?.name || id}`).join(', ')}.`);
         }
     }
     for (const id of new Set(takeCapNotes())) lines.push(`Hammerspace: ${itemNames[id]?.name || id} is full — the rest stays behind.`);

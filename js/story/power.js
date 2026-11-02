@@ -23,6 +23,7 @@
  * James never kills humans: he knocks them out and very nearly cripples them. Beaten humans grovel or swear revenge.
  */
 import { skillCheck, combatHooks } from '../core/game.js';
+import { HP_TUNE } from './fight_tune.js';
 
 export const DC_CAP = 7;
 export const ATK_CAP = 9;
@@ -52,7 +53,9 @@ export function lfScale(g, enemies) {
 /** The hook the combat engine calls on every encounter. */
 export function prepare(g, enc) {
     if (enc._prepared) return enc;
-    const enemies = lfScale(g, enc.enemies);
+    const f = HP_TUNE[enc.id] || 1;
+    const tuned = f !== 1 ? enc.enemies.map((e) => ({ ...e, hp: Math.max(1, Math.round(e.hp * f)) })) : enc.enemies;
+    const enemies = lfScale(g, tuned);
     const degree = degreeOf(g, enemies);
     const st = STOMP[enc.id];
     const keepTail = enc.intro?.includes('Ashfall does not kneel') ? ' Behind you, Ashfall does not kneel.' : '';

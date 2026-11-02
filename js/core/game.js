@@ -177,7 +177,7 @@ export function rollCheck(g, skillName, dc, bonus = 0) {
     g.stats.checks += 1;
     const success = die === 6 ? true : die === 1 ? total >= dc + 2 : total >= dc;
     if (success) g.stats.wins += 1;
-    return { skill: actingName(g, skillName), value, die, total, dc, success, crit: die === 6, fumble: die === 1 };
+    return { skill: actingName(g, skillName), value, die, total, dc, success, six: die === 6, crit: success && dc > 0 && total >= 2 * dc, fumble: die === 1 };
 }
 
 /* ---------------- time ---------------- */
@@ -416,10 +416,10 @@ export function combatStep(g, actionId, targetIdx = 0) {
             const r = rollCheck(g, act.skill, dc);
             lines.push(`${act.label}: ${r.skill} ${r.value} + 🎲${r.die} = ${r.total} vs DC ${dc} — ${r.success ? 'hit' : 'miss'}`);
             if (r.success) {
-                let dmg = dmgRoll(g, act.dmg) + (r.crit ? 2 : 0);
+                let dmg = dmgRoll(g, act.dmg) * (r.crit ? 2 : 1);
                 dmg = Math.max(0, dmg - (target.dr || 0));
                 target.hp -= dmg;
-                lines.push(`  ${target.name} takes ${dmg}${r.crit ? ' (clean hit)' : ''}.`);
+                lines.push(`  ${target.name} takes ${dmg}${r.crit ? ' (critical — double damage)' : ''}.`);
                 if (act.stagger && target.hp > 0) { target.staggered = true; lines.push(`  ${target.name} staggers.`); }
             }
         }

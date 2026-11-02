@@ -187,9 +187,12 @@ The bible and the contract between the four part files are at the top of `js/sto
 - **Hammerspace caps** (`game.js`): 99 of every item, 999 of `beast_core` and `spirit_grass` (`BIG_CAP`). `addItem` stops at the cap and the turn shows "Hammerspace: X is full". A gathering choice whose items are all at cap is hidden (items read from its `do` source), unless that would empty the scene. Old saves above a cap keep their pieces.
 - Test: 200 walks with every common item at its cap (no dead ends).
 
-## v0.7.2 — critical hauls
+## v0.7.2–0.7.3 — criticals
 
-- A natural 6 on any hunt or forage check (a choice with a check whose `do` adds items) doubles every item it gives: `setLootMult(2)` around the `do` in story.js; the turn shows "Six! A double haul — in total: …". Caps still apply. Average loot +17%.
+- **Critical = total (skill + d6 + bonus) ≥ 2 × DC** on a success (`rollCheck` → `crit`; `six` marks a natural 6, which still always succeeds but no longer crits).
+- Hunt/forage: a critical doubles every item the choice gives (`setLootMult(2)` around its `do`; "Critical! A double haul — in total: …"). Caps still apply. Measured critical rate on hunt/forage rolls: prologue ~44%, Act 1 ~70%, Long Forest ~89%.
+- Combat: a critical hit does double damage (replaces the old +2 on a 6).
+- Re-balance: enemy HP factors per fight in `js/story/fight_tune.js` (`HP_TUNE`, applied in power.js `prepare`, HP only so DCs and crit odds stay). Tuned back to the v0.7.1 win rates (bal1 sim): collectors ~54%, thornback ~85%, wolves ~87%, Ya brawl ~84%, root-wyrm ~85%, Guardian ~63%, Shen Qiu ~57%.
 
 ## Next steps (proposed, not built)
 
