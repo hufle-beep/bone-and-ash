@@ -25,7 +25,7 @@ const fights = {};
 for (let run = 0; run < 2000; run++) {
     const g = ensureBars(newGame(run + 1));
     let steps = 0;
-    for (; steps < 400; steps++) {
+    for (; steps < 2500; steps++) {
         seen.add(g.scene);
         const v = sceneView(g, SCENES);
         assert(typeof v.text === 'string' && v.text.length > 40, `text renders in ${g.scene}`);
@@ -50,7 +50,7 @@ for (let run = 0; run < 2000; run++) {
         assert(Number.isFinite(g.james.hp) && g.james.hp >= 0 && Number.isFinite(g.james.qi), `bars finite in ${g.scene}`);
     }
     maxSteps = Math.max(maxSteps, steps);
-    assert(steps < 400, `run ${run} finishes`);
+    assert(steps < 2500, `run ${run} finishes`);
 }
 const unreached = Object.keys(SCENES).filter((k) => !seen.has(k));
 assert(unreached.length === 0, `every scene reachable (unreached: ${unreached.join(', ')})`);

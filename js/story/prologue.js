@@ -8,6 +8,11 @@ import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, clockPar
 import { forestScale, villageScale, grow, NEW_ITEMS } from './common.js';
 import { WILDS, nightNext } from './wilds.js';
 import { ASHFALL, hubOf, nextEvening } from './ashfall.js';
+import { ACT1_ITEMS } from './act1_common.js';
+import { FALLOUT, BREAK_HUBS as B1 } from './act1_fallout.js';
+import { BLACKROOT, BREAK_HUBS as B2 } from './act1_blackroot.js';
+import { HEART, BREAK_HUBS as B3 } from './act1_heart.js';
+import { RETURN, BREAK_HUBS as B4 } from './act1_return.js';
 
 const once = (flag) => (g) => !g.flags[flag];
 const set = (...flags) => (g) => { for (const f of flags) g.flags[f] = true; return []; };
@@ -81,6 +86,7 @@ export const ITEMS = {
     jackal_fang: { name: 'Ashfang fangs', note: 'Trophies. Yuki keeps trying to bury them.' },
     beast_core: { name: 'Murky beast core', note: 'Locals swallow these to cultivate. You\'d rather swallow a battery.' },
     ...NEW_ITEMS,
+    ...ACT1_ITEMS,
 };
 
 export const SCENES = {
@@ -747,8 +753,7 @@ You're forty. You have a fresh doctorate, a cat, an empty closet the size of a u
 "Sure," you say. "What could possibly go wrong."
 
 — **End of the Prologue.** —`,
-        end: true,
-        choices: [],
+        choices: [{ text: 'Act 1: The Hearth Tree.', do: (g) => { const d = Math.floor(g.minutes / 1440) + 1; g.minutes = Math.max(d, 7) * 1440 + 6 * 60; g.james.hp = Math.max(g.james.hp, 1); return []; }, to: 'fo_start' }],
     },
 };
 
@@ -761,7 +766,7 @@ function cookMealMorning(g) {
     return out;
 }
 
-Object.assign(SCENES, WILDS, ASHFALL);
+Object.assign(SCENES, WILDS, ASHFALL, FALLOUT, BLACKROOT, HEART, RETURN);
 
 /* ---------- breakthrough: offered at calm moments whenever Saturation is 100% ---------- */
 const VILLAGE_SCENES = ['village', 'ashfall', 'supper'];
@@ -826,7 +831,7 @@ ${seen
     },
     choices: [{ text: 'Get up.', to: (g) => g.flags.bt_return || 'stream' }],
 };
-for (const id of ['stream', 'wilds', 'camp', 'night', 'village', 'ashfall', 'supper']) {
+for (const id of ['stream', 'wilds', 'camp', 'night', 'village', 'ashfall', 'supper', ...B1, ...B2, ...B3, ...B4]) {
     SCENES[id].choices.unshift({
         text: (g) => `Break through to ${realmName(g.james.realm + 1)}. (Saturation 100%.)`,
         show: canBreakThrough,
