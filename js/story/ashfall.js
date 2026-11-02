@@ -42,17 +42,19 @@ export const ASHFALL = {
                 ? 'You find her house by asking. You apologise on her doorstep, properly, no sarcasm. She looks at you for a long moment, then lets you in, which you did not deserve, and puts a bowl in front of you, which you deserved even less.'
                 : 'Mei Lin\'s house is two rooms and a herb loft, and her mother is a tiny fierce woman who looks at you once and starts adding more millet to the pot.'}
 
-"Three days," the mother says, to nobody, ladling. "Three days and they come up that road. Every year." She puts the biggest piece of fish in your bowl and looks at Yuki, then at you. "You can sleep in the loft. The cat can sleep wherever she likes. Cats do."
+"Three days," the mother says, to nobody, ladling. "Three days and they come up that road. Every year." She puts the biggest piece of fish in your bowl and looks at Yuki, then at you. "You will sleep in the loft. It is not proper. It is necessary." She regards Yuki for a long moment and inclines her head to her, very slightly. "The spirit-beast will sleep where it chooses. One does not command such creatures."
 
 Yuki, on the warm stove, closes her eyes in total agreement.`
             : `Second supper at Mei Lin's. Her mother has stopped watching you like a fox in the henhouse and started watching you like a fox she might be able to use.
 
 Tonight she talks. About Mei Lin's father, who had a spirit root and went up the road with the collectors when Mei Lin was six. About the letter that came back four years later: *Tribulation. Honoured.* About the box with nothing in it that they buried.
 
-Mei Lin clears the bowls very loudly through all of this. When her mother is done, she says, without turning round, "He'd have liked you. He was an idiot too."`),
+Mei Lin clears the bowls very loudly through all of this. When her mother is done, she says, without turning round, "He'd have liked you. He was an idiot too."
+
+"*Mei Lin.*" Her mother says it once, like a door shutting. "You do not speak of your father so." Mei Lin doesn't apologise. She doesn't stop smiling, either, and she doesn't look at her mother for the rest of the meal.`),
         choices: [
             { text: 'Climb out onto the roof with Mei Lin and watch the stars come out.', do: (g) => { bumpRel(g, 'Mei Lin', 3, 4); return []; }, time: 60, to: 'supper_roof' },
-            { text: 'Help her mother with the dishes and the gossip.', do: (g) => { bumpRel(g, 'Village', 3, 0); bumpRel(g, 'Mei Lin', 2, 0); return ['Her mother tells you who in Ashfall owes whom, and who is sleeping with whom, and who you should never let near a knife.']; }, time: 60, to: 'village_night' },
+            { text: 'Help her mother with the dishes, and listen.', do: (g) => { bumpRel(g, 'Village', 3, 0); bumpRel(g, 'Mei Lin', 2, 0); return ['Her mother tells you, in a low and formal voice, which families owe the Sect what, which houses have lost children to the road, and which neighbours would sell you for a sack of millet. She does not smile once. It is the most useful hour you\'ve spent on this world.']; }, time: 60, to: 'village_night' },
             { text: 'Go up to the loft early. Tomorrow will want everything you have.', to: 'village_night' },
         ],
     },
@@ -92,7 +94,7 @@ It's warm. It's *pulsing*, faint and slow, like something with a heartbeat.
 
 Below in the lane, in the moonlight, alone, stands Gao Feng. His hand is bandaged. His crimson robe is grey with road dust. He looks younger than he did on the herb slope, and much more frightened.
 
-"I'm not here to fight," he says, very quietly. "I'm here because you let me live, and I can't work out why, and it's driving me mad."`;
+"I have not come to fight," he says, very quietly, and bows — a real bow, the full depth, to a man in a lab coat at a window. "You spared my life. That is a debt. I do not know why you did it, and a debt I do not understand is a debt I cannot repay. It gives me no rest."`;
             return `Yuki wakes you with her claws and a single, urgent thought: *fire.*
 
 Down in the lane, torchlight. Three men creeping toward the side of the house where Mei Lin's herb loft — where you are sleeping — sits on its dry wooden posts. The one in front has a pock-marked face you remember from the herb slope.
@@ -122,7 +124,7 @@ Gao Feng's lackey has come to settle Gao Feng's grudge. With a torch. At night. 
         enter: (g) => { g.flags.night5_done = true; g.flags.arson_beaten = true; bumpRel(g, 'Village', 10, 0); bumpRel(g, 'Mei Lin', 4, 3); return []; },
         text: `By the time the shutters open, it's over: two thugs running, Pock-Face face-down in the lane with a bone needle pinning his sleeve to the dirt, and his torch hissing out in the gutter.
 
-Half the street comes out in nightclothes. Nobody says anything. Then Mei Lin's mother walks up and kicks Pock-Face, once, very precisely, and goes back to bed.
+Half the street comes out in nightclothes. Nobody says anything. Then Mei Lin's mother walks up in her nightclothes, looks down at Pock-Face, and says, in the voice of a magistrate passing sentence: "You came by night to burn a widow's house. Your ancestors will hear of it from me." She goes back to bed. Pock-Face, you notice, is crying.
 
 That's the moment Ashfall decides you're theirs.`,
         choices: [{ text: 'Back to the loft.', to: 'village_morning' }],
@@ -179,7 +181,7 @@ ${pantry(g)} ${g.james.satiety < 30 ? 'You are hungry.' : ''} ${g.james.hp < jam
             { text: 'Hunt beyond the oak hollow.', show: (g) => daily('far')(g) && hour(g) < 16, time: 60, to: 'far_hunt' },
             { text: 'Scout the tribute road.', show: (g) => vday(g) === 3 && !g.flags.scouted_try && hour(g) < 17, time: 30, to: 'scout' },
             { text: 'Walk with Mei Lin at sunset.', show: (g) => daily('walk')(g) && hour(g) >= 15 && hour(g) < 20, time: 30, to: 'mei_walk' },
-            { text: 'Eat at the communal pot.', show: (g) => daily('pot')(g) && g.james.satiety < 80 && !late(g), time: 30, do: (g) => { markDaily(g, 'pot'); eat(g, 25); return ['Barley and bean stew, ladled by a woman who calls you "the tall disaster": +25 satiety.']; }, to: 'ashfall' },
+            { text: 'Eat at the communal pot.', show: (g) => daily('pot')(g) && g.james.satiety < 80 && !late(g), time: 30, do: (g) => { markDaily(g, 'pot'); eat(g, 25); return ['Barley and bean stew, ladled by a woman who addresses you as "honoured guest" in a tone that makes clear she has not yet decided whether you are one: +25 satiety.']; }, to: 'ashfall' },
             { text: 'Eat something from the hammerspace.', show: (g) => foodCount(g) > 0 && g.james.satiety < 85, time: 15, do: (g) => eatBest(g, { fire: true }), to: 'ashfall' },
             { text: 'Chew a ghost-gill (+8 HP).', show: (g) => hasItem(g, 'ghost_gill') && g.james.hp < jamesHpMax(g), do: (g) => { addItem(g, 'ghost_gill', -1); g.james.hp = Math.min(jamesHpMax(g), g.james.hp + 8); return ['+8 HP. It still tastes like a cellar.']; }, to: 'ashfall' },
             { text: 'Cultivate behind the shrine: one sit, 10 Qi.', show: (g) => !late(g), req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`] : []; }, to: 'ashfall' },
@@ -202,7 +204,7 @@ ${g.flags.mei_bruised ? 'Her split lip has scabbed over. She catches you looking
 She talks about her father again, a little. About how he used to bring her up here and name every plant wrong on purpose, so she'd correct him.`),
         choices: [
             { text: 'Learn properly. Ask questions, take samples, run the omnitool on everything.', check: { skill: 'GU', dc: 3 }, time: 150, do: (g) => { addItem(g, 'spirit_grass', 2); bumpRel(g, 'Mei Lin', 4, 2); return ['+2 Ninefold spirit grass (trade goods). Mei Lin grudgingly admits you have hands.']; }, failDo: (g) => { addItem(g, 'spirit_grass', 1); bumpRel(g, 'Mei Lin', 2, 1); return ['You cut one stand wrong. She sighs at you like a teacher. +1 Ninefold spirit grass.']; }, to: 'ashfall' },
-            { text: 'Answer her question. Honestly.', do: (g) => { bumpRel(g, 'Mei Lin', 3, 5); return ['"Because you\'re here," you say, and then, appalled at yourself: "And the grass is fascinating." She laughs so hard she has to sit down.']; }, time: 150, to: 'ashfall' },
+            { text: 'Answer her question. Honestly.', do: (g) => { bumpRel(g, 'Mei Lin', 3, 5); return ['"Because you\'re here," you say, and then, appalled at yourself: "And the grass is fascinating." She laughs so hard she has to sit down. On the next terrace an old herb-woman straightens up and stares at her until she stops. It takes a while.']; }, time: 150, to: 'ashfall' },
         ],
     },
 
@@ -224,9 +226,9 @@ ${g.inventory.jade_bracket ? 'You have jade bracket in the hammerspace. Fifteen 
         enter: (g) => { markDaily(g, 'workshop'); return []; },
         text: `The smith lends you his bench and stands well back. You sing bone into shapes that Ashfall has needed for years and can't afford in iron. Children gather at a safe distance, then at an unsafe one.`,
         choices: [
-            { text: 'Needles and fishhooks for half the village.', qi: 3, check: { skill: 'Convergence Use', dc: 3 }, time: 120, do: (g) => { bumpRel(g, 'Village', 5, 0); return ['Every house gets a set. The seamstress cries a little.']; }, failDo: (g) => { bumpRel(g, 'Village', 2, 0); return ['Some come out brittle. Still, fishhooks.']; }, to: 'ashfall' },
+            { text: 'Needles and fishhooks for half the village.', qi: 3, check: { skill: 'Convergence Use', dc: 3 }, time: 120, do: (g) => { bumpRel(g, 'Village', 5, 0); return ['Every house gets a set. The seamstress bows to you three times, very low, and cannot be persuaded to stop.']; }, failDo: (g) => { bumpRel(g, 'Village', 2, 0); return ['Some come out brittle. Still, fishhooks.']; }, to: 'ashfall' },
             { text: 'Spearheads for the hunters. They\'ll need them tomorrow.', show: (g) => !g.flags.spears, qi: 5, check: { skill: 'Convergence Use', dc: 4, band: 'challenging' }, time: 120, do: (g) => { g.flags.spears = true; bumpRel(g, 'Village', 4, 0); return ['Six white spearheads, hard as antler, sharp as an insult.']; }, failDo: (g) => { bumpRel(g, 'Village', 1, 0); return ['They crack on the first test. Tomorrow, maybe.']; }, to: 'ashfall' },
-            { text: 'A bone plough-share for the barley field.', show: (g) => !g.flags.plough, qi: 6, check: { skill: 'Convergence Use', dc: 4, band: 'challenging' }, time: 150, do: (g) => { g.flags.plough = true; bumpRel(g, 'Village', 10, 0); return ['It cuts the black earth like butter. Old Wen comes out to watch and doesn\'t say anything for a long time.']; }, failDo: (g) => { bumpRel(g, 'Village', 2, 0); return ['It snaps on a root. The farmers are kind about it.']; }, to: 'ashfall' },
+            { text: 'A bone plough-share for the barley field.', show: (g) => !g.flags.plough, qi: 6, check: { skill: 'Convergence Use', dc: 4, band: 'challenging' }, time: 150, do: (g) => { g.flags.plough = true; bumpRel(g, 'Village', 10, 0); return ['It cuts the black earth like butter. Old Wen comes out to watch and doesn\'t say anything for a long time.']; }, failDo: (g) => { bumpRel(g, 'Village', 2, 0); return ['It snaps on a root. The farmers bow and say nothing at all, which is much worse.']; }, to: 'ashfall' },
             { text: 'Not today. Back to the village.', to: 'ashfall' },
         ],
     },
@@ -239,7 +241,7 @@ ${g.inventory.jade_bracket ? 'You have jade bracket in the hammerspace. Fifteen 
 ${g.flags.militia ? 'Second day. They\'re faster now. They\'re standing differently. That might be the most dangerous thing you\'ve done here.' : 'You are not a soldier. You are, however, a man who has just spent days learning to stay alive against things with more teeth than you. You can teach that.'}`,
         choices: [
             { text: 'Teach them to fight together: shields of bone, spears behind, nobody alone.', check: { skill: 'GU', dc: 3, band: 'challenging' }, time: 150, do: (g) => { g.flags.militia = (g.flags.militia || 0) + 1; bumpRel(g, 'Village', 4, 0); return ['By the end they move like one animal. A clumsy animal. But one.']; }, failDo: (g) => { bumpRel(g, 'Village', 1, 0); return ['Two of them hit each other. Still: progress.']; }, to: 'ashfall' },
-            { text: 'Spar with the best of them, and let Yuki show them what speed looks like.', check: { skill: 'GU', dc: 4 }, time: 120, do: (g) => { bumpRel(g, 'Village', 3, 0); return ['You win, mostly. Yuki wins completely.', ...awardYukiFightXp(g, 'standard')]; }, failDo: (g) => { g.james.hp -= 2; return ['The twelve-year-old puts you on your back. −2 HP. The village will never let this go.', ...awardYukiFightXp(g, 'standard')]; }, to: 'ashfall' },
+            { text: 'Spar with the best of them, and let Yuki show them what speed looks like.', check: { skill: 'GU', dc: 4 }, time: 120, do: (g) => { bumpRel(g, 'Village', 3, 0); return ['You win, mostly. Yuki wins completely.', ...awardYukiFightXp(g, 'standard')]; }, failDo: (g) => { g.james.hp -= 2; return ['The twelve-year-old puts you on your back, then helps you up and apologises with great formality for the disrespect. −2 HP. That is somehow worse.', ...awardYukiFightXp(g, 'standard')]; }, to: 'ashfall' },
             { text: 'Not today. Back to the village.', to: 'ashfall' },
         ],
     },
@@ -276,7 +278,7 @@ Mortal Vessel. Foundation. Core Formation. The realms go up like a ladder into c
     far_won: {
         id: 'far_won', title: 'Meat and Cores', art: (g) => (g.flags.far_kind === 'wolves' ? 'wolves' : 'lizard'), place: 'Blackroot Wilds — past the oak hollow',
         enter: (g) => { addItem(g, 'beast_core', 1); addItem(g, g.flags.far_kind === 'wolves' ? 'venison' : 'lizard_egg', 2); bumpRel(g, 'Village', 5, 0); return [`+1 Murky beast core, +2 ${g.flags.far_kind === 'wolves' ? 'wolf meat (as venison)' : 'thornback eggs'}.`]; },
-        text: `You drag it back to Ashfall in pieces. The hunters stop pretending they aren't impressed somewhere around the second trip.`,
+        text: `You drag it back to Ashfall in pieces. The hunters receive each load in silence and bow to it, the way you bow to a fallen enemy. Then, gravely, to you.`,
         choices: [{ text: 'Back to the village.', time: 60, to: 'ashfall' }],
     },
     far_lost: {

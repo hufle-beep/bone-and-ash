@@ -1,6 +1,6 @@
 # Bone and Ash — handoff (read this first in a new chat)
 
-**Saved:** 2026-11-02 (Europe/Budapest). **Version:** prologue 0.4.1 (`sw.js` VERSION `bone-ash-0.4.1`). **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
+**Saved:** 2026-11-02 (Europe/Budapest). **Version:** prologue 0.5.0 (`sw.js` VERSION `bone-ash-0.5.0`). **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
 Built in the SillyTavern chat as a spin-off. That chat stays for SillyTavern; this game continues in its own chat.
 
 ## What it is
@@ -31,6 +31,7 @@ A standalone, offline text RPG for Gábor's Android phone: a **web app (PWA)** f
 - James is an **outlier**: his Ouroboros Axiom composts the world's poisoned Qi, so he needs no herbs and gets no tribulations.
 
 **Play and tone**
+- **Tone rule (Gábor, 2026-11-02):** James and Yuki are deadpan and sarcastic. The world's inhabitants are overly serious, most of them: formal, grave about honour, face, hierarchy, Heaven and the Sect; they don't joke. Mei Lin is looser than the norm (teases, laughs) and it gets her in trouble. The humour comes from James reacting to grave people.
 - Survival and combat: **hunting and foraging for food**, with hunger.
 - Tongue in cheek, James sarcastic, serious when it matters.
 
@@ -88,7 +89,7 @@ node tests/rules.test.mjs && node tests/story.test.mjs
   - Yuki: HP 30 (body 5), Qi 32.5.
 - **Regen:** one Cycle is 30 minutes at T1. Each Cycle gives HP +5% and Qi +11.6% (5% + 0.1 × 66 collaterals). `sleepUntil` fills both bars.
 - **Hunger:** "Fed" drops 3 an hour. Below 30, −1 on every check; at 0, another −1 and HP loss over time.
-- **Breakthrough (v0.4.1):** at 100% Saturation a choice "Break through to <next realm>" appears in `stream`, `wilds`, `camp`, `night`, `village`, `ashfall`, `supper` (added in prologue.js after the scene list). `breakthrough(g)` in game.js: 2 hours, realm +1, Saturation 0, both bars full; Yuki rises with James (root-kin). Scene `breakthrough`: the tribulation comes, finds nothing to burn, leaves. In the village it sets `sky_witness` (Act 1 hook: the Sect hears). Each rung ≈ +3–4 HP, +1–1.5 Convergence. Fights scale by days, not realm.
+- **Breakthrough (v0.4.1):** at 100% Saturation a choice "Break through to <next realm>" appears in `stream`, `wilds`, `camp`, `night`, `village`, `ashfall`, `supper` (added in prologue.js after the scene list). `breakthrough(g)` in game.js: 2 hours, realm +1, Saturation 0, both bars full; Yuki rises with James (root-kin). Scene `breakthrough`: the tribulation comes, finds nothing to burn, leaves. Text varies by whether James has heard of tribulation yet (`lore1`, `lore_realms` or Mei Lin met), forest vs village (witnessed), day vs night, and first vs later rungs. In the village it sets `sky_witness` (Act 1 hook: the Sect hears). Each rung ≈ +3–4 HP, +1–1.5 Convergence. Fights scale by days, not realm.
 - **Condensation:** 10 Qi per sit, 0 XP, raises Saturation. It never refills Qi.
 - **Combat:** each round James acts, Yuki attacks automatically, then the enemies attack. James defends with GU + d6 vs their attack DC; DR 1 reduces hits. His actions:
   - **darts:** Convergence Use, 2 Qi, 2–4 damage;
@@ -154,6 +155,7 @@ The **long route** (v0.4.0, flag `long`, set on the first forest night) runs 7 d
 - **UI:** paper background, red 骨 seal by every title, choices marked with brushed ink circles (red for fights), brush-stroke bars and tab underline, ink-circle dice.
 - **Fonts:** Shippori Mincho for titles, Literata for body text.
 - **Art IDs** are made unique per scene key (`sk-<key>`, `gw-<key>` …), so several images can share a page.
+- **v0.5 look (`STYLE = 'clamp2'`, `js/art/clamp2.js`):** redrawn from scratch after the CLAMP references, on the public-domain paintings (`art/bg`). `figure(kind, x, y, s, {face, sway, sword, spear, sit, shut})` with kinds mei, woman, mother, james, sect, lu, man, thug, elder; `yuki()`; close-ups `meiCloseUp()` (three-quarter view) and `yukiCloseUp()`; `shoji()` interiors with butterfly shadows; `smoke()`, `butterfly()`, `curl()`, `crescent()`. Scene table `SCENES2` in art.js (background image, wash, night darkness, interior). Older looks (`clamp`, `ink`) still switchable.
 - **Art direction (Gábor, 2026-11-02): imitate CLAMP's *xxxHolic* style as closely as possible** — stark black and white, vertical screentone, elongated elegant figures, long cascading hair in strands, narrow half-lidded eyes, ornate jewellery, curling cloud (xiangyun) motifs, lotus. Style only: never copy a CLAMP character or page. Palette for it: black, white, greys, red (Gábor OK'd greys 2026-11-02). Full-body figures: `js/art/figures-clamp.js` (`clampPerson`, `clampCat`; ~9 heads tall, rope hair, hanging sleeves, robes with grey cloud swirls and a red crescent). `STYLE` in art.js: `'clamp'` (line art over screentone) or `'ink'` (the v0.2.0 ink-wash look over paintings). He also wants the tone more serious later.
 
 ## Next steps (proposed, not built)

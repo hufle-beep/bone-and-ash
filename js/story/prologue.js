@@ -346,11 +346,11 @@ Yuki is already looking at you. You are already moving. Apparently you have a ty
 
 A woman in a patched brown jacket, maybe mid-twenties, has her back to a boulder and a herb-knife in her fist. Her basket is on the ground, spilling something that glows faintly green. In front of her: a young man in crimson robes, sleeves embroidered with a lotus that looks like it's bleeding, and a pock-faced hulk carrying a hatchet.
 
-"The tribute is due ${g.flags.long ? 'in three days' : 'tomorrow'}," Crimson Robes is saying, bored. "This is *my* tribute, Mei Lin. The Ninefold grass, and you serve tea in my quarters tonight. Or the Elder learns your mother's been hiding a spirit root in that house."
+"The tribute is due ${g.flags.long ? 'in three days' : 'tomorrow'}," Crimson Robes is saying, with the grave, unhurried patience of a magistrate reading out a sentence. "And you laughed at an outer disciple of the Crimson Lotus in front of the whole slope, Mei Lin. Face is owed. The Ninefold grass is forfeit, and you will serve tea in my quarters tonight, as penance. Or the Elder learns your mother has been hiding a spirit root in that house."
 
-"My mother is *sixty*—"
+"My mother is *sixty*, you overdressed rooster—"
 
-"Then she'll make a very old servant."
+"Then she will serve the Sect for as many years as Heaven leaves her," he says, without heat. "That is the law. You should have thought of her before you laughed."
 
 Your Parallel Cognition is already labelling him. Qi like a coal under ash: a few rungs past your own. A cultivator. Of the local kind, and of the kind that likes it.`,
         choices: [
@@ -378,9 +378,9 @@ He stares at the white needle. Then at you. Then — and this is the interesting
         enter: (g) => { g.flags.gao_humiliated = true; bumpRel(g, 'Mei Lin', 8, 2); return []; },
         text: `It turns out that a tall foreigner in a strange white coat, who walks into an extortion with a cat on his shoulder and the bored tone of a man complaining about a parking ticket, does not compute for Crimson Robes.
 
-You talk. You are very, very sarcastic. At one point you describe his lotus embroidery as "a cry for help". The lackey snorts and has to pretend he coughed.
+You talk. You are very, very sarcastic. At one point you describe his lotus embroidery as "a cry for help". The lackey goes rigid with outrage on his master's behalf, which is somehow funnier.
 
-Crimson Robes — *Gao Feng, Outer Disciple of the Crimson Lotus Sect*, he informs you, as if that should mean something — decides the morning has become embarrassing. He leaves. He promises, loudly, that you will regret this.
+Crimson Robes — *Gao Feng, Outer Disciple of the Crimson Lotus Sect*, he informs you, as if that should mean something — decides his face cannot survive another minute of this. Before he leaves he turns, bows a precise, furious quarter-bow, and formally declares, before Heaven and witnesses, that the insult will be repaid in blood.
 
 "Put it on my tab," you tell his back.`,
         choices: [{ text: 'Turn to the woman with the knife.', to: 'mei_lin' }],
@@ -516,7 +516,7 @@ Yuki doesn't look at you for a long time.`,
 
 ${g.flags.ignored
         ? 'A woman in a patched brown jacket limps past you with a split lip and an empty basket, and the whole street goes quiet around her. Someone mutters "Gao Feng". Nobody looks at you, the stranger who came down from the ridge at exactly the wrong time.'
-        : 'Mei Lin walks you in like a stray she has decided to keep. "He\'s with me," she tells the street, and the street, visibly, decides to deal with that later.'}
+        : 'Mei Lin walks you in like a stray she has decided to keep. "He\'s with me," she tells the street, and the street goes quiet in the particular way of people who have watched Mei Lin say the wrong thing to the wrong person for twenty years. An old woman at the well makes a warding sign. A man spits, precisely, to one side.'}
 
 ${g.flags.long ? 'The tribute is due in three days, at dawn. You can feel the whole village counting them.' : 'The tribute is due at dawn tomorrow. You can feel the whole village holding its breath about it.'}`,
         choices: [
@@ -530,13 +530,13 @@ ${g.flags.long ? 'The tribute is due in three days, at dawn. You can feel the wh
         id: 'elder', title: 'Old Wen', art: 'elder', place: 'Ashfall Hamlet — the elder\'s house',
         text: (g) => `Old Wen is ninety, blind in one eye, and pours tea with the steadiness of a man who has outlived three sect masters and plans to outlive a fourth.
 
-"You don't eat pills," he says, before you've finished sitting down. "You don't smell of grass. And your cat has twelve meridians open, which is twelve more than my last three cats." He sips. "I'd like to know what you are before the Crimson Lotus does. They'll want to cut you open to find out."
+"You don't eat pills," he says, before you've finished sitting down. "You don't smell of grass. And the beast on your shoulder has twelve meridians open. In ninety years I have seen that only in the heirs of great sects." He sips. "I would know what you are before the Crimson Lotus does. They will want to cut you open to learn it."
 
 "That seems to be the consensus."
 
 "Then let me give you an old man's advice." He sets his cup down. "${g.flags.long ? 'In three days' : 'Tomorrow'}, the collectors come. If you're here, they'll see you. If they see you, they'll want you. You can run ${g.flags.long ? 'before then' : 'tonight'}. Nobody would blame you." A pause. "Or you can stand in front of us. Nobody has done that in forty years."
 
-${g.flags.gao_beaten || g.flags.gao_humiliated ? '"Also," he adds mildly, "I hear you\'ve already introduced yourself to Gao Feng. So running may be academic."' : ''}`,
+${g.flags.gao_beaten || g.flags.gao_humiliated ? '"You have also," he adds, without inflection, "already shamed an outer disciple of the Sect on our slope. Running may no longer be yours to choose."' : ''}`,
         choices: [{ text: 'Thank him. Think about it.', to: hubOf }],
     },
     heal: {
@@ -570,7 +570,7 @@ It finds you before you find it. It is the size of a small car and it has *opini
     boar_won: {
         id: 'boar_won', title: 'Meat for Forty Houses', art: 'boar', place: 'Ashfall Hamlet',
         enter: (g) => { addItem(g, 'beast_core', 1); eat(g, 40); bumpRel(g, 'Village', 12, 0); g.flags.boar = true; return ['+1 Murky beast core. You eat with the village: +40 satiety.']; },
-        text: `They come out with carts. By sunset half of Ashfall is grilling ironhide, children are fighting over the tusks, and a hunter old enough to be your grandfather tries to give you his daughter, two goats and a hat. You accept the hat.`,
+        text: `They come out with carts. By sunset half of Ashfall is grilling ironhide, the children carry the tusks to the shrine in solemn procession, and a hunter old enough to be your grandfather kneels in the dust and formally presents you with his own boar spear, which you gather is roughly equivalent to a knighthood. You accept it. You have nowhere to put a spear. Then you remember you own an infinite closet.`,
         choices: [{ text: (g) => (g.flags.long && clockParts(g.minutes).hh < 16 ? 'Back to the village.' : 'Evening.'), time: 30, to: (g) => (g.flags.long ? (clockParts(g.minutes).hh >= 16 ? nextEvening(g) : hubOf(g)) : 'evening') }],
     },
     boar_lost: {
@@ -586,7 +586,7 @@ It finds you before you find it. It is the size of a small car and it has *opini
         ? 'You find her house by asking. You apologise on her doorstep, properly, no sarcasm. She lets you in, which you did not deserve, and puts a bowl in front of you, which you deserved even less.'
         : g.flags.long ? 'Third supper at Mei Lin\'s. Her mother serves you first now, which in Ashfall is roughly the same as a signed adoption certificate.' : 'Mei Lin\'s house is two rooms and a herb loft, and her mother is a tiny fierce woman who looks at you once and starts adding more millet to the pot.'}
 
-Afterwards the mother goes to bed with pointed loudness, and it's just Mei Lin, a clay lamp, a jar of something that might once have been plum wine, and you. Yuki has claimed the warmest spot on the stove and is pretending to be asleep in a way that fools nobody.
+Afterwards the mother tells Mei Lin, in a low, severe voice you are clearly meant to overhear, that a respectable daughter does not drink plum wine with strange men under her mother's roof. Then she goes to bed. Mei Lin pours herself a second cup the moment the door shuts, and it's just Mei Lin, a clay lamp, a jar of something that might once have been plum wine, and you. Yuki has claimed the warmest spot on the stove and is pretending to be asleep in a way that fools nobody.
 
 Mei Lin's eyes are bright in the lamplight. She's taken her jacket off; underneath, a thin linen shirt and a collarbone that your Parallel Cognition has, without consulting you, dedicated an entire thread to.
 
@@ -649,13 +649,13 @@ Much later, the lamp is out, the hay is everywhere, and Mei Lin is asleep with h
     /* ================= DAY 3 ================= */
     tribute: {
         id: 'tribute', title: 'The Collectors', art: 'collectors', place: 'Ashfall Hamlet — the tribute post',
-        text: (g) => `They come with the sun: four men in crimson, walking up the road like they own it, because they do. At their head, a tall man in deeper red with a sword on his back and a face as calm as a frozen pond — *Inner Disciple Lu Han*, the whisper goes round. ${g.flags.gao_dead ? 'Gao Feng is not with them, and they have noticed.' : `Beside him, ${g.flags.gao_beaten ? 'bandaged and murderous' : 'smirking'}, is Gao Feng.`}
+        text: (g) => `They come with the sun: four men in crimson, walking up the road like they own it, because they do. At their head, a tall man in deeper red with a sword on his back and a face as calm as a frozen pond — *Inner Disciple Lu Han*, the whisper goes round. ${g.flags.gao_dead ? 'Gao Feng is not with them, and they have noticed.' : `Beside him, ${g.flags.gao_beaten ? 'bandaged, his face a mask of cold, formal hatred' : 'his face carefully blank, his eyes not'}, is Gao Feng.`}
 
 The village is lined up at the tribute post with its baskets of grass and grain. ${g.flags.healed === true ? 'The mother of the boy you healed is standing very close behind you. So is half the street.' : ''}
 
 Lu Han's gaze passes over the baskets, over the people, and stops on you. On Yuki. It stays there.
 
-"Interesting," he says. "No root. No pill-smell. And yet the beast on your shoulder has its meridians open like a sect heir's." He tilts his head. "Kneel, stranger, and come with us. The Sect Master will want to dissect you personally. It's an honour."
+"Interesting," he says. "No root. No pill-smell. And yet the beast on your shoulder has its meridians open like a sect heir's." He tilts his head. "Kneel, stranger, and come with us. The Sect Master will wish to dissect you personally. It is an honour. Few are offered it."
 
 "I've been offered worse," you say. "Not recently."`,
         choices: [
@@ -666,9 +666,9 @@ Lu Han's gaze passes over the baskets, over the people, and stops on you. On Yuk
     },
     bluff_fail: {
         id: 'bluff_fail', title: 'Called', art: 'collectors', place: 'Ashfall Hamlet — the tribute post',
-        text: `Lu Han watches your performance with real interest, the way a cat watches a beetle do something unusual. Then he smiles.
+        text: `Lu Han watches your performance in silence, the way a judge watches a defendant perjure himself. Then he shakes his head, once, with something close to regret.
 
-"No," he says. "But that was charming." And draws his sword.`,
+"No," he says. "A true senior does not need to announce himself. You have dishonoured yourself, and mocked the Sect." He draws his sword. "The second is the one that matters."`,
         choices: [{ text: 'Fight.', combat: collectorsFight, to: 'collectors_won' }],
     },
     bluff_win: {
@@ -775,26 +775,44 @@ SCENES.breakthrough = {
     },
     text: (g) => {
         const seen = VILLAGE_SCENES.includes(g.flags.bt_return);
+        const knows = !!(g.flags.lore1 || g.flags.lore_realms || g.rel['Mei Lin']);
+        const h = clockParts(g.minutes).hh;
+        const night = h >= 20 || h < 6;
+        const sky = night ? 'The stars go out one by one, as if someone is pinching candles.' : 'The red sun goes out behind them like a coin dropped in ink.';
         if (g.james.realm === 1) {
+            const recognise = knows
+                ? `You know what this is. Mei Lin told you, in her flat weather-report voice: *the sky decides you're impure and tries to burn you clean. Most people it just burns.* Tribulation. Heaven's verdict. It has come for you.`
+                : `You have no word for this. Your nine threads cross-reference everything you know about weather, atmospheric charge and the physics of a world you landed on less than a week ago, and come back with nothing. But the shape of it is obvious enough. The lightning isn't wandering. It's *aiming*. This is a judgment, and the defendant is you.`;
+            const witness = seen
+                ? `Ashfall saw it. Every soul in the village is standing in the street with their faces turned up, and nobody is speaking. Somebody's grandmother is on her knees in the dust, forehead to the ground, praying in a fast, shaking whisper. The hunters have their hands on their spears as if a spear could help. Old Wen stands in his doorway with his pipe gone cold in his hand, and when he finally looks at you, it is the look of a man revising, very carefully, everything he thought he knew about Heaven.
+
+"A tribulation that refuses its own judgment," he says to no one, quietly and formally, the way you'd read out a death in the family. "This has not happened in the history of the mountain."
+
+Somewhere, you suspect, someone is already running up the road to the Crimson Lotus.`
+                : night
+                    ? 'Nobody saw it but the trees and whatever lives in them. Out here, at night, that\'s the best kind of miracle.'
+                    : 'Nobody saw it but the trees. Out here, you suspect, that\'s the best kind of miracle.';
             return `You sit, and you let the loop close.
 
-Saturation has been pressing at the inside of you for a day like a held breath, and now you let it go — not out, but *down*, into the foundations. The Ouroboros Axiom turns once, slowly, like a great wheel finding its rest. Everything you've eaten from this world's poisoned Qi, composted, made clean, settles into you like bedrock.
+Saturation has been pressing at the inside of you like a held breath, and now you let it go — not out, but *down*, into the foundations. The Ouroboros Axiom turns once, slowly, like a great wheel finding its rest. Everything you've eaten from this world's poisoned Qi, composted, made clean, settles into you like bedrock.
 
 Then the sky notices.
 
-Clouds come from nowhere: black, low, piling over you, humming with a sound you feel in your back teeth. Lightning walks around inside them, looking. This is the thing Mei Lin told you about. The Heaven that burns cultivators clean. It has come to burn you.
+Clouds come from nowhere: black, low, piling over you, humming with a sound you feel in your back teeth. ${sky} Lightning walks around inside them, looking.
+
+${recognise}
 
 It looks.
 
 It looks for a long time.
 
-And then — you would swear to this in any court — the storm sort of *shrugs*. There's nothing impure to burn. Nothing to punish. A single bolt drops, wanders down to the ground beside you, fizzles out in the moss with a sound like a disappointed sigh, and the clouds come apart and drift away in embarrassed directions.
+And then — you would swear to this in any court — the storm sort of *shrugs*. There's nothing impure to burn. Nothing to punish. A single bolt drops, wanders down to the ground beside you, fizzles out in the ${seen ? 'dust' : 'moss'} with a sound like a disappointed sigh, and the clouds come apart and drift away in embarrassed directions.
 
 "Huh," you say.
 
 Yuki, who rose with you — you felt her meridians widen in the same breath as yours — opens one eye, sees the clear sky, and goes back to sleep.
 
-${seen ? 'Ashfall saw it. Every soul in the village was standing in the street, looking up at a tribulation that came, stared at the stranger, and *left*. Nobody says anything. Old Wen, in his doorway, very slowly takes his pipe out of his mouth. Somewhere, you suspect, someone is already running up the road to the Crimson Lotus.' : 'Nobody saw it but the trees. Out here, you suspect, that\'s the best kind of miracle.'}
+${witness}
 
 *Foundation.* Mortal Vessel no longer. You feel heavier, and steadier, and exactly the same amount of sarcastic.`;
         }
@@ -802,7 +820,9 @@ ${seen ? 'Ashfall saw it. Every soul in the village was standing in the street, 
 
 The sky tries again, as the sky apparently must: clouds, humming, lightning looking for something to burn. It finds nothing. It leaves faster this time, as if it's learning.
 
-${seen ? 'Ashfall watches it go. Nobody pretends any more that you are an ordinary stranger.' : 'Yuki doesn\'t even open her eyes.'}`;
+${seen
+        ? 'Ashfall watches it go in total silence. Then, one by one, people bow — not to the sky. To you. You would very much prefer they didn\'t.'
+        : night ? 'Yuki doesn\'t even open her eyes. Somewhere in the dark, something large decides not to come any closer.' : 'Yuki doesn\'t even open her eyes.'}`;
     },
     choices: [{ text: 'Get up.', to: (g) => g.flags.bt_return || 'stream' }],
 };

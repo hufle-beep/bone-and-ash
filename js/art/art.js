@@ -3,10 +3,11 @@
  * Every scene key returns one SVG (viewBox 400×250). Seeded, so a scene always looks the same.
  */
 import { clampPerson, clampCat, KEEP } from './figures-clamp.js';
+import * as C2 from './clamp2.js';
 import { meiPortrait, yukiPortrait, hatch, cloud, smoke, butterfly, shadeDefs, vignette as darkEdges } from './portrait.js';
 
 /** 'clamp': stark black-and-white line art over screentone (the current look). 'ink': the v0.2.0 ink-wash look. */
-const STYLE = 'clamp';
+const STYLE = 'clamp2';
 
 const W = 400;
 const H = 250;
@@ -476,9 +477,79 @@ const PORTRAITS = { mei_lin: { img: 'peaks', draw: meiPortrait }, yuki_close: { 
 export const BG_IMAGES = ['forest', 'peaks', 'cliffs', 'pine', 'village', 'mountain'];
 const bgImage = (img, opacity = 1) => `<image href="art/bg/${img}.jpg" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="xMidYMid slice" opacity="${opacity}"/>`;
 
+
+/* ============ v0.5 look: CLAMP-style figures (clamp2.js) over the public-domain ink paintings ============ */
+const FIG = C2.figure;
+const YU = C2.yuki;
+const MOON = (x, y, r) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#fbfaf7" stroke="#111010" stroke-width="0.8"/>`;
+const SUN = (x, y, r) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#a02c2c"/>`;
+const ground2 = (y = 200) => `<defs><linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ece8df" stop-opacity="0"/><stop offset="0.5" stop-color="#ece8df" stop-opacity="0.75"/><stop offset="1" stop-color="#ece8df" stop-opacity="0.95"/></linearGradient></defs><rect y="${y - 40}" width="400" height="${290 - y}" fill="url(#g2)"/>`;
+const fire2 = (x, y, s = 1) => `<g transform="translate(${x} ${y}) scale(${s})"><circle r="44" fill="#fbfaf7" opacity="0.45"/><path d="M-9 0 Q-11 -13 0 -28 Q4 -15 9 -19 Q13 -7 9 0 Z" fill="#a02c2c" stroke="#111010" stroke-width="0.8"/><path d="M-4 0 Q-4 -9 2 -16 Q5 -7 4 0 Z" fill="#fbfaf7"/><path d="M-15 3 L15 -1 M-13 -1 L13 4" stroke="#111010" stroke-width="3"/></g>`;
+const SCENES2 = {
+    forest_dawn: { bg: 'forest', fg: () => SUN(340, 40, 13) + ground2() + YU(170, 236, 1.1) + FIG('james', 210, 240, 1.25) },
+    omnitool: { bg: 'cliffs', wash: 0.25, fg: () => ground2() + `<g transform="translate(250 120)"><path d="M-70 30 Q-40 -30 -10 10 T50 -10 T80 -40" stroke="#111010" stroke-width="1.6" fill="none"/><rect x="-80" y="-56" width="170" height="104" rx="10" fill="#fbfaf7" opacity="0.55" stroke="#111010" stroke-width="0.8"/>${[[-48, -26], [-6, -20], [36, -38], [70, 16]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3" fill="#a02c2c"/>`).join('')}</g>` + FIG('james', 110, 244, 1.3) + YU(70, 244, 0.9) },
+    clearing: { bg: 'peaks', fg: () => SUN(70, 46, 10) + ground2() + FIG('james', 200, 238, 1.2) + YU(236, 238, 0.9) },
+    bone_needle: { bg: 'pine', wash: 0.35, fg: () => `<path d="M80 200 L330 70" stroke="#111010" stroke-width="7" stroke-linecap="round"/><path d="M80 200 L330 70" stroke="#fbfaf7" stroke-width="4.6" stroke-linecap="round"/><circle cx="330" cy="70" r="16" fill="#fbfaf7" opacity="0.6"/>` + C2.curl(300, 150, 10, '#111010', 1) },
+    meditation: { bg: 'peaks', fg: () => ground2() + C2.smoke([[-10, 120], [80, 80], [150, 160], [210, 120]], 6) + FIG('james', 200, 236, 1.2, { sit: true, shut: true }) + C2.curl(120, 70, 14, '#111010', 1) + C2.curl(280, 60, 10, '#111010', 1, -1) },
+    stream: { bg: 'cliffs', fg: () => ground2() + FIG('james', 140, 240, 1.15, { face: -1 }) + YU(300, 238, 1) },
+    forage: { bg: 'forest', fg: () => ground2() + `<g fill="#a02c2c">${[0, 1, 2, 3, 4, 5].map((i) => `<circle cx="${292 + (i % 3) * 9}" cy="${196 + Math.floor(i / 3) * 9}" r="3.6"/>`).join('')}</g>` + FIG('james', 230, 240, 1.15) + YU(170, 238, 0.9) },
+    hunt: { bg: 'forest', fg: () => ground2() + `<g transform="translate(290 226)"><ellipse rx="12" ry="7" fill="#c8c3bb" stroke="#111010" stroke-width="0.8"/><path d="M8 -5 L11 -16 M11 -5 L15 -14" stroke="#111010" stroke-width="2"/></g>` + YU(200, 238, 1, -1) + FIG('james', 110, 242, 1.15) },
+    camp: { bg: 'pine', night: 0.32, fg: () => ground2(212) + fire2(200, 226) + FIG('james', 150, 238, 1.15) + YU(250, 236, 0.9, -1) },
+    forest_night: { bg: 'pine', night: 0.55, fg: () => MOON(330, 40, 12) + fire2(200, 236, 0.6) },
+    jackals: { bg: 'pine', night: 0.5, fg: () => ground2(214) + beast(80, 232, 1.4) + beast(330, 236, -1.4) + fire2(200, 234, 0.5) + FIG('james', 196, 242, 1.15) + YU(226, 242, 0.85) },
+    jackals_dead: { bg: 'pine', night: 0.4, fg: () => ground2(214) + `<g transform="translate(130 226) rotate(170)">${beast(0, 0, 1.3, '#55514d', '#333')}</g><g transform="translate(300 230) rotate(190)">${beast(0, 0, 1.2, '#55514d', '#333')}</g>` + shards(47, 210, 218, 16, 110, '#fbfaf7') + YU(216, 240, 1) },
+    herb_girl: { bg: 'forest', fg: () => SUN(350, 36, 11) + ground2() + FIG('mei', 90, 240, 1.15, { sway: -8 }) + FIG('sect', 236, 240, 1.15, { face: -1 }) + FIG('thug', 292, 242, 1.2, { face: -1 }) },
+    gao_down: { bg: 'forest', fg: () => ground2() + `<g transform="translate(270 236) rotate(-88)">${FIG('sect', 0, 0, 1)}</g>` + `<path d="M262 206 L270 240" stroke="#fbfaf7" stroke-width="3"/>` + FIG('mei', 90, 240, 1.15) + FIG('james', 170, 242, 1.2) + YU(200, 242, 0.85) },
+    ridge: { bg: 'mountain', wash: 0.1, fg: () => SUN(60, 50, 12) + ground2(220) + `<g transform="translate(290 170)"><path d="M-18 0 L-10 -120 L-26 -150 M-10 -120 L10 -160 L4 -190 M10 -160 L30 -175 M-6 -60 L-40 -90 M2 -80 L36 -110" stroke="#111010" stroke-width="8" fill="none" stroke-linecap="round"/></g>` + FIG('james', 110, 244, 1.05) + YU(128, 172, 0.55) },
+    village: { bg: 'village', fg: () => ground2() + `<path d="M330 214 L330 100" stroke="#111010" stroke-width="4"/><path d="M330 104 L365 107 L362 150 L330 145 Z" fill="#a02c2c"/>` + FIG('woman', 60, 240, 1.0) + FIG('man', 100, 242, 1.05, { face: -1 }) + FIG('james', 220, 244, 1.2) + YU(250, 244, 0.8) },
+    elder: { interior: true, fg: () => FIG('elder', 270, 240, 1.25, { face: -1 }) + FIG('james', 120, 244, 1.25) + `<rect x="170" y="200" width="60" height="8" fill="#55514d"/><path d="M190 200 Q190 190 197 190 L203 190 Q210 190 210 200 Z" fill="#fbfaf7" stroke="#111010" stroke-width="0.8"/>` },
+    healer: { interior: true, fg: () => `<rect x="150" y="200" width="150" height="16" fill="#55514d"/><path d="M160 200 Q170 188 200 192 L270 192 Q284 194 290 200 Z" fill="#fbfaf7" stroke="#111010" stroke-width="0.8"/><circle cx="170" cy="190" r="8" fill="#fbfaf7" stroke="#111010" stroke-width="0.8"/>` + FIG('mother', 330, 242, 1.1, { face: -1 }) + FIG('james', 100, 244, 1.25) },
+    boar: { bg: 'forest', fg: () => ground2() + boarShape(260, 236, 1.6) + FIG('james', 96, 242, 1.2) + shards(71, 180, 204, 10, 40, '#fbfaf7') },
+    dinner: { interior: true, fg: () => FIG('mother', 320, 244, 1.0, { face: -1 }) + FIG('mei', 250, 244, 1.15, { face: -1 }) + FIG('james', 140, 246, 1.2) + YU(60, 244, 0.9) },
+    romance: { interior: true, dark: 0.45, fg: () => C2.smoke([[-10, 80], [80, 40], [140, 120], [190, 90]], 6) + C2.butterfly(320, 70, 1.2, 16) + C2.butterfly(80, 160, 0.9, -12) + FIG('james', 186, 250, 1.6) + FIG('mei', 222, 250, 1.55, { face: -1, sway: 6 }) },
+    collectors: { bg: 'village', fg: () => SUN(150, 36, 15) + ground2() + `<path d="M352 214 L352 100" stroke="#111010" stroke-width="4"/><path d="M352 104 L387 107 L384 150 L352 145 Z" fill="#a02c2c"/>` + FIG('sect', 40, 240, 1.05) + FIG('sect', 76, 242, 1.1) + FIG('lu', 124, 244, 1.3, { sword: true }) + FIG('sect', 170, 242, 1.1) + FIG('james', 270, 246, 1.25, { face: -1 }) + YU(300, 246, 0.85, -1) },
+    collectors_down: { bg: 'village', fg: () => ground2() + shards(73, 200, 214, 40, 190, '#fbfaf7') + `<g fill="#a02c2c">${[0, 1, 2, 3, 4, 5].map((i) => `<circle cx="${120 + i * 33}" cy="${222 + (i % 2) * 6}" r="2.4"/>`).join('')}</g>` + `<g transform="translate(150 244) scale(1 0.62)">${FIG('lu', 0, 0, 1.2)}</g>` + FIG('james', 240, 246, 1.25, { face: -1 }) },
+    hairpin: { interior: true, lamp: false, dark: 0.6, fg: () => `<g transform="translate(200 125) rotate(-28)"><path d="M-110 0 L100 0" stroke="#fbfaf7" stroke-width="6" stroke-linecap="round"/>${Array.from({ length: 9 }, (_, i) => `<path d="M${-80 + i * 20} 0 Q${-70 + i * 20} -16 ${-60 + i * 20} 0 Q${-70 + i * 20} 16 ${-80 + i * 20} 0 Z" fill="#fbfaf7" stroke="#111010" stroke-width="0.8"/>`).join('')}<circle cx="100" cy="0" r="9" fill="#a02c2c"/></g>` },
+    tribulation: { bg: 'peaks', night: 0.45, fg: () => `<g fill="#111010">${[[80, 40, 80, 28], [210, 26, 120, 36], [340, 44, 90, 30], [150, 62, 70, 22], [280, 64, 80, 24]].map(([x, y, rx, ry]) => `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}"/>`).join('')}</g><path d="M214 70 L200 104 L214 108 L194 150 L208 150 L188 196" stroke="#c8c3bb" stroke-width="3" fill="none" stroke-linejoin="round"/>` + ground2() + FIG('james', 236, 236, 1.15, { sit: true, shut: true }) + YU(290, 236, 0.85, -1) },
+    lights: { bg: 'pine', night: 0.6, fg: () => ground2(220) + [[60, 190, 3], [110, 180, 3.4], [160, 172, 2.6], [215, 166, 3], [262, 158, 2.4], [300, 150, 2]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r * 3}" fill="#fbfaf7" opacity="0.4"/><circle cx="${x}" cy="${y}" r="${r}" fill="#fbfaf7" stroke="#111010" stroke-width="0.5"/>`).join('') + FIG('james', 70, 244, 1.1) + YU(96, 244, 0.85) },
+    rain: { bg: 'forest', night: 0.25, fg: () => { let d = ''; for (let i = 0; i < 110; i++) { const x = (i * 37) % 420; const y = (i * 53) % 250; d += `M${x} ${y} l-4 12`; } return `<path d="${d}" stroke="#55514d" stroke-width="0.8"/>` + ground2() + fire2(210, 230, 0.5) + FIG('james', 160, 240, 1.15) + YU(244, 240, 0.9, -1); } },
+    crows: { bg: 'pine', night: 0.5, fg: () => MOON(330, 40, 11) + ground2(214) + bird(120, 110, 1.5) + bird(210, 84, 1.2, -1) + bird(296, 130, 1.4, -1) + fire2(220, 234, 0.5) + FIG('james', 160, 242, 1.15) + YU(250, 242, 0.85, -1) },
+    rats: { bg: 'cliffs', night: 0.5, fg: () => ground2(214) + beast(90, 230, 0.8, '#111010', '#a02c2c') + beast(310, 232, -0.75, '#111010', '#a02c2c') + FIG('james', 200, 244, 1.15) + YU(228, 244, 0.85) },
+    lizard: { bg: 'pine', night: 0.5, fg: () => ground2(214) + lizardShape(280, 232, 1.6, -1) + `<g fill="#fbfaf7" stroke="#111010" stroke-width="0.8"><ellipse cx="336" cy="238" rx="7" ry="5"/><ellipse cx="350" cy="240" rx="7" ry="5"/></g>` + fire2(100, 236, 0.5) + FIG('james', 150, 244, 1.15) + YU(178, 244, 0.85) },
+    gift: { bg: 'pine', night: 0.5, fg: () => MOON(320, 40, 12) + ground2(214) + fire2(110, 232, 0.55) + `<g transform="translate(236 238) rotate(80)">${bird(0, 0, 1.2)}</g>` + YU(270, 242, 1.4, -1) + FIG('james', 176, 242, 1.15, { sit: true }) },
+    bone_field: { bg: 'peaks', fg: () => ground2(196) + ribs(150, 214, 1.1) + skull(310, 218, 0.9) + FIG('james', 250, 244, 1.15) + YU(176, 128, 0.7) },
+    mire: { bg: 'cliffs', wash: 0.15, fg: () => `<rect y="185" width="400" height="65" fill="#55514d" opacity="0.85"/>` + `<g fill="#111010">${[[60, 204, 34], [170, 218, 26], [300, 200, 40]].map(([x, y, w]) => `<ellipse cx="${x}" cy="${y}" rx="${w}" ry="6"/>`).join('')}</g>` + FIG('james', 200, 244, 1.15) + YU(170, 216, 0.75) },
+    hollow: { bg: 'mountain', wash: 0.15, fg: () => roots(107, 160, 6) + ground2(236) + FIG('james', 150, 244, 1.2) + YU(180, 244, 0.85) },
+    roof: { bg: 'village', night: 0.55, fg: () => MOON(70, 40, 12) + `<path d="M0 250 L0 205 L200 160 L400 205 L400 250 Z" fill="#111010"/><path d="M0 205 L200 160 L400 205" stroke="#fbfaf7" stroke-width="1.2" fill="none"/>` + FIG('james', 184, 196, 0.85, { sit: true }) + FIG('mei', 214, 190, 0.78, { face: -1 }) + YU(246, 192, 0.6, -1) },
+    village_night: { bg: 'village', night: 0.6, fg: () => MOON(330, 40, 12) + `<rect x="180" y="150" width="14" height="12" fill="#fbfaf7" opacity="0.8"/>` },
+    token: { interior: true, lamp: false, dark: 0.5, fg: () => `<circle cx="200" cy="120" r="58" fill="#fbfaf7" opacity="0.35"/><circle cx="200" cy="120" r="40" fill="none" stroke="#fbfaf7" stroke-width="1"/><ellipse cx="200" cy="120" rx="20" ry="26" fill="#8c8781" stroke="#111010" stroke-width="1.4"/><path d="M190 110 Q200 98 210 110 M188 126 L212 126" stroke="#111010" stroke-width="1.4" fill="none"/>` + FIG('mei', 96, 250, 1.4) + FIG('james', 310, 252, 1.4, { face: -1 }) },
+    gao_window: { bg: 'village', night: 0.6, fg: () => MOON(70, 36, 11) + ground2(210) + FIG('sect', 160, 244, 1.25) + `<rect x="300" y="120" width="30" height="24" fill="#fbfaf7" opacity="0.85" stroke="#111010"/>` },
+    arson: { bg: 'village', night: 0.55, fg: () => ground2(210) + fire2(270, 190, 0.5) + fire2(120, 214, 0.4) + FIG('thug', 80, 240, 1.15) + FIG('thug', 124, 242, 1.1) + FIG('man', 168, 240, 1.1) + FIG('james', 260, 246, 1.25, { face: -1 }) + YU(290, 246, 0.8, -1) },
+    herb_slope: { bg: 'peaks', fg: () => SUN(340, 40, 11) + ground2() + FIG('mei', 170, 236, 1.15, { sway: -10 }) + FIG('james', 240, 240, 1.2, { face: -1 }) + YU(274, 240, 0.85, -1) },
+    workshop: { interior: true, lamp: false, fg: () => `<rect x="120" y="190" width="160" height="12" fill="#55514d"/><g stroke="#fbfaf7" stroke-width="2.4" stroke-linecap="round"><path d="M140 188 l10 -12 M160 188 l4 -14 M180 188 l12 -10 M220 188 l-6 -14 M250 188 l8 -12"/></g>` + FIG('james', 200, 246, 1.3) + FIG('woman', 70, 246, 0.7) + FIG('man', 96, 248, 0.66) + FIG('woman', 330, 246, 0.72, { face: -1 }) },
+    drill: { bg: 'village', fg: () => ground2() + [0, 1, 2, 3, 4, 5].map((i) => FIG('man', 50 + i * 44, 238 + (i % 2) * 4, 1.0, { spear: true })).join('') + FIG('james', 354, 246, 1.2, { face: -1 }) + YU(380, 246, 0.8, -1) },
+    wolves: { bg: 'forest', fg: () => ground2() + beast(250, 234, 1.6, '#55514d', '#a02c2c') + beast(330, 238, 1.4, '#55514d', '#a02c2c') + FIG('james', 100, 244, 1.2) + YU(128, 244, 0.85) },
+};
+const CLOSEUPS2 = { mei_lin: { bg: 'peaks', draw: C2.meiCloseUp }, yuki_close: { bg: 'peaks', draw: C2.yukiCloseUp } };
+const bgImg = (img) => `<image href="art/bg/${img}.jpg" x="0" y="0" width="400" height="250" preserveAspectRatio="xMidYMid slice"/>`;
+function scene2(key, id) {
+    const open = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${id.replace(/_/g, ' ')}" preserveAspectRatio="xMidYMid slice">`;
+    const vg = `<defs><radialGradient id="v2" cx="0.5" cy="0.45" r="0.75"><stop offset="0.6" stop-color="#111010" stop-opacity="0"/><stop offset="1" stop-color="#111010" stop-opacity="0.7"/></radialGradient></defs><rect width="400" height="250" fill="url(#v2)"/>`;
+    const fix = (svg) => svg.replace(/id="(g2|v2)"/g, `id="$1-${id}"`).replace(/url\(#(g2|v2)\)/g, `url(#$1-${id})`);
+    if (CLOSEUPS2[key]) {
+        const c = CLOSEUPS2[key];
+        return fix(`${open}<rect width="400" height="250" fill="#ece8df"/>${bgImg(c.bg)}<rect width="400" height="250" fill="#ece8df" opacity="0.55"/>${c.draw(`c${id}`)}${vg}</svg>`);
+    }
+    const sc = SCENES2[key] || SCENES2.forest_dawn;
+    const base = sc.interior ? C2.shoji(sc.lamp !== false, sc.dark || 0) : `${bgImg(sc.bg)}<rect width="400" height="250" fill="#ece8df" opacity="${sc.wash ?? 0.18}"/>${sc.night ? `<rect width="400" height="250" fill="#111010" opacity="${sc.night}"/>` : ''}`;
+    const fg = sc.fg().replace(/#[0-9a-fA-F]{6}\b/g, (h) => (C2.KEEP2.includes(h.toLowerCase()) || KEEP.includes(h.toLowerCase()) ? h : lum(h) < 0.36 ? '#111010' : '#fbfaf7'));
+    return fix(`${open}<rect width="400" height="250" fill="#ece8df"/>${base}${fg}${vg}</svg>`);
+}
+
 /** SVG markup for a scene's art key (unknown keys get a quiet forest). */
 export function sceneArt(key) {
     const id = String(key || 'x').replace(/\W/g, '');
+    if (STYLE === 'clamp2') return scene2(key, id);
     const open = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${id.replace(/_/g, ' ')}" preserveAspectRatio="xMidYMid slice">`;
     if (PORTRAITS[key]) {
         const pt = PORTRAITS[key];
