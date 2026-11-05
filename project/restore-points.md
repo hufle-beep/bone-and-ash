@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.8.6 | (this push) | Save safety, error bar, checks, restore-point tags. **Saves now use a wrapped format that 0.8.5 and older can't read: they would silently start a new game and overwrite the autosave. Before rolling back past 0.8.6, download the save first.** |
+| 0.9.0 | (this push) | Task cards and the queue (preview switch, off by default). Save state 2; 0.8.6 can't read state 2 ("newer version" on the recovery screen, nothing is wiped). Download the save before rolling back. |
+| 0.8.6 | `dc2ebee` | Save safety, error bar, checks, restore-point tags. **Saves now use a wrapped format that 0.8.5 and older can't read: they would silently start a new game and overwrite the autosave. Before rolling back past 0.8.6, download the save first.** |
 | 0.8.5 | `d689ceb` | Docs only; the game is the same as 0.8.4 |
 | 0.8.4 | `209e89a` | **Last version before the hybrid work.** Yuki's path, every romance arrangement. Tests pass (14 engine checks; story test with 2,000 full games). |
 | 0.8.3 | `ac92a7d` | Bonesinger T1–T10 in combat |

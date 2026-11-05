@@ -1,10 +1,16 @@
 # Bone and Ash — handover (read this first in a new chat)
 
-**Saved:** 2026-11-05 (Europe/Budapest). **Version:** 0.8.6 (`sw.js` VERSION `bone-ash-0.8.6`): save safety, error bar, checks, restore points. Prologue + Act 1, about 390 scenes. **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
+**Saved:** 2026-11-06 (Europe/Budapest). **Version:** 0.9.0 (`sw.js` VERSION `bone-ash-0.9.0`): step 3a, task cards and the queue (preview switch). Prologue + Act 1, about 390 scenes. **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
 Built in the SillyTavern chat as a spin-off. That chat stays for SillyTavern; this game continues in its own chats.
 
 **Rules:** `CLAUDE.md` (short) and `project/working-agreement.md` (full) — the change sequence is a HARD RULE. **Other docs:** `project/roadmap.md` (what's next), `project/design.md` (the approved hybrid design: Selene-style tasks and the Coil), `project/changelog.md`, `project/restore-points.md`. All mirrored to the claude.ai project "ash and bone".
 **Reference repos (the owner's):** `hufle-beep/Long-patience` (Selene: rules, docs, Android wrapper and workflows to copy), `hufle-beep/Shared-ST` (private; Rules Engine C in `st/rules-engine-c/`, presets in `st/rules-engine-c/lib/presets.js`, `docs/STANDING_LATEST.md`).
+
+## Decided in chat (2026-11-06)
+
+- **Step 3 is split into three pushes (option 1), behind a preview switch** that becomes the normal mode at the end of 3c: **3a the task loop** (done in v0.9.0), **3b getting better** (familiarity, Intuitive Aptitude, Yuki's lane, drills), **3c the Coil** (reset B, Coil screen, Bite the tail, accept-or-rewind at the tribute, breakthrough from 95%, bots tune the tribute ~30% → 80%). Then the serpent (`rt_serpent`) as its own small push, numbers to the owner first.
+- **3a picks:** 1a daily limits stay ("back tomorrow"); 2a Day 1 (`stream`) and Day 4 (`village`) stay story until rewinds exist; 3a HP 0 during a task = stand-in collapse until the Coil.
+- **Loot (owner's question 00:06, pick 00:08: "go with your recommendation"):** option 1 plus a little of 2. **Bone-work crafting:** cores, fangs, bone-meal and ship shards become gear in three slots (blade, wraithbone armour, a charm) and medicines (bracket salve); crafting is workshop task cards; on a rewind the gear is lost but the **recipes are kept (as Insights)**. Plus **cores as the world's currency** (bribes, tribute). Scheduled in step 4; the recipe list and numbers go to the owner before anything is built.
 
 ## Decided in chat (2026-11-05)
 
@@ -86,6 +92,8 @@ In `CLAUDE.md` and `project/working-agreement.md` (adopted 2026-11-05). The chan
 | `js/art/art.js` | `sceneArt(key)`: 26 scene illustrations from shared primitives (sky, sun/moon, mountains, treeline, mist, person, cat, beast, boar, hut, fire, shards, lotus) plus vignette and grain. |
 | `js/main.js` | The UI. Autosave key `boneash.auto`, slots `boneash.slot1–3`, save-file export/import. |
 | `sw.js`, `manifest.webmanifest`, `icons/` | Offline install. Game files: network first, cache when offline. Google Fonts: cached on first use. |
+| `js/core/tasks.js`, `js/story/task_hubs.js` | Task cards and the queue (v0.9.0): which hubs, card ids, `runTask`, dry runs, the outlook. |
+| `tests/tasks.test.mjs` | Task mode: 2,000 bot games each way, outlook = reality, collapse, migration. |
 | `tests/rules.test.mjs` | The engine numbers. 14 checks. |
 | `tests/story.test.mjs` | Every link valid, every scene reachable, 2,000 random playthroughs, per-fight win rates. |
 | `tests/part.test.mjs` | One Act 1 part alone; 1 run in 10 enters fights hurt so every "lost" scene is reached. |
@@ -253,6 +261,17 @@ The bible and the contract between the four part files are at the top of `js/sto
 - Last night of Act 1 (`rt_evening`) offers every arrangement the hearts allow: Mei Lin · Ya · Yuki alone; Mei Lin + Ya (`rt_trio`); Yuki + Mei Lin (`yk_night_mei`); Yuki + Ya (`yk_night_ya`); all four (`yk_night_all`). `g.flags.final_night` records it; `loveLine()` writes the Act 1 epilogue line (a1_end).
 - Romance with Yuki only in her human form (adult); fade to black. The code still says she bonded with James when he was six (34 years); **decided 2026-11-05: born together and bonded from birth** (fix pending, roadmap step 7).
 - Tests: 240 extra walks over the last night; combat round cap in the random runs raised to 400 (a rare long stalemate vs the Guardian at True Core).
+
+## v0.9.0 — task cards and the queue (step 3a, preview)
+
+- **Switch:** Saves tab → "Tasks (preview)", off by default, per phone (storage key `boneash.tasks`, `'1'` = on). Off = the game exactly as v0.8.6 (the classic story test gives the same count as before).
+- **Which hubs** (`js/story/task_hubs.js`, `TASK_HUBS`): `wilds` (Days 2–3; menus `wild_forage`, `wild_hunt`, `wild_train`) and `ashfall` (Days 5–6; menus `clinic`, `workshop`, `drill`). Choices on the hub that lead back to it (eat, rest, cultivate, ghost-gill, communal pot) are cards too. Everything else stays a **story stop** (buttons under "Story"). `herb_slopes`, `wen_lesson`, `mei_walk`, `far_hunt`, `scout`, explore, elder, heal and the boar stay stops because their prose (Mei Lin, Wen) or fights live in the scene.
+- **Engine** (`js/core/tasks.js`, pure): a card id is `<scene>:<choice index>`. `runTask` calls the same `choose()` as a tap (the door to the menu, then the choice, then back to the hub), so rolls, XP, loot, time and Fed are unchanged; only the moment moves to the end of the bar. `taskMinutes` and `outlook` dry-run on a copy (same seed, so the prediction is exact). `daily()` in common.js now carries `dailyKey` so cards can say "back tomorrow".
+- **Clock:** 1 game hour = 3 s (`MS_PER_GAME_HOUR`); runs only while a task runs. Queue up to 30 (`QUEUE_MAX`), saved in `g.tasks.queue`; the running bar is not saved (a reload restarts the head task, nothing applied twice). Tapping a story stop cancels the running bar (nothing of it happens); the queue waits and resumes on the hub. A queued card that isn't possible when its turn comes is skipped with a note.
+- **Outlook line:** "Fed runs out <time> on this queue" or "Fed holds: about N when the queue ends".
+- **HP 0 during a task** (stand-in until the Coil): the queue is cleared, the clock goes to 19:00 if earlier, HP 1, and James comes to at the hub's evening stop (`camp` or `nextEvening`); the night and morning then run as usual. Bots never reached it in 2,000 games (0 collapses); a unit test forces it.
+- **Save state 2:** migration 1 → 2 adds `tasks: { queue: [] }`.
+- **Test:** `tests/tasks.test.mjs` (in `tools/check.sh`): hubs and menus exist, migration, the collapse, 2,000 bot games in task mode and 2,000 classic, the outlook matches the real run every time, all 28 cards played. Tribute outcomes (random bots): tasks bluff 24.9 / fought 33.1 / lost 23.3 / paid 18.6%; classic bluff 27.3 / fought 23.5 / lost 29.9 / paid 19.2%. Same rules; the task bot simply trains more than a random walker.
 
 ## v0.8.6 — save safety, error bar, checks, restore points
 

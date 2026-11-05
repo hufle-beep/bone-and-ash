@@ -56,6 +56,8 @@ function visible(g, s) {
     const kept = list.filter(({ c }) => !allFull(g, c) && !lockReason(g, c));
     return kept.length ? kept : list;
 }
+/** A choice that can be taken right now and is worth showing (tasks.js uses the same rules as the story screen). */
+export const choiceOpen = (g, c) => shown(g, c) && !lockReason(g, c) && !allFull(g, c);
 /** A plain "go back" choice: no effects, leads to `home`. */
 const isBack = (g, c, home) => !c.do && !c.check && !c.combat && !c.qi && !c.req && (typeof c.to === 'function' ? c.to(g) : c.to) === home;
 /**

@@ -6,7 +6,8 @@ export const set = (...flags) => (g) => { for (const f of flags) g.flags[f] = tr
 export const day = (g) => clockParts(g.minutes).day;
 export const hour = (g) => clockParts(g.minutes).hh;
 /** Available once per in-game day. */
-export const daily = (key) => (g) => !g.flags[`${key}@${day(g)}`];
+/** A once-a-day test; `dailyKey` lets the task screen show it as "back tomorrow" (v0.9.0). */
+export const daily = (key) => Object.assign((g) => !g.flags[`${key}@${day(g)}`], { dailyKey: key });
 export const markDaily = (g, key) => { g.flags[`${key}@${day(g)}`] = true; };
 
 /** Days of training beyond the original pace: 0 on the old route, up to 2 in the forest and 2 in Ashfall. */

@@ -154,3 +154,27 @@ button { font: inherit; color: inherit; }
 #errbar .msg { flex: 1; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 6.5rem; overflow: auto; color: var(--red); }
 #errbar .btn { padding: 0.35rem 0.7rem; }
 .recovery h1 { color: var(--red); }
+
+/* ---- task cards and the queue (v0.9.0, "Tasks (preview)") ---- */
+.tasks { padding: 0.4rem 1rem 0.6rem; }
+.tasks h2 { font-family: var(--display); font-weight: 600; font-size: 1.1rem; margin: 1rem 0.15rem 0.45rem; padding-bottom: 0.25rem; background: var(--brush) left bottom / 4rem 5px no-repeat; }
+.now { margin: 0.9rem 1.15rem 0; font-size: 0.9rem; }
+.now b { font-weight: 600; }
+.now .stroke { height: 8px; }
+.now .stroke i { background: var(--ink); transition: none; }
+.now.idle { color: var(--ink-dim); font-style: italic; }
+.outlook { margin: 0.35rem 1.15rem 0; font-size: 0.82rem; color: var(--ink-dim); }
+.outlook.warn { color: var(--red); }
+.queue { list-style: none; margin: 0; padding: 0; }
+.queue li { display: grid; grid-template-columns: 1fr auto auto; gap: 0.6rem; align-items: center; padding: 0.35rem 0.2rem; border-bottom: 1px solid var(--line); font-size: 0.88rem; }
+.queue li.skip { opacity: 0.5; text-decoration: line-through; }
+.queue time { color: var(--ink-dim); font-size: 0.8rem; white-space: nowrap; }
+.queue .x { border: 0; background: none; cursor: pointer; padding: 0.3rem 0.5rem; font-size: 1rem; color: var(--ink-dim); }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: 0.5rem; }
+.card { text-align: left; cursor: pointer; padding: 0.65rem 0.7rem; border: 1.5px solid var(--ink); border-radius: 4px 10px 4px 10px; background: transparent; font-size: 0.88rem; line-height: 1.35; }
+.card:hover, .card:focus-visible { background: rgba(35,33,30,0.05); }
+.card:active { transform: translateY(1px); }
+.card .tag { display: block; margin-top: 0.3rem; font-size: 0.74rem; color: var(--ink-dim); font-style: italic; }
+.card .len { display: block; margin-top: 0.2rem; font-size: 0.74rem; color: var(--ink-2); }
+.card .n { float: right; font-family: var(--display); font-weight: 800; color: var(--red); }
+.card[disabled] { opacity: 0.42; cursor: not-allowed; border-style: dashed; }

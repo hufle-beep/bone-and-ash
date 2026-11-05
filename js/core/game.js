@@ -16,7 +16,7 @@ export const START_MINUTES = 6 * 60 + 40; // Day 1, 06:40
 export const SATIETY_PER_HOUR = 3;
 export const HUNGRY_AT = 30;
 export const XP_BANDS = { routine: 0, standard: 30, challenging: 60, major: 120 };
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2; // 2 (v0.9.0): the task queue
 
 const node = (tier = 1, level = 1) => ({ tier, level, xp: 0 });
 
@@ -64,6 +64,7 @@ export function newGame(seed = Date.now()) {
         log: [],
         stats: { checks: 0, wins: 0, kills: 0, meals: 0 },
         combat: null,
+        tasks: { queue: [] },
     };
 }
 
@@ -605,7 +606,9 @@ export class SaveError extends Error {
 }
 
 /** State migrations, oldest first: MIGRATIONS[v] turns a version-v state into version v + 1. */
-const MIGRATIONS = {};
+const MIGRATIONS = {
+    1: (g) => { g.tasks = { queue: [] }; }, // v0.9.0: the task queue (empty)
+};
 
 export function migrate(g) {
     if (g.v === undefined) g.v = 1;

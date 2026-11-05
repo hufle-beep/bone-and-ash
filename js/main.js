@@ -4,6 +4,7 @@ import {
     startCombat, combatStep, combatFlee, COMBAT_ACTIONS, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg,
 } from './core/game.js';
 import { sceneView, choose, goTo } from './core/story.js';
+import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskLabel, taskMinutes, runTask, outlook, taskQueue, MS_PER_GAME_HOUR, QUEUE_MAX } from './core/tasks.js';
 import { SCENES, ITEMS } from './story/prologue.js';
 import { meridianRow } from './story/meridians.js';
 import { realmShockHpBonus } from './core/formulas.js';
@@ -46,6 +47,85 @@ let lastTick = Date.now();
 let storageWarned = false;
 let prevScene = null;
 let lastPress = 0;
+
+/* ---------------- tasks (v0.9.0, preview) ---------------- */
+const TASKS_KEY = 'boneash.tasks'; // per phone: '1' = "Tasks (preview)" on
+let taskMode = store.get(TASKS_KEY) === '1';
+let running = null; // { id, label, t0, ms, m0, mins } — the head of the queue while its bar fills (not saved: a reload restarts it)
+let ticker = null;
+const durLabel = (m) => (m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} m` : ''}` : `${m} m`);
+const onTaskHub = () => taskMode && g && !recovery && isTaskHub(g);
+
+function startNext() {
+    if (running || !onTaskHub()) return;
+    const q = taskQueue(g);
+    const skipped = [];
+    while (q.length && !taskOpen(g, SCENES, q[0])) skipped.push(taskLabel(g, SCENES, q.shift()));
+    if (skipped.length) { lastResult = { lines: skipped.map((l) => `Skipped (not possible now): ${l}`), fail: true }; autosave(); }
+    if (!q.length) return;
+    const id = q[0];
+    const mins = taskMinutes(g, SCENES, id);
+    running = { id, label: taskLabel(g, SCENES, id), t0: Date.now(), ms: Math.max(400, (mins / 60) * MS_PER_GAME_HOUR), m0: g.minutes, mins };
+    if (!ticker) ticker = setInterval(tick, 100);
+}
+function stopRunning() { running = null; }
+function tick() {
+    if (!running) return;
+    if (!onTaskHub()) { running = null; return; }
+    const f = Math.min(1, (Date.now() - running.t0) / running.ms);
+    const bar = document.getElementById('nowbar');
+    if (bar) bar.style.width = `${(f * 100).toFixed(1)}%`;
+    const clk = document.querySelector('.status .clock');
+    if (clk && tab === 'story') clk.textContent = clockLabelG(g, running.m0 + Math.floor(f * running.mins));
+    if (f < 1) return;
+    const { id, label } = running;
+    running = null;
+    try {
+        if (taskQueue(g)[0] === id) taskQueue(g).shift();
+        const r = runTask(g, SCENES, id);
+        const prev = lastResult?.tasks ? lastResult.lines : [];
+        lastResult = { lines: [...prev, `**${label}**`, ...r.lines].slice(-24), fail: r.fail, tasks: true }; // a queue's results stack up
+        autosave();
+        startNext();
+        render();
+    } catch (err) { taskQueue(g).length = 0; showError(err); render(); }
+}
+
+function renderTaskHub() {
+    const v = sceneView(g, SCENES);
+    const cards = taskCards(g, SCENES);
+    const q = taskQueue(g);
+    const ol = outlook(g, SCENES);
+    const counts = {};
+    for (const id of q) counts[id] = (counts[id] || 0) + 1;
+    const groups = [];
+    for (const c of cards) { let gr = groups.find((x) => x.name === c.group); if (!gr) groups.push(gr = { name: c.group, cards: [] }); gr.cards.push(c); }
+    const cardHtml = (c) => {
+        const mins = c.status === 'open' ? taskMinutes(g, SCENES, c.id) : c.minutes;
+        return `<button class="card" data-task="${esc(c.id)}" ${c.status !== 'open' ? 'disabled' : ''}>${counts[c.id] ? `<span class="n">×${counts[c.id]}</span>` : ''}${md(c.label)}<span class="tag">${esc(c.status === 'open' ? (c.tag || 'no check') : 'done for today — back tomorrow')}</span>${c.status === 'open' ? `<span class="len">${durLabel(mins)}</span>` : ''}</button>`;
+    };
+    const rows = ol.rows.map((r, k) => `<li class="${r.skip ? 'skip' : ''}"><span>${md(taskLabel(g, SCENES, r.id))}</span><time>${r.skip ? 'not possible then' : r.wait ? 'after the story' : `→ ${clockLabelG(g, r.end).replace(/^Day \d+, /, '')}`}</time><button class="x" data-unq="${k}" aria-label="Remove">✕</button></li>`).join('');
+    const out = ol.fedOut != null
+        ? `<p class="outlook warn">Fed runs out ${esc(clockLabelG(g, ol.fedOut))} on this queue. Queue some food.</p>`
+        : q.length ? `<p class="outlook">Fed holds: about ${Math.round(ol.fedEnd)} when the queue ends (${esc(clockLabelG(g, ol.end))}).</p>` : '<p class="outlook">Nothing queued. The clock waits for you.</p>';
+    const now = running
+        ? `<div class="now"><b>Now:</b> ${md(running.label)}<div class="stroke"><i id="nowbar" style="width:${(Math.min(1, (Date.now() - running.t0) / running.ms) * 100).toFixed(1)}%"></i></div></div>`
+        : '<div class="now idle">Idle. Tap a card to queue it; the clock runs while a task does.</div>';
+    const stops = v.choices.filter((c) => c.index >= 1000 || !isTaskChoice(SCENES, g.scene, c.index))
+        .map((c) => `<li><button class="choice${/fight/.test(c.tag) ? ' fightish' : ''}" data-choice="${c.index}" ${c.disabled ? 'disabled aria-disabled="true"' : ''}>${md(c.label)}${c.tag || c.reason ? `<span class="tag">${esc(c.disabled ? c.reason : c.tag)}</span>` : ''}</button></li>`).join('');
+    view.innerHTML = `<section>
+<div class="plate">${sceneArt(v.art)}</div>
+<header class="head"><div class="place">${esc(v.place || g.location)}</div><h1 class="title">${esc(v.title)}</h1></header>
+${statusHtml()}${now}${out}${resultHtml()}
+<div class="prose">${paras(v.text)}</div>
+<div class="tasks">
+${q.length ? `<h2>Queue (${q.length} / ${QUEUE_MAX})</h2><ol class="queue">${rows}</ol>` : ''}
+${groups.map((gr) => `<h2>${esc(gr.name)}</h2><div class="cards">${gr.cards.map(cardHtml).join('')}</div>`).join('')}
+${stops ? `<h2>Story</h2>` : ''}
+</div>
+${stops ? `<ul class="choices">${stops}</ul>` : ''}
+</section>`;
+}
 
 const freshGame = () => ensureBars(newGame(Math.floor(Math.random() * 2 ** 31)));
 const bakMeta = () => { try { return JSON.parse(store.get(BAK_META)) || { play: 0, at: {}, when: {} }; } catch { return { play: 0, at: {}, when: {} }; } };
@@ -170,6 +250,7 @@ function resultHtml() {
 
 function renderStory() {
     if (g.combat) return renderCombat();
+    if (onTaskHub()) { startNext(); return renderTaskHub(); }
     const v = sceneView(g, SCENES);
     const choices = v.choices.map((c) => `<li><button class="choice${/fight/.test(c.tag) ? ' fightish' : ''}" data-choice="${c.index}" ${c.disabled ? `disabled aria-disabled="true"` : ''}>${md(c.label)}${c.tag || c.reason ? `<span class="tag">${esc(c.disabled ? c.reason : c.tag)}</span>` : ''}</button></li>`).join('');
     view.innerHTML = `<section class="fade-in">
@@ -255,6 +336,9 @@ function renderSaves() {
 ${slot(1)}${slot(2)}${slot(3)}
 <h2>Move a save to another device</h2>
 <div class="btns"><button class="btn" data-export="1">Download save file</button><label class="btn">Load save file<input type="file" accept="application/json,.json" data-import="1" hidden></label></div>
+<h2>Tasks (preview)</h2>
+<p class="note">${taskMode ? 'On: the forest days (2–3) and the village days (5–6) run as timed task cards with a queue. 1 game hour takes 3 seconds.' : 'Off: the game plays as before. Turn it on to try the forest and village days as timed task cards.'} Only this phone remembers it.</p>
+<div class="btns"><button class="btn${taskMode ? ' primary' : ''}" data-tasks="1">${taskMode ? 'Tasks: on — turn off' : 'Tasks: off — turn on'}</button></div>
 <h2>Start over</h2>
 <div class="btns"><button class="btn primary" data-new="1">New game</button></div>
 <p class="note" id="saveNote"></p></section>`;
@@ -279,13 +363,31 @@ view.addEventListener('click', (ev) => {
         lastPress = now;
     }
     try {
+        if (b.dataset.task) {
+            const q = taskQueue(g);
+            if (q.length >= QUEUE_MAX) { lastResult = { lines: [`The queue is full (${QUEUE_MAX}).`], fail: true }; render(); return; }
+            q.push(b.dataset.task); autosave(); startNext(); render();
+            return;
+        }
+        if (b.dataset.unq != null) {
+            const k = Number(b.dataset.unq);
+            if (k === 0 && running) stopRunning();
+            taskQueue(g).splice(k, 1); autosave(); startNext(); render();
+            return;
+        }
+        if (b.dataset.tasks) {
+            taskMode = !taskMode; store.set(TASKS_KEY, taskMode ? '1' : '0');
+            if (!taskMode) stopRunning(); else startNext();
+            renderSaves(); return;
+        }
+        if (b.dataset.choice != null) stopRunning(); // a story stop: the bar's work is not done, so nothing of it happens
         if (b.dataset.choice != null) {
             const ch = SCENES[g.scene]?.choices?.[Number(b.dataset.choice)];
             if (ch && /^Stay lost/.test(String(val(ch.text)))) backupBefore('the Long Forest');
             const r = choose(g, SCENES, Number(b.dataset.choice));
             lastResult = { lines: r.lines, fail: r.roll ? !r.roll.success : false };
             if (r.combat) { startCombat(g, r.combat(g)); combatLog = null; }
-            autosave(); render(); window.scrollTo({ top: 0, behavior: 'smooth' });
+            autosave(); startNext(); render(); window.scrollTo({ top: 0, behavior: 'smooth' });
         } else if (b.dataset.act) {
             const out = combatStep(g, b.dataset.act);
             combatLog = out.lines;
@@ -299,7 +401,7 @@ view.addEventListener('click', (ev) => {
         } else if (b.dataset.new) {
             if (tab !== 'story' && !confirmNew()) return;
             backupBefore('a new game');
-            g = freshGame();
+            g = freshGame(); stopRunning();
             lastResult = null; combatLog = null; autosave(); setTab('story');
         } else if (b.dataset.tabGo) {
             setTab(b.dataset.tabGo);
@@ -309,7 +411,7 @@ view.addEventListener('click', (ev) => {
             let next;
             try { next = checkScene(deserialize(store.get(SLOT(b.dataset.load)))); } catch (err) { note(`Slot ${b.dataset.load} can't be loaded: ${err.message}`); return; }
             backupBefore(`loading slot ${b.dataset.load}`);
-            g = next; lastResult = null; combatLog = null; autosave(); setTab('story');
+            g = next; stopRunning(); lastResult = null; combatLog = null; autosave(); setTab('story');
         } else if (b.dataset.export) {
             download(serialize(g), `bone-and-ash-${clockLabel(g.minutes).replace(/[^\w]+/g, '-')}.json`);
         }
@@ -324,7 +426,7 @@ view.addEventListener('change', async (ev) => {
     let next;
     try { next = checkScene(deserialize(await inp.files[0].text())); } catch (err) { note(`That file can't be loaded: ${err.message}`); return; }
     backupBefore('loading a save file');
-    g = next; autosave(); lastResult = null; setTab('story');
+    g = next; stopRunning(); autosave(); lastResult = null; setTab('story');
 });
 document.getElementById('tabs').addEventListener('click', (ev) => { const b = ev.target.closest('button[data-tab]'); if (b) setTab(b.dataset.tab); });
 
@@ -338,6 +440,7 @@ function confirmNew() {
 function note(t) { const n = document.getElementById('saveNote'); if (n) n.textContent = t; }
 
 load();
+startNext();
 render();
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
     navigator.serviceWorker.register('sw.js').catch(() => { /* offline install is optional */ });
