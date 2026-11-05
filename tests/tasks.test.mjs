@@ -5,7 +5,7 @@ import { SCENES } from '../js/story/prologue.js';
 import { TASK_HUBS } from '../js/story/task_hubs.js';
 import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION } from '../js/core/game.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
-import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskMinutes, runTask, outlook, taskQueue, QUEUE_MAX } from '../js/core/tasks.js';
+import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskMinutes, runTask, outlook, taskQueue, taskState, setYuki, yukiLane, famTier, QUEUE_MAX } from '../js/core/tasks.js';
 
 let pass = 0, fail = 0;
 const assert = (c, l) => { if (c) { pass++; } else { fail++; if (fail < 30) console.error('  FAIL ', l); } };
@@ -13,14 +13,14 @@ const assert = (c, l) => { if (c) { pass++; } else { fail++; if (fail < 30) cons
 // static: hubs, menus and their doors exist
 for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     assert(!!SCENES[hub], `hub ${hub} exists`);
-    for (const menu of Object.keys(cfg.menus)) {
+    for (const menu of Object.keys(cfg.menus || {})) {
         assert(!!SCENES[menu], `menu ${menu} exists`);
         assert(SCENES[hub].choices.some((c) => c.to === menu), `${hub} has a door to ${menu}`);
         assert(!SCENES[menu].choices.some((c) => c.combat), `${menu} has no fights (cards can't fight)`);
     }
 }
 // old state (v1) → empty queue
-{ const old = ensureBars(newGame(5)); delete old.tasks; old.v = 1; migrate(old); assert(old.v === SAVE_VERSION && Array.isArray(old.tasks.queue) && old.tasks.queue.length === 0, 'v1 save gets an empty queue'); }
+{ const old = ensureBars(newGame(5)); delete old.tasks; old.v = 1; migrate(old); assert(old.v === SAVE_VERSION && Array.isArray(old.tasks.queue) && old.tasks.queue.length === 0 && Object.keys(old.tasks.fam).length === 0 && old.tasks.yuki.on === false, 'v1 save gets an empty queue and no familiarity'); }
 assert(QUEUE_MAX === 30, 'queue holds 30');
 // HP 0 during a task (stand-in until the Coil): queue cleared, 1 HP, dusk, the camp stop
 {
@@ -46,6 +46,9 @@ function fight(g, run) {
 
 const stats = { tasks: { endings: {}, collapses: 0, cards: 0, skipped: 0, games: 0 }, classic: { endings: {}, games: 0 } };
 const cardsSeen = new Set();
+const cardsListed = new Set();
+const bands = {};
+let yukiRuns = 0;
 let predicted = 0;
 function play(run, tasks) {
     const g = ensureBars(newGame(run + 1));
@@ -55,7 +58,10 @@ function play(run, tasks) {
         const v = sceneView(g, SCENES);
         if (v.end) { const e = g.flags.ending || 'none'; st.endings[e] = (st.endings[e] || 0) + 1; st.games++; return true; }
         if (tasks && isTaskHub(g)) {
-            const cards = taskCards(g, SCENES).filter((c) => c.status === 'open');
+            const all = taskCards(g, SCENES);
+            for (const c of all) cardsListed.add(c.id);
+            if (yukiLane(g) && rnd(3) === 0) setYuki(g, !yukiLane(g).on);
+            const cards = all.filter((c) => c.status === 'open');
             const stops = v.choices.filter((c) => !c.disabled && (c.index >= 1000 || !isTaskChoice(SCENES, g.scene, c.index)));
             if (!cards.length && !stops.length) { assert(false, `dead end at task hub ${g.scene} (run ${run})`); return false; }
             if (cards.length && (rnd(10) < 8 || !stops.length)) {
@@ -70,7 +76,12 @@ function play(run, tasks) {
                     cardsSeen.add(id);
                     const m0 = g.minutes;
                     const mins = taskMinutes(g, SCENES, id);
+                    const card = taskCards(g, SCENES).find((c) => c.id === id);
+                    if (card?.check) bands[card.check.band] = (bands[card.check.band] || 0) + 1;
+                    const fam0 = taskState(g).fam[id] || 0;
                     const r = runTask(g, SCENES, id);
+                    if (r.lines.some((l) => /^Yuki (comes|leaves)/.test(l))) yukiRuns++;
+                    if (card?.kind === 'work') assert((taskState(g).fam[id] || 0) > fam0, `familiarity grows on ${id}`);
                     st.cards++;
                     assert(g.minutes - m0 === mins || r.stopped, `dry run predicts ${id} (${mins} vs ${g.minutes - m0})`);
                     real.push({ id, end: g.minutes });
@@ -98,17 +109,24 @@ function play(run, tasks) {
 }
 for (let run = 0; run < 2000; run++) { play(run, true); play(run, false); }
 
-// every card that exists was run at least once
-const all = new Set();
-for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
-    for (const menu of Object.keys(cfg.menus)) SCENES[menu].choices.forEach((c, i) => { if (c.do || c.check || c.time || c.qi) all.add(`${menu}:${i}`); });
-    SCENES[hub].choices.forEach((c, i) => { if (c.to === hub && (c.do || c.check || c.time || c.qi) && !c.combat) all.add(`${hub}:${i}`); });
-}
+// every card that was ever offered was also played at least once
+const all = cardsListed;
 for (const id of all) assert(cardsSeen.has(id), `card ${id} was played by a bot`);
+assert(yukiRuns > 1000, `Yuki's lane brings things home (${yukiRuns})`);
+// no dice on work cards: the same state gives the same result
+{
+    const g = ensureBars(newGame(3)); g.scene = 'wilds'; g.minutes += 1440; Object.assign(g.flags, { long: true, forest_day: 2 });
+    const a = JSON.parse(JSON.stringify(g)), b = JSON.parse(JSON.stringify(g));
+    a.rng = 1; b.rng = 999999;
+    const ra = runTask(a, SCENES, 'wild_forage:0'), rb = runTask(b, SCENES, 'wild_forage:0');
+    assert(JSON.stringify(ra.lines) === JSON.stringify(rb.lines) && JSON.stringify(a.inventory) === JSON.stringify(b.inventory), 'work cards ignore the dice');
+    assert(famTier(0) === 0 && famTier(2) === 1 && famTier(8) === 2 && famTier(18) === 3, 'familiarity tiers at 2 / 8 / 18');
+}
 
 const pctOf = (o, n) => Object.entries(o).sort().map(([k, v]) => `${k} ${((v / n) * 100).toFixed(1)}%`).join(', ');
 console.log(`  tribute, tasks:   ${pctOf(stats.tasks.endings, stats.tasks.games)}`);
 console.log(`  tribute, classic: ${pctOf(stats.classic.endings, stats.classic.games)}`);
+console.log(`  work-card results: ${Object.entries(bands).map(([k, v]) => `${k} ${v}`).join(', ')} · Yuki brought home ${yukiRuns} times`);
 console.log(`  ${stats.tasks.cards} cards run, ${stats.tasks.skipped} skipped, ${stats.tasks.collapses} collapses (HP 0), ${predicted} queues predicted, ${cardsSeen.size}/${all.size} cards played`);
 console.log(`${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

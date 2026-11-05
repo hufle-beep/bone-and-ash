@@ -16,7 +16,7 @@ export const START_MINUTES = 6 * 60 + 40; // Day 1, 06:40
 export const SATIETY_PER_HOUR = 3;
 export const HUNGRY_AT = 30;
 export const XP_BANDS = { routine: 0, standard: 30, challenging: 60, major: 120 };
-export const SAVE_VERSION = 2; // 2 (v0.9.0): the task queue
+export const SAVE_VERSION = 3; // 2 (v0.9.0): the task queue; 3 (v0.9.2): familiarity, adaptation, Yuki's lane
 
 const node = (tier = 1, level = 1) => ({ tier, level, xp: 0 });
 
@@ -64,7 +64,7 @@ export function newGame(seed = Date.now()) {
         log: [],
         stats: { checks: 0, wins: 0, kills: 0, meals: 0 },
         combat: null,
-        tasks: { queue: [] },
+        tasks: { queue: [], fam: {}, adapt: {}, yuki: { on: false, progress: 0 } },
     };
 }
 
@@ -182,11 +182,12 @@ function addXp(n, amount) {
  * Standard award, as in the engine: pool = band × the skill's tier, split equally between the skill and GU;
  * Yuki (bonded) gets a share of the same size to her Qi Use. A failed attempt pays 25%.
  */
-export function awardXp(g, skillName, band = 'standard', { fail = false } = {}) {
+export function awardXp(g, skillName, band = 'standard', { fail = false, factor = 1 } = {}) {
     const name = actingName(g, skillName);
     const n = getSkill(g, name);
     let pool = (XP_BANDS[band] ?? 30) * n.tier;
     if (fail) pool = Math.floor(pool * FAIL_XP_FRACTION);
+    if (factor !== 1) pool = Math.floor(pool * factor); // a partial result on a task card (v0.9.2)
     if (!pool) return [];
     const out = [];
     const heads = name === 'GU' ? 1 : 2;
@@ -608,6 +609,7 @@ export class SaveError extends Error {
 /** State migrations, oldest first: MIGRATIONS[v] turns a version-v state into version v + 1. */
 const MIGRATIONS = {
     1: (g) => { g.tasks = { queue: [] }; }, // v0.9.0: the task queue (empty)
+    2: (g) => { Object.assign(g.tasks, { fam: {}, adapt: {}, yuki: { on: false, progress: 0 } }); }, // v0.9.2: familiarity 0 everywhere
 };
 
 export function migrate(g) {

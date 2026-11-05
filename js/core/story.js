@@ -31,7 +31,7 @@ export function choiceTag(g, c) {
 
 /** The common items a choice's `do` adds (read once from its source; quoted ids in addItem(g, …, n > 0)). */
 const givesCache = new WeakMap();
-function gives(c) {
+export function gives(c) {
     if (!c.do) return [];
     if (!givesCache.has(c)) {
         const ids = new Set();

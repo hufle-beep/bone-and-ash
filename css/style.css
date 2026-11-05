@@ -179,3 +179,29 @@ button { font: inherit; color: inherit; }
 .card .n { float: right; font-family: var(--display); font-weight: 800; color: var(--red); }
 .card[disabled] { opacity: 0.42; cursor: not-allowed; border-style: dashed; }
 .clock .speed { display: block; margin: 0.2rem 0 0 auto; font: inherit; font-size: 0.78rem; font-weight: 600; color: var(--ink); background: transparent; border: 1.5px solid var(--ink); border-radius: 4px 8px 4px 8px; padding: 0.1rem 0.3rem; }
+.card.door { border-style: double; border-width: 3px; }
+.card.b-fail .tag { color: var(--red); }
+.card.b-double .tag { color: var(--ink); font-weight: 600; }
+.yuki-lane { margin: 0.5rem 1.15rem 0; display: grid; grid-template-columns: 1fr auto; gap: 0.6rem; align-items: center; font-size: 0.88rem; }
+.yuki-lane .note { color: var(--ink-dim); font-size: 0.78rem; }
+.yuki-lane .stroke i { background: var(--ink-dim); transition: none; }
+.yuki-lane .btn { padding: 0.3rem 0.8rem; font-size: 0.85rem; }
+/* v0.9.2: story on top, then Cards | Results (side by side on wide screens) */
+.panel-switch { display: grid; grid-template-columns: 1fr 1fr; margin: 0.9rem 1rem 0; border: 1.5px solid var(--ink); border-radius: 4px 10px 4px 10px; overflow: hidden; }
+.panel-switch button { border: 0; background: transparent; padding: 0.55rem; font: inherit; font-weight: 600; cursor: pointer; color: var(--ink); }
+.panel-switch button[aria-selected="true"] { background: var(--ink); color: var(--paper); }
+.panel-switch .badge { display: inline-block; min-width: 1.2em; padding: 0 0.3em; border-radius: 1em; background: var(--red); color: var(--paper); font-size: 0.75rem; }
+.pane { display: none; padding: 0.2rem 1rem 1rem; }
+.pane.on { display: block; }
+.res { border-bottom: 1px solid var(--line); padding: 0.45rem 0.1rem; font-size: 0.88rem; }
+.res summary { cursor: pointer; list-style: none; line-height: 1.4; }
+.res summary::-webkit-details-marker { display: none; }
+.res summary span { color: var(--ink-dim); }
+.res.fail summary span { color: var(--red); }
+.res > div { margin-top: 0.35rem; padding-left: 0.7rem; border-left: 2px solid var(--line); color: var(--ink-2); font-size: 0.84rem; }
+@media (min-width: 700px) {
+  .panel-switch { display: none; }
+  .split { display: grid; grid-template-columns: 1.5fr 1fr; gap: 0.5rem; align-items: start; }
+  .pane { display: block; }
+  .pane.results { position: sticky; top: 4.5rem; max-height: calc(100vh - 6rem); overflow: auto; }
+}

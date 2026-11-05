@@ -4,7 +4,7 @@ import {
     startCombat, combatStep, combatFlee, COMBAT_ACTIONS, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg,
 } from './core/game.js';
 import { sceneView, choose, goTo } from './core/story.js';
-import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskLabel, taskMinutes, runTask, outlook, taskQueue, MS_PER_GAME_HOUR, QUEUE_MAX } from './core/tasks.js';
+import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskLabel, taskMinutes, runTask, outlook, taskQueue, MS_PER_GAME_HOUR, QUEUE_MAX, FAM, yukiLane, setYuki } from './core/tasks.js';
 import { SCENES, ITEMS } from './story/prologue.js';
 import { meridianRow } from './story/meridians.js';
 import { realmShockHpBonus } from './core/formulas.js';
@@ -57,6 +57,37 @@ let speed = (() => { const v = Number(store.get(SPEED_KEY)); return SPEEDS.some(
 let lastTickAt = Date.now();
 let running = null; // { id, label, done, ms, m0, mins } — done = ms of bar filled (at ×1) — the head of the queue while its bar fills (not saved: a reload restarts it)
 let ticker = null;
+let panel = 'cards'; // the phone's switch under the story: 'cards' | 'results' (wide screens show both)
+let taskResults = []; // newest first: { title, sum, lines, fail } — the last 8 tasks (all of it is in the Journal too)
+let unseen = 0;
+const RESULTS_MAX = 8;
+const shortName = (t) => { const x = String(t).split(/(?<=[.!?])\s| — |: /)[0].replace(/[.!?]$/, ''); return x.length > 44 ? `${x.slice(0, 42)}…` : x; };
+/** One line for a finished task: what happened, what it gave, what levelled up, what it cost. */
+function summarize(lines) {
+    const bits = [];
+    const band = lines.map((l) => / — (a double haul|done|partly|failed)$/.exec(l)?.[1]).find(Boolean);
+    if (band) bits.push(band);
+    const items = [];
+    for (const l of lines) {
+        const keep = /(?:you keep|in total): (.+)\.$/.exec(l);
+        if (keep) { items.length = 0; items.push(...keep[1].split(', ')); continue; }
+        if (/^Yuki (comes|leaves)/.test(l)) continue; // her haul has its own bit below
+        for (const m of l.matchAll(/(?:^|[ .])(\+\d+ [A-Z][^.,]*?)(?=[.,]|$)/g)) if (!/XP|Qi Use|Fight/.test(m[1])) items.push(m[1]);
+    }
+    bits.push(...[...new Set(items)].slice(0, 3));
+    for (const l of lines) { const up = /^(.+?) \+\d+(?: XP)? → (T\d+ L\d+)$/.exec(l); if (up) bits.push(`${up[1].replace(' (bond)', '')} → ${up[2]}`); }
+    let hp = 0;
+    for (const l of lines) for (const m of l.matchAll(/−(\d+(?:\.\d+)?) HP/g)) hp += Number(m[1]);
+    if (hp) bits.push(`−${Math.round(hp * 10) / 10} HP`);
+    if (lines.some((l) => /^Yuki (comes|leaves)/.test(l))) { const y = lines.find((l) => /^Yuki (comes|leaves)/.test(l)); const got = /\+(\d+) /.exec(y); bits.push(got ? `Yuki +${got[1]}` : 'Yuki: nothing'); }
+    if (lines.some((l) => /queue is gone/.test(l))) bits.push('collapsed');
+    return bits.join(' · ');
+}
+function addResult(title, lines, fail) {
+    taskResults.unshift({ title, sum: summarize(lines), lines, fail });
+    taskResults.length = Math.min(taskResults.length, RESULTS_MAX);
+    if (panel !== 'results') unseen += 1;
+}
 const durLabel = (m) => (m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} m` : ''}` : `${m} m`);
 const onTaskHub = () => taskMode && g && !recovery && isTaskHub(g);
 
@@ -65,11 +96,13 @@ function startNext() {
     const q = taskQueue(g);
     const skipped = [];
     while (q.length && !taskOpen(g, SCENES, q[0])) skipped.push(taskLabel(g, SCENES, q.shift()));
-    if (skipped.length) { lastResult = { lines: skipped.map((l) => `Skipped (not possible now): ${l}`), fail: true }; autosave(); }
+    for (const l of skipped) addResult(shortName(l), ['Skipped: not possible when its turn came.'], true);
+    if (skipped.length) autosave();
     if (!q.length) return;
     const id = q[0];
     const mins = taskMinutes(g, SCENES, id);
-    running = { id, label: taskLabel(g, SCENES, id), done: 0, ms: Math.max(400, (mins / 60) * MS_PER_GAME_HOUR), m0: g.minutes, mins };
+    const yl = yukiLane(g);
+    running = { id, yuki: yl && yl.on ? { progress: yl.progress, len: yl.len } : null, label: taskLabel(g, SCENES, id), done: 0, ms: Math.max(400, (mins / 60) * MS_PER_GAME_HOUR), m0: g.minutes, mins };
     lastTickAt = Date.now();
     if (!ticker) ticker = setInterval(tick, 100);
 }
@@ -84,6 +117,8 @@ function tick() {
     const f = Math.min(1, running.done / running.ms);
     const bar = document.getElementById('nowbar');
     if (bar) bar.style.width = `${(f * 100).toFixed(1)}%`;
+    const yb = document.getElementById('yukibar');
+    if (yb && running.yuki) yb.style.width = `${Math.min(100, ((running.yuki.progress + f * running.mins) % running.yuki.len) / running.yuki.len * 100).toFixed(1)}%`;
     const clk = document.querySelector('.status .clk');
     if (clk && tab === 'story') clk.textContent = clockLabelG(g, running.m0 + Math.floor(f * running.mins));
     if (f < 1) return;
@@ -92,8 +127,8 @@ function tick() {
     try {
         if (taskQueue(g)[0] === id) taskQueue(g).shift();
         const r = runTask(g, SCENES, id);
-        const prev = lastResult?.tasks ? lastResult.lines : [];
-        lastResult = { lines: [...prev, `**${label}**`, ...r.lines].slice(-24), fail: r.fail, tasks: true }; // a queue's results stack up
+        lastResult = r.stopped ? { lines: r.lines, fail: r.fail } : null; // a door or collapse shows its lines in the scene it opens
+        if (!r.stopped) addResult(shortName(label), r.lines, r.fail);
         autosave();
         startNext();
         render();
@@ -111,28 +146,39 @@ function renderTaskHub() {
     for (const c of cards) { let gr = groups.find((x) => x.name === c.group); if (!gr) groups.push(gr = { name: c.group, cards: [] }); gr.cards.push(c); }
     const cardHtml = (c) => {
         const mins = c.status === 'open' ? taskMinutes(g, SCENES, c.id) : c.minutes;
-        return `<button class="card" data-task="${esc(c.id)}" ${c.status !== 'open' ? 'disabled' : ''}>${counts[c.id] ? `<span class="n">×${counts[c.id]}</span>` : ''}${md(c.label)}<span class="tag">${esc(c.status === 'open' ? (c.tag || 'no check') : 'done for today — back tomorrow')}</span>${c.status === 'open' ? `<span class="len">${durLabel(mins)}</span>` : ''}</button>`;
+        const fam = c.kind === 'work' ? ` · ${FAM[c.tier].name}${c.next != null ? ` ${c.fam}/${c.next}` : ''}` : '';
+        const tag = c.status !== 'open' ? 'done for today — back tomorrow' : c.kind === 'door' ? `opens the scene${c.tag ? ` · ${c.tag}` : ''}` : (c.tag || 'no check');
+        return `<button class="card${c.kind === 'door' ? ' door' : ''}${c.check ? ` b-${c.check.band}` : ''}" data-task="${esc(c.id)}" ${c.status !== 'open' ? 'disabled' : ''}>${counts[c.id] ? `<span class="n">×${counts[c.id]}</span>` : ''}${md(c.label)}<span class="tag">${esc(tag)}</span>${c.status === 'open' ? `<span class="len">${durLabel(mins)}${fam}</span>` : ''}</button>`;
     };
+    const yl = yukiLane(g);
+    const yHtml = yl ? `<div class="yuki-lane"><div><b>Yuki:</b> ${esc(yl.label)} <span class="note">Fight ${yl.check} / DC ${yl.dc} · ${durLabel(yl.len)} · ${FAM[yl.tier].name}</span>${yl.on ? `<div class="stroke"><i id="yukibar" style="width:${Math.min(100, (yl.progress / yl.len) * 100).toFixed(1)}%"></i></div>` : ''}</div><button class="btn${yl.on ? ' primary' : ''}" data-yuki="1">${yl.on ? 'On' : 'Off'}</button></div>` : '';
     const rows = ol.rows.map((r, k) => `<li class="${r.skip ? 'skip' : ''}"><span>${md(taskLabel(g, SCENES, r.id))}</span><time>${r.skip ? 'not possible then' : r.wait ? 'after the story' : `→ ${clockLabelG(g, r.end).replace(/^Day \d+, /, '')}`}</time><button class="x" data-unq="${k}" aria-label="Remove">✕</button></li>`).join('');
     const out = ol.fedOut != null
         ? `<p class="outlook warn">Fed runs out ${esc(clockLabelG(g, ol.fedOut))} on this queue. Queue some food.</p>`
         : q.length ? `<p class="outlook">Fed holds: about ${Math.round(ol.fedEnd)} when the queue ends (${esc(clockLabelG(g, ol.end))}).</p>` : '<p class="outlook">Nothing queued. The clock waits for you.</p>';
     const now = running
-        ? `<div class="now"><b>${speed ? 'Now:' : 'Paused:'}</b> ${md(running.label)}<div class="stroke"><i id="nowbar" style="width:${(Math.min(1, running.done / running.ms) * 100).toFixed(1)}%"></i></div></div>`
+        ? `<div class="now"><b>${speed ? 'James:' : 'Paused:'}</b> ${md(running.label)}<div class="stroke"><i id="nowbar" style="width:${(Math.min(1, running.done / running.ms) * 100).toFixed(1)}%"></i></div></div>`
         : '<div class="now idle">Idle. Tap a card to queue it; the clock runs while a task does.</div>';
     const stops = v.choices.filter((c) => c.index >= 1000 || !isTaskChoice(SCENES, g.scene, c.index))
         .map((c) => `<li><button class="choice${/fight/.test(c.tag) ? ' fightish' : ''}" data-choice="${c.index}" ${c.disabled ? 'disabled aria-disabled="true"' : ''}>${md(c.label)}${c.tag || c.reason ? `<span class="tag">${esc(c.disabled ? c.reason : c.tag)}</span>` : ''}</button></li>`).join('');
     view.innerHTML = `<section>
 <div class="plate">${sceneArt(v.art)}</div>
 <header class="head"><div class="place">${esc(v.place || g.location)}</div><h1 class="title">${esc(v.title)}</h1></header>
-${statusHtml()}${now}${out}${resultHtml()}
+${statusHtml()}${resultHtml()}
 <div class="prose">${paras(v.text)}</div>
-<div class="tasks">
+${stops ? `<ul class="choices">${stops}</ul>` : ''}
+${now}${yHtml}${out}
+<div class="panel-switch" role="tablist"><button role="tab" data-panel="cards" aria-selected="${panel === 'cards'}">Cards</button><button role="tab" data-panel="results" aria-selected="${panel === 'results'}">Results${unseen ? ` <span class="badge">${unseen}</span>` : ''}</button></div>
+<div class="split">
+<div class="pane tasks${panel === 'cards' ? ' on' : ''}">
 ${q.length ? `<h2>Queue (${q.length} / ${QUEUE_MAX})</h2><ol class="queue">${rows}</ol>` : ''}
 ${groups.map((gr) => `<h2>${esc(gr.name)}</h2><div class="cards">${gr.cards.map(cardHtml).join('')}</div>`).join('')}
-${stops ? `<h2>Story</h2>` : ''}
 </div>
-${stops ? `<ul class="choices">${stops}</ul>` : ''}
+<div class="pane results${panel === 'results' ? ' on' : ''}">
+<h2>Results</h2>
+${taskResults.length ? taskResults.map((r) => `<details class="res${r.fail ? ' fail' : ''}"><summary><b>${md(r.title)}</b> <span>${esc(r.sum)}</span></summary><div>${r.lines.map((l) => `<div>${dieHtml(l)}</div>`).join('')}</div></details>`).join('') : '<p class="note">Nothing yet. Finished tasks land here, newest on top; tap one for the details. The Journal keeps all of them.</p>'}
+</div>
+</div>
 </section>`;
 }
 
@@ -346,7 +392,7 @@ ${slot(1)}${slot(2)}${slot(3)}
 <h2>Move a save to another device</h2>
 <div class="btns"><button class="btn" data-export="1">Download save file</button><label class="btn">Load save file<input type="file" accept="application/json,.json" data-import="1" hidden></label></div>
 <h2>Tasks (preview)</h2>
-<p class="note">${taskMode ? 'On: the forest days (2–3) and the village days (5–6) run as timed task cards with a queue. 1 game hour takes 3 seconds.' : 'Off: the game plays as before. Turn it on to try the forest and village days as timed task cards.'} Only this phone remembers it.</p>
+<p class="note">${taskMode ? 'On: the prologue days (1–6) run as timed task cards with a queue, without dice: check ÷ DC decides how well a task goes, and familiarity makes it faster and easier. 1 game hour takes 3 seconds at ×1.' : 'Off: the game plays as before. Turn it on to try the prologue days as timed task cards.'} Only this phone remembers it.</p>
 <div class="btns"><button class="btn${taskMode ? ' primary' : ''}" data-tasks="1">${taskMode ? 'Tasks: on — turn off' : 'Tasks: off — turn on'}</button></div>
 <h2>Start over</h2>
 <div class="btns"><button class="btn primary" data-new="1">New game</button></div>
@@ -384,6 +430,8 @@ view.addEventListener('click', (ev) => {
             taskQueue(g).splice(k, 1); autosave(); startNext(); render();
             return;
         }
+        if (b.dataset.panel) { panel = b.dataset.panel; if (panel === 'results') unseen = 0; render(); return; }
+        if (b.dataset.yuki) { const yl = yukiLane(g); setYuki(g, !yl.on); autosave(); render(); return; }
         if (b.dataset.tasks) {
             taskMode = !taskMode; store.set(TASKS_KEY, taskMode ? '1' : '0');
             if (!taskMode) stopRunning(); else startNext();

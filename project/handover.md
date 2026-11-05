@@ -1,6 +1,6 @@
 # Bone and Ash — handover (read this first in a new chat)
 
-**Saved:** 2026-11-06 (Europe/Budapest). **Version:** 0.9.1 (`sw.js` VERSION `bone-ash-0.9.1`): step 3a, task cards and the queue (preview switch), plus the speed drop-down. Prologue + Act 1, about 390 scenes. **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
+**Saved:** 2026-11-06 (Europe/Budapest). **Version:** 0.9.2 (`sw.js` VERSION `bone-ash-0.9.2`): step 3b on the task cards (no dice, harder, familiarity, Intuitive Aptitude, Yuki's lane, door cards, the new layout). Everything behind the "Tasks (preview)" switch. Prologue + Act 1, about 390 scenes. **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
 Built in the SillyTavern chat as a spin-off. That chat stays for SillyTavern; this game continues in its own chats.
 
 **Rules:** `CLAUDE.md` (short) and `project/working-agreement.md` (full) — the change sequence is a HARD RULE. **Other docs:** `project/roadmap.md` (what's next), `project/design.md` (the approved hybrid design: Selene-style tasks and the Coil), `project/changelog.md`, `project/restore-points.md`. All mirrored to the claude.ai project "ash and bone".
@@ -11,6 +11,15 @@ Built in the SillyTavern chat as a spin-off. That chat stays for SillyTavern; th
 - **Step 3 is split into three pushes (option 1), behind a preview switch** that becomes the normal mode at the end of 3c: **3a the task loop** (done in v0.9.0), **3b getting better** (familiarity, Intuitive Aptitude, Yuki's lane, drills), **3c the Coil** (reset B, Coil screen, Bite the tail, accept-or-rewind at the tribute, breakthrough from 95%, bots tune the tribute ~30% → 80%). Then the serpent (`rt_serpent`) as its own small push, numbers to the owner first.
 - **3a picks:** 1a daily limits stay ("back tomorrow"); 2a Day 1 (`stream`) and Day 4 (`village`) stay story until rewinds exist; 3a HP 0 during a task = stand-in collapse until the Coil.
 - **Speed drop-down (owner 00:17–00:19, picks 1b, 2a, 3a, go; built in v0.9.1):** Pause, ×1, ×2, ×5, ×10 next to the clock on the task screen, remembered per phone (`boneash.speed`). Pause stops the bar without cancelling it. **All open for testing until the switch becomes the normal mode at the end of 3c;** then the gate: ×2 after the first won tribute, ×5 after Act 1 ends (per act, as in the design), and ×10 goes away.
+- **3b decisions (00:27–00:49), built in v0.9.2:**
+  - **Harder** (owner: "everything should be harder", "the checks should be harder"): DC +2 on new cards, length ×2, failures hurt double, Fed −4 an hour while tasks run; familiarity earns it back.
+  - **No dice on task cards** (owner: "pure level vs. DC"): result = check ÷ DC, partial results (1b). Task cards only now; the story checks (bluff, hairpin…) and fights keep the d6 until 3c (2a, 3a).
+  - **DC scale K 2:** card DC = old DC − 2 (the d6 averaged 3.5), plus +2 new / +1 Practised / +1 Skilled / +0 Mastered.
+  - **"Start from scratch"** dropped: the owner meant the wins came from the dice.
+  - **Intuitive Aptitude** is a constant trait (owner: "constant adaptation and rapid understanding"): learns from setbacks (+0.5 per below-full result, up to +2 per card) and transfer (a quarter of each completion to the card's group). The old "first try −2 DC" is dropped.
+  - **Door cards** (owner 00:41 "make everything that was supposed to become a card into a card now", confirmed 00:43): this reverses the 3a pick 2a (Day 1 and Day 4 now have cards).
+  - **Layout** (00:47, recommendation 1 + 3 + 2 on wide screens): story on top, then Cards | Results; results are one-line summaries, newest on top, tap to unfold; side by side from 700 px wide.
+  - **Measured before building** (Day 2–3 in the forest, K 2, deterministic bot): Coil 1 Day 2: 6 cards, 0% full, 50% partial, 50% fail, +7 food; Coil 2 Day 2: 8 cards, 51% full or double; Coil 3 Day 3: 12 cards, 91% full or double. HP never below 73% and no collapses in that sim, so the HP threat is a 3c item.
 - **Loot (owner's question 00:06, pick 00:08: "go with your recommendation"):** option 1 plus a little of 2. **Bone-work crafting:** cores, fangs, bone-meal and ship shards become gear in three slots (blade, wraithbone armour, a charm) and medicines (bracket salve); crafting is workshop task cards; on a rewind the gear is lost but the **recipes are kept (as Insights)**. Plus **cores as the world's currency** (bribes, tribute). Scheduled in step 4; the recipe list and numbers go to the owner before anything is built.
 
 ## Decided in chat (2026-11-05)
@@ -94,7 +103,7 @@ In `CLAUDE.md` and `project/working-agreement.md` (adopted 2026-11-05). The chan
 | `js/main.js` | The UI. Autosave key `boneash.auto`, slots `boneash.slot1–3`, save-file export/import. |
 | `sw.js`, `manifest.webmanifest`, `icons/` | Offline install. Game files: network first, cache when offline. Google Fonts: cached on first use. |
 | `js/core/tasks.js`, `js/story/task_hubs.js` | Task cards and the queue (v0.9.0): which hubs, card ids, `runTask`, dry runs, the outlook. |
-| `tests/tasks.test.mjs` | Task mode: 2,000 bot games each way, outlook = reality, collapse, migration. |
+| `tests/tasks.test.mjs` | Task mode: 2,000 bot games each way, outlook = reality, collapse, migration, no dice on work cards, familiarity grows, every offered card played, Yuki's lane. |
 | `tests/rules.test.mjs` | The engine numbers. 14 checks. |
 | `tests/story.test.mjs` | Every link valid, every scene reachable, 2,000 random playthroughs, per-fight win rates. |
 | `tests/part.test.mjs` | One Act 1 part alone; 1 run in 10 enters fights hurt so every "lost" scene is reached. |
@@ -262,6 +271,20 @@ The bible and the contract between the four part files are at the top of `js/sto
 - Last night of Act 1 (`rt_evening`) offers every arrangement the hearts allow: Mei Lin · Ya · Yuki alone; Mei Lin + Ya (`rt_trio`); Yuki + Mei Lin (`yk_night_mei`); Yuki + Ya (`yk_night_ya`); all four (`yk_night_all`). `g.flags.final_night` records it; `loveLine()` writes the Act 1 epilogue line (a1_end).
 - Romance with Yuki only in her human form (adult); fade to black. The code still says she bonded with James when he was six (34 years); **decided 2026-11-05: born together and bonded from birth** (fix pending, roadmap step 7).
 - Tests: 240 extra walks over the last night; combat round cap in the random runs raised to 400 (a rare long stalemate vs the Guardian at True Core).
+
+## v0.9.2 — step 3b on the task cards
+
+All in `js/core/tasks.js` (pure) and `js/story/task_hubs.js`; only with the switch on. The classic game is unchanged (the classic story test gives the same count as v0.8.6).
+- **Kinds of card:** *work* (a sub-menu choice or a hub choice with a check): resolved by `resolveWork` with no dice; *chore* (eat, rest, cultivate): through `choose` as before, lengths unchanged; *door* (`doors`, `doorMenus` in task_hubs.js): the bar is the walk, then the scene opens as a story stop and the queue waits.
+- **Hubs:** `stream` (Day 1: test the water; doors to `forage`, `hunt`), `wilds` (+ door menu `wild_explore`: Bone Field, Mire, Hollow), `village` (Day 4: doors `heal`, `village_hunt`), `ashfall` (+ doors `heal`, `village_hunt`, `herb_slopes`, `wen_lesson`, `far_hunt`, `scout`). Stops: Keep walking / Make camp, the elder's first visit, Mei Lin's walk, evenings.
+- **No dice:** `cardCheck`: value = acting check + the choice's bonus + adaptation; DC = max(0.5, old DC − `DC_SHIFT` 2 + `FAM[tier].dc`); ratio ≥ 2 double (loot ×2), ≥ 1 full, ≥ 0.5 partial (loot kept = max(1, ⌊gain × ratio⌋), XP × ratio; a partial on a card that gives no items runs its fail text without HP loss), < 0.5 fail (HP loss doubled, 25% XP). `awardXp` got a `factor` option.
+- **Familiarity** (`g.tasks.fam[id]`): +1 per result, +0.5 on a fail; tiers `FAM` New 0 / Practised 2 / Skilled 8 / Mastered 18 with DC +2/+1/+1/+0 and length ×2, ×1, ×0.4, ×0.2 (`NEW_LENGTH` 2 ÷ speed 1/2/5/10). A quarter of each gain goes to the card's menu-mates; drill menus (`wild_train`, `drill`) give 0.2 to every card on the hub. Ids are `<scene>:<choice index>` (if a scene's choice list changes order, familiarity on it starts over; story progress is not affected).
+- **Intuitive Aptitude** (`g.tasks.adapt[id]`): +0.5 per partial or fail, up to +2, with a line "You see what went wrong."
+- **Yuki's lane** (`g.tasks.yuki`): On/Off; her job (`yuki` in task_hubs.js: forest 75 min DC 1, Ashfall "Hunt the barley fields" 75 min DC 1.5, one hare) runs on the game time James's cards spend, 06:00–19:00, Fight check ÷ DC, her own familiarity. "Let Yuki hunt on her own" left James's cards (`notJames`).
+- **Fed −4 an hour** while work cards run (`FED_EXTRA_PER_HOUR` on top of the usual 3).
+- **Screen:** story text and stops on top; James's bar, Yuki's lane, the outlook; then Cards | Results (`panel`, red badge for unseen results; results kept in memory, last 8, newest first, `<details>` to unfold; all of it is in the Journal too). From 700 px the two sit side by side.
+- **Save state 3:** migration 2 → 3 adds `fam`, `adapt`, `yuki` (all empty / off).
+- **Random-bot numbers in task mode** (2,000 games each): tribute bluff 19.6 / fought 15.4 / lost 45.4 / paid 19.7% (classic: 27.2 / 21.3 / 31.3 / 20.2%); work-card results: partial 46%, fail 35%, full 13%, double 2%; 52 collapses (HP 0). Coil 1 is meant to be hard; the Coil (3c) adds the rewind and the tribute tuning.
 
 ## v0.9.1 — speed drop-down
 
