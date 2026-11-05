@@ -1,7 +1,7 @@
 /** Bone and Ash — UI. Renders the story, combat, sheet, hammerspace, journal and saves. */
 import {
     newGame, ensureBars, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, skillCheck, xpToNext, clockLabel, clockLabelG, realmName, yukiForm,
-    startCombat, combatStep, combatFlee, COMBAT_ACTIONS, serialize, deserialize, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg,
+    startCombat, combatStep, combatFlee, COMBAT_ACTIONS, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg,
 } from './core/game.js';
 import { sceneView, choose, goTo } from './core/story.js';
 import { SCENES, ITEMS } from './story/prologue.js';
@@ -33,13 +33,125 @@ const val = (v) => (typeof v === 'function' ? v(g) : v);
 const sceneTitle = (id) => val(SCENES[id]?.title) || id;
 const dieHtml = (line) => md(line).replace(/🎲(\d)/g, '<span class="die" aria-label="rolled $1">$1</span>');
 
-function autosave() { if (g) store.set(AUTO, serialize(g)); }
+/* ---------------- save safety (v0.8.6) ---------------- */
+
+// Rolling backups by play time, plus one taken before risky moves. Storage keys never change once released.
+const BAK = { '5m': 5 * 60e3, '30m': 30 * 60e3, '2h': 120 * 60e3 };
+const BAK_KEY = (k) => `boneash.bak.${k}`;
+const BAK_META = 'boneash.bak.meta';
+const BROKEN = 'boneash.broken';
+const RISKY_SCENES = { tribute: 'the tribute', rt_elder: 'Shen Qiu' };
+let recovery = null; // { raw, err } while the autosave can't be loaded
+let lastTick = Date.now();
+let storageWarned = false;
+let prevScene = null;
+let lastPress = 0;
+
+const freshGame = () => ensureBars(newGame(Math.floor(Math.random() * 2 ** 31)));
+const bakMeta = () => { try { return JSON.parse(store.get(BAK_META)) || { play: 0, at: {}, when: {} }; } catch { return { play: 0, at: {}, when: {} }; } };
+function writeKey(k, s) { if (!store.set(k, s) && !storageWarned) { storageWarned = true; showError('Could not save: the storage for this site is full or blocked. Download your save from the Saves tab.'); } }
+
+/** Throws a SaveError if the state points at a scene this version doesn't have. */
+function checkScene(s) { if (!SCENES[s.scene]) throw new SaveError('notSave', `The save points at a scene this version doesn't have (${s.scene}).`); return s; }
+
+function rolling(s) {
+    const m = bakMeta();
+    const now = Date.now();
+    m.play += Math.min(now - lastTick, 120e3); // idle time counts at most 2 minutes per step
+    lastTick = now;
+    for (const [k, ms] of Object.entries(BAK)) {
+        if (m.play - (m.at[k] || 0) >= ms) { writeKey(BAK_KEY(k), s); m.at[k] = m.play; m.when[k] = now; }
+    }
+    store.set(BAK_META, JSON.stringify(m));
+}
+function backupBefore(label) {
+    if (!g) return;
+    try { writeKey(BAK_KEY('before'), serialize(g)); } catch { return; }
+    const m = bakMeta(); m.when.before = Date.now(); m.label = label; store.set(BAK_META, JSON.stringify(m));
+}
+
+function autosave() {
+    if (!g) return;
+    let s;
+    try { s = serialize(g); } catch (err) { showError(err.message); return; } // never write a broken state
+    writeKey(AUTO, s);
+    rolling(s);
+    if (g.scene !== prevScene && RISKY_SCENES[g.scene]) backupBefore(RISKY_SCENES[g.scene]);
+    prevScene = g.scene;
+}
 
 function load() {
     const raw = store.get(AUTO);
-    if (raw) { try { g = deserialize(raw); return; } catch { /* fall through */ } }
-    g = ensureBars(newGame(Math.floor(Math.random() * 2 ** 31)));
+    if (!raw) { g = freshGame(); prevScene = g.scene; return; }
+    try { g = checkScene(deserialize(raw)); prevScene = g.scene; } catch (err) { g = null; recovery = { raw, err }; }
 }
+
+function download(text, name) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+    a.download = name;
+    a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+const stamp = () => new Date().toISOString().slice(0, 16).replace(/[^\d]/g, '');
+
+function backupList() {
+    const m = bakMeta();
+    const names = { '5m': 'Last 5 minutes', '30m': 'Last 30 minutes', '2h': 'Last 2 hours', before: `Before ${m.label || 'a risky move'}` };
+    return Object.keys(names).map((k) => ({ k, name: names[k], raw: store.get(BAK_KEY(k)), when: m.when?.[k] })).filter((b) => b.raw);
+}
+const descOf = (raw) => { const p = peekSave(raw); return p ? `${sceneTitle(p.scene)} — ${clockLabel(p.minutes)}` : 'Unreadable'; };
+
+function renderRecovery() {
+    const bak = backupList();
+    view.innerHTML = `<section class="page recovery"><h1>The save didn't load</h1>
+<p class="lede">${esc(recovery.err.message || String(recovery.err))} Nothing has been overwritten. Choose what to do.</p>
+<div class="btns"><button class="btn primary" data-rec="anyway">Load it anyway</button><button class="btn" data-rec="export">Download the damaged save</button></div>
+${bak.length ? `<h2>Backups</h2>${bak.map((b) => `<div class="row"><span>${esc(b.name)}</span><span class="note">${esc(descOf(b.raw))}${b.when ? ` · saved ${esc(new Date(b.when).toLocaleString())}` : ''}</span><div class="btns sub"><button class="btn" data-rec-bak="${b.k}">Restore</button></div></div>`).join('')}` : '<p class="note">No backups yet.</p>'}
+<h2>Start over</h2>
+<p class="note">The damaged save is kept on the phone (and can still be downloaded) either way.</p>
+<div class="btns"><button class="btn" data-rec="fresh">Start a new game</button></div>
+<p class="note" id="saveNote"></p></section>`;
+}
+function leaveRecovery(next) {
+    store.set(BROKEN, recovery.raw);
+    g = next; recovery = null; prevScene = g.scene; lastResult = null; combatLog = null; autosave(); setTab('story');
+}
+function onRecovery(b) {
+    if (b.dataset.rec === 'export') return download(recovery.raw, `bone-and-ash-damaged-${stamp()}.json`);
+    if (b.dataset.rec === 'fresh') return leaveRecovery(freshGame());
+    try {
+        if (b.dataset.rec === 'anyway') return leaveRecovery(checkScene(deserialize(recovery.raw, { force: true })));
+        if (b.dataset.recBak) return leaveRecovery(checkScene(deserialize(store.get(BAK_KEY(b.dataset.recBak)))));
+    } catch (err) { note(`That didn't work either: ${err.message}`); }
+}
+
+/* ---------------- error bar (v0.8.6) ---------------- */
+
+const errbar = document.createElement('div');
+errbar.id = 'errbar'; errbar.setAttribute('role', 'alert'); errbar.hidden = true;
+errbar.innerHTML = '<span class="msg"></span><button class="btn" data-err="copy">Copy</button><button class="btn" data-err="close" aria-label="Close">✕</button>';
+document.body.appendChild(errbar);
+function showError(err) {
+    const msg = typeof err === 'string' ? err : `${err?.message || err}${err?.stack ? `\n${String(err.stack).split('\n').slice(1, 3).join('\n')}` : ''}`;
+    errbar.querySelector('.msg').textContent = msg;
+    errbar.dataset.full = `Bone and Ash error · scene ${g?.scene || recovery?.err?.kind || '?'} · ${new Date().toISOString()}\n${msg}`;
+    errbar.hidden = false;
+}
+errbar.addEventListener('click', (ev) => {
+    const b = ev.target.closest('button[data-err]');
+    if (!b) return;
+    if (b.dataset.err === 'close') { errbar.hidden = true; return; }
+    const text = errbar.dataset.full || '';
+    const done = () => { b.textContent = 'Copied'; setTimeout(() => { b.textContent = 'Copy'; }, 1500); };
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(text).then(done, () => fallbackCopy(text, done)); else fallbackCopy(text, done);
+});
+function fallbackCopy(text, done) {
+    const t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select();
+    try { document.execCommand('copy'); done(); } catch { /* the message stays on screen */ }
+    t.remove();
+}
+window.addEventListener('error', (ev) => showError(ev.error || ev.message));
+window.addEventListener('unhandledrejection', (ev) => showError(ev.reason));
 
 /* ---------------- story ---------------- */
 
@@ -135,8 +247,7 @@ function renderJournal() {
 function renderSaves() {
     const slot = (n) => {
         const raw = store.get(SLOT(n));
-        let desc = 'Empty';
-        if (raw) { try { const s = JSON.parse(raw); desc = `${sceneTitle(s.scene)} — ${clockLabel(s.minutes)}`; } catch { desc = 'Unreadable'; } }
+        const desc = raw ? descOf(raw) : 'Empty';
         return `<div class="row"><span>Slot ${n}</span><span class="note">${esc(desc)}</span><div class="btns sub"><button class="btn" data-save="${n}">Save here</button>${raw ? `<button class="btn" data-load="${n}">Load</button>` : ''}</div></div>`;
     };
     view.innerHTML = `<section class="page"><h1>Saves</h1>
@@ -153,6 +264,7 @@ ${slot(1)}${slot(2)}${slot(3)}
 
 function render() {
     document.querySelectorAll('#tabs button').forEach((b) => b.setAttribute('aria-current', b.dataset.tab === tab ? 'page' : 'false'));
+    if (recovery) return renderRecovery();
     ({ story: renderStory, sheet: renderSheet, bag: renderBag, journal: renderJournal, saves: renderSaves })[tab]();
 }
 function setTab(t) { tab = t; render(); window.scrollTo({ top: 0 }); }
@@ -160,8 +272,16 @@ function setTab(t) { tab = t; render(); window.scrollTo({ top: 0 }); }
 view.addEventListener('click', (ev) => {
     const b = ev.target.closest('button');
     if (!b) return;
+    if (recovery) { onRecovery(b); return; }
+    if (b.dataset.choice != null || b.dataset.act || b.dataset.flee) {
+        const now = Date.now();
+        if (now - lastPress < 400) return; // double-tap guard: a fast second tap must not take the next scene's choice
+        lastPress = now;
+    }
     try {
         if (b.dataset.choice != null) {
+            const ch = SCENES[g.scene]?.choices?.[Number(b.dataset.choice)];
+            if (ch && /^Stay lost/.test(String(val(ch.text)))) backupBefore('the Long Forest');
             const r = choose(g, SCENES, Number(b.dataset.choice));
             lastResult = { lines: r.lines, fail: r.roll ? !r.roll.success : false };
             if (r.combat) { startCombat(g, r.combat(g)); combatLog = null; }
@@ -178,30 +298,33 @@ view.addEventListener('click', (ev) => {
             autosave(); render();
         } else if (b.dataset.new) {
             if (tab !== 'story' && !confirmNew()) return;
-            g = ensureBars(newGame(Math.floor(Math.random() * 2 ** 31)));
+            backupBefore('a new game');
+            g = freshGame();
             lastResult = null; combatLog = null; autosave(); setTab('story');
         } else if (b.dataset.tabGo) {
             setTab(b.dataset.tabGo);
         } else if (b.dataset.save) {
-            store.set(SLOT(b.dataset.save), serialize(g)); renderSaves(); note('Saved.');
+            writeKey(SLOT(b.dataset.save), serialize(g)); renderSaves(); note('Saved.');
         } else if (b.dataset.load) {
-            g = deserialize(store.get(SLOT(b.dataset.load))); lastResult = null; combatLog = null; autosave(); setTab('story');
+            let next;
+            try { next = checkScene(deserialize(store.get(SLOT(b.dataset.load)))); } catch (err) { note(`Slot ${b.dataset.load} can't be loaded: ${err.message}`); return; }
+            backupBefore(`loading slot ${b.dataset.load}`);
+            g = next; lastResult = null; combatLog = null; autosave(); setTab('story');
         } else if (b.dataset.export) {
-            const blob = new Blob([serialize(g)], { type: 'application/json' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `bone-and-ash-${clockLabel(g.minutes).replace(/[^\w]+/g, '-')}.json`;
-            a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+            download(serialize(g), `bone-and-ash-${clockLabel(g.minutes).replace(/[^\w]+/g, '-')}.json`);
         }
     } catch (err) {
         lastResult = { lines: [String(err.message || err)], fail: true }; render();
+        if (!(err instanceof SaveError)) showError(err);
     }
 });
 view.addEventListener('change', async (ev) => {
     const inp = ev.target.closest('input[data-import]');
     if (!inp || !inp.files?.[0]) return;
-    try { g = deserialize(await inp.files[0].text()); autosave(); lastResult = null; setTab('story'); }
-    catch (err) { note(`That file isn't a Bone and Ash save (${err.message}).`); }
+    let next;
+    try { next = checkScene(deserialize(await inp.files[0].text())); } catch (err) { note(`That file can't be loaded: ${err.message}`); return; }
+    backupBefore('loading a save file');
+    g = next; autosave(); lastResult = null; setTab('story');
 });
 document.getElementById('tabs').addEventListener('click', (ev) => { const b = ev.target.closest('button[data-tab]'); if (b) setTab(b.dataset.tab); });
 

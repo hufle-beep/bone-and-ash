@@ -579,11 +579,75 @@ export function combatFlee(g) {
 
 /* ---------------- saves ---------------- */
 
-export function serialize(g) {
-    return JSON.stringify(g);
+/**
+ * Save format (v0.8.6): {"fmt":1,"sum":"<FNV-1a of data>","data":"<the game state as JSON>"}.
+ * Old plain saves (the state as JSON, no wrapper) still load. State versions are migrated, never rejected.
+ */
+export const SAVE_FMT = 1;
+
+/** FNV-1a 32-bit hash as 8 hex digits. */
+export function fnv1a(str) {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+    return h.toString(16).padStart(8, '0');
 }
-export function deserialize(text) {
-    const g = JSON.parse(text);
-    if (!g || g.v !== SAVE_VERSION || !g.james || !g.scene) throw new Error('Not a James RPG save');
+
+/** Paths of numbers that are NaN or ±Infinity (a broken state must never be written). */
+export function badNums(obj, path = 'g', out = []) {
+    if (typeof obj === 'number') { if (!Number.isFinite(obj)) out.push(path); }
+    else if (obj && typeof obj === 'object') for (const k of Object.keys(obj)) badNums(obj[k], `${path}.${k}`, out);
+    return out;
+}
+
+/** A save that can't be loaded as it is. kind: empty | unreadable | checksum | tooNew | notSave | badNumbers. */
+export class SaveError extends Error {
+    constructor(kind, message) { super(message); this.kind = kind; }
+}
+
+/** State migrations, oldest first: MIGRATIONS[v] turns a version-v state into version v + 1. */
+const MIGRATIONS = {};
+
+export function migrate(g) {
+    if (g.v === undefined) g.v = 1;
+    if (g.v > SAVE_VERSION) throw new SaveError('tooNew', `This save is from a newer version of the game (state ${g.v}; this version reads up to ${SAVE_VERSION}).`);
+    while (g.v < SAVE_VERSION) { const step = MIGRATIONS[g.v]; if (!step) throw new SaveError('notSave', `No migration from state ${g.v}.`); step(g); g.v += 1; }
+    return g;
+}
+
+export function serialize(g) {
+    const bad = badNums(g);
+    if (bad.length) throw new SaveError('badNumbers', `Not saved: broken numbers at ${bad.slice(0, 3).join(', ')}${bad.length > 3 ? ' …' : ''}.`);
+    const data = JSON.stringify(g);
+    return JSON.stringify({ fmt: SAVE_FMT, sum: fnv1a(data), data });
+}
+
+/** Unwrap a save string to its state JSON. force: ignore a checksum mismatch and a too-new format. */
+export function unwrapSave(text, { force = false } = {}) {
+    if (text == null || text === '') throw new SaveError('empty', 'There is no save here.');
+    let outer;
+    try { outer = JSON.parse(text); } catch { throw new SaveError('unreadable', 'The save is not readable (damaged or cut off).'); }
+    if (outer && typeof outer === 'object' && 'fmt' in outer && typeof outer.data === 'string') {
+        if (outer.fmt > SAVE_FMT && !force) throw new SaveError('tooNew', 'This save is from a newer version of the game.');
+        if (fnv1a(outer.data) !== outer.sum && !force) throw new SaveError('checksum', 'The save failed its checksum (it was changed or damaged).');
+        return outer.data;
+    }
+    return text; // an old plain save
+}
+
+/** A short description of a save without loading it ("<scene id>|<minutes>"), or null. */
+export function peekSave(text) {
+    try { const s = JSON.parse(unwrapSave(text, { force: true })); return s && s.scene ? { scene: s.scene, minutes: s.minutes } : null; } catch { return null; }
+}
+
+export function deserialize(text, { force = false } = {}) {
+    const data = unwrapSave(text, { force });
+    let g;
+    try { g = JSON.parse(data); } catch { throw new SaveError('unreadable', 'The save is not readable (damaged or cut off).'); }
+    if (!g || typeof g !== 'object' || !g.james || !g.scene) throw new SaveError('notSave', 'This is not a Bone and Ash save.');
+    if (force && g.v > SAVE_VERSION) g.v = SAVE_VERSION; // "load anyway": read a newer state as best it can
+    migrate(g);
+    const bad = badNums(g);
+    if (bad.length && !force) throw new SaveError('badNumbers', `The save has broken numbers at ${bad.slice(0, 3).join(', ')}.`);
+    if (bad.length) for (const p of bad) { const keys = p.split('.').slice(1); let o = g; for (const k of keys.slice(0, -1)) o = o[k]; o[keys.at(-1)] = 0; }
     return ensureBars(g);
 }

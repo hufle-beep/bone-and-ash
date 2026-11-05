@@ -1,6 +1,6 @@
 # Bone and Ash — handover (read this first in a new chat)
 
-**Saved:** 2026-11-05 (Europe/Budapest). **Version:** 0.8.5 (`sw.js` VERSION `bone-ash-0.8.5`; the game is unchanged since 0.8.4, this push is docs only). Prologue + Act 1, about 390 scenes. **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
+**Saved:** 2026-11-05 (Europe/Budapest). **Version:** 0.8.6 (`sw.js` VERSION `bone-ash-0.8.6`): save safety, error bar, checks, restore points. Prologue + Act 1, about 390 scenes. **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
 Built in the SillyTavern chat as a spin-off. That chat stays for SillyTavern; this game continues in its own chats.
 
 **Rules:** `CLAUDE.md` (short) and `project/working-agreement.md` (full) — the change sequence is a HARD RULE. **Other docs:** `project/roadmap.md` (what's next), `project/design.md` (the approved hybrid design: Selene-style tasks and the Coil), `project/changelog.md`, `project/restore-points.md`. All mirrored to the claude.ai project "ash and bone".
@@ -18,7 +18,9 @@ Built in the SillyTavern chat as a spin-off. That chat stays for SillyTavern; th
   6. **The Long Forest** becomes a New Game preset ("Nascent Soul start"), not a choice in the clearing.
   7. **Android signing key:** kept in the repo, like Selene's.
   8. **Lore:** "root-kin" keeps the canon meaning (the bonded animal). Yuki's human look follows canon (cat ears, tail, qipao); the black dress stays as an outfit. James stays 40 and single (owner's spec).
-- **Build order:** see `project/roadmap.md` (1 rules and docs — this push; 2 save safety; 3 the hybrid core on the prologue; 4 progression layer; 5 Act 1 converted; 6 Android and comfort; 7 engine extras and lore).
+- **Game structure stays as it is (owner's question, 23:48):** plain HTML/CSS/JS in many files (ES modules), like Selene's technology but not merged into one file; the tests load the modules directly. The Android app (roadmap step 6) copies Selene's Java wrapper, which serves the whole folder through `WebViewAssetLoader`, so modules work. Bundling into one file only if the app ever needs it.
+- **The serpent fight on the way home (`rt_serpent`, 23:56, pick 3):** full games show it is lost only when James arrives at about 0–1% HP (after losing the wolves); from reasonable health it is never lost (3,000 games, 146 fights). Now: the Act 1 part test sends 1 run in 10 into fights hurt (1–20% HP) so every "lost" scene is walked (test only). Later, in roadmap step 3: make it a real threat on the first Coil (numbers to the owner first).
+- **Build order:** see `project/roadmap.md` (1 rules and docs — done in v0.8.5; 2 save safety — done in v0.8.6; 2 save safety; 3 the hybrid core on the prologue; 4 progression layer; 5 Act 1 converted; 6 Android and comfort; 7 engine extras and lore).
 - **Corrections to the 2026-11-04 notes:** the engine's breakthrough at 95% carries nothing over; Yuki's ladder is indexed by realm rung (lynx at Foundation … human at Nascent Soul); the engine's normal skill cap is T4 L10 (T9 with Exceptional 5), so the game's T10 L10 cap is a deliberate fork.
 
 ## What it is
@@ -86,10 +88,15 @@ In `CLAUDE.md` and `project/working-agreement.md` (adopted 2026-11-05). The chan
 | `sw.js`, `manifest.webmanifest`, `icons/` | Offline install. Game files: network first, cache when offline. Google Fonts: cached on first use. |
 | `tests/rules.test.mjs` | The engine numbers. 14 checks. |
 | `tests/story.test.mjs` | Every link valid, every scene reachable, 2,000 random playthroughs, per-fight win rates. |
+| `tests/part.test.mjs` | One Act 1 part alone; 1 run in 10 enters fights hurt so every "lost" scene is reached. |
+| `tests/saves.test.mjs` | Every file in `saves/` loads, round-trips and plays 200 steps; checksum, too-new, broken-number, cut-off and foreign-file cases. |
+| `saves/` | Test saves. Six made from v0.8.5 (Day 1, Day 4, Day 7 tribute, Act 1 start, Act 1 end, Long Forest start); the owner's exports go here too. |
+| `tools/check.sh` | Runs every check (syntax, engine, saves, the four Act 1 parts, 2,000 full games) in about 1 minute; stops at the first failure. |
+| `.github/workflows/restore-points.yml` | Tags the newest 5 commits on every push (`restore/<date>-<commit>`), copied from Selene. |
 
-**Run the tests:**
+**Run every check:**
 ```
-node tests/rules.test.mjs && node tests/story.test.mjs
+bash tools/check.sh
 ```
 **Browser check:** Playwright is preinstalled in the cloud session. Serve the folder and click through at 390×844. The last full click-through reached the end with no errors.
 
@@ -246,6 +253,16 @@ The bible and the contract between the four part files are at the top of `js/sto
 - Last night of Act 1 (`rt_evening`) offers every arrangement the hearts allow: Mei Lin · Ya · Yuki alone; Mei Lin + Ya (`rt_trio`); Yuki + Mei Lin (`yk_night_mei`); Yuki + Ya (`yk_night_ya`); all four (`yk_night_all`). `g.flags.final_night` records it; `loveLine()` writes the Act 1 epilogue line (a1_end).
 - Romance with Yuki only in her human form (adult); fade to black. The code still says she bonded with James when he was six (34 years); **decided 2026-11-05: born together and bonded from birth** (fix pending, roadmap step 7).
 - Tests: 240 extra walks over the last night; combat round cap in the random runs raised to 400 (a rare long stalemate vs the Guardian at True Core).
+
+## v0.8.6 — save safety, error bar, checks, restore points
+
+- **Save format** (`js/core/game.js`): `{"fmt":1,"sum":"<FNV-1a>","data":"<state JSON>"}`. Old plain saves still load. `migrate()` runs a chain (`MIGRATIONS[v]`) instead of rejecting other state versions; a newer state is reported, never wiped. `serialize` refuses to write a state with NaN or Infinity (`badNums`). Errors are `SaveError` with a `kind`: empty, unreadable, checksum, tooNew, notSave, badNumbers. `deserialize(text, {force:true})` is "load anyway" (ignores the checksum, reads a newer state, zeroes broken numbers). `peekSave` describes a save without loading it.
+- **Recovery screen** (`js/main.js`): if the autosave can't be loaded the game no longer starts over silently. It shows why and offers: load it anyway, download the damaged save, restore a backup, start a new game. Whatever is chosen, the damaged save is kept under `boneash.broken`. A save pointing at a scene this version doesn't have counts as damaged (`checkScene`).
+- **Backups:** `boneash.bak.5m`, `.30m`, `.2h` by play time (idle counts at most 2 minutes per step; meta in `boneash.bak.meta`), and `boneash.bak.before` before risky moves: a new game, loading a slot, loading a save file, the Long Forest button, arriving at the tribute and at Shen Qiu (`rt_elder`). Restorable from the recovery screen (not yet from the Saves tab).
+- **Storage full or blocked:** a warning in the error bar (once per session).
+- **Error bar:** any uncaught error or rejection shows at the bottom with **Copy** (scene, time, message, two stack lines) and ✕.
+- **Double-tap guard:** a second tap within 400 ms on a choice or a combat action is ignored.
+- Storage keys `boneash.auto` and `boneash.slot1–3` unchanged; the slots and exports now use the new format.
 
 ## Next steps
 

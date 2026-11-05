@@ -1,11 +1,12 @@
 # Restore points
 
-**Nothing is ever deleted from the git history**, so every past version can always be recovered. Update this list in every push: add the new point on top. Automatic tags of the newest 5 commits come with roadmap step 2 (H); until then this table is the list.
+**Nothing is ever deleted from the git history**, so every past version can always be recovered. Update this list in every push: add the new point on top. From v0.8.6 the **Restore points** workflow (`.github/workflows/restore-points.yml`) tags the newest 5 commits of `main` on every push as `restore/<date>-<commit>` and removes older restore tags (only the label; the commits stay in history). On GitHub: the repo → **Tags** (or the branch menu → Tags), filter `restore/`.
 
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.8.5 | (this push) | Docs only; the game is the same as 0.8.4 |
+| 0.8.6 | (this push) | Save safety, error bar, checks, restore-point tags. **Saves now use a wrapped format that 0.8.5 and older can't read: they would silently start a new game and overwrite the autosave. Before rolling back past 0.8.6, download the save first.** |
+| 0.8.5 | `d689ceb` | Docs only; the game is the same as 0.8.4 |
 | 0.8.4 | `209e89a` | **Last version before the hybrid work.** Yuki's path, every romance arrangement. Tests pass (14 engine checks; story test with 2,000 full games). |
 | 0.8.3 | `ac92a7d` | Bonesinger T1–T10 in combat |
 | 0.8.2 | `4442a05` | The Long Forest as one button |

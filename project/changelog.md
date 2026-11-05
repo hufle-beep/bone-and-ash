@@ -4,7 +4,8 @@ Every version, newest first. Details of each system are in `handover.md`.
 
 | Version | Date | Commit | What changed |
 |---|---|---|---|
-| 0.8.5 | 2026-11-05 | (this push) | Docs only, game unchanged: hard rules in `CLAUDE.md` and `project/working-agreement.md`; `HANDOFF.md` moved to `project/handover.md`; new roadmap, changelog, restore points and `design.md` (the hybrid with Selene: tasks, the Coil, threads); the decisions of 2026-11-05 recorded. |
+| 0.8.6 | 2026-11-05 | (this push) | Save safety: checksum and format number on every save, migrations instead of rejection, a recovery screen instead of a silent new game, rolling backups (5 min, 30 min, 2 h of play, and before risky moves), broken-number guard, storage-full warning. Error bar with Copy; double-tap guard on choices. `tools/check.sh`, `tests/saves.test.mjs` with six test saves in `saves/`; the Act 1 part test now walks every "lost" scene. Restore-point tags on every push. |
+| 0.8.5 | 2026-11-05 | `d689ceb` | Docs only, game unchanged: hard rules in `CLAUDE.md` and `project/working-agreement.md`; `HANDOFF.md` moved to `project/handover.md`; new roadmap, changelog, restore points and `design.md` (the hybrid with Selene: tasks, the Coil, threads); the decisions of 2026-11-05 recorded. |
 | 0.8.4 | 2026-11-02 | `209e89a` | Yuki's path (sister or lover); every romance arrangement on the last night of Act 1. |
 | 0.8.3 | 2026-11-02 | `ac92a7d` | Bonesinger T1–T10 in combat (damage, cost, pierce, volley, armour, construct); skill cap T10 L10 for everyone. |
 | 0.8.2 | 2026-11-02 | `4442a05` | The Long Forest as one button (Nascent Soul, all meridians, T10 L10, full hammerspace). |

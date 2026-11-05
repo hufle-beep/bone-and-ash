@@ -1,7 +1,7 @@
 // Run: node tests/part.test.mjs <part>   (fallout | blackroot | heart | return)
 // Tests one Act 1 part on its own: links, reachability from its entry, 1,000 random walks to its exit, fights resolve.
 // Other parts' entry scenes count as exits, so parts can be written in parallel.
-import { newGame, ensureBars, startCombat, combatStep, skillCheck } from '../js/core/game.js';
+import { newGame, ensureBars, startCombat, combatStep, skillCheck, jamesHpMax } from '../js/core/game.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
 const part = process.argv[2];
 const NAME = { fallout: 'FALLOUT', blackroot: 'BLACKROOT', heart: 'HEART', return: 'RETURN' }[part];
@@ -43,7 +43,10 @@ for (let run = 0; run < 1000; run++) {
         if (!open.length) { ok(false, `dead end at ${g.scene}`); break; }
         const r = choose(g, S, open[rnd(open.length)].index);
         if (r.combat) {
-            const enc = r.combat(g); startCombat(g, enc); let out;
+            const enc = r.combat(g);
+            // 1 run in 10 arrives hurt (1-20% HP), the way real losses happen (v0.8.6), so every "lost" scene is walked
+            if (run % 10 === 9) g.james.hp = Math.max(1, Math.round(jamesHpMax(g) * (0.01 + 0.19 * rnd(100) / 99)));
+            startCombat(g, enc); let out;
             for (let t = 0; t < 80 && g.combat; t++) { out = combatStep(g, g.james.qi >= 4 && t % 3 === 1 ? 'needle' : g.james.qi >= 3 ? 'blade' : 'dart'); if (out?.done) { goTo(g, S, out.next); break; } }
             ok(!g.combat, `combat ${enc.id} ends`); const k = fights[enc.id] ||= { win: 0, n: 0 }; k.n++; if (out?.done === 'win') k.win++;
         }

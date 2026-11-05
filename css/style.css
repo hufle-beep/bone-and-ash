@@ -147,3 +147,10 @@ button { font: inherit; color: inherit; }
 .fade-in { animation: fade 0.5s ease both; }
 @keyframes fade { from { opacity: 0; filter: blur(2px); } to { opacity: 1; filter: none; } }
 @media (prefers-reduced-motion: reduce) { .fade-in { animation: none; } .stroke i { transition: none; } }
+
+/* v0.8.6: error bar (copy button) and the recovery screen */
+#errbar { position: fixed; left: 0.5rem; right: 0.5rem; bottom: calc(4.2rem + env(safe-area-inset-bottom)); z-index: 50; display: flex; gap: 0.5rem; align-items: flex-start; padding: 0.6rem 0.7rem; background: var(--paper); border: 1.5px solid var(--red); border-radius: 4px 10px 4px 10px; box-shadow: 0 4px 18px rgba(35,33,30,0.18); font-size: 0.85rem; }
+#errbar[hidden] { display: none; }
+#errbar .msg { flex: 1; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 6.5rem; overflow: auto; color: var(--red); }
+#errbar .btn { padding: 0.35rem 0.7rem; }
+.recovery h1 { color: var(--red); }

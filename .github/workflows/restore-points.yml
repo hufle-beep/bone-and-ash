@@ -1,0 +1,42 @@
+name: Restore points
+
+# Keeps a restore-point tag on each of the newest 5 commits of main, named restore/<date>-<commit>.
+# Older restore tags are removed (only the label: every commit stays in the git history for good).
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: restore-points
+  cancel-in-progress: false
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Tag the newest 5 commits, drop older restore tags
+        run: |
+          git fetch --tags --force
+          keep=""
+          for c in $(git rev-list --first-parent -n 5 HEAD); do
+            t="restore/$(git show -s --format=%cd --date=format:%Y-%m-%d "$c")-$(git rev-parse --short=7 "$c")"
+            keep="$keep $t"
+            if ! git rev-parse -q --verify "refs/tags/$t" >/dev/null; then
+              git tag "$t" "$c"
+              for try in 1 2 3; do git push origin "refs/tags/$t" && break; sleep 5; done
+            fi
+          done
+          for t in $(git tag -l 'restore/*'); do
+            case " $keep " in
+              *" $t "*) ;;
+              *) git push origin ":refs/tags/$t" || true ;;
+            esac
+          done
+          echo "Restore points:$keep"
