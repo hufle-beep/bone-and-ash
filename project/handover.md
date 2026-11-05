@@ -1,7 +1,25 @@
-# Bone and Ash — handoff (read this first in a new chat)
+# Bone and Ash — handover (read this first in a new chat)
 
-**Saved:** 2026-11-02 (Europe/Budapest). **Version:** 0.6.0 — prologue + Act 1 (`sw.js` VERSION `bone-ash-0.6.0`). 271 scenes. **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
-Built in the SillyTavern chat as a spin-off. That chat stays for SillyTavern; this game continues in its own chat.
+**Saved:** 2026-11-05 (Europe/Budapest). **Version:** 0.8.5 (`sw.js` VERSION `bone-ash-0.8.5`; the game is unchanged since 0.8.4, this push is docs only). Prologue + Act 1, about 390 scenes. **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
+Built in the SillyTavern chat as a spin-off. That chat stays for SillyTavern; this game continues in its own chats.
+
+**Rules:** `CLAUDE.md` (short) and `project/working-agreement.md` (full) — the change sequence is a HARD RULE. **Other docs:** `project/roadmap.md` (what's next), `project/design.md` (the approved hybrid design: Selene-style tasks and the Coil), `project/changelog.md`, `project/restore-points.md`. All mirrored to the claude.ai project "ash and bone".
+**Reference repos (the owner's):** `hufle-beep/Long-patience` (Selene: rules, docs, Android wrapper and workflows to copy), `hufle-beep/Shared-ST` (private; Rules Engine C in `st/rules-engine-c/`, presets in `st/rules-engine-c/lib/presets.js`, `docs/STANDING_LATEST.md`).
+
+## Decided in chat (2026-11-05)
+
+- **Yuki and James were born together and bonded from birth.** Her path stays open: familial, or something closer (engine canon: familial until her human form, then play decides). To fix in the game (roadmap step 7): `js/story/yuki_path.js` and this handover still say she bonded when he was six (34 years); the opening scene (`yuki_check`) already says born the same day in the same grove.
+- **The hybrid with Selene** (full design in `project/design.md`; the owner's picks):
+  1. **The Coil:** each act is a loop with a deadline (prologue: the tribute on Day 7; Act 1: Shen Qiu on Day 21). It ends on a collapse, a lost deadline fight (accept the written outcome or rewind) or by choice ("Bite the tail"); James wakes at the act's first dawn. James never dies.
+  2. **Reset option B (middle):** kept: familiarity, Insights, Coil marks, realm, skills, meridians, Saturation, Yuki; reset to the act's start: hammerspace, world flags (James keeps "knowledge" flags); relationships other than Yuki reset with a 25% head start from the last Coil's peak.
+  3. **Time scale:** 1 game hour = 3 s real time at ×1 (×2 and ×5 unlock per act); the clock stops when nothing runs.
+  4. **Threads (option 3):** Parallel Cognition threads automate tasks at Practised (×2 familiarity). A thread wakes on every rewind **and** every first finish of an arc (Coil mark), up to 9; a player who never rewinds has 3 after the prologue and 9 by the end of Act 1. Lore: this world dulled the threads; "a thread holds only what your hands already know", "each bite of the tail wakes another".
+  5. **Engine rules to add:** J (Yuki's form ladder by realm), K (Intuitive Aptitude: first try −2 DC), L (breakthrough from 95%; anything over 100% is lost, nothing carries over), Qi bond flow, injury and Strain, the Ouroboros daily knockout beat, technique dampening on every Qi cost, quest steps with XP lumps, the status block / check labels / deadlines, the relationship ledger. **Skip M and N.**
+  6. **The Long Forest** becomes a New Game preset ("Nascent Soul start"), not a choice in the clearing.
+  7. **Android signing key:** kept in the repo, like Selene's.
+  8. **Lore:** "root-kin" keeps the canon meaning (the bonded animal). Yuki's human look follows canon (cat ears, tail, qipao); the black dress stays as an outfit. James stays 40 and single (owner's spec).
+- **Build order:** see `project/roadmap.md` (1 rules and docs — this push; 2 save safety; 3 the hybrid core on the prologue; 4 progression layer; 5 Act 1 converted; 6 Android and comfort; 7 engine extras and lore).
+- **Corrections to the 2026-11-04 notes:** the engine's breakthrough at 95% carries nothing over; Yuki's ladder is indexed by realm rung (lynx at Foundation … human at Nascent Soul); the engine's normal skill cap is T4 L10 (T9 with Exceptional 5), so the game's T10 L10 cap is a deliberate fork.
 
 ## What it is
 
@@ -41,12 +59,7 @@ A standalone, offline text RPG for Gábor's Android phone: a **web app (PWA)** f
 
 ## Gábor's working rules
 
-They carry over from the SillyTavern project:
-- **Propose first, build after his OK.**
-- **Show numbers** before any one-time change to a save or a balance.
-- Push every change. The Pages site updates in 1–2 minutes; tell him to reopen the game (once or twice, for the offline cache). Gábor is not a programmer: give him tap-by-tap steps for anything he must do on GitHub.
-- **Bump `VERSION` in `sw.js` on every release**, or installed copies keep the old files.
-- Short answers. A list of choices when there is something to decide.
+In `CLAUDE.md` and `project/working-agreement.md` (adopted 2026-11-05). The change sequence there is a HARD RULE: options and a recommendation first, then the owner's pick, then a confirmation and his explicit go, only then build and push.
 
 ## How to play / run
 
@@ -57,6 +70,7 @@ They carry over from the SillyTavern project:
 
 | Path | What |
 |---|---|
+| `CLAUDE.md`, `project/*.md` | The hard rules and the project docs (handover, working agreement, roadmap, design, changelog, restore points). |
 | `index.html`, `css/style.css` | The page. Phone-first layout: art plate, place and title, status strip (HP / Convergence / Fed / clock), roll-result panel, prose, choice "slips", tab bar (Story, James, Hammerspace, Journal, Saves). |
 | `js/core/formulas.js` | Rules Engine C formulas, unchanged. |
 | `js/core/game.js` | State (`newGame`), the numbers (HP, Qi Max, Convergence ×1.25), d6 from the save's own seed (a reload does not reroll), XP (`awardXp`), time and regen (`advance`, `sleepUntil`), hunger, condensation, inventory, relationships, **combat** (`COMBAT_ACTIONS`, `startCombat`, `combatStep`, `combatFlee`), save/load. |
@@ -230,14 +244,11 @@ The bible and the contract between the four part files are at the top of `js/sto
 - Sister: sassy, protective, pushes James toward Mei Lin and Ya (`yk_sister_talk` at Blackroot camps: +affection to both). Lover: open to sharing; `yk_camp` nights at Blackroot camps (human form only) raise `yk_mei` when James likes Mei Lin — Yuki wears down Mei Lin's resistance alongside Ya (`meiOpen` = trio ≥ 3 or yk_mei ≥ 2).
 - Beats appended to lf_exit, mei_lin, romance, epilogue, ya_meets, log_comfort, rt_camp, rt_evening, rt_quiet_night.
 - Last night of Act 1 (`rt_evening`) offers every arrangement the hearts allow: Mei Lin · Ya · Yuki alone; Mei Lin + Ya (`rt_trio`); Yuki + Mei Lin (`yk_night_mei`); Yuki + Ya (`yk_night_ya`); all four (`yk_night_all`). `g.flags.final_night` records it; `loveLine()` writes the Act 1 epilogue line (a1_end).
-- Romance with Yuki only in her human form (adult; bonded to James since he was six, 34 years); fade to black.
+- Romance with Yuki only in her human form (adult); fade to black. The code still says she bonded with James when he was six (34 years); **decided 2026-11-05: born together and bonded from birth** (fix pending, roadmap step 7).
 - Tests: 240 extra walks over the last night; combat round cap in the random runs raised to 400 (a rare long stalemate vs the Guardian at True Core).
 
-## Next steps (proposed, not built)
+## Next steps
 
-1. **Act 2** (open).
-2. **Android .apk:** wrap the web app with Capacitor and build it in GitHub Actions. The Android SDK can't be downloaded in the cloud session.
-3. **Art:** less cutesy manhua (see Design notes); close-ups for James and the Sect; manhua treatment for the remaining plain interiors (elder, healer, dinner); more paintings (Wang Hui *Landscape*, Cleveland 1915.105; Wang Shimin *Mountain Village*, Cleveland 1997.104 — Gábor downloads and attaches, the cloud session can't fetch images).
-4. **Quality:** sound effects (optional), a settings page (text size, reduce motion).
+See `project/roadmap.md`.
 
 **Session quirk:** in the cloud clone the `origin` remote sometimes resets to the old `James-rpg-test` URL. Before pushing: `git remote set-url origin https://github.com/hufle-beep/bone-and-ash`.

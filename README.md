@@ -17,7 +17,8 @@ Same rules as the SillyTavern game (Rules Engine C): Qi, Convergence (Qi + Bones
 - `js/core/story.js` — the scene runner.
 - `js/story/prologue.js`, `wilds.js`, `ashfall.js` — the prologue (87 scenes, 7 in-game days).
 - `js/art/art.js`, `js/art/portrait.js` — the illustrations: manhua figures drawn in code over public-domain ink paintings (`art/bg/`, credits in `art/bg/CREDITS.md`).
-- `HANDOFF.md` — everything a new chat needs (spec, rules, story map, next steps).
+- `CLAUDE.md` — the hard rules for working on the game (full version in `project/working-agreement.md`).
+- `project/` — the project docs: `handover.md` (read first in a new chat: spec, systems, story map, decisions), `roadmap.md` (what's next), `design.md` (the planned hybrid with Selene: timed tasks and the Coil), `changelog.md`, `restore-points.md`.
 - `tests/` — `node tests/rules.test.mjs` (engine numbers) and `node tests/story.test.mjs` (every scene reachable, 2,000 random playthroughs).
 
 When you change files, bump `VERSION` in `sw.js` so installed copies pick up the update.
