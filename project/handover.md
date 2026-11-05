@@ -1,6 +1,6 @@
 # Bone and Ash — handover (read this first in a new chat)
 
-**Saved:** 2026-11-06 (Europe/Budapest). **Version:** 0.9.0 (`sw.js` VERSION `bone-ash-0.9.0`): step 3a, task cards and the queue (preview switch). Prologue + Act 1, about 390 scenes. **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
+**Saved:** 2026-11-06 (Europe/Budapest). **Version:** 0.9.1 (`sw.js` VERSION `bone-ash-0.9.1`): step 3a, task cards and the queue (preview switch), plus the speed drop-down. Prologue + Act 1, about 390 scenes. **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
 Built in the SillyTavern chat as a spin-off. That chat stays for SillyTavern; this game continues in its own chats.
 
 **Rules:** `CLAUDE.md` (short) and `project/working-agreement.md` (full) — the change sequence is a HARD RULE. **Other docs:** `project/roadmap.md` (what's next), `project/design.md` (the approved hybrid design: Selene-style tasks and the Coil), `project/changelog.md`, `project/restore-points.md`. All mirrored to the claude.ai project "ash and bone".
@@ -10,6 +10,7 @@ Built in the SillyTavern chat as a spin-off. That chat stays for SillyTavern; th
 
 - **Step 3 is split into three pushes (option 1), behind a preview switch** that becomes the normal mode at the end of 3c: **3a the task loop** (done in v0.9.0), **3b getting better** (familiarity, Intuitive Aptitude, Yuki's lane, drills), **3c the Coil** (reset B, Coil screen, Bite the tail, accept-or-rewind at the tribute, breakthrough from 95%, bots tune the tribute ~30% → 80%). Then the serpent (`rt_serpent`) as its own small push, numbers to the owner first.
 - **3a picks:** 1a daily limits stay ("back tomorrow"); 2a Day 1 (`stream`) and Day 4 (`village`) stay story until rewinds exist; 3a HP 0 during a task = stand-in collapse until the Coil.
+- **Speed drop-down (owner 00:17–00:19, picks 1b, 2a, 3a, go; built in v0.9.1):** Pause, ×1, ×2, ×5, ×10 next to the clock on the task screen, remembered per phone (`boneash.speed`). Pause stops the bar without cancelling it. **All open for testing until the switch becomes the normal mode at the end of 3c;** then the gate: ×2 after the first won tribute, ×5 after Act 1 ends (per act, as in the design), and ×10 goes away.
 - **Loot (owner's question 00:06, pick 00:08: "go with your recommendation"):** option 1 plus a little of 2. **Bone-work crafting:** cores, fangs, bone-meal and ship shards become gear in three slots (blade, wraithbone armour, a charm) and medicines (bracket salve); crafting is workshop task cards; on a rewind the gear is lost but the **recipes are kept (as Insights)**. Plus **cores as the world's currency** (bribes, tribute). Scheduled in step 4; the recipe list and numbers go to the owner before anything is built.
 
 ## Decided in chat (2026-11-05)
@@ -261,6 +262,10 @@ The bible and the contract between the four part files are at the top of `js/sto
 - Last night of Act 1 (`rt_evening`) offers every arrangement the hearts allow: Mei Lin · Ya · Yuki alone; Mei Lin + Ya (`rt_trio`); Yuki + Mei Lin (`yk_night_mei`); Yuki + Ya (`yk_night_ya`); all four (`yk_night_all`). `g.flags.final_night` records it; `loveLine()` writes the Act 1 epilogue line (a1_end).
 - Romance with Yuki only in her human form (adult); fade to black. The code still says she bonded with James when he was six (34 years); **decided 2026-11-05: born together and bonded from birth** (fix pending, roadmap step 7).
 - Tests: 240 extra walks over the last night; combat round cap in the random runs raised to 400 (a rare long stalemate vs the Guardian at True Core).
+
+## v0.9.1 — speed drop-down
+
+- `js/main.js`: `SPEEDS` Pause/×1/×2/×5/×10, `speed` from `boneash.speed`; the running bar fills by `done += dt × speed` (dt capped at 1 s, so a sleeping phone doesn't fast-forward). Shown only on a task hub with the switch on. No gate yet (3c).
 
 ## v0.9.0 — task cards and the queue (step 3a, preview)
 

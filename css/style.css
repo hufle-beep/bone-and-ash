@@ -178,3 +178,4 @@ button { font: inherit; color: inherit; }
 .card .len { display: block; margin-top: 0.2rem; font-size: 0.74rem; color: var(--ink-2); }
 .card .n { float: right; font-family: var(--display); font-weight: 800; color: var(--red); }
 .card[disabled] { opacity: 0.42; cursor: not-allowed; border-style: dashed; }
+.clock .speed { display: block; margin: 0.2rem 0 0 auto; font: inherit; font-size: 0.78rem; font-weight: 600; color: var(--ink); background: transparent; border: 1.5px solid var(--ink); border-radius: 4px 8px 4px 8px; padding: 0.1rem 0.3rem; }

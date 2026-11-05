@@ -51,7 +51,11 @@ let lastPress = 0;
 /* ---------------- tasks (v0.9.0, preview) ---------------- */
 const TASKS_KEY = 'boneash.tasks'; // per phone: '1' = "Tasks (preview)" on
 let taskMode = store.get(TASKS_KEY) === '1';
-let running = null; // { id, label, t0, ms, m0, mins } — the head of the queue while its bar fills (not saved: a reload restarts it)
+const SPEED_KEY = 'boneash.speed'; // per phone: 0 = paused, 1, 2, 5, 10
+const SPEEDS = [[0, 'Pause'], [1, '×1'], [2, '×2'], [5, '×5'], [10, '×10']]; // all open while testing; the gate comes with the Coil (3c)
+let speed = (() => { const v = Number(store.get(SPEED_KEY)); return SPEEDS.some(([n]) => n === v) && store.get(SPEED_KEY) !== null ? v : 1; })();
+let lastTickAt = Date.now();
+let running = null; // { id, label, done, ms, m0, mins } — done = ms of bar filled (at ×1) — the head of the queue while its bar fills (not saved: a reload restarts it)
 let ticker = null;
 const durLabel = (m) => (m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} m` : ''}` : `${m} m`);
 const onTaskHub = () => taskMode && g && !recovery && isTaskHub(g);
@@ -65,17 +69,22 @@ function startNext() {
     if (!q.length) return;
     const id = q[0];
     const mins = taskMinutes(g, SCENES, id);
-    running = { id, label: taskLabel(g, SCENES, id), t0: Date.now(), ms: Math.max(400, (mins / 60) * MS_PER_GAME_HOUR), m0: g.minutes, mins };
+    running = { id, label: taskLabel(g, SCENES, id), done: 0, ms: Math.max(400, (mins / 60) * MS_PER_GAME_HOUR), m0: g.minutes, mins };
+    lastTickAt = Date.now();
     if (!ticker) ticker = setInterval(tick, 100);
 }
 function stopRunning() { running = null; }
 function tick() {
+    const now = Date.now();
+    const dt = Math.min(1000, now - lastTickAt); // a sleeping phone doesn't fast-forward more than a second
+    lastTickAt = now;
     if (!running) return;
     if (!onTaskHub()) { running = null; return; }
-    const f = Math.min(1, (Date.now() - running.t0) / running.ms);
+    running.done += dt * speed;
+    const f = Math.min(1, running.done / running.ms);
     const bar = document.getElementById('nowbar');
     if (bar) bar.style.width = `${(f * 100).toFixed(1)}%`;
-    const clk = document.querySelector('.status .clock');
+    const clk = document.querySelector('.status .clk');
     if (clk && tab === 'story') clk.textContent = clockLabelG(g, running.m0 + Math.floor(f * running.mins));
     if (f < 1) return;
     const { id, label } = running;
@@ -109,7 +118,7 @@ function renderTaskHub() {
         ? `<p class="outlook warn">Fed runs out ${esc(clockLabelG(g, ol.fedOut))} on this queue. Queue some food.</p>`
         : q.length ? `<p class="outlook">Fed holds: about ${Math.round(ol.fedEnd)} when the queue ends (${esc(clockLabelG(g, ol.end))}).</p>` : '<p class="outlook">Nothing queued. The clock waits for you.</p>';
     const now = running
-        ? `<div class="now"><b>Now:</b> ${md(running.label)}<div class="stroke"><i id="nowbar" style="width:${(Math.min(1, (Date.now() - running.t0) / running.ms) * 100).toFixed(1)}%"></i></div></div>`
+        ? `<div class="now"><b>${speed ? 'Now:' : 'Paused:'}</b> ${md(running.label)}<div class="stroke"><i id="nowbar" style="width:${(Math.min(1, running.done / running.ms) * 100).toFixed(1)}%"></i></div></div>`
         : '<div class="now idle">Idle. Tap a card to queue it; the clock runs while a task does.</div>';
     const stops = v.choices.filter((c) => c.index >= 1000 || !isTaskChoice(SCENES, g.scene, c.index))
         .map((c) => `<li><button class="choice${/fight/.test(c.tag) ? ' fightish' : ''}" data-choice="${c.index}" ${c.disabled ? 'disabled aria-disabled="true"' : ''}>${md(c.label)}${c.tag || c.reason ? `<span class="tag">${esc(c.disabled ? c.reason : c.tag)}</span>` : ''}</button></li>`).join('');
@@ -240,7 +249,7 @@ function statusHtml() {
 <div class="bar hp"><b>${n1(g.james.hp)} / ${jamesHpMax(g)}</b>HP<div class="stroke"><i style="width:${pct(g.james.hp, jamesHpMax(g))}"></i></div></div>
 <div class="bar qi"><b>${n1(g.james.qi)} / ${n1(jamesQiMax(g))}</b>Convergence<div class="stroke"><i style="width:${pct(g.james.qi, jamesQiMax(g))}"></i></div></div>
 <div class="bar food"><b>${Math.round(g.james.satiety)}</b>Fed<div class="stroke"><i style="width:${pct(g.james.satiety, 100)}"></i></div></div>
-<div class="clock">${clockLabelG(g)}</div></div>`;
+<div class="clock"><span class="clk">${clockLabelG(g)}</span>${onTaskHub() ? `<select class="speed" data-speed="1" aria-label="Speed">${SPEEDS.map(([n, l]) => `<option value="${n}"${n === speed ? ' selected' : ''}>${l}</option>`).join('')}</select>` : ''}</div></div>`;
 }
 
 function resultHtml() {
@@ -421,6 +430,8 @@ view.addEventListener('click', (ev) => {
     }
 });
 view.addEventListener('change', async (ev) => {
+    const sel = ev.target.closest('select[data-speed]');
+    if (sel) { speed = Number(sel.value); store.set(SPEED_KEY, String(speed)); lastTickAt = Date.now(); render(); return; }
     const inp = ev.target.closest('input[data-import]');
     if (!inp || !inp.files?.[0]) return;
     let next;
