@@ -4,7 +4,7 @@
  *             to | to(g), fail?, do?(g, r) → lines, failDo?(g, r) → lines, combat?: encounter, xp?: false }.
  * A check pays standard XP (25% on a fail) unless xp: false. Pure — no DOM.
  */
-import { rollCheck, awardXp, spendQi, advance, ensureBars, actingCheck, actingName, instantWin, itemFull, takeCapNotes, itemNames, setLootMult } from './game.js';
+import { rollCheck, awardXp, spendQi, advance, ensureBars, actingCheck, actingName, instantWin, itemFull, takeCapNotes, itemNames, setLootMult, isNoDice, noDiceDc, checkText, addItem } from './game.js';
 import { STOMP, degreeForChoice } from '../story/power.js';
 
 const ONE_MOVE = 1000; // virtual choice index offset: "End it in one move."
@@ -22,7 +22,11 @@ export function choiceTag(g, c) {
     if (c.check) {
         const bonus = c.check.bonus ? c.check.bonus(g) : 0;
         const v = Math.round((actingCheck(g, c.check.skill) + bonus) * 10) / 10;
-        bits.push(`${actingName(g, c.check.skill)} ${v} + d6 vs DC ${asText(c.check.dc, g)}`);
+        if (isNoDice()) {
+            const d = noDiceDc(asText(c.check.dc, g));
+            const ratio = v / d;
+            bits.push(`${actingName(g, c.check.skill)} ${v} / DC ${d} → ${ratio >= 1 ? 'passes' : ratio >= 0.5 && gives(c).length ? 'partly' : 'fails'}`);
+        } else bits.push(`${actingName(g, c.check.skill)} ${v} + d6 vs DC ${asText(c.check.dc, g)}`);
     }
     if (c.qi) bits.push(`${c.qi} Qi`);
     if (c.combat) bits.push('fight');
@@ -139,11 +143,15 @@ export function choose(g, scenes, index) {
     if (c.qi && !spendQi(g, c.qi)) throw new Error('Not enough Qi');
     let roll = null;
     let ok = true;
+    let partial = false;
     if (c.check) {
         roll = rollCheck(g, c.check.skill, asText(c.check.dc, g), c.check.bonus ? c.check.bonus(g) : 0);
         ok = roll.success;
-        lines.push(`${roll.skill} ${roll.value} + 🎲${roll.die} = ${roll.total} vs DC ${roll.dc} — ${ok ? 'success' : 'failure'}${roll.crit ? ' (critical!)' : roll.six ? ' (six!)' : roll.fumble ? ' (one…)' : ''}`);
-        if (c.xp !== false) lines.push(...awardXp(g, c.check.skill, c.check.band || 'standard', { fail: !ok }));
+        // no dice: a gathering choice between half and full the DC still brings back a thin haul
+        partial = isNoDice() && !ok && roll.ratio >= 0.5 && gives(c).length > 0;
+        if (partial) ok = true;
+        lines.push(`${checkText(roll)} — ${partial ? 'partly' : ok ? 'success' : 'failure'}${roll.crit ? (roll.die == null ? ' (double!)' : ' (critical!)') : roll.six ? ' (six!)' : roll.fumble ? ' (one…)' : ''}`);
+        if (c.xp !== false) lines.push(...awardXp(g, c.check.skill, c.check.band || 'standard', { fail: !ok, factor: partial ? roll.ratio : 1 }));
     }
     if (c.time) lines.push(...advance(g, c.time));
     takeCapNotes();
@@ -151,11 +159,18 @@ export function choose(g, scenes, index) {
         // a critical hunt or forage (total ≥ 2 × DC): a double haul
         const crit = roll?.crit && gives(c).length > 0;
         const before = crit ? { ...g.inventory } : null;
+        const before0 = { ...g.inventory };
         if (crit) setLootMult(2);
-        try { lines.push(...(c.do(g, roll) || [])); } finally { setLootMult(1); }
+        let out = [];
+        try { out = c.do(g, roll) || []; } finally { setLootMult(1); }
+        if (partial) {
+            const gained = Object.keys(g.inventory).map((id) => [id, (g.inventory[id] || 0) - ((before0[id]) || 0)]).filter(([, d]) => d > 0);
+            const kept = gained.map(([id, d]) => { const keep = Math.max(1, Math.floor(d * roll.ratio)); if (keep < d) addItem(g, id, keep - d); return [id, keep]; });
+            lines.push(...out.filter((l) => !/^\+\d/.test(l)), `A thin haul — you keep: ${kept.map(([id, d]) => `+${d} ${itemNames[id]?.name || id}`).join(', ') || 'nothing'}.`);
+        } else lines.push(...out);
         if (crit) {
             const extra = Object.keys(g.inventory).map((id) => [id, (g.inventory[id] || 0) - (before[id] || 0)]).filter(([, d]) => d > 0);
-            if (extra.length) lines.push(`Critical! A double haul — in total: ${extra.map(([id, d]) => `+${d} ${itemNames[id]?.name || id}`).join(', ')}.`);
+            if (extra.length) lines.push(`${isNoDice() ? 'Double haul' : 'Critical! A double haul'} — in total: ${extra.map(([id, d]) => `+${d} ${itemNames[id]?.name || id}`).join(', ')}.`);
         }
     }
     for (const id of new Set(takeCapNotes())) lines.push(`Hammerspace: ${itemNames[id]?.name || id} is full — the rest stays behind.`);

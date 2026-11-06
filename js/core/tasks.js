@@ -190,7 +190,9 @@ function resolveWork(g, scenes, hubId, card, id) {
         } else if (band === 'double' && gained.length) lines.push(`Double haul — in total: ${gained.map(([i, d]) => `+${d} ${itemNames[i]?.name || i}`).join(', ')}.`);
     } else if (!success && c.failDo) {
         const hp0 = g.james.hp;
-        lines.push(...(c.failDo(g, roll) || []));
+        const out = c.failDo(g, roll) || [];
+        // a partial never hurts, so its text drops the sentences about HP
+        lines.push(...(band === 'partial' ? out.map((l) => l.replace(/[^.!?]*−\d+(?:\.\d+)? HP[^.!?]*[.!?]?/g, '').trim()).filter(Boolean) : out));
         const lost = hp0 - g.james.hp;
         if (band === 'fail' && lost > 0) { g.james.hp -= lost; lines.push(`It goes in deeper than it should: another −${r1(lost)} HP.`); }
         if (band === 'partial' && lost > 0) g.james.hp = hp0; // a partial never hurts

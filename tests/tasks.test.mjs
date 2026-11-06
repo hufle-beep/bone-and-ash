@@ -3,7 +3,7 @@
 // 2,000 bot games in task mode reach the end with no dead end; the tribute outcomes are printed next to classic play.
 import { SCENES } from '../js/story/prologue.js';
 import { TASK_HUBS } from '../js/story/task_hubs.js';
-import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION } from '../js/core/game.js';
+import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, setNoDice } from '../js/core/game.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
 import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskMinutes, runTask, outlook, taskQueue, taskState, setYuki, yukiLane, famTier, QUEUE_MAX } from '../js/core/tasks.js';
 
@@ -51,6 +51,7 @@ const bands = {};
 let yukiRuns = 0;
 let predicted = 0;
 function play(run, tasks) {
+    setNoDice(tasks); // task mode has no dice anywhere (v0.9.3)
     const g = ensureBars(newGame(run + 1));
     const st = tasks ? stats.tasks : stats.classic;
     let steps = 0;
@@ -107,7 +108,32 @@ function play(run, tasks) {
     assert(false, `run ${run} finishes (${tasks ? 'tasks' : 'classic'})`);
     return false;
 }
+let diceInTasks = 0;
+const logBefore = (g) => g.log.length;
 for (let run = 0; run < 2000; run++) { play(run, true); play(run, false); }
+setNoDice(false);
+// task mode: no die anywhere, in fights or story; classic: the die stays
+{
+    setNoDice(true);
+    let die = 0;
+    for (let run = 0; run < 200; run++) {
+        const g = ensureBars(newGame(run + 9000));
+        for (let s = 0; s < 3000; s++) {
+            const v = sceneView(g, SCENES);
+            if (v.end) break;
+            const open = v.choices.filter((c) => !c.disabled && c.index < 1000);
+            if (!open.length) break;
+            const r = choose(g, SCENES, open[rnd(open.length)].index);
+            if (r.lines.some((l) => l.includes('🎲'))) die++;
+            if (r.combat) { startCombat(g, r.combat(g)); for (let t = 0; t < 400 && g.combat; t++) { const o = combatStep(g, t % 2 ? 'blade' : 'dart'); if (o.lines.some((l) => l.includes('🎲'))) die++; if (o.done) { goTo(g, SCENES, o.next); break; } } }
+            if (g.combat) assert(false, 'no-dice fight ends');
+        }
+    }
+    assert(die === 0, `no die shown anywhere in task mode (${die})`);
+    setNoDice(false);
+    const g = ensureBars(newGame(1)); const r = choose(g, SCENES, 1);
+    assert(r.lines.some((l) => l.includes('🎲')), 'classic mode still rolls the d6');
+}
 
 // every card that was ever offered was also played at least once
 const all = cardsListed;
@@ -118,7 +144,9 @@ assert(yukiRuns > 1000, `Yuki's lane brings things home (${yukiRuns})`);
     const g = ensureBars(newGame(3)); g.scene = 'wilds'; g.minutes += 1440; Object.assign(g.flags, { long: true, forest_day: 2 });
     const a = JSON.parse(JSON.stringify(g)), b = JSON.parse(JSON.stringify(g));
     a.rng = 1; b.rng = 999999;
+    setNoDice(true);
     const ra = runTask(a, SCENES, 'wild_forage:0'), rb = runTask(b, SCENES, 'wild_forage:0');
+    setNoDice(false);
     assert(JSON.stringify(ra.lines) === JSON.stringify(rb.lines) && JSON.stringify(a.inventory) === JSON.stringify(b.inventory), 'work cards ignore the dice');
     assert(famTier(0) === 0 && famTier(2) === 1 && famTier(8) === 2 && famTier(18) === 3, 'familiarity tiers at 2 / 8 / 18');
 }

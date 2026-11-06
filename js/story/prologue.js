@@ -5,6 +5,9 @@
  * That is going to be a problem — for them.
  */
 import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, clockParts, canBreakThrough, breakthrough, realmName } from '../core/game.js';
+import { NO_DICE_TUNE } from './nodice_tune.js';
+import { setNoDiceTune } from '../core/game.js';
+setNoDiceTune(NO_DICE_TUNE);
 import { forestScale, villageScale, grow, NEW_ITEMS } from './common.js';
 import './power.js';
 import './stomp_prologue.js';

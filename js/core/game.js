@@ -214,7 +214,28 @@ export function awardYukiFightXp(g, band = 'standard') {
  * A check: acting value + d6 against the DC. Returns everything the UI shows.
  * @returns {{ skill, value, die, total, dc, success, crit, fumble }}
  */
+/* No dice (v0.9.3, task mode): check ÷ DC decides; DCs move down by NO_DICE_DC_SHIFT (the d6 averaged 3.5). Set by the UI and the tests. */
+let noDice = false;
+export const setNoDice = (v) => { noDice = !!v; };
+export const isNoDice = () => noDice;
+export const NO_DICE_DC_SHIFT = 2;
+let noDiceTune = {};
+/** The story layer hands over its per-fight no-dice tuning (js/story/nodice_tune.js). */
+export const setNoDiceTune = (t) => { noDiceTune = t || {}; };
+export const noDiceDc = (dc) => Math.max(0.5, Math.round((dc - NO_DICE_DC_SHIFT) * 10) / 10);
+/** How a check reads in the log: "GU 1 / DC 2" without dice, "GU 1 + 🎲4 = 5 vs DC 3" with. */
+export const checkText = (r) => (r.die == null ? `${r.skill} ${r.value} / DC ${r.dc}` : `${r.skill} ${r.value} + 🎲${r.die} = ${r.total} vs DC ${r.dc}`);
+
 export function rollCheck(g, skillName, dc, bonus = 0) {
+    if (noDice) {
+        const value = Math.round((actingCheck(g, skillName) + bonus) * 10) / 10;
+        const d = noDiceDc(dc);
+        const ratio = value / d;
+        g.stats.checks += 1;
+        const success = ratio >= 1;
+        if (success) g.stats.wins += 1;
+        return { skill: actingName(g, skillName), value, die: null, total: value, dc: d, ratio, success, six: false, crit: ratio >= 2, fumble: false };
+    }
     const value = actingCheck(g, skillName) + bonus;
     const die = d6(g);
     const total = Math.round((value + die) * 10) / 10;
@@ -419,6 +440,7 @@ export const COMBAT_ACTIONS = {
 
 function dmgRoll(g, [lo, hi]) {
     if (hi <= 0) return 0;
+    if (noDice) return Math.round((lo + hi) / 2);
     return lo + ((d6(g) - 1) % (hi - lo + 1));
 }
 
@@ -455,15 +477,103 @@ export function startCombat(g, enc0) {
         degree: enc.degree || 1,
         band: enc.band || 'standard',
         bladeFormed: false,
-        enemies: enc.enemies.map((e) => ({ ...e, hpMax: e.hp, staggered: false })),
+        enemies: enc.enemies.map((e) => {
+            const t = noDice ? noDiceTune[enc.id] : null; // v0.9.3: per-fight tuning for the no-dice rules
+            const x = t ? { ...e, dc: e.dc + (t.up || 0), atk: e.atk + (t.up || 0), hp: Math.max(1, Math.round(e.hp * (t.hp || 1))) } : e;
+            return { ...x, hpMax: x.hp, staggered: false };
+        }),
         log: [enc.intro || 'Combat!'],
     };
     return g.combat;
 }
 
+export const NO_DICE_ROUND_CAP = 30; // a no-dice fight still undecided after this many rounds is lost: James is spent
+const ADAPT_FIGHT_STEP = 0.5, ADAPT_FIGHT_MAX = 2;
+const bandOf = (ratio) => (ratio >= 2 ? 'double' : ratio >= 1 ? 'full' : ratio >= 0.5 ? 'glance' : 'miss');
+
+/** A no-dice round (v0.9.3): check ÷ DC in bands. Hits: ≥ 2 double, ≥ 1 full, ≥ 0.5 a glancing blow (half), below a miss.
+ *  Defence the same way round: ≥ 1 avoided, ≥ 0.5 half the damage, below the full blow. Intuitive Aptitude: each miss
+ *  or glance raises that action's check by 0.5 for the rest of the fight (up to +2); Yuki adapts the same way. */
+function stepNoDice(g, actionId, targetIdx) {
+    const c = g.combat;
+    c.adapt = c.adapt || {};
+    const lines = [];
+    const act = COMBAT_ACTIONS[actionId];
+    const living = c.enemies.filter((e) => e.hp > 0);
+    const target = living[Math.min(targetIdx, living.length - 1)];
+    let guard = false;
+    const qiNeed = act.keeps === 'blade' && c.bladeFormed ? 0 : actionCost(g, act);
+    if (qiNeed && !spendQi(g, qiNeed)) {
+        lines.push(`Not enough Qi for ${act.label} — you fall back on guarding.`);
+        guard = true;
+    } else {
+        if (act.keeps === 'blade' && !c.bladeFormed) { c.bladeFormed = true; lines.push('White wraithbone slides out of your palm and sets into a blade.'); }
+        if (act.guard) {
+            guard = true;
+            lines.push('You give ground, watching for the opening.');
+        } else {
+            const T = boneTier(g);
+            const targets = act.id === 'dart' && T >= 4 ? living.slice(0, T >= 5 ? living.length : 2) : [target];
+            const key = actionId;
+            let learned = false;
+            for (const tg of targets) {
+                const r = rollCheck(g, act.skill, tg.dc + act.dcMod, c.adapt[key] || 0);
+                const band = T >= 10 && r.ratio < 1 ? 'full' : bandOf(r.ratio);
+                lines.push(`${act.label}${targets.length > 1 ? ` → ${tg.name}` : ''}: ${checkText(r)} — ${{ double: 'a clean, deep hit', full: 'hit', glance: 'a glancing blow', miss: 'miss' }[band]}`);
+                if ((band === 'glance' || band === 'miss') && !learned && (c.adapt[key] || 0) < ADAPT_FIGHT_MAX) { c.adapt[key] = (c.adapt[key] || 0) + ADAPT_FIGHT_STEP; learned = true; lines.push(`  You read the opening better. (+${ADAPT_FIGHT_STEP} to ${act.label} this fight)`); }
+                if (band === 'miss') continue;
+                let dmg = dmgRoll(g, actionDmg(g, act)) * (band === 'double' ? 2 : 1);
+                if (band === 'glance') dmg = Math.floor(dmg / 2);
+                dmg = Math.max(0, dmg - (T >= 3 ? 0 : (tg.dr || 0)));
+                tg.hp -= dmg;
+                lines.push(`  ${tg.name} takes ${dmg}${band === 'double' ? ' (double damage)' : ''}.`);
+                if (act.stagger && tg.hp > 0 && band !== 'glance') { tg.staggered = true; lines.push(`  ${tg.name} staggers.`); }
+            }
+        }
+    }
+    const ct = boneTier(g) >= 7 ? c.enemies.find((e) => e.hp > 0) : null;
+    if (ct) { const dmg = boneTier(g) * 2; ct.hp -= dmg; lines.push(`Your bone construct strikes ${ct.name}: ${dmg}.`); }
+    let shield = boneTier(g) >= 8;
+    const yt = c.enemies.find((e) => e.hp > 0);
+    if (yt && g.yuki.hp > 0) {
+        const form = YUKI_FORMS[yukiForm(g)];
+        const yv = Math.round((skillCheck(g.yuki.fight) + form.hit + (c.adapt.yuki || 0)) * 10) / 10;
+        const d = noDiceDc(yt.dc);
+        const band = bandOf(yv / d);
+        const verb = { cat: ['claws find a mark', 'a hiss and a swipe at air'], tiger: ['a paw the size of a shovel lands', 'jaws close on air'], human: ['a white blur and a strike', 'a sidestep, nothing more'] }[yukiForm(g)];
+        lines.push(`${form.name}: Fight ${yv} / DC ${d} — ${band === 'miss' ? verb[1] : band === 'glance' ? 'a graze' : verb[0]}`);
+        if ((band === 'glance' || band === 'miss') && (c.adapt.yuki || 0) < ADAPT_FIGHT_MAX) c.adapt.yuki = (c.adapt.yuki || 0) + ADAPT_FIGHT_STEP;
+        if (band !== 'miss') {
+            let dmg = Math.round((form.dmg[0] + form.dmg[1]) / 2) * (band === 'double' ? 2 : 1);
+            if (band === 'glance') dmg = Math.floor(dmg / 2);
+            dmg = Math.max(0, dmg - (yt.dr || 0));
+            yt.hp -= dmg; lines.push(`  ${yt.name} takes ${dmg}.`);
+        }
+    }
+    for (const e of c.enemies) {
+        if (e.hp <= 0) continue;
+        if (e.staggered) { e.staggered = false; lines.push(`${e.name} is still reeling.`); continue; }
+        if (e.prefersSmall && g.yuki.hp > 0 && c.round % 3 === 0) { // every third round it goes for the small one
+            const dodge = skillCheck(g.yuki.fight) + 1 >= noDiceDc(e.atk);
+            lines.push(`${e.name} lunges at Yuki — ${dodge ? 'she is not there' : 'it connects'}.`);
+            if (!dodge) g.yuki.hp = Math.max(1, g.yuki.hp - hitDamage(e.dmg, e.realm, g.yuki.realm, yukiDr(g)));
+            continue;
+        }
+        if (shield) { shield = false; lines.push(`${e.name} attacks — your construct steps into the blow.`); continue; }
+        const r = rollCheck(g, 'GU', e.atk, guard ? 2 : 0);
+        if (r.ratio >= 1) { lines.push(`${e.name} attacks: you defend (${checkText(r)}) — avoided.`); continue; }
+        let dmg = hitDamage(e.dmg, e.realm, g.james.realm, jamesDr(g));
+        if (r.ratio >= 0.5) dmg = Math.floor(dmg / 2);
+        g.james.hp = Math.max(0, g.james.hp - dmg);
+        lines.push(`${e.name} attacks: you defend (${checkText(r)}) — ${r.ratio >= 0.5 ? 'it only half lands' : 'it lands'}: ${dmg} (DR ${jamesDr(g)}).`);
+    }
+    return lines;
+}
+
 export function combatStep(g, actionId, targetIdx = 0) {
     const c = g.combat;
     if (!c) return null;
+    if (noDice) return finishRound(g, stepNoDice(g, actionId, targetIdx));
     const lines = [];
     const act = COMBAT_ACTIONS[actionId];
     const living = c.enemies.filter((e) => e.hp > 0);
@@ -532,6 +642,12 @@ export function combatStep(g, actionId, targetIdx = 0) {
             lines.push(`${e.name} attacks: you defend (GU ${r.value} + 🎲${r.die} = ${r.total} vs ${e.atk}) — hit for ${dmg} (DR ${jamesDr(g)}${(g.james.realm || 0) >= 7 && (g.james.realm || 0) > (e.realm || 0) ? ', realm gap' : ''}).`);
         }
     }
+    return finishRound(g, lines);
+}
+
+/** The end of every round, dice or not: realm healing, time, win / lose. */
+function finishRound(g, lines) {
+    const c = g.combat;
     // immortal flesh: from Immortal Ascension, wounds close mid-fight
     const hj = realmShockHpBonus(g.james.realm || 0);
     if (hj > 0 && g.james.hp > 0 && g.james.hp < jamesHpMax(g)) { const before = g.james.hp; g.james.hp = Math.min(jamesHpMax(g), g.james.hp + hj); lines.push(`Your flesh closes: +${Math.round((g.james.hp - before) * 10) / 10} HP.`); }
@@ -550,7 +666,8 @@ export function combatStep(g, actionId, targetIdx = 0) {
         g.combat = null;
         return { lines, done: 'win', next };
     }
-    if (g.james.hp <= 0) {
+    if (g.james.hp <= 0 || (noDice && c.round > NO_DICE_ROUND_CAP)) {
+        if (g.james.hp > 0) lines.push('', 'Thirty exchanges in, your arms stop answering. You are spent, and they are not.');
         const next = c.lose;
         g.combat = null;
         g.james.hp = 1;
@@ -564,7 +681,7 @@ export function combatFlee(g) {
     if (!c || !c.flee) return null;
     const worst = Math.max(...c.enemies.filter((e) => e.hp > 0).map((e) => e.atk));
     const r = rollCheck(g, 'GU', worst);
-    const lines = [`You run: GU ${r.value} + 🎲${r.die} = ${r.total} vs ${worst} — ${r.success ? 'you get clear' : 'not fast enough'}.`];
+    const lines = [`You run: ${checkText(r)} — ${r.success ? 'you get clear' : 'not fast enough'}.`];
     if (r.success) {
         const next = c.flee;
         g.combat = null;

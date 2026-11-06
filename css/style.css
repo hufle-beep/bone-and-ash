@@ -205,3 +205,5 @@ button { font: inherit; color: inherit; }
   .pane { display: block; }
   .pane.results { position: sticky; top: 4.5rem; max-height: calc(100vh - 6rem); overflow: auto; }
 }
+.res summary b { display: block; }
+.res summary span { display: block; margin-top: 0.1rem; }

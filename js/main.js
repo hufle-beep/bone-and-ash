@@ -1,7 +1,7 @@
 /** Bone and Ash — UI. Renders the story, combat, sheet, hammerspace, journal and saves. */
 import {
     newGame, ensureBars, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, skillCheck, xpToNext, clockLabel, clockLabelG, realmName, yukiForm,
-    startCombat, combatStep, combatFlee, COMBAT_ACTIONS, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg,
+    startCombat, combatStep, combatFlee, COMBAT_ACTIONS, setNoDice, noDiceDc, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg,
 } from './core/game.js';
 import { sceneView, choose, goTo } from './core/story.js';
 import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskLabel, taskMinutes, runTask, outlook, taskQueue, MS_PER_GAME_HOUR, QUEUE_MAX, FAM, yukiLane, setYuki } from './core/tasks.js';
@@ -51,6 +51,7 @@ let lastPress = 0;
 /* ---------------- tasks (v0.9.0, preview) ---------------- */
 const TASKS_KEY = 'boneash.tasks'; // per phone: '1' = "Tasks (preview)" on
 let taskMode = store.get(TASKS_KEY) === '1';
+setNoDice(taskMode); // no dice anywhere in task mode (v0.9.3)
 const SPEED_KEY = 'boneash.speed'; // per phone: 0 = paused, 1, 2, 5, 10
 const SPEEDS = [[0, 'Pause'], [1, '×1'], [2, '×2'], [5, '×5'], [10, '×10']]; // all open while testing; the gate comes with the Coil (3c)
 let speed = (() => { const v = Number(store.get(SPEED_KEY)); return SPEEDS.some(([n]) => n === v) && store.get(SPEED_KEY) !== null ? v : 1; })();
@@ -61,7 +62,6 @@ let panel = 'cards'; // the phone's switch under the story: 'cards' | 'results' 
 let taskResults = []; // newest first: { title, sum, lines, fail } — the last 8 tasks (all of it is in the Journal too)
 let unseen = 0;
 const RESULTS_MAX = 8;
-const shortName = (t) => { const x = String(t).split(/(?<=[.!?])\s| — |: /)[0].replace(/[.!?]$/, ''); return x.length > 44 ? `${x.slice(0, 42)}…` : x; };
 /** One line for a finished task: what happened, what it gave, what levelled up, what it cost. */
 function summarize(lines) {
     const bits = [];
@@ -96,7 +96,7 @@ function startNext() {
     const q = taskQueue(g);
     const skipped = [];
     while (q.length && !taskOpen(g, SCENES, q[0])) skipped.push(taskLabel(g, SCENES, q.shift()));
-    for (const l of skipped) addResult(shortName(l), ['Skipped: not possible when its turn came.'], true);
+    for (const l of skipped) addResult(l, ['Skipped: not possible when its turn came.'], true);
     if (skipped.length) autosave();
     if (!q.length) return;
     const id = q[0];
@@ -128,7 +128,7 @@ function tick() {
         if (taskQueue(g)[0] === id) taskQueue(g).shift();
         const r = runTask(g, SCENES, id);
         lastResult = r.stopped ? { lines: r.lines, fail: r.fail } : null; // a door or collapse shows its lines in the scene it opens
-        if (!r.stopped) addResult(shortName(label), r.lines, r.fail);
+        if (!r.stopped) addResult(label, r.lines, r.fail);
         autosave();
         startNext();
         render();
@@ -323,8 +323,10 @@ function renderCombat() {
         const cost = a.keeps === 'blade' && c.bladeFormed ? 0 : actionCost(g, a);
         const d = actionDmg(g, a);
         const off = cost > g.james.qi;
-        const val = n1(skillCheck(a.skill === 'GU' ? g.james.gu : g.james.skills[a.skill]));
-        return `<li><button class="choice fightish" data-act="${id}" ${off ? 'disabled' : ''}>${esc(a.label)}<span class="tag">${a.guard ? 'GU defence +2 this round' : `${a.skill} ${val} + d6 · ${d[0]}–${d[1]} dmg`}${cost ? ` · ${cost} Qi` : ''}${a.stagger ? ' · staggers' : ''}${off ? ' · not enough Qi' : ''}</span></button></li>`;
+        const val = n1(skillCheck(a.skill === 'GU' ? g.james.gu : g.james.skills[a.skill]) + (taskMode ? (c.adapt?.[id] || 0) : 0));
+        const tgt = c.enemies.find((e) => e.hp > 0);
+        const plain = taskMode && tgt ? `${a.skill} ${val} / DC ${noDiceDc(tgt.dc + a.dcMod)} · ${Math.round((d[0] + d[1]) / 2)} dmg` : `${a.skill} ${val} + d6 · ${d[0]}–${d[1]} dmg`;
+        return `<li><button class="choice fightish" data-act="${id}" ${off ? 'disabled' : ''}>${esc(a.label)}<span class="tag">${a.guard ? 'GU defence +2 this round' : plain}${cost ? ` · ${cost} Qi` : ''}${a.stagger ? ' · staggers' : ''}${off ? ' · not enough Qi' : ''}</span></button></li>`;
     }).join('');
     const foes = c.enemies.map((e) => `<div class="foe${e.hp <= 0 ? ' down' : ''}"><span>${esc(e.name)}${e.staggered ? ' (reeling)' : ''}</span><div class="stroke"><i style="width:${pct(Math.max(0, e.hp), e.hpMax)}"></i></div></div>`).join('');
     const yuki = `<div class="foe"><span>Yuki</span><div class="stroke" style="background:rgba(242,239,230,0.08)"><i style="width:${pct(g.yuki.hp, yukiHpMax(g))};background:var(--bone)"></i></div></div>`;
@@ -334,7 +336,7 @@ function renderCombat() {
 ${statusHtml()}
 <div class="foes">${foes}${yuki}</div>
 <div class="round">${(combatLog || c.log).map((l) => dieHtml(l)).join('<br>')}</div>
-<ul class="choices">${acts}${c.flee ? '<li><button class="choice" data-flee="1">Run<span class="tag">GU + d6 vs their best attack</span></button></li>' : ''}</ul>
+<ul class="choices">${acts}${c.flee ? `<li><button class="choice" data-flee="1">Run<span class="tag">${taskMode ? `GU ${n1(skillCheck(g.james.gu))} / DC ${noDiceDc(Math.max(...c.enemies.filter((e) => e.hp > 0).map((e) => e.atk)))}` : 'GU + d6 vs their best attack'}</span></button></li>` : ''}</ul>
 </section>`;
 }
 
@@ -433,7 +435,7 @@ view.addEventListener('click', (ev) => {
         if (b.dataset.panel) { panel = b.dataset.panel; if (panel === 'results') unseen = 0; render(); return; }
         if (b.dataset.yuki) { const yl = yukiLane(g); setYuki(g, !yl.on); autosave(); render(); return; }
         if (b.dataset.tasks) {
-            taskMode = !taskMode; store.set(TASKS_KEY, taskMode ? '1' : '0');
+            taskMode = !taskMode; store.set(TASKS_KEY, taskMode ? '1' : '0'); setNoDice(taskMode);
             if (!taskMode) stopRunning(); else startNext();
             renderSaves(); return;
         }

@@ -1,6 +1,6 @@
 # Bone and Ash — handover (read this first in a new chat)
 
-**Saved:** 2026-11-06 (Europe/Budapest). **Version:** 0.9.2 (`sw.js` VERSION `bone-ash-0.9.2`): step 3b on the task cards (no dice, harder, familiarity, Intuitive Aptitude, Yuki's lane, door cards, the new layout). Everything behind the "Tasks (preview)" switch. Prologue + Act 1, about 390 scenes. **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
+**Saved:** 2026-11-06 (Europe/Budapest). **Version:** 0.9.3 (`sw.js` VERSION `bone-ash-0.9.3`): no dice anywhere in task mode (story checks and fights, retuned), on top of step 3b. Everything behind the "Tasks (preview)" switch. Prologue + Act 1, about 390 scenes. **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
 Built in the SillyTavern chat as a spin-off. That chat stays for SillyTavern; this game continues in its own chats.
 
 **Rules:** `CLAUDE.md` (short) and `project/working-agreement.md` (full) — the change sequence is a HARD RULE. **Other docs:** `project/roadmap.md` (what's next), `project/design.md` (the approved hybrid design: Selene-style tasks and the Coil), `project/changelog.md`, `project/restore-points.md`. All mirrored to the claude.ai project "ash and bone".
@@ -20,6 +20,8 @@ Built in the SillyTavern chat as a spin-off. That chat stays for SillyTavern; th
   - **Door cards** (owner 00:41 "make everything that was supposed to become a card into a card now", confirmed 00:43): this reverses the 3a pick 2a (Day 1 and Day 4 now have cards).
   - **Layout** (00:47, recommendation 1 + 3 + 2 on wide screens): story on top, then Cards | Results; results are one-line summaries, newest on top, tap to unfold; side by side from 700 px wide.
   - **Measured before building** (Day 2–3 in the forest, K 2, deterministic bot): Coil 1 Day 2: 6 cards, 0% full, 50% partial, 50% fail, +7 food; Coil 2 Day 2: 8 cards, 51% full or double; Coil 3 Day 3: 12 cards, 91% full or double. HP never below 73% and no collapses in that sim, so the HP threat is a 3c item.
+- **No dice anywhere (owner 01:00 "my intention was no dice anywhere"; picks 01:02 "go with your recommendations", go 01:19; built in v0.9.3):** story checks pass at check ≥ DC (same −2 scale, outcome shown on the choice; gathering choices can be partial); fights in bands (2a); task mode only, classic kept as a fallback until 3c (3a); event picks stay seeded (4a); retune targets: small ~70%, middle ~50%, bosses ~30% (5). Also: full task names in Results (1a, 01:05) and partials drop their HP sentences (2a, 01:05).
+- **The serpent (`rt_serpent`):** measured in v0.9.3: dice 84%, no dice ~54% (78 meetings in 8,000 games); its tuning value changes nothing, because the outcome is decided by how hurt James arrives. Making it a real threat needs another lever (more damage, or James arriving weaker): a 3c item, numbers to the owner first.
 - **Loot (owner's question 00:06, pick 00:08: "go with your recommendation"):** option 1 plus a little of 2. **Bone-work crafting:** cores, fangs, bone-meal and ship shards become gear in three slots (blade, wraithbone armour, a charm) and medicines (bracket salve); crafting is workshop task cards; on a rewind the gear is lost but the **recipes are kept (as Insights)**. Plus **cores as the world's currency** (bribes, tribute). Scheduled in step 4; the recipe list and numbers go to the owner before anything is built.
 
 ## Decided in chat (2026-11-05)
@@ -103,7 +105,8 @@ In `CLAUDE.md` and `project/working-agreement.md` (adopted 2026-11-05). The chan
 | `js/main.js` | The UI. Autosave key `boneash.auto`, slots `boneash.slot1–3`, save-file export/import. |
 | `sw.js`, `manifest.webmanifest`, `icons/` | Offline install. Game files: network first, cache when offline. Google Fonts: cached on first use. |
 | `js/core/tasks.js`, `js/story/task_hubs.js` | Task cards and the queue (v0.9.0): which hubs, card ids, `runTask`, dry runs, the outlook. |
-| `tests/tasks.test.mjs` | Task mode: 2,000 bot games each way, outlook = reality, collapse, migration, no dice on work cards, familiarity grows, every offered card played, Yuki's lane. |
+| `js/story/nodice_tune.js` | No-dice fight tuning per encounter (v0.9.3). |
+| `tests/tasks.test.mjs` | Task mode: 2,000 bot games each way, outlook = reality, collapse, migration, no dice on work cards, familiarity grows, every offered card played, Yuki's lane, no die anywhere in task mode, classic still rolls. |
 | `tests/rules.test.mjs` | The engine numbers. 14 checks. |
 | `tests/story.test.mjs` | Every link valid, every scene reachable, 2,000 random playthroughs, per-fight win rates. |
 | `tests/part.test.mjs` | One Act 1 part alone; 1 run in 10 enters fights hurt so every "lost" scene is reached. |
@@ -271,6 +274,14 @@ The bible and the contract between the four part files are at the top of `js/sto
 - Last night of Act 1 (`rt_evening`) offers every arrangement the hearts allow: Mei Lin · Ya · Yuki alone; Mei Lin + Ya (`rt_trio`); Yuki + Mei Lin (`yk_night_mei`); Yuki + Ya (`yk_night_ya`); all four (`yk_night_all`). `g.flags.final_night` records it; `loveLine()` writes the Act 1 epilogue line (a1_end).
 - Romance with Yuki only in her human form (adult); fade to black. The code still says she bonded with James when he was six (34 years); **decided 2026-11-05: born together and bonded from birth** (fix pending, roadmap step 7).
 - Tests: 240 extra walks over the last night; combat round cap in the random runs raised to 400 (a rare long stalemate vs the Guardian at True Core).
+
+## v0.9.3 — no dice anywhere in task mode
+
+- **Switch:** `setNoDice(on)` in game.js; `main.js` sets it with the Tasks switch, the tests set it themselves. Classic mode (off) is untouched (the classic story test gives the same count as v0.8.6).
+- **Checks** (`rollCheck`): value ÷ `noDiceDc(dc)` (dc − `NO_DICE_DC_SHIFT` 2, at least 0.5); success at ratio ≥ 1, "double" at ≥ 2; returns `ratio`, `die: null`. `checkText(r)` writes "GU 1 / DC 2" or the dice form. `choiceTag` shows the outcome ("→ passes / partly / fails"). In `choose`, a gathering choice at ratio 0.5–1 is a thin haul (loot kept = max(1, ⌊gain × ratio⌋), XP × ratio).
+- **Fights** (`stepNoDice`, then `finishRound` shared with the dice round): James's hits ≥ 2 double, ≥ 1 full, ≥ 0.5 glancing (half), below a miss; damage = middle of the range; defence ≥ 1 avoided, ≥ 0.5 half, below the full blow; Yuki the same with her Fight; enemies that prefer the small one go for Yuki every third round; T7 construct = tier × 2; fleeing = GU vs their best attack. Intuitive Aptitude in fights: each miss or glance +0.5 to that action (and to Yuki) for the fight, up to +2 (`c.adapt`). `NO_DICE_ROUND_CAP` 30: still undecided → lost ("you are spent"); bots never reached it.
+- **Tuning** (`js/story/nodice_tune.js`, `NO_DICE_TUNE`, applied in `startCombat` only without dice): per fight `up` raises the enemy's DC and attack. Set by bot rounds (smart combat, random story and cards, Yuki on). Result (2,000 games each way, dice → no dice): jackals 100 → 77%, boar 96 → 70%, Gao 93 → 59%, Ya's brawl 85 → 54%, wolves 86 → 51%, thornback 84 → 47%, collectors (tribute) 56 → 37%, root-wyrm 87 → 25%, mire serpent 93 → 30%, rot-ape 87 → 34%, Guardian 58 → 36%, Shen Qiu 62 → 30%; other small fights 69–92% (crows 55%). Tribute lost 22% → 50%. Day 1: about 5 items by camp. Deterministic fights tip sharply between neighbouring values, so re-measure after any change upstream.
+- **Results** show the full task name (summary on its own line); a partial drops the HP sentences of its fail text.
 
 ## v0.9.2 — step 3b on the task cards
 
