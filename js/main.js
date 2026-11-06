@@ -4,7 +4,7 @@ import {
     startCombat, combatStep, combatFlee, COMBAT_ACTIONS, setNoDice, noDiceDc, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg,
 } from './core/game.js';
 import { sceneView, choose, goTo } from './core/story.js';
-import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskLabel, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, taskMinutes, runTask, outlook, taskQueue, MS_PER_GAME_HOUR, QUEUE_MAX, FAM, yukiLane, setYuki } from './core/tasks.js';
+import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskLabel, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, waitChoice, taskMinutes, runTask, outlook, taskQueue, MS_PER_GAME_HOUR, QUEUE_MAX, FAM, yukiLane, setYuki } from './core/tasks.js';
 import { SCENES, ITEMS } from './story/prologue.js';
 import { coilActive, endCoil, coilPrefill } from './core/coil.js';
 import { medCards, runMed, SIT_MINUTES, isSitChoice } from './core/meditate.js';
@@ -64,8 +64,18 @@ const PAUSE_DEATH_KEY = 'boneash.pausedeath'; // per phone: '0' = off; on by def
 let pauseDeath = store.get(PAUSE_DEATH_KEY) !== '0';
 let lastFc = null; // the last forecast the screen drew (for the pause before a forecast death)
 let deathWarned = ''; // which forecast death has paused the game already
-let speed = (() => { const v = Number(store.get(SPEED_KEY)); return SPEEDS.some(([n]) => n === v) && store.get(SPEED_KEY) !== null ? v : 1; })();
-let resumeSpeed = speed || 1; // what ▶ goes back to
+// v0.10.2: the game always opens paused and pauses on every new scene; the stored speed is what ▶ Resume (and a tapped card) runs at
+let resumeSpeed = (() => { const v = Number(store.get(SPEED_KEY)); return SPEEDS.some(([n]) => n === v) && v > 0 ? v : 1; })();
+let speed = 0;
+let oneShot = false; // a card tapped while paused runs at resumeSpeed, then the game pauses again
+let pauseScene = null; // the scene the pause rule last saw
+function pauseNow() { if (speed) resumeSpeed = speed; speed = 0; oneShot = false; }
+/** v0.10.2: pause on every new scene (task mode). */
+function scenePause() { if (!taskMode || !g || recovery) return; if (g.scene !== pauseScene) { if (pauseScene !== null) pauseNow(); pauseScene = g.scene; } }
+/** A tapped card's bar has finished: back to paused if it was a one-off. */
+function endOneShot() { if (oneShot) { oneShot = false; speed = 0; } }
+/** Tap while paused: run this one card now, then pause again. */
+function tapRun() { if (!speed) { speed = resumeSpeed || 1; oneShot = true; lastTickAt = Date.now(); } }
 let lastTickAt = Date.now();
 let running = null; // { id, label, done, ms, m0, mins } — done = ms of bar filled (at ×1) — the head of the queue while its bar fills (not saved: a reload restarts it)
 let ticker = null;
@@ -103,6 +113,7 @@ const durLabel = (m) => (m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60
 const onTaskHub = () => taskMode && g && !recovery && isTaskHub(g);
 
 function startNext() {
+    scenePause();
     if (running || !onTaskHub()) return;
     if (g.combat) return;
     if (coilPrefill(g)) autosave(); // "same days again": this hub and day get last Coil's cards
@@ -126,7 +137,7 @@ function tick() {
     const dt = Math.min(1000, now - lastTickAt); // a sleeping phone doesn't fast-forward more than a second
     lastTickAt = now;
     if (!running) return;
-    if (running.kind) { if (!taskMode || g.combat || g.scene !== running.scene) { running = null; return; } } // a story or meditate bar
+    if (running.kind) { if (!taskMode || g.combat || g.scene !== running.scene) { running = null; endOneShot(); return; } } // a story or meditate bar
     else if (!onTaskHub()) { running = null; return; }
     running.done += dt * runSpeed();
     const f = Math.min(1, running.done / running.ms);
@@ -141,6 +152,7 @@ function tick() {
     if (running.kind === 'story') { const { idx } = running; running = null; playChoice(idx); return; }
     if (running.kind === 'med') {
         const { id, label } = running; running = null;
+        endOneShot();
         try { const r = runMed(g, SCENES, id); lastResult = { lines: r.lines, fail: false }; addResult(label, r.lines, false); autosave(); startNext(); render(); } catch (err) { showError(err); render(); }
         return;
     }
@@ -152,6 +164,7 @@ function tick() {
 function finishTask(id, label) {
     try {
         if (taskQueue(g)[0] === id) taskQueue(g).shift();
+        endOneShot();
         const r = runTask(g, SCENES, id);
         lastResult = r.stopped ? { lines: r.lines, fail: r.fail } : null; // a door or collapse shows its lines in the scene it opens
         if (!r.stopped) addResult(label, r.lines, r.fail);
@@ -165,7 +178,7 @@ function checkDeathPause(nowMin) {
     if (!pauseDeath || !speed || !lastFc?.death) return;
     const key = `${g.coil?.act || 0}:${g.coil?.n || 1}:${lastFc.death.at}`;
     if (deathWarned === key || lastFc.death.at - nowMin > 60) return;
-    deathWarned = key; resumeSpeed = speed; speed = 0; store.set(SPEED_KEY, '0');
+    deathWarned = key; pauseNow();
     lastResult = { lines: [`Paused: the forecast says James ${lastFc.death.cause === 'hunger' ? 'starves' : 'collapses'} at ${clockLabelG(g, lastFc.death.at)} on this queue. Fix the queue, or press Resume to carry on.`], fail: true };
     render();
 }
@@ -190,6 +203,7 @@ function playChoice(idx) {
         const label = ch ? String(val(ch.text)) : 'End it in one move.';
         if (ch && /^Stay lost/.test(label)) backupBefore('the Long Forest');
         const r = choose(g, SCENES, idx);
+        endOneShot();
         lastResult = { lines: r.lines, fail: r.roll ? !r.roll.success : false };
         if (taskMode && r.lines.length) addResult(label, r.lines, lastResult.fail);
         if (r.combat) { startCombat(g, r.combat(g)); combatLog = null; }
@@ -200,7 +214,8 @@ const storyCardHtml = (c) => {
     const busy = running && running.kind === 'story' && running.idx === c.index;
     const mins = c.disabled ? 0 : storyMinutes(c.index);
     const tag = c.disabled ? c.reason : c.tag;
-    const inst = c.index < 1000 && instantChoice(SCENES[g.scene]?.choices?.[c.index]);
+    const ch0 = c.index < 1000 ? SCENES[g.scene]?.choices?.[c.index] : null;
+    const inst = !!ch0 && (instantChoice(ch0) || waitChoice(SCENES, ch0, mins, g.scene));
     return `<button class="card story${/fight/.test(c.tag) ? ' fightish' : ''}${busy ? ' busy' : ''}" data-story="${c.index}" ${c.disabled ? 'disabled aria-disabled="true"' : ''}>${md(c.label)}${tag ? `<span class="tag">${esc(tag)}</span>` : ''}<span class="len">${mins && !inst ? durLabel(mins) : mins ? `at once (${durLabel(mins)} pass)` : 'at once'}</span></button>`;
 };
 const medCardHtml = (m) => { const card = `<button class="card med" ${m.task ? `data-run="${esc(m.task)}"` : `data-med="${esc(m.id)}"`} ${m.open ? '' : 'disabled aria-disabled="true"'}>${md(m.label)}<span class="tag">${esc(m.tag)}</span><span class="len">${m.minutes ? durLabel(m.minutes) : 'at once'}</span></button>`; return m.task && m.open ? `<div class="cardwrap">${card}<button class="qadd" data-qadd="${esc(m.task)}" aria-label="Add to the end of the queue">+</button></div>` : card; };
@@ -208,8 +223,9 @@ const medCardHtml = (m) => { const card = `<button class="card med" ${m.task ? `
 function nowRowHtml() {
     const now = running
         ? `<div class="now"><b>${speed ? 'James:' : 'Paused:'}</b> ${md(running.label)}<div class="stroke"><i id="nowbar" style="width:${(Math.min(1, running.done / running.ms) * 100).toFixed(1)}%"></i></div></div>`
-        : `<div class="now idle">${speed ? 'Idle. Tap a card to do it now, or + to add it to the queue; the clock runs while James does something.' : 'Paused. Tap cards or + to queue them; nothing runs until you resume.'}</div>`;
-    return `<div class="nowrow">${now}<button class="btn pause${speed ? '' : ' primary'}" data-pause="1">${speed ? '⏸ Pause' : '▶ Resume'}</button></div>`;
+        : `<div class="now idle">${speed ? 'Idle. Tap a card to do it now, or + to add it to the queue; the clock runs while James does something.' : 'Paused. Tap a card to do just that one, or + to queue; ▶ Resume runs the queue.'}</div>`;
+    const on = speed && !oneShot;
+    return `<div class="nowrow">${now}<button class="btn pause${on ? '' : ' primary'}" data-pause="1">${on ? '⏸ Pause' : '▶ Resume'}</button></div>`;
 }
 function resultsPaneHtml() {
     return taskResults.length ? taskResults.map((r) => `<details class="res${r.fail ? ' fail' : ''}"><summary><b>${md(r.title)}</b> <span>${esc(r.sum)}</span></summary><div>${r.lines.map((l) => `<div>${dieHtml(l)}</div>`).join('')}</div></details>`).join('') : '<p class="note">Nothing yet. What James does lands here, newest on top; tap one for the details. The Journal keeps all of it.</p>';
@@ -526,6 +542,7 @@ ${testSpeeds || modeTaps >= 5 ? `<div class="btns"><button class="btn${testSpeed
 /* ---------------- wiring ---------------- */
 
 function render() {
+    scenePause();
     document.querySelectorAll('#tabs button').forEach((b) => b.setAttribute('aria-current', b.dataset.tab === tab ? 'page' : 'false'));
     if (recovery) return renderRecovery();
     ({ story: renderStory, sheet: renderSheet, bag: renderBag, journal: renderJournal, saves: renderSaves })[tab]();
@@ -549,9 +566,10 @@ view.addEventListener('click', (ev) => {
     try {
         if (b.dataset.run || b.dataset.qadd) { // tap = run now, ahead of the queue; + = add to the end (paused: both only queue) — v0.10.0
             const id = b.dataset.run || b.dataset.qadd;
-            const now = b.dataset.run && speed;
+            const now = !!b.dataset.run; // v0.10.2: a tap always runs now; paused, it runs this one card and pauses again
+            if (now) tapRun();
             if (now && running?.kind) stopRunning(); // a story or meditate bar: nothing of it happens
-            if (!(now ? queueRunNow(g, id) : queueAdd(g, id))) { lastResult = { lines: [`The queue is full (${QUEUE_MAX}).`], fail: true }; render(); return; }
+            if (!(now ? queueRunNow(g, id) : queueAdd(g, id))) { endOneShot(); lastResult = { lines: [`The queue is full (${QUEUE_MAX}).`], fail: true }; render(); return; }
             if (now && running) stopRunning(); // the card that was running moves to second place and starts over later
             autosave(); startNext(); render();
             return;
@@ -578,22 +596,23 @@ view.addEventListener('click', (ev) => {
             if (running) stopRunning(); // a story step stops a running task bar: nothing of it happens; the queue waits
             const idx = Number(b.dataset.story);
             const mins = storyMinutes(idx);
-            if (!mins || instantChoice(SCENES[g.scene]?.choices?.[idx])) { playChoice(idx); return; } // rest and sleep: no bar (v0.10.0)
             const ch = SCENES[g.scene]?.choices?.[idx];
+            if (!mins || instantChoice(ch) || waitChoice(SCENES, ch, mins, g.scene)) { playChoice(idx); return; } // rest, sleep and waiting for a time of day: no bar (v0.10.0, v0.10.2)
+            tapRun();
             startBar('story', idx, ch ? String(val(ch.text)) : 'Story', mins); render();
             return;
         }
         if (b.dataset.med) {
             if (running?.kind) return;
             if (running) stopRunning();
-            if (b.dataset.med === 'med:sit') { startBar('med', 'med:sit', 'Cultivate: one sit', SIT_MINUTES); render(); return; }
+            if (b.dataset.med === 'med:sit') { tapRun(); startBar('med', 'med:sit', 'Cultivate: one sit', SIT_MINUTES); render(); return; }
             const r = runMed(g, SCENES, b.dataset.med);
             lastResult = r.lines.length ? { lines: r.lines, fail: false } : null; autosave(); render(); window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
         }
         if (b.dataset.pause) {
-            if (speed) { resumeSpeed = speed; speed = 0; } else speed = resumeSpeed || 1;
-            store.set(SPEED_KEY, String(speed)); lastTickAt = Date.now(); render(); return;
+            if (speed && !oneShot) pauseNow(); else { speed = resumeSpeed || 1; oneShot = false; }
+            store.set(SPEED_KEY, String(resumeSpeed)); lastTickAt = Date.now(); startNext(); render(); return;
         }
         if (b.dataset.bite) {
             if (Date.now() - biteArmed > 4000) { biteArmed = Date.now(); note('Tap Bite the tail again to end this Coil. Everything in the hammerspace is lost; what James learned is not.'); return; }
@@ -653,7 +672,7 @@ view.addEventListener('click', (ev) => {
 });
 view.addEventListener('change', async (ev) => {
     const sel = ev.target.closest('select[data-speed]');
-    if (sel) { speed = Number(sel.value); if (speed) resumeSpeed = speed; store.set(SPEED_KEY, String(speed)); lastTickAt = Date.now(); render(); return; }
+    if (sel) { const v = Number(sel.value); if (v) { resumeSpeed = v; speed = v; oneShot = false; store.set(SPEED_KEY, String(v)); } else pauseNow(); lastTickAt = Date.now(); startNext(); render(); return; }
     const inp = ev.target.closest('input[data-import]');
     if (!inp || !inp.files?.[0]) return;
     let next;

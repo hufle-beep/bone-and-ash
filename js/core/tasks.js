@@ -81,6 +81,17 @@ export function merChoice(g, scenes) {
 /** v0.10.0: rest and sleep happen at once (no bar; the clock still moves). */
 export const instantChoice = (c) => !!c && !c.combat && !c.check && !c.qi && typeof c.text === 'string'
     && (/^(Rest|Sleep)\b/.test(c.text) || /^(Get wet\. Sleep|Make camp and sleep|Go back to sleep|Just sleep|Let her sleep|Bandage it\. Sleep|Leave (a|the) thread on watch|Thank her for dinner and sleep|Limp back to camp and sleep)/.test(c.text));
+/**
+ * v0.10.2: a story choice that only waits for a time of day (no check, Qi, fight or time of its own; its `do` or the
+ * next scene's `enter` sets the clock) plays at once in task mode — the clock jumps, no bar. `mins` = its dry run.
+ */
+const SETS_CLOCK = /g\.minutes\s*=[^=]|toHour\(/;
+export function waitChoice(scenes, c, mins = 60, from = null) {
+    if (!c || c.combat || c.check || c.qi || c.time != null || mins < 60 || (from && c.to === from)) return false; // a choice back to its own scene is an action, not a wait
+    if (c.do && SETS_CLOCK.test(String(c.do))) return true;
+    const to = typeof c.to === 'string' ? scenes[c.to] : null;
+    return !!(to?.enter && SETS_CLOCK.test(String(to.enter)));
+}
 export function isInstantTask(g, scenes, id) {
     if (id === MER_TASK) return false;
     const p = parse(id);
@@ -96,7 +107,7 @@ function cardOf(scenes, hubId, id) {
     if (!c) return null;
     if (p.scene === hubId) {
         if (isDoor(cfg, c)) return { kind: 'door', c, p, group: cfg.own };
-        if (isChore(hubId, c)) return { kind: c.check ? 'work' : 'chore', c, p, group: cfg.own, menu: null };
+        if (isChore(hubId, c)) return { kind: c.check && !cfg.plainChecks ? 'work' : 'chore', c, p, group: cfg.own, menu: null };
         return null;
     }
     const m = (cfg.menus || {})[p.scene];
@@ -152,7 +163,7 @@ export function taskCards(g, scenes) {
     hub.choices.forEach((c, i) => {
         if (!choiceOpen(g, c)) return;
         if (isDoor(cfg, c)) push(`${hubId}:${i}`, 'door', cfg.own, c, c.time || 0, 'open');
-        else if (isChore(hubId, c)) push(`${hubId}:${i}`, c.check ? 'work' : 'chore', cfg.own, c, c.time || 0, 'open');
+        else if (isChore(hubId, c)) push(`${hubId}:${i}`, c.check && !cfg.plainChecks ? 'work' : 'chore', cfg.own, c, c.time || 0, 'open');
     });
     const mi = merChoice(g, scenes);
     if (mi >= 0) {

@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.10.1 | (this push) | The Long Forest in task mode. Same save state as 0.9.6. |
+| 0.10.2 | (this push) | Pause rules, the camp as a task screen, waits at once. Same save state as 0.9.6. |
+| 0.10.1 | `ded9175` | The Long Forest in task mode. Same save state as 0.9.6. |
 | 0.10.0 | `549e3f6` | Queue planning and the forecast. Same save state as 0.9.6 (`starveCarry` is new but optional). |
 | 0.9.9 | `fc16a92` | Clock with seconds. Same save state as 0.9.6. |
 | 0.9.8 | `ee1e3a1` | Tasks by default, the speed gate. Same save state as 0.9.6. |

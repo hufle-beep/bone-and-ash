@@ -10,7 +10,7 @@ import { sceneView, choose, goTo } from '../js/core/story.js';
 import { medCards, runMed, canMeditate, NO_MEDITATE, isSitChoice } from '../js/core/meditate.js';
 import { defaultMinutes, DEFAULT_MINUTES } from '../js/core/story.js';
 import { coilActive, coilPrefill, rewind, endCoil, KEEP_FLAGS, REMEMBER } from '../js/core/coil.js';
-import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskMinutes, runTask, outlook, taskQueue, taskState, setYuki, yukiLane, famTier, QUEUE_MAX, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, merChoice, MER_TASK } from '../js/core/tasks.js';
+import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskMinutes, runTask, outlook, taskQueue, taskState, setYuki, yukiLane, famTier, QUEUE_MAX, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, merChoice, MER_TASK, waitChoice } from '../js/core/tasks.js';
 
 let pass = 0, fail = 0;
 const assert = (c, l) => { if (c) { pass++; } else { fail++; if (fail < 30) console.error('  FAIL ', l); } };
@@ -137,6 +137,33 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     assert(lf.james.primaries === 12 && lf.james.collaterals === 66 && lf.yuki.collaterals === 66, 'the Long Forest opens all 12 / 66');
     // the closed Day 1 scan text
     assert(/ash/.test(SCENES.yuki_check.text(ensureBars(newGame(45, { closed: true })))) && /Twelve primaries open/.test(SCENES.yuki_check.text(open)), 'Day 1 scan text follows the meridians');
+    setNoDice(false);
+}
+// v0.10.2: the camp is a task screen (its checks keep the story numbers); waiting for a time of day plays at once
+{
+    setNoDice(true);
+    const g = ensureBars(newGame(71, { closed: true })); goTo(g, SCENES, 'camp'); g.minutes = 15 * 60;
+    assert(isTaskHub(g), 'camp is a task hub');
+    const cards = taskCards(g, SCENES);
+    const fire = cards.find((c) => /^Make fire/.test(c.label)), stakes = cards.find((c) => /^Sing a ring/.test(c.label));
+    assert(fire && fire.kind === 'chore' && stakes && stakes.kind === 'chore', 'fire and stakes are chores (story-check numbers)');
+    assert(!cards.some((c) => /^Night falls/.test(c.label)) && !isTaskChoice(SCENES, 'camp', SCENES.camp.choices.findIndex((c) => /^Night falls/.test(c.text))), 'Night falls stays a story card');
+    // same numbers as the story choice: a copy taking the choice directly ends identical
+    const a = structuredClone(g), b = structuredClone(g);
+    runTask(a, SCENES, fire.id); choose(b, SCENES, Number(fire.id.split(':')[1]));
+    assert(a.minutes === b.minutes && a.flags.fire === b.flags.fire && a.james.hp === b.james.hp && JSON.stringify(a.james.gu) === JSON.stringify(b.james.gu), 'the fire card = the story choice (time, result, XP)');
+    const q = taskQueue(g); q.push(fire.id, stakes.id); const ol = outlook(g, SCENES);
+    runTask(g, SCENES, q.shift()); runTask(g, SCENES, q.shift());
+    assert(ol.rows[1].end === g.minutes && g.flags.fire && g.flags.stakes, 'camp cards queue and the forecast matches');
+    const ni = SCENES.camp.choices.findIndex((c) => /^Night falls/.test(c.text));
+    const m0 = g.minutes; const c = structuredClone(g); choose(c, SCENES, ni);
+    assert(waitChoice(SCENES, SCENES.camp.choices[ni], c.minutes - m0, 'camp'), 'Night falls is a wait (plays at once)');
+    choose(g, SCENES, ni);
+    assert(g.scene === 'night' || g.minutes % 1440 >= 21 * 60, 'Night falls: the clock lands on 21:00 or later');
+    assert(!waitChoice(SCENES, SCENES.camp.choices[0], 999, 'camp') && !waitChoice(SCENES, { text: 'x', to: 'night', combat: () => ({}) }, 999), 'a check, a fight or a choice back to its own scene is never a wait');
+    let waits = 0;
+    for (const [id, sc] of Object.entries(SCENES)) for (const ch of sc.choices || []) if (waitChoice(SCENES, ch, 999, id)) { waits++; assert(!ch.check && !ch.qi && !ch.combat && ch.time == null, `wait ${id} has no check, Qi, fight or time`); }
+    assert(waits >= 20, `waiting choices found (${waits})`);
     setNoDice(false);
 }
 // v0.10.1: the Long Forest in task mode — gated behind the first Coil, one season (+1 realm) per card

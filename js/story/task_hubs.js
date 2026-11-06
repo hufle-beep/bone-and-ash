@@ -12,6 +12,12 @@
 import { nextEvening } from './ashfall.js';
 
 export const TASK_HUBS = {
+    camp: { // v0.10.2: the camp (Days 1–3) — fire, cook, eat raw, stakes queue; checked cards keep their story-check numbers (`plainChecks`)
+        menus: {},
+        own: 'Camp',
+        plainChecks: true,
+        evening: 'camp',
+    },
     stream: { // Day 1: the first forage and hunt are door cards to their discovery scenes
         menus: {},
         doors: ['forage', 'hunt'],
