@@ -3,13 +3,13 @@
 // 2,000 bot games in task mode reach the end with no dead end; the tribute outcomes are printed next to classic play.
 import { SCENES } from '../js/story/prologue.js';
 import { TASK_HUBS } from '../js/story/task_hubs.js';
-import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, setNoDice, clockLabelSec, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1 } from '../js/core/game.js';
+import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, setNoDice, clockLabelSec, advance, STARVE_HP_PER_HOUR, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1 } from '../js/core/game.js';
 import { canPrimary, canColGroup, colGroupsOpen, sessionsToday, dcPrimary, dcColGroup, btTarget, canAnyMeridian, COL_GROUPS } from '../js/story/meridians.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
 import { medCards, runMed, canMeditate, NO_MEDITATE, isSitChoice } from '../js/core/meditate.js';
 import { defaultMinutes, DEFAULT_MINUTES } from '../js/core/story.js';
 import { coilActive, coilPrefill, rewind, endCoil, KEEP_FLAGS, REMEMBER } from '../js/core/coil.js';
-import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskMinutes, runTask, outlook, taskQueue, taskState, setYuki, yukiLane, famTier, QUEUE_MAX, maxSpeed, effectiveSpeed } from '../js/core/tasks.js';
+import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskMinutes, runTask, outlook, taskQueue, taskState, setYuki, yukiLane, famTier, QUEUE_MAX, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, merChoice, MER_TASK } from '../js/core/tasks.js';
 
 let pass = 0, fail = 0;
 const assert = (c, l) => { if (c) { pass++; } else { fail++; if (fail < 30) console.error('  FAIL ', l); } };
@@ -175,7 +175,7 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
 // v0.9.7: severe difficulty — HP 0 outside a fight and a lost beast fight end the Coil; people keep their branches
 {
     setNoDice(true);
-    const g = ensureBars(newGame(60)); g.james.hp = 0.5; g.james.satiety = 0;
+    const g = ensureBars(newGame(60)); g.james.hp = 0.5; g.james.satiety = 0; g.starveCarry = 55; // v0.10.0: a starving hour builds up first
     choose(g, SCENES, SCENES.arrival.choices.findIndex((c) => /Sit up/.test(String(c.text))));
     assert(g.scene === 'coil_end' && g.coil.why === 'collapse', `starving to 0 ends the Coil (${g.scene})`);
     assert(!sceneView(g, SCENES).choices.some((c) => /Accept/.test(c.label)), 'no Accept after a death');
@@ -411,6 +411,51 @@ assert(yukiRuns > 1000, `Yuki's lane brings things home (${yukiRuns})`);
     assert(famTier(0) === 0 && famTier(2) === 1 && famTier(8) === 2 && famTier(18) === 3, 'familiarity tiers at 2 / 8 / 18');
 }
 
+// v0.10.0: the queue edited, meridian sessions, the forecast's death row, starving 1.5 HP an hour, rest and sleep at once
+{
+    setNoDice(true);
+    const g = ensureBars(newGame(70, { closed: true })); g.scene = 'wilds'; g.minutes = 1440 + 8 * 60; Object.assign(g.flags, { long: true, forest_day: 2 });
+    const q = taskQueue(g); q.length = 0;
+    queueAdd(g, 'a'); queueAdd(g, 'b'); queueRunNow(g, 'c');
+    assert(q.join() === 'c,a,b', 'run now goes to the front, + to the end');
+    queueMove(g, 2, -1); assert(q.join() === 'c,b,a', 'a row moves up');
+    queueMove(g, 0, -1); assert(q.join() === 'c,b,a', 'the top row cannot move up');
+    queueClear(g, true); assert(q.join() === 'c', 'clear keeps the row in progress');
+    queueClear(g, false); assert(q.length === 0, 'clear empties the queue');
+    for (let i = 0; i < QUEUE_MAX; i++) queueAdd(g, 'x'); assert(!queueAdd(g, 'y') && !queueRunNow(g, 'y') && q.length === QUEUE_MAX, 'the queue stops at its limit');
+    q.length = 0;
+    // a meridian session from the queue
+    assert(merChoice(g, SCENES) === 0 && taskOpen(g, SCENES, MER_TASK), 'a closed start offers the next primary as a card');
+    const m0 = g.minutes, s0 = g.flags[`mer_s@${Math.floor(g.minutes / 1440) + 1}`] || 0;
+    const r = runTask(g, SCENES, MER_TASK);
+    assert(g.scene === 'wilds' && g.minutes - m0 === 120 && g.james.primaries === 1 && (g.flags[`mer_s@${Math.floor(m0 / 1440) + 1}`] || 0) === s0 + 1 && !r.stopped, 'a meridian session: 2 h, a primary, a session used, back on the hub');
+    runTask(g, SCENES, MER_TASK);
+    assert(merChoice(g, SCENES) === -1 && !taskOpen(g, SCENES, MER_TASK), 'two sessions a day, then no card');
+    // the forecast finds the row where a bad queue starves
+    const h = ensureBars(newGame(71, { closed: true })); h.scene = 'wilds'; h.minutes = 1440 + 7 * 60; Object.assign(h.flags, { long: true, forest_day: 2 });
+    h.james.satiety = 3; h.james.hp = 2; h.inventory = {};
+    const rest = SCENES.wilds.choices.findIndex((c) => /^Rest in the shade/.test(c.text));
+    for (let i = 0; i < 8; i++) queueAdd(h, `wilds:${rest}`);
+    const ol = outlook(h, SCENES);
+    assert(ol.death && ol.death.cause === 'hunger', `the forecast sees James starve (${JSON.stringify(ol.death)})`);
+    assert(ol.rows.slice(ol.death.row + 1).every((x) => x.dead) && ol.rows[ol.death.row].death === 'hunger', 'rows after the death row are never reached');
+    const real = JSON.parse(JSON.stringify(h)); let n = 0;
+    while (taskQueue(real).length && real.scene === 'wilds' && n++ < 20) { const id = taskQueue(real).shift(); runTask(real, SCENES, id); }
+    assert(real.scene === 'coil_end' && real.minutes === ol.death.at, `the real run starves where the forecast said (${real.minutes} vs ${ol.death.at})`);
+    // starving: 1.5 HP an hour in task mode, whatever the step size
+    const a1 = ensureBars(newGame(72)); a1.james.satiety = 0; a1.james.hp = 20;
+    for (let i = 0; i < 24; i++) advance(a1, 10);
+    const a2 = ensureBars(newGame(72)); a2.james.satiety = 0; a2.james.hp = 20; advance(a2, 240);
+    assert(STARVE_HP_PER_HOUR === 1.5 && a1.james.hp === 14 && a2.james.hp === 14, `4 starving hours cost 6 HP in 10-min steps and in one step (${a1.james.hp}, ${a2.james.hp})`);
+    setNoDice(false);
+    const c1 = ensureBars(newGame(72)); c1.james.satiety = 0; c1.james.hp = 20; for (let i = 0; i < 6; i++) advance(c1, 10);
+    assert(c1.james.hp === 14, `classic keeps the old rule: 1 HP per step (${c1.james.hp})`);
+    setNoDice(true);
+    // rest and sleep: no bar, the clock still moves
+    assert(isInstantTask(g, SCENES, `wilds:${rest}`) && instantChoice({ text: 'Sleep.' }) && !instantChoice({ text: 'Stay up with Mei Lin after the others sleep.' }) && !instantChoice({ text: 'Cultivate one sit before sleep.', do: () => [] }), 'rest and sleep are instant; staying up and cultivating are not');
+    assert(taskMinutes(g, SCENES, `wilds:${rest}`) === 60, 'an instant rest still passes its hour');
+    setNoDice(false);
+}
 // status clock with seconds (v0.9.9)
 {
     assert(clockLabelSec({ flags: {} }, 0) === 'Day 1, 00:00:00', 'clock: Day 1, 00:00:00');

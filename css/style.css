@@ -219,3 +219,15 @@ button { font: inherit; color: inherit; }
 .card.busy { background: rgba(160,44,44,0.08); border-color: var(--red); }
 .card.fightish { border-color: var(--red); }
 .prose.round { font-size: 0.92rem; }
+/* v0.10.0: run now + add to the queue, queue rows with the forecast */
+.cardwrap { position: relative; display: flex; }
+.cardwrap > .card { flex: 1; padding-right: 2.4rem; }
+.qadd { position: absolute; top: 0.3rem; right: 0.3rem; width: 2rem; height: 2rem; border: 1.5px solid var(--ink); border-radius: 50%; background: var(--paper, #ece8df); font-size: 1.1rem; line-height: 1; cursor: pointer; color: var(--ink); }
+.qadd:active { background: rgba(160,44,44,0.12); }
+.queue li { grid-template-columns: 1fr auto; }
+.queue li .qbtns { grid-column: 1 / -1; justify-self: end; white-space: nowrap; }
+.queue li time { grid-column: 2; grid-row: 1; white-space: normal; text-align: right; }
+.queue li.dead { color: var(--red); }
+.queue li.dead time { color: var(--red); }
+.queue .dies { color: var(--red); font-weight: 600; }
+.queue .x:disabled { opacity: 0.3; cursor: default; }

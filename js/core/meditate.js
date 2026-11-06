@@ -10,6 +10,7 @@ import { CONDENSE_SIT_COST } from './formulas.js';
 import { goTo, checkDeath } from './story.js';
 import { canAnyMeridian, btTarget } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
+import { merChoice, MER_TASK } from './tasks.js';
 
 /** No meditating here: urgent moments and screens that are already about it. */
 export const NO_MEDITATE = new Set(['herb_girl', 'tribute', 'rt_elder', 'rt_truth', 'coil_end', 'coil_dawn', 'breakthrough', 'ns_warn', 'col_warn', 'meridians', 'yuki_form', 'yuki_tiger_awaken', 'yuki_human_awaken']);
@@ -32,6 +33,7 @@ export function medCards(g, scenes) {
     const sit = { label: `Cultivate: one sit, ${CONDENSE_SIT_COST} Qi toward Saturation (${g.james.saturation}%).`, tag: qiOk ? `${CONDENSE_SIT_COST} Qi` : `needs ${CONDENSE_SIT_COST} Qi`, open: qiOk, minutes: SIT_MINUTES };
     if (hubSit >= 0) out.push({ ...sit, id: `${g.scene}:${hubSit}`, task: `${g.scene}:${hubSit}` });
     else out.push({ ...sit, id: 'med:sit' });
+    if (TASK_HUBS[g.scene] && merChoice(g, scenes) >= 0) out.push({ id: MER_TASK, task: MER_TASK, label: 'Next meridian session (2 h, 2 Qi): the next channel on the map.', tag: 'queueable', open: true, minutes: 120 }); // v0.10.0
     if (canAnyMeridian(g)) out.push({ id: 'med:mer', label: 'Open a meridian.', tag: 'opens the meridian screen', open: true, minutes: 0 });
     if (canBreakThrough(g)) out.push({ id: 'med:bt', label: `Break through. (Saturation ${g.james.saturation}%.)`, tag: 'opens the breakthrough', open: true, minutes: 0 });
     else if (breakReady(g) && breakBlock(g)) out.push({ id: 'med:bt', label: `Break through. (Saturation ${g.james.saturation}%.)`, tag: breakBlock(g), open: false, reason: breakBlock(g), minutes: 0 });

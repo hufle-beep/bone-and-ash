@@ -70,9 +70,27 @@ export function isTaskChoice(scenes, hubId, index) {
     return !!((cfg.menus || {})[c.to] || (cfg.doorMenus || {})[c.to] || isChore(hubId, c) || isDoor(cfg, c));
 }
 
+/** v0.10.0: "Next meridian session" — a queueable hub card that takes the first open session on the meridian screen. */
+export const MER_TASK = 'mer:next';
+/** Index of the meridian-screen choice the next session would take, or -1 (none left today, too little Qi, wrong realm). */
+export function merChoice(g, scenes) {
+    const cs = scenes.meridians?.choices || [];
+    for (let i = 0; i < cs.length; i++) { const c = cs[i]; if (c.to === 'meridians' && c.check && choiceOpen(g, c)) return i; }
+    return -1;
+}
+/** v0.10.0: rest and sleep happen at once (no bar; the clock still moves). */
+export const instantChoice = (c) => !!c && !c.combat && !c.check && !c.qi && typeof c.text === 'string'
+    && (/^(Rest|Sleep)\b/.test(c.text) || /^(Get wet\. Sleep|Make camp and sleep|Go back to sleep|Just sleep|Let her sleep|Bandage it\. Sleep|Leave (a|the) thread on watch|Thank her for dinner and sleep|Limp back to camp and sleep)/.test(c.text));
+export function isInstantTask(g, scenes, id) {
+    if (id === MER_TASK) return false;
+    const p = parse(id);
+    return instantChoice(scenes[p.scene]?.choices?.[p.index]);
+}
+
 /** What kind of card `id` is on hub `hubId`, with its choice and (for menu cards) the door choice into its menu. */
 function cardOf(scenes, hubId, id) {
     const cfg = TASK_HUBS[hubId];
+    if (id === MER_TASK) return { kind: 'mer', c: null, p: { scene: 'meridians', index: -1 }, group: 'Meditate' };
     const p = parse(id);
     const c = scenes[p.scene]?.choices?.[p.index];
     if (!c) return null;
@@ -136,11 +154,16 @@ export function taskCards(g, scenes) {
         if (isDoor(cfg, c)) push(`${hubId}:${i}`, 'door', cfg.own, c, c.time || 0, 'open');
         else if (isChore(hubId, c)) push(`${hubId}:${i}`, c.check ? 'work' : 'chore', cfg.own, c, c.time || 0, 'open');
     });
+    const mi = merChoice(g, scenes);
+    if (mi >= 0) {
+        const c = scenes.meridians.choices[mi];
+        cards.push({ id: MER_TASK, kind: 'mer', group: 'Meditate', label: `Next meridian session: ${asText(c.text, g).replace(/^Open /, '')}`, tag: choiceTag(g, c), minutes: c.time || 0, status: 'open', tier: 0, fam: 0, next: null });
+    }
     return cards;
 }
 
 export const taskOpen = (g, scenes, id) => taskCards(g, scenes).some((c) => c.id === id && c.status === 'open');
-export const taskLabel = (g, scenes, id) => { const p = parse(id); const c = scenes[p.scene]?.choices?.[p.index]; return c ? asText(c.text, g) : id; };
+export const taskLabel = (g, scenes, id) => { if (id === MER_TASK) return 'Next meridian session'; const p = parse(id); const c = scenes[p.scene]?.choices?.[p.index]; return c ? asText(c.text, g) : id; };
 
 /** HP 0 during a task (v0.9.4): the Coil ends. The queue is gone; the Coil screen decides what happens next. */
 function collapse(g, scenes, hubId) {
@@ -268,7 +291,15 @@ export function runTask(g, scenes, id) {
     const lines = [];
     let fail = false;
     recordCard(g, hubId, m0, id);
-    if (card.kind === 'work') {
+    if (card.kind === 'mer') {
+        const mi = merChoice(g, scenes);
+        if (mi < 0) throw new Error('No meridian session possible');
+        g.scene = 'meridians';
+        const r = choose(g, scenes, mi);
+        lines.push(...r.lines);
+        if (r.roll && !r.roll.success) fail = true;
+        if (g.scene === 'meridians') g.scene = hubId; // back to the hub without running its enter
+    } else if (card.kind === 'work') {
         const before = g.stats.wins;
         const checks = g.stats.checks;
         lines.push(...resolveWork(g, scenes, hubId, card, id));
@@ -310,14 +341,31 @@ export function outlook(g, scenes) {
     const rows = [];
     let fedOut = null;
     let left = false;
+    let death = null;
     for (const id of st(g).queue) {
+        if (death) { rows.push({ id, dead: true }); continue; }
         if (left) { rows.push({ id, wait: true }); continue; }
         if (!taskOpen(c, scenes, id)) { rows.push({ id, skip: true }); continue; }
         const before = c.minutes;
         const r = runTask(c, scenes, id);
         if (fedOut === null && c.james.satiety <= 0) fedOut = c.minutes;
-        rows.push({ id, start: before, end: c.minutes, door: !!r.stopped });
+        const row = { id, start: before, end: c.minutes, door: !!r.stopped, fed: c.james.satiety, hp: c.james.hp };
+        if (c.scene === 'coil_end') { // HP hit 0 on this row: the Coil would end here
+            row.death = c.james.satiety <= 0 ? 'hunger' : 'injury';
+            death = { at: c.minutes, cause: row.death, row: rows.length, id };
+        }
+        rows.push(row);
         if (r.stopped) left = true;
     }
-    return { rows, fedOut, fedEnd: c.james.satiety, end: c.minutes };
+    return { rows, fedOut, fedEnd: c.james.satiety, end: c.minutes, start: g.minutes, death };
 }
+
+/* ---------- the queue, edited (v0.10.0; pure: the screen calls these) ---------- */
+/** Run `id` now: it goes to the front (the card that was running moves to second place). */
+export function queueRunNow(g, id) { const q = st(g).queue; if (q.length >= QUEUE_MAX) return false; q.unshift(id); return true; }
+/** Add `id` to the end. */
+export function queueAdd(g, id) { const q = st(g).queue; if (q.length >= QUEUE_MAX) return false; q.push(id); return true; }
+/** Move row k up (dir −1) or down (+1). */
+export function queueMove(g, k, dir) { const q = st(g).queue; const j = k + dir; if (k < 0 || j < 0 || k >= q.length || j >= q.length) return false; [q[k], q[j]] = [q[j], q[k]]; return true; }
+/** Clear the queue; keepHead keeps the row in progress. */
+export function queueClear(g, keepHead) { const q = st(g).queue; q.splice(keepHead && q.length ? 1 : 0); }

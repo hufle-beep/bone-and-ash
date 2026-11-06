@@ -15,6 +15,8 @@ export const CONVERGENCE_MULTIPLIER = 1.25;
 export const START_MINUTES = 6 * 60 + 40; // Day 1, 06:40
 export const SATIETY_PER_HOUR = 3;
 export const HUNGRY_AT = 30;
+export let STARVE_HP_PER_HOUR = 1.5; // task mode (v0.10.0, owner pick b): 1.5 HP per starving hour; classic keeps its old rule
+export const setStarveRate = (n) => { STARVE_HP_PER_HOUR = n; }; // simulations only
 export const XP_BANDS = { routine: 0, standard: 30, challenging: 60, major: 120 };
 export const SAVE_VERSION = 5; // 2 (v0.9.0): the task queue; 3 (v0.9.2): familiarity, adaptation, Yuki's lane; 4 (v0.9.4): the Coil; 5 (v0.9.6): the Coil's act
 
@@ -313,13 +315,21 @@ export function advance(g, minutes, { resting = false } = {}) {
     if (!m) return [];
     const notes = [];
     g.minutes += m;
+    const fed0 = Math.max(0, g.james.satiety);
     g.james.satiety -= (SATIETY_PER_HOUR * m) / 60;
-    if (g.james.satiety <= 0) {
+    if (g.james.satiety <= 0 && !noDice) { // classic: the old rule, at least 1 HP per clock step
         g.james.satiety = 0;
         const loss = Math.max(1, Math.floor(m / 60));
         g.james.hp -= loss;
         notes.push(`Starving: −${loss} HP`);
-    }
+    } else if (g.james.satiety <= 0) {
+        // task mode (v0.10.0): STARVE_HP_PER_HOUR per starving hour, the minutes carried over
+        g.james.satiety = 0;
+        g.starveCarry = (g.starveCarry || 0) + Math.max(0, m - (fed0 * 60) / SATIETY_PER_HOUR);
+        const loss = Math.floor((g.starveCarry * STARVE_HP_PER_HOUR) / 60);
+        g.starveCarry -= (loss * 60) / STARVE_HP_PER_HOUR;
+        if (loss > 0) { g.james.hp -= loss; notes.push(`Starving: −${loss} HP`); }
+    } else g.starveCarry = 0;
     const cycle = cycleTimeMinutes(Math.max(g.james.gu.tier, g.james.skills['Convergence Use'].tier));
     g.regenCarry += m * (resting ? 2 : 1);
     const ticks = Math.floor(g.regenCarry / cycle);

@@ -4,7 +4,7 @@ import {
     startCombat, combatStep, combatFlee, COMBAT_ACTIONS, setNoDice, noDiceDc, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg,
 } from './core/game.js';
 import { sceneView, choose, goTo } from './core/story.js';
-import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskLabel, maxSpeed, effectiveSpeed, taskMinutes, runTask, outlook, taskQueue, MS_PER_GAME_HOUR, QUEUE_MAX, FAM, yukiLane, setYuki } from './core/tasks.js';
+import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskLabel, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, taskMinutes, runTask, outlook, taskQueue, MS_PER_GAME_HOUR, QUEUE_MAX, FAM, yukiLane, setYuki } from './core/tasks.js';
 import { SCENES, ITEMS } from './story/prologue.js';
 import { coilActive, endCoil, coilPrefill } from './core/coil.js';
 import { medCards, runMed, SIT_MINUTES, isSitChoice } from './core/meditate.js';
@@ -60,6 +60,10 @@ const TEST_SPEEDS_KEY = 'boneash.testspeeds'; // per phone: '1' = every speed op
 let testSpeeds = store.get(TEST_SPEEDS_KEY) === '1';
 const runSpeed = () => effectiveSpeed(g, speed, testSpeeds);
 let modeTaps = 0, modeTapAt = 0;
+const PAUSE_DEATH_KEY = 'boneash.pausedeath'; // per phone: '0' = off; on by default (v0.10.0)
+let pauseDeath = store.get(PAUSE_DEATH_KEY) !== '0';
+let lastFc = null; // the last forecast the screen drew (for the pause before a forecast death)
+let deathWarned = ''; // which forecast death has paused the game already
 let speed = (() => { const v = Number(store.get(SPEED_KEY)); return SPEEDS.some(([n]) => n === v) && store.get(SPEED_KEY) !== null ? v : 1; })();
 let resumeSpeed = speed || 1; // what ▶ goes back to
 let lastTickAt = Date.now();
@@ -109,6 +113,7 @@ function startNext() {
     if (skipped.length) autosave();
     if (!q.length) return;
     const id = q[0];
+    if (isInstantTask(g, SCENES, id)) { if (runSpeed()) { lastFc = outlook(g, SCENES); checkDeathPause(g.minutes); } if (runSpeed()) finishTask(id, taskLabel(g, SCENES, id)); return; } // rest and sleep: no bar (v0.10.0); paused: waits
     const mins = taskMinutes(g, SCENES, id);
     const yl = yukiLane(g);
     running = { id, yuki: yl && yl.on ? { progress: yl.progress, len: yl.len } : null, label: taskLabel(g, SCENES, id), done: 0, ms: Math.max(400, (mins / 60) * MS_PER_GAME_HOUR), m0: g.minutes, mins };
@@ -131,6 +136,7 @@ function tick() {
     if (yb && running.yuki) yb.style.width = `${Math.min(100, ((running.yuki.progress + f * running.mins) % running.yuki.len) / running.yuki.len * 100).toFixed(1)}%`;
     const clk = document.querySelector('.status .clk');
     if (clk && tab === 'story') clk.textContent = clockLabelSec(g, running.m0 + f * running.mins); // seconds run while a bar does (v0.9.9)
+    if (!running.kind) { checkDeathPause(running.m0 + f * running.mins); if (!speed) return; }
     if (f < 1) return;
     if (running.kind === 'story') { const { idx } = running; running = null; playChoice(idx); return; }
     if (running.kind === 'med') {
@@ -140,6 +146,10 @@ function tick() {
     }
     const { id, label } = running;
     running = null;
+    finishTask(id, label);
+}
+/** A task's bar has filled (or it takes no bar): do it, then start the next one. */
+function finishTask(id, label) {
     try {
         if (taskQueue(g)[0] === id) taskQueue(g).shift();
         const r = runTask(g, SCENES, id);
@@ -149,6 +159,15 @@ function tick() {
         startNext();
         render();
     } catch (err) { taskQueue(g).length = 0; showError(err); render(); }
+}
+/** Pause before the forecast death (v0.10.0): once per forecast death, an hour of game time before it. */
+function checkDeathPause(nowMin) {
+    if (!pauseDeath || !speed || !lastFc?.death) return;
+    const key = `${g.coil?.act || 0}:${g.coil?.n || 1}:${lastFc.death.at}`;
+    if (deathWarned === key || lastFc.death.at - nowMin > 60) return;
+    deathWarned = key; resumeSpeed = speed; speed = 0; store.set(SPEED_KEY, '0');
+    lastResult = { lines: [`Paused: the forecast says James ${lastFc.death.cause === 'hunger' ? 'starves' : 'collapses'} at ${clockLabelG(g, lastFc.death.at)} on this queue. Fix the queue, or press Resume to carry on.`], fail: true };
+    render();
 }
 
 /* ---------------- task mode: every screen as cards (v0.9.5) ---------------- */
@@ -181,14 +200,15 @@ const storyCardHtml = (c) => {
     const busy = running && running.kind === 'story' && running.idx === c.index;
     const mins = c.disabled ? 0 : storyMinutes(c.index);
     const tag = c.disabled ? c.reason : c.tag;
-    return `<button class="card story${/fight/.test(c.tag) ? ' fightish' : ''}${busy ? ' busy' : ''}" data-story="${c.index}" ${c.disabled ? 'disabled aria-disabled="true"' : ''}>${md(c.label)}${tag ? `<span class="tag">${esc(tag)}</span>` : ''}<span class="len">${mins ? durLabel(mins) : 'at once'}</span></button>`;
+    const inst = c.index < 1000 && instantChoice(SCENES[g.scene]?.choices?.[c.index]);
+    return `<button class="card story${/fight/.test(c.tag) ? ' fightish' : ''}${busy ? ' busy' : ''}" data-story="${c.index}" ${c.disabled ? 'disabled aria-disabled="true"' : ''}>${md(c.label)}${tag ? `<span class="tag">${esc(tag)}</span>` : ''}<span class="len">${mins && !inst ? durLabel(mins) : mins ? `at once (${durLabel(mins)} pass)` : 'at once'}</span></button>`;
 };
-const medCardHtml = (m) => `<button class="card med" ${m.task ? `data-task="${esc(m.task)}"` : `data-med="${esc(m.id)}"`} ${m.open ? '' : 'disabled aria-disabled="true"'}>${md(m.label)}<span class="tag">${esc(m.tag)}</span><span class="len">${m.minutes ? durLabel(m.minutes) : 'at once'}${m.task ? ' · queues' : ''}</span></button>`;
+const medCardHtml = (m) => { const card = `<button class="card med" ${m.task ? `data-run="${esc(m.task)}"` : `data-med="${esc(m.id)}"`} ${m.open ? '' : 'disabled aria-disabled="true"'}>${md(m.label)}<span class="tag">${esc(m.tag)}</span><span class="len">${m.minutes ? durLabel(m.minutes) : 'at once'}</span></button>`; return m.task && m.open ? `<div class="cardwrap">${card}<button class="qadd" data-qadd="${esc(m.task)}" aria-label="Add to the end of the queue">+</button></div>` : card; };
 
 function nowRowHtml() {
     const now = running
         ? `<div class="now"><b>${speed ? 'James:' : 'Paused:'}</b> ${md(running.label)}<div class="stroke"><i id="nowbar" style="width:${(Math.min(1, running.done / running.ms) * 100).toFixed(1)}%"></i></div></div>`
-        : `<div class="now idle">${speed ? 'Idle. Tap a card; the clock runs while James does something.' : 'Paused. Tap cards to queue them; nothing runs until you resume.'}</div>`;
+        : `<div class="now idle">${speed ? 'Idle. Tap a card to do it now, or + to add it to the queue; the clock runs while James does something.' : 'Paused. Tap cards or + to queue them; nothing runs until you resume.'}</div>`;
     return `<div class="nowrow">${now}<button class="btn pause${speed ? '' : ' primary'}" data-pause="1">${speed ? '⏸ Pause' : '▶ Resume'}</button></div>`;
 }
 function resultsPaneHtml() {
@@ -217,16 +237,22 @@ function renderCardScreen() {
             const mins = c.status === 'open' ? taskMinutes(g, SCENES, c.id) : c.minutes;
             const fam = c.kind === 'work' ? ` · ${FAM[c.tier].name}${c.next != null ? ` ${c.fam}/${c.next}` : ''}` : '';
             const tag = c.status !== 'open' ? 'done for today — back tomorrow' : c.kind === 'door' ? `opens the scene${c.tag ? ` · ${c.tag}` : ''}` : (c.tag || 'no check');
-            return `<button class="card${c.kind === 'door' ? ' door' : ''}${c.check ? ` b-${c.check.band}` : ''}" data-task="${esc(c.id)}" ${c.status !== 'open' ? 'disabled' : ''}>${counts[c.id] ? `<span class="n">×${counts[c.id]}</span>` : ''}${md(c.label)}<span class="tag">${esc(tag)}</span>${c.status === 'open' ? `<span class="len">${durLabel(mins)}${fam}</span>` : ''}</button>`;
+            const inst = isInstantTask(g, SCENES, c.id);
+            return `<div class="cardwrap"><button class="card${c.kind === 'door' ? ' door' : ''}${c.check ? ` b-${c.check.band}` : ''}" data-run="${esc(c.id)}" ${c.status !== 'open' ? 'disabled' : ''}>${counts[c.id] ? `<span class="n">×${counts[c.id]}</span>` : ''}${md(c.label)}<span class="tag">${esc(tag)}</span>${c.status === 'open' ? `<span class="len">${inst ? `at once (${durLabel(mins)} pass)` : durLabel(mins)}${fam}</span>` : ''}</button>${c.status === 'open' ? `<button class="qadd" data-qadd="${esc(c.id)}" aria-label="Add to the end of the queue">+</button>` : ''}</div>`;
         };
         const yl = yukiLane(g);
         const yHtml = yl ? `<div class="yuki-lane"><div><b>Yuki:</b> ${esc(yl.label)} <span class="note">Fight ${yl.check} / DC ${yl.dc} · ${durLabel(yl.len)} · ${FAM[yl.tier].name}</span>${yl.on ? `<div class="stroke"><i id="yukibar" style="width:${Math.min(100, (yl.progress / yl.len) * 100).toFixed(1)}%"></i></div>` : ''}</div><button class="btn${yl.on ? ' primary' : ''}" data-yuki="1">${yl.on ? 'On' : 'Off'}</button></div>` : '';
-        const rows = ol.rows.map((r, k) => `<li class="${r.skip ? 'skip' : ''}"><span>${md(taskLabel(g, SCENES, r.id))}</span><time>${r.skip ? 'not possible then' : r.wait ? 'after the story' : `→ ${clockLabelG(g, r.end).replace(/^Day \d+, /, '')}`}</time><button class="x" data-unq="${k}" aria-label="Remove">✕</button></li>`).join('');
-        const out = ol.fedOut != null
-            ? `<p class="outlook warn">Fed runs out ${esc(clockLabelG(g, ol.fedOut))} on this queue. Queue some food.</p>`
-            : q.length ? `<p class="outlook">Fed holds: about ${Math.round(ol.fedEnd)} when the queue ends (${esc(clockLabelG(g, ol.end))}).</p>` : '<p class="outlook">Nothing queued. The clock waits for you.</p>';
+        lastFc = ol;
+        const rowWhen = (r) => r.skip ? 'not possible then' : r.wait ? 'after the story' : r.dead ? 'never reached' : `→ ${clockLabelG(g, r.end).replace(/^Day \d+, /, '')} · Fed ${Math.round(r.fed)} · HP ${r.death ? 0 : Math.max(0, Math.round(r.hp))}`;
+        const rows = ol.rows.map((r, k) => `<li class="${r.skip ? 'skip' : ''}${r.dead || r.death ? ' dead' : ''}"><span>${md(taskLabel(g, SCENES, r.id))}${r.death ? ` <b class="dies">${r.death === 'hunger' ? 'Starves here' : 'Collapses here'}</b>` : ''}</span><time>${rowWhen(r)}</time><span class="qbtns"><button class="x" data-qup="${k}" aria-label="Move up" ${k ? '' : 'disabled'}>↑</button><button class="x" data-qdown="${k}" aria-label="Move down" ${k < ol.rows.length - 1 ? '' : 'disabled'}>↓</button><button class="x" data-unq="${k}" aria-label="Remove">✕</button></span></li>`).join('');
+        const span = ol.end - ol.start;
+        const out = ol.death
+            ? `<p class="outlook warn">Forecast: James ${ol.death.cause === 'hunger' ? 'starves' : 'collapses'} at ${esc(clockLabelG(g, ol.death.at))} on this queue (${ol.death.cause === 'hunger' ? 'hunger' : 'injuries'}). The Coil would end there.</p>`
+            : ol.fedOut != null
+                ? `<p class="outlook warn">Fed runs out ${esc(clockLabelG(g, ol.fedOut))} on this queue. Queue some food.</p>`
+                : q.length ? `<p class="outlook">The queue takes ${durLabel(span)}. Fed holds: about ${Math.round(ol.fedEnd)} when it ends (${esc(clockLabelG(g, ol.end))}).</p>` : '<p class="outlook">Nothing queued. The clock waits for you.</p>';
         hubTop = `${yHtml}${out}`;
-        hubHtml = `${q.length ? `<h2>Queue (${q.length} / ${QUEUE_MAX})</h2><ol class="queue">${rows}</ol>` : ''}${groups.map((gr) => `<h2>${esc(gr.name)}</h2><div class="cards">${gr.cards.map(cardHtml).join('')}</div>`).join('')}`;
+        hubHtml = `${q.length ? `<h2>Queue (${q.length} / ${QUEUE_MAX})</h2><ol class="queue">${rows}</ol><div class="btns"><button class="btn" data-qclear="1">Clear queue</button></div>` : ''}${groups.map((gr) => `<h2>${esc(gr.name)}</h2><div class="cards">${gr.cards.map(cardHtml).join('')}</div>`).join('')}`;
     }
     const storyHtml = v.end
         ? '<h2>Story</h2><div class="cards"><button class="card story" data-new="1">Start a new game</button><button class="card story" data-tab-go="sheet">See how James ended up</button></div>'
@@ -490,6 +516,7 @@ ${slot(1)}${slot(2)}${slot(3)}
 <h2 data-modehead="1">Game mode</h2>
 <p class="note">${taskMode ? 'Tasks: every screen is cards on a clock, with no dice (check ÷ DC decides), familiarity, Yuki\'s lane and the Coil. 1 game hour takes 3 seconds at ×1; ×2 opens after a won tribute, ×5 after Act 1. New games start with closed meridians.' : 'Classic: the older game, with dice and no Coil. Choices happen at once.'} Only this phone remembers it.</p>
 <div class="btns"><button class="btn${taskMode ? ' primary' : ''}" data-tasks="${taskMode ? '' : '1'}">Tasks</button><button class="btn${taskMode ? '' : ' primary'}" data-tasks="${taskMode ? '1' : ''}">Classic (older, with dice, no Coil)</button></div>
+${taskMode ? `<div class="btns"><button class="btn${pauseDeath ? ' primary' : ''}" data-pausedeath="1">Pause before the forecast death: ${pauseDeath ? 'on' : 'off'}</button></div>` : ''}
 ${testSpeeds || modeTaps >= 5 ? `<div class="btns"><button class="btn${testSpeeds ? ' primary' : ''}" data-testspeeds="1">Test speeds: ${testSpeeds ? 'on' : 'off'}</button></div>` : ''}
 <h2>Start over</h2>
 <div class="btns"><button class="btn primary" data-new="1">New game</button></div>
@@ -520,12 +547,23 @@ view.addEventListener('click', (ev) => {
         lastPress = now;
     }
     try {
-        if (b.dataset.task) {
-            const q = taskQueue(g);
-            if (q.length >= QUEUE_MAX) { lastResult = { lines: [`The queue is full (${QUEUE_MAX}).`], fail: true }; render(); return; }
-            q.push(b.dataset.task); autosave(); startNext(); render();
+        if (b.dataset.run || b.dataset.qadd) { // tap = run now, ahead of the queue; + = add to the end (paused: both only queue) — v0.10.0
+            const id = b.dataset.run || b.dataset.qadd;
+            const now = b.dataset.run && speed;
+            if (now && running?.kind) stopRunning(); // a story or meditate bar: nothing of it happens
+            if (!(now ? queueRunNow(g, id) : queueAdd(g, id))) { lastResult = { lines: [`The queue is full (${QUEUE_MAX}).`], fail: true }; render(); return; }
+            if (now && running) stopRunning(); // the card that was running moves to second place and starts over later
+            autosave(); startNext(); render();
             return;
         }
+        if (b.dataset.qup != null || b.dataset.qdown != null) {
+            const k = Number(b.dataset.qup ?? b.dataset.qdown), dir = b.dataset.qup != null ? -1 : 1;
+            if ((k === 0 || k + dir === 0) && running && !running.kind) stopRunning(); // the head changes
+            queueMove(g, k, dir); autosave(); startNext(); render();
+            return;
+        }
+        if (b.dataset.qclear) { queueClear(g, !!(running && !running.kind)); autosave(); render(); return; }
+        if (b.dataset.pausedeath) { pauseDeath = !pauseDeath; store.set(PAUSE_DEATH_KEY, pauseDeath ? '1' : '0'); renderSaves(); return; }
         if (b.dataset.unq != null) {
             const k = Number(b.dataset.unq);
             if (k === 0 && running) stopRunning();
@@ -540,7 +578,7 @@ view.addEventListener('click', (ev) => {
             if (running) stopRunning(); // a story step stops a running task bar: nothing of it happens; the queue waits
             const idx = Number(b.dataset.story);
             const mins = storyMinutes(idx);
-            if (!mins) { playChoice(idx); return; }
+            if (!mins || instantChoice(SCENES[g.scene]?.choices?.[idx])) { playChoice(idx); return; } // rest and sleep: no bar (v0.10.0)
             const ch = SCENES[g.scene]?.choices?.[idx];
             startBar('story', idx, ch ? String(val(ch.text)) : 'Story', mins); render();
             return;
