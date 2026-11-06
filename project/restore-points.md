@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.6 | (this push) | Docs only; the game is the same as 0.11.5. |
+| 0.11.7 | (this push) | Tests and tools only; the game is the same as 0.11.5. |
+| 0.11.6 | `6e2cf70` | Docs only; the game is the same as 0.11.5. |
 | 0.11.5 | `6de8d8e` | The safety push. Same save state as 0.9.6 plus the optional `runPart` (an older version ignores it). Before it: the branch `fallback/2026-11-06-before-pivot` (= 0.11.4), never deleted. |
 | 0.11.4 | `ddc2a44` | Forms 3b. Same save state as 0.9.6 (the new fight fields live only inside a fight). |
 | 0.11.3 | `5b15815` | Tools and rules only; the game is the same as 0.11.2. |

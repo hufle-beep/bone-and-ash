@@ -2,7 +2,7 @@
 # One check for everything (v0.8.6; tasks test since v0.9.0). Run from the repo root:
 #   bash tools/check.sh          the full check (2,000 bot games each; the bots split across cores, v0.11.1). Before every push.
 #   bash tools/check.sh quick    the same checks with 200 bot games each (about 15 s), for use while building; no sanity check.
-# The full check ends with tools/sanity.mjs (v0.11.3): the mechanics invariants and drift against tools/baseline.json.
+# The full check ends with tools/browser.py (v0.11.7: real taps in headless Chromium) and tools/sanity.mjs (v0.11.3): the mechanics invariants and drift against tools/baseline.json.
 # Stops at the first failure and says which check failed.
 set -u
 cd "$(dirname "$0")/.."
@@ -16,11 +16,14 @@ run "consistency (offline files, versions)" node tools/consistency.mjs
 run "engine numbers" node tests/rules.test.mjs
 run "engine's own formula tests" node tests/engine.test.mjs
 run "old saves (saves/)" node tests/saves.test.mjs
+run "data integrity (ids, markers)" node tests/data.test.mjs
+run "content lint (log only, never fails)" node tools/lint.mjs
 for p in fallout blackroot heart return; do run "Act 1 part: $p" node tests/part.test.mjs "$p"; done
 ST=$(mktemp -d)
 run "tasks ($GAMES bot games each way$Q)" node tests/tasks.test.mjs --games "$GAMES" --stats-out "$ST/tasks.json"
 run "story ($GAMES full games$Q)" node tests/story.test.mjs --games "$GAMES" --stats-out "$ST/story.json"
 # v0.11.3 (hard rule 2): the mechanics sanity check — invariants and drift against tools/baseline.json (full run only)
+[ "$GAMES" = 2000 ] && run "browser (real taps, both modes)" python3 tools/browser.py
 [ "$GAMES" = 2000 ] && run "sanity (invariants, drift ±5)" node tools/sanity.mjs --tasks "$ST/tasks.json" --story "$ST/story.json"
 rm -rf "$ST"
 [ "$fail" = 0 ] && { [ "$GAMES" = 2000 ] && echo "All checks passed." || echo "All quick checks passed (not enough for a push: run bash tools/check.sh)."; }
