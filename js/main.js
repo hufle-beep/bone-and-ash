@@ -81,6 +81,7 @@ function tapRun() { if (!speed) { speed = resumeSpeed || 1; oneShot = true; last
 let lastTickAt = Date.now();
 let running = null; // { id, label, done, ms, m0, mins } — done = ms of bar filled (at ×1) — the head of the queue while its bar fills (v0.11.5: its share is saved as g.runPart, so a reopen continues it)
 let lastRunSave = 0; // v0.11.5: autosave every 15 s while a bar runs
+let lastWritten = null; // v0.11.8: the autosave text this tab last wrote or loaded (a closing tab never overwrites a newer save from another tab)
 let ticker = null;
 let panel = 'cards'; // the phone's switch under the story: 'cards' | 'results' (wide screens show both)
 let taskResults = []; // newest first: { title, sum, lines, fail } — the last 8 tasks (all of it is in the Journal too)
@@ -355,6 +356,7 @@ function autosave() {
     let s;
     try { s = serialize(g); } catch (err) { showError(err.message); return; } // never write a broken state
     writeKey(AUTO, s);
+    lastWritten = s;
     rolling(s);
     lastRunSave = Date.now();
     if (g.scene !== prevScene && RISKY_SCENES[g.scene]) backupBefore(RISKY_SCENES[g.scene]);
@@ -363,6 +365,7 @@ function autosave() {
 
 function load() {
     const raw = store.get(AUTO);
+    lastWritten = raw;
     if (!raw) { g = freshGame(); prevScene = g.scene; return; }
     try { g = checkScene(deserialize(raw)); prevScene = g.scene; } catch (err) { g = null; recovery = { raw, err }; }
 }
@@ -708,8 +711,10 @@ function note(t) { const n = document.getElementById('saveNote'); if (n) n.textC
 
 load();
 // v0.11.5: save when the app is hidden or closed (Android may kill a backgrounded page)
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') autosave(); });
-window.addEventListener('pagehide', () => autosave());
+// v0.11.8: only if the stored save is still the one this tab last wrote or loaded (another tab may have saved since)
+const closeSave = () => { if (store.get(AUTO) === lastWritten) autosave(); };
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') closeSave(); });
+window.addEventListener('pagehide', closeSave);
 startNext();
 render();
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {

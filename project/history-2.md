@@ -4,6 +4,7 @@ Started 2026-11-06 (v0.10.4), when `history.md` passed 45 KB. Newer than `histor
 
 ## Older decisions (2026-11-06, v0.10.0 and later)
 
+- **v0.11.5: the safety push (go 15:47; built in v0.11.5):** 1 the branch `fallback/2026-11-06-before-pivot` at `ddc2a44` (never deleted); 2 `js/core/forms.js` in `sw.js` and `tools/consistency.mjs` in `check.sh` (every game file in FILES, nothing extra; VERSION = the handover, the changelog's top row, the newest restore point); 3 autosave on `visibilitychange` (hidden) and `pagehide`, and every 15 s while a queue card's bar runs (not while paused); the running card's share is saved as the optional `g.runPart` `{ id, at, frac }` and a reopen continues it when the same card is at the head at the same game minute (old saves have no field; the format number is unchanged); 4 the version check (in 2); 5 `tests/engine.test.mjs`, the engine's `formulas.test.mjs` copied unchanged but for the import path. Browser check: a 2 h meridian card at 41% before a reload, 41% after; resumed, it finished and `runPart` cleared; no page errors. Full check: all passed, 0 drift.
 - **v0.11.4: forms 3b (owner 14:57 "what is forms 3b" → "yes"; options with bot numbers; owner 15:05 "go with your recommendation plus the spear now, because I will pivot the direction of the project after. keep the roadmap."; 15:10 "every bone weapon is convergence. at least the creation of it. Hit/damage check can be GU." → pick 15:11 "a" (the spear as measured, no forming check); go 15:11; mid-build stop (the Act 1 rewind coverage), pick 15:20 "a"; baseline and commit 15:26 "commit"; built in v0.11.4):**
   - **The owner's next step:** a pivot in the project's direction after this push; **the roadmap is kept as it is** until then.
   - **Where players are (bots, 1,000 games):** Convergence Use at the tribute T1 L5–L10 (dart, knife, bracer, spikes, hedge); at the end of Act 1 mostly T2, some T3 (dagger, buckler, sword, shield, lance, plates); volley, storm and armour only in the Long Forest.
@@ -71,6 +72,15 @@ Started 2026-11-06 (v0.10.4), when `history.md` passed 45 KB. Newer than `histor
   - Test fix: the v0.9.7 test "starving to 0 ends the Coil" now builds up a starving hour first (it relied on the old 1 HP per step).
 
 ## Older version notes (v0.10.0 and later)
+
+## v0.11.5 — the safety push (the game plays the same)
+
+- **sw.js:** `js/core/forms.js` in FILES; VERSION `bone-ash-0.11.5`.
+- **main.js:** `autosave()` writes `g.runPart` (`{ id, at: running.m0, frac }`, 4 decimals) while a queue card runs and deletes it otherwise; `startNext()` gives a restored card `done = frac × ms` when its id and game minute match; `tick()` autosaves every 15 s while a queue bar runs at speed; listeners for `visibilitychange` (hidden) and `pagehide`.
+- **tools/consistency.mjs** (new): FILES vs `git ls-files` (js, css, art images, icons, index, manifest), both ways; VERSION vs the handover's **Version:**, the changelog's top row and restore points' top row.
+- **tests/engine.test.mjs** (new): Rules Engine C's `formulas.test.mjs` (engine 0.1.223), import path only changed.
+- **check.sh:** runs both after the syntax step.
+- **Fallback branch:** `fallback/2026-11-06-before-pivot` at `ddc2a44`.
 
 ## v0.11.4 — forms 3b (Incremental Mode)
 
