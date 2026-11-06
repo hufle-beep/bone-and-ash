@@ -12,7 +12,9 @@ GAMES=2000; Q=''
 run() { local name="$1"; shift; printf '%-42s' "$name"; local out; if out=$("$@" 2>&1); then echo "ok  ${out##*$'\n'}"; else echo "FAILED"; echo "$out" | tail -20; fail=1; exit 1; fi; }
 for f in $(git ls-files --cached --others --exclude-standard '*.js' '*.mjs'); do node --check "$f" >/dev/null 2>&1 || { echo "Syntax error in $f"; node --check "$f"; exit 1; }; done
 printf '%-42s%s\n' "syntax" "ok  all .js and .mjs files"
+run "consistency (offline files, versions)" node tools/consistency.mjs
 run "engine numbers" node tests/rules.test.mjs
+run "engine's own formula tests" node tests/engine.test.mjs
 run "old saves (saves/)" node tests/saves.test.mjs
 for p in fallout blackroot heart return; do run "Act 1 part: $p" node tests/part.test.mjs "$p"; done
 ST=$(mktemp -d)

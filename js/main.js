@@ -79,7 +79,8 @@ function endOneShot() { if (oneShot) { oneShot = false; speed = 0; } }
 /** Tap while paused: run this one card now, then pause again. */
 function tapRun() { if (!speed) { speed = resumeSpeed || 1; oneShot = true; lastTickAt = Date.now(); } }
 let lastTickAt = Date.now();
-let running = null; // { id, label, done, ms, m0, mins } — done = ms of bar filled (at ×1) — the head of the queue while its bar fills (not saved: a reload restarts it)
+let running = null; // { id, label, done, ms, m0, mins } — done = ms of bar filled (at ×1) — the head of the queue while its bar fills (v0.11.5: its share is saved as g.runPart, so a reopen continues it)
+let lastRunSave = 0; // v0.11.5: autosave every 15 s while a bar runs
 let ticker = null;
 let panel = 'cards'; // the phone's switch under the story: 'cards' | 'results' (wide screens show both)
 let taskResults = []; // newest first: { title, sum, lines, fail } — the last 8 tasks (all of it is in the Journal too)
@@ -130,6 +131,8 @@ function startNext() {
     const mins = taskMinutes(g, SCENES, id);
     const yl = yukiLane(g);
     running = { id, yuki: yl && yl.on ? { progress: yl.progress, len: yl.len } : null, label: taskLabel(g, SCENES, id), done: 0, ms: Math.max(400, (mins / 60) * MS_PER_GAME_HOUR), m0: g.minutes, mins };
+    const rp = g.runPart; // v0.11.5: the same card at the same game minute continues where the saved bar stood
+    if (rp && rp.id === id && rp.at === g.minutes && rp.frac > 0 && rp.frac < 1) running.done = rp.frac * running.ms;
     lastTickAt = Date.now();
     if (!ticker) ticker = setInterval(tick, 100);
 }
@@ -142,6 +145,7 @@ function tick() {
     if (running.kind) { if (!taskMode || g.combat || g.scene !== running.scene) { running = null; endOneShot(); return; } } // a story or meditate bar
     else if (!onTaskHub()) { running = null; return; }
     running.done += dt * runSpeed();
+    if (!running.kind && runSpeed() && now - lastRunSave >= 15e3) autosave(); // v0.11.5
     const f = Math.min(1, running.done / running.ms);
     const bar = document.getElementById('nowbar');
     if (bar) bar.style.width = `${(f * 100).toFixed(1)}%`;
@@ -345,10 +349,14 @@ function backupBefore(label) {
 
 function autosave() {
     if (!g) return;
+    // v0.11.5: the running card's share of its bar (queue cards only; story and meditate bars are short and start over)
+    if (running && !running.kind && running.ms > 0) g.runPart = { id: running.id, at: running.m0, frac: Math.round(Math.min(1, running.done / running.ms) * 1e4) / 1e4 };
+    else delete g.runPart;
     let s;
     try { s = serialize(g); } catch (err) { showError(err.message); return; } // never write a broken state
     writeKey(AUTO, s);
     rolling(s);
+    lastRunSave = Date.now();
     if (g.scene !== prevScene && RISKY_SCENES[g.scene]) backupBefore(RISKY_SCENES[g.scene]);
     prevScene = g.scene;
 }
@@ -699,6 +707,9 @@ function confirmNew() {
 function note(t) { const n = document.getElementById('saveNote'); if (n) n.textContent = t; }
 
 load();
+// v0.11.5: save when the app is hidden or closed (Android may kill a backgrounded page)
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') autosave(); });
+window.addEventListener('pagehide', () => autosave());
 startNext();
 render();
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
