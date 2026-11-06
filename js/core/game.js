@@ -5,6 +5,7 @@
  * open collateral Qi. New for a game without a narrator: every check is value + d6 against the DC.
  * Pure — no DOM. The UI (main.js) and the tests drive it.
  */
+import { setFormsActive, actionOpen, actionLabel, fragileKnife } from './forms.js';
 import {
     checkFromTierLevel, skillXpCost, maxHp, qiPoolMax, qiRegenPercent, cycleTimeMinutes,
     realmBonus, realmStepLabel, condensationSatGain, CONDENSE_SIT_COST, FAIL_XP_FRACTION, realmDr, realmShockHpBonus, dampenMultiplier,
@@ -257,6 +258,7 @@ export function awardYukiFightXp(g, band = 'standard') {
 let noDice = false;
 export const setNoDice = (v) => { noDice = !!v; };
 export const isNoDice = () => noDice;
+setFormsActive(() => noDice); // v0.10.4: the forms ladder applies in Incremental Mode only
 export const NO_DICE_DC_SHIFT = 2;
 let noDiceTune = {};
 /** The story layer hands over its per-fight no-dice tuning (js/story/nodice_tune.js). */
@@ -566,7 +568,8 @@ function stepNoDice(g, actionId, targetIdx) {
     const c = g.combat;
     c.adapt = c.adapt || {};
     const lines = [];
-    const act = COMBAT_ACTIONS[actionId];
+    if (!actionOpen(g, actionId)) actionId = 'guard'; // v0.10.4: a form he can't sing yet
+    const act = { ...COMBAT_ACTIONS[actionId], label: actionLabel(g, actionId, COMBAT_ACTIONS[actionId].label) };
     const living = c.enemies.filter((e) => e.hp > 0);
     const target = living[Math.min(targetIdx, living.length - 1)];
     let guard = false;
@@ -575,11 +578,12 @@ function stepNoDice(g, actionId, targetIdx) {
         lines.push(`Not enough Qi for ${act.label} — you fall back on guarding.`);
         guard = true;
     } else {
-        if (act.keeps === 'blade' && !c.bladeFormed) { c.bladeFormed = true; lines.push('White wraithbone slides out of your palm and sets into a blade.'); }
+        if (act.keeps === 'blade' && !c.bladeFormed) { c.bladeFormed = true; lines.push(`White wraithbone slides out of your palm and sets: ${act.label.toLowerCase()}.`); }
         if (act.guard) {
             guard = true;
             lines.push('You give ground, watching for the opening.');
         } else {
+            if (act.keeps === 'blade' && fragileKnife(g)) { c.bladeFormed = false; lines.push('The knife shatters on the swing. You will have to sing another.'); } // v0.10.4: breaks every swing below T1 L8
             const T = boneTier(g);
             const targets = act.id === 'dart' && T >= 4 ? living.slice(0, T >= 5 ? living.length : 2) : [target];
             const key = actionId;

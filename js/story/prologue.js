@@ -12,6 +12,7 @@ import { forestScale, villageScale, grow, NEW_ITEMS } from './common.js';
 import './power.js';
 import './stomp_prologue.js';
 import './stomp_act1.js';
+import { STORY_FORMS, hasForm } from '../core/forms.js';
 import { yukiForms, itemNames, itemCap, isNoDice, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, ensureBars, MAX_REALM } from '../core/game.js';
 import { WILDS, nightNext } from './wilds.js';
 import { ASHFALL, hubOf, nextEvening } from './ashfall.js';
@@ -965,6 +966,31 @@ SCENES.lf_hub.choices.push({
     const exit = SCENES.lf_exit.choices[0];
     const was = exit.do;
     exit.do = (g) => { const out = was(g); if (isNoDice()) { for (const id of LF_STOCK) g.inventory[id] = Math.max(g.inventory[id] || 0, itemCap(id)); out.push('The hammerspace is full: the Long Forest\'s pantry comes with you.'); } return out; };
+}
+
+/* ---------- v0.10.4: Bonesinger forms — Incremental Mode hides a choice until James can sing its form; four lines reworded ---------- */
+{
+    for (const sc of Object.values(SCENES)) for (const c of sc.choices || []) {
+        if (typeof c.text !== 'string') continue;
+        const hit = STORY_FORMS.find(([re]) => re.test(c.text));
+        if (!hit) continue;
+        const was = c.show, form = hit[1];
+        const f = (g) => hasForm(g, form) && (was ? was(g) : true);
+        if (was?.dailyKey) f.dailyKey = was.dailyKey;
+        c.form = form; c.show = f;
+    }
+    const inc = (a, b) => (g) => (isNoDice() ? a : (typeof b === 'function' ? b(g) : b));
+    const reword = (scene, re, text, out) => {
+        const c = SCENES[scene].choices.find((x) => typeof x.text === 'string' && re.test(x.text));
+        if (!c) throw new Error(`forms: no choice ${re} in ${scene}`);
+        c.text = inc(text, c.text);
+        if (out) { const d = c.do; c.do = (g, r) => { const lines = d(g, r) || []; return isNoDice() ? lines.map((l) => (l === out[0] ? out[1] : l)) : lines; }; }
+    };
+    reword('night_attack', /^Bone wall between you/, 'A hedge of bone spikes between you and them, then run for the water.');
+    SCENES.night_attack_forced.text = inc('The hedge comes out knee-high and full of gaps. The jackals step through it with an air of professional courtesy. Running is off the table.', SCENES.night_attack_forced.text);
+    reword('rt_ford', /bridge of bone/, 'Sing stepping-stones of bone from stone to stone.', ['A white bridge, ribbed like a spine. Mei Lin crosses it like a woman walking into a temple.', 'White stepping-stones, ribbed like vertebrae, rise between the black ones. Mei Lin crosses them like a woman walking into a temple.']);
+    reword('rt_ambush', /wall of bone/, 'A slab of bone between you and them, then down to the river.');
+    reword('ring_chambers', /wall of bone/, 'Seal the fourth ring\'s doorway with a slab of bone and leave them to it.', ['A white wall, floor to ceiling. The chewing goes on behind it, disappointed.', 'A white slab, man-high, jammed into the doorway. The chewing goes on behind it, disappointed.']);
 }
 
 export const START_SCENE = 'arrival';

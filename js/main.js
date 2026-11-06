@@ -1,4 +1,5 @@
 /** Bone and Ash — UI. Renders the story, combat, sheet, hammerspace, journal and saves. */
+import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel } from './core/forms.js';
 import {
     newGame, ensureBars, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, skillCheck, xpToNext, clockLabel, clockLabelG, clockLabelSec, realmName, yukiForm,
     startCombat, combatStep, combatFlee, COMBAT_ACTIONS, setNoDice, noDiceDc, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg,
@@ -293,7 +294,8 @@ ${nowRowHtml()}${hubTop}
 /** A fight in task mode: the picture and the round on top; the actions as cards below. */
 function renderCombatCards() {
     const c = g.combat;
-    const acts = Object.entries(COMBAT_ACTIONS).map(([id, a]) => {
+    const acts = Object.entries(COMBAT_ACTIONS).filter(([id]) => actionOpen(g, id)).map(([id, a0]) => {
+        const a = { ...a0, label: actionLabel(g, id, a0.label) }; // v0.10.4: only the forms James can sing, named for his best one
         const cost = a.keeps === 'blade' && c.bladeFormed ? 0 : actionCost(g, a);
         const d = actionDmg(g, a);
         const off = cost > g.james.qi;
@@ -454,7 +456,8 @@ ${v.end ? `<ul class="choices"><li><button class="choice" data-new="1">Start a n
 
 function renderCombat() {
     const c = g.combat;
-    const acts = Object.entries(COMBAT_ACTIONS).map(([id, a]) => {
+    const acts = Object.entries(COMBAT_ACTIONS).filter(([id]) => actionOpen(g, id)).map(([id, a0]) => {
+        const a = { ...a0, label: actionLabel(g, id, a0.label) }; // v0.10.4: only the forms James can sing, named for his best one
         const cost = a.keeps === 'blade' && c.bladeFormed ? 0 : actionCost(g, a);
         const d = actionDmg(g, a);
         const off = cost > g.james.qi;
@@ -494,6 +497,7 @@ function renderSheet() {
 ${skillRow('GU', j.gu, 'General Use: anything he has no skill for, and his defence')}
 ${skillRow('Convergence Use', cu, 'darts, needles, the wraithbone blade')}
 <p class="note">${esc(BONESINGER_TIERS[Math.min(cu.tier, BONESINGER_TIERS.length - 1)] || '')}</p>
+${taskMode ? Object.entries(FORM_LINES).map(([k, l]) => { const s = lineState(g, k); return `<div class="row"><span>${esc(l.label)}</span><span>${s.now ? esc(s.now.name) : '—'}${s.next ? ` <span class="note">(next: ${esc(s.next.name)} at ${rankLabel(s.next.at)})</span>` : ''}</span></div>`; }).join('') : ''}
 ${taskMode && g.coil ? `<h2>The Coil</h2><p class="note">${g.coil.act === 1 ? 'Act 1, ' : ''}Coil ${g.coil.n}. ${coilActive(g) ? `Bite the tail to wake at ${g.coil.act === 1 ? 'Day 8\'s dawn' : 'the first dawn'}: James keeps his realm, skills, familiarity and what he knows; the hammerspace and the world start over.${g.james.colSealed ? ' His collaterals are sealed, so the rewind also unwinds Foundation: Mortal Vessel again, Saturation 0.' : ''}` : 'The Coil turns during the prologue (until the tribute is settled) and during Act 1 (until Shen Qiu is settled).'}</p>${coilActive(g) ? '<div class="btns"><button class="btn" data-bite="1">Bite the tail</button></div><p class="note" id="saveNote"></p>' : ''}` : ''}
 <h2>Pillars</h2>
 <div class="row"><span>Ouroboros Axiom</span><span>DR 1</span><span class="sub">The body as a closed garden: what comes in is filtered and returned clean.</span></div>
@@ -530,8 +534,8 @@ ${slot(1)}${slot(2)}${slot(3)}
 <h2>Move a save to another device</h2>
 <div class="btns"><button class="btn" data-export="1">Download save file</button><label class="btn">Load save file<input type="file" accept="application/json,.json" data-import="1" hidden></label></div>
 <h2 data-modehead="1">Game mode</h2>
-<p class="note">${taskMode ? 'Tasks: every screen is cards on a clock, with no dice (check ÷ DC decides), familiarity, Yuki\'s lane and the Coil. 1 game hour takes 3 seconds at ×1; ×2 opens after a won tribute, ×5 after Act 1. New games start with closed meridians.' : 'Classic: the older game, with dice and no Coil. Choices happen at once.'} Only this phone remembers it.</p>
-<div class="btns"><button class="btn${taskMode ? ' primary' : ''}" data-tasks="${taskMode ? '' : '1'}">Tasks</button><button class="btn${taskMode ? '' : ' primary'}" data-tasks="${taskMode ? '1' : ''}">Classic (older, with dice, no Coil)</button></div>
+<p class="note">${taskMode ? 'Incremental Mode: every screen is cards on a clock, with no dice (check ÷ DC decides), familiarity, Yuki\'s lane and the Coil. 1 game hour takes 3 seconds at ×1; ×2 opens after a won tribute, ×5 after Act 1. New games start with closed meridians.' : 'Story Mode: the older game, with dice and no Coil. Choices happen at once.'} Only this phone remembers it.</p>
+<div class="btns"><button class="btn${taskMode ? ' primary' : ''}" data-tasks="${taskMode ? '' : '1'}">Incremental Mode</button><button class="btn${taskMode ? '' : ' primary'}" data-tasks="${taskMode ? '1' : ''}">Story Mode (older, with dice, no Coil)</button></div>
 ${taskMode ? `<div class="btns"><button class="btn${pauseDeath ? ' primary' : ''}" data-pausedeath="1">Pause before the forecast death: ${pauseDeath ? 'on' : 'off'}</button></div>` : ''}
 ${testSpeeds || modeTaps >= 5 ? `<div class="btns"><button class="btn${testSpeeds ? ' primary' : ''}" data-testspeeds="1">Test speeds: ${testSpeeds ? 'on' : 'off'}</button></div>` : ''}
 <h2>Start over</h2>

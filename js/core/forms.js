@@ -1,0 +1,89 @@
+/**
+ * Bonesinger forms (v0.10.4, owner 2026-11-06): what James can sing, by Convergence Use rank (rank = 10·(T−1) + L;
+ * T1 L1 = 1 … T10 L10 = 100). Four lines that grow side by side. Incremental Mode only (no dice); Story Mode
+ * (the older game) keeps every form open as before. What he cannot form yet is hidden in fights and story choices.
+ */
+let on = () => false;
+/** game.js wires this to isNoDice (Incremental Mode). */
+export function setFormsActive(fn) { on = fn; }
+export const formsActive = () => on();
+
+export const R = (tier, level) => 10 * (tier - 1) + level;
+export const FORM_LINES = {
+    ranged: { label: 'Ranged', forms: [
+        { id: 'needle', at: R(1, 1), name: 'needle' },
+        { id: 'dart', at: R(1, 5), name: 'dart' },
+        { id: 'lance', at: R(3, 1), name: 'thrown lance' },
+        { id: 'volley', at: R(4, 1), name: 'volley (several pieces)' },
+        { id: 'storm', at: R(5, 1), name: 'storm (many pieces)' },
+    ] },
+    melee: { label: 'Melee', forms: [
+        { id: 'fragile_knife', at: R(1, 1), name: 'fragile knife (breaks every swing)' },
+        { id: 'knife', at: R(1, 8), name: 'knife' },
+        { id: 'dagger', at: R(2, 1), name: 'dagger' },
+        { id: 'sword', at: R(2, 5), name: 'sword' },
+    ] },
+    structures: { label: 'Defensive structures', forms: [
+        { id: 'spikes', at: R(1, 3), name: 'spikes (a pit, a few stakes)' },
+        { id: 'hedge', at: R(1, 8), name: 'stake ring, spike hedge' },
+        { id: 'stones', at: R(2, 5), name: 'stepping-stones' },
+        { id: 'slab', at: R(3, 1), name: 'man-high slab' },
+        { id: 'walls', at: R(4, 1), name: 'walls, bridges, shelters' },
+        { id: 'forts', at: R(5, 1), name: 'fortifications' },
+    ] },
+    defence: { label: 'Personal defence', forms: [
+        { id: 'bracer', at: R(1, 5), name: 'bracer' },
+        { id: 'buckler', at: R(2, 1), name: 'buckler' },
+        { id: 'shield', at: R(2, 5), name: 'shield' },
+        { id: 'plates', at: R(3, 1), name: 'armour plates' },
+        { id: 'armour', at: R(5, 1), name: 'full wraithbone armour' },
+    ] },
+};
+const AT = Object.fromEntries(Object.values(FORM_LINES).flatMap((l) => l.forms.map((f) => [f.id, f.at])));
+export const formRankOf = (id) => AT[id];
+
+export const cuRank = (g) => { const s = g.james.skills['Convergence Use']; return R(s.tier || 1, s.level || 1); };
+/** Can James sing form `id` now? Story Mode: always. */
+export const hasForm = (g, id) => !on() || cuRank(g) >= (AT[id] ?? 0);
+/** The best form of a line he has (null if none yet), and the next one. Ignores the mode (for the James tab). */
+export function lineState(g, line) {
+    const r = cuRank(g);
+    const fs = FORM_LINES[line].forms;
+    const now = [...fs].reverse().find((f) => r >= f.at) || null;
+    const next = fs.find((f) => r < f.at) || null;
+    return { now, next };
+}
+const tl = (n) => `T${Math.floor((n - 1) / 10) + 1} L${((n - 1) % 10) + 1}`;
+export const rankLabel = tl;
+
+/* ---- fights: which actions show, and what they are called (Incremental Mode) ---- */
+const best = (g, line) => lineState(g, line).now?.id;
+export function actionOpen(g, id) {
+    if (!on()) return true;
+    if (id === 'dart') return hasForm(g, 'dart');
+    return true;
+}
+/** Below T1 L8 the knife breaks after every swing (owner's pick a: "if he dies, he dies"). */
+export const fragileKnife = (g) => on() && cuRank(g) < AT.knife;
+export function actionLabel(g, id, base) {
+    if (!on()) return base;
+    if (id === 'dart') return { storm: 'Bone storm', volley: 'Bone volley', lance: 'Thrown bone lance' }[best(g, 'ranged')] || 'Bone darts';
+    if (id === 'blade') return { sword: 'Bone sword', dagger: 'Bone dagger', knife: 'Bone knife' }[best(g, 'melee')] || 'Fragile bone knife';
+    if (id === 'guard') return { armour: 'Armour up, give ground', plates: 'Plates up, give ground', shield: 'Shield up, give ground', buckler: 'Buckler up, give ground', bracer: 'Bracer up, give ground' }[best(g, 'defence')] || base;
+    return base;
+}
+
+/* ---- story choices that need a form (Incremental Mode hides them until James has it) ---- */
+export const STORY_FORMS = [
+    [/^A bone dart, thrown from cover/, 'dart'],
+    [/^Glassback hare\. A dart from cover/, 'dart'],
+    [/a dart on the rise/, 'dart'],
+    [/^Darts at /, 'dart'],
+    [/^A dart, from a hundred paces/, 'dart'],
+    [/ring of bone stakes/, 'spikes'],
+    [/bed of bone spikes/, 'spikes'],
+    [/^Bone wall between you and them/, 'hedge'],
+    [/^Spearheads for the hunters/, 'knife'],
+    [/bridge of bone from stone to stone/, 'stones'],
+    [/wall of bone/, 'slab'],
+];

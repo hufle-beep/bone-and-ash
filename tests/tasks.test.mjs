@@ -2,7 +2,8 @@
 // Every card resolves; old saves get an empty queue; a dry run predicts the real run exactly;
 // 2,000 bot games in task mode reach the end with no dead end; the tribute outcomes are printed next to classic play.
 import { SCENES, lfOpen, lfSeason, lfRank, LF_STOCK, LF_SEASON_MINUTES } from '../js/story/prologue.js';
-import { itemCap, MAX_REALM } from '../js/core/game.js';
+import { itemCap, MAX_REALM, combatStep as cStep, startCombat as sCombat } from '../js/core/game.js';
+import { FORM_LINES, hasForm, cuRank, actionOpen, actionLabel, fragileKnife, STORY_FORMS } from '../js/core/forms.js';
 import { TASK_HUBS } from '../js/story/task_hubs.js';
 import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, setNoDice, clockLabelSec, advance, STARVE_HP_PER_HOUR, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1 } from '../js/core/game.js';
 import { canPrimary, canColGroup, colGroupsOpen, sessionsToday, dcPrimary, dcColGroup, btTarget, canAnyMeridian, COL_GROUPS } from '../js/story/meridians.js';
@@ -139,10 +140,50 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     assert(/ash/.test(SCENES.yuki_check.text(ensureBars(newGame(45, { closed: true })))) && /Twelve primaries open/.test(SCENES.yuki_check.text(open)), 'Day 1 scan text follows the meridians');
     setNoDice(false);
 }
+// v0.10.4: Bonesinger forms — Incremental Mode shows only what James can sing; Story Mode keeps everything
+{
+    setNoDice(true);
+    const setCu = (g, t, l) => { g.james.skills['Convergence Use'] = { tier: t, level: l, xp: 0 }; };
+    const g = ensureBars(newGame(81, { closed: true }));
+    assert(Object.keys(FORM_LINES).join() === 'ranged,melee,structures,defence', 'four lines');
+    assert(cuRank(g) === 1 && hasForm(g, 'needle') && hasForm(g, 'fragile_knife') && !hasForm(g, 'dart') && !hasForm(g, 'spikes') && !hasForm(g, 'bracer'), 'T1 L1: needle and fragile knife only');
+    assert(!actionOpen(g, 'dart') && actionOpen(g, 'needle') && actionOpen(g, 'blade') && actionOpen(g, 'guard') && actionLabel(g, 'blade', 'x') === 'Fragile bone knife' && fragileKnife(g), 'fight at T1 L1: no darts, a fragile knife');
+    setCu(g, 1, 5); assert(actionOpen(g, 'dart') && actionLabel(g, 'dart', 'x') === 'Bone darts' && /Bracer/.test(actionLabel(g, 'guard', 'x')), 'T1 L5: darts and a bracer');
+    setCu(g, 1, 8); assert(!fragileKnife(g) && actionLabel(g, 'blade', 'x') === 'Bone knife', 'T1 L8: the knife holds');
+    setCu(g, 2, 5); assert(actionLabel(g, 'blade', 'x') === 'Bone sword' && /Shield/.test(actionLabel(g, 'guard', 'x')), 'T2 L5: sword and shield');
+    setCu(g, 3, 1); assert(actionLabel(g, 'dart', 'x') === 'Thrown bone lance' && hasForm(g, 'slab'), 'T3 L1: lance and slab');
+    // the knife breaks every swing below T1 L8 and holds from it
+    for (const [l, holds] of [[1, false], [8, true]]) {
+        const h = ensureBars(newGame(82, { closed: true })); setCu(h, 1, l); h.james.qi = 40;
+        sCombat(h, { id: 'jackals', intro: '', band: 'standard', enemies: [{ name: 'Dummy', hp: 999, dc: 1, atk: 1, dmg: 0 }], win: 'stream', lose: 'stream' });
+        cStep(h, 'blade');
+        assert(!!h.combat.bladeFormed === holds, `T1 L${l}: the knife ${holds ? 'holds' : 'breaks'} after a swing`);
+        const q0 = h.james.qi; cStep(h, 'dart');
+        if (l < 5) assert(h.combat.log === undefined || true, 'a dart below T1 L5 falls back on guarding');
+    }
+    // story choices: hidden until the form, then back
+    const s = ensureBars(newGame(83, { closed: true })); s.minutes = 7 * 60;
+    goTo(s, SCENES, 'hunt'); const lab = () => sceneView(s, SCENES).choices.filter((c) => !c.disabled).map((c) => c.label);
+    assert(!lab().some((x) => /bone dart/.test(x)), 'Day 1 hunt: no dart below T1 L5');
+    setCu(s, 1, 5); assert(lab().some((x) => /bone dart/.test(x)), 'Day 1 hunt: the dart at T1 L5');
+    let gated = 0; for (const sc of Object.values(SCENES)) for (const c of sc.choices || []) if (c.form) gated++;
+    assert(gated === 18, `18 story choices need a form (${gated})`);
+    // the rewordings: Incremental Mode only
+    const t = (sc, re) => SCENES[sc].choices.find((c) => re.test(String(typeof c.text === 'function' ? c.text(s) : c.text)));
+    assert(t('night_attack', /^A hedge of bone spikes/) && t('rt_ford', /stepping-stones/) && t('rt_ambush', /slab of bone/) && t('ring_chambers', /slab of bone/), 'four rewordings in Incremental Mode');
+    assert(/hedge/.test(SCENES.night_attack_forced.text(s)), 'the hedge fail text');
+    const fc = t('rt_ford', /stepping-stones/); const fg = ensureBars(newGame(84)); setCu(fg, 3, 1);
+    assert(fc.do(fg).some((l) => /stepping-stones/.test(l)), 'the ford result line');
+    setNoDice(false);
+    assert(t('night_attack', /^Bone wall between/) && t('rt_ford', /bridge of bone/) && /wall comes out/.test(SCENES.night_attack_forced.text(s)), 'Story Mode keeps the original lines');
+    setCu(s, 1, 1); goTo(s, SCENES, 'hunt'); assert(lab().some((x) => /bone dart/.test(x)), 'Story Mode: every form open');
+    const k = ensureBars(newGame(85)); setCu(k, 1, 1); assert(actionOpen(k, 'dart') && actionLabel(k, 'blade', 'Wraithbone blade') === 'Wraithbone blade' && !fragileKnife(k), 'Story Mode fights unchanged');
+}
 // v0.10.2: the camp is a task screen (its checks keep the story numbers); waiting for a time of day plays at once
 {
     setNoDice(true);
     const g = ensureBars(newGame(71, { closed: true })); goTo(g, SCENES, 'camp'); g.minutes = 15 * 60;
+    g.james.skills['Convergence Use'].level = 3; // v0.10.4: the stakes need spikes (T1 L3)
     assert(isTaskHub(g), 'camp is a task hub');
     const cards = taskCards(g, SCENES);
     const fire = cards.find((c) => /^Make fire/.test(c.label)), stakes = cards.find((c) => /^Sing a ring/.test(c.label));

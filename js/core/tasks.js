@@ -12,6 +12,7 @@
  * Yuki's lane: her job on the hub runs on game time while James works (no dice; her Fight check vs the job's DC).
  * The story checks and fights keep the d6 until 3c.
  */
+import { hasForm } from './forms.js';
 import { choose, goTo, choiceOpen, choiceTag, gives, setTimeless, defaultMinutes, movesPlace } from './story.js';
 import { advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck } from './game.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
@@ -155,7 +156,7 @@ export function taskCards(g, scenes) {
             if (cfg.notJames && cfg.notJames(c)) return;
             let status = 'open';
             if (doneToday) status = 'tomorrow';
-            else if (c.show && !c.show(g)) { if (c.show.dailyKey) status = 'tomorrow'; else return; }
+            else if (c.show && !c.show(g)) { if (c.show.dailyKey && (!c.form || hasForm(g, c.form))) status = 'tomorrow'; else return; } // v0.10.4: a form he can't sing yet stays hidden
             else if (!choiceOpen(g, c)) return;
             push(`${menu}:${i}`, door ? 'door' : 'work', m.label, c, (entry.time || 0) + (c.time || 0), status);
         });
