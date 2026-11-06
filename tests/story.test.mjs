@@ -1,6 +1,6 @@
 // Run: node tests/story.test.mjs — story graph integrity + 2,000 random playthroughs (no crash, no dead end, always reaches the end)
 import { SCENES, START_SCENE } from '../js/story/prologue.js';
-import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, itemCap } from '../js/core/game.js';
+import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, itemCap, setNoDice } from '../js/core/game.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
 
 let pass = 0, fail = 0;
@@ -96,6 +96,16 @@ for (let run = 0; run < 200; run++) {
     walkFrom(g, run % 2 ? 'lf_enter' : 'arrival', new Set(['fo_start']), 1500);
     for (const id of COMMON) assert(g.inventory[id] <= itemCap(id) || !g.inventory[id], `cap holds for ${id}`);
 }
+// the Coil (task mode only, v0.9.4): a lost tribute, the Coil screen, the first dawn again, back into Day 1
+setNoDice(true);
+for (let run = 0; run < 40; run++) {
+    const g = ensureBars(newGame(run + 22222)); g.scene = 'collectors_lost'; g.flags.ending = 'lost'; g.flags.long = true;
+    if (run % 2) { walkFrom(g, 'collectors_lost', new Set(['stream', 'fo_start']), 400); continue; }
+    SCENES.collectors_lost.enter(g); seen.add('collectors_lost');
+    choose(g, SCENES, SCENES.collectors_lost.choices.findIndex((c) => c.to === 'coil_end')); // half the runs bite the tail
+    walkFrom(g, 'coil_end', new Set(['stream', 'fo_start']), 400);
+}
+setNoDice(false);
 const unreached = Object.keys(SCENES).filter((k) => !seen.has(k));
 assert(unreached.length === 0, `every scene reachable (unreached: ${unreached.join(', ')})`);
 console.log('fights', fights);

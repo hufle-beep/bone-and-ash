@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.9.3 | (this push) | No dice in task mode, fights retuned. Same save state as 0.9.2. |
+| 0.9.4 | (this push) | The Coil (3c-1). Save state 4; 0.9.3 and older report a state-4 save as "newer version" on the recovery screen (nothing is wiped). Download the save before rolling back. |
+| 0.9.3 | `4dec016` | No dice in task mode, fights retuned. Same save state as 0.9.2. |
 | 0.9.2 | `00f4836` | Step 3b on the task cards. Save state 3; 0.9.1 and older report a state-3 save as "newer version" on the recovery screen (nothing is wiped). |
 | 0.9.1 | `05349d0` | Speed drop-down. Same save state as 0.9.0. |
 | 0.9.0 | `b3d0e27` | Task cards and the queue (preview switch, off by default). Save state 2; 0.8.6 can't read state 2 ("newer version" on the recovery screen, nothing is wiped). Download the save before rolling back. |

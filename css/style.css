@@ -159,6 +159,9 @@ button { font: inherit; color: inherit; }
 .tasks { padding: 0.4rem 1rem 0.6rem; }
 .tasks h2 { font-family: var(--display); font-weight: 600; font-size: 1.1rem; margin: 1rem 0.15rem 0.45rem; padding-bottom: 0.25rem; background: var(--brush) left bottom / 4rem 5px no-repeat; }
 .now { margin: 0.9rem 1.15rem 0; font-size: 0.9rem; }
+.nowrow { display: flex; align-items: flex-end; gap: 0.6rem; margin: 0.9rem 1.15rem 0; }
+.nowrow .now { flex: 1; margin: 0; }
+.nowrow .pause { flex: none; white-space: nowrap; }
 .now b { font-weight: 600; }
 .now .stroke { height: 8px; }
 .now .stroke i { background: var(--ink); transition: none; }

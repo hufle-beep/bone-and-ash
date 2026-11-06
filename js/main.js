@@ -6,6 +6,7 @@ import {
 import { sceneView, choose, goTo } from './core/story.js';
 import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskLabel, taskMinutes, runTask, outlook, taskQueue, MS_PER_GAME_HOUR, QUEUE_MAX, FAM, yukiLane, setYuki } from './core/tasks.js';
 import { SCENES, ITEMS } from './story/prologue.js';
+import { coilActive, endCoil, coilPrefill } from './core/coil.js';
 import { meridianRow } from './story/meridians.js';
 import { realmShockHpBonus } from './core/formulas.js';
 import * as ART from './art/art.js';
@@ -41,7 +42,7 @@ const BAK = { '5m': 5 * 60e3, '30m': 30 * 60e3, '2h': 120 * 60e3 };
 const BAK_KEY = (k) => `boneash.bak.${k}`;
 const BAK_META = 'boneash.bak.meta';
 const BROKEN = 'boneash.broken';
-const RISKY_SCENES = { tribute: 'the tribute', rt_elder: 'Shen Qiu' };
+const RISKY_SCENES = { tribute: 'the tribute', rt_elder: 'Shen Qiu', coil_end: 'the Coil' };
 let recovery = null; // { raw, err } while the autosave can't be loaded
 let lastTick = Date.now();
 let storageWarned = false;
@@ -55,6 +56,7 @@ setNoDice(taskMode); // no dice anywhere in task mode (v0.9.3)
 const SPEED_KEY = 'boneash.speed'; // per phone: 0 = paused, 1, 2, 5, 10
 const SPEEDS = [[0, 'Pause'], [1, '×1'], [2, '×2'], [5, '×5'], [10, '×10']]; // all open while testing; the gate comes with the Coil (3c)
 let speed = (() => { const v = Number(store.get(SPEED_KEY)); return SPEEDS.some(([n]) => n === v) && store.get(SPEED_KEY) !== null ? v : 1; })();
+let resumeSpeed = speed || 1; // what ▶ goes back to
 let lastTickAt = Date.now();
 let running = null; // { id, label, done, ms, m0, mins } — done = ms of bar filled (at ×1) — the head of the queue while its bar fills (not saved: a reload restarts it)
 let ticker = null;
@@ -93,6 +95,7 @@ const onTaskHub = () => taskMode && g && !recovery && isTaskHub(g);
 
 function startNext() {
     if (running || !onTaskHub()) return;
+    if (coilPrefill(g)) autosave(); // "same days again": this hub and day get last Coil's cards
     const q = taskQueue(g);
     const skipped = [];
     while (q.length && !taskOpen(g, SCENES, q[0])) skipped.push(taskLabel(g, SCENES, q.shift()));
@@ -158,7 +161,8 @@ function renderTaskHub() {
         : q.length ? `<p class="outlook">Fed holds: about ${Math.round(ol.fedEnd)} when the queue ends (${esc(clockLabelG(g, ol.end))}).</p>` : '<p class="outlook">Nothing queued. The clock waits for you.</p>';
     const now = running
         ? `<div class="now"><b>${speed ? 'James:' : 'Paused:'}</b> ${md(running.label)}<div class="stroke"><i id="nowbar" style="width:${(Math.min(1, running.done / running.ms) * 100).toFixed(1)}%"></i></div></div>`
-        : '<div class="now idle">Idle. Tap a card to queue it; the clock runs while a task does.</div>';
+        : `<div class="now idle">${speed ? 'Idle. Tap a card to queue it; the clock runs while a task does.' : 'Paused. Tap cards to queue them; nothing runs until you resume.'}</div>`;
+    const nowRow = `<div class="nowrow">${now}<button class="btn pause${speed ? '' : ' primary'}" data-pause="1">${speed ? '⏸ Pause' : '▶ Resume'}</button></div>`;
     const stops = v.choices.filter((c) => c.index >= 1000 || !isTaskChoice(SCENES, g.scene, c.index))
         .map((c) => `<li><button class="choice${/fight/.test(c.tag) ? ' fightish' : ''}" data-choice="${c.index}" ${c.disabled ? 'disabled aria-disabled="true"' : ''}>${md(c.label)}${c.tag || c.reason ? `<span class="tag">${esc(c.disabled ? c.reason : c.tag)}</span>` : ''}</button></li>`).join('');
     view.innerHTML = `<section>
@@ -167,7 +171,7 @@ function renderTaskHub() {
 ${statusHtml()}${resultHtml()}
 <div class="prose">${paras(v.text)}</div>
 ${stops ? `<ul class="choices">${stops}</ul>` : ''}
-${now}${yHtml}${out}
+${nowRow}${yHtml}${out}
 <div class="panel-switch" role="tablist"><button role="tab" data-panel="cards" aria-selected="${panel === 'cards'}">Cards</button><button role="tab" data-panel="results" aria-selected="${panel === 'results'}">Results${unseen ? ` <span class="badge">${unseen}</span>` : ''}</button></div>
 <div class="split">
 <div class="pane tasks${panel === 'cards' ? ' on' : ''}">
@@ -359,6 +363,7 @@ function renderSheet() {
 ${skillRow('GU', j.gu, 'General Use: anything he has no skill for, and his defence')}
 ${skillRow('Convergence Use', cu, 'darts, needles, the wraithbone blade')}
 <p class="note">${esc(BONESINGER_TIERS[Math.min(cu.tier, BONESINGER_TIERS.length - 1)] || '')}</p>
+${taskMode && g.coil ? `<h2>The Coil</h2><p class="note">Coil ${g.coil.n}. ${coilActive(g) ? 'Bite the tail to wake at the first dawn: James keeps his realm, skills, familiarity and what he knows; the hammerspace and the world start over.' : 'The Coil only turns during the prologue for now.'}</p>${coilActive(g) ? '<div class="btns"><button class="btn" data-bite="1">Bite the tail</button></div><p class="note" id="saveNote"></p>' : ''}` : ''}
 <h2>Pillars</h2>
 <div class="row"><span>Ouroboros Axiom</span><span>DR 1</span><span class="sub">The body as a closed garden: what comes in is filtered and returned clean.</span></div>
 <div class="row"><span>Parallel Cognition Engine</span><span>9 threads</span><span class="sub">One of them is always on watch, if he asks.</span></div>
@@ -432,6 +437,17 @@ view.addEventListener('click', (ev) => {
             taskQueue(g).splice(k, 1); autosave(); startNext(); render();
             return;
         }
+        if (b.dataset.pause) {
+            if (speed) { resumeSpeed = speed; speed = 0; } else speed = resumeSpeed || 1;
+            store.set(SPEED_KEY, String(speed)); lastTickAt = Date.now(); render(); return;
+        }
+        if (b.dataset.bite) {
+            if (Date.now() - biteArmed > 4000) { biteArmed = Date.now(); note('Tap Bite the tail again to end this Coil. Everything in the hammerspace is lost; what James learned is not.'); return; }
+            biteArmed = 0; stopRunning();
+            endCoil(g, 'choice', g.scene);
+            lastResult = null; goTo(g, SCENES, 'coil_end'); autosave(); setTab('story');
+            return;
+        }
         if (b.dataset.panel) { panel = b.dataset.panel; if (panel === 'results') unseen = 0; render(); return; }
         if (b.dataset.yuki) { const yl = yukiLane(g); setYuki(g, !yl.on); autosave(); render(); return; }
         if (b.dataset.tasks) {
@@ -481,7 +497,7 @@ view.addEventListener('click', (ev) => {
 });
 view.addEventListener('change', async (ev) => {
     const sel = ev.target.closest('select[data-speed]');
-    if (sel) { speed = Number(sel.value); store.set(SPEED_KEY, String(speed)); lastTickAt = Date.now(); render(); return; }
+    if (sel) { speed = Number(sel.value); if (speed) resumeSpeed = speed; store.set(SPEED_KEY, String(speed)); lastTickAt = Date.now(); render(); return; }
     const inp = ev.target.closest('input[data-import]');
     if (!inp || !inp.files?.[0]) return;
     let next;
@@ -492,6 +508,7 @@ view.addEventListener('change', async (ev) => {
 document.getElementById('tabs').addEventListener('click', (ev) => { const b = ev.target.closest('button[data-tab]'); if (b) setTab(b.dataset.tab); });
 
 let newArmed = 0;
+let biteArmed = 0;
 function confirmNew() {
     if (Date.now() - newArmed < 4000) return true;
     newArmed = Date.now();

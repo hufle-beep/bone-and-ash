@@ -110,7 +110,9 @@ function go(g, scenes, to) {
     g.scene = id;
     const s = scenes[id];
     if (s.place) g.location = asText(s.place, g);
-    const lines = s.enter ? (s.enter(g) || []) : [];
+    const skip = !!g.coil?.skipEnter; // a Coil rewind or "Not yet": the scene was entered already, don't run its enter twice
+    if (skip) g.coil.skipEnter = false;
+    const lines = s.enter && !skip ? (s.enter(g) || []) : [];
     ensureBars(g);
     return lines;
 }

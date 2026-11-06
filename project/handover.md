@@ -1,12 +1,18 @@
 # Bone and Ash — handover (read this first in a new chat)
 
-**Saved:** 2026-11-06 (Europe/Budapest). **Version:** 0.9.3 (`sw.js` VERSION `bone-ash-0.9.3`): no dice anywhere in task mode (story checks and fights, retuned), on top of step 3b. Everything behind the "Tasks (preview)" switch. Prologue + Act 1, about 390 scenes. **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
+**Saved:** 2026-11-06 (Europe/Budapest). **Version:** 0.9.4 (`sw.js` VERSION `bone-ash-0.9.4`): step 3c-1, the Coil (task mode, prologue), plus a ⏸ / ▶ button on the task screen, on top of no dice anywhere in task mode (v0.9.3) and step 3b. Everything behind the "Tasks (preview)" switch. Prologue + Act 1, about 390 scenes. **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
 Built in the SillyTavern chat as a spin-off. That chat stays for SillyTavern; this game continues in its own chats.
 
 **Rules:** `CLAUDE.md` (short) and `project/working-agreement.md` (full) — the change sequence is a HARD RULE. **Other docs:** `project/roadmap.md` (what's next), `project/design.md` (the approved hybrid design: Selene-style tasks and the Coil), `project/changelog.md`, `project/restore-points.md`. All mirrored to the claude.ai project "ash and bone".
 **Reference repos (the owner's):** `hufle-beep/Long-patience` (Selene: rules, docs, Android wrapper and workflows to copy), `hufle-beep/Shared-ST` (private; Rules Engine C in `st/rules-engine-c/`, presets in `st/rules-engine-c/lib/presets.js`, `docs/STANDING_LATEST.md`).
 
 ## Decided in chat (2026-11-06)
+
+- **Step 3c (01:22–01:43, owner: "ok with your recommendations", go 01:34; built in v0.9.4 as 3c-1):** three pushes: **3c-1 the Coil** (done), **3c-2 balance** (measure Coils 1–3 with bots, then pick an HP lever with numbers: risky cards ×1.5 or sleep heals 50%; tune the collectors and the bluff DC toward ~30 / 55 / 80% won on Coils 1 / 2 / 3; numbers to the owner first), **3c-3** (Tasks on by default with classic kept as a switch until step 5; the speed gate ×2 after the first won tribute, ×5 after Act 1, ×10 removed, plus a hidden "test speeds" toggle in Saves). The Coil turns in the **prologue only** for now; Act 1 gets its Coil in step 5. A collapse (HP 0 during tasks) ends the Coil (no stand-in). The serpent stays its own small push after 3c.
+- **Pause (owner 01:31 "I don't see the pause button"; pick A):** a ⏸ Pause / ▶ Resume button next to James's bar on every task screen (the speed box stays under the clock).
+- **Knowledge flags (pick B, 01:37):** James keeps `lore1`, `lore_realms`, `lore_tree`, `saw_lights` (plus Yuki's flags, `long`, `longforest`, `lf_instant`); `roots`, `bone_sung`, `gills`, `fungus` lock one-time actions, so they reset with the world but the Coil remembers them (shown on the Coil screen; to become Insights in step 4).
+- **Far hunt dead end (found by the bots, pick A, go 01:43):** ash-deer with under 2 Qi left no way out; the deer now also have "Let them go. Not today." (1 h, back to Ashfall), in both modes.
+- **Bot numbers after 3c-1 (2,000 games, random bots that rewind a lost tribute up to Coil 3):** tribute won Coil 1 16% / Coil 2 60% / Coil 3 67%; lost 82% / 15% / 4%; 93 collapses. Input for 3c-2.
 
 - **Step 3 is split into three pushes (option 1), behind a preview switch** that becomes the normal mode at the end of 3c: **3a the task loop** (done in v0.9.0), **3b getting better** (familiarity, Intuitive Aptitude, Yuki's lane, drills), **3c the Coil** (reset B, Coil screen, Bite the tail, accept-or-rewind at the tribute, breakthrough from 95%, bots tune the tribute ~30% → 80%). Then the serpent (`rt_serpent`) as its own small push, numbers to the owner first.
 - **3a picks:** 1a daily limits stay ("back tomorrow"); 2a Day 1 (`stream`) and Day 4 (`village`) stay story until rewinds exist; 3a HP 0 during a task = stand-in collapse until the Coil.
@@ -106,6 +112,7 @@ In `CLAUDE.md` and `project/working-agreement.md` (adopted 2026-11-05). The chan
 | `sw.js`, `manifest.webmanifest`, `icons/` | Offline install. Game files: network first, cache when offline. Google Fonts: cached on first use. |
 | `js/core/tasks.js`, `js/story/task_hubs.js` | Task cards and the queue (v0.9.0): which hubs, card ids, `runTask`, dry runs, the outlook. |
 | `js/story/nodice_tune.js` | No-dice fight tuning per encounter (v0.9.3). |
+| `js/core/coil.js`, `js/story/coil_scenes.js` | The Coil (v0.9.4): end, rewind (reset B), the head start, "same days again", the Coil screen and the first dawn again. |
 | `tests/tasks.test.mjs` | Task mode: 2,000 bot games each way, outlook = reality, collapse, migration, no dice on work cards, familiarity grows, every offered card played, Yuki's lane, no die anywhere in task mode, classic still rolls. |
 | `tests/rules.test.mjs` | The engine numbers. 14 checks. |
 | `tests/story.test.mjs` | Every link valid, every scene reachable, 2,000 random playthroughs, per-fight win rates. |
@@ -275,6 +282,19 @@ The bible and the contract between the four part files are at the top of `js/sto
 - Romance with Yuki only in her human form (adult); fade to black. The code still says she bonded with James when he was six (34 years); **decided 2026-11-05: born together and bonded from birth** (fix pending, roadmap step 7).
 - Tests: 240 extra walks over the last night; combat round cap in the random runs raised to 400 (a rare long stalemate vs the Guardian at True Core).
 
+## v0.9.4 — step 3c-1, the Coil (task mode, prologue only)
+
+- **State 4** (`g.coil`, migration 3 → 4): `{ n, snap, wake, start, peak, played, replay, why, back, known, skipEnter }`. `snap` is the rewind point: a new game's Day 1 dawn (`newGame` → `makeCoil`), or an old save as it was loaded (log emptied, queue empty). `start` is what James was at the Coil's start (the screen compares). `peak` is each relationship's highest friendship and affection this Coil (kept up by `bumpRel`).
+- **A Coil ends** (`endCoil(g, why, back)`): `collapse` (HP 0 during a task: `collapse()` in tasks.js now goes to `coil_end`; the old dusk stand-in is gone), `tribute` (a "Bite the tail" choice on `collectors_lost`), `choice` (James tab → The Coil → Bite the tail, tap twice). `coilActive`: task mode, prologue (no tribute outcome yet, or the lost one), not in a fight.
+- **Rewind** (`rewind(g, { same })`, reset B): back to `snap`. Kept: all of `g.james` but HP, Qi, Fed (from the snapshot) and injuries; all of `g.yuki` but HP and Qi; familiarity, adaptation, Yuki's lane on/off; `KEEP_FLAGS`; stats; the journal (last 150) with a "Coil N begins" line; the dice state. Reset: hammerspace, every other flag, the queue. Relationships other than Yuki: `max(snapshot, round(25% of the peak))`, friendship and affection apart; Yuki's kept.
+- **Coil screen** (`coil_end`): why it ended, this Coil's gains (realm, GU, Convergence Use, Yuki's Fight, cards that reached a new familiarity tier), what James remembers (`known`: the knowledge flags and `REMEMBER`). Choices: Bite the tail (→ `coil_dawn`); Bite the tail and run the same days again (shown if cards ran; every task screen re-queues what the last Coil ran there on that day, once: `recordCard` / `coilPrefill`); Accept it (after a lost tribute: → `epilogue`, the lost ending); Not yet (after the James-tab bite: back where you were). `coil_dawn` → the snapshot's scene (`wake`). `skipEnter` makes `go()` skip a scene's `enter` once, so a scene is never entered twice by the Coil.
+- **Replays:** from Coil 2, `arrival` offers "You remember this. Skip to the stream." (30 min; sets `scanned`, `qi_toxic`, `bone_ok`, `sat_once`).
+- **Breakthrough from 95%** in task mode (`breakAt()`; classic 100%); the choice shows the real Saturation. Condensation already stops at 100%.
+- **Backup** before the Coil screen (`RISKY_SCENES.coil_end`).
+- **Pause button:** ⏸ Pause / ▶ Resume next to James's bar (`data-pause`; goes back to the last speed, `resumeSpeed`).
+- **Far hunt:** deer get "Let them go. Not today." (the old dead end at under 2 Qi).
+- **Tests:** tasks test checks rewind (kept, reset, head start, Yuki, bars), Not yet, Accept, same days again, 95%, state 3 → 4, classic shows no Coil choices; the bots rewind a lost tribute up to Coil 3 and print the tribute per Coil. The story test walks the Coil scenes in no-dice mode.
+
 ## v0.9.3 — no dice anywhere in task mode
 
 - **Switch:** `setNoDice(on)` in game.js; `main.js` sets it with the Tasks switch, the tests set it themselves. Classic mode (off) is untouched (the classic story test gives the same count as v0.8.6).
@@ -308,7 +328,7 @@ All in `js/core/tasks.js` (pure) and `js/story/task_hubs.js`; only with the swit
 - **Engine** (`js/core/tasks.js`, pure): a card id is `<scene>:<choice index>`. `runTask` calls the same `choose()` as a tap (the door to the menu, then the choice, then back to the hub), so rolls, XP, loot, time and Fed are unchanged; only the moment moves to the end of the bar. `taskMinutes` and `outlook` dry-run on a copy (same seed, so the prediction is exact). `daily()` in common.js now carries `dailyKey` so cards can say "back tomorrow".
 - **Clock:** 1 game hour = 3 s (`MS_PER_GAME_HOUR`); runs only while a task runs. Queue up to 30 (`QUEUE_MAX`), saved in `g.tasks.queue`; the running bar is not saved (a reload restarts the head task, nothing applied twice). Tapping a story stop cancels the running bar (nothing of it happens); the queue waits and resumes on the hub. A queued card that isn't possible when its turn comes is skipped with a note.
 - **Outlook line:** "Fed runs out <time> on this queue" or "Fed holds: about N when the queue ends".
-- **HP 0 during a task** (stand-in until the Coil): the queue is cleared, the clock goes to 19:00 if earlier, HP 1, and James comes to at the hub's evening stop (`camp` or `nextEvening`); the night and morning then run as usual. Bots never reached it in 2,000 games (0 collapses); a unit test forces it.
+- **HP 0 during a task** (stand-in until the Coil; replaced in v0.9.4 by the Coil screen): the queue is cleared, the clock goes to 19:00 if earlier, HP 1, and James comes to at the hub's evening stop (`camp` or `nextEvening`); the night and morning then run as usual. Bots never reached it in 2,000 games (0 collapses); a unit test forces it.
 - **Save state 2:** migration 1 → 2 adds `tasks: { queue: [] }`.
 - **Test:** `tests/tasks.test.mjs` (in `tools/check.sh`): hubs and menus exist, migration, the collapse, 2,000 bot games in task mode and 2,000 classic, the outlook matches the real run every time, all 28 cards played. Tribute outcomes (random bots): tasks bluff 24.9 / fought 33.1 / lost 23.3 / paid 18.6%; classic bluff 27.3 / fought 23.5 / lost 29.9 / paid 19.2%. Same rules; the task bot simply trains more than a random walker.
 

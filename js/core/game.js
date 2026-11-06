@@ -16,13 +16,13 @@ export const START_MINUTES = 6 * 60 + 40; // Day 1, 06:40
 export const SATIETY_PER_HOUR = 3;
 export const HUNGRY_AT = 30;
 export const XP_BANDS = { routine: 0, standard: 30, challenging: 60, major: 120 };
-export const SAVE_VERSION = 3; // 2 (v0.9.0): the task queue; 3 (v0.9.2): familiarity, adaptation, Yuki's lane
+export const SAVE_VERSION = 4; // 2 (v0.9.0): the task queue; 3 (v0.9.2): familiarity, adaptation, Yuki's lane; 4 (v0.9.4): the Coil
 
 const node = (tier = 1, level = 1) => ({ tier, level, xp: 0 });
 
 /** A fresh game: James (40, fresh doctorate), Yuki, an empty hammerspace. */
 export function newGame(seed = Date.now()) {
-    return {
+    const g = {
         v: SAVE_VERSION,
         seed: seed >>> 0,
         rng: seed >>> 0,
@@ -66,6 +66,29 @@ export function newGame(seed = Date.now()) {
         combat: null,
         tasks: { queue: [], fam: {}, adapt: {}, yuki: { on: false, progress: 0 } },
     };
+    g.coil = makeCoil(g);
+    return g;
+}
+
+/* ---------------- the Coil (v0.9.4, step 3c-1) ---------------- */
+
+/** A copy of the state to rewind to: the act's first dawn (a new game), or an old save as it was loaded. */
+export function coilSnap(g) {
+    const s = JSON.parse(JSON.stringify({ ...g, coil: undefined }));
+    delete s.coil;
+    s.log = []; s.combat = null; s.lastWin = null;
+    if (s.tasks) s.tasks.queue = [];
+    return s;
+}
+/** What James is at the start of a Coil (the Coil screen compares against it). */
+export function coilStart(g) {
+    const tl = (n) => [n.tier, n.level];
+    return { realm: g.james.realm, gu: tl(g.james.gu), cu: tl(g.james.skills['Convergence Use']), yf: tl(g.yuki.fight), fam: { ...(g.tasks?.fam || {}) } };
+}
+export function makeCoil(g) {
+    const peak = {};
+    for (const [who, r] of Object.entries(g.rel || {})) peak[who] = { f: r.f, a: r.a };
+    return { n: 1, snap: coilSnap(g), start: coilStart(g), peak, played: {}, replay: null, why: null, back: null, known: [], skipEnter: false };
 }
 
 /* ---------------- numbers ---------------- */
@@ -330,7 +353,9 @@ export function condense(g) {
  * Yuki is root-kin and rises with James. No herbs, no pills, no tribulation (the Ouroboros Axiom).
  */
 export const MAX_REALM = 14;
-export const canBreakThrough = (g) => g.james.saturation >= 100 && g.james.realm < MAX_REALM;
+/** Engine rule L in task mode (v0.9.4): from 95% Saturation (anything over 100% is lost; nothing carries over). Classic: 100%. */
+export const breakAt = () => (noDice ? 95 : 100);
+export const canBreakThrough = (g) => g.james.saturation >= breakAt() && g.james.realm < MAX_REALM;
 export function breakthrough(g) {
     if (!canBreakThrough(g)) return { ok: false };
     const before = { hp: jamesHpMax(g), qi: jamesQiMax(g), yhp: yukiHpMax(g), yqi: yukiQiMax(g) };
@@ -421,6 +446,7 @@ export function bumpRel(g, who, f = 0, a = 0) {
     const r = g.rel[who] || (g.rel[who] = { f: 0, a: 0 });
     r.f = Math.max(-150, Math.min(150, r.f + f));
     r.a = Math.max(-150, Math.min(150, r.a + a));
+    if (g.coil) { const p = g.coil.peak[who] || (g.coil.peak[who] = { f: r.f, a: r.a }); p.f = Math.max(p.f, r.f); p.a = Math.max(p.a, r.a); } // the Coil's head start (v0.9.4)
     return r;
 }
 
@@ -727,6 +753,7 @@ export class SaveError extends Error {
 const MIGRATIONS = {
     1: (g) => { g.tasks = { queue: [] }; }, // v0.9.0: the task queue (empty)
     2: (g) => { Object.assign(g.tasks, { fam: {}, adapt: {}, yuki: { on: false, progress: 0 } }); }, // v0.9.2: familiarity 0 everywhere
+    3: (g) => { g.coil = makeCoil(g); }, // v0.9.4: Coil 1; the rewind point is the save as loaded
 };
 
 export function migrate(g) {

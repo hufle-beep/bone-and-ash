@@ -16,6 +16,7 @@ import { choose, goTo, choiceOpen, choiceTag, gives } from './story.js';
 import { advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck } from './game.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
 import { daily } from '../story/common.js';
+import { endCoil, recordCard } from './coil.js';
 
 export const MS_PER_GAME_HOUR = 3000; // 1 game hour = 3 s at ×1 (design.md)
 export const QUEUE_MAX = 30;
@@ -128,15 +129,12 @@ export function taskCards(g, scenes) {
 export const taskOpen = (g, scenes, id) => taskCards(g, scenes).some((c) => c.id === id && c.status === 'open');
 export const taskLabel = (g, scenes, id) => { const p = parse(id); const c = scenes[p.scene]?.choices?.[p.index]; return c ? asText(c.text, g) : id; };
 
-/** HP 0 during a task (stand-in until the Coil, step 3c): the queue stops, James comes to at dusk with 1 HP. */
+/** HP 0 during a task (v0.9.4): the Coil ends. The queue is gone; the Coil screen decides what happens next. */
 function collapse(g, scenes, hubId) {
-    const { hh, mm } = clockParts(g.minutes);
-    if (hh < 19) advance(g, (19 - hh) * 60 - mm);
-    g.james.hp = 1;
     st(g).queue.length = 0;
-    const dest = TASK_HUBS[hubId].evening;
-    return ['Your knees make the decision for you. You fold up where you stand, and come to at dusk with Yuki sitting on your chest, unimpressed. 1 HP. The queue is gone.',
-        ...goTo(g, scenes, typeof dest === 'function' ? dest(g) : dest)];
+    endCoil(g, 'collapse');
+    return ['Your knees make the decision for you. You fold up where you stand, and the last thing you see is Yuki\'s face, very close, very unimpressed. The queue is gone.',
+        ...goTo(g, scenes, 'coil_end')];
 }
 
 function learn(g, scenes, hubId, card, id, gain) {
@@ -256,6 +254,7 @@ export function runTask(g, scenes, id) {
     const m0 = g.minutes;
     const lines = [];
     let fail = false;
+    recordCard(g, hubId, m0, id);
     if (card.kind === 'work') {
         const before = g.stats.wins;
         const checks = g.stats.checks;

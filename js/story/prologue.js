@@ -23,6 +23,7 @@ import { RETURN, BREAK_HUBS as B4 } from './act1_return.js';
 import { LONGFOREST, BREAK_HUBS as B0 } from './longforest.js';
 import { MERIDIANS, canAnyMeridian } from './meridians.js';
 import { installYukiPath } from './yuki_path.js';
+import { installCoil } from './coil_scenes.js';
 
 const once = (flag) => (g) => !g.flags[flag];
 const set = (...flags) => (g) => { for (const f of flags) g.flags[f] = true; return []; };
@@ -887,7 +888,7 @@ ${seen
 };
 for (const id of ['stream', 'wilds', 'camp', 'night', 'village', 'ashfall', 'supper', ...B0, ...B1, ...B2, ...B3, ...B4]) {
     SCENES[id].choices.unshift({
-        text: (g) => `Break through to ${realmName(g.james.realm + 1)}. (Saturation 100%.)`,
+        text: (g) => `Break through to ${realmName(g.james.realm + 1)}. (Saturation ${g.james.saturation}%.)`,
         show: canBreakThrough,
         do: (g) => { g.flags.bt_return = g.scene; return []; },
         to: (g) => (g.james.realm === 6 && (g.james.extra8 || 0) < 8 ? 'ns_warn' : 'breakthrough'),
@@ -905,6 +906,8 @@ for (const id of ['stream', 'wilds', 'camp', 'night', 'village', 'ashfall', 'sup
         to: (g) => (SCENES.yuki_form ? 'yuki_form' : g.scene),
     });
 }
+
+installCoil(SCENES);
 
 export const START_SCENE = 'arrival';
 export const SCENE_COUNT = Object.keys(SCENES).length;
