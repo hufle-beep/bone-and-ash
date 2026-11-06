@@ -1,12 +1,20 @@
 # Bone and Ash — handover (read this first in a new chat)
 
-**Saved:** 2026-11-06 (Europe/Budapest). **Version:** 0.9.6 (`sw.js` VERSION `bone-ash-0.9.6`): meridians closed at the start of a task-mode game and Act 1's Coil (push 2 of 4), on top of every screen as cards in task mode (v0.9.5: (story choices with bars, every choice takes time, the Meditate card everywhere), the Coil (v0.9.4) and no dice anywhere in task mode (v0.9.3) and step 3b. Everything behind the "Tasks (preview)" switch. Prologue + Act 1, about 390 scenes. **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
+**Saved:** 2026-11-06 (Europe/Budapest). **Version:** 0.9.7 (`sw.js` VERSION `bone-ash-0.9.7`): severe difficulty in task mode (push 3 of 4: HP 0 or a lost beast fight ends the Coil, beasts +0.5, tribute +1), on top of meridians closed at the start and Act 1's Coil (v0.9.6), every screen as cards (v0.9.5: story choices with bars, every choice takes time, the Meditate card everywhere), the Coil (v0.9.4) and no dice anywhere in task mode (v0.9.3) and step 3b. Everything behind the "Tasks (preview)" switch. Prologue + Act 1, about 390 scenes. **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
 Built in the SillyTavern chat as a spin-off. That chat stays for SillyTavern; this game continues in its own chats.
 
 **Rules:** `CLAUDE.md` (short) and `project/working-agreement.md` (full) — the change sequence is a HARD RULE. **Other docs:** `project/roadmap.md` (what's next), `project/design.md` (the approved hybrid design: Selene-style tasks and the Coil), `project/changelog.md`, `project/restore-points.md`. All mirrored to the claude.ai project "ash and bone".
 **Reference repos (the owner's):** `hufle-beep/Long-patience` (Selene: rules, docs, Android wrapper and workflows to copy), `hufle-beep/Shared-ST` (private; Rules Engine C in `st/rules-engine-c/`, presets in `st/rules-engine-c/lib/presets.js`, `docs/STANDING_LATEST.md`).
 
 ## Decided in chat (2026-11-06)
+
+- **Push 3 of 4: severe difficulty (owner "procceed" 08:40 → proposal with numbers; picks 08:58 "1 ok, 2b, 3a, 4b, 5b, 6 ok"; go 09:02; built in v0.9.7):**
+  - **1 People** (their losses keep the written branches): Gao, the collectors, Pock-Face's arson, Ya's brawl, `rt_brawl`, Shen Qiu (`elder`), the Sect watcher (and the Long Forest's `lf_rogue`). Every other fight is a beast.
+  - **2b** the rule in the prologue **and Act 1** now: HP 0 outside a fight (starving, task injuries, story HP losses) or a lost beast fight ends the Coil. No "Accept" after a death.
+  - **3a** beasts +0.5 DC and attack (prologue and Act 1, task mode). **4b** tribute +1: bluff DC 6 → 7, hairpin DC 4 → 5, collectors fight +1 (task mode). **5b** the tribute target counts "won" as not lost (fight, bluff or hairpin). **6** a lost beast fight has its own Coil-screen text ("Teeth, then the ground…"); starving and injuries keep the collapse text.
+  - **Measured before (simulation, random bots rewinding up to 4 times):** the rule alone: dead before Mei Lin 51 / 17 / 8%, tribute won/paid/lost 33/14/53, 61/27/12, 69/27/4; beasts +0.5: 79 / 33 / 15%; +1: 90 / 50 / 19%; Fed ×1.5: 80 / 53 / 34%; Fed ×1.5 + harsher starving + half hauls: 87 / 73 / 60%; half hauls: 57 / 18 / 10%. Tribute +1 with beasts +0.5: won or paid 46 / 51 / 83%. Act 1 under the rule: 84–87 / 75 / 49% of Coils die. Fed, starving and hauls stay as they are.
+  - **Bots after v0.9.7** (tasks test, 2,000 games): dead before Mei Lin 81 / 30 / 13% (after Mei Lin 12 / 11 / 9%); tribute won or paid 36 / 58 / 77% (won 33 / 39 / 51%); Act 1 Coils ending in a death 81 / 65 / 48 / 34% on Coils 1–4.
+  - Docs fix: the stray bracket on the handover's first line.
 
 - **Push 2 of 4: meridians closed and Act 1's Coil (proposal 08:05; picks 08:13 "4a, but coil undoes it, everything else as your recommendation", 08:15 "not any realm, gated according to engine rule", 08:16 "a. messing up has real consequences", go 08:17; mid-build stop, picks 08:30 "1a, 2 standard, go"; built in v0.9.6):**
   - **1b** two sessions a day (any mix); a session = 2 Qi, 2 h, Convergence Use vs DC with no dice. **2a** primaries DC 2.5 → 4.0, collateral groups DC 3 → 4.75; a fail spends the Qi, the time and the session, pays 25% XP and gives +0.5 to the next try (up to +2, gone on a success). **3** 8 collateral groups (9, 9, 8, 8, 8, 8, 8, 8) after primaries 2, 3, 5, 6, 8, 9, 11, 12, classical order Lung → Liver. **5a** task-mode new games only; classic new games and old saves keep 12 / 66.
@@ -303,6 +311,15 @@ The bible and the contract between the four part files are at the top of `js/sto
 - Last night of Act 1 (`rt_evening`) offers every arrangement the hearts allow: Mei Lin · Ya · Yuki alone; Mei Lin + Ya (`rt_trio`); Yuki + Mei Lin (`yk_night_mei`); Yuki + Ya (`yk_night_ya`); all four (`yk_night_all`). `g.flags.final_night` records it; `loveLine()` writes the Act 1 epilogue line (a1_end).
 - Romance with Yuki only in her human form (adult); fade to black. The code still says she bonded with James when he was six (34 years); **decided 2026-11-05: born together and bonded from birth** (fix pending, roadmap step 7).
 - Tests: 240 extra walks over the last night; combat round cap in the random runs raised to 400 (a rare long stalemate vs the Guardian at True Core).
+
+## v0.9.7 — severe difficulty (task mode)
+
+- **Deaths end the Coil** (`coil_scenes.js` installs two hooks; both only when `coilActive`, i.e. task mode, the prologue before the tribute is settled, Act 1 before Shen Qiu is settled): `setDeathHook` (story.js `checkDeath`, run at the end of every `choose` and after a Meditate sit): HP ≤ 0 outside a fight → HP 1, queue cleared, `endCoil('collapse')`, `coil_end`. `combatHooks.lose` (game.js `loseTo`, both lose paths of a fight): a fight not in `PEOPLE_FIGHTS` → `endCoil('beast')`, next = `coil_end`. Task collapses during a queue work as before (tasks.js).
+- **People** (`PEOPLE_FIGHTS` in game.js): `gao`, `collectors`, `arson`, `ya_brawl`, `rt_brawl`, `elder`, `sect_watcher`, `lf_rogue`.
+- **Beasts +0.5** (`BEAST_UP` in game.js, added in `startCombat` on top of `NO_DICE_TUNE`, no-dice only).
+- **Tribute +1** (task mode): bluff DC `6 + 1`, hairpin DC `4 + 1` (functions of `isNoDice()` in prologue.js), `NO_DICE_TUNE.collectors.up` 1.0 → 2.0.
+- **Coil screen:** `WHY.beast` text; "Accept it" still only after a lost tribute or Shen Qiu.
+- **Tests:** starving to 0 ends the Coil, no Accept after a death, a lost beast fight → `coil_end` with the beast text, a person keeps `gao_lost`, beasts +0.5 (task mode only), tribute DCs 7 / 5 in task mode and 6 / 4 in classic, classic beast losses and starving unchanged. Bots: deaths per act and Coil printed; 1 run in 5 rewinds Act 1 at Shen Qiu once; a bot stops counting after Coil 6 of an act.
 
 ## v0.9.6 — meridians closed at the start, Act 1's Coil (task mode)
 

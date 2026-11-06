@@ -699,8 +699,8 @@ Lu Han's gaze passes over the baskets, over the people, and stops on you. On Yuk
 "I've been offered worse," you say. "Not recently."`,
         choices: [
             { text: 'Step forward. "I\'m not kneeling, and nobody\'s paying you today."', combat: collectorsFight, to: 'collectors_won' },
-            { text: 'Bluff: a wandering senior of a hidden sect, testing the Crimson Lotus\'s manners. Let a little bone show.', qi: 4, check: { skill: 'GU', dc: 6, bonus: (g) => (g.flags.healed === true ? 1 : 0) + (g.flags.boar ? 1 : 0) + (g.flags.gao_beaten ? 1 : 0) + (g.flags.scouted ? 1 : 0) + (g.flags.gao_turned || g.flags.gao_warned ? 1 : 0) + (g.flags.token_silenced ? 1 : 0) + ((g.rel.Village?.f || 0) >= 40 ? 1 : 0) - Math.floor((forestScale(g) + villageScale(g)) / 2) }, to: 'bluff_win', fail: 'bluff_fail' },
-            { text: 'Offer tribute they\'ve never seen: sing a wraithbone hairpin, flawless, and pay the village\'s due with it.', qi: 8, check: { skill: 'Convergence Use', dc: 4, bonus: (g) => -Math.floor((forestScale(g) + villageScale(g)) / 2) }, do: (g) => { addItem(g, 'hairpin', 1); return []; }, to: 'tribute_paid', fail: 'bluff_fail' },
+            { text: 'Bluff: a wandering senior of a hidden sect, testing the Crimson Lotus\'s manners. Let a little bone show.', qi: 4, check: { skill: 'GU', dc: (g) => 6 + (isNoDice() ? 1 : 0), bonus: (g) => (g.flags.healed === true ? 1 : 0) + (g.flags.boar ? 1 : 0) + (g.flags.gao_beaten ? 1 : 0) + (g.flags.scouted ? 1 : 0) + (g.flags.gao_turned || g.flags.gao_warned ? 1 : 0) + (g.flags.token_silenced ? 1 : 0) + ((g.rel.Village?.f || 0) >= 40 ? 1 : 0) - Math.floor((forestScale(g) + villageScale(g)) / 2) }, to: 'bluff_win', fail: 'bluff_fail' },
+            { text: 'Offer tribute they\'ve never seen: sing a wraithbone hairpin, flawless, and pay the village\'s due with it.', qi: 8, check: { skill: 'Convergence Use', dc: (g) => 4 + (isNoDice() ? 1 : 0), bonus: (g) => -Math.floor((forestScale(g) + villageScale(g)) / 2) }, do: (g) => { addItem(g, 'hairpin', 1); return []; }, to: 'tribute_paid', fail: 'bluff_fail' },
         ],
     },
     bluff_fail: {

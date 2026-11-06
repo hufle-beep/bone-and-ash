@@ -3,7 +3,8 @@
  * "Bite the tail" after a lost tribute, "You remember this" on the arrival, breakthrough from 95% in the label.
  * Task mode only (every new choice checks isNoDice through coilActive or directly). Classic play is unchanged.
  */
-import { advance, isNoDice, startActCoil } from '../core/game.js';
+import { advance, isNoDice, startActCoil, combatHooks, PEOPLE_FIGHTS } from '../core/game.js';
+import { setDeathHook, goTo } from '../core/story.js';
 import { coilActive, endCoil, rewind, coilReport, hasPlayed, actOf, willUnwind } from '../core/coil.js';
 
 const WHY = {
@@ -13,6 +14,11 @@ It isn't the slow wheel of a breakthrough. It's a hard, practical snap, like a h
     tribute: `Lu Han's boots crunch away down the road. Ashfall stands around the tribute post in a silence so formal you could frame it, and nobody looks at you, which is its own kind of verdict.
 
 The village can live with this. Or you can decline to let it have happened.`,
+    beast: `Teeth, then the ground, then nothing in particular.
+
+Whatever it was does not stop to consider that you are a doctor of mycology from a civilisation of eight-hundred-year lifespans. It considers that you are meat. On the evidence, it has a point.
+
+Then the Ouroboros Axiom turns, with the hard snap of a hand catching a cup. This world was ready to digest you. The loop declines on your behalf.`,
     shen: `The crimson robes take the road down the mountain, and you walk between them. Behind you, the grove sings, faint and stubborn, and Ashfall stands at the tribute post in a silence so formal it could be carved on a stele.
 
 You could go with him. It is a written ending, and not the worst one. Or you can decline to let it have happened.`,
@@ -67,6 +73,20 @@ Yuki is standing on your sternum. The look says: *you have done this before. I w
 "I did not touch anything," you tell her. Out of habit.`;
         },
         choices: [{ text: 'Get up.', do: (g) => { g.coil.skipEnter = true; g.coil.unwound = false; return []; }, to: (g) => g.coil.wake || 'arrival' }],
+    };
+    // severe difficulty (v0.9.7, task mode): HP 0 outside a fight ends the Coil; so does losing to a beast
+    setDeathHook((g, scenes) => {
+        if (!coilActive(g) || g.scene === 'coil_end') return null;
+        g.james.hp = 1;
+        if (g.tasks) g.tasks.queue.length = 0;
+        endCoil(g, 'collapse');
+        return ['Your body runs out before the day does. You fold up where you stand, and the last thing you see is Yuki\'s face, very close, very unimpressed.', ...goTo(g, scenes, 'coil_end')];
+    });
+    combatHooks.lose = (g, c) => {
+        if (PEOPLE_FIGHTS.has(c.id) || !coilActive(g)) return null;
+        if (g.tasks) g.tasks.queue.length = 0;
+        endCoil(g, 'beast');
+        return 'coil_end';
     };
     // Act 1 begins (v0.9.6): its Coil's rewind point is Day 8 dawn, taken after fo_start's enter (a rewind skips it)
     const foEnter = SCENES.fo_start.enter;

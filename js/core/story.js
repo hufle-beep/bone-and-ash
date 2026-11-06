@@ -8,6 +8,10 @@ import { rollCheck, awardXp, spendQi, advance, ensureBars, actingCheck, actingNa
 import { STOMP, degreeForChoice } from '../story/power.js';
 
 const ONE_MOVE = 1000; // virtual choice index offset: "End it in one move."
+/** HP 0 outside a fight (v0.9.7): the Coil takes it (set by coil_scenes.js). Returns lines, or null when nothing happens. */
+let deathHook = null;
+export const setDeathHook = (fn) => { deathHook = fn; };
+export const checkDeath = (g, scenes) => (deathHook && g.james.hp <= 0 && !g.combat ? deathHook(g, scenes) : null) || [];
 
 const asText = (v, g) => (typeof v === 'function' ? v(g) : v);
 
@@ -208,6 +212,7 @@ export function choose(g, scenes, index) {
     lines.push(...go(g, scenes, dest));
     const extra = defaultMinutes(scenes, s.id, c, g.scene, g.location !== loc0);
     if (extra) lines.push(...advance(g, extra));
+    lines.push(...checkDeath(g, scenes));
     g.log.push({ at: g.minutes, scene: g.scene, lines: lines.slice(0, 12) });
     if (g.log.length > 200) g.log.shift();
     return { lines, roll, combat: null };

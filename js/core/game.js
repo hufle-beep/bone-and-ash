@@ -490,7 +490,13 @@ function dmgRoll(g, [lo, hi]) {
 }
 
 /** Story-layer hooks: `before(g, enc)` may adjust an encounter (Long Forest scaling, posture text, degree). */
-export const combatHooks = { before: null };
+export const combatHooks = { before: null, lose: null };
+/** Fights against people (v0.9.7): losing them keeps their written branches. Every other fight is a beast. */
+export const PEOPLE_FIGHTS = new Set(['gao', 'collectors', 'arson', 'ya_brawl', 'rt_brawl', 'elder', 'sect_watcher', 'lf_rogue']);
+/** Task mode (v0.9.7, owner's pick 3a): every beast fight +0.5 DC and attack on top of its no-dice tuning. */
+export const BEAST_UP = 0.5;
+/** Where a lost fight leads: its lose scene, unless the Coil takes it (combatHooks.lose, set by coil_scenes.js). */
+const loseTo = (g, c) => (combatHooks.lose && combatHooks.lose(g, c)) || c.lose;
 
 /** Yuki's forms: 'cat' always; 'tiger' (a root-kin the size of a Bengal tiger) from Core Formation; 'human' from Nascent Soul. */
 export const YUKI_FORMS = {
@@ -523,7 +529,8 @@ export function startCombat(g, enc0) {
         band: enc.band || 'standard',
         bladeFormed: false,
         enemies: enc.enemies.map((e) => {
-            const t = noDice ? noDiceTune[enc.id] : null; // v0.9.3: per-fight tuning for the no-dice rules
+            const t0 = noDice ? noDiceTune[enc.id] : null; // v0.9.3: per-fight tuning for the no-dice rules
+            const t = noDice && !PEOPLE_FIGHTS.has(enc.id) ? { ...(t0 || {}), up: ((t0 && t0.up) || 0) + BEAST_UP } : t0; // v0.9.7: beasts +0.5
             const x = t ? { ...e, dc: e.dc + (t.up || 0), atk: e.atk + (t.up || 0), hp: Math.max(1, Math.round(e.hp * (t.hp || 1))) } : e;
             return { ...x, hpMax: x.hp, staggered: false };
         }),
@@ -713,9 +720,9 @@ function finishRound(g, lines) {
     }
     if (g.james.hp <= 0 || (noDice && c.round > NO_DICE_ROUND_CAP)) {
         if (g.james.hp > 0) lines.push('', 'Thirty exchanges in, your arms stop answering. You are spent, and they are not.');
-        const next = c.lose;
         g.combat = null;
         g.james.hp = 1;
+        const next = loseTo(g, c);
         return { lines, done: 'lose', next };
     }
     return { lines, done: null };
@@ -737,7 +744,7 @@ export function combatFlee(g) {
     const dmg = hitDamage(biter.dmg, biter.realm, g.james.realm, jamesDr(g));
     g.james.hp = Math.max(0, g.james.hp - dmg);
     lines.push(`Something bites on the way out: −${dmg} HP.`);
-    if (g.james.hp <= 0) { const next = c.lose; g.combat = null; g.james.hp = 1; return { lines, done: 'lose', next }; }
+    if (g.james.hp <= 0) { g.combat = null; g.james.hp = 1; const next = loseTo(g, c); return { lines, done: 'lose', next }; }
     return { lines, done: null };
 }
 

@@ -7,7 +7,7 @@
  */
 import { condense, canBreakThrough, breakReady, breakBlock } from './game.js';
 import { CONDENSE_SIT_COST } from './formulas.js';
-import { goTo } from './story.js';
+import { goTo, checkDeath } from './story.js';
 import { canAnyMeridian, btTarget } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
 
@@ -43,7 +43,8 @@ export function runMed(g, scenes, id) {
     if (!canMeditate(g, scenes)) throw new Error('Not here');
     if (id === 'med:sit') {
         const r = condense(g);
-        return { lines: r.ok ? [`Condensed: Saturation ${r.saturation}%.`] : ['Not enough Qi to sit.'], moved: false };
+        const dead = checkDeath(g, scenes);
+        return { lines: [...(r.ok ? [`Condensed: Saturation ${r.saturation}%.`] : ['Not enough Qi to sit.']), ...dead], moved: dead.length > 0 };
     }
     const back = g.scene;
     if (id === 'med:mer' && canAnyMeridian(g)) {

@@ -17,7 +17,7 @@ One Coil per act. James never dies (engine canon: at HP 0 the main character is 
 **Lore:** the Ouroboros Axiom is universal among his people; on this world the poisoned Qi turns it into a loop. James and Yuki remember every Coil through the bond; no one else does (James knows Gao Feng's speech by heart; Old Wen gravely explains tribulation for the fourth time).
 
 **A Coil ends on:**
-1. **Collapse:** HP 0 outside a story fight, or Fed 0 until HP runs out.
+1. **Collapse:** HP 0 outside a story fight, or Fed 0 until HP runs out. (v0.9.7: also a lost fight against a beast; fights against people keep their written branches.)
 2. **A lost deadline fight:** the player chooses to accept the written outcome (the paid / lost endings stay) or bite the tail.
 3. **Choice:** a "Bite the tail" button, with a confirmation.
 
