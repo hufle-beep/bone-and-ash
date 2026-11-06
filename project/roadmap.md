@@ -1,6 +1,6 @@
 # Roadmap: Bone and Ash
 
-Last updated: 2026-11-06 (v0.10.2, pause rules, the camp as a task screen). Update in every push.
+Last updated: 2026-11-06 (v0.10.3, docs only: the handover split into handover, reference and history). Update in every push.
 
 ## Order of work (owner, 2026-11-05)
 The hybrid with Selene (design in `design.md`). Safety comes before the rewrite, because the hybrid changes the save format. Each step is one or more pushes, each with its own options, pick and go. Estimates are working sessions, not calendar days.
