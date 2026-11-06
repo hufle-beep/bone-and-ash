@@ -611,6 +611,7 @@ view.addEventListener('click', (ev) => {
             if (running?.kind) return;
             if (running) stopRunning();
             if (b.dataset.med === 'med:sit') { tapRun(); startBar('med', 'med:sit', 'Cultivate: one sit', SIT_MINUTES); render(); return; }
+            if (b.dataset.med === 'med:bt') { const bt = medCards(g, SCENES).find((m) => m.id === 'med:bt'); if (bt?.minutes) { tapRun(); startBar('med', 'med:bt', 'Break through', bt.minutes); render(); return; } } // v0.11.2: a timed sit, then the scene
             const r = runMed(g, SCENES, b.dataset.med);
             lastResult = r.lines.length ? { lines: r.lines, fail: false } : null; autosave(); render(); window.scrollTo({ top: 0, behavior: 'smooth' });
             return;

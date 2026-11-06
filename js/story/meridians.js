@@ -9,7 +9,7 @@
  * Menu: 'meridians' (choice "Open a meridian." on every hub that has the breakthrough choice). Warning before the
  * Nascent Soul breakthrough if the Extraordinary 8 aren't all open: 'ns_warn'.
  */
-import { extraRegen, qiRegenPct, clockParts, coilMult } from '../core/game.js';
+import { extraRegen, qiRegenPct, clockParts, coilMult, isNoDice, advance, awardXp } from '../core/game.js';
 import { daily, markDaily } from './common.js';
 
 /* ---------- the primaries and their collaterals (v0.9.6: closed at the start of a task-mode game) ----------
@@ -49,12 +49,50 @@ export const SESSION_MINUTES = 120;
 export const MER_ADAPT_STEP = 0.5;
 export const MER_ADAPT_MAX = 2;
 const P = (g) => g.james.primaries ?? 12;
+const fmtH = (h) => `${Math.round(h * 10) / 10} h`;
 const C = (g) => g.james.collaterals ?? 66;
 /** How many collateral groups are open (counts from old saves that aren't on a group boundary round down). */
 export const colGroupsOpen = (g) => { let n = 0, sum = 0; for (const gr of COL_GROUPS) { sum += gr.size; if (C(g) >= sum) n++; else break; } return n; };
 const sessionKey = (g) => `mer_s@${clockParts(g.minutes).day}`;
 export const sessionsToday = (g) => g.flags[sessionKey(g)] || 0;
-const sessionOk = (g) => sessionsToday(g) < SESSIONS_PER_DAY;
+const sessionOk = (g) => isNoDice() || sessionsToday(g) < SESSIONS_PER_DAY; // v0.11.2: no daily limit in Incremental Mode
+/**
+ * Timed meridians (v0.11.2, Incremental Mode): each channel is hours of work at ×1, ÷ the Coil bonus, in sittings of up
+ * to 2 h (2 Qi each), any number a day, no check, no failing. Primary k: 2 … 4 h (36 h for all 12); collateral group j:
+ * 3 … 5 h (32 h for all 8). Work is kept in `james.merWork` (primaries) and `james.colWork` (groups), hours at ×1, until
+ * the channel opens; standard XP once per channel opened; the cards lock below Fed 20.
+ */
+/** The work cards lock below this Fed (v0.11.2 pick 2a): the meridian screen has no forecast. */
+export const MER_FED_MIN = 20;
+export const priHours = (k) => Math.round((2 + (2 * k) / 11) * 100) / 100;
+export const colHours = (j) => Math.round((3 + (2 * j) / 7) * 100) / 100;
+const KEY = { pri: 'merWork', col: 'colWork' };
+const work = (g, k) => g.james[KEY[k]] || 0;
+const need = (g, k) => (k === 'pri' ? priHours(P(g)) : colHours(colGroupsOpen(g)));
+const nameOf = (g, k) => (k === 'pri' ? PRIMARIES[P(g)]?.name : COL_GROUPS[colGroupsOpen(g)]?.name);
+export const merMinutesOf = (g, k) => Math.max(10, Math.min(SESSION_MINUTES, Math.ceil(((need(g, k) - work(g, k)) * 60) / coilMult(g) / 10) * 10));
+/** The next sitting's minutes (primaries first, as the queue card takes them). */
+export const merMinutes = (g) => merMinutesOf(g, canPrimary(g) ? 'pri' : 'col');
+function workChoice(k) {
+    const can = (g) => isNoDice() && (k === 'pri' ? canPrimary(g) : canColGroup(g));
+    return {
+        text: (g) => `Work on ${nameOf(g, k)}. (${k === 'pri' ? `${P(g) + 1}/12` : `group ${colGroupsOpen(g) + 1}/8`}; ${fmtH(work(g, k))} of ${fmtH(need(g, k))} done; ${merMinutesOf(g, k)} min.)`,
+        show: can, qi: 2, time: 0, work: true, minutes: (g) => merMinutesOf(g, k),
+        req: (g) => (g.james.satiety >= MER_FED_MIN ? true : 'Too hungry to sit. Eat first.'),
+        do: (g) => {
+            const mins = merMinutesOf(g, k);
+            advance(g, mins);
+            g.james[KEY[k]] = Math.round((work(g, k) + (mins / 60) * coilMult(g)) * 100) / 100;
+            if (work(g, k) + 1e-9 < need(g, k)) return [`Two Qi and ${mins} minutes into the ash around ${nameOf(g, k)}. It gives a little. (${fmtH(work(g, k))} of ${fmtH(need(g, k))}.)`];
+            g.james[KEY[k]] = 0;
+            const xp = awardXp(g, 'Convergence Use', 'standard'); // once per channel opened (v0.11.2 pick 1a)
+            if (k === 'pri') { const v = PRIMARIES[P(g)]; g.james.primaries = P(g) + 1; mirror(g); return [`Opened ${v.name} (${g.james.primaries}/12). ${v.line}`, 'Qi Max +1.25 (Yuki +1).', ...xp]; }
+            const gr = COL_GROUPS[colGroupsOpen(g)]; g.james.collaterals = COL_GROUPS.slice(0, colGroupsOpen(g) + 1).reduce((a, x) => a + x.size, 0); mirror(g);
+            return [`Opened ${gr.name} (${g.james.collaterals}/66). Fine threads, lighting up one after another like a city at dusk.`, ...after(g), ...xp];
+        },
+        to: 'meridians',
+    };
+}
 const useSession = (g) => { g.flags[sessionKey(g)] = sessionsToday(g) + 1; };
 const mirror = (g) => { g.yuki.primaries = P(g); g.yuki.collaterals = C(g); };
 export const canPrimary = (g) => (g.james.realm || 0) === 0 && P(g) < 12 && sessionOk(g);
@@ -121,8 +159,9 @@ export const MERIDIANS = {
             const parts = [];
             if (P(g) >= 12 && C(g) >= 66) parts.push(`You sit, close your eyes, and let Parallel Cognition draw the map. Twelve primaries, sixty-six collaterals: lit, all of them. Around and between them, the second net. ${x.e}/8 Extraordinary vessels, ${x.c}/28 of their collaterals, ${x.j}/10 junctions open.`);
             else {
-                parts.push(`You sit, close your eyes, and let Parallel Cognition draw the map. It is mostly grey. The crossing ashed your channels shut, and this world's Qi settled in the ash like soot in a chimney. ${P(g)}/12 primaries open, ${C(g)}/66 collaterals (${colGroupsOpen(g)}/8 groups). The Axiom composts the seal one channel at a time: two hours, two Qi, and your full attention. Twice a day is all the body will stand.`);
-                if (sessionsToday(g) >= SESSIONS_PER_DAY) parts.push('You have done two today. The channels are raw. Tomorrow.');
+                parts.push(`You sit, close your eyes, and let Parallel Cognition draw the map. It is mostly grey. The crossing ashed your channels shut, and this world's Qi settled in the ash like soot in a chimney. ${P(g)}/12 primaries open, ${C(g)}/66 collaterals (${colGroupsOpen(g)}/8 groups). The Axiom composts the seal one channel at a time${isNoDice() ? `: sittings of two hours and two Qi, as many as you can stand, until the channel gives. ${P(g) < 12 ? `${nameOf(g, 'pri')}: ${fmtH(work(g, 'pri'))} of ${fmtH(need(g, 'pri'))} done.` : ''}` : ': two hours, two Qi, and your full attention. Twice a day is all the body will stand.'}`);
+                if (isNoDice() && g.james.satiety < MER_FED_MIN) parts.push('Your stomach files a formal complaint. Too hungry to sit. Eat first.');
+                if (!isNoDice() && sessionsToday(g) >= SESSIONS_PER_DAY) parts.push('You have done two today. The channels are raw. Tomorrow.');
                 if (P(g) < 12) parts.push(`Foundation won't hold on an open circuit. All twelve primaries first. ${12 - P(g)} to go.`);
                 if (g.james.colSealed) parts.push(`${66 - C(g)} collaterals sealed when you broke through to Foundation: scar tissue, now, and Mortal Vessel was their only window. Only the Coil can give that window back, and it will take the breakthrough with it.`);
                 else if ((g.james.realm || 0) === 0 && C(g) < 66) parts.push('The collaterals open only while you are Mortal Vessel. Break through with any of them closed and they seal.');
@@ -136,15 +175,17 @@ export const MERIDIANS = {
             return parts.join('\n\n');
         },
         choices: [
+            workChoice('pri'),
+            workChoice('col'),
             {
-                text: (g) => `Open ${PRIMARIES[P(g)]?.name}. (${P(g) + 1}/12; session ${sessionsToday(g) + 1} of ${SESSIONS_PER_DAY} today.)`, show: canPrimary, qi: 2, time: SESSION_MINUTES,
+                text: (g) => `Open ${PRIMARIES[P(g)]?.name}. (${P(g) + 1}/12; session ${sessionsToday(g) + 1} of ${SESSIONS_PER_DAY} today.)`, qi: 2, time: SESSION_MINUTES, show: (g) => !isNoDice() && canPrimary(g),
                 check: { skill: 'Convergence Use', dc: dcPrimary, band: 'standard', bonus: (g) => adaptOf(g, 'mer:pri') },
                 do: (g) => { const v = PRIMARIES[P(g)]; useSession(g); g.james.primaries = P(g) + 1; mirror(g); setAdapt(g, 'mer:pri', 0); return [`Opened ${v.name} (${g.james.primaries}/12). ${v.line}`, 'Qi Max +1.25 (Yuki +1).']; },
                 failDo: (g) => { useSession(g); return ['The ash holds. Two hours of breathing at a wall, and the wall won.', learn(g, 'mer:pri')]; },
                 to: 'meridians',
             },
             {
-                text: (g) => `Open ${COL_GROUPS[colGroupsOpen(g)]?.name}. (group ${colGroupsOpen(g) + 1}/8, ${COL_GROUPS[colGroupsOpen(g)]?.size} threads; session ${sessionsToday(g) + 1} of ${SESSIONS_PER_DAY} today.)`, show: canColGroup, qi: 2, time: SESSION_MINUTES,
+                text: (g) => `Open ${COL_GROUPS[colGroupsOpen(g)]?.name}. (group ${colGroupsOpen(g) + 1}/8, ${COL_GROUPS[colGroupsOpen(g)]?.size} threads; session ${sessionsToday(g) + 1} of ${SESSIONS_PER_DAY} today.)`, show: (g) => !isNoDice() && canColGroup(g), qi: 2, time: SESSION_MINUTES,
                 check: { skill: 'Convergence Use', dc: dcColGroup, band: 'standard', bonus: (g) => adaptOf(g, 'mer:col') },
                 do: (g) => { const gr = COL_GROUPS[colGroupsOpen(g)]; useSession(g); g.james.collaterals = COL_GROUPS.slice(0, colGroupsOpen(g) + 1).reduce((a, x) => a + x.size, 0); mirror(g); setAdapt(g, 'mer:col', 0); return [`Opened ${gr.name} (${g.james.collaterals}/66). Fine threads, lighting up one after another like a city at dusk.`, ...after(g)]; },
                 failDo: (g) => { useSession(g); return ['The threads tangle. You spend the session unpicking them and end where you started, minus two Qi and your patience.', learn(g, 'mer:col')]; },

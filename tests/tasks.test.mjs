@@ -2,16 +2,16 @@
 // Every card resolves; old saves get an empty queue; a dry run predicts the real run exactly;
 // 2,000 bot games in task mode reach the end with no dead end; the tribute outcomes are printed next to classic play.
 import { SCENES, lfOpen, lfSeason, lfRank, LF_STOCK, LF_SEASON_MINUTES } from '../js/story/prologue.js';
-import { itemCap, MAX_REALM, combatStep as cStep, startCombat as sCombat, coilMult, awardXp, awardYukiFightXp, condense } from '../js/core/game.js';
+import { itemCap, MAX_REALM, combatStep as cStep, startCombat as sCombat, coilMult, awardXp, awardYukiFightXp, condense, SAT_HOURS, sitGain, btMinutes } from '../js/core/game.js';
 import { FORM_LINES, hasForm, cuRank, actionOpen, actionLabel, fragileKnife, STORY_FORMS } from '../js/core/forms.js';
 import { TASK_HUBS } from '../js/story/task_hubs.js';
 import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, setNoDice, clockLabelSec, advance, STARVE_HP_PER_HOUR, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1 } from '../js/core/game.js';
-import { canPrimary, canColGroup, colGroupsOpen, sessionsToday, dcPrimary, dcColGroup, btTarget, canAnyMeridian, COL_GROUPS } from '../js/story/meridians.js';
+import { canPrimary, canColGroup, colGroupsOpen, sessionsToday, dcPrimary, dcColGroup, btTarget, canAnyMeridian, COL_GROUPS, priHours, colHours, merMinutesOf } from '../js/story/meridians.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
 import { medCards, runMed, canMeditate, NO_MEDITATE, isSitChoice } from '../js/core/meditate.js';
 import { defaultMinutes, DEFAULT_MINUTES } from '../js/core/story.js';
 import { coilActive, coilPrefill, rewind, endCoil, KEEP_FLAGS, REMEMBER } from '../js/core/coil.js';
-import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskMinutes, runTask, outlook, taskQueue, taskState, setYuki, yukiLane, famTier, QUEUE_MAX, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, merChoice, MER_TASK, waitChoice } from '../js/core/tasks.js';
+import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskMinutes, runTask, outlook, taskQueue, taskState, setYuki, yukiLane, famTier, QUEUE_MAX, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, merChoice, MER_TASK, BT_TASK, waitChoice } from '../js/core/tasks.js';
 
 import { GAMES, FULL, SHARD, WORKERS, SEED, SENSIBLE, REPORT, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
 let pass = 0, fail = 0;
@@ -63,10 +63,10 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
         else { assert(m.length >= 1, `Meditate on ${id}`); medded++; }
     }
     assert(medded > 250, `Meditate on most screens (${medded})`);
-    // a sit off the hubs: 30 min, Saturation up, the scene stays
+    // a sit off the hubs: an hour (v0.11.2), Saturation +10% at Mortal Vessel on Coil 1, the scene stays
     const k = ensureBars(newGame(33)); k.scene = 'mei_lin'; k.james.qi = 30; const k0 = k.minutes;
     const r = runMed(k, SCENES, 'med:sit');
-    assert(k.scene === 'mei_lin' && k.minutes - k0 === 30 && k.james.saturation > 0 && /Condensed/.test(r.lines[0]), 'Meditate: a sit keeps the scene');
+    assert(k.scene === 'mei_lin' && k.minutes - k0 === 60 && k.james.saturation === 10 && /Condensed/.test(r.lines[0]), `Meditate: a sit keeps the scene (1 h, +10%: ${k.minutes - k0} min, ${k.james.saturation}%)`);
     // open a meridian and come back without the scene's enter running again
     const e = ensureBars(newGame(34)); e.scene = 'village'; e.james.realm = 1; e.james.qi = 30;
     const before = JSON.stringify(e.inventory);
@@ -98,25 +98,46 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     assert(g.james.primaries === 0 && g.james.collaterals === 0 && g.yuki.primaries === 0 && g.yuki.collaterals === 0, 'closed new game: 0 / 0, Yuki too');
     assert(jamesQiMax(g) === 25.5 && yukiQiMax(g) === 20.5 && qiRegenPct(g, 0) === 5 && jamesQiMax(open) === 40.5, `closed bars: Qi 25.5, Yuki 20.5, regen 5% (${jamesQiMax(g)}, ${yukiQiMax(g)})`);
     assert(COL_GROUPS.reduce((a, x) => a + x.size, 0) === 66 && COL_GROUPS.length === 8, '8 collateral groups, 66 threads');
-    assert(dcPrimary(g) === 2.5 && !canColGroup(g) && canPrimary(g), 'first primary DC 2.5; no group before 2 primaries');
-    g.scene = 'stream'; g.james.qi = 20; g.james.skills['Convergence Use'].level = 3; // check 1.5: the sessions below pass
+    assert(!canColGroup(g) && canPrimary(g), 'no group before 2 primaries');
+    // v0.11.2: meridians by hours of work — primaries 2 … 4 h, groups 3 … 5 h, sittings of up to 2 h, 2 Qi, no daily limit, no check
+    assert(priHours(0) === 2 && priHours(11) === 4 && colHours(0) === 3 && colHours(7) === 5, 'hours: primaries 2–4, groups 3–5');
+    assert(Math.round(Array.from({ length: 12 }, (_, k) => priHours(k)).reduce((x, y) => x + y) * 10) / 10 === 36 && Math.round(Array.from({ length: 8 }, (_, j) => colHours(j)).reduce((x, y) => x + y) * 10) / 10 === 32, '36 h for the 12 primaries, 32 h for the 8 groups');
+    g.scene = 'stream'; g.james.qi = 20; g.james.satiety = 70;
     assert(medCards(g, SCENES).some((c) => c.id === 'med:mer'), 'Meditate offers the meridian screen in Mortal Vessel');
     runMed(g, SCENES, 'med:mer');
+    const wp = SCENES.meridians.choices.findIndex((c) => c.work && /primary|Lung/.test(String(c.text(g))) && c.show(g));
+    const wc = () => SCENES.meridians.choices.findIndex((c, i) => c.work && i !== wp);
+    assert(wp >= 0 && SCENES.meridians.choices.every((c) => !c.check || !(c.show ? c.show(g) : true) || c.to !== 'meridians' || c.work), 'Incremental Mode: work cards, the old checked sessions hidden');
+    const cu0 = g.james.skills['Convergence Use'].xp + g.james.skills['Convergence Use'].level * 1000;
     const m0 = g.minutes, q0 = g.james.qi;
-    choose(g, SCENES, 0);
-    assert(g.james.primaries === 1 && g.yuki.primaries === 1 && sessionsToday(g) === 1 && g.minutes - m0 === 120 && q0 - g.james.qi <= 2, `a session: 2 Qi, 2 h, one primary, Yuki mirrors (${g.james.primaries}, ${g.minutes - m0} min)`);
-    choose(g, SCENES, 0);
-    assert(g.james.primaries === 2 && sessionsToday(g) === 2 && !canPrimary(g) && !canColGroup(g) && !canAnyMeridian(g), 'two sessions a day, then nothing');
-    g.minutes += 1440; // next day: the first group opens after 2 primaries
-    assert(canColGroup(g) && dcColGroup(g) === 3, 'group 1 after primaries 1–2, DC 3');
-    choose(g, SCENES, SCENES.meridians.choices.findIndex((c) => c.show === canColGroup));
-    assert(g.james.collaterals === 9 && g.yuki.collaterals === 9 && colGroupsOpen(g) === 1, 'group 1: 9 collaterals, Yuki mirrors');
-    assert(!canColGroup(g), 'group 2 waits for primary 3');
-    // a fail: Qi and time spent, the session used, +0.5 on the next try
-    const f = ensureBars(newGame(41, { closed: true })); f.james.primaries = 11; f.scene = 'meridians'; f.james.qi = 20;
-    assert(dcPrimary(f) === 4, 'the last primary is DC 4');
-    choose(f, SCENES, 0);
-    assert(f.james.primaries === 11 && sessionsToday(f) === 1 && f.tasks.adapt['mer:pri'] === 0.5, 'a fail: nothing opens, session used, +0.5 next try');
+    choose(g, SCENES, wp);
+    assert(g.james.primaries === 1 && g.yuki.primaries === 1 && g.minutes - m0 === 120 && q0 - g.james.qi <= 2 && !g.james.merWork, `the first primary: one 2-hour sitting, 2 Qi, opens, Yuki mirrors (${g.james.primaries}, ${g.minutes - m0} min)`);
+    assert(g.james.skills['Convergence Use'].xp + g.james.skills['Convergence Use'].level * 1000 > cu0, 'XP when a channel opens');
+    const cu1 = g.james.skills['Convergence Use'].xp + g.james.skills['Convergence Use'].level * 1000;
+    choose(g, SCENES, wp); // primary 2 needs 2.18 h: 2 h now, the rest next time
+    assert(g.james.primaries === 1 && Math.abs(g.james.merWork - 2) < 0.01 && g.james.skills['Convergence Use'].xp + g.james.skills['Convergence Use'].level * 1000 === cu1, `a sitting short of the channel: progress kept, no XP (${g.james.merWork})`);
+    assert(merMinutesOf(g, 'pri') === 20, `the rest is a short sitting (${merMinutesOf(g, 'pri')} min)`);
+    const m1 = g.minutes; choose(g, SCENES, wp);
+    assert(g.james.primaries === 2 && g.minutes - m1 === 20 && !g.james.merWork, 'the second primary opens on the short sitting');
+    choose(g, SCENES, wp); g.james.qi = 20;
+    assert(canPrimary(g) && sessionsToday(g) === 0, 'no daily limit in Incremental Mode');
+    assert(canColGroup(g) && wc() >= 0 && SCENES.meridians.choices[wc()].show(g), 'group 1 after primaries 1–2: its own work card');
+    choose(g, SCENES, wc());
+    assert(g.james.collaterals === 0 && Math.abs(g.james.colWork - 2) < 0.01 && Math.abs(g.james.merWork - 2) < 0.01, 'groups and primaries keep separate progress');
+    g.james.qi = 20; choose(g, SCENES, wc());
+    assert(g.james.collaterals === 9 && g.yuki.collaterals === 9 && colGroupsOpen(g) === 1 && !g.james.colWork, 'group 1 after 3 h: 9 collaterals, Yuki mirrors');
+    // the Coil bonus divides the hours: ×2 on Coil 3 — the first primary takes 1 h
+    const c3 = ensureBars(newGame(46, { closed: true })); c3.coil.n = 3; c3.scene = 'meridians'; c3.james.qi = 20;
+    assert(merMinutesOf(c3, 'pri') === 60, `Coil 3: the first primary in 1 h (${merMinutesOf(c3, 'pri')})`);
+    // the Fed lock (pick 2a): below Fed 20 the work cards lock, and the screen says why
+    const h = ensureBars(newGame(47, { closed: true })); h.scene = 'meridians'; h.james.qi = 20; h.james.satiety = 19;
+    assert(merChoice(h, SCENES) === -1 && /Too hungry to sit/.test(SCENES.meridians.text(h)), 'Fed under 20: no sitting, the screen says why');
+    h.james.satiety = 20; assert(merChoice(h, SCENES) >= 0, 'Fed 20: sitting allowed');
+    // Story Mode keeps the old sessions: two a day, checks
+    setNoDice(false);
+    const sm = ensureBars(newGame(48, { closed: true })); sm.scene = 'meridians'; sm.james.qi = 20; sm.james.skills['Convergence Use'].level = 3;
+    assert(SCENES.meridians.choices.findIndex((c) => (c.show ? c.show(sm) : true) && c.check && c.to === 'meridians') >= 0 && !SCENES.meridians.choices.some((c) => c.work && c.show(sm)), 'Story Mode: the checked sessions, no work cards');
+    setNoDice(true);
     // Foundation needs all 12 primaries; collaterals still closed seal; a rewind unwinds Foundation
     const b = ensureBars(newGame(42, { closed: true })); b.scene = 'stream'; b.james.saturation = 96; b.james.primaries = 11;
     assert(!canBreakThrough(b) && medCards(b, SCENES).some((c) => c.id === 'med:bt' && !c.open && /12 primaries/.test(c.reason)), 'Foundation: locked at 11 primaries, the card says why');
@@ -403,6 +424,39 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     setNoDice(false);
 }
 
+// v0.11.2: timed cultivation — a sit is an hour, Saturation by hours (10 h × 2^realm ÷ the Coil bonus), the breakthrough a timed card
+{
+    setNoDice(true);
+    assert(SAT_HOURS(0) === 10 && SAT_HOURS(1) === 20 && SAT_HOURS(3) === 80, 'Saturation hours: 10, 20, 40, 80 …');
+    const g = ensureBars(newGame(95, { closed: true })); g.james.qi = 40;
+    assert(sitGain(g) === 10 && sitGain(g, 2) === 20, 'Mortal Vessel, Coil 1: +10% a sit, the hollow +20%');
+    g.james.realm = 1; ensureBars(g); assert(sitGain(g) === 5, 'Foundation: +5% a sit');
+    g.coil.n = 3; assert(sitGain(g) === 10, 'Foundation on Coil 3 (×2): +10%');
+    const big = ensureBars(newGame(96)); big.james.qi = 40; const sm = sitGain(big); big.james.primaries = 12; big.james.realm = 0;
+    assert(sm === 10, 'the gain does not depend on Qi Max');
+    const t = ensureBars(newGame(97, { closed: true })); t.james.qi = 20; const t0 = t.minutes; const r = condense(t);
+    assert(r.ok && t.minutes - t0 === 60 && t.james.saturation === 10 && 20 - t.james.qi <= 10 && 20 - t.james.qi > 5, 'a sit: 1 h, 10 Qi (some back from regen), +10%');
+    // the breakthrough: 2 h × (realm + 1) ÷ the bonus
+    const b = ensureBars(newGame(98)); b.james.saturation = 96;
+    assert(btMinutes(b) === 120, 'to Foundation: 2 h'); b.james.realm = 4; assert(btMinutes(b) === 600, 'realm 4 → 5: 10 h'); b.coil.n = 3; assert(btMinutes(b) === 300, '÷ the bonus: 5 h on Coil 3');
+    b.james.realm = 13; b.coil.n = 1; assert(btMinutes(b) === 1680, 'to Heavenly Immortal: 28 h');
+    // queued from a hub: the card, its length, the tribulation scene as a story stop
+    const q = ensureBars(newGame(99)); q.scene = 'wilds'; q.minutes += 1440; Object.assign(q.flags, { long: true, forest_day: 2 }); q.james.saturation = 96;
+    assert(taskOpen(q, SCENES, BT_TASK) && medCards(q, SCENES).some((c) => c.id === 'med:bt' && c.task === BT_TASK && c.minutes === 120), 'the queueable Break through card (2 h)');
+    const q0 = q.minutes; const rr = runTask(q, SCENES, BT_TASK);
+    assert(rr.stopped && q.scene === 'breakthrough' && q.james.realm === 1 && q.minutes - q0 === 120 && q.flags.bt_return === 'wilds', 'it runs 2 h, then the tribulation scene; back to the hub after');
+    const w = ensureBars(newGame(100, { closed: true })); w.scene = 'wilds'; w.minutes += 1440; Object.assign(w.flags, { long: true, forest_day: 2 }); w.james.saturation = 96; w.james.primaries = 12; w.james.collaterals = 9;
+    assert(!taskOpen(w, SCENES, BT_TASK) && medCards(w, SCENES).some((c) => c.id === 'med:bt' && !c.task && c.minutes === 0), 'a warning first: not queueable, opens at once');
+    // the forecast knows the breakthrough's length
+    const f = ensureBars(newGame(101)); f.scene = 'wilds'; f.minutes += 1440; Object.assign(f.flags, { long: true, forest_day: 2 }); f.james.saturation = 96;
+    assert(taskMinutes(f, SCENES, BT_TASK) === 120, `the forecast: 120 min (${taskMinutes(f, SCENES, BT_TASK)})`);
+    // Story Mode: the engine's sit and the 2-hour breakthrough
+    setNoDice(false);
+    const c = ensureBars(newGame(102)); c.james.qi = 40; const c0 = c.minutes; const cr = condense(c);
+    assert(cr.ok && c.minutes - c0 === 30 && Math.abs(cr.gain - 12.3) < 0.1, `Story Mode: a sit is 30 min, +12.3% at 40.5 Max (${cr.gain})`);
+    c.james.realm = 6; assert(btMinutes(c) === 120, 'Story Mode: every breakthrough 2 h');
+}
+
 } // end of the static checks before the bots
 
 let rs = 4242;
@@ -584,11 +638,12 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     q.length = 0;
     // a meridian session from the queue
     assert(merChoice(g, SCENES) === 0 && taskOpen(g, SCENES, MER_TASK), 'a closed start offers the next primary as a card');
-    const m0 = g.minutes, s0 = g.flags[`mer_s@${Math.floor(g.minutes / 1440) + 1}`] || 0;
+    const m0 = g.minutes;
     const r = runTask(g, SCENES, MER_TASK);
-    assert(g.scene === 'wilds' && g.minutes - m0 === 120 && g.james.primaries === 1 && (g.flags[`mer_s@${Math.floor(m0 / 1440) + 1}`] || 0) === s0 + 1 && !r.stopped, 'a meridian session: 2 h, a primary, a session used, back on the hub');
-    runTask(g, SCENES, MER_TASK);
-    assert(merChoice(g, SCENES) === -1 && !taskOpen(g, SCENES, MER_TASK), 'two sessions a day, then no card');
+    assert(g.scene === 'wilds' && g.minutes - m0 === 120 && g.james.primaries === 1 && !r.stopped, 'a meridian sitting from the queue: 2 h, a primary, back on the hub');
+    g.james.qi = 20; runTask(g, SCENES, MER_TASK); g.james.qi = 20;
+    assert(merChoice(g, SCENES) >= 0 && taskOpen(g, SCENES, MER_TASK), 'v0.11.2: no daily limit, the card stays');
+    g.james.satiety = 10; assert(!taskOpen(g, SCENES, MER_TASK), 'Fed under 20: no meridian card'); g.james.satiety = 70;
     // the forecast finds the row where a bad queue starves
     const h = ensureBars(newGame(71, { closed: true })); h.scene = 'wilds'; h.minutes = 1440 + 7 * 60; Object.assign(h.flags, { long: true, forest_day: 2 });
     h.james.satiety = 3; h.james.hp = 2; h.inventory = {};

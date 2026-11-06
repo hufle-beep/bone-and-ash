@@ -14,7 +14,8 @@
  */
 import { hasForm } from './forms.js';
 import { choose, goTo, choiceOpen, choiceTag, gives, setTimeless, defaultMinutes, movesPlace } from './story.js';
-import { advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck } from './game.js';
+import { advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck, canBreakThrough, btMinutes, realmName } from './game.js';
+import { btTarget } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
 import { daily } from '../story/common.js';
 import { endCoil, recordCard } from './coil.js';
@@ -73,10 +74,13 @@ export function isTaskChoice(scenes, hubId, index) {
 
 /** v0.10.0: "Next meridian session" — a queueable hub card that takes the first open session on the meridian screen. */
 export const MER_TASK = 'mer:next';
+/** v0.11.2: "Break through" as a queueable hub card (a timed sit, then the tribulation scene as a story stop). Only when no warning screen comes first. */
+export const BT_TASK = 'bt:next';
+export const btOpen = (g) => canBreakThrough(g) && btTarget(g) === 'breakthrough';
 /** Index of the meridian-screen choice the next session would take, or -1 (none left today, too little Qi, wrong realm). */
 export function merChoice(g, scenes) {
     const cs = scenes.meridians?.choices || [];
-    for (let i = 0; i < cs.length; i++) { const c = cs[i]; if (c.to === 'meridians' && c.check && choiceOpen(g, c)) return i; }
+    for (let i = 0; i < cs.length; i++) { const c = cs[i]; if (c.to === 'meridians' && (c.check || c.work) && choiceOpen(g, c)) return i; }
     return -1;
 }
 /** v0.10.0: rest and sleep happen at once (no bar; the clock still moves). */
@@ -94,7 +98,7 @@ export function waitChoice(scenes, c, mins = 60, from = null) {
     return !!(to?.enter && SETS_CLOCK.test(String(to.enter)));
 }
 export function isInstantTask(g, scenes, id) {
-    if (id === MER_TASK) return false;
+    if (id === MER_TASK || id === BT_TASK) return false;
     const p = parse(id);
     return instantChoice(scenes[p.scene]?.choices?.[p.index]);
 }
@@ -102,6 +106,7 @@ export function isInstantTask(g, scenes, id) {
 /** What kind of card `id` is on hub `hubId`, with its choice and (for menu cards) the door choice into its menu. */
 function cardOf(scenes, hubId, id) {
     const cfg = TASK_HUBS[hubId];
+    if (id === BT_TASK) return { kind: 'bt', c: null, p: { scene: 'breakthrough', index: -1 }, group: 'Meditate' };
     if (id === MER_TASK) return { kind: 'mer', c: null, p: { scene: 'meridians', index: -1 }, group: 'Meditate' };
     const p = parse(id);
     const c = scenes[p.scene]?.choices?.[p.index];
@@ -169,13 +174,14 @@ export function taskCards(g, scenes) {
     const mi = merChoice(g, scenes);
     if (mi >= 0) {
         const c = scenes.meridians.choices[mi];
-        cards.push({ id: MER_TASK, kind: 'mer', group: 'Meditate', label: `Next meridian session: ${asText(c.text, g).replace(/^Open /, '')}`, tag: choiceTag(g, c), minutes: c.time || 0, status: 'open', tier: 0, fam: 0, next: null });
+        cards.push({ id: MER_TASK, kind: 'mer', group: 'Meditate', label: `Next meridian session: ${asText(c.text, g).replace(/^Open /, '')}`, tag: choiceTag(g, c), minutes: c.minutes ? c.minutes(g) : c.time || 0, status: 'open', tier: 0, fam: 0, next: null });
     }
+    if (btOpen(g)) cards.push({ id: BT_TASK, kind: 'bt', group: 'Meditate', label: `Break through to ${realmName(g.james.realm + 1)}`, tag: `${btMinutes(g)} min`, minutes: btMinutes(g), status: 'open', tier: 0, fam: 0, next: null });
     return cards;
 }
 
 export const taskOpen = (g, scenes, id) => taskCards(g, scenes).some((c) => c.id === id && c.status === 'open');
-export const taskLabel = (g, scenes, id) => { if (id === MER_TASK) return 'Next meridian session'; const p = parse(id); const c = scenes[p.scene]?.choices?.[p.index]; return c ? asText(c.text, g) : id; };
+export const taskLabel = (g, scenes, id) => { if (id === MER_TASK) return 'Next meridian session'; if (id === BT_TASK) return 'Break through'; const p = parse(id); const c = scenes[p.scene]?.choices?.[p.index]; return c ? asText(c.text, g) : id; };
 
 /** HP 0 during a task (v0.9.4): the Coil ends. The queue is gone; the Coil screen decides what happens next. */
 function collapse(g, scenes, hubId) {
@@ -303,7 +309,11 @@ export function runTask(g, scenes, id) {
     const lines = [];
     let fail = false;
     recordCard(g, hubId, m0, id);
-    if (card.kind === 'mer') {
+    if (card.kind === 'bt') {
+        if (!btOpen(g)) throw new Error('No breakthrough possible');
+        g.flags.bt_return = hubId;
+        lines.push(...goTo(g, scenes, 'breakthrough'));
+    } else if (card.kind === 'mer') {
         const mi = merChoice(g, scenes);
         if (mi < 0) throw new Error('No meridian session possible');
         g.scene = 'meridians';

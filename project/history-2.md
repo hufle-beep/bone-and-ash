@@ -4,6 +4,14 @@ Started 2026-11-06 (v0.10.4), when `history.md` passed 45 KB. Newer than `histor
 
 ## Older decisions (2026-11-06, v0.10.0 and later)
 
+- **v0.10.4: Bonesinger forms and the mode names (owner 12:09 "skills and their expression… what cannot be formed yet should not be visible in checks and combat"; 12:46 the four lines: ranged needle → dart (an evolved needle) → lances later, melee a fragile knife, defensive structures spikes or walls, personal defence shields and armour; 12:48 "run them. 1a, 3a, 4a, 5a"; 12:51 "A. if he dies, he dies." (the knife really breaks); 12:53 rename Tasks → Incremental Mode, Classic → Story Mode, "then go"; built in v0.10.4):**
+  - **1a** forms unlock by Convergence Use rank (tier and level). **Ladder** (`js/core/forms.js`): ranged needle T1 L1 → dart T1 L5 → thrown lance T3 L1 → volley T4 L1 → storm T5 L1; melee fragile knife T1 L1 → knife T1 L8 → dagger T2 L1 → sword T2 L5; defensive structures spikes T1 L3 → stake ring / spike hedge T1 L8 → stepping-stones T2 L5 → man-high slab T3 L1 → walls, bridges, shelters T4 L1 → fortifications T5 L1; personal defence bracer T1 L5 → buckler T2 L1 → shield T2 L5 → armour plates T3 L1 → full wraithbone armour T5 L1. Constructs stay at T7+.
+  - **3a** fights show only the forms James has (no darts below T1 L5); the actions are named after his best form per line (knife / dagger / sword, darts / lance / volley / storm, bracer / buckler / shield / plates / armour on Guard). **Pick a:** the fragile knife breaks after every swing and costs its Qi again until T1 L8. Damage and effects otherwise unchanged (tier multipliers, plates' DR, volleys, constructs).
+  - **4a** 18 story choices that need a form are hidden until James has it (all the dart choices, the camp stakes, the spike pit, spearheads, and the four below); four reworded in Incremental Mode: night 3 "A hedge of bone spikes…" (T1 L8, fail text "The hedge comes out knee-high…"), the ford "Sing stepping-stones of bone…" (T2 L5, "White stepping-stones, ribbed like vertebrae…"), the ambush "A slab of bone…" (T3 L1), the ring chambers "…with a slab of bone…" (T3 L1, "A white slab, man-high, jammed into the doorway…").
+  - **5a** Incremental Mode only; Story Mode keeps every form and the original lines. The James tab lists each line's form and the next unlock (Incremental Mode).
+  - **Mode names (owner 12:53):** Tasks is now **Incremental Mode**, Classic **Story Mode** (Saves tab labels; storage key `boneash.tasks` unchanged). Code and older notes still say "task mode" / "classic".
+  - **Measured before (1,000 bot games each, same bot):** today: dead before Mei Lin 83 / 35 / 12 / 17%, tribute won 0 / 27 / 50%, Act 1 deaths 94 / 82 / 63 / 50%; ladder with the knife breaking (picked): 94 / 53 / 23 / 18%, 0 / 29 / 44%, 94 / 84 / 67 / 50%; ladder with the knife holding: 87 / 37 / 13 / 15%, 16 / 32 / 51%, 93 / 83 / 65 / 43%.
+  - **Bots after v0.10.4** (tasks test): dead before Mei Lin 91 / 49 / 29 / 33%, Act 1 Coils ending in death 89 / 78 / 61 / 43%, tribute won Coil 1–3 23 / 34 / 47%.
 - **v0.10.3: the handover split (owner 11:40 "the handover has been running for a very long time"; pick 11:41 "a"; go 11:42; docs only):** `handover.md` (core) + `reference.md` + `history.md`, nothing deleted, only moved; the last three versions stay here.
 - **v0.10.2 (owner 11:06: "Night falls. Settle in." too long, make camp a hub or merge it, move the clock instantly; paused by default, no automatic unpause; picks 11:11 "3a. 1 a+c, 2a but also on new scenes and doesn't automatically start until you queue everything and tapped (not queued) cards still run, but re-pause after"; go 11:20 without 3a; mid-build stop 11:25, pick 11:28 "a"; built in v0.10.2):**
   - **1a** the camp (`camp`, Days 1–3) is a task screen: fire, cook, eat raw, stakes are cards (tap or +). `plainChecks`: its checked cards stay chores (the story check's numbers, not the work-card DC +2 / double length). **Mid-build pick a:** "Eat it raw" (no own time) takes 0 minutes as a camp card instead of the story default 30, like eating on every other task screen; fire, cook and stakes keep their own times.
@@ -31,6 +39,15 @@ Started 2026-11-06 (v0.10.4), when `history.md` passed 45 KB. Newer than `histor
   - Test fix: the v0.9.7 test "starving to 0 ends the Coil" now builds up a starving hour first (it relied on the old 1 HP per step).
 
 ## Older version notes (v0.10.0 and later)
+
+## v0.10.4 — Bonesinger forms, the mode names
+
+- **forms.js** (new, `js/core/`): `FORM_LINES` (four lines, unlock rank = 10·(T−1) + L), `cuRank`, `hasForm` (always true in Story Mode), `lineState`, `actionOpen` (darts need `dart`), `actionLabel`, `fragileKnife` (Incremental Mode, rank < T1 L8), `STORY_FORMS` (text patterns → form). `setFormsActive` is wired to `isNoDice` by game.js.
+- **game.js** `stepNoDice`: an action whose form is missing falls back on Guard; labels from `actionLabel`; the fragile knife clears `bladeFormed` after every swing.
+- **prologue.js** (end): every choice matching `STORY_FORMS` gets `c.form` and a `show` that needs the form (keeps its `dailyKey`); the four rewordings are functions of the mode (`inc`), result lines swapped only in Incremental Mode.
+- **tasks.js:** a hidden-by-form card stays hidden (not "back tomorrow").
+- **main.js:** fight cards filter by `actionOpen` and use `actionLabel` (both screens); the James tab's form rows; Saves tab: Incremental Mode / Story Mode.
+- **Tests:** four lines, T1 L1 / L5 / L8, T2 L5, T3 L1 forms and names, the knife breaks below T1 L8 and holds from it, the Day 1 dart hidden then shown, 18 gated choices, the four rewordings and their result lines in Incremental Mode only, Story Mode unchanged; the camp test gives CU T1 L3 for the stakes.
 
 ## v0.10.2 — pause rules, the camp as a task screen, waits at once
 

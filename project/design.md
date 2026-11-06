@@ -56,6 +56,13 @@ The story becomes the stops; tasks fill the days between them. Art plate, ink lo
 - **Story stops** pause the clock. Some are timed (the scream on Day 4, night attacks, Shen Qiu), some opened by a task (first bone-field visit, the ship log). Choices show their check, `[GU 2.5 vs DC 4]`. Known stops can be skimmed ("You remember this one").
 - **The Coil screen** (Selene's death screen): what this Coil gained, Insights found, threads close to waking, what James remembers, "Same queue again".
 
+## Cultivation by time (v0.11.2, owner 2026-11-06)
+In Incremental Mode cultivation is timed work, like Selene's tasks, and the Coil bonus ×(1 + 0.5 × earlier Coils of the act) shortens it:
+- **Sit:** a 1-hour card, 10 Qi, Saturation +100 ÷ (10 × 2^realm) % × the bonus (Mortal Vessel 10 h, Foundation 20 h, Core 40 h…). The hollow and the grove count as two sits.
+- **Meridians:** hours of work, ÷ the bonus, in sittings of up to 2 h (2 Qi); primaries 2–4 h (36 h for all 12), collateral groups 3–5 h (32 h); no daily limit, no check, no fail; standard XP once per channel; locked below Fed 20. The Extraordinary net keeps its checks.
+- **Breakthrough:** a timed, queueable card of 2 h × (realm + 1) ÷ the bonus (Foundation 2 h … Heavenly Immortal 28 h), then the tribulation scene.
+- Many Coils for a high realm is intended; the Long Forest (+1 realm a season) is the bypass.
+
 ## The prologue as a Coil (Days 1–7)
 Rewind returns to Day 1 dawn (`arrival`). Every scene stays; the hubs `stream`, `wilds`, `ashfall` become task screens.
 

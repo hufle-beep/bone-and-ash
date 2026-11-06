@@ -5,16 +5,17 @@
  * On a task hub, Cultivate is the hub's own cultivate card (queueable; same id, same familiarity), shown in this group.
  * Pure — no DOM.
  */
-import { condense, canBreakThrough, breakReady, breakBlock } from './game.js';
+import { condense, canBreakThrough, breakReady, breakBlock, btMinutes, sitGain } from './game.js';
 import { CONDENSE_SIT_COST } from './formulas.js';
 import { goTo, checkDeath } from './story.js';
-import { canAnyMeridian, btTarget } from '../story/meridians.js';
+import { canAnyMeridian, btTarget, merMinutes } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
-import { merChoice, MER_TASK } from './tasks.js';
+import { merChoice, MER_TASK, BT_TASK } from './tasks.js';
+const hrs = (m) => (m % 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m / 60} h`);
 
 /** No meditating here: urgent moments and screens that are already about it. */
 export const NO_MEDITATE = new Set(['herb_girl', 'tribute', 'rt_elder', 'rt_truth', 'coil_end', 'coil_dawn', 'breakthrough', 'ns_warn', 'col_warn', 'meridians', 'yuki_form', 'yuki_tiger_awaken', 'yuki_human_awaken']);
-export const SIT_MINUTES = 30;
+export const SIT_MINUTES = 60; // v0.11.2: an hour (Incremental Mode only uses this card)
 
 /** Is a choice one of the plain "cultivate one sit and come back" choices (hub chores)? */
 export const isSitChoice = (c, sceneId) => c.to === sceneId && /^(Cultivate|Condense)/.test(String(typeof c.text === 'function' ? '' : c.text)) && /condense\(g\)/.test(String(c.do));
@@ -30,12 +31,15 @@ export function medCards(g, scenes) {
     const s = scenes[g.scene];
     const hubSit = TASK_HUBS[g.scene] ? (s.choices || []).findIndex((c) => isSitChoice(c, g.scene)) : -1;
     const qiOk = g.james.qi >= CONDENSE_SIT_COST;
-    const sit = { label: `Cultivate: one sit, ${CONDENSE_SIT_COST} Qi toward Saturation (${g.james.saturation}%).`, tag: qiOk ? `${CONDENSE_SIT_COST} Qi` : `needs ${CONDENSE_SIT_COST} Qi`, open: qiOk, minutes: SIT_MINUTES };
+    const sit = { label: `Cultivate: an hour, ${CONDENSE_SIT_COST} Qi, Saturation +${sitGain(g)}% (${g.james.saturation}%).`, tag: qiOk ? `${CONDENSE_SIT_COST} Qi` : `needs ${CONDENSE_SIT_COST} Qi`, open: qiOk, minutes: SIT_MINUTES };
     if (hubSit >= 0) out.push({ ...sit, id: `${g.scene}:${hubSit}`, task: `${g.scene}:${hubSit}` });
     else out.push({ ...sit, id: 'med:sit' });
-    if (TASK_HUBS[g.scene] && merChoice(g, scenes) >= 0) out.push({ id: MER_TASK, task: MER_TASK, label: 'Next meridian session (2 h, 2 Qi): the next channel on the map.', tag: 'queueable', open: true, minutes: 120 }); // v0.10.0
+    if (TASK_HUBS[g.scene] && merChoice(g, scenes) >= 0) out.push({ id: MER_TASK, task: MER_TASK, label: 'Next meridian session (up to 2 h, 2 Qi): the next channel on the map.', tag: 'queueable', open: true, minutes: merMinutes(g) }); // v0.10.0
     if (canAnyMeridian(g)) out.push({ id: 'med:mer', label: 'Open a meridian.', tag: 'opens the meridian screen', open: true, minutes: 0 });
-    if (canBreakThrough(g)) out.push({ id: 'med:bt', label: `Break through. (Saturation ${g.james.saturation}%.)`, tag: 'opens the breakthrough', open: true, minutes: 0 });
+    if (canBreakThrough(g)) {
+        const warn = btTarget(g) !== 'breakthrough';
+        out.push({ id: 'med:bt', label: `Break through. (Saturation ${g.james.saturation}%; ${hrs(btMinutes(g))}.)`, tag: warn ? 'a warning first' : 'queueable', open: true, minutes: warn ? 0 : btMinutes(g), ...(warn || !TASK_HUBS[g.scene] ? {} : { task: BT_TASK }) });
+    }
     else if (breakReady(g) && breakBlock(g)) out.push({ id: 'med:bt', label: `Break through. (Saturation ${g.james.saturation}%.)`, tag: breakBlock(g), open: false, reason: breakBlock(g), minutes: 0 });
     return out;
 }

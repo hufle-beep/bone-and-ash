@@ -4,7 +4,7 @@
  */
 import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, clockParts, d6, awardYukiFightXp, awardXp, jamesHpMax, jamesQiMax } from '../core/game.js';
 import { condensationSatGain } from '../core/formulas.js';
-import { coilMult } from '../core/game.js';
+import { coilMult, sitGain } from '../core/game.js';
 import { set, day, hour, daily, markDaily, forestScale, grow, eatBest, pantry, foodCount } from './common.js';
 
 const P = 'Blackroot Wilds';
@@ -272,7 +272,7 @@ It's faint. It's sad. It is, unmistakably, the same note your people's Hearth Tr
 
 ${g.flags.saw_lights ? 'The lights you saw at night came this way. You can see the faint trails where they passed — the moss is greener there.' : 'Yuki sits down very quietly, which she never does.'}`,
         choices: [
-            { text: 'Sit among the roots and cultivate. Let the song in.', show: (g) => !g.flags.hollow_sit, check: { skill: 'Convergence Use', dc: 3 }, time: 60, do: (g) => { g.flags.hollow_sit = true; const gain = Math.round(condensationSatGain(10, jamesQiMax(g)) * 2 * coilMult(g) * 10) / 10; g.james.saturation = Math.min(100, Math.round((g.james.saturation + gain) * 10) / 10); return [`The roots carry your Qi round and back, clean as a held breath. Saturation +${Math.round(gain * 10) / 10}% (${g.james.saturation}%), no Qi spent.`]; }, failDo: set('hollow_sit'), to: 'hollow' },
+            { text: 'Sit among the roots and cultivate. Let the song in.', show: (g) => !g.flags.hollow_sit, check: { skill: 'Convergence Use', dc: 3 }, time: 60, do: (g) => { g.flags.hollow_sit = true; const gain = sitGain(g, 2); g.james.saturation = Math.min(100, Math.round((g.james.saturation + gain) * 10) / 10); return [`The roots carry your Qi round and back, clean as a held breath. Saturation +${Math.round(gain * 10) / 10}% (${g.james.saturation}%), no Qi spent.`]; }, failDo: set('hollow_sit'), to: 'hollow' },
             { text: 'Follow one root as far as you dare.', show: (g) => !g.flags.roots, check: { skill: 'GU', dc: 4 }, time: 60, do: (g) => { g.flags.roots = true; return ['Two kilometres in, the root is warm. Something at the end of it is not entirely dead.']; }, failDo: (g) => { g.flags.roots = true; return ['The forest closes in. You turn back with the uneasy sense that it let you.']; }, to: 'hollow' },
             { text: 'Go back. You\'ll come back here. You know you will.', time: 60, to: 'wilds' },
         ],

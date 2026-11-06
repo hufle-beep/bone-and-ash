@@ -379,12 +379,22 @@ export function spendQi(g, amount) {
     return true;
 }
 
+/**
+ * Timed cultivation (v0.11.2, Incremental Mode): Saturation is earned by hours. A realm takes SAT_HOURS(realm) hours of
+ * sitting at ×1 (Mortal Vessel 10, doubling each realm), ÷ the Coil bonus. Story Mode keeps the engine's Qi-based gain.
+ */
+export const SAT_HOURS = (realm) => 10 * 2 ** (realm || 0);
+export const SIT_MINUTES_INC = 60;
+/** Saturation % from `sits` sits (one hour each in Incremental Mode; the hollow and the grove count as two). */
+export const sitGain = (g, sits = 1) => Math.round((noDice ? (100 * sits) / SAT_HOURS(g.james.realm) : condensationSatGain(CONDENSE_SIT_COST, jamesQiMax(g)) * sits) * coilMult(g) * 10) / 10;
+/** The breakthrough's length: 2 h × (realm + 1) ÷ the Coil bonus in Incremental Mode (Foundation 2 h … Heavenly Immortal 28 h); 2 h in Story Mode. */
+export const btMinutes = (g) => (noDice ? Math.round((120 * ((g.james.realm || 0) + 1)) / coilMult(g)) : 120);
 /** Condensation: a conscious sit, 10 Qi a sit, 0 XP; raises Saturation. Spends Qi, never refills it. */
 export function condense(g) {
     if (!spendQi(g, CONDENSE_SIT_COST)) return { ok: false };
-    const gain = Math.round(condensationSatGain(CONDENSE_SIT_COST, jamesQiMax(g)) * coilMult(g) * 10) / 10;
+    const gain = sitGain(g);
     g.james.saturation = Math.min(100, Math.round((g.james.saturation + gain) * 10) / 10);
-    advance(g, 30);
+    advance(g, noDice ? SIT_MINUTES_INC : 30);
     return { ok: true, gain, saturation: g.james.saturation };
 }
 
@@ -403,7 +413,7 @@ export const canBreakThrough = (g) => breakReady(g) && !breakBlock(g);
 export function breakthrough(g) {
     if (!canBreakThrough(g)) return { ok: false };
     const before = { hp: jamesHpMax(g), qi: jamesQiMax(g), yhp: yukiHpMax(g), yqi: yukiQiMax(g) };
-    advance(g, 120, { resting: true });
+    advance(g, btMinutes(g), { resting: true });
     if (g.james.realm === 0 && (g.james.collaterals ?? 66) < 66) g.james.colSealed = true; // the engine window: collaterals are Mortal Vessel only
     g.james.realm += 1;
     g.james.saturation = 0;
