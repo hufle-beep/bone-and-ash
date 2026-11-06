@@ -77,7 +77,7 @@ Rewind returns to Day 1 dawn (`arrival`). Every scene stays; the hubs `stream`, 
 A second Coil: James wakes in the clearing with full bars and an empty hammerspace; the arrival gets a Coil line ("You have done this before. Yuki has opinions about that."). Familiarity frees days for village work (militia, the boar, scouting), which raises the odds at the tribute.
 
 ## Act 1 as a Coil (Days 8–21)
-Rewind returns to Day 8 dawn (`fo_start`), the prologue's outcome fixed.
+Rewind returns to Day 8 dawn (`fo_start`), the prologue's outcome fixed. **Since v0.11.19** the seven resting places (`fo_ashfall`, `rr_hub`, `dw_hub`, `ah_hub`, `heart_hub`, `rt_camp`, `rt_ashfall`) are task screens like the prologue's: work menus, door cards, chores, Yuki's jobs on the road and in Ashfall.
 
 | Arc | Days | Story stops | Tasks | Yuki's lane | Insights | Finale |
 |---|---|---|---|---|---|---|

@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.18 | (this push) | Sleep resets the once-a-day things, Push through the night, Yuki's curve, the Extraordinary lines timed. Same save state as 0.11.5 plus the optional `wake` and `james.e8Work` / `ecWork` / `jnWork` (an older version ignores them: once-a-day things then come back at midnight again, and Extraordinary work started here is not counted there). |
+| 0.11.19 | (this push) | Act 1's resting places as task screens. Same save state as 0.11.18 (queued Act 1 rows are ids; an older version skips them there). |
+| 0.11.18 | `037d99a` | Sleep resets the once-a-day things, Push through the night, Yuki's curve, the Extraordinary lines timed. Same save state as 0.11.5 plus the optional `wake` and `james.e8Work` / `ecWork` / `jnWork` (an older version ignores them: once-a-day things then come back at midnight again, and Extraordinary work started here is not counted there). |
 | 0.11.17 | `42a5abf` | Cards that can't run hidden; the check-outcome leak. Display only; same save state as 0.11.16. |
 | 0.11.16 | `852e3ca` | The relationship catch-up, the leftover Cultivate choices. Same save state as 0.11.5 plus the optional `coil.best` (an older version ignores it; relationships then grow ×1). |
 | 0.11.15 | `e015408` | B1-b, speed by use. Same save state as 0.11.5 plus the optional `tasks.use` (an older version ignores it; its sits and breakthroughs then run at ×1 with the Coil bonus). |

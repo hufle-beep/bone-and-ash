@@ -34,6 +34,24 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
         assert(!SCENES[menu].choices.some((c) => c.combat), `${menu} has no fights (cards can't fight)`);
     }
 }
+// v0.11.19 (owner pick B): Act 1's seven resting places are task screens
+{
+    const A1 = { fo_ashfall: ['Palisade', 'Council', 'Militia', 'Clinic'], rr_hub: ['Forage', 'Scout'], dw_hub: ['Forage'], ah_hub: ['Forage'], heart_hub: [], rt_camp: [], rt_ashfall: ['Militia'] };
+    const JOBS = { fo_ashfall: 'yuki:ashfall', rr_hub: 'yuki:rr', dw_hub: 'yuki:dw', ah_hub: 'yuki:ah', rt_ashfall: 'yuki:ashfall' };
+    for (const [hub, groups] of Object.entries(A1)) {
+        const cfg = TASK_HUBS[hub];
+        assert(!!cfg && MED_SCREENS.has(hub), `v0.11.19: ${hub} is a task screen and a resting place`);
+        assert(JSON.stringify(Object.values(cfg.menus || {}).map((m) => m.label)) === JSON.stringify(groups), `v0.11.19: ${hub}'s work groups (${Object.values(cfg.menus || {}).map((m) => m.label)})`);
+        for (const d of cfg.doors || []) assert(!!SCENES[d] && SCENES[hub].choices.some((c) => c.to === d), `v0.11.19: ${hub} has a door to ${d}`);
+        assert((cfg.yuki?.id || null) === (JOBS[hub] || null), `v0.11.19: ${hub}'s Yuki job (${cfg.yuki?.id})`);
+    }
+    const f = ensureBars(newGame(311)); f.scene = 'fo_ashfall'; f.minutes = 8 * 1440 + 9 * 60; f.coil = f.coil || {}; f.james.qi = 30; f.james.satiety = 70;
+    const fc = taskCards(f, SCENES);
+    assert(isTaskHub(f) && ['Palisade', 'Council', 'Militia', 'Clinic'].every((gr) => fc.some((c) => c.group === gr && c.kind === 'work')) && fc.some((c) => c.kind === 'door' && c.group === 'Around Ashfall') && fc.some((c) => c.id === 'fo_ashfall:11'), `v0.11.19: Ashfall (fallout) on Day 9: work, doors, its own sit (${[...new Set(fc.map((c) => c.group))]})`);
+    const pid = fc.find((c) => c.group === 'Palisade').id, fm0 = taskMinutes(f, SCENES, pid), f0 = f.minutes;
+    runTask(f, SCENES, pid);
+    assert(f.scene === 'fo_ashfall' && f.minutes - f0 === fm0 && taskCards(f, SCENES).filter((c) => c.group === 'Palisade').every((c) => c.status === 'tomorrow'), 'v0.11.19: a palisade card runs as forecast, stays on the screen, and is done for the day');
+}
 // old state (v1) → empty queue
 { const old = ensureBars(newGame(5)); delete old.tasks; old.v = 1; migrate(old); assert(old.v === SAVE_VERSION && Array.isArray(old.tasks.queue) && old.tasks.queue.length === 0 && Object.keys(old.tasks.fam).length === 0 && old.tasks.yuki.on === false, 'v1 save gets an empty queue and no familiarity'); }
 assert(QUEUE_MAX === 30, 'queue holds 30');
@@ -793,19 +811,18 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
         assert(!medCards(a, SCENES).length && !isQueueScreen(a, SCENES) && !taskCards(a, SCENES).length, 'v0.11.14: the arrival has no Meditate and no queue');
         const rc = ensureBars(newGame(80, { closed: true })); rc.scene = 'rt_camp'; rc.james.qi = 30; rc.james.satiety = 70;
         const rm = medCards(rc, SCENES);
-        assert(isQueueScreen(rc, SCENES) && rm.find((c) => c.id === 'med:mer:pri')?.task === 'mer:pri' && rm.find((c) => c.id === 'med:sit')?.task === SIT_TASK, 'v0.11.14: rt_camp: the primary and the sit carry queue ids');
-        assert(taskCards(rc, SCENES).every((c) => ['mer', 'sit', 'bt'].includes(c.kind)) && taskCards(rc, SCENES).length === 2, 'v0.11.14: off the task screens only Meditate cards are cards');
-        queueAdd(rc, 'mer:pri'); queueAdd(rc, SIT_TASK); queueAdd(rc, 'stream:0'); queueAdd(rc, SIT_TASK);
+        assert(isQueueScreen(rc, SCENES) && rm.find((c) => c.id === 'med:mer:pri')?.task === 'mer:pri' && rm.find((c) => c.id === 'rt_camp:3')?.task === 'rt_camp:3', 'v0.11.19: rt_camp is a task screen: the primary and its own sit card carry queue ids');
+        assert(isTaskHub(rc) && taskCards(rc, SCENES).some((c) => c.id === 'rt_camp:3') && taskCards(rc, SCENES).some((c) => c.kind === 'door' && /fire/.test(c.label)) && taskCards(rc, SCENES).some((c) => c.id === 'mer:pri'), 'v0.11.19: rt_camp: its chores, doors and Meditate cards are cards');
+        queueAdd(rc, 'mer:pri'); queueAdd(rc, 'rt_camp:3');
         const ro = outlook(rc, SCENES), rr = JSON.parse(JSON.stringify(rc)), rgot = [];
-        for (const id of [...taskQueue(rr)]) { if (!runsHere(rr, SCENES, id)) break; taskQueue(rr).shift(); runTask(rr, SCENES, id); rgot.push(rr.minutes); }
-        assert(ro.rows.slice(0, 2).map((x) => x.end).join() === rgot.join() && ro.rows[2].wait && ro.rows[3].wait && rr.scene === 'rt_camp' && rr.james.primaries === 1 && taskQueue(rr).length === 2, `v0.11.14: rt_camp runs the Meditate rows (forecast = reality), the stream row waits and the rest after it (${ro.rows.map((x) => x.end || (x.wait ? 'wait' : '?')).join()})`);
-        assert(!runsHere(rr, SCENES, 'stream:0') && (rr.scene = 'stream', runsHere(rr, SCENES, 'stream:0')), 'v0.11.14: the stream row runs once back on the stream');
+        for (const id of [...taskQueue(rr)]) { taskQueue(rr).shift(); runTask(rr, SCENES, id); rgot.push(rr.minutes); }
+        assert(ro.rows.map((x) => x.end).join() === rgot.join() && rr.scene === 'rt_camp' && rr.james.primaries === 1, `v0.11.19: rt_camp runs its queue as forecast (${ro.rows.map((x) => x.end)} vs ${rgot})`);
         let threw = false; try { runTask(a, SCENES, SIT_TASK); } catch { threw = true; }
         assert(threw, 'v0.11.14: no queued work on a story screen');
         const bq = ensureBars(newGame(81)); bq.scene = 'rt_camp'; bq.james.qi = 30; bq.james.saturation = 96;
         assert(taskOpen(bq, SCENES, BT_TASK) && medCards(bq, SCENES).find((c) => c.id === 'med:bt')?.task === BT_TASK, 'v0.11.14: Break through queues on a resting place');
         const br = runTask(bq, SCENES, BT_TASK);
-        assert(br.stopped && bq.scene === 'breakthrough' && bq.flags.bt_return === 'rt_camp' && bq.flags.med_back === 'rt_camp', 'v0.11.14: it comes back to rt_camp without its enter');
+        assert(br.stopped && bq.scene === 'breakthrough' && bq.flags.bt_return === 'rt_camp', 'v0.11.19: Break through on the rt_camp task screen comes back to it');
         const fe = ensureBars(newGame(78)); fe.scene = 'stream'; fe.james.qi = 25; fe.james.realm = 1; markDaily(fe, 'mer_e8');
         const fm = medCards(fe, SCENES).find((c) => c.id === 'med:mer:e8');
         assert(fm && fm.open && taskOpen(fe, SCENES, 'mer:e8'), `v0.11.18: an Extraordinary line has no daily limit in Incremental Mode (${fm?.reason})`);
