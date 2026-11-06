@@ -1,12 +1,24 @@
 # Bone and Ash — handover (read this first in a new chat)
 
-**Saved:** 2026-11-06 (Europe/Budapest). **Version:** 0.9.4 (`sw.js` VERSION `bone-ash-0.9.4`): step 3c-1, the Coil (task mode, prologue), plus a ⏸ / ▶ button on the task screen, on top of no dice anywhere in task mode (v0.9.3) and step 3b. Everything behind the "Tasks (preview)" switch. Prologue + Act 1, about 390 scenes. **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
+**Saved:** 2026-11-06 (Europe/Budapest). **Version:** 0.9.5 (`sw.js` VERSION `bone-ash-0.9.5`): every screen as cards in task mode (story choices with bars, every choice takes time, the Meditate card everywhere), on top of the Coil (v0.9.4, prologue) and no dice anywhere in task mode (v0.9.3) and step 3b. Everything behind the "Tasks (preview)" switch. Prologue + Act 1, about 390 scenes. **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
 Built in the SillyTavern chat as a spin-off. That chat stays for SillyTavern; this game continues in its own chats.
 
 **Rules:** `CLAUDE.md` (short) and `project/working-agreement.md` (full) — the change sequence is a HARD RULE. **Other docs:** `project/roadmap.md` (what's next), `project/design.md` (the approved hybrid design: Selene-style tasks and the Coil), `project/changelog.md`, `project/restore-points.md`. All mirrored to the claude.ai project "ash and bone".
 **Reference repos (the owner's):** `hufle-beep/Long-patience` (Selene: rules, docs, Android wrapper and workflows to copy), `hufle-beep/Shared-ST` (private; Rules Engine C in `st/rules-engine-c/`, presets in `st/rules-engine-c/lib/presets.js`, `docs/STANDING_LATEST.md`).
 
 ## Decided in chat (2026-11-06)
+
+- **Cards everywhere, before the balance (owner 07:42; picks 07:50 "1b, 2a, 3a, 4ok, 5a, 6 …, yes, 7a, 8a, 9 ok, 10a"; go 07:52; built in v0.9.5 as push 1 of 4):**
+  - **Four pushes:** 1 cards everywhere (whole game), time on every choice, the Meditate card — **DONE in v0.9.5**; 2 meridians closed at the start + Act 1's Coil; 3 severe difficulty (replaces 3c-2); 4 = 3c-3 (Tasks on by default, speed gate).
+  - **Story cards (2a):** every story choice is a card with a bar; when it fills, the result and the next scene appear; story cards don't queue.
+  - **Time (3a):** a choice with no time takes talking 10 min, moving to another place 20, an action (check, Qi or items) 30; hand-set times stay; fights add none; hub ↔ menu steps and meta screens add none.
+  - **Layout (4):** top = the picture (title and place on it) and the story text only; below: status, speed and ⏸, the bars, Cards | Results; fights: the round on top, the actions as cards.
+  - **Meditate card (5a):** everywhere but fights, the scream (`herb_girl`), the tribute, Shen Qiu (`rt_elder`), the Coil and meridian / breakthrough screens; Cultivate (condensation) lives here, plus Open a meridian and Break through.
+  - **Push 2, meridians (6, owner):** new games start with **0 of 12 primaries and 0 of 66 collaterals**; about **20 sessions** open everything: **12 for the primaries (one each), 8 for the collaterals in sequential groups** (each group after its primaries); **the breakthrough to Foundation needs all 12 primaries**; old saves keep what they have. Act 1 gets its own Coil (rewind to Day 8 dawn, the prologue's outcome kept) (8a).
+  - **Push 3, difficulty (7a, 9):** in task mode HP 0 anywhere ends the Coil (starving, beasts); lost fights against people (Gao, the tribute, Ya, Shen Qiu) keep their written branches. Targets on a normal run (no Long Forest): dead before Mei Lin about 80 / 40 / 15% on Coils 1 / 2 / 3; tribute won about 30 / 55 / 80%. Levers to measure: faster Fed drain, smaller hauls, harsher starving, a Fed bar for Yuki, closed meridians. Numbers to the owner first.
+  - **Classic (10a):** unchanged, the fallback behind the switch until Tasks becomes the normal mode.
+  - **Two more dead ends (found by a sweep of 3,000 low-Qi games; picks 07:58 1a, 2a):** the rain night now has "Get wet. Sleep anyway." (to morning); "Show him the truth…" (Shen Qiu) needs 12 Qi. A re-sweep finds none.
+  - **Bots after v0.9.5:** tribute won Coil 1 12% / Coil 2 62% / Coil 3 68%.
 
 - **Step 3c (01:22–01:43, owner: "ok with your recommendations", go 01:34; built in v0.9.4 as 3c-1):** three pushes: **3c-1 the Coil** (done), **3c-2 balance** (measure Coils 1–3 with bots, then pick an HP lever with numbers: risky cards ×1.5 or sleep heals 50%; tune the collectors and the bluff DC toward ~30 / 55 / 80% won on Coils 1 / 2 / 3; numbers to the owner first), **3c-3** (Tasks on by default with classic kept as a switch until step 5; the speed gate ×2 after the first won tribute, ×5 after Act 1, ×10 removed, plus a hidden "test speeds" toggle in Saves). The Coil turns in the **prologue only** for now; Act 1 gets its Coil in step 5. A collapse (HP 0 during tasks) ends the Coil (no stand-in). The serpent stays its own small push after 3c.
 - **Pause (owner 01:31 "I don't see the pause button"; pick A):** a ⏸ Pause / ▶ Resume button next to James's bar on every task screen (the speed box stays under the clock).
@@ -112,6 +124,7 @@ In `CLAUDE.md` and `project/working-agreement.md` (adopted 2026-11-05). The chan
 | `sw.js`, `manifest.webmanifest`, `icons/` | Offline install. Game files: network first, cache when offline. Google Fonts: cached on first use. |
 | `js/core/tasks.js`, `js/story/task_hubs.js` | Task cards and the queue (v0.9.0): which hubs, card ids, `runTask`, dry runs, the outlook. |
 | `js/story/nodice_tune.js` | No-dice fight tuning per encounter (v0.9.3). |
+| `js/core/meditate.js` | The Meditate card (v0.9.5): which screens, its cards (sit, meridian, breakthrough), `runMed`. |
 | `js/core/coil.js`, `js/story/coil_scenes.js` | The Coil (v0.9.4): end, rewind (reset B), the head start, "same days again", the Coil screen and the first dawn again. |
 | `tests/tasks.test.mjs` | Task mode: 2,000 bot games each way, outlook = reality, collapse, migration, no dice on work cards, familiarity grows, every offered card played, Yuki's lane, no die anywhere in task mode, classic still rolls. |
 | `tests/rules.test.mjs` | The engine numbers. 14 checks. |
@@ -281,6 +294,15 @@ The bible and the contract between the four part files are at the top of `js/sto
 - Last night of Act 1 (`rt_evening`) offers every arrangement the hearts allow: Mei Lin · Ya · Yuki alone; Mei Lin + Ya (`rt_trio`); Yuki + Mei Lin (`yk_night_mei`); Yuki + Ya (`yk_night_ya`); all four (`yk_night_all`). `g.flags.final_night` records it; `loveLine()` writes the Act 1 epilogue line (a1_end).
 - Romance with Yuki only in her human form (adult); fade to black. The code still says she bonded with James when he was six (34 years); **decided 2026-11-05: born together and bonded from birth** (fix pending, roadmap step 7).
 - Tests: 240 extra walks over the last night; combat round cap in the random runs raised to 400 (a rare long stalemate vs the Guardian at True Core).
+
+## v0.9.5 — every screen as cards (task mode)
+
+- **Screen** (`renderCardScreen`, `renderCombatCards` in main.js; classic keeps `renderStory` / `renderCombat`): the picture with title and place, the story text; then `.below`: status (the speed box now on every screen in task mode), the last result, James's bar with ⏸ / ▶, on hubs Yuki's lane and the outlook, Cards | Results. Cards: **Story** (every visible story choice; on hubs the stops), the hub's task groups, **Meditate**. Fights: the round log as the story text, foes, the actions as cards.
+- **Story cards:** `data-story`; the bar length is a dry run of the choice on a copy (`storyMinutes`); 0 minutes (a fight starts, a screen opens) happens at once. `running.kind` is `'story'` or `'med'` for these bars (cancelled if the scene changes); a story card stops a running task bar (nothing of it happens). `playChoice` does what a tap did before; story results also go to Results.
+- **Time on every choice** (`defaultMinutes` in story.js, task mode only): no `time` → an action (check, Qi or items) 30, moving to another place 20, else 10; added after the move. None for fights, ends, meta screens (`TIMELESS`), and hub ↔ its menus (`setTimeless`, registered by tasks.js). Door cards include it in their bar.
+- **Meditate** (`js/core/meditate.js`): `NO_MEDITATE` screens excluded; cards: Cultivate (on a hub the hub's own cultivate card, queueable, same id; elsewhere `med:sit`, 30 min), Open a meridian (`med:mer`), Break through (`med:bt`). `med_back` makes `go()` skip the scene's enter on the way back. In task mode the hubs' old "Break through" / "Open a meridian" choices are hidden, and plain cultivate-and-come-back choices (`isSitChoice`) leave the Story group.
+- **Fixes:** rain night "Get wet. Sleep anyway."; "Show him the truth…" needs 12 Qi.
+- **Tests:** default times, Meditate on 250+ screens and none on the excluded ones, a sit keeps the scene, a meridian and back without the enter running twice, the hub sit card; all bots in task mode now pay the default times.
 
 ## v0.9.4 — step 3c-1, the Coil (task mode, prologue only)
 

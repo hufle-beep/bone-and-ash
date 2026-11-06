@@ -12,11 +12,13 @@
  * Yuki's lane: her job on the hub runs on game time while James works (no dice; her Fight check vs the job's DC).
  * The story checks and fights keep the d6 until 3c.
  */
-import { choose, goTo, choiceOpen, choiceTag, gives } from './story.js';
+import { choose, goTo, choiceOpen, choiceTag, gives, setTimeless, defaultMinutes, movesPlace } from './story.js';
 import { advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck } from './game.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
 import { daily } from '../story/common.js';
 import { endCoil, recordCard } from './coil.js';
+
+setTimeless(Object.fromEntries(Object.entries(TASK_HUBS).map(([h, cfg]) => [h, [...Object.keys(cfg.menus || {}), ...Object.keys(cfg.doorMenus || {})]]))); // hub ↔ menu steps take no extra time (v0.9.5)
 
 export const MS_PER_GAME_HOUR = 3000; // 1 game hour = 3 s at ×1 (design.md)
 export const QUEUE_MAX = 30;
@@ -280,7 +282,9 @@ export function taskMinutes(g, scenes, id) {
     const m0 = c.minutes;
     const card = cardOf(scenes, c.scene, id);
     if (card?.kind === 'door') { // only the walk: the scene's own time belongs to the story
-        return (card.entry?.time || 0) + (card.c.time || 0);
+        const from = card.menu || c.scene;
+        const to = typeof card.c.to === 'string' ? card.c.to : null;
+        return (card.entry?.time || 0) + (card.c.time || 0) + (to ? defaultMinutes(scenes, from, card.c, to, movesPlace(c, scenes, from, to)) : 0);
     }
     runTask(c, scenes, id);
     return Math.max(0, c.minutes - m0);

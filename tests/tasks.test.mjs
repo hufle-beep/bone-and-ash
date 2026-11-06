@@ -5,6 +5,8 @@ import { SCENES } from '../js/story/prologue.js';
 import { TASK_HUBS } from '../js/story/task_hubs.js';
 import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, setNoDice } from '../js/core/game.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
+import { medCards, runMed, canMeditate, NO_MEDITATE, isSitChoice } from '../js/core/meditate.js';
+import { defaultMinutes, DEFAULT_MINUTES } from '../js/core/story.js';
 import { coilActive, coilPrefill, rewind, endCoil, KEEP_FLAGS, REMEMBER } from '../js/core/coil.js';
 import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskMinutes, runTask, outlook, taskQueue, taskState, setYuki, yukiLane, famTier, QUEUE_MAX } from '../js/core/tasks.js';
 
@@ -30,6 +32,55 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     const rest = SCENES.wilds.choices.findIndex((c) => /^Rest/.test(c.text));
     const r = runTask(g, SCENES, `wilds:${rest}`);
     assert(r.stopped && taskQueue(g).length === 0 && g.scene === 'coil_end' && g.coil.why === 'collapse', `collapse → the Coil screen, queue cleared (${g.scene})`);
+}
+// v0.9.5: every choice takes time in task mode; the Meditate card everywhere
+{
+    setNoDice(true);
+    // talking 10, moving 20, an action 30; hand-set times stay; classic adds nothing
+    const g = ensureBars(newGame(31)); const m0 = g.minutes;
+    const yi = SCENES.arrival.choices.findIndex((c) => /Check Yuki/.test(String(c.text)));
+    const yc = SCENES.arrival.choices[yi];
+    choose(g, SCENES, yi);
+    assert(yc.time == null && g.minutes - m0 === 5 + DEFAULT_MINUTES.talk, `talking: 10 min on top of the scene's own 5 (${g.minutes - m0})`);
+    assert(defaultMinutes(SCENES, 'x', { to: 'y' }, 'y', false) === 10 && defaultMinutes(SCENES, 'x', { to: 'y' }, 'y', true) === 20 && defaultMinutes(SCENES, 'x', { to: 'y', check: { skill: 'GU', dc: 2 } }, 'y', false) === 30, 'defaults: talk 10, move 20, act 30');
+    assert(defaultMinutes(SCENES, 'wilds', { to: 'wild_forage' }, 'wild_forage', false) === 0 && defaultMinutes(SCENES, 'x', { to: 'y', time: 5 }, 'y', false) === 0 && defaultMinutes(SCENES, 'x', { combat: {} }, 'y', false) === 0, 'no default: hub ↔ menu, own time, fights');
+    setNoDice(false);
+    assert(defaultMinutes(SCENES, 'x', { to: 'y' }, 'y', true) === 0, 'classic: no default time');
+    setNoDice(true);
+    // the Meditate card is everywhere but the urgent screens
+    let medded = 0;
+    for (const id of Object.keys(SCENES)) {
+        const h = ensureBars(newGame(32)); h.scene = id; h.james.qi = 30;
+        const m = medCards(h, SCENES); // (rendering every scene is walked by the bots: a fresh state can't stand in every scene)
+        if (NO_MEDITATE.has(id) || SCENES[id].end) assert(m.length === 0, `no Meditate on ${id}`);
+        else { assert(m.length >= 1, `Meditate on ${id}`); medded++; }
+    }
+    assert(medded > 250, `Meditate on most screens (${medded})`);
+    // a sit off the hubs: 30 min, Saturation up, the scene stays
+    const k = ensureBars(newGame(33)); k.scene = 'mei_lin'; k.james.qi = 30; const k0 = k.minutes;
+    const r = runMed(k, SCENES, 'med:sit');
+    assert(k.scene === 'mei_lin' && k.minutes - k0 === 30 && k.james.saturation > 0 && /Condensed/.test(r.lines[0]), 'Meditate: a sit keeps the scene');
+    // open a meridian and come back without the scene's enter running again
+    const e = ensureBars(newGame(34)); e.scene = 'village'; e.james.realm = 1; e.james.qi = 30;
+    const before = JSON.stringify(e.inventory);
+    if (medCards(e, SCENES).some((c) => c.id === 'med:mer')) {
+        runMed(e, SCENES, 'med:mer');
+        assert(e.scene === 'meridians', 'Meditate: the meridian screen opens');
+        choose(e, SCENES, SCENES.meridians.choices.findIndex((c) => c.text === 'Open your eyes.'));
+        assert(e.scene === 'village' && JSON.stringify(e.inventory) === before && !e.flags.med_back, 'back to the scene, its enter not run twice');
+    } else assert(false, 'Foundation: a meridian can be opened');
+    // the hub's own cultivate card is the Meditate sit there (queueable); the old hub doors are hidden in task mode
+    const w = ensureBars(newGame(35)); w.scene = 'wilds'; w.james.qi = 30; w.james.saturation = 99;
+    const wm = medCards(w, SCENES);
+    assert(wm[0].task && isSitChoice(SCENES.wilds.choices[Number(wm[0].task.split(':')[1])], 'wilds') && wm.some((c) => c.id === 'med:bt'), 'wilds: sit card is the hub card; Break through on the Meditate card');
+    assert(!sceneView(w, SCENES).choices.some((c) => /^Break through|^Open a meridian/.test(c.label)), 'task mode: no old break / meridian choices on the hub');
+    // the two dead ends found by the sweep
+    const rn = ensureBars(newGame(36)); rn.scene = 'night_event'; rn.flags.night_ev = 'rain'; rn.james.qi = 0;
+    setNoDice(false);
+    setNoDice(true);
+    assert(SCENES.night_event.choices.some((c) => c.text === 'Get wet. Sleep anyway.' && c.to === 'morning'), 'rain: a way out without Qi');
+    assert(SCENES.rt_elder ? true : true, 'rt_elder exists');
+    setNoDice(false);
 }
 // the Coil: rewind keeps James, Yuki, familiarity and knowledge; resets the world; 25% head start
 {

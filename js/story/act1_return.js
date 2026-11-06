@@ -590,7 +590,7 @@ Behind you, Mei Lin's hand closes on her knife. Ya's lips draw back from her tee
         choices: [
             { text: 'Fight him. Here, in front of the grove.', combat: elderFight, to: 'rt_duel_won' },
             { text: 'Parley. Formally. Give him the face he needs and none of what he wants.', time: 30, to: 'rt_parley' },
-            { text: 'Show him the truth: take him to the grove and let him feel clean Qi for the first time in three hundred years.', time: 30, to: 'rt_truth' },
+            { text: 'Show him the truth: take him to the grove and let him feel clean Qi for the first time in three hundred years.', req: (g) => (g.james.qi >= 12 ? true : 'needs 12 Qi'), time: 30, to: 'rt_truth' },
             { text: 'Go with him. Spare Ashfall.', show: (g) => !!g.flags.offered_self, to: 'rt_taken' },
         ],
     },

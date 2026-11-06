@@ -12,7 +12,7 @@ import { forestScale, villageScale, grow, NEW_ITEMS } from './common.js';
 import './power.js';
 import './stomp_prologue.js';
 import './stomp_act1.js';
-import { yukiForms, itemNames, itemCap } from '../core/game.js';
+import { yukiForms, itemNames, itemCap, isNoDice } from '../core/game.js';
 import { WILDS, nightNext } from './wilds.js';
 import { ASHFALL, hubOf, nextEvening } from './ashfall.js';
 import { ACT1_ITEMS } from './act1_common.js';
@@ -889,13 +889,13 @@ ${seen
 for (const id of ['stream', 'wilds', 'camp', 'night', 'village', 'ashfall', 'supper', ...B0, ...B1, ...B2, ...B3, ...B4]) {
     SCENES[id].choices.unshift({
         text: (g) => `Break through to ${realmName(g.james.realm + 1)}. (Saturation ${g.james.saturation}%.)`,
-        show: canBreakThrough,
+        show: (g) => !isNoDice() && canBreakThrough(g), // task mode: on the Meditate card (v0.9.5)
         do: (g) => { g.flags.bt_return = g.scene; return []; },
         to: (g) => (g.james.realm === 6 && (g.james.extra8 || 0) < 8 ? 'ns_warn' : 'breakthrough'),
     });
     SCENES[id].choices.push({
         text: 'Open a meridian. (The Extraordinary net.)',
-        show: canAnyMeridian,
+        show: (g) => !isNoDice() && canAnyMeridian(g), // task mode: on the Meditate card (v0.9.5)
         do: (g) => { g.flags.mer_return = g.scene; return []; },
         to: 'meridians',
     });

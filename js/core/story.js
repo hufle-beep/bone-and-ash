@@ -110,11 +110,34 @@ function go(g, scenes, to) {
     g.scene = id;
     const s = scenes[id];
     if (s.place) g.location = asText(s.place, g);
-    const skip = !!g.coil?.skipEnter; // a Coil rewind or "Not yet": the scene was entered already, don't run its enter twice
+    let skip = !!g.coil?.skipEnter; // a Coil rewind or "Not yet": the scene was entered already, don't run its enter twice
     if (skip) g.coil.skipEnter = false;
+    if (g.flags.med_back && g.flags.med_back === id) { skip = true; delete g.flags.med_back; } // back from the Meditate card (v0.9.5)
     const lines = s.enter && !skip ? (s.enter(g) || []) : [];
     ensureBars(g);
     return lines;
+}
+
+/* ---------- every choice takes time (task mode, v0.9.5) ---------- */
+/** Scenes whose choices among themselves take no extra time: task hubs and their menus (their cards carry their own time), meta screens. */
+const TIMELESS = new Set(['coil_end', 'coil_dawn', 'meridians', 'ns_warn', 'yuki_form']);
+const TIMELESS_PAIR = new Set(); // hub ↔ its menus
+export function setTimeless(hubs) { for (const [hub, menus] of Object.entries(hubs)) { TIMELESS_PAIR.add(hub); for (const m of menus) TIMELESS_PAIR.add(m); } }
+export const DEFAULT_MINUTES = { talk: 10, move: 20, act: 30 };
+/** The default time of a choice with none: an action 30, moving to another place 20, talking 10. 0 when it has its own time or doesn't apply. */
+export function defaultMinutes(scenes, fromId, c, toId, moved) {
+    if (!isNoDice() || c.time != null || c.combat) return 0;
+    if (TIMELESS.has(fromId) || TIMELESS.has(toId)) return 0;
+    if (TIMELESS_PAIR.has(fromId) && TIMELESS_PAIR.has(toId)) return 0;
+    if (scenes[toId]?.end) return 0;
+    if (c.check || c.qi || gives(c).length) return DEFAULT_MINUTES.act;
+    return moved ? DEFAULT_MINUTES.move : DEFAULT_MINUTES.talk;
+}
+/** For a choice whose target is a plain scene id: would it move to another place? (doors use this before they run) */
+export function movesPlace(g, scenes, fromId, toId) {
+    const a = asText(scenes[fromId]?.place, g) || g.location;
+    const b = asText(scenes[toId]?.place, g);
+    return !!b && b !== a;
 }
 
 /**
@@ -181,7 +204,10 @@ export function choose(g, scenes, index) {
         return { lines, roll, combat: c.combat };
     }
     const dest = ok ? c.to : (c.fail ?? c.to);
+    const loc0 = g.location;
     lines.push(...go(g, scenes, dest));
+    const extra = defaultMinutes(scenes, s.id, c, g.scene, g.location !== loc0);
+    if (extra) lines.push(...advance(g, extra));
     g.log.push({ at: g.minutes, scene: g.scene, lines: lines.slice(0, 12) });
     if (g.log.length > 200) g.log.shift();
     return { lines, roll, combat: null };
