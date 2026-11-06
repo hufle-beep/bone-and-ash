@@ -721,6 +721,7 @@ You go down the road between the crimson robes. Behind you, faint, under the sou
     /* ======================================================== the end ===================================================== */
     a1_end: {
         id: 'a1_end', title: 'End of Act 1', art: 'a1_end', place: (g) => (g.flags.a1_outcome === 'taken' ? 'The road to the Crimson Lotus' : P),
+        enter: (g) => { g.flags.spd_a1 = true; return []; }, // ×5 speed from here (3c-3)
         text: (g) => {
             const o = g.flags.a1_outcome;
             const love = loveLine(g);

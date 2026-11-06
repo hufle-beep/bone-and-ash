@@ -1,12 +1,23 @@
 # Bone and Ash — handover (read this first in a new chat)
 
-**Saved:** 2026-11-06 (Europe/Budapest). **Version:** 0.9.7 (`sw.js` VERSION `bone-ash-0.9.7`): severe difficulty in task mode (push 3 of 4: HP 0 or a lost beast fight ends the Coil, beasts +0.5, tribute +1), on top of meridians closed at the start and Act 1's Coil (v0.9.6), every screen as cards (v0.9.5: story choices with bars, every choice takes time, the Meditate card everywhere), the Coil (v0.9.4) and no dice anywhere in task mode (v0.9.3) and step 3b. Everything behind the "Tasks (preview)" switch. Prologue + Act 1, about 390 scenes. **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
+**Saved:** 2026-11-06 (Europe/Budapest). **Version:** 0.9.8 (`sw.js` VERSION `bone-ash-0.9.8`): Tasks on by default and the speed gate (push 4 of 4, 3c-3), on top of severe difficulty in task mode (v0.9.7, push 3 of 4: HP 0 or a lost beast fight ends the Coil, beasts +0.5, tribute +1), on top of meridians closed at the start and Act 1's Coil (v0.9.6), every screen as cards (v0.9.5: story choices with bars, every choice takes time, the Meditate card everywhere), the Coil (v0.9.4) and no dice anywhere in task mode (v0.9.3) and step 3b. Tasks is now the default mode (Saves → Game mode: Tasks or Classic). Prologue + Act 1, about 390 scenes. **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
 Built in the SillyTavern chat as a spin-off. That chat stays for SillyTavern; this game continues in its own chats.
 
 **Rules:** `CLAUDE.md` (short) and `project/working-agreement.md` (full) — the change sequence is a HARD RULE. **Other docs:** `project/roadmap.md` (what's next), `project/design.md` (the approved hybrid design: Selene-style tasks and the Coil), `project/changelog.md`, `project/restore-points.md`. All mirrored to the claude.ai project "ash and bone".
 **Reference repos (the owner's):** `hufle-beep/Long-patience` (Selene: rules, docs, Android wrapper and workflows to copy), `hufle-beep/Shared-ST` (private; Rules Engine C in `st/rules-engine-c/`, presets in `st/rules-engine-c/lib/presets.js`, `docs/STANDING_LATEST.md`).
 
 ## Decided in chat (2026-11-06)
+
+- **Push 4 of 4: 3c-3 (proposal 09:20; picks 09:28 "1a, 2a, 3a, 4a, 5 ok, 6a, 7a, 8 ok"; go 09:29; built in v0.9.8):**
+  - **1a** Tasks on by default: a phone that never chose gets Tasks; `boneash.tasks` = `'0'` keeps Classic. Same key.
+  - **2a** Saves tab: "Game mode" heading, buttons **Tasks** / **Classic (older, with dice, no Coil)**, new text.
+  - **3a** the speed gate lives in the save, read from what is already there (no migration; a new game starts at ×1 again).
+  - **4a** ×2 after a won tribute: `ending` fought, bluff or paid (the hairpin). An accepted lost tribute stays ×1 until Act 1 ends. (Bots v0.9.7: won 33 / 39 / 51% on Coils 1 / 2 / 3.)
+  - **5** ×5 after Act 1: reaching `a1_end` by any route (`taken` included) sets the new flag `spd_a1`; an old save already at `a1_end` with an `a1_outcome` counts. ×10 gone from normal play.
+  - **6a** locked speeds are hidden; the stored speed is kept and held down to the gate, back up when it opens.
+  - **7a** hidden test toggle: tap the "Game mode" heading 5 times (within 1.5 s each) → "Test speeds: on/off", per phone (`boneash.testspeeds`), opens every speed incl. ×10.
+  - **8** tests: `maxSpeed` / `effectiveSpeed` in the tasks test.
+  - **Next:** the serpent push (`rt_serpent` is a beast, so losing it ends the Coil), numbers first.
 
 - **Push 3 of 4: severe difficulty (owner "procceed" 08:40 → proposal with numbers; picks 08:58 "1 ok, 2b, 3a, 4b, 5b, 6 ok"; go 09:02; built in v0.9.7):**
   - **1 People** (their losses keep the written branches): Gao, the collectors, Pock-Face's arson, Ya's brawl, `rt_brawl`, Shen Qiu (`elder`), the Sect watcher (and the Long Forest's `lf_rogue`). Every other fight is a beast.
@@ -138,7 +149,7 @@ In `CLAUDE.md` and `project/working-agreement.md` (adopted 2026-11-05). The chan
 | `js/art/art.js` | `sceneArt(key)`: 26 scene illustrations from shared primitives (sky, sun/moon, mountains, treeline, mist, person, cat, beast, boar, hut, fire, shards, lotus) plus vignette and grain. |
 | `js/main.js` | The UI. Autosave key `boneash.auto`, slots `boneash.slot1–3`, save-file export/import. |
 | `sw.js`, `manifest.webmanifest`, `icons/` | Offline install. Game files: network first, cache when offline. Google Fonts: cached on first use. |
-| `js/core/tasks.js`, `js/story/task_hubs.js` | Task cards and the queue (v0.9.0): which hubs, card ids, `runTask`, dry runs, the outlook. |
+| `js/core/tasks.js`, `js/story/task_hubs.js` | Task cards and the queue (v0.9.0): which hubs, card ids, `runTask`, dry runs, the outlook; the speed gate `maxSpeed` / `effectiveSpeed` (v0.9.8). |
 | `js/story/nodice_tune.js` | No-dice fight tuning per encounter (v0.9.3). |
 | `js/core/meditate.js` | The Meditate card (v0.9.5): which screens, its cards (sit, meridian, breakthrough), `runMed`. |
 | `js/story/meridians.js` | Every meridian screen: the primaries and collateral groups (v0.9.6), the Extraordinary net (v0.8.0), `col_warn` / `ns_warn`, `btTarget`, the James-tab row. |
@@ -311,6 +322,14 @@ The bible and the contract between the four part files are at the top of `js/sto
 - Last night of Act 1 (`rt_evening`) offers every arrangement the hearts allow: Mei Lin · Ya · Yuki alone; Mei Lin + Ya (`rt_trio`); Yuki + Mei Lin (`yk_night_mei`); Yuki + Ya (`yk_night_ya`); all four (`yk_night_all`). `g.flags.final_night` records it; `loveLine()` writes the Act 1 epilogue line (a1_end).
 - Romance with Yuki only in her human form (adult); fade to black. The code still says she bonded with James when he was six (34 years); **decided 2026-11-05: born together and bonded from birth** (fix pending, roadmap step 7).
 - Tests: 240 extra walks over the last night; combat round cap in the random runs raised to 400 (a rare long stalemate vs the Guardian at True Core).
+
+## v0.9.8 — Tasks by default, the speed gate (3c-3)
+
+- **Default** (`main.js`): `taskMode = store.get('boneash.tasks') !== '0'` (was `=== '1'`). Saves tab: "Game mode" (`h2[data-modehead]`) with Tasks / Classic buttons (`data-tasks` set only on the mode that is off).
+- **Gate** (`tasks.js`): `maxSpeed(g, test)`: 10 with test speeds; 5 if `flags.spd_a1` or (`a1_outcome` and scene `a1_end`); 2 if `ending` is fought / bluff / paid; else 1. `effectiveSpeed(g, stored, test)` = min(stored, gate), 0 stays 0. `main.js` fills the bar with `runSpeed()`, lists only allowed speeds, and keeps `boneash.speed` as the player's choice.
+- **`a1_end`** got an `enter` that sets `spd_a1`.
+- **Test speeds:** 5 taps on the Game mode heading show the button; `boneash.testspeeds` = `'1'` keeps it shown and every speed open.
+- **Tests:** the tasks test checks ×1 new, ×2 for each won ending, lost stays ×1, ×5 at `a1_end` (victory and taken), an old save at `a1_end`, test ×10, a stored ×5 held to ×2, pause stays pause.
 
 ## v0.9.7 — severe difficulty (task mode)
 

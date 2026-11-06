@@ -4,7 +4,7 @@ import {
     startCombat, combatStep, combatFlee, COMBAT_ACTIONS, setNoDice, noDiceDc, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg,
 } from './core/game.js';
 import { sceneView, choose, goTo } from './core/story.js';
-import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskLabel, taskMinutes, runTask, outlook, taskQueue, MS_PER_GAME_HOUR, QUEUE_MAX, FAM, yukiLane, setYuki } from './core/tasks.js';
+import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskLabel, maxSpeed, effectiveSpeed, taskMinutes, runTask, outlook, taskQueue, MS_PER_GAME_HOUR, QUEUE_MAX, FAM, yukiLane, setYuki } from './core/tasks.js';
 import { SCENES, ITEMS } from './story/prologue.js';
 import { coilActive, endCoil, coilPrefill } from './core/coil.js';
 import { medCards, runMed, SIT_MINUTES, isSitChoice } from './core/meditate.js';
@@ -51,11 +51,15 @@ let prevScene = null;
 let lastPress = 0;
 
 /* ---------------- tasks (v0.9.0, preview) ---------------- */
-const TASKS_KEY = 'boneash.tasks'; // per phone: '1' = "Tasks (preview)" on
-let taskMode = store.get(TASKS_KEY) === '1';
+const TASKS_KEY = 'boneash.tasks'; // per phone: '0' = Classic; anything else (never chosen, '1') = Tasks (on by default since v0.9.8)
+let taskMode = store.get(TASKS_KEY) !== '0';
 setNoDice(taskMode); // no dice anywhere in task mode (v0.9.3)
 const SPEED_KEY = 'boneash.speed'; // per phone: 0 = paused, 1, 2, 5, 10
-const SPEEDS = [[0, 'Pause'], [1, '×1'], [2, '×2'], [5, '×5'], [10, '×10']]; // all open while testing; the gate comes with the Coil (3c)
+const SPEEDS = [[0, 'Pause'], [1, '×1'], [2, '×2'], [5, '×5'], [10, '×10']]; // gated per save by maxSpeed (v0.9.8); the stored choice is kept and held down to the gate
+const TEST_SPEEDS_KEY = 'boneash.testspeeds'; // per phone: '1' = every speed open (hidden: tap "Game mode" 5 times)
+let testSpeeds = store.get(TEST_SPEEDS_KEY) === '1';
+const runSpeed = () => effectiveSpeed(g, speed, testSpeeds);
+let modeTaps = 0, modeTapAt = 0;
 let speed = (() => { const v = Number(store.get(SPEED_KEY)); return SPEEDS.some(([n]) => n === v) && store.get(SPEED_KEY) !== null ? v : 1; })();
 let resumeSpeed = speed || 1; // what ▶ goes back to
 let lastTickAt = Date.now();
@@ -119,7 +123,7 @@ function tick() {
     if (!running) return;
     if (running.kind) { if (!taskMode || g.combat || g.scene !== running.scene) { running = null; return; } } // a story or meditate bar
     else if (!onTaskHub()) { running = null; return; }
-    running.done += dt * speed;
+    running.done += dt * runSpeed();
     const f = Math.min(1, running.done / running.ms);
     const bar = document.getElementById('nowbar');
     if (bar) bar.style.width = `${(f * 100).toFixed(1)}%`;
@@ -384,7 +388,7 @@ function statusHtml() {
 <div class="bar hp"><b>${n1(g.james.hp)} / ${jamesHpMax(g)}</b>HP<div class="stroke"><i style="width:${pct(g.james.hp, jamesHpMax(g))}"></i></div></div>
 <div class="bar qi"><b>${n1(g.james.qi)} / ${n1(jamesQiMax(g))}</b>Convergence<div class="stroke"><i style="width:${pct(g.james.qi, jamesQiMax(g))}"></i></div></div>
 <div class="bar food"><b>${Math.round(g.james.satiety)}</b>Fed<div class="stroke"><i style="width:${pct(g.james.satiety, 100)}"></i></div></div>
-<div class="clock"><span class="clk">${clockLabelG(g)}</span>${taskMode ? `<select class="speed" data-speed="1" aria-label="Speed">${SPEEDS.map(([n, l]) => `<option value="${n}"${n === speed ? ' selected' : ''}>${l}</option>`).join('')}</select>` : ''}</div></div>`;
+<div class="clock"><span class="clk">${clockLabelG(g)}</span>${taskMode ? `<select class="speed" data-speed="1" aria-label="Speed">${SPEEDS.filter(([n]) => n <= maxSpeed(g, testSpeeds)).map(([n, l]) => `<option value="${n}"${n === runSpeed() ? ' selected' : ''}>${l}</option>`).join('')}</select>` : ''}</div></div>`;
 }
 
 function resultHtml() {
@@ -483,9 +487,10 @@ function renderSaves() {
 ${slot(1)}${slot(2)}${slot(3)}
 <h2>Move a save to another device</h2>
 <div class="btns"><button class="btn" data-export="1">Download save file</button><label class="btn">Load save file<input type="file" accept="application/json,.json" data-import="1" hidden></label></div>
-<h2>Tasks (preview)</h2>
-<p class="note">${taskMode ? 'On: the prologue days (1–6) run as timed task cards with a queue, without dice: check ÷ DC decides how well a task goes, and familiarity makes it faster and easier. 1 game hour takes 3 seconds at ×1.' : 'Off: the game plays as before. Turn it on to try the prologue days as timed task cards.'} Only this phone remembers it.</p>
-<div class="btns"><button class="btn${taskMode ? ' primary' : ''}" data-tasks="1">${taskMode ? 'Tasks: on — turn off' : 'Tasks: off — turn on'}</button></div>
+<h2 data-modehead="1">Game mode</h2>
+<p class="note">${taskMode ? 'Tasks: every screen is cards on a clock, with no dice (check ÷ DC decides), familiarity, Yuki\'s lane and the Coil. 1 game hour takes 3 seconds at ×1; ×2 opens after a won tribute, ×5 after Act 1. New games start with closed meridians.' : 'Classic: the older game, with dice and no Coil. Choices happen at once.'} Only this phone remembers it.</p>
+<div class="btns"><button class="btn${taskMode ? ' primary' : ''}" data-tasks="${taskMode ? '' : '1'}">Tasks</button><button class="btn${taskMode ? '' : ' primary'}" data-tasks="${taskMode ? '1' : ''}">Classic (older, with dice, no Coil)</button></div>
+${testSpeeds || modeTaps >= 5 ? `<div class="btns"><button class="btn${testSpeeds ? ' primary' : ''}" data-testspeeds="1">Test speeds: ${testSpeeds ? 'on' : 'off'}</button></div>` : ''}
 <h2>Start over</h2>
 <div class="btns"><button class="btn primary" data-new="1">New game</button></div>
 <p class="note" id="saveNote"></p></section>`;
@@ -501,6 +506,11 @@ function render() {
 function setTab(t) { tab = t; render(); window.scrollTo({ top: 0 }); }
 
 view.addEventListener('click', (ev) => {
+    if (ev.target.closest('h2[data-modehead]')) { // hidden: 5 taps within a few seconds show "Test speeds"
+        const now = Date.now(); modeTaps = now - modeTapAt < 1500 ? modeTaps + 1 : 1; modeTapAt = now;
+        if (modeTaps === 5) renderSaves();
+        return;
+    }
     const b = ev.target.closest('button');
     if (!b) return;
     if (recovery) { onRecovery(b); return; }
@@ -556,7 +566,9 @@ view.addEventListener('click', (ev) => {
         }
         if (b.dataset.panel) { panel = b.dataset.panel; if (panel === 'results') unseen = 0; render(); return; }
         if (b.dataset.yuki) { const yl = yukiLane(g); setYuki(g, !yl.on); autosave(); render(); return; }
-        if (b.dataset.tasks) {
+        if (b.dataset.testspeeds) { testSpeeds = !testSpeeds; store.set(TEST_SPEEDS_KEY, testSpeeds ? '1' : '0'); lastTickAt = Date.now(); renderSaves(); return; }
+        if (b.dataset.tasks != null) {
+            if (!b.dataset.tasks) return; // the mode already on
             taskMode = !taskMode; store.set(TASKS_KEY, taskMode ? '1' : '0'); setNoDice(taskMode);
             if (!taskMode) stopRunning(); else startNext();
             renderSaves(); return;

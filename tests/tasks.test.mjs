@@ -9,7 +9,7 @@ import { sceneView, choose, goTo } from '../js/core/story.js';
 import { medCards, runMed, canMeditate, NO_MEDITATE, isSitChoice } from '../js/core/meditate.js';
 import { defaultMinutes, DEFAULT_MINUTES } from '../js/core/story.js';
 import { coilActive, coilPrefill, rewind, endCoil, KEEP_FLAGS, REMEMBER } from '../js/core/coil.js';
-import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskMinutes, runTask, outlook, taskQueue, taskState, setYuki, yukiLane, famTier, QUEUE_MAX } from '../js/core/tasks.js';
+import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskMinutes, runTask, outlook, taskQueue, taskState, setYuki, yukiLane, famTier, QUEUE_MAX, maxSpeed, effectiveSpeed } from '../js/core/tasks.js';
 
 let pass = 0, fail = 0;
 const assert = (c, l) => { if (c) { pass++; } else { fail++; if (fail < 30) console.error('  FAIL ', l); } };
@@ -411,6 +411,23 @@ assert(yukiRuns > 1000, `Yuki's lane brings things home (${yukiRuns})`);
     assert(famTier(0) === 0 && famTier(2) === 1 && famTier(8) === 2 && famTier(18) === 3, 'familiarity tiers at 2 / 8 / 18');
 }
 
+// speed gate (v0.9.8, 3c-3)
+{
+    const g = ensureBars(newGame(5, { closed: true }));
+    assert(maxSpeed(g) === 1, 'a new game allows ×1');
+    for (const e of ['fought', 'bluff', 'paid']) { g.flags.ending = e; assert(maxSpeed(g) === 2, `a won tribute (${e}) opens ×2`); }
+    g.flags.ending = 'lost'; assert(maxSpeed(g) === 1, 'a lost tribute stays ×1');
+    assert(maxSpeed(g, true) === 10, 'test speeds open ×10');
+    g.flags.ending = 'fought';
+    assert(effectiveSpeed(g, 5) === 2 && effectiveSpeed(g, 0) === 0 && effectiveSpeed(g, 1) === 1 && effectiveSpeed(g, 10, true) === 10, 'a stored ×5 runs at the gate; pause stays pause');
+    for (const o of ['victory', 'taken']) {
+        const h = ensureBars(newGame(6)); Object.assign(h.flags, { ending: o === 'taken' ? 'lost' : 'bluff', a1_outcome: o });
+        goTo(h, SCENES, 'a1_end');
+        assert(h.flags.spd_a1 === true && maxSpeed(h) === 5, `reaching a1_end (${o}) opens ×5`);
+    }
+    const old = ensureBars(newGame(7)); Object.assign(old.flags, { ending: 'paid', a1_outcome: 'accord' }); old.scene = 'a1_end';
+    assert(maxSpeed(old) === 5, 'an old save already at the end of Act 1 has ×5');
+}
 const pctOf = (o, n) => Object.entries(o).sort().map(([k, v]) => `${k} ${((v / n) * 100).toFixed(1)}%`).join(', ');
 console.log(`  tribute, tasks:   ${pctOf(stats.tasks.endings, stats.tasks.games)}`);
 console.log(`  tribute, classic: ${pctOf(stats.classic.endings, stats.classic.games)}`);
