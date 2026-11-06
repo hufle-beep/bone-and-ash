@@ -1,6 +1,6 @@
 /** Bone and Ash — UI. Renders the story, combat, sheet, hammerspace, journal and saves. */
 import {
-    newGame, ensureBars, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, skillCheck, xpToNext, clockLabel, clockLabelG, realmName, yukiForm,
+    newGame, ensureBars, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, skillCheck, xpToNext, clockLabel, clockLabelG, clockLabelSec, realmName, yukiForm,
     startCombat, combatStep, combatFlee, COMBAT_ACTIONS, setNoDice, noDiceDc, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg,
 } from './core/game.js';
 import { sceneView, choose, goTo } from './core/story.js';
@@ -130,7 +130,7 @@ function tick() {
     const yb = document.getElementById('yukibar');
     if (yb && running.yuki) yb.style.width = `${Math.min(100, ((running.yuki.progress + f * running.mins) % running.yuki.len) / running.yuki.len * 100).toFixed(1)}%`;
     const clk = document.querySelector('.status .clk');
-    if (clk && tab === 'story') clk.textContent = clockLabelG(g, running.m0 + Math.floor(f * running.mins));
+    if (clk && tab === 'story') clk.textContent = clockLabelSec(g, running.m0 + f * running.mins); // seconds run while a bar does (v0.9.9)
     if (f < 1) return;
     if (running.kind === 'story') { const { idx } = running; running = null; playChoice(idx); return; }
     if (running.kind === 'med') {
@@ -388,7 +388,7 @@ function statusHtml() {
 <div class="bar hp"><b>${n1(g.james.hp)} / ${jamesHpMax(g)}</b>HP<div class="stroke"><i style="width:${pct(g.james.hp, jamesHpMax(g))}"></i></div></div>
 <div class="bar qi"><b>${n1(g.james.qi)} / ${n1(jamesQiMax(g))}</b>Convergence<div class="stroke"><i style="width:${pct(g.james.qi, jamesQiMax(g))}"></i></div></div>
 <div class="bar food"><b>${Math.round(g.james.satiety)}</b>Fed<div class="stroke"><i style="width:${pct(g.james.satiety, 100)}"></i></div></div>
-<div class="clock"><span class="clk">${clockLabelG(g)}</span>${taskMode ? `<select class="speed" data-speed="1" aria-label="Speed">${SPEEDS.filter(([n]) => n <= maxSpeed(g, testSpeeds)).map(([n, l]) => `<option value="${n}"${n === runSpeed() ? ' selected' : ''}>${l}</option>`).join('')}</select>` : ''}</div></div>`;
+<div class="clock"><span class="clk">${clockLabelSec(g)}</span>${taskMode ? `<select class="speed" data-speed="1" aria-label="Speed">${SPEEDS.filter(([n]) => n <= maxSpeed(g, testSpeeds)).map(([n, l]) => `<option value="${n}"${n === runSpeed() ? ' selected' : ''}>${l}</option>`).join('')}</select>` : ''}</div></div>`;
 }
 
 function resultHtml() {

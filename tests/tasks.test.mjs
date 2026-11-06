@@ -3,7 +3,7 @@
 // 2,000 bot games in task mode reach the end with no dead end; the tribute outcomes are printed next to classic play.
 import { SCENES } from '../js/story/prologue.js';
 import { TASK_HUBS } from '../js/story/task_hubs.js';
-import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, setNoDice, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1 } from '../js/core/game.js';
+import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, setNoDice, clockLabelSec, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1 } from '../js/core/game.js';
 import { canPrimary, canColGroup, colGroupsOpen, sessionsToday, dcPrimary, dcColGroup, btTarget, canAnyMeridian, COL_GROUPS } from '../js/story/meridians.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
 import { medCards, runMed, canMeditate, NO_MEDITATE, isSitChoice } from '../js/core/meditate.js';
@@ -411,6 +411,13 @@ assert(yukiRuns > 1000, `Yuki's lane brings things home (${yukiRuns})`);
     assert(famTier(0) === 0 && famTier(2) === 1 && famTier(8) === 2 && famTier(18) === 3, 'familiarity tiers at 2 / 8 / 18');
 }
 
+// status clock with seconds (v0.9.9)
+{
+    assert(clockLabelSec({ flags: {} }, 0) === 'Day 1, 00:00:00', 'clock: Day 1, 00:00:00');
+    assert(clockLabelSec({ flags: {} }, 14 * 60 + 5.5) === 'Day 1, 14:05:30', 'clock: seconds from the fraction');
+    assert(clockLabelSec({ flags: {} }, 1440 + 59.9999) === 'Day 2, 00:59:59', 'clock: never :60');
+    assert(clockLabelSec({ flags: { lf_active: true } }, 100) === 'The Long Forest', 'clock: the Long Forest label stays');
+}
 // speed gate (v0.9.8, 3c-3)
 {
     const g = ensureBars(newGame(5, { closed: true }));

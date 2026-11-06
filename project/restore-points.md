@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.9.8 | (this push) | Tasks by default, the speed gate. Same save state as 0.9.6. |
+| 0.9.9 | (this push) | Clock with seconds. Same save state as 0.9.6. |
+| 0.9.8 | `ee1e3a1` | Tasks by default, the speed gate. Same save state as 0.9.6. |
 | 0.9.7 | `5534bec` | Severe difficulty in task mode. Same save state as 0.9.6. |
 | 0.9.6 | `494b3a8` | Meridians closed at the start (task mode), Act 1's Coil. Save state 5; 0.9.5 and older report a state-5 save as "newer version" on the recovery screen (nothing is wiped). Download the save before rolling back. |
 | 0.9.5 | `f402b63` | Cards everywhere in task mode. Same save state as 0.9.4. |

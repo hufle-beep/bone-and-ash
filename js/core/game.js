@@ -292,6 +292,12 @@ export function clockParts(minutes) {
 export function clockLabelG(g, minutes = g.minutes) {
     return g.flags?.lf_active ? 'The Long Forest' : clockLabel(minutes);
 }
+/** The status-bar clock (v0.9.9): Day N, HH:MM:SS. `minutes` may be fractional (a running bar); the seconds come from the fraction. */
+export function clockLabelSec(g, minutes = g.minutes) {
+    if (g.flags?.lf_active) return 'The Long Forest';
+    const whole = Math.floor(minutes), sec = Math.min(59, Math.floor((minutes - whole) * 60));
+    return `${clockLabel(whole)}:${String(sec).padStart(2, '0')}`;
+}
 export function clockLabel(minutes) {
     const p = clockParts(minutes);
     return `Day ${p.day}, ${String(p.hh).padStart(2, '0')}:${String(p.mm).padStart(2, '0')}`;

@@ -1,12 +1,17 @@
 # Bone and Ash — handover (read this first in a new chat)
 
-**Saved:** 2026-11-06 (Europe/Budapest). **Version:** 0.9.8 (`sw.js` VERSION `bone-ash-0.9.8`): Tasks on by default and the speed gate (push 4 of 4, 3c-3), on top of severe difficulty in task mode (v0.9.7, push 3 of 4: HP 0 or a lost beast fight ends the Coil, beasts +0.5, tribute +1), on top of meridians closed at the start and Act 1's Coil (v0.9.6), every screen as cards (v0.9.5: story choices with bars, every choice takes time, the Meditate card everywhere), the Coil (v0.9.4) and no dice anywhere in task mode (v0.9.3) and step 3b. Tasks is now the default mode (Saves → Game mode: Tasks or Classic). Prologue + Act 1, about 390 scenes. **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
+**Saved:** 2026-11-06 (Europe/Budapest). **Version:** 0.9.9 (`sw.js` VERSION `bone-ash-0.9.9`): the status clock shows seconds (Day N, HH:MM:SS), on top of Tasks on by default and the speed gate (v0.9.8, push 4 of 4, 3c-3), on top of severe difficulty in task mode (v0.9.7, push 3 of 4: HP 0 or a lost beast fight ends the Coil, beasts +0.5, tribute +1), on top of meridians closed at the start and Act 1's Coil (v0.9.6), every screen as cards (v0.9.5: story choices with bars, every choice takes time, the Meditate card everywhere), the Coil (v0.9.4) and no dice anywhere in task mode (v0.9.3) and step 3b. Tasks is now the default mode (Saves → Game mode: Tasks or Classic). Prologue + Act 1, about 390 scenes. **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
 Built in the SillyTavern chat as a spin-off. That chat stays for SillyTavern; this game continues in its own chats.
 
 **Rules:** `CLAUDE.md` (short) and `project/working-agreement.md` (full) — the change sequence is a HARD RULE. **Other docs:** `project/roadmap.md` (what's next), `project/design.md` (the approved hybrid design: Selene-style tasks and the Coil), `project/changelog.md`, `project/restore-points.md`. All mirrored to the claude.ai project "ash and bone".
 **Reference repos (the owner's):** `hufle-beep/Long-patience` (Selene: rules, docs, Android wrapper and workflows to copy), `hufle-beep/Shared-ST` (private; Rules Engine C in `st/rules-engine-c/`, presets in `st/rules-engine-c/lib/presets.js`, `docs/STANDING_LATEST.md`).
 
 ## Decided in chat (2026-11-06)
+
+- **v0.9.9 (owner 09:39 "change clock format to 24 hours (HH:MM:SS)"; pick 09:40 "1a"; serpent pick 09:44 "D"; go 09:50):**
+  - **Clock (1a):** the clock was already 24-hour; it now shows seconds on the status clock only: `Day 3, 14:05:37`. Game time stays whole minutes; the seconds come from a running bar's fraction and run while it fills (a blur at ×2 / ×5), `:00` when nothing runs. Journal, outlook, queue times, save names keep `HH:MM`.
+  - **Serpent (D): folded into step 5** (Act 1 converted and retuned). Measured (600 random task-mode games, closed start, rewinding bots): every game reaches the ford (mostly on Act 1 Coil 3–4); the ford check (GU / Convergence DC 5, no-dice 3) vs GU check 9.5 / 13.5 / 19.0 (p10 / 50 / 90) is always passed, so **0 serpent fights in 1,500 games** (it woke 4 times; James outran it each time). Arrival HP 80–100%, so "arrives hurt" is not the lever any more. A forced fight: serpent `up` 0.25 (now) 100% won; +10: 73–97%; +16: 51–92%; +18: 33–90%. Ford DC 12 wakes it in 10% of games, DC 15 in 23%. The options for later were: B (ford DC 15, serpent +16, a loss ends the Coil), C (the same, but a loss keeps the "Swept" branch).
+  - **Next push: the Long Forest redesign** (owner 09:46, numbered v0.10.0): a cheat mode **gated behind the first Coil**, with **full ascension through the realm ladder possible in chunks**. Options, numbers and the owner's pick first. It replaces the step-7 plan "the Long Forest as a New Game preset" unless the owner picks that.
 
 - **Push 4 of 4: 3c-3 (proposal 09:20; picks 09:28 "1a, 2a, 3a, 4a, 5 ok, 6a, 7a, 8 ok"; go 09:29; built in v0.9.8):**
   - **1a** Tasks on by default: a phone that never chose gets Tasks; `boneash.tasks` = `'0'` keeps Classic. Same key.
@@ -322,6 +327,10 @@ The bible and the contract between the four part files are at the top of `js/sto
 - Last night of Act 1 (`rt_evening`) offers every arrangement the hearts allow: Mei Lin · Ya · Yuki alone; Mei Lin + Ya (`rt_trio`); Yuki + Mei Lin (`yk_night_mei`); Yuki + Ya (`yk_night_ya`); all four (`yk_night_all`). `g.flags.final_night` records it; `loveLine()` writes the Act 1 epilogue line (a1_end).
 - Romance with Yuki only in her human form (adult); fade to black. The code still says she bonded with James when he was six (34 years); **decided 2026-11-05: born together and bonded from birth** (fix pending, roadmap step 7).
 - Tests: 240 extra walks over the last night; combat round cap in the random runs raised to 400 (a rare long stalemate vs the Guardian at True Core).
+
+## v0.9.9 — the clock with seconds
+
+- `clockLabelSec(g, minutes)` in game.js: `Day N, HH:MM:SS`, minutes may be fractional (seconds = the fraction × 60, never 60); the Long Forest label stays. main.js: the status clock and the live tick (`running.m0 + f × running.mins`, no longer floored) use it. `clockLabel` / `clockLabelG` (HH:MM) unchanged elsewhere. Tasks test: 4 checks.
 
 ## v0.9.8 — Tasks by default, the speed gate (3c-3)
 
