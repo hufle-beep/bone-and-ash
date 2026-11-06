@@ -1,0 +1,4 @@
+# v0.11.22: caches and installs never go into git
+__pycache__/
+*.pyc
+node_modules/

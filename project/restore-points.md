@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.21 | (this push) | The test suite checked and strengthened (mutation-tested, real browser taps, the noise-scaled drift line). Tests and tools only; same save state as 0.11.19. |
+| 0.11.22 | (this push) | The leftover check (log only), the bots' flag / item / choice record, `.gitignore`. Tests and tools only; same save state as 0.11.19. |
+| 0.11.21 | `bd783e8` | The test suite checked and strengthened (mutation-tested, real browser taps, the noise-scaled drift line). Tests and tools only; same save state as 0.11.19. |
 | 0.11.20 | `e071973` | The test suite in parallel; the lean dry run. Same save state as 0.11.19. |
 | 0.11.19 | `fce05ab` | Act 1's resting places as task screens. Same save state as 0.11.18 (queued Act 1 rows are ids; an older version skips them there). |
 | 0.11.18 | `037d99a` | Sleep resets the once-a-day things, Push through the night, Yuki's curve, the Extraordinary lines timed. Same save state as 0.11.5 plus the optional `wake` and `james.e8Work` / `ecWork` / `jnWork` (an older version ignores them: once-a-day things then come back at midnight again, and Extraordinary work started here is not counted there). |

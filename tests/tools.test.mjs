@@ -3,14 +3,17 @@
 // tasks 51 games with --bots-only: the fewest that still get 2 workers, since shard.mjs allows one worker per 50 games).
 // tools/lib/noise.mjs: the noise-scaled drift band of tools/sanity.mjs (log only).
 // tools/check.mjs: its job list (--list, both modes) and tools/lib/jobs.mjs's validateJobs on a broken list.
+// v0.11.22: tools/leftovers.mjs on small made-up inputs (every kind found, kept entries skipped) and tests/lib/seen.mjs's watch.
 import { spawn, execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { mergeInto, seedOf } from './lib/shard.mjs';
 import { validateJobs } from '../tools/lib/jobs.mjs';
 import { noise, band, flagged, K, MIN } from '../tools/lib/noise.mjs';
+import { strip, scanFunctions, scanFlags, flagFindings, scanCss, scanMarkers, scanStorage, scanFiles, applyKeep, loadKeep, KINDS } from '../tools/leftovers.mjs'; // v0.11.22
+import { seen as touched, track, noteView, seenOut } from './lib/seen.mjs'; // v0.11.22
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 let pass = 0, fail = 0;
@@ -78,7 +81,13 @@ for (const mode of ['full', 'quick']) {
         const s = jobs.find((j) => j.key === 'sanity');
         assert(s && s.after.includes('tasks') && s.after.includes('story'), 'full: sanity waits for tasks and story');
         assert(keys.includes('browser1') && keys.includes('browser2'), 'full: has both browser parts');
-    } else assert(!keys.some((k) => k.startsWith('browser') || k === 'sanity'), 'quick: no browser or sanity jobs');
+        const lo = jobs.find((j) => j.key === 'leftovers'), tr = jobs.find((j) => j.key === 'track');
+        const ts = jobs.find((j) => j.key === 'track-story');
+        assert(lo && tr && ts && ['tasks', 'story', 'track', 'track-story'].every((a) => lo.after.includes(a)) && [tr, ts].every((j) => j.after.includes('tasks') && !j.heavy), 'v0.11.22 full: leftovers waits for tasks, story and both watched runs; the watched runs after tasks, not heavy');
+    } else {
+        assert(!keys.some((k) => k.startsWith('browser') || k === 'sanity' || k.startsWith('track')), 'quick: no browser, sanity or watched-run jobs');
+        assert(jobs.find((j) => j.key === 'leftovers')?.after.length === 0, 'v0.11.22 quick: the static leftover scan, waiting for nothing');
+    }
 }
 
 // 4. validateJobs flags a broken list
@@ -110,6 +119,84 @@ for (const mode of ['full', 'quick']) {
 }
 
 // 6. 1 worker = 2 workers: the same stats, object keys sorted
+// v0.11.22: the leftover check (tools/leftovers.mjs) on made-up inputs: every kind is found, and the keep-list skips
+{
+    const src = (raw) => ({ raw, ...strip(raw) });
+    // the tokenizer: comments go, string text is kept apart, ${…} code stays, a regex is not a string, a division is not a regex
+    const t = strip("const a = 'x // y'; // gone\n/* gone */ const b = `t ${f('q')} u`; const r = /'[a-z]/g; const d = a / b / 2; const e = \"it\\'s\";");
+    assert(!/gone/.test(t.code) && t.strings.includes('x // y') && t.strings.includes('q') && t.strings.includes('t ') && t.strings.includes(' u'), `strip: comments gone, strings apart (${JSON.stringify(t.strings)})`);
+    assert(/\bf\(/.test(t.code) && /\/r\//.test(t.code) && /a \/ b \/ 2/.test(t.code) && !t.strings.includes('[a-z'), `strip: template code kept, regex not a string, division kept (${t.code})`);
+    const inc = strip("let i = 0; const h = i++ / 2; const s = 'q';");
+    assert(inc.strings.join() === 'q' && /i\+\+ \/ 2/.test(inc.code), `strip: x++ / 2 is a division (${inc.code})`);
+    const nest = strip('const s = `a ${b ? `c ${d}` : "e"} f`; g();');
+    assert(/\bb\b/.test(nest.code) && /\bd\b/.test(nest.code) && /\bg\(\)/.test(nest.code) && nest.strings.includes('e'), `strip: nested templates (${nest.code})`);
+    // functions: unused, used only by tests, used only by main.js; a skipped file is not scanned
+    const game = {
+        'js/a.js': src('export function used() {}\nexport function lonely() {}\nexport const ALONE = 3;\nexport function forTests() {}\nexport function forUi() {}\nexport const { p, q: renamed } = obj;\nused(); p();'),
+        'js/main.js': src('import { forUi } from "./a.js"; forUi();'),
+        'js/core/formulas.js': src('export function engineOnly() {}'),
+    };
+    const other = { 'tests/x.mjs': src('forTests();') };
+    const fn = scanFunctions(game, other, ['js/core/formulas.js']);
+    const names = (l) => l.map((x) => x.replace(/ \(.*/, '')).sort().join();
+    assert(names(fn.unused) === 'ALONE,lonely,renamed', `scanFunctions: unused (${names(fn.unused)})`);
+    assert(names(fn.testOnly) === 'forTests' && names(fn.browserOnly) === 'forUi', `scanFunctions: tests only (${names(fn.testOnly)}), main.js only (${names(fn.browserOnly)})`);
+    // flags: every write and read form; a flag set and never read, one read and never set; the bots' reads clear a static hit
+    const fl = scanFlags({ 'js/s.js': src([
+        "g.flags.w1 = true; g.flags.both = 1; if (g.flags.both) x(); g.flags.n2 += 1; delete g.flags.d1;",
+        "enter: set('s1', 's2'), show: once('s2'); markDaily(g, 'mk'); daily('mk'); if (g.flags?.opt) y(); g.flags['br'] = 1; if (g.flags['rd']) z();",
+        "Object.assign(g.flags, { oa: true }); for (const f of ['l1', 'l2']) g.flags[f] = true; if (g.flags.ghost === 2) w(); const art = 'w1';",
+        "const f = (g && g.flags) || {}; if (f.viaAlias) v(); g.flags.viaAlias = 1; g.myflags.notAFlag = 1; g.flags.div /= 2;",
+        "const TABLE = { tk: 'a', tk2: 'b' }; g.flags.tk = 1; g.flags.tk2 = 1; for (const k of Object.keys(TABLE)) if (g.flags[k]) u();",
+    ].join('\n')) });
+    const ff = flagFindings(fl, null);
+    assert(ff.unread.join() === 'd1,div,n2,oa' && ff.unset.join() === 'ghost,opt' && !fl.W.has('notAFlag') && fl.R.has('viaAlias') && fl.R.has('tk2'), `flags (static; a plain-string name may be a built key, so it hides): unread ${ff.unread.join()} · unset ${ff.unset.join()}`);
+    const fs2 = flagFindings(fl, { flagsRead: new Set(['oa', 'l1']), flagsWritten: new Set(['opt']) });
+    assert(fs2.unread.join() === 'br,d1,div,l2,n2,s1,w1' && fs2.unset.join() === 'ghost,rd', `flags (with the bots): a read in play clears it; a plain-string mention no longer hides one (${fs2.unread.join()} · ${fs2.unset.join()})`);
+    // CSS, data-* markers, storage keys, files
+    const css = scanCss('.used { a: 1 } .gone, #lost:hover { b: url(x.png) } .tag.used-2 {} .b-fail {} /* .comment */', 'class="used used-2 tag" id="here" `card b-${band}`');
+    assert(css.join() === '#lost,.gone', `scanCss: a class built in a template (b-\${band}) counts (${css.join()})`);
+    const mk = scanMarkers('<b data-run="1" data-gone="2" data-tip-text="3">', 'x.closest("[data-run]"); el.dataset.tipText; page.locator("[data-other]")');
+    assert(mk.join() === 'gone', `scanMarkers (${mk.join()})`);
+    const sk = scanStorage([
+        "const A = 'boneash.a';", "localStorage.setItem(A, 1);", "localStorage.getItem(A);", "localStorage.setItem('boneash.lost', 2);", "localStorage.getItem('boneash.only');",
+        "const B = 'boneash.b', C = 'boneash.bc'; store.set(B, 1); store.set(C, 1); store.get(C);", // a read of boneash.bc is not a read of boneash.b
+        "const S = (n) => `boneash.slot${n}`; store.set(S(1), 'x'); store.get(S(2));",
+        "const P = (k) => `boneash.p.${k}`; store.set(P(1), 1); for (const k of keys) if (k.startsWith('boneash.p.')) n++;",
+    ].join('\n'));
+    assert(sk.join() === 'boneash.b,boneash.lost', `scanStorage: constants, the store wrapper, exact keys, a prefix scan (${sk.join()})`);
+    const files = scanFiles(['js/a.js', 'js/b.js', 'art/bg/pine.jpg', 'art/bg/gone.jpg', 'tools/hand.py'], { 'index.html': '<script src="js/a.js">', 'js/a.js': "import './b.js'; img(`art/bg/${'pine'}.jpg`);", 'js/b.js': '' });
+    assert(files.join() === 'art/bg/gone.jpg,tools/hand.py', `scanFiles (${files.join()})`);
+    // the keep-list: exact names and prefixes skip, entries that match nothing are listed, a reason is required
+    const k = applyKeep({ files: ['saves/a.json', 'tools/x.py'], functions: ['f (js/a.js)', 'g (js/a.js)'] }, { files: { 'saves/*': 'the saves test' }, functions: { f: 'hook', h: 'gone' } });
+    assert(k.left.files.join() === 'tools/x.py' && k.left.functions.join() === 'g (js/a.js)' && k.kept.files === 1 && k.stale.join() === 'functions: h', `applyKeep (${JSON.stringify(k.left)} · stale ${k.stale.join()})`);
+    assert(KINDS.every((kd) => Array.isArray(k.left[kd])), 'applyKeep: every kind listed');
+    const real = loadKeep(path.join(ROOT, 'tools/leftovers-keep.json'));
+    assert(real.errors.length === 0 && Object.keys(real.keep).length > 0, `tools/leftovers-keep.json: valid, every entry has a reason (${real.errors.join('; ')})`);
+    const bad = path.join(TMP, 'keep.json');
+    writeFileSync(bad, JSON.stringify({ keep: { files: { a: '' }, nonsense: {} } }));
+    assert(loadKeep(bad).errors.length === 2, `loadKeep: a missing reason and an unknown kind are errors (${loadKeep(bad).errors.join('; ')})`);
+}
+// v0.11.22: tests/lib/seen.mjs watches flags and items without changing them
+{
+    for (const s of Object.values(touched)) s.clear();
+    const g = { scene: 'here', flags: { old: 1, 'job@3': true }, inventory: { herb: 2 } };
+    track(g);
+    const copy = JSON.parse(JSON.stringify(g)); const spread = { ...g.flags };
+    assert(copy.flags.old === 1 && spread['job@3'] === true && touched.flagsRead.size === 0, `seen: a JSON copy and a spread are not reads (${[...touched.flagsRead]})`);
+    assert(touched.flagsWritten.size === 0, `seen: the first watch seeds nothing (what a test set up by hand is not the game's writing: ${[...touched.flagsWritten]})`);
+    const r = g.flags.old; g.flags.fresh = true; const h = 'nope' in g.flags; delete g.flags.old; g.inventory.herb -= 1;
+    assert(r === 1 && h === false && touched.flagsRead.has('old') && touched.flagsRead.has('nope') && touched.flagsWritten.has('fresh') && touched.itemsRead.has('herb') && touched.itemsWritten.has('herb'), 'seen: reads, `in`, writes and deletes are recorded');
+    assert(JSON.stringify(g.flags) === '{"job@3":true,"fresh":true}' && g.inventory.herb === 1, 'seen: the watched objects behave like the plain ones');
+    g.flags = { swapped: 1, 'day@4': true }; track(g); void g.flags.swapped;
+    assert(touched.flagsRead.has('swapped') && touched.flagsWritten.has('swapped') && touched.flagsWritten.has('day') && !touched.flagsWritten.has('day@4'), 'seen: a replaced flags object (a rewind) is watched again, its keys count as written, a daily key under its name');
+    void Object.keys(g.flags).length; void g.flags.afterKeys;
+    assert(touched.flagsRead.has('afterKeys'), 'seen: a read right after Object.keys is still a read');
+    noteView(g, { choices: [{ index: 0 }, { index: 2 }, { index: 1002 }] });
+    const out = seenOut();
+    assert(out.choices.join() === 'here#0,here#2' && out.flagsRead.join() === [...out.flagsRead].sort().join(), `seen: shown choices (not card rows), sorted output (${out.choices.join()})`);
+    for (const s of Object.values(touched)) s.clear();
+}
 const canon = (v) => (Array.isArray(v) ? v.map(canon) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, canon(v[k])])) : v);
 const results = await Promise.all(pending);
 for (const [name] of RUNS) {

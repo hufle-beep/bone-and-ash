@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// The check runner (v0.11.20): every check of tools/check.sh, run in parallel on a job pool.
+// The check runner (v0.11.20; v0.11.22: the leftover check, log only): every check of tools/check.sh, run in parallel on a job pool.
 //   node tools/check.mjs          the full check (2,000 bot games each, the browser test, the sanity check). Before every push.
 //   node tools/check.mjs quick    200 bot games each, no browser or sanity check (about 15 s), while building.
 //   node tools/check.mjs --jobs N run at most N jobs at once (default: the cores + 1; the browser parts mostly wait).
@@ -48,6 +48,13 @@ const jobs = [
     { name: 'content lint (old names, duplicate labels)', key: 'lint', cmd: node('tools/lint.mjs') }, // v0.11.21: those two strict
     { name: 'test tools (shard merge, 1 = 2 workers, job list)', key: 'tools', cmd: node('tests/tools.test.mjs') }, // v0.11.21
     ...['fallout', 'blackroot', 'heart', 'return'].map((p) => ({ name: `Act 1 part: ${p}`, key: `part:${p}`, cmd: node('tests/part.test.mjs', p) })),
+    // v0.11.22: the leftover check (log only). Full runs add what the bot games touched: the story test watches its flags and items
+    // itself; the tasks games get a separate small watched run (a Proxy slows every game in its process, so not in the big test).
+    ...(QUICK ? [{ name: 'leftovers (log only, static scan)', key: 'leftovers', show: true, cmd: node('tools/leftovers.mjs') }] : [
+        { name: 'watched bot games (300 each way, flags, items)', key: 'track', cmd: node('tests/tasks.test.mjs', '--bots-only', '--track', '--games', '300', '--workers', '1', '--stats-out', path.join(ST, 'track.json')), after: ['tasks'] },
+        { name: 'watched story games (300 and the walks)', key: 'track-story', cmd: node('tests/story.test.mjs', '--track', '--games', '300', '--workers', '1', '--stats-out', path.join(ST, 'track-story.json')), after: ['tasks'] },
+        { name: 'leftovers (log only)', key: 'leftovers', show: true, cmd: node('tools/leftovers.mjs', '--seen', ...['story', 'tasks', 'track', 'track-story'].map((k) => path.join(ST, `${k}.json`))), after: ['tasks', 'story', 'track', 'track-story'] },
+    ]),
     ...(QUICK ? [] : [{ name: 'sanity (invariants, drift ±5)', key: 'sanity', cmd: node('tools/sanity.mjs', '--tasks', path.join(ST, 'tasks.json'), '--story', path.join(ST, 'story.json')), after: ['tasks', 'story'] }]),
 ];
 
@@ -82,8 +89,10 @@ const { failed, stuck } = await runPool(jobs, {
         times[j.key] = Math.round(s * 10) / 10;
         const was = old?.steps?.[j.key];
         const slow = !QUICK && was && s > MIN_WARN_S && s > was * SLOWER ? `  (slower: ${was} s before)` : '';
-        if (!first) console.log(`${j.name.padEnd(56)}ok  ${String(times[j.key]).padStart(5)} s  ${last(r.out)}${slow}`);
-        else {
+        if (!first) {
+            console.log(`${j.name.padEnd(56)}ok  ${String(times[j.key]).padStart(5)} s  ${last(r.out)}${slow}`);
+            if (j.show) console.log(r.out.trim().split('\n').slice(0, -1).join('\n')); // v0.11.22: the leftover report in full
+        } else {
             console.log(`${j.name.padEnd(56)}FAILED  (${times[j.key]} s)`);
             console.log(r.out.trim().split('\n').slice(-20).join('\n'));
         }

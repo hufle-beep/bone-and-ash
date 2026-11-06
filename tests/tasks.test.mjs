@@ -19,6 +19,7 @@ import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskMinutes, runTask, out
 
 import { writeFileSync } from 'node:fs';
 import { GAMES, FULL, SHARD, WORKERS, SEED, SENSIBLE, REPORT, STATS_OUT, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
+import { seen as touched, track, noteView, noteCards, mergeSeen, seenOut as touchedOut } from './lib/seen.mjs'; // v0.11.22: for tools/leftovers.mjs
 let pass = 0, fail = 0;
 const assert = (c, l) => { if (c) { pass++; } else { fail++; if (fail < 30) console.error('  FAIL ', l); } };
 const kids = launch(import.meta.url); // v0.11.1: the bot games in worker processes, while this one runs the other checks
@@ -657,6 +658,9 @@ const cardsWhole = new Set(); // v0.11.21: cards that ran to the end at least on
 /** v0.11.21: the forecast = reality check runs on 1 game in FC_EVERY (it was about half of this test's time). The dry runs
  * never touch the game, so the bot games and their numbers are the same; a check below makes sure every played card is still forecast. */
 const FC_EVERY = 8;
+/** v0.11.22: the flag and item watch (tests/lib/seen.mjs), only with --track (tools/check.mjs runs a separate --bots-only --track
+ * job for tools/leftovers.mjs): a Proxy anywhere in the process slows every game in it (about +10 s on the full test, +5 s even on 1 game in 8). */
+const TRACK = process.argv.includes('--track');
 const bands = {};
 let yukiRuns = 0;
 const fightStats = {}; // v0.11.3: per mode, fight and bot style, for tools/sanity.mjs
@@ -704,6 +708,7 @@ function play(run, tasks) {
     let bitShen = false, meiSeen = false, coilKey = '', deadKey = '', ms = 0;
     const D = () => { const a = (g.coil.act || 0) ? deaths.a1 : deaths.pro; return a[g.coil.n] || (a[g.coil.n] = { coils: 0, early: 0, late: 0, beast: 0 }); };
     for (; steps < 18000; steps++) {
+        if (TRACK) track(g); // v0.11.22: which flags and items the games really read and write
         const out = tasks && TRIBUTE_OUT[g.scene];
         if (out && !seenOut.has(g.coil.n)) { seenOut.add(g.coil.n); const b = byCoil[g.coil.n] || (byCoil[g.coil.n] = { won: 0, paid: 0, lost: 0, realm: 0, pri: 0 }); b[out]++; b.realm += g.james.realm; b.pri += g.james.primaries; }
         if (tasks) {
@@ -725,11 +730,13 @@ function play(run, tasks) {
             if (g.scene !== 'meridians') ms = 0;
         }
         const v = sceneView(g, SCENES);
+        noteView(g, v);
         if (v.end) { const e = g.flags.ending || 'none'; st.endings[e] = (st.endings[e] || 0) + 1; st.games++; if (!barsOk(g)) badBars++; return true; }
         if (tasks && isTaskHub(g)) {
             coilPrefill(g);
             const all = taskCards(g, SCENES); // v0.11.15 (B1): the bots take the sit and the meridian cards too
             for (const c of all) cardsListed.add(c.id);
+            noteCards(all); // v0.11.22
             if (yukiLane(g) && rnd(3) === 0) setYuki(g, !yukiLane(g).on);
             const cards = all.filter((c) => c.status === 'open');
             const stops = v.choices.filter((c) => !c.disabled && (c.index >= 1000 || !isTaskChoice(SCENES, g.scene, c.index)));
@@ -798,12 +805,13 @@ if (kids) { // v0.11.1: merge the workers' numbers
         for (const id of r.cardsListed.__set) cardsListed.add(id);
         for (const id of r.cardsForecast.__set) cardsForecast.add(id);
         for (const id of r.cardsWhole.__set) cardsWhole.add(id);
+        mergeSeen(r.touched);
         yukiRuns += r.yukiRuns; predicted += r.predicted; diceInTasks += r.diceInTasks; pass += r.pass; fail += r.fail;
     }
 } else for (const run of myRuns()) { play(run, true); play(run, false); }
-if (SHARD) emit({ byCoil, medStats, deaths, stats, bands, fightStats, badBars, cardsSeen, cardsListed, cardsForecast, cardsWhole, yukiRuns, predicted, diceInTasks, pass, fail });
+if (SHARD) emit({ byCoil, medStats, deaths, stats, bands, fightStats, badBars, cardsSeen, cardsListed, cardsForecast, cardsWhole, yukiRuns, predicted, diceInTasks, pass, fail, touched });
 if (BOTS_ONLY) { // v0.11.21: the games' stats only (the same file a full run writes)
-    if (STATS_OUT) writeFileSync(STATS_OUT, JSON.stringify({ games: GAMES, deaths, byCoil, fights: fightStats, badBars }));
+    if (STATS_OUT) writeFileSync(STATS_OUT, JSON.stringify({ games: GAMES, deaths, byCoil, fights: fightStats, badBars, seen: touchedOut() }));
     console.log(`  ${GAMES} bot games each way, bots only (no rule checks)\n${pass} passed, ${fail} failed`);
     process.exit(fail ? 1 : 0);
 }
@@ -989,7 +997,7 @@ console.log(`  Meditate: ${medStats.mer} meridian screens, ${medStats.bt} breakt
 assert(!FULL || medStats.a1bites >= 5, `bots rewind Act 1 and reach its end (${medStats.a1bites})`);
 console.log(`  ${stats.tasks.cards} cards run, ${stats.tasks.skipped} skipped, ${stats.tasks.collapses} collapses (HP 0), ${predicted} queues predicted (1 game in ${FC_EVERY}), ${cardsSeen.size}/${all.size} cards played`);
 assert(badBars === 0, `no NaN / Infinity bar at the end of a bot game (${badBars})`);
-if (STATS_OUT) writeFileSync(STATS_OUT, JSON.stringify({ games: GAMES, deaths, byCoil, fights: fightStats, badBars })); // v0.11.3: for tools/sanity.mjs
+if (STATS_OUT) writeFileSync(STATS_OUT, JSON.stringify({ games: GAMES, deaths, byCoil, fights: fightStats, badBars, seen: touchedOut() })); // v0.11.3: for tools/sanity.mjs
 console.log(`  ${GAMES} games each way in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FULL ? '' : ' (quick: coverage logged, not checked)'}`);
 console.log(`${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

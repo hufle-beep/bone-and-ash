@@ -5,6 +5,9 @@ import { sceneView, choose, goTo } from '../js/core/story.js';
 import { actionOpen } from '../js/core/forms.js';
 import { writeFileSync } from 'node:fs';
 import { GAMES, FULL, SHARD, WORKERS, STATS_OUT, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
+import { seen as touched, track as watchGame, noteView, mergeSeen, seenOut as touchedOut } from './lib/seen.mjs'; // v0.11.22: for tools/leftovers.mjs
+/** v0.11.22: flags and items are watched only with --track (tools/check.mjs: a separate 300-game run); the shown choices always. */
+const track = process.argv.includes('--track') ? watchGame : () => {};
 
 let pass = 0, fail = 0;
 const assert = (c, l) => { if (c) { pass++; } else { fail++; console.error('  FAIL ', l); } };
@@ -32,7 +35,9 @@ for (const run of kids ? [] : myRuns()) {
     let steps = 0;
     for (; steps < 2500; steps++) {
         seen.add(g.scene);
+        track(g); // v0.11.22
         const v = sceneView(g, SCENES);
+        noteView(g, v);
         // v0.11.21: per-step checks build their label only when they fail (about 14% of this test's time)
         if (!(typeof v.text === 'string' && v.text.length > 40)) assert(false, `text renders in ${g.scene}`); else pass++;
         if (/undefined|NaN|\[object/.test(v.text)) assert(false, `no undefined/NaN in ${g.scene}`); else pass++;
@@ -58,8 +63,8 @@ for (const run of kids ? [] : myRuns()) {
     maxSteps = Math.max(maxSteps, steps);
     assert(steps < 2500, `run ${run} finishes`);
 }
-if (SHARD) emit({ seen, endings, fights, maxSteps, pass, fail });
-if (kids) for (const r of await collect(kids)) { for (const id of r.seen.__set) seen.add(id); mergeInto(endings, r.endings); mergeInto(fights, r.fights); maxSteps = Math.max(maxSteps, r.maxSteps); pass += r.pass; fail += r.fail; }
+if (SHARD) emit({ seen, endings, fights, maxSteps, pass, fail, touched });
+if (kids) for (const r of await collect(kids)) { for (const id of r.seen.__set) seen.add(id); mergeInto(endings, r.endings); mergeInto(fights, r.fights); maxSteps = Math.max(maxSteps, r.maxSteps); pass += r.pass; fail += r.fail; mergeSeen(r.touched); }
 rs = 12346; // the focused walks below draw from their own stream
 // focused walks: the Long Forest at every power level (realm 0–7, tiers 1–3), and the Blackroot with a Ya-leaning heart
 function walkFrom(g, entry, stopAt, budget = 1500) {
@@ -67,7 +72,9 @@ function walkFrom(g, entry, stopAt, budget = 1500) {
     for (let st = 0; st < budget; st++) {
         seen.add(g.scene);
         if (stopAt.has(g.scene)) return true;
+        track(g); // v0.11.22
         const v = sceneView(g, SCENES);
+        noteView(g, v);
         if (!(typeof v.text === 'string' && v.text.length > 40)) assert(false, `text renders in ${g.scene}`); else pass++;
         if (v.end) return 'end'; // v0.11.21: an ending is not the target (the walk checks below want `=== true`)
         const open = v.choices.filter((c) => !c.disabled);
@@ -146,7 +153,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));
 console.log('fights', sorted(fights));
 console.log('endings', sorted(endings), 'longest run', maxSteps, 'scenes', Object.keys(SCENES).length);
-if (STATS_OUT) writeFileSync(STATS_OUT, JSON.stringify({ games: GAMES, fights, endings })); // v0.11.3: for tools/sanity.mjs
+if (STATS_OUT) writeFileSync(STATS_OUT, JSON.stringify({ games: GAMES, fights, endings, seen: touchedOut() })); // v0.11.3: for tools/sanity.mjs; v0.11.22: `seen` for tools/leftovers.mjs
 console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FULL ? '' : ' (quick: coverage logged, not checked)'}`);
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

@@ -1,0 +1,25 @@
+{
+  "note": "v0.11.22: what tools/leftovers.mjs reports but stays on purpose, with a reason each. \"name*\" matches a prefix. Kinds: files, functions, testOnly, css, flagsUnread, flagsUnset, items, storage, markers, choices. New entries only with the owner's ok.",
+  "keep": {
+    "files": {
+      "project/*": "the project docs (named only in other docs, which the file scan skips)",
+      "CLAUDE.md": "the hard rules, read by Claude at the start of a chat",
+      ".github/*": "GitHub runs the workflows by itself",
+      "saves/*": "tests/saves.test.mjs loads every file in the folder",
+      "tools/bg.py": "by hand: makes the background crops in art/bg (handover, Files)",
+      "tools/snap.mjs": "by hand: fresh test saves for each new save format (tests/README.md)"
+    },
+    "testOnly": {
+      "setDryClone": "test hook: the lean = full copy comparison in tests/tasks.test.mjs",
+      "START_SCENE": "the first scene, exported for the tests",
+      "taskState": "test accessor: tests/tasks.test.mjs reads familiarity and the queue through it"
+    },
+    "choices": {
+      "meridians#0": "Incremental Mode runs the meridian work as Meditate cards (js/core/meditate.js), never as a choice on the screen",
+      "meridians#1": "as meridians#0",
+      "meridians#2": "as meridians#0",
+      "meridians#3": "as meridians#0",
+      "meridians#4": "as meridians#0"
+    }
+  }
+}

@@ -5,8 +5,8 @@ Everything here lives in git and grows with the game. **Rule (owner 2026-11-06, 
 ## Running it
 
 ```
-bash tools/check.sh          # the full check, before every push (about 70 s on 2 cores since v0.11.21)
-bash tools/check.sh quick    # 200 bot games each, no browser or sanity check (about 17 s), while building
+bash tools/check.sh          # the full check, before every push (about 61 s on 2 cores since v0.11.22)
+bash tools/check.sh quick    # 200 bot games each, no browser or sanity check, the leftover scan static only (about 17 s), while building
 node tools/check.mjs --jobs 1   # the same, one step at a time (to compare, or on a busy machine)
 node tools/check.mjs --list     # the job list as JSON, nothing run (v0.11.21)
 ```
@@ -32,6 +32,8 @@ node tools/check.mjs --list     # the job list as JSON, nothing run (v0.11.21)
 | story | `tests/story.test.mjs` | every link valid, every scene reachable, 2,000 random playthroughs, per-fight win rates; focused walks that must reach their target (v0.11.21, one of them to `yk_night_all`) | `node tests/story.test.mjs --games 200` |
 | browser part 1 | `tools/browser.py --part 1` | real taps in headless Chromium at 390×844: Incremental Mode, a running bar kept over a reload, Story Mode, two tabs | `python3 tools/browser.py --part 1` |
 | browser part 2 | `tools/browser.py --part 2` | Saves (export all / restore all, backups), the main menu and settings, tooltips and scroll, Meditate on the resting places | `python3 tools/browser.py --part 2` |
+| watched runs | `tests/tasks.test.mjs --bots-only --track`, `tests/story.test.mjs --track` | v0.11.22, full check only: 300 bot games each way and 300 story games plus the focused walks, with `tests/lib/seen.mjs` watching which flags and items are really read and written (a Proxy; it slows every game in its process, so the big runs don't watch) | `node tests/story.test.mjs --track --games 300 --stats-out x.json` |
+| leftovers | `tools/leftovers.mjs`, `tools/leftovers-keep.json` | v0.11.22, **log only**: files nothing loads or names; game functions and constants named nowhere else, or only by tests (`formulas.js` skipped); CSS classes and ids; flags set but never read, read but never set; items never given or not defined; `boneash.*` keys written but never read; `data-*` markers never read; story choices the bots never saw (as a choice or a task card). The keep-list holds what stays on purpose, each with a reason; the full check prints the whole report. Fails only on a broken keep-list | `node tools/leftovers.mjs [--seen a.json …] [--all] [--json]` |
 | sanity | `tools/sanity.mjs` | the mechanics invariants and the drift (±5 points, n ≥ 100) of every death, tribute and fight number against `tools/baseline.json`; a log-only noise-scaled line (v0.11.21, below) | `node tools/sanity.mjs` (runs both bot tests itself) |
 
 `python3 tools/browser.py` with no part runs both parts in one browser, in order.
@@ -41,6 +43,10 @@ Quick runs (`quick`, 200 games) can't promise full coverage, so since v0.11.21 t
 ## The drift rule and its noise (v0.11.21)
 
 Measured on 10 replays of the bot games under other seeds (2,000 games each): the spread of each number matches the textbook noise of a rate (measured ÷ formula: median 0.94). **Today's ±5 rule flags 4.0% of numbers on chance alone**, so a change that reshuffles the bots' games is expected to show about 8 drift flags that mean nothing; at the same time it misses 3–4-point shifts on numbers with n ≈ 2,000, and it skips the 16 numbers under n 100. The noise-scaled band (`tools/lib/noise.mjs`: 3 × the number's own noise, at least 2 points, every n) flags 0.23% by chance (about 0.5 per change). It is **log only**: the sanity check prints what it would flag next to the ±5 result. Unchanged code moves by exactly 0 (fixed seeds), so with either rule a flag on a change that should not touch balance is real.
+
+## The leftover check (v0.11.22)
+
+Static first: a small tokenizer (`strip`) takes comments and string text out of the game code, then each kind is matched by name. Flags are read as `g.flags.x`, `g.flags?.x`, an alias (`const f = g.flags`), `once('x')`, `daily('x')`, `flags['x']`, a table looped into `g.flags[k]`; written as assignments, `set(…)`, `markDaily`, `Object.assign(g.flags, …)`, `delete`. Without the bots' data, a flag name that also appears as a plain string is not reported (it may be a key the code builds). Then the bots: the stats files carry `seen` (flags and items read and written, choices shown), and a static finding the bots cleared is dropped. Known gaps (fine for log only): a `const a = 1, b = 2` line finds only `a`; a rewind inside a step reads plain flags until the next step; the test's own read of `g.flags.ending` counts as a read. Made strict only after the owner has picked what goes and what stays (the keep-list).
 
 ## Tools that are not steps
 
@@ -53,6 +59,7 @@ Measured on 10 replays of the bot games under other seeds (2,000 games each): th
 
 - v0.11.20: the dry runs behind the forecast and card times (`taskMinutes`, `outlook`) copy the game without its journal log and share the Coil snapshot (`dryClone` in `js/core/tasks.js`): about 6× faster per copy, the tasks test 102 s → 60 s. A test compares it with the old full copy on 200 queues.
 - v0.11.21: the forecast = reality check runs on 1 game in 8 (it was half of the tasks test's time; the dry runs don't touch the games, so the numbers are byte-identical); per-step checks in the bot loops build their label only on a failure (story test about 14% faster). The full check about 80 s → 70 s (68–73 s in 3 runs; 57–64 s without the new tools step, which costs about 8–10 s). The browser test now waits out the game's 400 ms double-tap guard (`tap()` in `tools/browser.py`): before, about half its taps were silently ignored, so part 1 really plays its 65 taps now (about 46 s) and part 2 takes about 8 s instead of 21. The tools step's 1 = 2 workers comparison plays the tasks games with `--bots-only` (no rule checks; the same stats file).
+- v0.11.22: the full check about 61 s (3 runs: 64, 61, 61). The watched runs (15 s and 7 s) start when the tasks test ends and share the cores with the story test (7 → 11 s there); watching inside the big tests would cost about +10 s on the tasks test (+5 s even on 1 game in 8: a Proxy anywhere slows the whole process).
 - Next places to look: browser part 1 (about 46 s, the longest step now: it could be split in two), the tools step's share, the tasks test's 2,000 games each way.
 - Older note: next places to look when the check grows: the tasks test's 2,000 games each way (the profile: `node --cpu-prof tests/tasks.test.mjs --games 200 --workers 1`), the browser parts' fixed waits.
 
