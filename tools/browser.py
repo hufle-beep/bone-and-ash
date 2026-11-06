@@ -147,6 +147,10 @@ def saves(pg, url):
     fresh(pg, url, """a => { localStorage.clear(); localStorage.setItem('boneash.auto', a[0]); localStorage.setItem('boneash.slot1', a[1]);
         localStorage.setItem('boneash.bak.5m', a[2]); localStorage.setItem('boneash.bak.meta', JSON.stringify({ play: 0, at: {}, when: { '5m': Date.now() } })); }""", [lf, s1, b5])
     open_saves(pg); check_text(pg, 'Saves')
+    # v0.11.13: every save line shows its Coil (Incremental Mode), as Continue does
+    txt = pg.inner_text('body')
+    if not re.search(r'Day \d+, \d\d:\d\d · Coil 2', txt): fails.append('Saves: the Coil 2 backup line has no "· Coil 2"')
+    else: notes.append('save lines show the Coil')
     # Copy status
     pg.click('button[data-status]'); pg.wait_for_timeout(800)
     st = pg.evaluate("navigator.clipboard.readText()")

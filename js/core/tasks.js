@@ -16,7 +16,7 @@ import { hasForm } from './forms.js';
 import { choose, goTo, choiceOpen, choiceTag, gives, setTimeless, defaultMinutes, movesPlace } from './story.js';
 import { advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck, canBreakThrough, btMinutes, realmName, condense, SIT_MINUTES_INC } from './game.js';
 import { CONDENSE_SIT_COST } from './formulas.js';
-import { btTarget } from '../story/meridians.js';
+import { btTarget, MER_LINES, lineWindow, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
 import { daily } from '../story/common.js';
 import { endCoil, recordCard } from './coil.js';
@@ -82,6 +82,15 @@ export const btOpen = (g) => canBreakThrough(g) && btTarget(g) === 'breakthrough
 export const SIT_TASK = 'sit:next';
 const hubHasSit = (scenes, hubId) => (scenes[hubId]?.choices || []).some((c) => c.to === hubId && /^(Cultivate|Condense)/.test(String(typeof c.text === 'function' ? '' : c.text)) && /condense\(g\)/.test(String(c.do)));
 export const sitOpen = (g, scenes) => !!TASK_HUBS[g.scene] && !hubHasSit(scenes, g.scene) && g.james.qi >= CONDENSE_SIT_COST && g.james.saturation < 100;
+/** v0.11.13 (E1): one queueable card per meridian line (`mer:pri`, `mer:col`, `mer:e8`, `mer:ec`, `mer:jn`). `mer:next` is no longer
+ * listed, but a queue saved with it still runs (primaries first, as before). */
+export const merLineTask = (line) => `mer:${line}`;
+export const lineOfTask = (id) => { const x = /^mer:(\w+)$/.exec(String(id)); return x && MER_LINES.includes(x[1]) ? x[1] : null; };
+/** Index of line `line`'s choice on the meridian screen if it can run now, or -1. */
+export function merLineChoice(g, scenes, line) {
+    const i = lineIndex(scenes, line);
+    return i >= 0 && lineWindow(g, line) && choiceOpen(g, scenes.meridians.choices[i]) ? i : -1;
+}
 /** Index of the meridian-screen choice the next session would take, or -1 (none left today, too little Qi, wrong realm). */
 export function merChoice(g, scenes) {
     const cs = scenes.meridians?.choices || [];
@@ -103,7 +112,7 @@ export function waitChoice(scenes, c, mins = 60, from = null) {
     return !!(to?.enter && SETS_CLOCK.test(String(to.enter)));
 }
 export function isInstantTask(g, scenes, id) {
-    if (id === MER_TASK || id === BT_TASK || id === SIT_TASK) return false;
+    if (id === MER_TASK || id === BT_TASK || id === SIT_TASK || lineOfTask(id)) return false;
     const p = parse(id);
     return instantChoice(scenes[p.scene]?.choices?.[p.index]);
 }
@@ -113,6 +122,7 @@ function cardOf(scenes, hubId, id) {
     const cfg = TASK_HUBS[hubId];
     if (id === BT_TASK) return { kind: 'bt', c: null, p: { scene: 'breakthrough', index: -1 }, group: 'Meditate' };
     if (id === MER_TASK) return { kind: 'mer', c: null, p: { scene: 'meridians', index: -1 }, group: 'Meditate' };
+    if (lineOfTask(id)) return { kind: 'mer', line: lineOfTask(id), c: null, p: { scene: 'meridians', index: -1 }, group: 'Meditate' };
     if (id === SIT_TASK) return { kind: 'sit', c: null, p: { scene: hubId, index: -1 }, group: 'Meditate' };
     const p = parse(id);
     const c = scenes[p.scene]?.choices?.[p.index];
@@ -177,18 +187,19 @@ export function taskCards(g, scenes) {
         if (isDoor(cfg, c)) push(`${hubId}:${i}`, 'door', cfg.own, c, c.time || 0, 'open');
         else if (isChore(hubId, c)) push(`${hubId}:${i}`, c.check && !cfg.plainChecks ? 'work' : 'chore', cfg.own, c, c.time || 0, 'open');
     });
-    const mi = merChoice(g, scenes);
-    if (mi >= 0) {
+    for (const line of MER_LINES) { // v0.11.13 (E1): where "Next meridian session" was
+        const mi = merLineChoice(g, scenes, line);
+        if (mi < 0) continue;
         const c = scenes.meridians.choices[mi];
-        cards.push({ id: MER_TASK, kind: 'mer', group: 'Meditate', label: `Next meridian session: ${asText(c.text, g).replace(/^Open /, '')}`, tag: choiceTag(g, c), minutes: c.minutes ? c.minutes(g) : c.time || 0, status: 'open', tier: 0, fam: 0, next: null });
+        cards.push({ id: merLineTask(line), kind: 'mer', line, group: 'Meditate', label: asText(c.text, g), tag: choiceTag(g, c), minutes: c.minutes ? c.minutes(g) : c.time || 0, status: 'open', tier: 0, fam: 0, next: null });
     }
     if (sitOpen(g, scenes)) cards.push({ id: SIT_TASK, kind: 'sit', group: 'Meditate', label: 'Cultivate: one sit', tag: `${CONDENSE_SIT_COST} Qi`, minutes: SIT_MINUTES_INC, status: 'open', tier: 0, fam: 0, next: null });
     if (btOpen(g)) cards.push({ id: BT_TASK, kind: 'bt', group: 'Meditate', label: `Break through to ${realmName(g.james.realm + 1)}`, tag: `${btMinutes(g)} min`, minutes: btMinutes(g), status: 'open', tier: 0, fam: 0, next: null });
     return cards;
 }
 
-export const taskOpen = (g, scenes, id) => taskCards(g, scenes).some((c) => c.id === id && c.status === 'open');
-export const taskLabel = (g, scenes, id) => { if (id === MER_TASK) return 'Next meridian session'; if (id === BT_TASK) return 'Break through'; if (id === SIT_TASK) return 'Cultivate: one sit'; const p = parse(id); const c = scenes[p.scene]?.choices?.[p.index]; return c ? asText(c.text, g) : id; };
+export const taskOpen = (g, scenes, id) => (id === MER_TASK ? !!TASK_HUBS[g.scene] && merChoice(g, scenes) >= 0 : taskCards(g, scenes).some((c) => c.id === id && c.status === 'open')); // v0.11.13: an old queue's mer:next still runs
+export const taskLabel = (g, scenes, id) => { if (id === MER_TASK) return 'Next meridian session'; if (lineOfTask(id)) return lineName(g, lineOfTask(id)).replace(/\.$/, ''); if (id === BT_TASK) return 'Break through'; if (id === SIT_TASK) return 'Cultivate: one sit'; const p = parse(id); const c = scenes[p.scene]?.choices?.[p.index]; return c ? asText(c.text, g) : id; };
 
 /** HP 0 during a task (v0.9.4): the Coil ends. The queue is gone; the Coil screen decides what happens next. */
 function collapse(g, scenes, hubId) {
@@ -325,7 +336,7 @@ export function runTask(g, scenes, id) {
         const r = condense(g);
         lines.push(r.ok ? `Condensed: Saturation ${r.saturation}%.` : 'Not enough Qi to sit.');
     } else if (card.kind === 'mer') {
-        const mi = merChoice(g, scenes);
+        const mi = card.line ? merLineChoice(g, scenes, card.line) : merChoice(g, scenes);
         if (mi < 0) throw new Error('No meridian session possible');
         g.scene = 'meridians';
         const r = choose(g, scenes, mi);

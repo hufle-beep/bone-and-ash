@@ -77,7 +77,7 @@ function workChoice(k) {
     const can = (g) => isNoDice() && (k === 'pri' ? canPrimary(g) : canColGroup(g));
     return {
         text: (g) => `Work on ${nameOf(g, k)}. (${k === 'pri' ? `${P(g) + 1}/12` : `group ${colGroupsOpen(g) + 1}/8`}; ${fmtH(work(g, k))} of ${fmtH(need(g, k))} done; ${merMinutesOf(g, k)} min.)`,
-        show: can, qi: 2, time: 0, work: true, minutes: (g) => merMinutesOf(g, k),
+        show: can, qi: 2, time: 0, work: true, merLine: k, minutes: (g) => merMinutesOf(g, k),
         req: (g) => (g.james.satiety >= MER_FED_MIN ? true : 'Too hungry to sit. Eat first.'),
         do: (g) => {
             const mins = merMinutesOf(g, k);
@@ -145,6 +145,38 @@ export const canExtraColl = (g) => R(g) >= 7 && m(g).e >= 8 && m(g).c < 28 && da
 export const canJunction = (g) => R(g) >= 7 && m(g).j < 10 && daily('mer_jn')(g);
 export const canAnyMeridian = (g) => canPrimary(g) || canColGroup(g) || canExtra8(g) || canExtraColl(g) || canJunction(g);
 
+/**
+ * v0.11.13 (E1, Incremental Mode): each meridian line is its own Meditate card (queueable on the task screens), in this
+ * order. `window` = the line is in reach at this realm (the card shows); `wait` = why it can't run yet though it shows
+ * (the collateral group's primaries, one opening a day for the Extraordinary lines), '' if nothing. The work itself is the
+ * line's choice on the meridian screen (`merLine` field), which Story Mode keeps as a screen.
+ */
+export const MER_LINES = ['pri', 'col', 'e8', 'ec', 'jn'];
+const LINE_WINDOW = {
+    pri: (g) => isNoDice() && R(g) === 0 && P(g) < 12,
+    col: (g) => isNoDice() && R(g) === 0 && colGroupsOpen(g) < COL_GROUPS.length,
+    e8: (g) => R(g) >= 1 && R(g) <= 6 && m(g).e < 8,
+    ec: (g) => R(g) >= 7 && m(g).e >= 8 && m(g).c < 28,
+    jn: (g) => R(g) >= 7 && m(g).j < 10,
+};
+const LINE_DAILY = { e8: 'mer_e8', ec: 'mer_ec', jn: 'mer_jn' };
+export const lineWindow = (g, line) => !!LINE_WINDOW[line]?.(g);
+export function lineWait(g, line) {
+    if (line === 'col') { const gr = COL_GROUPS[colGroupsOpen(g)]; if (gr && P(g) < gr.need) return `opens with ${gr.need} primaries open`; }
+    if (LINE_DAILY[line] && !daily(LINE_DAILY[line])(g)) return 'one a day: back tomorrow';
+    return '';
+}
+/** The line's choice index on the meridian screen. */
+export const lineIndex = (scenes, line) => (scenes.meridians?.choices || []).findIndex((c) => c.merLine === line);
+/** The card's label when its choice is hidden (waiting): the next channel of the line. */
+export function lineName(g, line) {
+    if (line === 'pri') return `Work on ${PRIMARIES[P(g)]?.name}.`;
+    if (line === 'col') return `Work on ${COL_GROUPS[colGroupsOpen(g)]?.name}.`;
+    if (line === 'e8') return `Open ${EXTRA8[m(g).e]?.name}.`;
+    if (line === 'ec') return `Open ${EXTRA_COLL[m(g).c]}.`;
+    return `Open ${JUNCTIONS[m(g).j]?.name}.`;
+}
+
 const dcE = (g) => 4 + m(g).e; // 4 … 11
 const dcC = (g) => 6 + Math.floor(m(g).c / 4); // 6 … 12
 const dcJ = (g) => 8 + Math.floor(m(g).j / 2); // 8 … 12
@@ -192,21 +224,21 @@ export const MERIDIANS = {
                 to: 'meridians',
             },
             {
-                text: (g) => `Open ${EXTRA8[m(g).e]?.name}.`, show: canExtra8, qi: 2, time: 60,
+                text: (g) => `Open ${EXTRA8[m(g).e]?.name}.`, show: canExtra8, qi: 2, time: 60, merLine: 'e8',
                 check: { skill: 'Convergence Use', dc: dcE, band: 'challenging' },
                 do: (g) => { const v = EXTRA8[m(g).e]; g.james.extra8 = m(g).e + 1; markDaily(g, 'mer_e8'); return [`Opened ${v.name} (${g.james.extra8}/8). ${v.line}`, ...after(g)]; },
                 failDo: () => ['The vessel holds. Two Qi gone into a wall. Tomorrow, maybe, or in an hour if you\'re stubborn.'],
                 to: 'meridians',
             },
             {
-                text: (g) => `Open ${EXTRA_COLL[m(g).c]}.`, show: canExtraColl, qi: 2, time: 60,
+                text: (g) => `Open ${EXTRA_COLL[m(g).c]}.`, show: canExtraColl, qi: 2, time: 60, merLine: 'ec',
                 check: { skill: 'Convergence Use', dc: dcC, band: 'challenging' },
                 do: (g) => { const n = EXTRA_COLL[m(g).c]; g.james.extraCollaterals = m(g).c + 1; markDaily(g, 'mer_ec'); return [`Opened ${n} (${g.james.extraCollaterals}/28). A fine, bright thread, no thicker than a hair.`, ...after(g)]; },
                 failDo: () => ['The thread slips. It\'s like threading a needle in the dark, if the needle were inside you.'],
                 to: 'meridians',
             },
             {
-                text: (g) => `Open ${JUNCTIONS[m(g).j]?.name}.`, show: canJunction, qi: 2, time: 60,
+                text: (g) => `Open ${JUNCTIONS[m(g).j]?.name}.`, show: canJunction, qi: 2, time: 60, merLine: 'jn',
                 check: { skill: 'Convergence Use', dc: dcJ, band: 'challenging' },
                 do: (g) => { const v = JUNCTIONS[m(g).j]; g.james.junctions = m(g).j + 1; markDaily(g, 'mer_jn'); return [`Opened ${v.name} (${g.james.junctions}/10). ${v.line}`, ...after(g)]; },
                 failDo: () => ['The junction doesn\'t give. It isn\'t stubborn. It\'s just bigger than you are, today.'],

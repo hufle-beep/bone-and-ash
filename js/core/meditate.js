@@ -1,16 +1,16 @@
 /**
  * The Meditate card (v0.9.5, task mode): on every screen except fights and a few urgent moments.
- * Inside: Cultivate (condensation lives here now), Open a meridian, Break through. The scene stays open:
+ * Inside: Cultivate (condensation lives here now), the meridian lines (v0.11.13, E1: one card each, no screen), Break through. The scene stays open:
  * the meridian and breakthrough screens come back to it without running its enter again (`med_back`).
  * On a task hub, Cultivate is the hub's own cultivate card (queueable; same id, same familiarity), shown in this group.
  * Pure — no DOM.
  */
-import { condense, canBreakThrough, breakReady, breakBlock, btMinutes, sitGain } from './game.js';
+import { condense, canBreakThrough, breakReady, breakBlock, btMinutes, sitGain, isNoDice } from './game.js';
 import { CONDENSE_SIT_COST } from './formulas.js';
-import { goTo, checkDeath } from './story.js';
-import { canAnyMeridian, btTarget, merMinutes } from '../story/meridians.js';
+import { goTo, checkDeath, choose, choiceOpen } from './story.js';
+import { canAnyMeridian, btTarget, MER_LINES, lineWindow, lineWait, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
-import { merChoice, MER_TASK, BT_TASK, SIT_TASK, sitOpen } from './tasks.js';
+import { BT_TASK, SIT_TASK, sitOpen, merLineTask, merLineChoice } from './tasks.js';
 const hrs = (m) => (m % 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m / 60} h`);
 
 /** No meditating here: urgent moments and screens that are already about it. */
@@ -24,6 +24,27 @@ export const isMedDoor = (c) => typeof c.text === 'function' ? /Break through/.t
 
 export const canMeditate = (g, scenes) => !g.combat && !NO_MEDITATE.has(g.scene) && !scenes[g.scene]?.end;
 
+const asStr = (t, g) => String(typeof t === 'function' ? t(g) : t);
+/** v0.11.13 (E1): the meridian cards: one per line in reach; locked with the reason when it can't run now. */
+function merCards(g, scenes) {
+    if (!isNoDice()) return []; // Story Mode keeps the meridian screen (its hub choice)
+    const out = [];
+    for (const line of MER_LINES) {
+        if (!lineWindow(g, line)) continue;
+        const i = lineIndex(scenes, line);
+        if (i < 0) continue;
+        const c = scenes.meridians.choices[i];
+        const wait = lineWait(g, line);
+        const shown = !c.show || c.show(g);
+        const req = c.req ? c.req(g) : true;
+        const reason = wait || (req !== true ? req : g.james.qi < (c.qi || 0) ? `needs ${c.qi} Qi` : !shown ? 'not now' : '');
+        const open = !reason && merLineChoice(g, scenes, line) >= 0;
+        const minutes = c.minutes ? c.minutes(g) : c.time || 0;
+        out.push({ id: `med:mer:${line}`, line, label: shown ? asStr(c.text, g) : lineName(g, line), tag: open ? `${c.qi} Qi` : reason, open, ...(open ? {} : { reason }), minutes, ...(open && TASK_HUBS[g.scene] ? { task: merLineTask(line) } : {}) });
+    }
+    return out;
+}
+
 /** The Meditate cards here: [{ id, label, tag, open, reason, minutes, task? }] — `task` = a hub card id (queueable). */
 export function medCards(g, scenes) {
     if (!canMeditate(g, scenes)) return [];
@@ -34,8 +55,7 @@ export function medCards(g, scenes) {
     const sit = { label: `Cultivate: an hour, ${CONDENSE_SIT_COST} Qi, Saturation +${sitGain(g)}% (${g.james.saturation}%).`, tag: qiOk ? `${CONDENSE_SIT_COST} Qi` : `needs ${CONDENSE_SIT_COST} Qi`, open: qiOk, minutes: SIT_MINUTES };
     if (hubSit >= 0) out.push({ ...sit, id: `${g.scene}:${hubSit}`, task: `${g.scene}:${hubSit}` });
     else out.push({ ...sit, id: 'med:sit', ...(sitOpen(g, scenes) ? { task: SIT_TASK } : {}) }); // v0.11.12: queueable on a task screen with no Cultivate of its own
-    if (TASK_HUBS[g.scene] && merChoice(g, scenes) >= 0) out.push({ id: MER_TASK, task: MER_TASK, label: 'Next meridian session (up to 2 h, 2 Qi): the next channel on the map.', tag: 'queueable', open: true, minutes: merMinutes(g) }); // v0.10.0
-    if (canAnyMeridian(g)) out.push({ id: 'med:mer', label: 'Open a meridian.', tag: 'opens the meridian screen', open: true, minutes: 0 });
+    out.push(...merCards(g, scenes)); // v0.11.13 (E1): replaces "Next meridian session" and "Open a meridian"
     if (canBreakThrough(g)) {
         const warn = btTarget(g) !== 'breakthrough';
         out.push({ id: 'med:bt', label: `Break through. (Saturation ${g.james.saturation}%; ${hrs(btMinutes(g))}.)`, tag: warn ? 'a warning first' : 'queueable', open: true, minutes: warn ? 0 : btMinutes(g), ...(warn || !TASK_HUBS[g.scene] ? {} : { task: BT_TASK }) });
@@ -53,7 +73,17 @@ export function runMed(g, scenes, id) {
         return { lines: [...(r.ok ? [`Condensed: Saturation ${r.saturation}%.`] : ['Not enough Qi to sit.']), ...dead], moved: dead.length > 0 };
     }
     const back = g.scene;
-    if (id === 'med:mer' && canAnyMeridian(g)) {
+    const line = /^med:mer:(\w+)$/.exec(id)?.[1];
+    if (line) { // v0.11.13 (E1): the line's work, run from here (its bar has filled); the scene stays
+        const i = merLineChoice(g, scenes, line);
+        if (i < 0) throw new Error(`No meridian work on ${line} now`);
+        g.scene = 'meridians';
+        const r = choose(g, scenes, i);
+        if (g.scene === 'meridians') g.scene = back; // back without running the scene's enter again
+        const dead = g.scene === back ? checkDeath(g, scenes) : [];
+        return { lines: [...r.lines, ...dead], moved: g.scene !== back };
+    }
+    if (id === 'med:mer' && canAnyMeridian(g)) { // the old screen door: no card offers it since v0.11.13; the test bots still walk in (owner pick i, until B1)
         g.flags.mer_return = back; g.flags.med_back = back;
         return { lines: goTo(g, scenes, 'meridians'), moved: true };
     }

@@ -5,13 +5,14 @@ import { SCENES, lfOpen, lfSeason, lfRank, LF_STOCK, LF_SEASON_MINUTES } from '.
 import { itemCap, MAX_REALM, combatStep as cStep, startCombat as sCombat, coilMult, awardXp, awardYukiFightXp, condense, SAT_HOURS, sitGain, btMinutes, formDmgBonus, guardBonus, fieldDamage, FIELD_ROUNDS, actionDmg } from '../js/core/game.js';
 import { FORM_LINES, hasForm, cuRank, actionOpen, actionLabel, fragileKnife, STORY_FORMS, INC_ONLY_ACTIONS } from '../js/core/forms.js';
 import { TASK_HUBS } from '../js/story/task_hubs.js';
+import { markDaily } from '../js/story/common.js';
 import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, setNoDice, isNoDice, clockLabelSec, advance, STARVE_HP_PER_HOUR, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1 } from '../js/core/game.js';
 import { canPrimary, canColGroup, colGroupsOpen, sessionsToday, dcPrimary, dcColGroup, btTarget, canAnyMeridian, COL_GROUPS, priHours, colHours, merMinutesOf } from '../js/story/meridians.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
 import { medCards, runMed, canMeditate, NO_MEDITATE, isSitChoice } from '../js/core/meditate.js';
 import { defaultMinutes, DEFAULT_MINUTES } from '../js/core/story.js';
 import { coilActive, coilPrefill, rewind, endCoil, KEEP_FLAGS, REMEMBER } from '../js/core/coil.js';
-import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskMinutes, runTask, outlook, taskQueue, taskState, setYuki, yukiLane, famTier, QUEUE_MAX, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, merChoice, MER_TASK, BT_TASK, SIT_TASK, waitChoice } from '../js/core/tasks.js';
+import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskMinutes, runTask, outlook, taskQueue, taskState, setYuki, yukiLane, famTier, QUEUE_MAX, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, merChoice, MER_TASK, BT_TASK, SIT_TASK, waitChoice, merLineTask, lineOfTask } from '../js/core/tasks.js';
 
 import { writeFileSync } from 'node:fs';
 import { GAMES, FULL, SHARD, WORKERS, SEED, SENSIBLE, REPORT, STATS_OUT, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
@@ -68,15 +69,13 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     const k = ensureBars(newGame(33)); k.scene = 'mei_lin'; k.james.qi = 30; const k0 = k.minutes;
     const r = runMed(k, SCENES, 'med:sit');
     assert(k.scene === 'mei_lin' && k.minutes - k0 === 60 && k.james.saturation === 10 && /Condensed/.test(r.lines[0]), `Meditate: a sit keeps the scene (1 h, +10%: ${k.minutes - k0} min, ${k.james.saturation}%)`);
-    // open a meridian and come back without the scene's enter running again
+    // v0.11.13 (E1): no meridian screen from Meditate; at Foundation the Extraordinary vessel is a card, run from the scene, which stays
     const e = ensureBars(newGame(34)); e.scene = 'village'; e.james.realm = 1; e.james.qi = 30;
     const before = JSON.stringify(e.inventory);
-    if (medCards(e, SCENES).some((c) => c.id === 'med:mer')) {
-        runMed(e, SCENES, 'med:mer');
-        assert(e.scene === 'meridians', 'Meditate: the meridian screen opens');
-        choose(e, SCENES, SCENES.meridians.choices.findIndex((c) => c.text === 'Open your eyes.'));
-        assert(e.scene === 'village' && JSON.stringify(e.inventory) === before && !e.flags.med_back, 'back to the scene, its enter not run twice');
-    } else assert(false, 'Foundation: a meridian can be opened');
+    const em = medCards(e, SCENES);
+    assert(!em.some((c) => c.id === 'med:mer') && em.some((c) => c.id === 'med:mer:e8' && c.open && c.minutes === 60), 'Foundation: the Extraordinary vessel is a Meditate card (1 h), no meridian screen');
+    const e0 = e.minutes, er = runMed(e, SCENES, 'med:mer:e8');
+    assert(e.scene === 'village' && !er.moved && e.minutes - e0 === 60 && JSON.stringify(e.inventory) === before && !e.flags.med_back, `the card runs here: 1 h, the scene stays, its enter not run (${e.scene}, ${e.minutes - e0} min)`);
     // the hub's own cultivate card is the Meditate sit there (queueable); the old hub doors are hidden in task mode
     const w = ensureBars(newGame(35)); w.scene = 'wilds'; w.james.qi = 30; w.james.saturation = 99;
     const wm = medCards(w, SCENES);
@@ -104,8 +103,8 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     assert(priHours(0) === 2 && priHours(11) === 4 && colHours(0) === 3 && colHours(7) === 5, 'hours: primaries 2–4, groups 3–5');
     assert(Math.round(Array.from({ length: 12 }, (_, k) => priHours(k)).reduce((x, y) => x + y) * 10) / 10 === 36 && Math.round(Array.from({ length: 8 }, (_, j) => colHours(j)).reduce((x, y) => x + y) * 10) / 10 === 32, '36 h for the 12 primaries, 32 h for the 8 groups');
     g.scene = 'stream'; g.james.qi = 20; g.james.satiety = 70;
-    assert(medCards(g, SCENES).some((c) => c.id === 'med:mer'), 'Meditate offers the meridian screen in Mortal Vessel');
-    runMed(g, SCENES, 'med:mer');
+    { const gm = medCards(g, SCENES); assert(!gm.some((c) => c.id === 'med:mer') && gm.some((c) => c.id === 'med:mer:pri' && c.open && c.task === merLineTask('pri')) && gm.some((c) => c.id === 'med:mer:col' && !c.open && /2 primaries/.test(c.reason)), 'v0.11.13: Mortal Vessel: a primary card (queueable here), the collateral card locked until 2 primaries, no screen'); }
+    g.scene = 'meridians'; g.flags.mer_return = 'stream'; // the screen itself (Story Mode's, and saves sitting on it)
     const wp = SCENES.meridians.choices.findIndex((c) => c.work && /primary|Lung/.test(String(c.text(g))) && c.show(g));
     const wc = () => SCENES.meridians.choices.findIndex((c, i) => c.work && i !== wp);
     assert(wp >= 0 && SCENES.meridians.choices.every((c) => !c.check || !(c.show ? c.show(g) : true) || c.to !== 'meridians' || c.work), 'Incremental Mode: work cards, the old checked sessions hidden');
@@ -544,7 +543,7 @@ function play(run, tasks) {
         if (tasks && canMeditate(g, SCENES) && rnd(6) === 0) {
             const mc = medCards(g, SCENES);
             if (mc.some((c) => c.id === 'med:bt' && c.open) && rnd(2) === 0) { runMed(g, SCENES, 'med:bt'); medStats.bt++; continue; }
-            if (mc.some((c) => c.id === 'med:mer')) { runMed(g, SCENES, 'med:mer'); medStats.mer++; continue; }
+            if (canAnyMeridian(g)) { runMed(g, SCENES, 'med:mer'); medStats.mer++; continue; } // v0.11.13 (owner pick i): the bots still walk into the old screen until B1
         }
         if (SENSIBLE && tasks) { // tools/bots.mjs --sensible: at most 2 meridian sittings in a row, none when hungry
             if (g.scene === 'meridians' && ((ms = (ms || 0) + 1) > 2 || g.james.satiety < 40)) { ms = 0; choose(g, SCENES, SCENES.meridians.choices.findIndex((c) => c.text === 'Open your eyes.')); continue; }
@@ -554,7 +553,8 @@ function play(run, tasks) {
         if (v.end) { const e = g.flags.ending || 'none'; st.endings[e] = (st.endings[e] || 0) + 1; st.games++; if (!barsOk(g)) badBars++; return true; }
         if (tasks && isTaskHub(g)) {
             coilPrefill(g);
-            const all = taskCards(g, SCENES).filter((c) => c.id !== SIT_TASK); // v0.11.12 (owner pick b): the bots leave the new queueable sit alone until the familiarity rework re-measures; its own tests cover it
+            const all = taskCards(g, SCENES).filter((c) => c.id !== SIT_TASK && !lineOfTask(c.id));
+            { const ti = taskCards(g, SCENES).filter((c) => c.id !== SIT_TASK).findIndex((c) => lineOfTask(c.id)); if (ti >= 0) all.splice(ti, 0, { id: MER_TASK, kind: 'mer', status: 'open' }); } // v0.11.13 (pick i): the bots keep the old "Next meridian session" in its old place until B1 // v0.11.12 (owner pick b): the bots leave the new queueable sit alone until the familiarity rework re-measures; its own tests cover it
             for (const c of all) cardsListed.add(c.id);
             if (yukiLane(g) && rnd(3) === 0) setYuki(g, !yukiLane(g).on);
             const cards = all.filter((c) => c.status === 'open');
@@ -684,6 +684,35 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     g.james.qi = 20; runTask(g, SCENES, MER_TASK); g.james.qi = 20;
     assert(merChoice(g, SCENES) >= 0 && taskOpen(g, SCENES, MER_TASK), 'v0.11.2: no daily limit, the card stays');
     g.james.satiety = 10; assert(!taskOpen(g, SCENES, MER_TASK), 'Fed under 20: no meridian card'); g.james.satiety = 70;
+    // v0.11.13 (E1): one card per meridian line; collaterals queueable while primaries are still closed; an old mer:next queue still runs
+    {
+        const L = ensureBars(newGame(76, { closed: true })); L.scene = 'stream'; L.james.qi = 25; L.james.satiety = 70; L.james.primaries = 3; L.yuki.primaries = 3;
+        const ids = taskCards(L, SCENES).filter((c) => c.kind === 'mer').map((c) => c.id);
+        assert(ids.join() === 'mer:pri,mer:col' && !ids.includes(MER_TASK), `v0.11.13: two meridian cards on the stream (${ids.join()})`);
+        assert(medCards(L, SCENES).filter((c) => /^med:mer:/.test(c.id)).map((c) => c.task).join() === 'mer:pri,mer:col', 'v0.11.13: the Meditate cards carry the queue ids');
+        assert(taskMinutes(L, SCENES, 'mer:col') === 120 && !isInstantTask(L, SCENES, 'mer:col') && lineOfTask('mer:col') === 'col' && lineOfTask('mer:next') === null, 'v0.11.13: the collateral card: 2 h in the forecast, never at once');
+        queueAdd(L, 'mer:col'); queueAdd(L, 'mer:col'); queueAdd(L, 'mer:pri');
+        const ol = outlook(L, SCENES), real = JSON.parse(JSON.stringify(L)), got = [];
+        for (const id of [...taskQueue(real)]) { taskQueue(real).shift(); runTask(real, SCENES, id); got.push(real.minutes); }
+        assert(ol.rows.map((x) => x.end).join() === got.join(), `v0.11.13: the forecast = what happens (${ol.rows.map((x) => x.end).join()} / ${got.join()})`);
+        assert(real.james.collaterals === 9 && real.james.primaries === 3 && Math.abs(real.james.merWork - 2) < 0.01 && real.scene === 'stream', `v0.11.13: two collateral sittings open group 1 with 3 primaries; then the primary's work (${real.james.collaterals}, ${real.james.merWork})`);
+        L.james.satiety = 19; const lk = medCards(L, SCENES).filter((c) => /^med:mer:/.test(c.id));
+        assert(lk.length === 2 && lk.every((c) => !c.open && !c.task && /Too hungry/.test(c.reason)) && !taskOpen(L, SCENES, 'mer:pri'), 'v0.11.13: under Fed 20 both show, locked, with the reason');
+        L.james.satiety = 70; L.james.qi = 1; assert(medCards(L, SCENES).filter((c) => /^med:mer:/.test(c.id)).every((c) => !c.open && /2 Qi/.test(c.reason)), 'v0.11.13: under 2 Qi: locked'); L.james.qi = 25;
+        const o = JSON.parse(JSON.stringify(L)); taskQueue(o).push(MER_TASK);
+        assert(taskOpen(o, SCENES, MER_TASK) && runTask(o, SCENES, MER_TASK) && o.james.primaries === 3 && o.james.merWork > 0, 'v0.11.13: a saved mer:next still runs (primaries first)');
+        const a = ensureBars(newGame(77, { closed: true })); a.scene = 'arrival'; a.james.qi = 25; a.james.satiety = 70;
+        const am = medCards(a, SCENES).find((c) => c.id === 'med:mer:pri');
+        assert(am && am.open && !am.task && am.minutes === 120, 'v0.11.13: off the task screens the card is tap-only, with its length (a bar)');
+        const a0 = a.minutes; runMed(a, SCENES, 'med:mer:pri');
+        assert(a.scene === 'arrival' && a.james.primaries === 1 && a.minutes - a0 === 120, 'v0.11.13: tapped off a task screen: the work, the scene stays');
+        const fe = ensureBars(newGame(78)); fe.scene = 'stream'; fe.james.qi = 25; fe.james.realm = 1; markDaily(fe, 'mer_e8');
+        const fm = medCards(fe, SCENES).find((c) => c.id === 'med:mer:e8');
+        assert(fm && !fm.open && /tomorrow/.test(fm.reason) && !taskOpen(fe, SCENES, 'mer:e8'), `v0.11.13: an Extraordinary line used today: shown, locked till tomorrow (${fm?.reason})`);
+        const s7 = ensureBars(newGame(79)); s7.scene = 'stream'; s7.james.qi = 25; s7.james.realm = 7; s7.james.extra8 = 8;
+        assert(medCards(s7, SCENES).filter((c) => /^med:mer:/.test(c.id)).map((c) => c.id).join() === 'med:mer:ec,med:mer:jn', 'v0.11.13: Nascent Soul: the vessels\' collaterals and the junctions');
+        setNoDice(false); assert(!medCards(s7, SCENES).some((c) => /^med:mer/.test(c.id)), 'v0.11.13: Story Mode: no meridian cards (its screen stays)'); setNoDice(true);
+    }
     // v0.11.12: a queueable Cultivate sit where the task screen has none of its own
     {
         const k = ensureBars(newGame(73, { closed: true })); k.scene = 'stream'; k.james.qi = 25; k.james.satiety = 70;

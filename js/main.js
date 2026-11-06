@@ -441,7 +441,7 @@ function backupList() {
     const names = { '5m': 'Last 5 minutes', '30m': 'Last 30 minutes', '2h': 'Last 2 hours', before: `Before ${m.label || 'a risky move'}` };
     return Object.keys(names).map((k) => ({ k, name: names[k], raw: store.get(BAK_KEY(k)), when: m.when?.[k] })).filter((b) => b.raw);
 }
-const descOf = (raw) => { const p = peekSave(raw); return p ? `${sceneTitle(p.scene)} — ${clockLabel(p.minutes)}` : 'Unreadable'; };
+const descOf = (raw) => { const p = peekSave(raw); return p ? `${sceneTitle(p.scene)} — ${clockLabel(p.minutes)}${taskMode && p.coil ? ` · ${p.act === 1 ? 'Act 1, ' : ''}Coil ${p.coil}` : ''}` : 'Unreadable'; }; // v0.11.13: the Coil too (Incremental Mode, as on Continue)
 
 /* ---------------- saves push (v0.11.9): share, export all, reminder, status ---------------- */
 
@@ -829,6 +829,8 @@ function tipFor(b) {
             if (showChecks) { const d = actionDmg(g, a); lines.push(`${a.skill} · ${d[0]}–${d[1]} damage.`); }
         }
     } else if (b.dataset.flee) lines.push('Tries to get away. Not every fight lets you.');
+    else if (b.dataset.med) { const mc = medCards(g, SCENES).find((m) => m.id === b.dataset.med); if (mc?.open) mins = mc.minutes || 0; }
+    if (/^mer:|^med:mer:/.test(b.dataset.run || b.dataset.med || '')) lines.push(`The map: ${meridianRow(g)}.`, 'Up to 2 hours and 2 Qi a sitting; the channel opens when its hours are done.'); // v0.11.13 (E1): the meridian screen's map, here now
     if (ch) {
         const items = itemNames(ch);
         if (items.length) lines.push(`Can bring back: ${items.join(', ')}.`);
@@ -972,6 +974,7 @@ view.addEventListener('click', (ev) => {
             if (running?.kind) return;
             if (running) stopRunning();
             if (b.dataset.med === 'med:sit') { tapRun(); startBar('med', 'med:sit', 'Cultivate: one sit', SIT_MINUTES); render(); return; }
+            if (/^med:mer:/.test(b.dataset.med)) { const mc = medCards(g, SCENES).find((m) => m.id === b.dataset.med); if (mc?.open && mc.minutes) { tapRun(); startBar('med', mc.id, plain(mc.label).replace(/ \(.*$/, '').replace(/\.$/, ''), mc.minutes); render(); return; } } // v0.11.13 (E1): a meridian card off the task screens: a bar, then the work
             if (b.dataset.med === 'med:bt') { const bt = medCards(g, SCENES).find((m) => m.id === 'med:bt'); if (bt?.minutes) { tapRun(); startBar('med', 'med:bt', 'Break through', bt.minutes); render(); return; } } // v0.11.2: a timed sit, then the scene
             const r = runMed(g, SCENES, b.dataset.med);
             lastResult = r.lines.length ? { lines: r.lines, fail: false } : null; autosave(); render(); window.scrollTo({ top: 0, behavior: smoothScroll() });

@@ -872,7 +872,7 @@ export function unwrapSave(text, { force = false } = {}) {
 
 /** A short description of a save without loading it ("<scene id>|<minutes>"), or null. */
 export function peekSave(text) {
-    try { const s = JSON.parse(unwrapSave(text, { force: true })); return s && s.scene ? { scene: s.scene, minutes: s.minutes } : null; } catch { return null; }
+    try { const s = JSON.parse(unwrapSave(text, { force: true })); return s && s.scene ? { scene: s.scene, minutes: s.minutes, coil: s.coil?.n || 0, act: s.coil?.act || 0 } : null; } catch { return null; } // v0.11.13: with the Coil, for the save lists
 }
 
 export function deserialize(text, { force = false } = {}) {

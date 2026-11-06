@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.12 | (this push) | The queueable sit, the card order. Same save state as 0.11.5 (a queued `sit:next` is just an id in the queue; an older version skips it as "not possible"). |
+| 0.11.13 | (this push) | E1, the meridian cards; the Coil on save lines. Same save state as 0.11.5 (a queued `mer:pri` / `mer:col` / `mer:e8` / `mer:ec` / `mer:jn` is just an id in the queue; an older version skips it as "not possible"). |
+| 0.11.12 | `bef146c` | The queueable sit, the card order. Same save state as 0.11.5 (a queued `sit:next` is just an id in the queue; an older version skips it as "not possible"). |
 | 0.11.11 | `a22729e` | Sliding bars, the hold tooltip, accessibility, scroll per tab. Same save state as 0.11.5. |
 | 0.11.10 | `dd1bd9d` | Cache fix, hidden checks, the main menu. Same save state as 0.11.5 (new per-phone keys `boneash.showchecks`, `boneash.textsize` are outside the save). |
 | 0.11.9 | `4369ec3` | Saves: share, export all, reminder, Backups, Copy status. Same save state as 0.11.5 (the new key `boneash.exp` is outside the save). |
