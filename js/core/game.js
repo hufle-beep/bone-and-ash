@@ -205,11 +205,29 @@ export const SKILL_MAX_TIER = 10;
 export const atSkillCap = (n) => n.tier >= SKILL_MAX_TIER && n.level >= 10;
 /**
  * The Coil bonus (v0.11.0, owner 2026-11-06: picks 1b, per act): in Incremental Mode every earlier Coil of this act
- * makes James and Yuki learn faster: ×(1 + 0.5 × earlier Coils). It multiplies XP and the Saturation a sit gives,
- * and divides the meridian session DCs. Story Mode: ×1.
+ * makes James and Yuki learn faster: ×(1 + 0.5 × earlier Coils). Since v0.11.15 (B1-b) it multiplies XP only (James's
+ * skills, Yuki's Qi Use and fights); time is sped up by use instead (below). Story Mode: ×1.
  */
 export const COIL_GROWTH = 0.5;
 export const coilMult = (g) => (noDice ? 1 + COIL_GROWTH * Math.max(0, (g?.coil?.n || 1) - 1) : 1);
+/**
+ * Speed by use (v0.11.15, B1-b, owner 19:12, Selene's familiarity): each activity speeds up with its own use, kept across
+ * Coils: speed = 1 + 9 × (uses ÷ N), up to ×10. Cards N 18 (tasks.js, the familiarity count), the sit N 30, meridian
+ * work N 30 (a sitting), the breakthrough N 6. Uses of the sit, meridian work and the breakthrough live in
+ * `g.tasks.use['act:sit' | 'act:mer' | 'act:bt']`. Incremental Mode only.
+ */
+export const USE_N = { card: 18, sit: 30, mer: 30, bt: 6 };
+export const USE_CAP = 10;
+export const useSpeed = (uses, n) => Math.min(USE_CAP, 1 + ((USE_CAP - 1) * (uses || 0)) / n);
+const ACT_KEY = { sit: 'act:sit', mer: 'act:mer', bt: 'act:bt' };
+export const actUses = (g, k) => g?.tasks?.use?.[ACT_KEY[k]] || 0;
+export const actSpeed = (g, k) => (noDice ? useSpeed(actUses(g, k), USE_N[k]) : 1);
+export function actUse(g, k) {
+    if (!noDice) return;
+    if (!g.tasks || typeof g.tasks !== 'object') g.tasks = {};
+    if (!g.tasks.use || typeof g.tasks.use !== 'object') g.tasks.use = {};
+    g.tasks.use[ACT_KEY[k]] = actUses(g, k) + 1;
+}
 function addXp(n, amount) {
     const ups = [];
     if (n.tier > SKILL_MAX_TIER) { n.tier = SKILL_MAX_TIER; n.level = 10; }
@@ -387,16 +405,19 @@ export function spendQi(g, amount) {
  */
 export const SAT_HOURS = (realm) => 10 * 2 ** (realm || 0);
 export const SIT_MINUTES_INC = 60;
+/** v0.11.15: a sit's length: an hour ÷ its speed by use (at least a minute). */
+export const sitMinutes = (g) => Math.max(1, Math.round(SIT_MINUTES_INC / actSpeed(g, 'sit')));
 /** Saturation % from `sits` sits (one hour each in Incremental Mode; the hollow and the grove count as two). */
-export const sitGain = (g, sits = 1) => Math.round((noDice ? (100 * sits) / SAT_HOURS(g.james.realm) : condensationSatGain(CONDENSE_SIT_COST, jamesQiMax(g)) * sits) * coilMult(g) * 10) / 10;
+export const sitGain = (g, sits = 1) => Math.round((noDice ? (100 * sits) / SAT_HOURS(g.james.realm) : condensationSatGain(CONDENSE_SIT_COST, jamesQiMax(g)) * sits) * 10) / 10; // v0.11.15: no Coil bonus
 /** The breakthrough's length: 2 h × (realm + 1) ÷ the Coil bonus in Incremental Mode (Foundation 2 h … Heavenly Immortal 28 h); 2 h in Story Mode. */
-export const btMinutes = (g) => (noDice ? Math.round((120 * ((g.james.realm || 0) + 1)) / coilMult(g)) : 120);
+export const btMinutes = (g) => (noDice ? Math.round((120 * ((g.james.realm || 0) + 1)) / actSpeed(g, 'bt')) : 120); // v0.11.15: ÷ its speed by use
 /** Condensation: a conscious sit, 10 Qi a sit, 0 XP; raises Saturation. Spends Qi, never refills it. */
 export function condense(g) {
     if (!spendQi(g, CONDENSE_SIT_COST)) return { ok: false };
     const gain = sitGain(g);
     g.james.saturation = Math.min(100, Math.round((g.james.saturation + gain) * 10) / 10);
-    advance(g, noDice ? SIT_MINUTES_INC : 30);
+    advance(g, noDice ? sitMinutes(g) : 30);
+    actUse(g, 'sit');
     return { ok: true, gain, saturation: g.james.saturation };
 }
 
@@ -415,7 +436,7 @@ export const canBreakThrough = (g) => breakReady(g) && !breakBlock(g);
 export function breakthrough(g) {
     if (!canBreakThrough(g)) return { ok: false };
     const before = { hp: jamesHpMax(g), qi: jamesQiMax(g), yhp: yukiHpMax(g), yqi: yukiQiMax(g) };
-    advance(g, btMinutes(g), { resting: true });
+    advance(g, btMinutes(g), { resting: true }); actUse(g, 'bt');
     if (g.james.realm === 0 && (g.james.collaterals ?? 66) < 66) g.james.colSealed = true; // the engine window: collaterals are Mortal Vessel only
     g.james.realm += 1;
     g.james.saturation = 0;

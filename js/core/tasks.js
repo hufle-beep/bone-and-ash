@@ -14,7 +14,7 @@
  */
 import { hasForm } from './forms.js';
 import { choose, goTo, choiceOpen, choiceTag, gives, setTimeless, defaultMinutes, movesPlace } from './story.js';
-import { advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck, canBreakThrough, btMinutes, realmName, condense, SIT_MINUTES_INC, isNoDice } from './game.js';
+import { advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck, canBreakThrough, btMinutes, realmName, condense, sitMinutes, isNoDice, useSpeed, USE_N } from './game.js';
 import { CONDENSE_SIT_COST } from './formulas.js';
 import { btTarget, MER_LINES, lineWindow, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
@@ -46,6 +46,8 @@ const YUKI_HOURS = [6, 19];
 const asText = (v, g) => (typeof v === 'function' ? v(g) : v);
 const r1 = (x) => Math.round(x * 10) / 10;
 export const famTier = (f) => (f >= 18 ? 3 : f >= 8 ? 2 : f >= 2 ? 1 : 0);
+/** v0.11.15 (B1-b): a card's speed by use: 1 + 9 × (familiarity ÷ 18), up to ×10 (= the tiers' ×2 / ×5 / ×10 at 2 / 8 / 18). */
+export const cardSpeed = (f) => (isNoDice() ? useSpeed(f, USE_N.card) : FAM[famTier(f)].speed);
 const nextAt = (f) => FAM.find((t) => t.at > f)?.at ?? null;
 
 export const isTaskHub = (g) => !!TASK_HUBS[g.scene] && !g.combat;
@@ -207,7 +209,7 @@ function medTaskCards(g, scenes) {
         const c = scenes.meridians.choices[mi];
         cards.push({ id: merLineTask(line), kind: 'mer', line, group: 'Meditate', label: asText(c.text, g), tag: choiceTag(g, c), minutes: c.minutes ? c.minutes(g) : c.time || 0, status: 'open', tier: 0, fam: 0, next: null });
     }
-    if (sitOpen(g, scenes)) cards.push({ id: SIT_TASK, kind: 'sit', group: 'Meditate', label: 'Cultivate: one sit', tag: `${CONDENSE_SIT_COST} Qi`, minutes: SIT_MINUTES_INC, status: 'open', tier: 0, fam: 0, next: null });
+    if (sitOpen(g, scenes)) cards.push({ id: SIT_TASK, kind: 'sit', group: 'Meditate', label: 'Cultivate: one sit', tag: `${CONDENSE_SIT_COST} Qi`, minutes: sitMinutes(g), status: 'open', tier: 0, fam: 0, next: null });
     if (btOpen(g)) cards.push({ id: BT_TASK, kind: 'bt', group: 'Meditate', label: `Break through to ${realmName(g.james.realm + 1)}`, tag: `${btMinutes(g)} min`, minutes: btMinutes(g), status: 'open', tier: 0, fam: 0, next: null });
     return cards;
 }
@@ -254,7 +256,7 @@ function resolveWork(g, scenes, hubId, card, id) {
         lines.push(`${k.skill} ${k.value} / DC ${k.dc} — ${BAND_TEXT[band]}`);
         if (c.xp !== false) lines.push(...awardXp(g, c.check.skill, c.check.band || 'standard', { fail: band === 'fail', factor: band === 'partial' ? ratio : 1 }));
     }
-    const mins = Math.round((((card.entry?.time || 0) + (c.time || 0)) * NEW_LENGTH) / FAM[tier].speed);
+    const mins = Math.round((((card.entry?.time || 0) + (c.time || 0)) * NEW_LENGTH) / cardSpeed(t.fam[id] || 0));
     lines.push(...advance(g, mins));
     g.james.satiety = Math.max(0, g.james.satiety - (FED_EXTRA_PER_HOUR * mins) / 60);
     takeCapNotes();
@@ -306,7 +308,7 @@ function yukiTick(g, hubId, minutes) {
     y.progress = (y.progress || 0) + minutes;
     for (let guard = 0; guard < 20; guard++) {
         const f = st(g).fam[job.id] || 0;
-        const len = Math.round((job.minutes * NEW_LENGTH) / FAM[famTier(f)].speed);
+        const len = Math.round((job.minutes * NEW_LENGTH) / cardSpeed(f));
         if (y.progress < len) break;
         y.progress -= len;
         const ratio = skillCheck(g.yuki.fight) / job.dc;
@@ -324,7 +326,7 @@ export function yukiLane(g) {
     if (!job) return null;
     const y = st(g).yuki;
     const f = st(g).fam[job.id] || 0;
-    return { label: job.label, on: !!y.on, progress: y.progress || 0, len: Math.round((job.minutes * NEW_LENGTH) / FAM[famTier(f)].speed), fam: f, tier: famTier(f), dc: job.dc, check: r1(skillCheck(g.yuki.fight)) };
+    return { label: job.label, on: !!y.on, progress: y.progress || 0, len: Math.round((job.minutes * NEW_LENGTH) / cardSpeed(f)), fam: f, tier: famTier(f), dc: job.dc, check: r1(skillCheck(g.yuki.fight)) };
 }
 export function setYuki(g, on) { st(g).yuki.on = !!on; }
 

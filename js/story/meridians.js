@@ -9,7 +9,7 @@
  * Menu: 'meridians' (choice "Open a meridian." on every hub that has the breakthrough choice). Warning before the
  * Nascent Soul breakthrough if the Extraordinary 8 aren't all open: 'ns_warn'.
  */
-import { extraRegen, qiRegenPct, clockParts, coilMult, isNoDice, advance, awardXp } from '../core/game.js';
+import { extraRegen, qiRegenPct, clockParts, coilMult, isNoDice, advance, awardXp, actSpeed, actUse } from '../core/game.js';
 import { daily, markDaily } from './common.js';
 
 /* ---------- the primaries and their collaterals (v0.9.6: closed at the start of a task-mode game) ----------
@@ -57,8 +57,8 @@ const sessionKey = (g) => `mer_s@${clockParts(g.minutes).day}`;
 export const sessionsToday = (g) => g.flags[sessionKey(g)] || 0;
 const sessionOk = (g) => isNoDice() || sessionsToday(g) < SESSIONS_PER_DAY; // v0.11.2: no daily limit in Incremental Mode
 /**
- * Timed meridians (v0.11.2, Incremental Mode): each channel is hours of work at ×1, ÷ the Coil bonus, in sittings of up
- * to 2 h (2 Qi each), any number a day, no check, no failing. Primary k: 2 … 4 h (36 h for all 12); collateral group j:
+ * Timed meridians (v0.11.2, Incremental Mode): each channel is hours of work at ×1 (÷ the Coil bonus until v0.11.15), in sittings of up
+ * to 2 h (2 Qi each; since v0.11.15 a sitting does its minutes × its speed by use), any number a day, no check, no failing. Primary k: 2 … 4 h (36 h for all 12); collateral group j:
  * 3 … 5 h (32 h for all 8). Work is kept in `james.merWork` (primaries) and `james.colWork` (groups), hours at ×1, until
  * the channel opens; standard XP once per channel opened; the cards lock below Fed 20.
  */
@@ -70,7 +70,7 @@ const KEY = { pri: 'merWork', col: 'colWork' };
 const work = (g, k) => g.james[KEY[k]] || 0;
 const need = (g, k) => (k === 'pri' ? priHours(P(g)) : colHours(colGroupsOpen(g)));
 const nameOf = (g, k) => (k === 'pri' ? PRIMARIES[P(g)]?.name : COL_GROUPS[colGroupsOpen(g)]?.name);
-export const merMinutesOf = (g, k) => Math.max(10, Math.min(SESSION_MINUTES, Math.ceil(((need(g, k) - work(g, k)) * 60) / coilMult(g) / 10) * 10));
+export const merMinutesOf = (g, k) => Math.max(10, Math.min(SESSION_MINUTES, Math.ceil(((need(g, k) - work(g, k)) * 60) / actSpeed(g, 'mer') / 10) * 10)); // v0.11.15: ÷ its speed by use
 /** The next sitting's minutes (primaries first, as the queue card takes them). */
 export const merMinutes = (g) => merMinutesOf(g, canPrimary(g) ? 'pri' : 'col');
 function workChoice(k) {
@@ -82,7 +82,7 @@ function workChoice(k) {
         do: (g) => {
             const mins = merMinutesOf(g, k);
             advance(g, mins);
-            g.james[KEY[k]] = Math.round((work(g, k) + (mins / 60) * coilMult(g)) * 100) / 100;
+            g.james[KEY[k]] = Math.round((work(g, k) + (mins / 60) * actSpeed(g, 'mer')) * 100) / 100; actUse(g, 'mer');
             if (work(g, k) + 1e-9 < need(g, k)) return [`Two Qi and ${mins} minutes into the ash around ${nameOf(g, k)}. It gives a little. (${fmtH(work(g, k))} of ${fmtH(need(g, k))}.)`];
             g.james[KEY[k]] = 0;
             const xp = awardXp(g, 'Convergence Use', 'standard'); // once per channel opened (v0.11.2 pick 1a)

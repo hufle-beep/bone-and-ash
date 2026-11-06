@@ -5,17 +5,21 @@
  * On a task hub, Cultivate is the hub's own cultivate card (queueable; same id, same familiarity), shown in this group.
  * Pure — no DOM.
  */
-import { condense, canBreakThrough, breakReady, breakBlock, btMinutes, sitGain, isNoDice } from './game.js';
+import { condense, canBreakThrough, breakReady, breakBlock, btMinutes, sitGain, isNoDice, sitMinutes, actSpeed, actUses } from './game.js';
 import { CONDENSE_SIT_COST } from './formulas.js';
 import { goTo, checkDeath, choose, choiceOpen } from './story.js';
-import { canAnyMeridian, btTarget, MER_LINES, lineWindow, lineWait, lineIndex, lineName } from '../story/meridians.js';
+import { btTarget, MER_LINES, lineWindow, lineWait, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
 import { BT_TASK, SIT_TASK, sitOpen, merLineTask, merLineChoice, isQueueScreen } from './tasks.js';
 const hrs = (m) => (m % 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m / 60} h`);
 
 /** No meditating here: urgent moments and screens that are already about it. */
 export const NO_MEDITATE = new Set(['herb_girl', 'tribute', 'rt_elder', 'rt_truth', 'coil_end', 'coil_dawn', 'breakthrough', 'ns_warn', 'col_warn', 'meridians', 'yuki_form', 'yuki_tiger_awaken', 'yuki_human_awaken']);
-export const SIT_MINUTES = 60; // v0.11.2: an hour (Incremental Mode only uses this card)
+export const SIT_MINUTES = 60; // v0.11.2: an hour at ×1 (v0.11.15: ÷ its speed by use, game.js sitMinutes)
+/** v0.11.15: which activity a Meditate card or queue id belongs to ('sit' | 'mer' | 'bt'), for its speed by use. */
+export const medActivity = (id) => (/^(med:)?mer:/.test(id) ? 'mer' : /^(med:bt|bt:next)$/.test(id) ? 'bt' : /^(med:sit|sit:next)$/.test(id) ? 'sit' : null);
+/** v0.11.15: the tooltip line: its speed and uses. */
+export const useLine = (g, k) => { const n = actUses(g, k); return `Familiar: ×${actSpeed(g, k).toFixed(1)} (${n} ${k === 'sit' ? (n === 1 ? 'sit' : 'sits') : k === 'mer' ? (n === 1 ? 'sitting' : 'sittings') : (n === 1 ? 'breakthrough' : 'breakthroughs')}). It goes faster the more you do it, up to ×10.`; };
 
 /** Is a choice one of the plain "cultivate one sit and come back" choices (hub chores)? */
 export const isSitChoice = (c, sceneId) => c.to === sceneId && /^(Cultivate|Condense)/.test(String(typeof c.text === 'function' ? '' : c.text)) && /condense\(g\)/.test(String(c.do));
@@ -54,7 +58,8 @@ export function medCards(g, scenes) {
     const s = scenes[g.scene];
     const hubSit = TASK_HUBS[g.scene] ? (s.choices || []).findIndex((c) => isSitChoice(c, g.scene)) : -1;
     const qiOk = g.james.qi >= CONDENSE_SIT_COST;
-    const sit = { label: `Cultivate: an hour, ${CONDENSE_SIT_COST} Qi, Saturation +${sitGain(g)}% (${g.james.saturation}%).`, tag: qiOk ? `${CONDENSE_SIT_COST} Qi` : `needs ${CONDENSE_SIT_COST} Qi`, open: qiOk, minutes: SIT_MINUTES };
+    const sm = sitMinutes(g);
+    const sit = { label: `Cultivate: ${sm === 60 ? 'an hour' : `${sm} min`}, ${CONDENSE_SIT_COST} Qi, Saturation +${sitGain(g)}% (${g.james.saturation}%).`, tag: qiOk ? `${CONDENSE_SIT_COST} Qi` : `needs ${CONDENSE_SIT_COST} Qi`, open: qiOk, minutes: sm };
     if (hubSit >= 0) out.push({ ...sit, id: `${g.scene}:${hubSit}`, task: `${g.scene}:${hubSit}` });
     else out.push({ ...sit, id: 'med:sit', ...(sitOpen(g, scenes) ? { task: SIT_TASK } : {}) }); // v0.11.12: queueable on a task screen with no Cultivate of its own
     out.push(...merCards(g, scenes)); // v0.11.13 (E1): replaces "Next meridian session" and "Open a meridian"
@@ -84,10 +89,6 @@ export function runMed(g, scenes, id) {
         if (g.scene === 'meridians') g.scene = back; // back without running the scene's enter again
         const dead = g.scene === back ? checkDeath(g, scenes) : [];
         return { lines: [...r.lines, ...dead], moved: g.scene !== back };
-    }
-    if (id === 'med:mer' && canAnyMeridian(g)) { // the old screen door: no card offers it since v0.11.13; the test bots still walk in (owner pick i, until B1)
-        g.flags.mer_return = back; g.flags.med_back = back;
-        return { lines: goTo(g, scenes, 'meridians'), moved: true };
     }
     if (id === 'med:bt' && canBreakThrough(g)) {
         g.flags.bt_return = back; g.flags.med_back = back;

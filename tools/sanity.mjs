@@ -33,24 +33,29 @@ const M = await import(path.join(root, 'js/story/meridians.js'));
 await import(path.join(root, 'js/story/prologue.js')); // installs every scene and hook
 const near = (a, b) => Math.abs(a - b) < 0.051;
 G.setNoDice(true);
-for (const coil of [1, 2, 3, 5]) {
+for (const coil of [1, 2, 3, 5]) { // v0.11.15 (B1-b): the Coil bonus is XP only; sit, breakthrough and meridian time go by uses
     const mult = 1 + 0.5 * (coil - 1);
     const g = G.ensureBars(G.newGame(7, { closed: true })); g.coil.n = coil;
-    ok(G.coilMult(g) === mult, `Coil ${coil}: bonus ×${mult} (${G.coilMult(g)})`);
-    for (const realm of [0, 1, 3, 7, 13]) {
-        g.james.realm = realm;
-        ok(near(G.sitGain(g), Math.round((100 / (10 * 2 ** realm)) * mult * 10) / 10), `sit gain, realm ${realm}, Coil ${coil}`);
-        ok(G.btMinutes(g) === Math.round((120 * (realm + 1)) / mult), `breakthrough length, realm ${realm}, Coil ${coil}`);
+    ok(G.coilMult(g) === mult, `Coil ${coil}: XP bonus ×${mult} (${G.coilMult(g)})`);
+    for (const uses of [0, 3, 6, 30]) {
+        g.tasks.use = { 'act:sit': uses * 5, 'act:mer': uses * 5, 'act:bt': uses };
+        const spSit = Math.min(10, 1 + (9 * uses * 5) / 30), spBt = Math.min(10, 1 + (9 * uses) / 6);
+        for (const realm of [0, 1, 3, 7, 13]) {
+            g.james.realm = realm;
+            ok(near(G.sitGain(g), Math.round((100 / (10 * 2 ** realm)) * 10) / 10), `sit gain, realm ${realm}, Coil ${coil} (no Coil bonus)`);
+            ok(G.btMinutes(g) === Math.round((120 * (realm + 1)) / spBt), `breakthrough length, realm ${realm}, Coil ${coil}, ${uses} uses`);
+        }
+        g.james.realm = 0;
+        ok(G.sitMinutes(g) === Math.max(1, Math.round(60 / spSit)), `sit length, Coil ${coil}, ${uses * 5} uses`);
+        ok(M.merMinutesOf(g, 'pri') === Math.max(10, Math.min(120, Math.ceil((2 * 60) / spSit / 10) * 10)), `first primary's sitting, Coil ${coil}, ${uses * 5} uses`);
     }
-    g.james.realm = 0;
-    ok(M.merMinutesOf(g, 'pri') === Math.max(10, Math.min(120, Math.ceil((2 * 60) / mult / 10) * 10)), `first primary's sitting, Coil ${coil}`);
 }
 const sum = (n, f) => Array.from({ length: n }, (_, k) => f(k)).reduce((a, b) => a + b, 0);
 ok(near(sum(12, M.priHours), 36) && near(sum(8, M.colHours), 32), 'meridian hours: 36 h primaries, 32 h groups');
 ok(M.MER_FED_MIN === 20, 'meridian work locks below Fed 20');
 { const g = G.ensureBars(G.newGame(8)); const q = g.james.qi; const r = G.condense(g); ok(r.ok && g.minutes - G.START_MINUTES === 60 && q - g.james.qi <= 10, 'Incremental: a sit is 1 h and 10 Qi'); }
 G.setNoDice(false);
-{ const g = G.ensureBars(G.newGame(9)); g.coil.n = 4; ok(G.coilMult(g) === 1, 'Story Mode: no Coil bonus'); const r = G.condense(g); ok(r.ok && g.minutes - G.START_MINUTES === 30, 'Story Mode: a sit is 30 min'); g.james.realm = 9; ok(G.btMinutes(g) === 120, 'Story Mode: a breakthrough is 2 h'); }
+{ const g = G.ensureBars(G.newGame(9)); g.coil.n = 4; ok(G.coilMult(g) === 1, 'Story Mode: no Coil bonus'); g.tasks = { use: { 'act:sit': 30, 'act:bt': 6 } }; const r = G.condense(g); ok(r.ok && g.minutes - G.START_MINUTES === 30, 'Story Mode: a sit is 30 min'); g.james.realm = 9; ok(G.btMinutes(g) === 120, 'Story Mode: a breakthrough is 2 h'); }
 
 /* ---------- 2. drift ---------- */
 let tasksFile = opt('tasks'), storyFile = opt('story');

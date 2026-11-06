@@ -40,7 +40,7 @@ Targets: the first Coil's deadline fight about 30% win, the third about 80%; a s
 |---|---|---|
 | Timed tasks, tap or + to queue | Hub choices become task cards with a bar; the game time a choice takes becomes its length; queue of 30 rows | 1 game hour = 3 s at ×1; ×2 and ×5 unlock per act; the clock stops when nothing runs |
 | Energy and death | Fed drains all the time; HP is hit by risky tasks and fights; both at zero = collapse = the Coil ends | Fed −3/h (as now); task HP loss ÷ (1 + 3 × familiarity fraction) |
-| Familiarity | Per task: faster, safer, better loot. **Intuitive Aptitude:** a first try is 2 easier | Speed = 1 + 9 × min(1, done ÷ need), up to ×10; Practised ×2, Skilled ×5, Mastered ×10 |
+| Familiarity | Per task: faster, safer, better loot. **Intuitive Aptitude:** a first try is 2 easier | Speed = 1 + 9 × min(1, done ÷ need), up to ×10; Practised ×2, Skilled ×5, Mastered ×10 (v0.11.15: smooth between the tiers, need 18; also the sit, meridian work and the breakthrough, each by its own use) |
 | Jobs | Run in **Yuki's lane**, next to James: hunt, scout, guard camp; later drying racks, herb loft, clinic, the grove | A job runs until its stock is full |
 | Permanent unlocks | **Insights** (one-time discoveries) and **Coil marks** (one per arc finished; Fed drains slower) | Insights +5–15% to one thing each; Coil marks −5% drain each, up to −50% |
 | Automation | **Parallel Cognition threads** (see below) | up to 9 |
@@ -56,11 +56,11 @@ The story becomes the stops; tasks fill the days between them. Art plate, ink lo
 - **Story stops** pause the clock. Some are timed (the scream on Day 4, night attacks, Shen Qiu), some opened by a task (first bone-field visit, the ship log). Choices show their check, `[GU 2.5 vs DC 4]`. Known stops can be skimmed ("You remember this one").
 - **The Coil screen** (Selene's death screen): what this Coil gained, Insights found, threads close to waking, what James remembers, "Same queue again".
 
-## Cultivation by time (v0.11.2, owner 2026-11-06)
-In Incremental Mode cultivation is timed work, like Selene's tasks, and the Coil bonus ×(1 + 0.5 × earlier Coils of the act) shortens it:
-- **Sit:** a 1-hour card, 10 Qi, Saturation +100 ÷ (10 × 2^realm) % × the bonus (Mortal Vessel 10 h, Foundation 20 h, Core 40 h…). The hollow and the grove count as two sits.
-- **Meridians:** hours of work, ÷ the bonus, in sittings of up to 2 h (2 Qi); primaries 2–4 h (36 h for all 12), collateral groups 3–5 h (32 h); no daily limit, no check, no fail; standard XP once per channel; locked below Fed 20. The Extraordinary net keeps its checks.
-- **Breakthrough:** a timed, queueable card of 2 h × (realm + 1) ÷ the bonus (Foundation 2 h … Heavenly Immortal 28 h), then the tribulation scene.
+## Cultivation by time (v0.11.2, owner 2026-11-06; speed by use since v0.11.15)
+In Incremental Mode cultivation is timed work, like Selene's tasks. **Since v0.11.15 (B1-b) every activity speeds up with its own use**, kept across Coils: speed = 1 + 9 × (uses ÷ N), up to ×10 — cards N 18 (the same as the tiers ×2 / ×5 / ×10 at 2 / 8 / 18, smooth in between), the sit N 30, meridian work N 30 (a sitting), the breakthrough N 6. The Coil bonus ×(1 + 0.5 × earlier Coils of the act) now multiplies XP only (James's skills, Yuki's Qi Use and fights); until v0.11.14 it also shortened the times below:
+- **Sit:** a 1-hour card ÷ its speed, 10 Qi, Saturation +100 ÷ (10 × 2^realm) % (Mortal Vessel 10 h, Foundation 20 h, Core 40 h… at ×1). The hollow and the grove count as two sits.
+- **Meridians:** hours of work, a sitting doing its minutes × its speed, in sittings of up to 2 h (2 Qi); primaries 2–4 h (36 h for all 12), collateral groups 3–5 h (32 h); no daily limit, no check, no fail; standard XP once per channel; locked below Fed 20. The Extraordinary net keeps its checks.
+- **Breakthrough:** a timed, queueable card of 2 h × (realm + 1) ÷ its speed (Foundation 2 h … Heavenly Immortal 28 h at ×1), then the tribulation scene.
 - Many Coils for a high realm is intended; the Long Forest (+1 realm a season) is the bypass.
 
 ## The prologue as a Coil (Days 1–7)

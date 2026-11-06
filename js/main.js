@@ -9,7 +9,7 @@ import { sceneView, choose, goTo, gives } from './core/story.js';
 import { isTaskHub, isQueueScreen, runsHere, isTaskChoice, taskCards, taskOpen, taskLabel, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, waitChoice, taskMinutes, runTask, outlook, taskQueue, MS_PER_GAME_HOUR, QUEUE_MAX, FAM, yukiLane, setYuki } from './core/tasks.js';
 import { SCENES, ITEMS } from './story/prologue.js';
 import { coilActive, endCoil, coilPrefill } from './core/coil.js';
-import { medCards, runMed, SIT_MINUTES, isSitChoice } from './core/meditate.js';
+import { medCards, runMed, isSitChoice, medActivity, useLine } from './core/meditate.js';
 import { meridianRow } from './story/meridians.js';
 import { realmShockHpBonus } from './core/formulas.js';
 import * as ART from './art/art.js';
@@ -840,6 +840,7 @@ function tipFor(b) {
         if (ch.combat) lines.push('Leads to a fight.');
     }
     if (mins) lines.push(`Takes ${durLabel(mins)}${b.dataset.run && isInstantTask(g, SCENES, b.dataset.run) ? ', passing at once' : ''}.`);
+    { const id0 = b.dataset.run || b.dataset.med || ''; const k = medActivity(id0) || (/^(.+):(\d+)$/.test(id0) && taskMode && isSitChoice(SCENES[id0.split(':')[0]]?.choices?.[Number(id0.split(':')[1])], id0.split(':')[0]) ? 'sit' : null); if (k && taskMode) lines.push(useLine(g, k)); } // v0.11.15: speed by use
     if (card && card.kind === 'work') lines.push(`Familiarity: ${FAM[card.tier].name}${card.next != null ? `, ${card.fam} of ${card.next} to ${FAM[card.tier + 1].name}` : ' (the top)'}. Familiar work goes faster.`);
     if (card && card.status !== 'open') lines.push('Done for today. Back tomorrow.');
     if (b.disabled && !card) { const tag = b.querySelector('.tag')?.textContent; lines.push(tag ? `Not now: ${tag}.` : 'Not now.'); }
@@ -975,7 +976,7 @@ view.addEventListener('click', (ev) => {
         if (b.dataset.med) {
             if (running?.kind) return;
             if (running) stopRunning();
-            if (b.dataset.med === 'med:sit') { tapRun(); startBar('med', 'med:sit', 'Cultivate: one sit', SIT_MINUTES); render(); return; }
+            if (b.dataset.med === 'med:sit') { tapRun(); startBar('med', 'med:sit', 'Cultivate: one sit', medCards(g, SCENES).find((m) => m.id === 'med:sit')?.minutes || 60); render(); return; }
             if (/^med:mer:/.test(b.dataset.med)) { const mc = medCards(g, SCENES).find((m) => m.id === b.dataset.med); if (mc?.open && mc.minutes) { tapRun(); startBar('med', mc.id, plain(mc.label).replace(/ \(.*$/, '').replace(/\.$/, ''), mc.minutes); render(); return; } } // v0.11.13 (E1): a meridian card off the task screens: a bar, then the work
             if (b.dataset.med === 'med:bt') { const bt = medCards(g, SCENES).find((m) => m.id === 'med:bt'); if (bt?.minutes) { tapRun(); startBar('med', 'med:bt', 'Break through', bt.minutes); render(); return; } } // v0.11.2: a timed sit, then the scene
             const r = runMed(g, SCENES, b.dataset.med);

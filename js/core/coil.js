@@ -108,7 +108,7 @@ export function rewind(g, { same = false } = {}) {
     }
     if (g.rel.Yuki) rel.Yuki = clone(g.rel.Yuki);
     base.rel = rel;
-    base.tasks = { queue: [], fam: clone(g.tasks.fam || {}), adapt: clone(g.tasks.adapt || {}), yuki: { on: !!g.tasks.yuki?.on, progress: 0 } };
+    base.tasks = { queue: [], fam: clone(g.tasks.fam || {}), use: clone(g.tasks.use || {}), adapt: clone(g.tasks.adapt || {}), yuki: { on: !!g.tasks.yuki?.on, progress: 0 } };
     base.stats = clone(g.stats);
     base.log = g.log.slice(-150);
     base.rng = g.rng;
