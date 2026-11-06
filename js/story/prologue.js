@@ -209,9 +209,9 @@ It comes in like a crowd of angry ghosts — grief, hunger, the iron of old bloo
 
 You have a strong, immediate suspicion that nobody on this world can do that. That they need *something* — medicine, herbs, ritual — to scrub what they breathe, and that whatever they use, it isn't enough.
 
-${g.james.qi >= 10 ? 'You could keep going: condense a little Qi toward the next realm. It costs Qi, not time you don\'t have.' : ''}`,
+${g.james.qi >= 10 && !isNoDice() ? 'You could keep going: condense a little Qi toward the next realm. It costs Qi, not time you don\'t have.' : ''}`,
         choices: [
-            { text: 'Condense: one sit, 10 Qi toward Saturation.', req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`] : []; }, to: 'stream' },
+            { text: 'Condense: one sit, 10 Qi toward Saturation.', show: () => !isNoDice() /* v0.11.16: Meditate only where James rests (Incremental Mode) */, req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`] : []; }, to: 'stream' },
             { text: 'Enough. Water, food, shelter — the boring holy trinity.', time: 15, to: 'stream' },
         ],
     },
@@ -300,7 +300,7 @@ ${g.flags.fire ? 'The fire makes a small, defiant room in the dark.' : 'Without 
 ${(g.flags.forest_day || 1) > 1 ? 'Another night in the Blackroot. Your watch-thread is already spinning up before you ask.' : 'Your Parallel Cognition offers, unprompted, to spin up a thread for watch-keeping. Nine threads, and one of them never sleeps unless you tell it to.'}`,
         choices: [
             { text: 'Leave a thread on watch and sleep.', do: set('watch'), to: nightNext },
-            { text: 'Cultivate first — one sit — then sleep.', req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`] : []; }, to: nightNext },
+            { text: 'Cultivate first — one sit — then sleep.', show: () => !isNoDice() /* v0.11.16 */, req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`] : []; }, to: nightNext },
             { text: 'Just sleep. You\'ve earned it.', to: nightNext },
         ],
     },

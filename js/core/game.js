@@ -105,7 +105,7 @@ export function startActCoil(g, act = 1) {
     const old = g.coil;
     g.coil = makeCoil(g, act);
     g.coil.wake = g.scene;
-    if (old) { g.coil.known = [...(old.known || [])]; g.stats[`coils${old.act || 0}`] = old.n; }
+    if (old) { g.coil.known = [...(old.known || [])]; g.stats[`coils${old.act || 0}`] = old.n; if (old.best) g.coil.best = JSON.parse(JSON.stringify(old.best)); } // v0.11.16: best-ever relationships carry into Act 1
 }
 /** Is a state in Act 1? (Act 1 starts on Day 8 06:00, after the tribute's outcome and the epilogue.) */
 export const inAct1 = (g) => !!g.flags?.ending && g.scene !== 'epilogue' && g.minutes >= 7 * 1440 + 6 * 60;
@@ -527,10 +527,28 @@ export function eat(g, satiety, { yuki = true } = {}) {
 
 /* ---------------- relationships ---------------- */
 
+/**
+ * v0.11.16 (C1, owner 19:48): the catch-up. In Incremental Mode, while a person's friendship or affection is below its
+ * best-ever value (`g.coil.best`, kept across Coils and into Act 1), gains count ×3 until they reach it; above it, ×1.
+ * Losses are never multiplied; Yuki is never caught up (she is never reset).
+ */
+export const REL_CATCHUP = 3;
+function catchUp(cur, d, top) {
+    if (d <= 0 || cur >= top) return cur + d;
+    const fast = Math.min(top - cur, d * REL_CATCHUP);
+    return Math.round(cur + fast + (d - fast / REL_CATCHUP));
+}
 export function bumpRel(g, who, f = 0, a = 0) {
     const r = g.rel[who] || (g.rel[who] = { f: 0, a: 0 });
-    r.f = Math.max(-150, Math.min(150, r.f + f));
-    r.a = Math.max(-150, Math.min(150, r.a + a));
+    let b = null;
+    if (noDice && g.coil && who !== 'Yuki') {
+        const best = g.coil.best || (g.coil.best = {});
+        const p = g.coil.peak?.[who];
+        b = best[who] || (best[who] = { f: Math.max(r.f, p?.f ?? r.f), a: Math.max(r.a, p?.a ?? r.a) }); // an old save starts from this Coil's peak
+    }
+    r.f = Math.max(-150, Math.min(150, b ? catchUp(r.f, f, b.f) : r.f + f));
+    r.a = Math.max(-150, Math.min(150, b ? catchUp(r.a, a, b.a) : r.a + a));
+    if (b) { b.f = Math.max(b.f, r.f); b.a = Math.max(b.a, r.a); }
     if (g.coil) { const p = g.coil.peak[who] || (g.coil.peak[who] = { f: r.f, a: r.a }); p.f = Math.max(p.f, r.f); p.a = Math.max(p.a, r.a); } // the Coil's head start (v0.9.4)
     return r;
 }

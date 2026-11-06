@@ -3,7 +3,7 @@
  * Day 21. Ashfall prepares. On Day 9 Ya walks out of the Blackroot. On Day 10 the expedition to the Old Tree is
  * planned, and at dawn on Day 11 it leaves (→ 'bl_start').
  */
-import { addItem, eat, condense, advance, sleepUntil, jamesHpMax, hasItem, awardYukiFightXp } from '../core/game.js';
+import { addItem, eat, condense, advance, sleepUntil, jamesHpMax, hasItem, awardYukiFightXp, isNoDice } from '../core/game.js';
 import { daily, markDaily, hour, day, eatBest, pantry, foodCount } from './common.js';
 import { encounter, rel, likesMei, likesYa, trioStep, bumpRel } from './act1_common.js';
 
@@ -374,7 +374,7 @@ ${meiLovers(g)
         : 'Mei Lin\'s lamp is still burning below, late. Once, you hear her laugh — alone, at something — and then stop herself, as if someone might hear.'}${yaHere(g) ? '\n\nAnd on the shrine roof across the lane, a silhouette is sitting cross-legged against the stars, watching your window, not even pretending not to.' : ''}`,
         choices: [
             { text: (g) => (meiLovers(g) ? 'Let the night be just this.' : 'Sleep.'), do: (g) => { if (meiLovers(g)) bumpRel(g, 'Mei Lin', 2, 4); return []; }, to: (g) => (dd(g) === 8 && !g.flags.palisade && !g.flags.wolf ? 'fo_wolf' : 'fo_morning') },
-            { text: 'Cultivate one sit before sleep.', req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`] : []; }, to: (g) => (dd(g) === 8 && !g.flags.palisade && !g.flags.wolf ? 'fo_wolf' : 'fo_morning') },
+            { text: 'Cultivate one sit before sleep.', show: () => !isNoDice() /* v0.11.16 */, req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`] : []; }, to: (g) => (dd(g) === 8 && !g.flags.palisade && !g.flags.wolf ? 'fo_wolf' : 'fo_morning') },
         ],
     },
     fo_wolf: {

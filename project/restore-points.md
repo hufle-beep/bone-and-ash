@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.15 | (this push) | B1-b, speed by use. Same save state as 0.11.5 plus the optional `tasks.use` (an older version ignores it; its sits and breakthroughs then run at ×1 with the Coil bonus). |
+| 0.11.16 | (this push) | The relationship catch-up, the leftover Cultivate choices. Same save state as 0.11.5 plus the optional `coil.best` (an older version ignores it; relationships then grow ×1). |
+| 0.11.15 | `e015408` | B1-b, speed by use. Same save state as 0.11.5 plus the optional `tasks.use` (an older version ignores it; its sits and breakthroughs then run at ×1 with the Coil bonus). |
 | 0.11.14 | `39651ba` | Meditate only on the resting places, queueable there. Same save state as 0.11.5 (queued Meditate rows are ids; an older version skips them off the task screens). |
 | 0.11.13 | `aa403a3` | E1, the meridian cards; the Coil on save lines. Same save state as 0.11.5 (a queued `mer:pri` / `mer:col` / `mer:e8` / `mer:ec` / `mer:jn` is just an id in the queue; an older version skips it as "not possible"). |
 | 0.11.12 | `bef146c` | The queueable sit, the card order. Same save state as 0.11.5 (a queued `sit:next` is just an id in the queue; an older version skips it as "not possible"). |

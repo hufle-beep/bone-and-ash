@@ -3,7 +3,7 @@
  * how the Old Tree lived and how the Crimson Lotus killed it, the guardian at its heart, and a living seed-sliver.
  * Entry 'ht_start' (Day 16). Exit 'rt_start' (Day 19, dawn).
  */
-import { addItem, hasItem, condense, advance, jamesHpMax, d6 } from '../core/game.js';
+import { addItem, hasItem, condense, advance, jamesHpMax, d6, isNoDice } from '../core/game.js';
 import { eatBest, pantry, foodCount, set } from './common.js';
 import { day, hour, encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil } from './act1_common.js';
 
@@ -459,7 +459,7 @@ ${trio(g) >= 3 ? 'The three of you sleep in a heap by the fire now. Nobody has s
             { text: 'Talk with Mei Lin by the fire.', show: (g) => !g.flags[`hc_mei@${day(g)}`], do: (g) => { g.flags[`hc_mei@${day(g)}`] = true; bumpRel(g, 'Mei Lin', 3, likesMei(g) ? 3 : 1); return ['She tells you the songs about the Old Tree her grandmother sang. Some of the words are your words, worn smooth by four hundred years of people who didn\'t know what they meant.']; }, to: 'heart_night' },
             { text: 'Climb up to Ya\'s ledge.', show: (g) => ya(g) && !g.flags[`hc_ya@${day(g)}`], do: (g) => { g.flags[`hc_ya@${day(g)}`] = true; bumpRel(g, 'Ya', 3, likesYa(g) ? 4 : 1); return ['She makes you sit on the very edge, then laughs when you hold on. Then she tells you, very seriously, how many days she followed you through the forest before she decided you were interesting. It was all of them.']; }, to: 'heart_night' },
             { text: 'Sit up with Yuki and the hearth-log.', show: (g) => hasItem(g, 'hearth_log'), do: (g) => { bumpRel(g, 'Yuki', 2, 0); return ['You play the first part again, just Wren\'s voice, just the planting. Yuki purrs against your chest the whole way through.']; }, to: 'heart_night' },
-            { text: 'Cultivate by the fire: one sit, 10 Qi.', req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`] : []; }, to: 'heart_night' },
+            { text: 'Cultivate by the fire: one sit, 10 Qi.', show: () => !isNoDice() /* v0.11.16 */, req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`] : []; }, to: 'heart_night' },
             { text: 'Sleep.', to: 'heart_night' },
         ],
     },

@@ -6,7 +6,7 @@ import { itemCap, MAX_REALM, combatStep as cStep, startCombat as sCombat, coilMu
 import { FORM_LINES, hasForm, cuRank, actionOpen, actionLabel, fragileKnife, STORY_FORMS, INC_ONLY_ACTIONS } from '../js/core/forms.js';
 import { TASK_HUBS } from '../js/story/task_hubs.js';
 import { markDaily } from '../js/story/common.js';
-import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, setNoDice, isNoDice, clockLabelSec, advance, STARVE_HP_PER_HOUR, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1 } from '../js/core/game.js';
+import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, setNoDice, isNoDice, clockLabelSec, advance, STARVE_HP_PER_HOUR, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1, bumpRel as relBump, startActCoil, REL_CATCHUP } from '../js/core/game.js';
 import { canPrimary, canColGroup, colGroupsOpen, sessionsToday, dcPrimary, dcColGroup, btTarget, canAnyMeridian, COL_GROUPS, priHours, colHours, merMinutesOf } from '../js/story/meridians.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
 import { medCards, runMed, canMeditate, NO_MEDITATE, isSitChoice, MED_SCREENS } from '../js/core/meditate.js';
@@ -528,6 +528,37 @@ const cardsListed = new Set();
 const bands = {};
 let yukiRuns = 0;
 const fightStats = {}; // v0.11.3: per mode, fight and bot style, for tools/sanity.mjs
+// v0.11.16 (C1, owner 19:48): the relationship catch-up ×3 below the best-ever value; the 5 leftover Cultivate choices off the resting places
+{
+    setNoDice(true);
+    const g = ensureBars(newGame(110));
+    relBump(g, 'Mei Lin', 10, 20); relBump(g, 'Yuki', 0, 5);
+    assert(REL_CATCHUP === 3 && g.rel['Mei Lin'].f === 10 && g.rel['Mei Lin'].a === 20 && g.coil.best['Mei Lin'].a === 20, 'C1: at the best-ever value, gains count ×1');
+    endCoil(g, 'choice', 'arrival'); rewind(g);
+    const R = () => g.rel['Mei Lin'];
+    assert(R().f === 3 && R().a === 5 && g.coil.best['Mei Lin'].f === 10 && g.coil.best['Mei Lin'].a === 20, `C1: the 25% head start stays, the best is kept over a rewind (${R().f}/${R().a})`);
+    relBump(g, 'Mei Lin', 0, 3); assert(R().a === 14, `C1: below the best, +3 counts +9 (${R().a})`);
+    relBump(g, 'Mei Lin', 0, 4); assert(R().a === 22 && g.coil.best['Mei Lin'].a === 22, `C1: +4 catches up the last 6 (×3), the rest ×1 (${R().a})`);
+    relBump(g, 'Mei Lin', 0, -5); assert(R().a === 17, 'C1: losses are never multiplied');
+    relBump(g, 'Mei Lin', 1, 0); assert(R().f === 6, `C1: friendship catches up on its own (${R().f})`);
+    const y0 = g.rel.Yuki.a; relBump(g, 'Yuki', 0, 3); assert(g.rel.Yuki.a === y0 + 3 && !g.coil.best.Yuki, 'C1: Yuki is never caught up');
+    startActCoil(g, 1); assert(g.coil.act === 1 && g.coil.best['Mei Lin'].a === 22, 'C1: the best-ever values carry into Act 1');
+    setNoDice(false);
+    const s = ensureBars(newGame(111)); s.coil.best = { 'Mei Lin': { f: 50, a: 50 } }; relBump(s, 'Mei Lin', 2, 2);
+    assert(s.rel['Mei Lin'].f === 2 && s.rel['Mei Lin'].a === 2, 'C1: Story Mode counts ×1');
+    // the leftovers: no Cultivate choice on a story screen in Incremental Mode; Story Mode keeps them
+    const left = [['meditate1', /^Condense: one sit/], ['night', /^Cultivate first/], ['night_event', /^Sit in the rain/], ['fo_night', /^Cultivate one sit before sleep/], ['heart_camp', /^Cultivate by the fire/]];
+    const h = ensureBars(newGame(112)); h.james.qi = 30; h.flags.night_ev = 'rain';
+    for (const [id, re] of left) {
+        const c = SCENES[id].choices.find((x) => typeof x.text === 'string' && re.test(x.text));
+        setNoDice(true); const inc = c && c.show && c.show(h);
+        setNoDice(false); const story = c && (!c.show || c.show(h));
+        assert(c && !inc && story, `v0.11.16: ${id}: its Cultivate choice is hidden in Incremental Mode, kept in Story Mode`);
+    }
+    setNoDice(true); h.scene = 'meditate1'; assert(!/You could keep going/.test(SCENES.meditate1.text(h)), 'v0.11.16: meditate1 no longer offers to condense (Incremental Mode)');
+    setNoDice(false); assert(/You could keep going/.test(SCENES.meditate1.text(h)), 'v0.11.16: Story Mode keeps the line');
+    setNoDice(true);
+}
 let badBars = 0; // v0.11.3: games that ended with a NaN / Infinity bar
 const barsOk = (g) => [g.james.hp, g.james.qi, g.james.saturation, g.james.satiety, g.yuki.hp, g.yuki.qi].every(Number.isFinite);
 let predicted = 0;
