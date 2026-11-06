@@ -5,7 +5,9 @@
  * open collateral Qi. New for a game without a narrator: every check is value + d6 against the DC.
  * Pure — no DOM. The UI (main.js) and the tests drive it.
  */
-import { setFormsActive, actionOpen, actionLabel, fragileKnife } from './forms.js';
+import { setFormsActive, actionOpen, actionLabel, fragileKnife, lineState, FORM_LINES, hasForm } from './forms.js';
+/** v0.11.4: how far along a form line James is (0 = its first form, −1 = none yet). */
+const formStep = (g, line) => { const n = lineState(g, line).now; return n ? FORM_LINES[line].forms.findIndex((f) => f.id === n.id) : -1; };
 import {
     checkFromTierLevel, skillXpCost, maxHp, qiPoolMax, qiRegenPercent, cycleTimeMinutes,
     realmBonus, realmStepLabel, condensationSatGain, CONDENSE_SIT_COST, FAIL_XP_FRACTION, realmDr, realmShockHpBonus, dampenMultiplier,
@@ -459,7 +461,14 @@ export const BONESINGER_TIERS = [
  */
 export const boneTier = (g) => Math.min(SKILL_MAX_TIER, g.james.skills['Convergence Use'].tier);
 export const actionCost = (g, a) => (a.qi ? Math.round(a.qi * dampenMultiplier(boneTier(g)) * 10) / 10 : 0);
-export const actionDmg = (g, a) => [a.dmg[0] * boneTier(g), a.dmg[1] * boneTier(g)];
+/** Damage × the Convergence Use tier; v0.11.4 (Incremental Mode): dagger +1, sword +2 on the blade; the thrown lance +2 on darts. */
+export const formDmgBonus = (g, a) => (!noDice ? 0 : a.keeps === 'blade' ? Math.max(0, formStep(g, 'melee') - 1) : a.id === 'dart' && hasForm(g, 'lance') ? 2 : 0);
+export const actionDmg = (g, a) => { const b = formDmgBonus(g, a); return [a.dmg[0] * boneTier(g) + b, a.dmg[1] * boneTier(g) + b]; };
+/** Guard's defence bonus: 2; v0.11.4 (Incremental Mode) +0.5 per personal-defence form (bracer 2.5 … full armour 4.5). */
+export const guardBonus = (g) => 2 + (noDice ? 0.5 * (formStep(g, 'defence') + 1) : 0);
+/** v0.11.4 spike field: rounds, and the damage each attacker takes (1; 2 from the slab). */
+export const FIELD_ROUNDS = 2;
+export const fieldDamage = (g) => (hasForm(g, 'slab') ? 2 : 1);
 export const armourDr = (g) => Math.max(0, boneTier(g) - 2);
 
 /* ---------------- inventory and food ---------------- */
@@ -517,6 +526,9 @@ export const COMBAT_ACTIONS = {
     blade: { label: 'Wraithbone blade', skill: 'GU', qi: 3, dmg: [3, 6], dcMod: 1, keeps: 'blade' },
     needle: { label: 'Needle to a joint', skill: 'Convergence Use', qi: 4, dmg: [1, 2], dcMod: 2, stagger: true },
     guard: { label: 'Guard and give ground', skill: 'GU', qi: 0, dmg: [0, 0], dcMod: -1, guard: true },
+    // v0.11.4, Incremental Mode only (actionOpen hides them in Story Mode):
+    spear: { id: 'spear', label: 'Bone spear', skill: 'GU', qi: 3, dmg: [3, 6], dcMod: 2, reach: true, keeps: 'spear' }, // sung once (Convergence), thrust with GU; a full hit holds the enemy off for the round
+    spikes: { id: 'spikes', label: 'Sing a field of bone spikes', skill: 'Convergence Use', qi: 4, dmg: [0, 0], dcMod: 0, field: true }, // once per fight, 2 rounds
 };
 
 function dmgRoll(g, [lo, hi]) {
@@ -591,15 +603,20 @@ function stepNoDice(g, actionId, targetIdx) {
     const living = c.enemies.filter((e) => e.hp > 0);
     const target = living[Math.min(targetIdx, living.length - 1)];
     let guard = false;
-    const qiNeed = act.keeps === 'blade' && c.bladeFormed ? 0 : actionCost(g, act);
+    const formed = (act.keeps === 'blade' && c.bladeFormed) || (act.keeps === 'spear' && c.spearFormed) || (act.field && c.fieldUsed); // a used field costs nothing (and does nothing)
+    const qiNeed = formed ? 0 : actionCost(g, act);
     if (qiNeed && !spendQi(g, qiNeed)) {
         lines.push(`Not enough Qi for ${act.label} — you fall back on guarding.`);
         guard = true;
     } else {
         if (act.keeps === 'blade' && !c.bladeFormed) { c.bladeFormed = true; lines.push(`White wraithbone slides out of your palm and sets: ${act.label.toLowerCase()}.`); }
+        if (act.keeps === 'spear' && !c.spearFormed) { c.spearFormed = true; lines.push('A long white shaft grows out of your fist and keeps growing: a bone spear.'); }
         if (act.guard) {
             guard = true;
             lines.push('You give ground, watching for the opening.');
+        } else if (act.field) {
+            if (c.fieldUsed) lines.push('The ground is already broken. There is nothing left in it to sing.');
+            else { c.field = FIELD_ROUNDS; c.fieldUsed = true; lines.push('Bone spikes punch up through the ground around you, ankle-high and very sincere.'); }
         } else {
             if (act.keeps === 'blade' && fragileKnife(g)) { c.bladeFormed = false; lines.push('The knife shatters on the swing. You will have to sing another.'); } // v0.10.4: breaks every swing below T1 L8
             const T = boneTier(g);
@@ -618,6 +635,7 @@ function stepNoDice(g, actionId, targetIdx) {
                 tg.hp -= dmg;
                 lines.push(`  ${tg.name} takes ${dmg}${band === 'double' ? ' (double damage)' : ''}.`);
                 if (act.stagger && tg.hp > 0 && band !== 'glance') { tg.staggered = true; lines.push(`  ${tg.name} staggers.`); }
+                if (act.reach && tg.hp > 0 && band !== 'glance') { tg.atBay = true; lines.push(`  ${tg.name} is held at the spear's length.`); }
             }
         }
     }
@@ -643,20 +661,23 @@ function stepNoDice(g, actionId, targetIdx) {
     for (const e of c.enemies) {
         if (e.hp <= 0) continue;
         if (e.staggered) { e.staggered = false; lines.push(`${e.name} is still reeling.`); continue; }
+        if (e.atBay) { e.atBay = false; lines.push(`${e.name} can't get past the spear.`); continue; }
         if (e.prefersSmall && g.yuki.hp > 0 && c.round % 3 === 0) { // every third round it goes for the small one
-            const dodge = skillCheck(g.yuki.fight) + 1 >= noDiceDc(e.atk);
+            const dodge = skillCheck(g.yuki.fight) + 1 >= noDiceDc(e.atk) || (guard && hasForm(g, 'buckler')); // v0.11.4: shield cover
             lines.push(`${e.name} lunges at Yuki — ${dodge ? 'she is not there' : 'it connects'}.`);
             if (!dodge) g.yuki.hp = Math.max(1, g.yuki.hp - hitDamage(e.dmg, e.realm, g.yuki.realm, yukiDr(g)));
             continue;
         }
         if (shield) { shield = false; lines.push(`${e.name} attacks — your construct steps into the blow.`); continue; }
-        const r = rollCheck(g, 'GU', e.atk, guard ? 2 : 0);
+        if (c.field > 0) { const th = fieldDamage(g); e.hp -= th; lines.push(`${e.name} comes through the spikes: ${th}.`); if (e.hp <= 0) continue; }
+        const r = rollCheck(g, 'GU', e.atk, guard ? guardBonus(g) : 0);
         if (r.ratio >= 1) { lines.push(`${e.name} attacks: you defend (${checkText(r)}) — avoided.`); continue; }
         let dmg = hitDamage(e.dmg, e.realm, g.james.realm, jamesDr(g));
         if (r.ratio >= 0.5) dmg = Math.floor(dmg / 2);
         g.james.hp = Math.max(0, g.james.hp - dmg);
         lines.push(`${e.name} attacks: you defend (${checkText(r)}) — ${r.ratio >= 0.5 ? 'it only half lands' : 'it lands'}: ${dmg} (DR ${jamesDr(g)}).`);
     }
+    if (c.field > 0) c.field--;
     return lines;
 }
 
@@ -665,6 +686,7 @@ export function combatStep(g, actionId, targetIdx = 0) {
     if (!c) return null;
     if (noDice) return finishRound(g, stepNoDice(g, actionId, targetIdx));
     const lines = [];
+    if (!actionOpen(g, actionId)) actionId = 'guard'; // v0.11.4: the spear and the spike field are Incremental Mode only
     const act = COMBAT_ACTIONS[actionId];
     const living = c.enemies.filter((e) => e.hp > 0);
     const target = living[Math.min(targetIdx, living.length - 1)];

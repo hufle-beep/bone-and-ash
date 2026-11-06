@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.3 | (this push) | Tools and rules only; the game is the same as 0.11.2. |
+| 0.11.4 | (this push) | Forms 3b. Same save state as 0.9.6 (the new fight fields live only inside a fight). |
+| 0.11.3 | `5b15815` | Tools and rules only; the game is the same as 0.11.2. |
 | 0.11.2 | `71e47a3` | Timed cultivation. Same save state as 0.9.6 (`merWork` / `colWork` are new but optional). |
 | 0.11.1 | `525e8e0` | Tests and tools only; the game is the same as 0.11.0. |
 | 0.11.0 | `fd1022e` | The base redesign, push 1 (everything James grew starts over each Coil; the Coil bonus). Same save state as 0.9.6; a save that rewinds under 0.11.0 has its skills reset, which an older version will simply keep. |

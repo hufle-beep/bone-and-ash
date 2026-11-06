@@ -2,6 +2,7 @@
 import { SCENES, START_SCENE } from '../js/story/prologue.js';
 import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, itemCap, setNoDice } from '../js/core/game.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
+import { actionOpen } from '../js/core/forms.js';
 import { writeFileSync } from 'node:fs';
 import { GAMES, FULL, SHARD, WORKERS, STATS_OUT, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
 
@@ -42,7 +43,7 @@ for (const run of kids ? [] : myRuns()) {
         if (r.combat) {
             startCombat(g, r.combat(g));
             for (let t = 0; t < 400 && g.combat; t++) {
-                const acts = Object.keys(COMBAT_ACTIONS);
+                const acts = Object.keys(COMBAT_ACTIONS).filter((a) => actionOpen(g, a)); // v0.11.4: only the actions this mode shows
                 const id = g.combat.id;
                 const smart = run % 2 === 0;
                 const act = smart ? (g.james.qi >= 4 && t % 3 === 1 ? 'needle' : g.james.qi >= 3 ? 'blade' : 'dart') : acts[rnd(acts.length)];

@@ -4,6 +4,10 @@ Started 2026-11-06 (v0.10.4), when `history.md` passed 45 KB. Newer than `histor
 
 ## Older decisions (2026-11-06, v0.10.0 and later)
 
+- **v0.11.1: a faster test suite (owner 14:02 "can you run tests parallel to speed up… design faster test suite and bake it into the project"; pick 14:07 "B+C"; go 14:07; mid-build stop: the bots shared one random stream across all games, so a split can't match the old numbers; pick 14:08 "1" (a seed per game); go 14:10; built in v0.11.1):**
+  - **B** the tasks and story tests split their bot games across worker processes (`tests/lib/shard.mjs`), one per core; the parent runs the other checks meanwhile and merges the numbers. **1** every bot game seeds its own random stream from its game number (`seedOf`), so 1 worker and 2 give byte-identical output (checked: both tests). This machine has 2 cores: the tasks test 59 → 34 s, the full check about 75 → 46 s.
+  - **C** `bash tools/check.sh quick` (every check, 200 bot games each, about 15 s; coverage checks skipped) while building; `bash tools/check.sh` (full, 2,000) before every push, as before. `node tools/bots.mjs` prints only the balance summary per Coil (with the beast share of deaths): `--games N`, `--seed N` (another set of games), `--sensible` (the bot leaves the meridian screen after 2 sittings in a row or when Fed < 40), `--workers N`.
+  - **The one-time change in the printed numbers (same rules, other random games):** tasks test before → after: dead before Mei Lin 91 / 63 / 59 / 54 → 90 / 66 / 60 / 51%; tribute won 28 / 41 / 61 / 63 / 68 / 77 → 28 / 38 / 53 / 61 / 64 / 69% (Coils 1–6); lost 65 / 41 / 12 → 71 / 46 / 14%; Act 1 Coils ending in death 78 / 65 / 57 / 61 → 76 / 67 / 58 / 56%. Story test (smart bots) mostly within 3 points; the largest moves were root-wyrm 83 → 89% (86–87% with `--seed 1` / `2`), mire 92 → 99% (n ≈ 70; 90–96% on the other sets), wolves 85 → 88%, Ya's brawl 83 → 86%, Guardian 62 → 59%, collectors 60 → 57%. Endings (story test) fought / paid / bluff / lost 538 / 328 / 514 / 620 → 499 / 333 / 540 / 628.
 - **v0.11.0: the base redesign, push 1 of 2 (owner 13:06 "base redesign. make the game closer to Selene. Skills and realms reset but their progression gets faster with each coil. Cultivation should also be a timed action… the number of coils increases drastically, but that's intended and can be bypassed by Long Forest"; picks 13:24 "1a, 2a, 3a, 4a, 6a"; 13:34 "1b", projections asked for both counts; 13:36 "count per act"; go 13:37; built in v0.11.0):**
   - **1a** a rewind resets James's and Yuki's realm, Saturation, skills (GU, Convergence Use, Fight, Qi Use) and every meridian to the act's start (the snapshot: Day 1 dawn, or Day 8 dawn for Act 1). Kept: familiarity, Intuitive Aptitude, what James knows (`KEEP_FLAGS`), Yuki's relationship and path, the relationship head start. The "Foundation unwinds" rule is gone (everything starts over anyway).
   - **2a + 1b + count per act** the Coil bonus ×(1 + 0.5 × earlier Coils of this act) (`coilMult`): XP (James and Yuki), the Saturation of a sit (and the hollow and grove sits), meridian session DCs ÷ the bonus. Act 1's first Coil is ×1 again.
@@ -45,6 +49,13 @@ Started 2026-11-06 (v0.10.4), when `history.md` passed 45 KB. Newer than `histor
   - Test fix: the v0.9.7 test "starving to 0 ends the Coil" now builds up a starving hour first (it relied on the old 1 HP per step).
 
 ## Older version notes (v0.10.0 and later)
+
+## v0.11.1 — a faster test suite (tests and tools only)
+
+- **`tests/lib/shard.mjs`** (new): `GAMES` (`--games`, default 2,000), `FULL` (≥ 2,000: the coverage checks run), `SHARD` (`--shard i/n`, in a worker), `WORKERS` (`--workers`, default one per core, at most one per 50 games), `SEED`, `SENSIBLE`, `REPORT`, `myRuns`, `seedOf(run, stream)`, `launch` (spawns the workers with the same options), `collect`, `emit` (`@@SHARD` + JSON on stdout), `mergeInto` (numbers add, `max…` keys take the largest, sets unite).
+- **tasks test:** the static checks run in the parent only (`if (!SHARD)`), while the workers play; `play()` reseeds `rs` per game (`seedOf(run, 1 | 2)`); the merged stats print sorted; the post-bot checks draw from their own stream (4243); "every card played" and "bots rewind Act 1" only on the full run; Yuki's lane check scales with the games; `--sensible`, `--report`, `--seed` for `tools/bots.mjs`.
+- **story test:** the 2,000 random playthroughs in workers (`seedOf(run, 3)`), the focused walks in the parent (stream 12346); "every scene reachable" only on the full run; printed objects sorted.
+- **check.sh:** `quick`; the syntax check also covers files not yet committed.
 
 ## v0.11.0 — the base redesign, push 1: everything James grew starts over each Coil, the Coil bonus
 

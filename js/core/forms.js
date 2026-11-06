@@ -31,6 +31,9 @@ export const FORM_LINES = {
         { id: 'walls', at: R(4, 1), name: 'walls, bridges, shelters' },
         { id: 'forts', at: R(5, 1), name: 'fortifications' },
     ] },
+    reach: { label: 'Reach', forms: [ // v0.11.4
+        { id: 'spear', at: R(1, 8), name: 'bone spear (holds an enemy off)' },
+    ] },
     defence: { label: 'Personal defence', forms: [
         { id: 'bracer', at: R(1, 5), name: 'bracer' },
         { id: 'buckler', at: R(2, 1), name: 'buckler' },
@@ -58,7 +61,10 @@ export const rankLabel = tl;
 
 /* ---- fights: which actions show, and what they are called (Incremental Mode) ---- */
 const best = (g, line) => lineState(g, line).now?.id;
+/** v0.11.4: the spear and the spike field exist only in Incremental Mode. */
+export const INC_ONLY_ACTIONS = new Set(['spear', 'spikes']);
 export function actionOpen(g, id) {
+    if (INC_ONLY_ACTIONS.has(id)) return on() && hasForm(g, id);
     if (!on()) return true;
     if (id === 'dart') return hasForm(g, 'dart');
     return true;
