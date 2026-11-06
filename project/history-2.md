@@ -4,6 +4,10 @@ Started 2026-11-06 (v0.10.4), when `history.md` passed 45 KB. Newer than `histor
 
 ## Older decisions (2026-11-06, v0.10.0 and later)
 
+- **v0.11.3: a new hard rule, the sanity check (owner 14:44 "another new hard rule. a sanity check of the mechanics after each iteration. re-run the whole test suite again on the entire game after the update is done and before updating the docs. notify if anything breaks"; pick 14:46 "B"; go 14:47; built in v0.11.3):**
+  - **Rule 2** (CLAUDE.md, working agreement): after every build, before the docs, the full `bash tools/check.sh`; any failure or flag stops the work and goes to the owner with the numbers. The baseline is saved again only after the owner has seen an intended change's numbers and said go.
+  - **B** `tools/sanity.mjs`, the last step of the full check (`quick` skips it): invariants (the sit gain, the breakthrough length and the first primary's sitting for realms 0 / 1 / 3 / 7 / 13 on Coils 1 / 2 / 3 / 5; 36 h / 32 h of meridians; the Fed lock at 20; Story Mode's 30-minute sit, 2-hour breakthrough and no Coil bonus; no NaN / Infinity bar after the bot games) and drift: 222 numbers (deaths and beast deaths per Coil and act, the tribute per Coil, every fight's win rate per mode and bot style) against `tools/baseline.json`; more than 5 points off with n ≥ 100 on both sides is flagged (202 compared today). The tests write their merged stats with `--stats-out`, so the sanity check adds a second or two (the full check about 52 s).
+  - **Proved:** the current build passes with 0 drift (same seeds, same numbers); a copy with beasts +1.0 instead of +0.5, fed to the drift step, gives 20 flagged numbers and fails (boar −7.5 / −10.8, thornback −13.2, palisade wolf −14 …). The baseline is the v0.11.2 numbers, saved 2026-11-06.
 - **v0.11.2: timed cultivation, the base redesign push 2 of 2 (picks 13:51 "1a, 2a, 3a, 4a"; XP and guard picks 14:30 "1a, 2a, 3a"; go 14:31; built in v0.11.2):**
   - **Found (today's rules, a bot that only cultivates and never starves):** Foundation always lands on Day 6 12:00 from Coil 2 on (2 primaries a day), so the Coil bonus doesn't speed it; after Foundation the realms chain (a breakthrough refills Qi and a sit costs only Qi): Coil 2 reaches realm 5 by Day 7 and Heavenly Immortal by Day 14; even Coil 1 reaches realm 12 by Day 14.
   - **1a** a sit is a 1-hour card, 10 Qi, Saturation +100 ÷ SAT_HOURS(realm) % × the Coil bonus (not by Qi Max); the hollow and grove sits count as two. **2a** meridians by hours of work, ÷ the bonus, sittings of up to 2 h (2 Qi), any number a day, no check, no fail: primaries 2–4 h (36 h for 12), collateral groups 3–5 h (32 h for 8); primaries and groups keep separate progress (two work cards; groups still open between primaries). **3a** the breakthrough a queueable card of 2 h × (realm + 1) ÷ the bonus (Foundation 2 h … Heavenly Immortal 28 h), then the tribulation scene. **4a** SAT_HOURS = 10 × 2^realm (Foundation 20 h, Core 40 h, True Core 80 h…). Extraordinary vessels, collaterals and junctions keep their checks. Story Mode unchanged.
@@ -57,6 +61,12 @@ Started 2026-11-06 (v0.10.4), when `history.md` passed 45 KB. Newer than `histor
   - Test fix: the v0.9.7 test "starving to 0 ends the Coil" now builds up a starving hour first (it relied on the old 1 HP per step).
 
 ## Older version notes (v0.10.0 and later)
+
+## v0.11.3 — the mechanics sanity check (tools only)
+
+- **`tools/sanity.mjs`** (new): the invariants (imports game.js and meridians.js), then drift: reads `--tasks` / `--story` stats files (or runs both tests itself), flattens them into percent + n, compares with `tools/baseline.json` (`LIMIT` 5 points, `MIN_N` 100; a number that disappears or appears with n ≥ 100 is flagged too); `--update` saves the baseline (refused if an invariant fails). Exit 1 on any flag.
+- **tests:** `--stats-out PATH` (`STATS_OUT` in shard.mjs, not passed to workers); the tasks test records every fight's outcome per mode and bot style (`fightStats`, `inc:` / `story:` + id + smart / random) and counts games ending with a broken bar (`badBars`, asserted 0). The story test writes its fights and endings.
+- **check.sh:** the tests write their stats to a temp folder; the full run ends with the sanity check; the labels are wider.
 
 ## v0.11.2 — timed cultivation (the base redesign, push 2)
 

@@ -1,6 +1,6 @@
 # Roadmap: Bone and Ash
 
-Last updated: 2026-11-06 (v0.11.5, the safety push). **The pivot (owner 15:43): copy what is useful from Selene and Rules Engine C, game and process; see "The copy-over" below. It comes before steps 4–7, which are kept and take its items in where they fit.** Update in every push.
+Last updated: 2026-11-06 (v0.11.6, docs only: a go covers one push). **The pivot (owner 15:43): copy what is useful from Selene and Rules Engine C, game and process; see "The copy-over" below. It comes before steps 4–7, which are kept and take its items in where they fit.** Update in every push.
 
 ## Order of work (owner, 2026-11-05)
 The hybrid with Selene (design in `design.md`). Safety comes before the rewrite, because the hybrid changes the save format. Each step is one or more pushes, each with its own options, pick and go. Estimates are working sessions, not calendar days.
@@ -14,7 +14,7 @@ The hybrid with Selene (design in `design.md`). Safety comes before the rewrite,
 7. **Engine extras and lore** (about 2 days): J (Yuki's form ladder by realm), Qi bond flow, injury and Strain, Ouroboros daily knockout beat, dampening on every Qi cost, quests with XP lumps, status block and check labels, the relationship ledger; Yuki's canon look (ears, tail, qipao; the dress as an outfit); Yuki born with James (fix `yuki_path.js`); ~~the Long Forest as a New Game preset~~ (replaced by v0.10.1: the walkable Long Forest from Coil 2, one season per card).
 
 ## The copy-over (owner 2026-11-06 15:43 / 15:47)
-From the read-only analysis of Selene (`hufle-beep/Long-patience`) and Rules Engine C (`hufle-beep/Shared-ST`). One push each, in this order; each gets its confirm, and anything that moves balance shows its numbers first.
+From the read-only analysis of Selene (`hufle-beep/Long-patience`) and Rules Engine C (`hufle-beep/Shared-ST`). One push each, in this order; **each gets its own exact list and its own go, and Claude stops after every push** (rule 1, v0.11.6); anything that moves balance shows its numbers first.
 
 1. **Safety — DONE in v0.11.5:** fallback branch `fallback/2026-11-06-before-pivot`; `forms.js` in the offline list plus a check; save when hidden and every 15 s, a running card kept across a reopen; a version check; the engine's own 126 formula tests.
 2. **Tests and tools:** a browser test in `check.sh` (Playwright: every tab and pop-up, real taps, no `undefined` / `NaN` / old mode names on screen, every `data-*` marker handled; Selene's `sanity.py`); fresh test saves from today's version (a `tools/snap.mjs` writing Coil 2, Act 1 Coil 1 and Long Forest saves; a new set with each format change); a content lint over every scene, log-only first (choices with no time, check labels vs real DCs, DCs above the engine's `maxCalibratedDc`, `bumpRel` sizes, old names); a data-integrity test (unique ids; every item, flag, task card and form id that is used exists; no requirement loops); the workspace gotchas in the handover (Selene §6).

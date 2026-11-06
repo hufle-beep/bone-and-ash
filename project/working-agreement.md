@@ -12,7 +12,7 @@ Every change follows this sequence, with no exceptions:
 4. **Claude confirms back exactly what it will change and waits for the owner's explicit go.** (When the owner's answer already picks fully specified options and says "go" or "build/commit and push", that is the go.)
 5. Only then does Claude build it, and commit and push it.
 
-This covers **everything that changes the repository or what players get**: game code, balance numbers, texts, saves, the build and release workflow, these documents' rules, and every commit and push, including "obvious" fixes, small follow-ups and fixes to broken builds. Nothing counts as approved implicitly; a request is not a go. A past go is not blanket permission.
+This covers **everything that changes the repository or what players get**: game code, balance numbers, texts, saves, the build and release workflow, these documents' rules, and every commit and push, including "obvious" fixes, small follow-ups and fixes to broken builds. Nothing counts as approved implicitly; a request is not a go. A past go is not blanket permission. **A go covers one push only** (owner 2026-11-06, v0.11.6), even when it is worded "go for the rest": after every push Claude stops, reports what was pushed and waits; it never starts the next push on its own. Each next push gets its own exact list (step 4) and its own explicit go.
 
 Allowed without asking (they change nothing): reading code and saves, running tests, checks and simulations, investigating failures. Their results come back as analysis and options (step 2).
 
