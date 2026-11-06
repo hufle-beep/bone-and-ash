@@ -18,7 +18,7 @@ from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parent.parent
 BAD = re.compile(r"\bundefined\b|\bNaN\b|\[object Object\]|Tasks \(preview\)|\bClassic\b")
-CHECKS = re.compile(r"\bDC\b|🎲|\+ d6\b|→ (?:passes|partly|fails)")
+CHECKS = re.compile(r"\bDC\b|🎲|\+ d6\b|→ (?:passes|partly|fails|double|full|partial|fail)\b")  # v0.11.17: the task cards' bands too
 fails, notes = [], []
 
 def free_port():
@@ -52,6 +52,11 @@ def visit_tabs(pg, where):
     if 'story' in tabs: pg.click('[data-tab="story"]'); pg.wait_for_timeout(150)
     return tabs
 
+def no_greyed(pg, where):
+    """v0.11.17 (owner pick 1a): Incremental Mode shows no greyed-out task, Meditate or fight card (story choices keep their own rule)."""
+    g = pg.query_selector('button.card[disabled]:not(.story)')
+    if g: fails.append(f"{where}: a greyed-out card shows: {g.inner_text()[:80]!r}")
+
 def taps(pg, n, rng, where, sel):
     done = 0
     for i in range(n):
@@ -64,6 +69,7 @@ def taps(pg, n, rng, where, sel):
         except Exception: continue  # re-rendered under the tap: look again
         pg.wait_for_timeout(120)
         if i % 10 == 9: check_text(pg, f"{where}, tap {i + 1}", strict=True)
+        if 'Incremental' in where: no_greyed(pg, f"{where}, tap {i + 1}")
     check_text(pg, f"{where}, after {done} taps", strict=True)
     return done
 

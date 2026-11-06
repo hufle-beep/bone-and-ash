@@ -79,7 +79,7 @@ const CHK = `(?:GU|Convergence Use|Fight|Qi Use) ${CHK_NUM} (?:\\/ DC ${CHK_NUM}
 const RX_DEFEND = new RegExp(`: you defend \\(${CHK}\\)`);
 const RX_ACTION = new RegExp(`^(.+?): ${CHK} — `);
 const RX_LINE = new RegExp(`^${CHK} (?:—|→) (.+)$`);
-const RX_TAG = new RegExp(`${CHK}(?: (?:→|—) (?:passes|partly|fails))?`, 'g');
+const RX_TAG = new RegExp(`${CHK}(?: (?:→|—) (?:passes|partly|fails|double|full|partial|fail))?`, 'g'); // v0.11.17: the task cards' bands too
 /** A result or log line without its check (v0.11.10). '' = drop the line. */
 function hideCheck(l) {
     if (showChecks || typeof l !== 'string') return l;
@@ -305,7 +305,7 @@ function renderCardScreen() {
     let queueHtml = ''; // v0.11.12: the queue first, then every card group together (Story, the hub's groups, Meditate)
     let hubTop = '';
     if (qs) {
-        const cards = taskCards(g, SCENES).filter((c) => !medIds.has(c.id));
+        const cards = taskCards(g, SCENES).filter((c) => !medIds.has(c.id) && c.status === 'open'); // v0.11.17 (owner pick 1a): "done for today" cards are hidden
         const q = taskQueue(g);
         const ol = outlook(g, SCENES);
         const counts = {};
@@ -338,7 +338,8 @@ function renderCardScreen() {
     const storyHtml = v.end
         ? '<h2>Story</h2><div class="cards"><button class="card story" data-new="1">Start a new game</button><button class="card story" data-tab-go="sheet">See how James ended up</button></div>'
         : story.length ? `<h2>Story</h2><div class="cards">${story.map(storyCardHtml).join('')}</div>` : '';
-    const medHtml = med.length ? `<h2>Meditate</h2><div class="cards">${med.map(medCardHtml).join('')}</div>` : '';
+    const medOpen = med.filter((m) => m.open); // v0.11.17 (pick 1a): only what can run now (collaterals until they open, locked sits and meridians, Break through until ready)
+    const medHtml = medOpen.length ? `<h2>Meditate</h2><div class="cards">${medOpen.map(medCardHtml).join('')}</div>` : '';
     view.innerHTML = `<section class="fade-in">
 <div class="plate">${sceneArt(v.art)}</div>
 <header class="head"><div class="place">${esc(v.place || g.location)}</div><h1 class="title">${esc(v.title)}</h1></header>
@@ -363,6 +364,7 @@ function renderCombatCards() {
         const cost = (a.keeps === 'blade' && c.bladeFormed) || (a.keeps === 'spear' && c.spearFormed) || (a.field && c.fieldUsed) ? 0 : actionCost(g, a);
         const d = actionDmg(g, a);
         const off = cost > g.james.qi;
+        if (off) return ''; // v0.11.17 (pick 1a): a move he can't afford is hidden (Guard costs nothing)
         const v = n1(skillCheck(a.skill === 'GU' ? g.james.gu : g.james.skills[a.skill]) + (c.adapt?.[id] || 0));
         const tgt = c.enemies.find((e) => e.hp > 0);
         const plain = tgt && showChecks ? `${a.skill} ${v} / DC ${noDiceDc(tgt.dc + a.dcMod)} · ${Math.round((d[0] + d[1]) / 2)} dmg` : '';
