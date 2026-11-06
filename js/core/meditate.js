@@ -10,7 +10,7 @@ import { CONDENSE_SIT_COST } from './formulas.js';
 import { goTo, checkDeath } from './story.js';
 import { canAnyMeridian, btTarget, merMinutes } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
-import { merChoice, MER_TASK, BT_TASK } from './tasks.js';
+import { merChoice, MER_TASK, BT_TASK, SIT_TASK, sitOpen } from './tasks.js';
 const hrs = (m) => (m % 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m / 60} h`);
 
 /** No meditating here: urgent moments and screens that are already about it. */
@@ -33,7 +33,7 @@ export function medCards(g, scenes) {
     const qiOk = g.james.qi >= CONDENSE_SIT_COST;
     const sit = { label: `Cultivate: an hour, ${CONDENSE_SIT_COST} Qi, Saturation +${sitGain(g)}% (${g.james.saturation}%).`, tag: qiOk ? `${CONDENSE_SIT_COST} Qi` : `needs ${CONDENSE_SIT_COST} Qi`, open: qiOk, minutes: SIT_MINUTES };
     if (hubSit >= 0) out.push({ ...sit, id: `${g.scene}:${hubSit}`, task: `${g.scene}:${hubSit}` });
-    else out.push({ ...sit, id: 'med:sit' });
+    else out.push({ ...sit, id: 'med:sit', ...(sitOpen(g, scenes) ? { task: SIT_TASK } : {}) }); // v0.11.12: queueable on a task screen with no Cultivate of its own
     if (TASK_HUBS[g.scene] && merChoice(g, scenes) >= 0) out.push({ id: MER_TASK, task: MER_TASK, label: 'Next meridian session (up to 2 h, 2 Qi): the next channel on the map.', tag: 'queueable', open: true, minutes: merMinutes(g) }); // v0.10.0
     if (canAnyMeridian(g)) out.push({ id: 'med:mer', label: 'Open a meridian.', tag: 'opens the meridian screen', open: true, minutes: 0 });
     if (canBreakThrough(g)) {

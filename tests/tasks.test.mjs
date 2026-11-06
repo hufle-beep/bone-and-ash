@@ -11,7 +11,7 @@ import { sceneView, choose, goTo } from '../js/core/story.js';
 import { medCards, runMed, canMeditate, NO_MEDITATE, isSitChoice } from '../js/core/meditate.js';
 import { defaultMinutes, DEFAULT_MINUTES } from '../js/core/story.js';
 import { coilActive, coilPrefill, rewind, endCoil, KEEP_FLAGS, REMEMBER } from '../js/core/coil.js';
-import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskMinutes, runTask, outlook, taskQueue, taskState, setYuki, yukiLane, famTier, QUEUE_MAX, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, merChoice, MER_TASK, BT_TASK, waitChoice } from '../js/core/tasks.js';
+import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskMinutes, runTask, outlook, taskQueue, taskState, setYuki, yukiLane, famTier, QUEUE_MAX, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, merChoice, MER_TASK, BT_TASK, SIT_TASK, waitChoice } from '../js/core/tasks.js';
 
 import { writeFileSync } from 'node:fs';
 import { GAMES, FULL, SHARD, WORKERS, SEED, SENSIBLE, REPORT, STATS_OUT, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
@@ -554,7 +554,7 @@ function play(run, tasks) {
         if (v.end) { const e = g.flags.ending || 'none'; st.endings[e] = (st.endings[e] || 0) + 1; st.games++; if (!barsOk(g)) badBars++; return true; }
         if (tasks && isTaskHub(g)) {
             coilPrefill(g);
-            const all = taskCards(g, SCENES);
+            const all = taskCards(g, SCENES).filter((c) => c.id !== SIT_TASK); // v0.11.12 (owner pick b): the bots leave the new queueable sit alone until the familiarity rework re-measures; its own tests cover it
             for (const c of all) cardsListed.add(c.id);
             if (yukiLane(g) && rnd(3) === 0) setYuki(g, !yukiLane(g).on);
             const cards = all.filter((c) => c.status === 'open');
@@ -684,6 +684,21 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     g.james.qi = 20; runTask(g, SCENES, MER_TASK); g.james.qi = 20;
     assert(merChoice(g, SCENES) >= 0 && taskOpen(g, SCENES, MER_TASK), 'v0.11.2: no daily limit, the card stays');
     g.james.satiety = 10; assert(!taskOpen(g, SCENES, MER_TASK), 'Fed under 20: no meridian card'); g.james.satiety = 70;
+    // v0.11.12: a queueable Cultivate sit where the task screen has none of its own
+    {
+        const k = ensureBars(newGame(73, { closed: true })); k.scene = 'stream'; k.james.qi = 25; k.james.satiety = 70;
+        assert(taskOpen(k, SCENES, SIT_TASK) && medCards(k, SCENES).some((c) => c.id === 'med:sit' && c.task === SIT_TASK), 'v0.11.12: the stream offers a queueable sit (Meditate card with a task)');
+        const before = { qi: k.james.qi, sat: k.james.saturation, m: k.minutes }, gain = sitGain(k);
+        assert(taskMinutes(k, SCENES, SIT_TASK) === 60, `v0.11.12: the sit's forecast is 60 min (${taskMinutes(k, SCENES, SIT_TASK)})`);
+        const rs = runTask(k, SCENES, SIT_TASK);
+        assert(!rs.stopped && k.scene === 'stream' && k.minutes - before.m === 60 && k.james.saturation === Math.round((before.sat + gain) * 10) / 10 && k.james.qi < before.qi, 'v0.11.12: a queued sit: an hour, Saturation +gain, Qi spent, still on the hub');
+        k.james.qi = 5; assert(!taskOpen(k, SCENES, SIT_TASK) && !medCards(k, SCENES).find((c) => c.id === 'med:sit').task, 'v0.11.12: under 10 Qi: no queueable sit');
+        k.james.qi = 25; k.james.saturation = 100; assert(!taskOpen(k, SCENES, SIT_TASK), 'v0.11.12: at 100% Saturation: no queueable sit');
+        const w2 = ensureBars(newGame(74, { closed: true })); w2.scene = 'wilds'; w2.james.qi = 25;
+        assert(!taskOpen(w2, SCENES, SIT_TASK), 'v0.11.12: the wilds keep their own Cultivate card (no second one)');
+        const lone = ensureBars(newGame(75, { closed: true })); lone.scene = 'arrival'; lone.james.qi = 25;
+        assert(!taskOpen(lone, SCENES, SIT_TASK) && !medCards(lone, SCENES).find((c) => c.id === 'med:sit')?.task, 'v0.11.12: off the task screens the sit stays tap-only');
+    }
     // the forecast finds the row where a bad queue starves
     const h = ensureBars(newGame(71, { closed: true })); h.scene = 'wilds'; h.minutes = 1440 + 7 * 60; Object.assign(h.flags, { long: true, forest_day: 2 });
     h.james.satiety = 3; h.james.hp = 2; h.inventory = {};

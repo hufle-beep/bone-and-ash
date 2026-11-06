@@ -300,6 +300,7 @@ function renderCardScreen() {
     const sitHere = (c) => c.index < 1000 && isSitChoice(SCENES[g.scene].choices[c.index], g.scene); // condensation lives on the Meditate card
     const story = (hub ? v.choices.filter((c) => c.index >= 1000 || !isTaskChoice(SCENES, g.scene, c.index)) : v.choices).filter((c) => !sitHere(c));
     let hubHtml = '';
+    let queueHtml = ''; // v0.11.12: the queue first, then every card group together (Story, the hub's groups, Meditate)
     let hubTop = '';
     if (hub) {
         const cards = taskCards(g, SCENES).filter((c) => !medIds.has(c.id));
@@ -329,7 +330,8 @@ function renderCardScreen() {
                 ? `<p class="outlook warn">Fed runs out ${esc(clockLabelG(g, ol.fedOut))} on this queue. Queue some food.</p>`
                 : q.length ? `<p class="outlook">The queue takes ${durLabel(span)}. Fed holds: about ${Math.round(ol.fedEnd)} when it ends (${esc(clockLabelG(g, ol.end))}).</p>` : '<p class="outlook">Nothing queued. The clock waits for you.</p>';
         hubTop = `${yHtml}${out}`;
-        hubHtml = `${q.length ? `<h2>Queue (${q.length} / ${QUEUE_MAX})</h2><ol class="queue">${rows}</ol><div class="btns"><button class="btn" data-qclear="1">Clear queue</button></div>` : ''}${groups.map((gr) => `<h2>${esc(gr.name)}</h2><div class="cards">${gr.cards.map(cardHtml).join('')}</div>`).join('')}`;
+        queueHtml = q.length ? `<h2>Queue (${q.length} / ${QUEUE_MAX})</h2><ol class="queue">${rows}</ol><div class="btns"><button class="btn" data-qclear="1">Clear queue</button></div>` : '';
+        hubHtml = `${groups.map((gr) => `<h2>${esc(gr.name)}</h2><div class="cards">${gr.cards.map(cardHtml).join('')}</div>`).join('')}`;
     }
     const storyHtml = v.end
         ? '<h2>Story</h2><div class="cards"><button class="card story" data-new="1">Start a new game</button><button class="card story" data-tab-go="sheet">See how James ended up</button></div>'
@@ -344,7 +346,7 @@ ${statusHtml()}${resultHtml()}
 ${nowRowHtml()}${hubTop}
 <div class="panel-switch" role="tablist"><button role="tab" data-panel="cards" aria-selected="${panel === 'cards'}">Cards</button><button role="tab" data-panel="results" aria-selected="${panel === 'results'}">Results${unseen ? ` <span class="badge">${unseen}</span>` : ''}</button></div>
 <div class="split">
-<div class="pane tasks${panel === 'cards' ? ' on' : ''}">${storyHtml}${hubHtml}${medHtml}</div>
+<div class="pane tasks${panel === 'cards' ? ' on' : ''}">${queueHtml}${storyHtml}${hubHtml}${medHtml}</div>
 <div class="pane results${panel === 'results' ? ' on' : ''}"><h2>Results</h2>${resultsPaneHtml()}</div>
 </div>
 </div>
