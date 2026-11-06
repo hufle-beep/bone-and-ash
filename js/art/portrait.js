@@ -89,22 +89,6 @@ function plum(x, y, s = 1) {
     return `<g transform="translate(${x} ${y})">${[0, 72, 144, 216, 288].map((a) => { const r = (a - 90) * Math.PI / 180; return `<circle cx="${k(Math.cos(r) * 3.4)}" cy="${k(Math.sin(r) * 3.4)}" r="${k(2.8)}" fill="${W}" ${ln(0.6)}/>`; }).join('')}<circle r="${k(1.6)}" fill="${RED}"/></g>`;
 }
 
-/** A peony in line: scalloped rings. */
-function peony(x, y, s = 1, fill = W) {
-    const k = (n) => f(n * s);
-    let p = '';
-    for (const [rr, n] of [[12, 9], [8, 7], [4.5, 5]]) {
-        let d = '';
-        for (let i = 0; i < n; i++) {
-            const a0 = (i / n) * Math.PI * 2;
-            const a1 = ((i + 1) / n) * Math.PI * 2;
-            d += `${i ? 'L' : 'M'}${k(Math.cos(a0) * rr)} ${k(Math.sin(a0) * rr)} Q${k(Math.cos((a0 + a1) / 2) * rr * 1.35)} ${k(Math.sin((a0 + a1) / 2) * rr * 1.35)} ${k(Math.cos(a1) * rr)} ${k(Math.sin(a1) * rr)}`;
-        }
-        p += `<path d="${d} Z" fill="${fill}" ${ln(0.6)}/>`;
-    }
-    return `<g transform="translate(${x} ${y})">${p}</g>`;
-}
-
 /** Hair falling in long ribbons: black bands with white partings, swaying to one side. */
 function ribbons(r, x0, y0, width, len, sway, n, flare = 1.6) {
     let s = '';

@@ -109,7 +109,7 @@ export const BREAK_HUBS = ['fo_ashfall'];
 export const FALLOUT = {
     fo_start: {
         id: 'fo_start', title: 'Day Eight', art: (g) => (ending(g) === 'bluff' ? 'envoy' : 'ashfall_dawn'), place: P,
-        enter: (g) => { g.flags.act1 = true; g.flags.elder_day = 21; if (g.james.hp < 1) g.james.hp = 1; return []; },
+        enter: (g) => { if (g.james.hp < 1) g.james.hp = 1; return []; },
         text: (g) => `${OPENING[ending(g)]}
 
 ${g.flags.sky_witness ? 'And under all of it, the thing nobody says out loud: they saw the sky come for you, and leave. Children stop playing when you walk past. A grandmother touches your sleeve and then touches her forehead, as if your sleeve were a shrine.' : ''}${g.flags.gao_dead || g.flags.gao_broken ? ' Somewhere up the mountain, a disciple named Gao Feng is lying in the Sect\'s infirmary with his sword arm in splints and his meridians cracked, telling anyone who will listen that a mortal did it. Nobody believes him. He has started swearing oaths about you in the ancestral hall, which you gather is a big deal.' : g.flags.gao_turned ? ' You think of Gao Feng, limping home with what you told him. You wonder what he told them.' : ''}`,

@@ -8,7 +8,6 @@ import { yukiForm } from '../core/game.js';
 
 const pick = (d, a, b, c) => (d >= 3 ? c : d === 2 ? b : a);
 const meiOn = (g) => !!g.flags.mei_party;
-const yaOn = (g) => !!g.flags.ya_party;
 const luHere = (g) => g.flags.ending !== 'fought' && !g.flags.lu_disgraced && !g.flags.a1_militia;
 /** Yuki, as she currently is, in a few words. */
 const yu = (g) => ({ cat: 'Yuki, on your shoulder,', tiger: 'Yuki, the size of a tiger and twice as bored,', human: 'Yuki, in her human form, arms folded,' }[yukiForm(g)]);

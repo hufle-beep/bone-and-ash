@@ -88,7 +88,6 @@ ${ya(g) ? 'Ya spits on the lotus. Then, after a moment\'s thought, she spits on 
     },
     heart_hall: {
         id: 'heart_hall', title: 'The Hall', art: 'heart_hall', place: PIN,
-        enter: (g) => { g.flags.heart_entered = true; return []; },
         text: (g) => `Inside, the tree is hollow, and the hollow is a cathedral.
 
 Light comes down in thin grey shafts from cracks high above. The walls rise in ridges and galleries, grown, not built — you can see where living wood flowed around itself to make ledges, stairs, alcoves. Your people grow houses like this. Your people grow *cities* like this. This was somebody's home.

@@ -1,5 +1,5 @@
 {
-  "note": "v0.11.22: what tools/leftovers.mjs reports but stays on purpose, with a reason each. \"name*\" matches a prefix. Kinds: files, functions, testOnly, css, flagsUnread, flagsUnset, items, storage, markers, choices. New entries only with the owner's ok.",
+  "note": "v0.11.22: what tools/leftovers.mjs reports but stays on purpose, with a reason each. \"name*\" matches a prefix. Kinds: files, functions, testOnly, css, flagsUnread, flagsUnset, items, storage, markers, choices. New entries only with the owner's ok. Since v0.11.23 the check is strict: a finding not on this list fails the full and the quick check (choices stay log only).",
   "keep": {
     "files": {
       "project/*": "the project docs (named only in other docs, which the file scan skips)",
@@ -19,7 +19,48 @@
       "meridians#1": "as meridians#0",
       "meridians#2": "as meridians#0",
       "meridians#3": "as meridians#0",
-      "meridians#4": "as meridians#0"
+      "meridians#4": "as meridians#0",
+      "stream#0": "Story Mode only, after switching a closed-meridian game from Incremental Mode: reachable, not by bots",
+      "meridians#5": "Story Mode only, after switching a closed-meridian game from Incremental Mode: reachable, not by bots",
+      "meridians#6": "Story Mode only, after switching a closed-meridian game from Incremental Mode: reachable, not by bots",
+      "coil_end#4": "'Not yet.': only after the browser's Bite the tail button (why = 'choice'): reachable, not by bots",
+      "fo_morning#2": "a door no path uses now: hide it if ever, never delete (task card ids are scene:index in saves)",
+      "heart_hub#7": "a door no path uses now: hide it if ever, never delete (task card ids are scene:index in saves)",
+      "heart_hub#8": "a door no path uses now: hide it if ever, never delete (task card ids are scene:index in saves)",
+      "heart_hub#11": "a door no path uses now: hide it if ever, never delete (task card ids are scene:index in saves)"
+    },
+    "flagsUnread": {
+      "arson_beaten": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
+      "bl_followed_lights": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
+      "envoy": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
+      "flirted": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
+      "founder_cairn": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
+      "gao_won_fight": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
+      "grove_site": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
+      "jackals": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
+      "laughed_with_ya": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
+      "lu_han_seed": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
+      "mei_carried_seed": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
+      "mei_vow": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
+      "mother_vow": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
+      "ship_glyph": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
+      "told_hearth": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
+      "told_ship": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
+      "wyrm_bridged": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
+      "ya_free": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
+      "ya_gift": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
+      "ya_grudge": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
+      "ya_price": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
+      "yk_kissed": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
+      "foundation_day": "the day of the Foundation breakthrough, kept for later (reference.md: set, not read yet)",
+      "bl_stakes_night": "KNOWN BUG (v0.11.22): the Blackroot camp stakes do nothing; its own push (balance: numbers first)"
+    },
+    "flagsUnset": {
+      "lu_disgraced": "KNOWN BUG (v0.11.22): never set, so Lu Han always stands with Shen Qiu unless the prologue ended 'fought'; its own push",
+      "gao_dead": "never set by the game (the scene gao_dead sets gao_broken); tests/part.test.mjs sets it as a starting state; its own decision"
+    },
+    "storage": {
+      "boneash.broken": "the recovery screen keeps a rescue copy of a broken save here (read by hand, not by the game)"
     }
   }
 }

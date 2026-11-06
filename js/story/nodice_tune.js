@@ -37,8 +37,3 @@ export const NO_DICE_TUNE = {
     wolves: { up: 0.75 },
     ya_brawl: { up: 4.75 },
 };
-export const TARGETS = {
-    boss: ['collectors', 'root_wyrm', 'mire_serpent', 'rot_ape', 'guardian', 'elder'],
-    middle: ['ya_brawl', 'gao', 'thornback', 'wolves', 'rt_serpent'],
-};
-export const targetOf = (id) => (TARGETS.boss.includes(id) ? 0.3 : TARGETS.middle.includes(id) ? 0.5 : 0.7);

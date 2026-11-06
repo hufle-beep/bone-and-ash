@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 import { mergeInto, seedOf } from './lib/shard.mjs';
 import { validateJobs } from '../tools/lib/jobs.mjs';
 import { noise, band, flagged, K, MIN } from '../tools/lib/noise.mjs';
-import { strip, scanFunctions, scanFlags, flagFindings, scanCss, scanMarkers, scanStorage, scanFiles, applyKeep, loadKeep, KINDS } from '../tools/leftovers.mjs'; // v0.11.22
+import { strip, scanFunctions, scanFlags, flagFindings, scanCss, scanMarkers, scanStorage, scanFiles, applyKeep, loadKeep, KINDS, strictFailures, STRICT_KINDS } from '../tools/leftovers.mjs'; // v0.11.22; strict v0.11.23
 import { seen as touched, track, noteView, seenOut } from './lib/seen.mjs'; // v0.11.22
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -171,6 +171,12 @@ for (const mode of ['full', 'quick']) {
     const k = applyKeep({ files: ['saves/a.json', 'tools/x.py'], functions: ['f (js/a.js)', 'g (js/a.js)'] }, { files: { 'saves/*': 'the saves test' }, functions: { f: 'hook', h: 'gone' } });
     assert(k.left.files.join() === 'tools/x.py' && k.left.functions.join() === 'g (js/a.js)' && k.kept.files === 1 && k.stale.join() === 'functions: h', `applyKeep (${JSON.stringify(k.left)} · stale ${k.stale.join()})`);
     assert(KINDS.every((kd) => Array.isArray(k.left[kd])), 'applyKeep: every kind listed');
+    // v0.11.23: strict mode fails on any kind but choices; the real repo passes it (static scan)
+    const sf = strictFailures({ functions: ['f (js/a.js)'], choices: ['s#1 (x)'], flagsUnread: [] });
+    assert(sf.join() === 'functions: f (js/a.js)' && !STRICT_KINDS.includes('choices') && STRICT_KINDS.length === KINDS.length - 1, `strict: a function fails, a choice doesn't (${sf.join()})`);
+    let strictOut = '', strictCode = 0;
+    try { strictOut = execFileSync(process.execPath, ['tools/leftovers.mjs', '--strict'], { cwd: ROOT, encoding: 'utf8' }); } catch (e) { strictCode = e.status ?? 1; strictOut = String(e.stdout || e); }
+    assert(strictCode === 0 && /strict: 0 leftovers outside the keep-list/.test(strictOut), `v0.11.23: the game has no leftover outside the keep-list (static scan; exit ${strictCode}): ${strictOut.trim().split('\n').pop()}`);
     const real = loadKeep(path.join(ROOT, 'tools/leftovers-keep.json'));
     assert(real.errors.length === 0 && Object.keys(real.keep).length > 0, `tools/leftovers-keep.json: valid, every entry has a reason (${real.errors.join('; ')})`);
     const bad = path.join(TMP, 'keep.json');

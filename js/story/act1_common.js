@@ -28,7 +28,6 @@ import { TUNE } from './act1_tune.js';
 export { day, hour };
 
 /** Day number within Act 1 (Day 8 = 1). */
-export const a1Day = (g) => clockParts(g.minutes).day - 7;
 
 /** Training-days scale for Act 1 fights: the prologue's days plus one step per two Act 1 days. Tuned by simulation. */
 export const a1Scale = () => 0; // Act 1 fights are tuned in absolute numbers by full-game simulation (no growth on top).
@@ -73,7 +72,6 @@ export const ACT1_ITEMS = {
     elk_antler: { name: 'Bone-elk antler', note: 'Your Convergence likes it. A lot.' },
     wyrm_scale: { name: 'Root-wyrm scale', note: 'Barklike, overlapping. Ya says it makes good armour. Ya says many things.' },
     ya_tooth: { name: 'Ya\'s wolf tooth', note: 'She bit it off the wolf herself. She gave it to you. You are choosing not to ask what that means.' },
-    palisade_stake: { name: 'Bone stakes (bundle)', note: 'For Ashfall\'s palisade.' },
     hearth_log: { name: 'Hearth-log (memory seed)', note: 'The ship\'s record, grown into a knot of wood. It plays when you hold it.' },
     smoked_meat: { name: 'Smoked meat', note: 'Ya\'s. Do not ask what animal.' },
 };
@@ -88,4 +86,3 @@ export const ACT1_ITEMS = {
  * ship_log, guardian, seed, heart_core, return_road, seed_planting, grove_sprout, elder_arrives, elder_duel,
  * elder_parley, a1_end, trio.
  */
-export const ACT1_ART = ['ashfall_dawn', 'envoy', 'palisade', 'council', 'ya_arrives', 'ya_close', 'ya_fight', 'root_road', 'root_camp', 'drowned_wood', 'drowned_camp', 'ashen_hills', 'ashen_camp', 'trio_fire', 'hot_spring', 'night_watch', 'bone_elk', 'root_wyrm', 'drowned_dead', 'mire_serpent', 'rot_ape', 'cinder_hawks', 'heart_gate', 'heart_hall', 'heart_roots', 'ship_wreck', 'ship_bridge', 'ship_log', 'guardian', 'seed', 'heart_core', 'return_road', 'seed_planting', 'grove_sprout', 'elder_arrives', 'elder_duel', 'elder_parley', 'a1_end', 'trio'];

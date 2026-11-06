@@ -79,7 +79,6 @@ const collectorsFight = (g) => {
         win: 'collectors_won', lose: 'collectors_lost',
     };
 };
-const tributeDc = (g, base) => base + Math.floor((forestScale(g) + villageScale(g)) / 2);
 
 const cookMeal = (g) => {
     const out = [];
@@ -145,7 +144,6 @@ The air does taste wrong. There is Qi here — thick, heavy, everywhere — but 
     },
     scan_ok: {
         id: 'scan_ok', title: 'Readings', art: 'omnitool', place: 'Unknown forest',
-        enter: set('scanned', 'qi_toxic'),
         text: `The omnitool unfolds a holographic pane in your vision. Oxygen: slightly rich. Gravity: 0.97 of home. Spectrum of the sun: hotter, redder. No signal. No satellites. No network. No anyone.
 
 And the Qi. The tool renders it as a slow fog of particles, and every particle is tagged with something your people's instruments call *intent residue*. This world's Qi remembers how it was used. Most of it was used to kill.
@@ -157,7 +155,6 @@ Your Ouroboros Axiom — the pillar every one of your people carries, the loop t
     },
     scan_bad: {
         id: 'scan_bad', title: 'Readings (partial)', art: 'omnitool', place: 'Unknown forest',
-        enter: set('scanned'),
         text: `The omnitool gives you oxygen, gravity, a sun that is redder than it should be, and then a long, wounded string of error codes about the ambient Qi it cannot classify.
 
 "You and me both," you tell it.
@@ -955,7 +952,7 @@ export function lfSeason(g) {
 SCENES.clearing.choices.push({ text: 'Stay lost. (The Long Forest: climb the realms one season at a time.)', show: lfOpen, to: 'lf_enter' });
 SCENES.arrival.choices.push({
     text: 'You remember this. Stay lost. (The Long Forest.)', show: lfOpen, time: 30,
-    do: (g) => { for (const f of ['scanned', 'qi_toxic', 'bone_ok', 'sat_once']) g.flags[f] = true; return ['You skip the parts you know by heart, and walk the other way from the water.']; },
+    do: (g) => { for (const f of ['bone_ok', 'sat_once']) g.flags[f] = true; return ['You skip the parts you know by heart, and walk the other way from the water.']; },
     to: 'lf_enter',
 });
 SCENES.lf_hub.choices.push({
@@ -994,4 +991,3 @@ SCENES.lf_hub.choices.push({
 }
 
 export const START_SCENE = 'arrival';
-export const SCENE_COUNT = Object.keys(SCENES).length;

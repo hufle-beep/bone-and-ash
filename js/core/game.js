@@ -18,8 +18,7 @@ export const CONVERGENCE_MULTIPLIER = 1.25;
 export const START_MINUTES = 6 * 60 + 40; // Day 1, 06:40
 export const SATIETY_PER_HOUR = 3;
 export const HUNGRY_AT = 30;
-export let STARVE_HP_PER_HOUR = 1.5; // task mode (v0.10.0, owner pick b): 1.5 HP per starving hour; classic keeps its old rule
-export const setStarveRate = (n) => { STARVE_HP_PER_HOUR = n; }; // simulations only
+export const STARVE_HP_PER_HOUR = 1.5; // task mode (v0.10.0, owner pick b): 1.5 HP per starving hour; classic keeps its old rule
 export const XP_BANDS = { routine: 0, standard: 30, challenging: 60, major: 120 };
 export const SAVE_VERSION = 5; // 2 (v0.9.0): the task queue; 3 (v0.9.2): familiarity, adaptation, Yuki's lane; 4 (v0.9.4): the Coil; 5 (v0.9.6): the Coil's act
 
@@ -333,10 +332,6 @@ export function clockLabelSec(g, minutes = g.minutes) {
 export function clockLabel(minutes) {
     const p = clockParts(minutes);
     return `Day ${p.day}, ${String(p.hh).padStart(2, '0')}:${String(p.mm).padStart(2, '0')}`;
-}
-export function isNight(g) {
-    const h = clockParts(g.minutes).hh;
-    return h >= 20 || h < 6;
 }
 
 /** Time passes: hunger, then regen per Cycle (T1 30 min) — HP 5%, Qi 5% + 0.1 per open collateral. */

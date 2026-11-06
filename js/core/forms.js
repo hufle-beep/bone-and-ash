@@ -6,7 +6,6 @@
 let on = () => false;
 /** game.js wires this to isNoDice (Incremental Mode). */
 export function setFormsActive(fn) { on = fn; }
-export const formsActive = () => on();
 
 export const R = (tier, level) => 10 * (tier - 1) + level;
 export const FORM_LINES = {
@@ -43,7 +42,6 @@ export const FORM_LINES = {
     ] },
 };
 const AT = Object.fromEntries(Object.values(FORM_LINES).flatMap((l) => l.forms.map((f) => [f.id, f.at])));
-export const formRankOf = (id) => AT[id];
 
 export const cuRank = (g) => { const s = g.james.skills['Convergence Use']; return R(s.tier || 1, s.level || 1); };
 /** Can James sing form `id` now? Story Mode: always. */

@@ -28,7 +28,7 @@ Automated "commit and push your changes" reminders from the tooling do **not** o
   - `restore-points.md`: known-good versions and how to roll back.
   - `design.md`: the approved design (the hybrid with Selene).
   - `reference.md`: the prologue story map, the visual design notes, the Act 1 overview (split out of the handover, v0.10.3).
-  - `history.md`: older decisions and version notes, newest first. The handover keeps the last three versions; each push moves older ones here. Past about 45 KB the next part starts (`history-2.md` since v0.10.4, then `history-3.md`), so every doc can be mirrored straight from its file.
+  - `history.md`: older decisions and version notes, newest first. The handover keeps the last three versions; each push moves older ones here. Past about 45 KB the next part starts (`history-2.md` since v0.10.4, `history-3.md` since v0.11.11, `history-4.md` since v0.11.22), so every doc can be mirrored straight from its file.
 - **Every push updates the handover, roadmap, changelog and restore points in the same commit.**
 - Anything decided or drafted in chat that isn't in the repo yet goes into the handover at the next push, so nothing lives only in a chat.
 - **Never rewrite git history** (no force-push, no rebase of pushed commits, no amend of pushed commits).
@@ -49,3 +49,5 @@ Automated "commit and push your changes" reminders from the tooling do **not** o
 - **The test suite grows with the game** (owner 2026-11-06, v0.11.20): every push adds or updates the tests for what it changes; a new kind of check starts log-only and is made strict once its numbers are known. The suite, its steps and how to run each one alone: `tests/README.md`; each full check's step times go to `tools/timings.json`, committed with the push.
 - **Before pushing from a cloud clone:** check `git remote -v`; the origin has sometimes reset to the old `James-rpg-test` URL (`git remote set-url origin https://github.com/hufle-beep/bone-and-ash`).
 - **Commits** end with the attribution lines the session provides (Co-Authored-By and Claude-Session).
+- **Fable for cold reviews** (owner 2026-11-07, v0.11.23; `CLAUDE.md` rule 9): the cold review of a push that changes game logic or balance runs on Fable (Claude starts it as a helper agent with model `fable`, so the owner switches nothing); building, checks, docs and tools-only pushes stay on Opus (where the full check already proves a push, e.g. byte-identical bot stats, a stronger reviewer adds little). Claude says so in a line every time a step should be handed off to Fable, and also flags any other step where Fable would likely do better. If a step ever needs the whole chat on Fable, Claude says so and the owner switches the model.
+- **The claude.ai project's Instructions field** mirrors `CLAUDE.md` (the owner pastes it by hand: Claude's tools can't edit that field); a new version is drafted in chat whenever the hard rules change.

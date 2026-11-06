@@ -75,7 +75,7 @@ Mei Lin is pale and quiet, which for her is a kind of shouting. Ya is already te
 
 "I know," you say. "I've been bitten."`,
         choices: [
-            { text: 'Ya\'s way. One day. Ashfall is waiting.', time: 30, do: set('ya_route'), to: 'rt_road' },
+            { text: 'Ya\'s way. One day. Ashfall is waiting.', time: 30, to: 'rt_road' },
             { text: 'Ask Ya what exactly "a thing" in the river means.', time: 10, do: (g) => { bumpRel(g, 'Ya', 1, 0); return ['"Big. Hungry. Has a face." She shrugs. "Most things do."']; }, to: 'rt_road' },
         ],
     },
@@ -605,7 +605,7 @@ ${g.flags.ending === 'bluff' ? 'He remembers the bluff at the tribute post; Lu H
         choices: [
             {
                 text: 'Make your offer: the grove stays, Ashfall stays, and the Sect may send one disciple a season to learn what clean cultivation is.',
-                check: { skill: 'GU', dc: 9, band: 'major', bonus: (g) => (g.flags.grove ? 1 : 0) + (g.flags.grove === 'strong' ? 1 : 0) + (g.flags.a1_palisade ? 1 : 0) + (g.flags.a1_militia ? 1 : 0) + (g.flags.council_unity ? 1 : 0) + (g.flags.sky_witness ? 1 : 0) + (hasItem(g, 'hearth_log') || g.flags.ship_known ? 1 : 0) + (g.flags.ending === 'paid' || g.flags.ending === 'bluff' ? 1 : 0) - (g.flags.ending === 'fought' ? 1 : 0) },
+                check: { skill: 'GU', dc: 9, band: 'major', bonus: (g) => (g.flags.grove ? 1 : 0) + (g.flags.grove === 'strong' ? 1 : 0) + (g.flags.a1_palisade ? 1 : 0) + (g.flags.a1_militia ? 1 : 0) + (g.flags.council_unity ? 1 : 0) + (g.flags.sky_witness ? 1 : 0) + (hasItem(g, 'hearth_log') ? 1 : 0) + (g.flags.ending === 'paid' || g.flags.ending === 'bluff' ? 1 : 0) - (g.flags.ending === 'fought' ? 1 : 0) },
                 to: 'rt_accord', fail: 'rt_parley_fail',
             },
         ],
@@ -634,11 +634,11 @@ He looks at you for a long time. Then, slowly, he steps into the ring.
 
 You see it hit him. Three hundred years of poison — every herb, every pill, every core, every rival he ate — and for the first time since he was a boy, the air in his lungs has nothing in it at all. Something goes across his ancient face that you would not have believed it could hold.
 
-${hasItem(g, 'hearth_log') || g.flags.ship_known ? 'You hold out the hearth-log. "Your founder did this," you say. "It was a filter. He killed it for its heart. Hold this, and watch him do it."' : '"This is what the world tasted like," you say, "before your founder cut its heart out."'}`,
+${hasItem(g, 'hearth_log') ? 'You hold out the hearth-log. "Your founder did this," you say. "It was a filter. He killed it for its heart. Hold this, and watch him do it."' : '"This is what the world tasted like," you say, "before your founder cut its heart out."'}`,
         choices: [
             {
                 text: 'Open the Convergence and sing the grove\'s note through him. All of it.',
-                qi: 12, check: { skill: 'Convergence Use', dc: 8, band: 'major', bonus: (g) => (g.flags.grove === 'strong' ? 2 : g.flags.grove ? 1 : 0) + (g.flags.grove_attuned ? 1 : 0) + (hasItem(g, 'hearth_log') || g.flags.ship_known ? 1 : 0) + (g.james.realm >= 1 ? 1 : 0) },
+                qi: 12, check: { skill: 'Convergence Use', dc: 8, band: 'major', bonus: (g) => (g.flags.grove === 'strong' ? 2 : g.flags.grove ? 1 : 0) + (g.flags.grove_attuned ? 1 : 0) + (hasItem(g, 'hearth_log') ? 1 : 0) + (g.james.realm >= 1 ? 1 : 0) },
                 to: 'rt_truth_won', fail: 'rt_parley_fail',
             },
         ],

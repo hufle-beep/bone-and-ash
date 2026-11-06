@@ -288,7 +288,7 @@ Something moves in the gap between the halves of the root — something long, ba
 "I vote across," Mei Lin says. "I vote *very much* across."`,
         choices: [
             { text: 'Through it. Fight the root-wyrm.', combat: wyrmFight, to: 'wyrm_won' },
-            { text: 'Across it: sing a bone bridge over the split, fast and quiet.', qi: 8, check: { skill: 'Convergence Use', dc: 6, band: 'challenging' }, do: (g) => { g.flags.wyrm_bridged = true; g.flags.wyrm_done = true; return ['A white span grows out of your hands across the chasm, ribbed and singing. You run. Behind you the wyrm rises, too late, and the bridge dissolves into its open mouth.']; }, failDo: (g) => { g.flags.wyrm_bridge_fail = true; return ['The bridge is half-grown when the wyrm hits it. The bone shatters. So does your concentration.']; }, to: 'dw_enter', fail: 'rr_bridge_fail' },
+            { text: 'Across it: sing a bone bridge over the split, fast and quiet.', qi: 8, check: { skill: 'Convergence Use', dc: 6, band: 'challenging' }, do: (g) => { g.flags.wyrm_bridged = true; return ['A white span grows out of your hands across the chasm, ribbed and singing. You run. Behind you the wyrm rises, too late, and the bridge dissolves into its open mouth.']; }, failDo: (g) => { g.flags.wyrm_bridge_fail = true; return ['The bridge is half-grown when the wyrm hits it. The bone shatters. So does your concentration.']; }, to: 'dw_enter', fail: 'rr_bridge_fail' },
         ],
     },
     rr_bridge_fail: {
@@ -300,7 +300,7 @@ Something moves in the gap between the halves of the root — something long, ba
     },
     wyrm_won: {
         id: 'wyrm_won', title: 'The Wyrm', art: 'root_wyrm', place: `${P} — the split`,
-        enter: (g) => { g.flags.wyrm_done = true; addItem(g, 'wyrm_scale', 4); addItem(g, 'beast_core', 1); bumpRel(g, 'Ya', 4, 3); bumpRel(g, 'Mei Lin', 3, 2); return ['+4 Root-wyrm scales, +1 Murky beast core.']; },
+        enter: (g) => { addItem(g, 'wyrm_scale', 4); addItem(g, 'beast_core', 1); bumpRel(g, 'Ya', 4, 3); bumpRel(g, 'Mei Lin', 3, 2); return ['+4 Root-wyrm scales, +1 Murky beast core.']; },
         text: `It takes a long time to die, and it's ugly when it does, and when it's over the four of you are sitting on the lip of the split with your backs against the root, breathing like bellows.
 
 Ya is grinning through a mask of sap. Mei Lin has a cut along her cheekbone that she hasn't noticed. Yuki is grooming, which in Yuki is a statement of victory.
@@ -316,7 +316,7 @@ Mei Lin watches her go. Something in her face softens, and then she notices it s
     },
     wyrm_lost: {
         id: 'wyrm_lost', title: 'Over the Edge', art: 'root_wyrm', place: `${P} — the split`,
-        enter: (g) => { g.flags.wyrm_done = true; return patchUp(g); },
+        enter: (g) => patchUp(g),
         text: `You lose the fight and win the crossing, which is the worst kind of win: the wyrm's tail takes you off the root and you fall, and Ya jumps after you, and Mei Lin — swearing a blue streak you will remember for the rest of your life — jumps after *her*.
 
 You all hit the water forty metres down in the Drowned Wood. The wyrm doesn't follow. Wyrms, it turns out, don't swim.
@@ -332,7 +332,7 @@ You all hit the water forty metres down in the Drowned Wood. The wyrm doesn't fo
     /* =================================== the Drowned Wood =================================== */
     dw_enter: {
         id: 'dw_enter', title: 'The Drowned Wood', art: 'drowned_wood', place: PLACE.dw,
-        enter: (g) => { g.flags.bl_region = 'dw'; g.flags.wyrm_done = true; toHour(g, 18); return []; },
+        enter: (g) => { g.flags.bl_region = 'dw'; toHour(g, 18); return []; },
         text: `Below the split the forest is underwater.
 
 Not a lake: a forest, still standing, drowned to the waist in black, perfectly still water. The trunks go down into it and their reflections come up out of it, so that every tree is two trees, one of them upside down. Mist lies on the surface in sheets. Nothing sings. Nothing calls. The only sound is water dripping from very high up.
@@ -458,7 +458,7 @@ Ya is already moving.`,
     },
     dw_drowned_won: {
         id: 'dw_drowned_won', title: 'Out of the Water', art: 'drowned_dead', place: `${P} — the mourning hollow`,
-        enter: (g) => { g.flags.drowned_done = true; g.flags.ya_saved_mei = true; bumpRel(g, 'Ya', 3, 2); bumpRel(g, 'Mei Lin', 3, 2); return []; },
+        enter: (g) => { g.flags.drowned_done = true; bumpRel(g, 'Ya', 3, 2); bumpRel(g, 'Mei Lin', 3, 2); return []; },
         text: `When the last of them sinks — and they do sink, slowly, as if relieved — Ya is the one who comes up with Mei Lin.
 
 She went under after her without a second's thought, and she's hauling her onto the nearest trunk by the collar, pounding her back until she coughs up half the hollow. There's a long gash down Ya's forearm where one of the drowned got its nails in. She hasn't noticed.
@@ -472,7 +472,7 @@ Then Mei Lin says, hoarsely, "You came in after me."
     },
     dw_drowned_lost: {
         id: 'dw_drowned_lost', title: 'Held Under', art: 'drowned_dead', place: `${P} — the mourning hollow`,
-        enter: (g) => { g.flags.drowned_done = true; g.flags.ya_saved_mei = true; return patchUp(g); },
+        enter: (g) => { g.flags.drowned_done = true; return patchUp(g); },
         text: `They hold you under. For a while there is only cold and dark and hands, so many hands, and a strange, terrible peace.
 
 Then Yuki is screaming through the bond like a fire alarm, and someone's bone-knife is cutting the hands away — not yours, Ya's, borrowed from your own hammerspace without asking — and you come up into the air with Mei Lin's fist knotted in your hair.
@@ -482,7 +482,7 @@ Ya got her out first. Then both of them came back for you. You'll be thinking ab
     },
     dw_after: {
         id: 'dw_after', title: 'Stitches', art: 'drowned_camp', place: PLACE.dw,
-        enter: (g) => { g.flags.women_bond = true; bumpRel(g, 'Mei Lin', 0, 2); bumpRel(g, 'Ya', 0, 2); return []; },
+        enter: (g) => { bumpRel(g, 'Mei Lin', 0, 2); bumpRel(g, 'Ya', 0, 2); return []; },
         text: `Mei Lin stitches Ya's arm on a dry hummock with a bone needle you grow for her, and thread from her own sleeve.
 
 Ya does not flinch. Ya talks the entire time instead: about the drowned, about the time she fought a bear when she was fourteen, about how Mei Lin's hands are cold, about how Mei Lin's hands are very *nice* for being cold.
@@ -747,7 +747,7 @@ Mei Lin takes Ya's hand. Just takes it. Ya lets her.
     },
     ape_won: {
         id: 'ape_won', title: 'The Pass Is Open', art: 'rot_ape', place: `${P} — the last pass`,
-        enter: (g) => { g.flags.ape_done = true; addItem(g, 'beast_core', 2); bumpRel(g, 'Ya', 5, 4); bumpRel(g, 'Mei Lin', 4, 3); return ['+2 Murky beast cores (one of them the size of a fist).']; },
+        enter: (g) => { addItem(g, 'beast_core', 2); bumpRel(g, 'Ya', 5, 4); bumpRel(g, 'Mei Lin', 4, 3); return ['+2 Murky beast cores (one of them the size of a fist).']; },
         text: `It falls across the pass like a landslide, and the moss on its back goes on growing even after its heart stops.
 
 Ya walks over to it, slowly. Puts her hand on its face. Then she goes through the bones in the notch, one by one, until she finds what she's looking for: a spear-head, rusted, wrapped in leather gone black with age. She stands there holding it for a long time.
@@ -761,7 +761,7 @@ You give them the time. Yuki sits beside you and watches the dead tree.
     },
     ape_lost: {
         id: 'ape_lost', title: 'Through, Somehow', art: 'rot_ape', place: `${P} — the last pass`,
-        enter: (g) => { g.flags.ape_done = true; return patchUp(g); },
+        enter: (g) => patchUp(g),
         text: `The ape breaks you. It's not even a contest: it hits you once and you're in the ash, and everything goes white.
 
 What saves you is Ya, who goes up its back like a squirrel up a tree and puts her mother's old spear-head — snatched from the bone pile — into the base of its skull. It doesn't die. But it goes, crashing off down the far side of the ridge, howling, and doesn't come back.

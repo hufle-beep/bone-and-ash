@@ -400,7 +400,7 @@ ${yukiForm(g) === 'cat' ? 'Yuki watches from the rock with the horror of a cat w
 It looks at you for a long time. Then it turns its head toward the heart of the forest, toward the dead tree, the way a guide points, and walks away into the trees without hurrying.
 
 Yuki says nothing at all. That, from her, is the loudest thing she\'s ever said.`,
-        choices: [{ text: 'Remember the direction.', do: (g) => { g.flags.saw_stag = true; return awardXp(g, 'GU', 'challenging'); }, to: 'lf_hub' }],
+        choices: [{ text: 'Remember the direction.', do: (g) => awardXp(g, 'GU', 'challenging'), to: 'lf_hub' }],
     },
 
     /* ---------- seclusion ---------- */

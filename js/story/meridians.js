@@ -74,11 +74,8 @@ export const ecHours = (k) => 3 + Math.floor(k / 9);
 export const jnHours = (k) => 6 + Math.floor(k / 2);
 const need = (g, k) => (k === 'pri' ? priHours(P(g)) : k === 'col' ? colHours(colGroupsOpen(g)) : k === 'e8' ? e8Hours(m(g).e) : k === 'ec' ? ecHours(m(g).c) : jnHours(m(g).j));
 const nameOf = (g, k) => (k === 'pri' ? PRIMARIES[P(g)]?.name : k === 'col' ? COL_GROUPS[colGroupsOpen(g)]?.name : k === 'e8' ? EXTRA8[m(g).e]?.name : k === 'ec' ? EXTRA_COLL[m(g).c] : JUNCTIONS[m(g).j]?.name);
-const XLINE = { e8: () => 'Extraordinary vessel', ec: () => 'vessel thread', jn: () => 'junction' };
 const countOf = (g, k) => (k === 'pri' ? `${P(g) + 1}/12` : k === 'col' ? `group ${colGroupsOpen(g) + 1}/8` : k === 'e8' ? `${m(g).e + 1}/8` : k === 'ec' ? `${m(g).c + 1}/28` : `${m(g).j + 1}/10`);
 export const merMinutesOf = (g, k) => Math.max(10, Math.min(SESSION_MINUTES, Math.ceil(((need(g, k) - work(g, k)) * 60) / actSpeed(g, 'mer') / 10) * 10)); // v0.11.15: ÷ its speed by use
-/** The next sitting's minutes (primaries first, as the queue card takes them). */
-export const merMinutes = (g) => merMinutesOf(g, canPrimary(g) ? 'pri' : 'col');
 function workChoice(k) {
     const can = (g) => isNoDice() && (k === 'pri' ? canPrimary(g) : k === 'col' ? canColGroup(g) : k === 'e8' ? canExtra8(g) : k === 'ec' ? canExtraColl(g) : canJunction(g));
     return {

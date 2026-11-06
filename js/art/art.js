@@ -474,7 +474,6 @@ const PAINTED = {
 };
 /** Close-ups drawn as realistic portraits (no ink wobble, true colours), over a faint painted backdrop. */
 const PORTRAITS = { mei_lin: { img: 'peaks', draw: meiPortrait }, yuki_close: { img: 'peaks', draw: yukiPortrait } };
-export const BG_IMAGES = ['forest', 'peaks', 'cliffs', 'pine', 'village', 'mountain'];
 const bgImage = (img, opacity = 1) => `<image href="art/bg/${img}.jpg" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="xMidYMid slice" opacity="${opacity}"/>`;
 
 
@@ -651,4 +650,3 @@ export function sceneArt(key) {
     return `${open}${FILTERS}<rect width="${W}" height="${H}" fill="#ece8df"/>${base}<g filter="url(#ink)">${body}</g>${vignette}${grain}</svg>`
         .replace(/id="(sk|vg|gr|ink|bl|sh|gw|tl\d+)"/g, `id="$1-${id}"`).replace(/url\(#(sk|vg|gr|ink|bl|sh|gw|tl\d+)\)/g, `url(#$1-${id})`);
 }
-export const ART_KEYS = Object.keys(SCENES);

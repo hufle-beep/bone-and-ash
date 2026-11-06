@@ -16,7 +16,6 @@ const hrs = (m) => (m % 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m / 60
 
 /** No meditating here: urgent moments and screens that are already about it. */
 export const NO_MEDITATE = new Set(['herb_girl', 'tribute', 'rt_elder', 'rt_truth', 'coil_end', 'coil_dawn', 'breakthrough', 'ns_warn', 'col_warn', 'meridians', 'yuki_form', 'yuki_tiger_awaken', 'yuki_human_awaken']);
-export const SIT_MINUTES = 60; // v0.11.2: an hour at ×1 (v0.11.15: ÷ its speed by use, game.js sitMinutes)
 /** v0.11.15: which activity a Meditate card or queue id belongs to ('sit' | 'mer' | 'bt'), for its speed by use. */
 export const medActivity = (id) => (/^(med:)?mer:/.test(id) ? 'mer' : /^(med:bt|bt:next)$/.test(id) ? 'bt' : /^(med:sit|sit:next)$/.test(id) ? 'sit' : null);
 /** v0.11.15: the tooltip line: its speed and uses. */
@@ -25,7 +24,6 @@ export const useLine = (g, k) => { const n = actUses(g, k); return `Familiar: ×
 /** Is a choice one of the plain "cultivate one sit and come back" choices (hub chores)? */
 export const isSitChoice = (c, sceneId) => c.to === sceneId && /^(Cultivate|Condense)/.test(String(typeof c.text === 'function' ? '' : c.text)) && /condense\(g\)/.test(String(c.do));
 /** The old hub choices that the Meditate card replaces in task mode (break through, open a meridian). */
-export const isMedDoor = (c) => typeof c.text === 'function' ? /Break through/.test(String(c.text)) && /bt_return/.test(String(c.do)) : /^Open a meridian/.test(String(c.text));
 
 /** v0.11.14 (owner 18:53, pick A): Meditate only where James rests: the task screens and Act 1's resting places. */
 export const MED_SCREENS = new Set(['camp', 'stream', 'wilds', 'village', 'ashfall', 'lf_hub', 'fo_ashfall', 'rr_hub', 'dw_hub', 'ah_hub', 'heart_hub', 'rt_camp', 'rt_ashfall']);

@@ -27,7 +27,6 @@ setTimeless(Object.fromEntries(Object.entries(TASK_HUBS).map(([h, cfg]) => [h, [
 export const MS_PER_GAME_HOUR = 3000; // 1 game hour = 3 s at ×1 (design.md)
 export const QUEUE_MAX = 30;
 /** Speed gate (3c-3, owner 2026-11-06): ×1 at the start, ×2 after a won tribute (fought, bluff or the hairpin), ×5 after Act 1 ends (any route, `taken` included); ×10 only with the hidden test toggle. Read from the save, so no migration. */
-export const SPEED_STEPS = [1, 2, 5, 10];
 export function maxSpeed(g, test = false) {
     if (test) return 10;
     const f = (g && g.flags) || {};

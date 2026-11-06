@@ -1,12 +1,14 @@
 #!/usr/bin/env node
 // The leftover check (v0.11.22, owner 2026-11-06 21:15 / 23:19 pick A): what nothing reaches or reads any more.
-// LOG ONLY for now (the rule: a new kind of check starts log-only): it never fails on a finding, only on its own errors
-// (a broken keep-list). After the owner has picked what goes, the next push removes it and makes this strict.
+// v0.11.22 log only; since v0.11.23 (owner pick A) STRICT with --strict (tools/check.mjs, full and quick): a finding not on
+// the keep-list fails, except story choices the bots never saw (log only: they shift with balance) and keep-list entries
+// that match nothing (log only). A broken keep-list always fails.
 //
 //   node tools/leftovers.mjs                         static scan only (quick runs)
 //   node tools/leftovers.mjs --seen a.json b.json …  plus what the bot games touched (the stats files' `seen`)
 //   node tools/leftovers.mjs … --all                 every finding, not just the first few per kind
 //   node tools/leftovers.mjs … --json                the findings as JSON
+//   node tools/leftovers.mjs … --strict              exit 1 on a finding not on the keep-list (choices excepted)
 //
 // Kinds: files nothing loads or names; game functions and constants named nowhere else (and the ones only tests use;
 // `js/core/formulas.js` is the engine's own copy and is skipped); functions only main.js calls (the browser: untested,
@@ -216,6 +218,10 @@ export function applyKeep(findings, keep) {
     return { left, stale, kept };
 }
 
+/** v0.11.23: the kinds that fail the check in strict mode (choices stay log only: what the bots see shifts with balance). */
+export const STRICT_KINDS = KINDS.filter((k) => k !== 'choices');
+export const strictFailures = (left) => STRICT_KINDS.flatMap((k) => (left[k] || []).map((x) => `${k}: ${x}`));
+
 /** Load the keep-list; every entry needs a reason (a broken list is the one way this check fails). */
 export function loadKeep(file) {
     if (!existsSync(file)) return { keep: {}, errors: [] };
@@ -231,7 +237,7 @@ export function loadKeep(file) {
 const isMain = process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url;
 if (isMain) {
     const argv = process.argv.slice(2);
-    const ALL = argv.includes('--all'), JSON_OUT = argv.includes('--json');
+    const ALL = argv.includes('--all'), JSON_OUT = argv.includes('--json'), STRICT = argv.includes('--strict');
     const si = argv.indexOf('--seen');
     const seenFiles = si < 0 ? [] : argv.slice(si + 1).filter((a) => !a.startsWith('--'));
     const tracked = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard'], { cwd: ROOT, encoding: 'utf8' }).split('\n').filter(Boolean).filter((f) => existsSync(path.join(ROOT, f)));
@@ -273,7 +279,8 @@ if (isMain) {
     }
     const { keep, errors } = loadKeep(path.join(ROOT, 'tools/leftovers-keep.json'));
     if (errors.length) { console.log(`tools/leftovers-keep.json is broken:\n${errors.map((e) => `  - ${e}`).join('\n')}`); process.exit(1); }
-    const { left, stale, kept } = applyKeep(findings, keep);
+    const { left, kept } = applyKeep(findings, keep);
+    const stale = seen ? applyKeep(findings, keep).stale : []; // without the bots' data a plain-string name hides findings, so unmatched entries mean nothing
     if (JSON_OUT) { console.log(JSON.stringify({ seen: !!seen, findings: left, kept, stale, browserOnly: fn.browserOnly }, null, 2)); process.exit(0); }
     const CAP = ALL ? Infinity : 12;
     for (const kind of KINDS) {
@@ -284,5 +291,11 @@ if (isMain) {
     console.log(`  functions only main.js calls (the browser; untested, not leftovers): ${fn.browserOnly.length}${ALL ? `: ${fn.browserOnly.join(', ')}` : ''}`);
     if (stale.length) console.log(`  keep-list entries that match nothing now (log only): ${stale.join(', ')}`);
     const total = KINDS.reduce((a, k) => a + left[k].length, 0);
+    const bad = strictFailures(left);
+    if (STRICT && bad.length) {
+        console.log(`FAILED (strict): ${bad.length} finding(s) not on tools/leftovers-keep.json: ${bad.join('; ')}\nRemove what is left over, or keep it on the list with a reason (only with the owner's ok).`);
+        process.exit(1);
+    }
+    if (STRICT) { console.log(`strict: 0 leftovers outside the keep-list (${KINDS.reduce((a, k) => a + kept[k], 0)} kept on purpose); choices log only: ${left.choices.length}${seen ? '' : ' (static scan only)'}`); process.exit(0); }
     console.log(`log only: ${total} possible leftovers (${KINDS.filter((k) => left[k].length).map((k) => `${left[k].length} ${k}`).join(', ') || 'none'})${seen ? '' : ', static scan only'}; ${KINDS.reduce((a, k) => a + kept[k], 0)} kept on purpose`);
 }

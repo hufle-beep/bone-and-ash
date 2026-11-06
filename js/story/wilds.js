@@ -70,7 +70,7 @@ Through the bond: *you hunt like a tree. I am fixing it.*`,
         choices: [
             { text: 'Watch where the lights go. Let the threads map it.', show: ev('lights'), check: { skill: 'GU', dc: 3 }, do: (g) => { g.flags.saw_lights = true; return ['Mapped: the lights flow toward the dead tree, like blood toward a heart that stopped.']; }, to: 'morning' },
             { text: 'Pull the blanket over your head. Not your business. Not tonight.', show: ev('lights'), to: 'morning' },
-            { text: 'Sing a bone lean-to over the camp.', show: ev('rain'), qi: 2, check: { skill: 'Convergence Use', dc: 2 }, do: (g) => { g.flags.leanto = true; return ['A ribbed white roof. Dry, smug, asleep.']; }, failDo: (g) => { g.james.hp -= 2; return ['It collapses in the night. Wet, cold, −2 HP.']; }, to: 'morning' },
+            { text: 'Sing a bone lean-to over the camp.', show: ev('rain'), qi: 2, check: { skill: 'Convergence Use', dc: 2 }, do: (g) => { return ['A ribbed white roof. Dry, smug, asleep.']; }, failDo: (g) => { g.james.hp -= 2; return ['It collapses in the night. Wet, cold, −2 HP.']; }, to: 'morning' },
             { text: 'Sit in the rain and cultivate. It\'s not like you can sleep.', show: (g) => !isNoDice() && ev('rain')(g) && g.james.qi >= 10, /* v0.11.16 */ do: (g) => { const r = condense(g); return r.ok ? [`Condensed in the rain: Saturation ${r.saturation}%.`] : []; }, to: 'morning' },
             { text: 'Get wet. Sleep anyway.', show: ev('rain'), to: 'morning' },
             { text: 'Fight them off.', show: ev('crows'), combat: nightFight('crows'), to: 'night_won' },

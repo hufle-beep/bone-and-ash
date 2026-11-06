@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.22 | (this push) | The leftover check (log only), the bots' flag / item / choice record, `.gitignore`. Tests and tools only; same save state as 0.11.19. |
+| 0.11.23 | (this push) | The clean-up (dead code, an unused item, 12 unread flags no longer written), the leftover check strict. The bot stats byte-identical to 0.11.22; same save state as 0.11.19 (saves that hold the dropped flags keep them; nothing reads them; no save holds `palisade_stake`). |
+| 0.11.22 | `55ff818` | The leftover check (log only), the bots' flag / item / choice record, `.gitignore`. Tests and tools only; same save state as 0.11.19. |
 | 0.11.21 | `bd783e8` | The test suite checked and strengthened (mutation-tested, real browser taps, the noise-scaled drift line). Tests and tools only; same save state as 0.11.19. |
 | 0.11.20 | `e071973` | The test suite in parallel; the lean dry run. Same save state as 0.11.19. |
 | 0.11.19 | `fce05ab` | Act 1's resting places as task screens. Same save state as 0.11.18 (queued Act 1 rows are ids; an older version skips them there). |
