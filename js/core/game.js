@@ -16,12 +16,15 @@ export const START_MINUTES = 6 * 60 + 40; // Day 1, 06:40
 export const SATIETY_PER_HOUR = 3;
 export const HUNGRY_AT = 30;
 export const XP_BANDS = { routine: 0, standard: 30, challenging: 60, major: 120 };
-export const SAVE_VERSION = 4; // 2 (v0.9.0): the task queue; 3 (v0.9.2): familiarity, adaptation, Yuki's lane; 4 (v0.9.4): the Coil
+export const SAVE_VERSION = 5; // 2 (v0.9.0): the task queue; 3 (v0.9.2): familiarity, adaptation, Yuki's lane; 4 (v0.9.4): the Coil; 5 (v0.9.6): the Coil's act
 
 const node = (tier = 1, level = 1) => ({ tier, level, xp: 0 });
 
-/** A fresh game: James (40, fresh doctorate), Yuki, an empty hammerspace. */
-export function newGame(seed = Date.now()) {
+/**
+ * A fresh game: James (40, fresh doctorate), Yuki, an empty hammerspace.
+ * closed (v0.9.6, task mode): every primary and collateral starts closed (0/12, 0/66); classic games start open.
+ */
+export function newGame(seed = Date.now(), { closed = false } = {}) {
     const g = {
         v: SAVE_VERSION,
         seed: seed >>> 0,
@@ -36,8 +39,9 @@ export function newGame(seed = Date.now()) {
             skills: { 'Convergence Use': node() },
             realm: 0,
             saturation: 0,
-            primaries: 12,
-            collaterals: 66,
+            primaries: closed ? 0 : 12,
+            collaterals: closed ? 0 : 66,
+            colSealed: false,
             extra8: 0,
             extraCollaterals: 0,
             junctions: 0,
@@ -51,8 +55,8 @@ export function newGame(seed = Date.now()) {
             name: 'Yuki',
             form: 'cat',
             realm: 0,
-            primaries: 12,
-            collaterals: 66,
+            primaries: closed ? 0 : 12,
+            collaterals: closed ? 0 : 66,
             fight: node(),
             qiUse: node(),
             hp: null,
@@ -85,11 +89,21 @@ export function coilStart(g) {
     const tl = (n) => [n.tier, n.level];
     return { realm: g.james.realm, gu: tl(g.james.gu), cu: tl(g.james.skills['Convergence Use']), yf: tl(g.yuki.fight), fam: { ...(g.tasks?.fam || {}) } };
 }
-export function makeCoil(g) {
+/** act: 0 the prologue (rewinds to Day 1 dawn), 1 Act 1 (rewinds to Day 8 dawn, v0.9.6). */
+export function makeCoil(g, act = 0) {
     const peak = {};
     for (const [who, r] of Object.entries(g.rel || {})) peak[who] = { f: r.f, a: r.a };
-    return { n: 1, snap: coilSnap(g), start: coilStart(g), peak, played: {}, replay: null, why: null, back: null, known: [], skipEnter: false };
+    return { act, n: 1, snap: coilSnap(g), start: coilStart(g), peak, played: {}, replay: null, why: null, back: null, known: [], skipEnter: false };
 }
+/** Act 1 begins (v0.9.6): a new Coil whose rewind point is this moment (Day 8 dawn, the prologue's outcome kept). */
+export function startActCoil(g, act = 1) {
+    const old = g.coil;
+    g.coil = makeCoil(g, act);
+    g.coil.wake = g.scene;
+    if (old) { g.coil.known = [...(old.known || [])]; g.stats[`coils${old.act || 0}`] = old.n; }
+}
+/** Is a state in Act 1? (Act 1 starts on Day 8 06:00, after the tribute's outcome and the epilogue.) */
+export const inAct1 = (g) => !!g.flags?.ending && g.scene !== 'epilogue' && g.minutes >= 7 * 1440 + 6 * 60;
 
 /* ---------------- numbers ---------------- */
 
@@ -355,11 +369,16 @@ export function condense(g) {
 export const MAX_REALM = 14;
 /** Engine rule L in task mode (v0.9.4): from 95% Saturation (anything over 100% is lost; nothing carries over). Classic: 100%. */
 export const breakAt = () => (noDice ? 95 : 100);
-export const canBreakThrough = (g) => g.james.saturation >= breakAt() && g.james.realm < MAX_REALM;
+export const PRIMARIES_FOR_FOUNDATION = 12;
+/** Saturation is ready but the realm's gate isn't met (v0.9.6: Foundation needs all 12 primaries). '' if nothing blocks. */
+export const breakBlock = (g) => (g.james.realm === 0 && (g.james.primaries ?? 12) < PRIMARIES_FOR_FOUNDATION ? `needs all 12 primaries (${g.james.primaries}/12)` : '');
+export const breakReady = (g) => g.james.saturation >= breakAt() && g.james.realm < MAX_REALM;
+export const canBreakThrough = (g) => breakReady(g) && !breakBlock(g);
 export function breakthrough(g) {
     if (!canBreakThrough(g)) return { ok: false };
     const before = { hp: jamesHpMax(g), qi: jamesQiMax(g), yhp: yukiHpMax(g), yqi: yukiQiMax(g) };
     advance(g, 120, { resting: true });
+    if (g.james.realm === 0 && (g.james.collaterals ?? 66) < 66) g.james.colSealed = true; // the engine window: collaterals are Mortal Vessel only
     g.james.realm += 1;
     g.james.saturation = 0;
     g.yuki.realm = Math.max(g.yuki.realm, g.james.realm);
@@ -754,6 +773,7 @@ const MIGRATIONS = {
     1: (g) => { g.tasks = { queue: [] }; }, // v0.9.0: the task queue (empty)
     2: (g) => { Object.assign(g.tasks, { fam: {}, adapt: {}, yuki: { on: false, progress: 0 } }); }, // v0.9.2: familiarity 0 everywhere
     3: (g) => { g.coil = makeCoil(g); }, // v0.9.4: Coil 1; the rewind point is the save as loaded
+    4: (g) => { if (inAct1(g)) startActCoil(g, 1); else if (g.coil) g.coil.act = 0; }, // v0.9.6: the Coil's act; mid-Act 1 = rewinds to the save as loaded
 };
 
 export function migrate(g) {

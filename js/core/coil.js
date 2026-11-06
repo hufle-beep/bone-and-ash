@@ -1,5 +1,7 @@
 /**
- * The Coil (v0.9.4, step 3c-1; design.md "The Coil", reset option B). Task mode only, prologue only for now.
+ * The Coil (v0.9.4, step 3c-1; design.md "The Coil", reset option B). Task mode only. The prologue's Coil rewinds to
+ * Day 1 dawn; Act 1's (v0.9.6, g.coil.act = 1) to Day 8 dawn, the prologue's outcome kept, ending at Shen Qiu (rt_taken).
+ * Sealed collaterals (v0.9.6): a rewind unwinds the sealing breakthrough — James and Yuki back to Mortal Vessel, Saturation 0.
  * A Coil ends on a collapse (HP 0 during tasks), a lost tribute (accept or rewind) or by choice ("Bite the tail").
  * Rewind: back to the snapshot (Day 1 dawn for a new game; an old save as it was loaded).
  *   Kept: James (realm, skills, meridians, Saturation), Yuki (all of her), familiarity, adaptation, Yuki's lane on/off,
@@ -14,16 +16,26 @@ import { famTier, FAM, QUEUE_MAX } from './tasks.js';
 /** What James knows and keeps (plus Yuki's own flags and the Long Forest run, so that run stays scaled). */
 export const KEEP_FLAGS = ['lore1', 'lore_realms', 'lore_tree', 'saw_lights', 'yuki_tiger_seen', 'yuki_human_seen', 'yk_path', 'long', 'longforest', 'lf_instant'];
 /** Discoveries that also lock a one-time action: reset with the world, but the Coil remembers them (Insights in step 4). */
-export const REMEMBER = { roots: 'the roots under the hollow', bone_sung: 'the song in the bone field', gills: 'where the ghost-gills grow', fungus: 'the jade bracket fungus by the stream' };
+export const REMEMBER = { roots: 'the roots under the hollow', bone_sung: 'the song in the bone field', gills: 'where the ghost-gills grow', fungus: 'the jade bracket fungus by the stream', ship_found: 'where the seed-ship lies', log_heard: 'what Wren Aldous\'s log said' };
 const KNOW_TEXT = { lore1: 'what the tribute is', lore_realms: 'the realms, from Old Wen', lore_tree: 'the story of the dead tree', saw_lights: 'where the night lights go' };
 export const HEAD_START = 0.25;
 
 const clone = (o) => JSON.parse(JSON.stringify(o));
 const coil = (g) => g.coil;
 
-/** The Coil can turn here: task mode, the prologue (no tribute outcome yet, or the lost one), not in a fight. */
-export const coilActive = (g) => isNoDice() && !!g.coil && !g.combat && (!g.flags.ending || g.flags.ending === 'lost') && !String(g.scene).startsWith('coil_')
-    && !g.scene.startsWith('fo_') && g.scene !== 'epilogue';
+/**
+ * The Coil can turn here: task mode, not in a fight, not on its own screens, and
+ *   the prologue's Coil: no tribute outcome yet, or the lost one (not the epilogue);
+ *   Act 1's Coil: no Shen Qiu outcome yet, or 'taken' (not the act's end).
+ */
+export const coilActive = (g) => {
+    if (!isNoDice() || !g.coil || g.combat || String(g.scene).startsWith('coil_')) return false;
+    if ((g.coil.act || 0) === 1) return (!g.flags.a1_outcome || g.flags.a1_outcome === 'taken') && g.scene !== 'a1_end';
+    return (!g.flags.ending || g.flags.ending === 'lost') && !g.scene.startsWith('fo_') && g.scene !== 'epilogue';
+};
+export const actOf = (g) => g.coil?.act || 0;
+/** A rewind would unwind Foundation (collaterals sealed). */
+export const willUnwind = (g) => !!g.james.colSealed;
 
 /** End the Coil: why = 'collapse' | 'tribute' | 'choice'; back = the scene "Not yet" returns to. */
 export function endCoil(g, why, back = null) {
@@ -84,6 +96,12 @@ export function rewind(g, { same = false } = {}) {
     base.v = SAVE_VERSION;
     base.james = { ...clone(g.james), hp: null, qi: null, satiety: base.james.satiety, injuries: [] };
     base.yuki = { ...clone(g.yuki), hp: null, qi: null };
+    let unwound = false;
+    if (base.james.colSealed) { // the price of sealed collaterals: the breakthrough itself comes undone
+        base.james.realm = 0; base.james.saturation = 0; base.james.colSealed = false;
+        base.yuki.realm = 0; base.yuki.form = 'cat';
+        unwound = true;
+    }
     base.flags = { ...base.flags, ...kept };
     const rel = clone(base.rel || {});
     for (const [who, p] of Object.entries(c.peak)) {
@@ -106,6 +124,7 @@ export function rewind(g, { same = false } = {}) {
     Object.assign(g, base);
     ensureBars(g);
     g.coil.start = coilStart(g);
-    g.log.push({ at: g.minutes, scene: g.scene, lines: [`Coil ${n} begins.`] });
+    g.log.push({ at: g.minutes, scene: g.scene, lines: [`${(g.coil.act || 0) === 1 ? 'Act 1, ' : ''}Coil ${n} begins.${unwound ? ' Foundation unwound: Mortal Vessel again, the collaterals open to you.' : ''}`] });
+    g.coil.unwound = unwound;
     return n;
 }

@@ -1,12 +1,20 @@
 # Bone and Ash — handover (read this first in a new chat)
 
-**Saved:** 2026-11-06 (Europe/Budapest). **Version:** 0.9.5 (`sw.js` VERSION `bone-ash-0.9.5`): every screen as cards in task mode (story choices with bars, every choice takes time, the Meditate card everywhere), on top of the Coil (v0.9.4, prologue) and no dice anywhere in task mode (v0.9.3) and step 3b. Everything behind the "Tasks (preview)" switch. Prologue + Act 1, about 390 scenes. **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
+**Saved:** 2026-11-06 (Europe/Budapest). **Version:** 0.9.6 (`sw.js` VERSION `bone-ash-0.9.6`): meridians closed at the start of a task-mode game and Act 1's Coil (push 2 of 4), on top of every screen as cards in task mode (v0.9.5: (story choices with bars, every choice takes time, the Meditate card everywhere), the Coil (v0.9.4) and no dice anywhere in task mode (v0.9.3) and step 3b. Everything behind the "Tasks (preview)" switch. Prologue + Act 1, about 390 scenes. **Repo:** `hufle-beep/bone-and-ash` (public), branch `main`. Moved here 2026-11-01 from the private `hufle-beep/James-rpg-test` (now retired). **Play:** https://hufle-beep.github.io/bone-and-ash/ (GitHub Pages, from `main`, root).
 Built in the SillyTavern chat as a spin-off. That chat stays for SillyTavern; this game continues in its own chats.
 
 **Rules:** `CLAUDE.md` (short) and `project/working-agreement.md` (full) — the change sequence is a HARD RULE. **Other docs:** `project/roadmap.md` (what's next), `project/design.md` (the approved hybrid design: Selene-style tasks and the Coil), `project/changelog.md`, `project/restore-points.md`. All mirrored to the claude.ai project "ash and bone".
 **Reference repos (the owner's):** `hufle-beep/Long-patience` (Selene: rules, docs, Android wrapper and workflows to copy), `hufle-beep/Shared-ST` (private; Rules Engine C in `st/rules-engine-c/`, presets in `st/rules-engine-c/lib/presets.js`, `docs/STANDING_LATEST.md`).
 
 ## Decided in chat (2026-11-06)
+
+- **Push 2 of 4: meridians closed and Act 1's Coil (proposal 08:05; picks 08:13 "4a, but coil undoes it, everything else as your recommendation", 08:15 "not any realm, gated according to engine rule", 08:16 "a. messing up has real consequences", go 08:17; mid-build stop, picks 08:30 "1a, 2 standard, go"; built in v0.9.6):**
+  - **1b** two sessions a day (any mix); a session = 2 Qi, 2 h, Convergence Use vs DC with no dice. **2a** primaries DC 2.5 → 4.0, collateral groups DC 3 → 4.75; a fail spends the Qi, the time and the session, pays 25% XP and gives +0.5 to the next try (up to +2, gone on a success). **3** 8 collateral groups (9, 9, 8, 8, 8, 8, 8, 8) after primaries 2, 3, 5, 6, 8, 9, 11, 12, classical order Lung → Liver. **5a** task-mode new games only; classic new games and old saves keep 12 / 66.
+  - **4a, version a (owner):** the engine window holds: collaterals open only in Mortal Vessel. Breaking through to Foundation with collaterals closed shows a warning (`col_warn`), then seals them (`james.colSealed`). **The next rewind unwinds the breakthrough:** James and Yuki back to Mortal Vessel (every realm since gone), Saturation 0, Yuki's form cat; the collaterals open again. Meridians already open and the extra meridians stay.
+  - **Mid-build stop:** (1a) a dead end at `rt_truth` (only choice needs 12 Qi; Meditate there could drain it; possible since v0.9.5): `rt_truth` joins the no-Meditate list. (2) Session XP **standard**, not challenging: challenging made the Coil 1 tribute 44% won; standard 25% (old v0.9.5: 13%), none 15%.
+  - **Numbers measured (bots, before):** closed bars at realm 0: James Qi Max 25.5 (open 40.5; +1.25 per primary), regen 5.0% (11.6%; +0.1 per collateral), Yuki Qi 20.5 (32.5); a sit gives +19.6% Saturation at 25.5 Max (+12.3% at 40.5).
+  - **Act 1's Coil (6):** as proposed; see the v0.9.6 section.
+  - **Bots after v0.9.6** (closed start, bots use Meditate now and then): tribute won Coil 1 24% / Coil 2 62% / Coil 3 66% (lost 62 / 6 / 1%); primaries at the tribute about 7 / 11 / 12; 26 Act 1 rewinds at Shen Qiu.
 
 - **Cards everywhere, before the balance (owner 07:42; picks 07:50 "1b, 2a, 3a, 4ok, 5a, 6 …, yes, 7a, 8a, 9 ok, 10a"; go 07:52; built in v0.9.5 as push 1 of 4):**
   - **Four pushes:** 1 cards everywhere (whole game), time on every choice, the Meditate card — **DONE in v0.9.5**; 2 meridians closed at the start + Act 1's Coil; 3 severe difficulty (replaces 3c-2); 4 = 3c-3 (Tasks on by default, speed gate).
@@ -75,7 +83,7 @@ A standalone, offline text RPG for Gábor's Android phone: a **web app (PWA)** f
 - Arrives with nothing on an unknown world. He keeps:
   - the **omnitool**, whose hammerspace is the infinite inventory (empty at the start);
   - the **pillars**: Ouroboros Axiom (DR 1) and Parallel Cognition (9 threads).
-- **Mortal Vessel, all 12 primaries and 66 collaterals open.** Everything starts at **T1 L1**: GU and Convergence Use.
+- **Mortal Vessel, all 12 primaries and 66 collaterals open.** Everything starts at **T1 L1**: GU and Convergence Use. *(Changed 2026-11-06 for task mode, v0.9.6: a task-mode new game starts with 0 / 12 and 0 / 66 — the crossing ashed his channels shut — and opens them in about 20 sessions. Classic keeps the original spec.)*
 - **Convergence (Qi + Bonesinger)** works as in the game, with **ranged use**: thrown bone darts and needles, plus a **wraithbone blade**.
 
 **Yuki**
@@ -125,6 +133,7 @@ In `CLAUDE.md` and `project/working-agreement.md` (adopted 2026-11-05). The chan
 | `js/core/tasks.js`, `js/story/task_hubs.js` | Task cards and the queue (v0.9.0): which hubs, card ids, `runTask`, dry runs, the outlook. |
 | `js/story/nodice_tune.js` | No-dice fight tuning per encounter (v0.9.3). |
 | `js/core/meditate.js` | The Meditate card (v0.9.5): which screens, its cards (sit, meridian, breakthrough), `runMed`. |
+| `js/story/meridians.js` | Every meridian screen: the primaries and collateral groups (v0.9.6), the Extraordinary net (v0.8.0), `col_warn` / `ns_warn`, `btTarget`, the James-tab row. |
 | `js/core/coil.js`, `js/story/coil_scenes.js` | The Coil (v0.9.4): end, rewind (reset B), the head start, "same days again", the Coil screen and the first dawn again. |
 | `tests/tasks.test.mjs` | Task mode: 2,000 bot games each way, outlook = reality, collapse, migration, no dice on work cards, familiarity grows, every offered card played, Yuki's lane, no die anywhere in task mode, classic still rolls. |
 | `tests/rules.test.mjs` | The engine numbers. 14 checks. |
@@ -294,6 +303,17 @@ The bible and the contract between the four part files are at the top of `js/sto
 - Last night of Act 1 (`rt_evening`) offers every arrangement the hearts allow: Mei Lin · Ya · Yuki alone; Mei Lin + Ya (`rt_trio`); Yuki + Mei Lin (`yk_night_mei`); Yuki + Ya (`yk_night_ya`); all four (`yk_night_all`). `g.flags.final_night` records it; `loveLine()` writes the Act 1 epilogue line (a1_end).
 - Romance with Yuki only in her human form (adult); fade to black. The code still says she bonded with James when he was six (34 years); **decided 2026-11-05: born together and bonded from birth** (fix pending, roadmap step 7).
 - Tests: 240 extra walks over the last night; combat round cap in the random runs raised to 400 (a rare long stalemate vs the Guardian at True Core).
+
+## v0.9.6 — meridians closed at the start, Act 1's Coil (task mode)
+
+- **Closed start** (`newGame(seed, { closed })`; `main.js` passes `closed: taskMode`): James and Yuki 0 / 12 primaries, 0 / 66 collaterals. Classic new games and every old save: 12 / 66 (no migration needed for this). The Long Forest button sets 12 / 66.
+- **Sessions** (`js/story/meridians.js`, on the `meridians` screen via Meditate → Open a meridian): `PRIMARIES` (12, Lung → Liver, a line each), `COL_GROUPS` (8: size, `need` primaries). Each: 2 Qi, `SESSION_MINUTES` 120, Convergence Use, standard XP, `SESSIONS_PER_DAY` 2 (flag `mer_s@<day>`). DCs: `dcPrimary` 2.5 + 1.5·k/11 (2.5 … 4.0), `dcColGroup` 3 + 0.25·k (3 … 4.75). Fail: `failDo` uses the session and adds 0.5 to `g.tasks.adapt['mer:pri' | 'mer:col']` (up to 2, cleared on success; shown as the check's bonus). Yuki's counts copy James's after each opening. Engine window: both only at realm 0. `colGroupsOpen` rounds down for counts off a group boundary.
+- **Foundation gate** (`game.js`): `breakBlock` ("needs all 12 primaries (n/12)"), `breakReady`, `canBreakThrough = breakReady && !breakBlock`. The Meditate card shows a locked Break through with the reason. `btTarget` (meridians.js): realm 0 with collaterals < 66 → `col_warn`; realm 6 with Extraordinary < 8 → `ns_warn`; else `breakthrough`. `breakthrough()` sets `james.colSealed` when leaving realm 0 with collaterals < 66.
+- **The unwind** (`rewind` in coil.js): if `colSealed`, James and Yuki go to realm 0, Saturation 0, Yuki's form cat, `colSealed` false; `g.coil.unwound` makes `coil_dawn` say so. The Coil screen and the James tab warn before the bite ("Foundation unwinds").
+- **Texts:** `yuki_check` has a closed version (grey meridians under ash; the crossing burned out the frames; sessions, plural); Old Wen and Lu Han describe Yuki's meridians by count (`yukiMerElder`, `yukiMerLu`); the meridian screen describes the closed net, the daily limit, the window and the seal; James tab row via `meridianRow`.
+- **No Meditate on `rt_truth`** (its only choice needs 12 Qi).
+- **Act 1's Coil** (state 5, `g.coil.act`): `startActCoil(g, 1)` runs after `fo_start`'s enter on the first arrival: a new Coil (n 1) whose snapshot is Day 8 06:00 with the prologue's outcome; the prologue's count goes to `g.stats.coils0`; what James remembers carries over. `coilActive` for act 1: no `a1_outcome` yet or `taken`, not `a1_end`. Ends: "Bite the tail" on `rt_taken` (why `shen`; "Accept it. Walk." → `a1_end`), the James tab, a collapse during tasks. `coil_dawn` has a Day 8 Ashfall text (`ashfall_dawn`). `REMEMBER` adds `ship_found`, `log_heard` (shown, reset with the world). Migration 4 → 5: `inAct1(g)` (an ending, not the epilogue, at or after Day 8 06:00) → an Act 1 Coil from the save as loaded; otherwise `act` 0.
+- **Tests:** tasks test — closed and open starts, bars, groups, a session (2 Qi, 2 h, Yuki mirrors), the daily limit, a fail with +0.5, the Foundation gate and its card, the warning, the seal, the unwind on rewind (and no unwind without a seal), the Long Forest, the scan text, Act 1's Coil (start, bite at `rt_taken`, the screen, Day 8 again, head start, accept), migration 4 → 5, classic shows no Coil at Shen Qiu; bots start closed, use the Meditate card (meridians, breakthroughs) and 1 run in 10 rewinds Act 1 once. Story test walks `col_warn` and the Act 1 Coil scenes.
 
 ## v0.9.5 — every screen as cards (task mode)
 

@@ -21,7 +21,7 @@ import { BLACKROOT, BREAK_HUBS as B2 } from './act1_blackroot.js';
 import { HEART, BREAK_HUBS as B3 } from './act1_heart.js';
 import { RETURN, BREAK_HUBS as B4 } from './act1_return.js';
 import { LONGFOREST, BREAK_HUBS as B0 } from './longforest.js';
-import { MERIDIANS, canAnyMeridian } from './meridians.js';
+import { MERIDIANS, canAnyMeridian, btTarget } from './meridians.js';
 import { installYukiPath } from './yuki_path.js';
 import { installCoil } from './coil_scenes.js';
 
@@ -101,6 +101,10 @@ export const ITEMS = {
 };
 Object.assign(itemNames, ITEMS);
 
+/** What locals sense of Yuki's meridians (v0.9.6: they may still be closed). */
+const yukiMerElder = (g) => { const n = g.yuki.primaries ?? 12; return n >= 12 ? 'And the beast on your shoulder has twelve meridians open. In ninety years I have seen that only in the heirs of great sects.' : n > 0 ? `And the beast on your shoulder has ${n === 1 ? 'a meridian' : `${n} meridians`} open, and is opening more, at its size, without a single pill. In ninety years I have seen that only in the heirs of great sects.` : 'And the beast on your shoulder holds Qi with every meridian shut, which is not possible, and which it is doing anyway.'; };
+const yukiMerLu = (g) => { const n = g.yuki.primaries ?? 12; return n >= 12 ? 'And yet the beast on your shoulder has its meridians open like a sect heir\'s.' : n > 0 ? `And yet the beast on your shoulder has ${n === 1 ? 'a meridian' : `${n} meridians`} open, and no pill-smell either. Like a sect heir's.` : 'And yet the beast on your shoulder holds Qi with its meridians shut, like a sealed jar that is somehow full.'; };
+
 export const SCENES = {
     /* ================= DAY 1 ================= */
     arrival: {
@@ -123,7 +127,10 @@ Your omnitool hums awake under the skin of your forearm, organic and warm and bl
     yuki_check: {
         id: 'yuki_check', title: 'Root-kin', art: 'yuki_close', place: 'Unknown forest',
         enter: (g) => { bumpRel(g, 'Yuki', 2, 1); advance(g, 5); return ['Yuki: bond steady.']; },
-        text: `She lets you do it, which is how you know she was scared. Twelve primaries open, sixty-six collaterals, the same as yours — you were born on the same day, in the same grove, and her meridians have always mirrored yours like a reflection in still water. Mortal Vessel, both of you. Young, by your people's standards. Practically larval.
+        text: (g) => `She lets you do it, which is how you know she was scared. ${(g.yuki.primaries ?? 12) >= 12 && (g.yuki.collaterals ?? 66) >= 66
+        ? 'Twelve primaries open, sixty-six collaterals, the same as yours — you were born on the same day, in the same grove, and her meridians have always mirrored yours like a reflection in still water.'
+        : `Her meridians are grey. ${g.yuki.primaries ? `${g.yuki.primaries} of twelve primaries lit, ${g.yuki.collaterals} of sixty-six collaterals` : 'All twelve primaries, all sixty-six collaterals'}${g.yuki.primaries ? ', the rest' : ','} shut under a crust of ash, the same as yours. The crossing did that: this world's Qi came in through every open door and burned out the frames. You were born on the same day, in the same grove, and her meridians have always mirrored yours like a reflection in still water. Even this. Especially this. The Axiom is already chewing at the ash. It will take sessions, plural.`}
+Mortal Vessel, both of you. Young, by your people's standards. Practically larval.
 
 Through the bond she sends you a feeling that translates roughly as: *the air tastes wrong and you smell like burnt lab.*
 
@@ -562,7 +569,7 @@ ${g.flags.long ? 'The tribute is due in three days, at dawn. You can feel the wh
         id: 'elder', title: 'Old Wen', art: 'elder', place: 'Ashfall Hamlet — the elder\'s house',
         text: (g) => `Old Wen is ninety, blind in one eye, and pours tea with the steadiness of a man who has outlived three sect masters and plans to outlive a fourth.
 
-"You don't eat pills," he says, before you've finished sitting down. "You don't smell of grass. And when I reach for you with what little sense ninety years have left me, I find nothing. No root. No sea of Qi. As if there were no one sitting in that chair." He frowns at the chair. "Yet Mei Lin says you made a needle out of air. One of those things is untrue, and I am too old to think it is her. And the beast on your shoulder has twelve meridians open. In ninety years I have seen that only in the heirs of great sects." He sips. "I would know what you are before the Crimson Lotus does. They will want to cut you open to learn it."
+"You don't eat pills," he says, before you've finished sitting down. "You don't smell of grass. And when I reach for you with what little sense ninety years have left me, I find nothing. No root. No sea of Qi. As if there were no one sitting in that chair." He frowns at the chair. "Yet Mei Lin says you made a needle out of air. One of those things is untrue, and I am too old to think it is her. ${yukiMerElder(g)}" He sips. "I would know what you are before the Crimson Lotus does. They will want to cut you open to learn it."
 
 "That seems to be the consensus."
 
@@ -687,7 +694,7 @@ The village is lined up at the tribute post with its baskets of grass and grain.
 
 Lu Han's gaze passes over the baskets, over the people, and stops on you. On Yuki. It stays there.
 
-"Interesting," he says. He reaches for you with his Qi-sense — you feel it pass over you like a draught under a door — and finds nothing. "No root. No pill-smell. No cultivation at all. A mortal." His gaze moves to Yuki, and sharpens. "And yet the beast on your shoulder has its meridians open like a sect heir's. A mortal holding a treasure he cannot possibly understand." He tilts his head. "Kneel, stranger, and come with us. The Sect Master will wish to dissect you personally. It is an honour. Few are offered it."
+"Interesting," he says. He reaches for you with his Qi-sense — you feel it pass over you like a draught under a door — and finds nothing. "No root. No pill-smell. No cultivation at all. A mortal." His gaze moves to Yuki, and sharpens. "${yukiMerLu(g)} A mortal holding a treasure he cannot possibly understand." He tilts his head. "Kneel, stranger, and come with us. The Sect Master will wish to dissect you personally. It is an honour. Few are offered it."
 
 "I've been offered worse," you say. "Not recently."`,
         choices: [
@@ -806,7 +813,8 @@ export function longForestInstant(g) {
     Object.assign(g.flags, { lf_active: true, longforest: true, lf_instant: true, yuki_tiger_seen: true, yuki_human_seen: true });
     g.james.realm = 7; g.yuki.realm = 7; g.james.saturation = 0;
     g.james.gu = top(); g.james.skills['Convergence Use'] = top(); g.yuki.fight = top(); g.yuki.qiUse = top();
-    Object.assign(g.james, { extra8: 8, extraCollaterals: 28, junctions: 10 });
+    Object.assign(g.james, { primaries: 12, collaterals: 66, colSealed: false, extra8: 8, extraCollaterals: 28, junctions: 10 });
+    Object.assign(g.yuki, { primaries: 12, collaterals: 66 });
     for (const id of LF_STOCK) g.inventory[id] = itemCap(id);
     g.rel.Yuki = { f: 150, a: 150 }; g.flags.yk_back = 'lf_exit';
     g.james.satiety = 100; g.james.hp = null; g.james.qi = null; g.yuki.hp = null; g.yuki.qi = null;
@@ -891,7 +899,7 @@ for (const id of ['stream', 'wilds', 'camp', 'night', 'village', 'ashfall', 'sup
         text: (g) => `Break through to ${realmName(g.james.realm + 1)}. (Saturation ${g.james.saturation}%.)`,
         show: (g) => !isNoDice() && canBreakThrough(g), // task mode: on the Meditate card (v0.9.5)
         do: (g) => { g.flags.bt_return = g.scene; return []; },
-        to: (g) => (g.james.realm === 6 && (g.james.extra8 || 0) < 8 ? 'ns_warn' : 'breakthrough'),
+        to: btTarget,
     });
     SCENES[id].choices.push({
         text: 'Open a meridian. (The Extraordinary net.)',

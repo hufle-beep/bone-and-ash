@@ -1,6 +1,6 @@
 # Roadmap: Bone and Ash
 
-Last updated: 2026-11-06 (v0.9.5, cards everywhere). Update in every push.
+Last updated: 2026-11-06 (v0.9.6, meridians closed and Act 1's Coil). Update in every push.
 
 ## Order of work (owner, 2026-11-05)
 The hybrid with Selene (design in `design.md`). Safety comes before the rewrite, because the hybrid changes the save format. Each step is one or more pushes, each with its own options, pick and go. Estimates are working sessions, not calendar days.
@@ -14,8 +14,8 @@ The hybrid with Selene (design in `design.md`). Safety comes before the rewrite,
 7. **Engine extras and lore** (about 2 days): J (Yuki's form ladder by realm), Qi bond flow, injury and Strain, Ouroboros daily knockout beat, dampening on every Qi cost, quests with XP lumps, status block and check labels, the relationship ledger; Yuki's canon look (ears, tail, qipao; the dress as an outfit); Yuki born with James (fix `yuki_path.js`); the Long Forest as a New Game preset.
 
 ## Next up
-- **The owner's four pushes (2026-11-06 07:50):** 1 cards everywhere — **DONE in v0.9.5**; **2 next: meridians closed at the start** (0/12 primaries, 0/66 collaterals; 12 sessions for the primaries, 8 grouped sessions for the collaterals; Foundation needs all 12) **and Act 1's Coil** — Claude confirms the exact contents and numbers, owner says go; 3 severe difficulty with numbers first (replaces 3c-2: dead before Mei Lin ~80 / 40 / 15%, tribute ~30 / 55 / 80% on Coils 1–3); 4 = 3c-3 (Tasks on by default, speed gate with a hidden "test speeds" toggle). Then the serpent push.
-- The owner tries v0.9.5 on the phone (Saves → Tasks: on) and reports what feels wrong.
+- **The owner's four pushes (2026-11-06 07:50):** 1 cards everywhere — **DONE in v0.9.5**; 2 meridians closed at the start and Act 1's Coil — **DONE in v0.9.6**; **3 next: severe difficulty** with numbers first (replaces 3c-2: HP 0 anywhere ends the Coil; dead before Mei Lin ~80 / 40 / 15%, tribute ~30 / 55 / 80% on Coils 1–3; bots after v0.9.6 win the tribute 24 / 62 / 66%); 4 = 3c-3 (Tasks on by default, speed gate with a hidden "test speeds" toggle). Then the serpent push.
+- The owner tries v0.9.6 on the phone (Saves → Tasks: on, then a **new game** to get closed meridians) and reports what feels wrong.
 - Optional small follow-up to step 2: a "Backups" list in the Saves tab (today backups are restorable only from the recovery screen).
 
 ## Waiting on the owner

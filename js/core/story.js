@@ -120,7 +120,7 @@ function go(g, scenes, to) {
 
 /* ---------- every choice takes time (task mode, v0.9.5) ---------- */
 /** Scenes whose choices among themselves take no extra time: task hubs and their menus (their cards carry their own time), meta screens. */
-const TIMELESS = new Set(['coil_end', 'coil_dawn', 'meridians', 'ns_warn', 'yuki_form']);
+const TIMELESS = new Set(['coil_end', 'coil_dawn', 'meridians', 'ns_warn', 'col_warn', 'yuki_form']);
 const TIMELESS_PAIR = new Set(); // hub ↔ its menus
 export function setTimeless(hubs) { for (const [hub, menus] of Object.entries(hubs)) { TIMELESS_PAIR.add(hub); for (const m of menus) TIMELESS_PAIR.add(m); } }
 export const DEFAULT_MINUTES = { talk: 10, move: 20, act: 30 };

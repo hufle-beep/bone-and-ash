@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.9.5 | (this push) | Cards everywhere in task mode. Same save state as 0.9.4. |
+| 0.9.6 | (this push) | Meridians closed at the start (task mode), Act 1's Coil. Save state 5; 0.9.5 and older report a state-5 save as "newer version" on the recovery screen (nothing is wiped). Download the save before rolling back. |
+| 0.9.5 | `f402b63` | Cards everywhere in task mode. Same save state as 0.9.4. |
 | 0.9.4 | `1b3e832` | The Coil (3c-1). Save state 4; 0.9.3 and older report a state-4 save as "newer version" on the recovery screen (nothing is wiped). Download the save before rolling back. |
 | 0.9.3 | `4dec016` | No dice in task mode, fights retuned. Same save state as 0.9.2. |
 | 0.9.2 | `00f4836` | Step 3b on the task cards. Save state 3; 0.9.1 and older report a state-3 save as "newer version" on the recovery screen (nothing is wiped). |

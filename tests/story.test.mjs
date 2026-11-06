@@ -105,6 +105,16 @@ for (let run = 0; run < 40; run++) {
     choose(g, SCENES, SCENES.collectors_lost.choices.findIndex((c) => c.to === 'coil_end')); // half the runs bite the tail
     walkFrom(g, 'coil_end', new Set(['stream', 'fo_start']), 400);
 }
+// v0.9.6: the warning before a sealing Foundation, and Act 1's Coil at Shen Qiu
+for (let run = 0; run < 40; run++) {
+    const g = ensureBars(newGame(run + 44444, { closed: true })); g.james.primaries = 12; g.james.collaterals = 9 * (run % 3); g.james.saturation = 96; g.flags.bt_return = 'stream';
+    walkFrom(g, 'col_warn', new Set(['stream']), 400);
+    const a = ensureBars(newGame(run + 45454)); a.scene = 'epilogue'; a.flags.ending = 'bluff'; a.minutes = 6 * 1440 + 900;
+    choose(a, SCENES, 0); seen.add('fo_start');
+    a.scene = 'rt_taken'; SCENES.rt_taken.enter(a); seen.add('rt_taken');
+    choose(a, SCENES, SCENES.rt_taken.choices.findIndex((c) => c.to === 'coil_end'));
+    walkFrom(a, 'coil_end', new Set(['fo_start']), 400);
+}
 setNoDice(false);
 const unreached = Object.keys(SCENES).filter((k) => !seen.has(k));
 assert(unreached.length === 0, `every scene reachable (unreached: ${unreached.join(', ')})`);

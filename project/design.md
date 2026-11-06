@@ -26,7 +26,7 @@ One Coil per act. James never dies (engine canon: at HP 0 the main character is 
 | | Kept | Reset to the act's first dawn |
 |---|---|---|
 | Familiarity, Insights, Coil marks, threads | ✓ | |
-| Realm, skills, meridians, Saturation | ✓ | |
+| Realm, skills, meridians, Saturation | ✓ (v0.9.6: collaterals sealed at Foundation → the rewind unwinds Foundation: Mortal Vessel, Saturation 0) | |
 | Yuki (bond, forms, path, relationship) | ✓ | |
 | Knowledge flags (what James has learned) | ✓ | |
 | Hammerspace items | | ✓ |

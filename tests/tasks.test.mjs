@@ -3,7 +3,8 @@
 // 2,000 bot games in task mode reach the end with no dead end; the tribute outcomes are printed next to classic play.
 import { SCENES } from '../js/story/prologue.js';
 import { TASK_HUBS } from '../js/story/task_hubs.js';
-import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, setNoDice } from '../js/core/game.js';
+import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, setNoDice, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1 } from '../js/core/game.js';
+import { canPrimary, canColGroup, colGroupsOpen, sessionsToday, dcPrimary, dcColGroup, btTarget, canAnyMeridian, COL_GROUPS } from '../js/story/meridians.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
 import { medCards, runMed, canMeditate, NO_MEDITATE, isSitChoice } from '../js/core/meditate.js';
 import { defaultMinutes, DEFAULT_MINUTES } from '../js/core/story.js';
@@ -82,6 +83,94 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     assert(SCENES.rt_elder ? true : true, 'rt_elder exists');
     setNoDice(false);
 }
+
+// v0.9.6: meridians closed at the start (task mode), sessions, the Foundation gate, the seal and its unwinding
+{
+    setNoDice(true);
+    const open = ensureBars(newGame(40)), g = ensureBars(newGame(40, { closed: true }));
+    assert(open.james.primaries === 12 && open.james.collaterals === 66 && open.yuki.primaries === 12, 'classic new game: 12 / 66 open');
+    assert(g.james.primaries === 0 && g.james.collaterals === 0 && g.yuki.primaries === 0 && g.yuki.collaterals === 0, 'closed new game: 0 / 0, Yuki too');
+    assert(jamesQiMax(g) === 25.5 && yukiQiMax(g) === 20.5 && qiRegenPct(g, 0) === 5 && jamesQiMax(open) === 40.5, `closed bars: Qi 25.5, Yuki 20.5, regen 5% (${jamesQiMax(g)}, ${yukiQiMax(g)})`);
+    assert(COL_GROUPS.reduce((a, x) => a + x.size, 0) === 66 && COL_GROUPS.length === 8, '8 collateral groups, 66 threads');
+    assert(dcPrimary(g) === 2.5 && !canColGroup(g) && canPrimary(g), 'first primary DC 2.5; no group before 2 primaries');
+    g.scene = 'stream'; g.james.qi = 20; g.james.skills['Convergence Use'].level = 3; // check 1.5: the sessions below pass
+    assert(medCards(g, SCENES).some((c) => c.id === 'med:mer'), 'Meditate offers the meridian screen in Mortal Vessel');
+    runMed(g, SCENES, 'med:mer');
+    const m0 = g.minutes, q0 = g.james.qi;
+    choose(g, SCENES, 0);
+    assert(g.james.primaries === 1 && g.yuki.primaries === 1 && sessionsToday(g) === 1 && g.minutes - m0 === 120 && q0 - g.james.qi <= 2, `a session: 2 Qi, 2 h, one primary, Yuki mirrors (${g.james.primaries}, ${g.minutes - m0} min)`);
+    choose(g, SCENES, 0);
+    assert(g.james.primaries === 2 && sessionsToday(g) === 2 && !canPrimary(g) && !canColGroup(g) && !canAnyMeridian(g), 'two sessions a day, then nothing');
+    g.minutes += 1440; // next day: the first group opens after 2 primaries
+    assert(canColGroup(g) && dcColGroup(g) === 3, 'group 1 after primaries 1–2, DC 3');
+    choose(g, SCENES, SCENES.meridians.choices.findIndex((c) => c.show === canColGroup));
+    assert(g.james.collaterals === 9 && g.yuki.collaterals === 9 && colGroupsOpen(g) === 1, 'group 1: 9 collaterals, Yuki mirrors');
+    assert(!canColGroup(g), 'group 2 waits for primary 3');
+    // a fail: Qi and time spent, the session used, +0.5 on the next try
+    const f = ensureBars(newGame(41, { closed: true })); f.james.primaries = 11; f.scene = 'meridians'; f.james.qi = 20;
+    assert(dcPrimary(f) === 4, 'the last primary is DC 4');
+    choose(f, SCENES, 0);
+    assert(f.james.primaries === 11 && sessionsToday(f) === 1 && f.tasks.adapt['mer:pri'] === 0.5, 'a fail: nothing opens, session used, +0.5 next try');
+    // Foundation needs all 12 primaries; collaterals still closed seal; a rewind unwinds Foundation
+    const b = ensureBars(newGame(42, { closed: true })); b.scene = 'stream'; b.james.saturation = 96; b.james.primaries = 11;
+    assert(!canBreakThrough(b) && medCards(b, SCENES).some((c) => c.id === 'med:bt' && !c.open && /12 primaries/.test(c.reason)), 'Foundation: locked at 11 primaries, the card says why');
+    b.james.primaries = 12; b.james.collaterals = 18;
+    assert(canBreakThrough(b) && btTarget(b) === 'col_warn', 'with all 12: the warning before sealing');
+    runMed(b, SCENES, 'med:bt');
+    assert(b.scene === 'col_warn', 'Meditate → Break through → the warning');
+    choose(b, SCENES, SCENES.col_warn.choices.findIndex((c) => c.to === 'breakthrough'));
+    assert(b.james.realm === 1 && b.james.colSealed && !canColGroup(b), 'sealed at Foundation: no collaterals any more');
+    b.james.saturation = 40; b.inventory.hare_raw = 3;
+    endCoil(b, 'choice', 'stream'); rewind(b);
+    assert(b.james.realm === 0 && b.james.saturation === 0 && !b.james.colSealed && b.yuki.realm === 0 && b.james.collaterals === 18 && b.james.primaries === 12 && !b.inventory.hare_raw, 'the rewind unwinds Foundation: Mortal Vessel, Saturation 0, meridians kept');
+    assert(canColGroup(b), 'after the unwind the collaterals open again');
+    const k = ensureBars(newGame(43, { closed: true })); k.james.primaries = 12; k.james.collaterals = 66; k.james.saturation = 96; k.flags.bt_return = 'stream';
+    assert(btTarget(k) === 'breakthrough', 'everything open: no warning');
+    breakthrough(k); endCoil(k, 'choice', 'stream'); rewind(k);
+    assert(k.james.realm === 1, 'no seal: the realm is kept on a rewind');
+    // old saves keep what they have; the Long Forest opens everything
+    const lf = ensureBars(newGame(44, { closed: true })); lf.scene = 'clearing';
+    choose(lf, SCENES, SCENES.clearing.choices.findIndex((c) => /Stay lost/.test(String(c.text))));
+    assert(lf.james.primaries === 12 && lf.james.collaterals === 66 && lf.yuki.collaterals === 66, 'the Long Forest opens all 12 / 66');
+    // the closed Day 1 scan text
+    assert(/ash/.test(SCENES.yuki_check.text(ensureBars(newGame(45, { closed: true })))) && /Twelve primaries open/.test(SCENES.yuki_check.text(open)), 'Day 1 scan text follows the meridians');
+    setNoDice(false);
+}
+// v0.9.6: Act 1's Coil — Day 8 dawn, ends at Shen Qiu (rt_taken), accept or rewind; state 4 → 5
+{
+    setNoDice(true);
+    const g = ensureBars(newGame(50)); g.scene = 'epilogue'; g.flags.ending = 'bluff'; g.minutes = 6 * 1440 + 15 * 60; g.coil.n = 3;
+    choose(g, SCENES, 0);
+    assert(g.scene === 'fo_start' && g.coil.act === 1 && g.coil.n === 1 && g.coil.snap.scene === 'fo_start' && g.coil.snap.minutes === 7 * 1440 + 360 && g.stats.coils0 === 3, 'Act 1 begins: a new Coil at Day 8 dawn, the prologue count kept');
+    assert(coilActive(g), 'the Coil turns in Act 1');
+    const inv0 = JSON.stringify(g.coil.snap.inventory);
+    g.inventory.beast_core = 7; g.flags.log_heard = true; g.minutes += 12 * 1440; g.rel['Mei Lin'] = { f: 80, a: 80 };
+    const { bumpRel } = await import('../js/core/game.js'); bumpRel(g, 'Mei Lin', 0, 0);
+    goTo(g, SCENES, 'rt_taken');
+    const bite = sceneView(g, SCENES).choices.find((c) => /Bite the tail/.test(c.label));
+    assert(!!bite, 'rt_taken offers Bite the tail');
+    choose(g, SCENES, bite.index);
+    const v = sceneView(g, SCENES);
+    assert(g.scene === 'coil_end' && g.coil.why === 'shen' && v.choices.some((c) => /Accept it. Walk/.test(c.label)) && /Act 1/.test(v.title), 'the Coil screen after Shen Qiu: accept or rewind');
+    assert(/Wren Aldous/.test(v.text), 'James remembers the log');
+    choose(g, SCENES, v.choices.find((c) => /^Bite the tail. Wake/.test(c.label)).index);
+    assert(g.scene === 'coil_dawn' && /Ashfall/.test(sceneView(g, SCENES).text), 'Day 8 dawn again');
+    choose(g, SCENES, 0);
+    assert(g.scene === 'fo_start' && g.coil.act === 1 && g.coil.n === 2 && g.minutes === 7 * 1440 + 360 && JSON.stringify(g.inventory) === inv0 && !g.flags.log_heard && !g.flags.a1_outcome, 'rewound to Day 8: Coil 2, the world as it was');
+    assert(g.rel['Mei Lin'].a >= 20, `25% head start in Act 1 (${g.rel['Mei Lin'].a})`);
+    const a = ensureBars(newGame(51)); a.scene = 'epilogue'; a.flags.ending = 'lost'; a.minutes = 6 * 1440 + 15 * 60; choose(a, SCENES, 0);
+    goTo(a, SCENES, 'rt_taken'); choose(a, SCENES, sceneView(a, SCENES).choices.find((c) => /Bite/.test(c.label)).index);
+    choose(a, SCENES, sceneView(a, SCENES).choices.find((c) => /Accept it. Walk/.test(c.label)).index);
+    assert(a.scene === 'a1_end' && a.flags.a1_outcome === 'taken' && !coilActive(a), 'accept: on to the end of Act 1');
+    // state 4 → 5: prologue saves get act 0; a save mid-Act 1 gets an Act 1 Coil that rewinds to where it was loaded
+    const p4 = ensureBars(newGame(52)); p4.v = 4; delete p4.coil.act; migrate(p4);
+    assert(p4.v === SAVE_VERSION && p4.coil.act === 0, 'state 4 in the prologue: act 0');
+    const s4 = ensureBars(newGame(53)); s4.flags.ending = 'paid'; s4.scene = 'fo_ashfall'; s4.minutes = 8 * 1440 + 600; s4.v = 4; delete s4.coil.act; migrate(s4);
+    assert(inAct1(s4) && s4.coil.act === 1 && s4.coil.n === 1 && s4.coil.snap.scene === 'fo_ashfall' && s4.coil.wake === 'fo_ashfall', 'state 4 mid-Act 1: an Act 1 Coil from the save as loaded');
+    setNoDice(false);
+    const c = ensureBars(newGame(54)); c.flags.ending = 'bluff'; c.scene = 'epilogue'; c.minutes = 6 * 1440 + 15 * 60; choose(c, SCENES, 0); goTo(c, SCENES, 'rt_taken');
+    assert(!sceneView(c, SCENES).choices.some((x) => /Bite/.test(x.label)), 'classic: no Coil at Shen Qiu');
+}
 // the Coil: rewind keeps James, Yuki, familiarity and knowledge; resets the world; 25% head start
 {
     setNoDice(true);
@@ -154,6 +243,7 @@ function fight(g, run) {
 }
 
 const byCoil = {};
+const medStats = { bt: 0, mer: 0, warn: 0, a1bites: 0, a1coils: {} };
 const TRIBUTE_OUT = { bluff_win: 'won', collectors_won: 'won', tribute_paid: 'paid', collectors_lost: 'lost' };
 const stats = { tasks: { endings: {}, collapses: 0, cards: 0, skipped: 0, games: 0 }, classic: { endings: {}, games: 0 } };
 const cardsSeen = new Set();
@@ -163,13 +253,20 @@ let yukiRuns = 0;
 let predicted = 0;
 function play(run, tasks) {
     setNoDice(tasks); // task mode has no dice anywhere (v0.9.3)
-    const g = ensureBars(newGame(run + 1));
+    const g = ensureBars(newGame(run + 1, { closed: tasks })); // task mode: meridians closed at the start (v0.9.6)
     const st = tasks ? stats.tasks : stats.classic;
     let steps = 0;
     const seenOut = new Set();
     for (; steps < 18000; steps++) {
         const out = tasks && TRIBUTE_OUT[g.scene];
-        if (out && !seenOut.has(g.coil.n)) { seenOut.add(g.coil.n); const b = byCoil[g.coil.n] || (byCoil[g.coil.n] = { won: 0, paid: 0, lost: 0 }); b[out]++; }
+        if (out && !seenOut.has(g.coil.n)) { seenOut.add(g.coil.n); const b = byCoil[g.coil.n] || (byCoil[g.coil.n] = { won: 0, paid: 0, lost: 0, realm: 0, pri: 0 }); b[out]++; b.realm += g.james.realm; b.pri += g.james.primaries; }
+        if (tasks && g.scene === 'a1_end') { medStats.a1coils[g.coil.n] = (medStats.a1coils[g.coil.n] || 0) + 1; }
+        // the Meditate card now and then (v0.9.6): open meridians, break through
+        if (tasks && canMeditate(g, SCENES) && rnd(6) === 0) {
+            const mc = medCards(g, SCENES);
+            if (mc.some((c) => c.id === 'med:bt' && c.open) && rnd(2) === 0) { runMed(g, SCENES, 'med:bt'); medStats.bt++; continue; }
+            if (mc.some((c) => c.id === 'med:mer')) { runMed(g, SCENES, 'med:mer'); medStats.mer++; continue; }
+        }
         const v = sceneView(g, SCENES);
         if (v.end) { const e = g.flags.ending || 'none'; st.endings[e] = (st.endings[e] || 0) + 1; st.games++; return true; }
         if (tasks && isTaskHub(g)) {
@@ -218,6 +315,9 @@ function play(run, tasks) {
         if (!open.length) { assert(false, `dead end at ${g.scene} (run ${run})`); return false; }
         if (tasks && g.scene === 'collectors_lost') open = open.filter((c) => (g.coil.n < 3) === /Bite the tail/.test(c.label)); // bots try three Coils
         if (tasks && g.scene === 'coil_end' && g.coil.why === 'tribute') open = open.filter((c) => /^Bite/.test(c.label));
+        if (tasks && g.scene === 'rt_taken') open = open.filter((c) => (run % 10 === 0 && g.coil.act === 1 && g.coil.n < 2) === /Bite the tail/.test(c.label)); // 1 run in 10 rewinds Act 1 once
+        if (tasks && g.scene === 'coil_end' && g.coil.why === 'shen') { open = open.filter((c) => /^Bite the tail. Wake/.test(c.label)); medStats.a1bites++; }
+        if (tasks && g.scene === 'col_warn') medStats.warn++;
         const r = choose(g, SCENES, open[rnd(open.length)].index);
         if (r.combat) { startCombat(g, r.combat(g)); fight(g, run); }
         assert(!g.combat, `combat ends (${g.scene})`);
@@ -273,6 +373,9 @@ console.log(`  tribute, tasks:   ${pctOf(stats.tasks.endings, stats.tasks.games)
 console.log(`  tribute, classic: ${pctOf(stats.classic.endings, stats.classic.games)}`);
 console.log(`  work-card results: ${Object.entries(bands).map(([k, v]) => `${k} ${v}`).join(', ')} · Yuki brought home ${yukiRuns} times`);
 console.log(`  tribute per Coil (tasks, bots rewind a lost tribute up to Coil 3): ${Object.entries(byCoil).map(([n, b]) => { const t = b.won + b.paid + b.lost; return `Coil ${n}: won ${((b.won / t) * 100).toFixed(1)}% paid ${((b.paid / t) * 100).toFixed(1)}% lost ${((b.lost / t) * 100).toFixed(1)}% (${t})`; }).join(' · ')}`);
+console.log(`  realm / primaries at the tribute (tasks): ${Object.entries(byCoil).map(([n, b]) => { const t = b.won + b.paid + b.lost; return `Coil ${n}: realm ${(b.realm / t).toFixed(2)}, primaries ${(b.pri / t).toFixed(1)}`; }).join(' · ')}`);
+console.log(`  Meditate: ${medStats.mer} meridian screens, ${medStats.bt} breakthroughs, ${medStats.warn} seal warnings; Act 1: ${medStats.a1bites} rewinds at Shen Qiu, ends on ${JSON.stringify(medStats.a1coils)}`);
+assert(medStats.a1bites >= 10 && medStats.a1coils[2] >= 10, `bots rewind Act 1 and reach its end (${medStats.a1bites})`);
 console.log(`  ${stats.tasks.cards} cards run, ${stats.tasks.skipped} skipped, ${stats.tasks.collapses} collapses (HP 0), ${predicted} queues predicted, ${cardsSeen.size}/${all.size} cards played`);
 console.log(`${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
