@@ -11,6 +11,9 @@ Serves the folder, opens the game at 390x844 in headless Chromium and taps the r
 Game screens (story, fights, journal) also fail on any check text: DC, a die, "+ d6" (checks are hidden since v0.11.10).
 Fails on any page error, or when the screen shows undefined, NaN, [object Object] or an old mode name.
 The taps are seeded, so a run repeats. Exit code 1 on any failure.
+v0.11.21: fixed sleeps replaced by condition waits (each step waits for what the next line checks, with a timeout; a check still
+reports its own message when the wait runs out). Taps on story cards, choices and fight actions wait out the game's 400 ms
+double-tap guard, so no tap is swallowed and a run no longer depends on how busy the machine is.
 """
 import json, random, re, socket, subprocess, sys, time
 from pathlib import Path
@@ -29,27 +32,55 @@ def check_text(pg, where, strict=False):
     m = BAD.search(t) or (CHECKS.search(t) if strict else None)
     if m: fails.append(f"{where}: the screen shows '{m.group(0)}' … {t[max(0, m.start() - 60):m.end() + 40]!r}")
 
+def until(pg, what, ms=5000, state=None, arg=None):
+    """v0.11.21: wait for a selector (state: visible, hidden, attached, detached) or, for a JS expression or function,
+    until it is truthy; False when the time runs out: the check after it then reports as before."""
+    try:
+        if state: pg.wait_for_selector(what, state=state, timeout=ms)
+        else: pg.wait_for_function(what, arg=arg, timeout=ms)
+        return True
+    except Exception: return False
+
+def in_game(pg, ms=5000):
+    """the menu closed and the game drawn (render() runs inside the click, so this is usually true at once)"""
+    return until(pg, "!document.body.classList.contains('menu-on') && !document.querySelector('.main-menu')", ms)
+
+def on_tab(pg, t, ms=5000):
+    return until(pg, f'#tabs [data-tab="{t}"][aria-current="page"]', ms, 'attached') and in_game(pg, ms)
+
 def enter(pg):
     """v0.11.10: the game opens on the main menu; Continue (or Begin) enters it."""
     b = pg.query_selector('button[data-menu="continue"]')
-    if b: b.click(); pg.wait_for_timeout(300)
+    if b: b.click(); in_game(pg)
 
 def wait_bar(pg, ms=800):
-    end = time.time() + ms / 1000
-    while time.time() < end and pg.query_selector('#nowbar'): pg.wait_for_timeout(100)
+    """up to ms for a running bar (#nowbar) to end; returns at once when none runs"""
+    until(pg, '#nowbar', ms, 'detached')
+
+GUARD = 0.41  # js/main.js (view click handler): a story card, choice or fight action within 400 ms of the last one is ignored
+_pressed = {}
+def tap(pg, el, timeout=3000):
+    """click a card; one the double-tap guard covers first waits out the 400 ms since the last such tap on this page
+    (a genuine pause: the game checks Date.now(), there is no element to wait for)"""
+    guarded = el.evaluate("e => e.dataset.story != null || e.dataset.choice != null || !!e.dataset.act || !!e.dataset.flee")
+    if guarded:
+        w = _pressed.get(id(pg), 0) + GUARD - time.monotonic()
+        if w > 0: time.sleep(w)
+    el.click(timeout=timeout)
+    if guarded: _pressed[id(pg)] = time.monotonic()
 
 def fresh(pg, url, js, arg=None):
     """v0.11.8: set storage from a non-game page on the same site, then open the game: the game's save-on-close can't write over it."""
     pg.goto(url.replace('index.html', 'art/bg/CREDITS.md'))
     pg.evaluate(js, arg) if arg is not None else pg.evaluate(js)
-    pg.goto(url); pg.wait_for_timeout(500)
+    pg.goto(url); until(pg, '.main-menu', 10000, 'attached')
     enter(pg)
 
 def visit_tabs(pg, where):
     tabs = [t for t in pg.eval_on_selector_all('[data-tab]', 'els => els.map(e => e.dataset.tab)') if t != 'menu']
     for t in tabs:
-        pg.click(f'[data-tab="{t}"]'); pg.wait_for_timeout(150); check_text(pg, f"{where}, tab {t}", strict=t in ('story', 'journal'))
-    if 'story' in tabs: pg.click('[data-tab="story"]'); pg.wait_for_timeout(150)
+        pg.click(f'[data-tab="{t}"]'); on_tab(pg, t); check_text(pg, f"{where}, tab {t}", strict=t in ('story', 'journal'))
+    if 'story' in tabs: pg.click('[data-tab="story"]'); on_tab(pg, 'story')
     return tabs
 
 def no_greyed(pg, where):
@@ -63,11 +94,11 @@ def taps(pg, n, rng, where, sel):
         wait_bar(pg)
         btns = pg.query_selector_all(sel)
         if not btns:
-            if pg.query_selector('button.pause'): pg.click('button.pause'); pg.wait_for_timeout(300); continue
+            pb = pg.query_selector('button.pause')
+            if pb: pb.click(); until(pg, 'e => !e.isConnected', 3000, arg=pb); continue  # the paused screen is drawn again
             break
-        try: rng.choice(btns).click(timeout=3000); done += 1
+        try: tap(pg, rng.choice(btns)); done += 1
         except Exception: continue  # re-rendered under the tap: look again
-        pg.wait_for_timeout(120)
         if i % 10 == 9: check_text(pg, f"{where}, tap {i + 1}", strict=True)
         if 'Incremental' in where: no_greyed(pg, f"{where}, tap {i + 1}")
     check_text(pg, f"{where}, after {done} taps", strict=True)
@@ -77,33 +108,34 @@ def scene_of(raw):
     return json.loads(json.loads(raw)['data'])['scene']
 
 def open_saves(pg):
-    pg.click('[data-tab="menu"]'); pg.wait_for_timeout(200); pg.click('button[data-menu="saves"]'); pg.wait_for_timeout(200)
+    pg.click('[data-tab="menu"]'); until(pg, '.main-menu button[data-menu="saves"]', 5000, 'visible')
+    pg.click('button[data-menu="saves"]'); until(pg, 'button[data-exportall]', 5000, 'visible')
 
 def main_menu(pg, url):
     """v0.11.10: the menu opens first, without the tab bar or the game's picture; Settings and Saves; Continue enters the game."""
     pg.goto(url.replace('index.html', 'art/bg/CREDITS.md')); pg.evaluate("localStorage.clear()")
-    pg.goto(url); pg.wait_for_timeout(500)
+    pg.goto(url); until(pg, '.main-menu', 10000, 'attached')
     if not pg.query_selector('.main-menu'): fails.append('menu: the game did not open on the main menu'); return
     if pg.is_visible('#tabs') or pg.query_selector('.plate'): fails.append('menu: the tab bar or the game picture shows behind the menu')
     if not pg.query_selector('button[data-menu="continue"]') or 'Begin' not in pg.inner_text('button[data-menu="continue"]'): fails.append('menu: a first start should offer Begin')
     check_text(pg, 'menu')
-    pg.click('button[data-menu="settings"]'); pg.wait_for_timeout(200); check_text(pg, 'Settings')
-    pg.click('button[data-textsize="120"]'); pg.wait_for_timeout(150)
+    pg.click('button[data-menu="settings"]'); until(pg, 'button[data-showchecks]', 5000, 'visible'); check_text(pg, 'Settings')
+    pg.click('button[data-textsize="120"]'); until(pg, "getComputedStyle(document.documentElement).fontSize === '19.2px'", 3000)
     fs = pg.evaluate("getComputedStyle(document.documentElement).fontSize")
     if fs != '19.2px': fails.append(f'Settings: text size 120% gave a root font of {fs}')
-    pg.click('button[data-textsize="100"]'); pg.wait_for_timeout(150)
-    pg.click('button[data-showchecks]'); pg.wait_for_timeout(150)
+    pg.click('button[data-textsize="100"]'); until(pg, 'button.primary[data-textsize="100"]', 3000, 'attached')
+    pg.click('button[data-showchecks]'); until(pg, "localStorage.getItem('boneash.showchecks') === '1'", 3000)
     if pg.evaluate("localStorage.getItem('boneash.showchecks')") != '1': fails.append('Settings: Show checks did not switch on')
-    pg.click('button[data-showchecks]'); pg.wait_for_timeout(150)
-    pg.click('button[data-menu="main"]'); pg.wait_for_timeout(150)
-    pg.click('button[data-menu="saves"]'); pg.wait_for_timeout(200); check_text(pg, 'Saves (menu)')
-    pg.click('button[data-menu="main"]'); pg.wait_for_timeout(150)
+    pg.click('button[data-showchecks]'); until(pg, "localStorage.getItem('boneash.showchecks') === '0'", 3000)
+    pg.click('button[data-menu="main"]'); until(pg, '.main-menu', 5000, 'attached')
+    pg.click('button[data-menu="saves"]'); until(pg, 'button[data-exportall]', 5000, 'visible'); check_text(pg, 'Saves (menu)')
+    pg.click('button[data-menu="main"]'); until(pg, '.main-menu', 5000, 'attached')
     enter(pg)
     if pg.query_selector('.main-menu') or not pg.is_visible('#tabs'): fails.append('menu: Continue did not enter the game')
     else: notes.append('menu, settings and saves')
     check_text(pg, 'after Begin', strict=True)
     # back to the menu from the game: it pauses, and Continue says so now
-    pg.click('[data-tab="menu"]'); pg.wait_for_timeout(200)
+    pg.click('[data-tab="menu"]'); until(pg, '.main-menu', 5000, 'attached')
     if not pg.query_selector('.main-menu'): fails.append('menu: the ☰ Menu tab did not open the menu')
     enter(pg)
 
@@ -113,15 +145,16 @@ def comfort(pg, url):
     card = pg.query_selector('button.card:not([disabled])[data-story]') or pg.query_selector('button.card:not([disabled])[data-run]')
     if not card: fails.append('tooltip: no card to hold'); return
     scene0 = pg.inner_text('.head .title')
-    card.scroll_into_view_if_needed(); pg.wait_for_timeout(150)
+    card.scroll_into_view_if_needed()  # an instant scroll: the page has no smooth scroll-behavior
     bb = card.bounding_box(); x, y = bb['x'] + bb['width'] / 2, bb['y'] + bb['height'] / 2
-    pg.mouse.move(x, y); pg.mouse.down(); pg.wait_for_timeout(750); pg.mouse.up(); pg.wait_for_timeout(300)
+    # the 750 ms hold is what is tested (HOLD_MS = 500 in js/main.js): kept as it was
+    pg.mouse.move(x, y); pg.mouse.down(); pg.wait_for_timeout(750); pg.mouse.up(); until(pg, '#tip', 3000, 'visible')
     if not pg.is_visible('#tip'): fails.append('tooltip: holding a card did not open it')
     else:
         t = pg.inner_text('#tip')
         if CHECKS.search(t): fails.append(f'tooltip: shows check text {t[:120]!r}')
         if pg.query_selector('#nowbar'): fails.append('tooltip: the tap that ended the hold started the card')
-        pg.click('#tip [data-tip="close"]'); pg.wait_for_timeout(150)
+        pg.click('#tip [data-tip="close"]'); until(pg, '#tip', 3000, 'hidden')
         if pg.is_visible('#tip'): fails.append('tooltip: ✕ did not close it')
         else: notes.append('tooltip')
     scene1 = pg.inner_text('.head .title')
@@ -129,22 +162,23 @@ def comfort(pg, url):
     # the running bar slides
     long = pg.query_selector('button.card:not([disabled])[data-story]')
     if long:
-        long.click(); pg.wait_for_timeout(700)
+        tap(pg, long); until(pg, "(e => e && parseFloat(e.dataset.v) > 0)(document.getElementById('nowbar'))", 5000)  # the bar has moved
         bar = pg.query_selector('#nowbar')
         if bar:
             st = pg.evaluate("e => [e.style.transform, e.style.width, e.parentElement.getAttribute('role')]", bar)
             if 'scaleX' not in st[0] or st[1] or st[2] != 'progressbar': fails.append(f'bars: the running bar is {st}')
-    pg.wait_for_timeout(2500)
+        # the story step ends (its bar is gone, the next scene drawn, its smooth scroll to the top done) before the tabs
+        until(pg, '#nowbar', 15000, 'detached'); until(pg, 'scrollY === 0', 3000)
     # each tab keeps its scroll
-    pg.click('[data-tab="sheet"]'); pg.wait_for_timeout(200)
+    pg.click('[data-tab="sheet"]'); on_tab(pg, 'sheet')
     room = pg.evaluate("document.documentElement.scrollHeight - innerHeight")
     if room > 150:
-        pg.evaluate("scrollTo(0, 120)"); pg.wait_for_timeout(100)
-        pg.click('[data-tab="bag"]'); pg.wait_for_timeout(150); pg.click('[data-tab="sheet"]'); pg.wait_for_timeout(200)
+        pg.evaluate("scrollTo(0, 120)"); until(pg, 'scrollY === 120', 3000)
+        pg.click('[data-tab="bag"]'); on_tab(pg, 'bag'); pg.click('[data-tab="sheet"]'); on_tab(pg, 'sheet'); until(pg, 'Math.abs(scrollY - 120) <= 5', 3000)
         yv = pg.evaluate("scrollY")
         if abs(yv - 120) > 5: fails.append(f'scroll: the James tab came back at {yv}, not 120')
         else: notes.append('scroll kept per tab')
-    pg.click('[data-tab="story"]'); pg.wait_for_timeout(150)
+    pg.click('[data-tab="story"]'); on_tab(pg, 'story')
 
 def rest_places(pg, url):
     fresh(pg, url, "localStorage.clear(); localStorage.setItem('boneash.speed','1')")
@@ -154,7 +188,7 @@ def rest_places(pg, url):
     add = pg.query_selector('.cardwrap:has(button.card.med) button.qadd')
     if not add: fails.append('the stream: no + on a Meditate card'); return
     n0 = len(pg.query_selector_all('ol.queue li'))
-    add.click(); pg.wait_for_timeout(300)
+    add.click(); until(pg, "n => document.querySelectorAll('ol.queue li').length === n", 3000, arg=n0 + 1)
     if len(pg.query_selector_all('ol.queue li')) != n0 + 1: fails.append('the stream: + on a Meditate card added no queue row')
     else: notes.append('Meditate only on resting places, + queues there')
     check_text(pg, 'resting place', strict=True)
@@ -171,7 +205,9 @@ def saves(pg, url):
     if not re.search(r'Day \d+, \d\d:\d\d · Coil 2', txt): fails.append('Saves: the Coil 2 backup line has no "· Coil 2"')
     else: notes.append('save lines show the Coil')
     # Copy status
-    pg.click('button[data-status]'); pg.wait_for_timeout(800)
+    pg.click('button[data-status]')  # the note comes once the clipboard write has settled; then the clipboard holds text
+    until(pg, "/Status copied|could not be copied|No status/.test(document.getElementById('saveNote')?.textContent || '')", 10000)
+    until(pg, "navigator.clipboard.readText().then(t => t.length > 0)", 5000)
     st = pg.evaluate("navigator.clipboard.readText()")
     if scene_of(lf) not in st or not re.search(r'Bone and Ash \d+\.\d+\.\d+', st) or 'Pause log' not in st: fails.append(f'Copy status: unexpected text {st[:200]!r}')
     # Export all, then Restore all into a new game
@@ -180,11 +216,11 @@ def saves(pg, url):
     path = dl.value.path()
     fresh(pg, url, "localStorage.clear()")
     open_saves(pg)
-    pg.set_input_files('label:has-text("Restore all saves") input[data-import]', str(path)); pg.wait_for_timeout(500)
+    pg.set_input_files('label:has-text("Restore all saves") input[data-import]', str(path)); until(pg, 'button[data-restoreall="1"]', 10000, 'visible')
     if not pg.query_selector('button[data-restoreall="1"]'): fails.append('Restore all: no confirm button after choosing the file')
     else:
         check_text(pg, 'Restore all confirm')
-        pg.click('button[data-restoreall="1"]'); pg.wait_for_timeout(500)
+        pg.click('button[data-restoreall="1"]'); on_tab(pg, 'story')  # restoreAll() writes the storage, then opens the Story tab
         got = pg.evaluate("[localStorage.getItem('boneash.auto'), localStorage.getItem('boneash.slot1'), localStorage.getItem('boneash.bak.5m'), localStorage.getItem('boneash.bak.before')]")
         if got[0] != auto0: fails.append(f'Restore all: the autosave differs ({scene_of(got[0]) if got[0] else None} vs {scene_of(auto0)})')
         elif got[1] != s1 or got[2] != b5: fails.append('Restore all: a slot or backup differs')
@@ -194,7 +230,7 @@ def saves(pg, url):
     open_saves(pg)
     if not pg.query_selector('button[data-bak="5m"]'): fails.append('Backups: no Restore button for the 5-minute backup')
     else:
-        pg.click('button[data-bak="5m"]'); pg.wait_for_timeout(400)
+        pg.click('button[data-bak="5m"]'); on_tab(pg, 'story')  # the backup is loaded and autosaved, then the Story tab
         a = pg.evaluate("[localStorage.getItem('boneash.auto'), localStorage.getItem('boneash.bak.before')]")
         if scene_of(a[0]) != scene_of(b5) or scene_of(a[1]) != scene_of(lf): fails.append(f'Backups: after restore the game is at {scene_of(a[0])}, before = {scene_of(a[1])}')
         else: notes.append('backup restored')
@@ -207,7 +243,13 @@ def main(part=0):
     n1 = n3 = 0; tabs = []
     port = free_port()
     srv = subprocess.Popen([sys.executable, '-m', 'http.server', str(port)], cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    time.sleep(0.8)
+    up = time.time() + 10  # v0.11.21: wait for the server's port instead of a fixed 0.8 s
+    while True:
+        try: socket.create_connection(('127.0.0.1', port), timeout=0.5).close(); break
+        except OSError:
+            if srv.poll() is not None or time.time() > up:
+                srv.terminate(); print(f'browser test: the local server on port {port} did not come up in 10 s'); sys.exit(1)
+            time.sleep(0.05)
     url = f'http://127.0.0.1:{port}/index.html'
     try:
         with sync_playwright() as p:
@@ -226,9 +268,10 @@ def main(part=0):
               long = pg.eval_on_selector_all('button.card[data-run]:not([disabled])', "els => els.filter(e => / h/.test(e.querySelector('.len')?.textContent || '') && !/at once/.test(e.textContent)).map(e => e.dataset.run)")
               if not long: fails.append('reload: no task screen with an hour-long card reached; on screen: ' + ' | '.join(pg.eval_on_selector_all('#view button', 'els => els.slice(0, 8).map(e => e.textContent.slice(0, 50))')))
               else:
-                  pg.click(f'button.card[data-run="{long[0]}"]'); pg.wait_for_timeout(2200)
+                  pg.click(f'button.card[data-run="{long[0]}"]')
+                  until(pg, "(e => e && parseFloat(e.dataset.v) * 100 > 5)(document.getElementById('nowbar'))", 8000)  # the bar past 5% at x1
                   w1 = pg.eval_on_selector('#nowbar', 'e => parseFloat(e.dataset.v) * 100')
-                  pg.reload(); pg.wait_for_timeout(500); enter(pg)
+                  pg.reload(); until(pg, '.main-menu', 10000, 'attached'); enter(pg); until(pg, '#nowbar', 5000, 'attached')
                   w2 = pg.eval_on_selector('#nowbar', 'e => parseFloat(e.dataset.v) * 100') if pg.query_selector('#nowbar') else 0
                   if not (w1 > 5 and abs(w1 - w2) < 3): fails.append(f'reload: the bar was {w1}% before and {w2}% after')
                   else: notes.append(f'reload kept the bar ({w1:.0f}% → {w2:.0f}%)')
@@ -239,14 +282,14 @@ def main(part=0):
               # 4. two tabs (v0.11.8): a tab that closes never writes its older game over a newer save from another tab
               fresh(pg, url, "localStorage.clear(); localStorage.setItem('boneash.speed','10'); localStorage.setItem('boneash.testspeeds','1')")
               pg.evaluate("1")
-              pb = ctx.new_page(); pb.goto(url); pb.wait_for_timeout(500); enter(pb)
+              pb = ctx.new_page(); pb.goto(url); until(pb, '.main-menu', 10000, 'attached'); enter(pb)
               before = pb.evaluate("localStorage.getItem('boneash.auto')")
               for _ in range(6):
                   bt = pb.query_selector_all('button.card:not([disabled])[data-story], button.card:not([disabled])[data-run]')
                   if not bt: break
-                  try: bt[0].click(timeout=3000)
+                  try: tap(pb, bt[0])
                   except Exception: pass
-                  pb.wait_for_timeout(300); wait_bar(pb, 3000)
+                  wait_bar(pb, 3000)
               newer = pb.evaluate("localStorage.getItem('boneash.auto')")
               pg.goto(url.replace('index.html', 'art/bg/CREDITS.md'))  # the older tab closes: its save on close fires
               after = pg.evaluate("localStorage.getItem('boneash.auto')")

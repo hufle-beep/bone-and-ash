@@ -5,12 +5,13 @@ Everything here lives in git and grows with the game. **Rule (owner 2026-11-06, 
 ## Running it
 
 ```
-bash tools/check.sh          # the full check, before every push (about 70 s on 2 cores)
+bash tools/check.sh          # the full check, before every push (about 70 s on 2 cores since v0.11.21)
 bash tools/check.sh quick    # 200 bot games each, no browser or sanity check (about 17 s), while building
 node tools/check.mjs --jobs 1   # the same, one step at a time (to compare, or on a busy machine)
+node tools/check.mjs --list     # the job list as JSON, nothing run (v0.11.21)
 ```
 
-`tools/check.sh` calls `tools/check.mjs`, which runs the steps in parallel on a job pool (the cores + 1; the two browser parts mostly wait). The two bot tests never run at the same time (each one already uses every core through `tests/lib/shard.mjs`); the sanity check waits for both. The first failure stops everything and prints the last 20 lines of its output; the exit code is 1. Every step prints its time.
+`tools/check.sh` calls `tools/check.mjs`, which runs the steps in parallel on a job pool (the cores + 1; the two browser parts mostly wait). The two bot tests never run at the same time (each one already uses every core through `tests/lib/shard.mjs`); the sanity check waits for both. The first failure stops everything and prints the last 20 lines of its output; the exit code is 1. Every step prints its time. Since v0.11.21 the job list is checked before anything runs (unique keys, every `after` a job of this mode), a queue that can't move stops the run, and a failure or Ctrl-C kills each job's whole process tree (bot workers, Chromium, the test server); the pool lives in `tools/lib/jobs.mjs`.
 
 **Timings:** each full check writes `tools/timings.json` (the time of every step and the total), committed with the push. A step more than 25% slower than the stored time (and over 3 s) gets a "(slower: …)" note; it never fails the check. Before v0.11.20 the full check took about 175 s one step after another.
 
@@ -24,15 +25,22 @@ node tools/check.mjs --jobs 1   # the same, one step at a time (to compare, or o
 | engine's own tests | `tests/engine.test.mjs` | the engine's 126 formula tests on our copy of `formulas.js` | `node tests/engine.test.mjs` |
 | old saves | `tests/saves.test.mjs` | every file in `saves/` loads, round-trips and plays 200 steps; checksum, too-new, broken and cut-off saves | `node tests/saves.test.mjs` |
 | data integrity | `tests/data.test.mjs` | every id the game refers to exists (hubs, menus, items, forms, `data-*` markers) | `node tests/data.test.mjs` |
-| content lint | `tools/lint.mjs` | log only: choices on default time, check labels, old names, duplicate labels | `node tools/lint.mjs --list` |
+| content lint | `tools/lint.mjs` | strict since v0.11.21: old mode names, the same label twice in a scene (when neither choice is conditional); log only: choices on the default time | `node tools/lint.mjs --list` |
+| test tools | `tests/tools.test.mjs` | v0.11.21: `shard.mjs`'s merge rules and seeds, 1 worker = 2 workers (story 100, tasks 51 games), the runner's job list and `validateJobs`, the noise band | `node tests/tools.test.mjs` |
 | Act 1 parts | `tests/part.test.mjs` | one Act 1 part alone: links, reachability, 1,000 walks, every "lost" scene | `node tests/part.test.mjs heart` |
-| tasks | `tests/tasks.test.mjs` | Incremental Mode: hundreds of rule checks (cards, queue, forecast = reality, Coil, speed by use, sleep, Push, Yuki, Act 1 task screens…) and 2,000 bot games each way; writes stats for the sanity check | `node tests/tasks.test.mjs --games 200` |
-| story | `tests/story.test.mjs` | every link valid, every scene reachable, 2,000 random playthroughs, per-fight win rates | `node tests/story.test.mjs --games 200` |
+| tasks | `tests/tasks.test.mjs` | Incremental Mode: hundreds of rule checks (cards, queue, forecast = reality, Coil, speed by use, sleep, Push, Yuki, Act 1 task screens…) and 2,000 bot games each way; the forecast = reality check on 1 game in 8 (v0.11.21), with a check that every played card was forecast; writes stats for the sanity check | `node tests/tasks.test.mjs --games 200` |
+| story | `tests/story.test.mjs` | every link valid, every scene reachable, 2,000 random playthroughs, per-fight win rates; focused walks that must reach their target (v0.11.21, one of them to `yk_night_all`) | `node tests/story.test.mjs --games 200` |
 | browser part 1 | `tools/browser.py --part 1` | real taps in headless Chromium at 390×844: Incremental Mode, a running bar kept over a reload, Story Mode, two tabs | `python3 tools/browser.py --part 1` |
 | browser part 2 | `tools/browser.py --part 2` | Saves (export all / restore all, backups), the main menu and settings, tooltips and scroll, Meditate on the resting places | `python3 tools/browser.py --part 2` |
-| sanity | `tools/sanity.mjs` | the mechanics invariants and the drift (±5 points, n ≥ 100) of every death, tribute and fight number against `tools/baseline.json` | `node tools/sanity.mjs` (runs both bot tests itself) |
+| sanity | `tools/sanity.mjs` | the mechanics invariants and the drift (±5 points, n ≥ 100) of every death, tribute and fight number against `tools/baseline.json`; a log-only noise-scaled line (v0.11.21, below) | `node tools/sanity.mjs` (runs both bot tests itself) |
 
 `python3 tools/browser.py` with no part runs both parts in one browser, in order.
+
+Quick runs (`quick`, 200 games) can't promise full coverage, so since v0.11.21 they print the coverage counts ("reached X of Y", "cards played … forecast-checked") instead of checking them; the full run checks them.
+
+## The drift rule and its noise (v0.11.21)
+
+Measured on 10 replays of the bot games under other seeds (2,000 games each): the spread of each number matches the textbook noise of a rate (measured ÷ formula: median 0.94). **Today's ±5 rule flags 4.0% of numbers on chance alone**, so a change that reshuffles the bots' games is expected to show about 8 drift flags that mean nothing; at the same time it misses 3–4-point shifts on numbers with n ≈ 2,000, and it skips the 16 numbers under n 100. The noise-scaled band (`tools/lib/noise.mjs`: 3 × the number's own noise, at least 2 points, every n) flags 0.23% by chance (about 0.5 per change). It is **log only**: the sanity check prints what it would flag next to the ±5 result. Unchanged code moves by exactly 0 (fixed seeds), so with either rule a flag on a change that should not touch balance is real.
 
 ## Tools that are not steps
 
@@ -44,7 +52,9 @@ node tools/check.mjs --jobs 1   # the same, one step at a time (to compare, or o
 ## Speed notes
 
 - v0.11.20: the dry runs behind the forecast and card times (`taskMinutes`, `outlook`) copy the game without its journal log and share the Coil snapshot (`dryClone` in `js/core/tasks.js`): about 6× faster per copy, the tasks test 102 s → 60 s. A test compares it with the old full copy on 200 queues.
-- Next places to look when the check grows: the tasks test's 2,000 games each way (the profile: `node --cpu-prof tests/tasks.test.mjs --games 200 --workers 1`), the browser parts' fixed waits.
+- v0.11.21: the forecast = reality check runs on 1 game in 8 (it was half of the tasks test's time; the dry runs don't touch the games, so the numbers are byte-identical); per-step checks in the bot loops build their label only on a failure (story test about 14% faster). The full check about 80 s → 70 s (68–73 s in 3 runs; 57–64 s without the new tools step, which costs about 8–10 s). The browser test now waits out the game's 400 ms double-tap guard (`tap()` in `tools/browser.py`): before, about half its taps were silently ignored, so part 1 really plays its 65 taps now (about 46 s) and part 2 takes about 8 s instead of 21. The tools step's 1 = 2 workers comparison plays the tasks games with `--bots-only` (no rule checks; the same stats file).
+- Next places to look: browser part 1 (about 46 s, the longest step now: it could be split in two), the tools step's share, the tasks test's 2,000 games each way.
+- Older note: next places to look when the check grows: the tasks test's 2,000 games each way (the profile: `node --cpu-prof tests/tasks.test.mjs --games 200 --workers 1`), the browser parts' fixed waits.
 
 ## Adding a test
 

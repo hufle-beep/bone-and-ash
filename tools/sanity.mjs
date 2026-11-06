@@ -8,10 +8,13 @@
 //
 //   node tools/sanity.mjs --tasks t.json --story s.json   compare the stats the two tests wrote (tools/check.sh does this)
 //   node tools/sanity.mjs                                 run both tests itself first (about 50 s)
+// v0.11.21: also a log-only line, the noise-scaled drift (tools/lib/noise.mjs): each number against its own chance
+// wobble (3 × its noise, at least 2 points); it never fails the check, ±5 stays the rule until the owner says otherwise.
 //   node tools/sanity.mjs --update                        save the current numbers as the new baseline — ONLY after the
 //                                                         owner has seen the numbers of an intended change and said go
 import { spawnSync } from 'node:child_process';
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdtempSync, rmSync } from 'node:fs';
+import { band, flagged, K as NOISE_K, MIN as NOISE_MIN } from './lib/noise.mjs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import os from 'node:os';
@@ -60,7 +63,8 @@ G.setNoDice(false);
 /* ---------- 2. drift ---------- */
 let tasksFile = opt('tasks'), storyFile = opt('story');
 if (!tasksFile || !storyFile) {
-    tasksFile = path.join(os.tmpdir(), 'boneash-tasks.json'); storyFile = path.join(os.tmpdir(), 'boneash-story.json');
+    const tmp = mkdtempSync(path.join(os.tmpdir(), 'boneash-sanity-')); process.on('exit', () => rmSync(tmp, { recursive: true, force: true })); // v0.11.21: its own folder (two runs at once no longer share files)
+    tasksFile = path.join(tmp, 'tasks.json'); storyFile = path.join(tmp, 'story.json');
     for (const [t, f] of [['tasks', tasksFile], ['story', storyFile]]) {
         const r = spawnSync(process.execPath, [path.join(root, `tests/${t}.test.mjs`), '--stats-out', f], { cwd: root, encoding: 'utf8' });
         if (r.status !== 0) { console.log(`  the ${t} test failed; run it alone for details`); process.exit(1); }
@@ -88,17 +92,21 @@ if (update) {
 if (!existsSync(BASE)) { console.log('  no tools/baseline.json yet (node tools/sanity.mjs --update)'); process.exit(1); }
 const base = JSON.parse(readFileSync(BASE, 'utf8')).metrics;
 const flags = [];
-let compared = 0;
+const wobble = []; // v0.11.21: log only
+let compared = 0, small = 0;
 for (const [name, b] of Object.entries(base)) {
     const m = metrics[name];
     if (!m) { if (b.n >= MIN_N) flags.push(`${name}: was ${b.v}% (n ${b.n}), now never happens`); continue; }
-    if (b.n < MIN_N || m.n < MIN_N) continue;
+    if (flagged(b, m)) wobble.push(`${name}: ${b.v}% → ${m.v}% (band ±${band((b.v + m.v) / 2, b.n, m.n).toFixed(1)}; n ${b.n} → ${m.n})`);
+    if (b.n < MIN_N || m.n < MIN_N) { small++; continue; }
     compared++;
     const d = Math.round((m.v - b.v) * 10) / 10;
     if (Math.abs(d) > LIMIT) flags.push(`${name}: ${b.v}% → ${m.v}% (${d > 0 ? '+' : ''}${d}; n ${b.n} → ${m.n})`);
 }
 for (const [name, m] of Object.entries(metrics)) if (!base[name] && m.n >= MIN_N) flags.push(`${name}: new, ${m.v}% (n ${m.n})`);
 for (const f of flags) console.log(`  DRIFT  ${f}`);
+for (const w of wobble) console.log(`  noise-scaled (log only)  ${w}`);
+console.log(`  noise-scaled drift (log only, ${NOISE_K} × each number's noise, at least ${NOISE_MIN} points, every n): ${wobble.length} would flag; ${small} numbers under n ${MIN_N} are not compared by the ±${LIMIT} rule`);
 const total = fails + flags.length;
 console.log(`${compared} numbers compared (±${LIMIT} points, n ≥ ${MIN_N}): ${flags.length} drifted, ${fails} invariant(s) failed`);
 process.exit(total ? 1 : 0);

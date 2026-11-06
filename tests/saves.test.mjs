@@ -21,7 +21,7 @@ for (const f of files) {
     const raw = unpack(readFileSync(new URL(f, dir), 'utf8'));
     let g;
     try { g = deserialize(raw); } catch (e) { assert(false, `${f} loads (${e.message})`); continue; }
-    assert(true, `${f} loads`);
+    assert(!!g?.james && typeof g.scene === 'string', `${f} loads (a game with James and a scene)`); // v0.11.21: was assert(true)
     assert(!!SCENES[g.scene], `${f}: scene ${g.scene} exists`);
     const again = deserialize(serialize(g));
     assert(JSON.stringify(again) === JSON.stringify(g), `${f}: save → load round trip is exact`);

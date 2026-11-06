@@ -1,4 +1,6 @@
-// v0.11.7: content lint over every scene — LOG ONLY (never fails a build; rules are measured before they are enforced).
+// v0.11.7: content lint over every scene. Rules are measured log-only before they are enforced.
+// v0.11.21: old mode names and duplicate labels are strict (both were at 0): any hit fails the check (exit 1).
+// Choices on the default time stay log only (357 today, many on purpose).
 //   node tools/lint.mjs           counts
 //   node tools/lint.mjs --list    every hit
 // Looks at the written scene data (text and choices that are plain strings; functions are skipped).
@@ -26,4 +28,7 @@ for (const [k, v] of Object.entries(hits)) {
     console.log(`  ${v.length} ${names[k]}`);
     if (LIST) for (const h of v) console.log(`      ${h}`);
 }
-console.log(`${scenes} scenes, ${choices} choices: ${hits.noTime.length} on default time, ${hits.oldNames.length} old names, ${hits.dupLabels.length} duplicate labels (log only)`);
+const strict = hits.oldNames.length + hits.dupLabels.length;
+if (strict && !LIST) for (const h of [...hits.oldNames, ...hits.dupLabels]) console.log(`      ${h}`);
+console.log(`${scenes} scenes, ${choices} choices: ${hits.noTime.length} on default time (log only), ${hits.oldNames.length} old names, ${hits.dupLabels.length} duplicate labels${strict ? ' — FAILED' : ''}`);
+process.exit(strict ? 1 : 0);

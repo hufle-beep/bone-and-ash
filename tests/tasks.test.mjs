@@ -22,8 +22,10 @@ import { GAMES, FULL, SHARD, WORKERS, SEED, SENSIBLE, REPORT, STATS_OUT, myRuns,
 let pass = 0, fail = 0;
 const assert = (c, l) => { if (c) { pass++; } else { fail++; if (fail < 30) console.error('  FAIL ', l); } };
 const kids = launch(import.meta.url); // v0.11.1: the bot games in worker processes, while this one runs the other checks
+/** v0.11.21: --bots-only plays the bot games and writes their stats, without the rule checks (tests/tools.test.mjs: 1 worker = 2 workers). */
+const BOTS_ONLY = process.argv.includes('--bots-only');
 
-if (!SHARD) { // the static checks run in the parent only
+if (!SHARD && !BOTS_ONLY) { // the static checks run in the parent only
 
 // static: hubs, menus and their doors exist
 for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
@@ -288,7 +290,7 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
         cStep(h, 'blade');
         assert(!!h.combat.bladeFormed === holds, `T1 L${l}: the knife ${holds ? 'holds' : 'breaks'} after a swing`);
         const q0 = h.james.qi; cStep(h, 'dart');
-        if (l < 5) assert(h.combat.log === undefined || true, 'a dart below T1 L5 falls back on guarding');
+        if (l < 5) assert(h.combat && h.james.qi === q0, `v0.11.21: a dart below T1 L5 falls back on guarding (no Qi spent: ${q0} → ${h.james.qi})`); // was `|| true`: could never fail
     }
     // story choices: hidden until the form, then back
     const s = ensureBars(newGame(83, { closed: true })); s.minutes = 7 * 60;
@@ -605,8 +607,56 @@ const medStats = { bt: 0, mer: 0, warn: 0, a1bites: 0, a1coils: {} };
 const deaths = { pro: {}, a1: {} }; // v0.9.7: per act and Coil: { coils, early (before Mei Lin), late, beast }
 const TRIBUTE_OUT = { bluff_win: 'won', collectors_won: 'won', tribute_paid: 'paid', collectors_lost: 'lost' };
 const stats = { tasks: { endings: {}, collapses: 0, cards: 0, skipped: 0, games: 0 }, classic: { endings: {}, games: 0 } };
+// v0.11.21: bugs the mutation test (20 deliberate bugs) found the suite missing, or caught only by luck (the parent only)
+if (!SHARD && !BOTS_ONLY) {
+    const G = await import('../js/core/game.js');
+    // Fed and HP regen, directly (a drain of 2 / h and a 6% Cycle were caught only by a scene the walks stopped reaching)
+    const h = ensureBars(newGame(911)); h.james.hp = 1; h.james.satiety = 80; const hm = jamesHpMax(h);
+    advance(h, 30);
+    assert(Math.abs(h.james.satiety - 78.5) < 1e-9, `v0.11.21: Fed drops 3 an hour (80 → ${h.james.satiety} in 30 min)`);
+    assert(Math.abs(h.james.hp - (1 + hm * 0.05)) < 1e-9, `v0.11.21: one Cycle (30 min) at realm 0 heals 5% of max HP (${h.james.hp})`);
+    // the combat actions' Qi costs, and a dart really spends its 2
+    assert(COMBAT_ACTIONS.dart.qi === 2 && COMBAT_ACTIONS.blade.qi === 3 && COMBAT_ACTIONS.needle.qi === 4, 'v0.11.21: dart 2, blade 3, needle 4 Qi');
+    for (const nd of [false, true]) {
+        setNoDice(nd);
+        const d = ensureBars(newGame(912, { closed: nd })); d.james.skills['Convergence Use'] = { tier: 1, level: 5, xp: 0 }; d.james.qi = jamesQiMax(d);
+        sCombat(d, { id: 'jackals', intro: '', band: 'standard', enemies: [{ name: 'Dummy', hp: 999, dc: 1, atk: 1, dmg: 0 }], win: 'stream', lose: 'stream' });
+        const q0 = d.james.qi; cStep(d, 'dart');
+        assert(Math.abs(q0 - d.james.qi - 2) < 1e-9, `v0.11.21: a dart costs 2 Qi (${nd ? 'Incremental' : 'Story'} Mode: ${q0} → ${d.james.qi})`);
+    }
+    setNoDice(true);
+    // a breakthrough fills both bars, James's and Yuki's
+    for (const nd of [true, false]) {
+        setNoDice(nd);
+        const b = ensureBars(newGame(913)); b.james.saturation = 100; b.james.hp = 1; b.james.qi = 1; b.yuki.hp = 1; b.yuki.qi = 1;
+        const r = breakthrough(b);
+        assert(r.ok && b.james.hp === jamesHpMax(b) && b.james.qi === jamesQiMax(b) && b.yuki.hp === G.yukiHpMax(b) && b.yuki.qi === yukiQiMax(b), `v0.11.21: a breakthrough fills HP and Qi for both (${nd ? 'Incremental' : 'Story'} Mode)`);
+    }
+    setNoDice(true);
+    // the forecast while exhausted: a work card's dry run = its real run, ×1.5 of the rested time
+    const x = ensureBars(newGame(914)); x.scene = 'ashfall';
+    const wc = taskCards(x, SCENES).find((c) => c.kind === 'work' && c.status === 'open');
+    assert(!!wc, 'v0.11.21: Ashfall has an open work card');
+    if (wc) {
+        const t0 = taskMinutes(x, SCENES, wc.id);
+        markDaily(x, 'clinic'); runMed(x, SCENES, 'med:push');
+        const t1 = taskMinutes(x, SCENES, wc.id), y = JSON.parse(JSON.stringify(x)), ym = y.minutes;
+        runTask(y, SCENES, wc.id);
+        assert(exLevel(x) === 1 && t1 === y.minutes - ym, `v0.11.21: exhausted, the forecast of ${wc.id} is its real time (${t1} vs ${y.minutes - ym})`);
+        assert(Math.abs(t1 - t0 * 1.5) <= 1, `v0.11.21: exhausted, ${wc.id} takes ×1.5 (${t0} → ${t1})`);
+    }
+    // an old state version 1 gets every field the later migrations add
+    const o = ensureBars(newGame(915)); delete o.tasks; delete o.coil; o.v = 1; migrate(o);
+    const fresh = ensureBars(newGame(915));
+    assert(o.v === SAVE_VERSION && Object.keys(fresh.tasks).every((k) => k in o.tasks) && !!o.coil, `v0.11.21: a version-1 state migrates to ${SAVE_VERSION} with every task field (${Object.keys(o.tasks).join(', ')}) and a Coil`);
+}
 const cardsSeen = new Set();
 const cardsListed = new Set();
+const cardsForecast = new Set(); // v0.11.21: cards whose forecast was compared with a real run that finished (not cut short by a door)
+const cardsWhole = new Set(); // v0.11.21: cards that ran to the end at least once (the ones a forecast can be checked on)
+/** v0.11.21: the forecast = reality check runs on 1 game in FC_EVERY (it was about half of this test's time). The dry runs
+ * never touch the game, so the bot games and their numbers are the same; a check below makes sure every played card is still forecast. */
+const FC_EVERY = 8;
 const bands = {};
 let yukiRuns = 0;
 const fightStats = {}; // v0.11.3: per mode, fight and bot style, for tools/sanity.mjs
@@ -688,30 +738,34 @@ function play(run, tasks) {
                 const q = taskQueue(g);
                 for (let k = 1 + rnd(4); k > 0; k--) q.push(cards[rnd(cards.length)].id);
                 // the outlook's finish times must match what really happens
-                const ol = outlook(g, SCENES);
+                const FC = run % FC_EVERY === 0; // v0.11.21
+                const ol = FC ? outlook(g, SCENES) : null;
                 const real = [];
                 while (q.length && isTaskHub(g)) {
                     const id = q.shift();
                     if (!taskOpen(g, SCENES, id)) { st.skipped++; real.push({ id, skip: true }); continue; }
                     cardsSeen.add(id);
                     const m0 = g.minutes;
-                    const mins = taskMinutes(g, SCENES, id);
+                    const mins = FC ? taskMinutes(g, SCENES, id) : 0;
                     const card = taskCards(g, SCENES).find((c) => c.id === id);
                     if (card?.check) bands[card.check.band] = (bands[card.check.band] || 0) + 1;
                     const fam0 = taskState(g).fam[id] || 0;
                     const r = runTask(g, SCENES, id);
                     if (r.lines.some((l) => /^Yuki (comes|leaves)/.test(l))) yukiRuns++;
-                    if (card?.kind === 'work') assert((taskState(g).fam[id] || 0) > fam0, `familiarity grows on ${id}`);
+                    if (card?.kind === 'work') { if ((taskState(g).fam[id] || 0) > fam0) pass++; else assert(false, `familiarity grows on ${id}`); } // v0.11.21: the label only on a failure
                     st.cards++;
-                    assert(g.minutes - m0 === mins || r.stopped, `dry run predicts ${id} (${mins} vs ${g.minutes - m0})`);
+                    if (FC) { if (g.minutes - m0 === mins || r.stopped) pass++; else assert(false, `dry run predicts ${id} (${mins} vs ${g.minutes - m0})`); }
+                    if (!r.stopped) { cardsWhole.add(id); if (FC) cardsForecast.add(id); }
                     real.push({ id, end: g.minutes });
                     if (r.lines.some((l) => /queue is gone/.test(l))) st.collapses++;
-                    assert(Number.isFinite(g.james.hp) && g.james.hp >= 0 && Number.isFinite(g.james.satiety), `bars finite after ${id}`);
+                    if (Number.isFinite(g.james.hp) && g.james.hp >= 0 && Number.isFinite(g.james.satiety)) pass++; else assert(false, `bars finite after ${id}`);
                 }
                 q.length = 0;
-                const same = real.every((r, k) => ol.rows[k] && (r.skip ? ol.rows[k].skip : ol.rows[k].end === r.end));
-                assert(same, `outlook matches the real queue (run ${run})`);
-                predicted++;
+                if (FC) {
+                    const same = real.every((r, k) => ol.rows[k] && (r.skip ? ol.rows[k].skip : ol.rows[k].end === r.end));
+                    assert(same, `outlook matches the real queue (run ${run})`);
+                    predicted++;
+                }
                 continue;
             }
             const r = choose(g, SCENES, stops[rnd(stops.length)].index);
@@ -742,10 +796,17 @@ if (kids) { // v0.11.1: merge the workers' numbers
         badBars += r.badBars;
         for (const id of r.cardsSeen.__set) cardsSeen.add(id);
         for (const id of r.cardsListed.__set) cardsListed.add(id);
+        for (const id of r.cardsForecast.__set) cardsForecast.add(id);
+        for (const id of r.cardsWhole.__set) cardsWhole.add(id);
         yukiRuns += r.yukiRuns; predicted += r.predicted; diceInTasks += r.diceInTasks; pass += r.pass; fail += r.fail;
     }
 } else for (const run of myRuns()) { play(run, true); play(run, false); }
-if (SHARD) emit({ byCoil, medStats, deaths, stats, bands, fightStats, badBars, cardsSeen, cardsListed, yukiRuns, predicted, diceInTasks, pass, fail });
+if (SHARD) emit({ byCoil, medStats, deaths, stats, bands, fightStats, badBars, cardsSeen, cardsListed, cardsForecast, cardsWhole, yukiRuns, predicted, diceInTasks, pass, fail });
+if (BOTS_ONLY) { // v0.11.21: the games' stats only (the same file a full run writes)
+    if (STATS_OUT) writeFileSync(STATS_OUT, JSON.stringify({ games: GAMES, deaths, byCoil, fights: fightStats, badBars }));
+    console.log(`  ${GAMES} bot games each way, bots only (no rule checks)\n${pass} passed, ${fail} failed`);
+    process.exit(fail ? 1 : 0);
+}
 rs = 4243; // the checks below draw from their own stream
 setNoDice(false);
 // task mode: no die anywhere, in fights or story; classic: the die stays
@@ -774,6 +835,8 @@ setNoDice(false);
 // every card that was ever offered was also played at least once
 const all = cardsListed;
 if (FULL) for (const id of all) assert(cardsSeen.has(id), `card ${id} was played by a bot`); // coverage: the full run only
+if (FULL) for (const id of cardsWhole) assert(cardsForecast.has(id), `v0.11.21: card ${id}'s forecast was checked on a whole run (1 game in ${FC_EVERY})`);
+if (!FULL) console.log(`  coverage (quick, log only): ${cardsSeen.size} of ${all.size} offered cards played, ${cardsForecast.size} of ${cardsWhole.size} whole-run cards forecast-checked`); // v0.11.21
 assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
 // no dice on work cards: the same state gives the same result
 {
@@ -924,9 +987,9 @@ console.log(`  deaths, prologue (HP 0 or a beast): ${dl(deaths.pro, 'pro')}`);
 console.log(`  deaths, Act 1: ${dl(deaths.a1, 'a1')}`);
 console.log(`  Meditate: ${medStats.mer} meridian screens, ${medStats.bt} breakthroughs, ${medStats.warn} seal warnings; Act 1: ${medStats.a1bites} rewinds at Shen Qiu, ends on ${JSON.stringify(Object.fromEntries(Object.entries(medStats.a1coils).sort(([a], [b]) => a - b)))}`);
 assert(!FULL || medStats.a1bites >= 5, `bots rewind Act 1 and reach its end (${medStats.a1bites})`);
-console.log(`  ${stats.tasks.cards} cards run, ${stats.tasks.skipped} skipped, ${stats.tasks.collapses} collapses (HP 0), ${predicted} queues predicted, ${cardsSeen.size}/${all.size} cards played`);
+console.log(`  ${stats.tasks.cards} cards run, ${stats.tasks.skipped} skipped, ${stats.tasks.collapses} collapses (HP 0), ${predicted} queues predicted (1 game in ${FC_EVERY}), ${cardsSeen.size}/${all.size} cards played`);
 assert(badBars === 0, `no NaN / Infinity bar at the end of a bot game (${badBars})`);
 if (STATS_OUT) writeFileSync(STATS_OUT, JSON.stringify({ games: GAMES, deaths, byCoil, fights: fightStats, badBars })); // v0.11.3: for tools/sanity.mjs
-console.log(`  ${GAMES} games each way in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FULL ? '' : ' (quick: coverage checks skipped)'}`);
+console.log(`  ${GAMES} games each way in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FULL ? '' : ' (quick: coverage logged, not checked)'}`);
 console.log(`${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

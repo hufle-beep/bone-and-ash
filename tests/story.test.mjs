@@ -33,8 +33,9 @@ for (const run of kids ? [] : myRuns()) {
     for (; steps < 2500; steps++) {
         seen.add(g.scene);
         const v = sceneView(g, SCENES);
-        assert(typeof v.text === 'string' && v.text.length > 40, `text renders in ${g.scene}`);
-        assert(!/undefined|NaN|\[object/.test(v.text), `no undefined/NaN in ${g.scene}`);
+        // v0.11.21: per-step checks build their label only when they fail (about 14% of this test's time)
+        if (!(typeof v.text === 'string' && v.text.length > 40)) assert(false, `text renders in ${g.scene}`); else pass++;
+        if (/undefined|NaN|\[object/.test(v.text)) assert(false, `no undefined/NaN in ${g.scene}`); else pass++;
         if (v.end) { endings[g.flags.ending || 'none'] = (endings[g.flags.ending || 'none'] || 0) + 1; break; }
         const open = v.choices.filter((c) => !c.disabled);
         if (!open.length) { assert(false, `dead end at ${g.scene} (run ${run})`); break; }
@@ -52,7 +53,7 @@ for (const run of kids ? [] : myRuns()) {
             }
             assert(!g.combat, `combat ends (${g.scene}, run ${run})`);
         }
-        assert(Number.isFinite(g.james.hp) && g.james.hp >= 0 && Number.isFinite(g.james.qi), `bars finite in ${g.scene}`);
+        if (!(Number.isFinite(g.james.hp) && g.james.hp >= 0 && Number.isFinite(g.james.qi))) assert(false, `bars finite in ${g.scene}`); else pass++;
     }
     maxSteps = Math.max(maxSteps, steps);
     assert(steps < 2500, `run ${run} finishes`);
@@ -67,8 +68,8 @@ function walkFrom(g, entry, stopAt, budget = 1500) {
         seen.add(g.scene);
         if (stopAt.has(g.scene)) return true;
         const v = sceneView(g, SCENES);
-        assert(typeof v.text === 'string' && v.text.length > 40, `text renders in ${g.scene}`);
-        if (v.end) return true;
+        if (!(typeof v.text === 'string' && v.text.length > 40)) assert(false, `text renders in ${g.scene}`); else pass++;
+        if (v.end) return 'end'; // v0.11.21: an ending is not the target (the walk checks below want `=== true`)
         const open = v.choices.filter((c) => !c.disabled);
         if (!open.length) { assert(false, `dead end at ${g.scene}`); return false; }
         const r = choose(g, SCENES, open[rnd(open.length)].index);
@@ -79,13 +80,13 @@ function walkFrom(g, entry, stopAt, budget = 1500) {
 for (let run = 0; run < 600; run++) {
     const g = ensureBars(newGame(run + 77777));
     const r = run % 8; g.james.realm = r; g.yuki.realm = r; g.james.gu.tier = 1 + (run % 3); g.james.skills['Convergence Use'].tier = 1 + ((run + 1) % 3); g.james.gu.level = 1 + (run % 9); ensureBars(g);
-    assert(walkFrom(g, 'lf_enter', new Set(['dawn']), 1200) || true, 'lf walk');
+    assert(walkFrom(g, 'lf_enter', new Set(['dawn']), 1200) === true, `v0.11.21: the Long Forest walk reaches dawn (run ${run})`); // was `|| true`: could never fail
 }
 for (let run = 0; run < 300; run++) {
     const g = ensureBars(newGame(run + 55555)); g.minutes = 10 * 1440 + 360;
     Object.assign(g.flags, { long: true, forest_day: 3, vday: 3, ending: 'bluff', mei_party: true, ya_party: true, ya_met: true });
     g.rel = { 'Mei Lin': { f: 20, a: 5 }, Ya: { f: 40, a: 60 + (run % 40) }, Village: { f: 30, a: 0 } }; g.james.gu.level = 7; g.james.skills['Convergence Use'].level = 5; ensureBars(g);
-    walkFrom(g, 'bl_start', new Set(['ht_start']), 1500);
+    assert(walkFrom(g, 'bl_start', new Set(['ht_start']), 1500) === true, `v0.11.21: the Blackroot walk reaches the Heart (run ${run})`);
 }
 // Yuki's path: every last-night arrangement (lover / sister, with Mei Lin and Ya at different heats)
 for (let run = 0; run < 240; run++) {
@@ -93,7 +94,22 @@ for (let run = 0; run < 240; run++) {
     Object.assign(g.flags, { long: true, forest_day: 3, vday: 3, ending: 'bluff', mei_party: true, ya_party: true, ya_met: true, yk_path: run % 4 === 3 ? 'sister' : 'lover', trio: run % 3, yk_mei: run % 3 });
     g.rel = { 'Mei Lin': { f: 40, a: run % 2 ? 80 : 10 }, Ya: { f: 40, a: (run >> 1) % 2 ? 95 : 10 }, Yuki: { f: 150, a: 150 }, Village: { f: 30, a: 0 } };
     g.james.gu.level = 9; g.james.skills['Convergence Use'].level = 6; ensureBars(g);
-    walkFrom(g, run % 2 ? 'rt_start' : 'bl_start', new Set(['a1_end']), 2500);
+    assert(walkFrom(g, run % 2 ? 'rt_start' : 'bl_start', new Set(['a1_end']), 2500) === true, `v0.11.21: Yuki's path walk reaches the end of Act 1 (run ${run})`);
+}
+// v0.11.21: "All of you" (yk_night_all) on purpose: the random walks above reach it only by luck (missed under 4 of 10
+// other seeds), so the scene-coverage check held by chance. Yuki's lover path, Mei Lin and Ya both warm, the trio ready.
+for (let run = 0; run < 20; run++) {
+    const g = ensureBars(newGame(run + 43434)); g.minutes = 18 * 1440 + 360;
+    Object.assign(g.flags, { long: true, forest_day: 3, vday: 3, ending: 'bluff', mei_party: true, ya_party: true, ya_met: true, yk_path: 'lover', trio: 3, yk_mei: 2 });
+    g.rel = { 'Mei Lin': { f: 40, a: 80 }, Ya: { f: 40, a: 95 }, Yuki: { f: 150, a: 150 }, Village: { f: 30, a: 0 } };
+    g.james.gu.level = 9; g.james.skills['Convergence Use'].level = 6; ensureBars(g);
+    g.scene = 'rt_evening'; const e = SCENES.rt_evening.enter; if (e) e(g); seen.add('rt_evening');
+    const all = sceneView(g, SCENES).choices.find((c) => !c.disabled && /^All of you/.test(c.label));
+    assert(!!all, `v0.11.21: the last night offers "All of you" on Yuki's lover path with both warm (run ${run})`);
+    if (!all) continue;
+    choose(g, SCENES, all.index);
+    assert(g.scene === 'yk_night_all', `v0.11.21: "All of you" leads to yk_night_all (${g.scene})`);
+    assert(walkFrom(g, g.scene, new Set(['a1_end']), 1500) === true, `v0.11.21: from yk_night_all to the end of Act 1 (run ${run})`);
 }
 // a full hammerspace: every common item at its cap — no dead ends from hidden gathering choices
 const COMMON = ['jade_bracket', 'ghost_gill', 'river_cress', 'honeycomb', 'spirit_grass', 'beast_core', 'fowl_raw', 'crow_feather', 'hare_raw', 'bone_meal', 'venison', 'crimson_berry', 'crab_meat', 'lizard_egg'];
@@ -101,35 +117,36 @@ for (let run = 0; run < 200; run++) {
     const g = ensureBars(newGame(run + 33333));
     for (const id of COMMON) g.inventory[id] = itemCap(id);
     const r = run % 8; g.james.realm = r; g.yuki.realm = r; ensureBars(g);
-    walkFrom(g, run % 2 ? 'lf_enter' : 'arrival', new Set(['fo_start']), 1500);
+    assert(walkFrom(g, run % 2 ? 'lf_enter' : 'arrival', new Set(['fo_start']), 1500) === true, `v0.11.21: the full-hammerspace walk reaches Act 1 (run ${run})`);
     for (const id of COMMON) assert(g.inventory[id] <= itemCap(id) || !g.inventory[id], `cap holds for ${id}`);
 }
 // the Coil (task mode only, v0.9.4): a lost tribute, the Coil screen, the first dawn again, back into Day 1
 setNoDice(true);
 for (let run = 0; run < 40; run++) {
     const g = ensureBars(newGame(run + 22222)); g.scene = 'collectors_lost'; g.flags.ending = 'lost'; g.flags.long = true;
-    if (run % 2) { walkFrom(g, 'collectors_lost', new Set(['stream', 'fo_start']), 400); continue; }
+    if (run % 2) { assert(walkFrom(g, 'collectors_lost', new Set(['stream', 'fo_start']), 400) === true, `v0.11.21: a lost tribute walks back to Day 1 (run ${run})`); continue; }
     SCENES.collectors_lost.enter(g); seen.add('collectors_lost');
     choose(g, SCENES, SCENES.collectors_lost.choices.findIndex((c) => c.to === 'coil_end')); // half the runs bite the tail
-    walkFrom(g, 'coil_end', new Set(['stream', 'fo_start']), 400);
+    assert(walkFrom(g, 'coil_end', new Set(['stream', 'fo_start']), 400) === true, `v0.11.21: the Coil screen walks back to Day 1 (run ${run})`);
 }
 // v0.9.6: the warning before a sealing Foundation, and Act 1's Coil at Shen Qiu
 for (let run = 0; run < 40; run++) {
     const g = ensureBars(newGame(run + 44444, { closed: true })); g.james.primaries = 12; g.james.collaterals = 9 * (run % 3); g.james.saturation = 96; g.flags.bt_return = 'stream';
-    walkFrom(g, 'col_warn', new Set(['stream']), 400);
+    assert(walkFrom(g, 'col_warn', new Set(['stream']), 400) === true, `v0.11.21: the seal warning walks back to the stream (run ${run})`);
     const a = ensureBars(newGame(run + 45454)); a.scene = 'epilogue'; a.flags.ending = 'bluff'; a.minutes = 6 * 1440 + 900;
     choose(a, SCENES, 0); seen.add('fo_start');
     a.scene = 'rt_taken'; SCENES.rt_taken.enter(a); seen.add('rt_taken');
     choose(a, SCENES, SCENES.rt_taken.choices.findIndex((c) => c.to === 'coil_end'));
-    walkFrom(a, 'coil_end', new Set(['fo_start']), 400);
+    assert(walkFrom(a, 'coil_end', new Set(['fo_start']), 400), `v0.11.21: Act 1's Coil screen walks back to its first dawn or an ending (run ${run})`); // an ending is fine here (1 run in 40 reaches a1_end)
 }
 setNoDice(false);
 const unreached = Object.keys(SCENES).filter((k) => !seen.has(k));
 assert(!FULL || unreached.length === 0, `every scene reachable (unreached: ${unreached.join(', ')})`);
+if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).length - unreached.length} of ${Object.keys(SCENES).length} scenes reached`); // v0.11.21
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));
 console.log('fights', sorted(fights));
 console.log('endings', sorted(endings), 'longest run', maxSteps, 'scenes', Object.keys(SCENES).length);
 if (STATS_OUT) writeFileSync(STATS_OUT, JSON.stringify({ games: GAMES, fights, endings })); // v0.11.3: for tools/sanity.mjs
-console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FULL ? '' : ' (quick: coverage checks skipped)'}`);
+console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FULL ? '' : ' (quick: coverage logged, not checked)'}`);
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);
