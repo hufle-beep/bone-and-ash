@@ -47,4 +47,9 @@ export const TASK_HUBS = {
         },
         evening: nextEvening,
     },
+    lf_hub: { // v0.10.1: the Long Forest's camp in task mode — the season card and the camp chores queue; trips and trials stay story cards
+        menus: {},
+        own: 'Camp',
+        evening: 'lf_morning',
+    },
 };

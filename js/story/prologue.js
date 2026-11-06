@@ -12,7 +12,7 @@ import { forestScale, villageScale, grow, NEW_ITEMS } from './common.js';
 import './power.js';
 import './stomp_prologue.js';
 import './stomp_act1.js';
-import { yukiForms, itemNames, itemCap, isNoDice } from '../core/game.js';
+import { yukiForms, itemNames, itemCap, isNoDice, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, ensureBars, MAX_REALM } from '../core/game.js';
 import { WILDS, nightNext } from './wilds.js';
 import { ASHFALL, hubOf, nextEvening } from './ashfall.js';
 import { ACT1_ITEMS } from './act1_common.js';
@@ -820,7 +820,7 @@ export function longForestInstant(g) {
     g.james.satiety = 100; g.james.hp = null; g.james.qi = null; g.yuki.hp = null; g.yuki.qi = null;
     return ['Seasons pass. You stop counting them.', `Realm: ${realmName(7)}. GU, Convergence Use, Yuki's Fight and Qi Use: T10 L10.`, 'Extraordinary 8/8, their collaterals 28/28, junctions 10/10.', 'The hammerspace is full.'];
 }
-SCENES.clearing.choices.push({ text: 'Stay lost. (The Long Forest, in one step: Nascent Soul, every meridian open, everything T10 L10, the hammerspace full.)', do: longForestInstant, to: 'yk_choice' });
+SCENES.clearing.choices.push({ show: () => !isNoDice(), text: 'Stay lost. (The Long Forest, in one step: Nascent Soul, every meridian open, everything T10 L10, the hammerspace full.)', do: longForestInstant, to: 'yk_choice' });
 installYukiPath(SCENES);
 
 /* ---------- breakthrough: offered at calm moments whenever Saturation is 100% ---------- */
@@ -916,6 +916,56 @@ for (const id of ['stream', 'wilds', 'camp', 'night', 'village', 'ashfall', 'sup
 }
 
 installCoil(SCENES);
+
+/* ---------- v0.10.1: the Long Forest in task mode — gated behind the first Coil, climbed one season at a time ---------- */
+/** Task mode, the prologue's Coil 2 or later. Classic keeps the one-step button above. */
+export const lfOpen = (g) => isNoDice() && (g.coil?.n || 1) > 1 && (g.coil?.act || 0) === 0;
+/** The skill rank a season lifts GU, Convergence Use, Yuki's Fight and Qi Use to (rank = 10·(T−1) + L): 7 per rung, T10 L10 at the top. */
+export const lfRank = (r) => (r >= MAX_REALM ? 100 : 7 * r);
+export const LF_SEASON_MINUTES = 120;
+const rankOf = (s) => (s ? 10 * ((s.tier || 1) - 1) + (s.level || 1) : 0);
+const fromRank = (n) => { const t = Math.floor((n - 1) / 10) + 1; return { tier: t, level: n - 10 * (t - 1), xp: 0 }; };
+const SEASON_LINES = [
+    'You sit behind the falls until the moss grows over your boots. Yuki keeps the moss off hers. Something gives.',
+    'A season of not talking. Yuki says it was the best season of your life. She says it through the bond, which is cheating.',
+    'The leaves turn, fall, and come back. So do you, a rung higher. The forest pretends not to notice.',
+    'You count your breaths. Somewhere past a million you stop needing to.',
+    'Snow on the cave mouth, then rain, then green again. You were busy.',
+];
+export function lfSeason(g) {
+    const j = g.james, y = g.yuki;
+    if (j.realm >= MAX_REALM) return [];
+    const was = j.realm;
+    Object.assign(j, { primaries: 12, collaterals: 66, colSealed: false });
+    Object.assign(y, { primaries: 12, collaterals: 66 });
+    const r = was + 1;
+    j.realm = r; y.realm = r; j.saturation = 0;
+    const want = lfRank(r);
+    const lift = (o, k) => { if (rankOf(o[k]) < want) o[k] = fromRank(want); };
+    lift(j, 'gu'); lift(j.skills, 'Convergence Use'); lift(y, 'fight'); lift(y, 'qiUse');
+    if (r >= 7) Object.assign(j, { extra8: 8, extraCollaterals: 28, junctions: 10 });
+    else j.extra8 = Math.max(j.extra8 || 0, Math.ceil((8 * r) / 6));
+    j.hp = jamesHpMax(g); j.qi = jamesQiMax(g); y.hp = yukiHpMax(g); y.qi = yukiQiMax(g);
+    ensureBars(g);
+    g.flags.lf_seasons = (g.flags.lf_seasons || 0) + 1;
+    const s = j.gu;
+    return [SEASON_LINES[(g.flags.lf_seasons - 1) % SEASON_LINES.length], `Realm: ${realmName(was)} → ${realmName(r)}. GU, Convergence Use, Yuki's Fight and Qi Use: at least T${s.tier} L${s.level}.`];
+}
+SCENES.clearing.choices.push({ text: 'Stay lost. (The Long Forest: climb the realms one season at a time.)', show: lfOpen, to: 'lf_enter' });
+SCENES.arrival.choices.push({
+    text: 'You remember this. Stay lost. (The Long Forest.)', show: lfOpen, time: 30,
+    do: (g) => { for (const f of ['scanned', 'qi_toxic', 'bone_ok', 'sat_once']) g.flags[f] = true; return ['You skip the parts you know by heart, and walk the other way from the water.']; },
+    to: 'lf_enter',
+});
+SCENES.lf_hub.choices.push({
+    text: (g) => `Withdraw for a season: ${realmName(g.james.realm)} → ${realmName(g.james.realm + 1)}.`,
+    show: (g) => isNoDice() && g.james.realm < MAX_REALM, time: LF_SEASON_MINUTES, do: lfSeason, to: 'lf_hub',
+});
+{ // leaving in task mode: the hammerspace goes out full
+    const exit = SCENES.lf_exit.choices[0];
+    const was = exit.do;
+    exit.do = (g) => { const out = was(g); if (isNoDice()) { for (const id of LF_STOCK) g.inventory[id] = Math.max(g.inventory[id] || 0, itemCap(id)); out.push('The hammerspace is full: the Long Forest\'s pantry comes with you.'); } return out; };
+}
 
 export const START_SCENE = 'arrival';
 export const SCENE_COUNT = Object.keys(SCENES).length;

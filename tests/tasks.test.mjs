@@ -1,7 +1,8 @@
 // Run: node tests/tasks.test.mjs — task cards and the queue (v0.9.0, "Tasks (preview)").
 // Every card resolves; old saves get an empty queue; a dry run predicts the real run exactly;
 // 2,000 bot games in task mode reach the end with no dead end; the tribute outcomes are printed next to classic play.
-import { SCENES } from '../js/story/prologue.js';
+import { SCENES, lfOpen, lfSeason, lfRank, LF_STOCK, LF_SEASON_MINUTES } from '../js/story/prologue.js';
+import { itemCap, MAX_REALM } from '../js/core/game.js';
 import { TASK_HUBS } from '../js/story/task_hubs.js';
 import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, setNoDice, clockLabelSec, advance, STARVE_HP_PER_HOUR, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1 } from '../js/core/game.js';
 import { canPrimary, canColGroup, colGroupsOpen, sessionsToday, dcPrimary, dcColGroup, btTarget, canAnyMeridian, COL_GROUPS } from '../js/story/meridians.js';
@@ -130,11 +131,59 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     assert(k.james.realm === 1, 'no seal: the realm is kept on a rewind');
     // old saves keep what they have; the Long Forest opens everything
     const lf = ensureBars(newGame(44, { closed: true })); lf.scene = 'clearing';
-    choose(lf, SCENES, SCENES.clearing.choices.findIndex((c) => /Stay lost/.test(String(c.text))));
+    setNoDice(false); // v0.10.1: the one-step button is Classic's now
+    choose(lf, SCENES, SCENES.clearing.choices.findIndex((c) => /in one step/.test(String(c.text))));
+    setNoDice(true);
     assert(lf.james.primaries === 12 && lf.james.collaterals === 66 && lf.yuki.collaterals === 66, 'the Long Forest opens all 12 / 66');
     // the closed Day 1 scan text
     assert(/ash/.test(SCENES.yuki_check.text(ensureBars(newGame(45, { closed: true })))) && /Twelve primaries open/.test(SCENES.yuki_check.text(open)), 'Day 1 scan text follows the meridians');
     setNoDice(false);
+}
+// v0.10.1: the Long Forest in task mode — gated behind the first Coil, one season (+1 realm) per card
+{
+    setNoDice(true);
+    const labels = (g) => sceneView(g, SCENES).choices.filter((c) => !c.disabled).map((c) => c.label);
+    const g = ensureBars(newGame(61, { closed: true }));
+    assert(!labels(g).some((l) => /Stay lost/.test(l)), 'Coil 1: no Stay lost on the arrival');
+    g.scene = 'clearing';
+    assert(!labels(g).some((l) => /Stay lost/.test(l)) && !lfOpen(g), 'Coil 1: no Stay lost in the clearing');
+    setNoDice(false);
+    assert(labels(g).some((l) => /in one step/.test(l)) && !labels(g).some((l) => /one season at a time/.test(l)), 'Classic: the one-step button, not the seasons');
+    setNoDice(true);
+    endCoil(g, 'choice', 'clearing'); rewind(g);
+    assert(g.coil.n === 2 && g.scene === 'arrival' && lfOpen(g), 'Coil 2: the Long Forest opens');
+    assert(labels(g).some((l) => /You remember this\. Stay lost/.test(l)), 'Coil 2: Stay lost on the arrival');
+    const c2 = structuredClone(g); c2.scene = 'clearing';
+    assert(labels(c2).some((l) => /one season at a time/.test(l)) && !labels(c2).some((l) => /in one step/.test(l)), 'Coil 2: Stay lost in the clearing (seasons), no one-step button');
+    choose(g, SCENES, sceneView(g, SCENES).choices.find((c) => /You remember this\. Stay lost/.test(c.label)).index);
+    assert(g.scene === 'lf_enter' && g.flags.longforest && g.flags.lf_active && g.flags.bone_ok, 'the arrival leads into the Long Forest');
+    choose(g, SCENES, 0);
+    assert(g.scene === 'lf_hub' && isTaskHub(g) && coilActive(g), 'the camp is a task screen, inside the Coil');
+    const season = taskCards(g, SCENES).find((c) => /^Withdraw for a season/.test(c.label));
+    assert(season && season.kind === 'chore' && season.minutes === LF_SEASON_MINUTES && /Mortal Vessel → Foundation/.test(season.label), 'the season card: a chore, 2 h, Mortal Vessel → Foundation');
+    const q = taskQueue(g); q.push(season.id, season.id);
+    const ol = outlook(g, SCENES);
+    const m0 = g.minutes;
+    runTask(g, SCENES, q.shift());
+    assert(g.james.realm === 1 && g.yuki.realm === 1 && g.james.primaries === 12 && g.james.collaterals === 66 && g.yuki.collaterals === 66 && !g.james.colSealed, 'a season: Foundation, every primary and collateral open, no seal');
+    assert(g.james.gu.tier === 1 && g.james.gu.level === 7 && g.james.skills['Convergence Use'].level === 7 && g.yuki.fight.level === 7 && g.yuki.qiUse.level === 7, 'a season lifts the skills to T1 L7');
+    assert(g.minutes - m0 === LF_SEASON_MINUTES && g.james.saturation === 0 && g.james.hp === jamesHpMax(g), 'a season takes 2 h, Saturation 0, bars full');
+    runTask(g, SCENES, q.shift());
+    assert(g.james.realm === 2 && ol.rows[1] && ol.rows[1].end === g.minutes, 'two queued seasons: Core Formation, and the forecast matched');
+    for (let i = 0; i < 20; i++) { g.james.satiety = 100; lfSeason(g); }
+    assert(g.james.realm === MAX_REALM && g.james.gu.tier === 10 && g.james.gu.level === 10 && g.yuki.qiUse.tier === 10 && g.james.extra8 === 8 && g.james.extraCollaterals === 28 && g.james.junctions === 10, 'the full climb: Heavenly Immortal, T10 L10, every extra meridian');
+    assert(!taskCards(g, SCENES).some((c) => /^Withdraw for a season/.test(c.label)), 'no season card at the top of the ladder');
+    assert(lfRank(7) === 49 && lfRank(10) === 70 && lfRank(14) === 100, 'ranks per rung: 49 / 70 / 100');
+    const hi = ensureBars(newGame(62, { closed: true })); hi.james.gu = { tier: 10, level: 10, xp: 0 }; hi.james.realm = 1; hi.james.colSealed = true;
+    lfSeason(hi);
+    assert(hi.james.gu.tier === 10 && hi.james.realm === 2 && !hi.james.colSealed && hi.james.collaterals === 66, 'a season never lowers a skill, and lifts a seal');
+    goTo(g, SCENES, 'lf_exit'); choose(g, SCENES, 0);
+    assert(g.scene === 'dawn' && !g.flags.lf_active && LF_STOCK.every((id) => g.inventory[id] >= itemCap(id) - 1), 'leaving: Day 4 at dawn, the hammerspace full (less breakfast)');
+    endCoil(g, 'choice', 'stream'); rewind(g);
+    assert(g.james.realm === MAX_REALM && !g.inventory.hare_raw && g.coil.n === 3 && lfOpen(g), 'a rewind keeps the realm, empties the hammerspace, and the forest stays open');
+    setNoDice(false);
+    const cl = ensureBars(newGame(63)); goTo(cl, SCENES, 'lf_exit'); choose(cl, SCENES, 0);
+    assert(!cl.inventory.hare_raw, 'Classic: leaving the walkable forest stocks nothing');
 }
 // v0.9.6: Act 1's Coil — Day 8 dawn, ends at Shen Qiu (rt_taken), accept or rewind; state 4 → 5
 {
@@ -356,6 +405,7 @@ function play(run, tasks) {
         }
         let open = v.choices.filter((c) => !c.disabled);
         if (!open.length) { assert(false, `dead end at ${g.scene} (run ${run})`); return false; }
+        if (tasks && /^(arrival|clearing)$/.test(g.scene)) open = open.filter((c) => !/Stay lost/.test(c.label)); // v0.10.1: the balance bots stay out of the Long Forest
         if (tasks && g.scene === 'collectors_lost') open = open.filter((c) => (g.coil.n < 3) === /Bite the tail/.test(c.label)); // bots try three Coils
         if (tasks && g.scene === 'coil_end' && g.coil.why === 'tribute') open = open.filter((c) => /^Bite/.test(c.label));
         if (tasks && g.scene === 'rt_taken') { const bite = run % 5 === 0 && g.coil.act === 1 && !bitShen; open = open.filter((c) => bite === /Bite the tail/.test(c.label)); if (bite) bitShen = true; } // 1 run in 5 rewinds Act 1 at Shen Qiu once

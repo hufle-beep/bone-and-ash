@@ -106,4 +106,4 @@ Docs set; saves (slots, autosave 15 s, rolling backups, format number, FNV-1a ch
 - "Root-kin" means the bonded animal (canon), even though Selene uses Root-Kin for the people.
 - Yuki's human look: cat ears, tail, qipao (canon); the black dress is an outfit.
 - James is 40 and single (owner's spec, differs from the SillyTavern canon on purpose).
-- The Long Forest becomes a New Game preset ("Nascent Soul start").
+- The Long Forest: ~~a New Game preset~~ (replaced 2026-11-06, v0.10.1): in task mode it opens from the prologue's Coil 2 ("Stay lost" on the arrival or in the clearing); the walkable forest's camp has a queueable "Withdraw for a season" card, +1 realm each, up to Heavenly Immortal. Classic keeps the one-step button.
