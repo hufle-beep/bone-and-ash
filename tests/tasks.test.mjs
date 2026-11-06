@@ -7,7 +7,7 @@ import { FORM_LINES, hasForm, cuRank, actionOpen, actionLabel, fragileKnife, STO
 import { TASK_HUBS } from '../js/story/task_hubs.js';
 import { markDaily, daily } from '../js/story/common.js';
 import { wakeDay, exLevel, sleepUntil, clockParts } from '../js/core/game.js';
-import { yukiSpeed } from '../js/core/tasks.js';
+import { yukiSpeed, setDryClone } from '../js/core/tasks.js';
 import { e8Hours, ecHours, jnHours } from '../js/story/meridians.js';
 import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, setNoDice, isNoDice, clockLabelSec, advance, STARVE_HP_PER_HOUR, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1, bumpRel as relBump, startActCoil, REL_CATCHUP } from '../js/core/game.js';
 import { canPrimary, canColGroup, colGroupsOpen, sessionsToday, dcPrimary, dcColGroup, btTarget, canAnyMeridian, COL_GROUPS, priHours, colHours, merMinutesOf } from '../js/story/meridians.js';
@@ -51,6 +51,25 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     const pid = fc.find((c) => c.group === 'Palisade').id, fm0 = taskMinutes(f, SCENES, pid), f0 = f.minutes;
     runTask(f, SCENES, pid);
     assert(f.scene === 'fo_ashfall' && f.minutes - f0 === fm0 && taskCards(f, SCENES).filter((c) => c.group === 'Palisade').every((c) => c.status === 'tomorrow'), 'v0.11.19: a palisade card runs as forecast, stays on the screen, and is done for the day');
+}
+// v0.11.20: the lean dry-run copy gives exactly what the old full copy gave (forecast rows, card minutes)
+{
+    setNoDice(true);
+    const hubs = ['camp', 'stream', 'wilds', 'village', 'ashfall', 'fo_ashfall', 'rr_hub', 'dw_hub', 'ah_hub', 'heart_hub', 'rt_camp', 'rt_ashfall'];
+    const day0 = { camp: 0, stream: 0, wilds: 1, village: 3, ashfall: 4, fo_ashfall: 7, rr_hub: 10, dw_hub: 11, ah_hub: 13, heart_hub: 15, rt_camp: 18, rt_ashfall: 19 };
+    let same = 0, diff = [];
+    for (let i = 0; i < 200; i++) {
+        const hub = hubs[i % hubs.length];
+        const g = ensureBars(newGame(400 + i)); g.scene = hub; g.minutes = day0[hub] * 1440 + (7 + (i % 9)) * 60; g.james.qi = 20 + (i % 20); g.james.satiety = 15 + (i * 7) % 80;
+        Object.assign(g.flags, { long: true, forest_day: 2, vday: 2 });
+        for (let k = 0; k < 30; k++) g.log.push({ at: g.minutes, scene: hub, lines: ['filler line to make the log heavy'] });
+        const cards = taskCards(g, SCENES).filter((c) => c.status === 'open');
+        for (let k = 0; k < 6 && cards.length; k++) taskQueue(g).push(cards[(i * 3 + k * 5) % cards.length].id);
+        setDryClone(true); const a = JSON.stringify([outlook(g, SCENES), cards.map((c) => taskMinutes(g, SCENES, c.id))]);
+        setDryClone(false); const b = JSON.stringify([outlook(g, SCENES), cards.map((c) => taskMinutes(g, SCENES, c.id))]);
+        if (a === b) same++; else if (diff.length < 3) diff.push(`${hub} #${i}`);
+    }
+    assert(same === 200, `v0.11.20: the lean dry run = the full copy on 200 queues (${same}; differs: ${diff.join(', ')})`);
 }
 // old state (v1) → empty queue
 { const old = ensureBars(newGame(5)); delete old.tasks; old.v = 1; migrate(old); assert(old.v === SAVE_VERSION && Array.isArray(old.tasks.queue) && old.tasks.queue.length === 0 && Object.keys(old.tasks.fam).length === 0 && old.tasks.yuki.on === false, 'v1 save gets an empty queue and no familiarity'); }

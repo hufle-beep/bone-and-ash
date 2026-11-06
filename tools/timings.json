@@ -1,0 +1,25 @@
+{
+  "note": "Written by every full check (tools/check.mjs); committed with each push.",
+  "when": "2026-11-06T20:30:47.588Z",
+  "cores": 2,
+  "jobs": 3,
+  "total": 87.6,
+  "steps": {
+    "browser2": 24.7,
+    "syntax": 1.2,
+    "consistency": 0.1,
+    "rules": 0.1,
+    "engine": 0.1,
+    "saves": 0.4,
+    "data": 0.2,
+    "lint": 0.2,
+    "part:fallout": 1.2,
+    "part:blackroot": 3.5,
+    "part:heart": 1.9,
+    "part:return": 1.4,
+    "browser1": 46.3,
+    "tasks": 80.1,
+    "story": 7.4,
+    "sanity": 0.1
+  }
+}

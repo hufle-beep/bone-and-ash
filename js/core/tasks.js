@@ -380,7 +380,20 @@ export function runTask(g, scenes, id) {
     return { lines, fail, stopped };
 }
 
-const clone = (g) => JSON.parse(JSON.stringify(g));
+const fullClone = (g) => JSON.parse(JSON.stringify(g));
+/**
+ * v0.11.20: the dry runs' copy (taskMinutes, the forecast) leaves out the journal log (about 3/4 of a save, never read by the
+ * rules) and shares the Coil snapshot (only ever copied from, never changed in place): about 6× faster, the same numbers.
+ */
+export function dryClone(g) {
+    const { log, coil, ...rest } = g;
+    const c = JSON.parse(JSON.stringify(rest));
+    c.log = [];
+    if (coil) { const { snap, ...cr } = coil; c.coil = JSON.parse(JSON.stringify(cr)); if (snap !== undefined) c.coil.snap = snap; }
+    return c;
+}
+export const setDryClone = (full) => { clone = full ? fullClone : dryClone; }; // tests: compare against the old full copy
+let clone = dryClone;
 
 /** Game minutes card `id` will take from here (a dry run on a copy: no dice, so the prediction is exact). */
 export function taskMinutes(g, scenes, id) {

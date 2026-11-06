@@ -200,7 +200,11 @@ def saves(pg, url):
         else: notes.append('backup restored')
         check_text(pg, 'after a backup restore')
 
-def main():
+def main(part=0):
+    """v0.11.20: part 1 (Incremental Mode, the reload, Story Mode, two tabs) and part 2 (Saves, the menu, tooltips and scroll,
+    the resting places) can run side by side, each with its own browser and server; no part = everything, in order."""
+    one, two = part in (0, 1), part in (0, 2)
+    n1 = n3 = 0; tabs = []
     port = free_port()
     srv = subprocess.Popen([sys.executable, '-m', 'http.server', str(port)], cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     time.sleep(0.8)
@@ -211,59 +215,63 @@ def main():
             ctx = b.new_context(viewport={'width': 390, 'height': 844}, service_workers='block', permissions=['clipboard-read', 'clipboard-write'])
             pg = ctx.new_page()
             pg.on('pageerror', lambda e: fails.append(f"page error: {e}"))
-            # 1. Incremental Mode
-            fresh(pg, url, "localStorage.clear(); localStorage.setItem('boneash.testspeeds','1'); localStorage.setItem('boneash.speed','10')")
-            if 'Day 1' not in pg.evaluate("document.body.innerText"): fails.append('Incremental Mode: the new game did not start on Day 1')
-            n1 = taps(pg, 40, random.Random(7), 'Incremental Mode', 'button.card:not([disabled])[data-story], button.card:not([disabled])[data-run], button.card:not([disabled])[data-act]')
-            tabs = visit_tabs(pg, 'Incremental Mode')
-            # 2. a running bar survives a reload: a fixed task screen (the Long Forest camp on Coil 2, a v0.11.7 test save), so the path never varies
-            fresh(pg, url, "s => { localStorage.setItem('boneash.auto', s); localStorage.setItem('boneash.speed', '1'); }", (ROOT / 'saves/v0.11.7-long-forest-coil2.json').read_text())  # the measured card runs at x1
-            long = pg.eval_on_selector_all('button.card[data-run]:not([disabled])', "els => els.filter(e => / h/.test(e.querySelector('.len')?.textContent || '') && !/at once/.test(e.textContent)).map(e => e.dataset.run)")
-            if not long: fails.append('reload: no task screen with an hour-long card reached; on screen: ' + ' | '.join(pg.eval_on_selector_all('#view button', 'els => els.slice(0, 8).map(e => e.textContent.slice(0, 50))')))
-            else:
-                pg.click(f'button.card[data-run="{long[0]}"]'); pg.wait_for_timeout(2200)
-                w1 = pg.eval_on_selector('#nowbar', 'e => parseFloat(e.dataset.v) * 100')
-                pg.reload(); pg.wait_for_timeout(500); enter(pg)
-                w2 = pg.eval_on_selector('#nowbar', 'e => parseFloat(e.dataset.v) * 100') if pg.query_selector('#nowbar') else 0
-                if not (w1 > 5 and abs(w1 - w2) < 3): fails.append(f'reload: the bar was {w1}% before and {w2}% after')
-                else: notes.append(f'reload kept the bar ({w1:.0f}% → {w2:.0f}%)')
-            # 3. Story Mode
-            fresh(pg, url, "localStorage.clear(); localStorage.setItem('boneash.tasks','0')")
-            n3 = taps(pg, 25, random.Random(11), 'Story Mode', 'button.choice:not([disabled])[data-choice], button.choice:not([disabled])[data-act]')
-            visit_tabs(pg, 'Story Mode')
-            # 4. two tabs (v0.11.8): a tab that closes never writes its older game over a newer save from another tab
-            fresh(pg, url, "localStorage.clear(); localStorage.setItem('boneash.speed','10'); localStorage.setItem('boneash.testspeeds','1')")
-            pg.evaluate("1")
-            pb = ctx.new_page(); pb.goto(url); pb.wait_for_timeout(500); enter(pb)
-            before = pb.evaluate("localStorage.getItem('boneash.auto')")
-            for _ in range(6):
-                bt = pb.query_selector_all('button.card:not([disabled])[data-story], button.card:not([disabled])[data-run]')
-                if not bt: break
-                try: bt[0].click(timeout=3000)
-                except Exception: pass
-                pb.wait_for_timeout(300); wait_bar(pb, 3000)
-            newer = pb.evaluate("localStorage.getItem('boneash.auto')")
-            pg.goto(url.replace('index.html', 'art/bg/CREDITS.md'))  # the older tab closes: its save on close fires
-            after = pg.evaluate("localStorage.getItem('boneash.auto')")
-            if newer == before: fails.append('two tabs: the second tab never saved, nothing to compare')
-            elif after != newer: fails.append('two tabs: the closing tab wrote over the newer save')
-            else: notes.append('two tabs: the newer save kept')
-            pb.close()
-            # 5. Saves (v0.11.9)
-            saves(pg, url)
-            # 6. the main menu (v0.11.10)
-            main_menu(pg, url)
-            # 7. tooltip, bars, scroll (v0.11.11)
-            comfort(pg, url)
-            # 8. Meditate only on the resting places, queueable there (v0.11.14)
-            rest_places(pg, url)
+            if one:
+              # 1. Incremental Mode
+              fresh(pg, url, "localStorage.clear(); localStorage.setItem('boneash.testspeeds','1'); localStorage.setItem('boneash.speed','10')")
+              if 'Day 1' not in pg.evaluate("document.body.innerText"): fails.append('Incremental Mode: the new game did not start on Day 1')
+              n1 = taps(pg, 40, random.Random(7), 'Incremental Mode', 'button.card:not([disabled])[data-story], button.card:not([disabled])[data-run], button.card:not([disabled])[data-act]')
+              tabs = visit_tabs(pg, 'Incremental Mode')
+              # 2. a running bar survives a reload: a fixed task screen (the Long Forest camp on Coil 2, a v0.11.7 test save), so the path never varies
+              fresh(pg, url, "s => { localStorage.setItem('boneash.auto', s); localStorage.setItem('boneash.speed', '1'); }", (ROOT / 'saves/v0.11.7-long-forest-coil2.json').read_text())  # the measured card runs at x1
+              long = pg.eval_on_selector_all('button.card[data-run]:not([disabled])', "els => els.filter(e => / h/.test(e.querySelector('.len')?.textContent || '') && !/at once/.test(e.textContent)).map(e => e.dataset.run)")
+              if not long: fails.append('reload: no task screen with an hour-long card reached; on screen: ' + ' | '.join(pg.eval_on_selector_all('#view button', 'els => els.slice(0, 8).map(e => e.textContent.slice(0, 50))')))
+              else:
+                  pg.click(f'button.card[data-run="{long[0]}"]'); pg.wait_for_timeout(2200)
+                  w1 = pg.eval_on_selector('#nowbar', 'e => parseFloat(e.dataset.v) * 100')
+                  pg.reload(); pg.wait_for_timeout(500); enter(pg)
+                  w2 = pg.eval_on_selector('#nowbar', 'e => parseFloat(e.dataset.v) * 100') if pg.query_selector('#nowbar') else 0
+                  if not (w1 > 5 and abs(w1 - w2) < 3): fails.append(f'reload: the bar was {w1}% before and {w2}% after')
+                  else: notes.append(f'reload kept the bar ({w1:.0f}% → {w2:.0f}%)')
+              # 3. Story Mode
+              fresh(pg, url, "localStorage.clear(); localStorage.setItem('boneash.tasks','0')")
+              n3 = taps(pg, 25, random.Random(11), 'Story Mode', 'button.choice:not([disabled])[data-choice], button.choice:not([disabled])[data-act]')
+              visit_tabs(pg, 'Story Mode')
+              # 4. two tabs (v0.11.8): a tab that closes never writes its older game over a newer save from another tab
+              fresh(pg, url, "localStorage.clear(); localStorage.setItem('boneash.speed','10'); localStorage.setItem('boneash.testspeeds','1')")
+              pg.evaluate("1")
+              pb = ctx.new_page(); pb.goto(url); pb.wait_for_timeout(500); enter(pb)
+              before = pb.evaluate("localStorage.getItem('boneash.auto')")
+              for _ in range(6):
+                  bt = pb.query_selector_all('button.card:not([disabled])[data-story], button.card:not([disabled])[data-run]')
+                  if not bt: break
+                  try: bt[0].click(timeout=3000)
+                  except Exception: pass
+                  pb.wait_for_timeout(300); wait_bar(pb, 3000)
+              newer = pb.evaluate("localStorage.getItem('boneash.auto')")
+              pg.goto(url.replace('index.html', 'art/bg/CREDITS.md'))  # the older tab closes: its save on close fires
+              after = pg.evaluate("localStorage.getItem('boneash.auto')")
+              if newer == before: fails.append('two tabs: the second tab never saved, nothing to compare')
+              elif after != newer: fails.append('two tabs: the closing tab wrote over the newer save')
+              else: notes.append('two tabs: the newer save kept')
+              pb.close()
+            if two:
+                # 5. Saves (v0.11.9)
+                saves(pg, url)
+                # 6. the main menu (v0.11.10)
+                main_menu(pg, url)
+                # 7. tooltip, bars, scroll (v0.11.11)
+                comfort(pg, url)
+                # 8. Meditate only on the resting places, queueable there (v0.11.14)
+                rest_places(pg, url)
             b.close()
     finally:
         srv.terminate()
-    if n1 < 30: fails.append(f'Incremental Mode: only {n1} taps possible')
-    if n3 < 15: fails.append(f'Story Mode: only {n3} taps possible')
+    if one and n1 < 30: fails.append(f'Incremental Mode: only {n1} taps possible')
+    if one and n3 < 15: fails.append(f'Story Mode: only {n3} taps possible')
     if fails:
         print('\n'.join(fails[:20])); sys.exit(1)
-    print(f'{n1} + {n3} taps, {len(tabs)} tabs each mode, {"; ".join(notes)}, no errors')
+    print(f'{f"part {part}: " if part else ""}{f"{n1} + {n3} taps, {len(tabs)} tabs each mode; " if one else ""}{"; ".join(notes)}, no errors')
 
-main()
+if __name__ == '__main__':
+    pt = sys.argv.index('--part') if '--part' in sys.argv else -1
+    main(int(sys.argv[pt + 1]) if pt >= 0 else 0)
