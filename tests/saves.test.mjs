@@ -1,5 +1,6 @@
 // Run: node tests/saves.test.mjs — every file in saves/ must load and play on; the save format's safety checks.
 import { readdirSync, readFileSync } from 'node:fs';
+import { gunzipSync, gzipSync } from 'node:zlib';
 import { SCENES } from '../js/story/prologue.js';
 import { newGame, ensureBars, startCombat, combatStep, serialize, deserialize, peekSave, SaveError, SAVE_VERSION, fnv1a } from '../js/core/game.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
@@ -10,12 +11,14 @@ const kindOf = (fn) => { try { fn(); return 'ok'; } catch (e) { return e instanc
 
 // 1. every file in saves/ loads, round-trips and plays 200 steps
 const dir = new URL('../saves/', import.meta.url);
-const files = readdirSync(dir).filter((f) => f.endsWith('.json'));
+const files = readdirSync(dir).filter((f) => /\.(json|txt)$/.test(f));
+// v0.11.9: a save shared to GitHub is packed: 'BAZ1:' + base64(gzip(save)), as main.js packText writes it
+const unpack = (t) => (t.trim().startsWith('BAZ1:') ? gunzipSync(Buffer.from(t.trim().slice(5), 'base64')).toString('utf8') : t);
 assert(files.length > 0, 'saves/ has files');
 let rs = 4242;
 const rnd = (n) => { rs = (rs * 1103515245 + 12345) >>> 0; return (rs >>> 8) % n; };
 for (const f of files) {
-    const raw = readFileSync(new URL(f, dir), 'utf8');
+    const raw = unpack(readFileSync(new URL(f, dir), 'utf8'));
     let g;
     try { g = deserialize(raw); } catch (e) { assert(false, `${f} loads (${e.message})`); continue; }
     assert(true, `${f} loads`);
@@ -38,6 +41,7 @@ for (const f of files) {
 // 2. the format's safety checks
 const g = ensureBars(newGame(7));
 const good = serialize(g);
+assert(unpack('BAZ1:' + gzipSync(good).toString('base64')) === good, 'a packed save unpacks to the same text');
 const outer = JSON.parse(good);
 assert(outer.fmt === 1 && outer.sum === fnv1a(outer.data), 'wrapper has fmt and checksum');
 assert(kindOf(() => deserialize(good)) === 'ok', 'a good save loads');

@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.8 | (this push) | The save-on-close guard. Same save state as 0.11.5. |
+| 0.11.9 | (this push) | Saves: share, export all, reminder, Backups, Copy status. Same save state as 0.11.5 (the new key `boneash.exp` is outside the save). |
+| 0.11.8 | `3c2c33f` | The save-on-close guard. Same save state as 0.11.5. |
 | 0.11.7 | `ed8c980` | Tests and tools only; the game is the same as 0.11.5. **Pushed after a failed full check** (the browser test's reload part, flaky); fixed in 0.11.8. |
 | 0.11.6 | `6e2cf70` | Docs only; the game is the same as 0.11.5. |
 | 0.11.5 | `6de8d8e` | The safety push. Same save state as 0.9.6 plus the optional `runPart` (an older version ignores it). Before it: the branch `fallback/2026-11-06-before-pivot` (= 0.11.4), never deleted. |

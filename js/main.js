@@ -71,13 +71,24 @@ let resumeSpeed = (() => { const v = Number(store.get(SPEED_KEY)); return SPEEDS
 let speed = 0;
 let oneShot = false; // a card tapped while paused runs at resumeSpeed, then the game pauses again
 let pauseScene = null; // the scene the pause rule last saw
-function pauseNow() { if (speed) resumeSpeed = speed; speed = 0; oneShot = false; }
+function pauseNow(cause = 'paused') { if (speed) resumeSpeed = speed; speed = 0; oneShot = false; plog(cause); }
+// v0.11.9: the last 10 pause and speed changes with their cause, for "Copy status as text" (memory only, never saved).
+// plog('not logged') in tick() and render() catches any change that came from somewhere else (the automatic unpause hunt).
+const pauseLog = [];
+let plLast = 'paused';
+function plog(cause) {
+    const st = speed ? `×${speed}${oneShot ? ' (one card)' : ''}` : 'paused';
+    if (st === plLast) return;
+    pauseLog.push({ t: Date.now(), from: plLast, to: st, cause, scene: g?.scene || '?' });
+    if (pauseLog.length > 10) pauseLog.shift();
+    plLast = st;
+}
 /** v0.10.2: pause on every new scene (task mode). */
-function scenePause() { if (!taskMode || !g || recovery) return; if (g.scene !== pauseScene) { if (pauseScene !== null) pauseNow(); pauseScene = g.scene; } }
+function scenePause() { if (!taskMode || !g || recovery) return; if (g.scene !== pauseScene) { if (pauseScene !== null) pauseNow('new scene'); pauseScene = g.scene; } }
 /** A tapped card's bar has finished: back to paused if it was a one-off. */
-function endOneShot() { if (oneShot) { oneShot = false; speed = 0; } }
+function endOneShot(cause = 'the tapped card finished') { if (oneShot) { oneShot = false; speed = 0; plog(cause); } }
 /** Tap while paused: run this one card now, then pause again. */
-function tapRun() { if (!speed) { speed = resumeSpeed || 1; oneShot = true; lastTickAt = Date.now(); } }
+function tapRun() { if (!speed) { speed = resumeSpeed || 1; oneShot = true; lastTickAt = Date.now(); plog('card tapped while paused'); } }
 let lastTickAt = Date.now();
 let running = null; // { id, label, done, ms, m0, mins } — done = ms of bar filled (at ×1) — the head of the queue while its bar fills (v0.11.5: its share is saved as g.runPart, so a reopen continues it)
 let lastRunSave = 0; // v0.11.5: autosave every 15 s while a bar runs
@@ -139,6 +150,7 @@ function startNext() {
 }
 function stopRunning() { running = null; }
 function tick() {
+    plog('not logged');
     const now = Date.now();
     const dt = Math.min(1000, now - lastTickAt); // a sleeping phone doesn't fast-forward more than a second
     lastTickAt = now;
@@ -185,7 +197,7 @@ function checkDeathPause(nowMin) {
     if (!pauseDeath || !speed || !lastFc?.death) return;
     const key = `${g.coil?.act || 0}:${g.coil?.n || 1}:${lastFc.death.at}`;
     if (deathWarned === key || lastFc.death.at - nowMin > 60) return;
-    deathWarned = key; pauseNow();
+    deathWarned = key; pauseNow('forecast death ahead');
     lastResult = { lines: [`Paused: the forecast says James ${lastFc.death.cause === 'hunger' ? 'starves' : 'collapses'} at ${clockLabelG(g, lastFc.death.at)} on this queue. Fix the queue, or press Resume to carry on.`], fail: true };
     render();
 }
@@ -358,6 +370,7 @@ function autosave() {
     writeKey(AUTO, s);
     lastWritten = s;
     rolling(s);
+    expRemind();
     lastRunSave = Date.now();
     if (g.scene !== prevScene && RISKY_SCENES[g.scene]) backupBefore(RISKY_SCENES[g.scene]);
     prevScene = g.scene;
@@ -384,6 +397,120 @@ function backupList() {
     return Object.keys(names).map((k) => ({ k, name: names[k], raw: store.get(BAK_KEY(k)), when: m.when?.[k] })).filter((b) => b.raw);
 }
 const descOf = (raw) => { const p = peekSave(raw); return p ? `${sceneTitle(p.scene)} — ${clockLabel(p.minutes)}` : 'Unreadable'; };
+
+/* ---------------- saves push (v0.11.9): share, export all, reminder, status ---------------- */
+
+// A packed save is 'BAZ1:' + base64(gzip(the save text)); loading accepts it or plain JSON.
+async function packText(text) {
+    try {
+        const cs = new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'));
+        const buf = new Uint8Array(await new Response(cs).arrayBuffer());
+        let bin = ''; for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000));
+        return 'BAZ1:' + btoa(bin);
+    } catch { return null; }
+}
+async function unpackText(text) {
+    const t = String(text || '').trim();
+    if (!t.startsWith('BAZ1:')) return t;
+    try {
+        const bin = atob(t.slice(5)); const buf = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+        return await new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+    } catch { throw new SaveError('unreadable', 'The packed save is not readable (damaged or cut off).'); }
+}
+function copyText(text, done, fail) {
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(text).then(done, () => fallbackCopy(text, done, fail)); else fallbackCopy(text, done, fail);
+}
+
+// Share to GitHub without a token (Selene's shareToGitHub): GitHub's own new-file page with the save filled in.
+const GH_REPO = 'hufle-beep/bone-and-ash', GH_DIR = 'saves', GH_URL_MAX = 7500;
+function ghFileName(ext) {
+    const d = new Date(), p = (n) => String(n).padStart(2, '0');
+    const when = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}`;
+    return `${when}-${taskMode ? 'incremental' : 'story'}-${String(g.scene).replace(/[^\w-]+/g, '-')}.${ext}`;
+}
+function openOut(url) { const a = document.createElement('a'); a.href = url; a.target = '_blank'; a.rel = 'noopener'; document.body.appendChild(a); a.click(); a.remove(); }
+async function shareToGitHub() {
+    autosave();
+    const json = serialize(g);
+    const packed = await packText(json);
+    const body = packed || json;
+    const base = `https://github.com/${GH_REPO}/new/main?filename=${encodeURIComponent(`${GH_DIR}/${ghFileName(packed ? 'txt' : 'json')}`)}`;
+    const full = `${base}&value=${encodeURIComponent(body)}`;
+    expMark();
+    if (full.length <= GH_URL_MAX) { openOut(full); note('GitHub opens with the save filled in. Sign in, then tap "Commit changes".'); return; }
+    const go = (ok) => { openOut(base); note(ok ? `Save copied (${Math.round(body.length / 1024)} KB): too long for a link. On GitHub, paste it into the empty file, then tap "Commit changes".` : 'The save could not be copied. Use "Download save file" instead.'); };
+    copyText(body, () => go(true), () => go(false));
+}
+
+// Export all / restore all: the autosave, the 3 slots and the backups in one file. Storage keys stay the same.
+const BAK_NAMES = ['5m', '30m', '2h', 'before'];
+function allSaves() {
+    const slots = {}, backups = {};
+    for (const n of [1, 2, 3]) { const r = store.get(SLOT(n)); if (r) slots[n] = r; }
+    for (const k of BAK_NAMES) { const r = store.get(BAK_KEY(k)); if (r) backups[k] = r; }
+    const m = bakMeta();
+    return { boneashAllSaves: 1, saved: Date.now(), auto: store.get(AUTO), slots, backups, when: m.when || {}, label: m.label || '' };
+}
+function exportAll() { autosave(); expMark(); download(JSON.stringify(allSaves()), `bone-and-ash-all-saves-${stamp()}.json`); }
+let pendingAll = null; // an all-saves file waiting for its confirm tap
+function readAll(text) {
+    let o; try { o = JSON.parse(text); } catch { return null; }
+    if (!o || o.boneashAllSaves !== 1 || typeof o.auto !== 'string') return null;
+    checkScene(deserialize(o.auto)); // throws: nothing is written
+    const ok = (r) => { try { checkScene(deserialize(r)); return true; } catch { return false; } };
+    const slots = {}, backups = {}; let skipped = 0;
+    for (const n of [1, 2, 3]) { const r = o.slots?.[n]; if (typeof r === 'string') { if (ok(r)) slots[n] = r; else skipped += 1; } }
+    for (const k of BAK_NAMES.filter((x) => x !== 'before')) { const r = o.backups?.[k]; if (typeof r === 'string') { if (ok(r)) backups[k] = r; else skipped += 1; } }
+    return { auto: o.auto, slots, backups, when: o.when || {}, saved: o.saved, skipped };
+}
+function restoreAll(p) {
+    backupBefore('restoring all saves'); // this game goes to "before"; the file's own "before" backup is not restored
+    for (const n of [1, 2, 3]) { if (p.slots[n]) writeKey(SLOT(n), p.slots[n]); else store.del(SLOT(n)); }
+    const m = bakMeta();
+    for (const k of BAK_NAMES.filter((x) => x !== 'before')) { if (p.backups[k]) { writeKey(BAK_KEY(k), p.backups[k]); m.when[k] = p.when[k]; } else { store.del(BAK_KEY(k)); delete m.when[k]; } }
+    store.set(BAK_META, JSON.stringify(m));
+    g = checkScene(deserialize(p.auto)); stopRunning(); lastResult = null; combatLog = null; autosave();
+}
+
+// The export reminder (Selene's round 5): after an hour of play and a day since the last export or reminder.
+const EXP_KEY = 'boneash.exp', EXP_PLAY = 3600e3, EXP_WAIT = 86400e3;
+const expState = () => { try { const o = JSON.parse(store.get(EXP_KEY) || '{}'); return o && typeof o === 'object' ? o : {}; } catch { return {}; } };
+const expWrite = (o) => store.set(EXP_KEY, JSON.stringify(o));
+function expMark() { const o = expState(); o.t = Date.now(); o.pl = bakMeta().play; expWrite(o); }
+function expRemind() {
+    const o = expState(); if (o.off) return;
+    const pl = bakMeta().play, now = Date.now();
+    if (o.t == null || o.t > now) { o.t = now; o.pl = pl; expWrite(o); return; } // first time, or the clock went back
+    if (o.pl == null || o.pl > pl) { o.pl = pl; expWrite(o); return; }
+    if (now - o.t < EXP_WAIT || pl - o.pl < EXP_PLAY) return;
+    expMark(); showNotice('No save downloaded for over a day. Browser storage can be cleared; a downloaded file is the copy that survives.');
+}
+
+// "Copy status as text" for bug reports.
+async function gameVersion() {
+    try { const k = (await caches.keys()).find((x) => /^bone-ash-/.test(x)); if (k) return k.replace('bone-ash-', ''); } catch { /* no cache */ }
+    try { const t = await (await fetch('sw.js', { cache: 'no-store' })).text(); const m = /VERSION = 'bone-ash-([^']+)'/.exec(t); if (m) return m[1]; } catch { /* offline */ }
+    return '?';
+}
+async function statusText() {
+    const j = g.james, t = (ms) => new Date(ms).toLocaleTimeString();
+    const q = taskMode ? taskQueue(g).map((id) => taskLabel(g, SCENES, id)) : [];
+    const lines = [
+        `Bone and Ash ${await gameVersion()} · ${new Date().toISOString()}`,
+        `Mode: ${taskMode ? 'Incremental' : 'Story'} · speed ${speed ? `×${runSpeed()}${oneShot ? ' (one card)' : ''}` : 'paused'} (resume ×${resumeSpeed}) · tab ${tab}`,
+        `Scene: ${g.scene} (${sceneTitle(g.scene)}) · ${clockLabel(g.minutes)}${g.coil ? ` · ${g.coil.act === 1 ? 'Act 1' : 'Prologue'}, Coil ${g.coil.n}` : ''}${g.combat ? ' · in a fight' : ''}`,
+        `James: ${realmName(j.realm)}, Saturation ${n1(j.saturation)}% · HP ${n1(j.hp)} / ${jamesHpMax(g)} · Convergence ${n1(j.qi)} / ${n1(jamesQiMax(g))} · Fed ${Math.round(j.satiety)}`,
+        `Running: ${running ? `${running.label} (${Math.round(Math.min(1, running.done / running.ms) * 100)}%${running.kind ? `, ${running.kind}` : ''})` : 'nothing'}`,
+        `Queue (${q.length}): ${q.join(' · ') || 'empty'}`,
+        'Pause log (newest last):',
+        ...(pauseLog.length ? pauseLog.map((e) => `  ${t(e.t)} ${e.from} → ${e.to} · ${e.cause} · ${e.scene}`) : ['  no changes yet']),
+        'Journal (newest first):',
+        ...g.log.slice(-5).reverse().map((e) => `  ${clockLabel(e.at)} ${sceneTitle(e.scene)}${e.lines.length ? `: ${e.lines.join(' / ')}` : ''}`.replace(/🎲(\d)/g, 'd6=$1')),
+        `Browser: ${navigator.userAgent}`,
+    ];
+    return lines.join('\n');
+}
 
 function renderRecovery() {
     const bak = backupList();
@@ -429,11 +556,27 @@ errbar.addEventListener('click', (ev) => {
     const done = () => { b.textContent = 'Copied'; setTimeout(() => { b.textContent = 'Copy'; }, 1500); };
     if (navigator.clipboard?.writeText) navigator.clipboard.writeText(text).then(done, () => fallbackCopy(text, done)); else fallbackCopy(text, done);
 });
-function fallbackCopy(text, done) {
+function fallbackCopy(text, done, fail) {
     const t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select();
-    try { document.execCommand('copy'); done(); } catch { /* the message stays on screen */ }
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch { /* the message stays on screen */ }
     t.remove();
+    if (ok) done(); else fail?.();
 }
+
+/* ---------------- notice bar (v0.11.9): the export reminder ---------------- */
+
+const notebar = document.createElement('div');
+notebar.id = 'notebar'; notebar.setAttribute('role', 'status'); notebar.hidden = true;
+notebar.innerHTML = '<span class="msg"></span><button class="btn" data-note="export">Download now</button><button class="btn" data-note="close" aria-label="Close">✕</button>';
+document.body.appendChild(notebar);
+function showNotice(msg) { notebar.querySelector('.msg').textContent = msg; notebar.hidden = false; }
+notebar.addEventListener('click', (ev) => {
+    const b = ev.target.closest('button[data-note]');
+    if (!b) return;
+    notebar.hidden = true;
+    if (b.dataset.note === 'export' && g) { expMark(); download(serialize(g), `bone-and-ash-${clockLabel(g.minutes).replace(/[^\w]+/g, '-')}.json`); }
+});
 window.addEventListener('error', (ev) => showError(ev.error || ev.message));
 window.addEventListener('unhandledrejection', (ev) => showError(ev.reason));
 
@@ -535,6 +678,7 @@ function renderJournal() {
     view.innerHTML = `<section class="page"><h1>Journal</h1><p class="lede">${g.stats.checks} checks rolled, ${g.stats.wins} passed · ${g.stats.kills} things that wanted to eat you, didn't · ${g.stats.meals} meals.</p>${entries || '<p class="note">Nothing yet. Give it a minute.</p>'}</section>`;
 }
 function renderSaves() {
+    const bak = backupList();
     const slot = (n) => {
         const raw = store.get(SLOT(n));
         const desc = raw ? descOf(raw) : 'Empty';
@@ -543,8 +687,17 @@ function renderSaves() {
     view.innerHTML = `<section class="page"><h1>Saves</h1>
 <p class="lede">The game saves itself after every choice. Slots are for keeping a moment you might want back.</p>
 ${slot(1)}${slot(2)}${slot(3)}
+<h2>Backups</h2>
+<p class="note">Kept by themselves after 5 minutes, 30 minutes and 2 hours of play, and before a risky move. Restoring one keeps this game as the "before" backup.</p>
+${bak.length ? bak.map((b) => `<div class="row"><span>${esc(b.name)}</span><span class="note">${esc(descOf(b.raw))}${b.when ? ` · saved ${esc(new Date(b.when).toLocaleString())}` : ''}</span><div class="btns sub"><button class="btn" data-bak="${b.k}">Restore</button></div></div>`).join('') : '<p class="note">No backups yet.</p>'}
 <h2>Move a save to another device</h2>
-<div class="btns"><button class="btn" data-export="1">Download save file</button><label class="btn">Load save file<input type="file" accept="application/json,.json" data-import="1" hidden></label></div>
+<div class="btns"><button class="btn" data-export="1">Download save file</button><label class="btn">Load save file<input type="file" accept="application/json,.json,text/plain,.txt" data-import="1" hidden></label></div>
+<div class="btns"><button class="btn" data-share="1">Share to GitHub</button><button class="btn" data-status="1">Copy status as text</button></div>
+<p class="note">Share to GitHub opens GitHub's page for a new file in the game's saves folder with this save filled in; sign in and tap "Commit changes". Copy status is for bug reports.</p>
+<h2>All saves</h2>
+<div class="btns"><button class="btn" data-exportall="1">Export all saves</button><label class="btn">Restore all saves<input type="file" accept="application/json,.json" data-import="1" hidden></label></div>
+${pendingAll ? `<p class="note">This file holds a game at ${esc(descOf(pendingAll.auto))}, ${Object.keys(pendingAll.slots).length} slot${Object.keys(pendingAll.slots).length === 1 ? '' : 's'} and ${Object.keys(pendingAll.backups).length} backup${Object.keys(pendingAll.backups).length === 1 ? '' : 's'}${pendingAll.saved ? `, exported ${esc(new Date(pendingAll.saved).toLocaleString())}` : ''}${pendingAll.skipped ? ` (${pendingAll.skipped} unreadable, left out)` : ''}. Restoring replaces your autosave, slots and backups; this game is kept as the "before" backup.</p><div class="btns"><button class="btn primary" data-restoreall="1">Restore all</button><button class="btn" data-restoreall="">Cancel</button></div>` : ''}
+<div class="btns"><button class="btn${expState().off ? '' : ' primary'}" data-expremind="1">Remind me to download: ${expState().off ? 'off' : 'on'}</button></div>
 <h2 data-modehead="1">Game mode</h2>
 <p class="note">${taskMode ? 'Incremental Mode: every screen is cards on a clock, with no dice (check ÷ DC decides), familiarity, Yuki\'s lane and the Coil. 1 game hour takes 3 seconds at ×1; ×2 opens after a won tribute, ×5 after Act 1. New games start with closed meridians.' : 'Story Mode: the older game, with dice and no Coil. Choices happen at once.'} Only this phone remembers it.</p>
 <div class="btns"><button class="btn${taskMode ? ' primary' : ''}" data-tasks="${taskMode ? '' : '1'}">Incremental Mode</button><button class="btn${taskMode ? '' : ' primary'}" data-tasks="${taskMode ? '1' : ''}">Story Mode (older, with dice, no Coil)</button></div>
@@ -558,6 +711,7 @@ ${testSpeeds || modeTaps >= 5 ? `<div class="btns"><button class="btn${testSpeed
 /* ---------------- wiring ---------------- */
 
 function render() {
+    plog('not logged');
     scenePause();
     document.querySelectorAll('#tabs button').forEach((b) => b.setAttribute('aria-current', b.dataset.tab === tab ? 'page' : 'false'));
     if (recovery) return renderRecovery();
@@ -585,7 +739,7 @@ view.addEventListener('click', (ev) => {
             const now = !!b.dataset.run; // v0.10.2: a tap always runs now; paused, it runs this one card and pauses again
             if (now) tapRun();
             if (now && running?.kind) stopRunning(); // a story or meditate bar: nothing of it happens
-            if (!(now ? queueRunNow(g, id) : queueAdd(g, id))) { endOneShot(); lastResult = { lines: [`The queue is full (${QUEUE_MAX}).`], fail: true }; render(); return; }
+            if (!(now ? queueRunNow(g, id) : queueAdd(g, id))) { endOneShot('queue full'); lastResult = { lines: [`The queue is full (${QUEUE_MAX}).`], fail: true }; render(); return; }
             if (now && running) stopRunning(); // the card that was running moves to second place and starts over later
             autosave(); startNext(); render();
             return;
@@ -597,6 +751,27 @@ view.addEventListener('click', (ev) => {
             return;
         }
         if (b.dataset.qclear) { queueClear(g, !!(running && !running.kind)); autosave(); render(); return; }
+        if (b.dataset.bak) {
+            let next;
+            try { next = checkScene(deserialize(store.get(BAK_KEY(b.dataset.bak)))); } catch (err) { note(`That backup can't be loaded: ${err.message}`); return; }
+            backupBefore('restoring a backup');
+            g = next; stopRunning(); lastResult = null; combatLog = null; autosave(); setTab('story');
+            return;
+        }
+        if (b.dataset.share) { shareToGitHub().catch((err) => note(`Sharing didn't work: ${err.message || err}`)); return; }
+        if (b.dataset.status) {
+            statusText().then((text) => copyText(text, () => note('Status copied. Paste it into the chat.'), () => note('The status could not be copied.')), (err) => note(`No status: ${err.message || err}`));
+            return;
+        }
+        if (b.dataset.exportall) { exportAll(); note('All saves downloaded.'); return; }
+        if (b.dataset.restoreall != null) {
+            const p = pendingAll; pendingAll = null;
+            if (!b.dataset.restoreall || !p) { renderSaves(); return; }
+            try { restoreAll(p); } catch (err) { renderSaves(); note(`Nothing was changed: ${err.message}`); return; }
+            setTab('story');
+            return;
+        }
+        if (b.dataset.expremind) { const o = expState(); o.off = !o.off; if (!o.off) { o.t = Date.now(); o.pl = bakMeta().play; } expWrite(o); renderSaves(); return; }
         if (b.dataset.pausedeath) { pauseDeath = !pauseDeath; store.set(PAUSE_DEATH_KEY, pauseDeath ? '1' : '0'); renderSaves(); return; }
         if (b.dataset.unq != null) {
             const k = Number(b.dataset.unq);
@@ -628,7 +803,7 @@ view.addEventListener('click', (ev) => {
             return;
         }
         if (b.dataset.pause) {
-            if (speed && !oneShot) pauseNow(); else { speed = resumeSpeed || 1; oneShot = false; }
+            if (speed && !oneShot) pauseNow('pause button'); else { speed = resumeSpeed || 1; oneShot = false; plog('resume button'); }
             store.set(SPEED_KEY, String(resumeSpeed)); lastTickAt = Date.now(); startNext(); render(); return;
         }
         if (b.dataset.bite) {
@@ -680,7 +855,7 @@ view.addEventListener('click', (ev) => {
             backupBefore(`loading slot ${b.dataset.load}`);
             g = next; stopRunning(); lastResult = null; combatLog = null; autosave(); setTab('story');
         } else if (b.dataset.export) {
-            download(serialize(g), `bone-and-ash-${clockLabel(g.minutes).replace(/[^\w]+/g, '-')}.json`);
+            download(serialize(g), `bone-and-ash-${clockLabel(g.minutes).replace(/[^\w]+/g, '-')}.json`); expMark();
         }
     } catch (err) {
         lastResult = { lines: [String(err.message || err)], fail: true }; render();
@@ -689,11 +864,17 @@ view.addEventListener('click', (ev) => {
 });
 view.addEventListener('change', async (ev) => {
     const sel = ev.target.closest('select[data-speed]');
-    if (sel) { const v = Number(sel.value); if (v) { resumeSpeed = v; speed = v; oneShot = false; store.set(SPEED_KEY, String(v)); } else pauseNow(); lastTickAt = Date.now(); startNext(); render(); return; }
+    if (sel) { const v = Number(sel.value); if (v) { resumeSpeed = v; speed = v; oneShot = false; store.set(SPEED_KEY, String(v)); plog('speed menu'); } else pauseNow('speed menu'); lastTickAt = Date.now(); startNext(); render(); return; }
     const inp = ev.target.closest('input[data-import]');
     if (!inp || !inp.files?.[0]) return;
     let next;
-    try { next = checkScene(deserialize(await inp.files[0].text())); } catch (err) { note(`That file can't be loaded: ${err.message}`); return; }
+    try {
+        const text = await unpackText(await inp.files[0].text());
+        inp.value = '';
+        const all = readAll(text); // v0.11.9: an all-saves file asks first
+        if (all) { pendingAll = all; renderSaves(); return; }
+        next = checkScene(deserialize(text));
+    } catch (err) { inp.value = ''; note(`That file can't be loaded: ${err.message}`); return; }
     backupBefore('loading a save file');
     g = next; stopRunning(); autosave(); lastResult = null; setTab('story');
 });

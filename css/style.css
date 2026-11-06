@@ -153,6 +153,10 @@ button { font: inherit; color: inherit; }
 #errbar[hidden] { display: none; }
 #errbar .msg { flex: 1; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 6.5rem; overflow: auto; color: var(--red); }
 #errbar .btn { padding: 0.35rem 0.7rem; }
+#notebar { position: fixed; left: 0.5rem; right: 0.5rem; bottom: calc(4.2rem + env(safe-area-inset-bottom)); z-index: 49; display: flex; gap: 0.5rem; align-items: flex-start; padding: 0.6rem 0.7rem; background: var(--paper); border: 1.5px solid var(--ink); border-radius: 4px 10px 4px 10px; box-shadow: 0 4px 18px rgba(35,33,30,0.18); font-size: 0.85rem; }
+#notebar[hidden] { display: none; }
+#notebar .msg { flex: 1; overflow-wrap: anywhere; }
+#notebar .btn { padding: 0.35rem 0.7rem; }
 .recovery h1 { color: var(--red); }
 
 /* ---- task cards and the queue (v0.9.0, "Tasks (preview)") ---- */

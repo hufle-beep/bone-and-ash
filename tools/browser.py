@@ -3,11 +3,12 @@ Serves the folder, opens the game at 390x844 in headless Chromium and taps the r
   1. Incremental Mode, a new game: about 40 taps on cards, story choices and fight actions (test speeds, x10), every tab;
   2. a running bar survives a reload (v0.11.5), from a fixed task screen (saves/v0.11.7-long-forest-coil2.json);
   3. Story Mode, a new game: about 25 taps, every tab;
-  4. two tabs: closing the older tab leaves the newer save alone (v0.11.8).
+  4. two tabs: closing the older tab leaves the newer save alone (v0.11.8);
+  5. the Saves tab (v0.11.9): Copy status, Export all then Restore all into a new game, a backup restored.
 Fails on any page error, or when the screen shows undefined, NaN, [object Object] or an old mode name.
 The taps are seeded, so a run repeats. Exit code 1 on any failure.
 """
-import random, re, socket, subprocess, sys, time
+import json, random, re, socket, subprocess, sys, time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
@@ -56,6 +57,46 @@ def taps(pg, n, rng, where, sel):
     check_text(pg, f"{where}, after {done} taps")
     return done
 
+def scene_of(raw):
+    return json.loads(json.loads(raw)['data'])['scene']
+
+def saves(pg, url):
+    lf = (ROOT / 'saves/v0.11.7-long-forest-coil2.json').read_text()
+    s1 = (ROOT / 'saves/v0.8.5-day1-stream.json').read_text()
+    b5 = (ROOT / 'saves/v0.11.7-coil2-day1.json').read_text()
+    fresh(pg, url, """a => { localStorage.clear(); localStorage.setItem('boneash.auto', a[0]); localStorage.setItem('boneash.slot1', a[1]);
+        localStorage.setItem('boneash.bak.5m', a[2]); localStorage.setItem('boneash.bak.meta', JSON.stringify({ play: 0, at: {}, when: { '5m': Date.now() } })); }""", [lf, s1, b5])
+    pg.click('[data-tab="saves"]'); pg.wait_for_timeout(200); check_text(pg, 'Saves tab')
+    # Copy status
+    pg.click('button[data-status]'); pg.wait_for_timeout(800)
+    st = pg.evaluate("navigator.clipboard.readText()")
+    if scene_of(lf) not in st or not re.search(r'Bone and Ash \d+\.\d+\.\d+', st) or 'Pause log' not in st: fails.append(f'Copy status: unexpected text {st[:200]!r}')
+    # Export all, then Restore all into a new game
+    auto0 = pg.evaluate("localStorage.getItem('boneash.auto')")
+    with pg.expect_download() as dl: pg.click('button[data-exportall]')
+    path = dl.value.path()
+    fresh(pg, url, "localStorage.clear()")
+    pg.click('[data-tab="saves"]'); pg.wait_for_timeout(200)
+    pg.set_input_files('label:has-text("Restore all saves") input[data-import]', str(path)); pg.wait_for_timeout(500)
+    if not pg.query_selector('button[data-restoreall="1"]'): fails.append('Restore all: no confirm button after choosing the file')
+    else:
+        check_text(pg, 'Restore all confirm')
+        pg.click('button[data-restoreall="1"]'); pg.wait_for_timeout(500)
+        got = pg.evaluate("[localStorage.getItem('boneash.auto'), localStorage.getItem('boneash.slot1'), localStorage.getItem('boneash.bak.5m'), localStorage.getItem('boneash.bak.before')]")
+        if got[0] != auto0: fails.append(f'Restore all: the autosave differs ({scene_of(got[0]) if got[0] else None} vs {scene_of(auto0)})')
+        elif got[1] != s1 or got[2] != b5: fails.append('Restore all: a slot or backup differs')
+        elif not got[3]: fails.append('Restore all: no "before" backup of the game it replaced')
+        else: notes.append('export all → restore all exact')
+    # a backup restored from the Saves tab
+    pg.click('[data-tab="saves"]'); pg.wait_for_timeout(200)
+    if not pg.query_selector('button[data-bak="5m"]'): fails.append('Backups: no Restore button for the 5-minute backup')
+    else:
+        pg.click('button[data-bak="5m"]'); pg.wait_for_timeout(400)
+        a = pg.evaluate("[localStorage.getItem('boneash.auto'), localStorage.getItem('boneash.bak.before')]")
+        if scene_of(a[0]) != scene_of(b5) or scene_of(a[1]) != scene_of(lf): fails.append(f'Backups: after restore the game is at {scene_of(a[0])}, before = {scene_of(a[1])}')
+        else: notes.append('backup restored')
+        check_text(pg, 'after a backup restore')
+
 def main():
     port = free_port()
     srv = subprocess.Popen([sys.executable, '-m', 'http.server', str(port)], cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -64,7 +105,7 @@ def main():
     try:
         with sync_playwright() as p:
             b = p.chromium.launch()
-            ctx = b.new_context(viewport={'width': 390, 'height': 844}, service_workers='block')
+            ctx = b.new_context(viewport={'width': 390, 'height': 844}, service_workers='block', permissions=['clipboard-read', 'clipboard-write'])
             pg = ctx.new_page()
             pg.on('pageerror', lambda e: fails.append(f"page error: {e}"))
             # 1. Incremental Mode
@@ -105,6 +146,8 @@ def main():
             elif after != newer: fails.append('two tabs: the closing tab wrote over the newer save')
             else: notes.append('two tabs: the newer save kept')
             pb.close()
+            # 5. the Saves tab (v0.11.9)
+            saves(pg, url)
             b.close()
     finally:
         srv.terminate()
