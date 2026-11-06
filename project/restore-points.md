@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.9 | (this push) | Saves: share, export all, reminder, Backups, Copy status. Same save state as 0.11.5 (the new key `boneash.exp` is outside the save). |
+| 0.11.10 | (this push) | Cache fix, hidden checks, the main menu. Same save state as 0.11.5 (new per-phone keys `boneash.showchecks`, `boneash.textsize` are outside the save). |
+| 0.11.9 | `4369ec3` | Saves: share, export all, reminder, Backups, Copy status. Same save state as 0.11.5 (the new key `boneash.exp` is outside the save). |
 | 0.11.8 | `3c2c33f` | The save-on-close guard. Same save state as 0.11.5. |
 | 0.11.7 | `ed8c980` | Tests and tools only; the game is the same as 0.11.5. **Pushed after a failed full check** (the browser test's reload part, flaky); fixed in 0.11.8. |
 | 0.11.6 | `6e2cf70` | Docs only; the game is the same as 0.11.5. |

@@ -235,3 +235,14 @@ button { font: inherit; color: inherit; }
 .queue li.dead time { color: var(--red); }
 .queue .dies { color: var(--red); font-weight: 600; }
 .queue .x:disabled { opacity: 0.3; cursor: default; }
+
+/* v0.11.10: the main menu, on plain paper (the game hidden until Continue) */
+body.menu-on #tabs { display: none; }
+.menu-page { padding-bottom: 3rem; }
+.main-menu { min-height: 88vh; display: flex; flex-direction: column; justify-content: center; text-align: center; }
+.main-menu .mseal { align-self: center; width: 3.2rem; height: 3.2rem; line-height: 3.2rem; border-radius: 6px; background: var(--red); color: var(--paper); font-family: var(--display); font-weight: 800; font-size: 1.9rem; margin-bottom: 0.9rem; }
+.main-menu .mtitle { font-size: clamp(2.4rem, 11vw, 3.4rem); margin-bottom: 0.2rem; }
+.main-menu .mver { margin: 0 0 1.6rem; }
+.mbtns { display: flex; flex-direction: column; gap: 0.7rem; align-items: stretch; max-width: 22rem; width: 100%; margin: 0 auto; }
+.btn.big { padding: 0.85rem 1rem; font-size: 1.05rem; }
+.btn.big small { display: block; margin-top: 0.2rem; font-size: 0.78rem; font-weight: 400; opacity: 0.8; }

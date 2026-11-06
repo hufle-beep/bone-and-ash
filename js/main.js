@@ -25,6 +25,8 @@ const store = {
 
 let g = null;
 let tab = 'story';
+let menu = 'main'; // v0.11.10: the main menu ('main' | 'saves' | 'settings'), shown on every open; null = in the game
+let hadSave = false; // an autosave existed when the game opened (else the menu says Begin)
 let lastResult = null; // { lines, fail }
 let combatLog = null;
 const view = document.getElementById('view');
@@ -64,6 +66,31 @@ const runSpeed = () => effectiveSpeed(g, speed, testSpeeds);
 let modeTaps = 0, modeTapAt = 0;
 const PAUSE_DEATH_KEY = 'boneash.pausedeath'; // per phone: '0' = off; on by default (v0.10.0)
 let pauseDeath = store.get(PAUSE_DEATH_KEY) !== '0';
+// v0.11.10: checks are hidden on every card and in every result line (owner 2026-11-06: immersion); the James tab still shows the skills
+const SHOW_CHECKS_KEY = 'boneash.showchecks'; // per phone: '1' = show them (Settings → Show checks)
+let showChecks = store.get(SHOW_CHECKS_KEY) === '1';
+const TEXT_SIZE_KEY = 'boneash.textsize'; // per phone: 90–130 (%)
+const TEXT_SIZES = [90, 100, 110, 120, 130];
+let textSize = (() => { const v = Number(store.get(TEXT_SIZE_KEY)); return TEXT_SIZES.includes(v) ? v : 100; })();
+const applyTextSize = () => { document.documentElement.style.fontSize = textSize === 100 ? '' : `${textSize}%`; };
+applyTextSize();
+const CHK_NUM = '-?\\d+(?:\\.\\d+)?';
+const CHK = `(?:GU|Convergence Use|Fight|Qi Use) ${CHK_NUM} (?:\\/ DC ${CHK_NUM}|\\+ 🎲\\d(?: = ${CHK_NUM})? vs (?:DC )?${CHK_NUM}|\\+ d6 vs DC ${CHK_NUM})`;
+const RX_DEFEND = new RegExp(`: you defend \\(${CHK}\\)`);
+const RX_ACTION = new RegExp(`^(.+?): ${CHK} — `);
+const RX_LINE = new RegExp(`^${CHK} (?:—|→) (.+)$`);
+const RX_TAG = new RegExp(`${CHK}(?: (?:→|—) (?:passes|partly|fails))?`, 'g');
+/** A result or log line without its check (v0.11.10). '' = drop the line. */
+function hideCheck(l) {
+    if (showChecks || typeof l !== 'string') return l;
+    let t = l.replace(RX_DEFEND, '').replace(RX_ACTION, '$1 — ');
+    const m = RX_LINE.exec(t);
+    if (m) return /double haul/.test(m[1]) ? 'A double haul.' : /^partly/.test(m[1]) ? 'Only partly.' : '';
+    return t.replace(RX_TAG, '').trim();
+}
+const shownLines = (lines) => (showChecks ? lines : lines.map(hideCheck).filter((l) => l));
+/** A card's tag without its check: what's left is time, Qi and effects. */
+const hideTag = (t) => (showChecks || !t ? t : String(t).replace(RX_TAG, '').replace(/^\s*·\s*|\s*·\s*$/g, '').replace(/(\s*·\s*){2,}/g, ' · ').trim());
 let lastFc = null; // the last forecast the screen drew (for the pause before a forecast death)
 let deathWarned = ''; // which forecast death has paused the game already
 // v0.10.2: the game always opens paused and pauses on every new scene; the stored speed is what ▶ Resume (and a tapped card) runs at
@@ -232,12 +259,12 @@ function playChoice(idx) {
 const storyCardHtml = (c) => {
     const busy = running && running.kind === 'story' && running.idx === c.index;
     const mins = c.disabled ? 0 : storyMinutes(c.index);
-    const tag = c.disabled ? c.reason : c.tag;
+    const tag = c.disabled ? c.reason : hideTag(c.tag);
     const ch0 = c.index < 1000 ? SCENES[g.scene]?.choices?.[c.index] : null;
     const inst = !!ch0 && (instantChoice(ch0) || waitChoice(SCENES, ch0, mins, g.scene));
     return `<button class="card story${/fight/.test(c.tag) ? ' fightish' : ''}${busy ? ' busy' : ''}" data-story="${c.index}" ${c.disabled ? 'disabled aria-disabled="true"' : ''}>${md(c.label)}${tag ? `<span class="tag">${esc(tag)}</span>` : ''}<span class="len">${mins && !inst ? durLabel(mins) : mins ? `at once (${durLabel(mins)} pass)` : 'at once'}</span></button>`;
 };
-const medCardHtml = (m) => { const card = `<button class="card med" ${m.task ? `data-run="${esc(m.task)}"` : `data-med="${esc(m.id)}"`} ${m.open ? '' : 'disabled aria-disabled="true"'}>${md(m.label)}<span class="tag">${esc(m.tag)}</span><span class="len">${m.minutes ? durLabel(m.minutes) : 'at once'}</span></button>`; return m.task && m.open ? `<div class="cardwrap">${card}<button class="qadd" data-qadd="${esc(m.task)}" aria-label="Add to the end of the queue">+</button></div>` : card; };
+const medCardHtml = (m) => { const card = `<button class="card med" ${m.task ? `data-run="${esc(m.task)}"` : `data-med="${esc(m.id)}"`} ${m.open ? '' : 'disabled aria-disabled="true"'}>${md(m.label)}${hideTag(m.tag) ? `<span class="tag">${esc(hideTag(m.tag))}</span>` : ''}<span class="len">${m.minutes ? durLabel(m.minutes) : 'at once'}</span></button>`; return m.task && m.open ? `<div class="cardwrap">${card}<button class="qadd" data-qadd="${esc(m.task)}" aria-label="Add to the end of the queue">+</button></div>` : card; };
 
 function nowRowHtml() {
     const now = running
@@ -247,7 +274,7 @@ function nowRowHtml() {
     return `<div class="nowrow">${now}<button class="btn pause${on ? '' : ' primary'}" data-pause="1">${on ? '⏸ Pause' : '▶ Resume'}</button></div>`;
 }
 function resultsPaneHtml() {
-    return taskResults.length ? taskResults.map((r) => `<details class="res${r.fail ? ' fail' : ''}"><summary><b>${md(r.title)}</b> <span>${esc(r.sum)}</span></summary><div>${r.lines.map((l) => `<div>${dieHtml(l)}</div>`).join('')}</div></details>`).join('') : '<p class="note">Nothing yet. What James does lands here, newest on top; tap one for the details. The Journal keeps all of it.</p>';
+    return taskResults.length ? taskResults.map((r) => `<details class="res${r.fail ? ' fail' : ''}"><summary><b>${md(r.title)}</b> <span>${esc(r.sum)}</span></summary><div>${shownLines(r.lines).map((l) => `<div>${dieHtml(l)}</div>`).join('')}</div></details>`).join('') : '<p class="note">Nothing yet. What James does lands here, newest on top; tap one for the details. The Journal keeps all of it.</p>';
 }
 
 /** Any screen in task mode: picture and story on top; everything you can do below, as cards. */
@@ -271,12 +298,13 @@ function renderCardScreen() {
         const cardHtml = (c) => {
             const mins = c.status === 'open' ? taskMinutes(g, SCENES, c.id) : c.minutes;
             const fam = c.kind === 'work' ? ` · ${FAM[c.tier].name}${c.next != null ? ` ${c.fam}/${c.next}` : ''}` : '';
-            const tag = c.status !== 'open' ? 'done for today — back tomorrow' : c.kind === 'door' ? `opens the scene${c.tag ? ` · ${c.tag}` : ''}` : (c.tag || 'no check');
+            const ctag = hideTag(c.tag);
+            const tag = c.status !== 'open' ? 'done for today — back tomorrow' : c.kind === 'door' ? `opens the scene${ctag ? ` · ${ctag}` : ''}` : (ctag || (showChecks ? 'no check' : ''));
             const inst = isInstantTask(g, SCENES, c.id);
-            return `<div class="cardwrap"><button class="card${c.kind === 'door' ? ' door' : ''}${c.check ? ` b-${c.check.band}` : ''}" data-run="${esc(c.id)}" ${c.status !== 'open' ? 'disabled' : ''}>${counts[c.id] ? `<span class="n">×${counts[c.id]}</span>` : ''}${md(c.label)}<span class="tag">${esc(tag)}</span>${c.status === 'open' ? `<span class="len">${inst ? `at once (${durLabel(mins)} pass)` : durLabel(mins)}${fam}</span>` : ''}</button>${c.status === 'open' ? `<button class="qadd" data-qadd="${esc(c.id)}" aria-label="Add to the end of the queue">+</button>` : ''}</div>`;
+            return `<div class="cardwrap"><button class="card${c.kind === 'door' ? ' door' : ''}${c.check && showChecks ? ` b-${c.check.band}` : ''}" data-run="${esc(c.id)}" ${c.status !== 'open' ? 'disabled' : ''}>${counts[c.id] ? `<span class="n">×${counts[c.id]}</span>` : ''}${md(c.label)}${tag ? `<span class="tag">${esc(tag)}</span>` : ''}${c.status === 'open' ? `<span class="len">${inst ? `at once (${durLabel(mins)} pass)` : durLabel(mins)}${fam}</span>` : ''}</button>${c.status === 'open' ? `<button class="qadd" data-qadd="${esc(c.id)}" aria-label="Add to the end of the queue">+</button>` : ''}</div>`;
         };
         const yl = yukiLane(g);
-        const yHtml = yl ? `<div class="yuki-lane"><div><b>Yuki:</b> ${esc(yl.label)} <span class="note">Fight ${yl.check} / DC ${yl.dc} · ${durLabel(yl.len)} · ${FAM[yl.tier].name}</span>${yl.on ? `<div class="stroke"><i id="yukibar" style="width:${Math.min(100, (yl.progress / yl.len) * 100).toFixed(1)}%"></i></div>` : ''}</div><button class="btn${yl.on ? ' primary' : ''}" data-yuki="1">${yl.on ? 'On' : 'Off'}</button></div>` : '';
+        const yHtml = yl ? `<div class="yuki-lane"><div><b>Yuki:</b> ${esc(yl.label)} <span class="note">${showChecks ? `Fight ${yl.check} / DC ${yl.dc} · ` : ''}${durLabel(yl.len)} · ${FAM[yl.tier].name}</span>${yl.on ? `<div class="stroke"><i id="yukibar" style="width:${Math.min(100, (yl.progress / yl.len) * 100).toFixed(1)}%"></i></div>` : ''}</div><button class="btn${yl.on ? ' primary' : ''}" data-yuki="1">${yl.on ? 'On' : 'Off'}</button></div>` : '';
         lastFc = ol;
         const rowWhen = (r) => r.skip ? 'not possible then' : r.wait ? 'after the story' : r.dead ? 'never reached' : `→ ${clockLabelG(g, r.end).replace(/^Day \d+, /, '')} · Fed ${Math.round(r.fed)} · HP ${r.death ? 0 : Math.max(0, Math.round(r.hp))}`;
         const rows = ol.rows.map((r, k) => `<li class="${r.skip ? 'skip' : ''}${r.dead || r.death ? ' dead' : ''}"><span>${md(taskLabel(g, SCENES, r.id))}${r.death ? ` <b class="dies">${r.death === 'hunger' ? 'Starves here' : 'Collapses here'}</b>` : ''}</span><time>${rowWhen(r)}</time><span class="qbtns"><button class="x" data-qup="${k}" aria-label="Move up" ${k ? '' : 'disabled'}>↑</button><button class="x" data-qdown="${k}" aria-label="Move down" ${k < ol.rows.length - 1 ? '' : 'disabled'}>↓</button><button class="x" data-unq="${k}" aria-label="Remove">✕</button></span></li>`).join('');
@@ -319,16 +347,16 @@ function renderCombatCards() {
         const off = cost > g.james.qi;
         const v = n1(skillCheck(a.skill === 'GU' ? g.james.gu : g.james.skills[a.skill]) + (c.adapt?.[id] || 0));
         const tgt = c.enemies.find((e) => e.hp > 0);
-        const plain = tgt ? `${a.skill} ${v} / DC ${noDiceDc(tgt.dc + a.dcMod)} · ${Math.round((d[0] + d[1]) / 2)} dmg` : '';
-        return `<button class="card fightish" data-act="${id}" ${off ? 'disabled' : ''}>${esc(a.label)}<span class="tag">${a.guard ? `GU defence +${guardBonus(g)} this round${hasForm(g, 'buckler') && taskMode ? ' · covers Yuki' : ''}` : a.field ? `${FIELD_ROUNDS} rounds · ${fieldDamage(g)} to each attacker · once a fight` : plain}${a.reach ? ' · a full hit holds it off' : ''}${cost ? ` · ${cost} Qi` : ''}${a.stagger ? ' · staggers' : ''}${off ? ' · not enough Qi' : ''}</span></button>`;
+        const plain = tgt && showChecks ? `${a.skill} ${v} / DC ${noDiceDc(tgt.dc + a.dcMod)} · ${Math.round((d[0] + d[1]) / 2)} dmg` : '';
+        return `<button class="card fightish" data-act="${id}" ${off ? 'disabled' : ''}>${esc(a.label)}<span class="tag">${a.guard ? `${showChecks ? 'GU ' : ''}defence +${guardBonus(g)} this round${hasForm(g, 'buckler') && taskMode ? ' · covers Yuki' : ''}` : a.field ? `${FIELD_ROUNDS} rounds · ${fieldDamage(g)} to each attacker · once a fight` : plain}${a.reach ? ' · a full hit holds it off' : ''}${cost ? ` · ${cost} Qi` : ''}${a.stagger ? ' · staggers' : ''}${off ? ' · not enough Qi' : ''}</span></button>`;
     }).join('');
-    const flee = c.flee ? `<button class="card" data-flee="1">Run<span class="tag">GU ${n1(skillCheck(g.james.gu))} / DC ${noDiceDc(Math.max(...c.enemies.filter((e) => e.hp > 0).map((e) => e.atk)))}</span></button>` : '';
+    const flee = c.flee ? `<button class="card" data-flee="1">Run${showChecks ? `<span class="tag">GU ${n1(skillCheck(g.james.gu))} / DC ${noDiceDc(Math.max(...c.enemies.filter((e) => e.hp > 0).map((e) => e.atk)))}</span>` : ''}</button>` : '';
     const foes = c.enemies.map((e) => `<div class="foe${e.hp <= 0 ? ' down' : ''}"><span>${esc(e.name)}${e.staggered ? ' (reeling)' : ''}</span><div class="stroke"><i style="width:${pct(Math.max(0, e.hp), e.hpMax)}"></i></div></div>`).join('');
     const yuki = `<div class="foe"><span>Yuki</span><div class="stroke" style="background:rgba(242,239,230,0.08)"><i style="width:${pct(g.yuki.hp, yukiHpMax(g))};background:var(--bone)"></i></div></div>`;
     view.innerHTML = `<section>
 <div class="plate">${sceneArt(val(SCENES[g.scene].art))}</div>
 <header class="head"><div class="place">${esc(sceneTitle(g.scene))}</div><h1 class="title">Round ${c.round}</h1></header>
-<div class="prose round">${(combatLog || c.log).map((l) => dieHtml(l)).join('<br>') || 'The fight begins.'}</div>
+<div class="prose round">${shownLines(combatLog || c.log).map((l) => dieHtml(l)).join('<br>') || 'The fight begins.'}</div>
 <div class="below">
 ${statusHtml()}
 <div class="foes">${foes}${yuki}</div>
@@ -339,7 +367,7 @@ ${statusHtml()}
 
 const freshGame = () => ensureBars(newGame(Math.floor(Math.random() * 2 ** 31), { closed: taskMode })); // task mode: meridians closed at the start (v0.9.6)
 const bakMeta = () => { try { return JSON.parse(store.get(BAK_META)) || { play: 0, at: {}, when: {} }; } catch { return { play: 0, at: {}, when: {} }; } };
-function writeKey(k, s) { if (!store.set(k, s) && !storageWarned) { storageWarned = true; showError('Could not save: the storage for this site is full or blocked. Download your save from the Saves tab.'); } }
+function writeKey(k, s) { if (!store.set(k, s) && !storageWarned) { storageWarned = true; showError('Could not save: the storage for this site is full or blocked. Download your save: ☰ Menu → Saves.'); } }
 
 /** Throws a SaveError if the state points at a scene this version doesn't have. */
 function checkScene(s) { if (!SCENES[s.scene]) throw new SaveError('notSave', `The save points at a scene this version doesn't have (${s.scene}).`); return s; }
@@ -379,6 +407,7 @@ function autosave() {
 function load() {
     const raw = store.get(AUTO);
     lastWritten = raw;
+    hadSave = !!raw;
     if (!raw) { g = freshGame(); prevScene = g.scene; return; }
     try { g = checkScene(deserialize(raw)); prevScene = g.scene; } catch (err) { g = null; recovery = { raw, err }; }
 }
@@ -591,15 +620,15 @@ function statusHtml() {
 }
 
 function resultHtml() {
-    if (!lastResult || !lastResult.lines.length) return '';
-    return `<div class="result${lastResult.fail ? ' fail' : ''}" role="status">${lastResult.lines.map((l) => `<div>${dieHtml(l)}</div>`).join('')}</div>`;
+    if (!lastResult || !shownLines(lastResult.lines).length) return '';
+    return `<div class="result${lastResult.fail ? ' fail' : ''}" role="status">${shownLines(lastResult.lines).map((l) => `<div>${dieHtml(l)}</div>`).join('')}</div>`;
 }
 
 function renderStory() {
     if (taskMode) return g.combat ? renderCombatCards() : (startNext(), renderCardScreen());
     if (g.combat) return renderCombat();
     const v = sceneView(g, SCENES);
-    const choices = v.choices.map((c) => `<li><button class="choice${/fight/.test(c.tag) ? ' fightish' : ''}" data-choice="${c.index}" ${c.disabled ? `disabled aria-disabled="true"` : ''}>${md(c.label)}${c.tag || c.reason ? `<span class="tag">${esc(c.disabled ? c.reason : c.tag)}</span>` : ''}</button></li>`).join('');
+    const choices = v.choices.map((c) => `<li><button class="choice${/fight/.test(c.tag) ? ' fightish' : ''}" data-choice="${c.index}" ${c.disabled ? `disabled aria-disabled="true"` : ''}>${md(c.label)}${(c.disabled ? c.reason : hideTag(c.tag)) ? `<span class="tag">${esc(c.disabled ? c.reason : hideTag(c.tag))}</span>` : ''}</button></li>`).join('');
     view.innerHTML = `<section class="fade-in">
 <div class="plate">${sceneArt(v.art)}</div>
 <header class="head"><div class="place">${esc(v.place || g.location)}</div><h1 class="title">${esc(v.title)}</h1></header>
@@ -618,8 +647,8 @@ function renderCombat() {
         const off = cost > g.james.qi;
         const val = n1(skillCheck(a.skill === 'GU' ? g.james.gu : g.james.skills[a.skill]) + (taskMode ? (c.adapt?.[id] || 0) : 0));
         const tgt = c.enemies.find((e) => e.hp > 0);
-        const plain = taskMode && tgt ? `${a.skill} ${val} / DC ${noDiceDc(tgt.dc + a.dcMod)} · ${Math.round((d[0] + d[1]) / 2)} dmg` : `${a.skill} ${val} + d6 · ${d[0]}–${d[1]} dmg`;
-        return `<li><button class="choice fightish" data-act="${id}" ${off ? 'disabled' : ''}>${esc(a.label)}<span class="tag">${a.guard ? `GU defence +${guardBonus(g)} this round${hasForm(g, 'buckler') && taskMode ? ' · covers Yuki' : ''}` : a.field ? `${FIELD_ROUNDS} rounds · ${fieldDamage(g)} to each attacker · once a fight` : plain}${a.reach ? ' · a full hit holds it off' : ''}${cost ? ` · ${cost} Qi` : ''}${a.stagger ? ' · staggers' : ''}${off ? ' · not enough Qi' : ''}</span></button></li>`;
+        const plain = !showChecks ? '' : taskMode && tgt ? `${a.skill} ${val} / DC ${noDiceDc(tgt.dc + a.dcMod)} · ${Math.round((d[0] + d[1]) / 2)} dmg` : `${a.skill} ${val} + d6 · ${d[0]}–${d[1]} dmg`;
+        return `<li><button class="choice fightish" data-act="${id}" ${off ? 'disabled' : ''}>${esc(a.label)}<span class="tag">${a.guard ? `${showChecks ? 'GU ' : ''}defence +${guardBonus(g)} this round${hasForm(g, 'buckler') && taskMode ? ' · covers Yuki' : ''}` : a.field ? `${FIELD_ROUNDS} rounds · ${fieldDamage(g)} to each attacker · once a fight` : plain}${a.reach ? ' · a full hit holds it off' : ''}${cost ? ` · ${cost} Qi` : ''}${a.stagger ? ' · staggers' : ''}${off ? ' · not enough Qi' : ''}</span></button></li>`;
     }).join('');
     const foes = c.enemies.map((e) => `<div class="foe${e.hp <= 0 ? ' down' : ''}"><span>${esc(e.name)}${e.staggered ? ' (reeling)' : ''}</span><div class="stroke"><i style="width:${pct(Math.max(0, e.hp), e.hpMax)}"></i></div></div>`).join('');
     const yuki = `<div class="foe"><span>Yuki</span><div class="stroke" style="background:rgba(242,239,230,0.08)"><i style="width:${pct(g.yuki.hp, yukiHpMax(g))};background:var(--bone)"></i></div></div>`;
@@ -628,8 +657,8 @@ function renderCombat() {
 <header class="head"><div class="place">${esc(sceneTitle(g.scene))}</div><h1 class="title">Round ${c.round}</h1></header>
 ${statusHtml()}
 <div class="foes">${foes}${yuki}</div>
-<div class="round">${(combatLog || c.log).map((l) => dieHtml(l)).join('<br>')}</div>
-<ul class="choices">${acts}${c.flee ? `<li><button class="choice" data-flee="1">Run<span class="tag">${taskMode ? `GU ${n1(skillCheck(g.james.gu))} / DC ${noDiceDc(Math.max(...c.enemies.filter((e) => e.hp > 0).map((e) => e.atk)))}` : 'GU + d6 vs their best attack'}</span></button></li>` : ''}</ul>
+<div class="round">${shownLines(combatLog || c.log).map((l) => dieHtml(l)).join('<br>')}</div>
+<ul class="choices">${acts}${c.flee ? `<li><button class="choice" data-flee="1">Run${showChecks ? `<span class="tag">${taskMode ? `GU ${n1(skillCheck(g.james.gu))} / DC ${noDiceDc(Math.max(...c.enemies.filter((e) => e.hp > 0).map((e) => e.atk)))}` : 'GU + d6 vs their best attack'}</span>` : ''}</button></li>` : ''}</ul>
 </section>`;
 }
 
@@ -674,8 +703,8 @@ ${items.map(([id, n]) => `<div class="row"><span>${esc(ITEMS[id]?.name || id)}</
 </section>`;
 }
 function renderJournal() {
-    const entries = g.log.slice().reverse().slice(0, 60).map((e) => `<div class="entry"><time>${clockLabel(e.at)}</time>${esc(sceneTitle(e.scene))}${e.lines.length ? `<div class="note">${e.lines.map((l) => dieHtml(l)).join('<br>')}</div>` : ''}</div>`).join('');
-    view.innerHTML = `<section class="page"><h1>Journal</h1><p class="lede">${g.stats.checks} checks rolled, ${g.stats.wins} passed · ${g.stats.kills} things that wanted to eat you, didn't · ${g.stats.meals} meals.</p>${entries || '<p class="note">Nothing yet. Give it a minute.</p>'}</section>`;
+    const entries = g.log.slice().reverse().slice(0, 60).map((e) => `<div class="entry"><time>${clockLabel(e.at)}</time>${esc(sceneTitle(e.scene))}${shownLines(e.lines).length ? `<div class="note">${shownLines(e.lines).map((l) => dieHtml(l)).join('<br>')}</div>` : ''}</div>`).join('');
+    view.innerHTML = `<section class="page"><h1>Journal</h1><p class="lede">${showChecks ? `${g.stats.checks} checks rolled, ${g.stats.wins} passed · ` : ''}${g.stats.kills} things that wanted to eat you, didn't · ${g.stats.meals} meals.</p>${entries || '<p class="note">Nothing yet. Give it a minute.</p>'}</section>`;
 }
 function renderSaves() {
     const bak = backupList();
@@ -684,7 +713,7 @@ function renderSaves() {
         const desc = raw ? descOf(raw) : 'Empty';
         return `<div class="row"><span>Slot ${n}</span><span class="note">${esc(desc)}</span><div class="btns sub"><button class="btn" data-save="${n}">Save here</button>${raw ? `<button class="btn" data-load="${n}">Load</button>` : ''}</div></div>`;
     };
-    view.innerHTML = `<section class="page"><h1>Saves</h1>
+    view.innerHTML = `<section class="page menu-page"><div class="btns"><button class="btn" data-menu="main">← Menu</button></div><h1>Saves</h1>
 <p class="lede">The game saves itself after every choice. Slots are for keeping a moment you might want back.</p>
 ${slot(1)}${slot(2)}${slot(3)}
 <h2>Backups</h2>
@@ -697,15 +726,48 @@ ${bak.length ? bak.map((b) => `<div class="row"><span>${esc(b.name)}</span><span
 <h2>All saves</h2>
 <div class="btns"><button class="btn" data-exportall="1">Export all saves</button><label class="btn">Restore all saves<input type="file" accept="application/json,.json" data-import="1" hidden></label></div>
 ${pendingAll ? `<p class="note">This file holds a game at ${esc(descOf(pendingAll.auto))}, ${Object.keys(pendingAll.slots).length} slot${Object.keys(pendingAll.slots).length === 1 ? '' : 's'} and ${Object.keys(pendingAll.backups).length} backup${Object.keys(pendingAll.backups).length === 1 ? '' : 's'}${pendingAll.saved ? `, exported ${esc(new Date(pendingAll.saved).toLocaleString())}` : ''}${pendingAll.skipped ? ` (${pendingAll.skipped} unreadable, left out)` : ''}. Restoring replaces your autosave, slots and backups; this game is kept as the "before" backup.</p><div class="btns"><button class="btn primary" data-restoreall="1">Restore all</button><button class="btn" data-restoreall="">Cancel</button></div>` : ''}
-<div class="btns"><button class="btn${expState().off ? '' : ' primary'}" data-expremind="1">Remind me to download: ${expState().off ? 'off' : 'on'}</button></div>
+<div class="btns"><button class="btn" data-menu="main">Back</button></div>
+<p class="note" id="saveNote"></p></section>`;
+}
+
+function renderSettings() {
+    view.innerHTML = `<section class="page menu-page"><div class="btns"><button class="btn" data-menu="main">← Menu</button></div><h1>Settings</h1>
+<p class="lede">Kept on this phone only, for every save.</p>
 <h2 data-modehead="1">Game mode</h2>
-<p class="note">${taskMode ? 'Incremental Mode: every screen is cards on a clock, with no dice (check ÷ DC decides), familiarity, Yuki\'s lane and the Coil. 1 game hour takes 3 seconds at ×1; ×2 opens after a won tribute, ×5 after Act 1. New games start with closed meridians.' : 'Story Mode: the older game, with dice and no Coil. Choices happen at once.'} Only this phone remembers it.</p>
+<p class="note">${taskMode ? 'Incremental Mode: every screen is cards on a clock, with no dice, familiarity, Yuki\'s lane and the Coil. 1 game hour takes 3 seconds at ×1; ×2 opens after a won tribute, ×5 after Act 1. New games start with closed meridians.' : 'Story Mode: the older game, with dice and no Coil. Choices happen at once.'}</p>
 <div class="btns"><button class="btn${taskMode ? ' primary' : ''}" data-tasks="${taskMode ? '' : '1'}">Incremental Mode</button><button class="btn${taskMode ? '' : ' primary'}" data-tasks="${taskMode ? '1' : ''}">Story Mode (older, with dice, no Coil)</button></div>
 ${taskMode ? `<div class="btns"><button class="btn${pauseDeath ? ' primary' : ''}" data-pausedeath="1">Pause before the forecast death: ${pauseDeath ? 'on' : 'off'}</button></div>` : ''}
 ${testSpeeds || modeTaps >= 5 ? `<div class="btns"><button class="btn${testSpeeds ? ' primary' : ''}" data-testspeeds="1">Test speeds: ${testSpeeds ? 'on' : 'off'}</button></div>` : ''}
-<h2>Start over</h2>
-<div class="btns"><button class="btn primary" data-new="1">New game</button></div>
+<h2>Text size</h2>
+<div class="btns">${TEXT_SIZES.map((n) => `<button class="btn${n === textSize ? ' primary' : ''}" data-textsize="${n}">${n}%</button>`).join('')}</div>
+<h2>Checks</h2>
+<p class="note">Cards and results don't show skill values, DCs or odds; the James tab shows the skills. Turn this on to see the numbers (for testing).</p>
+<div class="btns"><button class="btn${showChecks ? ' primary' : ''}" data-showchecks="1">Show checks: ${showChecks ? 'on' : 'off'}</button></div>
+<h2>Saving</h2>
+<div class="btns"><button class="btn${expState().off ? '' : ' primary'}" data-expremind="1">Remind me to download: ${expState().off ? 'off' : 'on'}</button></div>
+<div class="btns"><button class="btn" data-menu="main">Back</button></div>
 <p class="note" id="saveNote"></p></section>`;
+}
+
+/** The main menu (v0.11.10, Selene's): on plain paper, the game hidden until Continue. */
+function renderMenu() {
+    if (menu === 'saves') return renderSaves();
+    if (menu === 'settings') return renderSettings();
+    const cont = recovery
+        ? '<button class="btn primary big" data-menu="recovery">The save can\'t be opened: see the options</button>'
+        : `<button class="btn primary big" data-menu="continue">${hadSave ? 'Continue' : 'Begin'}<small>${esc(sceneTitle(g.scene))} — ${esc(clockLabel(g.minutes))}${taskMode && g.coil && hadSave ? ` · ${g.coil.act === 1 ? 'Act 1, ' : ''}Coil ${g.coil.n}` : ''}</small></button>`;
+    view.innerHTML = `<section class="page menu-page main-menu">
+<div class="mseal" aria-hidden="true">骨</div>
+<h1 class="mtitle">Bone and Ash</h1>
+<p class="note mver">Version <span id="menuVer">…</span> · ${taskMode ? 'Incremental Mode' : 'Story Mode'}</p>
+<div class="mbtns">${cont}${hadSave && !recovery ? '<button class="btn big" data-new="1">New game</button>' : ''}<button class="btn big" data-menu="saves">Saves</button><button class="btn big" data-menu="settings">Settings</button></div>
+<p class="note" id="saveNote"></p></section>`;
+    gameVersion().then((v) => { const el = document.getElementById('menuVer'); if (el) el.textContent = v; });
+}
+function openMenu(page = 'main') {
+    if (!menu && g && !recovery) { pauseNow('menu'); autosave(); }
+    menu = page; pendingAll = page === 'saves' ? pendingAll : null;
+    render(); window.scrollTo({ top: 0 });
 }
 
 /* ---------------- wiring ---------------- */
@@ -714,20 +776,22 @@ function render() {
     plog('not logged');
     scenePause();
     document.querySelectorAll('#tabs button').forEach((b) => b.setAttribute('aria-current', b.dataset.tab === tab ? 'page' : 'false'));
+    document.body.classList.toggle('menu-on', !!menu);
+    if (menu) return renderMenu();
     if (recovery) return renderRecovery();
-    ({ story: renderStory, sheet: renderSheet, bag: renderBag, journal: renderJournal, saves: renderSaves })[tab]();
+    ({ story: renderStory, sheet: renderSheet, bag: renderBag, journal: renderJournal })[tab]();
 }
-function setTab(t) { tab = t; render(); window.scrollTo({ top: 0 }); }
+function setTab(t) { if (t === 'menu') { openMenu('main'); return; } menu = null; tab = t; render(); window.scrollTo({ top: 0 }); }
 
 view.addEventListener('click', (ev) => {
     if (ev.target.closest('h2[data-modehead]')) { // hidden: 5 taps within a few seconds show "Test speeds"
         const now = Date.now(); modeTaps = now - modeTapAt < 1500 ? modeTaps + 1 : 1; modeTapAt = now;
-        if (modeTaps === 5) renderSaves();
+        if (modeTaps === 5) render();
         return;
     }
     const b = ev.target.closest('button');
     if (!b) return;
-    if (recovery) { onRecovery(b); return; }
+    if (recovery && !menu) { onRecovery(b); return; }
     if (b.dataset.choice != null || b.dataset.act || b.dataset.flee) {
         const now = Date.now();
         if (now - lastPress < 400) return; // double-tap guard: a fast second tap must not take the next scene's choice
@@ -751,6 +815,13 @@ view.addEventListener('click', (ev) => {
             return;
         }
         if (b.dataset.qclear) { queueClear(g, !!(running && !running.kind)); autosave(); render(); return; }
+        if (b.dataset.menu) {
+            const m = b.dataset.menu;
+            if (m === 'continue' || m === 'recovery') { hadSave = true; menu = null; setTab('story'); return; }
+            openMenu(m); return;
+        }
+        if (b.dataset.textsize) { textSize = Number(b.dataset.textsize); store.set(TEXT_SIZE_KEY, String(textSize)); applyTextSize(); render(); return; }
+        if (b.dataset.showchecks) { showChecks = !showChecks; store.set(SHOW_CHECKS_KEY, showChecks ? '1' : '0'); render(); return; }
         if (b.dataset.bak) {
             let next;
             try { next = checkScene(deserialize(store.get(BAK_KEY(b.dataset.bak)))); } catch (err) { note(`That backup can't be loaded: ${err.message}`); return; }
@@ -766,13 +837,13 @@ view.addEventListener('click', (ev) => {
         if (b.dataset.exportall) { exportAll(); note('All saves downloaded.'); return; }
         if (b.dataset.restoreall != null) {
             const p = pendingAll; pendingAll = null;
-            if (!b.dataset.restoreall || !p) { renderSaves(); return; }
-            try { restoreAll(p); } catch (err) { renderSaves(); note(`Nothing was changed: ${err.message}`); return; }
+            if (!b.dataset.restoreall || !p) { render(); return; }
+            try { restoreAll(p); } catch (err) { render(); note(`Nothing was changed: ${err.message}`); return; }
             setTab('story');
             return;
         }
-        if (b.dataset.expremind) { const o = expState(); o.off = !o.off; if (!o.off) { o.t = Date.now(); o.pl = bakMeta().play; } expWrite(o); renderSaves(); return; }
-        if (b.dataset.pausedeath) { pauseDeath = !pauseDeath; store.set(PAUSE_DEATH_KEY, pauseDeath ? '1' : '0'); renderSaves(); return; }
+        if (b.dataset.expremind) { const o = expState(); o.off = !o.off; if (!o.off) { o.t = Date.now(); o.pl = bakMeta().play; } expWrite(o); render(); return; }
+        if (b.dataset.pausedeath) { pauseDeath = !pauseDeath; store.set(PAUSE_DEATH_KEY, pauseDeath ? '1' : '0'); render(); return; }
         if (b.dataset.unq != null) {
             const k = Number(b.dataset.unq);
             if (k === 0 && running) stopRunning();
@@ -815,12 +886,12 @@ view.addEventListener('click', (ev) => {
         }
         if (b.dataset.panel) { panel = b.dataset.panel; if (panel === 'results') unseen = 0; render(); return; }
         if (b.dataset.yuki) { const yl = yukiLane(g); setYuki(g, !yl.on); autosave(); render(); return; }
-        if (b.dataset.testspeeds) { testSpeeds = !testSpeeds; store.set(TEST_SPEEDS_KEY, testSpeeds ? '1' : '0'); lastTickAt = Date.now(); renderSaves(); return; }
+        if (b.dataset.testspeeds) { testSpeeds = !testSpeeds; store.set(TEST_SPEEDS_KEY, testSpeeds ? '1' : '0'); lastTickAt = Date.now(); render(); return; }
         if (b.dataset.tasks != null) {
             if (!b.dataset.tasks) return; // the mode already on
             taskMode = !taskMode; store.set(TASKS_KEY, taskMode ? '1' : '0'); setNoDice(taskMode);
             if (!taskMode) stopRunning(); else startNext();
-            renderSaves(); return;
+            render(); return;
         }
         if (b.dataset.choice != null) stopRunning(); // a story stop: the bar's work is not done, so nothing of it happens
         if (b.dataset.choice != null) {
@@ -841,14 +912,14 @@ view.addEventListener('click', (ev) => {
             if (out.done) { const lines = out.lines.slice(); lines.push(...goTo(g, SCENES, out.next)); lastResult = { lines, fail: out.done === 'lose' }; combatLog = null; }
             autosave(); render();
         } else if (b.dataset.new) {
-            if (tab !== 'story' && !confirmNew()) return;
+            if ((menu || tab !== 'story') && !confirmNew()) return;
             backupBefore('a new game');
             g = freshGame(); stopRunning();
             lastResult = null; combatLog = null; autosave(); setTab('story');
         } else if (b.dataset.tabGo) {
             setTab(b.dataset.tabGo);
         } else if (b.dataset.save) {
-            writeKey(SLOT(b.dataset.save), serialize(g)); renderSaves(); note('Saved.');
+            writeKey(SLOT(b.dataset.save), serialize(g)); render(); note('Saved.');
         } else if (b.dataset.load) {
             let next;
             try { next = checkScene(deserialize(store.get(SLOT(b.dataset.load)))); } catch (err) { note(`Slot ${b.dataset.load} can't be loaded: ${err.message}`); return; }
@@ -872,7 +943,7 @@ view.addEventListener('change', async (ev) => {
         const text = await unpackText(await inp.files[0].text());
         inp.value = '';
         const all = readAll(text); // v0.11.9: an all-saves file asks first
-        if (all) { pendingAll = all; renderSaves(); return; }
+        if (all) { pendingAll = all; render(); return; }
         next = checkScene(deserialize(text));
     } catch (err) { inp.value = ''; note(`That file can't be loaded: ${err.message}`); return; }
     backupBefore('loading a save file');
