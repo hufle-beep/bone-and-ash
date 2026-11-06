@@ -4,6 +4,7 @@ Started 2026-11-06 (v0.10.4), when `history.md` passed 45 KB. Newer than `histor
 
 ## Older decisions (2026-11-06, v0.10.0 and later)
 
+- **v0.10.3: the handover split (owner 11:40 "the handover has been running for a very long time"; pick 11:41 "a"; go 11:42; docs only):** `handover.md` (core) + `reference.md` + `history.md`, nothing deleted, only moved; the last three versions stay here.
 - **v0.10.2 (owner 11:06: "Night falls. Settle in." too long, make camp a hub or merge it, move the clock instantly; paused by default, no automatic unpause; picks 11:11 "3a. 1 a+c, 2a but also on new scenes and doesn't automatically start until you queue everything and tapped (not queued) cards still run, but re-pause after"; go 11:20 without 3a; mid-build stop 11:25, pick 11:28 "a"; built in v0.10.2):**
   - **1a** the camp (`camp`, Days 1–3) is a task screen: fire, cook, eat raw, stakes are cards (tap or +). `plainChecks`: its checked cards stay chores (the story check's numbers, not the work-card DC +2 / double length). **Mid-build pick a:** "Eat it raw" (no own time) takes 0 minutes as a camp card instead of the story default 30, like eating on every other task screen; fire, cook and stakes keep their own times.
   - **1c** waiting happens at once (task mode): a story card with no check, Qi, fight or own time that takes 60+ minutes because its `do` or the next scene's `enter` sets the clock (`waitChoice` in tasks.js; never a choice back to its own scene) plays with no bar. 25 such choices (Night falls, chapter transitions, Act 1 camp nights…).

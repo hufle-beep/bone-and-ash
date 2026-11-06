@@ -13,8 +13,12 @@ import { defaultMinutes, DEFAULT_MINUTES } from '../js/core/story.js';
 import { coilActive, coilPrefill, rewind, endCoil, KEEP_FLAGS, REMEMBER } from '../js/core/coil.js';
 import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskMinutes, runTask, outlook, taskQueue, taskState, setYuki, yukiLane, famTier, QUEUE_MAX, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, merChoice, MER_TASK, waitChoice } from '../js/core/tasks.js';
 
+import { GAMES, FULL, SHARD, WORKERS, SEED, SENSIBLE, REPORT, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
 let pass = 0, fail = 0;
 const assert = (c, l) => { if (c) { pass++; } else { fail++; if (fail < 30) console.error('  FAIL ', l); } };
+const kids = launch(import.meta.url); // v0.11.1: the bot games in worker processes, while this one runs the other checks
+
+if (!SHARD) { // the static checks run in the parent only
 
 // static: hubs, menus and their doors exist
 for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
@@ -399,6 +403,8 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     setNoDice(false);
 }
 
+} // end of the static checks before the bots
+
 let rs = 4242;
 const rnd = (n) => { rs = (rs * 1103515245 + 12345) >>> 0; return (rs >>> 8) % n; };
 
@@ -423,12 +429,13 @@ const bands = {};
 let yukiRuns = 0;
 let predicted = 0;
 function play(run, tasks) {
+    rs = seedOf(run, tasks ? 1 : 2); // v0.11.1: every game its own random stream
     setNoDice(tasks); // task mode has no dice anywhere (v0.9.3)
-    const g = ensureBars(newGame(run + 1, { closed: tasks })); // task mode: meridians closed at the start (v0.9.6)
+    const g = ensureBars(newGame(run + 1 + SEED * 100000, { closed: tasks })); // task mode: meridians closed at the start (v0.9.6)
     const st = tasks ? stats.tasks : stats.classic;
     let steps = 0;
     const seenOut = new Set();
-    let bitShen = false, meiSeen = false, coilKey = '', deadKey = '';
+    let bitShen = false, meiSeen = false, coilKey = '', deadKey = '', ms = 0;
     const D = () => { const a = (g.coil.act || 0) ? deaths.a1 : deaths.pro; return a[g.coil.n] || (a[g.coil.n] = { coils: 0, early: 0, late: 0, beast: 0 }); };
     for (; steps < 18000; steps++) {
         const out = tasks && TRIBUTE_OUT[g.scene];
@@ -446,6 +453,10 @@ function play(run, tasks) {
             const mc = medCards(g, SCENES);
             if (mc.some((c) => c.id === 'med:bt' && c.open) && rnd(2) === 0) { runMed(g, SCENES, 'med:bt'); medStats.bt++; continue; }
             if (mc.some((c) => c.id === 'med:mer')) { runMed(g, SCENES, 'med:mer'); medStats.mer++; continue; }
+        }
+        if (SENSIBLE && tasks) { // tools/bots.mjs --sensible: at most 2 meridian sittings in a row, none when hungry
+            if (g.scene === 'meridians' && ((ms = (ms || 0) + 1) > 2 || g.james.satiety < 40)) { ms = 0; choose(g, SCENES, SCENES.meridians.choices.findIndex((c) => c.text === 'Open your eyes.')); continue; }
+            if (g.scene !== 'meridians') ms = 0;
         }
         const v = sceneView(g, SCENES);
         if (v.end) { const e = g.flags.ending || 'none'; st.endings[e] = (st.endings[e] || 0) + 1; st.games++; return true; }
@@ -508,7 +519,16 @@ function play(run, tasks) {
 }
 let diceInTasks = 0;
 const logBefore = (g) => g.log.length;
-for (let run = 0; run < 2000; run++) { play(run, true); play(run, false); }
+if (kids) { // v0.11.1: merge the workers' numbers
+    for (const r of await collect(kids)) {
+        for (const [k, o] of Object.entries({ byCoil, medStats, deaths, stats, bands })) mergeInto(o, r[k]);
+        for (const id of r.cardsSeen.__set) cardsSeen.add(id);
+        for (const id of r.cardsListed.__set) cardsListed.add(id);
+        yukiRuns += r.yukiRuns; predicted += r.predicted; diceInTasks += r.diceInTasks; pass += r.pass; fail += r.fail;
+    }
+} else for (const run of myRuns()) { play(run, true); play(run, false); }
+if (SHARD) emit({ byCoil, medStats, deaths, stats, bands, cardsSeen, cardsListed, yukiRuns, predicted, diceInTasks, pass, fail });
+rs = 4243; // the checks below draw from their own stream
 setNoDice(false);
 // task mode: no die anywhere, in fights or story; classic: the die stays
 {
@@ -535,8 +555,8 @@ setNoDice(false);
 
 // every card that was ever offered was also played at least once
 const all = cardsListed;
-for (const id of all) assert(cardsSeen.has(id), `card ${id} was played by a bot`);
-assert(yukiRuns > 1000, `Yuki's lane brings things home (${yukiRuns})`);
+if (FULL) for (const id of all) assert(cardsSeen.has(id), `card ${id} was played by a bot`); // coverage: the full run only
+assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
 // no dice on work cards: the same state gives the same result
 {
     const g = ensureBars(newGame(3)); g.scene = 'wilds'; g.minutes += 1440; Object.assign(g.flags, { long: true, forest_day: 2 });
@@ -621,14 +641,15 @@ assert(yukiRuns > 1000, `Yuki's lane brings things home (${yukiRuns})`);
 const pctOf = (o, n) => Object.entries(o).sort().map(([k, v]) => `${k} ${((v / n) * 100).toFixed(1)}%`).join(', ');
 console.log(`  tribute, tasks:   ${pctOf(stats.tasks.endings, stats.tasks.games)}`);
 console.log(`  tribute, classic: ${pctOf(stats.classic.endings, stats.classic.games)}`);
-console.log(`  work-card results: ${Object.entries(bands).map(([k, v]) => `${k} ${v}`).join(', ')} · Yuki brought home ${yukiRuns} times`);
-console.log(`  tribute per Coil (tasks, bots rewind a lost tribute up to Coil 3): ${Object.entries(byCoil).map(([n, b]) => { const t = b.won + b.paid + b.lost; return `Coil ${n}: won ${((b.won / t) * 100).toFixed(1)}% paid ${((b.paid / t) * 100).toFixed(1)}% lost ${((b.lost / t) * 100).toFixed(1)}% (${t})`; }).join(' · ')}`);
-console.log(`  realm / primaries at the tribute (tasks): ${Object.entries(byCoil).map(([n, b]) => { const t = b.won + b.paid + b.lost; return `Coil ${n}: realm ${(b.realm / t).toFixed(2)}, primaries ${(b.pri / t).toFixed(1)}`; }).join(' · ')}`);
-const dl = (o, name) => Object.entries(o).filter(([n]) => n <= 4).map(([n, d]) => `Coil ${n}: ${name === 'pro' ? `dead before Mei Lin ${((d.early / d.coils) * 100).toFixed(0)}%, after ${((d.late / d.coils) * 100).toFixed(0)}%` : `dead ${((d.late / d.coils) * 100).toFixed(0)}%`} (${d.coils})`).join(' · ');
+console.log(`  work-card results: ${Object.entries(bands).sort().map(([k, v]) => `${k} ${v}`).join(', ')} · Yuki brought home ${yukiRuns} times`);
+console.log(`  tribute per Coil (tasks, bots rewind a lost tribute up to Coil 3): ${Object.entries(byCoil).sort(([a], [b]) => a - b).map(([n, b]) => { const t = b.won + b.paid + b.lost; return `Coil ${n}: won ${((b.won / t) * 100).toFixed(1)}% paid ${((b.paid / t) * 100).toFixed(1)}% lost ${((b.lost / t) * 100).toFixed(1)}% (${t})`; }).join(' · ')}`);
+console.log(`  realm / primaries at the tribute (tasks): ${Object.entries(byCoil).sort(([a], [b]) => a - b).map(([n, b]) => { const t = b.won + b.paid + b.lost; return `Coil ${n}: realm ${(b.realm / t).toFixed(2)}, primaries ${(b.pri / t).toFixed(1)}`; }).join(' · ')}`);
+const dl = (o, name) => Object.entries(o).sort(([a], [b]) => a - b).filter(([n]) => n <= 4).map(([n, d]) => `Coil ${n}: ${name === 'pro' ? `dead before Mei Lin ${((d.early / d.coils) * 100).toFixed(0)}%, after ${((d.late / d.coils) * 100).toFixed(0)}%` : `dead ${((d.late / d.coils) * 100).toFixed(0)}%`} (${d.coils}${REPORT ? `; beasts ${((d.beast / d.coils) * 100).toFixed(0)}%` : ''})`).join(' · ');
 console.log(`  deaths, prologue (HP 0 or a beast): ${dl(deaths.pro, 'pro')}`);
 console.log(`  deaths, Act 1: ${dl(deaths.a1, 'a1')}`);
-console.log(`  Meditate: ${medStats.mer} meridian screens, ${medStats.bt} breakthroughs, ${medStats.warn} seal warnings; Act 1: ${medStats.a1bites} rewinds at Shen Qiu, ends on ${JSON.stringify(medStats.a1coils)}`);
-assert(medStats.a1bites >= 5, `bots rewind Act 1 and reach its end (${medStats.a1bites})`);
+console.log(`  Meditate: ${medStats.mer} meridian screens, ${medStats.bt} breakthroughs, ${medStats.warn} seal warnings; Act 1: ${medStats.a1bites} rewinds at Shen Qiu, ends on ${JSON.stringify(Object.fromEntries(Object.entries(medStats.a1coils).sort(([a], [b]) => a - b)))}`);
+assert(!FULL || medStats.a1bites >= 5, `bots rewind Act 1 and reach its end (${medStats.a1bites})`);
 console.log(`  ${stats.tasks.cards} cards run, ${stats.tasks.skipped} skipped, ${stats.tasks.collapses} collapses (HP 0), ${predicted} queues predicted, ${cardsSeen.size}/${all.size} cards played`);
+console.log(`  ${GAMES} games each way in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FULL ? '' : ' (quick: coverage checks skipped)'}`);
 console.log(`${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

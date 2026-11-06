@@ -2,12 +2,14 @@
 import { SCENES, START_SCENE } from '../js/story/prologue.js';
 import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, itemCap, setNoDice } from '../js/core/game.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
+import { GAMES, FULL, SHARD, WORKERS, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
 
 let pass = 0, fail = 0;
 const assert = (c, l) => { if (c) { pass++; } else { fail++; console.error('  FAIL ', l); } };
+const kids = launch(import.meta.url); // v0.11.1: the random playthroughs in worker processes
 
 // static: every literal target exists
-const src = Object.values(SCENES);
+const src = SHARD ? [] : Object.values(SCENES);
 for (const s of src) {
     assert(s.id && SCENES[s.id] === s, `scene id matches key: ${s.id}`);
     for (const c of s.choices || []) {
@@ -22,7 +24,8 @@ let maxSteps = 0;
 let rs = 12345;
 const rnd = (n) => { rs = (rs * 1103515245 + 12345) >>> 0; return (rs >>> 8) % n; };
 const fights = {};
-for (let run = 0; run < 2000; run++) {
+for (const run of kids ? [] : myRuns()) {
+    rs = seedOf(run, 3); // v0.11.1: every game its own random stream
     const g = ensureBars(newGame(run + 1));
     let steps = 0;
     for (; steps < 2500; steps++) {
@@ -52,6 +55,9 @@ for (let run = 0; run < 2000; run++) {
     maxSteps = Math.max(maxSteps, steps);
     assert(steps < 2500, `run ${run} finishes`);
 }
+if (SHARD) emit({ seen, endings, fights, maxSteps, pass, fail });
+if (kids) for (const r of await collect(kids)) { for (const id of r.seen.__set) seen.add(id); mergeInto(endings, r.endings); mergeInto(fights, r.fights); maxSteps = Math.max(maxSteps, r.maxSteps); pass += r.pass; fail += r.fail; }
+rs = 12346; // the focused walks below draw from their own stream
 // focused walks: the Long Forest at every power level (realm 0–7, tiers 1–3), and the Blackroot with a Ya-leaning heart
 function walkFrom(g, entry, stopAt, budget = 1500) {
     g.scene = entry; const e = SCENES[entry].enter; if (e) e(g);
@@ -117,8 +123,10 @@ for (let run = 0; run < 40; run++) {
 }
 setNoDice(false);
 const unreached = Object.keys(SCENES).filter((k) => !seen.has(k));
-assert(unreached.length === 0, `every scene reachable (unreached: ${unreached.join(', ')})`);
-console.log('fights', fights);
-console.log('endings', endings, 'longest run', maxSteps, 'scenes', Object.keys(SCENES).length);
+assert(!FULL || unreached.length === 0, `every scene reachable (unreached: ${unreached.join(', ')})`);
+const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));
+console.log('fights', sorted(fights));
+console.log('endings', sorted(endings), 'longest run', maxSteps, 'scenes', Object.keys(SCENES).length);
+console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FULL ? '' : ' (quick: coverage checks skipped)'}`);
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);
