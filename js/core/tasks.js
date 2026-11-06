@@ -14,12 +14,13 @@
  */
 import { hasForm } from './forms.js';
 import { choose, goTo, choiceOpen, choiceTag, gives, setTimeless, defaultMinutes, movesPlace } from './story.js';
-import { advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck, canBreakThrough, btMinutes, realmName, condense, SIT_MINUTES_INC } from './game.js';
+import { advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck, canBreakThrough, btMinutes, realmName, condense, SIT_MINUTES_INC, isNoDice } from './game.js';
 import { CONDENSE_SIT_COST } from './formulas.js';
 import { btTarget, MER_LINES, lineWindow, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
 import { daily } from '../story/common.js';
 import { endCoil, recordCard } from './coil.js';
+import { canMeditate } from './meditate.js';
 
 setTimeless(Object.fromEntries(Object.entries(TASK_HUBS).map(([h, cfg]) => [h, [...Object.keys(cfg.menus || {}), ...Object.keys(cfg.doorMenus || {})]]))); // hub ↔ menu steps take no extra time (v0.9.5)
 
@@ -81,7 +82,13 @@ export const btOpen = (g) => canBreakThrough(g) && btTarget(g) === 'breakthrough
 /** v0.11.12: "Cultivate (one sit)" as a queueable card on the task screens that have no Cultivate choice of their own (camp, stream, village). */
 export const SIT_TASK = 'sit:next';
 const hubHasSit = (scenes, hubId) => (scenes[hubId]?.choices || []).some((c) => c.to === hubId && /^(Cultivate|Condense)/.test(String(typeof c.text === 'function' ? '' : c.text)) && /condense\(g\)/.test(String(c.do)));
-export const sitOpen = (g, scenes) => !!TASK_HUBS[g.scene] && !hubHasSit(scenes, g.scene) && g.james.qi >= CONDENSE_SIT_COST && g.james.saturation < 100;
+export const sitOpen = (g, scenes) => isQueueScreen(g, scenes) && !(TASK_HUBS[g.scene] && hubHasSit(scenes, g.scene)) && g.james.qi >= CONDENSE_SIT_COST && g.james.saturation < 100;
+/** v0.11.14: the Meditate cards that can be queued anywhere Meditate shows. */
+export const isMedTask = (id) => id === SIT_TASK || id === BT_TASK || !!lineOfTask(id);
+/** v0.11.14: a screen with a queue: a task screen, or a resting place where Meditate shows (only Meditate cards queue there). */
+export const isQueueScreen = (g, scenes) => !g.combat && (!!TASK_HUBS[g.scene] || (isNoDice() && canMeditate(g, scenes)));
+/** v0.11.14: can queue row `id` run on this screen at all (else it waits for its own screen)? */
+export const runsHere = (g, scenes, id) => (TASK_HUBS[g.scene] ? true : isQueueScreen(g, scenes) && isMedTask(id));
 /** v0.11.13 (E1): one queueable card per meridian line (`mer:pri`, `mer:col`, `mer:e8`, `mer:ec`, `mer:jn`). `mer:next` is no longer
  * listed, but a queue saved with it still runs (primaries first, as before). */
 export const merLineTask = (line) => `mer:${line}`;
@@ -155,7 +162,7 @@ export function cardCheck(g, id, c) {
 export function taskCards(g, scenes) {
     const hubId = g.scene;
     const cfg = TASK_HUBS[hubId];
-    if (!cfg) return [];
+    if (!cfg) return medTaskCards(g, scenes); // v0.11.14: a resting place: only the Meditate cards
     const hub = scenes[hubId];
     const t = st(g);
     const cards = [];
@@ -187,6 +194,13 @@ export function taskCards(g, scenes) {
         if (isDoor(cfg, c)) push(`${hubId}:${i}`, 'door', cfg.own, c, c.time || 0, 'open');
         else if (isChore(hubId, c)) push(`${hubId}:${i}`, c.check && !cfg.plainChecks ? 'work' : 'chore', cfg.own, c, c.time || 0, 'open');
     });
+    cards.push(...medTaskCards(g, scenes));
+    return cards;
+}
+/** The queueable Meditate cards here (v0.11.13 meridian lines, v0.11.12 sit, v0.11.2 breakthrough); off the task screens they are the only cards (v0.11.14). */
+function medTaskCards(g, scenes) {
+    const cards = [];
+    if (!isQueueScreen(g, scenes)) return cards;
     for (const line of MER_LINES) { // v0.11.13 (E1): where "Next meridian session" was
         const mi = merLineChoice(g, scenes, line);
         if (mi < 0) continue;
@@ -320,16 +334,17 @@ export function setYuki(g, on) { st(g).yuki.on = !!on; }
  */
 export function runTask(g, scenes, id) {
     const hubId = g.scene;
-    if (!TASK_HUBS[hubId]) throw new Error(`Not a task hub: ${hubId}`);
+    if (!runsHere(g, scenes, id)) throw new Error(`Not a task hub: ${hubId}`); // v0.11.14: Meditate cards also on the resting places
     const card = cardOf(scenes, hubId, id);
     if (!card) throw new Error(`No card ${id} on ${hubId}`);
     const m0 = g.minutes;
     const lines = [];
     let fail = false;
-    recordCard(g, hubId, m0, id);
+    if (TASK_HUBS[hubId]) recordCard(g, hubId, m0, id);
     if (card.kind === 'bt') {
         if (!btOpen(g)) throw new Error('No breakthrough possible');
         g.flags.bt_return = hubId;
+        if (!TASK_HUBS[hubId]) g.flags.med_back = hubId; // v0.11.14: back to a resting place without its enter again
         lines.push(...goTo(g, scenes, 'breakthrough'));
     } else if (card.kind === 'sit') {
         if (!sitOpen(g, scenes)) throw new Error('No sit possible');
@@ -389,6 +404,7 @@ export function outlook(g, scenes) {
     for (const id of st(g).queue) {
         if (death) { rows.push({ id, dead: true }); continue; }
         if (left) { rows.push({ id, wait: true }); continue; }
+        if (!runsHere(c, scenes, id)) { left = true; rows.push({ id, wait: true }); continue; } // v0.11.14: a row for another screen waits
         if (!taskOpen(c, scenes, id)) { rows.push({ id, skip: true }); continue; }
         const before = c.minutes;
         const r = runTask(c, scenes, id);

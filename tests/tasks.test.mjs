@@ -9,10 +9,10 @@ import { markDaily } from '../js/story/common.js';
 import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, setNoDice, isNoDice, clockLabelSec, advance, STARVE_HP_PER_HOUR, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1 } from '../js/core/game.js';
 import { canPrimary, canColGroup, colGroupsOpen, sessionsToday, dcPrimary, dcColGroup, btTarget, canAnyMeridian, COL_GROUPS, priHours, colHours, merMinutesOf } from '../js/story/meridians.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
-import { medCards, runMed, canMeditate, NO_MEDITATE, isSitChoice } from '../js/core/meditate.js';
+import { medCards, runMed, canMeditate, NO_MEDITATE, isSitChoice, MED_SCREENS } from '../js/core/meditate.js';
 import { defaultMinutes, DEFAULT_MINUTES } from '../js/core/story.js';
 import { coilActive, coilPrefill, rewind, endCoil, KEEP_FLAGS, REMEMBER } from '../js/core/coil.js';
-import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskMinutes, runTask, outlook, taskQueue, taskState, setYuki, yukiLane, famTier, QUEUE_MAX, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, merChoice, MER_TASK, BT_TASK, SIT_TASK, waitChoice, merLineTask, lineOfTask } from '../js/core/tasks.js';
+import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskMinutes, runTask, outlook, taskQueue, taskState, setYuki, yukiLane, famTier, QUEUE_MAX, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, merChoice, MER_TASK, BT_TASK, SIT_TASK, waitChoice, merLineTask, lineOfTask, isQueueScreen, runsHere } from '../js/core/tasks.js';
 
 import { writeFileSync } from 'node:fs';
 import { GAMES, FULL, SHARD, WORKERS, SEED, SENSIBLE, REPORT, STATS_OUT, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
@@ -56,19 +56,19 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     setNoDice(false);
     assert(defaultMinutes(SCENES, 'x', { to: 'y' }, 'y', true) === 0, 'classic: no default time');
     setNoDice(true);
-    // the Meditate card is everywhere but the urgent screens
+    // v0.11.14 (owner pick A): the Meditate card only on the 13 resting places
     let medded = 0;
     for (const id of Object.keys(SCENES)) {
         const h = ensureBars(newGame(32)); h.scene = id; h.james.qi = 30;
         const m = medCards(h, SCENES); // (rendering every scene is walked by the bots: a fresh state can't stand in every scene)
-        if (NO_MEDITATE.has(id) || SCENES[id].end) assert(m.length === 0, `no Meditate on ${id}`);
+        if (NO_MEDITATE.has(id) || SCENES[id].end || !MED_SCREENS.has(id)) assert(m.length === 0, `no Meditate on ${id}`);
         else { assert(m.length >= 1, `Meditate on ${id}`); medded++; }
     }
-    assert(medded > 250, `Meditate on most screens (${medded})`);
+    assert(medded === 13 && MED_SCREENS.size === 13 && [...MED_SCREENS].every((id) => SCENES[id]), `v0.11.14: Meditate on the 13 resting places and nowhere else (${medded})`);
     // a sit off the hubs: an hour (v0.11.2), Saturation +10% at Mortal Vessel on Coil 1, the scene stays
-    const k = ensureBars(newGame(33)); k.scene = 'mei_lin'; k.james.qi = 30; const k0 = k.minutes;
+    const k = ensureBars(newGame(33)); k.scene = 'rt_camp'; k.james.qi = 30; const k0 = k.minutes;
     const r = runMed(k, SCENES, 'med:sit');
-    assert(k.scene === 'mei_lin' && k.minutes - k0 === 60 && k.james.saturation === 10 && /Condensed/.test(r.lines[0]), `Meditate: a sit keeps the scene (1 h, +10%: ${k.minutes - k0} min, ${k.james.saturation}%)`);
+    assert(k.scene === 'rt_camp' && k.minutes - k0 === 60 && k.james.saturation === 10 && /Condensed/.test(r.lines[0]), `Meditate: a sit keeps the scene (1 h, +10%: ${k.minutes - k0} min, ${k.james.saturation}%)`);
     // v0.11.13 (E1): no meridian screen from Meditate; at Foundation the Extraordinary vessel is a card, run from the scene, which stays
     const e = ensureBars(newGame(34)); e.scene = 'village'; e.james.realm = 1; e.james.qi = 30;
     const before = JSON.stringify(e.inventory);
@@ -701,11 +701,24 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
         L.james.satiety = 70; L.james.qi = 1; assert(medCards(L, SCENES).filter((c) => /^med:mer:/.test(c.id)).every((c) => !c.open && /2 Qi/.test(c.reason)), 'v0.11.13: under 2 Qi: locked'); L.james.qi = 25;
         const o = JSON.parse(JSON.stringify(L)); taskQueue(o).push(MER_TASK);
         assert(taskOpen(o, SCENES, MER_TASK) && runTask(o, SCENES, MER_TASK) && o.james.primaries === 3 && o.james.merWork > 0, 'v0.11.13: a saved mer:next still runs (primaries first)');
+        // v0.11.14: no Meditate on a story screen; on Act 1's resting places the Meditate cards queue
         const a = ensureBars(newGame(77, { closed: true })); a.scene = 'arrival'; a.james.qi = 25; a.james.satiety = 70;
-        const am = medCards(a, SCENES).find((c) => c.id === 'med:mer:pri');
-        assert(am && am.open && !am.task && am.minutes === 120, 'v0.11.13: off the task screens the card is tap-only, with its length (a bar)');
-        const a0 = a.minutes; runMed(a, SCENES, 'med:mer:pri');
-        assert(a.scene === 'arrival' && a.james.primaries === 1 && a.minutes - a0 === 120, 'v0.11.13: tapped off a task screen: the work, the scene stays');
+        assert(!medCards(a, SCENES).length && !isQueueScreen(a, SCENES) && !taskCards(a, SCENES).length, 'v0.11.14: the arrival has no Meditate and no queue');
+        const rc = ensureBars(newGame(80, { closed: true })); rc.scene = 'rt_camp'; rc.james.qi = 30; rc.james.satiety = 70;
+        const rm = medCards(rc, SCENES);
+        assert(isQueueScreen(rc, SCENES) && rm.find((c) => c.id === 'med:mer:pri')?.task === 'mer:pri' && rm.find((c) => c.id === 'med:sit')?.task === SIT_TASK, 'v0.11.14: rt_camp: the primary and the sit carry queue ids');
+        assert(taskCards(rc, SCENES).every((c) => ['mer', 'sit', 'bt'].includes(c.kind)) && taskCards(rc, SCENES).length === 2, 'v0.11.14: off the task screens only Meditate cards are cards');
+        queueAdd(rc, 'mer:pri'); queueAdd(rc, SIT_TASK); queueAdd(rc, 'stream:0'); queueAdd(rc, SIT_TASK);
+        const ro = outlook(rc, SCENES), rr = JSON.parse(JSON.stringify(rc)), rgot = [];
+        for (const id of [...taskQueue(rr)]) { if (!runsHere(rr, SCENES, id)) break; taskQueue(rr).shift(); runTask(rr, SCENES, id); rgot.push(rr.minutes); }
+        assert(ro.rows.slice(0, 2).map((x) => x.end).join() === rgot.join() && ro.rows[2].wait && ro.rows[3].wait && rr.scene === 'rt_camp' && rr.james.primaries === 1 && taskQueue(rr).length === 2, `v0.11.14: rt_camp runs the Meditate rows (forecast = reality), the stream row waits and the rest after it (${ro.rows.map((x) => x.end || (x.wait ? 'wait' : '?')).join()})`);
+        assert(!runsHere(rr, SCENES, 'stream:0') && (rr.scene = 'stream', runsHere(rr, SCENES, 'stream:0')), 'v0.11.14: the stream row runs once back on the stream');
+        let threw = false; try { runTask(a, SCENES, SIT_TASK); } catch { threw = true; }
+        assert(threw, 'v0.11.14: no queued work on a story screen');
+        const bq = ensureBars(newGame(81)); bq.scene = 'rt_camp'; bq.james.qi = 30; bq.james.saturation = 96;
+        assert(taskOpen(bq, SCENES, BT_TASK) && medCards(bq, SCENES).find((c) => c.id === 'med:bt')?.task === BT_TASK, 'v0.11.14: Break through queues on a resting place');
+        const br = runTask(bq, SCENES, BT_TASK);
+        assert(br.stopped && bq.scene === 'breakthrough' && bq.flags.bt_return === 'rt_camp' && bq.flags.med_back === 'rt_camp', 'v0.11.14: it comes back to rt_camp without its enter');
         const fe = ensureBars(newGame(78)); fe.scene = 'stream'; fe.james.qi = 25; fe.james.realm = 1; markDaily(fe, 'mer_e8');
         const fm = medCards(fe, SCENES).find((c) => c.id === 'med:mer:e8');
         assert(fm && !fm.open && /tomorrow/.test(fm.reason) && !taskOpen(fe, SCENES, 'mer:e8'), `v0.11.13: an Extraordinary line used today: shown, locked till tomorrow (${fm?.reason})`);
@@ -726,7 +739,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
         const w2 = ensureBars(newGame(74, { closed: true })); w2.scene = 'wilds'; w2.james.qi = 25;
         assert(!taskOpen(w2, SCENES, SIT_TASK), 'v0.11.12: the wilds keep their own Cultivate card (no second one)');
         const lone = ensureBars(newGame(75, { closed: true })); lone.scene = 'arrival'; lone.james.qi = 25;
-        assert(!taskOpen(lone, SCENES, SIT_TASK) && !medCards(lone, SCENES).find((c) => c.id === 'med:sit')?.task, 'v0.11.12: off the task screens the sit stays tap-only');
+        assert(!taskOpen(lone, SCENES, SIT_TASK) && !medCards(lone, SCENES).length, 'v0.11.14: no sit on a story screen');
     }
     // the forecast finds the row where a bad queue starves
     const h = ensureBars(newGame(71, { closed: true })); h.scene = 'wilds'; h.minutes = 1440 + 7 * 60; Object.assign(h.flags, { long: true, forest_day: 2 });

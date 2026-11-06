@@ -6,7 +6,7 @@ import {
     startCombat, combatStep, combatFlee, COMBAT_ACTIONS, setNoDice, noDiceDc, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage,
 } from './core/game.js';
 import { sceneView, choose, goTo, gives } from './core/story.js';
-import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskLabel, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, waitChoice, taskMinutes, runTask, outlook, taskQueue, MS_PER_GAME_HOUR, QUEUE_MAX, FAM, yukiLane, setYuki } from './core/tasks.js';
+import { isTaskHub, isQueueScreen, runsHere, isTaskChoice, taskCards, taskOpen, taskLabel, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, waitChoice, taskMinutes, runTask, outlook, taskQueue, MS_PER_GAME_HOUR, QUEUE_MAX, FAM, yukiLane, setYuki } from './core/tasks.js';
 import { SCENES, ITEMS } from './story/prologue.js';
 import { coilActive, endCoil, coilPrefill } from './core/coil.js';
 import { medCards, runMed, SIT_MINUTES, isSitChoice } from './core/meditate.js';
@@ -156,18 +156,19 @@ function addResult(title, lines, fail) {
 }
 const durLabel = (m) => (m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} m` : ''}` : `${m} m`);
 const onTaskHub = () => taskMode && g && !recovery && isTaskHub(g);
+const onQueueScreen = () => taskMode && g && !recovery && isQueueScreen(g, SCENES); // v0.11.14: task screens and the resting places
 
 function startNext() {
     scenePause();
-    if (running || !onTaskHub()) return;
+    if (running || !onQueueScreen()) return;
     if (g.combat) return;
-    if (coilPrefill(g)) autosave(); // "same days again": this hub and day get last Coil's cards
+    if (onTaskHub() && coilPrefill(g)) autosave(); // "same days again": this hub and day get last Coil's cards
     const q = taskQueue(g);
     const skipped = [];
-    while (q.length && !taskOpen(g, SCENES, q[0])) skipped.push(taskLabel(g, SCENES, q.shift()));
+    while (q.length && runsHere(g, SCENES, q[0]) && !taskOpen(g, SCENES, q[0])) skipped.push(taskLabel(g, SCENES, q.shift()));
     for (const l of skipped) addResult(l, ['Skipped: not possible when its turn came.'], true);
     if (skipped.length) autosave();
-    if (!q.length) return;
+    if (!q.length || !runsHere(g, SCENES, q[0])) return; // v0.11.14: a row for another screen waits there
     const id = q[0];
     if (isInstantTask(g, SCENES, id)) { if (runSpeed()) { lastFc = outlook(g, SCENES); checkDeathPause(g.minutes); } if (runSpeed()) finishTask(id, taskLabel(g, SCENES, id)); return; } // rest and sleep: no bar (v0.10.0); paused: waits
     const mins = taskMinutes(g, SCENES, id);
@@ -198,7 +199,7 @@ function tick() {
     lastTickAt = now;
     if (!running) return;
     if (running.kind) { if (!taskMode || g.combat || g.scene !== running.scene) { running = null; endOneShot(); return; } } // a story or meditate bar
-    else if (!onTaskHub()) { running = null; return; }
+    else if (!onQueueScreen()) { running = null; return; }
     running.done += dt * runSpeed();
     if (!running.kind && runSpeed() && now - lastRunSave >= 15e3) autosave(); // v0.11.5
     const f = Math.min(1, running.done / running.ms);
@@ -295,6 +296,7 @@ function resultsPaneHtml() {
 function renderCardScreen() {
     const v = sceneView(g, SCENES);
     const hub = onTaskHub();
+    const qs = onQueueScreen(); // v0.11.14: the queue on the resting places too
     const med = medCards(g, SCENES);
     const medIds = new Set(med.filter((m) => m.task).map((m) => m.task));
     const sitHere = (c) => c.index < 1000 && isSitChoice(SCENES[g.scene].choices[c.index], g.scene); // condensation lives on the Meditate card
@@ -302,7 +304,7 @@ function renderCardScreen() {
     let hubHtml = '';
     let queueHtml = ''; // v0.11.12: the queue first, then every card group together (Story, the hub's groups, Meditate)
     let hubTop = '';
-    if (hub) {
+    if (qs) {
         const cards = taskCards(g, SCENES).filter((c) => !medIds.has(c.id));
         const q = taskQueue(g);
         const ol = outlook(g, SCENES);
@@ -806,7 +808,7 @@ function tipFor(b) {
     const lb = b.cloneNode(true); lb.querySelectorAll('.tag, .len, .n').forEach((e) => e.remove());
     const label = plain(lb.textContent).trim();
     let ch = null, card = null, mins = 0;
-    if (b.dataset.run && onTaskHub()) {
+    if (b.dataset.run && onQueueScreen()) {
         card = taskCards(g, SCENES).find((c) => c.id === b.dataset.run);
         const m = /^(.+):(\d+)$/.exec(b.dataset.run);
         if (m) ch = SCENES[m[1]]?.choices?.[Number(m[2])] || null;

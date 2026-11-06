@@ -140,6 +140,19 @@ def comfort(pg, url):
         else: notes.append('scroll kept per tab')
     pg.click('[data-tab="story"]'); pg.wait_for_timeout(150)
 
+def rest_places(pg, url):
+    fresh(pg, url, "localStorage.clear(); localStorage.setItem('boneash.speed','1')")
+    if pg.query_selector('button.card.med'): fails.append('the arrival shows a Meditate card (v0.11.14: resting places only)')
+    s1 = (ROOT / 'saves/v0.8.5-day1-stream.json').read_text()
+    fresh(pg, url, "s => { localStorage.clear(); localStorage.setItem('boneash.auto', s); }", s1)
+    add = pg.query_selector('.cardwrap:has(button.card.med) button.qadd')
+    if not add: fails.append('the stream: no + on a Meditate card'); return
+    n0 = len(pg.query_selector_all('ol.queue li'))
+    add.click(); pg.wait_for_timeout(300)
+    if len(pg.query_selector_all('ol.queue li')) != n0 + 1: fails.append('the stream: + on a Meditate card added no queue row')
+    else: notes.append('Meditate only on resting places, + queues there')
+    check_text(pg, 'resting place', strict=True)
+
 def saves(pg, url):
     lf = (ROOT / 'saves/v0.11.7-long-forest-coil2.json').read_text()
     s1 = (ROOT / 'saves/v0.8.5-day1-stream.json').read_text()
@@ -236,6 +249,8 @@ def main():
             main_menu(pg, url)
             # 7. tooltip, bars, scroll (v0.11.11)
             comfort(pg, url)
+            # 8. Meditate only on the resting places, queueable there (v0.11.14)
+            rest_places(pg, url)
             b.close()
     finally:
         srv.terminate()
