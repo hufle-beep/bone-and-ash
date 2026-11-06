@@ -5,7 +5,9 @@ Serves the folder, opens the game at 390x844 in headless Chromium and taps the r
   3. Story Mode, a new game: about 25 taps, every tab;
   4. two tabs: closing the older tab leaves the newer save alone (v0.11.8);
   5. Saves (v0.11.9, in the menu since v0.11.10): Copy status, Export all then Restore all into a new game, a backup restored;
-  6. the main menu (v0.11.10): opens first on plain paper with no tab bar; Settings (text size, Show checks) and Saves; Continue.
+  6. the main menu (v0.11.10): opens first on plain paper with no tab bar; Settings (text size, Show checks) and Saves; Continue;
+  7. v0.11.11: holding a card opens its tooltip (no check text) and the tap that ends the hold runs nothing; the status bars carry
+     progress values; the running bar slides (transform, no width); each tab keeps its scroll.
 Game screens (story, fights, journal) also fail on any check text: DC, a die, "+ d6" (checks are hidden since v0.11.10).
 Fails on any page error, or when the screen shows undefined, NaN, [object Object] or an old mode name.
 The taps are seeded, so a run repeats. Exit code 1 on any failure.
@@ -99,6 +101,45 @@ def main_menu(pg, url):
     if not pg.query_selector('.main-menu'): fails.append('menu: the ☰ Menu tab did not open the menu')
     enter(pg)
 
+def comfort(pg, url):
+    fresh(pg, url, "localStorage.clear(); localStorage.setItem('boneash.speed','1')")
+    if len(pg.query_selector_all('.status [role="progressbar"][aria-valuenow]')) != 3: fails.append('a11y: the status bars lack progress values')
+    card = pg.query_selector('button.card:not([disabled])[data-story]') or pg.query_selector('button.card:not([disabled])[data-run]')
+    if not card: fails.append('tooltip: no card to hold'); return
+    scene0 = pg.inner_text('.head .title')
+    card.scroll_into_view_if_needed(); pg.wait_for_timeout(150)
+    bb = card.bounding_box(); x, y = bb['x'] + bb['width'] / 2, bb['y'] + bb['height'] / 2
+    pg.mouse.move(x, y); pg.mouse.down(); pg.wait_for_timeout(750); pg.mouse.up(); pg.wait_for_timeout(300)
+    if not pg.is_visible('#tip'): fails.append('tooltip: holding a card did not open it')
+    else:
+        t = pg.inner_text('#tip')
+        if CHECKS.search(t): fails.append(f'tooltip: shows check text {t[:120]!r}')
+        if pg.query_selector('#nowbar'): fails.append('tooltip: the tap that ended the hold started the card')
+        pg.click('#tip [data-tip="close"]'); pg.wait_for_timeout(150)
+        if pg.is_visible('#tip'): fails.append('tooltip: ✕ did not close it')
+        else: notes.append('tooltip')
+    scene1 = pg.inner_text('.head .title')
+    if scene1 != scene0: fails.append(f'tooltip: the hold moved the story ({scene0} → {scene1})')
+    # the running bar slides
+    long = pg.query_selector('button.card:not([disabled])[data-story]')
+    if long:
+        long.click(); pg.wait_for_timeout(700)
+        bar = pg.query_selector('#nowbar')
+        if bar:
+            st = pg.evaluate("e => [e.style.transform, e.style.width, e.parentElement.getAttribute('role')]", bar)
+            if 'scaleX' not in st[0] or st[1] or st[2] != 'progressbar': fails.append(f'bars: the running bar is {st}')
+    pg.wait_for_timeout(2500)
+    # each tab keeps its scroll
+    pg.click('[data-tab="sheet"]'); pg.wait_for_timeout(200)
+    room = pg.evaluate("document.documentElement.scrollHeight - innerHeight")
+    if room > 150:
+        pg.evaluate("scrollTo(0, 120)"); pg.wait_for_timeout(100)
+        pg.click('[data-tab="bag"]'); pg.wait_for_timeout(150); pg.click('[data-tab="sheet"]'); pg.wait_for_timeout(200)
+        yv = pg.evaluate("scrollY")
+        if abs(yv - 120) > 5: fails.append(f'scroll: the James tab came back at {yv}, not 120')
+        else: notes.append('scroll kept per tab')
+    pg.click('[data-tab="story"]'); pg.wait_for_timeout(150)
+
 def saves(pg, url):
     lf = (ROOT / 'saves/v0.11.7-long-forest-coil2.json').read_text()
     s1 = (ROOT / 'saves/v0.8.5-day1-stream.json').read_text()
@@ -158,9 +199,9 @@ def main():
             if not long: fails.append('reload: no task screen with an hour-long card reached; on screen: ' + ' | '.join(pg.eval_on_selector_all('#view button', 'els => els.slice(0, 8).map(e => e.textContent.slice(0, 50))')))
             else:
                 pg.click(f'button.card[data-run="{long[0]}"]'); pg.wait_for_timeout(2200)
-                w1 = pg.eval_on_selector('#nowbar', 'e => parseFloat(e.style.width)')
+                w1 = pg.eval_on_selector('#nowbar', 'e => parseFloat(e.dataset.v) * 100')
                 pg.reload(); pg.wait_for_timeout(500); enter(pg)
-                w2 = pg.eval_on_selector('#nowbar', 'e => parseFloat(e.style.width)') if pg.query_selector('#nowbar') else 0
+                w2 = pg.eval_on_selector('#nowbar', 'e => parseFloat(e.dataset.v) * 100') if pg.query_selector('#nowbar') else 0
                 if not (w1 > 5 and abs(w1 - w2) < 3): fails.append(f'reload: the bar was {w1}% before and {w2}% after')
                 else: notes.append(f'reload kept the bar ({w1:.0f}% → {w2:.0f}%)')
             # 3. Story Mode
@@ -189,6 +230,8 @@ def main():
             saves(pg, url)
             # 6. the main menu (v0.11.10)
             main_menu(pg, url)
+            # 7. tooltip, bars, scroll (v0.11.11)
+            comfort(pg, url)
             b.close()
     finally:
         srv.terminate()

@@ -5,7 +5,7 @@ import {
     newGame, ensureBars, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, skillCheck, xpToNext, clockLabel, clockLabelG, clockLabelSec, realmName, yukiForm,
     startCombat, combatStep, combatFlee, COMBAT_ACTIONS, setNoDice, noDiceDc, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage,
 } from './core/game.js';
-import { sceneView, choose, goTo } from './core/story.js';
+import { sceneView, choose, goTo, gives } from './core/story.js';
 import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskLabel, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, waitChoice, taskMinutes, runTask, outlook, taskQueue, MS_PER_GAME_HOUR, QUEUE_MAX, FAM, yukiLane, setYuki } from './core/tasks.js';
 import { SCENES, ITEMS } from './story/prologue.js';
 import { coilActive, endCoil, coilPrefill } from './core/coil.js';
@@ -146,8 +146,11 @@ function summarize(lines) {
     if (lines.some((l) => /queue is gone/.test(l))) bits.push('collapsed');
     return bits.join(' · ');
 }
+let resultSeq = 0;
+const openResults = new Set(); // v0.11.11: Results entries the player opened stay open when the screen redraws
 function addResult(title, lines, fail) {
-    taskResults.unshift({ title, sum: summarize(lines), lines, fail });
+    taskResults.unshift({ id: ++resultSeq, title, sum: summarize(lines), lines, fail });
+    announce(`${title}${summarize(lines) ? `: ${summarize(lines)}` : ''}`);
     taskResults.length = Math.min(taskResults.length, RESULTS_MAX);
     if (panel !== 'results') unseen += 1;
 }
@@ -176,6 +179,18 @@ function startNext() {
     if (!ticker) ticker = setInterval(tick, 100);
 }
 function stopRunning() { running = null; }
+/** v0.11.11: a ticking bar (an <i class="tick">): scaleX, written only when it moves by 0.1%; its track carries the progressbar value. */
+function setBar(el, frac) {
+    if (!el) return;
+    const v = Math.max(0, Math.min(1, frac || 0)).toFixed(3);
+    if (el.dataset.v === v) return;
+    el.dataset.v = v; el.style.transform = `scaleX(${v})`;
+    const pc = String(Math.round(v * 100));
+    const track = el.parentElement;
+    if (track && track.getAttribute('aria-valuenow') !== pc) track.setAttribute('aria-valuenow', pc);
+}
+const tickBar = (id, frac, label) => { const v = Math.max(0, Math.min(1, frac || 0)).toFixed(3); return `<div class="stroke" role="progressbar" aria-label="${esc(label)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(v * 100)}"><i id="${id}" class="tick" data-v="${v}" style="transform:scaleX(${v})"></i></div>`; };
+const pbar = (a, b, label) => `<div class="stroke" role="progressbar" aria-label="${esc(label)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(Math.max(0, Math.min(100, (a / b) * 100)))}"><i style="width:${pct(a, b)}"></i></div>`;
 function tick() {
     plog('not logged');
     const now = Date.now();
@@ -187,12 +202,11 @@ function tick() {
     running.done += dt * runSpeed();
     if (!running.kind && runSpeed() && now - lastRunSave >= 15e3) autosave(); // v0.11.5
     const f = Math.min(1, running.done / running.ms);
-    const bar = document.getElementById('nowbar');
-    if (bar) bar.style.width = `${(f * 100).toFixed(1)}%`;
-    const yb = document.getElementById('yukibar');
-    if (yb && running.yuki) yb.style.width = `${Math.min(100, ((running.yuki.progress + f * running.mins) % running.yuki.len) / running.yuki.len * 100).toFixed(1)}%`;
+    // v0.11.11: the ticking bars slide (transform, no layout) and are written only when their value changes
+    setBar(document.getElementById('nowbar'), f);
+    if (running.yuki) setBar(document.getElementById('yukibar'), ((running.yuki.progress + f * running.mins) % running.yuki.len) / running.yuki.len);
     const clk = document.querySelector('.status .clk');
-    if (clk && tab === 'story') clk.textContent = clockLabelSec(g, running.m0 + f * running.mins); // seconds run while a bar does (v0.9.9)
+    if (clk && tab === 'story') { const t = clockLabelSec(g, running.m0 + f * running.mins); if (clk.textContent !== t) clk.textContent = t; } // seconds run while a bar does (v0.9.9)
     if (!running.kind) { checkDeathPause(running.m0 + f * running.mins); if (!speed) return; }
     if (f < 1) return;
     if (running.kind === 'story') { const { idx } = running; running = null; playChoice(idx); return; }
@@ -253,7 +267,7 @@ function playChoice(idx) {
         lastResult = { lines: r.lines, fail: r.roll ? !r.roll.success : false };
         if (taskMode && r.lines.length) addResult(label, r.lines, lastResult.fail);
         if (r.combat) { startCombat(g, r.combat(g)); combatLog = null; }
-        autosave(); startNext(); render(); window.scrollTo({ top: 0, behavior: 'smooth' });
+        autosave(); startNext(); render(); window.scrollTo({ top: 0, behavior: smoothScroll() });
     } catch (err) { lastResult = { lines: [String(err.message || err)], fail: true }; render(); showError(err); }
 }
 const storyCardHtml = (c) => {
@@ -268,13 +282,13 @@ const medCardHtml = (m) => { const card = `<button class="card med" ${m.task ? `
 
 function nowRowHtml() {
     const now = running
-        ? `<div class="now"><b>${speed ? 'James:' : 'Paused:'}</b> ${md(running.label)}<div class="stroke"><i id="nowbar" style="width:${(Math.min(1, running.done / running.ms) * 100).toFixed(1)}%"></i></div></div>`
+        ? `<div class="now"><b>${speed ? 'James:' : 'Paused:'}</b> ${md(running.label)}${tickBar('nowbar', running.done / running.ms, 'James\'s card')}</div>`
         : `<div class="now idle">${speed ? 'Idle. Tap a card to do it now, or + to add it to the queue; the clock runs while James does something.' : 'Paused. Tap a card to do just that one, or + to queue; ▶ Resume runs the queue.'}</div>`;
     const on = speed && !oneShot;
     return `<div class="nowrow">${now}<button class="btn pause${on ? '' : ' primary'}" data-pause="1">${on ? '⏸ Pause' : '▶ Resume'}</button></div>`;
 }
 function resultsPaneHtml() {
-    return taskResults.length ? taskResults.map((r) => `<details class="res${r.fail ? ' fail' : ''}"><summary><b>${md(r.title)}</b> <span>${esc(r.sum)}</span></summary><div>${shownLines(r.lines).map((l) => `<div>${dieHtml(l)}</div>`).join('')}</div></details>`).join('') : '<p class="note">Nothing yet. What James does lands here, newest on top; tap one for the details. The Journal keeps all of it.</p>';
+    return taskResults.length ? taskResults.map((r) => `<details class="res${r.fail ? ' fail' : ''}" data-rid="${r.id}"${openResults.has(r.id) ? ' open' : ''}><summary><b>${md(r.title)}</b> <span>${esc(r.sum)}</span></summary><div>${shownLines(r.lines).map((l) => `<div>${dieHtml(l)}</div>`).join('')}</div></details>`).join('') : '<p class="note">Nothing yet. What James does lands here, newest on top; tap one for the details. The Journal keeps all of it.</p>';
 }
 
 /** Any screen in task mode: picture and story on top; everything you can do below, as cards. */
@@ -304,10 +318,10 @@ function renderCardScreen() {
             return `<div class="cardwrap"><button class="card${c.kind === 'door' ? ' door' : ''}${c.check && showChecks ? ` b-${c.check.band}` : ''}" data-run="${esc(c.id)}" ${c.status !== 'open' ? 'disabled' : ''}>${counts[c.id] ? `<span class="n">×${counts[c.id]}</span>` : ''}${md(c.label)}${tag ? `<span class="tag">${esc(tag)}</span>` : ''}${c.status === 'open' ? `<span class="len">${inst ? `at once (${durLabel(mins)} pass)` : durLabel(mins)}${fam}</span>` : ''}</button>${c.status === 'open' ? `<button class="qadd" data-qadd="${esc(c.id)}" aria-label="Add to the end of the queue">+</button>` : ''}</div>`;
         };
         const yl = yukiLane(g);
-        const yHtml = yl ? `<div class="yuki-lane"><div><b>Yuki:</b> ${esc(yl.label)} <span class="note">${showChecks ? `Fight ${yl.check} / DC ${yl.dc} · ` : ''}${durLabel(yl.len)} · ${FAM[yl.tier].name}</span>${yl.on ? `<div class="stroke"><i id="yukibar" style="width:${Math.min(100, (yl.progress / yl.len) * 100).toFixed(1)}%"></i></div>` : ''}</div><button class="btn${yl.on ? ' primary' : ''}" data-yuki="1">${yl.on ? 'On' : 'Off'}</button></div>` : '';
+        const yHtml = yl ? `<div class="yuki-lane"><div><b>Yuki:</b> ${esc(yl.label)} <span class="note">${showChecks ? `Fight ${yl.check} / DC ${yl.dc} · ` : ''}${durLabel(yl.len)} · ${FAM[yl.tier].name}</span>${yl.on ? tickBar('yukibar', yl.progress / yl.len, 'Yuki\'s job') : ''}</div><button class="btn${yl.on ? ' primary' : ''}" data-yuki="1">${yl.on ? 'On' : 'Off'}</button></div>` : '';
         lastFc = ol;
         const rowWhen = (r) => r.skip ? 'not possible then' : r.wait ? 'after the story' : r.dead ? 'never reached' : `→ ${clockLabelG(g, r.end).replace(/^Day \d+, /, '')} · Fed ${Math.round(r.fed)} · HP ${r.death ? 0 : Math.max(0, Math.round(r.hp))}`;
-        const rows = ol.rows.map((r, k) => `<li class="${r.skip ? 'skip' : ''}${r.dead || r.death ? ' dead' : ''}"><span>${md(taskLabel(g, SCENES, r.id))}${r.death ? ` <b class="dies">${r.death === 'hunger' ? 'Starves here' : 'Collapses here'}</b>` : ''}</span><time>${rowWhen(r)}</time><span class="qbtns"><button class="x" data-qup="${k}" aria-label="Move up" ${k ? '' : 'disabled'}>↑</button><button class="x" data-qdown="${k}" aria-label="Move down" ${k < ol.rows.length - 1 ? '' : 'disabled'}>↓</button><button class="x" data-unq="${k}" aria-label="Remove">✕</button></span></li>`).join('');
+        const rows = ol.rows.map((r, k) => `<li class="${r.skip ? 'skip' : ''}${r.dead || r.death ? ' dead' : ''}${k === 0 && running && !running.kind ? ' running' : ''}"${k === 0 && running && !running.kind ? ' aria-current="step"' : ''}><span>${md(taskLabel(g, SCENES, r.id))}${r.death ? ` <b class="dies">${r.death === 'hunger' ? 'Starves here' : 'Collapses here'}</b>` : ''}</span><time>${rowWhen(r)}</time><span class="qbtns"><button class="x" data-qup="${k}" aria-label="Move up" ${k ? '' : 'disabled'}>↑</button><button class="x" data-qdown="${k}" aria-label="Move down" ${k < ol.rows.length - 1 ? '' : 'disabled'}>↓</button><button class="x" data-unq="${k}" aria-label="Remove">✕</button></span></li>`).join('');
         const span = ol.end - ol.start;
         const out = ol.death
             ? `<p class="outlook warn">Forecast: James ${ol.death.cause === 'hunger' ? 'starves' : 'collapses'} at ${esc(clockLabelG(g, ol.death.at))} on this queue (${ol.death.cause === 'hunger' ? 'hunger' : 'injuries'}). The Coil would end there.</p>`
@@ -613,15 +627,15 @@ window.addEventListener('unhandledrejection', (ev) => showError(ev.reason));
 
 function statusHtml() {
     return `<div class="status">
-<div class="bar hp"><b>${n1(g.james.hp)} / ${jamesHpMax(g)}</b>HP<div class="stroke"><i style="width:${pct(g.james.hp, jamesHpMax(g))}"></i></div></div>
-<div class="bar qi"><b>${n1(g.james.qi)} / ${n1(jamesQiMax(g))}</b>Convergence<div class="stroke"><i style="width:${pct(g.james.qi, jamesQiMax(g))}"></i></div></div>
-<div class="bar food"><b>${Math.round(g.james.satiety)}</b>Fed<div class="stroke"><i style="width:${pct(g.james.satiety, 100)}"></i></div></div>
+<div class="bar hp"><b>${n1(g.james.hp)} / ${jamesHpMax(g)}</b>HP${pbar(g.james.hp, jamesHpMax(g), 'HP')}</div>
+<div class="bar qi"><b>${n1(g.james.qi)} / ${n1(jamesQiMax(g))}</b>Convergence${pbar(g.james.qi, jamesQiMax(g), 'Convergence')}</div>
+<div class="bar food"><b>${Math.round(g.james.satiety)}</b>Fed${pbar(g.james.satiety, 100, 'Fed')}</div>
 <div class="clock"><span class="clk">${clockLabelSec(g)}</span>${taskMode ? `<select class="speed" data-speed="1" aria-label="Speed">${SPEEDS.filter(([n]) => n <= maxSpeed(g, testSpeeds)).map(([n, l]) => `<option value="${n}"${n === runSpeed() ? ' selected' : ''}>${l}</option>`).join('')}</select>` : ''}</div></div>`;
 }
 
 function resultHtml() {
     if (!lastResult || !shownLines(lastResult.lines).length) return '';
-    return `<div class="result${lastResult.fail ? ' fail' : ''}" role="status">${shownLines(lastResult.lines).map((l) => `<div>${dieHtml(l)}</div>`).join('')}</div>`;
+    return `<div class="result${lastResult.fail ? ' fail' : ''}">${shownLines(lastResult.lines).map((l) => `<div>${dieHtml(l)}</div>`).join('')}</div>`;
 }
 
 function renderStory() {
@@ -770,6 +784,84 @@ function openMenu(page = 'main') {
     render(); window.scrollTo({ top: 0 });
 }
 
+/* ---------------- v0.11.11: announcer, hold-for-tooltip ---------------- */
+
+const smoothScroll = () => (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth');
+const announcer = document.createElement('div');
+announcer.id = 'announce'; announcer.className = 'sr-only'; announcer.setAttribute('aria-live', 'polite');
+document.body.appendChild(announcer);
+let announcedScene = null;
+function announce(text) { if (!text) return; announcer.textContent = ''; setTimeout(() => { announcer.textContent = String(text).replace(/\*/g, ''); }, 30); }
+
+const tipEl = document.createElement('div');
+tipEl.id = 'tip'; tipEl.setAttribute('role', 'dialog'); tipEl.setAttribute('aria-label', 'Card details'); tipEl.hidden = true;
+document.body.appendChild(tipEl);
+const plain = (t) => String(t || '').replace(/\*\*?/g, '');
+const itemNames = (c) => [...new Set(gives(c).map((id) => ITEMS[id]?.name || id))];
+/** What a held card tells: what it can give, time, Qi, familiarity, why it's shut. No checks unless Show checks is on. */
+function tipFor(b) {
+    const lines = [];
+    const lb = b.cloneNode(true); lb.querySelectorAll('.tag, .len, .n').forEach((e) => e.remove());
+    const label = plain(lb.textContent).trim();
+    let ch = null, card = null, mins = 0;
+    if (b.dataset.run && onTaskHub()) {
+        card = taskCards(g, SCENES).find((c) => c.id === b.dataset.run);
+        const m = /^(.+):(\d+)$/.exec(b.dataset.run);
+        if (m) ch = SCENES[m[1]]?.choices?.[Number(m[2])] || null;
+        mins = card && card.status === 'open' ? taskMinutes(g, SCENES, card.id) : card?.minutes || 0;
+    } else if (b.dataset.story != null) {
+        const i = Number(b.dataset.story);
+        ch = i < 1000 ? SCENES[g.scene]?.choices?.[i] || null : null;
+        mins = b.disabled ? 0 : storyMinutes(i);
+    } else if (b.dataset.choice != null) {
+        ch = SCENES[g.scene]?.choices?.[Number(b.dataset.choice)] || null;
+    } else if (b.dataset.act) {
+        const a = COMBAT_ACTIONS[b.dataset.act];
+        if (a) {
+            const cost = actionCost(g, a);
+            if (cost) lines.push(`Costs ${cost} Qi${a.keeps ? ' to form, then free this fight' : ''}.`);
+            if (a.guard) lines.push(`Braces: defence +${guardBonus(g)} this round${hasForm(g, 'buckler') && taskMode ? ', and the shield covers Yuki' : ''}.`);
+            if (a.field) lines.push(`A field of bone spikes for ${FIELD_ROUNDS} rounds: ${fieldDamage(g)} back to each attacker. Once a fight.`);
+            if (a.stagger) lines.push('Staggers what it hits.');
+            if (a.reach) lines.push('A clean hit holds the enemy off for the round.');
+            if (showChecks) { const d = actionDmg(g, a); lines.push(`${a.skill} · ${d[0]}–${d[1]} damage.`); }
+        }
+    } else if (b.dataset.flee) lines.push('Tries to get away. Not every fight lets you.');
+    if (ch) {
+        const items = itemNames(ch);
+        if (items.length) lines.push(`Can bring back: ${items.join(', ')}.`);
+        if (ch.qi) lines.push(`Costs ${ch.qi} Qi.`);
+        if (ch.combat) lines.push('Leads to a fight.');
+    }
+    if (mins) lines.push(`Takes ${durLabel(mins)}${b.dataset.run && isInstantTask(g, SCENES, b.dataset.run) ? ', passing at once' : ''}.`);
+    if (card && card.kind === 'work') lines.push(`Familiarity: ${FAM[card.tier].name}${card.next != null ? `, ${card.fam} of ${card.next} to ${FAM[card.tier + 1].name}` : ' (the top)'}. Familiar work goes faster.`);
+    if (card && card.status !== 'open') lines.push('Done for today. Back tomorrow.');
+    if (b.disabled && !card) { const tag = b.querySelector('.tag')?.textContent; lines.push(tag ? `Not now: ${tag}.` : 'Not now.'); }
+    if (showChecks && card?.tag) lines.push(`Check: ${card.tag}`);
+    if (!lines.length) lines.push('Nothing more to tell. Tap it to find out.');
+    return `<div class="tiphead"><b>${esc(label)}</b><button class="btn" data-tip="close" aria-label="Close">✕</button></div>${lines.map((l) => `<p>${esc(l)}</p>`).join('')}`;
+}
+let holdTimer = null, holdStart = null, swallowUntil = 0, swallowBtn = null;
+const HOLD_MS = 500;
+function cancelHold() { if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; } }
+view.addEventListener('pointerdown', (ev) => {
+    const b = ev.target.closest('button.card, button.choice');
+    if (!b || menu || !g) return;
+    cancelHold();
+    holdStart = { x: ev.clientX, y: ev.clientY };
+    holdTimer = setTimeout(() => {
+        holdTimer = null;
+        try { tipEl.innerHTML = tipFor(b); tipEl.hidden = false; swallowUntil = Date.now() + 1500; swallowBtn = b; } catch (err) { showError(err); }
+    }, HOLD_MS);
+});
+view.addEventListener('pointermove', (ev) => { if (holdStart && Math.hypot(ev.clientX - holdStart.x, ev.clientY - holdStart.y) > 10) cancelHold(); });
+['pointerup', 'pointercancel', 'pointerleave'].forEach((t) => view.addEventListener(t, cancelHold));
+view.addEventListener('contextmenu', (ev) => { if (ev.target.closest('button.card, button.choice')) ev.preventDefault(); });
+// the tap that ends a hold must not run the card
+document.addEventListener('click', (ev) => { if (Date.now() < swallowUntil && swallowBtn && ev.target.closest('button') === swallowBtn) { swallowUntil = 0; swallowBtn = null; ev.stopPropagation(); ev.preventDefault(); } }, true);
+tipEl.addEventListener('click', (ev) => { if (ev.target.closest('[data-tip]')) tipEl.hidden = true; });
+view.addEventListener('toggle', (ev) => { const d = ev.target; if (d.dataset?.rid) { const id = Number(d.dataset.rid); if (d.open) openResults.add(id); else openResults.delete(id); } }, true);
+
 /* ---------------- wiring ---------------- */
 
 function render() {
@@ -780,8 +872,18 @@ function render() {
     if (menu) return renderMenu();
     if (recovery) return renderRecovery();
     ({ story: renderStory, sheet: renderSheet, bag: renderBag, journal: renderJournal })[tab]();
+    if (tab === 'story' && g && g.scene !== announcedScene) { announcedScene = g.scene; announce(g.combat ? `A fight: ${sceneTitle(g.scene)}` : val(SCENES[g.scene]?.title) || ''); }
 }
-function setTab(t) { if (t === 'menu') { openMenu('main'); return; } menu = null; tab = t; render(); window.scrollTo({ top: 0 }); }
+/** v0.11.11: each tab keeps its scroll; the Story tab starts at the top again on a new scene. */
+const scrollPos = {};
+function setTab(t) {
+    tipEl.hidden = true;
+    if (t === 'menu') { if (!menu) scrollPos[tab] = { y: window.scrollY, scene: g?.scene }; openMenu('main'); return; }
+    if (!menu) scrollPos[tab] = { y: window.scrollY, scene: g?.scene };
+    menu = null; tab = t; render();
+    const p = scrollPos[t];
+    window.scrollTo({ top: p && (t !== 'story' || p.scene === g?.scene) ? p.y : 0 });
+}
 
 view.addEventListener('click', (ev) => {
     if (ev.target.closest('h2[data-modehead]')) { // hidden: 5 taps within a few seconds show "Test speeds"
@@ -870,7 +972,7 @@ view.addEventListener('click', (ev) => {
             if (b.dataset.med === 'med:sit') { tapRun(); startBar('med', 'med:sit', 'Cultivate: one sit', SIT_MINUTES); render(); return; }
             if (b.dataset.med === 'med:bt') { const bt = medCards(g, SCENES).find((m) => m.id === 'med:bt'); if (bt?.minutes) { tapRun(); startBar('med', 'med:bt', 'Break through', bt.minutes); render(); return; } } // v0.11.2: a timed sit, then the scene
             const r = runMed(g, SCENES, b.dataset.med);
-            lastResult = r.lines.length ? { lines: r.lines, fail: false } : null; autosave(); render(); window.scrollTo({ top: 0, behavior: 'smooth' });
+            lastResult = r.lines.length ? { lines: r.lines, fail: false } : null; autosave(); render(); window.scrollTo({ top: 0, behavior: smoothScroll() });
             return;
         }
         if (b.dataset.pause) {
@@ -900,7 +1002,7 @@ view.addEventListener('click', (ev) => {
             const r = choose(g, SCENES, Number(b.dataset.choice));
             lastResult = { lines: r.lines, fail: r.roll ? !r.roll.success : false };
             if (r.combat) { startCombat(g, r.combat(g)); combatLog = null; }
-            autosave(); startNext(); render(); window.scrollTo({ top: 0, behavior: 'smooth' });
+            autosave(); startNext(); render(); window.scrollTo({ top: 0, behavior: smoothScroll() });
         } else if (b.dataset.act) {
             const out = combatStep(g, b.dataset.act);
             combatLog = out.lines;
