@@ -9,7 +9,7 @@
  * Menu: 'meridians' (choice "Open a meridian." on every hub that has the breakthrough choice). Warning before the
  * Nascent Soul breakthrough if the Extraordinary 8 aren't all open: 'ns_warn'.
  */
-import { extraRegen, qiRegenPct, clockParts } from '../core/game.js';
+import { extraRegen, qiRegenPct, clockParts, coilMult } from '../core/game.js';
 import { daily, markDaily } from './common.js';
 
 /* ---------- the primaries and their collaterals (v0.9.6: closed at the start of a task-mode game) ----------
@@ -59,8 +59,8 @@ const useSession = (g) => { g.flags[sessionKey(g)] = sessionsToday(g) + 1; };
 const mirror = (g) => { g.yuki.primaries = P(g); g.yuki.collaterals = C(g); };
 export const canPrimary = (g) => (g.james.realm || 0) === 0 && P(g) < 12 && sessionOk(g);
 export const canColGroup = (g) => { const k = colGroupsOpen(g); return (g.james.realm || 0) === 0 && k < COL_GROUPS.length && P(g) >= COL_GROUPS[k].need && sessionOk(g); };
-export const dcPrimary = (g) => Math.round((2.5 + (1.5 * P(g)) / 11) * 10) / 10; // 2.5 … 4.0
-export const dcColGroup = (g) => 3 + 0.25 * colGroupsOpen(g); // 3 … 4.75
+export const dcPrimary = (g) => Math.round(((2.5 + (1.5 * P(g)) / 11) / coilMult(g)) * 10) / 10; // 2.5 … 4.0, ÷ the Coil bonus (v0.11.0)
+export const dcColGroup = (g) => Math.round(((3 + 0.25 * colGroupsOpen(g)) / coilMult(g)) * 10) / 10; // 3 … 4.75, ÷ the Coil bonus (v0.11.0)
 const adaptOf = (g, k) => (g.tasks?.adapt?.[k]) || 0;
 const setAdapt = (g, k, v) => { if (!g.tasks) return; g.tasks.adapt = g.tasks.adapt || {}; if (v) g.tasks.adapt[k] = v; else delete g.tasks.adapt[k]; };
 const learn = (g, k) => { const a = Math.min(MER_ADAPT_MAX, adaptOf(g, k) + MER_ADAPT_STEP); setAdapt(g, k, a); return `You see what went wrong. (+${a} on the next try.)`; };

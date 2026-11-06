@@ -201,6 +201,13 @@ export function actingName(g, name) {
 /** Every skill (James's, Yuki's) stops at T10 L10; XP past the cap is lost (engine: lost-at-cap). */
 export const SKILL_MAX_TIER = 10;
 export const atSkillCap = (n) => n.tier >= SKILL_MAX_TIER && n.level >= 10;
+/**
+ * The Coil bonus (v0.11.0, owner 2026-11-06: picks 1b, per act): in Incremental Mode every earlier Coil of this act
+ * makes James and Yuki learn faster: ×(1 + 0.5 × earlier Coils). It multiplies XP and the Saturation a sit gives,
+ * and divides the meridian session DCs. Story Mode: ×1.
+ */
+export const COIL_GROWTH = 0.5;
+export const coilMult = (g) => (noDice ? 1 + COIL_GROWTH * Math.max(0, (g?.coil?.n || 1) - 1) : 1);
 function addXp(n, amount) {
     const ups = [];
     if (n.tier > SKILL_MAX_TIER) { n.tier = SKILL_MAX_TIER; n.level = 10; }
@@ -228,6 +235,7 @@ export function awardXp(g, skillName, band = 'standard', { fail = false, factor 
     let pool = (XP_BANDS[band] ?? 30) * n.tier;
     if (fail) pool = Math.floor(pool * FAIL_XP_FRACTION);
     if (factor !== 1) pool = Math.floor(pool * factor); // a partial result on a task card (v0.9.2)
+    pool = Math.floor(pool * coilMult(g)); // the Coil bonus (v0.11.0)
     if (!pool) return [];
     const out = [];
     const heads = name === 'GU' ? 1 : 2;
@@ -245,7 +253,7 @@ export function awardXp(g, skillName, band = 'standard', { fail = false, factor 
     return out;
 }
 export function awardYukiFightXp(g, band = 'standard') {
-    const pool = (XP_BANDS[band] ?? 30) * g.yuki.fight.tier;
+    const pool = Math.floor((XP_BANDS[band] ?? 30) * g.yuki.fight.tier * coilMult(g));
     const ups = addXp(g.yuki.fight, pool);
     return [atSkillCap(g.yuki.fight) && !ups.length ? 'Yuki Fight at T10 L10 (cap)' : `Yuki Fight +${pool}${ups.length ? ` → ${ups.at(-1)}` : ''}`];
 }
@@ -374,7 +382,7 @@ export function spendQi(g, amount) {
 /** Condensation: a conscious sit, 10 Qi a sit, 0 XP; raises Saturation. Spends Qi, never refills it. */
 export function condense(g) {
     if (!spendQi(g, CONDENSE_SIT_COST)) return { ok: false };
-    const gain = condensationSatGain(CONDENSE_SIT_COST, jamesQiMax(g));
+    const gain = Math.round(condensationSatGain(CONDENSE_SIT_COST, jamesQiMax(g)) * coilMult(g) * 10) / 10;
     g.james.saturation = Math.min(100, Math.round((g.james.saturation + gain) * 10) / 10);
     advance(g, 30);
     return { ok: true, gain, saturation: g.james.saturation };

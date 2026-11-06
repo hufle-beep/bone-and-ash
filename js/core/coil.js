@@ -1,12 +1,13 @@
 /**
  * The Coil (v0.9.4, step 3c-1; design.md "The Coil", reset option B). Task mode only. The prologue's Coil rewinds to
  * Day 1 dawn; Act 1's (v0.9.6, g.coil.act = 1) to Day 8 dawn, the prologue's outcome kept, ending at Shen Qiu (rt_taken).
- * Sealed collaterals (v0.9.6): a rewind unwinds the sealing breakthrough — James and Yuki back to Mortal Vessel, Saturation 0.
+ * v0.11.0 (owner 2026-11-06): James's and Yuki's realm, Saturation, skills and meridians start over with the act (the
+ * snapshot's values); the Coil bonus (game.js coilMult, ×(1 + 0.5 × earlier Coils of this act)) makes them come back faster.
  * A Coil ends on a collapse (HP 0 during tasks), a lost tribute (accept or rewind) or by choice ("Bite the tail").
  * Rewind: back to the snapshot (Day 1 dawn for a new game; an old save as it was loaded).
- *   Kept: James (realm, skills, meridians, Saturation), Yuki (all of her), familiarity, adaptation, Yuki's lane on/off,
+ *   Kept: familiarity, adaptation, Yuki's lane on/off, Yuki's relationship and path,
  *         the knowledge flags (KEEP_FLAGS), the journal and stats.
- *   Reset: hammerspace, every other flag, bars (full), Fed, the queue (unless "same days again").
+ *   Reset: James and Yuki (to the snapshot), hammerspace, every other flag, bars (full), Fed, the queue (unless "same days again").
  *   Relationships other than Yuki: max(snapshot value, 25% of the last Coil's peak), friendship and affection apart.
  * Pure — no DOM.
  */
@@ -35,7 +36,7 @@ export const coilActive = (g) => {
 };
 export const actOf = (g) => g.coil?.act || 0;
 /** A rewind would unwind Foundation (collaterals sealed). */
-export const willUnwind = (g) => !!g.james.colSealed;
+export const willUnwind = () => false; // v0.11.0: everything James grew starts over on a rewind anyway
 
 /** End the Coil: why = 'collapse' | 'tribute' | 'choice'; back = the scene "Not yet" returns to. */
 export function endCoil(g, why, back = null) {
@@ -94,14 +95,10 @@ export function rewind(g, { same = false } = {}) {
     const kept = {};
     for (const f of KEEP_FLAGS) if (g.flags[f] !== undefined) kept[f] = g.flags[f];
     base.v = SAVE_VERSION;
-    base.james = { ...clone(g.james), hp: null, qi: null, satiety: base.james.satiety, injuries: [] };
-    base.yuki = { ...clone(g.yuki), hp: null, qi: null };
-    let unwound = false;
-    if (base.james.colSealed) { // the price of sealed collaterals: the breakthrough itself comes undone
-        base.james.realm = 0; base.james.saturation = 0; base.james.colSealed = false;
-        base.yuki.realm = 0; base.yuki.form = 'cat';
-        unwound = true;
-    }
+    // v0.11.0 (owner 2026-11-06, pick 1a): realm, Saturation, skills and meridians start over with the act; the Coil bonus makes them come back faster
+    base.james = { ...clone(base.james), hp: null, qi: null, injuries: [] };
+    base.yuki = { ...clone(base.yuki), hp: null, qi: null };
+    const unwound = false;
     base.flags = { ...base.flags, ...kept };
     const rel = clone(base.rel || {});
     for (const [who, p] of Object.entries(c.peak)) {

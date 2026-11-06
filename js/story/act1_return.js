@@ -5,6 +5,7 @@
  */
 import { addItem, hasItem, eat, condense, advance, clockParts, jamesQiMax } from '../core/game.js';
 import { condensationSatGain } from '../core/formulas.js';
+import { coilMult } from '../core/game.js';
 import { set, daily, markDaily, eatBest } from './common.js';
 import { loveLine } from './yuki_path.js';
 import { encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil, hour } from './act1_common.js';
@@ -419,7 +420,7 @@ The children have crept closer. One small girl has her hand out flat, not touchi
 
 Yuki walks into the middle of the ring, lies down, and purrs so loudly that the leaves tremble.`,
         choices: [
-            { text: 'Sit among them and cultivate. Let the song in.', check: { skill: 'Convergence Use', dc: 4 }, time: 60, do: (g) => { g.flags.grove_attuned = true; const gain = condensationSatGain(10, jamesQiMax(g)) * 2; g.james.saturation = Math.min(100, Math.round((g.james.saturation + gain) * 10) / 10); return [`The grove carries your Qi round and back, clean as a held breath. Saturation +${Math.round(gain * 10) / 10}% (${g.james.saturation}%), no Qi spent.`]; }, failDo: () => ['You try. You\'re too afraid of tomorrow to listen.'], to: 'rt_ashfall' },
+            { text: 'Sit among them and cultivate. Let the song in.', check: { skill: 'Convergence Use', dc: 4 }, time: 60, do: (g) => { g.flags.grove_attuned = true; const gain = Math.round(condensationSatGain(10, jamesQiMax(g)) * 2 * coilMult(g) * 10) / 10; g.james.saturation = Math.min(100, Math.round((g.james.saturation + gain) * 10) / 10); return [`The grove carries your Qi round and back, clean as a held breath. Saturation +${Math.round(gain * 10) / 10}% (${g.james.saturation}%), no Qi spent.`]; }, failDo: () => ['You try. You\'re too afraid of tomorrow to listen.'], to: 'rt_ashfall' },
             { text: 'Kneel by the girl and show her how to feel the song.', do: (g) => { bumpRel(g, 'Village', 5, 0); return ['Her grandmother watches, stiff as a post. Then, slowly, she kneels too.']; }, time: 30, to: 'rt_ashfall' },
         ],
     },

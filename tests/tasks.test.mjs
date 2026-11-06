@@ -2,7 +2,7 @@
 // Every card resolves; old saves get an empty queue; a dry run predicts the real run exactly;
 // 2,000 bot games in task mode reach the end with no dead end; the tribute outcomes are printed next to classic play.
 import { SCENES, lfOpen, lfSeason, lfRank, LF_STOCK, LF_SEASON_MINUTES } from '../js/story/prologue.js';
-import { itemCap, MAX_REALM, combatStep as cStep, startCombat as sCombat } from '../js/core/game.js';
+import { itemCap, MAX_REALM, combatStep as cStep, startCombat as sCombat, coilMult, awardXp, awardYukiFightXp, condense } from '../js/core/game.js';
 import { FORM_LINES, hasForm, cuRank, actionOpen, actionLabel, fragileKnife, STORY_FORMS } from '../js/core/forms.js';
 import { TASK_HUBS } from '../js/story/task_hubs.js';
 import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, setNoDice, clockLabelSec, advance, STARVE_HP_PER_HOUR, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1 } from '../js/core/game.js';
@@ -124,12 +124,11 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     assert(b.james.realm === 1 && b.james.colSealed && !canColGroup(b), 'sealed at Foundation: no collaterals any more');
     b.james.saturation = 40; b.inventory.hare_raw = 3;
     endCoil(b, 'choice', 'stream'); rewind(b);
-    assert(b.james.realm === 0 && b.james.saturation === 0 && !b.james.colSealed && b.yuki.realm === 0 && b.james.collaterals === 18 && b.james.primaries === 12 && !b.inventory.hare_raw, 'the rewind unwinds Foundation: Mortal Vessel, Saturation 0, meridians kept');
-    assert(canColGroup(b), 'after the unwind the collaterals open again');
+    assert(b.james.realm === 0 && b.james.saturation === 0 && !b.james.colSealed && b.yuki.realm === 0 && b.james.collaterals === 0 && b.james.primaries === 0 && !b.inventory.hare_raw, 'v0.11.0: the rewind starts James over: Mortal Vessel, Saturation 0, meridians closed again');
     const k = ensureBars(newGame(43, { closed: true })); k.james.primaries = 12; k.james.collaterals = 66; k.james.saturation = 96; k.flags.bt_return = 'stream';
     assert(btTarget(k) === 'breakthrough', 'everything open: no warning');
     breakthrough(k); endCoil(k, 'choice', 'stream'); rewind(k);
-    assert(k.james.realm === 1, 'no seal: the realm is kept on a rewind');
+    assert(k.james.realm === 0 && k.james.primaries === 0, 'v0.11.0: the realm starts over on a rewind, sealed or not');
     // old saves keep what they have; the Long Forest opens everything
     const lf = ensureBars(newGame(44, { closed: true })); lf.scene = 'clearing';
     setNoDice(false); // v0.10.1: the one-step button is Classic's now
@@ -139,6 +138,25 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     // the closed Day 1 scan text
     assert(/ash/.test(SCENES.yuki_check.text(ensureBars(newGame(45, { closed: true })))) && /Twelve primaries open/.test(SCENES.yuki_check.text(open)), 'Day 1 scan text follows the meridians');
     setNoDice(false);
+}
+// v0.11.0: the Coil bonus — ×(1 + 0.5 × earlier Coils of this act), Incremental Mode only
+{
+    setNoDice(true);
+    const g = ensureBars(newGame(91, { closed: true }));
+    assert(coilMult(g) === 1, 'Coil 1: ×1');
+    const xp1 = (h) => { const c = structuredClone(h); const out = awardXp(c, 'Convergence Use', 'standard'); return Number(/\+(\d+) XP/.exec(out[0])[1]); };
+    const base = xp1(g);
+    endCoil(g, 'choice', 'arrival'); rewind(g); endCoil(g, 'choice', 'arrival'); rewind(g);
+    assert(g.coil.n === 3 && coilMult(g) === 2 && xp1(g) === base * 2, `Coil 3: ×2 XP (${base} → ${xp1(g)})`);
+    const y0 = g.yuki.fight.xp; awardYukiFightXp(g, 'standard'); assert(g.yuki.fight.xp - y0 === 60 || g.yuki.fight.level > 1, 'Yuki\'s XP ×2 too');
+    const dc1 = dcPrimary(ensureBars(newGame(92, { closed: true }))); assert(Math.abs(dcPrimary(g) - Math.round(dc1 / 2 * 10) / 10) < 0.11, `meridian DC ÷2 (${dc1} → ${dcPrimary(g)})`);
+    g.james.qi = 40; const s0 = g.james.saturation; const r = condense(g); const one = ensureBars(newGame(93, { closed: true })); one.james.qi = 40; const r1 = condense(one);
+    assert(r.ok && Math.abs((g.james.saturation - s0) - 2 * r1.gain) < 0.2, `a sit gives ×2 Saturation (${r1.gain} → ${g.james.saturation - s0})`);
+    const a = ensureBars(newGame(94)); a.scene = 'epilogue'; a.flags.ending = 'bluff'; a.minutes = 6 * 1440 + 900; a.coil.n = 5;
+    choose(a, SCENES, 0);
+    assert(a.coil.act === 1 && a.coil.n === 1 && coilMult(a) === 1, 'per act: Act 1 starts at ×1 whatever the prologue took');
+    setNoDice(false);
+    assert(coilMult(g) === 1, 'Story Mode: ×1');
 }
 // v0.10.4: Bonesinger forms — Incremental Mode shows only what James can sing; Story Mode keeps everything
 {
@@ -248,7 +266,7 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     goTo(g, SCENES, 'lf_exit'); choose(g, SCENES, 0);
     assert(g.scene === 'dawn' && !g.flags.lf_active && LF_STOCK.every((id) => g.inventory[id] >= itemCap(id) - 1), 'leaving: Day 4 at dawn, the hammerspace full (less breakfast)');
     endCoil(g, 'choice', 'stream'); rewind(g);
-    assert(g.james.realm === MAX_REALM && !g.inventory.hare_raw && g.coil.n === 3 && lfOpen(g), 'a rewind keeps the realm, empties the hammerspace, and the forest stays open');
+    assert(g.james.realm === 0 && !g.inventory.hare_raw && g.coil.n === 3 && lfOpen(g), 'v0.11.0: a rewind starts the realm over, empties the hammerspace, and the forest stays open (climb it again)');
     setNoDice(false);
     const cl = ensureBars(newGame(63)); goTo(cl, SCENES, 'lf_exit'); choose(cl, SCENES, 0);
     assert(!cl.inventory.hare_raw, 'Classic: leaving the walkable forest stocks nothing');
@@ -337,7 +355,9 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     assert(g.coil.known.includes('bone_sung') && g.coil.known.includes('roots') && g.coil.known.includes('gills'), 'the Coil remembers the one-time discoveries');
     const n = rewind(g);
     assert(n === 2 && g.coil.n === 2 && g.scene === 'arrival' && g.minutes === newGame(1).minutes, `rewind to Day 1 dawn (${g.scene})`);
-    assert(g.james.realm === 1 && g.yuki.realm === 1 && g.james.saturation === 40 && g.james.gu.level === 5 && g.yuki.fight.level === 3 && g.james.extra8 === 2, 'realm, skills, meridians, Saturation kept');
+    const s0 = newGame(1);
+    assert(g.james.realm === s0.james.realm && g.yuki.realm === s0.yuki.realm && g.james.saturation === 0 && g.james.gu.level === 1 && g.yuki.fight.level === 1 && !g.james.extra8, 'v0.11.0: realm, skills, meridians, Saturation start over');
+    assert(g.rel.Yuki && g.flags.yk_path === 'sister' && g.tasks.fam['wild_forage:0'] === 9, 'v0.11.0: Yuki\'s bond and path and familiarity kept');
     assert(g.tasks.fam['wild_forage:0'] === 9 && g.tasks.adapt['wild_forage:0'] === 1 && g.tasks.yuki.on && g.tasks.queue.length === 0, 'familiarity and adaptation kept, queue empty');
     assert(Object.keys(g.inventory).length === 0, 'hammerspace empty');
     for (const f of ['lore1', 'lore_realms', 'saw_lights', 'yk_path', 'long', 'longforest']) assert(g.flags[f] !== undefined, `knowledge flag ${f} kept`);

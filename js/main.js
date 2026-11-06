@@ -1,5 +1,6 @@
 /** Bone and Ash — UI. Renders the story, combat, sheet, hammerspace, journal and saves. */
 import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel } from './core/forms.js';
+import { coilMult } from './core/game.js';
 import {
     newGame, ensureBars, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, skillCheck, xpToNext, clockLabel, clockLabelG, clockLabelSec, realmName, yukiForm,
     startCombat, combatStep, combatFlee, COMBAT_ACTIONS, setNoDice, noDiceDc, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg,
@@ -498,7 +499,7 @@ ${skillRow('GU', j.gu, 'General Use: anything he has no skill for, and his defen
 ${skillRow('Convergence Use', cu, 'darts, needles, the wraithbone blade')}
 <p class="note">${esc(BONESINGER_TIERS[Math.min(cu.tier, BONESINGER_TIERS.length - 1)] || '')}</p>
 ${taskMode ? Object.entries(FORM_LINES).map(([k, l]) => { const s = lineState(g, k); return `<div class="row"><span>${esc(l.label)}</span><span>${s.now ? esc(s.now.name) : '—'}${s.next ? ` <span class="note">(next: ${esc(s.next.name)} at ${rankLabel(s.next.at)})</span>` : ''}</span></div>`; }).join('') : ''}
-${taskMode && g.coil ? `<h2>The Coil</h2><p class="note">${g.coil.act === 1 ? 'Act 1, ' : ''}Coil ${g.coil.n}. ${coilActive(g) ? `Bite the tail to wake at ${g.coil.act === 1 ? 'Day 8\'s dawn' : 'the first dawn'}: James keeps his realm, skills, familiarity and what he knows; the hammerspace and the world start over.${g.james.colSealed ? ' His collaterals are sealed, so the rewind also unwinds Foundation: Mortal Vessel again, Saturation 0.' : ''}` : 'The Coil turns during the prologue (until the tribute is settled) and during Act 1 (until Shen Qiu is settled).'}</p>${coilActive(g) ? '<div class="btns"><button class="btn" data-bite="1">Bite the tail</button></div><p class="note" id="saveNote"></p>' : ''}` : ''}
+${taskMode && g.coil ? `<h2>The Coil</h2><p class="note">${g.coil.act === 1 ? 'Act 1, ' : ''}Coil ${g.coil.n}. ${coilActive(g) ? `Bite the tail to wake at ${g.coil.act === 1 ? 'Day 8\'s dawn' : 'the first dawn'}: James keeps his familiarity and what he knows; his realm, skills and meridians, the hammerspace and the world start over. This Coil he learns ×${coilMult(g).toFixed(1)} as fast; the next, ×${(coilMult(g) + 0.5).toFixed(1)}.` : 'The Coil turns during the prologue (until the tribute is settled) and during Act 1 (until Shen Qiu is settled).'}</p>${coilActive(g) ? '<div class="btns"><button class="btn" data-bite="1">Bite the tail</button></div><p class="note" id="saveNote"></p>' : ''}` : ''}
 <h2>Pillars</h2>
 <div class="row"><span>Ouroboros Axiom</span><span>DR 1</span><span class="sub">The body as a closed garden: what comes in is filtered and returned clean.</span></div>
 <div class="row"><span>Parallel Cognition Engine</span><span>9 threads</span><span class="sub">One of them is always on watch, if he asks.</span></div>

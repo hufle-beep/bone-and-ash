@@ -3,7 +3,7 @@
  * "Bite the tail" after a lost tribute, "You remember this" on the arrival, breakthrough from 95% in the label.
  * Task mode only (every new choice checks isNoDice through coilActive or directly). Classic play is unchanged.
  */
-import { advance, isNoDice, startActCoil, combatHooks, PEOPLE_FIGHTS } from '../core/game.js';
+import { advance, isNoDice, startActCoil, combatHooks, PEOPLE_FIGHTS, coilMult, COIL_GROWTH } from '../core/game.js';
 import { setDeathHook, goTo } from '../core/story.js';
 import { coilActive, endCoil, rewind, coilReport, hasPlayed, actOf, willUnwind } from '../core/coil.js';
 
@@ -24,7 +24,7 @@ Then the Ouroboros Axiom turns, with the hard snap of a hand catching a cup. Thi
 You could go with him. It is a written ending, and not the worst one. Or you can decline to let it have happened.`,
     choice: `You could keep going. It's an option. People do it all the time.
 
-Or you could close the loop yourself: bite the tail, and wake at the first dawn with everything you've learned and nothing you've carried.`,
+Or you could close the loop yourself: bite the tail, and wake at the first dawn with what you remember and nothing you've carried.`,
 };
 
 export function installCoil(SCENES) {
@@ -38,12 +38,14 @@ export function installCoil(SCENES) {
 
 **James remembers:** ${r.known.length ? `${r.known.join('; ')}.` : 'the way the moss smells. Not much else worth writing down.'}
 
-Yuki remembers everything. She always does, through the bond, and she will bring it up.${willUnwind(g) ? `
+Yuki remembers everything. She always does, through the bond, and she will bring it up.
+
+**Next Coil:** your realm, skills and meridians start over. What you remember makes them come back faster: you will learn ×${(1 + COIL_GROWTH * (g.coil?.n || 1)).toFixed(1)} as fast.${willUnwind(g) ? `
 
 **The price:** your collaterals sealed at Foundation. This rewind unwinds the breakthrough with them: Mortal Vessel again, ${g.james.realm} realm${g.james.realm > 1 ? 's' : ''} gone, Saturation at zero. The threads will open again. Everything else you learned stays.` : ''}`;
         },
         choices: [
-            { text: (g) => `Bite the tail. Wake at ${actOf(g) === 1 ? 'Day 8\'s dawn' : 'the first dawn'}.${willUnwind(g) ? ' (Foundation unwinds.)' : ''}`, do: (g) => { const n = rewind(g); return [`Coil ${n}. The hammerspace is empty; everything you learned is not.`]; }, to: 'coil_dawn' },
+            { text: (g) => `Bite the tail. Wake at ${actOf(g) === 1 ? 'Day 8\'s dawn' : 'the first dawn'}.${willUnwind(g) ? ' (Foundation unwinds.)' : ''}`, do: (g) => { const n = rewind(g); return [`Coil ${n}. The hammerspace is empty, and so are your hands. Your head is not: you learn ×${coilMult(g).toFixed(1)} as fast.`]; }, to: 'coil_dawn' },
             { text: (g) => `Bite the tail, and run the same days again.${willUnwind(g) ? ' (Foundation unwinds.)' : ''}`, show: hasPlayed, do: (g) => { const n = rewind(g, { same: true }); return [`Coil ${n}. Each task screen will queue what you did there last time, day by day.`]; }, to: 'coil_dawn' },
             { text: 'Accept it. Get up.', show: (g) => g.coil?.why === 'tribute', do: (g) => { g.coil.why = null; advance(g, 120, { resting: true }); return []; }, to: 'epilogue' },
             { text: 'Accept it. Walk.', show: (g) => g.coil?.why === 'shen', do: (g) => { g.coil.why = null; return []; }, to: 'a1_end' },
@@ -59,14 +61,14 @@ Yuki remembers everything. She always does, through the bond, and she will bring
 One thing is missing, and you feel its shape like a pulled tooth: Foundation. The Axiom took it back with the seal. Mortal Vessel again, and the sealed threads warm and open to you, waiting.` : '';
             if (actOf(g) === 1) return `Grey light over the palisade. Smoke from forty chimneys. A rooster with no sense of occasion. You have seen this morning ${times}, and Ashfall has not.
 
-Your hammerspace reports in: whatever the tribute left you, and nothing you earned since. Everything you learned on the road to the dead tree is still in you, packed into muscle and meridian.${unwound}
+Your hammerspace reports in: whatever the tribute left you, and nothing you earned since. Your body has forgotten the road to the dead tree; your head has not. It will come back faster this time.${unwound}
 
 Somewhere down the street Mei Lin is already arguing with someone about herbs. She doesn't know what she said to you at the tree. You do. That is going to be a strange conversation.
 
 Yuki is sitting on the windowsill, tail around her feet. The look says: *again. Fine. Try not to get taken this time.*`;
             return `Black bark. Grey moss. A sky the colour of a bruise. You have seen this sky ${times}, and it has not improved.
 
-Your hammerspace reports in: empty. Your body reports in too, and that report is longer. Everything you learned is still there, packed into muscle and meridian like a library nobody thought to burn.${unwound}
+Your hammerspace reports in: empty. Your body reports in too, and that report is short: it has forgotten everything. Your meridians are ash again. Your head, though, is a library nobody thought to burn, and it knows the way back.${unwound}
 
 Yuki is standing on your sternum. The look says: *you have done this before. I was there. Try to remember it this time.*
 

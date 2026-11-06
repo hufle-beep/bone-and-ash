@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.10.4 | (this push) | Bonesinger forms, the mode names. Same save state as 0.9.6. |
+| 0.11.0 | (this push) | The base redesign, push 1 (everything James grew starts over each Coil; the Coil bonus). Same save state as 0.9.6; a save that rewinds under 0.11.0 has its skills reset, which an older version will simply keep. |
+| 0.10.4 | `f942fff` | Bonesinger forms, the mode names. Same save state as 0.9.6. |
 | 0.10.3 | `a5f1a8b` | Docs only; the game is the same as 0.10.2. |
 | 0.10.2 | `6dca6fa` | Pause rules, the camp as a task screen, waits at once. Same save state as 0.9.6. |
 | 0.10.1 | `ded9175` | The Long Forest in task mode. Same save state as 0.9.6. |

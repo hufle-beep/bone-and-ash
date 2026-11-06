@@ -4,6 +4,12 @@ Started 2026-11-06 (v0.10.4), when `history.md` passed 45 KB. Newer than `histor
 
 ## Older decisions (2026-11-06, v0.10.0 and later)
 
+- **v0.10.2 (owner 11:06: "Night falls. Settle in." too long, make camp a hub or merge it, move the clock instantly; paused by default, no automatic unpause; picks 11:11 "3a. 1 a+c, 2a but also on new scenes and doesn't automatically start until you queue everything and tapped (not queued) cards still run, but re-pause after"; go 11:20 without 3a; mid-build stop 11:25, pick 11:28 "a"; built in v0.10.2):**
+  - **1a** the camp (`camp`, Days 1–3) is a task screen: fire, cook, eat raw, stakes are cards (tap or +). `plainChecks`: its checked cards stay chores (the story check's numbers, not the work-card DC +2 / double length). **Mid-build pick a:** "Eat it raw" (no own time) takes 0 minutes as a camp card instead of the story default 30, like eating on every other task screen; fire, cook and stakes keep their own times.
+  - **1c** waiting happens at once (task mode): a story card with no check, Qi, fight or own time that takes 60+ minutes because its `do` or the next scene's `enter` sets the clock (`waitChoice` in tasks.js; never a choice back to its own scene) plays with no bar. 25 such choices (Night falls, chapter transitions, Act 1 camp nights…).
+  - **2a** the game always opens paused and pauses on every new scene (task mode). Paused: a tapped card (task, story, Meditate sit) runs now at the remembered speed, then the game pauses again; + only queues; ▶ Resume runs the queue until the next new scene. `boneash.speed` now stores only the speed to resume at (never 0). The pause before a forecast death stays.
+  - **3a** (the automatic unpause the owner saw): no details given, built without it; no code path resumes on its own (only ▶ and the speed menu).
+  - **Bots after v0.10.2** (camp cards change their random path; rules unchanged): dead before Mei Lin 84 / 41 / 17 / 18%, Act 1 Coils ending in death 91 / 77 / 61 / 45%, tribute won Coil 1–3 30 / 40 / 48%.
 - **v0.10.1: the Long Forest redesign (proposal 10:40; owner 10:50 "go with your suggestions, but for the 31 scenes, also keep the option to advance seasons, because only grinding through the scenes is incredibly tedious"; go 10:59; built in v0.10.1):**
   - **1a gate:** task mode, the prologue's Coil 2 or later (`lfOpen`: `coil.n > 1`, act 0). Coil 1 has no way in. **7: Classic** keeps the one-step button (now shown only in Classic).
   - **2a entrance:** "Stay lost" in the clearing and "You remember this. Stay lost." on the arrival (sets the skip flags), both → `lf_enter` → the walkable Long Forest (`lf_hub`).
@@ -24,6 +30,13 @@ Started 2026-11-06 (v0.10.4), when `history.md` passed 45 KB. Newer than `histor
   - Test fix: the v0.9.7 test "starving to 0 ends the Coil" now builds up a starving hour first (it relied on the old 1 HP per step).
 
 ## Older version notes (v0.10.0 and later)
+
+## v0.10.2 — pause rules, the camp as a task screen, waits at once
+
+- **main.js:** `speed` starts at 0; `resumeSpeed` from `boneash.speed` (stored only when > 0); `pauseNow`, `scenePause` (in `render` and `startNext`: a new `g.scene` pauses), `tapRun` / `oneShot` / `endOneShot` (a tap while paused runs that card, then pauses; ended in `finishTask`, `playChoice`, a finished sit, a cancelled story bar, a full queue); ⏸ shows only while running continuously; the speed menu's Pause = `pauseNow`; story taps use `waitChoice` to play at once.
+- **tasks.js:** `waitChoice(scenes, c, mins, from)`; `cfg.plainChecks` makes checked hub chores `chore` cards (run through `choose`).
+- **task_hubs.js:** `camp` (`plainChecks`, own 'Camp').
+- **Tests:** camp hub, fire and stakes are chores, the fire card = the story choice, queue and forecast, Night falls is a wait and lands at 21:00+, no wait has a check / Qi / fight / time, at least 20 waits. Browser: opens paused, + queues only, a tap runs once and re-pauses, Resume runs the queue, Night falls jumps 16:45 → 21:10 and the night opens paused.
 
 ## v0.10.1 — the Long Forest in task mode
 
