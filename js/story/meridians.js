@@ -66,25 +66,37 @@ const sessionOk = (g) => isNoDice() || sessionsToday(g) < SESSIONS_PER_DAY; // v
 export const MER_FED_MIN = 20;
 export const priHours = (k) => Math.round((2 + (2 * k) / 11) * 100) / 100;
 export const colHours = (j) => Math.round((3 + (2 * j) / 7) * 100) / 100;
-const KEY = { pri: 'merWork', col: 'colWork' };
+const KEY = { pri: 'merWork', col: 'colWork', e8: 'e8Work', ec: 'ecWork', jn: 'jnWork' };
 const work = (g, k) => g.james[KEY[k]] || 0;
-const need = (g, k) => (k === 'pri' ? priHours(P(g)) : colHours(colGroupsOpen(g)));
-const nameOf = (g, k) => (k === 'pri' ? PRIMARIES[P(g)]?.name : COL_GROUPS[colGroupsOpen(g)]?.name);
+/** v0.11.18 (owner pick b): the Extraordinary lines are timed work too (Incremental Mode), no check, no daily limit: vessel k 4 … 11 h, their collaterals 3 … 6 h, junctions 6 … 10 h. */
+export const e8Hours = (k) => 4 + k;
+export const ecHours = (k) => 3 + Math.floor(k / 9);
+export const jnHours = (k) => 6 + Math.floor(k / 2);
+const need = (g, k) => (k === 'pri' ? priHours(P(g)) : k === 'col' ? colHours(colGroupsOpen(g)) : k === 'e8' ? e8Hours(m(g).e) : k === 'ec' ? ecHours(m(g).c) : jnHours(m(g).j));
+const nameOf = (g, k) => (k === 'pri' ? PRIMARIES[P(g)]?.name : k === 'col' ? COL_GROUPS[colGroupsOpen(g)]?.name : k === 'e8' ? EXTRA8[m(g).e]?.name : k === 'ec' ? EXTRA_COLL[m(g).c] : JUNCTIONS[m(g).j]?.name);
+const XLINE = { e8: () => 'Extraordinary vessel', ec: () => 'vessel thread', jn: () => 'junction' };
+const countOf = (g, k) => (k === 'pri' ? `${P(g) + 1}/12` : k === 'col' ? `group ${colGroupsOpen(g) + 1}/8` : k === 'e8' ? `${m(g).e + 1}/8` : k === 'ec' ? `${m(g).c + 1}/28` : `${m(g).j + 1}/10`);
 export const merMinutesOf = (g, k) => Math.max(10, Math.min(SESSION_MINUTES, Math.ceil(((need(g, k) - work(g, k)) * 60) / actSpeed(g, 'mer') / 10) * 10)); // v0.11.15: ÷ its speed by use
 /** The next sitting's minutes (primaries first, as the queue card takes them). */
 export const merMinutes = (g) => merMinutesOf(g, canPrimary(g) ? 'pri' : 'col');
 function workChoice(k) {
-    const can = (g) => isNoDice() && (k === 'pri' ? canPrimary(g) : canColGroup(g));
+    const can = (g) => isNoDice() && (k === 'pri' ? canPrimary(g) : k === 'col' ? canColGroup(g) : k === 'e8' ? canExtra8(g) : k === 'ec' ? canExtraColl(g) : canJunction(g));
     return {
-        text: (g) => `Work on ${nameOf(g, k)}. (${k === 'pri' ? `${P(g) + 1}/12` : `group ${colGroupsOpen(g) + 1}/8`}; ${fmtH(work(g, k))} of ${fmtH(need(g, k))} done; ${merMinutesOf(g, k)} min.)`,
+        text: (g) => `Work on ${nameOf(g, k)}. (${countOf(g, k)}; ${fmtH(work(g, k))} of ${fmtH(need(g, k))} done; ${merMinutesOf(g, k)} min.)`,
         show: can, qi: 2, time: 0, work: true, merLine: k, minutes: (g) => merMinutesOf(g, k),
         req: (g) => (g.james.satiety >= MER_FED_MIN ? true : 'Too hungry to sit. Eat first.'),
         do: (g) => {
             const mins = merMinutesOf(g, k);
-            advance(g, mins);
+            advance(g, mins, { work: true });
             g.james[KEY[k]] = Math.round((work(g, k) + (mins / 60) * actSpeed(g, 'mer')) * 100) / 100; actUse(g, 'mer');
             if (work(g, k) + 1e-9 < need(g, k)) return [`Two Qi and ${mins} minutes into the ash around ${nameOf(g, k)}. It gives a little. (${fmtH(work(g, k))} of ${fmtH(need(g, k))}.)`];
             g.james[KEY[k]] = 0;
+            if (k === 'e8' || k === 'ec' || k === 'jn') { // v0.11.18: the Extraordinary lines, timed; their old challenging XP once per channel
+                const xx = awardXp(g, 'Convergence Use', 'challenging');
+                if (k === 'e8') { const v = EXTRA8[m(g).e]; g.james.extra8 = m(g).e + 1; return [`Opened ${v.name} (${g.james.extra8}/8). ${v.line}`, ...after(g), ...xx]; }
+                if (k === 'ec') { const n = EXTRA_COLL[m(g).c]; g.james.extraCollaterals = m(g).c + 1; return [`Opened ${n} (${g.james.extraCollaterals}/28). A fine, bright thread, no thicker than a hair.`, ...after(g), ...xx]; }
+                const v = JUNCTIONS[m(g).j]; g.james.junctions = m(g).j + 1; return [`Opened ${v.name} (${g.james.junctions}/10). ${v.line}`, ...after(g), ...xx];
+            }
             const xp = awardXp(g, 'Convergence Use', 'standard'); // once per channel opened (v0.11.2 pick 1a)
             if (k === 'pri') { const v = PRIMARIES[P(g)]; g.james.primaries = P(g) + 1; mirror(g); return [`Opened ${v.name} (${g.james.primaries}/12). ${v.line}`, 'Qi Max +1.25 (Yuki +1).', ...xp]; }
             const gr = COL_GROUPS[colGroupsOpen(g)]; g.james.collaterals = COL_GROUPS.slice(0, colGroupsOpen(g) + 1).reduce((a, x) => a + x.size, 0); mirror(g);
@@ -140,9 +152,10 @@ export const JUNCTIONS = [
 
 const m = (g) => ({ e: g.james.extra8 || 0, c: g.james.extraCollaterals || 0, j: g.james.junctions || 0 });
 const R = (g) => g.james.realm || 0;
-export const canExtra8 = (g) => R(g) >= 1 && R(g) <= 6 && m(g).e < 8 && daily('mer_e8')(g);
-export const canExtraColl = (g) => R(g) >= 7 && m(g).e >= 8 && m(g).c < 28 && daily('mer_ec')(g);
-export const canJunction = (g) => R(g) >= 7 && m(g).j < 10 && daily('mer_jn')(g);
+const oneADay = (g, key) => isNoDice() || daily(key)(g); // v0.11.18: no daily limit in Incremental Mode
+export const canExtra8 = (g) => R(g) >= 1 && R(g) <= 6 && m(g).e < 8 && oneADay(g, 'mer_e8');
+export const canExtraColl = (g) => R(g) >= 7 && m(g).e >= 8 && m(g).c < 28 && oneADay(g, 'mer_ec');
+export const canJunction = (g) => R(g) >= 7 && m(g).j < 10 && oneADay(g, 'mer_jn');
 export const canAnyMeridian = (g) => canPrimary(g) || canColGroup(g) || canExtra8(g) || canExtraColl(g) || canJunction(g);
 
 /**
@@ -163,7 +176,7 @@ const LINE_DAILY = { e8: 'mer_e8', ec: 'mer_ec', jn: 'mer_jn' };
 export const lineWindow = (g, line) => !!LINE_WINDOW[line]?.(g);
 export function lineWait(g, line) {
     if (line === 'col') { const gr = COL_GROUPS[colGroupsOpen(g)]; if (gr && P(g) < gr.need) return `opens with ${gr.need} primaries open`; }
-    if (LINE_DAILY[line] && !daily(LINE_DAILY[line])(g)) return 'one a day: back tomorrow';
+    if (LINE_DAILY[line] && !isNoDice() && !daily(LINE_DAILY[line])(g)) return 'one a day: back tomorrow';
     return '';
 }
 /** The line's choice index on the meridian screen. */
@@ -209,6 +222,9 @@ export const MERIDIANS = {
         choices: [
             workChoice('pri'),
             workChoice('col'),
+            workChoice('e8'),
+            workChoice('ec'),
+            workChoice('jn'),
             {
                 text: (g) => `Open ${PRIMARIES[P(g)]?.name}. (${P(g) + 1}/12; session ${sessionsToday(g) + 1} of ${SESSIONS_PER_DAY} today.)`, qi: 2, time: SESSION_MINUTES, show: (g) => !isNoDice() && canPrimary(g),
                 check: { skill: 'Convergence Use', dc: dcPrimary, band: 'standard', bonus: (g) => adaptOf(g, 'mer:pri') },
@@ -224,21 +240,21 @@ export const MERIDIANS = {
                 to: 'meridians',
             },
             {
-                text: (g) => `Open ${EXTRA8[m(g).e]?.name}.`, show: canExtra8, qi: 2, time: 60, merLine: 'e8',
+                text: (g) => `Open ${EXTRA8[m(g).e]?.name}.`, show: (g) => !isNoDice() && canExtra8(g), qi: 2, time: 60,
                 check: { skill: 'Convergence Use', dc: dcE, band: 'challenging' },
                 do: (g) => { const v = EXTRA8[m(g).e]; g.james.extra8 = m(g).e + 1; markDaily(g, 'mer_e8'); return [`Opened ${v.name} (${g.james.extra8}/8). ${v.line}`, ...after(g)]; },
                 failDo: () => ['The vessel holds. Two Qi gone into a wall. Tomorrow, maybe, or in an hour if you\'re stubborn.'],
                 to: 'meridians',
             },
             {
-                text: (g) => `Open ${EXTRA_COLL[m(g).c]}.`, show: canExtraColl, qi: 2, time: 60, merLine: 'ec',
+                text: (g) => `Open ${EXTRA_COLL[m(g).c]}.`, show: (g) => !isNoDice() && canExtraColl(g), qi: 2, time: 60,
                 check: { skill: 'Convergence Use', dc: dcC, band: 'challenging' },
                 do: (g) => { const n = EXTRA_COLL[m(g).c]; g.james.extraCollaterals = m(g).c + 1; markDaily(g, 'mer_ec'); return [`Opened ${n} (${g.james.extraCollaterals}/28). A fine, bright thread, no thicker than a hair.`, ...after(g)]; },
                 failDo: () => ['The thread slips. It\'s like threading a needle in the dark, if the needle were inside you.'],
                 to: 'meridians',
             },
             {
-                text: (g) => `Open ${JUNCTIONS[m(g).j]?.name}.`, show: canJunction, qi: 2, time: 60, merLine: 'jn',
+                text: (g) => `Open ${JUNCTIONS[m(g).j]?.name}.`, show: (g) => !isNoDice() && canJunction(g), qi: 2, time: 60,
                 check: { skill: 'Convergence Use', dc: dcJ, band: 'challenging' },
                 do: (g) => { const v = JUNCTIONS[m(g).j]; g.james.junctions = m(g).j + 1; markDaily(g, 'mer_jn'); return [`Opened ${v.name} (${g.james.junctions}/10). ${v.line}`, ...after(g)]; },
                 failDo: () => ['The junction doesn\'t give. It isn\'t stubborn. It\'s just bigger than you are, today.'],

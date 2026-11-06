@@ -182,7 +182,7 @@ export function choose(g, scenes, index) {
         lines.push(`${checkText(roll)} — ${partial ? 'partly' : ok ? 'success' : 'failure'}${roll.crit ? (roll.die == null ? ' (double!)' : ' (critical!)') : roll.six ? ' (six!)' : roll.fumble ? ' (one…)' : ''}`);
         if (c.xp !== false) lines.push(...awardXp(g, c.check.skill, c.check.band || 'standard', { fail: !ok, factor: partial ? roll.ratio : 1 }));
     }
-    if (c.time) lines.push(...advance(g, c.time));
+    if (c.time) lines.push(...advance(g, c.time, { work: true }));
     takeCapNotes();
     if (ok && c.do) {
         // a critical hunt or forage (total ≥ 2 × DC): a double haul
@@ -211,7 +211,7 @@ export function choose(g, scenes, index) {
     const loc0 = g.location;
     lines.push(...go(g, scenes, dest));
     const extra = defaultMinutes(scenes, s.id, c, g.scene, g.location !== loc0);
-    if (extra) lines.push(...advance(g, extra));
+    if (extra) lines.push(...advance(g, extra, { work: true }));
     lines.push(...checkDeath(g, scenes));
     g.log.push({ at: g.minutes, scene: g.scene, lines: lines.slice(0, 12) });
     if (g.log.length > 200) g.log.shift();

@@ -5,7 +5,10 @@ import { SCENES, lfOpen, lfSeason, lfRank, LF_STOCK, LF_SEASON_MINUTES } from '.
 import { itemCap, MAX_REALM, combatStep as cStep, startCombat as sCombat, coilMult, awardXp, actSpeed, sitMinutes, awardYukiFightXp, condense, SAT_HOURS, sitGain, btMinutes, formDmgBonus, guardBonus, fieldDamage, FIELD_ROUNDS, actionDmg } from '../js/core/game.js';
 import { FORM_LINES, hasForm, cuRank, actionOpen, actionLabel, fragileKnife, STORY_FORMS, INC_ONLY_ACTIONS } from '../js/core/forms.js';
 import { TASK_HUBS } from '../js/story/task_hubs.js';
-import { markDaily } from '../js/story/common.js';
+import { markDaily, daily } from '../js/story/common.js';
+import { wakeDay, exLevel, sleepUntil, clockParts } from '../js/core/game.js';
+import { yukiSpeed } from '../js/core/tasks.js';
+import { e8Hours, ecHours, jnHours } from '../js/story/meridians.js';
 import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, setNoDice, isNoDice, clockLabelSec, advance, STARVE_HP_PER_HOUR, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1, bumpRel as relBump, startActCoil, REL_CATCHUP } from '../js/core/game.js';
 import { canPrimary, canColGroup, colGroupsOpen, sessionsToday, dcPrimary, dcColGroup, btTarget, canAnyMeridian, COL_GROUPS, priHours, colHours, merMinutesOf } from '../js/story/meridians.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
@@ -73,9 +76,51 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     const e = ensureBars(newGame(34)); e.scene = 'village'; e.james.realm = 1; e.james.qi = 30;
     const before = JSON.stringify(e.inventory);
     const em = medCards(e, SCENES);
-    assert(!em.some((c) => c.id === 'med:mer') && em.some((c) => c.id === 'med:mer:e8' && c.open && c.minutes === 60), 'Foundation: the Extraordinary vessel is a Meditate card (1 h), no meridian screen');
+    assert(!em.some((c) => c.id === 'med:mer') && em.some((c) => c.id === 'med:mer:e8' && c.open && c.minutes === 120), 'Foundation: the Extraordinary vessel is a Meditate card (a 2 h sitting of its 4 h, v0.11.18), no meridian screen');
     const e0 = e.minutes, er = runMed(e, SCENES, 'med:mer:e8');
-    assert(e.scene === 'village' && !er.moved && e.minutes - e0 === 60 && JSON.stringify(e.inventory) === before && !e.flags.med_back, `the card runs here: 1 h, the scene stays, its enter not run (${e.scene}, ${e.minutes - e0} min)`);
+    assert(e.scene === 'village' && !er.moved && e.minutes - e0 === 120 && JSON.stringify(e.inventory) === before && !e.flags.med_back, `the card runs here: 2 h, the scene stays, its enter not run (${e.scene}, ${e.minutes - e0} min)`);
+    // v0.11.18 (owner picks B, c2, b): sleep brings the once-a-day things back; Push through the night; Yuki's curve; timed Extraordinary lines
+    {
+        const s = ensureBars(newGame(301)); s.scene = 'ashfall'; s.minutes = 5 * 1440 + 10 * 60; delete s.wake; // an old save: Day 6
+        assert(wakeDay(s) === 6, `an old save's days-slept counter starts at its calendar day (${wakeDay(s)})`);
+        markDaily(s, 'clinic'); assert(!daily('clinic')(s), 'the clinic is done today');
+        advance(s, 20 * 60); assert(clockParts(s.minutes).day === 7 && !daily('clinic')(s) && wakeDay(s) === 6, 'past midnight and past 04:00 awake: still done (no new day)');
+        sleepUntil(s, 6); assert(wakeDay(s) === 7 && daily('clinic')(s), `slept: a new day, the clinic back (${wakeDay(s)})`);
+        sleepUntil(s, 6); assert(wakeDay(s) === 8, 'every night slept counts once');
+        const j = ensureBars(newGame(302)); j.minutes = 2 * 1440 + 22 * 60; wakeDay(j); j.minutes = 3 * 1440 + 6 * 60; // a scene that sets the clock to morning
+        assert(wakeDay(j) === 4, `a scene that moves the clock past a morning counts as sleep (${wakeDay(j)})`);
+        const n0 = ensureBars(newGame(303)); n0.minutes = 1440 + 23 * 60; wakeDay(n0); n0.minutes = 2 * 1440 + 60; sleepUntil(n0, 6);
+        assert(wakeDay(n0) === 3, `a night broken after midnight, then slept to 06:00: one new day (${wakeDay(n0)})`);
+        const t5 = ensureBars(newGame(304)); t5.minutes = 5 * 1440 + 22 * 60; wakeDay(t5); sleepUntil(t5, 5); assert(wakeDay(t5) === 7, 'sleeping to 05:00 (the tribute) counts');
+        const L = ensureBars(newGame(305)); const l0 = wakeDay(L); advance(L, 90 * 1440); assert(wakeDay(L) === l0 + 90, 'a span of days (a Long Forest season) has its nights in it');
+        // Push through the night
+        const p = ensureBars(newGame(306)); p.scene = 'ashfall'; p.minutes = 5 * 1440 + 21 * 60; markDaily(p, 'clinic');
+        assert(medCards(p, SCENES).some((c) => c.id === 'med:push' && c.open && !c.minutes), 'Push through the night: a Meditate card when a once-a-day thing is used up, at once');
+        const q = ensureBars(newGame(307)); q.scene = 'ashfall'; assert(!medCards(q, SCENES).some((c) => c.id === 'med:push'), 'no Push card when nothing daily is used up');
+        const w0 = wakeDay(p), m0 = p.minutes;
+        const r1 = runMed(p, SCENES, 'med:push');
+        assert(wakeDay(p) === w0 + 1 && p.minutes === m0 && exLevel(p) === 1 && daily('clinic')(p) && /Exhaustion 1/.test(r1.lines[0]), 'a push: a new day at once, Exhaustion 1, the clinic back');
+        const sm = sitMinutes(p); const c0 = p.minutes; p.james.qi = 30; condense(p);
+        assert(p.minutes - c0 === Math.round(sm * 1.5) && medCards(p, SCENES).find((c) => /Cultivate/.test(c.label)).minutes === Math.round(sitMinutes(p) * 1.5), `Exhaustion 1: a sit takes ×1.5, and its card says so (${p.minutes - c0} vs ${sm})`);
+        const r0 = p.minutes; advance(p, 60, { resting: true }); assert(p.minutes - r0 === 60, 'a rest is not slowed');
+        const k0 = p.minutes; advance(p, 60); assert(p.minutes - k0 === 60, 'a wait for a time of day is not slowed');
+        markDaily(p, 'clinic'); runMed(p, SCENES, 'med:push'); assert(exLevel(p) === 2, 'a second push: Exhaustion 2');
+        const s0 = p.minutes, sb = sitMinutes(p); p.james.qi = 30; condense(p); assert(p.minutes - s0 === Math.round(sb * 2), `Exhaustion 2: ×2 (${p.minutes - s0} vs ${sb})`);
+        markDaily(p, 'clinic'); p.james.hp = 5; const f0 = p.james.satiety, pm = p.minutes, pw = wakeDay(p);
+        const r3 = runMed(p, SCENES, 'med:push');
+        assert(/a day later/.test(r3.lines[0]) && p.minutes - pm >= 1440 && clockParts(p.minutes).hh === 6 && exLevel(p) === 0 && p.james.hp === jamesHpMax(p) && wakeDay(p) === pw + 1, `the third push: collapse, a day lost, wakes at 06:00 with full bars and no Exhaustion (${p.minutes - pm} min)`);
+        assert(Math.abs((f0 - p.james.satiety) - (3 * (p.minutes - pm)) / 60 / 2) < 0.6, 'the lost day drains Fed at the sleeping rate');
+        const z = ensureBars(newGame(308)); z.scene = 'ashfall'; markDaily(z, 'clinic'); runMed(z, SCENES, 'med:push'); sleepUntil(z, 6); assert(exLevel(z) === 0, 'a real sleep clears Exhaustion');
+        setNoDice(false); const st = ensureBars(newGame(309)); st.scene = 'ashfall'; markDaily(st, 'clinic'); assert(!medCards(st, SCENES).some((c) => c.id === 'med:push'), 'Story Mode: no Push card'); const sd = st.minutes; advance(st, 600); assert(daily('clinic')(st) === false, 'Story Mode: still the calendar day'); st.minutes = sd + 1440; assert(daily('clinic')(st), 'Story Mode: back on the next calendar day'); setNoDice(true);
+        // Yuki's curve (c2)
+        assert(yukiSpeed(0) === 1 && Math.abs(yukiSpeed(10) - 2) < 1e-9 && yukiSpeed(20) === 3 && yukiSpeed(61) === 3 && yukiSpeed(500) === 3, `Yuki's job: N 90, capped at ×3 (${yukiSpeed(10)}, ${yukiSpeed(61)})`);
+        // the Extraordinary lines, timed (b)
+        assert(e8Hours(0) === 4 && e8Hours(7) === 11 && ecHours(0) === 3 && ecHours(27) === 6 && jnHours(0) === 6 && jnHours(9) === 10, 'Extraordinary hours: vessels 4 … 11, collaterals 3 … 6, junctions 6 … 10');
+        const x = ensureBars(newGame(310)); x.scene = 'village'; x.james.realm = 1; x.james.qi = 30;
+        let sit = 0; while ((x.james.extra8 || 0) < 2 && sit < 20) { x.james.qi = 30; x.james.satiety = 80; runMed(x, SCENES, 'med:mer:e8'); sit++; }
+        assert(x.james.extra8 === 2 && sit >= 3 && sit <= 5 && clockParts(x.minutes).day === 1, `two vessels in one day, no check, by hours (4 h + 5 h; ${sit} sittings)`);
+        x.james.satiety = 10; assert(medCards(x, SCENES).find((c) => c.id === 'med:mer:e8')?.open === false, 'Extraordinary work locks below Fed 20');
+    }
     // the hub's own cultivate card is the Meditate sit there (queueable); the old hub doors are hidden in task mode
     const w = ensureBars(newGame(35)); w.scene = 'wilds'; w.james.qi = 30; w.james.saturation = 99;
     const wm = medCards(w, SCENES);
@@ -763,7 +808,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
         assert(br.stopped && bq.scene === 'breakthrough' && bq.flags.bt_return === 'rt_camp' && bq.flags.med_back === 'rt_camp', 'v0.11.14: it comes back to rt_camp without its enter');
         const fe = ensureBars(newGame(78)); fe.scene = 'stream'; fe.james.qi = 25; fe.james.realm = 1; markDaily(fe, 'mer_e8');
         const fm = medCards(fe, SCENES).find((c) => c.id === 'med:mer:e8');
-        assert(fm && !fm.open && /tomorrow/.test(fm.reason) && !taskOpen(fe, SCENES, 'mer:e8'), `v0.11.13: an Extraordinary line used today: shown, locked till tomorrow (${fm?.reason})`);
+        assert(fm && fm.open && taskOpen(fe, SCENES, 'mer:e8'), `v0.11.18: an Extraordinary line has no daily limit in Incremental Mode (${fm?.reason})`);
         const s7 = ensureBars(newGame(79)); s7.scene = 'stream'; s7.james.qi = 25; s7.james.realm = 7; s7.james.extra8 = 8;
         assert(medCards(s7, SCENES).filter((c) => /^med:mer:/.test(c.id)).map((c) => c.id).join() === 'med:mer:ec,med:mer:jn', 'v0.11.13: Nascent Soul: the vessels\' collaterals and the junctions');
         setNoDice(false); assert(!medCards(s7, SCENES).some((c) => /^med:mer/.test(c.id)), 'v0.11.13: Story Mode: no meridian cards (its screen stays)'); setNoDice(true);

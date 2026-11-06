@@ -1,6 +1,6 @@
 /** Bone and Ash — UI. Renders the story, combat, sheet, hammerspace, journal and saves. */
 import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel, hasForm } from './core/forms.js';
-import { coilMult } from './core/game.js';
+import { coilMult, exLevel, exMult, wakeDay } from './core/game.js';
 import {
     newGame, ensureBars, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, skillCheck, xpToNext, clockLabel, clockLabelG, clockLabelSec, realmName, yukiForm,
     startCombat, combatStep, combatFlee, COMBAT_ACTIONS, setNoDice, noDiceDc, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage,
@@ -549,7 +549,7 @@ async function statusText() {
         `Bone and Ash ${await gameVersion()} · ${new Date().toISOString()}`,
         `Mode: ${taskMode ? 'Incremental' : 'Story'} · speed ${speed ? `×${runSpeed()}${oneShot ? ' (one card)' : ''}` : 'paused'} (resume ×${resumeSpeed}) · tab ${tab}`,
         `Scene: ${g.scene} (${sceneTitle(g.scene)}) · ${clockLabel(g.minutes)}${g.coil ? ` · ${g.coil.act === 1 ? 'Act 1' : 'Prologue'}, Coil ${g.coil.n}` : ''}${g.combat ? ' · in a fight' : ''}`,
-        `James: ${realmName(j.realm)}, Saturation ${n1(j.saturation)}% · HP ${n1(j.hp)} / ${jamesHpMax(g)} · Convergence ${n1(j.qi)} / ${n1(jamesQiMax(g))} · Fed ${Math.round(j.satiety)}`,
+        `James: ${realmName(j.realm)}, Saturation ${n1(j.saturation)}% · HP ${n1(j.hp)} / ${jamesHpMax(g)} · Convergence ${n1(j.qi)} / ${n1(jamesQiMax(g))} · Fed ${Math.round(j.satiety)}${taskMode ? ` · days slept ${wakeDay(g)} · Exhaustion ${exLevel(g)}` : ''}`,
         `Running: ${running ? `${running.label} (${Math.round(Math.min(1, running.done / running.ms) * 100)}%${running.kind ? `, ${running.kind}` : ''})` : 'nothing'}`,
         `Queue (${q.length}): ${q.join(' · ') || 'empty'}`,
         'Pause log (newest last):',
@@ -636,7 +636,7 @@ function statusHtml() {
 <div class="bar hp"><b>${n1(g.james.hp)} / ${jamesHpMax(g)}</b>HP${pbar(g.james.hp, jamesHpMax(g), 'HP')}</div>
 <div class="bar qi"><b>${n1(g.james.qi)} / ${n1(jamesQiMax(g))}</b>Convergence${pbar(g.james.qi, jamesQiMax(g), 'Convergence')}</div>
 <div class="bar food"><b>${Math.round(g.james.satiety)}</b>Fed${pbar(g.james.satiety, 100, 'Fed')}</div>
-<div class="clock"><span class="clk">${clockLabelSec(g)}</span>${taskMode ? `<select class="speed" data-speed="1" aria-label="Speed">${SPEEDS.filter(([n]) => n <= maxSpeed(g, testSpeeds)).map(([n, l]) => `<option value="${n}"${n === runSpeed() ? ' selected' : ''}>${l}</option>`).join('')}</select>` : ''}</div></div>`;
+<div class="clock"><span class="clk">${clockLabelSec(g)}</span>${taskMode && exLevel(g) ? `<span class="exh">Exhausted ×${exMult(g)}</span>` : ''}${taskMode ? `<select class="speed" data-speed="1" aria-label="Speed">${SPEEDS.filter(([n]) => n <= maxSpeed(g, testSpeeds)).map(([n, l]) => `<option value="${n}"${n === runSpeed() ? ' selected' : ''}>${l}</option>`).join('')}</select>` : ''}</div></div>`;
 }
 
 function resultHtml() {

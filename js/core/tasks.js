@@ -14,7 +14,7 @@
  */
 import { hasForm } from './forms.js';
 import { choose, goTo, choiceOpen, choiceTag, gives, setTimeless, defaultMinutes, movesPlace } from './story.js';
-import { advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck, canBreakThrough, btMinutes, realmName, condense, sitMinutes, isNoDice, useSpeed, USE_N } from './game.js';
+import { advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck, canBreakThrough, btMinutes, realmName, condense, sitMinutes, isNoDice, useSpeed, USE_N, exMins } from './game.js';
 import { CONDENSE_SIT_COST } from './formulas.js';
 import { btTarget, MER_LINES, lineWindow, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
@@ -47,6 +47,9 @@ const asText = (v, g) => (typeof v === 'function' ? v(g) : v);
 const r1 = (x) => Math.round(x * 10) / 10;
 export const famTier = (f) => (f >= 18 ? 3 : f >= 8 ? 2 : f >= 2 ? 1 : 0);
 /** v0.11.15 (B1-b): a card's speed by use: 1 + 9 × (familiarity ÷ 18), up to ×10 (= the tiers' ×2 / ×5 / ×10 at 2 / 8 / 18). */
+/** v0.11.18 (owner pick c): Yuki's job has its own slower curve, N 90, capped at ×3 (Incremental Mode). */
+export const YUKI_N = 90, YUKI_CAP = 3;
+export const yukiSpeed = (f) => (isNoDice() ? Math.min(YUKI_CAP, useSpeed(f, YUKI_N)) : FAM[famTier(f)].speed);
 export const cardSpeed = (f) => (isNoDice() ? useSpeed(f, USE_N.card) : FAM[famTier(f)].speed);
 const nextAt = (f) => FAM.find((t) => t.at > f)?.at ?? null;
 
@@ -209,7 +212,7 @@ function medTaskCards(g, scenes) {
         const c = scenes.meridians.choices[mi];
         cards.push({ id: merLineTask(line), kind: 'mer', line, group: 'Meditate', label: asText(c.text, g), tag: choiceTag(g, c), minutes: c.minutes ? c.minutes(g) : c.time || 0, status: 'open', tier: 0, fam: 0, next: null });
     }
-    if (sitOpen(g, scenes)) cards.push({ id: SIT_TASK, kind: 'sit', group: 'Meditate', label: 'Cultivate: one sit', tag: `${CONDENSE_SIT_COST} Qi`, minutes: sitMinutes(g), status: 'open', tier: 0, fam: 0, next: null });
+    if (sitOpen(g, scenes)) cards.push({ id: SIT_TASK, kind: 'sit', group: 'Meditate', label: 'Cultivate: one sit', tag: `${CONDENSE_SIT_COST} Qi`, minutes: exMins(g, sitMinutes(g)), status: 'open', tier: 0, fam: 0, next: null });
     if (btOpen(g)) cards.push({ id: BT_TASK, kind: 'bt', group: 'Meditate', label: `Break through to ${realmName(g.james.realm + 1)}`, tag: `${btMinutes(g)} min`, minutes: btMinutes(g), status: 'open', tier: 0, fam: 0, next: null });
     return cards;
 }
@@ -257,7 +260,7 @@ function resolveWork(g, scenes, hubId, card, id) {
         if (c.xp !== false) lines.push(...awardXp(g, c.check.skill, c.check.band || 'standard', { fail: band === 'fail', factor: band === 'partial' ? ratio : 1 }));
     }
     const mins = Math.round((((card.entry?.time || 0) + (c.time || 0)) * NEW_LENGTH) / cardSpeed(t.fam[id] || 0));
-    lines.push(...advance(g, mins));
+    lines.push(...advance(g, mins, { work: true }));
     g.james.satiety = Math.max(0, g.james.satiety - (FED_EXTRA_PER_HOUR * mins) / 60);
     takeCapNotes();
     const items = gives(c).length > 0;
@@ -308,12 +311,12 @@ function yukiTick(g, hubId, minutes) {
     y.progress = (y.progress || 0) + minutes;
     for (let guard = 0; guard < 20; guard++) {
         const f = st(g).fam[job.id] || 0;
-        const len = Math.round((job.minutes * NEW_LENGTH) / cardSpeed(f));
+        const len = Math.round((job.minutes * NEW_LENGTH) / yukiSpeed(f));
         if (y.progress < len) break;
         y.progress -= len;
         const ratio = skillCheck(g.yuki.fight) / job.dc;
         const n = ratio >= 2 ? job.n * 2 : ratio >= 1 ? job.n : ratio >= 0.5 ? Math.floor(job.n * ratio + 0.5) : 0;
-        if (n > 0) { addItem(g, job.item, n); lines.push(`${job.got(n)} +${n} ${itemNames[job.item]?.name || job.item}.`, ...awardYukiFightXp(g, 'standard')); } else lines.push(job.none);
+        if (n > 0) { addItem(g, job.item, n); lines.push(`${job.got(n)} +${n} ${itemNames[job.item]?.name || job.item}.`, ...awardYukiFightXp(g, 'challenging')); } else lines.push(job.none);
         takeCapNotes();
         st(g).fam[job.id] = r1(f + (n > 0 ? 1 : 0.5));
     }
@@ -326,7 +329,7 @@ export function yukiLane(g) {
     if (!job) return null;
     const y = st(g).yuki;
     const f = st(g).fam[job.id] || 0;
-    return { label: job.label, on: !!y.on, progress: y.progress || 0, len: Math.round((job.minutes * NEW_LENGTH) / cardSpeed(f)), fam: f, tier: famTier(f), dc: job.dc, check: r1(skillCheck(g.yuki.fight)) };
+    return { label: job.label, on: !!y.on, progress: y.progress || 0, len: Math.round((job.minutes * NEW_LENGTH) / yukiSpeed(f)), fam: f, tier: famTier(f), dc: job.dc, check: r1(skillCheck(g.yuki.fight)) };
 }
 export function setYuki(g, on) { st(g).yuki.on = !!on; }
 

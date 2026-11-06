@@ -340,10 +340,33 @@ export function isNight(g) {
 }
 
 /** Time passes: hunger, then regen per Cycle (T1 30 min) — HP 5%, Qi 5% + 0.1 per open collateral. */
-export function advance(g, minutes, { resting = false } = {}) {
-    const m = Math.max(0, Math.round(minutes));
+/* v0.11.18 (owner pick B): once-a-day things come back after sleep, not at midnight (Incremental Mode).
+ * g.wake.n counts waking days: +1 for each night slept (sleepUntil to a new morning, a scene that moves the clock past
+ * a morning by itself, a span of a day or more), +1 for a push. Old saves start at their calendar day. */
+const X4 = (m) => Math.floor((m - 240) / 1440) + 1;
+export const EX_MULT = [1, 1.5, 2];
+export function wakeState(g) {
+    const d = clockParts(g.minutes).day;
+    if (!g.wake) g.wake = { n: d, ex: 0, lastX: X4(g.minutes), slept: d };
+    const x = X4(g.minutes);
+    if (x > g.wake.lastX) { g.wake.n += x - g.wake.lastX; g.wake.ex = 0; g.wake.slept = d; } // the clock passed a morning by itself: slept
+    g.wake.lastX = x;
+    return g.wake;
+}
+export const wakeDay = (g) => wakeState(g).n;
+export const exLevel = (g) => (noDice ? wakeState(g).ex : 0);
+export const exMult = (g) => EX_MULT[exLevel(g)] || 1;
+export const exMins = (g, m) => (m && noDice ? Math.round(m * exMult(g)) : m);
+export function advance(g, minutes, { resting = false, work = false } = {}) {
+    let m = Math.max(0, Math.round(minutes));
     if (!m) return [];
     const notes = [];
+    if (noDice) {
+        const w = wakeState(g);
+        if (work && !resting && m < 1440) m = Math.round(m * (EX_MULT[w.ex] || 1)); // Exhaustion: work only, not waits, rests or sleep
+        if (m >= 1440) { w.n += Math.floor(m / 1440); w.ex = 0; w.slept = clockParts(g.minutes + m).day; } // a span of a day or more has its nights in it
+        w.lastX = X4(g.minutes + m); // a morning passed awake: no new day
+    }
     g.minutes += m;
     const fed0 = Math.max(0, g.james.satiety);
     g.james.satiety -= (SATIETY_PER_HOUR * m) / 60;
@@ -375,13 +398,30 @@ export function advance(g, minutes, { resting = false } = {}) {
     return notes;
 }
 
+/** v0.11.18: Push through the night: a new waking day without sleep, one Exhaustion more; the third collapses him for a day. */
+export function pushNight(g) {
+    const w = wakeState(g);
+    if (w.ex < 2) { w.n += 1; w.ex += 1; return { collapsed: false, ex: w.ex }; }
+    const p = clockParts(g.minutes + 1440);
+    let target = (p.day - 1) * 1440 + 6 * 60;
+    if (target < g.minutes + 1440) target += 1440;
+    sleepUntil(g, 6); // bars, Fed at the sleeping rate up to the first morning
+    const rest = target - g.minutes;
+    g.minutes = target;
+    g.james.satiety = Math.max(0, g.james.satiety - (SATIETY_PER_HOUR * rest) / 60 / 2);
+    w.lastX = X4(target); w.slept = clockParts(target).day; w.ex = 0; // the lost day: one waking day (sleepUntil counted it)
+    return { collapsed: true, ex: 0 };
+}
+
 /** A full night (or long rest): bars to Max, clock to the given hour of the next morning. */
 export function sleepUntil(g, hour = 6) {
     const p = clockParts(g.minutes);
     let target = (p.day - 1) * 1440 + hour * 60;
     if (target <= g.minutes) target += 1440;
     const span = target - g.minutes;
+    if (noDice) wakeState(g);
     g.minutes = target;
+    if (noDice) { const w = g.wake, d = clockParts(target).day; if (d > w.slept) { w.n += 1; w.slept = d; } w.ex = 0; w.lastX = X4(target); }
     g.james.satiety = Math.max(0, g.james.satiety - (SATIETY_PER_HOUR * span) / 60 / 2);
     g.james.hp = jamesHpMax(g);
     g.james.qi = jamesQiMax(g);
@@ -410,13 +450,13 @@ export const sitMinutes = (g) => Math.max(1, Math.round(SIT_MINUTES_INC / actSpe
 /** Saturation % from `sits` sits (one hour each in Incremental Mode; the hollow and the grove count as two). */
 export const sitGain = (g, sits = 1) => Math.round((noDice ? (100 * sits) / SAT_HOURS(g.james.realm) : condensationSatGain(CONDENSE_SIT_COST, jamesQiMax(g)) * sits) * 10) / 10; // v0.11.15: no Coil bonus
 /** The breakthrough's length: 2 h × (realm + 1) ÷ the Coil bonus in Incremental Mode (Foundation 2 h … Heavenly Immortal 28 h); 2 h in Story Mode. */
-export const btMinutes = (g) => (noDice ? Math.round((120 * ((g.james.realm || 0) + 1)) / actSpeed(g, 'bt')) : 120); // v0.11.15: ÷ its speed by use
+export const btMinutes = (g) => (noDice ? exMins(g, Math.round((120 * ((g.james.realm || 0) + 1)) / actSpeed(g, 'bt'))) : 120); // v0.11.15: ÷ its speed by use
 /** Condensation: a conscious sit, 10 Qi a sit, 0 XP; raises Saturation. Spends Qi, never refills it. */
 export function condense(g) {
     if (!spendQi(g, CONDENSE_SIT_COST)) return { ok: false };
     const gain = sitGain(g);
     g.james.saturation = Math.min(100, Math.round((g.james.saturation + gain) * 10) / 10);
-    advance(g, noDice ? sitMinutes(g) : 30);
+    advance(g, noDice ? sitMinutes(g) : 30, { work: true });
     actUse(g, 'sit');
     return { ok: true, gain, saturation: g.james.saturation };
 }

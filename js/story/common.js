@@ -1,5 +1,5 @@
 /** Shared story helpers: flags, days, food, and how enemies grow with the days James spends training. */
-import { clockParts, addItem, eat } from '../core/game.js';
+import { clockParts, addItem, eat, isNoDice, wakeDay } from '../core/game.js';
 
 export const once = (flag) => (g) => !g.flags[flag];
 export const set = (...flags) => (g) => { for (const f of flags) g.flags[f] = true; return []; };
@@ -7,8 +7,12 @@ export const day = (g) => clockParts(g.minutes).day;
 export const hour = (g) => clockParts(g.minutes).hh;
 /** Available once per in-game day. */
 /** A once-a-day test; `dailyKey` lets the task screen show it as "back tomorrow" (v0.9.0). */
-export const daily = (key) => Object.assign((g) => !g.flags[`${key}@${day(g)}`], { dailyKey: key });
-export const markDaily = (g, key) => { g.flags[`${key}@${day(g)}`] = true; };
+/** v0.11.18: in Incremental Mode a "day" for these is a waking day (back after sleep or a push), not the calendar. */
+export const dayKey = (g) => (isNoDice() ? wakeDay(g) : day(g));
+export const DAILY_KEYS = new Set();
+export const daily = (key) => { DAILY_KEYS.add(key); return Object.assign((g) => !g.flags[`${key}@${dayKey(g)}`], { dailyKey: key }); };
+export const markDaily = (g, key) => { DAILY_KEYS.add(key); g.flags[`${key}@${dayKey(g)}`] = true; };
+export const anyDailyDone = (g) => { const d = dayKey(g); for (const k of DAILY_KEYS) if (g.flags[`${k}@${d}`]) return true; return false; };
 
 /** Days of training beyond the original pace: 0 on the old route, up to 2 in the forest and 2 in Ashfall. */
 export const forestScale = (g) => g.flags.longforest ? 0 : Math.max(0, Math.min(2, (g.flags.forest_day || 1) - 1));
