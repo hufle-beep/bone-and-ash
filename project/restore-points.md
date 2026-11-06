@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.2 | (this push) | Timed cultivation. Same save state as 0.9.6 (`merWork` / `colWork` are new but optional). |
+| 0.11.3 | (this push) | Tools and rules only; the game is the same as 0.11.2. |
+| 0.11.2 | `71e47a3` | Timed cultivation. Same save state as 0.9.6 (`merWork` / `colWork` are new but optional). |
 | 0.11.1 | `525e8e0` | Tests and tools only; the game is the same as 0.11.0. |
 | 0.11.0 | `fd1022e` | The base redesign, push 1 (everything James grew starts over each Coil; the Coil bonus). Same save state as 0.9.6; a save that rewinds under 0.11.0 has its skills reset, which an older version will simply keep. |
 | 0.10.4 | `f942fff` | Bonesinger forms, the mode names. Same save state as 0.9.6. |

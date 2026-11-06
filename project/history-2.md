@@ -4,6 +4,12 @@ Started 2026-11-06 (v0.10.4), when `history.md` passed 45 KB. Newer than `histor
 
 ## Older decisions (2026-11-06, v0.10.0 and later)
 
+- **v0.11.0: the base redesign, push 1 of 2 (owner 13:06 "base redesign. make the game closer to Selene. Skills and realms reset but their progression gets faster with each coil. Cultivation should also be a timed action… the number of coils increases drastically, but that's intended and can be bypassed by Long Forest"; picks 13:24 "1a, 2a, 3a, 4a, 6a"; 13:34 "1b", projections asked for both counts; 13:36 "count per act"; go 13:37; built in v0.11.0):**
+  - **1a** a rewind resets James's and Yuki's realm, Saturation, skills (GU, Convergence Use, Fight, Qi Use) and every meridian to the act's start (the snapshot: Day 1 dawn, or Day 8 dawn for Act 1). Kept: familiarity, Intuitive Aptitude, what James knows (`KEEP_FLAGS`), Yuki's relationship and path, the relationship head start. The "Foundation unwinds" rule is gone (everything starts over anyway).
+  - **2a + 1b + count per act** the Coil bonus ×(1 + 0.5 × earlier Coils of this act) (`coilMult`): XP (James and Yuki), the Saturation of a sit (and the hollow and grove sits), meridian session DCs ÷ the bonus. Act 1's first Coil is ×1 again.
+  - **4a** the Long Forest stays the bypass (climb it again each Coil). **6a** two pushes: timed cultivation (3a, the same Coil bonus) is push 2. Story Mode unchanged. Old saves keep what they have until their next rewind; no migration.
+  - **Measured before (bots, +0.5 per earlier Coil, 1,000 games each; prologue numbers the same either way):** dead before Mei Lin 92–94 / 71–72 / 60–62 / 49–50 / 38–41 / 39–40 / 19–22% on Coils 1–7; tribute won 4–20 / 23–27 / 57–62 / 65–71 / 72%; first Coil past the tribute: median 4 (p25 3, p75 5). Counting all Coils: Act 1 deaths 10 / 31 / 45 / 14%, Act 1 in 1 Coil, about 5 Coils in total. **Counting per act (picked):** Act 1 deaths 84 / 66 / 38 / 24 / 25 / 23%, 3 Act 1 Coils (median), about 7 in total. Other bonus sizes (all Coils counted): 0 → 92% dead before Mei Lin on every Coil; +0.25 → past the tribute on Coil 5; +1.0 → Coil 3. No bot reached Foundation in the prologue (12 primaries need 6 days of 2 sessions, plus 95% Saturation, in one Coil).
+  - **Bots after v0.11.0** (tasks test: bots rewind a lost tribute up to Coil 3 only): dead before Mei Lin 91 / 63 / 59 / 54%; tribute won 28 / 41 / 61 / 63 / 68 / 77% (Coils 1–6); Act 1 Coils ending in death 78 / 65 / 57 / 61%.
 - **v0.10.4: Bonesinger forms and the mode names (owner 12:09 "skills and their expression… what cannot be formed yet should not be visible in checks and combat"; 12:46 the four lines: ranged needle → dart (an evolved needle) → lances later, melee a fragile knife, defensive structures spikes or walls, personal defence shields and armour; 12:48 "run them. 1a, 3a, 4a, 5a"; 12:51 "A. if he dies, he dies." (the knife really breaks); 12:53 rename Tasks → Incremental Mode, Classic → Story Mode, "then go"; built in v0.10.4):**
   - **1a** forms unlock by Convergence Use rank (tier and level). **Ladder** (`js/core/forms.js`): ranged needle T1 L1 → dart T1 L5 → thrown lance T3 L1 → volley T4 L1 → storm T5 L1; melee fragile knife T1 L1 → knife T1 L8 → dagger T2 L1 → sword T2 L5; defensive structures spikes T1 L3 → stake ring / spike hedge T1 L8 → stepping-stones T2 L5 → man-high slab T3 L1 → walls, bridges, shelters T4 L1 → fortifications T5 L1; personal defence bracer T1 L5 → buckler T2 L1 → shield T2 L5 → armour plates T3 L1 → full wraithbone armour T5 L1. Constructs stay at T7+.
   - **3a** fights show only the forms James has (no darts below T1 L5); the actions are named after his best form per line (knife / dagger / sword, darts / lance / volley / storm, bracer / buckler / shield / plates / armour on Guard). **Pick a:** the fragile knife breaks after every swing and costs its Qi again until T1 L8. Damage and effects otherwise unchanged (tier multipliers, plates' DR, volleys, constructs).
@@ -39,6 +45,14 @@ Started 2026-11-06 (v0.10.4), when `history.md` passed 45 KB. Newer than `histor
   - Test fix: the v0.9.7 test "starving to 0 ends the Coil" now builds up a starving hour first (it relied on the old 1 HP per step).
 
 ## Older version notes (v0.10.0 and later)
+
+## v0.11.0 — the base redesign, push 1: everything James grew starts over each Coil, the Coil bonus
+
+- **game.js:** `COIL_GROWTH` 0.5, `coilMult(g)` (Incremental Mode: 1 + 0.5 × (coil.n − 1); per act, since Act 1's Coil numbering starts at 1); `awardXp` multiplies the pool, `awardYukiFightXp` too; `condense` multiplies the Saturation gain.
+- **coil.js** `rewind`: James and Yuki come from the snapshot (hp / qi refilled, injuries cleared); `willUnwind` is always false; the header comment lists what is kept.
+- **meridians.js:** `dcPrimary` / `dcColGroup` ÷ `coilMult`. **wilds.js / act1_return.js:** the hollow and grove sits × `coilMult`.
+- **coil_scenes.js:** the Coil screen's "Next Coil" line (×N as fast), the rewind result line, the two dawn texts (the body forgets, the head does not). **main.js:** the James tab's Coil line.
+- **Tests:** the old "kept" assertions now check the reset; new: ×1 on Coil 1, ×2 XP on Coil 3, Yuki ×2, meridian DC ÷ 2, a sit ×2, Act 1 starts at ×1, Story Mode ×1.
 
 ## v0.10.4 — Bonesinger forms, the mode names
 

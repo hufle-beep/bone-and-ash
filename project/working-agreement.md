@@ -16,7 +16,7 @@ This covers **everything that changes the repository or what players get**: game
 
 Allowed without asking (they change nothing): reading code and saves, running tests, checks and simulations, investigating failures. Their results come back as analysis and options (step 2).
 
-If a check or test shows a problem, Claude stops and reports it right away, even mid-build after a go. If something urgent breaks, Claude reports it with options and waits; it does not fix it unasked.
+**After every build, before the docs** (owner 2026-11-06, v0.11.3): Claude runs the full `bash tools/check.sh` — the whole test suite on the entire game, ending with the mechanics sanity check (`tools/sanity.mjs`: the cultivation and Coil formulas, Story Mode's numbers, no broken bars, and every per-Coil rate and fight win rate against `tools/baseline.json`; more than 5 points off with at least 100 samples is flagged). If a check or test fails or flags anything, Claude stops and reports it right away with the numbers, even mid-build after a go. After an intended balance change, the baseline is saved again (`node tools/sanity.mjs --update`) only after the owner has seen the numbers and said go. If something urgent breaks, Claude reports it with options and waits; it does not fix it unasked.
 
 Automated "commit and push your changes" reminders from the tooling do **not** override this rule.
 
@@ -45,6 +45,6 @@ Automated "commit and push your changes" reminders from the tooling do **not** o
 - **Content limits (Claude's own, not the owner's):** romance is frank and sensual up to the door, then fades to black; no nude images. Adults only.
 - **Images:** public-domain pictures and AI images are fine. Reference images from other artists are style references only, never put in the game.
 - **Rules Engine C:** `js/core/formulas.js` is the engine's own file, copied unchanged from hufle-beep/Shared-ST. The deliberate game forks (d6 on every check, crits at 2× DC, meridian regen, realm HP regen, realm gap, T10 L10 cap) stay unless the owner says otherwise.
-- **Checks:** `bash tools/check.sh quick` (200 bot games) is for use while building; only the full `bash tools/check.sh` counts before a push. Balance numbers come from `node tools/bots.mjs` (v0.11.1).
+- **Checks:** `bash tools/check.sh quick` (200 bot games, no sanity check) is for use while building; only the full `bash tools/check.sh` (with the sanity check) counts, after every build and before a push. Balance numbers come from `node tools/bots.mjs` (v0.11.1).
 - **Before pushing from a cloud clone:** check `git remote -v`; the origin has sometimes reset to the old `James-rpg-test` URL (`git remote set-url origin https://github.com/hufle-beep/bone-and-ash`).
 - **Commits** end with the attribution lines the session provides (Co-Authored-By and Claude-Session).

@@ -5,7 +5,7 @@ import { SCENES, lfOpen, lfSeason, lfRank, LF_STOCK, LF_SEASON_MINUTES } from '.
 import { itemCap, MAX_REALM, combatStep as cStep, startCombat as sCombat, coilMult, awardXp, awardYukiFightXp, condense, SAT_HOURS, sitGain, btMinutes } from '../js/core/game.js';
 import { FORM_LINES, hasForm, cuRank, actionOpen, actionLabel, fragileKnife, STORY_FORMS } from '../js/core/forms.js';
 import { TASK_HUBS } from '../js/story/task_hubs.js';
-import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, setNoDice, clockLabelSec, advance, STARVE_HP_PER_HOUR, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1 } from '../js/core/game.js';
+import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, setNoDice, isNoDice, clockLabelSec, advance, STARVE_HP_PER_HOUR, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1 } from '../js/core/game.js';
 import { canPrimary, canColGroup, colGroupsOpen, sessionsToday, dcPrimary, dcColGroup, btTarget, canAnyMeridian, COL_GROUPS, priHours, colHours, merMinutesOf } from '../js/story/meridians.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
 import { medCards, runMed, canMeditate, NO_MEDITATE, isSitChoice } from '../js/core/meditate.js';
@@ -13,7 +13,8 @@ import { defaultMinutes, DEFAULT_MINUTES } from '../js/core/story.js';
 import { coilActive, coilPrefill, rewind, endCoil, KEEP_FLAGS, REMEMBER } from '../js/core/coil.js';
 import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskMinutes, runTask, outlook, taskQueue, taskState, setYuki, yukiLane, famTier, QUEUE_MAX, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, merChoice, MER_TASK, BT_TASK, waitChoice } from '../js/core/tasks.js';
 
-import { GAMES, FULL, SHARD, WORKERS, SEED, SENSIBLE, REPORT, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
+import { writeFileSync } from 'node:fs';
+import { GAMES, FULL, SHARD, WORKERS, SEED, SENSIBLE, REPORT, STATS_OUT, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
 let pass = 0, fail = 0;
 const assert = (c, l) => { if (c) { pass++; } else { fail++; if (fail < 30) console.error('  FAIL ', l); } };
 const kids = launch(import.meta.url); // v0.11.1: the bot games in worker processes, while this one runs the other checks
@@ -463,12 +464,13 @@ let rs = 4242;
 const rnd = (n) => { rs = (rs * 1103515245 + 12345) >>> 0; return (rs >>> 8) % n; };
 
 function fight(g, run) {
+    const id0 = g.combat?.id;
     for (let t = 0; t < 400 && g.combat; t++) {
         const smart = run % 2 === 0;
         const acts = Object.keys(COMBAT_ACTIONS);
         const act = smart ? (g.james.qi >= 4 && t % 3 === 1 ? 'needle' : g.james.qi >= 3 ? 'blade' : 'dart') : acts[rnd(acts.length)];
         const out = (!smart && t % 7 === 6 && g.combat.flee) ? combatFlee(g) : combatStep(g, act);
-        if (out?.done) { goTo(g, SCENES, out.next); return; }
+        if (out?.done) { const k = `${isNoDice() ? 'inc' : 'story'}:${id0 || '?'}:${smart ? 'smart' : 'random'}`; const f = fightStats[k] || (fightStats[k] = { win: 0, lose: 0, flee: 0 }); f[out.done] = (f[out.done] || 0) + 1; goTo(g, SCENES, out.next); return; }
     }
 }
 
@@ -481,6 +483,9 @@ const cardsSeen = new Set();
 const cardsListed = new Set();
 const bands = {};
 let yukiRuns = 0;
+const fightStats = {}; // v0.11.3: per mode, fight and bot style, for tools/sanity.mjs
+let badBars = 0; // v0.11.3: games that ended with a NaN / Infinity bar
+const barsOk = (g) => [g.james.hp, g.james.qi, g.james.saturation, g.james.satiety, g.yuki.hp, g.yuki.qi].every(Number.isFinite);
 let predicted = 0;
 function play(run, tasks) {
     rs = seedOf(run, tasks ? 1 : 2); // v0.11.1: every game its own random stream
@@ -499,7 +504,7 @@ function play(run, tasks) {
             if (k !== coilKey) { coilKey = k; meiSeen = false; D().coils++; }
             if (g.scene === 'mei_lin') meiSeen = true;
             if (g.scene === 'coil_end' && (g.coil.why === 'collapse' || g.coil.why === 'beast') && deadKey !== coilKey) { deadKey = coilKey; const d = D(); if (meiSeen || g.coil.act) d.late++; else d.early++; if (g.coil.why === 'beast') d.beast++; }
-            if (g.coil.n > 6) { st.games++; return true; } // a bot that keeps dying stops counting after Coil 6 of an act
+            if (g.coil.n > 6) { st.games++; if (!barsOk(g)) badBars++; return true; } // a bot that keeps dying stops counting after Coil 6 of an act
         }
         if (tasks && g.scene === 'a1_end') { medStats.a1coils[g.coil.n] = (medStats.a1coils[g.coil.n] || 0) + 1; }
         // the Meditate card now and then (v0.9.6): open meridians, break through
@@ -513,7 +518,7 @@ function play(run, tasks) {
             if (g.scene !== 'meridians') ms = 0;
         }
         const v = sceneView(g, SCENES);
-        if (v.end) { const e = g.flags.ending || 'none'; st.endings[e] = (st.endings[e] || 0) + 1; st.games++; return true; }
+        if (v.end) { const e = g.flags.ending || 'none'; st.endings[e] = (st.endings[e] || 0) + 1; st.games++; if (!barsOk(g)) badBars++; return true; }
         if (tasks && isTaskHub(g)) {
             coilPrefill(g);
             const all = taskCards(g, SCENES);
@@ -575,13 +580,14 @@ let diceInTasks = 0;
 const logBefore = (g) => g.log.length;
 if (kids) { // v0.11.1: merge the workers' numbers
     for (const r of await collect(kids)) {
-        for (const [k, o] of Object.entries({ byCoil, medStats, deaths, stats, bands })) mergeInto(o, r[k]);
+        for (const [k, o] of Object.entries({ byCoil, medStats, deaths, stats, bands, fightStats })) mergeInto(o, r[k]);
+        badBars += r.badBars;
         for (const id of r.cardsSeen.__set) cardsSeen.add(id);
         for (const id of r.cardsListed.__set) cardsListed.add(id);
         yukiRuns += r.yukiRuns; predicted += r.predicted; diceInTasks += r.diceInTasks; pass += r.pass; fail += r.fail;
     }
 } else for (const run of myRuns()) { play(run, true); play(run, false); }
-if (SHARD) emit({ byCoil, medStats, deaths, stats, bands, cardsSeen, cardsListed, yukiRuns, predicted, diceInTasks, pass, fail });
+if (SHARD) emit({ byCoil, medStats, deaths, stats, bands, fightStats, badBars, cardsSeen, cardsListed, yukiRuns, predicted, diceInTasks, pass, fail });
 rs = 4243; // the checks below draw from their own stream
 setNoDice(false);
 // task mode: no die anywhere, in fights or story; classic: the die stays
@@ -705,6 +711,8 @@ console.log(`  deaths, Act 1: ${dl(deaths.a1, 'a1')}`);
 console.log(`  Meditate: ${medStats.mer} meridian screens, ${medStats.bt} breakthroughs, ${medStats.warn} seal warnings; Act 1: ${medStats.a1bites} rewinds at Shen Qiu, ends on ${JSON.stringify(Object.fromEntries(Object.entries(medStats.a1coils).sort(([a], [b]) => a - b)))}`);
 assert(!FULL || medStats.a1bites >= 5, `bots rewind Act 1 and reach its end (${medStats.a1bites})`);
 console.log(`  ${stats.tasks.cards} cards run, ${stats.tasks.skipped} skipped, ${stats.tasks.collapses} collapses (HP 0), ${predicted} queues predicted, ${cardsSeen.size}/${all.size} cards played`);
+assert(badBars === 0, `no NaN / Infinity bar at the end of a bot game (${badBars})`);
+if (STATS_OUT) writeFileSync(STATS_OUT, JSON.stringify({ games: GAMES, deaths, byCoil, fights: fightStats, badBars })); // v0.11.3: for tools/sanity.mjs
 console.log(`  ${GAMES} games each way in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FULL ? '' : ' (quick: coverage checks skipped)'}`);
 console.log(`${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

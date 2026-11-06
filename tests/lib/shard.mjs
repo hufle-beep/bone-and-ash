@@ -27,6 +27,8 @@ export const WORKERS = SHARD ? 1 : Math.max(1, Math.min(Number(opt('workers', 0)
 export const SEED = Number(opt('seed', 0)) || 0;
 /** tools/bots.mjs --sensible: the bot leaves the meridian screen after 2 sittings in a row, or when Fed is under 40. */
 export const SENSIBLE = argv.includes('--sensible');
+/** v0.11.3: write the merged stats here as JSON (tools/check.sh → tools/sanity.mjs). Not passed to workers. */
+export const STATS_OUT = opt('stats-out', null);
 /** tools/bots.mjs: print the beast share of the deaths too. */
 export const REPORT = argv.includes('--report');
 /** The game numbers this process plays. */
@@ -44,8 +46,8 @@ export function seedOf(run, stream = 0) {
 export function launch(fileUrl) {
     if (SHARD || WORKERS < 2) return null;
     const file = fileURLToPath(fileUrl);
-    const pass = []; // forward the other options (--seed, --sensible …), not --workers / --games / --shard
-    for (let i = 0; i < argv.length; i++) { if (['--workers', '--games', '--shard'].includes(argv[i])) { i++; continue; } pass.push(argv[i]); }
+    const pass = []; // forward the other options (--seed, --sensible …), not --workers / --games / --shard / --stats-out
+    for (let i = 0; i < argv.length; i++) { if (['--workers', '--games', '--shard', '--stats-out'].includes(argv[i])) { i++; continue; } pass.push(argv[i]); }
     return Array.from({ length: WORKERS }, (_, i) => new Promise((resolve, reject) => {
         const child = spawn(process.execPath, [file, ...pass, '--games', String(GAMES), '--shard', `${i}/${WORKERS}`], { stdio: ['ignore', 'pipe', 'inherit'] });
         let out = '';

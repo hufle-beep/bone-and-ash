@@ -2,7 +2,8 @@
 import { SCENES, START_SCENE } from '../js/story/prologue.js';
 import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, itemCap, setNoDice } from '../js/core/game.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
-import { GAMES, FULL, SHARD, WORKERS, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
+import { writeFileSync } from 'node:fs';
+import { GAMES, FULL, SHARD, WORKERS, STATS_OUT, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
 
 let pass = 0, fail = 0;
 const assert = (c, l) => { if (c) { pass++; } else { fail++; console.error('  FAIL ', l); } };
@@ -127,6 +128,7 @@ assert(!FULL || unreached.length === 0, `every scene reachable (unreached: ${unr
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));
 console.log('fights', sorted(fights));
 console.log('endings', sorted(endings), 'longest run', maxSteps, 'scenes', Object.keys(SCENES).length);
+if (STATS_OUT) writeFileSync(STATS_OUT, JSON.stringify({ games: GAMES, fights, endings })); // v0.11.3: for tools/sanity.mjs
 console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FULL ? '' : ' (quick: coverage checks skipped)'}`);
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);
