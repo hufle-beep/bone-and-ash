@@ -15,7 +15,7 @@ const BR = 'Blackroot Wilds';
 const seeded = (g) => !!g.flags.seed || hasItem(g, 'seed_sliver');
 const both = (g) => likesMei(g) && likesYa(g);
 const trioReady = (g) => both(g) && trio(g) >= 3;
-const luHanHere = (g) => g.flags.ending !== 'fought' && !g.flags.lu_disgraced;
+const luHanHere = (g) => g.flags.ending !== 'fought';
 const toHour = (g, h) => { const p = clockParts(g.minutes); if (p.hh < h) g.minutes = (p.day - 1) * 1440 + h * 60; };
 /** Preparations that blunt the Elder (count). */
 const preps = (g) => (g.flags.a1_palisade ? 1 : 0) + (g.flags.a1_militia ? 1 : 0) + (g.flags.grove_attuned ? 1 : 0) + (g.flags.council_unity ? 1 : 0);

@@ -37,13 +37,14 @@ export function choiceTag(g, c) {
     return bits.join(' · ');
 }
 
-/** The common items a choice's `do` adds (read once from its source; quoted ids in addItem(g, …, n > 0)). */
+/** The common items a choice's `do` adds (read once from its source; quoted ids in addItem(g, …, n > 0) that are real items:
+ *  v0.11.25, so a quoted non-item such as yukiForm(g) === 'tiger' inside the call is not taken for one). */
 const givesCache = new WeakMap();
 export function gives(c) {
     if (!c.do) return [];
     if (!givesCache.has(c)) {
         const ids = new Set();
-        for (const m of c.do.toString().matchAll(/addItem\(g,\s*([^,]+?),\s*(-?)/g)) if (!m[2]) for (const q of m[1].matchAll(/'([a-z_]+)'/g)) ids.add(q[1]);
+        for (const m of c.do.toString().matchAll(/addItem\(g,\s*([^,]+?),\s*(-?)/g)) if (!m[2]) for (const q of m[1].matchAll(/'([a-z_]+)'/g)) if (Object.hasOwn(itemNames, q[1])) ids.add(q[1]);
         givesCache.set(c, [...ids]);
     }
     return givesCache.get(c);

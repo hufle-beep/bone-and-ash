@@ -40,7 +40,19 @@ const nightFight = (kind) => (g) => {
         serpent: { intro: 'The serpent comes up the bank toward the warmth of the fire.', enemies: [{ name: 'Mire serpent', hp: 11, dc: 5, atk: 6, dmg: 4 }] },
         hawks: { intro: 'Cinder hawks, two, diving at the fire as if it owes them money.', enemies: [{ name: 'Cinder hawk', hp: 5, dc: 5.5, atk: 6, dmg: 3, prefersSmall: true }, { name: 'Cinder hawk', hp: 5, dc: 5.5, atk: 6, dmg: 3, prefersSmall: true }] },
     }[kind];
-    return encounter(g, { id: `night_${kind}`, tier: 'small', intro: t.intro, enemies: t.enemies, win: 'bl_night_won', lose: 'bl_night_lost', flee: kind === 'drowned' ? null : 'bl_morning' });
+    /* v0.11.25 (owner picks b1, X2, T1): the camp stakes (bl_camp, one night) cut the first attacker by 3 HP (4 with bone-meal),
+       after the scaling and the ally floor, so the cut is real on every kind; at least 1 HP left. */
+    const stake = g.flags.bl_stakes_night ? (g.flags.stakes_hard ? 4 : 3) : 0;
+    const intro = stake ? `${t.intro} ${STAKE_LINES[kind]}` : t.intro;
+    const r = encounter(g, { id: `night_${kind}`, tier: 'small', intro, enemies: t.enemies, win: 'bl_night_won', lose: 'bl_night_lost', flee: kind === 'drowned' ? null : 'bl_morning' });
+    if (stake) r.enemies[0] = { ...r.enemies[0], hp: Math.max(1, r.enemies[0].hp - stake) };
+    return r;
+};
+const STAKE_LINES = {
+    wolves: 'One of them comes in off the stakes already bleeding.',
+    drowned: 'One of them walks onto the stakes and keeps walking. It is leaking now, which is something.',
+    serpent: 'It comes over the stakes and leaves a fair amount of itself on them.',
+    hawks: 'One of them dives too low over the stakes and comes up with fewer feathers.',
 };
 
 /* ---------------- night events per region ---------------- */
@@ -1028,6 +1040,7 @@ ${likesMei(g) ? 'Across the fire, Mei Lin opens one eye, sees, and closes it aga
             const lines = [];
             if (hour(g) < 6 || hour(g) >= 19) { sleepUntil(g, 6); lines.push('Slept until 06:00. HP and Qi full.'); }
             g.flags.bl_day = bday(g) + 1;
+            g.flags.bl_stakes_night = false; // v0.11.25: the stakes last one night
             const out = eatBest(g, { fire: true });
             lines.push(out.length ? `Breakfast. ${out[0]}` : 'No breakfast. Ya offers you a beetle. You decline. For now.');
             return lines;

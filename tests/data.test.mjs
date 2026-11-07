@@ -6,6 +6,9 @@ import { PICTURES, pictureOf, sceneArt, setArtState } from '../js/art/art.js';
 import { SCENES, ITEMS } from '../js/story/prologue.js';
 import { TASK_HUBS } from '../js/story/task_hubs.js';
 import { FORM_LINES } from '../js/core/forms.js';
+import { gunzipSync } from 'node:zlib';
+import { deserialize, newGame, ensureBars, itemCap } from '../js/core/game.js';
+import { gives, sceneView } from '../js/core/story.js';
 
 let pass = 0, fail = 0;
 const assert = (c, l) => { if (c) pass++; else { fail++; console.error('  FAIL ', l); } };
@@ -75,6 +78,46 @@ for (const [form, file] of [['tiger', 'yuki_tiger'], ['human', 'yuki_human'], ['
 assert(sceneArt('james').includes('data-pic="james"') && sceneArt('james').includes('art/pic/james.webp'), 'v0.11.24: a key with a picture draws the picture');
 assert(SCENES.arrival.art === 'james', 'v0.11.24: the arrival shows James');
 assert(!sceneArt('forest_dawn').includes('data-pic') && sceneArt('forest_dawn').startsWith('<svg'), 'v0.11.24: a key without a picture keeps its code art');
+
+// v0.11.25: the item names the part test fills (tests/lib/items.mjs) are exactly the game's ITEMS
+{
+    const { PROLOGUE_ITEM_IDS } = await import('./lib/items.mjs');
+    const { NEW_ITEMS } = await import('../js/story/common.js'); const { ACT1_ITEMS } = await import('../js/story/act1_common.js');
+    const mine = [...new Set([...PROLOGUE_ITEM_IDS, ...Object.keys(NEW_ITEMS), ...Object.keys(ACT1_ITEMS)])].sort().join(' ');
+    assert(mine === Object.keys(ITEMS).sort().join(' '), 'v0.11.25: tests/lib/items.mjs names exactly the game\'s items');
+}
+// v0.11.25 (c): gives() names only real items, so a quoted non-item inside addItem (the 'tiger' in "Let Yuki hunt") is not one
+for (const sc of Object.values(SCENES)) for (const c of sc.choices || []) for (const id of gives(c)) assert(!!ITEMS[id], `v0.11.25: ${sc.id}: "${c.text}" gives ${id}, a real item`);
+const yhunt = SCENES.lf_hunt.choices.find((c) => c.text.startsWith('Let Yuki hunt'));
+assert(gives(yhunt).slice().sort().join(' ') === 'hare_raw venison', `v0.11.25: "Let Yuki hunt" gives hare or venison (now: ${gives(yhunt).join(' ')})`);
+{
+    const g = ensureBars(newGame(7)); g.scene = 'lf_hunt'; g.minutes = 3 * 1440 + 8 * 60;
+    const has = () => sceneView(g, SCENES).choices.some((c) => c.label.startsWith('Let Yuki hunt'));
+    assert(has(), 'v0.11.25: "Let Yuki hunt" shows with room in the stock');
+    g.inventory.hare_raw = itemCap('hare_raw'); assert(has(), 'v0.11.25: "Let Yuki hunt" still shows with only the hares full');
+    g.inventory.venison = itemCap('venison'); assert(!has(), 'v0.11.25: "Let Yuki hunt" hides when hares and venison are both full');
+}
+
+// v0.11.25 (b): the Blackroot camp stakes hurt the first night attacker for one night (like the prologue's), from the owner's 03:07 camp save
+{
+    const raw = readFileSync('saves/2026-11-07-0307-incremental-bl_camp.txt', 'utf8').trim();
+    const base = deserialize(gunzipSync(Buffer.from(raw.slice(5), 'base64')).toString('utf8'));
+    assert(base.scene === 'bl_camp' && base.flags.bl_stakes_night === true, 'v0.11.25: the 03:07 save is at the camp with the stakes up');
+    const fight = SCENES.bl_night_event.choices.find((c) => c.text === 'Fight.');
+    const enc = (kind, stakes, hard) => { const g = structuredClone(base); g.flags.bl_ev = kind; g.flags.bl_stakes_night = stakes; g.flags.stakes_hard = hard; return fight.combat(g); };
+    // X2: the cut comes after the scaling and the ally floor, so it is exact: max(1, hp − 3), max(1, hp − 4) with bone-meal
+    const LINE = { wolves: 'off the stakes already bleeding', drowned: 'walks onto the stakes', serpent: 'comes over the stakes', hawks: 'dives too low over the stakes' };
+    for (const kind of ['wolves', 'drowned', 'serpent', 'hawks']) {
+        const off = enc(kind, false, false), on = enc(kind, true, false), hard = enc(kind, true, true);
+        const h0 = off.enemies[0].hp;
+        assert(on.enemies[0].hp === Math.max(1, h0 - 3) && hard.enemies[0].hp === Math.max(1, h0 - 4), `v0.11.25: ${kind}: the stakes cut the first attacker exactly (${h0} → ${on.enemies[0].hp}, ${hard.enemies[0].hp} with bone-meal)`);
+        if (kind === 'serpent') assert(hard.enemies[0].hp < on.enemies[0].hp, 'v0.11.25: serpent: bone-meal cuts more than plain stakes');
+        assert(JSON.stringify(on.enemies.slice(1)) === JSON.stringify(off.enemies.slice(1)), `v0.11.25: ${kind}: the others are untouched`);
+        assert(on.intro.includes(LINE[kind]) && !off.intro.includes('stakes'), `v0.11.25: ${kind}: its own stakes line, only with the stakes up`);
+    }
+    const g = structuredClone(base); g.scene = 'bl_morning'; SCENES.bl_morning.enter(g);
+    assert(g.flags.bl_stakes_night === false, 'v0.11.25: the stakes last one night (cleared in the morning)');
+}
 
 console.log(`${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

@@ -52,11 +52,9 @@
       "ya_grudge": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
       "ya_price": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
       "yk_kissed": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
-      "foundation_day": "the day of the Foundation breakthrough, kept for later (reference.md: set, not read yet)",
-      "bl_stakes_night": "KNOWN BUG (v0.11.22): the Blackroot camp stakes do nothing; its own push (balance: numbers first)"
+      "foundation_day": "the day of the Foundation breakthrough, kept for later (reference.md: set, not read yet)"
     },
     "flagsUnset": {
-      "lu_disgraced": "KNOWN BUG (v0.11.22): never set, so Lu Han always stands with Shen Qiu unless the prologue ended 'fought'; its own push",
       "gao_dead": "never set by the game (the scene gao_dead sets gao_broken); tests/part.test.mjs sets it as a starting state; its own decision"
     },
     "storage": {

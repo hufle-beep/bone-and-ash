@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.24 | (this push) | The first generated pictures (8 art keys, `art/pic/`, recipes in `tools/art/`), the palette check. Art only; the bot stats unchanged (0 drift); same save state as 0.11.19 (art keys are not in saves). |
+| 0.11.25 | (this push) | The three leftover-check bugs fixed (the Blackroot stakes work, one night; `gives()` real items only; the dead `lu_disgraced` check out); the baseline updated (the night serpent). Same save state as 0.11.19 (`bl_stakes_night` is an existing flag; an old save with a stale `true` gets the cut once, on its next Blackroot night). |
+| 0.11.24 | `dc3bba7` | The first generated pictures (8 art keys, `art/pic/`, recipes in `tools/art/`), the palette check. Art only; the bot stats unchanged (0 drift); same save state as 0.11.19 (art keys are not in saves). |
 | 0.11.23 | `67a97f2` | The clean-up (dead code, an unused item, 12 unread flags no longer written), the leftover check strict. The bot stats byte-identical to 0.11.22; same save state as 0.11.19 (saves that hold the dropped flags keep them; nothing reads them; no save holds `palisade_stake`). |
 | 0.11.22 | `55ff818` | The leftover check (log only), the bots' flag / item / choice record, `.gitignore`. Tests and tools only; same save state as 0.11.19. |
 | 0.11.21 | `bd783e8` | The test suite checked and strengthened (mutation-tested, real browser taps, the noise-scaled drift line). Tests and tools only; same save state as 0.11.19. |

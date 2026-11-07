@@ -3,6 +3,8 @@
 // Other parts' entry scenes count as exits, so parts can be written in parallel.
 import { newGame, ensureBars, startCombat, combatStep, skillCheck, jamesHpMax } from '../js/core/game.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
+import { fillItemNames } from './lib/items.mjs';
+fillItemNames(); // v0.11.25: the item names, so gives() (the full-stock hide, the hauls) works in the walks
 const part = process.argv[2];
 const NAME = { fallout: 'FALLOUT', blackroot: 'BLACKROOT', heart: 'HEART', return: 'RETURN' }[part];
 const ENTRY = { fallout: 'fo_start', blackroot: 'bl_start', heart: 'ht_start', return: 'rt_start' }[part];
