@@ -183,6 +183,13 @@ def comfort(pg, url):
 def rest_places(pg, url):
     fresh(pg, url, "localStorage.clear(); localStorage.setItem('boneash.speed','1')")
     if pg.query_selector('button.card.med'): fails.append('the arrival shows a Meditate card (v0.11.14: resting places only)')
+    # v0.11.24: the arrival plate shows James's picture (art/pic/james.webp), and the file really loads
+    pic = pg.evaluate("""async () => { const s = document.querySelector('.plate svg[data-pic]'); if (!s) return null;
+        const href = s.querySelector('image')?.getAttribute('href'); const im = new Image(); im.src = href;
+        try { await im.decode(); } catch (e) { return [s.dataset.pic, href, 0]; } return [s.dataset.pic, href, im.naturalWidth]; }""")
+    if not pic: fails.append('the arrival plate shows no picture (v0.11.24: data-pic)')
+    elif pic[0] != 'james' or pic[2] != 800: fails.append(f'the arrival picture is wrong or did not load: {pic}')
+    else: notes.append('the arrival plate shows James\'s picture (800 px, loaded)')
     s1 = (ROOT / 'saves/v0.8.5-day1-stream.json').read_text()
     fresh(pg, url, "s => { localStorage.clear(); localStorage.setItem('boneash.auto', s); }", s1)
     add = pg.query_selector('.cardwrap:has(button.card.med) button.qadd')

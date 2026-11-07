@@ -45,6 +45,7 @@ const jobs = [
     { name: "engine's own formula tests", key: 'engine', cmd: node('tests/engine.test.mjs') },
     { name: 'old saves (saves/)', key: 'saves', cmd: node('tests/saves.test.mjs') },
     { name: 'data integrity (ids, markers)', key: 'data', cmd: node('tests/data.test.mjs') },
+    { name: 'picture palette (art/pic)', key: 'palette', cmd: ['python3', ['-I', 'tools/art/palette_check.py']] }, // v0.11.24
     { name: 'content lint (old names, duplicate labels)', key: 'lint', cmd: node('tools/lint.mjs') }, // v0.11.21: those two strict
     { name: 'test tools (shard merge, 1 = 2 workers, job list)', key: 'tools', cmd: node('tests/tools.test.mjs') }, // v0.11.21
     ...['fallout', 'blackroot', 'heart', 'return'].map((p) => ({ name: `Act 1 part: ${p}`, key: `part:${p}`, cmd: node('tests/part.test.mjs', p) })),

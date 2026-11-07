@@ -1,0 +1,540 @@
+{
+ "note": "v0.11.24: how every picture in art/pic was made (owner picks 2026-11-07). Run each step's 'op' in order on the owner's ComfyUI (tools/art/workflow.json; Z-Image-Turbo bf16, 8 steps, cfg 1, res_multistep / simple, shift 3). Masks are polygons in source pixels, white = repaint, blurred by 'blur' px; tools/art/masks.py draws them. Then tools/art/palette.py cuts the last file to the palette at 800x500 (--gold for Yuki). Originals: the owner's ComfyUI output folder, boneash/.",
+ "masks": {
+  "shen_eyes_big": {
+   "size": [
+    768,
+    512
+   ],
+   "blur": 14,
+   "polys": [
+    [
+     [
+      96,
+      160
+     ],
+     [
+      672,
+      160
+     ],
+     [
+      672,
+      352
+     ],
+     [
+      96,
+      352
+     ]
+    ]
+   ],
+   "for_crop": [
+    576,
+    130,
+    192,
+    128
+   ]
+  },
+  "shen_eyes_small": {
+   "size": [
+    192,
+    128
+   ],
+   "blur": 4,
+   "polys": [
+    [
+     [
+      24,
+      40
+     ],
+     [
+      168,
+      40
+     ],
+     [
+      168,
+      88
+     ],
+     [
+      24,
+      88
+     ]
+    ]
+   ]
+  },
+  "ya_chest": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 14,
+   "polys": [
+    [
+     [
+      470,
+      540
+     ],
+     [
+      870,
+      540
+     ],
+     [
+      880,
+      800
+     ],
+     [
+      460,
+      800
+     ]
+    ]
+   ]
+  },
+  "jackals_james": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 12,
+   "polys": [
+    [
+     [
+      300,
+      70
+     ],
+     [
+      580,
+      70
+     ],
+     [
+      580,
+      320
+     ],
+     [
+      300,
+      320
+     ]
+    ],
+    [
+     [
+      150,
+      240
+     ],
+     [
+      810,
+      240
+     ],
+     [
+      810,
+      520
+     ],
+     [
+      940,
+      770
+     ],
+     [
+      260,
+      770
+     ],
+     [
+      150,
+      420
+     ]
+    ]
+   ],
+   "holes": [
+    [
+     [
+      590,
+      590
+     ],
+     [
+      790,
+      590
+     ],
+     [
+      790,
+      770
+     ],
+     [
+      590,
+      770
+     ]
+    ]
+   ]
+  },
+  "full": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 0,
+   "polys": [
+    [
+     [
+      -50,
+      -50
+     ],
+     [
+      1330,
+      -50
+     ],
+     [
+      1330,
+      850
+     ],
+     [
+      -50,
+      850
+     ]
+    ]
+   ]
+  },
+  "crow44": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 8,
+   "polys": [
+    [
+     [
+      835,
+      465
+     ],
+     [
+      965,
+      465
+     ],
+     [
+      965,
+      598
+     ],
+     [
+      835,
+      598
+     ]
+    ]
+   ]
+  },
+  "armA_big": {
+   "size": [
+    768,
+    576
+   ],
+   "blur": 18,
+   "polys": [
+    [
+     [
+      135,
+      90
+     ],
+     [
+      450,
+      90
+     ],
+     [
+      450,
+      375
+     ],
+     [
+      135,
+      375
+     ]
+    ]
+   ]
+  },
+  "armA_small": {
+   "size": [
+    256,
+    192
+   ],
+   "blur": 6,
+   "polys": [
+    [
+     [
+      45,
+      30
+     ],
+     [
+      150,
+      30
+     ],
+     [
+      150,
+      125
+     ],
+     [
+      45,
+      125
+     ]
+    ]
+   ]
+  },
+  "armB_big": {
+   "size": [
+    768,
+    576
+   ],
+   "blur": 18,
+   "polys": [
+    [
+     [
+      165,
+      90
+     ],
+     [
+      465,
+      90
+     ],
+     [
+      465,
+      396
+     ],
+     [
+      165,
+      396
+     ]
+    ]
+   ]
+  },
+  "armB_small": {
+   "size": [
+    256,
+    192
+   ],
+   "blur": 6,
+   "polys": [
+    [
+     [
+      55,
+      30
+     ],
+     [
+      155,
+      30
+     ],
+     [
+      155,
+      132
+     ],
+     [
+      55,
+      132
+     ]
+    ]
+   ]
+  }
+ },
+ "pictures": {
+  "yuki_human": [
+   {
+    "op": "generate",
+    "file": "blend_yuki_s22",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A slender young woman with very long straight white hair streaming in the wind, white cat ears, a long white cat tail, gold cat eyes with slit pupils and a dry unimpressed look, wearing a plain black slip dress and a thin red cord choker, upper-body portrait against a black night sky with a few white stars.",
+    "seed": 22,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "yuki_cat": [
+   {
+    "op": "generate",
+    "file": "fix2_yukicat_s55",
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. The picture shows only an animal and no people. A small elegant white cat with snow-white fur, gold eyes with slit pupils and a thin red cord collar, sitting upright on a rock with her tail curled around her paws, looking at the viewer with dry disdain, a black night sky with a few white stars behind her.",
+    "seed": 55,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "yuki_tiger": [
+   {
+    "op": "generate",
+    "file": "fix_yukitiger_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair drawn as sharp locks separated by thin gaps, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A huge white great cat the size of a tiger, snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck, prowling along a thick branch high in a dark ancient forest canopy, powerful and graceful.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "mei_lin": [
+   {
+    "op": "generate",
+    "file": "blend_mei_s22",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A village herbalist woman in her mid-twenties with a teasing smile, long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, upper-body portrait in front of a paper wall with drifting leaves.",
+    "seed": 22,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "ya": [
+   {
+    "op": "generate",
+    "file": "fix_ya_s22",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A tall rangy wild young woman with a fierce grin, long tangled black hair with twigs caught in it, a thin red scar across her cheek, a jacket patched together from animal skins and a necklace of teeth, holding over her shoulder a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, no metal at all, upper-body portrait at the dark edge of a forest.",
+    "seed": 22,
+    "width": 1280,
+    "height": 800
+   },
+   {
+    "op": "inpaint",
+    "file": "ya_bust_s55",
+    "source": "fix_ya_s22",
+    "mask": "ya_chest",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A tall wild young woman with a fierce grin and a curvy figure with a full, large bust under her pale shirt and her jacket patched from animal skins with a fur collar, fully clothed, a necklace of teeth, upper-body portrait at the dark edge of a forest.",
+    "seed": 55,
+    "denoise": 0.6
+   }
+  ],
+  "shen_qiu": [
+   {
+    "op": "generate",
+    "file": "fix_shen_s55",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A very old Chinese sect elder with a grave courteous expression, long white hair in a topknot under a small black crown, a long white beard, deep crimson robes with very wide sleeves joined in front of him so that his hands are completely hidden inside the sleeves, no hands visible, a white lotus embroidered on the chest of the robe, upper-body portrait on a misty mountain road.",
+    "seed": 55,
+    "width": 1280,
+    "height": 800
+   },
+   {
+    "op": "detail_inpaint",
+    "file": "shen_shut_s2",
+    "source": "fix_shen_s55",
+    "crop": [
+     576,
+     130,
+     192,
+     128
+    ],
+    "scale": 4,
+    "mask": [
+     "shen_eyes_big",
+     "shen_eyes_small"
+    ],
+    "prompt": "A close-up of the face of a very old serene Chinese sage drawn in elegant black and white manga ink style with clean crisp lines. His eyes are fully shut in calm meditation: each closed eye is drawn as a single thin downward-curving black line of the shut eyelid with a few short lashes, no eyeball, no iris and no white of the eye visible, the eyelids completely closed. Thin white eyebrows above.",
+    "seed": 2,
+    "denoise": 0.85
+   }
+  ],
+  "james": [
+   {
+    "op": "generate",
+    "file": "james3_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, a tall lean elegant figure with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. An upper-body portrait of a man in his early forties with SHORT pale blond hair cut short above his ears and collar, drawn in light grey ink, a short neat full beard in the same pale blond light grey, thin rectangular metal-framed glasses, no red in his hair or beard, wearing a long white lab coat with the sleeves rolled up to his elbows over a dark shirt, with a calm deadpan expression, his arms folded across his chest so both forearms show. Both bare forearms carry small black ink tattoos on the skin: on his left forearm a circular ouroboros, a dragon-serpent biting its own tail; on his right forearm a tree with curling roots and a small raven silhouette, with a few red brush streaks behind it. The raven exists only as part of the tattoo; there are no birds in the scene. A small white cat with gold eyes and a red cord collar sits on his shoulder. Behind him is a misty pine forest.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   },
+   {
+    "op": "inpaint",
+    "file": "james3_s44_nocrow_s7",
+    "source": "james3_s44",
+    "mask": "crow44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, a tall lean elegant figure with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. An upper-body portrait of a man in his early forties with SHORT pale blond hair cut short above his ears and collar, drawn in light grey ink, a short neat full beard in the same pale blond light grey, thin rectangular metal-framed glasses, no red in his hair or beard, wearing a long white lab coat with the sleeves rolled up to his elbows over a dark shirt, his arms folded across his chest. The white sleeve of his lab coat and the misty pine forest behind him. There are no birds and no animals here.",
+    "seed": 7,
+    "denoise": 1.0
+   },
+   {
+    "op": "detail_inpaint",
+    "file": "tatA_s3",
+    "source": "james3_s44_nocrow_s7",
+    "crop": [
+     470,
+     590,
+     256,
+     192
+    ],
+    "scale": 3,
+    "mask": [
+     "armA_big",
+     "armA_small"
+    ],
+    "prompt": "A close-up of a man's bare forearm drawn in elegant high-contrast black and white manga ink style with clean crisp lines, the rolled-up sleeve of a white lab coat nearby. On the skin of the forearm is a black ink tattoo: a slender tree with curling swirling branches and long curling roots, a small black raven seen from the side perched on one of its branches with folded wings, and a few bright red brush streaks and dots behind the tree in trash polka style. The tattoo sits flat on the skin.",
+    "seed": 3,
+    "denoise": 0.85
+   },
+   {
+    "op": "detail_inpaint",
+    "file": "tatB_s2",
+    "source": "james3_s44_nocrow_s7",
+    "crop": [
+     660,
+     590,
+     256,
+     192
+    ],
+    "scale": 3,
+    "mask": [
+     "armB_big",
+     "armB_small"
+    ],
+    "prompt": "A close-up of a man's bare forearm drawn in elegant high-contrast black and white manga ink style with clean crisp lines, the rolled-up sleeve of a white lab coat nearby. On the skin of the forearm is a black ink tattoo of an ouroboros: a scaled dragon-serpent bent into a closed circle, its open jaws biting the tip of its own tail at the top of the ring, the ring hollow in the middle. The tattoo sits flat on the skin.",
+    "seed": 2,
+    "denoise": 0.85
+   },
+   {
+    "op": "local",
+    "file": "james_ouro_raw",
+    "note": "OpenCV on this side: tatA_s3 with the box (690,608)-(830,740) of tatB_s2 feathered in (6 px); the S-shaped snake lifted (dark pixels < 165 inside (728,622)-(794,716), the bottom 8 rows and right 4 columns left out, cv2.inpaint TELEA r6; two crumbs at (728,699)-(754,713) and (784,676)-(799,714), < 150, r5); then tools/art/ouroboros.py IN OUT 761 669 26 22 -8 (thickness 0.32)."
+   },
+   {
+    "op": "detail_inpaint",
+    "file": "ouro_ink_s3",
+    "source": "james_ouro_raw",
+    "crop": [
+     660,
+     590,
+     256,
+     192
+    ],
+    "scale": 3,
+    "mask": [
+     "armB_big",
+     "armB_small"
+    ],
+    "prompt": "A close-up of a man's bare forearm drawn in elegant high-contrast black and white manga ink style with clean crisp lines, the rolled-up sleeve of a white lab coat nearby. On the skin is a black ink tattoo of an ouroboros: a scaled dragon-serpent forming a closed circle, its open jaws biting its own tail at the top of the ring, finely drawn scales along its body. The tattoo sits flat on the skin.",
+    "seed": 3,
+    "denoise": 0.45
+   },
+   {
+    "op": "local",
+    "file": "james_final",
+    "note": "the wrist edge over the ouroboros put back: polygon (680,624) (760,616) (764,634) (748,641) (680,646) from james3_s44_nocrow_s7, feathered 2.5 px, over ouro_ink_s3."
+   }
+  ],
+  "jackals": [
+   {
+    "op": "generate",
+    "file": "blend_jackals_s22",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide night action scene in a forest clearing: sharp white bone stakes stand upright in the ground in a ring around the camp. A tall lean man in a long white lab coat lunges forward and throws three thin white bone darts that fly from his hand straight at a lean ash-grey jackal with too many teeth and glowing red eyes, which leaps at him against a huge pale full moon. A second jackal crouches snarling on the ground. A small white cat with gold eyes arches her back at his feet. Dynamic diagonal composition.",
+    "seed": 22,
+    "width": 1280,
+    "height": 800
+   },
+   {
+    "op": "inpaint",
+    "file": "jackals5_s44_d65",
+    "source": "blend_jackals_s22",
+    "mask": "full",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide night action scene in a forest clearing under a single huge pale full moon. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, lunges forward and has just thrown three thin white bone darts that streak through the air towards a lean ash-grey jackal with bared teeth and glowing red eyes, which leaps at him against the moon. A second ash-grey jackal crouches snarling low on the right. A small white cat with gold eyes stands near his feet. White bone stakes stand in the ground on the left. Exactly two jackals, no birds.",
+    "seed": 44,
+    "denoise": 0.65
+   }
+  ]
+ },
+ "palette": {
+  "gold": [
+   "yuki_human",
+   "yuki_cat",
+   "yuki_tiger"
+  ],
+  "command": "python3 -I tools/art/palette.py OUT_DIR [--gold] LAST_FILE.png",
+  "rename": {
+   "blend_yuki_s22": "yuki_human",
+   "fix2_yukicat_s55": "yuki_cat",
+   "fix_yukitiger_s44": "yuki_tiger",
+   "blend_mei_s22": "mei_lin",
+   "james_final": "james",
+   "ya_bust_s55": "ya",
+   "shen_shut_s2": "shen_qiu",
+   "jackals5_s44_d65": "jackals"
+  }
+ }
+}

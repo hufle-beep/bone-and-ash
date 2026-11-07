@@ -610,9 +610,33 @@ function scene2(key, id) {
     return fix(`${open}<rect width="400" height="250" fill="#ece8df"/>${base}${fg}${vg}</svg>`);
 }
 
+/**
+ * v0.11.24 (owner picks A, R1, F1, K1): generated pictures (art/pic, WebP 800×500, cut to the palette; recipes in tools/art/recipes.json).
+ * A key in this table shows its picture; every other key keeps its code art. A function picks by Yuki's form ('cat', 'tiger', 'human').
+ */
+export const PICTURES = {
+    yuki_human: 'yuki_human',
+    yuki_close: (form) => ({ human: 'yuki_human', tiger: 'yuki_tiger' }[form] || 'yuki_cat'),
+    yuki_tiger: 'yuki_tiger',
+    mei_lin: 'mei_lin',
+    ya_close: 'ya',
+    elder_arrives: 'shen_qiu',
+    jackals: 'jackals',
+    james: 'james',
+};
+/** The picture file for an art key in Yuki's current form, or '' when the key has none (code art). */
+export function pictureOf(key, form = C2.getYukiForm()) {
+    const p = PICTURES[key];
+    if (!p) return '';
+    return `art/pic/${typeof p === 'function' ? p(form) : p}.webp`;
+}
+const pictureSvg = (key, id, file) => `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${id.replace(/_/g, ' ')}" preserveAspectRatio="xMidYMid slice" data-pic="${key}"><rect width="400" height="250" fill="#111010"/><image href="${file}" x="0" y="0" width="400" height="250" preserveAspectRatio="xMidYMid slice"/></svg>`;
+
 /** SVG markup for a scene's art key (unknown keys get a quiet forest). */
 export function sceneArt(key) {
     const id = String(key || 'x').replace(/\W/g, '');
+    const pic = pictureOf(key);
+    if (pic) return pictureSvg(key, id, pic);
     if (STYLE === 'clamp2') return scene2(key, id);
     const open = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${id.replace(/_/g, ' ')}" preserveAspectRatio="xMidYMid slice">`;
     if (PORTRAITS[key]) {

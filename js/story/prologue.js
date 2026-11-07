@@ -108,7 +108,7 @@ const yukiMerLu = (g) => { const n = g.yuki.primaries ?? 12; return n >= 12 ? 'A
 export const SCENES = {
     /* ================= DAY 1 ================= */
     arrival: {
-        id: 'arrival', title: 'Bone and Ash', art: 'forest_dawn', place: 'Unknown forest',
+        id: 'arrival', title: 'Bone and Ash', art: 'james', place: 'Unknown forest',
         text: `Three days ago you defended a doctorate in mycology and computational biology. Yesterday you celebrated. This morning, as far as you can reconstruct it, you went into the resonance lab to "just check one reading", Yuki asleep in the hood of your lab coat, and the spatial seed chamber decided to have opinions.
 
 Now you are lying on your back in a forest made of black bark and grey moss, under a sky the colour of a bruise, and something small and white is standing on your sternum, staring at you with the deep, personal disappointment only a cat can manage.

@@ -1,7 +1,8 @@
 // Run: node tests/data.test.mjs — data integrity (v0.11.7, from Selene's data.test.js).
 // Every id the game refers to exists: task-hub scenes and menus, form ids on story choices, items given or needed,
 // and every data-* marker in the page has code that reads it (a renamed marker once stuck every Selene player).
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
+import { PICTURES, pictureOf, sceneArt, setArtState } from '../js/art/art.js';
 import { SCENES, ITEMS } from '../js/story/prologue.js';
 import { TASK_HUBS } from '../js/story/task_hubs.js';
 import { FORM_LINES } from '../js/core/forms.js';
@@ -49,6 +50,31 @@ const markers = new Set([...(main + html).matchAll(/data-([a-z][a-z-]*)=/g)].map
 const camel = (s) => s.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
 for (const k of markers) assert(main.includes(`dataset.${camel(k)}`) || main.includes(`[data-${k}`), `data-${k} is handled in main.js`);
 assert(markers.size >= 20, `data markers found: ${markers.size}`);
+
+// 5. v0.11.24: the generated pictures (art/pic): each file exists, is offline in sw.js, stays in the size budget; each key is used by a scene
+const swList = readFileSync('sw.js', 'utf8');
+const artKeys = new Set();
+for (const s of Object.values(SCENES)) { if (typeof s.art === 'string') artKeys.add(s.art); else if (typeof s.art === 'function') for (const m of s.art.toString().matchAll(/\?\s*'([a-z_0-9]+)'|:\s*'([a-z_0-9]+)'/g)) artKeys.add(m[1] || m[2]); } // a function's returned keys only (after ? or :), not every quoted word
+const picFiles = new Set();
+for (const key of Object.keys(PICTURES)) {
+    assert(artKeys.has(key), `v0.11.24: picture key ${key} is an art key some scene shows`);
+    for (const form of ['cat', 'tiger', 'human']) picFiles.add(pictureOf(key, form));
+}
+let picBytes = 0;
+for (const f of picFiles) {
+    assert(existsSync(f), `v0.11.24: ${f} exists`);
+    if (!existsSync(f)) continue;
+    const b = statSync(f).size; picBytes += b;
+    assert(b <= 150 * 1024, `v0.11.24: ${f} is at most 150 KB (${Math.round(b / 1024)} KB)`);
+    assert(swList.includes(`'${f}'`), `v0.11.24: ${f} is in sw.js FILES (offline)`);
+}
+assert(picBytes <= 8 * 1024 * 1024, `v0.11.24: all pictures together at most 8 MB (${Math.round(picBytes / 1024)} KB)`);
+assert(readdirSync('art/pic').filter((f) => f.endsWith('.webp')).every((f) => picFiles.has(`art/pic/${f}`)), 'v0.11.24: every file in art/pic is a picture some key shows');
+assert(pictureOf('yuki_close', 'cat') === 'art/pic/yuki_cat.webp' && pictureOf('yuki_close', 'tiger') === 'art/pic/yuki_tiger.webp' && pictureOf('yuki_close', 'human') === 'art/pic/yuki_human.webp', 'v0.11.24: yuki_close follows Yuki\'s form');
+for (const [form, file] of [['tiger', 'yuki_tiger'], ['human', 'yuki_human'], ['cat', 'yuki_cat']]) { setArtState({ yukiForm: form }); assert(sceneArt('yuki_close').includes(`art/pic/${file}.webp`), `v0.11.24: with Yuki in ${form} form the yuki_close plate shows ${file}`); }
+assert(sceneArt('james').includes('data-pic="james"') && sceneArt('james').includes('art/pic/james.webp'), 'v0.11.24: a key with a picture draws the picture');
+assert(SCENES.arrival.art === 'james', 'v0.11.24: the arrival shows James');
+assert(!sceneArt('forest_dawn').includes('data-pic') && sceneArt('forest_dawn').startsWith('<svg'), 'v0.11.24: a key without a picture keeps its code art');
 
 console.log(`${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
