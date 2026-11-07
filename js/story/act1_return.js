@@ -16,7 +16,9 @@ const seeded = (g) => !!g.flags.seed || hasItem(g, 'seed_sliver');
 const both = (g) => likesMei(g) && likesYa(g);
 const trioReady = (g) => both(g) && trio(g) >= 3;
 const luHanHere = (g) => g.flags.ending !== 'fought';
-const toHour = (g, h) => { const p = clockParts(g.minutes); if (dayHour(g) < h) g.minutes = (p.day - 1) * 1440 + h * 60; }; // v0.11.37: after midnight (24+) the hour has passed
+// v0.11.37: after midnight (24+) the hour has passed. v0.11.47 (N1, the Fable review of v0.11.46): an evening hour is not jumped to
+// before 06:00 (04:00–05:59, or a night pushed through: it is still the night; it used to skip 14–18 h); the mornings (6, 8) as before
+const toHour = (g, h) => { const p = clockParts(g.minutes); const dh = dayHour(g); if (dh < h && (h < 12 || dh >= 6)) g.minutes = (p.day - 1) * 1440 + h * 60; };
 /** Preparations that blunt the Elder (count). */
 const preps = (g) => (g.flags.a1_palisade ? 1 : 0) + (g.flags.a1_militia ? 1 : 0) + (g.flags.grove_attuned ? 1 : 0) + (g.flags.council_unity ? 1 : 0);
 

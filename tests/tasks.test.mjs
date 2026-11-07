@@ -1383,6 +1383,53 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
         assert(g.minutes === want, `bl_camp entered at ${hh}:${String(mm).padStart(2, '0')}: ${jump ? 'to 19:00' : 'the clock stays'} (moved ${g.minutes - m0} min)`);
     }
 }
+// v0.11.47 (N1, owner 19:39 / 19:58 / 20:01 / 20:03): the Root Road's "Eat with the others." (the Manners beat) in place of "Eat something."
+// until it has played; "Train." gone once the day's drills are used up; the return camps' evening clock; gather Qi locked at Fed 0
+{
+    const { BLACKROOT } = await import('../js/story/act1_blackroot.js');
+    const T = await import('../js/core/tasks.js');
+    const rr = () => { const g = ensureBars(newGame(4701)); g.scene = 'rr_hub'; g.minutes = 11 * 1440 + 15 * 60; g.flags.bl_region = 'rr'; g.flags.bl_day = 1; g.james.satiety = 60; g.inventory.hare_raw = 5; return g; };
+    const labels = (g) => sceneView(g, SCENES).choices.map((c) => c.label);
+    const a = rr();
+    assert(labels(a).includes('Eat with the others.') && !labels(a).includes('Eat something.'), `N1: on the Root Road "Eat with the others." stands in for "Eat something." until Manners has played (${labels(a).join(' | ')})`);
+    assert(SCENES.rr_hub.choices[1].text === 'Eat with the others.' && SCENES.rr_hub.choices[1].to === 'ya_mocks', 'N1: it keeps the old midday meal\'s place (index 1) and opens Manners');
+    const eatI = sceneView(a, SCENES).choices.find((c) => c.label === 'Eat with the others.').index; const f0 = a.james.satiety, hare0 = a.inventory.hare_raw;
+    choose(a, SCENES, eatI);
+    assert(a.scene === 'ya_mocks' && a.flags.ya_mocked && a.james.satiety > f0 && a.inventory.hare_raw === hare0, 'N1: Manners plays, James eats their cakes (no food from the hammerspace)');
+    a.scene = 'rr_hub';
+    assert(labels(a).includes('Eat something.') && !labels(a).includes('Eat with the others.'), 'N1: after Manners the ordinary "Eat something." is back');
+    const b = rr(); b.inventory = {}; assert(labels(b).includes('Eat with the others.'), 'N1: "Eat with the others." needs no food of James\'s own');
+    const c = rr(); c.james.satiety = 90; assert(!labels(c).includes('Eat with the others.'), 'N1: not offered at Fed 85 or more, like eating');
+    const d = rr(); d.scene = 'dw_hub'; d.flags.bl_region = 'dw'; assert(labels(d).includes('Eat something.'), 'N1: the other Blackroot camps keep "Eat something."');
+    // Train
+    const t = rr(); t.james.skills['Convergence Use'] = { tier: 1, level: 6, xp: 0 }; ensureBars(t);
+    assert(labels(t).includes('Train.'), 'T1: Train shows with drills left');
+    for (const k of ['bt_ya', 'bt_dart', 'bt_needle']) markDaily(t, k);
+    assert(labels(t).includes('Train.'), 'T1: one drill left (footwork with Yuki): Train still shows');
+    markDaily(t, 'bt_yuki');
+    assert(!labels(t).includes('Train.'), 'T1: all four drills done today: Train is gone');
+    const u = rr(); u.james.skills['Convergence Use'] = { tier: 1, level: 1, xp: 0 }; ensureBars(u); for (const k of ['bt_ya', 'bt_needle', 'bt_yuki']) markDaily(u, k);
+    assert(!labels(u).includes('Train.'), 'T1: only darts left and James can\'t sing darts yet: Train is gone');
+    assert(!T.taskCards(t, SCENES).some((x) => x.status === 'open' && /bl_train|Train/.test(x.label + x.id)), 'T1: no Train card on the task screen either');
+    // the return camps' evening clock
+    const { RETURN } = await import('../js/story/act1_return.js');
+    const camp = Object.values(RETURN).find((x) => x.id === 'rt_camp');
+    for (const [hh, mm, jump] of [[4, 30, false], [1, 0, false], [15, 0, true]]) {
+        const g = ensureBars(newGame(4702)); g.minutes = 19 * 1440 + hh * 60 + mm; const m0 = g.minutes; camp.enter(g);
+        assert(g.minutes === (jump ? 19 * 1440 + 19 * 60 : m0), `N1: rt_camp entered at ${hh}:${String(mm).padStart(2, '0')}: ${jump ? 'to 19:00' : 'the clock stays'} (moved ${g.minutes - m0} min)`);
+    }
+    const morning = Object.values(RETURN).find((x) => String(x.enter || '').includes('toHour(g, 6)'));
+    const mg = ensureBars(newGame(4703)); mg.minutes = 19 * 1440 + 4 * 60 + 30; morning.enter(mg);
+    assert(clockParts(mg.minutes).hh === 6 && clockParts(mg.minutes).mm === 0, 'N1: a morning toHour (6) still moves 04:30 to 06:00');
+    // gather Qi at Fed 0, and the late tag on a locked sit
+    const q = ensureBars(newGame(4704)); q.scene = 'camp'; q.minutes = 20 * 60; q.james.qi = 1; q.james.satiety = 0;
+    const qc = medCards(q, SCENES).find((x) => x.id === 'med:qi');
+    assert(qc && !qc.open && qc.show && /too hungry/.test(qc.tag) && !qc.task && !taskOpen(q, SCENES, T.QI_TASK), 'N1: gather Qi locked at Fed 0, with the reason');
+    q.james.satiety = 1; assert(medCards(q, SCENES).find((x) => x.id === 'med:qi').open && taskOpen(q, SCENES, T.QI_TASK), 'N1: and open again at Fed 1');
+    const l = ensureBars(newGame(4705)); l.scene = 'camp'; l.minutes = 1440 + 90; l.james.qi = 9;
+    const ls = medCards(l, SCENES).find((x) => x.id === 'med:sit');
+    assert(ls && !ls.open && ls.late && ls.tag === 'ends past 02:00', `N1: a sit short of Qi at 01:30 says "ends past 02:00" (${ls?.tag})`);
+}
 const pctOf = (o, n) => Object.entries(o).sort().map(([k, v]) => `${k} ${((v / n) * 100).toFixed(1)}%`).join(', ');
 console.log(`  tribute, tasks:   ${pctOf(stats.tasks.endings, stats.tasks.games)}`);
 console.log(`  work-card results: ${Object.entries(bands).sort().map(([k, v]) => `${k} ${v}`).join(', ')} · Yuki brought home ${yukiRuns} times`);

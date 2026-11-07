@@ -10,7 +10,7 @@ import { CONDENSE_SIT_COST } from './formulas.js';
 import { goTo, checkDeath, choose, choiceOpen } from './story.js';
 import { btTarget, MER_LINES, lineWindow, lineWait, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
-import { BT_TASK, SIT_TASK, QI_TASK, QI_MINUTES, qiNotFull, sitOpen, merLineTask, merLineChoice, isQueueScreen } from './tasks.js';
+import { BT_TASK, SIT_TASK, QI_TASK, QI_MINUTES, qiNotFull, qiFed, sitOpen, merLineTask, merLineChoice, isQueueScreen } from './tasks.js';
 const hrs = (m) => (m % 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m / 60} h`);
 
 /** No meditating here: urgent moments and screens that are already about it. */
@@ -58,12 +58,13 @@ export function medCards(g, scenes) {
     const qiOk = g.james.qi >= CONDENSE_SIT_COST;
     const sm0 = sitMinutes(g), sm = exMins(g, sm0);
     const sit = { label: `Cultivate: ${sm0 === 60 ? 'an hour' : `${sm0} min`}, ${CONDENSE_SIT_COST} Qi, Saturation +${sitGain(g)}% (${g.james.saturation}%).`, tag: qiOk ? `${CONDENSE_SIT_COST} Qi` : `needs ${CONDENSE_SIT_COST} Qi (you have ${Math.round(g.james.qi * 10) / 10})`, open: qiOk, minutes: sm, ...(qiOk ? {} : { show: true }) }; // v0.11.46 (Q1): short of Qi, it shows locked with the reason
-    if (sit.open && endsLate(g, sm)) Object.assign(sit, LATE);
+    if ((sit.open || sit.show) && endsLate(g, sm)) Object.assign(sit, LATE); // v0.11.47: a sit short of Qi past 02:00 says so too
     if (sitUseless(g)) { /* v0.11.37 (B2): a sit that changes nothing is not offered */ }
     else if (hubSit >= 0) out.push({ ...sit, id: `${g.scene}:${hubSit}`, task: `${g.scene}:${hubSit}` }); // its task id keeps the hub's own chore off the card list even when locked
     else out.push({ ...sit, id: 'med:sit', ...((sit.open || sit.late) && sitOpen(g, scenes) ? { task: SIT_TASK } : {}) }); // v0.11.12: queueable on a task screen with no Cultivate of its own
     if (qiNotFull(g)) { // v0.11.46 (owner 19:26, pick Q1): recover Qi by meditating, an hour at the resting rate
-        const q = { id: 'med:qi', label: `Meditate: gather Qi. (An hour; Qi ${Math.round(g.james.qi * 10) / 10} / ${Math.round(jamesQiMax(g) * 10) / 10}.)`, tag: 'an hour, resting', open: true, minutes: QI_MINUTES, ...(isQueueScreen(g, scenes) ? { task: QI_TASK } : {}) };
+        const fed = qiFed(g); // v0.11.47 (the Fable review of v0.11.46): at Fed 0 there is no regen, so it is locked with the reason
+        const q = { id: 'med:qi', label: `Meditate: gather Qi. (An hour; Qi ${Math.round(g.james.qi * 10) / 10} / ${Math.round(jamesQiMax(g) * 10) / 10}.)`, tag: fed ? 'an hour, resting' : 'too hungry: eat first', open: fed, minutes: QI_MINUTES, ...(fed ? {} : { show: true, reason: 'too hungry: eat first' }), ...(fed && isQueueScreen(g, scenes) ? { task: QI_TASK } : {}) };
         if (endsLate(g, QI_MINUTES)) Object.assign(q, LATE);
         out.push(q);
     }

@@ -116,7 +116,9 @@ export const sitOpen = (g, scenes) => isQueueScreen(g, scenes) && !(TASK_HUBS[g.
 export const QI_TASK = 'qi:next';
 export const QI_MINUTES = 60;
 export const qiNotFull = (g) => g.james.qi < jamesQiMax(g) - 0.05;
-export const qiOpen = (g, scenes) => isQueueScreen(g, scenes) && qiNotFull(g);
+/** v0.11.47: not at Fed 0 (no regen while starving: game.js advance). */
+export const qiFed = (g) => g.james.satiety > 0;
+export const qiOpen = (g, scenes) => isQueueScreen(g, scenes) && qiNotFull(g) && qiFed(g);
 /** v0.11.14: the Meditate cards that can be queued anywhere Meditate shows. */
 export const isMedTask = (id) => id === SIT_TASK || id === BT_TASK || id === QI_TASK || !!lineOfTask(id);
 /** v0.11.14: a screen with a queue: a task screen, or a resting place where Meditate shows (only Meditate cards queue there). */

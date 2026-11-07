@@ -6,6 +6,7 @@
  * Entry 'bl_start' (Day 11). Exit 'ht_start' (Day 16, 06:00). Region in g.flags.bl_region, expedition day in g.flags.bl_day (1–5).
  */
 import { addItem, hasItem, eat, advance, clockParts, d6, awardYukiFightXp, jamesHpMax, condense, dayHour } from '../core/game.js';
+import { hasForm } from '../core/forms.js';
 import { daily, markDaily, eatBest, pantry, foodCount, hour } from './common.js';
 import { encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil } from './act1_common.js';
 
@@ -68,14 +69,16 @@ const nev = (k) => (g) => g.flags.bl_ev === k;
 const FIGHTS = ['wolves', 'drowned', 'serpent', 'hawks'];
 
 /* ---------------- shared hub choices ---------------- */
+/** v0.11.47 (owner 19:39, T1): any of bl_train's once-a-day drills left today (darts only once James can sing them). */
+const trainLeft = (g) => daily('bt_ya')(g) || daily('bt_yuki')(g) || daily('bt_needle')(g) || (daily('bt_dart')(g) && hasForm(g, 'dart'));
 function hubChoices(id) {
     return [
         { text: 'Talk to Mei Lin.', show: (g) => daily('tmei')(g) && !late(g), time: 10, to: 'talk_mei' },
         { text: 'Talk to Ya.', show: (g) => daily('tya')(g) && !late(g), time: 10, to: 'talk_ya' },
-        { text: 'Train.', show: (g) => !late(g), time: 10, to: 'bl_train' },
+        { text: 'Train.', show: (g) => !late(g) && trainLeft(g), time: 10, to: 'bl_train' }, // v0.11.47 (owner 19:39, T1): gone once the day's drills are used up
         { text: 'Cultivate: one sit, 10 Qi toward Saturation.', show: (g) => !late(g), req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`] : []; }, to: id },
         { text: 'Rest an hour.', show: (g) => !late(g), do: (g) => advance(g, 60, { resting: true }).concat(['An hour off your feet. Ya calls it a nap. You call it data collection.']), to: id },
-        { text: 'Eat something.', show: (g) => foodCount(g) > 0 && g.james.satiety < 85, time: 15, do: (g) => eatBest(g, { fire: false }), to: id },
+        { text: 'Eat something.', show: (g) => foodCount(g) > 0 && g.james.satiety < 85 && (id !== 'rr_hub' || !!g.flags.ya_mocked), time: 15, do: (g) => eatBest(g, { fire: false }), to: id }, // v0.11.47: on the Root Road, "Eat with the others." (Manners) comes first
         { text: 'Chew a ghost-gill (+8 HP).', show: (g) => hasItem(g, 'ghost_gill') && g.james.hp < jamesHpMax(g), do: (g) => { addItem(g, 'ghost_gill', -1); g.james.hp = Math.min(jamesHpMax(g), g.james.hp + 8); return ['+8 HP. Still tastes like a cellar.']; }, to: id },
     ];
 }
@@ -121,7 +124,9 @@ By noon you reach the first of the roots: grey-white, smooth as bone, wide as a 
             ? 'The root runs on ahead, wide enough for a cart, rising and falling over the forest floor like the spine of something asleep. Other roots join it from left and right. All of them go the same way.'
             : 'Day two on the Root Road. The roots are thicker here, and warmer. Ya says the road ends today, at the split — and that something lives in the split. She says it the way other people mention the weather.'),
         choices: [
-            { text: 'Stop for the midday meal.', show: (g) => !g.flags.ya_mocked && !late(g), time: 30, to: 'ya_mocks' },
+            // v0.11.47 (owner 20:01): the Manners beat sits behind eating on the Root Road (was "Stop for the midday meal.", the same place in the list):
+            // until it has played this card replaces "Eat something." here; Ya's millet cakes, so no food needed; then the ordinary card is back
+            { text: 'Eat with the others.', show: (g) => !g.flags.ya_mocked && !late(g) && g.james.satiety < 85, time: 30, to: 'ya_mocks' },
             { text: 'Ya has been staring at you for an hour. Ask her what her problem is.', show: (g) => !!g.flags.ya_mocked && !g.flags.ya_sparred && !late(g), time: 10, to: 'ya_fight_start' },
             { text: 'Forage along the roots.', show: (g) => daily('rr_forage')(g) && !late(g), time: 15, to: 'rr_forage' },
             { text: 'Hunt.', show: (g) => daily('rr_hunt')(g) && !late(g), time: 15, to: 'rr_hunt' },
