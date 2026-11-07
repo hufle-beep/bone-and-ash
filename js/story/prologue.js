@@ -67,7 +67,7 @@ const collectorsFight = (g) => {
     const militia = Math.min(2, g.flags.militia || 0) + (g.flags.spears ? 1 : 0);
     const enemies = [
         { name: 'Lu Han', hp: 12, dc: 5, atk: 6, dmg: 5, dr: 1 },
-        ...(g.flags.gao_dead || g.flags.gao_broken || g.flags.gao_turned ? [] : [{ name: 'Gao Feng', hp: g.flags.gao_beaten ? 5 : 8, dc: 4, atk: 5, dmg: 4, dr: 1 }]),
+        ...(g.flags.gao_broken || g.flags.gao_turned ? [] : [{ name: 'Gao Feng', hp: g.flags.gao_beaten ? 5 : 8, dc: 4, atk: 5, dmg: 4, dr: 1 }]),
         
     ].map((e) => grow(e, s, LU_GROWTH));
     // the hunters you drilled hold the others off and wear Lu Han down
@@ -304,7 +304,7 @@ ${(g.flags.forest_day || 1) > 1 ? 'Another night in the Blackroot. Your watch-th
     },
     night_attack: {
         id: 'night_attack', title: 'Ashfangs', art: 'jackals', place: 'Blackroot Wilds — the dry rise',
-        enter: (g) => { const p = clockParts(g.minutes); g.minutes = (p.hh >= 21 ? p.day : p.day - 1) * 1440 + 60 + 20; return []; },
+        enter: (g) => { const p = clockParts(g.minutes); g.minutes = Math.max(g.minutes, (p.hh >= 21 ? p.day : p.day - 1) * 1440 + 60 + 20); /* v0.11.40 (N1): never back (entered after 01:20, the clock stays) */ return []; },
         text: (g) => `${g.flags.watch ? 'The watch-thread yanks you awake a full three seconds before anything happens. Three seconds is a lot.' : 'Yuki\'s claws in your thigh wake you. That, and the smell.'}
 
 ${g.flags.stakes ? 'Something yelps on your bone stakes — one of them is already bleeding.' : ''} Two shapes at the edge of the ${g.flags.fire ? 'firelight' : 'dark'}: grey hides, black lips peeled back from teeth that drip something that smokes when it hits the moss.
@@ -687,7 +687,7 @@ Much later, the lamp is out, the hay is everywhere, and Mei Lin is asleep with h
     /* ================= DAY 3 ================= */
     tribute: {
         id: 'tribute', title: 'The Collectors', art: 'collectors', place: 'Ashfall Hamlet — the tribute post',
-        text: (g) => `They come with the sun: four men in crimson, walking up the road like they own it, because they do. At their head, a tall man in deeper red with a sword on his back and a face as calm as a frozen pond — *Inner Disciple Lu Han*, the whisper goes round. ${g.flags.gao_dead || g.flags.gao_broken ? 'Gao Feng is with them — carried in a litter at the back, his sword arm bound to his chest, his face grey. He sees you and says nothing. His eyes say everything.' : `Beside him, ${g.flags.gao_beaten ? 'bandaged, his face a mask of cold, formal hatred' : 'his face carefully blank, his eyes not'}, is Gao Feng.`}
+        text: (g) => `They come with the sun: four men in crimson, walking up the road like they own it, because they do. At their head, a tall man in deeper red with a sword on his back and a face as calm as a frozen pond — *Inner Disciple Lu Han*, the whisper goes round. ${g.flags.gao_broken ? 'Gao Feng is with them — carried in a litter at the back, his sword arm bound to his chest, his face grey. He sees you and says nothing. His eyes say everything.' : `Beside him, ${g.flags.gao_beaten ? 'bandaged, his face a mask of cold, formal hatred' : 'his face carefully blank, his eyes not'}, is Gao Feng.`}
 
 The village is lined up at the tribute post with its baskets of grass and grain. ${g.flags.healed === true ? 'The mother of the boy you healed is standing very close behind you. So is half the street.' : ''}
 

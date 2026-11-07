@@ -4,6 +4,7 @@
  * DEGREE (how badly the enemy is outclassed), measured when a fight starts:
  *   jp  = max(GU check, Convergence Use check) + 0.3 × realm        (James's power)
  *   ep  = for the strongest enemy, max(DC, attack − 1)              (their power)
+ *   (v0.11.40, E1: in Incremental Mode ep includes the fight's no-dice raise, noDiceUp: the fight as it will be fought)
  *   gap = jp − ep  →  1 "beaten" (gap < 1)   2 "outclassed" (1 ≤ gap < 4)   3 "roflstomp" (gap ≥ 4)
  *   Degree 1 shows each fight's original texts. Degrees 2 and 3 use STOMP texts when a fight has them.
  *   Degree 3 also offers "End it in one move." (skips the combat screen).
@@ -22,7 +23,7 @@
  *   }
  * James never kills humans: he knocks them out and very nearly cripples them. Beaten humans grovel or swear revenge.
  */
-import { skillCheck, combatHooks } from '../core/game.js';
+import { skillCheck, combatHooks, noDiceUp } from '../core/game.js';
 import { HP_TUNE } from './fight_tune.js';
 
 /** Cultivators' realms (for the realm-gap rule; everyone else is realm 0). Locals can't sense James; he can sense them. */
@@ -36,8 +37,9 @@ export const registerStomp = (table) => Object.assign(STOMP, table);
 
 export const jamesPower = (g) => Math.max(skillCheck(g.james.gu), skillCheck(g.james.skills['Convergence Use'])) + 0.3 * (g.james.realm || 0);
 export const enemyPower = (enemies) => Math.max(...enemies.map((e) => Math.max(e.dc || 0, (e.atk || 0) - 1)));
-export function degreeOf(g, enemies) {
-    const gap = jamesPower(g) - enemyPower(enemies);
+/** v0.11.40 (E1): `up` is the fight's no-dice raise (noDiceUp), so the degree (and "End it in one move.") reads the fight as it will be fought. */
+export function degreeOf(g, enemies, up = 0) {
+    const gap = jamesPower(g) - (enemyPower(enemies) + up);
     return gap >= 4 ? 3 : gap >= 1 ? 2 : 1;
 }
 
@@ -63,7 +65,7 @@ export function prepare(g, enc) {
         .map((e) => (e.realm == null && ENEMY_REALM[e.name] != null ? { ...e, realm: ENEMY_REALM[e.name] } : e))
         // enemies share the T10 L10 ceiling: no defence or attack above a check of 50
         .map((e) => (e.dc > ENEMY_CAP || e.atk > ENEMY_CAP ? { ...e, dc: Math.min(e.dc, ENEMY_CAP), atk: Math.min(e.atk, ENEMY_CAP) } : e));
-    const degree = degreeOf(g, enemies);
+    const degree = degreeOf(g, enemies, noDiceUp(enc.id));
     const st = STOMP[enc.id];
     const keepTail = enc.intro?.includes('Ashfall does not kneel') ? ' Behind you, Ashfall does not kneel.' : '';
     const intro = st?.posture ? st.posture(g, degree) + keepTail : enc.intro;

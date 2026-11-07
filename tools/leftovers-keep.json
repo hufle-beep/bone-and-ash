@@ -58,7 +58,7 @@
       "foundation_day": "the day of the Foundation breakthrough, kept for later (reference.md: set, not read yet)"
     },
     "flagsUnset": {
-      "gao_dead": "never set by the game (the scene gao_dead sets gao_broken); tests/part.test.mjs sets it as a starting state; its own decision"
+      "gao_dead": "v0.11.40 (G1): read only by gaoFill in game.js, which carries a pre-v0.7.0 save's gao_dead over to gao_broken; the game no longer sets or reads it otherwise"
     },
     "storage": {
       "boneash.broken": "the recovery screen keeps a rescue copy of a broken save here (read by hand, not by the game)"

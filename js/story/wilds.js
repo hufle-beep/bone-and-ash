@@ -40,7 +40,7 @@ export const WILDS = {
             g.flags.night_ev = pick;
             g.flags.last_ev = pick;
             const p = clockParts(g.minutes);
-            g.minutes = (p.hh >= 21 ? p.day : p.day - 1) * 1440 + 60;
+            g.minutes = Math.max(g.minutes, (p.hh >= 21 ? p.day : p.day - 1) * 1440 + 60); // v0.11.40 (N1): never back
             return [];
         },
         text: (g) => ({

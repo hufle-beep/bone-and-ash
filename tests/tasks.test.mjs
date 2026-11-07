@@ -489,7 +489,7 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
 {
     setNoDice(true);
     const g = ensureBars(newGame(21)); g.scene = 'ashfall'; g.minutes += 4 * 1440;
-    Object.assign(g.flags, { long: true, vday: 2, lore1: true, lore_realms: true, saw_lights: true, bone_sung: true, roots: true, gills: true, healed: true, boar: true, gao_dead: true, yk_path: 'sister', longforest: true });
+    Object.assign(g.flags, { long: true, vday: 2, lore1: true, lore_realms: true, saw_lights: true, bone_sung: true, roots: true, gills: true, healed: true, boar: true, gao_broken: true, yk_path: 'sister', longforest: true });
     g.inventory = { hare_raw: 5, beast_core: 3 };
     g.rel = {}; const bump = (w, f, a) => { const r = g.rel[w] || (g.rel[w] = { f: 0, a: 0 }); r.f += f; r.a += a; const p = g.coil.peak[w] || (g.coil.peak[w] = { f: 0, a: 0 }); p.f = Math.max(p.f, r.f); p.a = Math.max(p.a, r.a); };
     bump('Mei Lin', 80, 40); bump('Mei Lin', -30, 0); bump('Village', 40, 0); bump('Yuki', 20, 10);
@@ -507,7 +507,7 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     assert(g.tasks.fam['wild_forage:0'] === 9 && g.tasks.adapt['wild_forage:0'] === 1 && g.tasks.yuki.on && g.tasks.queue.length === 0, 'familiarity and adaptation kept, queue empty');
     assert(Object.keys(g.inventory).length === 0, 'hammerspace empty');
     for (const f of ['lore1', 'lore_realms', 'saw_lights', 'yk_path', 'long', 'longforest']) assert(g.flags[f] !== undefined, `knowledge flag ${f} kept`);
-    for (const f of ['healed', 'boar', 'gao_dead', 'vday', 'bone_sung', 'roots', 'gills']) assert(g.flags[f] === undefined, `world flag ${f} reset`);
+    for (const f of ['healed', 'boar', 'gao_broken', 'vday', 'bone_sung', 'roots', 'gills']) assert(g.flags[f] === undefined, `world flag ${f} reset`);
     assert(g.rel['Mei Lin'].f === 20 && g.rel['Mei Lin'].a === 10 && g.rel.Village.f === 10 && g.rel.Yuki.f === 20 && g.rel.Yuki.a === 10, `25% head start from the peak, Yuki kept (${JSON.stringify(g.rel)})`);
     assert(g.james.hp === jamesHpMax(g) && g.james.satiety === 70 && g.stats.checks === stats0, 'bars full, Fed back to the start, stats kept');
     assert(KEEP_FLAGS.every((f) => !(f in REMEMBER)), 'no flag both kept and remembered');
@@ -1289,6 +1289,70 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     assert(lateHub.length > 0 && lateHub.every((c) => dmIds.has(c.id)), `review: a late Meditate card keeps its task id, so the hub list doesn't show it twice (${lateHub.map((c) => c.id).join(', ')})`);
     for (const [r, open] of [[7, true], [8, false]]) { const cp = at(3744 + r, 'camp', 20 * 60); cp.james.realm = r; cp.james.qi = 999; cp.james.saturation = 0; assert(taskCards(cp, SCENES).some((c) => c.id === SIT_TASK) === open, `review: the camp's queueable sit at realm ${r}: ${open ? 'offered' : 'hidden'}`); }
     const mn = at(3746, 'ashfall', 4 * 1440 + 150); mn.james.qi = 999; assert(!taskOpen(mn, SCENES, MER_TASK), 'review: an old queue\'s mer:next waits after 02:00');
+}
+// v0.11.40 (N1, owner pick 18:02): the three night scenes never set the clock back. Entered in the evening they jump forward
+// to the night's hour as before; entered after it (01:50, 02:30, 03:30, and the rare 04:30), the clock stays where it was.
+{
+    const D = 3 * 1440; // the start of day 4
+    const cases = [['night_attack', 21, 80], ['night_event', 21, 60], ['bl_night_event', 19, 60]];
+    for (const [scene, eve, nightAt] of cases) {
+        const enterAt = (m) => { const x = ensureBars(newGame(4000 + m)); x.scene = scene; x.minutes = m; SCENES[scene].enter(x); return x.minutes; };
+        assert(enterAt(D - 1440 + 22 * 60) === D + nightAt, `N1: ${scene} entered at 22:00 jumps forward to the night's hour, as before`);
+        assert(enterAt(D - 1440 + eve * 60) === D + nightAt, `N1: ${scene} entered at ${eve}:00 jumps forward to the night's hour, as before`);
+        assert(enterAt(D + 30) === D + nightAt, `N1: ${scene} entered at 00:30 jumps forward to the night's hour, as before`);
+        for (const hm of [110, 150, 210, 270]) assert(enterAt(D + hm) === D + hm, `N1: ${scene} entered at ${String(Math.floor(hm / 60)).padStart(2, '0')}:${String(hm % 60).padStart(2, '0')} keeps the clock (was set back)`);
+    }    for (const [scene, wake] of [['morning', 'wilds'], ['bl_morning', 'blackroot']]) {
+        for (const hm of [150, 270]) {
+            const x = ensureBars(newGame(4200 + hm)); x.scene = scene; x.minutes = D + hm; x.flags.night_ev = 'stars'; x.flags.bl_ev = 'stars';
+            SCENES[scene].enter && SCENES[scene].enter(x);
+            assert(x.minutes === D + 6 * 60, `N1: the ${wake} morning entered at ${Math.floor(hm / 60)}:${String(hm % 60).padStart(2, '0')} ends at 06:00 that day (${clockParts(x.minutes).hh}:${String(clockParts(x.minutes).mm).padStart(2, '0')} day ${clockParts(x.minutes).day})`);
+        }
+    }
+}
+// v0.11.40 (E1, owner pick 18:11): the degree (and "End it in one move.") reads the fight as it will be fought: with its no-dice raise
+{
+    const { noDiceUp } = await import('../js/core/game.js');
+    const { degreeOf, jamesPower, enemyPower } = await import('../js/story/power.js');
+    setNoDice(true);
+    for (const id of ['rot_ape', 'collectors', 'jackals', 'gao']) {
+        const enemy = { name: 'x', hp: 10, dc: 5, atk: 6, dmg: 3 };
+        const g = ensureBars(newGame(4100)); const c = startCombat(g, { id, enemies: [enemy], win: 'arrival', lose: 'arrival' });
+        assert(c.enemies[0].dc - enemy.dc === noDiceUp(id) && c.enemies[0].atk - enemy.atk === noDiceUp(id), `E1: noDiceUp(${id}) = the raise startCombat applies (${noDiceUp(id)})`);
+    }
+    const { NO_DICE_TUNE } = await import('../js/story/nodice_tune.js');
+    const { BEAST_UP } = await import('../js/core/game.js');
+    const apeUp = NO_DICE_TUNE.rot_ape.up + BEAST_UP;
+    assert(noDiceUp('rot_ape') === apeUp && noDiceUp('collectors') === NO_DICE_TUNE.collectors.up, `E1: the rot ape its tune + a beast's ${BEAST_UP}, the tribute its tune only (people) (${noDiceUp('rot_ape')}, ${noDiceUp('collectors')})`);
+    setNoDice(false); assert(noDiceUp('rot_ape') === 0, 'E1: with dice there is no raise'); setNoDice(true);
+    const ape = ensureBars(newGame(4101)); ape.scene = 'ape_lured'; ape.minutes = 12 * 1440 + 10 * 60;
+    ape.james.gu = { tier: 3, level: 4 }; ape.james.realm = 0;
+    const jp = jamesPower(ape), ep = enemyPower([{ dc: 6, atk: 7 }]);
+    assert(jp - ep >= 4 && jp - (ep + apeUp) < 1, `E1: the test James crushes the ape on paper and not in the fight (power ${jp}, ape ${ep} + ${apeUp})`);
+    assert(degreeOf(ape, [{ dc: 6, atk: 7 }]) === 3 && degreeOf(ape, [{ dc: 6, atk: 7 }], apeUp) === 1, 'E1: degreeOf without the raise 3, with it 1');
+    const labels = sceneView(ape, SCENES).choices.map((c) => c.label);
+    assert(labels.includes('Fight.') && !labels.includes('End it in one move.'), `E1: no "End it in one move." against the ape for that James (${labels.join(' | ')})`);
+    ape.james.gu = { tier: 10, level: 10 }; ape.james.realm = 9;
+    assert(jamesPower(ape) - (ep + apeUp) >= 4 && sceneView(ape, SCENES).choices.some((c) => c.label === 'End it in one move.'), `E1: a James truly past the fight still gets "End it in one move." (power ${jamesPower(ape)})`);
+}
+// v0.11.40 (G1): the flag gao_dead was never set (the scene gao_dead sets gao_broken); nothing reads it any more
+{
+    const { readFileSync, readdirSync } = await import('node:fs');
+    const src = ['js', 'js/core', 'js/story', 'js/art'].flatMap((d) => readdirSync(d).filter((f) => f.endsWith('.js')).map((f) => readFileSync(`${d}/${f}`, 'utf8'))).join('\n');
+    assert((src.match(/flags\??\.gao_dead/g) || []).length === 1, 'G1: nothing in js/ reads the flag gao_dead but the old-save fill');
+    const old = migrate({ v: SAVE_VERSION, ...JSON.parse(JSON.stringify(ensureBars(newGame(4103)))), flags: { gao_dead: true } });
+    assert(old.flags.gao_broken === true, 'G1: an old save with gao_dead (before v0.7.0) gets gao_broken, so it plays as before');
+    const plain = migrate({ ...JSON.parse(JSON.stringify(ensureBars(newGame(4104)))) });
+    assert(!plain.flags.gao_broken, 'G1: a save without gao_dead gets no gao_broken');
+    const sc = Object.values(SCENES).flatMap((s) => (s.choices || []).filter((c) => c.to === 'gao_dead'));
+    assert(sc.length === 1, `G1: one choice leads to the scene gao_dead (${sc.length})`);
+    const g = ensureBars(newGame(4102)); sc[0].do(g);
+    assert(g.flags.gao_broken === true && g.flags.gao_dead === undefined, 'G1: that choice sets gao_broken, not gao_dead');
+}
+// v0.11.40 (Y-text): Yuki and James were born together (owner 2026-11-05); no "six" or "thirty-four years" left in her path
+{
+    const { readFileSync } = await import('node:fs');
+    const yp = readFileSync('js/story/yuki_path.js', 'utf8');
+    assert(!/thirty-four|you were six|boy of six/i.test(yp) && /born the same morning, in the same grove/.test(yp) && /Forty years of her sleeping/.test(yp), 'Y-text: yuki_path.js says born together, forty years');
 }
 const pctOf = (o, n) => Object.entries(o).sort().map(([k, v]) => `${k} ${((v / n) * 100).toFixed(1)}%`).join(', ');
 console.log(`  tribute, tasks:   ${pctOf(stats.tasks.endings, stats.tasks.games)}`);

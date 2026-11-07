@@ -26,7 +26,7 @@ let rs = 4242; const rnd = (n) => { rs = (rs * 1103515245 + 12345) >>> 0; return
 function seedState(g, run) {
     g.minutes = { fallout: 7, blackroot: 10, heart: 15, return: 18 }[part] * 1440 + 6 * 60;
     g.flags = { long: true, forest_day: 3, vday: 3, ending: ['fought', 'bluff', 'paid', 'lost'][run % 4], romance: run % 3 === 0, healed: true, boar: run % 2 === 0, sky_witness: run % 5 === 0 ? 1 : 0,
-        gao_dead: run % 6 === 1, gao_spared: run % 6 === 2, gao_humiliated: run % 6 > 2, militia: run % 3, mei_party: part !== 'fallout', ya_party: part !== 'fallout' && run % 7 !== 0, ya_met: part !== 'fallout',
+        gao_broken: run % 6 === 1, gao_spared: run % 6 === 2, gao_humiliated: run % 6 > 2, militia: run % 3, mei_party: part !== 'fallout', ya_party: part !== 'fallout' && run % 7 !== 0, ya_met: part !== 'fallout',
         ya_romance: run % 4 === 1, trio: part === 'return' ? run % 5 : part === 'heart' ? run % 4 : 0 };
     g.rel = { 'Mei Lin': { f: 30 + (run % 20), a: run % 3 === 0 ? 25 : run % 30 }, Village: { f: 40, a: 0 }, Ya: { f: part === 'fallout' ? 0 : 20, a: part === 'fallout' ? 0 : run % 30 } };
     g.james.gu.level = 7; g.james.skills['Convergence Use'].level = 5; g.yuki.fight.level = 3; g.james.realm = run % 3; ensureBars(g);

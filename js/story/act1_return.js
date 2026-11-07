@@ -573,7 +573,7 @@ Toward dawn Yuki puts her nose against your chin. *Stop thinking,* says the bond
     rt_elder: {
         id: 'rt_elder', title: 'Outer Elder Shen Qiu', art: 'elder_arrives', place: `${P} — the tribute post`,
         enter: (g) => { toHour(g, 8); return []; },
-        text: (g) => `He comes up the road at the hour of the snake, on foot, with twelve disciples behind him in crimson ${luHanHere(g) ? 'and Lu Han at his right hand, face like a frozen pond' : 'and, conspicuously, no Lu Han'}.${g.flags.gao_broken || g.flags.gao_dead ? ' At the very back, carried in an open litter, sword arm still bound to his chest, rides Gao Feng. He has come to watch. His lips move the whole time, the same few words over and over, and you are fairly sure they are your name.' : ''}
+        text: (g) => `He comes up the road at the hour of the snake, on foot, with twelve disciples behind him in crimson ${luHanHere(g) ? 'and Lu Han at his right hand, face like a frozen pond' : 'and, conspicuously, no Lu Han'}.${g.flags.gao_broken ? ' At the very back, carried in an open litter, sword arm still bound to his chest, rides Gao Feng. He has come to watch. His lips move the whole time, the same few words over and over, and you are fairly sure they are your name.' : ''}
 
 Outer Elder Shen Qiu is old in the way mountains are old. His hair is white and bound up under a red jade crown. His robe is the deep red of dried blood, embroidered with a single lotus. He walks slowly, and the air walks with him: heavy, sweet, rotten, the poisoned Qi of this world drawn so thick around him that the grass at the roadside greys as he passes.
 

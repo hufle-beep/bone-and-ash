@@ -992,7 +992,7 @@ Watches to set. Ya says she doesn't need sleep, which is a lie; Mei Lin says she
             g.flags.bl_ev = pick;
             g.flags.bl_last_ev = pick;
             const p = clockParts(g.minutes);
-            g.minutes = (p.hh >= 19 ? p.day : p.day - 1) * 1440 + 60;
+            g.minutes = Math.max(g.minutes, (p.hh >= 19 ? p.day : p.day - 1) * 1440 + 60); // v0.11.40 (N1): never back
             return [];
         },
         text: (g) => ({

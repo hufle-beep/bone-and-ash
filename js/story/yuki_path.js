@@ -3,8 +3,8 @@
  * run), she asks: family or more. g.flags.yk_path = 'sister' | 'lover'.
  *   Sister: very sassy, very protective, pushes James toward Mei Lin and Ya (affection), grades his flirting.
  *   Lover: hers, and open to sharing with other women. With Ya she wears down Mei Lin's resistance (g.flags.yk_mei).
- * Romance with Yuki only ever happens in her human form: an adult woman, at James's side since he was a boy of six —
- * thirty-four years. Frank up to the door, then fade to black (Claude's limit).
+ * Romance with Yuki only ever happens in her human form: an adult woman, at James's side since they were born on the same
+ * day in the same grove (owner 2026-11-05; v0.11.40) — forty years. Frank up to the door, then fade to black (Claude's limit).
  *
  * The last night of Act 1 (rt_evening) offers every arrangement the hearts allow:
  *   alone: Mei Lin · Ya · Yuki      pairs: Mei Lin + Ya (rt_trio) · Yuki + Mei Lin · Yuki + Ya      all four.
@@ -31,7 +31,7 @@ const SCENES_YK = {
 
 "Should I be worried?"
 
-"Always." She pokes the fire with a stick, which she does not need to do and does because she has hands now and enjoys them. "You were six when the bond took. I was a kitten the size of your fist. I've slept on you for thirty-four years. I know what you look like when you lie, and when you're scared, and when you're pretending a lecture is going well." Gold eyes, level. "I'm not a kitten any more, James. I haven't been for a very long time. And now I have *this*." She lifts one hand, turns it in the firelight. "So I'm asking. Once. Out loud, because the bond makes it too easy to not say things."
+"Always." She pokes the fire with a stick, which she does not need to do and does because she has hands now and enjoys them. "We were born the same morning, in the same grove. You were the size of a loaf of bread and I was the size of your fist, and the bond took before either of us could see. I've slept on you for forty years. I know what you look like when you lie, and when you're scared, and when you're pretending a lecture is going well." Gold eyes, level. "I'm not a kitten any more, James. I haven't been for a very long time. And now I have *this*." She lifts one hand, turns it in the firelight. "So I'm asking. Once. Out loud, because the bond makes it too easy to not say things."
 
 She takes a breath.
 
@@ -58,7 +58,7 @@ She takes a breath.
     },
     yk_lover: {
         id: 'yk_lover', title: 'More', art: 'yuki_human', place: 'The Long Forest',
-        text: `Her hand is warm. You don't know why that surprises you. Thirty-four years of her sleeping on your chest and you never thought about her hands.
+        text: `Her hand is warm. You don't know why that surprises you. Forty years of her sleeping on your chest and you never thought about her hands.
 
 "Oh," says Yuki, very quietly, and for once she doesn't have anything dry to follow it with.
 

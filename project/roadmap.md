@@ -1,6 +1,16 @@
 # Roadmap: Bone and Ash
 
-Last updated: 2026-11-07 (v0.11.37, the day's end). **The pivot (owner 15:43): copy what is useful from Selene and Rules Engine C, game and process; see "The copy-over" below. It comes before steps 4–7, which are kept and take its items in where they fit.** Update in every push.
+Last updated: 2026-11-07 (v0.11.40, chunk A). **The pivot (owner 15:43): copy what is useful from Selene and Rules Engine C, game and process; see "The copy-over" below. It comes before steps 4–7, which are kept and take its items in where they fit.** Update in every push.
+
+## Now (owner 2026-11-07 18:00–18:19): the chunks
+The art is tabled until the owner is home (after every push Claude asks). In order:
+1. **A — DONE in v0.11.40:** N1 the night clock never back, E1 the one-move rule reads the no-dice raise, G1 `gao_dead` no longer read, Yuki born with James in her path's text.
+2. **D2-a + S, next (owner 18:19):** Story Mode's code out (the dice paths, the meridian screen and its 3 flags, Story Mode's once-a-day rules, the dice tests; the 17 lost / failed-check scenes stay, a weak James can reach them; bot stats byte-identical) and the check faster (the leftover check's watched runs on fewer games, browser part 1 in two halves; about 115 → 85 s).
+3. **B:** MIN_N 100 → 50 for the 7 drift numbers under it; `design.md`'s two stale lines.
+4. **D, the art (the owner's PC):** Y3 + `ridge` in one session, then the Act 1 art, then the last art part (code art and `clamp2.js` close-ups out).
+5. **E, the Act 1 retune (numbers first):** the Act 1 part test in Incremental Mode, the night fights, the ford serpent, Shen Qiu.
+6. **F, the copy-over push 5 (the Coil)**, then **G** (engine systems, crafting and threads, Android; steps 4, 6, 7 below).
+Optional, open: P1-b / P1-c (hand-written "again" beats, knowledge branches).
 
 ## Order of work (owner, 2026-11-05)
 The hybrid with Selene (design in `design.md`). Safety comes before the rewrite, because the hybrid changes the save format. Each step is one or more pushes, each with its own options, pick and go. Estimates are working sessions, not calendar days.

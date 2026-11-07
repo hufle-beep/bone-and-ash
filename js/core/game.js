@@ -646,6 +646,12 @@ export const combatHooks = { before: null, lose: null };
 export const PEOPLE_FIGHTS = new Set(['gao', 'collectors', 'arson', 'ya_brawl', 'rt_brawl', 'elder', 'sect_watcher', 'lf_rogue']);
 /** Task mode (v0.9.7, owner's pick 3a): every beast fight +0.5 DC and attack on top of its no-dice tuning. */
 export const BEAST_UP = 0.5;
+/** v0.11.40 (E1): the no-dice raise to a fight's DC and attack (its tune plus BEAST_UP for a beast), as startCombat applies it; 0 with dice. */
+export function noDiceUp(id) {
+    if (!noDice) return 0;
+    const t0 = noDiceTune[id];
+    return ((t0 && t0.up) || 0) + (PEOPLE_FIGHTS.has(id) ? 0 : BEAST_UP);
+}
 /** Where a lost fight leads: its lose scene, unless the Coil takes it (combatHooks.lose, set by coil_scenes.js). */
 const loseTo = (g, c) => (combatHooks.lose && combatHooks.lose(g, c)) || c.lose;
 
@@ -950,7 +956,12 @@ export function migrate(g) {
     if (g.v === undefined) g.v = 1;
     if (g.v > SAVE_VERSION) throw new SaveError('tooNew', `This save is from a newer version of the game (state ${g.v}; this version reads up to ${SAVE_VERSION}).`);
     while (g.v < SAVE_VERSION) { const step = MIGRATIONS[g.v]; if (!step) throw new SaveError('notSave', `No migration from state ${g.v}.`); step(g); g.v += 1; }
-    return seenFill(oneCount(g));
+    return gaoFill(seenFill(oneCount(g)));
+}
+/** v0.11.40 (G1, Fable review): before v0.7.0 the Gao event could set `gao_dead`; the game reads only `gao_broken` now, so an old save carries it over. Fills only. */
+export function gaoFill(g) {
+    if (g?.flags?.gao_dead && !g.flags.gao_broken) g.flags.gao_broken = true;
+    return g;
 }
 /**
  * v0.11.35 (P1-a): a save from before has no `seen` record. Past Coil 1, the scenes it picked a choice on count as read in an
