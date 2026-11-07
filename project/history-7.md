@@ -2,6 +2,24 @@
 
 Started 2026-11-07 (v0.11.45), when `history-6.md` reached about 45 KB. Newer than `history-6.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.52 (word for word)
+
+### From "Decided in chat (2026-11-07)"
+
+- **v0.11.49: Y3 part 1, the great cat (owner 20:30 "let's do the art now"; options V1 / V2 / V3, H1 / H2 / H3; 20:33 "go with your recommendation, but split the output into two, so the 35 minutes is two sessions" = V3 + H1, as two pushes: the great cat now, human next):**
+  - **Asked mid-build and picked:** `james` and `jackals` (multi-step pictures): inpaint Yuki only (20:36); James's look (20:52): "new tigers now, cats later"; James's head (21:52): "original heads now, uniform later" (the head repaints from text came out far from uniform; a ComfyUI restart would not help: it does not learn between runs).
+  - **The pictures (owner picks 20:48–21:52):** s44 for forest_dawn, clearing, forage, hunt, camp, gao_down, dinner, collectors, tribulation, lights, rain, crows, rats, gift, herb_slope, drill, wolves; mire s22, hollow s22; stream s66 and bone_field s66 (redos as a real tiger, cast `yuki_tiger2`); arson s88 and jackals s44 (redos with the tiger apart from James; jackals' cord fixed); village and omnitool s44 with the stray women / the floating face inpainted out; roof s44 and omnitool with the face made less catlike, then flatter; lizard s44 with the second James out (s6) and a faint outline out (c2's base); james (arrival): the great cat beside him (s7), ears and cord fixed (s1); jackals_dead: the great cat behind the dead jackals (s7), the fire under her paws lost (s3); ridge (21:52–22:55, after the great cat kept blending into the tree, the owner's tries: the tree pushed far away, then "just show the ridge without Yuki at all", then his own pick of an earlier ridge with the figures painted out, then "its not worth the effort… redraw it" from a photo he found): **a new picture drawn from a description** (a lone dead tree on the ridge above rolling mountains; not traced from the photo, which is someone else's), seed 22; `ridge` left `YUKI_PICS` and shows in every form; no `ridge_tiger`. **After the cold review (owner 22:00 "fix all four first", picks 22:10):** camp s2 (the second tiger out), forage s2 (a real tiger face), wolves s1 (the leash-like cord out), roof s2 (one cord).
+  - **Code:** `js/art/art.js`: `YUKI_CAT_ONLY` → `YUKI_PICS` (29 keys: the 30 without `ridge`) + `YUKI_PIC_FORMS` {cat, tiger}; `pictureOf` returns `<file>_<form>.webp` for a drawn form, code art for human. `tools/art/masks.py` draws `ellipses`; `recipes.json` every step, the masks, cast `yuki_tiger`, `yuki_tiger2`, `james_shaggy`.
+  - **Checks:** the full check (twice; last after the final ridge): exit 0, 0 drifted, 1 log-only move (tribute C6 won 60.2 → 53.6%, as in v0.11.48); the models unchanged; the baseline kept; after the owner's wilds save landed: the saves test (22 files, 126 passed) and the quick check. Cold review on Opus (art): see the version note.
+  - **Uploaded by Claude after v0.11.48 (owner 20:18):** handover, roadmap, changelog, restore points, `history-7.md`.
+
+### From "Version notes"
+
+### v0.11.49 — Y3 part 1: the great-cat pictures
+
+- **art/pic:** 29 new `<key>_tiger.webp` (about 2.2 MB); `ridge.webp` replaced (a new landscape without characters). **js/art/art.js** (the form map), **sw.js** (ART fingerprints, VERSION), **tests/data.test.mjs** (the v0.11.49 block: `YUKI_PICS` is 29 keys and `ridge` shows its one picture in every form; every `YUKI_PICS` key shows `<file>_tiger` in tiger form, has a recipe whose last step draws the great cat; human keeps code art), **tools/art/recipes.json, masks.py, README.md; tests/README.md; project/reference.md, roadmap.md, changelog.md, restore-points.md, history-7.md** (v0.11.46 moved).
+- **Checks:** the full `bash tools/check.sh` (results in the decisions block); the cold review on Opus: the code, recipes, files and cache table correct (`pictureOf` for every form and key kind, no `YUKI_CAT_ONLY` left, all 30 recipes complete with their masks and renames, the new files 800×500, 58–100 KB, 0% gold (it read 30 incl. the since-dropped `ridge_tiger`), adding files safe for the offline cache, no save or id change); VERSION not yet bumped when it read (bumped with the docs). **Its picture findings, fixed in this push (owner 22:00, picks 22:10):** camp had a second tiger, forage a house cat, wolves a leash-like cord, roof two cords. **Low, kept:** lights and rats are tiger-ish but catlike in the face; a function-valued `PICTURES` entry added to `YUKI_PICS` would get `_<form>` added twice (none today). The data test checks the prompt text, not the drawn picture: pictures are checked by eye on contact sheets.
+
 ## Moved from the handover in v0.11.51 (word for word)
 
 ### From "Decided in chat (2026-11-07)"
