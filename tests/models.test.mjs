@@ -20,7 +20,7 @@
 // lost tribute up to 3 times, bite the tail when Shen Qiu takes James up to 3 times (the start of Act 1), and stop after
 // Coil 8. A rewind forgets the cards done (the days start over).
 import { SCENES } from '../js/story/prologue.js';
-import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, setNoDice, jamesHpMax, clockParts } from '../js/core/game.js';
+import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, jamesHpMax, clockParts } from '../js/core/game.js';
 import { INC_ONLY_ACTIONS, actionOpen } from '../js/core/forms.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
 import { isTaskHub, isTaskChoice, taskCards, taskOpen, runTask, taskQueue, setYuki, yukiLane } from '../js/core/tasks.js';
@@ -115,7 +115,6 @@ function storyPick(model, g, choices, mem) {
 /** One game. Returns 'end' (an Act 1 ending), 'gaveUp' (past Coil 8) or 'stuck'. */
 function play(run, model, st, yuki) {
     rs = seedOf(run, 7 + MODELS.indexOf(model) + (yuki === 'off' ? 50 : 0));
-    setNoDice(true);
     const smart = model !== 'random' || run % 2 === 0;
     const g = ensureBars(newGame(run + 1 + 900000, { closed: true }));
     const mem = { done: {}, tried: new Set(), tribLost: 0, shenBites: 0 };
@@ -225,7 +224,6 @@ for (const [m, st] of Object.entries(all)) assert(!st.stuck, `${m}: every game e
 if (all.rusher?.work) notes.push(`rusher: ${all.rusher.work} work cards queued (it should queue only meals)`);
 if (all.careful?.hungry) notes.push(`careful: under Fed 30 with food in the hammerspace ${all.careful.hungry} times`);
 if (!SHARD) { // the completionist really runs every open card of the wilds before it leaves
-    setNoDice(true);
     const g = ensureBars(newGame(77, { closed: true })); goTo(g, SCENES, 'wilds'); g.minutes += 1440;
     const mem = { done: {}, tried: new Set() };
     const ids = taskCards(g, SCENES).filter((c) => c.status === 'open' && c.kind !== 'door' && !EAT.test(c.label) && !REST.test(c.label)).map((c) => c.id);

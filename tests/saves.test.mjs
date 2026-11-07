@@ -2,8 +2,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { gunzipSync, gzipSync } from 'node:zlib';
 import { SCENES } from '../js/story/prologue.js';
-import { newGame, ensureBars, startCombat, combatStep, serialize, deserialize, peekSave, SaveError, SAVE_VERSION, fnv1a, setNoDice } from '../js/core/game.js';
-setNoDice(true); // v0.11.34 (D1, owner pick 4a): the saves play on in Incremental Mode, the only mode
+import { newGame, ensureBars, startCombat, combatStep, serialize, deserialize, peekSave, SaveError, SAVE_VERSION, fnv1a } from '../js/core/game.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
 
 let pass = 0, fail = 0;

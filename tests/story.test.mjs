@@ -1,7 +1,7 @@
 // Run: node tests/story.test.mjs — story graph integrity + 1,000 random playthroughs (2,000 before v0.11.34) (no crash, no dead end, always reaches the end);
 // Incremental Mode since v0.11.34 (D1: Story Mode dropped from the game)
 import { SCENES, START_SCENE } from '../js/story/prologue.js';
-import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, itemCap, setNoDice } from '../js/core/game.js';
+import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, itemCap } from '../js/core/game.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
 import { actionOpen } from '../js/core/forms.js';
 import { btTarget } from '../js/story/meridians.js';
@@ -14,7 +14,6 @@ const track = process.argv.includes('--track') ? watchGame : () => {};
 let pass = 0, fail = 0;
 const assert = (c, l) => { if (c) { pass++; } else { fail++; console.error('  FAIL ', l); } };
 const kids = launch(import.meta.url); // v0.11.1: the random playthroughs in worker processes
-setNoDice(true); // v0.11.34 (D1): the game is Incremental Mode only, so every walk here plays it (no dice, closed meridians at the start)
 const fresh = (seed) => newGame(seed, { closed: true });
 const STEP_CAP = 5000; // v0.11.34: Incremental Mode games go round the Coil (one game took 2,512 steps over 19 Act 1 Coils), was 2,500 in Story Mode
 

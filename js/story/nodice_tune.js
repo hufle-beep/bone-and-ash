@@ -1,8 +1,8 @@
 /**
- * No-dice fight tuning (v0.9.3, task mode only). Per encounter id: `up` raises the enemy's DC and attack by that much
+ * No-dice fight tuning (v0.9.3; every fight since the dice went in v0.11.45). Per encounter id: `up` raises the enemy's DC and attack by that much
  * (on top of the common no-dice shift of −2), `hp` multiplies its HP. Set by bot simulations (smart combat, random
  * story choices) toward the owner's targets: bosses ~30% in the first Coil, middle fights ~50%, small fights ~70%.
- * Classic mode (with dice) never reads this. v0.9.7: every beast fight also gets +0.5 (game.js BEAST_UP, PEOPLE_FIGHTS).
+ * v0.9.7: every beast fight also gets +0.5 (game.js BEAST_UP, PEOPLE_FIGHTS).
  */
 export const NO_DICE_TUNE = {
     arson: { up: 1.0 },

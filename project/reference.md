@@ -130,7 +130,7 @@ node tools/sanity.mjs --update                # new baseline, only after the own
 - A GitHub Pages deploy can stick "in progress"; a new commit republishes. Check a build once (or with a short bounded wait), never block on it.
 - Foreground `sleep` can be blocked; poll with short waits.
 
-## Rules as implemented (moved from the handover in v0.11.43; where a line says d6 or Story Mode it describes the dice era: Incremental Mode has no dice since v0.9.3, check ÷ DC)
+## Rules as implemented (moved from the handover in v0.11.43; where a line says d6 or Story Mode it describes the dice era: Incremental Mode has no dice since v0.9.3, check ÷ DC; the dice code itself went in v0.11.45, and `d6()` is left only as the save's random-number source for story events)
 
 - **Check value** = 0.5 × rank (T1 L1 = 0.5). James rolls GU for anything he has no skill for, and for defence.
 - **XP:** a standard award is 30 × the skill's tier, split equally between the skill and GU. Yuki gets the same share to her Qi Use. A fail pays 25%. Bands: standard 30, challenging 60, major 120.

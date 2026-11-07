@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.44 | (this push) | E step 1 (P2): the Act 1 part test in Incremental Mode, bot-like strength. Tests and docs only; the game is identical to 0.11.41. |
+| 0.11.45 | (this push) | E step 2 (D-a): the dice code out. Same save state as 0.11.44; the bot stats and the part tests byte-identical to 0.11.44. |
+| 0.11.44 | `2c49f29` | E step 1 (P2): the Act 1 part test in Incremental Mode, bot-like strength. Tests and docs only; the game is identical to 0.11.41. |
 | 0.11.43 | `44ded19` | Docs only: the handover trimmed (H2). The game is identical to 0.11.41. |
 | 0.11.42 | `1ff11d5` | B1: the drift check from n 50; docs; rule 8. The game is identical to 0.11.41. |
 | 0.11.41 | `801a931` | D2-a + S: Story Mode's code out but the dice core; Story-only choices as hidden places (indices kept); the check faster. Same save state as 0.11.40 (an old Story Mode save loads and plays Incremental Mode, as since v0.11.34). Bot stats byte-identical to 0.11.40. |

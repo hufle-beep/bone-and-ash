@@ -4,7 +4,7 @@
 // Make a new set whenever the save format changes, so tests/saves.test.mjs keeps old and new saves loading.
 import { writeFileSync, readFileSync } from 'node:fs';
 import { SCENES } from '../js/story/prologue.js';
-import { newGame, ensureBars, startCombat, combatStep, COMBAT_ACTIONS, setNoDice, serialize, deserialize } from '../js/core/game.js';
+import { newGame, ensureBars, startCombat, combatStep, COMBAT_ACTIONS, serialize, deserialize } from '../js/core/game.js';
 import { INC_ONLY_ACTIONS, actionOpen } from '../js/core/forms.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
 import { isTaskHub, isTaskChoice, taskCards, taskOpen, runTask, taskQueue } from '../js/core/tasks.js';
@@ -32,7 +32,6 @@ const POINTS = [
 
 function playTo(point, seed) {
     rs = seed;
-    setNoDice(true);
     const g = ensureBars(newGame(seed, { closed: true }));
     for (let steps = 0; steps < 30000; steps++) {
         if (point.at(g)) return g;

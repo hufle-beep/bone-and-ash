@@ -3,11 +3,10 @@
 // Other parts' entry scenes count as exits, so parts can be written in parallel.
 // v0.11.44 (E step 1, owner pick P2): Incremental Mode (no dice), like the game; James's strength comes from the bots' range
 // at each part's entry (BANDS below), plus test-only runs with a weak James, so every failed check and "lost" scene is walked.
-import { newGame, ensureBars, startCombat, combatStep, jamesHpMax, jamesQiMax, setNoDice } from '../js/core/game.js';
+import { newGame, ensureBars, startCombat, combatStep, jamesHpMax, jamesQiMax } from '../js/core/game.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
 import { fillItemNames } from './lib/items.mjs';
 fillItemNames(); // v0.11.25: the item names, so gives() (the full-stock hide, the hauls) works in the walks
-setNoDice(true); // v0.11.44: the game is Incremental Mode only; this was the last test playing with dice
 const part = process.argv[2];
 const NAME = { fallout: 'FALLOUT', blackroot: 'BLACKROOT', heart: 'HEART', return: 'RETURN' }[part];
 const ENTRY = { fallout: 'fo_start', blackroot: 'bl_start', heart: 'ht_start', return: 'rt_start' }[part];

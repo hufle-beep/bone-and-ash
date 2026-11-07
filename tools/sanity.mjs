@@ -37,7 +37,6 @@ const G = await import(path.join(root, 'js/core/game.js'));
 const M = await import(path.join(root, 'js/story/meridians.js'));
 await import(path.join(root, 'js/story/prologue.js')); // installs every scene and hook
 const near = (a, b) => Math.abs(a - b) < 0.051;
-G.setNoDice(true);
 for (const coil of [1, 2, 3, 5]) { // v0.11.15 (B1-b): the Coil bonus is XP only; sit, breakthrough and meridian time go by uses
     const mult = 1 + 0.25 * (coil - 1); // v0.11.29 (RB-1): 0.5 → 0.25
     const g = G.ensureBars(G.newGame(7, { closed: true })); g.coil.n = coil;

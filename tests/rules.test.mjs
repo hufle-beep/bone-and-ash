@@ -1,5 +1,5 @@
 // Run: node tests/rules.test.mjs — the same numbers as Rules Engine C at James's start (T1 L1, Mortal Vessel, 12/66)
-import { skillCheck, newGame, ensureBars, jamesHpMax, jamesQiMax, yukiQiMax, xpToNext, awardXp, rollCheck, advance, condense, sleepUntil, clockLabel, d6, serialize, deserialize, eat } from '../js/core/game.js';
+import { skillCheck, newGame, ensureBars, jamesHpMax, jamesQiMax, yukiQiMax, xpToNext, awardXp, rollCheck, noDiceDc, advance, condense, sleepUntil, clockLabel, d6, serialize, deserialize, eat } from '../js/core/game.js';
 
 let pass = 0, fail = 0;
 const assert = (c, l) => { if (c) { pass++; console.log('  PASS ', l); } else { fail++; console.error('  FAIL ', l); } };
@@ -14,9 +14,9 @@ awardXp(g, 'Convergence Use');
 assert(g.james.skills['Convergence Use'].level === 2 && g.james.skills['Convergence Use'].xp === 5, 'second award levels up (30 − 25 = 5 over)');
 assert(lines.length === 3, 'award lines');
 const r = rollCheck(g, 'Convergence Use', 3);
-assert(r.die >= 1 && r.die <= 6 && r.total === Math.round((r.value + r.die) * 10) / 10, 'check = value + d6');
+assert(r.die === undefined && r.dc === noDiceDc(3) && r.ratio === r.value / r.dc && r.success === (r.ratio >= 1) && r.crit === (r.ratio >= 2), 'check = value ÷ (DC − 2), no dice (v0.11.45)');
 const g2 = ensureBars(newGame(42)); const a = [d6(g2), d6(g2), d6(g2)]; const g3 = ensureBars(newGame(42)); const b = [d6(g3), d6(g3), d6(g3)];
-assert(a.join() === b.join(), 'dice come from the save seed (a reload does not reroll)');
+assert(a.join() === b.join(), 'the random numbers come from the save seed (a reload does not reroll)');
 g.james.qi = 20; advance(g, 30);
 assert(Math.abs(g.james.qi - (20 + jamesQiMax(g) * 0.116)) < 1e-6, 'one Cycle (30 min at T1) regenerates 11.6% of Convergence (5% + 66 × 0.1)');
 const before = g.james.saturation; const c = condense(g);

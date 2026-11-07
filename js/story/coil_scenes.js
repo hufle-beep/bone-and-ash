@@ -1,9 +1,9 @@
 /**
  * The Coil's scenes (v0.9.4, step 3c-1): the Coil screen (`coil_end`), the first dawn again (`coil_dawn`),
  * "Bite the tail" after a lost tribute, "You remember this" on the arrival, breakthrough from 95% in the label.
- * Task mode only (every new choice checks isNoDice through coilActive or directly). Classic play is unchanged.
+ * Every new choice checks coilActive (Incremental Mode, the only mode since v0.11.34).
  */
-import { advance, isNoDice, startActCoil, combatHooks, PEOPLE_FIGHTS, coilMult, COIL_GROWTH, fmtMult } from '../core/game.js';
+import { advance, startActCoil, combatHooks, PEOPLE_FIGHTS, coilMult, COIL_GROWTH, fmtMult } from '../core/game.js';
 import { setDeathHook, goTo } from '../core/story.js';
 import { coilActive, endCoil, rewind, coilReport, actOf, willUnwind } from '../core/coil.js';
 

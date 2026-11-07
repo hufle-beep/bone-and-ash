@@ -1,11 +1,8 @@
 /**
  * Bonesinger forms (v0.10.4, owner 2026-11-06): what James can sing, by Convergence Use rank (rank = 10·(T−1) + L;
- * T1 L1 = 1 … T10 L10 = 100). Four lines that grow side by side. Incremental Mode only (no dice); Story Mode
- * (the older game) keeps every form open as before. What he cannot form yet is hidden in fights and story choices.
+ * T1 L1 = 1 … T10 L10 = 100). Four lines that grow side by side. What he cannot form yet is hidden in fights and story
+ * choices. (Until v0.11.45 a switch kept every form open in the dice rules of Story Mode; both are gone.)
  */
-let on = () => false;
-/** game.js wires this to isNoDice (Incremental Mode). */
-export function setFormsActive(fn) { on = fn; }
 
 export const R = (tier, level) => 10 * (tier - 1) + level;
 export const FORM_LINES = {
@@ -44,9 +41,9 @@ export const FORM_LINES = {
 const AT = Object.fromEntries(Object.values(FORM_LINES).flatMap((l) => l.forms.map((f) => [f.id, f.at])));
 
 export const cuRank = (g) => { const s = g.james.skills['Convergence Use']; return R(s.tier || 1, s.level || 1); };
-/** Can James sing form `id` now? Story Mode: always. */
-export const hasForm = (g, id) => !on() || cuRank(g) >= (AT[id] ?? 0);
-/** The best form of a line he has (null if none yet), and the next one. Ignores the mode (for the James tab). */
+/** Can James sing form `id` now? */
+export const hasForm = (g, id) => cuRank(g) >= (AT[id] ?? 0);
+/** The best form of a line he has (null if none yet), and the next one (also for the James tab). */
 export function lineState(g, line) {
     const r = cuRank(g);
     const fs = FORM_LINES[line].forms;
@@ -57,27 +54,25 @@ export function lineState(g, line) {
 const tl = (n) => `T${Math.floor((n - 1) / 10) + 1} L${((n - 1) % 10) + 1}`;
 export const rankLabel = tl;
 
-/* ---- fights: which actions show, and what they are called (Incremental Mode) ---- */
+/* ---- fights: which actions show, and what they are called ---- */
 const best = (g, line) => lineState(g, line).now?.id;
-/** v0.11.4: the spear and the spike field exist only in Incremental Mode. */
+/** v0.11.4: the spear and the spike field (the name is from when they existed only in Incremental Mode, not Story Mode). */
 export const INC_ONLY_ACTIONS = new Set(['spear', 'spikes']);
 export function actionOpen(g, id) {
-    if (INC_ONLY_ACTIONS.has(id)) return on() && hasForm(g, id);
-    if (!on()) return true;
+    if (INC_ONLY_ACTIONS.has(id)) return hasForm(g, id);
     if (id === 'dart') return hasForm(g, 'dart');
     return true;
 }
 /** Below T1 L8 the knife breaks after every swing (owner's pick a: "if he dies, he dies"). */
-export const fragileKnife = (g) => on() && cuRank(g) < AT.knife;
+export const fragileKnife = (g) => cuRank(g) < AT.knife;
 export function actionLabel(g, id, base) {
-    if (!on()) return base;
     if (id === 'dart') return { storm: 'Bone storm', volley: 'Bone volley', lance: 'Thrown bone lance' }[best(g, 'ranged')] || 'Bone darts';
     if (id === 'blade') return { sword: 'Bone sword', dagger: 'Bone dagger', knife: 'Bone knife' }[best(g, 'melee')] || 'Fragile bone knife';
     if (id === 'guard') return { armour: 'Armour up, give ground', plates: 'Plates up, give ground', shield: 'Shield up, give ground', buckler: 'Buckler up, give ground', bracer: 'Bracer up, give ground' }[best(g, 'defence')] || base;
     return base;
 }
 
-/* ---- story choices that need a form (Incremental Mode hides them until James has it) ---- */
+/* ---- story choices that need a form (hidden until James has it) ---- */
 export const STORY_FORMS = [
     [/^A bone dart, thrown from cover/, 'dart'],
     [/^Glassback hare\. A dart from cover/, 'dart'],

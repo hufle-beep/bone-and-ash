@@ -4,7 +4,7 @@
  *             to | to(g), fail?, do?(g, r) → lines, failDo?(g, r) → lines, combat?: encounter, xp?: false }.
  * A check pays standard XP (25% on a fail) unless xp: false. Pure — no DOM.
  */
-import { rollCheck, awardXp, spendQi, advance, ensureBars, actingCheck, actingName, instantWin, itemFull, takeCapNotes, itemNames, setLootMult, isNoDice, noDiceDc, checkText, addItem } from './game.js';
+import { rollCheck, awardXp, spendQi, advance, ensureBars, actingCheck, actingName, instantWin, itemFull, takeCapNotes, itemNames, setLootMult, noDiceDc, checkText, addItem } from './game.js';
 import { STOMP, degreeForChoice } from '../story/power.js';
 
 const ONE_MOVE = 1000; // virtual choice index offset: "End it in one move."
@@ -26,11 +26,9 @@ export function choiceTag(g, c) {
     if (c.check) {
         const bonus = c.check.bonus ? c.check.bonus(g) : 0;
         const v = Math.round((actingCheck(g, c.check.skill) + bonus) * 10) / 10;
-        if (isNoDice()) {
-            const d = noDiceDc(asText(c.check.dc, g));
-            const ratio = v / d;
-            bits.push(`${actingName(g, c.check.skill)} ${v} / DC ${d} → ${ratio >= 1 ? 'passes' : ratio >= 0.5 && gives(c).length ? 'partly' : 'fails'}`);
-        } else bits.push(`${actingName(g, c.check.skill)} ${v} + d6 vs DC ${asText(c.check.dc, g)}`);
+        const d = noDiceDc(asText(c.check.dc, g));
+        const ratio = v / d;
+        bits.push(`${actingName(g, c.check.skill)} ${v} / DC ${d} → ${ratio >= 1 ? 'passes' : ratio >= 0.5 && gives(c).length ? 'partly' : 'fails'}`);
     }
     if (c.qi) bits.push(`${c.qi} Qi`);
     if (c.combat) bits.push('fight');
@@ -221,10 +219,10 @@ export function choose(g, scenes, index, { task = false } = {}) {
     if (c.check) {
         roll = rollCheck(g, c.check.skill, asText(c.check.dc, g), c.check.bonus ? c.check.bonus(g) : 0);
         ok = roll.success;
-        // no dice: a gathering choice between half and full the DC still brings back a thin haul
-        partial = isNoDice() && !ok && roll.ratio >= 0.5 && gives(c).length > 0;
+        // a gathering choice between half and full the DC still brings back a thin haul
+        partial = !ok && roll.ratio >= 0.5 && gives(c).length > 0;
         if (partial) ok = true;
-        lines.push(`${checkText(roll)} — ${partial ? 'partly' : ok ? 'success' : 'failure'}${roll.crit ? (roll.die == null ? ' (double!)' : ' (critical!)') : roll.six ? ' (six!)' : roll.fumble ? ' (one…)' : ''}`);
+        lines.push(`${checkText(roll)} — ${partial ? 'partly' : ok ? 'success' : 'failure'}${roll.crit ? ' (double!)' : ''}`);
         if (c.xp !== false) lines.push(...awardXp(g, c.check.skill, c.check.band || 'standard', { fail: !ok, factor: partial ? roll.ratio : 1 }));
     }
     if (onChoose && ok) onChoose(g, s.id, index, c); // v0.11.33: once-per-Coil work counts only when it succeeds (owner 14:05)
@@ -245,7 +243,7 @@ export function choose(g, scenes, index, { task = false } = {}) {
         } else lines.push(...out);
         if (crit) {
             const extra = Object.keys(g.inventory).map((id) => [id, (g.inventory[id] || 0) - (before[id] || 0)]).filter(([, d]) => d > 0);
-            if (extra.length) lines.push(`${isNoDice() ? 'Double haul' : 'Critical! A double haul'} — in total: ${extra.map(([id, d]) => `+${d} ${itemNames[id]?.name || id}`).join(', ')}.`);
+            if (extra.length) lines.push(`Double haul — in total: ${extra.map(([id, d]) => `+${d} ${itemNames[id]?.name || id}`).join(', ')}.`);
         }
     }
     for (const id of new Set(takeCapNotes())) lines.push(`Hammerspace: ${itemNames[id]?.name || id} is full — the rest stays behind.`);

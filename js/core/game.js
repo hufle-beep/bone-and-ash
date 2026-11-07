@@ -2,10 +2,10 @@
  * James RPG — game core. Same Qi rules as Rules Engine C (formulas.js is the engine's own file):
  * check = 0.5 × rank, XP cost = 50·k·T·L (k 0.5), Qi Max = 20 + Use check + open primaries + realm bonus,
  * Convergence ×1.25, HP = 20 + 2 × GU check (realm-filled), regen per Cycle (T1 = 30 min) 5% HP, 5% + 0.1 per
- * open collateral Qi. New for a game without a narrator: every check is value + d6 against the DC.
+ * open collateral Qi. New for a game without a narrator: every check is value ÷ DC (no dice; value + d6 until v0.9.3 / v0.11.45).
  * Pure — no DOM. The UI (main.js) and the tests drive it.
  */
-import { setFormsActive, actionOpen, actionLabel, fragileKnife, lineState, FORM_LINES, hasForm } from './forms.js';
+import { actionOpen, actionLabel, fragileKnife, lineState, FORM_LINES, hasForm } from './forms.js';
 /** v0.11.4: how far along a form line James is (0 = its first form, −1 = none yet). */
 const formStep = (g, line) => { const n = lineState(g, line).now; return n ? FORM_LINES[line].forms.findIndex((f) => f.id === n.id) : -1; };
 import {
@@ -173,9 +173,10 @@ export function ensureBars(g) {
 }
 export const realmName = (i) => realmStepLabel(i);
 
-/* ---------------- dice ---------------- */
+/* ---------------- the save's random numbers ---------------- */
 
-/** Deterministic d6 from the save's own seed (a reload does not reroll). */
+/** Deterministic d6 from the save's own seed (a reload does not reroll). Since v0.11.45 no check or fight rolls it (no dice
+ *  anywhere); the story still uses it for random events (night visitors, the far trail, Yuki's lone hunt…). */
 export function d6(g) {
     let x = g.rng || 1;
     x ^= x << 13; x >>>= 0; x ^= x >>> 17; x ^= x << 5; x >>>= 0;
@@ -280,40 +281,28 @@ export function awardYukiFightXp(g, band = 'standard') {
     return [atSkillCap(g.yuki.fight) && !ups.length ? 'Yuki Fight at T10 L10 (cap)' : `Yuki Fight +${pool}${ups.length ? ` → ${ups.at(-1)}` : ''}`];
 }
 
-/**
- * A check: acting value + d6 against the DC. Returns everything the UI shows.
- * @returns {{ skill, value, die, total, dc, success, crit, fumble }}
- */
-/* No dice (v0.9.3, task mode): check ÷ DC decides; DCs move down by NO_DICE_DC_SHIFT (the d6 averaged 3.5). Set by the UI and the tests. */
-let noDice = false;
-export const setNoDice = (v) => { noDice = !!v; };
-export const isNoDice = () => noDice;
-setFormsActive(() => noDice); // v0.10.4: the forms ladder applies in Incremental Mode only
+/* No dice (v0.9.3; the only rules since v0.11.45, E step 2, when the dice code went): check ÷ DC decides; DCs move down by
+ * NO_DICE_DC_SHIFT (the d6 averaged 3.5). The "no-dice" names (noDiceDc, NO_DICE_TUNE, noDiceUp…) are kept from that time. */
 export const NO_DICE_DC_SHIFT = 2;
 let noDiceTune = {};
 /** The story layer hands over its per-fight no-dice tuning (js/story/nodice_tune.js). */
 export const setNoDiceTune = (t) => { noDiceTune = t || {}; };
 export const noDiceDc = (dc) => Math.max(0.5, Math.round((dc - NO_DICE_DC_SHIFT) * 10) / 10);
-/** How a check reads in the log: "GU 1 / DC 2" without dice, "GU 1 + 🎲4 = 5 vs DC 3" with. */
-export const checkText = (r) => (r.die == null ? `${r.skill} ${r.value} / DC ${r.dc}` : `${r.skill} ${r.value} + 🎲${r.die} = ${r.total} vs DC ${r.dc}`);
+/** How a check reads in the log: "GU 1 / DC 2". */
+export const checkText = (r) => `${r.skill} ${r.value} / DC ${r.dc}`;
 
+/**
+ * A check: the acting value (plus any bonus) ÷ the DC moved down by NO_DICE_DC_SHIFT; 1 or more succeeds, 2 or more is a double.
+ * @returns {{ skill, value, dc, ratio, success, crit }}
+ */
 export function rollCheck(g, skillName, dc, bonus = 0) {
-    if (noDice) {
-        const value = Math.round((actingCheck(g, skillName) + bonus) * 10) / 10;
-        const d = noDiceDc(dc);
-        const ratio = value / d;
-        g.stats.checks += 1;
-        const success = ratio >= 1;
-        if (success) g.stats.wins += 1;
-        return { skill: actingName(g, skillName), value, die: null, total: value, dc: d, ratio, success, six: false, crit: ratio >= 2, fumble: false };
-    }
-    const value = actingCheck(g, skillName) + bonus;
-    const die = d6(g);
-    const total = Math.round((value + die) * 10) / 10;
+    const value = Math.round((actingCheck(g, skillName) + bonus) * 10) / 10;
+    const d = noDiceDc(dc);
+    const ratio = value / d;
     g.stats.checks += 1;
-    const success = die === 6 ? true : die === 1 ? total >= dc + 2 : total >= dc;
+    const success = ratio >= 1;
     if (success) g.stats.wins += 1;
-    return { skill: actingName(g, skillName), value, die, total, dc, success, six: die === 6, crit: success && dc > 0 && total >= 2 * dc, fumble: die === 1 };
+    return { skill: actingName(g, skillName), value, dc: d, ratio, success, crit: ratio >= 2 };
 }
 
 /* ---------------- time ---------------- */
@@ -537,11 +526,11 @@ export const BONESINGER_TIERS = [
  */
 export const boneTier = (g) => Math.min(SKILL_MAX_TIER, g.james.skills['Convergence Use'].tier);
 export const actionCost = (g, a) => (a.qi ? Math.round(a.qi * dampenMultiplier(boneTier(g)) * 10) / 10 : 0);
-/** Damage × the Convergence Use tier; v0.11.4 (Incremental Mode): dagger +1, sword +2 on the blade; the thrown lance +2 on darts. */
-export const formDmgBonus = (g, a) => (!noDice ? 0 : a.keeps === 'blade' ? Math.max(0, formStep(g, 'melee') - 1) : a.id === 'dart' && hasForm(g, 'lance') ? 2 : 0);
+/** Damage × the Convergence Use tier; v0.11.4: dagger +1, sword +2 on the blade; the thrown lance +2 on darts. */
+export const formDmgBonus = (g, a) => (a.keeps === 'blade' ? Math.max(0, formStep(g, 'melee') - 1) : a.id === 'dart' && hasForm(g, 'lance') ? 2 : 0);
 export const actionDmg = (g, a) => { const b = formDmgBonus(g, a); return [a.dmg[0] * boneTier(g) + b, a.dmg[1] * boneTier(g) + b]; };
-/** Guard's defence bonus: 2; v0.11.4 (Incremental Mode) +0.5 per personal-defence form (bracer 2.5 … full armour 4.5). */
-export const guardBonus = (g) => 2 + (noDice ? 0.5 * (formStep(g, 'defence') + 1) : 0);
+/** Guard's defence bonus: 2; v0.11.4: +0.5 per personal-defence form (bracer 2.5 … full armour 4.5). */
+export const guardBonus = (g) => 2 + 0.5 * (formStep(g, 'defence') + 1);
 /** v0.11.4 spike field: rounds, and the damage each attacker takes (1; 2 from the slab). */
 export const FIELD_ROUNDS = 2;
 export const fieldDamage = (g) => (hasForm(g, 'slab') ? 2 : 1);
@@ -612,23 +601,23 @@ export function bumpRel(g, who, f = 0, a = 0) {
 
 /**
  * One exchange. James acts (dart / blade / dodge / Yuki-strike), Yuki strikes on her own, then every enemy
- * still standing attacks: James defends with GU + d6 against the enemy's attack DC; a hit deals its damage
- * minus DR 1 (Ouroboros).
+ * still standing attacks: James defends with GU ÷ the enemy's attack DC (stepNoDice has the bands); a hit deals its
+ * damage minus DR 1 (Ouroboros).
  */
 export const COMBAT_ACTIONS = {
     dart: { id: 'dart', label: 'Bone darts', skill: 'Convergence Use', qi: 2, dmg: [2, 4], dcMod: 0 },
     blade: { label: 'Wraithbone blade', skill: 'GU', qi: 3, dmg: [3, 6], dcMod: 1, keeps: 'blade' },
     needle: { label: 'Needle to a joint', skill: 'Convergence Use', qi: 4, dmg: [1, 2], dcMod: 2, stagger: true },
     guard: { label: 'Guard and give ground', skill: 'GU', qi: 0, dmg: [0, 0], dcMod: -1, guard: true },
-    // v0.11.4, Incremental Mode only (actionOpen hides them in Story Mode):
+    // v0.11.4 (actionOpen hides them until James can sing them):
     spear: { id: 'spear', label: 'Bone spear', skill: 'GU', qi: 3, dmg: [3, 6], dcMod: 2, reach: true, keeps: 'spear' }, // sung once (Convergence), thrust with GU; a full hit holds the enemy off for the round
     spikes: { id: 'spikes', label: 'Sing a field of bone spikes', skill: 'Convergence Use', qi: 4, dmg: [0, 0], dcMod: 0, field: true }, // once per fight, 2 rounds
 };
 
+/** A hit's damage: the middle of its range (no dice). */
 function dmgRoll(g, [lo, hi]) {
     if (hi <= 0) return 0;
-    if (noDice) return Math.round((lo + hi) / 2);
-    return lo + ((d6(g) - 1) % (hi - lo + 1));
+    return Math.round((lo + hi) / 2);
 }
 
 /** Story-layer hooks: `before(g, enc)` may adjust an encounter (Long Forest scaling, posture text, degree). */
@@ -637,9 +626,8 @@ export const combatHooks = { before: null, lose: null };
 export const PEOPLE_FIGHTS = new Set(['gao', 'collectors', 'arson', 'ya_brawl', 'rt_brawl', 'elder', 'sect_watcher', 'lf_rogue']);
 /** Task mode (v0.9.7, owner's pick 3a): every beast fight +0.5 DC and attack on top of its no-dice tuning. */
 export const BEAST_UP = 0.5;
-/** v0.11.40 (E1): the no-dice raise to a fight's DC and attack (its tune plus BEAST_UP for a beast), as startCombat applies it; 0 with dice. */
+/** v0.11.40 (E1): the no-dice raise to a fight's DC and attack (its tune plus BEAST_UP for a beast), as startCombat applies it. */
 export function noDiceUp(id) {
-    if (!noDice) return 0;
     const t0 = noDiceTune[id];
     return ((t0 && t0.up) || 0) + (PEOPLE_FIGHTS.has(id) ? 0 : BEAST_UP);
 }
@@ -677,8 +665,8 @@ export function startCombat(g, enc0) {
         band: enc.band || 'standard',
         bladeFormed: false,
         enemies: enc.enemies.map((e) => {
-            const t0 = noDice ? noDiceTune[enc.id] : null; // v0.9.3: per-fight tuning for the no-dice rules
-            const t = noDice && !PEOPLE_FIGHTS.has(enc.id) ? { ...(t0 || {}), up: ((t0 && t0.up) || 0) + BEAST_UP } : t0; // v0.9.7: beasts +0.5
+            const t0 = noDiceTune[enc.id]; // v0.9.3: per-fight tuning for the no-dice rules
+            const t = !PEOPLE_FIGHTS.has(enc.id) ? { ...(t0 || {}), up: ((t0 && t0.up) || 0) + BEAST_UP } : t0; // v0.9.7: beasts +0.5
             const x = t ? { ...e, dc: e.dc + (t.up || 0), atk: e.atk + (t.up || 0), hp: Math.max(1, Math.round(e.hp * (t.hp || 1))) } : e;
             return { ...x, hpMax: x.hp, staggered: false };
         }),
@@ -782,82 +770,11 @@ function stepNoDice(g, actionId, targetIdx) {
 }
 
 export function combatStep(g, actionId, targetIdx = 0) {
-    const c = g.combat;
-    if (!c) return null;
-    if (noDice) return finishRound(g, stepNoDice(g, actionId, targetIdx));
-    const lines = [];
-    if (!actionOpen(g, actionId)) actionId = 'guard'; // v0.11.4: the spear and the spike field are Incremental Mode only
-    const act = COMBAT_ACTIONS[actionId];
-    const living = c.enemies.filter((e) => e.hp > 0);
-    const target = living[Math.min(targetIdx, living.length - 1)];
-    let guard = false;
-    const qiNeed = act.keeps === 'blade' && c.bladeFormed ? 0 : actionCost(g, act);
-    if (qiNeed && !spendQi(g, qiNeed)) {
-        lines.push(`Not enough Qi for ${act.label} — you fall back on guarding.`);
-        guard = true;
-    } else {
-        if (act.keeps === 'blade' && !c.bladeFormed) { c.bladeFormed = true; lines.push('White wraithbone slides out of your palm and sets into a blade.'); }
-        if (act.guard) {
-            guard = true;
-            lines.push('You give ground, watching for the opening.');
-        } else {
-            const T = boneTier(g);
-            const targets = act.id === 'dart' && T >= 4 ? living.slice(0, T >= 5 ? living.length : 2) : [target];
-            for (const tg of targets) {
-                const dc = tg.dc + act.dcMod;
-                const r = rollCheck(g, act.skill, dc);
-                const hit = r.success || T >= 10;
-                lines.push(`${act.label}${targets.length > 1 ? ` → ${tg.name}` : ''}: ${r.skill} ${r.value} + 🎲${r.die} = ${r.total} vs DC ${dc} — ${hit ? 'hit' : 'miss'}${!r.success && hit ? ' (it cuts what should not be cut)' : ''}`);
-                if (!hit) continue;
-                let dmg = dmgRoll(g, actionDmg(g, act)) * (r.crit ? 2 : 1);
-                dmg = Math.max(0, dmg - (T >= 3 ? 0 : (tg.dr || 0)));
-                tg.hp -= dmg;
-                lines.push(`  ${tg.name} takes ${dmg}${r.crit ? ' (critical — double damage)' : ''}.`);
-                if (act.stagger && tg.hp > 0) { tg.staggered = true; lines.push(`  ${tg.name} staggers.`); }
-            }
-        }
-    }
-    // T7+: a bone construct fights beside him
-    const ct = boneTier(g) >= 7 ? c.enemies.find((e) => e.hp > 0) : null;
-    if (ct) { const dmg = boneTier(g) * (1 + ((d6(g) - 1) % 3)); ct.hp -= dmg; lines.push(`Your bone construct strikes ${ct.name}: ${dmg}.`); }
-    let shield = boneTier(g) >= 8;
-    // Yuki
-    const yt = c.enemies.find((e) => e.hp > 0);
-    if (yt && g.yuki.hp > 0) {
-        const form = YUKI_FORMS[yukiForm(g)];
-        const yv = skillCheck(g.yuki.fight) + form.hit;
-        const die = d6(g);
-        const hit = yv + die >= yt.dc;
-        const verb = { cat: ['claws find a mark', 'a hiss and a swipe at air'], tiger: ['a paw the size of a shovel lands', 'jaws close on air'], human: ['a white blur and a strike', 'a sidestep, nothing more'] }[yukiForm(g)];
-        lines.push(`${form.name}: Fight ${yv} + 🎲${die} vs DC ${yt.dc} — ${hit ? verb[0] : verb[1]}`);
-        if (hit) { const [lo, hi] = form.dmg; const raw = yukiForm(g) === 'cat' ? 1 + (die >= 5 ? 1 : 0) : lo + ((die - 1) % (hi - lo + 1)); const dmg = Math.max(0, raw - (yt.dr || 0)); yt.hp -= dmg; lines.push(`  ${yt.name} takes ${dmg}.`); }
-    }
-    // enemies
-    for (const e of c.enemies) {
-        if (e.hp <= 0) continue;
-        if (e.staggered) { e.staggered = false; lines.push(`${e.name} is still reeling.`); continue; }
-        const aimYuki = e.prefersSmall && g.yuki.hp > 0 && d6(g) <= 2;
-        if (aimYuki) {
-            const die = d6(g);
-            const dodge = skillCheck(g.yuki.fight) + die + 1 >= e.atk;
-            lines.push(`${e.name} lunges at Yuki — ${dodge ? 'she is not there' : 'it connects'}.`);
-            if (!dodge) g.yuki.hp = Math.max(1, g.yuki.hp - hitDamage(e.dmg, e.realm, g.yuki.realm, yukiDr(g)));
-            continue;
-        }
-        if (shield) { shield = false; lines.push(`${e.name} attacks — your construct steps into the blow.`); continue; }
-        const r = rollCheck(g, 'GU', e.atk, guard ? 2 : 0);
-        if (r.success) {
-            lines.push(`${e.name} attacks: you defend (GU ${r.value} + 🎲${r.die} = ${r.total} vs ${e.atk}) — avoided.`);
-        } else {
-            const dmg = hitDamage(e.dmg, e.realm, g.james.realm, jamesDr(g));
-            g.james.hp = Math.max(0, g.james.hp - dmg);
-            lines.push(`${e.name} attacks: you defend (GU ${r.value} + 🎲${r.die} = ${r.total} vs ${e.atk}) — hit for ${dmg} (DR ${jamesDr(g)}${(g.james.realm || 0) >= 7 && (g.james.realm || 0) > (e.realm || 0) ? ', realm gap' : ''}).`);
-        }
-    }
-    return finishRound(g, lines);
+    if (!g.combat) return null;
+    return finishRound(g, stepNoDice(g, actionId, targetIdx));
 }
 
-/** The end of every round, dice or not: realm healing, time, win / lose. */
+/** The end of every round: realm healing, time, win / lose. */
 function finishRound(g, lines) {
     const c = g.combat;
     // immortal flesh: from Immortal Ascension, wounds close mid-fight
@@ -878,7 +795,7 @@ function finishRound(g, lines) {
         g.combat = null;
         return { lines, done: 'win', next };
     }
-    if (g.james.hp <= 0 || (noDice && c.round > NO_DICE_ROUND_CAP)) {
+    if (g.james.hp <= 0 || c.round > NO_DICE_ROUND_CAP) {
         if (g.james.hp > 0) lines.push('', 'Thirty exchanges in, your arms stop answering. You are spent, and they are not.');
         g.combat = null;
         g.james.hp = 1;

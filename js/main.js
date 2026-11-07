@@ -3,7 +3,7 @@ import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel, hasForm } fr
 import { coilMult, exLevel, exMult, wakeDay, fmtMult, COIL_GROWTH } from './core/game.js';
 import {
     newGame, ensureBars, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, skillCheck, xpToNext, clockLabel, clockLabelG, clockLabelSec, realmName, yukiForm,
-    startCombat, combatStep, combatFlee, COMBAT_ACTIONS, setNoDice, noDiceDc, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage,
+    startCombat, combatStep, combatFlee, COMBAT_ACTIONS, noDiceDc, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage,
 } from './core/game.js';
 import { sceneView, choose, goTo, gives } from './core/story.js';
 import { showPicked, isTaskHub, isQueueScreen, runsHere, isTaskChoice, taskCards, taskOpen, taskLabel, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, waitChoice, taskMinutes, runTask, outlook, taskQueue, MS_PER_GAME_HOUR, QUEUE_MAX, FAM, yukiLane, setYuki, dayOver } from './core/tasks.js';
@@ -57,7 +57,7 @@ let lastPress = 0;
 
 /* ---------------- tasks (v0.9.0, preview) ---------------- */
 // v0.11.34 (D1): Incremental Mode only; Story Mode's code stays in place unused (deleted later, D2) and 'boneash.tasks' is no longer read
-setNoDice(true); // no dice anywhere (v0.9.3); Incremental Mode only since v0.11.34, Story Mode's code out in v0.11.41
+// no dice anywhere (v0.9.3); Incremental Mode only since v0.11.34, Story Mode's code out in v0.11.41, the dice code in v0.11.45
 const SPEED_KEY = 'boneash.speed'; // per phone: 0 = paused, 1, 2, 5, 10
 const SPEEDS = [[0, 'Pause'], [1, '×1'], [2, '×2'], [5, '×5'], [10, '×10']]; // gated per save by maxSpeed (v0.9.8); the stored choice is kept and held down to the gate
 const TEST_SPEEDS_KEY = 'boneash.testspeeds'; // per phone: '1' = every speed open (hidden: tap "The clock" in Settings 5 times)
