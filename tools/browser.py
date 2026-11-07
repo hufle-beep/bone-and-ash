@@ -6,6 +6,7 @@ Serves the folder, opens the game at 390x844 in headless Chromium and taps the r
   4. two tabs: closing the older tab leaves the newer save alone (v0.11.8);
   5. Saves (v0.11.9, in the menu since v0.11.10): Copy status, Export all then Restore all into a new game, a backup restored;
   6. the main menu (v0.11.10): opens first on plain paper with no tab bar; Settings (text size, Show checks) and Saves; Continue;
+  (part 2 also: v0.11.35 a scene read before folds, Read it all again, Skip to the next choice)
   7. v0.11.11: holding a card opens its tooltip (no check text) and the tap that ends the hold runs nothing; the status bars carry
      progress values; the running bar slides (transform, no width); each tab keeps its scroll.
 Game screens (story, fights, journal) also fail on any check text: DC, a die, "+ d6" (checks are hidden since v0.11.10).
@@ -276,6 +277,31 @@ def picked(pg, url):
         if n != 1: fails.append(f'picked, {where}: {n} recoloured buttons, expected 1 (the work card "Test the water" stays as it was)')
     if not any(f.startswith('picked') for f in fails): notes.append('picked choices recoloured, work left alone')
 
+def again(pg, url):
+    """v0.11.35 (P1-a): a scene read in an earlier Coil folds under a memory line; Read it all again opens it; Skip to the next choice
+    walks the stretch at once (night_won → morning → the wilds) and lands on the task screen."""
+    st = json.loads((ROOT / 'saves/v0.11.7-coil2-day1.json').read_text())
+    st = json.loads(st['data']) if 'data' in st and isinstance(st.get('data'), str) else st
+    st['scene'] = 'night_won'; st['combat'] = None
+    st['flags'].update({'long': True, 'forest_day': 2}); st['minutes'] = 1440 + 22 * 60 + 360
+    st['coil']['n'] = 2; st['seen'] = {'night_won': 1, 'morning': 1, 'wilds': 1, 'arrival': 1}
+    fresh(pg, url, "a => { localStorage.clear(); localStorage.setItem('boneash.auto', a); }", json.dumps(st))
+    mem = pg.query_selector('.prose.again .memory')
+    if not mem: fails.append('again: no memory line on a scene read before'); return
+    rd = pg.query_selector('button.readall')
+    if not rd: fails.append('again: no Read it all again'); return
+    n0 = len(pg.query_selector_all('.prose.again > p'))
+    tap(pg, rd); until(pg, '!document.querySelector("button.readall")', 3000)
+    n1 = len(pg.query_selector_all('.prose.again > p'))
+    if not (n1 > n0): fails.append(f'again: Read it all again showed nothing more ({n0} → {n1} paragraphs)')
+    sk = pg.query_selector('button.card.skip[data-skip]')
+    if not sk or '2 scenes' not in sk.inner_text(): fails.append('again: no Skip to the next choice (2 scenes)'); return
+    tap(pg, sk); until(pg, "JSON.parse(JSON.parse(localStorage.getItem('boneash.auto')).data || localStorage.getItem('boneash.auto')).scene === 'wilds'", 5000)
+    raw = pg.evaluate("localStorage.getItem('boneash.auto')"); o = json.loads(raw); o = json.loads(o['data']) if isinstance(o.get('data'), str) else o
+    if o.get('scene') != 'wilds': fails.append(f'again: the skip ended on {o.get("scene")}, not the wilds')
+    else: notes.append('a scene read before folds, reads in full, and the skip walks to the wilds')
+    check_text(pg, 'after the skip', strict=True)
+
 def main(part=0):
     """v0.11.20: part 1 (Incremental Mode, the reload, no mode switch, two tabs) and part 2 (Saves, the menu, tooltips and scroll,
     the resting places) can run side by side, each with its own browser and server; no part = everything, in order."""
@@ -351,6 +377,8 @@ def main(part=0):
                 rest_places(pg, url)
                 # 9. picked choices recoloured (v0.11.32)
                 picked(pg, url)
+                # 10. a scene read before: the fold, the memory line, the skip (v0.11.35)
+                again(pg, url)
             b.close()
     finally:
         srv.terminate()

@@ -12,7 +12,8 @@ import { e8Hours, ecHours, jnHours } from '../js/story/meridians.js';
 import { serialize, deserialize } from '../js/core/game.js';
 import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, setNoDice, isNoDice, clockLabelSec, advance, STARVE_HP_PER_HOUR, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1, bumpRel as relBump, startActCoil, REL_CATCHUP } from '../js/core/game.js';
 import { canPrimary, canColGroup, colGroupsOpen, sessionsToday, dcPrimary, dcColGroup, btTarget, canAnyMeridian, COL_GROUPS, priHours, colHours, merMinutesOf } from '../js/story/meridians.js';
-import { sceneView, choose, goTo, wasPicked, isMenuScene, notePicked } from '../js/core/story.js';
+import { sceneView, choose, goTo, wasPicked, isMenuScene, notePicked, seenBefore, noteSeen } from '../js/core/story.js';
+import { againView, skipStep, skipRun, skipPlan, MEMORY_LINES, noFold, SKIP_MAX } from '../js/story/again.js'; // v0.11.35 (P1-a)
 import { medCards, runMed, canMeditate, NO_MEDITATE, isSitChoice, MED_SCREENS } from '../js/core/meditate.js';
 import { defaultMinutes, DEFAULT_MINUTES } from '../js/core/story.js';
 import { coilActive, rewind, endCoil, KEEP_FLAGS, REMEMBER } from '../js/core/coil.js';
@@ -699,6 +700,17 @@ const fightStats = {}; // v0.11.3: per mode, fight and bot style, for tools/sani
 let badBars = 0; // v0.11.3: games that ended with a NaN / Infinity bar
 const barsOk = (g) => [g.james.hp, g.james.qi, g.james.saturation, g.james.satiety, g.yuki.hp, g.yuki.qi].every(Number.isFinite);
 let predicted = 0;
+let skipChecked = 0;
+/** v0.11.35 (P1-a): on a copy, the skip ends in exactly the state of tapping through the same choices one by one. */
+function skipCheck(g, run) {
+    const a = JSON.parse(JSON.stringify(g));
+    if (skipStep(a, SCENES) < 0) return;
+    const b = JSON.parse(JSON.stringify(g));
+    const r = skipRun(a, SCENES);
+    for (let k = 0; k < r.steps; k++) { const o = sceneView(b, SCENES).choices.filter((c) => !c.disabled); choose(b, SCENES, o[0].index); }
+    if (JSON.stringify(a) === JSON.stringify(b)) pass++; else assert(false, `v0.11.35: the skip = tapping through (${g.scene}, run ${run}, ${r.steps} steps)`);
+    skipChecked++;
+}
 function play(run, tasks) {
     rs = seedOf(run, tasks ? 1 : 2); // v0.11.1: every game its own random stream
     setNoDice(tasks); // task mode has no dice anywhere (v0.9.3)
@@ -779,6 +791,7 @@ function play(run, tasks) {
             if (r.combat) { startCombat(g, r.combat(g)); fight(g, run); }
             continue;
         }
+        if (tasks && run % FC_EVERY === 0 && seenBefore(g)) skipCheck(g, run); // v0.11.35 (P1-a): copies only
         let open = v.choices.filter((c) => !c.disabled);
         if (!open.length) { assert(false, `dead end at ${g.scene} (run ${run})`); return false; }
         if (tasks && /^(arrival|clearing)$/.test(g.scene)) open = open.filter((c) => !/Stay lost/.test(c.label)); // v0.10.1: the balance bots stay out of the Long Forest
@@ -807,10 +820,10 @@ if (kids) { // v0.11.1: merge the workers' numbers
         for (const id of r.cardsForecast.__set) cardsForecast.add(id);
         for (const id of r.cardsWhole.__set) cardsWhole.add(id);
         mergeSeen(r.touched);
-        yukiRuns += r.yukiRuns; predicted += r.predicted; diceInTasks += r.diceInTasks; pass += r.pass; fail += r.fail;
+        yukiRuns += r.yukiRuns; predicted += r.predicted; skipChecked += r.skipChecked; diceInTasks += r.diceInTasks; pass += r.pass; fail += r.fail;
     }
 } else for (const run of myRuns()) play(run, true); // v0.11.34 (D1): Incremental Mode only (the Story Mode games are gone)
-if (SHARD) emit({ byCoil, medStats, deaths, stats, bands, fightStats, badBars, cardsSeen, cardsListed, cardsForecast, cardsWhole, yukiRuns, predicted, diceInTasks, pass, fail, touched });
+if (SHARD) emit({ byCoil, medStats, deaths, stats, bands, fightStats, badBars, cardsSeen, cardsListed, cardsForecast, cardsWhole, yukiRuns, predicted, skipChecked, diceInTasks, pass, fail, touched });
 if (BOTS_ONLY) { // v0.11.21: the games' stats only (the same file a full run writes)
     if (STATS_OUT) writeFileSync(STATS_OUT, JSON.stringify({ games: GAMES, deaths, byCoil, fights: fightStats, badBars, seen: touchedOut() }));
     console.log(`  ${GAMES} bot games, bots only (no rule checks)\n${pass} passed, ${fail} failed`);
@@ -1089,6 +1102,65 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
         assert(h.flags.spd_a1 === true && maxSpeed(h) === 5, `gates: ×5 survives the rewind to the start of ${to === 'act' ? 'Act 1' : 'the whole game'}`);
         assert(to === 'act' ? h.flags.ending === 'bluff' : (!h.flags.ending && h.scene !== 'a1_end' && (h.coil.act || 0) === 0), `gates: the ${to} rewind otherwise resets as before`);
     }
+}
+// v0.11.35 (P1-a, owner pick 15:42): scenes read in an earlier Coil fold, a memory line, Skip to the next choice
+{
+    setNoDice(true);
+    const g = ensureBars(newGame(3501, { closed: true }));
+    assert(g.seen && g.seen.arrival === 1 && !seenBefore(g), 'P1-a: a new game has read its first scene on Coil 1');
+    goTo(g, SCENES, 'stream'); assert(g.seen.stream === 1, 'P1-a: entering a scene records the Coil it was first read in');
+    noteSeen(g, 'stream'); g.coil.n = 3; noteSeen(g, 'stream'); assert(g.seen.stream === 1, 'P1-a: the first Coil is kept, never overwritten'); g.coil.n = 1;
+    endCoil(g, 'choice', 'stream'); rewind(g);
+    assert(g.coil.n === 2 && g.seen.stream === 1 && seenBefore(g, 'stream') && seenBefore(g, 'arrival') && !seenBefore(g, 'wilds'), 'P1-a: a rewind keeps the record; Coil 2 has read stream and arrival before, not the wilds');
+    // the whole-game rewind from Act 1 keeps it too
+    const w = ensureBars(newGame(3502, { closed: true })); w.scene = 'epilogue'; w.flags.ending = 'bluff'; w.minutes = 6 * 1440 + 900; choose(w, SCENES, 0);
+    const sw = { ...w.seen }; w.flags.a1_outcome = 'victory'; goTo(w, SCENES, 'a1_end'); rewind(w, { to: 'game' });
+    assert(Object.keys(sw).every((k) => w.seen[k] === sw[k]) && w.seen.a1_end != null, 'P1-a: the whole-game rewind keeps the record');
+    // old saves: a missing record is filled (past Coil 1 from the picked choices), a present one left alone
+    const o1 = ensureBars(newGame(3503)); delete o1.seen; o1.picked = { stream: [1] }; const l1 = deserialize(serialize(o1));
+    assert(l1.seen && !Object.keys(l1.seen).length, 'P1-a: an old Coil 1 save loads with an empty record');
+    const o2 = ensureBars(newGame(3504)); delete o2.seen; o2.coil.n = 3; o2.picked = { stream: [1], wilds: [0] }; const l2 = deserialize(serialize(o2));
+    assert(l2.seen.stream === 0 && l2.seen.wilds === 0 && seenBefore(l2, 'stream') && !seenBefore(l2, 'arrival'), 'P1-a: an old Coil 3 save counts its picked scenes as read before');
+    const o3 = ensureBars(newGame(3505)); o3.seen = { stream: 2 }; o3.coil.n = 3; assert(deserialize(serialize(o3)).seen.stream === 2, 'P1-a: a present record loads unchanged');
+    assert(!JSON.stringify(dryClone(g)).includes('"seen":null'), 'P1-a: a dry run copies the record');
+    // the fold
+    const f = ensureBars(newGame(3506, { closed: true })); f.flags.long = true; f.flags.forest_day = 2; f.minutes += 1440 + 22 * 60;
+    goTo(f, SCENES, 'night_won'); const v1 = sceneView(f, SCENES);
+    assert(!againView(f, v1).fold && againView(f, v1).first === v1.text, 'P1-a: Coil 1: the text in full, no memory line');
+    f.coil.n = 2; const a = againView(f, v1);
+    assert(a.fold && MEMORY_LINES.includes(a.memory) && `${a.first}\n\n${a.rest}` === v1.text.split(/\n\s*\n/).map((x) => x.trim()).filter(Boolean).join('\n\n'), 'P1-a: read on an earlier Coil: the first paragraph, the rest behind Read it all again, a memory line');
+    assert(againView(f, v1).memory === a.memory, 'P1-a: the same line for that scene on that Coil');
+    assert(MEMORY_LINES.length >= 24 && new Set(MEMORY_LINES).size === MEMORY_LINES.length, `P1-a: ${MEMORY_LINES.length} memory lines, none twice`);
+    const lines = new Set(); for (const id of Object.keys(SCENES)) { f.seen[id] = 1; const t = { id, text: 'a\n\nb' }; const x = againView(f, t); if (x.fold) lines.add(x.memory); }
+    assert(lines.size >= 18, `P1-a: the lines vary by scene (${lines.size} different on Coil 2)`);
+    f.seen.wilds = 1; assert(!againView(f, { id: 'wilds', text: 'a\n\nb' }).fold && noFold('wilds') && noFold('coil_end') && noFold(Object.keys(TASK_HUBS)[0]), 'P1-a: no fold on the task screens, their menus or the Coil\'s screens');
+    assert(!againView(f, { id: 'night_won', text: 'one paragraph only' }).fold, 'P1-a: a one-paragraph scene does not fold');
+    // the skip: night_won → morning → wilds (a task screen), two steps, the same as tapping
+    const s0 = ensureBars(newGame(3507, { closed: true })); s0.flags.long = true; s0.flags.forest_day = 2; s0.minutes += 1440 + 22 * 60; goTo(s0, SCENES, 'night_won'); goTo(s0, SCENES, 'morning'); goTo(s0, SCENES, 'night_won');
+    s0.coil.n = 2;
+    const pl = skipPlan(s0, SCENES);
+    assert(pl.steps === 2 && pl.to === 'wilds' && s0.scene === 'night_won', `P1-a: the plan: 2 steps to the wilds, the game untouched (${pl.steps}, ${pl.to})`);
+    const A = JSON.parse(JSON.stringify(s0)), B = JSON.parse(JSON.stringify(s0));
+    const rr = skipRun(A, SCENES);
+    for (let k = 0; k < rr.steps; k++) choose(B, SCENES, sceneView(B, SCENES).choices.filter((c) => !c.disabled)[0].index);
+    assert(JSON.stringify(A) === JSON.stringify(B) && rr.minutes === A.minutes - s0.minutes && rr.minutes === pl.minutes && A.scene === 'wilds', `P1-a: skipping = tapping through (state, clock ${rr.minutes} min)`);
+    // where it stops
+    const u = JSON.parse(JSON.stringify(s0)); delete u.seen.morning; assert(skipPlan(u, SCENES).steps === 1, 'P1-a: it stops at a scene not read before');
+    const c1 = JSON.parse(JSON.stringify(s0)); c1.coil.n = 1; assert(skipStep(c1, SCENES) < 0, 'P1-a: nothing to skip on the Coil a scene was first read');
+    const ch = ensureBars(newGame(3508, { closed: true })); ch.coil.n = 2; ch.seen = { arrival: 1, yuki_check: 1 }; goTo(ch, SCENES, 'arrival'); ch.coil.n = 2;
+    assert(skipStep(ch, SCENES) < 0, 'P1-a: no skip where there is a real choice (the arrival)');
+    let checks = 0, fights = 0; for (const [id, sc] of Object.entries(SCENES)) { if ((sc.choices || []).length !== 1) continue; const c = sc.choices[0]; if (!c.check && !c.combat) continue; const t = ensureBars(newGame(3509, { closed: true })); t.coil.n = 2; t.seen = { [id]: 1 }; t.scene = id; if (skipStep(t, SCENES) < 0) { if (c.check) checks++; else fights++; } else assert(false, `P1-a: the skip never takes a check or a fight (${id})`); }
+    assert(checks + fights > 0, `P1-a: one-choice checks and fights are never skipped (${checks} checks, ${fights} fights)`);
+    assert(SKIP_MAX >= 10, 'P1-a: the skip walks up to 30 steps');
+    // after the Fable review: no skip into a collapse, none across into Act 1, no fold on an outcome's own text
+    const dy = JSON.parse(JSON.stringify(s0)); dy.james.hp = 0.5; dy.james.satiety = 0; const dp = skipPlan(dy, SCENES);
+    { const t = JSON.parse(JSON.stringify(dy)); skipRun(t, SCENES); assert(t.scene !== 'coil_end' || dp.steps === 0, `P1-a: a stretch that ends in a collapse is not offered (${dp.steps}, ${t.scene})`); }
+    const ab = ensureBars(newGame(3510, { closed: true })); ab.coil.n = 2; ab.flags.ending = 'bluff'; ab.minutes = 6 * 1440 + 900; ab.seen = { bluff_win: 1, epilogue: 1, fo_start: 1, fo_envoy: 1 }; ab.scene = 'bluff_win';
+    { const t = JSON.parse(JSON.stringify(ab)); const r2 = skipRun(t, SCENES); assert((t.coil.act || 0) === 0 && t.scene === 'epilogue' && r2.steps === 1, `P1-a: the skip stops at the prologue's end (the epilogue, an outcome scene), never crossing into Act 1 (${t.scene}, ${r2.steps} steps)`); }
+    for (const id of ['epilogue', 'fo_start', 'breakthrough', 'a1_end']) { f.seen[id] = 1; assert(!againView(f, { id, text: 'a\n\nb' }).fold, `P1-a: an outcome scene never folds (${id})`); }
+    f.seen.night_won = 1; f.lastWin = { next: 'night_won', degree: 2, id: 'crows' }; assert(!againView(f, { id: 'night_won', text: 'a\n\nb' }).fold, 'P1-a: a lopsided win\'s own text never folds'); f.lastWin = null;
+    if (FULL) assert(skipChecked >= 1000, `v0.11.35: the bot games compared the skip with tapping through often enough (${skipChecked})`);
+    else console.log(`  skip = tapping through, checked in the bot games (quick, log only): ${skipChecked}`);
 }
 const pctOf = (o, n) => Object.entries(o).sort().map(([k, v]) => `${k} ${((v / n) * 100).toFixed(1)}%`).join(', ');
 console.log(`  tribute, tasks:   ${pctOf(stats.tasks.endings, stats.tasks.games)}`);

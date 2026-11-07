@@ -75,6 +75,11 @@ button { font: inherit; color: inherit; }
 .prose em { color: var(--ink-2); }
 .prose strong { color: var(--ink); }
 .end-mark { font-family: var(--display); color: var(--red); text-align: center; }
+/* v0.11.35 (P1-a): a scene read in an earlier Coil: a memory line, the first paragraph, "Read it all again" */
+.prose .memory { font-style: italic; color: var(--ink-2); border-left: 2px solid var(--red); padding-left: 0.6em; }
+.prose p.memory:first-child::first-letter { font: inherit; float: none; margin: 0; }
+.prose p.memory + p::first-letter { font-family: var(--display); font-weight: 800; font-size: 2.1em; float: left; line-height: 0.9; margin: 0.08em 0.12em 0 0; }
+.readall { display: block; margin: 0 0 0.95em; padding: 0.35em 0; background: none; border: 0; font: inherit; font-size: 0.92rem; color: var(--red); cursor: pointer; text-decoration: underline; text-underline-offset: 0.2em; }
 
 /* ---- what just happened: rolls and gains ---- */
 .result { margin: 1rem 1.15rem 0; padding: 0.7rem 0.9rem; border-left: 3px solid var(--ink); background: rgba(35,33,30,0.05); font-size: 0.92rem; line-height: 1.5; border-radius: 0 6px 6px 0; }
@@ -220,6 +225,7 @@ button { font: inherit; color: inherit; }
 .below { margin-top: 0.6rem; border-top: 1px solid rgba(35,33,30,0.15); padding-top: 0.2rem; }
 .below > h2, .below .cards { margin-left: 1.15rem; margin-right: 1.15rem; }
 .card.story { border-style: solid; }
+.card.story.skip { border-style: dashed; } /* v0.11.35 (P1-a): Skip to the next choice */
 .card.med { border-style: dashed; }
 .card.busy { background: rgba(160,44,44,0.08); border-color: var(--red); }
 .card.fightish { border-color: var(--red); }

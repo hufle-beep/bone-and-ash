@@ -2,6 +2,13 @@
 
 Started 2026-11-07 (v0.11.33), when `history-4.md` reached about 45 KB. Newer than `history-4.md`, `history-3.md`, `history-2.md` and `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Version notes (moved from the handover in v0.11.35)
+
+### v0.11.32 — P2-a, picked choices recoloured
+
+- **js/core/story.js:** `notePicked`, `wasPicked`, `isMenuScene`; `choose()` records the picked choice (both paths). **js/core/coil.js:** `rewind` keeps `picked`. **js/core/tasks.js:** `dryClone` leaves `picked` out. **js/main.js:** `WORK_SUBS`, `pickedMark`; the `picked` class and "(picked before)" for screen readers on story cards and Story Mode choices. **css/style.css:** `.picked` (`#6b5a45` on `#e3ded3`, tags `#75665a`, busy keeps its red). **tests/tasks.test.mjs:** the picked block. **tools/browser.py:** `picked` (part 2). **tests/README.md**. **sw.js:** VERSION.
+- **The full check:** exit code 0, 0 drift (208 numbers compared), the leftover step 0 findings, 96.3 s. **Cold review (Fable, rule 9):** nothing blocking. Folded in: the colour rule moved to `tasks.js` `showPicked` (pure) and tested (one move, menus, gathering inside a task card's scene, "Back…", a hub's story exit); "Open a meridian" and "Yuki: change form" no longer recoloured; a picked fight choice keeps its red tag in Story Mode; a running picked card keeps its red tint under the pointer. Noted: `coilSnap` copies `picked` into Act 1's snapshot (a few hundred bytes; `rewind` uses the live record). Full check after: exit code 0, 0 drift, 94.4 s.
+
 ## Decisions and version notes (moved from the handover in v0.11.34)
 
 - **v0.11.28: the leaner check (owner 12:14 "Can we thin the output and also the suite while trying to keep the efficiency? I allow you to search the internet"; 12:30 "check the github for output trimmers e.g. caveman"; 12:33 "we should revise the hard rules … once I pick the options, there is no need to write everything out again for a doublechek"; 12:34 "go with your recommendation" = O1 + S1 + S2 + R-a (H, cutting this file's line 3, left out: optional); 12:38 "go"; built in v0.11.28):**

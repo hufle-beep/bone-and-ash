@@ -8,6 +8,7 @@ import {
 import { sceneView, choose, goTo, gives } from './core/story.js';
 import { showPicked, isTaskHub, isQueueScreen, runsHere, isTaskChoice, taskCards, taskOpen, taskLabel, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, waitChoice, taskMinutes, runTask, outlook, taskQueue, MS_PER_GAME_HOUR, QUEUE_MAX, FAM, yukiLane, setYuki } from './core/tasks.js';
 import { SCENES, ITEMS } from './story/prologue.js';
+import { againView, skipPlan, skipRun } from './story/again.js'; // v0.11.35 (P1-a)
 import { coilActive, endCoil } from './core/coil.js';
 import { medCards, runMed, isSitChoice, medActivity, useLine } from './core/meditate.js';
 import { meridianRow } from './story/meridians.js';
@@ -295,6 +296,14 @@ function resultsPaneHtml() {
 }
 
 /** Any screen in task mode: picture and story on top; everything you can do below, as cards. */
+/** v0.11.35 (P1-a): a scene read in an earlier Coil folds to its first paragraph under a memory line; "Read it all again" opens it. */
+let readAllScene = null;
+function proseHtml(v) {
+    const a = againView(g, v);
+    if (!a.fold) return `<div class="prose">${paras(v.text)}</div>`;
+    const all = readAllScene === `${g.scene}#${g.coil?.n || 1}`; // per scene and Coil (Fable review)
+    return `<div class="prose again"><p class="memory">${md(a.memory)}</p>${paras(a.first)}${all ? paras(a.rest) : '<button class="readall" data-readall="1" aria-expanded="false"><span aria-hidden="true">▸ </span>Read it all again</button>'}</div>`;
+}
 function renderCardScreen() {
     const v = sceneView(g, SCENES);
     const hub = onTaskHub();
@@ -337,15 +346,17 @@ function renderCardScreen() {
         queueHtml = q.length ? `<h2>Queue (${q.length} / ${QUEUE_MAX})</h2><ol class="queue">${rows}</ol><div class="btns"><button class="btn" data-qclear="1">Clear queue</button></div>` : '';
         hubHtml = `${groups.map((gr) => `<h2>${esc(gr.name)}</h2><div class="cards">${gr.cards.map(cardHtml).join('')}</div>`).join('')}`;
     }
+    const sk = v.end || hub ? { steps: 0 } : skipPlan(g, SCENES); // v0.11.35 (P1-a): a stretch read before, 2 steps or more
+    const skipHtml = sk.steps >= 2 ? `<button class="card story skip" data-skip="1">Skip to the next choice.<span class="tag">${sk.steps} scenes you know</span><span class="len">${esc(durLabel(sk.minutes))} · at once</span></button>` : '';
     const storyHtml = v.end
         ? `<h2>Story</h2><div class="cards">${story.map(storyCardHtml).join('')}<button class="card story" data-new="1">Start a new game</button><button class="card story" data-tab-go="sheet">See how James ended up</button></div>` // v0.11.26: an end's own choices first (Go round again…)
-        : story.length ? `<h2>Story</h2><div class="cards">${story.map(storyCardHtml).join('')}</div>` : '';
+        : story.length ? `<h2>Story</h2><div class="cards">${skipHtml}${story.map(storyCardHtml).join('')}</div>` : '';
     const medOpen = med.filter((m) => m.open); // v0.11.17 (pick 1a): only what can run now (collaterals until they open, locked sits and meridians, Break through until ready)
     const medHtml = medOpen.length ? `<h2>Meditate</h2><div class="cards">${medOpen.map(medCardHtml).join('')}</div>` : '';
     view.innerHTML = `<section class="fade-in">
 <div class="plate">${sceneArt(v.art)}</div>
 <header class="head"><div class="place">${esc(v.place || g.location)}</div><h1 class="title">${esc(v.title)}</h1></header>
-<div class="prose">${paras(v.text)}</div>
+${proseHtml(v)}
 <div class="below">
 ${statusHtml()}${resultHtml()}
 ${nowRowHtml()}${hubTop}
@@ -960,6 +971,22 @@ view.addEventListener('click', (ev) => {
             const k = Number(b.dataset.unq);
             if (k === 0 && running) stopRunning();
             taskQueue(g).splice(k, 1); autosave(); startNext(); render();
+            return;
+        }
+        if (b.dataset.readall) { readAllScene = `${g.scene}#${g.coil?.n || 1}`; render(); return; } // v0.11.35 (P1-a)
+        if (b.dataset.skip) { // v0.11.35 (P1-a): the stretch read before, at once; each choice as a tap would take it
+            const now = Date.now();
+            if (now - lastPress < 400) return;
+            lastPress = now;
+            if (running?.kind) return;
+            if (running) stopRunning();
+            try {
+                const r = skipRun(g, SCENES);
+                endOneShot();
+                lastResult = r.lines.length ? { lines: r.lines, fail: false } : null;
+                if (r.lines.length) addResult('Skip to the next choice', r.lines, false);
+                autosave(); startNext(); render(); window.scrollTo({ top: 0, behavior: smoothScroll() });
+            } catch (err) { lastResult = { lines: [String(err.message || err)], fail: true }; render(); showError(err); }
             return;
         }
         if (b.dataset.story != null) {

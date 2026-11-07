@@ -113,6 +113,7 @@ function go(g, scenes, to) {
     const id = typeof to === 'function' ? to(g) : to;
     if (!scenes[id]) throw new Error(`Choice leads to unknown scene "${id}"`);
     g.scene = id;
+    noteSeen(g, id); // v0.11.35 (P1-a)
     const s = scenes[id];
     if (s.place) g.location = asText(s.place, g);
     let skip = !!g.coil?.skipEnter; // a Coil rewind or "Not yet": the scene was entered already, don't run its enter twice
@@ -122,6 +123,15 @@ function go(g, scenes, to) {
     ensureBars(g);
     return lines;
 }
+
+/* ---------- scenes read (v0.11.35, P1-a, owner 13:16 / 15:42) ---------- */
+/** `g.seen[sceneId]` = the Coil in which the scene was first read (kept across every rewind, coil.js; 0 = before the record). */
+export function noteSeen(g, id) {
+    if (!g.seen || typeof g.seen !== 'object') g.seen = {};
+    if (g.seen[id] == null) g.seen[id] = g.coil?.n || 1;
+}
+/** Read in an earlier Coil than this one. */
+export const seenBefore = (g, id = g.scene) => g.seen?.[id] != null && g.seen[id] < (g.coil?.n || 1);
 
 /* ---------- picked choices (v0.11.32, P2-a, owner 13:16 / 13:29) ---------- */
 /**

@@ -75,6 +75,7 @@ export function newGame(seed = Date.now(), { closed = false } = {}) {
         tasks: { queue: [], fam: {}, adapt: {}, yuki: { on: false, progress: 0 } },
     };
     g.coil = makeCoil(g);
+    g.seen = { [g.scene]: 1 }; // v0.11.35 (P1-a): the start scene, first read on Coil 1
     return g;
 }
 
@@ -924,7 +925,17 @@ export function migrate(g) {
     if (g.v === undefined) g.v = 1;
     if (g.v > SAVE_VERSION) throw new SaveError('tooNew', `This save is from a newer version of the game (state ${g.v}; this version reads up to ${SAVE_VERSION}).`);
     while (g.v < SAVE_VERSION) { const step = MIGRATIONS[g.v]; if (!step) throw new SaveError('notSave', `No migration from state ${g.v}.`); step(g); g.v += 1; }
-    return oneCount(g);
+    return seenFill(oneCount(g));
+}
+/**
+ * v0.11.35 (P1-a): a save from before has no `seen` record. Past Coil 1, the scenes it picked a choice on count as read in an
+ * earlier Coil (0); on Coil 1 it starts empty. Fills a missing field only.
+ */
+export function seenFill(g) {
+    if (!g || (g.seen && typeof g.seen === 'object')) return g;
+    g.seen = {};
+    if ((g.coil?.n || 1) > 1) for (const k of Object.keys(g.picked || {})) g.seen[k] = 0;
+    return g;
 }
 /**
  * One Coil count per save (v0.11.26, owner 11:12). A save from before counted Act 1's Coils from 1: its count becomes the
