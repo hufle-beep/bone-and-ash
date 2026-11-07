@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.49 | (this push) | Y3 part 1: the great-cat pictures (29 `<key>_tiger.webp`, the form map in `art.js`) and a new `ridge.webp`. Same save state as 0.11.48; the baseline kept. Rolling back only drops the new pictures (the great cat shows code art again). |
+| 0.11.50 | (this push) | Y3 part 2a: 15 human-form pictures (`<key>_human.webp`, `YUKI_HUMAN_PICS` in `art.js`) and `yuki_human.webp` in the qipao. Same save state as 0.11.49; the baseline kept. Rolling back only drops the new pictures (human form shows code art again, the portrait its slip dress). |
+| 0.11.49 | `55de0d6` | Y3 part 1: the great-cat pictures (29 `<key>_tiger.webp`, the form map in `art.js`) and a new `ridge.webp`. Same save state as 0.11.48; the baseline kept. Rolling back only drops the new pictures (the great cat shows code art again). |
 | 0.11.48 | `57054e9` | M1 + G1: Manners at any Fed, gather Qi above Fed 3. Same save state as 0.11.47; the baseline kept. |
 | 0.11.47 | `9faa1d9` | N1: the Root Road's meal (Manners behind eating), Train hidden when done, the return camps' clock, gather Qi at Fed 0. Same save state as 0.11.46 (`rr_hub:1` is still the Manners door; the baseline kept). |
 | 0.11.46 | `813df05` | Q1 + X1: the gather-Qi card, the vessels' collaterals before Nascent Soul, the Blackroot camp clock; the baseline updated (owner pick B1). Same save state as 0.11.45 (a queued `qi:next` is just an id; an older version skips it as "not possible"; collaterals opened under 0.11.46 count the same in an older version). |

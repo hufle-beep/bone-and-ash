@@ -2,6 +2,25 @@
 
 Started 2026-11-07 (v0.11.45), when `history-6.md` reached about 45 KB. Newer than `history-6.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.50 (word for word)
+
+### From "Decided in chat (2026-11-07)"
+
+- **v0.11.47: N1 (owner 19:39 the Root Road notes with `saves/2026-11-07-1939-incremental-rr_hub.txt`; options after v0.11.46: N1; 19:58 "the midday meal/stop to eat could be consolidated into the "eat something" button. If, and only if it doesn't have a story beat behind it. if it does, it should stay as midday meal and be gated until 14:00"; told: it has one (Manners, `ya_mocks`: Ya mocks Mei Lin's thanks to Heaven; relationships, `ya_grudge`, a GU check, the later "Ya has been staring" talk); 20:01 "Put the Manners scene behind the eat something instead. Rename it something fitting. after the Manners scene is played, it becomes an ordinary eat something again"; 20:03 "go with your recommendations" = "Eat with the others." and T1):**
+  - **The meal:** `rr_hub`'s choice 1 (was "Stop for the midday meal.", the same place in the list, so `rr_hub:1` keeps its meaning in saves and queues) is "Eat with the others.": shown while `ya_mocked` is unset, not late, Fed under 85, no food of James's own needed (Ya's millet cakes, +15 in Manners); while it shows, the shared "Eat something." is hidden on `rr_hub` only; once Manners has played, the ordinary card is back. The 14:00 gate (the 19:58 idea) dropped with it.
+  - **T1 (picked):** the shared "Train." door on the Blackroot camps (`rr_hub`, `dw_hub`, `ah_hub`) shows only while one of `bl_train`'s drills is left today (`bt_ya`, `bt_yuki`, `bt_needle`, or `bt_dart` once James can sing darts). T2 (the drills as queueable cards like the forest's; a balance change, for the retune) not picked.
+  - **From the v0.11.46 Fable review:** `act1_return.js` `toHour`: an evening hour (19:00: `rt_camp`, `rt_evening`) is not jumped to before 06:00; the mornings (6, 8) as before. "Meditate: gather Qi" locked at Fed 0 ("too hungry: eat first"; `qiFed`, so a queued one is skipped there too). A sit short of Qi that would end past 02:00 shows "ends past 02:00".
+  - **Checks:** the full check: exit 0, 0 drifted, 3 log-only moves (random bots' tribute: C4 won 43.3 → 37.8%, C6 won 60.2 → 49.1%, C6 paid 26.5 → 33.3%; n about 100–220); models: Careful 2.29 / 3.87 (Yuki off 2.40 / 4.18 → 4.12), Completionist 2.12 / 2.96 → 2.94 (Yuki off 3.53 → 3.52); the baseline kept. Cold review on Fable: see the version note.
+  - **Uploaded by Claude after v0.11.46 (owner 19:57):** handover, roadmap, changelog, restore points, `reference.md`, working agreement, `history-7.md`.
+- **The art (19:57):** not home yet; ask again after this push.
+
+### Version note
+
+#### v0.11.47 — N1: the Root Road's meal and Train, the return camps' clock, gather Qi at Fed 0
+
+- **js/story/act1_blackroot.js** (the meal, `trainLeft`), **js/story/act1_return.js** (`toHour`), **js/core/tasks.js** (`qiFed`), **js/core/meditate.js** (the Fed lock, the late sit). **tests/tasks.test.mjs:** the v0.11.47 block. **tests/README.md; project/roadmap.md, changelog.md, restore-points.md, history-7.md** (v0.11.44 moved). **sw.js:** VERSION.
+- **Checks:** the full `bash tools/check.sh` (results in the decisions block); the Fable cold review: nothing breaks saves, ids or the forecast (`rr_hub:1` is still the Manners door, `g.picked` keeps its meaning, the new label matches no instant-choice rule, `trainLeft` matches `bl_train` exactly, `qi:next` forecast = reality). **Its findings, for the owner (options next):** (1) medium: with the Fed < 85 gate, Manners is hidden all morning on Root Road day 2 after a full supper (Fed 99 at 06:20, the card from about 11:00) and from 10:00 to about 15:00 on day 1 if James arrives fed, so a player can walk off the Road without it, losing its later talk (`ya_fight_start`, Ya +4–6, `ya_respected`); before, it showed at any Fed; (2) low-medium: the gather card's Fed gate should be Fed > 3 (an hour drains 3 and regen needs Fed left at the end): at Fed 0–3 it gives no Qi; (3) low: on `rr_hub` from 19:00 before Manners there is no eating card at all (`bl_camp` still has "Cook and eat."); (4) low: `trainLeft` ignores Qi (at 0 Qi with only darts / needles left, Train opens two locked drills); (5) note, older: a morning `toHour` (6) entered at 00:00–03:59 doesn't move the clock (`a1`, act1_return.js:67).
+
 ## Moved from the handover in v0.11.49 (word for word)
 
 ### From "Decided in chat (2026-11-07)"

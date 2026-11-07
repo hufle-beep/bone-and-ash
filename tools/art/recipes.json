@@ -1,5 +1,5 @@
 {
- "note": "v0.11.24: how every picture in art/pic was made (owner picks 2026-11-07). Run each step's 'op' in order on the owner's ComfyUI (tools/art/workflow.json; Z-Image-Turbo bf16, 8 steps, cfg 1, res_multistep / simple, shift 3). Masks are polygons in source pixels, white = repaint, blurred by 'blur' px; tools/art/masks.py draws them. Then tools/art/palette.py cuts the last file to the palette at 800x500 (--gold for Yuki). Originals: the owner's ComfyUI output folder, boneash/. v0.11.26 (the prologue, owner picks S1 P1 C1 R-a, 2026-11-07): each prologue key has one picture named after the key; the shared character descriptions are in \"cast\" and the style texts in \"styles\" (p: scenes with people, n: animals, objects and landscapes only). Rules learnt: the model adds stray women in black dresses and giant floating faces to busy scenes; saying \"no women\" or \"no faces\" makes it worse (and once added nude figures to an animals-only prompt, which were deleted unseen by the owner); describing what fills the background works, and so does the n style for scenes without James. v0.11.49 (Y3 part 1, the great cat; owner picks 2026-11-07 20:33-22:00): each picture that draws Yuki has a <key>_tiger version. Fresh ones swap the cat line for cast \"yuki_tiger\" (redos: \"yuki_tiger2\", more tiger-like); james, jackals_dead and ridge are inpaints on the approved picture; problem areas (stray women, faces, extra figures, leash-like cords, the fire under her paws) are inpainted out with prompts that describe only what belongs there. Scenes cut without --gold. Rules learnt: the model ignores \"nothing on his shoulder\" (it drew a cat there; describe the shoulder instead); a detail inpaint at 3x on a face comes out too realistic next to the flat style (1x inpaints with \"flat two-tone ink, no realistic shading\" fit); the style text's cloud curls leak into small repaints; head repaints from text alone do not make James uniform (owner 21:52: a reference tool, its own step before the Act 1 art); \"james_shaggy\" is the look the owner wants (village tiger s44) and is used by bone_field, arson and jackals.",
+ "note": "v0.11.24: how every picture in art/pic was made (owner picks 2026-11-07). Run each step's 'op' in order on the owner's ComfyUI (tools/art/workflow.json; Z-Image-Turbo bf16, 8 steps, cfg 1, res_multistep / simple, shift 3). Masks are polygons in source pixels, white = repaint, blurred by 'blur' px; tools/art/masks.py draws them. Then tools/art/palette.py cuts the last file to the palette at 800x500 (--gold for Yuki). Originals: the owner's ComfyUI output folder, boneash/. v0.11.26 (the prologue, owner picks S1 P1 C1 R-a, 2026-11-07): each prologue key has one picture named after the key; the shared character descriptions are in \"cast\" and the style texts in \"styles\" (p: scenes with people, n: animals, objects and landscapes only). Rules learnt: the model adds stray women in black dresses and giant floating faces to busy scenes; saying \"no women\" or \"no faces\" makes it worse (and once added nude figures to an animals-only prompt, which were deleted unseen by the owner); describing what fills the background works, and so does the n style for scenes without James. v0.11.49 (Y3 part 1, the great cat; owner picks 2026-11-07 20:33-22:00): each picture that draws Yuki has a <key>_tiger version. Fresh ones swap the cat line for cast \"yuki_tiger\" (redos: \"yuki_tiger2\", more tiger-like); james, jackals_dead and ridge are inpaints on the approved picture; problem areas (stray women, faces, extra figures, leash-like cords, the fire under her paws) are inpainted out with prompts that describe only what belongs there. Scenes cut without --gold. Rules learnt: the model ignores \"nothing on his shoulder\" (it drew a cat there; describe the shoulder instead); a detail inpaint at 3x on a face comes out too realistic next to the flat style (1x inpaints with \"flat two-tone ink, no realistic shading\" fit); the style text's cloud curls leak into small repaints; head repaints from text alone do not make James uniform (owner 21:52: a reference tool, its own step before the Act 1 art); \"james_shaggy\" is the look the owner wants (village tiger s44) and is used by bone_field, arson and jackals. v0.11.50 (Y3 part 2a): style 'pc' (CLAMP-heavier, owner 23:05) and cast 'yuki_human' (from the yuki_human portrait, the black high-collared qipao; the choker dropped because the high collar hides it, owner 23:19) for the human versions.",
  "masks": {
   "shen_eyes_big": {
    "size": [
@@ -920,6 +920,57 @@
      ]
     ]
    ]
+  },
+  "y3h_portrait_dress": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 12,
+   "polys": [
+    [
+     [
+      822,
+      276
+     ],
+     [
+      928,
+      276
+     ],
+     [
+      935,
+      332
+     ],
+     [
+      1045,
+      345
+     ],
+     [
+      1080,
+      420
+     ],
+     [
+      1085,
+      800
+     ],
+     [
+      695,
+      800
+     ],
+     [
+      700,
+      420
+     ],
+     [
+      712,
+      348
+     ],
+     [
+      815,
+      332
+     ]
+    ]
+   ]
   }
  },
  "pictures": {
@@ -931,6 +982,106 @@
     "seed": 22,
     "width": 1280,
     "height": 800
+   },
+   {
+    "op": "inpaint",
+    "file": "y3h_portrait_s2_d85",
+    "source": "blend_yuki_s22",
+    "mask": "y3h_portrait_dress",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs, long narrow faces with pointed chins, hair as long flowing locks separated by thin gaps, fine vertical hatching lines in places, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. The upper body of a slender young woman wearing a long-sleeved black qipao with a high stand collar closed snugly around her throat, thin red piping along the collar and the diagonal front opening, small red knot buttons at the collar, long straight white hair falling over her shoulders, against a black night sky.",
+    "seed": 2,
+    "denoise": 0.85,
+    "why": "D1 (owner 23:08): the portrait wears the scenes' qipao; it came out sleeveless; owner 23:37 picked it for its body shape and pose"
+   },
+   {
+    "op": "local",
+    "file": "y3h_portrait_sleeves",
+    "source": "y3h_portrait_s2_d85",
+    "note": "long sleeves (owner 23:37, 23:46): python3 -I tools/art/sleeves.py SRC SPEC OUT with SPEC = this step's spec: the bare arms (the bright region joined to each seed inside the limits) filled black, a 3 px white rim kept. Then palette.py --gold.",
+    "spec": {
+     "limits": [
+      [
+       [
+        700,
+        330
+       ],
+       [
+        772,
+        330
+       ],
+       [
+        770,
+        450
+       ],
+       [
+        766,
+        800
+       ],
+       [
+        600,
+        800
+       ],
+       [
+        640,
+        620
+       ],
+       [
+        684,
+        520
+       ],
+       [
+        692,
+        400
+       ]
+      ],
+      [
+       [
+        958,
+        332
+       ],
+       [
+        1024,
+        326
+       ],
+       [
+        1046,
+        420
+       ],
+       [
+        1110,
+        800
+       ],
+       [
+        1004,
+        800
+       ],
+       [
+        970,
+        520
+       ],
+       [
+        960,
+        420
+       ]
+      ]
+     ],
+     "seeds": [
+      [
+       732,
+       540
+      ],
+      [
+       1000,
+       540
+      ],
+      [
+       660,
+       760
+      ]
+     ],
+     "thr": 120,
+     "rim": 3
+    }
    }
   ],
   "yuki_cat": [
@@ -1970,6 +2121,160 @@
     "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. A night scene in a forest clearing. A huge white tiger, a big cat as long as a man is tall, with a broad tiger face, thin grey tiger stripes on snow-white fur, heavy paws, gold eyes and a thin red cord around her neck stands on four legs behind two dead jackals, looking down at them, pleased. Her two front paws stand side by side on the bare ground, with a few scattered white bones around them on the ground. No fire.",
     "why": "owner 21:39: lose the fire"
    }
+  ],
+  "forest_dawn_human": [
+   {
+    "op": "generate",
+    "file": "y3h_forest_dawn_s44",
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide dawn scene at the edge of an ancient dark forest of huge gnarled trees, mist between the trunks, a small red sun low in the sky. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers has just arrived and stands looking around, one hand on his glasses, deadpan. Beside him stands a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles, looking unimpressed. Exactly one man and one woman.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "omnitool_human": [
+   {
+    "op": "generate",
+    "file": "y3h_omnitool_s44",
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime scene on a rocky ledge among tall stone cliffs with mist. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers looks at a translucent glowing rectangular holographic screen floating in the air in front of his raised left wrist, showing a few thin lines and four small red dots, his face deadpan. Beside him on a rock sits a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles, reading the screen over his arm. Exactly one man and one woman.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "clearing_human": [
+   {
+    "op": "generate",
+    "file": "y3h_clearing_s44",
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide daytime scene of a forest clearing of pale grey grass and old moss-covered standing stones, tall dark trees around it, a small pale sun. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands in the middle of the clearing with a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles beside him, both looking toward a gap in the trees. Exactly one man and one woman.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "stream_human": [
+   {
+    "op": "generate",
+    "file": "y3h_stream_s44",
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide daytime scene of a cold dark mountain stream running over black stones between tall grey cliffs and ferns. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers crouches at the water's edge cupping water in his hands. Across the stream a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles sits on a flat stone with her knees drawn up, looking at the water with distaste. Exactly one man and one woman.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "forage_human": [
+   {
+    "op": "generate",
+    "file": "y3h_forage_s44",
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime scene in a dense forest undergrowth. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers crouches studying a cluster of small round red berries on a bush and a ring of pale mushrooms beside him, holding one mushroom up to his glasses. Beside him stands a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping reaching her ankles and a thin red band choker, her arms folded, watching him. Exactly one man and one woman.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800,
+    "why": "the test sheet (owner 23:19 \"s44 looks great for a baseline\"); its prompt still has the choker line, which the high collar hides"
+   }
+  ],
+  "hunt_human": [
+   {
+    "op": "generate",
+    "file": "y3h_hunt3_s22",
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime forest scene. The background is a dense wall of tall dark tree trunks and big ferns, nothing else. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers and a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles stand side by side among the trunks, she is a head shorter than him; she leans forward on light feet, stalking, her tail straight out behind her, and he holds one thin white bone dart ready in his hand. Both watch a small wild hare that sits up alert among the ferns on the right. Exactly one man, one woman and one hare.",
+    "seed": 22,
+    "width": 1280,
+    "height": 800,
+    "why": "cold review 23:50: in s44 (owner 23:37) she knelt in front and read twice James's size; crouching redos stayed too big; side by side, owner pick s22 (23:59)"
+   }
+  ],
+  "camp_human": [
+   {
+    "op": "generate",
+    "file": "y3h_camp_s44",
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A night scene at a small camp under tall pine trees: A small campfire with red flames and white smoke in the centre. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers sits on a log by the fire, deadpan, warming his hands. Beside him on the same log sits a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping reaching her ankles and a thin red band choker, her tail curled around her feet, holding her hands to the fire. Darkness all around. Exactly one man and one woman.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800,
+    "why": "the test sheet (owner 23:19 \"s44 looks great for a baseline\"); its prompt still has the choker line, which the high collar hides"
+   }
+  ],
+  "tribulation_human": [
+   {
+    "op": "generate",
+    "file": "y3h_tribulation_s44",
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide dramatic scene on a mountain top: Enormous black storm clouds gather overhead and one jagged white bolt of lightning strikes down. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers sits cross-legged and calm below it with his eyes closed, completely unharmed, and beside him sits a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles, yawning behind her hand. Exactly one man and one woman.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "lights_human": [
+   {
+    "op": "generate",
+    "file": "y3h_lights_s44",
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A dark night forest of tall black trunks: A slow procession of pale glowing orbs of light drifts low between the trees in a loose line, all going the same way into the distance. In the foreground a man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers sits up on his blanket watching them, and beside him kneels a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles, her cat ears flat. Exactly one man and one woman.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "rain_human": [
+   {
+    "op": "generate",
+    "file": "y3h_rain_s44",
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A night scene of warm grey rain falling in long slanting lines over a forest camp, the small campfire hissing with smoke. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers sits hunched by the fire with his lab coat collar turned up, deadpan, and beside him sits a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles, soaked, her wet hair plastered down and her cat ears flat, furious. Exactly one man and one woman.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "crows_human": [
+   {
+    "op": "generate",
+    "file": "y3h_crows_s44",
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A night scene at a small forest camp under a pale moon: Three huge moulting rot-crows with ragged black feathers and milky white eyes perch on a fallen trunk above a small campfire, staring down. Below, a man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers sits up on his blanket looking back at them, deadpan, and beside him stands a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles, glaring up at the crows. Exactly one man, one woman and three crows.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "rats_human": [
+   {
+    "op": "generate",
+    "file": "y3h_rats_s44",
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A night scene on the bank of a black stream between grey cliffs: Two huge slick black mire-rats the size of dogs with long whip tails climb out of the reeds. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands with white bone darts in his hand, and in front of him stands a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles, looking amused. Exactly one man, one woman and two rats.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "gift_human": [
+   {
+    "op": "generate",
+    "file": "y3h_gift_s44",
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A night scene at a small campfire under a pale moon in a pine forest. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers lies on his back on a blanket, just awake, deadpan, and a dead fat long-necked marsh bird is laid out on his chest like an offering. Beside him kneels a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles, very upright and proud. Exactly one man and one woman.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "bone_field_human": [
+   {
+    "op": "generate",
+    "file": "y3h_bone_field2_s66",
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide daytime scene of a valley of giant bones: Ribs as big as house frames, a huge skull half sunk in moss, a long spine of giant vertebrae running into the distance, grey mountains behind. In the middle distance, small beside the huge bones, a man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers and a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles stand side by side looking up at the ribs, she is a head shorter than him. Exactly one man and one woman.",
+    "seed": 66,
+    "width": 1280,
+    "height": 800,
+    "why": "owner 23:37: s44 drew her twice James's size; the inpaints failed (a stray figure, then a clipped one); a new picture side by side, owner pick s66 (23:46)"
+   }
+  ],
+  "mire_human": [
+   {
+    "op": "generate",
+    "file": "y3h_mire_s44",
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide grey daytime scene of a misty marsh: Black water between grey grassy hummocks, dead reeds, a few ugly long-necked marsh birds lifting off. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers wades through the mud with his trousers soaked to the knee, deadpan, and beside him a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles walks along a fallen log, holding up the hem of her qipao, refusing to touch the water. Exactly one man and one woman.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
   ]
  },
  "palette": {
@@ -2063,7 +2368,8 @@
  },
  "styles": {
   "p": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. ",
-  "n": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. "
+  "n": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. ",
+  "pc": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. "
  },
  "cast": {
   "james": "a man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers",
@@ -2078,6 +2384,7 @@
   "pockface": "a huge pock-faced brute with a shaved head and a ragged sleeveless tunic",
   "yuki_tiger": "a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck",
   "yuki_tiger2": "huge white tiger, a big cat as long as a man is tall, with a broad tiger face, thin grey tiger stripes on snow-white fur, heavy paws, gold eyes and a thin red cord around her neck",
-  "james_shaggy": "a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers"
+  "james_shaggy": "a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers",
+  "yuki_human": "a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles"
  }
 }
