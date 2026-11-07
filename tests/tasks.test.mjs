@@ -1399,7 +1399,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     a.scene = 'rr_hub';
     assert(labels(a).includes('Eat something.') && !labels(a).includes('Eat with the others.'), 'N1: after Manners the ordinary "Eat something." is back');
     const b = rr(); b.inventory = {}; assert(labels(b).includes('Eat with the others.'), 'N1: "Eat with the others." needs no food of James\'s own');
-    const c = rr(); c.james.satiety = 90; assert(!labels(c).includes('Eat with the others.'), 'N1: not offered at Fed 85 or more, like eating');
+    const c = rr(); c.james.satiety = 99; assert(labels(c).includes('Eat with the others.') && !labels(c).includes('Eat something.'), 'M1 (v0.11.48): offered at any Fed (99 after a full supper), so Manners can\'t be walked past');
     const d = rr(); d.scene = 'dw_hub'; d.flags.bl_region = 'dw'; assert(labels(d).includes('Eat something.'), 'N1: the other Blackroot camps keep "Eat something."');
     // Train
     const t = rr(); t.james.skills['Convergence Use'] = { tier: 1, level: 6, xp: 0 }; ensureBars(t);
@@ -1425,7 +1425,9 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     const q = ensureBars(newGame(4704)); q.scene = 'camp'; q.minutes = 20 * 60; q.james.qi = 1; q.james.satiety = 0;
     const qc = medCards(q, SCENES).find((x) => x.id === 'med:qi');
     assert(qc && !qc.open && qc.show && /too hungry/.test(qc.tag) && !qc.task && !taskOpen(q, SCENES, T.QI_TASK), 'N1: gather Qi locked at Fed 0, with the reason');
-    q.james.satiety = 1; assert(medCards(q, SCENES).find((x) => x.id === 'med:qi').open && taskOpen(q, SCENES, T.QI_TASK), 'N1: and open again at Fed 1');
+    q.james.satiety = 3; assert(!medCards(q, SCENES).find((x) => x.id === 'med:qi').open && !taskOpen(q, SCENES, T.QI_TASK), 'G1 (v0.11.48): still locked at Fed 3 (an hour drains 3; no Qi would come back)');
+    q.james.satiety = 3.5; assert(medCards(q, SCENES).find((x) => x.id === 'med:qi').open && taskOpen(q, SCENES, T.QI_TASK), 'G1: open above Fed 3');
+    { const r0 = q.james.qi; runTask(q, SCENES, T.QI_TASK); assert(q.james.qi > r0, `G1: at Fed 3.5 the hour does give Qi (${r0} → ${q.james.qi})`); }
     const l = ensureBars(newGame(4705)); l.scene = 'camp'; l.minutes = 1440 + 90; l.james.qi = 9;
     const ls = medCards(l, SCENES).find((x) => x.id === 'med:sit');
     assert(ls && !ls.open && ls.late && ls.tag === 'ends past 02:00', `N1: a sit short of Qi at 01:30 says "ends past 02:00" (${ls?.tag})`);

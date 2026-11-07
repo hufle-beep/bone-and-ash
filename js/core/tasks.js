@@ -14,7 +14,7 @@
  */
 import { hasForm } from './forms.js';
 import { choose, goTo, choiceOpen, choiceTag, gives, setTimeless, defaultMinutes, movesPlace, wasPicked, isMenuScene, isTimeless, setFamiliar } from './story.js';
-import { advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck, canBreakThrough, btMinutes, realmName, condense, sitMinutes, useSpeed, USE_N, exMins, nightLock, endsLate, sitUseless, jamesQiMax } from './game.js';
+import { advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck, canBreakThrough, btMinutes, realmName, condense, sitMinutes, useSpeed, USE_N, exMins, nightLock, endsLate, sitUseless, jamesQiMax, SATIETY_PER_HOUR } from './game.js';
 import { CONDENSE_SIT_COST } from './formulas.js';
 import { btTarget, MER_LINES, lineWindow, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
@@ -116,8 +116,9 @@ export const sitOpen = (g, scenes) => isQueueScreen(g, scenes) && !(TASK_HUBS[g.
 export const QI_TASK = 'qi:next';
 export const QI_MINUTES = 60;
 export const qiNotFull = (g) => g.james.qi < jamesQiMax(g) - 0.05;
-/** v0.11.47: not at Fed 0 (no regen while starving: game.js advance). */
-export const qiFed = (g) => g.james.satiety > 0;
+/** v0.11.47: not when starving; v0.11.48 (owner pick G1): an hour drains SATIETY_PER_HOUR (3) and regen needs Fed left at its end
+ *  (game.js advance), so it opens only above that. */
+export const qiFed = (g) => g.james.satiety > (SATIETY_PER_HOUR * QI_MINUTES) / 60;
 export const qiOpen = (g, scenes) => isQueueScreen(g, scenes) && qiNotFull(g) && qiFed(g);
 /** v0.11.14: the Meditate cards that can be queued anywhere Meditate shows. */
 export const isMedTask = (id) => id === SIT_TASK || id === BT_TASK || id === QI_TASK || !!lineOfTask(id);

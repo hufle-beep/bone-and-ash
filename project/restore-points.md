@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.47 | (this push) | N1: the Root Road's meal (Manners behind eating), Train hidden when done, the return camps' clock, gather Qi at Fed 0. Same save state as 0.11.46 (`rr_hub:1` is still the Manners door; the baseline kept). |
+| 0.11.48 | (this push) | M1 + G1: Manners at any Fed, gather Qi above Fed 3. Same save state as 0.11.47; the baseline kept. |
+| 0.11.47 | `9faa1d9` | N1: the Root Road's meal (Manners behind eating), Train hidden when done, the return camps' clock, gather Qi at Fed 0. Same save state as 0.11.46 (`rr_hub:1` is still the Manners door; the baseline kept). |
 | 0.11.46 | `813df05` | Q1 + X1: the gather-Qi card, the vessels' collaterals before Nascent Soul, the Blackroot camp clock; the baseline updated (owner pick B1). Same save state as 0.11.45 (a queued `qi:next` is just an id; an older version skips it as "not possible"; collaterals opened under 0.11.46 count the same in an older version). |
 | 0.11.45 | `d7dfaa0` | E step 2 (D-a): the dice code out. Same save state as 0.11.44; the bot stats and the part tests byte-identical to 0.11.44. |
 | 0.11.44 | `2c49f29` | E step 1 (P2): the Act 1 part test in Incremental Mode, bot-like strength. Tests and docs only; the game is identical to 0.11.41. |

@@ -125,8 +125,9 @@ By noon you reach the first of the roots: grey-white, smooth as bone, wide as a 
             : 'Day two on the Root Road. The roots are thicker here, and warmer. Ya says the road ends today, at the split — and that something lives in the split. She says it the way other people mention the weather.'),
         choices: [
             // v0.11.47 (owner 20:01): the Manners beat sits behind eating on the Root Road (was "Stop for the midday meal.", the same place in the list):
-            // until it has played this card replaces "Eat something." here; Ya's millet cakes, so no food needed; then the ordinary card is back
-            { text: 'Eat with the others.', show: (g) => !g.flags.ya_mocked && !late(g) && g.james.satiety < 85, time: 30, to: 'ya_mocks' },
+            // until it has played this card replaces "Eat something." here; Ya's millet cakes, so no food needed; then the ordinary card is back;
+            // v0.11.48 (owner pick M1): at any Fed, as the old midday meal (the Fed < 85 gate hid it all morning after a full supper)
+            { text: 'Eat with the others.', show: (g) => !g.flags.ya_mocked && !late(g), time: 30, to: 'ya_mocks' },
             { text: 'Ya has been staring at you for an hour. Ask her what her problem is.', show: (g) => !!g.flags.ya_mocked && !g.flags.ya_sparred && !late(g), time: 10, to: 'ya_fight_start' },
             { text: 'Forage along the roots.', show: (g) => daily('rr_forage')(g) && !late(g), time: 15, to: 'rr_forage' },
             { text: 'Hunt.', show: (g) => daily('rr_hunt')(g) && !late(g), time: 15, to: 'rr_hunt' },

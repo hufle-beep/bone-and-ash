@@ -2,6 +2,24 @@
 
 Started 2026-11-07 (v0.11.45), when `history-6.md` reached about 45 KB. Newer than `history-6.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.48 (word for word)
+
+### From "Decided in chat (2026-11-07)"
+
+- **v0.11.45: E step 2, D-a (owner 19:08 "upload yourself, not home for the art. procceed to E step 2"; options D-a / D-b / D-c; 19:10 "Go with your recommendation" = D-a):**
+  - **Removed:** `game.js`: the `noDice` switch (`setNoDice` / `isNoDice`), `rollCheck`'s dice branch (a check returns `{ skill, value, dc, ratio, success, crit }`, no `die` / `total` / `six` / `fumble`), the dice fight round in `combatStep` (now `finishRound(g, stepNoDice(…))`), `dmgRoll`'s die (the middle of the range), the `noDice` tests in `formDmgBonus`, `guardBonus`, `noDiceUp`, `startCombat` and the 30-round cap, `checkText`'s dice text; `forms.js`: the forms switch (`setFormsActive`, `on()`; forms always apply); `story.js`: the `isNoDice()` branches (the check label, the thin haul, "critical / six / one" wording, "Double haul"); `coil_scenes.js`'s import, `main.js`'s call. **Kept:** `d6()` (the save's seeded random numbers for night events, the far trail, Yuki's lone hunt, the Long Forest's wanderers, the heart's night), the "no-dice" names (`noDiceDc`, `NO_DICE_TUNE`, `setNoDiceTune`, `noDiceUp`, `NO_DICE_ROUND_CAP`, `NO_DICE_DC_SHIFT`, `stepNoDice`, `INC_ONLY_ACTIONS`; D-b's renaming not picked), and `main.js`'s display of 🎲 in log lines (old saves' logs may hold dice lines).
+  - **Tests and tools:** every `setNoDice(true)` call gone (tasks, story, models, part, saves tests; `tools/sanity.mjs`, `tools/snap.mjs`); the tasks test's fight keys stay `inc:…` (the baseline keys); its E1 check "with dice there is no raise" gone (one assertion fewer); the rules test checks value ÷ (DC − 2) instead of value + d6.
+  - **Proof:** the tasks test (1,000 games), the story test (1,000), the models (300 each of Careful, Completionist, Rusher, Random, plus 100 with Yuki off) and the four part tests wrote byte-identical stats and output before and after. Full check: exit 0, 152 numbers compared, 0 drifted, the same 12 log-only moves as since v0.11.42, the leftover step 0 findings, models unchanged (Careful 2.21 / 4.09, Completionist 2.24 / 3.00); 140 s on this 2-core workspace (99.7 s stored). No Fable review: no logic change, proven by byte-identical stats (as in v0.11.41 and v0.11.23).
+  - **Uploaded by Claude after v0.11.44 (owner 19:08):** handover, roadmap, changelog, restore points, `history-6.md`.
+- **The art (19:08):** not home yet; ask again after this push.
+
+### Version note
+
+#### v0.11.45 — E step 2: the dice code out
+
+- **js/core/game.js, js/core/forms.js, js/core/story.js, js/story/coil_scenes.js, js/story/nodice_tune.js, js/main.js:** as in the decisions block. **tests/tasks.test.mjs, story.test.mjs, models.test.mjs, part.test.mjs, saves.test.mjs, rules.test.mjs; tools/sanity.mjs, tools/snap.mjs:** no `setNoDice`; the rules test's check. **tests/README.md, project/reference.md, tools/timings.json; project/roadmap.md, changelog.md, restore-points.md, history-7.md** (new: v0.11.42's decisions and note moved). **sw.js:** VERSION.
+- **Checks:** the byte-identical stats run and the full `bash tools/check.sh` (results in the decisions block).
+
 ## Moved from the handover in v0.11.47 (word for word)
 
 ### From "Decided in chat (2026-11-07)"
