@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.29 | (this push) | The rebalance RB-1 (tribute and rot ape harder, the Coil bonus 0.25 per Coil); the baseline updated. Same save state as 0.11.26; a save on Coil n keeps its XP, its bonus is ×(1 + 0.25(n−1)) from now on. |
+| 0.11.30 | (this push) | Docs only (the priority points); the game is the same as 0.11.29. |
+| 0.11.29 | `4cd2c20` | The rebalance RB-1 (tribute and rot ape harder, the Coil bonus 0.25 per Coil); the baseline updated. Same save state as 0.11.26; a save on Coil n keeps its XP, its bonus is ×(1 + 0.25(n−1)) from now on. |
 | 0.11.28 | `a53abb7` | The leaner check (compact output, a leaner models step, rule 1: the pick is the go). Tests, tools and docs only; the game is the same as 0.11.26; same save state. |
 | 0.11.27 | `16f59e2` | The bot models (tests and tools only). The game is the same as 0.11.26; same save state. |
 | 0.11.26 | `3b35f70` | The Coil goes round again (two wake points from Act 1, the end of Act 1 included), "same days again" gone, one Coil count per save; the baseline updated (Act 1 easier). Same save state as 0.11.19 plus the optional `coil.one` (an older version ignores it; an older version's Act 1 Coils then count from the save's number). The fields `played` / `replay` are no longer written. |
