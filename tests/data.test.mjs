@@ -112,9 +112,9 @@ assert(!sceneArt('envoy').includes('data-pic') && sceneArt('envoy').startsWith('
     assert([...drawsCat].sort().join(' ') === [...YUKI_PICS].sort().join(' '), `v0.11.38: YUKI_PICS is exactly the pictures whose recipe draws the cat (recipes ${drawsCat.size}, list ${YUKI_PICS.size})`);
     assert(YUKI_PICS.size === 29, `v0.11.49: 29 pictures draw Yuki (30 in v0.11.38; ridge is a new landscape without her) (${YUKI_PICS.size})`);
     assert(!YUKI_PICS.has('ridge') && pictureOf('ridge', 'tiger') === 'art/pic/ridge.webp' && pictureOf('ridge', 'human') === 'art/pic/ridge.webp', 'v0.11.49: ridge shows the landscape without Yuki in every form');
-    // v0.11.49 (Y3, part 1): the great-cat versions. v0.11.50 (Y3 part 2a): human for the 15 keys of YUKI_HUMAN_PICS (2b: the other 14)
+    // v0.11.49 (Y3, part 1): the great-cat versions. v0.11.50 (Y3 part 2a): human for 15 keys; v0.11.51 (part 2b): all 29
     assert([...YUKI_PIC_FORMS].join(' ') === 'cat tiger human', `v0.11.50: Yuki's pictures exist for the cat, the great cat and the human (${[...YUKI_PIC_FORMS]})`);
-    assert(YUKI_HUMAN_PICS.size === 15 && [...YUKI_HUMAN_PICS].every((k) => YUKI_PICS.has(k)), `v0.11.50: 15 keys of YUKI_PICS have a human picture (${YUKI_HUMAN_PICS.size})`);
+    assert(YUKI_HUMAN_PICS.size === 29 && [...YUKI_PICS].every((k) => YUKI_HUMAN_PICS.has(k)), `v0.11.51: every key of YUKI_PICS has a human picture (${YUKI_HUMAN_PICS.size})`);
     const drawnIn = (key, form) => YUKI_PIC_FORMS.has(form) && (form !== 'human' || YUKI_HUMAN_PICS.has(key));
     for (const key of Object.keys(PICTURES)) {
         if (key.startsWith('yuki_')) continue;
@@ -181,6 +181,16 @@ assert(gives(yhunt).slice().sort().join(' ') === 'hare_raw venison', `v0.11.25: 
     }
     const g = structuredClone(base); g.scene = 'bl_morning'; SCENES.bl_morning.enter(g);
     assert(g.flags.bl_stakes_night === false, 'v0.11.25: the stakes last one night (cleared in the morning)');
+}
+
+// v0.11.51 (Y3 part 2b, owner pick C1): the code-art human Yuki (Act 1's code-art scenes, the form-change plate) has no red choker
+{
+    const C2 = await import('../js/art/clamp2.js');
+    const svg = C2.yukiHuman(0, 0);
+    const reds = svg.match(new RegExp(`<path [^>]*${C2.RED}[^>]*>`, 'g')) || [];
+    assert(reds.length === 1 && !svg.includes(`fill="${C2.RED}"`), `v0.11.51: the code-art human Yuki's only red is her mouth (no choker, no knot) (${reds.length} red paths)`);
+    const close = C2.yukiHumanCloseUp('t');
+    assert(close.includes('<path') && !close.includes(C2.RED), 'v0.11.51: the code-art human close-up draws no red at all (its only red was the choker and knot)');
 }
 
 console.log(`${pass} passed, ${fail} failed`);

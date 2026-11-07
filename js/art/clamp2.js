@@ -741,8 +741,7 @@ export function yukiHuman(x, y, s = 1, face = 1) {
     front += `<path d="M-4.3 ${top + 5.6} C-4.8 ${top - 1} -2.4 ${top - 3} 0 ${top - 3} C2.4 ${top - 3} 4.8 ${top - 1} 4.3 ${top + 5.6} L3.4 ${top + 3.2} L2.4 ${top + 4.6} L1.2 ${top + 2.8} L0 ${top + 4.4} L-1.2 ${top + 2.8} L-2.4 ${top + 4.6} L-3.4 ${top + 3.2} Z" fill="${W}" ${st(0.45)}/>`;
     front += `<path d="M-4.4 ${top + 3} C-5 ${top + 14} -5.4 ${top + 26} -6.6 ${top + 40} M4.4 ${top + 3} C5 ${top + 14} 5.4 ${top + 26} 6.6 ${top + 40}" ${st(1.6)} fill="none"/><path d="M-4.4 ${top + 3} C-5 ${top + 14} -5.4 ${top + 26} -6.6 ${top + 40} M4.4 ${top + 3} C5 ${top + 14} 5.4 ${top + 26} 6.6 ${top + 40}" ${st(1, W)} fill="none"/>`;
     front += `<path d="M-3.8 ${top - 0.6} L-5.2 ${top - 7.4} L-1.2 ${top - 2.4} Z M3.8 ${top - 0.6} L5.2 ${top - 7.4} L1.2 ${top - 2.4} Z" fill="${W}" ${st(0.45)}/><path d="M-3.6 ${top - 1.6} L-4.4 ${top - 5.6} L-2.2 ${top - 2.6} Z M3.6 ${top - 1.6} L4.4 ${top - 5.6} L2.2 ${top - 2.6} Z" fill="${G2}"/>`;
-    // the red cord, now a choker with a knot
-    front += `<path d="M-1.5 ${top + 15.2} Q0 ${top + 16.2} 1.5 ${top + 15.2}" ${st(0.6, RED)} fill="none"/><path d="M0 ${top + 15.6} L0.8 ${top + 16.6} L0 ${top + 17.6} L-0.8 ${top + 16.6} Z" fill="${RED}"/>`;
+    // v0.11.51 (Y3 part 2b, owner pick C1): no choker (dropped from her look at 2026-11-07 23:19; the pictures' high collar carries the red)
     const shadow = `<ellipse cx="0" cy="0.4" rx="14" ry="1.4" fill="${K}" opacity="0.4"/>`;
     return `<g transform="translate(${f(x)} ${f(y)}) scale(${f(s * face)} ${f(s)})">${shadow}${back}${body}${front}</g>`;
 }
@@ -766,7 +765,7 @@ export function yukiHumanCloseUp(id = 'yh') {
     // neck
     s += `<path d="M${cx - 11} 130 C${cx - 11} 150 ${cx - 13} 166 ${cx - 18} 178 L${cx + 22} 178 C${cx + 15} 164 ${cx + 12} 148 ${cx + 12} 128 Z" fill="${W}" ${st(1)}/>`;
     s += `<path d="M${cx - 11} 138 C${cx - 3} 148 ${cx + 6} 148 ${cx + 12} 136 L${cx + 12} 150 C${cx + 6} 156 ${cx - 3} 156 ${cx - 11} 150 Z" fill="${G2}"/>`;
-    s += `<path d="M${cx - 13} 160 Q${cx} 168 ${cx + 15} 158" ${st(2.2, RED)} fill="none"/><path d="M${cx + 1} 162 L${cx + 6} 168 L${cx + 1} 174 L${cx - 4} 168 Z" fill="${RED}" ${st(0.6)}/>`;
+    // v0.11.51 (cold review, owner pick): the choker and its knot out here too
     // face, three-quarter; eyes closed-soft, half-lidded gold
     const face = `M${cx - 28} 74 C${cx - 29} 98 ${cx - 24} 116 ${cx - 13} 132 C${cx - 8} 138 ${cx - 5} 141 ${cx - 2} 141.5 C${cx + 5} 140 ${cx + 14} 132 ${cx + 23} 118 C${cx + 31} 104 ${cx + 34} 88 ${cx + 33} 72 Z`;
     s += `<path d="${face}" fill="${W}"/><clipPath id="${id}f"><path d="${face}"/></clipPath><g clip-path="url(#${id}f)"><path d="M${cx + 21} 72 C${cx + 29} 92 ${cx + 25} 116 ${cx + 8} 142 L${cx + 40} 142 L${cx + 40} 72 Z" fill="${G2}"/></g><path d="${face}" fill="none" ${st(1.2)}/>`;

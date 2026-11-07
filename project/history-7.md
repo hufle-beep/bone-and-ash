@@ -2,6 +2,24 @@
 
 Started 2026-11-07 (v0.11.45), when `history-6.md` reached about 45 KB. Newer than `history-6.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.51 (word for word)
+
+### From "Decided in chat (2026-11-07)"
+
+- **v0.11.48: M1 + G1 (owner 20:18 "M1+G1, upload. I'm home but the art can wait. keep asking if I'm ready for it yet."; the v0.11.47 Fable review's findings 1 and 2, options M1 / M2 and G1):**
+  - **M1 (picked):** "Eat with the others." (`rr_hub:1`, Manners) shows at any Fed while `ya_mocked` is unset and it isn't late; "Eat something." stays hidden on `rr_hub` until then (Fed < 85 after). M2 (keep the gate, always offer it on the last Root Road day) not picked.
+  - **G1 (picked):** `qiFed` = Fed above `SATIETY_PER_HOUR` × `QI_MINUTES` / 60 (3): at Fed 3 or below the gather card is locked ("too hungry: eat first") and a queued one is skipped.
+  - **Checks:** the full check: exit 0, 0 drifted, 1 log-only move (the random bots' tribute C6 won 60.2 → 53.6%, n 110); the models unchanged from v0.11.47 (Careful 2.29 / 3.87, Completionist 2.12 / 2.94); the baseline kept. Cold review on Fable: see the version note.
+  - **Uploaded by Claude after v0.11.47 (owner 20:18):** handover, roadmap, changelog, restore points, `history-7.md`.
+- **The art (20:18):** the owner is home; the art can wait; ask after this push whether he is ready for it.
+
+### From "Version notes"
+
+### v0.11.48 — M1 + G1: Manners at any Fed, gather Qi above Fed 3
+
+- **js/story/act1_blackroot.js** (M1), **js/core/tasks.js** (G1). **tests/tasks.test.mjs:** the v0.11.47 block's Fed checks (Manners at Fed 99; gather locked at Fed 3, open and giving Qi at 3.5). **project/roadmap.md, changelog.md, restore-points.md, history-7.md** (v0.11.45 moved). **sw.js:** VERSION.
+- **Checks:** the full `bash tools/check.sh` (results in the decisions block); the Fable cold review: nothing serious (the Fed > 3 threshold is exact against `advance`: resting doubles regen only, Exhaustion multiplies work only; a queue of three gathers from Fed 7 forecasts and plays 4 / 1 / skip alike; Manners shows once, never with "Eat something."; the bots don't loop on it). **Notes for the owner, low:** after a full supper Manners' line still says "+15 satiety" while Fed caps at 100 (cosmetic); a day-2 arrival on the Root Road after 19:00 still misses Manners before "Push on" (older).
+
 ## Moved from the handover in v0.11.50 (word for word)
 
 ### From "Decided in chat (2026-11-07)"

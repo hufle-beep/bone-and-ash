@@ -671,10 +671,12 @@ export const PICTURES = {
  * v0.11.38 (P-b): the pictures that draw Yuki. v0.11.49 (Y3, part 1): each has a version per form in YUKI_PIC_FORMS,
  * named `<file>_<form>` (the cat keeps the plain name); in a form not yet drawn the scene keeps its code art
  * (which draws her current form). `ridge` left the set in v0.11.49: it shows the landscape without Yuki in every
- * form (owner 22:36). v0.11.50 (Y3 part 2a): 'human', drawn so far for the keys in YUKI_HUMAN_PICS; part 2b draws the rest.
+ * form (owner 22:36). v0.11.50 (Y3 part 2a): 'human', drawn for the keys in YUKI_HUMAN_PICS; v0.11.51 (part 2b): all 29.
+ * The set stays as the gate for keys added later (Act 1) that get a human picture after their cat one.
  */
 export const YUKI_PIC_FORMS = new Set(['cat', 'tiger', 'human']);
-export const YUKI_HUMAN_PICS = new Set(['forest_dawn', 'omnitool', 'clearing', 'stream', 'forage', 'hunt', 'camp', 'tribulation', 'lights', 'rain', 'crows', 'rats', 'gift', 'bone_field', 'mire']);
+export const YUKI_HUMAN_PICS = new Set(['forest_dawn', 'omnitool', 'clearing', 'stream', 'forage', 'hunt', 'camp', 'tribulation', 'lights', 'rain', 'crows', 'rats', 'gift', 'bone_field', 'mire',
+    'hollow', 'drill', 'wolves', 'lizard', 'roof', 'arson', 'herb_slope', 'gao_down', 'village', 'dinner', 'collectors', 'jackals', 'james', 'jackals_dead']);
 /** Whether a key of YUKI_PICS has its own picture in this form (v0.11.50). */
 const hasFormPic = (key, form) => YUKI_PIC_FORMS.has(form) && (form !== 'human' || YUKI_HUMAN_PICS.has(key));
 export const YUKI_PICS = new Set(['james', 'jackals', 'jackals_dead', 'forest_dawn', 'omnitool', 'clearing', 'stream', 'forage', 'hunt', 'camp', 'gao_down', 'village', 'dinner', 'collectors', 'tribulation', 'lights', 'rain', 'crows', 'rats', 'lizard', 'gift', 'bone_field', 'mire', 'hollow', 'roof', 'arson', 'herb_slope', 'drill', 'wolves']);
