@@ -141,7 +141,7 @@ export function jamesHpMax(g) {
 }
 /**
  * The extra meridians (v0.8): Extraordinary 8 (Foundation → Soul Embryo; closes at Nascent Soul), their 28 collaterals
- * and 10 junctions (Nascent Soul+). Gábor 2026-11-02: each raises the Qi regen percentage per Cycle — Extraordinary
+ * (after the 8, Foundation → Soul Embryo since v0.11.46; closes at Nascent Soul) and 10 junctions (Nascent Soul+). Gábor 2026-11-02: each raises the Qi regen percentage per Cycle — Extraordinary
  * +0.5, collateral +0.1 (engine), junction +0.3 (all 46: +9.8 points). Yuki opens the same ones through the bond.
  * Old saves: all 0.
  */

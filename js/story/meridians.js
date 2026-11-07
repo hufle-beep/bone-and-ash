@@ -1,13 +1,14 @@
 /**
- * The extra meridians (v0.8.0). Rules Engine C windows:
+ * The extra meridians (v0.8.0). Windows:
  *   Extraordinary 8  — Foundation (realm 1) to Soul Embryo (realm 6). Closes for good at Nascent Soul (realm 7).
- *   Their collaterals (28) — Nascent Soul+, only after all 8 Extraordinary are open.
- *   Junctions (10) — Nascent Soul+.
+ *   Their collaterals (28) — v0.11.46 (owner 19:26, pick X1; a deliberate fork from Rules Engine C, whose formulas.js opens
+ *     them from Nascent Soul): after all 8 Extraordinary are open, Foundation to Soul Embryo; closes for good at Nascent Soul.
+ *   Junctions (10) — Nascent Soul+ (as the engine).
  * Each attempt: 2 Qi, 1 hour, a Convergence Use check (DC climbs per meridian opened); a success pays challenging XP.
  * One opening per group per day (fails can retry). Effect: Qi regen % per Cycle (+0.5 / +0.1 / +0.3 — game.js extraRegen).
  * Yuki opens the same ones through the bond.
  * Menu: 'meridians' (choice "Open a meridian." on every hub that has the breakthrough choice). Warning before the
- * Nascent Soul breakthrough if the Extraordinary 8 aren't all open: 'ns_warn'.
+ * Nascent Soul breakthrough if the Extraordinary 8 or their collaterals aren't all open: 'ns_warn' (the collaterals since v0.11.46).
  */
 import { extraRegen, qiRegenPct, advance, awardXp, actSpeed, actUse } from '../core/game.js';
 
@@ -135,7 +136,7 @@ export const JUNCTIONS = [
 const m = (g) => ({ e: g.james.extra8 || 0, c: g.james.extraCollaterals || 0, j: g.james.junctions || 0 });
 const R = (g) => g.james.realm || 0;
 export const canExtra8 = (g) => R(g) >= 1 && R(g) <= 6 && m(g).e < 8;
-export const canExtraColl = (g) => R(g) >= 7 && m(g).e >= 8 && m(g).c < 28;
+export const canExtraColl = (g) => R(g) >= 1 && R(g) <= 6 && m(g).e >= 8 && m(g).c < 28; // v0.11.46 (X1): before Nascent Soul
 export const canJunction = (g) => R(g) >= 7 && m(g).j < 10;
 
 /**
@@ -149,7 +150,7 @@ const LINE_WINDOW = {
     pri: (g) => R(g) === 0 && P(g) < 12,
     col: (g) => R(g) === 0 && colGroupsOpen(g) < COL_GROUPS.length,
     e8: (g) => R(g) >= 1 && R(g) <= 6 && m(g).e < 8,
-    ec: (g) => R(g) >= 7 && m(g).e >= 8 && m(g).c < 28,
+    ec: (g) => R(g) >= 1 && R(g) <= 6 && m(g).e >= 8 && m(g).c < 28, // v0.11.46 (X1): Foundation to Soul Embryo, after the 8 vessels
     jn: (g) => R(g) >= 7 && m(g).j < 10,
 };
 export const lineWindow = (g, line) => !!LINE_WINDOW[line]?.(g);
@@ -191,7 +192,8 @@ export const MERIDIANS = {
             if (R(g) === 0) parts.push('The Extraordinary vessels are there, but sealed, like doors painted on a wall. Your people open them after Foundation. Not before.');
             else if (R(g) <= 6 && x.e < 8) parts.push(`They open between Foundation and Soul Embryo, and only then: at Nascent Soul the window shuts for good. ${8 - x.e} still closed.`);
             if (R(g) >= 7 && x.e < 8) parts.push('The vessels you didn\'t open in time are scar tissue now, and their collaterals with them. You knew the rule. You were busy.');
-            if (R(g) >= 7 && x.e >= 8 && x.c < 28) parts.push('With all eight vessels open, their collaterals are within reach: twenty-eight fine threads.');
+            if (R(g) >= 1 && R(g) <= 6 && x.e >= 8 && x.c < 28) parts.push(`With all eight vessels open, their collaterals are within reach: twenty-eight fine threads, ${28 - x.c} still closed. The same window: at Nascent Soul it shuts on them for good.`);
+            if (R(g) >= 7 && x.e >= 8 && x.c < 28) parts.push(`${28 - x.c} of the vessels' collaterals sealed at Nascent Soul. Scar tissue, fine as hair. You knew the rule. You were busy.`);
             parts.push('Yuki curls against your hip. Whatever you open, she opens too; the bond doesn\'t do things by halves.');
             return parts.join('\n\n');
         },
@@ -213,11 +215,11 @@ export const MERIDIANS = {
         id: 'ns_warn', title: 'Before Nascent Soul', art: 'tribulation', place: (g) => g.location,
         text: (g) => `Saturation sits at the brim. One more step and you're Nascent Soul.
 
-Parallel Cognition raises a hand, the way it does when it has read the fine print. *${8 - m(g).e} of the eight Extraordinary vessels are still closed. They open between Foundation and Soul Embryo. Break through now, and they seal for good, and their twenty-eight collaterals with them.*
+Parallel Cognition raises a hand, the way it does when it has read the fine print. *${m(g).e < 8 ? `${8 - m(g).e} of the eight Extraordinary vessels are still closed. They open between Foundation and Soul Embryo. Break through now, and they seal for good, and their twenty-eight collaterals with them.` : `${28 - m(g).c} of the vessels' twenty-eight collaterals are still closed. They open only before Nascent Soul. Break through now, and they seal for good.`}*
 
 Yuki looks at you. *Your call,* says the bond. *I'd open them. But I'm a cat. I'd also eat the curtains.*`,
         choices: [
-            { text: 'Not yet. Open the vessels first.', to: (g) => g.flags.bt_return || 'stream' },
+            { text: (g) => (m(g).e < 8 ? 'Not yet. Open the vessels first.' : 'Not yet. Open the collaterals first.'), to: (g) => g.flags.bt_return || 'stream' },
             { text: 'Break through anyway. Let them seal.', to: 'breakthrough' },
         ],
     },
@@ -239,7 +241,7 @@ Yuki looks at you. *Finish the threads,* says the bond. *Then show off.*`,
     ],
 };
 /** Where a breakthrough starts: a warning first if it would seal something (collaterals at Foundation, the Extraordinary 8 at Nascent Soul). */
-export const btTarget = (g) => (g.james.realm === 0 && C(g) < 66 ? 'col_warn' : g.james.realm === 6 && (g.james.extra8 || 0) < 8 ? 'ns_warn' : 'breakthrough');
+export const btTarget = (g) => (g.james.realm === 0 && C(g) < 66 ? 'col_warn' : g.james.realm === 6 && ((g.james.extra8 || 0) < 8 || (g.james.extraCollaterals || 0) < 28) ? 'ns_warn' : 'breakthrough'); // v0.11.46 (X1): the collaterals too
 
 /** The James page row. */
 export const meridianRow = (g) => { const x = m(g); return `Primaries ${P(g)}/12 · collaterals ${C(g)}/66 (${colGroupsOpen(g)}/8 groups${g.james.colSealed ? ', the rest sealed: a rewind unwinds Foundation to reopen them' : ''}) · Extraordinary ${x.e}/8 · their collaterals ${x.c}/28 · junctions ${x.j}/10 · Qi regen ${baseRegen(g).toFixed(1)}%/Cycle`; };

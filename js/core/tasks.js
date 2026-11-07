@@ -14,7 +14,7 @@
  */
 import { hasForm } from './forms.js';
 import { choose, goTo, choiceOpen, choiceTag, gives, setTimeless, defaultMinutes, movesPlace, wasPicked, isMenuScene, isTimeless, setFamiliar } from './story.js';
-import { advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck, canBreakThrough, btMinutes, realmName, condense, sitMinutes, useSpeed, USE_N, exMins, nightLock, endsLate, sitUseless } from './game.js';
+import { advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck, canBreakThrough, btMinutes, realmName, condense, sitMinutes, useSpeed, USE_N, exMins, nightLock, endsLate, sitUseless, jamesQiMax } from './game.js';
 import { CONDENSE_SIT_COST } from './formulas.js';
 import { btTarget, MER_LINES, lineWindow, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
@@ -111,8 +111,14 @@ export const btOpen = (g) => canBreakThrough(g) && btTarget(g) === 'breakthrough
 export const SIT_TASK = 'sit:next';
 const hubHasSit = (scenes, hubId) => (scenes[hubId]?.choices || []).some((c) => c.to === hubId && /^(Cultivate|Condense)/.test(String(typeof c.text === 'function' ? '' : c.text)) && /condense\(g\)/.test(String(c.do)));
 export const sitOpen = (g, scenes) => isQueueScreen(g, scenes) && !(TASK_HUBS[g.scene] && hubHasSit(scenes, g.scene)) && g.james.qi >= CONDENSE_SIT_COST && g.james.saturation < 100 && !sitUseless(g);
+/** v0.11.46 (owner 19:26, pick Q1): "Meditate: gather Qi" — an hour of meditation at the resting rate (×2 regen, HP and Qi, like
+ *  "Rest an hour"), queueable wherever Meditate shows, offered while Qi isn't full. */
+export const QI_TASK = 'qi:next';
+export const QI_MINUTES = 60;
+export const qiNotFull = (g) => g.james.qi < jamesQiMax(g) - 0.05;
+export const qiOpen = (g, scenes) => isQueueScreen(g, scenes) && qiNotFull(g);
 /** v0.11.14: the Meditate cards that can be queued anywhere Meditate shows. */
-export const isMedTask = (id) => id === SIT_TASK || id === BT_TASK || !!lineOfTask(id);
+export const isMedTask = (id) => id === SIT_TASK || id === BT_TASK || id === QI_TASK || !!lineOfTask(id);
 /** v0.11.14: a screen with a queue: a task screen, or a resting place where Meditate shows (only Meditate cards queue there). */
 export const isQueueScreen = (g, scenes) => !g.combat && (!!TASK_HUBS[g.scene] || canMeditate(g, scenes));
 /** v0.11.14: can queue row `id` run on this screen at all (else it waits for its own screen)? */
@@ -150,7 +156,7 @@ export function waitChoice(scenes, c, mins = 60, from = null) {
     return !!(to?.enter && SETS_CLOCK.test(String(to.enter)));
 }
 export function isInstantTask(g, scenes, id) {
-    if (id === MER_TASK || id === BT_TASK || id === SIT_TASK || lineOfTask(id)) return false;
+    if (id === MER_TASK || id === BT_TASK || id === SIT_TASK || id === QI_TASK || lineOfTask(id)) return false;
     const p = parse(id);
     return instantChoice(scenes[p.scene]?.choices?.[p.index]);
 }
@@ -162,6 +168,7 @@ function cardOf(scenes, hubId, id) {
     if (id === MER_TASK) return { kind: 'mer', c: null, p: { scene: 'meridians', index: -1 }, group: 'Meditate' };
     if (lineOfTask(id)) return { kind: 'mer', line: lineOfTask(id), c: null, p: { scene: 'meridians', index: -1 }, group: 'Meditate' };
     if (id === SIT_TASK) return { kind: 'sit', c: null, p: { scene: hubId, index: -1 }, group: 'Meditate' };
+    if (id === QI_TASK) return { kind: 'qi', c: null, p: { scene: hubId, index: -1 }, group: 'Meditate' }; // v0.11.46 (Q1)
     const p = parse(id);
     const c = scenes[p.scene]?.choices?.[p.index];
     if (!c) return null;
@@ -258,12 +265,13 @@ function medTaskCards(g, scenes) {
         cards.push({ id: merLineTask(line), kind: 'mer', line, group: 'Meditate', label: asText(c.text, g), tag: choiceTag(g, c), minutes: c.minutes ? c.minutes(g) : c.time || 0, status: 'open', tier: 0, fam: 0, next: null });
     }
     if (sitOpen(g, scenes)) cards.push({ id: SIT_TASK, kind: 'sit', group: 'Meditate', label: 'Cultivate: one sit', tag: `${CONDENSE_SIT_COST} Qi`, minutes: exMins(g, sitMinutes(g)), status: 'open', tier: 0, fam: 0, next: null });
+    if (qiOpen(g, scenes)) cards.push({ id: QI_TASK, kind: 'qi', group: 'Meditate', label: 'Meditate: gather Qi', tag: 'an hour, resting', minutes: QI_MINUTES, status: 'open', tier: 0, fam: 0, next: null }); // v0.11.46 (Q1)
     if (btOpen(g)) cards.push({ id: BT_TASK, kind: 'bt', group: 'Meditate', label: `Break through to ${realmName(g.james.realm + 1)}`, tag: `${btMinutes(g)} min`, minutes: btMinutes(g), status: 'open', tier: 0, fam: 0, next: null });
     return cards;
 }
 
 export const taskOpen = (g, scenes, id) => (id === MER_TASK ? !!TASK_HUBS[g.scene] && merChoice(g, scenes) >= 0 && !nightLock(g) : taskCards(g, scenes, id).some((c) => c.id === id && c.status === 'open')); // v0.11.13: an old queue's mer:next still runs
-export const taskLabel = (g, scenes, id) => { if (id === MER_TASK) return 'Next meridian session'; if (lineOfTask(id)) return lineName(g, lineOfTask(id)).replace(/\.$/, ''); if (id === BT_TASK) return 'Break through'; if (id === SIT_TASK) return 'Cultivate: one sit'; const p = parse(id); const c = scenes[p.scene]?.choices?.[p.index]; return c ? asText(c.text, g) : id; };
+export const taskLabel = (g, scenes, id) => { if (id === MER_TASK) return 'Next meridian session'; if (lineOfTask(id)) return lineName(g, lineOfTask(id)).replace(/\.$/, ''); if (id === BT_TASK) return 'Break through'; if (id === SIT_TASK) return 'Cultivate: one sit'; if (id === QI_TASK) return 'Meditate: gather Qi'; const p = parse(id); const c = scenes[p.scene]?.choices?.[p.index]; return c ? asText(c.text, g) : id; };
 
 /** HP 0 during a task (v0.9.4): the Coil ends. The queue is gone; the Coil screen decides what happens next. */
 function collapse(g, scenes, hubId) {
@@ -396,6 +404,11 @@ export function runTask(g, scenes, id) {
         g.flags.bt_return = hubId;
         if (!TASK_HUBS[hubId]) g.flags.med_back = hubId; // v0.11.14: back to a resting place without its enter again
         lines.push(...goTo(g, scenes, 'breakthrough'));
+    } else if (card.kind === 'qi') { // v0.11.46 (Q1): an hour at the resting rate
+        if (!qiOpen(g, scenes)) throw new Error('Qi is already full');
+        const q0 = g.james.qi;
+        lines.push(...advance(g, QI_MINUTES, { resting: true }));
+        lines.push(`Meditated an hour: Qi ${Math.round(q0 * 10) / 10} → ${Math.round(g.james.qi * 10) / 10}.`);
     } else if (card.kind === 'sit') {
         if (!sitOpen(g, scenes)) throw new Error('No sit possible');
         const r = condense(g);

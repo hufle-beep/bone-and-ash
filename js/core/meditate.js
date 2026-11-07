@@ -5,12 +5,12 @@
  * On a task hub, Cultivate is the hub's own cultivate card (queueable; same id, same familiarity), shown in this group.
  * Pure — no DOM.
  */
-import { condense, canBreakThrough, breakReady, breakBlock, btMinutes, sitGain, sitMinutes, actSpeed, actUses, exMins, exLevel, EX_MULT, pushNight, nightLock, endsLate, pushWindow, sitUseless } from './game.js';
+import { condense, jamesQiMax, canBreakThrough, breakReady, breakBlock, btMinutes, sitGain, sitMinutes, actSpeed, actUses, exMins, exLevel, EX_MULT, pushNight, nightLock, endsLate, pushWindow, sitUseless } from './game.js';
 import { CONDENSE_SIT_COST } from './formulas.js';
 import { goTo, checkDeath, choose, choiceOpen } from './story.js';
 import { btTarget, MER_LINES, lineWindow, lineWait, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
-import { BT_TASK, SIT_TASK, sitOpen, merLineTask, merLineChoice, isQueueScreen } from './tasks.js';
+import { BT_TASK, SIT_TASK, QI_TASK, QI_MINUTES, qiNotFull, sitOpen, merLineTask, merLineChoice, isQueueScreen } from './tasks.js';
 const hrs = (m) => (m % 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m / 60} h`);
 
 /** No meditating here: urgent moments and screens that are already about it. */
@@ -57,11 +57,16 @@ export function medCards(g, scenes) {
     const hubSit = TASK_HUBS[g.scene] ? (s.choices || []).findIndex((c) => isSitChoice(c, g.scene)) : -1;
     const qiOk = g.james.qi >= CONDENSE_SIT_COST;
     const sm0 = sitMinutes(g), sm = exMins(g, sm0);
-    const sit = { label: `Cultivate: ${sm0 === 60 ? 'an hour' : `${sm0} min`}, ${CONDENSE_SIT_COST} Qi, Saturation +${sitGain(g)}% (${g.james.saturation}%).`, tag: qiOk ? `${CONDENSE_SIT_COST} Qi` : `needs ${CONDENSE_SIT_COST} Qi`, open: qiOk, minutes: sm };
+    const sit = { label: `Cultivate: ${sm0 === 60 ? 'an hour' : `${sm0} min`}, ${CONDENSE_SIT_COST} Qi, Saturation +${sitGain(g)}% (${g.james.saturation}%).`, tag: qiOk ? `${CONDENSE_SIT_COST} Qi` : `needs ${CONDENSE_SIT_COST} Qi (you have ${Math.round(g.james.qi * 10) / 10})`, open: qiOk, minutes: sm, ...(qiOk ? {} : { show: true }) }; // v0.11.46 (Q1): short of Qi, it shows locked with the reason
     if (sit.open && endsLate(g, sm)) Object.assign(sit, LATE);
     if (sitUseless(g)) { /* v0.11.37 (B2): a sit that changes nothing is not offered */ }
     else if (hubSit >= 0) out.push({ ...sit, id: `${g.scene}:${hubSit}`, task: `${g.scene}:${hubSit}` }); // its task id keeps the hub's own chore off the card list even when locked
     else out.push({ ...sit, id: 'med:sit', ...((sit.open || sit.late) && sitOpen(g, scenes) ? { task: SIT_TASK } : {}) }); // v0.11.12: queueable on a task screen with no Cultivate of its own
+    if (qiNotFull(g)) { // v0.11.46 (owner 19:26, pick Q1): recover Qi by meditating, an hour at the resting rate
+        const q = { id: 'med:qi', label: `Meditate: gather Qi. (An hour; Qi ${Math.round(g.james.qi * 10) / 10} / ${Math.round(jamesQiMax(g) * 10) / 10}.)`, tag: 'an hour, resting', open: true, minutes: QI_MINUTES, ...(isQueueScreen(g, scenes) ? { task: QI_TASK } : {}) };
+        if (endsLate(g, QI_MINUTES)) Object.assign(q, LATE);
+        out.push(q);
+    }
     out.push(...merCards(g, scenes).map((m) => (m.open && endsLate(g, m.minutes) ? { ...m, ...LATE } : m))); // a late card keeps its task id: the hub list doesn't show it twice (Fable review) // v0.11.13 (E1): replaces "Next meridian session" and "Open a meridian"
     if (canBreakThrough(g)) {
         const warn = btTarget(g) !== 'breakthrough';

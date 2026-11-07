@@ -4,7 +4,8 @@ Every version, newest first. Details of each system are in `handover.md`.
 
 | Version | Date | Commit | What changed |
 |---|---|---|---|
-| 0.11.45 | 2026-11-07 | (this push) | Housekeeping: the last of the old dice code is gone (checks and fights have worked without dice since 0.9.3). Nothing changes in play; saves are unchanged. |
+| 0.11.46 | 2026-11-07 | (this push) | Two fixes from your camp saves. Every resting place now has **Meditate: gather Qi**: an hour of meditation that refills Qi (and HP) twice as fast as waiting, and it can be queued; and when James is short of Qi, Cultivate now shows locked with how much he has, instead of disappearing. The 28 collaterals of the Extraordinary vessels now open from Foundation, once all eight vessels are open, until Nascent Soul, when they seal like the vessels (before, they opened only after Nascent Soul); the warning before Nascent Soul now counts them too. Entering the Blackroot camp after midnight no longer skips the clock to the next evening. Act 1 is a little easier, mostly for players who open those collaterals. Saves are unchanged. |
+| 0.11.45 | 2026-11-07 | `d7dfaa0` | Housekeeping: the last of the old dice code is gone (checks and fights have worked without dice since 0.9.3). Nothing changes in play; saves are unchanged. |
 | 0.11.44 | 2026-11-07 | `2c49f29` | Tests only: the Act 1 test now plays without dice, like the game, with a James as strong as real players are at each part. Nothing changes in play. |
 | 0.11.43 | 2026-11-07 | `44ded19` | Notes only: the project's main notes file is shorter, with older notes moved, nothing lost. Nothing changes in play. |
 | 0.11.42 | 2026-11-07 | `1ff11d5` | Behind the scenes only: the balance check now watches a few more rare numbers, and two notes in the design document match the game again. Nothing changes in play. |

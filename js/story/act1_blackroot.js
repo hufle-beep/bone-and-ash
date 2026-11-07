@@ -21,7 +21,10 @@ const onlyMei = (g) => likesMei(g) && !likesYa(g);
 /** Move the clock forward to hour h today (time passes: hunger, regen). */
 function toHour(g, h) {
     const p = clockParts(g.minutes);
-    if (dayHour(g) < h) advance(g, (h - p.hh) * 60 - p.mm); // v0.11.37: after midnight (24+) the hour has passed
+    const dh = dayHour(g);
+    // v0.11.37: after midnight (24+) the hour has passed. v0.11.46: before 06:00 (04:00–05:59, or a night pushed through) it is
+    // still the night: no jump forward to the evening (it used to skip 14–18 h)
+    if (dh < h && dh >= 6) advance(g, (h - p.hh) * 60 - p.mm);
 }
 /** After a lost fight: the others drag you clear; you come round with some HP. */
 const patchUp = (g) => { g.james.hp = Math.max(g.james.hp, Math.round(jamesHpMax(g) * 0.4)); return ['Mei Lin binds what she can. Ya calls you soft, and carries your pack.']; };

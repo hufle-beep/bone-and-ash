@@ -15,11 +15,9 @@
       "taskState": "test accessor: tests/tasks.test.mjs reads familiarity and the queue through it"
     },
     "choices": {
-      "meridians#0": "Incremental Mode runs the meridian work as Meditate cards (js/core/meditate.js), never as a choice on the screen",
-      "meridians#1": "as meridians#0",
-      "meridians#2": "as meridians#0",
-      "meridians#3": "as meridians#0",
-      "meridians#4": "as meridians#0",
+      "meridians#2": "Incremental Mode runs the meridian work as Meditate cards (js/core/meditate.js), never as a choice on the screen (meridians#0 and #1, pri and col, are now seen by the bots; off the list in v0.11.46)",
+      "meridians#3": "as meridians#2",
+      "meridians#4": "as meridians#2",
       "stream#0": "Story Mode only, after switching a closed-meridian game from Incremental Mode: reachable, not by bots",
       "meridians#5": "Story Mode only, after switching a closed-meridian game from Incremental Mode: reachable, not by bots",
       "meridians#6": "Story Mode only, after switching a closed-meridian game from Incremental Mode: reachable, not by bots",
@@ -30,9 +28,6 @@
       "heart_hub#11": "a door no path uses now: hide it if ever, never delete (task card ids are scene:index in saves)"
     },
     "flagsUnread": {
-      "mer_e8": "Story Mode only since v0.11.34 (D1, owner pick 3a): its daily meridian limit reads it (meridians.js oneADay); goes with D2",
-      "mer_ec": "Story Mode only since v0.11.34 (D1, owner pick 3a): its daily meridian limit reads it (meridians.js oneADay); goes with D2",
-      "mer_jn": "Story Mode only since v0.11.34 (D1, owner pick 3a): its daily meridian limit reads it (meridians.js oneADay); goes with D2",
       "arson_beaten": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
       "bl_followed_lights": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
       "envoy": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",

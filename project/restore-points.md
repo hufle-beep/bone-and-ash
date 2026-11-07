@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.45 | (this push) | E step 2 (D-a): the dice code out. Same save state as 0.11.44; the bot stats and the part tests byte-identical to 0.11.44. |
+| 0.11.46 | (this push) | Q1 + X1: the gather-Qi card, the vessels' collaterals before Nascent Soul, the Blackroot camp clock; the baseline updated (owner pick B1). Same save state as 0.11.45 (a queued `qi:next` is just an id; an older version skips it as "not possible"; collaterals opened under 0.11.46 count the same in an older version). |
+| 0.11.45 | `d7dfaa0` | E step 2 (D-a): the dice code out. Same save state as 0.11.44; the bot stats and the part tests byte-identical to 0.11.44. |
 | 0.11.44 | `2c49f29` | E step 1 (P2): the Act 1 part test in Incremental Mode, bot-like strength. Tests and docs only; the game is identical to 0.11.41. |
 | 0.11.43 | `44ded19` | Docs only: the handover trimmed (H2). The game is identical to 0.11.41. |
 | 0.11.42 | `1ff11d5` | B1: the drift check from n 50; docs; rule 8. The game is identical to 0.11.41. |

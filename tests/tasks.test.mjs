@@ -754,7 +754,10 @@ function play(run, tasks) {
                     if (!taskOpen(g, SCENES, id)) { st.skipped++; real.push({ id, skip: true }); continue; }
                     cardsSeen.add(id);
                     const m0 = g.minutes;
-                    const mins = FC ? taskMinutes(g, SCENES, id) : 0;
+                    // v0.11.46 (owner pick B1): also the first time a card runs in this process, so every card's forecast is checked
+                    // without luck (a rare card such as dw_hub's "Call it a day" could miss the 1 game in 8); the dry run is on a copy
+                    const fc1 = FC || !cardsForecast.has(id);
+                    const mins = fc1 ? taskMinutes(g, SCENES, id) : 0;
                     const card = taskCards(g, SCENES).find((c) => c.id === id);
                     if (card?.check) bands[card.check.band] = (bands[card.check.band] || 0) + 1;
                     const fam0 = taskState(g).fam[id] || 0;
@@ -762,8 +765,8 @@ function play(run, tasks) {
                     if (r.lines.some((l) => /^Yuki (comes|leaves)/.test(l))) yukiRuns++;
                     if (card?.kind === 'work') { if ((taskState(g).fam[id] || 0) > fam0) pass++; else assert(false, `familiarity grows on ${id}`); } // v0.11.21: the label only on a failure
                     st.cards++;
-                    if (FC) { if (g.minutes - m0 === mins || r.stopped) pass++; else assert(false, `dry run predicts ${id} (${mins} vs ${g.minutes - m0})`); }
-                    if (!r.stopped) { cardsWhole.add(id); if (FC) cardsForecast.add(id); }
+                    if (fc1) { if (g.minutes - m0 === mins || r.stopped) pass++; else assert(false, `dry run predicts ${id} (${mins} vs ${g.minutes - m0})`); }
+                    if (!r.stopped) { cardsWhole.add(id); if (fc1) cardsForecast.add(id); }
                     real.push({ id, end: g.minutes });
                     if (r.lines.some((l) => /queue is gone/.test(l))) st.collapses++;
                     if (Number.isFinite(g.james.hp) && g.james.hp >= 0 && Number.isFinite(g.james.satiety)) pass++; else assert(false, `bars finite after ${id}`);
@@ -841,7 +844,7 @@ rs = 4243; // the checks below draw from their own stream
 // every card that was ever offered was also played at least once
 const all = cardsListed;
 if (FULL) for (const id of all) assert(cardsSeen.has(id), `card ${id} was played by a bot`); // coverage: the full run only
-if (FULL) for (const id of cardsWhole) assert(cardsForecast.has(id), `v0.11.21: card ${id}'s forecast was checked on a whole run (1 game in ${FC_EVERY})`);
+if (FULL) for (const id of cardsWhole) assert(cardsForecast.has(id), `v0.11.21: card ${id}'s forecast was checked on a whole run (1 game in ${FC_EVERY}, and since v0.11.46 its first run)`);
 if (!FULL) console.log(`  coverage (quick, log only): ${cardsSeen.size} of ${all.size} offered cards played, ${cardsForecast.size} of ${cardsWhole.size} whole-run cards forecast-checked`); // v0.11.21
 assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
 // no dice on work cards: the same state gives the same result
@@ -912,7 +915,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
         const fm = medCards(fe, SCENES).find((c) => c.id === 'med:mer:e8');
         assert(fm && fm.open && taskOpen(fe, SCENES, 'mer:e8'), `v0.11.18: an Extraordinary line has no daily limit in Incremental Mode (${fm?.reason})`);
         const s7 = ensureBars(newGame(79)); s7.scene = 'stream'; s7.james.qi = 25; s7.james.realm = 7; s7.james.extra8 = 8;
-        assert(medCards(s7, SCENES).filter((c) => /^med:mer:/.test(c.id)).map((c) => c.id).join() === 'med:mer:ec,med:mer:jn', 'v0.11.13: Nascent Soul: the vessels\' collaterals and the junctions');
+        assert(medCards(s7, SCENES).filter((c) => /^med:mer:/.test(c.id)).map((c) => c.id).join() === 'med:mer:jn', 'v0.11.13: Nascent Soul: the junctions (v0.11.46, X1: the vessels\' collaterals no longer, they sealed)');
     }
     // v0.11.12: a queueable Cultivate sit where the task screen has none of its own
     {
@@ -1326,6 +1329,59 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     const { readFileSync } = await import('node:fs');
     const yp = readFileSync('js/story/yuki_path.js', 'utf8');
     assert(!/thirty-four|you were six|boy of six/i.test(yp) && /born the same morning, in the same grove/.test(yp) && /Forty years of her sleeping/.test(yp), 'Y-text: yuki_path.js says born together, forty years');
+}
+// v0.11.46 (X1, owner 19:26 "The extraordinary collaterals can be opened UNTIL Nascent soul, not after"): their window is
+// Foundation to Soul Embryo after all 8 vessels (a fork from the engine's formulas.js); at Nascent Soul they seal; ns_warn counts them
+{
+    const MER = await import('../js/story/meridians.js');
+    const at = (realm, e, c) => { const g = ensureBars(newGame(4601)); g.james.realm = realm; g.james.extra8 = e; g.james.extraCollaterals = c; return g; };
+    for (const [r, e, c, want] of [[0, 8, 0, false], [1, 7, 0, false], [1, 8, 0, true], [3, 8, 27, true], [6, 8, 5, true], [1, 8, 28, false], [7, 8, 0, false], [9, 8, 3, false]]) {
+        const g = at(r, e, c);
+        assert(MER.lineWindow(g, 'ec') === want && MER.canExtraColl(g) === want, `X1: the vessels' collaterals at realm ${r}, ${e}/8 vessels, ${c}/28: ${want ? 'open' : 'shut'}`);
+    }
+    assert(!MER.lineWindow(at(3, 8, 0), 'jn') && MER.lineWindow(at(7, 8, 0), 'jn'), 'X1: the junctions stay at Nascent Soul and later');
+    assert(btTarget(at(6, 8, 27)) === 'ns_warn' && btTarget(at(6, 7, 0)) === 'ns_warn' && btTarget(at(6, 8, 28)) === 'breakthrough', 'X1: the Nascent Soul warning when a vessel or one of their collaterals is still closed');
+    const w = at(6, 8, 20); w.scene = 'ns_warn'; const wv = sceneView(w, SCENES);
+    assert(/8 of the vessels' twenty-eight collaterals are still closed/.test(wv.text) && /Open the collaterals first/.test(wv.choices[0].label), 'X1: ns_warn names the closed collaterals');
+    const w2 = at(6, 6, 0); w2.scene = 'ns_warn';
+    assert(/2 of the eight Extraordinary vessels are still closed/.test(sceneView(w2, SCENES).text), 'X1: ns_warn still names the closed vessels first');
+    const k = at(2, 8, 0); k.scene = 'camp'; k.minutes = 3 * 1440 + 15 * 60; k.james.qi = jamesQiMax(k); k.james.satiety = 90;
+    assert(medCards(k, SCENES).some((c) => c.id === 'med:mer:ec' && c.open && c.task === merLineTask('ec')), 'X1: the camp offers the first of the vessels\' collaterals at Foundation (queueable)');
+    const x0 = k.james.extraCollaterals; let guard = 0;
+    while (k.james.extraCollaterals === x0 && guard++ < 10) { k.james.qi = jamesQiMax(k); runTask(k, SCENES, merLineTask('ec')); }
+    assert(k.james.extraCollaterals === 1, `X1: timed work opens it (${k.james.extraCollaterals}/28 after ${guard} sittings)`);
+}
+// v0.11.46 (Q1, owner 19:26 "Meditate to recover Qi manually, and another to condense Qi"): "Meditate: gather Qi", an hour at the
+// resting rate, queueable wherever Meditate shows while Qi isn't full; a sit short of Qi shows, locked, with the reason
+{
+    const T = await import('../js/core/tasks.js');
+    const g = ensureBars(newGame(4602, { closed: true })); g.scene = 'camp'; g.minutes = 20 * 60 + 40; g.james.qi = 9.3; g.james.satiety = 90;
+    const mc = medCards(g, SCENES);
+    const sit = mc.find((c) => c.id === 'med:sit'), qi = mc.find((c) => c.id === 'med:qi');
+    assert(sit && !sit.open && sit.show && /needs 10 Qi \(you have 9\.3\)/.test(sit.tag), `Q1: the sit short of Qi shows locked with the reason (${sit?.tag})`);
+    assert(qi && qi.open && qi.task === T.QI_TASK && qi.minutes === 60 && /Meditate: gather Qi/.test(qi.label), 'Q1: the gather-Qi card on the night camp, queueable, an hour');
+    assert(taskOpen(g, SCENES, T.QI_TASK) && taskMinutes(g, SCENES, T.QI_TASK) === 60, 'Q1: the queue card is open and takes 60 min');
+    const h = ensureBars(JSON.parse(JSON.stringify(g))); advance(h, 60, { resting: true });
+    const m0 = g.minutes; const r = runTask(g, SCENES, T.QI_TASK);
+    assert(g.minutes - m0 === 60 && Math.abs(g.james.qi - h.james.qi) < 1e-9 && g.james.qi > 9.3, `Q1: an hour at the resting rate, as "Rest an hour" (Qi 9.3 → ${g.james.qi})`);
+    assert(/Meditated an hour: Qi 9\.3 → /.test(r.lines.join(' ')), 'Q1: its result line');
+    g.james.qi = jamesQiMax(g);
+    assert(!medCards(g, SCENES).some((c) => c.id === 'med:qi') && !taskOpen(g, SCENES, T.QI_TASK), 'Q1: no gather card when Qi is full');
+    let threw = false; try { runTask(g, SCENES, T.QI_TASK); } catch { threw = true; } assert(threw, 'Q1: a queued gather with Qi full is refused');
+    for (const id of MED_SCREENS) { const s = ensureBars(newGame(4603)); s.scene = id; s.minutes = 2 * 1440 + 14 * 60; s.james.qi = 1; s.flags.long = true; if (!canMeditate(s, SCENES)) continue; assert(medCards(s, SCENES).some((c) => c.id === 'med:qi' && c.open), `Q1: the gather card on ${id}`); }
+    const late = ensureBars(newGame(4604)); late.scene = 'camp'; late.minutes = 1440 + 90; late.james.qi = 1; // 01:30: an hour would end past 02:00
+    assert(medCards(late, SCENES).some((c) => c.id === 'med:qi' && !c.open && c.late), 'Q1: at 01:30 the gather card is locked (ends past 02:00)');
+    assert(isInstantTask(g, SCENES, T.QI_TASK) === false && T.isMedTask(T.QI_TASK), 'Q1: a bar, and a Meditate card that queues on the resting places');
+}
+// v0.11.46: the Blackroot camp (and the other toHour scenes) no longer jump the clock forward when entered before 06:00
+{
+    const { BLACKROOT } = await import('../js/story/act1_blackroot.js');
+    for (const [hh, mm, jump] of [[4, 30, false], [5, 50, false], [15, 0, true], [1, 0, false]]) {
+        const g = ensureBars(newGame(4605)); g.minutes = 12 * 1440 + hh * 60 + mm; g.flags.bl_region = 'rr'; const m0 = g.minutes;
+        BLACKROOT.bl_camp.enter(g);
+        const want = jump ? 12 * 1440 + 19 * 60 : m0;
+        assert(g.minutes === want, `bl_camp entered at ${hh}:${String(mm).padStart(2, '0')}: ${jump ? 'to 19:00' : 'the clock stays'} (moved ${g.minutes - m0} min)`);
+    }
 }
 const pctOf = (o, n) => Object.entries(o).sort().map(([k, v]) => `${k} ${((v / n) * 100).toFixed(1)}%`).join(', ');
 console.log(`  tribute, tasks:   ${pctOf(stats.tasks.endings, stats.tasks.games)}`);

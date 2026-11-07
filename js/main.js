@@ -351,7 +351,7 @@ function renderCardScreen() {
     const storyHtml = v.end
         ? `<h2>Story</h2><div class="cards">${story.map(storyCardHtml).join('')}<button class="card story" data-new="1">Start a new game</button><button class="card story" data-tab-go="sheet">See how James ended up</button></div>` // v0.11.26: an end's own choices first (Go round again…)
         : story.length ? `<h2>Story</h2><div class="cards">${skipHtml}${story.map(storyCardHtml).join('')}</div>` : '';
-    const medOpen = med.filter((m) => m.open || m.late); // v0.11.37 (D-a): a card that would end past 02:00 shows, locked, with that tag // v0.11.17 (pick 1a): only what can run now (collaterals until they open, locked sits and meridians, Break through until ready)
+    const medOpen = med.filter((m) => m.open || m.late || m.show); // v0.11.46 (Q1): a sit short of Qi shows, locked, with the reason // v0.11.37 (D-a): a card that would end past 02:00 shows, locked, with that tag // v0.11.17 (pick 1a): only what can run now (collaterals until they open, locked sits and meridians, Break through until ready)
     const medHtml = medOpen.length ? `<h2>Meditate</h2><div class="cards">${medOpen.map(medCardHtml).join('')}</div>` : '';
     view.innerHTML = `<section class="fade-in">
 <div class="plate">${sceneArt(v.art)}</div>
