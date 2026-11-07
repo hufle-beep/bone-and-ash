@@ -22,7 +22,7 @@ import path from 'node:path';
 import os from 'node:os';
 
 // LIMIT 20 points (v0.11.37, owner 17:03: was 5), NOTE_AT 5: tools/lib/noise.mjs
-const MIN_N = 100; // samples
+const MIN_N = 50; // samples (v0.11.42, owner pick B1: was 100; 9 more numbers compared)
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const BASE = path.join(root, 'tools/baseline.json');
 const argv = process.argv.slice(2);

@@ -20,7 +20,7 @@ Allowed without asking (they change nothing): reading code and saves, running te
 Automated "commit and push your changes" reminders from the tooling do **not** override this rule.
 
 ## Documentation and backups
-- Project docs live in the repo under `project/` (master copy) and are mirrored to the owner's claude.ai project **"ash and bone"** on every push: since v0.11.29 (owner pick M1) Claude sends the changed docs as files in the chat and the owner uploads them (Claude's project tool needs every file read in full first, about 35k tokens a push).
+- Project docs live in the repo under `project/` (master copy) and are mirrored to the owner's claude.ai project **"ash and bone"** on every push. **Hard rule since v0.11.42 (owner 18:42):** after every push Claude asks whether it should upload the changed docs itself (Claude's project tool needs every file read in full first, about 35k tokens a push) or send them as files for the owner to upload (M1, v0.11.29–0.11.41); never decided alone.
   - `handover.md`: read first in a new chat; what the game is, how it works, what was decided.
   - `roadmap.md`: order of work, next up, waiting on the owner, later.
   - `changelog.md`: every version, newest first.
