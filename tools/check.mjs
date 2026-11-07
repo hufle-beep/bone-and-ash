@@ -39,6 +39,8 @@ const jobs = [
         { name: 'browser part 2 (saves, menu, tooltip, resting places)', key: 'browser2', cmd: ['python3', ['tools/browser.py', '--part', '2']] },
     ]),
     { name: `story (${GAMES} full games${QUICK ? ', quick' : ''})`, key: 'story', cmd: node('tests/story.test.mjs', '--games', String(GAMES), '--stats-out', path.join(ST, 'story.json')), heavy: true },
+    // v0.11.27: the bot models (random, careful, completionist, rusher), log only: the summary per model is printed, nothing compared yet
+    { name: `bot models (${QUICK ? 50 : 1000} games each, log only)`, key: 'models', show: true, cmd: node('tests/models.test.mjs', '--games', QUICK ? '50' : '1000', '--off', QUICK ? '0' : '300'), heavy: true },
     { name: 'syntax', key: 'syntax', fn: syntax },
     { name: 'consistency (offline files, versions)', key: 'consistency', cmd: node('tools/consistency.mjs') },
     { name: 'engine numbers', key: 'rules', cmd: node('tests/rules.test.mjs') },

@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.26 | (this push) | The Coil goes round again (two wake points from Act 1, the end of Act 1 included), "same days again" gone, one Coil count per save; the baseline updated (Act 1 easier). Same save state as 0.11.19 plus the optional `coil.one` (an older version ignores it; an older version's Act 1 Coils then count from the save's number). The fields `played` / `replay` are no longer written. |
+| 0.11.27 | (this push) | The bot models (tests and tools only). The game is the same as 0.11.26; same save state. |
+| 0.11.26 | `3b35f70` | The Coil goes round again (two wake points from Act 1, the end of Act 1 included), "same days again" gone, one Coil count per save; the baseline updated (Act 1 easier). Same save state as 0.11.19 plus the optional `coil.one` (an older version ignores it; an older version's Act 1 Coils then count from the save's number). The fields `played` / `replay` are no longer written. |
 | 0.11.25 | `9b064d0` | The three leftover-check bugs fixed (the Blackroot stakes work, one night; `gives()` real items only; the dead `lu_disgraced` check out); the baseline updated (the night serpent). Same save state as 0.11.19 (`bl_stakes_night` is an existing flag; an old save with a stale `true` gets the cut once, on its next Blackroot night). |
 | 0.11.24 | `dc3bba7` | The first generated pictures (8 art keys, `art/pic/`, recipes in `tools/art/`), the palette check. Art only; the bot stats unchanged (0 drift); same save state as 0.11.19 (art keys are not in saves). |
 | 0.11.23 | `67a97f2` | The clean-up (dead code, an unused item, 12 unread flags no longer written), the leftover check strict. The bot stats byte-identical to 0.11.22; same save state as 0.11.19 (saves that hold the dropped flags keep them; nothing reads them; no save holds `palisade_stake`). |

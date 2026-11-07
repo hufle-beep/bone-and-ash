@@ -52,6 +52,7 @@ Static first: a small tokenizer (`strip`) takes comments and string text out of 
 ## Tools that are not steps
 
 - v0.11.26: the tasks test checks the Coil's two wake points from Act 1 (and "Go round again…" at its end, for several outcomes), one count per save and the one-time update of older saves, with the owner's 11:02 save; the story test walks `a1_again`; browser part 2 taps the owner's save through it.
+- v0.11.27, **bot models** (`tests/models.test.mjs`, log only): Random, Careful, Completionist and Rusher play Incremental Mode, 1,000 games each plus 300 each with Yuki's lane off in the full check (50 in quick); each prints deaths per Coil, Act 1 losses to people (taken), the tribute, the Coils it takes to clear the prologue and Act 1, the whole game on Coil 1, and the key fights. Run one alone: `node tests/models.test.mjs --model careful --games 500`, or `node tools/bots.mjs --model all`. Log only: only a stuck game or a broken same-seed replay fails; what a model did against its own rules is a NOTE line.
 - `tools/bots.mjs`: balance numbers only (the tasks test's bots, a summary per Coil): `node tools/bots.mjs --games 1000 [--seed N] [--sensible]`.
 - `tools/snap.mjs`: fresh test saves from the current version, by hand, for each new save format.
 - `node tools/sanity.mjs --update`: a new baseline, **only** after the owner has seen the drifted numbers of an intended change and said ok.

@@ -7,6 +7,7 @@
 //   node tools/bots.mjs --seed 3              another set of games (0 = the tests' own set)
 //   node tools/bots.mjs --sensible            the bot leaves the meridian screen after 2 sittings in a row, or when Fed < 40
 //   node tools/bots.mjs --workers 1           one process
+//   node tools/bots.mjs --model all           v0.11.27: the bot models (careful, completionist, rusher, random), 2,000 games each
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -14,6 +15,11 @@ import path from 'node:path';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
 const t0 = Date.now();
+// v0.11.27: --model careful | completionist | rusher | random | all runs the bot models instead (tests/models.test.mjs)
+if (args.includes('--model')) {
+    const m = spawn(process.execPath, [path.join(root, 'tests/models.test.mjs'), ...args], { cwd: root, stdio: 'inherit' });
+    m.on('close', (code) => { console.log(`\n${((Date.now() - t0) / 1000).toFixed(0)} s`); process.exit(code ?? 1); });
+} else {
 const child = spawn(process.execPath, [path.join(root, 'tests/tasks.test.mjs'), '--report', ...args], { cwd: root, stdio: ['ignore', 'pipe', 'pipe'] });
 let out = '', err = '';
 child.stdout.on('data', (d) => { out += d; });
@@ -28,3 +34,4 @@ child.on('close', (code) => {
     console.log(`\n${((Date.now() - t0) / 1000).toFixed(0)} s`);
     process.exit(code && !lines.length ? 1 : 0);
 });
+}

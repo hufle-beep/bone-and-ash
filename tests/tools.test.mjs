@@ -75,7 +75,7 @@ for (const mode of ['full', 'quick']) {
     assert(jobs.every((j) => typeof j.name === 'string' && Array.isArray(j.after) && typeof j.heavy === 'boolean'), `${mode}: every job has name, after, heavy`);
     for (const j of jobs) for (const a of j.after) assert(keys.includes(a), `${mode}: ${j.key} waits for ${a}, a job of this mode`);
     for (const k of ['tasks', 'story', 'syntax', 'data']) assert(keys.includes(k), `${mode}: has ${k}`);
-    assert(jobs.filter((j) => j.heavy).map((j) => j.key).sort().join() === 'story,tasks', `${mode}: the heavy jobs are tasks and story`);
+    assert(jobs.filter((j) => j.heavy).map((j) => j.key).sort().join() === 'models,story,tasks', `${mode}: the heavy jobs are tasks, story and the bot models (v0.11.27)`);
     assert(validateJobs(jobs.map((j) => ({ ...j, cmd: ['x', []] }))).length === 0, `${mode}: validateJobs finds no problem`);
     if (mode === 'full') {
         const s = jobs.find((j) => j.key === 'sanity');
