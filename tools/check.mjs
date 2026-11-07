@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // The check runner (v0.11.20; v0.11.22: the leftover check, strict since v0.11.23): every check of tools/check.sh, run in parallel on a job pool.
-//   node tools/check.mjs          the full check (2,000 bot games each, the browser test, the sanity check). Before every push.
+//   node tools/check.mjs          the full check (1,000 bot games each since v0.11.34, the browser test, the sanity check). Before every push.
 //   node tools/check.mjs quick    200 bot games each, no browser or sanity check (about 15 s), while building.
 //   node tools/check.mjs --jobs N run at most N jobs at once (default: the cores + 1; the browser parts mostly wait).
 //   node tools/check.mjs --list [quick]  print the job list (key, name, after, heavy) as JSON, run nothing (v0.11.21).
@@ -28,7 +28,7 @@ const VERBOSE = argv.includes('--verbose'); // v0.11.28
 const CORES = availableParallelism?.() ?? cpus().length;
 const ji = argv.indexOf('--jobs');
 const JOBS = ji >= 0 ? Math.max(1, Number(argv[ji + 1]) || 1) : CORES + 1;
-const GAMES = QUICK ? 200 : 2000;
+const GAMES = QUICK ? 200 : 1000; // v0.11.34 (owner 14:30): 2,000 → 1,000
 const ST = LIST ? path.join(tmpdir(), 'boneash-check-list') : mkdtempSync(path.join(tmpdir(), 'boneash-check-')); // v0.11.21: --list makes no temp dir
 const TIMINGS = path.join(ROOT, 'tools/timings.json');
 const SLOWER = 1.25, MIN_WARN_S = 3;
@@ -38,9 +38,9 @@ const files = LIST ? [] : execFileSync('git', ['ls-files', '--cached', '--others
 
 /** The jobs, in start order (longest first). `after`: names that must pass first. `heavy`: uses every core by itself. */
 const jobs = [
-    { name: `tasks (${GAMES} bot games each way${QUICK ? ', quick' : ''})`, key: 'tasks', cmd: node('tests/tasks.test.mjs', '--games', String(GAMES), '--stats-out', path.join(ST, 'tasks.json')), heavy: true },
+    { name: `tasks (${GAMES} bot games${QUICK ? ', quick' : ''})`, key: 'tasks', cmd: node('tests/tasks.test.mjs', '--games', String(GAMES), '--stats-out', path.join(ST, 'tasks.json')), heavy: true },
     ...(QUICK ? [] : [
-        { name: 'browser part 1 (Incremental, reload, Story, two tabs)', key: 'browser1', cmd: ['python3', ['tools/browser.py', '--part', '1']] },
+        { name: 'browser part 1 (Incremental, reload, no mode switch, two tabs)', key: 'browser1', cmd: ['python3', ['tools/browser.py', '--part', '1']] },
         { name: 'browser part 2 (saves, menu, tooltip, resting places)', key: 'browser2', cmd: ['python3', ['tools/browser.py', '--part', '2']] },
     ]),
     { name: `story (${GAMES} full games${QUICK ? ', quick' : ''})`, key: 'story', cmd: node('tests/story.test.mjs', '--games', String(GAMES), '--stats-out', path.join(ST, 'story.json')), heavy: true },
@@ -61,7 +61,7 @@ const jobs = [
     // v0.11.22: the leftover check (strict since v0.11.23, choices log only). Full runs add what the bot games touched: the story test watches its flags and items
     // itself; the tasks games get a separate small watched run (a Proxy slows every game in its process, so not in the big test).
     ...(QUICK ? [{ name: 'leftovers (strict, static scan)', key: 'leftovers', show: 'leftovers', cmd: node('tools/leftovers.mjs', '--strict') }] : [
-        { name: 'watched bot games (300 each way, flags, items)', key: 'track', cmd: node('tests/tasks.test.mjs', '--bots-only', '--track', '--games', '300', '--workers', '1', '--stats-out', path.join(ST, 'track.json')), after: ['tasks'] },
+        { name: 'watched bot games (300, flags, items)', key: 'track', cmd: node('tests/tasks.test.mjs', '--bots-only', '--track', '--games', '300', '--workers', '1', '--stats-out', path.join(ST, 'track.json')), after: ['tasks'] },
         { name: 'watched story games (300 and the walks)', key: 'track-story', cmd: node('tests/story.test.mjs', '--track', '--games', '300', '--workers', '1', '--stats-out', path.join(ST, 'track-story.json')), after: ['tasks'] },
         { name: 'leftovers (strict; choices log only)', key: 'leftovers', show: 'leftovers', cmd: node('tools/leftovers.mjs', '--strict', '--seen', ...['story', 'tasks', 'track', 'track-story'].map((k) => path.join(ST, `${k}.json`))), after: ['tasks', 'story', 'track', 'track-story'] },
     ]),

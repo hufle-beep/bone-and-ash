@@ -2,12 +2,12 @@
 // Balance numbers only (v0.11.1): runs the tasks test's bots and prints the summary per Coil.
 // Changes nothing in the game; for the numbers shown to the owner before a balance change.
 //
-//   node tools/bots.mjs                       2,000 games, one worker per core
+//   node tools/bots.mjs                       1,000 games (v0.11.34), one worker per core
 //   node tools/bots.mjs --games 500           fewer games (faster, noisier)
 //   node tools/bots.mjs --seed 3              another set of games (0 = the tests' own set)
 //   node tools/bots.mjs --sensible            the bot leaves the meridian screen after 2 sittings in a row, or when Fed < 40
 //   node tools/bots.mjs --workers 1           one process
-//   node tools/bots.mjs --model all           v0.11.27: the bot models (careful, completionist, rusher, random), 2,000 games each
+//   node tools/bots.mjs --model all           v0.11.27: the bot models (careful, completionist, rusher, random), 1,000 games each (v0.11.34)
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -25,7 +25,7 @@ let out = '', err = '';
 child.stdout.on('data', (d) => { out += d; });
 child.stderr.on('data', (d) => { err += d; });
 child.on('close', (code) => {
-    const keep = /^\s*(tribute|realm \/ primaries|deaths|Meditate:|work-card|\d+ cards run|\d+ games each way)/;
+    const keep = /^\s*(tribute|realm \/ primaries|deaths|Meditate:|work-card|\d+ cards run|\d+ games (?:each way|in))/; // v0.11.34: "N games in W workers"
     const lines = out.split('\n').filter((l) => keep.test(l));
     console.log(`Bots: ${args.join(' ') || '(defaults)'}`);
     for (const l of lines) console.log(l.replace(/ · /g, '\n      '));

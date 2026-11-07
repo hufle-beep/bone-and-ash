@@ -2,7 +2,7 @@
 Serves the folder, opens the game at 390x844 in headless Chromium and taps the real buttons:
   1. Incremental Mode, a new game: about 40 taps on cards, story choices and fight actions (test speeds, x10), every tab;
   2. a running bar survives a reload (v0.11.5), from a fixed task screen (saves/v0.11.7-long-forest-coil2.json);
-  3. Story Mode, a new game: about 25 taps, every tab;
+  3. v0.11.34 (D1): no Game mode switch; a phone still set to Story Mode ('boneash.tasks' '0') plays Incremental Mode;
   4. two tabs: closing the older tab leaves the newer save alone (v0.11.8);
   5. Saves (v0.11.9, in the menu since v0.11.10): Copy status, Export all then Restore all into a new game, a backup restored;
   6. the main menu (v0.11.10): opens first on plain paper with no tab bar; Settings (text size, Show checks) and Saves; Continue;
@@ -260,27 +260,27 @@ def saves(pg, url):
         check_text(pg, 'after a backup restore')
 
 def picked(pg, url):
-    """v0.11.32 (P2-a): a story choice picked before is recoloured, in both modes; a task card and work stay as they were."""
+    """v0.11.32 (P2-a): a story choice picked before is recoloured; a task card and work stay as they were (Incremental Mode only since v0.11.34)."""
     import json
     st = json.loads((ROOT / 'saves/v0.8.5-day1-stream.json').read_text())
     st['picked'] = {'stream': [1, 5]}  # 1 = "Test the water" (a work card on this task screen), 5 = "Keep walking" (story)
     s = json.dumps(st)
-    for mode, sel in (('1', 'button.card.story'), ('0', 'button.choice')):
-        fresh(pg, url, "a => { localStorage.clear(); localStorage.setItem('boneash.tasks', a[1]); localStorage.setItem('boneash.auto', a[0]); }", [s, mode])
-        where = 'Incremental Mode' if mode == '1' else 'Story Mode'
+    for sel in ('button.card.story',):
+        fresh(pg, url, "a => { localStorage.clear(); localStorage.setItem('boneash.auto', a); }", s)
+        where = 'Incremental Mode'
         walk = pg.query_selector(f'{sel}:has-text("Keep walking")')
         if not walk: fails.append(f'picked, {where}: the stream\'s "Keep walking" is missing'); continue
         col = walk.evaluate("e => [e.classList.contains('picked'), getComputedStyle(e).color, /picked before/.test(e.textContent)]")
         if col != [True, 'rgb(107, 90, 69)', True]: fails.append(f'picked, {where}: "Keep walking" not recoloured: {col}')
         n = len(pg.query_selector_all('#view .picked'))
         if n != 1: fails.append(f'picked, {where}: {n} recoloured buttons, expected 1 (the work card "Test the water" stays as it was)')
-    if not any(f.startswith('picked') for f in fails): notes.append('picked choices recoloured in both modes, work left alone')
+    if not any(f.startswith('picked') for f in fails): notes.append('picked choices recoloured, work left alone')
 
 def main(part=0):
-    """v0.11.20: part 1 (Incremental Mode, the reload, Story Mode, two tabs) and part 2 (Saves, the menu, tooltips and scroll,
+    """v0.11.20: part 1 (Incremental Mode, the reload, no mode switch, two tabs) and part 2 (Saves, the menu, tooltips and scroll,
     the resting places) can run side by side, each with its own browser and server; no part = everything, in order."""
     one, two = part in (0, 1), part in (0, 2)
-    n1 = n3 = 0; tabs = []
+    n1 = 0; tabs = []
     port = free_port()
     srv = subprocess.Popen([sys.executable, '-m', 'http.server', str(port)], cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     up = time.time() + 10  # v0.11.21: wait for the server's port instead of a fixed 0.8 s
@@ -315,10 +315,13 @@ def main(part=0):
                   w2 = pg.eval_on_selector('#nowbar', 'e => parseFloat(e.dataset.v) * 100') if pg.query_selector('#nowbar') else 0
                   if not (w1 > 5 and abs(w1 - w2) < 3): fails.append(f'reload: the bar was {w1}% before and {w2}% after')
                   else: notes.append(f'reload kept the bar ({w1:.0f}% → {w2:.0f}%)')
-              # 3. Story Mode
+              # 3. v0.11.34 (D1): Incremental Mode only; an old Story Mode setting on the phone is ignored, and Settings has no switch
               fresh(pg, url, "localStorage.clear(); localStorage.setItem('boneash.tasks','0')")
-              n3 = taps(pg, 25, random.Random(11), 'Story Mode', 'button.choice:not([disabled])[data-choice], button.choice:not([disabled])[data-act]')
-              visit_tabs(pg, 'Story Mode')
+              if pg.query_selector('button.choice[data-choice]') or not pg.query_selector('button.card[data-story], button.card[data-run]'): fails.append('D1: a phone set to Story Mode did not open in Incremental Mode (cards)')
+              pg.click('[data-tab="menu"]'); until(pg, '.main-menu button[data-menu="settings"]', 5000, 'visible')
+              pg.click('button[data-menu="settings"]'); until(pg, 'button[data-showchecks]', 5000, 'visible')
+              if pg.query_selector('[data-tasks]') or 'Story Mode' in pg.inner_text('#view'): fails.append('D1: Settings still offers a game mode')
+              else: notes.append('Incremental Mode only, no mode switch')
               # 4. two tabs (v0.11.8): a tab that closes never writes its older game over a newer save from another tab
               fresh(pg, url, "localStorage.clear(); localStorage.setItem('boneash.speed','10'); localStorage.setItem('boneash.testspeeds','1')")
               pg.evaluate("1")
@@ -352,10 +355,9 @@ def main(part=0):
     finally:
         srv.terminate()
     if one and n1 < 30: fails.append(f'Incremental Mode: only {n1} taps possible')
-    if one and n3 < 15: fails.append(f'Story Mode: only {n3} taps possible')
     if fails:
         print('\n'.join(fails[:20])); sys.exit(1)
-    print(f'{f"part {part}: " if part else ""}{f"{n1} + {n3} taps, {len(tabs)} tabs each mode; " if one else ""}{"; ".join(notes)}, no errors')
+    print(f'{f"part {part}: " if part else ""}{f"{n1} taps, {len(tabs)} tabs; " if one else ""}{"; ".join(notes)}, no errors')
 
 if __name__ == '__main__':
     pt = sys.argv.index('--part') if '--part' in sys.argv else -1

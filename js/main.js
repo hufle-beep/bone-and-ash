@@ -55,12 +55,12 @@ let prevScene = null;
 let lastPress = 0;
 
 /* ---------------- tasks (v0.9.0, preview) ---------------- */
-const TASKS_KEY = 'boneash.tasks'; // per phone: '0' = Classic; anything else (never chosen, '1') = Tasks (on by default since v0.9.8)
-let taskMode = store.get(TASKS_KEY) !== '0';
+// v0.11.34 (D1): Incremental Mode only; Story Mode's code stays in place unused (deleted later, D2) and 'boneash.tasks' is no longer read
+const taskMode = true;
 setNoDice(taskMode); // no dice anywhere in task mode (v0.9.3)
 const SPEED_KEY = 'boneash.speed'; // per phone: 0 = paused, 1, 2, 5, 10
 const SPEEDS = [[0, 'Pause'], [1, '×1'], [2, '×2'], [5, '×5'], [10, '×10']]; // gated per save by maxSpeed (v0.9.8); the stored choice is kept and held down to the gate
-const TEST_SPEEDS_KEY = 'boneash.testspeeds'; // per phone: '1' = every speed open (hidden: tap "Game mode" 5 times)
+const TEST_SPEEDS_KEY = 'boneash.testspeeds'; // per phone: '1' = every speed open (hidden: tap "The clock" in Settings 5 times)
 let testSpeeds = store.get(TEST_SPEEDS_KEY) === '1';
 const runSpeed = () => effectiveSpeed(g, speed, testSpeeds);
 let modeTaps = 0, modeTapAt = 0;
@@ -755,9 +755,8 @@ ${pendingAll ? `<p class="note">This file holds a game at ${esc(descOf(pendingAl
 function renderSettings() {
     view.innerHTML = `<section class="page menu-page"><div class="btns"><button class="btn" data-menu="main">← Menu</button></div><h1>Settings</h1>
 <p class="lede">Kept on this phone only, for every save.</p>
-<h2 data-modehead="1">Game mode</h2>
-<p class="note">${taskMode ? 'Incremental Mode: every screen is cards on a clock, with no dice, familiarity, Yuki\'s lane and the Coil. 1 game hour takes 3 seconds at ×1; ×2 opens after a won tribute, ×5 after Act 1. New games start with closed meridians.' : 'Story Mode: the older game, with dice and no Coil. Choices happen at once.'}</p>
-<div class="btns"><button class="btn${taskMode ? ' primary' : ''}" data-tasks="${taskMode ? '' : '1'}">Incremental Mode</button><button class="btn${taskMode ? '' : ' primary'}" data-tasks="${taskMode ? '1' : ''}">Story Mode (older, with dice, no Coil)</button></div>
+<h2 data-modehead="1">The clock</h2>
+<p class="note">1 game hour takes 3 seconds at ×1; ×2 opens after the tribute, ×5 after Act 1.</p>
 ${taskMode ? `<div class="btns"><button class="btn${pauseDeath ? ' primary' : ''}" data-pausedeath="1">Pause before the forecast death: ${pauseDeath ? 'on' : 'off'}</button></div>` : ''}
 ${testSpeeds || modeTaps >= 5 ? `<div class="btns"><button class="btn${testSpeeds ? ' primary' : ''}" data-testspeeds="1">Test speeds: ${testSpeeds ? 'on' : 'off'}</button></div>` : ''}
 <h2>Text size</h2>
@@ -1001,12 +1000,6 @@ view.addEventListener('click', (ev) => {
         if (b.dataset.panel) { panel = b.dataset.panel; if (panel === 'results') unseen = 0; render(); return; }
         if (b.dataset.yuki) { const yl = yukiLane(g); setYuki(g, !yl.on); autosave(); render(); return; }
         if (b.dataset.testspeeds) { testSpeeds = !testSpeeds; store.set(TEST_SPEEDS_KEY, testSpeeds ? '1' : '0'); lastTickAt = Date.now(); render(); return; }
-        if (b.dataset.tasks != null) {
-            if (!b.dataset.tasks) return; // the mode already on
-            taskMode = !taskMode; store.set(TASKS_KEY, taskMode ? '1' : '0'); setNoDice(taskMode);
-            if (!taskMode) stopRunning(); else startNext();
-            render(); return;
-        }
         if (b.dataset.choice != null) stopRunning(); // a story stop: the bar's work is not done, so nothing of it happens
         if (b.dataset.choice != null) {
             const ch = SCENES[g.scene]?.choices?.[Number(b.dataset.choice)];

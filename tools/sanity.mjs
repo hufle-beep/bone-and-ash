@@ -2,8 +2,8 @@
 // The mechanics sanity check (v0.11.3, hard rule 2): run after every build, before the docs. Part of the full
 // tools/check.sh (a flag fails it); `quick` skips it.
 //
-// 1. Invariants: the cultivation formulas, the Coil bonus, Story Mode's numbers.
-// 2. Drift: every per-Coil rate of the tasks test's bots and every fight's win rate (both modes, both bot styles)
+// 1. Invariants: the cultivation formulas, the Coil bonus (Story Mode's numbers dropped in v0.11.34, D1).
+// 2. Drift: every per-Coil rate of the tasks test's bots and every fight's win rate (both bot styles; Incremental Mode only since v0.11.34)
 //    against tools/baseline.json. More than LIMIT points off, with at least MIN_N samples on both sides, is flagged.
 //
 //   node tools/sanity.mjs --tasks t.json --story s.json   compare the stats the two tests wrote (tools/check.sh does this)
@@ -57,8 +57,7 @@ const sum = (n, f) => Array.from({ length: n }, (_, k) => f(k)).reduce((a, b) =>
 ok(near(sum(12, M.priHours), 36) && near(sum(8, M.colHours), 32), 'meridian hours: 36 h primaries, 32 h groups');
 ok(M.MER_FED_MIN === 20, 'meridian work locks below Fed 20');
 { const g = G.ensureBars(G.newGame(8)); const q = g.james.qi; const r = G.condense(g); ok(r.ok && g.minutes - G.START_MINUTES === 60 && q - g.james.qi <= 10, 'Incremental: a sit is 1 h and 10 Qi'); }
-G.setNoDice(false);
-{ const g = G.ensureBars(G.newGame(9)); g.coil.n = 4; ok(G.coilMult(g) === 1, 'Story Mode: no Coil bonus'); g.tasks = { use: { 'act:sit': 30, 'act:bt': 6 } }; const r = G.condense(g); ok(r.ok && g.minutes - G.START_MINUTES === 30, 'Story Mode: a sit is 30 min'); g.james.realm = 9; ok(G.btMinutes(g) === 120, 'Story Mode: a breakthrough is 2 h'); }
+// v0.11.34 (D1): Story Mode's invariants dropped (Incremental Mode only)
 
 /* ---------- 2. drift ---------- */
 let tasksFile = opt('tasks'), storyFile = opt('story');
@@ -71,7 +70,7 @@ if (!tasksFile || !storyFile) {
     }
 }
 const T = JSON.parse(readFileSync(tasksFile, 'utf8')), S = JSON.parse(readFileSync(storyFile, 'utf8'));
-ok(T.games >= 2000 && S.games >= 2000, `drift needs the full 2,000 games (tasks ${T.games}, story ${S.games})`);
+ok(T.games >= 1000 && S.games >= 1000, `drift needs the full 1,000 games (tasks ${T.games}, story ${S.games})`);
 ok(!T.badBars, `no NaN / Infinity bar after the bot games (${T.badBars})`);
 
 /** Every compared number: { name: { v: percent, n: samples } }. */

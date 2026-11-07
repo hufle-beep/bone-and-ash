@@ -1,7 +1,7 @@
 // Bot games split across processes (v0.11.1). A test file imports this, starts its workers with `launch()` at the top,
 // runs its own static checks while they play, then `collect()`s and merges their numbers.
 //
-//   node tests/tasks.test.mjs                 full run: 2,000 games, one worker per core
+//   node tests/tasks.test.mjs                 full run: 1,000 games (2,000 before v0.11.34), one worker per core
 //   node tests/tasks.test.mjs --games 200     quick run (bash tools/check.sh quick)
 //   node tests/tasks.test.mjs --workers 1     everything in one process (the numbers are the same)
 //
@@ -14,10 +14,10 @@ import os from 'node:os';
 const argv = process.argv.slice(2);
 const opt = (name, def) => { const i = argv.indexOf(`--${name}`); return i >= 0 && argv[i + 1] != null ? argv[i + 1] : def; };
 
-/** Games to play (default 2,000). */
-export const GAMES = Math.max(1, Number(opt('games', 2000)) || 2000);
+/** Games to play (default 1,000 since v0.11.34; owner 14:30). */
+export const GAMES = Math.max(1, Number(opt('games', 1000)) || 1000);
 /** The coverage checks ("every card played", "every scene reached") only hold on the full run. */
-export const FULL = GAMES >= 2000;
+export const FULL = GAMES >= 1000; // the coverage checks need a full run
 /** In a worker: { i, n }. In the parent: null. */
 export const SHARD = (() => { const s = opt('shard', null); if (!s) return null; const [i, n] = s.split('/').map(Number); return { i, n }; })();
 /** Workers to start (default: one per core, at most one per 50 games). */

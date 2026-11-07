@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.33 | (this push) | The one-off work on the task screens, "Call it a day"; the baseline updated (Act 1 harder). **The last version with Story Mode** (dropped next, D1): the starting point for the separate Story Mode game. Same save state as 0.11.32 (the new `oo:` flags are world flags; an older version ignores them). |
+| 0.11.34 | (this push) | D1, Story Mode dropped: Incremental Mode only (the switch gone, Story Mode's code unused in place); the tests Incremental only at 1,000 games; the baseline updated. Same save state as 0.11.33 (a Story Mode save loads and plays on in Incremental Mode; the owner deletes his). |
+| 0.11.33 | `309792b` | The one-off work on the task screens, "Call it a day"; the baseline updated (Act 1 harder). **The last version with Story Mode** (dropped next, D1): the starting point for the separate Story Mode game. Same save state as 0.11.32 (the new `oo:` flags are world flags; an older version ignores them). |
 | 0.11.32 | `1b50cb3` | P2-a, picked choices recoloured. Same save state as 0.11.31 plus the optional `picked` field (an older version ignores it). |
 | 0.11.31 | `4ff31d5` | P3-b, the speed gates kept across rewinds. Same save state as 0.11.26 plus the optional kept flag `spd_pro` (an older version ignores it). |
 | 0.11.30 | `5154270` | Docs only (the priority points); the game is the same as 0.11.29. |

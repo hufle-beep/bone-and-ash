@@ -1,6 +1,6 @@
 // Run: node tests/tasks.test.mjs — task cards and the queue (v0.9.0, "Tasks (preview)").
 // Every card resolves; old saves get an empty queue; a dry run predicts the real run exactly;
-// 2,000 bot games in task mode reach the end with no dead end; the tribute outcomes are printed next to classic play.
+// 1,000 bot games (2,000 before v0.11.34) in task mode reach the end with no dead end (Incremental Mode only since v0.11.34, D1: the classic games and the Story Mode checks gone).
 import { SCENES, lfOpen, lfSeason, lfRank, LF_STOCK, LF_SEASON_MINUTES } from '../js/story/prologue.js';
 import { itemCap, MAX_REALM, combatStep as cStep, startCombat as sCombat, coilMult, awardXp, actSpeed, sitMinutes, awardYukiFightXp, condense, SAT_HOURS, sitGain, btMinutes, formDmgBonus, guardBonus, fieldDamage, FIELD_ROUNDS, actionDmg } from '../js/core/game.js';
 import { FORM_LINES, hasForm, cuRank, actionOpen, actionLabel, fragileKnife, STORY_FORMS, INC_ONLY_ACTIONS } from '../js/core/forms.js';
@@ -24,6 +24,7 @@ import { seen as touched, track, noteView, noteCards, mergeSeen, seenOut as touc
 let pass = 0, fail = 0;
 const assert = (c, l) => { if (c) { pass++; } else { fail++; if (fail < 30) console.error('  FAIL ', l); } };
 const kids = launch(import.meta.url); // v0.11.1: the bot games in worker processes, while this one runs the other checks
+setNoDice(true); // v0.11.34 (D1): the game is Incremental Mode only
 /** v0.11.21: --bots-only plays the bot games and writes their stats, without the rule checks (tests/tools.test.mjs: 1 worker = 2 workers). */
 const BOTS_ONLY = process.argv.includes('--bots-only');
 
@@ -89,7 +90,7 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
 // v0.9.5: every choice takes time in task mode; the Meditate card everywhere
 {
     setNoDice(true);
-    // talking 10, moving 20, an action 30; hand-set times stay; classic adds nothing
+    // talking 10, moving 20, an action 30; hand-set times stay
     const g = ensureBars(newGame(31)); const m0 = g.minutes;
     const yi = SCENES.arrival.choices.findIndex((c) => /Check Yuki/.test(String(c.text)));
     const yc = SCENES.arrival.choices[yi];
@@ -97,9 +98,6 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     assert(yc.time == null && g.minutes - m0 === 5 + DEFAULT_MINUTES.talk, `talking: 10 min on top of the scene's own 5 (${g.minutes - m0})`);
     assert(defaultMinutes(SCENES, 'x', { to: 'y' }, 'y', false) === 10 && defaultMinutes(SCENES, 'x', { to: 'y' }, 'y', true) === 20 && defaultMinutes(SCENES, 'x', { to: 'y', check: { skill: 'GU', dc: 2 } }, 'y', false) === 30, 'defaults: talk 10, move 20, act 30');
     assert(defaultMinutes(SCENES, 'wilds', { to: 'wild_forage' }, 'wild_forage', false) === 0 && defaultMinutes(SCENES, 'x', { to: 'y', time: 5 }, 'y', false) === 0 && defaultMinutes(SCENES, 'x', { combat: {} }, 'y', false) === 0, 'no default: hub ↔ menu, own time, fights');
-    setNoDice(false);
-    assert(defaultMinutes(SCENES, 'x', { to: 'y' }, 'y', true) === 0, 'classic: no default time');
-    setNoDice(true);
     // v0.11.14 (owner pick A): the Meditate card only on the 13 resting places
     let medded = 0;
     for (const id of Object.keys(SCENES)) {
@@ -152,7 +150,6 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
         assert(/a day later/.test(r3.lines[0]) && p.minutes - pm >= 1440 && clockParts(p.minutes).hh === 6 && exLevel(p) === 0 && p.james.hp === jamesHpMax(p) && wakeDay(p) === pw + 1, `the third push: collapse, a day lost, wakes at 06:00 with full bars and no Exhaustion (${p.minutes - pm} min)`);
         assert(Math.abs((f0 - p.james.satiety) - (3 * (p.minutes - pm)) / 60 / 2) < 0.6, 'the lost day drains Fed at the sleeping rate');
         const z = ensureBars(newGame(308)); z.scene = 'ashfall'; markDaily(z, 'clinic'); runMed(z, SCENES, 'med:push'); sleepUntil(z, 6); assert(exLevel(z) === 0, 'a real sleep clears Exhaustion');
-        setNoDice(false); const st = ensureBars(newGame(309)); st.scene = 'ashfall'; markDaily(st, 'clinic'); assert(!medCards(st, SCENES).some((c) => c.id === 'med:push'), 'Story Mode: no Push card'); const sd = st.minutes; advance(st, 600); assert(daily('clinic')(st) === false, 'Story Mode: still the calendar day'); st.minutes = sd + 1440; assert(daily('clinic')(st), 'Story Mode: back on the next calendar day'); setNoDice(true);
         // Yuki's curve (c2)
         assert(yukiSpeed(0) === 1 && Math.abs(yukiSpeed(10) - 2) < 1e-9 && yukiSpeed(20) === 3 && yukiSpeed(61) === 3 && yukiSpeed(500) === 3, `Yuki's job: N 90, capped at ×3 (${yukiSpeed(10)}, ${yukiSpeed(61)})`);
         // the Extraordinary lines, timed (b)
@@ -169,18 +166,15 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     assert(!sceneView(w, SCENES).choices.some((c) => /^Break through|^Open a meridian/.test(c.label)), 'task mode: no old break / meridian choices on the hub');
     // the two dead ends found by the sweep
     const rn = ensureBars(newGame(36)); rn.scene = 'night_event'; rn.flags.night_ev = 'rain'; rn.james.qi = 0;
-    setNoDice(false);
-    setNoDice(true);
     assert(SCENES.night_event.choices.some((c) => c.text === 'Get wet. Sleep anyway.' && c.to === 'morning'), 'rain: a way out without Qi');
     assert(SCENES.rt_elder ? true : true, 'rt_elder exists');
-    setNoDice(false);
 }
 
 // v0.9.6: meridians closed at the start (task mode), sessions, the Foundation gate, the seal and its unwinding
 {
     setNoDice(true);
     const open = ensureBars(newGame(40)), g = ensureBars(newGame(40, { closed: true }));
-    assert(open.james.primaries === 12 && open.james.collaterals === 66 && open.yuki.primaries === 12, 'classic new game: 12 / 66 open');
+    assert(open.james.primaries === 12 && open.james.collaterals === 66 && open.yuki.primaries === 12, 'a new game without closed meridians (old saves, older tests): 12 / 66 open');
     assert(g.james.primaries === 0 && g.james.collaterals === 0 && g.yuki.primaries === 0 && g.yuki.collaterals === 0, 'closed new game: 0 / 0, Yuki too');
     assert(jamesQiMax(g) === 25.5 && yukiQiMax(g) === 20.5 && qiRegenPct(g, 0) === 5 && jamesQiMax(open) === 40.5, `closed bars: Qi 25.5, Yuki 20.5, regen 5% (${jamesQiMax(g)}, ${yukiQiMax(g)})`);
     assert(COL_GROUPS.reduce((a, x) => a + x.size, 0) === 66 && COL_GROUPS.length === 8, '8 collateral groups, 66 threads');
@@ -190,7 +184,7 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     assert(Math.round(Array.from({ length: 12 }, (_, k) => priHours(k)).reduce((x, y) => x + y) * 10) / 10 === 36 && Math.round(Array.from({ length: 8 }, (_, j) => colHours(j)).reduce((x, y) => x + y) * 10) / 10 === 32, '36 h for the 12 primaries, 32 h for the 8 groups');
     g.scene = 'stream'; g.james.qi = 20; g.james.satiety = 70;
     { const gm = medCards(g, SCENES); assert(!gm.some((c) => c.id === 'med:mer') && gm.some((c) => c.id === 'med:mer:pri' && c.open && c.task === merLineTask('pri')) && gm.some((c) => c.id === 'med:mer:col' && !c.open && /2 primaries/.test(c.reason)), 'v0.11.13: Mortal Vessel: a primary card (queueable here), the collateral card locked until 2 primaries, no screen'); }
-    g.scene = 'meridians'; g.flags.mer_return = 'stream'; // the screen itself (Story Mode's, and saves sitting on it)
+    g.scene = 'meridians'; g.flags.mer_return = 'stream'; // the screen itself (Story Mode's; old saves sitting on it)
     const wp = SCENES.meridians.choices.findIndex((c) => c.work && /primary|Lung/.test(String(c.text(g))) && c.show(g));
     const wc = () => SCENES.meridians.choices.findIndex((c, i) => c.work && i !== wp);
     assert(wp >= 0 && SCENES.meridians.choices.every((c) => !c.check || !(c.show ? c.show(g) : true) || c.to !== 'meridians' || c.work), 'Incremental Mode: work cards, the old checked sessions hidden');
@@ -223,11 +217,6 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     const h = ensureBars(newGame(47, { closed: true })); h.scene = 'meridians'; h.james.qi = 20; h.james.satiety = 19;
     assert(merChoice(h, SCENES) === -1 && /Too hungry to sit/.test(SCENES.meridians.text(h)), 'Fed under 20: no sitting, the screen says why');
     h.james.satiety = 20; assert(merChoice(h, SCENES) >= 0, 'Fed 20: sitting allowed');
-    // Story Mode keeps the old sessions: two a day, checks
-    setNoDice(false);
-    const sm = ensureBars(newGame(48, { closed: true })); sm.scene = 'meridians'; sm.james.qi = 20; sm.james.skills['Convergence Use'].level = 3;
-    assert(SCENES.meridians.choices.findIndex((c) => (c.show ? c.show(sm) : true) && c.check && c.to === 'meridians') >= 0 && !SCENES.meridians.choices.some((c) => c.work && c.show(sm)), 'Story Mode: the checked sessions, no work cards');
-    setNoDice(true);
     // Foundation needs all 12 primaries; collaterals still closed seal; a rewind unwinds Foundation
     const b = ensureBars(newGame(42, { closed: true })); b.scene = 'stream'; b.james.saturation = 96; b.james.primaries = 11;
     assert(!canBreakThrough(b) && medCards(b, SCENES).some((c) => c.id === 'med:bt' && !c.open && /12 primaries/.test(c.reason)), 'Foundation: locked at 11 primaries, the card says why');
@@ -244,15 +233,8 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     assert(btTarget(k) === 'breakthrough', 'everything open: no warning');
     breakthrough(k); endCoil(k, 'choice', 'stream'); rewind(k);
     assert(k.james.realm === 0 && k.james.primaries === 0, 'v0.11.0: the realm starts over on a rewind, sealed or not');
-    // old saves keep what they have; the Long Forest opens everything
-    const lf = ensureBars(newGame(44, { closed: true })); lf.scene = 'clearing';
-    setNoDice(false); // v0.10.1: the one-step button is Classic's now
-    choose(lf, SCENES, SCENES.clearing.choices.findIndex((c) => /in one step/.test(String(c.text))));
-    setNoDice(true);
-    assert(lf.james.primaries === 12 && lf.james.collaterals === 66 && lf.yuki.collaterals === 66, 'the Long Forest opens all 12 / 66');
     // the closed Day 1 scan text
     assert(/ash/.test(SCENES.yuki_check.text(ensureBars(newGame(45, { closed: true })))) && /Twelve primaries open/.test(SCENES.yuki_check.text(open)), 'Day 1 scan text follows the meridians');
-    setNoDice(false);
 }
 // v0.11.0: the Coil bonus — ×(1 + 0.5 × earlier Coils), Incremental Mode only; v0.11.29 (RB-1): ×(1 + 0.25 × earlier Coils)
 {
@@ -270,8 +252,6 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     const a = ensureBars(newGame(94)); a.scene = 'epilogue'; a.flags.ending = 'bluff'; a.minutes = 6 * 1440 + 900; a.coil.n = 5;
     choose(a, SCENES, 0);
     assert(a.coil.act === 1 && a.coil.n === 5 && coilMult(a) === 2, 'v0.11.26 (one count, N1): Act 1 continues the prologue\'s Coil 5 at ×2 (×3 before v0.11.29)');
-    setNoDice(false);
-    assert(coilMult(g) === 1, 'Story Mode: ×1');
 }
 // v0.11.29 (owner pick RB-1): the two walls and the bonus text
 {
@@ -280,7 +260,7 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     assert(NO_DICE_TUNE.collectors.up === 4.5 && NO_DICE_TUNE.rot_ape.up === 15 && COIL_GROWTH === 0.25, `RB-1: the tribute 4.5, the rot ape 15, the Coil bonus 0.25 per Coil (${NO_DICE_TUNE.collectors.up}, ${NO_DICE_TUNE.rot_ape.up}, ${COIL_GROWTH})`);
     assert(fmtMult(1) === '1' && fmtMult(1.25) === '1.25' && fmtMult(1.5) === '1.5' && fmtMult(2.75) === '2.75', 'fmtMult: ×1.25 shows as 1.25, not 1.3');
 }
-// v0.10.4: Bonesinger forms — Incremental Mode shows only what James can sing; Story Mode keeps everything
+// v0.10.4: Bonesinger forms — Incremental Mode shows only what James can sing
 {
     setNoDice(true);
     const setCu = (g, t, l) => { g.james.skills['Convergence Use'] = { tier: t, level: l, xp: 0 }; };
@@ -314,10 +294,6 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     assert(/hedge/.test(SCENES.night_attack_forced.text(s)), 'the hedge fail text');
     const fc = t('rt_ford', /stepping-stones/); const fg = ensureBars(newGame(84)); setCu(fg, 3, 1);
     assert(fc.do(fg).some((l) => /stepping-stones/.test(l)), 'the ford result line');
-    setNoDice(false);
-    assert(t('night_attack', /^Bone wall between/) && t('rt_ford', /bridge of bone/) && /wall comes out/.test(SCENES.night_attack_forced.text(s)), 'Story Mode keeps the original lines');
-    setCu(s, 1, 1); goTo(s, SCENES, 'hunt'); assert(lab().some((x) => /bone dart/.test(x)), 'Story Mode: every form open');
-    const k = ensureBars(newGame(85)); setCu(k, 1, 1); assert(actionOpen(k, 'dart') && actionLabel(k, 'blade', 'Wraithbone blade') === 'Wraithbone blade' && !fragileKnife(k), 'Story Mode fights unchanged');
 }
 // v0.10.2: the camp is a task screen (its checks keep the story numbers); waiting for a time of day plays at once
 {
@@ -345,7 +321,6 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     let waits = 0;
     for (const [id, sc] of Object.entries(SCENES)) for (const ch of sc.choices || []) if (waitChoice(SCENES, ch, 999, id)) { waits++; assert(!ch.check && !ch.qi && !ch.combat && ch.time == null, `wait ${id} has no check, Qi, fight or time`); }
     assert(waits >= 20, `waiting choices found (${waits})`);
-    setNoDice(false);
 }
 // v0.10.1: the Long Forest in task mode — gated behind the first Coil, one season (+1 realm) per card
 {
@@ -355,9 +330,6 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     assert(!labels(g).some((l) => /Stay lost/.test(l)), 'Coil 1: no Stay lost on the arrival');
     g.scene = 'clearing';
     assert(!labels(g).some((l) => /Stay lost/.test(l)) && !lfOpen(g), 'Coil 1: no Stay lost in the clearing');
-    setNoDice(false);
-    assert(labels(g).some((l) => /in one step/.test(l)) && !labels(g).some((l) => /one season at a time/.test(l)), 'Classic: the one-step button, not the seasons');
-    setNoDice(true);
     endCoil(g, 'choice', 'clearing'); rewind(g);
     assert(g.coil.n === 2 && g.scene === 'arrival' && lfOpen(g), 'Coil 2: the Long Forest opens');
     assert(labels(g).some((l) => /You remember this\. Stay lost/.test(l)), 'Coil 2: Stay lost on the arrival');
@@ -389,9 +361,6 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     assert(g.scene === 'dawn' && !g.flags.lf_active && LF_STOCK.every((id) => g.inventory[id] >= itemCap(id) - 1), 'leaving: Day 4 at dawn, the hammerspace full (less breakfast)');
     endCoil(g, 'choice', 'stream'); rewind(g);
     assert(g.james.realm === 0 && !g.inventory.hare_raw && g.coil.n === 3 && lfOpen(g), 'v0.11.0: a rewind starts the realm over, empties the hammerspace, and the forest stays open (climb it again)');
-    setNoDice(false);
-    const cl = ensureBars(newGame(63)); goTo(cl, SCENES, 'lf_exit'); choose(cl, SCENES, 0);
-    assert(!cl.inventory.hare_raw, 'Classic: leaving the walkable forest stocks nothing');
 }
 // v0.9.6: Act 1's Coil — Day 8 dawn, ends at Shen Qiu (rt_taken), accept or rewind; state 4 → 5
 {
@@ -484,9 +453,6 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     assert(p4.v === SAVE_VERSION && p4.coil.act === 0, 'state 4 in the prologue: act 0');
     const s4 = ensureBars(newGame(53)); s4.flags.ending = 'paid'; s4.scene = 'fo_ashfall'; s4.minutes = 8 * 1440 + 600; s4.v = 4; delete s4.coil.act; migrate(s4);
     assert(inAct1(s4) && s4.coil.act === 1 && s4.coil.n === 1 && s4.coil.snap.scene === 'fo_ashfall' && s4.coil.wake === 'fo_ashfall', 'state 4 mid-Act 1: an Act 1 Coil from the save as loaded');
-    setNoDice(false);
-    const c = ensureBars(newGame(54)); c.flags.ending = 'bluff'; c.scene = 'epilogue'; c.minutes = 6 * 1440 + 15 * 60; choose(c, SCENES, 0); goTo(c, SCENES, 'rt_taken');
-    assert(!sceneView(c, SCENES).choices.some((x) => /Bite/.test(x.label)), 'classic: no Coil at Shen Qiu');
 }
 
 // v0.9.7: severe difficulty — HP 0 outside a fight and a lost beast fight end the Coil; people keep their branches
@@ -510,16 +476,6 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     const tg = ensureBars(newGame(64));
     const bl = SCENES.tribute.choices.find((c) => /Bluff/.test(String(c.text))), hp = SCENES.tribute.choices.find((c) => /hairpin/.test(String(c.text)));
     assert(bl.check.dc(tg) === 7 && hp.check.dc(tg) === 5, 'tribute +1 in task mode');
-    setNoDice(false);
-    assert(bl.check.dc(tg) === 6 && hp.check.dc(tg) === 4, 'classic tribute unchanged');
-    const c = ensureBars(newGame(65)); startCombat(c, enc('rats'));
-    for (let t = 0; t < 50 && c.combat; t++) o = combatStep(c, 'dart');
-    assert(o.next === 'night_lost', 'classic: a lost beast fight keeps its scene');
-    const z = ensureBars(newGame(66)); startCombat(z, { id: 'zz_test', enemies: [{ name: 'Y', hp: 5, dc: 3, atk: 3, dmg: 1 }], win: 'night_won', lose: 'night_lost' });
-    assert(z.combat.enemies[0].dc === 3, 'classic: no beast bonus');
-    const h = ensureBars(newGame(67)); h.james.hp = 0.5; h.james.satiety = 0;
-    choose(h, SCENES, SCENES.arrival.choices.findIndex((c) => /Sit up/.test(String(c.text))));
-    assert(h.scene !== 'coil_end', 'classic: starving does not end anything');
 }
 // the Coil: rewind keeps James, Yuki, familiarity and knowledge; resets the world; 25% head start
 {
@@ -550,12 +506,9 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     // "You remember this" and the first dawn
     const v = sceneView(g, SCENES);
     assert(v.choices.some((c) => /You remember this/.test(c.label)), 'Coil 2 offers the Day 1 skip');
-    // "Not yet" returns without running the scene again; a lost tribute offers the tail; classic offers nothing
+    // "Not yet" returns without running the scene again; a lost tribute offers the tail
     const h = ensureBars(newGame(22)); h.scene = 'collectors_lost'; h.flags.ending = 'lost';
     assert(coilActive(h) && SCENES.collectors_lost.choices.some((c) => c.to === 'coil_end' && c.show(h)), 'lost tribute: Bite the tail offered');
-    setNoDice(false);
-    assert(!SCENES.collectors_lost.choices.some((c) => c.to === 'coil_end' && c.show(h)) && !sceneView(g, SCENES).choices.some((c) => /You remember this/.test(c.label)), 'classic mode: no Coil choices');
-    setNoDice(true);
     const k = ensureBars(newGame(23)); k.scene = 'collectors_lost'; k.flags.ending = 'lost';
     choose(k, SCENES, SCENES.collectors_lost.choices.findIndex((c) => c.to === 'coil_end'));
     const acc = sceneView(k, SCENES).choices.find((c) => /^Accept/.test(c.label));
@@ -567,28 +520,26 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     const ny = sceneView(w, SCENES).choices.find((c) => c.label === 'Not yet.');
     choose(w, SCENES, ny.index);
     assert(w.scene === 'wilds' && w.inventory.hare_raw === 2 && w.coil.n === 1 && !w.coil.why, 'Not yet goes back unchanged');
-    // breakthrough from 95% in task mode, 100% in classic
+    // breakthrough from 95%
     const b = ensureBars(newGame(26)); b.james.saturation = 96;
     assert(canBreakThrough(b), 'task mode: break through from 95%');
-    setNoDice(false); assert(!canBreakThrough(b), 'classic: still 100%'); setNoDice(true);
     // old state 3 → 4: Coil 1, the snapshot is the save as loaded
     const o = ensureBars(newGame(27)); o.scene = 'ashfall'; o.inventory.hare_raw = 4; delete o.coil; o.v = 3; migrate(o);
     assert(o.v === SAVE_VERSION && o.coil.n === 1 && o.coil.snap.scene === 'ashfall' && o.coil.snap.inventory.hare_raw === 4 && !o.coil.snap.coil, 'state 3 → 4: Coil 1, snapshot = the save as loaded');
-    setNoDice(false);
 }
 
 // v0.11.2: timed cultivation — a sit is an hour, Saturation by hours (10 h × 2^realm ÷ the Coil bonus), the breakthrough a timed card
 {
     setNoDice(true);
     assert(SAT_HOURS(0) === 10 && SAT_HOURS(1) === 20 && SAT_HOURS(3) === 80, 'Saturation hours: 10, 20, 40, 80 …');
-    // v0.11.15 (B1-b): speed by use — cards N 18 (the old tiers on the line), the sit N 30, kept over a rewind, Story Mode ×1
+    // v0.11.15 (B1-b): speed by use — cards N 18 (the old tiers on the line), the sit N 30, kept over a rewind
     assert(cardSpeed(0) === 1 && cardSpeed(2) === 2 && cardSpeed(5) === 3.5 && cardSpeed(8) === 5 && cardSpeed(18) === 10 && cardSpeed(40) === 10, 'v0.11.15: card speed 1 / 2 / 3.5 / 5 / 10 / 10 at 0 / 2 / 5 / 8 / 18 / 40 uses');
     { const u = ensureBars(newGame(97, { closed: true })); u.james.qi = 40; const u0 = u.minutes; condense(u);
       assert(u.minutes - u0 === 60 && u.tasks.use['act:sit'] === 1, 'v0.11.15: the first sit: an hour, one use');
       u.tasks.use['act:sit'] = 10; u.james.qi = 40; const u1 = u.minutes; condense(u); assert(u.minutes - u1 === 15, `v0.11.15: after 10 sits ×4: 15 min (${u.minutes - u1})`);
       u.tasks.use['act:sit'] = 30; assert(sitMinutes(u) === 6, 'v0.11.15: after 30 sits ×10: 6 min');
       endCoil(u, 'choice', 'arrival'); rewind(u); assert(u.tasks.use['act:sit'] === 30 && u.coil.n === 2, 'v0.11.15: uses are kept over a rewind');
-      setNoDice(false); assert(actSpeed(u, 'sit') === 1 && cardSpeed(18) === 10 && cardSpeed(5) === 2, 'v0.11.15: Story Mode: no speed by use (cards keep their tiers)'); setNoDice(true); }
+    }
     const g = ensureBars(newGame(95, { closed: true })); g.james.qi = 40;
     assert(sitGain(g) === 10 && sitGain(g, 2) === 20, 'Mortal Vessel, Coil 1: +10% a sit, the hollow +20%');
     g.james.realm = 1; ensureBars(g); assert(sitGain(g) === 5, 'Foundation: +5% a sit');
@@ -611,11 +562,6 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     // the forecast knows the breakthrough's length
     const f = ensureBars(newGame(101)); f.scene = 'wilds'; f.minutes += 1440; Object.assign(f.flags, { long: true, forest_day: 2 }); f.james.saturation = 96;
     assert(taskMinutes(f, SCENES, BT_TASK) === 120, `the forecast: 120 min (${taskMinutes(f, SCENES, BT_TASK)})`);
-    // Story Mode: the engine's sit and the 2-hour breakthrough
-    setNoDice(false);
-    const c = ensureBars(newGame(102)); c.james.qi = 40; const c0 = c.minutes; const cr = condense(c);
-    assert(cr.ok && c.minutes - c0 === 30 && Math.abs(cr.gain - 12.3) < 0.1, `Story Mode: a sit is 30 min, +12.3% at 40.5 Max (${cr.gain})`);
-    c.james.realm = 6; assert(btMinutes(c) === 120, 'Story Mode: every breakthrough 2 h');
 }
 
 // v0.11.4: forms 3b — damage by form, the spike field, shield cover, the bone spear (Incremental Mode only)
@@ -645,10 +591,6 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     startCombat(y, { id: 'test_crows', name: 't', enemies: [{ name: 'Crow', hp: 99, dc: 9, atk: 30, dmg: 5, prefersSmall: true }], win: 'stream', lose: 'stream' });
     y.combat.round = 3; const ry = combatStep(y, 'guard');
     assert(y.yuki.hp === yh && ry.lines.some((l) => /she is not there/.test(l)), 'shield cover: a guarded lunge at Yuki misses');
-    // Story Mode: no spear, no field, Guard +2, no form damage
-    setNoDice(false);
-    const s = at(3, 1);
-    assert(!actionOpen(s, 'spear') && !actionOpen(s, 'spikes') && guardBonus(s) === 2 && formDmgBonus(s, blade) === 0 && formDmgBonus(s, dart) === 0, 'Story Mode unchanged');
 }
 
 } // end of the static checks before the bots
@@ -671,7 +613,7 @@ const byCoil = {};
 const medStats = { bt: 0, mer: 0, warn: 0, a1bites: 0, a1coils: {} };
 const deaths = { pro: {}, a1: {} }; // v0.9.7: per act and Coil: { coils, early (before Mei Lin), late, beast }
 const TRIBUTE_OUT = { bluff_win: 'won', collectors_won: 'won', tribute_paid: 'paid', collectors_lost: 'lost' };
-const stats = { tasks: { endings: {}, collapses: 0, cards: 0, skipped: 0, games: 0 }, classic: { endings: {}, games: 0 } };
+const stats = { tasks: { endings: {}, collapses: 0, cards: 0, skipped: 0, games: 0 } }; // v0.11.34 (D1): the classic games gone
 // v0.11.21: bugs the mutation test (20 deliberate bugs) found the suite missing, or caught only by luck (the parent only)
 if (!SHARD && !BOTS_ONLY) {
     const G = await import('../js/core/game.js');
@@ -682,7 +624,7 @@ if (!SHARD && !BOTS_ONLY) {
     assert(Math.abs(h.james.hp - (1 + hm * 0.05)) < 1e-9, `v0.11.21: one Cycle (30 min) at realm 0 heals 5% of max HP (${h.james.hp})`);
     // the combat actions' Qi costs, and a dart really spends its 2
     assert(COMBAT_ACTIONS.dart.qi === 2 && COMBAT_ACTIONS.blade.qi === 3 && COMBAT_ACTIONS.needle.qi === 4, 'v0.11.21: dart 2, blade 3, needle 4 Qi');
-    for (const nd of [false, true]) {
+    for (const nd of [true]) { // v0.11.34 (D1): Incremental Mode only
         setNoDice(nd);
         const d = ensureBars(newGame(912, { closed: nd })); d.james.skills['Convergence Use'] = { tier: 1, level: 5, xp: 0 }; d.james.qi = jamesQiMax(d);
         sCombat(d, { id: 'jackals', intro: '', band: 'standard', enemies: [{ name: 'Dummy', hp: 999, dc: 1, atk: 1, dmg: 0 }], win: 'stream', lose: 'stream' });
@@ -691,7 +633,7 @@ if (!SHARD && !BOTS_ONLY) {
     }
     setNoDice(true);
     // a breakthrough fills both bars, James's and Yuki's
-    for (const nd of [true, false]) {
+    for (const nd of [true]) { // v0.11.34 (D1): Incremental Mode only
         setNoDice(nd);
         const b = ensureBars(newGame(913)); b.james.saturation = 100; b.james.hp = 1; b.james.qi = 1; b.yuki.hp = 1; b.yuki.qi = 1;
         const r = breakthrough(b);
@@ -743,20 +685,15 @@ const fightStats = {}; // v0.11.3: per mode, fight and bot style, for tools/sani
     relBump(g, 'Mei Lin', 1, 0); assert(R().f === 6, `C1: friendship catches up on its own (${R().f})`);
     const y0 = g.rel.Yuki.a; relBump(g, 'Yuki', 0, 3); assert(g.rel.Yuki.a === y0 + 3 && !g.coil.best.Yuki, 'C1: Yuki is never caught up');
     startActCoil(g, 1); assert(g.coil.act === 1 && g.coil.best['Mei Lin'].a === 22, 'C1: the best-ever values carry into Act 1');
-    setNoDice(false);
-    const s = ensureBars(newGame(111)); s.coil.best = { 'Mei Lin': { f: 50, a: 50 } }; relBump(s, 'Mei Lin', 2, 2);
-    assert(s.rel['Mei Lin'].f === 2 && s.rel['Mei Lin'].a === 2, 'C1: Story Mode counts ×1');
-    // the leftovers: no Cultivate choice on a story screen in Incremental Mode; Story Mode keeps them
+    // the leftovers: no Cultivate choice on a story screen in Incremental Mode
     const left = [['meditate1', /^Condense: one sit/], ['night', /^Cultivate first/], ['night_event', /^Sit in the rain/], ['fo_night', /^Cultivate one sit before sleep/], ['heart_camp', /^Cultivate by the fire/]];
     const h = ensureBars(newGame(112)); h.james.qi = 30; h.flags.night_ev = 'rain';
     for (const [id, re] of left) {
         const c = SCENES[id].choices.find((x) => typeof x.text === 'string' && re.test(x.text));
-        setNoDice(true); const inc = c && c.show && c.show(h);
-        setNoDice(false); const story = c && (!c.show || c.show(h));
-        assert(c && !inc && story, `v0.11.16: ${id}: its Cultivate choice is hidden in Incremental Mode, kept in Story Mode`);
+        const inc = c && c.show && c.show(h);
+        assert(c && !inc, `v0.11.16: ${id}: its Cultivate choice is hidden in Incremental Mode`);
     }
     setNoDice(true); h.scene = 'meditate1'; assert(!/You could keep going/.test(SCENES.meditate1.text(h)), 'v0.11.16: meditate1 no longer offers to condense (Incremental Mode)');
-    setNoDice(false); assert(/You could keep going/.test(SCENES.meditate1.text(h)), 'v0.11.16: Story Mode keeps the line');
     setNoDice(true);
 }
 let badBars = 0; // v0.11.3: games that ended with a NaN / Infinity bar
@@ -766,7 +703,7 @@ function play(run, tasks) {
     rs = seedOf(run, tasks ? 1 : 2); // v0.11.1: every game its own random stream
     setNoDice(tasks); // task mode has no dice anywhere (v0.9.3)
     const g = ensureBars(newGame(run + 1 + SEED * 100000, { closed: tasks })); // task mode: meridians closed at the start (v0.9.6)
-    const st = tasks ? stats.tasks : stats.classic;
+    const st = stats.tasks;
     let steps = 0;
     const seenOut = new Set();
     let bitShen = false, meiSeen = false, coilKey = '', deadKey = '', ms = 0;
@@ -856,7 +793,7 @@ function play(run, tasks) {
         if (r.combat) { startCombat(g, r.combat(g)); fight(g, run); }
         assert(!g.combat, `combat ends (${g.scene})`);
     }
-    assert(false, `run ${run} finishes (${tasks ? 'tasks' : 'classic'})`);
+    assert(false, `run ${run} finishes`);
     return false;
 }
 let diceInTasks = 0;
@@ -872,16 +809,15 @@ if (kids) { // v0.11.1: merge the workers' numbers
         mergeSeen(r.touched);
         yukiRuns += r.yukiRuns; predicted += r.predicted; diceInTasks += r.diceInTasks; pass += r.pass; fail += r.fail;
     }
-} else for (const run of myRuns()) { play(run, true); play(run, false); }
+} else for (const run of myRuns()) play(run, true); // v0.11.34 (D1): Incremental Mode only (the Story Mode games are gone)
 if (SHARD) emit({ byCoil, medStats, deaths, stats, bands, fightStats, badBars, cardsSeen, cardsListed, cardsForecast, cardsWhole, yukiRuns, predicted, diceInTasks, pass, fail, touched });
 if (BOTS_ONLY) { // v0.11.21: the games' stats only (the same file a full run writes)
     if (STATS_OUT) writeFileSync(STATS_OUT, JSON.stringify({ games: GAMES, deaths, byCoil, fights: fightStats, badBars, seen: touchedOut() }));
-    console.log(`  ${GAMES} bot games each way, bots only (no rule checks)\n${pass} passed, ${fail} failed`);
+    console.log(`  ${GAMES} bot games, bots only (no rule checks)\n${pass} passed, ${fail} failed`);
     process.exit(fail ? 1 : 0);
 }
 rs = 4243; // the checks below draw from their own stream
-setNoDice(false);
-// task mode: no die anywhere, in fights or story; classic: the die stays
+// task mode: no die anywhere, in fights or story
 {
     setNoDice(true);
     let die = 0;
@@ -899,9 +835,6 @@ setNoDice(false);
         }
     }
     assert(die === 0, `no die shown anywhere in task mode (${die})`);
-    setNoDice(false);
-    const g = ensureBars(newGame(1)); const r = choose(g, SCENES, 1);
-    assert(r.lines.some((l) => l.includes('🎲')), 'classic mode still rolls the d6');
 }
 
 // every card that was ever offered was also played at least once
@@ -917,7 +850,6 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     a.rng = 1; b.rng = 999999;
     setNoDice(true);
     const ra = runTask(a, SCENES, 'wild_forage:0'), rb = runTask(b, SCENES, 'wild_forage:0');
-    setNoDice(false);
     assert(JSON.stringify(ra.lines) === JSON.stringify(rb.lines) && JSON.stringify(a.inventory) === JSON.stringify(b.inventory), 'work cards ignore the dice');
     assert(famTier(0) === 0 && famTier(2) === 1 && famTier(8) === 2 && famTier(18) === 3, 'familiarity tiers at 2 / 8 / 18');
 }
@@ -982,7 +914,6 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
         assert(fm && fm.open && taskOpen(fe, SCENES, 'mer:e8'), `v0.11.18: an Extraordinary line has no daily limit in Incremental Mode (${fm?.reason})`);
         const s7 = ensureBars(newGame(79)); s7.scene = 'stream'; s7.james.qi = 25; s7.james.realm = 7; s7.james.extra8 = 8;
         assert(medCards(s7, SCENES).filter((c) => /^med:mer:/.test(c.id)).map((c) => c.id).join() === 'med:mer:ec,med:mer:jn', 'v0.11.13: Nascent Soul: the vessels\' collaterals and the junctions');
-        setNoDice(false); assert(!medCards(s7, SCENES).some((c) => /^med:mer/.test(c.id)), 'v0.11.13: Story Mode: no meridian cards (its screen stays)'); setNoDice(true);
     }
     // v0.11.12: a queueable Cultivate sit where the task screen has none of its own
     {
@@ -1015,14 +946,9 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     for (let i = 0; i < 24; i++) advance(a1, 10);
     const a2 = ensureBars(newGame(72)); a2.james.satiety = 0; a2.james.hp = 20; advance(a2, 240);
     assert(STARVE_HP_PER_HOUR === 1.5 && a1.james.hp === 14 && a2.james.hp === 14, `4 starving hours cost 6 HP in 10-min steps and in one step (${a1.james.hp}, ${a2.james.hp})`);
-    setNoDice(false);
-    const c1 = ensureBars(newGame(72)); c1.james.satiety = 0; c1.james.hp = 20; for (let i = 0; i < 6; i++) advance(c1, 10);
-    assert(c1.james.hp === 14, `classic keeps the old rule: 1 HP per step (${c1.james.hp})`);
-    setNoDice(true);
     // rest and sleep: no bar, the clock still moves
     assert(isInstantTask(g, SCENES, `wilds:${rest}`) && instantChoice({ text: 'Sleep.' }) && !instantChoice({ text: 'Stay up with Mei Lin after the others sleep.' }) && !instantChoice({ text: 'Cultivate one sit before sleep.', do: () => [] }), 'rest and sleep are instant; staying up and cultivating are not');
     assert(taskMinutes(g, SCENES, `wilds:${rest}`) === 60, 'an instant rest still passes its hour');
-    setNoDice(false);
 }
 // status clock with seconds (v0.9.9)
 {
@@ -1107,7 +1033,6 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     assert(!ids(g).includes('drill:0') && d1?.status === 'tomorrow', 'once: the done choice is gone, the other waits for tomorrow (one per menu per day, B)');
     delete g.flags[`drill@${wd(g)}`]; // the next day
     assert(!ids(g).includes('drill:0') && taskCards(g, SCENES).find((c) => c.id === 'drill:1')?.status === 'open', 'once: the next day only the other choice is open');
-    setNoDice(false); assert(onceOpen(g, 'drill', 0) && stageOpen({ flags: { 'oo:wen_lesson': 9 } }, 'wen_lesson'), 'once: Story Mode keeps its rules'); setNoDice(true);
     const nt = SCENES.drill.choices.findIndex((c) => /^Not today/.test(c.text)); noteOnce(g, 'drill', nt, SCENES.drill.choices[nt]);
     assert(!g.flags[onceKey('drill', nt)], 'once: "Not today" is not work');
     endCoil(g, 'choice'); rewind(g);
@@ -1143,9 +1068,6 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     assert(SCENES.heart_hub.choices.find((c) => c.to === 'heart_roots').show(t) && oneOffLeft(t, SCENES, 'heart_hub'), 'skip: the Old Tree holds it back while its story stops lead on');
     k.minutes = 5 * 1440 + 3 * 60; Object.assign(k.flags, { 'oo:wen_lesson': 2 });
     assert(!SCENES.ashfall.choices[ci].show(k), 'skip: never between 00:00 and 04:00');
-    setNoDice(false); const q = at5(); setNoDice(false);
-    assert(!sceneView(q, SCENES).choices.some((c) => /^Call it a day/.test(c.label)), 'skip: not in Story Mode');
-    setNoDice(true);
 }
 // v0.11.31 (P3-b): an open speed gate stays open across every rewind
 {
@@ -1170,7 +1092,6 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
 }
 const pctOf = (o, n) => Object.entries(o).sort().map(([k, v]) => `${k} ${((v / n) * 100).toFixed(1)}%`).join(', ');
 console.log(`  tribute, tasks:   ${pctOf(stats.tasks.endings, stats.tasks.games)}`);
-console.log(`  tribute, classic: ${pctOf(stats.classic.endings, stats.classic.games)}`);
 console.log(`  work-card results: ${Object.entries(bands).sort().map(([k, v]) => `${k} ${v}`).join(', ')} · Yuki brought home ${yukiRuns} times`);
 console.log(`  tribute per Coil (tasks, bots rewind a lost tribute up to Coil 3): ${Object.entries(byCoil).sort(([a], [b]) => a - b).map(([n, b]) => { const t = b.won + b.paid + b.lost; return `Coil ${n}: won ${((b.won / t) * 100).toFixed(1)}% paid ${((b.paid / t) * 100).toFixed(1)}% lost ${((b.lost / t) * 100).toFixed(1)}% (${t})`; }).join(' · ')}`);
 console.log(`  realm / primaries at the tribute (tasks): ${Object.entries(byCoil).sort(([a], [b]) => a - b).map(([n, b]) => { const t = b.won + b.paid + b.lost; return `Coil ${n}: realm ${(b.realm / t).toFixed(2)}, primaries ${(b.pri / t).toFixed(1)}`; }).join(' · ')}`);
@@ -1182,6 +1103,6 @@ assert(!FULL || medStats.a1bites >= 5, `bots rewind Act 1 and reach its end (${m
 console.log(`  ${stats.tasks.cards} cards run, ${stats.tasks.skipped} skipped, ${stats.tasks.collapses} collapses (HP 0), ${predicted} queues predicted (1 game in ${FC_EVERY}), ${cardsSeen.size}/${all.size} cards played`);
 assert(badBars === 0, `no NaN / Infinity bar at the end of a bot game (${badBars})`);
 if (STATS_OUT) writeFileSync(STATS_OUT, JSON.stringify({ games: GAMES, deaths, byCoil, fights: fightStats, badBars, seen: touchedOut() })); // v0.11.3: for tools/sanity.mjs
-console.log(`  ${GAMES} games each way in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FULL ? '' : ' (quick: coverage logged, not checked)'}`);
+console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FULL ? '' : ' (quick: coverage logged, not checked)'}`);
 console.log(`${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

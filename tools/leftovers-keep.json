@@ -30,6 +30,9 @@
       "heart_hub#11": "a door no path uses now: hide it if ever, never delete (task card ids are scene:index in saves)"
     },
     "flagsUnread": {
+      "mer_e8": "Story Mode only since v0.11.34 (D1, owner pick 3a): its daily meridian limit reads it (meridians.js oneADay); goes with D2",
+      "mer_ec": "Story Mode only since v0.11.34 (D1, owner pick 3a): its daily meridian limit reads it (meridians.js oneADay); goes with D2",
+      "mer_jn": "Story Mode only since v0.11.34 (D1, owner pick 3a): its daily meridian limit reads it (meridians.js oneADay); goes with D2",
       "arson_beaten": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
       "bl_followed_lights": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
       "envoy": "story memory: set on a player choice or a find, nothing reads it yet (for Act 2 or later; owner 2026-11-07, v0.11.23)",
