@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.38 | (this push) | P-b: the prologue's 42 generated pictures; the 30 that draw Yuki as the cat only while she is the cat (`YUKI_CAT_ONLY`). Art only; 0 drift; same save state as 0.11.37 (art keys are not in saves). |
+| 0.11.39 | (this push) | Z2-b: the art cache `boneash-art` (kept across versions, by fingerprint). Same save state as 0.11.37. Going back to 0.11.38 or older is safe: the old worker deletes `boneash-art` on activation and caches its pictures in its own version cache again (a later return to 0.11.39+ downloads them once more). |
+| 0.11.38 | `fdabddd` | P-b: the prologue's 42 generated pictures; the 30 that draw Yuki as the cat only while she is the cat (`YUKI_CAT_ONLY`). Art only; 0 drift; same save state as 0.11.37 (art keys are not in saves). |
 | 0.11.37 | `ca0585e` | The day ends at 02:00, Push through only at night, story choices and eating at once, familiar story choices at half time, the Long Forest's way back, no useless sit; the baseline updated (owner 17:03), the drift rule ±20. Same save state as 0.11.36 plus the optional `wake.push` and the flags `lf_from` / `lf_at` (an older version ignores them). |
 | 0.11.36 | `232abcb` | The rot ape 15 → 14 (Act 1 softer). Same save state as 0.11.35; the baseline unchanged (0 drift). |
 | 0.11.35 | `4f26b3d` | P1-a: the fold, the memory lines, Skip to the next choice. Same save state as 0.11.34 plus the optional `seen` field (an older version ignores it). No balance change. |

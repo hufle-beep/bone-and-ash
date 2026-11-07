@@ -7,6 +7,7 @@ Serves the folder, opens the game at 390x844 in headless Chromium and taps the r
   5. Saves (v0.11.9, in the menu since v0.11.10): Copy status, Export all then Restore all into a new game, a backup restored;
   6. the main menu (v0.11.10): opens first on plain paper with no tab bar; Settings (text size, Show checks) and Saves; Continue;
   (part 2 also: v0.11.35 a scene read before folds, Read it all again, Skip to the next choice)
+  (part 3, v0.11.39: the art cache across an update, with the service worker running; see update_test)
   7. v0.11.11: holding a card opens its tooltip (no check text) and the tap that ends the hold runs nothing; the status bars carry
      progress values; the running bar slides (transform, no width); each tab keeps its scroll.
 Game screens (story, fights, journal) also fail on any check text: DC, a die, "+ d6" (checks are hidden since v0.11.10).
@@ -302,10 +303,101 @@ def again(pg, url):
     else: notes.append('a scene read before folds, reads in full, and the skip walks to the wilds')
     check_text(pg, 'after the skip', strict=True)
 
+def poll(pg, js, ms=20000):
+    """v0.11.39: evaluate js (may return a promise) until it is truthy; the last value (falsy when the time ran out)."""
+    end = time.time() + ms / 1000; v = None
+    while time.time() < end:
+        try: v = pg.evaluate(js)
+        except Exception: v = None
+        if v: return v
+        time.sleep(0.1)
+    return v
+
+def update_test(b):
+    """v0.11.39 (Z2-b), part 3: the service worker for real (served under /bone-and-ash/ like GitHub Pages).
+    0. a phone on today's 0.11.38 worker (tests/fixtures/sw-0.11.38.js: every picture in its version cache, no art cache);
+    1. the update to Z2-b: the old cache goes, every art file is downloaded exactly once into 'boneash-art', pictures served from it;
+    2. a new version with one picture replaced (same name, new fingerprint): only that picture is downloaded, its old copy pruned;
+    3. a version whose fingerprint does not match the file (a stale copy from a proxy): the install fails, the working version stays;
+    4. a picture missing from the art cache is fetched and stored again; 5. the replaced picture is served offline."""
+    import functools, http.server, shutil, tempfile, threading
+    tmp = Path(tempfile.mkdtemp(prefix='boneash-sw-')); site = tmp / 'bone-and-ash'
+    shutil.copytree(ROOT, site, ignore=shutil.ignore_patterns('.git', 'node_modules', 'tests', 'tools', 'saves', 'project', '__pycache__'))
+    log = []
+    class H(http.server.SimpleHTTPRequestHandler):
+        def log_message(self, *a): pass
+        def do_GET(self): log.append(self.path.split('?')[0]); super().do_GET()
+    srv = http.server.ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(H, directory=str(tmp)))
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    base = f'http://127.0.0.1:{srv.server_port}/bone-and-ash/'
+    sw = (site / 'sw.js').read_text()
+    art = dict(re.findall(r"'((?:art|icons)/[^']+)': '([0-9a-f]+)'", sw))
+    ver = re.search(r"const VERSION = '([^']+)'", sw).group(1)
+    def with_version(text, v): return text.replace(f"const VERSION = '{ver}'", f"const VERSION = '{v}'")
+    art_hits = lambda: [x for x in log if re.match(r'^/bone-and-ash/(art/.*\.(jpg|png|svg|webp)|icons/)', x)]
+    entries = "async () => (await (await caches.open('boneash-art')).keys()).map(r => r.url.replace(location.origin, ''))"
+    def update_to(pg, v, ms=20000):
+        log.clear(); pg.evaluate("navigator.serviceWorker.getRegistration().then(r => r.update())")
+        return poll(pg, f"caches.keys().then(k => k.includes('{v}') && k.includes('boneash-art') && k.filter(x => /^bone-ash-/.test(x)).length === 1)", ms)
+    def bad(msg): fails.append(f'update: {msg}')
+    try:
+        ctx = b.new_context(viewport={'width': 390, 'height': 844})
+        pg = ctx.new_page(); pg.on('pageerror', lambda e: bad(f'page error: {e}'))
+        # 0. today's phones: the 0.11.38 worker
+        (site / 'sw.js').write_text((ROOT / 'tests/fixtures/sw-0.11.38.js').read_text())
+        pg.goto(base + 'index.html')
+        if not poll(pg, "caches.open('bone-ash-0.11.38').then(c => c.match('art/pic/james.webp')).then(r => !!r)"): bad('the 0.11.38 worker did not cache its pictures'); return
+        pg.reload(); poll(pg, "navigator.serviceWorker.controller ? 1 : 0", 10000)
+        # 1. the update to this version (Z2-b)
+        (site / 'sw.js').write_text(with_version(sw, 'bone-ash-9.9.8'))
+        if not update_to(pg, 'bone-ash-9.9.8'): bad(f'the update from 0.11.38 never took over (caches {pg.evaluate("caches.keys()")})'); return
+        have = pg.evaluate(entries); hits = art_hits()
+        if len(have) != len(art) or sorted(hits) != sorted('/bone-and-ash/' + f for f in art): bad(f'from 0.11.38: {len(have)} art files cached, {len(hits)} downloaded ({len(set(hits))} distinct), expected {len(art)} each once')
+        log.clear()
+        if pg.evaluate("fetch('art/pic/james.webp').then(r => r.status)") != 200 or art_hits(): bad(f'a cached picture went to the network ({art_hits()})')
+        # 2. one picture replaced, same name
+        changed, donor = 'art/pic/ridge.webp', 'art/pic/hollow.webp'
+        shutil.copyfile(site / donor, site / changed)
+        new_fp = art[donor]
+        sw2 = with_version(sw, 'bone-ash-9.9.9').replace(f"'{changed}': '{art[changed]}'", f"'{changed}': '{new_fp}'")
+        (site / 'sw.js').write_text(sw2)
+        if not update_to(pg, 'bone-ash-9.9.9'): bad(f'the next version never took over (caches {pg.evaluate("caches.keys()")})'); return
+        if sorted(set(art_hits())) != ['/bone-and-ash/' + changed]: bad(f'art downloaded on the update {sorted(set(art_hits()))}, expected only {changed}')
+        have = pg.evaluate(entries)
+        if f'/bone-and-ash/{changed}?v={new_fp}' not in have or f'/bone-and-ash/{changed}?v={art[changed]}' in have or len(have) != len(art):
+            bad(f'the art cache after the update holds {len(have)} files, {changed}: ' + ', '.join(h for h in have if 'ridge' in h))
+        # 3. a stale copy: the fingerprint in sw.js does not match the file served; the install must fail and 9.9.9 stay
+        stale = 'art/pic/hairpin.webp'
+        (site / 'sw.js').write_text(sw2.replace("bone-ash-9.9.9", "bone-ash-9.9.10").replace(f"'{stale}': '{art[stale]}'", f"'{stale}': 'deadbeef00'"))
+        log.clear(); pg.evaluate("navigator.serviceWorker.getRegistration().then(r => r.update())")
+        end = time.time() + 10
+        while '/bone-and-ash/' + stale not in log and time.time() < end: time.sleep(0.05)  # the new worker's install has fetched the file
+        settled = poll(pg, "navigator.serviceWorker.getRegistration().then(r => !r.installing && !r.waiting)", 10000)
+        tried = '/bone-and-ash/' + stale in log
+        have = pg.evaluate(entries); keys = pg.evaluate("caches.keys()")
+        if not (settled and tried) or 'bone-ash-9.9.9' not in keys or any('deadbeef00' in h for h in have) or f'/bone-and-ash/{stale}?v={art[stale]}' not in have:
+            bad(f'a stale file: settled {bool(settled)}, fetched {tried}, caches {keys}, stored under the bogus fingerprint {any("deadbeef00" in h for h in have)}')
+        (site / 'sw.js').write_text(sw2)  # back to 9.9.9 on the server
+        # 4. a picture missing from the art cache (evicted): fetched again and stored again
+        pg.evaluate(f"caches.open('boneash-art').then(c => c.delete('art/pic/james.webp?v={art['art/pic/james.webp']}'))")
+        log.clear()
+        st = pg.evaluate("fetch('art/pic/james.webp').then(r => r.status)")
+        back = poll(pg, f"caches.open('boneash-art').then(c => c.match('art/pic/james.webp?v={art['art/pic/james.webp']}')).then(r => !!r)", 5000)
+        if st != 200 or '/bone-and-ash/art/pic/james.webp' not in log or not back: bad(f'a miss: status {st}, fetched {"/bone-and-ash/art/pic/james.webp" in log}, stored again {bool(back)}')
+        # 5. offline
+        ctx.set_offline(True)
+        size = pg.evaluate(f"fetch('{changed}').then(r => r.ok ? r.arrayBuffer().then(a => a.byteLength) : -r.status).catch(e => String(e))")
+        if size != (site / donor).stat().st_size: bad(f'offline, {changed} gave {size}, not the new file ({(site / donor).stat().st_size} bytes)')
+        ctx.set_offline(False)
+        if not any(f for f in fails if f.startswith('update')): notes.append(f'update: from 0.11.38 every art file once ({len(art)}); a new version downloaded only the 1 changed picture, old copy pruned; a stale file rejected (the install failed, the version stayed); a miss stored again; served offline')
+        ctx.close()
+    finally:
+        srv.shutdown(); shutil.rmtree(tmp, ignore_errors=True)
+
 def main(part=0):
     """v0.11.20: part 1 (Incremental Mode, the reload, no mode switch, two tabs) and part 2 (Saves, the menu, tooltips and scroll,
     the resting places) can run side by side, each with its own browser and server; no part = everything, in order."""
-    one, two = part in (0, 1), part in (0, 2)
+    one, two, three = part in (0, 1), part in (0, 2), part in (0, 3)
     n1 = 0; tabs = []
     port = free_port()
     srv = subprocess.Popen([sys.executable, '-m', 'http.server', str(port)], cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -379,6 +471,9 @@ def main(part=0):
                 picked(pg, url)
                 # 10. a scene read before: the fold, the memory line, the skip (v0.11.35)
                 again(pg, url)
+            if three:
+                # 11. the art cache across an update (v0.11.39, Z2-b): its own server and a service worker that runs
+                update_test(b)
             b.close()
     finally:
         srv.terminate()

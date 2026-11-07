@@ -2,6 +2,17 @@
 
 Started 2026-11-07 (v0.11.33), when `history-4.md` reached about 45 KB. Newer than `history-4.md`, `history-3.md`, `history-2.md` and `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Decisions and version notes (moved from the handover in v0.11.39)
+
+- **v0.11.36: the rot ape 15 → 14 (owner 16:02 "go", on the recommendation after v0.11.35; the sweep in the v0.11.35 block):**
+  - **The full check:** 0 drift (145 compared): the tasks test's random bots are weak, so they move little: the rot ape won smart 41.8 → 45.2%, random 39.2 → 41.4%; Act 1 dead C3 87.8 → 84.7%, C4 49.8 → 47.0%; the story test's rot ape 54.6 → 55.5%. The models (500 games): Careful Act 1 cleared at mean Coil 5.10 → 4.22, the Completionist 3.61 → 3.16, Yuki off 4.95 → 4.84 / 3.94 → 3.87; the prologue unchanged; Careful's rot ape won 26 → 35%.
+  - **The baseline:** kept (nothing drifted, so `--update` was not needed). Refreshing it to today's values is a one-line push (the owner's "baseline"), so later drifts compare against 14.
+
+### v0.11.36 — the rot ape 15 → 14
+
+- **js/story/nodice_tune.js:** `rot_ape.up` 15 → 14. **tests/tasks.test.mjs:** the RB-1 check pins 14. **sw.js:** VERSION.
+- **The full check:** exit code 0, 0 drift (145 compared), the leftover step 0 findings, about 98 s. **Cold review (Fable, rule 9):** the tune lands on every route to the ape (both choices use `apeFight`; no growth per Coil or day), no stale 15 anywhere, no save change. **Noted for the owner:** (1) "End it in one move." is offered from the power gap computed before the no-dice `up` is added (story.js `degreeForChoice`), so a James strong enough (power ≥ 11.5) skips the ape with no fight: an older rule, untouched here; (2) the baseline still holds the 15-era rates (rot ape smart 41.8, now 45.2%).
+
 ## Decisions and version notes (moved from the handover in v0.11.38)
 
 - **v0.11.35: P1-a (owner 15:37 "procceed" = the options; 15:42 "your pick go" = P1-a, the recommendation; the rot ape at 14 recommended as the next push, its own pick):**

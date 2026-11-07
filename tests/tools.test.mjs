@@ -4,9 +4,10 @@
 // tools/lib/noise.mjs: the noise-scaled drift band of tools/sanity.mjs (log only).
 // tools/check.mjs: its job list (--list, both modes) and tools/lib/jobs.mjs's validateJobs on a broken list.
 // v0.11.28: tools/lib/report.mjs (the compact output) and the models step's --off-models, on a tiny real models run.
+// v0.11.39: tools/arthash.mjs (the ART fingerprints in sw.js) on a made-up folder and on the real repo.
 // v0.11.22: tools/leftovers.mjs on small made-up inputs (every kind found, kept entries skipped) and tests/lib/seen.mjs's watch.
 import { spawn, execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -16,6 +17,7 @@ import { noise, band, flagged, K, MIN, LIMIT, NOTE_AT, driftKind } from '../tool
 import { strip, scanFunctions, scanFlags, flagFindings, scanCss, scanMarkers, scanStorage, scanFiles, applyKeep, loadKeep, KINDS, strictFailures, STRICT_KINDS } from '../tools/leftovers.mjs'; // v0.11.22; strict v0.11.23
 import { seen as touched, track, noteView, seenOut } from './lib/seen.mjs'; // v0.11.22
 import { stepLine, flagLines, leftoverFound, modelDigest } from '../tools/lib/report.mjs'; // v0.11.28
+import { artFiles, fingerprint, readArt, checkArt, writeArt, ART_RE } from '../tools/arthash.mjs'; // v0.11.39
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 let pass = 0, fail = 0;
@@ -83,7 +85,7 @@ for (const mode of ['full', 'quick']) {
     if (mode === 'full') {
         const s = jobs.find((j) => j.key === 'sanity');
         assert(s && s.after.includes('tasks') && s.after.includes('story'), 'full: sanity waits for tasks and story');
-        assert(keys.includes('browser1') && keys.includes('browser2'), 'full: has both browser parts');
+        assert(keys.includes('browser1') && keys.includes('browser2') && keys.includes('browser3'), 'full: has the three browser parts (part 3 v0.11.39)');
         const lo = jobs.find((j) => j.key === 'leftovers'), tr = jobs.find((j) => j.key === 'track');
         const ts = jobs.find((j) => j.key === 'track-story');
         assert(lo && tr && ts && ['tasks', 'story', 'track', 'track-story'].every((a) => lo.after.includes(a)) && [tr, ts].every((j) => j.after.includes('tasks') && !j.heavy), 'v0.11.22 full: leftovers waits for tasks, story and both watched runs; the watched runs after tasks, not heavy');
@@ -243,6 +245,34 @@ for (const [name] of RUNS) {
     assert(a && a.length > 50, `${name}: stats written (${a?.length ?? 0} chars)`);
     assert(a === b, `${name}: 1 worker and 2 workers give the same stats`);
 }
+// v0.11.39 (Z2-b): tools/arthash.mjs on a made-up folder: written, checked, a changed file and a missing or extra entry caught
+{
+    const d = mkdtempSync(path.join(tmpdir(), 'arthash-'));
+    for (const sub of ['art/pic', 'art/bg', 'icons']) mkdirSync(path.join(d, sub), { recursive: true });
+    writeFileSync(path.join(d, 'art/pic/a.webp'), 'AAA'); writeFileSync(path.join(d, 'art/bg/b.jpg'), 'BBB'); writeFileSync(path.join(d, 'icons/c.svg'), 'CCC');
+    writeFileSync(path.join(d, 'art/bg/CREDITS.md'), 'not art');
+    assert(artFiles(d).join(' ') === 'art/bg/b.jpg art/pic/a.webp icons/c.svg', `arthash: the art files, sorted, no CREDITS.md (${artFiles(d).join(' ')})`);
+    const sw = writeArt("const X = 1;\nconst ART = {\n};\nconst Y = 2;\n", d);
+    assert(sw.startsWith('const X = 1;') && sw.endsWith('const Y = 2;\n') && Object.keys(readArt(sw)).length === 3, 'arthash: writeArt fills only the ART table');
+    assert(checkArt(sw, d).length === 0, 'arthash: a fresh table checks clean');
+    assert(/^[0-9a-f]{10}$/.test(readArt(sw)['art/pic/a.webp']) && readArt(sw)['art/pic/a.webp'] === fingerprint(path.join(d, 'art/pic/a.webp')), 'arthash: 10 hex digits of the SHA-256');
+    writeFileSync(path.join(d, 'art/pic/a.webp'), 'AAB');
+    assert(checkArt(sw, d).some((f) => /a\.webp changed/.test(f)), 'arthash: a replaced file with the same name is caught (stale fingerprint)');
+    writeFileSync(path.join(d, 'art/pic/new.webp'), 'N');
+    assert(checkArt(sw, d).some((f) => /missing art\/pic\/new\.webp/.test(f)), 'arthash: a new picture not in ART is caught');
+    rmSync(path.join(d, 'icons/c.svg'));
+    assert(checkArt(sw, d).some((f) => /lists icons\/c\.svg/.test(f)), 'arthash: an ART entry with no file is caught');
+    assert(checkArt('const ART_X = 1;', d)[0] === 'sw.js: no ART table', 'arthash: no table reported');
+    assert(checkArt(writeArt(sw, d), d).length === 0, 'arthash: rewriting fixes all three');
+    rmSync(d, { recursive: true, force: true });
+    const real = readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
+    assert(checkArt(real, ROOT).length === 0 && Object.keys(readArt(real)).length === artFiles(ROOT).length, `arthash: the repo's sw.js is current (${artFiles(ROOT).length} art files)`);
+    assert(!/'art\/|'icons\//.test((real.match(/const FILES = \[([\s\S]*?)\];/) || ['', ''])[1]), 'arthash: no picture, background or icon left in FILES');
+    const artCache = (real.match(/const ART_CACHE = '([^']+)'/) || [])[1];
+    assert(artCache && !/^bone-ash-/.test(artCache), `arthash: sw.js's art cache name (${artCache}) does not start with 'bone-ash-' (main.js reads the version from that prefix)`);
+    assert(artFiles(ROOT).every((f) => ART_RE.test(f)) && ART_RE.test('art/bg/x.webp') && ART_RE.test('art/pic/sub/y.webp') && !ART_RE.test('art/bg/CREDITS.md'), 'arthash: one rule for art files (ART_RE), any depth under art/');
+}
+
 rmSync(TMP, { recursive: true, force: true });
 
 console.log(`(${((Date.now() - t0) / 1000).toFixed(1)} s)`);

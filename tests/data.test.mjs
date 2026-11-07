@@ -69,9 +69,11 @@ for (const f of picFiles) {
     if (!existsSync(f)) continue;
     const b = statSync(f).size; picBytes += b;
     assert(b <= 150 * 1024, `v0.11.24: ${f} is at most 150 KB (${Math.round(b / 1024)} KB)`);
-    assert(swList.includes(`'${f}'`), `v0.11.24: ${f} is in sw.js FILES (offline)`);
+    assert(new RegExp(`'${f.replace(/[.]/g, '\\.')}': '[0-9a-f]{10}'`).test(swList), `v0.11.39: ${f} is in sw.js ART with a fingerprint (offline, its own cache)`);
 }
-assert(picBytes <= 8 * 1024 * 1024, `v0.11.24: all pictures together at most 8 MB (${Math.round(picBytes / 1024)} KB)`);
+// v0.11.39 (Z2-b): the cap 8 → 40 MB (the pictures are kept across versions, so the size is paid once); a log line from 25 MB
+assert(picBytes <= 40 * 1024 * 1024, `v0.11.39: all pictures together at most 40 MB (${Math.round(picBytes / 1024)} KB)`);
+if (picBytes > 25 * 1024 * 1024) console.log(`  NOTE  the pictures total ${(picBytes / 1048576).toFixed(1)} MB (log from 25 MB, the cap 40 MB)`);
 assert(readdirSync('art/pic').filter((f) => f.endsWith('.webp')).every((f) => picFiles.has(`art/pic/${f}`)), 'v0.11.24: every file in art/pic is a picture some key shows');
 assert(pictureOf('yuki_close', 'cat') === 'art/pic/yuki_cat.webp' && pictureOf('yuki_close', 'tiger') === 'art/pic/yuki_tiger.webp' && pictureOf('yuki_close', 'human') === 'art/pic/yuki_human.webp', 'v0.11.24: yuki_close follows Yuki\'s form');
 for (const [form, file] of [['tiger', 'yuki_tiger'], ['human', 'yuki_human'], ['cat', 'yuki_cat']]) { setArtState({ yukiForm: form }); assert(sceneArt('yuki_close').includes(`art/pic/${file}.webp`), `v0.11.24: with Yuki in ${form} form the yuki_close plate shows ${file}`); }

@@ -42,6 +42,7 @@ const jobs = [
     ...(QUICK ? [] : [
         { name: 'browser part 1 (Incremental, reload, no mode switch, two tabs)', key: 'browser1', cmd: ['python3', ['tools/browser.py', '--part', '1']] },
         { name: 'browser part 2 (saves, menu, tooltip, resting places)', key: 'browser2', cmd: ['python3', ['tools/browser.py', '--part', '2']] },
+        { name: 'browser part 3 (the art cache across an update, service worker on)', key: 'browser3', cmd: ['python3', ['tools/browser.py', '--part', '3']] }, // v0.11.39
     ]),
     { name: `story (${GAMES} full games${QUICK ? ', quick' : ''})`, key: 'story', cmd: node('tests/story.test.mjs', '--games', String(GAMES), '--stats-out', path.join(ST, 'story.json')), heavy: true },
     // v0.11.27: the bot models, log only: the summary per model is printed, nothing compared yet. v0.11.28 (owner pick S1): Random
