@@ -2,6 +2,26 @@
 
 Started 2026-11-07 (v0.11.43, pick H2), when `history-5.md` reached about 40 KB and the handover was trimmed. Newer than `history-5.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.44 (word for word)
+
+### From "Decided in chat (2026-11-07)"
+
+- **v0.11.41: D2-a + S (owner 18:19 "go with your recommendation" = D2-a + S; 18:25 "not home yet, push art back one step" = go, ask about the art after this push; 18:27 "K1"):**
+  - **Found while building (stopped, options K1 / K2 / K3):** the Act 1 part test still plays with dice and, in Incremental Mode, its walks fall into prologue scenes it doesn't load; so the dice core can't go before that test is converted. **K1 (picked):** everything else now, the dice in checks and fights later with the part test's conversion (chunk E). K2 (convert the part test now) and K3 (drop it) not picked.
+  - **Removed:** `main.js`: `taskMode`, Story Mode's screen (`renderStory`'s choice list, `renderCombat`, the `data-choice` handlers), every Story-or-Incremental branch; `game.js`: the Story branches of the Coil bonus, speed by use, Exhaustion, the day's end and the night, sleep's wake count, starving, the sit's gain and length, the breakthrough's length and 95%, the relationship catch-up (`condensationSatGain` no longer imported); `meridians.js`: Story Mode's checked sessions (2 a day, DCs ÷ the Coil bonus, Intuitive Aptitude), the one-a-day rule and its flags `mer_e8` / `mer_ec` / `mer_jn`, `canAnyMeridian`, `dcPrimary` / `dcColGroup` / `sessionsToday`; `prologue.js`: the one-button Long Forest (`longForestInstant`), the hubs' Story "Break through" and "Open a meridian", Story wording of the forms; `tasks.js`, `story.js`, `meditate.js`, `oneoff.js`, `common.js` (`dayKey` = the waking day), `coil.js`, `coil_scenes.js`. **Kept (the dice core):** `setNoDice` / `isNoDice`, `rollCheck`'s dice branch, the dice fight round, `dmgRoll`'s die, the forms switch, `noDiceUp`, the check outcomes in `story.js`.
+  - **Choice places kept:** every Story-only choice is now `{ text: 'Story Mode only (removed in v0.11.41).', show: () => false, to: … }`, so no later choice moves (task card ids are `scene:index` in saves; `g.picked` too): the meridian screen's 5 sessions, the hubs' break-through (first) and meridian (after the work) choices, `meditate1`'s Condense, `night`'s, `night_event`'s, `fo_night`'s and `heart_camp`'s sits, the clearing's one-step Long Forest. The meridian screen itself stays (its 5 work choices are the Meditate cards' data). `mer_return` is read only (the screen's "Open your eyes." for an old save left there): on the keep-list. The tribute's bluff and hairpin DCs are plain 7 and 5 (were 6 / 4 + 1 in Incremental Mode).
+  - **Proof:** the tasks test (1,000 games), the story test (1,000) and the models (300 + 100 Yuki off) wrote byte-identical stats before and after. The part test: in the return part 1 run in 20 now starts far past it (T3, realm 4), since its walks used to climb realms through Story Mode's hub choices; that is how the elder's duel was won and walked.
+  - **S:** browser part 1 split (part 4: the reload and the two tabs, side by side with part 1); the leftover check's watched runs 300 → 150 games each (150 and 100 gave findings identical to 300). The full check 114 → 100 s (not the 85 s estimated: the tasks test, 62 s, stays the longest path).
+  - **Noted while building:** in the heart part, a James at T3 realm 4 doesn't finish the guardian fight in 80 rounds with dice (a stalemate; the part test's strong runs are limited to the return part). Worth a look in the Act 1 retune: in Incremental Mode a fight past 30 rounds is lost.
+- **The art (owner 18:25):** not home yet, pushed back one step: ask again after the next push.
+
+### Version note
+
+#### v0.11.41 — D2-a + S: Story Mode's code out, a faster check
+
+- **js/main.js, js/core/game.js, js/core/story.js, js/core/tasks.js, js/core/meditate.js, js/core/coil.js, js/story/meridians.js, js/story/prologue.js, js/story/oneoff.js, js/story/common.js, js/story/coil_scenes.js, js/story/wilds.js, js/story/act1_heart.js, js/story/act1_fallout.js:** as in the decisions block. **tests/tasks.test.mjs:** the Story checks out (session limits, the meridian DC ÷ the Coil bonus), the hidden places checked (no Story text left), the tribute DCs and the hedge text as plain values. **tests/part.test.mjs:** the strong run in the return part. **tools/check.mjs:** browser part 4, the watched runs 150. **tools/browser.py:** part 4. **tests/tools.test.mjs:** four browser parts. **tools/leftovers-keep.json:** `mer_return` (read only). **tests/README.md**, **tools/timings.json**. **sw.js:** VERSION.
+- **The full check:** exit code 0, 0 drifted (the same 11 log-only moves as v0.11.40), the leftover step 0 findings, 99.7 s; models unchanged (Careful 2.21 / 4.09, Completionist 2.24 / 3.00). No Fable review: no logic or balance change, proven by byte-identical bot stats (as in v0.11.23); the UI by the browser test's four parts.
+
 ## Moved from the handover in v0.11.43 (H2, the trim; word for word)
 
 ### The version line as it stood at v0.11.42

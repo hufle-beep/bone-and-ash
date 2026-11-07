@@ -4,7 +4,8 @@ Every version, newest first. Details of each system are in `handover.md`.
 
 | Version | Date | Commit | What changed |
 |---|---|---|---|
-| 0.11.43 | 2026-11-07 | (this push) | Notes only: the project's main notes file is shorter, with older notes moved, nothing lost. Nothing changes in play. |
+| 0.11.44 | 2026-11-07 | (this push) | Tests only: the Act 1 test now plays without dice, like the game, with a James as strong as real players are at each part. Nothing changes in play. |
+| 0.11.43 | 2026-11-07 | `44ded19` | Notes only: the project's main notes file is shorter, with older notes moved, nothing lost. Nothing changes in play. |
 | 0.11.42 | 2026-11-07 | `1ff11d5` | Behind the scenes only: the balance check now watches a few more rare numbers, and two notes in the design document match the game again. Nothing changes in play. |
 | 0.11.41 | 2026-11-07 | `801a931` | Housekeeping: the old Story Mode's code is gone (apart from the dice, which one test still needs until the Act 1 retune). Nothing changes in play; saves are unchanged and the game is a little smaller. The test suite runs a bit faster. |
 | 0.11.40 | 2026-11-07 | `bece0f9` | Four small fixes. Going to sleep late in the forest or the Blackroot no longer winds the clock back (you used to get up to two free hours of night). "End it in one move" now only shows when James would really crush the fight as it is fought, so a strong James can no longer skip the rot ape. Yuki's talk in human form now says what the opening says: she and James were born the same morning in the same grove, forty years ago. A leftover check for a flag the game never set is gone (no change in play). Saves are unchanged. |

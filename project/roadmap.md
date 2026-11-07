@@ -1,6 +1,6 @@
 # Roadmap: Bone and Ash
 
-Last updated: 2026-11-07 (v0.11.43, the handover trimmed; where this file says "in the handover" about anything before v0.11.41, it is in `history-6.md` now). **The pivot (owner 15:43): copy what is useful from Selene and Rules Engine C, game and process; see "The copy-over" below. It comes before steps 4–7, which are kept and take its items in where they fit.** Update in every push.
+Last updated: 2026-11-07 (v0.11.44, E step 1: the part test in Incremental Mode; v0.11.43, the handover trimmed; where this file says "in the handover" about anything before v0.11.41, it is in `history-6.md` now). **The pivot (owner 15:43): copy what is useful from Selene and Rules Engine C, game and process; see "The copy-over" below. It comes before steps 4–7, which are kept and take its items in where they fit.** Update in every push.
 
 ## Now (owner 2026-11-07 18:00–18:19): the chunks
 The art is tabled until the owner is home (after every push Claude asks). In order:
@@ -8,7 +8,8 @@ The art is tabled until the owner is home (after every push Claude asks). In ord
 2. **D2-a + S — DONE in v0.11.41 (as K1: the dice in checks and fights stay until the part test is converted in E; the check 114 → 100 s).** Was: **D2-a + S, next (owner 18:19):** Story Mode's code out (the dice paths, the meridian screen and its 3 flags, Story Mode's once-a-day rules, the dice tests; the 17 lost / failed-check scenes stay, a weak James can reach them; bot stats byte-identical) and the check faster (the leftover check's watched runs on fewer games, browser part 1 in two halves; about 115 → 85 s).
 3. **B — DONE in v0.11.42 (B1):** the drift check from n 50 (152 numbers compared); `design.md`'s two stale lines.
 4. **D, the art (the owner's PC):** Y3 + `ridge` in one session, then the Act 1 art, then the last art part (code art and `clamp2.js` close-ups out).
-5. **E, the Act 1 retune (numbers first):** the Act 1 part test in Incremental Mode, then the dice core out (the rest of D2); the night fights, the ford serpent, Shen Qiu; the guardian stalemate for a strong James (v0.11.41 note).
+5. **E, the Act 1 retune (numbers first):** **step 1 DONE in v0.11.44 (P2):** the Act 1 part test in Incremental Mode, with bot-like strength. **Next, step 2:** the dice core out (the rest of D2). Then the night fights, the ford serpent, Shen Qiu, the guardian stalemate for a strong James (v0.11.41 note); the part test's first numbers: the bot-like runs win 97–100% of Act 1's fights, the guardian 84%, and lose none of the return part's even at 2 HP.
+   - **After E (owner 18:56, 19:02):** two task-screen checks with the owner's saves (`saves/2026-11-07-1855-incremental-wilds.txt`, `saves/2026-11-07-1901-incremental-camp.txt`): no Condense / Cultivate card at the night camp with time left (Day 1, 20:40); no card to open the Extraordinary collaterals at the camp (Day 3, 19:11). Options first.
 6. **F, the copy-over push 5 (the Coil)**, then **G** (engine systems, crafting and threads, Android; steps 4, 6, 7 below).
 **The story text pass** (with P1-b): Mei Lin's clothes on the herb slope to match her picture; Yuki's cultivation can't be sensed either; James's glasses and tattoos (owner 18:29 / 18:35; details in the handover).
 Optional, open: P1-b / P1-c (hand-written "again" beats, knowledge branches).
