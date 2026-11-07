@@ -25,6 +25,7 @@ import { LONGFOREST, BREAK_HUBS as B0 } from './longforest.js';
 import { MERIDIANS, canAnyMeridian, btTarget } from './meridians.js';
 import { installYukiPath } from './yuki_path.js';
 import { installCoil } from './coil_scenes.js';
+import { installOnce } from './oneoff.js';
 
 const once = (flag) => (g) => !g.flags[flag];
 const set = (...flags) => (g) => { for (const f of flags) g.flags[f] = true; return []; };
@@ -914,6 +915,7 @@ for (const id of ['stream', 'wilds', 'camp', 'night', 'village', 'ashfall', 'sup
 }
 
 installCoil(SCENES);
+installOnce(SCENES); // v0.11.33: the task screens' one-off work, "Call it a day"
 
 /* ---------- v0.10.1: the Long Forest in task mode — gated behind the first Coil, climbed one season at a time ---------- */
 /** Task mode, the prologue's Coil 2 or later. Classic keeps the one-step button above. */

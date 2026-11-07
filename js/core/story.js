@@ -134,6 +134,9 @@ export function notePicked(g, sceneId, index) {
     const a = g.picked[sceneId] || (g.picked[sceneId] = []);
     if (!a.includes(index)) { a.push(index); a.sort((x, y) => x - y); }
 }
+/** v0.11.33: called on every choice taken (oneoff.js counts the once-per-Coil work); set once at load. */
+let onChoose = null;
+export const setOnChoose = (fn) => { onChoose = fn; };
 /** Was choice `index` (a "one move" index counts as its fight choice) ever picked on this scene? */
 export const wasPicked = (g, sceneId, index) => !!g.picked?.[sceneId]?.includes(index >= ONE_MOVE ? index - ONE_MOVE : index);
 /** A hub's work menu (Hunt, Forage, Train…): its choices are work, never recoloured. */
@@ -173,6 +176,7 @@ export function choose(g, scenes, index) {
         const c = (s.choices || [])[index - ONE_MOVE];
         if (!c || !c.combat) throw new Error('No fight to finish');
         notePicked(g, s.id, index - ONE_MOVE);
+        if (onChoose) onChoose(g, s.id, index - ONE_MOVE, c);
         const r = instantWin(g, c.combat(g));
         const st = STOMP[r.enc.id];
         const lines = [];
@@ -203,6 +207,7 @@ export function choose(g, scenes, index) {
         lines.push(`${checkText(roll)} — ${partial ? 'partly' : ok ? 'success' : 'failure'}${roll.crit ? (roll.die == null ? ' (double!)' : ' (critical!)') : roll.six ? ' (six!)' : roll.fumble ? ' (one…)' : ''}`);
         if (c.xp !== false) lines.push(...awardXp(g, c.check.skill, c.check.band || 'standard', { fail: !ok, factor: partial ? roll.ratio : 1 }));
     }
+    if (onChoose && ok) onChoose(g, s.id, index, c); // v0.11.33: once-per-Coil work counts only when it succeeds (owner 14:05)
     if (c.time) lines.push(...advance(g, c.time, { work: true }));
     takeCapNotes();
     if (ok && c.do) {

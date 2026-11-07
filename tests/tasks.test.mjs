@@ -1086,6 +1086,67 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     assert(!wasPicked(o, o.scene, 0), 'picked: an old save without the field loads, nothing marked');
     choose(o, SCENES, sceneView(o, SCENES).choices[0].index); assert(Object.keys(o.picked || {}).length === 1, 'picked: an old save starts recording on its first choice');
 }
+// v0.11.33 (owner 13:34–13:51, B + F1 + T1 + S1): the task screens' one-off work, "Call it a day"
+{
+    const { onceOpen, stageOpen, noteOnce, oneOffLeft, ONCE_MENUS, ONCE_STAGES, onceKey } = await import('../js/story/oneoff.js');
+    const { wakeDay: wd } = await import('../js/core/game.js');
+    setNoDice(true);
+    const at5 = () => { const g = ensureBars(newGame(21, { closed: true })); g.minutes = 4 * 1440 + 8 * 60; goTo(g, SCENES, 'ashfall'); Object.assign(g.flags, { healed_try: true, elder: true }); return g; };
+    const ids = (g) => taskCards(g, SCENES).map((c) => c.id);
+    const g = at5();
+    assert(ids(g).includes('drill:0') && ids(g).includes('drill:1'), 'once: both militia choices open on Day 5');
+    // owner 14:05: a failed try can be made again; only a success uses the one-off up
+    const f = at5(); f.james.gu = { tier: 1, level: 1, xp: 0 }; f.james.satiety = 0; f.tasks.fam = {}; ensureBars(f);
+    const fr = runTask(f, SCENES, 'drill:0');
+    if (/failed/.test(fr.lines.join(' '))) assert(!f.flags[onceKey('drill', 0)] && taskCards(f, SCENES).some((c) => c.id === 'drill:0'), 'once: a failed militia drill stays open (tomorrow)');
+    else assert(false, 'once: the weak-James drill was meant to fail (test setup)');
+    g.james.gu = { tier: 3, level: 10, xp: 0 }; ensureBars(g);
+    runTask(g, SCENES, 'drill:0');
+    assert(g.flags[onceKey('drill', 0)] === true, 'once: a militia choice done is recorded for the Coil');
+    const d1 = taskCards(g, SCENES).find((c) => c.id === 'drill:1');
+    assert(!ids(g).includes('drill:0') && d1?.status === 'tomorrow', 'once: the done choice is gone, the other waits for tomorrow (one per menu per day, B)');
+    delete g.flags[`drill@${wd(g)}`]; // the next day
+    assert(!ids(g).includes('drill:0') && taskCards(g, SCENES).find((c) => c.id === 'drill:1')?.status === 'open', 'once: the next day only the other choice is open');
+    setNoDice(false); assert(onceOpen(g, 'drill', 0) && stageOpen({ flags: { 'oo:wen_lesson': 9 } }, 'wen_lesson'), 'once: Story Mode keeps its rules'); setNoDice(true);
+    const nt = SCENES.drill.choices.findIndex((c) => /^Not today/.test(c.text)); noteOnce(g, 'drill', nt, SCENES.drill.choices[nt]);
+    assert(!g.flags[onceKey('drill', nt)], 'once: "Not today" is not work');
+    endCoil(g, 'choice'); rewind(g);
+    assert(!Object.keys(g.flags).some((k) => k.startsWith('oo:')), 'once: a rewind brings every one-off back (the next Coil)');
+    assert(['clinic', 'workshop', 'drill', 'fo_palisade', 'fo_council', 'fo_drill', 'fo_clinic', 'rr_scout'].every((m) => ONCE_MENUS.has(m) && SCENES[m]) && !ONCE_MENUS.has('wild_hunt') && !ONCE_MENUS.has('wild_train') && !ONCE_MENUS.has('rr_forage'), 'once: the one-off menus; hunts, training and foraging stay repeatable');
+    // staged doors: Wen's lessons, the herb slopes, two visits per Coil
+    const h = at5();
+    const wi = SCENES.ashfall.choices.findIndex((c) => c.to === 'wen_lesson');
+    assert(ids(h).includes(`ashfall:${wi}`), 'stages: Wen open');
+    noteOnce(h, 'ashfall', wi, SCENES.ashfall.choices[wi]); noteOnce(h, 'ashfall', wi, SCENES.ashfall.choices[wi]);
+    assert(h.flags['oo:wen_lesson'] === 2 && !ids(h).includes(`ashfall:${wi}`) && Object.keys(ONCE_STAGES).length === 2, 'stages: after two lessons Wen is done for the Coil');
+    // "Call it a day" (S1)
+    const k = at5();
+    const ci = SCENES.ashfall.choices.findIndex((c) => /^Call it a day/.test(String(c.text)));
+    assert(ci >= 0 && !ids(k).includes(`ashfall:${ci}`) && oneOffLeft(k, SCENES, 'ashfall'), 'skip: hidden while a one-off is open');
+    for (const m of ['clinic', 'workshop', 'drill']) SCENES[m].choices.forEach((c, i) => { k.flags[onceKey(m, i)] = true; });
+    Object.assign(k.flags, { 'oo:wen_lesson': 2, 'oo:herb_slopes': 2, village_hunt: true });
+    const w0 = JSON.stringify(k.wake);
+    const v = sceneView(k, SCENES);
+    assert(JSON.stringify(k.wake) === w0, 'skip: looking ahead to the evening leaves the clock state alone');
+    assert(!oneOffLeft(k, SCENES, 'ashfall') && ids(k).includes(`ashfall:${ci}`) && isInstantTask(k, SCENES, `ashfall:${ci}`), 'skip: shown once the one-offs are done, at once');
+    assert(!v.choices.some((c) => /^Evening/.test(c.label)), 'skip: the evening exit not yet at 08:00');
+    runTask(k, SCENES, `ashfall:${ci}`);
+    assert(k.scene === 'ashfall' && clockParts(k.minutes).day === 5 && clockParts(k.minutes).hh === 16 && clockParts(k.minutes).mm === 0, 'skip: the clock at 16:00 the same day, still on the hub');
+    assert(sceneView(k, SCENES).choices.some((c) => /^Evening/.test(c.label)) && !ids(k).includes(`ashfall:${ci}`), 'skip: the evening exit shows, the skip is gone');
+    // after the Fable review: Ashfall's last day (a one-time menu, a checked chore), the Old Tree's story stops, before 04:00
+    const r = ensureBars(newGame(22, { closed: true })); r.minutes = 19 * 1440 + 8 * 60; goTo(r, SCENES, 'rt_ashfall'); Object.assign(r.flags, { council_done: true, ya_village: true });
+    const rc = SCENES.rt_ashfall.choices.findIndex((c) => /^Call it a day/.test(String(c.text)));
+    assert(oneOffLeft(r, SCENES, 'rt_ashfall') && !ids(r).includes(`rt_ashfall:${rc}`), 'skip: Ashfall\'s last day, hidden while the palisade and the drill are open');
+    r.flags.a1_palisade = true; assert(oneOffLeft(r, SCENES, 'rt_ashfall'), 'skip: still hidden while the last drill is open');
+    r.flags.a1_militia = true; assert(!oneOffLeft(r, SCENES, 'rt_ashfall') && ids(r).includes(`rt_ashfall:${rc}`), 'skip: shown once the preparations are done');
+    const t = ensureBars(newGame(23, { closed: true })); t.minutes = 15 * 1440 + 8 * 60; t.scene = 'heart_hub';
+    assert(SCENES.heart_hub.choices.find((c) => c.to === 'heart_roots').show(t) && oneOffLeft(t, SCENES, 'heart_hub'), 'skip: the Old Tree holds it back while its story stops lead on');
+    k.minutes = 5 * 1440 + 3 * 60; Object.assign(k.flags, { 'oo:wen_lesson': 2 });
+    assert(!SCENES.ashfall.choices[ci].show(k), 'skip: never between 00:00 and 04:00');
+    setNoDice(false); const q = at5(); setNoDice(false);
+    assert(!sceneView(q, SCENES).choices.some((c) => /^Call it a day/.test(c.label)), 'skip: not in Story Mode');
+    setNoDice(true);
+}
 // v0.11.31 (P3-b): an open speed gate stays open across every rewind
 {
     const p = ensureBars(newGame(8, { closed: true }));

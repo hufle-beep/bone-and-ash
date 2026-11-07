@@ -18,6 +18,7 @@ import { advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp
 import { CONDENSE_SIT_COST } from './formulas.js';
 import { btTarget, MER_LINES, lineWindow, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
+import { onceOpen, noteOnce, stageOpen, ONCE_MENUS } from '../story/oneoff.js';
 import { daily } from '../story/common.js';
 import { endCoil } from './coil.js';
 import { canMeditate } from './meditate.js';
@@ -131,7 +132,7 @@ export function merChoice(g, scenes) {
 }
 /** v0.10.0: rest and sleep happen at once (no bar; the clock still moves). */
 export const instantChoice = (c) => !!c && !c.combat && !c.check && !c.qi && typeof c.text === 'string'
-    && (/^(Rest|Sleep)\b/.test(c.text) || /^(Get wet\. Sleep|Make camp and sleep|Go back to sleep|Just sleep|Let her sleep|Bandage it\. Sleep|Leave (a|the) thread on watch|Thank her for dinner and sleep|Limp back to camp and sleep)/.test(c.text));
+    && (/^(Rest|Sleep|Call it a day)\b/.test(c.text) || /^(Get wet\. Sleep|Make camp and sleep|Go back to sleep|Just sleep|Let her sleep|Bandage it\. Sleep|Leave (a|the) thread on watch|Thank her for dinner and sleep|Limp back to camp and sleep)/.test(c.text));
 /**
  * v0.10.2: a story choice that only waits for a time of day (no check, Qi, fight or time of its own; its `do` or the
  * next scene's `enter` sets the clock) plays at once in task mode — the clock jumps, no bar. `mins` = its dry run.
@@ -207,6 +208,7 @@ export function taskCards(g, scenes) {
         (scenes[menu].choices || []).forEach((c, i) => {
             if (door ? (typeof c.to !== 'string' || c.to === hubId) : !hasWork(c)) return;
             if (cfg.notJames && cfg.notJames(c)) return;
+            if (!onceOpen(g, menu, i)) return; // v0.11.33: done this Coil
             let status = 'open';
             if (doneToday) status = 'tomorrow';
             else if (c.show && !c.show(g)) { if (c.show.dailyKey && (!c.form || hasForm(g, c.form))) status = 'tomorrow'; else return; } // v0.10.4: a form he can't sing yet stays hidden
@@ -286,6 +288,7 @@ function resolveWork(g, scenes, hubId, card, id) {
     const items = gives(c).length > 0;
     const success = band === 'double' || band === 'full' || (band === 'partial' && items);
     const roll = { success, crit: band === 'double', ratio };
+    if (card.menu && success) noteOnce(g, card.menu, Number(String(id).split(':').pop()), c); // v0.11.33: once per Coil; a failed try can be made again (owner 14:05)
     if (success && c.do) {
         const before = { ...g.inventory };
         if (band === 'double') setLootMult(2);
