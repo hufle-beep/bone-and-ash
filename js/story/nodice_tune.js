@@ -9,7 +9,7 @@ export const NO_DICE_TUNE = {
     boar: { up: 0.75 },
     bone_elk: { up: 1.5 },
     cinder_hawks: { up: 5.25 },
-    collectors: { up: 2.0 }, // v0.9.7: tribute +1 (was 1.0)
+    collectors: { up: 4.5 }, // v0.9.7: tribute +1 (was 1.0); v0.11.29 (RB-1): 2.0 → 4.5, the prologue's wall
     crows: { up: 4.25 },
     drowned: { up: 3.0 },
     elder: { up: 9.75 },
@@ -28,7 +28,7 @@ export const NO_DICE_TUNE = {
     rats: { up: 4.0 },
     root_husks: { up: 1.25 },
     root_wyrm: { up: 3.25 },
-    rot_ape: { up: 8.0 },
+    rot_ape: { up: 15.0 }, // v0.11.29 (RB-1): 8.0 → 15.0, Act 1's wall (every route meets it)
     rt_brawl: { up: 8.75 },
     rt_serpent: { up: 0.25 },
     rt_wolves: { up: 7.0 },

@@ -205,10 +205,12 @@ export const SKILL_MAX_TIER = 10;
 export const atSkillCap = (n) => n.tier >= SKILL_MAX_TIER && n.level >= 10;
 /**
  * The Coil bonus (v0.11.0, owner 2026-11-06: picks 1b, per act): in Incremental Mode every earlier Coil of this act
- * makes James and Yuki learn faster: ×(1 + 0.5 × earlier Coils). Since v0.11.15 (B1-b) it multiplies XP only (James's
+ * makes James and Yuki learn faster: ×(1 + 0.5 × earlier Coils); ×(1 + 0.25 × earlier Coils) since v0.11.29 (RB-1). Since v0.11.15 (B1-b) it multiplies XP only (James's
  * skills, Yuki's Qi Use and fights); time is sped up by use instead (below). Story Mode: ×1.
  */
-export const COIL_GROWTH = 0.5;
+export const COIL_GROWTH = 0.25; // v0.11.29 (owner pick RB-1): was 0.5
+/** v0.11.29: the Coil bonus as text, up to two decimals (×1.25, ×1.5, ×2). */
+export const fmtMult = (x) => String(Math.round(x * 100) / 100);
 export const coilMult = (g) => (noDice ? 1 + COIL_GROWTH * Math.max(0, (g?.coil?.n || 1) - 1) : 1);
 /**
  * Speed by use (v0.11.15, B1-b, owner 19:12, Selene's familiarity): each activity speeds up with its own use, kept across

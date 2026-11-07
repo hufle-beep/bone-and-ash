@@ -28,7 +28,7 @@ One Coil per act. James never dies (engine canon: at HP 0 the main character is 
 | | Kept | Reset to the act's first dawn |
 |---|---|---|
 | Familiarity, Insights, Coil marks, threads | ✓ | |
-| Realm, skills, meridians, Saturation | (until v0.10.4) | ✓ since v0.11.0 (owner 2026-11-06, closer to Selene): they start over, and the Coil bonus ×(1 + 0.5 × earlier Coils of the act) makes them come back faster |
+| Realm, skills, meridians, Saturation | (until v0.10.4) | ✓ since v0.11.0 (owner 2026-11-06, closer to Selene): they start over, and the Coil bonus ×(1 + 0.5 × earlier Coils of the act; 0.25 since v0.11.29) makes them come back faster |
 | Yuki (bond, path, relationship) | ✓ | her realm, skills and forms start over with James's (v0.11.0) |
 | Knowledge flags (what James has learned) | ✓ | |
 | Hammerspace items | | ✓ |

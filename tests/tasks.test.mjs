@@ -253,7 +253,7 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     assert(/ash/.test(SCENES.yuki_check.text(ensureBars(newGame(45, { closed: true })))) && /Twelve primaries open/.test(SCENES.yuki_check.text(open)), 'Day 1 scan text follows the meridians');
     setNoDice(false);
 }
-// v0.11.0: the Coil bonus — ×(1 + 0.5 × earlier Coils of this act), Incremental Mode only
+// v0.11.0: the Coil bonus — ×(1 + 0.5 × earlier Coils), Incremental Mode only; v0.11.29 (RB-1): ×(1 + 0.25 × earlier Coils)
 {
     setNoDice(true);
     const g = ensureBars(newGame(91, { closed: true }));
@@ -261,16 +261,23 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     const xp1 = (h) => { const c = structuredClone(h); const out = awardXp(c, 'Convergence Use', 'standard'); return Number(/\+(\d+) XP/.exec(out[0])[1]); };
     const base = xp1(g);
     endCoil(g, 'choice', 'arrival'); rewind(g); endCoil(g, 'choice', 'arrival'); rewind(g);
-    assert(g.coil.n === 3 && coilMult(g) === 2 && xp1(g) === base * 2, `Coil 3: ×2 XP (${base} → ${xp1(g)})`);
-    const y0 = g.yuki.fight.xp; awardYukiFightXp(g, 'standard'); assert(g.yuki.fight.xp - y0 === 60 || g.yuki.fight.level > 1, 'Yuki\'s XP ×2 too');
-    const dc1 = dcPrimary(ensureBars(newGame(92, { closed: true }))); assert(Math.abs(dcPrimary(g) - Math.round(dc1 / 2 * 10) / 10) < 0.11, `meridian DC ÷2 (${dc1} → ${dcPrimary(g)})`);
+    assert(g.coil.n === 3 && coilMult(g) === 1.5 && xp1(g) === Math.floor(base * 1.5), `Coil 3: ×1.5 XP (${base} → ${xp1(g)})`);
+    const y0 = g.yuki.fight.xp; awardYukiFightXp(g, 'standard'); assert(g.yuki.fight.xp - y0 === 45 || g.yuki.fight.level > 1, `Yuki's XP ×1.5 too (${g.yuki.fight.xp - y0})`);
+    const dc1 = dcPrimary(ensureBars(newGame(92, { closed: true }))); assert(Math.abs(dcPrimary(g) - Math.round(dc1 / 1.5 * 10) / 10) < 0.11, `meridian DC ÷1.5 (${dc1} → ${dcPrimary(g)})`);
     g.james.qi = 40; const s0 = g.james.saturation; const r = condense(g); const one = ensureBars(newGame(93, { closed: true })); one.james.qi = 40; const r1 = condense(one);
     assert(r.ok && Math.abs((g.james.saturation - s0) - r1.gain) < 0.2, `v0.11.15: a sit gives the same Saturation on Coil 3 (${r1.gain} → ${g.james.saturation - s0})`);
     const a = ensureBars(newGame(94)); a.scene = 'epilogue'; a.flags.ending = 'bluff'; a.minutes = 6 * 1440 + 900; a.coil.n = 5;
     choose(a, SCENES, 0);
-    assert(a.coil.act === 1 && a.coil.n === 5 && coilMult(a) === 3, 'v0.11.26 (one count, N1): Act 1 continues the prologue\'s Coil 5 at ×3');
+    assert(a.coil.act === 1 && a.coil.n === 5 && coilMult(a) === 2, 'v0.11.26 (one count, N1): Act 1 continues the prologue\'s Coil 5 at ×2 (×3 before v0.11.29)');
     setNoDice(false);
     assert(coilMult(g) === 1, 'Story Mode: ×1');
+}
+// v0.11.29 (owner pick RB-1): the two walls and the bonus text
+{
+    const { NO_DICE_TUNE } = await import('../js/story/nodice_tune.js');
+    const { fmtMult, COIL_GROWTH } = await import('../js/core/game.js');
+    assert(NO_DICE_TUNE.collectors.up === 4.5 && NO_DICE_TUNE.rot_ape.up === 15 && COIL_GROWTH === 0.25, `RB-1: the tribute 4.5, the rot ape 15, the Coil bonus 0.25 per Coil (${NO_DICE_TUNE.collectors.up}, ${NO_DICE_TUNE.rot_ape.up}, ${COIL_GROWTH})`);
+    assert(fmtMult(1) === '1' && fmtMult(1.25) === '1.25' && fmtMult(1.5) === '1.5' && fmtMult(2.75) === '2.75', 'fmtMult: ×1.25 shows as 1.25, not 1.3');
 }
 // v0.10.4: Bonesinger forms — Incremental Mode shows only what James can sing; Story Mode keeps everything
 {
@@ -424,7 +431,7 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
         const av = sceneView(e, SCENES);
         assert(e.scene === 'a1_again' && av.choices.map((c) => c.label).join('|') === 'Bite the tail. Wake at the start of Act 1.|Bite the tail. Wake at the start of the whole game (Day 1, the arrival).|Not yet.', `${outcome}: the confirm screen`);
         choose(e, SCENES, av.choices.find((c) => (target === 'act' ? /start of Act 1/ : /whole game/).test(c.label)).index);
-        assert(e.scene === 'coil_dawn' && e.coil.n === 3 && coilMult(e) === 2 && !e.flags.a1_outcome && !e.inventory.beast_core, `${outcome} → ${target}: Coil 3 (one count), ×2, the outcome and the hammerspace gone`);
+        assert(e.scene === 'coil_dawn' && e.coil.n === 3 && coilMult(e) === 1.5 && !e.flags.a1_outcome && !e.inventory.beast_core, `${outcome} → ${target}: Coil 3 (one count), ×1.5, the outcome and the hammerspace gone`);
         assert(e.tasks.fam['rr_hub:1'] === 7 && e.flags.lore_tree && e.coil.known.includes('ship_found') && e.rel['Mei Lin'].a >= 20, `${outcome} → ${target}: familiarity, knowledge and the head start kept`);
         choose(e, SCENES, 0);
         if (target === 'act') assert(e.scene === 'fo_start' && e.coil.act === 1 && e.minutes === 7 * 1440 + 360 && e.flags.ending === 'paid', `${outcome} → the start of Act 1 (the prologue's outcome kept)`);

@@ -3,7 +3,7 @@
  * "Bite the tail" after a lost tribute, "You remember this" on the arrival, breakthrough from 95% in the label.
  * Task mode only (every new choice checks isNoDice through coilActive or directly). Classic play is unchanged.
  */
-import { advance, isNoDice, startActCoil, combatHooks, PEOPLE_FIGHTS, coilMult, COIL_GROWTH } from '../core/game.js';
+import { advance, isNoDice, startActCoil, combatHooks, PEOPLE_FIGHTS, coilMult, COIL_GROWTH, fmtMult } from '../core/game.js';
 import { setDeathHook, goTo } from '../core/story.js';
 import { coilActive, endCoil, rewind, coilReport, actOf, willUnwind } from '../core/coil.js';
 
@@ -31,7 +31,7 @@ Or you could close the loop yourself: bite the tail, and wake at a dawn you have
 function bite(g, to) {
     const whole = to === 'game' && actOf(g) === 1;
     const n = rewind(g, { to });
-    return [`Coil ${n}.${whole ? ' Day 1 again: the forest, the stream, the whole of it.' : ''} The hammerspace is empty, and so are your hands. Your head is not: you learn ×${coilMult(g).toFixed(1)} as fast.`];
+    return [`Coil ${n}.${whole ? ' Day 1 again: the forest, the stream, the whole of it.' : ''} The hammerspace is empty, and so are your hands. Your head is not: you learn ×${fmtMult(coilMult(g))} as fast.`];
 }
 
 export function installCoil(SCENES) {
@@ -47,7 +47,7 @@ export function installCoil(SCENES) {
 
 Yuki remembers everything. She always does, through the bond, and she will bring it up.
 
-**Next Coil:** your realm, skills and meridians start over. What you remember makes them come back faster: you will learn ×${(1 + COIL_GROWTH * (g.coil?.n || 1)).toFixed(1)} as fast.${willUnwind(g) ? `
+**Next Coil:** your realm, skills and meridians start over. What you remember makes them come back faster: you will learn ×${fmtMult(1 + COIL_GROWTH * (g.coil?.n || 1))} as fast.${willUnwind(g) ? `
 
 **The price:** your collaterals sealed at Foundation. This rewind unwinds the breakthrough with them: Mortal Vessel again, ${g.james.realm} realm${g.james.realm > 1 ? 's' : ''} gone, Saturation at zero. The threads will open again. Everything else you learned stays.` : ''}`;
         },

@@ -5,7 +5,7 @@ Everything here lives in git and grows with the game. **Rule (owner 2026-11-06, 
 ## Running it
 
 ```
-bash tools/check.sh          # the full check, before every push (about 113 s on 2 cores since v0.11.27–28)
+bash tools/check.sh          # the full check, when a push changes the game or the bot code (rule 2 since v0.11.29; about 113–146 s on 2 cores)
 node tools/check.mjs --verbose  # v0.11.28: every step's last line and the full reports, as before
 bash tools/check.sh quick    # 200 bot games each, no browser or sanity check, the leftover scan static only (about 17 s), while building
 node tools/check.mjs --jobs 1   # the same, one step at a time (to compare, or on a busy machine)
