@@ -1,5 +1,5 @@
 {
- "note": "v0.11.24: how every picture in art/pic was made (owner picks 2026-11-07). Run each step's 'op' in order on the owner's ComfyUI (tools/art/workflow.json; Z-Image-Turbo bf16, 8 steps, cfg 1, res_multistep / simple, shift 3). Masks are polygons in source pixels, white = repaint, blurred by 'blur' px; tools/art/masks.py draws them. Then tools/art/palette.py cuts the last file to the palette at 800x500 (--gold for Yuki). Originals: the owner's ComfyUI output folder, boneash/. v0.11.26 (the prologue, owner picks S1 P1 C1 R-a, 2026-11-07): each prologue key has one picture named after the key; the shared character descriptions are in \"cast\" and the style texts in \"styles\" (p: scenes with people, n: animals, objects and landscapes only). Rules learnt: the model adds stray women in black dresses and giant floating faces to busy scenes; saying \"no women\" or \"no faces\" makes it worse (and once added nude figures to an animals-only prompt, which were deleted unseen by the owner); describing what fills the background works, and so does the n style for scenes without James.",
+ "note": "v0.11.24: how every picture in art/pic was made (owner picks 2026-11-07). Run each step's 'op' in order on the owner's ComfyUI (tools/art/workflow.json; Z-Image-Turbo bf16, 8 steps, cfg 1, res_multistep / simple, shift 3). Masks are polygons in source pixels, white = repaint, blurred by 'blur' px; tools/art/masks.py draws them. Then tools/art/palette.py cuts the last file to the palette at 800x500 (--gold for Yuki). Originals: the owner's ComfyUI output folder, boneash/. v0.11.26 (the prologue, owner picks S1 P1 C1 R-a, 2026-11-07): each prologue key has one picture named after the key; the shared character descriptions are in \"cast\" and the style texts in \"styles\" (p: scenes with people, n: animals, objects and landscapes only). Rules learnt: the model adds stray women in black dresses and giant floating faces to busy scenes; saying \"no women\" or \"no faces\" makes it worse (and once added nude figures to an animals-only prompt, which were deleted unseen by the owner); describing what fills the background works, and so does the n style for scenes without James. v0.11.49 (Y3 part 1, the great cat; owner picks 2026-11-07 20:33-22:00): each picture that draws Yuki has a <key>_tiger version. Fresh ones swap the cat line for cast \"yuki_tiger\" (redos: \"yuki_tiger2\", more tiger-like); james, jackals_dead and ridge are inpaints on the approved picture; problem areas (stray women, faces, extra figures, leash-like cords, the fire under her paws) are inpainted out with prompts that describe only what belongs there. Scenes cut without --gold. Rules learnt: the model ignores \"nothing on his shoulder\" (it drew a cat there; describe the shoulder instead); a detail inpaint at 3x on a face comes out too realistic next to the flat style (1x inpaints with \"flat two-tone ink, no realistic shading\" fit); the style text's cloud curls leak into small repaints; head repaints from text alone do not make James uniform (owner 21:52: a reference tool, its own step before the Act 1 art); \"james_shaggy\" is the look the owner wants (village tiger s44) and is used by bone_field, arson and jackals.",
  "masks": {
   "shen_eyes_big": {
    "size": [
@@ -392,6 +392,534 @@
     ]
    ],
    "note": "drawn in the browser with a canvas blur of 10 px"
+  },
+  "y3f_roof44": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 18,
+   "polys": [],
+   "ellipses": [
+    [
+     810,
+     120,
+     1060,
+     410
+    ]
+   ]
+  },
+  "y3t_jd2": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 20,
+   "polys": [
+    [
+     [
+      380,
+      80
+     ],
+     [
+      900,
+      80
+     ],
+     [
+      900,
+      500
+     ],
+     [
+      760,
+      520
+     ],
+     [
+      750,
+      610
+     ],
+     [
+      580,
+      610
+     ],
+     [
+      575,
+      520
+     ],
+     [
+      380,
+      500
+     ]
+    ]
+   ]
+  },
+  "y3t_village_fix": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 16,
+   "polys": [
+    [
+     [
+      640,
+      70
+     ],
+     [
+      795,
+      70
+     ],
+     [
+      805,
+      210
+     ],
+     [
+      795,
+      420
+     ],
+     [
+      640,
+      430
+     ]
+    ],
+    [
+     [
+      640,
+      610
+     ],
+     [
+      805,
+      610
+     ],
+     [
+      812,
+      800
+     ],
+     [
+      640,
+      800
+     ]
+    ],
+    [
+     [
+      975,
+      0
+     ],
+     [
+      1185,
+      0
+     ],
+     [
+      1195,
+      190
+     ],
+     [
+      1110,
+      335
+     ],
+     [
+      995,
+      335
+     ],
+     [
+      975,
+      200
+     ]
+    ]
+   ]
+  },
+  "y3t_james2": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 24,
+   "polys": [
+    [
+     [
+      440,
+      165
+     ],
+     [
+      575,
+      160
+     ],
+     [
+      580,
+      300
+     ],
+     [
+      560,
+      395
+     ],
+     [
+      420,
+      395
+     ],
+     [
+      410,
+      300
+     ]
+    ],
+    [
+     [
+      0,
+      120
+     ],
+     [
+      415,
+      120
+     ],
+     [
+      420,
+      800
+     ],
+     [
+      0,
+      800
+     ]
+    ]
+   ]
+  },
+  "y3f_jdfire": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 18,
+   "polys": [
+    [
+     [
+      470,
+      450
+     ],
+     [
+      820,
+      450
+     ],
+     [
+      830,
+      770
+     ],
+     [
+      460,
+      770
+     ]
+    ]
+   ]
+  },
+  "y3t_liz_fix": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 14,
+   "polys": [
+    [
+     [
+      655,
+      40
+     ],
+     [
+      795,
+      40
+     ],
+     [
+      800,
+      740
+     ],
+     [
+      655,
+      740
+     ]
+    ]
+   ]
+  },
+  "y3f_liz6": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 8,
+   "polys": [
+    [
+     [
+      762,
+      145
+     ],
+     [
+      808,
+      145
+     ],
+     [
+      808,
+      430
+     ],
+     [
+      762,
+      430
+     ]
+    ]
+   ]
+  },
+  "y3f_james7": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 14,
+   "polys": [
+    [
+     [
+      0,
+      330
+     ],
+     [
+      260,
+      330
+     ],
+     [
+      260,
+      450
+     ],
+     [
+      0,
+      450
+     ]
+    ],
+    [
+     [
+      180,
+      320
+     ],
+     [
+      340,
+      320
+     ],
+     [
+      340,
+      420
+     ],
+     [
+      180,
+      420
+     ]
+    ]
+   ],
+   "ellipses": [
+    [
+     150,
+     95,
+     250,
+     185
+    ],
+    [
+     310,
+     95,
+     410,
+     185
+    ]
+   ]
+  },
+  "y3f_jack44": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 12,
+   "polys": [
+    [
+     [
+      285,
+      540
+     ],
+     [
+      425,
+      540
+     ],
+     [
+      425,
+      640
+     ],
+     [
+      285,
+      640
+     ]
+    ]
+   ]
+  },
+  "y3f_omni1": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 18,
+   "polys": [],
+   "ellipses": [
+    [
+     790,
+     235,
+     990,
+     460
+    ]
+   ]
+  },
+  "y3t_omni_fix": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 24,
+   "polys": [
+    [
+     [
+      110,
+      0
+     ],
+     [
+      478,
+      0
+     ],
+     [
+      478,
+      90
+     ],
+     [
+      470,
+      210
+     ],
+     [
+      478,
+      800
+     ],
+     [
+      110,
+      800
+     ]
+    ]
+   ]
+  },
+  "y3f_camp": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 16,
+   "polys": [
+    [
+     [
+      948,
+      520
+     ],
+     [
+      1280,
+      520
+     ],
+     [
+      1280,
+      800
+     ],
+     [
+      880,
+      800
+     ],
+     [
+      880,
+      735
+     ],
+     [
+      948,
+      725
+     ]
+    ],
+    [
+     [
+      808,
+      690
+     ],
+     [
+      950,
+      690
+     ],
+     [
+      950,
+      800
+     ],
+     [
+      808,
+      800
+     ]
+    ]
+   ]
+  },
+  "y3f_forage": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 20,
+   "polys": [],
+   "ellipses": [
+    [
+     790,
+     0,
+     1110,
+     300
+    ]
+   ]
+  },
+  "y3f_wolves": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 14,
+   "polys": [
+    [
+     [
+      40,
+      440
+     ],
+     [
+      300,
+      440
+     ],
+     [
+      300,
+      545
+     ],
+     [
+      40,
+      545
+     ]
+    ]
+   ]
+  },
+  "y3f_roof": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 12,
+   "polys": [
+    [
+     [
+      870,
+      350
+     ],
+     [
+      1025,
+      350
+     ],
+     [
+      1005,
+      475
+     ],
+     [
+      885,
+      475
+     ]
+    ]
+   ]
   }
  },
  "pictures": {
@@ -1011,11 +1539,436 @@
   "ridge": [
    {
     "op": "generate",
-    "file": "r5_ridge_s88",
-    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. The picture shows only a landscape and no people. A wide panoramic view from a high rocky ridge in the foreground: A black forest rolling to the horizon, jagged mountains like broken teeth, and far away at the forest's heart the enormous dead grey trunk of a leafless dead tree, taller than the mountains, with bare broken branches against a pale sky with a few cloud curls. A small white cat with gold eyes and a thin red cord collar sits on the rock in the foreground, looking at the dead tree.",
+    "file": "y3_ridge_new_s22",
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. The picture shows only a landscape, no people and no animals. A wide view from the top of a high bare ridge. In the foreground on the right stands one huge lone dead tree, its thick grey trunk split and leaning with the wind, its bare twisted branches reaching far out across the sky like claws. Beyond the ridge, rolling black forested mountains fade into pale distance, ridge after ridge, and the sky is full of decorative swirling cloud curls.",
+    "seed": 22,
+    "width": 1280,
+    "height": 800,
+    "why": "v0.11.49 (owner 22:36-22:55): a new picture of a lone dead tree on the ridge, drawn from a description, with no characters in it (the old landscape r5_ridge_s88 had the cat overlapping its tree; the cat version stays in the originals)"
+   }
+  ],
+  "forest_dawn_tiger": [
+   {
+    "op": "generate",
+    "file": "y3t_forest_dawn_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide dawn scene at the edge of an ancient dark forest of huge gnarled trees, mist between the trunks, a small red sun low in the sky. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers has just arrived and stands looking around, one hand on his glasses, deadpan. A huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck stands beside him with her shoulder at his hip, looking unimpressed. Exactly one person and one great white cat.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "clearing_tiger": [
+   {
+    "op": "generate",
+    "file": "y3t_clearing_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide daytime scene of a forest clearing of pale grey grass and old moss-covered standing stones, tall dark trees around it, a small pale sun. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands in the middle of the clearing with a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck beside him, both looking toward a gap in the trees. Exactly one person and one great white cat.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "forage_tiger": [
+   {
+    "op": "generate",
+    "file": "y3t_forage_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime scene in a dense forest undergrowth. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers crouches studying a cluster of small round red berries on a bush and a ring of pale mushrooms beside him, holding one mushroom up to his glasses. A huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck sits nearby watching. Exactly one person and one great white cat.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   },
+   {
+    "op": "inpaint",
+    "file": "y3f_forage_s2",
+    "source": "y3t_forage_s44",
+    "mask": "y3f_forage",
+    "seed": 2,
+    "denoise": 0.8,
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. The head of a huge white tiger seen from the front: a broad tiger face with a wide muzzle and heavy jaw, bold black tiger stripes across the forehead and cheeks, a white ruff, small rounded ears, calm gold eyes, a thin red cord around her neck. Behind her head the black forest.",
+    "why": "cold review 21:58: a big house cat, not a tiger (owner pick 22:10)"
+   }
+  ],
+  "hunt_tiger": [
+   {
+    "op": "generate",
+    "file": "y3t_hunt_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime forest scene. The background is a dense wall of tall dark tree trunks and big ferns, nothing else. In the foreground a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck crouches low in the grass, stalking, her tail straight. On the right a wild hare sits up alert among the ferns. On the left a man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands still among the trunks with one thin white bone dart ready in his hand. Exactly one person, one great white cat and one hare.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "camp_tiger": [
+   {
+    "op": "generate",
+    "file": "y3t_camp_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A night scene at a small camp under tall pine trees: A small campfire with red flames and white smoke in the centre. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers sits on a log by the fire, deadpan, warming his hands. A huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck lies curled up beside him by the fire, as long as he is tall. Darkness all around. Exactly one person and one great white cat.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   },
+   {
+    "op": "inpaint",
+    "file": "y3f_camp_s2",
+    "source": "y3t_camp_s44",
+    "mask": "y3f_camp",
+    "seed": 2,
+    "denoise": 1.0,
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. A dark night forest floor: ferns, tangled roots, a fallen mossy log and dark tree trunks, bare ground. Nothing else, no animals.",
+    "why": "cold review 21:58: a second tiger curled on the right (owner pick 22:10)"
+   }
+  ],
+  "gao_down_tiger": [
+   {
+    "op": "generate",
+    "file": "y3t_gao_down_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide daytime scene in tall grass on a mountain slope. A proud young man of about twenty with a smooth haughty face and a high black topknot, wearing crimson sect robes with wide sleeves embroidered with a red lotus lies defeated on his back in the grass, his arm twisted, his robe spread out like spilled ink. Standing over him, a man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers looks down with a deadpan face, holding a thin white bone blade. Behind on the left a village herbalist woman in her mid-twenties with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash watches holding a short herb knife. A huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck stands beside the man. Exactly three people.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "herb_slope_tiger": [
+   {
+    "op": "generate",
+    "file": "y3t_herb_slope_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide sunny scene on a high mountain herb slope with swirling cloud curls and distant peaks. A village herbalist woman in her mid-twenties with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash crouches cutting herbs with a short knife, a woven basket beside her, looking up over her shoulder with a teasing smile. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands nearby with his hands in his coat pockets, deadpan. A huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck sits on a rock. Exactly two people and one great white cat.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "drill_tiger": [
+   {
+    "op": "generate",
+    "file": "y3t_drill_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide daytime scene on a village green: A line of eight village hunters in patched hemp clothes, old men and one twelve-year-old boy, hold boar spears in a ragged line, very serious. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands in front of them with his arms folded, deadpan, inspecting them, and a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck sits beside him also inspecting them. No women in the picture.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "wolves_tiger": [
+   {
+    "op": "generate",
+    "file": "y3t_wolves_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide daytime action scene in a dark forest: Two lean grey wolves with bared teeth and red eyes advance from the right, heads low. On the left a man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands ready with a thin white bone blade, and a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck crouches beside him snarling. Exactly one person, one great white cat and two wolves. No women in the picture.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   },
+   {
+    "op": "inpaint",
+    "file": "y3f_wolves_s1",
+    "source": "y3t_wolves_s44",
+    "mask": "y3f_wolves",
+    "seed": 1,
+    "denoise": 0.9,
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. The white chest fur and front leg of a huge white tiger with grey stripes, and the dark forest ground and swirling ink cloud curls beside her. No cord, no rope.",
+    "why": "cold review 21:58: the cord trailed like a leash (owner pick 22:10)"
+   }
+  ],
+  "dinner_tiger": [
+   {
+    "op": "generate",
+    "file": "y3t_dinner_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. An interior scene of supper in a small village house with paper walls and an oil lamp on a low table with bowls of rice and soup. A village herbalist woman in her mid-twenties with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash sits at the table laughing and teasing. Across from her sits a stern sixty-year-old village woman with grey hair in a tight bun, a lined face, a plain dark jacket and an apron, eating with grave disapproval. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers sits between them holding chopsticks, deadpan. On the floor by the door a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck lies too big for the room, eating from a large bowl. Exactly three people and one great white cat.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "collectors_tiger": [
+   {
+    "op": "generate",
+    "file": "y3t_collectors_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide morning scene on the road into a grey mountain hamlet with a tall tribute post and a long red banner, a big pale sun. On the left four young men in crimson sect robes with lotus embroidery walk in formation, led by a tall cold man of about thirty with a perfectly calm still face, long black hair tied high, wearing deep crimson sect robes with the hilt of a long sword over his shoulder. On the right a man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands facing them with a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck beside him. Grey villagers kneel in the background.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "tribulation_tiger": [
+   {
+    "op": "generate",
+    "file": "y3t_tribulation_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide dramatic scene on a mountain top: Enormous black storm clouds gather overhead and one jagged white bolt of lightning strikes down. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers sits cross-legged and calm below it with his eyes closed, completely unharmed, and a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck sits beside him yawning. Exactly one person and one great white cat. No women in the picture.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "lights_tiger": [
+   {
+    "op": "generate",
+    "file": "y3t_lights_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A dark night forest of tall black trunks: A slow procession of pale glowing orbs of light drifts low between the trees in a loose line, all going the same way into the distance. In the foreground a man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers sits up on his blanket watching them, with a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck lying beside him with her head raised, ears flat. Exactly one person and one great white cat. No women in the picture.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "rain_tiger": [
+   {
+    "op": "generate",
+    "file": "y3t_rain_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A night scene of warm grey rain falling in long slanting lines over a forest camp, the small campfire hissing with smoke. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers sits hunched by the fire with his lab coat collar turned up, deadpan, and a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck sits beside him soaked and furious. Exactly one person and one great white cat. No women in the picture.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "crows_tiger": [
+   {
+    "op": "generate",
+    "file": "y3t_crows_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A night scene at a small forest camp under a pale moon: Three huge moulting rot-crows with ragged black feathers and milky white eyes perch on a fallen trunk above a small campfire, staring down. Below, a man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers sits up on his blanket looking back at them, deadpan, and a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck glares at the crows. Exactly one person, one great white cat and three crows. No women in the picture.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "rats_tiger": [
+   {
+    "op": "generate",
+    "file": "y3t_rats_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A night scene on the bank of a black stream between grey cliffs: Two huge slick black mire-rats the size of dogs with long whip tails climb out of the reeds. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands with white bone darts in his hand, and a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck sits in front of him looking amused. Exactly one person, one great white cat and two rats. No women in the picture.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "gift_tiger": [
+   {
+    "op": "generate",
+    "file": "y3t_gift_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A night scene at a small campfire under a pale moon in a pine forest. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers lies on his back on a blanket, just awake, deadpan, and a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck sits very upright and proud beside him, and a dead fat long-necked marsh bird is laid out on his chest like an offering. Exactly one person and one great white cat. No women in the picture.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "mire_tiger": [
+   {
+    "op": "generate",
+    "file": "y3t_mire_s22",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide grey daytime scene of a misty marsh: Black water between grey grassy hummocks, dead reeds, a few ugly long-necked marsh birds lifting off. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers wades through the mud with his trousers soaked to the knee, deadpan, and a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck picks her way along a fallen log beside him, refusing to touch the water. Exactly one person and one great white cat. No women in the picture.",
+    "seed": 22,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "hollow_tiger": [
+   {
+    "op": "generate",
+    "file": "y3t_hollow_s22",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime scene in a deep sunken hollow in the forest floor, the ground dropping steeply on all sides, filled with a tangle of enormous smooth grey-white roots as thick as a man, like old bone, all running in the same direction out of the earth and back into it. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands among the roots with one hand resting on one, and a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck sits on a root beside him. Behind them only dark tree trunks. Exactly one person and one great white cat.",
+    "seed": 22,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "stream_tiger": [
+   {
+    "op": "generate",
+    "file": "y3t_stream_s66",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide daytime scene of a cold dark mountain stream running over black stones between tall grey cliffs and ferns. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers crouches at the water's edge cupping water in his hands. A huge white tiger, a big cat as long as a man is tall, with a broad tiger face, thin grey tiger stripes on snow-white fur, heavy paws, gold eyes and a thin red cord around her neck sits on a flat stone across the stream looking at the water with distaste. Exactly one person and one white tiger.",
+    "seed": 66,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "bone_field_tiger": [
+   {
+    "op": "generate",
+    "file": "y3t_bone_field_s66",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide daytime scene of a valley of giant bones: Ribs as big as house frames, a huge skull half sunk in moss, a long spine of vertebrae as big as cartwheels running into the distance, grey mountains behind. A man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands small among the bones, looking up, and a huge white tiger, a big cat as long as a man is tall, with a broad tiger face, thin grey tiger stripes on snow-white fur, heavy paws, gold eyes and a thin red cord around her neck sits on top of a rib. Exactly one person and one white tiger. No women in the picture.",
+    "seed": 66,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "arson_tiger": [
+   {
+    "op": "generate",
+    "file": "y3t_arson_s88",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A night action scene in a village street: The thatched roof of a house behind them is on fire with big red flames and black smoke. On the left a huge pock-faced brute with a shaved head and a ragged sleeveless tunic holds up a burning torch and grins, with two ragged male thugs crouching beside him. On the right a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers faces them with three thin white bone darts between his fingers, and in the bottom right corner, in front of him and clearly separate from him, a huge white tiger, a big cat as long as a man is tall, with a broad tiger face, thin grey tiger stripes on snow-white fur, heavy paws, gold eyes and a thin red cord around her neck crouches snarling at the thugs. Exactly four men and one white tiger, no women in the picture.",
     "seed": 88,
     "width": 1280,
     "height": 800
+   }
+  ],
+  "village_tiger": [
+   {
+    "op": "generate",
+    "file": "y3t_village_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide daytime scene of Ashfall, a poor mountain hamlet of grey wooden houses with ash-grey thatched roofs on a slope, a tall wooden tribute post with a long red banner, thin smoke rising. A few thin grey-faced villagers in patched hemp clothes stand watching with grave suspicious faces. In the foreground a man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers walks into the village with a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck pacing beside him.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   },
+   {
+    "op": "inpaint",
+    "file": "y3i_village44_fix_s2",
+    "source": "y3t_village_s44",
+    "mask": "y3t_village_fix",
+    "seed": 2,
+    "denoise": 1.0,
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A grey mountain village of thatched wooden huts under a black sky with drifting smoke and cloud curls, a red banner on a pole on the left, four thin villagers in patched hemp clothes standing on the left. a man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers walks into the village, and a huge white tiger with grey stripes, gold eyes and a thin red cord around her neck pads beside him in front. Behind them only thatched roofs, the black sky and smoke. Exactly one man in a lab coat, one tiger and four villagers.",
+    "why": "owner 20:49: two stray tall women"
+   }
+  ],
+  "omnitool_tiger": [
+   {
+    "op": "generate",
+    "file": "y3t_omnitool_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime scene on a rocky ledge among tall stone cliffs with mist. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers looks at a translucent glowing rectangular holographic screen floating in the air in front of his raised left wrist, showing a few thin lines and four small red dots, his face deadpan. A huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck sits on a rock beside him. Exactly one person and one great white cat.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   },
+   {
+    "op": "inpaint",
+    "file": "y3i_omnitool44_fix_s1",
+    "source": "y3t_omnitool_s44",
+    "mask": "y3t_omni_fix",
+    "seed": 1,
+    "denoise": 1.0,
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A dark misty forest of tall cracked grey stone pillars and black tree trunks, white mist pooling on the ground. In the middle a man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands on a rock holding up a small glowing translucent square screen, and on the right a huge white tiger with grey stripes, gold eyes and a thin red cord around her neck sits beside him. The left side of the picture is only tall grey stone pillars, hatched rock and white mist. Exactly one person and one tiger.",
+    "why": "owner 20:49: a floating face"
+   },
+   {
+    "op": "inpaint",
+    "file": "y3f_omni1_s1",
+    "source": "y3i_omnitool44_fix_s1",
+    "mask": "y3f_omni1",
+    "seed": 1,
+    "denoise": 0.6,
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, flat white fur with simple bold black tiger stripes, no fine fur texture, no realistic shading. The head of a huge white tiger: a broad tiger face, simple bold black stripes on the forehead and cheeks, a white ruff, small rounded ears, gold eyes, a thin red cord around her neck.",
+    "why": "owner 21:05/21:21: the face catlike, then too realistic"
+   }
+  ],
+  "roof_tiger": [
+   {
+    "op": "generate",
+    "file": "y3t_roof_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A night scene on the thatched roof of a village house under a big pale moon. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers sits on the roof ridge, deadpan, and beside him sits a village herbalist woman in her mid-twenties with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, smiling, looking at the stars. A huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck sits a little apart from them. Grey village roofs below. Exactly two people and one great white cat.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   },
+   {
+    "op": "inpaint",
+    "file": "y3f_roof44_s2",
+    "source": "y3t_roof_s44",
+    "mask": "y3f_roof44",
+    "seed": 2,
+    "denoise": 0.6,
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, flat white fur with simple bold black tiger stripes, no fine fur texture, no realistic shading. The head of a huge white tiger: a broad tiger face, simple bold black stripes on the forehead and cheeks, a white ruff, small rounded ears, gold eyes, a thin red cord around her neck.",
+    "why": "owner 21:05/21:21: the face catlike, then too realistic"
+   },
+   {
+    "op": "inpaint",
+    "file": "y3f_roof_s2",
+    "source": "y3f_roof44_s2",
+    "mask": "y3f_roof",
+    "seed": 2,
+    "denoise": 0.85,
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. The white chest fur of a huge white tiger with soft grey stripes. Nothing hanging on her chest.",
+    "why": "cold review 21:58: two cords (owner pick 22:10)"
+   }
+  ],
+  "jackals_tiger": [
+   {
+    "op": "generate",
+    "file": "y3t_jackals_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide night action scene in a forest clearing under a single huge pale full moon. A man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, lunges forward and has just thrown three thin white bone darts that streak through the air towards a lean ash-grey jackal with bared teeth and glowing red eyes, which leaps at him against the moon. A second ash-grey jackal crouches snarling low on the right. In the lower left foreground, well apart from him with open ground between them, a huge white tiger, a big cat as long as a man is tall, with a broad tiger face, thin grey tiger stripes on snow-white fur, heavy paws, gold eyes and a thin red cord around her neck crouches low among the bone stakes, snarling at the jackals. White bone stakes stand in the ground on the left. Exactly one man, one white tiger and two jackals, no birds.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   },
+   {
+    "op": "inpaint",
+    "file": "y3f_jack44_s1",
+    "source": "y3t_jackals_s44",
+    "mask": "y3f_jack44",
+    "seed": 1,
+    "denoise": 0.7,
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, flat white fur with simple bold black tiger stripes, no fine fur texture, no realistic shading. A huge white tiger, a big cat as long as a man is tall, with a broad tiger face, thin grey tiger stripes on snow-white fur, heavy paws, gold eyes and a thin red cord around her neck crouches in a dark forest at night. A thin red cord is tied snugly around her neck, half hidden in her white ruff, nothing hanging from it.",
+    "why": "owner 21:21: the cord became a leash"
+   }
+  ],
+  "lizard_tiger": [
+   {
+    "op": "generate",
+    "file": "y3t_lizard_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A night scene at the edge of firelight in a pine forest: A huge thornback lizard as long as a canoe, with a ridge of hollow spines down its back and one big gold slit eye, crawls toward a small campfire, two pale eggs in a nest beside it. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands up slowly from his blanket, deadpan, with a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck beside him. Exactly one person, one great white cat and one lizard. No women in the picture.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   },
+   {
+    "op": "inpaint",
+    "file": "y3i_lizard44_fix2_s6",
+    "source": "y3t_lizard_s44",
+    "mask": "y3t_liz_fix",
+    "seed": 6,
+    "denoise": 1.0,
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. A dark night forest: tall black tree trunks, hanging ferns and leaves, bare ground with a few small stones. Only trees, ferns and darkness, nothing else.",
+    "why": "owner 20:52: two Jameses"
+   },
+   {
+    "op": "inpaint",
+    "file": "y3f_liz6_s2",
+    "source": "y3i_lizard44_fix2_s6",
+    "mask": "y3f_liz6",
+    "seed": 2,
+    "denoise": 1.0,
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. A dark night forest: black background between a pale hatched tree trunk and a man in a white lab coat. Only darkness, nothing else.",
+    "why": "owner 21:39: a faint outline beside James"
+   }
+  ],
+  "james_tiger": [
+   {
+    "op": "inpaint",
+    "file": "y3i_james2_s7",
+    "source": "james_final",
+    "mask": "y3t_james2",
+    "seed": 7,
+    "denoise": 1.0,
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime scene in a dark misty forest of tall black trunks and ferns. In the middle a man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands with his arms folded, deadpan, his shoulders plain white lab coat. On the left side of the picture a huge white tiger, a big cat as long as a man is tall, with a broad tiger face, thin grey tiger stripes on snow-white fur, heavy paws, gold eyes and a thin red cord around her neck stands on the forest floor beside him, her big striped head level with his chest, looking at the viewer with dry disdain. Exactly one person and one white tiger.",
+    "why": "Y3: the great cat beside him on the approved arrival"
+   },
+   {
+    "op": "inpaint",
+    "file": "y3f_james7_s1",
+    "source": "y3i_james2_s7",
+    "mask": "y3f_james7",
+    "seed": 1,
+    "denoise": 0.8,
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, flat white fur with simple bold black tiger stripes, no fine fur texture, no realistic shading. A daytime scene in a dark misty forest of tall black trunks and ferns. On the left a huge white tiger, a big cat as long as a man is tall, with a broad tiger face, thin grey tiger stripes on snow-white fur, heavy paws, gold eyes and a thin red cord around her neck stands beside a man in a white lab coat. She has two small rounded tiger ears on top of her head, and a thin red cord tied snugly around her neck with a small red knot at her throat. Behind her only dark forest and ferns.",
+    "why": "owner 21:21: the ears and the cord"
+   }
+  ],
+  "jackals_dead_tiger": [
+   {
+    "op": "inpaint",
+    "file": "y3i_jackals_dead2_s7",
+    "source": "jd_dead_s2_d80",
+    "mask": "y3t_jd2",
+    "seed": 7,
+    "denoise": 1.0,
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. The picture shows only animals and no people. A night scene in a forest clearing under a pale moon. Two dead ash-grey jackals lie on their sides on the left and on the right in front. Behind them, standing tall between the dark tree trunks, a huge white tiger, a big cat as long as a man is tall, with a broad tiger face, thin grey tiger stripes on snow-white fur, heavy paws, gold eyes and a thin red cord around her neck looks down at the dead jackals, very pleased with herself. Exactly one white tiger and two dead jackals.",
+    "why": "Y3: the great cat behind the dead jackals on the approved picture"
+   },
+   {
+    "op": "inpaint",
+    "file": "y3f_jdfire_s3",
+    "source": "y3i_jackals_dead2_s7",
+    "mask": "y3f_jdfire",
+    "seed": 3,
+    "denoise": 0.95,
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. A night scene in a forest clearing. A huge white tiger, a big cat as long as a man is tall, with a broad tiger face, thin grey tiger stripes on snow-white fur, heavy paws, gold eyes and a thin red cord around her neck stands on four legs behind two dead jackals, looking down at them, pleased. Her two front paws stand side by side on the bare ground, with a few scattered white bones around them on the ground. No fire.",
+    "why": "owner 21:39: lose the fire"
    }
   ]
  },
@@ -1076,7 +2029,36 @@
    "r3_collectors_down_s99": "collectors_down",
    "r4_hunt_s88": "hunt",
    "r4_romance_s88": "romance",
-   "r5_ridge_s88": "ridge"
+   "y3t_forest_dawn_s44": "forest_dawn_tiger",
+   "y3t_clearing_s44": "clearing_tiger",
+   "y3t_hunt_s44": "hunt_tiger",
+   "y3t_gao_down_s44": "gao_down_tiger",
+   "y3t_herb_slope_s44": "herb_slope_tiger",
+   "y3t_drill_s44": "drill_tiger",
+   "y3t_dinner_s44": "dinner_tiger",
+   "y3t_collectors_s44": "collectors_tiger",
+   "y3t_tribulation_s44": "tribulation_tiger",
+   "y3t_lights_s44": "lights_tiger",
+   "y3t_rain_s44": "rain_tiger",
+   "y3t_crows_s44": "crows_tiger",
+   "y3t_rats_s44": "rats_tiger",
+   "y3t_gift_s44": "gift_tiger",
+   "y3t_mire_s22": "mire_tiger",
+   "y3t_hollow_s22": "hollow_tiger",
+   "y3t_stream_s66": "stream_tiger",
+   "y3t_bone_field_s66": "bone_field_tiger",
+   "y3t_arson_s88": "arson_tiger",
+   "y3i_village44_fix_s2": "village_tiger",
+   "y3f_omni1_s1": "omnitool_tiger",
+   "y3f_jack44_s1": "jackals_tiger",
+   "y3f_liz6_s2": "lizard_tiger",
+   "y3f_james7_s1": "james_tiger",
+   "y3f_jdfire_s3": "jackals_dead_tiger",
+   "y3f_camp_s2": "camp_tiger",
+   "y3f_forage_s2": "forage_tiger",
+   "y3f_wolves_s1": "wolves_tiger",
+   "y3f_roof_s2": "roof_tiger",
+   "y3_ridge_new_s22": "ridge"
   }
  },
  "styles": {
@@ -1093,6 +2075,9 @@
   "wen": "a ninety-year-old village elder with one blind milky eye, a bald head with a tiny white topknot and a thin white beard, wearing a plain grey robe",
   "mother": "a stern sixty-year-old village woman with grey hair in a tight bun, a lined face, a plain dark jacket and an apron",
   "villagers": "thin grey-faced villagers in patched hemp clothes",
-  "pockface": "a huge pock-faced brute with a shaved head and a ragged sleeveless tunic"
+  "pockface": "a huge pock-faced brute with a shaved head and a ragged sleeveless tunic",
+  "yuki_tiger": "a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck",
+  "yuki_tiger2": "huge white tiger, a big cat as long as a man is tall, with a broad tiger face, thin grey tiger stripes on snow-white fur, heavy paws, gold eyes and a thin red cord around her neck",
+  "james_shaggy": "a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers"
  }
 }

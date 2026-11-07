@@ -668,16 +668,20 @@ export const PICTURES = {
     wolves: 'wolves',
 };
 /**
- * v0.11.38 (P-b): the pictures that draw Yuki as the small cat. They show only while she is the cat;
- * in her tiger or human form the scene keeps its code art (which draws her current form) until Y3 adds those versions.
+ * v0.11.38 (P-b): the pictures that draw Yuki. v0.11.49 (Y3, part 1): each has a version per form in YUKI_PIC_FORMS,
+ * named `<file>_<form>` (the cat keeps the plain name); in a form not yet drawn the scene keeps its code art
+ * (which draws her current form). Part 2 adds 'human'. `ridge` left the set in v0.11.49: it shows the landscape
+ * without Yuki in every form (owner 22:36).
  */
-export const YUKI_CAT_ONLY = new Set(['james', 'jackals', 'jackals_dead', 'forest_dawn', 'omnitool', 'clearing', 'stream', 'forage', 'hunt', 'camp', 'gao_down', 'ridge', 'village', 'dinner', 'collectors', 'tribulation', 'lights', 'rain', 'crows', 'rats', 'lizard', 'gift', 'bone_field', 'mire', 'hollow', 'roof', 'arson', 'herb_slope', 'drill', 'wolves']);
+export const YUKI_PIC_FORMS = new Set(['cat', 'tiger']);
+export const YUKI_PICS = new Set(['james', 'jackals', 'jackals_dead', 'forest_dawn', 'omnitool', 'clearing', 'stream', 'forage', 'hunt', 'camp', 'gao_down', 'village', 'dinner', 'collectors', 'tribulation', 'lights', 'rain', 'crows', 'rats', 'lizard', 'gift', 'bone_field', 'mire', 'hollow', 'roof', 'arson', 'herb_slope', 'drill', 'wolves']);
 /** The picture file for an art key in Yuki's current form, or '' when the key has none in that form (code art). */
 export function pictureOf(key, form = C2.getYukiForm()) {
     const p = PICTURES[key];
     if (!p) return '';
-    if (form !== 'cat' && YUKI_CAT_ONLY.has(key)) return '';
-    return `art/pic/${typeof p === 'function' ? p(form) : p}.webp`;
+    const file = typeof p === 'function' ? p(form) : p;
+    if (YUKI_PICS.has(key) && form !== 'cat') return YUKI_PIC_FORMS.has(form) ? `art/pic/${file}_${form}.webp` : '';
+    return `art/pic/${file}.webp`;
 }
 const pictureSvg = (key, id, file) => `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${id.replace(/_/g, ' ')}" preserveAspectRatio="xMidYMid slice" data-pic="${key}"><rect width="400" height="250" fill="#111010"/><image href="${file}" x="0" y="0" width="400" height="250" preserveAspectRatio="xMidYMid slice"/></svg>`;
 

@@ -2,7 +2,7 @@
 // Every id the game refers to exists: task-hub scenes and menus, form ids on story choices, items given or needed,
 // and every data-* marker in the page has code that reads it (a renamed marker once stuck every Selene player).
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
-import { PICTURES, pictureOf, sceneArt, setArtState, YUKI_CAT_ONLY } from '../js/art/art.js';
+import { PICTURES, pictureOf, sceneArt, setArtState, YUKI_PICS, YUKI_PIC_FORMS } from '../js/art/art.js';
 import { SCENES, ITEMS } from '../js/story/prologue.js';
 import { TASK_HUBS } from '../js/story/task_hubs.js';
 import { FORM_LINES } from '../js/core/forms.js';
@@ -109,15 +109,23 @@ assert(!sceneArt('envoy').includes('data-pic') && sceneArt('envoy').startsWith('
         assert(r, `v0.11.38: picture ${file} has a recipe`);
         if (r && /\b(white cat|kitten|yuki)\b/i.test(JSON.stringify(r))) drawsCat.add(key);
     }
-    assert([...drawsCat].sort().join(' ') === [...YUKI_CAT_ONLY].sort().join(' '), `v0.11.38: YUKI_CAT_ONLY is exactly the pictures whose recipe draws the cat (recipes ${drawsCat.size}, list ${YUKI_CAT_ONLY.size})`);
-    assert(YUKI_CAT_ONLY.size === 30, `v0.11.38: 30 pictures draw Yuki as the cat (28 new, james, jackals) (${YUKI_CAT_ONLY.size})`);
+    assert([...drawsCat].sort().join(' ') === [...YUKI_PICS].sort().join(' '), `v0.11.38: YUKI_PICS is exactly the pictures whose recipe draws the cat (recipes ${drawsCat.size}, list ${YUKI_PICS.size})`);
+    assert(YUKI_PICS.size === 29, `v0.11.49: 29 pictures draw Yuki (30 in v0.11.38; ridge is a new landscape without her) (${YUKI_PICS.size})`);
+    assert(!YUKI_PICS.has('ridge') && pictureOf('ridge', 'tiger') === 'art/pic/ridge.webp' && pictureOf('ridge', 'human') === 'art/pic/ridge.webp', 'v0.11.49: ridge shows the landscape without Yuki in every form');
+    // v0.11.49 (Y3, part 1): the great-cat versions; human waits for part 2 (code art there)
+    assert([...YUKI_PIC_FORMS].join(' ') === 'cat tiger', `v0.11.49: Yuki's pictures exist for the cat and the great cat (${[...YUKI_PIC_FORMS]})`);
     for (const key of Object.keys(PICTURES)) {
         if (key.startsWith('yuki_')) continue;
         for (const form of ['tiger', 'human']) {
             setArtState({ yukiForm: form });
             const art = sceneArt(key);
-            if (YUKI_CAT_ONLY.has(key)) {
-                assert(pictureOf(key, form) === '' && !art.includes('data-pic') && !art.includes('art/pic/'), `v0.11.38: with Yuki in ${form} form ${key} keeps its code art`);
+            if (YUKI_PICS.has(key) && YUKI_PIC_FORMS.has(form)) {
+                const f = `${fileOf(key)}_${form}`;
+                assert(pictureOf(key, form) === `art/pic/${f}.webp` && art.includes(`data-pic="${key}"`) && art.includes(`art/pic/${f}.webp`), `v0.11.49: with Yuki in ${form} form ${key} shows ${f}`);
+                const r = recipes[f];
+                assert(r && /great cat|white tiger/i.test(JSON.stringify(r)) && !/small white cat/i.test(r[r.length - 1].prompt || ''), `v0.11.49: ${f} has a recipe whose last step draws the great cat`);
+            } else if (YUKI_PICS.has(key)) {
+                assert(pictureOf(key, form) === '' && !art.includes('data-pic') && !art.includes('art/pic/'), `v0.11.38: with Yuki in ${form} form ${key} keeps its code art (no ${form} picture yet)`);
             } else {
                 assert(pictureOf(key, form) === `art/pic/${fileOf(key)}.webp` && art.includes(`data-pic="${key}"`), `v0.11.38: ${key} (no Yuki) shows its picture in ${form} form too`);
             }
