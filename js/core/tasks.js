@@ -26,12 +26,12 @@ setTimeless(Object.fromEntries(Object.entries(TASK_HUBS).map(([h, cfg]) => [h, [
 
 export const MS_PER_GAME_HOUR = 3000; // 1 game hour = 3 s at ×1 (design.md)
 export const QUEUE_MAX = 30;
-/** Speed gate (3c-3, owner 2026-11-06): ×1 at the start, ×2 after a won tribute (fought, bluff or the hairpin), ×5 after Act 1 ends (any route, `taken` included); ×10 only with the hidden test toggle. Read from the save, so no migration. */
+/** Speed gate (3c-3, owner 2026-11-06): ×1 at the start, ×2 once the tribute has been reached (fought, bluff, the hairpin, or lost: v0.11.31, P3-b), ×5 after Act 1 ends (any route, `taken` included); ×10 only with the hidden test toggle. Read from the save, so no migration. v0.11.31: a gate once open stays open across every rewind (`spd_pro`, `spd_a1` are kept flags, coil.js). */
 export function maxSpeed(g, test = false) {
     if (test) return 10;
     const f = (g && g.flags) || {};
     if (f.spd_a1 || (f.a1_outcome && g.scene === 'a1_end')) return 5;
-    if (f.ending === 'fought' || f.ending === 'bluff' || f.ending === 'paid') return 2;
+    if (f.spd_pro || f.ending === 'fought' || f.ending === 'bluff' || f.ending === 'paid' || f.ending === 'lost') return 2;
     return 1;
 }
 /** The speed that actually runs: the stored one, held down to the gate (0 = paused stays 0). */

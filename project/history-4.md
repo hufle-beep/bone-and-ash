@@ -2,6 +2,14 @@
 
 Started 2026-11-06 (v0.11.22), when `history-3.md` reached about 45 KB. Newer than `history-3.md`, `history-2.md` and `history.md`. Each push moves what is older than the last three versions here from `handover.md`, on top of its section. When this file passes about 45 KB, start `history-5.md`.
 
+## Version note (moved from the handover in v0.11.31)
+
+### v0.11.28 — the leaner check (tools and docs only)
+
+- **tools/check.mjs:** compact output by default (`stepLine`, the flagged lines, a digest per model, the leftover report only with findings), every step's whole output to `LOG`, `--verbose`; the models job `--model careful,completionist,rusher --games 500 --off 300 --off-models careful,completionist` (50 games in quick). **tools/lib/report.mjs** (new): `LOG`, `stepLine`, `flagLines`, `leftoverFound`, `modelDigest` (null on an unreadable report: the whole report prints). **tests/models.test.mjs:** `--off-models`. **tests/tools.test.mjs:** story 100 → 51 games; section 8 (the helpers, the models step's name per mode, `--off-models` on a tiny real models run, the digest on the real report, an unknown model exits 2): 94 → 105 checks. **CLAUDE.md, project/working-agreement.md:** rule 1, the pick is the go (and "after a pick" in rule 2). **tests/README.md**, **tools/timings.json**. **sw.js:** VERSION. No game file changed.
+- **The full check:** exit code 0, 0 drift, 112.9 s (117.6 s before; the models step 29.8 → 16.4 s, the tasks test 5 s slower in that run: noise on 2 cores), output 8.8 → 1.3 KB.
+- **Cold review (Opus, tools only):** nothing serious; four things the old output showed would have been hidden, all fixed: sanity's and the lint's last lines always print (how many numbers were compared; the log-only count); the leftover check's stale keep-list line is a flagged line; the model digest keeps "N gave up" and prints the whole report when a model block is missing (`expect`); Ctrl-C writes the log too. **Noted, not changed:** a failing step prints its last 20 lines (old behaviour), so a sanity failure with many noise-scaled lines can push its DRIFT lines out of view (they are in the log); the tools test's mini models run waits in sync (a little slower, no risk). **After the fixes** (owner 12:42: no full game check when the game doesn't change): the tools test and the quick check, exit 0; the fixes touch only the runner's printing.
+
 ## Version note (moved from the handover in v0.11.29)
 
 ### v0.11.26 — the Coil goes round again; one count

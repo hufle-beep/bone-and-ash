@@ -1035,7 +1035,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     const g = ensureBars(newGame(5, { closed: true }));
     assert(maxSpeed(g) === 1, 'a new game allows ×1');
     for (const e of ['fought', 'bluff', 'paid']) { g.flags.ending = e; assert(maxSpeed(g) === 2, `a won tribute (${e}) opens ×2`); }
-    g.flags.ending = 'lost'; assert(maxSpeed(g) === 1, 'a lost tribute stays ×1');
+    g.flags.ending = 'lost'; assert(maxSpeed(g) === 2, 'a lost tribute opens ×2 too (v0.11.31, P3-b)');
     assert(maxSpeed(g, true) === 10, 'test speeds open ×10');
     g.flags.ending = 'fought';
     assert(effectiveSpeed(g, 5) === 2 && effectiveSpeed(g, 0) === 0 && effectiveSpeed(g, 1) === 1 && effectiveSpeed(g, 10, true) === 10, 'a stored ×5 runs at the gate; pause stays pause');
@@ -1046,6 +1046,27 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     }
     const old = ensureBars(newGame(7)); Object.assign(old.flags, { ending: 'paid', a1_outcome: 'accord' }); old.scene = 'a1_end';
     assert(maxSpeed(old) === 5, 'an old save already at the end of Act 1 has ×5');
+}
+// v0.11.31 (P3-b): an open speed gate stays open across every rewind
+{
+    const p = ensureBars(newGame(8, { closed: true }));
+    assert(!KEEP_FLAGS.includes('ending') && KEEP_FLAGS.includes('spd_pro') && KEEP_FLAGS.includes('spd_a1'), 'gates: the gate flags are kept, the tribute outcome is not');
+    goTo(p, SCENES, 'collectors_lost');
+    assert(p.flags.ending === 'lost' && maxSpeed(p) === 2, 'gates: a lost tribute opens ×2');
+    endCoil(p, 'tribute', 'collectors_lost'); rewind(p);
+    assert(!p.flags.ending && p.flags.spd_pro === true && maxSpeed(p) === 2, 'gates: rewinding a lost tribute keeps ×2');
+    rewind(p);
+    assert(p.flags.spd_pro === true && maxSpeed(p) === 2, 'gates: ×2 survives a second rewind');
+    const q = ensureBars(newGame(9, { closed: true }));
+    endCoil(q, 'choice'); rewind(q);
+    assert(!q.flags.spd_pro && maxSpeed(q) === 1, 'gates: a rewind before the tribute stays ×1');
+    for (const to of ['act', 'game']) {
+        const h = ensureBars(newGame(10)); Object.assign(h.flags, { ending: 'bluff' }); startActCoil(h);
+        h.flags.a1_outcome = 'victory'; goTo(h, SCENES, 'a1_end');
+        rewind(h, { to });
+        assert(h.flags.spd_a1 === true && maxSpeed(h) === 5, `gates: ×5 survives the rewind to the start of ${to === 'act' ? 'Act 1' : 'the whole game'}`);
+        assert(to === 'act' ? h.flags.ending === 'bluff' : (!h.flags.ending && h.scene !== 'a1_end' && (h.coil.act || 0) === 0), `gates: the ${to} rewind otherwise resets as before`);
+    }
 }
 const pctOf = (o, n) => Object.entries(o).sort().map(([k, v]) => `${k} ${((v / n) * 100).toFixed(1)}%`).join(', ');
 console.log(`  tribute, tasks:   ${pctOf(stats.tasks.endings, stats.tasks.games)}`);

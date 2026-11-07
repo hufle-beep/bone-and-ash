@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.30 | (this push) | Docs only (the priority points); the game is the same as 0.11.29. |
+| 0.11.31 | (this push) | P3-b, the speed gates kept across rewinds. Same save state as 0.11.26 plus the optional kept flag `spd_pro` (an older version ignores it). |
+| 0.11.30 | `5154270` | Docs only (the priority points); the game is the same as 0.11.29. |
 | 0.11.29 | `4cd2c20` | The rebalance RB-1 (tribute and rot ape harder, the Coil bonus 0.25 per Coil); the baseline updated. Same save state as 0.11.26; a save on Coil n keeps its XP, its bonus is ×(1 + 0.25(n−1)) from now on. |
 | 0.11.28 | `a53abb7` | The leaner check (compact output, a leaner models step, rule 1: the pick is the go). Tests, tools and docs only; the game is the same as 0.11.26; same save state. |
 | 0.11.27 | `16f59e2` | The bot models (tests and tools only). The game is the same as 0.11.26; same save state. |
