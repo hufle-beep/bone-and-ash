@@ -1,8 +1,9 @@
 // Run: node tests/tools.test.mjs — the test tools themselves (v0.11.21).
-// tests/lib/shard.mjs: mergeInto's rules, seedOf, and that 1 worker gives the same bot stats as 2 (story 100 games,
+// tests/lib/shard.mjs: mergeInto's rules, seedOf, and that 1 worker gives the same bot stats as 2 (story 51 games since v0.11.28,
 // tasks 51 games with --bots-only: the fewest that still get 2 workers, since shard.mjs allows one worker per 50 games).
 // tools/lib/noise.mjs: the noise-scaled drift band of tools/sanity.mjs (log only).
 // tools/check.mjs: its job list (--list, both modes) and tools/lib/jobs.mjs's validateJobs on a broken list.
+// v0.11.28: tools/lib/report.mjs (the compact output) and the models step's --off-models, on a tiny real models run.
 // v0.11.22: tools/leftovers.mjs on small made-up inputs (every kind found, kept entries skipped) and tests/lib/seen.mjs's watch.
 import { spawn, execFileSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -14,6 +15,7 @@ import { validateJobs } from '../tools/lib/jobs.mjs';
 import { noise, band, flagged, K, MIN } from '../tools/lib/noise.mjs';
 import { strip, scanFunctions, scanFlags, flagFindings, scanCss, scanMarkers, scanStorage, scanFiles, applyKeep, loadKeep, KINDS, strictFailures, STRICT_KINDS } from '../tools/leftovers.mjs'; // v0.11.22; strict v0.11.23
 import { seen as touched, track, noteView, seenOut } from './lib/seen.mjs'; // v0.11.22
+import { stepLine, flagLines, leftoverFound, modelDigest } from '../tools/lib/report.mjs'; // v0.11.28
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 let pass = 0, fail = 0;
@@ -23,7 +25,8 @@ const t0 = Date.now();
 // start the bot runs first (they take the time); the quick checks below run while they play
 const TMP = mkdtempSync(path.join(tmpdir(), 'boneash-tools-'));
 // v0.11.21: the tasks runs play their games with --bots-only (no rule checks): that was 20 s of the full check, for nothing this compares
-const RUNS = [['story', 'tests/story.test.mjs', 100, []], ['tasks', 'tests/tasks.test.mjs', 51, ['--bots-only']]];
+const RUNS = [['story', 'tests/story.test.mjs', 51, []], // v0.11.28 (owner pick S2): 100 → 51, the fewest that still get 2 workers
+    ['tasks', 'tests/tasks.test.mjs', 51, ['--bots-only']]];
 const bot = (file, games, workers, out, extra = []) => new Promise((resolve) => {
     const ch = spawn(process.execPath, [file, ...extra, '--games', String(games), '--workers', String(workers), '--stats-out', out], { cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'] });
     let log = '';
@@ -203,6 +206,30 @@ for (const mode of ['full', 'quick']) {
     assert(out.choices.join() === 'here#0,here#2' && out.flagsRead.join() === [...out.flagsRead].sort().join(), `seen: shown choices (not card rows), sorted output (${out.choices.join()})`);
     for (const s of Object.values(touched)) s.clear();
 }
+// 8. v0.11.28: the full check's compact output (tools/lib/report.mjs) and the models step's Yuki-off list
+{
+    assert(/^ok {2}tasks {10} {2}70\.8 s$/.test(stepLine('tasks', 70.8)) && stepLine('sanity', 0.2, '  (slower: 0.1 s before)').endsWith('(slower: 0.1 s before)'), `stepLine (${stepLine('tasks', 70.8)})`);
+    const out = ['  noise-scaled (log only)  x: 50% → 58% (band ±3; n 2000 → 2000)', '  noise-scaled drift (log only, 3 × …): 1 would flag', '  DRIFT  y: 10% → 20%', '  NOTE  careful: hungry', 'NOTE not indented', '208 numbers compared'].join('\n');
+    assert(flagLines(out).join('|') === '  noise-scaled (log only)  x: 50% → 58% (band ±3; n 2000 → 2000)|  DRIFT  y: 10% → 20%|  NOTE  careful: hungry', `flagLines keeps the flags, not the summaries (${flagLines(out).join('|')})`);
+    assert(flagLines('  keep-list entries that match nothing now (log only): flags: x').length === 1, 'flagLines keeps the stale keep-list line');
+    assert(leftoverFound('strict: 0 leftovers outside the keep-list (63 kept on purpose); choices log only: 2') && !leftoverFound('strict: 0 leftovers outside the keep-list (63 kept on purpose); choices log only: 0'), 'leftoverFound: only log-only choices count on a pass');
+    assert(modelDigest('no report here') === null && modelDigest('[careful] 5 games, 1 cards\n  prologue: —') === null, 'modelDigest: an unreadable report gives null (the whole report is printed then)');
+    assert(/500 games each/.test(list().jobs?.find((j) => j.key === 'models')?.name ?? '') && /50 games each/.test(list('quick').jobs?.find((j) => j.key === 'models')?.name ?? ''), 'the models step: 500 games each in the full check, 50 in quick (v0.11.28)');
+    // the real report format: a tiny models run, Yuki off only for the listed model
+    let rep = '';
+    try { rep = execFileSync(process.execPath, ['tests/models.test.mjs', '--model', 'careful,rusher', '--games', '4', '--off', '2', '--off-models', 'careful', '--workers', '1'], { cwd: ROOT, encoding: 'utf8' }); } catch (e) { rep = String(e.stdout || e); }
+    const heads = [...rep.matchAll(/^\[([^\]]+)\] (\d+) games/gm)].map((m) => `${m[1]} ${m[2]}`).join();
+    assert(heads === 'careful 4,careful:yukiOff 2,rusher 4', `models --off-models careful: Yuki off only for Careful, no Random (${heads})`);
+    const dg = modelDigest(rep);
+    assert(dg?.length === 3 && dg.every((l) => /prologue C1 dead [\d.]+% · mean Coil ([\d.]+|—) \/ ([\d.]+|—) · whole game C1 [\d.]+%( · \d+ gave up)?$/.test(l)), `modelDigest reads the real report, one line per model (${dg?.join(' | ') ?? 'null'})`);
+    assert(modelDigest(rep, 3)?.length === 3 && modelDigest(rep, 4) === null, 'modelDigest: a missing model block prints the whole report');
+    const gaveUp = modelDigest('[rusher] 9 games, 1 cards (1 forced: a screen with no story exit), 7 gave up after Coil 8\n  prologue: C1 dead 100% (n 9)\n  cleared: prologue 22.2% (mean Coil 7.00) · Act 1 22.2% (mean Coil 7.00) · the whole game on Coil 1 0%');
+    assert(/· 7 gave up$/.test(gaveUp?.[0] ?? ''), `modelDigest keeps the games that gave up (${gaveUp?.[0]})`);
+    let bad = 0;
+    try { execFileSync(process.execPath, ['tests/models.test.mjs', '--games', '1', '--off-models', 'nobody'], { cwd: ROOT, stdio: 'ignore' }); } catch (e) { bad = e.status; }
+    assert(bad === 2, `models --off-models with an unknown model exits 2 (${bad})`);
+}
+
 const canon = (v) => (Array.isArray(v) ? v.map(canon) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, canon(v[k])])) : v);
 const results = await Promise.all(pending);
 for (const [name] of RUNS) {

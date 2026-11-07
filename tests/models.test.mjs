@@ -6,6 +6,7 @@
 //   node tests/models.test.mjs --games 50 --off 0     quick (the models finish their games)
 //   node tests/models.test.mjs --model completionist  one model (careful | completionist | rusher | random)
 //   node tests/models.test.mjs --json FILE            also write the merged numbers as JSON
+//   node tests/models.test.mjs --off-models careful   v0.11.28: only these models play the Yuki-off games (default: all but Random)
 //
 // The models (tests/README.md has the details):
 //   random         the tasks test's bot (tests/tasks.test.mjs): random cards and story choices, half its games fight at
@@ -35,6 +36,9 @@ const PLAY = ONLY === 'all' ? MODELS : ONLY.split(',');
 for (const m of PLAY) if (!MODELS.includes(m)) { console.error(`unknown model ${m} (${MODELS.join(', ')})`); process.exit(2); }
 const JSON_OUT = opt('json', null);
 const OFF = Math.max(0, Number(opt('off', 300)) || 0);
+// v0.11.28: which models also play the Yuki-off games (default: every model played but Random)
+const OFF_MODELS = opt('off-models', 'careful,completionist,rusher').split(',');
+for (const m of OFF_MODELS) if (!MODELS.includes(m)) { console.error(`unknown model ${m} in --off-models (${MODELS.join(', ')})`); process.exit(2); }
 const MAX_COIL = 8;
 const STEPS = 30000;
 
@@ -202,7 +206,7 @@ const all = {};
 const playInto = (st, run, m, yuki) => { st.games++; const r = play(run, m, st, yuki); if (r === 'end') st.finished++; else if (r === 'stuck') st.stuck++; };
 for (const m of PLAY) {
     all[m] = blank();
-    if (m !== 'random' && OFF) all[`${m}:yukiOff`] = blank();
+    if (m !== 'random' && OFF && OFF_MODELS.includes(m)) all[`${m}:yukiOff`] = blank();
     if (kids) continue; // with workers the parent only merges
     for (const run of myRuns()) playInto(all[m], run, m, 'on');
     if (all[`${m}:yukiOff`]) for (const run of myRuns()) if (run < OFF) playInto(all[`${m}:yukiOff`], run, m, 'off');

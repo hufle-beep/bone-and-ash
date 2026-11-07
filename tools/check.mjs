@@ -4,6 +4,9 @@
 //   node tools/check.mjs quick    200 bot games each, no browser or sanity check (about 15 s), while building.
 //   node tools/check.mjs --jobs N run at most N jobs at once (default: the cores + 1; the browser parts mostly wait).
 //   node tools/check.mjs --list [quick]  print the job list (key, name, after, heavy) as JSON, run nothing (v0.11.21).
+//   node tools/check.mjs --verbose  print every step's last line and the full reports, as before v0.11.28.
+// v0.11.28 (owner pick O1): compact output by default, one short line per passing step, the lines a step flags, a digest
+// per bot model; every step's whole output goes to the log file (tools/lib/report.mjs, LOG). Failures print as before.
 // v0.11.21: the job list is checked first (unique keys, every `after` a job of this mode); a stuck queue stops the run;
 // a failure or Ctrl-C kills each job's whole process tree (bot workers, Chromium, http.server). The pool: tools/lib/jobs.mjs.
 // `bash tools/check.sh [quick]` calls this. The first failure stops the rest and prints its output; exit code 1.
@@ -15,11 +18,13 @@ import { tmpdir, availableParallelism, cpus } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { validateJobs, run, runPool, onSignals } from './lib/jobs.mjs'; // v0.11.21
+import { LOG, stepLine, flagLines, leftoverFound, modelDigest } from './lib/report.mjs'; // v0.11.28
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const argv = process.argv.slice(2);
 const QUICK = argv.includes('quick');
 const LIST = argv.includes('--list'); // v0.11.21
+const VERBOSE = argv.includes('--verbose'); // v0.11.28
 const CORES = availableParallelism?.() ?? cpus().length;
 const ji = argv.indexOf('--jobs');
 const JOBS = ji >= 0 ? Math.max(1, Number(argv[ji + 1]) || 1) : CORES + 1;
@@ -39,8 +44,10 @@ const jobs = [
         { name: 'browser part 2 (saves, menu, tooltip, resting places)', key: 'browser2', cmd: ['python3', ['tools/browser.py', '--part', '2']] },
     ]),
     { name: `story (${GAMES} full games${QUICK ? ', quick' : ''})`, key: 'story', cmd: node('tests/story.test.mjs', '--games', String(GAMES), '--stats-out', path.join(ST, 'story.json')), heavy: true },
-    // v0.11.27: the bot models (random, careful, completionist, rusher), log only: the summary per model is printed, nothing compared yet
-    { name: `bot models (${QUICK ? 50 : 1000} games each, log only)`, key: 'models', show: true, cmd: node('tests/models.test.mjs', '--games', QUICK ? '50' : '1000', '--off', QUICK ? '0' : '300'), heavy: true },
+    // v0.11.27: the bot models, log only: the summary per model is printed, nothing compared yet. v0.11.28 (owner pick S1): Random
+    // left out (it is the tasks test's own bot, in the drift baseline; `--model random` on demand), 500 games each, Yuki off
+    // (300 games) only for Careful and Completionist (the Rusher dies at the jackals either way)
+    { name: `bot models (${QUICK ? 50 : 500} games each, log only)`, key: 'models', show: 'models', blocks: QUICK ? 3 : 5, cmd: node('tests/models.test.mjs', '--model', 'careful,completionist,rusher', '--games', QUICK ? '50' : '500', '--off', QUICK ? '0' : '300', '--off-models', 'careful,completionist'), heavy: true },
     { name: 'syntax', key: 'syntax', fn: syntax },
     { name: 'consistency (offline files, versions)', key: 'consistency', cmd: node('tools/consistency.mjs') },
     { name: 'engine numbers', key: 'rules', cmd: node('tests/rules.test.mjs') },
@@ -48,17 +55,17 @@ const jobs = [
     { name: 'old saves (saves/)', key: 'saves', cmd: node('tests/saves.test.mjs') },
     { name: 'data integrity (ids, markers)', key: 'data', cmd: node('tests/data.test.mjs') },
     { name: 'picture palette (art/pic)', key: 'palette', cmd: ['python3', ['-I', 'tools/art/palette_check.py']] }, // v0.11.24
-    { name: 'content lint (old names, duplicate labels)', key: 'lint', cmd: node('tools/lint.mjs') }, // v0.11.21: those two strict
+    { name: 'content lint (old names, duplicate labels)', key: 'lint', last: true, cmd: node('tools/lint.mjs') }, // v0.11.21: those two strict
     { name: 'test tools (shard merge, 1 = 2 workers, job list)', key: 'tools', cmd: node('tests/tools.test.mjs') }, // v0.11.21
     ...['fallout', 'blackroot', 'heart', 'return'].map((p) => ({ name: `Act 1 part: ${p}`, key: `part:${p}`, cmd: node('tests/part.test.mjs', p) })),
     // v0.11.22: the leftover check (strict since v0.11.23, choices log only). Full runs add what the bot games touched: the story test watches its flags and items
     // itself; the tasks games get a separate small watched run (a Proxy slows every game in its process, so not in the big test).
-    ...(QUICK ? [{ name: 'leftovers (strict, static scan)', key: 'leftovers', show: true, cmd: node('tools/leftovers.mjs', '--strict') }] : [
+    ...(QUICK ? [{ name: 'leftovers (strict, static scan)', key: 'leftovers', show: 'leftovers', cmd: node('tools/leftovers.mjs', '--strict') }] : [
         { name: 'watched bot games (300 each way, flags, items)', key: 'track', cmd: node('tests/tasks.test.mjs', '--bots-only', '--track', '--games', '300', '--workers', '1', '--stats-out', path.join(ST, 'track.json')), after: ['tasks'] },
         { name: 'watched story games (300 and the walks)', key: 'track-story', cmd: node('tests/story.test.mjs', '--track', '--games', '300', '--workers', '1', '--stats-out', path.join(ST, 'track-story.json')), after: ['tasks'] },
-        { name: 'leftovers (strict; choices log only)', key: 'leftovers', show: true, cmd: node('tools/leftovers.mjs', '--strict', '--seen', ...['story', 'tasks', 'track', 'track-story'].map((k) => path.join(ST, `${k}.json`))), after: ['tasks', 'story', 'track', 'track-story'] },
+        { name: 'leftovers (strict; choices log only)', key: 'leftovers', show: 'leftovers', cmd: node('tools/leftovers.mjs', '--strict', '--seen', ...['story', 'tasks', 'track', 'track-story'].map((k) => path.join(ST, `${k}.json`))), after: ['tasks', 'story', 'track', 'track-story'] },
     ]),
-    ...(QUICK ? [] : [{ name: 'sanity (invariants, drift ±5)', key: 'sanity', cmd: node('tools/sanity.mjs', '--tasks', path.join(ST, 'tasks.json'), '--story', path.join(ST, 'story.json')), after: ['tasks', 'story'] }]),
+    ...(QUICK ? [] : [{ name: 'sanity (invariants, drift ±5)', key: 'sanity', last: true, cmd: node('tools/sanity.mjs', '--tasks', path.join(ST, 'tasks.json'), '--story', path.join(ST, 'story.json')), after: ['tasks', 'story'] }]),
 ];
 
 /** Every .js / .mjs file must parse (node --check), a few at a time. */
@@ -72,6 +79,17 @@ async function syntax() {
 }
 
 const last = (out) => out.trim().split('\n').pop() || '';
+const body = (out) => out.trim().split('\n').slice(0, -1).join('\n');
+const log = []; // v0.11.28: every step's whole output, written to LOG at the end
+const writeLog = () => { try { writeFileSync(LOG, log.join('\n')); } catch { /* the log is a convenience */ } };
+/** v0.11.28: what a passing step prints in the compact output (besides its ok line). */
+function compact(j, out) {
+    const lines = flagLines(out);
+    if (j.last) lines.push(`  ${last(out)}`); // sanity: how many numbers it compared; lint: the log-only count
+    if (j.show === 'models') lines.push(...(modelDigest(out, j.blocks) ?? [body(out)]));
+    if (j.show === 'leftovers' && leftoverFound(out)) lines.push(body(out), `  ${last(out)}`);
+    return lines;
+}
 const old = existsSync(TIMINGS) ? JSON.parse(readFileSync(TIMINGS, 'utf8')) : null;
 const t0 = Date.now();
 const times = {};
@@ -84,7 +102,7 @@ if (problems.length) {
     process.exit(1);
 }
 if (LIST) { console.log(JSON.stringify(jobs.map((j) => ({ key: j.key, name: j.name, after: j.after || [], heavy: !!j.heavy })), null, 2)); process.exit(0); }
-onSignals(() => rmSync(ST, { recursive: true, force: true })); // v0.11.21: Ctrl-C kills the job trees too
+onSignals(() => { rmSync(ST, { recursive: true, force: true }); log.push('== stopped (Ctrl-C)'); writeLog(); }); // v0.11.21: Ctrl-C kills the job trees too; v0.11.28: and writes the log
 
 const { failed, stuck } = await runPool(jobs, {
     limit: JOBS, cwd: ROOT,
@@ -92,9 +110,13 @@ const { failed, stuck } = await runPool(jobs, {
         times[j.key] = Math.round(s * 10) / 10;
         const was = old?.steps?.[j.key];
         const slow = !QUICK && was && s > MIN_WARN_S && s > was * SLOWER ? `  (slower: ${was} s before)` : '';
-        if (!first) {
+        log.push(`== ${j.name} (${first ? 'FAILED' : 'ok'}, ${times[j.key]} s)`, r.out.trim(), '');
+        if (!first && VERBOSE) {
             console.log(`${j.name.padEnd(56)}ok  ${String(times[j.key]).padStart(5)} s  ${last(r.out)}${slow}`);
-            if (j.show) console.log(r.out.trim().split('\n').slice(0, -1).join('\n')); // v0.11.22: the leftover report in full
+            if (j.show) console.log(body(r.out)); // v0.11.22: the leftover report in full
+        } else if (!first) {
+            console.log(stepLine(j.key, times[j.key], slow));
+            for (const l of compact(j, r.out)) console.log(l);
         } else {
             console.log(`${j.name.padEnd(56)}FAILED  (${times[j.key]} s)`);
             console.log(r.out.trim().split('\n').slice(-20).join('\n'));
@@ -103,13 +125,14 @@ const { failed, stuck } = await runPool(jobs, {
 });
 
 rmSync(ST, { recursive: true, force: true });
+writeLog();
 const total = Math.round((Date.now() - t0) / 100) / 10;
-if (failed) { console.log(`\nStopped at the first failure (${total} s).`); process.exit(1); }
+if (failed) { console.log(`\nStopped at the first failure (${total} s). Full output: ${LOG}`); process.exit(1); }
 if (stuck.length) { // v0.11.21: should not happen after validateJobs; never end without a verdict
     console.log(`\nStuck: these jobs could never start (${total} s):\n${stuck.map((j) => `  - ${j.key} (after: ${(j.after || []).join(', ') || 'nothing'})`).join('\n')}`);
     process.exit(1);
 }
 if (!QUICK) {
     writeFileSync(TIMINGS, JSON.stringify({ note: 'Written by every full check (tools/check.mjs); committed with each push.', when: new Date().toISOString(), cores: CORES, jobs: JOBS, total, steps: times }, null, 2) + '\n');
-    console.log(`All checks passed in ${total} s (${JOBS} jobs on ${CORES} cores${old ? `; last stored run ${old.total} s` : ''}).`);
-} else console.log(`All quick checks passed in ${total} s (not enough for a push: run bash tools/check.sh).`);
+    console.log(`All checks passed in ${total} s (${JOBS} jobs on ${CORES} cores${old ? `; last stored run ${old.total} s` : ''}). Full output: ${LOG}`);
+} else console.log(`All quick checks passed in ${total} s (not enough for a push: run bash tools/check.sh). Full output: ${LOG}`);
