@@ -2,6 +2,27 @@
 
 Started 2026-11-07 (v0.11.45), when `history-6.md` reached about 45 KB. Newer than `history-6.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.53 (word for word)
+
+### From "Decided in chat (2026-11-07)"
+
+- **v0.11.50: Y3 part 2a, the human form (owner 23:01 the session's start; options P1 / P2 / P3; 23:05 "take into account the character pictures picked that are in the game… the hybrid CLAMP/Monogatari style with heavier emphasis on CLAMP"; options D1–D3, S1 / S2; 23:08 "go with your picks" = D1 + S1 + P2; "when all the pictures are done for both acts we can uniformize"):**
+  - **Picked:** P2 (two pushes: 2a the 15 scenes with only James and Yuki, 2b the 14 harder ones); S1 (the CLAMP-heavier style **pc** for the human pictures only; their cat and tiger versions keep their style); D1 (the scenes' qipao, and the portrait repainted in it). Each push starts with a test sheet.
+  - **The test sheet (forage, camp):** owner 23:19 "s44 looks great for a baseline. the choker can be lost then… reword the description if necessary" (K1: the high collar hid the choker; a low-collar wording and a throat inpaint both failed): cast `yuki_human` without the choker (the story text never mentions it).
+  - **The pictures (owner 23:37):** s44 for all 13 others; bone_field: "she is ginormous… rationalize her height and size": painting her out brought in a stray woman, painting her in small cut her off; a new picture with the two side by side, owner pick s66 (23:46). The portrait: "the sleeveless ones' body shape and how she is holding herself look better… use y3h_portrait_s2_d85 and draw long sleeves on it": three inpaints melted the sleeves into the dress; the arms recoloured in code (`tools/art/sleeves.py`); 23:46 "the sleeve fades to white, it should cover the whole arm": the limits widened to the bottom of the frame.
+  - **After the cold review (owner 23:56 "F2 and add the second round mentioned in F3 before the final uniformization of the art"; options F1 / F2 / F3):** hunt redone side by side (crouching redos still drew her too big), owner pick s22 (23:59); rain kept ("the rain smudged her mascara"); `sleeves.py` stops on a seed off the arm. **Before the final uniformization pass (the F3 second round):** the tails of mire (thin, black), rats (mostly black) and forest_dawn (a loop not joined to her), and gift (her legs merge with James's; the red piping in a V on the ground), as small inpaints.
+  - **Noted for later (23:22–23:29):** the ridge redrawn from the owner's find as the last art pass; one hub format for the whole game; no repeated texts all over the game (Open items).
+  - **Code:** `js/art/art.js`: `YUKI_PIC_FORMS` {cat, tiger, human} and `YUKI_HUMAN_PICS` (the 15 keys); `pictureOf` shows `<file>_human` only for those; `tools/art/recipes.json` style `pc`, cast `yuki_human`, the 15 `<key>_human` recipes, the portrait's inpaint and local step, the mask `y3h_portrait_dress`; `tools/art/sleeves.py` (new).
+  - **Checks:** see the version note.
+  - **Uploaded by Claude after v0.11.49 (owner, before this chat):** handover, roadmap, changelog, restore points, `reference.md`, `history-7.md`.
+
+### From "Version notes"
+
+### v0.11.50 — Y3 part 2a: the human form (15 pictures) and the portrait in the qipao
+
+- **art/pic:** 15 new `<key>_human.webp` (about 1.25 MB); `yuki_human.webp` replaced (the qipao with long sleeves). **js/art/art.js** (`YUKI_PIC_FORMS` with human, `YUKI_HUMAN_PICS`), **sw.js** (ART fingerprints, VERSION), **tests/data.test.mjs** (the v0.11.50 lines: the forms are cat, tiger, human; the 15 keys show `<file>_human` with a recipe that draws her human form and no cat; the other 14 keep code art in human form), **tools/art/recipes.json, sleeves.py (new), README.md; tests/README.md; project/reference.md, roadmap.md, changelog.md, restore-points.md, history-7.md** (v0.11.47 moved).
+- **Checks:** the full `bash tools/check.sh`: exit 0, 0 drifted, 1 log-only move (tribute C6 won 60.2 → 53.6%, n 110, as in v0.11.48 and v0.11.49); the models unchanged (Careful 2.29 / 3.87, Completionist 2.12 / 2.94); the baseline kept; the palette check 94 pictures, 0 failed. Every recorded prompt checked against what ComfyUI ran (SHA-256 of the prompt text from its history); the masks and the sleeves step rebuild the files byte for byte. Cold review on Opus (art): the code, files, fingerprints and recipes correct (`pictureOf` for all 29 keys in every form, `yuki_close` and `ridge` unchanged, no id changed; 16 pictures 800×500, 53–103 KB, 0% other colour, gold only in the portrait's eyes); its picture findings: hunt (medium, fixed: redone), rain's streak (kept, owner), the three tails and gift's legs (low, the second round, above); `sleeves.py`'s seed guard (low, fixed); the code art's choker (low, Open items). The full check rerun after the hunt redo and the VERSION bump: exit 0, 0 drifted, the same log-only move, models unchanged.
+
 ## Moved from the handover in v0.11.52 (word for word)
 
 ### From "Decided in chat (2026-11-07)"
