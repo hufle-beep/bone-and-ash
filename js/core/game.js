@@ -97,14 +97,15 @@ export function coilStart(g) {
 export function makeCoil(g, act = 0) {
     const peak = {};
     for (const [who, r] of Object.entries(g.rel || {})) peak[who] = { f: r.f, a: r.a };
-    return { act, n: 1, snap: coilSnap(g), start: coilStart(g), peak, played: {}, replay: null, why: null, back: null, known: [], skipEnter: false };
+    return { act, n: 1, snap: coilSnap(g), start: coilStart(g), peak, why: null, back: null, known: [], skipEnter: false, one: true }; // v0.11.26: one count per save (`one`), no "same days again"
 }
 /** Act 1 begins (v0.9.6): a new Coil whose rewind point is this moment (Day 8 dawn, the prologue's outcome kept). */
 export function startActCoil(g, act = 1) {
     const old = g.coil;
     g.coil = makeCoil(g, act);
     g.coil.wake = g.scene;
-    if (old) { g.coil.known = [...(old.known || [])]; g.stats[`coils${old.act || 0}`] = old.n; if (old.best) g.coil.best = JSON.parse(JSON.stringify(old.best)); } // v0.11.16: best-ever relationships carry into Act 1
+    if (old) { g.coil.n = old.n || 1; g.coil.known = [...(old.known || [])]; g.stats[`coils${old.act || 0}`] = old.n; // v0.11.26 (owner 11:12, N1): crossing into Act 1 continues the Coil (one count per save)
+        if (old.best) g.coil.best = JSON.parse(JSON.stringify(old.best)); } // v0.11.16: best-ever relationships carry into Act 1
 }
 /** Is a state in Act 1? (Act 1 starts on Day 8 06:00, after the tribute's outcome and the epilogue.) */
 export const inAct1 = (g) => !!g.flags?.ending && g.scene !== 'epilogue' && g.minutes >= 7 * 1440 + 6 * 60;
@@ -921,8 +922,20 @@ export function migrate(g) {
     if (g.v === undefined) g.v = 1;
     if (g.v > SAVE_VERSION) throw new SaveError('tooNew', `This save is from a newer version of the game (state ${g.v}; this version reads up to ${SAVE_VERSION}).`);
     while (g.v < SAVE_VERSION) { const step = MIGRATIONS[g.v]; if (!step) throw new SaveError('notSave', `No migration from state ${g.v}.`); step(g); g.v += 1; }
+    return oneCount(g);
+}
+/**
+ * One Coil count per save (v0.11.26, owner 11:12). A save from before counted Act 1's Coils from 1: its count becomes the
+ * prologue's Coils (stats.coils0) + Act 1's − 1. Marks the Coil (one: true) so this runs once. Called after migrate().
+ */
+export function oneCount(g) {
+    const c = g?.coil;
+    if (!c || c.one) return g;
+    if ((c.act || 0) === 1) c.n = Math.max(1, (g.stats?.coils0 || 1) + (c.n || 1) - 1);
+    c.one = true;
     return g;
 }
+
 
 export function serialize(g) {
     const bad = badNums(g);
@@ -946,7 +959,7 @@ export function unwrapSave(text, { force = false } = {}) {
 
 /** A short description of a save without loading it ("<scene id>|<minutes>"), or null. */
 export function peekSave(text) {
-    try { const s = JSON.parse(unwrapSave(text, { force: true })); return s && s.scene ? { scene: s.scene, minutes: s.minutes, coil: s.coil?.n || 0, act: s.coil?.act || 0 } : null; } catch { return null; } // v0.11.13: with the Coil, for the save lists
+    try { const s = JSON.parse(unwrapSave(text, { force: true })); return s && s.scene ? { scene: s.scene, minutes: s.minutes, coil: (s.coil ? oneCount(JSON.parse(JSON.stringify(s))).coil.n : 0), act: s.coil?.act || 0 } : null; /* v0.11.26: the one count, as it loads */ } catch { return null; } // v0.11.13: with the Coil, for the save lists
 }
 
 export function deserialize(text, { force = false } = {}) {

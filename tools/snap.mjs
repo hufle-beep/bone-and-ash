@@ -8,7 +8,6 @@ import { newGame, ensureBars, startCombat, combatStep, COMBAT_ACTIONS, setNoDice
 import { INC_ONLY_ACTIONS, actionOpen } from '../js/core/forms.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
 import { isTaskHub, isTaskChoice, taskCards, taskOpen, runTask, taskQueue } from '../js/core/tasks.js';
-import { coilPrefill } from '../js/core/coil.js';
 
 const version = (readFileSync('sw.js', 'utf8').match(/bone-ash-([\d.]+)/) || [])[1];
 let rs = 1;
@@ -40,7 +39,6 @@ function playTo(point, seed) {
         const v = sceneView(g, SCENES);
         if (v.end) return null;
         if (isTaskHub(g)) {
-            coilPrefill(g);
             const cards = taskCards(g, SCENES).filter((c) => c.status === 'open');
             const stops = v.choices.filter((c) => !c.disabled && (c.index >= 1000 || !isTaskChoice(SCENES, g.scene, c.index)));
             if (cards.length && (rnd(10) < 8 || !stops.length)) {

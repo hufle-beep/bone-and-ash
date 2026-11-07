@@ -4,15 +4,17 @@
  * v0.11.0 (owner 2026-11-06): James's and Yuki's realm, Saturation, skills and meridians start over with the act (the
  * snapshot's values); the Coil bonus (game.js coilMult, ×(1 + 0.5 × earlier Coils of this act)) makes them come back faster.
  * A Coil ends on a collapse (HP 0 during tasks), a lost tribute (accept or rewind) or by choice ("Bite the tail").
- * Rewind: back to the snapshot (Day 1 dawn for a new game; an old save as it was loaded).
+ * Rewind: back to the snapshot (Day 1 dawn for a new game; an old save as it was loaded). v0.11.26 (owner 11:07): from Act 1
+ * also to the start of the whole game (Day 1, the arrival, a fresh start); "same days again" is gone. One Coil count per save
+ * (owner 11:12): crossing into Act 1 continues the Coil, every rewind adds 1, and the bonus follows it (pick N1).
  *   Kept: familiarity, adaptation, Yuki's lane on/off, Yuki's relationship and path,
  *         the knowledge flags (KEEP_FLAGS), the journal and stats.
- *   Reset: James and Yuki (to the snapshot), hammerspace, every other flag, bars (full), Fed, the queue (unless "same days again").
+ *   Reset: James and Yuki (to the snapshot), hammerspace, every other flag, bars (full), Fed, the queue.
  *   Relationships other than Yuki: max(snapshot value, 25% of the last Coil's peak), friendship and affection apart.
  * Pure — no DOM.
  */
-import { coilStart, ensureBars, clockParts, SAVE_VERSION, isNoDice } from './game.js';
-import { famTier, FAM, QUEUE_MAX } from './tasks.js';
+import { coilStart, coilSnap, ensureBars, SAVE_VERSION, isNoDice, newGame } from './game.js';
+import { famTier, FAM } from './tasks.js';
 
 /** What James knows and keeps (plus Yuki's own flags and the Long Forest run, so that run stays scaled). */
 export const KEEP_FLAGS = ['lore1', 'lore_realms', 'lore_tree', 'saw_lights', 'yuki_tiger_seen', 'yuki_human_seen', 'yk_path', 'long', 'longforest', 'lf_instant'];
@@ -31,7 +33,7 @@ const coil = (g) => g.coil;
  */
 export const coilActive = (g) => {
     if (!isNoDice() || !g.coil || g.combat || String(g.scene).startsWith('coil_')) return false;
-    if ((g.coil.act || 0) === 1) return (!g.flags.a1_outcome || g.flags.a1_outcome === 'taken') && g.scene !== 'a1_end';
+    if ((g.coil.act || 0) === 1) return !g.flags.a1_outcome || g.flags.a1_outcome === 'taken' || g.scene === 'a1_end'; // v0.11.26: and the act's end, every outcome
     return (!g.flags.ending || g.flags.ending === 'lost') && !g.scene.startsWith('fo_') && g.scene !== 'epilogue';
 };
 export const actOf = (g) => g.coil?.act || 0;
@@ -45,27 +47,6 @@ export function endCoil(g, why, back = null) {
     for (const f of Object.keys(REMEMBER)) if (g.flags[f] && !c.known.includes(f)) c.known.push(f);
     for (const f of Object.keys(KNOW_TEXT)) if (g.flags[f] && !c.known.includes(f)) c.known.push(f);
 }
-
-/** Record a card that ran (for "same days again"): per hub and day, in order. */
-export function recordCard(g, hubId, minutes, id) {
-    const c = coil(g);
-    if (!c) return;
-    const key = `${hubId}@${clockParts(minutes).day}`;
-    const list = c.played[key] || (c.played[key] = []);
-    if (list.length < QUEUE_MAX) list.push(id);
-}
-/** On a task hub with an empty queue: put back what the last Coil ran here on this day. True if it did. */
-export function coilPrefill(g) {
-    const c = coil(g);
-    if (!c?.replay || g.tasks.queue.length) return false;
-    const key = `${g.scene}@${clockParts(g.minutes).day}`;
-    const ids = c.replay[key];
-    if (!ids) return false;
-    delete c.replay[key];
-    g.tasks.queue.push(...ids.slice(0, QUEUE_MAX));
-    return true;
-}
-export const hasPlayed = (g) => !!g.coil && Object.keys(g.coil.played).length > 0;
 
 /** What this Coil gained and what James remembers (the Coil screen). */
 export function coilReport(g) {
@@ -86,12 +67,14 @@ export function coilReport(g) {
 }
 
 /**
- * Rewind to the snapshot, in place. same: the next Coil re-queues the cards this one ran (per hub and day).
- * Returns the new Coil number.
+ * Rewind, in place. to: 'act' (the snapshot: the act's first dawn) or 'game' (v0.11.26, from Act 1: a fresh start at the
+ * arrival, Day 1, the prologue's Coil). Returns the new Coil number (one count per save).
  */
-export function rewind(g, { same = false } = {}) {
+export function rewind(g, { to = 'act' } = {}) {
     const c = coil(g);
-    const base = clone(c.snap);
+    const whole = to === 'game' && (c.act || 0) === 1;
+    const fresh = whole ? coilSnap(newGame(g.seed, { closed: true })) : null; // the arrival as a new game has it
+    const base = clone(whole ? fresh : c.snap);
     const kept = {};
     for (const f of KEEP_FLAGS) if (g.flags[f] !== undefined) kept[f] = g.flags[f];
     base.v = SAVE_VERSION;
@@ -116,12 +99,14 @@ export function rewind(g, { same = false } = {}) {
     const n = c.n + 1;
     const peak = {};
     for (const [who, r] of Object.entries(base.rel)) peak[who] = { f: r.f, a: r.a };
-    base.coil = { ...c, n, snap: c.snap, wake: base.scene, peak, played: {}, replay: same ? clone(c.played) : null, why: null, back: null, skipEnter: false };
+    base.coil = { ...c, n, act: whole ? 0 : (c.act || 0), snap: whole ? fresh : c.snap, wake: base.scene, peak, why: null, back: null, skipEnter: false, one: true };
+    delete base.coil.played; delete base.coil.replay; // v0.11.26: "same days again" is gone (older saves keep the fields; nothing reads them)
     for (const k of Object.keys(g)) delete g[k];
     Object.assign(g, base);
     ensureBars(g);
     g.coil.start = coilStart(g);
-    g.log.push({ at: g.minutes, scene: g.scene, lines: [`${(g.coil.act || 0) === 1 ? 'Act 1, ' : ''}Coil ${n} begins.${unwound ? ' Foundation unwound: Mortal Vessel again, the collaterals open to you.' : ''}`] });
+    g.log.push({ at: g.minutes, scene: g.scene, lines: [`${(g.coil.act || 0) === 1 ? 'Act 1, ' : whole ? 'The whole game again. ' : ''}Coil ${n} begins.${unwound ? ' Foundation unwound: Mortal Vessel again, the collaterals open to you.' : ''}`] });
     g.coil.unwound = unwound;
     return n;
 }
+

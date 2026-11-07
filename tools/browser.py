@@ -199,6 +199,22 @@ def rest_places(pg, url):
     if len(pg.query_selector_all('ol.queue li')) != n0 + 1: fails.append('the stream: + on a Meditate card added no queue row')
     else: notes.append('Meditate only on resting places, + queues there')
     check_text(pg, 'resting place', strict=True)
+    # v0.11.26: the owner's 11:02 save (the end of Act 1 after "taken") goes round again: Go round again… → the start of Act 1
+    import gzip, base64
+    raw = (ROOT / 'saves/2026-11-07-1102-incremental-a1_end.txt').read_text().strip()
+    s2 = gzip.decompress(base64.b64decode(raw[5:])).decode()
+    fresh(pg, url, "s => { localStorage.clear(); localStorage.setItem('boneash.auto', s); localStorage.setItem('boneash.speed','1'); }", s2)
+    again = pg.query_selector('button.card.story:has-text("Go round again")')
+    if not again: fails.append('the end of Act 1: no "Go round again…" (v0.11.26)'); return
+    tap(pg, again)
+    until(pg, "() => /Go Round Again/i.test(document.querySelector('.title')?.innerText || '')", 3000)
+    bite = pg.query_selector('button.card.story:has-text("start of Act 1")')
+    whole = pg.query_selector('button.card.story:has-text("start of the whole game")')
+    if not bite or not whole: fails.append('Go round again: the two Bite choices are missing'); return
+    tap(pg, bite); until(pg, "() => /Ashfall, Again/.test(document.body.innerText)", 3000)
+    if 'Ashfall, Again' not in pg.evaluate('document.body.innerText'): fails.append('Go round again → the start of Act 1 did not show "Ashfall, Again"')
+    else: notes.append('the end of Act 1 goes round again (the owner\'s save → the start of Act 1)')
+    check_text(pg, 'going round again', strict=True)
 
 def saves(pg, url):
     lf = (ROOT / 'saves/v0.11.7-long-forest-coil2.json').read_text()

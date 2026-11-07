@@ -8,7 +8,7 @@ import {
 import { sceneView, choose, goTo, gives } from './core/story.js';
 import { isTaskHub, isQueueScreen, runsHere, isTaskChoice, taskCards, taskOpen, taskLabel, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, waitChoice, taskMinutes, runTask, outlook, taskQueue, MS_PER_GAME_HOUR, QUEUE_MAX, FAM, yukiLane, setYuki } from './core/tasks.js';
 import { SCENES, ITEMS } from './story/prologue.js';
-import { coilActive, endCoil, coilPrefill } from './core/coil.js';
+import { coilActive, endCoil } from './core/coil.js';
 import { medCards, runMed, isSitChoice, medActivity, useLine } from './core/meditate.js';
 import { meridianRow } from './story/meridians.js';
 import { realmShockHpBonus } from './core/formulas.js';
@@ -162,7 +162,6 @@ function startNext() {
     scenePause();
     if (running || !onQueueScreen()) return;
     if (g.combat) return;
-    if (onTaskHub() && coilPrefill(g)) autosave(); // "same days again": this hub and day get last Coil's cards
     const q = taskQueue(g);
     const skipped = [];
     while (q.length && runsHere(g, SCENES, q[0]) && !taskOpen(g, SCENES, q[0])) skipped.push(taskLabel(g, SCENES, q.shift()));
@@ -336,7 +335,7 @@ function renderCardScreen() {
         hubHtml = `${groups.map((gr) => `<h2>${esc(gr.name)}</h2><div class="cards">${gr.cards.map(cardHtml).join('')}</div>`).join('')}`;
     }
     const storyHtml = v.end
-        ? '<h2>Story</h2><div class="cards"><button class="card story" data-new="1">Start a new game</button><button class="card story" data-tab-go="sheet">See how James ended up</button></div>'
+        ? `<h2>Story</h2><div class="cards">${story.map(storyCardHtml).join('')}<button class="card story" data-new="1">Start a new game</button><button class="card story" data-tab-go="sheet">See how James ended up</button></div>` // v0.11.26: an end's own choices first (Go round again…)
         : story.length ? `<h2>Story</h2><div class="cards">${story.map(storyCardHtml).join('')}</div>` : '';
     const medOpen = med.filter((m) => m.open); // v0.11.17 (pick 1a): only what can run now (collaterals until they open, locked sits and meridians, Break through until ready)
     const medHtml = medOpen.length ? `<h2>Meditate</h2><div class="cards">${medOpen.map(medCardHtml).join('')}</div>` : '';
@@ -654,7 +653,7 @@ function renderStory() {
 <header class="head"><div class="place">${esc(v.place || g.location)}</div><h1 class="title">${esc(v.title)}</h1></header>
 ${statusHtml()}${resultHtml()}
 <div class="prose">${paras(v.text)}</div>
-${v.end ? `<ul class="choices"><li><button class="choice" data-new="1">Start a new game</button></li><li><button class="choice" data-tab-go="sheet">See how James ended up</button></li></ul>` : `<ul class="choices">${choices}</ul>`}
+${v.end ? `<ul class="choices">${choices}<li><button class="choice" data-new="1">Start a new game</button></li><li><button class="choice" data-tab-go="sheet">See how James ended up</button></li></ul>` : `<ul class="choices">${choices}</ul>`}
 </section>`;
 }
 
@@ -702,7 +701,7 @@ ${skillRow('GU', j.gu, 'General Use: anything he has no skill for, and his defen
 ${skillRow('Convergence Use', cu, 'darts, needles, the wraithbone blade')}
 <p class="note">${esc(BONESINGER_TIERS[Math.min(cu.tier, BONESINGER_TIERS.length - 1)] || '')}</p>
 ${taskMode ? Object.entries(FORM_LINES).map(([k, l]) => { const s = lineState(g, k); return `<div class="row"><span>${esc(l.label)}</span><span>${s.now ? esc(s.now.name) : '—'}${s.next ? ` <span class="note">(next: ${esc(s.next.name)} at ${rankLabel(s.next.at)})</span>` : ''}</span></div>`; }).join('') : ''}
-${taskMode && g.coil ? `<h2>The Coil</h2><p class="note">${g.coil.act === 1 ? 'Act 1, ' : ''}Coil ${g.coil.n}. ${coilActive(g) ? `Bite the tail to wake at ${g.coil.act === 1 ? 'Day 8\'s dawn' : 'the first dawn'}: James keeps his familiarity and what he knows; his realm, skills and meridians, the hammerspace and the world start over. This Coil he learns ×${coilMult(g).toFixed(1)} as fast; the next, ×${(coilMult(g) + 0.5).toFixed(1)}.` : 'The Coil turns during the prologue (until the tribute is settled) and during Act 1 (until Shen Qiu is settled).'}</p>${coilActive(g) ? '<div class="btns"><button class="btn" data-bite="1">Bite the tail</button></div><p class="note" id="saveNote"></p>' : ''}` : ''}
+${taskMode && g.coil ? `<h2>The Coil</h2><p class="note">${g.coil.act === 1 ? 'Act 1, ' : ''}Coil ${g.coil.n}. ${coilActive(g) ? `Bite the tail to wake at ${g.coil.act === 1 ? 'the start of Act 1 or of the whole game' : 'the first dawn'}: James keeps his familiarity and what he knows; his realm, skills and meridians, the hammerspace and the world start over. This Coil he learns ×${coilMult(g).toFixed(1)} as fast; the next, ×${(coilMult(g) + 0.5).toFixed(1)}.` : 'The Coil turns during the prologue (until the tribute is settled) and during Act 1 (until Shen Qiu is settled, and again at its end).'}</p>${coilActive(g) ? '<div class="btns"><button class="btn" data-bite="1">Bite the tail</button></div><p class="note" id="saveNote"></p>' : ''}` : ''}
 <h2>Pillars</h2>
 <div class="row"><span>Ouroboros Axiom</span><span>DR 1</span><span class="sub">The body as a closed garden: what comes in is filtered and returned clean.</span></div>
 <div class="row"><span>Parallel Cognition Engine</span><span>9 threads</span><span class="sub">One of them is always on watch, if he asks.</span></div>

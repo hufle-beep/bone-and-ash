@@ -14,7 +14,7 @@ import { canPrimary, canColGroup, colGroupsOpen, sessionsToday, dcPrimary, dcCol
 import { sceneView, choose, goTo } from '../js/core/story.js';
 import { medCards, runMed, canMeditate, NO_MEDITATE, isSitChoice, MED_SCREENS } from '../js/core/meditate.js';
 import { defaultMinutes, DEFAULT_MINUTES } from '../js/core/story.js';
-import { coilActive, coilPrefill, rewind, endCoil, KEEP_FLAGS, REMEMBER } from '../js/core/coil.js';
+import { coilActive, rewind, endCoil, KEEP_FLAGS, REMEMBER } from '../js/core/coil.js';
 import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskMinutes, runTask, outlook, taskQueue, taskState, setYuki, yukiLane, famTier, QUEUE_MAX, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, merChoice, MER_TASK, BT_TASK, SIT_TASK, waitChoice, merLineTask, lineOfTask, isQueueScreen, runsHere, cardSpeed } from '../js/core/tasks.js';
 
 import { writeFileSync } from 'node:fs';
@@ -268,7 +268,7 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     assert(r.ok && Math.abs((g.james.saturation - s0) - r1.gain) < 0.2, `v0.11.15: a sit gives the same Saturation on Coil 3 (${r1.gain} → ${g.james.saturation - s0})`);
     const a = ensureBars(newGame(94)); a.scene = 'epilogue'; a.flags.ending = 'bluff'; a.minutes = 6 * 1440 + 900; a.coil.n = 5;
     choose(a, SCENES, 0);
-    assert(a.coil.act === 1 && a.coil.n === 1 && coilMult(a) === 1, 'per act: Act 1 starts at ×1 whatever the prologue took');
+    assert(a.coil.act === 1 && a.coil.n === 5 && coilMult(a) === 3, 'v0.11.26 (one count, N1): Act 1 continues the prologue\'s Coil 5 at ×3');
     setNoDice(false);
     assert(coilMult(g) === 1, 'Story Mode: ×1');
 }
@@ -390,7 +390,7 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     setNoDice(true);
     const g = ensureBars(newGame(50)); g.scene = 'epilogue'; g.flags.ending = 'bluff'; g.minutes = 6 * 1440 + 15 * 60; g.coil.n = 3;
     choose(g, SCENES, 0);
-    assert(g.scene === 'fo_start' && g.coil.act === 1 && g.coil.n === 1 && g.coil.snap.scene === 'fo_start' && g.coil.snap.minutes === 7 * 1440 + 360 && g.stats.coils0 === 3, 'Act 1 begins: a new Coil at Day 8 dawn, the prologue count kept');
+    assert(g.scene === 'fo_start' && g.coil.act === 1 && g.coil.n === 3 && g.coil.snap.scene === 'fo_start' && g.coil.snap.minutes === 7 * 1440 + 360 && g.stats.coils0 === 3, 'Act 1 begins: its rewind point at Day 8 dawn, the same Coil (3) goes on (v0.11.26)');
     assert(coilActive(g), 'the Coil turns in Act 1');
     const inv0 = JSON.stringify(g.coil.snap.inventory);
     g.inventory.beast_core = 7; g.flags.log_heard = true; g.minutes += 12 * 1440; g.rel['Mei Lin'] = { f: 80, a: 80 };
@@ -402,15 +402,75 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     const v = sceneView(g, SCENES);
     assert(g.scene === 'coil_end' && g.coil.why === 'shen' && v.choices.some((c) => /Accept it. Walk/.test(c.label)) && /Act 1/.test(v.title), 'the Coil screen after Shen Qiu: accept or rewind');
     assert(/Wren Aldous/.test(v.text), 'James remembers the log');
-    choose(g, SCENES, v.choices.find((c) => /^Bite the tail. Wake/.test(c.label)).index);
-    assert(g.scene === 'coil_dawn' && /Ashfall/.test(sceneView(g, SCENES).text), 'Day 8 dawn again');
+    assert(v.choices.some((c) => /start of Act 1/.test(c.label)) && v.choices.some((c) => /start of the whole game/.test(c.label)) && !v.choices.some((c) => /same days/.test(c.label)), 'v0.11.26: Act 1\'s Coil screen: the start of Act 1 or of the whole game, no "same days again"');
+    choose(g, SCENES, v.choices.find((c) => /start of Act 1/.test(c.label)).index);
+    assert(g.scene === 'coil_dawn' && /Ashfall/.test(sceneView(g, SCENES).text), 'the start of Act 1 again');
     choose(g, SCENES, 0);
-    assert(g.scene === 'fo_start' && g.coil.act === 1 && g.coil.n === 2 && g.minutes === 7 * 1440 + 360 && JSON.stringify(g.inventory) === inv0 && !g.flags.log_heard && !g.flags.a1_outcome, 'rewound to Day 8: Coil 2, the world as it was');
+    assert(g.scene === 'fo_start' && g.coil.act === 1 && g.coil.n === 4 && g.minutes === 7 * 1440 + 360 && JSON.stringify(g.inventory) === inv0 && !g.flags.log_heard && !g.flags.a1_outcome, 'rewound to the start of Act 1: Coil 4 (one count), the world as it was');
     assert(g.rel['Mei Lin'].a >= 20, `25% head start in Act 1 (${g.rel['Mei Lin'].a})`);
     const a = ensureBars(newGame(51)); a.scene = 'epilogue'; a.flags.ending = 'lost'; a.minutes = 6 * 1440 + 15 * 60; choose(a, SCENES, 0);
     goTo(a, SCENES, 'rt_taken'); choose(a, SCENES, sceneView(a, SCENES).choices.find((c) => /Bite/.test(c.label)).index);
     choose(a, SCENES, sceneView(a, SCENES).choices.find((c) => /Accept it. Walk/.test(c.label)).index);
-    assert(a.scene === 'a1_end' && a.flags.a1_outcome === 'taken' && !coilActive(a), 'accept: on to the end of Act 1');
+    assert(a.scene === 'a1_end' && a.flags.a1_outcome === 'taken' && coilActive(a), 'accept: on to the end of Act 1, where the Coil still turns (v0.11.26)');
+    // v0.11.26 (owner 11:07, E1): the end of Act 1 goes round again, every outcome, to the start of Act 1 or of the whole game
+    for (const [outcome, target] of [['taken', 'act'], ['victory', 'game'], ['revelation', 'act'], ['taken', 'game']]) {
+        const e = ensureBars(newGame(57)); e.scene = 'epilogue'; e.flags.ending = 'paid'; e.minutes = 6 * 1440 + 15 * 60; e.coil.n = 2; choose(e, SCENES, 0);
+        e.inventory.beast_core = 9; e.flags.a1_outcome = outcome; e.flags.lore_tree = true; e.flags.ship_found = true; e.tasks.fam['rr_hub:1'] = 7; e.rel['Mei Lin'] = { f: 60, a: 80 };
+        const { bumpRel } = await import('../js/core/game.js'); bumpRel(e, 'Mei Lin', 0, 0);
+        goTo(e, SCENES, 'a1_end');
+        const ev = sceneView(e, SCENES);
+        assert(ev.end && ev.choices.length === 1 && /Go round again/.test(ev.choices[0].label), `${outcome}: the end screen offers Go round again`);
+        choose(e, SCENES, ev.choices[0].index);
+        const av = sceneView(e, SCENES);
+        assert(e.scene === 'a1_again' && av.choices.map((c) => c.label).join('|') === 'Bite the tail. Wake at the start of Act 1.|Bite the tail. Wake at the start of the whole game (Day 1, the arrival).|Not yet.', `${outcome}: the confirm screen`);
+        choose(e, SCENES, av.choices.find((c) => (target === 'act' ? /start of Act 1/ : /whole game/).test(c.label)).index);
+        assert(e.scene === 'coil_dawn' && e.coil.n === 3 && coilMult(e) === 2 && !e.flags.a1_outcome && !e.inventory.beast_core, `${outcome} → ${target}: Coil 3 (one count), ×2, the outcome and the hammerspace gone`);
+        assert(e.tasks.fam['rr_hub:1'] === 7 && e.flags.lore_tree && e.coil.known.includes('ship_found') && e.rel['Mei Lin'].a >= 20, `${outcome} → ${target}: familiarity, knowledge and the head start kept`);
+        choose(e, SCENES, 0);
+        if (target === 'act') assert(e.scene === 'fo_start' && e.coil.act === 1 && e.minutes === 7 * 1440 + 360 && e.flags.ending === 'paid', `${outcome} → the start of Act 1 (the prologue's outcome kept)`);
+        else {
+            assert(e.scene === 'arrival' && e.coil.act === 0 && e.minutes === newGame(1).minutes && !e.flags.ending && e.james.primaries === 0 && e.james.realm === 0, `${outcome} → the start of the whole game: Day 1, the arrival, channels shut, no tribute outcome`);
+            assert(e.coil.snap.scene === 'arrival' && !e.coil.snap.flags.lore_tree && e.coil.snap.tasks.fam['rr_hub:1'] === undefined, 'the whole game\'s rewind point is a clean arrival');
+            e.scene = 'epilogue'; e.flags.ending = 'bluff'; e.minutes = 6 * 1440 + 15 * 60; choose(e, SCENES, 0);
+            assert(e.coil.act === 1 && e.coil.n === 3 && e.stats.coils0 === 3, 'back in Act 1 the same Coil goes on (3)');
+        }
+    }
+    {
+        const n = ensureBars(newGame(58)); n.scene = 'epilogue'; n.flags.ending = 'paid'; n.minutes = 6 * 1440 + 15 * 60; choose(n, SCENES, 0);
+        endCoil(n, 'choice', 'a1_end'); const r = rewind(n, { same: true });
+        assert(r === 2 && !('played' in n.coil) && !('replay' in n.coil), 'v0.11.26: no "same days again" (the old option is ignored, its fields gone)');
+        const pv = ensureBars(newGame(59)); endCoil(pv, 'choice', 'arrival'); goTo(pv, SCENES, 'coil_end');
+        assert(sceneView(pv, SCENES).choices.filter((c) => /Bite/.test(c.label)).map((c) => c.label).join('|') === 'Bite the tail. Wake at the first dawn.', 'v0.11.26: the prologue wakes at the first dawn only');
+    }
+    // v0.11.26: one count per save; an older save's Act 1 count becomes the prologue's + Act 1's − 1, once
+    {
+        const o = ensureBars(newGame(60)); o.scene = 'epilogue'; o.flags.ending = 'paid'; o.minutes = 6 * 1440 + 15 * 60; choose(o, SCENES, 0);
+        o.coil.n = 2; o.stats.coils0 = 4; delete o.coil.one; migrate(o);
+        assert(o.coil.n === 5 && o.coil.one, `an older Act 1 save: 4 + 2 − 1 = Coil 5 (${o.coil.n})`);
+        migrate(o); assert(o.coil.n === 5, 'and only once');
+        const pr = ensureBars(newGame(61)); pr.coil.n = 3; delete pr.coil.one; migrate(pr); assert(pr.coil.n === 3 && pr.coil.one, 'a prologue save keeps its count');
+    }
+    {   // the owner's save (2026-11-07 11:02): the end of Act 1 after "taken", Act 1 Coil 1 after 1 prologue Coil
+        const { readFileSync } = await import('node:fs'); const { gunzipSync } = await import('node:zlib');
+        const t = readFileSync(new URL('../saves/2026-11-07-1102-incremental-a1_end.txt', import.meta.url), 'utf8').trim();
+        const w = JSON.parse(gunzipSync(Buffer.from(t.slice(5), 'base64')).toString('utf8'));
+        const o = migrate(JSON.parse(w.data)); ensureBars(o);
+        assert(o.scene === 'a1_end' && o.coil.n === 1 && coilActive(o) && /Go round again/.test(sceneView(o, SCENES).choices[0]?.label), 'the owner\'s 11:02 save: Coil 1, Go round again offered');
+        const o2 = JSON.parse(JSON.stringify(o));
+        choose(o, SCENES, 0); choose(o, SCENES, sceneView(o, SCENES).choices.findIndex((c) => /start of Act 1/.test(c.label))); choose(o, SCENES, 0);
+        assert(o.scene === 'fo_start' && o.coil.n === 2 && o.coil.act === 1, 'the owner\'s save → the start of Act 1, Coil 2');
+        choose(o2, SCENES, 0); choose(o2, SCENES, sceneView(o2, SCENES).choices.findIndex((c) => /whole game/.test(c.label))); choose(o2, SCENES, 0);
+        assert(o2.scene === 'arrival' && o2.coil.n === 2 && o2.coil.act === 0, 'the owner\'s save → the whole game, Coil 2');
+    }
+    // v0.11.26 (Fable review): the save list shows the one count; the dawn screen names no number
+    {
+        const { peekSave, serialize } = await import('../js/core/game.js');
+        const o = ensureBars(newGame(62)); o.scene = 'epilogue'; o.flags.ending = 'paid'; o.minutes = 6 * 1440 + 15 * 60; choose(o, SCENES, 0);
+        o.coil.n = 2; o.stats.coils0 = 3; delete o.coil.one;
+        assert(peekSave(serialize(o)).coil === 4, 'v0.11.26: the save list shows an older Act 1 save as it will load (3 + 2 − 1)');
+        endCoil(o, 'choice', 'fo_start'); o.coil.one = true; rewind(o, { to: 'game' }); goTo(o, SCENES, 'coil_dawn');
+        assert(/seen this sky before/.test(sceneView(o, SCENES).text) && !/\d+ times before/.test(sceneView(o, SCENES).text), 'v0.11.26: the dawn again says "before", no count');
+    }
     // state 4 → 5: prologue saves get act 0; a save mid-Act 1 gets an Act 1 Coil that rewinds to where it was loaded
     const p4 = ensureBars(newGame(52)); p4.v = 4; delete p4.coil.act; migrate(p4);
     assert(p4.v === SAVE_VERSION && p4.coil.act === 0, 'state 4 in the prologue: act 0');
@@ -499,10 +559,6 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     const ny = sceneView(w, SCENES).choices.find((c) => c.label === 'Not yet.');
     choose(w, SCENES, ny.index);
     assert(w.scene === 'wilds' && w.inventory.hare_raw === 2 && w.coil.n === 1 && !w.coil.why, 'Not yet goes back unchanged');
-    // same days again: the hub and day get last Coil's cards back
-    const q = ensureBars(newGame(25)); q.coil.played = { 'wilds@2': ['wilds:6', 'wild_forage:0'] }; endCoil(q, 'choice', 'arrival'); rewind(q, { same: true });
-    q.scene = 'wilds'; q.minutes += 1440;
-    assert(coilPrefill(q) && q.tasks.queue.join() === 'wilds:6,wild_forage:0' && !coilPrefill(q), 'same days again: queue put back once');
     // breakthrough from 95% in task mode, 100% in classic
     const b = ensureBars(newGame(26)); b.james.saturation = 96;
     assert(canBreakThrough(b), 'task mode: break through from 95%');
@@ -733,7 +789,6 @@ function play(run, tasks) {
         noteView(g, v);
         if (v.end) { const e = g.flags.ending || 'none'; st.endings[e] = (st.endings[e] || 0) + 1; st.games++; if (!barsOk(g)) badBars++; return true; }
         if (tasks && isTaskHub(g)) {
-            coilPrefill(g);
             const all = taskCards(g, SCENES); // v0.11.15 (B1): the bots take the sit and the meridian cards too
             for (const c of all) cardsListed.add(c.id);
             noteCards(all); // v0.11.22
@@ -786,7 +841,8 @@ function play(run, tasks) {
         if (tasks && g.scene === 'coil_end' && g.coil.why === 'tribute') open = open.filter((c) => /^Bite/.test(c.label));
         if (tasks && g.scene === 'rt_elder' && run % 10 === 0 && g.coil.act === 1 && !bitShen) { goTo(g, SCENES, 'rt_taken'); continue; } // v0.11.4: 1 run in 10 goes with Shen Qiu on purpose, so the Act 1 rewind path is walked however the fights are tuned
         if (tasks && g.scene === 'rt_taken') { const bite = run % 5 === 0 && g.coil.act === 1 && !bitShen; open = open.filter((c) => bite === /Bite the tail/.test(c.label)); if (bite) bitShen = true; } // 1 run in 5 rewinds Act 1 at Shen Qiu once
-        if (tasks && g.scene === 'coil_end' && g.coil.why === 'shen') { open = open.filter((c) => /^Bite the tail. Wake/.test(c.label)); medStats.a1bites++; }
+        if (tasks && g.scene === 'coil_end' && g.coil.why === 'shen') { open = open.filter((c) => /start of Act 1/.test(c.label)); medStats.a1bites++; }
+        if (tasks && g.scene === 'coil_end' && g.coil.act === 1) open = open.filter((c) => !/whole game/.test(c.label)); // v0.11.26: the balance bots stay in Act 1 (the whole-game rewind has its own tests)
         if (tasks && g.scene === 'col_warn') medStats.warn++;
         const r = choose(g, SCENES, open[rnd(open.length)].index);
         if (r.combat) { startCombat(g, r.combat(g)); fight(g, run); }

@@ -19,7 +19,7 @@ import { CONDENSE_SIT_COST } from './formulas.js';
 import { btTarget, MER_LINES, lineWindow, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
 import { daily } from '../story/common.js';
-import { endCoil, recordCard } from './coil.js';
+import { endCoil } from './coil.js';
 import { canMeditate } from './meditate.js';
 
 setTimeless(Object.fromEntries(Object.entries(TASK_HUBS).map(([h, cfg]) => [h, [...Object.keys(cfg.menus || {}), ...Object.keys(cfg.doorMenus || {})]]))); // hub ↔ menu steps take no extra time (v0.9.5)
@@ -344,7 +344,6 @@ export function runTask(g, scenes, id) {
     const m0 = g.minutes;
     const lines = [];
     let fail = false;
-    if (TASK_HUBS[hubId]) recordCard(g, hubId, m0, id);
     if (card.kind === 'bt') {
         if (!btOpen(g)) throw new Error('No breakthrough possible');
         g.flags.bt_return = hubId;

@@ -144,9 +144,19 @@ for (let run = 0; run < 40; run++) {
     choose(a, SCENES, 0); seen.add('fo_start');
     a.scene = 'rt_taken'; SCENES.rt_taken.enter(a); seen.add('rt_taken');
     choose(a, SCENES, SCENES.rt_taken.choices.findIndex((c) => c.to === 'coil_end'));
-    assert(walkFrom(a, 'coil_end', new Set(['fo_start']), 400), `v0.11.21: Act 1's Coil screen walks back to its first dawn or an ending (run ${run})`); // an ending is fine here (1 run in 40 reaches a1_end)
+    assert(walkFrom(a, 'coil_end', new Set(['fo_start', 'arrival']), 400), `v0.11.21: Act 1's Coil screen walks back to its first dawn or an ending (run ${run})`); // an ending is fine here (1 run in 40 reaches a1_end)
+}
+// v0.11.26: the end of Act 1 goes round again (Incremental Mode): a1_end → a1_again → back to a first dawn, or not yet
+for (let run = 0; run < 10; run++) {
+    const e = ensureBars(newGame(run + 46464)); e.scene = 'epilogue'; e.flags.ending = 'paid'; e.minutes = 6 * 1440 + 900; choose(e, SCENES, 0);
+    e.flags.a1_outcome = ['victory', 'taken', 'revelation'][run % 3]; goTo(e, SCENES, 'a1_end'); seen.add('a1_end');
+    const go = sceneView(e, SCENES).choices.find((c) => /Go round again/.test(c.label));
+    assert(!!go, `v0.11.26: the end of Act 1 offers Go round again (run ${run})`);
+    choose(e, SCENES, go.index);
+    assert(walkFrom(e, 'a1_again', new Set(['fo_start', 'arrival', 'a1_end']), 400), `v0.11.26: going round again walks to a first dawn or back to the end (run ${run})`);
 }
 setNoDice(false);
+{ const c = ensureBars(newGame(46999)); c.flags.a1_outcome = 'victory'; goTo(c, SCENES, 'a1_end'); assert(!sceneView(c, SCENES).choices.length, 'v0.11.26: Story Mode\'s end of Act 1 has no Coil'); }
 const unreached = Object.keys(SCENES).filter((k) => !seen.has(k));
 assert(!FULL || unreached.length === 0, `every scene reachable (unreached: ${unreached.join(', ')})`);
 if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).length - unreached.length} of ${Object.keys(SCENES).length} scenes reached`); // v0.11.21

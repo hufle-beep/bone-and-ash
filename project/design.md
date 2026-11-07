@@ -23,6 +23,8 @@ One Coil per act. James never dies (engine canon: at HP 0 the main character is 
 
 **Reset option B (picked):**
 
+> **v0.11.26 (owner 2026-11-07):** a Coil ended in Act 1 (or the end of Act 1, any outcome, through "Go round again…") wakes at the start of Act 1 **or** the start of the whole game (Day 1, a fresh arrival); the prologue wakes at its first dawn only; "same days again" is gone. **One Coil count per save:** crossing into Act 1 continues the Coil, every rewind adds 1, and the Coil bonus follows that count (not "earlier Coils of the act" any more).
+
 | | Kept | Reset to the act's first dawn |
 |---|---|---|
 | Familiarity, Insights, Coil marks, threads | ✓ | |
