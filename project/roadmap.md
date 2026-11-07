@@ -1,6 +1,6 @@
 # Roadmap: Bone and Ash
 
-Last updated: 2026-11-07 (v0.11.42, B1). **The pivot (owner 15:43): copy what is useful from Selene and Rules Engine C, game and process; see "The copy-over" below. It comes before steps 4–7, which are kept and take its items in where they fit.** Update in every push.
+Last updated: 2026-11-07 (v0.11.43, the handover trimmed; where this file says "in the handover" about anything before v0.11.41, it is in `history-6.md` now). **The pivot (owner 15:43): copy what is useful from Selene and Rules Engine C, game and process; see "The copy-over" below. It comes before steps 4–7, which are kept and take its items in where they fit.** Update in every push.
 
 ## Now (owner 2026-11-07 18:00–18:19): the chunks
 The art is tabled until the owner is home (after every push Claude asks). In order:

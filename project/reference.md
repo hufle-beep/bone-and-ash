@@ -66,3 +66,98 @@ The bible and the contract between the four part files are at the top of `js/sto
 - **Attraction:** `likesMei` = prologue romance or Mei Lin affection ≥ 60; `likesYa` = `ya_romance` or Ya affection ≥ 85. Random-play outcomes: throuple ~39%, Ya ~40%, Mei Lin ~16%, none ~2%.
 - **Fights:** `encounter()` in act1_common; `a1Scale` is 0 and every fight is tuned in absolute terms by `js/story/act1_tune.js` (per id, t raises DC and attack by t and HP by 10%·t), set by 7 rounds of 500 full-game simulations. Targets (smart combat, random story choices): small ~93%, region bosses ~80%, Ya brawl ~80%, Guardian ~55%, Shen Qiu ~40%. James grows a lot during the act (GU check ~3.6 at Day 8 → ~7.6 at Day 21).
 - **Tests:** `node tests/part.test.mjs <fallout|blackroot|heart|return>` tests one part alone; `tests/story.test.mjs` runs 2,000 full games (step cap 2,500, 200 combat rounds).
+
+## Files (moved from the handover in v0.11.43, word for word; lines of the dice / Story Mode era are marked)
+
+| Path | What |
+|---|---|
+| `CLAUDE.md`, `project/*.md` | The hard rules and the project docs (handover, working agreement, roadmap, design, changelog, restore points). |
+| `index.html`, `css/style.css` | The page. Phone-first layout: art plate, place and title, status strip (HP / Convergence / Fed / clock), roll-result panel, prose, choice "slips", tab bar (Story, James, Hammerspace, Journal, Saves). |
+| `js/core/formulas.js` | Rules Engine C formulas, unchanged. |
+| `js/core/game.js` | State (`newGame`), the numbers (HP, Qi Max, Convergence ×1.25), d6 from the save's own seed (a reload does not reroll), XP (`awardXp`), time and regen (`advance`, `sleepUntil`), hunger, condensation, inventory, relationships, **combat** (`COMBAT_ACTIONS`, `startCombat`, `combatStep`, `combatFlee`), save/load. |
+| `js/core/story.js` | The scene runner (`sceneView`, `choose`, `goTo`). |
+| `js/story/common.js` | Shared helpers: daily flags, `forestScale` / `villageScale`, `grow()` (enemy growth), food table and `eatBest()`, new items. |
+| `js/story/wilds.js` | Forest Days 2–3 and the random nights (v0.4.0). |
+| `js/story/ashfall.js` | Village Days 5–6, suppers, the night-5 Gao event (v0.4.0). |
+| `js/story/prologue.js` | `SCENES` (52), `ITEMS`, and the encounters (jackals, Gao Feng, boar, collectors). |
+| `js/art/portrait.js` | Close-ups in manhua style: `meiPortrait()`, `yukiPortrait()` (clean lines, flat cel tone, big eyes, glossy-hair highlights). |
+| `art/bg/*.jpg`, `art/bg/CREDITS.md` | Six background crops of public-domain paintings (Dong Qichang, Wen Zhengming, the Met's *Misty Landscape*), toned to the paper. Made with `tools/bg.py` (crop → 1200×750 → luminance mapped to ink `#23211e`…paper `#ece8df`, reds kept). |
+| `art/pic/*.webp`, `tools/art/` | v0.11.24: the generated pictures (`PICTURES` in art.js) and how each was made (`tools/art/README.md`). |
+| `js/art/art.js` | `sceneArt(key)`: 26 scene illustrations from shared primitives (sky, sun/moon, mountains, treeline, mist, person, cat, beast, boar, hut, fire, shards, lotus) plus vignette and grain. |
+| `js/main.js` | The UI. Autosave key `boneash.auto`, slots `boneash.slot1–3`, backups `boneash.bak.*`, the export reminder `boneash.exp` (v0.11.9); save-file export/import, Export all / Restore all, Share to GitHub, Copy status as text. |
+| `sw.js`, `manifest.webmanifest`, `icons/` | Offline install. Game files: network first, cache when offline. Google Fonts: cached on first use. v0.11.39: pictures, backgrounds and icons in their own cache `boneash-art`, kept across versions, by fingerprint (`ART`). |
+| `tools/arthash.mjs`, `tests/fixtures/sw-0.11.38.js` | v0.11.39: the `ART` fingerprints (`node tools/arthash.mjs --write` after replacing a picture; the check runs in `tools/consistency.mjs`); the old worker for browser part 3's update test. |
+| `js/core/forms.js` | Bonesinger forms (v0.10.4): the lines (five since v0.11.4: ranged, melee, structures, reach, defence), ranks, what shows in fights and story choices, `INC_ONLY_ACTIONS`. |
+| `js/story/prologue.js` (end) | The Long Forest in task mode (v0.10.1): `lfOpen`, `lfSeason`, `lfRank`, the entrances and the season card. |
+| `js/core/tasks.js`, `js/story/task_hubs.js` | Task cards and the queue (v0.9.0); `waitChoice`, `plainChecks`, the camp hub (v0.10.2): which hubs, card ids, `runTask`, dry runs, the outlook; the speed gate `maxSpeed` / `effectiveSpeed` (v0.9.8); queue editing, `mer:next`, `instantChoice`, the forecast's death row (v0.10.0). |
+| `js/story/nodice_tune.js` | No-dice fight tuning per encounter (v0.9.3). |
+| `js/core/meditate.js` | The Meditate card (v0.9.5; on the 13 resting places since v0.11.14, `MED_SCREENS`): which screens, its cards (sit, the meridian lines since v0.11.13, breakthrough), `runMed`. |
+| `js/story/meridians.js` | Every meridian screen (Story Mode's; the meridian lines for the Meditate cards since v0.11.13): the primaries and collateral groups (v0.9.6), the Extraordinary net (v0.8.0), `col_warn` / `ns_warn`, `btTarget`, the James-tab row. |
+| `js/core/coil.js`, `js/story/coil_scenes.js` | The Coil (v0.9.4): end, rewind (reset B), the head start, "same days again", the Coil screen and the first dawn again. |
+| `tests/tasks.test.mjs` | Task mode: 1,000 bot games (Incremental Mode only since v0.11.34), outlook = reality, collapse, migration, no dice on work cards, familiarity grows, every offered card played, Yuki's lane, no die anywhere in task mode, classic still rolls. |
+| `tests/rules.test.mjs` | The engine numbers. 14 checks. |
+| `tests/story.test.mjs` | Every link valid, every scene reachable but the 19 Story-only ones (v0.11.34), 1,000 random playthroughs in Incremental Mode, per-fight win rates. |
+| `tests/part.test.mjs` | One Act 1 part alone; 1 run in 10 enters fights hurt so every "lost" scene is reached. |
+| `tests/saves.test.mjs` | Every file in `saves/` loads, round-trips and plays 200 steps; checksum, too-new, broken-number, cut-off and foreign-file cases. |
+| `saves/` | Test saves (`.json`, or `.txt` packed by Share to GitHub, v0.11.9). Six made from v0.8.5 (Day 1, Day 4, Day 7 tribute, Act 1 start, Act 1 end, Long Forest start) and four from v0.11.7 (`tools/snap.mjs`: prologue Coil 2, Act 1 Coils 1 and 2, the Long Forest on Coil 2); the owner's exports go here too. |
+| `tools/check.sh`, `tools/check.mjs`, `tools/lib/jobs.mjs`, `tools/lib/report.mjs`, `tests/README.md` | v0.11.28: compact output, the whole output in `boneash-check.log` (temp folder), `--verbose` as before. Runs every check (syntax, engine, saves, the four Act 1 parts, the tasks and story bots, the browser test in two parts, the test tools, the sanity check) in parallel since v0.11.20, about 61 s on 2 cores since v0.11.22 with the leftover check (the job list checked first, every job's process tree stopped on a failure; `--list`); `quick` = 200 bot games each (about 17 s, not enough for a push); stops at the first failure. The suite and each step: `tests/README.md`; step times: `tools/timings.json`. |
+| `tests/lib/shard.mjs` | The bot games split across worker processes (v0.11.1): `--games`, `--workers`, `--seed`; a seed per game (`seedOf`), so any number of workers gives the same numbers. |
+| `tools/sanity.mjs`, `tools/baseline.json`, `tools/lib/noise.mjs` | The mechanics sanity check (v0.11.3, hard rule 2): invariants and drift (±20 points since v0.11.37, was ±5; n ≥ 100; past ±5 a log-only note) against the saved baseline, plus a log-only noise-scaled line (v0.11.21); the last step of the full check; `--update` only after the owner's go. |
+| `tests/tools.test.mjs` | v0.11.21: the test tools themselves (shard merge and seeds, 1 worker = 2 workers, the runner's job list, the noise band). |
+| `tools/leftovers.mjs`, `tools/leftovers-keep.json`, `tests/lib/seen.mjs` | v0.11.22: the leftover check, strict since v0.11.23 (choices log only; what nothing reaches or reads; the keep-list with a reason each; the bots' record of the flags, items and choices they touch, from two small watched runs). `tests/README.md` has the details. |
+| `.gitignore` | v0.11.22: `__pycache__/`, `*.pyc`, `node_modules/`. |
+| `tools/consistency.mjs`, `tests/engine.test.mjs` | v0.11.5: the offline file list and the version in every doc (in `check.sh`); the engine's own formula tests on our copy. |
+| `tests/data.test.mjs`, `tools/lint.mjs`, `tools/browser.py`, `tools/snap.mjs` | v0.11.7: data integrity (in the check); the content lint (log only); the browser test (full check only); fresh test saves (`node tools/snap.mjs`, by hand, for each new save format). |
+| `tools/bots.mjs` | Balance numbers only (v0.11.1): the tasks test's bots, summary per Coil with the beast share of deaths; `--games`, `--seed`, `--sensible`, `--workers`. |
+| `.github/workflows/restore-points.yml` | Tags the newest 5 commits on every push (`restore/<date>-<commit>`), copied from Selene. |
+
+**Run every check:**
+```
+bash tools/check.sh          # full, after every build and before the docs and the push (ends with the sanity check)
+bash tools/check.sh quick    # while building
+node tools/check.mjs --verbose   # the full check with the old long output (v0.11.28)
+node tools/bots.mjs --games 1000 --sensible   # balance numbers only
+node tools/sanity.mjs --update                # new baseline, only after the owner's go on an intended change
+```
+**Browser check:** Playwright is preinstalled in the cloud session; `python3 tools/browser.py` (part of the full check since v0.11.7) taps through both modes at 390×844.
+
+**Workspace gotchas** (v0.11.7; some from Selene's handover):
+- **Read the full check's exit code before anything else; never chain a commit or push after it** (v0.11.7 went out after a failed check that way).
+- Bump `VERSION` in `sw.js` together with the docs, after the full check: `tools/consistency.mjs` fails while they differ.
+- The `origin` remote can reset to the old `James-rpg-test` URL (see the end of this file). The clone is shallow: `git fetch origin main` before a push.
+- Tags can't be pushed from the cloud workspace; the restore tags come from the workflow. Use `gh api` (REST) rather than GraphQL.
+- Browser tests: block service workers (a stale cache hides changes), cap bar waits, retry a tap whose button re-rendered. Set storage from a non-game page on the same site, then open the game (`fresh` in `tools/browser.py`): a reload fires the game's own save on close (v0.11.5), which used to write the old game over a fresh `localStorage` write (Selene saw the same).
+- A GitHub Pages deploy can stick "in progress"; a new commit republishes. Check a build once (or with a short bounded wait), never block on it.
+- Foreground `sleep` can be blocked; poll with short waits.
+
+## Rules as implemented (moved from the handover in v0.11.43; where a line says d6 or Story Mode it describes the dice era: Incremental Mode has no dice since v0.9.3, check ÷ DC)
+
+- **Check value** = 0.5 × rank (T1 L1 = 0.5). James rolls GU for anything he has no skill for, and for defence.
+- **XP:** a standard award is 30 × the skill's tier, split equally between the skill and GU. Yuki gets the same share to her Qi Use. A fail pays 25%. Bands: standard 30, challenging 60, major 120.
+- **Level cost** = 50 × k × T × L, with k 0.5. T1 L1 → L2 costs 25.
+- **Starting numbers** (match the engine):
+  - James: HP 21 (body = GU check), DR 1, Convergence 40.5 = (20 + 0.5 + 12) × 1.25.
+  - Yuki: HP 30 (body 5), Qi 32.5.
+- **Regen:** one Cycle is 30 minutes at T1. Each Cycle gives HP +5% and Qi +11.6% (5% + 0.1 × 66 collaterals). `sleepUntil` fills both bars.
+- **Once a day (v0.11.18, Incremental Mode):** a waking day (`g.wake.n`): back after a night slept or a Push through the night, not at midnight; Story Mode: the calendar day.
+- **Hunger:** "Fed" drops 3 an hour. Below 30, −1 on every check; at 0, another −1 and HP loss over time.
+- **Breakthrough (v0.4.1; Incremental Mode since v0.11.2: from 95%, a timed card of 2 h × (realm + 1) ÷ the Coil bonus):** at 100% Saturation a choice "Break through to <next realm>" appears in `stream`, `wilds`, `camp`, `night`, `village`, `ashfall`, `supper` (added in prologue.js after the scene list). `breakthrough(g)` in game.js: 2 hours, realm +1, Saturation 0, both bars full; Yuki rises with James (root-kin). Scene `breakthrough`: the tribulation comes, finds nothing to burn, leaves. Text varies by whether James has heard of tribulation yet (`lore1`, `lore_realms` or Mei Lin met), forest vs village (witnessed), day vs night, and first vs later rungs. In the village it sets `sky_witness` (Act 1 hook: the Sect hears). Each rung ≈ +3–4 HP, +1–1.5 Convergence. Fights scale by days, not realm.
+- **Condensation** (Incremental Mode since v0.11.2: a 1-hour sit, 10 Qi, +100 ÷ (10 × 2^realm) % × the Coil bonus): 10 Qi per sit, 0 XP, raises Saturation. It never refills Qi.
+- **Combat:** each round James acts, Yuki attacks automatically, then the enemies attack. James defends with GU + d6 vs their attack DC; DR 1 reduces hits. His actions:
+  - **darts:** Convergence Use, 2 Qi, 2–4 damage;
+  - **blade:** GU, 3 Qi to form, free once formed, 3–6 damage;
+  - **needle:** Convergence Use, 4 Qi, staggers;
+  - **guard:** +2 to defence (Incremental Mode since v0.11.4: +0.5 per defence form, and with a buckler the lunges at Yuki miss);
+  - **spear** (Incremental Mode, v0.11.4, from T1 L8): GU, 3 Qi to sing, then free, 3–6 × tier, +2 DC; a full hit holds the enemy off for the round;
+  - **spike field** (Incremental Mode, v0.11.4, from T1 L3): 4 Qi, once a fight, 2 rounds, 1 back to every attacker (2 from the slab);
+  - **run:** only in some fights.
+
+  Losing a fight never ends the game; it leads to a "lost" branch.
+- **Bonesinger ladder:** a T1 rung was added for this game: antler-hard bone, needles, darts, a knife-length blade, thrown to about 15 m. T2+ text is from the SillyTavern james3 preset (`BONESINGER_TIERS` in game.js has T1–T3).
+
+**Balance (v0.4.0, smart combat, random hub choices; `s` = extra days trained) — historical, the dice era; today's numbers: the bots and `tools/baseline.json`:**
+- Enemies grow per extra day with `grow()` in `js/story/common.js`: HP +15%, DC to hit +0.45, attack +0.6 (to the half point). Lu Han: HP +5%, DC +0.35, attack +0.5. That tracks the average gain per day, so a player who trains harder than average wins more.
+- Jackals (night 3 adds a yearling): ~99%. Gao Feng: 84% (s1) / 95% (s2). Boar: 91% / 99%. Collectors: 37% (s3) / 58% (s4). Night fights (crows, rats, lizard): 97–100%. Far hunt (wolves, thornback bull): ~80%. Arson: ~97%.
+- Player at the jackals: GU check ~2.8, Convergence Use ~1.7 after two full forest days (was 1.2 / 0.6 on night 1).
+- Old saves (no `long` flag) keep the original numbers and route.
+- Re-tune with the balance script pattern: random hub choices, smart combat, group win rate by `s` (see git history, `bal.mjs` in the session that built v0.4.0).
