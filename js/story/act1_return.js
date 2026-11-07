@@ -3,7 +3,7 @@
  * the night the romance resolves (a throuple, one lover, or none), and Outer Elder Shen Qiu at the gate on Day 21.
  * Entry 'rt_start' (Day 19 ~06:00). Ends at 'a1_end'.
  */
-import { addItem, hasItem, eat, condense, advance, clockParts, jamesQiMax } from '../core/game.js';
+import { addItem, hasItem, eat, condense, advance, clockParts, jamesQiMax, dayHour } from '../core/game.js';
 import { condensationSatGain } from '../core/formulas.js';
 import { coilMult, sitGain } from '../core/game.js';
 import { set, daily, markDaily, eatBest } from './common.js';
@@ -16,7 +16,7 @@ const seeded = (g) => !!g.flags.seed || hasItem(g, 'seed_sliver');
 const both = (g) => likesMei(g) && likesYa(g);
 const trioReady = (g) => both(g) && trio(g) >= 3;
 const luHanHere = (g) => g.flags.ending !== 'fought';
-const toHour = (g, h) => { const p = clockParts(g.minutes); if (p.hh < h) g.minutes = (p.day - 1) * 1440 + h * 60; };
+const toHour = (g, h) => { const p = clockParts(g.minutes); if (dayHour(g) < h) g.minutes = (p.day - 1) * 1440 + h * 60; }; // v0.11.37: after midnight (24+) the hour has passed
 /** Preparations that blunt the Elder (count). */
 const preps = (g) => (g.flags.a1_palisade ? 1 : 0) + (g.flags.a1_militia ? 1 : 0) + (g.flags.grove_attuned ? 1 : 0) + (g.flags.council_unity ? 1 : 0);
 

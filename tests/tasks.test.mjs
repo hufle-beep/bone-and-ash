@@ -5,7 +5,9 @@ import { SCENES, lfOpen, lfSeason, lfRank, LF_STOCK, LF_SEASON_MINUTES } from '.
 import { itemCap, MAX_REALM, combatStep as cStep, startCombat as sCombat, coilMult, awardXp, actSpeed, sitMinutes, awardYukiFightXp, condense, SAT_HOURS, sitGain, btMinutes, formDmgBonus, guardBonus, fieldDamage, FIELD_ROUNDS, actionDmg } from '../js/core/game.js';
 import { FORM_LINES, hasForm, cuRank, actionOpen, actionLabel, fragileKnife, STORY_FORMS, INC_ONLY_ACTIONS } from '../js/core/forms.js';
 import { TASK_HUBS } from '../js/story/task_hubs.js';
-import { markDaily, daily } from '../js/story/common.js';
+import { markDaily, daily, hour } from '../js/story/common.js';
+import { dayEnd, nightLock, pushWindow, pushedTonight, dayHour, endsLate, sitUseless } from '../js/core/game.js'; // v0.11.37
+import { pickedMinutes, PICKED_SPEED } from '../js/core/story.js'; // v0.11.37 (F1)
 import { wakeDay, exLevel, sleepUntil, clockParts } from '../js/core/game.js';
 import { yukiSpeed, setDryClone, dryClone, showPicked } from '../js/core/tasks.js';
 import { e8Hours, ecHours, jnHours } from '../js/story/meridians.js';
@@ -17,7 +19,7 @@ import { againView, skipStep, skipRun, skipPlan, MEMORY_LINES, noFold, SKIP_MAX 
 import { medCards, runMed, canMeditate, NO_MEDITATE, isSitChoice, MED_SCREENS } from '../js/core/meditate.js';
 import { defaultMinutes, DEFAULT_MINUTES } from '../js/core/story.js';
 import { coilActive, rewind, endCoil, KEEP_FLAGS, REMEMBER } from '../js/core/coil.js';
-import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskMinutes, runTask, outlook, taskQueue, taskState, setYuki, yukiLane, famTier, QUEUE_MAX, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, merChoice, MER_TASK, BT_TASK, SIT_TASK, waitChoice, merLineTask, lineOfTask, isQueueScreen, runsHere, cardSpeed } from '../js/core/tasks.js';
+import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskMinutes, runTask, outlook, taskQueue, taskState, setYuki, yukiLane, famTier, QUEUE_MAX, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, merChoice, MER_TASK, BT_TASK, SIT_TASK, waitChoice, merLineTask, lineOfTask, isQueueScreen, runsHere, cardSpeed, dayOver } from '../js/core/tasks.js';
 
 import { writeFileSync } from 'node:fs';
 import { GAMES, FULL, SHARD, WORKERS, SEED, SENSIBLE, REPORT, STATS_OUT, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
@@ -133,24 +135,29 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
         assert(wakeDay(n0) === 3, `a night broken after midnight, then slept to 06:00: one new day (${wakeDay(n0)})`);
         const t5 = ensureBars(newGame(304)); t5.minutes = 5 * 1440 + 22 * 60; wakeDay(t5); sleepUntil(t5, 5); assert(wakeDay(t5) === 7, 'sleeping to 05:00 (the tribute) counts');
         const L = ensureBars(newGame(305)); const l0 = wakeDay(L); advance(L, 90 * 1440); assert(wakeDay(L) === l0 + 90, 'a span of days (a Long Forest season) has its nights in it');
-        // Push through the night
-        const p = ensureBars(newGame(306)); p.scene = 'ashfall'; p.minutes = 5 * 1440 + 21 * 60; markDaily(p, 'clinic');
-        assert(medCards(p, SCENES).some((c) => c.id === 'med:push' && c.open && !c.minutes), 'Push through the night: a Meditate card when a once-a-day thing is used up, at once');
-        const q = ensureBars(newGame(307)); q.scene = 'ashfall'; assert(!medCards(q, SCENES).some((c) => c.id === 'med:push'), 'no Push card when nothing daily is used up');
+        // Push through the night (v0.11.37, E-a: only from 00:00 to 03:59, once a night; no longer tied to a used-up daily)
+        const toNight = (x) => { x.james.satiety = 100; const t = clockParts(x.minutes).day * 1440 + 60; while (x.minutes < t) advance(x, Math.min(600, t - x.minutes)); }; // awake to the next 01:00
+        const p = ensureBars(newGame(306)); p.scene = 'ashfall'; p.minutes = 5 * 1440 + 21 * 60; wakeDay(p); markDaily(p, 'clinic');
+        assert(!medCards(p, SCENES).some((c) => c.id === 'med:push'), 'v0.11.37: no Push card at 21:00, even with a daily used up');
+        const q = ensureBars(newGame(307)); q.scene = 'ashfall'; q.minutes = 16 * 60 + 60; assert(!medCards(q, SCENES).some((c) => c.id === 'med:push'), 'v0.11.37: no Push card at 17:00');
+        toNight(p);
+        assert(medCards(p, SCENES).some((c) => c.id === 'med:push' && c.open && !c.minutes), 'Push through the night: a Meditate card at 01:00, at once');
         const w0 = wakeDay(p), m0 = p.minutes;
         const r1 = runMed(p, SCENES, 'med:push');
         assert(wakeDay(p) === w0 + 1 && p.minutes === m0 && exLevel(p) === 1 && daily('clinic')(p) && /Exhaustion 1/.test(r1.lines[0]), 'a push: a new day at once, Exhaustion 1, the clinic back');
+        assert(!medCards(p, SCENES).some((c) => c.id === 'med:push'), 'v0.11.37: once a night: no second Push card the same night');
+        let threw = false; try { runMed(p, SCENES, 'med:push'); } catch { threw = true; } assert(threw, 'v0.11.37: a second push the same night is refused');
         const sm = sitMinutes(p); const c0 = p.minutes; p.james.qi = 30; condense(p);
         assert(p.minutes - c0 === Math.round(sm * 1.5) && medCards(p, SCENES).find((c) => /Cultivate/.test(c.label)).minutes === Math.round(sitMinutes(p) * 1.5), `Exhaustion 1: a sit takes ×1.5, and its card says so (${p.minutes - c0} vs ${sm})`);
         const r0 = p.minutes; advance(p, 60, { resting: true }); assert(p.minutes - r0 === 60, 'a rest is not slowed');
         const k0 = p.minutes; advance(p, 60); assert(p.minutes - k0 === 60, 'a wait for a time of day is not slowed');
-        markDaily(p, 'clinic'); runMed(p, SCENES, 'med:push'); assert(exLevel(p) === 2, 'a second push: Exhaustion 2');
+        toNight(p); markDaily(p, 'clinic'); runMed(p, SCENES, 'med:push'); assert(exLevel(p) === 2, 'a second push (the next night, no sleep between): Exhaustion 2');
         const s0 = p.minutes, sb = sitMinutes(p); p.james.qi = 30; condense(p); assert(p.minutes - s0 === Math.round(sb * 2), `Exhaustion 2: ×2 (${p.minutes - s0} vs ${sb})`);
-        markDaily(p, 'clinic'); p.james.hp = 5; const f0 = p.james.satiety, pm = p.minutes, pw = wakeDay(p);
+        toNight(p); markDaily(p, 'clinic'); p.james.hp = 5; p.james.satiety = 100; const f0 = p.james.satiety, pm = p.minutes, pw = wakeDay(p);
         const r3 = runMed(p, SCENES, 'med:push');
         assert(/a day later/.test(r3.lines[0]) && p.minutes - pm >= 1440 && clockParts(p.minutes).hh === 6 && exLevel(p) === 0 && p.james.hp === jamesHpMax(p) && wakeDay(p) === pw + 1, `the third push: collapse, a day lost, wakes at 06:00 with full bars and no Exhaustion (${p.minutes - pm} min)`);
         assert(Math.abs((f0 - p.james.satiety) - (3 * (p.minutes - pm)) / 60 / 2) < 0.6, 'the lost day drains Fed at the sleeping rate');
-        const z = ensureBars(newGame(308)); z.scene = 'ashfall'; markDaily(z, 'clinic'); runMed(z, SCENES, 'med:push'); sleepUntil(z, 6); assert(exLevel(z) === 0, 'a real sleep clears Exhaustion');
+        const z = ensureBars(newGame(308)); z.scene = 'ashfall'; toNight(z); runMed(z, SCENES, 'med:push'); sleepUntil(z, 6); assert(exLevel(z) === 0, 'a real sleep clears Exhaustion');
         // Yuki's curve (c2)
         assert(yukiSpeed(0) === 1 && Math.abs(yukiSpeed(10) - 2) < 1e-9 && yukiSpeed(20) === 3 && yukiSpeed(61) === 3 && yukiSpeed(500) === 3, `Yuki's job: N 90, capped at ×3 (${yukiSpeed(10)}, ${yukiSpeed(61)})`);
         // the Extraordinary lines, timed (b)
@@ -647,7 +654,7 @@ if (!SHARD && !BOTS_ONLY) {
     assert(!!wc, 'v0.11.21: Ashfall has an open work card');
     if (wc) {
         const t0 = taskMinutes(x, SCENES, wc.id);
-        markDaily(x, 'clinic'); runMed(x, SCENES, 'med:push');
+        x.minutes = 1440 + 60; wakeDay(x); runMed(x, SCENES, 'med:push'); // v0.11.37: a push only at night
         const t1 = taskMinutes(x, SCENES, wc.id), y = JSON.parse(JSON.stringify(x)), ym = y.minutes;
         runTask(y, SCENES, wc.id);
         assert(exLevel(x) === 1 && t1 === y.minutes - ym, `v0.11.21: exhausted, the forecast of ${wc.id} is its real time (${t1} vs ${y.minutes - ym})`);
@@ -762,6 +769,7 @@ function play(run, tasks) {
                 const real = [];
                 while (q.length && isTaskHub(g)) {
                     const id = q.shift();
+                    if (dayOver(g, SCENES, id)) { st.night = (st.night || 0) + 1; real.push({ id, night: true }, ...q.map((x) => ({ id: x, night: true }))); q.length = 0; break; } // v0.11.37 (D-a): the queue waits for the morning (the game's startNext)
                     if (!taskOpen(g, SCENES, id)) { st.skipped++; real.push({ id, skip: true }); continue; }
                     cardsSeen.add(id);
                     const m0 = g.minutes;
@@ -781,7 +789,7 @@ function play(run, tasks) {
                 }
                 q.length = 0;
                 if (FC) {
-                    const same = real.every((r, k) => ol.rows[k] && (r.skip ? ol.rows[k].skip : ol.rows[k].end === r.end));
+                    const same = real.every((r, k) => ol.rows[k] && (r.night ? ol.rows[k].night : r.skip ? ol.rows[k].skip : ol.rows[k].end === r.end));
                     assert(same, `outlook matches the real queue (run ${run})`);
                     predicted++;
                 }
@@ -1161,6 +1169,126 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     f.seen.night_won = 1; f.lastWin = { next: 'night_won', degree: 2, id: 'crows' }; assert(!againView(f, { id: 'night_won', text: 'a\n\nb' }).fold, 'P1-a: a lopsided win\'s own text never folds'); f.lastWin = null;
     if (FULL) assert(skipChecked >= 1000, `v0.11.35: the bot games compared the skip with tapping through often enough (${skipChecked})`);
     else console.log(`  skip = tapping through, checked in the bot games (quick, log only): ${skipChecked}`);
+}
+// v0.11.37 (owner 12:59–14:27, picks A1 + B2 + C-a + D-a + E-a + F1): the day ends at 02:00, Push through only at night,
+// at once vs a bar, the Long Forest's two exits, no useless sit, familiar story choices
+{
+    setNoDice(true);
+    const at = (seed, scene, m) => { const x = ensureBars(newGame(seed)); x.scene = scene; x.minutes = m; wakeDay(x); x.james.satiety = 90; return x; };
+    const addFood = (x) => { x.inventory.hare_raw = 3; x.inventory.river_cress = 3; };
+    const choiceIx = (x, re) => SCENES[x.scene].choices.findIndex((c) => (!c.show || c.show(x)) && re.test(String(typeof c.text === 'function' ? c.text(x) : c.text)));
+    const shownIx = (x, re) => sceneView(x, SCENES).choices.some((c) => re.test(c.label));
+    // the night hours belong to the evening before
+    const n = at(3701, 'ashfall', 4 * 1440 + 30); // Day 5, 00:30
+    assert(hour(n) === 24 && dayHour(n) === 24 && !nightLock(n) && dayEnd(n) === 4 * 1440 + 120, `D: 00:30 reads 24, the day ends at 02:00 (${hour(n)})`);
+    assert(!shownIx(n, /^Run a clinic/) && shownIx(n, /^Evening\. Go home/), 'D: at 00:30 the day cards stay gone and the evening exit stays (was: back at midnight)');
+    const w = at(3702, 'wilds', 2 * 1440 + 60); w.flags.forest_day = 2;
+    const raw = (re) => SCENES.wilds.choices.find((c) => typeof c.text === 'string' && re.test(c.text));
+    assert(!raw(/^Forage\.$/).show(w) && raw(/^Make camp for the night/).show(w), 'D: in the wilds at 01:00 no Forage, Make camp shows');
+    // from 02:00: only the night
+    const l = at(3703, 'ashfall', 4 * 1440 + 125); l.james.satiety = 40; addFood(l);
+    assert(nightLock(l), 'D: 02:05 is past the day\'s end');
+    const lc = taskCards(l, SCENES);
+    assert(lc.length > 0 && lc.every((c) => c.kind === 'chore' && /^(Eat|Cook|Chew)/.test(c.label)), `D: from 02:00 the task screen offers only eating (${lc.map((c) => c.label).join(' | ')})`);
+    const lm = medCards(l, SCENES);
+    assert(lm.length === 1 && lm[0].id === 'med:push', `D: from 02:00 Meditate offers only Push through (${lm.map((m) => m.id).join(', ')})`);
+    assert(shownIx(l, /^Evening\. Go home/), 'D: the evening exit (a story stop) is never blocked');
+    // a card that would end past 02:00 doesn't start; the queue waits
+    const e = at(3704, 'rt_camp', 20 * 1440 + 105); e.james.qi = 999; // 01:45 by the fire (its Cultivate has no hour of its own)
+    const ea = at(3714, 'ashfall', 4 * 1440 + 105); ea.james.qi = 999; const em = medCards(ea, SCENES);
+    assert(em.some((m) => m.late) && em.every((m) => m.id === 'med:push' || (m.late && !m.open && m.tag === 'ends past 02:00')), `D-a: at 01:45 a sit or a meridian that would end past 02:00 is locked with its reason (${em.map((m) => m.id + ':' + m.tag).join(', ')})`);
+    const late = taskCards(e, SCENES).filter((c) => c.status === 'late');
+    const okc = taskCards(e, SCENES).filter((c) => c.status === 'open');
+    assert(late.length > 0 && late.every((c) => endsLate(e, taskMinutes(e, SCENES, c.id))), `D-a: at 01:45 the cards that would end past 02:00 are 'late' (${late.map((c) => c.id).join(', ')})`);
+    assert(okc.every((c) => !endsLate(e, taskMinutes(e, SCENES, c.id))), 'D-a: the open ones end by 02:00');
+    if (late.length) {
+        const id = late[0].id;
+        assert(!taskOpen(e, SCENES, id) && dayOver(e, SCENES, id), 'D-a: a late card is not open; the day is over for it');
+        taskQueue(e).push(id, id); const ol = outlook(e, SCENES);
+        assert(ol.rows.length === 2 && ol.rows.every((r) => r.night), 'D-a: the forecast shows a late row and everything after it as waiting for the morning');
+        taskQueue(e).length = 0;
+    }
+    const bq = at(3705, 'ashfall', 4 * 1440 + 115); bq.james.realm = 1; bq.james.saturation = 100;
+    assert(taskCards(bq, SCENES).some((c) => c.id === BT_TASK && c.status === 'open'), 'D-a: the breakthrough is exempt (it is rest)');
+    // E-a: Push through only at night; it lifts that night's 02:00
+    const pn = at(3706, 'ashfall', 4 * 1440 + 15 * 60);
+    assert(!pushWindow(pn) && !medCards(pn, SCENES).some((m) => m.id === 'med:push'), 'E-a: no Push at 15:00');
+    pn.minutes = 4 * 1440 + 23 * 60 + 59; assert(!pushWindow(pn), 'E-a: none at 23:59');
+    pn.minutes = 5 * 1440 + 30; assert(pushWindow(pn), 'E-a: Push from 00:00');
+    runMed(pn, SCENES, 'med:push');
+    assert(pushedTonight(pn) && hour(pn) === 0 && dayEnd(pn) === 6 * 1440 + 120, 'E-a: pushed: 00:30 reads as the morning, the day now ends at the next 02:00');
+    pn.minutes = 5 * 1440 + 150; assert(!nightLock(pn) && taskCards(pn, SCENES).some((c) => c.kind === 'work' && c.status === 'open'), 'E-a: after a push, 02:30 is a working hour: the work cards are back');
+    pn.minutes = 6 * 1440 + 125; assert(nightLock(pn) && pushWindow(pn), 'E-a: the next night locks at 02:00 again, and offers a push again');
+    const old = at(3707, 'ashfall', 4 * 1440 + 60); delete old.wake.push; assert(!pushedTonight(old) && hour(old) === 25, 'E: a save without the push mark has pushed nothing');
+    // B2: a sit that changes nothing is not offered
+    for (const [r, useless] of [[7, false], [8, true], [MAX_REALM, true]]) {
+        const v = at(3708 + r, 'ashfall', 4 * 1440 + 9 * 60); v.james.realm = r; v.james.qi = 999;
+        const sitCard = medCards(v, SCENES).some((m) => /^Cultivate/.test(m.label));
+        const sitChore = taskCards(v, SCENES).some((c) => /^Cultivate/.test(c.label) && c.status === 'open');
+        assert(sitUseless(v) === useless && sitCard === !useless && (!useless || !sitChore), `B2: realm ${r}: sit gain ${sitGain(v)}%, the Cultivate card ${useless ? 'hidden' : 'shown'}`);
+    }
+    // C: what happens at once
+    for (const t of ['Eat something.', 'Cook and eat.', 'Chew a ghost-gill (+8 HP).', 'Eat at the communal pot.', 'Eat it raw. Civilisation is a state of mind.']) assert(instantChoice({ text: t, to: 'x' }), `C2: "${t}" at once`);
+    assert(!instantChoice({ text: 'Train.', to: 'x', time: 10 }), 'C5: work keeps its bar');
+    const ex = SCENES.lf_exit.choices[0];
+    assert(instantChoice(ex) && waitChoice(SCENES, ex, 2275, 'lf_exit'), 'C1 / A1: the Long Forest walk toward the smoke happens at once (was a 37 h bar)');
+    // A1: the Long Forest's second exit, back where he walked in
+    const lf = ensureBars(newGame(3720, { closed: true })); lf.coil.n = 2; lf.scene = 'clearing'; lf.minutes = 10 * 60;
+    const ent = choiceIx(lf, /^Stay lost/); assert(ent >= 0, 'A1: the clearing offers the Long Forest on Coil 2');
+    choose(lf, SCENES, ent); const at0 = lf.flags.lf_at;
+    assert(lf.flags.lf_from === 'clearing' && at0 === 10 * 60, `A1: walking in records the place and the time (${lf.flags.lf_from}, ${at0})`);
+    while (lf.scene !== 'lf_hub') choose(lf, SCENES, 0);
+    advance(lf, 3 * 1440); lf.inventory = {}; lf.james.hp = 1; lf.james.satiety = 90;
+    const back = choiceIx(lf, /^Go back the way you came/);
+    assert(back >= 0 && shownIx(lf, /^Go back the way you came/) && SCENES.lf_hub.choices[back].instant, 'A1: the Long Forest offers the way back, at once');
+    choose(lf, SCENES, back);
+    assert(lf.scene === 'clearing' && !lf.flags.lf_active && lf.minutes >= at0 && lf.minutes <= at0 + DEFAULT_MINUTES.move && lf.james.hp === jamesHpMax(lf) && LF_STOCK.every((id) => lf.inventory[id] === itemCap(id)), `A1: back in the clearing, the clock as he left it (${clockParts(lf.minutes).day}, ${lf.minutes - at0} min walk), bars and hammerspace full`);
+    assert(shownIx(lf, /^Stay lost/), 'A1: the Long Forest can be entered again from there');
+    const ar = ensureBars(newGame(3721, { closed: true })); ar.coil.n = 2; ar.scene = 'arrival';
+    choose(ar, SCENES, choiceIx(ar, /^You remember this\. Stay lost/)); assert(ar.flags.lf_from === 'arrival', 'A1: from the arrival too');
+    const nolf = ensureBars(newGame(3722, { closed: true })); nolf.coil.n = 2; nolf.scene = 'lf_hub'; nolf.flags.lf_active = true;
+    assert(!shownIx(nolf, /^Go back the way you came/) && shownIx(nolf, /^Follow the smoke/), 'A1: a save inside the Long Forest from before the record keeps only the smoke exit');
+    // F1: a story choice picked before takes half its time; task cards keep their own familiarity
+    let tried = 0;
+    for (const [id, sc] of Object.entries(SCENES)) {
+        if (TASK_HUBS[id] || isMenuScene(id) || sc.end || tried >= 6) continue;
+        (sc.choices || []).forEach((c, i) => {
+            if (tried >= 6 || !(c.time >= 20) || c.show || c.req || c.check || c.combat || c.qi || typeof c.to !== 'string' || SCENES[c.to]?.enter || typeof c.text !== 'string' || /^Back\b/.test(c.text)) return;
+            const a = ensureBars(newGame(3730)); a.scene = id; a.james.satiety = 90; a.minutes = 8 * 60;
+            const b = JSON.parse(JSON.stringify(a)); notePicked(b, id, i);
+            const ma = a.minutes; choose(a, SCENES, i); const mb = b.minutes; choose(b, SCENES, i);
+            assert(b.minutes - mb === pickedMinutes(a.minutes - ma) && a.minutes - ma === c.time, `F1: ${id}:${i} picked before takes half (${a.minutes - ma} → ${b.minutes - mb} min)`);
+            tried++;
+        });
+    }
+    assert(tried >= 3 && PICKED_SPEED === 2, `F1: checked on ${tried} story choices`);
+    const ch = at(3731, 'ashfall', 4 * 1440 + 9 * 60); addFood(ch); ch.james.satiety = 20;
+    const eatId = taskCards(ch, SCENES).find((c) => /^Eat something/.test(c.label))?.id;
+    if (eatId) { // full copies (dryClone drops g.picked): the real run with and without the mark (Fable review)
+        const ix = Number(eatId.split(':').pop());
+        const c1 = JSON.parse(JSON.stringify(ch)), c2 = JSON.parse(JSON.stringify(ch)); notePicked(c2, 'ashfall', ix);
+        const m1 = c1.minutes, m2 = c2.minutes; runTask(c1, SCENES, eatId); runTask(c2, SCENES, eatId);
+        assert(c1.minutes - m1 > 0 && c1.minutes - m1 === c2.minutes - m2, `F1: a task card (a chore) picked before keeps its time (${c1.minutes - m1} / ${c2.minutes - m2})`);
+    } else assert(false, 'F1: Ashfall offers Eat something');
+    // after the Fable review
+    const ev = at(3740, 'ashfall', 4 * 1440 + 60); ev.flags.vday = 2; const evi = choiceIx(ev, /^Evening\. Go home/); const ev0 = ev.minutes, evw = wakeDay(ev);
+    assert(evi >= 0, 'review: Ashfall at 01:00 offers the evening exit');
+    if (evi >= 0) { choose(ev, SCENES, evi); assert(ev.minutes >= ev0 && ev.minutes - ev0 < 6 * 60 && wakeDay(ev) === evw, `review: the evening exit at 01:00 doesn't jump to 19:00 (was: 18 h and a free night; ${ev.scene}, +${ev.minutes - ev0} min)`); }
+    const lw = ensureBars(newGame(3741, { closed: true })); lw.coil.n = 2; lw.scene = 'clearing'; lw.minutes = 10 * 60;
+    choose(lw, SCENES, choiceIx(lw, /^Stay lost/)); while (lw.scene !== 'lf_hub') choose(lw, SCENES, 0);
+    for (let k = 0; k < 3; k++) sleepUntil(lw, 6); // three forest nights
+    lw.james.satiety = 90; choose(lw, SCENES, choiceIx(lw, /^Go back the way you came/));
+    const lw0 = wakeDay(lw); sleepUntil(lw, 6); assert(wakeDay(lw) === lw0 + 1 && lw.wake.push === undefined, `review: after the way back, the next night slept counts (${lw0} → ${wakeDay(lw)})`);
+    const fe = at(3742, 'ashfall', 4 * 1440 + 110); addFood(fe); fe.james.satiety = 20; // 01:50
+    const fec = taskCards(fe, SCENES).find((c) => /^Eat something/.test(c.label));
+    assert(fec && fec.status === 'open', `review: eating is never locked as late (01:50: ${fec?.status})`);
+    fe.minutes = 4 * 1440 + 130; assert(fec && !dayOver(fe, SCENES, fec.id) && taskOpen(fe, SCENES, fec.id), 'review: at 02:10 a queued meal still runs');
+    const dm = at(3743, 'ashfall', 4 * 1440 + 105); dm.james.qi = 999; dm.james.primaries = 3;
+    const dmed = medCards(dm, SCENES), dmIds = new Set(dmed.filter((m) => m.task).map((m) => m.task));
+    const lateHub = taskCards(dm, SCENES).filter((c) => c.status === 'late');
+    assert(lateHub.length > 0 && lateHub.every((c) => dmIds.has(c.id)), `review: a late Meditate card keeps its task id, so the hub list doesn't show it twice (${lateHub.map((c) => c.id).join(', ')})`);
+    for (const [r, open] of [[7, true], [8, false]]) { const cp = at(3744 + r, 'camp', 20 * 60); cp.james.realm = r; cp.james.qi = 999; cp.james.saturation = 0; assert(taskCards(cp, SCENES).some((c) => c.id === SIT_TASK) === open, `review: the camp's queueable sit at realm ${r}: ${open ? 'offered' : 'hidden'}`); }
+    const mn = at(3746, 'ashfall', 4 * 1440 + 150); mn.james.qi = 999; assert(!taskOpen(mn, SCENES, MER_TASK), 'review: an old queue\'s mer:next waits after 02:00');
 }
 const pctOf = (o, n) => Object.entries(o).sort().map(([k, v]) => `${k} ${((v / n) * 100).toFixed(1)}%`).join(', ');
 console.log(`  tribute, tasks:   ${pctOf(stats.tasks.endings, stats.tasks.games)}`);

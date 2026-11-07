@@ -5,21 +5,23 @@
 // 1. Invariants: the cultivation formulas, the Coil bonus (Story Mode's numbers dropped in v0.11.34, D1).
 // 2. Drift: every per-Coil rate of the tasks test's bots and every fight's win rate (both bot styles; Incremental Mode only since v0.11.34)
 //    against tools/baseline.json. More than LIMIT points off, with at least MIN_N samples on both sides, is flagged.
+//    v0.11.37 (owner 17:03, pick T1): LIMIT 5 → 20 until the retune; a move of more than NOTE_AT (5) points is still
+//    printed, as a log-only NOTE line.
 //
 //   node tools/sanity.mjs --tasks t.json --story s.json   compare the stats the two tests wrote (tools/check.sh does this)
 //   node tools/sanity.mjs                                 run both tests itself first (about 50 s)
 // v0.11.21: also a log-only line, the noise-scaled drift (tools/lib/noise.mjs): each number against its own chance
-// wobble (3 × its noise, at least 2 points); it never fails the check, ±5 stays the rule until the owner says otherwise.
+// wobble (3 × its noise, at least 2 points); it never fails the check.
 //   node tools/sanity.mjs --update                        save the current numbers as the new baseline — ONLY after the
 //                                                         owner has seen the numbers of an intended change and said go
 import { spawnSync } from 'node:child_process';
 import { readFileSync, writeFileSync, existsSync, mkdtempSync, rmSync } from 'node:fs';
-import { band, flagged, K as NOISE_K, MIN as NOISE_MIN } from './lib/noise.mjs';
+import { band, flagged, K as NOISE_K, MIN as NOISE_MIN, LIMIT, NOTE_AT, driftKind } from './lib/noise.mjs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import os from 'node:os';
 
-const LIMIT = 5; // points
+// LIMIT 20 points (v0.11.37, owner 17:03: was 5), NOTE_AT 5: tools/lib/noise.mjs
 const MIN_N = 100; // samples
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const BASE = path.join(root, 'tools/baseline.json');
@@ -93,6 +95,7 @@ const base = JSON.parse(readFileSync(BASE, 'utf8')).metrics;
 const flags = [];
 const wobble = []; // v0.11.21: log only
 let compared = 0, small = 0;
+const moved = []; // v0.11.37: past ±NOTE_AT, inside ±LIMIT
 for (const [name, b] of Object.entries(base)) {
     const m = metrics[name];
     if (!m) { if (b.n >= MIN_N) flags.push(`${name}: was ${b.v}% (n ${b.n}), now never happens`); continue; }
@@ -100,12 +103,15 @@ for (const [name, b] of Object.entries(base)) {
     if (b.n < MIN_N || m.n < MIN_N) { small++; continue; }
     compared++;
     const d = Math.round((m.v - b.v) * 10) / 10;
-    if (Math.abs(d) > LIMIT) flags.push(`${name}: ${b.v}% → ${m.v}% (${d > 0 ? '+' : ''}${d}; n ${b.n} → ${m.n})`);
+    const kind = driftKind(d);
+    if (kind === 'drift') flags.push(`${name}: ${b.v}% → ${m.v}% (${d > 0 ? '+' : ''}${d}; n ${b.n} → ${m.n})`);
+    else if (kind === 'note') moved.push(`${name}: ${b.v}% → ${m.v}% (${d > 0 ? '+' : ''}${d}; n ${b.n} → ${m.n})`);
 }
 for (const [name, m] of Object.entries(metrics)) if (!base[name] && m.n >= MIN_N) flags.push(`${name}: new, ${m.v}% (n ${m.n})`);
 for (const f of flags) console.log(`  DRIFT  ${f}`);
+for (const w of moved) console.log(`  NOTE  moved more than ${NOTE_AT} points (log only)  ${w}`);
 for (const w of wobble) console.log(`  noise-scaled (log only)  ${w}`);
 console.log(`  noise-scaled drift (log only, ${NOISE_K} × each number's noise, at least ${NOISE_MIN} points, every n): ${wobble.length} would flag; ${small} numbers under n ${MIN_N} are not compared by the ±${LIMIT} rule`);
 const total = fails + flags.length;
-console.log(`${compared} numbers compared (±${LIMIT} points, n ≥ ${MIN_N}): ${flags.length} drifted, ${fails} invariant(s) failed`);
+console.log(`${compared} numbers compared (±${LIMIT} points, n ≥ ${MIN_N}): ${flags.length} drifted, ${moved.length} moved more than ${NOTE_AT} (log only), ${fails} invariant(s) failed`);
 process.exit(total ? 1 : 0);

@@ -20,3 +20,7 @@ export const band = (p, n0, n1, k = K, min = MIN) => Math.max(min, k * noise(p, 
 
 /** Did a number move by more than its band? b and m: { v: percent, n: samples }. */
 export const flagged = (b, m, k = K, min = MIN) => Math.abs(m.v - b.v) > band((b.v + m.v) / 2, b.n, m.n, k, min);
+
+/** v0.11.37 (owner 17:03, pick T1): the drift rule of tools/sanity.mjs: a move past `limit` fails ('drift'), past `noteAt` is listed log only ('note'). */
+export const LIMIT = 20, NOTE_AT = 5;
+export const driftKind = (d, limit = LIMIT, noteAt = NOTE_AT) => (Math.abs(d) > limit ? 'drift' : Math.abs(d) > noteAt ? 'note' : 'ok');

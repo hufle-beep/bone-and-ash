@@ -65,7 +65,7 @@ const jobs = [
         { name: 'watched story games (300 and the walks)', key: 'track-story', cmd: node('tests/story.test.mjs', '--track', '--games', '300', '--workers', '1', '--stats-out', path.join(ST, 'track-story.json')), after: ['tasks'] },
         { name: 'leftovers (strict; choices log only)', key: 'leftovers', show: 'leftovers', cmd: node('tools/leftovers.mjs', '--strict', '--seen', ...['story', 'tasks', 'track', 'track-story'].map((k) => path.join(ST, `${k}.json`))), after: ['tasks', 'story', 'track', 'track-story'] },
     ]),
-    ...(QUICK ? [] : [{ name: 'sanity (invariants, drift ±5)', key: 'sanity', last: true, cmd: node('tools/sanity.mjs', '--tasks', path.join(ST, 'tasks.json'), '--story', path.join(ST, 'story.json')), after: ['tasks', 'story'] }]),
+    ...(QUICK ? [] : [{ name: 'sanity (invariants, drift ±20)', key: 'sanity', last: true, cmd: node('tools/sanity.mjs', '--tasks', path.join(ST, 'tasks.json'), '--story', path.join(ST, 'story.json')), after: ['tasks', 'story'] }]),
 ];
 
 /** Every .js / .mjs file must parse (node --check), a few at a time. */

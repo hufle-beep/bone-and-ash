@@ -6,11 +6,11 @@ import {
     startCombat, combatStep, combatFlee, COMBAT_ACTIONS, setNoDice, noDiceDc, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage,
 } from './core/game.js';
 import { sceneView, choose, goTo, gives } from './core/story.js';
-import { showPicked, isTaskHub, isQueueScreen, runsHere, isTaskChoice, taskCards, taskOpen, taskLabel, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, waitChoice, taskMinutes, runTask, outlook, taskQueue, MS_PER_GAME_HOUR, QUEUE_MAX, FAM, yukiLane, setYuki } from './core/tasks.js';
+import { showPicked, isTaskHub, isQueueScreen, runsHere, isTaskChoice, taskCards, taskOpen, taskLabel, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, waitChoice, taskMinutes, runTask, outlook, taskQueue, MS_PER_GAME_HOUR, QUEUE_MAX, FAM, yukiLane, setYuki, dayOver } from './core/tasks.js';
 import { SCENES, ITEMS } from './story/prologue.js';
 import { againView, skipPlan, skipRun } from './story/again.js'; // v0.11.35 (P1-a)
 import { coilActive, endCoil } from './core/coil.js';
-import { medCards, runMed, isSitChoice, medActivity, useLine } from './core/meditate.js';
+import { medCards, runMed, isSitChoice, medActivity, useLine, LATE_TAG } from './core/meditate.js';
 import { meridianRow } from './story/meridians.js';
 import { realmShockHpBonus } from './core/formulas.js';
 import * as ART from './art/art.js';
@@ -165,6 +165,7 @@ function startNext() {
     if (g.combat) return;
     const q = taskQueue(g);
     const skipped = [];
+    if (q.length && runsHere(g, SCENES, q[0]) && dayOver(g, SCENES, q[0])) return; // v0.11.37 (D-a): the day is over; the queue waits for the morning
     while (q.length && runsHere(g, SCENES, q[0]) && !taskOpen(g, SCENES, q[0])) skipped.push(taskLabel(g, SCENES, q.shift()));
     for (const l of skipped) addResult(l, ['Skipped: not possible when its turn came.'], true);
     if (skipped.length) autosave();
@@ -278,7 +279,7 @@ const storyCardHtml = (c) => {
     const mins = c.disabled ? 0 : storyMinutes(c.index);
     const tag = c.disabled ? c.reason : hideTag(c.tag);
     const ch0 = c.index < 1000 ? SCENES[g.scene]?.choices?.[c.index] : null;
-    const inst = !!ch0 && (instantChoice(ch0) || waitChoice(SCENES, ch0, mins, g.scene));
+    const inst = taskMode || (!!ch0 && (instantChoice(ch0) || waitChoice(SCENES, ch0, mins, g.scene))); // v0.11.37 (C-a)
     const pk = pickedMark(c);
     return `<button class="card story${/fight/.test(c.tag) ? ' fightish' : ''}${busy ? ' busy' : ''}${pk ? ' picked' : ''}" data-story="${c.index}" ${c.disabled ? 'disabled aria-disabled="true"' : ''}>${md(c.label)}${pk ? PICKED_SR : ''}${tag ? `<span class="tag">${esc(tag)}</span>` : ''}<span class="len">${mins && !inst ? durLabel(mins) : mins ? `at once (${durLabel(mins)} pass)` : 'at once'}</span></button>`;
 };
@@ -316,7 +317,7 @@ function renderCardScreen() {
     let queueHtml = ''; // v0.11.12: the queue first, then every card group together (Story, the hub's groups, Meditate)
     let hubTop = '';
     if (qs) {
-        const cards = taskCards(g, SCENES).filter((c) => !medIds.has(c.id) && c.status === 'open'); // v0.11.17 (owner pick 1a): "done for today" cards are hidden
+        const cards = taskCards(g, SCENES).filter((c) => !medIds.has(c.id) && (c.status === 'open' || c.status === 'late')); // v0.11.37 (D-a): 'late' = would end past 02:00, shown locked // v0.11.17 (owner pick 1a): "done for today" cards are hidden
         const q = taskQueue(g);
         const ol = outlook(g, SCENES);
         const counts = {};
@@ -327,14 +328,14 @@ function renderCardScreen() {
             const mins = c.status === 'open' ? taskMinutes(g, SCENES, c.id) : c.minutes;
             const fam = c.kind === 'work' ? ` · ${FAM[c.tier].name}${c.next != null ? ` ${c.fam}/${c.next}` : ''}` : '';
             const ctag = hideTag(c.tag);
-            const tag = c.status !== 'open' ? 'done for today — back tomorrow' : c.kind === 'door' ? `opens the scene${ctag ? ` · ${ctag}` : ''}` : (ctag || (showChecks ? 'no check' : ''));
+            const tag = c.status === 'late' ? LATE_TAG : c.status !== 'open' ? 'done for today — back tomorrow' : c.kind === 'door' ? `opens the scene${ctag ? ` · ${ctag}` : ''}` : (ctag || (showChecks ? 'no check' : ''));
             const inst = isInstantTask(g, SCENES, c.id);
             return `<div class="cardwrap"><button class="card${c.kind === 'door' ? ' door' : ''}${c.check && showChecks ? ` b-${c.check.band}` : ''}" data-run="${esc(c.id)}" ${c.status !== 'open' ? 'disabled' : ''}>${counts[c.id] ? `<span class="n">×${counts[c.id]}</span>` : ''}${md(c.label)}${tag ? `<span class="tag">${esc(tag)}</span>` : ''}${c.status === 'open' ? `<span class="len">${inst ? `at once (${durLabel(mins)} pass)` : durLabel(mins)}${fam}</span>` : ''}</button>${c.status === 'open' ? `<button class="qadd" data-qadd="${esc(c.id)}" aria-label="Add to the end of the queue">+</button>` : ''}</div>`;
         };
         const yl = yukiLane(g);
         const yHtml = yl ? `<div class="yuki-lane"><div><b>Yuki:</b> ${esc(yl.label)} <span class="note">${showChecks ? `Fight ${yl.check} / DC ${yl.dc} · ` : ''}${durLabel(yl.len)} · ${FAM[yl.tier].name}</span>${yl.on ? tickBar('yukibar', yl.progress / yl.len, 'Yuki\'s job') : ''}</div><button class="btn${yl.on ? ' primary' : ''}" data-yuki="1">${yl.on ? 'On' : 'Off'}</button></div>` : '';
         lastFc = ol;
-        const rowWhen = (r) => r.skip ? 'not possible then' : r.wait ? 'after the story' : r.dead ? 'never reached' : `→ ${clockLabelG(g, r.end).replace(/^Day \d+, /, '')} · Fed ${Math.round(r.fed)} · HP ${r.death ? 0 : Math.max(0, Math.round(r.hp))}`;
+        const rowWhen = (r) => r.skip ? 'not possible then' : r.wait ? 'after the story' : r.night ? 'after you sleep (the day ends at 02:00)' : r.dead ? 'never reached' : `→ ${clockLabelG(g, r.end).replace(/^Day \d+, /, '')} · Fed ${Math.round(r.fed)} · HP ${r.death ? 0 : Math.max(0, Math.round(r.hp))}`;
         const rows = ol.rows.map((r, k) => `<li class="${r.skip ? 'skip' : ''}${r.dead || r.death ? ' dead' : ''}${k === 0 && running && !running.kind ? ' running' : ''}"${k === 0 && running && !running.kind ? ' aria-current="step"' : ''}><span>${md(taskLabel(g, SCENES, r.id))}${r.death ? ` <b class="dies">${r.death === 'hunger' ? 'Starves here' : 'Collapses here'}</b>` : ''}</span><time>${rowWhen(r)}</time><span class="qbtns"><button class="x" data-qup="${k}" aria-label="Move up" ${k ? '' : 'disabled'}>↑</button><button class="x" data-qdown="${k}" aria-label="Move down" ${k < ol.rows.length - 1 ? '' : 'disabled'}>↓</button><button class="x" data-unq="${k}" aria-label="Remove">✕</button></span></li>`).join('');
         const span = ol.end - ol.start;
         const out = ol.death
@@ -351,7 +352,7 @@ function renderCardScreen() {
     const storyHtml = v.end
         ? `<h2>Story</h2><div class="cards">${story.map(storyCardHtml).join('')}<button class="card story" data-new="1">Start a new game</button><button class="card story" data-tab-go="sheet">See how James ended up</button></div>` // v0.11.26: an end's own choices first (Go round again…)
         : story.length ? `<h2>Story</h2><div class="cards">${skipHtml}${story.map(storyCardHtml).join('')}</div>` : '';
-    const medOpen = med.filter((m) => m.open); // v0.11.17 (pick 1a): only what can run now (collaterals until they open, locked sits and meridians, Break through until ready)
+    const medOpen = med.filter((m) => m.open || m.late); // v0.11.37 (D-a): a card that would end past 02:00 shows, locked, with that tag // v0.11.17 (pick 1a): only what can run now (collaterals until they open, locked sits and meridians, Break through until ready)
     const medHtml = medOpen.length ? `<h2>Meditate</h2><div class="cards">${medOpen.map(medCardHtml).join('')}</div>` : '';
     view.innerHTML = `<section class="fade-in">
 <div class="plate">${sceneArt(v.art)}</div>
@@ -853,10 +854,11 @@ function tipFor(b) {
         if (ch.qi) lines.push(`Costs ${ch.qi} Qi.`);
         if (ch.combat) lines.push('Leads to a fight.');
     }
-    if (mins) lines.push(`Takes ${durLabel(mins)}${b.dataset.run && isInstantTask(g, SCENES, b.dataset.run) ? ', passing at once' : ''}.`);
+    if (mins) lines.push(`Takes ${durLabel(mins)}${(b.dataset.run && isInstantTask(g, SCENES, b.dataset.run)) || (b.dataset.story != null && taskMode) ? ', passing at once' : ''}.`);
     { const id0 = b.dataset.run || b.dataset.med || ''; const k = medActivity(id0) || (/^(.+):(\d+)$/.test(id0) && taskMode && isSitChoice(SCENES[id0.split(':')[0]]?.choices?.[Number(id0.split(':')[1])], id0.split(':')[0]) ? 'sit' : null); if (k && taskMode) lines.push(useLine(g, k)); } // v0.11.15: speed by use
     if (card && card.kind === 'work') lines.push(`Familiarity: ${FAM[card.tier].name}${card.next != null ? `, ${card.fam} of ${card.next} to ${FAM[card.tier + 1].name}` : ' (the top)'}. Familiar work goes faster.`);
-    if (card && card.status !== 'open') lines.push('Done for today. Back tomorrow.');
+    if (card && card.status === 'late') lines.push('It would end past 02:00, when the day is over. Sleep, or push through the night.');
+    else if (card && card.status !== 'open') lines.push('Done for today. Back tomorrow.');
     if (b.disabled && !card) { const tag = b.querySelector('.tag')?.textContent; lines.push(tag ? `Not now: ${tag}.` : 'Not now.'); }
     if (showChecks && card?.tag) lines.push(`Check: ${card.tag}`);
     if (!lines.length) lines.push('Nothing more to tell. Tap it to find out.');
@@ -998,7 +1000,7 @@ view.addEventListener('click', (ev) => {
             const idx = Number(b.dataset.story);
             const mins = storyMinutes(idx);
             const ch = SCENES[g.scene]?.choices?.[idx];
-            if (!mins || instantChoice(ch) || waitChoice(SCENES, ch, mins, g.scene)) { playChoice(idx); return; } // rest, sleep and waiting for a time of day: no bar (v0.10.0, v0.10.2)
+            if (taskMode || !mins || instantChoice(ch) || waitChoice(SCENES, ch, mins, g.scene)) { playChoice(idx); return; } // v0.11.37 (C-a): every story choice at once, the clock moved (was: rest, sleep and waits only, v0.10.0, v0.10.2)
             tapRun();
             startBar('story', idx, ch ? String(val(ch.text)) : 'Story', mins); render();
             return;

@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.36 | (this push) | The rot ape 15 → 14 (Act 1 softer). Same save state as 0.11.35; the baseline unchanged (0 drift). |
+| 0.11.37 | (this push) | The day ends at 02:00, Push through only at night, story choices and eating at once, familiar story choices at half time, the Long Forest's way back, no useless sit; the baseline updated (owner 17:03), the drift rule ±20. Same save state as 0.11.36 plus the optional `wake.push` and the flags `lf_from` / `lf_at` (an older version ignores them). |
+| 0.11.36 | `232abcb` | The rot ape 15 → 14 (Act 1 softer). Same save state as 0.11.35; the baseline unchanged (0 drift). |
 | 0.11.35 | `4f26b3d` | P1-a: the fold, the memory lines, Skip to the next choice. Same save state as 0.11.34 plus the optional `seen` field (an older version ignores it). No balance change. |
 | 0.11.34 | `dfe27bd` | D1, Story Mode dropped: Incremental Mode only (the switch gone, Story Mode's code unused in place); the tests Incremental only at 1,000 games; the baseline updated. Same save state as 0.11.33 (a Story Mode save loads and plays on in Incremental Mode; the owner deletes his). |
 | 0.11.33 | `309792b` | The one-off work on the task screens, "Call it a day"; the baseline updated (Act 1 harder). **The last version with Story Mode** (dropped next, D1): the starting point for the separate Story Mode game. Same save state as 0.11.32 (the new `oo:` flags are world flags; an older version ignores them). |

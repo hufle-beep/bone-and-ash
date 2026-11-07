@@ -397,9 +397,32 @@ export function advance(g, minutes, { resting = false, work = false } = {}) {
     return notes;
 }
 
+/*
+ * v0.11.37 (owner 14:17 / 14:27, picks D-a + E-a): the waking day ends at 02:00 (Incremental Mode). From 00:00 to 03:59 the
+ * hour tests read 24–27 (the evening before, `dayHour`), so day cards don't come back at midnight. From 02:00 the task
+ * screens and resting places offer only the night (tasks.js, meditate.js), and a card that would end past 02:00 doesn't
+ * start. Push through the night shows only from 00:00 to 03:59; it starts the next waking day at once and lifts that
+ * night's 02:00 (`g.wake.push` = the calendar day of the night pushed through; a save without it has pushed nothing).
+ */
+export const DAY_END_HOUR = 2, NIGHT_TO = 4;
+/** The night hours belong to the day before; pushed through, they belong to the next one. */
+export const pushedTonight = (g) => { if (!noDice) return false; const p = clockParts(g.minutes); return p.hh < NIGHT_TO && wakeState(g).push === p.day; };
+export const dayHour = (g) => { const hh = clockParts(g.minutes).hh; return noDice && hh < NIGHT_TO && !pushedTonight(g) ? hh + 24 : hh; };
+/** The minute this waking day ends (the next 02:00, or the one after a push); Infinity in Story Mode. */
+export function dayEnd(g) {
+    if (!noDice) return Infinity;
+    const p = clockParts(g.minutes), d0 = (p.day - 1) * 1440 + DAY_END_HOUR * 60;
+    return p.hh < NIGHT_TO ? d0 + (pushedTonight(g) ? 1440 : 0) : d0 + 1440;
+}
+export const nightLock = (g) => noDice && g.minutes >= dayEnd(g);
+/** Would `minutes` of work from now run past the day's end? */
+export const endsLate = (g, minutes) => noDice && g.minutes + Math.max(0, minutes || 0) > dayEnd(g);
+export const pushWindow = (g) => noDice && clockParts(g.minutes).hh < NIGHT_TO && !pushedTonight(g);
+
 /** v0.11.18: Push through the night: a new waking day without sleep, one Exhaustion more; the third collapses him for a day. */
 export function pushNight(g) {
     const w = wakeState(g);
+    w.push = clockParts(g.minutes).day; // v0.11.37: this night's 02:00 no longer ends the day
     if (w.ex < 2) { w.n += 1; w.ex += 1; return { collapsed: false, ex: w.ex }; }
     const p = clockParts(g.minutes + 1440);
     let target = (p.day - 1) * 1440 + 6 * 60;
@@ -448,6 +471,8 @@ export const SIT_MINUTES_INC = 60;
 export const sitMinutes = (g) => Math.max(1, Math.round(SIT_MINUTES_INC / actSpeed(g, 'sit')));
 /** Saturation % from `sits` sits (one hour each in Incremental Mode; the hollow and the grove count as two). */
 export const sitGain = (g, sits = 1) => Math.round((noDice ? (100 * sits) / SAT_HOURS(g.james.realm) : condensationSatGain(CONDENSE_SIT_COST, jamesQiMax(g)) * sits) * 10) / 10; // v0.11.15: no Coil bonus
+/** v0.11.37 (owner 13:06, pick B2): a sit that changes nothing (the top realm, or a gain that rounds to 0%: from realm 8) is not offered (Incremental Mode). */
+export const sitUseless = (g) => noDice && (g.james.realm >= MAX_REALM || sitGain(g) <= 0);
 /** The breakthrough's length: 2 h × (realm + 1) ÷ the Coil bonus in Incremental Mode (Foundation 2 h … Heavenly Immortal 28 h); 2 h in Story Mode. */
 export const btMinutes = (g) => (noDice ? exMins(g, Math.round((120 * ((g.james.realm || 0) + 1)) / actSpeed(g, 'bt'))) : 120); // v0.11.15: ÷ its speed by use
 /** Condensation: a conscious sit, 10 Qi a sit, 0 XP; raises Saturation. Spends Qi, never refills it. */

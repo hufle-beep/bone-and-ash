@@ -13,7 +13,7 @@ import './power.js';
 import './stomp_prologue.js';
 import './stomp_act1.js';
 import { STORY_FORMS, hasForm } from '../core/forms.js';
-import { yukiForms, itemNames, itemCap, isNoDice, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, ensureBars, MAX_REALM } from '../core/game.js';
+import { yukiForms, itemNames, itemCap, isNoDice, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, ensureBars, MAX_REALM, wakeState, clockLabel, dayHour } from '../core/game.js';
 import { WILDS, nightNext } from './wilds.js';
 import { ASHFALL, hubOf, nextEvening } from './ashfall.js';
 import { ACT1_ITEMS } from './act1_common.js';
@@ -217,7 +217,7 @@ ${g.james.qi >= 10 && !isNoDice() ? 'You could keep going: condense a little Qi 
         id: 'stream', title: 'Blackwater', art: 'stream', place: 'Blackroot Wilds — the stream',
         text: (g) => `The stream runs dark over black stones, cold enough to hurt your teeth just looking at it. ${g.flags.drank ? 'You\'ve had your fill.' : 'You are very thirsty.'}
 
-${clockParts(g.minutes).hh >= 17 ? 'The light is going amber. Night here will be properly dark.' : 'The red sun is climbing. You have the day — use it.'}
+${dayHour(g) >= 17 ? 'The light is going amber. Night here will be properly dark.' : 'The red sun is climbing. You have the day — use it.'}
 
 ${g.james.satiety < 40 ? 'Your stomach has stopped being polite.' : ''}`,
         choices: [
@@ -609,17 +609,17 @@ It finds you before you find it. It is the size of a small car and it has *opini
         id: 'boar_won', title: 'Meat for Forty Houses', art: 'boar', place: 'Ashfall Hamlet',
         enter: (g) => { addItem(g, 'beast_core', 1); eat(g, 40); bumpRel(g, 'Village', 12, 0); g.flags.boar = true; return ['+1 Murky beast core. You eat with the village: +40 satiety.']; },
         text: `They come out with carts. By sunset half of Ashfall is grilling ironhide, the children carry the tusks to the shrine in solemn procession, and a hunter old enough to be your grandfather kneels in the dust and formally presents you with his own boar spear, which you gather is roughly equivalent to a knighthood. You accept it. You have nowhere to put a spear. Then you remember you own an infinite closet.`,
-        choices: [{ text: (g) => (g.flags.long && clockParts(g.minutes).hh < 16 ? 'Back to the village.' : 'Evening.'), time: 30, to: (g) => (g.flags.long ? (clockParts(g.minutes).hh >= 16 ? nextEvening(g) : hubOf(g)) : 'evening') }],
+        choices: [{ text: (g) => (g.flags.long && dayHour(g) < 16 ? 'Back to the village.' : 'Evening.'), time: 30, to: (g) => (g.flags.long ? (dayHour(g) >= 16 ? nextEvening(g) : hubOf(g)) : 'evening') }],
     },
     boar_lost: {
         id: 'boar_lost', title: 'Ironhide Wins', art: 'boar', place: 'Blackroot Wilds — the oak hollow',
         enter: (g) => { g.james.hp = Math.max(1, Math.floor(g.james.hp * 0.7)); return []; },
         text: `You end up up a tree. The boar ends up bored. You both agree to call it a draw, and you limp back to Ashfall with bark in places bark should not go.`,
-        choices: [{ text: (g) => (g.flags.long && clockParts(g.minutes).hh < 16 ? 'Back to the village.' : 'Evening.'), time: 30, to: (g) => (g.flags.long ? (clockParts(g.minutes).hh >= 16 ? nextEvening(g) : hubOf(g)) : 'evening') }],
+        choices: [{ text: (g) => (g.flags.long && dayHour(g) < 16 ? 'Back to the village.' : 'Evening.'), time: 30, to: (g) => (g.flags.long ? (dayHour(g) >= 16 ? nextEvening(g) : hubOf(g)) : 'evening') }],
     },
     evening: {
         id: 'evening', title: 'Dinner', art: 'dinner', place: 'Ashfall Hamlet — Mei Lin\'s house',
-        enter: (g) => { const p = clockParts(g.minutes); if (p.hh < 19) g.minutes = (p.day - 1) * 1440 + 19 * 60; if (!g.flags.ate_dinner) { eat(g, 30); g.flags.ate_dinner = true; return ['Millet, greens and a little smoked fish: +30 satiety.']; } return []; },
+        enter: (g) => { const p = clockParts(g.minutes); if (dayHour(g) < 19) g.minutes = (p.day - 1) * 1440 + 19 * 60; /* v0.11.37: after midnight (24+) it is already evening: no jump back to 19:00 */ if (!g.flags.ate_dinner) { eat(g, 30); g.flags.ate_dinner = true; return ['Millet, greens and a little smoked fish: +30 satiety.']; } return []; },
         text: (g) => `${g.flags.ignored
         ? 'You find her house by asking. You apologise on her doorstep, properly, no sarcasm. She lets you in, which you did not deserve, and puts a bowl in front of you, which you deserved even less.'
         : g.flags.long ? 'Third supper at Mei Lin\'s. Her mother serves you first now, which in Ashfall is roughly the same as a signed adoption certificate.' : 'Mei Lin\'s house is two rooms and a herb loft, and her mother is a tiny fierce woman who looks at you once and starts adding more millet to the pot.'}
@@ -951,21 +951,42 @@ export function lfSeason(g) {
     const s = j.gu;
     return [SEASON_LINES[(g.flags.lf_seasons - 1) % SEASON_LINES.length], `Realm: ${realmName(was)} → ${realmName(r)}. GU, Convergence Use, Yuki's Fight and Qi Use: at least T${s.tier} L${s.level}.`];
 }
-SCENES.clearing.choices.push({ text: 'Stay lost. (The Long Forest: climb the realms one season at a time.)', show: lfOpen, to: 'lf_enter' });
+/** v0.11.37 (owner 12:59, pick A1): where James walked into the Long Forest, and when (flags `lf_from`, `lf_at`), for "Go back the way you came". */
+const lfFrom = (from) => (g) => { g.flags.lf_from = from; g.flags.lf_at = g.minutes; return []; };
+SCENES.clearing.choices.push({ text: 'Stay lost. (The Long Forest: climb the realms one season at a time.)', show: lfOpen, do: lfFrom('clearing'), to: 'lf_enter' });
 SCENES.arrival.choices.push({
     text: 'You remember this. Stay lost. (The Long Forest.)', show: lfOpen, time: 30,
-    do: (g) => { for (const f of ['bone_ok', 'sat_once']) g.flags[f] = true; return ['You skip the parts you know by heart, and walk the other way from the water.']; },
+    do: (g) => { for (const f of ['bone_ok', 'sat_once']) g.flags[f] = true; lfFrom('arrival')(g); return ['You skip the parts you know by heart, and walk the other way from the water.']; },
     to: 'lf_enter',
 });
 SCENES.lf_hub.choices.push({
     text: (g) => `Withdraw for a season: ${realmName(g.james.realm)} → ${realmName(g.james.realm + 1)}.`,
     show: (g) => isNoDice() && g.james.realm < MAX_REALM, time: LF_SEASON_MINUTES, do: lfSeason, to: 'lf_hub',
 });
+const LF_FULL = 'The hammerspace is full: the Long Forest\'s pantry comes with you.';
+const lfStock = (g) => { for (const id of LF_STOCK) g.inventory[id] = Math.max(g.inventory[id] || 0, itemCap(id)); };
 { // leaving in task mode: the hammerspace goes out full
     const exit = SCENES.lf_exit.choices[0];
     const was = exit.do;
-    exit.do = (g) => { const out = was(g); if (isNoDice()) { for (const id of LF_STOCK) g.inventory[id] = Math.max(g.inventory[id] || 0, itemCap(id)); out.push('The hammerspace is full: the Long Forest\'s pantry comes with you.'); } return out; };
+    exit.do = (g) => { const out = was(g); if (isNoDice()) { lfStock(g); out.push(LF_FULL); } return out; };
+    exit.instant = true; // v0.11.37 (A1): at once (the wrapper hides its clock from waitChoice's reading)
 }
+/** v0.11.37 (owner 12:59, pick A1): the second way out: back where he walked in (the clearing or the arrival), the clock as he left it. At the end of the list: the hub's card ids stay. */
+SCENES.lf_hub.choices.push({
+    text: 'Go back the way you came. (The calendar starts again where you walked in.)',
+    show: (g) => isNoDice() && ['clearing', 'arrival'].includes(g.flags.lf_from) && Number.isFinite(g.flags.lf_at),
+    instant: true,
+    do: (g) => {
+        g.flags.lf_active = false;
+        g.minutes = g.flags.lf_at;
+        { const w = wakeState(g); w.ex = 0; w.slept = clockParts(g.minutes).day; delete w.push; } // rested; the day count runs on, but the next night slept counts (Fable review: `slept` was left at the forest's last day)
+        g.james.hp = jamesHpMax(g); g.james.qi = jamesQiMax(g); g.yuki.hp = yukiHpMax(g); g.yuki.qi = yukiQiMax(g);
+        ensureBars(g);
+        lfStock(g);
+        return [`You walk out of the Long Forest the way you came in. The calendar starts again where you left it: ${clockLabel(g.minutes)}.`, LF_FULL];
+    },
+    to: (g) => g.flags.lf_from,
+});
 
 /* ---------- v0.10.4: Bonesinger forms — Incremental Mode hides a choice until James can sing its form; four lines reworded ---------- */
 {

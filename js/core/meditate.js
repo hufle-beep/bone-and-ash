@@ -5,8 +5,7 @@
  * On a task hub, Cultivate is the hub's own cultivate card (queueable; same id, same familiarity), shown in this group.
  * Pure — no DOM.
  */
-import { condense, canBreakThrough, breakReady, breakBlock, btMinutes, sitGain, isNoDice, sitMinutes, actSpeed, actUses, exMins, exLevel, EX_MULT, pushNight } from './game.js';
-import { anyDailyDone } from '../story/common.js';
+import { condense, canBreakThrough, breakReady, breakBlock, btMinutes, sitGain, isNoDice, sitMinutes, actSpeed, actUses, exMins, exLevel, EX_MULT, pushNight, nightLock, endsLate, pushWindow, sitUseless } from './game.js';
 import { CONDENSE_SIT_COST } from './formulas.js';
 import { goTo, checkDeath, choose, choiceOpen } from './story.js';
 import { btTarget, MER_LINES, lineWindow, lineWait, lineIndex, lineName } from '../story/meridians.js';
@@ -54,21 +53,33 @@ function merCards(g, scenes) {
 export function medCards(g, scenes) {
     if (!canMeditate(g, scenes)) return [];
     const out = [];
+    if (isNoDice() && nightLock(g)) return pushCard(g); // v0.11.37 (D-a): from 02:00 only the night
     const s = scenes[g.scene];
     const hubSit = TASK_HUBS[g.scene] ? (s.choices || []).findIndex((c) => isSitChoice(c, g.scene)) : -1;
     const qiOk = g.james.qi >= CONDENSE_SIT_COST;
     const sm0 = sitMinutes(g), sm = exMins(g, sm0);
     const sit = { label: `Cultivate: ${sm0 === 60 ? 'an hour' : `${sm0} min`}, ${CONDENSE_SIT_COST} Qi, Saturation +${sitGain(g)}% (${g.james.saturation}%).`, tag: qiOk ? `${CONDENSE_SIT_COST} Qi` : `needs ${CONDENSE_SIT_COST} Qi`, open: qiOk, minutes: sm };
-    if (hubSit >= 0) out.push({ ...sit, id: `${g.scene}:${hubSit}`, task: `${g.scene}:${hubSit}` });
-    else out.push({ ...sit, id: 'med:sit', ...(sitOpen(g, scenes) ? { task: SIT_TASK } : {}) }); // v0.11.12: queueable on a task screen with no Cultivate of its own
-    out.push(...merCards(g, scenes)); // v0.11.13 (E1): replaces "Next meridian session" and "Open a meridian"
+    if (sit.open && endsLate(g, sm)) Object.assign(sit, LATE);
+    if (sitUseless(g)) { /* v0.11.37 (B2): a sit that changes nothing is not offered */ }
+    else if (hubSit >= 0) out.push({ ...sit, id: `${g.scene}:${hubSit}`, task: `${g.scene}:${hubSit}` }); // its task id keeps the hub's own chore off the card list even when locked
+    else out.push({ ...sit, id: 'med:sit', ...((sit.open || sit.late) && sitOpen(g, scenes) ? { task: SIT_TASK } : {}) }); // v0.11.12: queueable on a task screen with no Cultivate of its own
+    out.push(...merCards(g, scenes).map((m) => (m.open && endsLate(g, m.minutes) ? { ...m, ...LATE } : m))); // a late card keeps its task id: the hub list doesn't show it twice (Fable review) // v0.11.13 (E1): replaces "Next meridian session" and "Open a meridian"
     if (canBreakThrough(g)) {
         const warn = btTarget(g) !== 'breakthrough';
         out.push({ id: 'med:bt', label: `Break through. (Saturation ${g.james.saturation}%; ${hrs(btMinutes(g))}.)`, tag: warn ? 'a warning first' : 'queueable', open: true, minutes: warn ? 0 : btMinutes(g), ...(warn || !isQueueScreen(g, scenes) ? {} : { task: BT_TASK }) });
     }
     else if (breakReady(g) && breakBlock(g)) out.push({ id: 'med:bt', label: `Break through. (Saturation ${g.james.saturation}%.)`, tag: breakBlock(g), open: false, reason: breakBlock(g), minutes: 0 });
-    if (isNoDice() && anyDailyDone(g)) { const ex = exLevel(g); out.push({ id: 'med:push', label: ex >= 2 ? 'Push through the night. (You will collapse: a day lost.)' : `Push through the night. (A new day without sleep; work ×${EX_MULT[ex + 1]} until you sleep.)`, tag: ex >= 2 ? 'collapse' : `Exhaustion ${ex + 1}`, open: true, minutes: 0 }); }
+    out.push(...pushCard(g));
     return out;
+}
+/** v0.11.37 (D-a): a card that would run past 02:00 doesn't start. */
+export const LATE_TAG = 'ends past 02:00';
+const LATE = { open: false, late: true, tag: LATE_TAG, reason: LATE_TAG };
+/** v0.11.37 (owner 14:27, E-a): Push through the night only from 00:00 to 03:59, once a night (no longer tied to a used-up daily). */
+function pushCard(g) {
+    if (!isNoDice() || !pushWindow(g)) return [];
+    const ex = exLevel(g);
+    return [{ id: 'med:push', label: ex >= 2 ? 'Push through the night. (You will collapse: a day lost.)' : `Push through the night. (A new day without sleep; work ×${EX_MULT[ex + 1]} until you sleep.)`, tag: ex >= 2 ? 'collapse' : `Exhaustion ${ex + 1}`, open: true, minutes: 0 }];
 }
 
 /** Run a Meditate card that isn't a hub task. Returns { lines, moved }. */
@@ -85,12 +96,13 @@ export function runMed(g, scenes, id) {
         const i = merLineChoice(g, scenes, line);
         if (i < 0) throw new Error(`No meridian work on ${line} now`);
         g.scene = 'meridians';
-        const r = choose(g, scenes, i);
+        const r = choose(g, scenes, i, { task: true });
         if (g.scene === 'meridians') g.scene = back; // back without running the scene's enter again
         const dead = g.scene === back ? checkDeath(g, scenes) : [];
         return { lines: [...r.lines, ...dead], moved: g.scene !== back };
     }
     if (id === 'med:push') {
+        if (!pushWindow(g)) throw new Error('Not the night');
         const r = pushNight(g);
         const dead = checkDeath(g, scenes);
         return { lines: [r.collapsed ? 'You sit down to think about it and wake a day later, face down. Yuki has been sitting on your back the whole time, on principle. HP and Qi full; Exhaustion gone.' : `You don't sleep. Yuki watches you not sleeping with professional disapproval. The once-a-day work is open again. Exhaustion ${r.ex}: work takes ×${EX_MULT[r.ex]} until you sleep.`, ...dead], moved: dead.length > 0 };

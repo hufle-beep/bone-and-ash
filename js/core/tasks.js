@@ -13,8 +13,8 @@
  * The story checks and fights keep the d6 until 3c.
  */
 import { hasForm } from './forms.js';
-import { choose, goTo, choiceOpen, choiceTag, gives, setTimeless, defaultMinutes, movesPlace, wasPicked, isMenuScene, isTimeless } from './story.js';
-import { advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck, canBreakThrough, btMinutes, realmName, condense, sitMinutes, isNoDice, useSpeed, USE_N, exMins } from './game.js';
+import { choose, goTo, choiceOpen, choiceTag, gives, setTimeless, defaultMinutes, movesPlace, wasPicked, isMenuScene, isTimeless, setFamiliar } from './story.js';
+import { advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck, canBreakThrough, btMinutes, realmName, condense, sitMinutes, isNoDice, useSpeed, USE_N, exMins, nightLock, endsLate, sitUseless } from './game.js';
 import { CONDENSE_SIT_COST } from './formulas.js';
 import { btTarget, MER_LINES, lineWindow, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
@@ -100,6 +100,8 @@ export function showPicked(g, scenes, index, label) {
     return !/^Back\b/.test(String(label));
 }
 
+setFamiliar((g, scenes, index, label) => showPicked(g, scenes, index, label)); // v0.11.37 (F1): the sepia choices are the familiar ones
+
 /** v0.10.0: "Next meridian session" — a queueable hub card that takes the first open session on the meridian screen. */
 export const MER_TASK = 'mer:next';
 /** v0.11.2: "Break through" as a queueable hub card (a timed sit, then the tribulation scene as a story stop). Only when no warning screen comes first. */
@@ -108,7 +110,7 @@ export const btOpen = (g) => canBreakThrough(g) && btTarget(g) === 'breakthrough
 /** v0.11.12: "Cultivate (one sit)" as a queueable card on the task screens that have no Cultivate choice of their own (camp, stream, village). */
 export const SIT_TASK = 'sit:next';
 const hubHasSit = (scenes, hubId) => (scenes[hubId]?.choices || []).some((c) => c.to === hubId && /^(Cultivate|Condense)/.test(String(typeof c.text === 'function' ? '' : c.text)) && /condense\(g\)/.test(String(c.do)));
-export const sitOpen = (g, scenes) => isQueueScreen(g, scenes) && !(TASK_HUBS[g.scene] && hubHasSit(scenes, g.scene)) && g.james.qi >= CONDENSE_SIT_COST && g.james.saturation < 100;
+export const sitOpen = (g, scenes) => isQueueScreen(g, scenes) && !(TASK_HUBS[g.scene] && hubHasSit(scenes, g.scene)) && g.james.qi >= CONDENSE_SIT_COST && g.james.saturation < 100 && !sitUseless(g);
 /** v0.11.14: the Meditate cards that can be queued anywhere Meditate shows. */
 export const isMedTask = (id) => id === SIT_TASK || id === BT_TASK || !!lineOfTask(id);
 /** v0.11.14: a screen with a queue: a task screen, or a resting place where Meditate shows (only Meditate cards queue there). */
@@ -131,14 +133,17 @@ export function merChoice(g, scenes) {
     return -1;
 }
 /** v0.10.0: rest and sleep happen at once (no bar; the clock still moves). */
-export const instantChoice = (c) => !!c && !c.combat && !c.check && !c.qi && typeof c.text === 'string'
-    && (/^(Rest|Sleep|Call it a day)\b/.test(c.text) || /^(Get wet\. Sleep|Make camp and sleep|Go back to sleep|Just sleep|Let her sleep|Bandage it\. Sleep|Leave (a|the) thread on watch|Thank her for dinner and sleep|Limp back to camp and sleep)/.test(c.text));
+export const instantChoice = (c) => !!c && !c.combat && !c.check && !c.qi && (c.instant === true || typeof c.text === 'string'
+    && (/^(Rest|Sleep|Call it a day)\b/.test(c.text) || EAT_NOW.test(c.text) || /^(Get wet\. Sleep|Make camp and sleep|Go back to sleep|Just sleep|Let her sleep|Bandage it\. Sleep|Leave (a|the) thread on watch|Thank her for dinner and sleep|Limp back to camp and sleep)/.test(c.text)));
+/** v0.11.37 (owner 13:08, C2): eating and a quick herb happen at once too (the clock still moves). */
+const EAT_NOW = /^(Eat (something|it raw|at the communal pot)|Cook and eat|Chew a ghost-gill)\b/;
 /**
  * v0.10.2: a story choice that only waits for a time of day (no check, Qi, fight or time of its own; its `do` or the
  * next scene's `enter` sets the clock) plays at once in task mode — the clock jumps, no bar. `mins` = its dry run.
  */
 const SETS_CLOCK = /g\.minutes\s*=[^=]|toHour\(/;
 export function waitChoice(scenes, c, mins = 60, from = null) {
+    if (c?.instant === true && !c.combat && !c.check && !c.qi) return true; // v0.11.37: marked by hand (the Long Forest's exits: a wrapper hides their clock)
     if (!c || c.combat || c.check || c.qi || c.time != null || mins < 60 || (from && c.to === from)) return false; // a choice back to its own scene is an action, not a wait
     if (c.do && SETS_CLOCK.test(String(c.do))) return true;
     const to = typeof c.to === 'string' ? scenes[c.to] : null;
@@ -185,10 +190,10 @@ export function cardCheck(g, id, c) {
 }
 
 /** Every card on the current hub: { id, kind, group, label, tag, minutes (estimate), status, tier, fam, next, check? }. */
-export function taskCards(g, scenes) {
+export function taskCards(g, scenes, only = null) {
     const hubId = g.scene;
     const cfg = TASK_HUBS[hubId];
-    if (!cfg) return medTaskCards(g, scenes); // v0.11.14: a resting place: only the Meditate cards
+    if (!cfg) return nightCards(g, scenes, medTaskCards(g, scenes), only); // v0.11.14: a resting place: only the Meditate cards
     const hub = scenes[hubId];
     const t = st(g);
     const cards = [];
@@ -218,10 +223,29 @@ export function taskCards(g, scenes) {
     }
     hub.choices.forEach((c, i) => {
         if (!choiceOpen(g, c)) return;
+        if (sitUseless(g) && isSitChore(c, hubId)) return; // v0.11.37 (B2): a sit that changes nothing is not offered
         if (isDoor(cfg, c)) push(`${hubId}:${i}`, 'door', cfg.own, c, c.time || 0, 'open');
         else if (isChore(hubId, c)) push(`${hubId}:${i}`, c.check && !cfg.plainChecks ? 'work' : 'chore', cfg.own, c, c.time || 0, 'open');
     });
     cards.push(...medTaskCards(g, scenes));
+    return nightCards(g, scenes, cards, only);
+}
+/**
+ * v0.11.37 (owner 14:17, pick D-a): from 02:00 a task screen offers only the night: eating stays (its story stops, the
+ * evening exits, show as before); any other card that would end past 02:00 is 'late' (shown locked; the queue skips
+ * it). The breakthrough is exempt (it is rest). `only`: check just that card (taskOpen, the forecast's rows).
+ */
+const NIGHT_OK = /^(Eat|Cook and eat|Chew a ghost-gill)\b/;
+const isNightOk = (c) => c.kind === 'chore' && NIGHT_OK.test(String(c.label));
+const isSitChore = (c, hubId) => c.to === hubId && /^(Cultivate|Condense)/.test(String(typeof c.text === 'function' ? '' : c.text)) && /condense\(g\)/.test(String(c.do));
+function nightCards(g, scenes, cards, only) {
+    if (!isNoDice()) return cards;
+    if (nightLock(g)) return cards.filter(isNightOk);
+    for (const c of cards) {
+        if (c.status !== 'open' || c.kind === 'bt' || isNightOk(c) || (only && c.id !== only)) continue; // eating is open at night anyway (Fable review)
+        if (!endsLate(g, 4 * (c.minutes || 0) + 120)) continue; // cheap bound first (work ×2 new ×2 Exhaustion; a sit or a rest inside a chore ≤ 2 h)
+        if (endsLate(g, taskMinutes(g, scenes, c.id))) c.status = 'late';
+    }
     return cards;
 }
 /** The queueable Meditate cards here (v0.11.13 meridian lines, v0.11.12 sit, v0.11.2 breakthrough); off the task screens they are the only cards (v0.11.14). */
@@ -239,7 +263,7 @@ function medTaskCards(g, scenes) {
     return cards;
 }
 
-export const taskOpen = (g, scenes, id) => (id === MER_TASK ? !!TASK_HUBS[g.scene] && merChoice(g, scenes) >= 0 : taskCards(g, scenes).some((c) => c.id === id && c.status === 'open')); // v0.11.13: an old queue's mer:next still runs
+export const taskOpen = (g, scenes, id) => (id === MER_TASK ? !!TASK_HUBS[g.scene] && merChoice(g, scenes) >= 0 && !nightLock(g) : taskCards(g, scenes, id).some((c) => c.id === id && c.status === 'open')); // v0.11.13: an old queue's mer:next still runs
 export const taskLabel = (g, scenes, id) => { if (id === MER_TASK) return 'Next meridian session'; if (lineOfTask(id)) return lineName(g, lineOfTask(id)).replace(/\.$/, ''); if (id === BT_TASK) return 'Break through'; if (id === SIT_TASK) return 'Cultivate: one sit'; const p = parse(id); const c = scenes[p.scene]?.choices?.[p.index]; return c ? asText(c.text, g) : id; };
 
 /** HP 0 during a task (v0.9.4): the Coil ends. The queue is gone; the Coil screen decides what happens next. */
@@ -381,7 +405,7 @@ export function runTask(g, scenes, id) {
         const mi = card.line ? merLineChoice(g, scenes, card.line) : merChoice(g, scenes);
         if (mi < 0) throw new Error('No meridian session possible');
         g.scene = 'meridians';
-        const r = choose(g, scenes, mi);
+        const r = choose(g, scenes, mi, { task: true });
         lines.push(...r.lines);
         if (r.roll && !r.roll.success) fail = true;
         if (g.scene === 'meridians') g.scene = hubId; // back to the hub without running its enter
@@ -391,7 +415,7 @@ export function runTask(g, scenes, id) {
         lines.push(...resolveWork(g, scenes, hubId, card, id));
         fail = g.stats.checks > checks && g.stats.wins === before;
     } else {
-        const take = (index) => { const r = choose(g, scenes, index); lines.push(...r.lines); if (r.roll && !r.roll.success) fail = true; if (r.combat) throw new Error(`A task can't start a fight (${id})`); };
+        const take = (index) => { const r = choose(g, scenes, index, { task: true }); lines.push(...r.lines); if (r.roll && !r.roll.success) fail = true; if (r.combat) throw new Error(`A task can't start a fight (${id})`); };
         if (card.menu) take(card.entryIndex);
         if (!card.menu || g.scene === card.menu) take(card.p.index);
         if (card.kind === 'chore' || card.kind === 'door') learn(g, scenes, hubId, card, id, 1);
@@ -441,10 +465,13 @@ export function outlook(g, scenes) {
     let fedOut = null;
     let left = false;
     let death = null;
+    let night = false;
     for (const id of st(g).queue) {
         if (death) { rows.push({ id, dead: true }); continue; }
         if (left) { rows.push({ id, wait: true }); continue; }
+        if (night) { rows.push({ id, night: true }); continue; }
         if (!runsHere(c, scenes, id)) { left = true; rows.push({ id, wait: true }); continue; } // v0.11.14: a row for another screen waits
+        if (dayOver(c, scenes, id)) { night = true; rows.push({ id, night: true }); continue; } // v0.11.37 (D-a): the queue stops at the day's end and waits for the morning
         if (!taskOpen(c, scenes, id)) { rows.push({ id, skip: true }); continue; }
         const before = c.minutes;
         const r = runTask(c, scenes, id);
@@ -459,6 +486,9 @@ export function outlook(g, scenes) {
     }
     return { rows, fedOut, fedEnd: c.james.satiety, end: c.minutes, start: g.minutes, death };
 }
+
+/** v0.11.37 (D-a): queue row `id` can't run because the day is over (02:00 passed, or it would end past 02:00): the queue waits, nothing is skipped. */
+export const dayOver = (g, scenes, id) => isNoDice() && (nightLock(g) ? !taskCards(g, scenes, id).some((x) => x.id === id && x.status === 'open') : taskCards(g, scenes, id).some((x) => x.id === id && x.status === 'late')); // at night a queued meal still runs (Fable review)
 
 /* ---------- the queue, edited (v0.10.0; pure: the screen calls these) ---------- */
 /** Run `id` now: it goes to the front (the card that was running moves to second place). */

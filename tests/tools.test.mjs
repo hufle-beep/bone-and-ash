@@ -12,7 +12,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { mergeInto, seedOf } from './lib/shard.mjs';
 import { validateJobs } from '../tools/lib/jobs.mjs';
-import { noise, band, flagged, K, MIN } from '../tools/lib/noise.mjs';
+import { noise, band, flagged, K, MIN, LIMIT, NOTE_AT, driftKind } from '../tools/lib/noise.mjs';
 import { strip, scanFunctions, scanFlags, flagFindings, scanCss, scanMarkers, scanStorage, scanFiles, applyKeep, loadKeep, KINDS, strictFailures, STRICT_KINDS } from '../tools/leftovers.mjs'; // v0.11.22; strict v0.11.23
 import { seen as touched, track, noteView, seenOut } from './lib/seen.mjs'; // v0.11.22
 import { stepLine, flagLines, leftoverFound, modelDigest } from '../tools/lib/report.mjs'; // v0.11.28
@@ -119,6 +119,9 @@ for (const mode of ['full', 'quick']) {
     assert(!flagged({ v: 50, n: 2000 }, { v: 50, n: 2000 }), 'no change: not flagged');
     assert(flagged({ v: 50, n: 2000 }, { v: 55, n: 2000 }), 'n 2,000: a 5-point move is flagged');
     assert(!flagged({ v: 81, n: 107 }, { v: 75, n: 107 }), 'n 107: a 6-point move is within the noise');
+    // v0.11.37 (owner 17:03, pick T1): the drift rule ±20 fails, past ±5 is listed log only
+    assert(LIMIT === 20 && NOTE_AT === 5, `the drift rule: ±${LIMIT} fails, past ±${NOTE_AT} a log-only note`);
+    assert(driftKind(0) === 'ok' && driftKind(5) === 'ok' && driftKind(-5.1) === 'note' && driftKind(11.5) === 'note' && driftKind(20) === 'note' && driftKind(-20.1) === 'drift' && driftKind(30) === 'drift', 'driftKind: ok ≤ 5 < note ≤ 20 < drift, both signs');
 }
 
 // 6. 1 worker = 2 workers: the same stats, object keys sorted

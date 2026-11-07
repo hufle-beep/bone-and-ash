@@ -5,7 +5,7 @@
  * shared camp / fireside / night scenes, a seeded night event, and the Mei Lin – Ya – James romance arc.
  * Entry 'bl_start' (Day 11). Exit 'ht_start' (Day 16, 06:00). Region in g.flags.bl_region, expedition day in g.flags.bl_day (1–5).
  */
-import { addItem, hasItem, eat, advance, clockParts, d6, awardYukiFightXp, jamesHpMax, condense } from '../core/game.js';
+import { addItem, hasItem, eat, advance, clockParts, d6, awardYukiFightXp, jamesHpMax, condense, dayHour } from '../core/game.js';
 import { daily, markDaily, eatBest, pantry, foodCount, hour } from './common.js';
 import { encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil } from './act1_common.js';
 
@@ -21,7 +21,7 @@ const onlyMei = (g) => likesMei(g) && !likesYa(g);
 /** Move the clock forward to hour h today (time passes: hunger, regen). */
 function toHour(g, h) {
     const p = clockParts(g.minutes);
-    if (p.hh < h) advance(g, (h - p.hh) * 60 - p.mm);
+    if (dayHour(g) < h) advance(g, (h - p.hh) * 60 - p.mm); // v0.11.37: after midnight (24+) the hour has passed
 }
 /** After a lost fight: the others drag you clear; you come round with some HP. */
 const patchUp = (g) => { g.james.hp = Math.max(g.james.hp, Math.round(jamesHpMax(g) * 0.4)); return ['Mei Lin binds what she can. Ya calls you soft, and carries your pack.']; };

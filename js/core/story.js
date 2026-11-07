@@ -144,6 +144,15 @@ export function notePicked(g, sceneId, index) {
     const a = g.picked[sceneId] || (g.picked[sceneId] = []);
     if (!a.includes(index)) { a.push(index); a.sort((x, y) => x - y); }
 }
+/**
+ * v0.11.37 (owner 14:25, pick F1): familiarity on story choices: one picked before (any Coil; the ones shown in sepia,
+ * tasks.js `showPicked`, set at load) takes half its time: its own `time` and the default walk or talk. Not the clock jumps
+ * a scene sets (waits, sleep), not fights, not task cards (their own familiarity), Incremental Mode only.
+ */
+let familiar = null;
+export const setFamiliar = (fn) => { familiar = fn; };
+export const PICKED_SPEED = 2;
+export const pickedMinutes = (m) => Math.max(1, Math.round(m / PICKED_SPEED));
 /** v0.11.33: called on every choice taken (oneoff.js counts the once-per-Coil work); set once at load. */
 let onChoose = null;
 export const setOnChoose = (fn) => { onChoose = fn; };
@@ -179,7 +188,7 @@ export function movesPlace(g, scenes, fromId, toId) {
 /**
  * Take choice `index`. Returns { lines, roll, combat } — lines are what happened (rolls, XP, items).
  */
-export function choose(g, scenes, index) {
+export function choose(g, scenes, index, { task = false } = {}) {
     const s = currentScene(g, scenes);
     g.lastWin = null;
     if (index >= ONE_MOVE) {
@@ -204,6 +213,7 @@ export function choose(g, scenes, index) {
     if (c.req && c.req(g) !== true) throw new Error(`Locked: ${c.req(g)}`);
     const lines = [];
     if (c.qi && !spendQi(g, c.qi)) throw new Error('Not enough Qi');
+    const fast = !task && isNoDice() && !!familiar && familiar(g, scenes, index, asText(c.text, g)); // v0.11.37 (F1): before this pick marks it
     notePicked(g, s.id, index);
     let roll = null;
     let ok = true;
@@ -218,7 +228,7 @@ export function choose(g, scenes, index) {
         if (c.xp !== false) lines.push(...awardXp(g, c.check.skill, c.check.band || 'standard', { fail: !ok, factor: partial ? roll.ratio : 1 }));
     }
     if (onChoose && ok) onChoose(g, s.id, index, c); // v0.11.33: once-per-Coil work counts only when it succeeds (owner 14:05)
-    if (c.time) lines.push(...advance(g, c.time, { work: true }));
+    if (c.time) lines.push(...advance(g, fast ? pickedMinutes(c.time) : c.time, { work: true }));
     takeCapNotes();
     if (ok && c.do) {
         // a critical hunt or forage (total ≥ 2 × DC): a double haul
@@ -247,7 +257,7 @@ export function choose(g, scenes, index) {
     const loc0 = g.location;
     lines.push(...go(g, scenes, dest));
     const extra = defaultMinutes(scenes, s.id, c, g.scene, g.location !== loc0);
-    if (extra) lines.push(...advance(g, extra, { work: true }));
+    if (extra) lines.push(...advance(g, fast ? pickedMinutes(extra) : extra, { work: true }));
     lines.push(...checkDeath(g, scenes));
     g.log.push({ at: g.minutes, scene: g.scene, lines: lines.slice(0, 12) });
     if (g.log.length > 200) g.log.shift();
