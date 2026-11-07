@@ -94,6 +94,7 @@ export function rewind(g, { to = 'act' } = {}) {
     base.rel = rel;
     base.tasks = { queue: [], fam: clone(g.tasks.fam || {}), use: clone(g.tasks.use || {}), adapt: clone(g.tasks.adapt || {}), yuki: { on: !!g.tasks.yuki?.on, progress: 0 } };
     base.stats = clone(g.stats);
+    if (g.picked) base.picked = clone(g.picked); // v0.11.32 (P2-a): picked choices are remembered across every rewind
     base.log = g.log.slice(-150);
     base.rng = g.rng;
     base.combat = null; base.lastWin = null;

@@ -259,6 +259,23 @@ def saves(pg, url):
         else: notes.append('backup restored')
         check_text(pg, 'after a backup restore')
 
+def picked(pg, url):
+    """v0.11.32 (P2-a): a story choice picked before is recoloured, in both modes; a task card and work stay as they were."""
+    import json
+    st = json.loads((ROOT / 'saves/v0.8.5-day1-stream.json').read_text())
+    st['picked'] = {'stream': [1, 5]}  # 1 = "Test the water" (a work card on this task screen), 5 = "Keep walking" (story)
+    s = json.dumps(st)
+    for mode, sel in (('1', 'button.card.story'), ('0', 'button.choice')):
+        fresh(pg, url, "a => { localStorage.clear(); localStorage.setItem('boneash.tasks', a[1]); localStorage.setItem('boneash.auto', a[0]); }", [s, mode])
+        where = 'Incremental Mode' if mode == '1' else 'Story Mode'
+        walk = pg.query_selector(f'{sel}:has-text("Keep walking")')
+        if not walk: fails.append(f'picked, {where}: the stream\'s "Keep walking" is missing'); continue
+        col = walk.evaluate("e => [e.classList.contains('picked'), getComputedStyle(e).color, /picked before/.test(e.textContent)]")
+        if col != [True, 'rgb(107, 90, 69)', True]: fails.append(f'picked, {where}: "Keep walking" not recoloured: {col}')
+        n = len(pg.query_selector_all('#view .picked'))
+        if n != 1: fails.append(f'picked, {where}: {n} recoloured buttons, expected 1 (the work card "Test the water" stays as it was)')
+    if not any(f.startswith('picked') for f in fails): notes.append('picked choices recoloured in both modes, work left alone')
+
 def main(part=0):
     """v0.11.20: part 1 (Incremental Mode, the reload, Story Mode, two tabs) and part 2 (Saves, the menu, tooltips and scroll,
     the resting places) can run side by side, each with its own browser and server; no part = everything, in order."""
@@ -329,6 +346,8 @@ def main(part=0):
                 comfort(pg, url)
                 # 8. Meditate only on the resting places, queueable there (v0.11.14)
                 rest_places(pg, url)
+                # 9. picked choices recoloured (v0.11.32)
+                picked(pg, url)
             b.close()
     finally:
         srv.terminate()

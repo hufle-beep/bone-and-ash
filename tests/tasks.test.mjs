@@ -7,11 +7,12 @@ import { FORM_LINES, hasForm, cuRank, actionOpen, actionLabel, fragileKnife, STO
 import { TASK_HUBS } from '../js/story/task_hubs.js';
 import { markDaily, daily } from '../js/story/common.js';
 import { wakeDay, exLevel, sleepUntil, clockParts } from '../js/core/game.js';
-import { yukiSpeed, setDryClone } from '../js/core/tasks.js';
+import { yukiSpeed, setDryClone, dryClone, showPicked } from '../js/core/tasks.js';
 import { e8Hours, ecHours, jnHours } from '../js/story/meridians.js';
+import { serialize, deserialize } from '../js/core/game.js';
 import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, setNoDice, isNoDice, clockLabelSec, advance, STARVE_HP_PER_HOUR, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1, bumpRel as relBump, startActCoil, REL_CATCHUP } from '../js/core/game.js';
 import { canPrimary, canColGroup, colGroupsOpen, sessionsToday, dcPrimary, dcColGroup, btTarget, canAnyMeridian, COL_GROUPS, priHours, colHours, merMinutesOf } from '../js/story/meridians.js';
-import { sceneView, choose, goTo } from '../js/core/story.js';
+import { sceneView, choose, goTo, wasPicked, isMenuScene, notePicked } from '../js/core/story.js';
 import { medCards, runMed, canMeditate, NO_MEDITATE, isSitChoice, MED_SCREENS } from '../js/core/meditate.js';
 import { defaultMinutes, DEFAULT_MINUTES } from '../js/core/story.js';
 import { coilActive, rewind, endCoil, KEEP_FLAGS, REMEMBER } from '../js/core/coil.js';
@@ -1046,6 +1047,44 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     }
     const old = ensureBars(newGame(7)); Object.assign(old.flags, { ending: 'paid', a1_outcome: 'accord' }); old.scene = 'a1_end';
     assert(maxSpeed(old) === 5, 'an old save already at the end of Act 1 has ×5');
+}
+// v0.11.32 (P2-a): picked choices are recorded per save, kept across every rewind, never in a dry run's copy
+{
+    const g = ensureBars(newGame(11, { closed: true }));
+    assert(!g.picked || Object.keys(g.picked).length === 0, 'picked: a new game has none');
+    const s0 = g.scene, i0 = sceneView(g, SCENES).choices[0].index;
+    assert(!wasPicked(g, s0, i0), 'picked: not before it is taken');
+    choose(g, SCENES, i0);
+    assert(wasPicked(g, s0, i0) && g.picked[s0].length === 1, 'picked: choose() records the scene and position');
+    assert(wasPicked(g, s0, 1000 + i0), 'picked: a one-move index counts as its fight choice');
+    notePicked(g, s0, i0); assert(g.picked[s0].length === 1, 'picked: no duplicates');
+    notePicked(g, 'coil_end', 0); assert(!g.picked.coil_end, 'picked: the Coil screens are never recorded');
+    assert(isMenuScene('wild_hunt') && isMenuScene('wilds') && !isMenuScene('collectors_lost'), 'picked: hubs and their menus are known (main.js leaves work and menus uncoloured)');
+    const before = JSON.stringify(g.picked);
+    assert(dryClone(g).picked === undefined, 'picked: a dry run copy carries none');
+    const back = deserialize(serialize(g));
+    assert(JSON.stringify(back.picked) === before, 'picked: a save round trip keeps them');
+    endCoil(g, 'choice'); rewind(g);
+    assert(JSON.stringify(g.picked) === before, 'picked: kept across a rewind');
+    const h = ensureBars(newGame(12)); Object.assign(h.flags, { ending: 'bluff' }); startActCoil(h);
+    notePicked(h, 'stream', 4); h.flags.a1_outcome = 'victory'; goTo(h, SCENES, 'a1_end');
+    for (const to of ['act', 'game']) { rewind(h, { to }); assert(wasPicked(h, 'stream', 4), `picked: kept across the rewind to the start of ${to === 'act' ? 'Act 1' : 'the whole game'}`); if (to === 'act') { h.flags.a1_outcome = 'victory'; goTo(h, SCENES, 'a1_end'); } }
+    const old = JSON.parse(serialize(ensureBars(newGame(13, { closed: true })))); const od = JSON.parse(old.data); delete od.picked;
+    // which picked choices show recoloured (showPicked, main.js)
+    const m = ensureBars(newGame(14, { closed: true })); m.scene = 'stream';
+    m.picked = { stream: [1, 5, 6, 7], wild_hunt: [0], ashfall: [17], hunt: [0, 2], coil_end: [0] };
+    const ch = (sid, i) => SCENES[sid].choices[i];
+    assert(showPicked(m, SCENES, 5, 'Keep walking') && !showPicked(m, SCENES, 4, 'Make camp'), 'picked shown: a picked story choice yes, an unpicked one no');
+    assert(!showPicked(m, SCENES, 1, 'Test the water'), 'picked shown: a work card on a task screen no');
+    assert(!showPicked(m, SCENES, 6, 'Open a meridian') && !showPicked(m, SCENES, 7, 'Yuki: change form'), 'picked shown: the meta screens\' entries no');
+    assert(showPicked(m, SCENES, 1005, 'End it in one move.'), 'picked shown: a one-move index counts as its choice');
+    m.scene = 'wild_hunt'; assert(!showPicked(m, SCENES, 0, 'Glassback hare'), 'picked shown: a hub\'s work menu no');
+    m.scene = 'hunt'; assert(!showPicked(m, SCENES, 0, 'A bone dart') && showPicked(m, SCENES, 2, String(ch('hunt', 2).text)), 'picked shown: gathering inside a task card\'s scene no, its plain choice yes');
+    assert(!showPicked(m, SCENES, 2, 'Back to the stream.'), 'picked shown: a plain "Back…" no');
+    m.scene = 'ashfall'; assert(showPicked(m, SCENES, 17, 'Evening. Go home to Mei Lin\'s.'), 'picked shown: a hub\'s story exit yes');
+    const o = deserialize(JSON.stringify(od));
+    assert(!wasPicked(o, o.scene, 0), 'picked: an old save without the field loads, nothing marked');
+    choose(o, SCENES, sceneView(o, SCENES).choices[0].index); assert(Object.keys(o.picked || {}).length === 1, 'picked: an old save starts recording on its first choice');
 }
 // v0.11.31 (P3-b): an open speed gate stays open across every rewind
 {

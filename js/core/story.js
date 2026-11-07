@@ -123,6 +123,24 @@ function go(g, scenes, to) {
     return lines;
 }
 
+/* ---------- picked choices (v0.11.32, P2-a, owner 13:16 / 13:29) ---------- */
+/**
+ * `g.picked[sceneId]` = the positions of the choices ever picked on that scene, this save (both modes; kept across every
+ * rewind, coil.js; an old save starts empty). Keyed by position: a choice inserted mid-list later shifts that scene's marks.
+ */
+export function notePicked(g, sceneId, index) {
+    if (TIMELESS.has(sceneId)) return; // the Coil's own screens, meridians, warnings
+    if (!g.picked) g.picked = {};
+    const a = g.picked[sceneId] || (g.picked[sceneId] = []);
+    if (!a.includes(index)) { a.push(index); a.sort((x, y) => x - y); }
+}
+/** Was choice `index` (a "one move" index counts as its fight choice) ever picked on this scene? */
+export const wasPicked = (g, sceneId, index) => !!g.picked?.[sceneId]?.includes(index >= ONE_MOVE ? index - ONE_MOVE : index);
+/** A hub's work menu (Hunt, Forage, Train…): its choices are work, never recoloured. */
+export const isMenuScene = (id) => TIMELESS_PAIR.has(id);
+/** The meta screens (the Coil's, meridians, warnings, Yuki's form). */
+export const isTimeless = (id) => TIMELESS.has(id);
+
 /* ---------- every choice takes time (task mode, v0.9.5) ---------- */
 /** Scenes whose choices among themselves take no extra time: task hubs and their menus (their cards carry their own time), meta screens. */
 const TIMELESS = new Set(['coil_end', 'coil_dawn', 'meridians', 'ns_warn', 'col_warn', 'yuki_form']);
@@ -154,6 +172,7 @@ export function choose(g, scenes, index) {
     if (index >= ONE_MOVE) {
         const c = (s.choices || [])[index - ONE_MOVE];
         if (!c || !c.combat) throw new Error('No fight to finish');
+        notePicked(g, s.id, index - ONE_MOVE);
         const r = instantWin(g, c.combat(g));
         const st = STOMP[r.enc.id];
         const lines = [];
@@ -171,6 +190,7 @@ export function choose(g, scenes, index) {
     if (c.req && c.req(g) !== true) throw new Error(`Locked: ${c.req(g)}`);
     const lines = [];
     if (c.qi && !spendQi(g, c.qi)) throw new Error('Not enough Qi');
+    notePicked(g, s.id, index);
     let roll = null;
     let ok = true;
     let partial = false;

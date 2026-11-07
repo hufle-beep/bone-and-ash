@@ -13,7 +13,7 @@
  * The story checks and fights keep the d6 until 3c.
  */
 import { hasForm } from './forms.js';
-import { choose, goTo, choiceOpen, choiceTag, gives, setTimeless, defaultMinutes, movesPlace } from './story.js';
+import { choose, goTo, choiceOpen, choiceTag, gives, setTimeless, defaultMinutes, movesPlace, wasPicked, isMenuScene, isTimeless } from './story.js';
 import { advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck, canBreakThrough, btMinutes, realmName, condense, sitMinutes, isNoDice, useSpeed, USE_N, exMins } from './game.js';
 import { CONDENSE_SIT_COST } from './formulas.js';
 import { btTarget, MER_LINES, lineWindow, lineIndex, lineName } from '../story/meridians.js';
@@ -76,6 +76,27 @@ export function isTaskChoice(scenes, hubId, index) {
     const cfg = TASK_HUBS[hubId];
     const c = scenes[hubId].choices[index];
     return !!((cfg.menus || {})[c.to] || (cfg.doorMenus || {})[c.to] || isChore(hubId, c) || isDoor(cfg, c));
+}
+
+/** v0.11.32 (P2-a): the scenes a task-screen card leads into (hunting, foraging, training, talks); their checks and gathering are work. Built on first use. */
+let workSubs = null;
+const WORK_SUBS = (scenes) => workSubs || (workSubs = new Set(Object.keys(TASK_HUBS).flatMap((h) => (scenes[h]?.choices || []).map((c, i) => (typeof c.to === 'string' && c.to !== h && isTaskChoice(scenes, h, i) ? c.to : null)).filter(Boolean))));
+/**
+ * v0.11.32 (P2-a): is this choice on the current scene recoloured as picked before? Story choices only: not work (task-screen
+ * cards, the hubs' work menus, the checks and gathering inside the scenes a task card leads into), not the meta screens'
+ * entries ("Open a meridian", "Yuki: change form"), not a plain "Back…". A one-move index counts as its fight choice.
+ */
+export function showPicked(g, scenes, index, label) {
+    const i = index >= 1000 ? index - 1000 : index;
+    const hub = !!TASK_HUBS[g.scene];
+    if (!wasPicked(g, g.scene, i) || (isMenuScene(g.scene) && !hub)) return false;
+    if (hub && isTaskChoice(scenes, g.scene, i)) return false;
+    const ch = scenes[g.scene]?.choices?.[i];
+    if (!ch) return false;
+    if (WORK_SUBS(scenes).has(g.scene) && (ch.check || gives(ch).length)) return false;
+    if (typeof ch.to === 'string' && (isTimeless(ch.to) || ch.to === 'yuki_form')) return false;
+    if (typeof ch.to === 'function' && /yuki_form|meridians/.test(String(ch.to))) return false;
+    return !/^Back\b/.test(String(label));
 }
 
 /** v0.10.0: "Next meridian session" — a queueable hub card that takes the first open session on the meridian screen. */
@@ -384,7 +405,7 @@ const fullClone = (g) => JSON.parse(JSON.stringify(g));
  * rules) and shares the Coil snapshot (only ever copied from, never changed in place): about 6× faster, the same numbers.
  */
 export function dryClone(g) {
-    const { log, coil, ...rest } = g;
+    const { log, coil, picked, ...rest } = g; // v0.11.32: picked choices change nothing a dry run measures; a copy starts its own
     const c = JSON.parse(JSON.stringify(rest));
     c.log = [];
     if (coil) { const { snap, ...cr } = coil; c.coil = JSON.parse(JSON.stringify(cr)); if (snap !== undefined) c.coil.snap = snap; }

@@ -259,3 +259,9 @@ button.card, button.choice { -webkit-touch-callout: none; -webkit-user-select: n
 #tip p { margin: 0.25rem 0; color: var(--ink-2); }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+/* v0.11.32 (P2-a, owner 13:16): a story choice picked before on this save, slightly but noticeably recoloured */
+.card.story.picked, .choice.picked { color: #6b5a45; background: #e3ded3; }
+.card.story.picked .tag, .card.story.picked .len, .choice.picked .tag { color: #75665a; }
+.card.story.picked:hover, .card.story.picked:focus-visible, .choice.picked:hover, .choice.picked:focus-visible { background: #dbd5c8; }
+.card.story.picked.busy { background: rgba(160,44,44,0.08); }
+.choice.picked.fightish .tag { color: var(--red); }

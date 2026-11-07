@@ -2,6 +2,14 @@
 
 Started 2026-11-06 (v0.11.22), when `history-3.md` reached about 45 KB. Newer than `history-3.md`, `history-2.md` and `history.md`. Each push moves what is older than the last three versions here from `handover.md`, on top of its section. When this file passes about 45 KB, start `history-5.md`.
 
+## Version note (moved from the handover in v0.11.32)
+
+### v0.11.29 — the rebalance, RB-1
+
+- **js/story/nodice_tune.js:** `collectors` `up` 2.0 → 4.5, `rot_ape` 8.0 → 15.0. **js/core/game.js:** `COIL_GROWTH` 0.5 → 0.25; `fmtMult` (the bonus with up to two decimals). **js/main.js, js/story/coil_scenes.js:** the bonus text through `fmtMult`; the James tab's "next" adds `COIL_GROWTH` (was a fixed +0.5). **js/core/coil.js, project/design.md:** the comments. **tests/tasks.test.mjs:** the Coil-bonus block (×1.5 on Coil 3, Yuki's XP 45, the meridian DC ÷1.5, Act 1 Coil 5 ×2), the v0.11.29 block (the three values pinned, `fmtMult`). **tools/sanity.mjs:** the invariant 1 + 0.25 × (Coil − 1). **tools/baseline.json** (owner 13:06). **CLAUDE.md, project/working-agreement.md:** rule 2 scoped (C-a), rule 8 (M1). **saves/:** the owner's 12:58 and 13:05 saves (uploaded on GitHub). **sw.js:** VERSION.
+- **The full check:** first run exit 1, the 34 drifts (decisions block), 0 invariants; after the owner's "baseline": exit 0, 0 drift (208 compared), 146.2 s. The models after: Careful 2.12 / 3.87, Completionist 2.09 / 3.23; Yuki off: Careful 2.37 / 3.67, Completionist 2.97 / 3.54; the whole game on Coil 1 0% for all; Rusher 500 of 500 gave up after Coil 8. After the review's comment fix: syntax and the engine numbers (comments only); after pulling the 13:05 save: the saves test.
+- **Noted:** a failing sanity step prints its last 20 lines, and the 18 noise-scaled lines pushed the DRIFT lines out of view (they were in the log). Worth a small tools fix: print a failing sanity step's DRIFT lines first.
+
 ## Version note (moved from the handover in v0.11.31)
 
 ### v0.11.28 — the leaner check (tools and docs only)

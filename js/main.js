@@ -6,7 +6,7 @@ import {
     startCombat, combatStep, combatFlee, COMBAT_ACTIONS, setNoDice, noDiceDc, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage,
 } from './core/game.js';
 import { sceneView, choose, goTo, gives } from './core/story.js';
-import { isTaskHub, isQueueScreen, runsHere, isTaskChoice, taskCards, taskOpen, taskLabel, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, waitChoice, taskMinutes, runTask, outlook, taskQueue, MS_PER_GAME_HOUR, QUEUE_MAX, FAM, yukiLane, setYuki } from './core/tasks.js';
+import { showPicked, isTaskHub, isQueueScreen, runsHere, isTaskChoice, taskCards, taskOpen, taskLabel, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, waitChoice, taskMinutes, runTask, outlook, taskQueue, MS_PER_GAME_HOUR, QUEUE_MAX, FAM, yukiLane, setYuki } from './core/tasks.js';
 import { SCENES, ITEMS } from './story/prologue.js';
 import { coilActive, endCoil } from './core/coil.js';
 import { medCards, runMed, isSitChoice, medActivity, useLine } from './core/meditate.js';
@@ -270,13 +270,16 @@ function playChoice(idx) {
         autosave(); startNext(); render(); window.scrollTo({ top: 0, behavior: smoothScroll() });
     } catch (err) { lastResult = { lines: [String(err.message || err)], fail: true }; render(); showError(err); }
 }
+const pickedMark = (c) => showPicked(g, SCENES, c.index, c.label); // v0.11.32 (P2-a), tasks.js
+const PICKED_SR = '<span class="sr-only"> (picked before)</span>';
 const storyCardHtml = (c) => {
     const busy = running && running.kind === 'story' && running.idx === c.index;
     const mins = c.disabled ? 0 : storyMinutes(c.index);
     const tag = c.disabled ? c.reason : hideTag(c.tag);
     const ch0 = c.index < 1000 ? SCENES[g.scene]?.choices?.[c.index] : null;
     const inst = !!ch0 && (instantChoice(ch0) || waitChoice(SCENES, ch0, mins, g.scene));
-    return `<button class="card story${/fight/.test(c.tag) ? ' fightish' : ''}${busy ? ' busy' : ''}" data-story="${c.index}" ${c.disabled ? 'disabled aria-disabled="true"' : ''}>${md(c.label)}${tag ? `<span class="tag">${esc(tag)}</span>` : ''}<span class="len">${mins && !inst ? durLabel(mins) : mins ? `at once (${durLabel(mins)} pass)` : 'at once'}</span></button>`;
+    const pk = pickedMark(c);
+    return `<button class="card story${/fight/.test(c.tag) ? ' fightish' : ''}${busy ? ' busy' : ''}${pk ? ' picked' : ''}" data-story="${c.index}" ${c.disabled ? 'disabled aria-disabled="true"' : ''}>${md(c.label)}${pk ? PICKED_SR : ''}${tag ? `<span class="tag">${esc(tag)}</span>` : ''}<span class="len">${mins && !inst ? durLabel(mins) : mins ? `at once (${durLabel(mins)} pass)` : 'at once'}</span></button>`;
 };
 const medCardHtml = (m) => { const card = `<button class="card med" ${m.task ? `data-run="${esc(m.task)}"` : `data-med="${esc(m.id)}"`} ${m.open ? '' : 'disabled aria-disabled="true"'}>${md(m.label)}${hideTag(m.tag) ? `<span class="tag">${esc(hideTag(m.tag))}</span>` : ''}<span class="len">${m.minutes ? durLabel(m.minutes) : 'at once'}</span></button>`; return m.task && m.open ? `<div class="cardwrap">${card}<button class="qadd" data-qadd="${esc(m.task)}" aria-label="Add to the end of the queue">+</button></div>` : card; };
 
@@ -647,7 +650,7 @@ function renderStory() {
     if (taskMode) return g.combat ? renderCombatCards() : (startNext(), renderCardScreen());
     if (g.combat) return renderCombat();
     const v = sceneView(g, SCENES);
-    const choices = v.choices.map((c) => `<li><button class="choice${/fight/.test(c.tag) ? ' fightish' : ''}" data-choice="${c.index}" ${c.disabled ? `disabled aria-disabled="true"` : ''}>${md(c.label)}${(c.disabled ? c.reason : hideTag(c.tag)) ? `<span class="tag">${esc(c.disabled ? c.reason : hideTag(c.tag))}</span>` : ''}</button></li>`).join('');
+    const choices = v.choices.map((c) => `<li><button class="choice${/fight/.test(c.tag) ? ' fightish' : ''}${pickedMark(c) ? ' picked' : ''}" data-choice="${c.index}" ${c.disabled ? `disabled aria-disabled="true"` : ''}>${md(c.label)}${pickedMark(c) ? PICKED_SR : ''}${(c.disabled ? c.reason : hideTag(c.tag)) ? `<span class="tag">${esc(c.disabled ? c.reason : hideTag(c.tag))}</span>` : ''}</button></li>`).join('');
     view.innerHTML = `<section class="fade-in">
 <div class="plate">${sceneArt(v.art)}</div>
 <header class="head"><div class="place">${esc(v.place || g.location)}</div><h1 class="title">${esc(v.title)}</h1></header>
