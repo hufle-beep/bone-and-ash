@@ -57,8 +57,7 @@ let lastPress = 0;
 
 /* ---------------- tasks (v0.9.0, preview) ---------------- */
 // v0.11.34 (D1): Incremental Mode only; Story Mode's code stays in place unused (deleted later, D2) and 'boneash.tasks' is no longer read
-const taskMode = true;
-setNoDice(taskMode); // no dice anywhere in task mode (v0.9.3)
+setNoDice(true); // no dice anywhere (v0.9.3); Incremental Mode only since v0.11.34, Story Mode's code out in v0.11.41
 const SPEED_KEY = 'boneash.speed'; // per phone: 0 = paused, 1, 2, 5, 10
 const SPEEDS = [[0, 'Pause'], [1, '×1'], [2, '×2'], [5, '×5'], [10, '×10']]; // gated per save by maxSpeed (v0.9.8); the stored choice is kept and held down to the gate
 const TEST_SPEEDS_KEY = 'boneash.testspeeds'; // per phone: '1' = every speed open (hidden: tap "The clock" in Settings 5 times)
@@ -112,7 +111,7 @@ function plog(cause) {
     plLast = st;
 }
 /** v0.10.2: pause on every new scene (task mode). */
-function scenePause() { if (!taskMode || !g || recovery) return; if (g.scene !== pauseScene) { if (pauseScene !== null) pauseNow('new scene'); pauseScene = g.scene; } }
+function scenePause() { if (!g || recovery) return; if (g.scene !== pauseScene) { if (pauseScene !== null) pauseNow('new scene'); pauseScene = g.scene; } }
 /** A tapped card's bar has finished: back to paused if it was a one-off. */
 function endOneShot(cause = 'the tapped card finished') { if (oneShot) { oneShot = false; speed = 0; plog(cause); } }
 /** Tap while paused: run this one card now, then pause again. */
@@ -156,8 +155,8 @@ function addResult(title, lines, fail) {
     if (panel !== 'results') unseen += 1;
 }
 const durLabel = (m) => (m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} m` : ''}` : `${m} m`);
-const onTaskHub = () => taskMode && g && !recovery && isTaskHub(g);
-const onQueueScreen = () => taskMode && g && !recovery && isQueueScreen(g, SCENES); // v0.11.14: task screens and the resting places
+const onTaskHub = () => g && !recovery && isTaskHub(g);
+const onQueueScreen = () => g && !recovery && isQueueScreen(g, SCENES); // v0.11.14: task screens and the resting places
 
 function startNext() {
     scenePause();
@@ -199,7 +198,7 @@ function tick() {
     const dt = Math.min(1000, now - lastTickAt); // a sleeping phone doesn't fast-forward more than a second
     lastTickAt = now;
     if (!running) return;
-    if (running.kind) { if (!taskMode || g.combat || g.scene !== running.scene) { running = null; endOneShot(); return; } } // a story or meditate bar
+    if (running.kind) { if (g.combat || g.scene !== running.scene) { running = null; endOneShot(); return; } } // a story or meditate bar
     else if (!onQueueScreen()) { running = null; return; }
     running.done += dt * runSpeed();
     if (!running.kind && runSpeed() && now - lastRunSave >= 15e3) autosave(); // v0.11.5
@@ -267,7 +266,7 @@ function playChoice(idx) {
         const r = choose(g, SCENES, idx);
         endOneShot();
         lastResult = { lines: r.lines, fail: r.roll ? !r.roll.success : false };
-        if (taskMode && r.lines.length) addResult(label, r.lines, lastResult.fail);
+        if (r.lines.length) addResult(label, r.lines, lastResult.fail);
         if (r.combat) { startCombat(g, r.combat(g)); combatLog = null; }
         autosave(); startNext(); render(); window.scrollTo({ top: 0, behavior: smoothScroll() });
     } catch (err) { lastResult = { lines: [String(err.message || err)], fail: true }; render(); showError(err); }
@@ -279,7 +278,7 @@ const storyCardHtml = (c) => {
     const mins = c.disabled ? 0 : storyMinutes(c.index);
     const tag = c.disabled ? c.reason : hideTag(c.tag);
     const ch0 = c.index < 1000 ? SCENES[g.scene]?.choices?.[c.index] : null;
-    const inst = taskMode || (!!ch0 && (instantChoice(ch0) || waitChoice(SCENES, ch0, mins, g.scene))); // v0.11.37 (C-a)
+    const inst = true; // v0.11.37 (C-a): every story choice at once
     const pk = pickedMark(c);
     return `<button class="card story${/fight/.test(c.tag) ? ' fightish' : ''}${busy ? ' busy' : ''}${pk ? ' picked' : ''}" data-story="${c.index}" ${c.disabled ? 'disabled aria-disabled="true"' : ''}>${md(c.label)}${pk ? PICKED_SR : ''}${tag ? `<span class="tag">${esc(tag)}</span>` : ''}<span class="len">${mins && !inst ? durLabel(mins) : mins ? `at once (${durLabel(mins)} pass)` : 'at once'}</span></button>`;
 };
@@ -382,7 +381,7 @@ function renderCombatCards() {
         const v = n1(skillCheck(a.skill === 'GU' ? g.james.gu : g.james.skills[a.skill]) + (c.adapt?.[id] || 0));
         const tgt = c.enemies.find((e) => e.hp > 0);
         const plain = tgt && showChecks ? `${a.skill} ${v} / DC ${noDiceDc(tgt.dc + a.dcMod)} · ${Math.round((d[0] + d[1]) / 2)} dmg` : '';
-        return `<button class="card fightish" data-act="${id}" ${off ? 'disabled' : ''}>${esc(a.label)}<span class="tag">${a.guard ? `${showChecks ? 'GU ' : ''}defence +${guardBonus(g)} this round${hasForm(g, 'buckler') && taskMode ? ' · covers Yuki' : ''}` : a.field ? `${FIELD_ROUNDS} rounds · ${fieldDamage(g)} to each attacker · once a fight` : plain}${a.reach ? ' · a full hit holds it off' : ''}${cost ? ` · ${cost} Qi` : ''}${a.stagger ? ' · staggers' : ''}${off ? ' · not enough Qi' : ''}</span></button>`;
+        return `<button class="card fightish" data-act="${id}" ${off ? 'disabled' : ''}>${esc(a.label)}<span class="tag">${a.guard ? `${showChecks ? 'GU ' : ''}defence +${guardBonus(g)} this round${hasForm(g, 'buckler') ? ' · covers Yuki' : ''}` : a.field ? `${FIELD_ROUNDS} rounds · ${fieldDamage(g)} to each attacker · once a fight` : plain}${a.reach ? ' · a full hit holds it off' : ''}${cost ? ` · ${cost} Qi` : ''}${a.stagger ? ' · staggers' : ''}${off ? ' · not enough Qi' : ''}</span></button>`;
     }).join('');
     const flee = c.flee ? `<button class="card" data-flee="1">Run${showChecks ? `<span class="tag">GU ${n1(skillCheck(g.james.gu))} / DC ${noDiceDc(Math.max(...c.enemies.filter((e) => e.hp > 0).map((e) => e.atk)))}</span>` : ''}</button>` : '';
     const foes = c.enemies.map((e) => `<div class="foe${e.hp <= 0 ? ' down' : ''}"><span>${esc(e.name)}${e.staggered ? ' (reeling)' : ''}</span><div class="stroke"><i style="width:${pct(Math.max(0, e.hp), e.hpMax)}"></i></div></div>`).join('');
@@ -399,7 +398,7 @@ ${statusHtml()}
 </section>`;
 }
 
-const freshGame = () => ensureBars(newGame(Math.floor(Math.random() * 2 ** 31), { closed: taskMode })); // task mode: meridians closed at the start (v0.9.6)
+const freshGame = () => ensureBars(newGame(Math.floor(Math.random() * 2 ** 31), { closed: true })); // meridians closed at the start (v0.9.6)
 const bakMeta = () => { try { return JSON.parse(store.get(BAK_META)) || { play: 0, at: {}, when: {} }; } catch { return { play: 0, at: {}, when: {} }; } };
 function writeKey(k, s) { if (!store.set(k, s) && !storageWarned) { storageWarned = true; showError('Could not save: the storage for this site is full or blocked. Download your save: ☰ Menu → Saves.'); } }
 
@@ -459,7 +458,7 @@ function backupList() {
     const names = { '5m': 'Last 5 minutes', '30m': 'Last 30 minutes', '2h': 'Last 2 hours', before: `Before ${m.label || 'a risky move'}` };
     return Object.keys(names).map((k) => ({ k, name: names[k], raw: store.get(BAK_KEY(k)), when: m.when?.[k] })).filter((b) => b.raw);
 }
-const descOf = (raw) => { const p = peekSave(raw); return p ? `${sceneTitle(p.scene)} — ${clockLabel(p.minutes)}${taskMode && p.coil ? ` · ${p.act === 1 ? 'Act 1, ' : ''}Coil ${p.coil}` : ''}` : 'Unreadable'; }; // v0.11.13: the Coil too (Incremental Mode, as on Continue)
+const descOf = (raw) => { const p = peekSave(raw); return p ? `${sceneTitle(p.scene)} — ${clockLabel(p.minutes)}${p.coil ? ` · ${p.act === 1 ? 'Act 1, ' : ''}Coil ${p.coil}` : ''}` : 'Unreadable'; }; // v0.11.13: the Coil too (Incremental Mode, as on Continue)
 
 /* ---------------- saves push (v0.11.9): share, export all, reminder, status ---------------- */
 
@@ -490,7 +489,7 @@ const GH_REPO = 'hufle-beep/bone-and-ash', GH_DIR = 'saves', GH_URL_MAX = 7500;
 function ghFileName(ext) {
     const d = new Date(), p = (n) => String(n).padStart(2, '0');
     const when = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}`;
-    return `${when}-${taskMode ? 'incremental' : 'story'}-${String(g.scene).replace(/[^\w-]+/g, '-')}.${ext}`;
+    return `${when}-incremental-${String(g.scene).replace(/[^\w-]+/g, '-')}.${ext}`;
 }
 function openOut(url) { const a = document.createElement('a'); a.href = url; a.target = '_blank'; a.rel = 'noopener'; document.body.appendChild(a); a.click(); a.remove(); }
 async function shareToGitHub() {
@@ -558,12 +557,12 @@ async function gameVersion() {
 }
 async function statusText() {
     const j = g.james, t = (ms) => new Date(ms).toLocaleTimeString();
-    const q = taskMode ? taskQueue(g).map((id) => taskLabel(g, SCENES, id)) : [];
+    const q = taskQueue(g).map((id) => taskLabel(g, SCENES, id));
     const lines = [
         `Bone and Ash ${await gameVersion()} · ${new Date().toISOString()}`,
-        `Mode: ${taskMode ? 'Incremental' : 'Story'} · speed ${speed ? `×${runSpeed()}${oneShot ? ' (one card)' : ''}` : 'paused'} (resume ×${resumeSpeed}) · tab ${tab}`,
+        `Mode: Incremental · speed ${speed ? `×${runSpeed()}${oneShot ? ' (one card)' : ''}` : 'paused'} (resume ×${resumeSpeed}) · tab ${tab}`,
         `Scene: ${g.scene} (${sceneTitle(g.scene)}) · ${clockLabel(g.minutes)}${g.coil ? ` · ${g.coil.act === 1 ? 'Act 1' : 'Prologue'}, Coil ${g.coil.n}` : ''}${g.combat ? ' · in a fight' : ''}`,
-        `James: ${realmName(j.realm)}, Saturation ${n1(j.saturation)}% · HP ${n1(j.hp)} / ${jamesHpMax(g)} · Convergence ${n1(j.qi)} / ${n1(jamesQiMax(g))} · Fed ${Math.round(j.satiety)}${taskMode ? ` · days slept ${wakeDay(g)} · Exhaustion ${exLevel(g)}` : ''}`,
+        `James: ${realmName(j.realm)}, Saturation ${n1(j.saturation)}% · HP ${n1(j.hp)} / ${jamesHpMax(g)} · Convergence ${n1(j.qi)} / ${n1(jamesQiMax(g))} · Fed ${Math.round(j.satiety)} · days slept ${wakeDay(g)} · Exhaustion ${exLevel(g)}`,
         `Running: ${running ? `${running.label} (${Math.round(Math.min(1, running.done / running.ms) * 100)}%${running.kind ? `, ${running.kind}` : ''})` : 'nothing'}`,
         `Queue (${q.length}): ${q.join(' · ') || 'empty'}`,
         'Pause log (newest last):',
@@ -650,7 +649,7 @@ function statusHtml() {
 <div class="bar hp"><b>${n1(g.james.hp)} / ${jamesHpMax(g)}</b>HP${pbar(g.james.hp, jamesHpMax(g), 'HP')}</div>
 <div class="bar qi"><b>${n1(g.james.qi)} / ${n1(jamesQiMax(g))}</b>Convergence${pbar(g.james.qi, jamesQiMax(g), 'Convergence')}</div>
 <div class="bar food"><b>${Math.round(g.james.satiety)}</b>Fed${pbar(g.james.satiety, 100, 'Fed')}</div>
-<div class="clock"><span class="clk">${clockLabelSec(g)}</span>${taskMode && exLevel(g) ? `<span class="exh">Exhausted ×${exMult(g)}</span>` : ''}${taskMode ? `<select class="speed" data-speed="1" aria-label="Speed">${SPEEDS.filter(([n]) => n <= maxSpeed(g, testSpeeds)).map(([n, l]) => `<option value="${n}"${n === runSpeed() ? ' selected' : ''}>${l}</option>`).join('')}</select>` : ''}</div></div>`;
+<div class="clock"><span class="clk">${clockLabelSec(g)}</span>${exLevel(g) ? `<span class="exh">Exhausted ×${exMult(g)}</span>` : ''}<select class="speed" data-speed="1" aria-label="Speed">${SPEEDS.filter(([n]) => n <= maxSpeed(g, testSpeeds)).map(([n, l]) => `<option value="${n}"${n === runSpeed() ? ' selected' : ''}>${l}</option>`).join('')}</select></div></div>`;
 }
 
 function resultHtml() {
@@ -659,41 +658,7 @@ function resultHtml() {
 }
 
 function renderStory() {
-    if (taskMode) return g.combat ? renderCombatCards() : (startNext(), renderCardScreen());
-    if (g.combat) return renderCombat();
-    const v = sceneView(g, SCENES);
-    const choices = v.choices.map((c) => `<li><button class="choice${/fight/.test(c.tag) ? ' fightish' : ''}${pickedMark(c) ? ' picked' : ''}" data-choice="${c.index}" ${c.disabled ? `disabled aria-disabled="true"` : ''}>${md(c.label)}${pickedMark(c) ? PICKED_SR : ''}${(c.disabled ? c.reason : hideTag(c.tag)) ? `<span class="tag">${esc(c.disabled ? c.reason : hideTag(c.tag))}</span>` : ''}</button></li>`).join('');
-    view.innerHTML = `<section class="fade-in">
-<div class="plate">${sceneArt(v.art)}</div>
-<header class="head"><div class="place">${esc(v.place || g.location)}</div><h1 class="title">${esc(v.title)}</h1></header>
-${statusHtml()}${resultHtml()}
-<div class="prose">${paras(v.text)}</div>
-${v.end ? `<ul class="choices">${choices}<li><button class="choice" data-new="1">Start a new game</button></li><li><button class="choice" data-tab-go="sheet">See how James ended up</button></li></ul>` : `<ul class="choices">${choices}</ul>`}
-</section>`;
-}
-
-function renderCombat() {
-    const c = g.combat;
-    const acts = Object.entries(COMBAT_ACTIONS).filter(([id]) => actionOpen(g, id) && !(id === 'spikes' && c.fieldUsed)).map(([id, a0]) => {
-        const a = { ...a0, label: actionLabel(g, id, a0.label) }; // v0.10.4: only the forms James can sing, named for his best one
-        const cost = (a.keeps === 'blade' && c.bladeFormed) || (a.keeps === 'spear' && c.spearFormed) || (a.field && c.fieldUsed) ? 0 : actionCost(g, a);
-        const d = actionDmg(g, a);
-        const off = cost > g.james.qi;
-        const val = n1(skillCheck(a.skill === 'GU' ? g.james.gu : g.james.skills[a.skill]) + (taskMode ? (c.adapt?.[id] || 0) : 0));
-        const tgt = c.enemies.find((e) => e.hp > 0);
-        const plain = !showChecks ? '' : taskMode && tgt ? `${a.skill} ${val} / DC ${noDiceDc(tgt.dc + a.dcMod)} · ${Math.round((d[0] + d[1]) / 2)} dmg` : `${a.skill} ${val} + d6 · ${d[0]}–${d[1]} dmg`;
-        return `<li><button class="choice fightish" data-act="${id}" ${off ? 'disabled' : ''}>${esc(a.label)}<span class="tag">${a.guard ? `${showChecks ? 'GU ' : ''}defence +${guardBonus(g)} this round${hasForm(g, 'buckler') && taskMode ? ' · covers Yuki' : ''}` : a.field ? `${FIELD_ROUNDS} rounds · ${fieldDamage(g)} to each attacker · once a fight` : plain}${a.reach ? ' · a full hit holds it off' : ''}${cost ? ` · ${cost} Qi` : ''}${a.stagger ? ' · staggers' : ''}${off ? ' · not enough Qi' : ''}</span></button></li>`;
-    }).join('');
-    const foes = c.enemies.map((e) => `<div class="foe${e.hp <= 0 ? ' down' : ''}"><span>${esc(e.name)}${e.staggered ? ' (reeling)' : ''}</span><div class="stroke"><i style="width:${pct(Math.max(0, e.hp), e.hpMax)}"></i></div></div>`).join('');
-    const yuki = `<div class="foe"><span>Yuki</span><div class="stroke" style="background:rgba(242,239,230,0.08)"><i style="width:${pct(g.yuki.hp, yukiHpMax(g))};background:var(--bone)"></i></div></div>`;
-    view.innerHTML = `<section>
-<div class="plate">${sceneArt(val(SCENES[g.scene].art))}</div>
-<header class="head"><div class="place">${esc(sceneTitle(g.scene))}</div><h1 class="title">Round ${c.round}</h1></header>
-${statusHtml()}
-<div class="foes">${foes}${yuki}</div>
-<div class="round">${shownLines(combatLog || c.log).map((l) => dieHtml(l)).join('<br>')}</div>
-<ul class="choices">${acts}${c.flee ? `<li><button class="choice" data-flee="1">Run${showChecks ? `<span class="tag">${taskMode ? `GU ${n1(skillCheck(g.james.gu))} / DC ${noDiceDc(Math.max(...c.enemies.filter((e) => e.hp > 0).map((e) => e.atk)))}` : 'GU + d6 vs their best attack'}</span>` : ''}</button></li>` : ''}</ul>
-</section>`;
+    return g.combat ? renderCombatCards() : (startNext(), renderCardScreen());
 }
 
 /* ---------------- sheet / bag / journal / saves ---------------- */
@@ -715,8 +680,8 @@ function renderSheet() {
 ${skillRow('GU', j.gu, 'General Use: anything he has no skill for, and his defence')}
 ${skillRow('Convergence Use', cu, 'darts, needles, the wraithbone blade')}
 <p class="note">${esc(BONESINGER_TIERS[Math.min(cu.tier, BONESINGER_TIERS.length - 1)] || '')}</p>
-${taskMode ? Object.entries(FORM_LINES).map(([k, l]) => { const s = lineState(g, k); return `<div class="row"><span>${esc(l.label)}</span><span>${s.now ? esc(s.now.name) : '—'}${s.next ? ` <span class="note">(next: ${esc(s.next.name)} at ${rankLabel(s.next.at)})</span>` : ''}</span></div>`; }).join('') : ''}
-${taskMode && g.coil ? `<h2>The Coil</h2><p class="note">${g.coil.act === 1 ? 'Act 1, ' : ''}Coil ${g.coil.n}. ${coilActive(g) ? `Bite the tail to wake at ${g.coil.act === 1 ? 'the start of Act 1 or of the whole game' : 'the first dawn'}: James keeps his familiarity and what he knows; his realm, skills and meridians, the hammerspace and the world start over. This Coil he learns ×${fmtMult(coilMult(g))} as fast; the next, ×${fmtMult(coilMult(g) + COIL_GROWTH)}.` : 'The Coil turns during the prologue (until the tribute is settled) and during Act 1 (until Shen Qiu is settled, and again at its end).'}</p>${coilActive(g) ? '<div class="btns"><button class="btn" data-bite="1">Bite the tail</button></div><p class="note" id="saveNote"></p>' : ''}` : ''}
+${Object.entries(FORM_LINES).map(([k, l]) => { const s = lineState(g, k); return `<div class="row"><span>${esc(l.label)}</span><span>${s.now ? esc(s.now.name) : '—'}${s.next ? ` <span class="note">(next: ${esc(s.next.name)} at ${rankLabel(s.next.at)})</span>` : ''}</span></div>`; }).join('')}
+${g.coil ? `<h2>The Coil</h2><p class="note">${g.coil.act === 1 ? 'Act 1, ' : ''}Coil ${g.coil.n}. ${coilActive(g) ? `Bite the tail to wake at ${g.coil.act === 1 ? 'the start of Act 1 or of the whole game' : 'the first dawn'}: James keeps his familiarity and what he knows; his realm, skills and meridians, the hammerspace and the world start over. This Coil he learns ×${fmtMult(coilMult(g))} as fast; the next, ×${fmtMult(coilMult(g) + COIL_GROWTH)}.` : 'The Coil turns during the prologue (until the tribute is settled) and during Act 1 (until Shen Qiu is settled, and again at its end).'}</p>${coilActive(g) ? '<div class="btns"><button class="btn" data-bite="1">Bite the tail</button></div><p class="note" id="saveNote"></p>' : ''}` : ''}
 <h2>Pillars</h2>
 <div class="row"><span>Ouroboros Axiom</span><span>DR 1</span><span class="sub">The body as a closed garden: what comes in is filtered and returned clean.</span></div>
 <div class="row"><span>Parallel Cognition Engine</span><span>9 threads</span><span class="sub">One of them is always on watch, if he asks.</span></div>
@@ -769,7 +734,7 @@ function renderSettings() {
 <p class="lede">Kept on this phone only, for every save.</p>
 <h2 data-modehead="1">The clock</h2>
 <p class="note">1 game hour takes 3 seconds at ×1; ×2 opens after the tribute, ×5 after Act 1.</p>
-${taskMode ? `<div class="btns"><button class="btn${pauseDeath ? ' primary' : ''}" data-pausedeath="1">Pause before the forecast death: ${pauseDeath ? 'on' : 'off'}</button></div>` : ''}
+<div class="btns"><button class="btn${pauseDeath ? ' primary' : ''}" data-pausedeath="1">Pause before the forecast death: ${pauseDeath ? 'on' : 'off'}</button></div>
 ${testSpeeds || modeTaps >= 5 ? `<div class="btns"><button class="btn${testSpeeds ? ' primary' : ''}" data-testspeeds="1">Test speeds: ${testSpeeds ? 'on' : 'off'}</button></div>` : ''}
 <h2>Text size</h2>
 <div class="btns">${TEXT_SIZES.map((n) => `<button class="btn${n === textSize ? ' primary' : ''}" data-textsize="${n}">${n}%</button>`).join('')}</div>
@@ -788,11 +753,11 @@ function renderMenu() {
     if (menu === 'settings') return renderSettings();
     const cont = recovery
         ? '<button class="btn primary big" data-menu="recovery">The save can\'t be opened: see the options</button>'
-        : `<button class="btn primary big" data-menu="continue">${hadSave ? 'Continue' : 'Begin'}<small>${esc(sceneTitle(g.scene))} — ${esc(clockLabel(g.minutes))}${taskMode && g.coil && hadSave ? ` · ${g.coil.act === 1 ? 'Act 1, ' : ''}Coil ${g.coil.n}` : ''}</small></button>`;
+        : `<button class="btn primary big" data-menu="continue">${hadSave ? 'Continue' : 'Begin'}<small>${esc(sceneTitle(g.scene))} — ${esc(clockLabel(g.minutes))}${g.coil && hadSave ? ` · ${g.coil.act === 1 ? 'Act 1, ' : ''}Coil ${g.coil.n}` : ''}</small></button>`;
     view.innerHTML = `<section class="page menu-page main-menu">
 <div class="mseal" aria-hidden="true">骨</div>
 <h1 class="mtitle">Bone and Ash</h1>
-<p class="note mver">Version <span id="menuVer">…</span> · ${taskMode ? 'Incremental Mode' : 'Story Mode'}</p>
+<p class="note mver">Version <span id="menuVer">…</span> · Incremental Mode</p>
 <div class="mbtns">${cont}${hadSave && !recovery ? '<button class="btn big" data-new="1">New game</button>' : ''}<button class="btn big" data-menu="saves">Saves</button><button class="btn big" data-menu="settings">Settings</button></div>
 <p class="note" id="saveNote"></p></section>`;
     gameVersion().then((v) => { const el = document.getElementById('menuVer'); if (el) el.textContent = v; });
@@ -832,14 +797,12 @@ function tipFor(b) {
         const i = Number(b.dataset.story);
         ch = i < 1000 ? SCENES[g.scene]?.choices?.[i] || null : null;
         mins = b.disabled ? 0 : storyMinutes(i);
-    } else if (b.dataset.choice != null) {
-        ch = SCENES[g.scene]?.choices?.[Number(b.dataset.choice)] || null;
     } else if (b.dataset.act) {
         const a = COMBAT_ACTIONS[b.dataset.act];
         if (a) {
             const cost = actionCost(g, a);
             if (cost) lines.push(`Costs ${cost} Qi${a.keeps ? ' to form, then free this fight' : ''}.`);
-            if (a.guard) lines.push(`Braces: defence +${guardBonus(g)} this round${hasForm(g, 'buckler') && taskMode ? ', and the shield covers Yuki' : ''}.`);
+            if (a.guard) lines.push(`Braces: defence +${guardBonus(g)} this round${hasForm(g, 'buckler') ? ', and the shield covers Yuki' : ''}.`);
             if (a.field) lines.push(`A field of bone spikes for ${FIELD_ROUNDS} rounds: ${fieldDamage(g)} back to each attacker. Once a fight.`);
             if (a.stagger) lines.push('Staggers what it hits.');
             if (a.reach) lines.push('A clean hit holds the enemy off for the round.');
@@ -854,8 +817,8 @@ function tipFor(b) {
         if (ch.qi) lines.push(`Costs ${ch.qi} Qi.`);
         if (ch.combat) lines.push('Leads to a fight.');
     }
-    if (mins) lines.push(`Takes ${durLabel(mins)}${(b.dataset.run && isInstantTask(g, SCENES, b.dataset.run)) || (b.dataset.story != null && taskMode) ? ', passing at once' : ''}.`);
-    { const id0 = b.dataset.run || b.dataset.med || ''; const k = medActivity(id0) || (/^(.+):(\d+)$/.test(id0) && taskMode && isSitChoice(SCENES[id0.split(':')[0]]?.choices?.[Number(id0.split(':')[1])], id0.split(':')[0]) ? 'sit' : null); if (k && taskMode) lines.push(useLine(g, k)); } // v0.11.15: speed by use
+    if (mins) lines.push(`Takes ${durLabel(mins)}${(b.dataset.run && isInstantTask(g, SCENES, b.dataset.run)) || b.dataset.story != null ? ', passing at once' : ''}.`);
+    { const id0 = b.dataset.run || b.dataset.med || ''; const k = medActivity(id0) || (/^(.+):(\d+)$/.test(id0) && isSitChoice(SCENES[id0.split(':')[0]]?.choices?.[Number(id0.split(':')[1])], id0.split(':')[0]) ? 'sit' : null); if (k) lines.push(useLine(g, k)); } // v0.11.15: speed by use
     if (card && card.kind === 'work') lines.push(`Familiarity: ${FAM[card.tier].name}${card.next != null ? `, ${card.fam} of ${card.next} to ${FAM[card.tier + 1].name}` : ' (the top)'}. Familiar work goes faster.`);
     if (card && card.status === 'late') lines.push('It would end past 02:00, when the day is over. Sleep, or push through the night.');
     else if (card && card.status !== 'open') lines.push('Done for today. Back tomorrow.');
@@ -917,7 +880,7 @@ view.addEventListener('click', (ev) => {
     const b = ev.target.closest('button');
     if (!b) return;
     if (recovery && !menu) { onRecovery(b); return; }
-    if (b.dataset.choice != null || b.dataset.act || b.dataset.flee) {
+    if (b.dataset.act || b.dataset.flee) {
         const now = Date.now();
         if (now - lastPress < 400) return; // double-tap guard: a fast second tap must not take the next scene's choice
         lastPress = now;
@@ -1000,7 +963,7 @@ view.addEventListener('click', (ev) => {
             const idx = Number(b.dataset.story);
             const mins = storyMinutes(idx);
             const ch = SCENES[g.scene]?.choices?.[idx];
-            if (taskMode || !mins || instantChoice(ch) || waitChoice(SCENES, ch, mins, g.scene)) { playChoice(idx); return; } // v0.11.37 (C-a): every story choice at once, the clock moved (was: rest, sleep and waits only, v0.10.0, v0.10.2)
+            playChoice(idx); return; // v0.11.37 (C-a): every story choice at once // v0.11.37 (C-a): every story choice at once, the clock moved (was: rest, sleep and waits only, v0.10.0, v0.10.2)
             tapRun();
             startBar('story', idx, ch ? String(val(ch.text)) : 'Story', mins); render();
             return;
@@ -1029,15 +992,7 @@ view.addEventListener('click', (ev) => {
         if (b.dataset.panel) { panel = b.dataset.panel; if (panel === 'results') unseen = 0; render(); return; }
         if (b.dataset.yuki) { const yl = yukiLane(g); setYuki(g, !yl.on); autosave(); render(); return; }
         if (b.dataset.testspeeds) { testSpeeds = !testSpeeds; store.set(TEST_SPEEDS_KEY, testSpeeds ? '1' : '0'); lastTickAt = Date.now(); render(); return; }
-        if (b.dataset.choice != null) stopRunning(); // a story stop: the bar's work is not done, so nothing of it happens
-        if (b.dataset.choice != null) {
-            const ch = SCENES[g.scene]?.choices?.[Number(b.dataset.choice)];
-            if (ch && /^Stay lost/.test(String(val(ch.text)))) backupBefore('the Long Forest');
-            const r = choose(g, SCENES, Number(b.dataset.choice));
-            lastResult = { lines: r.lines, fail: r.roll ? !r.roll.success : false };
-            if (r.combat) { startCombat(g, r.combat(g)); combatLog = null; }
-            autosave(); startNext(); render(); window.scrollTo({ top: 0, behavior: smoothScroll() });
-        } else if (b.dataset.act) {
+        if (b.dataset.act) {
             const out = combatStep(g, b.dataset.act);
             combatLog = out.lines;
             if (out.done) { const lines = out.lines.slice(); lines.push(...goTo(g, SCENES, out.next)); lastResult = { lines, fail: out.done === 'lose' }; combatLog = null; }

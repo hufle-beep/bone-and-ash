@@ -397,7 +397,7 @@ def update_test(b):
 def main(part=0):
     """v0.11.20: part 1 (Incremental Mode, the reload, no mode switch, two tabs) and part 2 (Saves, the menu, tooltips and scroll,
     the resting places) can run side by side, each with its own browser and server; no part = everything, in order."""
-    one, two, three = part in (0, 1), part in (0, 2), part in (0, 3)
+    one, two, three, four = part in (0, 1), part in (0, 2), part in (0, 3), part in (0, 4)  # v0.11.41: part 4 = the reload and the two tabs, split off part 1
     n1 = 0; tabs = []
     port = free_port()
     srv = subprocess.Popen([sys.executable, '-m', 'http.server', str(port)], cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -421,6 +421,14 @@ def main(part=0):
               if 'Day 1' not in pg.evaluate("document.body.innerText"): fails.append('Incremental Mode: the new game did not start on Day 1')
               n1 = taps(pg, 40, random.Random(7), 'Incremental Mode', 'button.card:not([disabled])[data-story], button.card:not([disabled])[data-run], button.card:not([disabled])[data-act]')
               tabs = visit_tabs(pg, 'Incremental Mode')
+              # 3. v0.11.34 (D1): Incremental Mode only; an old Story Mode setting on the phone is ignored, and Settings has no switch
+              fresh(pg, url, "localStorage.clear(); localStorage.setItem('boneash.tasks','0')")
+              if pg.query_selector('button.choice[data-choice]') or not pg.query_selector('button.card[data-story], button.card[data-run]'): fails.append('D1: a phone set to Story Mode did not open in Incremental Mode (cards)')
+              pg.click('[data-tab="menu"]'); until(pg, '.main-menu button[data-menu="settings"]', 5000, 'visible')
+              pg.click('button[data-menu="settings"]'); until(pg, 'button[data-showchecks]', 5000, 'visible')
+              if pg.query_selector('[data-tasks]') or 'Story Mode' in pg.inner_text('#view'): fails.append('D1: Settings still offers a game mode')
+              else: notes.append('Incremental Mode only, no mode switch')
+            if four:
               # 2. a running bar survives a reload: a fixed task screen (the Long Forest camp on Coil 2, a v0.11.7 test save), so the path never varies
               fresh(pg, url, "s => { localStorage.setItem('boneash.auto', s); localStorage.setItem('boneash.speed', '1'); }", (ROOT / 'saves/v0.11.7-long-forest-coil2.json').read_text())  # the measured card runs at x1
               long = pg.eval_on_selector_all('button.card[data-run]:not([disabled])', "els => els.filter(e => / h/.test(e.querySelector('.len')?.textContent || '') && !/at once/.test(e.textContent)).map(e => e.dataset.run)")
@@ -433,13 +441,6 @@ def main(part=0):
                   w2 = pg.eval_on_selector('#nowbar', 'e => parseFloat(e.dataset.v) * 100') if pg.query_selector('#nowbar') else 0
                   if not (w1 > 5 and abs(w1 - w2) < 3): fails.append(f'reload: the bar was {w1}% before and {w2}% after')
                   else: notes.append(f'reload kept the bar ({w1:.0f}% → {w2:.0f}%)')
-              # 3. v0.11.34 (D1): Incremental Mode only; an old Story Mode setting on the phone is ignored, and Settings has no switch
-              fresh(pg, url, "localStorage.clear(); localStorage.setItem('boneash.tasks','0')")
-              if pg.query_selector('button.choice[data-choice]') or not pg.query_selector('button.card[data-story], button.card[data-run]'): fails.append('D1: a phone set to Story Mode did not open in Incremental Mode (cards)')
-              pg.click('[data-tab="menu"]'); until(pg, '.main-menu button[data-menu="settings"]', 5000, 'visible')
-              pg.click('button[data-menu="settings"]'); until(pg, 'button[data-showchecks]', 5000, 'visible')
-              if pg.query_selector('[data-tasks]') or 'Story Mode' in pg.inner_text('#view'): fails.append('D1: Settings still offers a game mode')
-              else: notes.append('Incremental Mode only, no mode switch')
               # 4. two tabs (v0.11.8): a tab that closes never writes its older game over a newer save from another tab
               fresh(pg, url, "localStorage.clear(); localStorage.setItem('boneash.speed','10'); localStorage.setItem('boneash.testspeeds','1')")
               pg.evaluate("1")

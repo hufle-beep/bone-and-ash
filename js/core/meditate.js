@@ -5,7 +5,7 @@
  * On a task hub, Cultivate is the hub's own cultivate card (queueable; same id, same familiarity), shown in this group.
  * Pure — no DOM.
  */
-import { condense, canBreakThrough, breakReady, breakBlock, btMinutes, sitGain, isNoDice, sitMinutes, actSpeed, actUses, exMins, exLevel, EX_MULT, pushNight, nightLock, endsLate, pushWindow, sitUseless } from './game.js';
+import { condense, canBreakThrough, breakReady, breakBlock, btMinutes, sitGain, sitMinutes, actSpeed, actUses, exMins, exLevel, EX_MULT, pushNight, nightLock, endsLate, pushWindow, sitUseless } from './game.js';
 import { CONDENSE_SIT_COST } from './formulas.js';
 import { goTo, checkDeath, choose, choiceOpen } from './story.js';
 import { btTarget, MER_LINES, lineWindow, lineWait, lineIndex, lineName } from '../story/meridians.js';
@@ -31,7 +31,6 @@ export const canMeditate = (g, scenes) => !g.combat && MED_SCREENS.has(g.scene) 
 const asStr = (t, g) => String(typeof t === 'function' ? t(g) : t);
 /** v0.11.13 (E1): the meridian cards: one per line in reach; locked with the reason when it can't run now. */
 function merCards(g, scenes) {
-    if (!isNoDice()) return []; // Story Mode keeps the meridian screen (its hub choice)
     const out = [];
     for (const line of MER_LINES) {
         if (!lineWindow(g, line)) continue;
@@ -53,7 +52,7 @@ function merCards(g, scenes) {
 export function medCards(g, scenes) {
     if (!canMeditate(g, scenes)) return [];
     const out = [];
-    if (isNoDice() && nightLock(g)) return pushCard(g); // v0.11.37 (D-a): from 02:00 only the night
+    if (nightLock(g)) return pushCard(g); // v0.11.37 (D-a): from 02:00 only the night
     const s = scenes[g.scene];
     const hubSit = TASK_HUBS[g.scene] ? (s.choices || []).findIndex((c) => isSitChoice(c, g.scene)) : -1;
     const qiOk = g.james.qi >= CONDENSE_SIT_COST;
@@ -77,7 +76,7 @@ export const LATE_TAG = 'ends past 02:00';
 const LATE = { open: false, late: true, tag: LATE_TAG, reason: LATE_TAG };
 /** v0.11.37 (owner 14:27, E-a): Push through the night only from 00:00 to 03:59, once a night (no longer tied to a used-up daily). */
 function pushCard(g) {
-    if (!isNoDice() || !pushWindow(g)) return [];
+    if (!pushWindow(g)) return [];
     const ex = exLevel(g);
     return [{ id: 'med:push', label: ex >= 2 ? 'Push through the night. (You will collapse: a day lost.)' : `Push through the night. (A new day without sleep; work ×${EX_MULT[ex + 1]} until you sleep.)`, tag: ex >= 2 ? 'collapse' : `Exhaustion ${ex + 1}`, open: true, minutes: 0 }];
 }

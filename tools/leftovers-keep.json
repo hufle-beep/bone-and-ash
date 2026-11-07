@@ -58,6 +58,7 @@
       "foundation_day": "the day of the Foundation breakthrough, kept for later (reference.md: set, not read yet)"
     },
     "flagsUnset": {
+      "mer_return": "v0.11.41 (D2-a): Story Mode's \"Open a meridian\" set it; the meridian screen's \"Open your eyes.\" still reads it, so an old Story Mode save left on that screen goes back to its hub",
       "gao_dead": "v0.11.40 (G1): read only by gaoFill in game.js, which carries a pre-v0.7.0 save's gao_dead over to gao_broken; the game no longer sets or reads it otherwise"
     },
     "storage": {

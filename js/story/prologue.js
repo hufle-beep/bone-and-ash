@@ -4,7 +4,7 @@
  * corpses of their rivals, and where Heaven answers every breakthrough with lightning. James needs none of it.
  * That is going to be a problem — for them.
  */
-import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, clockParts, canBreakThrough, breakthrough, realmName } from '../core/game.js';
+import { addItem, hasItem, eat, bumpRel, sleepUntil, advance, clockParts, breakthrough, realmName } from '../core/game.js';
 import { NO_DICE_TUNE } from './nodice_tune.js';
 import { setNoDiceTune } from '../core/game.js';
 setNoDiceTune(NO_DICE_TUNE);
@@ -13,7 +13,7 @@ import './power.js';
 import './stomp_prologue.js';
 import './stomp_act1.js';
 import { STORY_FORMS, hasForm } from '../core/forms.js';
-import { yukiForms, itemNames, itemCap, isNoDice, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, ensureBars, MAX_REALM, wakeState, clockLabel, dayHour } from '../core/game.js';
+import { yukiForms, itemNames, itemCap, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, ensureBars, MAX_REALM, wakeState, clockLabel, dayHour } from '../core/game.js';
 import { WILDS, nightNext } from './wilds.js';
 import { ASHFALL, hubOf, nextEvening } from './ashfall.js';
 import { ACT1_ITEMS } from './act1_common.js';
@@ -22,7 +22,7 @@ import { BLACKROOT, BREAK_HUBS as B2 } from './act1_blackroot.js';
 import { HEART, BREAK_HUBS as B3 } from './act1_heart.js';
 import { RETURN, BREAK_HUBS as B4 } from './act1_return.js';
 import { LONGFOREST, BREAK_HUBS as B0 } from './longforest.js';
-import { MERIDIANS, canAnyMeridian, btTarget } from './meridians.js';
+import { MERIDIANS } from './meridians.js';
 import { installYukiPath } from './yuki_path.js';
 import { installCoil } from './coil_scenes.js';
 import { installOnce } from './oneoff.js';
@@ -207,9 +207,9 @@ It comes in like a crowd of angry ghosts — grief, hunger, the iron of old bloo
 
 You have a strong, immediate suspicion that nobody on this world can do that. That they need *something* — medicine, herbs, ritual — to scrub what they breathe, and that whatever they use, it isn't enough.
 
-${g.james.qi >= 10 && !isNoDice() ? 'You could keep going: condense a little Qi toward the next realm. It costs Qi, not time you don\'t have.' : ''}`,
+`,
         choices: [
-            { text: 'Condense: one sit, 10 Qi toward Saturation.', show: () => !isNoDice() /* v0.11.16: Meditate only where James rests (Incremental Mode) */, req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`] : []; }, to: 'stream' },
+            { text: 'Story Mode only (removed in v0.11.41).', show: () => false, to: 'stream' }, // v0.11.41 (D2-a): Story Mode's sit; the place kept (choice indices)
             { text: 'Enough. Water, food, shelter — the boring holy trinity.', time: 15, to: 'stream' },
         ],
     },
@@ -298,7 +298,7 @@ ${g.flags.fire ? 'The fire makes a small, defiant room in the dark.' : 'Without 
 ${(g.flags.forest_day || 1) > 1 ? 'Another night in the Blackroot. Your watch-thread is already spinning up before you ask.' : 'Your Parallel Cognition offers, unprompted, to spin up a thread for watch-keeping. Nine threads, and one of them never sleeps unless you tell it to.'}`,
         choices: [
             { text: 'Leave a thread on watch and sleep.', do: set('watch'), to: nightNext },
-            { text: 'Cultivate first — one sit — then sleep.', show: () => !isNoDice() /* v0.11.16 */, req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`] : []; }, to: nightNext },
+            { text: 'Story Mode only (removed in v0.11.41).', show: () => false, to: nightNext }, // v0.11.41 (D2-a): Story Mode's sit; the place kept (choice indices)
             { text: 'Just sleep. You\'ve earned it.', to: nightNext },
         ],
     },
@@ -698,8 +698,8 @@ Lu Han's gaze passes over the baskets, over the people, and stops on you. On Yuk
 "I've been offered worse," you say. "Not recently."`,
         choices: [
             { text: 'Step forward. "I\'m not kneeling, and nobody\'s paying you today."', combat: collectorsFight, to: 'collectors_won' },
-            { text: 'Bluff: a wandering senior of a hidden sect, testing the Crimson Lotus\'s manners. Let a little bone show.', qi: 4, check: { skill: 'GU', dc: (g) => 6 + (isNoDice() ? 1 : 0), bonus: (g) => (g.flags.healed === true ? 1 : 0) + (g.flags.boar ? 1 : 0) + (g.flags.gao_beaten ? 1 : 0) + (g.flags.scouted ? 1 : 0) + (g.flags.gao_turned || g.flags.gao_warned ? 1 : 0) + (g.flags.token_silenced ? 1 : 0) + ((g.rel.Village?.f || 0) >= 40 ? 1 : 0) - Math.floor((forestScale(g) + villageScale(g)) / 2) }, to: 'bluff_win', fail: 'bluff_fail' },
-            { text: 'Offer tribute they\'ve never seen: sing a wraithbone hairpin, flawless, and pay the village\'s due with it.', qi: 8, check: { skill: 'Convergence Use', dc: (g) => 4 + (isNoDice() ? 1 : 0), bonus: (g) => -Math.floor((forestScale(g) + villageScale(g)) / 2) }, do: (g) => { addItem(g, 'hairpin', 1); return []; }, to: 'tribute_paid', fail: 'bluff_fail' },
+            { text: 'Bluff: a wandering senior of a hidden sect, testing the Crimson Lotus\'s manners. Let a little bone show.', qi: 4, check: { skill: 'GU', dc: 7, bonus: (g) => (g.flags.healed === true ? 1 : 0) + (g.flags.boar ? 1 : 0) + (g.flags.gao_beaten ? 1 : 0) + (g.flags.scouted ? 1 : 0) + (g.flags.gao_turned || g.flags.gao_warned ? 1 : 0) + (g.flags.token_silenced ? 1 : 0) + ((g.rel.Village?.f || 0) >= 40 ? 1 : 0) - Math.floor((forestScale(g) + villageScale(g)) / 2) }, to: 'bluff_win', fail: 'bluff_fail' },
+            { text: 'Offer tribute they\'ve never seen: sing a wraithbone hairpin, flawless, and pay the village\'s due with it.', qi: 8, check: { skill: 'Convergence Use', dc: 5, bonus: (g) => -Math.floor((forestScale(g) + villageScale(g)) / 2) }, do: (g) => { addItem(g, 'hairpin', 1); return []; }, to: 'tribute_paid', fail: 'bluff_fail' },
         ],
     },
     bluff_fail: {
@@ -801,25 +801,9 @@ function cookMealMorning(g) {
 Object.assign(SCENES, MERIDIANS, WILDS, ASHFALL, FALLOUT, BLACKROOT, HEART, RETURN, LONGFOREST);
 
 /* the way into the Long Forest (pre-prologue): from the Day 1 clearing */
-/**
- * The Long Forest, one button (v0.8.2, Gábor): Nascent Soul, all 46 extra meridians open, GU / Convergence Use and Yuki's
- * Fight / Qi Use at T10 L10, the hammerspace full of every stock item. Then straight to the exit (Day 4, the scream).
- * The old walkable Long Forest (lf_enter, lf_hub …) stays in the code for the tests but has no entrance.
- */
+/** The Long Forest's stock (its hauls fill the hammerspace with these). The one-button Long Forest (Story Mode) is gone since v0.11.41. */
 export const LF_STOCK = ['hare_raw', 'jade_bracket', 'crimson_berry', 'spirit_grass', 'beast_core', 'fowl_raw', 'crab_meat', 'honeycomb', 'lizard_egg', 'river_cress', 'venison', 'ghost_gill', 'bone_meal', 'crow_feather'];
-export function longForestInstant(g) {
-    const top = () => ({ tier: 10, level: 10, xp: 0 });
-    Object.assign(g.flags, { lf_active: true, longforest: true, lf_instant: true, yuki_tiger_seen: true, yuki_human_seen: true });
-    g.james.realm = 7; g.yuki.realm = 7; g.james.saturation = 0;
-    g.james.gu = top(); g.james.skills['Convergence Use'] = top(); g.yuki.fight = top(); g.yuki.qiUse = top();
-    Object.assign(g.james, { primaries: 12, collaterals: 66, colSealed: false, extra8: 8, extraCollaterals: 28, junctions: 10 });
-    Object.assign(g.yuki, { primaries: 12, collaterals: 66 });
-    for (const id of LF_STOCK) g.inventory[id] = itemCap(id);
-    g.rel.Yuki = { f: 150, a: 150 }; g.flags.yk_back = 'lf_exit';
-    g.james.satiety = 100; g.james.hp = null; g.james.qi = null; g.yuki.hp = null; g.yuki.qi = null;
-    return ['Seasons pass. You stop counting them.', `Realm: ${realmName(7)}. GU, Convergence Use, Yuki's Fight and Qi Use: T10 L10.`, 'Extraordinary 8/8, their collaterals 28/28, junctions 10/10.', 'The hammerspace is full.'];
-}
-SCENES.clearing.choices.push({ show: () => !isNoDice(), text: 'Stay lost. (The Long Forest, in one step: Nascent Soul, every meridian open, everything T10 L10, the hammerspace full.)', do: longForestInstant, to: 'yk_choice' });
+SCENES.clearing.choices.push({ text: 'Story Mode only (removed in v0.11.41).', show: () => false, to: 'clearing' }); // v0.11.41 (D2-a): Story Mode's one-step Long Forest; the place kept (choice indices)
 installYukiPath(SCENES);
 
 /* ---------- breakthrough: offered at calm moments whenever Saturation is 100% ---------- */
@@ -894,18 +878,8 @@ ${seen
     } }],
 };
 for (const id of ['stream', 'wilds', 'camp', 'night', 'village', 'ashfall', 'supper', ...B0, ...B1, ...B2, ...B3, ...B4]) {
-    SCENES[id].choices.unshift({
-        text: (g) => `Break through to ${realmName(g.james.realm + 1)}. (Saturation ${g.james.saturation}%.)`,
-        show: (g) => !isNoDice() && canBreakThrough(g), // task mode: on the Meditate card (v0.9.5)
-        do: (g) => { g.flags.bt_return = g.scene; return []; },
-        to: btTarget,
-    });
-    SCENES[id].choices.push({
-        text: 'Open a meridian. (The Extraordinary net.)',
-        show: (g) => !isNoDice() && canAnyMeridian(g), // task mode: on the Meditate card (v0.9.5)
-        do: (g) => { g.flags.mer_return = g.scene; return []; },
-        to: 'meridians',
-    });
+    SCENES[id].choices.unshift({ text: 'Story Mode only (removed in v0.11.41).', show: () => false, to: 'breakthrough' }); // v0.11.41 (D2-a): Story Mode's "Break through" (the Meditate card since v0.9.5); the place kept
+    SCENES[id].choices.push({ text: 'Story Mode only (removed in v0.11.41).', show: () => false, to: 'meridians' }); // v0.11.41 (D2-a): Story Mode's "Open a meridian" (the Meditate cards); the place kept
     SCENES[id].choices.push({
         text: 'Yuki: change form.',
         show: (g) => yukiForms(g).length > 1 && !!SCENES.yuki_form,
@@ -919,7 +893,7 @@ installOnce(SCENES); // v0.11.33: the task screens' one-off work, "Call it a day
 
 /* ---------- v0.10.1: the Long Forest in task mode — gated behind the first Coil, climbed one season at a time ---------- */
 /** Task mode, the prologue's Coil 2 or later. Classic keeps the one-step button above. */
-export const lfOpen = (g) => isNoDice() && (g.coil?.n || 1) > 1 && (g.coil?.act || 0) === 0;
+export const lfOpen = (g) => (g.coil?.n || 1) > 1 && (g.coil?.act || 0) === 0;
 /** The skill rank a season lifts GU, Convergence Use, Yuki's Fight and Qi Use to (rank = 10·(T−1) + L): 7 per rung, T10 L10 at the top. */
 export const lfRank = (r) => (r >= MAX_REALM ? 100 : 7 * r);
 export const LF_SEASON_MINUTES = 120;
@@ -961,20 +935,20 @@ SCENES.arrival.choices.push({
 });
 SCENES.lf_hub.choices.push({
     text: (g) => `Withdraw for a season: ${realmName(g.james.realm)} → ${realmName(g.james.realm + 1)}.`,
-    show: (g) => isNoDice() && g.james.realm < MAX_REALM, time: LF_SEASON_MINUTES, do: lfSeason, to: 'lf_hub',
+    show: (g) => g.james.realm < MAX_REALM, time: LF_SEASON_MINUTES, do: lfSeason, to: 'lf_hub',
 });
 const LF_FULL = 'The hammerspace is full: the Long Forest\'s pantry comes with you.';
 const lfStock = (g) => { for (const id of LF_STOCK) g.inventory[id] = Math.max(g.inventory[id] || 0, itemCap(id)); };
 { // leaving in task mode: the hammerspace goes out full
     const exit = SCENES.lf_exit.choices[0];
     const was = exit.do;
-    exit.do = (g) => { const out = was(g); if (isNoDice()) { lfStock(g); out.push(LF_FULL); } return out; };
+    exit.do = (g) => { const out = was(g); lfStock(g); out.push(LF_FULL); return out; };
     exit.instant = true; // v0.11.37 (A1): at once (the wrapper hides its clock from waitChoice's reading)
 }
 /** v0.11.37 (owner 12:59, pick A1): the second way out: back where he walked in (the clearing or the arrival), the clock as he left it. At the end of the list: the hub's card ids stay. */
 SCENES.lf_hub.choices.push({
     text: 'Go back the way you came. (The calendar starts again where you walked in.)',
-    show: (g) => isNoDice() && ['clearing', 'arrival'].includes(g.flags.lf_from) && Number.isFinite(g.flags.lf_at),
+    show: (g) => ['clearing', 'arrival'].includes(g.flags.lf_from) && Number.isFinite(g.flags.lf_at),
     instant: true,
     do: (g) => {
         g.flags.lf_active = false;
@@ -999,15 +973,14 @@ SCENES.lf_hub.choices.push({
         if (was?.dailyKey) f.dailyKey = was.dailyKey;
         c.form = form; c.show = f;
     }
-    const inc = (a, b) => (g) => (isNoDice() ? a : (typeof b === 'function' ? b(g) : b));
     const reword = (scene, re, text, out) => {
         const c = SCENES[scene].choices.find((x) => typeof x.text === 'string' && re.test(x.text));
         if (!c) throw new Error(`forms: no choice ${re} in ${scene}`);
-        c.text = inc(text, c.text);
-        if (out) { const d = c.do; c.do = (g, r) => { const lines = d(g, r) || []; return isNoDice() ? lines.map((l) => (l === out[0] ? out[1] : l)) : lines; }; }
+        c.text = text; // v0.11.41: Incremental Mode's wording only (Story Mode's is gone)
+        if (out) { const d = c.do; c.do = (g, r) => (d(g, r) || []).map((l) => (l === out[0] ? out[1] : l)); }
     };
     reword('night_attack', /^Bone wall between you/, 'A hedge of bone spikes between you and them, then run for the water.');
-    SCENES.night_attack_forced.text = inc('The hedge comes out knee-high and full of gaps. The jackals step through it with an air of professional courtesy. Running is off the table.', SCENES.night_attack_forced.text);
+    SCENES.night_attack_forced.text = 'The hedge comes out knee-high and full of gaps. The jackals step through it with an air of professional courtesy. Running is off the table.';
     reword('rt_ford', /bridge of bone/, 'Sing stepping-stones of bone from stone to stone.', ['A white bridge, ribbed like a spine. Mei Lin crosses it like a woman walking into a temple.', 'White stepping-stones, ribbed like vertebrae, rise between the black ones. Mei Lin crosses them like a woman walking into a temple.']);
     reword('rt_ambush', /wall of bone/, 'A slab of bone between you and them, then down to the river.');
     reword('ring_chambers', /wall of bone/, 'Seal the fourth ring\'s doorway with a slab of bone and leave them to it.', ['A white wall, floor to ceiling. The chewing goes on behind it, disappointed.', 'A white slab, man-high, jammed into the doorway. The chewing goes on behind it, disappointed.']);

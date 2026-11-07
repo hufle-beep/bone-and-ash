@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.40 | (this push) | Chunk A: N1 (night clock never back), E1 (the one-move rule reads the no-dice raise), G1 (`gao_dead` no longer read), Yuki born with James in her path's text. Same save state as 0.11.37; a pre-v0.7.0 save holding `gao_dead` gets `gao_broken` on load (`gaoFill`, fills only). 0 drift, the baseline kept. |
+| 0.11.41 | (this push) | D2-a + S: Story Mode's code out but the dice core; Story-only choices as hidden places (indices kept); the check faster. Same save state as 0.11.40 (an old Story Mode save loads and plays Incremental Mode, as since v0.11.34). Bot stats byte-identical to 0.11.40. |
+| 0.11.40 | `bece0f9` | Chunk A: N1 (night clock never back), E1 (the one-move rule reads the no-dice raise), G1 (`gao_dead` no longer read), Yuki born with James in her path's text. Same save state as 0.11.37; a pre-v0.7.0 save holding `gao_dead` gets `gao_broken` on load (`gaoFill`, fills only). 0 drift, the baseline kept. |
 | 0.11.39 | `b8b7b76` | Z2-b: the art cache `boneash-art` (kept across versions, by fingerprint). Same save state as 0.11.37. Going back to 0.11.38 or older is safe: the old worker deletes `boneash-art` on activation and caches its pictures in its own version cache again (a later return to 0.11.39+ downloads them once more). |
 | 0.11.38 | `fdabddd` | P-b: the prologue's 42 generated pictures; the 30 that draw Yuki as the cat only while she is the cat (`YUKI_CAT_ONLY`). Art only; 0 drift; same save state as 0.11.37 (art keys are not in saves). |
 | 0.11.37 | `ca0585e` | The day ends at 02:00, Push through only at night, story choices and eating at once, familiar story choices at half time, the Long Forest's way back, no useless sit; the baseline updated (owner 17:03), the drift rule ±20. Same save state as 0.11.36 plus the optional `wake.push` and the flags `lf_from` / `lf_at` (an older version ignores them). |

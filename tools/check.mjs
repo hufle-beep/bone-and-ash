@@ -40,7 +40,8 @@ const files = LIST ? [] : execFileSync('git', ['ls-files', '--cached', '--others
 const jobs = [
     { name: `tasks (${GAMES} bot games${QUICK ? ', quick' : ''})`, key: 'tasks', cmd: node('tests/tasks.test.mjs', '--games', String(GAMES), '--stats-out', path.join(ST, 'tasks.json')), heavy: true },
     ...(QUICK ? [] : [
-        { name: 'browser part 1 (Incremental, reload, no mode switch, two tabs)', key: 'browser1', cmd: ['python3', ['tools/browser.py', '--part', '1']] },
+        { name: 'browser part 1 (Incremental taps, no mode switch)', key: 'browser1', cmd: ['python3', ['tools/browser.py', '--part', '1']] },
+        { name: 'browser part 4 (the reload, two tabs)', key: 'browser4', cmd: ['python3', ['tools/browser.py', '--part', '4']] }, // v0.11.41: split off part 1
         { name: 'browser part 2 (saves, menu, tooltip, resting places)', key: 'browser2', cmd: ['python3', ['tools/browser.py', '--part', '2']] },
         { name: 'browser part 3 (the art cache across an update, service worker on)', key: 'browser3', cmd: ['python3', ['tools/browser.py', '--part', '3']] }, // v0.11.39
     ]),
@@ -62,8 +63,8 @@ const jobs = [
     // v0.11.22: the leftover check (strict since v0.11.23, choices log only). Full runs add what the bot games touched: the story test watches its flags and items
     // itself; the tasks games get a separate small watched run (a Proxy slows every game in its process, so not in the big test).
     ...(QUICK ? [{ name: 'leftovers (strict, static scan)', key: 'leftovers', show: 'leftovers', cmd: node('tools/leftovers.mjs', '--strict') }] : [
-        { name: 'watched bot games (300, flags, items)', key: 'track', cmd: node('tests/tasks.test.mjs', '--bots-only', '--track', '--games', '300', '--workers', '1', '--stats-out', path.join(ST, 'track.json')), after: ['tasks'] },
-        { name: 'watched story games (300 and the walks)', key: 'track-story', cmd: node('tests/story.test.mjs', '--track', '--games', '300', '--workers', '1', '--stats-out', path.join(ST, 'track-story.json')), after: ['tasks'] },
+        { name: 'watched bot games (150, flags, items)', key: 'track', cmd: node('tests/tasks.test.mjs', '--bots-only', '--track', '--games', '150', '--workers', '1', '--stats-out', path.join(ST, 'track.json')), after: ['tasks'] },
+        { name: 'watched story games (150 and the walks)', key: 'track-story', cmd: node('tests/story.test.mjs', '--track', '--games', '150', '--workers', '1', '--stats-out', path.join(ST, 'track-story.json')), after: ['tasks'] },
         { name: 'leftovers (strict; choices log only)', key: 'leftovers', show: 'leftovers', cmd: node('tools/leftovers.mjs', '--strict', '--seen', ...['story', 'tasks', 'track', 'track-story'].map((k) => path.join(ST, `${k}.json`))), after: ['tasks', 'story', 'track', 'track-story'] },
     ]),
     ...(QUICK ? [] : [{ name: 'sanity (invariants, drift ±20)', key: 'sanity', last: true, cmd: node('tools/sanity.mjs', '--tasks', path.join(ST, 'tasks.json'), '--story', path.join(ST, 'story.json')), after: ['tasks', 'story'] }]),

@@ -4,7 +4,7 @@
  */
 import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, clockParts, d6, awardYukiFightXp, awardXp, jamesHpMax, jamesQiMax } from '../core/game.js';
 import { condensationSatGain } from '../core/formulas.js';
-import { sitGain, isNoDice } from '../core/game.js';
+import { sitGain } from '../core/game.js';
 import { set, day, hour, daily, markDaily, forestScale, grow, eatBest, pantry, foodCount } from './common.js';
 
 const P = 'Blackroot Wilds';
@@ -71,7 +71,7 @@ Through the bond: *you hunt like a tree. I am fixing it.*`,
             { text: 'Watch where the lights go. Let the threads map it.', show: ev('lights'), check: { skill: 'GU', dc: 3 }, do: (g) => { g.flags.saw_lights = true; return ['Mapped: the lights flow toward the dead tree, like blood toward a heart that stopped.']; }, to: 'morning' },
             { text: 'Pull the blanket over your head. Not your business. Not tonight.', show: ev('lights'), to: 'morning' },
             { text: 'Sing a bone lean-to over the camp.', show: ev('rain'), qi: 2, check: { skill: 'Convergence Use', dc: 2 }, do: (g) => { return ['A ribbed white roof. Dry, smug, asleep.']; }, failDo: (g) => { g.james.hp -= 2; return ['It collapses in the night. Wet, cold, −2 HP.']; }, to: 'morning' },
-            { text: 'Sit in the rain and cultivate. It\'s not like you can sleep.', show: (g) => !isNoDice() && ev('rain')(g) && g.james.qi >= 10, /* v0.11.16 */ do: (g) => { const r = condense(g); return r.ok ? [`Condensed in the rain: Saturation ${r.saturation}%.`] : []; }, to: 'morning' },
+            { text: 'Story Mode only (removed in v0.11.41).', show: () => false, to: 'morning' }, // v0.11.41 (D2-a): Story Mode's sit; the place kept (choice indices)
             { text: 'Get wet. Sleep anyway.', show: ev('rain'), to: 'morning' },
             { text: 'Fight them off.', show: ev('crows'), combat: nightFight('crows'), to: 'night_won' },
             { text: 'Throw them the scraps and keep your eyes.', show: ev('crows'), do: (g) => { const id = ['crimson_berry', 'river_cress', 'jade_bracket', 'crab_meat', 'hare_raw', 'fowl_raw'].find((k) => g.inventory[k] > 0); if (id) addItem(g, id, -1); return [id ? 'The crows take some of your food and leave.' : 'You have nothing to throw. The crows leave anyway, disgusted.']; }, to: 'morning' },

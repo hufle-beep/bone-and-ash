@@ -85,7 +85,7 @@ for (const mode of ['full', 'quick']) {
     if (mode === 'full') {
         const s = jobs.find((j) => j.key === 'sanity');
         assert(s && s.after.includes('tasks') && s.after.includes('story'), 'full: sanity waits for tasks and story');
-        assert(keys.includes('browser1') && keys.includes('browser2') && keys.includes('browser3'), 'full: has the three browser parts (part 3 v0.11.39)');
+        assert(['browser1', 'browser2', 'browser3', 'browser4'].every((k) => keys.includes(k)), 'full: has the four browser parts (part 3 v0.11.39, part 4 v0.11.41)');
         const lo = jobs.find((j) => j.key === 'leftovers'), tr = jobs.find((j) => j.key === 'track');
         const ts = jobs.find((j) => j.key === 'track-story');
         assert(lo && tr && ts && ['tasks', 'story', 'track', 'track-story'].every((a) => lo.after.includes(a)) && [tr, ts].every((j) => j.after.includes('tasks') && !j.heavy), 'v0.11.22 full: leftovers waits for tasks, story and both watched runs; the watched runs after tasks, not heavy');

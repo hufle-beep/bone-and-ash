@@ -10,7 +10,7 @@ import { setFormsActive, actionOpen, actionLabel, fragileKnife, lineState, FORM_
 const formStep = (g, line) => { const n = lineState(g, line).now; return n ? FORM_LINES[line].forms.findIndex((f) => f.id === n.id) : -1; };
 import {
     checkFromTierLevel, skillXpCost, maxHp, qiPoolMax, qiRegenPercent, cycleTimeMinutes,
-    realmBonus, realmStepLabel, condensationSatGain, CONDENSE_SIT_COST, FAIL_XP_FRACTION, realmDr, realmShockHpBonus, dampenMultiplier,
+    realmBonus, realmStepLabel, CONDENSE_SIT_COST, FAIL_XP_FRACTION, realmDr, realmShockHpBonus, dampenMultiplier,
 } from './formulas.js';
 
 export const K = 0.5;
@@ -212,7 +212,7 @@ export const atSkillCap = (n) => n.tier >= SKILL_MAX_TIER && n.level >= 10;
 export const COIL_GROWTH = 0.25; // v0.11.29 (owner pick RB-1): was 0.5
 /** v0.11.29: the Coil bonus as text, up to two decimals (×1.25, ×1.5, ×2). */
 export const fmtMult = (x) => String(Math.round(x * 100) / 100);
-export const coilMult = (g) => (noDice ? 1 + COIL_GROWTH * Math.max(0, (g?.coil?.n || 1) - 1) : 1);
+export const coilMult = (g) => 1 + COIL_GROWTH * Math.max(0, (g?.coil?.n || 1) - 1);
 /**
  * Speed by use (v0.11.15, B1-b, owner 19:12, Selene's familiarity): each activity speeds up with its own use, kept across
  * Coils: speed = 1 + 9 × (uses ÷ N), up to ×10. Cards N 18 (tasks.js, the familiarity count), the sit N 30, meridian
@@ -224,9 +224,8 @@ export const USE_CAP = 10;
 export const useSpeed = (uses, n) => Math.min(USE_CAP, 1 + ((USE_CAP - 1) * (uses || 0)) / n);
 const ACT_KEY = { sit: 'act:sit', mer: 'act:mer', bt: 'act:bt' };
 export const actUses = (g, k) => g?.tasks?.use?.[ACT_KEY[k]] || 0;
-export const actSpeed = (g, k) => (noDice ? useSpeed(actUses(g, k), USE_N[k]) : 1);
+export const actSpeed = (g, k) => useSpeed(actUses(g, k), USE_N[k]);
 export function actUse(g, k) {
-    if (!noDice) return;
     if (!g.tasks || typeof g.tasks !== 'object') g.tasks = {};
     if (!g.tasks.use || typeof g.tasks.use !== 'object') g.tasks.use = {};
     g.tasks.use[ACT_KEY[k]] = actUses(g, k) + 1;
@@ -353,28 +352,21 @@ export function wakeState(g) {
     return g.wake;
 }
 export const wakeDay = (g) => wakeState(g).n;
-export const exLevel = (g) => (noDice ? wakeState(g).ex : 0);
+export const exLevel = (g) => wakeState(g).ex;
 export const exMult = (g) => EX_MULT[exLevel(g)] || 1;
-export const exMins = (g, m) => (m && noDice ? Math.round(m * exMult(g)) : m);
+export const exMins = (g, m) => (m ? Math.round(m * exMult(g)) : m);
 export function advance(g, minutes, { resting = false, work = false } = {}) {
     let m = Math.max(0, Math.round(minutes));
     if (!m) return [];
     const notes = [];
-    if (noDice) {
-        const w = wakeState(g);
-        if (work && !resting && m < 1440) m = Math.round(m * (EX_MULT[w.ex] || 1)); // Exhaustion: work only, not waits, rests or sleep
-        if (m >= 1440) { w.n += Math.floor(m / 1440); w.ex = 0; w.slept = clockParts(g.minutes + m).day; } // a span of a day or more has its nights in it
-        w.lastX = X4(g.minutes + m); // a morning passed awake: no new day
-    }
+    const w = wakeState(g);
+    if (work && !resting && m < 1440) m = Math.round(m * (EX_MULT[w.ex] || 1)); // Exhaustion: work only, not waits, rests or sleep
+    if (m >= 1440) { w.n += Math.floor(m / 1440); w.ex = 0; w.slept = clockParts(g.minutes + m).day; } // a span of a day or more has its nights in it
+    w.lastX = X4(g.minutes + m); // a morning passed awake: no new day
     g.minutes += m;
     const fed0 = Math.max(0, g.james.satiety);
     g.james.satiety -= (SATIETY_PER_HOUR * m) / 60;
-    if (g.james.satiety <= 0 && !noDice) { // classic: the old rule, at least 1 HP per clock step
-        g.james.satiety = 0;
-        const loss = Math.max(1, Math.floor(m / 60));
-        g.james.hp -= loss;
-        notes.push(`Starving: −${loss} HP`);
-    } else if (g.james.satiety <= 0) {
+    if (g.james.satiety <= 0) {
         // task mode (v0.10.0): STARVE_HP_PER_HOUR per starving hour, the minutes carried over
         g.james.satiety = 0;
         g.starveCarry = (g.starveCarry || 0) + Math.max(0, m - (fed0 * 60) / SATIETY_PER_HOUR);
@@ -406,18 +398,17 @@ export function advance(g, minutes, { resting = false, work = false } = {}) {
  */
 export const DAY_END_HOUR = 2, NIGHT_TO = 4;
 /** The night hours belong to the day before; pushed through, they belong to the next one. */
-export const pushedTonight = (g) => { if (!noDice) return false; const p = clockParts(g.minutes); return p.hh < NIGHT_TO && wakeState(g).push === p.day; };
-export const dayHour = (g) => { const hh = clockParts(g.minutes).hh; return noDice && hh < NIGHT_TO && !pushedTonight(g) ? hh + 24 : hh; };
-/** The minute this waking day ends (the next 02:00, or the one after a push); Infinity in Story Mode. */
+export const pushedTonight = (g) => { const p = clockParts(g.minutes); return p.hh < NIGHT_TO && wakeState(g).push === p.day; };
+export const dayHour = (g) => { const hh = clockParts(g.minutes).hh; return hh < NIGHT_TO && !pushedTonight(g) ? hh + 24 : hh; };
+/** The minute this waking day ends (the next 02:00, or the one after a push). */
 export function dayEnd(g) {
-    if (!noDice) return Infinity;
     const p = clockParts(g.minutes), d0 = (p.day - 1) * 1440 + DAY_END_HOUR * 60;
     return p.hh < NIGHT_TO ? d0 + (pushedTonight(g) ? 1440 : 0) : d0 + 1440;
 }
-export const nightLock = (g) => noDice && g.minutes >= dayEnd(g);
+export const nightLock = (g) => g.minutes >= dayEnd(g);
 /** Would `minutes` of work from now run past the day's end? */
-export const endsLate = (g, minutes) => noDice && g.minutes + Math.max(0, minutes || 0) > dayEnd(g);
-export const pushWindow = (g) => noDice && clockParts(g.minutes).hh < NIGHT_TO && !pushedTonight(g);
+export const endsLate = (g, minutes) => g.minutes + Math.max(0, minutes || 0) > dayEnd(g);
+export const pushWindow = (g) => clockParts(g.minutes).hh < NIGHT_TO && !pushedTonight(g);
 
 /** v0.11.18: Push through the night: a new waking day without sleep, one Exhaustion more; the third collapses him for a day. */
 export function pushNight(g) {
@@ -441,9 +432,9 @@ export function sleepUntil(g, hour = 6) {
     let target = (p.day - 1) * 1440 + hour * 60;
     if (target <= g.minutes) target += 1440;
     const span = target - g.minutes;
-    if (noDice) wakeState(g);
+    wakeState(g);
     g.minutes = target;
-    if (noDice) { const w = g.wake, d = clockParts(target).day; if (d > w.slept) { w.n += 1; w.slept = d; } w.ex = 0; w.lastX = X4(target); }
+    { const w = g.wake, d = clockParts(target).day; if (d > w.slept) { w.n += 1; w.slept = d; } w.ex = 0; w.lastX = X4(target); }
     g.james.satiety = Math.max(0, g.james.satiety - (SATIETY_PER_HOUR * span) / 60 / 2);
     g.james.hp = jamesHpMax(g);
     g.james.qi = jamesQiMax(g);
@@ -470,17 +461,17 @@ export const SIT_MINUTES_INC = 60;
 /** v0.11.15: a sit's length: an hour ÷ its speed by use (at least a minute). */
 export const sitMinutes = (g) => Math.max(1, Math.round(SIT_MINUTES_INC / actSpeed(g, 'sit')));
 /** Saturation % from `sits` sits (one hour each in Incremental Mode; the hollow and the grove count as two). */
-export const sitGain = (g, sits = 1) => Math.round((noDice ? (100 * sits) / SAT_HOURS(g.james.realm) : condensationSatGain(CONDENSE_SIT_COST, jamesQiMax(g)) * sits) * 10) / 10; // v0.11.15: no Coil bonus
+export const sitGain = (g, sits = 1) => Math.round(((100 * sits) / SAT_HOURS(g.james.realm)) * 10) / 10; // v0.11.15: no Coil bonus
 /** v0.11.37 (owner 13:06, pick B2): a sit that changes nothing (the top realm, or a gain that rounds to 0%: from realm 8) is not offered (Incremental Mode). */
-export const sitUseless = (g) => noDice && (g.james.realm >= MAX_REALM || sitGain(g) <= 0);
-/** The breakthrough's length: 2 h × (realm + 1) ÷ the Coil bonus in Incremental Mode (Foundation 2 h … Heavenly Immortal 28 h); 2 h in Story Mode. */
-export const btMinutes = (g) => (noDice ? exMins(g, Math.round((120 * ((g.james.realm || 0) + 1)) / actSpeed(g, 'bt'))) : 120); // v0.11.15: ÷ its speed by use
+export const sitUseless = (g) => (g.james.realm >= MAX_REALM || sitGain(g) <= 0);
+/** The breakthrough's length: 2 h × (realm + 1) (Foundation 2 h … Heavenly Immortal 28 h). */
+export const btMinutes = (g) => exMins(g, Math.round((120 * ((g.james.realm || 0) + 1)) / actSpeed(g, 'bt'))); // v0.11.15: ÷ its speed by use
 /** Condensation: a conscious sit, 10 Qi a sit, 0 XP; raises Saturation. Spends Qi, never refills it. */
 export function condense(g) {
     if (!spendQi(g, CONDENSE_SIT_COST)) return { ok: false };
     const gain = sitGain(g);
     g.james.saturation = Math.min(100, Math.round((g.james.saturation + gain) * 10) / 10);
-    advance(g, noDice ? sitMinutes(g) : 30, { work: true });
+    advance(g, sitMinutes(g), { work: true });
     actUse(g, 'sit');
     return { ok: true, gain, saturation: g.james.saturation };
 }
@@ -490,8 +481,8 @@ export function condense(g) {
  * Yuki is root-kin and rises with James. No herbs, no pills, no tribulation (the Ouroboros Axiom).
  */
 export const MAX_REALM = 14;
-/** Engine rule L in task mode (v0.9.4): from 95% Saturation (anything over 100% is lost; nothing carries over). Classic: 100%. */
-export const breakAt = () => (noDice ? 95 : 100);
+/** Engine rule L (v0.9.4): from 95% Saturation (anything over 100% is lost; nothing carries over). */
+export const breakAt = () => 95;
 export const PRIMARIES_FOR_FOUNDATION = 12;
 /** Saturation is ready but the realm's gate isn't met (v0.9.6: Foundation needs all 12 primaries). '' if nothing blocks. */
 export const breakBlock = (g) => (g.james.realm === 0 && (g.james.primaries ?? 12) < PRIMARIES_FOR_FOUNDATION ? `needs all 12 primaries (${g.james.primaries}/12)` : '');
@@ -605,7 +596,7 @@ function catchUp(cur, d, top) {
 export function bumpRel(g, who, f = 0, a = 0) {
     const r = g.rel[who] || (g.rel[who] = { f: 0, a: 0 });
     let b = null;
-    if (noDice && g.coil && who !== 'Yuki') {
+    if (g.coil && who !== 'Yuki') {
         const best = g.coil.best || (g.coil.best = {});
         const p = g.coil.peak?.[who];
         b = best[who] || (best[who] = { f: Math.max(r.f, p?.f ?? r.f), a: Math.max(r.a, p?.a ?? r.a) }); // an old save starts from this Coil's peak

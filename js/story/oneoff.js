@@ -9,7 +9,7 @@
  * - S1: "Call it a day" on the hubs with a set evening, from 04:00, once nothing but repeatable work is open there
  *   (`oneOffLeft`): the clock to the evening hour at once, as rest; the evening exit then shows as usual.
  */
-import { isNoDice, advance, clockParts } from '../core/game.js';
+import { advance, clockParts } from '../core/game.js';
 import { TASK_HUBS } from './task_hubs.js';
 import { setOnChoose } from '../core/story.js';
 
@@ -25,13 +25,13 @@ export const EVENING_HOUR = { wilds: 15, ashfall: 16, fo_ashfall: 16, rr_hub: 16
 export const onceKey = (scene, i) => `oo:${scene}#${i}`;
 const isWork = (c) => !!c && (!!c.check || c.time != null);
 /** Is this menu choice still open this Coil? (always in Story Mode) */
-export const onceOpen = (g, scene, i) => !isNoDice() || !ONCE_MENUS.has(scene) || !g.flags[onceKey(scene, i)];
+export const onceOpen = (g, scene, i) => !ONCE_MENUS.has(scene) || !g.flags[onceKey(scene, i)];
 /** Visits left this Coil to a staged door scene. */
-export const stageOpen = (g, to) => !isNoDice() || !ONCE_STAGES[to] || (g.flags[`oo:${to}`] || 0) < ONCE_STAGES[to];
+export const stageOpen = (g, to) => !ONCE_STAGES[to] || (g.flags[`oo:${to}`] || 0) < ONCE_STAGES[to];
 
 /** Record a choice taken (story.js choose, tasks.js resolveWork): a once-menu's work choice, a visit to a staged scene. */
 export function noteOnce(g, sceneId, index, c) {
-    if (!isNoDice() || !c) return;
+    if (!c) return;
     if (ONCE_MENUS.has(sceneId) && isWork(c)) g.flags[onceKey(sceneId, index)] = true;
     const to = typeof c.to === 'string' ? c.to : null;
     if (to && ONCE_STAGES[to]) g.flags[`oo:${to}`] = (g.flags[`oo:${to}`] || 0) + 1;
@@ -82,7 +82,7 @@ export function installOnce(scenes) {
         const exitAt = (g) => { const at = { ...g, minutes: (clockParts(g.minutes).day - 1) * 1440 + h * 60, wake: g.wake && { ...g.wake } }; /* its own wake: wakeState writes to it */ return evening.some((c) => c.show && !c.show(g) && c.show(at)); };
         s.choices.push({
             text: 'Call it a day. Nothing here needs you before evening.',
-            show: (g) => isNoDice() && hourOf(g) >= 4 && hourOf(g) < h && !oneOffLeft(g, scenes, hubId) && exitAt(g),
+            show: (g) => hourOf(g) >= 4 && hourOf(g) < h && !oneOffLeft(g, scenes, hubId) && exitAt(g),
             do: (g) => toHour(g, h),
             to: hubId,
         });

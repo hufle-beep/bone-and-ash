@@ -171,7 +171,7 @@ export function setTimeless(hubs) { for (const [hub, menus] of Object.entries(hu
 export const DEFAULT_MINUTES = { talk: 10, move: 20, act: 30 };
 /** The default time of a choice with none: an action 30, moving to another place 20, talking 10. 0 when it has its own time or doesn't apply. */
 export function defaultMinutes(scenes, fromId, c, toId, moved) {
-    if (!isNoDice() || c.time != null || c.combat) return 0;
+    if (c.time != null || c.combat) return 0;
     if (TIMELESS.has(fromId) || TIMELESS.has(toId)) return 0;
     if (TIMELESS_PAIR.has(fromId) && TIMELESS_PAIR.has(toId)) return 0;
     if (scenes[toId]?.end) return 0;
@@ -213,7 +213,7 @@ export function choose(g, scenes, index, { task = false } = {}) {
     if (c.req && c.req(g) !== true) throw new Error(`Locked: ${c.req(g)}`);
     const lines = [];
     if (c.qi && !spendQi(g, c.qi)) throw new Error('Not enough Qi');
-    const fast = !task && isNoDice() && !!familiar && familiar(g, scenes, index, asText(c.text, g)); // v0.11.37 (F1): before this pick marks it
+    const fast = !task && !!familiar && familiar(g, scenes, index, asText(c.text, g)); // v0.11.37 (F1): before this pick marks it
     notePicked(g, s.id, index);
     let roll = null;
     let ok = true;

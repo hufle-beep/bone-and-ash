@@ -13,7 +13,7 @@ import { yukiSpeed, setDryClone, dryClone, showPicked } from '../js/core/tasks.j
 import { e8Hours, ecHours, jnHours } from '../js/story/meridians.js';
 import { serialize, deserialize } from '../js/core/game.js';
 import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, setNoDice, isNoDice, clockLabelSec, advance, STARVE_HP_PER_HOUR, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1, bumpRel as relBump, startActCoil, REL_CATCHUP } from '../js/core/game.js';
-import { canPrimary, canColGroup, colGroupsOpen, sessionsToday, dcPrimary, dcColGroup, btTarget, canAnyMeridian, COL_GROUPS, priHours, colHours, merMinutesOf } from '../js/story/meridians.js';
+import { canPrimary, canColGroup, colGroupsOpen, btTarget, COL_GROUPS, priHours, colHours, merMinutesOf } from '../js/story/meridians.js';
 import { sceneView, choose, goTo, wasPicked, isMenuScene, notePicked, seenBefore, noteSeen } from '../js/core/story.js';
 import { againView, skipStep, skipRun, skipPlan, MEMORY_LINES, noFold, SKIP_MAX } from '../js/story/again.js'; // v0.11.35 (P1-a)
 import { medCards, runMed, canMeditate, NO_MEDITATE, isSitChoice, MED_SCREENS } from '../js/core/meditate.js';
@@ -208,7 +208,7 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     const m1 = g.minutes; (g.tasks.use = {}, choose(g, SCENES, wp));
     assert(g.james.primaries === 2 && g.minutes - m1 === 20 && !g.james.merWork, 'the second primary opens on the short sitting');
     (g.tasks.use = {}, choose(g, SCENES, wp)); g.james.qi = 20;
-    assert(canPrimary(g) && sessionsToday(g) === 0, 'no daily limit in Incremental Mode');
+    assert(canPrimary(g), 'no daily limit');
     assert(canColGroup(g) && wc() >= 0 && SCENES.meridians.choices[wc()].show(g), 'group 1 after primaries 1–2: its own work card');
     (g.tasks.use = {}, choose(g, SCENES, wc()));
     assert(g.james.collaterals === 0 && Math.abs(g.james.colWork - 2) < 0.01 && Math.abs(g.james.merWork - 2) < 0.01, 'groups and primaries keep separate progress');
@@ -254,7 +254,7 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     endCoil(g, 'choice', 'arrival'); rewind(g); endCoil(g, 'choice', 'arrival'); rewind(g);
     assert(g.coil.n === 3 && coilMult(g) === 1.5 && xp1(g) === Math.floor(base * 1.5), `Coil 3: ×1.5 XP (${base} → ${xp1(g)})`);
     const y0 = g.yuki.fight.xp; awardYukiFightXp(g, 'standard'); assert(g.yuki.fight.xp - y0 === 45 || g.yuki.fight.level > 1, `Yuki's XP ×1.5 too (${g.yuki.fight.xp - y0})`);
-    const dc1 = dcPrimary(ensureBars(newGame(92, { closed: true }))); assert(Math.abs(dcPrimary(g) - Math.round(dc1 / 1.5 * 10) / 10) < 0.11, `meridian DC ÷1.5 (${dc1} → ${dcPrimary(g)})`);
+    // v0.11.41 (D2-a): the meridian DC ÷ the Coil bonus was Story Mode's checked sessions (gone)
     g.james.qi = 40; const s0 = g.james.saturation; const r = condense(g); const one = ensureBars(newGame(93, { closed: true })); one.james.qi = 40; const r1 = condense(one);
     assert(r.ok && Math.abs((g.james.saturation - s0) - r1.gain) < 0.2, `v0.11.15: a sit gives the same Saturation on Coil 3 (${r1.gain} → ${g.james.saturation - s0})`);
     const a = ensureBars(newGame(94)); a.scene = 'epilogue'; a.flags.ending = 'bluff'; a.minutes = 6 * 1440 + 900; a.coil.n = 5;
@@ -299,7 +299,7 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     // the rewordings: Incremental Mode only
     const t = (sc, re) => SCENES[sc].choices.find((c) => re.test(String(typeof c.text === 'function' ? c.text(s) : c.text)));
     assert(t('night_attack', /^A hedge of bone spikes/) && t('rt_ford', /stepping-stones/) && t('rt_ambush', /slab of bone/) && t('ring_chambers', /slab of bone/), 'four rewordings in Incremental Mode');
-    assert(/hedge/.test(SCENES.night_attack_forced.text(s)), 'the hedge fail text');
+    assert(/hedge/.test(SCENES.night_attack_forced.text), 'the hedge fail text');
     const fc = t('rt_ford', /stepping-stones/); const fg = ensureBars(newGame(84)); setCu(fg, 3, 1);
     assert(fc.do(fg).some((l) => /stepping-stones/.test(l)), 'the ford result line');
 }
@@ -483,7 +483,7 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     assert(e.combat.enemies[0].dc === 3.5 && e.combat.enemies[0].atk === 3.5, 'beasts +0.5 in task mode');
     const tg = ensureBars(newGame(64));
     const bl = SCENES.tribute.choices.find((c) => /Bluff/.test(String(c.text))), hp = SCENES.tribute.choices.find((c) => /hairpin/.test(String(c.text)));
-    assert(bl.check.dc(tg) === 7 && hp.check.dc(tg) === 5, 'tribute +1 in task mode');
+    assert(bl.check.dc === 7 && hp.check.dc === 5, 'tribute +1 in task mode');
 }
 // the Coil: rewind keeps James, Yuki, familiarity and knowledge; resets the world; 25% head start
 {
@@ -694,12 +694,13 @@ const fightStats = {}; // v0.11.3: per mode, fight and bot style, for tools/sani
     const y0 = g.rel.Yuki.a; relBump(g, 'Yuki', 0, 3); assert(g.rel.Yuki.a === y0 + 3 && !g.coil.best.Yuki, 'C1: Yuki is never caught up');
     startActCoil(g, 1); assert(g.coil.act === 1 && g.coil.best['Mei Lin'].a === 22, 'C1: the best-ever values carry into Act 1');
     // the leftovers: no Cultivate choice on a story screen in Incremental Mode
-    const left = [['meditate1', /^Condense: one sit/], ['night', /^Cultivate first/], ['night_event', /^Sit in the rain/], ['fo_night', /^Cultivate one sit before sleep/], ['heart_camp', /^Cultivate by the fire/]];
+    // v0.11.41 (D2-a): Story Mode's sits are gone; their places stay (never shown) so later choices keep their index
+    const left = ['meditate1', 'night', 'night_event', 'fo_night', 'heart_camp'];
     const h = ensureBars(newGame(112)); h.james.qi = 30; h.flags.night_ev = 'rain';
-    for (const [id, re] of left) {
-        const c = SCENES[id].choices.find((x) => typeof x.text === 'string' && re.test(x.text));
+    for (const id of left) {
+        const c = SCENES[id].choices.find((x) => /^Story Mode only/.test(String(x.text)));
         const inc = c && c.show && c.show(h);
-        assert(c && !inc, `v0.11.16: ${id}: its Cultivate choice is hidden in Incremental Mode`);
+        assert(c && !inc && !SCENES[id].choices.some((x) => /^(Condense|Cultivate first|Sit in the rain|Cultivate one sit before|Cultivate by the fire)/.test(String(x.text))), `v0.11.41: ${id}: Story Mode's sit is a hidden place, its text gone`);
     }
     setNoDice(true); h.scene = 'meditate1'; assert(!/You could keep going/.test(SCENES.meditate1.text(h)), 'v0.11.16: meditate1 no longer offers to condense (Incremental Mode)');
     setNoDice(true);

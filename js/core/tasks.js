@@ -14,7 +14,7 @@
  */
 import { hasForm } from './forms.js';
 import { choose, goTo, choiceOpen, choiceTag, gives, setTimeless, defaultMinutes, movesPlace, wasPicked, isMenuScene, isTimeless, setFamiliar } from './story.js';
-import { advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck, canBreakThrough, btMinutes, realmName, condense, sitMinutes, isNoDice, useSpeed, USE_N, exMins, nightLock, endsLate, sitUseless } from './game.js';
+import { advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck, canBreakThrough, btMinutes, realmName, condense, sitMinutes, useSpeed, USE_N, exMins, nightLock, endsLate, sitUseless } from './game.js';
 import { CONDENSE_SIT_COST } from './formulas.js';
 import { btTarget, MER_LINES, lineWindow, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
@@ -49,8 +49,8 @@ export const famTier = (f) => (f >= 18 ? 3 : f >= 8 ? 2 : f >= 2 ? 1 : 0);
 /** v0.11.15 (B1-b): a card's speed by use: 1 + 9 × (familiarity ÷ 18), up to ×10 (= the tiers' ×2 / ×5 / ×10 at 2 / 8 / 18). */
 /** v0.11.18 (owner pick c): Yuki's job has its own slower curve, N 90, capped at ×3 (Incremental Mode). */
 export const YUKI_N = 90, YUKI_CAP = 3;
-export const yukiSpeed = (f) => (isNoDice() ? Math.min(YUKI_CAP, useSpeed(f, YUKI_N)) : FAM[famTier(f)].speed);
-export const cardSpeed = (f) => (isNoDice() ? useSpeed(f, USE_N.card) : FAM[famTier(f)].speed);
+export const yukiSpeed = (f) => Math.min(YUKI_CAP, useSpeed(f, YUKI_N));
+export const cardSpeed = (f) => useSpeed(f, USE_N.card);
 const nextAt = (f) => FAM.find((t) => t.at > f)?.at ?? null;
 
 export const isTaskHub = (g) => !!TASK_HUBS[g.scene] && !g.combat;
@@ -114,7 +114,7 @@ export const sitOpen = (g, scenes) => isQueueScreen(g, scenes) && !(TASK_HUBS[g.
 /** v0.11.14: the Meditate cards that can be queued anywhere Meditate shows. */
 export const isMedTask = (id) => id === SIT_TASK || id === BT_TASK || !!lineOfTask(id);
 /** v0.11.14: a screen with a queue: a task screen, or a resting place where Meditate shows (only Meditate cards queue there). */
-export const isQueueScreen = (g, scenes) => !g.combat && (!!TASK_HUBS[g.scene] || (isNoDice() && canMeditate(g, scenes)));
+export const isQueueScreen = (g, scenes) => !g.combat && (!!TASK_HUBS[g.scene] || canMeditate(g, scenes));
 /** v0.11.14: can queue row `id` run on this screen at all (else it waits for its own screen)? */
 export const runsHere = (g, scenes, id) => (TASK_HUBS[g.scene] ? true : isQueueScreen(g, scenes) && isMedTask(id));
 /** v0.11.13 (E1): one queueable card per meridian line (`mer:pri`, `mer:col`, `mer:e8`, `mer:ec`, `mer:jn`). `mer:next` is no longer
@@ -239,7 +239,6 @@ const NIGHT_OK = /^(Eat|Cook and eat|Chew a ghost-gill)\b/;
 const isNightOk = (c) => c.kind === 'chore' && NIGHT_OK.test(String(c.label));
 const isSitChore = (c, hubId) => c.to === hubId && /^(Cultivate|Condense)/.test(String(typeof c.text === 'function' ? '' : c.text)) && /condense\(g\)/.test(String(c.do));
 function nightCards(g, scenes, cards, only) {
-    if (!isNoDice()) return cards;
     if (nightLock(g)) return cards.filter(isNightOk);
     for (const c of cards) {
         if (c.status !== 'open' || c.kind === 'bt' || isNightOk(c) || (only && c.id !== only)) continue; // eating is open at night anyway (Fable review)
@@ -488,7 +487,7 @@ export function outlook(g, scenes) {
 }
 
 /** v0.11.37 (D-a): queue row `id` can't run because the day is over (02:00 passed, or it would end past 02:00): the queue waits, nothing is skipped. */
-export const dayOver = (g, scenes, id) => isNoDice() && (nightLock(g) ? !taskCards(g, scenes, id).some((x) => x.id === id && x.status === 'open') : taskCards(g, scenes, id).some((x) => x.id === id && x.status === 'late')); // at night a queued meal still runs (Fable review)
+export const dayOver = (g, scenes, id) => (nightLock(g) ? !taskCards(g, scenes, id).some((x) => x.id === id && x.status === 'open') : taskCards(g, scenes, id).some((x) => x.id === id && x.status === 'late')); // at night a queued meal still runs (Fable review)
 
 /* ---------- the queue, edited (v0.10.0; pure: the screen calls these) ---------- */
 /** Run `id` now: it goes to the front (the card that was running moves to second place). */

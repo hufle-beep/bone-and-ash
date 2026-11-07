@@ -13,7 +13,7 @@
  *   Relationships other than Yuki: max(snapshot value, 25% of the last Coil's peak), friendship and affection apart.
  * Pure — no DOM.
  */
-import { coilStart, coilSnap, ensureBars, SAVE_VERSION, isNoDice, newGame } from './game.js';
+import { coilStart, coilSnap, ensureBars, SAVE_VERSION, newGame } from './game.js';
 import { famTier, FAM } from './tasks.js';
 
 /** What James knows and keeps (plus Yuki's own flags and the Long Forest run, so that run stays scaled; v0.11.31: and the speed gates, tasks.js maxSpeed). */
@@ -32,7 +32,7 @@ const coil = (g) => g.coil;
  *   Act 1's Coil: no Shen Qiu outcome yet, or 'taken' (not the act's end).
  */
 export const coilActive = (g) => {
-    if (!isNoDice() || !g.coil || g.combat || String(g.scene).startsWith('coil_')) return false;
+    if (!g.coil || g.combat || String(g.scene).startsWith('coil_')) return false;
     if ((g.coil.act || 0) === 1) return !g.flags.a1_outcome || g.flags.a1_outcome === 'taken' || g.scene === 'a1_end'; // v0.11.26: and the act's end, every outcome
     return (!g.flags.ending || g.flags.ending === 'lost') && !g.scene.startsWith('fo_') && g.scene !== 'epilogue';
 };

@@ -30,6 +30,9 @@ function seedState(g, run) {
         ya_romance: run % 4 === 1, trio: part === 'return' ? run % 5 : part === 'heart' ? run % 4 : 0 };
     g.rel = { 'Mei Lin': { f: 30 + (run % 20), a: run % 3 === 0 ? 25 : run % 30 }, Village: { f: 40, a: 0 }, Ya: { f: part === 'fallout' ? 0 : 20, a: part === 'fallout' ? 0 : run % 30 } };
     g.james.gu.level = 7; g.james.skills['Convergence Use'].level = 5; g.yuki.fight.level = 3; g.james.realm = run % 3; ensureBars(g);
+    // v0.11.41 (D2-a): Story Mode's breakthrough and meridian choices on the hubs are gone, so the walks no longer climb realms on
+    // the way; in the return part 1 run in 20 starts as a James far past it (T3, realm 4), so the elder's duel can be won and its scene walked
+    if (part === 'return' && run % 20 === 19) { g.james.gu = { tier: 3, level: 5, xp: 0 }; g.james.skills['Convergence Use'] = { tier: 3, level: 5, xp: 0 }; g.james.realm = 4; ensureBars(g); }
 }
 for (let run = 0; run < 1000; run++) {
     const g = ensureBars(newGame(run + 7)); seedState(g, run); g.scene = ENTRY; const e = S[ENTRY].enter; if (e) e(g);

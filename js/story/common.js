@@ -1,5 +1,5 @@
 /** Shared story helpers: flags, days, food, and how enemies grow with the days James spends training. */
-import { clockParts, addItem, eat, isNoDice, wakeDay, dayHour } from '../core/game.js';
+import { clockParts, addItem, eat, wakeDay, dayHour } from '../core/game.js';
 
 export const once = (flag) => (g) => !g.flags[flag];
 export const set = (...flags) => (g) => { for (const f of flags) g.flags[f] = true; return []; };
@@ -8,7 +8,7 @@ export const hour = (g) => dayHour(g); // v0.11.37: 00:00–03:59 read 24–27 i
 /** Available once per in-game day. */
 /** A once-a-day test; `dailyKey` lets the task screen show it as "back tomorrow" (v0.9.0). */
 /** v0.11.18: in Incremental Mode a "day" for these is a waking day (back after sleep or a push), not the calendar. */
-export const dayKey = (g) => (isNoDice() ? wakeDay(g) : day(g));
+export const dayKey = (g) => wakeDay(g);
 export const DAILY_KEYS = new Set();
 export const daily = (key) => { DAILY_KEYS.add(key); return Object.assign((g) => !g.flags[`${key}@${dayKey(g)}`], { dailyKey: key }); };
 export const markDaily = (g, key) => { DAILY_KEYS.add(key); g.flags[`${key}@${dayKey(g)}`] = true; };

@@ -130,7 +130,7 @@ Yuki opens one eye. *Again?* says the bond. *Fine. I'll remember it for both of 
     });
     SCENES.arrival.choices.push({
         text: 'You remember this. Skip to the stream.',
-        show: (g) => isNoDice() && (g.coil?.n || 1) > 1,
+        show: (g) => (g.coil?.n || 1) > 1,
         time: 30,
         do: (g) => { for (const f of ['bone_ok', 'sat_once']) g.flags[f] = true; return ['You skip the parts you know by heart: Yuki is fine, the Qi is poison, the bone sings, the clearing is a clearing.']; },
         to: 'stream',
