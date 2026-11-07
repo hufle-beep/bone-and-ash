@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.35 | (this push) | P1-a: the fold, the memory lines, Skip to the next choice. Same save state as 0.11.34 plus the optional `seen` field (an older version ignores it). No balance change. |
+| 0.11.36 | (this push) | The rot ape 15 → 14 (Act 1 softer). Same save state as 0.11.35; the baseline unchanged (0 drift). |
+| 0.11.35 | `4f26b3d` | P1-a: the fold, the memory lines, Skip to the next choice. Same save state as 0.11.34 plus the optional `seen` field (an older version ignores it). No balance change. |
 | 0.11.34 | `dfe27bd` | D1, Story Mode dropped: Incremental Mode only (the switch gone, Story Mode's code unused in place); the tests Incremental only at 1,000 games; the baseline updated. Same save state as 0.11.33 (a Story Mode save loads and plays on in Incremental Mode; the owner deletes his). |
 | 0.11.33 | `309792b` | The one-off work on the task screens, "Call it a day"; the baseline updated (Act 1 harder). **The last version with Story Mode** (dropped next, D1): the starting point for the separate Story Mode game. Same save state as 0.11.32 (the new `oo:` flags are world flags; an older version ignores them). |
 | 0.11.32 | `1b50cb3` | P2-a, picked choices recoloured. Same save state as 0.11.31 plus the optional `picked` field (an older version ignores it). |

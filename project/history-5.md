@@ -2,6 +2,13 @@
 
 Started 2026-11-07 (v0.11.33), when `history-4.md` reached about 45 KB. Newer than `history-4.md`, `history-3.md`, `history-2.md` and `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Version notes (moved from the handover in v0.11.36)
+
+### v0.11.33 — the one-off work on the task screens
+
+- **js/story/oneoff.js** (new; the decisions block). **js/core/story.js:** `setOnChoose`, called in both `choose()` paths. **js/core/tasks.js:** `resolveWork` → `noteOnce`; `taskCards` hides a once-done choice; `instantChoice` takes "Call it a day". **js/story/prologue.js:** `installOnce`. **sw.js:** `oneoff.js` offline; VERSION. **tools/baseline.json** (owner 13:51). **tests/tasks.test.mjs:** the one-off block. **tests/README.md**.
+- **The full check (new baseline):** exit code 0, 0 drift (208 compared), the leftover step 0 findings, 99.7 s; models: Careful 2.30 / 5.03, Completionist 2.16 / 3.60. **Cold review (Fable):** see the decisions block (two fixes, the retry rule, 2 drifts, the owner's "baseline" 14:08). Full check after: exit code 0, 0 drift (208 compared), 98.6 s; models Careful 2.34 / 5.10, Completionist 2.16 / 3.61.
+
 ## Version notes (moved from the handover in v0.11.35)
 
 ### v0.11.32 — P2-a, picked choices recoloured

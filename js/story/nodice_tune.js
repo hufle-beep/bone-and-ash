@@ -28,7 +28,7 @@ export const NO_DICE_TUNE = {
     rats: { up: 4.0 },
     root_husks: { up: 1.25 },
     root_wyrm: { up: 3.25 },
-    rot_ape: { up: 15.0 }, // v0.11.29 (RB-1): 8.0 → 15.0, Act 1's wall (every route meets it)
+    rot_ape: { up: 14.0 }, // v0.11.29 (RB-1): 8.0 → 15.0, Act 1's wall (every route meets it); v0.11.36 (owner 16:02): 15 → 14
     rt_brawl: { up: 8.75 },
     rt_serpent: { up: 0.25 },
     rt_wolves: { up: 7.0 },

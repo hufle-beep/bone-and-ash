@@ -258,7 +258,7 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
 {
     const { NO_DICE_TUNE } = await import('../js/story/nodice_tune.js');
     const { fmtMult, COIL_GROWTH } = await import('../js/core/game.js');
-    assert(NO_DICE_TUNE.collectors.up === 4.5 && NO_DICE_TUNE.rot_ape.up === 15 && COIL_GROWTH === 0.25, `RB-1: the tribute 4.5, the rot ape 15, the Coil bonus 0.25 per Coil (${NO_DICE_TUNE.collectors.up}, ${NO_DICE_TUNE.rot_ape.up}, ${COIL_GROWTH})`);
+    assert(NO_DICE_TUNE.collectors.up === 4.5 && NO_DICE_TUNE.rot_ape.up === 14 && COIL_GROWTH === 0.25, `RB-1: the tribute 4.5, the rot ape 14 (v0.11.36; 15 in RB-1), the Coil bonus 0.25 per Coil (${NO_DICE_TUNE.collectors.up}, ${NO_DICE_TUNE.rot_ape.up}, ${COIL_GROWTH})`);
     assert(fmtMult(1) === '1' && fmtMult(1.25) === '1.25' && fmtMult(1.5) === '1.5' && fmtMult(2.75) === '2.75', 'fmtMult: ×1.25 shows as 1.25, not 1.3');
 }
 // v0.10.4: Bonesinger forms — Incremental Mode shows only what James can sing
