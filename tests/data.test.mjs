@@ -2,7 +2,7 @@
 // Every id the game refers to exists: task-hub scenes and menus, form ids on story choices, items given or needed,
 // and every data-* marker in the page has code that reads it (a renamed marker once stuck every Selene player).
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
-import { PICTURES, pictureOf, sceneArt, setArtState } from '../js/art/art.js';
+import { PICTURES, pictureOf, sceneArt, setArtState, YUKI_CAT_ONLY } from '../js/art/art.js';
 import { SCENES, ITEMS } from '../js/story/prologue.js';
 import { TASK_HUBS } from '../js/story/task_hubs.js';
 import { FORM_LINES } from '../js/core/forms.js';
@@ -61,7 +61,7 @@ for (const s of Object.values(SCENES)) { if (typeof s.art === 'string') artKeys.
 const picFiles = new Set();
 for (const key of Object.keys(PICTURES)) {
     assert(artKeys.has(key), `v0.11.24: picture key ${key} is an art key some scene shows`);
-    for (const form of ['cat', 'tiger', 'human']) picFiles.add(pictureOf(key, form));
+    for (const form of ['cat', 'tiger', 'human']) { const f = pictureOf(key, form); if (f) picFiles.add(f); } // v0.11.38: '' = code art in that form
 }
 let picBytes = 0;
 for (const f of picFiles) {
@@ -77,7 +77,58 @@ assert(pictureOf('yuki_close', 'cat') === 'art/pic/yuki_cat.webp' && pictureOf('
 for (const [form, file] of [['tiger', 'yuki_tiger'], ['human', 'yuki_human'], ['cat', 'yuki_cat']]) { setArtState({ yukiForm: form }); assert(sceneArt('yuki_close').includes(`art/pic/${file}.webp`), `v0.11.24: with Yuki in ${form} form the yuki_close plate shows ${file}`); }
 assert(sceneArt('james').includes('data-pic="james"') && sceneArt('james').includes('art/pic/james.webp'), 'v0.11.24: a key with a picture draws the picture');
 assert(SCENES.arrival.art === 'james', 'v0.11.24: the arrival shows James');
-assert(!sceneArt('forest_dawn').includes('data-pic') && sceneArt('forest_dawn').startsWith('<svg'), 'v0.11.24: a key without a picture keeps its code art');
+assert(!sceneArt('envoy').includes('data-pic') && sceneArt('envoy').startsWith('<svg'), 'v0.11.24: a key without a picture keeps its code art (an Act 1 key since v0.11.38)');
+// v0.11.38 (P-b; built as the v0.11.26 work in progress): every key of the prologue's art table shows its own picture (file named after the key)
+{
+    const PROLOGUE_KEYS = 'forest_dawn omnitool clearing bone_needle meditation stream forage hunt camp forest_night jackals jackals_dead herb_girl gao_down ridge village elder healer boar dinner romance collectors collectors_down hairpin tribulation lights rain crows rats lizard gift bone_field mire hollow roof village_night token gao_window arson herb_slope workshop drill wolves'.split(' ');
+    assert(PROLOGUE_KEYS.length === 43, `v0.11.38: 43 prologue art keys (${PROLOGUE_KEYS.length})`);
+    const artSrc = readFileSync('js/art/art.js', 'utf8');
+    const table = artSrc.slice(artSrc.indexOf('const SCENES2 = {'), artSrc.indexOf('/* ---------------- Act 1 ---------------- */'));
+    const inTable = [...table.matchAll(/^ {4}(\w+): \{/gm)].map((m) => m[1]);
+    assert(inTable.join(' ') === PROLOGUE_KEYS.join(' '), 'v0.11.38: the list is exactly the prologue part of the art table');
+    setArtState({ yukiForm: 'cat' });
+    for (const k of PROLOGUE_KEYS) {
+        assert(pictureOf(k, 'cat') === `art/pic/${k}.webp`, `v0.11.38: ${k} shows art/pic/${k}.webp while Yuki is the cat`);
+        assert(sceneArt(k).includes(`data-pic="${k}"`), `v0.11.38: the ${k} plate draws the picture while Yuki is the cat`);
+    }
+    assert(Object.keys(PICTURES).length === 8 + 42, `v0.11.38: 50 keys have pictures (${Object.keys(PICTURES).length})`);
+    assert(!sceneArt('no_such_key').includes('data-pic'), 'v0.11.38: an unknown key still falls back to code art');
+}
+// v0.11.38 (P-b): the form map. A picture whose recipe draws Yuki as the small cat shows only while she is the cat;
+// in tiger or human form the plate is code art (which draws her current form). The list is checked against the recipes, so it cannot drift.
+{
+    const recipes = JSON.parse(readFileSync('tools/art/recipes.json', 'utf8')).pictures;
+    const fileOf = (key) => { const p = PICTURES[key]; return typeof p === 'function' ? null : p; };
+    const drawsCat = new Set();
+    for (const key of Object.keys(PICTURES)) {
+        const file = fileOf(key);
+        if (!file || key.startsWith('yuki_')) continue; // yuki_close picks by form; Yuki's own pictures are her forms
+        const r = recipes[file];
+        assert(r, `v0.11.38: picture ${file} has a recipe`);
+        if (r && /\b(white cat|kitten|yuki)\b/i.test(JSON.stringify(r))) drawsCat.add(key);
+    }
+    assert([...drawsCat].sort().join(' ') === [...YUKI_CAT_ONLY].sort().join(' '), `v0.11.38: YUKI_CAT_ONLY is exactly the pictures whose recipe draws the cat (recipes ${drawsCat.size}, list ${YUKI_CAT_ONLY.size})`);
+    assert(YUKI_CAT_ONLY.size === 30, `v0.11.38: 30 pictures draw Yuki as the cat (28 new, james, jackals) (${YUKI_CAT_ONLY.size})`);
+    for (const key of Object.keys(PICTURES)) {
+        if (key.startsWith('yuki_')) continue;
+        for (const form of ['tiger', 'human']) {
+            setArtState({ yukiForm: form });
+            const art = sceneArt(key);
+            if (YUKI_CAT_ONLY.has(key)) {
+                assert(pictureOf(key, form) === '' && !art.includes('data-pic') && !art.includes('art/pic/'), `v0.11.38: with Yuki in ${form} form ${key} keeps its code art`);
+            } else {
+                assert(pictureOf(key, form) === `art/pic/${fileOf(key)}.webp` && art.includes(`data-pic="${key}"`), `v0.11.38: ${key} (no Yuki) shows its picture in ${form} form too`);
+            }
+        }
+    }
+    setArtState({ yukiForm: 'cat' });
+    assert(sceneArt('james').includes('data-pic="james"'), 'v0.11.38: back to the cat, the arrival shows its picture again');
+    // every plate in main.js goes through its wrapper, which sets Yuki's form first (the guarantee behind the form map)
+    const mainSrc = readFileSync('js/main.js', 'utf8');
+    assert(/const sceneArt = \(key\) => \{ ART\.setArtState\?\.\(\{ yukiForm: yukiForm\(g\) \}\); return ART\.sceneArt\(key\); \};/.test(mainSrc), 'v0.11.38: main.js draws plates through the wrapper that sets Yuki\'s form');
+    assert((mainSrc.match(/ART\.sceneArt\(/g) || []).length === 1 && (mainSrc.match(/ART\.pictureOf\(|ART\.PICTURES/g) || []).length === 0, 'v0.11.38: main.js draws no plate around the wrapper');
+    assert(typeof setArtState === 'function', 'v0.11.38: art.js still exports setArtState (the wrapper calls it with ?.)');
+}
 
 // v0.11.25: the item names the part test fills (tests/lib/items.mjs) are exactly the game's ITEMS
 {

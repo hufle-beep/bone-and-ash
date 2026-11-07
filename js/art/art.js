@@ -623,11 +623,60 @@ export const PICTURES = {
     elder_arrives: 'shen_qiu',
     jackals: 'jackals',
     james: 'james',
+    // v0.11.38 (P-b; built as the v0.11.26 work in progress): the prologue's scenes; each file is named after its key
+    forest_dawn: 'forest_dawn',
+    omnitool: 'omnitool',
+    clearing: 'clearing',
+    bone_needle: 'bone_needle',
+    meditation: 'meditation',
+    stream: 'stream',
+    forage: 'forage',
+    hunt: 'hunt',
+    camp: 'camp',
+    forest_night: 'forest_night',
+    jackals_dead: 'jackals_dead',
+    herb_girl: 'herb_girl',
+    gao_down: 'gao_down',
+    ridge: 'ridge',
+    village: 'village',
+    elder: 'elder',
+    healer: 'healer',
+    boar: 'boar',
+    dinner: 'dinner',
+    romance: 'romance',
+    collectors: 'collectors',
+    collectors_down: 'collectors_down',
+    hairpin: 'hairpin',
+    tribulation: 'tribulation',
+    lights: 'lights',
+    rain: 'rain',
+    crows: 'crows',
+    rats: 'rats',
+    lizard: 'lizard',
+    gift: 'gift',
+    bone_field: 'bone_field',
+    mire: 'mire',
+    hollow: 'hollow',
+    roof: 'roof',
+    village_night: 'village_night',
+    token: 'token',
+    gao_window: 'gao_window',
+    arson: 'arson',
+    herb_slope: 'herb_slope',
+    workshop: 'workshop',
+    drill: 'drill',
+    wolves: 'wolves',
 };
-/** The picture file for an art key in Yuki's current form, or '' when the key has none (code art). */
+/**
+ * v0.11.38 (P-b): the pictures that draw Yuki as the small cat. They show only while she is the cat;
+ * in her tiger or human form the scene keeps its code art (which draws her current form) until Y3 adds those versions.
+ */
+export const YUKI_CAT_ONLY = new Set(['james', 'jackals', 'jackals_dead', 'forest_dawn', 'omnitool', 'clearing', 'stream', 'forage', 'hunt', 'camp', 'gao_down', 'ridge', 'village', 'dinner', 'collectors', 'tribulation', 'lights', 'rain', 'crows', 'rats', 'lizard', 'gift', 'bone_field', 'mire', 'hollow', 'roof', 'arson', 'herb_slope', 'drill', 'wolves']);
+/** The picture file for an art key in Yuki's current form, or '' when the key has none in that form (code art). */
 export function pictureOf(key, form = C2.getYukiForm()) {
     const p = PICTURES[key];
     if (!p) return '';
+    if (form !== 'cat' && YUKI_CAT_ONLY.has(key)) return '';
     return `art/pic/${typeof p === 'function' ? p(form) : p}.webp`;
 }
 const pictureSvg = (key, id, file) => `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${id.replace(/_/g, ' ')}" preserveAspectRatio="xMidYMid slice" data-pic="${key}"><rect width="400" height="250" fill="#111010"/><image href="${file}" x="0" y="0" width="400" height="250" preserveAspectRatio="xMidYMid slice"/></svg>`;
