@@ -728,11 +728,14 @@ export const PICTURES = {
  * The set stays as the gate for keys added later (Act 1) that get a human picture after their cat one.
  */
 export const YUKI_PIC_FORMS = new Set(['cat', 'tiger', 'human']);
-/** v0.11.54 (pick F1): the keys whose great-cat picture is drawn; Act 1's keys get theirs after their cat one (push 4). */
+/** v0.11.54 (pick F1): the keys whose great-cat picture is drawn; Act 1's keys get theirs after their cat one (push 4a, v0.11.60). */
 export const YUKI_TIGER_PICS = new Set(['forest_dawn', 'omnitool', 'clearing', 'stream', 'forage', 'hunt', 'camp', 'tribulation', 'lights', 'rain', 'crows', 'rats', 'gift', 'bone_field', 'mire',
     'hollow', 'drill', 'wolves', 'lizard', 'roof', 'arson', 'herb_slope', 'gao_down', 'village', 'dinner', 'collectors', 'jackals', 'james', 'jackals_dead',
     // v0.11.59 (Act 1 push 3, pick L2): the Long Forest in all three forms
-    'lf_hub', 'lf_seclusion', 'lf_bone_depths', 'lf_black_mire', 'lf_thunder_ridge', 'lf_old_roots', 'lf_bandits', 'lf_rogue', 'root_camp', 'ashen_camp']);
+    'lf_hub', 'lf_seclusion', 'lf_bone_depths', 'lf_black_mire', 'lf_thunder_ridge', 'lf_old_roots', 'lf_bandits', 'lf_rogue', 'root_camp', 'ashen_camp',
+    // v0.11.60 (Act 1 push 4a, picks M1 + P2): Act 1's 20 Yuki keys as the great cat (human in push 4b)
+    'council', 'ashfall_dawn', 'ya_fight', 'root_road', 'drowned_wood', 'drowned_camp', 'ashen_hills', 'rot_ape', 'night_watch', 'trio_fire',
+    'heart_gate', 'heart_hall', 'heart_roots', 'heart_core', 'guardian', 'ship_bridge', 'ship_wreck', 'return_road', 'grove_sprout', 'a1_end']);
 export const YUKI_HUMAN_PICS = new Set(['forest_dawn', 'omnitool', 'clearing', 'stream', 'forage', 'hunt', 'camp', 'tribulation', 'lights', 'rain', 'crows', 'rats', 'gift', 'bone_field', 'mire',
     'hollow', 'drill', 'wolves', 'lizard', 'roof', 'arson', 'herb_slope', 'gao_down', 'village', 'dinner', 'collectors', 'jackals', 'james', 'jackals_dead',
     // v0.11.59 (Act 1 push 3, pick L2)
@@ -740,9 +743,9 @@ export const YUKI_HUMAN_PICS = new Set(['forest_dawn', 'omnitool', 'clearing', '
 /** Whether a key of YUKI_PICS has its own picture in this form (v0.11.50). */
 const hasFormPic = (key, form) => YUKI_PIC_FORMS.has(form) && (form !== 'human' || YUKI_HUMAN_PICS.has(key)) && (form !== 'tiger' || YUKI_TIGER_PICS.has(key));
 export const YUKI_PICS = new Set(['james', 'jackals', 'jackals_dead', 'forest_dawn', 'omnitool', 'clearing', 'stream', 'forage', 'hunt', 'camp', 'gao_down', 'village', 'dinner', 'collectors', 'tribulation', 'lights', 'rain', 'crows', 'rats', 'lizard', 'gift', 'bone_field', 'mire', 'hollow', 'roof', 'arson', 'herb_slope', 'drill', 'wolves',
-    // v0.11.54 (Act 1 push 1, Y1: every key whose code art draws her): the cat now, the great cat and human in push 4
+    // v0.11.54 (Act 1 push 1, Y1: every key whose code art draws her): the cat now, the great cat in push 4a (v0.11.60), human in push 4b
     'council', 'ashfall_dawn', 'ya_fight', 'root_road', 'drowned_wood', 'drowned_camp', 'ashen_hills', 'rot_ape', 'night_watch', 'trio_fire',
-    // v0.11.58 (Act 1 push 2, Y1): the cat now, the great cat and human in push 4
+    // v0.11.58 (Act 1 push 2, Y1): the cat now, the great cat in push 4a (v0.11.60), human in push 4b
     'heart_gate', 'heart_hall', 'heart_roots', 'heart_core', 'guardian', 'ship_bridge', 'ship_wreck', 'return_road', 'grove_sprout', 'a1_end',
     // v0.11.59 (Act 1 push 3, L2: every Long Forest key draws her, in all three forms; O3: the two missed Blackroot camps too)
     'lf_hub', 'lf_seclusion', 'lf_bone_depths', 'lf_black_mire', 'lf_thunder_ridge', 'lf_old_roots', 'lf_bandits', 'lf_rogue', 'root_camp', 'ashen_camp']);

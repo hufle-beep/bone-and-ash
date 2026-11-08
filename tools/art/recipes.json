@@ -1,5 +1,5 @@
 {
- "note": "v0.11.24: how every picture in art/pic was made (owner picks 2026-11-07). Run each step's 'op' in order on the owner's ComfyUI (tools/art/workflow.json; Z-Image-Turbo bf16, 8 steps, cfg 1, res_multistep / simple, shift 3). Masks are polygons in source pixels, white = repaint, blurred by 'blur' px; tools/art/masks.py draws them. Then tools/art/palette.py cuts the last file to the palette at 800x500 (--gold for Yuki). Originals: the owner's ComfyUI output folder, boneash/. v0.11.26 (the prologue, owner picks S1 P1 C1 R-a, 2026-11-07): each prologue key has one picture named after the key; the shared character descriptions are in \"cast\" and the style texts in \"styles\" (p: scenes with people, n: animals, objects and landscapes only). Rules learnt: the model adds stray women in black dresses and giant floating faces to busy scenes; saying \"no women\" or \"no faces\" makes it worse (and once added nude figures to an animals-only prompt, which were deleted unseen by the owner); describing what fills the background works, and so does the n style for scenes without James. v0.11.49 (Y3 part 1, the great cat; owner picks 2026-11-07 20:33-22:00): each picture that draws Yuki has a <key>_tiger version. Fresh ones swap the cat line for cast \"yuki_tiger\" (redos: \"yuki_tiger2\", more tiger-like); james, jackals_dead and ridge are inpaints on the approved picture; problem areas (stray women, faces, extra figures, leash-like cords, the fire under her paws) are inpainted out with prompts that describe only what belongs there. Scenes cut without --gold. Rules learnt: the model ignores \"nothing on his shoulder\" (it drew a cat there; describe the shoulder instead); a detail inpaint at 3x on a face comes out too realistic next to the flat style (1x inpaints with \"flat two-tone ink, no realistic shading\" fit); the style text's cloud curls leak into small repaints; head repaints from text alone do not make James uniform (owner 21:52: a reference tool, its own step before the Act 1 art); \"james_shaggy\" is the look the owner wants (village tiger s44) and is used by bone_field, arson and jackals. v0.11.50 (Y3 part 2a): style 'pc' (CLAMP-heavier, owner 23:05) and cast 'yuki_human' (from the yuki_human portrait, the black high-collared qipao; the choker dropped because the high collar hides it, owner 23:19) for the human versions. v0.11.58 (the Act 1 art, push 2: the Heart and the Return; owner picks S1 P1 D1 W1, 2026-11-08 02:21, pictures 02:45-02:46): 15 keys, one generate step each (style p, n for seed, heart_core and grove_sprout), cast \"shen\" (from his portrait: black crown, eyes shut, hands in his sleeves) and \"wren\" (Head Gardener Wren Aldous, a memory of light in ship_log). Job lists: input/boneash_jobs/a1p2_test, a1p2_a, a1p2_redo, a1p2_redo2 ... a1p2_redo5, a1p2_end. After the cold review (owner pick R2, 02:53): return_road and ship_wreck redrawn with Mei Lin (and in ship_wreck Ya) described as grown women; elder_duel's leftover poles painted out (mask a1_ed_poles).",
+ "note": "v0.11.24: how every picture in art/pic was made (owner picks 2026-11-07). Run each step's 'op' in order on the owner's ComfyUI (tools/art/workflow.json; Z-Image-Turbo bf16, 8 steps, cfg 1, res_multistep / simple, shift 3). Masks are polygons in source pixels, white = repaint, blurred by 'blur' px; tools/art/masks.py draws them. Then tools/art/palette.py cuts the last file to the palette at 800x500 (--gold for Yuki). Originals: the owner's ComfyUI output folder, boneash/. v0.11.26 (the prologue, owner picks S1 P1 C1 R-a, 2026-11-07): each prologue key has one picture named after the key; the shared character descriptions are in \"cast\" and the style texts in \"styles\" (p: scenes with people, n: animals, objects and landscapes only). Rules learnt: the model adds stray women in black dresses and giant floating faces to busy scenes; saying \"no women\" or \"no faces\" makes it worse (and once added nude figures to an animals-only prompt, which were deleted unseen by the owner); describing what fills the background works, and so does the n style for scenes without James. v0.11.49 (Y3 part 1, the great cat; owner picks 2026-11-07 20:33-22:00): each picture that draws Yuki has a <key>_tiger version. Fresh ones swap the cat line for cast \"yuki_tiger\" (redos: \"yuki_tiger2\", more tiger-like); james, jackals_dead and ridge are inpaints on the approved picture; problem areas (stray women, faces, extra figures, leash-like cords, the fire under her paws) are inpainted out with prompts that describe only what belongs there. Scenes cut without --gold. Rules learnt: the model ignores \"nothing on his shoulder\" (it drew a cat there; describe the shoulder instead); a detail inpaint at 3x on a face comes out too realistic next to the flat style (1x inpaints with \"flat two-tone ink, no realistic shading\" fit); the style text's cloud curls leak into small repaints; head repaints from text alone do not make James uniform (owner 21:52: a reference tool, its own step before the Act 1 art); \"james_shaggy\" is the look the owner wants (village tiger s44) and is used by bone_field, arson and jackals. v0.11.50 (Y3 part 2a): style 'pc' (CLAMP-heavier, owner 23:05) and cast 'yuki_human' (from the yuki_human portrait, the black high-collared qipao; the choker dropped because the high collar hides it, owner 23:19) for the human versions. v0.11.58 (the Act 1 art, push 2: the Heart and the Return; owner picks S1 P1 D1 W1, 2026-11-08 02:21, pictures 02:45-02:46): 15 keys, one generate step each (style p, n for seed, heart_core and grove_sprout), cast \"shen\" (from his portrait: black crown, eyes shut, hands in his sleeves) and \"wren\" (Head Gardener Wren Aldous, a memory of light in ship_log). Job lists: input/boneash_jobs/a1p2_test, a1p2_a, a1p2_redo, a1p2_redo2 ... a1p2_redo5, a1p2_end. After the cold review (owner pick R2, 02:53): return_road and ship_wreck redrawn with Mei Lin (and in ship_wreck Ya) described as grown women; elder_duel's leftover poles painted out (mask a1_ed_poles). v0.11.60 (the Act 1 art, push 4a; owner picks 2026-11-08 03:58 M1 + P2, pictures 04:21): the great-cat version <key>_tiger of Act 1's 20 Yuki keys: one generate step each, style as the key's cat picture (p; n for heart_core and grove_sprout), the cat line swapped for cast yuki_tiger as 'one single huge white great cat ...' with her pose beside James (lying, standing or walking; no shoulder, lap or table), seeds 22 / 44 / 55; second prompts (seeds 66 / 77 / 88) for rot_ape (the people seen from behind, the ape far off), guardian (a round opening framed by ribs of bone, no door) and a1_end (old thatched huts, the sky black and empty, Ya 'clearly a woman'); ship_wreck and a1_end add the eyes.py step. After the cold review (owner pick R2): return_road (Mei Lin in red heels) and ya_fight (towers with letter-like marks, a wire) redrawn with a second prompt, seeds 66 / 77 / 88: Mei Lin in 'long dark trousers and plain dark cloth shoes'; ya_fight's background 'a wall of dark tree trunks and leaves'.",
  "masks": {
   "shen_eyes_big": {
    "size": [
@@ -3487,6 +3487,262 @@
     "width": 1280,
     "height": 800
    }
+  ],
+  "council_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_council_s55",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. An interior scene in the village elder's house with paper walls and an oil lamp on a low table that holds a red lacquered message tube. Behind the table sits a ninety-year-old village elder with one blind milky eye, a bald head with a tiny white topknot and a thin white beard, wearing a plain grey robe, grave. Beside him kneel a stern sixty-year-old village woman with grey hair in a tight bun, a lined face, a plain dark jacket and an apron and a bent old man with short grey hair, a grey beard and a lined face in patched hemp clothes. At the side kneels a village herbalist woman in her mid-twenties with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, worried. Across the table from the elder sits a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, deadpan, and on his right one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck lies on the floor beside him, her chin on her paws.",
+    "seed": 55,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "ashfall_dawn_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_ashfall_dawn_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. Dawn over Ashfall, a poor mountain hamlet of grey wooden houses with ash-grey thatched roofs on a slope, thin smoke rising from the roofs, a pale sun low in the sky. At the edge of the village a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands looking north along a road that climbs into the mountains, and one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck stands at his side on his left. Beside him stands a village herbalist woman in her mid-twenties with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash. Behind them two bent old men with short grey hair, grey beards and lined faces in patched hemp clothes watch from a doorway.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "ya_fight_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_ya_fight2_s77",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime scene in a village lane at the edge of a dark forest, a ring of grave grey-faced old villagers in patched hemp clothes watching from behind a low wooden fence. In the middle a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth crouches bare-handed with a delighted fierce grin, her spear stuck upright in the ground behind her. Facing her stands a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, fists up, deadpan. Behind the fence the background is a wall of dark tree trunks and leaves. At a safe distance one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck lies on the ground in front of the low wooden fence, watching.",
+    "seed": 77,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "root_road_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_root_road_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide daytime scene of an ancient forest where giant grey-white roots, smooth as bone and as thick as houses, wind across the ground like roads. Along the top of one great root walk three travellers: in front a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, walking backwards and grinning; then a village herbalist woman in her mid-twenties with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, with a basket on her arm; then a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, and beside him walks one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "drowned_wood_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_drowned_wood_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A drowned forest at dusk: tall bare black trees standing waist-deep in perfectly still black water, every tree reflected upside down beneath it, sheets of mist lying on the water. In the foreground a raft of fallen trunks wedged between two trees, where three travellers make camp: a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, a village herbalist woman in her mid-twenties with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, and a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, with one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck lying on the trunks beside him.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "drowned_camp_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_drowned_camp_s22",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. Night on a dry grassy hummock in a drowned forest of black trees standing in still water, a small campfire. By the fire a village herbalist woman in her mid-twenties with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash sits stitching a cut on the bare forearm of a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, who sits close beside her watching her face. A little apart, a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers sits with his back to them, looking at a tree, deadpan, and one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck sits on his right looking at the tree too.",
+    "seed": 22,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "ashen_hills_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_ashen_hills_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide scene of burnt black hills: grey ash, the stumps of trees standing like broken teeth, the sky a dark bruised grey. Far away beyond the hills, on the horizon, rises a colossal dead tree as big as a mountain, filling half the sky, its bark grey as old bone, its great limbs broken off, a vast black wound in its side. In the foreground three travellers walk through the ash: a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, a village herbalist woman in her mid-twenties with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, and a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, with one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck walking beside him.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "rot_ape_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_rot_ape2_s88",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide view over a black rock in the foreground. Crouching low behind the rock in the foreground, seen from behind, are a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord on the left, a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers in the middle, and one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck on his right, all three looking away from us toward the pass. Far ahead, a hundred paces away, in the notch of a pass in a black ridge, sits the rot-ape: a gigantic ape as big as a house, its whole body covered in shaggy living moss, with fungus and little ferns growing out of its shoulders and back, its eyes milky and blind. The ground around it is littered with white bones. Beyond the ridge a colossal grey dead tree fills the sky.",
+    "seed": 88,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "night_watch_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_night_watch_s55",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. Night in burnt black hills under a pale moon, a small campfire burning low. On a black rock above the camp sits a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, keeping watch with her spear across her knees. Below her by the fire sits a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, and beside him one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck lies staring out into the dark, ears flat.",
+    "seed": 55,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "trio_fire_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_trio_fire_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. Night under dark pine trees, a campfire. Three people sit around the fire, two women and one man, each clearly separate. On the left sits a village herbalist woman in her mid-twenties with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, eating from a bowl with chopsticks with great dignity. On the right sits a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, her chin on her knees, listening wide-eyed. At the back between them sits a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, telling a story, with one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck lying behind him, her head resting beside his knee. A few small pale butterflies drift above the fire.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "heart_gate_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_heart_gate_s22",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime scene in a wide bare clearing of grey dust where nothing grows, under a pale empty sky. Most of the picture is filled by the base of one gigantic dead tree trunk, so wide that it fills the picture from edge to edge like a smooth grey cliff of dead wood, its top far out of sight above the frame, huge roots like collapsed stone bridges running out into the dust. Up the middle of the trunk runs a tall straight crack that splits it from the ground up out of sight, wide enough to drive a cart through, black inside. The people are tiny next to the tree. At the foot of the crack stand three small travellers, two women and one man, each clearly separate: on the left a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, in the middle a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, with one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck standing beside him, and on the right a village herbalist woman in her mid-twenties with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash.",
+    "seed": 22,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "heart_hall_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_heart_hall_s22",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. An interior scene inside a vast hollow dead tree like a cathedral: walls of smooth grey wood rising in grown ridges, galleries, ledges and stairs where the living wood once flowed around itself, thin grey shafts of light falling from cracks far above, the floor soft with pale dust. In the foreground stand three people, two women and one man, each clearly separate: on the left a village herbalist woman in her mid-twenties with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, in the middle a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, looking up, with one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck sitting in the dust beside him, and on the right a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, facing him.",
+    "seed": 22,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "heart_roots_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_heart_roots_s55",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A dark interior scene in a tunnel inside the roots of a giant tree: a smooth ribbed tunnel of pale grey root wood as wide as a corridor, running steeply down into blackness, twisted roots on its walls, the only light a small white glow from the tool in the man's hand. a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers walks down the tunnel holding up the light, one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck padding ahead of him on the root floor, and right behind him, close and wary, comes a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord. Beyond them the tunnel is black.",
+    "seed": 55,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "heart_core_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_heart_core_s55",
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. An interior view of a round high chamber deep inside a dead tree, its curved walls of bare grey wood grain with deep cracks, the floor of old dark wood. In the middle of the far wall is a huge perfectly round hole as big as a house, its edges scorched black, with a ring of small carved red lotus symbols around its rim. At the bottom of the hole, from a burnt black stump, a small pale shoot of wood no longer than a hand grows up, glowing softly white. On the right, in the foreground, stands a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, looking at it, with one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck sitting beside him. The left side of the picture is the bare curved grey wall.",
+    "seed": 55,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "guardian_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_guardian2_s66",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. An interior scene in a round chamber like the inside of a seed, with walls of pale grown wood and no doors. In the far wall is a tall round opening framed by curved white ribs of bone like the ribs of a great animal, and in it a giant guardian is standing up, as big as a house, the people tiny next to it: a huge figure shaped like a gardener, its body of dark grown wood, its joints of white bone, long moss hanging from its arms, and for a head a smooth white seed-pod; in the middle of its chest is a hollow with a faint white glow. In the foreground, small, two people face it, one woman and one man, each clearly separate: on the left a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, and on the right a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, with one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck crouching beside him, ready to spring.",
+    "seed": 66,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "ship_bridge_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_ship_bridge_s55",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. An interior scene inside an enclosed round chamber grown from living pale wood, its curved walls and low ceiling in soft folds like the inside of a flower or a shell, faint light glowing from within the wood, six empty seats grown up from the floor in a ring. In the middle, on a pedestal grown up out of the floor, sits a polished knot of wood the size of two fists, glowing faintly. Three people, two women and one man, each clearly separate: on the left a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, touching the wall, in the middle a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, looking at the knot of wood, with one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck lying on the floor beside him, and on the right a village herbalist woman in her mid-twenties with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, sitting against the wall with her knees drawn up.",
+    "seed": 55,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "ship_wreck_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_ship_wreck_s55",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A dark interior scene in a vast cavern beneath the roots of a giant tree. In it lies an enormous ancient starship grown from living pale wood, as big as a palace, the people tiny next to it: a long sleek hull of smooth flowing organic curves tapering to a long pointed prow, great curved swept-back fins like the wings of a tree seed, its whole surface covered in grown patterns of wood grain like veins, hatches shaped like folded leaves, its front third crushed and split, huge tree roots grown around it and holding it like a hand. In the foreground three adults of about the same height stand side by side looking up at it, two women and one man, each clearly separate: on the left a tall rangy wild grown woman in her twenties, an adult as tall as the man with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, next to her a tall grown village herbalist woman of twenty-six, an adult with a mature face and a slender adult figure, almost as tall as the man, with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, and on the right a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, with one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck standing beside him.",
+    "seed": 55,
+    "width": 1280,
+    "height": 800
+   },
+   {
+    "op": "local",
+    "file": "a1t_ship_wreck_eyes",
+    "source": "a1t_ship_wreck_s55",
+    "note": "v0.11.60: Mei Lin's and Ya's red eyes made grey, Ya's red scar kept: python3 -I tools/art/eyes.py SRC SPEC OUT with SPEC = this step's spec (boxes in source pixels). Then palette.py.",
+    "spec": {
+     "boxes": [
+      [
+       755,
+       254,
+       764,
+       266
+      ],
+      [
+       784,
+       250,
+       796,
+       263
+      ],
+      [
+       589,
+       304,
+       600,
+       315
+      ],
+      [
+       618,
+       302,
+       630,
+       312
+      ]
+     ]
+    }
+   }
+  ],
+  "return_road_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_return_road2_s77",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A grey morning scene on a narrow deer path through a dark forest of black trunks and grey moss, mist between the trees, the light pale. Three travellers walk along the path, two women and one man, each clearly separate: in front, ten paces ahead, a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, her spear across her shoulders; behind her a tall grown village herbalist woman of twenty-six, an adult with a mature face and a slender adult figure, almost as tall as the man, with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, long dark trousers and plain dark cloth shoes, pale and quiet; and at the back a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, with one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck walking beside him.",
+    "seed": 77,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "grove_sprout_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_grove_sprout_s22",
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. A daytime scene in a lane of old thatched mud-walled huts, the sky empty and pale. In the middle of the picture grows a ring of seven slender white saplings as tall as a man's knee, their pale leaves unfolding, veined like the inside of a wrist, a soft white glow among them. Around them, a few steps back, stand a few grave bent old villagers with short grey hair, grey beards and lined faces, in patched hemp clothes, and on the right a ninety-year-old village elder with one blind milky eye, a bald head with a tiny white topknot and a thin white beard, wearing a plain grey robe, leaning on a walking stick. In front of the saplings lies one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck, watching them. Behind them the huts and the pale sky fill the background.",
+    "seed": 22,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "a1_end_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_a1_end2_s66",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A night scene in a lane of old thatched mud-walled huts under a small white moon, the huts dark, the night sky above them black and empty. In the middle a young slender white tree grows from the ground, its pale leaves glowing softly, a white moth flying near it. Three adults, two women and one man, each clearly separate, stand quietly looking at it: on the left a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, beside him a tall grown village herbalist woman of twenty-six, an adult with a mature face and a slender adult figure, almost as tall as the man, with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, and on the right a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, clearly a woman, with a feminine face, full lips, long eyelashes and a slender woman's figure, with one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck sitting in front of her.",
+    "seed": 66,
+    "width": 1280,
+    "height": 800
+   },
+   {
+    "op": "local",
+    "file": "a1t_a1_end_eyes",
+    "source": "a1t_a1_end2_s66",
+    "note": "v0.11.60: Mei Lin's red eyes made grey, Ya's red scar kept: python3 -I tools/art/eyes.py SRC SPEC OUT with SPEC = this step's spec (boxes in source pixels). Then palette.py.",
+    "spec": {
+     "boxes": [
+      [
+       417,
+       163,
+       431,
+       176
+      ],
+      [
+       447,
+       166,
+       458,
+       180
+      ]
+     ]
+    }
+   }
   ]
  },
  "palette": {
@@ -3640,7 +3896,27 @@
    "a1_lf_rogue_s55": "lf_rogue",
    "a1_ashen_camp_s44": "ashen_camp",
    "a1h_root_camp2_s66": "root_camp_human",
-   "a1h_ashen_camp2_s66": "ashen_camp_human"
+   "a1h_ashen_camp2_s66": "ashen_camp_human",
+   "a1t_council_s55": "council_tiger",
+   "a1t_ashfall_dawn_s44": "ashfall_dawn_tiger",
+   "a1t_root_road_s44": "root_road_tiger",
+   "a1t_drowned_wood_s44": "drowned_wood_tiger",
+   "a1t_drowned_camp_s22": "drowned_camp_tiger",
+   "a1t_ashen_hills_s44": "ashen_hills_tiger",
+   "a1t_rot_ape2_s88": "rot_ape_tiger",
+   "a1t_night_watch_s55": "night_watch_tiger",
+   "a1t_trio_fire_s44": "trio_fire_tiger",
+   "a1t_heart_gate_s22": "heart_gate_tiger",
+   "a1t_heart_hall_s22": "heart_hall_tiger",
+   "a1t_heart_roots_s55": "heart_roots_tiger",
+   "a1t_heart_core_s55": "heart_core_tiger",
+   "a1t_guardian2_s66": "guardian_tiger",
+   "a1t_ship_bridge_s55": "ship_bridge_tiger",
+   "a1t_ship_wreck_eyes": "ship_wreck_tiger",
+   "a1t_grove_sprout_s22": "grove_sprout_tiger",
+   "a1t_a1_end_eyes": "a1_end_tiger",
+   "a1t_return_road2_s77": "return_road_tiger",
+   "a1t_ya_fight2_s77": "ya_fight_tiger"
   }
  },
  "styles": {

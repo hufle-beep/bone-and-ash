@@ -79,8 +79,8 @@ assert(pictureOf('yuki_close', 'cat') === 'art/pic/yuki_cat.webp' && pictureOf('
 for (const [form, file] of [['tiger', 'yuki_tiger'], ['human', 'yuki_human'], ['cat', 'yuki_cat']]) { setArtState({ yukiForm: form }); assert(sceneArt('yuki_close').includes(`art/pic/${file}.webp`), `v0.11.24: with Yuki in ${form} form the yuki_close plate shows ${file}`); }
 assert(sceneArt('james').includes('data-pic="james"') && sceneArt('james').includes('art/pic/james.webp'), 'v0.11.24: a key with a picture draws the picture');
 assert(SCENES.arrival.art === 'james', 'v0.11.24: the arrival shows James');
-setArtState({ yukiForm: 'tiger' }); // v0.11.59: every scene's key has a picture now, so the code-art case is a form not drawn yet
-assert(!sceneArt('council').includes('data-pic') && sceneArt('council').startsWith('<svg'), 'v0.11.24: a key without a picture keeps its code art (council\'s great cat until push 4; envoy until v0.11.54, heart_hall until v0.11.58, lf_hub until v0.11.59)');
+setArtState({ yukiForm: 'human' }); // v0.11.59: every scene's key has a picture now, so the code-art case is a form not drawn yet (v0.11.60: human, the great cat is drawn)
+assert(!sceneArt('council').includes('data-pic') && sceneArt('council').startsWith('<svg'), 'v0.11.24: a key without a picture keeps its code art (council as human until push 4b; envoy until v0.11.54, heart_hall until v0.11.58, lf_hub until v0.11.59, council\'s great cat until v0.11.60)');
 setArtState({ yukiForm: 'cat' });
 // v0.11.38 (P-b; built as the v0.11.26 work in progress): every key of the prologue's art table shows its own picture (file named after the key)
 {
@@ -197,6 +197,36 @@ const LF_P3 = 'lf_hub lf_seclusion lf_bone_depths lf_black_mire lf_thunder_ridge
     // the form chooser shows her portrait in her current form, as yuki_close
     for (const form of ['cat', 'tiger', 'human']) assert(pictureOf('yuki_form', form) === pictureOf('yuki_close', form), `v0.11.59: yuki_form shows her ${form} portrait, as yuki_close`);
 }
+// v0.11.60 (Act 1 art, push 4a; owner picks 2026-11-08 M1 + P2): the great-cat version of Act 1's 20 Yuki keys, each a fresh picture from its cat prompt
+{
+    const R = JSON.parse(readFileSync('tools/art/recipes.json', 'utf8'));
+    const gen = (f) => R.pictures[f].find((st) => st.op === 'generate').prompt;
+    const T = 'one single ' + R.cast.yuki_tiger.slice(2);
+    for (const k of [...ACT1_YUKI_P1, ...ACT1_YUKI_P2]) {
+        const f = `${k}_tiger`;
+        assert(YUKI_TIGER_PICS.has(k) && !YUKI_HUMAN_PICS.has(k), `v0.11.60: ${k} has its great-cat picture, human still to come (push 4b)`);
+        setArtState({ yukiForm: 'tiger' });
+        assert(pictureOf(k, 'tiger') === `art/pic/${f}.webp` && sceneArt(k).includes(`data-pic="${k}"`) && sceneArt(k).includes(`art/pic/${f}.webp`), `v0.11.60: with Yuki the great cat ${k} shows ${f}.webp`);
+        setArtState({ yukiForm: 'human' });
+        assert(pictureOf(k, 'human') === '' && !sceneArt(k).includes('data-pic'), `v0.11.60: with Yuki human ${k} keeps its code art until push 4b`);
+        setArtState({ yukiForm: 'cat' });
+        assert(pictureOf(k, 'cat') === `art/pic/${k}.webp`, `v0.11.60: with Yuki the cat ${k} still shows ${k}.webp`);
+        assert(R.palette.rename[R.pictures[f].at(-1).file] === f, `v0.11.60: palette.rename maps ${f}'s last file (${R.pictures[f].at(-1).file}) to ${f}`);
+        const pr = gen(f), cat = gen(k);
+        assert(pr.includes(T) && !pr.includes(R.cast.yuki) && !/small white cat|on his shoulder|in his lap|on the table beside his hand/.test(pr), `v0.11.60: ${f} draws her once as the great cat from her cast, beside James (no shoulder, lap or table)`);
+        assert(pr.includes(R.cast.james_shaggy) === cat.includes(R.cast.james_shaggy) && pr.slice(0, 200) === cat.slice(0, 200), `v0.11.60: ${f} keeps the cat picture's style and James (grove_sprout has no James)`);
+        assert(!/nude|naked|breast|bust|bath|bare (?:chest|skin)/i.test(pr), `v0.11.60: ${f}'s prompt asks for nothing unclothed`);
+    }
+    // the second prompts: the ape far off, the guardian's doorway of rib bones (no modern door), a1_end among thatched huts with Ya clearly a woman
+    assert(/a hundred paces away/.test(gen('rot_ape_tiger')) && /seen from behind/.test(gen('rot_ape_tiger')), 'v0.11.60: rot_ape_tiger has the ape far off, the three seen from behind');
+    assert(/no doors/.test(gen('guardian_tiger')) && /ribs of bone/.test(gen('guardian_tiger')) && !/open door/.test(gen('guardian_tiger')), 'v0.11.60: guardian_tiger has a doorway of rib bones, no door');
+    assert(/thatched mud-walled huts/.test(gen('a1_end_tiger')) && /black and empty/.test(gen('a1_end_tiger')) && /clearly a woman, with a feminine face/.test(gen('a1_end_tiger')) && !/village street/.test(gen('a1_end_tiger')), 'v0.11.60: a1_end_tiger among thatched huts under an empty sky, Ya clearly a woman');
+    // after the cold review (owner pick R2): return_road without the modern heels, ya_fight without the towers and marks behind them
+    assert(/long dark trousers and plain dark cloth shoes/.test(gen('return_road_tiger')) && R.pictures.return_road_tiger[0].file === 'a1t_return_road2_s77', 'v0.11.60 (R2): return_road_tiger redrawn, Mei Lin in trousers and cloth shoes');
+    assert(/Behind the fence the background is a wall of dark tree trunks and leaves/.test(gen('ya_fight_tiger')) && R.pictures.ya_fight_tiger[0].file === 'a1t_ya_fight2_s77', 'v0.11.60 (R2): ya_fight_tiger redrawn against a wall of trees');
+    // red eyes made grey by a recorded local step on the generated picture
+    for (const k of ['ship_wreck_tiger', 'a1_end_tiger']) { const st = R.pictures[k].at(-1); assert(st.op === 'local' && /eyes\.py/.test(st.note) && st.source === R.pictures[k][0].file && st.spec.boxes.length >= 2, `v0.11.60: ${k}'s red eyes made grey by a recorded local step`); }
+}
 // v0.11.38 (P-b): the form map. A picture whose recipe draws Yuki as the small cat shows only while she is the cat;
 // in tiger or human form the plate is code art (which draws her current form). The list is checked against the recipes, so it cannot drift.
 {
@@ -217,8 +247,8 @@ const LF_P3 = 'lf_hub lf_seclusion lf_bone_depths lf_black_mire lf_thunder_ridge
     assert([...YUKI_PIC_FORMS].join(' ') === 'cat tiger human', `v0.11.50: Yuki's pictures exist for the cat, the great cat and the human (${[...YUKI_PIC_FORMS]})`);
     assert(YUKI_HUMAN_PICS.size === 29 + 10 && [...YUKI_HUMAN_PICS].every((k) => YUKI_PICS.has(k)), `v0.11.59: the prologue's 29 keys of YUKI_PICS, the Long Forest's 8 and the 2 camps have a human picture (${YUKI_HUMAN_PICS.size})`);
     // v0.11.54 (pick F1): the great cat is gated like the human form; the prologue's 29 have both, Act 1's keys only the cat until push 4
-    assert([...YUKI_TIGER_PICS].sort().join(' ') === [...YUKI_HUMAN_PICS].sort().join(' '), `v0.11.59: the great-cat list is the same as the human one: the prologue's 29, the Long Forest's 8 and the 2 camps (${YUKI_TIGER_PICS.size})`);
-    assert([...YUKI_PICS].filter((k) => !YUKI_TIGER_PICS.has(k)).sort().join(' ') === [...ACT1_YUKI_P1, ...ACT1_YUKI_P2].sort().join(' '), 'v0.11.58: the Yuki keys without a great-cat picture are exactly Act 1 push 1\'s ten and push 2\'s ten');
+    assert([...YUKI_TIGER_PICS].sort().join(' ') === [...YUKI_PICS].sort().join(' '), `v0.11.60: every picture that draws Yuki has its great-cat version (${YUKI_TIGER_PICS.size} of ${YUKI_PICS.size})`);
+    assert([...YUKI_PICS].filter((k) => !YUKI_HUMAN_PICS.has(k)).sort().join(' ') === [...ACT1_YUKI_P1, ...ACT1_YUKI_P2].sort().join(' '), 'v0.11.60: the Yuki keys without a human picture are exactly Act 1 push 1\'s ten and push 2\'s ten (push 4b)');
     const drawnIn = (key, form) => YUKI_PIC_FORMS.has(form) && (form !== 'human' || YUKI_HUMAN_PICS.has(key)) && (form !== 'tiger' || YUKI_TIGER_PICS.has(key));
     for (const key of Object.keys(PICTURES)) {
         if (key.startsWith('yuki_')) continue;
