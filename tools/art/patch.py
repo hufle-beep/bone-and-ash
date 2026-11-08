@@ -5,6 +5,7 @@ SPEC: {"layers": [{"file": "f5_x_s2_00001_", "mask": "f5_x"}, ...],
        "copies": [{"from": [x, y], "to": [x0, y0, x1, y1], "feather": 6}, ...],
        "discs": [{"center": [x, y], "r": 25, "fill": 250, "outline": 120, "width": 2}, ...],
        "lines": [{"from": [x, y], "to": [x, y], "width": 7, "fill": 85, "outline": 20}, ...],
+       "figures": [{"poly": [[x, y], ...]} or {"ellipse": [x0, y0, x1, y1]}, "fill": 200 or [r, g, b], "outline": 20, "width": 2}, ...],
        "shutters": [{"box": [x0, y0, x1, y1], "fill": 78, "line": 28, "step": 6}, ...],
        "tails": [{"limits": [[[x, y], ...]], "seeds": [[x, y], ...], "thr": 40, "grow": 3, "rim": 3}, ...]}
  - a layer pastes an inpaint's result through its (already blurred) mask: out = out * (1 - m) + layer * m.
@@ -14,6 +15,8 @@ SPEC: {"layers": [{"file": "f5_x_s2_00001_", "mask": "f5_x"}, ...],
  - a disc paints a plain round moon: grey level "fill" inside radius r, a ring of grey "outline" "width" px wide
    at its edge, both antialiased over one pixel.
  - a line draws a straight stick (a spear shaft): grey "fill", "width" px wide, with a 1 px dark "outline", antialiased.
+ - a figure paints a flat shape (a polygon or an ellipse) in one grey or colour with a dark outline: the rough
+   layout a later inpaint at partial denoise turns into a drawn figure (v0.11.63: the people drawn small, push 5b).
  - a shutter covers a glass window with a closed shutter of dark wooden boards: grey "fill", a darker line every
    "step" px and a 2 px dark border, its edge softened over one pixel.
  - a tail turns a black cat tail white: the dark pixels (grey below "thr") connected to the seeds inside the limit
@@ -65,6 +68,25 @@ for Ln in S.get('lines', []):
     outer, inner = stroke(wd), stroke(max(wd - 2, 1))
     a = a * (1 - outer) + Ln.get('outline', 20) * outer
     a = a * (1 - inner) + Ln.get('fill', 85) * inner
+for F in S.get('figures', []):
+    k = 4
+    def shape(grow):
+        im = Image.new('L', (w * k, h * k), 0); dr = ImageDraw.Draw(im)
+        if 'poly' in F:
+            pts = [(x * k, y * k) for x, y in F['poly']]
+            if not all(0 <= x <= w * k and 0 <= y <= h * k for x, y in pts): sys.exit(f'figure {F} is outside the picture')
+            dr.polygon(pts, fill=255)
+            if grow: dr.line(pts + [pts[0]], fill=255, width=int(grow * 2 * k), joint='curve')
+        else:
+            x0, y0, x1, y1 = F['ellipse']
+            if not (0 <= x0 < x1 <= w and 0 <= y0 < y1 <= h): sys.exit(f'figure {F} is outside the picture')
+            dr.ellipse([x0 * k - grow * k, y0 * k - grow * k, x1 * k + grow * k, y1 * k + grow * k], fill=255)
+        return np.asarray(im.resize((w, h), Image.LANCZOS)).astype(float)[..., None] / 255
+    wd = F.get('width', 2)
+    outer, inner = shape(wd), shape(0)
+    fill = np.array(F.get('fill', 200), dtype=float).reshape(-1)[:3] if isinstance(F.get('fill', 200), list) else float(F.get('fill', 200))
+    if wd: a = a * (1 - outer) + F.get('outline', 20) * outer
+    a = a * (1 - inner) + fill * inner
 for B in S.get('shutters', []):
     x0, y0, x1, y1 = B['box']
     if not (0 <= x0 < x1 <= w and 0 <= y0 < y1 <= h): sys.exit(f'shutter {B} is outside the picture')
@@ -93,4 +115,4 @@ for T in S.get('tails', []):
     a = a * (1 - t) + 18 * t
     a = a * (1 - c) + 246 * c
 Image.fromarray(np.clip(a + 0.5, 0, 255).astype('uint8')).save(out)
-print(', '.join(f'{k} {len(S.get(k, []))}' for k in ('layers', 'copies', 'discs', 'lines', 'shutters', 'tails')))
+print(', '.join(f'{k} {len(S.get(k, []))}' for k in ('layers', 'copies', 'discs', 'lines', 'figures', 'shutters', 'tails')))

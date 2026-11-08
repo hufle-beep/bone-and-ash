@@ -291,7 +291,7 @@ try:
     m = np.zeros((40, 60), 'uint8'); m[30:36, 2:10] = 255; Image.fromarray(m).convert('RGB').save(d / 'M.png')
     spec = {"layers": [{"file": "L_00001_", "mask": "M"}], "copies": [{"from": [2, 2], "to": [10, 2, 14, 6], "feather": 0}],
             "discs": [{"center": [50, 8], "r": 4, "fill": 250, "outline": 120, "width": 1}], "lines": [{"from": [14, 12], "to": [14, 18], "width": 3, "fill": 85, "outline": 20}],
-            "shutters": [{"box": [20, 2, 28, 10]}],
+            "shutters": [{"box": [20, 2, 28, 10]}], "figures": [{"poly": [[40, 30], [50, 30], [50, 38], [40, 38]], "fill": 210, "outline": 20, "width": 1}],
             "tails": [{"limits": [[[28, 18], [52, 18], [52, 26], [28, 26]]], "seeds": [[40, 22]], "thr": 40, "grow": 2, "rim": 2}]}
     def run(sp, name):
         json.dump(sp, open(d / f'{name}.json', 'w'))
@@ -299,10 +299,11 @@ try:
     res = {"rc": run(spec, 'p')}
     o = np.asarray(Image.open(d / 'p.png').convert('L')).astype(int)
     res.update({"layer_in": int(o[32, 5]), "layer_out": int(o[32, 20]), "copy": int(o[4, 12]), "moon": int(o[8, 50]), "line": int(o[15, 14]), "line_off": int(o[15, 18]),
-                "shutter": int(o[6, 23]), "boards": int(o[6, 20]) != int(o[6, 23]), "tail_core": int(o[22, 40]), "tail_rim": int(o[18, 40]), "far": int(o[38, 58])})
+                "shutter": int(o[6, 23]), "boards": int(o[6, 20]) != int(o[6, 23]), "tail_core": int(o[22, 40]), "tail_rim": int(o[18, 40]), "far": int(o[38, 58]), "figure": int(o[34, 45]), "figure_edge": int(o[29, 45])})
     bad = {"bad_seed": dict(spec, tails=[{"limits": spec["tails"][0]["limits"], "seeds": [[29, 19]], "thr": 40}]),
            "bad_copy": dict(spec, copies=[{"from": [58, 2], "to": [10, 2, 14, 6]}]), "bad_disc": dict(spec, discs=[{"center": [58, 8], "r": 4}]),
-           "bad_line": dict(spec, lines=[{"from": [14, 12], "to": [70, 18]}]), "bad_shutter": dict(spec, shutters=[{"box": [20, 2, 70, 10]}])}
+           "bad_line": dict(spec, lines=[{"from": [14, 12], "to": [70, 18]}]), "bad_shutter": dict(spec, shutters=[{"box": [20, 2, 70, 10]}]),
+           "bad_figure": dict(spec, figures=[{"poly": [[40, 30], [70, 30], [70, 38]]}])}
     for k, v in bad.items(): res[k] = run(v, k)
 finally:
     shutil.rmtree(d, ignore_errors=True)
@@ -317,7 +318,30 @@ print(json.dumps(res))`;
     assert(r.shutter < 100 && r.boards, `patch.py: a shutter darkens its box, with board lines (${r.shutter})`);
     assert(r.tail_core >= 230 && r.tail_rim < 90, `patch.py: a black tail turns white with a black rim (${r.tail_core}, ${r.tail_rim})`);
     assert(r.far === 128, `patch.py: pixels outside every step are untouched (${r.far})`);
-    for (const k of ['bad_seed', 'bad_copy', 'bad_disc', 'bad_line', 'bad_shutter']) assert(r[k] !== undefined && r[k] !== 0, `patch.py: ${k.replace('bad_', 'a bad ')} fails the run (${r[k]})`);
+    assert(Math.abs(r.figure - 210) <= 2 && r.figure_edge < 120, `patch.py: a figure paints its flat shape with a dark outline (${r.figure}, ${r.figure_edge})`);
+    for (const k of ['bad_seed', 'bad_copy', 'bad_disc', 'bad_line', 'bad_shutter', 'bad_figure']) assert(r[k] !== undefined && r[k] !== 0, `patch.py: ${k.replace('bad_', 'a bad ')} fails the run (${r[k]})`);
+}
+// v0.11.63: tools/art/masks.py draws every mask of recipes.json, the stored 1-bit outlines (tools/art/masks/) included, at its recorded size
+{
+    const out = mkdtempSync(path.join(tmpdir(), 'boneash-masks-'));
+    let ok = true;
+    try { execFileSync('python3', ['-I', path.join(ROOT, 'tools/art/masks.py'), out], { encoding: 'utf8' }); } catch (e) { ok = false; }
+    assert(ok, 'masks.py: runs on the real recipes');
+    if (ok) {
+        const R = JSON.parse(readFileSync(path.join(ROOT, 'tools/art/recipes.json'), 'utf8'));
+        const py = String.raw`
+import json, sys, pathlib
+from PIL import Image
+R = json.load(open(sys.argv[1])); d = pathlib.Path(sys.argv[2]); bad = []
+for n, m in R['masks'].items():
+    p = d / f'{n}.png'
+    if not p.exists() or list(Image.open(p).size) != m['size']: bad.append(n)
+    elif 'bitmap' in m and Image.open(p).convert('L').getextrema()[1] < 200: bad.append(n)
+print(json.dumps({"n": len(R['masks']), "bad": bad, "bitmaps": sum('bitmap' in m for m in R['masks'].values())}))`;
+        const r = JSON.parse(execFileSync('python3', ['-I', '-c', py, path.join(ROOT, 'tools/art/recipes.json'), out], { encoding: 'utf8' }).trim());
+        assert(r.bad.length === 0 && r.bitmaps >= 30, `masks.py: all ${r.n} masks drawn at their size, the ${r.bitmaps} stored outlines with white in them (bad: ${r.bad.slice(0, 5)})`);
+    }
+    rmSync(out, { recursive: true, force: true });
 }
 rmSync(TMP, { recursive: true, force: true });
 

@@ -2,6 +2,26 @@
 
 Started 2026-11-08 (v0.11.57), when `history-7.md` reached about 45 KB. Newer than `history-7.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.63 (word for word)
+
+### From "Decided in chat (2026-11-07)"
+
+- **v0.11.60: the Act 1 art, push 4a: the great cat in Act 1 (options M1 / M2 for how, P1 / P2 for the split; owner 03:58 "go with your recommendation" = M1 + P2; sheets with my picks marked, 04:19; pictures 04:21 "go with your picks"):**
+  - **Picked:** M1 (fresh pictures from each key's approved cat prompt, the cat line swapped for cast `yuki_tiger` as "one single huge white great cat …", her pose beside James: lying, standing or walking; no shoulder, lap or table; style as the cat picture, p, n for heart_core and grove_sprout); P2 (push 4 in two: 4a the great cat now, 4b human next with its own options). A test sheet first (council, trio_fire, ship_wreck), then the rest, every seed checked at 960 px for the owner's list.
+  - **The pictures (my picks):** council s55, ashfall_dawn s44, ya_fight (2nd, after the review; was s22) s77, root_road s44, drowned_wood s44, drowned_camp s22, ashen_hills s44, rot_ape (2nd prompt) s88, night_watch s55, trio_fire s44, heart_gate s22, heart_hall s22, heart_roots s55, heart_core s55, guardian (2nd) s66, ship_bridge s55, ship_wreck s55, return_road (2nd, after the review; was s22) s77, grove_sprout s22, a1_end (2nd) s66; ship_wreck and a1_end add the `eyes.py` step (Mei Lin's and Ya's red eyes grey; Ya's scar kept). Second prompts (seeds 66 / 77 / 88): rot_ape (the ape sat beside them in all three: the three seen from behind, the ape a hundred paces off), guardian (modern door handles: "a round opening framed by curved white ribs of bone", "no doors"), a1_end (telephone poles and a male-looking Ya in all three: thatched huts, the sky black and empty, Ya "clearly a woman"). What was left off the sheets and why: `tools/art/README.md` (v0.11.60).
+  - **Still as in the cat versions (second round or the later art pass):** the rot ape and the guardian about a man's height, the seed-ship small, the saplings tall, Ya holding her spear in ya_fight, the ashen_hills tree normal-sized; Mei Lin looks young beside Ya in a few (her cast `mei` lacks the grown wording of push 2).
+- **After the cold review (Opus, art; options R1 / R2 / R3; owner 04:30 "R2", pictures 04:34 "go with your picks"):** the code correct (five mutations each failed the tests; no IDs changed). Redrawn: return_road (Mei Lin in red high heels and a white dress: "long dark trousers and plain dark cloth shoes", s77) and ya_fight (two towers with letter-like marks and a wire-like line behind them: "Behind the fence the background is a wall of dark tree trunks and leaves", s77); left off: return_road2 s66 / s88 (two spears), ya_fight2 s66 (a villager in a baseball cap, a second man in a lab coat). **For the second round (medium):** rot_ape's second prompt not followed (the ape close by, James standing in the open, a living leafy tree where the dead one should fill the sky, Ya in boots; no worse than the cat version); ship_wreck's Ya a head shorter than Mei Lin and young-ish (borderline). **Low:** council's elder with an eye patch, no topknot, the message tube a red cup; heart_roots a "?"-like curl on the wall; a1_end glass windows and a lantern glow; ashfall_dawn's great cat on his right (the prompt said left); Mei Lin absent from rot_ape and guardian (as in the cat versions; rot_ape's text has her); the stripes bold black, as in the earlier great-cat pictures.
+  - **Code:** `js/art/art.js` (`YUKI_TIGER_PICS` + 20), `tools/art/recipes.json` (20 recipes `<key>_tiger`, the rename map), `sw.js` (ART fingerprints), `tests/data.test.mjs` (the v0.11.60 block; the code-art example is council as human now).
+  - **Also:** after v0.11.59 Claude uploaded its changed docs to the project itself. The two saves of 02:20 and 02:49 were not bug reports (owner 03:55, "nothing else in the saves for now"). The Open items heading named v0.11.58 in v0.11.59 (fixed).
+  - **Checks:** see the version note.
+
+### From "Version notes"
+
+#### v0.11.60 — the Act 1 art, push 4a: the great cat in Act 1 (20 pictures)
+
+- **art/pic:** 20 new `<key>_tiger.webp` (about 1.6 MB). **js/art/art.js** (`YUKI_TIGER_PICS`), **sw.js** (ART fingerprints, VERSION), **tests/data.test.mjs** (the v0.11.60 block; list in `tests/README.md`), **tools/art/recipes.json, README.md; tests/README.md; project docs** (v0.11.57 moved to `history-8.md`).
+- **Checks:** the full `bash tools/check.sh`: exit 0, 0 drifted, 1 log-only move (tribute C6 won 60.2 → 53.6%, n 110, as since v0.11.48); the models unchanged (Careful 2.29 / 3.87, Completionist 2.12 / 2.94); the baseline kept; the palette check 193 pictures, 0 failed. Every recorded prompt and seed checked against what ComfyUI ran (SHA-256 of the prompt text from its history, 20 of 20). Cold review on Opus (art): the code correct; two medium picture findings fixed after the owner's pick R2 (decisions above); the full check rerun after the fixes: exit 0, the same numbers, 193 pictures through the palette check.
+
 ## Moved from the handover in v0.11.62 (word for word)
 
 ### From "Decided in chat (2026-11-07)"

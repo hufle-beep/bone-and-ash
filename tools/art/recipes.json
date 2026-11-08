@@ -1668,6 +1668,344 @@
      ]
     ]
    ]
+  },
+  "b5m_guardian_tiger_big": {
+   "size": [
+    862,
+    460
+   ],
+   "blur": 0,
+   "bitmap": "b5m_guardian_tiger.png",
+   "gauss": 6
+  },
+  "b5m_guardian_tiger_small": {
+   "size": [
+    431,
+    230
+   ],
+   "blur": 0,
+   "bitmap": "b5m_guardian_tiger.png",
+   "gauss": 3
+  },
+  "b5m_ashen_hills_tiger_big": {
+   "size": [
+    710,
+    436
+   ],
+   "blur": 0,
+   "bitmap": "b5m_ashen_hills_tiger.png",
+   "gauss": 6
+  },
+  "b5m_ashen_hills_tiger_small": {
+   "size": [
+    355,
+    218
+   ],
+   "blur": 0,
+   "bitmap": "b5m_ashen_hills_tiger.png",
+   "gauss": 3
+  },
+  "b5m_ashen_hills_human_big": {
+   "size": [
+    656,
+    434
+   ],
+   "blur": 0,
+   "bitmap": "b5m_ashen_hills_human.png",
+   "gauss": 6
+  },
+  "b5m_ashen_hills_human_small": {
+   "size": [
+    328,
+    217
+   ],
+   "blur": 0,
+   "bitmap": "b5m_ashen_hills_human.png",
+   "gauss": 3
+  },
+  "b5m_grove_sprout_saplings3b_big": {
+   "size": [
+    1080,
+    360
+   ],
+   "blur": 15,
+   "polys": [],
+   "ellipses": [
+    [
+     60,
+     30,
+     1020,
+     312
+    ]
+   ]
+  },
+  "b5m_grove_sprout_saplings3b_small": {
+   "size": [
+    360,
+    120
+   ],
+   "blur": 5,
+   "polys": [],
+   "ellipses": [
+    [
+     20,
+     10,
+     340,
+     104
+    ]
+   ]
+  },
+  "b5m_grove_sprout_cat_big": {
+   "size": [
+    246,
+    291
+   ],
+   "blur": 0,
+   "bitmap": "b5m_grove_sprout_cat.png",
+   "gauss": 9
+  },
+  "b5m_grove_sprout_cat_small": {
+   "size": [
+    82,
+    97
+   ],
+   "blur": 0,
+   "bitmap": "b5m_grove_sprout_cat.png",
+   "gauss": 3
+  },
+  "b5m_grove_sprout_tiger_big": {
+   "size": [
+    660,
+    303
+   ],
+   "blur": 0,
+   "bitmap": "b5m_grove_sprout_tiger.png",
+   "gauss": 9
+  },
+  "b5m_grove_sprout_tiger_small": {
+   "size": [
+    220,
+    101
+   ],
+   "blur": 0,
+   "bitmap": "b5m_grove_sprout_tiger.png",
+   "gauss": 3
+  },
+  "b5m_grove_sprout_human_big": {
+   "size": [
+    297,
+    459
+   ],
+   "blur": 0,
+   "bitmap": "b5m_grove_sprout_human.png",
+   "gauss": 9
+  },
+  "b5m_grove_sprout_human_small": {
+   "size": [
+    99,
+    153
+   ],
+   "blur": 0,
+   "bitmap": "b5m_grove_sprout_human.png",
+   "gauss": 3
+  },
+  "b5m_ashen_camp_cat_big": {
+   "size": [
+    1010,
+    384
+   ],
+   "blur": 0,
+   "bitmap": "b5m_ashen_camp_cat.png",
+   "gauss": 6
+  },
+  "b5m_ashen_camp_cat_small": {
+   "size": [
+    505,
+    192
+   ],
+   "blur": 0,
+   "bitmap": "b5m_ashen_camp_cat.png",
+   "gauss": 3
+  },
+  "b5m_ashen_camp_tiger_big": {
+   "size": [
+    1010,
+    388
+   ],
+   "blur": 0,
+   "bitmap": "b5m_ashen_camp_tiger.png",
+   "gauss": 6
+  },
+  "b5m_ashen_camp_tiger_small": {
+   "size": [
+    505,
+    194
+   ],
+   "blur": 0,
+   "bitmap": "b5m_ashen_camp_tiger.png",
+   "gauss": 3
+  },
+  "b5m_lf_old_roots_cat_big": {
+   "size": [
+    304,
+    396
+   ],
+   "blur": 0,
+   "bitmap": "b5m_lf_old_roots_cat.png",
+   "gauss": 6
+  },
+  "b5m_lf_old_roots_cat_small": {
+   "size": [
+    152,
+    198
+   ],
+   "blur": 0,
+   "bitmap": "b5m_lf_old_roots_cat.png",
+   "gauss": 3
+  },
+  "b5m_lf_old_roots_tiger_big": {
+   "size": [
+    494,
+    400
+   ],
+   "blur": 0,
+   "bitmap": "b5m_lf_old_roots_tiger.png",
+   "gauss": 6
+  },
+  "b5m_lf_old_roots_tiger_small": {
+   "size": [
+    247,
+    200
+   ],
+   "blur": 0,
+   "bitmap": "b5m_lf_old_roots_tiger.png",
+   "gauss": 3
+  },
+  "b5m_lf_old_roots_human_big": {
+   "size": [
+    378,
+    396
+   ],
+   "blur": 0,
+   "bitmap": "b5m_lf_old_roots_human.png",
+   "gauss": 6
+  },
+  "b5m_lf_old_roots_human_small": {
+   "size": [
+    189,
+    198
+   ],
+   "blur": 0,
+   "bitmap": "b5m_lf_old_roots_human.png",
+   "gauss": 3
+  },
+  "b5m_rot_ape_cat_big": {
+   "size": [
+    880,
+    354
+   ],
+   "blur": 0,
+   "bitmap": "b5m_rot_ape_cat.png",
+   "gauss": 6
+  },
+  "b5m_rot_ape_cat_small": {
+   "size": [
+    440,
+    177
+   ],
+   "blur": 0,
+   "bitmap": "b5m_rot_ape_cat.png",
+   "gauss": 3
+  },
+  "b5m_rot_ape_tiger_big": {
+   "size": [
+    1072,
+    354
+   ],
+   "blur": 0,
+   "bitmap": "b5m_rot_ape_tiger.png",
+   "gauss": 6
+  },
+  "b5m_rot_ape_tiger_small": {
+   "size": [
+    536,
+    177
+   ],
+   "blur": 0,
+   "bitmap": "b5m_rot_ape_tiger.png",
+   "gauss": 3
+  },
+  "b5m_rot_ape_human_big": {
+   "size": [
+    924,
+    354
+   ],
+   "blur": 0,
+   "bitmap": "b5m_rot_ape_human.png",
+   "gauss": 6
+  },
+  "b5m_rot_ape_human_small": {
+   "size": [
+    462,
+    177
+   ],
+   "blur": 0,
+   "bitmap": "b5m_rot_ape_human.png",
+   "gauss": 3
+  },
+  "b5m_ship_wreck_cat_big": {
+   "size": [
+    610,
+    320
+   ],
+   "blur": 0,
+   "bitmap": "b5m_ship_wreck_cat.png",
+   "gauss": 6
+  },
+  "b5m_ship_wreck_cat_small": {
+   "size": [
+    305,
+    160
+   ],
+   "blur": 0,
+   "bitmap": "b5m_ship_wreck_cat.png",
+   "gauss": 3
+  },
+  "b5m_ship_wreck_tiger_big": {
+   "size": [
+    742,
+    320
+   ],
+   "blur": 0,
+   "bitmap": "b5m_ship_wreck_tiger.png",
+   "gauss": 6
+  },
+  "b5m_ship_wreck_tiger_small": {
+   "size": [
+    371,
+    160
+   ],
+   "blur": 0,
+   "bitmap": "b5m_ship_wreck_tiger.png",
+   "gauss": 3
+  },
+  "b5m_ship_wreck_human_big": {
+   "size": [
+    686,
+    320
+   ],
+   "blur": 0,
+   "bitmap": "b5m_ship_wreck_human.png",
+   "gauss": 6
+  },
+  "b5m_ship_wreck_human_small": {
+   "size": [
+    343,
+    160
+   ],
+   "blur": 0,
+   "bitmap": "b5m_ship_wreck_human.png",
+   "gauss": 3
   }
  },
  "pictures": {
@@ -3583,22 +3921,200 @@
   "rot_ape": [
    {
     "op": "generate",
-    "file": "a1_rot_ape2_s66",
-    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A pass in a black ridge, and beyond it a colossal grey dead tree filling the sky. In the notch of the pass sits the rot-ape: a gigantic ape as big as a house, its whole body covered in shaggy living moss, with fungus and little ferns growing out of its shoulders and back, its eyes milky and blind. The ground around it is littered with white bones. In the foreground, tiny next to it, a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord and a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers crouch behind a black rock, watching it, and beside him sits a small white cat with gold eyes and a thin red cord collar.",
-    "seed": 66,
+    "file": "b5_rot_ape_bg_s44",
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. A pass in a black rock ridge, and beyond the ridge a colossal bare grey dead tree without a single leaf that fills the whole sky, its broken limbs bare. In the notch of the pass, in the middle of the picture, sits the rot-ape: a gigantic ape as big as a hut, its whole body covered in shaggy living moss, with fungus and little ferns growing out of its shoulders and back, its eyes milky and blind. The ground of the pass around it is littered with white bones and a few rags of crimson cloth. In the foreground at the bottom of the picture is a low black rock with an empty strip of black ground in front of it.",
+    "seed": 44,
     "width": 1280,
     "height": 800,
-    "why": "redo: the first round drew a gorilla-sized ape"
+    "why": "the giant drawn alone, filling the frame, with no people (B1); one background for all three forms (F1)"
    },
    {
-    "op": "inpaint",
-    "file": "a1_ra_tail2_s6",
-    "source": "a1_rot_ape2_s66",
-    "mask": "a1_ra_tail2",
-    "seed": 6,
-    "denoise": 1.0,
-    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. The rounded lower edge of a dark grey mossy rock, and below it flat solid black ground in deep shadow. Only rock and black ground.",
-    "why": "cold review (medium): a stray second cat tail behind James; owner pick R1 (01:44); a first try (mask a1_ra_tail, seeds 1-3, a prompt naming the coat hem) left patches; this tighter mask, seeds 4-6, s6. Source copy in ComfyUI input: a1src_rot_ape.png"
+    "op": "local",
+    "file": "b5l_rot_ape_cat",
+    "source": "b5_rot_ape_bg_s44",
+    "note": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people's stand-ins, small beside the giant (seen from behind or far off). python3 -I tools/art/patch.py SRC SPEC OUT --dir DIR with SPEC = this step's spec (flat stand-in shapes for the people; DIR is not read). Its OUT is copied to ComfyUI's input as boneash/<file>.png for the next step.",
+    "spec": {
+     "figures": [
+      {
+       "ellipse": [
+        351.5,
+        723.5,
+        408.5,
+        790
+       ],
+       "fill": 210,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        368.6,
+        696.9,
+        391.4,
+        721.6
+       ],
+       "fill": 15,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         368.6,
+         704.5
+        ],
+        [
+         391.4,
+         704.5
+        ],
+        [
+         393.3,
+         752.0
+        ],
+        [
+         366.7,
+         752.0
+        ]
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         352,
+         650
+        ],
+        [
+         356,
+         650
+        ],
+        [
+         356,
+         792
+        ],
+        [
+         352,
+         792
+        ]
+       ],
+       "fill": 70,
+       "outline": 20,
+       "width": 1
+      },
+      {
+       "ellipse": [
+        473.0,
+        727.0,
+        527.0,
+        790
+       ],
+       "fill": 120,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        489.2,
+        701.8,
+        510.8,
+        725.2
+       ],
+       "fill": 15,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         489.2,
+         709.0
+        ],
+        [
+         510.8,
+         709.0
+        ],
+        [
+         512.6,
+         754.0
+        ],
+        [
+         487.4,
+         754.0
+        ]
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        611.5,
+        723.5,
+        668.5,
+        790
+       ],
+       "fill": 248,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        628.6,
+        696.9,
+        651.4,
+        721.6
+       ],
+       "fill": 215,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        706,
+        767.6,
+        734,
+        790
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        710.2,
+        755.0,
+        729.8,
+        771.8
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 2
+      }
+     ]
+    }
+   },
+   {
+    "op": "detail_inpaint",
+    "file": "b5_rot_ape_cat_s3",
+    "source": "b5l_rot_ape_cat",
+    "image": "boneash/b5l_rot_ape_cat.png (input)",
+    "crop": [
+     323,
+     623,
+     440,
+     177
+    ],
+    "scale": 2,
+    "mask": [
+     "b5m_rot_ape_cat_big",
+     "b5m_rot_ape_cat_small"
+    ],
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. Small figures crouch side by side, each clearly separate: on the left a tall rangy wild young woman with very long black hair with a few twigs caught in it, a long patched hunter's jacket of pale hide with a thick spotted fur collar, leather trousers, barefoot, a primitive spear with a jagged white bone point upright beside her; then a grown woman with long black hair in a loose bun pinned with one long slender ivory hairpin, a patched grey jacket with a red sash, long dark trousers; then a man with slightly shaggy tousled pale blond hair and a short pale blond beard, a long white lab coat, black trousers; and a small white cat with a thin red cord collar crouching beside him. Seen from behind, crouching low on black rocky ground, looking away from the viewer up toward a gigantic ape in the pass. Black rock and ground around them.",
+    "seed": 3,
+    "denoise": 0.8,
+    "why": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people painted from their stand-ins at 0.8; my pick from the sheet"
    }
   ],
   "night_watch": [
@@ -3720,12 +4236,389 @@
   "ship_wreck": [
    {
     "op": "generate",
-    "file": "a1_ship_wreck4_s55",
-    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A dark interior scene in a vast cavern beneath the roots of a giant tree. In it lies an enormous ancient starship grown from living pale wood, as big as a palace, the people tiny next to it: a long sleek hull of smooth flowing organic curves tapering to a long pointed prow, great curved swept-back fins like the wings of a tree seed, its whole surface covered in grown patterns of wood grain like veins, hatches shaped like folded leaves, its front third crushed and split, huge tree roots grown around it and holding it like a hand. In the foreground three adults of about the same height stand side by side looking up at it, two women and one man, each clearly separate: on the left a tall rangy wild grown woman in her twenties, an adult as tall as the man with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, next to her a tall grown village herbalist woman of twenty-six, an adult with a mature face and a slender adult figure, almost as tall as the man, with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, and on the right a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, with a small white cat with gold eyes and a thin red cord collar sitting at his feet.",
-    "seed": 55,
+    "file": "b5_ship_wreck_bg_s22",
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. A dark interior scene in a vast cavern beneath the roots of a giant tree. Filling most of the picture lies an enormous ancient starship grown from living pale wood: a long sleek teardrop hull of smooth flowing organic curves tapering to a long pointed prow, ribs curving like the inside of a shell, great curved swept-back fins like the wings of a tree seed, its whole surface covered in grown patterns of wood grain like veins, hatches shaped like folded leaves, its front third crushed and split, huge tree roots grown around it and holding it like a hand. In the lower part of the picture is the bare empty floor of the cavern, dark earth and thin roots.",
+    "seed": 22,
     "width": 1280,
     "height": 800,
-    "why": "after the cold review (owner pick R2): Mei Lin looked young in the first pick (s44); with only her adult wording two seeds drew a second cat and Ya came out small and young (ship_wreck3), so Ya too is a grown woman as tall as James and the three adults about the same height. The seed-ship stays an original grown-wood starship (owner 02:26-02:27: inspired by other works, never their design)"
+    "why": "the giant drawn alone, filling the frame, with no people (B1); one background for all three forms (F1); the cavern under the roots, as the scene text (T1)"
+   },
+   {
+    "op": "local",
+    "file": "b5l_ship_wreck_cat",
+    "source": "b5_ship_wreck_bg_s22",
+    "note": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people's stand-ins, small beside the giant (seen from behind or far off). python3 -I tools/art/patch.py SRC SPEC OUT --dir DIR with SPEC = this step's spec (flat stand-in shapes for the people; DIR is not read). Its OUT is copied to ComfyUI's input as boneash/<file>.png for the next step.",
+    "spec": {
+     "figures": [
+      {
+       "poly": [
+        [
+         231,
+         667
+        ],
+        [
+         233,
+         667
+        ],
+        [
+         233,
+         790
+        ],
+        [
+         231,
+         790
+        ]
+       ],
+       "fill": 70,
+       "outline": 20,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         244.875,
+         700.625
+        ],
+        [
+         275.125,
+         700.625
+        ],
+        [
+         283.375,
+         768.0
+        ],
+        [
+         236.625,
+         768.0
+        ]
+       ],
+       "fill": 210,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        251.75,
+        680,
+        268.25,
+        697.875
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         251.75,
+         688.25
+        ],
+        [
+         268.25,
+         688.25
+        ],
+        [
+         271.0,
+         731.5625
+        ],
+        [
+         249.0,
+         731.5625
+        ]
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         249,
+         768
+        ],
+        [
+         257,
+         768
+        ],
+        [
+         257,
+         790
+        ],
+        [
+         249,
+         790
+        ]
+       ],
+       "fill": 50,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         262,
+         768
+        ],
+        [
+         271,
+         768
+        ],
+        [
+         271,
+         790
+        ],
+        [
+         262,
+         790
+        ]
+       ],
+       "fill": 50,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        334.09375,
+        685,
+        345.90625,
+        695.5
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        332.78125,
+        690.25,
+        347.21875,
+        706.0
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         328.1875,
+         706.0
+        ],
+        [
+         351.8125,
+         706.0
+        ],
+        [
+         355.75,
+         750.625
+        ],
+        [
+         324.25,
+         750.625
+        ]
+       ],
+       "fill": 120,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         326,
+         729
+        ],
+        [
+         353,
+         729
+        ],
+        [
+         353,
+         736
+        ],
+        [
+         326,
+         736
+        ]
+       ],
+       "fill": [
+        160,
+        44,
+        44
+       ],
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         329,
+         750
+        ],
+        [
+         338,
+         750
+        ],
+        [
+         338,
+         790
+        ],
+        [
+         329,
+         790
+        ]
+       ],
+       "fill": 40,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         341,
+         750
+        ],
+        [
+         350,
+         750
+        ],
+        [
+         350,
+         790
+        ],
+        [
+         341,
+         790
+        ]
+       ],
+       "fill": 40,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        411.6,
+        678,
+        428.4,
+        696.2
+       ],
+       "fill": 215,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         406.0,
+         694.8
+        ],
+        [
+         434.0,
+         694.8
+        ],
+        [
+         441.0,
+         763.4
+        ],
+        [
+         399.0,
+         763.4
+        ]
+       ],
+       "fill": 248,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         408,
+         763
+        ],
+        [
+         417,
+         763
+        ],
+        [
+         417,
+         790
+        ],
+        [
+         408,
+         790
+        ]
+       ],
+       "fill": 25,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         422,
+         763
+        ],
+        [
+         431,
+         763
+        ],
+        [
+         431,
+         790
+        ],
+        [
+         422,
+         790
+        ]
+       ],
+       "fill": 25,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        461,
+        775.6,
+        479,
+        790
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        463.7,
+        767.5,
+        476.3,
+        778.3
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 2
+      }
+     ]
+    }
+   },
+   {
+    "op": "detail_inpaint",
+    "file": "b5_ship_wreck_cat_s3",
+    "source": "b5l_ship_wreck_cat",
+    "image": "boneash/b5l_ship_wreck_cat.png (input)",
+    "crop": [
+     203,
+     640,
+     305,
+     160
+    ],
+    "scale": 2,
+    "mask": [
+     "b5m_ship_wreck_cat_big",
+     "b5m_ship_wreck_cat_small"
+    ],
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. Small figures stand side by side, each clearly separate: on the left a tall rangy wild young woman seen from behind, very long black hair with a few twigs caught in it hanging down her back, a long patched hunter's jacket of pale hide with a thick spotted fur collar, leather trousers, barefoot, holding upright a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord; then a grown woman seen from behind, long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, a patched grey jacket with a red sash, long dark trousers and plain dark cloth shoes; then a man seen from behind, slightly shaggy tousled pale blond hair, a long white lab coat, black trousers and black shoes; and a small white cat with a thin red cord collar sitting at his feet. Seen from behind, tiny, standing on the dark earth floor of a cavern, looking up at a huge wooden starship. Dark earth and thin roots around them.",
+    "seed": 3,
+    "denoise": 0.8,
+    "why": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people painted from their stand-ins at 0.8; my pick from the sheet"
    }
   ],
   "ship_bridge": [
@@ -3773,12 +4666,334 @@
   "grove_sprout": [
    {
     "op": "generate",
-    "file": "a1_grove_sprout2_s66",
-    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. A daytime scene in a lane of old thatched mud-walled huts, the sky empty and pale. In the middle of the picture grows a ring of seven slender white saplings as tall as a man's knee, their pale leaves unfolding, veined like the inside of a wrist, a soft white glow among them. Around them, a few steps back, stand a few grave bent old villagers with short grey hair, grey beards and lined faces, in patched hemp clothes, and on the right a ninety-year-old village elder with one blind milky eye, a bald head with a tiny white topknot and a thin white beard, wearing a plain grey robe, leaning on a walking stick. In front of the saplings sits a small white cat with gold eyes and a thin red cord collar, watching them. Behind them the huts and the pale sky fill the background.",
-    "seed": 66,
+    "file": "b5_grove_sprout_bg_s22",
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. A daytime scene in a lane of old thatched mud-walled huts, the sky empty and pale. In the middle of the picture, on the bare earth of the lane, is a small empty patch of dark freshly turned soil. Around it, a few steps back, stand a few grave bent old villagers with short grey hair, grey beards and lined faces, in patched hemp clothes, looking down at it, and on the right a ninety-year-old village elder with one blind milky eye, a bald head with a tiny white topknot and a thin white beard, wearing a plain grey robe, leaning on a walking stick. Behind them the huts and the pale sky fill the background.",
+    "seed": 22,
     "width": 1280,
     "height": 800,
-    "why": "redo: the first prompt (style p) drew stray tall figures in black and telephone poles; style n, bent old villagers, the huts and pale sky named as the background"
+    "why": "the giant drawn alone, filling the frame, with no people (B1); one background for all three forms (F1)"
+   },
+   {
+    "op": "local",
+    "file": "b5l_grove_sprout",
+    "source": "b5_grove_sprout_bg_s22",
+    "note": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): seven sapling stand-ins on the mound, knee-high. python3 -I tools/art/patch.py SRC SPEC OUT --dir DIR with SPEC = this step's spec (flat stand-in shapes for the people; DIR is not read). Its OUT is copied to ComfyUI's input as boneash/<file>.png for the next step.",
+    "spec": {
+     "figures": [
+      {
+       "poly": [
+        [
+         423,
+         648
+        ],
+        [
+         427,
+         648
+        ],
+        [
+         427,
+         702
+        ],
+        [
+         423,
+         702
+        ]
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "ellipse": [
+        414,
+        636,
+        436,
+        652
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         468,
+         648
+        ],
+        [
+         472,
+         648
+        ],
+        [
+         472,
+         702
+        ],
+        [
+         468,
+         702
+        ]
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "ellipse": [
+        459,
+        636,
+        481,
+        652
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         513,
+         648
+        ],
+        [
+         517,
+         648
+        ],
+        [
+         517,
+         702
+        ],
+        [
+         513,
+         702
+        ]
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "ellipse": [
+        504,
+        636,
+        526,
+        652
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         558,
+         648
+        ],
+        [
+         562,
+         648
+        ],
+        [
+         562,
+         702
+        ],
+        [
+         558,
+         702
+        ]
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "ellipse": [
+        549,
+        636,
+        571,
+        652
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         603,
+         648
+        ],
+        [
+         607,
+         648
+        ],
+        [
+         607,
+         702
+        ],
+        [
+         603,
+         702
+        ]
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "ellipse": [
+        594,
+        636,
+        616,
+        652
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         648,
+         648
+        ],
+        [
+         652,
+         648
+        ],
+        [
+         652,
+         702
+        ],
+        [
+         648,
+         702
+        ]
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "ellipse": [
+        639,
+        636,
+        661,
+        652
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         693,
+         648
+        ],
+        [
+         697,
+         648
+        ],
+        [
+         697,
+         702
+        ],
+        [
+         693,
+         702
+        ]
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "ellipse": [
+        684,
+        636,
+        706,
+        652
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      }
+     ]
+    }
+   },
+   {
+    "op": "detail_inpaint",
+    "file": "b5_grove_sprout_saplings3b_s1",
+    "source": "b5l_grove_sprout",
+    "image": "boneash/b5l_grove_sprout.png (input)",
+    "crop": [
+     380,
+     610,
+     360,
+     120
+    ],
+    "scale": 3,
+    "mask": [
+     "b5m_grove_sprout_saplings3b_big",
+     "b5m_grove_sprout_saplings3b_small"
+    ],
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. A ring of seven slender white saplings, each only as tall as a man's knee, growing from a low mound of dark turned soil, their pale leaves unfolding, a soft white glow among them.",
+    "seed": 1,
+    "denoise": 0.8,
+    "why": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the saplings painted small from their stand-ins (seeds 1-2 at 0.7 and 0.8, s1 at 0.8)"
+   },
+   {
+    "op": "local",
+    "file": "b5l_grove_sprout_cat",
+    "source": "b5_grove_sprout_saplings3b_s1",
+    "note": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): Yuki's stand-in in front of the saplings. python3 -I tools/art/patch.py SRC SPEC OUT --dir DIR with SPEC = this step's spec (flat stand-in shapes for the people; DIR is not read). Its OUT is copied to ComfyUI's input as boneash/<file>.png for the next step.",
+    "spec": {
+     "figures": [
+      {
+       "ellipse": [
+        548,
+        744,
+        576,
+        774
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        552,
+        730,
+        572,
+        750
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 2
+      }
+     ]
+    }
+   },
+   {
+    "op": "detail_inpaint",
+    "file": "b5_grove_sprout_cat_s2",
+    "source": "b5l_grove_sprout_cat",
+    "image": "boneash/b5l_grove_sprout_cat.png (input)",
+    "crop": [
+     521,
+     703,
+     82,
+     97
+    ],
+    "scale": 3,
+    "mask": [
+     "b5m_grove_sprout_cat_big",
+     "b5m_grove_sprout_cat_small"
+    ],
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. a small white cat with a thin red cord collar sits seen from behind, watching the saplings. In front of a ring of small white saplings on a mound of dark soil, on pale bare earth.",
+    "seed": 2,
+    "denoise": 0.8,
+    "why": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people painted from their stand-ins at 0.8; my pick from the sheet"
    }
   ],
   "elder_duel": [
@@ -4057,31 +5272,667 @@
   "lf_old_roots": [
    {
     "op": "generate",
-    "file": "a1_lf_old_roots_s44",
-    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime scene in an ancient forest where gigantic smooth white roots, each as thick as a house, rise out of the earth and lie across the forest floor like the fallen pillars of a temple, all running the same way into the distance, where far away on the horizon the grey shape of a huge dead tree stands against the pale sky. Dark tree trunks and ferns grow between the roots. The people are tiny next to the roots. In the foreground a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands with one hand laid flat on the side of a root, listening, and a small white cat with gold eyes and a thin red cord collar sits on the root beside his hand. Exactly one man and one small white cat.",
-    "seed": 44,
+    "file": "b5_lf_old_roots_bg_s22",
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. A daytime scene in an ancient forest where gigantic smooth white roots rise out of the earth and lie across the forest floor like the fallen pillars of a temple, all running the same way into the distance, each root so thick that it fills a third of the height of the picture. Far away on the horizon the grey shape of a huge dead tree stands against the pale sky. Dark tree trunks and ferns grow between the roots. In the lower part of the picture the bare forest floor of dark earth and moss runs along the side of the nearest root, empty.",
+    "seed": 22,
     "width": 1280,
-    "height": 800
+    "height": 800,
+    "why": "the giant drawn alone, filling the frame, with no people (B1); one background for all three forms (F1)"
+   },
+   {
+    "op": "local",
+    "file": "b5l_lf_old_roots_cat",
+    "source": "b5_lf_old_roots_bg_s22",
+    "note": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people's stand-ins, small beside the giant (seen from behind or far off). python3 -I tools/art/patch.py SRC SPEC OUT --dir DIR with SPEC = this step's spec (flat stand-in shapes for the people; DIR is not read). Its OUT is copied to ComfyUI's input as boneash/<file>.png for the next step.",
+    "spec": {
+     "figures": [
+      {
+       "ellipse": [
+        634.5,
+        560,
+        655.5,
+        582.75
+       ],
+       "fill": 215,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         627.5,
+         581.0
+        ],
+        [
+         662.5,
+         581.0
+        ],
+        [
+         671.25,
+         666.75
+        ],
+        [
+         618.75,
+         666.75
+        ]
+       ],
+       "fill": 248,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         631,
+         666
+        ],
+        [
+         642,
+         666
+        ],
+        [
+         642,
+         700
+        ],
+        [
+         631,
+         700
+        ]
+       ],
+       "fill": 25,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         647,
+         666
+        ],
+        [
+         659,
+         666
+        ],
+        [
+         659,
+         700
+        ],
+        [
+         647,
+         700
+        ]
+       ],
+       "fill": 25,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         618,
+         600
+        ],
+        [
+         600,
+         612
+        ],
+        [
+         604,
+         620
+        ],
+        [
+         622,
+         610
+        ]
+       ],
+       "fill": 248,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        577,
+        592.4,
+        599,
+        610
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        580.3,
+        582.5,
+        595.7,
+        595.7
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 2
+      }
+     ]
+    }
+   },
+   {
+    "op": "detail_inpaint",
+    "file": "b5_lf_old_roots_cat_s2",
+    "source": "b5l_lf_old_roots_cat",
+    "image": "boneash/b5l_lf_old_roots_cat.png (input)",
+    "crop": [
+     548,
+     531,
+     152,
+     198
+    ],
+    "scale": 2,
+    "mask": [
+     "b5m_lf_old_roots_cat_big",
+     "b5m_lf_old_roots_cat_small"
+    ],
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. A small man seen from the side, a man with slightly shaggy tousled pale blond hair and a short pale blond beard, a long white lab coat, black trousers, stands at the foot of a gigantic white root with one hand laid flat on its side, listening, and a small white cat with a thin red cord collar sits on the root beside his hand. Dark earth and moss at the foot of gigantic white roots.",
+    "seed": 2,
+    "denoise": 0.8,
+    "why": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people painted from their stand-ins at 0.8; my pick from the sheet"
    }
   ],
   "lf_old_roots_tiger": [
    {
     "op": "generate",
-    "file": "a1t_lf_old_roots_s22",
-    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime scene in an ancient forest where gigantic smooth white roots, each as thick as a house, rise out of the earth and lie across the forest floor like the fallen pillars of a temple, all running the same way into the distance, where far away on the horizon the grey shape of a huge dead tree stands against the pale sky. Dark tree trunks and ferns grow between the roots. The people are tiny next to the roots. In the foreground a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands with one hand laid flat on the side of a root, listening, and a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck stands beside him, looking along the roots. Exactly one man and one great white cat.",
+    "file": "b5_lf_old_roots_bg_s22",
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. A daytime scene in an ancient forest where gigantic smooth white roots rise out of the earth and lie across the forest floor like the fallen pillars of a temple, all running the same way into the distance, each root so thick that it fills a third of the height of the picture. Far away on the horizon the grey shape of a huge dead tree stands against the pale sky. Dark tree trunks and ferns grow between the roots. In the lower part of the picture the bare forest floor of dark earth and moss runs along the side of the nearest root, empty.",
     "seed": 22,
     "width": 1280,
-    "height": 800
+    "height": 800,
+    "why": "the giant drawn alone, filling the frame, with no people (B1); one background for all three forms (F1)"
+   },
+   {
+    "op": "local",
+    "file": "b5l_lf_old_roots_tiger",
+    "source": "b5_lf_old_roots_bg_s22",
+    "note": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people's stand-ins, small beside the giant (seen from behind or far off). python3 -I tools/art/patch.py SRC SPEC OUT --dir DIR with SPEC = this step's spec (flat stand-in shapes for the people; DIR is not read). Its OUT is copied to ComfyUI's input as boneash/<file>.png for the next step.",
+    "spec": {
+     "figures": [
+      {
+       "ellipse": [
+        634.5,
+        560,
+        655.5,
+        582.75
+       ],
+       "fill": 215,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         627.5,
+         581.0
+        ],
+        [
+         662.5,
+         581.0
+        ],
+        [
+         671.25,
+         666.75
+        ],
+        [
+         618.75,
+         666.75
+        ]
+       ],
+       "fill": 248,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         631,
+         666
+        ],
+        [
+         642,
+         666
+        ],
+        [
+         642,
+         700
+        ],
+        [
+         631,
+         700
+        ]
+       ],
+       "fill": 25,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         647,
+         666
+        ],
+        [
+         659,
+         666
+        ],
+        [
+         659,
+         700
+        ],
+        [
+         647,
+         700
+        ]
+       ],
+       "fill": 25,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         618,
+         600
+        ],
+        [
+         600,
+         612
+        ],
+        [
+         604,
+         620
+        ],
+        [
+         622,
+         610
+        ]
+       ],
+       "fill": 248,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        672,
+        655.5,
+        768.76,
+        702
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        754.6,
+        640,
+        790,
+        677.2
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         695,
+         661
+        ],
+        [
+         698,
+         661
+        ],
+        [
+         698,
+         686
+        ],
+        [
+         695,
+         686
+        ]
+       ],
+       "fill": 60,
+       "outline": 60,
+       "width": 0
+      },
+      {
+       "poly": [
+        [
+         713,
+         661
+        ],
+        [
+         716,
+         661
+        ],
+        [
+         716,
+         686
+        ],
+        [
+         713,
+         686
+        ]
+       ],
+       "fill": 60,
+       "outline": 60,
+       "width": 0
+      },
+      {
+       "poly": [
+        [
+         731,
+         661
+        ],
+        [
+         734,
+         661
+        ],
+        [
+         734,
+         686
+        ],
+        [
+         731,
+         686
+        ]
+       ],
+       "fill": 60,
+       "outline": 60,
+       "width": 0
+      }
+     ]
+    }
+   },
+   {
+    "op": "detail_inpaint",
+    "file": "b5_lf_old_roots_tiger_s2",
+    "source": "b5l_lf_old_roots_tiger",
+    "image": "boneash/b5l_lf_old_roots_tiger.png (input)",
+    "crop": [
+     572,
+     531,
+     247,
+     200
+    ],
+    "scale": 2,
+    "mask": [
+     "b5m_lf_old_roots_tiger_big",
+     "b5m_lf_old_roots_tiger_small"
+    ],
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. A small man seen from the side, a man with slightly shaggy tousled pale blond hair and a short pale blond beard, a long white lab coat, black trousers, stands at the foot of a gigantic white root with one hand laid flat on its side, listening, and one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes and a thin red cord around her neck stands beside him. Dark earth and moss at the foot of gigantic white roots.",
+    "seed": 2,
+    "denoise": 0.8,
+    "why": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people painted from their stand-ins at 0.8; my pick from the sheet"
    }
   ],
   "lf_old_roots_human": [
    {
     "op": "generate",
-    "file": "a1h_lf_old_roots_s22",
-    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime scene in an ancient forest where gigantic smooth white roots, each as thick as a house, rise out of the earth and lie across the forest floor like the fallen pillars of a temple, all running the same way into the distance, where far away on the horizon the grey shape of a huge dead tree stands against the pale sky. Dark tree trunks and ferns grow between the roots. The people are tiny next to the roots. In the foreground a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands with one hand laid flat on the side of a root, listening, and a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles stands beside him with one hand on the root too, she is a head shorter than him. Exactly one man and one woman.",
+    "file": "b5_lf_old_roots_bg_s22",
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. A daytime scene in an ancient forest where gigantic smooth white roots rise out of the earth and lie across the forest floor like the fallen pillars of a temple, all running the same way into the distance, each root so thick that it fills a third of the height of the picture. Far away on the horizon the grey shape of a huge dead tree stands against the pale sky. Dark tree trunks and ferns grow between the roots. In the lower part of the picture the bare forest floor of dark earth and moss runs along the side of the nearest root, empty.",
     "seed": 22,
     "width": 1280,
-    "height": 800
+    "height": 800,
+    "why": "the giant drawn alone, filling the frame, with no people (B1); one background for all three forms (F1)"
+   },
+   {
+    "op": "local",
+    "file": "b5l_lf_old_roots_human",
+    "source": "b5_lf_old_roots_bg_s22",
+    "note": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people's stand-ins, small beside the giant (seen from behind or far off). python3 -I tools/art/patch.py SRC SPEC OUT --dir DIR with SPEC = this step's spec (flat stand-in shapes for the people; DIR is not read). Its OUT is copied to ComfyUI's input as boneash/<file>.png for the next step.",
+    "spec": {
+     "figures": [
+      {
+       "ellipse": [
+        634.5,
+        560,
+        655.5,
+        582.75
+       ],
+       "fill": 215,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         627.5,
+         581.0
+        ],
+        [
+         662.5,
+         581.0
+        ],
+        [
+         671.25,
+         666.75
+        ],
+        [
+         618.75,
+         666.75
+        ]
+       ],
+       "fill": 248,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         631,
+         666
+        ],
+        [
+         642,
+         666
+        ],
+        [
+         642,
+         700
+        ],
+        [
+         631,
+         700
+        ]
+       ],
+       "fill": 25,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         647,
+         666
+        ],
+        [
+         659,
+         666
+        ],
+        [
+         659,
+         700
+        ],
+        [
+         647,
+         700
+        ]
+       ],
+       "fill": 25,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         618,
+         600
+        ],
+        [
+         600,
+         612
+        ],
+        [
+         604,
+         620
+        ],
+        [
+         622,
+         610
+        ]
+       ],
+       "fill": 248,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         695,
+         600
+        ],
+        [
+         715,
+         600
+        ],
+        [
+         723,
+         700
+        ],
+        [
+         687,
+         700
+        ]
+       ],
+       "fill": 20,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         693,
+         586
+        ],
+        [
+         717,
+         586
+        ],
+        [
+         720,
+         645
+        ],
+        [
+         690,
+         645
+        ]
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        694,
+        578,
+        716,
+        600
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         695,
+         582
+        ],
+        [
+         699,
+         570
+        ],
+        [
+         703,
+         581
+        ]
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         707,
+         581
+        ],
+        [
+         711,
+         570
+        ],
+        [
+         715,
+         582
+        ]
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         719,
+         651
+        ],
+        [
+         724,
+         651
+        ],
+        [
+         733,
+         696
+        ],
+        [
+         728,
+         696
+        ]
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 1
+      }
+     ]
+    }
+   },
+   {
+    "op": "detail_inpaint",
+    "file": "b5_lf_old_roots_human_s3",
+    "source": "b5l_lf_old_roots_human",
+    "image": "boneash/b5l_lf_old_roots_human.png (input)",
+    "crop": [
+     572,
+     531,
+     189,
+     198
+    ],
+    "scale": 2,
+    "mask": [
+     "b5m_lf_old_roots_human_big",
+     "b5m_lf_old_roots_human_small"
+    ],
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. A small man seen from the side, a man with slightly shaggy tousled pale blond hair and a short pale blond beard, a long white lab coat, black trousers, stands at the foot of a gigantic white root with one hand laid flat on its side, listening, and beside him stands a slender young woman with very long straight snow-white hair, pointed white cat ears, a long black high-collared qipao with red piping, her long snow-white cat tail behind her, a head shorter than him, one hand on the root too. Dark earth and moss at the foot of gigantic white roots.",
+    "seed": 3,
+    "denoise": 0.8,
+    "why": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people painted from their stand-ins at 0.8; my pick from the sheet"
    }
   ],
   "root_camp": [
@@ -4117,21 +5968,560 @@
   "ashen_camp": [
    {
     "op": "generate",
-    "file": "a1_ashen_camp_s44",
-    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A night scene in grey hills covered in ash, in the lee of a black rock ridge, under a sky full of stars; far off on the horizon a colossal dead tree blots out a third of the stars. A small campfire burns low with pale flames. Three adults sit around the fire, two women and one man, each clearly separate: on the left a tall grown village herbalist woman of twenty-six, an adult with a mature face and a slender adult figure, almost as tall as the man, with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, in the middle a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers sitting cross-legged by the fire, and on the right a tall rangy wild grown woman in her twenties, an adult as tall as the man with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, and a small white cat with gold eyes and a thin red cord collar sits by the fire beside him. Behind them only the black ridge and the stars.",
-    "seed": 44,
+    "file": "b5_ashen_camp_bg_s22",
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. A night scene in grey hills covered in ash, in the lee of a black rock ridge, under a sky full of stars. Far off beyond the hills a colossal dead tree rises from the horizon to the top of the picture, so huge that its black silhouette blots out a third of the stars, its broken limbs spread against the night sky. In the lower part of the picture, on flat grey ash in the shelter of the ridge, a small campfire burns low with pale flames, with empty flat ground of grey ash all around it.",
+    "seed": 22,
     "width": 1280,
-    "height": 800
+    "height": 800,
+    "why": "the giant drawn alone, filling the frame, with no people (B1); one background for all three forms (F1)"
+   },
+   {
+    "op": "local",
+    "file": "b5l_ashen_camp_cat",
+    "source": "b5_ashen_camp_bg_s22",
+    "note": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people's stand-ins, small beside the giant (seen from behind or far off). python3 -I tools/art/patch.py SRC SPEC OUT --dir DIR with SPEC = this step's spec (flat stand-in shapes for the people; DIR is not read). Its OUT is copied to ComfyUI's input as boneash/<file>.png for the next step.",
+    "spec": {
+     "figures": [
+      {
+       "ellipse": [
+        467.7,
+        702.7,
+        532.3,
+        735
+       ],
+       "fill": 120,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         484.8,
+         659.0
+        ],
+        [
+         515.2,
+         659.0
+        ],
+        [
+         520.9,
+         711.25
+        ],
+        [
+         479.1,
+         711.25
+        ]
+       ],
+       "fill": 120,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        489.55,
+        640.0,
+        510.45,
+        660.9
+       ],
+       "fill": 15,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        701.0,
+        701.0,
+        769.0,
+        735
+       ],
+       "fill": 248,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         719.0,
+         655.0
+        ],
+        [
+         751.0,
+         655.0
+        ],
+        [
+         757.0,
+         710.0
+        ],
+        [
+         713.0,
+         710.0
+        ]
+       ],
+       "fill": 248,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        724.0,
+        635.0,
+        746.0,
+        657.0
+       ],
+       "fill": 215,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        847.7,
+        702.7,
+        912.3,
+        735
+       ],
+       "fill": 210,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         864.8,
+         659.0
+        ],
+        [
+         895.2,
+         659.0
+        ],
+        [
+         900.9,
+         711.25
+        ],
+        [
+         859.1,
+         711.25
+        ]
+       ],
+       "fill": 210,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        869.55,
+        640.0,
+        890.45,
+        660.9
+       ],
+       "fill": 15,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         869.55,
+         647.6
+        ],
+        [
+         890.45,
+         647.6
+        ],
+        [
+         892.35,
+         687.5
+        ],
+        [
+         867.65,
+         687.5
+        ]
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         912,
+         600
+        ],
+        [
+         916,
+         600
+        ],
+        [
+         916,
+         736
+        ],
+        [
+         912,
+         736
+        ]
+       ],
+       "fill": 70,
+       "outline": 20,
+       "width": 1
+      },
+      {
+       "ellipse": [
+        777,
+        715.2,
+        803,
+        736
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        780.9,
+        703.5,
+        799.1,
+        719.1
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 2
+      }
+     ]
+    }
+   },
+   {
+    "op": "detail_inpaint",
+    "file": "b5_ashen_camp_cat_s3",
+    "source": "b5l_ashen_camp_cat",
+    "image": "boneash/b5l_ashen_camp_cat.png (input)",
+    "crop": [
+     439,
+     573,
+     505,
+     192
+    ],
+    "scale": 2,
+    "mask": [
+     "b5m_ashen_camp_cat_big",
+     "b5m_ashen_camp_cat_small"
+    ],
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. Night. Small figures sit on the grey ash around a small campfire, each clearly separate: on the left of the fire a grown woman with long black hair in a loose bun pinned with one long slender ivory hairpin, a patched grey jacket with a red sash, long dark trousers, sitting; on the right of the fire a man with slightly shaggy tousled pale blond hair and a short pale blond beard, a long white lab coat, black trousers, sitting cross-legged, with a small white cat with a thin red cord collar sitting beside him; and further right a tall rangy wild young woman with very long black hair with a few twigs caught in it, a long patched hunter's jacket of pale hide with a thick spotted fur collar, leather trousers, barefoot, a primitive spear with a jagged white bone point upright beside her, sitting. Flat grey ash around them, lit by the fire.",
+    "seed": 3,
+    "denoise": 0.8,
+    "why": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people painted from their stand-ins at 0.8; my pick from the sheet"
    }
   ],
   "ashen_camp_tiger": [
    {
     "op": "generate",
-    "file": "a1t_ashen_camp_s44",
-    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A night scene in grey hills covered in ash, in the lee of a black rock ridge, under a sky full of stars; far off on the horizon a colossal dead tree blots out a third of the stars. A small campfire burns low with pale flames. Three adults sit around the fire, two women and one man, each clearly separate: on the left a tall grown village herbalist woman of twenty-six, an adult with a mature face and a slender adult figure, almost as tall as the man, with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, in the middle a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers sitting cross-legged by the fire, and on the right a tall rangy wild grown woman in her twenties, an adult as tall as the man with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, and a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck lies beside the fire beside him. Behind them only the black ridge and the stars.",
-    "seed": 44,
+    "file": "b5_ashen_camp_bg_s22",
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. A night scene in grey hills covered in ash, in the lee of a black rock ridge, under a sky full of stars. Far off beyond the hills a colossal dead tree rises from the horizon to the top of the picture, so huge that its black silhouette blots out a third of the stars, its broken limbs spread against the night sky. In the lower part of the picture, on flat grey ash in the shelter of the ridge, a small campfire burns low with pale flames, with empty flat ground of grey ash all around it.",
+    "seed": 22,
     "width": 1280,
-    "height": 800
+    "height": 800,
+    "why": "the giant drawn alone, filling the frame, with no people (B1); one background for all three forms (F1)"
+   },
+   {
+    "op": "local",
+    "file": "b5l_ashen_camp_tiger",
+    "source": "b5_ashen_camp_bg_s22",
+    "note": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people's stand-ins, small beside the giant (seen from behind or far off). python3 -I tools/art/patch.py SRC SPEC OUT --dir DIR with SPEC = this step's spec (flat stand-in shapes for the people; DIR is not read). Its OUT is copied to ComfyUI's input as boneash/<file>.png for the next step.",
+    "spec": {
+     "figures": [
+      {
+       "ellipse": [
+        467.7,
+        702.7,
+        532.3,
+        735
+       ],
+       "fill": 120,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         484.8,
+         659.0
+        ],
+        [
+         515.2,
+         659.0
+        ],
+        [
+         520.9,
+         711.25
+        ],
+        [
+         479.1,
+         711.25
+        ]
+       ],
+       "fill": 120,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        489.55,
+        640.0,
+        510.45,
+        660.9
+       ],
+       "fill": 15,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        701.0,
+        701.0,
+        769.0,
+        735
+       ],
+       "fill": 248,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         719.0,
+         655.0
+        ],
+        [
+         751.0,
+         655.0
+        ],
+        [
+         757.0,
+         710.0
+        ],
+        [
+         713.0,
+         710.0
+        ]
+       ],
+       "fill": 248,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        724.0,
+        635.0,
+        746.0,
+        657.0
+       ],
+       "fill": 215,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        847.7,
+        702.7,
+        912.3,
+        735
+       ],
+       "fill": 210,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         864.8,
+         659.0
+        ],
+        [
+         895.2,
+         659.0
+        ],
+        [
+         900.9,
+         711.25
+        ],
+        [
+         859.1,
+         711.25
+        ]
+       ],
+       "fill": 210,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        869.55,
+        640.0,
+        890.45,
+        660.9
+       ],
+       "fill": 15,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         869.55,
+         647.6
+        ],
+        [
+         890.45,
+         647.6
+        ],
+        [
+         892.35,
+         687.5
+        ],
+        [
+         867.65,
+         687.5
+        ]
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         912,
+         600
+        ],
+        [
+         916,
+         600
+        ],
+        [
+         916,
+         736
+        ],
+        [
+         912,
+         736
+        ]
+       ],
+       "fill": 70,
+       "outline": 20,
+       "width": 1
+      },
+      {
+       "ellipse": [
+        770,
+        702.0,
+        843.8,
+        738
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        833.0,
+        690,
+        860,
+        718.8
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         788,
+         706
+        ],
+        [
+         791,
+         706
+        ],
+        [
+         791,
+         726
+        ],
+        [
+         788,
+         726
+        ]
+       ],
+       "fill": 60,
+       "outline": 60,
+       "width": 0
+      },
+      {
+       "poly": [
+        [
+         801,
+         706
+        ],
+        [
+         804,
+         706
+        ],
+        [
+         804,
+         726
+        ],
+        [
+         801,
+         726
+        ]
+       ],
+       "fill": 60,
+       "outline": 60,
+       "width": 0
+      },
+      {
+       "poly": [
+        [
+         815,
+         706
+        ],
+        [
+         818,
+         706
+        ],
+        [
+         818,
+         726
+        ],
+        [
+         815,
+         726
+        ]
+       ],
+       "fill": 60,
+       "outline": 60,
+       "width": 0
+      }
+     ]
+    }
+   },
+   {
+    "op": "detail_inpaint",
+    "file": "b5_ashen_camp_tiger_s3",
+    "source": "b5l_ashen_camp_tiger",
+    "image": "boneash/b5l_ashen_camp_tiger.png (input)",
+    "crop": [
+     439,
+     573,
+     505,
+     194
+    ],
+    "scale": 2,
+    "mask": [
+     "b5m_ashen_camp_tiger_big",
+     "b5m_ashen_camp_tiger_small"
+    ],
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. Night. Small figures sit on the grey ash around a small campfire, each clearly separate: on the left of the fire a grown woman with long black hair in a loose bun pinned with one long slender ivory hairpin, a patched grey jacket with a red sash, long dark trousers, sitting; on the right of the fire a man with slightly shaggy tousled pale blond hair and a short pale blond beard, a long white lab coat, black trousers, sitting cross-legged, with one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes and a thin red cord around her neck lying beside him; and further right a tall rangy wild young woman with very long black hair with a few twigs caught in it, a long patched hunter's jacket of pale hide with a thick spotted fur collar, leather trousers, barefoot, a primitive spear with a jagged white bone point upright beside her, sitting. Flat grey ash around them, lit by the fire.",
+    "seed": 3,
+    "denoise": 0.8,
+    "why": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people painted from their stand-ins at 0.8; my pick from the sheet"
    }
   ],
   "ashen_camp_human": [
@@ -4207,21 +6597,745 @@
   "ashen_hills_tiger": [
    {
     "op": "generate",
-    "file": "a1t_ashen_hills_s44",
-    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide scene of burnt black hills: grey ash, the stumps of trees standing like broken teeth, the sky a dark bruised grey. Far away beyond the hills, on the horizon, rises a colossal dead tree as big as a mountain, filling half the sky, its bark grey as old bone, its great limbs broken off, a vast black wound in its side. In the foreground three travellers walk through the ash: a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, a village herbalist woman in her mid-twenties with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, and a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, with one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck walking beside him.",
-    "seed": 44,
+    "file": "b5_ashen_hills_bg_s22",
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. A wide scene of burnt black hills under a dark bruised grey sky: grey ash a hand deep, the stumps of burnt trees standing like broken teeth, glassy runs of melted stone in the gullies. Close beyond the last black ridge stands a colossal dead tree, so huge that its trunk fills the whole upper half of the picture from edge to edge and its top is cut off by the top of the picture, its bark grey as old bone, the stumps of its great broken limbs, a vast black wound in its side. In the lower part of the picture an empty path of grey ash winds between the burnt stumps toward it.",
+    "seed": 22,
     "width": 1280,
-    "height": 800
+    "height": 800,
+    "why": "the giant drawn alone, filling the frame, with no people (B1); one background for all three forms (F1)"
+   },
+   {
+    "op": "local",
+    "file": "b5l_ashen_hills_tiger",
+    "source": "b5_ashen_hills_bg_s22",
+    "note": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people's stand-ins, small beside the giant (seen from behind or far off). python3 -I tools/art/patch.py SRC SPEC OUT --dir DIR with SPEC = this step's spec (flat stand-in shapes for the people; DIR is not read). Its OUT is copied to ComfyUI's input as boneash/<file>.png for the next step.",
+    "spec": {
+     "figures": [
+      {
+       "poly": [
+        [
+         600,
+         505
+        ],
+        [
+         604,
+         505
+        ],
+        [
+         604,
+         652
+        ],
+        [
+         600,
+         652
+        ]
+       ],
+       "fill": 70,
+       "outline": 20,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         602,
+         490
+        ],
+        [
+         606,
+         507
+        ],
+        [
+         598,
+         507
+        ]
+       ],
+       "fill": 240,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         612,
+         545
+        ],
+        [
+         648,
+         545
+        ],
+        [
+         658,
+         625
+        ],
+        [
+         602,
+         625
+        ]
+       ],
+       "fill": 210,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        620,
+        516,
+        640,
+        540
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         618,
+         528
+        ],
+        [
+         642,
+         528
+        ],
+        [
+         646,
+         582
+        ],
+        [
+         614,
+         582
+        ]
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         616,
+         625
+        ],
+        [
+         626,
+         625
+        ],
+        [
+         626,
+         650
+        ],
+        [
+         616,
+         650
+        ]
+       ],
+       "fill": 50,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         632,
+         625
+        ],
+        [
+         642,
+         625
+        ],
+        [
+         642,
+         650
+        ],
+        [
+         632,
+         650
+        ]
+       ],
+       "fill": 50,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        697,
+        518,
+        713,
+        534
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        695,
+        528,
+        715,
+        552
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         688,
+         550
+        ],
+        [
+         722,
+         550
+        ],
+        [
+         728,
+         612
+        ],
+        [
+         682,
+         612
+        ]
+       ],
+       "fill": 120,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         685,
+         584
+        ],
+        [
+         725,
+         584
+        ],
+        [
+         725,
+         594
+        ],
+        [
+         685,
+         594
+        ]
+       ],
+       "fill": [
+        160,
+        44,
+        44
+       ],
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         690,
+         612
+        ],
+        [
+         702,
+         612
+        ],
+        [
+         702,
+         650
+        ],
+        [
+         690,
+         650
+        ]
+       ],
+       "fill": 40,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         708,
+         612
+        ],
+        [
+         720,
+         612
+        ],
+        [
+         720,
+         650
+        ],
+        [
+         708,
+         650
+        ]
+       ],
+       "fill": 40,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        774,
+        516,
+        796,
+        540
+       ],
+       "fill": 215,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         766,
+         538
+        ],
+        [
+         804,
+         538
+        ],
+        [
+         814,
+         626
+        ],
+        [
+         756,
+         626
+        ]
+       ],
+       "fill": 245,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         768,
+         626
+        ],
+        [
+         780,
+         626
+        ],
+        [
+         780,
+         652
+        ],
+        [
+         768,
+         652
+        ]
+       ],
+       "fill": 25,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         788,
+         626
+        ],
+        [
+         800,
+         626
+        ],
+        [
+         800,
+         652
+        ],
+        [
+         788,
+         652
+        ]
+       ],
+       "fill": 25,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        816,
+        610.0,
+        881.6,
+        652
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        872.0,
+        596,
+        896,
+        629.6
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         832,
+         615
+        ],
+        [
+         835,
+         615
+        ],
+        [
+         835,
+         638
+        ],
+        [
+         832,
+         638
+        ]
+       ],
+       "fill": 60,
+       "outline": 60,
+       "width": 0
+      },
+      {
+       "poly": [
+        [
+         844,
+         615
+        ],
+        [
+         847,
+         615
+        ],
+        [
+         847,
+         638
+        ],
+        [
+         844,
+         638
+        ]
+       ],
+       "fill": 60,
+       "outline": 60,
+       "width": 0
+      },
+      {
+       "poly": [
+        [
+         856,
+         615
+        ],
+        [
+         859,
+         615
+        ],
+        [
+         859,
+         638
+        ],
+        [
+         856,
+         638
+        ]
+       ],
+       "fill": 60,
+       "outline": 60,
+       "width": 0
+      }
+     ]
+    }
+   },
+   {
+    "op": "detail_inpaint",
+    "file": "b5_ashen_hills_tiger_s3",
+    "source": "b5l_ashen_hills_tiger",
+    "image": "boneash/b5l_ashen_hills_tiger.png (input)",
+    "crop": [
+     570,
+     463,
+     355,
+     218
+    ],
+    "scale": 2,
+    "mask": [
+     "b5m_ashen_hills_tiger_big",
+     "b5m_ashen_hills_tiger_small"
+    ],
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. Three small travellers seen from behind walk away from the viewer along a path of grey ash, each clearly separate: on the left a tall rangy wild young woman seen from behind, very long black hair with a few twigs caught in it hanging down her back, a long patched hunter's jacket of pale hide with a thick spotted fur collar, leather trousers, barefoot, holding upright a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord; in the middle a grown woman seen from behind, long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, a patched grey jacket with a red sash, long dark trousers and plain dark cloth shoes; on the right a man seen from behind, slightly shaggy tousled pale blond hair, a long white lab coat, black trousers and black shoes, and beside him walks one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes and a thin red cord around her neck. Grey ash and black burnt ground around them.",
+    "seed": 3,
+    "denoise": 0.8,
+    "why": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people painted from their stand-ins at 0.8; my pick from the sheet"
    }
   ],
   "rot_ape_tiger": [
    {
     "op": "generate",
-    "file": "a1t_rot_ape2_s88",
-    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide view over a black rock in the foreground. Crouching low behind the rock in the foreground, seen from behind, are a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord on the left, a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers in the middle, and one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck on his right, all three looking away from us toward the pass. Far ahead, a hundred paces away, in the notch of a pass in a black ridge, sits the rot-ape: a gigantic ape as big as a house, its whole body covered in shaggy living moss, with fungus and little ferns growing out of its shoulders and back, its eyes milky and blind. The ground around it is littered with white bones. Beyond the ridge a colossal grey dead tree fills the sky.",
-    "seed": 88,
+    "file": "b5_rot_ape_bg_s44",
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. A pass in a black rock ridge, and beyond the ridge a colossal bare grey dead tree without a single leaf that fills the whole sky, its broken limbs bare. In the notch of the pass, in the middle of the picture, sits the rot-ape: a gigantic ape as big as a hut, its whole body covered in shaggy living moss, with fungus and little ferns growing out of its shoulders and back, its eyes milky and blind. The ground of the pass around it is littered with white bones and a few rags of crimson cloth. In the foreground at the bottom of the picture is a low black rock with an empty strip of black ground in front of it.",
+    "seed": 44,
     "width": 1280,
-    "height": 800
+    "height": 800,
+    "why": "the giant drawn alone, filling the frame, with no people (B1); one background for all three forms (F1)"
+   },
+   {
+    "op": "local",
+    "file": "b5l_rot_ape_tiger",
+    "source": "b5_rot_ape_bg_s44",
+    "note": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people's stand-ins, small beside the giant (seen from behind or far off). python3 -I tools/art/patch.py SRC SPEC OUT --dir DIR with SPEC = this step's spec (flat stand-in shapes for the people; DIR is not read). Its OUT is copied to ComfyUI's input as boneash/<file>.png for the next step.",
+    "spec": {
+     "figures": [
+      {
+       "ellipse": [
+        351.5,
+        723.5,
+        408.5,
+        790
+       ],
+       "fill": 210,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        368.6,
+        696.9,
+        391.4,
+        721.6
+       ],
+       "fill": 15,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         368.6,
+         704.5
+        ],
+        [
+         391.4,
+         704.5
+        ],
+        [
+         393.3,
+         752.0
+        ],
+        [
+         366.7,
+         752.0
+        ]
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         352,
+         650
+        ],
+        [
+         356,
+         650
+        ],
+        [
+         356,
+         792
+        ],
+        [
+         352,
+         792
+        ]
+       ],
+       "fill": 70,
+       "outline": 20,
+       "width": 1
+      },
+      {
+       "ellipse": [
+        473.0,
+        727.0,
+        527.0,
+        790
+       ],
+       "fill": 120,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        489.2,
+        701.8,
+        510.8,
+        725.2
+       ],
+       "fill": 15,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         489.2,
+         709.0
+        ],
+        [
+         510.8,
+         709.0
+        ],
+        [
+         512.6,
+         754.0
+        ],
+        [
+         487.4,
+         754.0
+        ]
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        611.5,
+        723.5,
+        668.5,
+        790
+       ],
+       "fill": 248,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        628.6,
+        696.9,
+        651.4,
+        721.6
+       ],
+       "fill": 215,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        700,
+        750.0,
+        806.6,
+        795
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        791.0,
+        735,
+        830,
+        771.0
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         726,
+         756
+        ],
+        [
+         729,
+         756
+        ],
+        [
+         729,
+         780
+        ],
+        [
+         726,
+         780
+        ]
+       ],
+       "fill": 60,
+       "outline": 60,
+       "width": 0
+      },
+      {
+       "poly": [
+        [
+         745,
+         756
+        ],
+        [
+         748,
+         756
+        ],
+        [
+         748,
+         780
+        ],
+        [
+         745,
+         780
+        ]
+       ],
+       "fill": 60,
+       "outline": 60,
+       "width": 0
+      },
+      {
+       "poly": [
+        [
+         765,
+         756
+        ],
+        [
+         768,
+         756
+        ],
+        [
+         768,
+         780
+        ],
+        [
+         765,
+         780
+        ]
+       ],
+       "fill": 60,
+       "outline": 60,
+       "width": 0
+      }
+     ]
+    }
+   },
+   {
+    "op": "detail_inpaint",
+    "file": "b5_rot_ape_tiger_s3",
+    "source": "b5l_rot_ape_tiger",
+    "image": "boneash/b5l_rot_ape_tiger.png (input)",
+    "crop": [
+     323,
+     623,
+     536,
+     177
+    ],
+    "scale": 2,
+    "mask": [
+     "b5m_rot_ape_tiger_big",
+     "b5m_rot_ape_tiger_small"
+    ],
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. Small figures crouch side by side, each clearly separate: on the left a tall rangy wild young woman with very long black hair with a few twigs caught in it, a long patched hunter's jacket of pale hide with a thick spotted fur collar, leather trousers, barefoot, a primitive spear with a jagged white bone point upright beside her; then a grown woman with long black hair in a loose bun pinned with one long slender ivory hairpin, a patched grey jacket with a red sash, long dark trousers; then a man with slightly shaggy tousled pale blond hair and a short pale blond beard, a long white lab coat, black trousers; and one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes and a thin red cord around her neck crouching low beside him. Seen from behind, crouching low on black rocky ground, looking away from the viewer up toward a gigantic ape in the pass. Black rock and ground around them.",
+    "seed": 3,
+    "denoise": 0.8,
+    "why": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people painted from their stand-ins at 0.8; my pick from the sheet"
    }
   ],
   "night_watch_tiger": [
@@ -4310,11 +7424,392 @@
   "guardian_tiger": [
    {
     "op": "generate",
-    "file": "a1t_guardian2_s66",
-    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. An interior scene in a round chamber like the inside of a seed, with walls of pale grown wood and no doors. In the far wall is a tall round opening framed by curved white ribs of bone like the ribs of a great animal, and in it a giant guardian is standing up, as big as a house, the people tiny next to it: a huge figure shaped like a gardener, its body of dark grown wood, its joints of white bone, long moss hanging from its arms, and for a head a smooth white seed-pod; in the middle of its chest is a hollow with a faint white glow. In the foreground, small, two people face it, one woman and one man, each clearly separate: on the left a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, and on the right a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, with one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck crouching beside him, ready to spring.",
-    "seed": 66,
+    "file": "b5_guardian_bg_s44",
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. An interior scene in a vast round chamber like the inside of a seed, with walls of pale grown wood and no doors. In the far wall is a tall round opening framed by curved white ribs of bone like the ribs of a great animal, and in it a giant guardian is standing up, so huge that it fills the picture from the floor to the top edge: a figure shaped like a gardener, its body of dark grown wood, its joints of white bone, long moss hanging from its arms, and for a head a smooth white seed-pod with no face; in the middle of its chest is a hollow with a faint white glow. Its great feet stand on the floor of the chamber. The lower quarter of the picture, in front of it, is the bare empty floor of pale grown wood with fine grain lines, empty all the way to the bottom edge.",
+    "seed": 44,
     "width": 1280,
-    "height": 800
+    "height": 800,
+    "why": "the giant drawn alone, filling the frame, with no people (B1); one background for all three forms (F1)"
+   },
+   {
+    "op": "local",
+    "file": "b5l_guardian_tiger",
+    "source": "b5_guardian_bg_s44",
+    "note": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people's stand-ins, small beside the giant (seen from behind or far off). python3 -I tools/art/patch.py SRC SPEC OUT --dir DIR with SPEC = this step's spec (flat stand-in shapes for the people; DIR is not read). Its OUT is copied to ComfyUI's input as boneash/<file>.png for the next step.",
+    "spec": {
+     "figures": [
+      {
+       "poly": [
+        [
+         528,
+         662
+        ],
+        [
+         572,
+         662
+        ],
+        [
+         586,
+         762
+        ],
+        [
+         514,
+         762
+        ]
+       ],
+       "fill": 215,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        522,
+        652,
+        578,
+        672
+       ],
+       "fill": 235,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         538,
+         640
+        ],
+        [
+         562,
+         640
+        ],
+        [
+         566,
+         705
+        ],
+        [
+         534,
+         705
+        ]
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        538,
+        630,
+        562,
+        656
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         532,
+         762
+        ],
+        [
+         546,
+         762
+        ],
+        [
+         546,
+         792
+        ],
+        [
+         532,
+         792
+        ]
+       ],
+       "fill": 55,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         554,
+         762
+        ],
+        [
+         568,
+         762
+        ],
+        [
+         568,
+         792
+        ],
+        [
+         554,
+         792
+        ]
+       ],
+       "fill": 55,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        530,
+        788,
+        548,
+        798
+       ],
+       "fill": 235,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        552,
+        788,
+        570,
+        798
+       ],
+       "fill": 235,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         507,
+         618
+        ],
+        [
+         512,
+         618
+        ],
+        [
+         512,
+         798
+        ],
+        [
+         507,
+         798
+        ]
+       ],
+       "fill": 70,
+       "outline": 20,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         509,
+         596
+        ],
+        [
+         514,
+         620
+        ],
+        [
+         505,
+         620
+        ]
+       ],
+       "fill": 240,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        703,
+        636,
+        727,
+        660
+       ],
+       "fill": 215,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         694,
+         660
+        ],
+        [
+         736,
+         660
+        ],
+        [
+         748,
+         768
+        ],
+        [
+         682,
+         768
+        ]
+       ],
+       "fill": 248,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         698,
+         768
+        ],
+        [
+         712,
+         768
+        ],
+        [
+         712,
+         796
+        ],
+        [
+         698,
+         796
+        ]
+       ],
+       "fill": 25,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         718,
+         768
+        ],
+        [
+         732,
+         768
+        ],
+        [
+         732,
+         796
+        ],
+        [
+         718,
+         796
+        ]
+       ],
+       "fill": 25,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        762,
+        736.5,
+        857.12,
+        798
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        843.2,
+        716,
+        878,
+        765.2
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         785,
+         744
+        ],
+        [
+         788,
+         744
+        ],
+        [
+         788,
+         777
+        ],
+        [
+         785,
+         777
+        ]
+       ],
+       "fill": 60,
+       "outline": 60,
+       "width": 0
+      },
+      {
+       "poly": [
+        [
+         802,
+         744
+        ],
+        [
+         805,
+         744
+        ],
+        [
+         805,
+         777
+        ],
+        [
+         802,
+         777
+        ]
+       ],
+       "fill": 60,
+       "outline": 60,
+       "width": 0
+      },
+      {
+       "poly": [
+        [
+         820,
+         744
+        ],
+        [
+         823,
+         744
+        ],
+        [
+         823,
+         777
+        ],
+        [
+         820,
+         777
+        ]
+       ],
+       "fill": 60,
+       "outline": 60,
+       "width": 0
+      }
+     ]
+    }
+   },
+   {
+    "op": "detail_inpaint",
+    "file": "b5_guardian_tiger_s2",
+    "source": "b5l_guardian_tiger",
+    "image": "boneash/b5l_guardian_tiger.png (input)",
+    "crop": [
+     476,
+     570,
+     431,
+     230
+    ],
+    "scale": 2,
+    "mask": [
+     "b5m_guardian_tiger_big",
+     "b5m_guardian_tiger_small"
+    ],
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. Seen from behind and far below a giant, two small people stand on the pale wooden floor facing away from the viewer, each clearly separate: on the left a tall rangy wild young woman seen from behind, very long black hair with a few twigs caught in it hanging down her back, a long patched hunter's jacket of pale hide with a thick spotted fur collar, leather trousers, barefoot, holding upright a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord; in the middle a man seen from behind, slightly shaggy tousled pale blond hair, a long white lab coat, black trousers and black shoes; and on his right one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes and a thin red cord around her neck, crouching beside him, seen from behind. The floor of pale grown wood with fine grain lines around them.",
+    "seed": 2,
+    "denoise": 0.8,
+    "why": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people painted from their stand-ins at 0.8; my pick from the sheet"
    }
   ],
   "ship_bridge_tiger": [
@@ -4330,45 +7825,458 @@
   "ship_wreck_tiger": [
    {
     "op": "generate",
-    "file": "a1t_ship_wreck_s55",
-    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A dark interior scene in a vast cavern beneath the roots of a giant tree. In it lies an enormous ancient starship grown from living pale wood, as big as a palace, the people tiny next to it: a long sleek hull of smooth flowing organic curves tapering to a long pointed prow, great curved swept-back fins like the wings of a tree seed, its whole surface covered in grown patterns of wood grain like veins, hatches shaped like folded leaves, its front third crushed and split, huge tree roots grown around it and holding it like a hand. In the foreground three adults of about the same height stand side by side looking up at it, two women and one man, each clearly separate: on the left a tall rangy wild grown woman in her twenties, an adult as tall as the man with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, next to her a tall grown village herbalist woman of twenty-six, an adult with a mature face and a slender adult figure, almost as tall as the man, with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, and on the right a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, with one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck standing beside him.",
-    "seed": 55,
+    "file": "b5_ship_wreck_bg_s22",
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. A dark interior scene in a vast cavern beneath the roots of a giant tree. Filling most of the picture lies an enormous ancient starship grown from living pale wood: a long sleek teardrop hull of smooth flowing organic curves tapering to a long pointed prow, ribs curving like the inside of a shell, great curved swept-back fins like the wings of a tree seed, its whole surface covered in grown patterns of wood grain like veins, hatches shaped like folded leaves, its front third crushed and split, huge tree roots grown around it and holding it like a hand. In the lower part of the picture is the bare empty floor of the cavern, dark earth and thin roots.",
+    "seed": 22,
     "width": 1280,
-    "height": 800
+    "height": 800,
+    "why": "the giant drawn alone, filling the frame, with no people (B1); one background for all three forms (F1); the cavern under the roots, as the scene text (T1)"
    },
    {
     "op": "local",
-    "file": "a1t_ship_wreck_eyes",
-    "source": "a1t_ship_wreck_s55",
-    "note": "v0.11.60: Mei Lin's and Ya's red eyes made grey, Ya's red scar kept: python3 -I tools/art/eyes.py SRC SPEC OUT with SPEC = this step's spec (boxes in source pixels). Then palette.py.",
+    "file": "b5l_ship_wreck_tiger",
+    "source": "b5_ship_wreck_bg_s22",
+    "note": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people's stand-ins, small beside the giant (seen from behind or far off). python3 -I tools/art/patch.py SRC SPEC OUT --dir DIR with SPEC = this step's spec (flat stand-in shapes for the people; DIR is not read). Its OUT is copied to ComfyUI's input as boneash/<file>.png for the next step.",
     "spec": {
-     "boxes": [
-      [
-       755,
-       254,
-       764,
-       266
-      ],
-      [
-       784,
-       250,
-       796,
-       263
-      ],
-      [
-       589,
-       304,
-       600,
-       315
-      ],
-      [
-       618,
-       302,
-       630,
-       312
-      ]
+     "figures": [
+      {
+       "poly": [
+        [
+         231,
+         667
+        ],
+        [
+         233,
+         667
+        ],
+        [
+         233,
+         790
+        ],
+        [
+         231,
+         790
+        ]
+       ],
+       "fill": 70,
+       "outline": 20,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         244.875,
+         700.625
+        ],
+        [
+         275.125,
+         700.625
+        ],
+        [
+         283.375,
+         768.0
+        ],
+        [
+         236.625,
+         768.0
+        ]
+       ],
+       "fill": 210,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        251.75,
+        680,
+        268.25,
+        697.875
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         251.75,
+         688.25
+        ],
+        [
+         268.25,
+         688.25
+        ],
+        [
+         271.0,
+         731.5625
+        ],
+        [
+         249.0,
+         731.5625
+        ]
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         249,
+         768
+        ],
+        [
+         257,
+         768
+        ],
+        [
+         257,
+         790
+        ],
+        [
+         249,
+         790
+        ]
+       ],
+       "fill": 50,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         262,
+         768
+        ],
+        [
+         271,
+         768
+        ],
+        [
+         271,
+         790
+        ],
+        [
+         262,
+         790
+        ]
+       ],
+       "fill": 50,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        334.09375,
+        685,
+        345.90625,
+        695.5
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        332.78125,
+        690.25,
+        347.21875,
+        706.0
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         328.1875,
+         706.0
+        ],
+        [
+         351.8125,
+         706.0
+        ],
+        [
+         355.75,
+         750.625
+        ],
+        [
+         324.25,
+         750.625
+        ]
+       ],
+       "fill": 120,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         326,
+         729
+        ],
+        [
+         353,
+         729
+        ],
+        [
+         353,
+         736
+        ],
+        [
+         326,
+         736
+        ]
+       ],
+       "fill": [
+        160,
+        44,
+        44
+       ],
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         329,
+         750
+        ],
+        [
+         338,
+         750
+        ],
+        [
+         338,
+         790
+        ],
+        [
+         329,
+         790
+        ]
+       ],
+       "fill": 40,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         341,
+         750
+        ],
+        [
+         350,
+         750
+        ],
+        [
+         350,
+         790
+        ],
+        [
+         341,
+         790
+        ]
+       ],
+       "fill": 40,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        411.6,
+        678,
+        428.4,
+        696.2
+       ],
+       "fill": 215,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         406.0,
+         694.8
+        ],
+        [
+         434.0,
+         694.8
+        ],
+        [
+         441.0,
+         763.4
+        ],
+        [
+         399.0,
+         763.4
+        ]
+       ],
+       "fill": 248,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         408,
+         763
+        ],
+        [
+         417,
+         763
+        ],
+        [
+         417,
+         790
+        ],
+        [
+         408,
+         790
+        ]
+       ],
+       "fill": 25,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         422,
+         763
+        ],
+        [
+         431,
+         763
+        ],
+        [
+         431,
+         790
+        ],
+        [
+         422,
+         790
+        ]
+       ],
+       "fill": 25,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        455,
+        759.0,
+        528.8,
+        792
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        518.0,
+        748,
+        545,
+        774.4
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         473,
+         763
+        ],
+        [
+         476,
+         763
+        ],
+        [
+         476,
+         781
+        ],
+        [
+         473,
+         781
+        ]
+       ],
+       "fill": 60,
+       "outline": 60,
+       "width": 0
+      },
+      {
+       "poly": [
+        [
+         486,
+         763
+        ],
+        [
+         489,
+         763
+        ],
+        [
+         489,
+         781
+        ],
+        [
+         486,
+         781
+        ]
+       ],
+       "fill": 60,
+       "outline": 60,
+       "width": 0
+      },
+      {
+       "poly": [
+        [
+         500,
+         763
+        ],
+        [
+         503,
+         763
+        ],
+        [
+         503,
+         781
+        ],
+        [
+         500,
+         781
+        ]
+       ],
+       "fill": 60,
+       "outline": 60,
+       "width": 0
+      }
      ]
     }
+   },
+   {
+    "op": "detail_inpaint",
+    "file": "b5_ship_wreck_tiger_s2",
+    "source": "b5l_ship_wreck_tiger",
+    "image": "boneash/b5l_ship_wreck_tiger.png (input)",
+    "crop": [
+     203,
+     640,
+     371,
+     160
+    ],
+    "scale": 2,
+    "mask": [
+     "b5m_ship_wreck_tiger_big",
+     "b5m_ship_wreck_tiger_small"
+    ],
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. Small figures stand side by side, each clearly separate: on the left a tall rangy wild young woman seen from behind, very long black hair with a few twigs caught in it hanging down her back, a long patched hunter's jacket of pale hide with a thick spotted fur collar, leather trousers, barefoot, holding upright a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord; then a grown woman seen from behind, long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, a patched grey jacket with a red sash, long dark trousers and plain dark cloth shoes; then a man seen from behind, slightly shaggy tousled pale blond hair, a long white lab coat, black trousers and black shoes; and one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes and a thin red cord around her neck beside him. Seen from behind, tiny, standing on the dark earth floor of a cavern, looking up at a huge wooden starship. Dark earth and thin roots around them.",
+    "seed": 2,
+    "denoise": 0.8,
+    "why": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people painted from their stand-ins at 0.8; my pick from the sheet"
    }
   ],
   "return_road_tiger": [
@@ -4384,11 +8292,403 @@
   "grove_sprout_tiger": [
    {
     "op": "generate",
-    "file": "a1t_grove_sprout_s22",
-    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. A daytime scene in a lane of old thatched mud-walled huts, the sky empty and pale. In the middle of the picture grows a ring of seven slender white saplings as tall as a man's knee, their pale leaves unfolding, veined like the inside of a wrist, a soft white glow among them. Around them, a few steps back, stand a few grave bent old villagers with short grey hair, grey beards and lined faces, in patched hemp clothes, and on the right a ninety-year-old village elder with one blind milky eye, a bald head with a tiny white topknot and a thin white beard, wearing a plain grey robe, leaning on a walking stick. In front of the saplings lies one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck, watching them. Behind them the huts and the pale sky fill the background.",
+    "file": "b5_grove_sprout_bg_s22",
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. A daytime scene in a lane of old thatched mud-walled huts, the sky empty and pale. In the middle of the picture, on the bare earth of the lane, is a small empty patch of dark freshly turned soil. Around it, a few steps back, stand a few grave bent old villagers with short grey hair, grey beards and lined faces, in patched hemp clothes, looking down at it, and on the right a ninety-year-old village elder with one blind milky eye, a bald head with a tiny white topknot and a thin white beard, wearing a plain grey robe, leaning on a walking stick. Behind them the huts and the pale sky fill the background.",
     "seed": 22,
     "width": 1280,
-    "height": 800
+    "height": 800,
+    "why": "the giant drawn alone, filling the frame, with no people (B1); one background for all three forms (F1)"
+   },
+   {
+    "op": "local",
+    "file": "b5l_grove_sprout",
+    "source": "b5_grove_sprout_bg_s22",
+    "note": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): seven sapling stand-ins on the mound, knee-high. python3 -I tools/art/patch.py SRC SPEC OUT --dir DIR with SPEC = this step's spec (flat stand-in shapes for the people; DIR is not read). Its OUT is copied to ComfyUI's input as boneash/<file>.png for the next step.",
+    "spec": {
+     "figures": [
+      {
+       "poly": [
+        [
+         423,
+         648
+        ],
+        [
+         427,
+         648
+        ],
+        [
+         427,
+         702
+        ],
+        [
+         423,
+         702
+        ]
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "ellipse": [
+        414,
+        636,
+        436,
+        652
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         468,
+         648
+        ],
+        [
+         472,
+         648
+        ],
+        [
+         472,
+         702
+        ],
+        [
+         468,
+         702
+        ]
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "ellipse": [
+        459,
+        636,
+        481,
+        652
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         513,
+         648
+        ],
+        [
+         517,
+         648
+        ],
+        [
+         517,
+         702
+        ],
+        [
+         513,
+         702
+        ]
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "ellipse": [
+        504,
+        636,
+        526,
+        652
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         558,
+         648
+        ],
+        [
+         562,
+         648
+        ],
+        [
+         562,
+         702
+        ],
+        [
+         558,
+         702
+        ]
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "ellipse": [
+        549,
+        636,
+        571,
+        652
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         603,
+         648
+        ],
+        [
+         607,
+         648
+        ],
+        [
+         607,
+         702
+        ],
+        [
+         603,
+         702
+        ]
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "ellipse": [
+        594,
+        636,
+        616,
+        652
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         648,
+         648
+        ],
+        [
+         652,
+         648
+        ],
+        [
+         652,
+         702
+        ],
+        [
+         648,
+         702
+        ]
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "ellipse": [
+        639,
+        636,
+        661,
+        652
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         693,
+         648
+        ],
+        [
+         697,
+         648
+        ],
+        [
+         697,
+         702
+        ],
+        [
+         693,
+         702
+        ]
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "ellipse": [
+        684,
+        636,
+        706,
+        652
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      }
+     ]
+    }
+   },
+   {
+    "op": "detail_inpaint",
+    "file": "b5_grove_sprout_saplings3b_s1",
+    "source": "b5l_grove_sprout",
+    "image": "boneash/b5l_grove_sprout.png (input)",
+    "crop": [
+     380,
+     610,
+     360,
+     120
+    ],
+    "scale": 3,
+    "mask": [
+     "b5m_grove_sprout_saplings3b_big",
+     "b5m_grove_sprout_saplings3b_small"
+    ],
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. A ring of seven slender white saplings, each only as tall as a man's knee, growing from a low mound of dark turned soil, their pale leaves unfolding, a soft white glow among them.",
+    "seed": 1,
+    "denoise": 0.8,
+    "why": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the saplings painted small from their stand-ins (seeds 1-2 at 0.7 and 0.8, s1 at 0.8)"
+   },
+   {
+    "op": "local",
+    "file": "b5l_grove_sprout_tiger",
+    "source": "b5_grove_sprout_saplings3b_s1",
+    "note": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): Yuki's stand-in in front of the saplings. python3 -I tools/art/patch.py SRC SPEC OUT --dir DIR with SPEC = this step's spec (flat stand-in shapes for the people; DIR is not read). Its OUT is copied to ComfyUI's input as boneash/<file>.png for the next step.",
+    "spec": {
+     "figures": [
+      {
+       "ellipse": [
+        486,
+        742.5,
+        622.12,
+        792
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        602.2,
+        726,
+        652,
+        765.6
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         519,
+         749
+        ],
+        [
+         522,
+         749
+        ],
+        [
+         522,
+         775
+        ],
+        [
+         519,
+         775
+        ]
+       ],
+       "fill": 60,
+       "outline": 60,
+       "width": 0
+      },
+      {
+       "poly": [
+        [
+         544,
+         749
+        ],
+        [
+         547,
+         749
+        ],
+        [
+         547,
+         775
+        ],
+        [
+         544,
+         775
+        ]
+       ],
+       "fill": 60,
+       "outline": 60,
+       "width": 0
+      },
+      {
+       "poly": [
+        [
+         569,
+         749
+        ],
+        [
+         572,
+         749
+        ],
+        [
+         572,
+         775
+        ],
+        [
+         569,
+         775
+        ]
+       ],
+       "fill": 60,
+       "outline": 60,
+       "width": 0
+      }
+     ]
+    }
+   },
+   {
+    "op": "detail_inpaint",
+    "file": "b5_grove_sprout_tiger_s2",
+    "source": "b5l_grove_sprout_tiger",
+    "image": "boneash/b5l_grove_sprout_tiger.png (input)",
+    "crop": [
+     459,
+     699,
+     220,
+     101
+    ],
+    "scale": 3,
+    "mask": [
+     "b5m_grove_sprout_tiger_big",
+     "b5m_grove_sprout_tiger_small"
+    ],
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. one single huge white great cat the size of a tiger, with snow-white fur with faint pale stripes and a thin red cord around her neck lies on the ground, watching the saplings. In front of a ring of small white saplings on a mound of dark soil, on pale bare earth.",
+    "seed": 2,
+    "denoise": 0.8,
+    "why": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people painted from their stand-ins at 0.8; my pick from the sheet"
    }
   ],
   "a1_end_tiger": [
@@ -4775,21 +9075,764 @@
   "ashen_hills_human": [
    {
     "op": "generate",
-    "file": "a1h_ashen_hills_s22",
-    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide scene of burnt black hills: grey ash, the stumps of trees standing like broken teeth, the sky a dark bruised grey. Far away beyond the hills, on the horizon, rises a colossal dead tree as big as a mountain, filling half the sky, its bark grey as old bone, its great limbs broken off, a vast black wound in its side. In the foreground four adults walk through the ash, three women and one man, each clearly separate: on the left a tall rangy wild grown woman in her twenties, clearly a woman, with a soft feminine face, full red lips, long eyelashes, a narrow waist and a slender woman's figure, almost as tall as the man, with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, next to her a tall grown village herbalist woman of twenty-six, an adult with a mature face and a slender adult figure, almost as tall as the man, with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, long dark trousers and plain dark cloth shoes, and on the right a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, with a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles, her long snow-white cat tail hanging behind her, she is a head shorter than him walking beside him.",
+    "file": "b5_ashen_hills_bg_s22",
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. A wide scene of burnt black hills under a dark bruised grey sky: grey ash a hand deep, the stumps of burnt trees standing like broken teeth, glassy runs of melted stone in the gullies. Close beyond the last black ridge stands a colossal dead tree, so huge that its trunk fills the whole upper half of the picture from edge to edge and its top is cut off by the top of the picture, its bark grey as old bone, the stumps of its great broken limbs, a vast black wound in its side. In the lower part of the picture an empty path of grey ash winds between the burnt stumps toward it.",
     "seed": 22,
     "width": 1280,
-    "height": 800
+    "height": 800,
+    "why": "the giant drawn alone, filling the frame, with no people (B1); one background for all three forms (F1)"
+   },
+   {
+    "op": "local",
+    "file": "b5l_ashen_hills_human",
+    "source": "b5_ashen_hills_bg_s22",
+    "note": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people's stand-ins, small beside the giant (seen from behind or far off). python3 -I tools/art/patch.py SRC SPEC OUT --dir DIR with SPEC = this step's spec (flat stand-in shapes for the people; DIR is not read). Its OUT is copied to ComfyUI's input as boneash/<file>.png for the next step.",
+    "spec": {
+     "figures": [
+      {
+       "poly": [
+        [
+         600,
+         505
+        ],
+        [
+         604,
+         505
+        ],
+        [
+         604,
+         652
+        ],
+        [
+         600,
+         652
+        ]
+       ],
+       "fill": 70,
+       "outline": 20,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         602,
+         490
+        ],
+        [
+         606,
+         507
+        ],
+        [
+         598,
+         507
+        ]
+       ],
+       "fill": 240,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         612,
+         545
+        ],
+        [
+         648,
+         545
+        ],
+        [
+         658,
+         625
+        ],
+        [
+         602,
+         625
+        ]
+       ],
+       "fill": 210,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        620,
+        516,
+        640,
+        540
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         618,
+         528
+        ],
+        [
+         642,
+         528
+        ],
+        [
+         646,
+         582
+        ],
+        [
+         614,
+         582
+        ]
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         616,
+         625
+        ],
+        [
+         626,
+         625
+        ],
+        [
+         626,
+         650
+        ],
+        [
+         616,
+         650
+        ]
+       ],
+       "fill": 50,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         632,
+         625
+        ],
+        [
+         642,
+         625
+        ],
+        [
+         642,
+         650
+        ],
+        [
+         632,
+         650
+        ]
+       ],
+       "fill": 50,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        697,
+        518,
+        713,
+        534
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        695,
+        528,
+        715,
+        552
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         688,
+         550
+        ],
+        [
+         722,
+         550
+        ],
+        [
+         728,
+         612
+        ],
+        [
+         682,
+         612
+        ]
+       ],
+       "fill": 120,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         685,
+         584
+        ],
+        [
+         725,
+         584
+        ],
+        [
+         725,
+         594
+        ],
+        [
+         685,
+         594
+        ]
+       ],
+       "fill": [
+        160,
+        44,
+        44
+       ],
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         690,
+         612
+        ],
+        [
+         702,
+         612
+        ],
+        [
+         702,
+         650
+        ],
+        [
+         690,
+         650
+        ]
+       ],
+       "fill": 40,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         708,
+         612
+        ],
+        [
+         720,
+         612
+        ],
+        [
+         720,
+         650
+        ],
+        [
+         708,
+         650
+        ]
+       ],
+       "fill": 40,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        774,
+        516,
+        796,
+        540
+       ],
+       "fill": 215,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         766,
+         538
+        ],
+        [
+         804,
+         538
+        ],
+        [
+         814,
+         626
+        ],
+        [
+         756,
+         626
+        ]
+       ],
+       "fill": 245,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         768,
+         626
+        ],
+        [
+         780,
+         626
+        ],
+        [
+         780,
+         652
+        ],
+        [
+         768,
+         652
+        ]
+       ],
+       "fill": 25,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         788,
+         626
+        ],
+        [
+         800,
+         626
+        ],
+        [
+         800,
+         652
+        ],
+        [
+         788,
+         652
+        ]
+       ],
+       "fill": 25,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         832,
+         548
+        ],
+        [
+         852,
+         548
+        ],
+        [
+         860,
+         650
+        ],
+        [
+         824,
+         650
+        ]
+       ],
+       "fill": 20,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         830,
+         534
+        ],
+        [
+         854,
+         534
+        ],
+        [
+         857,
+         594
+        ],
+        [
+         827,
+         594
+        ]
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        831,
+        526,
+        853,
+        548
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         832,
+         530
+        ],
+        [
+         836,
+         518
+        ],
+        [
+         840,
+         529
+        ]
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         844,
+         529
+        ],
+        [
+         848,
+         518
+        ],
+        [
+         852,
+         530
+        ]
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         856,
+         600
+        ],
+        [
+         861,
+         600
+        ],
+        [
+         870,
+         646
+        ],
+        [
+         865,
+         646
+        ]
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 1
+      }
+     ]
+    }
+   },
+   {
+    "op": "detail_inpaint",
+    "file": "b5_ashen_hills_human_s2",
+    "source": "b5l_ashen_hills_human",
+    "image": "boneash/b5l_ashen_hills_human.png (input)",
+    "crop": [
+     570,
+     463,
+     328,
+     217
+    ],
+    "scale": 2,
+    "mask": [
+     "b5m_ashen_hills_human_big",
+     "b5m_ashen_hills_human_small"
+    ],
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. Four small travellers seen from behind walk away from the viewer along a path of grey ash, three women and one man, each clearly separate: on the left a tall rangy wild young woman seen from behind, very long black hair with a few twigs caught in it hanging down her back, a long patched hunter's jacket of pale hide with a thick spotted fur collar, leather trousers, barefoot, holding upright a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord; then a grown woman seen from behind, long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, a patched grey jacket with a red sash, long dark trousers and plain dark cloth shoes; then a man seen from behind, slightly shaggy tousled pale blond hair, a long white lab coat, black trousers and black shoes; and on the right a slender young woman seen from behind, very long straight snow-white hair down her back, pointed white cat ears, a long black high-collared qipao with red piping reaching her ankles, her long snow-white cat tail hanging behind her, a head shorter than him. Grey ash and black burnt ground around them.",
+    "seed": 2,
+    "denoise": 0.8,
+    "why": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people painted from their stand-ins at 0.8; my pick from the sheet"
    }
   ],
   "rot_ape_human": [
    {
     "op": "generate",
-    "file": "a1h_rot_ape_s44",
-    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide view over a black rock in the foreground. Crouching low behind the rock in the foreground, seen from behind, are four adults, three women and one man, each clearly separate: on the left a tall rangy wild grown woman in her twenties, clearly a woman, with a soft feminine face, full red lips, long eyelashes, a narrow waist and a slender woman's figure, almost as tall as the man, with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, next to her a tall grown village herbalist woman of twenty-six, an adult with a mature face and a slender adult figure, almost as tall as the man, with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, long dark trousers and plain dark cloth shoes, in the middle a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, crouching low, and on his right a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles, her long snow-white cat tail hanging behind her, she is a head shorter than him, crouching low, all four looking away from us toward the pass. Far ahead, a hundred paces away, in the notch of a pass in a black ridge, sits the rot-ape: a gigantic ape as big as a house, its whole body covered in shaggy living moss, with fungus and little ferns growing out of its shoulders and back, its eyes milky and blind. The ground around it is littered with white bones. Beyond the ridge a colossal bare dead grey tree without a single leaf, its broken limbs bare, fills the sky.",
+    "file": "b5_rot_ape_bg_s44",
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. A pass in a black rock ridge, and beyond the ridge a colossal bare grey dead tree without a single leaf that fills the whole sky, its broken limbs bare. In the notch of the pass, in the middle of the picture, sits the rot-ape: a gigantic ape as big as a hut, its whole body covered in shaggy living moss, with fungus and little ferns growing out of its shoulders and back, its eyes milky and blind. The ground of the pass around it is littered with white bones and a few rags of crimson cloth. In the foreground at the bottom of the picture is a low black rock with an empty strip of black ground in front of it.",
     "seed": 44,
     "width": 1280,
-    "height": 800
+    "height": 800,
+    "why": "the giant drawn alone, filling the frame, with no people (B1); one background for all three forms (F1)"
+   },
+   {
+    "op": "local",
+    "file": "b5l_rot_ape_human",
+    "source": "b5_rot_ape_bg_s44",
+    "note": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people's stand-ins, small beside the giant (seen from behind or far off). python3 -I tools/art/patch.py SRC SPEC OUT --dir DIR with SPEC = this step's spec (flat stand-in shapes for the people; DIR is not read). Its OUT is copied to ComfyUI's input as boneash/<file>.png for the next step.",
+    "spec": {
+     "figures": [
+      {
+       "ellipse": [
+        351.5,
+        723.5,
+        408.5,
+        790
+       ],
+       "fill": 210,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        368.6,
+        696.9,
+        391.4,
+        721.6
+       ],
+       "fill": 15,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         368.6,
+         704.5
+        ],
+        [
+         391.4,
+         704.5
+        ],
+        [
+         393.3,
+         752.0
+        ],
+        [
+         366.7,
+         752.0
+        ]
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         352,
+         650
+        ],
+        [
+         356,
+         650
+        ],
+        [
+         356,
+         792
+        ],
+        [
+         352,
+         792
+        ]
+       ],
+       "fill": 70,
+       "outline": 20,
+       "width": 1
+      },
+      {
+       "ellipse": [
+        473.0,
+        727.0,
+        527.0,
+        790
+       ],
+       "fill": 120,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        489.2,
+        701.8,
+        510.8,
+        725.2
+       ],
+       "fill": 15,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         489.2,
+         709.0
+        ],
+        [
+         510.8,
+         709.0
+        ],
+        [
+         512.6,
+         754.0
+        ],
+        [
+         487.4,
+         754.0
+        ]
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        611.5,
+        723.5,
+        668.5,
+        790
+       ],
+       "fill": 248,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        628.6,
+        696.9,
+        651.4,
+        721.6
+       ],
+       "fill": 215,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        712.9,
+        733.9,
+        757.1,
+        790
+       ],
+       "fill": 20,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         724.8,
+         713.5
+        ],
+        [
+         745.2,
+         713.5
+        ],
+        [
+         747.75,
+         764.5
+        ],
+        [
+         722.25,
+         764.5
+        ]
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        725.65,
+        706.7,
+        744.35,
+        725.4
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         727.35,
+         710.95
+        ],
+        [
+         729.9,
+         699.9
+        ],
+        [
+         733.3,
+         710.1
+        ]
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         736.7,
+         710.1
+        ],
+        [
+         740.1,
+         699.9
+        ],
+        [
+         742.65,
+         710.95
+        ]
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 1
+      }
+     ]
+    }
+   },
+   {
+    "op": "detail_inpaint",
+    "file": "b5_rot_ape_human_s3",
+    "source": "b5l_rot_ape_human",
+    "image": "boneash/b5l_rot_ape_human.png (input)",
+    "crop": [
+     323,
+     623,
+     462,
+     177
+    ],
+    "scale": 2,
+    "mask": [
+     "b5m_rot_ape_human_big",
+     "b5m_rot_ape_human_small"
+    ],
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. Small figures crouch side by side, three women and one man, each clearly separate: on the left a tall rangy wild young woman with very long black hair with a few twigs caught in it, a long patched hunter's jacket of pale hide with a thick spotted fur collar, leather trousers, barefoot, a primitive spear with a jagged white bone point upright beside her; then a grown woman with long black hair in a loose bun pinned with one long slender ivory hairpin, a patched grey jacket with a red sash, long dark trousers; then a man with slightly shaggy tousled pale blond hair and a short pale blond beard, a long white lab coat, black trousers; and a slender young woman with very long straight snow-white hair, pointed white cat ears, a long black high-collared qipao with red piping, her long snow-white cat tail behind her, crouching beside him. Seen from behind, crouching low on black rocky ground, looking away from the viewer up toward a gigantic ape in the pass. Black rock and ground around them.",
+    "seed": 3,
+    "denoise": 0.8,
+    "why": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people painted from their stand-ins at 0.8; my pick from the sheet"
    }
   ],
   "night_watch_human": [
@@ -4885,11 +9928,485 @@
   "ship_wreck_human": [
    {
     "op": "generate",
-    "file": "a1h_ship_wreck_s44",
-    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A dark interior scene in a vast cavern beneath the roots of a giant tree. In it lies an enormous ancient starship grown from living pale wood, as big as a palace, the people tiny next to it: a long sleek hull of smooth flowing organic curves tapering to a long pointed prow, great curved swept-back fins like the wings of a tree seed, its whole surface covered in grown patterns of wood grain like veins, hatches shaped like folded leaves, its front third crushed and split, huge tree roots grown around it and holding it like a hand. In the foreground four adults stand side by side looking up at it, three women and one man, each clearly separate: on the left a tall rangy wild grown woman in her twenties, clearly a woman, with a soft feminine face, full red lips, long eyelashes, a narrow waist and a slender woman's figure, almost as tall as the man, with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, next to her a tall grown village herbalist woman of twenty-six, an adult with a mature face and a slender adult figure, almost as tall as the man, with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, long dark trousers and plain dark cloth shoes, then a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, and on the right a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles, her long snow-white cat tail hanging behind her, she is a head shorter than him.",
-    "seed": 44,
+    "file": "b5_ship_wreck_bg_s22",
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. A dark interior scene in a vast cavern beneath the roots of a giant tree. Filling most of the picture lies an enormous ancient starship grown from living pale wood: a long sleek teardrop hull of smooth flowing organic curves tapering to a long pointed prow, ribs curving like the inside of a shell, great curved swept-back fins like the wings of a tree seed, its whole surface covered in grown patterns of wood grain like veins, hatches shaped like folded leaves, its front third crushed and split, huge tree roots grown around it and holding it like a hand. In the lower part of the picture is the bare empty floor of the cavern, dark earth and thin roots.",
+    "seed": 22,
     "width": 1280,
-    "height": 800
+    "height": 800,
+    "why": "the giant drawn alone, filling the frame, with no people (B1); one background for all three forms (F1); the cavern under the roots, as the scene text (T1)"
+   },
+   {
+    "op": "local",
+    "file": "b5l_ship_wreck_human",
+    "source": "b5_ship_wreck_bg_s22",
+    "note": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people's stand-ins, small beside the giant (seen from behind or far off). python3 -I tools/art/patch.py SRC SPEC OUT --dir DIR with SPEC = this step's spec (flat stand-in shapes for the people; DIR is not read). Its OUT is copied to ComfyUI's input as boneash/<file>.png for the next step.",
+    "spec": {
+     "figures": [
+      {
+       "poly": [
+        [
+         231,
+         667
+        ],
+        [
+         233,
+         667
+        ],
+        [
+         233,
+         790
+        ],
+        [
+         231,
+         790
+        ]
+       ],
+       "fill": 70,
+       "outline": 20,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         244.875,
+         700.625
+        ],
+        [
+         275.125,
+         700.625
+        ],
+        [
+         283.375,
+         768.0
+        ],
+        [
+         236.625,
+         768.0
+        ]
+       ],
+       "fill": 210,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        251.75,
+        680,
+        268.25,
+        697.875
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         251.75,
+         688.25
+        ],
+        [
+         268.25,
+         688.25
+        ],
+        [
+         271.0,
+         731.5625
+        ],
+        [
+         249.0,
+         731.5625
+        ]
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         249,
+         768
+        ],
+        [
+         257,
+         768
+        ],
+        [
+         257,
+         790
+        ],
+        [
+         249,
+         790
+        ]
+       ],
+       "fill": 50,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         262,
+         768
+        ],
+        [
+         271,
+         768
+        ],
+        [
+         271,
+         790
+        ],
+        [
+         262,
+         790
+        ]
+       ],
+       "fill": 50,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        334.09375,
+        685,
+        345.90625,
+        695.5
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        332.78125,
+        690.25,
+        347.21875,
+        706.0
+       ],
+       "fill": 15,
+       "outline": 15,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         328.1875,
+         706.0
+        ],
+        [
+         351.8125,
+         706.0
+        ],
+        [
+         355.75,
+         750.625
+        ],
+        [
+         324.25,
+         750.625
+        ]
+       ],
+       "fill": 120,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         326,
+         729
+        ],
+        [
+         353,
+         729
+        ],
+        [
+         353,
+         736
+        ],
+        [
+         326,
+         736
+        ]
+       ],
+       "fill": [
+        160,
+        44,
+        44
+       ],
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         329,
+         750
+        ],
+        [
+         338,
+         750
+        ],
+        [
+         338,
+         790
+        ],
+        [
+         329,
+         790
+        ]
+       ],
+       "fill": 40,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         341,
+         750
+        ],
+        [
+         350,
+         750
+        ],
+        [
+         350,
+         790
+        ],
+        [
+         341,
+         790
+        ]
+       ],
+       "fill": 40,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        411.6,
+        678,
+        428.4,
+        696.2
+       ],
+       "fill": 215,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         406.0,
+         694.8
+        ],
+        [
+         434.0,
+         694.8
+        ],
+        [
+         441.0,
+         763.4
+        ],
+        [
+         399.0,
+         763.4
+        ]
+       ],
+       "fill": 248,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         408,
+         763
+        ],
+        [
+         417,
+         763
+        ],
+        [
+         417,
+         790
+        ],
+        [
+         408,
+         790
+        ]
+       ],
+       "fill": 25,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         422,
+         763
+        ],
+        [
+         431,
+         763
+        ],
+        [
+         431,
+         790
+        ],
+        [
+         422,
+         790
+        ]
+       ],
+       "fill": 25,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         480,
+         722
+        ],
+        [
+         500,
+         722
+        ],
+        [
+         508,
+         790
+        ],
+        [
+         472,
+         790
+        ]
+       ],
+       "fill": 20,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         478,
+         708
+        ],
+        [
+         502,
+         708
+        ],
+        [
+         505,
+         749
+        ],
+        [
+         475,
+         749
+        ]
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        479,
+        700,
+        501,
+        722
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         480,
+         704
+        ],
+        [
+         484,
+         692
+        ],
+        [
+         488,
+         703
+        ]
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         492,
+         703
+        ],
+        [
+         496,
+         692
+        ],
+        [
+         500,
+         704
+        ]
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         504,
+         754
+        ],
+        [
+         509,
+         754
+        ],
+        [
+         518,
+         786
+        ],
+        [
+         513,
+         786
+        ]
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 1
+      }
+     ]
+    }
+   },
+   {
+    "op": "detail_inpaint",
+    "file": "b5_ship_wreck_human_s3",
+    "source": "b5l_ship_wreck_human",
+    "image": "boneash/b5l_ship_wreck_human.png (input)",
+    "crop": [
+     203,
+     640,
+     343,
+     160
+    ],
+    "scale": 2,
+    "mask": [
+     "b5m_ship_wreck_human_big",
+     "b5m_ship_wreck_human_small"
+    ],
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. Small figures stand side by side, three women and one man, each clearly separate: on the left a tall rangy wild young woman seen from behind, very long black hair with a few twigs caught in it hanging down her back, a long patched hunter's jacket of pale hide with a thick spotted fur collar, leather trousers, barefoot, holding upright a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord; then a grown woman seen from behind, long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, a patched grey jacket with a red sash, long dark trousers and plain dark cloth shoes; then a man seen from behind, slightly shaggy tousled pale blond hair, a long white lab coat, black trousers and black shoes; and on the right a slender young woman seen from behind, very long straight snow-white hair down her back, pointed white cat ears, a long black high-collared qipao with red piping reaching her ankles, her long snow-white cat tail hanging behind her, a head shorter than him. Seen from behind, tiny, standing on the dark earth floor of a cavern, looking up at a huge wooden starship. Dark earth and thin roots around them.",
+    "seed": 3,
+    "denoise": 0.8,
+    "why": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people painted from their stand-ins at 0.8; my pick from the sheet"
    }
   ],
   "return_road_human": [
@@ -4905,11 +10422,430 @@
   "grove_sprout_human": [
    {
     "op": "generate",
-    "file": "a1h_grove_sprout_s44",
-    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime scene in a lane of old thatched mud-walled huts, the sky empty and pale. In the middle of the picture grows a ring of seven slender white saplings as tall as a man's knee, their pale leaves unfolding, veined like the inside of a wrist, a soft white glow among them. Around them, a few steps back, stand a few grave bent old villagers with short grey hair, grey beards and lined faces, in patched hemp clothes, and on the right a ninety-year-old village elder with one blind milky eye, a bald head with a tiny white topknot and a thin white beard, wearing a plain grey robe, leaning on a walking stick. In front of the saplings kneels a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles, her long snow-white cat tail hanging behind her, watching them. Behind them the huts and the pale sky fill the background.",
-    "seed": 44,
+    "file": "b5_grove_sprout_bg_s22",
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. A daytime scene in a lane of old thatched mud-walled huts, the sky empty and pale. In the middle of the picture, on the bare earth of the lane, is a small empty patch of dark freshly turned soil. Around it, a few steps back, stand a few grave bent old villagers with short grey hair, grey beards and lined faces, in patched hemp clothes, looking down at it, and on the right a ninety-year-old village elder with one blind milky eye, a bald head with a tiny white topknot and a thin white beard, wearing a plain grey robe, leaning on a walking stick. Behind them the huts and the pale sky fill the background.",
+    "seed": 22,
     "width": 1280,
-    "height": 800
+    "height": 800,
+    "why": "the giant drawn alone, filling the frame, with no people (B1); one background for all three forms (F1)"
+   },
+   {
+    "op": "local",
+    "file": "b5l_grove_sprout",
+    "source": "b5_grove_sprout_bg_s22",
+    "note": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): seven sapling stand-ins on the mound, knee-high. python3 -I tools/art/patch.py SRC SPEC OUT --dir DIR with SPEC = this step's spec (flat stand-in shapes for the people; DIR is not read). Its OUT is copied to ComfyUI's input as boneash/<file>.png for the next step.",
+    "spec": {
+     "figures": [
+      {
+       "poly": [
+        [
+         423,
+         648
+        ],
+        [
+         427,
+         648
+        ],
+        [
+         427,
+         702
+        ],
+        [
+         423,
+         702
+        ]
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "ellipse": [
+        414,
+        636,
+        436,
+        652
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         468,
+         648
+        ],
+        [
+         472,
+         648
+        ],
+        [
+         472,
+         702
+        ],
+        [
+         468,
+         702
+        ]
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "ellipse": [
+        459,
+        636,
+        481,
+        652
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         513,
+         648
+        ],
+        [
+         517,
+         648
+        ],
+        [
+         517,
+         702
+        ],
+        [
+         513,
+         702
+        ]
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "ellipse": [
+        504,
+        636,
+        526,
+        652
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         558,
+         648
+        ],
+        [
+         562,
+         648
+        ],
+        [
+         562,
+         702
+        ],
+        [
+         558,
+         702
+        ]
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "ellipse": [
+        549,
+        636,
+        571,
+        652
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         603,
+         648
+        ],
+        [
+         607,
+         648
+        ],
+        [
+         607,
+         702
+        ],
+        [
+         603,
+         702
+        ]
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "ellipse": [
+        594,
+        636,
+        616,
+        652
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         648,
+         648
+        ],
+        [
+         652,
+         648
+        ],
+        [
+         652,
+         702
+        ],
+        [
+         648,
+         702
+        ]
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "ellipse": [
+        639,
+        636,
+        661,
+        652
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         693,
+         648
+        ],
+        [
+         697,
+         648
+        ],
+        [
+         697,
+         702
+        ],
+        [
+         693,
+         702
+        ]
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "ellipse": [
+        684,
+        636,
+        706,
+        652
+       ],
+       "fill": 245,
+       "outline": 30,
+       "width": 1
+      }
+     ]
+    }
+   },
+   {
+    "op": "detail_inpaint",
+    "file": "b5_grove_sprout_saplings3b_s1",
+    "source": "b5l_grove_sprout",
+    "image": "boneash/b5l_grove_sprout.png (input)",
+    "crop": [
+     380,
+     610,
+     360,
+     120
+    ],
+    "scale": 3,
+    "mask": [
+     "b5m_grove_sprout_saplings3b_big",
+     "b5m_grove_sprout_saplings3b_small"
+    ],
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. A ring of seven slender white saplings, each only as tall as a man's knee, growing from a low mound of dark turned soil, their pale leaves unfolding, a soft white glow among them.",
+    "seed": 1,
+    "denoise": 0.8,
+    "why": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the saplings painted small from their stand-ins (seeds 1-2 at 0.7 and 0.8, s1 at 0.8)"
+   },
+   {
+    "op": "local",
+    "file": "b5l_grove_sprout_human",
+    "source": "b5_grove_sprout_saplings3b_s1",
+    "note": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): Yuki's stand-in in front of the saplings. python3 -I tools/art/patch.py SRC SPEC OUT --dir DIR with SPEC = this step's spec (flat stand-in shapes for the people; DIR is not read). Its OUT is copied to ComfyUI's input as boneash/<file>.png for the next step.",
+    "spec": {
+     "figures": [
+      {
+       "poly": [
+        [
+         552,
+         702
+        ],
+        [
+         572,
+         702
+        ],
+        [
+         580,
+         792
+        ],
+        [
+         544,
+         792
+        ]
+       ],
+       "fill": 20,
+       "outline": 20,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         550,
+         688
+        ],
+        [
+         574,
+         688
+        ],
+        [
+         577,
+         741
+        ],
+        [
+         547,
+         741
+        ]
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 2
+      },
+      {
+       "ellipse": [
+        551,
+        680,
+        573,
+        702
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 2
+      },
+      {
+       "poly": [
+        [
+         552,
+         684
+        ],
+        [
+         556,
+         672
+        ],
+        [
+         560,
+         683
+        ]
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         564,
+         683
+        ],
+        [
+         568,
+         672
+        ],
+        [
+         572,
+         684
+        ]
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 1
+      },
+      {
+       "poly": [
+        [
+         576,
+         747
+        ],
+        [
+         581,
+         747
+        ],
+        [
+         590,
+         788
+        ],
+        [
+         585,
+         788
+        ]
+       ],
+       "fill": 240,
+       "outline": 30,
+       "width": 1
+      }
+     ]
+    }
+   },
+   {
+    "op": "detail_inpaint",
+    "file": "b5_grove_sprout_human_s2",
+    "source": "b5l_grove_sprout_human",
+    "image": "boneash/b5l_grove_sprout_human.png (input)",
+    "crop": [
+     517,
+     647,
+     99,
+     153
+    ],
+    "scale": 3,
+    "mask": [
+     "b5m_grove_sprout_human_big",
+     "b5m_grove_sprout_human_small"
+    ],
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. a slender young woman seen from behind, very long straight snow-white hair down her back, pointed white cat ears, a long black high-collared qipao with red piping reaching her ankles, her long snow-white cat tail hanging behind her kneels on the ground, watching the saplings. In front of a ring of small white saplings on a mound of dark soil, on pale bare earth.",
+    "seed": 2,
+    "denoise": 0.8,
+    "why": "v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 09:59 D2 + F1 + T1, pictures 10:21 \"go\"): the people painted from their stand-ins at 0.8; my pick from the sheet"
    }
   ],
   "a1_end_human": [
@@ -5161,27 +11097,22 @@
    "a1_drowned_dead_eyes": "drowned_dead",
    "a1_mire_serpent2_s77": "mire_serpent",
    "a1_hot_spring2_s44": "hot_spring",
-   "a1_ashen_hills2_s88": "ashen_hills",
    "a1_cinder_hawks_s44": "cinder_hawks",
    "a1_night_watch_s44": "night_watch",
    "a1_trio_s44": "trio",
    "a1_dc_tail_s3": "drowned_camp",
-   "a1_ra_tail2_s6": "rot_ape",
    "a1_trio_fire_eyes": "trio_fire",
    "a1_heart_gate_s22": "heart_gate",
    "a1_heart_hall_s55": "heart_hall",
    "a1_heart_roots2_s88": "heart_roots",
    "a1_heart_core2_s66": "heart_core",
-   "a1_guardian_s44": "guardian",
    "a1_seed_s44": "seed",
    "a1_ship_bridge_s55": "ship_bridge",
    "a1_ship_log2_s66": "ship_log",
    "a1_seed_planting_s44": "seed_planting",
-   "a1_grove_sprout2_s66": "grove_sprout",
    "a1_elder_parley2_s66": "elder_parley",
    "a1_a1_end2_s77": "a1_end",
    "a1_return_road2_s77": "return_road",
-   "a1_ship_wreck4_s55": "ship_wreck",
    "a1_ed_poles_s2": "elder_duel",
    "a1_lf_hub_s22": "lf_hub",
    "a1t_lf_hub_s22": "lf_hub_tiger",
@@ -5201,50 +11132,34 @@
    "a1_lf_thunder_ridge_s44": "lf_thunder_ridge",
    "a1t_lf_thunder_ridge_s22": "lf_thunder_ridge_tiger",
    "a1h_lf_thunder_ridge_s22": "lf_thunder_ridge_human",
-   "a1_lf_old_roots_s44": "lf_old_roots",
-   "a1t_lf_old_roots_s22": "lf_old_roots_tiger",
-   "a1h_lf_old_roots_s22": "lf_old_roots_human",
    "a1_root_camp_s44": "root_camp",
    "a1t_root_camp_s44": "root_camp_tiger",
-   "a1t_ashen_camp_s44": "ashen_camp_tiger",
    "a1_lf_rogue_s55": "lf_rogue",
-   "a1_ashen_camp_s44": "ashen_camp",
    "a1h_root_camp2_s66": "root_camp_human",
-   "a1h_ashen_camp2_s66": "ashen_camp_human",
    "a1t_council_s55": "council_tiger",
    "a1t_ashfall_dawn_s44": "ashfall_dawn_tiger",
    "a1t_root_road_s44": "root_road_tiger",
    "a1t_drowned_wood_s44": "drowned_wood_tiger",
    "a1t_drowned_camp_s22": "drowned_camp_tiger",
-   "a1t_ashen_hills_s44": "ashen_hills_tiger",
-   "a1t_rot_ape2_s88": "rot_ape_tiger",
    "a1t_night_watch_s55": "night_watch_tiger",
    "a1t_trio_fire_s44": "trio_fire_tiger",
    "a1t_heart_gate_s22": "heart_gate_tiger",
    "a1t_heart_hall_s22": "heart_hall_tiger",
    "a1t_heart_core_s55": "heart_core_tiger",
-   "a1t_guardian2_s66": "guardian_tiger",
    "a1t_ship_bridge_s55": "ship_bridge_tiger",
-   "a1t_ship_wreck_eyes": "ship_wreck_tiger",
-   "a1t_grove_sprout_s22": "grove_sprout_tiger",
    "a1t_return_road2_s77": "return_road_tiger",
    "a1t_ya_fight2_s77": "ya_fight_tiger",
    "a1h_council_s44": "council_human",
    "a1h_drowned_wood_s22": "drowned_wood_human",
    "a1h_drowned_camp2_s88": "drowned_camp_human",
-   "a1h_ashen_hills_s22": "ashen_hills_human",
-   "a1h_rot_ape_s44": "rot_ape_human",
    "a1h_night_watch_s22": "night_watch_human",
    "a1h_trio_fire_s44": "trio_fire_human",
    "a1h_heart_gate_s22": "heart_gate_human",
    "a1h_heart_core_s55": "heart_core_human",
    "a1h_ship_bridge_s55": "ship_bridge_human",
    "a1h_return_road_s22": "return_road_human",
-   "a1h_grove_sprout_s44": "grove_sprout_human",
-   "a1h_guardian_s44": "guardian_human",
    "a1h_heart_roots_s55": "heart_roots_human",
    "a1h_root_road_s55": "root_road_human",
-   "a1h_ship_wreck_s44": "ship_wreck_human",
    "f5_forest_dawn_tail_s2": "forest_dawn_human",
    "f5_jackals_dead_ears_s2": "jackals_dead_human",
    "f5_lf_black_mire_tiger_tower_s3": "lf_black_mire_tiger",
@@ -5259,7 +11174,28 @@
    "f5_heart_roots_tiger_patch": "heart_roots_tiger",
    "f5_ya_fight_human_patch": "ya_fight_human",
    "f5_ya_arrives_patch": "ya_arrives",
-   "f5_gift4_s55": "gift_human"
+   "f5_gift4_s55": "gift_human",
+   "b5_guardian_tiger_s2": "guardian_tiger",
+   "b5_ashen_hills_tiger_s3": "ashen_hills_tiger",
+   "b5_ashen_hills_human_s2": "ashen_hills_human",
+   "b5_grove_sprout_cat_s2": "grove_sprout",
+   "b5_grove_sprout_tiger_s2": "grove_sprout_tiger",
+   "b5_grove_sprout_human_s2": "grove_sprout_human",
+   "b5_ashen_camp_cat_s3": "ashen_camp",
+   "b5_ashen_camp_tiger_s3": "ashen_camp_tiger",
+   "b5_lf_old_roots_cat_s2": "lf_old_roots",
+   "b5_lf_old_roots_tiger_s2": "lf_old_roots_tiger",
+   "b5_lf_old_roots_human_s3": "lf_old_roots_human",
+   "b5_rot_ape_cat_s3": "rot_ape",
+   "b5_rot_ape_tiger_s3": "rot_ape_tiger",
+   "b5_rot_ape_human_s3": "rot_ape_human",
+   "b5_ship_wreck_cat_s3": "ship_wreck",
+   "b5_ship_wreck_tiger_s2": "ship_wreck_tiger",
+   "b5_ship_wreck_human_s3": "ship_wreck_human",
+   "a1_guardian_s44": "guardian",
+   "a1h_guardian_s44": "guardian_human",
+   "a1_ashen_hills2_s88": "ashen_hills",
+   "a1h_ashen_camp2_s66": "ashen_camp_human"
   }
  },
  "styles": {

@@ -9,6 +9,8 @@ import { FORM_LINES } from '../js/core/forms.js';
 import { gunzipSync } from 'node:zlib';
 import { deserialize, newGame, ensureBars, itemCap } from '../js/core/game.js';
 import { gives, sceneView } from '../js/core/story.js';
+// v0.11.63 (push 5b): the 21 size redraws replaced their pictures' recipes; the earlier blocks' prompt checks skip them (the v0.11.63 block checks them)
+const R5B = (f) => JSON.parse(readFileSync('tools/art/recipes.json', 'utf8')).pictures[f].some((st) => st.file.startsWith('b5_'));
 
 let pass = 0, fail = 0;
 const assert = (c, l) => { if (c) pass++; else { fail++; console.error('  FAIL ', l); } };
@@ -120,7 +122,7 @@ const ACT1_YUKI_P1 = 'council ashfall_dawn ya_fight root_road drowned_wood drown
     assert(rec.drowned_dead.at(-1).op === 'local' && /eyes\.py/.test(rec.drowned_dead.at(-1).note) && existsSync('tools/art/eyes.py'), 'v0.11.54: drowned_dead\'s red eyes made grey by a recorded local step (tools/art/eyes.py)');
     // after the cold review (owner pick R1): the stray tails painted out (recorded inpaints with their masks), Ya's red eyes grey in trio_fire
     const masks = JSON.parse(readFileSync('tools/art/recipes.json', 'utf8')).masks;
-    for (const k of ['drowned_camp', 'rot_ape']) { const st = rec[k].at(-1); assert(st.op === 'inpaint' && masks[st.mask] && st.source === rec[k].at(-2).file, `v0.11.54: ${k}'s stray tail painted out by a recorded inpaint on its picture`); }
+    for (const k of ['drowned_camp', 'rot_ape'].filter((k) => !R5B(k))) { const st = rec[k].at(-1); assert(st.op === 'inpaint' && masks[st.mask] && st.source === rec[k].at(-2).file, `v0.11.54: ${k}'s stray tail painted out by a recorded inpaint on its picture`); }
     assert(rec.trio_fire.at(-1).op === 'local' && /eyes\.py/.test(rec.trio_fire.at(-1).note), 'v0.11.54: trio_fire\'s red eyes made grey by a recorded local step');
     assert(/fully clothed/.test(rec.trio.at(-1).prompt) && /three black shadow silhouettes/.test(rec.trio.at(-1).prompt), 'v0.11.54: trio is three clothed shadows on a paper door');
 }
@@ -152,8 +154,8 @@ const ACT1_YUKI_P2 = 'heart_gate heart_hall heart_roots heart_core guardian ship
     for (const k of ACT1_P2) assert(!/nude|naked|breast|bust/i.test(last(k)), `v0.11.58: ${k}'s prompt asks for nothing unclothed`);
     // after the cold review (owner pick R2): the rename table maps every Act 1 picture's last file to its key (a wrong name failed nothing before)
     // after the cold review (owner pick R2): Mei Lin (and Ya) drawn as grown women where she had looked young; elder_duel's poles painted out by a recorded inpaint on its picture
-    for (const k of ['a1_end', 'return_road', 'ship_wreck']) assert(/a tall grown village herbalist woman of twenty-six/.test(last(k)), `v0.11.58: ${k} draws Mei Lin as a grown woman`);
-    assert(/grown woman in her twenties, an adult as tall as the man/.test(last('ship_wreck')), 'v0.11.58: ship_wreck draws Ya as a grown woman too');
+    for (const k of ['a1_end', 'return_road', 'ship_wreck'].filter((k) => !R5B(k))) assert(/a tall grown village herbalist woman of twenty-six/.test(last(k)), `v0.11.58: ${k} draws Mei Lin as a grown woman`);
+    assert(R5B('ship_wreck') || /grown woman in her twenties, an adult as tall as the man/.test(last('ship_wreck')), 'v0.11.58: ship_wreck draws Ya as a grown woman too');
     { const st = R.pictures.elder_duel.at(-1); assert(st.op === 'inpaint' && R.masks[st.mask] && st.source === R.pictures.elder_duel.at(-2).file, 'v0.11.58: elder_duel\'s leftover poles painted out by a recorded inpaint on its picture'); }
     for (const k of [...ACT1_P1, ...ACT1_P2]) assert(R.palette.rename[R.pictures[k].at(-1).file] === k, `v0.11.58: palette.rename maps ${k}'s last file (${R.pictures[k].at(-1).file}) to ${k}`);
 }
@@ -175,6 +177,7 @@ const LF_P3 = 'lf_hub lf_seclusion lf_bone_depths lf_black_mire lf_thunder_ridge
             assert(pictureOf(k, form) === `art/pic/${f}.webp` && sceneArt(k).includes(`data-pic="${k}"`), `v0.11.59: with Yuki in ${form} form ${k} shows ${f}.webp`);
             assert(R.palette.rename[R.pictures[f].at(-1).file] === f, `v0.11.59: palette.rename maps ${f}'s last file (${R.pictures[f].at(-1).file}) to ${f}`);
             const pr = gen(f);
+            if (R5B(f)) continue;
             assert(pr.includes(R.cast.james_shaggy) && !/nude|naked|breast|bust|bath|bare (?:chest|skin)/i.test(pr), `v0.11.59: ${f} draws James as james_shaggy and asks for nothing unclothed`);
             assert(form !== 'cat' || pr.includes(R.cast.yuki), `v0.11.59: ${f} draws the cat from her cast`);
             assert(form !== 'human' || (pr.includes(R.cast.yuki_human) && pr.startsWith(R.styles.pc)), `v0.11.59: ${f} draws her human form from her cast, in the pc style`);
@@ -190,8 +193,8 @@ const LF_P3 = 'lf_hub lf_seclusion lf_bone_depths lf_black_mire lf_thunder_ridge
     }
     assert(R.cast.tan && R.cast.fang && gen('lf_bandits').includes(R.cast.tan) && gen('lf_rogue').includes(R.cast.fang) && /crimson sect robes/.test(R.cast.fang) && /straw sandals/.test(R.cast.tan), 'v0.11.59 (B2): the Tan brothers (in period clothes) and Fang Wei (crimson robes) drawn from their casts');
     // after the cold review (owner pick R3): Ya drawn clearly as a woman in the human camps; Fang Wei's lotus picked off in every form
-    for (const k of ['root_camp_human', 'ashen_camp_human']) assert(/clearly a woman, with a feminine face/.test(gen(k)), `v0.11.59 (R3): ${k} draws Ya clearly as a woman`);
-    assert(R.pictures.lf_rogue[0].seed === 55 && R.pictures.ashen_camp[0].seed === 44, 'v0.11.59 (R3): lf_rogue (cat) is seed 55, the lotus picked off; ashen_camp (cat) seed 44, no floating speck');
+    for (const k of ['root_camp_human', 'ashen_camp_human'].filter((k) => !R5B(k))) assert(/clearly a woman, with a feminine face/.test(gen(k)), `v0.11.59 (R3): ${k} draws Ya clearly as a woman`);
+    assert(R.pictures.lf_rogue[0].seed === 55 && (R5B('ashen_camp') || R.pictures.ashen_camp[0].seed === 44), 'v0.11.59 (R3): lf_rogue (cat) is seed 55, the lotus picked off; ashen_camp (cat) seed 44, no floating speck');
     // S1: one seclusion picture for every season, the cave behind the falls
     assert(/cave behind a waterfall/.test(gen('lf_seclusion')) && !/snow|spring|summer|autumn|winter/i.test(gen('lf_seclusion')), 'v0.11.59 (S1): lf_seclusion is the cave behind the falls, in no season');
     // the form chooser shows her portrait in her current form, as yuki_close
@@ -211,19 +214,20 @@ const LF_P3 = 'lf_hub lf_seclusion lf_bone_depths lf_black_mire lf_thunder_ridge
         assert(pictureOf(k, 'cat') === `art/pic/${k}.webp`, `v0.11.60: with Yuki the cat ${k} still shows ${k}.webp`);
         assert(R.palette.rename[R.pictures[f].at(-1).file] === f, `v0.11.60: palette.rename maps ${f}'s last file (${R.pictures[f].at(-1).file}) to ${f}`);
         const pr = gen(f), cat = gen(k);
+        if (R5B(f)) continue;
         assert(pr.includes(T) && !pr.includes(R.cast.yuki) && !/small white cat|on his shoulder|in his lap|on the table beside his hand/.test(pr), `v0.11.60: ${f} draws her once as the great cat from her cast, beside James (no shoulder, lap or table)`);
         assert(pr.includes(R.cast.james_shaggy) === cat.includes(R.cast.james_shaggy) && pr.slice(0, 200) === cat.slice(0, 200), `v0.11.60: ${f} keeps the cat picture's style and James (grove_sprout has no James)`);
         assert(!/nude|naked|breast|bust|bath|bare (?:chest|skin)/i.test(pr), `v0.11.60: ${f}'s prompt asks for nothing unclothed`);
     }
     // the second prompts: the ape far off, the guardian's doorway of rib bones (no modern door), a1_end among thatched huts with Ya clearly a woman
-    assert(/a hundred paces away/.test(gen('rot_ape_tiger')) && /seen from behind/.test(gen('rot_ape_tiger')), 'v0.11.60: rot_ape_tiger has the ape far off, the three seen from behind');
+    assert(R5B('rot_ape_tiger') || /a hundred paces away/.test(gen('rot_ape_tiger')) && /seen from behind/.test(gen('rot_ape_tiger')), 'v0.11.60: rot_ape_tiger has the ape far off, the three seen from behind');
     assert(/no doors/.test(gen('guardian_tiger')) && /ribs of bone/.test(gen('guardian_tiger')) && !/open door/.test(gen('guardian_tiger')), 'v0.11.60: guardian_tiger has a doorway of rib bones, no door');
     assert(/thatched mud-walled huts/.test(gen('a1_end_tiger')) && /black and empty/.test(gen('a1_end_tiger')) && /clearly a woman, with a feminine face/.test(gen('a1_end_tiger')) && !/village street/.test(gen('a1_end_tiger')), 'v0.11.60: a1_end_tiger among thatched huts under an empty sky, Ya clearly a woman');
     // after the cold review (owner pick R2): return_road without the modern heels, ya_fight without the towers and marks behind them
     assert(/long dark trousers and plain dark cloth shoes/.test(gen('return_road_tiger')) && R.pictures.return_road_tiger[0].file === 'a1t_return_road2_s77', 'v0.11.60 (R2): return_road_tiger redrawn, Mei Lin in trousers and cloth shoes');
     assert(/Behind the fence the background is a wall of dark tree trunks and leaves/.test(gen('ya_fight_tiger')) && R.pictures.ya_fight_tiger[0].file === 'a1t_ya_fight2_s77', 'v0.11.60 (R2): ya_fight_tiger redrawn against a wall of trees');
     // red eyes made grey by a recorded local step on the generated picture
-    for (const k of ['ship_wreck_tiger', 'a1_end_tiger']) { const st = R.pictures[k].at(-1); assert(st.op === 'local' && /eyes\.py/.test(st.note) && st.source === R.pictures[k].at(-2).file && st.spec.boxes.length >= 2, `v0.11.60: ${k}'s red eyes made grey by a recorded local step`); }
+    for (const k of ['ship_wreck_tiger', 'a1_end_tiger'].filter((k) => !R5B(k))) { const st = R.pictures[k].at(-1); assert(st.op === 'local' && /eyes\.py/.test(st.note) && st.source === R.pictures[k].at(-2).file && st.spec.boxes.length >= 2, `v0.11.60: ${k}'s red eyes made grey by a recorded local step`); }
 }
 // v0.11.61 (Act 1 art, push 4b; owner picks 2026-11-08 N1 + F1 + P1): the human version of Act 1's 20 Yuki keys, style pc, cast yuki_human
 {
@@ -241,9 +245,10 @@ const LF_P3 = 'lf_hub lf_seclusion lf_bone_depths lf_black_mire lf_thunder_ridge
         assert(pictureOf(k, 'cat') === `art/pic/${k}.webp` && pictureOf(k, 'tiger') === `art/pic/${k}_tiger.webp`, `v0.11.61: ${k}'s cat and great-cat pictures unchanged`);
         assert(R.palette.rename[R.pictures[f].at(-1).file] === f, `v0.11.61: palette.rename maps ${f}'s last file (${R.pictures[f].at(-1).file}) to ${f}`);
         const pr = gen(f), cat = gen(`${k}_tiger`);
+        if (R5B(f)) continue;
         assert(pr.startsWith(R.styles.pc), `v0.11.61: ${f} is drawn in the pc style (N1: heart_core and grove_sprout too)`);
         assert(pr.split(R.cast.yuki_human).length === 2 && !pr.includes(R.cast.yuki) && !pr.includes(R.cast.yuki_tiger) && pr.includes(H), `v0.11.61: ${f} draws her once from cast yuki_human, her tail named white, no cat`);
-        assert(pr.includes(R.cast.james_shaggy) === cat.includes(R.cast.james_shaggy), `v0.11.61: ${f} has James exactly when the great-cat picture does (grove_sprout has none)`);
+        assert(R5B(`${k}_tiger`) || pr.includes(R.cast.james_shaggy) === cat.includes(R.cast.james_shaggy), `v0.11.61: ${f} has James exactly when the great-cat picture does (grove_sprout has none)`);
         if (pr.includes(R.cast.james_shaggy) && !['ya_fight', 'heart_roots'].includes(k)) assert(pr.includes('she is a head shorter than him'), `v0.11.61: ${f} makes her a head shorter than James (not in ya_fight and heart_roots, where she stands apart from him)`);
         if (/herbalist/.test(pr)) assert(pr.includes(MEI) && /a tall grown village herbalist woman of twenty-six/.test(pr), `v0.11.61: ${f}'s Mei Lin is grown, in trousers and cloth shoes`);
         if (/fierce grin/.test(pr)) assert(/a tall rangy wild grown woman in her twenties, clearly a woman/.test(pr) && /barefoot/.test(pr), `v0.11.61: ${f}'s Ya is grown, clearly a woman, barefoot`);
@@ -251,13 +256,13 @@ const LF_P3 = 'lf_hub lf_seclusion lf_bone_depths lf_black_mire lf_thunder_ridge
         assert(!/nude|naked|breast|bust|bath|bare (?:chest|skin)/i.test(pr), `v0.11.61: ${f}'s prompt asks for nothing unclothed`);
     }
     // the stronger woman wording for Ya, used for every key after the test sheet (council, trio_fire, heart_core were drawn before; trio_fire's Ya kept the earlier wording)
-    for (const k of ['ya_fight', 'root_road', 'drowned_wood', 'drowned_camp', 'ashen_hills', 'rot_ape', 'night_watch', 'heart_gate', 'heart_hall', 'heart_roots', 'guardian', 'ship_bridge', 'ship_wreck', 'return_road', 'a1_end']) assert(gen(`${k}_human`).includes(YA), `v0.11.61: ${k}_human's Ya has the stronger woman wording`);
+    for (const k of ['ya_fight', 'root_road', 'drowned_wood', 'drowned_camp', 'ashen_hills', 'rot_ape', 'night_watch', 'heart_gate', 'heart_hall', 'heart_roots', 'guardian', 'ship_bridge', 'ship_wreck', 'return_road', 'a1_end'].filter((k) => !R5B(`${k}_human`))) assert(gen(`${k}_human`).includes(YA), `v0.11.61: ${k}_human's Ya has the stronger woman wording`);
     // F1: rot_ape with Mei Lin and James crouching; ship_wreck with Ya grown among four adults
-    assert(/herbalist/.test(gen('rot_ape_human')) && /crouching low/.test(gen('rot_ape_human')) && /a hundred paces away/.test(gen('rot_ape_human')), 'v0.11.61 (F1): rot_ape_human has Mei Lin, the four crouching, the ape a hundred paces off');
-    assert(/four adults stand side by side/.test(gen('ship_wreck_human')), 'v0.11.61 (F1): ship_wreck_human has the four side by side');
+    assert(R5B('rot_ape_human') || /herbalist/.test(gen('rot_ape_human')) && /crouching low/.test(gen('rot_ape_human')) && /a hundred paces away/.test(gen('rot_ape_human')), 'v0.11.61 (F1): rot_ape_human has Mei Lin, the four crouching, the ape a hundred paces off');
+    assert(R5B('ship_wreck_human') || /four adults stand side by side/.test(gen('ship_wreck_human')), 'v0.11.61 (F1): ship_wreck_human has the four side by side');
     // second and third prompts where the first ones failed (Ya male, Mei Lin male, a missing Mei Lin, a second Yuki)
     // after the cold review (owner pick R2): guardian without heels, heart_roots without the wire, root_road without the marks, ship_wreck with Ya barefoot (and no local step)
-    for (const [f, file] of [['guardian_human', 'a1h_guardian_s44'], ['heart_roots_human', 'a1h_heart_roots_s55'], ['root_road_human', 'a1h_root_road_s55'], ['ship_wreck_human', 'a1h_ship_wreck_s44']]) assert(R.pictures[f].length === 1 && R.pictures[f][0].file === file, `v0.11.61 (R2): ${f} is ${file}, one step`);
+    for (const [f, file] of [['guardian_human', 'a1h_guardian_s44'], ['heart_roots_human', 'a1h_heart_roots_s55'], ['root_road_human', 'a1h_root_road_s55'], ['ship_wreck_human', 'a1h_ship_wreck_s44']].filter(([f]) => !R5B(f))) assert(R.pictures[f].length === 1 && R.pictures[f][0].file === file, `v0.11.61 (R2): ${f} is ${file}, one step`);
     for (const [f, file] of [['ya_fight_human', 'a1h_ya_fight2_s66'], ['drowned_camp_human', 'a1h_drowned_camp2_s88'], ['heart_hall_human', 'a1h_heart_hall3_s88'], ['a1_end_human', 'a1h_a1_end3_s88']]) assert(R.pictures[f][0].file === file, `v0.11.61: ${f} is drawn from ${file}`);
     assert(/clearly a woman, with a soft feminine face, full lips/.test(gen('a1_end_human')) && /clearly a woman, with a soft feminine face, full lips/.test(gen('heart_hall_human')), 'v0.11.61: a1_end and heart_hall give Mei Lin the woman wording too');
     // the local step: a1_end Ya's red eyes grey (her scar kept)
@@ -306,6 +311,59 @@ const LF_P3 = 'lf_hub lf_seclusion lf_bone_depths lf_black_mire lf_thunder_ridge
     assert(patchOf('heart_roots_tiger').spec.copies.length === 1, 'v0.11.62: heart_roots_tiger\'s curl covered');
     // the five pictures redrawn in push 5b keep their pictures for now (B1, owner 09:12)
     for (const k of ['guardian', 'ashen_hills', 'rot_ape', 'ship_wreck', 'grove_sprout']) assert(!Object.values(R.pictures).flat().some((st) => st.file.startsWith(`f5_${k}`)), `v0.11.62: ${k} is left for push 5b`);
+}
+// v0.11.63 (the second round of small fixes, push 5b, the size redraws; owner picks 2026-11-08 D2 + F1 + T1, pictures 10:21): 21 pictures redrawn
+// with the giant alone first (one background per key, shared by its three forms), the people's flat stand-ins painted in code (patch.py
+// figures), then repainted small by a detail inpaint whose masks are stored (polygons, or 1-bit outlines in tools/art/masks/)
+{
+    const R = JSON.parse(readFileSync('tools/art/recipes.json', 'utf8'));
+    const KEYS = ['guardian', 'ashen_hills', 'grove_sprout', 'ashen_camp', 'lf_old_roots', 'rot_ape', 'ship_wreck'];
+    // owner pick A3 (10:40): these four keep their old pictures; their redraws had a broken figure (a headless James, a face on Ya's back, a faceless Ya)
+    const KEPT_OLD = ['guardian', 'guardian_human', 'ashen_hills', 'ashen_camp_human'];
+    for (const key of KEYS) {
+        const bgs = new Set();
+        for (const [form, f] of [['cat', key], ['tiger', `${key}_tiger`], ['human', `${key}_human`]]) {
+            const steps = R.pictures[f];
+            if (KEPT_OLD.includes(f)) { assert(!R5B(f), `v0.11.63 (A3): ${f} keeps its old picture (its redraw had a broken figure; the later art pass)`); continue; }
+            assert(steps && existsSync(`art/pic/${f}.webp`) && R.palette.rename[steps.at(-1).file] === f && steps.at(-1).file.startsWith('b5_') && steps.at(-1).op === 'detail_inpaint', `v0.11.63: ${f} ends in its picked detail inpaint, named in the rename map`);
+            assert(Object.entries(R.palette.rename).filter(([, v]) => v === f).length === 1, `v0.11.63: only one file renames to ${f}`);
+            assert(steps[0].op === 'generate' && steps[0].file === `b5_${key}_bg_s${steps[0].seed}` && !/\b(man|woman|cat|people|person|travellers?)\b(?! shaped)/.test(steps[0].prompt.slice(R.styles.n.length).replace(/shaped like a gardener|villagers?|village elder|elder/g, '')) || key === 'grove_sprout', `v0.11.63: ${f} starts from the giant drawn alone (${steps[0].file})`);
+            bgs.add(steps[0].file);
+            let prev = steps[0].file;
+            for (const st of steps.slice(1)) {
+                assert(st.source === prev, `v0.11.63: ${f}'s ${st.file} runs on the step before it (${prev})`);
+                if (st.op === 'local') assert(/patch\.py/.test(st.note) && (st.spec.figures || []).length >= 2 && st.file.startsWith('b5l_'), `v0.11.63: ${f}'s stand-ins ${st.file} are a recorded patch.py step`);
+                if (st.op === 'detail_inpaint') {
+                    const [x, y, w, h] = st.crop;
+                    const [mb, ms] = st.mask.map((n) => R.masks[n]);
+                    assert(mb && ms && mb.size[0] === w * st.scale && mb.size[1] === h * st.scale && ms.size[0] === w && ms.size[1] === h && x + w <= 1280 && y + h <= 800, `v0.11.63: ${f}'s ${st.file} has both masks, sized to its crop (${w}x${h} x${st.scale})`);
+                    for (const m of [mb, ms]) if (m.bitmap) assert(existsSync(`tools/art/masks/${m.bitmap}`), `v0.11.63: ${f}'s mask outline ${m.bitmap} is stored`);
+                    assert(st.denoise <= 0.9 && !/nude|naked|breast|bust|bath|bare (?:chest|skin)/i.test(st.prompt), `v0.11.63: ${f}'s ${st.file} repaints at most at 0.9 and asks for nothing unclothed`);
+                }
+                prev = st.file;
+            }
+            const pr = steps.at(-1).prompt;
+            if (key !== 'grove_sprout') {
+                assert(/pale blond hair/.test(pr) && /lab coat/.test(pr), `v0.11.63: ${f} draws James`);
+                if (key !== 'lf_old_roots') assert(/primitive spear/.test(pr) && /barefoot/.test(pr), `v0.11.63: ${f}'s Ya is barefoot, with her spear (the Old Roots have James and Yuki only)`);
+                assert(!/scar/.test(pr), `v0.11.63: ${f} puts no scar on anyone (the small figures; Ya's scar no longer lands on Mei Lin)`);
+            }
+            if (form === 'cat') assert(/small white cat with a thin red cord collar/.test(pr) && !/great cat|qipao/.test(pr), `v0.11.63: ${f} draws the small cat`);
+            if (form === 'tiger') assert(/one single huge white great cat/.test(pr) && !/small white cat|qipao/.test(pr), `v0.11.63: ${f} draws the great cat once`);
+            if (form === 'human') assert(pr.startsWith(R.styles.pc) && /cat ears/.test(pr) && /snow-white cat tail/.test(pr) && !/small white cat|great cat/.test(pr), `v0.11.63: ${f} draws her human form in the pc style, her tail white`);
+        }
+        assert(bgs.size === 1, `v0.11.63 (F1): ${key}'s three forms share one background (${[...bgs]})`);
+    }
+    const gen = (k) => R.pictures[k][0].prompt;
+    assert(/fills the picture from the floor to the top edge/.test(gen('guardian_tiger')), 'v0.11.63: the guardian fills the picture');
+    assert(/fills the whole upper half of the picture/.test(gen('ashen_hills_tiger')) && /blots out a third of the stars/.test(gen('ashen_camp')), 'v0.11.63: the dead tree colossal over the Ashen Hills and their camp');
+    assert(/fills a third of the height of the picture/.test(gen('lf_old_roots')), 'v0.11.63: the old roots as thick as houses');
+    assert(/cavern beneath the roots/.test(gen('ship_wreck')) && /teardrop hull/.test(gen('ship_wreck')), 'v0.11.63 (T1): the seed-ship in the cavern under the roots, its teardrop hull, as the scene text');
+    assert(/only as tall as a man's knee/.test(R.pictures.grove_sprout[2].prompt), 'v0.11.63: the saplings knee-high');
+    assert(/crouch/.test(R.pictures.rot_ape.at(-1).prompt) && /gigantic ape/.test(R.pictures.rot_ape.at(-1).prompt), 'v0.11.63: the four crouch far below the rot-ape');
+    const used = new Set(Object.values(R.pictures).flat().flatMap((st) => [st.mask, ...((st.spec && st.spec.layers) || []).map((L) => L.mask)].flat()));
+    assert(Object.keys(R.masks).filter((m) => m.startsWith('b5m_')).every((m) => used.has(m)), 'v0.11.63: every b5m_ mask is used by a recorded step');
+    assert(readdirSync('tools/art/masks').every((f) => Object.values(R.masks).some((m) => m.bitmap === f)), 'v0.11.63: every stored mask outline is used');
 }
 // v0.11.38 (P-b): the form map. A picture whose recipe draws Yuki as the small cat shows only while she is the cat;
 // in tiger or human form the plate is code art (which draws her current form). The list is checked against the recipes, so it cannot drift.
