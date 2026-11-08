@@ -2,6 +2,20 @@
 
 Started 2026-11-08 (v0.11.57), when `history-7.md` reached about 45 KB. Newer than `history-7.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.58 (word for word)
+
+### From "Decided in chat (2026-11-07)"
+
+- **v0.11.55: the first-priority item of the story and mechanics pass (owner 02:04 "upload yourself please, but before that add another important point to the story/mechanics section of the roadmap, this one first priority. eliminate the timer and waiting bar, everything should resolve instantly while moving the clock forward, this eliminating the need for game speeds. no queue needed either."):** added word for word at the top of the roadmap's section, marked first priority, with what it touches (the timed tasks, the queue, the speeds, the bars, the threads) and the first step (a map of what runs on the timer, then options with numbers). Docs only.
+  - **Uploaded by Claude after v0.11.54 and v0.11.55 (owner 02:04 "upload yourself please"):** handover, roadmap, changelog, restore points, `reference.md`, `history-7.md`.
+
+### From "Version notes"
+
+### v0.11.55 — docs: no timer, no queue (first priority of the story and mechanics pass)
+
+- **project/roadmap.md** (the item), **project/handover.md** (Open items; v0.11.52 moved), **project/history-7.md, changelog.md, restore-points.md. sw.js:** VERSION (no game change).
+- **Checks (docs only, rule 2):** `tools/consistency.mjs` and `bash tools/check.sh quick`. Nothing outside the docs reads them except the consistency check (the **Version:** line, kept).
+
 ## Moved from the handover in v0.11.57 (word for word)
 
 ### From "Decided in chat (2026-11-07)"

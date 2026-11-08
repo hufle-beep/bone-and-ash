@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.57 | (this push) | Docs only (the uniformization moved to the later art pass). The game is identical to 0.11.54. |
+| 0.11.58 | (this push) | The Act 1 art, push 2: 15 pictures for the Heart and the Return (`PICTURES` + 15, `YUKI_PICS` + 10, still outside `YUKI_TIGER_PICS` / `YUKI_HUMAN_PICS`). Same save state as 0.11.54; the baseline kept. Rolling back only drops the new pictures (those scenes show code art again). |
+| 0.11.57 | `a0f7ea4` | Docs only (the uniformization moved to the later art pass). The game is identical to 0.11.54. |
 | 0.11.56 | `0e17dcf` | Docs only (condense until the limit, on the roadmap). The game is identical to 0.11.54. |
 | 0.11.55 | `6530afc` | Docs only (the first-priority roadmap item: no timer, no queue). The game is identical to 0.11.54. |
 | 0.11.54 | `62b3e13` | The Act 1 art, push 1: 20 pictures for Fallout and the Blackroot (`PICTURES`, `YUKI_PICS` + 10, the new `YUKI_TIGER_PICS` gate). Same save state as 0.11.53; the baseline kept. Rolling back only drops the new pictures (those scenes show code art again). |

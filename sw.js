@@ -1,5 +1,5 @@
 /* Bone and Ash — offline cache. Bump VERSION on every release so phones pick up the new files. */
-const VERSION = 'bone-ash-0.11.57';
+const VERSION = 'bone-ash-0.11.58';
 /* v0.11.39 (Z2-b): pictures, backgrounds and icons live in their own cache, kept across versions. Its name must not start with
    'bone-ash-' (main.js reads the game's version from that cache's name). Each file is stored under its path plus '?v=' and its
    fingerprint from ART (checked against the bytes before it is stored), and downloaded again only when that fingerprint changes. File names never change: replace a file, then
@@ -16,6 +16,7 @@ const ART = {
     'art/bg/peaks.jpg': '04209ed7b8',
     'art/bg/pine.jpg': '9da50c2600',
     'art/bg/village.jpg': '50ce1392a4',
+    'art/pic/a1_end.webp': '23b8fe0d8a',
     'art/pic/arson.webp': '799703cfc5',
     'art/pic/arson_human.webp': '0e5fe3e019',
     'art/pic/arson_tiger.webp': '09fb022d52',
@@ -52,6 +53,8 @@ const ART = {
     'art/pic/drowned_dead.webp': '4851d4b7b9',
     'art/pic/drowned_wood.webp': '6dcb62d01a',
     'art/pic/elder.webp': '53dbf280d6',
+    'art/pic/elder_duel.webp': '3c82ccb2c8',
+    'art/pic/elder_parley.webp': '2995894298',
     'art/pic/envoy.webp': 'fb6421fcbb',
     'art/pic/forage.webp': 'ce70ccd032',
     'art/pic/forage_human.webp': 'dd9cb33ef6',
@@ -67,8 +70,14 @@ const ART = {
     'art/pic/gift.webp': '050831e63e',
     'art/pic/gift_human.webp': '877a8e2813',
     'art/pic/gift_tiger.webp': '59af0bd777',
+    'art/pic/grove_sprout.webp': '91894c07da',
+    'art/pic/guardian.webp': '64fe8bacd1',
     'art/pic/hairpin.webp': '2fe570b45e',
     'art/pic/healer.webp': '8d7f38896d',
+    'art/pic/heart_core.webp': '126602b201',
+    'art/pic/heart_gate.webp': '18536ad127',
+    'art/pic/heart_hall.webp': 'b72e7810ca',
+    'art/pic/heart_roots.webp': '2be01fd3c4',
     'art/pic/herb_girl.webp': 'ce8d9e9ded',
     'art/pic/herb_slope.webp': 'dde2ae8ac2',
     'art/pic/herb_slope_human.webp': 'c7f3a6b6a5',
@@ -112,6 +121,7 @@ const ART = {
     'art/pic/rats.webp': 'e88067d3c7',
     'art/pic/rats_human.webp': '25ca1b399d',
     'art/pic/rats_tiger.webp': '43a33192f4',
+    'art/pic/return_road.webp': '07397443c8',
     'art/pic/ridge.webp': '8ac3fbe774',
     'art/pic/romance.webp': 'bf6da9159e',
     'art/pic/roof.webp': '1e0c3a558c',
@@ -120,7 +130,12 @@ const ART = {
     'art/pic/root_road.webp': 'ff10bdd591',
     'art/pic/root_wyrm.webp': '266063c3d5',
     'art/pic/rot_ape.webp': '888c7bb5c1',
+    'art/pic/seed.webp': '4e6b244b79',
+    'art/pic/seed_planting.webp': '3e08438ee9',
     'art/pic/shen_qiu.webp': '0ffff3ce3a',
+    'art/pic/ship_bridge.webp': '0a69ad668b',
+    'art/pic/ship_log.webp': 'b7669cb0a9',
+    'art/pic/ship_wreck.webp': '04fcfb1a63',
     'art/pic/stream.webp': '146f618712',
     'art/pic/stream_human.webp': 'e0cfc1300f',
     'art/pic/stream_tiger.webp': 'f730f97690',

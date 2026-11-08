@@ -687,6 +687,22 @@ export const PICTURES = {
     night_watch: 'night_watch',
     trio: 'trio',
     trio_fire: 'trio_fire',
+    // v0.11.58 (Act 1 art, push 2: the Heart and the Return; owner picks S1 P1 D1 W1, 2026-11-08): each file named after its key
+    heart_gate: 'heart_gate',
+    heart_hall: 'heart_hall',
+    heart_roots: 'heart_roots',
+    heart_core: 'heart_core',
+    guardian: 'guardian',
+    seed: 'seed',
+    ship_wreck: 'ship_wreck',
+    ship_bridge: 'ship_bridge',
+    ship_log: 'ship_log',
+    return_road: 'return_road',
+    seed_planting: 'seed_planting',
+    grove_sprout: 'grove_sprout',
+    elder_duel: 'elder_duel',
+    elder_parley: 'elder_parley',
+    a1_end: 'a1_end',
 };
 /**
  * v0.11.38 (P-b): the pictures that draw Yuki. v0.11.49 (Y3, part 1): each has a version per form in YUKI_PIC_FORMS,
@@ -705,7 +721,9 @@ export const YUKI_HUMAN_PICS = new Set(['forest_dawn', 'omnitool', 'clearing', '
 const hasFormPic = (key, form) => YUKI_PIC_FORMS.has(form) && (form !== 'human' || YUKI_HUMAN_PICS.has(key)) && (form !== 'tiger' || YUKI_TIGER_PICS.has(key));
 export const YUKI_PICS = new Set(['james', 'jackals', 'jackals_dead', 'forest_dawn', 'omnitool', 'clearing', 'stream', 'forage', 'hunt', 'camp', 'gao_down', 'village', 'dinner', 'collectors', 'tribulation', 'lights', 'rain', 'crows', 'rats', 'lizard', 'gift', 'bone_field', 'mire', 'hollow', 'roof', 'arson', 'herb_slope', 'drill', 'wolves',
     // v0.11.54 (Act 1 push 1, Y1: every key whose code art draws her): the cat now, the great cat and human in push 4
-    'council', 'ashfall_dawn', 'ya_fight', 'root_road', 'drowned_wood', 'drowned_camp', 'ashen_hills', 'rot_ape', 'night_watch', 'trio_fire']);
+    'council', 'ashfall_dawn', 'ya_fight', 'root_road', 'drowned_wood', 'drowned_camp', 'ashen_hills', 'rot_ape', 'night_watch', 'trio_fire',
+    // v0.11.58 (Act 1 push 2, Y1): the cat now, the great cat and human in push 4
+    'heart_gate', 'heart_hall', 'heart_roots', 'heart_core', 'guardian', 'ship_bridge', 'ship_wreck', 'return_road', 'grove_sprout', 'a1_end']);
 /** The picture file for an art key in Yuki's current form, or '' when the key has none in that form (code art). */
 export function pictureOf(key, form = C2.getYukiForm()) {
     const p = PICTURES[key];
