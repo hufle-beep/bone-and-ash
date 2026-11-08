@@ -361,14 +361,15 @@ print(json.dumps({"n": len(R['masks']), "bad": bad, "bitmaps": sum('bitmap' in m
     try { out = execFileSync(process.execPath, ['tools/consistency.mjs'], { cwd: ROOT, encoding: 'utf8' }); } catch (e) { code = e.status ?? 1; out = String(e.stdout || e); }
     assert(code === 0 && /handover \d+ bytes/.test(out), `docs: tools/consistency.mjs passes on the real repo, with the handover's size (exit ${code}: ${out.trim().split('\n').pop()})`);
 }
-// v0.11.74 (group i round 1, I1; v0.11.75: round 2's wave 1, W1): every group i candidate in project/research.md is placed in the roadmap, and every roadmap line marked "from group i" (or "from group i round 2") names a real one
+// v0.11.74 (group i round 1, I1; v0.11.75: round 2's wave 1, W1; v0.11.76: wave 2, V1): every group i candidate in project/research.md is placed in the roadmap, and every roadmap line marked "from group i" (or "from group i round 2") names a real one
 {
     const research = readFileSync(path.join(ROOT, 'project/research.md'), 'utf8');
     const roadmap = readFileSync(path.join(ROOT, 'project/roadmap.md'), 'utf8');
     const a = research.indexOf('## Group i — the games, round 1');
     const r2 = research.indexOf('## Group i, round 2');
-    const b = research.indexOf('### Wave 2: the cultivation games');
-    assert(a > 0 && r2 > a && b > r2, 'research: group i round 1, round 2 and its pending wave 2 exist, in that order');
+    const w2 = research.indexOf('### Wave 2: cultivation and xianxia games');
+    const b = research.indexOf('\nSources: round 1,', w2);
+    assert(a > 0 && r2 > a && w2 > r2 && b > w2, 'research: group i round 1, round 2, its wave 2 and the Sources line exist, in that order');
     const rows = new Set([...research.slice(a, b).matchAll(/^\| (\d+) \|/gm)].map((m) => Number(m[1])));
     const refs = new Set();
     for (const [, list] of roadmap.matchAll(/from group i(?: round 2)?; `research\.md` ([^)]*)\)/g)) { // the marker's own list, not the other groups' numbers in the line's text
@@ -377,10 +378,10 @@ print(json.dumps({"n": len(R['masks']), "bad": bad, "bitmaps": sum('bitmap' in m
     const nowhere = [...research.slice(a, b).matchAll(/^\| (\d+) \|.*\| nowhere[^|]*\|$/gm)].map((m) => Number(m[1]));
     const missing = [...rows].filter((n) => !refs.has(n) && !nowhere.includes(n));
     const unknown = [...refs].filter((n) => !rows.has(n));
-    assert(rows.size >= 76 && Math.min(...rows) === 43 && Math.max(...rows) === 42 + rows.size, `research: group i numbers from #43, none skipped (${rows.size} rows, up to #${Math.max(...rows)})`);
+    assert(rows.size >= 104 && Math.min(...rows) === 43 && Math.max(...rows) === 42 + rows.size, `research: group i numbers from #43, none skipped (${rows.size} rows, up to #${Math.max(...rows)})`);
     assert(missing.length === 0, `roadmap: every group i candidate placed or marked "nowhere" (missing: ${missing.join(', ') || 'none'})`);
     assert(unknown.length === 0, `roadmap: every "from group i" number is a group i row (unknown: ${unknown.join(', ') || 'none'})`);
-    for (const f of ['a-loops', 'b-narrative', 'c-incrementals', 'd-closed', 'brief', 'e-dating', 'f-vn', 'brief-2']) assert(existsSync(path.join(ROOT, `project/research/group-i-${f}.md`)), `research: project/research/group-i-${f}.md kept`);
+    for (const f of ['a-loops', 'b-narrative', 'c-incrementals', 'd-closed', 'brief', 'e-dating', 'f-vn', 'brief-2', 'g-idle', 'h-rpg', 'i-chinese', 'brief-3']) assert(existsSync(path.join(ROOT, `project/research/group-i-${f}.md`)), `research: project/research/group-i-${f}.md kept`);
 }
 rmSync(TMP, { recursive: true, force: true });
 

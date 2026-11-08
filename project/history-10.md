@@ -2,6 +2,24 @@
 
 Started 2026-11-08 (v0.11.74), when `history-9.md` reached about 45 KB. Newer than `history-9.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.76 (word for word)
+
+### From "Decided in chat (2026-11-07)"
+
+- **v0.11.73: the story and mechanics pass, group h, the analysis of Selene's and the SillyTavern repositories (read-only first, both repos whole, by two Opus helper agents, the main claims checked by Claude; 42 candidates; options H1 / H2 / H3, K1 / K2 / K3; owner 17:54 "H1, K1. but I would also like to see what you didn't list, like Selene does."):**
+  - **Picked:** **H1**, docs and checks, no game change: `project/lore.md` (rule 10 names it); the docs' size rules in `tools/consistency.mjs` (`tools/lib/docs.mjs`); rule 5's fallback branches; `project/research.md` (Selene's layout) and `CREDITS.md`; the README; every other finding placed in the roadmap, marked "new in v0.11.73, from group h" (where each went: `research.md`). **K1**: the game's canon stands; the SillyTavern canon that differs and the lore that could be used are in `lore.md`, not adopted until the owner picks. H2 (the text lint now), H3 (roadmap only), K2 (James 168 cm), K3 not picked.
+  - **"What you didn't list":** the whole list (every candidate not in the summary, and the considered-and-skipped list) sent in chat at 17:54 and kept in `research.md`, group h.
+  - **No Fable step** (docs and tools only; rule 9 is for game logic or balance, rule 10 for story texts).
+  - **Also:** after v0.11.72 Claude uploaded the 7 changed project docs (handover, roadmap, roadmap-done, changelog, restore-points, history-9, reference) to the claude.ai project itself (owner "upload the files"); `ab6b61b` filled in for 0.11.72 in the changelog and restore points. The claude.ai project's Instructions field mirrors `CLAUDE.md`: rules 5 and 10 changed (the new text given in chat; the owner pastes it).
+  - **Checks:** see the version note.
+
+### From "Version notes"
+
+## v0.11.73 — the story and mechanics pass, group h: the analysis of Selene's and the SillyTavern repositories (H1 + K1)
+
+- **project/lore.md, research.md, CREDITS.md, tools/lib/docs.mjs** (new), **README.md, tools/consistency.mjs, tests/tools.test.mjs** (v0.11.73 block), **CLAUDE.md** (rules 5, 10), **working-agreement.md, restore-points.md** (Fallback branches), **sw.js, tests/README.md; project docs** (v0.11.70 to `history-9.md`). The game identical to 0.11.72; saves unchanged.
+- **Checks:** tools and docs only (rule 2): `node tests/tools.test.mjs`, `node tools/consistency.mjs` and `bash tools/check.sh quick`. How it interacts: no game file, save or bot code changed, so the game and the bot numbers can't move; the new check reads only the docs' sizes and the roadmap's first lines. The one thing that can now break a push: a handover at 35,000 bytes or more, or a roadmap whose "Last updated" line names another version, fails `check.sh` (intended).
+
 ## Moved from the handover in v0.11.75 (word for word)
 
 ### From "Decided in chat (2026-11-07)"
