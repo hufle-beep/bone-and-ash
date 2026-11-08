@@ -2,6 +2,24 @@
 
 Started 2026-11-08 (v0.11.74), when `history-9.md` reached about 45 KB. Newer than `history-9.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.81 (word for word)
+
+### From "Decided in chat (2026-11-07)"
+
+- **v0.11.78: `research.md` split into parts (owner 20:44 "can you somehow trim the research or split the upload into two chunks?": after v0.11.77 the project tool couldn't upload `research.md`, 87 KB, about 35k tokens against its about 25k a read, so it was sent to the owner as a file; options S1 (split in the repo, like the history files) / S2 (split only the upload) / S3 (trim: too little alone); owner 20:46: "S1, and also do the same for other docs if they grow too big, but run a trimming pass over them first, but you have to make sure nothing gets lost in the exchange. go."):**
+  - **Picked:** **S1**: `research.md` keeps its header (with a "Parts" note), the licence table (every round's rows), group h and group i round 1 (45,824 bytes); `research-2.md` holds group i round 2, both waves (41,902 bytes), moved word for word; checked by putting the two parts back together: identical to the old file (86,164 characters). "`research.md` #NN" in the roadmap and elsewhere means the series. `tools/lib/docs.mjs`: a note when the newest research part passes 45,000 bytes, and when any project doc passes 60,000 (too big for the project tool in one read). The test reads group i across the parts. S2, S3 not picked.
+  - **The owner's rule for other docs (20:46), in `working-agreement.md`:** when a doc grows too big for the project tool, a trimming pass first, then a split into parts, as options in a docs push (rule 1); nothing lost (what a trim takes out moves word for word elsewhere, or is a true duplicate named in the push; every split checked against the original). Today no other doc is past 60,000 bytes (the roadmap 51 KB, the changelog 48 KB are the nearest). Read as: the trim pass applies to the docs that grow too big from now on; `research.md` was split as S1 described, without trimming.
+  - **No Fable step** (docs, a check and a test).
+  - **Also:** after v0.11.77 Claude uploaded 6 changed docs to the claude.ai project itself (handover, roadmap, changelog, restore-points, lore, history-10; owner 20:39 "then upload"); `research.md` was too big for the tool and went to the owner as a file (superseded by this push's upload of both parts); `54b7b36` filled in for 0.11.77; v0.11.75's notes moved to `history-10.md`.
+  - **Checks:** see the version note.
+
+### From "Version notes"
+
+## v0.11.78 — `research.md` in parts (S1)
+
+- **project/research.md** (the header's "Parts" note, the pointer at the end), **project/research-2.md** (new: group i round 2, word for word), **tools/lib/docs.mjs** (`RESEARCH_MAX`, `DOC_TOOL_MAX`, `newestResearch`), **tools/consistency.mjs** (the research parts' and every doc's sizes), **tests/tools.test.mjs** (the docs block's new notes; group i read across the parts), **project/working-agreement.md** (the research parts; the owner's rule for docs that grow too big), **project/reference.md** (the files row), **sw.js, tests/README.md; project docs** (v0.11.75 to `history-10.md`). The game identical to 0.11.77; saves unchanged.
+- **Checks:** docs, a check and a test only (rule 2): `node tests/tools.test.mjs`, `node tools/consistency.mjs` and `bash tools/check.sh quick`; one mutation tried by hand (a wave 2 number taken off its roadmap line: the test fails, then restored). How it interacts: no game file, save or bot code changed, so the game and the bot numbers can't move; the new notes are log lines, never failures. What can now break a push: a gap in the research parts' numbering or a part that doesn't point on to the next (intended).
+
 ## Moved from the handover in v0.11.80 (word for word)
 
 ### From "Decided in chat (2026-11-07)"

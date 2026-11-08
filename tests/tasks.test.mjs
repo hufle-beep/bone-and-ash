@@ -12,6 +12,7 @@ import { wakeDay, exLevel, sleepUntil, clockParts } from '../js/core/game.js';
 import { yukiSpeed, setDryClone, dryClone, showPicked } from '../js/core/tasks.js';
 import { e8Hours, ecHours, jnHours } from '../js/story/meridians.js';
 import { serialize, deserialize } from '../js/core/game.js';
+import { PEOPLE_FIGHTS, combatHooks } from '../js/core/game.js'; // v0.11.81
 import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, advance, STARVE_HP_PER_HOUR, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1, bumpRel as relBump, startActCoil, REL_CATCHUP } from '../js/core/game.js';
 import { canPrimary, canColGroup, colGroupsOpen, btTarget, COL_GROUPS, priHours, colHours, merMinutesOf } from '../js/story/meridians.js';
 import { sceneView, choose, goTo, wasPicked, isMenuScene, notePicked, seenBefore, noteSeen } from '../js/core/story.js';
@@ -1111,6 +1112,20 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
         taskState(w).adapt['wild_forage:2'] = Math.round((0.75 * k.dc - k.value) * 10) / 10;
         const r = runTask(w, SCENES, 'wild_forage:2');
         assert(cardCheck(w, 'wild_forage:2', c) && r.lines.some((l) => /— partly/.test(l)) && splitReply(r.lines).reply.some((l) => /bees are still arguing/.test(l)), `v0.11.69 (P1): a partial work card keeps its reply (${r.lines})`);
+    }
+}
+// v0.11.81 (owner pick T1): the Tan brothers (`lf_bandits`) fight as people: no beasts' +0.5, a loss keeps "Robbed"
+{
+    const ch = SCENES.lf_wanderers.choices.find((c) => c.combat);
+    for (const who of ['lf_bandits', 'lf_rogue']) {
+        const g = ensureBars(newGame(8101, { closed: true })); g.flags.longforest = true; g.flags.lf_human = who;
+        const enc = combatHooks.before(g, ch.combat(g)); // prepared as the game does (the Long Forest's scaling)
+        assert(enc.id === who && enc.lose === 'lf_human_lost' && PEOPLE_FIGHTS.has(enc.id), `T1: every trail fight against people is a people fight (${who})`);
+        startCombat(g, enc);
+        assert(g.combat.enemies.every((e, i) => e.dc === enc.enemies[i].dc && e.atk === enc.enemies[i].atk), `T1: no beasts' +0.5 on ${who}`);
+        g.james.hp = 1; g.combat.enemies.forEach((e) => { e.hp = 999; e.atk = 99; });
+        let o = null; for (let t = 0; t < 50 && g.combat; t++) o = combatStep(g, 'guard');
+        assert(o?.done === 'lose' && o.next === 'lf_human_lost' && g.coil.why !== 'beast', `T1: losing to ${who} on an active Coil leads to "Robbed", not the Coil's end (${o?.next})`);
     }
 }
 // v0.11.71 (owner picks Y1 + C1 + X1; Yuki's texts Fable's): Yuki switches food when her kind is full; "Cultivate until
