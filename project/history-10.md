@@ -2,6 +2,23 @@
 
 Started 2026-11-08 (v0.11.74), when `history-9.md` reached about 45 KB. Newer than `history-9.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.80 (word for word)
+
+### From "Decided in chat (2026-11-07)"
+
+- **v0.11.77: flight (owner 20:33: "to the story beats I want to add something about James' people. They gain flight right out from the first breakthrough, so they can fly from Foundation Establishment. James is a natural. And like with everything else, he is completely unbothered about the bafflement of others at his using it like second nature. As he advances through the realms his speed increases, his maneuverability increases with GU. Yuki can fly too, since her cultivation is the same as James'. This world has people who can fly too, but it comes at much higher realms. and is slower and clumsier."; nothing about flight in the game or the lore before (only the mire fowl fly); options F1 / F2 / F3 and two questions (the locals' realm a / b / c, a limit); owner 20:39: "F1, Golden Core for locals. James and Yuki have no limit except for realm and GU. They ride the local Qi flows as if they was swimming in river or ocean currents, it's as natural a walking. It's the same for the locals too, just slower and clumsier, as established. go. then upload and create handover message"):**
+  - **Picked:** **F1**, docs only: the canon in `lore.md` (James, Yuki, the world); the roadmap's group e line (the story: first a list of every scene where flight matters, the first flight each Coil, the bafflement, Yuki, flight as evidence for #122), group d's (the mechanics: walks, escapes, chasing, maybe fights; numbers first) and section 2's (the walk times, measured first). F2 (the beats right after d) and F3 (roadmap only) not picked; locals' realm **a, Golden Core** (b Nascent Soul, c the Immortal realms not picked).
+  - **No Fable step** (docs only; the flight texts are Fable's, in group e).
+  - **Also:** after this push Claude uploads the changed docs of v0.11.76 and v0.11.77 to the claude.ai project itself (owner 20:39 "then upload") and writes a handover message for a new chat; `2f1f55e` filled in for 0.11.76; v0.11.74's notes moved to `history-10.md`.
+  - **Checks:** see the version note.
+
+### From "Version notes"
+
+## v0.11.77 — flight, the canon recorded (F1)
+
+- **project/lore.md** (flight: James, Yuki, the world), **project/roadmap.md** (three lines), **tests/tools.test.mjs** (the flight block), **sw.js, tests/README.md; project docs** (v0.11.74 to `history-10.md`). The game identical to 0.11.76; saves unchanged.
+- **Checks:** docs and a test only (rule 2): `node tests/tools.test.mjs`, `node tools/consistency.mjs` and `bash tools/check.sh quick`. How it interacts: no game file, save or bot code changed, so the game and the bot numbers can't move; the new test reads only `lore.md` and the roadmap. What can now break a push: the flight canon or one of its three roadmap lines removed (intended; move the test with them when they are built).
+
 ## Moved from the handover in v0.11.79 (word for word)
 
 ### From "Decided in chat (2026-11-07)"

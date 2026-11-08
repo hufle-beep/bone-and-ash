@@ -7,6 +7,8 @@
 // v0.11.39: tools/arthash.mjs (the ART fingerprints in sw.js) on a made-up folder and on the real repo.
 // v0.11.62: tools/art/patch.py on a made-up picture.
 // v0.11.22: tools/leftovers.mjs on small made-up inputs (every kind found, kept entries skipped) and tests/lib/seen.mjs's watch.
+// v0.11.80: the fight lab (tools/fightlab.mjs, tools/lib/fightlab.mjs): its summary on made-up samples, one fight on a real
+// state, and a tiny real run (1 worker = 2 workers; the bots' own fights the same with and without the lab).
 import { spawn, execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -19,6 +21,9 @@ import { strip, scanFunctions, scanFlags, flagFindings, scanCss, scanMarkers, sc
 import { seen as touched, track, noteView, seenOut } from './lib/seen.mjs'; // v0.11.22
 import { stepLine, flagLines, leftoverFound, modelDigest } from '../tools/lib/report.mjs'; // v0.11.28
 import { artFiles, fingerprint, readArt, checkArt, writeArt, ART_RE } from '../tools/arthash.mjs'; // v0.11.39
+import { TACTICS, FIXED, rank, rankLabel, stream, isOneMove, playFight, sampleFight, sampleOrder, tacticStats, thirds, guNeeded, summarize, summarizeAll, tableLines } from '../tools/lib/fightlab.mjs'; // v0.11.80
+import { SCENES } from '../js/story/prologue.js'; // v0.11.80: the story's hooks, for the fight lab's real fight
+import { newGame, ensureBars, combatHooks, startCombat, combatStep } from '../js/core/game.js'; // v0.11.80
 import { docFindings, newestHistory, newestResearch, HANDOVER_MAX, HISTORY_MAX, RESEARCH_MAX, DOC_TOOL_MAX } from '../tools/lib/docs.mjs'; // v0.11.73; v0.11.78 the research parts
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -38,6 +43,14 @@ const bot = (file, games, workers, out, extra = []) => new Promise((resolve) => 
     ch.stderr.on('data', (d) => { log += d; });
     ch.on('close', (code) => resolve({ code, log }));
 });
+// v0.11.80: the fight lab's tiny real runs (1 and 2 workers) and the same bot games without it
+const labRun = (w) => new Promise((resolve) => {
+    const out = path.join(TMP, `lab-${w}.json`);
+    const ch = spawn(process.execPath, ['tools/fightlab.mjs', '--games', '12', '--workers', String(w), '--min', '1', '--json', out], { cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'] });
+    let log = ''; ch.stdout.on('data', (d) => { log += d; }); ch.stderr.on('data', (d) => { log += d; });
+    ch.on('close', (code) => { let j = null; try { j = JSON.parse(readFileSync(out, 'utf8')); } catch { /* checked below */ } resolve({ code, log, j }); });
+});
+const labPending = Promise.all([labRun(1), labRun(2), bot('tests/tasks.test.mjs', 12, 1, path.join(TMP, 'lab-plain.json'), ['--bots-only'])]);
 const pending = RUNS.flatMap(([name, file, games, extra]) => [1, 2].map((w) => bot(file, games, w, path.join(TMP, `${name}-${w}.json`), extra).then((r) => ({ name, w, ...r }))));
 
 // 1. mergeInto: numbers add, max* keys take the largest, objects merge per key, { __set } → Set union
@@ -410,6 +423,73 @@ print(json.dumps({"n": len(R['masks']), "bad": bad, "bitmaps": sum('bitmap' in m
     const r8 = (rules.match(/^8\. .*$/m) || [''])[0];
     assert(/Claude uploads the changed `project\/` docs/.test(r8) && !/asks\*\* whether/.test(r8) && /project\/research\/` stays repo only/.test(r8), 'CLAUDE.md: rule 8 says Claude uploads the changed docs itself, research/ repo only, no question');
     assert(readFileSync(path.join(ROOT, 'project/working-agreement.md'), 'utf8').includes('**Since v0.11.79 (owner 2026-11-08 20:52'), 'working-agreement: the mirror rule of v0.11.79 is there');
+}
+// v0.11.80 (owner pick L1): the fight lab
+{
+    // made-up samples: two fights; `a` easy under everything, `b` won only by blade (guard never pays), darts and spear never open
+    const S = (id, power, gu, res, i = 0) => ({ id, power, gu, cu: 1, realm: 0, seed: i, at: 0, res: { smart: null, random: null, blade: null, dart: null, needle: null, spear: null, guard: null, ...res } });
+    const all = (w) => Object.fromEntries(Object.keys(TACTICS).map((t) => [t, [w, 4, 80]]));
+    const easy = Array.from({ length: 12 }, (_, i) => S('a', i, 5 + i, all(1), i));
+    const hard = Array.from({ length: 12 }, (_, i) => S('b', i, 3 + i, { smart: [i >= 6 ? 1 : 0, 6, 50], random: [0, 9, 0], blade: [1, 5, 70], dart: [1, 5, 70], needle: [0, 9, 0], spear: [1, 5, 70], guard: [i % 2, 7, 60] }, 100 + i));
+    const sa = summarize('a', easy), sb = summarize('b', hard);
+    assert(rank({ tier: 2, level: 5 }) === 15 && rankLabel(15) === 'T2 L5' && rankLabel(1) === 'T1 L1' && rankLabel(100) === 'T10 L10', 'fightlab: ranks and their labels');
+    assert(sa.flags.includes('easy') && !sa.flags.includes('one-tactic') && sa.flags.includes('blade-best'), `fightlab: an easy fight is flagged easy, not one-tactic (${sa.flags})`);
+    assert(sb.flags.includes('one-tactic') && sb.flags.includes('guard-never') && sb.flags.includes('blade-best') && !sb.flags.includes('easy'), `fightlab: one tactic always wins, guard never pays (${sb.flags})`);
+    assert(sb.best.join() === 'blade,dart,spear' && sb.bestShared.join() === 'blade,dart,spear' && sb.same.blade.win === 100 && sb.same.guard.win === 50 && sb.same.guard.hp === 60, `fightlab: the best fixed tactics, fewest rounds first, and their numbers (${sb.best})`);
+    const th = thirds(hard);
+    assert(th.map((p) => p.length).join() === '4,4,4' && th[0].every((s) => s.power < 4) && th[2].every((s) => s.power >= 8), 'fightlab: thirds by power (weak, middle, strong)');
+    assert(sb.third.map((v) => v.win).join() === '0,50,100', `fightlab: smart's win % by thirds (${sb.third.map((v) => v.win)})`);
+    assert(guNeeded(hard, 90, 3) === 9 && guNeeded(hard, 90, 20) === null, `fightlab: the GU from which smart wins 90 % (${guNeeded(hard, 90, 3)}), none with too few samples`);
+    const t1 = tacticStats(hard, 'needle'), t0 = tacticStats(easy.map((s) => ({ ...s, res: { ...s.res, spear: null } })), 'spear');
+    assert(t1.win === 0 && t1.hp === null && t0 === null, 'fightlab: a tactic never won has no HP left; one never open has no stats');
+    const few = summarize('c', hard.slice(0, 5));
+    assert(few.same === null && few.best.length === 0 && !few.flags.includes('blade-best'), 'fightlab: too few same states: no comparison flags');
+    const sum = summarizeAll([...hard, ...easy, S('z', 1, 1, all(1))], 10);
+    assert(sum.fights.map((f) => f.id).join() === 'a,b' && sum.few.join() === 'z (1)', 'fightlab: fights in name order, the thin ones listed apart');
+    const lines = tableLines(sum).join('\n');
+    assert(/^a\s+12 /m.test(lines) && /won at least 99% under every tactic: 1 of 2 \(a\)/.test(lines) && /tied for it: blade 2, dart 2, needle 1, spear 2, guard 1/.test(lines) && /Too few samples.*z \(1\)/.test(lines), 'fightlab: the table, the same-states block and the flags as text');
+    const close = summarize('d', Array.from({ length: 12 }, (_, i) => S('d', i, 5, { blade: [i ? 1 : 0, 4, 70], dart: [1, 4, 80], needle: [1, 4, 70], spear: [1, 4, 70], guard: [1, 9, 90] }, 200 + i)));
+    assert(close.best.join() === 'dart,needle,spear,guard' && close.bestShared.join() === 'dart' && !close.flags.includes('blade-best'), `fightlab: ties on rounds broken by HP left (blade at 91.7% out of the best) (${close.best})`);
+    const tie = summarize('e', Array.from({ length: 12 }, (_, i) => S('e', i, 5, all(1), 300 + i)));
+    assert(tie.bestShared.length === 5, 'fightlab: a full tie is shared by every fixed tactic');
+    const tl = tableLines({ fights: [close, tie], few: [] }).join('\n');
+    assert(/ 91\.7% r4/.test(tl) && /alone: blade 0, dart 1,.*tied for it: blade 1, dart 1, needle 1, spear 1, guard 1 \(of 2 fights\)/.test(tl), 'fightlab: win % to one decimal (91.7, not 92); the quickest tally alone and tied');
+    assert(isOneMove('Error\n    at combatHooks.before (x)\n    at instantWin (file:///g/js/core/game.js:645:5)') && !isOneMove('Error\n    at startCombat (file:///g/js/core/game.js:654:51)'), 'fightlab: the one-move finish told from a real fight by its call');
+    assert([...hard].reverse().sort(sampleOrder).map((s) => s.seed).join() === hard.map((s) => s.seed).join(), 'fightlab: samples sort into one fixed order');
+    const r1 = stream(7), r2 = stream(7);
+    assert(Array.from({ length: 20 }, () => r1(6)).join() === Array.from({ length: 20 }, () => r2(6)).join(), 'fightlab: the random stream repeats for the same seed');
+    assert(FIXED.every((t) => TACTICS[t]) && !FIXED.includes('smart') && !FIXED.includes('random'), 'fightlab: the fixed tactics are tactics, smart and random not among them');
+
+    // one fight on a real state: the jackals, prepared by the story's hook, played blade only by hand and by the lab
+    const prepare = combatHooks.before, lose = combatHooks.lose;
+    const g = ensureBars(newGame(4242, { closed: true }));
+    g.james.gu.level = 6; g.james.skills['Convergence Use'].level = 8;
+    const ch = SCENES.night_attack.choices.find((c) => c.combat);
+    const enc = prepare(g, ch.combat(g));
+    const before = JSON.stringify(g);
+    const lab = playFight(g, enc, 'blade', 1);
+    const h = structuredClone(g); combatHooks.before = null; combatHooks.lose = null;
+    startCombat(h, structuredClone(enc)); let o = null, t = 0; for (; t < 400 && h.combat; t++) { o = combatStep(h, 'blade'); if (o?.done) break; }
+    combatHooks.before = prepare; combatHooks.lose = lose;
+    assert(lab && lab.win === (o?.done === 'win') && lab.rounds === t + 1, `fightlab: the lab's fight = the same fight by hand (${JSON.stringify(lab)} vs ${o?.done} in ${t + 1})`);
+    assert(JSON.stringify(g) === before && combatHooks.before === prepare && combatHooks.lose === lose, 'fightlab: the state it copied is untouched, the story hooks put back');
+    assert(playFight(g, enc, 'spear', 1) !== null && JSON.stringify(playFight(g, enc, 'random', 9)) === JSON.stringify(playFight(g, enc, 'random', 9)), 'fightlab: the spear open at T1 L8; random repeats for one seed');
+    const weak = structuredClone(g); weak.james.skills['Convergence Use'].level = 2;
+    const sw = sampleFight(weak, enc, 3);
+    assert(sw.res.dart === null && sw.res.spear === null && sw.res.blade && sw.id === 'jackals' && sw.gu === 6 && sw.cu === 2, 'fightlab: darts and the spear not counted where James can\'t sing them');
+
+    // a tiny real run: 1 worker = 2 workers, and the bots' own fights are the same as without the lab
+    const [l1, l2, plain] = await labPending;
+    assert(l1.code === 0 && l2.code === 0 && l1.j && l2.j, `fightlab: the tiny runs finish (exit ${l1.code} / ${l2.code})\n${l1.log.slice(-400)}`);
+    if (l1.j && l2.j) {
+        assert(JSON.stringify(l1.j.fights) === JSON.stringify(l2.j.fights) && l1.j.states === l2.j.states && l1.j.states > 50, `fightlab: 1 worker = 2 workers (${l1.j.states} / ${l2.j.states} fight states)`);
+        assert(l1.j.fights.some((f) => f.id === 'ya_brawl') && l1.j.fights.some((f) => f.id === 'jackals'), 'fightlab: the tiny run meets the jackals and Ya');
+        let pj = null; try { pj = JSON.parse(readFileSync(path.join(TMP, 'lab-plain.json'), 'utf8')); } catch { /* below */ }
+        const norm = (o) => JSON.stringify(o, (k, v) => (v && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.keys(v).sort().map((x) => [x, v[x]])) : v));
+        for (const k of ['fights', 'deaths', 'byCoil']) assert(plain.code === 0 && pj && norm(pj[k]) === norm(l1.j.bots[k]) && norm(pj[k]) === norm(l2.j.bots[k]), `fightlab: the bots' own ${k} are the same with and without the lab (1 and 2 workers)`);
+        assert(Number.isInteger(l1.j.oneMove) && l1.j.oneMove === l2.j.oneMove, `fightlab: one-move finishes counted apart, not as fights (${l1.j.oneMove})`);
+        assert(/^Fight lab: 12 bot games/m.test(l1.log) && /Flags:/.test(l1.log), 'fightlab: the report prints its header and flags');
+    }
 }
 rmSync(TMP, { recursive: true, force: true });
 

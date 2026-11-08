@@ -111,6 +111,7 @@ The bible and the contract between the four part files are at the top of `js/sto
 | `tools/consistency.mjs`, `tests/engine.test.mjs` | v0.11.5: the offline file list and the version in every doc (in `check.sh`); the engine's own formula tests on our copy. v0.11.73: the docs' size rules (`tools/lib/docs.mjs`: the handover under 35,000 bytes and the roadmap's "Last updated" version, failures; the newest history file past 45,000 bytes, a note), tested in `tests/tools.test.mjs`. |
 | `tests/data.test.mjs`, `tools/lint.mjs`, `tools/browser.py`, `tools/snap.mjs` | v0.11.7: data integrity (in the check); the content lint (log only); the browser test (full check only); fresh test saves (`node tools/snap.mjs`, by hand, for each new save format). |
 | `tools/bots.mjs` | Balance numbers only (v0.11.1): the tasks test's bots, summary per Coil with the beast share of deaths; `--games`, `--seed`, `--sensible`, `--workers`. |
+| `tools/fightlab.mjs`, `tools/lib/fightlab.mjs` | The fight lab (v0.11.80, owner pick L1; `research.md` #52): plays the tasks test's bot games and every fight they start again on copies under seven tactics (smart, random, blade, darts, needle, spear, guard + blade); per fight win %, median rounds and HP left, smart by thirds of James's power, the GU from which smart wins 90%, the fixed tactics on the same states, four flags; the bots' own games play as without it; `--games`, `--fight`, `--min`, `--workers`, `--json`. A tool, not a check step. |
 | `.github/workflows/restore-points.yml` | Tags the newest 5 commits on every push (`restore/<date>-<commit>`), copied from Selene. |
 
 **Run every check:**
@@ -119,6 +120,7 @@ bash tools/check.sh          # full, after every build and before the docs and t
 bash tools/check.sh quick    # while building
 node tools/check.mjs --verbose   # the full check with the old long output (v0.11.28)
 node tools/bots.mjs --games 1000 --sensible   # balance numbers only
+node tools/fightlab.mjs --fight rot_ape       # the fight lab (v0.11.80): every tactic on one fight; no --fight: every fight
 node tools/sanity.mjs --update                # new baseline, only after the owner's go on an intended change
 ```
 **Browser check:** Playwright is preinstalled in the cloud session; `python3 tools/browser.py` (part of the full check since v0.11.7) taps through both modes at 390×844.
