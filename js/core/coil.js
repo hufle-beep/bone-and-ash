@@ -63,7 +63,38 @@ export function coilReport(g) {
     for (const [id, f] of Object.entries(g.tasks.fam || {})) { const t = famTier(f); if (t > famTier(s.fam[id] || 0)) tiers[t]++; }
     for (let t = 1; t < 4; t++) if (tiers[t]) gained.push(`${tiers[t]} card${tiers[t] > 1 ? 's' : ''} ${FAM[t].name}`);
     const known = c.known.map((f) => REMEMBER[f] || KNOW_TEXT[f]).filter(Boolean);
-    return { n: c.n, why: c.why, gained, known };
+    // v0.11.72 (owner pick S1): the cards that grew this Coil and are closest to their next tier (up to 3)
+    const near = [];
+    for (const [id, f] of Object.entries(g.tasks.fam || {})) {
+        const t = famTier(f), next = FAM[t + 1];
+        if (!next || f <= (s.fam[id] || 0)) continue;
+        near.push({ id, f, at: next.at, tier: next.name, frac: (f - FAM[t].at) / (next.at - FAM[t].at) });
+    }
+    near.sort((a, b) => b.frac - a.frac || a.id.localeCompare(b.id));
+    return { n: c.n, why: c.why, gained, known, near: near.slice(0, 3) };
+}
+
+/* ---------- v0.11.72 (owner pick T1): a target per act and the personal best ---------- */
+/** Target Coils per act (0 the prologue, 1 Act 1), counted from Day 1 of the pass (the owner's Completionist targets). */
+export const TARGETS = { 0: 2, 1: 3 };
+/** The Coils this pass of the whole game has taken so far: a new game or a whole-game rewind starts a pass (`stats.pass`). */
+export const passCoils = (g) => Math.max(1, (g.coil?.n || 1) - (g.stats?.pass || 1) + 1);
+/** An act cleared: keep the fewest Coils (`stats.best`, kept across every rewind); a line for Results when it is a new best. */
+export function noteClear(g, act) {
+    if (!g.coil || !g.stats) return [];
+    // the review's L4 (R1): a save from before v0.11.72 that already went round the whole game (it crossed before, no `pass`)
+    // doesn't know where this pass began: no best until its next whole-game rewind starts a known one
+    if (act === 0 && g.stats.pass == null && g.stats.coils0 != null) g.stats.passUnknown = true;
+    if (g.stats.passUnknown) return [];
+    const k = passCoils(g), best = g.stats.best || (g.stats.best = {});
+    if (best[act] != null && best[act] <= k) return [];
+    best[act] = k;
+    return [`${act === 1 ? 'Act 1' : 'Prologue'} cleared in ${k} Coil${k === 1 ? '' : 's'}: a new best${k <= TARGETS[act] ? ' ★' : ''} (target ${TARGETS[act]}).`];
+}
+/** The targets and the best, for the Coil screen and the James tab. */
+export function targetsText(g) {
+    const b = g.stats?.best || {}, one = (act) => (b[act] != null ? `${b[act]} Coil${b[act] === 1 ? '' : 's'}` : 'not yet');
+    return `the prologue by Coil ${TARGETS[0]}, Act 1 by Coil ${TARGETS[1]}, counted from Day 1. Your best: prologue ${one(0)}, Act 1 ${one(1)}.`;
 }
 
 /**
@@ -94,6 +125,7 @@ export function rewind(g, { to = 'act' } = {}) {
     base.rel = rel;
     base.tasks = { queue: [], fam: clone(g.tasks.fam || {}), use: clone(g.tasks.use || {}), adapt: clone(g.tasks.adapt || {}), yuki: { on: !!g.tasks.yuki?.on, progress: 0 } };
     base.stats = clone(g.stats);
+    if (whole) { base.stats.pass = c.n + 1; delete base.stats.passUnknown; } // v0.11.72 (T1): the whole game again starts a new pass
     if (g.picked) base.picked = clone(g.picked); // v0.11.32 (P2-a): picked choices are remembered across every rewind
     if (g.seen) base.seen = clone(g.seen); // v0.11.35 (P1-a): so are the scenes read
     base.log = g.log.slice(-150);

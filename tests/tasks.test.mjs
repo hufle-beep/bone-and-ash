@@ -1193,6 +1193,56 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
         g.minutes = 1440 + 10 * 60; Object.assign(g.flags, { v_bone: true, v_mire: true, v_hollow: true }); assert(!ex.show(g), 'X1: Coil 2: gone once the three places are seen');
     }
 }
+// v0.11.72 (owner picks S1 + N1 + P0 + T1, the copy-over push 5): the Coil screen's closest cards and what carries over,
+// Selene's next-step line on the prologue's task screens, a target per act and the personal best.
+{
+    const { nextStep } = await import('../js/core/tasks.js');
+    const { coilReport, noteClear, targetsText, passCoils, TARGETS } = await import('../js/core/coil.js');
+    const hub = (seed, scene, day, set) => { const x = ensureBars(newGame(seed, { closed: true })); x.scene = scene; x.minutes = (day - 1) * 1440 + 9 * 60; Object.assign(x.flags, { long: true, forest_day: day }); x.james.satiety = 70; x.james.qi = 3; if (set) set(x); return x; };
+    // N1: each rule in its order
+    assert(/^You're hungry/.test(nextStep(hub(7201, 'wilds', 2, (x) => { x.james.satiety = 20; x.inventory.hare_raw = 1; }), SCENES)), 'N1: 1 hungry with food');
+    assert(!/^You're hungry/.test(nextStep(hub(7202, 'wilds', 2, (x) => { x.james.satiety = 20; }), SCENES)), 'N1: 1 needs food in the hammerspace (R1: the review\'s L5)');
+    { const x = hub(7203, 'wilds', 2, (x) => { x.james.saturation = 96; x.james.primaries = 12; }); assert(canBreakThrough(x) && /breakthrough point/.test(nextStep(x, SCENES)), `N1: 2 the breakthrough point (${nextStep(x, SCENES)})`); }
+    assert(/^Tap a card/.test(nextStep(hub(7204, 'stream', 1), SCENES)), 'N1: 3 Coil 1, Day 1');
+    { const x = hub(7205, 'wilds', 2); setYuki(x, false); assert(/^Yuki can hunt/.test(nextStep(x, SCENES)), `N1: 4 Yuki's job off (${nextStep(x, SCENES)})`); setYuki(x, true); assert(nextStep(x, SCENES) === 'Day 2 of 7: the Sect\'s tribute comes on Day 7.', `N1: 7 otherwise the day (${nextStep(x, SCENES)})`); }
+    { const x = hub(7206, 'stream', 1); x.coil.n = 3; assert(/^A new Coil: .* you learn ×1\.5 as fast\.$/.test(nextStep(x, SCENES)), `N1: 5 a new Coil's first day, its number (${nextStep(x, SCENES)})`); }
+    { const x = hub(7207, 'wilds', 2, (x) => { x.james.qi = jamesQiMax(x); }); setYuki(x, true); assert(/^Qi is nearly full/.test(nextStep(x, SCENES)), `N1: 6 Qi nearly full (${nextStep(x, SCENES)})`); }
+    // the review's M1 (R1): the short route (no `long`) has the tribute at the next dawn: no "Day N of 7"
+    { const x = hub(7212, 'village', 2, (x) => { x.flags.long = false; }); setYuki(x, true); assert(!/of 7/.test(nextStep(x, SCENES)), `R1: the short route gets no tribute-day line (${nextStep(x, SCENES)})`); }
+    // the review's M2 (R1): a Long Forest run earlier doesn't turn the hints off; only the Long Forest itself does
+    { const x = hub(7213, 'stream', 1, (x) => { x.coil.n = 2; x.flags.longforest = true; x.flags.lf_active = false; }); assert(/^A new Coil/.test(nextStep(x, SCENES)), `R1: after a Long Forest run the hints come back (${nextStep(x, SCENES)})`);
+      x.flags.lf_active = true; assert(nextStep(x, SCENES) === '', 'R1: none while in the Long Forest'); }
+    { const a = hub(7208, 'wilds', 2); a.stats.coils0 = 1; const b = hub(7208, 'fo_ashfall', 9); b.coil.act = 1; const c = hub(7208, 'arrival', 1);
+      assert(nextStep(a, SCENES) === '' && nextStep(b, SCENES) === '' && nextStep(c, SCENES) === '', 'N1: none after the first crossing, in Act 1 or off the task screens'); }
+    // T1: the best per act, counted from the pass's first Coil, kept and only improved
+    { const x = hub(7209, 'wilds', 2); x.coil.n = 2;
+      assert(passCoils(x) === 2 && JSON.stringify(noteClear(x, 0)) === JSON.stringify(['Prologue cleared in 2 Coils: a new best ★ (target 2).']) && x.stats.best[0] === 2, 'T1: the prologue on Coil 2: a new best within the target');
+      x.coil.n = 3; assert(noteClear(x, 0).length === 0 && x.stats.best[0] === 2, 'T1: a worse clear changes nothing');
+      x.coil.n = 5; x.stats.pass = 5; assert(passCoils(x) === 1 && /in 1 Coil: a new best ★/.test(noteClear(x, 0)[0]) && x.stats.best[0] === 1, 'T1: a new pass counts from its own first Coil');
+      x.coil.n = 8; assert(/^Act 1 cleared in 4 Coils: a new best \(target 3\)\.$/.test(noteClear(x, 1)[0]), 'T1: over the target, no star');
+      assert(targetsText(x) === `the prologue by Coil ${TARGETS[0]}, Act 1 by Coil ${TARGETS[1]}, counted from Day 1. Your best: prologue 1 Coil, Act 1 4 Coils.`, `T1: the targets line (${targetsText(x)})`); }
+    // T1 through the scenes: crossing into Act 1 and reaching its end; a whole-game rewind starts a pass
+    { const x = hub(7210, 'epilogue', 8); x.coil.n = 2; x.flags.ending = 'paid'; const lines = SCENES.fo_start.enter(x) || [];
+      assert(x.coil.act === 1 && lines.includes('Prologue cleared in 2 Coils: a new best ★ (target 2).') && x.stats.coils0 === 2, `T1: crossing records the prologue (${lines.join(' | ')})`);
+      const l2 = SCENES.a1_end.enter ? SCENES.a1_end.enter(x) || [] : []; assert(l2.includes('Act 1 cleared in 2 Coils: a new best ★ (target 3).') && x.stats.best[1] === 2, `T1: the end of Act 1 records it (${l2.join(' | ')})`);
+      rewind(x, { to: 'game' }); assert(x.coil.act === 0 && x.stats.pass === x.coil.n && passCoils(x) === 1 && x.stats.best[0] === 2 && x.stats.best[1] === 2, `T1: the whole game again: a new pass, the bests kept (pass ${x.stats.pass}, n ${x.coil.n})`);
+    }
+    // a rewind to the start of Act 1 keeps the pass (the review's L5, R1: on an Act 1 state)
+    { const x = hub(7214, 'epilogue', 8); x.coil.n = 4; x.stats.pass = 3; x.flags.ending = 'paid'; SCENES.fo_start.enter(x); x.scene = 'fo_ashfall';
+      endCoil(x, 'choice', 'fo_ashfall'); const n = rewind(x, { to: 'act' }); assert(x.coil.act === 1 && n === 5 && x.stats.pass === 3 && passCoils(x) === 3, `T1: a rewind to the act keeps the pass (act ${x.coil.act}, n ${n}, pass ${x.stats.pass})`); }
+    // the review's L3 (R1): a new best is a Results line; L4: a save from before v0.11.72 on an unknown pass records nothing until a whole-game rewind
+    { const { splitLine: sl } = await import('../js/core/replies.js');
+      assert(['Prologue cleared in 2 Coils: a new best ★ (target 2).', 'Act 1 cleared in 1 Coil: a new best ★ (target 3).'].every((l) => sl(l).reply === '' && sl(l).gain === l), 'R1: a new best goes to Results');
+      const x = hub(7215, 'epilogue', 8); x.coil.n = 6; x.stats.coils0 = 2; delete x.stats.pass; x.flags.ending = 'paid';
+      const l = SCENES.fo_start.enter(x) || []; assert(!l.some((t) => /cleared in/.test(t)) && x.stats.passUnknown === true && !x.stats.best, `R1: an old save's second pass records no prologue best (${l.join(' | ')})`);
+      assert(noteClear(x, 1).length === 0 && !x.stats.best, 'R1: nor its Act 1');
+      rewind(x, { to: 'game' }); assert(!x.stats.passUnknown && x.stats.pass === x.coil.n && passCoils(x) === 1, 'R1: the next whole-game rewind starts a known pass'); }
+    // S1: the closest cards (only those that grew this Coil), the screen's new lines
+    { const x = hub(7211, 'wilds', 2); x.coil.start.fam = { 'wild_forage:0': 1.5, 'wild_forage:1': 5 }; x.tasks.fam = { 'wild_forage:0': 1.5, 'wild_forage:1': 7, 'wild_hunt:0': 1, 'wild_train:0': 19, 'yuki:wilds': 17 };
+      const r = coilReport(x); assert(JSON.stringify(r.near.map((n) => [n.id, n.at, n.tier])) === JSON.stringify([['yuki:wilds', 18, 'Mastered'], ['wild_forage:1', 8, 'Skilled'], ['wild_hunt:0', 2, 'Practised']]), `S1: the closest three, grown this Coil, none at the top tier (${JSON.stringify(r.near)})`);
+      endCoil(x, 'choice', 'wilds'); goTo(x, SCENES, 'coil_end'); const t = sceneView(x, SCENES).text;
+      assert(/\*\*Closest to the next tier:\*\* Yuki's hunting 17\/18 \(Mastered\) · River cress in the shallows 7\/8 \(Skilled\) · /.test(t) && /\*\*Carries over:\*\* familiarity with every card/.test(t) && t.includes(`**Targets:** ${targetsText(x)}`), `S1 + T1: the Coil screen's lines (${t.slice(t.indexOf('**Closest'), t.indexOf('**Closest') + 160)})`); }
+}
 // every card that was ever offered was also played at least once
 const all = cardsListed;
 if (FULL) for (const id of all) assert(cardsSeen.has(id), `card ${id} was played by a bot`); // coverage: the full run only

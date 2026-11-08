@@ -2,6 +2,18 @@
 
 Split out of `roadmap.md` in v0.11.65 (owner pick G2, 2026-11-08 11:45), so the roadmap shows only the open work. Every line here moved word for word; newest first. Update in every push that finishes a roadmap line.
 
+## Moved in v0.11.72 (word for word)
+
+### From section 1g, "The copy-over push 5, the Coil" (done in v0.11.72: S1 the Coil screen's closest cards and what carries over, N1 the next-step line, P0 progressive reveal moot (Selene's queue controls are gone here since v0.11.64), T1 a target per act and the personal best; R1 after the Fable review)
+
+- **Then:** the copy-over continues with 5, the Coil (options first, its own list and go).
+*(5. The Coil: its queue Undo, presets and advanced queue controls are moot since v0.11.64)*
+5. **The Coil:** an end-of-Coil summary (what carried over, which tasks are close to Practised); queue Undo and named presets that load by themselves (at a Coil's first dawn, on reaching a hub); progressive reveal (advanced queue controls after the first rewind) and a next-step line; a target Coil per act and a personal best.
+
+### The old "Last updated" line
+
+Last updated: 2026-11-08 (v0.11.71, the story and mechanics pass, group c, the small rules (owner picks Y1 + C1 + X1, 16:05; R1 after the Fable review, 16:27): Yuki's food switch, one total per skill for "Cultivate until the limit", more than one Blackroot exploration a day from Coil 2; group c's three lines moved word for word to `project/roadmap-done.md`; next in the order (O1): g). Update in every push.
+
 ## Moved in v0.11.71 (word for word)
 
 ### From section 1c, "Small rules" (done in v0.11.71: Y1 Yuki's food switch, C1 one total per skill, X1 Explore again the same day from Coil 2; R1 after the Fable review: a switch when her kind can't take the whole haul)

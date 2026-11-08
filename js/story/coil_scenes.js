@@ -5,7 +5,7 @@
  */
 import { advance, startActCoil, combatHooks, PEOPLE_FIGHTS, coilMult, COIL_GROWTH, fmtMult } from '../core/game.js';
 import { setDeathHook, goTo } from '../core/story.js';
-import { coilActive, endCoil, rewind, coilReport, actOf, willUnwind } from '../core/coil.js';
+import { coilActive, endCoil, rewind, coilReport, actOf, willUnwind, noteClear, targetsText } from '../core/coil.js';
 
 const WHY = {
     collapse: `Somewhere between the ground and the dark, the Ouroboros Axiom turns.
@@ -27,6 +27,16 @@ You could go with him. It is a written ending, and not the worst one. Or you can
 Or you could close the loop yourself: bite the tail, and wake at a dawn you have already seen, with what you remember and nothing you've carried.`,
 };
 
+/** v0.11.72 (S1): a card's name for the Coil screen, from its id ("scene:index"; Yuki's job by its label). */
+function cardName(g, id) {
+    const [scene, i] = [id.slice(0, id.lastIndexOf(':')), Number(id.slice(id.lastIndexOf(':') + 1))];
+    if (scene === 'yuki') return 'Yuki\'s hunting';
+    const c = cardScenes[scene]?.choices?.[i];
+    const t = c ? String(typeof c.text === 'function' ? c.text(g) : c.text) : id;
+    return t.length > 40 ? `${t.slice(0, 38).replace(/[\s,.:;—-]+\S*$/, '')}…` : t.replace(/\.$/, '');
+}
+let cardScenes = {};
+
 /** Rewind to 'act' (the act's first dawn) or 'game' (the arrival); the line the player sees. v0.11.26 */
 function bite(g, to) {
     const whole = to === 'game' && actOf(g) === 1;
@@ -35,6 +45,7 @@ function bite(g, to) {
 }
 
 export function installCoil(SCENES) {
+    cardScenes = SCENES;
     SCENES.coil_end = {
         id: 'coil_end', title: (g) => `${actOf(g) === 1 ? 'Act 1 · ' : ''}Coil ${g.coil?.n || 1}`, art: 'meditation', place: 'The Ouroboros Axiom',
         text: (g) => {
@@ -44,6 +55,12 @@ export function installCoil(SCENES) {
 **This Coil:** ${r.gained.length ? r.gained.join(' · ') : 'nothing you can measure. Yet.'}
 
 **James remembers:** ${r.known.length ? `${r.known.join('; ')}.` : 'the way the moss smells. Not much else worth writing down.'}
+${r.near.length ? `
+**Closest to the next tier:** ${r.near.map((x) => `${cardName(g, x.id)} ${x.f}/${x.at} (${x.tier})`).join(' · ')}
+` : ''}
+**Carries over:** familiarity with every card, what James remembers, the faster learning, Yuki's bond, and a quarter of each relationship's best as a head start.
+
+**Targets:** ${targetsText(g)}
 
 Yuki remembers everything. She always does, through the bond, and she will bring it up.
 
@@ -100,7 +117,7 @@ Yuki is standing on your sternum. The look says: *you have done this before. I w
     };
     // Act 1 begins (v0.9.6): its Coil's rewind point is Day 8 dawn, taken after fo_start's enter (a rewind skips it)
     const foEnter = SCENES.fo_start.enter;
-    SCENES.fo_start.enter = (g) => { const lines = foEnter ? (foEnter(g) || []) : []; if (actOf(g) !== 1) startActCoil(g, 1); return lines; };
+    SCENES.fo_start.enter = (g) => { const lines = foEnter ? (foEnter(g) || []) : []; if (actOf(g) !== 1) { lines.push(...noteClear(g, 0)); startActCoil(g, 1); } return lines; }; // v0.11.72 (T1): the prologue cleared
     // v0.11.26 (owner 11:07, E1): the end of Act 1 can go round again, every outcome (Incremental Mode)
     SCENES.a1_again = {
         id: 'a1_again', title: 'Go Round Again', art: 'meditation', place: 'The Ouroboros Axiom',
@@ -116,6 +133,8 @@ Yuki opens one eye. *Again?* says the bond. *Fine. I'll remember it for both of 
         ],
     };
     SCENES.a1_end.choices.push({ text: 'Go round again…', show: coilActive, to: 'a1_again' });
+    const a1Enter = SCENES.a1_end.enter; // v0.11.72 (T1): Act 1 cleared, every outcome
+    SCENES.a1_end.enter = (g) => { const lines = a1Enter ? (a1Enter(g) || []) : []; if (actOf(g) === 1) lines.push(...noteClear(g, 1)); return lines; };
     SCENES.rt_taken.choices.push({
         text: 'Bite the tail. (The Coil: wake at the start of Act 1 or of the whole game, keep what you learned.)',
         show: coilActive,

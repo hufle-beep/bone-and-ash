@@ -6,12 +6,12 @@ import {
     startCombat, combatStep, combatFlee, COMBAT_ACTIONS, noDiceDc, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage,
 } from './core/game.js';
 import { sceneView, choose, goTo, gives } from './core/story.js';
-import { showPicked, isTaskHub, isQueueScreen, isTaskChoice, taskCards, taskLabel, taskMinutes, taskOutcome, dryOutcome, outcomeOf, runTask, FAM, yukiLane, setYuki } from './core/tasks.js';
+import { showPicked, isTaskHub, isQueueScreen, isTaskChoice, taskCards, taskLabel, taskMinutes, taskOutcome, dryOutcome, outcomeOf, runTask, FAM, yukiLane, setYuki, nextStep } from './core/tasks.js';
 import { SCENES, ITEMS } from './story/prologue.js';
 import { TASK_HUBS } from './story/task_hubs.js';
 import { landParts } from './core/replies.js'; // v0.11.68 (A1 + B2 + C1)
 import { againView, skipPlan, skipRun } from './story/again.js'; // v0.11.35 (P1-a)
-import { coilActive, endCoil } from './core/coil.js';
+import { coilActive, endCoil, targetsText } from './core/coil.js';
 import { medCards, runMed, isSitChoice, medActivity, useLine, LATE_TAG } from './core/meditate.js';
 import { meridianRow } from './story/meridians.js';
 import { realmShockHpBonus } from './core/formulas.js';
@@ -125,6 +125,7 @@ const openResults = new Set(); // v0.11.11: Results entries the player opened st
 // v0.11.67 (owner pick D2): a screen's card groups fold. Story never folds; the hub's own group (Camp chores, Around
 // Ashfall…) and Meditate start open; the work groups (a hub's menus: Forage, Hunt, Practice, Explore, Go deep…) start
 // folded, their heading showing how many cards they hold. What the player opens or folds is kept on this phone, per group name.
+const NONEXT_KEY = 'boneash.nonext'; // v0.11.72 (N1): '1' = the next-step line hidden for good on this phone
 const GROUPS_KEY = 'boneash.groups';
 const groupOpen = (() => { try { const o = JSON.parse(store.get(GROUPS_KEY) || '{}'); return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; } catch { return {}; } })();
 const isGroupOpen = (name, dflt) => (typeof groupOpen[name] === 'boolean' ? groupOpen[name] : dflt);
@@ -273,7 +274,8 @@ function renderCardScreen() {
         // v0.11.64 (D1): her job counts James's game time (06:00–19:00); the screen says how much is left, no bar
         const yLeft = yl ? Math.max(1, yl.len - yl.progress) : 0;
         const yHtml = yl ? `<div class="yuki-lane"><div><b>Yuki:</b> ${esc(yl.label)} <span class="note">${showChecks ? `Fight ${yl.check} / DC ${yl.dc} · ` : ''}${yl.on ? `next haul after ${durLabel(yLeft)} of your time (06:00–19:00)` : `${durLabel(yl.len)} a haul`} · ${FAM[yl.tier].name}</span></div><button class="btn${yl.on ? ' primary' : ''}" data-yuki="1">${yl.on ? 'On' : 'Off'}</button></div>` : '';
-        hubTop = yHtml;
+        const ns = store.get(NONEXT_KEY) === '1' ? '' : nextStep(g, SCENES); // v0.11.72 (N1): Selene's next-step line, ✕ hides it for good
+        hubTop = `${ns ? `<div class="nstep"><b>Next step</b> <span>${esc(ns)}</span><button class="nstep-x" data-nonext="1" aria-label="Hide the next-step line">✕</button></div>` : ''}${yHtml}`;
         const work = workGroups(g.scene);
         hubHtml = groups.map((gr) => groupHtml(gr.name, gr.cards.map(cardHtml), !work.has(gr.name))).join(''); // v0.11.67 (D2)
     }
@@ -610,7 +612,7 @@ ${skillRow('GU', j.gu, 'General Use: anything he has no skill for, and his defen
 ${skillRow('Convergence Use', cu, 'darts, needles, the wraithbone blade')}
 <p class="note">${esc(BONESINGER_TIERS[Math.min(cu.tier, BONESINGER_TIERS.length - 1)] || '')}</p>
 ${Object.entries(FORM_LINES).map(([k, l]) => { const s = lineState(g, k); return `<div class="row"><span>${esc(l.label)}</span><span>${s.now ? esc(s.now.name) : '—'}${s.next ? ` <span class="note">(next: ${esc(s.next.name)} at ${rankLabel(s.next.at)})</span>` : ''}</span></div>`; }).join('')}
-${g.coil ? `<h2>The Coil</h2><p class="note">${g.coil.act === 1 ? 'Act 1, ' : ''}Coil ${g.coil.n}. ${coilActive(g) ? `Bite the tail to wake at ${g.coil.act === 1 ? 'the start of Act 1 or of the whole game' : 'the first dawn'}: James keeps his familiarity and what he knows; his realm, skills and meridians, the hammerspace and the world start over. This Coil he learns ×${fmtMult(coilMult(g))} as fast; the next, ×${fmtMult(coilMult(g) + COIL_GROWTH)}.` : 'The Coil turns during the prologue (until the tribute is settled) and during Act 1 (until Shen Qiu is settled, and again at its end).'}</p>${coilActive(g) ? '<div class="btns"><button class="btn" data-bite="1">Bite the tail</button></div><p class="note" id="saveNote"></p>' : ''}` : ''}
+${g.coil ? `<h2>The Coil</h2><p class="note">${g.coil.act === 1 ? 'Act 1, ' : ''}Coil ${g.coil.n}. ${coilActive(g) ? `Bite the tail to wake at ${g.coil.act === 1 ? 'the start of Act 1 or of the whole game' : 'the first dawn'}: James keeps his familiarity and what he knows; his realm, skills and meridians, the hammerspace and the world start over. This Coil he learns ×${fmtMult(coilMult(g))} as fast; the next, ×${fmtMult(coilMult(g) + COIL_GROWTH)}.` : 'The Coil turns during the prologue (until the tribute is settled) and during Act 1 (until Shen Qiu is settled, and again at its end).'}</p><p class="note"><b>Targets:</b> ${esc(targetsText(g))}</p>${coilActive(g) ? '<div class="btns"><button class="btn" data-bite="1">Bite the tail</button></div><p class="note" id="saveNote"></p>' : ''}` : ''}
 <h2>Pillars</h2>
 <div class="row"><span>Ouroboros Axiom</span><span>DR 1</span><span class="sub">The body as a closed garden: what comes in is filtered and returned clean.</span></div>
 <div class="row"><span>Parallel Cognition Engine</span><span>9 threads</span><span class="sub">One of them is always on watch, if he asks.</span></div>
@@ -880,6 +882,7 @@ view.addEventListener('click', (ev) => {
             return;
         }
         if (b.dataset.panel) { panel = b.dataset.panel; if (panel === 'results') unseen = 0; render(); return; }
+        if (b.dataset.nonext) { store.set(NONEXT_KEY, '1'); render(); return; } // v0.11.72 (N1)
         if (b.dataset.yuki) { const yl = yukiLane(g); setYuki(g, !yl.on); autosave(); render(); return; }
         if (b.dataset.act) {
             const rel0 = relSnap(); const fightTitle = sceneTitle(g.scene);

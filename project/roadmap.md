@@ -1,6 +1,6 @@
 # Roadmap: Bone and Ash
 
-Last updated: 2026-11-08 (v0.11.71, the story and mechanics pass, group c, the small rules (owner picks Y1 + C1 + X1, 16:05; R1 after the Fable review, 16:27): Yuki's food switch, one total per skill for "Cultivate until the limit", more than one Blackroot exploration a day from Coil 2; group c's three lines moved word for word to `project/roadmap-done.md`; next in the order (O1): g). Update in every push.
+Last updated: 2026-11-08 (v0.11.72, the story and mechanics pass, group g, the copy-over push 5, the Coil (owner picks S1 + N1 + P0 + T1, 16:50; R1 after the Fable review, 17:29): the Coil screen's closest cards and what carries over, the next-step line, the targets and the personal best; progressive reveal moot; group g's lines moved word for word to `project/roadmap-done.md`; next in the order (O1): h; v0.11.71, group c). Update in every push.
 
 **How this file is laid out (v0.11.53, owner 00:52 "reorder it to show the done ones in a separate section", pick R1):** Part 1 is what is still open; Part 2 is everything done, newest first. Nothing was deleted or reworded: every line moved word for word; a line that was partly done was split at the sentence (its done part in Part 2, its open part here), and a done line is labelled with where it stood ("was …").
 
@@ -8,13 +8,13 @@ Last updated: 2026-11-08 (v0.11.71, the story and mechanics pass, group c, the s
 
 # Part 1: Open
 
-## 1. The story and mechanics pass (in progress; push 1 done in v0.11.64, group a in v0.11.66, group b's hub format in v0.11.67, where replies show in v0.11.68, the missing replies in v0.11.69: group b done; group c in v0.11.71)
+## 1. The story and mechanics pass (in progress; push 1 done in v0.11.64, group a in v0.11.66, group b's hub format in v0.11.67, where replies show in v0.11.68, the missing replies in v0.11.69: group b done; group c in v0.11.71; group g in v0.11.72)
 
 **The story and mechanics pass:** in progress (owner 2026-11-08 10:40): push 1 done in v0.11.64 (no timer, no queue, Cultivate until the limit); every open item in its own section below, the next one the owner's pick (options first).
 
 Moved here word for word from the handover in v0.11.52 (owner 00:48 "add the story pass to the roadmap instead", pick A2), so the handover stays small. Each item gets its options (and numbers, where balance moves) before anything is built; drafts of story texts in chat first. ("The block below" in the first item is the second item.)
 
-**Suggested order** *(new in v0.11.65)*: a, b, c, d, e, f, then section 2 *(v0.11.70, owner pick O1: now c, g, h, i, then d, e, f, section 2, then the rest of section 4; before d the owner names more games for i)* (the retune comes after a, which moves the numbers). *(v0.11.66: group a done, its four lines in `roadmap-done.md`.)* *(v0.11.67: group b's hub format done.)* *(v0.11.68: where replies show done; left in b: the missing replies, first the full list of choices without a reply.)* *(v0.11.69: group b done; the repeating replies moved to group e.)* *(v0.11.71: group c done; next g.)* Each group is one push or more, each with its own options and pick.
+**Suggested order** *(new in v0.11.65)*: a, b, c, d, e, f, then section 2 *(v0.11.70, owner pick O1: now c, g, h, i, then d, e, f, section 2, then the rest of section 4; before d the owner names more games for i)* (the retune comes after a, which moves the numbers). *(v0.11.66: group a done, its four lines in `roadmap-done.md`.)* *(v0.11.67: group b's hub format done.)* *(v0.11.68: where replies show done; left in b: the missing replies, first the full list of choices without a reply.)* *(v0.11.69: group b done; the repeating replies moved to group e.)* *(v0.11.71: group c done; next g.)* *(v0.11.72: group g done; next h.)* Each group is one push or more, each with its own options and pick.
 
 ### b. The screen's format
 
@@ -30,9 +30,7 @@ Moved here word for word from the handover in v0.11.52 (owner 00:48 "add the sto
 
 ### g. The copy-over push 5, the Coil *(new in v0.11.70, owner pick O1: moved up from section 4, after c)*
 
-- **Then:** the copy-over continues with 5, the Coil (options first, its own list and go).
-*(5. The Coil: its queue Undo, presets and advanced queue controls are moot since v0.11.64)*
-5. **The Coil:** an end-of-Coil summary (what carried over, which tasks are close to Practised); queue Undo and named presets that load by themselves (at a Coil's first dawn, on reaching a hub); progressive reveal (advanced queue controls after the first rewind) and a next-step line; a target Coil per act and a personal best.
+*(v0.11.72: done (owner picks S1 + N1 + P0 + T1, R1 after the Fable review); its lines moved word for word to `roadmap-done.md`.)*
 
 ### h. Analysis of Selene's and the SillyTavern repositories *(new in v0.11.70)*
 
@@ -102,6 +100,7 @@ Moved here word for word from the handover in v0.11.52 (owner 00:48 "add the sto
 
 ## 4. Systems still to build (after the retune)
 
+*(v0.11.72: F, the copy-over push 5, done in group g)*
 6. **F, the copy-over push 5 (the Coil)**, then **G** (engine systems, crafting and threads, Android; steps 4, 6, 7 below).
 
 - *(new in v0.11.65)* **Threads need a new design:** they were planned to work queued tasks; since v0.11.64 there is no queue, so what a thread does (and when it wakes) is an open question for the owner before step 4 is built.

@@ -2,6 +2,25 @@
 
 Started 2026-11-08 (v0.11.65), when `history-8.md` reached about 45 KB. Newer than `history-8.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.72 (word for word)
+
+### From "Decided in chat (2026-11-07)"
+
+- **v0.11.69: the story and mechanics pass, group b's last item, the missing replies (the list from 150 random games: 163 actions on a hub or the same screen without a reply; about 55 fight starts and plain moves and 14 system cards (eat, cultivate, rest, call it a day) not missing; options R1 / R2 / R3, owner 14:54 "R1"):**
+  - **Picked:** R1 (replies for the one-off story choices only: 12 relationship choices that said nothing (`wen_lesson` ×2, `far_lost`, `mei_walk` ×2, `supper_roof` ×2, `ya_found`, `sect_cut`, `rt_watch`, `rt_fire_talk` without the trio, `yuki_tiger_awaken`, `lf_ride`, `lf_bored`), 5 that answered with gains only (`forage` #0 and #2, `mire` #0, `rt_ford` #0, `ah_hunt` #1), 4 failed checks without a line (`heal` #1, `bone_field` #0, `hollow` #0, `hunt_miss` #0)); R2 (one text each for the repeating ones now) and R3 (all inside group e) not picked. Found while drafting and picked (15:01 "P1"): a partial haul dropped whole "+N" lines with their reply sentences (10 choices: `hunt` ×2, `wild_forage`, `herb_slopes`, `rr_forage`, `rr_hunt`, `dw_forage` ×2, `ah_forage` ×2): `keepReplies` keeps the reply sentences; P2 (leave it) not picked.
+  - **The texts:** the owner asked whether Opus is the best writer (15:01); Claude: probably not, Fable is the higher tier. W1 (15:02): Fable drafted the 23 without seeing Claude's, both shown side by side; the owner picked Fable's, all of them (15:09 "F All"). Moved out of R1 because they repeat (to group e): `fo_palisade`, `bl_camp` "Cook and eat", `yuki_form` ×3, Act 1's talks (`talk_mei`, `talk_ya`, `fo_mei`, `fo_ya_time`, `fo_night`), about 27 work cards with silent results.
+  - **After the cold review (Opus, texts and display; options R1 / R2 / R3, owner 15:26 "R1"):** no high. Medium: `hunt_miss`'s failed retry spoke of "the first dart" after the grab; `lf_bored` spoke through the bond in human form. Low: the hill-hares and "Both" on a thin haul; "came down that ridge" true on one path; "a long afternoon" at any hour; "the poisoned sky" before James knows; the bone stakes sentence (`GAIN_LINES` never matched it) to `GAIN_BITS`; test gaps. Fable wrote the six fixes (a neutral retry line, the human-form line, the hill-hares' and "Both"'s thin-haul variants (6b: found by Claude, "Both" can be partial), "out of that forest", "not getting out of it", "a sky the colour of a bruise"), shown to the owner (15:28 "ok"). R2 and R3 not picked; the rest found correct.
+  - **The owner's notes in this chat, for the roadmap:** 14:50, group e: "we neeed to decide whose relationships are worth tracking and develop the new choice/reply/increase tree based on that. we have to weigh if someone needs to be dropped or new entries need to be created." (today's tracked relationships, by the places in the code that move them: Ya 89, Mei Lin 83, Village 60, Yuki 16, Old Wen 4, Mother 4, Old Hu 2); 15:16, the Fable rewrite pass (Open items).
+  - **Also:** after v0.11.68 Claude uploaded the 7 changed project docs to the claude.ai project itself (owner "upload them"); `59c75e4` filled in for 0.11.68 in the changelog and restore points.
+  - **Checks:** see the version note.
+
+### From "Version notes"
+
+## v0.11.69 — the story and mechanics pass, group b's last item: the missing replies (R1 + P1, the texts Fable's)
+
+- **js/story/ashfall.js, prologue.js, wilds.js, act1_blackroot.js, act1_heart.js, act1_return.js, longforest.js** (the 20 choices' replies: 26 texts with the variants), **js/core/replies.js** (`keepReplies`; the bone stakes pattern to `GAIN_BITS`), **js/core/story.js, js/core/tasks.js** (a partial keeps its reply sentences); **sw.js** (VERSION), **tests/tasks.test.mjs** (the v0.11.69 block), **tests/README.md, tools/timings.json; project docs** (v0.11.66 moved to `history-9.md`; group b's last line to `roadmap-done.md`; group e's new lines; `reference.md` brought up to date).
+- **Checks:** the full `bash tools/check.sh` before the cold review: exit 0, 0 drifted, 0 moved past 5 points; the models unchanged (Careful 2.23 / 2.82, Completionist 2.08 / 2.76); the four browser parts pass; a scan of 150 random games: none of the 21 choices silent any more (183 → 164 actions without a reply, the rest fights, moves, system cards and the repeating ones). Cold review on Opus (texts and display): see the decisions. After R1: exit 0, 0 drifted, 0 moved past 5 points, the models unchanged, the four browser parts pass.
+
 ## Moved from the handover in v0.11.71 (word for word)
 
 ### From "Decided in chat (2026-11-07)"

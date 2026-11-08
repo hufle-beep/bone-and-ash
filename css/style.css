@@ -189,6 +189,10 @@ button { font: inherit; color: inherit; }
 .card.door { border-style: double; border-width: 3px; }
 .card.b-fail .tag { color: var(--red); }
 .card.b-double .tag { color: var(--ink); font-weight: 600; }
+/* v0.11.72 (N1): the next-step line */
+.nstep { margin: 0.5rem 1.15rem 0; display: grid; grid-template-columns: 1fr auto; gap: 0.5rem; align-items: start; font-size: 0.86rem; color: var(--ink-dim); }
+.nstep b { color: var(--ink); margin-right: 0.3rem; }
+.nstep-x { background: none; border: 0; color: var(--ink-dim); font-size: 0.95rem; padding: 0 0.2rem; cursor: pointer; }
 .yuki-lane { margin: 0.5rem 1.15rem 0; display: grid; grid-template-columns: 1fr auto; gap: 0.6rem; align-items: center; font-size: 0.88rem; }
 .yuki-lane .note { color: var(--ink-dim); font-size: 0.78rem; }
 .yuki-lane .btn { padding: 0.3rem 0.8rem; font-size: 0.85rem; }

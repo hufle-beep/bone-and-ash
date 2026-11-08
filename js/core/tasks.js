@@ -14,12 +14,12 @@
  */
 import { hasForm } from './forms.js';
 import { choose, goTo, choiceOpen, choiceTag, gives, setTimeless, defaultMinutes, movesPlace, wasPicked, isMenuScene, isTimeless, setFamiliar } from './story.js';
-import { itemCap, yukiForm, advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck, canBreakThrough, btMinutes, realmName, condense, sitMinutes, useSpeed, USE_N, exMins, nightLock, endsLate, sitUseless, jamesQiMax, SATIETY_PER_HOUR, breakAt } from './game.js';
+import { itemCap, yukiForm, advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck, canBreakThrough, btMinutes, realmName, condense, sitMinutes, useSpeed, USE_N, exMins, nightLock, endsLate, sitUseless, jamesQiMax, SATIETY_PER_HOUR, breakAt, coilMult, fmtMult } from './game.js';
 import { CONDENSE_SIT_COST } from './formulas.js';
 import { btTarget, MER_LINES, lineWindow, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
 import { onceOpen, noteOnce, stageOpen, ONCE_MENUS } from '../story/oneoff.js';
-import { daily } from '../story/common.js';
+import { daily, foodCount } from '../story/common.js';
 import { endCoil } from './coil.js';
 import { canMeditate } from './meditate.js';
 import { keepReplies } from './replies.js'; // v0.11.69 (P1)
@@ -551,3 +551,24 @@ export function sitSummary(lines) {
     return [...out, ...rest];
 }
 export const SIT_STOP_TEXT = { sat: 'the breakthrough point', qi: 'then Qi runs out', night: 'then the day ends', fed: 'then you need food', shut: 'then it stops', left: 'the story moves on', max: 'a long session' };
+
+/* ---------- v0.11.72 (owner pick N1, the copy-over push 5): the next-step line ---------- */
+/**
+ * One hint for the prologue's task screens, from the first rule that matches, or '' (Selene's nextStepTxt). Shown until
+ * James first reaches Act 1 (`stats.coils0`, set on the crossing); not in Act 1, the Long Forest or a fight. The ✕ that
+ * hides it for good is the phone's (`boneash.nonext`, js/main.js).
+ */
+export function nextStep(g, scenes) {
+    if (!TASK_HUBS[g.scene] || g.combat || g.scene === 'lf_hub' || (g.coil?.act || 0) !== 0 || g.stats?.coils0 || g.flags?.lf_active) return ''; // the review's M2 (R1): only the Long Forest itself, not the save after it
+    const day = clockParts(g.minutes).day, n = g.coil?.n || 1;
+    if (g.james.satiety < 30 && foodCount(g) > 0) return 'You\'re hungry and carrying food: eat before the next card.';
+    if (canBreakThrough(g)) return 'Saturation has reached the breakthrough point: Meditate → Break through.';
+    if (n === 1 && day === 1) return 'Tap a card and it happens at once: the clock moves by the time on the card, which shows when it ends.';
+    const yl = yukiLane(g);
+    if (yl && !yl.on) return 'Yuki can hunt on her own while you work: switch her job on at the top of the list.';
+    if (n >= 2 && day === 1) return `A new Coil: the world and the hammerspace started over, but your familiarity and what James knows didn't. Cards you know run faster, and you learn ×${fmtMult(coilMult(g))} as fast.`;
+    if (g.james.qi >= CONDENSE_SIT_COST && g.james.qi >= 0.9 * jamesQiMax(g) && g.james.saturation < breakAt() && !sitUseless(g) && taskOpen(g, scenes, sitTaskId(g, scenes))) return 'Qi is nearly full: Cultivate turns it into Saturation.';
+    if (g.flags.long && day >= 2 && day <= 6) return `Day ${day} of 7: the Sect's tribute comes on Day 7.`;
+    return '';
+}
+

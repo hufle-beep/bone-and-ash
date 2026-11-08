@@ -232,6 +232,19 @@ def replies(pg, url):
     else: notes.append('a card\'s reply under the scene text, its gains in Results')
     check_text(pg, 'a reply', strict=True)
 
+def nextstep(pg, url):
+    """v0.11.72 (owner pick N1): the next-step line on a prologue task screen (Day 1, the stream, a v0.8.5 test save);
+    its ✕ hides it for good on this phone, through a redraw and a reload."""
+    fresh(pg, url, "s => { localStorage.clear(); localStorage.setItem('boneash.auto', s); }", (ROOT / 'saves/v0.8.5-day1-stream.json').read_text())
+    line = pg.inner_text('.nstep') if pg.query_selector('.nstep') else ''
+    if not re.search(r'Next step\s+Tap a card and it happens at once', line): fails.append(f'N1: no next-step line on Day 1 at the stream: {line!r}'); return
+    tap(pg, pg.query_selector('.nstep [data-nonext]')); until(pg, "() => !document.querySelector('.nstep')", 3000)
+    if pg.query_selector('.nstep') or pg.evaluate("localStorage.getItem('boneash.nonext')") != '1': fails.append('N1: the ✕ does not hide the line for good'); return
+    pg.goto(url.replace('index.html', 'art/bg/CREDITS.md')); pg.goto(url); until(pg, '.main-menu', 10000, 'attached'); enter(pg)
+    if pg.query_selector('.nstep'): fails.append('N1: the line is back after a reload')
+    else: notes.append('the next-step line shows on Day 1 and its ✕ hides it for good')
+    check_text(pg, 'the next-step line', strict=True)
+
 def rest_places(pg, url):
     fresh(pg, url, "localStorage.clear()")
     if pg.query_selector('button.card.med'): fails.append('the arrival shows a Meditate card (v0.11.14: resting places only)')
@@ -508,6 +521,7 @@ def main(part=0):
               pg.evaluate("scrollTo(0, 0)")
               groups(pg, url)
               replies(pg, url)
+              nextstep(pg, url)
               # 4. two tabs (v0.11.8): a tab that closes never writes its older game over a newer save from another tab
               fresh(pg, url, "localStorage.clear()")
               pg.evaluate("1")

@@ -12,6 +12,7 @@
 export const GAIN_LINES = [
     /^Realm: /, // the breakthrough's summary: its second sentence lists what rose
     /^Coil \d+\. /, // the Coil screen's summary line
+    /^(Prologue|Act 1) cleared in \d+ Coils?: /, // v0.11.72 (T1; the review's L3, R1): a new best is a Results line
     /^ {2}\S/, // a fight's indented damage lines
     /attacks: you defend \(/, // a fight's defence lines
     /^(Breakfast\. |Supper\. )?You eat: /, // eating: what and how much
