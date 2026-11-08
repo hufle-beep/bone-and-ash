@@ -383,6 +383,16 @@ print(json.dumps({"n": len(R['masks']), "bad": bad, "bitmaps": sum('bitmap' in m
     assert(unknown.length === 0, `roadmap: every "from group i" number is a group i row (unknown: ${unknown.join(', ') || 'none'})`);
     for (const f of ['a-loops', 'b-narrative', 'c-incrementals', 'd-closed', 'brief', 'e-dating', 'f-vn', 'brief-2', 'g-idle', 'h-rpg', 'i-chinese', 'brief-3']) assert(existsSync(path.join(ROOT, `project/research/group-i-${f}.md`)), `research: project/research/group-i-${f}.md kept`);
 }
+// v0.11.77 (owner pick F1): the flight canon is in lore.md (James, Yuki, the world: locals from Golden Core) and the roadmap carries its story, mechanics and walk-times lines
+{
+    const lore = readFileSync(path.join(ROOT, 'project/lore.md'), 'utf8');
+    const roadmap = readFileSync(path.join(ROOT, 'project/roadmap.md'), 'utf8');
+    const sec = (h) => { const a = lore.indexOf(h); const b = lore.indexOf('\n## ', a + 1); return a < 0 ? '' : lore.slice(a, b < 0 ? undefined : b); };
+    assert(/\*\*Flight \(owner[^\n]*Foundation[^\n]*realm and GU/.test(sec('## James Green')), 'lore: James flies from Foundation, limited only by realm and GU');
+    assert(/\*\*Flight:\*\*/.test(sec('## Yuki')), 'lore: Yuki flies too');
+    assert(/\*\*Flight on this world[^\n]*Golden Core/.test(sec('## The world')), 'lore: locals fly only from Golden Core');
+    for (const t of ['**Story, flight', '**Mechanics, flight', "**Flight's walk times"]) assert(roadmap.includes(t), `roadmap: the flight line "${t.replace(/\*/g, '')}" is there`);
+}
 rmSync(TMP, { recursive: true, force: true });
 
 console.log(`(${((Date.now() - t0) / 1000).toFixed(1)} s)`);

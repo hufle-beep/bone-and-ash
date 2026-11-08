@@ -2,6 +2,24 @@
 
 Started 2026-11-08 (v0.11.74), when `history-9.md` reached about 45 KB. Newer than `history-9.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.77 (word for word)
+
+### From "Decided in chat (2026-11-07)"
+
+- **v0.11.74: the story and mechanics pass, group i round 1, the games on Selene's list (read fresh for Bone and Ash, owner 18:19 "you are only taking the list itself and analyzing everything yourself right? ... this is a very different game despite the same root": yes, Selene's notes only to see what she took; 33 repos and the closed games' pages by four Opus helpers, one cluster each, from one brief; every licence rechecked by Claude, the main claims checked against our code; options I1 / I2 / I3, L1 / L2, E1 / E2; owner 18:40 "I1,L1,E1"):**
+  - **Picked:** **I1**, docs only: `research.md` group i (52 candidates, #43–#94, best value first; the skipped and avoid lists; a licence row per game: all match Selene's table except Prestige Tree's LICENSE, The Modding Tree's text (c) Acamaeda, and Candy Box 2's GPL notice in `candybox2_sourceCodeLicense.txt`); the four reports and the brief word for word in `project/research/group-i-*.md` (owner 18:30: "I don't want to lose anything to compression"; not mirrored to the claude.ai project unless the owner asks); every candidate placed in the roadmap. **L1:** the Coil-bonus finding (#53: "Bite the tail" from the first dawn, +0.25 a rewind, no cap: ten bites ×3.5 XP) a line in roadmap section 2, decided there with numbers (fixes a / b / c). **E1:** the five cultivation games into round 2. I2, I3, L2, E2 not picked. The strongest, told in chat: telegraphed moves (all four clusters), foes remembered across Coils, enemy traits, threads as lanes with priority tiers and standing rules, a line picker against repeats (today `again.js`'s 24 lines repeat within a Coil), foreknowledge choices, the Coil screen by cause, a fight lab.
+  - **The owner's questions (18:40):** nothing found is discarded: in groups h and i every candidate is in `research.md` with where it went (most on roadmap lines as notes for later; a few nowhere, with the reason); group h's 42: 7 built in v0.11.73, the other 35 on lines marked "from group h". The owner asked for the research to be paced (18:30): from here, findings in short lists, the full tables in files and the repo.
+  - **No Fable step** (docs only; rule 9 is for game logic or balance, rule 10 for story texts).
+  - **Also:** after v0.11.73 Claude uploaded the 11 changed docs (handover, roadmap, roadmap-done, changelog, restore-points, history-9, reference, working-agreement, lore, research, `claude/CLAUDE.md`) to the claude.ai project itself (owner "upload") and gave the new rules 5 and 10 for the project's Instructions field; `e9cc514` filled in for 0.11.73 in the changelog and restore points; the version line's "about 390 scenes" corrected to the lint's 317 (the README says "more than 300").
+  - **Checks:** see the version note.
+
+### From "Version notes"
+
+## v0.11.74 — the story and mechanics pass, group i round 1: the games on Selene's list (I1 + L1 + E1)
+
+- **project/research.md** (group i: the licence rows, #43–#94, the skipped and avoid lists, round 2), **project/research/** (new: `group-i-a-loops.md`, `group-i-b-narrative.md`, `group-i-c-incrementals.md`, `group-i-d-closed.md`, `group-i-brief.md`, word for word), **tests/tools.test.mjs** (v0.11.74 block), **sw.js, tests/README.md; project docs** (v0.11.71 to the new `history-10.md`). The game identical to 0.11.73; saves unchanged.
+- **Checks:** docs and a test only (rule 2): `node tests/tools.test.mjs`, `node tools/consistency.mjs` and `bash tools/check.sh quick`. How it interacts: no game file, save or bot code changed, so the game and the bot numbers can't move; the new test reads only `research.md` and the roadmap. What can now break a push: a group i number in `research.md` that no roadmap line names, or a roadmap line naming one that isn't there (intended).
+
 ## Moved from the handover in v0.11.76 (word for word)
 
 ### From "Decided in chat (2026-11-07)"

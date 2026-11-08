@@ -23,6 +23,7 @@
 - **Body:** at the start the crossing has ashed his channels shut (task mode, v0.9.6). He opens the 12 primaries and 66 collaterals in play. Every skill starts at T1 L1.
 - **His look in the pictures:** the casts `james` and `james_shaggy` in `tools/art/recipes.json`, from the owner's photos (02:16): early forties, glasses. **The texts call him tall** (Ya: "You're tall"; "a tall soft scholar"; "a tall empty jar in a ridiculous white coat").
 - **Why locals misread him:** they can't feel his cultivation at all. To them he looks mortal (`longforest.js` 147, 291).
+- **Flight (owner 2026-11-08 20:33 and 20:39, pick F1; not in the game yet, roadmap groups e and d):** James's people gain flight with their first breakthrough, so they fly from **Foundation**. James is a natural. They ride the local Qi flows the way a swimmer rides river or ocean currents: as natural as walking. **No limit except realm and GU:** his speed rises as he climbs the realms; his manoeuvrability rises with GU. As with everything else, he is completely unbothered by others' bafflement at his using it like second nature. Since the realm resets each Coil, flight comes back with each Coil's first breakthrough.
 
 ## Yuki
 
@@ -37,6 +38,7 @@
   *`design.md` J still lists the engine's eight-step ladder (lynx, panther, tiger, dire, spirit, apex); the game has these three. Noted for the forks register (roadmap, group h's findings).*
 - **Her human look (cast `yuki_human`):** very long straight white hair, bangs between the eyes, long side locks, pointed white cat ears and a long white tail. Narrow gold slit eyes and a dry look. A long black high-collared qipao with red piping and red knot buttons. No choker. The black dress is an outfit. She is a head shorter than James where she stands beside him.
 - **Memory:** she and James remember every Coil through the bond. No one else does.
+- **Flight:** Yuki flies too, since her cultivation is the same as James's (from Foundation, the same rules: speed by realm; owner 20:33).
 
 ## The world
 
@@ -45,6 +47,7 @@
 - **Its murder:** about four hundred years ago, a calm man in red sat under the Tree for a season and learnt its song. He came back with three hundred disciples. The Tree screamed for nine days, and the last gardeners died in front of it. He took its heart with his own hands and founded the **Crimson Lotus Sect**. The poison came back up. The locals were told the Old Tree died of age. The founder's seal is on the tribute post, "on everything" (`ship_log3`, `act1_heart.js` 84).
 - **The seed-sliver:** the ship still holds a living one. It can grow again (the grove, Act 1).
 - **James's place in it:** "You're not the outlier … The world is the outlier."
+- **Flight on this world (owner 20:33, 20:39):** this world's people can fly too, the same way (riding the Qi flows), but only from **Golden Core**, and slower and clumsier. So no one James meets in the prologue or Act 1 flies: the highest of them, Shen Qiu, is Core Formation (`ENEMY_REALM`, `power.js`).
 - **The Coil:** each act loops to a deadline: the prologue to the tribute on Day 7, Act 1 to Shen Qiu on Day 21. James never dies. The Ouroboros Axiom is universal among his people, but on this world the poisoned Qi turns it into a loop.
 
 ## Places and people

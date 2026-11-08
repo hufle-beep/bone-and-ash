@@ -12,7 +12,8 @@ The next one is made before the whole-game rewrite pass (group e) and before the
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.76 | (this push) | Docs and a test only (V1: `project/research.md` group i round 2 wave 2, `project/research/group-i-g-idle.md`, `group-i-h-rpg.md`, `group-i-i-chinese.md`, `group-i-brief-3.md`, the roadmap's placements). The game is identical to 0.11.75. |
+| 0.11.77 | (this push) | Docs and a test only (F1: flight in `project/lore.md`, three roadmap lines). The game is identical to 0.11.76. |
+| 0.11.76 | `2f1f55e` | Docs and a test only (V1: `project/research.md` group i round 2 wave 2, `project/research/group-i-g-idle.md`, `group-i-h-rpg.md`, `group-i-i-chinese.md`, `group-i-brief-3.md`, the roadmap's placements). The game is identical to 0.11.75. |
 | 0.11.75 | `bcd454b` | Docs and a test only (W1: `project/research.md` group i round 2 wave 1, `project/research/group-i-e-dating.md`, `group-i-f-vn.md`, `group-i-brief-2.md`, the roadmap's placements). The game is identical to 0.11.74. |
 | 0.11.74 | `0f3c088` | Docs and a test only (I1 + L1 + E1: `project/research.md` group i, `project/research/group-i-*.md`, the roadmap's placements, `history-10.md` new). The game is identical to 0.11.73. |
 | 0.11.73 | `e9cc514` | Docs and checks only (H1 + K1: `project/lore.md`, `project/research.md`, `CREDITS.md`, `tools/lib/docs.mjs` in `tools/consistency.mjs`, rule 5's fallback branches, the README). The game is identical to 0.11.72. |
