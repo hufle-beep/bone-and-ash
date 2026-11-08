@@ -2,7 +2,7 @@
 // Every id the game refers to exists: task-hub scenes and menus, form ids on story choices, items given or needed,
 // and every data-* marker in the page has code that reads it (a renamed marker once stuck every Selene player).
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
-import { PICTURES, pictureOf, sceneArt, setArtState, YUKI_PICS, YUKI_PIC_FORMS, YUKI_HUMAN_PICS } from '../js/art/art.js';
+import { PICTURES, pictureOf, sceneArt, setArtState, YUKI_PICS, YUKI_PIC_FORMS, YUKI_HUMAN_PICS, YUKI_TIGER_PICS } from '../js/art/art.js';
 import { SCENES, ITEMS } from '../js/story/prologue.js';
 import { TASK_HUBS } from '../js/story/task_hubs.js';
 import { FORM_LINES } from '../js/core/forms.js';
@@ -79,7 +79,7 @@ assert(pictureOf('yuki_close', 'cat') === 'art/pic/yuki_cat.webp' && pictureOf('
 for (const [form, file] of [['tiger', 'yuki_tiger'], ['human', 'yuki_human'], ['cat', 'yuki_cat']]) { setArtState({ yukiForm: form }); assert(sceneArt('yuki_close').includes(`art/pic/${file}.webp`), `v0.11.24: with Yuki in ${form} form the yuki_close plate shows ${file}`); }
 assert(sceneArt('james').includes('data-pic="james"') && sceneArt('james').includes('art/pic/james.webp'), 'v0.11.24: a key with a picture draws the picture');
 assert(SCENES.arrival.art === 'james', 'v0.11.24: the arrival shows James');
-assert(!sceneArt('envoy').includes('data-pic') && sceneArt('envoy').startsWith('<svg'), 'v0.11.24: a key without a picture keeps its code art (an Act 1 key since v0.11.38)');
+assert(!sceneArt('heart_hall').includes('data-pic') && sceneArt('heart_hall').startsWith('<svg'), 'v0.11.24: a key without a picture keeps its code art (an Act 1 key not drawn yet; envoy until v0.11.54)');
 // v0.11.38 (P-b; built as the v0.11.26 work in progress): every key of the prologue's art table shows its own picture (file named after the key)
 {
     const PROLOGUE_KEYS = 'forest_dawn omnitool clearing bone_needle meditation stream forage hunt camp forest_night jackals jackals_dead herb_girl gao_down ridge village elder healer boar dinner romance collectors collectors_down hairpin tribulation lights rain crows rats lizard gift bone_field mire hollow roof village_night token gao_window arson herb_slope workshop drill wolves'.split(' ');
@@ -93,8 +93,34 @@ assert(!sceneArt('envoy').includes('data-pic') && sceneArt('envoy').startsWith('
         assert(pictureOf(k, 'cat') === `art/pic/${k}.webp`, `v0.11.38: ${k} shows art/pic/${k}.webp while Yuki is the cat`);
         assert(sceneArt(k).includes(`data-pic="${k}"`), `v0.11.38: the ${k} plate draws the picture while Yuki is the cat`);
     }
-    assert(Object.keys(PICTURES).length === 8 + 42, `v0.11.38: 50 keys have pictures (${Object.keys(PICTURES).length})`);
+    assert(Object.keys(PICTURES).length === 8 + 42 + 20, `v0.11.54: 70 keys have pictures (50 in v0.11.38; Act 1 push 1 adds 20) (${Object.keys(PICTURES).length})`);
     assert(!sceneArt('no_such_key').includes('data-pic'), 'v0.11.38: an unknown key still falls back to code art');
+}
+// v0.11.54 (Act 1 art, push 1; owner picks 2026-11-08 A1 F1 Y1 T1): Fallout and the Blackroot, each file named after its key
+const ACT1_P1 = 'council envoy palisade ashfall_dawn ya_arrives ya_fight root_road bone_elk root_wyrm drowned_wood drowned_dead mire_serpent drowned_camp hot_spring ashen_hills cinder_hawks rot_ape night_watch trio trio_fire'.split(' ');
+const ACT1_YUKI_P1 = 'council ashfall_dawn ya_fight root_road drowned_wood drowned_camp ashen_hills rot_ape night_watch trio_fire'.split(' ');
+{
+    assert(ACT1_P1.length === 20, `v0.11.54: 20 keys in Act 1 push 1 (${ACT1_P1.length})`);
+    const artSrc = readFileSync('js/art/art.js', 'utf8');
+    const act1 = artSrc.slice(artSrc.indexOf('/* ---------------- Act 1 ---------------- */'));
+    setArtState({ yukiForm: 'cat' });
+    for (const k of ACT1_P1) {
+        assert(new RegExp(`^ {4}${k}: \\{`, 'm').test(act1), `v0.11.54: ${k} is an Act 1 key of the art table`);
+        assert(PICTURES[k] === k && pictureOf(k, 'cat') === `art/pic/${k}.webp` && sceneArt(k).includes(`data-pic="${k}"`), `v0.11.54: ${k} shows art/pic/${k}.webp while Yuki is the cat`);
+        // Y1: Yuki is drawn exactly where the key's code art draws her (YU(...))
+        const code = act1.slice(act1.search(new RegExp(`^ {4}${k}: \\{`, 'm'))).split(/\n {4}\w+: \{/)[0];
+        assert(/YU\(/.test(code) === ACT1_YUKI_P1.includes(k) && YUKI_PICS.has(k) === ACT1_YUKI_P1.includes(k), `v0.11.54 (Y1): ${k} draws Yuki in its picture exactly when its code art does`);
+    }
+    // Claude's limits (rule 7): the spring shows them to the collarbones, the trio three clothed shadows
+    const rec = JSON.parse(readFileSync('tools/art/recipes.json', 'utf8')).pictures;
+    assert(/Seen from behind/.test(rec.hot_spring.at(-1).prompt) && /up to their shoulders/.test(rec.hot_spring.at(-1).prompt) && !/nude|naked|breast|bust/i.test(rec.hot_spring.at(-1).prompt), 'v0.11.54: hot_spring shows them from behind, in the water to the shoulders, nothing more');
+    // the red-eye fix on drowned_dead is a recorded local step, and the tool exists
+    assert(rec.drowned_dead.at(-1).op === 'local' && /eyes\.py/.test(rec.drowned_dead.at(-1).note) && existsSync('tools/art/eyes.py'), 'v0.11.54: drowned_dead\'s red eyes made grey by a recorded local step (tools/art/eyes.py)');
+    // after the cold review (owner pick R1): the stray tails painted out (recorded inpaints with their masks), Ya's red eyes grey in trio_fire
+    const masks = JSON.parse(readFileSync('tools/art/recipes.json', 'utf8')).masks;
+    for (const k of ['drowned_camp', 'rot_ape']) { const st = rec[k].at(-1); assert(st.op === 'inpaint' && masks[st.mask] && st.source === rec[k].at(-2).file, `v0.11.54: ${k}'s stray tail painted out by a recorded inpaint on its picture`); }
+    assert(rec.trio_fire.at(-1).op === 'local' && /eyes\.py/.test(rec.trio_fire.at(-1).note), 'v0.11.54: trio_fire\'s red eyes made grey by a recorded local step');
+    assert(/fully clothed/.test(rec.trio.at(-1).prompt) && /three black shadow silhouettes/.test(rec.trio.at(-1).prompt), 'v0.11.54: trio is three clothed shadows on a paper door');
 }
 // v0.11.38 (P-b): the form map. A picture whose recipe draws Yuki as the small cat shows only while she is the cat;
 // in tiger or human form the plate is code art (which draws her current form). The list is checked against the recipes, so it cannot drift.
@@ -110,12 +136,15 @@ assert(!sceneArt('envoy').includes('data-pic') && sceneArt('envoy').startsWith('
         if (r && /\b(white cat|kitten|yuki)\b/i.test(JSON.stringify(r))) drawsCat.add(key);
     }
     assert([...drawsCat].sort().join(' ') === [...YUKI_PICS].sort().join(' '), `v0.11.38: YUKI_PICS is exactly the pictures whose recipe draws the cat (recipes ${drawsCat.size}, list ${YUKI_PICS.size})`);
-    assert(YUKI_PICS.size === 29, `v0.11.49: 29 pictures draw Yuki (30 in v0.11.38; ridge is a new landscape without her) (${YUKI_PICS.size})`);
+    assert(YUKI_PICS.size === 39, `v0.11.54: 39 pictures draw Yuki (29 since v0.11.49; Act 1 push 1 adds 10) (${YUKI_PICS.size})`);
     assert(!YUKI_PICS.has('ridge') && pictureOf('ridge', 'tiger') === 'art/pic/ridge.webp' && pictureOf('ridge', 'human') === 'art/pic/ridge.webp', 'v0.11.49: ridge shows the landscape without Yuki in every form');
     // v0.11.49 (Y3, part 1): the great-cat versions. v0.11.50 (Y3 part 2a): human for 15 keys; v0.11.51 (part 2b): all 29
     assert([...YUKI_PIC_FORMS].join(' ') === 'cat tiger human', `v0.11.50: Yuki's pictures exist for the cat, the great cat and the human (${[...YUKI_PIC_FORMS]})`);
-    assert(YUKI_HUMAN_PICS.size === 29 && [...YUKI_PICS].every((k) => YUKI_HUMAN_PICS.has(k)), `v0.11.51: every key of YUKI_PICS has a human picture (${YUKI_HUMAN_PICS.size})`);
-    const drawnIn = (key, form) => YUKI_PIC_FORMS.has(form) && (form !== 'human' || YUKI_HUMAN_PICS.has(key));
+    assert(YUKI_HUMAN_PICS.size === 29 && [...YUKI_HUMAN_PICS].every((k) => YUKI_PICS.has(k)), `v0.11.51: the prologue's 29 keys of YUKI_PICS have a human picture (${YUKI_HUMAN_PICS.size})`);
+    // v0.11.54 (pick F1): the great cat is gated like the human form; the prologue's 29 have both, Act 1's keys only the cat until push 4
+    assert([...YUKI_TIGER_PICS].sort().join(' ') === [...YUKI_HUMAN_PICS].sort().join(' '), `v0.11.54: the great-cat list is the prologue's 29 (${YUKI_TIGER_PICS.size})`);
+    assert([...YUKI_PICS].filter((k) => !YUKI_TIGER_PICS.has(k)).sort().join(' ') === ACT1_YUKI_P1.slice().sort().join(' '), 'v0.11.54: the Yuki keys without a great-cat picture are exactly Act 1 push 1\'s ten');
+    const drawnIn = (key, form) => YUKI_PIC_FORMS.has(form) && (form !== 'human' || YUKI_HUMAN_PICS.has(key)) && (form !== 'tiger' || YUKI_TIGER_PICS.has(key));
     for (const key of Object.keys(PICTURES)) {
         if (key.startsWith('yuki_')) continue;
         for (const form of ['tiger', 'human']) {

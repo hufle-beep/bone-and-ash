@@ -1102,6 +1102,111 @@
      ]
     ]
    ]
+  },
+  "a1_dc_tail": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 10,
+   "polys": [
+    [
+     [
+      1176,
+      584
+     ],
+     [
+      1272,
+      584
+     ],
+     [
+      1278,
+      740
+     ],
+     [
+      1176,
+      740
+     ]
+    ]
+   ]
+  },
+  "a1_ra_tail": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 10,
+   "polys": [
+    [
+     [
+      1186,
+      548
+     ],
+     [
+      1276,
+      548
+     ],
+     [
+      1278,
+      740
+     ],
+     [
+      1186,
+      740
+     ]
+    ]
+   ]
+  },
+  "a1_ra_tail2": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 6,
+   "polys": [
+    [
+     [
+      1190,
+      572
+     ],
+     [
+      1264,
+      572
+     ],
+     [
+      1264,
+      622
+     ],
+     [
+      1230,
+      624
+     ],
+     [
+      1232,
+      700
+     ],
+     [
+      1244,
+      748
+     ],
+     [
+      1240,
+      778
+     ],
+     [
+      1204,
+      778
+     ],
+     [
+      1190,
+      706
+     ],
+     [
+      1188,
+      624
+     ]
+    ]
+   ]
   }
  },
  "pictures": {
@@ -2582,6 +2687,273 @@
     "height": 800,
     "why": "Y3 part 2b (owner picks 2026-11-08 00:29): owner pick from the contact sheet"
    }
+  ],
+  "council": [
+   {
+    "op": "generate",
+    "file": "a1_council_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. An interior scene in the village elder's house with paper walls and an oil lamp on a low table that holds a red lacquered message tube. Behind the table sits a ninety-year-old village elder with one blind milky eye, a bald head with a tiny white topknot and a thin white beard, wearing a plain grey robe, grave. Beside him kneel a stern sixty-year-old village woman with grey hair in a tight bun, a lined face, a plain dark jacket and an apron and a bent old man with short grey hair, a grey beard and a lined face in patched hemp clothes. At the side kneels a village herbalist woman in her mid-twenties with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, worried. Across the table from the elder sits a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, deadpan, and on the table beside his hand sits a small white cat with gold eyes and a thin red cord collar.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "envoy": [
+   {
+    "op": "generate",
+    "file": "a1_envoy_s22",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime scene in the lane of Ashfall, a poor mountain hamlet of grey wooden houses with ash-grey thatched roofs on a slope. A sect envoy has arrived under a red silk canopy held up on poles by two young men in crimson sect robes with lotus embroidery. In front of the canopy stands a tall cold man of about thirty with a perfectly calm still face, long black hair tied high, wearing deep crimson sect robes with the hilt of a long sword over his shoulder, holding out a lacquered scroll tube. Facing him, a ninety-year-old village elder with one blind milky eye, a bald head with a tiny white topknot and a thin white beard, wearing a plain grey robe bows formally, and beside the elder stands a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers with his arms folded, deadpan.",
+    "seed": 22,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "palisade": [
+   {
+    "op": "generate",
+    "file": "a1_palisade2_s77",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime scene at the edge of Ashfall, a poor mountain hamlet of grey wooden houses with ash-grey thatched roofs on a slope: a long straight palisade of tall pointed stakes runs along a chalk line, each stake a smooth tapering ivory-white spike taller than a man, sharp at the top like a spear point, planted upright side by side like a fence of teeth. At the end of the palisade stands a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, one hand raised, as a new white spike grows up out of the earth in front of him. Two bent old men with short grey hair, grey beards and lined faces in patched hemp clothes carry armfuls of old bones to him, gravely. Grey mountains behind.",
+    "seed": 77,
+    "width": 1280,
+    "height": 800,
+    "why": "redo: the first round drew cartoon bones, not stakes"
+   }
+  ],
+  "ashfall_dawn": [
+   {
+    "op": "generate",
+    "file": "a1_ashfall_dawn_s22",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. Dawn over Ashfall, a poor mountain hamlet of grey wooden houses with ash-grey thatched roofs on a slope, thin smoke rising from the roofs, a pale sun low in the sky. At the edge of the village a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands looking north along a road that climbs into the mountains, with a small white cat with gold eyes and a thin red cord collar riding on his shoulder. Beside him stands a village herbalist woman in her mid-twenties with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash. Behind them two bent old men with short grey hair, grey beards and lined faces in patched hemp clothes watch from a doorway.",
+    "seed": 22,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "ya_arrives": [
+   {
+    "op": "generate",
+    "file": "a1_ya_arrives2_s88",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime scene in the lane of Ashfall, a poor mountain hamlet of grey wooden houses with ash-grey thatched roofs on a slope. In the middle of the lane stands a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, shouting, a rope over her shoulder. On the ground behind her, at the end of the rope, lies the carcass of a huge grey wolf the size of a pony, dead, limp on its side, its eyes shut, its legs tied together, dragged through the dust. Bent old villagers with grey hair and lined faces in patched hemp clothes stare at her from the doorways, frozen and horrified. At the side of the lane stand a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers and a village herbalist woman in her mid-twenties with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, watching.",
+    "seed": 88,
+    "width": 1280,
+    "height": 800,
+    "why": "redo: the first round drew the wolf alive"
+   }
+  ],
+  "ya_fight": [
+   {
+    "op": "generate",
+    "file": "a1_ya_fight2_s22",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime scene in a village lane at the edge of a dark forest, a ring of grave grey-faced old villagers in patched hemp clothes watching from behind a low wooden fence. In the middle a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth crouches bare-handed with a delighted fierce grin, her spear stuck upright in the ground behind her. Facing her stands a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, fists up, deadpan. At a safe distance a small white cat with gold eyes and a thin red cord collar sits on top of the low wooden fence, watching.",
+    "seed": 22,
+    "width": 1280,
+    "height": 800,
+    "why": "test sheet: the first prompt gave Ya a short fur outfit and gravestone posts; her cast was rewritten from her portrait and the fence named (owner 00:59 sheet)"
+   }
+  ],
+  "root_road": [
+   {
+    "op": "generate",
+    "file": "a1_root_road_s55",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide daytime scene of an ancient forest where giant grey-white roots, smooth as bone and as thick as houses, wind across the ground like roads. Along the top of one great root walk three travellers: in front a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, walking backwards and grinning; then a village herbalist woman in her mid-twenties with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, with a basket on her arm; then a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, with a small white cat with gold eyes and a thin red cord collar riding on his shoulder.",
+    "seed": 55,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "bone_elk": [
+   {
+    "op": "generate",
+    "file": "a1_bone_elk_s22",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. An ancient forest of giant grey roots. Between two roots a bone-elk grazes on the moss: a huge elk with grey hide, its antlers raw white bone, branching and growing in spirals out of its skull and down along its neck like a mane of knives. In the foreground, behind a root, a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord crouches with her spear ready, and beside her crouches a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers.",
+    "seed": 22,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "root_wyrm": [
+   {
+    "op": "generate",
+    "file": "a1_root_wyrm2_s88",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A gigantic grey-white tree root, as wide as a road, splits in two around a deep dark chasm full of mist. Out of the chasm rears a colossal root-wyrm: a serpent as thick as a tree trunk and many times longer than a man, covered in rough grey scales like tree bark, its huge head high above, jaws open. On the near half of the root stand three small people, tiny next to it: a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord with her spear raised, a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, and a village herbalist woman in her mid-twenties with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, who steps back.",
+    "seed": 88,
+    "width": 1280,
+    "height": 800,
+    "why": "redo: the first round drew a small snake"
+   }
+  ],
+  "drowned_wood": [
+   {
+    "op": "generate",
+    "file": "a1_drowned_wood_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A drowned forest at dusk: tall bare black trees standing waist-deep in perfectly still black water, every tree reflected upside down beneath it, sheets of mist lying on the water. In the foreground a raft of fallen trunks wedged between two trees, where three travellers make camp: a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, a village herbalist woman in her mid-twenties with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, and a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, with a small white cat with gold eyes and a thin red cord collar sitting on the trunk beside him.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "drowned_dead": [
+   {
+    "op": "generate",
+    "file": "a1_drowned_dead_s22",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A deep black pool under leaning black trees in a drowned forest. a village herbalist woman in her mid-twenties with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash stands chest-deep in the black water, alarmed, as grey bloated hands with long fingernails rise out of the water and grip her sleeve; behind her grey drowned corpses in rotten rags, with long wet hair over their faces, rise slowly out of the water. a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers wades toward her through the water.",
+    "seed": 22,
+    "width": 1280,
+    "height": 800
+   },
+   {
+    "op": "local",
+    "file": "a1_drowned_dead_eyes",
+    "source": "a1_drowned_dead_s22",
+    "note": "Mei Lin's red eyes made grey (owner 01:32 \"fix the red eyes\"): python3 -I tools/art/eyes.py SRC SPEC OUT with SPEC = this step's spec (boxes in source pixels). Then palette.py.",
+    "spec": {
+     "boxes": [
+      [
+       440,
+       225,
+       560,
+       290
+      ]
+     ]
+    }
+   }
+  ],
+  "mire_serpent": [
+   {
+    "op": "generate",
+    "file": "a1_mire_serpent2_s77",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A drowned forest of bare black trees standing in black water, fat marsh fowl roosting in the branches. A colossal mire serpent as thick as a tree trunk, its head as big as a horse, rears high out of the black water, its long dark glistening body coiling through the trees. On a fallen trunk in the foreground stand two small people, small next to it: a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, grinning with her spear raised, and a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers.",
+    "seed": 77,
+    "width": 1280,
+    "height": 800,
+    "why": "redo: the first round drew a small snake"
+   }
+  ],
+  "drowned_camp": [
+   {
+    "op": "generate",
+    "file": "a1_drowned_camp_s22",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. Night on a dry grassy hummock in a drowned forest of black trees standing in still water, a small campfire. By the fire a village herbalist woman in her mid-twenties with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash sits stitching a cut on the bare forearm of a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, who sits close beside her watching her face. A little apart, a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers sits with his back to them, looking at a tree, deadpan, and a small white cat with gold eyes and a thin red cord collar sits beside him looking at the tree too.",
+    "seed": 22,
+    "width": 1280,
+    "height": 800
+   },
+   {
+    "op": "inpaint",
+    "file": "a1_dc_tail_s3",
+    "source": "a1_drowned_camp_s22",
+    "mask": "a1_dc_tail",
+    "seed": 3,
+    "denoise": 1.0,
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. The dark trunk of a tree in a drowned forest, its black bark with pale ink markings, and tall dark grass and reeds at its foot on a grassy hummock at night. Only bark and grass.",
+    "why": "cold review (medium): a stray second cat tail behind James; owner pick R1 (01:44), seeds 1-3, s3. Source copy in ComfyUI input: a1src_drowned_camp.png"
+   }
+  ],
+  "hot_spring": [
+   {
+    "op": "generate",
+    "file": "a1_hot_spring2_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. Dusk at a hot spring: a pool among black rocks at the edge of a drowned forest, thick white steam lying over the dark opaque water and rising in curls. Seen from behind, two young women sit in the water up to their shoulders, their backs to us, looking out at the steaming forest: on the left a wild young woman with very long wet black hair with twigs in it hanging down her back, one arm resting on a rock; on the right a young woman with long black hair pinned up in a loose bun with one long slender ivory hairpin with a small red tassel, her head turned away shyly. Only the backs of their heads, their necks and the tops of their shoulders show above the water and the steam. On a rock on the bank lie their folded clothes: a patched jacket with a red sash, and a pale hide jacket with a spotted fur collar and a necklace of teeth.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800,
+    "why": "the first prompt (shoulders out, facing out) drew them nude in every seed: deleted unseen by the owner; drawn from behind instead (owner pick 01:32)"
+   }
+  ],
+  "ashen_hills": [
+   {
+    "op": "generate",
+    "file": "a1_ashen_hills2_s88",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A wide scene of burnt black hills: grey ash, the stumps of trees standing like broken teeth, the sky a dark bruised grey. Far away beyond the hills, on the horizon, rises a colossal dead tree as big as a mountain, filling half the sky, its bark grey as old bone, its great limbs broken off, a vast black wound in its side. In the foreground three travellers walk through the ash: a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, a village herbalist woman in her mid-twenties with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, and a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, with a small white cat with gold eyes and a thin red cord collar riding on his shoulder.",
+    "seed": 88,
+    "width": 1280,
+    "height": 800,
+    "why": "redo: the first round drew a normal-sized tree (it still is: a fix for the second round)"
+   }
+  ],
+  "cinder_hawks": [
+   {
+    "op": "generate",
+    "file": "a1_cinder_hawks_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. Burnt black hills under a smoky grey sky. Three huge ash-grey hawks, bigger than eagles, dive out of the sky with sparks trailing from their wings like embers. On the black ridge a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord braces with her spear raised against them, and beside her a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers holds a white bone dart ready to throw.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "rot_ape": [
+   {
+    "op": "generate",
+    "file": "a1_rot_ape2_s66",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A pass in a black ridge, and beyond it a colossal grey dead tree filling the sky. In the notch of the pass sits the rot-ape: a gigantic ape as big as a house, its whole body covered in shaggy living moss, with fungus and little ferns growing out of its shoulders and back, its eyes milky and blind. The ground around it is littered with white bones. In the foreground, tiny next to it, a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord and a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers crouch behind a black rock, watching it, and beside him sits a small white cat with gold eyes and a thin red cord collar.",
+    "seed": 66,
+    "width": 1280,
+    "height": 800,
+    "why": "redo: the first round drew a gorilla-sized ape"
+   },
+   {
+    "op": "inpaint",
+    "file": "a1_ra_tail2_s6",
+    "source": "a1_rot_ape2_s66",
+    "mask": "a1_ra_tail2",
+    "seed": 6,
+    "denoise": 1.0,
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. The rounded lower edge of a dark grey mossy rock, and below it flat solid black ground in deep shadow. Only rock and black ground.",
+    "why": "cold review (medium): a stray second cat tail behind James; owner pick R1 (01:44); a first try (mask a1_ra_tail, seeds 1-3, a prompt naming the coat hem) left patches; this tighter mask, seeds 4-6, s6. Source copy in ComfyUI input: a1src_rot_ape.png"
+   }
+  ],
+  "night_watch": [
+   {
+    "op": "generate",
+    "file": "a1_night_watch_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. Night in burnt black hills under a pale moon, a small campfire burning low. On a black rock above the camp sits a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, keeping watch with her spear across her knees. Below her by the fire sits a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, and beside him a small white cat with gold eyes and a thin red cord collar stares out into the dark, ears flat.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "trio": [
+   {
+    "op": "generate",
+    "file": "a1_trio_s44",
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark. The picture shows a quiet night interior: A dark wooden corridor of an old village house, and at its end a glowing lamp-lit paper sliding door that fills most of the frame, standing half open with a dark gap. On the glowing paper of the door fall the three black shadow silhouettes of a man and two women standing close together, fully clothed, one woman's hair in a bun with a long hairpin, the other woman's hair long and wild, the man's glasses visible in the shadow. The corridor in front of the door is empty, with dark wooden floorboards and walls, and a few small pale butterflies drift in the dark. Only three shadows on the paper, nobody in the corridor.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "trio_fire": [
+   {
+    "op": "generate",
+    "file": "a1_trio_fire2_s88",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. Night under dark pine trees, a campfire. Three people sit around the fire, two women and one man, each clearly separate. On the left sits a village herbalist woman in her mid-twenties with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, eating from a bowl with chopsticks with great dignity. On the right sits a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, her chin on her knees, listening wide-eyed. At the back between them sits a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers, telling a story, with a small white cat with gold eyes and a thin red cord collar lying in his lap. A few small pale butterflies drift above the fire.",
+    "seed": 88,
+    "width": 1280,
+    "height": 800,
+    "why": "redo: the first round merged Mei Lin and Ya into one woman"
+   },
+   {
+    "op": "local",
+    "file": "a1_trio_fire_eyes",
+    "source": "a1_trio_fire2_s88",
+    "note": "Ya's pinkish-red eyes made grey, her red scar kept (cold review, low; owner pick R1, 01:44): python3 -I tools/art/eyes.py SRC SPEC OUT with SPEC = this step's spec (boxes in source pixels). Then palette.py.",
+    "spec": {
+     "boxes": [
+      [
+       895,
+       158,
+       922,
+       174
+      ],
+      [
+       852,
+       172,
+       878,
+       188
+      ]
+     ]
+    }
+   }
   ]
  },
  "palette": {
@@ -2670,7 +3042,27 @@
    "y3f_forage_s2": "forage_tiger",
    "y3f_wolves_s1": "wolves_tiger",
    "y3f_roof_s2": "roof_tiger",
-   "y3_ridge_new_s22": "ridge"
+   "y3_ridge_new_s22": "ridge",
+   "a1_council_s44": "council",
+   "a1_envoy_s22": "envoy",
+   "a1_palisade2_s77": "palisade",
+   "a1_ashfall_dawn_s22": "ashfall_dawn",
+   "a1_ya_arrives2_s88": "ya_arrives",
+   "a1_ya_fight2_s22": "ya_fight",
+   "a1_root_road_s55": "root_road",
+   "a1_bone_elk_s22": "bone_elk",
+   "a1_root_wyrm2_s88": "root_wyrm",
+   "a1_drowned_wood_s44": "drowned_wood",
+   "a1_drowned_dead_eyes": "drowned_dead",
+   "a1_mire_serpent2_s77": "mire_serpent",
+   "a1_hot_spring2_s44": "hot_spring",
+   "a1_ashen_hills2_s88": "ashen_hills",
+   "a1_cinder_hawks_s44": "cinder_hawks",
+   "a1_night_watch_s44": "night_watch",
+   "a1_trio_s44": "trio",
+   "a1_dc_tail_s3": "drowned_camp",
+   "a1_ra_tail2_s6": "rot_ape",
+   "a1_trio_fire_eyes": "trio_fire"
   }
  },
  "styles": {
@@ -2692,6 +3084,8 @@
   "yuki_tiger": "a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck",
   "yuki_tiger2": "huge white tiger, a big cat as long as a man is tall, with a broad tiger face, thin grey tiger stripes on snow-white fur, heavy paws, gold eyes and a thin red cord around her neck",
   "james_shaggy": "a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers",
-  "yuki_human": "a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles"
+  "yuki_human": "a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles",
+  "ya": "a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord",
+  "ya_bare": "a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth"
  }
 }

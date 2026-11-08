@@ -666,6 +666,27 @@ export const PICTURES = {
     workshop: 'workshop',
     drill: 'drill',
     wolves: 'wolves',
+    // v0.11.54 (Act 1 art, push 1: Fallout and the Blackroot; owner picks A1 F1 Y1 T1, 2026-11-08): each file named after its key
+    council: 'council',
+    envoy: 'envoy',
+    palisade: 'palisade',
+    ashfall_dawn: 'ashfall_dawn',
+    ya_arrives: 'ya_arrives',
+    ya_fight: 'ya_fight',
+    root_road: 'root_road',
+    bone_elk: 'bone_elk',
+    root_wyrm: 'root_wyrm',
+    drowned_wood: 'drowned_wood',
+    drowned_dead: 'drowned_dead',
+    mire_serpent: 'mire_serpent',
+    drowned_camp: 'drowned_camp',
+    hot_spring: 'hot_spring',
+    ashen_hills: 'ashen_hills',
+    cinder_hawks: 'cinder_hawks',
+    rot_ape: 'rot_ape',
+    night_watch: 'night_watch',
+    trio: 'trio',
+    trio_fire: 'trio_fire',
 };
 /**
  * v0.11.38 (P-b): the pictures that draw Yuki. v0.11.49 (Y3, part 1): each has a version per form in YUKI_PIC_FORMS,
@@ -675,11 +696,16 @@ export const PICTURES = {
  * The set stays as the gate for keys added later (Act 1) that get a human picture after their cat one.
  */
 export const YUKI_PIC_FORMS = new Set(['cat', 'tiger', 'human']);
+/** v0.11.54 (pick F1): the keys whose great-cat picture is drawn; Act 1's keys get theirs after their cat one (push 4). */
+export const YUKI_TIGER_PICS = new Set(['forest_dawn', 'omnitool', 'clearing', 'stream', 'forage', 'hunt', 'camp', 'tribulation', 'lights', 'rain', 'crows', 'rats', 'gift', 'bone_field', 'mire',
+    'hollow', 'drill', 'wolves', 'lizard', 'roof', 'arson', 'herb_slope', 'gao_down', 'village', 'dinner', 'collectors', 'jackals', 'james', 'jackals_dead']);
 export const YUKI_HUMAN_PICS = new Set(['forest_dawn', 'omnitool', 'clearing', 'stream', 'forage', 'hunt', 'camp', 'tribulation', 'lights', 'rain', 'crows', 'rats', 'gift', 'bone_field', 'mire',
     'hollow', 'drill', 'wolves', 'lizard', 'roof', 'arson', 'herb_slope', 'gao_down', 'village', 'dinner', 'collectors', 'jackals', 'james', 'jackals_dead']);
 /** Whether a key of YUKI_PICS has its own picture in this form (v0.11.50). */
-const hasFormPic = (key, form) => YUKI_PIC_FORMS.has(form) && (form !== 'human' || YUKI_HUMAN_PICS.has(key));
-export const YUKI_PICS = new Set(['james', 'jackals', 'jackals_dead', 'forest_dawn', 'omnitool', 'clearing', 'stream', 'forage', 'hunt', 'camp', 'gao_down', 'village', 'dinner', 'collectors', 'tribulation', 'lights', 'rain', 'crows', 'rats', 'lizard', 'gift', 'bone_field', 'mire', 'hollow', 'roof', 'arson', 'herb_slope', 'drill', 'wolves']);
+const hasFormPic = (key, form) => YUKI_PIC_FORMS.has(form) && (form !== 'human' || YUKI_HUMAN_PICS.has(key)) && (form !== 'tiger' || YUKI_TIGER_PICS.has(key));
+export const YUKI_PICS = new Set(['james', 'jackals', 'jackals_dead', 'forest_dawn', 'omnitool', 'clearing', 'stream', 'forage', 'hunt', 'camp', 'gao_down', 'village', 'dinner', 'collectors', 'tribulation', 'lights', 'rain', 'crows', 'rats', 'lizard', 'gift', 'bone_field', 'mire', 'hollow', 'roof', 'arson', 'herb_slope', 'drill', 'wolves',
+    // v0.11.54 (Act 1 push 1, Y1: every key whose code art draws her): the cat now, the great cat and human in push 4
+    'council', 'ashfall_dawn', 'ya_fight', 'root_road', 'drowned_wood', 'drowned_camp', 'ashen_hills', 'rot_ape', 'night_watch', 'trio_fire']);
 /** The picture file for an art key in Yuki's current form, or '' when the key has none in that form (code art). */
 export function pictureOf(key, form = C2.getYukiForm()) {
     const p = PICTURES[key];

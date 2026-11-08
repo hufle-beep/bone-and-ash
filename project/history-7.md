@@ -2,6 +2,26 @@
 
 Started 2026-11-07 (v0.11.45), when `history-6.md` reached about 45 KB. Newer than `history-6.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.54 (word for word)
+
+### From "Decided in chat (2026-11-07)"
+
+- **v0.11.51: Y3 part 2b, the other 14 human pictures (2026-11-08; options after v0.11.50: H1 / H2 for jackals_dead's pose, C1 / C2 for the code art's choker, T1 / T2 for a test sheet; owner 00:09 "go with your picks" = H1 + C1 + T1):**
+  - **Picked:** H1 (jackals_dead: she crouches between the dead jackals wiping her hands, smug; mask `y3h_jd`); C1 (the choker out of the code-art human Yuki now: Act 1's code-art scenes draw her); T1 (a test sheet first: dinner, james).
+  - **How:** fresh pictures (style **pc**, each key's scene text with the cat line swapped for cast `yuki_human`, side by side, "she is a head shorter than him"; details `tools/art/README.md`); `james` and `jackals_dead` inpaints on the approved pictures; drill redone with old bearded hunters (the first seeds drew long-haired young men, some like women).
+  - **The pictures (owner picks 00:29):** dinner s44, james s44, hollow s44, wolves s22, lizard s44, arson s55 (s22 and s44 grew a stray woman), jackals s44, jackals_dead s55 ("the top of the ears are cut off, leave that for a final pass": in the second round), drill (redo) s88, roof s22, herb_slope s22, gao_down s22, village s44 (s55 drew her twice), collectors s44. In most she comes out about James's height, not a head shorter (accepted; none oversized).
+  - **After the cold review (owner picks J1 + L1 + the low items' option):** james: the cat's paws left on his shoulder painted out (mask `y3h_james_paws`, owner pick s1); lizard: her black tail repainted white (mask `y3h_lizard_tail`, owner pick s3); the close-up's choker out too (`yukiHumanCloseUp`, never shown while `yuki_human.webp` exists); kept: arson's third thug, jackals_dead without the fire's ashes.
+  - **Code:** `js/art/art.js` `YUKI_HUMAN_PICS` all 29 keys (kept as the gate for Act 1 keys that get their human picture after their cat one); `js/art/clamp2.js` the choker and knot out of `yukiHuman` and `yukiHumanCloseUp`; `tools/art/recipes.json` the 14 `<key>_human` recipes and the masks `y3h_jd`, `y3h_james_paws`, `y3h_lizard_tail`.
+  - **Checks:** see the version note.
+  - **Uploaded by Claude after v0.11.50 (owner, before this chat):** the changed docs ("docs uploaded by Claude").
+
+### From "Version notes"
+
+### v0.11.51 — Y3 part 2b: the other 14 human pictures, the code art's choker out
+
+- **art/pic:** 14 new `<key>_human.webp` (about 1.1 MB). **js/art/art.js** (`YUKI_HUMAN_PICS` all 29), **js/art/clamp2.js** (the choker out of `yukiHuman` and `yukiHumanCloseUp`), **sw.js** (ART fingerprints, VERSION), **tests/data.test.mjs** (every `YUKI_PICS` key in `YUKI_HUMAN_PICS`; the code-art human Yuki's only red is her mouth, the close-up has none; both fail on v0.11.50), **tools/art/recipes.json, README.md; tests/README.md; project/reference.md, roadmap.md, changelog.md, restore-points.md, history-7.md** (v0.11.48 moved).
+- **Checks:** the full `bash tools/check.sh` twice (after the picks; after the two fixes and the VERSION bump): exit 0, 0 drifted, 1 log-only move (tribute C6 won 60.2 → 53.6%, n 110, as since v0.11.48); the models unchanged (Careful 2.29 / 3.87, Completionist 2.12 / 2.94); the baseline kept; the palette check 108 pictures, 0 failed. Every recorded prompt (the 14 and the two fixes) checked against what ComfyUI ran (SHA-256 of the prompt text from its history). Cold review on Opus (art): code, files, fingerprints, recipes correct, no id changed, Yuki once in each picture with no stray figures; its findings are in the decisions block (two medium fixed, the close-up's choker fixed, two low kept).
+
 ## Moved from the handover in v0.11.53 (word for word)
 
 ### From "Decided in chat (2026-11-07)"
