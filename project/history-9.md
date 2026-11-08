@@ -2,6 +2,23 @@
 
 Started 2026-11-08 (v0.11.65), when `history-8.md` reached about 45 KB. Newer than `history-8.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.73 (word for word)
+
+### From "Decided in chat (2026-11-07)"
+
+- **v0.11.70: docs only, the roadmap's new order and rule 10 (owner 15:45 "the roadmap is growing large, but before the combat begins, we should move the copy over up after c. And when that is done, another full analysis pass of the whole Selene and Sillytavern repositories, not just the games themselves, to see if there is anything it useful to adapt/adopt. After that, o hope selene still has the list of games it went through for analysis, because I want to analyze then here too and adopt/adapt features."; options O1 / O2 / O3; owner 15:48 "before D I will tell you more games to analyze. I'm aware this pushes everything back by a lot, but I want a more mature game before we extend the combat and retune. Go O1. and A"):**
+  - **Picked:** O1: c → **g** the copy-over push 5 (the Coil: an end-of-Coil summary, progressive reveal and a next-step line, a target Coil per act and a personal best; moved word for word from section 4) → **h** a read-only analysis of the whole of Selene's and the SillyTavern repositories (tools, tests, workflows, docs, rules, not only the games) → **i** the games analysis (Selene's `project/research.md`: five rounds, about 45 games with their licences, still there; plus the games the owner names before d) → d → e → f → section 2 → the rest of section 4 (engine systems, the progression layer, Android, engine extras: after the analyses, so their plans can change). O2 (the whole copy-over first) and O3 (push 5 and the engine systems) not picked. New letters, so groups d, e, f keep their names.
+  - **"A" read as A1** (Claude's recommendation; told to the owner): `CLAUDE.md` **rule 10, Fable for story texts**; the full text in `working-agreement.md`. A2 (a line in rule 9) and A3 (wait for the comparison) not picked. The claude.ai project's Instructions field mirrors `CLAUDE.md` and is pasted by the owner (Claude's tools can't edit it): the new text given in chat.
+  - **Also:** `8dbc773` filled in for 0.11.69 in the changelog and restore points. The mirror of v0.11.69's docs was asked after that push and not answered yet: asked again after this one (rule 8).
+  - **Checks:** see the version note.
+
+### From "Version notes"
+
+### v0.11.70 — docs only: the roadmap's new order (O1) and rule 10, Fable for story texts (A1)
+
+- **CLAUDE.md** (rule 10), **project/working-agreement.md** (the full rule), **project/roadmap.md** (groups g, h, i in section 1; push 5 moved word for word from section 4; the order), **project/roadmap-done.md** (the old "Last updated" line), **sw.js** (VERSION); **the other project docs** (v0.11.67 moved to `history-9.md`). The game is identical to 0.11.69.
+- **Checks:** docs only: `bash tools/check.sh quick` and `node tools/consistency.mjs` (they read the version and the docs); no game file, save or tool changed, so nothing else can break.
+
 ## Moved from the handover in v0.11.72 (word for word)
 
 ### From "Decided in chat (2026-11-07)"

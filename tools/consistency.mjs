@@ -2,9 +2,12 @@
 // 1. Every game file the page needs is in sw.js FILES (so it works offline from the first install); v0.11.39 (Z2-b): pictures,
 //    backgrounds and icons are in sw.js ART instead (their own cache), each with a current fingerprint (tools/arthash.mjs).
 // 2. sw.js VERSION matches the handover header, the newest changelog row and the newest restore point.
-import { readFileSync } from 'node:fs';
+// 3. v0.11.73 (group h, H1): the handover under 35,000 bytes, the roadmap's "Last updated" version (failures); the newest
+//    history file past 45,000 bytes (a log line). The rules are in tools/lib/docs.mjs.
+import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { readArt, checkArt, ART_RE } from './arthash.mjs';
+import { docFindings } from './lib/docs.mjs';
 
 const fail = [];
 const sw = readFileSync('sw.js', 'utf8');
@@ -28,5 +31,11 @@ const docs = {
 };
 for (const [where, v] of Object.entries(docs)) if (v !== version) fail.push(`${where} says ${v}, sw.js says ${version}`);
 
+const histories = Object.fromEntries(readdirSync('project').filter((f) => /^history(-\d+)?\.md$/.test(f)).map((f) => [f, statSync(`project/${f}`).size]));
+const handoverBytes = statSync('project/handover.md').size;
+const docs2 = docFindings({ version, handoverBytes, histories, roadmap: readFileSync('project/roadmap.md', 'utf8') });
+fail.push(...docs2.fail);
+for (const n of docs2.notes) console.log(`note: ${n}`);
+
 if (fail.length) { console.log(fail.join('\n')); process.exit(1); }
-console.log(`${needed.length} files offline (${Object.keys(art).length} in the art cache, fingerprints current), version ${version} everywhere`);
+console.log(`${needed.length} files offline (${Object.keys(art).length} in the art cache, fingerprints current), version ${version} everywhere, handover ${handoverBytes} bytes`);

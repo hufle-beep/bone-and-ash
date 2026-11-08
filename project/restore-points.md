@@ -2,10 +2,18 @@
 
 **Nothing is ever deleted from the git history**, so every past version can always be recovered. Update this list in every push: add the new point on top. From v0.8.6 the **Restore points** workflow (`.github/workflows/restore-points.yml`) tags the newest 5 commits of `main` on every push as `restore/<date>-<commit>` and removes older restore tags (only the label; the commits stay in history). On GitHub: the repo → **Tags** (or the branch menu → Tags), filter `restore/`.
 
+## Fallback branches (never deleted without the owner's word; hard rule 5 since v0.11.73)
+| Branch | What it holds |
+|---|---|
+| `fallback/2026-11-06-before-pivot` | 0.11.4, the game before the copy-over from Selene and Rules Engine C (made with 0.11.5). |
+
+The next one is made before the whole-game rewrite pass (group e) and before the retune (section 2), in those pushes.
+
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.72 | (this push) | The story and mechanics pass, group g, the copy-over push 5 (the Coil): S1 the Coil screen's closest cards and what carries over (`coilReport().near`, `cardName` in `coil_scenes.js`), N1 the next-step line (`nextStep` in `js/core/tasks.js`, the per-phone `boneash.nonext` in `js/main.js`), P0 (progressive reveal moot), T1 the targets and the personal best (`TARGETS`, `passCoils`, `noteClear`, `targetsText` in `js/core/coil.js`; the optional `stats.pass` and `stats.best`). Same save shape plus those two optional fields (an older version ignores them); ids unchanged; the baseline kept (0 drifted). Rolling back only drops the hints, the new Coil-screen lines and the bests. |
+| 0.11.73 | (this push) | Docs and checks only (H1 + K1: `project/lore.md`, `project/research.md`, `CREDITS.md`, `tools/lib/docs.mjs` in `tools/consistency.mjs`, rule 5's fallback branches, the README). The game is identical to 0.11.72. |
+| 0.11.72 | `ab6b61b` | The story and mechanics pass, group g, the copy-over push 5 (the Coil): S1 the Coil screen's closest cards and what carries over (`coilReport().near`, `cardName` in `coil_scenes.js`), N1 the next-step line (`nextStep` in `js/core/tasks.js`, the per-phone `boneash.nonext` in `js/main.js`), P0 (progressive reveal moot), T1 the targets and the personal best (`TARGETS`, `passCoils`, `noteClear`, `targetsText` in `js/core/coil.js`; the optional `stats.pass` and `stats.best`). Same save shape plus those two optional fields (an older version ignores them); ids unchanged; the baseline kept (0 drifted). Rolling back only drops the hints, the new Coil-screen lines and the bests. |
 | 0.11.71 | `81353b3` | The story and mechanics pass, group c (small rules): Y1 Yuki's food switch (`yukiCatch` in `js/core/tasks.js`, the jobs' `alts` and `full` in `task_hubs.js`, `lfYukiCatch` in `longforest.js`, `gives` on a choice in `story.js`; Fable's texts), C1 `sitSummary` (`meditate.js`), X1 `replayExplore` (`wilds.js`); R1 after the Fable review (a switch when her kind can't take the whole haul). Same save shape as 0.11.70; ids unchanged; the baseline kept (0 drifted). Rolling back brings back the false "+1" hauls, the 4 lines a sit and once-a-day Explore. |
 | 0.11.70 | `2eb867e` | Docs only (O1: the roadmap's new order, groups g, h, i; A1: `CLAUDE.md` rule 10). The game is identical to 0.11.69. |
 | 0.11.69 | `8dbc773` | The story and mechanics pass, group b's last item, the missing replies: R1 (the 20 one-off story choices' replies, Fable's texts, in seven story files) + P1 (`keepReplies` in `js/core/replies.js`, used by `js/core/story.js` and `js/core/tasks.js`); R1 after the Opus review (Fable's six fixes, the bone stakes pattern). Texts and display only; same save state as 0.11.68; the baseline kept. |

@@ -2,6 +2,12 @@
 
 Split out of `roadmap.md` in v0.11.65 (owner pick G2, 2026-11-08 11:45), so the roadmap shows only the open work. Every line here moved word for word; newest first. Update in every push that finishes a roadmap line.
 
+## Moved in v0.11.73 (word for word)
+
+### From section 1h, "Analysis of Selene's and the SillyTavern repositories" (done in v0.11.73: H1 `project/lore.md`, `project/research.md`, `CREDITS.md`, the docs' size rules in `tools/consistency.mjs`, the fallback-branch rule, the README; K1 the game's canon stands; the whole record in `research.md`)
+
+- **The owner (2026-11-08 15:45, "And when that is done, another full analysis pass of the whole Selene and Sillytavern repositories, not just the games themselves, to see if there is anything it useful to adapt/adopt."):** after g, a read-only analysis of the whole of `hufle-beep/Long-patience` (Selene) and `hufle-beep/Shared-ST` (SillyTavern, private: read access through `add_repo` first): the games and also the tools, tests, checks, workflows, docs, rules and working habits; a list of what could be adapted or adopted for Bone and Ash, with options first (an earlier read-only pass, 2026-11-06, gave the copy-over list in section 4).
+
 ## Moved in v0.11.72 (word for word)
 
 ### From section 1g, "The copy-over push 5, the Coil" (done in v0.11.72: S1 the Coil screen's closest cards and what carries over, N1 the next-step line, P0 progressive reveal moot (Selene's queue controls are gone here since v0.11.64), T1 a target per act and the personal best; R1 after the Fable review)

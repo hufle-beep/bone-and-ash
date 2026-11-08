@@ -71,7 +71,8 @@ The bible and the contract between the four part files are at the top of `js/sto
 
 | Path | What |
 |---|---|
-| `CLAUDE.md`, `project/*.md` | The hard rules and the project docs (handover, working agreement, roadmap, design, changelog, restore points; v0.11.65: `roadmap-done.md`, the roadmap's done, stale and moot lines). |
+| `CLAUDE.md`, `project/*.md` | The hard rules and the project docs (handover, working agreement, roadmap, design, changelog, restore points; v0.11.65: `roadmap-done.md`, the roadmap's done, stale and moot lines; v0.11.73: `lore.md`, the one lore source for story texts (rule 10; the SillyTavern canon that differs listed as not adopted), and `research.md`, every research round with its licences, candidates, skipped list and where each went). |
+| `README.md`, `CREDITS.md` | The public front page (brought up to date in v0.11.73, with a "Made with AI" line); the credits for code, ideas, fonts and tools (v0.11.73; the paintings in `art/bg/CREDITS.md`). |
 | `index.html`, `css/style.css` | The page. Phone-first layout: status strip (HP / Convergence / Fed / clock; v0.11.64: first, pinned at the very top, above the art), art plate, place and title, roll-result panel, prose, choice "slips", tab bar (Story, James, Hammerspace, Journal, Saves). |
 | `js/core/formulas.js` | Rules Engine C formulas, unchanged. |
 | `js/core/game.js` | State (`newGame`), the numbers (HP, Qi Max, Convergence ×1.25), d6 from the save's own seed (a reload does not reroll), XP (`awardXp`), time and regen (`advance`, `sleepUntil`), hunger, condensation, inventory, relationships, **combat** (`COMBAT_ACTIONS`, `startCombat`, `combatStep`, `combatFlee`), save/load. |
@@ -107,7 +108,7 @@ The bible and the contract between the four part files are at the top of `js/sto
 | `tests/tools.test.mjs` | v0.11.21: the test tools themselves (shard merge and seeds, 1 worker = 2 workers, the runner's job list, the noise band). |
 | `tools/leftovers.mjs`, `tools/leftovers-keep.json`, `tests/lib/seen.mjs` | v0.11.22: the leftover check, strict since v0.11.23 (choices log only; what nothing reaches or reads; the keep-list with a reason each; the bots' record of the flags, items and choices they touch, from two small watched runs). `tests/README.md` has the details. |
 | `.gitignore` | v0.11.22: `__pycache__/`, `*.pyc`, `node_modules/`. |
-| `tools/consistency.mjs`, `tests/engine.test.mjs` | v0.11.5: the offline file list and the version in every doc (in `check.sh`); the engine's own formula tests on our copy. |
+| `tools/consistency.mjs`, `tests/engine.test.mjs` | v0.11.5: the offline file list and the version in every doc (in `check.sh`); the engine's own formula tests on our copy. v0.11.73: the docs' size rules (`tools/lib/docs.mjs`: the handover under 35,000 bytes and the roadmap's "Last updated" version, failures; the newest history file past 45,000 bytes, a note), tested in `tests/tools.test.mjs`. |
 | `tests/data.test.mjs`, `tools/lint.mjs`, `tools/browser.py`, `tools/snap.mjs` | v0.11.7: data integrity (in the check); the content lint (log only); the browser test (full check only); fresh test saves (`node tools/snap.mjs`, by hand, for each new save format). |
 | `tools/bots.mjs` | Balance numbers only (v0.11.1): the tasks test's bots, summary per Coil with the beast share of deaths; `--games`, `--seed`, `--sensible`, `--workers`. |
 | `.github/workflows/restore-points.yml` | Tags the newest 5 commits on every push (`restore/<date>-<commit>`), copied from Selene. |

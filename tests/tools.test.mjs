@@ -19,6 +19,7 @@ import { strip, scanFunctions, scanFlags, flagFindings, scanCss, scanMarkers, sc
 import { seen as touched, track, noteView, seenOut } from './lib/seen.mjs'; // v0.11.22
 import { stepLine, flagLines, leftoverFound, modelDigest } from '../tools/lib/report.mjs'; // v0.11.28
 import { artFiles, fingerprint, readArt, checkArt, writeArt, ART_RE } from '../tools/arthash.mjs'; // v0.11.39
+import { docFindings, newestHistory, HANDOVER_MAX, HISTORY_MAX } from '../tools/lib/docs.mjs'; // v0.11.73
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 let pass = 0, fail = 0;
@@ -342,6 +343,23 @@ print(json.dumps({"n": len(R['masks']), "bad": bad, "bitmaps": sum('bitmap' in m
         assert(r.bad.length === 0 && r.bitmaps >= 30, `masks.py: all ${r.n} masks drawn at their size, the ${r.bitmaps} stored outlines with white in them (bad: ${r.bad.slice(0, 5)})`);
     }
     rmSync(out, { recursive: true, force: true });
+}
+// v0.11.73 (group h, H1): the docs' own rules in tools/lib/docs.mjs (the handover's size, the newest history part, the roadmap's version)
+{
+    const ok = { version: '1.2.3', handoverBytes: 34999, histories: { 'history.md': 50000, 'history-2.md': 50000, 'history-10.md': 44000, 'history-9.md': 46000 }, roadmap: '# Roadmap\n\nLast updated: 2026-11-08 (v1.2.3, docs): x\n' };
+    assert(newestHistory(Object.keys(ok.histories)) === 'history-10.md' && newestHistory(['history.md']) === 'history.md' && newestHistory([]) === null, 'docs: the newest history part is the highest number (10 after 9, history.md is part 1)');
+    const r = docFindings(ok);
+    assert(r.fail.length === 0 && r.notes.length === 0, `docs: a handover under ${HANDOVER_MAX} bytes, the newest part under ${HISTORY_MAX} (older parts over it don't count), the roadmap on the version: nothing (${r.fail.concat(r.notes).join('; ')})`);
+    const big = docFindings({ ...ok, handoverBytes: HANDOVER_MAX });
+    assert(big.fail.length === 1 && /handover\.md is 35000 bytes/.test(big.fail[0]), `docs: a handover of ${HANDOVER_MAX} bytes fails (${big.fail.join('; ')})`);
+    const hist = docFindings({ ...ok, histories: { ...ok.histories, 'history-10.md': HISTORY_MAX + 1 } });
+    assert(hist.fail.length === 0 && hist.notes.length === 1 && /history-10\.md is 45001 bytes/.test(hist.notes[0]), `docs: the newest part past ${HISTORY_MAX} bytes is a note, not a failure (${hist.notes.join('; ')})`);
+    const old = docFindings({ ...ok, roadmap: 'Last updated: 2026-11-08 (v1.2.2, docs)' });
+    const none = docFindings({ ...ok, roadmap: '# Roadmap\n' });
+    assert(/says 1\.2\.2, sw\.js says 1\.2\.3/.test(old.fail[0] ?? '') && /says nothing/.test(none.fail[0] ?? ''), `docs: the roadmap on an older version, or with no "Last updated" line, fails (${old.fail[0]}; ${none.fail[0]})`);
+    let code = 0, out = '';
+    try { out = execFileSync(process.execPath, ['tools/consistency.mjs'], { cwd: ROOT, encoding: 'utf8' }); } catch (e) { code = e.status ?? 1; out = String(e.stdout || e); }
+    assert(code === 0 && /handover \d+ bytes/.test(out), `docs: tools/consistency.mjs passes on the real repo, with the handover's size (exit ${code}: ${out.trim().split('\n').pop()})`);
 }
 rmSync(TMP, { recursive: true, force: true });
 
