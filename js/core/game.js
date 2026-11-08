@@ -577,6 +577,7 @@ export function eat(g, satiety, { yuki = true } = {}) {
  * Losses are never multiplied; Yuki is never caught up (she is never reset).
  */
 export const REL_CATCHUP = 3;
+export const REL_MAX = 150; // v0.11.83: friendship and affection run −150 to 150 (named for the FAQ; unchanged)
 function catchUp(cur, d, top) {
     if (d <= 0 || cur >= top) return cur + d;
     const fast = Math.min(top - cur, d * REL_CATCHUP);
@@ -590,8 +591,8 @@ export function bumpRel(g, who, f = 0, a = 0) {
         const p = g.coil.peak?.[who];
         b = best[who] || (best[who] = { f: Math.max(r.f, p?.f ?? r.f), a: Math.max(r.a, p?.a ?? r.a) }); // an old save starts from this Coil's peak
     }
-    r.f = Math.max(-150, Math.min(150, b ? catchUp(r.f, f, b.f) : r.f + f));
-    r.a = Math.max(-150, Math.min(150, b ? catchUp(r.a, a, b.a) : r.a + a));
+    r.f = Math.max(-REL_MAX, Math.min(REL_MAX, b ? catchUp(r.f, f, b.f) : r.f + f));
+    r.a = Math.max(-REL_MAX, Math.min(REL_MAX, b ? catchUp(r.a, a, b.a) : r.a + a));
     if (b) { b.f = Math.max(b.f, r.f); b.a = Math.max(b.a, r.a); }
     if (g.coil) { const p = g.coil.peak[who] || (g.coil.peak[who] = { f: r.f, a: r.a }); p.f = Math.max(p.f, r.f); p.a = Math.max(p.a, r.a); } // the Coil's head start (v0.9.4)
     return r;

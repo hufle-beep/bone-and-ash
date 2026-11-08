@@ -145,7 +145,7 @@ button { font: inherit; color: inherit; }
 
 /* ---- tab bar: paper strip, the current tab underlined in ink ---- */
 #tabs {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; display: grid; grid-template-columns: repeat(5, 1fr);
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; display: grid; grid-template-columns: repeat(6, auto); justify-content: space-around; /* v0.11.83: six tabs (FAQ), one row from 360 px */
   max-width: 44rem; margin: 0 auto; background: rgba(236,232,223,0.96); padding-bottom: env(safe-area-inset-bottom);
   backdrop-filter: blur(6px); box-shadow: 0 -10px 18px -12px rgba(35,33,30,0.35);
 }
@@ -257,3 +257,17 @@ button.card, button.choice { -webkit-touch-callout: none; -webkit-user-select: n
 /* v0.11.64 (B1): a card that would end the Coil */
 .card.fatal { border-color: var(--red); }
 .card .dies { color: var(--red); font-weight: 600; }
+
+/* ---- v0.11.83: the FAQ (Selene's, in ink) ---- */
+#tabs button.new { background: radial-gradient(circle at 18% 0.65rem, var(--red) 0 2.5px, transparent 3px) no-repeat; }
+.faqs { display: grid; gap: 0.25rem; margin: 0.4rem 0 1rem; }
+.faqs input { font: inherit; font-size: 1rem; background: var(--paper-2); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 0.5rem 0.6rem; }
+.faq { display: grid; gap: 0.45rem; }
+.faq details { border: 1px solid var(--line); border-radius: 6px; background: var(--paper-2); padding: 0 0.8rem; }
+.faq summary { cursor: pointer; padding: 0.7rem 0; font-family: var(--display); font-weight: 600; font-size: 1rem; line-height: 1.35; list-style: none; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::before { content: '▸ ' / ''; color: var(--ink-dim); }
+.faq details[open] summary::before { content: '▾ ' / ''; }
+.faq details p { margin: 0 0 0.8rem; font-size: 0.95rem; color: var(--ink-2); line-height: 1.55; }
+.faq details p b { color: var(--ink); font-weight: 600; }
+.faq .fnew { display: inline-block; margin-left: 0.3rem; padding: 0 0.4em; border-radius: 1em; background: var(--red); color: var(--paper); font-family: var(--body); font-size: 0.72rem; font-weight: 400; vertical-align: 0.1em; }

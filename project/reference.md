@@ -77,6 +77,7 @@ The bible and the contract between the four part files are at the top of `js/sto
 | `js/core/formulas.js` | Rules Engine C formulas, unchanged. |
 | `js/core/game.js` | State (`newGame`), the numbers (HP, Qi Max, Convergence ×1.25), d6 from the save's own seed (a reload does not reroll), XP (`awardXp`), time and regen (`advance`, `sleepUntil`), hunger, condensation, inventory, relationships, **combat** (`COMBAT_ACTIONS`, `startCombat`, `combatStep`, `combatFlee`), save/load. |
 | `js/core/story.js` | The scene runner (`sceneView`, `choose`, `goTo`). |
+| `js/core/faq.js` | v0.11.83 (owner picks P1 + T1 + R1): the FAQ, Selene's: 20 entries (question, answer from the game's own values, gate), the gates (`FAQ_TEST`), the per-tab entries (`FAQ_TAB`), the unfolding (`faqState`, `faqCheck`, `faqList`, `faqHasNew`, `faqSeen`, `faqMatch`); pure. main.js keeps its state on the phone (`boneash.faq.v1`, never in a save) and draws the FAQ tab; tested by `tests/faq.test.mjs` and browser part 2. |
 | `js/story/common.js` | Shared helpers: daily flags, `forestScale` / `villageScale`, `grow()` (enemy growth), food table and `eatBest()`, new items. |
 | `js/story/wilds.js` | Forest Days 2–3 and the random nights (v0.4.0). |
 | `js/story/ashfall.js` | Village Days 5–6, suppers, the night-5 Gao event (v0.4.0). |

@@ -12,7 +12,8 @@ import { TASK_HUBS } from './story/task_hubs.js';
 import { landParts } from './core/replies.js'; // v0.11.68 (A1 + B2 + C1)
 import { againView, skipPlan, skipRun } from './story/again.js'; // v0.11.35 (P1-a)
 import { coilActive, endCoil, targetsText } from './core/coil.js';
-import { medCards, runMed, isSitChoice, medActivity, useLine, LATE_TAG } from './core/meditate.js';
+import { medCards, runMed, isSitChoice, medActivity, useLine, LATE_TAG, canMeditate } from './core/meditate.js';
+import { FAQ_KEY, FAQ_TAB, faqState, faqText, faqCheck, faqList, faqHasNew, faqSeen, faqMatch } from './core/faq.js'; // v0.11.83 (P1 + T1 + R1)
 import { meridianRow } from './story/meridians.js';
 import { realmShockHpBonus } from './core/formulas.js';
 import * as ART from './art/art.js';
@@ -621,8 +622,8 @@ ${g.coil ? `<h2>The Coil</h2><p class="note">${g.coil.act === 1 ? 'Act 1, ' : ''
 <div class="row"><span>HP · Qi</span><span>${n1(g.yuki.hp)} / ${yukiHpMax(g)} · ${n1(g.yuki.qi)} / ${n1(yukiQiMax(g))}</span></div>
 ${skillRow('Fight', g.yuki.fight)}${skillRow('Qi Use', g.yuki.qiUse, 'shares every award through the bond')}
 ${rel ? `<h2>People</h2>${rel}` : ''}
-<h2>Rules in one breath</h2>
-<p class="note">A check is the skill's value plus a d6 against the DC; a 6 always succeeds, a 1 needs DC + 2. Success pays XP to the skill and to GU in equal shares (a fail pays a quarter); Yuki gets a share through the bond. Every 30 minutes the body regenerates 5% HP and 11.6% Convergence. Hunger below 30 costs 1 on every check.</p>
+<h2>The rules</h2>
+<p class="note">How checks, XP, regeneration and hunger work, and more as James gets further: the FAQ.</p><div class="btns"><button class="btn" data-tab-go="faq">Open the FAQ</button></div>
 </section>`;
 }
 function renderBag() {
@@ -780,7 +781,59 @@ view.addEventListener('toggle', (ev) => {
     const d = ev.target;
     if (d.dataset?.rid) { const id = Number(d.dataset.rid); if (d.open) openResults.add(id); else openResults.delete(id); }
     if (d.dataset?.grp != null && d.isConnected) setGroupOpen(d.dataset.grp, d.open, d.dataset.dflt === '1'); // v0.11.67 (D2)
+    if (d.dataset?.faq && d.isConnected) { if (d.open) { faqOpen.add(d.dataset.faq); if (faqSeen(faqLoad(), d.dataset.faq)) { faqSave(); faqUpdate(); } d.querySelector('.fnew')?.remove(); } else faqOpen.delete(d.dataset.faq); } // v0.11.83
 }, true);
+
+/* ---------------- v0.11.83: the FAQ (owner picks P1 + T1 + R1; Selene's, js/core/faq.js) ---------------- */
+
+let faqSt = null, faqQ = '', faqFrom = null, faqKey = '';
+const faqOpen = new Set(); // the entries open on the page (kept when the tab is left and come back to, until a reload)
+const faqLoad = () => faqSt || (faqSt = faqState(store.get(FAQ_KEY)));
+const faqSave = () => store.set(FAQ_KEY, faqText(faqSt));
+/** Unlock what this game has reached (every redraw), and show the tab's dot while an entry is new. */
+function faqUpdate() {
+    const st = faqLoad();
+    if (g && faqCheck(st, g, { meditate: canMeditate(g, SCENES) })) faqSave();
+    const b = document.querySelector('#tabs button[data-tab="faq"]');
+    if (b) { const on = tab !== 'faq' && faqHasNew(st); b.classList.toggle('new', on); b.setAttribute('aria-label', on ? 'FAQ, new questions' : 'FAQ'); }
+}
+function renderFaq() {
+    const st = faqLoad();
+    const list = faqList(st, g);
+    const k = `${JSON.stringify(st.u)}|${g?.coil?.n}`;
+    if (faqKey === k && view.querySelector('#faq-list')) return; // nothing new: keep the page as it is (open entries, the search box's focus)
+    faqKey = k;
+    const firstNew = list.findIndex((e) => e.isNew);
+    view.innerHTML = `<section class="page faq-page"><h1>FAQ</h1>
+<p class="lede">How Bone and Ash works. Tap a question to open it. New questions appear as James gets further.</p>
+<label class="faqs"><span class="note">Search</span><input type="search" id="faq-q" placeholder="Search the FAQ" autocomplete="off" value="${esc(faqQ)}"></label>
+<p class="note" id="faq-none" hidden>No question matches. Try another word.</p>
+<div class="faq" id="faq-list">${list.map((e, i) => `<details data-faq="${esc(e.q)}"${i === firstNew || faqOpen.has(e.q) ? ' open' : ''}><summary>${esc(e.q)}${e.isNew ? ' <span class="fnew">new</span>' : ''}</summary><p>${e.a}</p></details>`).join('')}</div>
+</section>`;
+    if (firstNew >= 0) { faqOpen.add(list[firstNew].q); if (faqSeen(st, list[firstNew].q)) faqSave(); } // seen now (its tag goes with the toggle event a details drawn open fires, as in Selene's)
+    if (faqQ) faqFilter(false);
+}
+/** Search: only the questions whose question or answer holds every word typed; they open while searching. */
+function faqFilter(open) {
+    const words = faqQ.toLowerCase().split(/\s+/).filter(Boolean);
+    let n = 0;
+    view.querySelectorAll('details[data-faq]').forEach((d) => {
+        const ok = faqMatch(d.dataset.faq, d.querySelector('p')?.textContent || '', words);
+        d.hidden = !ok; if (ok) n += 1;
+        if (ok && open && words.length) d.open = true;
+    });
+    const none = document.getElementById('faq-none'); if (none) none.hidden = n > 0;
+}
+view.addEventListener('input', (ev) => { if (ev.target.id === 'faq-q') { faqQ = ev.target.value; faqFilter(true); } });
+/** Opened from another tab: that tab's entry opens and scrolls into view. */
+function faqFocus() {
+    const q = FAQ_TAB[faqFrom]; faqFrom = null;
+    if (!q || faqQ) return;
+    const d = [...view.querySelectorAll('details[data-faq]')].find((x) => x.dataset.faq === q);
+    if (!d) return;
+    d.open = true; faqOpen.add(q);
+    d.scrollIntoView({ block: 'start' });
+}
 
 /* ---------------- wiring ---------------- */
 
@@ -789,7 +842,8 @@ function render() {
     document.body.classList.toggle('menu-on', !!menu);
     if (menu) return renderMenu();
     if (recovery) return renderRecovery();
-    ({ story: renderStory, sheet: renderSheet, bag: renderBag, journal: renderJournal })[tab]();
+    faqUpdate(); // v0.11.83: unlock what the game has reached; the tab's dot
+    ({ story: renderStory, sheet: renderSheet, bag: renderBag, journal: renderJournal, faq: renderFaq })[tab]();
     if (tab === 'story' && g && g.scene !== announcedScene) { announcedScene = g.scene; announce(g.combat ? `A fight: ${sceneTitle(g.scene)}` : val(SCENES[g.scene]?.title) || ''); }
 }
 /** v0.11.11: each tab keeps its scroll; the Story tab starts at the top again on a new scene. */
@@ -798,9 +852,11 @@ function setTab(t) {
     tipEl.hidden = true;
     if (t === 'menu') { if (!menu) scrollPos[tab] = { y: window.scrollY, scene: g?.scene }; openMenu('main'); return; }
     if (!menu) scrollPos[tab] = { y: window.scrollY, scene: g?.scene };
+    faqFrom = t === 'faq' && tab !== 'faq' && !menu ? tab : null; // v0.11.83: the FAQ opens the entry for the tab you came from
     menu = null; tab = t; render();
     const p = scrollPos[t];
     window.scrollTo({ top: p && (t !== 'story' || p.scene === g?.scene) ? p.y : 0 });
+    if (t === 'faq') faqFocus(); // after the scroll is restored
 }
 
 view.addEventListener('click', (ev) => {

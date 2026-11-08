@@ -7,7 +7,7 @@ Serves the folder, opens the game at 390x844 in headless Chromium and taps the r
   4. two tabs: closing the older tab leaves the newer save alone (v0.11.8);
   5. Saves (v0.11.9, in the menu since v0.11.10): Copy status, Export all then Restore all into a new game, a backup restored;
   6. the main menu (v0.11.10): opens first on plain paper with no tab bar; Settings (text size, Show checks) and Saves; Continue;
-  (part 2 also: v0.11.35 a scene read before folds, Read it all again, Skip to the next choice)
+  (part 2 also: v0.11.35 a scene read before folds, Read it all again, Skip to the next choice; v0.11.83 the FAQ tab)
   (part 3, v0.11.39: the art cache across an update, with the service worker running; see update_test)
   7. v0.11.11: holding a card opens its tooltip (no check text) and the tap that ends the hold runs nothing; the status bars carry
      progress values; a story card plays at once; each tab keeps its scroll.
@@ -244,6 +244,73 @@ def nextstep(pg, url):
     if pg.query_selector('.nstep'): fails.append('N1: the line is back after a reload')
     else: notes.append('the next-step line shows on Day 1 and its ✕ hides it for good')
     check_text(pg, 'the next-step line', strict=True)
+
+def faq(pg, url):
+    """v0.11.83 (owner picks P1 + T1 + R1): the FAQ tab, Selene's. Six tabs in one row (390 and 360 px). A phone that already
+    has the FAQ (start entries seen) loading the Long Forest Coil 2 save: the tab shows its dot, the new entries are tagged and
+    the first opens by itself; opening another removes its tag and is kept through a reload. A phone new to the FAQ: nothing
+    new. Search filters (every word) and says when nothing matches; the FAQ opened from a tab opens that tab's entry; the James
+    tab's old dice rules are gone (its button opens the FAQ)."""
+    save = (ROOT / 'saves/v0.11.7-long-forest-coil2.json').read_text()
+    start = ["James and Yuki", "What is the goal?", "How do I play?", "HP, Convergence and Fed", "Days, sleep and the night", "Results and the Journal", "Saving and settings", "Skills and checks", "The hammerspace"]
+    kept = json.dumps({'u': {'start': 1}, 'seen': {q: 1 for q in start}})
+    fresh(pg, url, "a => { localStorage.clear(); localStorage.setItem('boneash.auto', a[0]); localStorage.setItem('boneash.faq.v1', a[1]); }", [save, kept])
+    row = pg.eval_on_selector_all('#tabs button', "els => els.map(e => Math.round(e.getBoundingClientRect().top))")
+    if len(row) != 6 or len(set(row)) != 1: fails.append(f'FAQ: the six tabs are not one row at 390 px: tops {row}')
+    pg.set_viewport_size({'width': 360, 'height': 780})
+    row = pg.eval_on_selector_all('#tabs button', "els => els.map(e => Math.round(e.getBoundingClientRect().top))")
+    if len(set(row)) != 1: fails.append(f'FAQ: the six tabs are not one row at 360 px: tops {row}')
+    pg.set_viewport_size({'width': 390, 'height': 844})
+    if not until(pg, '#tabs button[data-tab="faq"].new', 3000, 'attached'): fails.append('FAQ: no dot on the tab with new entries'); return
+    pg.click('#tabs [data-tab="faq"]'); on_tab(pg, 'faq')
+    if pg.query_selector('#tabs button[data-tab="faq"].new'): fails.append('FAQ: the dot stays on while the FAQ is open')
+    ents = pg.eval_on_selector_all('details[data-faq]', "els => els.map(e => [e.dataset.faq, e.open, !!e.querySelector('.fnew')])")
+    later = [q for q, o, n in ents if q not in start]  # unlocked by the save: new on this phone
+    first = later[0] if later else None
+    news = [q for q, o, n in ents if n]
+    if not later or any(q in start for q in news) or news != later[1:]: fails.append(f'FAQ: the wrong entries are tagged new: {news} (unlocked: {later})')
+    opened = [q for q, o, n in ents if o]
+    until(pg, f"() => (JSON.parse(localStorage.getItem('boneash.faq.v1') || '{{}}').seen || {{}})[{json.dumps(first)}] === 1", 3000)
+    if first not in opened or not pg.evaluate(f"(JSON.parse(localStorage.getItem('boneash.faq.v1')).seen || {{}})[{json.dumps(first)}] === 1"): fails.append(f'FAQ: the first new entry ({first}) did not open by itself as seen; open: {opened}')
+    if 'The Long Forest' not in [q for q, o, n in ents] or 'Act 1' in [q for q, o, n in ents]: fails.append(f'FAQ: the Long Forest save unlocked the wrong entries: {[q for q, o, n in ents]}')
+    other = next((q for q in news if q != first), None)
+    if other:
+        pg.click(f'details[data-faq="{other}"] > summary')
+        until(pg, f"() => !document.querySelector('details[data-faq=\"{other}\"] .fnew')", 3000)
+        until(pg, f"() => (JSON.parse(localStorage.getItem('boneash.faq.v1') || '{{}}').seen || {{}})[{json.dumps(other)}] === 1", 3000)
+        if pg.query_selector(f'details[data-faq="{other}"] .fnew'): fails.append(f'FAQ: opening "{other}" kept its new tag')
+    check_text(pg, 'the FAQ')
+    seen0 = pg.evaluate("Object.keys(JSON.parse(localStorage.getItem('boneash.faq.v1')).seen).length")
+    pg.click('#tabs [data-tab="faq"]'); pg.click('#tabs [data-tab="faq"]'); on_tab(pg, 'faq')  # the review's #4: tapping the open tab again must not read the next new entry
+    seen1 = pg.evaluate("Object.keys(JSON.parse(localStorage.getItem('boneash.faq.v1')).seen).length")
+    if seen1 != seen0: fails.append(f'FAQ: tapping the FAQ tab again marked entries read ({seen0} → {seen1})')
+    pg.fill('#faq-q', 'exhausted push')
+    vis = pg.eval_on_selector_all('details[data-faq]', "els => els.filter(e => !e.hidden).map(e => [e.dataset.faq, e.open])")
+    if [q for q, o in vis] != ['Days, sleep and the night'] or not all(o for q, o in vis): fails.append(f'FAQ: searching "exhausted push" shows {vis}')
+    pg.fill('#faq-q', 'zebra'); until(pg, '#faq-none', 2000, 'visible')
+    if not pg.is_visible('#faq-none'): fails.append('FAQ: no "no question matches" note')
+    pg.fill('#faq-q', '')
+    pg.goto(url.replace('index.html', 'art/bg/CREDITS.md')); pg.goto(url); until(pg, '.main-menu', 10000, 'attached'); enter(pg)
+    st = pg.evaluate("JSON.parse(localStorage.getItem('boneash.faq.v1'))")
+    if other and not st['seen'].get(other): fails.append('FAQ: an opened entry is not kept through a reload')
+    pg.click('#tabs [data-tab="sheet"]'); on_tab(pg, 'sheet')
+    if re.search(r'Rules in one breath|a 6 always|d6', pg.inner_text('#view')): fails.append('R1: the James tab still shows the dice-era rules')
+    b = pg.query_selector('#view button[data-tab-go="faq"]')
+    if not b: fails.append('R1: no button to the FAQ on the James tab'); return
+    b.click(); on_tab(pg, 'faq')
+    if not pg.evaluate("document.querySelector('details[data-faq=\"Skills and checks\"]')?.open"): fails.append('FAQ: opened from the James tab, "Skills and checks" is not open')
+    pg.click('#tabs [data-tab="story"]'); on_tab(pg, 'story'); pg.click('#tabs [data-tab="faq"]'); on_tab(pg, 'faq')
+    if not pg.evaluate("document.querySelector('details[data-faq=\"How do I play?\"]')?.open"): fails.append('FAQ: opened from the Story tab, "How do I play?" is not open')
+    # a phone new to the FAQ: what the save reached is there, none of it new, no dot
+    fresh(pg, url, "a => { localStorage.clear(); localStorage.setItem('boneash.auto', a); }", save)
+    if pg.query_selector('#tabs button[data-tab="faq"].new'): fails.append('FAQ: a phone new to the FAQ shows the dot')
+    pg.click('#tabs [data-tab="faq"]'); on_tab(pg, 'faq')
+    if pg.query_selector('.fnew'): fails.append('FAQ: a phone new to the FAQ tags entries as new')
+    # the review's #1: on a new game the James tab's button finds its entry
+    fresh(pg, url, "localStorage.clear()")
+    pg.click('#tabs [data-tab="sheet"]'); on_tab(pg, 'sheet'); pg.click('#view button[data-tab-go="faq"]'); on_tab(pg, 'faq')
+    if not pg.evaluate("document.querySelector('details[data-faq=\"Skills and checks\"]')?.open"): fails.append('FAQ: on a new game, the James tab\'s button does not open Skills and checks')
+    elif not fails or not any(f.startswith(('FAQ', 'R1')) for f in fails): notes.append(f'the FAQ: six tabs in a row, {len(ents)} entries unfold with a dot and new tags, search, per-tab entries, kept on the phone')
 
 def rest_places(pg, url):
     fresh(pg, url, "localStorage.clear()")
@@ -552,6 +619,8 @@ def main(part=0):
                 picked(pg, url)
                 # 10. a scene read before: the fold, the memory line, the skip (v0.11.35)
                 again(pg, url)
+                # 12. the FAQ (v0.11.83)
+                faq(pg, url)
             if three:
                 # 11. the art cache across an update (v0.11.39, Z2-b): its own server and a service worker that runs
                 update_test(b)

@@ -32,8 +32,8 @@ setTimeless(Object.fromEntries(Object.entries(TASK_HUBS).map(([h, cfg]) => [h, [
 export const DC_SHIFT = 2; // no dice: DCs move down to the new scale (K 2, owner 2026-11-06)
 export const FAM = [{ name: 'New', at: 0, dc: 2, speed: 1 }, { name: 'Practised', at: 2, dc: 1, speed: 2 }, { name: 'Skilled', at: 8, dc: 1, speed: 5 }, { name: 'Mastered', at: 18, dc: 0, speed: 10 }];
 export const NEW_LENGTH = 2; // a new card takes twice its old time; familiarity divides it
-const ADAPT_STEP = 0.5, ADAPT_MAX = 2, TRANSFER = 0.25, DRILL_SHARE = 0.2, FED_EXTRA_PER_HOUR = 1; // Fed −4 an hour in total while tasks run
-const YUKI_HOURS = [6, 19];
+export const ADAPT_STEP = 0.5, ADAPT_MAX = 2, TRANSFER = 0.25, DRILL_SHARE = 0.2, FED_EXTRA_PER_HOUR = 1; // Fed −4 an hour in total while tasks run
+export const YUKI_HOURS = [6, 19]; // v0.11.83: exported for the FAQ
 
 const asText = (v, g) => (typeof v === 'function' ? v(g) : v);
 const r1 = (x) => Math.round(x * 10) / 10;

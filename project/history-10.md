@@ -2,6 +2,28 @@
 
 Started 2026-11-08 (v0.11.74), when `history-9.md` reached about 45 KB. Newer than `history-9.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.83 (word for word)
+
+### From "Open items", the NEXT item's part (1) (done in v0.11.83)
+
+- (1) **the FAQ (done in v0.11.83)** (22:10: "the next step, after this is pushed. one of my other friends agrees to playtest, and I realized something. there is no faq at all... Selene has an excellent one. after this pass, build one modelled after selene-s. with the same unfolding logic. everything else is tabled until that is done."): read Selene's FAQ and its unfolding logic in `hufle-beep/Long-patience` (the owner's own, copy freely), then options and the pick; one push.
+
+### From "Decided in chat"
+
+- **v0.11.80: group d starts, the fight lab (the owner 20:57 asked for the lists first; Claude's lists and options at 21:02: L1 the lab as a tool first / L2 straight to unarmed / L3 both in one push; the lists in the roadmap's group d; owner 21:12: "L1, …", the rest in the open items above):**
+  - **Picked:** **L1**: `tools/fightlab.mjs` and `tools/lib/fightlab.mjs` (a tool; no game file uses them). It plays the tasks test's bot games and at every fight they start plays that same fight again on copies under seven tactics (smart = the test's smart bot, random, blade only, darts only, needle only, spear only, guard + blade; darts and the spear only where James can sing them); a table per fight (win %, median rounds, median HP left on a win, smart by thirds of James's power, the GU from which smart wins 90%), a block comparing the five fixed tactics on the same states, and four flags (easy, one tactic always wins, guard never pays, blade best). The bots' own games play exactly as without it (tested). L2, L3 not picked.
+  - **First table (300 games, 7,877 fight states):** in the roadmap's group d line "The fight lab's first table" (12 of 29 fights easy under every tactic; blade only best on the same states in 24 of 24; guard never pays in 20 of 24).
+  - **No Fable step** (a tool: its cold review on Opus, rule 9).
+  - **Also:** after v0.11.79 Claude uploaded the 8 changed docs (handover, roadmap, changelog, restore-points, history-10, working-agreement, reference, `claude/CLAUDE.md`) to the claude.ai project itself (rule 8); `eb56b71` filled in for 0.11.79; v0.11.77's notes moved to `history-10.md`.
+  - **Checks:** see the version note.
+
+### From "Version notes"
+
+## v0.11.80 — group d starts: the fight lab (L1)
+
+- **tools/fightlab.mjs** (new: the lab's runner; one worker per core, `--games`, `--fight`, `--min`, `--workers`, `--json`), **tools/lib/fightlab.mjs** (new: the tactics, one fight on a copy with the story hooks off and put back, the summary, the flags, the table), **tests/tools.test.mjs** (the v0.11.80 block), **sw.js, tests/README.md, project/reference.md; project docs** (v0.11.77 to `history-10.md`). The game identical to 0.11.79; saves unchanged.
+- **Checks:** a tool and a test only (rule 2): `node tests/tools.test.mjs` (the lab's block: its summary on made-up samples, one real fight against the same fight played by hand, a tiny real run with 1 and 2 workers and the bots' own fights with and without it; one mutation tried by hand: the darts and spear check taken out, the test fails, then restored; after the cold review also the decimals, the ties, the one-move finishes and the bots' deaths and tribute per Coil), `node tools/consistency.mjs` and `bash tools/check.sh quick`. How it interacts: no game file, save or bot code changed, so the game and the bot numbers can't move; the lab imports the game and the tasks test read-only and plays only copies. What can now break a push: a change to the fight engine's exports (`startCombat`, `combatStep`, `combatHooks`) or to the tasks test's shard output, which the lab reads; the tools test would catch it.
+
 ## Moved from the handover in v0.11.82 (word for word)
 
 ### From "Open items" (done: the Tan fight in v0.11.81, the brawls in v0.11.82)

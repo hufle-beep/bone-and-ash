@@ -1,0 +1,96 @@
+/**
+ * The FAQ (v0.11.83, owner picks P1 + T1 + R1; modelled on Selene's, `hufle-beep/Long-patience` index.html "FAQ").
+ * Its own tab. The FAQ unfolds as the game does: each entry has a gate (FAQ_TEST), checked on every redraw; unlocks and the
+ * entries opened are kept on this phone (FAQ_KEY), never in a save, so a new game keeps them, and loading a save unlocks
+ * whatever that save has reached. An entry not opened yet is marked new; the first new one opens by itself; the tab shows a
+ * dot while any is new. The first time the FAQ runs on a phone, nothing already unlocked counts as new.
+ * The numbers come from the game's own values, so a balance change updates the answers (tests/faq.test.mjs checks them).
+ * Pure — no DOM, no storage: main.js loads and saves the state.
+ */
+import { SATIETY_PER_HOUR, HUNGRY_AT, STARVE_HP_PER_HOUR, hpRegenPct, COIL_GROWTH, coilMult, fmtMult, EX_MULT, DAY_END_HOUR, NIGHT_TO, breakAt, realmName, ITEM_CAP, BIG_CAP, yukiForms, USE_CAP } from './game.js';
+import { CONDENSE_SIT_COST, FAIL_XP_FRACTION } from './formulas.js';
+import { FAM, NEW_LENGTH, ADAPT_STEP, ADAPT_MAX, TRANSFER, DRILL_SHARE, FED_EXTRA_PER_HOUR, YUKI_CAP, YUKI_HOURS } from './tasks.js';
+import { PRIMARIES, COL_GROUPS } from '../story/meridians.js';
+import { TARGETS, HEAD_START } from './coil.js';
+import { REL_CATCHUP, REL_MAX } from './game.js';
+
+/** Storage key on the phone (never renamed). */
+export const FAQ_KEY = 'boneash.faq.v1';
+
+const pctOf = (x) => `${Math.round(x * 100)}%`;
+const hh = (h) => `${String(h).padStart(2, '0')}:00`;
+const ex = (i) => `×${EX_MULT[i]}`;
+
+/** [question, answer (HTML; a function of the game for numbers that move with it), gate]. In reading order. */
+export const FAQ = [
+    ['James and Yuki', () => `<b>James Green</b> is forty, three days past a doctorate in mycology and computational biology. His people grow their cities, tools and ships from Qi-attuned wood and live eight or nine hundred years. A crossing left him in a forest on a world he doesn't know, with his omnitool (its hammerspace empty) and <b>Yuki</b>: his root-kin, a small white cat born the same day as him and bonded to him from birth. This world is dark: its cultivators climb on herbs, pills, beast cores and each other, and Heaven sends tribulation lightning at every breakthrough. James is an outlier. His <b>Ouroboros Axiom</b> composts the world's poisoned Qi, so he needs no herbs and gets no tribulations, and as a <b>Bonesinger</b> he sings bone into darts, needles and a blade.`, 'start'],
+    ['What is the goal?', () => `Survive, and get further each time. The story runs in acts, each ending on a deadline: the prologue's is the tribute on Day 7. Each act turns as a <b>Coil</b>: if it ends badly (or you end it), James wakes at the act's first dawn and keeps what he has learned, so every Coil goes faster than the last. James never dies. The James tab shows the targets: the prologue by Coil ${TARGETS[0]}, Act 1 by Coil ${TARGETS[1]}, and your best so far.`, 'start'],
+    ['How do I play?', () => `Every screen is a picture, the story, and cards below it. <b>Tap a card and it happens at once</b>: the clock moves by the card's time, which the card shows with when it ends (2 h → 14:20). <b>Story</b> cards move the story; on camps and other task screens, <b>work</b> cards are jobs you can do again and again. <b>Hold a card</b> for half a second to see what it can bring back, what it costs and why it is shut. A card that would end the Coil says <b>Collapses here</b> or <b>Starves here</b> and asks for a second tap (Settings can turn that off). Groups of cards fold: tap a heading. Early on, a <b>Next step</b> line at the top of a task screen suggests what to do (✕ hides it for good). A scene you read in an earlier Coil folds to its first paragraph (<b>Read it all again</b> opens it), a stretch you know can be passed with <b>Skip to the next choice</b>, and story choices you picked before are tinted.`, 'start'],
+    ['HP, Convergence and Fed', () => `The three bars at the top. <b>HP</b>: at 0 while working, James collapses and the Coil ends; in a fight, the fight is lost. <b>Convergence</b> is his Qi and his Bonesinger together: darts, the blade and meditation spend it. Every <b>Cycle</b> (30 minutes at first, shorter as his skills reach higher tiers) the body gets some of both back: HP ${hpRegenPct(0)}% at first (more at higher realms), Convergence 5% plus a little for every open collateral meridian. Resting doubles that, and a night's sleep fills both bars. <b>Fed</b> drops ${SATIETY_PER_HOUR} an hour (${SATIETY_PER_HOUR + FED_EXTRA_PER_HOUR} while working, half as fast asleep). Below ${HUNGRY_AT} every check gets harder; at 0 it gets harder again, nothing regenerates and he loses ${STARVE_HP_PER_HOUR} HP an hour. Food is in the hammerspace; eat it from the cards.`, 'start'],
+    ['Days, sleep and the night', () => `A waking day ends at ${hh(DAY_END_HOUR)}: from then on only the night's cards show, and a card that would end past ${hh(DAY_END_HOUR)} won't start (it shows locked, with the reason). <b>Sleep</b> to wake at dawn with full bars. Cards that are <b>done for today</b> come back after a night's sleep, not at midnight. From 00:00 to ${hh(NIGHT_TO - 1).replace(':00', ':59')} you can <b>Push through the night</b> (in Meditate): a new day at once without sleep, but work then takes ${ex(1)} as long until he sleeps (${ex(2)} after a second push), and a third push in a row collapses him and costs a day. The clock shows <b>Exhausted</b> while it lasts.`, 'start'],
+    ['Results and the Journal', () => `Under the story, <b>Cards</b> and <b>Results</b> switch (side by side on a wide screen). The reply to your choice shows under the scene text; what it gave (items, XP, HP, friendship) lands in Results, newest on top, with a count on the switch until you look. Tap an entry for the details. The <b>Journal</b> tab keeps a longer record (the newest 60 entries) and a few counts. Checks are hidden everywhere; Settings → <b>Show checks</b> shows the numbers.`, 'start'],
+    ['Saving and settings', () => `The game saves itself after every choice, on this phone only. ☰ Menu → <b>Saves</b>: three slots for keeping a moment, <b>backups</b> kept by themselves (after 5 minutes, 30 minutes and 2 hours of play, and before risky moves), <b>Download save file</b> and <b>Load save file</b> to move a game to another device, <b>Export all saves</b> and <b>Restore all saves</b>, <b>Share to GitHub</b>, and <b>Copy status as text</b> for bug reports. ☰ Menu → <b>Settings</b>: ask before a card that ends the Coil, text size (90–130%), Show checks, and a reminder to download a save. Settings, folded groups and this FAQ's progress are kept on this phone, not in the save.`, 'start'],
+    ['Work cards and familiarity', () => `Work cards (foraging, hunting, practice, exploring) get faster and easier the more James does them: <b>familiarity</b>, kept for good, across every Coil. A new card takes ${NEW_LENGTH === 2 ? 'twice' : `${NEW_LENGTH} times`} as long and is at its hardest. It becomes <b>${FAM[1].name}</b> at ${FAM[1].at} completions (×${FAM[1].speed} speed), <b>${FAM[2].name}</b> at ${FAM[2].at} (×${FAM[2].speed}) and <b>${FAM[3].name}</b> at ${FAM[3].at} (×${FAM[3].speed}); the speed rises smoothly in between. A new card's check is the hardest, ${FAM[1].name} and ${FAM[2].name} are easier, and ${FAM[3].name} is easiest. A card shows its step and count (${FAM[1].name} 3/${FAM[2].at}). A result is a <b>double haul</b>, <b>done</b>, <b>partly</b> (less loot and XP) or <b>failed</b> (it costs more HP). A result short of full makes that card a little easier next time (+${ADAPT_STEP}, up to +${ADAPT_MAX}). ${pctOf(TRANSFER)} of every completion goes to the other cards in its group, and a drill gives ${pctOf(DRILL_SHARE)} of one to every card on the screen. Work groups start folded; cards done for today hide until tomorrow. Meditating, opening meridians and breaking through speed up with use the same way, up to ×${USE_CAP}.`, 'work'],
+    ['Skills and checks', (g) => `James has two skills: <b>GU</b> (General Use: anything he has no skill for, and his defence) and <b>Convergence Use</b> (darts, needles, the song that shapes the blade). Each has a tier and a level, from T1 L1 to T10 L10; the James tab shows them. A <b>check</b> sets the skill against the difficulty, with no dice: the same numbers always give the same result. Hunger makes every check harder. A success pays XP, shared between the skill and GU; a fail pays ${pctOf(FAIL_XP_FRACTION)}. Yuki gets a share through the bond. Every earlier Coil makes them learn faster: this Coil, ×${fmtMult(coilMult(g))}. To see the numbers, turn on Settings → Show checks.`, 'start'],
+    ['Yuki\'s job', () => `On some task screens Yuki can hunt on her own: switch her job on at the top of the list. Her hauls come while James works, on his time, between ${hh(YUKI_HOURS[0])} and ${hh(YUKI_HOURS[1])}. She gets faster with practice too (up to ×${YUKI_CAP}), and her practice is kept like his.`, 'work'],
+    ['Fights', () => `Each round James acts, Yuki attacks on her own, then whatever is still standing attacks; James defends with GU. What he can do grows with his Bonesinger (Convergence Use). At first: a <b>Fragile bone knife</b> (it shatters on every swing and has to be sung again, Qi each time), a <b>Needle to a joint</b> (staggers) and <b>Guard and give ground</b> (a better defence that round). Later the knife holds (sung once, then free for the rest of the fight) and grows into a dagger and a sword, <b>Bone darts</b> join, then a bone spear, a field of bone spikes, and armour to guard behind. The James tab shows what he can sing now and what comes next. Hold an action to see its cost. Some fights let you run. When James clearly outclasses a fight, <b>End it in one move</b> finishes it at once. A <b>spar</b> is weapons only and a <b>brawl</b> is fists only, no Qi; Yuki usually watches those. A lost fight against people has its own story; losing to a beast while the Coil turns ends the Coil. HP and Qi carry into a fight and out of it.`, 'fight'],
+    ['Meditation, Saturation and realms', () => `The <b>Meditate</b> group shows where James rests. <b>Meditate: gather Qi</b>: an hour at the resting rate. <b>Cultivate</b>: a sit spends ${CONDENSE_SIT_COST} Qi and raises <b>Saturation</b>; every realm needs more sits than the last, and <b>Cultivate until the limit</b> runs sits until something stops them. From ${breakAt()}% Saturation, <b>Break through</b>: a long sit, then the next realm (${realmName(0)}, ${realmName(1)}, ${realmName(2)}…), with more HP and Qi, both bars full, and Yuki rising with him. No herbs, no pills, and the tribulation finds nothing to burn. Meditate also holds the meridians and Push through the night.`, 'sit'],
+    ['Meridians', () => `The crossing ashed James's channels shut. In Meditate he opens them again: the ${PRIMARIES.length} primaries and their ${COL_GROUPS.reduce((n, c) => n + c.size, 0)} collaterals, which open in groups as their primaries do. Each line is one card; a sitting takes up to 2 hours and some Qi, and a channel opens when its hours are done. ${realmName(1)} needs all ${PRIMARIES.length} primaries, and collaterals still closed at that breakthrough are sealed for that Coil. Every open collateral adds to Qi regeneration. Yuki's channels open with his, through the bond. Higher realms have more lines, each with its own window.`, 'sit'],
+    ['The Coil', (g) => `The Ouroboros Axiom bites its own tail. A <b>Coil</b> ends when James collapses (HP 0 while working, or starving), when he loses to a beast, when a deadline goes against him (accept the written outcome, or rewind), or by choice: <b>Bite the tail</b> on the James tab. Then he wakes at the act's first dawn. Every earlier Coil makes him learn faster: XP ×(1 + ${COIL_GROWTH} × earlier Coils), ×${fmtMult(coilMult(g))} this Coil. The Coil screen shows what this Coil gained, what James remembers and the cards closest to their next step; the James tab shows the targets and your best.`, 'coil'],
+    ['What carries over', () => `<b>Kept:</b> familiarity (every card, and the speed of meditating, meridian work and breaking through), what James knows (some discoveries are remembered), Yuki's bond and path, the Journal, the counts, the choices picked and the scenes read. <b>Back to the act's start:</b> James's and Yuki's realm, Saturation, skills and meridians (the Coil bonus brings them back faster), the hammerspace and the world. People other than Yuki start with a head start of ${pctOf(HEAD_START)} of their best in the last Coil, and while they are below their best ever, gains count ×${REL_CATCHUP}.`, 'rewind'],
+    ['People, friendship and affection', () => `The James tab lists the people James knows, each with two numbers: <b>friendship</b> and <b>affection</b> (−${REL_MAX} to ${REL_MAX}). Choices and some cards move them; Results says by how much. Yuki's never start over; for everyone else, see What carries over (once a Coil has ended).`, 'people'],
+    ['The hammerspace', () => `Folded space grown into James's omnitool. It holds up to ${ITEM_CAP} of anything (${BIG_CAP.beast_core} of beast cores and spirit grass); a full item says <b>full</b>, and anything past that is left behind. Food lives here; the eating cards take it from here. It starts over with every Coil.`, 'start'],
+    ['Yuki\'s forms', () => `As she rises with James, Yuki gains forms: from ${realmName(2)}, a <b>great root-kin</b> the size of a tiger, and more later. <b>Yuki: change form</b> switches between them. Her form changes how she fights, and how people react to her. Some fights she joins only in a form she doesn't have yet.`, 'form'],
+    ['Act 1', () => `After the prologue's outcome, <b>Act 1</b> runs from Day 8 with its own deadline, on Day 21. A Coil in Act 1 wakes James at the start of Act 1, or, if you choose, at the start of the whole game. The Coil count and its bonus carry on from the prologue (one count per save). At the end of Act 1, whatever the outcome, you can go round again.`, 'act1'],
+    ['The Long Forest', () => `In the Long Forest the days aren't counted: the clock just reads The Long Forest. Seclusion (a season at a time), trials and the deep zones let James climb as far up the realms as you like before he walks back into the story; Yuki's forms come with the realms.`, 'forest'],
+];
+
+/** The gates. ctx: what only the screen knows ({ meditate: the Meditate group shows here }). */
+export const FAQ_TEST = {
+    start: () => true,
+    work: (g) => Object.values(g.tasks?.fam || {}).some((f) => f > 0) || (g.coil?.n || 1) > 1,
+    fight: (g) => !!g.combat || (g.stats?.kills || 0) > 0,
+    sit: (g, ctx = {}) => !!ctx.meditate || (g.james?.saturation || 0) > 0 || (g.james?.realm || 0) > 0 || (g.james?.primaries || 0) > 0 || Object.keys(g.tasks?.use || {}).some((k) => k.startsWith('act:') && g.tasks.use[k] > 0),
+    coil: (g) => (g.coil?.n || 1) > 1 || !!g.coil?.why || String(g.scene).startsWith('coil_'),
+    rewind: (g) => (g.coil?.n || 1) > 1,
+    people: (g) => Object.keys(g.rel || {}).some((k) => k !== 'Yuki' && k !== 'Village'),
+    form: (g) => !!g.yuki && (yukiForms(g).length > 1 || !!g.flags?.yuki_tiger_seen),
+    act1: (g) => (g.coil?.act || 0) === 1 || g.stats?.coils0 != null,
+    forest: (g) => !!g.flags?.longforest,
+};
+
+/** The entry opened when the FAQ tab is opened from another tab. */
+export const FAQ_TAB = { story: 'How do I play?', sheet: 'Skills and checks', bag: 'The hammerspace', journal: 'Results and the Journal' };
+
+const gateOf = (q) => FAQ.find(([x]) => x === q)?.[2] || 'start';
+
+/** A state from what the phone kept (null or junk: a fresh one, marked `fresh`). */
+export function faqState(raw) {
+    let st = null;
+    try { st = raw ? JSON.parse(raw) : null; } catch { st = null; }
+    if (st && typeof st === 'object' && st.u && typeof st.u === 'object') return { u: { ...st.u, start: 1 }, seen: st.seen && typeof st.seen === 'object' ? { ...st.seen } : {}, fresh: false };
+    return { u: { start: 1 }, seen: {}, fresh: true };
+}
+/** What the phone keeps. */
+export const faqText = (st) => JSON.stringify({ u: st.u, seen: st.seen });
+
+/** Unlock what this game has reached. True if anything changed (then save). */
+export function faqCheck(st, g, ctx = {}) {
+    let changed = false;
+    if (g) for (const k of Object.keys(FAQ_TEST)) if (!st.u[k]) { let ok = false; try { ok = !!FAQ_TEST[k](g, ctx); } catch { ok = false; } if (ok) { st.u[k] = 1; changed = true; } }
+    if (st.fresh) { for (const [q] of FAQ) if (st.u[gateOf(q)]) st.seen[q] = 1; st.fresh = false; changed = true; } // the first run on this phone: nothing already open counts as new
+    for (const [q, , gate] of FAQ) if (gate === 'start' && !st.seen[q]) { st.seen[q] = 1; changed = true; } // the always-there entries are never new
+    return changed;
+}
+/** The unlocked entries, in order: { q, a (HTML), isNew }. */
+export function faqList(st, g) {
+    return FAQ.filter(([q]) => st.u[gateOf(q)]).map(([q, a]) => ({ q, a: typeof a === 'function' ? a(g || {}) : a, isNew: !st.seen[q] }));
+}
+export const faqHasNew = (st) => FAQ.some(([q]) => st.u[gateOf(q)] && !st.seen[q]);
+/** Mark an entry opened. True if it changed. */
+export function faqSeen(st, q) { if (st.seen[q]) return false; st.seen[q] = 1; return true; }
+/** Search: every word typed in the question or the answer (tags stripped). */
+export function faqMatch(q, a, words) {
+    const t = `${q} ${String(a).replace(/<[^>]+>/g, '')}`.toLowerCase();
+    return words.every((w) => t.includes(w));
+}

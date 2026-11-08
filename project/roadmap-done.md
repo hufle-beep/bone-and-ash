@@ -2,6 +2,12 @@
 
 Split out of `roadmap.md` in v0.11.65 (owner pick G2, 2026-11-08 11:45), so the roadmap shows only the open work. Every line here moved word for word; newest first. Update in every push that finishes a roadmap line.
 
+## Moved in v0.11.83 (word for word)
+
+### From section 0, "Next, before everything else" (done in v0.11.83: P1 the FAQ as its own tab, T1 Claude's texts from the game's own numbers, R1 the James tab's dice-era rules replaced by a button to the FAQ)
+
+- **The FAQ (22:10, "the next step, after this is pushed. one of my other friends agrees to playtest, and I realized something. there is no faq at all... Selene has an excellent one. after this pass, build one modelled after selene-s. with the same unfolding logic. everything else is tabled until that is done."):** read Selene's FAQ and its unfolding logic (`hufle-beep/Long-patience`, the owner's own: copy freely), then options and the pick. (Section 4's step 4 already planned "an FAQ that unlocks with progress"; this moves it to the front.)
+
 ## Moved in v0.11.73 (word for word)
 
 ### From section 1h, "Analysis of Selene's and the SillyTavern repositories" (done in v0.11.73: H1 `project/lore.md`, `project/research.md`, `CREDITS.md`, the docs' size rules in `tools/consistency.mjs`, the fallback-branch rule, the README; K1 the game's canon stands; the whole record in `research.md`)
