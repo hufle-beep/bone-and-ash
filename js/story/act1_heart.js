@@ -217,7 +217,7 @@ She stops reading. Her finger stays on the last character.
 "They teach that line," she says. "In the outer sect. On the first day. My father would have learned it." She takes her hand away from the wall as if it's hot. "I thought it was about courage."
 
 ${ya(g) ? '"It\'s about stealing," says Ya. "Everything\'s about stealing, with them."' : ''}`,
-        choices: [{ text: 'Go back down. You\'ve seen enough of their poetry.', time: 40, do: (g) => { bumpRel(g, 'Mei Lin', 3, 0); return []; }, to: 'heart_hub' }],
+        choices: [{ text: 'Go back down. You\'ve seen enough of their poetry.', time: 40, do: (g) => { bumpRel(g, 'Mei Lin', 3, 0); return [`Mei Lin comes down behind you without a word, and halfway down she takes hold of the back of your coat and doesn't let go until the floor. "He believed it," she says at the bottom. "My father. He stood somewhere like that and believed it." You don't say anything. You've learned when not to.`]; }, to: 'heart_hub' }],
     },
 
     /* ---------- the roots and the ship ---------- */

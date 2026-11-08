@@ -177,7 +177,7 @@ Ya hauls you up by your coat. "You fight like a scholar," she says, disgusted. T
 
 "You don't. You're the loudest thinker I've ever met."`,
         choices: [
-            { text: 'Cross carefully, stone by stone.', check: { skill: 'GU', dc: 5 }, time: 40, to: 'rt_camp', fail: 'rt_ford_wake' },
+            { text: 'Cross carefully, stone by stone.', check: { skill: 'GU', dc: 5 }, time: 40, do: () => [`You go stone to stone with Ya's chin for a map and your mind as quiet as you can make it, which Ya says, afterwards, is not very. Something long shifts under the brown water as Mei Lin passes over it, and doesn't wake. On the far bank Yuki shakes a wet paw at the river, formally, and walks on.`], to: 'rt_camp', fail: 'rt_ford_wake' },
             { text: 'Sing a bridge of bone from stone to stone.', qi: 8, check: { skill: 'Convergence Use', dc: 5 }, time: 40, do: (g) => { bumpRel(g, 'Mei Lin', 2, 0); return ['A white bridge, ribbed like a spine. Mei Lin crosses it like a woman walking into a temple.']; }, to: 'rt_camp', fail: 'rt_ford_wake' },
         ],
     },
@@ -251,7 +251,7 @@ Mei Lin tells of her father. You tell of the lab, and the blast, and the people 
 
 When the fire is down to embers, nobody is talking any more, and it's comfortable.`),
         choices: [
-            { text: (g) => (both(g) ? '"Is this a good time to mention I\'m right here?"' : 'Bank the fire.'), do: (g) => { if (both(g)) { trioStep(g, 3); bumpRel(g, 'Ya', 2, 4); bumpRel(g, 'Mei Lin', 2, 4); return ['Ya laughs. Mei Lin, after a moment, does too. It sounds like something breaking open.']; } bumpRel(g, 'Ya', 3, 1); bumpRel(g, 'Mei Lin', 3, 1); return []; }, to: 'rt_camp' },
+            { text: (g) => (both(g) ? '"Is this a good time to mention I\'m right here?"' : 'Bank the fire.'), do: (g) => { if (both(g)) { trioStep(g, 3); bumpRel(g, 'Ya', 2, 4); bumpRel(g, 'Mei Lin', 2, 4); return ['Ya laughs. Mei Lin, after a moment, does too. It sounds like something breaking open.']; } bumpRel(g, 'Ya', 3, 1); bumpRel(g, 'Mei Lin', 3, 1); return [`You bank the fire the way Ya taught you, so it keeps without showing. Nobody moves to sleep. Ya lies flat with her hands behind her head and says, to the stars, "That was a good one." Mei Lin, to everyone's surprise and especially her own, agrees.`]; }, to: 'rt_camp' },
         ],
     },
     rt_watch: {
@@ -268,7 +268,7 @@ When the fire is down to embers, nobody is talking any more, and it's comfortabl
 
 She's quiet for a moment. Then: "${likesYa(g) ? 'If you were in the house, I could stand it. Maybe.' : 'You\'re a strange one. I haven\'t decided if I like you.'}" She bumps her shoulder into yours, hard enough to hurt. It's the gentlest thing she's ever done.`,
         choices: [
-            { text: 'Bump her back.', do: (g) => { bumpRel(g, 'Ya', 3, 4); return []; }, time: 60, to: 'rt_camp' },
+            { text: 'Bump her back.', do: (g) => { bumpRel(g, 'Ya', 3, 4); return [`You bump her back, not as hard, because you'd like to keep the shoulder. She grunts. Then she leans in and stays leaning, a warm weight against your arm, and goes on listening to the dark as if nothing has changed. Twice more she names a sound before you hear it, quieter each time.`]; }, time: 60, to: 'rt_camp' },
             { text: '"You don\'t have to sleep in a house. Sleep where you like. I\'ll explain to the old women."', do: (g) => { bumpRel(g, 'Ya', 6, 2); g.flags.ya_free = true; return ['She looks at you like you\'ve given her something with teeth in it.']; }, time: 60, to: 'rt_camp' },
         ],
     },

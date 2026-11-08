@@ -20,7 +20,7 @@ export const GAIN_LINES = [
     // the Opus review (R1): system lines the shapes put in the reply
     /^Two Qi and \d+ minutes into the ash around/, // a vessel sitting
     /^\S.* lunges at Yuki — /, // a fight's last round: the attack on Yuki
-    /^Your bone stakes will be harder/, /^The hammerspace is full/,
+    /^The hammerspace is full/, // v0.11.69 (the Opus review, low 7): the bone stakes line moved to GAIN_BITS (it follows "+1 Giant's bone-meal.")
 ];
 /** Whole lines that are reply whatever their shape (none yet: the shapes place every line the bots see). */
 export const REPLY_LINES = [];
@@ -40,6 +40,7 @@ const GAIN_BITS = [
     /^\+ ?[A-Z']/, // an item without a count: "+Ya's wolf tooth.", "+ The watcher's ledger: …"
     /^The calendar starts again/, /^You stay until the Day \d+ dawn/, /few hours of sleep/, // the clock
     /\btakes \d+/, // fight damage
+    /^Your bone stakes will be harder/, // v0.11.69: a gain sentence inside the bone-meal line
 ];
 
 /** Sentences of a line, keeping each sentence's own punctuation and quotes. */
@@ -82,6 +83,12 @@ export function splitLine(line) {
     for (const t of sentences(s)) (isGainSentence(t) && !/"/.test(t) ? gain : reply).push(t);
     return { reply: reply.join(' '), gain: gain.join(' ') };
 }
+
+/**
+ * v0.11.69 (P1): a partial haul lists only what it keeps, so it drops the choice's item lines ("+2 Glassback hare …"); their
+ * reply sentences stay ("Teamwork. Disgusting, bloody teamwork."). Used by js/core/story.js and js/core/tasks.js.
+ */
+export const keepReplies = (out) => (out || []).flatMap((l) => (/^\+\d/.test(l) ? [splitLine(l).reply].filter(Boolean) : [l]));
 
 /** Lines → { reply: string[], gains: string[] }, each in its order. */
 export function splitReply(lines) {

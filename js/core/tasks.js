@@ -22,6 +22,7 @@ import { onceOpen, noteOnce, stageOpen, ONCE_MENUS } from '../story/oneoff.js';
 import { daily } from '../story/common.js';
 import { endCoil } from './coil.js';
 import { canMeditate } from './meditate.js';
+import { keepReplies } from './replies.js'; // v0.11.69 (P1)
 
 setTimeless(Object.fromEntries(Object.entries(TASK_HUBS).map(([h, cfg]) => [h, [...Object.keys(cfg.menus || {}), ...Object.keys(cfg.doorMenus || {})]]))); // hub ↔ menu steps take no extra time (v0.9.5)
 
@@ -297,7 +298,7 @@ function resolveWork(g, scenes, hubId, card, id) {
         if (band === 'double') setLootMult(2);
         let out = [];
         try { out = c.do(g, roll) || []; } finally { setLootMult(1); }
-        lines.push(...(band === 'partial' ? out.filter((l) => !/^\+\d/.test(l)) : out)); // a partial lists only what it keeps
+        lines.push(...(band === 'partial' ? keepReplies(out) : out)); // a partial lists only what it keeps; v0.11.69 (P1): its reply sentences stay
         const gained = Object.keys(g.inventory).map((i) => [i, (g.inventory[i] || 0) - (before[i] || 0)]).filter(([, d]) => d > 0);
         if (band === 'partial') {
             const kept = gained.map(([i, d]) => { const keep = Math.max(1, Math.floor(d * ratio)); if (keep < d) addItem(g, i, keep - d); return [i, keep]; }).filter(([, d]) => d > 0);

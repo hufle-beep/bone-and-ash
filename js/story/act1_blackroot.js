@@ -640,7 +640,7 @@ Yuki, on your shoulder, flattens her ears and sends you a thought that consists 
 There are hill-hares in the gullies too: small, fast, ash-coloured. Less exciting. Less likely to set you on fire.`,
         choices: [
             { text: 'Take the hawks before they take Yuki.', combat: hawksFight, to: 'ah_hawks_won' },
-            { text: 'Darts at the hill-hares instead.', qi: 2, check: { skill: 'Convergence Use', dc: 5 }, time: 50, do: (g) => { addItem(g, 'hare_raw', 2); return ['+2 hill-hares.']; }, failDo: () => ['Ash-coloured hares on ash-coloured hills. You hit a lot of ash.'], to: 'ah_hub' },
+            { text: 'Darts at the hill-hares instead.', qi: 2, check: { skill: 'Convergence Use', dc: 5 }, time: 50, do: (g, r) => { addItem(g, 'hare_raw', 2); return [r && r.ratio < 1 ? `The darts go out flat through the ash haze and most of them hit ash. One hare stops being fast. Ya fetches it without being asked and holds it up by the ears, considering it. "Thin," she says. "Like you." Above you the hawks wheel off, unimpressed, trailing sparks.` : `The darts go out flat through the ash haze and the hares stop being fast. Ya fetches them without being asked and comes back holding them up by the ears. "Small," she says. "But you hit what you aimed at. Rare, for you." Above you the hawks wheel off, disappointed, trailing sparks.`, '+2 hill-hares.']; }, failDo: () => ['Ash-coloured hares on ash-coloured hills. You hit a lot of ash.'], to: 'ah_hub' },
         ],
     },
     ah_hawks_won: {
@@ -716,7 +716,7 @@ She stops gutting the hare. Looks at you, finally, eyes narrowed.
 
 "Hm," she says. And then, after a long pause, holding something out: a wolf's tooth, long and yellow, threaded on a cord. "I bit that off a wolf when I was eleven. It's the best thing I own." She shoves it at your chest. "Don't laugh at me again."`,
         choices: [
-            { text: 'Take the tooth. Put it on. "I won\'t."', do: (g) => { addItem(g, 'ya_tooth', 1); bumpRel(g, 'Ya', 6, 6); return ['+1 Ya\'s wolf tooth.']; }, to: 'ah_hub' },
+            { text: 'Take the tooth. Put it on. "I won\'t."', do: (g) => { addItem(g, 'ya_tooth', 1); bumpRel(g, 'Ya', 6, 6); return [`The cord is greasy and the tooth is warm from her fist. You put it on. She watches you do it with the stillness of something deciding whether to bolt, and then goes back to the hare as if nothing has happened, except that she's sitting a hand's width closer than she was.`, '+1 Ya\'s wolf tooth.']; }, to: 'ah_hub' },
             { text: '"Bring it back to camp and give one to Mei Lin, too. She\'s been looking for you."', do: (g) => { addItem(g, 'ya_tooth', 1); bumpRel(g, 'Ya', 4, 3); bumpRel(g, 'Mei Lin', 2, 2); trioStep(g, 2); return ['+1 Ya\'s wolf tooth. Ya goes looking for a second wolf.']; }, to: 'ah_hub' },
         ],
     },

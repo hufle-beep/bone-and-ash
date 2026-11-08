@@ -6,6 +6,7 @@
  */
 import { rollCheck, awardXp, spendQi, advance, ensureBars, actingCheck, actingName, instantWin, itemFull, takeCapNotes, itemNames, setLootMult, noDiceDc, checkText, addItem } from './game.js';
 import { STOMP, degreeForChoice } from '../story/power.js';
+import { keepReplies } from './replies.js'; // v0.11.69 (P1)
 
 const ONE_MOVE = 1000; // virtual choice index offset: "End it in one move."
 /** HP 0 outside a fight (v0.9.7): the Coil takes it (set by coil_scenes.js). Returns lines, or null when nothing happens. */
@@ -239,7 +240,7 @@ export function choose(g, scenes, index, { task = false } = {}) {
         if (partial) {
             const gained = Object.keys(g.inventory).map((id) => [id, (g.inventory[id] || 0) - ((before0[id]) || 0)]).filter(([, d]) => d > 0);
             const kept = gained.map(([id, d]) => { const keep = Math.max(1, Math.floor(d * roll.ratio)); if (keep < d) addItem(g, id, keep - d); return [id, keep]; });
-            lines.push(...out.filter((l) => !/^\+\d/.test(l)), `A thin haul — you keep: ${kept.map(([id, d]) => `+${d} ${itemNames[id]?.name || id}`).join(', ') || 'nothing'}.`);
+            lines.push(...keepReplies(out), `A thin haul — you keep: ${kept.map(([id, d]) => `+${d} ${itemNames[id]?.name || id}`).join(', ') || 'nothing'}.`);
         } else lines.push(...out);
         if (crit) {
             const extra = Object.keys(g.inventory).map((id) => [id, (g.inventory[id] || 0) - (before[id] || 0)]).filter(([, d]) => d > 0);

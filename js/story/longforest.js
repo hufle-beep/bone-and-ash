@@ -348,7 +348,7 @@ It isn't. It's just very, very cold.`,
 At the top of the canopy she stops on a branch that should not hold her and lets you look: the whole Blackroot rolling to the horizon, the smoke of a village, and the dead tree at the heart of it all, enormous and grey.
 
 Through the bond, smug as anything: *you are welcome.*`,
-        choices: [{ text: 'Thank her. Properly. She will want fish.', do: (g) => { bumpRel(g, 'Yuki', 3, 0); return awardYukiFightXp(g, 'challenging'); }, time: 60, to: 'lf_hub' }],
+        choices: [{ text: 'Thank her. Properly. She will want fish.', do: (g) => { bumpRel(g, 'Yuki', 3, 0); return [`You thank her properly: out loud, with your forehead against hers, which is now wider than your hand. The bond goes very quiet and very warm, and then, businesslike: *fish. The flat ones from the slow water. You know the ones.* You do. You also know you are not getting out of it.`, ...awardYukiFightXp(g, 'challenging')]; }, time: 60, to: 'lf_hub' }],
     },
     lf_tree_view: {
         id: 'lf_tree_view', title: 'The High Spur', art: 'ridge', place: `${P} — the high spur`,
@@ -385,7 +385,7 @@ You are, technically, the most powerful thing within a week\'s walk. You have a 
 You try a bone mouse on a thread. She looks at it, and at you, with pity. You try a bone mouse that runs on its own, a little clockwork thing your Convergence works out on the spot. She considers it for a long moment, then destroys it with a single surgical swipe and walks off with the pieces.
 
 You have, apparently, invented a toy. Your threads file the design under *publishable*.`,
-        choices: [{ text: 'Make her another one. Then three more.', do: (g) => { bumpRel(g, 'Yuki', 2, 0); return awardXp(g, 'Convergence Use', 'standard'); }, time: 30, to: 'lf_hub' }],
+        choices: [{ text: 'Make her another one. Then three more.', do: (g) => { bumpRel(g, 'Yuki', 2, 0); return [yukiForm(g) === 'human' ? `You make her another one. She destroys it. You make more, each faster and cleverer than the last, and she destroys each of them with growing contentment and lines the pieces up on the root beside her like trophies. "Acceptable," she says, when she's done, not looking up. From her, that's a standing ovation.` : `You make her another one. She destroys it. You make more, each faster and cleverer than the last, and she destroys each of them with growing contentment and lines the pieces up on a root like trophies. Through the bond, when she's done: *acceptable.* From her, that's a standing ovation.`, ...awardXp(g, 'Convergence Use', 'standard')]; }, time: 30, to: 'lf_hub' }],
     },
     lf_bathe: {
         id: 'lf_bathe', title: 'The River', art: 'stream', place: `${P} — the river`,
@@ -606,7 +606,7 @@ She looks at you. She looks down at herself. She sits, wraps her enormous tail a
 
 Then, as you watch, she shrinks back down to eleven pounds in a single breath, climbs your coat, settles on your shoulder, and adds: *I can do both. Whenever I like. Don't make it weird.*`,
         choices: [
-            { text: '"I am absolutely going to make it weird."', do: (g) => { bumpRel(g, 'Yuki', 2, 0); return []; }, to: back },
+            { text: '"I am absolutely going to make it weird."', do: (g) => { bumpRel(g, 'Yuki', 2, 0); return [`*I know,* she says, and sinks every claw she has into your shoulder, lightly, the way you'd underline a word. Then she settles, a small warm weight pretending she was never anything else, and starts to purr: a small sound with something very large behind it.`]; }, to: back },
             { text: 'Ask her to do it again. For science.', do: (g) => { g.yuki.form = 'tiger'; return ['Yuki: great root-kin form. She does it purely to loom over you.']; }, to: back },
         ],
     },

@@ -1013,6 +1013,106 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     assert(rewinds > 0 && meds > 0 && lf > 0 && (skips > 0 || !FULL), `R1: the walk bites the tail (${rewinds}), meditates (${meds}), skips (${skips}), runs (${flees}) and walks the Long Forest (${lf} steps)`);
     assert(bad.size === 0, `B2: every line of ${walked} choices and cards is placed (${[...bad].slice(0, 4).map(([t, w]) => `${w}: ${t}`).join(' || ')})`);
 }
+// v0.11.69 (owner picks R1 + P1, the texts Fable's, "F All"): the missing replies of the one-off story choices (relationship
+// choices that said nothing, choices that answered with gains only, failed checks without a line), and a partial haul keeps
+// the reply sentences of the item lines it drops.
+{
+    const { splitReply, keepReplies, splitLine } = await import('../js/core/replies.js');
+    const { gives } = await import('../js/core/story.js');
+    const { actingCheck, noDiceDc } = await import('../js/core/game.js');
+    const { cardCheck } = await import('../js/core/tasks.js');
+    const R69 = [
+        ['wen_lesson', 0, 'do', (g) => { delete g.flags.lore_realms; }, 'Now you have asked the right question'],
+        ['wen_lesson', 0, 'do', (g) => { g.flags.lore_realms = true; }, 'and cannot name'],
+        ['far_lost', 0, 'do', null, 'Next time, take me'],
+        ['mei_walk', 0, 'do', (g) => { g.flags.vday = 2; }, 'By now it may be'],
+        ['mei_walk', 0, 'do', (g) => { g.flags.vday = 3; }, 'learning how to breathe again'],
+        ['supper_roof', 0, 'do', (g) => { g.flags.vday = 1; }, 'Tell me about the trees again'],
+        ['supper_roof', 0, 'do', (g) => { g.flags.vday = 2; }, 'shoulder still warm'],
+        ['ya_found', 0, 'do', null, 'a hand\'s width closer'],
+        ['sect_cut', 0, 'do', null, 'He believed it'],
+        ['rt_watch', 0, 'do', null, 'quieter each time'],
+        ['rt_fire_talk', 0, 'do', null, 'That was a good one'],
+        ['yuki_tiger_awaken', 0, 'do', null, 'underline a word'],
+        ['lf_ride', 0, 'do', null, 'The flat ones from the slow water'],
+        ['lf_bored', 0, 'do', null, 'standing ovation'],
+        ['forage', 0, 'do', null, 'You have standards'],
+        ['forage', 2, 'do', null, 'peer review'],
+        ['mire', 0, 'do', null, 'specimen worth your whole grant'],
+        ['rt_ford', 0, 'do', null, 'shakes a wet paw'],
+        ['ah_hunt', 1, 'do', null, 'Rare, for you'],
+        ['heal', 1, 'fail', null, 'didn\'t do well enough'],
+        ['bone_field', 0, 'fail', null, 'decency not to look at you'],
+        ['hollow', 0, 'fail', null, 'patient with a child'],
+        ['hunt_miss', 0, 'fail', null, 'a hand\'s width from where the hare was'],
+        // R1 after the Opus review (Fable's fixes): the variants by form and by a thin haul
+        ['lf_bored', 0, 'do', (g) => { g.yuki.realm = 7; g.yuki.form = 'human'; }, '"Acceptable," she says'],
+        ['ah_hunt', 1, 'do', null, '"Thin," she says', { success: false, ratio: 0.7 }],
+        ['forage', 2, 'do', null, 'turns out not to be the right way', { success: false, ratio: 0.7 }],
+        ['forage', 2, 'do', null, 'a sky the colour of a bruise'],
+        ['mei_walk', 0, 'do', (g) => { g.flags.vday = 3; }, 'came out of that forest'],
+        ['lf_ride', 0, 'do', null, 'not getting out of it'],
+    ];
+    for (const [id, i, branch, setup, phrase, roll] of R69) {
+        const g = ensureBars(newGame(690)); g.scene = id;
+        if (setup) setup(g);
+        const c = SCENES[id]?.choices?.[i];
+        const fn = c && (branch === 'do' ? c.do : c.failDo);
+        const out = fn ? fn(g, roll || { success: branch === 'do', ratio: branch === 'do' ? 1 : 0 }) || [] : [];
+        const reply = splitReply(out).reply.join(' ');
+        assert(reply.includes(phrase), `v0.11.69 (R1): ${id} #${i} (${branch}) answers with its reply (${reply.slice(0, 80) || 'nothing'})`);
+    }
+    // the review's test gaps: the variant replies through the real screens, the reply matching the text just read
+    const high = (g) => { g.james.gu.tier = 4; g.james.gu.level = 5; };
+    for (const [id, setup, textBit, replyBit] of [
+        ['wen_lesson', (g) => { delete g.flags.lore_realms; }, 'ladder', 'right question'],
+        ['wen_lesson', (g) => { g.flags.lore_realms = true; }, 'Old Tree', 'cannot name'],
+        ['mei_walk', (g) => { g.flags.vday = 2; }, 'Bit late for that', 'By now it may be'],
+        ['mei_walk', (g) => { g.flags.vday = 3; }, 'last sunset', 'out of that forest'],
+        ['supper_roof', (g) => { g.flags.vday = 1; }, 'Which one', 'trees again'],
+        ['supper_roof', (g) => { g.flags.vday = 2; }, 'plum wine', 'shoulder still warm'],
+    ]) {
+        const g = ensureBars(newGame(696)); high(g); setup(g); goTo(g, SCENES, id);
+        const text = sceneView(g, SCENES).text, r = choose(g, SCENES, 0), rep = splitReply(r.lines).reply.join(' ');
+        assert(text.includes(textBit) && rep.includes(replyBit), `v0.11.69 (review): ${id}: the text read (${textBit}) and the reply (${replyBit}) agree (${rep.slice(0, 60)})`);
+    }
+    // nothing else about these choices changed
+    {   const g = ensureBars(newGame(697)); high(g); goTo(g, SCENES, 'rt_ford'); const c = SCENES.rt_ford.choices[0];
+        const r = choose(g, SCENES, 0);
+        assert(g.scene === 'rt_camp' && gives(c).length === 0 && splitReply(r.lines).reply.some((l) => /wet paw/.test(l)), `v0.11.69 (review): the ford still lands on rt_camp, gives nothing (${g.scene})`); }
+    {   const g = ensureBars(newGame(698)); g.james.gu.tier = 1; g.james.gu.level = 1; goTo(g, SCENES, 'heal'); const v0 = JSON.stringify(g.rel.Village || null);
+        const idx = sceneView(g, SCENES).choices.find((c) => /^Drain and clean/.test(c.label)).index;
+        const r = choose(g, SCENES, idx);
+        assert(r.lines.some((l) => /— failure/.test(l)) && !g.flags.healed && JSON.stringify(g.rel.Village || null) === v0 && splitReply(r.lines).reply.some((l) => /well enough/.test(l)), `v0.11.69 (review): a failed heal still heals nothing and moves no one (${g.flags.healed})`); }
+    {   const g = ensureBars(newGame(699)); g.james.gu.tier = 1; g.james.gu.level = 1; g.james.qi = 10; goTo(g, SCENES, 'hunt_miss');
+        const r = choose(g, SCENES, 0);
+        assert(r.lines.some((l) => /— failure/.test(l)) && g.scene === 'stream' && !g.flags.hunt2, `v0.11.69 (review): a failed retry still leaves hunt2 unset (${g.scene}, ${g.flags.hunt2})`); }
+    { const g = ensureBars(newGame(700)); SCENES.hollow.choices[0].failDo(g); assert(g.flags.hollow_sit === true, 'v0.11.69 (review): the failed hollow sit still sets its flag'); }
+    // the review's low 7: the bone stakes sentence is a gain, also on a partial
+    assert(splitLine('+1 Giant\'s bone-meal. Your bone stakes will be harder from now on.').reply === '' && keepReplies(['+1 Giant\'s bone-meal. Your bone stakes will be harder from now on.']).length === 0, 'v0.11.69 (review): the bone stakes line is all gain');
+    // the gains still come with them, unchanged
+    { const g = ensureBars(newGame(691)); const o = SCENES.ya_found.choices[0].do(g); assert(splitReply(o).gains.join() === '+1 Ya\'s wolf tooth.' && g.inventory.ya_tooth === 1, 'v0.11.69: the tooth is still a gain'); }
+    { const g = ensureBars(newGame(692)); const o = SCENES.bone_field.choices[0].failDo(g); assert(g.flags.bone_sung === true && o.length === 1, 'v0.11.69: the failed skull still sets its flag'); }
+    { const g = ensureBars(newGame(693)); g.flags.lore_realms = true; SCENES.wen_lesson.choices[0].do(g); assert(g.flags.lore_tree === true, 'v0.11.69: the second lesson still sets lore_tree'); }
+    // through choose: the far_lost lecture lands under Ashfall's text
+    { const g = ensureBars(newGame(694)); goTo(g, SCENES, 'far_lost'); const r = choose(g, SCENES, 0); assert(g.scene === 'ashfall' && splitReply(r.lines).reply.some((l) => /take me/.test(l)), 'v0.11.69: far_lost answers through choose'); }
+    // P1: a partial keeps the reply sentences of the item lines it drops
+    assert(JSON.stringify(keepReplies(['+2 Glassback hare (dressed). Teamwork. Disgusting, bloody teamwork.', 'Other line.', '+3 Jade bracket fungus.'])) === JSON.stringify(['Teamwork. Disgusting, bloody teamwork.', 'Other line.']), 'v0.11.69 (P1): keepReplies');
+    assert(JSON.stringify(keepReplies(['+2 Mire fowl. "Small," she says. "Rare, for you." Through the bond: *fish. The flat ones.*'])) === JSON.stringify(['"Small," she says. "Rare, for you." Through the bond: *fish. The flat ones.*']), `v0.11.69 (review): keepReplies keeps quotes and italics whole (${keepReplies(['+2 Mire fowl. "Small," she says. "Rare, for you." Through the bond: *fish. The flat ones.*'])})`);
+    {   // a story choice: the hare with Yuki, partly
+        const g = ensureBars(newGame(695)); goTo(g, SCENES, 'hunt');
+        let lv = 0; for (let l = 1; l <= 10; l++) { g.james.gu.level = l; const v = actingCheck(g, 'GU'); if (v / noDiceDc(4) >= 0.5 && v / noDiceDc(4) < 1) { lv = l; break; } }
+        const r = choose(g, SCENES, 1);
+        assert(lv > 0 && r.lines.some((l) => /— partly/.test(l)) && splitReply(r.lines).reply.some((l) => /bloody teamwork/.test(l)) && r.lines.some((l) => /^A thin haul — you keep: \+1 Glassback/.test(l)), `v0.11.69 (P1): a partial hunt keeps its reply (${lv}: ${r.lines})`);
+    }
+    {   // a work card: the honey tree, partly
+        const w = ensureBars(newGame(3)); w.scene = 'wilds'; w.minutes += 1440; Object.assign(w.flags, { long: true, forest_day: 2 }); w.james.qi = 20;
+        const c = SCENES.wild_forage.choices[2], k = cardCheck(w, 'wild_forage:2', c);
+        taskState(w).adapt['wild_forage:2'] = Math.round((0.75 * k.dc - k.value) * 10) / 10;
+        const r = runTask(w, SCENES, 'wild_forage:2');
+        assert(cardCheck(w, 'wild_forage:2', c) && r.lines.some((l) => /— partly/.test(l)) && splitReply(r.lines).reply.some((l) => /bees are still arguing/.test(l)), `v0.11.69 (P1): a partial work card keeps its reply (${r.lines})`);
+    }
+}
 // every card that was ever offered was also played at least once
 const all = cardsListed;
 if (FULL) for (const id of all) assert(cardsSeen.has(id), `card ${id} was played by a bot`); // coverage: the full run only

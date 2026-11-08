@@ -77,7 +77,7 @@ She considers the patch of dark with great seriousness. "It looks cold."
 She tells you what the tribute actually costs, in numbers: so many baskets of grass, so many sacks of millet, so many children tested for roots. She tells you which families hid their children last year and which ones were caught. She's very calm about it. Her hands are not.
 
 Then she's quiet for a long time, and then she leans her shoulder against yours, and neither of you says anything about that.`),
-        choices: [{ text: 'Stay until the cold drives you in.', do: (g) => { bumpRel(g, 'Mei Lin', 2, 3); return []; }, to: 'village_night' }],
+        choices: [{ text: 'Stay until the cold drives you in.', do: (g) => { bumpRel(g, 'Mei Lin', 2, 3); return [vday(g) === 1 ? `You stay until your fingers stop working and she's stopped pretending she isn't shivering. "Tell me about the trees again," she says as you climb down, and you do, all the way to the loft ladder. She doesn't say it sounds insane. She says goodnight like it costs her something.` : `Neither of you says anything about it on the way down, either. At the foot of the ladder she takes the empty jar out of your hand, holds your wrist a moment longer than she needs to, and goes to her mother's room without looking back. You climb into the loft with your shoulder still warm.`]; }, to: 'village_night' }],
     },
 
     /* ---------- the night: quiet, or Gao Feng's doing (night 5) ---------- */
@@ -257,7 +257,7 @@ Mortal Vessel. Foundation. Core Formation. The realms go up like a ladder into c
 
 "Then one day it stopped. And the forest stopped being kind." He looks at you with his good eye. "Your cat's been staring toward it since you came. So have you."`),
         choices: [
-            { text: 'Listen. Ask. Take notes in a mind with nine threads.', check: { skill: 'GU', dc: 2 }, time: 120, do: (g) => { if (!g.flags.lore_realms) g.flags.lore_realms = true; else g.flags.lore_tree = true; bumpRel(g, 'Old Wen', 4, 0); return []; }, failDo: (g) => { if (!g.flags.lore_realms) g.flags.lore_realms = true; else g.flags.lore_tree = true; return ['You drift. He notices, and forgives it.']; }, to: 'ashfall' },
+            { text: 'Listen. Ask. Take notes in a mind with nine threads.', check: { skill: 'GU', dc: 2 }, time: 120, do: (g) => { const first = !g.flags.lore_realms; if (first) g.flags.lore_realms = true; else g.flags.lore_tree = true; bumpRel(g, 'Old Wen', 4, 0); return [first ? `You take it down rung by rung, in a thread of its own, and ask who holds the bottom of the ladder here. Old Wen looks at you with his good eye for a long moment. "Now you have asked the right question," he says. "Nobody in Ashfall has asked it since my father's time."` : `You ask what the hunters' tales say the singing sounded like. He thinks about it with great seriousness. "Like something you have already heard," he says at last, "and cannot name." You don't tell him that's exactly it. Yuki, on your knee, has not stopped looking toward the forest.`]; }, failDo: (g) => { if (!g.flags.lore_realms) g.flags.lore_realms = true; else g.flags.lore_tree = true; return ['You drift. He notices, and forgives it.']; }, to: 'ashfall' },
         ],
     },
 
@@ -285,7 +285,7 @@ Mortal Vessel. Foundation. Core Formation. The realms go up like a ladder into c
     far_lost: {
         id: 'far_lost', title: 'Not Today', art: 'herb_slope', place: 'Blackroot Wilds — past the oak hollow',
         text: `You get away, which is the most important part of losing. You get back to Ashfall bleeding, and Mei Lin patches you up while telling you, at length, how stupid you are.`,
-        choices: [{ text: 'Accept the lecture.', time: 60, do: (g) => { bumpRel(g, 'Mei Lin', 2, 2); return []; }, to: 'ashfall' }],
+        choices: [{ text: 'Accept the lecture.', time: 60, do: (g) => { bumpRel(g, 'Mei Lin', 2, 2); return [`You let her finish. It takes a while, and she sews while she talks, and her stitches get smaller and neater the angrier she gets. When she ties off the last one she presses her thumb against it, hard, and says, "Next time, take me." You don't point out that that isn't an argument. It isn't meant to be.`]; }, to: 'ashfall' }],
     },
 
     scout: {
@@ -307,6 +307,6 @@ Mortal Vessel. Foundation. Core Formation. The realms go up like a ladder into c
 
 "Bit late for that."`
             : `The last sunset before the tribute. She doesn't talk at all this time. She just takes your hand halfway along the field edge and doesn't let go until the lamps come on.`),
-        choices: [{ text: 'Walk her home.', do: (g) => { bumpRel(g, 'Mei Lin', 3, meiRel(g).a >= 8 ? 5 : 4); return []; }, time: 60, to: 'ashfall' }],
+        choices: [{ text: 'Walk her home.', do: (g) => { bumpRel(g, 'Mei Lin', 3, meiRel(g).a >= 8 ? 5 : 4); return [vday(g) === 2 ? `You walk her to her mother's door in the last of the red light. At the step she turns, looks at you as if she's about to say something else, and says "Idiot," very quietly, instead. Yuki pushes past both of you and goes in first, as if the house were hers. By now it may be.` : `She doesn't let go at the door either. She stands there with your hand in hers and the lamplight on her face and says, "Tomorrow, whatever happens, I'm glad you came out of that forest." Then she goes in, fast, before you can answer, and you stand in the lane for a while learning how to breathe again.`]; }, time: 60, to: 'ashfall' }],
     },
 };

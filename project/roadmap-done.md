@@ -2,6 +2,16 @@
 
 Split out of `roadmap.md` in v0.11.65 (owner pick G2, 2026-11-08 11:45), so the roadmap shows only the open work. Every line here moved word for word; newest first. Update in every push that finishes a roadmap line.
 
+## Moved in v0.11.69 (word for word)
+
+### From section 1b, "The screen's format" (the reply bullet's last part; done in v0.11.69 for the one-off story choices: R1 the 20 choices' replies, Fable's texts, P1 a partial haul keeps its reply; the repeating ones moved to group e)
+
+- *(where replies show done in v0.11.68 (owner picks A1 + B2 + C1), moved word for word to `roadmap-done.md`; the rest is story writing)* **Story pass, the reply texts (owner 2026-11-08 00:43, "uniformize where the reply text goes (not to the results but the replies that come with it, the checks and gains (xp, affectio+friendship still go to the results. fix/add replies to choices that should come with text replies"):** and choices that should answer with a text but don't (or answer only with gains) get their reply. First a list of where replies go today, scene by scene, and of the choices without one; drafts in chat first.
+
+### The old "Last updated" line
+
+Last updated: 2026-11-08 (v0.11.68, the story and mechanics pass, group b part 2: where replies show (owner picks A1 + B2 + C1); the reply bullet's done part moved word for word to `project/roadmap-done.md`; the owner's 14:14 notes on Yuki's forms added to group e; v0.11.67, group b part 1). Update in every push.
+
 ## Moved in v0.11.68 (word for word)
 
 ### From section 1b, "The screen's format" (the reply bullet's first part; done in v0.11.68: A1 the reply under the scene text, B2 sorted by shape, C1 friendship and affection in Results)
