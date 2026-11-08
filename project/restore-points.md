@@ -12,7 +12,8 @@ The next one is made before the whole-game rewrite pass (group e) and before the
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.83 | (this push) | P1 + T1 + R1: the FAQ tab (`js/core/faq.js`, its wiring in `main.js`, a sixth tab in `index.html` and `css/style.css`), the James tab's dice-era rules replaced. Saves unchanged, no id changed; one new phone key `boneash.faq.v1` (rolling back leaves it unread). Rolling back removes the FAQ and brings back the old rules paragraph. |
+| 0.11.84 | (this push) | Docs only (the bug's place in group f confirmed). The game is identical to 0.11.83. |
+| 0.11.83 | `18a0aa2` | P1 + T1 + R1: the FAQ tab (`js/core/faq.js`, its wiring in `main.js`, a sixth tab in `index.html` and `css/style.css`), the James tab's dice-era rules replaced. Saves unchanged, no id changed; one new phone key `boneash.faq.v1` (rolling back leaves it unread). Rolling back removes the FAQ and brings back the old rules paragraph. |
 | 0.11.82 | `bfc0f07` | B1 + Y1: the brawls' styles (`style: 'spar' / 'unarmed'` on `yaBrawl` and `brawl`; `fightAction`, `yukiSitsOut`, the unarmed actions in `game.js`; `fightStyle` in `forms.js`), Fable's texts; the baseline re-saved (owner's go). Saves unchanged in shape (fight-only optional fields); no id changed. Rolling back brings back the bone kit in both brawls and the old baseline. |
 | 0.11.81 | `ff012d7` | T1: `lf_bandits` in `PEOPLE_FIGHTS` (`js/core/game.js`). Saves unchanged, no id changed; the baseline kept (0 drifted). Rolling back brings back the Tans' +0.5 and a lost Tan fight ending the Coil. |
 | 0.11.80 | `fe8310f` | A tool and a test only (L1: the fight lab, `tools/fightlab.mjs`, `tools/lib/fightlab.mjs`). The game is identical to 0.11.79. |

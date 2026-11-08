@@ -2,6 +2,24 @@
 
 Started 2026-11-08 (v0.11.74), when `history-9.md` reached about 45 KB. Newer than `history-9.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.84 (word for word)
+
+### From "Decided in chat"
+
+- **v0.11.81: the Tan brothers' fight as people (owner 21:12 "Fix the Tan fight."; options T1 (add `lf_bandits` to `PEOPLE_FIGHTS`) / T2 (only the loss path, keep the +0.5); owner 21:38 "T1"):**
+  - **Picked:** **T1**: `lf_bandits` in `PEOPLE_FIGHTS` (`js/core/game.js`): no beasts' +0.5 on DC and attack; a loss on an active Coil goes to `lf_human_lost` ("Robbed": one food item taken, back to camp) instead of `coil_end`, like Fang Wei's. T2 not picked.
+  - **The numbers shown before the build (forced Tan fights on 1,334 James states from the bots, sent in chat at 21:40):** smart 92.7 → 94.8% (GU T1: 80.7 → 86.1%), random 93.2 → 95.7% (GU T1: 81.9 → 88.5%), GU T2 and up 100% both. The bots met the Tans about once in 300 games (the lab saw none fought: every bot meeting was a one-move finish); the story test's Tan rows moved 12/21 → 14/22 (smart), 11/16 → 12/16 (random).
+  - **Cold review on Fable (rule 9):** nothing that matters; every reader of the people / beast split checked (`noDiceUp`, `startCombat`, the Coil's lose hook, the one-move degree, the beast-death counts keyed on `coil.why`); "Robbed" safe for the Tans; every human-named enemy now in the set; the test fails with the id removed. Its one low item (the README line) done.
+  - **Also:** the owner's PC note (21:48) in the open items and the roadmap; `fe8310f` filled in for 0.11.80; v0.11.78's notes moved to `history-10.md`. After v0.11.80 Claude uploaded the 6 changed docs (handover, roadmap, changelog, restore-points, history-10, reference).
+  - **Checks:** see the version note.
+
+### From "Version notes"
+
+## v0.11.81 — the Tan brothers' fight as people (T1)
+
+- **js/core/game.js** (`PEOPLE_FIGHTS` + `lf_bandits`), **tests/tasks.test.mjs** (the v0.11.81 block: both trail fights are people fights, no +0.5, a loss leads to "Robbed" on an active Coil), **sw.js, tests/README.md, tools/timings.json; project docs** (v0.11.78 to `history-10.md`). Saves unchanged; no id changed (a save mid-fight keeps that fight's +0.5 and goes to "Robbed" on a loss).
+- **Checks:** the full `bash tools/check.sh` (a game change, rule 2): exit 0, 0 drifted of 152, 7 log-only notes past 5 points: the same six as since v0.11.71 plus the story test's Gao fight (smart 59.5 → 54.3% against the baseline; 54.8% before this change too, so not from it: 120 / 219 → 120 / 221); the models unchanged (Careful 2.23 / 2.83, Completionist 2.08 / 2.77); the four browser parts pass; the baseline kept. One mutation by hand: the id taken out, the three new assertions fail. Cold review on Fable: see the decisions.
+
 ## Moved from the handover in v0.11.83 (word for word)
 
 ### From "Open items", the NEXT item's part (1) (done in v0.11.83)
