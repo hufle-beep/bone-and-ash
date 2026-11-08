@@ -2,6 +2,23 @@
 
 Started 2026-11-08 (v0.11.74), when `history-9.md` reached about 45 KB. Newer than `history-9.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.78 (word for word)
+
+### From "Decided in chat (2026-11-07)"
+
+- **v0.11.75: the story and mechanics pass, group i round 2, wave 1: dating sims and visual novels (the owner 18:52: no named games; "dating sim style games for the time and relationship management aspect, also goals and things like that. and also visual novels too (those overlap often). the whole net, don't just stop at google and github and Reddit please. I would also like you to look into cultivation/xianxia games, both idle/incremental and not."; paced in two waves (owner 18:30 "you could have paced it... the research too"); two Opus helpers from one brief, `project/research/group-i-brief-2.md`; the main claims checked by Claude; options W1 / W2 / W3; owner 19:54 "W1"):**
+  - **Picked:** **W1**, docs only: `research.md` round 2 (26 candidates, #95–#120; the skipped and avoid lists; the licence rows: ink, inkjs, Yarn Spinner, Ren'Py, the Dating Sim Engine and Chapbook MIT; Tracery Apache-2.0; SugarCube BSD-2; DS-toolkit MIT but an adult stat set, nothing taken; the closed games ideas only); the two reports and the brief word for word in `project/research/` (`group-i-e-dating.md`, `group-i-f-vn.md`, `group-i-brief-2.md`); every candidate placed in the roadmap (groups e and f, section 4). W2 (with wave 2 in one push) and W3 (the reports only) not picked. **Checked in our code:** `mei_talks` resets every Coil (Coil 2 replays Mei Lin's three talks); `g.seen` is per scene, so after the rewrite pass an old save would fold rewritten text unread (#96, placed before the rewrite pass). The strongest, told in chat: beats that move on across Coils (#95), fold per paragraph (#96), the picker's order and pool kinds (#97, #98), a story beat opens the next affection tier (#99), the both-high choice (#100), "tell them what you know" (#101), friendship perks (#102), the act's calendar and the web of what James knows (#103, #104).
+  - **No Fable step** (docs only).
+  - **Also:** after v0.11.74 Claude uploaded the 8 changed docs (handover, roadmap, changelog, restore-points, research, reference, working-agreement, the new history-10) to the claude.ai project itself (owner 18:57 "upload them"); the project tool needed each existing doc read from the project and from disk first, so the upload cost about twice the usual; `0f3c088` filled in for 0.11.74 in the changelog and restore points; v0.11.72's notes moved to `history-10.md`. This chat ran long: wave 2 goes to a new chat with a handover message (rule 4).
+  - **Checks:** see the version note.
+
+### From "Version notes"
+
+## v0.11.75 — the story and mechanics pass, group i round 2, wave 1: dating sims and visual novels (W1)
+
+- **project/research.md** (round 2: the licence rows, #95–#120, the skipped and avoid lists, wave 2 pending), **project/research/** (new: `group-i-e-dating.md`, `group-i-f-vn.md`, `group-i-brief-2.md`, word for word), **tests/tools.test.mjs** (the v0.11.74 block widened to round 2), **sw.js, tests/README.md; project docs** (v0.11.72 to `history-10.md`). The game identical to 0.11.74; saves unchanged.
+- **Checks:** docs and a test only (rule 2): `node tests/tools.test.mjs`, `node tools/consistency.mjs` and `bash tools/check.sh quick`. How it interacts: no game file, save or bot code changed, so the game and the bot numbers can't move; the test reads only `research.md`, the roadmap and `project/research/`. What can now break a push: a gap in group i's numbers, a candidate placed nowhere, or a marker naming a number that isn't there (intended).
+
 ## Moved from the handover in v0.11.77 (word for word)
 
 ### From "Decided in chat (2026-11-07)"

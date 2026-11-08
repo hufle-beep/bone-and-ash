@@ -8,7 +8,7 @@
 // v0.11.62: tools/art/patch.py on a made-up picture.
 // v0.11.22: tools/leftovers.mjs on small made-up inputs (every kind found, kept entries skipped) and tests/lib/seen.mjs's watch.
 import { spawn, execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -19,7 +19,7 @@ import { strip, scanFunctions, scanFlags, flagFindings, scanCss, scanMarkers, sc
 import { seen as touched, track, noteView, seenOut } from './lib/seen.mjs'; // v0.11.22
 import { stepLine, flagLines, leftoverFound, modelDigest } from '../tools/lib/report.mjs'; // v0.11.28
 import { artFiles, fingerprint, readArt, checkArt, writeArt, ART_RE } from '../tools/arthash.mjs'; // v0.11.39
-import { docFindings, newestHistory, HANDOVER_MAX, HISTORY_MAX } from '../tools/lib/docs.mjs'; // v0.11.73
+import { docFindings, newestHistory, newestResearch, HANDOVER_MAX, HISTORY_MAX, RESEARCH_MAX, DOC_TOOL_MAX } from '../tools/lib/docs.mjs'; // v0.11.73; v0.11.78 the research parts
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 let pass = 0, fail = 0;
@@ -357,13 +357,22 @@ print(json.dumps({"n": len(R['masks']), "bad": bad, "bitmaps": sum('bitmap' in m
     const old = docFindings({ ...ok, roadmap: 'Last updated: 2026-11-08 (v1.2.2, docs)' });
     const none = docFindings({ ...ok, roadmap: '# Roadmap\n' });
     assert(/says 1\.2\.2, sw\.js says 1\.2\.3/.test(old.fail[0] ?? '') && /says nothing/.test(none.fail[0] ?? ''), `docs: the roadmap on an older version, or with no "Last updated" line, fails (${old.fail[0]}; ${none.fail[0]})`);
+    // v0.11.78 (S1): the research parts and the docs too big for the project tool (notes, never failures)
+    assert(newestResearch(['research.md', 'research-2.md', 'research-10.md', 'roadmap.md']) === 'research-10.md' && newestResearch(['research.md']) === 'research.md' && newestResearch([]) === null, 'docs: the newest research part is the highest number (research.md is part 1)');
+    const rs = docFindings({ ...ok, researches: { 'research.md': RESEARCH_MAX + 5000, 'research-2.md': RESEARCH_MAX + 1 } });
+    assert(rs.fail.length === 0 && rs.notes.length === 1 && /research-2\.md is 45001 bytes/.test(rs.notes[0]), `docs: only the newest research part past ${RESEARCH_MAX} bytes is a note (${rs.notes.join('; ')})`);
+    const tool = docFindings({ ...ok, docs: { 'roadmap.md': DOC_TOOL_MAX, 'changelog.md': DOC_TOOL_MAX + 1 } });
+    assert(tool.fail.length === 0 && tool.notes.length === 1 && /changelog\.md is 60001 bytes.*trimming pass/.test(tool.notes[0]), `docs: a doc past ${DOC_TOOL_MAX} bytes is a note naming the trim-then-split rule (${tool.notes.join('; ')})`);
     let code = 0, out = '';
     try { out = execFileSync(process.execPath, ['tools/consistency.mjs'], { cwd: ROOT, encoding: 'utf8' }); } catch (e) { code = e.status ?? 1; out = String(e.stdout || e); }
     assert(code === 0 && /handover \d+ bytes/.test(out), `docs: tools/consistency.mjs passes on the real repo, with the handover's size (exit ${code}: ${out.trim().split('\n').pop()})`);
 }
-// v0.11.74 (group i round 1, I1; v0.11.75: round 2's wave 1, W1; v0.11.76: wave 2, V1): every group i candidate in project/research.md is placed in the roadmap, and every roadmap line marked "from group i" (or "from group i round 2") names a real one
+// v0.11.74 (group i round 1, I1; v0.11.75: round 2's wave 1, W1; v0.11.76: wave 2, V1; v0.11.78: read across the research parts, S1): every group i candidate in project/research.md is placed in the roadmap, and every roadmap line marked "from group i" (or "from group i round 2") names a real one
 {
-    const research = readFileSync(path.join(ROOT, 'project/research.md'), 'utf8');
+    const parts = readdirSync(path.join(ROOT, 'project')).filter((f) => /^research(-\d+)?\.md$/.test(f)).sort((x, y) => (x === 'research.md' ? 1 : Number(x.match(/\d+/)[0])) - (y === 'research.md' ? 1 : Number(y.match(/\d+/)[0])));
+    assert(parts[0] === 'research.md' && parts[1] === 'research-2.md' && parts.every((f, i) => i === 0 || f === `research-${i + 1}.md`), `research: the parts run research.md, research-2.md, ... with no gap (${parts.join(', ')})`);
+    for (const [i, f] of parts.entries()) if (i + 1 < parts.length) assert(/\*Continued in `[^`]+`/.test(readFileSync(path.join(ROOT, 'project', f), 'utf8').trimEnd().split('\n').pop()) && readFileSync(path.join(ROOT, 'project', f), 'utf8').trimEnd().split('\n').pop().includes(parts[i + 1]), `research: ${f} ends pointing on to ${parts[i + 1]}`);
+    const research = parts.map((f) => readFileSync(path.join(ROOT, 'project', f), 'utf8')).join('\n');
     const roadmap = readFileSync(path.join(ROOT, 'project/roadmap.md'), 'utf8');
     const a = research.indexOf('## Group i — the games, round 1');
     const r2 = research.indexOf('## Group i, round 2');

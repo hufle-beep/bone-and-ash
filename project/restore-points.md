@@ -12,7 +12,8 @@ The next one is made before the whole-game rewrite pass (group e) and before the
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.77 | (this push) | Docs and a test only (F1: flight in `project/lore.md`, three roadmap lines). The game is identical to 0.11.76. |
+| 0.11.78 | (this push) | Docs, a check and a test only (S1: `project/research.md` split into `research.md` and `research-2.md`, word for word; `tools/lib/docs.mjs` notes for research parts and docs past 60,000 bytes). The game is identical to 0.11.77. |
+| 0.11.77 | `54b7b36` | Docs and a test only (F1: flight in `project/lore.md`, three roadmap lines). The game is identical to 0.11.76. |
 | 0.11.76 | `2f1f55e` | Docs and a test only (V1: `project/research.md` group i round 2 wave 2, `project/research/group-i-g-idle.md`, `group-i-h-rpg.md`, `group-i-i-chinese.md`, `group-i-brief-3.md`, the roadmap's placements). The game is identical to 0.11.75. |
 | 0.11.75 | `bcd454b` | Docs and a test only (W1: `project/research.md` group i round 2 wave 1, `project/research/group-i-e-dating.md`, `group-i-f-vn.md`, `group-i-brief-2.md`, the roadmap's placements). The game is identical to 0.11.74. |
 | 0.11.74 | `0f3c088` | Docs and a test only (I1 + L1 + E1: `project/research.md` group i, `project/research/group-i-*.md`, the roadmap's placements, `history-10.md` new). The game is identical to 0.11.73. |

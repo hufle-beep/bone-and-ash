@@ -4,6 +4,7 @@
 // 2. sw.js VERSION matches the handover header, the newest changelog row and the newest restore point.
 // 3. v0.11.73 (group h, H1): the handover under 35,000 bytes, the roadmap's "Last updated" version (failures); the newest
 //    history file past 45,000 bytes (a log line). The rules are in tools/lib/docs.mjs.
+//    v0.11.78 (S1): the newest research part past 45,000 bytes, and any project doc past 60,000 (too big for the project tool), log lines.
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { readArt, checkArt, ART_RE } from './arthash.mjs';
@@ -33,7 +34,8 @@ for (const [where, v] of Object.entries(docs)) if (v !== version) fail.push(`${w
 
 const histories = Object.fromEntries(readdirSync('project').filter((f) => /^history(-\d+)?\.md$/.test(f)).map((f) => [f, statSync(`project/${f}`).size]));
 const handoverBytes = statSync('project/handover.md').size;
-const docs2 = docFindings({ version, handoverBytes, histories, roadmap: readFileSync('project/roadmap.md', 'utf8') });
+const sizes = (re) => Object.fromEntries(readdirSync('project').filter((f) => re.test(f)).map((f) => [f, statSync(`project/${f}`).size]));
+const docs2 = docFindings({ version, handoverBytes, histories, roadmap: readFileSync('project/roadmap.md', 'utf8'), researches: sizes(/^research(-\d+)?\.md$/), docs: sizes(/\.md$/) }); // v0.11.78: the research parts and every doc's size
 fail.push(...docs2.fail);
 for (const n of docs2.notes) console.log(`note: ${n}`);
 

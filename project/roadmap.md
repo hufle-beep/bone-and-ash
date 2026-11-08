@@ -1,6 +1,6 @@
 # Roadmap: Bone and Ash
 
-Last updated: 2026-11-08 (v0.11.77, flight (owner 20:33, pick F1 at 20:39): the canon in `lore.md`; a story line in group e, a mechanics line in group d and a walk-times line in section 2, each marked *(new in v0.11.77)*; the game unchanged; next d; v0.11.76, group i round 2 wave 2: group i done). Update in every push.
+Last updated: 2026-11-08 (v0.11.78, docs: `project/research.md` split into parts (owner pick S1, 20:46): `research.md` (licences, group h, group i round 1) and `research-2.md` (group i round 2 on), word for word; "`research.md` #NN" below means the series; the owner's rule for docs that grow too big (a trimming pass, nothing lost, then a split) in `working-agreement.md`; the game unchanged; next d; v0.11.77, flight). Update in every push.
 
 **How this file is laid out (v0.11.53, owner 00:52 "reorder it to show the done ones in a separate section", pick R1):** Part 1 is what is still open; Part 2 is everything done, newest first. Nothing was deleted or reworded: every line moved word for word; a line that was partly done was split at the sentence (its done part in Part 2, its open part here), and a done line is labelled with where it stood ("was …").
 
