@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.55 | (this push) | Docs only (the first-priority roadmap item: no timer, no queue). The game is identical to 0.11.54. |
+| 0.11.56 | (this push) | Docs only (condense until the limit, on the roadmap). The game is identical to 0.11.54. |
+| 0.11.55 | `6530afc` | Docs only (the first-priority roadmap item: no timer, no queue). The game is identical to 0.11.54. |
 | 0.11.54 | `62b3e13` | The Act 1 art, push 1: 20 pictures for Fallout and the Blackroot (`PICTURES`, `YUKI_PICS` + 10, the new `YUKI_TIGER_PICS` gate). Same save state as 0.11.53; the baseline kept. Rolling back only drops the new pictures (those scenes show code art again). |
 | 0.11.53 | `696ea29` | Docs only (R1: the roadmap reordered, open on top, done below). The game is identical to 0.11.51. |
 | 0.11.52 | `e5bf128` | Docs only (A2: the story and mechanics pass into the roadmap). The game is identical to 0.11.51. |

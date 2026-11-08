@@ -2,6 +2,20 @@
 
 Started 2026-11-07 (v0.11.45), when `history-6.md` reached about 45 KB. Newer than `history-6.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.56 (word for word)
+
+### From "Decided in chat (2026-11-07)"
+
+- **v0.11.53: R1, the roadmap reordered (owner 00:52 "reorder it to show the done ones in a separate section"; options R1 / R2; 00:53 "R1. upload them yourself"):** Part 1 Open (Now, the story and mechanics pass, the open steps of the order of work and the copy-over, open notes split off done lines, waiting on the owner, later, decided), Part 2 Done (newest first, each line labelled with where it stood). Every line moved word for word; partly done lines split at the sentence (the Y3 and E steps 1–2 sentences, step 3's speed drop-down and full list, the RB-1 line's "Open for the owner" and three sentences of the older notes). R2 (only wholly done lines moved) not picked.
+  - **Uploaded by Claude after v0.11.52 and v0.11.53 (owner 00:53 "upload them yourself"):** handover, roadmap, changelog, restore points, `history-7.md`.
+
+### From "Version notes"
+
+### v0.11.53 — R1: the roadmap reordered
+
+- **project/roadmap.md** (Part 1 Open, Part 2 Done; checked by a token count: only the old section headings and list numbers were replaced by the labels), **project/handover.md** (v0.11.50 moved), **project/history-7.md, changelog.md, restore-points.md. sw.js:** VERSION (no game change).
+- **Checks (docs only, rule 2):** `tools/consistency.mjs` and `bash tools/check.sh quick`. Nothing outside the docs reads the roadmap.
+
 ## Moved from the handover in v0.11.55 (word for word)
 
 ### From "Decided in chat (2026-11-07)"
