@@ -2,6 +2,20 @@
 
 Started 2026-11-07 (v0.11.45), when `history-6.md` reached about 45 KB. Newer than `history-6.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.55 (word for word)
+
+### From "Decided in chat (2026-11-07)"
+
+- **v0.11.52: A2, the story and mechanics pass into the roadmap (owner 00:47 "give handover for new chat"; 00:48 "add the story pass to the roadmap instead, not just the handover message, then it will not bloat the handover message"; options A1 / A2; 00:49 "a2"):** `project/roadmap.md` has a new section "The story and mechanics pass (after the art)" holding, word for word, the handover's items: the story text pass and its block, P1-b / P1-c, the story and format pass, the reply texts, queueing in Act 1, batch-queueing, Yuki's loot switch, the romance gates, the Extraordinary pairs and midway gate; the handover keeps one pointer line in Open items; the roadmap's older lines on them point to the section. A1 (the section only, the handover unchanged) not picked.
+  - **Uploaded by Claude after v0.11.51 (owner 00:46):** handover, roadmap, changelog, restore points, `reference.md`, `history-7.md`.
+
+### From "Version notes"
+
+### v0.11.52 — A2: the story and mechanics pass into the roadmap
+
+- **project/roadmap.md** (the new section, the pointers), **project/handover.md** (the items out, one pointer; v0.11.49 moved), **project/history-7.md, changelog.md, restore-points.md. sw.js:** VERSION (no game change).
+- **Checks (docs only, rule 2):** `tools/consistency.mjs` and `bash tools/check.sh quick`. Nothing outside the docs reads them except the consistency check (the **Version:** line, kept).
+
 ## Moved from the handover in v0.11.54 (word for word)
 
 ### From "Decided in chat (2026-11-07)"
