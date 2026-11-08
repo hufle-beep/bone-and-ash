@@ -4,7 +4,8 @@ Every version, newest first. Details of each system are in `handover.md`.
 
 | Version | Date | Commit | What changed |
 |---|---|---|---|
-| 0.11.56 | 2026-11-08 | (this push) | Notes only, the game is the same: with the no-waiting plan, a planned "condense until full" choice whose button shows how long it takes and how much Qi it costs. |
+| 0.11.57 | 2026-11-08 | (this push) | Notes only, the game is the same: making James and Yuki look the same in every picture, with one art style for all of them, now comes in a later art pass after the planned story and mechanics changes; the redrawn ridge still comes in this round of art. |
+| 0.11.56 | 2026-11-08 | `0e17dcf` | Notes only, the game is the same: with the no-waiting plan, a planned "condense until full" choice whose button shows how long it takes and how much Qi it costs. |
 | 0.11.55 | 2026-11-08 | `6530afc` | Notes only, the game is the same: the top item of the planned story and mechanics changes is now no waiting at all: every action happens at once and moves the clock, with no speeds and no queue. |
 | 0.11.54 | 2026-11-08 | `62b3e13` | New art for Act 1, first part: 20 scenes from Ashfall's fallout and the Blackroot now have pictures (the council, the envoy, the palisade, the dawn, Ya's arrival and the brawl, the Root Road, the bone-elk, the root-wyrm, the Drowned Wood, the drowned dead, the mire serpent, the stitching, the hot spring, the Ashen Hills, the cinder hawks, the rot-ape, the night watch and two scenes of the three of you). Ten show Yuki as the cat; while she is the great cat or human those ten keep the drawn art until their own versions come. Your save is unaffected. |
 | 0.11.53 | 2026-11-08 | `696ea29` | Notes only, the game is the same: the roadmap now shows what is still to do on top and everything already done in its own part below, newest first. |
