@@ -1,5 +1,5 @@
 /**
- * Task cards and the queue (v0.9.0 step 3a; v0.9.2 step 3b). Pure — no DOM.
+ * Task cards (v0.9.0 step 3a; v0.9.2 step 3b; the queue went in v0.11.64). Pure — no DOM.
  *
  * Kinds of card (ids are `<scene>:<choice index>`):
  * - work: a sub-menu choice (`menus`) or a hub choice with a check. Resolved here WITHOUT dice (3b):
@@ -14,7 +14,7 @@
  */
 import { hasForm } from './forms.js';
 import { choose, goTo, choiceOpen, choiceTag, gives, setTimeless, defaultMinutes, movesPlace, wasPicked, isMenuScene, isTimeless, setFamiliar } from './story.js';
-import { advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck, canBreakThrough, btMinutes, realmName, condense, sitMinutes, useSpeed, USE_N, exMins, nightLock, endsLate, sitUseless, jamesQiMax, SATIETY_PER_HOUR } from './game.js';
+import { advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck, canBreakThrough, btMinutes, realmName, condense, sitMinutes, useSpeed, USE_N, exMins, nightLock, endsLate, sitUseless, jamesQiMax, SATIETY_PER_HOUR, breakAt } from './game.js';
 import { CONDENSE_SIT_COST } from './formulas.js';
 import { btTarget, MER_LINES, lineWindow, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
@@ -25,18 +25,9 @@ import { canMeditate } from './meditate.js';
 
 setTimeless(Object.fromEntries(Object.entries(TASK_HUBS).map(([h, cfg]) => [h, [...Object.keys(cfg.menus || {}), ...Object.keys(cfg.doorMenus || {})]]))); // hub ↔ menu steps take no extra time (v0.9.5)
 
-export const MS_PER_GAME_HOUR = 3000; // 1 game hour = 3 s at ×1 (design.md)
-export const QUEUE_MAX = 30;
-/** Speed gate (3c-3, owner 2026-11-06): ×1 at the start, ×2 once the tribute has been reached (fought, bluff, the hairpin, or lost: v0.11.31, P3-b), ×5 after Act 1 ends (any route, `taken` included); ×10 only with the hidden test toggle. Read from the save, so no migration. v0.11.31: a gate once open stays open across every rewind (`spd_pro`, `spd_a1` are kept flags, coil.js). */
-export function maxSpeed(g, test = false) {
-    if (test) return 10;
-    const f = (g && g.flags) || {};
-    if (f.spd_a1 || (f.a1_outcome && g.scene === 'a1_end')) return 5;
-    if (f.spd_pro || f.ending === 'fought' || f.ending === 'bluff' || f.ending === 'paid' || f.ending === 'lost') return 2;
-    return 1;
-}
-/** The speed that actually runs: the stored one, held down to the gate (0 = paused stays 0). */
-export const effectiveSpeed = (g, stored, test = false) => (stored ? Math.min(stored, maxSpeed(g, test)) : 0);
+/* v0.11.64 (owner 2026-11-08 02:04 / 10:58, picks A1 + B1 + C1 + D1 + E1): no timer, no game speeds, no queue. Every card
+ * resolves at once and moves the clock by its time (it always did in the rules; the bar only made the screen wait). The
+ * old `g.tasks.queue` stays in the save as an empty list (save shape unchanged); `migrate` empties an old one. */
 export const DC_SHIFT = 2; // no dice: DCs move down to the new scale (K 2, owner 2026-11-06)
 export const FAM = [{ name: 'New', at: 0, dc: 2, speed: 1 }, { name: 'Practised', at: 2, dc: 1, speed: 2 }, { name: 'Skilled', at: 8, dc: 1, speed: 5 }, { name: 'Mastered', at: 18, dc: 0, speed: 10 }];
 export const NEW_LENGTH = 2; // a new card takes twice its old time; familiarity divides it
@@ -63,7 +54,6 @@ function st(g) {
     if (!t.yuki || typeof t.yuki !== 'object') t.yuki = { on: false, progress: 0 };
     return t;
 }
-export const taskQueue = (g) => st(g).queue;
 export const taskState = st;
 
 function parse(id) { const k = String(id).lastIndexOf(':'); return { scene: id.slice(0, k), index: Number(id.slice(k + 1)) }; }
@@ -141,28 +131,7 @@ export function merChoice(g, scenes) {
     for (let i = 0; i < cs.length; i++) { const c = cs[i]; if (c.to === 'meridians' && (c.check || c.work) && choiceOpen(g, c)) return i; }
     return -1;
 }
-/** v0.10.0: rest and sleep happen at once (no bar; the clock still moves). */
-export const instantChoice = (c) => !!c && !c.combat && !c.check && !c.qi && (c.instant === true || typeof c.text === 'string'
-    && (/^(Rest|Sleep|Call it a day)\b/.test(c.text) || EAT_NOW.test(c.text) || /^(Get wet\. Sleep|Make camp and sleep|Go back to sleep|Just sleep|Let her sleep|Bandage it\. Sleep|Leave (a|the) thread on watch|Thank her for dinner and sleep|Limp back to camp and sleep)/.test(c.text)));
-/** v0.11.37 (owner 13:08, C2): eating and a quick herb happen at once too (the clock still moves). */
-const EAT_NOW = /^(Eat (something|it raw|at the communal pot)|Cook and eat|Chew a ghost-gill)\b/;
-/**
- * v0.10.2: a story choice that only waits for a time of day (no check, Qi, fight or time of its own; its `do` or the
- * next scene's `enter` sets the clock) plays at once in task mode — the clock jumps, no bar. `mins` = its dry run.
- */
-const SETS_CLOCK = /g\.minutes\s*=[^=]|toHour\(/;
-export function waitChoice(scenes, c, mins = 60, from = null) {
-    if (c?.instant === true && !c.combat && !c.check && !c.qi) return true; // v0.11.37: marked by hand (the Long Forest's exits: a wrapper hides their clock)
-    if (!c || c.combat || c.check || c.qi || c.time != null || mins < 60 || (from && c.to === from)) return false; // a choice back to its own scene is an action, not a wait
-    if (c.do && SETS_CLOCK.test(String(c.do))) return true;
-    const to = typeof c.to === 'string' ? scenes[c.to] : null;
-    return !!(to?.enter && SETS_CLOCK.test(String(to.enter)));
-}
-export function isInstantTask(g, scenes, id) {
-    if (id === MER_TASK || id === BT_TASK || id === SIT_TASK || id === QI_TASK || lineOfTask(id)) return false;
-    const p = parse(id);
-    return instantChoice(scenes[p.scene]?.choices?.[p.index]);
-}
+/* v0.11.64: every card happens at once, so the old "instant" cards (rest, sleep, eating: `instantChoice`, `isInstantTask`, v0.10.0 / v0.11.37) are no longer singled out. */
 
 /** What kind of card `id` is on hub `hubId`, with its choice and (for menu cards) the door choice into its menu. */
 function cardOf(scenes, hubId, id) {
@@ -276,11 +245,11 @@ function medTaskCards(g, scenes) {
 export const taskOpen = (g, scenes, id) => (id === MER_TASK ? !!TASK_HUBS[g.scene] && merChoice(g, scenes) >= 0 && !nightLock(g) : taskCards(g, scenes, id).some((c) => c.id === id && c.status === 'open')); // v0.11.13: an old queue's mer:next still runs
 export const taskLabel = (g, scenes, id) => { if (id === MER_TASK) return 'Next meridian session'; if (lineOfTask(id)) return lineName(g, lineOfTask(id)).replace(/\.$/, ''); if (id === BT_TASK) return 'Break through'; if (id === SIT_TASK) return 'Cultivate: one sit'; if (id === QI_TASK) return 'Meditate: gather Qi'; const p = parse(id); const c = scenes[p.scene]?.choices?.[p.index]; return c ? asText(c.text, g) : id; };
 
-/** HP 0 during a task (v0.9.4): the Coil ends. The queue is gone; the Coil screen decides what happens next. */
+/** HP 0 during a task (v0.9.4): the Coil ends; the Coil screen decides what happens next. */
 function collapse(g, scenes, hubId) {
     st(g).queue.length = 0;
     endCoil(g, 'collapse');
-    return ['Your knees make the decision for you. You fold up where you stand, and the last thing you see is Yuki\'s face, very close, very unimpressed. The queue is gone.',
+    return ['Your knees make the decision for you. You fold up where you stand, and the last thing you see is Yuki\'s face, very close, very unimpressed.',
         ...goTo(g, scenes, 'coil_end')];
 }
 
@@ -391,8 +360,8 @@ export function yukiLane(g) {
 export function setYuki(g, on) { st(g).yuki.on = !!on; }
 
 /**
- * Run card `id` now (its bar has finished). Returns { lines, fail, stopped }: `stopped` means the story
- * left the hub (a door, a fail scene, a collapse), so the queue must wait.
+ * Run card `id` now (at once, v0.11.64). Returns { lines, fail, stopped }: `stopped` means the story
+ * left the hub (a door, a fail scene, a collapse), so the screen changes.
  */
 export function runTask(g, scenes, id) {
     const hubId = g.scene;
@@ -471,46 +440,66 @@ export function taskMinutes(g, scenes, id) {
 }
 
 /**
- * The queue played out on a copy: per row its finish time (or `skip` if it won't be available then),
- * the first minute Fed reaches 0 (`fedOut`), and Fed at the end. Rows after the story leaves the hub are `wait`.
+ * v0.11.64 (A1, B1): what card `id` does from here, played on a copy (no dice, so it is exact): its game minutes, the minute
+ * it ends, Fed and HP at its end, and `death` ('hunger' | 'injury') if the Coil would end on it. A door counts only its walk.
  */
-export function outlook(g, scenes) {
+export function taskOutcome(g, scenes, id) {
     const c = clone(g);
-    const rows = [];
-    let fedOut = null;
-    let left = false;
-    let death = null;
-    let night = false;
-    for (const id of st(g).queue) {
-        if (death) { rows.push({ id, dead: true }); continue; }
-        if (left) { rows.push({ id, wait: true }); continue; }
-        if (night) { rows.push({ id, night: true }); continue; }
-        if (!runsHere(c, scenes, id)) { left = true; rows.push({ id, wait: true }); continue; } // v0.11.14: a row for another screen waits
-        if (dayOver(c, scenes, id)) { night = true; rows.push({ id, night: true }); continue; } // v0.11.37 (D-a): the queue stops at the day's end and waits for the morning
-        if (!taskOpen(c, scenes, id)) { rows.push({ id, skip: true }); continue; }
-        const before = c.minutes;
-        const r = runTask(c, scenes, id);
-        if (fedOut === null && c.james.satiety <= 0) fedOut = c.minutes;
-        const row = { id, start: before, end: c.minutes, door: !!r.stopped, fed: c.james.satiety, hp: c.james.hp };
-        if (c.scene === 'coil_end') { // HP hit 0 on this row: the Coil would end here
-            row.death = c.james.satiety <= 0 ? 'hunger' : 'injury';
-            death = { at: c.minutes, cause: row.death, row: rows.length, id };
-        }
-        rows.push(row);
-        if (r.stopped) left = true;
-    }
-    return { rows, fedOut, fedEnd: c.james.satiety, end: c.minutes, start: g.minutes, death };
+    const card = cardOf(scenes, c.scene, id);
+    if (card?.kind === 'door') { const minutes = taskMinutes(g, scenes, id); return { minutes, end: g.minutes + minutes, fed: g.james.satiety, hp: g.james.hp, death: null }; }
+    const m0 = c.minutes;
+    runTask(c, scenes, id);
+    return outcomeOf(c, m0);
 }
+/** v0.11.64 (B1): the same for a Meditate card that runs off the task list (meditate.js runMed), passed in as `run`. */
+export function dryOutcome(g, run) {
+    const c = clone(g);
+    const m0 = c.minutes;
+    run(c);
+    return outcomeOf(c, m0);
+}
+/** A Coil-ending death: the Coil screen for a collapse or a beast (a chosen "Bite the tail", the tribute or Shen Qiu are no death; the death hook sets HP back to 1, so HP can't tell). */
+export const outcomeOf = (c, m0) => ({ minutes: Math.max(0, c.minutes - m0), end: c.minutes, fed: c.james.satiety, hp: c.james.hp, death: c.scene === 'coil_end' && (c.coil?.why === 'collapse' || c.coil?.why === 'beast') ? (c.james.satiety <= 0 ? 'hunger' : 'injury') : null });
 
-/** v0.11.37 (D-a): queue row `id` can't run because the day is over (02:00 passed, or it would end past 02:00): the queue waits, nothing is skipped. */
-export const dayOver = (g, scenes, id) => (nightLock(g) ? !taskCards(g, scenes, id).some((x) => x.id === id && x.status === 'open') : taskCards(g, scenes, id).some((x) => x.id === id && x.status === 'late')); // at night a queued meal still runs (Fable review)
-
-/* ---------- the queue, edited (v0.10.0; pure: the screen calls these) ---------- */
-/** Run `id` now: it goes to the front (the card that was running moves to second place). */
-export function queueRunNow(g, id) { const q = st(g).queue; if (q.length >= QUEUE_MAX) return false; q.unshift(id); return true; }
-/** Add `id` to the end. */
-export function queueAdd(g, id) { const q = st(g).queue; if (q.length >= QUEUE_MAX) return false; q.push(id); return true; }
-/** Move row k up (dir −1) or down (+1). */
-export function queueMove(g, k, dir) { const q = st(g).queue; const j = k + dir; if (k < 0 || j < 0 || k >= q.length || j >= q.length) return false; [q[k], q[j]] = [q[j], q[k]]; return true; }
-/** Clear the queue; keepHead keeps the row in progress. */
-export function queueClear(g, keepHead) { const q = st(g).queue; q.splice(keepHead && q.length ? 1 : 0); }
+/* ---------- v0.11.64 (owner 02:07, pick C1): Cultivate until the limit ---------- */
+export const SIT_LOOP_MAX = 200;
+/** The sit this screen runs: the hub's own Cultivate chore, or "Cultivate: one sit". */
+export function sitTaskId(g, scenes) {
+    if (TASK_HUBS[g.scene]) { const i = (scenes[g.scene]?.choices || []).findIndex((c) => isSitChore(c, g.scene)); if (i >= 0) return `${g.scene}:${i}`; }
+    return SIT_TASK;
+}
+/** Why the next sit can't run ('' = it can): Saturation at the breakthrough point, Qi short, past 02:00, the card shut. */
+function sitStop(g, scenes, id) {
+    if (sitUseless(g) || g.james.saturation >= breakAt()) return 'sat';
+    if (g.james.qi < CONDENSE_SIT_COST) return 'qi';
+    if (nightLock(g) || endsLate(g, exMins(g, sitMinutes(g)))) return 'night';
+    if (!taskOpen(g, scenes, id)) return 'shut';
+    return '';
+}
+/**
+ * Sit after sit, each exactly one tap of the sit card (runTask), until the first of: Saturation 95% (the breakthrough
+ * point; nothing over 100% carries), Qi under 10, a sit that would end past 02:00, a sit that would leave Fed at 0, or the
+ * story leaving the screen. Returns { sits, lines, stop, minutes, qi, saturation } (`qi` = Qi spent net of regen).
+ */
+export function sitLoop(g, scenes) {
+    const id = sitTaskId(g, scenes);
+    const scene = g.scene, m0 = g.minutes, q0 = g.james.qi;
+    const lines = [];
+    let sits = 0, stop = '';
+    while (sits < SIT_LOOP_MAX) {
+        stop = sitStop(g, scenes, id);
+        if (stop) break;
+        const t = clone(g);
+        runTask(t, scenes, id);
+        if (t.james.satiety <= 0) { stop = 'fed'; break; }
+        const r = runTask(g, scenes, id);
+        lines.push(...r.lines);
+        sits += 1;
+        if (r.stopped || g.scene !== scene) { stop = 'left'; break; }
+    }
+    if (sits >= SIT_LOOP_MAX) stop = stop || 'max';
+    return { sits, lines, stop, minutes: g.minutes - m0, qi: Math.round((q0 - g.james.qi) * 10) / 10, saturation: g.james.saturation };
+}
+/** The loop played on a copy, for the button. */
+export const sitLoopPlan = (g, scenes) => sitLoop(clone(g), scenes);
+export const SIT_STOP_TEXT = { sat: 'the breakthrough point', qi: 'then Qi runs out', night: 'then the day ends', fed: 'then you need food', shut: 'then it stops', left: 'the story moves on', max: 'a long session' };

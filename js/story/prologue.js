@@ -943,13 +943,11 @@ const lfStock = (g) => { for (const id of LF_STOCK) g.inventory[id] = Math.max(g
     const exit = SCENES.lf_exit.choices[0];
     const was = exit.do;
     exit.do = (g) => { const out = was(g); lfStock(g); out.push(LF_FULL); return out; };
-    exit.instant = true; // v0.11.37 (A1): at once (the wrapper hides its clock from waitChoice's reading)
 }
 /** v0.11.37 (owner 12:59, pick A1): the second way out: back where he walked in (the clearing or the arrival), the clock as he left it. At the end of the list: the hub's card ids stay. */
 SCENES.lf_hub.choices.push({
     text: 'Go back the way you came. (The calendar starts again where you walked in.)',
     show: (g) => ['clearing', 'arrival'].includes(g.flags.lf_from) && Number.isFinite(g.flags.lf_at),
-    instant: true,
     do: (g) => {
         g.flags.lf_active = false;
         g.minutes = g.flags.lf_at;

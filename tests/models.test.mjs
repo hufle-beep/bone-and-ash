@@ -23,7 +23,7 @@ import { SCENES } from '../js/story/prologue.js';
 import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, jamesHpMax, clockParts } from '../js/core/game.js';
 import { INC_ONLY_ACTIONS, actionOpen } from '../js/core/forms.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
-import { isTaskHub, isTaskChoice, taskCards, taskOpen, runTask, taskQueue, setYuki, yukiLane } from '../js/core/tasks.js';
+import { isTaskHub, isTaskChoice, taskCards, taskOpen, runTask, taskState, setYuki, yukiLane } from '../js/core/tasks.js';
 import { medCards, runMed, canMeditate } from '../js/core/meditate.js';
 import { writeFileSync } from 'node:fs';
 import { SHARD, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
@@ -156,7 +156,7 @@ function play(run, model, st, yuki) {
             const stops = v.choices.filter((c) => !c.disabled && (c.index >= 1000 || !isTaskChoice(SCENES, g.scene, c.index)));
             const plan = hubPlan(model, g, cards, mem, !stops.length);
             if (plan && plan.length) {
-                const q = taskQueue(g); q.push(...plan);
+                const q = taskState(g).queue; q.push(...plan); // v0.11.64: the plan in the save's old queue field, as before
                 while (q.length && isTaskHub(g)) {
                     const id = q.shift();
                     if (!taskOpen(g, SCENES, id)) continue;

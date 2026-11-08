@@ -12,14 +12,18 @@ import { wakeDay, exLevel, sleepUntil, clockParts } from '../js/core/game.js';
 import { yukiSpeed, setDryClone, dryClone, showPicked } from '../js/core/tasks.js';
 import { e8Hours, ecHours, jnHours } from '../js/story/meridians.js';
 import { serialize, deserialize } from '../js/core/game.js';
-import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, clockLabelSec, advance, STARVE_HP_PER_HOUR, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1, bumpRel as relBump, startActCoil, REL_CATCHUP } from '../js/core/game.js';
+import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, advance, STARVE_HP_PER_HOUR, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1, bumpRel as relBump, startActCoil, REL_CATCHUP } from '../js/core/game.js';
 import { canPrimary, canColGroup, colGroupsOpen, btTarget, COL_GROUPS, priHours, colHours, merMinutesOf } from '../js/story/meridians.js';
 import { sceneView, choose, goTo, wasPicked, isMenuScene, notePicked, seenBefore, noteSeen } from '../js/core/story.js';
 import { againView, skipStep, skipRun, skipPlan, MEMORY_LINES, noFold, SKIP_MAX } from '../js/story/again.js'; // v0.11.35 (P1-a)
 import { medCards, runMed, canMeditate, NO_MEDITATE, isSitChoice, MED_SCREENS } from '../js/core/meditate.js';
 import { defaultMinutes, DEFAULT_MINUTES } from '../js/core/story.js';
 import { coilActive, rewind, endCoil, KEEP_FLAGS, REMEMBER } from '../js/core/coil.js';
-import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskMinutes, runTask, outlook, taskQueue, taskState, setYuki, yukiLane, famTier, QUEUE_MAX, maxSpeed, effectiveSpeed, queueRunNow, queueAdd, queueMove, queueClear, isInstantTask, instantChoice, merChoice, MER_TASK, BT_TASK, SIT_TASK, waitChoice, merLineTask, lineOfTask, isQueueScreen, runsHere, cardSpeed, dayOver } from '../js/core/tasks.js';
+import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskMinutes, taskOutcome, dryOutcome, outcomeOf, sitLoop, sitLoopPlan, sitTaskId, SIT_STOP_TEXT, runTask, taskState, setYuki, yukiLane, famTier, merChoice, MER_TASK, BT_TASK, SIT_TASK, merLineTask, lineOfTask, isQueueScreen, runsHere, cardSpeed } from '../js/core/tasks.js';
+/** v0.11.64: the game has no queue; the bots keep their plan of cards in the save's old queue field (emptied by the Coil screens and a collapse, as the queue was), so they play exactly as before. */
+const planOf = (g) => taskState(g).queue;
+/** v0.11.37 (D-a): card `id` can't run because the day is over (02:00 passed, or it would end past 02:00); the bots' plan stops there, as the queue did. A test helper since v0.11.64. */
+const dayOver = (g, scenes, id) => (nightLock(g) ? !taskCards(g, scenes, id).some((x) => x.id === id && x.status === 'open') : taskCards(g, scenes, id).some((x) => x.id === id && x.status === 'late'));
 
 import { writeFileSync } from 'node:fs';
 import { GAMES, FULL, SHARD, WORKERS, SEED, SENSIBLE, REPORT, STATS_OUT, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
@@ -70,23 +74,29 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
         Object.assign(g.flags, { long: true, forest_day: 2, vday: 2 });
         for (let k = 0; k < 30; k++) g.log.push({ at: g.minutes, scene: hub, lines: ['filler line to make the log heavy'] });
         const cards = taskCards(g, SCENES).filter((c) => c.status === 'open');
-        for (let k = 0; k < 6 && cards.length; k++) taskQueue(g).push(cards[(i * 3 + k * 5) % cards.length].id);
-        setDryClone(true); const a = JSON.stringify([outlook(g, SCENES), cards.map((c) => taskMinutes(g, SCENES, c.id))]);
-        setDryClone(false); const b = JSON.stringify([outlook(g, SCENES), cards.map((c) => taskMinutes(g, SCENES, c.id))]);
+        setDryClone(true); const a = JSON.stringify([cards.map((c) => taskOutcome(g, SCENES, c.id)), cards.map((c) => taskMinutes(g, SCENES, c.id))]);
+        setDryClone(false); const b = JSON.stringify([cards.map((c) => taskOutcome(g, SCENES, c.id)), cards.map((c) => taskMinutes(g, SCENES, c.id))]);
         if (a === b) same++; else if (diff.length < 3) diff.push(`${hub} #${i}`);
     }
-    assert(same === 200, `v0.11.20: the lean dry run = the full copy on 200 queues (${same}; differs: ${diff.join(', ')})`);
+    assert(same === 200, `v0.11.20: the lean dry run = the full copy on 200 screens (${same}; differs: ${diff.join(', ')})`);
 }
 // old state (v1) → empty queue
 { const old = ensureBars(newGame(5)); delete old.tasks; old.v = 1; migrate(old); assert(old.v === SAVE_VERSION && Array.isArray(old.tasks.queue) && old.tasks.queue.length === 0 && Object.keys(old.tasks.fam).length === 0 && old.tasks.yuki.on === false, 'v1 save gets an empty queue and no familiarity'); }
-assert(QUEUE_MAX === 30, 'queue holds 30');
+// v0.11.64 (F): no queue: a saved queue is emptied and a half-filled bar dropped when the save is read; the field stays
+{
+    const o = ensureBars(newGame(6)); o.tasks.queue.push('wilds:6', 'mer:pri'); o.runPart = { id: 'wilds:6', at: o.minutes, frac: 0.4 };
+    const back = deserialize(serialize(o));
+    assert(Array.isArray(back.tasks.queue) && back.tasks.queue.length === 0 && !('runPart' in back) && back.minutes === o.minutes && JSON.stringify(back.james) === JSON.stringify(o.james), 'v0.11.64: a saved queue is emptied and runPart dropped; nothing else changes');
+    const e = ensureBars(newGame(6)); const s0 = serialize(e); assert(serialize(deserialize(s0)) === s0, 'v0.11.64: a save without a queue reads back unchanged');
+}
 // HP 0 during a task (v0.9.4): the Coil ends — queue cleared, the Coil screen
 {
     const g = ensureBars(newGame(9)); g.scene = 'wilds'; g.minutes += 1440 + 120; Object.assign(g.flags, { long: true, forest_day: 2 });
-    g.james.satiety = 0; g.james.hp = 0.5; taskQueue(g).push('wilds:6', 'wilds:6');
+    g.james.satiety = 0; g.james.hp = 0.5; planOf(g).push('wilds:6', 'wilds:6');
     const rest = SCENES.wilds.choices.findIndex((c) => /^Rest/.test(c.text));
     const r = runTask(g, SCENES, `wilds:${rest}`);
-    assert(r.stopped && taskQueue(g).length === 0 && g.scene === 'coil_end' && g.coil.why === 'collapse', `collapse → the Coil screen, queue cleared (${g.scene})`);
+    assert(r.stopped && planOf(g).length === 0 && g.scene === 'coil_end' && g.coil.why === 'collapse', `collapse → the Coil screen, the plan cleared (${g.scene})`);
+    assert(r.lines.some((l) => /You fold up where you stand/.test(l)) && !r.lines.some((l) => /queue/i.test(l)), 'v0.11.64: the collapse text mentions no queue');
 }
 // v0.9.5: every choice takes time in task mode; the Meditate card everywhere
 {
@@ -310,18 +320,12 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     const a = structuredClone(g), b = structuredClone(g);
     runTask(a, SCENES, fire.id); choose(b, SCENES, Number(fire.id.split(':')[1]));
     assert(a.minutes === b.minutes && a.flags.fire === b.flags.fire && a.james.hp === b.james.hp && JSON.stringify(a.james.gu) === JSON.stringify(b.james.gu), 'the fire card = the story choice (time, result, XP)');
-    const q = taskQueue(g); q.push(fire.id, stakes.id); const ol = outlook(g, SCENES);
-    runTask(g, SCENES, q.shift()); runTask(g, SCENES, q.shift());
-    assert(ol.rows[1].end === g.minutes && g.flags.fire && g.flags.stakes, 'camp cards queue and the forecast matches');
+    const o1 = taskOutcome(g, SCENES, fire.id); runTask(g, SCENES, fire.id); const e1 = g.minutes;
+    const o2 = taskOutcome(g, SCENES, stakes.id); runTask(g, SCENES, stakes.id);
+    assert(o1.end === e1 && o2.end === g.minutes && g.flags.fire && g.flags.stakes, 'v0.11.64: camp cards end where their card said');
     const ni = SCENES.camp.choices.findIndex((c) => /^Night falls/.test(c.text));
-    const m0 = g.minutes; const c = structuredClone(g); choose(c, SCENES, ni);
-    assert(waitChoice(SCENES, SCENES.camp.choices[ni], c.minutes - m0, 'camp'), 'Night falls is a wait (plays at once)');
     choose(g, SCENES, ni);
     assert(g.scene === 'night' || g.minutes % 1440 >= 21 * 60, 'Night falls: the clock lands on 21:00 or later');
-    assert(!waitChoice(SCENES, SCENES.camp.choices[0], 999, 'camp') && !waitChoice(SCENES, { text: 'x', to: 'night', combat: () => ({}) }, 999), 'a check, a fight or a choice back to its own scene is never a wait');
-    let waits = 0;
-    for (const [id, sc] of Object.entries(SCENES)) for (const ch of sc.choices || []) if (waitChoice(SCENES, ch, 999, id)) { waits++; assert(!ch.check && !ch.qi && !ch.combat && ch.time == null, `wait ${id} has no check, Qi, fight or time`); }
-    assert(waits >= 20, `waiting choices found (${waits})`);
 }
 // v0.10.1: the Long Forest in task mode — gated behind the first Coil, one season (+1 realm) per card
 {
@@ -341,15 +345,13 @@ assert(QUEUE_MAX === 30, 'queue holds 30');
     assert(g.scene === 'lf_hub' && isTaskHub(g) && coilActive(g), 'the camp is a task screen, inside the Coil');
     const season = taskCards(g, SCENES).find((c) => /^Withdraw for a season/.test(c.label));
     assert(season && season.kind === 'chore' && season.minutes === LF_SEASON_MINUTES && /Mortal Vessel → Foundation/.test(season.label), 'the season card: a chore, 2 h, Mortal Vessel → Foundation');
-    const q = taskQueue(g); q.push(season.id, season.id);
-    const ol = outlook(g, SCENES);
     const m0 = g.minutes;
-    runTask(g, SCENES, q.shift());
+    runTask(g, SCENES, season.id);
     assert(g.james.realm === 1 && g.yuki.realm === 1 && g.james.primaries === 12 && g.james.collaterals === 66 && g.yuki.collaterals === 66 && !g.james.colSealed, 'a season: Foundation, every primary and collateral open, no seal');
     assert(g.james.gu.tier === 1 && g.james.gu.level === 7 && g.james.skills['Convergence Use'].level === 7 && g.yuki.fight.level === 7 && g.yuki.qiUse.level === 7, 'a season lifts the skills to T1 L7');
     assert(g.minutes - m0 === LF_SEASON_MINUTES && g.james.saturation === 0 && g.james.hp === jamesHpMax(g), 'a season takes 2 h, Saturation 0, bars full');
-    runTask(g, SCENES, q.shift());
-    assert(g.james.realm === 2 && ol.rows[1] && ol.rows[1].end === g.minutes, 'two queued seasons: Core Formation, and the forecast matched');
+    const os = taskOutcome(g, SCENES, season.id); runTask(g, SCENES, season.id);
+    assert(g.james.realm === 2 && os.end === g.minutes, 'two seasons: Core Formation, and the card said where it ends');
     for (let i = 0; i < 20; i++) { g.james.satiety = 100; lfSeason(g); }
     assert(g.james.realm === MAX_REALM && g.james.gu.tier === 10 && g.james.gu.level === 10 && g.yuki.qiUse.tier === 10 && g.james.extra8 === 8 && g.james.extraCollaterals === 28 && g.james.junctions === 10, 'the full climb: Heavenly Immortal, T10 L10, every extra meridian');
     assert(!taskCards(g, SCENES).some((c) => /^Withdraw for a season/.test(c.label)), 'no season card at the top of the ladder');
@@ -742,22 +744,21 @@ function play(run, tasks) {
             const stops = v.choices.filter((c) => !c.disabled && (c.index >= 1000 || !isTaskChoice(SCENES, g.scene, c.index)));
             if (!cards.length && !stops.length) { assert(false, `dead end at task hub ${g.scene} (run ${run})`); return false; }
             if (cards.length && (rnd(10) < 8 || !stops.length)) {
-                const q = taskQueue(g);
+                const q = planOf(g);
                 for (let k = 1 + rnd(4); k > 0; k--) q.push(cards[rnd(cards.length)].id);
-                // the outlook's finish times must match what really happens
+                // v0.11.64: each card's dry run (the card's time, end, Fed, HP) must match what really happens
                 const FC = run % FC_EVERY === 0; // v0.11.21
-                const ol = FC ? outlook(g, SCENES) : null;
-                const real = [];
                 while (q.length && isTaskHub(g)) {
                     const id = q.shift();
-                    if (dayOver(g, SCENES, id)) { st.night = (st.night || 0) + 1; real.push({ id, night: true }, ...q.map((x) => ({ id: x, night: true }))); q.length = 0; break; } // v0.11.37 (D-a): the queue waits for the morning (the game's startNext)
-                    if (!taskOpen(g, SCENES, id)) { st.skipped++; real.push({ id, skip: true }); continue; }
+                    if (dayOver(g, SCENES, id)) { st.night = (st.night || 0) + 1; q.length = 0; break; } // v0.11.37 (D-a): the plan stops at the day's end (as the queue did)
+                    if (!taskOpen(g, SCENES, id)) { st.skipped++; continue; }
                     cardsSeen.add(id);
                     const m0 = g.minutes;
                     // v0.11.46 (owner pick B1): also the first time a card runs in this process, so every card's forecast is checked
                     // without luck (a rare card such as dw_hub's "Call it a day" could miss the 1 game in 8); the dry run is on a copy
                     const fc1 = FC || !cardsForecast.has(id);
                     const mins = fc1 ? taskMinutes(g, SCENES, id) : 0;
+                    const oc = FC ? taskOutcome(g, SCENES, id) : null; // v0.11.64 (A1, B1)
                     const card = taskCards(g, SCENES).find((c) => c.id === id);
                     if (card?.check) bands[card.check.band] = (bands[card.check.band] || 0) + 1;
                     const fam0 = taskState(g).fam[id] || 0;
@@ -767,16 +768,11 @@ function play(run, tasks) {
                     st.cards++;
                     if (fc1) { if (g.minutes - m0 === mins || r.stopped) pass++; else assert(false, `dry run predicts ${id} (${mins} vs ${g.minutes - m0})`); }
                     if (!r.stopped) { cardsWhole.add(id); if (fc1) cardsForecast.add(id); }
-                    real.push({ id, end: g.minutes });
-                    if (r.lines.some((l) => /queue is gone/.test(l))) st.collapses++;
+                    if (oc) { if (r.stopped && oc.minutes === mins && !oc.death === (g.scene !== 'coil_end') || (!r.stopped && oc.end === g.minutes && oc.fed === g.james.satiety && oc.hp === g.james.hp && !oc.death)) predicted++; else assert(false, `v0.11.64: ${id}'s dry run = what happens (run ${run}: ${JSON.stringify(oc)} vs ${g.minutes}, ${g.scene})`); }
+                    if (r.lines.some((l) => /Your knees make the decision/.test(l))) st.collapses++;
                     if (Number.isFinite(g.james.hp) && g.james.hp >= 0 && Number.isFinite(g.james.satiety)) pass++; else assert(false, `bars finite after ${id}`);
                 }
                 q.length = 0;
-                if (FC) {
-                    const same = real.every((r, k) => ol.rows[k] && (r.night ? ol.rows[k].night : r.skip ? ol.rows[k].skip : ol.rows[k].end === r.end));
-                    assert(same, `outlook matches the real queue (run ${run})`);
-                    predicted++;
-                }
                 continue;
             }
             const r = choose(g, SCENES, stops[rnd(stops.length)].index);
@@ -857,23 +853,14 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     assert(famTier(0) === 0 && famTier(2) === 1 && famTier(8) === 2 && famTier(18) === 3, 'familiarity tiers at 2 / 8 / 18');
 }
 
-// v0.10.0: the queue edited, meridian sessions, the forecast's death row, starving 1.5 HP an hour, rest and sleep at once
+// v0.10.0: meridian sessions, a card that would end the Coil, starving 1.5 HP an hour, rest and sleep at once (the queue went in v0.11.64)
 {
     const g = ensureBars(newGame(70, { closed: true })); g.scene = 'wilds'; g.minutes = 1440 + 8 * 60; Object.assign(g.flags, { long: true, forest_day: 2 });
-    const q = taskQueue(g); q.length = 0;
-    queueAdd(g, 'a'); queueAdd(g, 'b'); queueRunNow(g, 'c');
-    assert(q.join() === 'c,a,b', 'run now goes to the front, + to the end');
-    queueMove(g, 2, -1); assert(q.join() === 'c,b,a', 'a row moves up');
-    queueMove(g, 0, -1); assert(q.join() === 'c,b,a', 'the top row cannot move up');
-    queueClear(g, true); assert(q.join() === 'c', 'clear keeps the row in progress');
-    queueClear(g, false); assert(q.length === 0, 'clear empties the queue');
-    for (let i = 0; i < QUEUE_MAX; i++) queueAdd(g, 'x'); assert(!queueAdd(g, 'y') && !queueRunNow(g, 'y') && q.length === QUEUE_MAX, 'the queue stops at its limit');
-    q.length = 0;
-    // a meridian session from the queue
+    // a meridian session as a card
     assert(merChoice(g, SCENES) === 0 && taskOpen(g, SCENES, MER_TASK), 'a closed start offers the next primary as a card');
     const m0 = g.minutes;
     const r = runTask(g, SCENES, MER_TASK);
-    assert(g.scene === 'wilds' && g.minutes - m0 === 120 && g.james.primaries === 1 && !r.stopped, 'a meridian sitting from the queue: 2 h, a primary, back on the hub');
+    assert(g.scene === 'wilds' && g.minutes - m0 === 120 && g.james.primaries === 1 && !r.stopped, 'a meridian sitting as a card: 2 h, a primary, back on the hub');
     g.james.qi = 20; runTask(g, SCENES, MER_TASK); g.james.qi = 20;
     assert(merChoice(g, SCENES) >= 0 && taskOpen(g, SCENES, MER_TASK), 'v0.11.2: no daily limit, the card stays');
     g.james.satiety = 10; assert(!taskOpen(g, SCENES, MER_TASK), 'Fed under 20: no meridian card'); g.james.satiety = 70;
@@ -883,28 +870,26 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
         const ids = taskCards(L, SCENES).filter((c) => c.kind === 'mer').map((c) => c.id);
         assert(ids.join() === 'mer:pri,mer:col' && !ids.includes(MER_TASK), `v0.11.13: two meridian cards on the stream (${ids.join()})`);
         assert(medCards(L, SCENES).filter((c) => /^med:mer:/.test(c.id)).map((c) => c.task).join() === 'mer:pri,mer:col', 'v0.11.13: the Meditate cards carry the queue ids');
-        assert(taskMinutes(L, SCENES, 'mer:col') === 120 && !isInstantTask(L, SCENES, 'mer:col') && lineOfTask('mer:col') === 'col' && lineOfTask('mer:next') === null, 'v0.11.13: the collateral card: 2 h in the forecast, never at once');
-        queueAdd(L, 'mer:col'); queueAdd(L, 'mer:col'); queueAdd(L, 'mer:pri');
-        const ol = outlook(L, SCENES), real = JSON.parse(JSON.stringify(L)), got = [];
-        for (const id of [...taskQueue(real)]) { taskQueue(real).shift(); runTask(real, SCENES, id); got.push(real.minutes); }
-        assert(ol.rows.map((x) => x.end).join() === got.join(), `v0.11.13: the forecast = what happens (${ol.rows.map((x) => x.end).join()} / ${got.join()})`);
+        assert(taskMinutes(L, SCENES, 'mer:col') === 120 && lineOfTask('mer:col') === 'col' && lineOfTask('mer:next') === null, 'v0.11.13: the collateral card: 2 h in the forecast, never at once');
+        const real = JSON.parse(JSON.stringify(L)), said = [], got = [];
+        for (const id of ['mer:col', 'mer:col', 'mer:pri']) { said.push(taskOutcome(real, SCENES, id).end); runTask(real, SCENES, id); got.push(real.minutes); }
+        assert(said.join() === got.join(), `v0.11.13: each card ends where it said (${said.join()} / ${got.join()})`);
         assert(real.james.collaterals === 9 && real.james.primaries === 4 && real.tasks.use['act:mer'] === 3 && real.scene === 'stream', `v0.11.13: two collateral sittings open group 1 with 3 primaries; v0.11.15: the third sitting (×1.6) opens the 4th primary (${real.james.collaterals}, ${real.james.primaries})`);
         L.james.satiety = 19; const lk = medCards(L, SCENES).filter((c) => /^med:mer:/.test(c.id));
         assert(lk.length === 2 && lk.every((c) => !c.open && !c.task && /Too hungry/.test(c.reason)) && !taskOpen(L, SCENES, 'mer:pri'), 'v0.11.13: under Fed 20 both show, locked, with the reason');
         L.james.satiety = 70; L.james.qi = 1; assert(medCards(L, SCENES).filter((c) => /^med:mer:/.test(c.id)).every((c) => !c.open && /2 Qi/.test(c.reason)), 'v0.11.13: under 2 Qi: locked'); L.james.qi = 25;
-        const o = JSON.parse(JSON.stringify(L)); taskQueue(o).push(MER_TASK);
-        assert(taskOpen(o, SCENES, MER_TASK) && runTask(o, SCENES, MER_TASK) && o.james.primaries === 3 && o.james.merWork > 0, 'v0.11.13: a saved mer:next still runs (primaries first)');
+        const o = JSON.parse(JSON.stringify(L));
+        assert(taskOpen(o, SCENES, MER_TASK) && runTask(o, SCENES, MER_TASK) && o.james.primaries === 3 && o.james.merWork > 0, 'v0.11.13: mer:next still runs (primaries first)');
         // v0.11.14: no Meditate on a story screen; on Act 1's resting places the Meditate cards queue
         const a = ensureBars(newGame(77, { closed: true })); a.scene = 'arrival'; a.james.qi = 25; a.james.satiety = 70;
-        assert(!medCards(a, SCENES).length && !isQueueScreen(a, SCENES) && !taskCards(a, SCENES).length, 'v0.11.14: the arrival has no Meditate and no queue');
+        assert(!medCards(a, SCENES).length && !isQueueScreen(a, SCENES) && !taskCards(a, SCENES).length, 'v0.11.14: the arrival has no Meditate and no task cards');
         const rc = ensureBars(newGame(80, { closed: true })); rc.scene = 'rt_camp'; rc.james.qi = 30; rc.james.satiety = 70;
         const rm = medCards(rc, SCENES);
         assert(isQueueScreen(rc, SCENES) && rm.find((c) => c.id === 'med:mer:pri')?.task === 'mer:pri' && rm.find((c) => c.id === 'rt_camp:3')?.task === 'rt_camp:3', 'v0.11.19: rt_camp is a task screen: the primary and its own sit card carry queue ids');
         assert(isTaskHub(rc) && taskCards(rc, SCENES).some((c) => c.id === 'rt_camp:3') && taskCards(rc, SCENES).some((c) => c.kind === 'door' && /fire/.test(c.label)) && taskCards(rc, SCENES).some((c) => c.id === 'mer:pri'), 'v0.11.19: rt_camp: its chores, doors and Meditate cards are cards');
-        queueAdd(rc, 'mer:pri'); queueAdd(rc, 'rt_camp:3');
-        const ro = outlook(rc, SCENES), rr = JSON.parse(JSON.stringify(rc)), rgot = [];
-        for (const id of [...taskQueue(rr)]) { taskQueue(rr).shift(); runTask(rr, SCENES, id); rgot.push(rr.minutes); }
-        assert(ro.rows.map((x) => x.end).join() === rgot.join() && rr.scene === 'rt_camp' && rr.james.primaries === 1, `v0.11.19: rt_camp runs its queue as forecast (${ro.rows.map((x) => x.end)} vs ${rgot})`);
+        const rr = JSON.parse(JSON.stringify(rc)), rsaid = [], rgot = [];
+        for (const id of ['mer:pri', 'rt_camp:3']) { rsaid.push(taskOutcome(rr, SCENES, id).end); runTask(rr, SCENES, id); rgot.push(rr.minutes); }
+        assert(rsaid.join() === rgot.join() && rr.scene === 'rt_camp' && rr.james.primaries === 1, `v0.11.19: rt_camp's cards run as their cards said (${rsaid} vs ${rgot})`);
         let threw = false; try { runTask(a, SCENES, SIT_TASK); } catch { threw = true; }
         assert(threw, 'v0.11.14: no queued work on a story screen');
         const bq = ensureBars(newGame(81)); bq.scene = 'rt_camp'; bq.james.qi = 30; bq.james.saturation = 96;
@@ -932,49 +917,75 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
         const lone = ensureBars(newGame(75, { closed: true })); lone.scene = 'arrival'; lone.james.qi = 25;
         assert(!taskOpen(lone, SCENES, SIT_TASK) && !medCards(lone, SCENES).length, 'v0.11.14: no sit on a story screen');
     }
-    // the forecast finds the row where a bad queue starves
+    // v0.11.64 (owner 02:07, pick C1): Cultivate until the limit = that many single sits; its stops
+    {
+        const mk = (seed, scene, set) => { const x = ensureBars(newGame(seed, { closed: true })); x.scene = scene; x.minutes = 1440 + 8 * 60; Object.assign(x.flags, { long: true, forest_day: 2 }); x.james.satiety = 90; x.james.qi = jamesQiMax(x); Object.assign(x.james, set || {}); return x; };
+        const same = (a, b) => a.minutes === b.minutes && JSON.stringify(a.james) === JSON.stringify(b.james) && JSON.stringify(a.yuki) === JSON.stringify(b.yuki) && JSON.stringify(a.tasks) === JSON.stringify(b.tasks) && JSON.stringify(a.inventory) === JSON.stringify(b.inventory);
+        for (const [scene, seed] of [['stream', 90], ['wilds', 91], ['camp', 92], ['ashfall', 93]]) {
+            const x = mk(seed, scene); if (scene === 'ashfall') x.minutes = 4 * 1440 + 8 * 60;
+            const p = sitLoopPlan(x, SCENES), id = sitTaskId(x, SCENES);
+            const taps = JSON.parse(JSON.stringify(x)); for (let k = 0; k < p.sits; k++) runTask(taps, SCENES, id);
+            const r = sitLoop(x, SCENES);
+            assert(p.sits >= 2 && r.sits === p.sits && r.minutes === p.minutes && r.qi === p.qi && same(x, taps), `C1 (${scene}): the loop = ${p.sits} single taps of ${id}, and the button's numbers are what happens`);
+            assert(r.stop === 'qi' && x.james.qi < 10, `C1 (${scene}): from a full bar Qi runs out first (${r.stop}, Qi ${x.james.qi})`);
+        }
+        const s1 = mk(94, 'stream', { realm: 1, saturation: 85, qi: 999 }); const r1 = sitLoop(s1, SCENES);
+        assert(r1.stop === 'sat' && s1.james.saturation === 95 && r1.sits === 2, `C1: it stops at the breakthrough point, 95% (${s1.james.saturation}%, ${r1.stop})`);
+        const s2 = mk(95, 'stream'); s2.minutes = 2 * 1440 + 30; const r2 = sitLoop(s2, SCENES); // 00:30: one sit ends 01:30, a second would end past 02:00
+        assert(r2.stop === 'night' && r2.sits === 1 && !nightLock(s2) && s2.minutes <= 2 * 1440 + 120, `C1: it stops before a sit that would end past 02:00 (${r2.sits} sits, ${r2.stop})`);
+        const s3 = mk(96, 'stream'); s3.james.satiety = 4; const r3 = sitLoop(s3, SCENES); // a sit costs 3 Fed: one leaves 1, a second would leave none
+        assert(r3.stop === 'fed' && r3.sits === 1 && s3.james.satiety > 0, `C1: it stops before a sit that would leave Fed at 0 (${r3.sits} sits, Fed ${s3.james.satiety})`);
+        const s4 = mk(97, 'stream', { qi: 15 });
+        assert(sitLoopPlan(s4, SCENES).sits === 1 && !medCards(s4, SCENES).some((c) => c.id === 'med:sitall'), 'C1: one sit only: no loop card (the plain sit does it)');
+        const s5 = mk(98, 'stream'); const card = medCards(s5, SCENES).find((c) => c.id === 'med:sitall');
+        assert(card && card.open && /^Cultivate until the limit: \d+ sits, .+, [\d.]+ Qi → Saturation [\d.]+% \(then Qi runs out\)\.$/.test(card.label) && card.minutes === card.plan.minutes, `C1: the button shows sits, time, Qi and Saturation (${card?.label})`);
+        const s5b = JSON.parse(JSON.stringify(s5)); const rm = runMed(s5, SCENES, 'med:sitall');
+        assert(!rm.moved && s5.minutes - s5b.minutes === card.minutes && s5.james.saturation === card.plan.saturation && new RegExp(`^${card.plan.sits} sits`).test(rm.lines[0]), `C1: the card does what it said (${rm.lines[0]})`);
+        const s6 = mk(99, 'stream'); s6.minutes = 1440 + 3 * 60; assert(!medCards(s6, SCENES).some((c) => c.id === 'med:sitall'), 'C1: no loop at night (from 02:00 only the night)');
+        assert(Object.keys(SIT_STOP_TEXT).every((k) => typeof SIT_STOP_TEXT[k] === 'string'), 'C1: every stop has its words');
+    }
+    // v0.11.64 (the Fable review): every open Meditate card and task card on every resting place, at every hour, can be played on a copy (the screen draws each card's dry run); a screen that hides its own Cultivate hides it in Meditate too
+    {
+        let tried = 0; const bad = [];
+        for (const sc of MED_SCREENS) for (let hh = 0; hh < 24; hh++) for (const day of [2, 5, 12, 20]) {
+            const x = ensureBars(newGame(5, { closed: true })); x.scene = sc; x.minutes = (day - 1) * 1440 + hh * 60 + 30; Object.assign(x.flags, { long: true, forest_day: 2, vday: 2, lf_active: sc === 'lf_hub' }); x.james.satiety = 90; x.james.qi = jamesQiMax(x);
+            let med = [], cards = [];
+            try { med = medCards(x, SCENES); cards = isTaskHub(x) ? taskCards(x, SCENES).filter((c) => c.status === 'open') : []; } catch (e) { bad.push(`${sc}@${hh}: lists ${e.message}`); continue; }
+            const ids = new Set([...med.filter((c) => c.open && c.task).map((c) => c.task), ...cards.map((c) => c.id)]);
+            for (const id of ids) { tried++; try { taskOutcome(x, SCENES, id); } catch (e) { bad.push(`${sc}@${hh}: ${id} ${e.message}`); } }
+            for (const c of med.filter((m) => m.open && !m.task && m.id !== 'med:bt' && m.id !== 'med:push')) { tried++; try { dryOutcome(x, (k) => runMed(k, SCENES, c.id)); } catch (e) { bad.push(`${sc}@${hh}: ${c.id} ${e.message}`); } }
+        }
+        assert(!bad.length && tried > 1000, `v0.11.64: every open card on every resting place at every hour plays on a copy (${tried} tried; ${bad.slice(0, 4).join(' | ')})`);
+        const bite = ensureBars(newGame(7)); bite.scene = 'coil_end'; bite.coil.why = 'choice'; const sv = ensureBars(newGame(7)); sv.scene = 'coil_end'; sv.coil.why = 'collapse'; sv.james.satiety = 0;
+        assert(outcomeOf(bite, bite.minutes).death === null && outcomeOf(sv, sv.minutes).death === 'hunger', 'v0.11.64: "Bite the tail" is no death; a collapse at Fed 0 is starving');
+        const w = ensureBars(newGame(5, { closed: true })); w.scene = 'wilds'; Object.assign(w.flags, { long: true, forest_day: 2 }); w.minutes = 1440 + 20 * 60 + 30; w.james.qi = jamesQiMax(w);
+        assert(!medCards(w, SCENES).some((c) => c.id === 'wilds:5' || c.id === 'med:sitall') && !taskCards(w, SCENES).some((c) => c.id === 'wilds:5'), 'v0.11.64: the wilds hide their Cultivate at 20:30, so Meditate offers neither it nor the loop');
+    }
+    // v0.11.64 (B1): the card that would starve James says so (its dry run), and it does what it said
     const h = ensureBars(newGame(71, { closed: true })); h.scene = 'wilds'; h.minutes = 1440 + 7 * 60; Object.assign(h.flags, { long: true, forest_day: 2 });
     h.james.satiety = 3; h.james.hp = 2; h.inventory = {};
     const rest = SCENES.wilds.choices.findIndex((c) => /^Rest in the shade/.test(c.text));
-    for (let i = 0; i < 8; i++) queueAdd(h, `wilds:${rest}`);
-    const ol = outlook(h, SCENES);
-    assert(ol.death && ol.death.cause === 'hunger', `the forecast sees James starve (${JSON.stringify(ol.death)})`);
-    assert(ol.rows.slice(ol.death.row + 1).every((x) => x.dead) && ol.rows[ol.death.row].death === 'hunger', 'rows after the death row are never reached');
-    const real = JSON.parse(JSON.stringify(h)); let n = 0;
-    while (taskQueue(real).length && real.scene === 'wilds' && n++ < 20) { const id = taskQueue(real).shift(); runTask(real, SCENES, id); }
-    assert(real.scene === 'coil_end' && real.minutes === ol.death.at, `the real run starves where the forecast said (${real.minutes} vs ${ol.death.at})`);
+    let oc = null, n = 0;
+    while (h.scene === 'wilds' && n++ < 20) { oc = taskOutcome(h, SCENES, `wilds:${rest}`); if (oc.death) break; runTask(h, SCENES, `wilds:${rest}`); }
+    assert(oc && oc.death === 'hunger', `v0.11.64: a rest at Fed 0 and 2 HP: the card says James starves (${JSON.stringify(oc)})`);
+    const hc = JSON.parse(JSON.stringify(h)); runTask(hc, SCENES, `wilds:${rest}`);
+    assert(hc.scene === 'coil_end' && hc.minutes === oc.end && h.scene === 'wilds', `v0.11.64: the real card starves where it said (${hc.minutes} vs ${oc.end}); the dry run changed nothing`);
     // starving: 1.5 HP an hour in task mode, whatever the step size
     const a1 = ensureBars(newGame(72)); a1.james.satiety = 0; a1.james.hp = 20;
     for (let i = 0; i < 24; i++) advance(a1, 10);
     const a2 = ensureBars(newGame(72)); a2.james.satiety = 0; a2.james.hp = 20; advance(a2, 240);
     assert(STARVE_HP_PER_HOUR === 1.5 && a1.james.hp === 14 && a2.james.hp === 14, `4 starving hours cost 6 HP in 10-min steps and in one step (${a1.james.hp}, ${a2.james.hp})`);
-    // rest and sleep: no bar, the clock still moves
-    assert(isInstantTask(g, SCENES, `wilds:${rest}`) && instantChoice({ text: 'Sleep.' }) && !instantChoice({ text: 'Stay up with Mei Lin after the others sleep.' }) && !instantChoice({ text: 'Cultivate one sit before sleep.', do: () => [] }), 'rest and sleep are instant; staying up and cultivating are not');
-    assert(taskMinutes(g, SCENES, `wilds:${rest}`) === 60, 'an instant rest still passes its hour');
+    assert(taskMinutes(g, SCENES, `wilds:${rest}`) === 60, 'a rest passes its hour');
 }
-// status clock with seconds (v0.9.9)
+// v0.11.64: no game speeds (the speed gates went; their flags `spd_pro` / `spd_a1` are still set and kept, never renamed)
 {
-    assert(clockLabelSec({ flags: {} }, 0) === 'Day 1, 00:00:00', 'clock: Day 1, 00:00:00');
-    assert(clockLabelSec({ flags: {} }, 14 * 60 + 5.5) === 'Day 1, 14:05:30', 'clock: seconds from the fraction');
-    assert(clockLabelSec({ flags: {} }, 1440 + 59.9999) === 'Day 2, 00:59:59', 'clock: never :60');
-    assert(clockLabelSec({ flags: { lf_active: true } }, 100) === 'The Long Forest', 'clock: the Long Forest label stays');
-}
-// speed gate (v0.9.8, 3c-3)
-{
-    const g = ensureBars(newGame(5, { closed: true }));
-    assert(maxSpeed(g) === 1, 'a new game allows ×1');
-    for (const e of ['fought', 'bluff', 'paid']) { g.flags.ending = e; assert(maxSpeed(g) === 2, `a won tribute (${e}) opens ×2`); }
-    g.flags.ending = 'lost'; assert(maxSpeed(g) === 2, 'a lost tribute opens ×2 too (v0.11.31, P3-b)');
-    assert(maxSpeed(g, true) === 10, 'test speeds open ×10');
-    g.flags.ending = 'fought';
-    assert(effectiveSpeed(g, 5) === 2 && effectiveSpeed(g, 0) === 0 && effectiveSpeed(g, 1) === 1 && effectiveSpeed(g, 10, true) === 10, 'a stored ×5 runs at the gate; pause stays pause');
+    const T = await import('../js/core/tasks.js');
+    assert(!('maxSpeed' in T) && !('effectiveSpeed' in T) && !('MS_PER_GAME_HOUR' in T) && !('QUEUE_MAX' in T) && !('outlook' in T) && !('queueAdd' in T) && !('taskQueue' in T), 'v0.11.64: no speeds, no real-time clock, no queue in the rules');
     for (const o of ['victory', 'taken']) {
         const h = ensureBars(newGame(6)); Object.assign(h.flags, { ending: o === 'taken' ? 'lost' : 'bluff', a1_outcome: o });
         goTo(h, SCENES, 'a1_end');
-        assert(h.flags.spd_a1 === true && maxSpeed(h) === 5, `reaching a1_end (${o}) opens ×5`);
+        assert(h.flags.spd_a1 === true, `reaching a1_end (${o}) still sets its old flag`);
     }
-    const old = ensureBars(newGame(7)); Object.assign(old.flags, { ending: 'paid', a1_outcome: 'accord' }); old.scene = 'a1_end';
-    assert(maxSpeed(old) === 5, 'an old save already at the end of Act 1 has ×5');
 }
 // v0.11.32 (P2-a): picked choices are recorded per save, kept across every rewind, never in a dry run's copy
 {
@@ -1054,7 +1065,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     const w0 = JSON.stringify(k.wake);
     const v = sceneView(k, SCENES);
     assert(JSON.stringify(k.wake) === w0, 'skip: looking ahead to the evening leaves the clock state alone');
-    assert(!oneOffLeft(k, SCENES, 'ashfall') && ids(k).includes(`ashfall:${ci}`) && isInstantTask(k, SCENES, `ashfall:${ci}`), 'skip: shown once the one-offs are done, at once');
+    assert(!oneOffLeft(k, SCENES, 'ashfall') && ids(k).includes(`ashfall:${ci}`), 'skip: shown once the one-offs are done, at once');
     assert(!v.choices.some((c) => /^Evening/.test(c.label)), 'skip: the evening exit not yet at 08:00');
     runTask(k, SCENES, `ashfall:${ci}`);
     assert(k.scene === 'ashfall' && clockParts(k.minutes).day === 5 && clockParts(k.minutes).hh === 16 && clockParts(k.minutes).mm === 0, 'skip: the clock at 16:00 the same day, still on the hub');
@@ -1070,24 +1081,24 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     k.minutes = 5 * 1440 + 3 * 60; Object.assign(k.flags, { 'oo:wen_lesson': 2 });
     assert(!SCENES.ashfall.choices[ci].show(k), 'skip: never between 00:00 and 04:00');
 }
-// v0.11.31 (P3-b): an open speed gate stays open across every rewind
+// v0.11.31 (P3-b): the speed gates' flags stay across every rewind (the speeds went in v0.11.64; the flags are kept)
 {
     const p = ensureBars(newGame(8, { closed: true }));
     assert(!KEEP_FLAGS.includes('ending') && KEEP_FLAGS.includes('spd_pro') && KEEP_FLAGS.includes('spd_a1'), 'gates: the gate flags are kept, the tribute outcome is not');
     goTo(p, SCENES, 'collectors_lost');
-    assert(p.flags.ending === 'lost' && maxSpeed(p) === 2, 'gates: a lost tribute opens ×2');
+    assert(p.flags.ending === 'lost', 'gates: a lost tribute');
     endCoil(p, 'tribute', 'collectors_lost'); rewind(p);
-    assert(!p.flags.ending && p.flags.spd_pro === true && maxSpeed(p) === 2, 'gates: rewinding a lost tribute keeps ×2');
+    assert(!p.flags.ending && p.flags.spd_pro === true, 'gates: rewinding a lost tribute keeps its flag');
     rewind(p);
-    assert(p.flags.spd_pro === true && maxSpeed(p) === 2, 'gates: ×2 survives a second rewind');
+    assert(p.flags.spd_pro === true, 'gates: the flag survives a second rewind');
     const q = ensureBars(newGame(9, { closed: true }));
     endCoil(q, 'choice'); rewind(q);
-    assert(!q.flags.spd_pro && maxSpeed(q) === 1, 'gates: a rewind before the tribute stays ×1');
+    assert(!q.flags.spd_pro, 'gates: a rewind before the tribute sets no flag');
     for (const to of ['act', 'game']) {
         const h = ensureBars(newGame(10)); Object.assign(h.flags, { ending: 'bluff' }); startActCoil(h);
         h.flags.a1_outcome = 'victory'; goTo(h, SCENES, 'a1_end');
         rewind(h, { to });
-        assert(h.flags.spd_a1 === true && maxSpeed(h) === 5, `gates: ×5 survives the rewind to the start of ${to === 'act' ? 'Act 1' : 'the whole game'}`);
+        assert(h.flags.spd_a1 === true, `gates: the Act 1 flag survives the rewind to the start of ${to === 'act' ? 'Act 1' : 'the whole game'}`);
         assert(to === 'act' ? h.flags.ending === 'bluff' : (!h.flags.ending && h.scene !== 'a1_end' && (h.coil.act || 0) === 0), `gates: the ${to} rewind otherwise resets as before`);
     }
 }
@@ -1171,9 +1182,9 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     const lm = medCards(l, SCENES);
     assert(lm.length === 1 && lm[0].id === 'med:push', `D: from 02:00 Meditate offers only Push through (${lm.map((m) => m.id).join(', ')})`);
     assert(shownIx(l, /^Evening\. Go home/), 'D: the evening exit (a story stop) is never blocked');
-    // a card that would end past 02:00 doesn't start; the queue waits
+    // a card that would end past 02:00 doesn't start
     const e = at(3704, 'rt_camp', 20 * 1440 + 105); e.james.qi = 999; // 01:45 by the fire (its Cultivate has no hour of its own)
-    const ea = at(3714, 'ashfall', 4 * 1440 + 105); ea.james.qi = 999; const em = medCards(ea, SCENES);
+    const ea = at(3714, 'stream', 1440 + 105); ea.james.qi = 999; const em = medCards(ea, SCENES); // v0.11.64: the stream (Ashfall hides its own Cultivate after 19:00, and so does Meditate now)
     assert(em.some((m) => m.late) && em.every((m) => m.id === 'med:push' || (m.late && !m.open && m.tag === 'ends past 02:00')), `D-a: at 01:45 a sit or a meridian that would end past 02:00 is locked with its reason (${em.map((m) => m.id + ':' + m.tag).join(', ')})`);
     const late = taskCards(e, SCENES).filter((c) => c.status === 'late');
     const okc = taskCards(e, SCENES).filter((c) => c.status === 'open');
@@ -1182,9 +1193,6 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     if (late.length) {
         const id = late[0].id;
         assert(!taskOpen(e, SCENES, id) && dayOver(e, SCENES, id), 'D-a: a late card is not open; the day is over for it');
-        taskQueue(e).push(id, id); const ol = outlook(e, SCENES);
-        assert(ol.rows.length === 2 && ol.rows.every((r) => r.night), 'D-a: the forecast shows a late row and everything after it as waiting for the morning');
-        taskQueue(e).length = 0;
     }
     const bq = at(3705, 'ashfall', 4 * 1440 + 115); bq.james.realm = 1; bq.james.saturation = 100;
     assert(taskCards(bq, SCENES).some((c) => c.id === BT_TASK && c.status === 'open'), 'D-a: the breakthrough is exempt (it is rest)');
@@ -1205,11 +1213,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
         const sitChore = taskCards(v, SCENES).some((c) => /^Cultivate/.test(c.label) && c.status === 'open');
         assert(sitUseless(v) === useless && sitCard === !useless && (!useless || !sitChore), `B2: realm ${r}: sit gain ${sitGain(v)}%, the Cultivate card ${useless ? 'hidden' : 'shown'}`);
     }
-    // C: what happens at once
-    for (const t of ['Eat something.', 'Cook and eat.', 'Chew a ghost-gill (+8 HP).', 'Eat at the communal pot.', 'Eat it raw. Civilisation is a state of mind.']) assert(instantChoice({ text: t, to: 'x' }), `C2: "${t}" at once`);
-    assert(!instantChoice({ text: 'Train.', to: 'x', time: 10 }), 'C5: work keeps its bar');
-    const ex = SCENES.lf_exit.choices[0];
-    assert(instantChoice(ex) && waitChoice(SCENES, ex, 2275, 'lf_exit'), 'C1 / A1: the Long Forest walk toward the smoke happens at once (was a 37 h bar)');
+    // C: what happens at once (since v0.11.64 every card does)
     // A1: the Long Forest's second exit, back where he walked in
     const lf = ensureBars(newGame(3720, { closed: true })); lf.coil.n = 2; lf.scene = 'clearing'; lf.minutes = 10 * 60;
     const ent = choiceIx(lf, /^Stay lost/); assert(ent >= 0, 'A1: the clearing offers the Long Forest on Coil 2');
@@ -1218,7 +1222,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     while (lf.scene !== 'lf_hub') choose(lf, SCENES, 0);
     advance(lf, 3 * 1440); lf.inventory = {}; lf.james.hp = 1; lf.james.satiety = 90;
     const back = choiceIx(lf, /^Go back the way you came/);
-    assert(back >= 0 && shownIx(lf, /^Go back the way you came/) && SCENES.lf_hub.choices[back].instant, 'A1: the Long Forest offers the way back, at once');
+    assert(back >= 0 && shownIx(lf, /^Go back the way you came/) && !SCENES.lf_hub.choices[back].combat, 'A1: the Long Forest offers the way back (at once, as every choice since v0.11.64)');
     choose(lf, SCENES, back);
     assert(lf.scene === 'clearing' && !lf.flags.lf_active && lf.minutes >= at0 && lf.minutes <= at0 + DEFAULT_MINUTES.move && lf.james.hp === jamesHpMax(lf) && LF_STOCK.every((id) => lf.inventory[id] === itemCap(id)), `A1: back in the clearing, the clock as he left it (${clockParts(lf.minutes).day}, ${lf.minutes - at0} min walk), bars and hammerspace full`);
     assert(shownIx(lf, /^Stay lost/), 'A1: the Long Forest can be entered again from there');
@@ -1260,7 +1264,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     const fe = at(3742, 'ashfall', 4 * 1440 + 110); addFood(fe); fe.james.satiety = 20; // 01:50
     const fec = taskCards(fe, SCENES).find((c) => /^Eat something/.test(c.label));
     assert(fec && fec.status === 'open', `review: eating is never locked as late (01:50: ${fec?.status})`);
-    fe.minutes = 4 * 1440 + 130; assert(fec && !dayOver(fe, SCENES, fec.id) && taskOpen(fe, SCENES, fec.id), 'review: at 02:10 a queued meal still runs');
+    fe.minutes = 4 * 1440 + 130; assert(fec && !dayOver(fe, SCENES, fec.id) && taskOpen(fe, SCENES, fec.id), 'review: at 02:10 a meal still runs');
     const dm = at(3743, 'ashfall', 4 * 1440 + 105); dm.james.qi = 999; dm.james.primaries = 3;
     const dmed = medCards(dm, SCENES), dmIds = new Set(dmed.filter((m) => m.task).map((m) => m.task));
     const lateHub = taskCards(dm, SCENES).filter((c) => c.status === 'late');
@@ -1371,7 +1375,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     for (const id of MED_SCREENS) { const s = ensureBars(newGame(4603)); s.scene = id; s.minutes = 2 * 1440 + 14 * 60; s.james.qi = 1; s.flags.long = true; if (!canMeditate(s, SCENES)) continue; assert(medCards(s, SCENES).some((c) => c.id === 'med:qi' && c.open), `Q1: the gather card on ${id}`); }
     const late = ensureBars(newGame(4604)); late.scene = 'camp'; late.minutes = 1440 + 90; late.james.qi = 1; // 01:30: an hour would end past 02:00
     assert(medCards(late, SCENES).some((c) => c.id === 'med:qi' && !c.open && c.late), 'Q1: at 01:30 the gather card is locked (ends past 02:00)');
-    assert(isInstantTask(g, SCENES, T.QI_TASK) === false && T.isMedTask(T.QI_TASK), 'Q1: a bar, and a Meditate card that queues on the resting places');
+    assert(T.isMedTask(T.QI_TASK), 'Q1: a bar, and a Meditate card that queues on the resting places');
 }
 // v0.11.46: the Blackroot camp (and the other toHour scenes) no longer jump the clock forward when entered before 06:00
 {
@@ -1442,7 +1446,7 @@ console.log(`  deaths, prologue (HP 0 or a beast): ${dl(deaths.pro, 'pro')}`);
 console.log(`  deaths, Act 1: ${dl(deaths.a1, 'a1')}`);
 console.log(`  Meditate: ${medStats.mer} meridian screens, ${medStats.bt} breakthroughs, ${medStats.warn} seal warnings; Act 1: ${medStats.a1bites} rewinds at Shen Qiu, ends on ${JSON.stringify(Object.fromEntries(Object.entries(medStats.a1coils).sort(([a], [b]) => a - b)))}`);
 assert(!FULL || medStats.a1bites >= 5, `bots rewind Act 1 and reach its end (${medStats.a1bites})`);
-console.log(`  ${stats.tasks.cards} cards run, ${stats.tasks.skipped} skipped, ${stats.tasks.collapses} collapses (HP 0), ${predicted} queues predicted (1 game in ${FC_EVERY}), ${cardsSeen.size}/${all.size} cards played`);
+console.log(`  ${stats.tasks.cards} cards run, ${stats.tasks.skipped} skipped, ${stats.tasks.collapses} collapses (HP 0), ${predicted} cards predicted by their dry run (1 game in ${FC_EVERY}), ${cardsSeen.size}/${all.size} cards played`);
 assert(badBars === 0, `no NaN / Infinity bar at the end of a bot game (${badBars})`);
 if (STATS_OUT) writeFileSync(STATS_OUT, JSON.stringify({ games: GAMES, deaths, byCoil, fights: fightStats, badBars, seen: touchedOut() })); // v0.11.3: for tools/sanity.mjs
 console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FULL ? '' : ' (quick: coverage logged, not checked)'}`);

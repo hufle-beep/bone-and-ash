@@ -40,7 +40,7 @@ Targets: the first Coil's deadline fight about 30% win, the third about 80%; a s
 ## Selene's mechanics, mapped
 | Selene | Bone and Ash | Start numbers |
 |---|---|---|
-| Timed tasks, tap or + to queue | Hub choices become task cards with a bar; the game time a choice takes becomes its length; queue of 30 rows | 1 game hour = 3 s at ×1; ×2 and ×5 unlock per act; the clock stops when nothing runs |
+| Timed tasks, ~~tap or + to queue~~ tap to do (v0.11.64) | Hub choices become task cards; the game time a choice takes becomes its length; ~~queue of 30 rows~~ | ~~1 game hour = 3 s at ×1; ×2 and ×5 unlock per act~~ **v0.11.64 (owner 2026-11-08 02:04, picks 10:58): no timer, no speeds, no queue: every card resolves at once and moves the clock by its time; each card shows its length and the clock it ends; a card that would end the Coil asks for a second tap** |
 | Energy and death | Fed drains all the time; HP is hit by risky tasks and fights; both at zero = collapse = the Coil ends | Fed −3/h (as now); task HP loss ÷ (1 + 3 × familiarity fraction) |
 | Familiarity | Per task: faster, safer, better loot. **Intuitive Aptitude:** each setback makes the next try 0.5 easier, up to 2 (the engine's rule K says a first try −2; the game's fork since v0.9.2) | Speed = 1 + 9 × min(1, done ÷ need), up to ×10; Practised ×2, Skilled ×5, Mastered ×10 (v0.11.15: smooth between the tiers, need 18; also the sit, meridian work and the breakthrough, each by its own use) |
 | Jobs | Run in **Yuki's lane**, next to James: hunt, scout, guard camp; later drying racks, herb loft, clinic, the grove | A job runs until its stock is full |
@@ -53,17 +53,18 @@ Targets: the first Coil's deadline fight about 30% win, the third about 80%; a s
 ## The screen
 The story becomes the stops; tasks fill the days between them. Art plate, ink look and prose panel stay.
 
-- **Header:** Coil N, Day and hour, the deadline ("Tribute in 3 days 4 h"), speed; HP, Fed, Qi/Convergence, Saturation; the Now bar (James) and Yuki's bar; the Outlook line ("Fed runs out Day 5 14:00").
+- **Header:** Coil N, Day and hour, the deadline ("Tribute in 3 days 4 h"), ~~speed~~; HP, Fed, Qi/Convergence, Saturation; ~~the Now bar (James) and Yuki's bar; the Outlook line ("Fed runs out Day 5 14:00")~~. *(v0.11.64: the status bar, HP / Convergence / Fed / clock, pinned at the very top of the Story and fight screens; no bars, no outlook: each card shows where it ends; Yuki's lane says how much of James's time is left until her haul.)*
 - **Tabs:** Story (scene and choices when a stop is open, otherwise the arc's task cards: jobs, drills, tasks, locked cards with "opens when…"), Queue (finish times, "Fed runs out here", presets, skip, drag), Map (arcs, unreached as "?"), James (the engine status block), Mastery (familiarity, threads), Archive (Insights, Coil marks, "x of y"), Journal (story beats and quests). Saves, Settings and FAQ under ☰.
 - **Story stops** pause the clock. Some are timed (the scream on Day 4, night attacks, Shen Qiu), some opened by a task (first bone-field visit, the ship log). Choices show their check, `[GU 2.5 vs DC 4]`. Known stops can be skimmed ("You remember this one").
 - **The Coil screen** (Selene's death screen): what this Coil gained, Insights found, threads close to waking, what James remembers, "Same queue again".
 
 ## Cultivation by time (v0.11.2, owner 2026-11-06; speed by use since v0.11.15)
 In Incremental Mode cultivation is timed work, like Selene's tasks. **Since v0.11.15 (B1-b) every activity speeds up with its own use**, kept across Coils: speed = 1 + 9 × (uses ÷ N), up to ×10 — cards N 18 (the same as the tiers ×2 / ×5 / ×10 at 2 / 8 / 18, smooth in between), the sit N 30, meridian work N 30 (a sitting), the breakthrough N 6. The Coil bonus ×(1 + 0.5 × earlier Coils of the act) now multiplies XP only (James's skills, Yuki's Qi Use and fights); until v0.11.14 it also shortened the times below:
+- **Cultivate until the limit (v0.11.64, owner pick C1):** sit after sit, each one tap of the sit card, until Saturation 95%, Qi under 10, a sit that would end past 02:00 or leave Fed at 0; the button shows sits, time, Qi and the Saturation reached.
 - **Sit:** a 1-hour card ÷ its speed, 10 Qi, Saturation +100 ÷ (10 × 2^realm) % (Mortal Vessel 10 h, Foundation 20 h, Core 40 h… at ×1). The hollow and the grove count as two sits.
 - **Meridians:** hours of work, a sitting doing its minutes × its speed, in sittings of up to 2 h (2 Qi); primaries 2–4 h (36 h for all 12), collateral groups 3–5 h (32 h); no daily limit, no check, no fail; standard XP once per channel; locked below Fed 20. The Extraordinary net too since v0.11.18: vessels 4–11 h, their collaterals 3–6 h, junctions 6–10 h, the challenging XP once per channel.
 - **Once a day (v0.11.18):** once-a-day things come back after a night slept (waking days), not at midnight. *Push through the night* (a Meditate card on the resting places) gives a new day without sleep at Exhaustion ×1.5, then ×2 on all work; the third push in a row is a collapse (a day lost, bars full); any sleep clears it. Yuki's job has its own slower curve (×3 at most).
-- **Breakthrough:** a timed, queueable card of 2 h × (realm + 1) ÷ its speed (Foundation 2 h … Heavenly Immortal 28 h at ×1), then the tribulation scene.
+- **Breakthrough:** a timed card (at once since v0.11.64; no queue) of 2 h × (realm + 1) ÷ its speed (Foundation 2 h … Heavenly Immortal 28 h at ×1), then the tribulation scene.
 - Many Coils for a high realm is intended; the Long Forest (+1 realm a season) is the bypass.
 
 ## The prologue as a Coil (Days 1–7)
@@ -99,7 +100,7 @@ J Yuki's form ladder by realm (cat; lynx at Foundation; panther, tiger, dire, sp
 **Lore from the presets:** IASP — the 9 threads as instincts, never a voice. Universal-service gifts as possible Act 2 finds.
 
 ## From Selene's infrastructure (all)
-Docs set; saves (slots, autosave 15 s, rolling backups, format number, FNV-1a checksum, migrations, recovery screen, broken-number guard, plus a Coil snapshot in every save); export (file, text, export-all, share to `saves/`, reminder); settings (text size, close ✕, pause-when, auto-eat at a Fed threshold, two resets); notices (build label, What's new, Welcome back); fonts embedded; error bar and double-tap guard; checks (one script, old-saves test, softlock test, button-handler check, bots counting Coils per arc); restore points; the Android app (key in the repo); FAQ unlocking with progress. Not copied: section runs (they would skip story stops).
+Docs set; saves (slots, autosave on every action (the 15 s autosave of a running bar went in v0.11.64), rolling backups, format number, FNV-1a checksum, migrations, recovery screen, broken-number guard, plus a Coil snapshot in every save); export (file, text, export-all, share to `saves/`, reminder); settings (text size, close ✕, pause-when, auto-eat at a Fed threshold, two resets); notices (build label, What's new, Welcome back); fonts embedded; error bar and double-tap guard; checks (one script, old-saves test, softlock test, button-handler check, bots counting Coils per arc); restore points; the Android app (key in the repo); FAQ unlocking with progress. Not copied: section runs (they would skip story stops).
 
 ## Clashes and how they're handled
 | Selene does | Clash | Bone and Ash does |

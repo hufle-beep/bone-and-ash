@@ -315,12 +315,6 @@ export function clockParts(minutes) {
 export function clockLabelG(g, minutes = g.minutes) {
     return g.flags?.lf_active ? 'The Long Forest' : clockLabel(minutes);
 }
-/** The status-bar clock (v0.9.9): Day N, HH:MM:SS. `minutes` may be fractional (a running bar); the seconds come from the fraction. */
-export function clockLabelSec(g, minutes = g.minutes) {
-    if (g.flags?.lf_active) return 'The Long Forest';
-    const whole = Math.floor(minutes), sec = Math.min(59, Math.floor((minutes - whole) * 60));
-    return `${clockLabel(whole)}:${String(sec).padStart(2, '0')}`;
-}
 export function clockLabel(minutes) {
     const p = clockParts(minutes);
     return `Day ${p.day}, ${String(p.hh).padStart(2, '0')}:${String(p.mm).padStart(2, '0')}`;
@@ -864,7 +858,13 @@ export function migrate(g) {
     if (g.v === undefined) g.v = 1;
     if (g.v > SAVE_VERSION) throw new SaveError('tooNew', `This save is from a newer version of the game (state ${g.v}; this version reads up to ${SAVE_VERSION}).`);
     while (g.v < SAVE_VERSION) { const step = MIGRATIONS[g.v]; if (!step) throw new SaveError('notSave', `No migration from state ${g.v}.`); step(g); g.v += 1; }
-    return gaoFill(seenFill(oneCount(g)));
+    return queueDrop(gaoFill(seenFill(oneCount(g))));
+}
+/** v0.11.64 (F): no queue any more: a saved queue is emptied (nothing in it had run) and a half-filled bar (`runPart`) dropped. The field stays, an empty list. */
+export function queueDrop(g) {
+    if (g?.tasks && Array.isArray(g.tasks.queue)) g.tasks.queue.length = 0;
+    if (g) delete g.runPart;
+    return g;
 }
 /** v0.11.40 (G1, Fable review): before v0.7.0 the Gao event could set `gao_dead`; the game reads only `gao_broken` now, so an old save carries it over. Fills only. */
 export function gaoFill(g) {

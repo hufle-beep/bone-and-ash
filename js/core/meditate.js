@@ -10,7 +10,7 @@ import { CONDENSE_SIT_COST } from './formulas.js';
 import { goTo, checkDeath, choose, choiceOpen } from './story.js';
 import { btTarget, MER_LINES, lineWindow, lineWait, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
-import { BT_TASK, SIT_TASK, QI_TASK, QI_MINUTES, qiNotFull, qiFed, sitOpen, merLineTask, merLineChoice, isQueueScreen } from './tasks.js';
+import { BT_TASK, SIT_TASK, QI_TASK, QI_MINUTES, qiNotFull, qiFed, sitOpen, merLineTask, merLineChoice, isQueueScreen, sitLoop, sitLoopPlan, SIT_STOP_TEXT } from './tasks.js';
 const hrs = (m) => (m % 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m / 60} h`);
 
 /** No meditating here: urgent moments and screens that are already about it. */
@@ -55,13 +55,18 @@ export function medCards(g, scenes) {
     if (nightLock(g)) return pushCard(g); // v0.11.37 (D-a): from 02:00 only the night
     const s = scenes[g.scene];
     const hubSit = TASK_HUBS[g.scene] ? (s.choices || []).findIndex((c) => isSitChoice(c, g.scene)) : -1;
+    const hubShut = hubSit >= 0 && !choiceOpen(g, s.choices[hubSit]); // v0.11.64 (the Fable review): the screen hides its own Cultivate (most hubs in the evening): so does Meditate
     const qiOk = g.james.qi >= CONDENSE_SIT_COST;
     const sm0 = sitMinutes(g), sm = exMins(g, sm0);
     const sit = { label: `Cultivate: ${sm0 === 60 ? 'an hour' : `${sm0} min`}, ${CONDENSE_SIT_COST} Qi, Saturation +${sitGain(g)}% (${g.james.saturation}%).`, tag: qiOk ? `${CONDENSE_SIT_COST} Qi` : `needs ${CONDENSE_SIT_COST} Qi (you have ${Math.round(g.james.qi * 10) / 10})`, open: qiOk, minutes: sm, ...(qiOk ? {} : { show: true }) }; // v0.11.46 (Q1): short of Qi, it shows locked with the reason
     if ((sit.open || sit.show) && endsLate(g, sm)) Object.assign(sit, LATE); // v0.11.47: a sit short of Qi past 02:00 says so too
-    if (sitUseless(g)) { /* v0.11.37 (B2): a sit that changes nothing is not offered */ }
+    if (sitUseless(g) || hubShut) { /* v0.11.37 (B2): a sit that changes nothing is not offered; v0.11.64: nor one the screen hides */ }
     else if (hubSit >= 0) out.push({ ...sit, id: `${g.scene}:${hubSit}`, task: `${g.scene}:${hubSit}` }); // its task id keeps the hub's own chore off the card list even when locked
     else out.push({ ...sit, id: 'med:sit', ...((sit.open || sit.late) && sitOpen(g, scenes) ? { task: SIT_TASK } : {}) }); // v0.11.12: queueable on a task screen with no Cultivate of its own
+    if (sit.open && !sit.late && !sitUseless(g) && !hubShut) { // v0.11.64 (owner 02:07, pick C1): sit after sit until the limit; shown when two sits or more fit
+        const p = sitLoopPlan(g, scenes);
+        if (p.sits >= 2) out.push({ id: 'med:sitall', label: `Cultivate until the limit: ${p.sits} sits, ${hrs(p.minutes)}, ${p.qi} Qi → Saturation ${p.saturation}% (${SIT_STOP_TEXT[p.stop] || 'then it stops'}).`, tag: `${p.qi} Qi`, open: true, minutes: p.minutes, plan: p });
+    }
     if (qiNotFull(g)) { // v0.11.46 (owner 19:26, pick Q1): recover Qi by meditating, an hour at the resting rate
         const fed = qiFed(g); // v0.11.47 (the Fable review of v0.11.46): at Fed 0 there is no regen, so it is locked with the reason
         const q = { id: 'med:qi', label: `Meditate: gather Qi. (An hour; Qi ${Math.round(g.james.qi * 10) / 10} / ${Math.round(jamesQiMax(g) * 10) / 10}.)`, tag: fed ? 'an hour, resting' : 'too hungry: eat first', open: fed, minutes: QI_MINUTES, ...(fed ? {} : { show: true, reason: 'too hungry: eat first' }), ...(fed && isQueueScreen(g, scenes) ? { task: QI_TASK } : {}) };
@@ -90,6 +95,12 @@ function pushCard(g) {
 /** Run a Meditate card that isn't a hub task. Returns { lines, moved }. */
 export function runMed(g, scenes, id) {
     if (!canMeditate(g, scenes)) throw new Error('Not here');
+    const back0 = g.scene;
+    if (id === 'med:sitall') { // v0.11.64 (C1): each sit exactly one tap of the sit card
+        const r = sitLoop(g, scenes);
+        if (!r.sits) throw new Error('No sit possible');
+        return { lines: [`${r.sits} sits, ${hrs(r.minutes)}, ${r.qi} Qi: Saturation ${r.saturation}% (${SIT_STOP_TEXT[r.stop] || 'then it stops'}).`, ...r.lines], moved: g.scene !== back0 };
+    }
     if (id === 'med:sit') {
         const r = condense(g);
         const dead = checkDeath(g, scenes);

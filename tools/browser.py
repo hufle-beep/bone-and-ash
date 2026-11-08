@@ -1,7 +1,8 @@
 """v0.11.7: the browser test (Selene's sanity.py, adapted). Run from the repo root: python3 tools/browser.py
 Serves the folder, opens the game at 390x844 in headless Chromium and taps the real buttons:
-  1. Incremental Mode, a new game: about 40 taps on cards, story choices and fight actions (test speeds, x10), every tab;
-  2. a running bar survives a reload (v0.11.5), from a fixed task screen (saves/v0.11.7-long-forest-coil2.json);
+  1. Incremental Mode, a new game: about 40 taps on cards, story choices and fight actions, every tab;
+  2. v0.11.64: a timed card resolves at once (no bar, no queue, no speed menu; the clock moved, a Results entry), from a fixed
+     task screen (saves/v0.11.7-long-forest-coil2.json); the status bar stays pinned at the top when scrolled;
   3. v0.11.34 (D1): no Game mode switch; a phone still set to Story Mode ('boneash.tasks' '0') plays Incremental Mode;
   4. two tabs: closing the older tab leaves the newer save alone (v0.11.8);
   5. Saves (v0.11.9, in the menu since v0.11.10): Copy status, Export all then Restore all into a new game, a backup restored;
@@ -9,7 +10,8 @@ Serves the folder, opens the game at 390x844 in headless Chromium and taps the r
   (part 2 also: v0.11.35 a scene read before folds, Read it all again, Skip to the next choice)
   (part 3, v0.11.39: the art cache across an update, with the service worker running; see update_test)
   7. v0.11.11: holding a card opens its tooltip (no check text) and the tap that ends the hold runs nothing; the status bars carry
-     progress values; the running bar slides (transform, no width); each tab keeps its scroll.
+     progress values; a story card plays at once; each tab keeps its scroll.
+  8. v0.11.64 (C1): on a resting place, Cultivate until the limit runs its sits at once (the clock and Saturation move).
 Game screens (story, fights, journal) also fail on any check text: DC, a die, "+ d6" (checks are hidden since v0.11.10).
 Fails on any page error, or when the screen shows undefined, NaN, [object Object] or an old mode name.
 The taps are seeded, so a run repeats. Exit code 1 on any failure.
@@ -55,16 +57,17 @@ def enter(pg):
     b = pg.query_selector('button[data-menu="continue"]')
     if b: b.click(); in_game(pg)
 
-def wait_bar(pg, ms=800):
-    """up to ms for a running bar (#nowbar) to end; returns at once when none runs"""
-    until(pg, '#nowbar', ms, 'detached')
+TIMER = 'ol.queue, button.pause, select[data-speed], button.qadd, #nowbar, #yukibar'  # v0.11.64: none of these may show
+def no_timer(pg, where):
+    el = pg.query_selector(TIMER)
+    if el: fails.append(f"{where}: a timer or queue element shows ({el.evaluate('e => e.outerHTML.slice(0, 80)')})")
 
-GUARD = 0.41  # js/main.js (view click handler): a story card, choice or fight action within 400 ms of the last one is ignored
+GUARD = 0.41  # js/main.js (view click handler): a story card, choice, fight action or (v0.11.64) task or Meditate card within 400 ms of the last one is ignored
 _pressed = {}
 def tap(pg, el, timeout=3000):
     """click a card; one the double-tap guard covers first waits out the 400 ms since the last such tap on this page
     (a genuine pause: the game checks Date.now(), there is no element to wait for)"""
-    guarded = el.evaluate("e => e.dataset.story != null || e.dataset.choice != null || !!e.dataset.act || !!e.dataset.flee")
+    guarded = el.evaluate("e => e.dataset.story != null || e.dataset.choice != null || !!e.dataset.act || !!e.dataset.flee || !!e.dataset.run || !!e.dataset.med")  # v0.11.64: task and Meditate cards too
     if guarded:
         w = _pressed.get(id(pg), 0) + GUARD - time.monotonic()
         if w > 0: time.sleep(w)
@@ -93,15 +96,11 @@ def no_greyed(pg, where):
 def taps(pg, n, rng, where, sel):
     done = 0
     for i in range(n):
-        wait_bar(pg)
         btns = pg.query_selector_all(sel)
-        if not btns:
-            pb = pg.query_selector('button.pause')
-            if pb: pb.click(); until(pg, 'e => !e.isConnected', 3000, arg=pb); continue  # the paused screen is drawn again
-            break
+        if not btns: break
         try: tap(pg, rng.choice(btns)); done += 1
         except Exception: continue  # re-rendered under the tap: look again
-        if i % 10 == 9: check_text(pg, f"{where}, tap {i + 1}", strict=True)
+        if i % 10 == 9: check_text(pg, f"{where}, tap {i + 1}", strict=True); no_timer(pg, f"{where}, tap {i + 1}")
         if 'Incremental' in where: no_greyed(pg, f"{where}, tap {i + 1}")
     check_text(pg, f"{where}, after {done} taps", strict=True)
     return done
@@ -142,7 +141,7 @@ def main_menu(pg, url):
     enter(pg)
 
 def comfort(pg, url):
-    fresh(pg, url, "localStorage.clear(); localStorage.setItem('boneash.speed','1')")
+    fresh(pg, url, "localStorage.clear()")
     if len(pg.query_selector_all('.status [role="progressbar"][aria-valuenow]')) != 3: fails.append('a11y: the status bars lack progress values')
     card = pg.query_selector('button.card:not([disabled])[data-story]') or pg.query_selector('button.card:not([disabled])[data-run]')
     if not card: fails.append('tooltip: no card to hold'); return
@@ -155,22 +154,18 @@ def comfort(pg, url):
     else:
         t = pg.inner_text('#tip')
         if CHECKS.search(t): fails.append(f'tooltip: shows check text {t[:120]!r}')
-        if pg.query_selector('#nowbar'): fails.append('tooltip: the tap that ended the hold started the card')
         pg.click('#tip [data-tip="close"]'); until(pg, '#tip', 3000, 'hidden')
         if pg.is_visible('#tip'): fails.append('tooltip: ✕ did not close it')
         else: notes.append('tooltip')
     scene1 = pg.inner_text('.head .title')
     if scene1 != scene0: fails.append(f'tooltip: the hold moved the story ({scene0} → {scene1})')
-    # the running bar slides
+    # v0.11.64: a story card plays at once (no bar); its smooth scroll to the top ends before the tabs
     long = pg.query_selector('button.card:not([disabled])[data-story]')
     if long:
-        tap(pg, long); until(pg, "(e => e && parseFloat(e.dataset.v) > 0)(document.getElementById('nowbar'))", 5000)  # the bar has moved
-        bar = pg.query_selector('#nowbar')
-        if bar:
-            st = pg.evaluate("e => [e.style.transform, e.style.width, e.parentElement.getAttribute('role')]", bar)
-            if 'scaleX' not in st[0] or st[1] or st[2] != 'progressbar': fails.append(f'bars: the running bar is {st}')
-        # the story step ends (its bar is gone, the next scene drawn, its smooth scroll to the top done) before the tabs
-        until(pg, '#nowbar', 15000, 'detached'); until(pg, 'scrollY === 0', 3000)
+        ln = long.query_selector('.len').inner_text()
+        if not re.search(r'→ (Day \d+, )?\d\d:\d\d$|^at once$', ln): fails.append(f'A1: a story card does not say where it ends: {ln!r}')
+        tap(pg, long); until(pg, 'scrollY === 0', 3000)
+        no_timer(pg, 'a story card')
     # each tab keeps its scroll
     pg.click('[data-tab="sheet"]'); on_tab(pg, 'sheet')
     room = pg.evaluate("document.documentElement.scrollHeight - innerHeight")
@@ -183,7 +178,7 @@ def comfort(pg, url):
     pg.click('[data-tab="story"]'); on_tab(pg, 'story')
 
 def rest_places(pg, url):
-    fresh(pg, url, "localStorage.clear(); localStorage.setItem('boneash.speed','1')")
+    fresh(pg, url, "localStorage.clear()")
     if pg.query_selector('button.card.med'): fails.append('the arrival shows a Meditate card (v0.11.14: resting places only)')
     # v0.11.24: the arrival plate shows James's picture (art/pic/james.webp), and the file really loads
     pic = pg.evaluate("""async () => { const s = document.querySelector('.plate svg[data-pic]'); if (!s) return null;
@@ -194,18 +189,23 @@ def rest_places(pg, url):
     else: notes.append('the arrival plate shows James\'s picture (800 px, loaded)')
     s1 = (ROOT / 'saves/v0.8.5-day1-stream.json').read_text()
     fresh(pg, url, "s => { localStorage.clear(); localStorage.setItem('boneash.auto', s); }", s1)
-    add = pg.query_selector('.cardwrap:has(button.card.med) button.qadd')
-    if not add: fails.append('the stream: no + on a Meditate card'); return
-    n0 = len(pg.query_selector_all('ol.queue li'))
-    add.click(); until(pg, "n => document.querySelectorAll('ol.queue li').length === n", 3000, arg=n0 + 1)
-    if len(pg.query_selector_all('ol.queue li')) != n0 + 1: fails.append('the stream: + on a Meditate card added no queue row')
-    else: notes.append('Meditate only on resting places, + queues there')
+    # v0.11.64 (C1): Cultivate until the limit, at once: the clock and Saturation move, one Results entry
+    loop = pg.query_selector('button.card.med[data-med="med:sitall"]')
+    if not loop: fails.append('the stream: no "Cultivate until the limit" card'); return
+    lab = loop.inner_text()
+    if not re.search(r'\d+ sits, .*\d+ Qi → Saturation \d', lab): fails.append(f'the stream: the loop card does not show its sits, time and Qi: {lab[:120]!r}')
+    clk0 = pg.inner_text('.status .clk'); r0 = len(pg.query_selector_all('.res'))
+    tap(pg, loop); until(pg, "c => document.querySelector('.status .clk')?.innerText !== c", 3000, arg=clk0)
+    clk1 = pg.inner_text('.status .clk'); r1 = len(pg.query_selector_all('.res'))
+    if clk1 == clk0 or r1 != r0 + 1: fails.append(f'the stream: the loop did not run at once (clock {clk0} → {clk1}, results {r0} → {r1})')
+    else: notes.append(f'Meditate only on resting places; Cultivate until the limit at once ({clk0} → {clk1})')
+    no_timer(pg, 'the stream')
     check_text(pg, 'resting place', strict=True)
     # v0.11.26: the owner's 11:02 save (the end of Act 1 after "taken") goes round again: Go round again… → the start of Act 1
     import gzip, base64
     raw = (ROOT / 'saves/2026-11-07-1102-incremental-a1_end.txt').read_text().strip()
     s2 = gzip.decompress(base64.b64decode(raw[5:])).decode()
-    fresh(pg, url, "s => { localStorage.clear(); localStorage.setItem('boneash.auto', s); localStorage.setItem('boneash.speed','1'); }", s2)
+    fresh(pg, url, "s => { localStorage.clear(); localStorage.setItem('boneash.auto', s); }", s2)
     again = pg.query_selector('button.card.story:has-text("Go round again")')
     if not again: fails.append('the end of Act 1: no "Go round again…" (v0.11.26)'); return
     tap(pg, again)
@@ -234,7 +234,7 @@ def saves(pg, url):
     until(pg, "/Status copied|could not be copied|No status/.test(document.getElementById('saveNote')?.textContent || '')", 10000)
     until(pg, "navigator.clipboard.readText().then(t => t.length > 0)", 5000)
     st = pg.evaluate("navigator.clipboard.readText()")
-    if scene_of(lf) not in st or not re.search(r'Bone and Ash \d+\.\d+\.\d+', st) or 'Pause log' not in st: fails.append(f'Copy status: unexpected text {st[:200]!r}')
+    if scene_of(lf) not in st or not re.search(r'Bone and Ash \d+\.\d+\.\d+', st) or 'Journal (newest first)' not in st or 'Pause log' in st: fails.append(f'Copy status: unexpected text {st[:200]!r}')
     # Export all, then Restore all into a new game
     auto0 = pg.evaluate("localStorage.getItem('boneash.auto')")
     with pg.expect_download() as dl: pg.click('button[data-exportall]')
@@ -417,7 +417,7 @@ def main(part=0):
             pg.on('pageerror', lambda e: fails.append(f"page error: {e}"))
             if one:
               # 1. Incremental Mode
-              fresh(pg, url, "localStorage.clear(); localStorage.setItem('boneash.testspeeds','1'); localStorage.setItem('boneash.speed','10')")
+              fresh(pg, url, "localStorage.clear()")
               if 'Day 1' not in pg.evaluate("document.body.innerText"): fails.append('Incremental Mode: the new game did not start on Day 1')
               n1 = taps(pg, 40, random.Random(7), 'Incremental Mode', 'button.card:not([disabled])[data-story], button.card:not([disabled])[data-run], button.card:not([disabled])[data-act]')
               tabs = visit_tabs(pg, 'Incremental Mode')
@@ -429,20 +429,30 @@ def main(part=0):
               if pg.query_selector('[data-tasks]') or 'Story Mode' in pg.inner_text('#view'): fails.append('D1: Settings still offers a game mode')
               else: notes.append('Incremental Mode only, no mode switch')
             if four:
-              # 2. a running bar survives a reload: a fixed task screen (the Long Forest camp on Coil 2, a v0.11.7 test save), so the path never varies
-              fresh(pg, url, "s => { localStorage.setItem('boneash.auto', s); localStorage.setItem('boneash.speed', '1'); }", (ROOT / 'saves/v0.11.7-long-forest-coil2.json').read_text())  # the measured card runs at x1
+              # 2. v0.11.64: a timed card resolves at once, from a fixed task screen (the Long Forest camp on Coil 2, a v0.11.7 test save)
+              fresh(pg, url, "s => { localStorage.setItem('boneash.auto', s); localStorage.setItem('boneash.speed', '1'); }", (ROOT / 'saves/v0.11.7-long-forest-coil2.json').read_text())  # an old speed setting is ignored
+              no_timer(pg, 'a task screen')
               long = pg.eval_on_selector_all('button.card[data-run]:not([disabled])', "els => els.filter(e => / h/.test(e.querySelector('.len')?.textContent || '') && !/at once/.test(e.textContent)).map(e => e.dataset.run)")
-              if not long: fails.append('reload: no task screen with an hour-long card reached; on screen: ' + ' | '.join(pg.eval_on_selector_all('#view button', 'els => els.slice(0, 8).map(e => e.textContent.slice(0, 50))')))
+              if not long: fails.append('at once: no task screen with an hour-long card reached; on screen: ' + ' | '.join(pg.eval_on_selector_all('#view button', 'els => els.slice(0, 8).map(e => e.textContent.slice(0, 50))')))
               else:
-                  pg.click(f'button.card[data-run="{long[0]}"]')
-                  until(pg, "(e => e && parseFloat(e.dataset.v) * 100 > 5)(document.getElementById('nowbar'))", 8000)  # the bar past 5% at x1
-                  w1 = pg.eval_on_selector('#nowbar', 'e => parseFloat(e.dataset.v) * 100')
-                  pg.reload(); until(pg, '.main-menu', 10000, 'attached'); enter(pg); until(pg, '#nowbar', 5000, 'attached')
-                  w2 = pg.eval_on_selector('#nowbar', 'e => parseFloat(e.dataset.v) * 100') if pg.query_selector('#nowbar') else 0
-                  if not (w1 > 5 and abs(w1 - w2) < 3): fails.append(f'reload: the bar was {w1}% before and {w2}% after')
-                  else: notes.append(f'reload kept the bar ({w1:.0f}% → {w2:.0f}%)')
+                  dur = pg.eval_on_selector(f'button.card[data-run="{long[0]}"] .len', "e => { const m = /(\\d+) h(?: (\\d+) m)?/.exec(e.textContent); return m ? 60 * +m[1] + (+m[2] || 0) : -1; }")
+                  mins = "(() => JSON.parse(JSON.parse(localStorage.getItem('boneash.auto')).data).minutes)()"
+                  m0 = pg.evaluate(mins); r0 = len(pg.query_selector_all('.res'))
+                  tap(pg, pg.query_selector(f'button.card[data-run="{long[0]}"]'))
+                  until(pg, f"{mins} !== {m0}", 2000)
+                  m1 = pg.evaluate(mins); r1 = len(pg.query_selector_all('.res'))
+                  if m1 - m0 != dur: fails.append(f'at once: the card said {dur} min, the clock moved {m1 - m0} min')
+                  elif r1 != r0 + 1: fails.append(f'at once: no Results entry ({r0} → {r1})')
+                  else: notes.append(f'a card at once ({dur} min, as its card said)')
+                  no_timer(pg, 'after a card')
+              # v0.11.64 (S2): the status bar stays pinned at the top
+              pg.evaluate("scrollTo(0, document.documentElement.scrollHeight)"); until(pg, 'scrollY > 200', 3000)
+              top = pg.evaluate("(() => { const r = document.querySelector('.status')?.getBoundingClientRect(); return r ? [Math.round(r.top), Math.round(r.bottom), scrollY] : null; })()")
+              if not top or abs(top[0]) > 1 or top[1] < 20 or top[2] < 200: fails.append(f'status bar: not pinned at the top when scrolled (top, bottom, scrollY = {top})')
+              else: notes.append('the status bar pinned at the top')
+              pg.evaluate("scrollTo(0, 0)")
               # 4. two tabs (v0.11.8): a tab that closes never writes its older game over a newer save from another tab
-              fresh(pg, url, "localStorage.clear(); localStorage.setItem('boneash.speed','10'); localStorage.setItem('boneash.testspeeds','1')")
+              fresh(pg, url, "localStorage.clear()")
               pg.evaluate("1")
               pb = ctx.new_page(); pb.goto(url); until(pb, '.main-menu', 10000, 'attached'); enter(pb)
               before = pb.evaluate("localStorage.getItem('boneash.auto')")
@@ -451,7 +461,6 @@ def main(part=0):
                   if not bt: break
                   try: tap(pb, bt[0])
                   except Exception: pass
-                  wait_bar(pb, 3000)
               newer = pb.evaluate("localStorage.getItem('boneash.auto')")
               pg.goto(url.replace('index.html', 'art/bg/CREDITS.md'))  # the older tab closes: its save on close fires
               after = pg.evaluate("localStorage.getItem('boneash.auto')")
@@ -466,7 +475,7 @@ def main(part=0):
                 main_menu(pg, url)
                 # 7. tooltip, bars, scroll (v0.11.11)
                 comfort(pg, url)
-                # 8. Meditate only on the resting places, queueable there (v0.11.14)
+                # 8. Meditate only on the resting places (v0.11.14); Cultivate until the limit (v0.11.64)
                 rest_places(pg, url)
                 # 9. picked choices recoloured (v0.11.32)
                 picked(pg, url)

@@ -7,7 +7,7 @@ import { SCENES } from '../js/story/prologue.js';
 import { newGame, ensureBars, startCombat, combatStep, COMBAT_ACTIONS, serialize, deserialize } from '../js/core/game.js';
 import { INC_ONLY_ACTIONS, actionOpen } from '../js/core/forms.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
-import { isTaskHub, isTaskChoice, taskCards, taskOpen, runTask, taskQueue } from '../js/core/tasks.js';
+import { isTaskHub, isTaskChoice, taskCards, taskOpen, runTask, taskState } from '../js/core/tasks.js';
 
 const version = (readFileSync('sw.js', 'utf8').match(/bone-ash-([\d.]+)/) || [])[1];
 let rs = 1;
@@ -43,7 +43,7 @@ function playTo(point, seed) {
             if (cards.length && (rnd(10) < 8 || !stops.length)) {
                 const id = cards[rnd(cards.length)].id;
                 if (taskOpen(g, SCENES, id)) runTask(g, SCENES, id);
-                taskQueue(g).length = 0;
+                taskState(g).queue.length = 0;
                 continue;
             }
             if (!stops.length) return null;
@@ -67,7 +67,7 @@ for (const p of POINTS) {
     let g = null, seed = 0;
     for (seed = 1; seed <= 200 && !g; seed++) g = playTo(p, seed);
     if (!g) { console.log(`${p.name}: not reached in 200 seeds`); process.exitCode = 1; continue; }
-    taskQueue(g).length = 0; // a clean queue (the test plays it on)
+    taskState(g).queue.length = 0; // a clean queue (the test plays it on)
     const text = serialize(g);
     deserialize(text); // must load back
     const file = `saves/v${version}-${p.name}.json`;
