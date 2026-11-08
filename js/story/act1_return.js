@@ -3,7 +3,7 @@
  * the night the romance resolves (a throuple, one lover, or none), and Outer Elder Shen Qiu at the gate on Day 21.
  * Entry 'rt_start' (Day 19 ~06:00). Ends at 'a1_end'.
  */
-import { addItem, hasItem, eat, condense, advance, clockParts, jamesQiMax, dayHour } from '../core/game.js';
+import { addItem, hasItem, eat, condense, advance, clockParts, jamesQiMax, dayHour, yukiForm } from '../core/game.js';
 import { condensationSatGain } from '../core/formulas.js';
 import { coilMult, sitGain } from '../core/game.js';
 import { set, daily, markDaily, eatBest } from './common.js';
@@ -40,6 +40,10 @@ const brawl = (g) => encounter(g, {
     intro: 'Hunter Bao rolls his shoulders. His cousins rise from the bench behind him. Ya, delighted, cracks her knuckles one at a time.',
     enemies: [{ name: 'Hunter Bao', hp: 7, dc: 3, atk: 4, dmg: 2 }, { name: 'Bao\'s cousin', hp: 5, dc: 3, atk: 4, dmg: 2 }],
     win: 'rt_brawl_won', lose: 'rt_brawl_lost',
+    // v0.11.82 (owner picks B1 + Y1; texts Fable's): unarmed, on GU; Yuki only in her human form
+    style: 'unarmed',
+    opening: `Fists only. You leave the song where it is, lift your hands, and remind yourself that Bao is a neighbour, not a wolf.`,
+    tail: yukiForm(g) === 'human' ? `Yuki leaves the bench, shakes out her sleeves, and takes the place on your left. Bao looks at her — slight, white-haired, a head shorter than you, ears flat against all that hair — and says, with enormous gravity, "The outlander's lady may stand with him. No one will strike her hard." "No," Yuki agrees. "No one will." Ya, delighted: "Three against three. Better."` : `Yuki watches from the wine-shop bench — curled on it, or lying along the length of it, depending on the day — with the air of a referee who has already decided nobody here is worth scoring. Through the bond: *they said fists. I don't have any. Carry on.*`,
 });
 const elderFight = (g) => {
     const enc = encounter(g, {

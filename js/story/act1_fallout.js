@@ -3,7 +3,7 @@
  * Day 21. Ashfall prepares. On Day 9 Ya walks out of the Blackroot. On Day 10 the expedition to the Old Tree is
  * planned, and at dawn on Day 11 it leaves (→ 'bl_start').
  */
-import { addItem, eat, condense, advance, sleepUntil, jamesHpMax, hasItem, awardYukiFightXp } from '../core/game.js';
+import { addItem, eat, condense, advance, sleepUntil, jamesHpMax, hasItem, awardYukiFightXp, yukiForm } from '../core/game.js';
 import { daily, markDaily, hour, day, eatBest, pantry, foodCount } from './common.js';
 import { encounter, rel, likesMei, likesYa, trioStep, bumpRel } from './act1_common.js';
 
@@ -34,6 +34,9 @@ const yaBrawl = (g) => encounter(g, {
     intro: 'Ya grins, spits in the dust, and comes at you low and laughing, the way a dog comes at another dog it has decided to like.',
     enemies: [{ name: 'Ya', hp: 15, dc: 6, atk: 7, dmg: 3 }],
     win: 'ya_won', lose: 'ya_lost',
+    // v0.11.82 (owner picks B1 + Y1; texts Fable's): a weapon spar, Yuki only in her human form
+    style: 'spar',
+    tail: `The terms, agreed in the lane in front of forty houses: no armour, her spear against whatever you can sing, and the first one in the dust stays there.\n\n${yukiForm(g) === 'human' ? `Yuki steps off the fence, shakes out her sleeves, and stands at your left without being asked. Ya looks her up and down the way she looked at you — a head shorter, white-haired, ears flat, a dress you could not fight a goat in — and her grin gets wider. "The cat too? Good. Spear against two nothings." Old Hu considers Yuki for a long, formal moment, then inclines his head the exact depth owed to a second: "The matter stays between the outlander and the wild woman. The lady may stand with him. No one will strike her." "No," Yuki agrees, aloud. "No one will."` : `Yuki takes the fence — on it, or along the whole top of it, depending on the day — and does not so much as twitch an ear. Through the bond: *his face, your fight. I don't do proxies. Try not to bleed on the coat.*`}`,
 });
 
 /* ---------------- the Sect's answer, by ending ---------------- */
@@ -481,7 +484,7 @@ Ya sees it and *lights up*. "A fight? Good. I've been walking for four days."
 
 Old Hu looks at you with something like hope. If you take the fight, his face is saved. If you don't, he'll have to.`,
         choices: [
-            { text: 'Take the fight. Bare hands and bone, nobody dies.', combat: yaBrawl, to: 'ya_won' },
+            { text: 'Take the fight. "Your spear against my blade. No armour. Nobody dies."', combat: yaBrawl, to: 'ya_won' }, // v0.11.82: Fable's
             { text: 'Talk her down: "You came for salt. Insulting the salt-keeper is a bad trade."', check: { skill: 'GU', dc: 6 }, do: (g) => { g.flags.ya_brawl = 'talked'; bumpRel(g, 'Ya', -1, 1); bumpRel(g, 'Village', 2, 0); return ['She thinks about it. Then she bows to Old Hu — badly, sideways, like a dog imitating a person — and says, "Sorry your face smells like a goat." Old Hu accepts this, with visible agony, as an apology.']; }, failDo: (g) => { bumpRel(g, 'Ya', -3, 0); return ['"Coward," she says, offended to her bones. Then she hits you anyway.']; }, fail: 'ya_forced', to: 'ya_talk' },
         ],
     },
@@ -493,7 +496,7 @@ Old Hu looks at you with something like hope. If you take the fight, his face is
     ya_won: {
         id: 'ya_won', title: 'Pinned', art: 'ya_fight', place: `${P} — the lane`,
         enter: (g) => { g.flags.ya_brawl = 'won'; bumpRel(g, 'Ya', 6, 6); bumpRel(g, 'Village', 4, 0); bumpRel(g, 'Old Hu', 6, 0); return []; },
-        text: `It ends with Ya on her back in the dust and a cage of white bone across her chest, pinning her to the lane like a butterfly to a board. She's bleeding from the lip and laughing so hard she can't breathe.
+        text: `It ends with Ya on her back in the dust, her spear a long way from her hand, and the flat of a white bone blade laid across her collarbones, holding her to the lane the way a ruler holds down a page. She's bleeding from the lip and laughing so hard she can't breathe.
 
 "*Again,*" she says. "Do that again. Later. Somewhere with fewer goats."
 
@@ -505,7 +508,7 @@ Mei Lin, on the step, has put the knife down. She is staring at Ya with an expre
     ya_lost: {
         id: 'ya_lost', title: 'Pinned (You)', art: 'ya_fight', place: `${P} — the lane`,
         enter: (g) => { g.flags.ya_brawl = 'lost'; bumpRel(g, 'Ya', 4, 5); bumpRel(g, 'Old Hu', 3, 0); g.james.hp = Math.max(3, g.james.hp); return []; },
-        text: `It ends with you on your back in the dust and Ya sitting on your chest, one knee on each of your arms, grinning down at you upside-down with her hair hanging around both your faces like a curtain.
+        text: (g) => `It ends with you on your back in the dust and Ya sitting on your chest, one knee on each of your arms, grinning down at you upside-down with her hair hanging around both your faces like a curtain.
 
 "You're good," she says. "You're not *good* good. But you're good." She leans down, very close, and sniffs your hair again. "Still nothing."
 
@@ -513,7 +516,7 @@ Mei Lin, on the step, has put the knife down. She is staring at Ya with an expre
 
 "Eventually." She doesn't. Behind her, you can see Mei Lin on the step, white-knuckled around her knife, and Old Hu, who has replaced his headband with tremendous dignity, because a fight was had and his face, by proxy, is saved.
 
-Yuki sits on the fence and offers no help whatsoever.`,
+${yukiForm(g) === 'human' ? 'Yuki, who was asked to stand on the left and not to rescue anyone, stands on the left and rescues no one.' : 'Yuki sits on the fence and offers no help whatsoever.'}`, // v0.11.82: Fable's human-form line
         choices: [{ text: '"Eventually would be now."', to: 'ya_talk' }],
     },
     ya_talk: {
@@ -598,7 +601,7 @@ Your Convergence is humming so loudly you're surprised nobody else can hear it.
     },
     fo_price: {
         id: 'fo_price', title: 'The Price', art: 'ya_close', place: `${P} — the shrine roof`,
-        text: (g) => `You find Ya ${g.flags.ya_brawl === 'won' ? 'practising the bone-cage hold on a sack of millet' : 'asleep on the shrine roof in full sun like a lizard'}. You explain. She listens with her head on one side.
+        text: (g) => `You find Ya ${g.flags.ya_brawl === 'won' ? 'practising the disarm that took her spear, on a sack of millet, slowly, and losing to it on purpose' : 'asleep on the shrine roof in full sun like a lizard'}. You explain. She listens with her head on one side.
 
 "I'll take you," she says. "Five days in, maybe six. There are things past the Hollow that eat hunters like rice. There's a wet wood where the dead walk. There are hills where the birds are on fire. I know all of it." She grins. "My price."
 

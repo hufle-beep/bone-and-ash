@@ -13,6 +13,7 @@ import { yukiSpeed, setDryClone, dryClone, showPicked } from '../js/core/tasks.j
 import { e8Hours, ecHours, jnHours } from '../js/story/meridians.js';
 import { serialize, deserialize } from '../js/core/game.js';
 import { PEOPLE_FIGHTS, combatHooks } from '../js/core/game.js'; // v0.11.81
+import { fightAction, yukiSitsOut, armourDr as armourDrOf, jamesDr as jamesDrOf } from '../js/core/game.js'; // v0.11.82
 import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, advance, STARVE_HP_PER_HOUR, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1, bumpRel as relBump, startActCoil, REL_CATCHUP } from '../js/core/game.js';
 import { canPrimary, canColGroup, colGroupsOpen, btTarget, COL_GROUPS, priHours, colHours, merMinutesOf } from '../js/story/meridians.js';
 import { sceneView, choose, goTo, wasPicked, isMenuScene, notePicked, seenBefore, noteSeen } from '../js/core/story.js';
@@ -1127,6 +1128,53 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
         let o = null; for (let t = 0; t < 50 && g.combat; t++) o = combatStep(g, 'guard');
         assert(o?.done === 'lose' && o.next === 'lf_human_lost' && g.coil.why !== 'beast', `T1: losing to ${who} on an active Coil leads to "Robbed", not the Coil's end (${o?.next})`);
     }
+}
+// v0.11.82 (owner picks B1 + Y1; texts Fable's): Ya's brawl a weapon spar, Bao's an unarmed brawl, Yuki in them only in human form
+{
+    const yaCh = SCENES.ya_challenge.choices.find((c) => c.combat), baoCh = SCENES.rt_brawl_start.choices[0];
+    const mk = (cuT, cuL, guT = 3, guL = 5) => { const g = ensureBars(newGame(8201, { closed: true })); g.james.skills['Convergence Use'].tier = cuT; g.james.skills['Convergence Use'].level = cuL; g.james.gu.tier = guT; g.james.gu.level = guL; return ensureBars(g); };
+    const start = (g, ch) => { const e = combatHooks.before(g, ch.combat(g)); startCombat(g, e); return e; };
+    // the spar: blade, spear and guard only; no armour, no guard bonus from forms, no construct, no buckler cover; Yuki watches
+    const g = mk(7, 5); const e = start(g, yaCh);
+    assert(e.style === 'spar' && g.combat.style === 'spar' && g.combat.yukiOut === true, 'spar: the style and Yuki watching (cat)');
+    const open = Object.keys(COMBAT_ACTIONS).filter((id) => actionOpen(g, id));
+    assert(open.join() === 'blade,guard,spear', `spar: only the blade, guard and the spear (${open})`);
+    assert(guardBonus(g) === 2 && armourDrOf(g) === 0 && jamesDrOf(g) === 1 && actionLabel(g, 'guard', 'Guard and give ground') === 'Guard and give ground', 'spar: no armour (guard +2, no plates DR, the plain guard label)');
+    assert(fightAction(g, 'dart') === 'blade' && fightAction(g, 'needle') === 'blade' && fightAction(g, 'spikes') === 'blade' && fightAction(g, 'guard') === 'guard', 'spar: a closed bone action becomes the blade');
+    const r1 = combatStep(g, 'guard');
+    assert(!r1.lines.some((l) => /construct|Yuki|claws|swipe|paw|blur/.test(l)), `spar: no construct and no Yuki strike in a round (${r1.lines.join(' | ').slice(0, 160)})`);
+    assert(/The terms, agreed in the lane/.test(e.intro) && /I don't do proxies/.test(e.intro) && !/stands at your left/.test(e.intro), 'spar: the terms and the cat-form Yuki line in the intro');
+    const h = mk(7, 5); h.yuki.realm = 7; h.james.realm = 7; h.yuki.form = 'human'; ensureBars(h); const eh = start(h, yaCh);
+    assert(h.combat.yukiOut === false && /Spear against two nothings/.test(eh.intro) && yukiSitsOut(h, eh) === false, 'spar: in human form Yuki stands with him (Old Hu allows a second)');
+    // the brawl: strike, throw, cover; damage by the GU tier, no Qi, no DR pierce; a win's XP to GU only
+    const b = mk(3, 5, 3, 5); const be = start(b, baoCh);
+    const bopen = Object.keys(COMBAT_ACTIONS).filter((id) => actionOpen(b, id));
+    assert(be.style === 'unarmed' && bopen.join() === 'strike,throw,cover', `brawl: only the three unarmed actions (${bopen})`);
+    assert(actionDmg(b, COMBAT_ACTIONS.strike).join() === '6,12' && actionDmg(b, COMBAT_ACTIONS.throw).join() === '3,6' && guardBonus(b) === 2, 'brawl: strike 2–4 and throw 1–2 × GU tier 3, guard +2');
+    assert(fightAction(b, 'dart') === 'strike' && fightAction(b, 'guard') === 'cover' && fightAction(b, 'blade') === 'strike', 'brawl: a bone action becomes a strike, guard becomes cover');
+    const q0 = b.james.qi; const rb = combatStep(b, 'strike');
+    assert(b.james.qi === q0 && rb.lines[0].startsWith('Fists only. You leave the song where it is') && rb.lines.some((l) => l.startsWith('Step in and hit:')), 'brawl: no Qi, the opening line, the strike label');
+    assert(/they said fists/.test(be.intro), 'brawl: the cat-form Yuki line');
+    b.combat.enemies.forEach((x) => { x.hp = 999; x.dc = 0.6; x.atk = 0.6; }); const rt = combatStep(b, 'throw');
+    assert(rt.lines.some((l) => /hits the dust and takes a moment to work out which way is up/.test(l)), "brawl: the throw's stagger line");
+    assert(rt.lines.some((l) => /is still getting up/.test(l)), 'brawl: the thrown one is still getting up (and loses that attack)');
+    const w = mk(3, 5, 3, 5); start(w, baoCh); w.combat.enemies.forEach((x) => { x.hp = 1; x.dc = 0.6; });
+    const cu0 = JSON.stringify(w.james.skills['Convergence Use']), yf0 = JSON.stringify(w.yuki.fight); let ow = null;
+    for (let t = 0; t < 5 && w.combat; t++) ow = combatStep(w, 'strike');
+    assert(ow?.done === 'win' && JSON.stringify(w.james.skills['Convergence Use']) === cu0 && JSON.stringify(w.yuki.fight) === yf0 && ow.lines.some((l) => /^GU \+/.test(l)), 'brawl: a win pays GU only, and no fight XP to a Yuki who watched');
+    // the review (Fable): the brawl's degree (the one-move finish) reads GU alone, not Convergence
+    const dg = mk(10, 9, 1, 1); const de = combatHooks.before(dg, baoCh.combat(dg));
+    assert(de.degree === 1, `review: a strong singer with weak fists is not offered the one-move finish in Bao's brawl (degree ${de.degree})`);
+    // an ordinary fight is untouched
+    const n = mk(7, 5); startCombat(n, { id: 'zz_test', enemies: [{ name: 'Y', hp: 5, dc: 3, atk: 3, dmg: 1 }], win: 'night_won', lose: 'night_lost' });
+    assert(!n.combat.style && actionOpen(n, 'dart') && !actionOpen(n, 'strike') && guardBonus(n) > 2 && armourDrOf(n) === 5 && fightAction(n, 'strike') === 'guard', 'no style: every bone action as before, the unarmed ones closed');
+    // the texts (Fable's)
+    assert(yaCh.text === 'Take the fight. "Your spear against my blade. No armour. Nobody dies."', 'texts: the spar choice');
+    assert(/flat of a white bone blade laid across her collarbones/.test(SCENES.ya_won.text) && !/cage/.test(SCENES.ya_won.text), 'texts: ya_won without the bone cage');
+    const lostCat = SCENES.ya_lost.text(mk(1, 1)); const lostHuman = SCENES.ya_lost.text(h);
+    assert(/offers no help whatsoever/.test(lostCat) && /rescues no one/.test(lostHuman), 'texts: ya_lost by her form');
+    const pr = mk(1, 1); pr.flags.ya_brawl = 'won';
+    assert(/the disarm that took her spear/.test(SCENES.fo_price.text(pr)) && !/bone-cage/.test(SCENES.fo_price.text(pr)), 'texts: fo_price');
 }
 // v0.11.71 (owner picks Y1 + C1 + X1; Yuki's texts Fable's): Yuki switches food when her kind is full; "Cultivate until
 // the limit" gives one total per skill; from Coil 2 the Blackroot's Explore is not once a day.

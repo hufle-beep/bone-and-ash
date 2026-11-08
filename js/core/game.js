@@ -5,7 +5,7 @@
  * open collateral Qi. New for a game without a narrator: every check is value ÷ DC (no dice; value + d6 until v0.9.3 / v0.11.45).
  * Pure — no DOM. The UI (main.js) and the tests drive it.
  */
-import { actionOpen, actionLabel, fragileKnife, lineState, FORM_LINES, hasForm } from './forms.js';
+import { actionOpen, actionLabel, fragileKnife, lineState, FORM_LINES, hasForm, fightStyle } from './forms.js';
 /** v0.11.4: how far along a form line James is (0 = its first form, −1 = none yet). */
 const formStep = (g, line) => { const n = lineState(g, line).now; return n ? FORM_LINES[line].forms.findIndex((f) => f.id === n.id) : -1; };
 import {
@@ -525,13 +525,16 @@ export const boneTier = (g) => Math.min(SKILL_MAX_TIER, g.james.skills['Converge
 export const actionCost = (g, a) => (a.qi ? Math.round(a.qi * dampenMultiplier(boneTier(g)) * 10) / 10 : 0);
 /** Damage × the Convergence Use tier; v0.11.4: dagger +1, sword +2 on the blade; the thrown lance +2 on darts. */
 export const formDmgBonus = (g, a) => (a.keeps === 'blade' ? Math.max(0, formStep(g, 'melee') - 1) : a.id === 'dart' && hasForm(g, 'lance') ? 2 : 0);
-export const actionDmg = (g, a) => { const b = formDmgBonus(g, a); return [a.dmg[0] * boneTier(g) + b, a.dmg[1] * boneTier(g) + b]; };
+export const actionDmg = (g, a) => {
+    if (a.unarmed) { const t = Math.min(SKILL_MAX_TIER, g.james.gu.tier); return [a.dmg[0] * t, a.dmg[1] * t]; } // v0.11.82: fists by the GU tier
+    const b = formDmgBonus(g, a); return [a.dmg[0] * boneTier(g) + b, a.dmg[1] * boneTier(g) + b];
+};
 /** Guard's defence bonus: 2; v0.11.4: +0.5 per personal-defence form (bracer 2.5 … full armour 4.5). */
-export const guardBonus = (g) => 2 + 0.5 * (formStep(g, 'defence') + 1);
+export const guardBonus = (g) => (fightStyle(g) ? 2 : 2 + 0.5 * (formStep(g, 'defence') + 1)); // v0.11.82: no armour in a spar or a brawl
 /** v0.11.4 spike field: rounds, and the damage each attacker takes (1; 2 from the slab). */
 export const FIELD_ROUNDS = 2;
 export const fieldDamage = (g) => (hasForm(g, 'slab') ? 2 : 1);
-export const armourDr = (g) => Math.max(0, boneTier(g) - 2);
+export const armourDr = (g) => (fightStyle(g) ? 0 : Math.max(0, boneTier(g) - 2)); // v0.11.82: no bone plates in a spar or a brawl
 
 /* ---------------- inventory and food ---------------- */
 
@@ -609,7 +612,21 @@ export const COMBAT_ACTIONS = {
     // v0.11.4 (actionOpen hides them until James can sing them):
     spear: { id: 'spear', label: 'Bone spear', skill: 'GU', qi: 3, dmg: [3, 6], dcMod: 2, reach: true, keeps: 'spear' }, // sung once (Convergence), thrust with GU; a full hit holds the enemy off for the round
     spikes: { id: 'spikes', label: 'Sing a field of bone spikes', skill: 'Convergence Use', qi: 4, dmg: [0, 0], dcMod: 0, field: true }, // once per fight, 2 rounds
+    // v0.11.82 (owner pick B1; labels Fable's): the unarmed brawl (a fight with style 'unarmed'): GU, no Qi, damage × the GU tier
+    strike: { id: 'strike', label: 'Step in and hit', skill: 'GU', qi: 0, dmg: [2, 4], dcMod: 0, unarmed: true },
+    throw: { id: 'throw', label: 'Hook and throw', skill: 'GU', qi: 0, dmg: [1, 2], dcMod: 2, stagger: true, unarmed: true },
+    cover: { id: 'cover', label: 'Cover up and circle', skill: 'GU', qi: 0, dmg: [0, 0], dcMod: -1, guard: true, unarmed: true },
 };
+/** v0.11.82: what a closed action becomes: in a brawl a strike (guard: cover), in a spar the blade (guard stays), else guard. */
+export function fightAction(g, id) {
+    if (actionOpen(g, id)) return id;
+    const st = fightStyle(g), guardish = !!COMBAT_ACTIONS[id]?.guard;
+    if (st === 'unarmed') return guardish ? 'cover' : 'strike';
+    if (st === 'spar') return guardish ? 'guard' : 'blade';
+    return 'guard';
+}
+/** v0.11.82 (Y1): Yuki joins a spar or a brawl only in her human form; otherwise she watches. */
+export const yukiSitsOut = (g, enc) => !!enc?.style && yukiForm(g) !== 'human';
 
 /** A hit's damage: the middle of its range (no dice). */
 function dmgRoll(g, [lo, hi]) {
@@ -644,7 +661,7 @@ export const yukiForm = (g) => (yukiForms(g).includes(g.yuki.form) ? g.yuki.form
 export function instantWin(g, enc) {
     const e = combatHooks.before ? (combatHooks.before(g, enc) || enc) : enc;
     g.stats.kills += e.enemies.length;
-    const xp = awardXp(g, 'Convergence Use', e.band || 'standard').concat(awardYukiFightXp(g, e.band || 'standard'));
+    const xp = awardXp(g, e.style === 'unarmed' ? 'GU' : 'Convergence Use', e.band || 'standard').concat(yukiSitsOut(g, e) ? [] : awardYukiFightXp(g, e.band || 'standard')); // v0.11.82
     g.lastWin = { id: e.id, degree: e.degree || 3, next: e.win };
     advance(g, 1);
     return { lines: xp, next: e.win, enc: e };
@@ -669,6 +686,7 @@ export function startCombat(g, enc0) {
         }),
         log: [enc.intro || 'Combat!'],
     };
+    if (enc.style) Object.assign(g.combat, { style: enc.style, yukiOut: yukiSitsOut(g, enc), ...(enc.opening ? { opening: enc.opening } : {}) }); // v0.11.82
     return g.combat;
 }
 
@@ -683,7 +701,8 @@ function stepNoDice(g, actionId, targetIdx) {
     const c = g.combat;
     c.adapt = c.adapt || {};
     const lines = [];
-    if (!actionOpen(g, actionId)) actionId = 'guard'; // v0.10.4: a form he can't sing yet
+    actionId = fightAction(g, actionId); // v0.10.4: a form he can't sing yet; v0.11.82: and the fight's style
+    if (c.opening && c.round === 1) lines.push(c.opening); // v0.11.82: the brawl's first line
     const act = { ...COMBAT_ACTIONS[actionId], label: actionLabel(g, actionId, COMBAT_ACTIONS[actionId].label) };
     const living = c.enemies.filter((e) => e.hp > 0);
     const target = living[Math.min(targetIdx, living.length - 1)];
@@ -704,7 +723,7 @@ function stepNoDice(g, actionId, targetIdx) {
             else { c.field = FIELD_ROUNDS; c.fieldUsed = true; lines.push('Bone spikes punch up through the ground around you, ankle-high and very sincere.'); }
         } else {
             if (act.keeps === 'blade' && fragileKnife(g)) { c.bladeFormed = false; lines.push('The knife shatters on the swing. You will have to sing another.'); } // v0.10.4: breaks every swing below T1 L8
-            const T = boneTier(g);
+            const T = c.style === 'unarmed' ? 1 : boneTier(g); // v0.11.82: fists pierce nothing
             const targets = act.id === 'dart' && T >= 4 ? living.slice(0, T >= 5 ? living.length : 2) : [target];
             const key = actionId;
             let learned = false;
@@ -719,16 +738,16 @@ function stepNoDice(g, actionId, targetIdx) {
                 dmg = Math.max(0, dmg - (T >= 3 ? 0 : (tg.dr || 0)));
                 tg.hp -= dmg;
                 lines.push(`  ${tg.name} takes ${dmg}${band === 'double' ? ' (double damage)' : ''}.`);
-                if (act.stagger && tg.hp > 0 && band !== 'glance') { tg.staggered = true; lines.push(`  ${tg.name} staggers.`); }
+                if (act.stagger && tg.hp > 0 && band !== 'glance') { tg.staggered = true; lines.push(act.unarmed ? `  ${tg.name} hits the dust and takes a moment to work out which way is up.` : `  ${tg.name} staggers.`); } // v0.11.82: the throw's line Fable's
                 if (act.reach && tg.hp > 0 && band !== 'glance') { tg.atBay = true; lines.push(`  ${tg.name} is held at the spear's length.`); }
             }
         }
     }
-    const ct = boneTier(g) >= 7 ? c.enemies.find((e) => e.hp > 0) : null;
+    const ct = !c.style && boneTier(g) >= 7 ? c.enemies.find((e) => e.hp > 0) : null; // v0.11.82: no construct in a spar or a brawl
     if (ct) { const dmg = boneTier(g) * 2; ct.hp -= dmg; lines.push(`Your bone construct strikes ${ct.name}: ${dmg}.`); }
-    let shield = boneTier(g) >= 8;
+    let shield = !c.style && boneTier(g) >= 8;
     const yt = c.enemies.find((e) => e.hp > 0);
-    if (yt && g.yuki.hp > 0) {
+    if (yt && g.yuki.hp > 0 && !c.yukiOut) { // v0.11.82 (Y1): she watches a spar or a brawl unless human
         const form = YUKI_FORMS[yukiForm(g)];
         const yv = Math.round((skillCheck(g.yuki.fight) + form.hit + (c.adapt.yuki || 0)) * 10) / 10;
         const d = noDiceDc(yt.dc);
@@ -745,10 +764,10 @@ function stepNoDice(g, actionId, targetIdx) {
     }
     for (const e of c.enemies) {
         if (e.hp <= 0) continue;
-        if (e.staggered) { e.staggered = false; lines.push(`${e.name} is still reeling.`); continue; }
+        if (e.staggered) { e.staggered = false; lines.push(c.style === 'unarmed' ? `${e.name} is still getting up.` : `${e.name} is still reeling.`); continue; }
         if (e.atBay) { e.atBay = false; lines.push(`${e.name} can't get past the spear.`); continue; }
         if (e.prefersSmall && g.yuki.hp > 0 && c.round % 3 === 0) { // every third round it goes for the small one
-            const dodge = skillCheck(g.yuki.fight) + 1 >= noDiceDc(e.atk) || (guard && hasForm(g, 'buckler')); // v0.11.4: shield cover
+            const dodge = skillCheck(g.yuki.fight) + 1 >= noDiceDc(e.atk) || (guard && !c.style && hasForm(g, 'buckler')); // v0.11.4: shield cover
             lines.push(`${e.name} lunges at Yuki — ${dodge ? 'she is not there' : 'it connects'}.`);
             if (!dodge) g.yuki.hp = Math.max(1, g.yuki.hp - hitDamage(e.dmg, e.realm, g.yuki.realm, yukiDr(g)));
             continue;
@@ -785,7 +804,7 @@ function finishRound(g, lines) {
     const down = c.enemies.every((e) => e.hp <= 0);
     if (down) {
         g.stats.kills += c.enemies.length;
-        const xp = awardXp(g, 'Convergence Use', c.band).concat(awardYukiFightXp(g, c.band));
+        const xp = awardXp(g, c.style === 'unarmed' ? 'GU' : 'Convergence Use', c.band).concat(c.yukiOut ? [] : awardYukiFightXp(g, c.band)); // v0.11.82
         g.lastWin = { id: c.id, degree: c.degree || 1, next: c.win };
         lines.push('', 'It is over.', ...xp);
         const next = c.win;

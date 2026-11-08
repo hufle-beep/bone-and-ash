@@ -2,6 +2,30 @@
 
 Started 2026-11-08 (v0.11.74), when `history-9.md` reached about 45 KB. Newer than `history-9.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.82 (word for word)
+
+### From "Open items" (done: the Tan fight in v0.11.81, the brawls in v0.11.82)
+
+(And, to keep the handover under 35 KB, the standing item below; the rule itself is `CLAUDE.md` rule 10.)
+
+- **Story texts by Fable (owner 2026-11-08 15:02 W1, "if I find Fable better, then we will rewrite the story with fable. agreed?"; 15:09 "F All" for v0.11.69's 23 replies; 15:16, "we amend the rules then, the whole game gets a text rewrite pass from Fable. I dont need to read everything, but you will run a comparative analysis this also goes into group e [15:19: "I meant group e"]. if it comes out better, the text belongs to fable after that."):** new story texts are drafted by Fable (a helper agent with model `fable`), Claude builds; the whole game's text gets a Fable rewrite pass with Claude's comparative analysis (old vs new) in the roadmap's group e; if Fable's comes out better, the game's text is Fable's from then on. Every part through rule 1 (options and a pick, one push each). **Since v0.11.70 `CLAUDE.md` rule 10** (pick A1; the full text in `working-agreement.md`).
+- **Group d, the owner's calls of 21:12 (after the lists and options of 21:02; new in v0.11.80):** "L1, determine if the characters would accept Yuki joining. They would probably  be more receptive to it after she gains human form (which is a huge mistake since she is almost unimaginably powerful at that point which fits the deadpan humorous tone of everyone misjudging James and Yuki's power) if they allow Yuki to join, she joins. Ya: It can be spear to blade or spear, without armor. As usual, Convergence creates the weapon, GU is used for attack and defense checks. Fix the Tan fight." Read as: (1) for each brawl, Claude judges from the scenes whether the people in it would let Yuki join (likelier once she has her human form, which they badly underestimate); where they would, she fights; (2) Ya's brawl (`ya_brawl`) is a weapon spar: Ya's spear against James's blade or spear, no armour (no defence forms, no bone-armour DR), the weapon sung with Convergence, the attack and defence checks on GU, as today; (3) the Tan brothers' fight (`lf_bandits`, a fight against people missing from `PEOPLE_FIGHTS`, so it gets the beasts' +0.5 and a loss can end the Coil) is fixed. Each is a game change: options with the numbers first, one push each (rule 1). **The numbers shown in chat at 21:02** (a throwaway lab, 300 games; `tools/fightlab.mjs` from now on): Ya's brawl today 98.5% (smart) / 97.0% (random); unarmed variants (GU only, no Qi; strike, a staggering throw, guard; XP to GU): U1 strike 3–6 × GU tier, +1 DC, Yuki in: 99.8 / 97.8%; U2 the same, Yuki out: 99.3 / 72.8%; U3 strike 2–4 × GU tier, no DC change, Yuki in: 98.3 / 97.0% (today's numbers); Bao's brawl (`rt_brawl`, 17 fights) 100% in every variant. The chat's "blade only is best in all 29 fights" was measured with darts falling back to the needle; the lab confirms it on the same states (24 of 24 fights with enough of them, version note).
+
+### From "Decided in chat (2026-11-07)"
+
+- **v0.11.79: hard rule 8, Claude uploads every time (owner 20:52: "this new rule will eliminate the need for my manual upload. you can upload every time. change the rules and give me the updated hard rules plus the updated handover message too"; options R1 (rule 8 replaced; `project/research/` repo only) / R2 (the reports mirrored too); owner 20:53 "R1."):**
+  - **Picked:** **R1**: `CLAUDE.md` rule 8 now reads: after every push Claude uploads the changed `project/` docs itself with its project tool (the doc size rule keeps each readable in one go); a doc that can't go up is named with the reason, sent as a file and its trim-and-split fix proposed; `project/research/` repo only; every report lists what went up. `working-agreement.md` the same, with the history of the rule. The full hard rules given to the owner in chat to paste into the project's Instructions field; `claude/CLAUDE.md` in the project mirrored.
+  - **No Fable step** (docs and a test).
+  - **Also:** the 7 docs changed in v0.11.78 (handover, roadmap, changelog, restore-points, history-10, working-agreement, reference) were held back and go up with this push's (owner pick R1); both research parts went up after v0.11.78; `b6769c1` filled in for 0.11.78; v0.11.76's notes moved to `history-10.md`.
+  - **Checks:** see the version note.
+
+### From "Version notes"
+
+## v0.11.79 — hard rule 8: Claude uploads every time (R1)
+
+- **CLAUDE.md** (rule 8), **project/working-agreement.md** (the mirror rule), **tests/tools.test.mjs** (the v0.11.79 block), **sw.js, tests/README.md; project docs** (v0.11.76 to `history-10.md`). The game identical to 0.11.78; saves unchanged.
+- **Checks:** docs and a test only (rule 2): `node tests/tools.test.mjs`, `node tools/consistency.mjs` and `bash tools/check.sh quick`. How it interacts: no game file, save or bot code changed, so the game and the bot numbers can't move; the new test reads only `CLAUDE.md` and the working agreement. What can now break a push: `CLAUDE.md` losing a rule or its numbering, or rule 8 going back to asking (intended).
+
 ## Moved from the handover in v0.11.81 (word for word)
 
 ### From "Decided in chat (2026-11-07)"

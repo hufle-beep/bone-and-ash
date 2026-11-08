@@ -68,24 +68,24 @@ Old Hu moves the skulls back round. Then, after a while, he moves one of them ba
 
 ${pick(d, 'She is very fast, and she knows it.', 'She is fast, for someone who is about to have a very educational afternoon.', 'You find you are already sorry, mostly for the goats.')}`,
         win: {
-            2: () => `It ends with Ya flat on her back in the dust and a cage of white bone across her chest, pinning her to the lane like a butterfly to a board. She never landed a blow. She's bleeding from the lip anyway, mostly from laughing.
+            2: () => `It ends with Ya flat on her back in the dust, her spear lying in the barley where it went when it left her hands, and the flat of a white bone blade laid across her collarbones, holding her to the lane the way a ruler holds down a page. She never landed a touch; the spear never found anything to hit. She's bleeding from the lip anyway, mostly from laughing.
 
 "*How,*" she wheezes. "How are you — you're *nothing*, you smell of *nothing* — do that again. Later. Somewhere with fewer goats."
 
 Old Hu replaces his headband with tremendous dignity. His face has been saved, by proxy, and in this world that counts. He bows to you. Then, after a long and visible internal struggle, he bows to Ya, because she fought, and fighting is a thing that can be respected even in an animal.
 
 Mei Lin, on the step, has put the knife down. She is staring at Ya with an expression you can't read at all.`,
-            3: () => `Ya comes at you low and laughing. Ya is, a moment later, upside down, in the air, held by the ankle in a hand of white bone that grew out of the lane, with her hair in the dust and her spear on the roof of the smithy.
+            3: () => `Ya comes at you low and laughing. You step inside the spear. A moment later Ya is sitting in the dust with her legs straight out in front of her like a dropped doll, her hair full of grit, her spear on the roof of the smithy, and the point of your white blade resting, with great courtesy, on the crown of her head.
 
 There is a long silence.
 
-"Okay," she says, upside down. "*Okay.* That's — you're — I take it back about the coat. I want *all* of you. I want you on a plate. Put me down, I'm going to marry you, I'm going to fight you every morning until I win, which will be never, which is *perfect*—"
+"Okay," she says, to the dust. "*Okay.* That's — you're — I take it back about the coat. I want *all* of you. I want you on a plate. Let me up, I'm going to marry you, I'm going to fight you every morning until I win, which will be never, which is *perfect*—"
 
-You put her down. Gently. Old Hu replaces his headband with tremendous dignity: his face has been saved, by proxy, and in this world that counts. He bows to you. Then, after a long and visible internal struggle, he bows to Ya, because she fought, and fighting is a thing that can be respected even in an animal. Even one that is currently trying to kiss your boots out of what appears to be professional admiration.
+You take the blade away. Gently. Old Hu replaces his headband with tremendous dignity: his face has been saved, by proxy, and in this world that counts. He bows to you. Then, after a long and visible internal struggle, he bows to Ya, because she fought, and fighting is a thing that can be respected even in an animal. Even one that is currently trying to kiss your boots out of what appears to be professional admiration.
 
 Mei Lin, on the step, has put the knife down. She is staring at Ya with an expression you can't read at all.`,
         },
-        one: () => 'One gesture. The lane grows a hand, and the hand picks Ya up by the ankle like a disobedient kitten.',
+        one: () => 'One pass. Her spear is on the smithy roof and she is sitting in the dust, working out how.', // v0.11.82: Fable's (the spar)
     },
 
     /* ============================================================ PART 2 — INTO THE BLACKROOT ============================== */

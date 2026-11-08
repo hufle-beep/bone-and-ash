@@ -57,8 +57,17 @@ export const rankLabel = tl;
 /* ---- fights: which actions show, and what they are called ---- */
 const best = (g, line) => lineState(g, line).now?.id;
 /** v0.11.4: the spear and the spike field (the name is from when they existed only in Incremental Mode, not Story Mode). */
-export const INC_ONLY_ACTIONS = new Set(['spear', 'spikes']);
+export const INC_ONLY_ACTIONS = new Set(['spear', 'spikes', 'strike', 'throw', 'cover']); // v0.11.82: and the unarmed brawl's three
+/** v0.11.82 (owner pick B1): a fight's style. 'unarmed' (Bao's brawl): only the three unarmed actions; 'spar' (Ya's brawl):
+ *  only the sung weapon (blade, spear) and guard; no style: every bone action as before. */
+export const UNARMED_ACTIONS = new Set(['strike', 'throw', 'cover']);
+export const SPAR_ACTIONS = new Set(['blade', 'spear', 'guard']);
+export const fightStyle = (g) => g?.combat?.style || null;
 export function actionOpen(g, id) {
+    const st = fightStyle(g);
+    if (st === 'unarmed') return UNARMED_ACTIONS.has(id);
+    if (UNARMED_ACTIONS.has(id)) return false;
+    if (st === 'spar' && !SPAR_ACTIONS.has(id)) return false;
     if (INC_ONLY_ACTIONS.has(id)) return hasForm(g, id);
     if (id === 'dart') return hasForm(g, 'dart');
     return true;
@@ -68,6 +77,7 @@ export const fragileKnife = (g) => cuRank(g) < AT.knife;
 export function actionLabel(g, id, base) {
     if (id === 'dart') return { storm: 'Bone storm', volley: 'Bone volley', lance: 'Thrown bone lance' }[best(g, 'ranged')] || 'Bone darts';
     if (id === 'blade') return { sword: 'Bone sword', dagger: 'Bone dagger', knife: 'Bone knife' }[best(g, 'melee')] || 'Fragile bone knife';
+    if (id === 'guard' && fightStyle(g)) return base; // v0.11.82: no armour in a spar
     if (id === 'guard') return { armour: 'Armour up, give ground', plates: 'Plates up, give ground', shield: 'Shield up, give ground', buckler: 'Buckler up, give ground', bracer: 'Bracer up, give ground' }[best(g, 'defence')] || base;
     return base;
 }
