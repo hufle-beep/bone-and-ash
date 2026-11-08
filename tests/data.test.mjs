@@ -223,7 +223,7 @@ const LF_P3 = 'lf_hub lf_seclusion lf_bone_depths lf_black_mire lf_thunder_ridge
     assert(/long dark trousers and plain dark cloth shoes/.test(gen('return_road_tiger')) && R.pictures.return_road_tiger[0].file === 'a1t_return_road2_s77', 'v0.11.60 (R2): return_road_tiger redrawn, Mei Lin in trousers and cloth shoes');
     assert(/Behind the fence the background is a wall of dark tree trunks and leaves/.test(gen('ya_fight_tiger')) && R.pictures.ya_fight_tiger[0].file === 'a1t_ya_fight2_s77', 'v0.11.60 (R2): ya_fight_tiger redrawn against a wall of trees');
     // red eyes made grey by a recorded local step on the generated picture
-    for (const k of ['ship_wreck_tiger', 'a1_end_tiger']) { const st = R.pictures[k].at(-1); assert(st.op === 'local' && /eyes\.py/.test(st.note) && st.source === R.pictures[k][0].file && st.spec.boxes.length >= 2, `v0.11.60: ${k}'s red eyes made grey by a recorded local step`); }
+    for (const k of ['ship_wreck_tiger', 'a1_end_tiger']) { const st = R.pictures[k].at(-1); assert(st.op === 'local' && /eyes\.py/.test(st.note) && st.source === R.pictures[k].at(-2).file && st.spec.boxes.length >= 2, `v0.11.60: ${k}'s red eyes made grey by a recorded local step`); }
 }
 // v0.11.61 (Act 1 art, push 4b; owner picks 2026-11-08 N1 + F1 + P1): the human version of Act 1's 20 Yuki keys, style pc, cast yuki_human
 {
@@ -261,7 +261,51 @@ const LF_P3 = 'lf_hub lf_seclusion lf_bone_depths lf_black_mire lf_thunder_ridge
     for (const [f, file] of [['ya_fight_human', 'a1h_ya_fight2_s66'], ['drowned_camp_human', 'a1h_drowned_camp2_s88'], ['heart_hall_human', 'a1h_heart_hall3_s88'], ['a1_end_human', 'a1h_a1_end3_s88']]) assert(R.pictures[f][0].file === file, `v0.11.61: ${f} is drawn from ${file}`);
     assert(/clearly a woman, with a soft feminine face, full lips/.test(gen('a1_end_human')) && /clearly a woman, with a soft feminine face, full lips/.test(gen('heart_hall_human')), 'v0.11.61: a1_end and heart_hall give Mei Lin the woman wording too');
     // the local step: a1_end Ya's red eyes grey (her scar kept)
-    for (const k of ['a1_end_human']) { const st = R.pictures[k].at(-1); assert(st.op === 'local' && /eyes\.py/.test(st.note) && st.source === R.pictures[k][0].file && st.spec.boxes.length >= 1, `v0.11.61: ${k} has a recorded local step on its generated picture`); }
+    for (const k of ['a1_end_human']) { const st = R.pictures[k].at(-1); assert(st.op === 'local' && /eyes\.py/.test(st.note) && st.source === R.pictures[k].at(-2).file && st.spec.boxes.length >= 1, `v0.11.61: ${k} has a recorded local step on its picture (since v0.11.62 on the patched picture)`); }
+}
+// v0.11.62 (the second round of small fixes, push 5a; owner picks 2026-11-08 P1 + A1 + B1 + M1, pictures 09:12): 15 pictures fixed by
+// inpaints on the approved picture and a recorded local step (tools/art/patch.py: the inpaints pasted through their masks, copies of
+// the wall beside a stray object, a white moon, board shutters, a black tail made white); gift_human redrawn with the two apart
+{
+    const R = JSON.parse(readFileSync('tools/art/recipes.json', 'utf8'));
+    const FIXED = ['mire_human', 'rats_human', 'forest_dawn_human', 'gift_human', 'jackals_dead_human', 'ashfall_dawn_human', 'a1_end_human', 'a1_end_tiger', 'lf_black_mire_tiger', 'heart_roots_tiger', 'heart_hall_human', 'ya_arrives', 'ya_fight', 'ya_fight_human', 'lf_bandits_tiger'];
+    assert(existsSync('tools/art/patch.py'), 'v0.11.62: tools/art/patch.py exists');
+    const files = new Set();
+    for (const k of FIXED) {
+        const steps = R.pictures[k];
+        assert(steps && existsSync(`art/pic/${k}.webp`), `v0.11.62: ${k} has its recipe and picture`);
+        assert(R.palette.rename[steps.at(-1).file] === k && Object.entries(R.palette.rename).filter(([, v]) => v === k).length === 1, `v0.11.62: palette.rename maps ${k}'s last file (${steps.at(-1).file}) to ${k}, and only that file`);
+        const base = steps.find((st) => st.op === 'generate' || st.op === 'inpaint').file;
+        for (const st of steps) {
+            files.add(st.file);
+            if (st.op === 'inpaint' && st.file.startsWith('f5_')) assert(R.masks[st.mask] && st.source === base && st.why && /v0\.11\.62/.test(st.why), `v0.11.62: ${k}'s inpaint ${st.file} has its mask, runs on the approved picture (${base}) and says why`);
+            if (st.op === 'local' && /patch\.py/.test(st.note)) {
+                assert(st.source === base && st.file === `f5_${k}_patch`, `v0.11.62: ${k}'s patch step runs on the approved picture`);
+                for (const L of st.spec.layers || []) assert(R.masks[L.mask] && steps.some((x) => x.op === 'inpaint' && `${x.file}_00001_` === L.file && x.mask === L.mask), `v0.11.62: ${k}'s patch layer ${L.file} is a recorded inpaint with the same mask`);
+                for (const C of st.spec.copies || []) assert(C.to[2] - C.to[0] > 0 && C.to[3] - C.to[1] > 0 && C.from[0] + C.to[2] - C.to[0] <= 1280 && C.from[1] + C.to[3] - C.to[1] <= 800, `v0.11.62: ${k}'s copy from ${C.from} fits in the picture`);
+            }
+        }
+        for (const st of steps) assert(!/nude|naked|breast|bust|bath|bare (?:chest|skin)/i.test(st.prompt || ''), `v0.11.62: ${k}'s ${st.file} asks for nothing unclothed`);
+    }
+    const used = new Set(Object.values(R.pictures).flat().flatMap((st) => [st.mask, ...((st.spec && st.spec.layers) || []).map((L) => L.mask)]));
+    assert(Object.keys(R.masks).filter((m) => m.startsWith('f5_')).every((m) => used.has(m)), 'v0.11.62: every f5_ mask is used by a recorded step');
+    const patchOf = (k) => R.pictures[k].find((st) => st.op === 'local' && /patch\.py/.test(st.note));
+    // cold review: every f5_ inpaint of a picture with a patch step is pasted by it (a dropped layer failed nothing)
+    for (const k of FIXED) { const p = patchOf(k); if (p) for (const st of R.pictures[k].filter((x) => x.op === 'inpaint' && x.file.startsWith('f5_'))) assert((p.spec.layers || []).some((L) => L.file === `${st.file}_00001_`), `v0.11.62: ${k}'s patch step pastes its inpaint ${st.file}`); }
+    // what each fix is
+    assert(patchOf('mire_human').spec.tails.length === 1 && patchOf('rats_human').spec.tails.length === 1, 'v0.11.62: mire and rats (human) have their black tails made white');
+    assert(/snow-white cat tail/.test(R.pictures.forest_dawn_human.at(-1).prompt) && R.pictures.forest_dawn_human.at(-1).mask === 'f5_fd_tail', 'v0.11.62: forest_dawn_human\'s tail repainted joined to her');
+    assert(R.pictures.gift_human.length === 1 && R.pictures.gift_human[0].file === 'f5_gift4_s55' && /Behind his head, at the right edge of the picture, kneels/.test(R.pictures.gift_human[0].prompt) && R.pictures.gift_human[0].prompt.includes(R.cast.yuki_human) && /snow-white cat tail/.test(R.pictures.gift_human[0].prompt), 'v0.11.62: gift_human redrawn with her kneeling apart from him, her tail white');
+    assert(/cat ears/.test(R.pictures.jackals_dead_human.at(-1).prompt) && /whole and sharp at the tips/.test(R.pictures.jackals_dead_human.at(-1).prompt), 'v0.11.62: jackals_dead_human\'s ear tips repainted');
+    assert(patchOf('ashfall_dawn_human').spec.layers.length === 2 && patchOf('ashfall_dawn_human').spec.copies.length >= 3 && R.pictures.ashfall_dawn_human.some((st) => /bright red cloth sash/.test(st.prompt || '')) && R.pictures.ashfall_dawn_human.some((st) => /shutter of dark wooden boards/.test(st.prompt || '')), 'v0.11.62: ashfall_dawn_human: shuttered huts, the red sash, the knob and windows covered');
+    { const p = patchOf('a1_end_human').spec; assert(p.layers.length === 2 && p.copies.length >= 4 && p.discs.length === 1 && R.pictures.a1_end_human.some((st) => /clearly a woman/.test(st.prompt || '') && st.mask === 'f5_end_ya'), 'v0.11.62: a1_end_human: Ya clearly a woman, Mei Lin\'s cheek, the windows and knobs covered, a white moon'); }
+    assert(patchOf('a1_end_tiger').spec.copies.length >= 7 && R.pictures.a1_end_tiger.some((st) => /bare ankles/.test(st.prompt || '')), 'v0.11.62: a1_end_tiger: the windows and lantern covered, Ya barefoot');
+    for (const k of ['heart_hall_human', 'ya_arrives']) assert(R.pictures[k].some((st) => st.file.startsWith('f5_') && /leather trousers/.test(st.prompt || '') && /bare (?:ankles|feet)/.test(st.prompt || '')), `v0.11.62: ${k}: Ya in trousers and barefoot, not boots`);
+    assert(patchOf('ya_arrives').spec.shutters.length >= 8, 'v0.11.62: ya_arrives\'s glass windows closed with shutters (owner 09:12)');
+    assert(R.pictures.ya_fight_human.some((st) => /scar line on one cheek only/.test(st.prompt || '')) && R.pictures.ya_fight_human.some((st) => /bone point/.test(st.prompt || '')), 'v0.11.62: ya_fight_human: Ya\'s scar, a bone spear point');
+    assert(patchOf('heart_roots_tiger').spec.copies.length === 1, 'v0.11.62: heart_roots_tiger\'s curl covered');
+    // the five pictures redrawn in push 5b keep their pictures for now (B1, owner 09:12)
+    for (const k of ['guardian', 'ashen_hills', 'rot_ape', 'ship_wreck', 'grove_sprout']) assert(!Object.values(R.pictures).flat().some((st) => st.file.startsWith(`f5_${k}`)), `v0.11.62: ${k} is left for push 5b`);
 }
 // v0.11.38 (P-b): the form map. A picture whose recipe draws Yuki as the small cat shows only while she is the cat;
 // in tiger or human form the plate is code art (which draws her current form). The list is checked against the recipes, so it cannot drift.

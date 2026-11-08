@@ -5,6 +5,7 @@
 // tools/check.mjs: its job list (--list, both modes) and tools/lib/jobs.mjs's validateJobs on a broken list.
 // v0.11.28: tools/lib/report.mjs (the compact output) and the models step's --off-models, on a tiny real models run.
 // v0.11.39: tools/arthash.mjs (the ART fingerprints in sw.js) on a made-up folder and on the real repo.
+// v0.11.62: tools/art/patch.py on a made-up picture.
 // v0.11.22: tools/leftovers.mjs on small made-up inputs (every kind found, kept entries skipped) and tests/lib/seen.mjs's watch.
 import { spawn, execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -273,6 +274,51 @@ for (const [name] of RUNS) {
     assert(artFiles(ROOT).every((f) => ART_RE.test(f)) && ART_RE.test('art/bg/x.webp') && ART_RE.test('art/pic/sub/y.webp') && !ART_RE.test('art/bg/CREDITS.md'), 'arthash: one rule for art files (ART_RE), any depth under art/');
 }
 
+// v0.11.62: tools/art/patch.py (the second round of small fixes) on a made-up 60x40 picture: a layer pastes only inside its mask,
+// a copy moves the block it names, a disc paints a white moon, a line draws a stick, a shutter darkens a box with boards, a tail turns
+// a black line white with a black rim; a tail seed off the tail, a copy, a disc, a line or a shutter outside the picture each fail
+{
+    const py = String.raw`
+import json, subprocess, sys, tempfile, pathlib, shutil
+import numpy as np
+from PIL import Image
+d = pathlib.Path(tempfile.mkdtemp())
+try:
+    src = np.full((40, 60, 3), 128, 'uint8'); src[20:24, 30:50] = 0      # a grey picture with a black bar (the "tail")
+    src[2:6, 2:6] = 255                                                    # a white square to copy
+    Image.fromarray(src).save(d / 's.png')
+    lay = np.zeros((40, 60, 3), 'uint8'); Image.fromarray(lay).save(d / 'L_00001_.png')
+    m = np.zeros((40, 60), 'uint8'); m[30:36, 2:10] = 255; Image.fromarray(m).convert('RGB').save(d / 'M.png')
+    spec = {"layers": [{"file": "L_00001_", "mask": "M"}], "copies": [{"from": [2, 2], "to": [10, 2, 14, 6], "feather": 0}],
+            "discs": [{"center": [50, 8], "r": 4, "fill": 250, "outline": 120, "width": 1}], "lines": [{"from": [14, 12], "to": [14, 18], "width": 3, "fill": 85, "outline": 20}],
+            "shutters": [{"box": [20, 2, 28, 10]}],
+            "tails": [{"limits": [[[28, 18], [52, 18], [52, 26], [28, 26]]], "seeds": [[40, 22]], "thr": 40, "grow": 2, "rim": 2}]}
+    def run(sp, name):
+        json.dump(sp, open(d / f'{name}.json', 'w'))
+        return subprocess.run([sys.executable, '-I', sys.argv[1], str(d / 's.png'), str(d / f'{name}.json'), str(d / f'{name}.png'), '--dir', str(d)], capture_output=True, text=True).returncode
+    res = {"rc": run(spec, 'p')}
+    o = np.asarray(Image.open(d / 'p.png').convert('L')).astype(int)
+    res.update({"layer_in": int(o[32, 5]), "layer_out": int(o[32, 20]), "copy": int(o[4, 12]), "moon": int(o[8, 50]), "line": int(o[15, 14]), "line_off": int(o[15, 18]),
+                "shutter": int(o[6, 23]), "boards": int(o[6, 20]) != int(o[6, 23]), "tail_core": int(o[22, 40]), "tail_rim": int(o[18, 40]), "far": int(o[38, 58])})
+    bad = {"bad_seed": dict(spec, tails=[{"limits": spec["tails"][0]["limits"], "seeds": [[29, 19]], "thr": 40}]),
+           "bad_copy": dict(spec, copies=[{"from": [58, 2], "to": [10, 2, 14, 6]}]), "bad_disc": dict(spec, discs=[{"center": [58, 8], "r": 4}]),
+           "bad_line": dict(spec, lines=[{"from": [14, 12], "to": [70, 18]}]), "bad_shutter": dict(spec, shutters=[{"box": [20, 2, 70, 10]}])}
+    for k, v in bad.items(): res[k] = run(v, k)
+finally:
+    shutil.rmtree(d, ignore_errors=True)
+print(json.dumps(res))`;
+    let r = {};
+    try { r = JSON.parse(execFileSync('python3', ['-I', '-c', py, path.join(ROOT, 'tools/art/patch.py')], { encoding: 'utf8' }).trim()); } catch (e) { assert(false, `patch.py: the made-up run crashed (${String(e.message).slice(0, 200)})`); }
+    assert(r.rc === 0, `patch.py: runs on a good spec (${r.rc})`);
+    assert(r.layer_in < 20 && r.layer_out === 128, `patch.py: a layer pastes inside its mask only (${r.layer_in}, ${r.layer_out})`);
+    assert(r.copy === 255, `patch.py: a copy moves the block it names (${r.copy})`);
+    assert(r.moon >= 240, `patch.py: a disc paints a white moon (${r.moon})`);
+    assert(r.line < 100 && r.line_off === 128, `patch.py: a line draws a dark stick and nothing beside it (${r.line}, ${r.line_off})`);
+    assert(r.shutter < 100 && r.boards, `patch.py: a shutter darkens its box, with board lines (${r.shutter})`);
+    assert(r.tail_core >= 230 && r.tail_rim < 90, `patch.py: a black tail turns white with a black rim (${r.tail_core}, ${r.tail_rim})`);
+    assert(r.far === 128, `patch.py: pixels outside every step are untouched (${r.far})`);
+    for (const k of ['bad_seed', 'bad_copy', 'bad_disc', 'bad_line', 'bad_shutter']) assert(r[k] !== undefined && r[k] !== 0, `patch.py: ${k.replace('bad_', 'a bad ')} fails the run (${r[k]})`);
+}
 rmSync(TMP, { recursive: true, force: true });
 
 console.log(`(${((Date.now() - t0) / 1000).toFixed(1)} s)`);

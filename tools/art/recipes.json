@@ -1270,6 +1270,404 @@
      ]
     ]
    ]
+  },
+  "f5_end_ya": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 6,
+   "polys": [
+    [
+     [
+      960,
+      68
+     ],
+     [
+      1050,
+      58
+     ],
+     [
+      1066,
+      120
+     ],
+     [
+      1052,
+      188
+     ],
+     [
+      966,
+      192
+     ],
+     [
+      950,
+      130
+     ]
+    ]
+   ]
+  },
+  "f5_end_mei": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 4,
+   "ellipses": [
+    [
+     782,
+     116,
+     810,
+     144
+    ]
+   ]
+  },
+  "f5_ad_village": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 8,
+   "polys": [
+    [
+     [
+      0,
+      425
+     ],
+     [
+      372,
+      425
+     ],
+     [
+      372,
+      630
+     ],
+     [
+      330,
+      660
+     ],
+     [
+      240,
+      700
+     ],
+     [
+      0,
+      715
+     ]
+    ]
+   ]
+  },
+  "f5_ad_sash": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 4,
+   "polys": [
+    [
+     [
+      842,
+      352
+     ],
+     [
+      978,
+      352
+     ],
+     [
+      978,
+      418
+     ],
+     [
+      842,
+      418
+     ]
+    ]
+   ]
+  },
+  "f5_hh_legs2": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 6,
+   "polys": [
+    [
+     [
+      455,
+      358
+     ],
+     [
+      520,
+      358
+     ],
+     [
+      528,
+      470
+     ],
+     [
+      566,
+      520
+     ],
+     [
+      578,
+      765
+     ],
+     [
+      458,
+      765
+     ],
+     [
+      452,
+      600
+     ]
+    ]
+   ]
+  },
+  "f5_fd_tail": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 6,
+   "polys": [
+    [
+     [
+      988,
+      560
+     ],
+     [
+      1165,
+      560
+     ],
+     [
+      1165,
+      800
+     ],
+     [
+      988,
+      800
+     ]
+    ]
+   ]
+  },
+  "f5_jd_ears": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 6,
+   "polys": [
+    [
+     [
+      572,
+      48
+     ],
+     [
+      795,
+      48
+     ],
+     [
+      795,
+      128
+     ],
+     [
+      572,
+      128
+     ]
+    ]
+   ]
+  },
+  "f5_endt_legs": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 6,
+   "polys": [
+    [
+     [
+      878,
+      505
+     ],
+     [
+      1000,
+      505
+     ],
+     [
+      1038,
+      600
+     ],
+     [
+      1040,
+      800
+     ],
+     [
+      862,
+      800
+     ],
+     [
+      862,
+      610
+     ]
+    ]
+   ]
+  },
+  "f5_lbm_tower": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 6,
+   "polys": [
+    [
+     [
+      188,
+      268
+     ],
+     [
+      285,
+      268
+     ],
+     [
+      285,
+      345
+     ],
+     [
+      188,
+      345
+     ]
+    ]
+   ]
+  },
+  "f5_ya_legs": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 6,
+   "polys": [
+    [
+     [
+      640,
+      470
+     ],
+     [
+      748,
+      470
+     ],
+     [
+      800,
+      560
+     ],
+     [
+      832,
+      796
+     ],
+     [
+      598,
+      796
+     ],
+     [
+      628,
+      600
+     ]
+    ]
+   ]
+  },
+  "f5_yf_cheek": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 4,
+   "ellipses": [
+    [
+     604,
+     172,
+     636,
+     206
+    ]
+   ]
+  },
+  "f5_yfh_face": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 6,
+   "polys": [
+    [
+     [
+      412,
+      168
+     ],
+     [
+      505,
+      168
+     ],
+     [
+      512,
+      272
+     ],
+     [
+      420,
+      272
+     ]
+    ]
+   ]
+  },
+  "f5_yfh_spear": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 4,
+   "polys": [
+    [
+     [
+      604,
+      14
+     ],
+     [
+      656,
+      14
+     ],
+     [
+      656,
+      200
+     ],
+     [
+      604,
+      200
+     ]
+    ]
+   ]
+  },
+  "f5_lbt_loop": {
+   "size": [
+    1280,
+    800
+   ],
+   "blur": 4,
+   "polys": [
+    [
+     [
+      465,
+      600
+     ],
+     [
+      522,
+      600
+     ],
+     [
+      522,
+      684
+     ],
+     [
+      465,
+      684
+     ]
+    ]
+   ]
   }
  },
  "pictures": {
@@ -2429,6 +2827,16 @@
     "seed": 44,
     "width": 1280,
     "height": 800
+   },
+   {
+    "op": "inpaint",
+    "file": "f5_forest_dawn_tail_s2",
+    "source": "y3h_forest_dawn_s44",
+    "mask": "f5_fd_tail",
+    "seed": 2,
+    "denoise": 1.0,
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. From behind the hip of a slender woman in a long black qipao, a long snow-white cat tail with a thin black ink outline comes out and curves down to the misty forest floor in a loose loop, its tip curling up.",
+    "why": "v0.11.62 (second round of small fixes, push 5a; owner picks 2026-11-08 08:15 P1 + A1 + B1 + M1, pictures 09:12 \"I agree\"): the tail joined to her (was a loop apart from her); seeds 1-3, s1 drew a whole cat, s3 cloud curls; ComfyUI read the source as boneash/y3h_forest_dawn_s44_00001_.png [output]"
    }
   ],
   "omnitool_human": [
@@ -2542,16 +2950,81 @@
     "seed": 44,
     "width": 1280,
     "height": 800
+   },
+   {
+    "op": "local",
+    "file": "f5_rats_human_patch",
+    "source": "y3h_rats_s44",
+    "note": "v0.11.62 (second round of small fixes, push 5a; owner picks 2026-11-08 08:15 P1 + A1 + B1 + M1, pictures 09:12 \"I agree\"): her mostly black tail made white with a black rim; after the cold review (R1): the separate white curl to its right, which read as a second tail, covered with the ground beside it. python3 -I tools/art/patch.py SRC SPEC OUT --dir DIR with SPEC = this step's spec (DIR holds the inpaints' outputs as ComfyUI saved them, <file>_00001_.png, and the masks drawn by masks.py). Then palette.py.",
+    "spec": {
+     "tails": [
+      {
+       "limits": [
+        [
+         [
+          972,
+          640
+         ],
+         [
+          1010,
+          640
+         ],
+         [
+          1100,
+          740
+         ],
+         [
+          1170,
+          770
+         ],
+         [
+          1175,
+          800
+         ],
+         [
+          978,
+          800
+         ]
+        ]
+       ],
+       "seeds": [
+        [
+         1040,
+         730
+        ]
+       ],
+       "thr": 50,
+       "grow": 2,
+       "rim": 3
+      }
+     ],
+     "copies": [
+      {
+       "from": [
+        1178,
+        700
+       ],
+       "to": [
+        1094,
+        672,
+        1196,
+        770
+       ],
+       "feather": 8
+      }
+     ]
+    }
    }
   ],
   "gift_human": [
    {
     "op": "generate",
-    "file": "y3h_gift_s44",
-    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A night scene at a small campfire under a pale moon in a pine forest. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers lies on his back on a blanket, just awake, deadpan, and a dead fat long-necked marsh bird is laid out on his chest like an offering. Beside him kneels a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles, very upright and proud. Exactly one man and one woman.",
-    "seed": 44,
+    "file": "f5_gift4_s55",
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A night scene at a small campfire under a pale moon in a pine forest. A man in his early forties with SHORT pale blond hair, a short neat pale blond full beard and thin rectangular metal-framed glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers lies on his back on a blanket along the bottom of the picture, his head and shoulders propped against a pack at the right, his legs stretched out to the left edge of the picture, just awake, deadpan, and a dead fat long-necked marsh bird is laid out on his chest like an offering. Behind his head, at the right edge of the picture, kneels a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles, very upright and proud, her long snow-white cat tail curled on the ground behind her. Exactly one man and one woman.",
+    "seed": 55,
     "width": 1280,
-    "height": 800
+    "height": 800,
+    "why": "v0.11.62 (second round of small fixes, push 5a; owner picks 2026-11-08 08:15 P1 + A1 + B1 + M1, pictures 09:12 \"I agree\"): redrawn with the two apart (her legs merged with his and the red piping lay in a V on the ground; inpaints failed). The first redraw (f5_gift2_s22) still had his shoe in her skirt (cold review, R1); the third wording lays him along the bottom, his head on the pack at the right and his legs to the left edge, with her kneeling behind his head: seeds 22 / 44 / 55 / 66 / 77 / 88 all valid, s55 picked"
    }
   ],
   "bone_field_human": [
@@ -2573,6 +3046,59 @@
     "seed": 44,
     "width": 1280,
     "height": 800
+   },
+   {
+    "op": "local",
+    "file": "f5_mire_human_patch",
+    "source": "y3h_mire_s44",
+    "note": "v0.11.62 (second round of small fixes, push 5a; owner picks 2026-11-08 08:15 P1 + A1 + B1 + M1, pictures 09:12 \"I agree\"): her thin black tail made white with a black rim (the inpaints drew whole cats). python3 -I tools/art/patch.py SRC SPEC OUT --dir DIR with SPEC = this step's spec (DIR holds the inpaints' outputs as ComfyUI saved them, <file>_00001_.png, and the masks drawn by masks.py). Then palette.py.",
+    "spec": {
+     "tails": [
+      {
+       "limits": [
+        [
+         [
+          946,
+          531
+         ],
+         [
+          962,
+          526
+         ],
+         [
+          1075,
+          512
+         ],
+         [
+          1082,
+          562
+         ],
+         [
+          1000,
+          568
+         ],
+         [
+          962,
+          551
+         ],
+         [
+          946,
+          548
+         ]
+        ]
+       ],
+       "seeds": [
+        [
+         985,
+         540
+        ]
+       ],
+       "thr": 20,
+       "grow": 5,
+       "rim": 3
+      }
+     ]
+    }
    }
   ],
   "dinner_human": [
@@ -2683,6 +3209,16 @@
     "denoise": 1.0,
     "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A night scene in a forest clearing under a pale moon. Two dead ash-grey jackals lie on their sides on the left and on the right in front. Between them crouches a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles, sitting on her heels, wiping her hands on a small cloth, very pleased with herself. In front of her a few scattered white bones and the grey ashes of a burnt-out campfire. Behind her only dark tree trunks and the moon. Exactly one woman and two dead jackals.",
     "why": "Y3 part 2b (owner picks 2026-11-08 00:29): owner pick H1 (00:09): she crouches between the dead jackals wiping her hands; the tips of her ears are cut at the mask top (owner 00:29: leave for the final pass)"
+   },
+   {
+    "op": "inpaint",
+    "file": "f5_jackals_dead_ears_s2",
+    "source": "y3h_jackals_dead_s55",
+    "mask": "f5_jd_ears",
+    "seed": 2,
+    "denoise": 0.9,
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. The top of a young woman's head with long straight snow-white hair and two tall pointed white cat ears with thin black ink outlines and pale grey insides, whole and sharp at the tips, against a dark night forest and a pale moon.",
+    "why": "v0.11.62 (second round of small fixes, push 5a; owner picks 2026-11-08 08:15 P1 + A1 + B1 + M1, pictures 09:12 \"I agree\"): her ear tips, cut at the old mask top (owner 00:29); s1 a black cap of hair; ComfyUI read the source as boneash/y3h_jackals_dead_s55_00001_.png [output]"
    }
   ],
   "drill_human": [
@@ -2801,6 +3337,96 @@
     "width": 1280,
     "height": 800,
     "why": "redo: the first round drew the wolf alive"
+   },
+   {
+    "op": "inpaint",
+    "file": "f5_ya_arrives_legsc_s5",
+    "source": "a1_ya_arrives2_s88",
+    "mask": "f5_ya_legs",
+    "seed": 5,
+    "denoise": 0.9,
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. Between the open sides of a long pale hide coat with spotted fur, a tall woman's two legs in long loose dark leather trousers that reach all the way down to her ankles, pale cloth bands wrapped around each shin, her bare feet on the dusty village ground.",
+    "why": "v0.11.62 (second round of small fixes, push 5a; owner picks 2026-11-08 08:15 P1 + A1 + B1 + M1, pictures 09:12 \"I agree\"): Ya's black boots made trousers to the ankles with shin wraps, barefoot (v0.11.54 review, low); after the cold review (owner pick R1, 09:31) the first pick (s1) read as shorts with a stray round mark: seeds 4-9 with the ankle wording, s5 picked (s9 valid; s6 a black blob at her feet; 1.0 drew the same as 0.9); ComfyUI read the source as boneash/a1_ya_arrives2_s88_00001_.png [output]"
+   },
+   {
+    "op": "local",
+    "file": "f5_ya_arrives_patch",
+    "source": "a1_ya_arrives2_s88",
+    "note": "v0.11.62 (second round of small fixes, push 5a; owner picks 2026-11-08 08:15 P1 + A1 + B1 + M1, pictures 09:12 \"I agree\"): the inpaint pasted; eight glass-paned windows closed with board shutters (owner 09:12). python3 -I tools/art/patch.py SRC SPEC OUT --dir DIR with SPEC = this step's spec (DIR holds the inpaints' outputs as ComfyUI saved them, <file>_00001_.png, and the masks drawn by masks.py). Then palette.py.",
+    "spec": {
+     "layers": [
+      {
+       "file": "f5_ya_arrives_legsc_s5_00001_",
+       "mask": "f5_ya_legs"
+      }
+     ],
+     "shutters": [
+      {
+       "box": [
+        0,
+        322,
+        46,
+        404
+       ]
+      },
+      {
+       "box": [
+        262,
+        350,
+        296,
+        408
+       ]
+      },
+      {
+       "box": [
+        342,
+        380,
+        382,
+        414
+       ]
+      },
+      {
+       "box": [
+        598,
+        382,
+        617,
+        420
+       ]
+      },
+      {
+       "box": [
+        1250,
+        168,
+        1280,
+        300
+       ]
+      },
+      {
+       "box": [
+        1218,
+        168,
+        1250,
+        212
+       ]
+      },
+      {
+       "box": [
+        1262,
+        298,
+        1280,
+        342
+       ]
+      },
+      {
+       "box": [
+        267,
+        198,
+        289,
+        247
+       ]
+      }
+     ]
+    }
    }
   ],
   "ya_fight": [
@@ -2812,6 +3438,16 @@
     "width": 1280,
     "height": 800,
     "why": "test sheet: the first prompt gave Ya a short fur outfit and gravestone posts; her cast was rewritten from her portrait and the fence named (owner 00:59 sheet)"
+   },
+   {
+    "op": "inpaint",
+    "file": "f5_ya_fight_cheek_s1",
+    "source": "a1_ya_fight2_s22",
+    "mask": "f5_yf_cheek",
+    "seed": 1,
+    "denoise": 0.7,
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. The smooth pale cheek of a grinning young woman, plain white skin, a strand of long black hair.",
+    "why": "v0.11.62 (second round of small fixes, push 5a; owner picks 2026-11-08 08:15 P1 + A1 + B1 + M1, pictures 09:12 \"I agree\"): Ya's scar on one cheek only (v0.11.54 review, low); ComfyUI read the source as boneash/a1_ya_fight2_s22_00001_.png [output]"
    }
   ],
   "root_road": [
@@ -3236,6 +3872,16 @@
     "seed": 22,
     "width": 1280,
     "height": 800
+   },
+   {
+    "op": "inpaint",
+    "file": "f5_lf_bandits_tiger_loop_s3",
+    "source": "a1t_lf_bandits2_s22",
+    "mask": "f5_lbt_loop",
+    "seed": 3,
+    "denoise": 1.0,
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. Pale forest floor with small dark ink pebbles, seen between a man's legs in black trousers.",
+    "why": "v0.11.62 (second round of small fixes, push 5a; owner picks 2026-11-08 08:15 P1 + A1 + B1 + M1, pictures 09:12 \"I agree\"): the white loop (her tail tip) between James's legs (v0.11.59 review, low); ComfyUI read the source as boneash/a1t_lf_bandits2_s22_00001_.png [output]"
    }
   ],
   "lf_bandits_human": [
@@ -3356,6 +4002,16 @@
     "seed": 44,
     "width": 1280,
     "height": 800
+   },
+   {
+    "op": "inpaint",
+    "file": "f5_lf_black_mire_tiger_tower_s3",
+    "source": "a1t_lf_black_mire_s44",
+    "mask": "f5_lbm_tower",
+    "seed": 3,
+    "denoise": 1.0,
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. Flat dark marsh water and low misty dead reeds at night under black mist.",
+    "why": "v0.11.62 (second round of small fixes, push 5a; owner picks 2026-11-08 08:15 P1 + A1 + B1 + M1, pictures 09:12 \"I agree\"): the faint tower on the horizon (v0.11.59 review, low); s1 a cloud curl; ComfyUI read the source as boneash/a1t_lf_black_mire_s44_00001_.png [output]"
    }
   ],
   "lf_black_mire_human": [
@@ -3616,6 +4272,29 @@
     "seed": 55,
     "width": 1280,
     "height": 800
+   },
+   {
+    "op": "local",
+    "file": "f5_heart_roots_tiger_patch",
+    "source": "a1t_heart_roots_s55",
+    "note": "v0.11.62 (second round of small fixes, push 5a; owner picks 2026-11-08 08:15 P1 + A1 + B1 + M1, pictures 09:12 \"I agree\"): the \"?\"-like white curl covered with the roots above it (the inpaints drew cloud curls). python3 -I tools/art/patch.py SRC SPEC OUT --dir DIR with SPEC = this step's spec (DIR holds the inpaints' outputs as ComfyUI saved them, <file>_00001_.png, and the masks drawn by masks.py). Then palette.py.",
+    "spec": {
+     "copies": [
+      {
+       "from": [
+        48,
+        92
+       ],
+       "to": [
+        48,
+        246,
+        122,
+        396
+       ],
+       "feather": 8
+      }
+     ]
+    }
    }
   ],
   "heart_core_tiger": [
@@ -3722,10 +4401,181 @@
     "height": 800
    },
    {
+    "op": "inpaint",
+    "file": "f5_a1_end_tiger_legs_s1",
+    "source": "a1t_a1_end2_s66",
+    "mask": "f5_endt_legs",
+    "seed": 1,
+    "denoise": 0.8,
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. A tall woman's long legs in long loose dark leather trousers that reach down to her bare ankles, pale cloth bands wrapped around each shin, a plain wooden spear shaft crossing in front of her legs.",
+    "why": "v0.11.62 (second round of small fixes, push 5a; owner picks 2026-11-08 08:15 P1 + A1 + B1 + M1, pictures 09:12 \"I agree\"): Ya's thigh boots made leather trousers with shin wraps, barefoot, the spear kept; ComfyUI read the source as boneash/a1t_a1_end2_s66_00001_.png [output]"
+   },
+   {
+    "op": "local",
+    "file": "f5_a1_end_tiger_patch",
+    "source": "a1t_a1_end2_s66",
+    "note": "v0.11.62 (second round of small fixes, push 5a; owner picks 2026-11-08 08:15 P1 + A1 + B1 + M1, pictures 09:12 \"I agree\"): the inpaint pasted; the glass windows, the lantern glow and a small window behind Mei Lin covered with the wall or dark beside them; after the cold review (R1): the spear shaft drawn on to the ground (the inpaint cut it at her shin) and the door handle covered. python3 -I tools/art/patch.py SRC SPEC OUT --dir DIR with SPEC = this step's spec (DIR holds the inpaints' outputs as ComfyUI saved them, <file>_00001_.png, and the masks drawn by masks.py). Then palette.py.",
+    "spec": {
+     "copies": [
+      {
+       "from": [
+        1072,
+        500
+       ],
+       "to": [
+        1072,
+        392,
+        1118,
+        444
+       ],
+       "feather": 5
+      },
+      {
+       "from": [
+        1072,
+        500
+       ],
+       "to": [
+        1072,
+        442,
+        1118,
+        494
+       ],
+       "feather": 5
+      },
+      {
+       "from": [
+        1176,
+        500
+       ],
+       "to": [
+        1176,
+        354,
+        1250,
+        418
+       ],
+       "feather": 5
+      },
+      {
+       "from": [
+        1176,
+        500
+       ],
+       "to": [
+        1176,
+        418,
+        1250,
+        482
+       ],
+       "feather": 5
+      },
+      {
+       "from": [
+        16,
+        532
+       ],
+       "to": [
+        16,
+        422,
+        76,
+        470
+       ],
+       "feather": 5
+      },
+      {
+       "from": [
+        16,
+        532
+       ],
+       "to": [
+        16,
+        470,
+        76,
+        518
+       ],
+       "feather": 5
+      },
+      {
+       "from": [
+        646,
+        498
+       ],
+       "to": [
+        646,
+        538,
+        684,
+        576
+       ],
+       "feather": 5
+      },
+      {
+       "from": [
+        314,
+        556
+       ],
+       "to": [
+        314,
+        504,
+        334,
+        530
+       ],
+       "feather": 3
+      },
+      {
+       "from": [
+        314,
+        556
+       ],
+       "to": [
+        314,
+        528,
+        334,
+        554
+       ],
+       "feather": 3
+      },
+      {
+       "from": [
+        1236,
+        500
+       ],
+       "to": [
+        1236,
+        472,
+        1250,
+        496
+       ],
+       "feather": 3
+      }
+     ],
+     "layers": [
+      {
+       "file": "f5_a1_end_tiger_legs_s1_00001_",
+       "mask": "f5_endt_legs"
+      }
+     ],
+     "lines": [
+      {
+       "from": [
+        956,
+        596
+       ],
+       "to": [
+        926,
+        796
+       ],
+       "width": 7,
+       "fill": 85,
+       "outline": 20
+      }
+     ]
+    }
+   },
+   {
     "op": "local",
     "file": "a1t_a1_end_eyes",
-    "source": "a1t_a1_end2_s66",
-    "note": "v0.11.60: Mei Lin's red eyes made grey, Ya's red scar kept: python3 -I tools/art/eyes.py SRC SPEC OUT with SPEC = this step's spec (boxes in source pixels). Then palette.py.",
+    "source": "f5_a1_end_tiger_patch",
+    "note": "v0.11.60, rerun in v0.11.62 on the patched picture: Mei Lin's red eyes made grey, Ya's red scar kept: python3 -I tools/art/eyes.py SRC SPEC OUT with SPEC = this step's spec (boxes in source pixels). Then palette.py.",
     "spec": {
      "boxes": [
       [
@@ -3741,7 +4591,8 @@
        180
       ]
      ]
-    }
+    },
+    "prompt": ""
    }
   ],
   "council_human": [
@@ -3762,6 +4613,85 @@
     "seed": 22,
     "width": 1280,
     "height": 800
+   },
+   {
+    "op": "inpaint",
+    "file": "f5_ashfall_dawn_village2_s5",
+    "source": "a1h_ashfall_dawn_s22",
+    "mask": "f5_ad_village",
+    "seed": 5,
+    "denoise": 1.0,
+    "prompt": "An elegant high-contrast ink illustration that blends ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white with no grey gradients, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. A small village of old thatched huts with steep shaggy thatched roofs and walls of rough grey mud plaster, each small window opening closed by a solid shutter of dark wooden boards, small dark open doorways, an empty dirt lane between them, pine trees and thin smoke behind under a pale sky.",
+    "why": "v0.11.62 (second round of small fixes, push 5a; owner picks 2026-11-08 08:15 P1 + A1 + B1 + M1, pictures 09:12 \"I agree\"): the half-timbered houses and glass-paned windows on the left made thatched mud huts with board shutters (the first wording drew windows again); ComfyUI read the source as boneash/a1h_ashfall_dawn_s22_00002_.png [output]"
+   },
+   {
+    "op": "inpaint",
+    "file": "f5_ashfall_dawn_sash_s1",
+    "source": "a1h_ashfall_dawn_s22",
+    "mask": "f5_ad_sash",
+    "seed": 1,
+    "denoise": 0.85,
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. A wide bright red cloth sash tied around a woman's waist over a long grey patterned jacket.",
+    "why": "v0.11.62 (second round of small fixes, push 5a; owner picks 2026-11-08 08:15 P1 + A1 + B1 + M1, pictures 09:12 \"I agree\"): Mei Lin's grey sash made red; ComfyUI read the source as boneash/a1h_ashfall_dawn_s22_00002_.png [output]"
+   },
+   {
+    "op": "local",
+    "file": "f5_ashfall_dawn_human_patch",
+    "source": "a1h_ashfall_dawn_s22",
+    "note": "v0.11.62 (second round of small fixes, push 5a; owner picks 2026-11-08 08:15 P1 + A1 + B1 + M1, pictures 09:12 \"I agree\"): the two inpaints pasted through their masks; the door knob and two small paned windows covered with the wall beside them. python3 -I tools/art/patch.py SRC SPEC OUT --dir DIR with SPEC = this step's spec (DIR holds the inpaints' outputs as ComfyUI saved them, <file>_00001_.png, and the masks drawn by masks.py). Then palette.py.",
+    "spec": {
+     "layers": [
+      {
+       "file": "f5_ashfall_dawn_village2_s5_00001_",
+       "mask": "f5_ad_village"
+      },
+      {
+       "file": "f5_ashfall_dawn_sash_s1_00001_",
+       "mask": "f5_ad_sash"
+      }
+     ],
+     "copies": [
+      {
+       "from": [
+        1248,
+        350
+       ],
+       "to": [
+        1248,
+        396,
+        1280,
+        442
+       ],
+       "feather": 5
+      },
+      {
+       "from": [
+        788,
+        506
+       ],
+       "to": [
+        788,
+        460,
+        818,
+        504
+       ],
+       "feather": 4
+      },
+      {
+       "from": [
+        581,
+        440
+       ],
+       "to": [
+        581,
+        400,
+        613,
+        434
+       ],
+       "feather": 4
+      }
+     ]
+    }
    }
   ],
   "ya_fight_human": [
@@ -3772,6 +4702,44 @@
     "seed": 66,
     "width": 1280,
     "height": 800
+   },
+   {
+    "op": "inpaint",
+    "file": "f5_ya_fight_human_face_s1",
+    "source": "a1h_ya_fight2_s66",
+    "mask": "f5_yfh_face",
+    "seed": 1,
+    "denoise": 0.8,
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. The grinning face of a wild grown young woman, clearly a woman, with a soft feminine face, full red lips, long dark eyelashes, dark grey eyes, a single thin straight red scar line on one cheek only, very long black hair with a few twigs caught in it.",
+    "why": "v0.11.62 (second round of small fixes, push 5a; owner picks 2026-11-08 08:15 P1 + A1 + B1 + M1, pictures 09:12 \"I agree\"): Ya given her scar; the cross hair clip became a twig; ComfyUI read the source as boneash/a1h_ya_fight2_s66_00001_.png [output]"
+   },
+   {
+    "op": "inpaint",
+    "file": "f5_ya_fight_human_spear_s1",
+    "source": "a1h_ya_fight2_s66",
+    "mask": "f5_yfh_spear",
+    "seed": 1,
+    "denoise": 1.0,
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. The head of a primitive spear: a jagged white bone point lashed onto a plain wooden shaft with dark cord, against dark forest leaves.",
+    "why": "v0.11.62 (second round of small fixes, push 5a; owner picks 2026-11-08 08:15 P1 + A1 + B1 + M1, pictures 09:12 \"I agree\"): the metal spear head and ring made a bone point lashed with cord; ComfyUI read the source as boneash/a1h_ya_fight2_s66_00001_.png [output]"
+   },
+   {
+    "op": "local",
+    "file": "f5_ya_fight_human_patch",
+    "source": "a1h_ya_fight2_s66",
+    "note": "v0.11.62 (second round of small fixes, push 5a; owner picks 2026-11-08 08:15 P1 + A1 + B1 + M1, pictures 09:12 \"I agree\"): the two inpaints pasted through their masks. python3 -I tools/art/patch.py SRC SPEC OUT --dir DIR with SPEC = this step's spec (DIR holds the inpaints' outputs as ComfyUI saved them, <file>_00001_.png, and the masks drawn by masks.py). Then palette.py.",
+    "spec": {
+     "layers": [
+      {
+       "file": "f5_ya_fight_human_face_s1_00001_",
+       "mask": "f5_yfh_face"
+      },
+      {
+       "file": "f5_ya_fight_human_spear_s1_00001_",
+       "mask": "f5_yfh_spear"
+      }
+     ]
+    }
    }
   ],
   "root_road_human": [
@@ -3862,6 +4830,16 @@
     "seed": 88,
     "width": 1280,
     "height": 800
+   },
+   {
+    "op": "inpaint",
+    "file": "f5_heart_hall_legs3_s1",
+    "source": "a1h_heart_hall3_s88",
+    "mask": "f5_hh_legs2",
+    "seed": 1,
+    "denoise": 0.9,
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. A tall woman's long legs in long loose dark leather trousers that reach down to her bare ankles, pale cloth bands wrapped around each shin, the hem of a plain grey tunic at her hips.",
+    "why": "v0.11.62 (second round of small fixes, push 5a; owner picks 2026-11-08 08:15 P1 + A1 + B1 + M1, pictures 09:12 \"I agree\"): Ya's short shorts, thigh-high leggings and buckle (v0.11.61 review, medium) made long leather trousers with shin wraps, barefoot; the first mask and wording drew skirts; seeds 1-3 at 0.8 and 0.9, s1 at 0.9 picked; ComfyUI read the source as boneash/a1h_heart_hall3_s88_00001_.png [output]"
    }
   ],
   "heart_roots_human": [
@@ -3944,26 +4922,144 @@
     "height": 800
    },
    {
+    "op": "inpaint",
+    "file": "f5_a1_end_ya3_s9",
+    "source": "a1h_a1_end3_s88",
+    "mask": "f5_end_ya",
+    "seed": 9,
+    "denoise": 0.8,
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. The face of a wild grown young woman, clearly a woman, with a soft feminine face, full red lips, long dark eyelashes, dark grey eyes, a single thin straight red scar line on her cheek under one eye only, a fierce grin, very long black hair with a few twigs caught in it falling around her face.",
+    "why": "v0.11.62 (second round of small fixes, push 5a; owner picks 2026-11-08 08:15 P1 + A1 + B1 + M1, pictures 09:12 \"I agree\"): Ya clearly a woman, grinning, her scar under one eye (v0.11.61 review: borderline androgynous); seeds 4-9 (s2 of the first wording had blood under both eyes); ComfyUI read the source as boneash/a1h_a1_end3_s88_00001_.png [output]"
+   },
+   {
+    "op": "inpaint",
+    "file": "f5_a1_end_mei_s3",
+    "source": "a1h_a1_end3_s88",
+    "mask": "f5_end_mei",
+    "seed": 3,
+    "denoise": 0.7,
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands.  Drawn exactly like the rest of the picture: flat two-tone ink, bold clean outlines, no realistic shading. The smooth pale white cheek of a young woman's face, plain white skin.",
+    "why": "v0.11.62 (second round of small fixes, push 5a; owner picks 2026-11-08 08:15 P1 + A1 + B1 + M1, pictures 09:12 \"I agree\"): a red mark on Mei Lin's cheek (Ya's scar) painted out; ComfyUI read the source as boneash/a1h_a1_end3_s88_00001_.png [output]"
+   },
+   {
+    "op": "local",
+    "file": "f5_a1_end_human_patch",
+    "source": "a1h_a1_end3_s88",
+    "note": "v0.11.62 (second round of small fixes, push 5a; owner picks 2026-11-08 08:15 P1 + A1 + B1 + M1, pictures 09:12 \"I agree\"): the two inpaints pasted; the glass windows and the door knobs covered with the wall beside them (inpaints drew new windows and letter-like marks); the dark moon disc painted as a small white moon. python3 -I tools/art/patch.py SRC SPEC OUT --dir DIR with SPEC = this step's spec (DIR holds the inpaints' outputs as ComfyUI saved them, <file>_00001_.png, and the masks drawn by masks.py). Then palette.py.",
+    "spec": {
+     "layers": [
+      {
+       "file": "f5_a1_end_ya3_s9_00001_",
+       "mask": "f5_end_ya"
+      },
+      {
+       "file": "f5_a1_end_mei_s3_00001_",
+       "mask": "f5_end_mei"
+      }
+     ],
+     "copies": [
+      {
+       "from": [
+        1192,
+        452
+       ],
+       "to": [
+        1192,
+        296,
+        1280,
+        384
+       ],
+       "feather": 6
+      },
+      {
+       "from": [
+        1192,
+        452
+       ],
+       "to": [
+        1192,
+        368,
+        1280,
+        456
+       ],
+       "feather": 6
+      },
+      {
+       "from": [
+        0,
+        500
+       ],
+       "to": [
+        0,
+        398,
+        48,
+        458
+       ],
+       "feather": 5
+      },
+      {
+       "from": [
+        0,
+        500
+       ],
+       "to": [
+        0,
+        445,
+        48,
+        505
+       ],
+       "feather": 5
+      },
+      {
+       "from": [
+        70,
+        466
+       ],
+       "to": [
+        70,
+        508,
+        142,
+        558
+       ],
+       "feather": 5
+      }
+     ],
+     "discs": [
+      {
+       "center": [
+        616,
+        57
+       ],
+       "r": 24,
+       "fill": 250,
+       "outline": 120,
+       "width": 2
+      }
+     ]
+    }
+   },
+   {
     "op": "local",
     "file": "a1h_a1_end_eyes",
-    "source": "a1h_a1_end3_s88",
-    "note": "v0.11.61: Ya's red eyes made grey, her scar kept: python3 -I tools/art/eyes.py SRC SPEC OUT with SPEC = this step's spec (boxes in source pixels). Then palette.py.",
+    "source": "f5_a1_end_human_patch",
+    "note": "v0.11.62 (second round of small fixes, push 5a; owner picks 2026-11-08 08:15 P1 + A1 + B1 + M1, pictures 09:12 \"I agree\"): Ya's red eyes made grey, her scar kept (her face is new): python3 -I tools/art/eyes.py SRC SPEC OUT with SPEC = this step's spec (boxes in source pixels). Then palette.py.",
     "spec": {
      "boxes": [
       [
-       989,
-       128,
+       988,
+       121,
        1003,
-       141
+       135
       ],
       [
-       1016,
-       124,
+       1013,
+       120,
        1031,
-       134
+       128
       ]
      ]
-    }
+    },
+    "prompt": ""
    }
   ]
  },
@@ -4058,8 +5154,6 @@
    "a1_envoy_s22": "envoy",
    "a1_palisade2_s77": "palisade",
    "a1_ashfall_dawn_s22": "ashfall_dawn",
-   "a1_ya_arrives2_s88": "ya_arrives",
-   "a1_ya_fight2_s22": "ya_fight",
    "a1_root_road_s55": "root_road",
    "a1_bone_elk_s22": "bone_elk",
    "a1_root_wyrm2_s88": "root_wyrm",
@@ -4093,7 +5187,6 @@
    "a1t_lf_hub_s22": "lf_hub_tiger",
    "a1h_lf_hub_s22": "lf_hub_human",
    "a1_lf_bandits2_s44": "lf_bandits",
-   "a1t_lf_bandits2_s22": "lf_bandits_tiger",
    "a1h_lf_bandits2_s44": "lf_bandits_human",
    "a1t_lf_rogue_s22": "lf_rogue_tiger",
    "a1h_lf_rogue2_s77": "lf_rogue_human",
@@ -4104,7 +5197,6 @@
    "a1t_lf_bone_depths_s22": "lf_bone_depths_tiger",
    "a1h_lf_bone_depths_s22": "lf_bone_depths_human",
    "a1_lf_black_mire2_s77": "lf_black_mire",
-   "a1t_lf_black_mire_s44": "lf_black_mire_tiger",
    "a1h_lf_black_mire_s55": "lf_black_mire_human",
    "a1_lf_thunder_ridge_s44": "lf_thunder_ridge",
    "a1t_lf_thunder_ridge_s22": "lf_thunder_ridge_tiger",
@@ -4130,18 +5222,14 @@
    "a1t_trio_fire_s44": "trio_fire_tiger",
    "a1t_heart_gate_s22": "heart_gate_tiger",
    "a1t_heart_hall_s22": "heart_hall_tiger",
-   "a1t_heart_roots_s55": "heart_roots_tiger",
    "a1t_heart_core_s55": "heart_core_tiger",
    "a1t_guardian2_s66": "guardian_tiger",
    "a1t_ship_bridge_s55": "ship_bridge_tiger",
    "a1t_ship_wreck_eyes": "ship_wreck_tiger",
    "a1t_grove_sprout_s22": "grove_sprout_tiger",
-   "a1t_a1_end_eyes": "a1_end_tiger",
    "a1t_return_road2_s77": "return_road_tiger",
    "a1t_ya_fight2_s77": "ya_fight_tiger",
    "a1h_council_s44": "council_human",
-   "a1h_ashfall_dawn_s22": "ashfall_dawn_human",
-   "a1h_ya_fight2_s66": "ya_fight_human",
    "a1h_drowned_wood_s22": "drowned_wood_human",
    "a1h_drowned_camp2_s88": "drowned_camp_human",
    "a1h_ashen_hills_s22": "ashen_hills_human",
@@ -4149,16 +5237,29 @@
    "a1h_night_watch_s22": "night_watch_human",
    "a1h_trio_fire_s44": "trio_fire_human",
    "a1h_heart_gate_s22": "heart_gate_human",
-   "a1h_heart_hall3_s88": "heart_hall_human",
    "a1h_heart_core_s55": "heart_core_human",
    "a1h_ship_bridge_s55": "ship_bridge_human",
    "a1h_return_road_s22": "return_road_human",
    "a1h_grove_sprout_s44": "grove_sprout_human",
-   "a1h_a1_end_eyes": "a1_end_human",
    "a1h_guardian_s44": "guardian_human",
    "a1h_heart_roots_s55": "heart_roots_human",
    "a1h_root_road_s55": "root_road_human",
-   "a1h_ship_wreck_s44": "ship_wreck_human"
+   "a1h_ship_wreck_s44": "ship_wreck_human",
+   "f5_forest_dawn_tail_s2": "forest_dawn_human",
+   "f5_jackals_dead_ears_s2": "jackals_dead_human",
+   "f5_lf_black_mire_tiger_tower_s3": "lf_black_mire_tiger",
+   "f5_heart_hall_legs3_s1": "heart_hall_human",
+   "f5_ya_fight_cheek_s1": "ya_fight",
+   "f5_lf_bandits_tiger_loop_s3": "lf_bandits_tiger",
+   "f5_mire_human_patch": "mire_human",
+   "f5_rats_human_patch": "rats_human",
+   "f5_ashfall_dawn_human_patch": "ashfall_dawn_human",
+   "a1h_a1_end_eyes": "a1_end_human",
+   "a1t_a1_end_eyes": "a1_end_tiger",
+   "f5_heart_roots_tiger_patch": "heart_roots_tiger",
+   "f5_ya_fight_human_patch": "ya_fight_human",
+   "f5_ya_arrives_patch": "ya_arrives",
+   "f5_gift4_s55": "gift_human"
   }
  },
  "styles": {

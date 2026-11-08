@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.61 | (this push) | The Act 1 art, push 4b: the human versions of Act 1's 20 Yuki keys (`YUKI_HUMAN_PICS` + 20). Same save state as 0.11.54; the baseline kept. Rolling back only drops the new pictures (those scenes show code art again while Yuki is human). |
+| 0.11.62 | (this push) | The second round of small art fixes, push 5a: 15 pictures replaced, `tools/art/patch.py` new. Same save state as 0.11.54; the baseline kept. Rolling back only brings back the old pictures. |
+| 0.11.61 | `623b28d` | The Act 1 art, push 4b: the human versions of Act 1's 20 Yuki keys (`YUKI_HUMAN_PICS` + 20). Same save state as 0.11.54; the baseline kept. Rolling back only drops the new pictures (those scenes show code art again while Yuki is human). |
 | 0.11.60 | `913973b` | The Act 1 art, push 4a: the great-cat versions of Act 1's 20 Yuki keys (`YUKI_TIGER_PICS` + 20). Same save state as 0.11.54; the baseline kept. Rolling back only drops the new pictures (those scenes show code art again while Yuki is the great cat). |
 | 0.11.59 | `2929ab0` | The Act 1 art, push 3: the Long Forest's 8 keys and the 2 missed camps in all three forms (`PICTURES` + 10 and `yuki_form`; `YUKI_PICS`, `YUKI_TIGER_PICS`, `YUKI_HUMAN_PICS` + 10; the trail scenes' `lfTrailArt`). Same save state as 0.11.54; the baseline kept. Rolling back only drops the new pictures (those scenes show code art again). |
 | 0.11.58 | `653f722` | The Act 1 art, push 2: 15 pictures for the Heart and the Return (`PICTURES` + 15, `YUKI_PICS` + 10, still outside `YUKI_TIGER_PICS` / `YUKI_HUMAN_PICS`). Same save state as 0.11.54; the baseline kept. Rolling back only drops the new pictures (those scenes show code art again). |
