@@ -63,9 +63,10 @@ export const TASK_HUBS = {
         yuki: YUKI_ASHFALL,
         evening: 'fo_ashfall',
     },
+    // v0.11.67 (owner pick F1, one hub format): the Blackroot's "Train." (bl_train) is a Practice group on the list, not a gate card
     rr_hub: {
-        menus: { rr_forage: { label: 'Forage', daily: 'rr_forage' }, rr_scout: { label: 'Scout', daily: 'rr_scout' } },
-        doors: ['ya_mocks', 'rr_hunt', 'rr_roots', 'talk_mei', 'talk_ya', 'bl_train'],
+        menus: { rr_forage: { label: 'Forage', daily: 'rr_forage' }, rr_scout: { label: 'Scout', daily: 'rr_scout' }, bl_train: { label: 'Practice' } },
+        doors: ['ya_mocks', 'rr_hunt', 'rr_roots', 'talk_mei', 'talk_ya'],
         own: 'The root road',
         yuki: {
             id: 'yuki:rr', label: 'Hunt along the roots', minutes: 75, dc: 2, item: 'hare_raw', n: 1,
@@ -75,8 +76,8 @@ export const TASK_HUBS = {
         evening: 'rr_hub',
     },
     dw_hub: {
-        menus: { dw_forage: { label: 'Forage', daily: 'dw_forage' } },
-        doors: ['dw_hunt', 'dw_scout', 'talk_mei', 'talk_ya', 'bl_train', 'hot_spring'],
+        menus: { dw_forage: { label: 'Forage', daily: 'dw_forage' }, bl_train: { label: 'Practice' } },
+        doors: ['dw_hunt', 'dw_scout', 'talk_mei', 'talk_ya', 'hot_spring'],
         own: 'The drowned wood',
         yuki: {
             id: 'yuki:dw', label: 'Stalk mire fowl on the drowned trunks', minutes: 75, dc: 2.5, item: 'fowl_raw', n: 1,
@@ -86,8 +87,8 @@ export const TASK_HUBS = {
         evening: 'dw_hub',
     },
     ah_hub: {
-        menus: { ah_forage: { label: 'Forage', daily: 'ah_forage' } },
-        doors: ['ya_offended', 'trio_kiss', 'ah_hunt', 'ah_scout', 'talk_mei', 'talk_ya', 'bl_train'],
+        menus: { ah_forage: { label: 'Forage', daily: 'ah_forage' }, bl_train: { label: 'Practice' } },
+        doors: ['ya_offended', 'trio_kiss', 'ah_hunt', 'ah_scout', 'talk_mei', 'talk_ya'],
         own: 'The ashen hills',
         yuki: {
             id: 'yuki:ah', label: 'Hunt the ash slopes', minutes: 75, dc: 3, item: 'hare_raw', n: 1,
@@ -115,8 +116,12 @@ export const TASK_HUBS = {
         yuki: YUKI_ASHFALL,
         evening: 'rt_ashfall',
     },
-    lf_hub: { // v0.10.1: the Long Forest's camp in task mode — the season card and the camp chores queue; trips and trials stay story cards
-        menus: {},
+    // v0.10.1: the Long Forest's camp in task mode — the season card and the camp chores queue.
+    // v0.11.67 (owner pick F1, one hub format): Forage, Hunt and Train on the list like the Wilds' (no gate screens);
+    // the trial zones (Go deep) are door cards, like the Wilds' Explore. Wanderers and the season's beats stay story cards.
+    lf_hub: {
+        menus: { lf_forage: { label: 'Forage' }, lf_hunt: { label: 'Hunt' }, lf_train: { label: 'Practice' } },
+        doorMenus: { lf_trials: { label: 'Go deep' } },
         own: 'Camp',
         evening: 'lf_morning',
     },

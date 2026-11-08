@@ -45,9 +45,56 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
         assert(!SCENES[menu].choices.some((c) => c.combat), `${menu} has no fights (cards can't fight)`);
     }
 }
+// v0.11.67 (owner pick F1, one hub format): no gate cards. The Long Forest camp's Forage, Hunt and Practice are work cards on
+// its list and Go deep's zones door cards; the Blackroot's Practice is a work group on its three hubs. Each card runs from the
+// hub and comes back to it; a zone's door opens its scene.
+{
+    const { readFileSync } = await import('node:fs');
+    const { oneOffLeft, onceKey } = await import('../js/story/oneoff.js');
+    const lf = deserialize(readFileSync(new URL('../saves/v0.11.7-long-forest-coil2.json', import.meta.url), 'utf8'));
+    lf.james.qi = 30; lf.james.satiety = 70;
+    const lc = taskCards(lf, SCENES);
+    const grp = (n) => lc.filter((c) => c.group === n && c.status === 'open');
+    assert(lf.scene === 'lf_hub' && ['Forage', 'Hunt', 'Practice'].every((n) => grp(n).length && grp(n).every((c) => c.kind === 'work' || c.kind === 'chore')) && grp('Go deep').length === 4 && grp('Go deep').every((c) => c.kind === 'door'), `v0.11.67 (F1): the Long Forest camp's groups (${lc.map((c) => `${c.group}/${c.kind}`)})`);
+    const vis = sceneView(lf, SCENES).choices.filter((c) => c.index < 1000 && !isTaskChoice(SCENES, 'lf_hub', c.index)).map((c) => String(c.label));
+    assert(!vis.some((t) => /^(Forage|Hunt|Train)\.|^Go deep/.test(t)), `v0.11.67 (F1): no gate card left among the Long Forest's story cards (${vis})`);
+    for (const n of ['Forage', 'Hunt', 'Practice']) {
+        const x = deserialize(serialize(lf)); x.james.qi = 30; x.james.satiety = 70;
+        if (!grp(n).length) continue; // reported by the group check above (Fable review M2)
+        const id = grp(n)[0].id, m0 = x.minutes; runTask(x, SCENES, id);
+        assert(x.scene === 'lf_hub' && x.minutes > m0, `v0.11.67 (F1): a ${n} card runs from the camp and comes back (${id}: ${x.scene})`);
+    }
+    if (grp('Go deep').length) {
+        const z = deserialize(serialize(lf)); runTask(z, SCENES, grp('Go deep')[0].id);
+        assert(z.scene === 'lf_bone_depths', `v0.11.67 (F1): Go deep's first zone opens its scene (${z.scene})`);
+    }
+    for (const hub of ['rr_hub', 'dw_hub', 'ah_hub']) {
+        const b = ensureBars(newGame(312)); b.scene = hub; b.coil.act = 1; b.minutes = (hub === 'rr_hub' ? 13 : hub === 'dw_hub' ? 15 : 17) * 1440 + 9 * 60; b.james.qi = 30; b.james.satiety = 70; b.flags.ya_joined = true;
+        const pc = taskCards(b, SCENES).filter((c) => c.group === 'Practice' && c.status === 'open');
+        assert(pc.length >= 3 && pc.every((c) => c.kind === 'work' && c.id.startsWith('bl_train:')), `v0.11.67 (F1): ${hub}'s Practice group (${pc.map((c) => c.label)})`);
+        if (!pc.length) continue;
+        runTask(b, SCENES, pc[0].id);
+        assert(b.scene === hub, `v0.11.67 (F1): ${hub}: a Practice card comes back to the hub (${b.scene})`);
+    }
+    // the Fable review (H1, R1): the Practice drills are repeatable work, so drills left never hold "Call it a day" back:
+    // with every one-off done, the hub's oneOffLeft is the same with the four drills open or done
+    for (const hub of ['rr_hub', 'dw_hub', 'ah_hub']) {
+        const r = ensureBars(newGame(313)); r.scene = hub; r.coil.act = 1; r.minutes = (hub === 'rr_hub' ? 13 : hub === 'dw_hub' ? 15 : 17) * 1440 + 9 * 60; r.flags.ya_joined = true;
+        const scn = SCENES[hub];
+        scn.choices.forEach((c, i) => { r.flags[onceKey(hub, i)] = true; });
+        for (const m of Object.keys(TASK_HUBS[hub].menus)) SCENES[m].choices.forEach((c, i) => { r.flags[onceKey(m, i)] = true; });
+        Object.assign(r.flags, { ya_mocked: true, ya_sparred: true, rr_listened: true, ya_back: true, trio_found: true });
+        for (const k of ['rr_forage', 'rr_scout', 'rr_hunt', 'dw_forage', 'dw_hunt', 'dw_scout', 'ah_forage', 'ah_hunt', 'ah_scout', 'tmei', 'tya', 'hot_spring']) markDaily(r, k);
+        const open = !oneOffLeft(r, SCENES, hub);
+        const drills = taskCards(r, SCENES).filter((c) => c.status === 'open' && c.group === 'Practice').length;
+        for (const k of ['bt_ya', 'bt_dart', 'bt_needle', 'bt_yuki']) markDaily(r, k);
+        const after = !oneOffLeft(r, SCENES, hub);
+        assert(drills > 0 && open === after, `v0.11.67 (H1): ${hub}: the Practice drills never hold "Call it a day" back (${drills} drills open: ${open ? 'free' : 'held'}; done: ${after ? 'free' : 'held'})`);
+    }
+}
 // v0.11.19 (owner pick B): Act 1's seven resting places are task screens
 {
-    const A1 = { fo_ashfall: ['Palisade', 'Council', 'Militia', 'Clinic'], rr_hub: ['Forage', 'Scout'], dw_hub: ['Forage'], ah_hub: ['Forage'], heart_hub: [], rt_camp: [], rt_ashfall: ['Militia'] };
+    const A1 = { fo_ashfall: ['Palisade', 'Council', 'Militia', 'Clinic'], rr_hub: ['Forage', 'Scout', 'Practice'], dw_hub: ['Forage', 'Practice'], ah_hub: ['Forage', 'Practice'], heart_hub: [], rt_camp: [], rt_ashfall: ['Militia'] };
     const JOBS = { fo_ashfall: 'yuki:ashfall', rr_hub: 'yuki:rr', dw_hub: 'yuki:dw', ah_hub: 'yuki:ah', rt_ashfall: 'yuki:ashfall' };
     for (const [hub, groups] of Object.entries(A1)) {
         const cfg = TASK_HUBS[hub];
@@ -842,13 +889,13 @@ rs = 4243; // the checks below draw from their own stream
 // task screens' cards like the bots (random cards, random story stops, fights blade / dart); the cards it plays count toward the
 // coverage below. It runs in this process on its own random stream (restored after), so the bot games and their numbers don't change.
 const WALK_GAMES = 20;
-let walkEc = 0, walkCards = 0;
+let walkEc = 0, walkE8 = 0, walkCards = 0;
 {
     const rs0 = rs;
     for (let run = 0; run < WALK_GAMES; run++) {
         rs = seedOf(run, 66);
         const g = ensureBars(newGame(660000 + run, { closed: true }));
-        Object.assign(g.james, { realm: 4, primaries: 12, collaterals: 66, extra8: 8, extraCollaterals: 0 });
+        Object.assign(g.james, { realm: 4, primaries: 12, collaterals: 66, extra8: run % 2 ? 0 : 8, extraCollaterals: 0 }); // v0.11.67 (R1): odd runs with the vessels shut, so the vessel card (mer:e8) is played too
         Object.assign(g.yuki, { realm: 4, primaries: 12, collaterals: 66 });
         ensureBars(g); g.james.hp = jamesHpMax(g); g.james.qi = jamesQiMax(g);
         for (let step = 0; step < 4000; step++) {
@@ -860,7 +907,7 @@ let walkEc = 0, walkCards = 0;
                 const stops = open.filter((c) => c.index >= 1000 || !isTaskChoice(SCENES, g.scene, c.index));
                 if (cards.length && (rnd(10) < 8 || !stops.length)) {
                     const id = cards[rnd(cards.length)].id;
-                    runTask(g, SCENES, id); cardsSeen.add(id); walkCards++; if (id === 'mer:ec') walkEc++;
+                    runTask(g, SCENES, id); cardsSeen.add(id); walkCards++; if (id === 'mer:ec') walkEc++; if (id === 'mer:e8') walkE8++;
                     continue;
                 }
                 open = stops;
@@ -873,7 +920,8 @@ let walkEc = 0, walkCards = 0;
         }
     }
     rs = rs0;
-    assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card (${walkEc} times in ${walkCards} cards, ${WALK_GAMES} games)`);
+    assert(walkE8 > 0, `v0.11.67 (R1): the walk plays the vessel card too (${walkE8} times; with "Call it a day" back on the Blackroot the bots rarely do)`);
+assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card (${walkEc} times in ${walkCards} cards, ${WALK_GAMES} games)`);
 }
 // every card that was ever offered was also played at least once
 const all = cardsListed;

@@ -2,6 +2,16 @@
 
 Split out of `roadmap.md` in v0.11.65 (owner pick G2, 2026-11-08 11:45), so the roadmap shows only the open work. Every line here moved word for word; newest first. Update in every push that finishes a roadmap line.
 
+## Moved in v0.11.67 (word for word)
+
+### From section 1b, "The screen's format" (part (1) of the format bullet; done in v0.11.67: F1 no gate cards, the Blackroot's Train and the Long Forest's Forage, Hunt, Train and Go deep on the hub lists; D2 the card groups fold, the work groups folded at first, kept per phone)
+
+- **The story and format pass (owner 23:25–23:29, with the story text pass):** (1) **one hub format for the whole game**: decide between gate cards and lists for the hubs, and use it everywhere: the prologue, Act 1 and the Long Forest (options with how each hub looks today first); **the owner's preference (2026-11-08 01:40, "i would prefer to lose the gate cards and meintain main screen lists, even if they are long. you could make the dropdown ones to save some space"):** no gate cards; the hubs as lists on the main screen even when long, with collapsible (dropdown) groups where that saves space;
+
+### The old "Last updated" line
+
+Last updated: 2026-11-08 (v0.11.66, the story and mechanics pass, group a: cultivation and meridians (owner picks S1 + X1 + G4 + P1 + F1, then V1); its four lines moved word for word to `project/roadmap-done.md`; v0.11.65, the roadmap regrouped). Update in every push.
+
 ## Moved in v0.11.66 (word for word)
 
 ### From section 1a, "Cultivation and meridians" (done in v0.11.66: S1 the Saturation curve ×1.5 a realm, X1 XP for every sit, G4 the vessels from Golden Core, P1 the collaterals in pairs; with F1, the door's dry run, and V1, the Golden Core walk in the tests)

@@ -8,6 +8,7 @@ import {
 import { sceneView, choose, goTo, gives } from './core/story.js';
 import { showPicked, isTaskHub, isQueueScreen, isTaskChoice, taskCards, taskLabel, taskMinutes, taskOutcome, dryOutcome, outcomeOf, runTask, FAM, yukiLane, setYuki } from './core/tasks.js';
 import { SCENES, ITEMS } from './story/prologue.js';
+import { TASK_HUBS } from './story/task_hubs.js';
 import { againView, skipPlan, skipRun } from './story/again.js'; // v0.11.35 (P1-a)
 import { coilActive, endCoil } from './core/coil.js';
 import { medCards, runMed, isSitChoice, medActivity, useLine, LATE_TAG } from './core/meditate.js';
@@ -116,6 +117,20 @@ function summarize(lines) {
 }
 let resultSeq = 0;
 const openResults = new Set(); // v0.11.11: Results entries the player opened stay open when the screen redraws
+// v0.11.67 (owner pick D2): a screen's card groups fold. Story never folds; the hub's own group (Camp chores, Around
+// Ashfall…) and Meditate start open; the work groups (a hub's menus: Forage, Hunt, Practice, Explore, Go deep…) start
+// folded, their heading showing how many cards they hold. What the player opens or folds is kept on this phone, per group name.
+const GROUPS_KEY = 'boneash.groups';
+const groupOpen = (() => { try { const o = JSON.parse(store.get(GROUPS_KEY) || '{}'); return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; } catch { return {}; } })();
+const isGroupOpen = (name, dflt) => (typeof groupOpen[name] === 'boolean' ? groupOpen[name] : dflt);
+function setGroupOpen(name, open, dflt) {
+    if (isGroupOpen(name, dflt) === open) return; // the toggle a redraw's own `open` fires changes nothing
+    groupOpen[name] = open;
+    store.set(GROUPS_KEY, JSON.stringify(groupOpen));
+}
+/** The menus' labels on this hub: the groups that start folded. */
+const workGroups = (hubId) => { const cfg = TASK_HUBS[hubId]; return new Set(cfg ? [...Object.values(cfg.menus || {}), ...Object.values(cfg.doorMenus || {})].map((m) => m.label) : []); };
+const groupHtml = (name, cards, dflt) => `<details class="grp" data-grp="${esc(name)}" data-dflt="${dflt ? 1 : 0}"${isGroupOpen(name, dflt) ? ' open' : ''}><summary><h2>${esc(name)} <span class="count">· ${cards.length}</span></h2></summary><div class="cards">${cards.join('')}</div></details>`;
 function addResult(title, lines, fail) {
     taskResults.unshift({ id: ++resultSeq, title, sum: summarize(lines), lines, fail });
     announce(`${title}${summarize(lines) ? `: ${summarize(lines)}` : ''}`);
@@ -239,7 +254,8 @@ function renderCardScreen() {
         const yLeft = yl ? Math.max(1, yl.len - yl.progress) : 0;
         const yHtml = yl ? `<div class="yuki-lane"><div><b>Yuki:</b> ${esc(yl.label)} <span class="note">${showChecks ? `Fight ${yl.check} / DC ${yl.dc} · ` : ''}${yl.on ? `next haul after ${durLabel(yLeft)} of your time (06:00–19:00)` : `${durLabel(yl.len)} a haul`} · ${FAM[yl.tier].name}</span></div><button class="btn${yl.on ? ' primary' : ''}" data-yuki="1">${yl.on ? 'On' : 'Off'}</button></div>` : '';
         hubTop = yHtml;
-        hubHtml = `${groups.map((gr) => `<h2>${esc(gr.name)}</h2><div class="cards">${gr.cards.map(cardHtml).join('')}</div>`).join('')}`;
+        const work = workGroups(g.scene);
+        hubHtml = groups.map((gr) => groupHtml(gr.name, gr.cards.map(cardHtml), !work.has(gr.name))).join(''); // v0.11.67 (D2)
     }
     const sk = v.end || hub ? { steps: 0 } : skipPlan(g, SCENES); // v0.11.35 (P1-a): a stretch read before, 2 steps or more
     const skipHtml = sk.steps >= 2 ? `<button class="card story skip" data-skip="1">Skip to the next choice.<span class="tag">${sk.steps} scenes you know</span><span class="len">${esc(durLabel(sk.minutes))} · at once</span></button>` : '';
@@ -247,7 +263,7 @@ function renderCardScreen() {
         ? `<h2>Story</h2><div class="cards">${story.map(storyCardHtml).join('')}<button class="card story" data-new="1">Start a new game</button><button class="card story" data-tab-go="sheet">See how James ended up</button></div>` // v0.11.26: an end's own choices first (Go round again…)
         : story.length ? `<h2>Story</h2><div class="cards">${skipHtml}${story.map(storyCardHtml).join('')}</div>` : '';
     const medOpen = med.filter((m) => m.open || m.late || m.show); // v0.11.46 (Q1): a sit short of Qi shows, locked, with the reason // v0.11.37 (D-a): a card that would end past 02:00 shows, locked, with that tag // v0.11.17 (pick 1a): only what can run now (collaterals until they open, locked sits and meridians, Break through until ready)
-    const medHtml = medOpen.length ? `<h2>Meditate</h2><div class="cards">${medOpen.map(medCardHtml).join('')}</div>` : '';
+    const medHtml = medOpen.length ? groupHtml('Meditate', medOpen.map(medCardHtml), true) : ''; // v0.11.67 (D2): starts open, folds
     view.innerHTML = `<section class="fade-in">
 ${statusHtml()}
 <div class="plate">${sceneArt(v.art)}</div>
@@ -733,7 +749,11 @@ view.addEventListener('contextmenu', (ev) => { if (ev.target.closest('button.car
 // the tap that ends a hold must not run the card
 document.addEventListener('click', (ev) => { if (Date.now() < swallowUntil && swallowBtn && ev.target.closest('button') === swallowBtn) { swallowUntil = 0; swallowBtn = null; ev.stopPropagation(); ev.preventDefault(); } }, true);
 tipEl.addEventListener('click', (ev) => { if (ev.target.closest('[data-tip]')) tipEl.hidden = true; });
-view.addEventListener('toggle', (ev) => { const d = ev.target; if (d.dataset?.rid) { const id = Number(d.dataset.rid); if (d.open) openResults.add(id); else openResults.delete(id); } }, true);
+view.addEventListener('toggle', (ev) => {
+    const d = ev.target;
+    if (d.dataset?.rid) { const id = Number(d.dataset.rid); if (d.open) openResults.add(id); else openResults.delete(id); }
+    if (d.dataset?.grp != null && d.isConnected) setGroupOpen(d.dataset.grp, d.open, d.dataset.dflt === '1'); // v0.11.67 (D2)
+}, true);
 
 /* ---------------- wiring ---------------- */
 

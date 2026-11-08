@@ -16,9 +16,9 @@ import { setOnChoose } from '../core/story.js';
 export const ONCE_MENUS = new Set(['clinic', 'workshop', 'drill', 'fo_palisade', 'fo_council', 'fo_drill', 'fo_clinic', 'rr_scout']);
 export const ONCE_STAGES = { wen_lesson: 2, herb_slopes: 2 };
 /** Doors that stay repeatable (hunts, talks, training, the spring): they never hold "Call it a day" back. */
-const REPEAT_DOORS = new Set(['far_hunt', 'rr_hunt', 'dw_hunt', 'ah_hunt', 'talk_mei', 'talk_ya', 'fo_mei', 'fo_ya_time', 'bl_train', 'heart_spring']);
+const REPEAT_DOORS = new Set(['far_hunt', 'rr_hunt', 'dw_hunt', 'ah_hunt', 'talk_mei', 'talk_ya', 'fo_mei', 'fo_ya_time', 'heart_spring']); // v0.11.67: bl_train is a menu now (REPEAT_MENUS)
 /** Menus that stay repeatable (foraging, hunting, practice): they never hold "Call it a day" back. */
-const REPEAT_MENUS = new Set(['wild_forage', 'wild_hunt', 'wild_train', 'rr_forage', 'dw_forage', 'ah_forage']);
+const REPEAT_MENUS = new Set(['wild_forage', 'wild_hunt', 'wild_train', 'rr_forage', 'dw_forage', 'ah_forage', 'bl_train']); // v0.11.67 (R1): the Blackroot's Practice, a menu since F1
 /** The hubs with a set evening (the hour their evening exit shows). */
 export const EVENING_HOUR = { wilds: 15, ashfall: 16, fo_ashfall: 16, rr_hub: 16, dw_hub: 16, ah_hub: 16, heart_hub: 16, rt_ashfall: 15 };
 

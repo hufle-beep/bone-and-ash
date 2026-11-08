@@ -96,7 +96,11 @@ def no_greyed(pg, where):
 def taps(pg, n, rng, where, sel):
     done = 0
     for i in range(n):
-        btns = pg.query_selector_all(sel)
+        folded = pg.query_selector_all('details.grp:not([open]) > summary')
+        if folded and rng.random() < 0.2:  # v0.11.67 (Fable review M4): now and then open a folded group, so its cards get tapped too
+            try: rng.choice(folded).click(timeout=3000)
+            except Exception: pass
+        btns = [b for b in pg.query_selector_all(sel) if b.is_visible()]  # v0.11.67 (D2): a folded group's cards are not tappable
         if not btns: break
         try: tap(pg, rng.choice(btns)); done += 1
         except Exception: continue  # re-rendered under the tap: look again
@@ -176,6 +180,37 @@ def comfort(pg, url):
         if abs(yv - 120) > 5: fails.append(f'scroll: the James tab came back at {yv}, not 120')
         else: notes.append('scroll kept per tab')
     pg.click('[data-tab="story"]'); on_tab(pg, 'story')
+
+def groups(pg, url):
+    """v0.11.67 (owner picks F1 + D2): one hub format. The Long Forest camp (a v0.11.7 test save) has no gate cards: Forage, Hunt,
+    Practice and Go deep are groups on the list. Story never folds; the hub's own group and Meditate start open, the work groups
+    start folded with their count; a group the player opens stays open through a redraw and a reload (kept on this phone)."""
+    fresh(pg, url, "s => { localStorage.clear(); localStorage.setItem('boneash.auto', s); }", (ROOT / 'saves/v0.11.7-long-forest-coil2.json').read_text())
+    st = pg.eval_on_selector_all('details.grp', "els => els.map(e => [e.dataset.grp, e.open, e.querySelectorAll('button.card').length, e.querySelector('.count')?.textContent || ''])")
+    want = {'Forage': False, 'Hunt': False, 'Practice': False, 'Go deep': False, 'Camp': True, 'Meditate': True}
+    seen = {n: o for n, o, k, c in st}
+    bad = [f'{n} {"open" if seen.get(n) else "folded" if n in seen else "missing"}' for n, o in want.items() if seen.get(n) != o]
+    if bad: fails.append(f'D2: the Long Forest camp\'s groups start wrong: {bad} (on screen: {st})')
+    if any(c != f'· {k}' for n, o, k, c in st): fails.append(f'D2: a group heading does not show its card count: {st}')
+    gate = pg.eval_on_selector_all('button.card.story', "els => els.map(e => e.textContent).filter(t => /^(Forage|Hunt|Train)\\.|^Go deep/.test(t))")
+    if gate: fails.append(f'F1: the Long Forest camp still shows gate cards: {gate}')
+    if pg.query_selector('.tasks > h2:has-text("Story") + details, details.grp[data-grp="Story"]'): fails.append('D2: Story folds')
+    if pg.query_selector('details.grp:not([open]) button.card') and pg.query_selector('details.grp:not([open]) button.card').is_visible(): fails.append('D2: a folded group\'s card shows')
+    if bad or gate: return
+    pg.click('details.grp[data-grp="Hunt"] > summary'); until(pg, "() => document.querySelector('details.grp[data-grp=\"Hunt\"]').open", 3000)
+    pg.click('details.grp[data-grp="Camp"] > summary'); until(pg, "() => !document.querySelector('details.grp[data-grp=\"Camp\"]').open", 3000)
+    until(pg, "() => /Camp/.test(localStorage.getItem('boneash.groups') || '')", 3000)  # the toggle event comes a task after the click
+    kept = pg.evaluate("JSON.parse(localStorage.getItem('boneash.groups') || '{}')")
+    if kept != {'Hunt': True, 'Camp': False}: fails.append(f'D2: the opened and folded groups are not kept on the phone: {kept}')
+    card = next((e for e in pg.query_selector_all('details.grp[data-grp="Hunt"] button.card:not([disabled])[data-run]') if e.is_visible()), None)
+    if not card: fails.append('D2: the opened Hunt group shows no card'); return
+    r0 = len(pg.query_selector_all('.res')); tap(pg, card); until(pg, "n => document.querySelectorAll('.res').length > n", 3000, arg=r0)  # the Long Forest's clock label never changes (Fable review M3)
+    after = pg.eval_on_selector_all('details.grp', "els => Object.fromEntries(els.map(e => [e.dataset.grp, e.open]))")
+    if after.get('Hunt') is not True or after.get('Camp') is not False or after.get('Forage') is not False: fails.append(f'D2: a redraw lost the groups\' state: {after}')
+    pg.goto(url.replace('index.html', 'art/bg/CREDITS.md')); pg.goto(url); until(pg, '.main-menu', 10000, 'attached'); enter(pg)
+    again = pg.eval_on_selector_all('details.grp', "els => Object.fromEntries(els.map(e => [e.dataset.grp, e.open]))")
+    if again.get('Hunt') is not True or again.get('Camp') is not False: fails.append(f'D2: a reload lost the groups\' state: {again}')
+    else: notes.append('one hub format: no gate cards in the Long Forest; groups fold, start as picked, and keep their state')
 
 def rest_places(pg, url):
     fresh(pg, url, "localStorage.clear()")
@@ -432,7 +467,7 @@ def main(part=0):
               # 2. v0.11.64: a timed card resolves at once, from a fixed task screen (the Long Forest camp on Coil 2, a v0.11.7 test save)
               fresh(pg, url, "s => { localStorage.setItem('boneash.auto', s); localStorage.setItem('boneash.speed', '1'); }", (ROOT / 'saves/v0.11.7-long-forest-coil2.json').read_text())  # an old speed setting is ignored
               no_timer(pg, 'a task screen')
-              long = pg.eval_on_selector_all('button.card[data-run]:not([disabled])', "els => els.filter(e => / h/.test(e.querySelector('.len')?.textContent || '') && !/at once/.test(e.textContent)).map(e => e.dataset.run)")
+              long = pg.eval_on_selector_all('button.card[data-run]:not([disabled])', "els => els.filter(e => e.checkVisibility() && / h/.test(e.querySelector('.len')?.textContent || '') && !/at once/.test(e.textContent)).map(e => e.dataset.run)")
               if not long: fails.append('at once: no task screen with an hour-long card reached; on screen: ' + ' | '.join(pg.eval_on_selector_all('#view button', 'els => els.slice(0, 8).map(e => e.textContent.slice(0, 50))')))
               else:
                   dur = pg.eval_on_selector(f'button.card[data-run="{long[0]}"] .len', "e => { const m = /(\\d+) h(?: (\\d+) m)?/.exec(e.textContent); return m ? 60 * +m[1] + (+m[2] || 0) : -1; }")
@@ -451,13 +486,14 @@ def main(part=0):
               if not top or abs(top[0]) > 1 or top[1] < 20 or top[2] < 200: fails.append(f'status bar: not pinned at the top when scrolled (top, bottom, scrollY = {top})')
               else: notes.append('the status bar pinned at the top')
               pg.evaluate("scrollTo(0, 0)")
+              groups(pg, url)
               # 4. two tabs (v0.11.8): a tab that closes never writes its older game over a newer save from another tab
               fresh(pg, url, "localStorage.clear()")
               pg.evaluate("1")
               pb = ctx.new_page(); pb.goto(url); until(pb, '.main-menu', 10000, 'attached'); enter(pb)
               before = pb.evaluate("localStorage.getItem('boneash.auto')")
               for _ in range(6):
-                  bt = pb.query_selector_all('button.card:not([disabled])[data-story], button.card:not([disabled])[data-run]')
+                  bt = [e for e in pb.query_selector_all('button.card:not([disabled])[data-story], button.card:not([disabled])[data-run]') if e.is_visible()]
                   if not bt: break
                   try: tap(pb, bt[0])
                   except Exception: pass

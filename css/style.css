@@ -168,6 +168,12 @@ button { font: inherit; color: inherit; }
 /* ---- task cards and the queue (v0.9.0, "Tasks (preview)") ---- */
 .tasks { padding: 0.4rem 1rem 0.6rem; }
 .tasks h2 { font-family: var(--display); font-weight: 600; font-size: 1.1rem; margin: 1rem 0.15rem 0.45rem; padding-bottom: 0.25rem; background: var(--brush) left bottom / 4rem 5px no-repeat; }
+/* v0.11.67 (owner pick D2): a card group folds; its heading is the tap target */
+.grp > summary { cursor: pointer; list-style: none; }
+.grp > summary::-webkit-details-marker { display: none; }
+.grp > summary h2::before { content: '▸ ' / ''; color: var(--ink-dim); } /* the arrow is not read aloud (Fable review) */
+.grp[open] > summary h2::before { content: '▾ ' / ''; }
+.grp .count { color: var(--ink-dim); font-weight: 400; font-size: 0.9rem; }
 .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr)); gap: 0.5rem; }
 .card { text-align: left; cursor: pointer; padding: 0.65rem 0.7rem; border: 1.5px solid var(--ink); border-radius: 4px 10px 4px 10px; background: transparent; font-size: 0.88rem; line-height: 1.35; }
 .card:hover, .card:focus-visible { background: rgba(35,33,30,0.05); }

@@ -26,7 +26,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
 
 // 1b. v0.11.21: every door is a place a choice on its hub leads to, and the doors and menus of each hub are pinned
 // (the mutation test removed the stream's hunt door and only the drift check noticed). A deliberate change updates this list.
-const HUB_CARDS = {"camp":"","stream":"forage hunt","wilds":"menu:wild_explore menu:wild_forage menu:wild_hunt menu:wild_train","village":"heal village_hunt","ashfall":"far_hunt heal herb_slopes menu:clinic menu:drill menu:workshop scout village_hunt wen_lesson","fo_ashfall":"fo_mei fo_mother fo_spy fo_ya_time menu:fo_clinic menu:fo_council menu:fo_drill menu:fo_palisade","rr_hub":"bl_train menu:rr_forage menu:rr_scout rr_hunt rr_roots talk_mei talk_ya ya_mocks","dw_hub":"bl_train dw_hunt dw_scout hot_spring menu:dw_forage talk_mei talk_ya","ah_hub":"ah_hunt ah_scout bl_train menu:ah_forage talk_mei talk_ya trio_kiss ya_offended","heart_hub":"hall_listen heart_spring ring_chambers sect_cut","rt_camp":"rt_fire_talk rt_watch","rt_ashfall":"menu:rt_hunters rt_council rt_grove rt_ya_village","lf_hub":""};
+const HUB_CARDS = {"camp":"","stream":"forage hunt","wilds":"menu:wild_explore menu:wild_forage menu:wild_hunt menu:wild_train","village":"heal village_hunt","ashfall":"far_hunt heal herb_slopes menu:clinic menu:drill menu:workshop scout village_hunt wen_lesson","fo_ashfall":"fo_mei fo_mother fo_spy fo_ya_time menu:fo_clinic menu:fo_council menu:fo_drill menu:fo_palisade","rr_hub":"menu:bl_train menu:rr_forage menu:rr_scout rr_hunt rr_roots talk_mei talk_ya ya_mocks","dw_hub":"dw_hunt dw_scout hot_spring menu:bl_train menu:dw_forage talk_mei talk_ya","ah_hub":"ah_hunt ah_scout menu:ah_forage menu:bl_train talk_mei talk_ya trio_kiss ya_offended","heart_hub":"hall_listen heart_spring ring_chambers sect_cut","rt_camp":"rt_fire_talk rt_watch","rt_ashfall":"menu:rt_hunters rt_council rt_grove rt_ya_village","lf_hub":"menu:lf_forage menu:lf_hunt menu:lf_train menu:lf_trials"};
 for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     const targets = new Set((SCENES[hub]?.choices || []).map((c) => c.to).filter((t) => typeof t === 'string'));
     for (const d of cfg.doors || []) assert(targets.has(d), `v0.11.21: ${hub}: door ${d} is a choice on the hub`);
@@ -34,6 +34,23 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     assert(now === HUB_CARDS[hub], `v0.11.21: ${hub}'s doors and menus are the pinned ones (now: ${now || 'none'}; pinned: ${HUB_CARDS[hub] ?? 'not listed'})`);
 }
 assert(Object.keys(HUB_CARDS).every((h) => TASK_HUBS[h]), 'v0.11.21: every pinned hub is still a task hub');
+// v0.11.67 (owner pick F1, one hub format): no gate cards. A hub choice that opens a screen of its own work (two or more
+// of its choices come back to it: a forage, hunt or practice menu) is a menu on the hub's list (or a door menu), never a
+// story card or a door. Not menus: the camps (the night) and the Story Mode meridian screen (unreachable since v0.11.41).
+{
+    const NOT_MENUS = new Set(['camp', 'bl_camp', 'meridians']);
+    for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
+        const folded = new Set([...Object.keys(cfg.menus || {}), ...Object.keys(cfg.doorMenus || {})]);
+        for (const c of SCENES[hub].choices) {
+            const y = c.to;
+            if (typeof y !== 'string' || y === hub || !SCENES[y] || NOT_MENUS.has(y)) continue;
+            const loops = (SCENES[y].choices || []).filter((d) => d.to === y).length;
+            if (loops >= 2) assert(folded.has(y), `v0.11.67 (F1): ${hub}: "${typeof c.text === 'string' ? c.text : y}" opens a gate screen (${y}); fold it into the list`);
+        }
+    }
+    assert(['rr_hub', 'dw_hub', 'ah_hub'].every((h) => TASK_HUBS[h].menus.bl_train?.label === 'Practice' && !TASK_HUBS[h].doors.includes('bl_train')), 'v0.11.67 (F1): the Blackroot\'s Train is a Practice group on the list');
+    assert(TASK_HUBS.lf_hub.doorMenus?.lf_trials?.label === 'Go deep' && ['lf_forage', 'lf_hunt', 'lf_train'].every((m) => TASK_HUBS.lf_hub.menus[m]), 'v0.11.67 (F1): the Long Forest\'s Forage, Hunt, Train and Go deep are on the list');
+}
 
 // 2. form ids on story choices exist in forms.js
 const formIds = new Set(Object.values(FORM_LINES).flatMap((l) => l.forms.map((f) => f.id)));
