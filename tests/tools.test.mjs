@@ -402,6 +402,15 @@ print(json.dumps({"n": len(R['masks']), "bad": bad, "bitmaps": sum('bitmap' in m
     assert(/\*\*Flight on this world[^\n]*Golden Core/.test(sec('## The world')), 'lore: locals fly only from Golden Core');
     for (const t of ['**Story, flight', '**Mechanics, flight', "**Flight's walk times"]) assert(roadmap.includes(t), `roadmap: the flight line "${t.replace(/\*/g, '')}" is there`);
 }
+// v0.11.79 (owner pick R1): hard rule 8, Claude uploads the changed docs itself after every push (no question), in CLAUDE.md and the working agreement
+{
+    const rules = readFileSync(path.join(ROOT, 'CLAUDE.md'), 'utf8');
+    const nums = [...rules.matchAll(/^(\d+)\. /gm)].map((m) => Number(m[1]));
+    assert(nums.length === 10 && nums.every((n, i) => n === i + 1), `CLAUDE.md: ten hard rules, numbered 1 to 10 (${nums.join(', ')})`);
+    const r8 = (rules.match(/^8\. .*$/m) || [''])[0];
+    assert(/Claude uploads the changed `project\/` docs/.test(r8) && !/asks\*\* whether/.test(r8) && /project\/research\/` stays repo only/.test(r8), 'CLAUDE.md: rule 8 says Claude uploads the changed docs itself, research/ repo only, no question');
+    assert(readFileSync(path.join(ROOT, 'project/working-agreement.md'), 'utf8').includes('**Since v0.11.79 (owner 2026-11-08 20:52'), 'working-agreement: the mirror rule of v0.11.79 is there');
+}
 rmSync(TMP, { recursive: true, force: true });
 
 console.log(`(${((Date.now() - t0) / 1000).toFixed(1)} s)`);

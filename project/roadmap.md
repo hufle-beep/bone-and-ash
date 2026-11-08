@@ -1,6 +1,6 @@
 # Roadmap: Bone and Ash
 
-Last updated: 2026-11-08 (v0.11.78, docs: `project/research.md` split into parts (owner pick S1, 20:46): `research.md` (licences, group h, group i round 1) and `research-2.md` (group i round 2 on), word for word; "`research.md` #NN" below means the series; the owner's rule for docs that grow too big (a trimming pass, nothing lost, then a split) in `working-agreement.md`; the game unchanged; next d; v0.11.77, flight). Update in every push.
+Last updated: 2026-11-08 (v0.11.79, docs: hard rule 8 changed (owner pick R1, 20:53): Claude uploads the changed docs to the claude.ai project itself after every push; the game unchanged; next d; v0.11.78, `research.md` in parts). Update in every push.
 
 **How this file is laid out (v0.11.53, owner 00:52 "reorder it to show the done ones in a separate section", pick R1):** Part 1 is what is still open; Part 2 is everything done, newest first. Nothing was deleted or reworded: every line moved word for word; a line that was partly done was split at the sentence (its done part in Part 2, its open part here), and a done line is labelled with where it stood ("was …").
 

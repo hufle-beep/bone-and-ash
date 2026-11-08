@@ -2,6 +2,23 @@
 
 Started 2026-11-08 (v0.11.74), when `history-9.md` reached about 45 KB. Newer than `history-9.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.79 (word for word)
+
+### From "Decided in chat (2026-11-07)"
+
+- **v0.11.76: the story and mechanics pass, group i round 2, wave 2: cultivation and xianxia games, idle / incremental and not (owner 20:06: "Use the whole net, not just Google, GitHub and Reddit, and Chinese sources too (Bilibili, TapTap, Zhihu, NGA, the games' Chinese names). Include E1's five"; "Read every game fresh for Bone and Ash"; "Recheck every licence at its repo first"; "Pace it: short lists in chat, full tables in files"; three Opus helpers from one short brief, `project/research/group-i-brief-3.md`, reusing the two before it; every licence (22 repos) and the main claims checked by Claude; the merged table sent to the owner as a file before the pick; options V1 / V2 / V3; owner 20:25 "V1"):**
+  - **Picked:** **V1**, docs only: `research.md` wave 2 (26 candidates, #121–#146; the skipped, avoid and unverified lists; licence rows: eight MIT repos (lifeRestart, xiantu, Dao Tree, wendao, Spirit Mountain, vue-idle-xiuxian, Cultivation-Incremental, the Taiwu mods), one BSD-3, three CC BY-NC (vue-XiuXianGame's README badge says MIT; the file governs), the rest none or reserved, the games closed: ideas only, nothing copied); the three reports and the brief word for word in `project/research/` (`group-i-g-idle.md`, `group-i-h-rpg.md`, `group-i-i-chinese.md`, `group-i-brief-3.md`); every candidate placed in the roadmap (groups d, e, f, sections 2, 4, 5). V2 (#123's realm sheet as an open decision at the top of group e) and V3 (the reports only) not picked. **Checked in our code:** realms 2–14 share one breakthrough paragraph (`prologue.js` 864–869); `coilMult` uncapped; `SATIETY_PER_HOUR` 3 at every realm; `REALM_STEP_NAMES` puts Core Formation and True Core between Foundation and Golden Core, which the owner's realm-flavour scale doesn't place yet (Shen Qiu is Core Formation); "James never kills humans" (`stomp_prologue.js`). The strongest, told in chat: a breakthrough text per realm (#121), realm flavour by evidence, not realm (#122), a realm sheet first (#123), James senses them (#124), other people's breakthroughs (#125), two more shapes for #53 (#126), rules for the threads (#127), "Say something", the heart-demon fight and spar rules for group d (#132, #133, #136). The Reincarnation System confirmed as an example to avoid. Not reached: Zhihu, Gitee / Codeberg searches, Qingxuan's itch page (a story-driven cultivation idle, the closest in shape to us: worth a later look).
+  - **No Fable step** (docs only).
+  - **Also:** after v0.11.75 Claude uploaded the 6 changed docs (handover, roadmap, changelog, restore-points, research, history-10) to the claude.ai project itself (owner "upload them yourself"); `project/research/` stays repo only (not mirrored unless the owner asks); `bcd454b` filled in for 0.11.75 in the changelog and restore points; v0.11.73's notes moved to `history-10.md`. This push came from a new chat (the v0.11.75 chat ran long).
+  - **Checks:** see the version note.
+
+### From "Version notes"
+
+## v0.11.76 — the story and mechanics pass, group i round 2, wave 2: cultivation and xianxia games (V1)
+
+- **project/research.md** (wave 2: the licence rows, #121–#146, the skipped, avoid and unverified lists), **project/research/** (new: `group-i-g-idle.md`, `group-i-h-rpg.md`, `group-i-i-chinese.md`, `group-i-brief-3.md`, word for word), **tests/tools.test.mjs** (the group i block widened to wave 2), **sw.js, tests/README.md; project docs** (v0.11.73 to `history-10.md`). The game identical to 0.11.75; saves unchanged.
+- **Checks:** docs and a test only (rule 2): `node tests/tools.test.mjs`, `node tools/consistency.mjs` and `bash tools/check.sh quick`. How it interacts: no game file, save or bot code changed, so the game and the bot numbers can't move; the test reads only `research.md`, the roadmap and `project/research/`. What can now break a push: a wave 2 number placed nowhere, a gap in group i's numbers, or the wave 2 heading or the Sources line missing (intended).
+
 ## Moved from the handover in v0.11.78 (word for word)
 
 ### From "Decided in chat (2026-11-07)"
