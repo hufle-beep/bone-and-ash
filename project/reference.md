@@ -71,7 +71,7 @@ The bible and the contract between the four part files are at the top of `js/sto
 
 | Path | What |
 |---|---|
-| `CLAUDE.md`, `project/*.md` | The hard rules and the project docs (handover, working agreement, roadmap, design, changelog, restore points). |
+| `CLAUDE.md`, `project/*.md` | The hard rules and the project docs (handover, working agreement, roadmap, design, changelog, restore points; v0.11.65: `roadmap-done.md`, the roadmap's done, stale and moot lines). |
 | `index.html`, `css/style.css` | The page. Phone-first layout: status strip (HP / Convergence / Fed / clock; v0.11.64: first, pinned at the very top, above the art), art plate, place and title, roll-result panel, prose, choice "slips", tab bar (Story, James, Hammerspace, Journal, Saves). |
 | `js/core/formulas.js` | Rules Engine C formulas, unchanged. |
 | `js/core/game.js` | State (`newGame`), the numbers (HP, Qi Max, Convergence ×1.25), d6 from the save's own seed (a reload does not reroll), XP (`awardXp`), time and regen (`advance`, `sleepUntil`), hunger, condensation, inventory, relationships, **combat** (`COMBAT_ACTIONS`, `startCombat`, `combatStep`, `combatFlee`), save/load. |

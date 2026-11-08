@@ -5,7 +5,8 @@
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.64 | (this push) | The story and mechanics pass, push 1: no timer, speeds or queue (`js/main.js`), every card at once with its dry run (`taskOutcome`), Cultivate until the limit (`sitLoop`, `med:sitall`), the status bar pinned at the top. `queueDrop` in `migrate` empties an old save's queue and drops `runPart`; the save version is unchanged, so saves go both ways. The baseline kept (0 drifted). Rolling back to 0.11.63 brings back the timer and the queue (empty). |
+| 0.11.65 | (this push) | Docs only (G2: the roadmap regrouped, `roadmap-done.md` and `history-9.md` new). The game is identical to 0.11.64. |
+| 0.11.64 | `0dd7296` | The story and mechanics pass, push 1: no timer, speeds or queue (`js/main.js`), every card at once with its dry run (`taskOutcome`), Cultivate until the limit (`sitLoop`, `med:sitall`), the status bar pinned at the top. `queueDrop` in `migrate` empties an old save's queue and drops `runPart`; the save version is unchanged, so saves go both ways. The baseline kept (0 drifted). Rolling back to 0.11.63 brings back the timer and the queue (empty). |
 | 0.11.63 | `b09940b` | The second round of small art fixes, push 5b: 17 size redraws (four kept old); `patch.py` figures, `masks.py` bitmap masks (`tools/art/masks/`). Same save state as 0.11.54; the baseline kept. Rolling back only brings back the old pictures. |
 | 0.11.62 | `bc9161b` | The second round of small art fixes, push 5a: 15 pictures replaced, `tools/art/patch.py` new. Same save state as 0.11.54; the baseline kept. Rolling back only brings back the old pictures. |
 | 0.11.61 | `623b28d` | The Act 1 art, push 4b: the human versions of Act 1's 20 Yuki keys (`YUKI_HUMAN_PICS` + 20). Same save state as 0.11.54; the baseline kept. Rolling back only drops the new pictures (those scenes show code art again while Yuki is human). |
