@@ -1,6 +1,6 @@
 # Roadmap: Bone and Ash
 
-Last updated: 2026-11-08 (v0.11.69, the story and mechanics pass, group b's last item: the missing replies of the one-off story choices (owner picks R1 + P1; the texts Fable's); group b's last line moved word for word to `project/roadmap-done.md`; group e: the Fable rewrite pass with Claude's comparison (owner 15:16), the relationship decision (14:50), the repeating replies moved out of b; v0.11.68, where replies show). Update in every push.
+Last updated: 2026-11-08 (v0.11.70, docs only: the new order (owner pick O1, 15:48 "before D I will tell you more games to analyze. I'm aware this pushes everything back by a lot, but I want a more mature game before we extend the combat and retune. Go O1."): c, then the new groups g (the copy-over push 5, moved word for word from section 4), h (the analysis of Selene's and the SillyTavern repositories) and i (the games analysis), then d, e, f, the retune and the rest of section 4; rule 10, Fable for story texts (pick A1); v0.11.69, the missing replies). Update in every push.
 
 **How this file is laid out (v0.11.53, owner 00:52 "reorder it to show the done ones in a separate section", pick R1):** Part 1 is what is still open; Part 2 is everything done, newest first. Nothing was deleted or reworded: every line moved word for word; a line that was partly done was split at the sentence (its done part in Part 2, its open part here), and a done line is labelled with where it stood ("was …").
 
@@ -14,7 +14,7 @@ Last updated: 2026-11-08 (v0.11.69, the story and mechanics pass, group b's last
 
 Moved here word for word from the handover in v0.11.52 (owner 00:48 "add the story pass to the roadmap instead", pick A2), so the handover stays small. Each item gets its options (and numbers, where balance moves) before anything is built; drafts of story texts in chat first. ("The block below" in the first item is the second item.)
 
-**Suggested order** *(new in v0.11.65)*: a, b, c, d, e, f, then section 2 (the retune comes after a, which moves the numbers). *(v0.11.66: group a done, its four lines in `roadmap-done.md`.)* *(v0.11.67: group b's hub format done.)* *(v0.11.68: where replies show done; left in b: the missing replies, first the full list of choices without a reply.)* *(v0.11.69: group b done; the repeating replies moved to group e.)* Each group is one push or more, each with its own options and pick.
+**Suggested order** *(new in v0.11.65)*: a, b, c, d, e, f, then section 2 *(v0.11.70, owner pick O1: now c, g, h, i, then d, e, f, section 2, then the rest of section 4; before d the owner names more games for i)* (the retune comes after a, which moves the numbers). *(v0.11.66: group a done, its four lines in `roadmap-done.md`.)* *(v0.11.67: group b's hub format done.)* *(v0.11.68: where replies show done; left in b: the missing replies, first the full list of choices without a reply.)* *(v0.11.69: group b done; the repeating replies moved to group e.)* Each group is one push or more, each with its own options and pick.
 
 ### b. The screen's format
 
@@ -29,6 +29,20 @@ Moved here word for word from the handover in v0.11.52 (owner 00:48 "add the sto
 - **Mechanics, the same pass (owner 2026-11-08 00:02, "when one type of loot from Yuki's auto forage/hunt is full, she switches to another"):** when Yuki's own hunting or foraging would bring a kind of food James can't hold any more (its cap), she brings another kind instead (today "Let Yuki hunt" only hides once hares and venison are both full, v0.11.25). Find every place she gathers first; options with what changes.
 - *(new in v0.11.66, the Fable review's low finding 3, owner pick R1)* "Cultivate until the limit" lists every sit's four lines (Condensed, Convergence Use, GU, Yuki) since X1: about 640 lines for a 159-sit run at Nascent Soul (the panel's summary and the 12-line journal keep it usable). Option: one total line per skill for the loop. Options first.
 - *(was: Now, item 4, its own sentence)* Tabled until after the art: more than one Blackroot wilds exploration a day on replays (owner 21:31, the wilds save; options first, now with the story and mechanics pass).
+
+### g. The copy-over push 5, the Coil *(new in v0.11.70, owner pick O1: moved up from section 4, after c)*
+
+- **Then:** the copy-over continues with 5, the Coil (options first, its own list and go).
+*(5. The Coil: its queue Undo, presets and advanced queue controls are moot since v0.11.64)*
+5. **The Coil:** an end-of-Coil summary (what carried over, which tasks are close to Practised); queue Undo and named presets that load by themselves (at a Coil's first dawn, on reaching a hub); progressive reveal (advanced queue controls after the first rewind) and a next-step line; a target Coil per act and a personal best.
+
+### h. Analysis of Selene's and the SillyTavern repositories *(new in v0.11.70)*
+
+- **The owner (2026-11-08 15:45, "And when that is done, another full analysis pass of the whole Selene and Sillytavern repositories, not just the games themselves, to see if there is anything it useful to adapt/adopt."):** after g, a read-only analysis of the whole of `hufle-beep/Long-patience` (Selene) and `hufle-beep/Shared-ST` (SillyTavern, private: read access through `add_repo` first): the games and also the tools, tests, checks, workflows, docs, rules and working habits; a list of what could be adapted or adopted for Bone and Ash, with options first (an earlier read-only pass, 2026-11-06, gave the copy-over list in section 4).
+
+### i. The games analysis *(new in v0.11.70)*
+
+- **The owner (2026-11-08 15:45, "After that, o hope selene still has the list of games it went through for analysis, because I want to analyze then here too and adopt/adapt features."; 15:48 "before D I will tell you more games to analyze."):** after h, the games Selene studied (`project/research.md` in `hufle-beep/Long-patience`: five rounds, about 45 games with their licences and what may be taken: ideas only, or code with its notice) analysed again for Bone and Ash, plus the games the owner names before d; features to adopt or adapt as options, licences respected (ideas only where the licence says so).
 
 ### d. Combat
 
@@ -98,9 +112,7 @@ Moved here word for word from the handover in v0.11.52 (owner 00:48 "add the sto
 From the read-only analysis of Selene (`hufle-beep/Long-patience`) and Rules Engine C (`hufle-beep/Shared-ST`). One push each, in this order; **each gets its own exact list and its own go, and Claude stops after every push** (rule 1, v0.11.6); anything that moves balance shows its numbers first.
 (Pushes 1–4 and the items between them are done: Part 2.) *(Part 2 is now `project/roadmap-done.md`.)*
 
-- **Then:** the copy-over continues with 5, the Coil (options first, its own list and go).
-*(5. The Coil: its queue Undo, presets and advanced queue controls are moot since v0.11.64)*
-5. **The Coil:** an end-of-Coil summary (what carried over, which tasks are close to Practised); queue Undo and named presets that load by themselves (at a Coil's first dawn, on reaching a hub); progressive reveal (advanced queue controls after the first rewind) and a next-step line; a target Coil per act and a personal best.
+*(v0.11.70, owner pick O1: the copy-over push 5, the Coil, moved word for word to section 1, group g; the rest of this section stays after the retune)*
 6. **Engine systems (numbers first):** Qi bond flow with Yuki (`qiFlow*` already in `formulas.js`; off until primaries open); injuries (`INJURY_SEVERITY`, cure tiers; the clinic and salve); an emergency-dantian fight card; quest XP lumps (120 / 240 / 480).
 7. **Then roadmap step 4** with: crafting on the engine's equipment tiers 0–6, the 9 Parallel Cognition threads named after the engine's domains (learning, body, crafting, social reading, threat, synergy, priorities, food and salvage, executive review) under Selene's rule D2 (automation never runs ahead of affordable queued work, an idle Coil never auto-tops-up) and a global "pause all automation", the unfolding FAQ (kept on the device, with search and a "new" dot); **step 6** with: the build copying `js/ css/ art/ icons/` too, no service worker inside the app, embedded fonts (check the OFL font-name rules), target SDK 35/36 with edge-to-edge, Selene's `-next` release swap and `android-build-N` backups, saving in `onPause`; sound (ZzFX, MIT) when wanted.
 

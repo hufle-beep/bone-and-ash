@@ -2,6 +2,12 @@
 
 Split out of `roadmap.md` in v0.11.65 (owner pick G2, 2026-11-08 11:45), so the roadmap shows only the open work. Every line here moved word for word; newest first. Update in every push that finishes a roadmap line.
 
+## Moved in v0.11.70 (word for word)
+
+### The old "Last updated" line
+
+Last updated: 2026-11-08 (v0.11.69, the story and mechanics pass, group b's last item: the missing replies of the one-off story choices (owner picks R1 + P1; the texts Fable's); group b's last line moved word for word to `project/roadmap-done.md`; group e: the Fable rewrite pass with Claude's comparison (owner 15:16), the relationship decision (14:50), the repeating replies moved out of b; v0.11.68, where replies show). Update in every push.
+
 ## Moved in v0.11.69 (word for word)
 
 ### From section 1b, "The screen's format" (the reply bullet's last part; done in v0.11.69 for the one-off story choices: R1 the 20 choices' replies, Fable's texts, P1 a partial haul keeps its reply; the repeating ones moved to group e)
