@@ -248,6 +248,19 @@ for (const mode of ['full', 'quick']) {
     let bad = 0;
     try { execFileSync(process.execPath, ['tests/models.test.mjs', '--games', '1', '--off-models', 'nobody'], { cwd: ROOT, stdio: 'ignore' }); } catch (e) { bad = e.status; }
     assert(bad === 2, `models --off-models with an unknown model exits 2 (${bad})`);
+    // v0.11.85 (owner pick M1): the Sitter in the models step (its own game count), and a tiny real Sitter run
+    const mj = list().jobs?.find((j) => j.key === 'models'), mq = list('quick').jobs?.find((j) => j.key === 'models');
+    const src = readFileSync(path.join(ROOT, 'tools/check.mjs'), 'utf8'); // --list gives names only: the job's arguments read from the source
+    assert(/the Sitter 150/.test(mj?.name ?? '') && /the Sitter 20/.test(mq?.name ?? '') && src.includes("'--model', 'careful,completionist,rusher,sitter'") && src.includes("'--sitter-games', QUICK ? '20' : '150'") && src.includes("blocks: QUICK ? 4 : 6"), `the models step plays the Sitter: 150 games (20 quick), 6 / 4 blocks (${mj?.name}; ${mq?.name})`);
+    let sit = '';
+    try { sit = execFileSync(process.execPath, ['tests/models.test.mjs', '--model', 'careful,sitter', '--games', '3', '--sitter-games', '2', '--off', '0', '--workers', '1'], { cwd: ROOT, encoding: 'utf8' }); } catch (e) { sit = String(e.stdout || e); }
+    const sh = [...sit.matchAll(/^\[([^\]]+)\] (\d+) games, (\d+) cards/gm)].map((m) => `${m[1]} ${m[2]}`).join();
+    const sCards = Number(sit.match(/^\[sitter\] \d+ games, (\d+) cards/m)?.[1] || 0), cCards = Number(sit.match(/^\[careful\] \d+ games, (\d+) cards/m)?.[1] || 0);
+    assert(sh === 'careful 3,sitter 2' && / 0 failed/.test(sit), `models --sitter-games 2: the Sitter plays its own count, nothing fails (${sh})`);
+    assert(sCards > 3 * cCards, `the Sitter runs far more cards than Careful (${sCards} vs ${cCards}: the sits)`);
+    let badS = 0;
+    try { execFileSync(process.execPath, ['tests/models.test.mjs', '--model', 'sitter', '--games', '1', '--sitter-games', 'abc'], { cwd: ROOT, stdio: 'ignore' }); } catch (e) { badS = e.status; }
+    assert(badS === 2, `models --sitter-games abc exits 2 (${badS})`);
 }
 
 const canon = (v) => (Array.isArray(v) ? v.map(canon) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, canon(v[k])])) : v);

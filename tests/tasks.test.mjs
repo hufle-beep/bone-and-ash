@@ -14,6 +14,7 @@ import { e8Hours, ecHours, jnHours } from '../js/story/meridians.js';
 import { serialize, deserialize } from '../js/core/game.js';
 import { PEOPLE_FIGHTS, combatHooks } from '../js/core/game.js'; // v0.11.81
 import { fightAction, yukiSitsOut, armourDr as armourDrOf, jamesDr as jamesDrOf } from '../js/core/game.js'; // v0.11.82
+import { XP_RATE, XP_BANDS } from '../js/core/game.js'; // v0.11.85
 import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, advance, STARVE_HP_PER_HOUR, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1, bumpRel as relBump, startActCoil, REL_CATCHUP } from '../js/core/game.js';
 import { canPrimary, canColGroup, colGroupsOpen, btTarget, COL_GROUPS, priHours, colHours, merMinutesOf } from '../js/story/meridians.js';
 import { sceneView, choose, goTo, wasPicked, isMenuScene, notePicked, seenBefore, noteSeen } from '../js/core/story.js';
@@ -1129,6 +1130,31 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
         assert(o?.done === 'lose' && o.next === 'lf_human_lost' && g.coil.why !== 'beast', `T1: losing to ${who} on an active Coil leads to "Robbed", not the Coil's end (${o?.next})`);
     }
 }
+// v0.11.85 (owner pick D + T1): every XP award ×0.6 after the Coil bonus; the targets 4 / 6
+{
+    assert(XP_RATE === 0.6, 'D: the XP rate is 0.6');
+    const fresh = (n, set) => { const g = ensureBars(newGame(8501 + n, { closed: true })); if (set) set(g); return g; };
+    // a standard check on Coil 1, T1: pool 30 × 0.6 = 18, split 9 / 9; Yuki's bond share 9
+    { const g = fresh(0); const cu = g.james.skills['Convergence Use'].xp, gu = g.james.gu.xp, y = g.yuki.qiUse.xp; awardXp(g, 'Convergence Use', 'standard');
+      assert(g.james.skills['Convergence Use'].xp - cu === 9 && g.james.gu.xp - gu === 9 && g.yuki.qiUse.xp - y === 9, 'D: a standard award on Coil 1 pays 18 (30 × 0.6), split 9 / 9, Yuki 9'); }
+    // GU alone takes the whole pool
+    { const g = fresh(1); const gu = g.james.gu.xp; awardXp(g, 'GU', 'standard'); assert(g.james.gu.xp - gu === 18, 'D: GU alone: 18'); }
+    // the Coil bonus first, then the rate: Coil 3 ×1.5 → 45 × 0.6 = 27, split 13 / 13
+    { const g = fresh(2, (x) => { x.coil.n = 3; }); const cu = g.james.skills['Convergence Use'].xp; awardXp(g, 'Convergence Use', 'standard');
+      assert(coilMult(g) === 1.5 && g.james.skills['Convergence Use'].xp - cu === 13, 'D: Coil 3: 30 × 1.5 × 0.6 = 27, split 13'); }
+    // a fail pays 25% before the rate: floor(30 × 0.25) = 7 → floor(7 × 0.6) = 4, split 2 / 2
+    { const g = fresh(3); const cu = g.james.skills['Convergence Use'].xp; awardXp(g, 'Convergence Use', 'standard', { fail: true }); assert(g.james.skills['Convergence Use'].xp - cu === 2, 'D: a fail: 7 × 0.6 = 4, split 2'); }
+    // Yuki's fight XP: band × her tier × the Coil bonus × the rate
+    { const g = fresh(4); g.yuki.fight.tier = 2; const out = awardYukiFightXp(g, 'challenging');
+      assert(Math.floor(XP_BANDS.challenging * 2 * 0.6) === 72 && /^Yuki Fight \+72\b/.test(out[0]), `D: Yuki's fight XP 60 × 2 × 0.6 = 72 (${out[0]})`); }
+    // the routine band still pays nothing
+    { const g = fresh(5); assert(awardXp(g, 'Convergence Use', 'routine').length === 0, 'D: routine pays nothing'); }
+    // T1: the targets, the star at 4 / 6 and none past them
+    const { TARGETS: T, noteClear: nc } = await import('../js/core/coil.js');
+    assert(T[0] === 4 && T[1] === 6, 'T1: the targets 4 / 6');
+    { const g = fresh(6); g.coil.n = 4; assert(/in 4 Coils: a new best ★ \(target 4\)\./.test(nc(g, 0)[0]), 'T1: the prologue on Coil 4: a star');
+      const h = fresh(7); h.coil.n = 7; assert(/^Act 1 cleared in 7 Coils: a new best \(target 6\)\.$/.test(nc(h, 1)[0]), 'T1: Act 1 on Coil 7: no star'); }
+}
 // v0.11.82 (owner picks B1 + Y1; texts Fable's): Ya's brawl a weapon spar, Bao's an unarmed brawl, Yuki in them only in human form
 {
     const yaCh = SCENES.ya_challenge.choices.find((c) => c.combat), baoCh = SCENES.rt_brawl_start.choices[0];
@@ -1279,15 +1305,15 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
       assert(nextStep(a, SCENES) === '' && nextStep(b, SCENES) === '' && nextStep(c, SCENES) === '', 'N1: none after the first crossing, in Act 1 or off the task screens'); }
     // T1: the best per act, counted from the pass's first Coil, kept and only improved
     { const x = hub(7209, 'wilds', 2); x.coil.n = 2;
-      assert(passCoils(x) === 2 && JSON.stringify(noteClear(x, 0)) === JSON.stringify(['Prologue cleared in 2 Coils: a new best ★ (target 2).']) && x.stats.best[0] === 2, 'T1: the prologue on Coil 2: a new best within the target');
+      assert(passCoils(x) === 2 && JSON.stringify(noteClear(x, 0)) === JSON.stringify(['Prologue cleared in 2 Coils: a new best ★ (target 4).']) && x.stats.best[0] === 2, 'T1: the prologue on Coil 2: a new best within the target');
       x.coil.n = 3; assert(noteClear(x, 0).length === 0 && x.stats.best[0] === 2, 'T1: a worse clear changes nothing');
       x.coil.n = 5; x.stats.pass = 5; assert(passCoils(x) === 1 && /in 1 Coil: a new best ★/.test(noteClear(x, 0)[0]) && x.stats.best[0] === 1, 'T1: a new pass counts from its own first Coil');
-      x.coil.n = 8; assert(/^Act 1 cleared in 4 Coils: a new best \(target 3\)\.$/.test(noteClear(x, 1)[0]), 'T1: over the target, no star');
-      assert(targetsText(x) === `the prologue by Coil ${TARGETS[0]}, Act 1 by Coil ${TARGETS[1]}, counted from Day 1. Your best: prologue 1 Coil, Act 1 4 Coils.`, `T1: the targets line (${targetsText(x)})`); }
+      x.coil.n = 11; assert(/^Act 1 cleared in 7 Coils: a new best \(target 6\)\.$/.test(noteClear(x, 1)[0]), 'T1: over the target, no star');
+      assert(targetsText(x) === `the prologue by Coil ${TARGETS[0]}, Act 1 by Coil ${TARGETS[1]}, counted from Day 1. Your best: prologue 1 Coil, Act 1 7 Coils.`, `T1: the targets line (${targetsText(x)})`); }
     // T1 through the scenes: crossing into Act 1 and reaching its end; a whole-game rewind starts a pass
     { const x = hub(7210, 'epilogue', 8); x.coil.n = 2; x.flags.ending = 'paid'; const lines = SCENES.fo_start.enter(x) || [];
-      assert(x.coil.act === 1 && lines.includes('Prologue cleared in 2 Coils: a new best ★ (target 2).') && x.stats.coils0 === 2, `T1: crossing records the prologue (${lines.join(' | ')})`);
-      const l2 = SCENES.a1_end.enter ? SCENES.a1_end.enter(x) || [] : []; assert(l2.includes('Act 1 cleared in 2 Coils: a new best ★ (target 3).') && x.stats.best[1] === 2, `T1: the end of Act 1 records it (${l2.join(' | ')})`);
+      assert(x.coil.act === 1 && lines.includes('Prologue cleared in 2 Coils: a new best ★ (target 4).') && x.stats.coils0 === 2, `T1: crossing records the prologue (${lines.join(' | ')})`);
+      const l2 = SCENES.a1_end.enter ? SCENES.a1_end.enter(x) || [] : []; assert(l2.includes('Act 1 cleared in 2 Coils: a new best ★ (target 6).') && x.stats.best[1] === 2, `T1: the end of Act 1 records it (${l2.join(' | ')})`);
       rewind(x, { to: 'game' }); assert(x.coil.act === 0 && x.stats.pass === x.coil.n && passCoils(x) === 1 && x.stats.best[0] === 2 && x.stats.best[1] === 2, `T1: the whole game again: a new pass, the bests kept (pass ${x.stats.pass}, n ${x.coil.n})`);
     }
     // a rewind to the start of Act 1 keeps the pass (the review's L5, R1: on an Act 1 state)
@@ -1922,13 +1948,13 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
         const cu0 = g.james.skills['Convergence Use'].xp, gu0 = g.james.gu.xp, y0 = g.yuki.qiUse.xp, want = sitXp(g);
         const r = condense(g);
         assert(r.ok && r.xp.length === 3 && JSON.stringify(r.xp) === JSON.stringify(want), `X1: a sit's XP lines (${r.xp.join('; ')})`);
-        assert(g.james.skills['Convergence Use'].xp - cu0 === 5 && g.james.gu.xp - gu0 === 5 && g.yuki.qiUse.xp - y0 === 5, 'X1: T1 on Coil 1: Convergence Use +5, GU +5, Yuki Qi Use +5 (a standard award is 15 each)');
+        assert(g.james.skills['Convergence Use'].xp - cu0 === 3 && g.james.gu.xp - gu0 === 3 && g.yuki.qiUse.xp - y0 === 3, 'X1: T1 on Coil 1: Convergence Use +3, GU +3, Yuki Qi Use +3 (a third of 30 is 10, ×0.6 the XP rate since v0.11.85: 6, split)');
         const n = ensureBars(newGame(6603, { closed: true })); n.james.qi = 5; const nx = JSON.stringify([n.james.gu, n.yuki.qiUse]);
         const rn = condense(n); assert(!rn.ok && !rn.xp.length && JSON.stringify([n.james.gu, n.yuki.qiUse]) === nx, 'X1: no sit (short of Qi), no XP');
         const c3 = ensureBars(newGame(6604, { closed: true })); c3.coil.n = 3; c3.james.qi = 30; const r3 = condense(c3);
-        assert(/Convergence Use \+7 XP/.test(r3.xp[0]), `X1: the Coil bonus applies (Coil 3 ×1.5: ${r3.xp[0]})`);
+        assert(/Convergence Use \+4 XP/.test(r3.xp[0]), `X1: the Coil bonus applies (Coil 3 ×1.5, ×0.6: ${r3.xp[0]})`);
         const t2 = ensureBars(newGame(6605, { closed: true })); t2.james.skills['Convergence Use'] = { tier: 2, level: 1, xp: 0 }; t2.james.qi = 30;
-        assert(/Convergence Use \+10 XP/.test(condense(t2).xp[0]), 'X1: the pool goes by the skill\'s tier (T2: +10)');
+        assert(/Convergence Use \+6 XP/.test(condense(t2).xp[0]), 'X1: the pool goes by the skill\'s tier (T2: +6 with the XP rate)');
     }
     { // the sit from Meditate and from the task card carry the XP lines
         const m = ensureBars(newGame(6606)); m.scene = 'rt_camp'; m.james.qi = 30; const rm = runMed(m, SCENES, 'med:sit');

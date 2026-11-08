@@ -9,9 +9,11 @@ assert(jamesQiMax(g) === 40.5, 'Convergence 40.5 (engine: Convergence (Qi+Bonesi
 assert(yukiQiMax(g) === 32.5, 'Yuki Qi 32.5 (engine: Yuki Qi 32.5/32.5)');
 assert(xpToNext(g.james.gu) === 25, 'T1 L1 → L2 costs 25 XP (k 0.5)');
 const lines = awardXp(g, 'Convergence Use');
-assert(g.james.skills['Convergence Use'].xp === 15 && g.james.gu.xp === 15 && g.yuki.qiUse.xp === 15, 'standard award at T1: pool 30 → skill 15, GU 15, Yuki 15');
+assert(g.james.skills['Convergence Use'].xp === 9 && g.james.gu.xp === 9 && g.yuki.qiUse.xp === 9, 'standard award at T1: the engine\'s pool 30, ×0.6 the game\'s XP rate (v0.11.85) = 18 → skill 9, GU 9, Yuki 9');
 awardXp(g, 'Convergence Use');
-assert(g.james.skills['Convergence Use'].level === 2 && g.james.skills['Convergence Use'].xp === 5, 'second award levels up (30 − 25 = 5 over)');
+assert(g.james.skills['Convergence Use'].level === 1 && g.james.skills['Convergence Use'].xp === 18, 'second award: 18, still short of 25');
+awardXp(g, 'Convergence Use');
+assert(g.james.skills['Convergence Use'].level === 2 && g.james.skills['Convergence Use'].xp === 2, 'third award levels up (27 − 25 = 2 over)');
 assert(lines.length === 3, 'award lines');
 const r = rollCheck(g, 'Convergence Use', 3);
 assert(r.die === undefined && r.dc === noDiceDc(3) && r.ratio === r.value / r.dc && r.success === (r.ratio >= 1) && r.crit === (r.ratio >= 2), 'check = value ÷ (DC − 2), no dice (v0.11.45)');

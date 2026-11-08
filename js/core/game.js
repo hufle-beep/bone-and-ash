@@ -215,6 +215,12 @@ export const COIL_GROWTH = 0.25; // v0.11.29 (owner pick RB-1): was 0.5
 export const fmtMult = (x) => String(Math.round(x * 100) / 100);
 export const coilMult = (g) => 1 + COIL_GROWTH * Math.max(0, (g?.coil?.n || 1) - 1);
 /**
+ * v0.11.85 (owner 2026-11-09 00:05, pick D: "the game at least twice as hard"): every XP award (James's skills, Yuki's
+ * bond share and her fights) is ×0.6, after the Coil bonus. The models: the Completionist's prologue 2.06 → 3.94 Coils,
+ * Act 1 2.75 → 5.89; the Coil bonus and familiarity unchanged.
+ */
+export const XP_RATE = 0.6;
+/**
  * Speed by use (v0.11.15, B1-b, owner 19:12, Selene's familiarity): each activity speeds up with its own use, kept across
  * Coils: speed = 1 + 9 × (uses ÷ N), up to ×10. Cards N 18 (tasks.js, the familiarity count), the sit N 30, meridian
  * work N 30 (a sitting), the breakthrough N 6. Uses of the sit, meridian work and the breakthrough live in
@@ -258,7 +264,7 @@ export function awardXp(g, skillName, band = 'standard', { fail = false, factor 
     let pool = (XP_BANDS[band] ?? 30) * n.tier;
     if (fail) pool = Math.floor(pool * FAIL_XP_FRACTION);
     if (factor !== 1) pool = Math.floor(pool * factor); // a partial result on a task card (v0.9.2)
-    pool = Math.floor(pool * coilMult(g)); // the Coil bonus (v0.11.0)
+    pool = Math.floor(pool * coilMult(g) * XP_RATE); // the Coil bonus (v0.11.0), the XP rate (v0.11.85)
     if (!pool) return [];
     const out = [];
     const heads = name === 'GU' ? 1 : 2;
@@ -276,7 +282,7 @@ export function awardXp(g, skillName, band = 'standard', { fail = false, factor 
     return out;
 }
 export function awardYukiFightXp(g, band = 'standard') {
-    const pool = Math.floor((XP_BANDS[band] ?? 30) * g.yuki.fight.tier * coilMult(g));
+    const pool = Math.floor((XP_BANDS[band] ?? 30) * g.yuki.fight.tier * coilMult(g) * XP_RATE); // v0.11.85: the XP rate
     const ups = addXp(g.yuki.fight, pool);
     return [atSkillCap(g.yuki.fight) && !ups.length ? 'Yuki Fight at T10 L10 (cap)' : `Yuki Fight +${pool}${ups.length ? ` → ${ups.at(-1)}` : ''}`];
 }

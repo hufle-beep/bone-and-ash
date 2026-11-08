@@ -6,13 +6,15 @@
 | Branch | What it holds |
 |---|---|
 | `fallback/2026-11-06-before-pivot` | 0.11.4, the game before the copy-over from Selene and Rules Engine C (made with 0.11.5). |
+| `fallback/2026-11-09-before-difficulty` | 0.11.84 (`5eb5683`), the game before the XP rate ×0.6 and the targets 4 / 6 (made with 0.11.85, owner pick D: "at least twice as hard"). |
 
 The next one is made before the whole-game rewrite pass (group e) and before the retune (section 2), in those pushes.
 
 ## Known-good versions (newest first)
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.84 | (this push) | Docs only (the bug's place in group f confirmed). The game is identical to 0.11.83. |
+| 0.11.85 | (this push) | D + T1 + M1: the XP rate ×0.6 (`XP_RATE`, `js/core/game.js`), the targets 4 / 6 (`js/core/coil.js`), the Sitter model (`tests/models.test.mjs`, `tools/check.mjs`), the baseline re-saved. Saves unchanged, no id changed. Rolling back brings back the old XP and targets 2 / 3; a save made here plays on (its skills are kept; it learns at the old rate). The game before: `fallback/2026-11-09-before-difficulty`. |
+| 0.11.84 | `5eb5683` | Docs only (the bug's place in group f confirmed). The game is identical to 0.11.83. |
 | 0.11.83 | `18a0aa2` | P1 + T1 + R1: the FAQ tab (`js/core/faq.js`, its wiring in `main.js`, a sixth tab in `index.html` and `css/style.css`), the James tab's dice-era rules replaced. Saves unchanged, no id changed; one new phone key `boneash.faq.v1` (rolling back leaves it unread). Rolling back removes the FAQ and brings back the old rules paragraph. |
 | 0.11.82 | `bfc0f07` | B1 + Y1: the brawls' styles (`style: 'spar' / 'unarmed'` on `yaBrawl` and `brawl`; `fightAction`, `yukiSitsOut`, the unarmed actions in `game.js`; `fightStyle` in `forms.js`), Fable's texts; the baseline re-saved (owner's go). Saves unchanged in shape (fight-only optional fields); no id changed. Rolling back brings back the bone kit in both brawls and the old baseline. |
 | 0.11.81 | `ff012d7` | T1: `lf_bandits` in `PEOPLE_FIGHTS` (`js/core/game.js`). Saves unchanged, no id changed; the baseline kept (0 drifted). Rolling back brings back the Tans' +0.5 and a lost Tan fight ending the Coil. |

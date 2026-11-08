@@ -2,6 +2,24 @@
 
 Started 2026-11-08 (v0.11.74), when `history-9.md` reached about 45 KB. Newer than `history-9.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.85 (word for word)
+
+### From "Decided in chat"
+
+- **v0.11.82: the brawls (owner 21:52 "procceed": the options with the lab's numbers and Fable's drafts; options B1 (one push) / B2 (two), Y1 (Yuki only in human form) / Y2 (every form); owner 22:03 "go with your picks"; the full check then failed on two story-test numbers (Ya's brawl 53.5 → 75% smart, 53.5 → 85% random, past ±20): options K1 (accept, update the baseline) / K2 (Ya +1.5) / K3 (closed actions to guard); owner 22:11 "K1. go"; 22:16 "cover all the numbers... it will be out of sync otherwise": the whole baseline re-saved):**
+  - **Picked:** **B1 + Y1**, all of Fable's texts. Ya's brawl (`ya_brawl`) a weapon spar (`style: 'spar'`): blade, spear and guard only; guard a flat +2, no bone-plate DR, no construct, shield or buckler cover; the weapon sung (Convergence's damage), checks on GU. Bao's brawl (`rt_brawl`) unarmed (`style: 'unarmed'`): **Step in and hit** (2–4 × GU tier), **Hook and throw** (1–2 × GU tier, +2 DC, staggers), **Cover up and circle** (guard +2); no Qi; a win's XP to GU only. Yuki fights in both only in her human form (none of the bots' Act 1 states has her human, so in practice she watches); a Yuki who watched gets no fight XP. A closed action asked for (the bots, an old save) becomes the blade in a spar, a strike (guard: cover) in a brawl, guard elsewhere as before (`fightAction`). Fable's texts: the spar choice, `ya_won`'s opening, the one-move wins 2 and 3 and the one-move line, `fo_price`, `ya_lost`'s human-form line, the spar's terms and Yuki's lines by form (intro tails, `enc.tail`), Bao's first-round line (`enc.opening`), the throw's lines. B2, Y2, K2, K3 not picked.
+  - **Numbers:** before the pick (the lab's sim, 400 / 401 states): Ya 98.5 / 97.0% (smart / random) → 100 / 90.0% with Yuki out; Bao 100%. As built: Ya 100 / 100% (the bots' random attacks more; 90% is the honest random-player number), Bao 100%; the story test (a much weaker James): Ya 53.5 → 75 / 85%. **The baseline (K1, 22:16):** all 178 numbers re-saved, taking in also the drift since v0.11.71 (e.g. tribute C4 paid 38.3 → 32.1%) and noise.
+  - **Cold review on Fable (rule 9):** rerun (owner 22:46 R1): see the version note.
+  - **Also:** `ff012d7` filled in for 0.11.81; v0.11.79's notes and two open items to `history-10.md`; after v0.11.81 Claude uploaded 5 docs (handover, roadmap, changelog, restore-points, history-10).
+  - **Checks:** see the version note.
+
+### From "Version notes"
+
+## v0.11.82 — the brawls: Ya's spar, Bao unarmed, Yuki only in human form (B1 + Y1)
+
+- **js/core/game.js** (`strike`, `throw`, `cover`; `fightAction`, `yukiSitsOut`; the style in `startCombat`, the step, the XP, `actionDmg`, `guardBonus`, `armourDr`), **js/core/forms.js** (`fightStyle`, `UNARMED_ACTIONS`, `SPAR_ACTIONS`, `actionOpen`, the guard label), **js/story/act1_common.js** (`encounter` passes `style`, `tail`, `opening`), **js/story/power.js** (`prepare` adds the tail), **js/story/act1_fallout.js, act1_return.js, stomp_act1.js** (the encounters, Fable's texts), **js/main.js** (no buckler note in a style; Yuki "(watching)"), **tests/tasks.test.mjs** (the v0.11.82 block), **tools/baseline.json** (re-saved, owner's go), **sw.js, tests/README.md, tools/timings.json; project docs** (v0.11.79 to `history-10.md`). Saves: an optional `style`, `yukiOut`, `opening` inside a running fight only; no id changed (a save mid-brawl from before plays that fight the old way).
+- **Checks:** the full `bash tools/check.sh` failed at first (rule 2): the two story-test Ya numbers drifted (+21.5, +31.5); reported, owner K1; after the baseline was re-saved: exit 0, 0 drifted, 0 notes; the models unchanged (Careful 2.23 / 2.83, Completionist 2.08 / 2.77); the four browser parts pass. One mutation by hand (Yuki's sit-out taken out: the test fails). Cold review on Fable (rerun, fast brief): safe; fixed: the brawl's one-move degree read on GU alone (`power.js`), a thrown foe shows "(down)"; open (the owner's call): "Fists only." twice, the spar's "terms" line on `ya_forced`, a brawl win's GU XP about double a small fight's. Full check rerun: exit 0, 0 drifted.
+
 ## Moved from the handover in v0.11.84 (word for word)
 
 ### From "Decided in chat"

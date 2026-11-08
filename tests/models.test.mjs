@@ -7,6 +7,7 @@
 //   node tests/models.test.mjs --model completionist  one model (careful | completionist | rusher | random)
 //   node tests/models.test.mjs --json FILE            also write the merged numbers as JSON
 //   node tests/models.test.mjs --off-models careful   v0.11.28: only these models play the Yuki-off games (default: all but Random)
+//   node tests/models.test.mjs --sitter-games 200     v0.11.85: the Sitter's own game count (default: --games; it plays ~20× the cards)
 //
 // The models (tests/README.md has the details):
 //   random         the tasks test's bot (tests/tasks.test.mjs): random cards and story choices, half its games fight at
@@ -16,6 +17,9 @@
 //                  70, then training, then the rest and meditation), no doors, story choices without a fight where it can
 //   completionist  every open card once a waking day, doors too; breaks through as soon as it can; untried choices first
 //   rusher         the story with the least work: only meals (below Fed 15), and a screen's cards only when it has no exit
+//   sitter         v0.11.85 (owner pick M1): cultivates whenever it can, like the owner's saves (747 sits by Coil 4): a sit
+//                  while Qi ≥ 10 and Saturation < 95, else a meridian session, else "Meditate: gather Qi" (up to 6 h a waking
+//                  day, Fed over 30); otherwise plays like the completionist
 // Careful, Completionist and Rusher fight smart, keep Yuki's lane on (the "yukiOff" lines: the same with it off), rewind a
 // lost tribute up to 3 times, bite the tail when Shen Qiu takes James up to 3 times (the start of Act 1), and stop after
 // Coil 8. A rewind forgets the cards done (the days start over).
@@ -30,17 +34,20 @@ import { SHARD, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/s
 
 const argv = process.argv.slice(2);
 const opt = (n, d) => { const i = argv.indexOf(`--${n}`); return i >= 0 && argv[i + 1] != null ? argv[i + 1] : d; };
-export const MODELS = ['random', 'careful', 'completionist', 'rusher'];
+export const MODELS = ['random', 'careful', 'completionist', 'rusher', 'sitter']; // v0.11.85: the Sitter last, so the others' seeds don't move
 const ONLY = opt('model', 'all');
 const PLAY = ONLY === 'all' ? MODELS : ONLY.split(',');
 for (const m of PLAY) if (!MODELS.includes(m)) { console.error(`unknown model ${m} (${MODELS.join(', ')})`); process.exit(2); }
 const JSON_OUT = opt('json', null);
 const OFF = Math.max(0, Number(opt('off', 300)) || 0);
+const SITTER_GAMES = opt('sitter-games', null); // v0.11.85
+if (SITTER_GAMES != null && !(Number(SITTER_GAMES) >= 0)) { console.error(`--sitter-games needs a number of games (${SITTER_GAMES})`); process.exit(2); }
 // v0.11.28: which models also play the Yuki-off games (default: every model played but Random)
 const OFF_MODELS = opt('off-models', 'careful,completionist,rusher').split(',');
 for (const m of OFF_MODELS) if (!MODELS.includes(m)) { console.error(`unknown model ${m} in --off-models (${MODELS.join(', ')})`); process.exit(2); }
 const MAX_COIL = 8;
 const STEPS = 30000;
+const STEPS_SITTER = 120000; // v0.11.85: the Sitter takes a step per sit
 
 let pass = 0, fail = 0;
 const fails = [];
@@ -95,6 +102,15 @@ export function hubPlan(model, g, cards, mem, noExit = false) {
     if (rest && hp < 0.6) return [rest.id];
     const bt = open.find((c) => c.kind === 'bt');
     if (bt && fresh(bt)) return [bt.id];
+    if (model === 'sitter') { // v0.11.85 (M1): sit, then the meridians, then gather Qi; the rest like the completionist
+        const sit = open.find((c) => c.kind === 'sit' || (c.kind === 'chore' && /^(Cultivate|Condense)/.test(c.label)));
+        if (sit && g.james.qi >= 10 && g.james.saturation < 95) return [sit.id];
+        const mer = open.find((c) => c.kind === 'mer');
+        if (mer && g.james.qi >= 10) return [mer.id];
+        const qi = open.find((c) => c.kind === 'qi');
+        const dk = `qi@${dayKey(g)}`; mem.qi = mem.qi || {};
+        if (qi && (sit || mer) && (mem.qi[dk] || 0) < 6 && g.james.satiety > 30) { mem.qi[dk] = (mem.qi[dk] || 0) + 1; return [qi.id]; }
+    }
     const todo = open.filter((c) => fresh(c) && !EAT.test(c.label) && !REST.test(c.label));
     if (model === 'careful') {
         const work = todo.filter((c) => c.kind !== 'door');
@@ -120,12 +136,13 @@ function play(run, model, st, yuki) {
     const mem = { done: {}, tried: new Set(), tribLost: 0, shenBites: 0 };
     let coilKey = '', deadKey = '', takenKey = '', crossed = false, bitShen = false;
     const seenTrib = new Set();
-    for (let steps = 0; steps < STEPS; steps++) {
+    const maxSteps = model === 'sitter' ? STEPS_SITTER : STEPS;
+    for (let steps = 0; steps < maxSteps; steps++) {
         if (g.coil.n > MAX_COIL) { st.gaveUp++; return 'gaveUp'; }
         const act = g.coil.act || 0;
         const key = `${act}:${g.coil.n}`;
         if (key !== coilKey) { // a new Coil: the days start over
-            coilKey = key; mem.done = {};
+            coilKey = key; mem.done = {}; mem.qi = {}; // v0.11.85 (Fable review): the Sitter's gather-Qi hours start over too (a rewind restores the day count)
             const d = st.deaths[act] || (st.deaths[act] = {});
             (d[g.coil.n] || (d[g.coil.n] = { coils: 0, dead: 0, beast: 0, starve: 0, taken: 0 })).coils++;
         }
@@ -195,7 +212,7 @@ function play(run, model, st, yuki) {
         runCombat(g, choose(g, SCENES, i), st, smart);
         if (model === 'careful' && g.james.satiety < 30 && foodLeft(g)) st.hungry++;
     }
-    assert(false, `${model}: run ${run} finishes in ${STEPS} steps (at ${g.scene})`);
+    assert(false, `${model}: run ${run} finishes in ${maxSteps} steps (at ${g.scene})`);
     return 'stuck';
 }
 const foodLeft = (g) => Object.entries(g.inventory || {}).some(([k, n]) => n > 0 && /raw|meat|berry|cress|honey|crab|fowl|hare|venison|egg/.test(k));
@@ -207,8 +224,8 @@ for (const m of PLAY) {
     all[m] = blank();
     if (m !== 'random' && OFF && OFF_MODELS.includes(m)) all[`${m}:yukiOff`] = blank();
     if (kids) continue; // with workers the parent only merges
-    for (const run of myRuns()) playInto(all[m], run, m, 'on');
-    if (all[`${m}:yukiOff`]) for (const run of myRuns()) if (run < OFF) playInto(all[`${m}:yukiOff`], run, m, 'off');
+    for (const run of myRuns()) if (m !== 'sitter' || SITTER_GAMES == null || run < Number(SITTER_GAMES)) playInto(all[m], run, m, 'on'); // v0.11.85: the Sitter's own count (at most --games)
+    if (all[`${m}:yukiOff`]) for (const run of myRuns()) if (run < OFF && (m !== 'sitter' || SITTER_GAMES == null || run < Number(SITTER_GAMES))) playInto(all[`${m}:yukiOff`], run, m, 'off');
 }
 // the same seed plays the same game (separate totals: the replay adds nothing to the numbers)
 if (!SHARD) for (const m of PLAY) {

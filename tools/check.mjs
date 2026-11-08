@@ -49,7 +49,8 @@ const jobs = [
     // v0.11.27: the bot models, log only: the summary per model is printed, nothing compared yet. v0.11.28 (owner pick S1): Random
     // left out (it is the tasks test's own bot, in the drift baseline; `--model random` on demand), 500 games each, Yuki off
     // (300 games) only for Careful and Completionist (the Rusher dies at the jackals either way)
-    { name: `bot models (${QUICK ? 50 : 500} games each, log only)`, key: 'models', show: 'models', blocks: QUICK ? 3 : 5, cmd: node('tests/models.test.mjs', '--model', 'careful,completionist,rusher', '--games', QUICK ? '50' : '500', '--off', QUICK ? '0' : '300', '--off-models', 'careful,completionist'), heavy: true },
+    // v0.11.85 (owner pick M1): the Sitter too (it cultivates whenever it can), 150 games (20 in quick): it plays ~20× the cards
+    { name: `bot models (${QUICK ? 50 : 500} games each, the Sitter ${QUICK ? 20 : 150}, log only)`, key: 'models', show: 'models', blocks: QUICK ? 4 : 6, cmd: node('tests/models.test.mjs', '--model', 'careful,completionist,rusher,sitter', '--games', QUICK ? '50' : '500', '--sitter-games', QUICK ? '20' : '150', '--off', QUICK ? '0' : '300', '--off-models', 'careful,completionist'), heavy: true },
     { name: 'syntax', key: 'syntax', fn: syntax },
     { name: 'consistency (offline files, versions)', key: 'consistency', cmd: node('tools/consistency.mjs') },
     { name: 'engine numbers', key: 'rules', cmd: node('tests/rules.test.mjs') },

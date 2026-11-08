@@ -2,6 +2,12 @@
 
 Split out of `roadmap.md` in v0.11.65 (owner pick G2, 2026-11-08 11:45), so the roadmap shows only the open work. Every line here moved word for word; newest first. Update in every push that finishes a roadmap line.
 
+## Moved in v0.11.85 (word for word)
+
+### From section 0, "Next, before everything else" (done in v0.11.85: D the XP rate ×0.6, T1 the targets 4 / 6, M1 the Sitter model)
+
+- **The game at least twice as hard, before the friends' playtest (22:39, "after the faq, another important point for my friends playtest to prioritize. the numbers rise too clquicklt now, so we have to limit them. we have to make the game at least twice as hard. weight if the best way to do that would be to cut the XP increase per coil in half, or to cut the increase of familiarity."):** options with the bots' numbers: the Coil XP bonus halved (`COIL_GROWTH` 0.25 → 0.125) against slower familiarity (`USE_N` and the card tiers), alone and combined, the models against the targets (with section 2's #53, the farmable Coil bonus).
+
 ## Moved in v0.11.83 (word for word)
 
 ### From section 0, "Next, before everything else" (done in v0.11.83: P1 the FAQ as its own tab, T1 Claude's texts from the game's own numbers, R1 the James tab's dice-era rules replaced by a button to the FAQ)

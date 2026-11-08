@@ -1,6 +1,6 @@
 # Roadmap: Bone and Ash
 
-Last updated: 2026-11-08 (v0.11.84, docs only: the bug's place in group f confirmed (owner 23:33); v0.11.83, the FAQ (owner picks P1 + T1 + R1); **next: the game at least twice as hard (22:39; everything else tabled)**). Update in every push.
+Last updated: 2026-11-09 (v0.11.85, the game at least twice as hard (owner pick D + T1 + M1): the XP rate ×0.6, the targets 4 / 6, the Sitter model; section 0's line moved word for word to `roadmap-done.md`; **next: the owner's pick** (Claude's recommendation: #53, then the sitting loop, both before the playtest); v0.11.84, docs only). Update in every push.
 
 **How this file is laid out (v0.11.53, owner 00:52 "reorder it to show the done ones in a separate section", pick R1):** Part 1 is what is still open; Part 2 is everything done, newest first. Nothing was deleted or reworded: every line moved word for word; a line that was partly done was split at the sentence (its done part in Part 2, its open part here), and a done line is labelled with where it stood ("was …").
 
@@ -12,7 +12,9 @@ Last updated: 2026-11-08 (v0.11.84, docs only: the bug's place in group f confir
 
 *(v0.11.83: the FAQ done (owner picks P1 + T1 + R1), its line moved word for word to `roadmap-done.md`.)*
 
-- **The game at least twice as hard, before the friends' playtest (22:39, "after the faq, another important point for my friends playtest to prioritize. the numbers rise too clquicklt now, so we have to limit them. we have to make the game at least twice as hard. weight if the best way to do that would be to cut the XP increase per coil in half, or to cut the increase of familiarity."):** options with the bots' numbers: the Coil XP bonus halved (`COIL_GROWTH` 0.25 → 0.125) against slower familiarity (`USE_N` and the card tiers), alone and combined, the models against the targets (with section 2's #53, the farmable Coil bonus).
+*(v0.11.85: the difficulty done (owner pick D + T1 + M1), its line moved word for word to `roadmap-done.md`.)*
+
+- *(new in v0.11.85)* **Next before the playtest (the owner's pick; options and numbers first):** (1) **#53** (section 2): ten bites at the first dawn and the Completionist clears the whole game on its first real Coil, also with ×0.6. (2) **The sitting loop:** the Sitter reaches realm 14 and T10 L10 by Act 1's end (a higher tier shortens the regen Cycle, 30 min → 1 min from T6, so Qi stops limiting sits; sits ×10 from 30 uses); levers: the sit's familiarity cap, Saturation per realm, a realm ceiling per act, Qi per sit.
 
 ## 1. The story and mechanics pass (in progress; push 1 done in v0.11.64, group a in v0.11.66, group b's hub format in v0.11.67, where replies show in v0.11.68, the missing replies in v0.11.69: group b done; group c in v0.11.71; group g in v0.11.72; group h in v0.11.73; group i's round 1 in v0.11.74, round 2's wave 1 in v0.11.75, wave 2 in v0.11.76: group i done; group d started: the fight lab in v0.11.80, the Tan fight in v0.11.81, the brawls in v0.11.82)
 

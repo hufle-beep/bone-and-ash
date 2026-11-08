@@ -75,8 +75,9 @@ export function coilReport(g) {
 }
 
 /* ---------- v0.11.72 (owner pick T1): a target per act and the personal best ---------- */
-/** Target Coils per act (0 the prologue, 1 Act 1), counted from Day 1 of the pass (the owner's Completionist targets). */
-export const TARGETS = { 0: 2, 1: 3 };
+/** Target Coils per act (0 the prologue, 1 Act 1), counted from Day 1 of the pass (the owner's Completionist targets).
+ *  v0.11.85 (owner pick D + T1): 2 / 3 → 4 / 6, with the XP rate ×0.6 (the Completionist's means 3.94 / 5.89). */
+export const TARGETS = { 0: 4, 1: 6 };
 /** The Coils this pass of the whole game has taken so far: a new game or a whole-game rewind starts a pass (`stats.pass`). */
 export const passCoils = (g) => Math.max(1, (g.coil?.n || 1) - (g.stats?.pass || 1) + 1);
 /** An act cleared: keep the fewest Coils (`stats.best`, kept across every rewind); a line for Results when it is a new best. */
