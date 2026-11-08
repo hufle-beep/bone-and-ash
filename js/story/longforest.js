@@ -5,10 +5,21 @@
  * Also here: Yuki's transformations (great root-kin at Core Formation, human form at Nascent Soul) and her form chooser.
  * Contract: js/story/power.js (degrees, Long Forest scaling with a ceiling, STOMP texts). James never kills humans.
  */
-import { addItem, hasItem, eat, condense, sleepUntil, advance, d6, awardXp, awardYukiFightXp, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, yukiForms, yukiForm, ensureBars, bumpRel } from '../core/game.js';
+import { addItem, hasItem, eat, condense, sleepUntil, advance, d6, awardXp, awardYukiFightXp, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, yukiForms, yukiForm, ensureBars, bumpRel, itemCap } from '../core/game.js';
 import { condensationSatGain } from '../core/formulas.js';
 import { daily, markDaily, hour, eatBest, pantry, foodCount } from './common.js';
 import { registerStomp } from './power.js';
+
+/** v0.11.71 (owner pick Y1): the Long Forest's "Let Yuki hunt": { item, n, line }; the first kind with room for the whole haul (R1); item null: none, she eats it. */
+export function lfYukiCatch(g) {
+    const tiger = yukiForm(g) === 'tiger', n = tiger ? 2 : 1;
+    const order = tiger
+        ? [['venison', "She comes back dragging half an ash-deer."], ['hare_raw', "She comes back with two hares, carried with great care and visible disdain. Half an ash-deer would have been wasted on a man with no room left for venison."], ['fowl_raw', "She comes back dragging two mire fowl by the necks, which is beneath her, and she knows you know it. Deer you have in plenty, hares the same; fowl is what was left."]]
+        : [['hare_raw', "She comes back with a hare and a look."], ['fowl_raw', "She comes back with a mire fowl and a look. You have hares enough for a siege. She knows it."]];
+    const hit = order.find(([id]) => itemCap(id) - (g.inventory[id] || 0) >= n); // R1: room for the whole haul
+    if (!hit) return { item: null, n: 0, line: "She comes back licking her chops, and brings you nothing. Everything she hunts here, you already carry in quantity. She has eaten her share and yours." };
+    return { item: hit[0], n, line: `${hit[1]} +${n} ${hit[0] === 'venison' ? 'Ash-deer venison' : hit[0] === 'hare_raw' ? 'Glassback hare' : 'Mire fowl'}.` };
+}
 
 const P = 'The Long Forest';
 const late = (g) => hour(g) >= 20;
@@ -314,7 +325,8 @@ Yuki's opinion, through the bond: *both.*`,
         choices: [
             { text: 'Glassback hare. A dart from cover.', show: daily('lf_hare'), qi: 2, check: { skill: 'Convergence Use', dc: 3 }, time: 40, do: (g) => { markDaily(g, 'lf_hare'); addItem(g, 'hare_raw', 2); return ['+2 Glassback hare.']; }, failDo: (g) => { markDaily(g, 'lf_hare'); return ['Rainbows, then nothing.']; }, to: 'lf_hunt' },
             { text: 'Mire fowl on the rise.', show: daily('lf_fowl'), qi: 2, check: { skill: 'Convergence Use', dc: 4 }, time: 50, do: (g) => { markDaily(g, 'lf_fowl'); addItem(g, 'fowl_raw', 2); return ['+2 Mire fowl.']; }, failDo: (g) => { markDaily(g, 'lf_fowl'); return ['It honks at you from a safe distance.']; }, to: 'lf_hunt' },
-            { text: 'Let Yuki hunt and watch her work.', show: daily('lf_yhunt'), time: 60, do: (g) => { markDaily(g, 'lf_yhunt'); addItem(g, yukiForm(g) === 'tiger' ? 'venison' : 'hare_raw', yukiForm(g) === 'tiger' ? 2 : 1); return [yukiForm(g) === 'tiger' ? 'She comes back dragging half an ash-deer. +2 Ash-deer venison.' : 'She comes back with a hare and a look. +1 Glassback hare.', ...awardYukiFightXp(g, 'challenging')]; }, to: 'lf_hunt' },
+            // v0.11.71 (owner pick Y1, texts Fable's): her kind full → the next not full (tiger: venison → hares → fowl; else hares → fowl); all full: she eats it. Hidden when all three are full (`gives`)
+            { text: 'Let Yuki hunt and watch her work.', show: daily('lf_yhunt'), gives: ['venison', 'hare_raw', 'fowl_raw'], time: 60, do: (g) => { markDaily(g, 'lf_yhunt'); const r = lfYukiCatch(g); if (r.item) addItem(g, r.item, r.n); return [r.line, ...awardYukiFightXp(g, 'challenging')]; }, to: 'lf_hunt' },
             { text: 'Back to camp.', to: 'lf_hub' },
         ],
     },

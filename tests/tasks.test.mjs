@@ -1113,6 +1113,86 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
         assert(cardCheck(w, 'wild_forage:2', c) && r.lines.some((l) => /— partly/.test(l)) && splitReply(r.lines).reply.some((l) => /bees are still arguing/.test(l)), `v0.11.69 (P1): a partial work card keeps its reply (${r.lines})`);
     }
 }
+// v0.11.71 (owner picks Y1 + C1 + X1; Yuki's texts Fable's): Yuki switches food when her kind is full; "Cultivate until
+// the limit" gives one total per skill; from Coil 2 the Blackroot's Explore is not once a day.
+{
+    const { yukiCatch, sitSummary } = await import('../js/core/tasks.js');
+    const { lfYukiCatch } = await import('../js/story/longforest.js');
+    const { replayExplore } = await import('../js/story/wilds.js');
+    const { itemNames } = await import('../js/core/game.js');
+    const { gives } = await import('../js/core/story.js');
+    const FULLK = (g, ids) => { for (const id of ids) g.inventory[id] = itemCap(id); };
+    const jobs = [...new Set(Object.values(TASK_HUBS).map((h) => h.yuki).filter(Boolean))];
+    assert(jobs.length === 5 && jobs.every((j) => Array.isArray(j.alts) && j.alts.length >= 2 && typeof j.full === 'string' && j.alts.every((a) => a.item !== j.item && Object.hasOwn(itemNames, a.item) && typeof a.got(1) === 'string' && a.got(1) !== a.got(2))), `Y1: every Yuki job has its other kinds, each with a one and a two text, and a full line (${jobs.length})`);
+    for (const j of jobs) {
+        const g = ensureBars(newGame(7101));
+        assert(yukiCatch(g, j).item === j.item, `Y1 (${j.id}): her own kind first`);
+        FULLK(g, [j.item]); const small = j.alts.filter((a) => !a.big);
+        assert(yukiCatch(g, j).item === small[0].item, `Y1 (${j.id}): own kind full → ${small[0].item} (${yukiCatch(g, j)?.item})`);
+        FULLK(g, small.map((a) => a.item));
+        assert(yukiCatch(g, j) === null, `Y1 (${j.id}): cat form, every small kind full → nothing (venison needs tiger or human form)`);
+        g.yuki.realm = 2; g.yuki.form = 'tiger';
+        assert(yukiCatch(g, j)?.item === 'venison', `Y1 (${j.id}): tiger form → venison (${yukiCatch(g, j)?.item})`);
+        FULLK(g, ['venison']); assert(yukiCatch(g, j) === null, `Y1 (${j.id}): all full → nothing`);
+        const h = ensureBars(newGame(7108)); FULLK(h, [j.item, ...small.map((a) => a.item)]); h.yuki.realm = 7; h.yuki.form = 'human';
+        assert(yukiCatch(h, j)?.item === 'venison', `Y1 (${j.id}): human form → venison too (${yukiCatch(h, j)?.item})`);
+        const p = ensureBars(newGame(7109)); p.inventory[j.item] = itemCap(j.item) - 1; // the review's low 1 (R1): room for one, a double haul
+        assert(yukiCatch(p, j, 1).item === j.item && yukiCatch(p, j, 2).item === small[0].item, `R1 (${j.id}): one short of the cap: a single haul is hers, a double one switches (${yukiCatch(p, j, 2)?.item})`);
+    }
+    // through the lane: a haul with hares full brings fowl, says so, and no false "+1 Glassback hare"; all full: she eats it, XP still
+    const lane = (set) => {
+        const g = ensureBars(newGame(7102, { closed: true })); g.scene = 'wilds'; g.minutes = 1440 + 9 * 60; Object.assign(g.flags, { long: true, forest_day: 2 });
+        g.james.satiety = 90; g.james.qi = 30; g.yuki.fight.tier = 3; set(g); setYuki(g, true);
+        const yl = yukiLane(g); g.tasks.yuki.progress = yl.len - 1;
+        const id = taskCards(g, SCENES).find((c) => c.status === 'open' && /^Rest in the shade/.test(c.label))?.id; // an hour
+        const inv0 = { ...g.inventory }, r = runTask(g, SCENES, id);
+        return { g, inv0, lines: r.lines, id };
+    };
+    { const { g, inv0, lines, id } = lane((g) => FULLK(g, ['hare_raw']));
+        const l = lines.find((x) => /mire fowl/.test(x)) || '';
+        assert(!!id && /\+\d Mire fowl/.test(l) && (g.inventory.fowl_raw || 0) > (inv0.fowl_raw || 0) && g.inventory.hare_raw === itemCap('hare_raw') && !lines.some((x) => /\+\d Glassback hare/.test(x)), `Y1: the lane with hares full brings fowl (${l.slice(-60)})`); }
+    { const { g, inv0, lines } = lane((g) => FULLK(g, ['hare_raw', 'fowl_raw', 'crab_meat']));
+        assert(lines.includes(TASK_HUBS.wilds.yuki.full) && JSON.stringify(g.inventory) === JSON.stringify(inv0) && lines[lines.indexOf(TASK_HUBS.wilds.yuki.full) + 1]?.startsWith('Yuki Fight'), `Y1: everything full: the full line, nothing added, her XP still (${lines.join(' | ').slice(0, 160)})`); }
+    { const { g, inv0, lines } = lane((g) => { g.inventory.hare_raw = itemCap('hare_raw') - 1; g.yuki.fight.tier = 6; });
+        const l = lines.find((x) => /\+\d (Glassback hare|Mire fowl)/.test(x)) || '', n = Number(/\+(\d)/.exec(l.slice(l.lastIndexOf('+')))?.[1]);
+        assert(g.inventory.hare_raw + (g.inventory.fowl_raw || 0) - inv0.hare_raw - (inv0.fowl_raw || 0) === n && (n === 1 ? /Glassback hare/ : /Mire fowl/).test(l), `R1: one short of the cap, the lane's line says what landed (${l.slice(-40)}; hares ${g.inventory.hare_raw}, fowl ${g.inventory.fowl_raw || 0})`); }
+    // the Long Forest's card: tiger venison → hares → fowl; else hares → fowl; hidden only when all three are full
+    { const g = ensureBars(newGame(7103));
+        assert(lfYukiCatch(g).item === 'hare_raw' && lfYukiCatch(g).n === 1, 'Y1 (lf): cat: a hare');
+        FULLK(g, ['hare_raw']); assert(lfYukiCatch(g).item === 'fowl_raw' && /siege/.test(lfYukiCatch(g).line), 'Y1 (lf): cat, hares full: a fowl');
+        FULLK(g, ['fowl_raw']); assert(lfYukiCatch(g).item === null && /licking her chops/.test(lfYukiCatch(g).line), 'Y1 (lf): cat, hares and fowl full: nothing (venison is the tiger\'s)');
+        const t = ensureBars(newGame(7104)); t.yuki.realm = 2; t.yuki.form = 'tiger';
+        assert(lfYukiCatch(t).item === 'venison' && lfYukiCatch(t).n === 2 && lfYukiCatch(t).line === 'She comes back dragging half an ash-deer. +2 Ash-deer venison.', 'Y1 (lf): tiger: venison, the old line');
+        FULLK(t, ['venison']); assert(lfYukiCatch(t).item === 'hare_raw' && lfYukiCatch(t).n === 2, 'Y1 (lf): tiger, venison full: two hares');
+        FULLK(t, ['hare_raw']); assert(lfYukiCatch(t).item === 'fowl_raw', 'Y1 (lf): tiger, venison and hares full: fowl');
+        const q = ensureBars(newGame(7110)); q.yuki.realm = 2; q.yuki.form = 'tiger'; q.inventory.venison = itemCap('venison') - 1;
+        assert(lfYukiCatch(q).item === 'hare_raw', 'R1 (lf): tiger, room for one venison only: two hares, not "+2 venison" landing one');
+        const c = SCENES.lf_hunt.choices.find((x) => /Let Yuki hunt/.test(x.text));
+        assert(JSON.stringify(gives(c)) === JSON.stringify(['venison', 'hare_raw', 'fowl_raw']), `Y1 (lf): the card lists the three kinds it can bring (${gives(c)})`);
+        const h = ensureBars(newGame(7105)); const o = c.do(h); assert(h.inventory.hare_raw === 1 && o[0] === 'She comes back with a hare and a look. +1 Glassback hare.', `Y1 (lf): the card adds what it says (${o[0]})`); }
+    // C1: one total per skill, the rank reached, a cap once, other lines kept in order after the totals
+    {
+        const s = sitSummary(['Condensed: Saturation 10%.', 'Convergence Use +5 XP', 'GU +5 XP', 'Yuki (bond) Qi Use +5', 'Yuki comes back with a hare and a look of mild contempt. +1 Glassback hare.',
+            'Condensed: Saturation 20%.', 'Convergence Use +5.5 XP → T1 L3', 'GU at T10 L10 (cap)', 'Yuki (bond) Qi Use +5 → T2 L1', 'Some warning.']);
+        assert(JSON.stringify(s) === JSON.stringify(['Convergence Use +10.5 XP → T1 L3', 'GU +5 XP', 'GU at T10 L10 (cap)', 'Yuki (bond) Qi Use +10 → T2 L1', 'Yuki comes back with a hare and a look of mild contempt. +1 Glassback hare.', 'Some warning.']), `C1: the totals (${JSON.stringify(s)})`);
+        const x = ensureBars(newGame(7106, { closed: true })); x.scene = 'stream'; x.minutes = 1440 + 8 * 60; Object.assign(x.flags, { long: true, forest_day: 2 }); x.james.satiety = 90; x.james.qi = jamesQiMax(x);
+        const y = JSON.parse(JSON.stringify(x)), raw = sitLoop(y, SCENES), rm = runMed(x, SCENES, 'med:sitall');
+        const sum = (re) => raw.lines.reduce((n, l) => n + Number(re.exec(l)?.[1] || 0), 0);
+        assert(raw.sits >= 2 && rm.lines.length === 4 && !rm.lines.some((l) => /^Condensed/.test(l)) && rm.lines[2] === `GU +${sum(/^GU \+([\d.]+) XP/)} XP` && JSON.stringify(x.james) === JSON.stringify(y.james), `C1: ${raw.sits} sits in 4 lines, the totals what the sits gave (${rm.lines.join(' | ')})`);
+    }
+    // X1: Coil 1 once a day; from Coil 2 Explore again after a trip, before 16:00, until the three places are seen
+    {
+        const ex = SCENES.wilds.choices.find((c) => /^Explore deeper/.test(c.text));
+        const g = ensureBars(newGame(7107, { closed: true })); g.scene = 'wilds'; g.minutes = 1440 + 9 * 60; Object.assign(g.flags, { long: true, forest_day: 2 });
+        assert(ex.show(g) && !replayExplore(g), 'X1: Coil 1: Explore open in the morning');
+        goTo(g, SCENES, 'wild_explore'); g.scene = 'wilds';
+        assert(!ex.show(g), 'X1: Coil 1: once a day');
+        g.coil.n = 2; assert(replayExplore(g) && ex.show(g), 'X1: Coil 2: open again after a trip');
+        assert(taskCards(g, SCENES).some((c) => c.group === 'Explore' && c.kind === 'door' && c.status === 'open'), 'X1: Coil 2: the Explore cards are on the screen again');
+        g.minutes = 1440 + 16 * 60; assert(!ex.show(g), 'X1: Coil 2: not from 16:00');
+        g.minutes = 1440 + 10 * 60; Object.assign(g.flags, { v_bone: true, v_mire: true, v_hollow: true }); assert(!ex.show(g), 'X1: Coil 2: gone once the three places are seen');
+    }
+}
 // every card that was ever offered was also played at least once
 const all = cardsListed;
 if (FULL) for (const id of all) assert(cardsSeen.has(id), `card ${id} was played by a bot`); // coverage: the full run only

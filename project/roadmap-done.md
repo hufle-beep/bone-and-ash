@@ -2,6 +2,18 @@
 
 Split out of `roadmap.md` in v0.11.65 (owner pick G2, 2026-11-08 11:45), so the roadmap shows only the open work. Every line here moved word for word; newest first. Update in every push that finishes a roadmap line.
 
+## Moved in v0.11.71 (word for word)
+
+### From section 1c, "Small rules" (done in v0.11.71: Y1 Yuki's food switch, C1 one total per skill, X1 Explore again the same day from Coil 2; R1 after the Fable review: a switch when her kind can't take the whole haul)
+
+- **Mechanics, the same pass (owner 2026-11-08 00:02, "when one type of loot from Yuki's auto forage/hunt is full, she switches to another"):** when Yuki's own hunting or foraging would bring a kind of food James can't hold any more (its cap), she brings another kind instead (today "Let Yuki hunt" only hides once hares and venison are both full, v0.11.25). Find every place she gathers first; options with what changes.
+- *(new in v0.11.66, the Fable review's low finding 3, owner pick R1)* "Cultivate until the limit" lists every sit's four lines (Condensed, Convergence Use, GU, Yuki) since X1: about 640 lines for a 159-sit run at Nascent Soul (the panel's summary and the 12-line journal keep it usable). Option: one total line per skill for the loop. Options first.
+- *(was: Now, item 4, its own sentence)* Tabled until after the art: more than one Blackroot wilds exploration a day on replays (owner 21:31, the wilds save; options first, now with the story and mechanics pass).
+
+### The old "Last updated" line
+
+Last updated: 2026-11-08 (v0.11.70, docs only: the new order (owner pick O1, 15:48 "before D I will tell you more games to analyze. I'm aware this pushes everything back by a lot, but I want a more mature game before we extend the combat and retune. Go O1."): c, then the new groups g (the copy-over push 5, moved word for word from section 4), h (the analysis of Selene's and the SillyTavern repositories) and i (the games analysis), then d, e, f, the retune and the rest of section 4; rule 10, Fable for story texts (pick A1); v0.11.69, the missing replies). Update in every push.
+
 ## Moved in v0.11.70 (word for word)
 
 ### The old "Last updated" line

@@ -10,7 +10,7 @@ import { CONDENSE_SIT_COST } from './formulas.js';
 import { goTo, checkDeath, choose, choiceOpen } from './story.js';
 import { btTarget, MER_LINES, lineWindow, lineWait, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
-import { BT_TASK, SIT_TASK, QI_TASK, QI_MINUTES, qiNotFull, qiFed, sitOpen, merLineTask, merLineChoice, isQueueScreen, sitLoop, sitLoopPlan, SIT_STOP_TEXT } from './tasks.js';
+import { BT_TASK, SIT_TASK, QI_TASK, QI_MINUTES, qiNotFull, qiFed, sitOpen, merLineTask, merLineChoice, isQueueScreen, sitLoop, sitLoopPlan, SIT_STOP_TEXT, sitSummary } from './tasks.js';
 const hrs = (m) => (m % 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m / 60} h`);
 
 /** No meditating here: urgent moments and screens that are already about it. */
@@ -99,7 +99,7 @@ export function runMed(g, scenes, id) {
     if (id === 'med:sitall') { // v0.11.64 (C1): each sit exactly one tap of the sit card
         const r = sitLoop(g, scenes);
         if (!r.sits) throw new Error('No sit possible');
-        return { lines: [`${r.sits} sits, ${hrs(r.minutes)}, ${r.qi} Qi: Saturation ${r.saturation}% (${SIT_STOP_TEXT[r.stop] || 'then it stops'}).`, ...r.lines], moved: g.scene !== back0 };
+        return { lines: [`${r.sits} sits, ${hrs(r.minutes)}, ${r.qi} Qi: Saturation ${r.saturation}% (${SIT_STOP_TEXT[r.stop] || 'then it stops'}).`, ...sitSummary(r.lines)], moved: g.scene !== back0 };
     }
     if (id === 'med:sit') {
         const r = condense(g);

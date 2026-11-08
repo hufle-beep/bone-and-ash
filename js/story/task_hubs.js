@@ -15,6 +15,12 @@ const YUKI_ASHFALL = {
     id: 'yuki:ashfall', label: 'Hunt the barley fields', minutes: 75, dc: 1.5, item: 'hare_raw', n: 1,
     got: (n) => (n > 1 ? `Yuki leaves ${n} hares on Mei Lin's step. Mei Lin's mother bows to the cat. The cat accepts.` : 'Yuki leaves a hare on Mei Lin\'s step, in a precise line with the door.'),
     none: 'Yuki comes back from the barley with nothing but burrs, and a grievance against the farmer\'s dog.',
+    // v0.11.71 (owner pick Y1, texts Fable's): her own kind full → the next of these not full (big: tiger or human form only); all full → `full`
+    alts: [
+        { item: 'fowl_raw', got: (n) => (n > 1 ? "Yuki leaves two mire fowl on Mei Lin's step. Mei Lin's mother bows, lower than for the hares. The cat finds this appropriate; you had hares enough." : "Yuki leaves a mire fowl on Mei Lin's step, dead straight, with the gravity of a cat who knows you have run out of room for hares.") },
+        { item: 'venison', big: true, got: (n) => (n > 1 ? "Yuki leaves most of an ash-deer on Mei Lin's step and the whole household comes out to be solemn at it. Nobody asks about hares. The hares have been seen to, and then some." : "Yuki leaves a haunch of ash-deer on Mei Lin's step. The step was not built for it. The hares, it is understood, are no longer a question.") }
+    ],
+    full: "Yuki comes back from the barley fed and unhurried, and leaves nothing on the step. You already carry everything the fields have to offer. She ate the rest, out of principle.",
 };
 
 export const TASK_HUBS = {
@@ -39,6 +45,13 @@ export const TASK_HUBS = {
             id: 'yuki:wilds', label: 'Hunt alone in the reeds', minutes: 75, dc: 1, item: 'hare_raw', n: 1,
             got: (n) => (n > 1 ? `Yuki comes back with ${n} hares and the air of someone owed an apology.` : 'Yuki comes back with a hare and a look of mild contempt.'),
             none: 'Yuki comes back with nothing, and pretends she wasn\'t trying.',
+            // v0.11.71 (owner pick Y1, texts Fable's): her own kind full → the next of these not full (big: tiger or human form only); all full → `full`
+            alts: [
+                { item: 'fowl_raw', got: (n) => (n > 1 ? "Yuki comes back from the Mire's edge with two mire fowl, wet to the chest and above comment. Hares were not what you were short of." : "Yuki comes back from the stream edge with a mire fowl instead of a hare. You already have more hares than a man should. She has counted.") },
+                { item: 'crab_meat', got: (n) => (n > 1 ? "Yuki comes back with two stone-shell crabs and a cut on one pad she declines to show you. The hare situation, she makes clear, is your doing." : "Yuki comes back with a stone-shell crab, cracked, and sets it down as if settling an argument about your stores that you were not aware of having.") },
+                { item: 'venison', big: true, got: (n) => (n > 1 ? "Yuki comes back out of the reeds with the better part of an ash-deer and the air of someone who has stopped bothering with hares, since you plainly have no room for them." : "Yuki comes back dragging a haunch of ash-deer through the reeds. The hares, apparently, were beneath mention today; you had enough of them.") }
+            ],
+            full: "Yuki comes back from the reeds with blood on her chin and nothing in her mouth. You have enough of everything she could catch. She has eaten the proof.",
         },
         evening: 'camp',
     },
@@ -72,6 +85,12 @@ export const TASK_HUBS = {
             id: 'yuki:rr', label: 'Hunt along the roots', minutes: 75, dc: 2, item: 'hare_raw', n: 1,
             got: (n) => (n > 1 ? `Yuki drops ${n} root-hares at Ya's feet, then at yours, so there is no confusion about the order of things.` : 'Yuki brings back a root-hare and sits on it until you say thank you.'),
             none: 'Yuki comes back from the roots with nothing and the air of a cat who was never hunting anyway.',
+            // v0.11.71 (owner pick Y1, texts Fable's): her own kind full → the next of these not full (big: tiger or human form only); all full → `full`
+            alts: [
+                { item: 'fowl_raw', got: (n) => (n > 1 ? "Yuki drops two mire fowl at Ya's feet, then at yours. Ya asks where the hares are. You think of the ninety-nine already in the omnitool and decline to explain." : "Yuki brings back a mire fowl from somewhere under the roots and sits on it until Ya has finished saying there are no fowl here. You were carrying too many hares; she adjusted.") },
+                { item: 'venison', big: true, got: (n) => (n > 1 ? "Yuki comes back dragging an ash-deer by the neck, and Ya says nothing for a full minute, which from Ya is a speech. There was no room for hares. The deer is the point being made." : "Yuki comes back along the roots with a haunch of ash-deer, and Ya goes quiet in the way of a huntress revising an opinion. Hares, you note, are no longer being offered. You have plenty.") }
+            ],
+            full: "Yuki comes back from the roots with blood on her whiskers and nothing for you. Whatever she can catch out here, you already carry as much of as the omnitool will take, and she does not hunt for the exercise. Ya watches her clean her face and says, gravely, that it is right the hunter eats first.",
         },
         evening: 'rr_hub',
     },
@@ -83,6 +102,13 @@ export const TASK_HUBS = {
             id: 'yuki:dw', label: 'Stalk mire fowl on the drowned trunks', minutes: 75, dc: 2.5, item: 'fowl_raw', n: 1,
             got: (n) => (n > 1 ? `Yuki comes back soaked to the shoulder with ${n} mire fowl. The water was beneath her. She mentions it.` : 'Yuki brings back a mire fowl, wet, and holds you personally responsible for the wet.'),
             none: 'Yuki comes back wet and empty-mouthed. You do not discuss it.',
+            // v0.11.71 (owner pick Y1, texts Fable's): her own kind full → the next of these not full (big: tiger or human form only); all full → `full`
+            alts: [
+                { item: 'crab_meat', got: (n) => (n > 1 ? "Yuki comes back wet to the shoulder with two stone-shell crabs and an expression that says she has looked at your stores and found the fowl excessive." : "Yuki comes back from the drowned trunks with a stone-shell crab instead of a fowl, which is her way of telling you the fowl situation has got out of hand.") },
+                { item: 'hare_raw', got: (n) => (n > 1 ? "Yuki comes back from the dry edge of the wood with two hares, and not a drop on her. Fowl, you gather, are a closed subject until you make room." : "Yuki comes back dry for once, with a hare from the higher ground. The fowl, she has decided, you can have when you have eaten some.") },
+                { item: 'venison', big: true, got: (n) => (n > 1 ? "Yuki comes back hauling most of an ash-deer out of the shallows and leaves it on the one dry trunk in the wood. You were full of fowl; the deer is bigger than a fowl, and that is the whole of her argument." : "Yuki comes back along the drowned trunks with a haunch of ash-deer, dripping. You were full of fowl; this is her answer to that.") }
+            ],
+            full: "Yuki comes back from the drowned trunks wet, fed, and carrying nothing, because there is nothing left in the wood that you have room for. She holds you responsible for the wet regardless.",
         },
         evening: 'dw_hub',
     },
@@ -94,6 +120,12 @@ export const TASK_HUBS = {
             id: 'yuki:ah', label: 'Hunt the ash slopes', minutes: 75, dc: 3, item: 'hare_raw', n: 1,
             got: (n) => (n > 1 ? `Yuki comes down the ash with ${n} hill-hares, grey to the eyebrows, deeply pleased with herself.` : 'Yuki brings back a hill-hare and a fine coat of ash, and refuses to be brushed.'),
             none: 'Yuki comes back grey with ash and nothing else. The hares here are fast. She would like that on record.',
+            // v0.11.71 (owner pick Y1, texts Fable's): her own kind full → the next of these not full (big: tiger or human form only); all full → `full`
+            alts: [
+                { item: 'fowl_raw', got: (n) => (n > 1 ? "Yuki comes down the slope with two mire fowl she must have gone a long way for. Hares, she lets you understand, are no longer worth the running when you have no room for them." : "Yuki comes down the ash with a mire fowl, grey to the eyebrows, since a hill-hare would have been one more than you can carry.") },
+                { item: 'venison', big: true, got: (n) => (n > 1 ? "Yuki comes down the ash with the better part of an ash-deer and sets it at your feet with the air of someone who has stopped chasing hares, since you kept more than you could ever eat." : "Yuki comes down the slope dragging a haunch of ash-deer, grey with ash to the shoulder. The hill-hares can keep running. You had enough of them.") }
+            ],
+            full: "Yuki comes down the slope fed, ash-grey and empty-mouthed, and glances at the omnitool as though it were the one at fault. It is. Everything she hunts here, it already holds to the brim.",
         },
         evening: 'ah_hub',
     },

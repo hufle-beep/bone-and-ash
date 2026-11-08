@@ -442,13 +442,14 @@ const LF_P3 = 'lf_hub lf_seclusion lf_bone_depths lf_black_mire lf_thunder_ridge
 // v0.11.25 (c): gives() names only real items, so a quoted non-item inside addItem (the 'tiger' in "Let Yuki hunt") is not one
 for (const sc of Object.values(SCENES)) for (const c of sc.choices || []) for (const id of gives(c)) assert(!!ITEMS[id], `v0.11.25: ${sc.id}: "${c.text}" gives ${id}, a real item`);
 const yhunt = SCENES.lf_hunt.choices.find((c) => c.text.startsWith('Let Yuki hunt'));
-assert(gives(yhunt).slice().sort().join(' ') === 'hare_raw venison', `v0.11.25: "Let Yuki hunt" gives hare or venison (now: ${gives(yhunt).join(' ')})`);
+assert(gives(yhunt).slice().sort().join(' ') === 'fowl_raw hare_raw venison', `v0.11.25, v0.11.71 (Y1): "Let Yuki hunt" gives venison, hares or fowl (now: ${gives(yhunt).join(' ')})`);
 {
     const g = ensureBars(newGame(7)); g.scene = 'lf_hunt'; g.minutes = 3 * 1440 + 8 * 60;
     const has = () => sceneView(g, SCENES).choices.some((c) => c.label.startsWith('Let Yuki hunt'));
     assert(has(), 'v0.11.25: "Let Yuki hunt" shows with room in the stock');
     g.inventory.hare_raw = itemCap('hare_raw'); assert(has(), 'v0.11.25: "Let Yuki hunt" still shows with only the hares full');
-    g.inventory.venison = itemCap('venison'); assert(!has(), 'v0.11.25: "Let Yuki hunt" hides when hares and venison are both full');
+    g.inventory.venison = itemCap('venison'); assert(has(), 'v0.11.71 (Y1): "Let Yuki hunt" still shows with hares and venison full (fowl has room)');
+    g.inventory.fowl_raw = itemCap('fowl_raw'); assert(!has(), 'v0.11.71 (Y1): "Let Yuki hunt" hides when all three are full');
 }
 
 // v0.11.25 (b): the Blackroot camp stakes hurt the first night attacker for one night (like the prologue's), from the owner's 03:07 camp save

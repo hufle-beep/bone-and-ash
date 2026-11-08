@@ -9,6 +9,8 @@ import { set, day, hour, daily, markDaily, forestScale, grow, eatBest, pantry, f
 
 const P = 'Blackroot Wilds';
 const did = (key) => (g) => { markDaily(g, key); return []; };
+/** v0.11.71 (owner pick X1; owner 2026-11-07 21:31): from Coil 2 Explore is not once a day: another trip while it is before 16:00. */
+export const replayExplore = (g) => ((g.coil && g.coil.n) || 1) >= 2;
 const loot = (lines) => () => lines;
 
 /* ---------- where the night goes ---------- */
@@ -153,7 +155,7 @@ ${g.james.hp < jamesHpMax(g) * 0.5 ? 'You are hurt. Resting would be smart. You 
         choices: [
             { text: 'Forage.', show: (g) => hour(g) < 19, time: 15, to: 'wild_forage' },
             { text: 'Hunt.', show: (g) => hour(g) < 19, time: 15, to: 'wild_hunt' },
-            { text: 'Explore deeper into the forest (takes the afternoon).', show: (g) => hour(g) < 16 && daily('explore')(g) && !(g.flags.v_bone && g.flags.v_mire && g.flags.v_hollow), time: 30, to: 'wild_explore' },
+            { text: 'Explore deeper into the forest (takes the afternoon).', show: (g) => hour(g) < 16 && (replayExplore(g) || daily('explore')(g)) && !(g.flags.v_bone && g.flags.v_mire && g.flags.v_hollow), time: 30, to: 'wild_explore' },
             { text: 'Train: darts, blade, footwork, and a very unwilling sparring partner.', show: (g) => hour(g) < 19, time: 10, to: 'wild_train' },
             { text: 'Cultivate: one sit, 10 Qi toward Saturation.', show: (g) => hour(g) < 20, req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`, ...r.xp] : []; }, to: 'wilds' },
             { text: 'Rest in the shade for an hour.', show: (g) => hour(g) < 20, do: (g) => advance(g, 60, { resting: true }).concat(['An hour of rest. Breath back, a little HP and Qi.']), to: 'wilds' },

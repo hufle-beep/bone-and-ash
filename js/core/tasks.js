@@ -14,7 +14,7 @@
  */
 import { hasForm } from './forms.js';
 import { choose, goTo, choiceOpen, choiceTag, gives, setTimeless, defaultMinutes, movesPlace, wasPicked, isMenuScene, isTimeless, setFamiliar } from './story.js';
-import { advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck, canBreakThrough, btMinutes, realmName, condense, sitMinutes, useSpeed, USE_N, exMins, nightLock, endsLate, sitUseless, jamesQiMax, SATIETY_PER_HOUR, breakAt } from './game.js';
+import { itemCap, yukiForm, advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck, canBreakThrough, btMinutes, realmName, condense, sitMinutes, useSpeed, USE_N, exMins, nightLock, endsLate, sitUseless, jamesQiMax, SATIETY_PER_HOUR, breakAt } from './game.js';
 import { CONDENSE_SIT_COST } from './formulas.js';
 import { btTarget, MER_LINES, lineWindow, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
@@ -327,6 +327,16 @@ function resolveWork(g, scenes, hubId, card, id) {
     return lines;
 }
 
+/**
+ * v0.11.71 (owner pick Y1): what Yuki brings on this job: her own kind, or once it can't take the whole haul (`n`; after
+ * the cold review, R1) the first of the job's `alts` that can (a `big` one, venison, only in tiger or human form);
+ * null when none can.
+ */
+const roomFor = (g, id, n = 1) => itemCap(id) - (g.inventory[id] || 0) >= n;
+export function yukiCatch(g, job, n = 1) {
+    if (roomFor(g, job.item, n)) return { item: job.item, got: job.got };
+    return (job.alts || []).find((a) => (!a.big || yukiForm(g) !== 'cat') && roomFor(g, a.item, n)) || null;
+}
 /** Yuki's lane: her job runs on the game time that just passed. */
 function yukiTick(g, hubId, minutes) {
     const job = TASK_HUBS[hubId]?.yuki;
@@ -343,7 +353,10 @@ function yukiTick(g, hubId, minutes) {
         y.progress -= len;
         const ratio = skillCheck(g.yuki.fight) / job.dc;
         const n = ratio >= 2 ? job.n * 2 : ratio >= 1 ? job.n : ratio >= 0.5 ? Math.floor(job.n * ratio + 0.5) : 0;
-        if (n > 0) { addItem(g, job.item, n); lines.push(`${job.got(n)} +${n} ${itemNames[job.item]?.name || job.item}.`, ...awardYukiFightXp(g, 'challenging')); } else lines.push(job.none);
+        const pick = n > 0 ? yukiCatch(g, job, n) : null;
+        if (pick) { addItem(g, pick.item, n); lines.push(`${pick.got(n)} +${n} ${itemNames[pick.item]?.name || pick.item}.`, ...awardYukiFightXp(g, 'challenging')); }
+        else if (n > 0) lines.push(job.full || job.none, ...awardYukiFightXp(g, 'challenging')); // v0.11.71 (Y1): everything she brings here is full: she eats it; XP and familiarity as a haul
+        else lines.push(job.none);
         takeCapNotes();
         st(g).fam[job.id] = r1(f + (n > 0 ? 1 : 0.5));
     }
@@ -509,4 +522,32 @@ export function sitLoop(g, scenes) {
 }
 /** The loop played on a copy, for the button. */
 export const sitLoopPlan = (g, scenes) => sitLoop(clone(g), scenes);
+/**
+ * v0.11.71 (owner pick C1): the loop's lines in short: one total per skill ("GU +75 XP → T2 L1", the last rank reached;
+ * a skill at its cap says so once), the per-sit Saturation lines dropped (the loop's header has the end figure), every
+ * other line kept, in order, after the totals.
+ */
+const SIT_SAT = /^Condensed: Saturation [\d.]+%\.$/;
+const SIT_XP = /^(.+?) \+([\d.]+)(?: XP)?(?: → (.+))?$/;
+const SIT_CAP = /^(.+?) at T10 L10 \(cap\)$/;
+const SIT_SKILLS = /^(Convergence Use|GU|Yuki \(bond\) Qi Use)$/;
+export function sitSummary(lines) {
+    const tot = new Map(), rest = [];
+    const get = (name) => { if (!tot.has(name)) tot.set(name, { sum: 0, rank: '', cap: false, xp: !/^Yuki/.test(name) }); return tot.get(name); };
+    for (const l of lines) {
+        if (SIT_SAT.test(l)) continue;
+        const c = SIT_CAP.exec(l);
+        if (c && SIT_SKILLS.test(c[1])) { get(c[1]).cap = true; continue; }
+        const m = SIT_XP.exec(l);
+        if (m && SIT_SKILLS.test(m[1])) { const t = get(m[1]); t.sum += Number(m[2]); if (m[3]) t.rank = m[3]; continue; }
+        rest.push(l);
+    }
+    const out = [];
+    for (const [name, t] of tot) {
+        const sum = Math.round(t.sum * 10) / 10;
+        if (sum > 0) out.push(`${name} +${sum}${t.xp ? ' XP' : ''}${t.rank ? ` → ${t.rank}` : ''}`);
+        if (t.cap) out.push(`${name} at T10 L10 (cap)`);
+    }
+    return [...out, ...rest];
+}
 export const SIT_STOP_TEXT = { sat: 'the breakthrough point', qi: 'then Qi runs out', night: 'then the day ends', fed: 'then you need food', shut: 'then it stops', left: 'the story moves on', max: 'a long session' };

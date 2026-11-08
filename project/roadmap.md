@@ -1,6 +1,6 @@
 # Roadmap: Bone and Ash
 
-Last updated: 2026-11-08 (v0.11.70, docs only: the new order (owner pick O1, 15:48 "before D I will tell you more games to analyze. I'm aware this pushes everything back by a lot, but I want a more mature game before we extend the combat and retune. Go O1."): c, then the new groups g (the copy-over push 5, moved word for word from section 4), h (the analysis of Selene's and the SillyTavern repositories) and i (the games analysis), then d, e, f, the retune and the rest of section 4; rule 10, Fable for story texts (pick A1); v0.11.69, the missing replies). Update in every push.
+Last updated: 2026-11-08 (v0.11.71, the story and mechanics pass, group c, the small rules (owner picks Y1 + C1 + X1, 16:05; R1 after the Fable review, 16:27): Yuki's food switch, one total per skill for "Cultivate until the limit", more than one Blackroot exploration a day from Coil 2; group c's three lines moved word for word to `project/roadmap-done.md`; next in the order (O1): g). Update in every push.
 
 **How this file is laid out (v0.11.53, owner 00:52 "reorder it to show the done ones in a separate section", pick R1):** Part 1 is what is still open; Part 2 is everything done, newest first. Nothing was deleted or reworded: every line moved word for word; a line that was partly done was split at the sentence (its done part in Part 2, its open part here), and a done line is labelled with where it stood ("was …").
 
@@ -8,13 +8,13 @@ Last updated: 2026-11-08 (v0.11.70, docs only: the new order (owner pick O1, 15:
 
 # Part 1: Open
 
-## 1. The story and mechanics pass (in progress; push 1 done in v0.11.64, group a in v0.11.66, group b's hub format in v0.11.67, where replies show in v0.11.68, the missing replies in v0.11.69: group b done)
+## 1. The story and mechanics pass (in progress; push 1 done in v0.11.64, group a in v0.11.66, group b's hub format in v0.11.67, where replies show in v0.11.68, the missing replies in v0.11.69: group b done; group c in v0.11.71)
 
 **The story and mechanics pass:** in progress (owner 2026-11-08 10:40): push 1 done in v0.11.64 (no timer, no queue, Cultivate until the limit); every open item in its own section below, the next one the owner's pick (options first).
 
 Moved here word for word from the handover in v0.11.52 (owner 00:48 "add the story pass to the roadmap instead", pick A2), so the handover stays small. Each item gets its options (and numbers, where balance moves) before anything is built; drafts of story texts in chat first. ("The block below" in the first item is the second item.)
 
-**Suggested order** *(new in v0.11.65)*: a, b, c, d, e, f, then section 2 *(v0.11.70, owner pick O1: now c, g, h, i, then d, e, f, section 2, then the rest of section 4; before d the owner names more games for i)* (the retune comes after a, which moves the numbers). *(v0.11.66: group a done, its four lines in `roadmap-done.md`.)* *(v0.11.67: group b's hub format done.)* *(v0.11.68: where replies show done; left in b: the missing replies, first the full list of choices without a reply.)* *(v0.11.69: group b done; the repeating replies moved to group e.)* Each group is one push or more, each with its own options and pick.
+**Suggested order** *(new in v0.11.65)*: a, b, c, d, e, f, then section 2 *(v0.11.70, owner pick O1: now c, g, h, i, then d, e, f, section 2, then the rest of section 4; before d the owner names more games for i)* (the retune comes after a, which moves the numbers). *(v0.11.66: group a done, its four lines in `roadmap-done.md`.)* *(v0.11.67: group b's hub format done.)* *(v0.11.68: where replies show done; left in b: the missing replies, first the full list of choices without a reply.)* *(v0.11.69: group b done; the repeating replies moved to group e.)* *(v0.11.71: group c done; next g.)* Each group is one push or more, each with its own options and pick.
 
 ### b. The screen's format
 
@@ -26,9 +26,7 @@ Moved here word for word from the handover in v0.11.52 (owner 00:48 "add the sto
 
 ### c. Small rules
 
-- **Mechanics, the same pass (owner 2026-11-08 00:02, "when one type of loot from Yuki's auto forage/hunt is full, she switches to another"):** when Yuki's own hunting or foraging would bring a kind of food James can't hold any more (its cap), she brings another kind instead (today "Let Yuki hunt" only hides once hares and venison are both full, v0.11.25). Find every place she gathers first; options with what changes.
-- *(new in v0.11.66, the Fable review's low finding 3, owner pick R1)* "Cultivate until the limit" lists every sit's four lines (Condensed, Convergence Use, GU, Yuki) since X1: about 640 lines for a 159-sit run at Nascent Soul (the panel's summary and the 12-line journal keep it usable). Option: one total line per skill for the loop. Options first.
-- *(was: Now, item 4, its own sentence)* Tabled until after the art: more than one Blackroot wilds exploration a day on replays (owner 21:31, the wilds save; options first, now with the story and mechanics pass).
+*(v0.11.71: done (owner picks Y1 + C1 + X1, R1 after the Fable review); the three lines moved word for word to `roadmap-done.md`.)*
 
 ### g. The copy-over push 5, the Coil *(new in v0.11.70, owner pick O1: moved up from section 4, after c)*
 

@@ -40,6 +40,7 @@ export function choiceTag(g, c) {
  *  v0.11.25, so a quoted non-item such as yukiForm(g) === 'tiger' inside the call is not taken for one). */
 const givesCache = new WeakMap();
 export function gives(c) {
+    if (Array.isArray(c.gives)) return c.gives; // v0.11.71 (Y1): a choice that picks its item at run time lists them
     if (!c.do) return [];
     if (!givesCache.has(c)) {
         const ids = new Set();
