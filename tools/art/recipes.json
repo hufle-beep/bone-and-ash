@@ -3187,6 +3187,306 @@
     "height": 800,
     "why": "redo (owner 02:45 \"Mei Ling looks loke a child\"): Mei Lin described as a tall grown woman of twenty-six, almost as tall as James"
    }
+  ],
+  "lf_hub": [
+   {
+    "op": "generate",
+    "file": "a1_lf_hub_s22",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime scene deep in an ancient forest of tall black-barked trees with dark leaves, shafts of pale sunlight falling between the trunks, ferns and moss on the ground, a thin curl of woodsmoke rising from a small campfire ringed with stones in the front. a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands by the fire looking out into the forest with his hands in his coat pockets, and a small white cat with gold eyes and a thin red cord collar sits on a mossy root beside him. The background is a wall of black tree trunks and ferns. Exactly one man and one small white cat.",
+    "seed": 22,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "lf_hub_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_lf_hub_s22",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime scene deep in an ancient forest of tall black-barked trees with dark leaves, shafts of pale sunlight falling between the trunks, ferns and moss on the ground, a thin curl of woodsmoke rising from a small campfire ringed with stones in the front. a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands by the fire looking out into the forest with his hands in his coat pockets, and a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck lies on the moss beside him with her chin on her paws. The background is a wall of black tree trunks and ferns. Exactly one man and one great white cat.",
+    "seed": 22,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "lf_hub_human": [
+   {
+    "op": "generate",
+    "file": "a1h_lf_hub_s22",
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime scene deep in an ancient forest of tall black-barked trees with dark leaves, shafts of pale sunlight falling between the trunks, ferns and moss on the ground, a thin curl of woodsmoke rising from a small campfire ringed with stones in the front. a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands by the fire looking out into the forest with his hands in his coat pockets, and a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles stands beside him with her arms folded, she is a head shorter than him. The background is a wall of black tree trunks and ferns. Exactly one man and one woman.",
+    "seed": 22,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "lf_bandits": [
+   {
+    "op": "generate",
+    "file": "a1_lf_bandits2_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime scene on a narrow game trail through a dark forest. On the right, facing left, two bandits have stepped out onto the trail: two rough peasant bandits from old China in their thirties who are clearly brothers with the same faces, their black hair tied up in messy knots: one broad and heavy with a scarred face and a short black beard, one narrow, thin and twitchy with a wispy moustache, both wearing ragged dark hemp tunics with crossed collars tied with a rope sash, loose trousers wrapped at the shins and straw sandals, each holding a short curved knife. On the left, facing them, a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands calmly with his hands in his coat pockets, and a small white cat with gold eyes and a thin red cord collar sits at his feet. The background is a wall of black tree trunks and ferns. Exactly three men, two on the right and one on the left, and one small white cat.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "lf_bandits_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_lf_bandits2_s22",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime scene on a narrow game trail through a dark forest. On the right, facing left, two bandits have stepped out onto the trail: two rough peasant bandits from old China in their thirties who are clearly brothers with the same faces, their black hair tied up in messy knots: one broad and heavy with a scarred face and a short black beard, one narrow, thin and twitchy with a wispy moustache, both wearing ragged dark hemp tunics with crossed collars tied with a rope sash, loose trousers wrapped at the shins and straw sandals, each holding a short curved knife. On the left, facing them, a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands calmly with his hands in his coat pockets, and a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck stands beside him with her head low, staring at the bandits. The background is a wall of black tree trunks and ferns. Exactly three men, two on the right and one on the left, and one great white cat.",
+    "seed": 22,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "lf_bandits_human": [
+   {
+    "op": "generate",
+    "file": "a1h_lf_bandits2_s44",
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime scene on a narrow game trail through a dark forest. On the right, facing left, two bandits have stepped out onto the trail: two rough peasant bandits from old China in their thirties who are clearly brothers with the same faces, their black hair tied up in messy knots: one broad and heavy with a scarred face and a short black beard, one narrow, thin and twitchy with a wispy moustache, both wearing ragged dark hemp tunics with crossed collars tied with a rope sash, loose trousers wrapped at the shins and straw sandals, each holding a short curved knife. On the left, facing them, a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands calmly with his hands in his coat pockets, and a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles stands beside him with her arms folded, she is a head shorter than him. The background is a wall of black tree trunks and ferns. Exactly three men, two on the right and one on the left, and one woman.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "lf_rogue": [
+   {
+    "op": "generate",
+    "file": "a1_lf_rogue_s55",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime scene in a small sunny clearing in a dark forest, full of tall pale grass. On the right a young man kneels in the grass, cutting it with a small green knife and glancing back over his shoulder with a smug smile: a young man of about twenty with a sharp handsome face and black hair tied up in a topknot, in faded crimson sect robes with a torn patch on one sleeve where an embroidered lotus was picked off. On the left at the edge of the clearing a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands watching him, and a small white cat with gold eyes and a thin red cord collar sits at his feet. Behind them a wall of black tree trunks and ferns. Exactly two men and one small white cat.",
+    "seed": 55,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "lf_rogue_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_lf_rogue_s22",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime scene in a small sunny clearing in a dark forest, full of tall pale grass. On the right a young man kneels in the grass, cutting it with a small green knife and glancing back over his shoulder with a smug smile: a young man of about twenty with a sharp handsome face and black hair tied up in a topknot, in faded crimson sect robes with a torn patch on one sleeve where an embroidered lotus was picked off. On the left at the edge of the clearing a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands watching him, and a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck stands beside him, watching the young man. Behind them a wall of black tree trunks and ferns. Exactly two men and one great white cat.",
+    "seed": 22,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "lf_rogue_human": [
+   {
+    "op": "generate",
+    "file": "a1h_lf_rogue2_s77",
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime scene in a small sunny clearing in a dark forest, full of tall pale grass. On the right a young man kneels in the grass, cutting it with a small green knife and glancing back over his shoulder with a smug smile: a young man of about twenty with a sharp handsome face and black hair tied up in a topknot, in faded crimson sect robes with a torn patch on one sleeve where an embroidered lotus was picked off. On the left at the edge of the clearing a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands watching him, and a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles stands beside him with her arms folded, her long snow-white cat tail hanging behind her, she is a head shorter than him. Behind them a wall of black tree trunks and ferns. Exactly two men and one woman.",
+    "seed": 77,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "lf_seclusion": [
+   {
+    "op": "generate",
+    "file": "a1_lf_seclusion_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. An interior view from inside a dark stone cave behind a waterfall: the whole cave mouth is covered from edge to edge by a bright white curtain of falling water, with mist and spray, and green moss on the stone around the mouth. In the middle of the cave floor a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers sits cross-legged in meditation, his eyes shut, his hands resting on his knees, and a small white cat with gold eyes and a thin red cord collar sits curled asleep on the rock beside him. The rest of the cave is bare black rock. Exactly one man and one small white cat.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "lf_seclusion_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_lf_seclusion2_s88",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. An interior view from inside a dark stone cave behind a waterfall: the whole cave mouth is covered from edge to edge by a bright white curtain of falling water, with mist and spray, and green moss on the stone around the mouth. In the middle of the cave floor a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers sits cross-legged in meditation, his eyes shut, his hands resting on his knees, and one single a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck lies curled asleep on the rock on his right. The rest of the cave is bare black rock. Exactly one man and one great white cat.",
+    "seed": 88,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "lf_seclusion_human": [
+   {
+    "op": "generate",
+    "file": "a1h_lf_seclusion_s44",
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. An interior view from inside a dark stone cave behind a waterfall: the whole cave mouth is covered from edge to edge by a bright white curtain of falling water, with mist and spray, and green moss on the stone around the mouth. In the middle of the cave floor a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers sits cross-legged in meditation, his eyes shut, his hands resting on his knees, and a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles sits on the rock beside him with her knees drawn up, watching the water, she is a head shorter than him. The rest of the cave is bare black rock. Exactly one man and one woman.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "lf_bone_depths": [
+   {
+    "op": "generate",
+    "file": "a1_lf_bone_depths2_s88",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A deep valley floored with fine white sand made of old ground bone, under a pale grey sky. Gigantic white ribcages of long-dead colossal beasts rise out of the sand like the vaults of collapsed cathedrals, each rib taller than a tree, and a huge horned skull lies half-buried in the sand. The people are tiny next to the bones. In the foreground a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands looking up at the ribs, and a small white cat with gold eyes and a thin red cord collar sits on the sand beside him. Behind him the ribs crowd close and a black cliff closes off the valley; above only the pale empty sky. Exactly one man and one small white cat.",
+    "seed": 88,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "lf_bone_depths_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_lf_bone_depths_s22",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A deep valley floored with fine white sand made of old ground bone, under a pale grey sky. Gigantic white ribcages of long-dead colossal beasts rise out of the sand like the vaults of collapsed cathedrals, each rib taller than a tree, and a huge horned skull lies half-buried in the sand. The people are tiny next to the bones. In the foreground a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands looking up at the ribs, and a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck stands beside him, sniffing the sand. Beyond the bones only the pale empty sky. Exactly one man and one great white cat.",
+    "seed": 22,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "lf_bone_depths_human": [
+   {
+    "op": "generate",
+    "file": "a1h_lf_bone_depths_s22",
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A deep valley floored with fine white sand made of old ground bone, under a pale grey sky. Gigantic white ribcages of long-dead colossal beasts rise out of the sand like the vaults of collapsed cathedrals, each rib taller than a tree, and a huge horned skull lies half-buried in the sand. The people are tiny next to the bones. In the foreground a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands looking up at the ribs, and a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles stands beside him looking up at the ribs, she is a head shorter than him. Beyond the bones only the pale empty sky. Exactly one man and one woman.",
+    "seed": 22,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "lf_black_mire": [
+   {
+    "op": "generate",
+    "file": "a1_lf_black_mire2_s77",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A night scene in a black swamp: still water as black as ink fills most of the picture, with dead drowned trees standing in it, bare and straight, and rotting stumps with pale fungus, small pale glowing lights floating over the water. A long dark shape like a floating log lies in the water, with two small pale eyes. In the foreground on a narrow strip of black mud a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands at the water's edge, looking at the log, and a small white cat with gold eyes and a thin red cord collar sits on a stump beside him with her fur standing on end. Behind them only dead trees and mist, and above the dead trees the night sky is black and empty. Exactly one man and one small white cat.",
+    "seed": 77,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "lf_black_mire_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_lf_black_mire_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A night scene in a black swamp: still water as black as ink fills most of the picture, with dead drowned trees standing in it, bare and straight, and rotting stumps with pale fungus, small pale glowing lights floating over the water. A long dark shape like a floating log lies in the water, with two small pale eyes. In the foreground on a narrow strip of black mud a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands at the water's edge, looking at the log, and a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck stands beside him in the shallows with her head low. Behind them only dead trees and mist. Exactly one man and one great white cat.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "lf_black_mire_human": [
+   {
+    "op": "generate",
+    "file": "a1h_lf_black_mire_s55",
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A night scene in a black swamp: still water as black as ink fills most of the picture, with dead drowned trees standing in it, bare and straight, and rotting stumps with pale fungus, small pale glowing lights floating over the water. A long dark shape like a floating log lies in the water, with two small pale eyes. In the foreground on a narrow strip of black mud a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands at the water's edge, looking at the log, and a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles stands beside him with her arms folded, looking at the water with distaste, she is a head shorter than him. Behind them only dead trees and mist. Exactly one man and one woman.",
+    "seed": 55,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "lf_thunder_ridge": [
+   {
+    "op": "generate",
+    "file": "a1_lf_thunder_ridge_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A spine of jagged black rock above the treeline under a sky full of heavy black storm clouds. A single bright white jagged bolt of lightning strikes down from the clouds onto the rocks on the right, and the black rocks around it are fused into shining glass. On the ridge in the foreground a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands with his coat blowing in the wind, looking up at the storm, and a small white cat with gold eyes and a thin red cord collar crouches under an overhanging rock beside him. Far below, the dark tops of the forest. Exactly one man and one small white cat.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "lf_thunder_ridge_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_lf_thunder_ridge_s22",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A spine of jagged black rock above the treeline under a sky full of heavy black storm clouds. A single bright white jagged bolt of lightning strikes down from the clouds onto the rocks on the right, and the black rocks around it are fused into shining glass. On the ridge in the foreground a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands with his coat blowing in the wind, looking up at the storm, and a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck stands beside him, her fur blown by the wind. Far below, the dark tops of the forest. Exactly one man and one great white cat.",
+    "seed": 22,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "lf_thunder_ridge_human": [
+   {
+    "op": "generate",
+    "file": "a1h_lf_thunder_ridge_s22",
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A spine of jagged black rock above the treeline under a sky full of heavy black storm clouds. A single bright white jagged bolt of lightning strikes down from the clouds onto the rocks on the right, and the black rocks around it are fused into shining glass. On the ridge in the foreground a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands with his coat blowing in the wind, looking up at the storm, and a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles stands beside him, her long white hair blown by the wind, she is a head shorter than him. Far below, the dark tops of the forest. Exactly one man and one woman.",
+    "seed": 22,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "lf_old_roots": [
+   {
+    "op": "generate",
+    "file": "a1_lf_old_roots_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime scene in an ancient forest where gigantic smooth white roots, each as thick as a house, rise out of the earth and lie across the forest floor like the fallen pillars of a temple, all running the same way into the distance, where far away on the horizon the grey shape of a huge dead tree stands against the pale sky. Dark tree trunks and ferns grow between the roots. The people are tiny next to the roots. In the foreground a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands with one hand laid flat on the side of a root, listening, and a small white cat with gold eyes and a thin red cord collar sits on the root beside his hand. Exactly one man and one small white cat.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "lf_old_roots_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_lf_old_roots_s22",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime scene in an ancient forest where gigantic smooth white roots, each as thick as a house, rise out of the earth and lie across the forest floor like the fallen pillars of a temple, all running the same way into the distance, where far away on the horizon the grey shape of a huge dead tree stands against the pale sky. Dark tree trunks and ferns grow between the roots. The people are tiny next to the roots. In the foreground a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands with one hand laid flat on the side of a root, listening, and a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck stands beside him, looking along the roots. Exactly one man and one great white cat.",
+    "seed": 22,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "lf_old_roots_human": [
+   {
+    "op": "generate",
+    "file": "a1h_lf_old_roots_s22",
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A daytime scene in an ancient forest where gigantic smooth white roots, each as thick as a house, rise out of the earth and lie across the forest floor like the fallen pillars of a temple, all running the same way into the distance, where far away on the horizon the grey shape of a huge dead tree stands against the pale sky. Dark tree trunks and ferns grow between the roots. The people are tiny next to the roots. In the foreground a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers stands with one hand laid flat on the side of a root, listening, and a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles stands beside him with one hand on the root too, she is a head shorter than him. Exactly one man and one woman.",
+    "seed": 22,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "root_camp": [
+   {
+    "op": "generate",
+    "file": "a1_root_camp_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A night scene on the broad back of a gigantic tree root as wide as a road, running through a dark enormous forest of black trees. A small campfire burns in a hollow of the bark. Three adults sit around the fire, two women and one man, each clearly separate: on the left a tall grown village herbalist woman of twenty-six, an adult with a mature face and a slender adult figure, almost as tall as the man, with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, in the middle a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers sitting cross-legged by the fire, and on the right a tall rangy wild grown woman in her twenties, an adult as tall as the man with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, and a small white cat with gold eyes and a thin red cord collar sits by the fire beside him. Behind them only the dark trunks of enormous trees.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "root_camp_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_root_camp_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A night scene on the broad back of a gigantic tree root as wide as a road, running through a dark enormous forest of black trees. A small campfire burns in a hollow of the bark. Three adults sit around the fire, two women and one man, each clearly separate: on the left a tall grown village herbalist woman of twenty-six, an adult with a mature face and a slender adult figure, almost as tall as the man, with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, in the middle a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers sitting cross-legged by the fire, and on the right a tall rangy wild grown woman in her twenties, an adult as tall as the man with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, and a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck lies beside the fire beside him. Behind them only the dark trunks of enormous trees.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "root_camp_human": [
+   {
+    "op": "generate",
+    "file": "a1h_root_camp2_s66",
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A night scene on the broad back of a gigantic tree root as wide as a road, running through a dark enormous forest of black trees. A small campfire burns in a hollow of the bark. Four adults sit around the fire, three women and one man, each clearly separate: on the left a tall grown village herbalist woman of twenty-six, an adult with a mature face and a slender adult figure, almost as tall as the man, with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, in the middle a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers sitting cross-legged by the fire, beside him a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles, she is a head shorter than him, and on the right a tall rangy wild grown woman in her twenties, clearly a woman, with a feminine face, full lips, long eyelashes and a slender woman's figure, as tall as the man, with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord. Behind them only the dark trunks of enormous trees.",
+    "seed": 66,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "ashen_camp": [
+   {
+    "op": "generate",
+    "file": "a1_ashen_camp_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A night scene in grey hills covered in ash, in the lee of a black rock ridge, under a sky full of stars; far off on the horizon a colossal dead tree blots out a third of the stars. A small campfire burns low with pale flames. Three adults sit around the fire, two women and one man, each clearly separate: on the left a tall grown village herbalist woman of twenty-six, an adult with a mature face and a slender adult figure, almost as tall as the man, with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, in the middle a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers sitting cross-legged by the fire, and on the right a tall rangy wild grown woman in her twenties, an adult as tall as the man with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, and a small white cat with gold eyes and a thin red cord collar sits by the fire beside him. Behind them only the black ridge and the stars.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "ashen_camp_tiger": [
+   {
+    "op": "generate",
+    "file": "a1t_ashen_camp_s44",
+    "prompt": "An elegant high-contrast manga illustration that blends gothic shoujo ink art influenced by ukiyo-e and Art Nouveau with a stylish modern anime title-card look: stark black and white with a few red accents, large flat areas of solid black and pure white, tall lean elegant figures with long limbs, narrow sleepy almond eyes under heavy black upper eyelids, fine vertical hatching lines in places, decorative swirling cloud curls, graphic negative space, clean crisp ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A night scene in grey hills covered in ash, in the lee of a black rock ridge, under a sky full of stars; far off on the horizon a colossal dead tree blots out a third of the stars. A small campfire burns low with pale flames. Three adults sit around the fire, two women and one man, each clearly separate: on the left a tall grown village herbalist woman of twenty-six, an adult with a mature face and a slender adult figure, almost as tall as the man, with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, in the middle a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers sitting cross-legged by the fire, and on the right a tall rangy wild grown woman in her twenties, an adult as tall as the man with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord, and a huge white great cat the size of a tiger, with snow-white fur with faint pale stripes, gold eyes with slit pupils and a thin red cord around her neck lies beside the fire beside him. Behind them only the black ridge and the stars.",
+    "seed": 44,
+    "width": 1280,
+    "height": 800
+   }
+  ],
+  "ashen_camp_human": [
+   {
+    "op": "generate",
+    "file": "a1h_ashen_camp2_s66",
+    "prompt": "An elegant gothic shoujo manga illustration in delicate ink, influenced by ukiyo-e and Art Nouveau, with only a light touch of a modern anime title-card look: stark black and white with a few red accents, large areas of solid black and pure white with no grey gradients, very elongated slender figures with long limbs and long necks, long narrow faces with pointed chins, narrow sleepy almond eyes under heavy black upper eyelids, hair as long flowing locks separated by thin gaps, long trailing sleeves and clothes with fine ornamental patterns, fine vertical hatching lines in places, decorative swirling cloud curls, thin delicate ink lines. Sharp focus, high detail, no text, no watermark, natural hands. A night scene in grey hills covered in ash, in the lee of a black rock ridge, under a sky full of stars; far off on the horizon a colossal dead tree blots out a third of the stars. A small campfire burns low with pale flames. Four adults sit around the fire, three women and one man, each clearly separate: on the left a tall grown village herbalist woman of twenty-six, an adult with a mature face and a slender adult figure, almost as tall as the man, with long black hair in a loose bun pinned with one long slender ivory hairpin with a small red tassel, curtain bangs, wearing a patched jacket with a crossed Chinese collar and a red sash, in the middle a man in his early forties with slightly shaggy tousled pale blond hair falling over his ears and forehead, a short scruffy pale blond beard and thick black rectangular glasses with clear lenses, wearing a long white lab coat with the sleeves rolled up over a dark shirt and black trousers sitting cross-legged by the fire, beside him a slender young woman with very long straight white hair, bangs falling between her eyes and long side locks to her chest, pointed white cat ears, a long white cat tail, narrow gold cat eyes with slit pupils, a small mouth and a dry unimpressed look, wearing a long black high-collared qipao with red piping and small red knot buttons at the collar, reaching her ankles, she is a head shorter than him, and on the right a tall rangy wild grown woman in her twenties, clearly a woman, with a feminine face, full lips, long eyelashes and a slender woman's figure, as tall as the man, with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord. Behind them only the black ridge and the stars.",
+    "seed": 66,
+    "width": 1280,
+    "height": 800
+   }
   ]
  },
  "palette": {
@@ -3310,7 +3610,37 @@
    "a1_a1_end2_s77": "a1_end",
    "a1_return_road2_s77": "return_road",
    "a1_ship_wreck4_s55": "ship_wreck",
-   "a1_ed_poles_s2": "elder_duel"
+   "a1_ed_poles_s2": "elder_duel",
+   "a1_lf_hub_s22": "lf_hub",
+   "a1t_lf_hub_s22": "lf_hub_tiger",
+   "a1h_lf_hub_s22": "lf_hub_human",
+   "a1_lf_bandits2_s44": "lf_bandits",
+   "a1t_lf_bandits2_s22": "lf_bandits_tiger",
+   "a1h_lf_bandits2_s44": "lf_bandits_human",
+   "a1t_lf_rogue_s22": "lf_rogue_tiger",
+   "a1h_lf_rogue2_s77": "lf_rogue_human",
+   "a1_lf_seclusion_s44": "lf_seclusion",
+   "a1t_lf_seclusion2_s88": "lf_seclusion_tiger",
+   "a1h_lf_seclusion_s44": "lf_seclusion_human",
+   "a1_lf_bone_depths2_s88": "lf_bone_depths",
+   "a1t_lf_bone_depths_s22": "lf_bone_depths_tiger",
+   "a1h_lf_bone_depths_s22": "lf_bone_depths_human",
+   "a1_lf_black_mire2_s77": "lf_black_mire",
+   "a1t_lf_black_mire_s44": "lf_black_mire_tiger",
+   "a1h_lf_black_mire_s55": "lf_black_mire_human",
+   "a1_lf_thunder_ridge_s44": "lf_thunder_ridge",
+   "a1t_lf_thunder_ridge_s22": "lf_thunder_ridge_tiger",
+   "a1h_lf_thunder_ridge_s22": "lf_thunder_ridge_human",
+   "a1_lf_old_roots_s44": "lf_old_roots",
+   "a1t_lf_old_roots_s22": "lf_old_roots_tiger",
+   "a1h_lf_old_roots_s22": "lf_old_roots_human",
+   "a1_root_camp_s44": "root_camp",
+   "a1t_root_camp_s44": "root_camp_tiger",
+   "a1t_ashen_camp_s44": "ashen_camp_tiger",
+   "a1_lf_rogue_s55": "lf_rogue",
+   "a1_ashen_camp_s44": "ashen_camp",
+   "a1h_root_camp2_s66": "root_camp_human",
+   "a1h_ashen_camp2_s66": "ashen_camp_human"
   }
  },
  "styles": {
@@ -3336,6 +3666,8 @@
   "ya": "a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth, carrying a primitive spear: a plain wooden shaft with a jagged white bone point lashed on with cord",
   "ya_bare": "a tall rangy wild young woman with a fierce grin, very long black hair with a few twigs caught in it, a thin red scar down her cheek under one eye, barefoot, wearing a long patched hunter's jacket of pale hide with a thick spotted fur collar over a plain tunic and leather trousers, and a necklace of teeth",
   "shen": "a very old Chinese sect elder with a grave courteous expression and his eyes calmly shut, long white hair in a topknot under a small black crown, a long white beard, deep crimson robes with very wide sleeves joined in front of him so that his hands are completely hidden inside the sleeves, a white lotus embroidered on the chest of the robe",
-  "wren": "a tired, steady woman of about fifty with short grey-streaked hair tucked behind her ears and a calm lined face, wearing a plain long gardener's work coat with rolled sleeves over a simple shirt, soil on her hands"
+  "wren": "a tired, steady woman of about fifty with short grey-streaked hair tucked behind her ears and a calm lined face, wearing a plain long gardener's work coat with rolled sleeves over a simple shirt, soil on her hands",
+  "tan": "two rough peasant bandits from old China in their thirties who are clearly brothers with the same faces, their black hair tied up in messy knots: one broad and heavy with a scarred face and a short black beard, one narrow, thin and twitchy with a wispy moustache, both wearing ragged dark hemp tunics with crossed collars tied with a rope sash, loose trousers wrapped at the shins and straw sandals, each holding a short curved knife",
+  "fang": "a young man of about twenty with a sharp handsome face and black hair tied up in a topknot, in faded crimson sect robes with a torn patch on one sleeve where an embroidered lotus was picked off"
  }
 }

@@ -574,6 +574,8 @@ const SCENES2 = {
     lf_thunder_ridge: { bg: 'mountain', night: 0.4, fg: () => `<g fill="#111010">${[[90, 34, 100, 30], [260, 24, 130, 34], [370, 50, 70, 24]].map(([x, y, rx, ry]) => `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}"/>`).join('')}</g><path d="M300 60 L286 100 L302 104 L278 160 L296 158 L270 214" stroke="#fbfaf7" stroke-width="3.4" fill="none" stroke-linejoin="round"/><path d="M300 60 L286 100 L302 104 L278 160 L296 158 L270 214" stroke="#111010" stroke-width="0.8" fill="none"/>` + `<path d="M0 250 L0 214 L120 196 L230 210 L400 190 L400 250 Z" fill="#55514d" stroke="#111010"/><path d="M150 202 l14 10 l-6 8 l12 10 M60 214 l10 12" stroke="#111010" stroke-width="1.6" fill="none"/>` + FIG('james', 160, 244, 1.15) + YU(196, 244, 0.85) },
     lf_old_roots: { bg: 'mountain', wash: 0.12, fg: () => roots(411, 130, 9) + ground2(236) + C2.curl(320, 70, 12, '#111010', 1) + FIG('james', 180, 244, 1.15) + YU(214, 244, 0.85) },
     lf_bandits: { bg: 'forest', fg: () => ground2() + FIG('thug', 250, 242, 1.2, { face: -1 }) + FIG('man', 300, 244, 1.15, { face: -1, spear: true }) + `<path d="M232 170 L214 150" stroke="#111010" stroke-width="2"/><path d="M214 150 l-6 -4 l4 7 Z" fill="#fbfaf7" stroke="#111010" stroke-width="0.6"/>` + FIG('james', 120, 244, 1.2) + YU(150, 244, 0.85) },
+    // v0.11.59 (Act 1 art push 3, pick B2): Fang Wei, the poacher on the game trail (the code art only behind the picture)
+    lf_rogue: { bg: 'forest', fg: () => ground2() + FIG('sect', 290, 242, 1.15, { face: -1, sit: true }) + FIG('james', 120, 244, 1.2) + YU(150, 244, 0.85) },
     seed: { base: () => `<rect width="400" height="250" fill="#111010"/>`, fg: () => C2.seedSliver(200, 125, 1.4) + C2.curl(80, 60, 14, '#55514d', 1.2) + C2.curl(320, 190, 12, '#55514d', 1.2, -1) },
     heart_core: { base: () => C2.hollowInside(true), fg: () => `<circle cx="200" cy="110" r="70" fill="#55514d" stroke="#111010" stroke-width="2"/><path d="M160 70 L200 110 L190 160 M200 110 L250 90 M200 110 L236 150" stroke="#111010" stroke-width="3" fill="none"/><circle cx="200" cy="110" r="20" fill="#111010"/><circle cx="200" cy="110" r="6" fill="#a02c2c"/>` + FIG('james', 200, 240, 0.8) + YU(222, 240, 0.55) },
     return_road: { bg: 'forest', fg: () => ground2() + FIG('james', 160, 244, 1.1, { face: -1 }) + FIG('mei', 210, 242, 1.05, { face: -1 }) + FIG('ya', 270, 242, 1.1, { face: -1 }) + YU(130, 244, 0.75, -1) },
@@ -703,6 +705,20 @@ export const PICTURES = {
     elder_duel: 'elder_duel',
     elder_parley: 'elder_parley',
     a1_end: 'a1_end',
+    // v0.11.59 (Act 1 art, push 3: the Long Forest; owner picks L2 B2 S1, 2026-11-08): each file named after its key, in all three of Yuki's forms
+    lf_hub: 'lf_hub',
+    lf_seclusion: 'lf_seclusion',
+    lf_bone_depths: 'lf_bone_depths',
+    lf_black_mire: 'lf_black_mire',
+    lf_thunder_ridge: 'lf_thunder_ridge',
+    lf_old_roots: 'lf_old_roots',
+    lf_bandits: 'lf_bandits',
+    lf_rogue: 'lf_rogue',
+    // v0.11.59 (owner pick O3): the Blackroot camps missed in push 1 (bl_camp on the Root Road and in the Ashen Hills)
+    root_camp: 'root_camp',
+    ashen_camp: 'ashen_camp',
+    // v0.11.59: the form chooser shows her portrait in her current form, as yuki_close
+    yuki_form: (form) => ({ human: 'yuki_human', tiger: 'yuki_tiger' }[form] || 'yuki_cat'),
 };
 /**
  * v0.11.38 (P-b): the pictures that draw Yuki. v0.11.49 (Y3, part 1): each has a version per form in YUKI_PIC_FORMS,
@@ -714,16 +730,22 @@ export const PICTURES = {
 export const YUKI_PIC_FORMS = new Set(['cat', 'tiger', 'human']);
 /** v0.11.54 (pick F1): the keys whose great-cat picture is drawn; Act 1's keys get theirs after their cat one (push 4). */
 export const YUKI_TIGER_PICS = new Set(['forest_dawn', 'omnitool', 'clearing', 'stream', 'forage', 'hunt', 'camp', 'tribulation', 'lights', 'rain', 'crows', 'rats', 'gift', 'bone_field', 'mire',
-    'hollow', 'drill', 'wolves', 'lizard', 'roof', 'arson', 'herb_slope', 'gao_down', 'village', 'dinner', 'collectors', 'jackals', 'james', 'jackals_dead']);
+    'hollow', 'drill', 'wolves', 'lizard', 'roof', 'arson', 'herb_slope', 'gao_down', 'village', 'dinner', 'collectors', 'jackals', 'james', 'jackals_dead',
+    // v0.11.59 (Act 1 push 3, pick L2): the Long Forest in all three forms
+    'lf_hub', 'lf_seclusion', 'lf_bone_depths', 'lf_black_mire', 'lf_thunder_ridge', 'lf_old_roots', 'lf_bandits', 'lf_rogue', 'root_camp', 'ashen_camp']);
 export const YUKI_HUMAN_PICS = new Set(['forest_dawn', 'omnitool', 'clearing', 'stream', 'forage', 'hunt', 'camp', 'tribulation', 'lights', 'rain', 'crows', 'rats', 'gift', 'bone_field', 'mire',
-    'hollow', 'drill', 'wolves', 'lizard', 'roof', 'arson', 'herb_slope', 'gao_down', 'village', 'dinner', 'collectors', 'jackals', 'james', 'jackals_dead']);
+    'hollow', 'drill', 'wolves', 'lizard', 'roof', 'arson', 'herb_slope', 'gao_down', 'village', 'dinner', 'collectors', 'jackals', 'james', 'jackals_dead',
+    // v0.11.59 (Act 1 push 3, pick L2)
+    'lf_hub', 'lf_seclusion', 'lf_bone_depths', 'lf_black_mire', 'lf_thunder_ridge', 'lf_old_roots', 'lf_bandits', 'lf_rogue', 'root_camp', 'ashen_camp']);
 /** Whether a key of YUKI_PICS has its own picture in this form (v0.11.50). */
 const hasFormPic = (key, form) => YUKI_PIC_FORMS.has(form) && (form !== 'human' || YUKI_HUMAN_PICS.has(key)) && (form !== 'tiger' || YUKI_TIGER_PICS.has(key));
 export const YUKI_PICS = new Set(['james', 'jackals', 'jackals_dead', 'forest_dawn', 'omnitool', 'clearing', 'stream', 'forage', 'hunt', 'camp', 'gao_down', 'village', 'dinner', 'collectors', 'tribulation', 'lights', 'rain', 'crows', 'rats', 'lizard', 'gift', 'bone_field', 'mire', 'hollow', 'roof', 'arson', 'herb_slope', 'drill', 'wolves',
     // v0.11.54 (Act 1 push 1, Y1: every key whose code art draws her): the cat now, the great cat and human in push 4
     'council', 'ashfall_dawn', 'ya_fight', 'root_road', 'drowned_wood', 'drowned_camp', 'ashen_hills', 'rot_ape', 'night_watch', 'trio_fire',
     // v0.11.58 (Act 1 push 2, Y1): the cat now, the great cat and human in push 4
-    'heart_gate', 'heart_hall', 'heart_roots', 'heart_core', 'guardian', 'ship_bridge', 'ship_wreck', 'return_road', 'grove_sprout', 'a1_end']);
+    'heart_gate', 'heart_hall', 'heart_roots', 'heart_core', 'guardian', 'ship_bridge', 'ship_wreck', 'return_road', 'grove_sprout', 'a1_end',
+    // v0.11.59 (Act 1 push 3, L2: every Long Forest key draws her, in all three forms; O3: the two missed Blackroot camps too)
+    'lf_hub', 'lf_seclusion', 'lf_bone_depths', 'lf_black_mire', 'lf_thunder_ridge', 'lf_old_roots', 'lf_bandits', 'lf_rogue', 'root_camp', 'ashen_camp']);
 /** The picture file for an art key in Yuki's current form, or '' when the key has none in that form (code art). */
 export function pictureOf(key, form = C2.getYukiForm()) {
     const p = PICTURES[key];

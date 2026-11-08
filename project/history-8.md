@@ -2,6 +2,19 @@
 
 Started 2026-11-08 (v0.11.57), when `history-7.md` reached about 45 KB. Newer than `history-7.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.59 (word for word)
+
+### From "Decided in chat (2026-11-07)"
+
+- **v0.11.56: condense until the limit (owner 02:07 "also to that part, add an option condense until limit is reached as qi allows, and the button calculates the time and qi cost."):** added to the roadmap under the first-priority item, word for word, with today's sit numbers and the open question of what "the limit" is (100%, 95%, or 02:00). Docs only.
+
+### From "Version notes"
+
+### v0.11.56 — docs: condense until the limit
+
+- **project/roadmap.md** (the item), **project/handover.md** (Open items; v0.11.53 moved), **project/history-7.md, changelog.md, restore-points.md. sw.js:** VERSION (no game change).
+- **Checks (docs only, rule 2):** `tools/consistency.mjs` and `bash tools/check.sh quick`.
+
 ## Moved from the handover in v0.11.58 (word for word)
 
 ### From "Decided in chat (2026-11-07)"

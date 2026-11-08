@@ -180,6 +180,9 @@ When he comes round, he is lying neatly on his back with his herbs stacked on hi
 
 /* ---------------------------------------------------------------- scenes ---------------------------------------------------------------- */
 
+/** v0.11.59 (Act 1 art push 3, pick B2): the trail scenes show whom you met: the Tan brothers or Fang Wei. */
+const lfTrailArt = (g) => (g.flags.lf_human === 'lf_rogue' ? 'lf_rogue' : 'lf_bandits');
+
 const hubText = (g) => {
     const h = hour(g);
     const when = h < 11 ? 'Morning in the Long Forest. The red sun climbs the way it always does, as if it has nowhere else to be.' : h < 15 ? 'The heat of the day. The forest hums with things that would like to eat you and are reconsidering.' : h < 19 ? 'Afternoon going amber. The shadows are long, and so is the list of things you could still do today.' : 'Dusk. The Long Forest folds up its colours for the night.';
@@ -529,7 +532,7 @@ There's no shame in it. That's what the Long Forest is for.`,
 
     /* ---------- wandering humans ---------- */
     lf_wanderers: {
-        id: 'lf_wanderers', title: 'Company', art: (g) => (g.flags.lf_human === 'lf_rogue' ? 'lf_bandits' : 'lf_bandits'), place: `${P} — a game trail`,
+        id: 'lf_wanderers', title: 'Company', art: lfTrailArt, place: `${P} — a game trail`,
         enter: (g) => { markDaily(g, 'lf_wander'); g.flags.lf_human = d6(g) <= 3 ? 'lf_bandits' : 'lf_rogue'; g.flags.lf_last = g.flags.lf_human; return []; },
         text: (g) => (g.flags.lf_human === 'lf_bandits'
             ? `Two men step out onto the trail ahead of you: one broad and scarred, one narrow and twitchy, both with the kind of knives that are mostly for showing people. Brothers, by the faces. Bandits, by everything else.
@@ -549,7 +552,7 @@ He sees you. He sees the white coat and the cat and the lack of anything at all 
         ],
     },
     lf_human_talked: {
-        id: 'lf_human_talked', title: 'Words', art: 'lf_bandits', place: `${P} — a game trail`,
+        id: 'lf_human_talked', title: 'Words', art: lfTrailArt, place: `${P} — a game trail`,
         text: (g) => (g.flags.lf_human === 'lf_bandits'
             ? `You explain, at length and in great technical detail, the reproductive cycle of the bracket fungus growing on the log beside them. By the third minute their eyes have glazed over. By the fifth, Little Tan is asleep standing up. Scarred Tan pays *you* a copper to stop, which you accept on behalf of mycology everywhere, and they leave.`
             : `You tell him, gravely, that the grass he's cutting is the wrong grass: a toxic look-alike, fatal within the month, and that you're a travelling herb-doctor who has seen it kill a dozen men. You describe the symptoms. You make them up as you go, and they get worse every sentence.
@@ -559,7 +562,7 @@ He drops the knife. He runs. He leaves the grass. Yuki watches him go with deep 
         choices: [{ text: 'Back to camp.', time: 30, to: 'lf_hub' }],
     },
     lf_human_won: {
-        id: 'lf_human_won', title: 'Lesson', art: 'lf_bandits', place: `${P} — a game trail`,
+        id: 'lf_human_won', title: 'Lesson', art: lfTrailArt, place: `${P} — a game trail`,
         enter: (g) => { const f = FIGHTS[g.flags.lf_last]; return f ? f.loot(g) : []; },
         text: (g) => (g.flags.lf_last === 'lf_bandits'
             ? `It's harder than it should be, and messier, and at one point Little Tan gets a knife into your coat that you will be sewing up for a week. But it ends with both brothers in the leaf litter, alive, breathing, and holding various parts of themselves very carefully.
@@ -579,7 +582,7 @@ You don't kill him. You never do. You take the herbs he poached, as evidence, an
         choices: [{ text: 'Back to camp.', time: 60, to: 'lf_hub' }],
     },
     lf_human_lost: {
-        id: 'lf_human_lost', title: 'Robbed', art: 'lf_bandits', place: `${P} — a game trail`,
+        id: 'lf_human_lost', title: 'Robbed', art: lfTrailArt, place: `${P} — a game trail`,
         enter: (g) => { const id = ['hare_raw', 'fowl_raw', 'venison', 'honeycomb', 'jade_bracket', 'river_cress'].find((k) => g.inventory[k] > 0); if (id) addItem(g, id, -1); return id ? ['They take some of your food.'] : []; },
         text: `You lose, which stings more than the bruises. They take what food they can find in your pockets (they don't know about the hammerspace; you're not about to tell them) and leave you lying on the trail, laughing about the mortal in the white coat.
 
