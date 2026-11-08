@@ -923,6 +923,96 @@ let walkEc = 0, walkE8 = 0, walkCards = 0;
     assert(walkE8 > 0, `v0.11.67 (R1): the walk plays the vessel card too (${walkE8} times; with "Call it a day" back on the Blackroot the bots rarely do)`);
 assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card (${walkEc} times in ${walkCards} cards, ${WALK_GAMES} games)`);
 }
+// v0.11.68 (owner picks A1 + B2 + C1): a choice's or a card's lines split into the reply (under the scene text) and the gains
+// (Results), sentence by sentence by shape (js/core/replies.js); friendship and affection changes as Results lines.
+{
+    const { splitLine, splitReply, relLines, landParts, sentences, isGainSentence, GAIN_LINES, REPLY_LINES } = await import('../js/core/replies.js');
+    const { medCards: mCards, runMed: mRun } = await import('../js/core/meditate.js');
+    const { skipPlan: sPlan, skipRun: sRun } = await import('../js/story/again.js');
+    const sp = (l) => { const r = splitLine(l); return `${r.reply}|${r.gain}`; };
+    assert(sp('Raw hare: +12 satiety. You will not be telling anyone about this.') === 'You will not be telling anyone about this.|Raw hare: +12 satiety.', `B2: a meal line splits (${sp('Raw hare: +12 satiety. You will not be telling anyone about this.')})`);
+    assert(sp('She throws you twice. You throw her once. She\'s thrilled.') === 'She throws you twice. You throw her once. She\'s thrilled.|', 'B2: a reply stays whole');
+    assert(sp('"No," Ya says cheerfully. "She doesn\'t want me to either. She just doesn\'t know it yet."') === '"No," Ya says cheerfully. "She doesn\'t want me to either. She just doesn\'t know it yet."|', 'B2: speech stays whole and a reply');
+    assert(sp('Stung. A lot. +3 Wild honeycomb, −2 HP.') === 'Stung. A lot.|+3 Wild honeycomb, −2 HP.', `B2: a haul with a reply (${sp('Stung. A lot. +3 Wild honeycomb, −2 HP.')})`);
+    assert(sp('Opened the Lung meridian (1/12). It opens on an inhale.') === 'It opens on an inhale.|Opened the Lung meridian (1/12).', 'B2: a meridian line');
+    assert(sp('GU +5 XP → T1 L2') === '|GU +5 XP → T1 L2' && sp('Breakfast. You eat: hare, cooked. +14 satiety.') === '|Breakfast. You eat: hare, cooked. +14 satiety.', 'B2: XP and eating are gains');
+    assert(sp('Two Qi and 30 minutes into the ash around the Girdle Vessel. It gives a little. (4.5 h of 8 h.)') === '|Two Qi and 30 minutes into the ash around the Girdle Vessel. It gives a little. (4.5 h of 8 h.)', 'B2: a vessel sitting (a gain, the Opus review)');
+    // the Opus review (R1): lines the first shapes put in the reply
+    for (const l of ['You push on. Exhaustion 1: work takes ×1.5 until you sleep.', '+Ya\'s wolf tooth.', '+ The watcher\'s ledger: three pages of names.', 'The calendar starts again: Day 4.', 'You stay until the Day 19 dawn: resting, mapping, saying goodbye.', 'A miserable few hours of sleep.', 'Yuki: great root-kin form (hits much harder in a fight).', 'Your bone stakes will be harder from now on.', 'The hammerspace is full: the Long Forest\'s pantry comes with you.']) {
+        const r = splitLine(l);
+        assert(r.gain && !/×\d|\+ ?[A-Z']|Day \d|sleep|form \(|stakes|pantry/.test(r.reply), `R1: a gain, not a reply: ${l} (${r.reply} | ${r.gain})`);
+    }
+    // landParts: no relationship lines across a rewind; the summary reads every line (Yuki's haul)
+    const lp = landParts(['Coil 3. The hammerspace is empty.'], { Village: { f: 30, a: 0 } }, { Village: { f: 14, a: 0 } }, { coilChanged: true });
+    assert(!lp.gains.some((l) => /Village/.test(l)), `R1: biting the tail lists no relationship losses (${lp.gains})`);
+    const ly = landParts(['Yuki comes back with 2 hares and the air of someone owed an apology. +2 Glassback hare (dressed).'], {}, {});
+    assert(ly.sumLines.some((l) => /^Yuki comes/.test(l)) && ly.reply.length && ly.gains.some((l) => /^\+2 Glassback/.test(l)), `R1: Yuki's haul: the summary still reads her line (${JSON.stringify(ly)})`);
+    const rl = relLines({ 'Mei Lin': { f: 1, a: 0 }, Village: { f: 3, a: 0 } }, { 'Mei Lin': { f: 5, a: 2 }, Ya: { f: -3, a: 0 }, Village: { f: 3, a: 0 } });
+    assert(JSON.stringify(rl) === JSON.stringify(['Mei Lin: friendship +4, affection +2', 'Ya: friendship −3']), `C1: relationship lines (${rl})`);
+    // a real choice: siding with Mei Lin at the Root Road's meal
+    const m = ensureBars(newGame(316)); m.minutes = 13 * 1440 + 12 * 60; goTo(m, SCENES, 'ya_mocks'); m.rel['Mei Lin'] = { f: 30, a: 20 }; m.rel.Ya = { f: 30, a: 20 };
+    const rel0 = JSON.parse(JSON.stringify(m.rel));
+    const out = choose(m, SCENES, 0);
+    const parts = splitReply(out.lines), rels = relLines(rel0, m.rel);
+    assert(parts.reply.some((l) => /mouth twitches/.test(l)) && !parts.gains.some((l) => /mouth twitches/.test(l)) && rels.some((l) => /^Mei Lin: friendship \+/.test(l)) && rels.some((l) => /^Ya: friendship −/.test(l)), `A1 + C1: siding with Mei Lin: the reply under the text, the friendships in Results (${parts.reply} | ${parts.gains} | ${rels})`);
+    // every line of a walk of random games is placed: no gain sentence with speech in it, no reply sentence with a stat in it
+    const STAT = /\d+%|\b\d+(\.\d+)? (HP|Qi|XP)\b|[+−]\d|×\d|^\+ ?[A-Z']|\b\d\d:\d\d\b|\(\d+\/\d+\)/;
+    const bad = new Map();
+    let rewinds = 0, meds = 0, skips = 0, flees = 0, lf = 0;
+    const check = (src, lines) => {
+        for (const l of lines || []) {
+            const s0 = String(l);
+            if (GAIN_LINES.some((r) => r.test(s0)) || REPLY_LINES.some((r) => r.test(s0))) continue;
+            for (const t of sentences(s0)) {
+                const gain = isGainSentence(t) && !/"/.test(t);
+                if (!gain && STAT.test(t) && !bad.has(t)) bad.set(t, `${src}: a reply with a stat in it`);
+                if (isGainSentence(t) && /"/.test(t) && STAT.test(t) && !bad.has(t)) bad.set(t, `${src}: a gain with speech in it`);
+            }
+        }
+    };
+    const rs0 = rs;
+    let walked = 0;
+    // the Opus review (R1): the walk also takes the Long Forest (one run in three), bites the tail on the Coil screen,
+    // runs Meditate cards, skips stretches read before and runs from fights
+    for (let run = 0; run < (FULL ? 60 : 12); run++) {
+        rs = seedOf(run, 68);
+        const g = ensureBars(newGame(680000 + run, { closed: true }));
+        if (run % 3 === 1) { g.james.realm = 2; ensureBars(g); }
+        for (let step = 0; step < 3000; step++) {
+            const v = sceneView(g, SCENES);
+            if (v.end) break;
+            if (g.scene === 'coil_end') rewinds++;
+            if (g.flags.lf_active) lf++;
+            let open = v.choices.filter((c) => !c.disabled);
+            if (isTaskHub(g) || isQueueScreen(g, SCENES)) {
+                const ms = mCards(g, SCENES).filter((m) => m.open);
+                if (ms.length && rnd(10) < 2) { const m = ms[rnd(ms.length)]; let r; try { r = m.task ? runTask(g, SCENES, m.task) : mRun(g, SCENES, m.id); } catch { continue; } check(`meditate ${m.id}`, r.lines); meds++; walked++; continue; }
+                const cards = taskCards(g, SCENES).filter((c) => c.status === 'open');
+                const stops = open.filter((c) => c.index >= 1000 || !isTaskChoice(SCENES, g.scene, c.index));
+                if (cards.length && (rnd(10) < 7 || !stops.length)) { const id = cards[rnd(cards.length)].id; check(`card ${id}`, runTask(g, SCENES, id).lines); walked++; continue; }
+                open = stops;
+            } else if (sPlan(g, SCENES).steps >= 2 && rnd(4) === 0) { check('skip', sRun(g, SCENES).lines); skips++; walked++; continue; }
+            if (/^(arrival|clearing)$/.test(g.scene) && run % 3 !== 2) open = open.filter((c) => !/Stay lost/.test(c.label));
+            if (!open.length) break;
+            const sc = g.scene, pick = open[rnd(open.length)];
+            const r = choose(g, SCENES, pick.index); walked++;
+            check(`${sc}#${pick.index}`, r.lines);
+            if (r.combat) {
+                startCombat(g, r.combat(g));
+                for (let t = 0; t < 400 && g.combat; t++) {
+                    const fl = g.combat.flee && rnd(15) === 0;
+                    const o = fl ? combatFlee(g) : combatStep(g, t % 2 ? 'blade' : 'dart');
+                    if (fl) flees++;
+                    if (o.done) { check('fight end', [...o.lines, ...goTo(g, SCENES, o.next)]); break; }
+                }
+                if (g.combat) break;
+            }
+        }
+    }
+    rs = rs0;
+    assert(rewinds > 0 && meds > 0 && lf > 0 && (skips > 0 || !FULL), `R1: the walk bites the tail (${rewinds}), meditates (${meds}), skips (${skips}), runs (${flees}) and walks the Long Forest (${lf} steps)`);
+    assert(bad.size === 0, `B2: every line of ${walked} choices and cards is placed (${[...bad].slice(0, 4).map(([t, w]) => `${w}: ${t}`).join(' || ')})`);
+}
 // every card that was ever offered was also played at least once
 const all = cardsListed;
 if (FULL) for (const id of all) assert(cardsSeen.has(id), `card ${id} was played by a bot`); // coverage: the full run only

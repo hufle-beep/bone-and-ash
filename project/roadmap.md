@@ -1,6 +1,6 @@
 # Roadmap: Bone and Ash
 
-Last updated: 2026-11-08 (v0.11.67, the story and mechanics pass, group b part 1: one hub format (owner picks F1 + D2: no gate cards, the card groups fold); its part of the format bullet moved word for word to `project/roadmap-done.md`; the owner's cooking and music notes added to group e; v0.11.66, group a). Update in every push.
+Last updated: 2026-11-08 (v0.11.68, the story and mechanics pass, group b part 2: where replies show (owner picks A1 + B2 + C1); the reply bullet's done part moved word for word to `project/roadmap-done.md`; the owner's 14:14 notes on Yuki's forms added to group e; v0.11.67, group b part 1). Update in every push.
 
 **How this file is laid out (v0.11.53, owner 00:52 "reorder it to show the done ones in a separate section", pick R1):** Part 1 is what is still open; Part 2 is everything done, newest first. Nothing was deleted or reworded: every line moved word for word; a line that was partly done was split at the sentence (its done part in Part 2, its open part here), and a done line is labelled with where it stood ("was …").
 
@@ -8,19 +8,19 @@ Last updated: 2026-11-08 (v0.11.67, the story and mechanics pass, group b part 1
 
 # Part 1: Open
 
-## 1. The story and mechanics pass (in progress; push 1 done in v0.11.64, group a in v0.11.66, group b's hub format in v0.11.67)
+## 1. The story and mechanics pass (in progress; push 1 done in v0.11.64, group a in v0.11.66, group b's hub format in v0.11.67, where replies show in v0.11.68)
 
 **The story and mechanics pass:** in progress (owner 2026-11-08 10:40): push 1 done in v0.11.64 (no timer, no queue, Cultivate until the limit); every open item in its own section below, the next one the owner's pick (options first).
 
 Moved here word for word from the handover in v0.11.52 (owner 00:48 "add the story pass to the roadmap instead", pick A2), so the handover stays small. Each item gets its options (and numbers, where balance moves) before anything is built; drafts of story texts in chat first. ("The block below" in the first item is the second item.)
 
-**Suggested order** *(new in v0.11.65)*: a, b, c, d, e, f, then section 2 (the retune comes after a, which moves the numbers). *(v0.11.66: group a done, its four lines in `roadmap-done.md`.)* *(v0.11.67: group b's hub format done; next in b: the reply texts, first a list of where replies go today.)* Each group is one push or more, each with its own options and pick.
+**Suggested order** *(new in v0.11.65)*: a, b, c, d, e, f, then section 2 (the retune comes after a, which moves the numbers). *(v0.11.66: group a done, its four lines in `roadmap-done.md`.)* *(v0.11.67: group b's hub format done.)* *(v0.11.68: where replies show done; left in b: the missing replies, first the full list of choices without a reply.)* Each group is one push or more, each with its own options and pick.
 
 ### b. The screen's format
 
 *(v0.11.67, owner 13:34 "fold this into the story texts section": the rest of the format bullet, part (2), no repeated texts, moved word for word to group e)*
 
-- **Story pass, the reply texts (owner 2026-11-08 00:43, "uniformize where the reply text goes (not to the results but the replies that come with it, the checks and gains (xp, affectio+friendship still go to the results. fix/add replies to choices that should come with text replies"):** the story reply a choice brings (what is said or happens in answer) shows in one place everywhere, not in the results lines; the checks and gains (XP, affection, friendship) stay in the results; and choices that should answer with a text but don't (or answer only with gains) get their reply. First a list of where replies go today, scene by scene, and of the choices without one; drafts in chat first.
+- *(where replies show done in v0.11.68 (owner picks A1 + B2 + C1), moved word for word to `roadmap-done.md`; the rest is story writing)* **Story pass, the reply texts (owner 2026-11-08 00:43, "uniformize where the reply text goes (not to the results but the replies that come with it, the checks and gains (xp, affectio+friendship still go to the results. fix/add replies to choices that should come with text replies"):** and choices that should answer with a text but don't (or answer only with gains) get their reply. First a list of where replies go today, scene by scene, and of the choices without one; drafts in chat first.
 
 *(new in v0.11.65)* Part (2) of the bullet above, no repeated texts, is story writing: it goes with group e. *(v0.11.67: moved there.)*
 
@@ -47,6 +47,8 @@ Moved here word for word from the handover in v0.11.52 (owner 00:48 "add the sto
 - *(new in v0.11.65)* Small text fixes found by the art reviews (`history-8.md`): the won duel's "red jade crown" to match Shen Qiu's picture (the small black crown, v0.11.58 S1); `lf_human_lost` says "they" even when it was Fang Wei alone (v0.11.59). The art-against-text mismatches (M1) stay in section 3.
 
 - *(new in v0.11.67)* **Story beats, James's cooking and his music (owner 2026-11-08 13:17, "some beats and notes for the story texts. James is an excellent cook, and loves to feed people. when the trust is high enough, he begins to share the kitchen and cooking with Mei's mother. He is also great at working with what he's got, so both Yuki, Mei and Ya are very, very satisfied with his cooking. so are the villagers. add scenes where you cook for the village with the women, and teaches them. Another aspect. He listens to music on his onmitool. All kinds, depending on how mood and what he is doing. (except for when he hunts, because that would be stupid) His current favourites are Synthwave, Darkwave, Post-Punk, post-rock, classic rock, death metal, black metal, heavy metal and some Jpop and Kpop. It drives the villagers a bit mad. James doesn't care, the volume is not loud, they are just not used to it and are very startled by some of the music. Some come to like it, depending on personality."):** the hooks today: Mei Lin's mother's own trust number (`Mother`, raised at `fo_mother` and the Day 9 dinner), a cooking card on every hub. Options given in chat (13:17), not picked yet: **C1** (recommended) story scenes plus one repeatable card at Ashfall, "Cook with the women", behind Mother's trust, giving village goodwill and some food (a balance change: numbers first) / **C2** story scenes only; **M1** (recommended) a short flavour line on chores, camp and the road by mood and task, never when hunting, plus reaction beats (Old Wen, the mother, Mei Lin, Ya, the hunters; a few villagers come round) / **M2** the reaction beats only. Claude's limit: genres and real bands can be named, no song lyrics quoted (the music is described, not sung). Drafts in chat first.
+
+- *(new in v0.11.68)* **Reactions to Yuki's forms (owner 2026-11-08 14:14, "to group e, differing reactions to Yuki is different forms. The form changes/unlocks should get a reaction from the other cast member, nit just Ya and Mei, but the villagers, enemies etc too. Yuki should get different reactions and lines as well  (bond in the first two forms, spoken in human forms replies and reactions too)"):** the form changes and unlocks (`yuki_tiger_awaken`, `yuki_human_awaken`, `yuki_form`) answered by the rest of the cast, not only Mei Lin and Ya: villagers, enemies and the others; and Yuki's own lines and reactions differ by form: through the bond as the cat and the great cat, spoken aloud in human form. First a list of where her form shows or could show today; drafts in chat first.
 
 ### f. Romance
 

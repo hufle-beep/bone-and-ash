@@ -89,9 +89,13 @@ def visit_tabs(pg, where):
     return tabs
 
 def no_greyed(pg, where):
-    """v0.11.17 (owner pick 1a): Incremental Mode shows no greyed-out task, Meditate or fight card (story choices keep their own rule)."""
-    g = pg.query_selector('button.card[disabled]:not(.story)')
-    if g: fails.append(f"{where}: a greyed-out card shows: {g.inner_text()[:80]!r}")
+    """v0.11.17 (owner pick 1a): Incremental Mode shows no greyed-out task, Meditate or fight card (story choices keep their own rule).
+    v0.11.68 (owner pick T1): except the cards the game shows locked on purpose, with their reason: a sit short of Qi
+    ("needs 10 Qi", v0.11.46 Q1), gather Qi when too hungry, and a card that would end past 02:00 (v0.11.37 D-a)."""
+    for g in pg.query_selector_all('button.card[disabled]:not(.story)'):
+        t = g.inner_text()
+        if re.search(r'needs \d+ Qi \(you have|too hungry: eat first|ends past 02:00', t): continue
+        fails.append(f"{where}: a greyed-out card shows: {t[:80]!r}"); return
 
 def taps(pg, n, rng, where, sel):
     done = 0
@@ -211,6 +215,22 @@ def groups(pg, url):
     again = pg.eval_on_selector_all('details.grp', "els => Object.fromEntries(els.map(e => [e.dataset.grp, e.open]))")
     if again.get('Hunt') is not True or again.get('Camp') is not False: fails.append(f'D2: a reload lost the groups\' state: {again}')
     else: notes.append('one hub format: no gate cards in the Long Forest; groups fold, start as picked, and keep their state')
+
+def replies(pg, url):
+    """v0.11.68 (owner picks A1 + B2 + C1): a card's reply shows under the scene text, its gains in Results, never mixed;
+    no reply box above the cards. The Long Forest camp (a v0.11.7 test save): Hunt → "Let Yuki hunt and watch her work."."""
+    fresh(pg, url, "s => { localStorage.clear(); localStorage.setItem('boneash.auto', s); localStorage.setItem('boneash.groups', JSON.stringify({ Hunt: true })); }", (ROOT / 'saves/v0.11.7-long-forest-coil2.json').read_text())
+    card = pg.query_selector('details.grp[data-grp="Hunt"] button.card[data-run="lf_hunt:2"]:not([disabled])')
+    if not card: fails.append('A1: no "Let Yuki hunt" card in the Long Forest camp\'s Hunt group'); return
+    r0 = len(pg.query_selector_all('.res')); tap(pg, card); until(pg, "n => document.querySelectorAll('.res').length > n", 3000, arg=r0)
+    reply = pg.inner_text('.prose.reply') if pg.query_selector('.prose.reply') else ''
+    res = pg.eval_on_selector('.res', "e => e.querySelector('div')?.innerText || ''") if pg.query_selector('.res') else ''
+    if not re.search(r'comes back', reply): fails.append(f'A1: the card\'s reply is not under the scene text: {reply!r}')
+    elif re.search(r'\+\d', reply): fails.append(f'A1: the reply holds a gain: {reply!r}')
+    elif not re.search(r'\+\d', res) or 'comes back' in res: fails.append(f'A1: Results do not hold just the gains: {res!r}')
+    elif pg.query_selector('.below .result'): fails.append('A1: a reply box still shows above the cards')
+    else: notes.append('a card\'s reply under the scene text, its gains in Results')
+    check_text(pg, 'a reply', strict=True)
 
 def rest_places(pg, url):
     fresh(pg, url, "localStorage.clear()")
@@ -487,6 +507,7 @@ def main(part=0):
               else: notes.append('the status bar pinned at the top')
               pg.evaluate("scrollTo(0, 0)")
               groups(pg, url)
+              replies(pg, url)
               # 4. two tabs (v0.11.8): a tab that closes never writes its older game over a newer save from another tab
               fresh(pg, url, "localStorage.clear()")
               pg.evaluate("1")

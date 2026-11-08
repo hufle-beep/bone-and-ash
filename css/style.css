@@ -78,6 +78,10 @@ button { font: inherit; color: inherit; }
 .end-mark { font-family: var(--display); color: var(--red); text-align: center; }
 /* v0.11.35 (P1-a): a scene read in an earlier Coil: a memory line, the first paragraph, "Read it all again" */
 .prose .memory { font-style: italic; color: var(--ink-2); border-left: 2px solid var(--red); padding-left: 0.6em; }
+/* v0.11.68 (owner pick A1): the reply to the last choice or card, under the scene text */
+.prose.reply { padding-top: 0; }
+.prose.reply p { border-left: 2px solid var(--ink-2); padding-left: 0.6em; color: var(--ink-2); }
+.prose.reply p:first-child::first-letter { font: inherit; float: none; margin: 0; }
 .prose p.memory:first-child::first-letter { font: inherit; float: none; margin: 0; }
 .prose p.memory + p::first-letter { font-family: var(--display); font-weight: 800; font-size: 2.1em; float: left; line-height: 0.9; margin: 0.08em 0.12em 0 0; }
 .readall { display: block; margin: 0 0 0.95em; padding: 0.35em 0; background: none; border: 0; font: inherit; font-size: 0.92rem; color: var(--red); cursor: pointer; text-decoration: underline; text-underline-offset: 0.2em; }

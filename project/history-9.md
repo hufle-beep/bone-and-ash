@@ -2,6 +2,21 @@
 
 Started 2026-11-08 (v0.11.65), when `history-8.md` reached about 45 KB. Newer than `history-8.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.68 (word for word)
+
+### From "Decided in chat (2026-11-07)"
+
+- **v0.11.65: docs: the roadmap regrouped (owner 11:41 "upload them. also go over the whole roadmap and check if elements can be rearranged/grouped together or if there is redundancy"; options G1 / G2 / G3; owner 11:45 "G2"):**
+  - **Found:** the balance work in four places (E, the old steps 3 and 5, the open notes; the serpent four times); two plans for the same systems (the old order of work's steps 4–7 and the copy-over's 5–7); a pointer bullet and the glasses and tattoos twice; the 30-version "Last updated" line; lines done or made moot by v0.11.64 (queue Undo and presets, pause-when, the unpause report, ×1 speed, saves with a queue running; Yuki born with James, the export reminder, text size and the close ✕ done). New gap: threads were to work queued tasks; with no queue they need a new design (roadmap section 4).
+  - **Picked:** G2 (G1's regrouping, every line moved word for word with a label where it stood, plus the done list split off to `project/roadmap-done.md`); G1 (no split) and G3 (a rewrite in new words, the originals archived) not picked. The roadmap 52 → 26 KB; `roadmap-done.md` 30 KB. Every line of the old roadmap checked present, word for word, in one of the two files (a script; the only changes: the replaced headings, Part 2's heading, item 4 split at its wilds sentence).
+  - **Also:** after v0.11.64 Claude uploaded its seven changed docs to the project itself (owner 11:41 "upload them"); `0dd7296` filled in for 0.11.64 in the changelog and restore points.
+  - **Checks:** see the version note.
+
+## v0.11.65 — docs: the roadmap regrouped (G2)
+
+- **project/roadmap.md** (six open sections, word for word), **project/roadmap-done.md** (new: the done list, the old header line, the art round's status, the stale lines), **project/handover.md** (Open items point at the sections; v0.11.62 moved), **history-9.md** (new; part 8 reached 45 KB), changelog.md, restore-points.md, **reference.md** (the docs list). **sw.js:** VERSION (no game change).
+- **Checks (docs only, rule 2):** `tools/consistency.mjs` and `bash tools/check.sh quick`; the word-for-word script over the old roadmap. Nothing in the game or the tests reads the roadmap.
+
 ## Moved from the handover in v0.11.67 (word for word)
 
 ### From "Decided in chat (2026-11-07)"

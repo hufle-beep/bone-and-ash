@@ -2,6 +2,16 @@
 
 Split out of `roadmap.md` in v0.11.65 (owner pick G2, 2026-11-08 11:45), so the roadmap shows only the open work. Every line here moved word for word; newest first. Update in every push that finishes a roadmap line.
 
+## Moved in v0.11.68 (word for word)
+
+### From section 1b, "The screen's format" (the reply bullet's first part; done in v0.11.68: A1 the reply under the scene text, B2 sorted by shape, C1 friendship and affection in Results)
+
+- **Story pass, the reply texts (owner 2026-11-08 00:43, "uniformize where the reply text goes (not to the results but the replies that come with it, the checks and gains (xp, affectio+friendship still go to the results. fix/add replies to choices that should come with text replies"):** the story reply a choice brings (what is said or happens in answer) shows in one place everywhere, not in the results lines; the checks and gains (XP, affection, friendship) stay in the results;
+
+### The old "Last updated" line
+
+Last updated: 2026-11-08 (v0.11.67, the story and mechanics pass, group b part 1: one hub format (owner picks F1 + D2: no gate cards, the card groups fold); its part of the format bullet moved word for word to `project/roadmap-done.md`; the owner's cooking and music notes added to group e; v0.11.66, group a). Update in every push.
+
 ## Moved in v0.11.67 (word for word)
 
 ### From section 1b, "The screen's format" (part (1) of the format bullet; done in v0.11.67: F1 no gate cards, the Blackroot's Train and the Long Forest's Forage, Hunt, Train and Go deep on the hub lists; D2 the card groups fold, the work groups folded at first, kept per phone)

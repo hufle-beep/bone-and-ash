@@ -9,6 +9,7 @@ import { sceneView, choose, goTo, gives } from './core/story.js';
 import { showPicked, isTaskHub, isQueueScreen, isTaskChoice, taskCards, taskLabel, taskMinutes, taskOutcome, dryOutcome, outcomeOf, runTask, FAM, yukiLane, setYuki } from './core/tasks.js';
 import { SCENES, ITEMS } from './story/prologue.js';
 import { TASK_HUBS } from './story/task_hubs.js';
+import { landParts } from './core/replies.js'; // v0.11.68 (A1 + B2 + C1)
 import { againView, skipPlan, skipRun } from './story/again.js'; // v0.11.35 (P1-a)
 import { coilActive, endCoil } from './core/coil.js';
 import { medCards, runMed, isSitChoice, medActivity, useLine, LATE_TAG } from './core/meditate.js';
@@ -29,7 +30,10 @@ let g = null;
 let tab = 'story';
 let menu = 'main'; // v0.11.10: the main menu ('main' | 'saves' | 'settings'), shown on every open; null = in the game
 let hadSave = false; // an autosave existed when the game opened (else the menu says Begin)
-let lastResult = null; // { lines, fail }
+let lastResult = null; // { lines, fail }: since v0.11.68 only warnings (a card that ends the Coil, an error)
+// v0.11.68 (owner picks A1 + B2 + C1): the reply to the last choice or card shows under the scene text; its gains and the
+// friendship / affection it moved go to Results (js/core/replies.js sorts the lines)
+let lastReply = [];
 let combatLog = null;
 const view = document.getElementById('view');
 
@@ -113,6 +117,7 @@ function summarize(lines) {
     if (hp) bits.push(`−${Math.round(hp * 10) / 10} HP`);
     if (lines.some((l) => /^Yuki (comes|leaves)/.test(l))) { const y = lines.find((l) => /^Yuki (comes|leaves)/.test(l)); const got = /\+(\d+) /.exec(y); bits.push(got ? `Yuki +${got[1]}` : 'Yuki: nothing'); }
     if (lines.some((l) => /You fold up where you stand/.test(l))) bits.push('collapsed'); // both collapses (a task's and the story's)
+    for (const l of lines) { const r = /^([^:]+): (friendship [+−][\d.]+)?(?:, )?(affection [+−][\d.]+)?$/.exec(l); if (r && (r[2] || r[3])) bits.push(`${r[1]} ${[r[2], r[3]].filter(Boolean).join(', ')}`); } // v0.11.68 (C1)
     return bits.join(' · ');
 }
 let resultSeq = 0;
@@ -131,11 +136,26 @@ function setGroupOpen(name, open, dflt) {
 /** The menus' labels on this hub: the groups that start folded. */
 const workGroups = (hubId) => { const cfg = TASK_HUBS[hubId]; return new Set(cfg ? [...Object.values(cfg.menus || {}), ...Object.values(cfg.doorMenus || {})].map((m) => m.label) : []); };
 const groupHtml = (name, cards, dflt) => `<details class="grp" data-grp="${esc(name)}" data-dflt="${dflt ? 1 : 0}"${isGroupOpen(name, dflt) ? ' open' : ''}><summary><h2>${esc(name)} <span class="count">· ${cards.length}</span></h2></summary><div class="cards">${cards.join('')}</div></details>`;
-function addResult(title, lines, fail) {
-    taskResults.unshift({ id: ++resultSeq, title, sum: summarize(lines), lines, fail });
-    announce(`${title}${summarize(lines) ? `: ${summarize(lines)}` : ''}`);
+function addResult(title, lines, fail, { sumLines = lines, quiet = false } = {}) {
+    const sum = summarize(sumLines); // v0.11.68 (the Opus review): the summary reads all the action's lines (Yuki's haul, a collapse)
+    taskResults.unshift({ id: ++resultSeq, title, sum, lines, fail });
+    if (!quiet) announce(`${title}${sum ? `: ${sum}` : ''}`);
     taskResults.length = Math.min(taskResults.length, RESULTS_MAX);
     if (panel !== 'results') unseen += 1;
+}
+const relSnap = () => ({ rel: JSON.parse(JSON.stringify(g?.rel || {})), coil: `${g?.coil?.n}|${g?.coil?.act}` });
+/** v0.11.68: one action's lines: the reply under the scene text, the gains and relationship changes as a Results entry
+ * (`always`: an entry even with no gains, as a task card always had). */
+function land(title, lines, fail, snap0, { always = false } = {}) {
+    const p = landParts(lines, snap0.rel, g.rel, { coilChanged: snap0.coil !== `${g.coil?.n}|${g.coil?.act}` });
+    lastReply = p.reply;
+    lastResult = null;
+    const sum = summarize(p.sumLines);
+    const entry = p.gains.length || always || /collapsed/.test(sum);
+    if (entry) addResult(title, p.gains, fail, { sumLines: p.sumLines, quiet: true });
+    // one announcement: the reply, then what landed in Results (render() then skips the scene title, so the reply is heard)
+    const say = `${p.reply.join(' ')}${entry ? ` ${title}${sum ? `: ${sum}` : ''}` : ''}`.trim();
+    if (say) { announce(say); announcedScene = g.scene; }
 }
 const durLabel = (m) => (m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} m` : ''}` : `${m} m`);
 const onTaskHub = () => g && !recovery && isTaskHub(g);
@@ -160,9 +180,9 @@ function doTask(id) {
     const out = safeOutcome(() => taskOutcome(g, SCENES, id));
     if (!fatalOk(id, out)) return;
     const label = taskLabel(g, SCENES, id);
+    const rel0 = relSnap();
     const r = runTask(g, SCENES, id);
-    lastResult = r.stopped ? { lines: r.lines, fail: r.fail } : null; // a door or collapse shows its lines in the scene it opens
-    if (!r.stopped) addResult(label, r.lines, r.fail);
+    land(label, r.lines, r.fail, rel0, { always: !r.stopped }); // v0.11.68: a door or collapse shows its reply in the scene it opens
     autosave(); render();
     if (r.stopped) window.scrollTo({ top: 0, behavior: smoothScroll() });
 }
@@ -183,12 +203,12 @@ function playChoice(idx) {
         const label = ch ? String(val(ch.text)) : 'End it in one move.';
         if (!fatalOk(`${g.scene}#${idx}`, storyOutcome(idx))) return; // v0.11.64 (B1)
         if (ch && /^Stay lost/.test(label)) backupBefore('the Long Forest');
+        const rel0 = relSnap();
         const r = choose(g, SCENES, idx);
-        lastResult = { lines: r.lines, fail: r.roll ? !r.roll.success : false };
-        if (r.lines.length) addResult(label, r.lines, lastResult.fail);
+        land(label, r.lines, r.roll ? !r.roll.success : false, rel0); // v0.11.68
         if (r.combat) { startCombat(g, r.combat(g)); combatLog = null; }
         autosave(); render(); window.scrollTo({ top: 0, behavior: smoothScroll() });
-    } catch (err) { lastResult = { lines: [String(err.message || err)], fail: true }; render(); showError(err); }
+    } catch (err) { lastResult = { lines: [String(err.message || err)], fail: true }; lastReply = []; render(); showError(err); }
 }
 const pickedMark = (c) => showPicked(g, SCENES, c.index, c.label); // v0.11.32 (P2-a), tasks.js
 const PICKED_SR = '<span class="sr-only"> (picked before)</span>';
@@ -269,6 +289,7 @@ ${statusHtml()}
 <div class="plate">${sceneArt(v.art)}</div>
 <header class="head"><div class="place">${esc(v.place || g.location)}</div><h1 class="title">${esc(v.title)}</h1></header>
 ${proseHtml(v)}
+${replyHtml()}
 <div class="below">
 ${resultHtml()}
 ${hubTop}
@@ -441,7 +462,7 @@ function restoreAll(p) {
     const m = bakMeta();
     for (const k of BAK_NAMES.filter((x) => x !== 'before')) { if (p.backups[k]) { writeKey(BAK_KEY(k), p.backups[k]); m.when[k] = p.when[k]; } else { store.del(BAK_KEY(k)); delete m.when[k]; } }
     store.set(BAK_META, JSON.stringify(m));
-    g = checkScene(deserialize(p.auto)); lastResult = null; combatLog = null; autosave();
+    g = checkScene(deserialize(p.auto)); lastResult = null; lastReply = []; combatLog = null; autosave();
 }
 
 // The export reminder (Selene's round 5): after an hour of play and a day since the last export or reminder.
@@ -491,7 +512,7 @@ ${bak.length ? `<h2>Backups</h2>${bak.map((b) => `<div class="row"><span>${esc(b
 }
 function leaveRecovery(next) {
     store.set(BROKEN, recovery.raw);
-    g = next; recovery = null; prevScene = g.scene; lastResult = null; combatLog = null; autosave(); setTab('story');
+    g = next; recovery = null; prevScene = g.scene; lastResult = null; lastReply = []; combatLog = null; autosave(); setTab('story');
 }
 function onRecovery(b) {
     if (b.dataset.rec === 'export') return download(recovery.raw, `bone-and-ash-damaged-${stamp()}.json`);
@@ -556,6 +577,10 @@ function statusHtml() {
 <div class="clock"><span class="clk">${clockLabelG(g)}</span>${exLevel(g) ? `<span class="exh">Exhausted ×${exMult(g)}</span>` : ''}</div></div>`;
 }
 
+/** v0.11.68 (A1): the reply to the last choice or card, under the scene text. */
+function replyHtml() {
+    return lastReply.length ? `<div class="prose reply">${lastReply.map((l) => paras(l)).join('')}</div>` : ''; // paras: a multi-paragraph reply keeps its paragraphs
+}
 function resultHtml() {
     if (!lastResult || !shownLines(lastResult.lines).length) return '';
     return `<div class="result${lastResult.fail ? ' fail' : ''}">${shownLines(lastResult.lines).map((l) => `<div>${dieHtml(l)}</div>`).join('')}</div>`;
@@ -798,7 +823,7 @@ view.addEventListener('click', (ev) => {
             let next;
             try { next = checkScene(deserialize(store.get(BAK_KEY(b.dataset.bak)))); } catch (err) { note(`That backup can't be loaded: ${err.message}`); return; }
             backupBefore('restoring a backup');
-            g = next; lastResult = null; combatLog = null; autosave(); setTab('story');
+            g = next; lastResult = null; lastReply = []; combatLog = null; autosave(); setTab('story');
             return;
         }
         if (b.dataset.share) { shareToGitHub().catch((err) => note(`Sharing didn't work: ${err.message || err}`)); return; }
@@ -822,11 +847,11 @@ view.addEventListener('click', (ev) => {
             if (now - lastPress < 400) return;
             lastPress = now;
             try {
+                const rel0 = relSnap();
                 const r = skipRun(g, SCENES);
-                lastResult = r.lines.length ? { lines: r.lines, fail: false } : null;
-                if (r.lines.length) addResult('Skip to the next choice', r.lines, false);
+                land('Skip to the next choice', r.lines, false, rel0); // v0.11.68
                 autosave(); render(); window.scrollTo({ top: 0, behavior: smoothScroll() });
-            } catch (err) { lastResult = { lines: [String(err.message || err)], fail: true }; render(); showError(err); }
+            } catch (err) { lastResult = { lines: [String(err.message || err)], fail: true }; lastReply = []; render(); showError(err); }
             return;
         }
         if (b.dataset.story != null) {
@@ -839,10 +864,11 @@ view.addEventListener('click', (ev) => {
             const id = b.dataset.med; // v0.11.64: at once (was: a bar, then the work)
             const mc = medCards(g, SCENES).find((m) => m.id === id);
             if (!fatalOk(id, mc?.open ? medOutcome(id) : null)) return;
+            const rel0 = relSnap();
             const r = runMed(g, SCENES, id);
             const label = mc ? plain(mc.label).replace(/:.*$/, '').replace(/ \(.*$/, '').replace(/\.$/, '') : 'Meditate';
-            if (r.moved) { lastResult = r.lines.length ? { lines: r.lines, fail: false } : null; window.scrollTo({ top: 0, behavior: smoothScroll() }); }
-            else { lastResult = null; if (r.lines.length) addResult(label, r.lines, false); }
+            land(label, r.lines, false, rel0); // v0.11.68
+            if (r.moved) window.scrollTo({ top: 0, behavior: smoothScroll() });
             autosave(); render();
             return;
         }
@@ -850,26 +876,28 @@ view.addEventListener('click', (ev) => {
             if (Date.now() - biteArmed > 4000) { biteArmed = Date.now(); note('Tap Bite the tail again to end this Coil. Everything in the hammerspace is lost; what James learned is not.'); return; }
             biteArmed = 0;
             endCoil(g, 'choice', g.scene);
-            lastResult = null; goTo(g, SCENES, 'coil_end'); autosave(); setTab('story');
+            lastResult = null; lastReply = []; goTo(g, SCENES, 'coil_end'); autosave(); setTab('story');
             return;
         }
         if (b.dataset.panel) { panel = b.dataset.panel; if (panel === 'results') unseen = 0; render(); return; }
         if (b.dataset.yuki) { const yl = yukiLane(g); setYuki(g, !yl.on); autosave(); render(); return; }
         if (b.dataset.act) {
+            const rel0 = relSnap(); const fightTitle = sceneTitle(g.scene);
             const out = combatStep(g, b.dataset.act);
             combatLog = out.lines;
-            if (out.done) { const lines = out.lines.slice(); lines.push(...goTo(g, SCENES, out.next)); lastResult = { lines, fail: out.done === 'lose' }; combatLog = null; }
+            if (out.done) { const lines = out.lines.slice(); lines.push(...goTo(g, SCENES, out.next)); land(fightTitle, lines, out.done === 'lose', rel0); combatLog = null; } // v0.11.68
             autosave(); render();
         } else if (b.dataset.flee) {
+            const rel0 = relSnap(); const fightTitle = sceneTitle(g.scene);
             const out = combatFlee(g);
             combatLog = out.lines;
-            if (out.done) { const lines = out.lines.slice(); lines.push(...goTo(g, SCENES, out.next)); lastResult = { lines, fail: out.done === 'lose' }; combatLog = null; }
+            if (out.done) { const lines = out.lines.slice(); lines.push(...goTo(g, SCENES, out.next)); land(fightTitle, lines, out.done === 'lose', rel0); combatLog = null; } // v0.11.68
             autosave(); render();
         } else if (b.dataset.new) {
             if ((menu || tab !== 'story') && !confirmNew()) return;
             backupBefore('a new game');
             g = freshGame();
-            lastResult = null; combatLog = null; autosave(); setTab('story');
+            lastResult = null; lastReply = []; combatLog = null; autosave(); setTab('story');
         } else if (b.dataset.tabGo) {
             setTab(b.dataset.tabGo);
         } else if (b.dataset.save) {
@@ -878,12 +906,12 @@ view.addEventListener('click', (ev) => {
             let next;
             try { next = checkScene(deserialize(store.get(SLOT(b.dataset.load)))); } catch (err) { note(`Slot ${b.dataset.load} can't be loaded: ${err.message}`); return; }
             backupBefore(`loading slot ${b.dataset.load}`);
-            g = next; lastResult = null; combatLog = null; autosave(); setTab('story');
+            g = next; lastResult = null; lastReply = []; combatLog = null; autosave(); setTab('story');
         } else if (b.dataset.export) {
             download(serialize(g), `bone-and-ash-${clockLabel(g.minutes).replace(/[^\w]+/g, '-')}.json`); expMark();
         }
     } catch (err) {
-        lastResult = { lines: [String(err.message || err)], fail: true }; render();
+        lastResult = { lines: [String(err.message || err)], fail: true }; lastReply = []; render();
         if (!(err instanceof SaveError)) showError(err);
     }
 });
@@ -899,7 +927,7 @@ view.addEventListener('change', async (ev) => {
         next = checkScene(deserialize(text));
     } catch (err) { inp.value = ''; note(`That file can't be loaded: ${err.message}`); return; }
     backupBefore('loading a save file');
-    g = next; autosave(); lastResult = null; setTab('story');
+    g = next; autosave(); lastResult = null; lastReply = []; setTab('story');
 });
 document.getElementById('tabs').addEventListener('click', (ev) => { const b = ev.target.closest('button[data-tab]'); if (b) setTab(b.dataset.tab); });
 
