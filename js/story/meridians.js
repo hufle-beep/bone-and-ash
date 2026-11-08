@@ -1,8 +1,10 @@
 /**
  * The extra meridians (v0.8.0). Windows:
- *   Extraordinary 8  — Foundation (realm 1) to Soul Embryo (realm 6). Closes for good at Nascent Soul (realm 7).
+ *   Extraordinary 8  — Golden Core (realm 4; v0.11.66, owner pick G4; Foundation, realm 1, before) to Soul Embryo (realm 6).
+ *     Closes for good at Nascent Soul (realm 7).
  *   Their collaterals (28) — v0.11.46 (owner 19:26, pick X1; a deliberate fork from Rules Engine C, whose formulas.js opens
- *     them from Nascent Soul): after all 8 Extraordinary are open, Foundation to Soul Embryo; closes for good at Nascent Soul.
+ *     them from Nascent Soul): after all 8 Extraordinary are open, Golden Core to Soul Embryo; closes for good at Nascent Soul.
+ *     v0.11.66 (owner pick P1): opened in pairs, one collateral's hours per pair (56 h in all), two challenging awards per pair.
  *   Junctions (10) — Nascent Soul+ (as the engine).
  * Each attempt: 2 Qi, 1 hour, a Convergence Use check (DC climbs per meridian opened); a success pays challenging XP.
  * One opening per group per day (fails can retry). Effect: Qi regen % per Cycle (+0.5 / +0.1 / +0.3 — game.js extraRegen).
@@ -64,9 +66,14 @@ const work = (g, k) => g.james[KEY[k]] || 0;
 export const e8Hours = (k) => 4 + k;
 export const ecHours = (k) => 3 + Math.floor(k / 9);
 export const jnHours = (k) => 6 + Math.floor(k / 2);
+/** v0.11.66 (P1): the vessels' collaterals open two at a time (one alone only for an odd count left by an older save), for the first one's hours. */
+export const ecStep = (c) => Math.max(0, Math.min(2, 28 - c));
+/** "the Governing crown thread and the Governing nape thread" from collateral `c`. */
+export const ecPairName = (c) => (ecStep(c) === 2 ? `${EXTRA_COLL[c]} and ${EXTRA_COLL[c + 1]}` : EXTRA_COLL[c]);
+const ecCount = (c) => (ecStep(c) === 2 ? `${c + 1} and ${c + 2}/28` : `${c + 1}/28`);
 const need = (g, k) => (k === 'pri' ? priHours(P(g)) : k === 'col' ? colHours(colGroupsOpen(g)) : k === 'e8' ? e8Hours(m(g).e) : k === 'ec' ? ecHours(m(g).c) : jnHours(m(g).j));
-const nameOf = (g, k) => (k === 'pri' ? PRIMARIES[P(g)]?.name : k === 'col' ? COL_GROUPS[colGroupsOpen(g)]?.name : k === 'e8' ? EXTRA8[m(g).e]?.name : k === 'ec' ? EXTRA_COLL[m(g).c] : JUNCTIONS[m(g).j]?.name);
-const countOf = (g, k) => (k === 'pri' ? `${P(g) + 1}/12` : k === 'col' ? `group ${colGroupsOpen(g) + 1}/8` : k === 'e8' ? `${m(g).e + 1}/8` : k === 'ec' ? `${m(g).c + 1}/28` : `${m(g).j + 1}/10`);
+const nameOf = (g, k) => (k === 'pri' ? PRIMARIES[P(g)]?.name : k === 'col' ? COL_GROUPS[colGroupsOpen(g)]?.name : k === 'e8' ? EXTRA8[m(g).e]?.name : k === 'ec' ? ecPairName(m(g).c) : JUNCTIONS[m(g).j]?.name);
+const countOf = (g, k) => (k === 'pri' ? `${P(g) + 1}/12` : k === 'col' ? `group ${colGroupsOpen(g) + 1}/8` : k === 'e8' ? `${m(g).e + 1}/8` : k === 'ec' ? ecCount(m(g).c) : `${m(g).j + 1}/10`);
 export const merMinutesOf = (g, k) => Math.max(10, Math.min(SESSION_MINUTES, Math.ceil(((need(g, k) - work(g, k)) * 60) / actSpeed(g, 'mer') / 10) * 10)); // v0.11.15: ÷ its speed by use
 function workChoice(k) {
     const can = (g) => (k === 'pri' ? canPrimary(g) : k === 'col' ? canColGroup(g) : k === 'e8' ? canExtra8(g) : k === 'ec' ? canExtraColl(g) : canJunction(g));
@@ -83,7 +90,12 @@ function workChoice(k) {
             if (k === 'e8' || k === 'ec' || k === 'jn') { // v0.11.18: the Extraordinary lines, timed; their old challenging XP once per channel
                 const xx = awardXp(g, 'Convergence Use', 'challenging');
                 if (k === 'e8') { const v = EXTRA8[m(g).e]; g.james.extra8 = m(g).e + 1; return [`Opened ${v.name} (${g.james.extra8}/8). ${v.line}`, ...after(g), ...xx]; }
-                if (k === 'ec') { const n = EXTRA_COLL[m(g).c]; g.james.extraCollaterals = m(g).c + 1; return [`Opened ${n} (${g.james.extraCollaterals}/28). A fine, bright thread, no thicker than a hair.`, ...after(g), ...xx]; }
+                if (k === 'ec') { // v0.11.66 (P1): a pair, and the XP of each collateral in it
+                    const c = m(g).c, step = ecStep(c), n = ecPairName(c);
+                    for (let i = 1; i < step; i++) xx.push(...awardXp(g, 'Convergence Use', 'challenging'));
+                    g.james.extraCollaterals = c + step;
+                    return [`Opened ${n} (${g.james.extraCollaterals}/28). ${step === 2 ? 'Two fine, bright threads, no thicker than a hair, side by side.' : 'A fine, bright thread, no thicker than a hair.'}`, ...after(g), ...xx];
+                }
                 const v = JUNCTIONS[m(g).j]; g.james.junctions = m(g).j + 1; return [`Opened ${v.name} (${g.james.junctions}/10). ${v.line}`, ...after(g), ...xx];
             }
             const xp = awardXp(g, 'Convergence Use', 'standard'); // once per channel opened (v0.11.2 pick 1a)
@@ -135,8 +147,10 @@ export const JUNCTIONS = [
 
 const m = (g) => ({ e: g.james.extra8 || 0, c: g.james.extraCollaterals || 0, j: g.james.junctions || 0 });
 const R = (g) => g.james.realm || 0;
-export const canExtra8 = (g) => R(g) >= 1 && R(g) <= 6 && m(g).e < 8;
-export const canExtraColl = (g) => R(g) >= 1 && R(g) <= 6 && m(g).e >= 8 && m(g).c < 28; // v0.11.46 (X1): before Nascent Soul
+/** v0.11.66 (owner pick G4): the Extraordinary vessels and their collaterals open from Golden Core (Foundation before); still sealed at Nascent Soul. */
+export const EXTRA_FROM = 4;
+export const canExtra8 = (g) => R(g) >= EXTRA_FROM && R(g) <= 6 && m(g).e < 8;
+export const canExtraColl = (g) => R(g) >= EXTRA_FROM && R(g) <= 6 && m(g).e >= 8 && m(g).c < 28; // v0.11.46 (X1): before Nascent Soul
 export const canJunction = (g) => R(g) >= 7 && m(g).j < 10;
 
 /**
@@ -149,8 +163,8 @@ export const MER_LINES = ['pri', 'col', 'e8', 'ec', 'jn'];
 const LINE_WINDOW = {
     pri: (g) => R(g) === 0 && P(g) < 12,
     col: (g) => R(g) === 0 && colGroupsOpen(g) < COL_GROUPS.length,
-    e8: (g) => R(g) >= 1 && R(g) <= 6 && m(g).e < 8,
-    ec: (g) => R(g) >= 1 && R(g) <= 6 && m(g).e >= 8 && m(g).c < 28, // v0.11.46 (X1): Foundation to Soul Embryo, after the 8 vessels
+    e8: canExtra8,
+    ec: canExtraColl, // v0.11.46 (X1): before Nascent Soul, after the 8 vessels; v0.11.66 (G4): from Golden Core
     jn: (g) => R(g) >= 7 && m(g).j < 10,
 };
 export const lineWindow = (g, line) => !!LINE_WINDOW[line]?.(g);
@@ -165,7 +179,7 @@ export function lineName(g, line) {
     if (line === 'pri') return `Work on ${PRIMARIES[P(g)]?.name}.`;
     if (line === 'col') return `Work on ${COL_GROUPS[colGroupsOpen(g)]?.name}.`;
     if (line === 'e8') return `Open ${EXTRA8[m(g).e]?.name}.`;
-    if (line === 'ec') return `Open ${EXTRA_COLL[m(g).c]}.`;
+    if (line === 'ec') return `Open ${ecPairName(m(g).c)}.`;
     return `Open ${JUNCTIONS[m(g).j]?.name}.`;
 }
 
@@ -189,10 +203,11 @@ export const MERIDIANS = {
                 else if ((g.james.realm || 0) === 0 && C(g) < 66) parts.push('The collaterals open only while you are Mortal Vessel. Break through with any of them closed and they seal.');
                 if ((g.james.realm || 0) >= 1 || x.e || x.c || x.j) parts.push(`The second net: ${x.e}/8 Extraordinary vessels, ${x.c}/28 of their collaterals, ${x.j}/10 junctions.`);
             }
-            if (R(g) === 0) parts.push('The Extraordinary vessels are there, but sealed, like doors painted on a wall. Your people open them after Foundation. Not before.');
-            else if (R(g) <= 6 && x.e < 8) parts.push(`They open between Foundation and Soul Embryo, and only then: at Nascent Soul the window shuts for good. ${8 - x.e} still closed.`);
+            if (R(g) < EXTRA_FROM && x.e < 8) parts.push(x.e ? `${8 - x.e} of the Extraordinary vessels are still sealed, like doors painted on a wall. Your people open them at Golden Core. Not before.` : 'The Extraordinary vessels are there, but sealed, like doors painted on a wall. Your people open them at Golden Core. Not before.');
+            if (R(g) < EXTRA_FROM && x.e >= 8 && x.c < 28) parts.push(`All eight vessels open. Their twenty-eight collaterals wait for Golden Core: ${28 - x.c} still closed.`); // v0.11.66 (G4): an older save that opened them early
+            else if (R(g) >= EXTRA_FROM && R(g) <= 6 && x.e < 8) parts.push(`They open between Golden Core and Soul Embryo, and only then: at Nascent Soul the window shuts for good. ${8 - x.e} still closed.`);
             if (R(g) >= 7 && x.e < 8) parts.push('The vessels you didn\'t open in time are scar tissue now, and their collaterals with them. You knew the rule. You were busy.');
-            if (R(g) >= 1 && R(g) <= 6 && x.e >= 8 && x.c < 28) parts.push(`With all eight vessels open, their collaterals are within reach: twenty-eight fine threads, ${28 - x.c} still closed. The same window: at Nascent Soul it shuts on them for good.`);
+            if (R(g) >= EXTRA_FROM && R(g) <= 6 && x.e >= 8 && x.c < 28) parts.push(`With all eight vessels open, their collaterals are within reach: twenty-eight fine threads, ${28 - x.c} still closed. They open in pairs. The same window: at Nascent Soul it shuts on them for good.`);
             if (R(g) >= 7 && x.e >= 8 && x.c < 28) parts.push(`${28 - x.c} of the vessels' collaterals sealed at Nascent Soul. Scar tissue, fine as hair. You knew the rule. You were busy.`);
             parts.push('Yuki curls against your hip. Whatever you open, she opens too; the bond doesn\'t do things by halves.');
             return parts.join('\n\n');
@@ -215,7 +230,7 @@ export const MERIDIANS = {
         id: 'ns_warn', title: 'Before Nascent Soul', art: 'tribulation', place: (g) => g.location,
         text: (g) => `Saturation sits at the brim. One more step and you're Nascent Soul.
 
-Parallel Cognition raises a hand, the way it does when it has read the fine print. *${m(g).e < 8 ? `${8 - m(g).e} of the eight Extraordinary vessels are still closed. They open between Foundation and Soul Embryo. Break through now, and they seal for good, and their twenty-eight collaterals with them.` : `${28 - m(g).c} of the vessels' twenty-eight collaterals are still closed. They open only before Nascent Soul. Break through now, and they seal for good.`}*
+Parallel Cognition raises a hand, the way it does when it has read the fine print. *${m(g).e < 8 ? `${8 - m(g).e} of the eight Extraordinary vessels are still closed. They open between Golden Core and Soul Embryo. Break through now, and they seal for good, and their twenty-eight collaterals with them.` : `${28 - m(g).c} of the vessels' twenty-eight collaterals are still closed. They open only before Nascent Soul. Break through now, and they seal for good.`}*
 
 Yuki looks at you. *Your call,* says the bond. *I'd open them. But I'm a cat. I'd also eat the curtains.*`,
         choices: [

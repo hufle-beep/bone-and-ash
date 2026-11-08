@@ -140,8 +140,8 @@ export function jamesHpMax(g) {
     return maxHp({ body: skillCheck(g.james.gu), realmIndex: g.james.realm });
 }
 /**
- * The extra meridians (v0.8): Extraordinary 8 (Foundation → Soul Embryo; closes at Nascent Soul), their 28 collaterals
- * (after the 8, Foundation → Soul Embryo since v0.11.46; closes at Nascent Soul) and 10 junctions (Nascent Soul+). Gábor 2026-11-02: each raises the Qi regen percentage per Cycle — Extraordinary
+ * The extra meridians (v0.8): Extraordinary 8 (Golden Core → Soul Embryo since v0.11.66, Foundation before; closes at Nascent Soul), their 28 collaterals
+ * (after the 8, the same window since v0.11.46; opened in pairs since v0.11.66; closes at Nascent Soul) and 10 junctions (Nascent Soul+). Gábor 2026-11-02: each raises the Qi regen percentage per Cycle — Extraordinary
  * +0.5, collateral +0.1 (engine), junction +0.3 (all 46: +9.8 points). Yuki opens the same ones through the bond.
  * Old saves: all 0.
  */
@@ -437,26 +437,29 @@ export function spendQi(g, amount) {
 
 /**
  * Timed cultivation (v0.11.2, Incremental Mode): Saturation is earned by hours. A realm takes SAT_HOURS(realm) hours of
- * sitting at ×1 (Mortal Vessel 10, doubling each realm), ÷ the Coil bonus. Story Mode keeps the engine's Qi-based gain.
+ * sitting at ×1 (Mortal Vessel 10, ×1.5 each realm since v0.11.66, owner pick S1; ×2 before). Story Mode kept the engine's Qi-based gain.
  */
-export const SAT_HOURS = (realm) => 10 * 2 ** (realm || 0);
+export const SAT_HOURS = (realm) => 10 * 1.5 ** (realm || 0);
 export const SIT_MINUTES_INC = 60;
 /** v0.11.15: a sit's length: an hour ÷ its speed by use (at least a minute). */
 export const sitMinutes = (g) => Math.max(1, Math.round(SIT_MINUTES_INC / actSpeed(g, 'sit')));
 /** Saturation % from `sits` sits (one hour each in Incremental Mode; the hollow and the grove count as two). */
 export const sitGain = (g, sits = 1) => Math.round(((100 * sits) / SAT_HOURS(g.james.realm)) * 10) / 10; // v0.11.15: no Coil bonus
-/** v0.11.37 (owner 13:06, pick B2): a sit that changes nothing (the top realm, or a gain that rounds to 0%: from realm 8) is not offered (Incremental Mode). */
+/** v0.11.37 (owner 13:06, pick B2): a sit that changes nothing (the top realm, or a gain that rounds to 0%: from realm 14 since v0.11.66's ×1.5, so only the top realm) is not offered (Incremental Mode). */
 export const sitUseless = (g) => (g.james.realm >= MAX_REALM || sitGain(g) <= 0);
 /** The breakthrough's length: 2 h × (realm + 1) (Foundation 2 h … Heavenly Immortal 28 h). */
 export const btMinutes = (g) => exMins(g, Math.round((120 * ((g.james.realm || 0) + 1)) / actSpeed(g, 'bt'))); // v0.11.15: ÷ its speed by use
-/** Condensation: a conscious sit, 10 Qi a sit, 0 XP; raises Saturation. Spends Qi, never refills it. */
+/** v0.11.66 (owner pick X1): every sit pays a third of a standard award to Convergence Use and GU, with Yuki's bond share. */
+export const SIT_XP_FACTOR = 1 / 3;
+/** Condensation: a conscious sit, 10 Qi a sit; raises Saturation and pays SIT_XP_FACTOR of a standard award (`xp`: its lines). Spends Qi, never refills it. */
 export function condense(g) {
-    if (!spendQi(g, CONDENSE_SIT_COST)) return { ok: false };
+    if (!spendQi(g, CONDENSE_SIT_COST)) return { ok: false, xp: [] };
     const gain = sitGain(g);
     g.james.saturation = Math.min(100, Math.round((g.james.saturation + gain) * 10) / 10);
     advance(g, sitMinutes(g), { work: true });
     actUse(g, 'sit');
-    return { ok: true, gain, saturation: g.james.saturation };
+    const xp = awardXp(g, 'Convergence Use', 'standard', { factor: SIT_XP_FACTOR });
+    return { ok: true, gain, saturation: g.james.saturation, xp };
 }
 
 /**

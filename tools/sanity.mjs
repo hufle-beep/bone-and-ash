@@ -46,7 +46,7 @@ for (const coil of [1, 2, 3, 5]) { // v0.11.15 (B1-b): the Coil bonus is XP only
         const spSit = Math.min(10, 1 + (9 * uses * 5) / 30), spBt = Math.min(10, 1 + (9 * uses) / 6);
         for (const realm of [0, 1, 3, 7, 13]) {
             g.james.realm = realm;
-            ok(near(G.sitGain(g), Math.round((100 / (10 * 2 ** realm)) * 10) / 10), `sit gain, realm ${realm}, Coil ${coil} (no Coil bonus)`);
+            ok(near(G.sitGain(g), Math.round((100 / (10 * 1.5 ** realm)) * 10) / 10), `sit gain, realm ${realm}, Coil ${coil} (×1.5 a realm since v0.11.66, S1; no Coil bonus)`);
             ok(G.btMinutes(g) === Math.round((120 * (realm + 1)) / spBt), `breakthrough length, realm ${realm}, Coil ${coil}, ${uses} uses`);
         }
         g.james.realm = 0;

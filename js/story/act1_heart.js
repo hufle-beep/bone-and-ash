@@ -127,7 +127,7 @@ ${pantry(g)} ${g.james.hp < jamesHpMax(g) * 0.5 ? 'You are hurt.' : ''}${late(g)
             { text: 'Go round the guardian. Whatever it costs.', show: (g) => guardianOpen(g) && !!g.flags.guardian_lost_day && (late(g) || g.flags.guardian_lost_day === day(g)), time: 60, to: 'guardian_bypass' },
             { text: 'Into the heart-chamber.', show: (g) => !!g.flags.guardian && !g.flags.seed, time: 20, to: 'heart_core' },
             { text: 'Leave the Old Tree.', show: (g) => !!g.flags.seed, to: 'ht_leave' },
-            { text: 'Cultivate: one sit, 10 Qi.', show: (g) => active(g), req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%. The hall is very quiet while you sit.`] : []; }, to: 'heart_hub' },
+            { text: 'Cultivate: one sit, 10 Qi.', show: (g) => active(g), req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%. The hall is very quiet while you sit.`, ...r.xp] : []; }, to: 'heart_hub' },
             { text: 'Rest an hour.', show: (g) => active(g), do: (g) => advance(g, 60, { resting: true }).concat(['An hour of rest, back against grey wood that was once alive.']), to: 'heart_hub' },
             { text: 'Eat something.', show: (g) => foodCount(g) > 0 && g.james.satiety < 85, time: 15, do: (g) => eatBest(g, { fire: true }), to: 'heart_hub' },
             { text: 'Make camp for the night.', show: (g) => !active(g) || hour(g) >= 16, time: 20, to: 'heart_camp' },

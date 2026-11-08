@@ -134,7 +134,7 @@ function fatalOk(id, out) {
     if (!askFatal || !out?.death) return true;
     if (fatalArmed.id === id && Date.now() - fatalArmed.at < 6000) { fatalArmed = { id: null, at: 0 }; return true; }
     fatalArmed = { id, at: Date.now() };
-    lastResult = { lines: [`James ${out.death === 'hunger' ? 'starves' : 'collapses'} on this (${clockLabelG(g, out.end)}): the Coil would end there. Tap it again to do it anyway.`], fail: true };
+    lastResult = { lines: [`James ${out.death === 'hunger' ? 'starves' : 'collapses'} on this (${clockLabelG(g, out.deathAt ?? out.end)}): the Coil would end there. Tap it again to do it anyway.`], fail: true };
     render();
     return false;
 }

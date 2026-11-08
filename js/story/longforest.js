@@ -234,7 +234,7 @@ Through the bond, a single, weary image: a very long nap.
             { text: 'Wash in the river. You have been in a forest for a long time.', show: (g) => !late(g) && daily('lf_bathe')(g), time: 30, to: 'lf_bathe' },
             { text: 'Something white moves between the trees, and doesn\'t run.', show: (g) => lfDays(g) >= 3 && !g.flags.lf_stag && hour(g) < 17, time: 60, to: 'lf_white_stag' },
             { text: 'Take stock. Write it down.', show: (g) => lfDays(g) >= 2 && daily('lf_notes')(g), to: 'lf_notes' },
-            { text: 'Cultivate: one sit, 10 Qi toward Saturation.', show: (g) => !late(g), req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`] : []; }, to: 'lf_hub' },
+            { text: 'Cultivate: one sit, 10 Qi toward Saturation.', show: (g) => !late(g), req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`, ...r.xp] : []; }, to: 'lf_hub' },
             { text: 'Rest an hour.', show: (g) => !late(g), do: (g) => advance(g, 60, { resting: true }).concat(['An hour of rest.']), to: 'lf_hub' },
             { text: 'Eat something.', show: (g) => foodCount(g) > 0 && g.james.satiety < 85, time: 15, do: (g) => eatBest(g, { fire: true }), to: 'lf_hub' },
             { text: 'Chew a ghost-gill (+8 HP).', show: (g) => hasItem(g, 'ghost_gill') && g.james.hp < jamesHpMax(g), do: (g) => { addItem(g, 'ghost_gill', -1); g.james.hp = Math.min(jamesHpMax(g), g.james.hp + 8); return ['+8 HP.']; }, to: 'lf_hub' },

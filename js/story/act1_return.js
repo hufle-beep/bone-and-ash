@@ -229,7 +229,7 @@ Somewhere out in the dark, the dead tree stands against the stars. You can feel 
         choices: [
             { text: 'Talk, the three of you, until the fire burns down.', show: (g) => !g.flags.rt_fire_talk, time: 90, do: set('rt_fire_talk'), to: 'rt_fire_talk' },
             { text: 'Take the first watch with Ya.', show: (g) => !g.flags.rt_watch, time: 120, do: set('rt_watch'), to: 'rt_watch' },
-            { text: 'Cultivate by the fire: one sit, 10 Qi.', req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`] : []; }, to: 'rt_camp' },
+            { text: 'Cultivate by the fire: one sit, 10 Qi.', req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`, ...r.xp] : []; }, to: 'rt_camp' },
             { text: 'Sleep.', to: 'rt_dawn' },
         ],
     },
@@ -379,7 +379,7 @@ ${g.flags.a1_palisade ? 'The bone palisade stands white along the north lane.' :
             { text: 'Sit with the elders in council.', show: (g) => !g.flags.council_done && hour(g) < 19, time: 30, to: 'rt_council' },
             { text: 'Go and look at the place you planted the seed.', show: (g) => !!g.flags.grove && !g.flags.grove_visit && hour(g) < 20, time: 30, to: 'rt_grove' },
             { text: 'Find out where Ya has got to. You have a bad feeling.', show: (g) => !g.flags.ya_village && hour(g) < 19, time: 20, to: 'rt_ya_village' },
-            { text: 'Cultivate behind the shrine: one sit, 10 Qi.', show: (g) => hour(g) < 20, req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`] : []; }, to: 'rt_ashfall' },
+            { text: 'Cultivate behind the shrine: one sit, 10 Qi.', show: (g) => hour(g) < 20, req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`, ...r.xp] : []; }, to: 'rt_ashfall' },
             { text: 'Rest an hour.', show: (g) => hour(g) < 19, do: (g) => advance(g, 60, { resting: true }).concat(['An hour of rest.']), to: 'rt_ashfall' },
             { text: 'Evening. Supper at Mei Lin\'s.', show: (g) => hour(g) >= 15, time: 20, to: 'rt_evening' },
         ],

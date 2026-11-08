@@ -121,11 +121,11 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     const k = ensureBars(newGame(33)); k.scene = 'rt_camp'; k.james.qi = 30; const k0 = k.minutes;
     const r = runMed(k, SCENES, 'med:sit');
     assert(k.scene === 'rt_camp' && k.minutes - k0 === 60 && k.james.saturation === 10 && /Condensed/.test(r.lines[0]), `Meditate: a sit keeps the scene (1 h, +10%: ${k.minutes - k0} min, ${k.james.saturation}%)`);
-    // v0.11.13 (E1): no meridian screen from Meditate; at Foundation the Extraordinary vessel is a card, run from the scene, which stays
-    const e = ensureBars(newGame(34)); e.scene = 'village'; e.james.realm = 1; e.james.qi = 30;
+    // v0.11.13 (E1): no meridian screen from Meditate; at Golden Core (Foundation before v0.11.66, G4) the Extraordinary vessel is a card, run from the scene, which stays
+    const e = ensureBars(newGame(34)); e.scene = 'village'; e.james.realm = 4; e.james.qi = 30;
     const before = JSON.stringify(e.inventory);
     const em = medCards(e, SCENES);
-    assert(!em.some((c) => c.id === 'med:mer') && em.some((c) => c.id === 'med:mer:e8' && c.open && c.minutes === 120), 'Foundation: the Extraordinary vessel is a Meditate card (a 2 h sitting of its 4 h, v0.11.18), no meridian screen');
+    assert(!em.some((c) => c.id === 'med:mer') && em.some((c) => c.id === 'med:mer:e8' && c.open && c.minutes === 120), 'Golden Core: the Extraordinary vessel is a Meditate card (a 2 h sitting of its 4 h, v0.11.18), no meridian screen');
     const e0 = e.minutes, er = runMed(e, SCENES, 'med:mer:e8');
     assert(e.scene === 'village' && !er.moved && e.minutes - e0 === 120 && JSON.stringify(e.inventory) === before && !e.flags.med_back, `the card runs here: 2 h, the scene stays, its enter not run (${e.scene}, ${e.minutes - e0} min)`);
     // v0.11.18 (owner picks B, c2, b): sleep brings the once-a-day things back; Push through the night; Yuki's curve; timed Extraordinary lines
@@ -169,7 +169,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
         assert(yukiSpeed(0) === 1 && Math.abs(yukiSpeed(10) - 2) < 1e-9 && yukiSpeed(20) === 3 && yukiSpeed(61) === 3 && yukiSpeed(500) === 3, `Yuki's job: N 90, capped at ×3 (${yukiSpeed(10)}, ${yukiSpeed(61)})`);
         // the Extraordinary lines, timed (b)
         assert(e8Hours(0) === 4 && e8Hours(7) === 11 && ecHours(0) === 3 && ecHours(27) === 6 && jnHours(0) === 6 && jnHours(9) === 10, 'Extraordinary hours: vessels 4 … 11, collaterals 3 … 6, junctions 6 … 10');
-        const x = ensureBars(newGame(310)); x.scene = 'village'; x.james.realm = 1; x.james.qi = 30;
+        const x = ensureBars(newGame(310)); x.scene = 'village'; x.james.realm = 4; x.james.qi = 30; // v0.11.66 (G4): from Golden Core
         let sit = 0; while ((x.james.extra8 || 0) < 2 && sit < 20) { x.james.qi = 30; x.james.satiety = 80; runMed(x, SCENES, 'med:mer:e8'); sit++; }
         assert(x.james.extra8 === 2 && sit >= 3 && sit <= 5 && clockParts(x.minutes).day === 1, `two vessels in one day, no check, by hours (4 h + 5 h; ${sit} sittings)`);
         x.james.satiety = 10; assert(medCards(x, SCENES).find((c) => c.id === 'med:mer:e8')?.open === false, 'Extraordinary work locks below Fed 20');
@@ -527,9 +527,9 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     assert(o.v === SAVE_VERSION && o.coil.n === 1 && o.coil.snap.scene === 'ashfall' && o.coil.snap.inventory.hare_raw === 4 && !o.coil.snap.coil, 'state 3 → 4: Coil 1, snapshot = the save as loaded');
 }
 
-// v0.11.2: timed cultivation — a sit is an hour, Saturation by hours (10 h × 2^realm ÷ the Coil bonus), the breakthrough a timed card
+// v0.11.2: timed cultivation — a sit is an hour, Saturation by hours (10 h × 1.5^realm since v0.11.66, S1; × 2^realm before), the breakthrough a timed card
 {
-    assert(SAT_HOURS(0) === 10 && SAT_HOURS(1) === 20 && SAT_HOURS(3) === 80, 'Saturation hours: 10, 20, 40, 80 …');
+    assert(SAT_HOURS(0) === 10 && SAT_HOURS(1) === 15 && SAT_HOURS(2) === 22.5 && SAT_HOURS(3) === 33.75, 'v0.11.66 (S1): Saturation hours: 10, 15, 22.5, 33.75 … (×1.5 a realm)');
     // v0.11.15 (B1-b): speed by use — cards N 18 (the old tiers on the line), the sit N 30, kept over a rewind
     assert(cardSpeed(0) === 1 && cardSpeed(2) === 2 && cardSpeed(5) === 3.5 && cardSpeed(8) === 5 && cardSpeed(18) === 10 && cardSpeed(40) === 10, 'v0.11.15: card speed 1 / 2 / 3.5 / 5 / 10 / 10 at 0 / 2 / 5 / 8 / 18 / 40 uses');
     { const u = ensureBars(newGame(97, { closed: true })); u.james.qi = 40; const u0 = u.minutes; condense(u);
@@ -540,8 +540,8 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     }
     const g = ensureBars(newGame(95, { closed: true })); g.james.qi = 40;
     assert(sitGain(g) === 10 && sitGain(g, 2) === 20, 'Mortal Vessel, Coil 1: +10% a sit, the hollow +20%');
-    g.james.realm = 1; ensureBars(g); assert(sitGain(g) === 5, 'Foundation: +5% a sit');
-    g.coil.n = 3; assert(sitGain(g) === 5, 'v0.11.15: Foundation on Coil 3: still +5% (no Coil bonus)');
+    g.james.realm = 1; ensureBars(g); assert(sitGain(g) === 6.7, `v0.11.66 (S1): Foundation: +6.7% a sit (${sitGain(g)})`);
+    g.coil.n = 3; assert(sitGain(g) === 6.7, 'v0.11.15: Foundation on Coil 3: still +6.7% (no Coil bonus)');
     const big = ensureBars(newGame(96)); big.james.qi = 40; const sm = sitGain(big); big.james.primaries = 12; big.james.realm = 0;
     assert(sm === 10, 'the gain does not depend on Qi Max');
     const t = ensureBars(newGame(97, { closed: true })); t.james.qi = 20; const t0 = t.minutes; const r = condense(t);
@@ -837,11 +837,49 @@ rs = 4243; // the checks below draw from their own stream
     assert(die === 0, `no die shown anywhere in task mode (${die})`);
 }
 
+// v0.11.66 (owner pick V1): since G4 the bots rarely reach Golden Core with all 8 vessels open, so the vessels' collateral card
+// (mer:ec) is offered but hardly ever played. A walk of WALK_GAMES random games from a Golden Core start, 8 vessels open, plays the
+// task screens' cards like the bots (random cards, random story stops, fights blade / dart); the cards it plays count toward the
+// coverage below. It runs in this process on its own random stream (restored after), so the bot games and their numbers don't change.
+const WALK_GAMES = 20;
+let walkEc = 0, walkCards = 0;
+{
+    const rs0 = rs;
+    for (let run = 0; run < WALK_GAMES; run++) {
+        rs = seedOf(run, 66);
+        const g = ensureBars(newGame(660000 + run, { closed: true }));
+        Object.assign(g.james, { realm: 4, primaries: 12, collaterals: 66, extra8: 8, extraCollaterals: 0 });
+        Object.assign(g.yuki, { realm: 4, primaries: 12, collaterals: 66 });
+        ensureBars(g); g.james.hp = jamesHpMax(g); g.james.qi = jamesQiMax(g);
+        for (let step = 0; step < 4000; step++) {
+            const v = sceneView(g, SCENES);
+            if (v.end || g.scene === 'coil_end') break;
+            let open = v.choices.filter((c) => !c.disabled);
+            if (isTaskHub(g)) {
+                const cards = taskCards(g, SCENES).filter((c) => c.status === 'open');
+                const stops = open.filter((c) => c.index >= 1000 || !isTaskChoice(SCENES, g.scene, c.index));
+                if (cards.length && (rnd(10) < 8 || !stops.length)) {
+                    const id = cards[rnd(cards.length)].id;
+                    runTask(g, SCENES, id); cardsSeen.add(id); walkCards++; if (id === 'mer:ec') walkEc++;
+                    continue;
+                }
+                open = stops;
+            }
+            if (/^(arrival|clearing)$/.test(g.scene)) open = open.filter((c) => !/Stay lost/.test(c.label));
+            if (!open.length) break;
+            const r = choose(g, SCENES, open[rnd(open.length)].index);
+            if (r.combat) { startCombat(g, r.combat(g)); for (let t = 0; t < 400 && g.combat; t++) { const o = combatStep(g, t % 2 ? 'blade' : 'dart'); if (o.done) { goTo(g, SCENES, o.next); break; } } }
+            if (g.combat) { assert(false, `V1 walk: a fight ends (${g.scene}, run ${run})`); break; }
+        }
+    }
+    rs = rs0;
+    assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card (${walkEc} times in ${walkCards} cards, ${WALK_GAMES} games)`);
+}
 // every card that was ever offered was also played at least once
 const all = cardsListed;
 if (FULL) for (const id of all) assert(cardsSeen.has(id), `card ${id} was played by a bot`); // coverage: the full run only
 if (FULL) for (const id of cardsWhole) assert(cardsForecast.has(id), `v0.11.21: card ${id}'s forecast was checked on a whole run (1 game in ${FC_EVERY}, and since v0.11.46 its first run)`);
-if (!FULL) console.log(`  coverage (quick, log only): ${cardsSeen.size} of ${all.size} offered cards played, ${cardsForecast.size} of ${cardsWhole.size} whole-run cards forecast-checked`); // v0.11.21
+if (!FULL) console.log(`  coverage (quick, log only; with the Golden Core walk's ${walkCards} cards, mer:ec ${walkEc}): ${cardsSeen.size} of ${all.size} offered cards played, ${cardsForecast.size} of ${cardsWhole.size} whole-run cards forecast-checked`); // v0.11.21
 assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
 // no dice on work cards: the same state gives the same result
 {
@@ -896,7 +934,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
         assert(taskOpen(bq, SCENES, BT_TASK) && medCards(bq, SCENES).find((c) => c.id === 'med:bt')?.task === BT_TASK, 'v0.11.14: Break through queues on a resting place');
         const br = runTask(bq, SCENES, BT_TASK);
         assert(br.stopped && bq.scene === 'breakthrough' && bq.flags.bt_return === 'rt_camp', 'v0.11.19: Break through on the rt_camp task screen comes back to it');
-        const fe = ensureBars(newGame(78)); fe.scene = 'stream'; fe.james.qi = 25; fe.james.realm = 1; markDaily(fe, 'mer_e8');
+        const fe = ensureBars(newGame(78)); fe.scene = 'stream'; fe.james.qi = 25; fe.james.realm = 4; markDaily(fe, 'mer_e8'); // v0.11.66 (G4): Golden Core
         const fm = medCards(fe, SCENES).find((c) => c.id === 'med:mer:e8');
         assert(fm && fm.open && taskOpen(fe, SCENES, 'mer:e8'), `v0.11.18: an Extraordinary line has no daily limit in Incremental Mode (${fm?.reason})`);
         const s7 = ensureBars(newGame(79)); s7.scene = 'stream'; s7.james.qi = 25; s7.james.realm = 7; s7.james.extra8 = 8;
@@ -929,7 +967,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
             assert(p.sits >= 2 && r.sits === p.sits && r.minutes === p.minutes && r.qi === p.qi && same(x, taps), `C1 (${scene}): the loop = ${p.sits} single taps of ${id}, and the button's numbers are what happens`);
             assert(r.stop === 'qi' && x.james.qi < 10, `C1 (${scene}): from a full bar Qi runs out first (${r.stop}, Qi ${x.james.qi})`);
         }
-        const s1 = mk(94, 'stream', { realm: 1, saturation: 85, qi: 999 }); const r1 = sitLoop(s1, SCENES);
+        const s1 = mk(94, 'stream', { realm: 1, saturation: 81.6, qi: 999 }); const r1 = sitLoop(s1, SCENES); // v0.11.66 (S1): +6.7% a sit at Foundation
         assert(r1.stop === 'sat' && s1.james.saturation === 95 && r1.sits === 2, `C1: it stops at the breakthrough point, 95% (${s1.james.saturation}%, ${r1.stop})`);
         const s2 = mk(95, 'stream'); s2.minutes = 2 * 1440 + 30; const r2 = sitLoop(s2, SCENES); // 00:30: one sit ends 01:30, a second would end past 02:00
         assert(r2.stop === 'night' && r2.sits === 1 && !nightLock(s2) && s2.minutes <= 2 * 1440 + 120, `C1: it stops before a sit that would end past 02:00 (${r2.sits} sits, ${r2.stop})`);
@@ -1206,8 +1244,8 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     pn.minutes = 5 * 1440 + 150; assert(!nightLock(pn) && taskCards(pn, SCENES).some((c) => c.kind === 'work' && c.status === 'open'), 'E-a: after a push, 02:30 is a working hour: the work cards are back');
     pn.minutes = 6 * 1440 + 125; assert(nightLock(pn) && pushWindow(pn), 'E-a: the next night locks at 02:00 again, and offers a push again');
     const old = at(3707, 'ashfall', 4 * 1440 + 60); delete old.wake.push; assert(!pushedTonight(old) && hour(old) === 25, 'E: a save without the push mark has pushed nothing');
-    // B2: a sit that changes nothing is not offered
-    for (const [r, useless] of [[7, false], [8, true], [MAX_REALM, true]]) {
+    // B2: a sit that changes nothing is not offered (v0.11.66, S1: at ×1.5 a realm a sit still gains 0.1% at realm 13, so only the top realm)
+    for (const [r, useless] of [[7, false], [8, false], [13, false], [MAX_REALM, true]]) {
         const v = at(3708 + r, 'ashfall', 4 * 1440 + 9 * 60); v.james.realm = r; v.james.qi = 999;
         const sitCard = medCards(v, SCENES).some((m) => /^Cultivate/.test(m.label));
         const sitChore = taskCards(v, SCENES).some((c) => /^Cultivate/.test(c.label) && c.status === 'open');
@@ -1269,7 +1307,8 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     const dmed = medCards(dm, SCENES), dmIds = new Set(dmed.filter((m) => m.task).map((m) => m.task));
     const lateHub = taskCards(dm, SCENES).filter((c) => c.status === 'late');
     assert(lateHub.length > 0 && lateHub.every((c) => dmIds.has(c.id)), `review: a late Meditate card keeps its task id, so the hub list doesn't show it twice (${lateHub.map((c) => c.id).join(', ')})`);
-    for (const [r, open] of [[7, true], [8, false]]) { const cp = at(3744 + r, 'camp', 20 * 60); cp.james.realm = r; cp.james.qi = 999; cp.james.saturation = 0; assert(taskCards(cp, SCENES).some((c) => c.id === SIT_TASK) === open, `review: the camp's queueable sit at realm ${r}: ${open ? 'offered' : 'hidden'}`); }
+    // v0.11.66 (S1): a sit gains something up to realm 13
+    for (const [r, open] of [[7, true], [8, true], [13, true], [MAX_REALM, false]]) { const cp = at(3744 + r, 'camp', 20 * 60); cp.james.realm = r; cp.james.qi = 999; cp.james.saturation = 0; assert(taskCards(cp, SCENES).some((c) => c.id === SIT_TASK) === open, `review: the camp's queueable sit at realm ${r}: ${open ? 'offered' : 'hidden'}`); }
     const mn = at(3746, 'ashfall', 4 * 1440 + 150); mn.james.qi = 999; assert(!taskOpen(mn, SCENES, MER_TASK), 'review: an old queue\'s mer:next waits after 02:00');
 }
 // v0.11.40 (N1, owner pick 18:02): the three night scenes never set the clock back. Entered in the evening they jump forward
@@ -1339,7 +1378,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
 {
     const MER = await import('../js/story/meridians.js');
     const at = (realm, e, c) => { const g = ensureBars(newGame(4601)); g.james.realm = realm; g.james.extra8 = e; g.james.extraCollaterals = c; return g; };
-    for (const [r, e, c, want] of [[0, 8, 0, false], [1, 7, 0, false], [1, 8, 0, true], [3, 8, 27, true], [6, 8, 5, true], [1, 8, 28, false], [7, 8, 0, false], [9, 8, 3, false]]) {
+    for (const [r, e, c, want] of [[0, 8, 0, false], [1, 7, 0, false], [1, 8, 0, false], [3, 8, 27, false], [4, 8, 0, true], [4, 8, 27, true], [6, 8, 5, true], [4, 8, 28, false], [7, 8, 0, false], [9, 8, 3, false]]) { // v0.11.66 (G4): from Golden Core
         const g = at(r, e, c);
         assert(MER.lineWindow(g, 'ec') === want && MER.canExtraColl(g) === want, `X1: the vessels' collaterals at realm ${r}, ${e}/8 vessels, ${c}/28: ${want ? 'open' : 'shut'}`);
     }
@@ -1349,11 +1388,11 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     assert(/8 of the vessels' twenty-eight collaterals are still closed/.test(wv.text) && /Open the collaterals first/.test(wv.choices[0].label), 'X1: ns_warn names the closed collaterals');
     const w2 = at(6, 6, 0); w2.scene = 'ns_warn';
     assert(/2 of the eight Extraordinary vessels are still closed/.test(sceneView(w2, SCENES).text), 'X1: ns_warn still names the closed vessels first');
-    const k = at(2, 8, 0); k.scene = 'camp'; k.minutes = 3 * 1440 + 15 * 60; k.james.qi = jamesQiMax(k); k.james.satiety = 90;
-    assert(medCards(k, SCENES).some((c) => c.id === 'med:mer:ec' && c.open && c.task === merLineTask('ec')), 'X1: the camp offers the first of the vessels\' collaterals at Foundation (queueable)');
+    const k = at(4, 8, 0); k.scene = 'camp'; k.minutes = 3 * 1440 + 15 * 60; k.james.qi = jamesQiMax(k); k.james.satiety = 90;
+    assert(medCards(k, SCENES).some((c) => c.id === 'med:mer:ec' && c.open && c.task === merLineTask('ec')), 'X1: the camp offers the first of the vessels\' collaterals at Golden Core (queueable; Foundation before v0.11.66)');
     const x0 = k.james.extraCollaterals; let guard = 0;
     while (k.james.extraCollaterals === x0 && guard++ < 10) { k.james.qi = jamesQiMax(k); runTask(k, SCENES, merLineTask('ec')); }
-    assert(k.james.extraCollaterals === 1, `X1: timed work opens it (${k.james.extraCollaterals}/28 after ${guard} sittings)`);
+    assert(k.james.extraCollaterals === 2, `X1 + P1: timed work opens the first pair (${k.james.extraCollaterals}/28 after ${guard} sittings)`);
 }
 // v0.11.46 (Q1, owner 19:26 "Meditate to recover Qi manually, and another to condense Qi"): "Meditate: gather Qi", an hour at the
 // resting rate, queueable wherever Meditate shows while Qi isn't full; a sit short of Qi shows, locked, with the reason
@@ -1435,6 +1474,127 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     const l = ensureBars(newGame(4705)); l.scene = 'camp'; l.minutes = 1440 + 90; l.james.qi = 9;
     const ls = medCards(l, SCENES).find((x) => x.id === 'med:sit');
     assert(ls && !ls.open && ls.late && ls.tag === 'ends past 02:00', `N1: a sit short of Qi at 01:30 says "ends past 02:00" (${ls?.tag})`);
+}
+// v0.11.66 (owner picks S1 + X1 + G4 + P1 + F1, group 1a of the story and mechanics pass)
+{
+    const MER = await import('../js/story/meridians.js');
+    const G = await import('../js/core/game.js');
+    const T = await import('../js/core/tasks.js');
+    // S1: Saturation hours ×1.5 a realm; sits to 95%, a sit's gain rounded to 0.1% as before (Mortal Vessel 10 … Nascent Soul 159)
+    const sits95 = [0, 1, 2, 3, 4, 5, 6, 7].map((r) => { const g = ensureBars(newGame(6601, { closed: true })); g.james.realm = r; return Math.ceil(95 / sitGain(g) - 1e-9); });
+    assert(sits95.join() === '10,15,22,32,48,74,106,159', `S1: sits to 95% by realm (${sits95.join(', ')})`);
+    assert(Math.abs(SAT_HOURS(7) - 10 * 1.5 ** 7) < 1e-9 && SAT_HOURS(14) > SAT_HOURS(13), 'S1: SAT_HOURS = 10 × 1.5^realm');
+    // X1: every sit pays a third of a standard award to Convergence Use and GU, with Yuki's bond share
+    const sitXp = (g) => { const c = structuredClone(g); return awardXp(c, 'Convergence Use', 'standard', { factor: 1 / 3 }); };
+    {
+        const g = ensureBars(newGame(6602, { closed: true })); g.james.qi = 30;
+        const cu0 = g.james.skills['Convergence Use'].xp, gu0 = g.james.gu.xp, y0 = g.yuki.qiUse.xp, want = sitXp(g);
+        const r = condense(g);
+        assert(r.ok && r.xp.length === 3 && JSON.stringify(r.xp) === JSON.stringify(want), `X1: a sit's XP lines (${r.xp.join('; ')})`);
+        assert(g.james.skills['Convergence Use'].xp - cu0 === 5 && g.james.gu.xp - gu0 === 5 && g.yuki.qiUse.xp - y0 === 5, 'X1: T1 on Coil 1: Convergence Use +5, GU +5, Yuki Qi Use +5 (a standard award is 15 each)');
+        const n = ensureBars(newGame(6603, { closed: true })); n.james.qi = 5; const nx = JSON.stringify([n.james.gu, n.yuki.qiUse]);
+        const rn = condense(n); assert(!rn.ok && !rn.xp.length && JSON.stringify([n.james.gu, n.yuki.qiUse]) === nx, 'X1: no sit (short of Qi), no XP');
+        const c3 = ensureBars(newGame(6604, { closed: true })); c3.coil.n = 3; c3.james.qi = 30; const r3 = condense(c3);
+        assert(/Convergence Use \+7 XP/.test(r3.xp[0]), `X1: the Coil bonus applies (Coil 3 ×1.5: ${r3.xp[0]})`);
+        const t2 = ensureBars(newGame(6605, { closed: true })); t2.james.skills['Convergence Use'] = { tier: 2, level: 1, xp: 0 }; t2.james.qi = 30;
+        assert(/Convergence Use \+10 XP/.test(condense(t2).xp[0]), 'X1: the pool goes by the skill\'s tier (T2: +10)');
+    }
+    { // the sit from Meditate and from the task card carry the XP lines
+        const m = ensureBars(newGame(6606)); m.scene = 'rt_camp'; m.james.qi = 30; const rm = runMed(m, SCENES, 'med:sit');
+        assert(/Condensed/.test(rm.lines[0]) && rm.lines.some((l) => /^Convergence Use \+\d+ XP/.test(l)) && rm.lines.some((l) => /^GU \+\d+ XP/.test(l)) && rm.lines.some((l) => /^Yuki \(bond\) Qi Use \+/.test(l)), 'X1: meditate.js\'s sit shows the XP');
+        const k = ensureBars(newGame(6607, { closed: true })); k.scene = 'stream'; k.james.qi = 25; k.james.satiety = 70; const rk = runTask(k, SCENES, SIT_TASK);
+        assert(rk.lines.some((l) => /^Convergence Use \+\d+ XP/.test(l)) && rk.lines.some((l) => /^GU \+\d+ XP/.test(l)), 'X1: tasks.js\'s sit shows the XP');
+    }
+    { // the eight Cultivate chores on the hubs
+        const chores = [];
+        for (const [id, sc] of Object.entries(SCENES)) (sc.choices || []).forEach((c, i) => { if (typeof c.text === 'string' && /^Cultivate/.test(c.text) && /condense\(g\)/.test(String(c.do))) chores.push([id, i, c]); });
+        assert(chores.length === 10, `X1: the hubs' Cultivate chores call condense (eight in the code; blackroot's makes three hubs: ${chores.length}: ${chores.map(([id]) => id).join(', ')})`);
+        for (const [id, i, c] of chores) {
+            const g = ensureBars(newGame(6608)); g.james.qi = 30; const out = c.do(g);
+            assert(/^Condensed: Saturation/.test(out[0]) && out.some((l) => /^Convergence Use \+\d+ XP/.test(l)) && out.some((l) => /^GU \+\d+ XP/.test(l)) && out.some((l) => /^Yuki \(bond\)/.test(l)), `X1: ${id}:${i} shows the sit's XP`);
+        }
+    }
+    { // the loop: every sit pays, the same as single taps
+        const a = ensureBars(newGame(6609, { closed: true })); a.scene = 'stream'; a.minutes = 8 * 60; a.james.qi = jamesQiMax(a); a.james.satiety = 90;
+        const b = structuredClone(a);
+        const r = sitLoop(a, SCENES);
+        for (let i = 0; i < r.sits; i++) runTask(b, SCENES, sitTaskId(b, SCENES));
+        assert(r.sits >= 2 && JSON.stringify([a.james.gu, a.james.skills['Convergence Use'], a.yuki.qiUse]) === JSON.stringify([b.james.gu, b.james.skills['Convergence Use'], b.yuki.qiUse]), `X1: the loop's XP = that many single sits (${r.sits} sits)`);
+    }
+    // G4: the vessels and their collaterals from Golden Core (realm 4), still sealed at Nascent Soul
+    const at = (realm, e = 0, c = 0) => { const g = ensureBars(newGame(6610)); g.james.realm = realm; g.yuki.realm = realm; g.james.extra8 = e; g.james.extraCollaterals = c; return g; };
+    assert([0, 1, 2, 3, 4, 5, 6, 7].map((r) => (MER.canExtra8(at(r)) ? 1 : 0)).join('') === '00001110' && MER.EXTRA_FROM === 4, 'G4: the vessels open at realms 4–6 only');
+    assert([0, 1, 2, 3, 4, 5, 6, 7].map((r) => (MER.lineWindow(at(r), 'e8') ? 1 : 0)).join('') === '00001110', 'G4: the vessel card\'s window the same');
+    assert(!medCards(Object.assign(at(2), { scene: 'stream' }), SCENES).some((c) => c.id === 'med:mer:e8') && medCards(Object.assign(at(4), { scene: 'stream' }), SCENES).some((c) => c.id === 'med:mer:e8'), 'G4: no vessel card at Core Formation, one at Golden Core');
+    { const v = at(2); v.scene = 'meridians'; assert(/open them at Golden Core\. Not before/.test(sceneView(v, SCENES).text), 'G4: the screen says Golden Core below it'); }
+    { const v = at(2, 3); v.scene = 'meridians'; assert(/5 of the Extraordinary vessels are still sealed/.test(sceneView(v, SCENES).text), 'G4: an older save with vessels open early: the rest still sealed'); }
+    { const v = at(2, 8); v.scene = 'meridians'; assert(/collaterals wait for Golden Core: 28 still closed/.test(sceneView(v, SCENES).text), 'G4: an older save with all eight open early: the collaterals wait'); }
+    { const v = at(5, 2); v.scene = 'meridians'; assert(/between Golden Core and Soul Embryo/.test(sceneView(v, SCENES).text), 'G4: the screen\'s window from Golden Core'); }
+    // the review (R1): one vessel paragraph per realm, and the "wait for Golden Core" line only below it
+    for (const [r, e, c] of [[0, 0, 0], [1, 0, 0], [2, 3, 0], [3, 8, 5], [4, 0, 0], [4, 8, 5], [5, 2, 0], [6, 8, 27], [7, 5, 0], [7, 8, 20]]) {
+        const v = at(r, e, c); v.scene = 'meridians'; const t = sceneView(v, SCENES).text;
+        const sealed = /like doors painted on a wall/.test(t), window = /between Golden Core and Soul Embryo/.test(t), wait = /wait for Golden Core/.test(t), reach = /within reach/.test(t);
+        const wantSealed = r < 4 && e < 8, wantWindow = r >= 4 && r <= 6 && e < 8, wantWait = r < 4 && e >= 8 && c < 28, wantReach = r >= 4 && r <= 6 && e >= 8 && c < 28;
+        assert(sealed === wantSealed && window === wantWindow && wait === wantWait && reach === wantReach, `review: the meridian screen at realm ${r}, ${e}/8, ${c}/28 (sealed ${sealed}, window ${window}, wait ${wait}, reach ${reach})`);
+    }
+    { const v = at(6, 6); v.scene = 'ns_warn'; assert(/They open between Golden Core and Soul Embryo/.test(sceneView(v, SCENES).text), 'G4: ns_warn says Golden Core'); }
+    { // saves: partial e8Work kept until Golden Core; vessels already open stay open
+        const o = at(2, 3); o.james.e8Work = 1.5; o.scene = 'stream';
+        const back = deserialize(serialize(o));
+        assert(back.james.e8Work === 1.5 && back.james.extra8 === 3 && !MER.canExtra8(back), 'G4: a save at Core Formation keeps its vessel work and its open vessels');
+        back.james.realm = 4; back.yuki.realm = 4; back.james.qi = 30; back.james.satiety = 80;
+        const card = medCards(back, SCENES).find((c) => c.id === 'med:mer:e8');
+        assert(card && card.open && /1\.5 h of 7 h done/.test(sceneView(Object.assign(structuredClone(back), { scene: 'meridians' }), SCENES).choices.map((c) => c.label).join(' ')), 'G4: at Golden Core that work counts (1.5 h of the 4th vessel\'s 7 h)');
+    }
+    { // the Long Forest's seasons grant the vessels from Golden Core: 3, 6, 8
+        const lf = ensureBars(newGame(6611, { closed: true })); const got = [];
+        for (let i = 0; i < 7; i++) { lfSeason(lf); got.push(`${lf.james.realm}:${lf.james.extra8}`); }
+        assert(got.join() === '1:0,2:0,3:0,4:3,5:6,6:8,7:8' && lf.james.extraCollaterals === 28 && lf.james.junctions === 10, `G4: Long Forest seasons (realm:vessels ${got.join(', ')})`);
+        const keep = ensureBars(newGame(6612, { closed: true })); keep.james.extra8 = 5; for (let i = 0; i < 4; i++) lfSeason(keep);
+        assert(keep.james.realm === 4 && keep.james.extra8 === 5, 'G4: a season never takes vessels away');
+    }
+    // P1: the 28 collaterals in pairs, one collateral's hours a pair (56 h), two challenging awards a pair
+    { let h = 0, pairs = 0; for (let c = 0; c < 28; c += MER.ecStep(c)) { h += ecHours(c); pairs++; } assert(h === 56 && pairs === 14, `P1: 14 pairs, ${h} h (114 h one by one)`); }
+    assert(MER.ecPairName(0) === 'the Governing crown thread and the Governing nape thread' && MER.ecPairName(27) === 'the Yang Heel eye-corner thread' && MER.ecStep(27) === 1 && MER.ecStep(28) === 0, 'P1: the pair\'s name; an odd count left by an older save opens one');
+    {
+        const g = at(4, 8, 0); g.scene = 'meridians'; g.james.qi = 30; g.james.satiety = 80;
+        const lab = sceneView(g, SCENES).choices.map((c) => c.label).find((l) => /Governing crown thread/.test(l));
+        assert(/Work on the Governing crown thread and the Governing nape thread\. \(1 and 2\/28; 0 h of 3 h done/.test(lab || ''), `P1: the card reads "X and Y" (${lab})`);
+        assert(MER.lineName(g, 'ec') === 'Open the Governing crown thread and the Governing nape thread.', 'P1: the line\'s name');
+        const twice = structuredClone(g); const want = [...awardXp(twice, 'Convergence Use', 'challenging'), ...awardXp(twice, 'Convergence Use', 'challenging')];
+        const reg0 = qiRegenPct(g, g.james.collaterals ?? 66); g.james.ecWork = 2.9;
+        const i = MER.lineIndex(SCENES, 'ec'); const r = choose(g, SCENES, i, { task: true });
+        const xpLines = r.lines.filter((l) => /^(Convergence Use|GU|Yuki \(bond\))/.test(l));
+        assert(g.james.extraCollaterals === 2 && /^Opened the Governing crown thread and the Governing nape thread \(2\/28\)\. Two fine/.test(r.lines[0]), `P1: one sitting opens the pair (${r.lines[0]})`);
+        assert(JSON.stringify(xpLines) === JSON.stringify(want) && xpLines.filter((l) => /^Convergence Use/.test(l)).length === 2, 'P1: two challenging awards, as two collaterals one by one');
+        assert(Math.abs(qiRegenPct(g, g.james.collaterals ?? 66) - reg0 - 0.2) < 1e-9, 'P1: the regen of two collaterals (+0.2%)');
+        const odd = at(4, 8, 27); odd.scene = 'meridians'; odd.james.qi = 30; odd.james.satiety = 80; odd.james.ecWork = 5.95;
+        const ro = choose(odd, SCENES, i, { task: true });
+        assert(odd.james.extraCollaterals === 28 && /\(28\/28\)\. A fine, bright thread/.test(ro.lines[0]), 'P1: the last single one from an odd count');
+    }
+    // F1: a door's dry run sees a death that ends the Coil; it keeps the walk's minutes
+    {
+        const g = ensureBars(newGame(6613, { closed: true })); g.scene = 'village'; g.location = 'village'; g.james.hp = 1; g.james.satiety = 0;
+        const before = JSON.stringify(g); const o = taskOutcome(g, SCENES, 'village:2');
+        assert(JSON.stringify(g) === before, 'F1: the door\'s dry run leaves the game alone');
+        assert(o.death === 'hunger' && o.minutes === taskMinutes(g, SCENES, 'village:2') && o.end === g.minutes + o.minutes, `F1: village:2 at HP 1, Fed 0: "Starves here", the walk's minutes (${JSON.stringify(o)})`);
+        const real = structuredClone(g); runTask(real, SCENES, 'village:2');
+        assert(real.scene === 'coil_end' && real.coil.why === 'collapse', 'F1: and the real run does end the Coil');
+        const ok = ensureBars(newGame(6614, { closed: true })); ok.scene = 'village'; ok.location = 'village'; ok.james.satiety = 80;
+        const oo = taskOutcome(ok, SCENES, 'village:2');
+        assert(oo.death === null && oo.minutes === taskMinutes(ok, SCENES, 'village:2') && oo.fed === 80, 'F1: a safe walk: no death, the same walk minutes and Fed as before');
+        const card = taskCards(g, SCENES, 'village').find((c) => c.id === 'village:2');
+        const to = SCENES.village.choices[Number(card.id.split(':')[1])].to;
+        const broken = { ...SCENES, [to]: { ...SCENES[to], enter: () => { throw new Error('a fight'); } } };
+        let ob = null, threw = false; try { ob = taskOutcome(g, broken, 'village:2'); } catch { threw = true; }
+        assert(!threw && ob && ob.death === null && ob.minutes === o.minutes, 'F1: a door whose full run throws reads as no death, with its walk minutes');
+        // the review (R1): the warning's clock is the death's, the card's the walk's end
+        assert(o.deathAt === real.minutes && oo.deathAt === undefined, `review: deathAt = when the real run's Coil ends (${o.deathAt} vs ${real.minutes}); none on a safe door`);
+        const late = ensureBars(newGame(6615, { closed: true })); late.scene = 'village'; late.location = 'village'; late.james.hp = 5; late.james.satiety = 0;
+        const slow = { ...SCENES, [to]: { ...SCENES[to], enter: (x) => { advance(x, 300); return []; } } };
+        const ol = taskOutcome(late, slow, 'village:2'), rl = structuredClone(late); runTask(rl, slow, 'village:2');
+        assert(taskOutcome(late, SCENES, 'village:2').death === null && ol.death === 'hunger' && ol.end === late.minutes + 60 && ol.deathAt === rl.minutes && ol.deathAt > ol.end && rl.scene === 'coil_end', `review: a death inside the scene walked into: the card still ends at the walk, the warning says when (${ol.end} → ${ol.deathAt})`);
+    }
 }
 const pctOf = (o, n) => Object.entries(o).sort().map(([k, v]) => `${k} ${((v / n) * 100).toFixed(1)}%`).join(', ');
 console.log(`  tribute, tasks:   ${pctOf(stats.tasks.endings, stats.tasks.games)}`);

@@ -2,6 +2,19 @@
 
 Split out of `roadmap.md` in v0.11.65 (owner pick G2, 2026-11-08 11:45), so the roadmap shows only the open work. Every line here moved word for word; newest first. Update in every push that finishes a roadmap line.
 
+## Moved in v0.11.66 (word for word)
+
+### From section 1a, "Cultivation and meridians" (done in v0.11.66: S1 the Saturation curve ×1.5 a realm, X1 XP for every sit, G4 the vessels from Golden Core, P1 the collaterals in pairs; with F1, the door's dry run, and V1, the Golden Core walk in the tests)
+
+- **Mechanics, a balance change (owner 2026-11-08 01:15, "the saturation rate per sitting is droppong way too sharply, we should mitigate the drop since it make the time investment not worth it"):** today a sitting gives 100 ÷ (10 × 2^realm) % Saturation before the Coil bonus (`sitGain`, `tools/sanity.mjs`): 10% at Mortal Vessel, 5% at Foundation, 2.5% at Core Formation, about 0.6% at Golden Core, about 0.08% at Soul Embryo; it halves with every realm. Soften the drop (e.g. a gentler curve or a floor). Options with the per-realm numbers and sittings per breakthrough first; the baseline only after the owner's go.
+- **Mechanics, a balance change (owner 2026-11-08 02:30, "to the mechanics/story section in the roadmap, add that qi condensation/cultivation should also grant some convergence and gu xp."):** a sitting (condense / cultivate) also gives some XP to Convergence Use and GU, besides its Saturation. First where sitting gives XP today and how the two skills level now; options with the amounts, and what it does to the bots' play and the baseline, together with the Saturation item above and the first-priority item.
+- **For the next push that changes balance (owner 19:54, "A thing to note and group with the next update that changes balance"):** the opening of the Extraordinary vessels **and** their collaterals should be gated somewhere midway between Foundation and Nascent Soul (today both open from Foundation, realm 1; the collaterals after all 8 vessels since v0.11.46); they still seal at Nascent Soul if unopened. Options with the exact realm (2–5) and its numbers first.
+- **Noted for later (owner 22:08, "another note for the story thread later, the extraordinary collaterals should be grouped into pairs too, cutting the needed steps in half"):** open the 28 Extraordinary collaterals in 14 pairs (one opening per pair, half the steps). A balance change: options with the numbers first, grouped with the Extraordinary midway gate below.
+
+### The old "Last updated" line
+
+Last updated: 2026-11-08 (v0.11.65, docs: the roadmap regrouped (owner pick G2, 11:45): the open work in six groups below, every line moved word for word; the done list, the stale and the moot lines in `project/roadmap-done.md`; v0.11.64, the story and mechanics pass, push 1). Update in every push.
+
 ## Moved in v0.11.65 (word for word)
 
 ### The old "Last updated" line

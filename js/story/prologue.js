@@ -22,7 +22,7 @@ import { BLACKROOT, BREAK_HUBS as B2 } from './act1_blackroot.js';
 import { HEART, BREAK_HUBS as B3 } from './act1_heart.js';
 import { RETURN, BREAK_HUBS as B4 } from './act1_return.js';
 import { LONGFOREST, BREAK_HUBS as B0 } from './longforest.js';
-import { MERIDIANS } from './meridians.js';
+import { MERIDIANS, EXTRA_FROM } from './meridians.js';
 import { installYukiPath } from './yuki_path.js';
 import { installCoil } from './coil_scenes.js';
 import { installOnce } from './oneoff.js';
@@ -918,7 +918,7 @@ export function lfSeason(g) {
     const lift = (o, k) => { if (rankOf(o[k]) < want) o[k] = fromRank(want); };
     lift(j, 'gu'); lift(j.skills, 'Convergence Use'); lift(y, 'fight'); lift(y, 'qiUse');
     if (r >= 7) Object.assign(j, { extra8: 8, extraCollaterals: 28, junctions: 10 });
-    else j.extra8 = Math.max(j.extra8 || 0, Math.ceil((8 * r) / 6));
+    else if (r >= EXTRA_FROM) j.extra8 = Math.max(j.extra8 || 0, Math.ceil((8 * (r - EXTRA_FROM + 1)) / (7 - EXTRA_FROM))); // v0.11.66 (G4): the vessels from Golden Core (3, 6, 8); Foundation before (2, 3, 4, 6, 7, 8)
     j.hp = jamesHpMax(g); j.qi = jamesQiMax(g); y.hp = yukiHpMax(g); y.qi = yukiQiMax(g);
     ensureBars(g);
     g.flags.lf_seasons = (g.flags.lf_seasons || 0) + 1;

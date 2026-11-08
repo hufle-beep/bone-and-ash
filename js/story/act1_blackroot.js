@@ -76,7 +76,7 @@ function hubChoices(id) {
         { text: 'Talk to Mei Lin.', show: (g) => daily('tmei')(g) && !late(g), time: 10, to: 'talk_mei' },
         { text: 'Talk to Ya.', show: (g) => daily('tya')(g) && !late(g), time: 10, to: 'talk_ya' },
         { text: 'Train.', show: (g) => !late(g) && trainLeft(g), time: 10, to: 'bl_train' }, // v0.11.47 (owner 19:39, T1): gone once the day's drills are used up
-        { text: 'Cultivate: one sit, 10 Qi toward Saturation.', show: (g) => !late(g), req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`] : []; }, to: id },
+        { text: 'Cultivate: one sit, 10 Qi toward Saturation.', show: (g) => !late(g), req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`, ...r.xp] : []; }, to: id },
         { text: 'Rest an hour.', show: (g) => !late(g), do: (g) => advance(g, 60, { resting: true }).concat(['An hour off your feet. Ya calls it a nap. You call it data collection.']), to: id },
         { text: 'Eat something.', show: (g) => foodCount(g) > 0 && g.james.satiety < 85 && (id !== 'rr_hub' || !!g.flags.ya_mocked), time: 15, do: (g) => eatBest(g, { fire: false }), to: id }, // v0.11.47: on the Root Road, "Eat with the others." (Manners) comes first
         { text: 'Chew a ghost-gill (+8 HP).', show: (g) => hasItem(g, 'ghost_gill') && g.james.hp < jamesHpMax(g), do: (g) => { addItem(g, 'ghost_gill', -1); g.james.hp = Math.min(jamesHpMax(g), g.james.hp + 8); return ['+8 HP. Still tastes like a cellar.']; }, to: id },

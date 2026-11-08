@@ -104,7 +104,7 @@ export function runMed(g, scenes, id) {
     if (id === 'med:sit') {
         const r = condense(g);
         const dead = checkDeath(g, scenes);
-        return { lines: [...(r.ok ? [`Condensed: Saturation ${r.saturation}%.`] : ['Not enough Qi to sit.']), ...dead], moved: dead.length > 0 };
+        return { lines: [...(r.ok ? [`Condensed: Saturation ${r.saturation}%.`, ...r.xp] : ['Not enough Qi to sit.']), ...dead], moved: dead.length > 0 };
     }
     const back = g.scene;
     const line = /^med:mer:(\w+)$/.exec(id)?.[1];

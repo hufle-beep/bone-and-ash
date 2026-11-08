@@ -1,6 +1,6 @@
 # Roadmap: Bone and Ash
 
-Last updated: 2026-11-08 (v0.11.65, docs: the roadmap regrouped (owner pick G2, 11:45): the open work in six groups below, every line moved word for word; the done list, the stale and the moot lines in `project/roadmap-done.md`; v0.11.64, the story and mechanics pass, push 1). Update in every push.
+Last updated: 2026-11-08 (v0.11.66, the story and mechanics pass, group a: cultivation and meridians (owner picks S1 + X1 + G4 + P1 + F1, then V1); its four lines moved word for word to `project/roadmap-done.md`; v0.11.65, the roadmap regrouped). Update in every push.
 
 **How this file is laid out (v0.11.53, owner 00:52 "reorder it to show the done ones in a separate section", pick R1):** Part 1 is what is still open; Part 2 is everything done, newest first. Nothing was deleted or reworded: every line moved word for word; a line that was partly done was split at the sentence (its done part in Part 2, its open part here), and a done line is labelled with where it stood ("was …").
 
@@ -8,20 +8,13 @@ Last updated: 2026-11-08 (v0.11.65, docs: the roadmap regrouped (owner pick G2, 
 
 # Part 1: Open
 
-## 1. The story and mechanics pass (in progress; push 1 done in v0.11.64)
+## 1. The story and mechanics pass (in progress; push 1 done in v0.11.64, group a in v0.11.66)
 
 **The story and mechanics pass:** in progress (owner 2026-11-08 10:40): push 1 done in v0.11.64 (no timer, no queue, Cultivate until the limit); every open item in its own section below, the next one the owner's pick (options first).
 
 Moved here word for word from the handover in v0.11.52 (owner 00:48 "add the story pass to the roadmap instead", pick A2), so the handover stays small. Each item gets its options (and numbers, where balance moves) before anything is built; drafts of story texts in chat first. ("The block below" in the first item is the second item.)
 
-**Suggested order** *(new in v0.11.65)*: a, b, c, d, e, f, then section 2 (the retune comes after a, which moves the numbers). Each group is one push or more, each with its own options and pick.
-
-### a. Cultivation and meridians (balance; numbers first, the bots and the baseline move)
-
-- **Mechanics, a balance change (owner 2026-11-08 01:15, "the saturation rate per sitting is droppong way too sharply, we should mitigate the drop since it make the time investment not worth it"):** today a sitting gives 100 ÷ (10 × 2^realm) % Saturation before the Coil bonus (`sitGain`, `tools/sanity.mjs`): 10% at Mortal Vessel, 5% at Foundation, 2.5% at Core Formation, about 0.6% at Golden Core, about 0.08% at Soul Embryo; it halves with every realm. Soften the drop (e.g. a gentler curve or a floor). Options with the per-realm numbers and sittings per breakthrough first; the baseline only after the owner's go.
-- **Mechanics, a balance change (owner 2026-11-08 02:30, "to the mechanics/story section in the roadmap, add that qi condensation/cultivation should also grant some convergence and gu xp."):** a sitting (condense / cultivate) also gives some XP to Convergence Use and GU, besides its Saturation. First where sitting gives XP today and how the two skills level now; options with the amounts, and what it does to the bots' play and the baseline, together with the Saturation item above and the first-priority item.
-- **For the next push that changes balance (owner 19:54, "A thing to note and group with the next update that changes balance"):** the opening of the Extraordinary vessels **and** their collaterals should be gated somewhere midway between Foundation and Nascent Soul (today both open from Foundation, realm 1; the collaterals after all 8 vessels since v0.11.46); they still seal at Nascent Soul if unopened. Options with the exact realm (2–5) and its numbers first.
-- **Noted for later (owner 22:08, "another note for the story thread later, the extraordinary collaterals should be grouped into pairs too, cutting the needed steps in half"):** open the 28 Extraordinary collaterals in 14 pairs (one opening per pair, half the steps). A balance change: options with the numbers first, grouped with the Extraordinary midway gate below.
+**Suggested order** *(new in v0.11.65)*: a, b, c, d, e, f, then section 2 (the retune comes after a, which moves the numbers). *(v0.11.66: group a done, its four lines in `roadmap-done.md`.)* Each group is one push or more, each with its own options and pick.
 
 ### b. The screen's format
 
@@ -33,6 +26,7 @@ Moved here word for word from the handover in v0.11.52 (owner 00:48 "add the sto
 ### c. Small rules
 
 - **Mechanics, the same pass (owner 2026-11-08 00:02, "when one type of loot from Yuki's auto forage/hunt is full, she switches to another"):** when Yuki's own hunting or foraging would bring a kind of food James can't hold any more (its cap), she brings another kind instead (today "Let Yuki hunt" only hides once hares and venison are both full, v0.11.25). Find every place she gathers first; options with what changes.
+- *(new in v0.11.66, the Fable review's low finding 3, owner pick R1)* "Cultivate until the limit" lists every sit's four lines (Condensed, Convergence Use, GU, Yuki) since X1: about 640 lines for a 159-sit run at Nascent Soul (the panel's summary and the 12-line journal keep it usable). Option: one total line per skill for the loop. Options first.
 - *(was: Now, item 4, its own sentence)* Tabled until after the art: more than one Blackroot wilds exploration a day on replays (owner 21:31, the wilds save; options first, now with the story and mechanics pass).
 
 ### d. Combat
@@ -56,7 +50,7 @@ Moved here word for word from the handover in v0.11.52 (owner 00:48 "add the sto
 ## 2. The balance retune (after group a; numbers first)
 
 5. **E, the Act 1 retune (numbers first):** **Step 3 deferred (owner 19:22):** the retune itself, numbers first (since v0.11.46 Act 1 is easier for the random bots, from X1; the rot ape can be re-tightened here): the night fights, the ford serpent, Shen Qiu, the guardian stalemate for a strong James (v0.11.41 note); the part test's first numbers: the bot-like runs win 97–100% of Act 1's fights, the guardian 84%, and lose none of the return part's even at 2 HP.
-   - The romance gates (owner 20:12) and the Extraordinary midway gate and pairs (owner 19:54, 22:08): in the story and mechanics pass below.
+   - The romance gates (owner 20:12) and the Extraordinary midway gate and pairs (owner 19:54, 22:08): in the story and mechanics pass below. *(v0.11.66: the gate and the pairs done, group 1a.)*
 - *(was: Order of work, step 3; its 3a, 3b, 3c-1 and 3c-3 are done, 3c-2 and the serpent are open)*
   3. **The hybrid core on the prologue**, in three pushes behind the "Tasks (preview)" switch (owner 2026-11-06): **3a the task loop — DONE in v0.9.0** (cards, queue, clock, Outlook, Fed/HP, collapse stand-in, migration); **3b getting better — DONE in v0.9.2** (no dice on task cards, harder, familiarity, Intuitive Aptitude as setbacks + transfer, Yuki's lane, drills, door cards, the Cards | Results layout); **3c the Coil**, in three pushes (owner 2026-11-06): **3c-1 the Coil — DONE in v0.9.4** (reset B, Coil screen, Bite the tail, accept-or-rewind at the tribute, same days again, "You remember this", L from 95%, pause button; prologue only), **3c-2 balance** (HP as a real threat, tribute tuning), **3c-3 — DONE in v0.9.8** (Tasks on by default, speed gate, hidden test speeds) (no dice anywhere in task mode is DONE in v0.9.3; HP as a real threat, including the serpent (`rt_serpent`, decided by arrival HP); the switch turns on by default; the speed gate: ×2 after the first won tribute, ×5 after Act 1, ×10 removed). Bots tune the tribute for Coils 1–3 (about 30% → 80%). Also the serpent on the way home (`rt_serpent`): today it is lost only when James arrives at ~1% HP; make it a real first-Coil threat (owner 2026-11-05, numbers first).
 - *(was: Order of work, step 5; the resting places as task screens are done)*

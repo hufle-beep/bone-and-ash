@@ -384,7 +384,7 @@ export function runTask(g, scenes, id) {
     } else if (card.kind === 'sit') {
         if (!sitOpen(g, scenes)) throw new Error('No sit possible');
         const r = condense(g);
-        lines.push(r.ok ? `Condensed: Saturation ${r.saturation}%.` : 'Not enough Qi to sit.');
+        lines.push(...(r.ok ? [`Condensed: Saturation ${r.saturation}%.`, ...r.xp] : ['Not enough Qi to sit.']));
     } else if (card.kind === 'mer') {
         const mi = card.line ? merLineChoice(g, scenes, card.line) : merChoice(g, scenes);
         if (mi < 0) throw new Error('No meridian session possible');
@@ -441,12 +441,18 @@ export function taskMinutes(g, scenes, id) {
 
 /**
  * v0.11.64 (A1, B1): what card `id` does from here, played on a copy (no dice, so it is exact): its game minutes, the minute
- * it ends, Fed and HP at its end, and `death` ('hunger' | 'injury') if the Coil would end on it. A door counts only its walk.
+ * it ends, Fed and HP at its end, and `death` ('hunger' | 'injury') if the Coil would end on it. A door counts only its walk
+ * for its minutes, Fed and HP, but its `death` (and then `deathAt`, the clock of the death) from the whole card (v0.11.66, F1).
  */
 export function taskOutcome(g, scenes, id) {
     const c = clone(g);
     const card = cardOf(scenes, c.scene, id);
-    if (card?.kind === 'door') { const minutes = taskMinutes(g, scenes, id); return { minutes, end: g.minutes + minutes, fed: g.james.satiety, hp: g.james.hp, death: null }; }
+    if (card?.kind === 'door') { // the walk's minutes; v0.11.66 (owner pick F1): the death from a full run on the copy (a door that throws there, a fight, reads as no death)
+        const minutes = taskMinutes(g, scenes, id);
+        let death = null, deathAt = null;
+        try { runTask(c, scenes, id); death = outcomeOf(c, c.minutes).death; if (death) deathAt = c.minutes; } catch { death = null; }
+        return { minutes, end: g.minutes + minutes, fed: g.james.satiety, hp: g.james.hp, death, ...(death ? { deathAt } : {}) }; // the card shows the walk's end; the warning the death's clock (the review, R1)
+    }
     const m0 = c.minutes;
     runTask(c, scenes, id);
     return outcomeOf(c, m0);
