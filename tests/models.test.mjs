@@ -78,8 +78,10 @@ const dayKey = (g) => `${g.scene}@${g.wake?.n ?? clockParts(g.minutes).day}`;
 const doneSet = (mem, g) => { const k = dayKey(g); return mem.done[k] || (mem.done[k] = new Set()); };
 
 /** A fight to its end: smart (the shared smart rule, tests/lib/smartfight.mjs, v0.11.96) or random (its random branch, fleeing now and then). */
+const rankOf = (n) => 10 * ((n?.tier || 1) - 1) + (n?.level || 1);
 function fight(g, st, smart) {
     const id0 = g.combat?.id || '?';
+    if (rankOf(g.james.gu) < rankOf(g.james.skills['Convergence Use'])) st.cuAhead++; // v0.11.101 (DG1): the degree reads GU alone; GU should never be behind
     for (let t = 0; t < 400 && g.combat; t++) {
         let out;
         if (smart) {
@@ -237,7 +239,7 @@ function play(run, model, st, yuki) {
 }
 const foodLeft = (g) => Object.entries(g.inventory || {}).some(([k, n]) => n > 0 && /raw|meat|berry|cress|honey|crab|fowl|hare|venison|egg/.test(k));
 
-const blank = () => ({ games: 0, finished: 0, gaveUp: 0, stuck: 0, cards: 0, work: 0, forced: 0, oneCoil: 0, hungry: 0, deaths: {}, tribute: {}, prologueClear: {}, act1Clear: {}, endings: {}, fights: {} });
+const blank = () => ({ games: 0, finished: 0, gaveUp: 0, stuck: 0, cards: 0, work: 0, forced: 0, oneCoil: 0, hungry: 0, cuAhead: 0, deaths: {}, tribute: {}, prologueClear: {}, act1Clear: {}, endings: {}, fights: {} });
 const all = {};
 const playInto = (st, run, m, yuki) => { st.games++; const r = play(run, m, st, yuki); if (r === 'end') st.finished++; else if (r === 'stuck') st.stuck++; };
 for (const m of PLAY) {
@@ -259,6 +261,7 @@ if (kids) for (const r of await collect(kids)) { mergeInto(all, r.all); pass += 
 const notes = [];
 for (const [m, st] of Object.entries(all)) assert(!st.stuck, `${m}: every game ends or gives up after Coil ${MAX_COIL} (${st.stuck} stuck)`);
 if (all.rusher?.work) notes.push(`rusher: ${all.rusher.work} work cards queued (it should queue only meals)`);
+for (const [m, st] of Object.entries(all)) if (st.cuAhead) notes.push(`${m}: GU behind Convergence Use at ${st.cuAhead} fights (v0.11.101, DG1: the degree reads GU alone; it should never be)`);
 if (all.careful?.hungry) notes.push(`careful: under Fed 30 with food in the hammerspace ${all.careful.hungry} times`);
 if (!SHARD) { // the completionist really runs every open card of the wilds before it leaves
     const g = ensureBars(newGame(77, { closed: true })); goTo(g, SCENES, 'wilds'); g.minutes += 1440;

@@ -2,6 +2,23 @@
 
 Started 2026-11-09 (v0.11.97), when `history-11.md` neared 45 KB. Newer than `history-11.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.101 (word for word)
+
+### From "Decided in chat"
+
+- **v0.11.98: the fragile knife's shield and the snare (Fable's review of v0.11.97, medium 2; v0.11.96's low 3; the owner's "Continue" 15:10; Claude's options KR0–KR3; owner 15:22 "KR1 go"):**
+  - **The sub-items (lab: the fight lab 300 games, the same 6,259 fight states for every rule, 4,278 with the fragile knife; the models 300 games each, mean Coil prologue / Act 1):** **NS** no Qi shield while the knife is fragile: lab 72.9 → 73.2%, fragile states 67.6 → 68.0%, 68 fights now won, 49 now lost (boar 74.9 → 79.2%, rats 12.6 → 19.7%; also, not named in the options: mire 89.8 → 82.8%, Gao 73.9 → 71.0%); Careful 3.43 / 4.03 → 3.42 / 4.07, Completionist 3.82 / 4.11 → 3.77 / 4.07; **K2** a two-swing reserve on the fragile knife: lab 73.1%, +26 / −16, models unchanged; **NQ** neither the field nor the shield on it: lab 72.0%, +50 / −107 (measured, left out); **G** the snare on GU, XP to Convergence Use: never fails either way; double hauls (4 hares, not 2) 38 → 100% of the models' 173 snares, 22 → 100% of the random bots' 189; models unchanged; **T** the tests; **L** the baseline re-saved only past 20.
+  - **The options:** **KR1 🟢 NS + G + T + L (recommended)** / KR3 🟢 NS + T + L / KR2 🟡 K2 + G + T + L / KR0 🟠 G + T + L (colours: the lab's smart win %: 73.2 / 73.2 / 73.1 / 72.9). **Picked: KR1.** Not picked: KR0, KR2, KR3.
+  - **As built:** see the version note. The spear opens at T1 L8 with the knife, so "unless the spear" needs no code.
+  - **Also:** `4626b72` filled in for 0.11.97; after v0.11.97 Claude uploaded the changed docs; v0.11.95's notes to `history-12.md`.
+
+### From "Version notes"
+
+## v0.11.98 — no Qi shield on the fragile knife, the snare on GU (KR1)
+
+- **Files:** `tests/lib/smartfight.mjs` (`smartAction`: no Qi shield while `fragileKnife(g)`, below T1 L8; the spear opens there too), `js/story/act1_blackroot.js` (`rr_hunt` choice 1, "Snare root-hares": `skill: 'GU', xpTo: 'Convergence Use'`, DC 4 and 2 Qi as before), `tests/tasks.test.mjs` (the v0.11.98 block; BT1's and RQ1's shield tests moved to T1 L9 with the field spent; BT1's `xpTo` count 19 → 20), `tests/README.md`, `sw.js`, docs (v0.11.95 to `history-12.md`). Saves unchanged, no id changed; the baseline unchanged.
+- **Checks:** a game change and the bot code (rule 2): the full `bash tools/check.sh`, one run, exit 0, 0 drifted of 142, 5 past 5 (log only): rats smart 13.1 → 18.6%, mire smart 94.4 → 82.7%, boar smart 56.9 → 68.3%, Gao smart 74.3 → 66.5% (boar and Gao already past 5 in v0.11.97), the story test's Gao smart 51 → 42.5%. The models (500 games): Careful 3.44 / 4.06, Completionist 3.79 / 4.09, the Sitter 2.66 / 2.66, the Farmer 3.75 / 4.07. After the review's fixes (tests and comments only): the tasks test and `bash tools/check.sh quick`, exit 0. **Fable, cold review:** no high. Fixed: low 2 (stale "nothing else has xpTo"), low 3 (the snare test checks the 2 hares), low 5 (a redundant line), and the wording of medium 1 in the test and the rule's comment. **Open (options later):** medium 1, from T1 L8 the shield still comes before a formed weapon, so with Qi 5, 8, 11 … at 35% HP the bot shields down to one dart and guards to the cap (from RQ1, not new); low 4, the snare's text names no sung piece and the FAQ's throw sentence doesn't cover it.
+
 ## Moved from the handover in v0.11.100 (word for word)
 
 ### From "Decided in chat"

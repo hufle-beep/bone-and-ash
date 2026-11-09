@@ -632,8 +632,10 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
 let rs = 4242;
 const rnd = (n) => { rs = (rs * 1103515245 + 12345) >>> 0; return (rs >>> 8) % n; };
 
+const rankOf = (n) => 10 * ((n?.tier || 1) - 1) + (n?.level || 1);
 function fight(g, run) {
     const id0 = g.combat?.id;
+    if (rankOf(g.james.gu) < rankOf(g.james.skills['Convergence Use'])) assert(false, `DG1 I: GU never behind Convergence Use at a fight (${id0}: GU ${rankOf(g.james.gu)}, CU ${rankOf(g.james.skills['Convergence Use'])})`); // v0.11.101: the degree reads GU alone
     for (let t = 0; t < 400 && g.combat; t++) {
         const smart = run % 2 === 0;
         const acts = Object.keys(COMBAT_ACTIONS).filter((id) => !INC_ONLY_ACTIONS.has(id) || actionOpen(g, id)); // v0.11.4: the spear and the spike field when he can sing them
@@ -1330,6 +1332,40 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
         let o = null; for (let i = 0; i < NO_DICE_ROUND_CAP + 5 && g.combat; i++) o = combatStep(g, 'guard');
         assert(o?.done && g.minutes < night0 + 120, `v0.11.91: ${sc}${kind ? ` (${kind})` : ''} is over before 02:00 even at the round cap (${o?.done}, ${g.minutes - night0} min after midnight)`);
     }
+}
+// v0.11.101 (owner 2026-11-09 16:41, pick DG1; Fable's review of v0.11.100, medium 1): (D) the degree, and "End it in one
+// move.", reads GU alone, as every strike and the defence do; (I) GU is never behind Convergence Use: every Convergence award
+// gives GU the same XP (and the bot games above assert it at every fight), so the old max(GU, Convergence) was GU in play
+{
+    const { degreeOf, jamesPower, prepare } = await import('../js/story/power.js');
+    const { skillCheck, awardXp, noDiceUp, NO_DICE_DC_SHIFT } = await import('../js/core/game.js');
+    const { readFileSync, readdirSync } = await import('node:fs');
+    const { gunzipSync } = await import('node:zlib');
+    const rk = (n) => 10 * ((n?.tier || 1) - 1) + (n?.level || 1);
+    // D: Fable's probe: GU T1 L1, Convergence T3 L5: the power is GU's, with or without the realm
+    { const g = ensureBars(newGame(10101)); g.james.gu = { tier: 1, level: 1, xp: 0 }; g.james.skills['Convergence Use'] = { tier: 3, level: 5, xp: 0 }; g.james.realm = 2;
+      assert(jamesPower(g) === skillCheck(g.james.gu) + 0.6, `DG1 D: the power is GU's check + 0.3 × realm (${jamesPower(g)})`);
+      const enc = prepare(g, { id: 'dg1_test', enemies: [{ name: 'Foe', hp: 30, dc: 3, atk: 4, dmg: 2 }], win: 'stream', lose: 'stream' });
+      assert(enc.degree === degreeOf(g, enc.enemies, noDiceUp('dg1_test') - NO_DICE_DC_SHIFT) && enc.degree < 3, `DG1 D: a Convergence-heavy James at GU T1 L1 is not offered the one-move finish (degree ${enc.degree})`);
+      const brawl = prepare(g, { id: 'dg1_fists', style: 'unarmed', enemies: [{ name: 'Foe', hp: 30, dc: 3, atk: 4, dmg: 2 }], win: 'stream', lose: 'stream' });
+      assert(brawl.degree === enc.degree, `DG1 D: fists and weapons read the same power (${brawl.degree} / ${enc.degree})`); }
+    // I: every Convergence award gives GU the same XP (each band, a fail, a part, the Coil bonus; review low 3), so GU is never behind; and never in a save
+    for (const band of ['routine', 'standard', 'challenging', 'major']) for (const opts of [{}, { fail: true }, { factor: 0.5 }]) for (const coilN of [1, 3]) {
+        const g = ensureBars(newGame(10102)); if (g.coil) g.coil.n = coilN;
+        for (let k = 0; k < 40; k++) awardXp(g, 'Convergence Use', band, opts);
+        assert(rk(g.james.gu) >= rk(g.james.skills['Convergence Use']) && (rk(g.james.skills['Convergence Use']) > 1 || band === 'routine'), `DG1 I: ${band} ${JSON.stringify(opts)} Coil ${coilN}: GU ${rk(g.james.gu)} not behind Convergence ${rk(g.james.skills['Convergence Use'])}`);
+    }
+    { const g = ensureBars(newGame(10103)); g.james.gu = { tier: 10, level: 10, xp: 0 }; g.james.skills['Convergence Use'] = { tier: 10, level: 9, xp: 0 };
+      for (let k = 0; k < 400; k++) awardXp(g, 'Convergence Use', 'major');
+      assert(rk(g.james.gu) === 100 && rk(g.james.skills['Convergence Use']) === 100, `DG1 I: at the cap both stop at T10 L10 (${rk(g.james.gu)} / ${rk(g.james.skills['Convergence Use'])})`); }
+    { let n = 0; const dir = new URL('../saves/', import.meta.url); // review low 2: from the test's own folder, any cwd
+      for (const f of readdirSync(dir).filter((x) => /\.(json|txt)$/.test(x))) {
+          let s = null;
+          try { const t = readFileSync(new URL(f, dir), 'utf8').trim(); s = t.startsWith('BAZ1:') ? JSON.parse(gunzipSync(Buffer.from(t.slice(5), 'base64'))) : JSON.parse(t); if (s.data) s = typeof s.data === 'string' ? JSON.parse(s.data) : s.data; } catch (e) { assert(false, `DG1 I: saves/${f} reads (${e.message})`); continue; }
+          const j = (s.state || s.game || s).james; if (!j) continue; n++;
+          assert(rk(j.gu) >= rk(j.skills?.['Convergence Use']), `DG1 I: GU not behind Convergence Use in saves/${f} (${rk(j.gu)} / ${rk(j.skills?.['Convergence Use'])})`);
+      }
+      assert(n >= 30, `DG1 I: every save read (${n})`); }
 }
 // v0.11.100 (owner 2026-11-09 16:08, pick SB1): (M) the smart rule's Qi shield only once a weapon is formed (Fable's review
 // of v0.11.98, medium 1); (Q) the FAQ names the snare (Fable's sentence); (T) the T10 no-miss is the sung weapons', not the

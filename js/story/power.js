@@ -2,7 +2,9 @@
  * Power gap, Long Forest scaling with a ceiling, and the "stomp" texts.
  *
  * DEGREE (how badly the enemy is outclassed), measured when a fight starts:
- *   jp  = max(GU check, Convergence Use check) + 0.3 × realm        (James's power)
+ *   jp  = GU check + 0.3 × realm                                     (James's power)
+ *   (v0.11.101, owner pick DG1: GU alone, as every strike and the defence read it; it was max(GU, Convergence Use),
+ *    the same number in play, since every Convergence award gives GU the same XP, so GU is never behind)
  *   ep  = for the strongest enemy, max(DC, attack − 1)              (their power)
  *   (v0.11.40, E1: in Incremental Mode ep includes the fight's no-dice raise, noDiceUp: the fight as it will be fought;
  *    v0.11.100, owner pick SB1, E: and the no-dice shift, −NO_DICE_DC_SHIFT, that every combat check takes off the DC)
@@ -36,7 +38,8 @@ export const ATK_CAP = 9;
 export const STOMP = {};
 export const registerStomp = (table) => Object.assign(STOMP, table);
 
-export const jamesPower = (g) => Math.max(skillCheck(g.james.gu), skillCheck(g.james.skills['Convergence Use'])) + 0.3 * (g.james.realm || 0);
+/** v0.11.101 (DG1): GU alone (the fists' own reading since v0.11.82 is now every fight's). */
+export const jamesPower = (g) => skillCheck(g.james.gu) + 0.3 * (g.james.realm || 0);
 export const enemyPower = (enemies) => Math.max(...enemies.map((e) => Math.max(e.dc || 0, (e.atk || 0) - 1)));
 /** v0.11.40 (E1): `up` is the fight's no-dice raise (noDiceUp), so the degree (and "End it in one move.") reads the fight as it will be fought. */
 export function degreeOf(g, enemies, up = 0, power = jamesPower(g)) {
@@ -66,7 +69,7 @@ export function prepare(g, enc) {
         .map((e) => (e.realm == null && ENEMY_REALM[e.name] != null ? { ...e, realm: ENEMY_REALM[e.name] } : e))
         // enemies share the T10 L10 ceiling: no defence or attack above a check of 50
         .map((e) => (e.dc > ENEMY_CAP || e.atk > ENEMY_CAP ? { ...e, dc: Math.min(e.dc, ENEMY_CAP), atk: Math.min(e.atk, ENEMY_CAP) } : e));
-    const degree = degreeOf(g, enemies, noDiceUp(enc.id) - NO_DICE_DC_SHIFT, enc.style === 'unarmed' ? skillCheck(g.james.gu) + 0.3 * (g.james.realm || 0) : jamesPower(g)); // v0.11.82 (review): fists read on GU alone
+    const degree = degreeOf(g, enemies, noDiceUp(enc.id) - NO_DICE_DC_SHIFT); // v0.11.82: fists on GU alone; v0.11.101 (DG1): every fight
     const st = STOMP[enc.id];
     const keepTail = enc.intro?.includes('Ashfall does not kneel') ? ' Behind you, Ashfall does not kneel.' : '';
     const intro = (st?.posture ? st.posture(g, degree) + keepTail : enc.intro) + (enc.tail ? `\n\n${enc.tail}` : ''); // v0.11.82: a spar's or a brawl's tail (its terms, Yuki)
