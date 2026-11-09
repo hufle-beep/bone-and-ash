@@ -21,7 +21,7 @@ double-tap guard, so no tap is swallowed and a run no longer depends on how busy
 """
 import json, random, re, socket, subprocess, sys, time
 from pathlib import Path
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 
 ROOT = Path(__file__).resolve().parent.parent
 BAD = re.compile(r"\bundefined\b|\bNaN\b|\[object Object\]|Tasks \(preview\)|\bClassic\b")
@@ -38,12 +38,18 @@ def check_text(pg, where, strict=False):
 
 def until(pg, what, ms=5000, state=None, arg=None):
     """v0.11.21: wait for a selector (state: visible, hidden, attached, detached) or, for a JS expression or function,
-    until it is truthy; False when the time runs out: the check after it then reports as before."""
+    until it is truthy; False when the time runs out: the check after it then reports as before.
+    v0.11.103 (owner pick BF1, U): only a timeout is quiet. Any other error (a JS syntax error in the expression, a bad
+    selector) is a failure naming the wait: such a wait never waited, and under load Chromium also reported it as a page
+    error (the part 2 "missing ) after argument list" flake, v0.11.85–v0.11.102). Pass values with `arg`, never inside the text."""
     try:
         if state: pg.wait_for_selector(what, state=state, timeout=ms)
         else: pg.wait_for_function(what, arg=arg, timeout=ms)
         return True
-    except Exception: return False
+    except PWTimeout: return False
+    except Exception as e:
+        fails.append(f"until: the wait itself failed ({what[:80]}): {(str(e).splitlines() or [type(e).__name__])[0][:160]}")  # review low 1: an empty message
+        return False
 
 def in_game(pg, ms=5000):
     """the menu closed and the game drawn (render() runs inside the click, so this is usually true at once)"""
@@ -279,7 +285,7 @@ def faq(pg, url):
     other = next((q for q in news if q != first), None)
     if other:
         pg.click(f'details[data-faq="{other}"] > summary')
-        until(pg, f"() => !document.querySelector('details[data-faq=\"{other}\"] .fnew')", 3000)
+        until(pg, "q => ![...document.querySelectorAll('details[data-faq]')].some(d => d.dataset.faq === q && d.querySelector('.fnew'))", 3000, arg=other)  # v0.11.103 (BF1, F): the name as an argument ("Yuki's job" broke the text)
         until(pg, f"() => (JSON.parse(localStorage.getItem('boneash.faq.v1') || '{{}}').seen || {{}})[{json.dumps(other)}] === 1", 3000)
         if pg.query_selector(f'details[data-faq="{other}"] .fnew'): fails.append(f'FAQ: opening "{other}" kept its new tag')
     check_text(pg, 'the FAQ')

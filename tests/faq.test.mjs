@@ -108,5 +108,8 @@ assert(order.join('|') === qs.filter((q) => order.includes(q)).join('|'), 'entri
 assert(faqMatch('Days, sleep and the night', text('Days, sleep and the night'), ['sleep', 'night']) && !faqMatch('Days, sleep and the night', text('Days, sleep and the night'), ['sleep', 'zebra']), 'search: every word must be in the question or answer');
 assert(!faqMatch('X', '<b>bold</b>', ['b>']) && faqMatch('X', '<b>bold</b>', ['bold']), 'search reads the text, not the tags');
 
+// v0.11.103 (BF1, Opus's review low 2): the browser test puts each name into a CSS selector `details[data-faq="…"]`
+{ const bad = FAQ.map(([q]) => q).filter((q) => /["\\]/.test(q)); assert(bad.length === 0, `no FAQ question holds a double quote or a backslash (the browser test's selectors) (${JSON.stringify(bad)})`); }
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

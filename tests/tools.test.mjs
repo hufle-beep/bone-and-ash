@@ -33,6 +33,39 @@ const t0 = Date.now();
 
 // start the bot runs first (they take the time); the quick checks below run while they play
 const TMP = mkdtempSync(path.join(tmpdir(), 'boneash-tools-'));
+// v0.11.103 (owner pick BF1, T): the browser test's wait helper is quiet only on a timeout; any other error in a wait (the
+// part 2 flake: "Yuki's job" pasted into a JS string) is a failure naming the wait. Played on fake pages, no browser.
+{
+    const py = `
+import sys, json; sys.path.insert(0, 'tools')
+import browser as b
+from playwright.sync_api import TimeoutError as PWTimeout
+class Page:
+    def __init__(s, exc): s.exc = exc
+    def wait_for_function(s, what, arg=None, timeout=0):
+        if s.exc: raise s.exc
+    def wait_for_selector(s, what, state=None, timeout=0):
+        if s.exc: raise s.exc
+out = {}
+b.fails.clear(); out['ok'] = [b.until(Page(None), '1'), len(b.fails)]
+b.fails.clear(); out['timeout'] = [b.until(Page(PWTimeout('Timeout 3000ms exceeded.')), '0', 3000), len(b.fails)]
+b.fails.clear(); out['syntax'] = [b.until(Page(Exception('SyntaxError: missing ) after argument list')), "() => f('Yuki's job')"), list(b.fails)]
+b.fails.clear(); out['selector'] = [b.until(Page(Exception('Unexpected token')), 'div[', 1000, 'attached'), list(b.fails)]
+b.fails.clear(); out['empty'] = [b.until(Page(ValueError()), '1'), list(b.fails)]
+print(json.dumps(out))
+`;
+    let o = null;
+    try { o = JSON.parse(execFileSync('python3', ['-c', py], { cwd: ROOT, encoding: 'utf8' }).trim().split('\n').pop()); } catch (e) { assert(false, `BF1 T: the wait helper's fake-page run (${String(e).slice(0, 160)})`); }
+    if (o) {
+        assert(o.ok[0] === true && o.ok[1] === 0, `BF1 T: a wait that holds returns true, no failure (${JSON.stringify(o.ok)})`);
+        assert(o.timeout[0] === false && o.timeout[1] === 0, `BF1 T: a timeout returns false quietly (${JSON.stringify(o.timeout)})`);
+        assert(o.syntax[0] === false && o.syntax[1].length === 1 && /until: the wait itself failed .*Yuki's job.*missing \) after argument list/.test(o.syntax[1][0]), `BF1 T: a broken expression is a failure naming the wait (${JSON.stringify(o.syntax)})`);
+        assert(o.empty[0] === false && o.empty[1].length === 1 && /ValueError/.test(o.empty[1][0]), `BF1 T: an error with no message names its type (review low 1) (${JSON.stringify(o.empty)})`);
+        assert(o.selector[0] === false && o.selector[1].length === 1 && /until: the wait itself failed \(div\[\)/.test(o.selector[1][0]), `BF1 T: a broken selector too (${JSON.stringify(o.selector)})`);
+    }
+    const src = readFileSync(path.join(ROOT, 'tools/browser.py'), 'utf8');
+    assert(!/until\(pg, f"[^"]*data-faq=\\"\{/.test(src), 'BF1 F: the FAQ wait no longer pastes an entry name into the JS text');
+}
 // v0.11.21: the tasks runs play their games with --bots-only (no rule checks): that was 20 s of the full check, for nothing this compares
 const RUNS = [['story', 'tests/story.test.mjs', 51, []], // v0.11.28 (owner pick S2): 100 → 51, the fewest that still get 2 workers
     ['tasks', 'tests/tasks.test.mjs', 51, ['--bots-only']]];
