@@ -251,7 +251,7 @@ Fungus. Finally, something you actually have a doctorate in.`,
 
 Yuki is flat to the ground, tail tip twitching. Through the bond you get a single, crystalline thought: *mine.*`,
         choices: [
-            { text: 'A bone dart, thrown from cover. Clean and quick.', qi: 2, check: { skill: 'Convergence Use', dc: 3 }, time: 10, do: (g) => { addItem(g, 'hare_raw', 2); return ['+2 Glassback hare (dressed). Yuki pretends she let you have it.']; }, to: 'stream', fail: 'hunt_miss' },
+            { text: 'A bone dart, thrown from cover. Clean and quick.', qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 3 }, time: 10, do: (g) => { addItem(g, 'hare_raw', 2); return ['+2 Glassback hare (dressed). Yuki pretends she let you have it.']; }, to: 'stream', fail: 'hunt_miss' },
             { text: 'Let Yuki drive it toward you, then grab.', check: { skill: 'GU', dc: 4, bonus: (g) => (g.yuki.fight.level >= 2 ? 1 : 0) }, time: 20, do: (g) => { addItem(g, 'hare_raw', 2); bumpRel(g, 'Yuki', 2, 0); return ['+2 Glassback hare (dressed). Teamwork. Disgusting, bloody teamwork.']; }, to: 'stream', fail: 'hunt_miss' },
             { text: 'Leave it. Glass armour sounds like a learning experience you don\'t need.', to: 'stream' },
         ],
@@ -264,7 +264,7 @@ Yuki is flat to the ground, tail tip twitching. Through the bond you get a singl
 
 She does not accept your defence.`,
         choices: [
-            { text: 'Try again further downstream.', show: (g) => !g.flags.hunt2, time: 30, do: set('hunt2'), check: { skill: 'Convergence Use', dc: 3 }, qi: 2, xp: true, failDo: () => [`Downstream there is a second hare, and a bone dart, and the dart ends up in the mud a hand's width from where the hare was. Yuki does not come back out of the reeds for some time. When she does, she walks past you to the water and drinks, slowly, with her back turned.`], to: 'hunt_got', fail: 'stream' },
+            { text: 'Try again further downstream.', show: (g) => !g.flags.hunt2, time: 30, do: set('hunt2'), check: { skill: 'GU', xpTo: 'Convergence Use', dc: 3 }, qi: 2, xp: true, failDo: () => [`Downstream there is a second hare, and a bone dart, and the dart ends up in the mud a hand's width from where the hare was. Yuki does not come back out of the reeds for some time. When she does, she walks past you to the water and drinks, slowly, with her back turned.`], to: 'hunt_got', fail: 'stream' },
             { text: 'Back to the stream.', to: 'stream' },
         ],
     },
@@ -381,7 +381,7 @@ Your Parallel Cognition is already labelling him. Qi like a coal under ash: a fe
 He glances at you once, the quick appraising glance cultivators here give everyone — *root? realm? threat?* — and finds nothing. No root. No Qi. Not a flicker. His eyes slide off you the way they'd slide off a fence post. You, apparently, do not register. Of the local kind, and of the kind that likes it.`,
         choices: [
             { text: '"Morning. Is this a private extortion or can anyone join?"', check: { skill: 'GU', dc: 4 }, to: 'gao_talked', fail: 'gao_fight_start' },
-            { text: 'A bone needle through the back of his hand, before he knows you\'re here.', show: (g) => !!g.flags.sneak, qi: 3, check: { skill: 'Convergence Use', dc: 3 }, do: set('gao_hand'), to: 'gao_hand', fail: 'gao_fight_start' },
+            { text: 'A bone needle through the back of his hand, before he knows you\'re here.', show: (g) => !!g.flags.sneak, qi: 3, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 3 }, do: set('gao_hand'), to: 'gao_hand', fail: 'gao_fight_start' },
             { text: 'Step in front of her and let him make the first mistake.', to: 'gao_fight_start' },
         ],
     },

@@ -3,9 +3,9 @@
 // A seeded Incremental Mode bot plays until each point is reached and saves the game there.
 // Make a new set whenever the save format changes, so tests/saves.test.mjs keeps old and new saves loading.
 import { writeFileSync, readFileSync } from 'node:fs';
+import { smartAction } from '../tests/lib/smartfight.mjs'; // v0.11.96 (BT1)
 import { SCENES } from '../js/story/prologue.js';
-import { newGame, ensureBars, startCombat, combatStep, COMBAT_ACTIONS, serialize, deserialize } from '../js/core/game.js';
-import { INC_ONLY_ACTIONS, actionOpen } from '../js/core/forms.js';
+import { newGame, ensureBars, startCombat, combatStep, serialize, deserialize } from '../js/core/game.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
 import { isTaskHub, isTaskChoice, taskCards, taskOpen, runTask, taskState } from '../js/core/tasks.js';
 
@@ -15,9 +15,7 @@ const rnd = (n) => { rs = (rs * 1103515245 + 12345) >>> 0; return (rs >>> 8) % n
 
 function fight(g) {
     for (let t = 0; t < 400 && g.combat; t++) {
-        const act = actionOpen(g, 'spear') && g.james.qi >= 3 && t % 2 === 0 ? 'spear' : g.james.qi >= 4 && t % 3 === 1 ? 'needle' : g.james.qi >= 3 ? 'blade' : 'needle';
-        const ok = !INC_ONLY_ACTIONS.has(act) || actionOpen(g, act);
-        const out = combatStep(g, ok && COMBAT_ACTIONS[act] ? act : 'guard');
+        const out = combatStep(g, smartAction(g, t)); // v0.11.96 (BT1): the shared smart rule
         if (out?.done) { goTo(g, SCENES, out.next); return; }
     }
 }

@@ -35,6 +35,7 @@ import { sceneView, choose, goTo } from '../js/core/story.js';
 import { isTaskHub, isTaskChoice, taskCards, taskOpen, runTask, taskState, setYuki, yukiLane } from '../js/core/tasks.js';
 import { medCards, runMed, canMeditate } from '../js/core/meditate.js';
 import { writeFileSync } from 'node:fs';
+import { smartAction } from './lib/smartfight.mjs'; // v0.11.96 (BT1)
 import { SHARD, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
 
 const argv = process.argv.slice(2);
@@ -76,16 +77,13 @@ const TRAIN_GROUP = /Practice|Militia|Workshop|Train|Drill/i;
 const dayKey = (g) => `${g.scene}@${g.wake?.n ?? clockParts(g.minutes).day}`;
 const doneSet = (mem, g) => { const k = dayKey(g); return mem.done[k] || (mem.done[k] = new Set()); };
 
-/** A fight to its end: smart (the tasks test's smart branch) or random (its random branch, fleeing now and then). */
+/** A fight to its end: smart (the shared smart rule, tests/lib/smartfight.mjs, v0.11.96) or random (its random branch, fleeing now and then). */
 function fight(g, st, smart) {
     const id0 = g.combat?.id || '?';
     for (let t = 0; t < 400 && g.combat; t++) {
         let out;
         if (smart) {
-            const act = actionOpen(g, 'spikes') && !g.combat.fieldUsed && g.james.qi >= 6 ? 'spikes'
-                : actionOpen(g, 'spear') && g.james.qi >= 3 && t % 2 === 0 ? 'spear'
-                : g.james.qi >= 4 && t % 3 === 1 ? 'needle' : g.james.qi >= 3 ? 'blade' : 'dart';
-            out = combatStep(g, !INC_ONLY_ACTIONS.has(act) || actionOpen(g, act) ? act : 'dart');
+            out = combatStep(g, smartAction(g, t)); // v0.11.96 (BT1): the shared smart rule
         } else {
             const acts = Object.keys(COMBAT_ACTIONS).filter((id) => !INC_ONLY_ACTIONS.has(id) || actionOpen(g, id));
             out = (t % 7 === 6 && g.combat.flee) ? combatFlee(g) : combatStep(g, pick(acts));

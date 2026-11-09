@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // The fight lab (v0.11.80, owner pick L1; research.md #52). Tool only: it changes nothing in the game.
 // It plays the tasks test's bot games (tests/tasks.test.mjs, its own seeds) and, at every fight they start, plays that
-// same fight again on copies under fixed tactics: smart (the test's smart bot), random, blade only, darts only,
+// same fight again on copies under fixed tactics: smart (the bots' shared rule, tests/lib/smartfight.mjs), random, blade only, darts only,
 // needle only, spear only, guard + blade. A table per fight: win %, median rounds, median HP left on a win; the smart
 // tactic's win % by thirds of James's power (weak / middle / strong); the lowest GU from which smart wins 90 %;
 // and the flags (easy fights, one tactic always wins, guard never pays, blade best). The bots' own games play as before.
@@ -77,7 +77,7 @@ if (argv.includes('--lab-worker')) {
     const failed = parts.reduce((a, p) => a + p.fail, 0);
     const sum = summarizeAll(samples, only ? 1 : min);
     console.log(`Fight lab: ${games} bot games, ${workers} worker${workers > 1 ? 's' : ''}, ${samples.length} fight states${only ? ` (${only})` : ''} (${oneMove} one-move finishes not counted). Win %, median rounds (r), median HP left on a win (hp, % of max).`);
-    console.log('Tactics: smart = the tasks test\'s smart bot; random = the bot\'s random pick, no running; spear and darts count only the states where James can sing them.\n');
+    console.log('Tactics: smart = the bots\' shared smart rule (tests/lib/smartfight.mjs); random = the bot\'s random pick, no running; spear and darts count only the states where James can sing them.\n');
     for (const l of tableLines(sum)) console.log(l);
     if (failed) console.log(`\n(${failed} test failures in the bot games while playing — run node tests/tasks.test.mjs for details)`);
     if (jsonOut) writeFileSync(jsonOut, JSON.stringify({ games, workers, states: samples.length, oneMove, ...sum, bots }, null, 1));

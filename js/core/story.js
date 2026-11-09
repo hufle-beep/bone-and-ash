@@ -225,7 +225,7 @@ export function choose(g, scenes, index, { task = false } = {}) {
         partial = !ok && roll.ratio >= 0.5 && gives(c).length > 0;
         if (partial) ok = true;
         lines.push(`${checkText(roll)} — ${partial ? 'partly' : ok ? 'success' : 'failure'}${roll.crit ? ' (double!)' : ''}`);
-        if (c.xp !== false) lines.push(...awardXp(g, c.check.skill, c.check.band || 'standard', { fail: !ok, factor: partial ? roll.ratio : 1 }));
+        if (c.xp !== false) lines.push(...awardXp(g, c.check.xpTo || c.check.skill, c.check.band || 'standard', { fail: !ok, factor: partial ? roll.ratio : 1 }));
     }
     if (onChoose && ok) onChoose(g, s.id, index, c); // v0.11.33: once-per-Coil work counts only when it succeeds (owner 14:05)
     if (c.time) lines.push(...advance(g, fast ? pickedMinutes(c.time) : c.time, { work: true }));

@@ -29,6 +29,7 @@ const planOf = (g) => taskState(g).queue;
 const dayOver = (g, scenes, id) => (nightLock(g) ? !taskCards(g, scenes, id).some((x) => x.id === id && x.status === 'open') : taskCards(g, scenes, id).some((x) => x.id === id && x.status === 'late'));
 
 import { writeFileSync } from 'node:fs';
+import { smartAction } from './lib/smartfight.mjs'; // v0.11.96 (BT1)
 import { GAMES, FULL, SHARD, WORKERS, SEED, SENSIBLE, REPORT, STATS_OUT, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
 import { seen as touched, track, noteView, noteCards, mergeSeen, seenOut as touchedOut } from './lib/seen.mjs'; // v0.11.22: for tools/leftovers.mjs
 let pass = 0, fail = 0;
@@ -636,7 +637,7 @@ function fight(g, run) {
     for (let t = 0; t < 400 && g.combat; t++) {
         const smart = run % 2 === 0;
         const acts = Object.keys(COMBAT_ACTIONS).filter((id) => !INC_ONLY_ACTIONS.has(id) || actionOpen(g, id)); // v0.11.4: the spear and the spike field when he can sing them
-        const act = smart ? (actionOpen(g, 'spikes') && !g.combat.fieldUsed && g.james.qi >= 6 ? 'spikes' : actionOpen(g, 'spear') && g.james.qi >= 3 && t % 2 === 0 ? 'spear' : g.james.qi >= 4 && t % 3 === 1 ? 'needle' : g.james.qi >= 3 ? 'blade' : 'dart') : acts[rnd(acts.length)];
+        const act = smart ? (smartAction(g, t)) : acts[rnd(acts.length)]; // v0.11.96 (BT1): the shared smart rule
         const out = (!smart && t % 7 === 6 && g.combat.flee) ? combatFlee(g) : combatStep(g, act);
         if (out?.done) { const k = `inc:${id0 || '?'}:${smart ? 'smart' : 'random'}`; const f = fightStats[k] || (fightStats[k] = { win: 0, lose: 0, flee: 0 }); f[out.done] = (f[out.done] || 0) + 1; goTo(g, SCENES, out.next); return; }
     }
@@ -1329,6 +1330,50 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
         let o = null; for (let i = 0; i < NO_DICE_ROUND_CAP + 5 && g.combat; i++) o = combatStep(g, 'guard');
         assert(o?.done && g.minutes < night0 + 120, `v0.11.91: ${sc}${kind ? ` (${kind})` : ''} is over before 02:00 even at the round cap (${o?.done}, ${g.minutes - night0} min after midnight)`);
     }
+}
+// v0.11.96 (owner 2026-11-09 14:16, pick BT1): (N + S) one smart rule for every bot that fights smart
+// (tests/lib/smartfight.mjs); (H) the 19 story checks where James throws a dart or drives a needle, on GU with their XP
+// to Convergence Use, as in a fight; (F) the FAQ says so (Fable's sentence)
+{
+    const { smartAction, SMART_SHIELD_AT } = await import('./lib/smartfight.mjs');
+    const { actionCost: cost } = await import('../js/core/game.js');
+    const A = COMBAT_ACTIONS;
+    const at = (cuT, cuL, qi = 99) => { const g = ensureBars(newGame(9600 + cuT * 10 + cuL)); g.james.skills['Convergence Use'] = { tier: cuT, level: cuL, xp: 0 }; g.james.gu = { tier: 3, level: 1, xp: 0 }; ensureBars(g); startCombat(g, { id: 'bt1_test', enemies: [{ name: 'Foe', hp: 99, dc: 3, atk: 3, dmg: 2 }], win: 'stream', lose: 'stream' }); g.james.qi = qi; return g; };
+    assert(SMART_SHIELD_AT === 0.35, 'BT1 S: the shield at 35% HP or less');
+    // S: the shield at or under 35% HP while a foe will strike; not above, not when every foe is staggered or held, not without the Qi
+    { const g = at(1, 1); g.james.hp = SMART_SHIELD_AT * jamesHpMax(g); assert(smartAction(g, 0) === 'qshield', `BT1 S: shield at 35% HP (${smartAction(g, 0)})`); }
+    { const g = at(1, 1); g.james.hp = SMART_SHIELD_AT * jamesHpMax(g) + 1; assert(smartAction(g, 0) !== 'qshield', 'BT1 S: no shield above 35% HP'); }
+    { const g = at(1, 1); g.james.hp = 1; g.combat.enemies[0].staggered = true; assert(smartAction(g, 0) !== 'qshield', 'BT1 S: no shield when no foe will strike'); }
+    { const g = at(1, 1, 0); g.james.hp = 1; g.james.qi = cost(g, A.qshield) - 0.1; assert(smartAction(g, 0) !== 'qshield', 'BT1 S: no shield without its Qi'); }
+    // N: the spear when he can sing it, else the blade (free once formed unless it's the fragile knife), darts, guard
+    { const g = at(3, 1); g.combat.fieldUsed = true; assert(actionOpen(g, 'spear') && smartAction(g, 0) === 'spear', `BT1 N: the spear when open (${smartAction(g, 0)})`); g.james.qi = 0; g.combat.spearFormed = true; assert(smartAction(g, 1) === 'spear', 'BT1 N: a formed spear costs nothing'); }
+    { const g = at(1, 9, 0); assert(actionOpen(g, 'spear') && !fragileKnife(g), 'BT1 test state: a knife and the spear'); g.combat.bladeFormed = true; assert(smartAction(g, 0) === 'blade', 'BT1 N: no Qi for the spear: the formed knife swings for free'); }
+    { const g = at(1, 6, 0); assert(fragileKnife(g) && actionOpen(g, 'dart'), 'BT1 test state: the fragile knife, darts open'); // the knife breaks every swing, so it is never formed at the bot's turn (review, medium 2)
+      g.james.qi = cost(g, A.blade); assert(smartAction(g, 0) === 'blade', 'BT1 N: the fragile knife while its Qi lasts');
+      g.james.qi = cost(g, A.blade) - 0.1; assert(smartAction(g, 0) === 'dart', `BT1 N: the knife can't be paid: darts (${smartAction(g, 0)})`);
+      g.james.qi = cost(g, A.dart) - 0.1; assert(smartAction(g, 0) === 'guard', 'BT1 N: nothing paid: guard'); }
+    { const g = at(1, 1); g.combat.style = 'unarmed'; assert(smartAction(g, 0) === 'strike', 'BT1: a strike in a brawl (fists cost no Qi)'); g.james.qi = 0; assert(smartAction(g, 0) === 'strike', 'BT1: a strike in a brawl with no Qi'); }
+    { const g = at(1, 1); g.combat.style = 'spar'; const a = smartAction(g, 0); assert(['blade', 'spear', 'guard'].includes(a), `BT1: a spar move in a spar (${a})`); }
+    { let bad = 0; for (let t = 1; t <= 4; t++) for (const l of [1, 5, 9]) for (const qi of [0, 2, 3, 5, 9, 30]) for (const f of [0.1, 0.5, 1]) { const g = at(t, l, qi); g.james.hp = f * jamesHpMax(g); for (let r = 0; r < 3; r++) if (['needle', 'blast'].includes(smartAction(g, r))) bad++; } assert(bad === 0, `BT1: the smart rule never picks the needle or the Qi blast (${bad})`); }
+    // H: the 19 throws on GU, XP to Convergence Use; nothing else has xpTo; the singing checks stay on Convergence
+    const THROWS = ['hunt:0', 'hunt_miss:0', 'herb_girl:1', 'wild_forage:2', 'wild_hunt:0', 'wild_hunt:1', 'wild_hunt:2', 'wild_train:0', 'wild_train:3', 'far_hunt:3', 'dw_forage:2', 'dw_hunt:1', 'ah_hunt:1', 'bl_train:1', 'bl_train:2', 'lf_hunt:0', 'lf_hunt:1', 'lf_train:0', 'lf_train:3'];
+    const xs = []; for (const [id, s] of Object.entries(SCENES)) (s.choices || []).forEach((c, i) => { if (c.check?.xpTo) xs.push(`${id}:${i}`); });
+    assert(xs.length === 19 && THROWS.every((k) => xs.includes(k)), `BT1 H: the 19 throws carry xpTo (${xs.length}: ${xs.join(', ')})`);
+    for (const k of THROWS) { const [id, i] = k.split(':'); const c = SCENES[id].choices[Number(i)]; assert(c.check.skill === 'GU' && c.check.xpTo === 'Convergence Use', `BT1 H: ${k} on GU, XP to Convergence (${c.check.skill} / ${c.check.xpTo})`); }
+    const sing = []; for (const [id, s] of Object.entries(SCENES)) (s.choices || []).forEach((c, i) => { if (/^(Sing a single bone needle|Needles and fishhooks|Make her a set of bone needles|Put your hand on the great skull)/.test(String(c.text))) sing.push(`${id}:${i}:${c.check?.skill}`); });
+    assert(sing.length === 4 && sing.every((x) => x.endsWith(':Convergence Use')), `BT1 H: making needles and singing stay on Convergence (${sing.join(', ')})`);
+    // H: the XP lands on Convergence Use (half shared to GU, as every Convergence check), in a story choice and on a task card
+    const shared = (lines) => { const c = lines.find((l) => /^Convergence Use \+\d+ XP/.test(l)), u = lines.find((l) => /^GU \+\d+ XP/.test(l)); const n = (l) => Number(l?.match(/\+(\d+)/)?.[1]); return { c: n(c), u: n(u), check: lines.find((l) => / \/ DC /.test(l)) }; }; // the award's own lines (review, low 5: a level-up can't break it)
+    { const g = ensureBars(newGame(9650)); g.james.skills['Convergence Use'] = { tier: 1, level: 5, xp: 0 }; ensureBars(g); g.scene = 'hunt'; g.james.qi = 99; // darts from T1 L5
+      const x = shared(choose(g, SCENES, 0).lines);
+      assert(/^GU /.test(x.check || '') && x.c > 0 && x.c === x.u, `BT1 H: the hunt checked on GU, its XP to Convergence with half shared to GU (${x.check}; CU +${x.c}, GU +${x.u})`); }
+    { const g = ensureBars(newGame(9651)); g.scene = 'wilds'; g.minutes = 3 * 1440 + 9 * 60; g.james.qi = 30; g.james.satiety = 70;
+      const card = taskCards(g, SCENES).find((k) => k.id === 'wild_hunt:2' && k.status === 'open'); // the crab: a needle into the shell's joint
+      assert(!!card && /^GU /.test(card.tag || ''), `BT1 H: the crab card's tag names GU (${card?.tag})`);
+      const x = shared(runTask(g, SCENES, 'wild_hunt:2').lines);
+      assert(/^GU /.test(x.check || '') && x.c > 0 && x.c === x.u, `BT1 H: the crab card's XP to Convergence, half shared to GU (${x.check}; CU +${x.c}, GU +${x.u})`); }
+    // F: the FAQ (Fable's sentence)
+    { const { FAQ } = await import('../js/core/faq.js'); const e = FAQ.find(([q]) => q === 'Skills and checks'); assert(e[1]({ coil: { n: 1 } }).includes('A thrown dart or a driven needle, in a fight or on a hunt, is checked on GU but pays its XP to Convergence Use.'), 'BT1 F: the FAQ says it'); }
 }
 // v0.11.95 (owner 2026-11-09 12:26, pick Q1 at 12:43): every weapon sung with Convergence and checked on GU, one hit
 // modifier (+1), the weapons differ in damage and what they do; the Qi blast (Convergence Use, ignores armour) and the Qi

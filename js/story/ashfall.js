@@ -278,7 +278,7 @@ Mortal Vessel. Foundation. Core Formation. The realms go up like a ladder into c
             { text: 'Fight.', show: (g) => g.flags.far_kind !== 'deer', combat: farHunt, to: 'far_won' },
             { text: 'Back off. Not today.', show: (g) => g.flags.far_kind !== 'deer', time: 60, to: 'ashfall' },
             { text: 'Let them go. Not today.', show: (g) => g.flags.far_kind === 'deer', time: 60, to: 'ashfall' },
-            { text: 'A dart, from a hundred paces, through the gap in the birches.', show: (g) => g.flags.far_kind === 'deer', qi: 2, check: { skill: 'Convergence Use', dc: 5 }, time: 120, do: (g) => { addItem(g, 'venison', 3); bumpRel(g, 'Village', 5, 0); return ['+3 Ash-deer venison, and the hunters have a new story to tell.']; }, failDo: () => ['Gone, like smoke.'], to: 'ashfall' },
+            { text: 'A dart, from a hundred paces, through the gap in the birches.', show: (g) => g.flags.far_kind === 'deer', qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 5 }, time: 120, do: (g) => { addItem(g, 'venison', 3); bumpRel(g, 'Village', 5, 0); return ['+3 Ash-deer venison, and the hunters have a new story to tell.']; }, failDo: () => ['Gone, like smoke.'], to: 'ashfall' },
         ],
     },
     far_won: {

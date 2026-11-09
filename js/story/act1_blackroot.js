@@ -396,7 +396,7 @@ Mei Lin wades out to the chestnuts with her skirts knotted at her hip and her ja
         choices: [
             { text: 'The pale gill-fungi on the drowned trunks.', check: { skill: 'GU', dc: 5, bonus: () => 2 }, time: 50, do: (g) => { addItem(g, 'ghost_gill', 2); return ['+2 Ghost-gill. Your omnitool is ecstatic. You are mildly ecstatic.']; }, failDo: (g) => { g.james.hp -= 2; return ['Leeches. The fungi win this round. −2 HP.']; }, to: 'dw_hub' },
             { text: 'Wade out and help with the chestnuts.', check: { skill: 'GU', dc: 3 }, time: 50, do: (g) => { addItem(g, 'river_cress', 4); bumpRel(g, 'Mei Lin', 2, 2); return ['+4 water-chestnuts (as river cress). Mei Lin\'s lips are blue and she\'s laughing about something Yuki did.']; }, failDo: (g) => { addItem(g, 'river_cress', 1); return ['You slip. +1 chestnut, one soaked biologist.']; }, to: 'dw_hub' },
-            { text: 'Go frogging with Ya.', check: { skill: 'Convergence Use', dc: 4 }, time: 50, do: (g) => { eat(g, 18); bumpRel(g, 'Ya', 3, 3); return ['Needles through frogs, frogs on a stick, frogs in your mouth. +18 satiety. Ya kisses you on the ear for a good throw, as if that\'s normal.']; }, failDo: (g) => { bumpRel(g, 'Ya', 1, 0); return ['The frogs are faster than you. Ya is faster than the frogs. She shares. Eventually.']; }, to: 'dw_hub' },
+            { text: 'Go frogging with Ya.', check: { skill: 'GU', xpTo: 'Convergence Use', dc: 4 }, time: 50, do: (g) => { eat(g, 18); bumpRel(g, 'Ya', 3, 3); return ['Needles through frogs, frogs on a stick, frogs in your mouth. +18 satiety. Ya kisses you on the ear for a good throw, as if that\'s normal.']; }, failDo: (g) => { bumpRel(g, 'Ya', 1, 0); return ['The frogs are faster than you. Ya is faster than the frogs. She shares. Eventually.']; }, to: 'dw_hub' },
         ],
     },
     dw_hunt: {
@@ -415,7 +415,7 @@ Mei Lin wades out to the chestnuts with her skirts knotted at her hip and her ja
 "It was a *present*."`,
         choices: [
             { text: 'Go for the serpent.', combat: serpentFight, to: 'dw_serpent_won' },
-            { text: 'Darts at the roosting fowl.', qi: 2, check: { skill: 'Convergence Use', dc: 5 }, time: 50, do: (g) => { addItem(g, 'fowl_raw', 2); return ['+2 Marsh fowl.']; }, failDo: () => ['A storm of honking feathers and nothing else.'], to: 'dw_hub' },
+            { text: 'Darts at the roosting fowl.', qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 5 }, time: 50, do: (g) => { addItem(g, 'fowl_raw', 2); return ['+2 Marsh fowl.']; }, failDo: () => ['A storm of honking feathers and nothing else.'], to: 'dw_hub' },
         ],
     },
     dw_serpent_won: {
@@ -641,7 +641,7 @@ Yuki, on your shoulder, flattens her ears and sends you a thought that consists 
 There are hill-hares in the gullies too: small, fast, ash-coloured. Less exciting. Less likely to set you on fire.`,
         choices: [
             { text: 'Take the hawks before they take Yuki.', combat: hawksFight, to: 'ah_hawks_won' },
-            { text: 'Darts at the hill-hares instead.', qi: 2, check: { skill: 'Convergence Use', dc: 5 }, time: 50, do: (g, r) => { addItem(g, 'hare_raw', 2); return [r && r.ratio < 1 ? `The darts go out flat through the ash haze and most of them hit ash. One hare stops being fast. Ya fetches it without being asked and holds it up by the ears, considering it. "Thin," she says. "Like you." Above you the hawks wheel off, unimpressed, trailing sparks.` : `The darts go out flat through the ash haze and the hares stop being fast. Ya fetches them without being asked and comes back holding them up by the ears. "Small," she says. "But you hit what you aimed at. Rare, for you." Above you the hawks wheel off, disappointed, trailing sparks.`, '+2 hill-hares.']; }, failDo: () => ['Ash-coloured hares on ash-coloured hills. You hit a lot of ash.'], to: 'ah_hub' },
+            { text: 'Darts at the hill-hares instead.', qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 5 }, time: 50, do: (g, r) => { addItem(g, 'hare_raw', 2); return [r && r.ratio < 1 ? `The darts go out flat through the ash haze and most of them hit ash. One hare stops being fast. Ya fetches it without being asked and holds it up by the ears, considering it. "Thin," she says. "Like you." Above you the hawks wheel off, unimpressed, trailing sparks.` : `The darts go out flat through the ash haze and the hares stop being fast. Ya fetches them without being asked and comes back holding them up by the ears. "Small," she says. "But you hit what you aimed at. Rare, for you." Above you the hawks wheel off, disappointed, trailing sparks.`, '+2 hill-hares.']; }, failDo: () => ['Ash-coloured hares on ash-coloured hills. You hit a lot of ash.'], to: 'ah_hub' },
         ],
     },
     ah_hawks_won: {
@@ -798,8 +798,8 @@ You wake with Mei Lin's hands on your face and Ya sitting beside you, holding a 
         text: (g) => `${region(g) === 'dw' ? 'A dry trunk, long enough to move on.' : region(g) === 'ah' ? 'A flat of ash between two ridges.' : 'The broad back of the root.'} Ya watches you train with the critical eye of someone who has never had a lesson in her life and has never lost a fight she wanted to win. Mei Lin watches Ya watching you, and pretends she isn't.`,
         choices: [
             { text: 'Spar with Ya.', show: daily('bt_ya'), check: { skill: 'GU', dc: 5 }, time: 60, do: (g) => { markDaily(g, 'bt_ya'); bumpRel(g, 'Ya', 2, 2); return ['She throws you twice. You throw her once. She\'s thrilled.']; }, failDo: (g) => { markDaily(g, 'bt_ya'); g.james.hp -= 2; bumpRel(g, 'Ya', 1, 1); return ['She throws you four times. −2 HP. She\'s thrilled.']; }, to: 'bl_train' },
-            { text: 'Darts at a knot in the bark, from farther and farther.', show: daily('bt_dart'), qi: 2, check: { skill: 'Convergence Use', dc: 5 }, time: 60, do: (g) => { markDaily(g, 'bt_dart'); return []; }, failDo: (g) => { markDaily(g, 'bt_dart'); return []; }, to: 'bl_train' },
-            { text: 'Needle drills, slow and exact.', show: daily('bt_needle'), qi: 4, check: { skill: 'Convergence Use', dc: 6 }, time: 60, do: (g) => { markDaily(g, 'bt_needle'); return []; }, failDo: (g) => { markDaily(g, 'bt_needle'); return []; }, to: 'bl_train' },
+            { text: 'Darts at a knot in the bark, from farther and farther.', show: daily('bt_dart'), qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 5 }, time: 60, do: (g) => { markDaily(g, 'bt_dart'); return []; }, failDo: (g) => { markDaily(g, 'bt_dart'); return []; }, to: 'bl_train' },
+            { text: 'Needle drills, slow and exact.', show: daily('bt_needle'), qi: 4, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 6 }, time: 60, do: (g) => { markDaily(g, 'bt_needle'); return []; }, failDo: (g) => { markDaily(g, 'bt_needle'); return []; }, to: 'bl_train' },
             { text: 'Footwork with Yuki.', show: daily('bt_yuki'), check: { skill: 'GU', dc: 5 }, time: 60, do: (g) => { markDaily(g, 'bt_yuki'); return awardYukiFightXp(g, 'standard'); }, failDo: (g) => { markDaily(g, 'bt_yuki'); return awardYukiFightXp(g, 'standard'); }, to: 'bl_train' },
             { text: 'Enough.', to: hubFor },
         ],

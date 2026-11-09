@@ -3,6 +3,7 @@
 // tools/fightlab.mjs runs it on the fights the bots meet; tests/tools.test.mjs checks these parts on made-up and real states.
 import { combatHooks, startCombat, combatStep, COMBAT_ACTIONS, ensureBars, jamesHpMax } from '../../js/core/game.js';
 import { actionOpen, INC_ONLY_ACTIONS } from '../../js/core/forms.js';
+import { smartAction } from '../../tests/lib/smartfight.mjs'; // v0.11.96 (BT1)
 
 /** A rank from a tier and level (T1 L1 = 1, T10 L10 = 100), and back. */
 export const rank = (n) => 10 * ((n?.tier || 1) - 1) + (n?.level || 1);
@@ -13,11 +14,11 @@ export const stream = (seed) => { let s = seed >>> 0 || 1; return (n) => { s = (
 
 /**
  * The tactics. `open(g)`: false when James can't use it in this fight state (that state isn't counted for it).
- * smart = the tasks test's smart bot; random = the bot's random pick (no running away: the lab measures the fight); like
- * the bot it may pick darts before James can sing them, and the game turns that into guard.
+ * smart = the bots' shared smart rule (tests/lib/smartfight.mjs, v0.11.96); random = the bot's random pick (no running away: the lab measures the fight); like
+ * the bot it may pick a move James can't use here, and the game turns that into guard (or the fight's own move).
  */
 export const TACTICS = {
-    smart: { label: 'smart', pick: (g, t) => (actionOpen(g, 'spikes') && !g.combat.fieldUsed && g.james.qi >= 6 ? 'spikes' : actionOpen(g, 'spear') && g.james.qi >= 3 && t % 2 === 0 ? 'spear' : g.james.qi >= 4 && t % 3 === 1 ? 'needle' : g.james.qi >= 3 ? 'blade' : 'dart') },
+    smart: { label: 'smart', pick: (g, t) => smartAction(g, t) }, // v0.11.96 (BT1): the shared rule (tests/lib/smartfight.mjs)
     random: { label: 'random', pick: (g, t, rnd) => { const a = Object.keys(COMBAT_ACTIONS).filter((id) => !INC_ONLY_ACTIONS.has(id) || actionOpen(g, id)); return a[rnd(a.length)]; } },
     blade: { label: 'blade only', pick: () => 'blade' },
     dart: { label: 'darts only', open: (g) => actionOpen(g, 'dart'), pick: () => 'dart' },

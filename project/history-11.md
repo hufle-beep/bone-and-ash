@@ -2,6 +2,30 @@
 
 Started 2026-11-09 (v0.11.86), when `history-10.md` passed 45 KB. Newer than `history-10.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.96 (word for word)
+
+### From "Decided in chat"
+
+- **v0.11.93: docs only, every option laid out everywhere (owner 11:08: "strengthen the rule to lay out all sub options again, since the T-a and b were missed. Also log the two small timing options as the next items. once all that is done, give me the hardened hard rule to paste in the project instructions and update claude.md, then update the docs and send me the handover for a new chat"; Claude's options 11:08; owner 11:09 "A go"):**
+  - **The sub-items:** **W1** rule 1's "every option, everywhere" (any option or sub-option in any message gets the full layout; nothing offered in passing; not analysed = "open, options later", never put up for a pick); **W2** a check before sending; **L** the after-bed fights' timing as the next item (section 0 and NEXT; out of section 2's v0.11.92 line).
+  - **The options:** **A 🟢 W1 + W2 + L (recommended)** / B 🟡 W1 + L / C 🟠 W1 (colours: how well each stops a skipped layout). **Picked: A.** Not picked: B, C.
+  - **Also:** `3bbaf73` filled in for 0.11.92; after v0.11.92 Claude uploaded 8 docs; v0.11.90's notes to `history-11.md`; the hardened rule 1 given in chat for the project's Instructions; a handover message for a new chat.
+
+### From "Open items" (the NEXT item's list, as of v0.11.95)
+
+- (1) #53 done in v0.11.86; (2) **the sitting loop: done in v0.11.87** (O1; what is left, the levers not picked with their numbers: the roadmap's section 2, v0.11.87 line); (3) **the roadmap trim-and-split: done in v0.11.88** (A); (4) **the four small items: done in v0.11.89** (P1); (5) **the v0.11.87 review's first finding (the Day 19 heal): done in v0.11.90** (R1); (6) **B push 1, the night (Push through the night and Exhaustion gone, the day ends at 00:00, beds from 21:00): done in v0.11.91** (decisions below; the review's second finding gone with it). (7) **B push 2, N1 (a night fight costs sleep): done in v0.11.92** (O1 + X1 + K1). (8) **the after-bed fights' timing: done in v0.11.94** (T-b1). (9) **Group d's first item, the blade's lead: done in v0.11.95** (Q1 + P2).
+
+### From "Open items" (the art, as of v0.11.95)
+
+- **The art (the owner's PC with Comfy Desktop):** Y3 (the prologue's great-cat and human pictures) done in v0.11.49–v0.11.51; **the Act 1 art** (owner picks 2026-11-08 00:59 A1 + F1 + Y1 + T1, style p / n, cast `james_shaggy`): pushes 1–3 and 4a / 4b done in v0.11.54–v0.11.61 (every picture that draws Yuki exists in all three forms). **The second round of small fixes** (owner picks 2026-11-08 08:15 P1 + A1 + B1 + M1: two pushes): **push 5a done in v0.11.62** (15 pictures), **push 5b done in v0.11.63** (17 size redraws; decisions below). **The rest of this round's art is tabled for the later art pass after the story and mechanics pass (owner 10:40 "Table it all for the next art pass after the story/mechanics pass and put it on the roadmap. let's move on from art"):** push 5c (glass windows and modern objects, the sweep's list in the roadmap), the cold review's findings of 5b, the four kept-old size redraws, the ridge redraw, the code art and `clamp2.js` close-ups (kept in git as placeholders for the later acts, owner 08:19); the full list is in the roadmap's later art pass. M1: the story-text mismatches (hawks like eagles, the envoy's umbrella, root_camp's place, the seclusion waterfall, ship_log's Wren, the night scenes on a daytime grove, James greyer in a few) and the low cosmetic items wait for the later art pass, with 5a's left-overs (decisions below). **Art pushes: the owner picks from full sheets** of every valid, fixed seed (owner 02:41; `CLAUDE.md` rule 7). The James / Yuki uniformization and one CLAMP / Monogatari style for every picture: the later art pass after the story and mechanics pass (owner 02:13; roadmap). The seed-ships: original grown-wood starships, never another work's design (owner 02:26–02:27). Later: Z3, Z4. **Files on the owner's PC:** every push's job lists and pictures in `tools/art/README.md`; push 5a's and 5b's files: moved word for word to `history-11.md` in v0.11.86.
+
+### From "Version notes"
+
+## v0.11.93 — docs only: every option laid out everywhere (A)
+
+- **Files:** `CLAUDE.md` (rule 1: W1 + W2), `project/working-agreement.md` (the same, with the owner's words), the roadmap (section 0's next item, moved word for word from section 2), `tests/tools.test.mjs` (both rules checked), `sw.js`, `tests/README.md`, docs (v0.11.90 to `history-11.md`). The game identical to 0.11.92; saves unchanged.
+- **Checks:** docs and a test only (rule 2): `node tests/tools.test.mjs`, `node tools/consistency.mjs`, `bash tools/check.sh quick`. No game file, save or bot code changed, so the game and the bot numbers can't move; what could break: nothing beyond the two rule tests.
+
 ## Moved from the handover in v0.11.95 (word for word)
 
 ### From "Decided in chat"

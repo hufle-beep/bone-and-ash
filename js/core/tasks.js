@@ -283,7 +283,7 @@ function resolveWork(g, scenes, hubId, card, id) {
         band = k.band; ratio = k.ratio;
         g.stats.checks += 1; if (band !== 'fail') g.stats.wins += 1;
         lines.push(`${k.skill} ${k.value} / DC ${k.dc} — ${BAND_TEXT[band]}`);
-        if (c.xp !== false) lines.push(...awardXp(g, c.check.skill, c.check.band || 'standard', { fail: band === 'fail', factor: band === 'partial' ? ratio : 1 }));
+        if (c.xp !== false) lines.push(...awardXp(g, c.check.xpTo || c.check.skill, c.check.band || 'standard', { fail: band === 'fail', factor: band === 'partial' ? ratio : 1 }));
     }
     const mins = Math.round((((card.entry?.time || 0) + (c.time || 0)) * NEW_LENGTH) / cardSpeed(t.fam[id] || 0));
     lines.push(...advance(g, mins, { work: true }));
