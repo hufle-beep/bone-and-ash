@@ -1261,7 +1261,7 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     assert(actionDmg(b, COMBAT_ACTIONS.strike).join() === '6,12' && actionDmg(b, COMBAT_ACTIONS.throw).join() === '3,6' && guardBonus(b) === 2, 'brawl: strike 2–4 and throw 1–2 × GU tier 3, guard +2');
     assert(fightAction(b, 'dart') === 'strike' && fightAction(b, 'guard') === 'cover' && fightAction(b, 'blade') === 'strike', 'brawl: a bone action becomes a strike, guard becomes cover');
     const q0 = b.james.qi; const rb = combatStep(b, 'strike');
-    assert(b.james.qi === q0 && rb.lines[0].startsWith('Fists only. You leave the song where it is') && rb.lines.some((l) => l.startsWith('Step in and hit:')), 'brawl: no Qi, the opening line, the strike label');
+    assert(b.james.qi === q0 && rb.lines[0].startsWith('You leave the song where it is') && rb.lines.some((l) => l.startsWith('Step in and hit:')), 'brawl: no Qi, the opening line, the strike label');
     assert(/they said fists/.test(be.intro), 'brawl: the cat-form Yuki line');
     b.combat.enemies.forEach((x) => { x.hp = 999; x.dc = 0.6; x.atk = 0.6; }); const rt = combatStep(b, 'throw');
     assert(rt.lines.some((l) => /hits the dust and takes a moment to work out which way is up/.test(l)), "brawl: the throw's stagger line");
@@ -1283,6 +1283,43 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     assert(/offers no help whatsoever/.test(lostCat) && /rescues no one/.test(lostHuman), 'texts: ya_lost by her form');
     const pr = mk(1, 1); pr.flags.ya_brawl = 'won';
     assert(/the disarm that took her spear/.test(SCENES.fo_price.text(pr)) && !/bone-cage/.test(SCENES.fo_price.text(pr)), 'texts: fo_price');
+}
+// v0.11.89 (owner 2026-11-09 08:23, pick P1 = F1 + T3 + X1 + J1): the four small items
+{
+    const { instantWin, awardFightXp } = await import('../js/core/game.js');
+    const { readFileSync } = await import('node:fs');
+    const baoCh = SCENES.rt_brawl_start.choices[0];
+    const mk = (cuT, guT, coils = 0) => { const g = ensureBars(newGame(8901, { closed: true })); g.james.skills['Convergence Use'].tier = cuT; g.james.skills['Convergence Use'].level = 5; g.james.gu.tier = guT; g.james.gu.level = 5; if (coils) g.coil.n = coils; return ensureBars(g); };
+    const num = (lines, re) => Number((lines.find((l) => re.test(l)) || '').match(re)?.[1] ?? NaN);
+    // F1: "Fists only." stays on the button and in the intro, not in round 1's opening
+    const fe = combatHooks.before(mk(2, 3), baoCh.combat(mk(2, 3)));
+    assert(/^Fists only\./.test(baoCh.text) && /Fists only\./.test(fe.intro) && !/Fists only/.test(fe.opening) && fe.opening.startsWith('You leave the song where it is'), 'F1: "Fists only." on the button and the intro, gone from the round-1 opening');
+    // T3: the forced path says the terms, in the other path's exact words
+    const yaCh = SCENES.ya_challenge.choices.find((c) => c.combat);
+    assert(SCENES.ya_forced.choices.length === 1 && SCENES.ya_forced.choices[0].text === 'Fine. ' + yaCh.text.slice('Take the fight. '.length) && SCENES.ya_forced.choices[0].to === 'ya_won' && SCENES.ya_forced.choices[0].combat === yaCh.combat, 'T3: ya_forced\'s "Fine." says the terms (the same fight, the same ending)');
+    // X1: the pool on CU's tier like every fight, all of it to GU; Yuki's bond share the same as any fight's; CU untouched
+    for (const [cuT, guT] of [[2, 3], [1, 2], [3, 1], [5, 5]]) {
+        const ref = mk(cuT, guT), refL = awardXp(ref, 'Convergence Use', 'standard');
+        const g = mk(cuT, guT), cu0 = JSON.stringify(g.james.skills['Convergence Use']), L = awardFightXp(g, 'unarmed', 'standard');
+        const refCu = num(refL, /^Convergence Use \+(\d+) XP/), refGu = num(refL, /^GU \+(\d+) XP/), refY = num(refL, /^Yuki \(bond\) Qi Use \+(\d+)/);
+        const gu = num(L, /^GU \+(\d+) XP/), y = num(L, /^Yuki \(bond\) Qi Use \+(\d+)/);
+        assert(JSON.stringify(g.james.skills['Convergence Use']) === cu0 && !L.some((l) => /^Convergence Use/.test(l)), `X1 (CU T${cuT} GU T${guT}): no CU XP`);
+        assert(Math.abs(gu - (refCu + refGu)) <= 1 && y === refY, `X1 (CU T${cuT} GU T${guT}): GU ${gu} = the small fight's CU + GU (${refCu} + ${refGu}), Yuki ${y} = ${refY}`);
+        const n = mk(cuT, guT); assert(JSON.stringify(awardFightXp(n, undefined, 'standard')) === JSON.stringify(refL) && JSON.stringify(awardFightXp(mk(cuT, guT), 'spar', 'standard')) === JSON.stringify(refL), `X1 (CU T${cuT}): an ordinary fight and the spar pay as before`);
+    }
+    // the owner's example: Act 1 end, CU T2 GU T3, Coil 5 (×2 bonus): GU 72, Yuki 36 (was 108 / 54); the coil bonus as for any fight
+    const ex = mk(2, 3, 5), exL = awardFightXp(ex, 'unarmed', 'standard'), exRef = awardXp(mk(2, 3, 5), 'Convergence Use', 'standard');
+    assert(num(exL, /^GU \+(\d+) XP/) === 2 * num(exRef, /^GU \+(\d+) XP/) && num(exL, /^Yuki \(bond\) Qi Use \+(\d+)/) === num(exRef, /^Yuki \(bond\) Qi Use \+(\d+)/), `X1: at Coil 5 the brawl pays twice a small fight's GU (${exL.join(' | ')})`);
+    // both award paths: the combat win and the one-move finish
+    const w = mk(2, 3); const we = combatHooks.before(w, baoCh.combat(w)); startCombat(w, we); w.combat.enemies.forEach((x) => { x.hp = 1; x.dc = 0.6; });
+    const cuW = JSON.stringify(w.james.skills['Convergence Use']); let ow = null; for (let t = 0; t < 5 && w.combat; t++) ow = combatStep(w, 'strike');
+    const want = awardFightXp(mk(2, 3), 'unarmed', we.band || 'standard');
+    assert(ow?.done === 'win' && JSON.stringify(w.james.skills['Convergence Use']) === cuW && num(ow.lines, /^GU \+(\d+) XP/) === num(want, /^GU \+(\d+) XP/), `X1: the combat win pays the new GU (${ow?.lines.filter((l) => /XP|Qi Use/.test(l)).join(' | ')})`);
+    const iw = mk(2, 3); const ie = baoCh.combat(iw); const ir = instantWin(iw, ie);
+    assert(!ir.lines.some((l) => /^Convergence Use/.test(l)) && num(ir.lines, /^GU \+(\d+) XP/) === num(want, /^GU \+(\d+) XP/), `X1: the one-move finish pays the same (${ir.lines.join(' | ')})`);
+    // J1: the Journal says "checks made"
+    const main = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+    assert(main.includes('${g.stats.checks} checks made, ${g.stats.wins} passed') && !main.includes('checks rolled'), 'J1: the Journal reads "checks made"');
 }
 // v0.11.71 (owner picks Y1 + C1 + X1; Yuki's texts Fable's): Yuki switches food when her kind is full; "Cultivate until
 // the limit" gives one total per skill; from Coil 2 the Blackroot's Explore is not once a day.

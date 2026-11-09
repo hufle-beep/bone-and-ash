@@ -42,7 +42,7 @@ const brawl = (g) => encounter(g, {
     win: 'rt_brawl_won', lose: 'rt_brawl_lost',
     // v0.11.82 (owner picks B1 + Y1; texts Fable's): unarmed, on GU; Yuki only in her human form
     style: 'unarmed',
-    opening: `Fists only. You leave the song where it is, lift your hands, and remind yourself that Bao is a neighbour, not a wolf.`,
+    opening: `You leave the song where it is, lift your hands, and remind yourself that Bao is a neighbour, not a wolf.`,
     tail: yukiForm(g) === 'human' ? `Yuki leaves the bench, shakes out her sleeves, and takes the place on your left. Bao looks at her — slight, white-haired, a head shorter than you, ears flat against all that hair — and says, with enormous gravity, "The outlander's lady may stand with him. No one will strike her hard." "No," Yuki agrees. "No one will." Ya, delighted: "Three against three. Better."` : `Yuki watches from the wine-shop bench — curled on it, or lying along the length of it, depending on the day — with the air of a referee who has already decided nobody here is worth scoring. Through the bond: *they said fists. I don't have any. Carry on.*`,
 });
 const elderFight = (g) => {

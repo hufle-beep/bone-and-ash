@@ -266,10 +266,10 @@ function addXp(n, amount) {
  * Standard award, as in the engine: pool = band × the skill's tier, split equally between the skill and GU;
  * Yuki (bonded) gets a share of the same size to her Qi Use. A failed attempt pays 25%.
  */
-export function awardXp(g, skillName, band = 'standard', { fail = false, factor = 1 } = {}) {
+export function awardXp(g, skillName, band = 'standard', { fail = false, factor = 1, poolTier = null } = {}) {
     const name = actingName(g, skillName);
     const n = getSkill(g, name);
-    let pool = (XP_BANDS[band] ?? 30) * n.tier;
+    let pool = (XP_BANDS[band] ?? 30) * (poolTier ?? n.tier); // poolTier: v0.11.89, the unarmed brawl (awardFightXp)
     if (fail) pool = Math.floor(pool * FAIL_XP_FRACTION);
     if (factor !== 1) pool = Math.floor(pool * factor); // a partial result on a task card (v0.9.2)
     pool = Math.floor(pool * coilMult(g) * XP_RATE); // the Coil bonus (v0.11.0), the XP rate (v0.11.85)
@@ -288,6 +288,12 @@ export function awardXp(g, skillName, band = 'standard', { fail = false, factor 
     out.push(atSkillCap(g.yuki.qiUse) && !up3.length ? 'Yuki (bond) Qi Use at T10 L10 (cap)' : `Yuki (bond) Qi Use +${yShare}${up3.length ? ` → ${up3.at(-1)}` : ''}`);
     ensureBars(g);
     return out;
+}
+/** v0.11.89 (owner pick X1): a won fight's XP. The pool sized on CU's tier like every fight; an unarmed fight (Bao's brawl)
+ *  gives all of it to GU (no CU half), so a brawl pays the same total as any small fight. */
+export function awardFightXp(g, style, band = 'standard') {
+    if (style !== 'unarmed') return awardXp(g, 'Convergence Use', band);
+    return awardXp(g, 'GU', band, { poolTier: getSkill(g, actingName(g, 'Convergence Use')).tier });
 }
 export function awardYukiFightXp(g, band = 'standard') {
     const pool = Math.floor((XP_BANDS[band] ?? 30) * g.yuki.fight.tier * coilMult(g) * XP_RATE); // v0.11.85: the XP rate
@@ -676,7 +682,7 @@ export const yukiForm = (g) => (yukiForms(g).includes(g.yuki.form) ? g.yuki.form
 export function instantWin(g, enc) {
     const e = combatHooks.before ? (combatHooks.before(g, enc) || enc) : enc;
     g.stats.kills += e.enemies.length;
-    const xp = awardXp(g, e.style === 'unarmed' ? 'GU' : 'Convergence Use', e.band || 'standard').concat(yukiSitsOut(g, e) ? [] : awardYukiFightXp(g, e.band || 'standard')); // v0.11.82
+    const xp = awardFightXp(g, e.style, e.band || 'standard').concat(yukiSitsOut(g, e) ? [] : awardYukiFightXp(g, e.band || 'standard')); // v0.11.82; v0.11.89 (X1) awardFightXp
     g.lastWin = { id: e.id, degree: e.degree || 3, next: e.win };
     advance(g, 1);
     return { lines: xp, next: e.win, enc: e };
@@ -819,7 +825,7 @@ function finishRound(g, lines) {
     const down = c.enemies.every((e) => e.hp <= 0);
     if (down) {
         g.stats.kills += c.enemies.length;
-        const xp = awardXp(g, c.style === 'unarmed' ? 'GU' : 'Convergence Use', c.band).concat(c.yukiOut ? [] : awardYukiFightXp(g, c.band)); // v0.11.82
+        const xp = awardFightXp(g, c.style, c.band).concat(c.yukiOut ? [] : awardYukiFightXp(g, c.band)); // v0.11.82; v0.11.89 (X1) awardFightXp
         g.lastWin = { id: c.id, degree: c.degree || 1, next: c.win };
         lines.push('', 'It is over.', ...xp);
         const next = c.win;

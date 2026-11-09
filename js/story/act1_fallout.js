@@ -491,7 +491,7 @@ Old Hu looks at you with something like hope. If you take the fight, his face is
     ya_forced: {
         id: 'ya_forced', title: 'She Hits You Anyway', art: 'ya_fight', place: `${P} — the lane`,
         text: `It's an open-handed slap that nearly takes your head off. The whole village inhales at once.`,
-        choices: [{ text: 'Fine.', combat: yaBrawl, to: 'ya_won' }],
+        choices: [{ text: 'Fine. "Your spear against my blade. No armour. Nobody dies."', combat: yaBrawl, to: 'ya_won' }], // v0.11.89 (owner pick T3): the terms said on this path too, the other path's words (Fable's)
     },
     ya_won: {
         id: 'ya_won', title: 'Pinned', art: 'ya_fight', place: `${P} — the lane`,

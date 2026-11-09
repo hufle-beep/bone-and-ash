@@ -635,7 +635,7 @@ ${items.map(([id, n]) => `<div class="row"><span>${esc(ITEMS[id]?.name || id)}</
 }
 function renderJournal() {
     const entries = g.log.slice().reverse().slice(0, 60).map((e) => `<div class="entry"><time>${clockLabel(e.at)}</time>${esc(sceneTitle(e.scene))}${shownLines(e.lines).length ? `<div class="note">${shownLines(e.lines).map((l) => dieHtml(l)).join('<br>')}</div>` : ''}</div>`).join('');
-    view.innerHTML = `<section class="page"><h1>Journal</h1><p class="lede">${showChecks ? `${g.stats.checks} checks rolled, ${g.stats.wins} passed · ` : ''}${g.stats.kills} things that wanted to eat you, didn't · ${g.stats.meals} meals.</p>${entries || '<p class="note">Nothing yet. Give it a minute.</p>'}</section>`;
+    view.innerHTML = `<section class="page"><h1>Journal</h1><p class="lede">${showChecks ? `${g.stats.checks} checks made, ${g.stats.wins} passed · ` : ''}${g.stats.kills} things that wanted to eat you, didn't · ${g.stats.meals} meals.</p>${entries || '<p class="note">Nothing yet. Give it a minute.</p>'}</section>`;
 }
 function renderSaves() {
     const bak = backupList();

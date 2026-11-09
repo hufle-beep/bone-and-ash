@@ -2,6 +2,23 @@
 
 Started 2026-11-09 (v0.11.86), when `history-10.md` passed 45 KB. Newer than `history-10.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.89 (word for word)
+
+### From "Decided in chat"
+
+- **v0.11.86: a Coil ended by choice adds no Coil bonus (#53; Claude's options at 00:58 with the lab's numbers: K0 no change / K1 a bite on the act's first day adds nothing / K2 the same up to the third day / K3 the roadmap's (a)–(e); M1 a Farmer model / M2 none. Owner 01:06: "That isn't what I even thought the problem would be... ok. No manual tail biting. Or if you do, you get reset to the last starting point, either to the Start of the prologue or Act I. Without a bonus. The other ways, such as dying or losing still work normally. Also the part with the collectors resets normally with bonus." Claude's three questions at 01:08: C1 a chosen restart counts as a Coil / C2 it is free; G1 Go round again at Act 1's end also no bonus / G2 it keeps the bonus; W1 a manual bite in Act 1 restarts Act 1 only / W2 both starts; owner 01:09 "Go with your picks"):**
+  - **Picked:** **C1 + G1 + W1** (the build's scope as offered, with M1). A Coil ended by choice (the James tab's Bite the tail; Go round again at Act 1's end) counts as a Coil (the targets, the ★) but adds nothing to the bonus: `coil.free` counts them, `coilMult` = 1 + 0.25 × (earlier Coils − chosen ones). A collapse, a beast, a lost tribute and Shen Qiu add as before. In Act 1 the James tab's bite restarts Act 1 only; the whole game stays offered after a loss and at Act 1's end. Texts (help text, Claude's): the James tab, the bite warning, the Coil screen's "Next Coil", Go round again's labels, the FAQ. The **Farmer** model (log only; 100 / 20 games). Not picked: K0–K3, C2, G2, W2, M2.
+  - **The numbers shown before the pick** (lab, 300 games each; game-days to clear the whole game): honest Completionist 43.3; the dawn farm 19.8 today (84% on its first real Coil), 43.3 with the rule; honest numbers unchanged. The rest (K3's (a)–(e), the death farm left open): the roadmap's section 2, v0.11.86 line.
+  - **As built:** see the version note.
+  - **Also:** `e8a13db` filled in for 0.11.85; after v0.11.85 Claude uploaded 7 docs (handover, roadmap, roadmap-done, changelog, restore-points, history-10, reference); v0.11.83's notes to the new `history-11.md` (part 10 past 45 KB).
+
+### From "Version notes"
+
+## v0.11.86 — a Coil ended by choice adds no Coil bonus (#53; C1 + G1 + W1)
+
+- **Files:** `js/core/game.js` (`coilMult` reads `coil.free`, `coilMultNext`, `startActCoil` carries it), `coil.js` (`rewind` counts a chosen end), `js/story/coil_scenes.js`, `js/main.js`, `js/core/faq.js` (the texts; no whole-game choice after a chosen bite); tests: tasks (the v0.11.86 block; old Day 1 bites expecting ×1.5 now die), faq, models (the Farmer, `--farmer-games`), tools, `tools/browser.py` part 1; `tools/check.mjs` (7 / 5 blocks); `sw.js`, `tests/README.md`, timings, docs (v0.11.83 to the new `history-11.md`). Saves: one new field, `coil.free` (absent = 0, an old save's bonus as before; kept through a save, Act 1 and a whole-game rewind); no id changed.
+- **Checks:** a game change (rule 2): the full `bash tools/check.sh` (run 3): exit 0, 0 drifted of 139, 0 past 5; the models unchanged (Careful 3.51 / 6.71, Completionist 3.96 / 5.88, the Sitter 2.78 / 2.80), the Farmer 3.94 / 5.82 (from its first real Coil; ×1 after its ten bites); the four browser parts pass. **Cold review on Fable:** every Coil-end path and `free` (saves, Act 1, both rewinds) fine; fixed: the James tab's bite at a lost tribute or Shen Qiu counted as by choice (now that loss's, `tabWhy`), "×1 as fast" shown, the FAQ's formula, "adds no" in Go round again. Runs: 1 exit 0; 2 a roadmap test (#53's marker); 3 exit 0, 0 drifted.
+
 ## Moved from the handover in v0.11.88 (word for word)
 
 ### From "Decided in chat"

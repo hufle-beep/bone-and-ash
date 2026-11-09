@@ -2,6 +2,16 @@
 
 Started in v0.11.88 (owner pick A, 2026-11-09 02:37, D2), so `roadmap-done.md` (part 1) stays readable in one go. Newer than `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.89 (word for word)
+
+### The "Last updated" line of v0.11.88
+
+Last updated: 2026-11-09 (v0.11.88, docs only: the roadmap trimmed and split (owner pick A: T1 + D2 + S1 + X): the done and stale lines moved word for word to the new `roadmap-done-2.md`; sections 3–6 and Decided moved word for word to the new `roadmap-2.md`; **next: the owner's pick** (the open small items, the Fable review's two findings, group d); v0.11.87, the sitting loop). Update in every push.
+
+### From section 1, group e (done in v0.11.89, J1)
+
+- *(new in v0.11.83, from the FAQ's cold review; the owner's call)* The Journal's top line still says "checks rolled" (`main.js` `renderJournal`, shown with Show checks on), a dice-era word: "checks made".
+
 ## Moved in v0.11.88 (word for word)
 
 ### The old "Last updated" line
