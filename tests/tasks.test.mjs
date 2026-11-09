@@ -1330,6 +1330,53 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
         assert(o?.done && g.minutes < night0 + 120, `v0.11.91: ${sc}${kind ? ` (${kind})` : ''} is over before 02:00 even at the round cap (${o?.done}, ${g.minutes - night0} min after midnight)`);
     }
 }
+// v0.11.94 (owner 2026-11-09 11:35, pick T-b1): Ashfall's night 2 (the arson, Gao's token, Gao at the window) and the
+// fallout's barley wolves come after the bed at 01:00 too, never back, and a fight is over before 02:00; a quiet night is untouched
+{
+    const { NO_DICE_ROUND_CAP } = await import('../js/core/game.js');
+    const cases = [['village_night', { vday: 2 }, 6, 'arson'], ['village_night', { vday: 2, gao_broken: true }, 6, null], ['village_night', { vday: 2, gao_spared: true }, 6, null], ['fo_wolf', {}, 8, 'palisade_wolf']];
+    for (const [sc, fl, d, fight] of cases) for (const bed of [15 * 60, 19 * 60, 21 * 60 + 30, 23 * 60 + 59, 24 * 60]) {
+        const g = ensureBars(newGame(9400 + d)); g.minutes = (d - 1) * 1440 + bed; g.scene = sc; Object.assign(g.flags, fl);
+        SCENES[sc].enter?.(g);
+        const night0 = (d - 1) * 1440 + 24 * 60, t0 = g.minutes - night0, what = `${sc}${fight ? ` (${fight})` : Object.keys(fl).slice(1).join('') ? ` (${Object.keys(fl).slice(1).join('')})` : ''}`;
+        assert(t0 === 60, `T-b1: ${what} after a bed at ${bed / 60}h starts at 01:00 (${t0} min after midnight)`);
+        if (!fight) continue;
+        const ch = SCENES[sc].choices.find((c) => c.combat && (!c.show || c.show(g)));
+        const enc = combatHooks.before(g, ch.combat(g)); assert(enc.id === fight && enc.night === true, `T-b1: ${what} is a night fight`);
+        startCombat(g, enc);
+        g.combat.enemies.forEach((x) => { x.hp = 999; x.atk = 0.1; }); // the longest fight: it runs to the round cap
+        let o = null; for (let i = 0; i < NO_DICE_ROUND_CAP + 5 && g.combat; i++) o = combatStep(g, 'guard');
+        assert(o?.done && g.minutes < night0 + 120, `T-b1: ${what} is over before 02:00 even at the round cap (${g.minutes - night0} min after midnight)`);
+    }
+    for (const fl of [{ vday: 1 }, { vday: 2, night5_done: true }, { vday: 3 }]) { // a quiet night: the clock stays where the bed is
+        const q = ensureBars(newGame(9406)); q.minutes = 5 * 1440 + 21 * 60 + 30; Object.assign(q.flags, fl); const m0 = q.minutes;
+        SCENES.village_night.enter(q); assert(q.minutes === m0, `T-b1: a quiet Ashfall night (${JSON.stringify(fl)}) keeps the clock`);
+    }
+    { const late = ensureBars(newGame(9407)); late.minutes = 6 * 1440 + 150; late.flags.vday = 2; SCENES.village_night.enter(late); assert(late.minutes === 6 * 1440 + 150, 'T-b1: entered after 01:00, the clock never goes back'); }
+    // the review (Fable, low 2): end to end through the choices, from supper to the morning: the night at 01:xx, the fight,
+    // dawn at 06:00 the next day with the night marked short (half back), the village day moved on
+    const { goTo: go2 } = await import('../js/core/story.js');
+    for (const [from, idx, d, fl, fightTo, morn] of [['supper', 2, 6, { vday: 2 }, 'arson_won', 'village_morning'], ['fo_night', 0, 8, {}, 'fo_wolf_won', 'fo_morning']]) {
+        const g = ensureBars(newGame(9410 + d)); Object.assign(g.flags, fl); g.minutes = (d - 1) * 1440 + 20 * 60; go2(g, SCENES, from);
+        choose(g, SCENES, idx);
+        const night0 = (d - 1) * 1440 + 24 * 60, at = g.minutes - night0;
+        assert(at >= 60 && at < 120, `T-b1 (end to end): ${from} → ${g.scene} at ${at} min after midnight`);
+        const ci = SCENES[g.scene].choices.findIndex((x) => x.combat && x.to === fightTo && (!x.show || x.show(g)));
+        assert(ci >= 0, `T-b1 (end to end): ${g.scene} offers the fight`);
+        const r = choose(g, SCENES, ci); if (r.combat) startCombat(g, r.combat(g));
+        assert(g.combat && g.flags.night_fight === true, `T-b1 (end to end): ${g.scene}: the fight started and marks the night`);
+        g.combat.enemies.forEach((x) => { x.hp = 0.1; x.atk = 0.1; x.dc = 0.1; }); // a sure win: the morning is what is checked
+        let o = null; for (let k = 0; k < 40 && g.combat; k++) { g.james.qi = jamesQiMax(g); o = combatStep(g, 'blade'); }
+        assert(o?.done && g.minutes < night0 + 120, `T-b1 (end to end): the fight over before 02:00 (${g.minutes - night0} min)`);
+        if (o?.next) go2(g, SCENES, o.next);
+        g.james.hp = Math.round(jamesHpMax(g) * 0.4); const hp0 = g.james.hp, hm = jamesHpMax(g);
+        assert(g.scene === fightTo, `T-b1 (end to end): won, at ${g.scene}`);
+        choose(g, SCENES, 0);
+        const m = g.minutes - (d * 1440);
+        assert(g.scene === morn && m >= 6 * 60 && m < 7 * 60 && !g.flags.night_fight && g.james.hp < hm && g.james.hp >= Math.ceil(hp0 + (hm - hp0) / 2) - 1, `T-b1 (end to end): dawn at ${g.scene}, ${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')} of Day ${d + 1}, HP ${g.james.hp}/${hm} (half back from ${hp0})`);
+        if (fl.vday) assert(g.flags.vday === 3, `T-b1 (end to end): the village day moved on (${g.flags.vday})`);
+    }
+}
 // v0.11.92 (owner 2026-11-09 10:17, pick O1, B push 2): a night fight costs sleep. A fight (or a run) in the night marks the
 // night; at dawn only half of the missing HP and Qi come back, James's and Yuki's; a night without a fight fills every bar
 {

@@ -3,7 +3,7 @@
  * Day 21. Ashfall prepares. On Day 9 Ya walks out of the Blackroot. On Day 10 the expedition to the Old Tree is
  * planned, and at dawn on Day 11 it leaves (→ 'bl_start').
  */
-import { addItem, eat, condense, advance, sleepUntil, jamesHpMax, hasItem, awardYukiFightXp, yukiForm, nightRest } from '../core/game.js';
+import { addItem, eat, condense, advance, sleepUntil, jamesHpMax, hasItem, awardYukiFightXp, yukiForm, nightRest, nightTo } from '../core/game.js';
 import { daily, markDaily, hour, day, eatBest, pantry, foodCount } from './common.js';
 import { encounter, rel, likesMei, likesYa, trioStep, bumpRel } from './act1_common.js';
 
@@ -383,7 +383,7 @@ ${meiLovers(g)
     },
     fo_wolf: {
         id: 'fo_wolf', title: 'In the Barley', art: 'wolves', place: `${P} — the barley line`,
-        enter: (g) => { g.flags.wolf = 'came'; return []; },
+        enter: (g) => { g.flags.wolf = 'came'; nightTo(g, 60); return []; }, // v0.11.94 (T-b1): after the bed, at 01:00, like the camp nights
         text: `Yuki wakes you at the second hour with her claws and one word: *barley*.
 
 Something is moving through the barley toward the houses, low and silent, two shapes, grey on grey. Ash-wolves — drawn, maybe, by the blood from the clinic, or by the smell of a village that has stopped sleeping.

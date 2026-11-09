@@ -2,7 +2,7 @@
  * Days 5–6 in Ashfall Hamlet (the long route): suppers at Mei Lin's, a free day loop around the village,
  * a night visit shaped by what James did to Gao Feng, and bonuses that pay off when the Sect comes on Day 7.
  */
-import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, d6, awardYukiFightXp, jamesHpMax, nightRest } from '../core/game.js';
+import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, d6, awardYukiFightXp, jamesHpMax, nightRest, nightTo } from '../core/game.js';
 import { set, day, hour, daily, markDaily, forestScale, villageScale, grow, eatBest, pantry, foodCount } from './common.js';
 
 const P = 'Ashfall Hamlet';
@@ -84,6 +84,10 @@ Then she's quiet for a long time, and then she leans her shoulder against yours,
     /* ---------- the night: quiet, or Gao Feng's doing (night 5) ---------- */
     village_night: {
         id: 'village_night', title: 'Night in Ashfall', art: (g) => (vday(g) === 2 && !g.flags.night5_done ? ((g.flags.gao_broken) ? 'token' : g.flags.gao_spared ? 'gao_window' : 'arson') : 'village_night'), place: `${P} — the herb loft`,
+        // v0.11.94 (owner 2026-11-09 11:35, pick T-b1): night 2's beats (the arson, Gao's token, Gao at the window) come after
+        // the bed at 01:00, like the camp nights (never back; the fight taken at once is over by 02:00, one after a failed
+        // "Wake the street" starts at 01:50, like the camps' forced fights); a quiet night is untouched
+        enter: (g) => { if (vday(g) === 2 && !g.flags.night5_done) nightTo(g, 60); return []; },
         text: (g) => {
             if (vday(g) !== 2 || g.flags.night5_done) return 'The herb loft smells of mint and drying ginseng. Below, the house breathes. Yuki takes the exact centre of your chest and the exact centre of your sleep, and you let her.';
             if (g.flags.gao_broken) return `Mei Lin shakes you awake in the dark. She has something in her fist, wrapped in cloth: Gao Feng's jade token, the one she took from his sleeve while he lay in the herbs with his arm on backwards.
