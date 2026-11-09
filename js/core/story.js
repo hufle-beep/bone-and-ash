@@ -4,7 +4,7 @@
  *             to | to(g), fail?, do?(g, r) → lines, failDo?(g, r) → lines, combat?: encounter, xp?: false }.
  * A check pays standard XP (25% on a fail) unless xp: false. Pure — no DOM.
  */
-import { rollCheck, awardXp, spendQi, advance, ensureBars, actingCheck, actingName, instantWin, itemFull, takeCapNotes, itemNames, setLootMult, noDiceDc, checkText, addItem } from './game.js';
+import { rollCheck, awardXp, spendQi, advance, ensureBars, actingCheck, actingName, instantWin, itemFull, takeCapNotes, itemNames, setLootMult, noDiceDc, checkText, addItem, canFly, flightMinutes } from './game.js';
 import { STOMP, degreeForChoice } from '../story/power.js';
 import { keepReplies } from './replies.js'; // v0.11.69 (P1)
 
@@ -22,16 +22,20 @@ export function currentScene(g, scenes) {
     return s;
 }
 
+/** v0.11.109 (owner pick FQ1, N): a sung crossing marked `flyFree` costs no Qi while James can fly it (he sings no bridge). */
+export const choiceQi = (g, c) => (c.qi && !(c.flyFree && c.fly && canFly(g)) ? c.qi : 0);
+
 export function choiceTag(g, c) {
     const bits = [];
-    if (c.check) {
+    if (c.check && c.fly && canFly(g)) bits.push('flown'); // v0.11.109 (owner pick FL1, C): a crossing is flown, no check
+    else if (c.check) {
         const bonus = c.check.bonus ? c.check.bonus(g) : 0;
         const v = Math.round((actingCheck(g, c.check.skill) + bonus) * 10) / 10;
         const d = noDiceDc(asText(c.check.dc, g));
         const ratio = v / d;
         bits.push(`${actingName(g, c.check.skill)} ${v} / DC ${d} → ${ratio >= 1 ? 'passes' : ratio >= 0.5 && gives(c).length ? 'partly' : 'fails'}`);
     }
-    if (c.qi) bits.push(`${c.qi} Qi`);
+    if (choiceQi(g, c)) bits.push(`${c.qi} Qi`);
     if (c.combat) bits.push('fight');
     return bits.join(' · ');
 }
@@ -56,7 +60,7 @@ const shown = (g, c) => !c.show || c.show(g);
 /** Why a choice can't be taken right now ('' if it can). */
 function lockReason(g, c) {
     let reason = c.req ? c.req(g) : true;
-    if (reason === true && c.qi && g.james.qi < c.qi) reason = `needs ${c.qi} Qi`;
+    if (reason === true && choiceQi(g, c) && g.james.qi < c.qi) reason = `needs ${c.qi} Qi`;
     return reason === true ? '' : reason;
 }
 /** Choices still worth showing: hide full-stock gathering and anything unaffordable right now, unless that would leave nothing at all. */
@@ -163,6 +167,21 @@ export const isMenuScene = (id) => TIMELESS_PAIR.has(id);
 /** The meta screens (the Coil's, meridians, warnings, Yuki's form). */
 export const isTimeless = (id) => TIMELESS.has(id);
 
+/* ---------- flight (v0.11.109, owner pick FL1) ---------- */
+/** The line after a flown walk, in turn (Fable's, rule 10): {min} flying, {walk} walking. The turn is `g.stats.flown`. */
+export const FLOWN_LINES = [
+    "You fly. {min} min instead of {walk}. The path looks no better from above.",
+    "You ride the current over the trees: {min} min, not {walk}. Yuki keeps pace and looks bored.",
+    "{min} min by air, {walk} on foot. You don't miss the mud.",
+    "The Qi runs your way, more or less. {min} min instead of {walk}.",
+    "You take the high road, which isn't one. {min} min, where walking wanted {walk}.",
+    "Flown: {min} min instead of {walk}. Nobody below looks up. Probably for the best.",
+];
+function flownLine(g, min, walk) {
+    const n = g.stats.flown || 0; g.stats.flown = n + 1;
+    return FLOWN_LINES[n % FLOWN_LINES.length].replace('{min}', min).replace('{walk}', walk);
+}
+
 /* ---------- every choice takes time (task mode, v0.9.5) ---------- */
 /** Scenes whose choices among themselves take no extra time: task hubs and their menus (their cards carry their own time), meta screens. */
 const TIMELESS = new Set(['coil_end', 'coil_dawn', 'meridians', 'ns_warn', 'col_warn', 'yuki_form']);
@@ -212,23 +231,34 @@ export function choose(g, scenes, index, { task = false } = {}) {
     if (c.show && !c.show(g)) throw new Error('Choice not available');
     if (c.req && c.req(g) !== true) throw new Error(`Locked: ${c.req(g)}`);
     const lines = [];
-    if (c.qi && !spendQi(g, c.qi)) throw new Error('Not enough Qi');
+    if (choiceQi(g, c) && !spendQi(g, c.qi)) throw new Error('Not enough Qi');
     const fast = !task && !!familiar && familiar(g, scenes, index, asText(c.text, g)); // v0.11.37 (F1): before this pick marks it
     notePicked(g, s.id, index);
     let roll = null;
     let ok = true;
     let partial = false;
+    const flown = !!(c.check && c.fly && canFly(g)); // v0.11.109 (owner pick FL1, C): from Foundation a crossing is flown
+    // v0.11.109 (owner picks FS1 + MW1; Fable's two reviews): only a marked walk (js/story/walks.js, `c.walk`) is flown, and only
+    // as a story choice: never a card, never with a check, Qi, fight, work or haul in it (camps, sleep and story beats keep their time)
+    const walkOnly = !!c.walk && !task && !c.check && !c.qi && !c.do && !c.combat && gives(c).length === 0;
     if (c.check) {
         roll = rollCheck(g, c.check.skill, asText(c.check.dc, g), c.check.bonus ? c.check.bonus(g) : 0);
         ok = roll.success;
         // a gathering choice between half and full the DC still brings back a thin haul
         partial = !ok && roll.ratio >= 0.5 && gives(c).length > 0;
         if (partial) ok = true;
-        lines.push(`${checkText(roll)} — ${partial ? 'partly' : ok ? 'success' : 'failure'}${roll.crit ? ' (double!)' : ''}`);
+        if (flown) lines.push(asText(c.fly, g)); // no check shown; the roll stays only for its XP, as measured (FL1)
+        else lines.push(`${checkText(roll)} — ${partial ? 'partly' : ok ? 'success' : 'failure'}${roll.crit ? ' (double!)' : ''}`);
         if (c.xp !== false) lines.push(...awardXp(g, c.check.xpTo || c.check.skill, c.check.band || 'standard', { fail: !ok, factor: partial ? roll.ratio : 1 }));
+        if (flown) { ok = true; partial = false; roll = null; }
     }
     if (onChoose && ok) onChoose(g, s.id, index, c); // v0.11.33: once-per-Coil work counts only when it succeeds (owner 14:05)
-    if (c.time) lines.push(...advance(g, fast ? pickedMinutes(c.time) : c.time, { work: true }));
+    if (c.time) {
+        const t0 = fast ? pickedMinutes(c.time) : c.time;
+        const t = walkOnly && typeof c.to === 'string' && movesPlace(g, scenes, s.id, c.to) && !(TIMELESS_PAIR.has(s.id) && TIMELESS_PAIR.has(c.to)) ? flightMinutes(g, t0) : t0; // v0.11.109 (FL1 + FS1, WP): a pure walk elsewhere is flown
+        if (t < t0) lines.push(flownLine(g, t, t0));
+        lines.push(...advance(g, t, { work: true }));
+    }
     takeCapNotes();
     if (ok && c.do) {
         // a critical hunt or forage (total ≥ 2 × DC): a double haul
@@ -238,6 +268,7 @@ export function choose(g, scenes, index, { task = false } = {}) {
         if (crit) setLootMult(2);
         let out = [];
         try { out = c.do(g, roll) || []; } finally { setLootMult(1); }
+        if (flown) out = []; // v0.11.109 (FL1, C): the flown line replaces the scene's own success text; its effects stay
         if (partial) {
             const gained = Object.keys(g.inventory).map((id) => [id, (g.inventory[id] || 0) - ((before0[id]) || 0)]).filter(([, d]) => d > 0);
             const kept = gained.map(([id, d]) => { const keep = Math.max(1, Math.floor(d * roll.ratio)); if (keep < d) addItem(g, id, keep - d); return [id, keep]; });
@@ -257,7 +288,12 @@ export function choose(g, scenes, index, { task = false } = {}) {
     const loc0 = g.location;
     lines.push(...go(g, scenes, dest));
     const extra = defaultMinutes(scenes, s.id, c, g.scene, g.location !== loc0);
-    if (extra) lines.push(...advance(g, fast ? pickedMinutes(extra) : extra, { work: true }));
+    if (extra) {
+        const t0 = fast ? pickedMinutes(extra) : extra;
+        const t = walkOnly && g.location !== loc0 ? flightMinutes(g, t0) : t0; // v0.11.109 (FL1 + FS1, WP)
+        if (t < t0) lines.push(flownLine(g, t, t0));
+        lines.push(...advance(g, t, { work: true }));
+    }
     lines.push(...checkDeath(g, scenes));
     g.log.push({ at: g.minutes, scene: g.scene, lines: lines.slice(0, 12) });
     if (g.log.length > 200) g.log.shift();

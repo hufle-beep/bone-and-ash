@@ -143,7 +143,7 @@ Grey shapes between the white trunks. Coal-red eyes.
 Mei Lin draws her knife and stands next to you without being asked. Ya laughs under her breath, low and happy, like someone hearing music.`,
         choices: [
             { text: 'Fight. Back to back.', combat: roadWolves, to: 'rt_wolves_won' },
-            { text: 'A wall of bone between you and them, then down to the river.', qi: 6, check: { skill: 'Convergence Use', dc: 5 }, time: 30, to: 'rt_ford', fail: 'rt_ambush_forced' },
+            { text: 'A wall of bone between you and them, then down to the river.', qi: 6, check: { skill: 'Convergence Use', dc: 5 }, fly: "The wall goes up. Then so do you, with your company in tow. The wolves watch dinner leave by air and look personally wronged." /* v0.11.109 (owner pick FL1, C): flown from Foundation, Fable's line */, time: 30, to: 'rt_ford', fail: 'rt_ambush_forced' },
         ],
     },
     rt_ambush_forced: {
@@ -181,8 +181,8 @@ Ya hauls you up by your coat. "You fight like a scholar," she says, disgusted. T
 
 "You don't. You're the loudest thinker I've ever met."`,
         choices: [
-            { text: 'Cross carefully, stone by stone.', check: { skill: 'GU', dc: 5 }, time: 40, do: () => [`You go stone to stone with Ya's chin for a map and your mind as quiet as you can make it, which Ya says, afterwards, is not very. Something long shifts under the brown water as Mei Lin passes over it, and doesn't wake. On the far bank Yuki shakes a wet paw at the river, formally, and walks on.`], to: 'rt_camp', fail: 'rt_ford_wake' },
-            { text: 'Sing a bridge of bone from stone to stone.', qi: 8, check: { skill: 'Convergence Use', dc: 5 }, time: 40, do: (g) => { bumpRel(g, 'Mei Lin', 2, 0); return ['A white bridge, ribbed like a spine. Mei Lin crosses it like a woman walking into a temple.']; }, to: 'rt_camp', fail: 'rt_ford_wake' },
+            { text: 'Cross carefully, stone by stone.', check: { skill: 'GU', dc: 5 }, fly: "You cross carefully, a hand's width above every stone, and ferry the rest over the same way. The river sleeps on. Ya says you still think loud." /* v0.11.109 (owner pick FL1, C): flown from Foundation, Fable's line */, time: 40, do: () => [`You go stone to stone with Ya's chin for a map and your mind as quiet as you can make it, which Ya says, afterwards, is not very. Something long shifts under the brown water as Mei Lin passes over it, and doesn't wake. On the far bank Yuki shakes a wet paw at the river, formally, and walks on.`], to: 'rt_camp', fail: 'rt_ford_wake' },
+            { text: 'Sing a bridge of bone from stone to stone.', qi: 8, check: { skill: 'Convergence Use', dc: 5 }, fly: "You sing no bridge. You fly the ford and carry the others over, one trip each. The stones stay stones. The thing in the middle stays asleep." /* v0.11.109 (owner pick FL1, C): flown from Foundation, Fable's line */, flyFree: true /* FQ1: no Qi when flown */, time: 40, do: (g) => { bumpRel(g, 'Mei Lin', 2, 0); return ['A white bridge, ribbed like a spine. Mei Lin crosses it like a woman walking into a temple.']; }, to: 'rt_camp', fail: 'rt_ford_wake' },
         ],
     },
     rt_ford_wake: {
@@ -192,7 +192,7 @@ Ya hauls you up by your coat. "You fight like a scholar," she says, disgusted. T
 The river stands up.`,
         choices: [
             { text: 'Fight it in the shallows.', combat: fordSerpent, to: 'rt_serpent_won' },
-            { text: 'Run for the far bank.', check: { skill: 'GU', dc: 5 }, time: 20, to: 'rt_camp', fail: 'rt_serpent_forced' },
+            { text: 'Run for the far bank.', check: { skill: 'GU', dc: 5 }, fly: "You leave the river upwards, hauling whoever is nearest. The serpent strikes where a running man would be. You are not there, and not running." /* v0.11.109 (owner pick FL1, C): flown from Foundation, Fable's line */, time: 20, to: 'rt_camp', fail: 'rt_serpent_forced' },
         ],
     },
     rt_serpent_forced: {

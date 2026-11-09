@@ -26,6 +26,7 @@ import { MERIDIANS, EXTRA_FROM } from './meridians.js';
 import { installYukiPath } from './yuki_path.js';
 import { installCoil } from './coil_scenes.js';
 import { installOnce } from './oneoff.js';
+import { markWalks } from './walks.js'; // v0.11.109 (owner pick MW1)
 
 const once = (flag) => (g) => !g.flags[flag];
 const set = (...flags) => (g) => { for (const f of flags) g.flags[f] = true; return []; };
@@ -890,6 +891,7 @@ for (const id of ['stream', 'wilds', 'camp', 'night', 'village', 'ashfall', 'sup
 
 installCoil(SCENES);
 installOnce(SCENES); // v0.11.33: the task screens' one-off work, "Call it a day"
+markWalks(SCENES); // v0.11.109 (MW1): the walks flown from Foundation
 
 /* ---------- v0.10.1: the Long Forest in task mode — gated behind the first Coil, climbed one season at a time ---------- */
 /** Task mode, the prologue's Coil 2 or later. Classic keeps the one-step button above. */

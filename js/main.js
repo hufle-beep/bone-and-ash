@@ -5,7 +5,7 @@ import {
     newGame, ensureBars, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, skillCheck, xpToNext, clockLabel, clockLabelG, realmName, yukiForm,
     startCombat, combatStep, combatFlee, COMBAT_ACTIONS, noDiceDc, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage, qiShield,
 } from './core/game.js';
-import { sceneView, choose, goTo, gives } from './core/story.js';
+import { sceneView, choose, goTo, gives, choiceQi } from './core/story.js'; // v0.11.109 (FQ1): choiceQi
 import { showPicked, isTaskHub, isQueueScreen, isTaskChoice, taskCards, taskLabel, taskMinutes, taskOutcome, dryOutcome, outcomeOf, runTask, FAM, yukiLane, setYuki, nextStep } from './core/tasks.js';
 import { SCENES, ITEMS } from './story/prologue.js';
 import { TASK_HUBS } from './story/task_hubs.js';
@@ -752,7 +752,7 @@ function tipFor(b) {
     if (ch) {
         const items = itemNames(ch);
         if (items.length) lines.push(`Can bring back: ${items.join(', ')}.`);
-        if (ch.qi) lines.push(`Costs ${ch.qi} Qi.`);
+        if (choiceQi(g, ch)) lines.push(`Costs ${ch.qi} Qi.`); // v0.11.109 (FQ1): not for a sung crossing he flies
         if (ch.combat) lines.push('Leads to a fight.');
     }
     if (mins) lines.push(`Takes ${durLabel(mins)}, at once.`); // v0.11.64: every card at once

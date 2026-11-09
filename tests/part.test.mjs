@@ -52,6 +52,9 @@ function seedState(g, run) {
     // 2 rounds); not in the heart, where a James who can neither win a fight nor pass a check loops on the roots forever
     if (run % 40 === 29) b.splice(0, 6, 1, 7, 1, 5, 0, 3);
     if (run % 40 === 39 && part === 'return') b.splice(0, 6, 1, 1, 1, 1, 0, 1);
+    // v0.11.109 (owner pick FL1, C): from Foundation the ford is flown, so the GU-failing run 18 walks it at Mortal realm (its skills
+    // kept): it fails the far bank and wins the serpent (rt_serpent_won); the flown crossings are tested in the tasks test
+    if (run % 40 === 18 && part === 'return') b[4] = 0;
     g.james.gu = { tier: b[0], level: b[1], xp: 0 }; g.james.skills['Convergence Use'] = { tier: b[2], level: b[3], xp: 0 }; g.james.realm = b[4]; g.yuki.fight.level = b[5];
     ensureBars(g); g.james.hp = jamesHpMax(g); g.james.qi = jamesQiMax(g); // full, as the bots arrive (newGame's bars were kept before)
 }

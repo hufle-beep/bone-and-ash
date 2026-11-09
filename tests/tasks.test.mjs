@@ -310,6 +310,71 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     assert(NO_DICE_TUNE.collectors.up === 4.5 && NO_DICE_TUNE.rot_ape.up === 14 && COIL_GROWTH === 0.25, `RB-1: the tribute 4.5, the rot ape 14 (v0.11.36; 15 in RB-1), the Coil bonus 0.25 per Coil (${NO_DICE_TUNE.collectors.up}, ${NO_DICE_TUNE.rot_ape.up}, ${COIL_GROWTH})`);
     assert(fmtMult(1) === '1' && fmtMult(1.25) === '1.25' && fmtMult(1.5) === '1.5' && fmtMult(2.75) === '2.75', 'fmtMult: ×1.25 shows as 1.25, not 1.3');
 }
+// v0.11.109 (owner pick FL1, W + C): from Foundation a story choice that takes James elsewhere is flown (÷ (1 + realm), at
+// least 5 minutes, never longer); the seven crossings are flown (no check shown, they succeed, Fable's line replaces the scene's)
+{
+    const { flightMinutes, canFly, FLY_MIN } = await import('../js/core/game.js');
+    const { FLOWN_LINES, choiceTag } = await import('../js/core/story.js');
+    const at = (realm) => { const g = ensureBars(newGame(91)); g.james.realm = realm; return g; };
+    assert(!canFly(at(0)) && canFly(at(1)) && FLY_MIN === 5, 'FL1: flight from Foundation, at least 5 minutes');
+    assert(flightMinutes(at(0), 40) === 40 && flightMinutes(at(1), 40) === 20 && flightMinutes(at(2), 40) === 13 && flightMinutes(at(1), 10) === 5 && flightMinutes(at(1), 4) === 4 && flightMinutes(at(9), 120) === 12, 'FL1: ÷ (1 + realm), floor 5, never longer than walking');
+    assert(FLOWN_LINES.length === 6 && FLOWN_LINES.every((l) => l.includes('{min}') && l.includes('{walk}')), 'FL1: six flown lines, each with both numbers (Fable)');
+    // a walk elsewhere with its own time: the ford's "Cross carefully" (40 min, to rt_camp); and every one of the seven crossings marked
+    const crossings = Object.values(SCENES).flatMap((sc) => (sc.choices || []).filter((c) => c.fly).map((c) => [sc.id, c]));
+    assert(crossings.length === 7 && crossings.every(([, c]) => c.check && typeof c.fly === 'string' && c.fly.length > 40), `FL1: seven flown crossings, each with a check and Fable's line (${crossings.map(([id]) => id)})`);
+    const ford = SCENES.rt_ford, wake = SCENES.rt_ford_wake, iRun = wake.choices.findIndex((c) => /^Run for the far bank/.test(c.text)), iCross = ford.choices.findIndex((c) => /^Cross carefully/.test(c.text));
+    assert(iRun >= 0 && iCross >= 0, 'FL1: the ford\'s two crossings found');
+    for (const realm of [0, 1]) {
+        const g = at(realm); g.scene = 'rt_ford_wake'; g.james.gu = { tier: 1, level: 1, xp: 0 }; // fails every GU check walking
+        const r = choose(g, SCENES, iRun);
+        if (realm === 0) assert(g.scene === 'rt_serpent_forced' && r.roll && !r.roll.success, `FL1: walking, a weak James fails the far bank (${g.scene})`);
+        else assert(g.scene === 'rt_camp' && r.roll === null && r.lines[0] === wake.choices[iRun].fly && !r.lines.some((l) => /DC|failure/.test(l)), `FL1: flying, the far bank is flown: no check shown, Fable's line (${g.scene})`); // the camp's own clock moves on after it, so the minutes are tested on a plain walk below
+        assert(realm ? choiceTag(g, wake.choices[iRun]) === 'flown' : /DC/.test(choiceTag(g, wake.choices[iRun])), 'FL1: the card says flown, not the check');
+    }
+    { // v0.11.109 (owner pick FQ1, N): the two sung bridges cost no Qi when flown; the ambush wall keeps its 6 (it is still sung)
+        const { choiceQi } = await import('../js/core/story.js');
+        const free = crossings.filter(([, c]) => c.flyFree);
+        assert(free.length === 2 && free.every(([, c]) => c.qi === 8 && /bridge|stepping-stones/.test(c.text)) && crossings.some(([, c]) => /of bone between you/.test(c.text) && c.qi === 6 && !c.flyFree), `FQ1: the two sung bridges are free when flown, the wall is not (${free.map(([id]) => id)})`);
+        const iSung = ford.choices.findIndex((c) => c.flyFree); // its label reads by the forms ("Sing stepping-stones of bone …")
+        for (const realm of [0, 1]) { // at Qi 0: walking it can't be sung (8 Qi), flying it goes ahead and costs nothing
+            const g = at(realm); g.scene = 'rt_ford'; g.james.qi = 0; g.james.skills['Convergence Use'] = { tier: 3, level: 1, xp: 0 };
+            let r = null, err = null; try { r = choose(g, SCENES, iSung); } catch (e) { err = e; }
+            assert(choiceQi(g, ford.choices[iSung]) === (realm ? 0 : 8) && (realm ? !err && r.lines.includes(ford.choices[iSung].fly) : /Not enough Qi/.test(err?.message)), `FQ1: the ford's sung bridge at realm ${realm}, Qi 0: ${realm ? 'flown, free' : 'needs 8 Qi'} (${err?.message || 'ok'})`);
+        }
+    }
+    { // v0.11.109 (owner pick FS1, WP; Fable's review mediums 1–5): only a pure walk is flown
+        // B1: the flown wyrm bridge (default 30 min, a check) gets Fable's line and no walk line
+        const rr = SCENES.rr_end, iW = rr.choices.findIndex((c) => c.fly), gw = at(1); gw.scene = 'rr_end'; gw.james.qi = 0;
+        const rw = choose(gw, SCENES, iW);
+        assert(rw.lines.includes(rr.choices[iW].fly) && !gw.stats.flown, 'FS1 (B1): the flown wyrm bridge has its line and no walk line');
+        // a choice with work in it (a check, Qi, a do or a haul) to another place keeps its time at Foundation
+        const busy = Object.values(SCENES).flatMap((sc) => (sc.choices || []).map((c, i) => [sc, c, i])).filter(([sc, c]) => !c.fly && !c.show && !c.req && !c.qi && !c.combat && c.time >= 30 && (c.check || c.do) && typeof c.to === 'string' && SCENES[c.to] && typeof sc.place === 'string' && typeof SCENES[c.to].place === 'string' && sc.place !== SCENES[c.to].place && !SCENES[c.to].enter && !c.fail);
+        assert(busy.length > 3, `FS1: choices with work in them that end elsewhere (${busy.length})`);
+        let kept = 0;
+        for (const [sc, c, i] of busy.slice(0, 12)) { const g = at(1); g.scene = sc.id; const t0 = g.minutes; let r; try { r = choose(g, SCENES, i); } catch { continue; } if (g.minutes - t0 >= c.time && !g.stats.flown && r) kept++; else assert(false, `FS1: ${sc.id} "${String(c.text).slice(0, 40)}" keeps its ${c.time} min at Foundation (${g.minutes - t0})`); }
+        assert(kept > 0, `FS1: work that ends elsewhere keeps its time (${kept})`);
+        // MW1: only a marked walk is flown; a choice that only moves but isn't a walk keeps its time; a card (task: true) never flies
+        const { WALKS, markWalks } = await import('../js/story/walks.js');
+        assert(WALKS.length === 62 && WALKS.every(([id, i]) => SCENES[id]?.choices?.[i]?.walk === true), `MW1: 62 marked walks, each on its choice (${WALKS.length})`);
+        { let threw = false; try { markWalks({ [WALKS[0][0]]: { choices: [] } }); } catch { threw = true; } assert(threw, 'MW1: a mark that no longer matches its choice throws at load'); }
+        const camp = SCENES.rt_serpent_lost.choices[0];
+        assert(!camp.walk && /^Make camp/.test(camp.text) && camp.time === 90, 'MW1: "Make camp. Dry out." is not a walk');
+        { const g = at(1); g.scene = 'rt_serpent_lost'; const t0 = g.minutes; choose(g, SCENES, 0); assert(!g.stats.flown && g.minutes - t0 >= 90, `MW1: making camp keeps its 90 min at Foundation (${g.minutes - t0})`); }
+        { const [id, i] = WALKS.find(([wid, wi]) => { const c = SCENES[wid].choices[wi]; return c.time >= 30 && !c.show && !c.req && !SCENES[c.to]?.enter; }); const c = SCENES[id].choices[i];
+          const g = at(1); g.scene = id; const t0 = g.minutes; choose(g, SCENES, i, { task: true }); assert(!g.stats.flown && g.minutes - t0 === c.time, `MW1: run as a card, a walk is not flown (${id} ${c.time} → ${g.minutes - t0})`); }
+    }
+    { const g = at(1); g.scene = 'rt_ford'; const r = choose(g, SCENES, iCross); assert(!r.lines.some((l) => /stone to stone with Ya/.test(l)) && r.lines.includes(ford.choices[iCross].fly), 'FL1: a flown crossing\'s line replaces the scene\'s own'); }
+    { // a plain walk elsewhere: flown with a line in turn; walking, no line
+        const pick = Object.values(SCENES).flatMap((sc) => (sc.choices || []).map((c, i) => [sc, c, i])).find(([sc, c]) => c.walk && !c.check && !c.fly && !c.show && !c.req && !c.qi && !c.do && !c.combat && c.time >= 30 && typeof c.to === 'string' && SCENES[c.to] && typeof sc.place === 'string' && typeof SCENES[c.to].place === 'string' && sc.place !== SCENES[c.to].place && !SCENES[c.to].enter);
+        assert(!!pick, 'FL1: a plain walk to test');
+        const [sc, c, i] = pick;
+        for (const realm of [0, 1, 1]) {
+            const g = at(realm); g.stats.flown = realm ? 7 : undefined; g.scene = sc.id; const t0 = g.minutes; const r = choose(g, SCENES, i);
+            const want = realm ? flightMinutes(g, c.time) : c.time;
+            assert(g.minutes - t0 === want && (realm ? r.lines.includes(FLOWN_LINES[7 % 6].replace('{min}', want).replace('{walk}', c.time)) && g.stats.flown === 8 : !g.stats.flown), `FL1: ${sc.id} → ${c.to} at realm ${realm}: ${g.minutes - t0} min (want ${want}), the line in turn`);
+        }
+    }
+}
 // v0.11.107 (owner pick NK1, FL): the bone flail at Convergence T2 L1: sung once (Qi 3, dampened), then free; GU +1; damage
 // 2–4 × the bone multiplier; each swing hits the target and one more foe standing (each checked); not in a spar or a brawl.
 {

@@ -358,6 +358,14 @@ export function wakeState(g) {
     return g.wake;
 }
 export const wakeDay = (g) => wakeState(g).n;
+/** v0.11.109 (owner pick FL1, W): from Foundation James and Yuki fly; a walk to another place takes its time ÷ (1 + realm),
+ *  at least FLY_MIN minutes (never longer than walking). The numbers before the pick (200 games each, a scratch copy):
+ *  Act 1 travel at Foundation+ −51% (Careful 1,448 → 704 min a game, Completionist 1,958 → 972); Act 1 Coils Careful
+ *  3.67 → 3.56, Completionist 3.50 → 3.48; the full check 0 drifted. Work cards keep their own times (their walks are work). */
+export const FLY_FROM_REALM = 1, FLY_MIN = 5;
+export const canFly = (g) => (g.james?.realm || 0) >= FLY_FROM_REALM;
+export const flightMinutes = (g, m) => (canFly(g) ? Math.min(m, Math.max(FLY_MIN, Math.round(m / (1 + g.james.realm)))) : m);
+
 export function advance(g, minutes, { resting = false } = {}) {
     const m = Math.max(0, Math.round(minutes));
     if (!m) return [];

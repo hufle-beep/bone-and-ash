@@ -233,7 +233,7 @@ Halfway down, the tunnel drops away into a shaft. Below it, faintly, your Conver
 
 Your heart starts going very fast.`,
         choices: [
-            { text: 'Climb down the shaft on the root-ridges.', check: { skill: 'GU', dc: 4 }, time: 60, to: 'roots_dark', fail: 'roots_fall' },
+            { text: 'Climb down the shaft on the root-ridges.', check: { skill: 'GU', dc: 4 }, fly: "You step off the edge and ride the shaft's slow Qi down, then go back up for whoever can't. Yuki drifts past, inspecting the ridges nobody used." /* v0.11.109 (owner pick FL1, C): flown from Foundation, Fable's line */, time: 60, to: 'roots_dark', fail: 'roots_fall' },
             { text: 'Sing a ladder of bone down the side of the shaft.', qi: 6, check: { skill: 'Convergence Use', dc: 4 }, time: 40, to: 'roots_dark', fail: 'roots_fall' },
         ],
     },
@@ -254,7 +254,7 @@ Yuki climbs down after you, perfectly, and sits on your chest, and looks at you.
 The rot didn't just eat the tree. It moved in.`,
         choices: [
             { text: 'Fight your way through.', combat: rootThings, to: 'roots_won' },
-            { text: 'Run for the far tunnel and don\'t stop.', check: { skill: 'GU', dc: 5 }, time: 20, do: (g) => { g.flags.roots_done = true; return ['You make it. Barely. Something closes on the air behind your heel.']; }, fail: 'roots_caught', to: 'ship_wreck' },
+            { text: 'Run for the far tunnel and don\'t stop.', check: { skill: 'GU', dc: 5 }, fly: "You don't run. You go over, close under the ceiling, passengers and all. The lumps unfold at the place your feet should have been." /* v0.11.109 (owner pick FL1, C): flown from Foundation, Fable's line */, time: 20, do: (g) => { g.flags.roots_done = true; return ['You make it. Barely. Something closes on the air behind your heel.']; }, fail: 'roots_caught', to: 'ship_wreck' },
         ],
     },
     roots_caught: {

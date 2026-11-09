@@ -310,7 +310,7 @@ Something moves in the gap between the halves of the root — something long, ba
 "I vote across," Mei Lin says. "I vote *very much* across."`,
         choices: [
             { text: 'Through it. Fight the root-wyrm.', combat: wyrmFight, to: 'wyrm_won' },
-            { text: 'Across it: sing a bone bridge over the split, fast and quiet.', qi: 8, check: { skill: 'Convergence Use', dc: 6, band: 'challenging' }, do: (g) => { g.flags.wyrm_bridged = true; return ['A white span grows out of your hands across the chasm, ribbed and singing. You run. Behind you the wyrm rises, too late, and the bridge dissolves into its open mouth.']; }, failDo: (g) => { g.flags.wyrm_bridge_fail = true; return ['The bridge is half-grown when the wyrm hits it. The bone shatters. So does your concentration.']; }, to: 'dw_enter', fail: 'rr_bridge_fail' },
+            { text: 'Across it: sing a bone bridge over the split, fast and quiet.', qi: 8, check: { skill: 'Convergence Use', dc: 6, band: 'challenging' }, fly: "No bridge. You fly the split low and quiet, ferrying whoever can't. The wyrm tastes the air where a bridge ought to be and finds nothing to bite." /* v0.11.109 (owner pick FL1, C): flown from Foundation, Fable's line */, flyFree: true /* FQ1: no Qi when flown */, do: (g) => { g.flags.wyrm_bridged = true; return ['A white span grows out of your hands across the chasm, ribbed and singing. You run. Behind you the wyrm rises, too late, and the bridge dissolves into its open mouth.']; }, failDo: (g) => { g.flags.wyrm_bridge_fail = true; return ['The bridge is half-grown when the wyrm hits it. The bone shatters. So does your concentration.']; }, to: 'dw_enter', fail: 'rr_bridge_fail' },
         ],
     },
     rr_bridge_fail: {

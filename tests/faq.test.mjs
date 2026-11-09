@@ -18,7 +18,7 @@ const plain = (s) => s.replace(/<[^>]+>/g, '');
 
 // the list itself
 const qs = FAQ.map(([q]) => q);
-assert(FAQ.length === 20 && new Set(qs).size === qs.length, `20 entries, no question twice (${FAQ.length})`);
+assert(FAQ.length === 21 && new Set(qs).size === qs.length, `21 entries, no question twice (v0.11.109: Flight) (${FAQ.length})`);
 assert(FAQ.every(([, , gate]) => gate in FAQ_TEST), 'every entry has a known gate');
 assert(Object.keys(FAQ_TEST).every((k) => FAQ.some(([, , gate]) => gate === k)), 'every gate opens at least one entry');
 assert(Object.values(FAQ_TAB).every((q) => FAQ.find(([x]) => x === q)?.[2] === 'start'), 'every tab\'s entry exists and is there from a new game (the James tab\'s button finds its entry on Day 1)');
@@ -46,6 +46,12 @@ assert(plain(text('Yuki\'s job')).includes(`${String(YUKI_HOURS[0]).padStart(2, 
 assert(plain(text('Meridians')).includes(`${PRIMARIES.length} primaries and their ${COL_GROUPS.reduce((n, c) => n + c.size, 0)} collaterals`) && PRIMARIES.length === 12, 'the meridian counts from meridians.js (12 and 66)');
 { const gr = ensureBars(newGame(7, { closed: true })); bumpRel(gr, 'Mei Lin', 999, -999); assert(gr.rel['Mei Lin'].f === REL_MAX && gr.rel['Mei Lin'].a === -REL_MAX && plain(text('People, friendship and affection')).includes(`−${REL_MAX} to ${REL_MAX}`), 'the relationship range: the game clamps at the number the FAQ names'); }
 assert(inAct1({ flags: { ending: 'won' }, scene: 'fo_start', minutes: 7 * 1440 + 6 * 60 }) && plain(text('Act 1')).includes('Day 8'), 'Act 1 starts on Day 8 (inAct1), as the FAQ says');
+// v0.11.109 (owner pick FL1): the Flight entry's numbers from game.js, and its gate at Foundation
+{ const { FLY_MIN, FLY_FROM_REALM, flightMinutes } = await import('../js/core/game.js');
+  const gf = ensureBars(newGame(7, { closed: true })); gf.james.realm = FLY_FROM_REALM;
+  assert(plain(text('Flight')).includes(`never less than ${FLY_MIN} minutes`) && plain(text('Flight')).includes(`a 40-minute walk is a ${flightMinutes(gf, 40)}-minute flight`) && FLY_FROM_REALM === 1, 'Flight: the floor and the 40-minute example from game.js');
+  gf.james.realm = 2; assert(plain(text('Flight')).includes(`about ${flightMinutes(gf, 40)}`), 'Flight: one realm on, from game.js');
+  const g0 = ensureBars(newGame(7, { closed: true })); assert(!FAQ_TEST.fly(g0) && FAQ_TEST.fly({ ...g0, james: { ...g0.james, realm: 1 } }), 'Flight unlocks at Foundation'); }
 // numbers that live only in the UI's code (main.js imports the DOM, so it is read as text)
 { const main = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
   const sizes = /TEXT_SIZES = \[([\d, ]+)\]/.exec(main)[1].split(',').map(Number);
@@ -55,7 +61,7 @@ assert(inAct1({ flags: { ending: 'won' }, scene: 'fo_start', minutes: 7 * 1440 +
   assert((main.match(/\$\{slot\(\d\)\}/g) || []).length === 3 && plain(text('Saving and settings')).includes('three slots'), 'three save slots'); }
 // every bold label is a word the game uses (a button, a card, a tab), so the FAQ can't name a control that doesn't exist
 { const src = ['js/main.js', 'js/core/game.js', 'js/core/tasks.js', 'js/core/forms.js', 'js/core/meditate.js', 'js/core/coil.js', 'js/story/coil_scenes.js', 'js/story/prologue.js', 'js/story/longforest.js', 'js/story/again.js', 'js/core/replies.js', 'js/story/meridians.js', 'index.html'].map((f) => readFileSync(new URL(`../${f}`, import.meta.url), 'utf8')).join('\n').toLowerCase();
-  const OWN = new Set(['kept:', 'back to the act\'s start:', 'work', 'story', 'convergence', 'cycle', 'fed', 'hp', 'familiarity', 'check', 'spar', 'brawl', 'great root-kin', 'friendship', 'affection', 'bonesinger', 'saturation', 'coil', 'james green', 'act 1', 'hold a card']);
+  const OWN = new Set(['kept:', 'back to the act\'s start:', 'work', 'story', 'convergence', 'cycle', 'fed', 'hp', 'familiarity', 'check', 'spar', 'brawl', 'great root-kin', 'friendship', 'affection', 'bonesinger', 'saturation', 'coil', 'james green', 'act 1', 'hold a card', 'walks:', 'crossings:']); // v0.11.109 (FL1): the Flight entry's two headings
   const missing = [];
   for (const [q, a] of FAQ) for (const m of (typeof a === 'function' ? a(fresh) : a).matchAll(/<b>(.+?)<\/b>/g)) { const t = m[1].toLowerCase().replace(/\s+/g, ' '); if (!OWN.has(t) && !src.includes(t)) missing.push(`${q}: ${m[1]}`); }
   assert(!missing.length, `every bold label is the game's own words (${missing.join('; ') || 'all found'})`); }
