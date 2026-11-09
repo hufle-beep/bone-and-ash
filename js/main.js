@@ -1,6 +1,6 @@
 /** Bone and Ash — UI. Renders the story, combat, sheet, hammerspace, journal and saves. */
 import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel, hasForm } from './core/forms.js';
-import { coilMult, exLevel, exMult, wakeDay, fmtMult, COIL_GROWTH, clockParts } from './core/game.js';
+import { coilMult, coilMultNext, exLevel, exMult, wakeDay, fmtMult, clockParts } from './core/game.js';
 import {
     newGame, ensureBars, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, skillCheck, xpToNext, clockLabel, clockLabelG, realmName, yukiForm,
     startCombat, combatStep, combatFlee, COMBAT_ACTIONS, noDiceDc, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage,
@@ -11,7 +11,7 @@ import { SCENES, ITEMS } from './story/prologue.js';
 import { TASK_HUBS } from './story/task_hubs.js';
 import { landParts } from './core/replies.js'; // v0.11.68 (A1 + B2 + C1)
 import { againView, skipPlan, skipRun } from './story/again.js'; // v0.11.35 (P1-a)
-import { coilActive, endCoil, targetsText } from './core/coil.js';
+import { coilActive, endCoil, targetsText, tabWhy } from './core/coil.js';
 import { medCards, runMed, isSitChoice, medActivity, useLine, LATE_TAG, canMeditate } from './core/meditate.js';
 import { FAQ_KEY, FAQ_TAB, faqState, faqText, faqCheck, faqList, faqHasNew, faqSeen, faqMatch } from './core/faq.js'; // v0.11.83 (P1 + T1 + R1)
 import { meridianRow } from './story/meridians.js';
@@ -613,7 +613,7 @@ ${skillRow('GU', j.gu, 'General Use: anything he has no skill for, and his defen
 ${skillRow('Convergence Use', cu, 'darts, needles, the wraithbone blade')}
 <p class="note">${esc(BONESINGER_TIERS[Math.min(cu.tier, BONESINGER_TIERS.length - 1)] || '')}</p>
 ${Object.entries(FORM_LINES).map(([k, l]) => { const s = lineState(g, k); return `<div class="row"><span>${esc(l.label)}</span><span>${s.now ? esc(s.now.name) : '—'}${s.next ? ` <span class="note">(next: ${esc(s.next.name)} at ${rankLabel(s.next.at)})</span>` : ''}</span></div>`; }).join('')}
-${g.coil ? `<h2>The Coil</h2><p class="note">${g.coil.act === 1 ? 'Act 1, ' : ''}Coil ${g.coil.n}. ${coilActive(g) ? `Bite the tail to wake at ${g.coil.act === 1 ? 'the start of Act 1 or of the whole game' : 'the first dawn'}: James keeps his familiarity and what he knows; his realm, skills and meridians, the hammerspace and the world start over. This Coil he learns ×${fmtMult(coilMult(g))} as fast; the next, ×${fmtMult(coilMult(g) + COIL_GROWTH)}.` : 'The Coil turns during the prologue (until the tribute is settled) and during Act 1 (until Shen Qiu is settled, and again at its end).'}</p><p class="note"><b>Targets:</b> ${esc(targetsText(g))}</p>${coilActive(g) ? '<div class="btns"><button class="btn" data-bite="1">Bite the tail</button></div><p class="note" id="saveNote"></p>' : ''}` : ''}
+${g.coil ? `<h2>The Coil</h2><p class="note">${g.coil.act === 1 ? 'Act 1, ' : ''}Coil ${g.coil.n}. ${coilActive(g) ? `Bite the tail to start ${g.coil.act === 1 ? 'Act 1' : 'the prologue'} over at ${g.coil.act === 1 ? 'its start' : 'the first dawn'}: James keeps his familiarity and what he knows; his realm, skills and meridians, the hammerspace and the world start over. This Coil he learns ×${fmtMult(coilMult(g))} as fast. ${tabWhy(g) === 'choice' ? `A Coil ended by choice still counts as a Coil, but adds nothing to the faster learning: the next learns ×${fmtMult(coilMultNext(g, true))} too. A collapse, a lost fight or a lost deadline adds to it (×${fmtMult(coilMultNext(g, false))}).` : `The deadline went against him, so this bite adds to the faster learning: the next learns ×${fmtMult(coilMultNext(g, false))}.`}` : 'The Coil turns during the prologue (until the tribute is settled) and during Act 1 (until Shen Qiu is settled, and again at its end).'}</p><p class="note"><b>Targets:</b> ${esc(targetsText(g))}</p>${coilActive(g) ? '<div class="btns"><button class="btn" data-bite="1">Bite the tail</button></div><p class="note" id="saveNote"></p>' : ''}` : ''}
 <h2>Pillars</h2>
 <div class="row"><span>Ouroboros Axiom</span><span>DR 1</span><span class="sub">The body as a closed garden: what comes in is filtered and returned clean.</span></div>
 <div class="row"><span>Parallel Cognition Engine</span><span>9 threads</span><span class="sub">One of them is always on watch, if he asks.</span></div>
@@ -931,9 +931,9 @@ view.addEventListener('click', (ev) => {
             return;
         }
         if (b.dataset.bite) {
-            if (Date.now() - biteArmed > 4000) { biteArmed = Date.now(); note('Tap Bite the tail again to end this Coil. Everything in the hammerspace is lost; what James learned is not.'); return; }
+            if (Date.now() - biteArmed > 4000) { biteArmed = Date.now(); note(`Tap Bite the tail again to end this Coil. Everything in the hammerspace is lost; what James learned is not. ${tabWhy(g) === 'choice' ? ' By choice, it adds nothing to the faster learning.' : ''}`); return; }
             biteArmed = 0;
-            endCoil(g, 'choice', g.scene);
+            endCoil(g, tabWhy(g), g.scene); // v0.11.86 (Fable review): at a lost tribute or Shen Qiu, that loss's bite
             lastResult = null; lastReply = []; goTo(g, SCENES, 'coil_end'); autosave(); setTab('story');
             return;
         }

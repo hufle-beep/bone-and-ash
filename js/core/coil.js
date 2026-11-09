@@ -4,6 +4,8 @@
  * v0.11.0 (owner 2026-11-06): James's and Yuki's realm, Saturation, skills and meridians start over with the act (the
  * snapshot's values); the Coil bonus (game.js coilMult, ×(1 + 0.25 × earlier Coils since v0.11.29; 0.5 before)) makes them come back faster.
  * A Coil ends on a collapse (HP 0 during tasks), a lost tribute (accept or rewind) or by choice ("Bite the tail").
+ * v0.11.86 (owner 2026-11-09, #53, C1 + G1 + W1): a Coil ended by choice (why 'choice') counts as a Coil but adds no
+ * bonus (`coil.free`, game.js coilMult); on the James tab in Act 1 it restarts Act 1 only (W1).
  * Rewind: back to the snapshot (Day 1 dawn for a new game; an old save as it was loaded). v0.11.26 (owner 11:07): from Act 1
  * also to the start of the whole game (Day 1, the arrival, a fresh start); "same days again" is gone. One Coil count per save
  * (owner 11:12): crossing into Act 1 continues the Coil, every rewind adds 1, and the bonus follows it (pick N1).
@@ -40,6 +42,8 @@ export const actOf = (g) => g.coil?.act || 0;
 /** A rewind would unwind Foundation (collaterals sealed). */
 export const willUnwind = () => false; // v0.11.0: everything James grew starts over on a rewind anyway
 
+/** v0.11.86 (Fable review): the James tab's bite at a lost tribute or at Shen Qiu is that loss's bite (it adds the bonus), elsewhere by choice. */
+export const tabWhy = (g) => (g.scene === 'collectors_lost' ? 'tribute' : g.scene === 'rt_taken' ? 'shen' : 'choice');
 /** End the Coil: why = 'collapse' | 'tribute' | 'choice'; back = the scene "Not yet" returns to. */
 export function endCoil(g, why, back = null) {
     const c = coil(g);
@@ -135,7 +139,9 @@ export function rewind(g, { to = 'act' } = {}) {
     const n = c.n + 1;
     const peak = {};
     for (const [who, r] of Object.entries(base.rel)) peak[who] = { f: r.f, a: r.a };
+    const free = (c.free || 0) + (c.why === 'choice' ? 1 : 0); // v0.11.86 (#53, C1): a Coil ended by choice counts, but adds no bonus
     base.coil = { ...c, n, act: whole ? 0 : (c.act || 0), snap: whole ? fresh : c.snap, wake: base.scene, peak, why: null, back: null, skipEnter: false, one: true };
+    if (free) base.coil.free = free;
     delete base.coil.played; delete base.coil.replay; // v0.11.26: "same days again" is gone (older saves keep the fields; nothing reads them)
     for (const k of Object.keys(g)) delete g[k];
     Object.assign(g, base);

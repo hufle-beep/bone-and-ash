@@ -106,7 +106,8 @@ export function startActCoil(g, act = 1) {
     g.coil = makeCoil(g, act);
     g.coil.wake = g.scene;
     if (old) { g.coil.n = old.n || 1; g.coil.known = [...(old.known || [])]; g.stats[`coils${old.act || 0}`] = old.n; // v0.11.26 (owner 11:12, N1): crossing into Act 1 continues the Coil (one count per save)
-        if (old.best) g.coil.best = JSON.parse(JSON.stringify(old.best)); } // v0.11.16: best-ever relationships carry into Act 1
+        if (old.best) g.coil.best = JSON.parse(JSON.stringify(old.best));
+        if (old.free) g.coil.free = old.free; } // v0.11.86 (#53): the Coils ended by choice carry into Act 1 // v0.11.16: best-ever relationships carry into Act 1
 }
 /** Is a state in Act 1? (Act 1 starts on Day 8 06:00, after the tribute's outcome and the epilogue.) */
 export const inAct1 = (g) => !!g.flags?.ending && g.scene !== 'epilogue' && g.minutes >= 7 * 1440 + 6 * 60;
@@ -213,7 +214,14 @@ export const atSkillCap = (n) => n.tier >= SKILL_MAX_TIER && n.level >= 10;
 export const COIL_GROWTH = 0.25; // v0.11.29 (owner pick RB-1): was 0.5
 /** v0.11.29: the Coil bonus as text, up to two decimals (×1.25, ×1.5, ×2). */
 export const fmtMult = (x) => String(Math.round(x * 100) / 100);
-export const coilMult = (g) => 1 + COIL_GROWTH * Math.max(0, (g?.coil?.n || 1) - 1);
+/**
+ * v0.11.86 (owner 2026-11-09 01:06, picks C1 + G1 + W1, roadmap #53): a Coil ended by choice ("Bite the tail" on the
+ * James tab, "Go round again" at Act 1's end) still counts as a Coil, but adds nothing to the bonus: `coil.free` counts
+ * them. A collapse, a beast, a lost tribute and Shen Qiu add as before. A save from before has no `free`: ×as it was.
+ */
+export const coilMult = (g) => 1 + COIL_GROWTH * Math.max(0, (g?.coil?.n || 1) - 1 - (g?.coil?.free || 0));
+/** The bonus the next Coil will have, if this one ends now; `chosen`: ended by choice (adds nothing). */
+export const coilMultNext = (g, chosen) => 1 + COIL_GROWTH * Math.max(0, (g?.coil?.n || 1) - (g?.coil?.free || 0) - (chosen ? 1 : 0));
 /**
  * v0.11.85 (owner 2026-11-09 00:05, pick D: "the game at least twice as hard"): every XP award (James's skills, Yuki's
  * bond share and her fights) is ×0.6, after the Coil bonus. The models: the Completionist's prologue 2.06 → 3.94 Coils,

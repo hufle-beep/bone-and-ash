@@ -2,6 +2,12 @@
 
 Split out of `roadmap.md` in v0.11.65 (owner pick G2, 2026-11-08 11:45), so the roadmap shows only the open work. Every line here moved word for word; newest first. Update in every push that finishes a roadmap line.
 
+## Moved in v0.11.86 (word for word)
+
+### From section 2, "the balance retune" (done in v0.11.86: C1 a Coil ended by choice counts but adds no bonus, G1 Go round again too, W1 a chosen bite in Act 1 restarts Act 1 only; what is left: section 2's v0.11.86 line)
+
+- *(new in v0.11.74, from group i; `research.md` #53, owner pick L1)* **Found: the Coil bonus can be farmed.** "Bite the tail" works from the first dawn, and every rewind adds 0.25 to the Coil bonus with no limit (`coilMult`, `coilActive`): ten bites give ×3.5 XP for a few taps (the price: the Coil count for the targets and the best). Decided here with the numbers; the fixes: (a) the bonus grows only on a Coil that got further (a later day, arc or realm); (b) relearning by each skill's own best; (c) fast learning only up to the last Coil's peak. The bots never farm it, so today's numbers don't show it.
+
 ## Moved in v0.11.85 (word for word)
 
 ### From section 0, "Next, before everything else" (done in v0.11.85: D the XP rate ×0.6, T1 the targets 4 / 6, M1 the Sitter model)

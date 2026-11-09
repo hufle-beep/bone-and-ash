@@ -306,7 +306,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     assert(coilMult(g) === 1, 'Coil 1: ×1');
     const xp1 = (h) => { const c = structuredClone(h); const out = awardXp(c, 'Convergence Use', 'standard'); return Number(/\+(\d+) XP/.exec(out[0])[1]); };
     const base = xp1(g);
-    endCoil(g, 'choice', 'arrival'); rewind(g); endCoil(g, 'choice', 'arrival'); rewind(g);
+    endCoil(g, 'collapse'); rewind(g); endCoil(g, 'beast'); rewind(g); // v0.11.86 (#53): a death adds to the bonus (a bite by choice doesn't)
     assert(g.coil.n === 3 && coilMult(g) === 1.5 && xp1(g) === Math.floor(base * 1.5), `Coil 3: ×1.5 XP (${base} → ${xp1(g)})`);
     const y0 = g.yuki.fight.xp; awardYukiFightXp(g, 'standard'); assert(g.yuki.fight.xp - y0 === 45 || g.yuki.fight.level > 1, `Yuki's XP ×1.5 too (${g.yuki.fight.xp - y0})`);
     // v0.11.41 (D2-a): the meridian DC ÷ the Coil bonus was Story Mode's checked sessions (gone)
@@ -450,9 +450,9 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
         assert(ev.end && ev.choices.length === 1 && /Go round again/.test(ev.choices[0].label), `${outcome}: the end screen offers Go round again`);
         choose(e, SCENES, ev.choices[0].index);
         const av = sceneView(e, SCENES);
-        assert(e.scene === 'a1_again' && av.choices.map((c) => c.label).join('|') === 'Bite the tail. Wake at the start of Act 1.|Bite the tail. Wake at the start of the whole game (Day 1, the arrival).|Not yet.', `${outcome}: the confirm screen`);
+        assert(e.scene === 'a1_again' && av.choices.map((c) => c.label).join('|') === 'Bite the tail. Wake at the start of Act 1. (By choice: adds no faster learning.)|Bite the tail. Wake at the start of the whole game (Day 1, the arrival). (By choice: adds no faster learning.)|Not yet.', `${outcome}: the confirm screen`);
         choose(e, SCENES, av.choices.find((c) => (target === 'act' ? /start of Act 1/ : /whole game/).test(c.label)).index);
-        assert(e.scene === 'coil_dawn' && e.coil.n === 3 && coilMult(e) === 1.5 && !e.flags.a1_outcome && !e.inventory.beast_core, `${outcome} → ${target}: Coil 3 (one count), ×1.5, the outcome and the hammerspace gone`);
+        assert(e.scene === 'coil_dawn' && e.coil.n === 3 && e.coil.free === 1 && coilMult(e) === 1.25 && !e.flags.a1_outcome && !e.inventory.beast_core, `${outcome} → ${target}: Coil 3 (one count), ×1.25 (v0.11.86, G1: going round again is by choice, no bonus from it), the outcome and the hammerspace gone`);
         assert(e.tasks.fam['rr_hub:1'] === 7 && e.flags.lore_tree && e.coil.known.includes('ship_found') && e.rel['Mei Lin'].a >= 20, `${outcome} → ${target}: familiarity, knowledge and the head start kept`);
         choose(e, SCENES, 0);
         if (target === 'act') assert(e.scene === 'fo_start' && e.coil.act === 1 && e.minutes === 7 * 1440 + 360 && e.flags.ending === 'paid', `${outcome} → the start of Act 1 (the prologue's outcome kept)`);
@@ -1129,6 +1129,69 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
         let o = null; for (let t = 0; t < 50 && g.combat; t++) o = combatStep(g, 'guard');
         assert(o?.done === 'lose' && o.next === 'lf_human_lost' && g.coil.why !== 'beast', `T1: losing to ${who} on an active Coil leads to "Robbed", not the Coil's end (${o?.next})`);
     }
+}
+// v0.11.86 (owner 2026-11-09 01:06, picks C1 + G1 + W1, roadmap #53): a Coil ended by choice counts, but adds no bonus
+{
+    const { coilMultNext } = await import('../js/core/game.js');
+    const bitePath = (g) => { endCoil(g, 'choice', g.scene); goTo(g, SCENES, 'coil_end'); const v = sceneView(g, SCENES); return v; };
+    const wake = (g, re) => { const v = sceneView(g, SCENES); choose(g, SCENES, v.choices.find((c) => re.test(c.label)).index); choose(g, SCENES, 0); };
+    // the James tab's bite on Day 1, through the scenes: a Coil, no bonus, the prologue's first dawn only
+    { const g = ensureBars(newGame(8601, { closed: true }));
+      assert(coilMultNext(g, true) === 1 && coilMultNext(g, false) === 1.25, `C1: the next Coil's bonus: by choice ×1, otherwise ×1.25 (${coilMultNext(g, true)}, ${coilMultNext(g, false)})`);
+      const v = bitePath(g);
+      assert(v.choices.map((c) => c.label).join('|') === 'Bite the tail. Wake at the first dawn.|Not yet.' && /adds nothing to the faster learning: you will learn as fast as now\./.test(v.text) && !/×1 as fast/.test(v.text), 'C1: the Coil screen after a bite by choice: the first dawn, "Not yet", and the next ×1 said');
+      wake(g, /first dawn/);
+      assert(g.coil.n === 2 && g.coil.free === 1 && coilMult(g) === 1 && g.scene !== 'coil_dawn', `C1: a bite by choice: Coil 2, ×1 (${g.coil.n}, ${g.coil.free}, ${coilMult(g)})`);
+      for (let k = 0; k < 9; k++) { endCoil(g, 'choice', 'arrival'); rewind(g); }
+      assert(g.coil.n === 11 && g.coil.free === 10 && coilMult(g) === 1, 'C1: ten bites at the first dawn: Coil 11, still ×1 (the farm, #53, closed)');
+      g.minutes += 2 * 1440; endCoil(g, 'choice', 'stream'); rewind(g);
+      assert(g.coil.n === 12 && coilMult(g) === 1, 'C1: a bite by choice on Day 3 adds nothing either');
+      endCoil(g, 'collapse'); rewind(g);
+      assert(g.coil.n === 13 && coilMult(g) === 1.25, `C1: a collapse adds 0.25 (${coilMult(g)})`); }
+    // a death, a beast, a lost tribute: the bonus grows as before; the Coil screen says the next ×
+    { const g = ensureBars(newGame(8602, { closed: true }));
+      endCoil(g, 'beast'); goTo(g, SCENES, 'coil_end');
+      assert(/come back faster: you will learn ×1.25 as fast/.test(sceneView(g, SCENES).text), 'C1: after a beast the Coil screen says ×1.25');
+      wake(g, /first dawn/); assert(g.coil.n === 2 && !g.coil.free && coilMult(g) === 1.25, 'C1: a beast: Coil 2, ×1.25');
+      goTo(g, SCENES, 'collectors_lost'); choose(g, SCENES, sceneView(g, SCENES).choices.find((c) => /Bite the tail/.test(c.label)).index);
+      assert(g.scene === 'coil_end' && g.coil.why === 'tribute', 'a lost tribute: the Coil screen');
+      wake(g, /first dawn/); assert(g.coil.n === 3 && coilMult(g) === 1.5, `C1: a lost tribute adds 0.25 (${coilMult(g)})`); }
+    // Act 1: the count of bites by choice carries in; Shen Qiu adds; a bite by choice restarts Act 1 only (W1); a death offers both
+    { const e = ensureBars(newGame(8603)); endCoil(e, 'choice', 'arrival'); rewind(e); endCoil(e, 'collapse'); rewind(e);
+      e.scene = 'epilogue'; e.flags.ending = 'paid'; e.minutes = 6 * 1440 + 15 * 60; choose(e, SCENES, 0);
+      assert(e.coil.act === 1 && e.coil.n === 3 && e.coil.free === 1 && coilMult(e) === 1.25, `C1: into Act 1 the bites by choice carry (n ${e.coil.n}, free ${e.coil.free}, ×${coilMult(e)})`);
+      const v = bitePath(e);
+      assert(v.choices.map((c) => c.label).join('|') === 'Bite the tail. Wake at the start of Act 1.|Not yet.', `W1: in Act 1 a bite by choice restarts Act 1 only (${v.choices.map((c) => c.label).join('|')})`);
+      wake(e, /start of Act 1/);
+      assert(e.coil.act === 1 && e.coil.n === 4 && e.coil.free === 2 && coilMult(e) === 1.25 && e.scene === 'fo_start', 'W1 + C1: Act 1 again, Coil 4, still ×1.25');
+      goTo(e, SCENES, 'rt_taken'); choose(e, SCENES, sceneView(e, SCENES).choices.find((c) => /Bite/.test(c.label)).index);
+      assert(e.scene === 'coil_end' && sceneView(e, SCENES).choices.some((c) => /whole game/.test(c.label)), 'Shen Qiu: the whole game is still offered');
+      wake(e, /start of Act 1/); assert(e.coil.n === 5 && coilMult(e) === 1.5, `Shen Qiu adds 0.25 (${coilMult(e)})`);
+      endCoil(e, 'collapse'); goTo(e, SCENES, 'coil_end');
+      assert(sceneView(e, SCENES).choices.some((c) => /whole game/.test(c.label)), 'W1: after a collapse in Act 1 the whole game is still offered');
+      wake(e, /whole game/);
+      assert(e.coil.act === 0 && e.coil.n === 6 && e.coil.free === 2 && coilMult(e) === 1.75, `the whole-game rewind keeps the count (n ${e.coil.n}, free ${e.coil.free}, ×${coilMult(e)})`); }
+    // the review's #1: the James tab's bite at a lost tribute or at Shen Qiu is that loss's bite (tabWhy), not one by choice
+    { const { tabWhy } = await import('../js/core/coil.js');
+      const t = ensureBars(newGame(8607, { closed: true })); goTo(t, SCENES, 'collectors_lost');
+      assert(coilActive(t) && tabWhy(t) === 'tribute', 'the review\'s #1: the James tab at a lost tribute: the tribute\'s bite');
+      endCoil(t, tabWhy(t), t.scene); goTo(t, SCENES, 'coil_end'); wake(t, /first dawn/);
+      assert(t.coil.n === 2 && !t.coil.free && coilMult(t) === 1.25, `the review's #1: the tab's bite at a lost tribute adds the bonus (×${coilMult(t)})`);
+      const r = ensureBars(newGame(8608)); r.scene = 'epilogue'; r.flags.ending = 'paid'; r.minutes = 6 * 1440 + 15 * 60; choose(r, SCENES, 0); goTo(r, SCENES, 'rt_taken');
+      assert(coilActive(r) && tabWhy(r) === 'shen', 'the review\'s #1: the James tab at Shen Qiu: his bite');
+      endCoil(r, tabWhy(r), r.scene); goTo(r, SCENES, 'coil_end');
+      assert(sceneView(r, SCENES).choices.some((c) => /whole game/.test(c.label)), 'the review\'s #1: the tab\'s bite at Shen Qiu still offers the whole game');
+      wake(r, /start of Act 1/); assert(coilMult(r) === 1.25 && !r.coil.free, `the review's #1: and adds the bonus (×${coilMult(r)})`);
+      const w = ensureBars(newGame(8609, { closed: true })); w.scene = 'stream'; assert(tabWhy(w) === 'choice', 'elsewhere the tab\'s bite is by choice');
+      endCoil(w, 'choice', 'stream'); const lines = SCENES.coil_end.choices[0].do(w);
+      assert(coilMult(w) === 1 && /Your head is not\.$/.test(lines[0]) && !/×1 as fast/.test(lines[0]), `the review's #2: no "×1 as fast" after a chosen bite on Coil 1 (${lines[0]})`); }
+    // G1: going round again at Act 1's end is by choice (the labels say so); a save from before has no count: its bonus as before
+    { const o = ensureBars(newGame(8604)); o.coil.n = 4; delete o.coil.free;
+      assert(coilMult(o) === 1.75, 'an old save (no `free`): ×1.75 on Coil 4, as before');
+      const back = deserialize(serialize(Object.assign(ensureBars(newGame(8605)), {})));
+      const f = ensureBars(newGame(8606)); endCoil(f, 'choice', 'arrival'); rewind(f); const r = deserialize(serialize(f));
+      assert(r.coil.free === 1 && coilMult(r) === 1 && !back.coil.free, 'C1: the count survives a save and a load');
+      assert(SCENES.a1_again.choices.filter((c) => /Bite the tail/.test(c.text)).every((c) => /\(By choice: adds no faster learning\.\)$/.test(c.text)), 'G1: going round again says it adds no faster learning'); }
 }
 // v0.11.85 (owner pick D + T1): every XP award ×0.6 after the Coil bonus; the targets 4 / 6
 {

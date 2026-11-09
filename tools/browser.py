@@ -176,6 +176,9 @@ def comfort(pg, url):
         no_timer(pg, 'a story card')
     # each tab keeps its scroll
     pg.click('[data-tab="sheet"]'); on_tab(pg, 'sheet')
+    jt = pg.inner_text('#view')  # v0.11.86 (#53, C1): the James tab says a bite by choice adds no faster learning
+    if 'adds nothing to the faster learning' in jt and 'start the prologue over at the first dawn' in jt: notes.append('the James tab: a bite by choice restarts the prologue, no faster learning')
+    else: fails.append('v0.11.86: the James tab does not say a bite by choice restarts the act with no faster learning')
     room = pg.evaluate("document.documentElement.scrollHeight - innerHeight")
     if room > 150:
         pg.evaluate("scrollTo(0, 120)"); until(pg, 'scrollY === 120', 3000)

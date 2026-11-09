@@ -566,7 +566,7 @@ export function nextStep(g, scenes) {
     if (n === 1 && day === 1) return 'Tap a card and it happens at once: the clock moves by the time on the card, which shows when it ends.';
     const yl = yukiLane(g);
     if (yl && !yl.on) return 'Yuki can hunt on her own while you work: switch her job on at the top of the list.';
-    if (n >= 2 && day === 1) return `A new Coil: the world and the hammerspace started over, but your familiarity and what James knows didn't. Cards you know run faster, and you learn ×${fmtMult(coilMult(g))} as fast.`;
+    if (n >= 2 && day === 1) return `A new Coil: the world and the hammerspace started over, but your familiarity and what James knows didn't. Cards you know run faster${coilMult(g) > 1 ? `, and you learn ×${fmtMult(coilMult(g))} as fast` : ''}.`; // v0.11.86: no "×1 as fast"
     if (g.james.qi >= CONDENSE_SIT_COST && g.james.qi >= 0.9 * jamesQiMax(g) && g.james.saturation < breakAt() && !sitUseless(g) && taskOpen(g, scenes, sitTaskId(g, scenes))) return 'Qi is nearly full: Cultivate turns it into Saturation.';
     if (g.flags.long && day >= 2 && day <= 6) return `Day ${day} of 7: the Sect's tribute comes on Day 7.`;
     return '';

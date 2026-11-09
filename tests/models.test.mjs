@@ -8,6 +8,7 @@
 //   node tests/models.test.mjs --json FILE            also write the merged numbers as JSON
 //   node tests/models.test.mjs --off-models careful   v0.11.28: only these models play the Yuki-off games (default: all but Random)
 //   node tests/models.test.mjs --sitter-games 200     v0.11.85: the Sitter's own game count (default: --games; it plays ~20× the cards)
+//   node tests/models.test.mjs --farmer-games 100     v0.11.86: the Farmer's own game count (default: --games)
 //
 // The models (tests/README.md has the details):
 //   random         the tasks test's bot (tests/tasks.test.mjs): random cards and story choices, half its games fight at
@@ -20,11 +21,15 @@
 //   sitter         v0.11.85 (owner pick M1): cultivates whenever it can, like the owner's saves (747 sits by Coil 4): a sit
 //                  while Qi ≥ 10 and Saturation < 95, else a meridian session, else "Meditate: gather Qi" (up to 6 h a waking
 //                  day, Fed over 30); otherwise plays like the completionist
+//   farmer         v0.11.86 (#53, owner picks C1 + G1 + W1): bites the tail by choice 10 times at the first dawn (the James
+//                  tab's path, through the Coil screens), then plays like the completionist; its Coils are counted from its
+//                  first real one (so its line reads like the completionist's), and the bites by choice add no bonus
 // Careful, Completionist and Rusher fight smart, keep Yuki's lane on (the "yukiOff" lines: the same with it off), rewind a
 // lost tribute up to 3 times, bite the tail when Shen Qiu takes James up to 3 times (the start of Act 1), and stop after
 // Coil 8. A rewind forgets the cards done (the days start over).
 import { SCENES } from '../js/story/prologue.js';
-import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, jamesHpMax, clockParts } from '../js/core/game.js';
+import { endCoil } from '../js/core/coil.js';
+import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, jamesHpMax, clockParts, coilMult } from '../js/core/game.js';
 import { INC_ONLY_ACTIONS, actionOpen } from '../js/core/forms.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
 import { isTaskHub, isTaskChoice, taskCards, taskOpen, runTask, taskState, setYuki, yukiLane } from '../js/core/tasks.js';
@@ -34,7 +39,7 @@ import { SHARD, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/s
 
 const argv = process.argv.slice(2);
 const opt = (n, d) => { const i = argv.indexOf(`--${n}`); return i >= 0 && argv[i + 1] != null ? argv[i + 1] : d; };
-export const MODELS = ['random', 'careful', 'completionist', 'rusher', 'sitter']; // v0.11.85: the Sitter last, so the others' seeds don't move
+export const MODELS = ['random', 'careful', 'completionist', 'rusher', 'sitter', 'farmer']; // v0.11.85: the Sitter last, so the others' seeds don't move; v0.11.86: the Farmer after it
 const ONLY = opt('model', 'all');
 const PLAY = ONLY === 'all' ? MODELS : ONLY.split(',');
 for (const m of PLAY) if (!MODELS.includes(m)) { console.error(`unknown model ${m} (${MODELS.join(', ')})`); process.exit(2); }
@@ -42,6 +47,11 @@ const JSON_OUT = opt('json', null);
 const OFF = Math.max(0, Number(opt('off', 300)) || 0);
 const SITTER_GAMES = opt('sitter-games', null); // v0.11.85
 if (SITTER_GAMES != null && !(Number(SITTER_GAMES) >= 0)) { console.error(`--sitter-games needs a number of games (${SITTER_GAMES})`); process.exit(2); }
+const FARMER_GAMES = opt('farmer-games', null); // v0.11.86
+if (FARMER_GAMES != null && !(Number(FARMER_GAMES) >= 0)) { console.error(`--farmer-games needs a number of games (${FARMER_GAMES})`); process.exit(2); }
+export const FARM_BITES = 10;
+const OWN_GAMES = { sitter: SITTER_GAMES, farmer: FARMER_GAMES };
+const ownCount = (m, run) => OWN_GAMES[m] == null || run < Number(OWN_GAMES[m]);
 // v0.11.28: which models also play the Yuki-off games (default: every model played but Random)
 const OFF_MODELS = opt('off-models', 'careful,completionist,rusher').split(',');
 for (const m of OFF_MODELS) if (!MODELS.includes(m)) { console.error(`unknown model ${m} in --off-models (${MODELS.join(', ')})`); process.exit(2); }
@@ -133,32 +143,44 @@ function play(run, model, st, yuki) {
     rs = seedOf(run, 7 + MODELS.indexOf(model) + (yuki === 'off' ? 50 : 0));
     const smart = model !== 'random' || run % 2 === 0;
     const g = ensureBars(newGame(run + 1 + 900000, { closed: true }));
+    let off = 0; // v0.11.86: the Farmer's bites by choice, through the scenes the James tab's button leads to
+    if (model === 'farmer') {
+        for (let k = 0; k < FARM_BITES; k++) {
+            endCoil(g, 'choice', g.scene); goTo(g, SCENES, 'coil_end');
+            const w = sceneView(g, SCENES).choices.find((c) => /Wake at the first dawn/.test(c.label));
+            if (!w) { assert(false, `farmer: no first dawn on the Coil screen (run ${run})`); return 'stuck'; }
+            choose(g, SCENES, w.index); choose(g, SCENES, 0); // the Coil screen, then the first dawn's Get up
+        }
+        off = FARM_BITES; st.farmMult = (st.farmMult || 0) + coilMult(g); st.farmN = (st.farmN || 0) + 1;
+        model = 'completionist';
+    }
+    const cn = () => g.coil.n - off;
     const mem = { done: {}, tried: new Set(), tribLost: 0, shenBites: 0 };
     let coilKey = '', deadKey = '', takenKey = '', crossed = false, bitShen = false;
     const seenTrib = new Set();
     const maxSteps = model === 'sitter' ? STEPS_SITTER : STEPS;
     for (let steps = 0; steps < maxSteps; steps++) {
-        if (g.coil.n > MAX_COIL) { st.gaveUp++; return 'gaveUp'; }
+        if (cn() > MAX_COIL) { st.gaveUp++; return 'gaveUp'; }
         const act = g.coil.act || 0;
-        const key = `${act}:${g.coil.n}`;
+        const key = `${act}:${cn()}`;
         if (key !== coilKey) { // a new Coil: the days start over
             coilKey = key; mem.done = {}; mem.qi = {}; // v0.11.85 (Fable review): the Sitter's gather-Qi hours start over too (a rewind restores the day count)
             const d = st.deaths[act] || (st.deaths[act] = {});
-            (d[g.coil.n] || (d[g.coil.n] = { coils: 0, dead: 0, beast: 0, starve: 0, taken: 0 })).coils++;
+            (d[cn()] || (d[cn()] = { coils: 0, dead: 0, beast: 0, starve: 0, taken: 0 })).coils++;
         }
-        const row = st.deaths[act][g.coil.n];
-        if (act === 1 && !crossed) { crossed = true; st.prologueClear[g.coil.n] = (st.prologueClear[g.coil.n] || 0) + 1; }
+        const row = st.deaths[act][cn()];
+        if (act === 1 && !crossed) { crossed = true; st.prologueClear[cn()] = (st.prologueClear[cn()] || 0) + 1; }
         if (act === 1 && g.scene === 'rt_taken' && takenKey !== coilKey) { takenKey = coilKey; row.taken++; } // lost to people: Shen Qiu takes James
         if (g.scene === 'coil_end' && (g.coil.why === 'collapse' || g.coil.why === 'beast') && deadKey !== coilKey) {
             deadKey = coilKey; row.dead++; if (g.coil.why === 'beast') row.beast++; else if (g.james.satiety <= 0) row.starve++;
         }
         const tOut = { bluff_win: 'won', collectors_won: 'won', tribute_paid: 'paid', collectors_lost: 'lost' }[g.scene];
-        if (tOut && !seenTrib.has(g.coil.n)) { seenTrib.add(g.coil.n); const b = st.tribute[g.coil.n] || (st.tribute[g.coil.n] = { won: 0, paid: 0, lost: 0 }); b[tOut]++; }
+        if (tOut && !seenTrib.has(cn())) { seenTrib.add(cn()); const b = st.tribute[cn()] || (st.tribute[cn()] = { won: 0, paid: 0, lost: 0 }); b[tOut]++; }
         const v = sceneView(g, SCENES);
         if (v.end || g.scene === 'a1_end') {
             const o = g.flags.a1_outcome || 'none';
             st.endings[o] = (st.endings[o] || 0) + 1;
-            if (o !== 'taken' && o !== 'none') { st.act1Clear[g.coil.n] = (st.act1Clear[g.coil.n] || 0) + 1; if (g.coil.n === 1) st.oneCoil++; }
+            if (o !== 'taken' && o !== 'none') { st.act1Clear[cn()] = (st.act1Clear[cn()] || 0) + 1; if (cn() === 1) st.oneCoil++; }
             return 'end';
         }
         if (model === 'random' && canMeditate(g, SCENES) && rnd(6) === 0) { // the tasks test's bot: the Meditate card now and then
@@ -224,8 +246,8 @@ for (const m of PLAY) {
     all[m] = blank();
     if (m !== 'random' && OFF && OFF_MODELS.includes(m)) all[`${m}:yukiOff`] = blank();
     if (kids) continue; // with workers the parent only merges
-    for (const run of myRuns()) if (m !== 'sitter' || SITTER_GAMES == null || run < Number(SITTER_GAMES)) playInto(all[m], run, m, 'on'); // v0.11.85: the Sitter's own count (at most --games)
-    if (all[`${m}:yukiOff`]) for (const run of myRuns()) if (run < OFF && (m !== 'sitter' || SITTER_GAMES == null || run < Number(SITTER_GAMES))) playInto(all[`${m}:yukiOff`], run, m, 'off');
+    for (const run of myRuns()) if (ownCount(m, run)) playInto(all[m], run, m, 'on'); // v0.11.85: the Sitter's own count (at most --games); v0.11.86: the Farmer's
+    if (all[`${m}:yukiOff`]) for (const run of myRuns()) if (run < OFF && ownCount(m, run)) playInto(all[`${m}:yukiOff`], run, m, 'off');
 }
 // the same seed plays the same game (separate totals: the replay adds nothing to the numbers)
 if (!SHARD) for (const m of PLAY) {
@@ -268,6 +290,7 @@ for (const [m, st] of Object.entries(all)) {
     const avg = (o) => { let s = 0, n = 0; for (const [k, v] of Object.entries(o)) { s += Number(k) * v; n += v; } return n ? (s / n).toFixed(2) : '—'; };
     const sum = (o) => Object.values(o).reduce((a, b) => a + b, 0);
     console.log(`  cleared: prologue ${pct(sum(st.prologueClear), st.games)} (mean Coil ${avg(st.prologueClear)}) · Act 1 ${pct(sum(st.act1Clear), st.games)} (mean Coil ${avg(st.act1Clear)}) · the whole game on Coil 1 ${pct(st.oneCoil, st.games)}`);
+    if (st.farmN) console.log(`  farmer: ${FARM_BITES} bites by choice at the first dawn first, then ×${(st.farmMult / st.farmN).toFixed(2)} (a bite by choice adds no bonus); Coils above counted from its first real one`);
     const fl = KEY_FIGHTS.filter((k) => st.fights[k]).map((k) => { const f = st.fights[k]; const n = f.win + f.lose + (f.flee || 0); return `${k} ${pct(f.win, n)} (${n})`; });
     console.log(`  key fights won: ${fl.join(' · ') || '—'}`);
 }

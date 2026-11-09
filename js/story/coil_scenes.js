@@ -3,7 +3,7 @@
  * "Bite the tail" after a lost tribute, "You remember this" on the arrival, breakthrough from 95% in the label.
  * Every new choice checks coilActive (Incremental Mode, the only mode since v0.11.34).
  */
-import { advance, startActCoil, combatHooks, PEOPLE_FIGHTS, coilMult, COIL_GROWTH, fmtMult } from '../core/game.js';
+import { advance, startActCoil, combatHooks, PEOPLE_FIGHTS, coilMult, coilMultNext, fmtMult } from '../core/game.js';
 import { setDeathHook, goTo } from '../core/story.js';
 import { coilActive, endCoil, rewind, coilReport, actOf, willUnwind, noteClear, targetsText } from '../core/coil.js';
 
@@ -41,7 +41,7 @@ let cardScenes = {};
 function bite(g, to) {
     const whole = to === 'game' && actOf(g) === 1;
     const n = rewind(g, { to });
-    return [`Coil ${n}.${whole ? ' Day 1 again: the forest, the stream, the whole of it.' : ''} The hammerspace is empty, and so are your hands. Your head is not: you learn ×${fmtMult(coilMult(g))} as fast.`];
+    return [`Coil ${n}.${whole ? ' Day 1 again: the forest, the stream, the whole of it.' : ''} The hammerspace is empty, and so are your hands. Your head is not${coilMult(g) > 1 ? `: you learn ×${fmtMult(coilMult(g))} as fast` : ''}.`]; // v0.11.86: no "×1 as fast"
 }
 
 export function installCoil(SCENES) {
@@ -64,14 +64,14 @@ ${r.near.length ? `
 
 Yuki remembers everything. She always does, through the bond, and she will bring it up.
 
-**Next Coil:** your realm, skills and meridians start over. What you remember makes them come back faster: you will learn ×${fmtMult(1 + COIL_GROWTH * (g.coil?.n || 1))} as fast.${willUnwind(g) ? `
+**Next Coil:** your realm, skills and meridians start over. ${g.coil?.why === 'choice' ? `A Coil you end by choice adds nothing to the faster learning: you will learn as fast as now${coilMultNext(g, true) > 1 ? ` (×${fmtMult(coilMultNext(g, true))})` : ''}.` : `What you remember makes them come back faster: you will learn ×${fmtMult(coilMultNext(g, false))} as fast.`}${willUnwind(g) ? `
 
 **The price:** your collaterals sealed at Foundation. This rewind unwinds the breakthrough with them: Mortal Vessel again, ${g.james.realm} realm${g.james.realm > 1 ? 's' : ''} gone, Saturation at zero. The threads will open again. Everything else you learned stays.` : ''}`;
         },
         choices: [
             // v0.11.26 (owner 11:07): the prologue wakes at the first dawn only; Act 1 at its start or at the start of the whole game; no "same days again"
             { text: (g) => (actOf(g) === 1 ? 'Bite the tail. Wake at the start of Act 1.' : `Bite the tail. Wake at the first dawn.${willUnwind(g) ? ' (Foundation unwinds.)' : ''}`), do: (g) => bite(g, 'act'), to: 'coil_dawn' },
-            { text: 'Bite the tail. Wake at the start of the whole game (Day 1, the arrival).', show: (g) => actOf(g) === 1, do: (g) => bite(g, 'game'), to: 'coil_dawn' },
+            { text: 'Bite the tail. Wake at the start of the whole game (Day 1, the arrival).', show: (g) => actOf(g) === 1 && g.coil?.why !== 'choice', do: (g) => bite(g, 'game'), to: 'coil_dawn' }, // v0.11.86 (W1): a bite by choice restarts the act only
             { text: 'Accept it. Get up.', show: (g) => g.coil?.why === 'tribute', do: (g) => { g.coil.why = null; advance(g, 120, { resting: true }); return []; }, to: 'epilogue' },
             { text: 'Accept it. Walk.', show: (g) => g.coil?.why === 'shen', do: (g) => { g.coil.why = null; return []; }, to: 'a1_end' },
             { text: 'Not yet.', show: (g) => g.coil?.why === 'choice' && !!g.coil.back, do: (g) => { g.coil.why = null; g.coil.skipEnter = true; return []; }, to: (g) => g.coil.back },
@@ -127,8 +127,9 @@ You don't have to. The Axiom is right there, coiled under your breastbone, tail 
 
 Yuki opens one eye. *Again?* says the bond. *Fine. I'll remember it for both of us.*`,
         choices: [
-            { text: 'Bite the tail. Wake at the start of Act 1.', do: (g) => { endCoil(g, 'choice', 'a1_end'); return bite(g, 'act'); }, to: 'coil_dawn' },
-            { text: 'Bite the tail. Wake at the start of the whole game (Day 1, the arrival).', do: (g) => { endCoil(g, 'choice', 'a1_end'); return bite(g, 'game'); }, to: 'coil_dawn' },
+            // v0.11.86 (G1): going round again is a Coil ended by choice: no faster learning from it
+            { text: 'Bite the tail. Wake at the start of Act 1. (By choice: adds no faster learning.)', do: (g) => { endCoil(g, 'choice', 'a1_end'); return bite(g, 'act'); }, to: 'coil_dawn' },
+            { text: 'Bite the tail. Wake at the start of the whole game (Day 1, the arrival). (By choice: adds no faster learning.)', do: (g) => { endCoil(g, 'choice', 'a1_end'); return bite(g, 'game'); }, to: 'coil_dawn' },
             { text: 'Not yet.', to: 'a1_end' },
         ],
     };
