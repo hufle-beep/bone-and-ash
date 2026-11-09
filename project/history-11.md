@@ -2,6 +2,23 @@
 
 Started 2026-11-09 (v0.11.86), when `history-10.md` passed 45 KB. Newer than `history-10.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.90 (word for word)
+
+### From "Decided in chat"
+
+- **v0.11.87: the sitting loop (Claude's options before 01:52, with the lab's numbers: H the Heart's Day 19 rule in every option; O1 H only / O2 H + a realm ceiling per act (prologue 3, Act 1 5; O2b prologue 2) / O3 H + Saturation ×2 a realm / O4 H + the sit's speed capped ×3 / O5 H + 10 × (1 + realm) Qi a sit; Claude recommended O2. Owner 01:52: "O1. but to the hard rules and process, add that the analyzed sub items of the recommendation and option have to be added. until 2 chats ago, they were displayed... maybe ene color code the proposals in order of effectiveness. also put "(recommended)" in the report to your recommendations. as an exception for this case and to avoid rerunning the whole check, you can skip the rerun now, but the normal rest suite after building still applies."):**
+  - **Picked:** **O1.** From Day 19 (`late`) `heart_hub` hides "Cultivate: one sit" and "Rest an hour" (so Meditate's Cultivate, Cultivate until the limit and the task screen's sit close with it, `hubShut`); the way forward, the night camp and the rest unchanged; no text changed, no index moved. **The options rule** (the owner's words): `CLAUDE.md` rule 1 and `working-agreement.md`. Not picked: O2, O2b, O3, O4, O5 (their numbers: the roadmap's section 2, v0.11.87 line). "Skip the rerun": the options were not rerun with the new layout; the full check ran as usual.
+  - **The numbers shown before the pick** (lab, 100 games; the Sitter's Act 1 end: realm, CU tier, sits, mean Coils): today 14, T10, 4,400, 2.74 / 2.77; O1 9.4, T5.0, 1,020, 2.74 / 2.77; Completionist and Careful unchanged in all (realm 1). The Cycle capped at T3: no change.
+  - **As built:** see the version note.
+  - **Also:** `1f91390` filled in for 0.11.86; after v0.11.86 Claude uploaded 7 docs; v0.11.84's notes and the old roadmap and NEXT items to `history-11.md`.
+
+### From "Version notes"
+
+## v0.11.87 — the sitting loop: no sit or rest in the Heart from Day 19 (O1); the options rule
+
+- **Files:** `js/story/act1_heart.js` (two `show` conditions, `!late(g)`), tests: tasks (the v0.11.87 block: Day 18 offers both, Days 19 and 21 offer neither through the hub, Meditate, the task screen or Cultivate until the limit; the way forward and the night camp stay), tools (the Sitter's card count compared per game, ×2: O1 cut its sits); `CLAUDE.md`, `project/working-agreement.md` (the options rule); `sw.js`, `tests/README.md`, timings, docs. Saves unchanged, no id or index changed.
+- **Checks:** a game change (rule 2): the full `bash tools/check.sh`, two runs: 1 stopped at the tools test ("the Sitter runs far more cards than Careful": 2,452 vs 1,200 over 2 vs 3 games, ×3.1 a game; reported to the owner at once, updated as above); 2 exit 0, 0 drifted of 139, 0 past 5; the models' Coils unchanged (Careful 3.51 / 6.71, Completionist 3.96 / 5.88, the Sitter 2.78 / 2.80, the Farmer 3.94 / 5.82). **Cold review on Fable:** the sit shut on every path from Day 19; no soft-lock; saves safe; the tests fail without the fix. Not fixed (the owner's call; details in the roadmap's section 2, v0.11.87 line): medium, no Day 19 heal before the guardian without Rest; medium, older, Push through the night reopens the day-gated sits on a hub's last day (unbounded for a human); low, `runMed('med:sit')` unguarded.
+
 ## Moved from the handover in v0.11.89 (word for word)
 
 ### From "Decided in chat"

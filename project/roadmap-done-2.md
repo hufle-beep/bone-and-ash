@@ -2,6 +2,12 @@
 
 Started in v0.11.88 (owner pick A, 2026-11-09 02:37, D2), so `roadmap-done.md` (part 1) stays readable in one go. Newer than `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.90 (word for word)
+
+### The "Last updated" line of v0.11.89
+
+Last updated: 2026-11-09 (v0.11.89, the four small items (owner pick P1: F1 + T3 + X1 + J1): "Fists only." out of Bao's brawl's round-1 opening, `ya_forced`'s "Fine." says the terms, a won brawl's XP on CU's tier all to GU, the Journal's "checks made" (group e's line moved word for word to `roadmap-done-2.md`); **next: the owner's pick** (the Fable review's two findings of v0.11.87, section 2; group d); v0.11.88, the roadmap trimmed and split). Update in every push.
+
 ## Moved in v0.11.89 (word for word)
 
 ### The "Last updated" line of v0.11.88

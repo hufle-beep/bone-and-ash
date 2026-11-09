@@ -128,8 +128,9 @@ ${pantry(g)} ${g.james.hp < jamesHpMax(g) * 0.5 ? 'You are hurt.' : ''}${late(g)
             { text: 'Into the heart-chamber.', show: (g) => !!g.flags.guardian && !g.flags.seed, time: 20, to: 'heart_core' },
             { text: 'Leave the Old Tree.', show: (g) => !!g.flags.seed, to: 'ht_leave' },
             // v0.11.87 (owner 2026-11-09 01:52, pick O1, the sitting loop): from Day 19 the tree is done with them, so no sit and no rest here (the Sitter sat here to about Day 50)
+            // v0.11.90 (owner 08:42, pick R1, the v0.11.87 review): from Day 19 Rest stays while James is hurt (a heal before the guardian), gone once HP is full
             { text: 'Cultivate: one sit, 10 Qi.', show: (g) => active(g) && !late(g), req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%. The hall is very quiet while you sit.`, ...r.xp] : []; }, to: 'heart_hub' },
-            { text: 'Rest an hour.', show: (g) => active(g) && !late(g), do: (g) => advance(g, 60, { resting: true }).concat(['An hour of rest, back against grey wood that was once alive.']), to: 'heart_hub' },
+            { text: 'Rest an hour.', show: (g) => active(g) && (!late(g) || g.james.hp < jamesHpMax(g)), do: (g) => advance(g, 60, { resting: true }).concat(['An hour of rest, back against grey wood that was once alive.']), to: 'heart_hub' },
             { text: 'Eat something.', show: (g) => foodCount(g) > 0 && g.james.satiety < 85, time: 15, do: (g) => eatBest(g, { fire: true }), to: 'heart_hub' },
             { text: 'Make camp for the night.', show: (g) => !active(g) || hour(g) >= 16, time: 20, to: 'heart_camp' },
         ],

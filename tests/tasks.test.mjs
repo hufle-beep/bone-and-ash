@@ -1284,6 +1284,24 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     const pr = mk(1, 1); pr.flags.ya_brawl = 'won';
     assert(/the disarm that took her spear/.test(SCENES.fo_price.text(pr)) && !/bone-cage/.test(SCENES.fo_price.text(pr)), 'texts: fo_price');
 }
+// v0.11.90 (owner 2026-11-09 08:42, pick R1, the v0.11.87 Fable review): from Day 19 the hall's Rest stays while James is
+// hurt, so a hurt James can heal before the guardian; at full HP it is gone; the sit stays shut either way
+{
+    const heart = (day, hh, f = 1) => { const g = ensureBars(newGame(9001, { closed: true })); g.minutes = (day - 1) * 1440 + hh * 60; g.scene = 'heart_hub'; g.james.qi = jamesQiMax(g); g.james.satiety = 90; g.flags.roots_done = true; g.james.hp = Math.max(1, Math.round(jamesHpMax(g) * f)); return g; };
+    const ch = (g, re) => sceneView(g, SCENES).choices.find((c) => re.test(c.label) && !c.disabled);
+    for (const d of [19, 20, 21]) {
+        const hurt = heart(d, 9, 0.25), full = heart(d, 9);
+        assert(ch(hurt, /^Rest an hour/) && !ch(full, /^Rest an hour/), `R1: Day ${d}: Rest while hurt, none at full HP`);
+        assert(!ch(hurt, /^Cultivate: one sit/) && !medCards(hurt, SCENES).some((c) => c.open && /^Cultivate/.test(c.label || '')) && sitLoop(hurt, SCENES).sits === 0, `R1: Day ${d}: the sit stays shut while hurt`);
+    }
+    // the rest heals and runs out: a few rests bring James to full, then the card is gone (no endless clock)
+    const g = heart(19, 8, 0.15), h0 = g.james.hp, m0 = g.minutes; let n = 0;
+    for (; n < 30 && ch(g, /^Rest an hour/); n++) choose(g, SCENES, ch(g, /^Rest an hour/).index);
+    assert(g.james.hp === jamesHpMax(g) && g.james.hp > h0 && n >= 1 && n <= 10 && g.minutes === m0 + 60 * n && g.scene === 'heart_hub' && !ch(g, /^Rest an hour/), `R1: rests heal to full in ${n} hour(s), then Rest is gone (HP ${h0} → ${g.james.hp}, ${g.minutes - m0} min)`);
+    // the night: no Rest after 18:00 (the camp, as before); Day 18 as before
+    assert(!ch(heart(19, 18, 0.25), /^Rest an hour/) && ch(heart(19, 18, 0.25), /^Make camp for the night/), 'R1: after 18:00 the camp, not Rest');
+    assert(ch(heart(18, 9), /^Rest an hour/) && ch(heart(18, 9, 0.25), /^Rest an hour/), 'R1: Day 18 offers Rest as before, hurt or not');
+}
 // v0.11.89 (owner 2026-11-09 08:23, pick P1 = F1 + T3 + X1 + J1): the four small items
 {
     const { instantWin, awardFightXp } = await import('../js/core/game.js');
