@@ -29,8 +29,10 @@ export function attackReserve(g) {
  * (owner pick SB1, M; Fable's review of v0.11.98, medium 1) the shield only once a weapon is formed (the spear, or a knife
  * that holds), so its attack is already paid and the reserve binds the field alone (lab: 0 of 6,461 fights changed);
  * then (N) the spear if James can sing it, else the blade (free once formed, unless it is the fragile knife), darts when
- * the blade can't be paid, else guard. Never the needle or the Qi blast (measured: no gain; the blast is checked on
- * Convergence). In a spar or a brawl the game turns a move that isn't open there into its own (`fightAction`).
+ * the blade can't be paid, else guard. Never the needle or the Qi blast (v0.11.96: the blast for every swing measured no gain;
+ * v0.11.102, owner pick QB1: the blast in place of the fragile knife against an armoured foe does gain, lab 72.3 → 73.4% at
+ * the old +1 and 74.9% at QB1's 0, but it moves the bots' numbers a lot (14 moves past 5 points, 2 past 20 with QB1), so it
+ * waits for the retune: roadmap section 2). In a spar or a brawl the game turns a move that isn't open there into its own (`fightAction`).
  */
 export function smartAction(g, t = 0) { // eslint-disable-line no-unused-vars
     const c = g.combat, qi = g.james.qi;

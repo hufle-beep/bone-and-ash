@@ -674,6 +674,10 @@ export function bumpRel(g, who, f = 0, a = 0) {
  * v0.11.95 (owner 2026-11-09 12:26, pick Q1 at 12:43): every weapon is sung with Convergence and checked on GU, with one
  * hit modifier (+1); the weapons differ only in damage and what they do. Convergence's own moves: the Qi blast (checked on
  * Convergence Use, ignores armour) and the Qi shield (soaks QI_SHIELD_PER_TIER × the Convergence tier that round).
+ * BLAST_DC_NOTE, v0.11.102 (owner 2026-11-09 18:18, pick QB1): the Qi blast's hit modifier 0, one point under the weapons'
+ * +1. Convergence Use is never ahead of GU (equal at the start; every Convergence award gives GU the same XP): at the bots' fights GU leads by a median 3 ranks,
+ * 1.5 check points, nearly all at Convergence T1. With +1 the blast missed 85.8% of first swings (the knife 35.9%) and 56.9%
+ * in whole fights (the knife 25.7%); with 0, 73.3% and 46.7%; blast only wins 72.6% against the knife's 71.0% (was 69.0%).
  */
 export const QI_SHIELD_PER_TIER = 3;
 export const COMBAT_ACTIONS = {
@@ -682,7 +686,7 @@ export const COMBAT_ACTIONS = {
     needle: { label: 'Needle to a joint', skill: 'GU', qi: 4, dmg: [1, 2], dcMod: 1, stagger: true },
     guard: { label: 'Guard and give ground', skill: 'GU', qi: 0, dmg: [0, 0], dcMod: -1, guard: true },
     // v0.11.95 (Q1): Convergence's own moves, open from the start (not in a spar or a brawl: forms.js SPAR_ACTIONS / UNARMED_ACTIONS)
-    blast: { id: 'blast', label: 'Qi blast', skill: 'Convergence Use', qi: 4, dmg: [4, 6], dcMod: 1, pierce: true }, // P2: 4–6, the middle 5 × 1.4 a tier (the table the owner picked)
+    blast: { id: 'blast', label: 'Qi blast', skill: 'Convergence Use', qi: 4, dmg: [4, 6], dcMod: 0, pierce: true }, // P2: 4–6, the middle 5 × 1.4 a tier (the table the owner picked); v0.11.102 (QB1): hit modifier +1 → 0, see BLAST_DC_NOTE
     qshield: { id: 'qshield', label: 'Qi shield', skill: 'Convergence Use', qi: 3, dmg: [0, 0], dcMod: 0, qshield: true },
     // v0.11.4 (actionOpen hides them until James can sing them):
     spear: { id: 'spear', label: 'Bone spear', skill: 'GU', qi: 3, dmg: [3, 6], dcMod: 1, reach: true, keeps: 'spear' }, // sung once (Convergence), thrust with GU (v0.11.95: dcMod 2 → 1, Q1); a full hit holds the enemy off for the round

@@ -2,6 +2,23 @@
 
 Started 2026-11-09 (v0.11.97), when `history-11.md` neared 45 KB. Newer than `history-11.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.102 (word for word)
+
+### From "Decided in chat"
+
+- **v0.11.99: the loose open items placed (the owner's 15:47 "list the unordered dangling open questions … the ones that aren't assigned to a roadmap section"; Claude's list of eight; owner 15:50 "yes, please"; Claude's options PL1–PL3; owner 15:51 "PL1 go"):**
+  - **The sub-items:** **A** the v0.11.46 review's three lows → section 2; **B** "End it in one move" about 2 points too hard → group d; **C** the browser part 2 flake (5 stops in 4 pushes, a 4–6 minute re-run each) → **C0** section 0, a tools-only push after group d's current item / C5 section 5's test-suite line; **D** the two keep-list entries matching nothing → beside C; **E** the Careful model under Fed 30 with food (3,332 times in 500 games) → section 2's retune tools; **F** the snare's text names nothing sung → group e's small text fixes (Fable); **G** section 0 empty → "Next: group d" with its open items in order; **H** five fights past 5 points (rats +5.5, mire −11.7, boar +11.4, Gao −7.8, story Gao −8.5) → section 2, the baseline re-saved with the retune or on its own pick.
+  - **The options:** **PL1 🟢 A + B + C0 + D + E + F + G + H (recommended)** / PL2 🟡 A + B + C5 + D + E + F + G + H / PL3 🟠 A + B + E + F (colours: items placed, 8 / 8 / 4, then how soon the flake is fixed). **Picked: PL1.** Not picked: PL2, PL3.
+  - **As built:** see the version note.
+  - **Also:** `38c2748` filled in for 0.11.98; after v0.11.98 Claude uploaded 5 docs (handover, roadmap, changelog, restore-points, history-12); v0.11.96's notes to `history-12.md`.
+
+### From "Version notes"
+
+## v0.11.99 — the loose open items placed (PL1)
+
+- **Files:** `project/roadmap.md` (section 0: "Next: group d" with its open items in order, then the browser flake with the keep-list entries; group d: "End it in one move"; group e's small text fixes: the snare's line; section 2: the past-5 fight numbers, the v0.11.46 review's lows, the Careful model's eating), `sw.js`, docs (v0.11.96 to `history-12.md`; the handover's two old items to `history-12.md`, pointers left). Docs only: the game, the tests and the baseline unchanged.
+- **Checks:** docs only (rule 2): `node tests/tools.test.mjs` (the docs' size and version rules) and `bash tools/check.sh quick`. Interaction: none with the game; the consistency check reads the version in every doc.
+
 ## Moved from the handover in v0.11.101 (word for word)
 
 ### From "Decided in chat"

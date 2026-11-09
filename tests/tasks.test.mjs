@@ -1333,6 +1333,30 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
         assert(o?.done && g.minutes < night0 + 120, `v0.11.91: ${sc}${kind ? ` (${kind})` : ''} is over before 02:00 even at the round cap (${o?.done}, ${g.minutes - night0} min after midnight)`);
     }
 }
+// v0.11.102 (owner 2026-11-09 18:18, pick QB1): the Qi blast's hit modifier 0, one under the weapons' +1: Convergence Use
+// trails GU (a median 3 ranks, 1.5 check points, at the bots' fights), so with Convergence 2 ranks (1 check point) behind GU
+// the blast's check clears its DC by as much as the knife's (the bands are a ratio, so they can still differ); still checked on Convergence Use (the owner's "pure Convergence" design)
+{
+    const { rollCheck, skillCheck } = await import('../js/core/game.js');
+    const A = COMBAT_ACTIONS;
+    assert(A.blast.dcMod === A.blade.dcMod - 1 && A.blast.skill === 'Convergence Use', `QB1: the blast one under the weapons' modifier, on Convergence Use (${A.blast.dcMod} / ${A.blade.dcMod}, ${A.blast.skill})`);
+    for (const [guR, dc] of [[5, 3], [8, 4], [10, 5.5], [14, 6]]) {
+        const g = ensureBars(newGame(10200 + guR)); const cuR = guR - 2;
+        g.james.gu = { tier: Math.floor((guR - 1) / 10) + 1, level: ((guR - 1) % 10) + 1, xp: 0 };
+        g.james.skills['Convergence Use'] = { tier: Math.floor((cuR - 1) / 10) + 1, level: ((cuR - 1) % 10) + 1, xp: 0 };
+        assert(skillCheck(g.james.gu) - skillCheck(g.james.skills['Convergence Use']) === 1, `QB1: 2 ranks = 1 check point (GU rank ${guR})`);
+        const b = rollCheck(g, 'Convergence Use', dc + A.blast.dcMod), k = rollCheck(g, 'GU', dc + A.blade.dcMod);
+        assert(Math.abs((b.value - b.dc) - (k.value - k.dc)) < 1e-9, `QB1: with Convergence 2 ranks behind GU the blast clears its DC by as much as the knife (GU rank ${guR}, DC ${dc}: ${b.value}/${b.dc} vs ${k.value}/${k.dc})`);
+        if (guR === 8) assert(b.ratio >= 1 && b.ratio < 2 && k.ratio >= 1 && k.ratio < 2, `QB1: GU rank 8, DC 4: both a full hit (${b.value}/${b.dc}, ${k.value}/${k.dc}; review low 2)`);
+    }
+    // in a fight at T1 (GU 2 ranks ahead): DC 3.5, the knife hits and so does the blast (at the old +1 it glanced); DC 4.5, a
+    // same-band sanity case (both glance; at +1 too; at −1 the blast would hit: Fable's review of v0.11.102, low 1)
+    const fightOf = (dc) => { const g = ensureBars(newGame(10210)); g.james.gu = { tier: 1, level: 7, xp: 0 }; g.james.skills['Convergence Use'] = { tier: 1, level: 5, xp: 0 }; ensureBars(g); g.james.qi = 99;
+        startCombat(g, { id: 'qb1_test', enemies: [{ name: 'Foe', hp: 99, dc, atk: 0.1, dmg: 0 }], win: 'stream', lose: 'stream' }); return g; };
+    const band = (g, id) => (combatStep(g, id).lines.find((l) => / — (hit|miss|a glancing blow|a clean, deep hit)$/.test(l) && !/^Yuki/.test(l)) || '').replace(/^.* — /, '');
+    for (const dc of [3.5, 4.5]) { const want = band(fightOf(dc), 'blade'); const got = band(fightOf(dc), 'blast');
+        assert(want && got === want, `QB1: DC ${dc}: the blast's first swing lands as the knife's (${got} / ${want})`); }
+}
 // v0.11.101 (owner 2026-11-09 16:41, pick DG1; Fable's review of v0.11.100, medium 1): (D) the degree, and "End it in one
 // move.", reads GU alone, as every strike and the defence do; (I) GU is never behind Convergence Use: every Convergence award
 // gives GU the same XP (and the bot games above assert it at every fight), so the old max(GU, Convergence) was GU in play
@@ -1498,7 +1522,7 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     const A = COMBAT_ACTIONS;
     for (const id of ['dart', 'blade', 'needle', 'spear']) assert(A[id].skill === 'GU' && A[id].dcMod === 1, `Q1: ${id} checked on GU, hit modifier +1 (${A[id].skill}, ${A[id].dcMod})`);
     assert(A.guard.skill === 'GU' && A.guard.dcMod === -1 && A.spikes.skill === 'Convergence Use', 'Q1: guard and the spike field as before');
-    assert(A.blast.skill === 'Convergence Use' && A.blast.qi === 4 && A.blast.dmg.join() === '4,6' && A.blast.dcMod === 1 && A.blast.pierce === true, 'Q1: the Qi blast: Convergence Use, 4 Qi, 4–6 (P2), +1, ignores armour');
+    assert(A.blast.skill === 'Convergence Use' && A.blast.qi === 4 && A.blast.dmg.join() === '4,6' && A.blast.dcMod === 0 && A.blast.pierce === true, 'Q1: the Qi blast: Convergence Use, 4 Qi, 4–6 (P2), hit modifier 0 (v0.11.102, QB1; was +1), ignores armour');
     assert(A.qshield.qi === 3 && A.qshield.qshield === true && QI_SHIELD_PER_TIER === 3, 'Q1: the Qi shield: 3 Qi, 3 × the tier');
     const at = (t, l = 1) => { const g = ensureBars(newGame(9500 + t)); g.james.skills['Convergence Use'] = { tier: t, level: l, xp: 0 }; g.james.gu = { tier: 3, level: 1, xp: 0 }; ensureBars(g); g.james.qi = 99; return g; };
     assert(qiShield(at(1)) === 3 && qiShield(at(2)) === 6 && qiShield(at(4)) === 12, 'Q1: the shield soaks 3 / 6 / 12 at T1 / T2 / T4');
