@@ -5,7 +5,7 @@
  * shared camp / fireside / night scenes, a seeded night event, and the Mei Lin – Ya – James romance arc.
  * Entry 'bl_start' (Day 11). Exit 'ht_start' (Day 16, 06:00). Region in g.flags.bl_region, expedition day in g.flags.bl_day (1–5).
  */
-import { addItem, hasItem, eat, advance, clockParts, d6, awardYukiFightXp, jamesHpMax, condense, dayHour } from '../core/game.js';
+import { addItem, hasItem, eat, advance, clockParts, d6, awardYukiFightXp, jamesHpMax, condense, dayHour, nightTo } from '../core/game.js';
 import { hasForm } from '../core/forms.js';
 import { daily, markDaily, eatBest, pantry, foodCount, hour } from './common.js';
 import { encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil } from './act1_common.js';
@@ -1000,8 +1000,7 @@ Watches to set. Ya says she doesn't need sleep, which is a lie; Mei Lin says she
             if (pick === g.flags.bl_last_ev) pick = pool[d6(g) - 1];
             g.flags.bl_ev = pick;
             g.flags.bl_last_ev = pick;
-            const p = clockParts(g.minutes);
-            g.minutes = Math.max(g.minutes, (p.hh >= 19 ? p.day : p.day - 1) * 1440 + 60); // v0.11.40 (N1): never back
+            nightTo(g, 60); // v0.11.40 (N1): never back; v0.11.91: after the bed (from 21:00; it was 19:00 here), at 01:00
             return [];
         },
         text: (g) => ({

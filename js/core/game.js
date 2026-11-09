@@ -343,28 +343,26 @@ export function clockLabel(minutes) {
 /** Time passes: hunger, then regen per Cycle (T1 30 min) — HP 5%, Qi 5% + 0.1 per open collateral. */
 /* v0.11.18 (owner pick B): once-a-day things come back after sleep, not at midnight (Incremental Mode).
  * g.wake.n counts waking days: +1 for each night slept (sleepUntil to a new morning, a scene that moves the clock past
- * a morning by itself, a span of a day or more), +1 for a push. Old saves start at their calendar day. */
+ * a morning by itself, a span of a day or more). Old saves start at their calendar day.
+ * v0.11.91 (owner 2026-11-09 09:05, pick B, push 1): no Push through the night and no Exhaustion any more; an old save's
+ * `wake.ex` and `wake.push` are dropped when it is read (nothing reads them). */
 const X4 = (m) => Math.floor((m - 240) / 1440) + 1;
-export const EX_MULT = [1, 1.5, 2];
 export function wakeState(g) {
     const d = clockParts(g.minutes).day;
-    if (!g.wake) g.wake = { n: d, ex: 0, lastX: X4(g.minutes), slept: d };
+    if (!g.wake) g.wake = { n: d, lastX: X4(g.minutes), slept: d };
+    if ('ex' in g.wake || 'push' in g.wake) { delete g.wake.ex; delete g.wake.push; } // v0.11.91: an old save's Exhaustion and push, gone
     const x = X4(g.minutes);
-    if (x > g.wake.lastX) { g.wake.n += x - g.wake.lastX; g.wake.ex = 0; g.wake.slept = d; } // the clock passed a morning by itself: slept
+    if (x > g.wake.lastX) { g.wake.n += x - g.wake.lastX; g.wake.slept = d; } // the clock passed a morning by itself: slept
     g.wake.lastX = x;
     return g.wake;
 }
 export const wakeDay = (g) => wakeState(g).n;
-export const exLevel = (g) => wakeState(g).ex;
-export const exMult = (g) => EX_MULT[exLevel(g)] || 1;
-export const exMins = (g, m) => (m ? Math.round(m * exMult(g)) : m);
-export function advance(g, minutes, { resting = false, work = false } = {}) {
-    let m = Math.max(0, Math.round(minutes));
+export function advance(g, minutes, { resting = false } = {}) {
+    const m = Math.max(0, Math.round(minutes));
     if (!m) return [];
     const notes = [];
     const w = wakeState(g);
-    if (work && !resting && m < 1440) m = Math.round(m * (EX_MULT[w.ex] || 1)); // Exhaustion: work only, not waits, rests or sleep
-    if (m >= 1440) { w.n += Math.floor(m / 1440); w.ex = 0; w.slept = clockParts(g.minutes + m).day; } // a span of a day or more has its nights in it
+    if (m >= 1440) { w.n += Math.floor(m / 1440); w.slept = clockParts(g.minutes + m).day; } // a span of a day or more has its nights in it
     w.lastX = X4(g.minutes + m); // a morning passed awake: no new day
     g.minutes += m;
     const fed0 = Math.max(0, g.james.satiety);
@@ -393,51 +391,51 @@ export function advance(g, minutes, { resting = false, work = false } = {}) {
 }
 
 /*
- * v0.11.37 (owner 14:17 / 14:27, picks D-a + E-a): the waking day ends at 02:00 (Incremental Mode). From 00:00 to 03:59 the
- * hour tests read 24–27 (the evening before, `dayHour`), so day cards don't come back at midnight. From 02:00 the task
- * screens and resting places offer only the night (tasks.js, meditate.js), and a card that would end past 02:00 doesn't
- * start. Push through the night shows only from 00:00 to 03:59; it starts the next waking day at once and lifts that
- * night's 02:00 (`g.wake.push` = the calendar day of the night pushed through; a save without it has pushed nothing).
+ * v0.11.37 (owner 14:17 / 14:27, picks D-a + E-a): the waking day has an end (Incremental Mode). From 00:00 to 03:59 the
+ * hour tests read 24–27 (the evening before, `dayHour`), so day cards don't come back at midnight. From the day's end the
+ * task screens and resting places offer only the night (tasks.js, meditate.js), and a card that would end past it doesn't
+ * start. v0.11.91 (owner 2026-11-09 09:05, pick B, push 1): the day ends at 00:00 (it was 02:00), and Push through the
+ * night is gone, so the night is always for sleep; the night encounters come at 01:00 (01:20 the jackals) and end by 02:00.
  */
-export const DAY_END_HOUR = 2, NIGHT_TO = 4;
-/** The night hours belong to the day before; pushed through, they belong to the next one. */
-export const pushedTonight = (g) => { const p = clockParts(g.minutes); return p.hh < NIGHT_TO && wakeState(g).push === p.day; };
-export const dayHour = (g) => { const hh = clockParts(g.minutes).hh; return hh < NIGHT_TO && !pushedTonight(g) ? hh + 24 : hh; };
-/** The minute this waking day ends (the next 02:00, or the one after a push). */
+export const DAY_END_HOUR = 0, NIGHT_TO = 4;
+/** The night hours belong to the day before. */
+export const dayHour = (g) => { const hh = clockParts(g.minutes).hh; return hh < NIGHT_TO ? hh + 24 : hh; };
+/** The minute this waking day ends (the next 00:00). */
 export function dayEnd(g) {
     const p = clockParts(g.minutes), d0 = (p.day - 1) * 1440 + DAY_END_HOUR * 60;
-    return p.hh < NIGHT_TO ? d0 + (pushedTonight(g) ? 1440 : 0) : d0 + 1440;
+    return p.hh < NIGHT_TO ? d0 : d0 + 1440;
 }
 export const nightLock = (g) => g.minutes >= dayEnd(g);
 /** Would `minutes` of work from now run past the day's end? */
 export const endsLate = (g, minutes) => g.minutes + Math.max(0, minutes || 0) > dayEnd(g);
-export const pushWindow = (g) => clockParts(g.minutes).hh < NIGHT_TO && !pushedTonight(g);
 
-/** v0.11.18: Push through the night: a new waking day without sleep, one Exhaustion more; the third collapses him for a day. */
-export function pushNight(g) {
-    const w = wakeState(g);
-    w.push = clockParts(g.minutes).day; // v0.11.37: this night's 02:00 no longer ends the day
-    if (w.ex < 2) { w.n += 1; w.ex += 1; return { collapsed: false, ex: w.ex }; }
-    const p = clockParts(g.minutes + 1440);
-    let target = (p.day - 1) * 1440 + 6 * 60;
-    if (target < g.minutes + 1440) target += 1440;
-    sleepUntil(g, 6); // bars, Fed at the sleeping rate up to the first morning
-    const rest = target - g.minutes;
-    g.minutes = target;
-    g.james.satiety = Math.max(0, g.james.satiety - (SATIETY_PER_HOUR * rest) / 60 / 2);
-    w.lastX = X4(target); w.slept = clockParts(target).day; w.ex = 0; // the lost day: one waking day (sleepUntil counted it)
-    return { collapsed: true, ex: 0 };
+/** v0.11.91 (owner 2026-11-09 09:16, with pick B's push 1): no bed before 21:00 anywhere: an earlier bed first spends the
+ *  evening by the fire until 21:00 (time passes, resting). Dinner and night scenes before the bed are untouched. */
+export const BED_FROM_HOUR = 21;
+export function eveningTo(g, h = BED_FROM_HOUR) {
+    const dh = dayHour(g);
+    if (dh >= 6 && dh < h) { const p = clockParts(g.minutes); advance(g, (p.day - 1) * 1440 + h * 60 - g.minutes, { resting: true }); }
 }
-
-/** A full night (or long rest): bars to Max, clock to the given hour of the next morning. */
-export function sleepUntil(g, hour = 6) {
+/** v0.11.91: a night encounter comes after the bed (from 21:00), at `at` minutes past the coming midnight (01:00; the jackals
+ *  01:20), never back; the wait is asleep (Fed at the sleeping rate), so the fight is over before 02:00. */
+export function nightTo(g, at = 60) {
+    eveningTo(g);
+    const p = clockParts(g.minutes), n0 = (p.hh < 6 ? p.day - 1 : p.day) * 1440; // before 06:00 it is still this night
+    const t = Math.max(g.minutes, n0 + at), span = t - g.minutes;
+    wakeState(g); g.minutes = t; g.wake.lastX = X4(t);
+    g.james.satiety = Math.max(0, g.james.satiety - (SATIETY_PER_HOUR * span) / 60 / 2);
+}
+/** A full night (or long rest): bars to Max, clock to the given hour of the next morning (v0.11.91: never a bed before 21:00;
+ *  `bed: false` for a rest that isn't a bed, the Long Forest's seclusion, owner pick S1). */
+export function sleepUntil(g, hour = 6, { bed = true } = {}) {
+    if (bed) eveningTo(g);
     const p = clockParts(g.minutes);
     let target = (p.day - 1) * 1440 + hour * 60;
     if (target <= g.minutes) target += 1440;
     const span = target - g.minutes;
     wakeState(g);
     g.minutes = target;
-    { const w = g.wake, d = clockParts(target).day; if (d > w.slept) { w.n += 1; w.slept = d; } w.ex = 0; w.lastX = X4(target); }
+    { const w = g.wake, d = clockParts(target).day; if (d > w.slept) { w.n += 1; w.slept = d; } w.lastX = X4(target); }
     g.james.satiety = Math.max(0, g.james.satiety - (SATIETY_PER_HOUR * span) / 60 / 2);
     g.james.hp = jamesHpMax(g);
     g.james.qi = jamesQiMax(g);
@@ -468,7 +466,7 @@ export const sitGain = (g, sits = 1) => Math.round(((100 * sits) / SAT_HOURS(g.j
 /** v0.11.37 (owner 13:06, pick B2): a sit that changes nothing (the top realm, or a gain that rounds to 0%: from realm 14 since v0.11.66's ×1.5, so only the top realm) is not offered (Incremental Mode). */
 export const sitUseless = (g) => (g.james.realm >= MAX_REALM || sitGain(g) <= 0);
 /** The breakthrough's length: 2 h × (realm + 1) (Foundation 2 h … Heavenly Immortal 28 h). */
-export const btMinutes = (g) => exMins(g, Math.round((120 * ((g.james.realm || 0) + 1)) / actSpeed(g, 'bt'))); // v0.11.15: ÷ its speed by use
+export const btMinutes = (g) => Math.round((120 * ((g.james.realm || 0) + 1)) / actSpeed(g, 'bt')); // v0.11.15: ÷ its speed by use
 /** v0.11.66 (owner pick X1): every sit pays a third of a standard award to Convergence Use and GU, with Yuki's bond share. */
 export const SIT_XP_FACTOR = 1 / 3;
 /** Condensation: a conscious sit, 10 Qi a sit; raises Saturation and pays SIT_XP_FACTOR of a standard award (`xp`: its lines). Spends Qi, never refills it. */

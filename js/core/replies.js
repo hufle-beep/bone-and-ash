@@ -36,7 +36,7 @@ const GAIN_BITS = [
     /^Meditated an hour/, /^Slept\b/, /^A few hours of sleep/, /^An hour of rest/, // the clock and rest
     /^Hammerspace: /, /^A thin haul/, /^Double haul/, /^Not enough Qi/,
     /— (success|failure|failed|partly|done|a double haul)\b/, // check results in words
-    /×\d/, // Exhaustion: work takes ×1.5
+    /×\d/, // a multiplier line (×1.5 and the like)
     /^Yuki: (cat|great root-kin|human) form\b/, // her form's note
     /^\+ ?[A-Z']/, // an item without a count: "+Ya's wolf tooth.", "+ The watcher's ledger: …"
     /^The calendar starts again/, /^You stay until the Day \d+ dawn/, /few hours of sleep/, // the clock

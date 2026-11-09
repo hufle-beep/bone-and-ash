@@ -14,7 +14,7 @@
  */
 import { hasForm } from './forms.js';
 import { choose, goTo, choiceOpen, choiceTag, gives, setTimeless, defaultMinutes, movesPlace, wasPicked, isMenuScene, isTimeless, setFamiliar } from './story.js';
-import { itemCap, yukiForm, advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck, canBreakThrough, btMinutes, realmName, condense, sitMinutes, useSpeed, USE_N, exMins, nightLock, endsLate, sitUseless, jamesQiMax, SATIETY_PER_HOUR, breakAt, coilMult, fmtMult } from './game.js';
+import { itemCap, yukiForm, advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck, canBreakThrough, btMinutes, realmName, condense, sitMinutes, useSpeed, USE_N, nightLock, endsLate, sitUseless, jamesQiMax, SATIETY_PER_HOUR, breakAt, coilMult, fmtMult } from './game.js';
 import { CONDENSE_SIT_COST } from './formulas.js';
 import { btTarget, MER_LINES, lineWindow, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
@@ -211,8 +211,8 @@ export function taskCards(g, scenes, only = null) {
     return nightCards(g, scenes, cards, only);
 }
 /**
- * v0.11.37 (owner 14:17, pick D-a): from 02:00 a task screen offers only the night: eating stays (its story stops, the
- * evening exits, show as before); any other card that would end past 02:00 is 'late' (shown locked; the queue skips
+ * v0.11.37 (owner 14:17, pick D-a): from the day's end (00:00 since v0.11.91; 02:00 before) a task screen offers only the night: eating stays (its story stops, the
+ * evening exits, show as before); any other card that would end past it is 'late' (shown locked; the queue skips
  * it). The breakthrough is exempt (it is rest). `only`: check just that card (taskOpen, the forecast's rows).
  */
 const NIGHT_OK = /^(Eat|Cook and eat|Chew a ghost-gill)\b/;
@@ -222,7 +222,7 @@ function nightCards(g, scenes, cards, only) {
     if (nightLock(g)) return cards.filter(isNightOk);
     for (const c of cards) {
         if (c.status !== 'open' || c.kind === 'bt' || isNightOk(c) || (only && c.id !== only)) continue; // eating is open at night anyway (Fable review)
-        if (!endsLate(g, 4 * (c.minutes || 0) + 120)) continue; // cheap bound first (work ×2 new ×2 Exhaustion; a sit or a rest inside a chore ≤ 2 h)
+        if (!endsLate(g, 4 * (c.minutes || 0) + 120)) continue; // cheap bound first (work ×2 new; a sit or a rest inside a chore ≤ 2 h)
         if (endsLate(g, taskMinutes(g, scenes, c.id))) c.status = 'late';
     }
     return cards;
@@ -237,7 +237,7 @@ function medTaskCards(g, scenes) {
         const c = scenes.meridians.choices[mi];
         cards.push({ id: merLineTask(line), kind: 'mer', line, group: 'Meditate', label: asText(c.text, g), tag: choiceTag(g, c), minutes: c.minutes ? c.minutes(g) : c.time || 0, status: 'open', tier: 0, fam: 0, next: null });
     }
-    if (sitOpen(g, scenes)) cards.push({ id: SIT_TASK, kind: 'sit', group: 'Meditate', label: 'Cultivate: one sit', tag: `${CONDENSE_SIT_COST} Qi`, minutes: exMins(g, sitMinutes(g)), status: 'open', tier: 0, fam: 0, next: null });
+    if (sitOpen(g, scenes)) cards.push({ id: SIT_TASK, kind: 'sit', group: 'Meditate', label: 'Cultivate: one sit', tag: `${CONDENSE_SIT_COST} Qi`, minutes: sitMinutes(g), status: 'open', tier: 0, fam: 0, next: null });
     if (qiOpen(g, scenes)) cards.push({ id: QI_TASK, kind: 'qi', group: 'Meditate', label: 'Meditate: gather Qi', tag: 'an hour, resting', minutes: QI_MINUTES, status: 'open', tier: 0, fam: 0, next: null }); // v0.11.46 (Q1)
     if (btOpen(g)) cards.push({ id: BT_TASK, kind: 'bt', group: 'Meditate', label: `Break through to ${realmName(g.james.realm + 1)}`, tag: `${btMinutes(g)} min`, minutes: btMinutes(g), status: 'open', tier: 0, fam: 0, next: null });
     return cards;
@@ -488,17 +488,17 @@ export function sitTaskId(g, scenes) {
     if (TASK_HUBS[g.scene]) { const i = (scenes[g.scene]?.choices || []).findIndex((c) => isSitChore(c, g.scene)); if (i >= 0) return `${g.scene}:${i}`; }
     return SIT_TASK;
 }
-/** Why the next sit can't run ('' = it can): Saturation at the breakthrough point, Qi short, past 02:00, the card shut. */
+/** Why the next sit can't run ('' = it can): Saturation at the breakthrough point, Qi short, past the day's end, the card shut. */
 function sitStop(g, scenes, id) {
     if (sitUseless(g) || g.james.saturation >= breakAt()) return 'sat';
     if (g.james.qi < CONDENSE_SIT_COST) return 'qi';
-    if (nightLock(g) || endsLate(g, exMins(g, sitMinutes(g)))) return 'night';
+    if (nightLock(g) || endsLate(g, sitMinutes(g))) return 'night';
     if (!taskOpen(g, scenes, id)) return 'shut';
     return '';
 }
 /**
  * Sit after sit, each exactly one tap of the sit card (runTask), until the first of: Saturation 95% (the breakthrough
- * point; nothing over 100% carries), Qi under 10, a sit that would end past 02:00, a sit that would leave Fed at 0, or the
+ * point; nothing over 100% carries), Qi under 10, a sit that would end past the day's end, a sit that would leave Fed at 0, or the
  * story leaving the screen. Returns { sits, lines, stop, minutes, qi, saturation } (`qi` = Qi spent net of regen).
  */
 export function sitLoop(g, scenes) {

@@ -4,7 +4,7 @@
  * corpses of their rivals, and where Heaven answers every breakthrough with lightning. James needs none of it.
  * That is going to be a problem — for them.
  */
-import { addItem, hasItem, eat, bumpRel, sleepUntil, advance, clockParts, breakthrough, realmName } from '../core/game.js';
+import { addItem, hasItem, eat, bumpRel, sleepUntil, advance, clockParts, breakthrough, realmName, nightTo } from '../core/game.js';
 import { NO_DICE_TUNE } from './nodice_tune.js';
 import { setNoDiceTune } from '../core/game.js';
 setNoDiceTune(NO_DICE_TUNE);
@@ -304,7 +304,7 @@ ${(g.flags.forest_day || 1) > 1 ? 'Another night in the Blackroot. Your watch-th
     },
     night_attack: {
         id: 'night_attack', title: 'Ashfangs', art: 'jackals', place: 'Blackroot Wilds — the dry rise',
-        enter: (g) => { const p = clockParts(g.minutes); g.minutes = Math.max(g.minutes, (p.hh >= 21 ? p.day : p.day - 1) * 1440 + 60 + 20); /* v0.11.40 (N1): never back (entered after 01:20, the clock stays) */ return []; },
+        enter: (g) => { nightTo(g, 80); /* v0.11.40 (N1): never back (entered after 01:20, the clock stays); v0.11.91: after the bed (from 21:00), at 01:20 */ return []; },
         text: (g) => `${g.flags.watch ? 'The watch-thread yanks you awake a full three seconds before anything happens. Three seconds is a lot.' : 'Yuki\'s claws in your thigh wake you. That, and the smell.'}
 
 ${g.flags.stakes ? 'Something yelps on your bone stakes — one of them is already bleeding.' : ''} Two shapes at the edge of the ${g.flags.fire ? 'firelight' : 'dark'}: grey hides, black lips peeled back from teeth that drip something that smokes when it hits the moss.
@@ -951,7 +951,7 @@ SCENES.lf_hub.choices.push({
     do: (g) => {
         g.flags.lf_active = false;
         g.minutes = g.flags.lf_at;
-        { const w = wakeState(g); w.ex = 0; w.slept = clockParts(g.minutes).day; delete w.push; } // rested; the day count runs on, but the next night slept counts (Fable review: `slept` was left at the forest's last day)
+        { const w = wakeState(g); w.slept = clockParts(g.minutes).day; } // rested; the day count runs on, but the next night slept counts (Fable review: `slept` was left at the forest's last day)
         g.james.hp = jamesHpMax(g); g.james.qi = jamesQiMax(g); g.yuki.hp = yukiHpMax(g); g.yuki.qi = yukiQiMax(g);
         ensureBars(g);
         lfStock(g);

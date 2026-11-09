@@ -3,7 +3,7 @@
 // and the answers' numbers against the game's own values (so a balance change can't leave the FAQ stale).
 import { readFileSync } from 'node:fs';
 import { FAQ, FAQ_TEST, FAQ_TAB, FAQ_KEY, faqState, faqText, faqCheck, faqList, faqHasNew, faqSeen, faqMatch } from '../js/core/faq.js';
-import { newGame, ensureBars, deserialize, SATIETY_PER_HOUR, HUNGRY_AT, STARVE_HP_PER_HOUR, COIL_GROWTH, coilMult, fmtMult, EX_MULT, breakAt, realmName, ITEM_CAP, USE_CAP, REL_MAX, bumpRel, inAct1 } from '../js/core/game.js';
+import { newGame, ensureBars, deserialize, SATIETY_PER_HOUR, HUNGRY_AT, STARVE_HP_PER_HOUR, COIL_GROWTH, coilMult, fmtMult, breakAt, realmName, ITEM_CAP, USE_CAP, REL_MAX, bumpRel, inAct1 } from '../js/core/game.js';
 import { FAM, FED_EXTRA_PER_HOUR, YUKI_CAP, YUKI_HOURS } from '../js/core/tasks.js';
 import { PRIMARIES, COL_GROUPS } from '../js/story/meridians.js';
 import { CONDENSE_SIT_COST, FAIL_XP_FRACTION } from '../js/core/formulas.js';
@@ -37,7 +37,7 @@ const coil = plain(text('The Coil', g2));
 assert(coil.includes(`1 + ${COIL_GROWTH} × earlier Coils`) && coil.includes(`×${fmtMult(coilMult(g2))} this Coil`) && g2.coil.n === 2 && coilMult(g2) === 1 + COIL_GROWTH, 'the Coil: the bonus from COIL_GROWTH, this Coil\'s from the save (Coil 2)');
 assert(coil.includes('A Coil ended by choice (Bite the tail, or going round again at the end of Act 1) still counts as a Coil, but adds nothing to the faster learning.') && coil.includes('which starts the act he is in over') && coil.includes(`1 + ${COIL_GROWTH} × earlier Coils not ended by choice)`) && plain(text('Skills and checks', g2)).includes('Every earlier Coil not ended by choice'), 'v0.11.86 (#53, C1 + G1 + W1): the FAQ says a Coil ended by choice adds no bonus');
 assert(plain(text('Skills and checks', g2)).includes(`×${fmtMult(coilMult(g2))}`) && plain(text('Skills and checks')).includes(`fail pays ${Math.round(FAIL_XP_FRACTION * 100)}%`), 'skills: the Coil bonus and the fail share');
-assert(plain(text('Days, sleep and the night')).includes(`×${EX_MULT[1]}`) && plain(text('Days, sleep and the night')).includes(`×${EX_MULT[2]}`), 'the night: Exhaustion from EX_MULT');
+assert(plain(text('Days, sleep and the night')).includes('ends at midnight (00:00') && !/push|exhaust/i.test(plain(text('Days, sleep and the night'))) && !FAQ.some(([q, a]) => /push through|exhausted/i.test(typeof a === 'function' ? a(fresh) : a)), 'the night: midnight, no Push through the night or Exhaustion anywhere in the FAQ (v0.11.91)');
 assert(plain(text('Meditation, Saturation and realms')).includes(`${CONDENSE_SIT_COST} Qi`) && plain(text('Meditation, Saturation and realms')).includes(`${breakAt()}%`) && plain(text('Meditation, Saturation and realms')).includes(realmName(1)), 'meditation: the sit\'s Qi, the breakthrough point, the realm names');
 assert(plain(text('What is the goal?')).includes(`Coil ${TARGETS[0]}`) && plain(text('What is the goal?')).includes(`Coil ${TARGETS[1]}`), 'the goal: the targets from coil.js');
 assert(plain(text('What carries over')).includes(`${Math.round(HEAD_START * 100)}%`) && plain(text('The hammerspace')).includes(`${ITEM_CAP}`) && plain(text('Yuki\'s job')).includes(`×${YUKI_CAP}`), 'carry-over head start, the hammerspace cap and Yuki\'s cap from the game');
@@ -104,7 +104,7 @@ const order = faqList(back, g2).map((e) => e.q);
 assert(order.join('|') === qs.filter((q) => order.includes(q)).join('|'), 'entries keep the FAQ\'s order');
 
 // search
-assert(faqMatch('Days, sleep and the night', text('Days, sleep and the night'), ['push', 'night']) && !faqMatch('Days, sleep and the night', text('Days, sleep and the night'), ['push', 'zebra']), 'search: every word must be in the question or answer');
+assert(faqMatch('Days, sleep and the night', text('Days, sleep and the night'), ['sleep', 'night']) && !faqMatch('Days, sleep and the night', text('Days, sleep and the night'), ['sleep', 'zebra']), 'search: every word must be in the question or answer');
 assert(!faqMatch('X', '<b>bold</b>', ['b>']) && faqMatch('X', '<b>bold</b>', ['bold']), 'search reads the text, not the tags');
 
 console.log(`\n${pass} passed, ${fail} failed`);

@@ -91,10 +91,10 @@ def visit_tabs(pg, where):
 def no_greyed(pg, where):
     """v0.11.17 (owner pick 1a): Incremental Mode shows no greyed-out task, Meditate or fight card (story choices keep their own rule).
     v0.11.68 (owner pick T1): except the cards the game shows locked on purpose, with their reason: a sit short of Qi
-    ("needs 10 Qi", v0.11.46 Q1), gather Qi when too hungry, and a card that would end past 02:00 (v0.11.37 D-a)."""
+    ("needs 10 Qi", v0.11.46 Q1), gather Qi when too hungry, and a card that would end past midnight (v0.11.37 D-a; 00:00 since v0.11.91)."""
     for g in pg.query_selector_all('button.card[disabled]:not(.story)'):
         t = g.inner_text()
-        if re.search(r'needs \d+ Qi \(you have|too hungry: eat first|ends past 02:00', t): continue
+        if re.search(r'needs \d+ Qi \(you have|too hungry: eat first|ends past midnight', t): continue
         fails.append(f"{where}: a greyed-out card shows: {t[:80]!r}"); return
 
 def taps(pg, n, rng, where, sel):
@@ -287,9 +287,9 @@ def faq(pg, url):
     pg.click('#tabs [data-tab="faq"]'); pg.click('#tabs [data-tab="faq"]'); on_tab(pg, 'faq')  # the review's #4: tapping the open tab again must not read the next new entry
     seen1 = pg.evaluate("Object.keys(JSON.parse(localStorage.getItem('boneash.faq.v1')).seen).length")
     if seen1 != seen0: fails.append(f'FAQ: tapping the FAQ tab again marked entries read ({seen0} → {seen1})')
-    pg.fill('#faq-q', 'exhausted push')
+    pg.fill('#faq-q', 'midnight sleep')
     vis = pg.eval_on_selector_all('details[data-faq]', "els => els.filter(e => !e.hidden).map(e => [e.dataset.faq, e.open])")
-    if [q for q, o in vis] != ['Days, sleep and the night'] or not all(o for q, o in vis): fails.append(f'FAQ: searching "exhausted push" shows {vis}')
+    if [q for q, o in vis] != ['Days, sleep and the night'] or not all(o for q, o in vis): fails.append(f'FAQ: searching "midnight sleep" shows {vis}')
     pg.fill('#faq-q', 'zebra'); until(pg, '#faq-none', 2000, 'visible')
     if not pg.is_visible('#faq-none'): fails.append('FAQ: no "no question matches" note')
     pg.fill('#faq-q', '')

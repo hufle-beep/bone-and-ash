@@ -430,7 +430,7 @@ Yuki says nothing at all. That, from her, is the loudest thing she\'s ever said.
             lines.push(...awardYukiFightXp(g, 'major'));
             const gain = condensationSatGain(10, jamesQiMax(g)) * 3;
             g.james.saturation = Math.min(100, Math.round((g.james.saturation + gain) * 10) / 10);
-            sleepUntil(g, 6);
+            sleepUntil(g, 6, { bed: false }); // v0.11.91 (owner pick S1): a season of sitting, not a bed: no wait for 21:00
             g.flags.lf_days = lfDays(g) + 1;
             eat(g, 40);
             const short = lines.filter((l) => !/^Yuki \(bond\)/.test(l)).slice(0, 4);

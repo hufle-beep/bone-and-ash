@@ -2,6 +2,12 @@
 
 Started in v0.11.88 (owner pick A, 2026-11-09 02:37, D2), so `roadmap-done.md` (part 1) stays readable in one go. Newer than `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.91 (word for word)
+
+### The "Last updated" line of v0.11.90
+
+Last updated: 2026-11-09 (v0.11.90, the v0.11.87 review's first finding (owner pick R1): from Day 19 the Heart's Rest stays while James is hurt; section 2's v0.11.87 line labelled, a new v0.11.90 line (Fable's low notes); **next: the owner's pick** (the review's second finding, Push through the night, section 2; group d); v0.11.89, the four small items). Update in every push.
+
 ## Moved in v0.11.90 (word for word)
 
 ### The "Last updated" line of v0.11.89

@@ -185,7 +185,6 @@ button { font: inherit; color: inherit; }
 .card .tag { display: block; margin-top: 0.3rem; font-size: 0.74rem; color: var(--ink-dim); font-style: italic; }
 .card .len { display: block; margin-top: 0.2rem; font-size: 0.74rem; color: var(--ink-2); }
 .card[disabled] { opacity: 0.42; cursor: not-allowed; border-style: dashed; }
-.clock .exh { display: block; text-align: right; font-size: 0.72rem; font-weight: 600; color: var(--red, #a4282a); }
 .card.door { border-style: double; border-width: 3px; }
 .card.b-fail .tag { color: var(--red); }
 .card.b-double .tag { color: var(--ink); font-weight: 600; }

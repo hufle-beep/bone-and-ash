@@ -2,7 +2,7 @@
  * Days 2–3 in the Blackroot Wilds: a free loop of foraging, hunting, exploring and training, with a random
  * night (a fight or a quiet one) after nights 1 and 2. The jackals come on night 3, or the night James leaves.
  */
-import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, clockParts, d6, awardYukiFightXp, awardXp, jamesHpMax, jamesQiMax } from '../core/game.js';
+import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, clockParts, d6, awardYukiFightXp, awardXp, jamesHpMax, jamesQiMax, nightTo } from '../core/game.js';
 import { condensationSatGain } from '../core/formulas.js';
 import { sitGain } from '../core/game.js';
 import { set, day, hour, daily, markDaily, forestScale, grow, eatBest, pantry, foodCount } from './common.js';
@@ -41,8 +41,7 @@ export const WILDS = {
             if (pick === g.flags.last_ev) pick = NIGHT_EVENTS[d6(g) - 1];
             g.flags.night_ev = pick;
             g.flags.last_ev = pick;
-            const p = clockParts(g.minutes);
-            g.minutes = Math.max(g.minutes, (p.hh >= 21 ? p.day : p.day - 1) * 1440 + 60); // v0.11.40 (N1): never back
+            nightTo(g, 60); // v0.11.40 (N1): never back; v0.11.91: after the bed (from 21:00), at 01:00
             return [];
         },
         text: (g) => ({

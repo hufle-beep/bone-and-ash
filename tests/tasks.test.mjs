@@ -6,9 +6,9 @@ import { itemCap, MAX_REALM, combatStep as cStep, startCombat as sCombat, coilMu
 import { FORM_LINES, hasForm, cuRank, actionOpen, actionLabel, fragileKnife, STORY_FORMS, INC_ONLY_ACTIONS } from '../js/core/forms.js';
 import { TASK_HUBS } from '../js/story/task_hubs.js';
 import { markDaily, daily, hour } from '../js/story/common.js';
-import { dayEnd, nightLock, pushWindow, pushedTonight, dayHour, endsLate, sitUseless } from '../js/core/game.js'; // v0.11.37
+import { dayEnd, nightLock, dayHour, endsLate, sitUseless } from '../js/core/game.js'; // v0.11.37 (v0.11.91: no push)
 import { pickedMinutes, PICKED_SPEED } from '../js/core/story.js'; // v0.11.37 (F1)
-import { wakeDay, exLevel, sleepUntil, clockParts } from '../js/core/game.js';
+import { wakeDay, sleepUntil, clockParts } from '../js/core/game.js';
 import { yukiSpeed, setDryClone, dryClone, showPicked } from '../js/core/tasks.js';
 import { e8Hours, ecHours, jnHours } from '../js/story/meridians.js';
 import { serialize, deserialize } from '../js/core/game.js';
@@ -25,7 +25,7 @@ import { coilActive, rewind, endCoil, KEEP_FLAGS, REMEMBER } from '../js/core/co
 import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskMinutes, taskOutcome, dryOutcome, outcomeOf, sitLoop, sitLoopPlan, sitTaskId, SIT_STOP_TEXT, runTask, taskState, setYuki, yukiLane, famTier, merChoice, MER_TASK, BT_TASK, SIT_TASK, merLineTask, lineOfTask, isQueueScreen, runsHere, cardSpeed } from '../js/core/tasks.js';
 /** v0.11.64: the game has no queue; the bots keep their plan of cards in the save's old queue field (emptied by the Coil screens and a collapse, as the queue was), so they play exactly as before. */
 const planOf = (g) => taskState(g).queue;
-/** v0.11.37 (D-a): card `id` can't run because the day is over (02:00 passed, or it would end past 02:00); the bots' plan stops there, as the queue did. A test helper since v0.11.64. */
+/** v0.11.37 (D-a): card `id` can't run because the day is over (the day's end passed, or it would end past it; 00:00 since v0.11.91); the bots' plan stops there, as the queue did. A test helper since v0.11.64. */
 const dayOver = (g, scenes, id) => (nightLock(g) ? !taskCards(g, scenes, id).some((x) => x.id === id && x.status === 'open') : taskCards(g, scenes, id).some((x) => x.id === id && x.status === 'late'));
 
 import { writeFileSync } from 'node:fs';
@@ -192,29 +192,15 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
         assert(wakeDay(n0) === 3, `a night broken after midnight, then slept to 06:00: one new day (${wakeDay(n0)})`);
         const t5 = ensureBars(newGame(304)); t5.minutes = 5 * 1440 + 22 * 60; wakeDay(t5); sleepUntil(t5, 5); assert(wakeDay(t5) === 7, 'sleeping to 05:00 (the tribute) counts');
         const L = ensureBars(newGame(305)); const l0 = wakeDay(L); advance(L, 90 * 1440); assert(wakeDay(L) === l0 + 90, 'a span of days (a Long Forest season) has its nights in it');
-        // Push through the night (v0.11.37, E-a: only from 00:00 to 03:59, once a night; no longer tied to a used-up daily)
-        const toNight = (x) => { x.james.satiety = 100; const t = clockParts(x.minutes).day * 1440 + 60; while (x.minutes < t) advance(x, Math.min(600, t - x.minutes)); }; // awake to the next 01:00
-        const p = ensureBars(newGame(306)); p.scene = 'ashfall'; p.minutes = 5 * 1440 + 21 * 60; wakeDay(p); markDaily(p, 'clinic');
-        assert(!medCards(p, SCENES).some((c) => c.id === 'med:push'), 'v0.11.37: no Push card at 21:00, even with a daily used up');
-        const q = ensureBars(newGame(307)); q.scene = 'ashfall'; q.minutes = 16 * 60 + 60; assert(!medCards(q, SCENES).some((c) => c.id === 'med:push'), 'v0.11.37: no Push card at 17:00');
-        toNight(p);
-        assert(medCards(p, SCENES).some((c) => c.id === 'med:push' && c.open && !c.minutes), 'Push through the night: a Meditate card at 01:00, at once');
-        const w0 = wakeDay(p), m0 = p.minutes;
-        const r1 = runMed(p, SCENES, 'med:push');
-        assert(wakeDay(p) === w0 + 1 && p.minutes === m0 && exLevel(p) === 1 && daily('clinic')(p) && /Exhaustion 1/.test(r1.lines[0]), 'a push: a new day at once, Exhaustion 1, the clinic back');
-        assert(!medCards(p, SCENES).some((c) => c.id === 'med:push'), 'v0.11.37: once a night: no second Push card the same night');
-        let threw = false; try { runMed(p, SCENES, 'med:push'); } catch { threw = true; } assert(threw, 'v0.11.37: a second push the same night is refused');
-        const sm = sitMinutes(p); const c0 = p.minutes; p.james.qi = 30; condense(p);
-        assert(p.minutes - c0 === Math.round(sm * 1.5) && medCards(p, SCENES).find((c) => /Cultivate/.test(c.label)).minutes === Math.round(sitMinutes(p) * 1.5), `Exhaustion 1: a sit takes ×1.5, and its card says so (${p.minutes - c0} vs ${sm})`);
-        const r0 = p.minutes; advance(p, 60, { resting: true }); assert(p.minutes - r0 === 60, 'a rest is not slowed');
-        const k0 = p.minutes; advance(p, 60); assert(p.minutes - k0 === 60, 'a wait for a time of day is not slowed');
-        toNight(p); markDaily(p, 'clinic'); runMed(p, SCENES, 'med:push'); assert(exLevel(p) === 2, 'a second push (the next night, no sleep between): Exhaustion 2');
-        const s0 = p.minutes, sb = sitMinutes(p); p.james.qi = 30; condense(p); assert(p.minutes - s0 === Math.round(sb * 2), `Exhaustion 2: ×2 (${p.minutes - s0} vs ${sb})`);
-        toNight(p); markDaily(p, 'clinic'); p.james.hp = 5; p.james.satiety = 100; const f0 = p.james.satiety, pm = p.minutes, pw = wakeDay(p);
-        const r3 = runMed(p, SCENES, 'med:push');
-        assert(/a day later/.test(r3.lines[0]) && p.minutes - pm >= 1440 && clockParts(p.minutes).hh === 6 && exLevel(p) === 0 && p.james.hp === jamesHpMax(p) && wakeDay(p) === pw + 1, `the third push: collapse, a day lost, wakes at 06:00 with full bars and no Exhaustion (${p.minutes - pm} min)`);
-        assert(Math.abs((f0 - p.james.satiety) - (3 * (p.minutes - pm)) / 60 / 2) < 0.6, 'the lost day drains Fed at the sleeping rate');
-        const z = ensureBars(newGame(308)); z.scene = 'ashfall'; toNight(z); runMed(z, SCENES, 'med:push'); sleepUntil(z, 6); assert(exLevel(z) === 0, 'a real sleep clears Exhaustion');
+        // v0.11.91 (owner pick B, push 1): Push through the night and Exhaustion are gone: no Push card at any hour, the night
+        // locks the day's work, work is never slowed, and an old save's Exhaustion and push marks are dropped when read
+        const p = ensureBars(newGame(306)); p.scene = 'ashfall'; p.minutes = 5 * 1440 + 9 * 60; wakeDay(p); markDaily(p, 'clinic');
+        for (const hh of [17, 21, 23, 24, 25, 27]) { p.minutes = 5 * 1440 + hh * 60; assert(!medCards(p, SCENES).some((c) => c.id === 'med:push' || /Push through/.test(c.label || '')), `v0.11.91: no Push card at ${hh}:00`); }
+        p.minutes = 6 * 1440 + 60; assert(nightLock(p) && medCards(p, SCENES).length === 0 && !daily('clinic')(p), 'v0.11.91: at 01:00 the day is over: no Meditate card, the clinic still done');
+        let threw = false; try { runMed(p, SCENES, 'med:push'); } catch { threw = true; } assert(threw, 'v0.11.91: med:push is no card any more');
+        const sx = ensureBars(newGame(307)); sx.scene = 'ashfall'; sx.minutes = 5 * 1440 + 10 * 60; sx.wake = { n: 6, ex: 2, lastX: 6, slept: 6, push: 5 }; const sm = sitMinutes(sx); const c0 = sx.minutes; sx.james.qi = 30; condense(sx);
+        assert(sx.minutes - c0 === sm && !('ex' in sx.wake) && !('push' in sx.wake) && wakeDay(sx) === 6, `v0.11.91: an old save's Exhaustion 2 and push mark are dropped; a sit takes its own time (${sx.minutes - c0} vs ${sm})`);
+        const r0 = sx.minutes; advance(sx, 60, { resting: true }); const k0 = sx.minutes; advance(sx, 60); assert(sx.minutes - k0 === 60 && k0 - r0 === 60, 'v0.11.91: work and rest take their own time');
         // Yuki's curve (c2)
         assert(yukiSpeed(0) === 1 && Math.abs(yukiSpeed(10) - 2) < 1e-9 && yukiSpeed(20) === 3 && yukiSpeed(61) === 3 && yukiSpeed(500) === 3, `Yuki's job: N 90, capped at ×3 (${yukiSpeed(10)}, ${yukiSpeed(61)})`);
         // the Extraordinary lines, timed (b)
@@ -683,17 +669,14 @@ if (!SHARD && !BOTS_ONLY) {
         const r = breakthrough(b);
         assert(r.ok && b.james.hp === jamesHpMax(b) && b.james.qi === jamesQiMax(b) && b.yuki.hp === G.yukiHpMax(b) && b.yuki.qi === yukiQiMax(b), `v0.11.21: a breakthrough fills HP and Qi for both (${nd ? 'Incremental' : 'Story'} Mode)`);
     }
-    // the forecast while exhausted: a work card's dry run = its real run, ×1.5 of the rested time
+    // the forecast: a work card's dry run = its real run (v0.11.91: no Exhaustion, so no ×1.5 case any more)
     const x = ensureBars(newGame(914)); x.scene = 'ashfall';
     const wc = taskCards(x, SCENES).find((c) => c.kind === 'work' && c.status === 'open');
     assert(!!wc, 'v0.11.21: Ashfall has an open work card');
     if (wc) {
-        const t0 = taskMinutes(x, SCENES, wc.id);
-        x.minutes = 1440 + 60; wakeDay(x); runMed(x, SCENES, 'med:push'); // v0.11.37: a push only at night
         const t1 = taskMinutes(x, SCENES, wc.id), y = JSON.parse(JSON.stringify(x)), ym = y.minutes;
         runTask(y, SCENES, wc.id);
-        assert(exLevel(x) === 1 && t1 === y.minutes - ym, `v0.11.21: exhausted, the forecast of ${wc.id} is its real time (${t1} vs ${y.minutes - ym})`);
-        assert(Math.abs(t1 - t0 * 1.5) <= 1, `v0.11.21: exhausted, ${wc.id} takes ×1.5 (${t0} → ${t1})`);
+        assert(t1 === y.minutes - ym, `v0.11.21: the forecast of ${wc.id} is its real time (${t1} vs ${y.minutes - ym})`);
     }
     // an old state version 1 gets every field the later migrations add
     const o = ensureBars(newGame(915)); delete o.tasks; delete o.coil; o.v = 1; migrate(o);
@@ -891,6 +874,16 @@ rs = 4243; // the checks below draw from their own stream
 // (mer:ec) is offered but hardly ever played. A walk of WALK_GAMES random games from a Golden Core start, 8 vessels open, plays the
 // task screens' cards like the bots (random cards, random story stops, fights blade / dart); the cards it plays count toward the
 // coverage below. It runs in this process on its own random stream (restored after), so the bot games and their numbers don't change.
+// v0.11.91 (owner pick K1): since the day ends at 00:00, the bots reach Ashfall on the way home mostly in the evening, when its
+// 150-minute drills would end past midnight, so "Let Ya teach them" (rt_hunters:1) is offered but no longer played as a card.
+// A daytime visit (Day 20, 09:00) plays each open card there once, on its own copy; it counts toward the coverage below.
+let dayWalk = 0;
+{
+    const g0 = ensureBars(newGame(919100, { closed: true })); g0.scene = 'rt_ashfall'; g0.minutes = 19 * 1440 + 9 * 60; wakeDay(g0); g0.james.satiety = 90; g0.james.hp = jamesHpMax(g0); g0.james.qi = jamesQiMax(g0);
+    const open = taskCards(g0, SCENES).filter((c) => c.status === 'open');
+    assert(open.some((c) => c.id === 'rt_hunters:1'), `K1: Ashfall at 09:00 on Day 20 offers "Let Ya teach them" (${open.map((c) => c.id).join(', ')})`);
+    for (const c of open) { const g = structuredClone(g0); runTask(g, SCENES, c.id); cardsSeen.add(c.id); dayWalk++; }
+}
 const WALK_GAMES = 20;
 let walkEc = 0, walkE8 = 0, walkCards = 0;
 {
@@ -1284,6 +1277,40 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     const pr = mk(1, 1); pr.flags.ya_brawl = 'won';
     assert(/the disarm that took her spear/.test(SCENES.fo_price.text(pr)) && !/bone-cage/.test(SCENES.fo_price.text(pr)), 'texts: fo_price');
 }
+// v0.11.91 (owner 2026-11-09 09:05, pick B, push 1): the day ends at 00:00, so a bed taken by midnight puts every night
+// encounter at 01:00 (01:20 the jackals), and even a fight that runs to the round cap is over before 02:00
+{
+    const { NO_DICE_ROUND_CAP } = await import('../js/core/game.js');
+    const { BED_FROM_HOUR, SATIETY_PER_HOUR: SPH } = await import('../js/core/game.js');
+    // the bed rule (owner 09:16): no bed before 21:00 anywhere; an earlier bed spends the evening resting until 21:00, then sleeps
+    assert(BED_FROM_HOUR === 21, 'v0.11.91: beds from 21:00');
+    { // S1: the Long Forest's seclusion is not a bed: it sleeps from where it is, as before (Fed at the sleeping rate only)
+        const sc = ensureBars(newGame(9191)); sc.minutes = 2 * 1440 + 6 * 60; sc.james.satiety = 60; sleepUntil(sc, 6, { bed: false });
+        assert(sc.minutes === 3 * 1440 + 6 * 60 && Math.abs(sc.james.satiety - (60 - (SPH * 24) / 2)) < 0.01, `S1: a rest that isn't a bed (06:00 to 06:00) drains Fed at the sleeping rate only (${sc.james.satiety})`);
+        const src = String(SCENES.lf_seclusion.enter);
+        assert(/sleepUntil\(g, 6, \{ bed: false \}\)/.test(src), 'S1: the seclusion uses the no-bed sleep');
+    }
+    for (const [bed, wait] of [[17 * 60, 4 * 60], [20 * 60 + 30, 30], [21 * 60, 0], [23 * 60, 0]]) {
+        const b = ensureBars(newGame(9190)); b.minutes = 2 * 1440 + bed; b.james.satiety = 100; const w0 = wakeDay(b); sleepUntil(b, 6);
+        const want = 100 - (SPH * wait) / 60 - (SPH * (3 * 1440 + 6 * 60 - (2 * 1440 + bed + wait))) / 60 / 2;
+        assert(b.minutes === 3 * 1440 + 6 * 60 && Math.abs(b.james.satiety - want) < 0.01 && b.james.hp === jamesHpMax(b) && wakeDay(b) === w0 + 1, `v0.11.91: a bed at ${bed / 60}h: the evening to 21:00 awake (${wait} min), then asleep to 06:00 (Fed ${b.james.satiety} vs ${want})`);
+    }
+    const cases = [
+        ['night_event', 'night_ev', 'crows', 2], ['night_event', 'night_ev', 'rats', 2], ['night_event', 'night_ev', 'lizard', 2],
+        ['night_attack', null, null, 3], ['bl_night_event', 'bl_ev', 'wolves', 12], ['bl_night_event', 'bl_ev', 'hawks', 14],
+    ];
+    for (const [sc, flag, kind, d] of cases) for (const bed of [15 * 60, 19 * 60, 21 * 60 + 30, 23 * 60 + 59, 24 * 60]) {
+        const g = ensureBars(newGame(9100 + d)); g.minutes = (d - 1) * 1440 + bed; g.scene = sc; g.flags.bl_region = 'rr'; g.flags.bl_day = 2;
+        SCENES[sc].enter?.(g); if (flag) g.flags[flag] = kind;
+        const night0 = (d - 1) * 1440 + 24 * 60, t0 = g.minutes - night0;
+        assert(t0 >= 60 && t0 <= 80, `v0.11.91: ${sc}${kind ? ` (${kind})` : ''} after a bed at ${bed / 60}h starts at ${Math.floor(t0 / 60)}:${String(t0 % 60).padStart(2, '0')}`);
+        const ch = SCENES[sc].choices.find((c) => c.combat && (!c.show || c.show(g)));
+        const enc = combatHooks.before(g, ch.combat(g)); startCombat(g, enc);
+        g.combat.enemies.forEach((x) => { x.hp = 999; x.atk = 0.1; }); // the longest fight: nobody falls, it runs to the round cap
+        let o = null; for (let i = 0; i < NO_DICE_ROUND_CAP + 5 && g.combat; i++) o = combatStep(g, 'guard');
+        assert(o?.done && g.minutes < night0 + 120, `v0.11.91: ${sc}${kind ? ` (${kind})` : ''} is over before 02:00 even at the round cap (${o?.done}, ${g.minutes - night0} min after midnight)`);
+    }
+}
 // v0.11.90 (owner 2026-11-09 08:42, pick R1, the v0.11.87 Fable review): from Day 19 the hall's Rest stays while James is
 // hurt, so a hurt James can heal before the guardian; at full HP it is gone; the sit stays shut either way
 {
@@ -1563,8 +1590,8 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
         }
         const s1 = mk(94, 'stream', { realm: 1, saturation: 81.6, qi: 999 }); const r1 = sitLoop(s1, SCENES); // v0.11.66 (S1): +6.7% a sit at Foundation
         assert(r1.stop === 'sat' && s1.james.saturation === 95 && r1.sits === 2, `C1: it stops at the breakthrough point, 95% (${s1.james.saturation}%, ${r1.stop})`);
-        const s2 = mk(95, 'stream'); s2.minutes = 2 * 1440 + 30; const r2 = sitLoop(s2, SCENES); // 00:30: one sit ends 01:30, a second would end past 02:00
-        assert(r2.stop === 'night' && r2.sits === 1 && !nightLock(s2) && s2.minutes <= 2 * 1440 + 120, `C1: it stops before a sit that would end past 02:00 (${r2.sits} sits, ${r2.stop})`);
+        const s2 = mk(95, 'stream'); s2.minutes = 1440 + 22 * 60 + 30; const r2 = sitLoop(s2, SCENES); // 22:30: one sit ends 23:30, a second would end past midnight (v0.11.91)
+        assert(r2.stop === 'night' && r2.sits === 1 && !nightLock(s2) && s2.minutes <= 2 * 1440, `C1: it stops before a sit that would end past midnight (${r2.sits} sits, ${r2.stop})`);
         const s3 = mk(96, 'stream'); s3.james.satiety = 4; const r3 = sitLoop(s3, SCENES); // a sit costs 3 Fed: one leaves 1, a second would leave none
         assert(r3.stop === 'fed' && r3.sits === 1 && s3.james.satiety > 0, `C1: it stops before a sit that would leave Fed at 0 (${r3.sits} sits, Fed ${s3.james.satiety})`);
         const s4 = mk(97, 'stream', { qi: 15 });
@@ -1573,7 +1600,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
         assert(card && card.open && /^Cultivate until the limit: \d+ sits, .+, [\d.]+ Qi → Saturation [\d.]+% \(then Qi runs out\)\.$/.test(card.label) && card.minutes === card.plan.minutes, `C1: the button shows sits, time, Qi and Saturation (${card?.label})`);
         const s5b = JSON.parse(JSON.stringify(s5)); const rm = runMed(s5, SCENES, 'med:sitall');
         assert(!rm.moved && s5.minutes - s5b.minutes === card.minutes && s5.james.saturation === card.plan.saturation && new RegExp(`^${card.plan.sits} sits`).test(rm.lines[0]), `C1: the card does what it said (${rm.lines[0]})`);
-        const s6 = mk(99, 'stream'); s6.minutes = 1440 + 3 * 60; assert(!medCards(s6, SCENES).some((c) => c.id === 'med:sitall'), 'C1: no loop at night (from 02:00 only the night)');
+        const s6 = mk(99, 'stream'); s6.minutes = 1440 + 3 * 60; assert(!medCards(s6, SCENES).some((c) => c.id === 'med:sitall'), 'C1: no loop at night (from 00:00 only the night)');
         assert(Object.keys(SIT_STOP_TEXT).every((k) => typeof SIT_STOP_TEXT[k] === 'string'), 'C1: every stop has its words');
     }
     // v0.11.64 (the Fable review): every open Meditate card and task card on every resting place, at every hour, can be played on a copy (the screen draws each card's dry run); a screen that hides its own Cultivate hides it in Meditate too
@@ -1585,7 +1612,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
             try { med = medCards(x, SCENES); cards = isTaskHub(x) ? taskCards(x, SCENES).filter((c) => c.status === 'open') : []; } catch (e) { bad.push(`${sc}@${hh}: lists ${e.message}`); continue; }
             const ids = new Set([...med.filter((c) => c.open && c.task).map((c) => c.task), ...cards.map((c) => c.id)]);
             for (const id of ids) { tried++; try { taskOutcome(x, SCENES, id); } catch (e) { bad.push(`${sc}@${hh}: ${id} ${e.message}`); } }
-            for (const c of med.filter((m) => m.open && !m.task && m.id !== 'med:bt' && m.id !== 'med:push')) { tried++; try { dryOutcome(x, (k) => runMed(k, SCENES, c.id)); } catch (e) { bad.push(`${sc}@${hh}: ${c.id} ${e.message}`); } }
+            for (const c of med.filter((m) => m.open && !m.task && m.id !== 'med:bt')) { tried++; try { dryOutcome(x, (k) => runMed(k, SCENES, c.id)); } catch (e) { bad.push(`${sc}@${hh}: ${c.id} ${e.message}`); } }
         }
         assert(!bad.length && tried > 1000, `v0.11.64: every open card on every resting place at every hour plays on a copy (${tried} tried; ${bad.slice(0, 4).join(' | ')})`);
         const bite = ensureBars(newGame(7)); bite.scene = 'coil_end'; bite.coil.why = 'choice'; const sv = ensureBars(newGame(7)); sv.scene = 'coil_end'; sv.coil.why = 'collapse'; sv.james.satiety = 0;
@@ -1801,43 +1828,40 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     const shownIx = (x, re) => sceneView(x, SCENES).choices.some((c) => re.test(c.label));
     // the night hours belong to the evening before
     const n = at(3701, 'ashfall', 4 * 1440 + 30); // Day 5, 00:30
-    assert(hour(n) === 24 && dayHour(n) === 24 && !nightLock(n) && dayEnd(n) === 4 * 1440 + 120, `D: 00:30 reads 24, the day ends at 02:00 (${hour(n)})`);
+    const n23 = at(3701, 'ashfall', 3 * 1440 + 23 * 60 + 30); // Day 4, 23:30
+    assert(hour(n23) === 23 && !nightLock(n23) && dayEnd(n23) === 4 * 1440, `D (v0.11.91): at 23:30 the day ends at the coming 00:00 (${dayEnd(n23)})`);
+    assert(hour(n) === 24 && dayHour(n) === 24 && nightLock(n) && dayEnd(n) === 4 * 1440, `D (v0.11.91): 00:30 reads 24 and is past the day's end, 00:00 (${hour(n)})`);
     assert(!shownIx(n, /^Run a clinic/) && shownIx(n, /^Evening\. Go home/), 'D: at 00:30 the day cards stay gone and the evening exit stays (was: back at midnight)');
     const w = at(3702, 'wilds', 2 * 1440 + 60); w.flags.forest_day = 2;
     const raw = (re) => SCENES.wilds.choices.find((c) => typeof c.text === 'string' && re.test(c.text));
     assert(!raw(/^Forage\.$/).show(w) && raw(/^Make camp for the night/).show(w), 'D: in the wilds at 01:00 no Forage, Make camp shows');
-    // from 02:00: only the night
-    const l = at(3703, 'ashfall', 4 * 1440 + 125); l.james.satiety = 40; addFood(l);
-    assert(nightLock(l), 'D: 02:05 is past the day\'s end');
+    // from 00:00 (v0.11.91; 02:00 before): only the night
+    const l = at(3703, 'ashfall', 4 * 1440 + 5); l.james.satiety = 40; addFood(l);
+    assert(nightLock(l), 'D: 00:05 is past the day\'s end');
     const lc = taskCards(l, SCENES);
-    assert(lc.length > 0 && lc.every((c) => c.kind === 'chore' && /^(Eat|Cook|Chew)/.test(c.label)), `D: from 02:00 the task screen offers only eating (${lc.map((c) => c.label).join(' | ')})`);
+    assert(lc.length > 0 && lc.every((c) => c.kind === 'chore' && /^(Eat|Cook|Chew)/.test(c.label)), `D: from 00:00 the task screen offers only eating (${lc.map((c) => c.label).join(' | ')})`);
     const lm = medCards(l, SCENES);
-    assert(lm.length === 1 && lm[0].id === 'med:push', `D: from 02:00 Meditate offers only Push through (${lm.map((m) => m.id).join(', ')})`);
+    assert(lm.length === 0, `D (v0.11.91): from 00:00 Meditate offers nothing (no Push through the night) (${lm.map((m) => m.id).join(', ')})`);
     assert(shownIx(l, /^Evening\. Go home/), 'D: the evening exit (a story stop) is never blocked');
-    // a card that would end past 02:00 doesn't start
-    const e = at(3704, 'rt_camp', 20 * 1440 + 105); e.james.qi = 999; // 01:45 by the fire (its Cultivate has no hour of its own)
-    const ea = at(3714, 'stream', 1440 + 105); ea.james.qi = 999; const em = medCards(ea, SCENES); // v0.11.64: the stream (Ashfall hides its own Cultivate after 19:00, and so does Meditate now)
-    assert(em.some((m) => m.late) && em.every((m) => m.id === 'med:push' || (m.late && !m.open && m.tag === 'ends past 02:00')), `D-a: at 01:45 a sit or a meridian that would end past 02:00 is locked with its reason (${em.map((m) => m.id + ':' + m.tag).join(', ')})`);
+    // a card that would end past the day's end (00:00 since v0.11.91) doesn't start
+    const e = at(3704, 'rt_camp', 19 * 1440 + 23 * 60 + 45); e.james.qi = 999; // 23:45 by the fire (its Cultivate has no hour of its own)
+    const ea = at(3714, 'stream', 23 * 60 + 45); ea.james.qi = 999; const em = medCards(ea, SCENES); // v0.11.64: the stream (Ashfall hides its own Cultivate after 19:00, and so does Meditate now)
+    assert(em.some((m) => m.late) && em.every((m) => m.late && !m.open && m.tag === 'ends past midnight'), `D-a: at 23:45 a sit or a meridian that would end past midnight is locked with its reason (${em.map((m) => m.id + ':' + m.tag).join(', ')})`);
     const late = taskCards(e, SCENES).filter((c) => c.status === 'late');
     const okc = taskCards(e, SCENES).filter((c) => c.status === 'open');
-    assert(late.length > 0 && late.every((c) => endsLate(e, taskMinutes(e, SCENES, c.id))), `D-a: at 01:45 the cards that would end past 02:00 are 'late' (${late.map((c) => c.id).join(', ')})`);
-    assert(okc.every((c) => !endsLate(e, taskMinutes(e, SCENES, c.id))), 'D-a: the open ones end by 02:00');
+    assert(late.length > 0 && late.every((c) => endsLate(e, taskMinutes(e, SCENES, c.id))), `D-a: at 23:45 the cards that would end past midnight are 'late' (${late.map((c) => c.id).join(', ')})`);
+    assert(okc.every((c) => !endsLate(e, taskMinutes(e, SCENES, c.id))), 'D-a: the open ones end by midnight');
     if (late.length) {
         const id = late[0].id;
         assert(!taskOpen(e, SCENES, id) && dayOver(e, SCENES, id), 'D-a: a late card is not open; the day is over for it');
     }
-    const bq = at(3705, 'ashfall', 4 * 1440 + 115); bq.james.realm = 1; bq.james.saturation = 100;
+    const bq = at(3705, 'ashfall', 3 * 1440 + 23 * 60 + 55); bq.james.realm = 1; bq.james.saturation = 100;
     assert(taskCards(bq, SCENES).some((c) => c.id === BT_TASK && c.status === 'open'), 'D-a: the breakthrough is exempt (it is rest)');
-    // E-a: Push through only at night; it lifts that night's 02:00
+    // v0.11.91 (pick B): no Push through the night at any hour; the next night locks at 00:00 again
     const pn = at(3706, 'ashfall', 4 * 1440 + 15 * 60);
-    assert(!pushWindow(pn) && !medCards(pn, SCENES).some((m) => m.id === 'med:push'), 'E-a: no Push at 15:00');
-    pn.minutes = 4 * 1440 + 23 * 60 + 59; assert(!pushWindow(pn), 'E-a: none at 23:59');
-    pn.minutes = 5 * 1440 + 30; assert(pushWindow(pn), 'E-a: Push from 00:00');
-    runMed(pn, SCENES, 'med:push');
-    assert(pushedTonight(pn) && hour(pn) === 0 && dayEnd(pn) === 6 * 1440 + 120, 'E-a: pushed: 00:30 reads as the morning, the day now ends at the next 02:00');
-    pn.minutes = 5 * 1440 + 150; assert(!nightLock(pn) && taskCards(pn, SCENES).some((c) => c.kind === 'work' && c.status === 'open'), 'E-a: after a push, 02:30 is a working hour: the work cards are back');
-    pn.minutes = 6 * 1440 + 125; assert(nightLock(pn) && pushWindow(pn), 'E-a: the next night locks at 02:00 again, and offers a push again');
-    const old = at(3707, 'ashfall', 4 * 1440 + 60); delete old.wake.push; assert(!pushedTonight(old) && hour(old) === 25, 'E: a save without the push mark has pushed nothing');
+    for (const m of [4 * 1440 + 15 * 60, 4 * 1440 + 23 * 60 + 59, 5 * 1440 + 30, 5 * 1440 + 150]) { pn.minutes = m; assert(!medCards(pn, SCENES).some((x) => x.id === 'med:push'), `v0.11.91: no Push at ${m % 1440} min`); }
+    pn.minutes = 5 * 1440 + 150; assert(nightLock(pn) && !taskCards(pn, SCENES).some((c) => c.kind === 'work' && c.status === 'open'), 'v0.11.91: 02:30 is night: no work card');
+    const old = at(3707, 'ashfall', 4 * 1440 + 60); old.wake.push = 5; wakeDay(old); assert(hour(old) === 25 && nightLock(old) && !('push' in old.wake), 'v0.11.91: an old save\'s push mark is dropped: 01:00 is the night');
     // B2: a sit that changes nothing is not offered (v0.11.66, S1: at ×1.5 a realm a sit still gains 0.1% at realm 13, so only the top realm)
     for (const [r, useless] of [[7, false], [8, false], [13, false], [MAX_REALM, true]]) {
         const v = at(3708 + r, 'ashfall', 4 * 1440 + 9 * 60); v.james.realm = r; v.james.qi = 999;
@@ -1892,12 +1916,12 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     choose(lw, SCENES, choiceIx(lw, /^Stay lost/)); while (lw.scene !== 'lf_hub') choose(lw, SCENES, 0);
     for (let k = 0; k < 3; k++) sleepUntil(lw, 6); // three forest nights
     lw.james.satiety = 90; choose(lw, SCENES, choiceIx(lw, /^Go back the way you came/));
-    const lw0 = wakeDay(lw); sleepUntil(lw, 6); assert(wakeDay(lw) === lw0 + 1 && lw.wake.push === undefined, `review: after the way back, the next night slept counts (${lw0} → ${wakeDay(lw)})`);
+    const lw0 = wakeDay(lw); sleepUntil(lw, 6); assert(wakeDay(lw) === lw0 + 1, `review: after the way back, the next night slept counts (${lw0} → ${wakeDay(lw)})`);
     const fe = at(3742, 'ashfall', 4 * 1440 + 110); addFood(fe); fe.james.satiety = 20; // 01:50
     const fec = taskCards(fe, SCENES).find((c) => /^Eat something/.test(c.label));
     assert(fec && fec.status === 'open', `review: eating is never locked as late (01:50: ${fec?.status})`);
     fe.minutes = 4 * 1440 + 130; assert(fec && !dayOver(fe, SCENES, fec.id) && taskOpen(fe, SCENES, fec.id), 'review: at 02:10 a meal still runs');
-    const dm = at(3743, 'ashfall', 4 * 1440 + 105); dm.james.qi = 999; dm.james.primaries = 3;
+    const dm = at(3743, 'ashfall', 3 * 1440 + 23 * 60 + 45); dm.james.qi = 999; dm.james.primaries = 3; // 23:45 (v0.11.91: the day ends at 00:00)
     const dmed = medCards(dm, SCENES), dmIds = new Set(dmed.filter((m) => m.task).map((m) => m.task));
     const lateHub = taskCards(dm, SCENES).filter((c) => c.status === 'late');
     assert(lateHub.length > 0 && lateHub.every((c) => dmIds.has(c.id)), `review: a late Meditate card keeps its task id, so the hub list doesn't show it twice (${lateHub.map((c) => c.id).join(', ')})`);
@@ -1909,7 +1933,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
 // to the night's hour as before; entered after it (01:50, 02:30, 03:30, and the rare 04:30), the clock stays where it was.
 {
     const D = 3 * 1440; // the start of day 4
-    const cases = [['night_attack', 21, 80], ['night_event', 21, 60], ['bl_night_event', 19, 60]];
+    const cases = [['night_attack', 21, 80], ['night_event', 21, 60], ['bl_night_event', 21, 60]]; // v0.11.91: the Blackroot's night from 21:00 too (19:00 before)
     for (const [scene, eve, nightAt] of cases) {
         const enterAt = (m) => { const x = ensureBars(newGame(4000 + m)); x.scene = scene; x.minutes = m; SCENES[scene].enter(x); return x.minutes; };
         assert(enterAt(D - 1440 + 22 * 60) === D + nightAt, `N1: ${scene} entered at 22:00 jumps forward to the night's hour, as before`);
@@ -2006,8 +2030,8 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     assert(!medCards(g, SCENES).some((c) => c.id === 'med:qi') && !taskOpen(g, SCENES, T.QI_TASK), 'Q1: no gather card when Qi is full');
     let threw = false; try { runTask(g, SCENES, T.QI_TASK); } catch { threw = true; } assert(threw, 'Q1: a queued gather with Qi full is refused');
     for (const id of MED_SCREENS) { const s = ensureBars(newGame(4603)); s.scene = id; s.minutes = 2 * 1440 + 14 * 60; s.james.qi = 1; s.flags.long = true; if (!canMeditate(s, SCENES)) continue; assert(medCards(s, SCENES).some((c) => c.id === 'med:qi' && c.open), `Q1: the gather card on ${id}`); }
-    const late = ensureBars(newGame(4604)); late.scene = 'camp'; late.minutes = 1440 + 90; late.james.qi = 1; // 01:30: an hour would end past 02:00
-    assert(medCards(late, SCENES).some((c) => c.id === 'med:qi' && !c.open && c.late), 'Q1: at 01:30 the gather card is locked (ends past 02:00)');
+    const late = ensureBars(newGame(4604)); late.scene = 'camp'; late.minutes = 23 * 60 + 30; late.james.qi = 1; // 23:30: an hour would end past midnight (v0.11.91)
+    assert(medCards(late, SCENES).some((c) => c.id === 'med:qi' && !c.open && c.late), 'Q1: at 23:30 the gather card is locked (ends past midnight)');
     assert(T.isMedTask(T.QI_TASK), 'Q1: a bar, and a Meditate card that queues on the resting places');
 }
 // v0.11.46: the Blackroot camp (and the other toHour scenes) no longer jump the clock forward when entered before 06:00
@@ -2065,9 +2089,9 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     q.james.satiety = 3; assert(!medCards(q, SCENES).find((x) => x.id === 'med:qi').open && !taskOpen(q, SCENES, T.QI_TASK), 'G1 (v0.11.48): still locked at Fed 3 (an hour drains 3; no Qi would come back)');
     q.james.satiety = 3.5; assert(medCards(q, SCENES).find((x) => x.id === 'med:qi').open && taskOpen(q, SCENES, T.QI_TASK), 'G1: open above Fed 3');
     { const r0 = q.james.qi; runTask(q, SCENES, T.QI_TASK); assert(q.james.qi > r0, `G1: at Fed 3.5 the hour does give Qi (${r0} → ${q.james.qi})`); }
-    const l = ensureBars(newGame(4705)); l.scene = 'camp'; l.minutes = 1440 + 90; l.james.qi = 9;
+    const l = ensureBars(newGame(4705)); l.scene = 'camp'; l.minutes = 23 * 60 + 30; l.james.qi = 9;
     const ls = medCards(l, SCENES).find((x) => x.id === 'med:sit');
-    assert(ls && !ls.open && ls.late && ls.tag === 'ends past 02:00', `N1: a sit short of Qi at 01:30 says "ends past 02:00" (${ls?.tag})`);
+    assert(ls && !ls.open && ls.late && ls.tag === 'ends past midnight', `N1: a sit short of Qi at 23:30 says "ends past midnight" (${ls?.tag})`);
 }
 // v0.11.66 (owner picks S1 + X1 + G4 + P1 + F1, group 1a of the story and mechanics pass)
 {

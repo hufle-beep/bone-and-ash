@@ -1,6 +1,6 @@
 /** Bone and Ash — UI. Renders the story, combat, sheet, hammerspace, journal and saves. */
 import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel, hasForm } from './core/forms.js';
-import { coilMult, coilMultNext, exLevel, exMult, wakeDay, fmtMult, clockParts } from './core/game.js';
+import { coilMult, coilMultNext, wakeDay, fmtMult, clockParts } from './core/game.js';
 import {
     newGame, ensureBars, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, skillCheck, xpToNext, clockLabel, clockLabelG, realmName, yukiForm,
     startCombat, combatStep, combatFlee, COMBAT_ACTIONS, noDiceDc, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage,
@@ -230,7 +230,7 @@ const medCardHtml = (m) => {
 };
 /** v0.11.64: a Meditate card that runs off the task list (runMed), played on a copy; a screen change (the breakthrough's warning, the tribulation scene) is not timed here. */
 function medOutcome(id) {
-    if (id === 'med:bt' || id === 'med:push') return null;
+    if (id === 'med:bt') return null;
     try { return dryOutcome(g, (c) => runMed(c, SCENES, id)); } catch { return null; }
 }
 
@@ -258,7 +258,7 @@ function renderCardScreen() {
     let hubHtml = '';
     let hubTop = '';
     if (qs) {
-        const cards = taskCards(g, SCENES).filter((c) => !medIds.has(c.id) && (c.status === 'open' || c.status === 'late')); // v0.11.37 (D-a): 'late' = would end past 02:00, shown locked // v0.11.17 (owner pick 1a): "done for today" cards are hidden
+        const cards = taskCards(g, SCENES).filter((c) => !medIds.has(c.id) && (c.status === 'open' || c.status === 'late')); // v0.11.37 (D-a): 'late' = would end past the day's end (00:00 since v0.11.91), shown locked // v0.11.17 (owner pick 1a): "done for today" cards are hidden
         const groups = [];
         for (const c of cards) { let gr = groups.find((x) => x.name === c.group); if (!gr) groups.push(gr = { name: c.group, cards: [] }); gr.cards.push(c); }
         const cardHtml = (c) => {
@@ -285,7 +285,7 @@ function renderCardScreen() {
     const storyHtml = v.end
         ? `<h2>Story</h2><div class="cards">${story.map(storyCardHtml).join('')}<button class="card story" data-new="1">Start a new game</button><button class="card story" data-tab-go="sheet">See how James ended up</button></div>` // v0.11.26: an end's own choices first (Go round again…)
         : story.length ? `<h2>Story</h2><div class="cards">${skipHtml}${story.map(storyCardHtml).join('')}</div>` : '';
-    const medOpen = med.filter((m) => m.open || m.late || m.show); // v0.11.46 (Q1): a sit short of Qi shows, locked, with the reason // v0.11.37 (D-a): a card that would end past 02:00 shows, locked, with that tag // v0.11.17 (pick 1a): only what can run now (collaterals until they open, locked sits and meridians, Break through until ready)
+    const medOpen = med.filter((m) => m.open || m.late || m.show); // v0.11.46 (Q1): a sit short of Qi shows, locked, with the reason // v0.11.37 (D-a): a card that would end past the day's end (00:00 since v0.11.91) shows, locked, with that tag // v0.11.17 (pick 1a): only what can run now (collaterals until they open, locked sits and meridians, Break through until ready)
     const medHtml = medOpen.length ? groupHtml('Meditate', medOpen.map(medCardHtml), true) : ''; // v0.11.67 (D2): starts open, folds
     view.innerHTML = `<section class="fade-in">
 ${statusHtml()}
@@ -494,7 +494,7 @@ async function statusText() {
         `Bone and Ash ${await gameVersion()} · ${new Date().toISOString()}`,
         `Mode: Incremental (every action at once) · tab ${tab}`,
         `Scene: ${g.scene} (${sceneTitle(g.scene)}) · ${clockLabel(g.minutes)}${g.coil ? ` · ${g.coil.act === 1 ? 'Act 1' : 'Prologue'}, Coil ${g.coil.n}` : ''}${g.combat ? ' · in a fight' : ''}`,
-        `James: ${realmName(j.realm)}, Saturation ${n1(j.saturation)}% · HP ${n1(j.hp)} / ${jamesHpMax(g)} · Convergence ${n1(j.qi)} / ${n1(jamesQiMax(g))} · Fed ${Math.round(j.satiety)} · days slept ${wakeDay(g)} · Exhaustion ${exLevel(g)}`,
+        `James: ${realmName(j.realm)}, Saturation ${n1(j.saturation)}% · HP ${n1(j.hp)} / ${jamesHpMax(g)} · Convergence ${n1(j.qi)} / ${n1(jamesQiMax(g))} · Fed ${Math.round(j.satiety)} · days slept ${wakeDay(g)}`,
         'Journal (newest first):',
         ...g.log.slice(-5).reverse().map((e) => `  ${clockLabel(e.at)} ${sceneTitle(e.scene)}${e.lines.length ? `: ${e.lines.join(' / ')}` : ''}`.replace(/🎲(\d)/g, 'd6=$1')),
         `Browser: ${navigator.userAgent}`,
@@ -577,7 +577,7 @@ function statusHtml() {
 <div class="bar hp"><b>${n1(g.james.hp)} / ${jamesHpMax(g)}</b>HP${pbar(g.james.hp, jamesHpMax(g), 'HP')}</div>
 <div class="bar qi"><b>${n1(g.james.qi)} / ${n1(jamesQiMax(g))}</b>Convergence${pbar(g.james.qi, jamesQiMax(g), 'Convergence')}</div>
 <div class="bar food"><b>${Math.round(g.james.satiety)}</b>Fed${pbar(g.james.satiety, 100, 'Fed')}</div>
-<div class="clock"><span class="clk">${clockLabelG(g)}</span>${exLevel(g) ? `<span class="exh">Exhausted ×${exMult(g)}</span>` : ''}</div></div>`;
+<div class="clock"><span class="clk">${clockLabelG(g)}</span></div></div>`;
 }
 
 /** v0.11.68 (A1): the reply to the last choice or card, under the scene text. */
@@ -751,7 +751,7 @@ function tipFor(b) {
     if (mins) lines.push(`Takes ${durLabel(mins)}, at once.`); // v0.11.64: every card at once
     { const id0 = b.dataset.run || b.dataset.med || ''; const k = medActivity(id0) || (/^(.+):(\d+)$/.test(id0) && isSitChoice(SCENES[id0.split(':')[0]]?.choices?.[Number(id0.split(':')[1])], id0.split(':')[0]) ? 'sit' : null); if (k) lines.push(useLine(g, k)); } // v0.11.15: speed by use
     if (card && card.kind === 'work') lines.push(`Familiarity: ${FAM[card.tier].name}${card.next != null ? `, ${card.fam} of ${card.next} to ${FAM[card.tier + 1].name}` : ' (the top)'}. Familiar work goes faster.`);
-    if (card && card.status === 'late') lines.push('It would end past 02:00, when the day is over. Sleep, or push through the night.');
+    if (card && card.status === 'late') lines.push('It would end past midnight, when the day is over. Sleep.');
     else if (card && card.status !== 'open') lines.push('Done for today. Back tomorrow.');
     if (b.disabled && !card) { const tag = b.querySelector('.tag')?.textContent; lines.push(tag ? `Not now: ${tag}.` : 'Not now.'); }
     if (showChecks && card?.tag) lines.push(`Check: ${card.tag}`);

@@ -2,6 +2,22 @@
 
 Started 2026-11-09 (v0.11.86), when `history-10.md` passed 45 KB. Newer than `history-10.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.91 (word for word)
+
+### From "Decided in chat"
+
+- **v0.11.88: docs only, the roadmap trimmed and split (owner 02:21 "procceed"; Claude's options with the sub-items T1 the trim (8.8 KB of done and stale lines), D1 into `roadmap-done.md` / D2 into a new `roadmap-done-2.md`, S1 a split at section 3 / S2 group e alone, X the tooling; A 🟢 T1 + D2 + S1 + X (recommended), B 🟡 S1 + X, C 🟠 S2 + X, D 🔴 T1 + D2; owner 02:37 "go with your recommendation"):**
+  - **Picked:** **A.** Moved word for word to `roadmap-done-2.md`: the old "Last updated" line, the two layout paragraphs, section 0's done notes, the "Suggested order" paragraph, groups b, c, g, h and i (all done), group d's owner's calls of 21:12 and the unarmed-fights line (done in v0.11.81–v0.11.82), section 2's v0.11.67 note (superseded); a label where each stood, a new **Order** label in section 1. Sections 3–6 and Decided moved word for word to `roadmap-2.md`. Not picked: B, C, D, D1, S2.
+  - **As built:** see the version note.
+  - **Also:** `d639bd5` filled in for 0.11.87; after v0.11.87 Claude uploaded 8 docs (handover, roadmap, roadmap-done, changelog, restore-points, working-agreement, history-11, `claude/CLAUDE.md`); v0.11.85's notes to `history-11.md`.
+
+### From "Version notes"
+
+## v0.11.88 — docs only: the roadmap trimmed and split (A)
+
+- **Files:** `project/roadmap.md` (62.1 → 37.2 KB), `project/roadmap-2.md` (new, 17.7 KB), `project/roadmap-done-2.md` (new, 10.3 KB), `project/roadmap-done.md` (a pointer, closed), `project/working-agreement.md` (the docs list), `tests/tools.test.mjs` (the split's test; the group i and flight tests read both open parts), `sw.js`, `tests/README.md`, docs (v0.11.85 to `history-11.md`). The game identical to 0.11.87; saves unchanged.
+- **Checks:** docs and a test only (rule 2): the reassembly check (the 133 non-blank lines of the old `roadmap.md` each found in the three files as often as before, 0 missing; 20 new lines, all labels, headers and the new "Last updated"), `node tests/tools.test.mjs`, `node tools/consistency.mjs` and `bash tools/check.sh quick`. How it interacts: no game file, save or bot code changed, so the game and the bot numbers can't move. What can break: a test or tool that reads `roadmap.md` alone would miss sections 3–6 (the two that did now read both parts).
+
 ## Moved from the handover in v0.11.90 (word for word)
 
 ### From "Decided in chat"
