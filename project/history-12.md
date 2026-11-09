@@ -2,6 +2,23 @@
 
 Started 2026-11-09 (v0.11.97), when `history-11.md` neared 45 KB. Newer than `history-11.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.106 (word for word)
+
+### From "Decided in chat"
+
+- **v0.11.103: the browser flake fixed (section 0's next item; the owner's "procceed" 18:43; Claude's options BF1–BF3; owner 19:02 "BF1 go"):**
+  - **The sub-items (found by instrumenting a scratch copy: the page error's stack is Playwright's `wait_for_function` predicate in the FAQ step):** the cause: `faq()`'s wait `details[data-faq="{other}"]` with other = "Yuki's job" was a JS SyntaxError on every run (3 of 3 part 2 alone); `until()` swallowed it (the wait never waited); under load Chromium also reported it as a page error (3 of 4 full checks today; 10 stops in 7 pushes). **F** the name passed as an argument: a scratch copy with F + U, 4 of 4 full checks clean, 0 page errors; **U** `until()` quiet only on a timeout, any other error a failure naming the wait (across all four parts only this wait errored, 0 timeouts; with U and without F part 2 fails every run); **T** a tools test of the wait helper on fake pages.
+  - **The options:** **BF1 🟢 F + U + T (recommended)** / BF2 🟡 F only / BF3 🔴 change nothing (colours: a broken wait caught: this one fixed and any future one failing every run / this one fixed / neither). **Picked: BF1.** Not picked: BF2, BF3.
+  - **As built:** see the version note.
+  - **Also:** `b48ad55` filled in for 0.11.102; after v0.11.102 Claude uploaded 5 docs; v0.11.100's notes to `history-12.md`.
+
+### From "Version notes"
+
+## v0.11.103 — the browser flake fixed (BF1)
+
+- **Files:** `tools/browser.py` (U: `until()` catches Playwright's `TimeoutError` quietly, any other error appends a failure naming the wait; F: `faq()`'s wait for the opened entry's tag passes the name as `arg`), `tests/tools.test.mjs` (T: the BF1 block, `until()` on fake pages: a wait that holds, a quiet timeout, a broken expression and a broken selector each a failure; the FAQ wait no longer pastes a name), `tests/README.md`, `sw.js`, docs (v0.11.100 to `history-12.md`). Tools and tests only: the game, saves and the baseline unchanged. Without the change the tools test fails 3 asserts; with U and the old wait, part 2 fails every run, naming the wait.
+- **Checks:** tools and tests only (rule 2): `node tests/tools.test.mjs`, the four browser parts alone (exit 0 each), `bash tools/check.sh quick` (exit 0), and, to show the flake gone, the full `bash tools/check.sh` twice: both exit 0 at the first try, 0 drifted of 142, the same 9 past 5. Interaction: only the browser test's waits; a wait that errors now fails its part instead of passing silently. **Opus, cold review:** no high, no medium. Fixed (then the tools, FAQ and browser part 2 tests and `bash tools/check.sh quick`, exit 0): low 1 (an error with no message would crash `until()`: its type is named instead; tested), low 2 (FAQ names still go into CSS selectors: the FAQ test asserts no question holds `"` or `\`). Information: Playwright's `TimeoutError` is the class both waits raise; waits across a real navigation don't raise (5 of 5); "Target closed" only on a real close (no wait after `pb.close()`); part 3's `poll()` still swallows errors (version strings only; left). Not fixed (low 3): the static check matches only the old form.
+
 ## Moved from the handover in v0.11.105 (word for word)
 
 ### From "Decided in chat"

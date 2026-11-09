@@ -5,7 +5,7 @@
  */
 import { advance, startActCoil, combatHooks, PEOPLE_FIGHTS, coilMult, coilMultNext, fmtMult } from '../core/game.js';
 import { setDeathHook, goTo } from '../core/story.js';
-import { coilActive, endCoil, rewind, coilReport, actOf, willUnwind, noteClear, targetsText } from '../core/coil.js';
+import { coilActive, endCoil, rewind, coilReport, actOf, actWon, willUnwind, noteClear, targetsText } from '../core/coil.js';
 
 const WHY = {
     collapse: `Somewhere between the ground and the dark, the Ouroboros Axiom turns.
@@ -22,6 +22,9 @@ Then the Ouroboros Axiom turns, with the hard snap of a hand catching a cup. Thi
     shen: `The crimson robes take the road down the mountain, and you walk between them. Behind you, the grove sings, faint and stubborn, and Ashfall stands at the tribute post in a silence so formal it could be carved on a stele.
 
 You could go with him. It is a written ending, and not the worst one. Or you can decline to let it have happened.`,
+    clear: `The grove is singing behind you, and Shen Qiu is somewhere down the mountain, thinking about things. This is an ending. You read it to the last line and set it down.
+
+Then you pick it up again. The Ouroboros Axiom turns, slow this time, not a hand catching a cup but a season closing. You did this once, start to finish, and your hands know it now. A thread wakes to hold it.`,
     choice: `You could keep going. It's an option. People do it all the time.
 
 Or you could close the loop yourself: bite the tail, and wake at a dawn you have already seen, with what you remember and nothing you've carried.`,
@@ -64,7 +67,7 @@ ${r.near.length ? `
 
 Yuki remembers everything. She always does, through the bond, and she will bring it up.
 
-**Next Coil:** your realm, skills and meridians start over. ${g.coil?.why === 'choice' ? `A Coil you end by choice adds nothing to the faster learning: you will learn as fast as now${coilMultNext(g, true) > 1 ? ` (×${fmtMult(coilMultNext(g, true))})` : ''}.` : `What you remember makes them come back faster: you will learn ×${fmtMult(coilMultNext(g, false))} as fast.`}${willUnwind(g) ? `
+**Next Coil:** your realm, skills and meridians start over. ${g.coil?.why === 'clear' ? `Act 1 is won, and a bite from a won act counts like a hard one: you will learn ×${fmtMult(coilMultNext(g, false))} as fast.` : g.coil?.why === 'choice' ? `A Coil you end by choice adds nothing to the faster learning: you will learn as fast as now${coilMultNext(g, true) > 1 ? ` (×${fmtMult(coilMultNext(g, true))})` : ''}.` : `What you remember makes them come back faster: you will learn ×${fmtMult(coilMultNext(g, false))} as fast.`}${willUnwind(g) ? `
 
 **The price:** your collaterals sealed at Foundation. This rewind unwinds the breakthrough with them: Mortal Vessel again, ${g.james.realm} realm${g.james.realm > 1 ? 's' : ''} gone, Saturation at zero. The threads will open again. Everything else you learned stays.` : ''}`;
         },
@@ -74,7 +77,7 @@ Yuki remembers everything. She always does, through the bond, and she will bring
             { text: 'Bite the tail. Wake at the start of the whole game (Day 1, the arrival).', show: (g) => actOf(g) === 1 && g.coil?.why !== 'choice', do: (g) => bite(g, 'game'), to: 'coil_dawn' }, // v0.11.86 (W1): a bite by choice restarts the act only
             { text: 'Accept it. Get up.', show: (g) => g.coil?.why === 'tribute', do: (g) => { g.coil.why = null; advance(g, 120, { resting: true }); return []; }, to: 'epilogue' },
             { text: 'Accept it. Walk.', show: (g) => g.coil?.why === 'shen', do: (g) => { g.coil.why = null; return []; }, to: 'a1_end' },
-            { text: 'Not yet.', show: (g) => g.coil?.why === 'choice' && !!g.coil.back, do: (g) => { g.coil.why = null; g.coil.skipEnter = true; return []; }, to: (g) => g.coil.back },
+            { text: 'Not yet.', show: (g) => (g.coil?.why === 'choice' || g.coil?.why === 'clear') && !!g.coil.back, do: (g) => { g.coil.why = null; g.coil.skipEnter = true; return []; }, to: (g) => g.coil.back }, // v0.11.106 (RA1): Not yet after a won act's bite too
         ],
     };
     SCENES.coil_dawn = {
@@ -127,9 +130,10 @@ You don't have to. The Axiom is right there, coiled under your breastbone, tail 
 
 Yuki opens one eye. *Again?* says the bond. *Fine. I'll remember it for both of us.*`,
         choices: [
-            // v0.11.86 (G1): going round again is a Coil ended by choice: no faster learning from it
-            { text: 'Bite the tail. Wake at the start of Act 1. (By choice: adds no faster learning.)', do: (g) => { endCoil(g, 'choice', 'a1_end'); return bite(g, 'act'); }, to: 'coil_dawn' },
-            { text: 'Bite the tail. Wake at the start of the whole game (Day 1, the arrival). (By choice: adds no faster learning.)', do: (g) => { endCoil(g, 'choice', 'a1_end'); return bite(g, 'game'); }, to: 'coil_dawn' },
+            // v0.11.86 (G1): going round again is a Coil ended by choice: no faster learning from it;
+            // v0.11.106 (owner pick RA1, W): after an Act 1 James won (victory, accord, revelation) it adds to it ('clear'); after 'taken' as before
+            { text: (g) => (actWon(g) ? `Bite the tail. Wake at the start of Act 1. (Act 1 is won: the next Coil learns ×${fmtMult(coilMultNext(g, false))} as fast.)` : 'Bite the tail. Wake at the start of Act 1. (By choice: adds no faster learning.)'), do: (g) => { endCoil(g, actWon(g) ? 'clear' : 'choice', 'a1_end'); return bite(g, 'act'); }, to: 'coil_dawn' },
+            { text: (g) => (actWon(g) ? `Bite the tail. Wake at the start of the whole game (Day 1, the arrival). (Act 1 is won: the next Coil learns ×${fmtMult(coilMultNext(g, false))} as fast.)` : 'Bite the tail. Wake at the start of the whole game (Day 1, the arrival). (By choice: adds no faster learning.)'), do: (g) => { endCoil(g, actWon(g) ? 'clear' : 'choice', 'a1_end'); return bite(g, 'game'); }, to: 'coil_dawn' },
             { text: 'Not yet.', to: 'a1_end' },
         ],
     };

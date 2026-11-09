@@ -218,6 +218,7 @@ export const fmtMult = (x) => String(Math.round(x * 100) / 100);
  * v0.11.86 (owner 2026-11-09 01:06, picks C1 + G1 + W1, roadmap #53): a Coil ended by choice ("Bite the tail" on the
  * James tab, "Go round again" at Act 1's end) still counts as a Coil, but adds nothing to the bonus: `coil.free` counts
  * them. A collapse, a beast, a lost tribute and Shen Qiu add as before. A save from before has no `free`: ×as it was.
+ * v0.11.106 (owner pick RA1): except at the end of an Act 1 James won (victory, accord, revelation): that bite adds (why 'clear', coil.js `actWon`).
  */
 export const coilMult = (g) => 1 + COIL_GROWTH * Math.max(0, (g?.coil?.n || 1) - 1 - (g?.coil?.free || 0));
 /** The bonus the next Coil will have, if this one ends now; `chosen`: ended by choice (adds nothing). */

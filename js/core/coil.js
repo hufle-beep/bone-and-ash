@@ -6,6 +6,8 @@
  * A Coil ends on a collapse (HP 0 during tasks), a lost tribute (accept or rewind) or by choice ("Bite the tail").
  * v0.11.86 (owner 2026-11-09, #53, C1 + G1 + W1): a Coil ended by choice (why 'choice') counts as a Coil but adds no
  * bonus (`coil.free`, game.js coilMult); on the James tab in Act 1 it restarts Act 1 only (W1).
+ * v0.11.106 (owner 2026-11-09 21:29, pick RA1): a bite at the end of an Act 1 James won (why 'clear', `actWon`) adds
+ * to the bonus like a death; after 'taken' going round again is still by choice.
  * Rewind: back to the snapshot (Day 1 dawn for a new game; an old save as it was loaded). v0.11.26 (owner 11:07): from Act 1
  * also to the start of the whole game (Day 1, the arrival, a fresh start); "same days again" is gone. One Coil count per save
  * (owner 11:12): crossing into Act 1 continues the Coil, every rewind adds 1, and the bonus follows it (pick N1).
@@ -42,9 +44,15 @@ export const actOf = (g) => g.coil?.act || 0;
 /** A rewind would unwind Foundation (collaterals sealed). */
 export const willUnwind = () => false; // v0.11.0: everything James grew starts over on a rewind anyway
 
-/** v0.11.86 (Fable review): the James tab's bite at a lost tribute or at Shen Qiu is that loss's bite (it adds the bonus), elsewhere by choice. */
-export const tabWhy = (g) => (g.scene === 'collectors_lost' ? 'tribute' : g.scene === 'rt_taken' ? 'shen' : 'choice');
-/** End the Coil: why = 'collapse' | 'tribute' | 'choice'; back = the scene "Not yet" returns to. */
+/** v0.11.106 (owner 2026-11-09 21:29, pick RA1, W): the Act 1 endings James wins. A bite after one of them (going round
+ *  again, or the James tab at the act's end) adds to the faster learning (why 'clear'); after 'taken' it is by choice as before.
+ *  `a1_outcome` is a world flag (reset by every rewind), so only the act's end can read it. */
+export const ACT1_WON = ['victory', 'accord', 'revelation'];
+export const actWon = (g) => actOf(g) === 1 && (g.scene === 'a1_end' || g.scene === 'a1_again') && ACT1_WON.includes(g.flags?.a1_outcome); // the act's end only (Fable's review, medium 1)
+/** v0.11.86 (Fable review): the James tab's bite at a lost tribute or at Shen Qiu is that loss's bite (it adds the bonus), elsewhere by choice;
+ *  v0.11.106 (RA1): at the end of an Act 1 James won, a won act's bite ('clear', it adds the bonus). */
+export const tabWhy = (g) => (g.scene === 'collectors_lost' ? 'tribute' : g.scene === 'rt_taken' ? 'shen' : actWon(g) ? 'clear' : 'choice');
+/** End the Coil: why = 'collapse' | 'beast' | 'tribute' | 'shen' | 'clear' | 'choice'; back = the scene "Not yet" returns to. */
 export function endCoil(g, why, back = null) {
     const c = coil(g);
     c.why = why; c.back = back;
@@ -139,7 +147,7 @@ export function rewind(g, { to = 'act' } = {}) {
     const n = c.n + 1;
     const peak = {};
     for (const [who, r] of Object.entries(base.rel)) peak[who] = { f: r.f, a: r.a };
-    const free = (c.free || 0) + (c.why === 'choice' ? 1 : 0); // v0.11.86 (#53, C1): a Coil ended by choice counts, but adds no bonus
+    const free = (c.free || 0) + (c.why === 'choice' ? 1 : 0); // v0.11.86 (#53, C1): a Coil ended by choice counts, but adds no bonus; v0.11.106 (RA1): 'clear' (a won Act 1) adds
     base.coil = { ...c, n, act: whole ? 0 : (c.act || 0), snap: whole ? fresh : c.snap, wake: base.scene, peak, why: null, back: null, skipEnter: false, one: true };
     if (free) base.coil.free = free;
     delete base.coil.played; delete base.coil.replay; // v0.11.26: "same days again" is gone (older saves keep the fields; nothing reads them)

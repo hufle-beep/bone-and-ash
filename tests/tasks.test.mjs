@@ -437,9 +437,11 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
         assert(ev.end && ev.choices.length === 1 && /Go round again/.test(ev.choices[0].label), `${outcome}: the end screen offers Go round again`);
         choose(e, SCENES, ev.choices[0].index);
         const av = sceneView(e, SCENES);
-        assert(e.scene === 'a1_again' && av.choices.map((c) => c.label).join('|') === 'Bite the tail. Wake at the start of Act 1. (By choice: adds no faster learning.)|Bite the tail. Wake at the start of the whole game (Day 1, the arrival). (By choice: adds no faster learning.)|Not yet.', `${outcome}: the confirm screen`);
+        const tail = outcome === 'taken' ? 'By choice: adds no faster learning.' : 'Act 1 is won: the next Coil learns ×1.5 as fast.'; // v0.11.106 (RA1): a won act's bite adds
+        assert(e.scene === 'a1_again' && av.choices.map((c) => c.label).join('|') === `Bite the tail. Wake at the start of Act 1. (${tail})|Bite the tail. Wake at the start of the whole game (Day 1, the arrival). (${tail})|Not yet.`, `${outcome}: the confirm screen`);
         choose(e, SCENES, av.choices.find((c) => (target === 'act' ? /start of Act 1/ : /whole game/).test(c.label)).index);
-        assert(e.scene === 'coil_dawn' && e.coil.n === 3 && e.coil.free === 1 && coilMult(e) === 1.25 && !e.flags.a1_outcome && !e.inventory.beast_core, `${outcome} → ${target}: Coil 3 (one count), ×1.25 (v0.11.86, G1: going round again is by choice, no bonus from it), the outcome and the hammerspace gone`);
+        const won = outcome !== 'taken'; // v0.11.106 (RA1): after a won act going round again adds 0.25; after 'taken' by choice, as G1
+        assert(e.scene === 'coil_dawn' && e.coil.n === 3 && e.coil.free === (won ? undefined : 1) && coilMult(e) === (won ? 1.5 : 1.25) && !e.flags.a1_outcome && !e.inventory.beast_core, `${outcome} → ${target}: Coil 3 (one count), ×${won ? '1.5 (RA1: a won act adds)' : '1.25 (G1: by choice, no bonus from it)'}, the outcome and the hammerspace gone (×${coilMult(e)}, free ${e.coil.free})`);
         assert(e.tasks.fam['rr_hub:1'] === 7 && e.flags.lore_tree && e.coil.known.includes('ship_found') && e.rel['Mei Lin'].a >= 20, `${outcome} → ${target}: familiarity, knowledge and the head start kept`);
         choose(e, SCENES, 0);
         if (target === 'act') assert(e.scene === 'fo_start' && e.coil.act === 1 && e.minutes === 7 * 1440 + 360 && e.flags.ending === 'paid', `${outcome} → the start of Act 1 (the prologue's outcome kept)`);
@@ -1228,7 +1230,58 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
       const back = deserialize(serialize(Object.assign(ensureBars(newGame(8605)), {})));
       const f = ensureBars(newGame(8606)); endCoil(f, 'choice', 'arrival'); rewind(f); const r = deserialize(serialize(f));
       assert(r.coil.free === 1 && coilMult(r) === 1 && !back.coil.free, 'C1: the count survives a save and a load');
-      assert(SCENES.a1_again.choices.filter((c) => /Bite the tail/.test(c.text)).every((c) => /\(By choice: adds no faster learning\.\)$/.test(c.text)), 'G1: going round again says it adds no faster learning'); }
+      const tk = ensureBars(newGame(8610)); tk.coil.act = 1; tk.flags.a1_outcome = 'taken'; tk.scene = 'a1_again'; // v0.11.106 (RA1): the labels are by the ending now
+      assert(sceneView(tk, SCENES).choices.filter((c) => /Bite the tail/.test(c.label)).every((c) => /\(By choice: adds no faster learning\.\)$/.test(c.label)), 'G1: after \'taken\' going round again says it adds no faster learning'); }
+    // v0.11.106 (owner 2026-11-09 21:29, pick RA1, W + L): a bite at the end of an Act 1 James won adds to the faster learning
+    { const { tabWhy, actWon, ACT1_WON } = await import('../js/core/coil.js');
+      const { FAQ } = await import('../js/core/faq.js');
+      const atEnd = (seed, outcome) => { const e = ensureBars(newGame(seed)); e.scene = 'epilogue'; e.flags.ending = 'paid'; e.minutes = 6 * 1440 + 15 * 60; e.coil.n = 3; choose(e, SCENES, 0); e.flags.a1_outcome = outcome; goTo(e, SCENES, 'a1_end'); return e; };
+      assert(ACT1_WON.join() === 'victory,accord,revelation', 'RA1: the won endings are victory, accord and revelation');
+      for (const o of ['victory', 'accord', 'revelation', 'taken']) {
+        const won = o !== 'taken';
+        for (const target of ['act', 'game']) { // going round again
+          const e = atEnd(9100, o);
+          assert(coilActive(e) && actWon(e) === won && tabWhy(e) === (won ? 'clear' : 'choice'), `RA1: ${o} at the act's end: ${won ? 'a won act' : 'by choice'}`);
+          choose(e, SCENES, sceneView(e, SCENES).choices.find((c) => /Go round again/.test(c.label)).index);
+          const labels = sceneView(e, SCENES).choices.filter((c) => /Bite the tail/.test(c.label)).map((c) => c.label);
+          assert(labels.length === 2 && labels.every((l) => (won ? /\(Act 1 is won: the next Coil learns ×1\.75 as fast\.\)$/ : /\(By choice: adds no faster learning\.\)$/).test(l)), `RA1: ${o}: the labels say what the bite gives (${labels[0]})`);
+          choose(e, SCENES, sceneView(e, SCENES).choices.find((c) => (target === 'act' ? /start of Act 1/ : /whole game/).test(c.label)).index);
+          assert(e.scene === 'coil_dawn' && e.coil.n === 4 && e.coil.free === (won ? undefined : 1) && coilMult(e) === (won ? 1.75 : 1.5) && e.coil.act === (target === 'act' ? 1 : 0), `RA1: ${o} → ${target}: Coil 4 ×${coilMult(e)} (free ${e.coil.free})`);
+          choose(e, SCENES, 0);
+          if (target === 'act') assert(e.scene === 'fo_start' && !actWon(e) && tabWhy(e) === 'choice', `RA1: ${o}: on the next Coil the outcome is gone, the tab's bite mid-act is by choice again`);
+        }
+        // the James tab's bite at the act's end: the Coil screen
+        const t = atEnd(9200, o); endCoil(t, tabWhy(t), t.scene); goTo(t, SCENES, 'coil_end');
+        const v = sceneView(t, SCENES);
+        assert(won ? /a season closing/.test(v.text) && /Act 1 is won, and a bite from a won act counts like a hard one: you will learn ×1\.75 as fast\./.test(v.text) : /adds nothing to the faster learning/.test(v.text), `RA1: ${o}: the Coil screen says what the tab's bite gives`);
+        assert(v.choices.some((c) => /whole game/.test(c.label)) === won && v.choices.some((c) => /Not yet/.test(c.label)), `RA1: ${o}: ${won ? 'the whole game offered' : 'the act only (W1)'}, and Not yet`);
+        choose(t, SCENES, v.choices.find((c) => /Not yet/.test(c.label)).index);
+        assert(t.scene === 'a1_end' && !t.coil.why && t.coil.n === 3, `RA1: ${o}: Not yet goes back to the act's end, nothing counted`);
+        endCoil(t, tabWhy(t), t.scene); goTo(t, SCENES, 'coil_end'); wake(t, /start of Act 1/);
+        assert(t.coil.n === 4 && coilMult(t) === (won ? 1.75 : 1.5), `RA1: ${o}: the tab's bite at the act's end ×${coilMult(t)}`);
+      }
+      // Fable's review: medium 1, the won scenes themselves (walked from the duel) neither turn the Coil nor read as a won act's bite;
+      // low 3, a 'clear' bite on a save that already has Coils by choice keeps that count
+      for (const [sc, o] of [['rt_duel_won', 'victory'], ['rt_accord', 'accord'], ['rt_truth_won', 'revelation']]) {
+        const w = atEnd(9400, null); delete w.flags.a1_outcome; goTo(w, SCENES, sc);
+        assert(w.flags.a1_outcome === o && !coilActive(w) && !actWon(w) && tabWhy(w) === 'choice', `RA1 review: ${sc}: no bite there, nothing reads as won (${coilActive(w)}, ${actWon(w)})`);
+        choose(w, SCENES, 0); assert(w.scene === 'a1_end' && coilActive(w) && actWon(w) && tabWhy(w) === 'clear', `RA1 review: ${sc} → a1_end: the won act's bite`);
+      }
+      { const f = atEnd(9500, 'victory'); f.coil.n = 4; f.coil.free = 1; choose(f, SCENES, sceneView(f, SCENES).choices.find((c) => /Go round again/.test(c.label)).index);
+        assert(sceneView(f, SCENES).choices[0].label.includes('×1.75'), 'RA1 review: the label with a choice already counted (×1.75)');
+        choose(f, SCENES, 0); assert(f.coil.n === 5 && f.coil.free === 1 && coilMult(f) === 1.75, `RA1 review: free 1 kept, Coil 5 ×${coilMult(f)}`); }
+      // a bite by choice before the act is won stays by choice; the FAQ says both
+      const mid = atEnd(9300, 'victory'); delete mid.flags.a1_outcome; mid.scene = 'fo_ashfall';
+      assert(!actWon(mid) && tabWhy(mid) === 'choice', 'RA1: before the act is won the tab\'s bite is by choice');
+      const fq = FAQ.find((e) => e[0] === 'The Coil')[1](mid);
+      assert(/adds nothing to the faster learning, with one exception/.test(fq) && /Act 1 James won/.test(fq) && /ended with James taken adds nothing/.test(fq), 'RA1: the FAQ\'s Coil entry (Fable\'s text)');
+      // the owner's save of 21:27 (Coil 4 ×1.75, Act 1 won by the duel, on the go-round-again screen): the bite makes Coil 5 ×2
+      const { readFileSync } = await import('node:fs'); const { gunzipSync } = await import('node:zlib');
+      const raw = readFileSync(new URL('../saves/2026-11-09-2127-incremental-a1_again.txt', import.meta.url), 'utf8').trim();
+      const sv = deserialize(raw.startsWith('BAZ1:') ? gunzipSync(Buffer.from(raw.slice(5), 'base64')).toString('utf8') : raw);
+      assert(sv.scene === 'a1_again' && sv.coil.n === 4 && coilMult(sv) === 1.75 && sv.flags.a1_outcome === 'victory', `RA1: the owner's save as uploaded (Coil ${sv.coil.n}, ×${coilMult(sv)})`);
+      choose(sv, SCENES, sceneView(sv, SCENES).choices.find((c) => /start of Act 1/.test(c.label)).index);
+      assert(sv.coil.n === 5 && coilMult(sv) === 2 && !sv.coil.free, `RA1: the owner's save: going round again makes Coil 5 ×2 (×${coilMult(sv)})`); }
 }
 // v0.11.85 (owner pick D + T1): every XP award ×0.6 after the Coil bonus; the targets 4 / 6
 {
