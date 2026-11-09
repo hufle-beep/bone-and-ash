@@ -3,11 +3,9 @@
   "keep": {
     "files": {
       "project/*": "the project docs (named only in other docs, which the file scan skips)",
-      "CLAUDE.md": "the hard rules, read by Claude at the start of a chat",
       ".github/*": "GitHub runs the workflows by itself",
       "saves/*": "tests/saves.test.mjs loads every file in the folder",
-      "tools/bg.py": "by hand: makes the background crops in art/bg (handover, Files)",
-      "tools/snap.mjs": "by hand: fresh test saves for each new save format (tests/README.md)"
+      "tools/bg.py": "by hand: makes the background crops in art/bg (handover, Files)"
     },
     "testOnly": {
       "setDryClone": "test hook: the lean = full copy comparison in tests/tasks.test.mjs",

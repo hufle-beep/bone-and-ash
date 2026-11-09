@@ -2,6 +2,24 @@
 
 Started 2026-11-09 (v0.11.97), when `history-11.md` neared 45 KB. Newer than `history-11.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.100 (word for word)
+
+### From "Decided in chat"
+
+- **v0.11.97: the smart rule's Qi reserve (Fable's review of v0.11.96, medium 1; Claude's options RQ1 / RQ0 in the v0.11.96 report; owner 14:53 "RQ1 ok, then save standing even if there is something wrong, and give handover for new chat"):**
+  - **The sub-items (lab: the fight lab 300 games, 6,242 fight states, the smart bot's win %; the models 300 games each, mean Coil prologue / Act 1):** **R** the spike field and the Qi shield only when Qi also pays for an attack after them: lab 72.8 → 73.1%, 56 fights decided differently (39 now won, 17 now lost; Gao 79.2 → 72.2%, boar 64.8 → 73.6%); models Careful 3.43 / 4.03 unchanged, Completionist 4.14 → 4.11; **K** a test that plays the review's whole fight; **L** the baseline re-saved only past 20 points.
+  - **The options:** **RQ1 🟢 R + K + L (recommended)** / RQ0 🟡 keep (a roadmap line) (colours: the lab's smart win %: 73.1 / 72.8). **Picked: RQ1.** Not picked: RQ0.
+  - **Also (rule 6):** the owner asked for the standing to be saved even if something went wrong, and a handover message for a new chat (given in chat after this push).
+  - **As built:** see the version note.
+  - **Also:** `3617eb2` filled in for 0.11.96; after v0.11.96 Claude uploaded 5 docs (handover, roadmap, changelog, restore-points, history-11); v0.11.94's notes to the new `history-12.md` (part 11 at 44 KB).
+
+### From "Version notes"
+
+## v0.11.97 — the smart bots keep Qi for an attack (RQ1)
+
+- **Files:** `tests/lib/smartfight.mjs` (`attackReserve`: 0 with a formed spear or non-fragile blade, else the cheaper of the blade and, once open, darts; the field and the shield only when Qi pays for them plus the reserve; the field keeps its floor of 6), `tests/tasks.test.mjs` (the v0.11.97 block), `tests/README.md`, `sw.js`, docs (v0.11.94 to the new `history-12.md`). No game file changed; saves unchanged; the baseline unchanged (nothing past 20).
+- **Checks:** the code behind the bot numbers (rule 2): the full `bash tools/check.sh`, three runs: 1 and 2 stopped at the browser part 2 flake ("missing ) after argument list", as in v0.11.85, .92, .95; part 2 alone passed 3 of 3); 3 exit 0, 0 drifted of 143, 2 past 5 (log only, as the lab said): boar smart 56.9 → 68.5%, Gao smart 74.3 → 67.1%. The models (500 games): Careful 3.44 / 4.00, Completionist 3.83 / 4.11, the Sitter 2.66 / 2.66, the Farmer 3.81 / 4.06. After the review's test fixes: the tasks test and `bash tools/check.sh quick` (tests and comments only); without the reserve the three behaviour tests fail. **Fable, cold review:** no high. Fixed: medium 1 (the field's test sat where the old floor of 6 decides: now at T1 L3, 7 Qi), low 3 (the spear's cost pinned to the blade's), low 4 (the header's number), low 5 (hard numbers: 3 at T1 L1, 2 at T1 L6), low 6 (README). **Open (options later):** medium 2, with the fragile knife (below T1 L8) the reserve pays one swing, then the bot can guard to the cap (shield, one swing, guard); a two-swing reserve or no shield while the knife is fragile would change the rule (numbers first).
+
 ## Moved from the handover in v0.11.99 (word for word)
 
 ### From "Open items" (placed in the roadmap by PL1)

@@ -1331,6 +1331,39 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
         assert(o?.done && g.minutes < night0 + 120, `v0.11.91: ${sc}${kind ? ` (${kind})` : ''} is over before 02:00 even at the round cap (${o?.done}, ${g.minutes - night0} min after midnight)`);
     }
 }
+// v0.11.100 (owner 2026-11-09 16:08, pick SB1): (M) the smart rule's Qi shield only once a weapon is formed (Fable's review
+// of v0.11.98, medium 1); (Q) the FAQ names the snare (Fable's sentence); (T) the T10 no-miss is the sung weapons', not the
+// Qi blast's; (E) the degree, and "End it in one move.", reads the fight with the no-dice shift its checks take off the DC
+{
+    const { smartAction, SMART_SHIELD_AT } = await import('./lib/smartfight.mjs');
+    const { NO_DICE_DC_SHIFT, noDiceUp } = await import('../js/core/game.js');
+    const { degreeOf, jamesPower, enemyPower, prepare } = await import('../js/story/power.js');
+    // M: hurt at T1 L9 with nothing formed the bot forms the spear first, then shields
+    { const g = ensureBars(newGame(10001)); g.james.skills['Convergence Use'] = { tier: 1, level: 9, xp: 0 }; g.james.gu = { tier: 3, level: 1, xp: 0 }; ensureBars(g);
+      startCombat(g, { id: 'sb1_test', enemies: [{ name: 'Foe', hp: 99, dc: 3, atk: 3, dmg: 2 }], win: 'stream', lose: 'stream' }); g.james.qi = 99; g.combat.fieldUsed = true; g.james.hp = SMART_SHIELD_AT * jamesHpMax(g);
+      assert(actionOpen(g, 'qshield') && smartAction(g, 0) === 'spear', `SB1 M: nothing formed: the spear before the shield (${smartAction(g, 0)})`);
+      g.combat.spearFormed = true; assert(smartAction(g, 1) === 'qshield', `SB1 M: the spear formed: the shield (${smartAction(g, 1)})`); }
+    { // the review's case: T1 L8, 35% HP, 8 Qi: it no longer shields to one dart and guards to the cap
+      const g = ensureBars(newGame(10002)); g.james.skills['Convergence Use'] = { tier: 1, level: 8, xp: 0 }; g.james.gu = { tier: 1, level: 5, xp: 0 }; ensureBars(g);
+      startCombat(g, { id: 'sb1_case', enemies: [{ name: 'Foe', hp: 99, dc: 3, atk: 3, dmg: 2 }], win: 'stream', lose: 'stream' }); g.james.qi = 8; g.combat.fieldUsed = true; g.yuki.hp = 0; g.james.hp = SMART_SHIELD_AT * jamesHpMax(g);
+      const picks = []; for (let t = 0; t < 6 && g.combat; t++) { const a = smartAction(g, t); picks.push(a); combatStep(g, a); }
+      assert(picks[0] !== 'qshield' && picks.filter((a) => ['blade', 'spear', 'dart'].includes(a)).length >= 4, `SB1 M: the review's case attacks (${picks.join(', ')})`); }
+    // T: at T10 a sung weapon's miss lands as a hit; the Qi blast's miss stays a miss
+    { const g = ensureBars(newGame(10003)); g.james.skills['Convergence Use'] = { tier: 10, level: 1, xp: 0 }; g.james.gu = { tier: 1, level: 1, xp: 0 }; ensureBars(g);
+      startCombat(g, { id: 'sb1_t10', enemies: [{ name: 'Wall', hp: 9999, dc: 999, atk: 0.1, dmg: 0 }], win: 'stream', lose: 'stream' }); g.james.qi = 999;
+      const blast = combatStep(g, 'blast').lines.find((l) => /^Qi blast/.test(l)) || '';
+      const blade = combatStep(g, 'blade').lines.find((l) => / — (hit|miss|a glancing blow|a clean, deep hit)$/.test(l) && !/^Qi blast/.test(l)) || '';
+      assert(/^Qi blast/.test(blast) && !/ — (hit|a clean, deep hit)$/.test(blast), `SB1 T: a T10 Qi blast under its DC is not forced to a hit (${blast}; the enemy cap of 50 makes it a glance at T10 L1)`); // review low 4
+      assert(/ — hit$/.test(blade), `SB1 T: a T10 sung weapon never misses (${blade})`); }
+    // E: prepare reads the fight with the raise and the shift; a James 2–4 ahead on the raw numbers now gets the one-move finish
+    assert(NO_DICE_DC_SHIFT === 2, 'SB1 E: the shift is 2');
+    { const ape = ensureBars(newGame(10004)); ape.scene = 'ape_lured'; ape.minutes = 12 * 1440 + 10 * 60; ape.james.realm = 0;
+      const fight = SCENES.ape_lured.choices.find((c) => c.combat).combat, up = noDiceUp('rot_ape'); // the scene's own fight, grown as the story grows it
+      let found = null, enc = null;
+      for (let r = 1; r <= 100 && found == null; r++) { ape.james.gu = { tier: Math.floor((r - 1) / 10) + 1, level: ((r - 1) % 10) + 1 }; enc = prepare(ape, fight(ape)); const gap = jamesPower(ape) - (enemyPower(enc.enemies) + up); if (gap >= 2 && gap < 4) found = gap; }
+      assert(found != null && degreeOf(ape, enc.enemies, up) < 3 && enc.degree === 3 && enc.degree === degreeOf(ape, enc.enemies, up - NO_DICE_DC_SHIFT), `SB1 E: a James ${found} ahead on the raw numbers: degree 3 only with the shift (prepare ${enc?.degree})`);
+      assert(sceneView(ape, SCENES).choices.some((c) => c.label === 'End it in one move.'), `SB1 E: that James is offered "End it in one move." (gap ${found})`); }
+}
 // v0.11.98 (owner 2026-11-09 15:22, pick KR1): (NS) no Qi shield while the knife is fragile (below T1 L8; Fable's review
 // of v0.11.97, medium 2: the reserve paid one swing, then the bot could guard to the cap); (G) "Snare root-hares", the
 // last hunt on Convergence, checked on GU with its XP to Convergence Use
@@ -1338,7 +1371,7 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     const { smartAction, SMART_SHIELD_AT } = await import('./lib/smartfight.mjs');
     const at = (cuL, qi = 99) => { const g = ensureBars(newGame(9800 + cuL)); g.james.skills['Convergence Use'] = { tier: 1, level: cuL, xp: 0 }; g.james.gu = { tier: 3, level: 1, xp: 0 }; ensureBars(g); startCombat(g, { id: 'kr1_test', enemies: [{ name: 'Foe', hp: 99, dc: 3, atk: 3, dmg: 2 }], win: 'stream', lose: 'stream' }); g.james.qi = qi; g.combat.fieldUsed = true; g.james.hp = SMART_SHIELD_AT * jamesHpMax(g); return g; };
     for (const l of [1, 3, 5, 6, 7]) { const g = at(l); assert(fragileKnife(g) && actionOpen(g, 'qshield') && smartAction(g, 0) !== 'qshield', `KR1 NS: no shield on the fragile knife at T1 L${l} (${smartAction(g, 0)})`); }
-    { const g = at(8); assert(!fragileKnife(g) && smartAction(g, 0) === 'qshield', `KR1 NS: the shield again from T1 L8, where the knife stops breaking (${smartAction(g, 0)}; the shield can still come before a formed weapon there: open, Fable's review of v0.11.98, medium 1)`); }
+    { const g = at(8); g.combat.bladeFormed = true; assert(!fragileKnife(g) && smartAction(g, 0) === 'qshield', `KR1 NS: the shield again from T1 L8, where the knife stops breaking, once it is formed (v0.11.100, SB1) (${smartAction(g, 0)})`); }
     { const g = at(7); const picks = []; let out = null; for (let t = 0; t < 6 && g.combat; t++) { const a = smartAction(g, t); picks.push(a); out = combatStep(g, a); }
       assert(!picks.includes('qshield') && picks.filter((a) => ['blade', 'dart'].includes(a)).length >= 5, `KR1 NS: hurt on the fragile knife the bot keeps attacking (${picks.join(', ')}; ${out?.done || 'going'})`); }
     const c = SCENES.rr_hunt.choices[1];
@@ -1363,9 +1396,10 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     { const g = at(1, 6); assert(fragileKnife(g) && actionOpen(g, 'dart') && attackReserve(g) === Math.min(cost(g, A.blade), cost(g, A.dart)), `RQ1: darts open: the cheaper attack (${attackReserve(g)})`); }
     { const g = at(1, 9); g.combat.bladeFormed = true; assert(!fragileKnife(g) && attackReserve(g) === 0, 'RQ1: a formed knife: no reserve'); }
     { const g = at(3, 1); g.combat.spearFormed = true; assert(attackReserve(g) === 0, 'RQ1: a formed spear: no reserve'); }
-    { const g = at(1, 9); g.combat.fieldUsed = true; g.james.hp = SMART_SHIELD_AT * jamesHpMax(g); const need = cost(g, A.qshield) + attackReserve(g); // v0.11.98 (KR1): on a knife that holds
+    { const g = at(1, 9); g.combat.fieldUsed = true; g.combat.bladeFormed = true; g.james.hp = SMART_SHIELD_AT * jamesHpMax(g); const need = cost(g, A.qshield) + attackReserve(g); // v0.11.98 (KR1): on a knife that holds; v0.11.100 (SB1, M): formed, so the reserve is 0
+      assert(attackReserve(g) === 0, 'SB1: a formed knife leaves no reserve for the shield');
       g.james.qi = need; assert(smartAction(g, 0) === 'qshield', `RQ1: the shield when Qi pays for it and an attack (${need})`);
-      g.james.qi = need - 0.1; assert(smartAction(g, 0) !== 'qshield', `RQ1: no shield when only the shield can be paid (${smartAction(g, 0)})`); }
+      g.james.qi = need - 0.1; assert(smartAction(g, 0) !== 'qshield', `RQ1: no shield just under its own cost (the reserve is 0 with a formed knife, v0.11.100) (${smartAction(g, 0)})`); }
     { const g = at(1, 3); assert(actionOpen(g, 'spikes') && !actionOpen(g, 'dart'), 'RQ1 test state: the field open, no darts yet'); const need = Math.max(6, cost(g, A.spikes) + attackReserve(g)); assert(need === 7, `RQ1: at T1 L3 the reserve binds the field (4 + 3 = ${need}; from T1 L5 the old floor of 6 does)`); // the review's medium 1
       g.james.qi = need; assert(smartAction(g, 0) === 'spikes', `RQ1: the field when Qi pays for it and an attack (${need})`);
       g.james.qi = need - 0.1; assert(smartAction(g, 0) !== 'spikes', `RQ1: no field just under it (${smartAction(g, 0)})`); }
@@ -1384,8 +1418,8 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     const at = (cuT, cuL, qi = 99) => { const g = ensureBars(newGame(9600 + cuT * 10 + cuL)); g.james.skills['Convergence Use'] = { tier: cuT, level: cuL, xp: 0 }; g.james.gu = { tier: 3, level: 1, xp: 0 }; ensureBars(g); startCombat(g, { id: 'bt1_test', enemies: [{ name: 'Foe', hp: 99, dc: 3, atk: 3, dmg: 2 }], win: 'stream', lose: 'stream' }); g.james.qi = qi; return g; };
     assert(SMART_SHIELD_AT === 0.35, 'BT1 S: the shield at 35% HP or less');
     // S: the shield at or under 35% HP while a foe will strike; not above, not when every foe is staggered or held, not without the Qi
-    // (v0.11.98, KR1: on a knife that holds, T1 L9, the field spent; on the fragile knife there is no shield at all)
-    const held = (qi) => { const g = at(1, 9, qi); g.combat.fieldUsed = true; return g; };
+    // (v0.11.98, KR1: on a knife that holds, T1 L9, the field spent; on the fragile knife there is no shield at all; v0.11.100, SB1: the knife formed)
+    const held = (qi) => { const g = at(1, 9, qi); g.combat.fieldUsed = true; g.combat.bladeFormed = true; return g; }; // v0.11.100 (SB1, M): a formed knife, or no shield
     { const g = held(); g.james.hp = SMART_SHIELD_AT * jamesHpMax(g); assert(smartAction(g, 0) === 'qshield', `BT1 S: shield at 35% HP (${smartAction(g, 0)})`); }
     { const g = held(); g.james.hp = SMART_SHIELD_AT * jamesHpMax(g) + 1; assert(smartAction(g, 0) !== 'qshield', 'BT1 S: no shield above 35% HP'); }
     { const g = held(); g.james.hp = 1; g.combat.enemies[0].staggered = true; assert(smartAction(g, 0) !== 'qshield', 'BT1 S: no shield when no foe will strike'); }
@@ -1418,7 +1452,7 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
       const x = shared(runTask(g, SCENES, 'wild_hunt:2').lines);
       assert(/^GU /.test(x.check || '') && x.c > 0 && x.c === x.u, `BT1 H: the crab card's XP to Convergence, half shared to GU (${x.check}; CU +${x.c}, GU +${x.u})`); }
     // F: the FAQ (Fable's sentence)
-    { const { FAQ } = await import('../js/core/faq.js'); const e = FAQ.find(([q]) => q === 'Skills and checks'); assert(e[1]({ coil: { n: 1 } }).includes('A thrown dart or a driven needle, in a fight or on a hunt, is checked on GU but pays its XP to Convergence Use.'), 'BT1 F: the FAQ says it'); }
+    { const { FAQ } = await import('../js/core/faq.js'); const e = FAQ.find(([q]) => q === 'Skills and checks'); assert(e[1]({ coil: { n: 1 } }).includes('A thrown dart, a driven needle or a sung bone snare, in a fight or on a hunt, is checked on GU but pays its XP to Convergence Use.'), 'BT1 F: the FAQ says it (v0.11.100, SB1 Q: with the snare, Fable\'s sentence)'); }
 }
 // v0.11.95 (owner 2026-11-09 12:26, pick Q1 at 12:43): every weapon sung with Convergence and checked on GU, one hit
 // modifier (+1), the weapons differ in damage and what they do; the Qi blast (Convergence Use, ignores armour) and the Qi

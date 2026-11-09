@@ -25,8 +25,9 @@ export function attackReserve(g) {
  * The smart move (`t`, the round counter, is kept for the callers; the rule doesn't use it):
  * in a brawl a strike (fists cost no Qi; as before, when every move became one); the spike field once while Qi ≥ 6 (kept from the old rule); the Qi shield at or under 35% HP while a foe will still strike this round (S); both only when Qi still pays for an attack after them (`attackReserve`, v0.11.97);
  * no Qi shield while the knife is fragile (below T1 L8, where the spear isn't open either; v0.11.98, owner pick KR1, NS:
- * Fable's review of v0.11.97, medium 2: the reserve paid one swing, then the bot could guard to the cap; from T1 L8 the
- * shield still comes before a formed weapon, so with some Qi it can still end on guard: Fable's review of v0.11.98, medium 1, open);
+ * Fable's review of v0.11.97, medium 2: the reserve paid one swing, then the bot could guard to the cap); since v0.11.100
+ * (owner pick SB1, M; Fable's review of v0.11.98, medium 1) the shield only once a weapon is formed (the spear, or a knife
+ * that holds), so its attack is already paid and the reserve binds the field alone (lab: 0 of 6,461 fights changed);
  * then (N) the spear if James can sing it, else the blade (free once formed, unless it is the fragile knife), darts when
  * the blade can't be paid, else guard. Never the needle or the Qi blast (measured: no gain; the blast is checked on
  * Convergence). In a spar or a brawl the game turns a move that isn't open there into its own (`fightAction`).
@@ -37,7 +38,8 @@ export function smartAction(g, t = 0) { // eslint-disable-line no-unused-vars
     const living = c.enemies.filter((e) => e.hp > 0);
     const atk = attackReserve(g); // v0.11.97 (RQ1): the field and the shield only when an attack can still be paid after them
     if (actionOpen(g, 'spikes') && !c.fieldUsed && qi >= 6 && qi >= cost(g, 'spikes') + atk) return 'spikes';
-    if (!fragileKnife(g) && actionOpen(g, 'qshield') && g.james.hp <= SMART_SHIELD_AT * jamesHpMax(g) && qi >= cost(g, 'qshield') + atk
+    const formed = c.spearFormed || (c.bladeFormed && !fragileKnife(g)); // v0.11.100 (SB1, M): the shield waits for a formed weapon
+    if (formed && actionOpen(g, 'qshield') && g.james.hp <= SMART_SHIELD_AT * jamesHpMax(g) && qi >= cost(g, 'qshield') + atk
         && living.some((e) => !e.staggered && !e.atBay)) return 'qshield';
     if (actionOpen(g, 'spear') && (c.spearFormed || qi >= cost(g, 'spear'))) return 'spear';
     if ((c.bladeFormed && !fragileKnife(g)) || qi >= cost(g, 'blade')) return 'blade';

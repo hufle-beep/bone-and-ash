@@ -568,7 +568,7 @@ export const BONESINGER_TIERS = [
  *   T4+ darts strike two enemies (several pieces), T5+ every enemy (many pieces);
  *   T7+ a bone construct fights beside him (tier × 1–3 a round on the first enemy standing);
  *   T8+ the construct, on its own judgement, steps into the first blow aimed at him each round;
- *   T10 his constructs never miss (they cut what should not be cut).
+ *   T10 his constructs never miss (they cut what should not be cut); not the Qi blast, which is raw Qi, no bone (v0.11.100).
  */
 export const boneTier = (g) => Math.min(SKILL_MAX_TIER, g.james.skills['Convergence Use'].tier);
 /** v0.11.95 (owner 12:47, pick P2 at 13:19): the Qi blast's damage ×1.4 and its cost ×1.2 a Convergence tier (K2); the Qi
@@ -808,7 +808,7 @@ function stepNoDice(g, actionId, targetIdx) {
             let learned = false;
             for (const tg of targets) {
                 const r = rollCheck(g, act.skill, tg.dc + act.dcMod, c.adapt[key] || 0);
-                const band = T >= 10 && r.ratio < 1 ? 'full' : bandOf(r.ratio);
+                const band = T >= 10 && r.ratio < 1 && act.id !== 'blast' ? 'full' : bandOf(r.ratio); // v0.11.100 (SB1, T): the T10 no-miss is the constructs' (the sung weapons'), not the Qi blast's
                 lines.push(`${act.label}${targets.length > 1 ? ` → ${tg.name}` : ''}: ${checkText(r)} — ${{ double: 'a clean, deep hit', full: 'hit', glance: 'a glancing blow', miss: 'miss' }[band]}`);
                 if ((band === 'glance' || band === 'miss') && !learned && (c.adapt[key] || 0) < ADAPT_FIGHT_MAX) { c.adapt[key] = (c.adapt[key] || 0) + ADAPT_FIGHT_STEP; learned = true; lines.push(`  You read the opening better. (+${ADAPT_FIGHT_STEP} to ${act.label} this fight)`); }
                 if (band === 'miss') continue;
