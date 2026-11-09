@@ -2,6 +2,24 @@
 
 Started 2026-11-09 (v0.11.107), when `history-12.md` neared 45 KB. Newer than `history-12.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.108 (word for word)
+
+### From "Decided in chat"
+
+- **v0.11.105: the changelog split (the handover message of 21:10; Claude's options for group d's new weapon kinds (NK1–NK4, not picked yet) and for the changelog (CS1–CS3) at 21:10; owner 21:19 "CS1"):**
+  - **The changelog's sub-items:** **SP** the split: the rows for 0.0–0.11.69 (105 rows, about 43.9 KB) move word for word to `changelog-2.md`; `changelog.md` keeps 0.11.70–0.11.104 (35 rows, about 16.3 KB) and a pointer line; checked by putting the parts back together against the original; **TP** the trimming pass: every row is the only player-facing line of its version, nothing to cut without losing words (0 bytes); **H** the handover's doc list names `changelog-2.md`; **Q** the checks (docs only: the tools test and `bash tools/check.sh quick`).
+  - **The options:** **CS1 🟢 SP + TP + H + Q, its own docs push now (recommended)** / CS2 🟡 the same inside item 1's push / CS3 🔴 nothing (the next row tips it past 60,000; every mirror falls back to a file) (colours: every doc readable in one go, game and docs pushes kept apart). **Picked: CS1.** Not picked: CS2, CS3.
+  - **Group d's new weapon kinds, analysed, not picked yet:** the sub-items, numbers and options NK1–NK4 moved word for word to the roadmap's group d line ("bone weapons by Convergence") in v0.11.106, so the handover stays under 35 KB.
+  - **As built:** see the version note.
+  - **Also:** `7eb4d01` filled in for 0.11.104 (the restore-points row names SH1 too); after v0.11.104 Claude uploaded 5 docs (handover, roadmap, changelog, restore points, history-12); v0.11.102's notes to `history-12.md`.
+
+### From "Version notes"
+
+## v0.11.105 — the changelog split (CS1)
+
+- **Files:** `project/changelog.md` (the rows for 0.11.69 and before out, a pointer line in), `project/changelog-2.md` (new: those 105 rows word for word, newest first), `sw.js`, docs (v0.11.102 to `history-12.md`; the handover's doc list). Docs only: the game, saves and the baseline unchanged. The split checked: the two parts' rows put back together are the original's 140 rows, byte for byte.
+- **Checks:** docs only (rule 2): `node tests/tools.test.mjs` and `bash tools/check.sh quick` (the doc rules, the consistency check's top changelog row); see the report. Interaction: `tools/consistency.mjs` reads only `changelog.md`'s top row, so the split touches nothing else; every doc now under 60,000 bytes (`changelog.md` about 16.7 KB).
+
 ## Moved from the handover in v0.11.107 (word for word)
 
 ### From "Decided in chat"
