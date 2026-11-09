@@ -2,6 +2,8 @@
 
 Split out of `roadmap.md` in v0.11.65 (owner pick G2, 2026-11-08 11:45), so the roadmap shows only the open work. Every line here moved word for word; newest first. Update in every push that finishes a roadmap line.
 
+*(Since v0.11.88 (owner pick A, D2) new moves go to `roadmap-done-2.md`; this part is closed.)*
+
 ## Moved in v0.11.87 (word for word)
 
 ### From section 0, "Next, before everything else" (done in v0.11.87: (1) #53 in v0.11.86, (2) the sitting loop, O1 the Heart's Day 19 rule; what is left: section 2's v0.11.87 line)

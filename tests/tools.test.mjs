@@ -402,13 +402,28 @@ print(json.dumps({"n": len(R['masks']), "bad": bad, "bitmaps": sum('bitmap' in m
     try { out = execFileSync(process.execPath, ['tools/consistency.mjs'], { cwd: ROOT, encoding: 'utf8' }); } catch (e) { code = e.status ?? 1; out = String(e.stdout || e); }
     assert(code === 0 && /handover \d+ bytes/.test(out), `docs: tools/consistency.mjs passes on the real repo, with the handover's size (exit ${code}: ${out.trim().split('\n').pop()})`);
 }
+// v0.11.88 (owner pick A: T1 + D2 + S1 + X): the roadmap's open work in two parts, sections 0–2 in roadmap.md (with the
+// "Last updated" line) and 3–6 with Decided in roadmap-2.md, each pointing at the other; the done lines in roadmap-done.md
+// (closed) and roadmap-done-2.md; the tests that read the roadmap read every open part
+const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md'];
+{
+    const [r1, r2] = ROADMAP_PARTS.map((f) => readFileSync(path.join(ROOT, 'project', f), 'utf8'));
+    const secs = (t) => [...t.matchAll(/^## (\d)\. /gm)].map((m) => Number(m[1]));
+    assert(secs(r1).join() === '0,1,2' && secs(r2).join() === '3,4,5,6', `roadmap: sections 0–2 in roadmap.md, 3–6 in roadmap-2.md (${secs(r1).join()} / ${secs(r2).join()})`);
+    assert(/^Last updated: /m.test(r1) && !/^Last updated: /m.test(r2) && /^## Decided$/m.test(r2) && !/^## Decided$/m.test(r1), 'roadmap: the "Last updated" line in roadmap.md, Decided in roadmap-2.md');
+    assert(r1.includes('`roadmap-2.md`') && r2.includes('`roadmap.md`'), 'roadmap: each part names the other');
+    const d1 = readFileSync(path.join(ROOT, 'project/roadmap-done.md'), 'utf8'), d2 = readFileSync(path.join(ROOT, 'project/roadmap-done-2.md'), 'utf8');
+    assert(d1.includes('`roadmap-done-2.md`') && /^## Moved in v0\.11\.88 \(word for word\)$/m.test(d2) && d2.indexOf('## Moved in v0.11.88') < d2.indexOf('### The old "Last updated" line'), 'roadmap: roadmap-done.md points at roadmap-done-2.md, which starts with v0.11.88');
+    for (const t of ['**The fight lab, built:**', '**Fight ideas from the games', '**What the sitting loop\'s fix left', '**The game on a PC, a wide layout', '**Act 2** (open).']) assert((r1 + r2).includes(t), `roadmap: the open line "${t.replace(/\*/g, '')}" is still in an open part`);
+    for (const t of ['**Round 1 done (owner picks I1 + L1 + E1', "**The owner's calls for the next pushes", '**Mechanics and story, unarmed fights']) assert(d2.includes(t) && !(r1 + r2).includes(t), `roadmap: the done line "${t.replace(/\*/g, '')}" moved to roadmap-done-2.md`);
+}
 // v0.11.74 (group i round 1, I1; v0.11.75: round 2's wave 1, W1; v0.11.76: wave 2, V1; v0.11.78: read across the research parts, S1): every group i candidate in project/research.md is placed in the roadmap, and every roadmap line marked "from group i" (or "from group i round 2") names a real one
 {
     const parts = readdirSync(path.join(ROOT, 'project')).filter((f) => /^research(-\d+)?\.md$/.test(f)).sort((x, y) => (x === 'research.md' ? 1 : Number(x.match(/\d+/)[0])) - (y === 'research.md' ? 1 : Number(y.match(/\d+/)[0])));
     assert(parts[0] === 'research.md' && parts[1] === 'research-2.md' && parts.every((f, i) => i === 0 || f === `research-${i + 1}.md`), `research: the parts run research.md, research-2.md, ... with no gap (${parts.join(', ')})`);
     for (const [i, f] of parts.entries()) if (i + 1 < parts.length) assert(/\*Continued in `[^`]+`/.test(readFileSync(path.join(ROOT, 'project', f), 'utf8').trimEnd().split('\n').pop()) && readFileSync(path.join(ROOT, 'project', f), 'utf8').trimEnd().split('\n').pop().includes(parts[i + 1]), `research: ${f} ends pointing on to ${parts[i + 1]}`);
     const research = parts.map((f) => readFileSync(path.join(ROOT, 'project', f), 'utf8')).join('\n');
-    const roadmap = readFileSync(path.join(ROOT, 'project/roadmap.md'), 'utf8');
+    const roadmap = ROADMAP_PARTS.map((f) => readFileSync(path.join(ROOT, 'project', f), 'utf8')).join('\n'); // v0.11.88 (S1): every open part
     const a = research.indexOf('## Group i — the games, round 1');
     const r2 = research.indexOf('## Group i, round 2');
     const w2 = research.indexOf('### Wave 2: cultivation and xianxia games');
@@ -430,7 +445,7 @@ print(json.dumps({"n": len(R['masks']), "bad": bad, "bitmaps": sum('bitmap' in m
 // v0.11.77 (owner pick F1): the flight canon is in lore.md (James, Yuki, the world: locals from Golden Core) and the roadmap carries its story, mechanics and walk-times lines
 {
     const lore = readFileSync(path.join(ROOT, 'project/lore.md'), 'utf8');
-    const roadmap = readFileSync(path.join(ROOT, 'project/roadmap.md'), 'utf8');
+    const roadmap = ROADMAP_PARTS.map((f) => readFileSync(path.join(ROOT, 'project', f), 'utf8')).join('\n'); // v0.11.88 (S1): every open part
     const sec = (h) => { const a = lore.indexOf(h); const b = lore.indexOf('\n## ', a + 1); return a < 0 ? '' : lore.slice(a, b < 0 ? undefined : b); };
     assert(/\*\*Flight \(owner[^\n]*Foundation[^\n]*realm and GU/.test(sec('## James Green')), 'lore: James flies from Foundation, limited only by realm and GU');
     assert(/\*\*Flight:\*\*/.test(sec('## Yuki')), 'lore: Yuki flies too');
