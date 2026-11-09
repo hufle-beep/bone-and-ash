@@ -236,7 +236,7 @@ A bone-elk, grazing on the moss between two roots: grey hide, and antlers that a
 "Scream it, then."`,
         choices: [
             { text: 'Take the bone-elk.', combat: elkFight, to: 'rr_elk_won' },
-            { text: 'Leave the elk. Snare root-hares instead.', qi: 2, check: { skill: 'Convergence Use', dc: 4 }, time: 60, do: (g) => { addItem(g, 'hare_raw', 2); return ['+2 root-hares (as hare). Ya sulks about the elk all afternoon.']; }, failDo: () => ['Nothing. Ya does not let you forget it.'], to: 'rr_hub' },
+            { text: 'Leave the elk. Snare root-hares instead.', qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 4 }, time: 60, do: (g) => { addItem(g, 'hare_raw', 2); return ['+2 root-hares (as hare). Ya sulks about the elk all afternoon.']; }, failDo: () => ['Nothing. Ya does not let you forget it.'], to: 'rr_hub' },
         ],
     },
     rr_elk_won: {

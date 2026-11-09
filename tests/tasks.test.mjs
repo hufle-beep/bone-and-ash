@@ -1331,6 +1331,24 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
         assert(o?.done && g.minutes < night0 + 120, `v0.11.91: ${sc}${kind ? ` (${kind})` : ''} is over before 02:00 even at the round cap (${o?.done}, ${g.minutes - night0} min after midnight)`);
     }
 }
+// v0.11.98 (owner 2026-11-09 15:22, pick KR1): (NS) no Qi shield while the knife is fragile (below T1 L8; Fable's review
+// of v0.11.97, medium 2: the reserve paid one swing, then the bot could guard to the cap); (G) "Snare root-hares", the
+// last hunt on Convergence, checked on GU with its XP to Convergence Use
+{
+    const { smartAction, SMART_SHIELD_AT } = await import('./lib/smartfight.mjs');
+    const at = (cuL, qi = 99) => { const g = ensureBars(newGame(9800 + cuL)); g.james.skills['Convergence Use'] = { tier: 1, level: cuL, xp: 0 }; g.james.gu = { tier: 3, level: 1, xp: 0 }; ensureBars(g); startCombat(g, { id: 'kr1_test', enemies: [{ name: 'Foe', hp: 99, dc: 3, atk: 3, dmg: 2 }], win: 'stream', lose: 'stream' }); g.james.qi = qi; g.combat.fieldUsed = true; g.james.hp = SMART_SHIELD_AT * jamesHpMax(g); return g; };
+    for (const l of [1, 3, 5, 6, 7]) { const g = at(l); assert(fragileKnife(g) && actionOpen(g, 'qshield') && smartAction(g, 0) !== 'qshield', `KR1 NS: no shield on the fragile knife at T1 L${l} (${smartAction(g, 0)})`); }
+    { const g = at(8); assert(!fragileKnife(g) && smartAction(g, 0) === 'qshield', `KR1 NS: the shield again from T1 L8, where the knife stops breaking (${smartAction(g, 0)}; the shield can still come before a formed weapon there: open, Fable's review of v0.11.98, medium 1)`); }
+    { const g = at(7); const picks = []; let out = null; for (let t = 0; t < 6 && g.combat; t++) { const a = smartAction(g, t); picks.push(a); out = combatStep(g, a); }
+      assert(!picks.includes('qshield') && picks.filter((a) => ['blade', 'dart'].includes(a)).length >= 5, `KR1 NS: hurt on the fragile knife the bot keeps attacking (${picks.join(', ')}; ${out?.done || 'going'})`); }
+    const c = SCENES.rr_hunt.choices[1];
+    assert(/^Leave the elk\. Snare root-hares/.test(c.text) && c.check.skill === 'GU' && c.check.xpTo === 'Convergence Use' && c.check.dc === 4 && c.qi === 2, `KR1 G: the snare on GU, XP to Convergence, DC 4, 2 Qi (${c.check.skill} / ${c.check.xpTo})`);
+    { const g = ensureBars(newGame(9850)); g.james.skills['Convergence Use'] = { tier: 1, level: 1, xp: 0 }; g.james.gu = { tier: 1, level: 5, xp: 0 }; ensureBars(g); g.scene = 'rr_hunt'; g.james.qi = 30; g.james.satiety = 80;
+      const hares = g.inventory.hare_raw || 0; const lines = choose(g, SCENES, 1).lines;
+      assert((g.inventory.hare_raw || 0) - hares === 2, `KR1 G: the snare succeeds here and brings 2 hares (${(g.inventory.hare_raw || 0) - hares})`); // the review's low 3
+      const chk = lines.find((l) => / \/ DC /.test(l)), cu = lines.find((l) => /^Convergence Use \+\d+ XP/.test(l));
+      assert(/^GU /.test(chk || '') && !!cu, `KR1 G: the snare checked on GU, its XP to Convergence Use (${chk}; ${cu})`); }
+}
 // v0.11.97 (owner 2026-11-09 14:53, pick RQ1; Fable's review of v0.11.96, medium 1): the smart rule's spike field and Qi
 // shield only when Qi still pays for an attack after them (`attackReserve`), so the bot can't spend its last Qi on them
 // and guard to the round cap
@@ -1345,7 +1363,7 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     { const g = at(1, 6); assert(fragileKnife(g) && actionOpen(g, 'dart') && attackReserve(g) === Math.min(cost(g, A.blade), cost(g, A.dart)), `RQ1: darts open: the cheaper attack (${attackReserve(g)})`); }
     { const g = at(1, 9); g.combat.bladeFormed = true; assert(!fragileKnife(g) && attackReserve(g) === 0, 'RQ1: a formed knife: no reserve'); }
     { const g = at(3, 1); g.combat.spearFormed = true; assert(attackReserve(g) === 0, 'RQ1: a formed spear: no reserve'); }
-    { const g = at(1, 6); g.james.hp = SMART_SHIELD_AT * jamesHpMax(g); const need = cost(g, A.qshield) + attackReserve(g);
+    { const g = at(1, 9); g.combat.fieldUsed = true; g.james.hp = SMART_SHIELD_AT * jamesHpMax(g); const need = cost(g, A.qshield) + attackReserve(g); // v0.11.98 (KR1): on a knife that holds
       g.james.qi = need; assert(smartAction(g, 0) === 'qshield', `RQ1: the shield when Qi pays for it and an attack (${need})`);
       g.james.qi = need - 0.1; assert(smartAction(g, 0) !== 'qshield', `RQ1: no shield when only the shield can be paid (${smartAction(g, 0)})`); }
     { const g = at(1, 3); assert(actionOpen(g, 'spikes') && !actionOpen(g, 'dart'), 'RQ1 test state: the field open, no darts yet'); const need = Math.max(6, cost(g, A.spikes) + attackReserve(g)); assert(need === 7, `RQ1: at T1 L3 the reserve binds the field (4 + 3 = ${need}; from T1 L5 the old floor of 6 does)`); // the review's medium 1
@@ -1366,10 +1384,12 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     const at = (cuT, cuL, qi = 99) => { const g = ensureBars(newGame(9600 + cuT * 10 + cuL)); g.james.skills['Convergence Use'] = { tier: cuT, level: cuL, xp: 0 }; g.james.gu = { tier: 3, level: 1, xp: 0 }; ensureBars(g); startCombat(g, { id: 'bt1_test', enemies: [{ name: 'Foe', hp: 99, dc: 3, atk: 3, dmg: 2 }], win: 'stream', lose: 'stream' }); g.james.qi = qi; return g; };
     assert(SMART_SHIELD_AT === 0.35, 'BT1 S: the shield at 35% HP or less');
     // S: the shield at or under 35% HP while a foe will strike; not above, not when every foe is staggered or held, not without the Qi
-    { const g = at(1, 1); g.james.hp = SMART_SHIELD_AT * jamesHpMax(g); assert(smartAction(g, 0) === 'qshield', `BT1 S: shield at 35% HP (${smartAction(g, 0)})`); }
-    { const g = at(1, 1); g.james.hp = SMART_SHIELD_AT * jamesHpMax(g) + 1; assert(smartAction(g, 0) !== 'qshield', 'BT1 S: no shield above 35% HP'); }
-    { const g = at(1, 1); g.james.hp = 1; g.combat.enemies[0].staggered = true; assert(smartAction(g, 0) !== 'qshield', 'BT1 S: no shield when no foe will strike'); }
-    { const g = at(1, 1, 0); g.james.hp = 1; g.james.qi = cost(g, A.qshield) - 0.1; assert(smartAction(g, 0) !== 'qshield', 'BT1 S: no shield without its Qi'); }
+    // (v0.11.98, KR1: on a knife that holds, T1 L9, the field spent; on the fragile knife there is no shield at all)
+    const held = (qi) => { const g = at(1, 9, qi); g.combat.fieldUsed = true; return g; };
+    { const g = held(); g.james.hp = SMART_SHIELD_AT * jamesHpMax(g); assert(smartAction(g, 0) === 'qshield', `BT1 S: shield at 35% HP (${smartAction(g, 0)})`); }
+    { const g = held(); g.james.hp = SMART_SHIELD_AT * jamesHpMax(g) + 1; assert(smartAction(g, 0) !== 'qshield', 'BT1 S: no shield above 35% HP'); }
+    { const g = held(); g.james.hp = 1; g.combat.enemies[0].staggered = true; assert(smartAction(g, 0) !== 'qshield', 'BT1 S: no shield when no foe will strike'); }
+    { const g = held(0); g.james.hp = 1; g.james.qi = cost(g, A.qshield) - 0.1; assert(smartAction(g, 0) !== 'qshield', 'BT1 S: no shield without its Qi'); }
     // N: the spear when he can sing it, else the blade (free once formed unless it's the fragile knife), darts, guard
     { const g = at(3, 1); g.combat.fieldUsed = true; assert(actionOpen(g, 'spear') && smartAction(g, 0) === 'spear', `BT1 N: the spear when open (${smartAction(g, 0)})`); g.james.qi = 0; g.combat.spearFormed = true; assert(smartAction(g, 1) === 'spear', 'BT1 N: a formed spear costs nothing'); }
     { const g = at(1, 9, 0); assert(actionOpen(g, 'spear') && !fragileKnife(g), 'BT1 test state: a knife and the spear'); g.combat.bladeFormed = true; assert(smartAction(g, 0) === 'blade', 'BT1 N: no Qi for the spear: the formed knife swings for free'); }
@@ -1380,10 +1400,10 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     { const g = at(1, 1); g.combat.style = 'unarmed'; assert(smartAction(g, 0) === 'strike', 'BT1: a strike in a brawl (fists cost no Qi)'); g.james.qi = 0; assert(smartAction(g, 0) === 'strike', 'BT1: a strike in a brawl with no Qi'); }
     { const g = at(1, 1); g.combat.style = 'spar'; const a = smartAction(g, 0); assert(['blade', 'spear', 'guard'].includes(a), `BT1: a spar move in a spar (${a})`); }
     { let bad = 0; for (let t = 1; t <= 4; t++) for (const l of [1, 5, 9]) for (const qi of [0, 2, 3, 5, 9, 30]) for (const f of [0.1, 0.5, 1]) { const g = at(t, l, qi); g.james.hp = f * jamesHpMax(g); for (let r = 0; r < 3; r++) if (['needle', 'blast'].includes(smartAction(g, r))) bad++; } assert(bad === 0, `BT1: the smart rule never picks the needle or the Qi blast (${bad})`); }
-    // H: the 19 throws on GU, XP to Convergence Use; nothing else has xpTo; the singing checks stay on Convergence
+    // H: the 19 throws on GU, XP to Convergence Use; nothing else has xpTo but v0.11.98's snare (`rr_hunt:1`); the singing checks stay on Convergence
     const THROWS = ['hunt:0', 'hunt_miss:0', 'herb_girl:1', 'wild_forage:2', 'wild_hunt:0', 'wild_hunt:1', 'wild_hunt:2', 'wild_train:0', 'wild_train:3', 'far_hunt:3', 'dw_forage:2', 'dw_hunt:1', 'ah_hunt:1', 'bl_train:1', 'bl_train:2', 'lf_hunt:0', 'lf_hunt:1', 'lf_train:0', 'lf_train:3'];
     const xs = []; for (const [id, s] of Object.entries(SCENES)) (s.choices || []).forEach((c, i) => { if (c.check?.xpTo) xs.push(`${id}:${i}`); });
-    assert(xs.length === 19 && THROWS.every((k) => xs.includes(k)), `BT1 H: the 19 throws carry xpTo (${xs.length}: ${xs.join(', ')})`);
+    assert(xs.length === 20 && THROWS.every((k) => xs.includes(k)) && xs.includes('rr_hunt:1'), `BT1 H: the 19 throws carry xpTo, and v0.11.98's snare (${xs.length}: ${xs.join(', ')})`);
     for (const k of THROWS) { const [id, i] = k.split(':'); const c = SCENES[id].choices[Number(i)]; assert(c.check.skill === 'GU' && c.check.xpTo === 'Convergence Use', `BT1 H: ${k} on GU, XP to Convergence (${c.check.skill} / ${c.check.xpTo})`); }
     const sing = []; for (const [id, s] of Object.entries(SCENES)) (s.choices || []).forEach((c, i) => { if (/^(Sing a single bone needle|Needles and fishhooks|Make her a set of bone needles|Put your hand on the great skull)/.test(String(c.text))) sing.push(`${id}:${i}:${c.check?.skill}`); });
     assert(sing.length === 4 && sing.every((x) => x.endsWith(':Convergence Use')), `BT1 H: making needles and singing stay on Convergence (${sing.join(', ')})`);
