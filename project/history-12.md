@@ -2,6 +2,29 @@
 
 Started 2026-11-09 (v0.11.97), when `history-11.md` neared 45 KB. Newer than `history-11.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.99 (word for word)
+
+### From "Open items" (placed in the roadmap by PL1)
+
+- **Left from the v0.11.46 Fable review (owner's call, low):** a save at Nascent Soul or later with partial `ecWork` keeps those hours unused (the seal text explains it); at Soul Embryo the breakthrough can't be queued until all 28 collaterals are open (the warning first; intended by X1); the return camps' `toHour` still sets the clock directly for the jumps it does make (no hunger or regen for the skipped evening hours; changing that is a balance change).
+- **Noted, the owner's call (numbers first):** "End it in one move" still judges a fight about 2 points harder than it is (no-dice checks take `NO_DICE_DC_SHIFT` −2 off every combat DC; v0.11.40 review). *(The `bl_camp` clock jump was fixed in v0.11.46, the return camps' in v0.11.47.)*
+
+### From "Decided in chat"
+
+- **v0.11.96: the bots' fights and the thrown checks (v0.11.95's left-overs; the owner's "Continue" 13:50; Claude's options BT1–BT4; owner 14:16 "go BT1"):**
+  - **The sub-items (lab: the fight lab 300 games, 5,553 fight states, the smart bot's win %; the models 300 games each, mean Coil prologue / Act 1, Careful · Completionist; against v0.11.95):** **N** one plain smart rule (the spear if he has it, else the blade, darts when the blade can't be paid, no needle) for every smart bot: lab 67.0 → 72.5% (the blade alone 71.2%), models 3.52 / 6.68 · 3.96 / 5.83 → 3.44 / 4.53 · 3.82 / 4.45; **S** the Qi shield at 35% HP or less: lab 71.8%, models with N 3.44 / 4.00 · 3.88 / 4.16, the rot ape won in the models 24 → 64% (Careful), 36 → 79% (Completionist); **B** the Qi blast against armour or to finish: lab 71.5%, models ±0.06 (it is checked on Convergence, about half GU, so it misses more; left out); **H** the 19 story checks with a thrown dart or a driven needle (13 hunts with Gao's hand, 6 drills) on GU, XP still to Convergence Use: models 3.49 / 6.72 · 3.92 / 5.85 alone; of the models' 11,496 such checks fails 8.5 → 3.7%, double hauls 0.8 → 40.5%; measured, left out: the XP to GU (Careful Act 1 6.30; 4.46 with the drills); **F** the FAQ's sentence (Fable); **K** the tests; **L** the baseline re-saved (the full check in a scratch copy: 2 past 20, mire smart 67.1 → 94.4%, the story test's sect watcher smart 34.3 → 69.8%; 17 past 5). BT1 together: the Sitter 2.57 / 2.58 → 2.58 / 2.58 (100 games), the Farmer 4.05 / 5.85 → 3.82 / 4.10.
+  - **The options:** **BT1 🟢 N + S + H + F + K + L (recommended)** / BT2 🟢 N + S + K + L / BT3 🟡 N + S + B + H + F + K + L / BT4 🔴 H + F + K + L (colours: the lab's smart win %: 71.8 / 71.8 / 71.5 / 67.0). **Picked: BT1.** Not picked: BT2, BT3, BT4.
+  - **What it means for the targets:** the models clear Act 1 at about Coil 4 against the target 6 (v0.11.85's "twice as hard" was measured with the weaker fighting bot); the retune (section 2) tightens.
+  - **As built:** see the version note.
+  - **Also:** `8402ad4` filled in for 0.11.95; after v0.11.95 Claude uploaded the changed docs; v0.11.93's notes to `history-11.md`.
+
+### From "Version notes"
+
+## v0.11.96 — the bots fight like a sensible player, every thrown dart and needle on GU (BT1)
+
+- **Files:** `tests/lib/smartfight.mjs` (new: `smartAction`, `SMART_SHIELD_AT` 0.35: a strike in a brawl, the spike field once while Qi ≥ 6, the Qi shield, the spear, the blade, darts, guard), used by `tests/tasks.test.mjs`, `tests/story.test.mjs`, `tests/part.test.mjs`, `tests/models.test.mjs`, `tools/lib/fightlab.mjs` (the smart tactic) and `tools/snap.mjs`; 19 checks on `skill: 'GU', xpTo: 'Convergence Use'` (`prologue.js` hunt, hunt_miss, herb_girl; `wilds.js` wild_forage, wild_hunt ×3, wild_train ×2; `act1_blackroot.js` dw_forage, dw_hunt, ah_hunt, bl_train ×2; `ashfall.js` far_hunt; `longforest.js` lf_hunt ×2, lf_train ×2); `js/core/story.js`, `js/core/tasks.js` (XP to `c.check.xpTo || c.check.skill`); `js/core/faq.js` (Fable's sentence: "A thrown dart or a driven needle, in a fight or on a hunt, is checked on GU but pays its XP to Convergence Use."); the tasks test's BT1 block; `tests/README.md`; `tools/baseline.json` (re-saved, the pick's scope); `sw.js`, docs (v0.11.93 to `history-11.md`, with the NEXT item's old list and the art's full status). Saves: no new field, no id changed.
+- **Checks:** a game change and the bot code (rule 2): the full `bash tools/check.sh`, three runs: 1 stopped at the sanity check with exactly the drifts shown before the pick (mire smart 67.1 → 94.4%, the story test's sect watcher smart 34.3 → 69.8%; 17 past 5), baseline re-saved; 2 exit 0, 0 drifted of 143; 3 after the review's fixes (tests and comments) exit 0, the same numbers. The models (500 games): Careful 3.44 / 4.00, Completionist 3.85 / 4.15, the Sitter 2.66 / 2.66, the Farmer 3.82 / 4.10. Log only: the leftovers' keep-list entry for `tools/snap.mjs` now matches nothing (the new module names it). **Fable, cold review:** no high. Fixed: medium 2 (the fragile-knife test on a state the game never reaches), low 4 (a duplicate assert), low 5 (the XP tests read the award's own lines), low 6 (stale comments). **Open (options after this push):** medium 1, the field and the shield can leave no Qi for an attack (a reserve variant: lab 71.8 → 72.4%, 22 states); low 3, "Snare root-hares" (`act1_blackroot.js` 239) the one hunt still on Convergence (a made thing). Information (low 7): the part test's smart runs and `tools/snap.mjs` use the new rule (their printed rates move).
+
 ## Moved from the handover in v0.11.98 (word for word)
 
 ### From "Decided in chat"
