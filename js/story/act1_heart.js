@@ -13,7 +13,7 @@ const P = 'The Heart of the Blackroot';
 const PIN = 'Inside the Old Tree';
 /** Waking hours, when there is time to explore. */
 const active = (g) => hour(g) >= 6 && hour(g) < 18;
-/** From Day 19 the tree is done with them: only the way forward is left. */
+/** From Day 19 the tree is done with them: only the way forward is left (v0.11.87: Cultivate and Rest too). */
 const late = (g) => day(g) >= 19;
 const guardianOpen = (g) => !!g.flags.log_heard && !g.flags.guardian;
 const ya = (g) => !!g.flags.ya_party;
@@ -127,8 +127,9 @@ ${pantry(g)} ${g.james.hp < jamesHpMax(g) * 0.5 ? 'You are hurt.' : ''}${late(g)
             { text: 'Go round the guardian. Whatever it costs.', show: (g) => guardianOpen(g) && !!g.flags.guardian_lost_day && (late(g) || g.flags.guardian_lost_day === day(g)), time: 60, to: 'guardian_bypass' },
             { text: 'Into the heart-chamber.', show: (g) => !!g.flags.guardian && !g.flags.seed, time: 20, to: 'heart_core' },
             { text: 'Leave the Old Tree.', show: (g) => !!g.flags.seed, to: 'ht_leave' },
-            { text: 'Cultivate: one sit, 10 Qi.', show: (g) => active(g), req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%. The hall is very quiet while you sit.`, ...r.xp] : []; }, to: 'heart_hub' },
-            { text: 'Rest an hour.', show: (g) => active(g), do: (g) => advance(g, 60, { resting: true }).concat(['An hour of rest, back against grey wood that was once alive.']), to: 'heart_hub' },
+            // v0.11.87 (owner 2026-11-09 01:52, pick O1, the sitting loop): from Day 19 the tree is done with them, so no sit and no rest here (the Sitter sat here to about Day 50)
+            { text: 'Cultivate: one sit, 10 Qi.', show: (g) => active(g) && !late(g), req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%. The hall is very quiet while you sit.`, ...r.xp] : []; }, to: 'heart_hub' },
+            { text: 'Rest an hour.', show: (g) => active(g) && !late(g), do: (g) => advance(g, 60, { resting: true }).concat(['An hour of rest, back against grey wood that was once alive.']), to: 'heart_hub' },
             { text: 'Eat something.', show: (g) => foodCount(g) > 0 && g.james.satiety < 85, time: 15, do: (g) => eatBest(g, { fire: true }), to: 'heart_hub' },
             { text: 'Make camp for the night.', show: (g) => !active(g) || hour(g) >= 16, time: 20, to: 'heart_camp' },
         ],

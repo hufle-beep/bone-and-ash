@@ -1130,6 +1130,25 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
         assert(o?.done === 'lose' && o.next === 'lf_human_lost' && g.coil.why !== 'beast', `T1: losing to ${who} on an active Coil leads to "Robbed", not the Coil's end (${o?.next})`);
     }
 }
+// v0.11.87 (owner 2026-11-09 01:52, pick O1, the sitting loop): from Day 19 the Old Tree offers no sit and no rest
+// (the Sitter sat in the hall to about Day 50: about 3,860 of its 4,400 sits); Day 18 as before; nights unchanged
+{
+    const heart = (day, hh) => { const g = ensureBars(newGame(8701, { closed: true })); g.minutes = (day - 1) * 1440 + hh * 60; g.scene = 'heart_hub'; g.james.qi = jamesQiMax(g); g.james.satiety = 90; g.flags.roots_done = true; return g; };
+    const shown = (g, re) => sceneView(g, SCENES).choices.some((c) => re.test(c.label) && !c.disabled);
+    const d18 = heart(18, 9), d19 = heart(19, 9), d21 = heart(21, 9);
+    assert(shown(d18, /^Cultivate: one sit/) && shown(d18, /^Rest an hour/), 'O1: on Day 18 the hall still offers a sit and a rest');
+    assert(medCards(d18, SCENES).some((c) => c.open && /^Cultivate: /.test(c.label || '')) && medCards(d18, SCENES).some((c) => c.open && /until the limit/.test(c.label || '')) && sitLoop(heart(18, 9), SCENES).sits > 0, 'O1: and Meditate\'s Cultivate and Cultivate until the limit (Day 18)');
+    for (const [g, d] of [[d19, 19], [d21, 21]]) {
+        assert(!shown(g, /^Cultivate: one sit/) && !shown(g, /^Rest an hour/), `O1: from Day 19 no sit and no rest in the hall (Day ${d})`);
+        const mc = medCards(g, SCENES);
+        assert(!mc.some((c) => c.open && /^Cultivate/.test(c.label || '')), `O1: nor through Meditate (Day ${d}: ${mc.filter((c) => c.open).map((c) => c.id).join(', ')})`);
+        assert(!taskCards(g, SCENES).some((c) => (c.kind === 'sit' || /^Cultivate/.test(c.label)) && c.status === 'open'), `O1: no sit card on the task screen (Day ${d})`);
+        assert(sitLoop(g, SCENES).sits === 0, `O1: Cultivate until the limit runs no sit (Day ${d})`);
+        assert(shown(g, /^Go down to the ship/), `O1: the way forward stays open (Day ${d})`);
+    }
+    const n19 = heart(19, 17);
+    assert(shown(n19, /^Make camp for the night/), 'O1: the night camp is still there on Day 19');
+}
 // v0.11.86 (owner 2026-11-09 01:06, picks C1 + G1 + W1, roadmap #53): a Coil ended by choice counts, but adds no bonus
 {
     const { coilMultNext } = await import('../js/core/game.js');

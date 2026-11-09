@@ -2,6 +2,12 @@
 
 Split out of `roadmap.md` in v0.11.65 (owner pick G2, 2026-11-08 11:45), so the roadmap shows only the open work. Every line here moved word for word; newest first. Update in every push that finishes a roadmap line.
 
+## Moved in v0.11.87 (word for word)
+
+### From section 0, "Next, before everything else" (done in v0.11.87: (1) #53 in v0.11.86, (2) the sitting loop, O1 the Heart's Day 19 rule; what is left: section 2's v0.11.87 line)
+
+- *(new in v0.11.85)* **Next before the playtest (the owner's pick; options and numbers first):** (1) **#53** (section 2): ten bites at the first dawn and the Completionist clears the whole game on its first real Coil, also with ×0.6. *(v0.11.86: done, owner picks C1 + G1 + W1; section 2's line moved to `roadmap-done.md`.)* (2) **The sitting loop:** the Sitter reaches realm 14 and T10 L10 by Act 1's end (a higher tier shortens the regen Cycle, 30 min → 1 min from T6, so Qi stops limiting sits; sits ×10 from 30 uses); levers: the sit's familiarity cap, Saturation per realm, a realm ceiling per act, Qi per sit.
+
 ## Moved in v0.11.86 (word for word)
 
 ### From section 2, "the balance retune" (done in v0.11.86: C1 a Coil ended by choice counts but adds no bonus, G1 Go round again too, W1 a chosen bite in Act 1 restarts Act 1 only; what is left: section 2's v0.11.86 line)

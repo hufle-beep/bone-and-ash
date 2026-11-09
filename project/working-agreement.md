@@ -8,6 +8,11 @@ Every change follows this sequence, with no exceptions:
 
 1. **The owner proposes, points something out or reports a problem.**
 2. **Claude analyses it and offers options, each with its trade-offs and its exact scope (what changes; the numbers for any balance or save change), and ends with a clear recommendation (which option and why).** No edits yet.
+   **How the options are laid out** (owner 2026-11-09 01:52, v0.11.87: "to the hard rules and process, add that the analyzed sub items of the recommendation and option have to be added. until 2 chats ago, they were displayed... maybe ene color code the proposals in order of effectiveness. also put \"(recommended)\" in the report to your recommendations."):
+   - **The sub-items first:** every lever, part or fix that was analysed gets its own line with its own numbers (also the ones no option uses, and what was measured and found to change nothing).
+   - **Then the options:** each option names the sub-items it contains (by their labels) and gives its combined numbers and trade-offs; the recommendation names its sub-items too.
+   - **Colour by effectiveness:** each option carries a colour mark in order of effectiveness against the problem asked about (🟢 most, then 🟡, 🟠, 🔴 least), with one line saying what was measured.
+   - **"(recommended)"** after the recommended option's name, in the options list and in the recommendation line.
 3. **The owner picks an option. The pick is the go** (owner 2026-11-07, v0.11.28, pick R-a): Claude does not write the list out again for a double check.
 4. Claude builds it, checks it, and commits and pushes it. If building turns up anything the picked option didn't cover, Claude stops and asks before going on.
 

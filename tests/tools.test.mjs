@@ -257,7 +257,7 @@ for (const mode of ['full', 'quick']) {
     const sh = [...sit.matchAll(/^\[([^\]]+)\] (\d+) games, (\d+) cards/gm)].map((m) => `${m[1]} ${m[2]}`).join();
     const sCards = Number(sit.match(/^\[sitter\] \d+ games, (\d+) cards/m)?.[1] || 0), cCards = Number(sit.match(/^\[careful\] \d+ games, (\d+) cards/m)?.[1] || 0);
     assert(sh === 'careful 3,sitter 2' && / 0 failed/.test(sit), `models --sitter-games 2: the Sitter plays its own count, nothing fails (${sh})`);
-    assert(sCards > 3 * cCards, `the Sitter runs far more cards than Careful (${sCards} vs ${cCards}: the sits)`);
+    assert(sCards / 2 > 2 * (cCards / 3), `the Sitter runs far more cards a game than Careful (${sCards / 2} vs ${cCards / 3}: the sits; v0.11.87: per game, ×2, since O1 shut the Heart's endless sits)`);
     let badS = 0;
     try { execFileSync(process.execPath, ['tests/models.test.mjs', '--model', 'sitter', '--games', '1', '--sitter-games', 'abc'], { cwd: ROOT, stdio: 'ignore' }); } catch (e) { badS = e.status; }
     assert(badS === 2, `models --sitter-games abc exits 2 (${badS})`);

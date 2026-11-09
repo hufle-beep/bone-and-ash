@@ -2,6 +2,28 @@
 
 Started 2026-11-09 (v0.11.86), when `history-10.md` passed 45 KB. Newer than `history-10.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.87 (word for word)
+
+### From "Open items" (the NEXT item and the roadmap item, as of v0.11.86)
+
+- **NEXT, the owner's order (2026-11-08 22:10 and 22:39; new in v0.11.82; the FAQ done in v0.11.83, the difficulty in v0.11.85):** (1) and (2) done (v0.11.83, v0.11.85; their words moved to `history-10.md` and `history-11.md`). **Open small items (owner 23:37, "my call later"):** "Fists only." twice at the start of Bao's brawl; the spar's "terms agreed" line on the forced path (`ya_forced`); a brawl win's GU XP about double a small fight's; the Journal's "checks rolled" (group e). **Next before the playtest (the owner's order, 2026-11-09 00:43):** (1) **#53, the farmable Coil bonus: done in v0.11.86** (C1 + G1 + W1; decisions below); (2) **the sitting loop**, next, options and numbers first (the Sitter still reaches realm 14 and T10 L10 by Act 1's end: a higher skill tier shortens the regen Cycle from 30 min to 1 min from T6, so Qi stops limiting sits, and sits run ×10 from 30 uses); with its own options and numbers. Also open (the owner's call): the Sitter clears at 2.78 / 2.80, well inside the 4 / 6 targets; dying on purpose still adds the bonus (roadmap section 2, v0.11.86).
+
+- **The roadmap, regrouped in v0.11.65 (owner pick G2):** `project/roadmap.md` holds only the open work, in six sections: **1** the story and mechanics pass (push 1 done in v0.11.64; **group a done in v0.11.66**; **group b done**: one hub format in v0.11.67, where replies show in v0.11.68, **the missing replies of the one-off story choices in v0.11.69** (the repeating ones moved to group e); **group c, the small rules, done in v0.11.71** (Yuki's food switch, one total per skill for "Cultivate until the limit", more than one wilds exploration a day from Coil 2), **g the copy-over push 5, the Coil (moved up from section 4 in v0.11.70), done in v0.11.72** (the Coil screen's closest cards and what carries over, the next-step line, the targets and the personal best), h the analysis of Selene's and the SillyTavern repositories, i the games analysis (Selene's `project/research.md` list, about 45 games, plus the games the owner names before d)**, d combat, e story texts (now also the Fable rewrite pass and its comparison, the relationship decision of 14:50, the repeating replies), f romance; **order since v0.11.70 (O1): c → g → h → i → d → e → f**, then section 2, then the rest of section 4), **2** the balance retune (E below), **3** a later art pass, **4** systems still to build (F, the copy-over push 5 (the Coil), then G; threads need a new design without the queue), **5** later, **6** waiting on the owner. Done, stale and moot lines: `project/roadmap-done.md`. **group h done in v0.11.73** (H1 + K1; the findings placed in the roadmap's groups, each marked "new in v0.11.73, from group h"). **Group i's round 1 done in v0.11.74** (I1 + L1 + E1: 52 candidates, #43–#94 in `research.md`, each placed in the roadmap, marked "new in v0.11.74, from group i"; the Coil-bonus finding, #53, in section 2). **Round 2's wave 1 done in v0.11.75** (W1: dating sims and visual novels, 26 candidates, #95–#120, marked "new in v0.11.75, from group i round 2"). **Round 2's wave 2 done in v0.11.76** (V1: cultivation and xianxia games, idle and not, with E1's five and Chinese sources; 26 candidates, #121–#146, marked "new in v0.11.76, from group i round 2"). **Group i is done. Group d (combat) started in v0.11.80: the fight lab (L1, a tool).** **The Tan brothers' fight fixed in v0.11.81 (T1); the brawls in v0.11.82 (B1 + Y1).** **Tabled by the owner (22:10) until the FAQ is built; then the difficulty (22:39); both below.** Left in d after that (each its own options and pick, numbers first): the blade's lead over every other action, the weapons by Convergence, flight, the fight ideas from the games; then e, f, the retune, the rest of section 4. Two lore calls for the owner wait in group e (#123: where Core Formation, True Core, Origin Core and Soul Embryo sit on his realm scale; #141: whether this world had breakthroughs without tribulations before the poison). *(The three open items this replaced are in `history-9.md`, moved in v0.11.65.)*
+
+### From "Decided in chat"
+
+- **v0.11.84: docs only (owner 23:33: "it's ok I'm group f. give update the docs and give me a handover message"):**
+  - **Recorded:** the owner confirmed the place of his 23:22 bug report (Yuki's love-life talk in human form at Origin Core) in the roadmap's group f, beside the romance gates. A handover message for a new chat given in chat.
+  - **Also:** moved word for word to `history-11.md` in v0.11.86.
+  - **Checks:** see the version note.
+
+### From "Version notes"
+
+## v0.11.84 — docs only: the bug's place confirmed
+
+- **project docs** (handover, roadmap, changelog, restore-points, history-10: v0.11.81 moved there), **sw.js** (VERSION). The game identical to 0.11.83; saves unchanged.
+- **Checks:** docs only (rule 2): `node tools/consistency.mjs`, `node tests/tools.test.mjs` and `bash tools/check.sh quick`. How it interacts: no game file, save or bot code changed, so the game and the bot numbers can't move. What can break: nothing new.
+
 ## Moved from the handover in v0.11.86 (word for word)
 
 ### From "Decided in chat"
