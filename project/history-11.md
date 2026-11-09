@@ -2,6 +2,25 @@
 
 Started 2026-11-09 (v0.11.86), when `history-10.md` passed 45 KB. Newer than `history-10.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.95 (word for word)
+
+### From "Decided in chat"
+
+- **v0.11.92: a night fight costs sleep (B push 2, N1; Claude's options 10:05; owner 10:16 "Q1" (Claude asked: O1?), 10:17 "O1 go"):**
+  - **The sub-items (lab: the models 300 games each, the random bots a full run, against v0.11.91):** the day's regen heals James before his next fight (98–100% HP), so the cost is a morning rest, and Gao after the jackals. **W** a won night fight: W0 full / W1 half the wound back (jackals 53 → 76%, rats 34 → 69%, the Blackroot 78–85 → 91–96%; 12.5 HP points) / W2 a floor at 80% (13) / W3 waking regen (≈2). **Q** Qi too (21 points more). **F** a flight the same (1–2% of the random bots' night fights). **T** the result lines, the FAQ. The models' Coils unchanged but Careful's Gao (100 → 87.5%).
+  - **The options:** **O1 🟢 W1 + Q + F + T** / O2 🟡 W1 + F + T (recommended) / O3 🟡 W2 + F + T / O4 🔴 W3 + T (colours: what a won night fight costs at dawn). **Picked: O1.** Not picked: O2, O3, O4.
+  - **The owner's question (10:16, how many Coils the bots play):** the models to Coil 8, the random bots count an act to Coil 6; numbers per Coil; early deaths intended, kept.
+  - **Found while building (stopped and asked, 10:40):** Fable's review: two more fights after bed gave a full night (Ashfall's arson, 1,159 in 1,200 model games, HP 74% after a win; the fallout's barley wolves, 193, 90%). **X1 🟢** mark them too (dawn 88% / 96%; the models' Coils unchanged; the random bots 0 drifted, 19 past 5) / X2 🟠 narrow the FAQ. **Owner 10:44: "X1 go"**; with the review's lows. The full check then stopped at "bots rewind Act 1" (4 < 5): **owner 10:51: K1** (a walk to Shen Qiu on purpose; not picked K2, K3). **Open (rule 6):** the two fights still come at bedtime (19:00–01:00), not 01:00; T-a / T-b weren't laid out (owner 10:44): proper options after this push.
+  - **As built:** see the version note.
+  - **Also:** `78b4d31` filled in for 0.11.91; after v0.11.91 Claude uploaded 8 docs; v0.11.89's notes to `history-11.md`.
+
+### From "Version notes"
+
+## v0.11.92 — a night fight costs sleep (O1 + X1; K1)
+
+- **Files:** `game.js` (`NIGHT_FIGHT_HEAL`, `shortNight`, `nightRest`; the mark set in `startCombat` / `instantWin`, cleared by `sleepUntil`); `night: true` in `prologue.js` (`jackals_fled`: `'run'`), `wilds.js`, `act1_blackroot.js`, `ashfall.js`, `act1_fallout.js` (via `encounter`); their mornings call `nightRest`; `faq.js`; tests: tasks (+ K1's walk), faq. Saves: a new world flag.
+- **Checks:** full `bash tools/check.sh`, four runs: 1 a browser part 2 flake (passes alone), 2 exit 0 (O1), 3 stopped at "bots rewind Act 1" (4 < 5; K1), 4 exit 0: 0 drifted of 139, 18 past 5 (log only; the tribute C2 lost 73.1 → 92.9%, n 56, near the ±20 line; Gao smart 82.2 → 72.7%, Ya's spar random 74.6 → 64.8%); the baseline unchanged. The models: Careful 3.58 / 6.65, Completionist 4.00 / 5.85, the Sitter 2.65 / 2.66, the Farmer 4.05 / 5.84 (unchanged). **Fable, two cold reviews:** no high. Fixed: the arson and wolves gap (X1), the line's numbers, "after the run", a NaN guard, comments. Open (the owner's call): a lost arson fight (a people fight, so reachable; the bots never lose it) now wakes at ~50% HP (was full); K1's walk alone satisfies the check (a bot-only floor of 1 would bring chance back); the rest from the fight to 21:00 isn't counted; the X1 tests cover wins only.
+
 ## Moved from the handover in v0.11.94 (word for word)
 
 ### From "Decided in chat"

@@ -561,8 +561,9 @@ export const BONESINGER_TIERS = [
     'T10 — conceptual mastery. It ignores basic physical laws: it holds its shape in vacuum or fire, and cuts what should not be cut.',
 ];
 /**
- * What the tier does in a fight (Convergence Use tier; all three attacks are Bonesinger constructs, even the GU-swung blade):
- *   damage × tier (darts 2–4 → T10 20–40); Qi cost × engine dampen max(0.25, 1 − 0.0375·(T−1));
+ * What the tier does in a fight (Convergence Use tier; the weapons are Bonesinger constructs, all checked on GU since v0.11.95):
+ *   damage × tier (darts 2–4 → T10 20–40); Qi cost × engine dampen max(0.25, 1 − 0.0375·(T−1)); v0.11.95 (P2): the Qi blast's
+ *   damage ×1.4 and cost ×1.2 a tier, the Qi shield's soak 3 × tier and cost +10% a tier (actionCost, actionDmg);
  *   T3+ pierces enemy DR (hardened steel) and James wears wraithbone plates: +1 DR per tier from T3 (T10: +8);
  *   T4+ darts strike two enemies (several pieces), T5+ every enemy (many pieces);
  *   T7+ a bone construct fights beside him (tier × 1–3 a round on the first enemy standing);
@@ -570,11 +571,20 @@ export const BONESINGER_TIERS = [
  *   T10 his constructs never miss (they cut what should not be cut).
  */
 export const boneTier = (g) => Math.min(SKILL_MAX_TIER, g.james.skills['Convergence Use'].tier);
-export const actionCost = (g, a) => (a.qi ? Math.round(a.qi * dampenMultiplier(boneTier(g)) * 10) / 10 : 0);
+/** v0.11.95 (owner 12:47, pick P2 at 13:19): the Qi blast's damage ×1.4 and its cost ×1.2 a Convergence tier (K2); the Qi
+ *  shield's cost +10% of its base a tier (S1). Every other move's cost falls with the engine's dampening, as before. */
+export const BLAST_DMG_STEP = 1.4, BLAST_COST_STEP = 1.2, QSHIELD_COST_STEP = 0.1;
+export const actionCost = (g, a) => {
+    const T = boneTier(g), r = (x) => Math.round(x * 10) / 10;
+    if (a.pierce) return r(a.qi * BLAST_COST_STEP ** (T - 1));
+    if (a.qshield) return r(a.qi * (1 + QSHIELD_COST_STEP * (T - 1)));
+    return a.qi ? r(a.qi * dampenMultiplier(T)) : 0;
+};
 /** Damage × the Convergence Use tier; v0.11.4: dagger +1, sword +2 on the blade; the thrown lance +2 on darts. */
 export const formDmgBonus = (g, a) => (a.keeps === 'blade' ? Math.max(0, formStep(g, 'melee') - 1) : a.id === 'dart' && hasForm(g, 'lance') ? 2 : 0);
 export const actionDmg = (g, a) => {
     if (a.unarmed) { const t = Math.min(SKILL_MAX_TIER, g.james.gu.tier); return [a.dmg[0] * t, a.dmg[1] * t]; } // v0.11.82: fists by the GU tier
+    if (a.pierce) { const m = BLAST_DMG_STEP ** (boneTier(g) - 1); return [a.dmg[0] * m, a.dmg[1] * m]; } // v0.11.95 (P2): the Qi blast climbs ×1.4 a tier
     const b = formDmgBonus(g, a); return [a.dmg[0] * boneTier(g) + b, a.dmg[1] * boneTier(g) + b];
 };
 /** Guard's defence bonus: 2; v0.11.4: +0.5 per personal-defence form (bracer 2.5 … full armour 4.5). */
@@ -582,6 +592,15 @@ export const guardBonus = (g) => (fightStyle(g) ? 2 : 2 + 0.5 * (formStep(g, 'de
 /** v0.11.4 spike field: rounds, and the damage each attacker takes (1; 2 from the slab). */
 export const FIELD_ROUNDS = 2;
 export const fieldDamage = (g) => (hasForm(g, 'slab') ? 2 : 1);
+/** v0.11.95 (Q1): what the Qi shield soaks this round (3 × the Convergence Use tier), and its lines (Fable's, rule 10). */
+export const qiShield = (g) => QI_SHIELD_PER_TIER * boneTier(g);
+export const QI_SHIELD_TEXT = {
+    raise: 'Qi tightens over your skin like a held breath. It will not hold for long.',
+    soak: '{foe} hits the Qi, not you: {n} soaked.',
+    spent: 'The shell cracks and goes; the rest is yours to take.',
+};
+/** v0.11.95 (Q1): the first time in a fight the Qi blast goes through armour the bone would have met (Fable's). */
+export const QI_BLAST_PIERCE = 'Raw Qi doesn\'t care what {foe} is wearing. It goes straight in.';
 export const armourDr = (g) => (fightStyle(g) ? 0 : Math.max(0, boneTier(g) - 2)); // v0.11.82: no bone plates in a spar or a brawl
 
 /* ---------------- inventory and food ---------------- */
@@ -652,14 +671,21 @@ export function bumpRel(g, who, f = 0, a = 0) {
  * One exchange. James acts (dart / blade / dodge / Yuki-strike), Yuki strikes on her own, then every enemy
  * still standing attacks: James defends with GU ÷ the enemy's attack DC (stepNoDice has the bands); a hit deals its
  * damage minus DR 1 (Ouroboros).
+ * v0.11.95 (owner 2026-11-09 12:26, pick Q1 at 12:43): every weapon is sung with Convergence and checked on GU, with one
+ * hit modifier (+1); the weapons differ only in damage and what they do. Convergence's own moves: the Qi blast (checked on
+ * Convergence Use, ignores armour) and the Qi shield (soaks QI_SHIELD_PER_TIER × the Convergence tier that round).
  */
+export const QI_SHIELD_PER_TIER = 3;
 export const COMBAT_ACTIONS = {
-    dart: { id: 'dart', label: 'Bone darts', skill: 'Convergence Use', qi: 2, dmg: [2, 4], dcMod: 0 },
+    dart: { id: 'dart', label: 'Bone darts', skill: 'GU', qi: 2, dmg: [2, 4], dcMod: 1 },
     blade: { label: 'Wraithbone blade', skill: 'GU', qi: 3, dmg: [3, 6], dcMod: 1, keeps: 'blade' },
-    needle: { label: 'Needle to a joint', skill: 'Convergence Use', qi: 4, dmg: [1, 2], dcMod: 2, stagger: true },
+    needle: { label: 'Needle to a joint', skill: 'GU', qi: 4, dmg: [1, 2], dcMod: 1, stagger: true },
     guard: { label: 'Guard and give ground', skill: 'GU', qi: 0, dmg: [0, 0], dcMod: -1, guard: true },
+    // v0.11.95 (Q1): Convergence's own moves, open from the start (not in a spar or a brawl: forms.js SPAR_ACTIONS / UNARMED_ACTIONS)
+    blast: { id: 'blast', label: 'Qi blast', skill: 'Convergence Use', qi: 4, dmg: [4, 6], dcMod: 1, pierce: true }, // P2: 4–6, the middle 5 × 1.4 a tier (the table the owner picked)
+    qshield: { id: 'qshield', label: 'Qi shield', skill: 'Convergence Use', qi: 3, dmg: [0, 0], dcMod: 0, qshield: true },
     // v0.11.4 (actionOpen hides them until James can sing them):
-    spear: { id: 'spear', label: 'Bone spear', skill: 'GU', qi: 3, dmg: [3, 6], dcMod: 2, reach: true, keeps: 'spear' }, // sung once (Convergence), thrust with GU; a full hit holds the enemy off for the round
+    spear: { id: 'spear', label: 'Bone spear', skill: 'GU', qi: 3, dmg: [3, 6], dcMod: 1, reach: true, keeps: 'spear' }, // sung once (Convergence), thrust with GU (v0.11.95: dcMod 2 → 1, Q1); a full hit holds the enemy off for the round
     spikes: { id: 'spikes', label: 'Sing a field of bone spikes', skill: 'Convergence Use', qi: 4, dmg: [0, 0], dcMod: 0, field: true }, // once per fight, 2 rounds
     // v0.11.82 (owner pick B1; labels Fable's): the unarmed brawl (a fight with style 'unarmed'): GU, no Qi, damage × the GU tier
     strike: { id: 'strike', label: 'Step in and hit', skill: 'GU', qi: 0, dmg: [2, 4], dcMod: 0, unarmed: true },
@@ -769,6 +795,8 @@ function stepNoDice(g, actionId, targetIdx) {
         if (act.guard) {
             guard = true;
             lines.push('You give ground, watching for the opening.');
+        } else if (act.qshield) {
+            c.qshieldHp = qiShield(g); lines.push(QI_SHIELD_TEXT.raise); // v0.11.95 (Q1): this round only
         } else if (act.field) {
             if (c.fieldUsed) lines.push('The ground is already broken. There is nothing left in it to sing.');
             else { c.field = FIELD_ROUNDS; c.fieldUsed = true; lines.push('Bone spikes punch up through the ground around you, ankle-high and very sincere.'); }
@@ -786,7 +814,8 @@ function stepNoDice(g, actionId, targetIdx) {
                 if (band === 'miss') continue;
                 let dmg = dmgRoll(g, actionDmg(g, act)) * (band === 'double' ? 2 : 1);
                 if (band === 'glance') dmg = Math.floor(dmg / 2);
-                dmg = Math.max(0, dmg - (T >= 3 ? 0 : (tg.dr || 0)));
+                if (act.pierce && T < 3 && (tg.dr || 0) > 0 && !c.blastPierced) { c.blastPierced = true; lines.push(`  ${QI_BLAST_PIERCE.replace('{foe}', tg.name)}`); }
+                dmg = Math.max(0, dmg - (T >= 3 || act.pierce ? 0 : (tg.dr || 0))); // v0.11.95 (Q1): the Qi blast ignores armour
                 tg.hp -= dmg;
                 lines.push(`  ${tg.name} takes ${dmg}${band === 'double' ? ' (double damage)' : ''}.`);
                 if (act.stagger && tg.hp > 0 && band !== 'glance') { tg.staggered = true; lines.push(act.unarmed ? `  ${tg.name} hits the dust and takes a moment to work out which way is up.` : `  ${tg.name} staggers.`); } // v0.11.82: the throw's line Fable's
@@ -828,11 +857,19 @@ function stepNoDice(g, actionId, targetIdx) {
         const r = rollCheck(g, 'GU', e.atk, guard ? guardBonus(g) : 0);
         if (r.ratio >= 1) { lines.push(`${e.name} attacks: you defend (${checkText(r)}) — avoided.`); continue; }
         let dmg = hitDamage(e.dmg, e.realm, g.james.realm, jamesDr(g));
+        const soaked = []; // v0.11.95 (Q1): the Qi shield soaks the blow first (as measured), what gets through is halved as before; its lines after the attack's (review)
+        if (c.qshieldHp > 0 && dmg > 0) {
+            const a = Math.min(c.qshieldHp, dmg); c.qshieldHp -= a; dmg -= a;
+            soaked.push(QI_SHIELD_TEXT.soak.replace('{foe}', e.name).replace('{n}', a));
+            if (c.qshieldHp <= 0 && QI_SHIELD_TEXT.spent) soaked.push(QI_SHIELD_TEXT.spent);
+            if (dmg <= 0) { lines.push(`${e.name} attacks: you defend (${checkText(r)}).`, ...soaked); continue; }
+        }
         if (r.ratio >= 0.5) dmg = Math.floor(dmg / 2);
         g.james.hp = Math.max(0, g.james.hp - dmg);
-        lines.push(`${e.name} attacks: you defend (${checkText(r)}) — ${r.ratio >= 0.5 ? 'it only half lands' : 'it lands'}: ${dmg} (DR ${jamesDr(g)}).`);
+        lines.push(`${e.name} attacks: you defend (${checkText(r)}) — ${r.ratio >= 0.5 ? 'it only half lands' : 'it lands'}: ${dmg} (DR ${jamesDr(g)}).`, ...soaked);
     }
     if (c.field > 0) c.field--;
+    delete c.qshieldHp; // v0.11.95: the shield lasts the round
     return lines;
 }
 

@@ -1330,6 +1330,51 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
         assert(o?.done && g.minutes < night0 + 120, `v0.11.91: ${sc}${kind ? ` (${kind})` : ''} is over before 02:00 even at the round cap (${o?.done}, ${g.minutes - night0} min after midnight)`);
     }
 }
+// v0.11.95 (owner 2026-11-09 12:26, pick Q1 at 12:43): every weapon sung with Convergence and checked on GU, one hit
+// modifier (+1), the weapons differ in damage and what they do; the Qi blast (Convergence Use, ignores armour) and the Qi
+// shield (soaks 3 × the Convergence tier that round), open from the start, never in a spar or a brawl
+{
+    const { QI_SHIELD_PER_TIER, qiShield, QI_SHIELD_TEXT, QI_BLAST_PIERCE } = await import('../js/core/game.js');
+    const A = COMBAT_ACTIONS;
+    for (const id of ['dart', 'blade', 'needle', 'spear']) assert(A[id].skill === 'GU' && A[id].dcMod === 1, `Q1: ${id} checked on GU, hit modifier +1 (${A[id].skill}, ${A[id].dcMod})`);
+    assert(A.guard.skill === 'GU' && A.guard.dcMod === -1 && A.spikes.skill === 'Convergence Use', 'Q1: guard and the spike field as before');
+    assert(A.blast.skill === 'Convergence Use' && A.blast.qi === 4 && A.blast.dmg.join() === '4,6' && A.blast.dcMod === 1 && A.blast.pierce === true, 'Q1: the Qi blast: Convergence Use, 4 Qi, 4–6 (P2), +1, ignores armour');
+    assert(A.qshield.qi === 3 && A.qshield.qshield === true && QI_SHIELD_PER_TIER === 3, 'Q1: the Qi shield: 3 Qi, 3 × the tier');
+    const at = (t, l = 1) => { const g = ensureBars(newGame(9500 + t)); g.james.skills['Convergence Use'] = { tier: t, level: l, xp: 0 }; g.james.gu = { tier: 3, level: 1, xp: 0 }; ensureBars(g); g.james.qi = 99; return g; };
+    assert(qiShield(at(1)) === 3 && qiShield(at(2)) === 6 && qiShield(at(4)) === 12, 'Q1: the shield soaks 3 / 6 / 12 at T1 / T2 / T4');
+    { // P2 (owner 13:19): the blast ×1.4 damage and ×1.2 cost a tier; the shield's cost +10% of its base a tier; the rest as before
+        const { actionCost: cost } = await import('../js/core/game.js');
+        const mid = (d) => Math.round((d[0] + d[1]) / 2);
+        const want = { 1: [5, 4, 3], 2: [7, 4.8, 3.3], 3: [10, 5.8, 3.6], 5: [19, 8.3, 4.2], 7: [38, 11.9, 4.8], 10: [103, 20.6, 5.7] };
+        for (const [T, [d, c, s]] of Object.entries(want)) { const x = at(Number(T)); assert(mid(actionDmg(x, A.blast)) === d && cost(x, A.blast) === c && cost(x, A.qshield) === s, `P2: T${T}: blast ${mid(actionDmg(x, A.blast))} dmg for ${cost(x, A.blast)} Qi (want ${d}, ${c}), shield ${cost(x, A.qshield)} Qi (want ${s})`); }
+        assert(cost(at(10), A.dart) < cost(at(1), A.dart) && cost(at(10), A.needle) < cost(at(1), A.needle), 'P2: darts and the needle still get cheaper with the tier');
+        assert(actionDmg(at(3), A.blade).join() === actionDmg(at(3), { ...A.blade, pierce: undefined }).join(), 'P2: the blade unchanged');
+    }
+    const g0 = at(1);
+    assert(actionOpen(g0, 'blast') && actionOpen(g0, 'qshield'), 'Q1: both Qi moves open from the start');
+    for (const style of ['spar', 'unarmed']) { const s2 = at(1); s2.combat = { style, enemies: [] }; assert(!actionOpen(s2, 'blast') && !actionOpen(s2, 'qshield'), `Q1: no Qi move in a ${style}`); }
+    // the blast goes through armour (DR 2 at T1), the blade does not; the pierce line once a fight
+    const hit = (id) => { const g = at(1); startCombat(g, { id: 'q1_test', enemies: [{ name: 'Plated', hp: 99, dc: 0.1, atk: 0.1, dmg: 0, dr: 2 }], win: 'stream', lose: 'stream' }); const rounds = [combatStep(g, id).lines, combatStep(g, id).lines]; return { rounds, lines: rounds.flat() }; };
+    const bl = hit('blast'), bd = hit('blade');
+    const bmid = 5; // the middle hit at T1 (the blast 4–6, the knife 3–6)
+    const per = (h) => h.rounds.map((ls) => { const a = ls.find((l) => /^(Qi blast|Fragile bone knife|Bone knife):/.test(l)) || ''; const t = ls.find((l) => /^  Plated takes/.test(l)); return t ? [/clean, deep hit/.test(a), Number(/takes (\d+)/.exec(t)[1])] : null; }).filter(Boolean);
+    const pb = per(bl), pd = per(bd);
+    assert(pb.length >= 1 && pb.every(([dbl, n]) => n === bmid * (dbl ? 2 : 1)), `Q1: each blast hit at T1 deals its full damage through DR 2 (${JSON.stringify(pb)})`);
+    assert(pd.length >= 1 && pd.every(([dbl, n]) => n === bmid * (dbl ? 2 : 1) - 2), `Q1: each blade hit loses DR 2 (${JSON.stringify(pd)})`);
+    assert(bl.lines.filter((l) => l.includes(QI_BLAST_PIERCE.replace('{foe}', 'Plated'))).length === 1, 'Q1: the pierce line once a fight');
+    assert(bd.lines.every((l) => !l.includes("Raw Qi")), 'Q1: no pierce line for the blade');
+    // the shield soaks first, then the rest lands as before, for that round only
+    const sh = at(1); startCombat(sh, { id: 'q1_test', enemies: [{ name: 'Brute', hp: 99, dc: 99, atk: 99, dmg: 8 }], win: 'stream', lose: 'stream' });
+    const hp0 = sh.james.hp, q0 = sh.james.qi; const r1 = combatStep(sh, 'qshield'); const took1 = hp0 - sh.james.hp;
+    const hp1 = sh.james.hp; combatStep(sh, 'guard'); const took2 = hp1 - sh.james.hp;
+    assert(r1.lines.includes(QI_SHIELD_TEXT.raise) && r1.lines.some((l) => l === QI_SHIELD_TEXT.soak.replace('{foe}', 'Brute').replace('{n}', 3)), `Q1: the shield's lines (${r1.lines.join(' | ')})`);
+    assert(q0 - sh.james.qi > 0 && took1 > 0 && took2 > took1 - 0.001 && sh.combat?.qshieldHp === undefined, `Q1: the shield soaked 3 that round only (took ${took1}, then ${took2} guarding)`);
+    { const z = at(1); startCombat(z, { id: 'q1_test', enemies: [{ name: 'Gnat', hp: 99, dc: 99, atk: 99, dmg: 2 }], win: 'stream', lose: 'stream' }); const h0 = z.james.hp; const rz = combatStep(z, 'qshield'); const ai = rz.lines.findIndex((l) => /^Gnat attacks: you defend \(/.test(l)), si = rz.lines.findIndex((l) => /soaked/.test(l)); assert(z.james.hp === h0 && !rz.lines.some((l) => /it lands/.test(l)) && ai >= 0 && si > ai, `Q1: a blow the shield takes whole doesn't land; the defence line first, then the soak (${rz.lines.join(' | ')})`); }
+    { // the review (Fable, medium 1): a half-landing blow: the shield soaks first, the rest is halved (7 after DR, 3 soaked, 4 halved: 2)
+        const h = at(1); startCombat(h, { id: 'q1_test', enemies: [{ name: 'Brute', hp: 99, dc: 99, atk: 17, dmg: 8 }], win: 'stream', lose: 'stream' }); const h0 = h.james.hp; const rh = combatStep(h, 'qshield');
+        assert(rh.lines.some((l) => /it only half lands: 2 /.test(l)) && h0 - h.james.hp === 2, `Q1: soak first, then halve (took ${h0 - h.james.hp}: ${rh.lines.join(' | ')})`);
+    }
+}
 // v0.11.94 (owner 2026-11-09 11:35, pick T-b1): Ashfall's night 2 (the arson, Gao's token, Gao at the window) and the
 // fallout's barley wolves come after the bed at 01:00 too, never back, and a fight is over before 02:00; a quiet night is untouched
 {

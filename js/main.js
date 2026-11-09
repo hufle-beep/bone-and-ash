@@ -3,7 +3,7 @@ import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel, hasForm } fr
 import { coilMult, coilMultNext, wakeDay, fmtMult, clockParts } from './core/game.js';
 import {
     newGame, ensureBars, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, skillCheck, xpToNext, clockLabel, clockLabelG, realmName, yukiForm,
-    startCombat, combatStep, combatFlee, COMBAT_ACTIONS, noDiceDc, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage,
+    startCombat, combatStep, combatFlee, COMBAT_ACTIONS, noDiceDc, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage, qiShield,
 } from './core/game.js';
 import { sceneView, choose, goTo, gives } from './core/story.js';
 import { showPicked, isTaskHub, isQueueScreen, isTaskChoice, taskCards, taskLabel, taskMinutes, taskOutcome, dryOutcome, outcomeOf, runTask, FAM, yukiLane, setYuki, nextStep } from './core/tasks.js';
@@ -317,7 +317,7 @@ function renderCombatCards() {
         const v = n1(skillCheck(a.skill === 'GU' ? g.james.gu : g.james.skills[a.skill]) + (c.adapt?.[id] || 0));
         const tgt = c.enemies.find((e) => e.hp > 0);
         const plain = tgt && showChecks ? `${a.skill} ${v} / DC ${noDiceDc(tgt.dc + a.dcMod)} · ${Math.round((d[0] + d[1]) / 2)} dmg` : '';
-        return `<button class="card fightish" data-act="${id}" ${off ? 'disabled' : ''}>${esc(a.label)}<span class="tag">${a.guard ? `${showChecks ? 'GU ' : ''}defence +${guardBonus(g)} this round${hasForm(g, 'buckler') && !c.style ? ' · covers Yuki' : ''}` : a.field ? `${FIELD_ROUNDS} rounds · ${fieldDamage(g)} to each attacker · once a fight` : plain}${a.reach ? ' · a full hit holds it off' : ''}${cost ? ` · ${cost} Qi` : ''}${a.stagger ? ' · staggers' : ''}${off ? ' · not enough Qi' : ''}</span></button>`;
+        return `<button class="card fightish" data-act="${id}" ${off ? 'disabled' : ''}>${esc(a.label)}<span class="tag">${a.guard ? `${showChecks ? 'GU ' : ''}defence +${guardBonus(g)} this round${hasForm(g, 'buckler') && !c.style ? ' · covers Yuki' : ''}` : a.qshield ? `soaks ${qiShield(g)} this round` : a.field ? `${FIELD_ROUNDS} rounds · ${fieldDamage(g)} to each attacker · once a fight` : plain}${a.reach ? ' · a full hit holds it off' : ''}${a.pierce ? ' · ignores armour' : ''}${cost ? ` · ${cost} Qi` : ''}${a.stagger ? ' · staggers' : ''}${off ? ' · not enough Qi' : ''}</span></button>`;
     }).join('');
     const flee = c.flee ? `<button class="card" data-flee="1">Run${showChecks ? `<span class="tag">GU ${n1(skillCheck(g.james.gu))} / DC ${noDiceDc(Math.max(...c.enemies.filter((e) => e.hp > 0).map((e) => e.atk)))}</span>` : ''}</button>` : '';
     const foes = c.enemies.map((e) => `<div class="foe${e.hp <= 0 ? ' down' : ''}"><span>${esc(e.name)}${e.staggered ? (c.style === 'unarmed' ? ' (down)' : ' (reeling)') : ''}</span><div class="stroke"><i style="width:${pct(Math.max(0, e.hp), e.hpMax)}"></i></div></div>`).join('');
@@ -610,7 +610,7 @@ function renderSheet() {
 <div class="row"><span>Realm</span><span>${esc(realmName(j.realm))} · Saturation ${n1(j.saturation)}%</span><span class="sub">${meridianRow(g)}. No herbs, no pills, no tribulation: the Ouroboros Axiom composts this world's poisoned Qi.</span></div>
 <h2>Skills</h2>
 ${skillRow('GU', j.gu, 'General Use: anything he has no skill for, and his defence')}
-${skillRow('Convergence Use', cu, 'darts, needles, the wraithbone blade')}
+${skillRow('Convergence Use', cu, 'the song: what he can sing, how hard it hits, the Qi blast and shield')}
 <p class="note">${esc(BONESINGER_TIERS[Math.min(cu.tier, BONESINGER_TIERS.length - 1)] || '')}</p>
 ${Object.entries(FORM_LINES).map(([k, l]) => { const s = lineState(g, k); return `<div class="row"><span>${esc(l.label)}</span><span>${s.now ? esc(s.now.name) : '—'}${s.next ? ` <span class="note">(next: ${esc(s.next.name)} at ${rankLabel(s.next.at)})</span>` : ''}</span></div>`; }).join('')}
 ${g.coil ? `<h2>The Coil</h2><p class="note">${g.coil.act === 1 ? 'Act 1, ' : ''}Coil ${g.coil.n}. ${coilActive(g) ? `Bite the tail to start ${g.coil.act === 1 ? 'Act 1' : 'the prologue'} over at ${g.coil.act === 1 ? 'its start' : 'the first dawn'}: James keeps his familiarity and what he knows; his realm, skills and meridians, the hammerspace and the world start over. This Coil he learns ×${fmtMult(coilMult(g))} as fast. ${tabWhy(g) === 'choice' ? `A Coil ended by choice still counts as a Coil, but adds nothing to the faster learning: the next learns ×${fmtMult(coilMultNext(g, true))} too. A collapse, a lost fight or a lost deadline adds to it (×${fmtMult(coilMultNext(g, false))}).` : `The deadline went against him, so this bite adds to the faster learning: the next learns ×${fmtMult(coilMultNext(g, false))}.`}` : 'The Coil turns during the prologue (until the tribute is settled) and during Act 1 (until Shen Qiu is settled, and again at its end).'}</p><p class="note"><b>Targets:</b> ${esc(targetsText(g))}</p>${coilActive(g) ? '<div class="btns"><button class="btn" data-bite="1">Bite the tail</button></div><p class="note" id="saveNote"></p>' : ''}` : ''}
@@ -737,7 +737,9 @@ function tipFor(b) {
             if (a.field) lines.push(`A field of bone spikes for ${FIELD_ROUNDS} rounds: ${fieldDamage(g)} back to each attacker. Once a fight.`);
             if (a.stagger) lines.push('Staggers what it hits.');
             if (a.reach) lines.push('A clean hit holds the enemy off for the round.');
-            if (showChecks) { const d = actionDmg(g, a); lines.push(`${a.skill} · ${d[0]}–${d[1]} damage.`); }
+            if (a.pierce) lines.push('Raw Qi: it ignores the enemy\'s armour.'); // v0.11.95 (review)
+            if (a.qshield) lines.push(`Soaks ${qiShield(g)} damage this round; does not cover Yuki.`);
+            if (showChecks) { const d = actionDmg(g, a); if (d[1] > 0) lines.push(`${a.skill} · ${n1(d[0])}–${n1(d[1])} damage.`); }
         }
     } else if (b.dataset.flee) lines.push('Tries to get away. Not every fight lets you.');
     else if (b.dataset.med) { const mc = medCards(g, SCENES).find((m) => m.id === b.dataset.med); if (mc?.open) mins = mc.minutes || 0; }

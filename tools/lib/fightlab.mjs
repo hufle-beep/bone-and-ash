@@ -24,9 +24,11 @@ export const TACTICS = {
     needle: { label: 'needle only', pick: () => 'needle' },
     spear: { label: 'spear only', open: (g) => actionOpen(g, 'spear'), pick: () => 'spear' },
     guard: { label: 'guard + blade', pick: (g, t) => (t % 2 ? 'guard' : 'blade') },
+    blast: { label: 'Qi blast only', open: (g) => actionOpen(g, 'blast'), pick: () => 'blast' }, // v0.11.95 (Q1; review: none in a spar)
+    qshield: { label: 'Qi shield + blade', open: (g) => actionOpen(g, 'qshield'), pick: (g, t) => (t % 2 ? 'qshield' : 'blade') }, // v0.11.95 (Q1)
 };
 /** The fixed tactics (not smart or random): the "one tactic always wins" flag compares these. */
-export const FIXED = ['blade', 'dart', 'needle', 'spear', 'guard'];
+export const FIXED = ['blade', 'dart', 'needle', 'spear', 'guard']; // v0.11.95: the Qi moves show in the main table only (TACTICS)
 export const MAX_STEPS = 400;
 
 /**
