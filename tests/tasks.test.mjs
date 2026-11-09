@@ -29,7 +29,7 @@ const planOf = (g) => taskState(g).queue;
 const dayOver = (g, scenes, id) => (nightLock(g) ? !taskCards(g, scenes, id).some((x) => x.id === id && x.status === 'open') : taskCards(g, scenes, id).some((x) => x.id === id && x.status === 'late'));
 
 import { writeFileSync } from 'node:fs';
-import { smartAction } from './lib/smartfight.mjs'; // v0.11.96 (BT1)
+import { smartAction, attackReserve } from './lib/smartfight.mjs'; // v0.11.96 (BT1); v0.11.107 (NK1): attackReserve
 import { GAMES, FULL, SHARD, WORKERS, SEED, SENSIBLE, REPORT, STATS_OUT, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
 import { seen as touched, track, noteView, noteCards, mergeSeen, seenOut as touchedOut } from './lib/seen.mjs'; // v0.11.22: for tools/leftovers.mjs
 let pass = 0, fail = 0;
@@ -310,11 +310,61 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     assert(NO_DICE_TUNE.collectors.up === 4.5 && NO_DICE_TUNE.rot_ape.up === 14 && COIL_GROWTH === 0.25, `RB-1: the tribute 4.5, the rot ape 14 (v0.11.36; 15 in RB-1), the Coil bonus 0.25 per Coil (${NO_DICE_TUNE.collectors.up}, ${NO_DICE_TUNE.rot_ape.up}, ${COIL_GROWTH})`);
     assert(fmtMult(1) === '1' && fmtMult(1.25) === '1.25' && fmtMult(1.5) === '1.5' && fmtMult(2.75) === '2.75', 'fmtMult: ×1.25 shows as 1.25, not 1.3');
 }
+// v0.11.107 (owner pick NK1, FL): the bone flail at Convergence T2 L1: sung once (Qi 3, dampened), then free; GU +1; damage
+// 2–4 × the bone multiplier; each swing hits the target and one more foe standing (each checked); not in a spar or a brawl.
+{
+    const { FLAIL_SUNG, actionCost } = await import('../js/core/game.js');
+    const { dampenMultiplier } = await import('../js/core/formulas.js');
+    const { FAQ } = await import('../js/core/faq.js');
+    const setSk = (g, t, l) => { g.james.skills['Convergence Use'] = { tier: t, level: l, xp: 0 }; g.james.gu = { tier: t, level: l, xp: 0 }; };
+    const fl = COMBAT_ACTIONS.flail;
+    assert(fl && fl.label === 'Bone flail' && fl.skill === 'GU' && fl.qi === 3 && fl.dmg.join() === '2,4' && fl.dcMod === 1 && fl.keeps === 'flail' && fl.sweep === 2 && !fl.pierce && !fl.stagger && !fl.reach, 'NK1: the flail as picked (GU +1, Qi 3, 2–4, keeps, two targets)');
+    assert(INC_ONLY_ACTIONS.has('flail') && FORM_LINES.sweep.label === 'Sweep' && FORM_LINES.sweep.forms.length === 1 && FORM_LINES.sweep.forms[0].at === 11, 'NK1: the sweep line, the flail at rank 11 (T2 L1)');
+    const g = ensureBars(newGame(83, { closed: true }));
+    setSk(g, 1, 10); assert(!hasForm(g, 'flail') && !actionOpen(g, 'flail'), 'NK1: T1 L10: no flail');
+    setSk(g, 2, 1); assert(hasForm(g, 'flail') && actionOpen(g, 'flail'), 'NK1: T2 L1: the flail opens');
+    assert(actionCost(g, fl) === Math.round(3 * dampenMultiplier(2) * 10) / 10 && actionDmg(g, fl).join() === '4,8', `NK1: T2 L1 costs 3 dampened, 4–8 damage (${actionCost(g, fl)}, ${actionDmg(g, fl)})`);
+    for (const style of ['spar', 'unarmed']) { const h = ensureBars(newGame(84, { closed: true })); setSk(h, 2, 1); sCombat(h, { id: 'jackals', intro: '', band: 'standard', style, enemies: [{ name: 'A', hp: 50, dc: 1, atk: 1, dmg: 0 }], win: 'stream', lose: 'stream' }); assert(!actionOpen(h, 'flail') && fightAction(h, 'flail') === (style === 'spar' ? 'blade' : 'strike'), `NK1: no flail in a ${style}`); }
+    // two dummies: the first swing sings it (Qi, the line) and hits both; the second costs nothing; three foes: only two hit
+    const h = ensureBars(newGame(85, { closed: true })); setSk(h, 2, 1); h.james.qi = 20; // under the T2 maximum (32)
+    const foe = (n) => ({ name: n, hp: 99, dc: 1, atk: 1, dmg: 0 });
+    sCombat(h, { id: 'jackals', intro: '', band: 'standard', enemies: [foe('A'), foe('B'), foe('C')], win: 'stream', lose: 'stream' });
+    const q0 = h.james.qi, o1 = cStep(h, 'flail');
+    const hp = () => h.combat.enemies.map((e) => e.hp).join();
+    assert(h.combat.flailFormed && Math.abs(q0 - h.james.qi - actionCost(h, fl)) < 1e-9 && o1.lines.includes(FLAIL_SUNG), `NK1: the first swing sings it (Qi ${q0} → ${h.james.qi}, the line)`);
+    assert(o1.lines.filter((l) => /^Bone flail → /.test(l)).length === 2 && h.combat.enemies[2].hp === 99 && h.combat.enemies[0].hp < 99 && h.combat.enemies[1].hp < 99, `NK1: the target and one more, not a third (${hp()})`);
+    const q1 = h.james.qi, b1 = h.combat.enemies.map((e) => e.hp); cStep(h, 'flail', 1);
+    assert(h.james.qi === q1 && h.combat.enemies[1].hp < b1[1] && h.combat.enemies[0].hp < b1[0] && h.combat.enemies[2].hp === 99, `NK1: free once sung; target B and the first other (A), not C (${hp()})`); // review low 2
+    { // review low 2: a target index past the end or a dead first foe: the last living one and one other, never the same foe twice
+        const t = ensureBars(newGame(88, { closed: true })); setSk(t, 2, 1); t.james.qi = 20;
+        sCombat(t, { id: 'jackals', intro: '', band: 'standard', enemies: [foe('A'), foe('B'), foe('C')], win: 'stream', lose: 'stream' });
+        const o = cStep(t, 'flail', 7); const hit = o.lines.filter((l) => /^Bone flail → /.test(l)).map((l) => l.split('→ ')[1].split(':')[0]);
+        assert(hit.join() === 'C,A', `NK1: index 7 of 3: C, then A (${hit})`);
+        t.combat.enemies[0].hp = 0; const o2 = cStep(t, 'flail', 1); const hit2 = o2.lines.filter((l) => /^Bone flail → /.test(l)).map((l) => l.split('→ ')[1].split(':')[0]);
+        assert(hit2.join() === 'C,B', `NK1: A down, index 1 of the living: C, then B (${hit2})`);
+    }
+    // one foe left: it hits that one alone, no second line
+    const k = ensureBars(newGame(86, { closed: true })); setSk(k, 2, 1); k.james.qi = 40;
+    sCombat(k, { id: 'jackals', intro: '', band: 'standard', enemies: [foe('A')], win: 'stream', lose: 'stream' });
+    const o2 = cStep(k, 'flail'); assert(o2.lines.some((l) => /^Bone flail: /.test(l)) && !o2.lines.some((l) => / → /.test(l)), 'NK1: one foe: one hit, no arrow');
+    // the smart rule: the flail while two or more stand; the spear on one; a sung flail is free on the last foe; the reserve is 0 once sung
+    const m = ensureBars(newGame(87, { closed: true })); setSk(m, 2, 1); m.james.qi = 20;
+    sCombat(m, { id: 'jackals', intro: '', band: 'standard', enemies: [foe('A'), foe('B')], win: 'stream', lose: 'stream' });
+    assert(smartAction(m) === 'spikes', 'NK1 smart: the spike field first, as before'); m.combat.fieldUsed = true;
+    assert(smartAction(m) === 'flail', 'NK1 smart: two foes → the flail');
+    { const q = m.james.qi; m.james.qi = actionCost(m, fl); assert(smartAction(m) === 'flail', 'NK1 smart: Qi exactly at the cost sings it (review low 3)'); m.james.qi = q; }
+    { m.combat.flailFormed = true; const q = m.james.qi; m.james.qi = 0; assert(smartAction(m) === 'flail', 'NK1 smart: two foes, a sung flail, no Qi → the flail (review low 3)');
+      m.james.qi = 20; const hp0 = m.james.hp; m.james.hp = 1; assert(smartAction(m) === 'qshield', 'NK1 smart: a sung flail lets the shield through at low HP (review low 3)'); m.james.hp = hp0; m.james.qi = q; m.combat.flailFormed = false; }
+    m.combat.enemies[1].hp = 0; assert(smartAction(m) === 'spear', 'NK1 smart: one foe → the spear');
+    m.combat.flailFormed = true; m.james.qi = 0; assert(smartAction(m) === 'flail' && attackReserve(m) === 0, 'NK1 smart: no Qi, a sung flail → the flail; the reserve 0');
+    setSk(m, 1, 10); m.combat.flailFormed = false; m.combat.enemies[1].hp = 99; m.james.qi = 20; assert(smartAction(m) !== 'flail', 'NK1 smart: below T2, never the flail');
+    assert(/<b>Bone flail<\/b> from T2 that hits a second enemy/.test(FAQ.find(([t]) => t === 'Fights')[1]()), 'NK1: the FAQ names the flail (Fable)');
+}
 // v0.10.4: Bonesinger forms — Incremental Mode shows only what James can sing
 {
     const setCu = (g, t, l) => { g.james.skills['Convergence Use'] = { tier: t, level: l, xp: 0 }; };
     const g = ensureBars(newGame(81, { closed: true }));
-    assert(Object.keys(FORM_LINES).join() === 'ranged,melee,structures,reach,defence', 'five lines (v0.11.4: reach)');
+    assert(Object.keys(FORM_LINES).join() === 'ranged,melee,structures,reach,sweep,defence', 'six lines (v0.11.4: reach; v0.11.107, NK1: sweep)');
     assert(cuRank(g) === 1 && hasForm(g, 'needle') && hasForm(g, 'fragile_knife') && !hasForm(g, 'dart') && !hasForm(g, 'spikes') && !hasForm(g, 'bracer'), 'T1 L1: needle and fragile knife only');
     assert(!actionOpen(g, 'dart') && actionOpen(g, 'needle') && actionOpen(g, 'blade') && actionOpen(g, 'guard') && actionLabel(g, 'blade', 'x') === 'Fragile bone knife' && fragileKnife(g), 'fight at T1 L1: no darts, a fragile knife');
     setCu(g, 1, 5); assert(actionOpen(g, 'dart') && actionLabel(g, 'dart', 'x') === 'Bone darts' && /Bracer/.test(actionLabel(g, 'guard', 'x')), 'T1 L5: darts and a bracer');
@@ -1631,7 +1681,8 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
 {
     const { QI_SHIELD_PER_TIER, qiShield, QI_SHIELD_TEXT, QI_BLAST_PIERCE } = await import('../js/core/game.js');
     const A = COMBAT_ACTIONS;
-    for (const id of ['dart', 'blade', 'needle', 'spear']) assert(A[id].skill === 'GU' && A[id].dcMod === 1, `Q1: ${id} checked on GU, hit modifier +1 (${A[id].skill}, ${A[id].dcMod})`);
+    for (const id of ['dart', 'blade', 'needle', 'spear', 'flail']) assert(A[id].skill === 'GU' && A[id].dcMod === 1, // v0.11.107 (NK1, review low 4): the flail too
+         `Q1: ${id} checked on GU, hit modifier +1 (${A[id].skill}, ${A[id].dcMod})`);
     assert(A.guard.skill === 'GU' && A.guard.dcMod === -1 && A.spikes.skill === 'Convergence Use', 'Q1: guard and the spike field as before');
     assert(A.blast.skill === 'Convergence Use' && A.blast.qi === 4 && A.blast.dmg.join() === '4,6' && A.blast.dcMod === 0 && A.blast.pierce === true, 'Q1: the Qi blast: Convergence Use, 4 Qi, 4–6 (P2), hit modifier 0 (v0.11.102, QB1; was +1), ignores armour');
     assert(A.qshield.qi === 3 && A.qshield.qshield === true && QI_SHIELD_PER_TIER === 3, 'Q1: the Qi shield: 3 Qi, 3 × the tier');

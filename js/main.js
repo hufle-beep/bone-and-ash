@@ -310,7 +310,7 @@ function renderCombatCards() {
     const c = g.combat;
     const acts = Object.entries(COMBAT_ACTIONS).filter(([id]) => actionOpen(g, id) && !(id === 'spikes' && c.fieldUsed)).map(([id, a0]) => {
         const a = { ...a0, label: actionLabel(g, id, a0.label) }; // v0.10.4: only the forms James can sing, named for his best one
-        const cost = (a.keeps === 'blade' && c.bladeFormed) || (a.keeps === 'spear' && c.spearFormed) || (a.field && c.fieldUsed) ? 0 : actionCost(g, a);
+        const cost = (a.keeps === 'blade' && c.bladeFormed) || (a.keeps === 'spear' && c.spearFormed) || (a.keeps === 'flail' && c.flailFormed) || (a.field && c.fieldUsed) ? 0 : actionCost(g, a); // v0.11.107 (NK1): the flail
         const d = actionDmg(g, a);
         const off = cost > g.james.qi;
         if (off) return ''; // v0.11.17 (pick 1a): a move he can't afford is hidden (Guard costs nothing)
@@ -318,7 +318,7 @@ function renderCombatCards() {
         const tgt = c.enemies.find((e) => e.hp > 0);
         const plain = tgt && showChecks ? `${a.skill} ${v} / DC ${noDiceDc(tgt.dc + a.dcMod)} · ${Math.round((d[0] + d[1]) / 2)} dmg` : '';
         const sw = a.keeps === 'blade' && fragileKnife(g) ? (() => { const n = knifeSwings(g), left = c.bladeFormed ? n - (c.knifeSw || 0) : n; return `${plain ? ' · ' : ''}${c.bladeFormed ? `${left} swing${left === 1 ? '' : 's'} left` : `lasts ${n} swing${n === 1 ? '' : 's'}`}`; })() : ''; // v0.11.104 (GW2, K)
-        return `<button class="card fightish" data-act="${id}" ${off ? 'disabled' : ''}>${esc(a.label)}<span class="tag">${a.guard ? `${showChecks ? 'GU ' : ''}defence +${guardBonus(g)} this round${hasForm(g, 'buckler') && !c.style ? ' · covers Yuki' : ''}` : a.qshield ? `soaks ${qiShield(g)} this round` : a.field ? `${FIELD_ROUNDS} rounds · ${fieldDamage(g)} to each attacker · once a fight` : plain + sw}${a.reach ? ' · a full hit holds it off' : ''}${a.pierce ? ' · ignores armour' : ''}${cost ? ` · ${cost} Qi` : ''}${a.stagger ? ' · staggers' : ''}${off ? ' · not enough Qi' : ''}</span></button>`;
+        return `<button class="card fightish" data-act="${id}" ${off ? 'disabled' : ''}>${esc(a.label)}<span class="tag">${a.guard ? `${showChecks ? 'GU ' : ''}defence +${guardBonus(g)} this round${hasForm(g, 'buckler') && !c.style ? ' · covers Yuki' : ''}` : a.qshield ? `soaks ${qiShield(g)} this round` : a.field ? `${FIELD_ROUNDS} rounds · ${fieldDamage(g)} to each attacker · once a fight` : plain + sw}${a.reach ? ' · a full hit holds it off' : ''}${a.sweep ? ' · hits a second enemy too' : ''}${a.pierce ? ' · ignores armour' : ''}${cost ? ` · ${cost} Qi` : ''}${a.stagger ? ' · staggers' : ''}${off ? ' · not enough Qi' : ''}</span></button>`;
     }).join('');
     const flee = c.flee ? `<button class="card" data-flee="1">Run${showChecks ? `<span class="tag">GU ${n1(skillCheck(g.james.gu))} / DC ${noDiceDc(Math.max(...c.enemies.filter((e) => e.hp > 0).map((e) => e.atk)))}</span>` : ''}</button>` : '';
     const foes = c.enemies.map((e) => `<div class="foe${e.hp <= 0 ? ' down' : ''}"><span>${esc(e.name)}${e.staggered ? (c.style === 'unarmed' ? ' (down)' : ' (reeling)') : ''}</span><div class="stroke"><i style="width:${pct(Math.max(0, e.hp), e.hpMax)}"></i></div></div>`).join('');
@@ -741,6 +741,7 @@ function tipFor(b) {
             if (a.field) lines.push(`A field of bone spikes for ${FIELD_ROUNDS} rounds: ${fieldDamage(g)} back to each attacker. Once a fight.`);
             if (a.stagger) lines.push('Staggers what it hits.');
             if (a.reach) lines.push('A clean hit holds the enemy off for the round.');
+            if (a.sweep) lines.push('Swings on into a second enemy, if one is standing; each is checked on its own.'); // v0.11.107 (NK1)
             if (a.pierce) lines.push('Raw Qi: it ignores the enemy\'s armour.'); // v0.11.95 (review)
             if (a.qshield) lines.push(`Soaks ${qiShield(g)} damage this round; does not cover Yuki.`);
             if (showChecks) { const d = actionDmg(g, a); if (d[1] > 0) lines.push(`${a.skill} · ${n1(d[0])}–${n1(d[1])} damage.`); }

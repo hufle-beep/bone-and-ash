@@ -567,6 +567,7 @@ export const BONESINGER_TIERS = [
  *   darts 2–4 → T10 20–40); Qi cost × engine dampen max(0.25, 1 − 0.0375·(m−1)); v0.11.95 (P2): the Qi blast's
  *   cost ×1.2 a step, its damage on the weapons' multiplier until ×1.4 a step passes it (T7; GW2, Bw), the Qi shield's
  *   soak 3 × the multiplier and cost +10% a step (actionCost, actionDmg);
+ *   T2+ the bone flail (v0.11.107, owner pick NK1): sung once, each swing hits the target and one more foe (COMBAT_ACTIONS.flail);
  *   T3+ pierces enemy DR (hardened steel) and James wears wraithbone plates: DR 1 at T3 L1, +0.1 a level (GW2, U; T10: 8);
  *   T4+ darts strike two enemies (several pieces), T5+ every enemy (many pieces);
  *   T7+ a bone construct fights beside him (2 × the bone multiplier, rounded, a round on the first enemy standing: T7 L1 14);
@@ -714,6 +715,8 @@ export function bumpRel(g, who, f = 0, a = 0) {
  * in whole fights (the knife 25.7%); with 0, 73.3% and 46.7%; blast only wins 72.6% against the knife's 71.0% (was 69.0%).
  */
 export const QI_SHIELD_PER_TIER = 3;
+/** v0.11.107 (owner pick NK1): the line when the bone flail is sung (Fable's, rule 10). */
+export const FLAIL_SUNG = 'A short white haft sets in your fist; a length of knuckled bone swings from its end, looking for company: a bone flail.';
 export const COMBAT_ACTIONS = {
     dart: { id: 'dart', label: 'Bone darts', skill: 'GU', qi: 2, dmg: [2, 4], dcMod: 1 },
     blade: { label: 'Wraithbone blade', skill: 'GU', qi: 3, dmg: [3, 6], dcMod: 1, keeps: 'blade' },
@@ -725,6 +728,8 @@ export const COMBAT_ACTIONS = {
     // v0.11.4 (actionOpen hides them until James can sing them):
     spear: { id: 'spear', label: 'Bone spear', skill: 'GU', qi: 3, dmg: [3, 6], dcMod: 1, reach: true, keeps: 'spear' }, // sung once (Convergence), thrust with GU (v0.11.95: dcMod 2 → 1, Q1); a full hit holds the enemy off for the round
     spikes: { id: 'spikes', label: 'Sing a field of bone spikes', skill: 'Convergence Use', qi: 4, dmg: [0, 0], dcMod: 0, field: true }, // once per fight, 2 rounds
+    // v0.11.107 (owner pick NK1, FL): sung once (Convergence) at T2 L1, swung with GU; each swing hits the target and one more foe standing
+    flail: { id: 'flail', label: 'Bone flail', skill: 'GU', qi: 3, dmg: [2, 4], dcMod: 1, keeps: 'flail', sweep: 2 },
     // v0.11.82 (owner pick B1; labels Fable's): the unarmed brawl (a fight with style 'unarmed'): GU, no Qi, damage × the GU tier
     strike: { id: 'strike', label: 'Step in and hit', skill: 'GU', qi: 0, dmg: [2, 4], dcMod: 0, unarmed: true },
     throw: { id: 'throw', label: 'Hook and throw', skill: 'GU', qi: 0, dmg: [1, 2], dcMod: 2, stagger: true, unarmed: true },
@@ -822,7 +827,7 @@ function stepNoDice(g, actionId, targetIdx) {
     const living = c.enemies.filter((e) => e.hp > 0);
     const target = living[Math.min(targetIdx, living.length - 1)];
     let guard = false;
-    const formed = (act.keeps === 'blade' && c.bladeFormed) || (act.keeps === 'spear' && c.spearFormed) || (act.field && c.fieldUsed); // a used field costs nothing (and does nothing)
+    const formed = (act.keeps === 'blade' && c.bladeFormed) || (act.keeps === 'spear' && c.spearFormed) || (act.keeps === 'flail' && c.flailFormed) || (act.field && c.fieldUsed); // a used field costs nothing (and does nothing)
     const qiNeed = formed ? 0 : actionCost(g, act);
     if (qiNeed && !spendQi(g, qiNeed)) {
         lines.push(`Not enough Qi for ${act.label} — you fall back on guarding.`);
@@ -830,6 +835,7 @@ function stepNoDice(g, actionId, targetIdx) {
     } else {
         if (act.keeps === 'blade' && !c.bladeFormed) { c.bladeFormed = true; lines.push(`White wraithbone slides out of your palm and sets: ${act.label.toLowerCase()}.`); }
         if (act.keeps === 'spear' && !c.spearFormed) { c.spearFormed = true; lines.push('A long white shaft grows out of your fist and keeps growing: a bone spear.'); }
+        if (act.keeps === 'flail' && !c.flailFormed) { c.flailFormed = true; lines.push(FLAIL_SUNG); } // v0.11.107 (NK1)
         if (act.guard) {
             guard = true;
             lines.push('You give ground, watching for the opening.');
@@ -844,7 +850,8 @@ function stepNoDice(g, actionId, targetIdx) {
                 if (c.knifeSw >= knifeSwings(g)) { c.knifeSw = 0; c.bladeFormed = false; lines.push('The knife shatters on the swing. You will have to sing another.'); }
             }
             const T = c.style === 'unarmed' ? 1 : boneTier(g); // v0.11.82: fists pierce nothing
-            const targets = act.id === 'dart' && T >= 4 ? living.slice(0, T >= 5 ? living.length : 2) : [target];
+            const targets = act.id === 'dart' && T >= 4 ? living.slice(0, T >= 5 ? living.length : 2)
+                : act.sweep ? [target, ...living.filter((e) => e !== target).slice(0, act.sweep - 1)] : [target]; // v0.11.107 (NK1): the flail, the target and one more
             const key = actionId;
             let learned = false;
             for (const tg of targets) {

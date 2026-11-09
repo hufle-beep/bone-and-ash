@@ -1,6 +1,6 @@
 /**
  * Bonesinger forms (v0.10.4, owner 2026-11-06): what James can sing, by Convergence Use rank (rank = 10·(T−1) + L;
- * T1 L1 = 1 … T10 L10 = 100). Four lines that grow side by side. What he cannot form yet is hidden in fights and story
+ * T1 L1 = 1 … T10 L10 = 100). Lines that grow side by side (four at first; six since v0.11.107, NK1: reach, sweep). What he cannot form yet is hidden in fights and story
  * choices. (Until v0.11.45 a switch kept every form open in the dice rules of Story Mode; both are gone.)
  */
 
@@ -30,6 +30,9 @@ export const FORM_LINES = {
     reach: { label: 'Reach', forms: [ // v0.11.4
         { id: 'spear', at: R(1, 8), name: 'bone spear (holds an enemy off)' },
     ] },
+    sweep: { label: 'Sweep', forms: [ // v0.11.107 (owner pick NK1, FL): the bone flail, hits the target and one more
+        { id: 'flail', at: R(2, 1), name: 'bone flail (hits two at a swing)' },
+    ] },
     defence: { label: 'Personal defence', forms: [
         { id: 'bracer', at: R(1, 5), name: 'bracer' },
         { id: 'buckler', at: R(2, 1), name: 'buckler' },
@@ -57,7 +60,7 @@ export const rankLabel = tl;
 /* ---- fights: which actions show, and what they are called ---- */
 const best = (g, line) => lineState(g, line).now?.id;
 /** v0.11.4: the spear and the spike field (the name is from when they existed only in Incremental Mode, not Story Mode). */
-export const INC_ONLY_ACTIONS = new Set(['spear', 'spikes', 'strike', 'throw', 'cover']); // v0.11.82: and the unarmed brawl's three
+export const INC_ONLY_ACTIONS = new Set(['spear', 'spikes', 'flail', 'strike', 'throw', 'cover']); // v0.11.82: and the unarmed brawl's three; v0.11.107 (NK1): the flail
 /** v0.11.82 (owner pick B1): a fight's style. 'unarmed' (Bao's brawl): only the three unarmed actions; 'spar' (Ya's brawl):
  *  only the sung weapon (blade, spear) and guard; no style: every bone action as before. */
 export const UNARMED_ACTIONS = new Set(['strike', 'throw', 'cover']);
