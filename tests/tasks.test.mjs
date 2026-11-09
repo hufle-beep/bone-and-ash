@@ -321,8 +321,8 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     setCu(g, 1, 8); assert(!fragileKnife(g) && actionLabel(g, 'blade', 'x') === 'Bone knife', 'T1 L8: the knife holds');
     setCu(g, 2, 5); assert(actionLabel(g, 'blade', 'x') === 'Bone sword' && /Shield/.test(actionLabel(g, 'guard', 'x')), 'T2 L5: sword and shield');
     setCu(g, 3, 1); assert(actionLabel(g, 'dart', 'x') === 'Thrown bone lance' && hasForm(g, 'slab'), 'T3 L1: lance and slab');
-    // the knife breaks every swing below T1 L8 and holds from it
-    for (const [l, holds] of [[1, false], [8, true]]) {
+    // the knife breaks every swing at T1 L1–L2, after two swings at L3–L4 (v0.11.104, GW2 K: still formed after one), and holds from T1 L8
+    for (const [l, holds] of [[1, false], [3, true], [8, true]]) {
         const h = ensureBars(newGame(82, { closed: true })); setCu(h, 1, l); h.james.qi = 40;
         sCombat(h, { id: 'jackals', intro: '', band: 'standard', enemies: [{ name: 'Dummy', hp: 999, dc: 1, atk: 1, dmg: 0 }], win: 'stream', lose: 'stream' });
         cStep(h, 'blade');
@@ -605,15 +605,17 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     const blade = COMBAT_ACTIONS.blade, dart = COMBAT_ACTIONS.dart;
     assert(formDmgBonus(at(1, 8), blade) === 0 && formDmgBonus(at(2, 1), blade) === 1 && formDmgBonus(at(2, 5), blade) === 2, 'blade: knife +0, dagger +1, sword +2');
     assert(formDmgBonus(at(2, 9), dart) === 0 && formDmgBonus(at(3, 1), dart) === 2, 'darts: +2 from the thrown lance');
-    assert(actionDmg(at(2, 5), blade).join() === '8,14', `sword at T2: (3–6) × 2 + 2 (${actionDmg(at(2, 5), blade)})`);
-    assert(guardBonus(at(1, 4)) === 2 && guardBonus(at(1, 5)) === 2.5 && guardBonus(at(2, 1)) === 3 && guardBonus(at(5, 1)) === 4.5, 'Guard +2, +0.5 per defence form');
+    assert(actionDmg(at(2, 1), blade).join() === '7,13', `dagger at T2 L1: (3–6) × 2 + 1 (${actionDmg(at(2, 1), blade)})`); // v0.11.104 (GW2): × the bone multiplier; at L1 as before
+    { const m = 2 + 0.5 * 4 / 9, d = actionDmg(at(2, 5), blade); assert(Math.abs(d[0] - (3 * m + 2)) < 1e-9 && Math.abs(d[1] - (6 * m + 2)) < 1e-9, `sword at T2 L5: (3–6) × ${m.toFixed(2)} + 2 (${d})`); }
+    assert(guardBonus(at(1, 1)) === 2 && guardBonus(at(1, 5)) === 2.5 && guardBonus(at(2, 1)) === 3 && guardBonus(at(5, 1)) === 4.5, 'Guard +2, +0.5 per defence form');
+    assert(guardBonus(at(1, 4)) === 2.4 && guardBonus(at(1, 8)) === 2.8 && guardBonus(at(3, 5)) === 4.1 && guardBonus(at(7, 1)) === 4.5, `GW2 U: guard grows level by level toward the next form (${guardBonus(at(1, 4))}, ${guardBonus(at(1, 8))}, ${guardBonus(at(3, 5))})`);
     assert(!actionOpen(at(1, 2), 'spikes') && actionOpen(at(1, 3), 'spikes') && !actionOpen(at(1, 7), 'spear') && actionOpen(at(1, 8), 'spear'), 'spike field from T1 L3, spear from T1 L8');
     assert(fieldDamage(at(2, 1)) === 1 && fieldDamage(at(3, 1)) === 2 && FIELD_ROUNDS === 2, 'the field: 1 back, 2 from the slab, 2 rounds');
     // a fight: the field, once, then the spear holds a foe off
     const g = at(1, 8); g.james.qi = 30; g.james.gu.level = 9; ensureBars(g); g.james.qi = 30;
     startCombat(g, { id: 'test_rats', name: 't', enemies: [{ name: 'Rat', hp: 40, dc: 2, atk: 3, dmg: 2 }, { name: 'Rat 2', hp: 40, dc: 2, atk: 3, dmg: 2 }], win: 'stream', lose: 'stream' });
     const q0 = g.james.qi; const r1 = combatStep(g, 'spikes');
-    assert(g.combat.fieldUsed && g.combat.field === 1 && q0 - g.james.qi === 4 && r1.lines.filter((l) => /through the spikes: 1/.test(l)).length === 2, 'the field: 4 Qi, both attackers take 1, one round left');
+    assert(g.combat.fieldUsed && g.combat.field === 1 && Math.abs(q0 - g.james.qi - 3.9) < 1e-9 && r1.lines.filter((l) => /through the spikes: 1/.test(l)).length === 2, 'the field: 3.9 Qi at T1 L8 (4 dampened by the bone multiplier 1.39; v0.11.104, GW2), both attackers take 1, one round left');
     combatStep(g, 'guard'); assert(g.combat.field === 0, 'gone after 2 rounds');
     const q1 = g.james.qi; const r2 = combatStep(g, 'spikes'); assert(g.james.qi === q1 && r2.lines.some((l) => /already broken/.test(l)), 'once a fight: the second try does nothing and costs nothing');
     const q2 = g.james.qi; const r3 = combatStep(g, 'spear');
@@ -641,6 +643,7 @@ function fight(g, run) {
         const acts = Object.keys(COMBAT_ACTIONS).filter((id) => !INC_ONLY_ACTIONS.has(id) || actionOpen(g, id)); // v0.11.4: the spear and the spike field when he can sing them
         const act = smart ? (smartAction(g, t)) : acts[rnd(acts.length)]; // v0.11.96 (BT1): the shared smart rule
         const out = (!smart && t % 7 === 6 && g.combat.flee) ? combatFlee(g) : combatStep(g, act);
+        for (const l of out?.lines || []) if (/\d\.\d{2,}/.test(l)) { assert(false, `SH1 L4: a fight line with float noise (${id0}): ${l}`); break; } // v0.11.104 (SH1): no number past one decimal in a fight's log
         if (out?.done) { const k = `inc:${id0 || '?'}:${smart ? 'smart' : 'random'}`; const f = fightStats[k] || (fightStats[k] = { win: 0, lose: 0, flee: 0 }); f[out.done] = (f[out.done] || 0) + 1; goTo(g, SCENES, out.next); return; }
     }
 }
@@ -1290,7 +1293,7 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     assert(de.degree === 1, `review: a strong singer with weak fists is not offered the one-move finish in Bao's brawl (degree ${de.degree})`);
     // an ordinary fight is untouched
     const n = mk(7, 5); startCombat(n, { id: 'zz_test', enemies: [{ name: 'Y', hp: 5, dc: 3, atk: 3, dmg: 1 }], win: 'night_won', lose: 'night_lost' });
-    assert(!n.combat.style && actionOpen(n, 'dart') && !actionOpen(n, 'strike') && guardBonus(n) > 2 && armourDrOf(n) === 5 && fightAction(n, 'strike') === 'guard', 'no style: every bone action as before, the unarmed ones closed');
+    assert(!n.combat.style && actionOpen(n, 'dart') && !actionOpen(n, 'strike') && guardBonus(n) > 2 && armourDrOf(n) === 5.4 && fightAction(n, 'strike') === 'guard', 'no style: every bone action as before (plates DR 5.4 at T7 L5: GW2, U), the unarmed ones closed');
     // the texts (Fable's)
     assert(yaCh.text === 'Take the fight. "Your spear against my blade. No armour. Nobody dies."', 'texts: the spar choice');
     assert(/flat of a white bone blade laid across her collarbones/.test(SCENES.ya_won.text) && !/cage/.test(SCENES.ya_won.text), 'texts: ya_won without the bone cage');
@@ -1333,6 +1336,61 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
         assert(o?.done && g.minutes < night0 + 120, `v0.11.91: ${sc}${kind ? ` (${kind})` : ''} is over before 02:00 even at the round cap (${o?.done}, ${g.minutes - night0} min after midnight)`);
     }
 }
+// v0.11.104 (owner 2026-11-09 20:13, pick GW2): growth by level. D (DH): the bone multiplier, the tier plus half a step over
+// its ten levels; U: guard toward the next form and the plates +0.1 a level; K: the fragile knife lasts a few swings; Bw: the
+// Qi blast and shield on the same multiplier (the blast's damage at the weapons' pace until ×1.4 a step passes it, T7).
+{
+    const G = await import('../js/core/game.js');
+    const { knifeSwings } = await import('../js/core/forms.js');
+    const { dampenMultiplier } = await import('../js/core/formulas.js');
+    const A = G.COMBAT_ACTIONS;
+    const at = (t, l) => { const g = ensureBars(newGame(10400 + t * 10 + l)); g.james.skills['Convergence Use'] = { tier: t, level: l, xp: 0 }; return g; };
+    const near = (a, b) => Math.abs(a - b) < 1e-9;
+    assert(G.LEVEL_STEP === 0.5, 'GW2 D: half a step over a tier');
+    assert(near(G.boneMult(at(1, 1)), 1) && near(G.boneMult(at(1, 8)), 1 + 3.5 / 9) && near(G.boneMult(at(1, 10)), 1.5) && near(G.boneMult(at(2, 1)), 2) && G.boneMult(at(10, 1)) === 10 && G.boneMult(at(10, 10)) === 10, 'GW2 D: the multiplier: 1, 1.39, 1.5, 2 … 10');
+    // at every L1, everything as before the change (the old formulas, written out)
+    const oldDr = (T) => Math.max(0, T - 2), oldGuard = [2, 2.5, 3, 3.5, 4, 4.5];
+    for (let T = 1; T <= 10; T++) {
+        const g = at(T, 1), b = G.formDmgBonus(g, A.dart);
+        assert(G.actionDmg(g, A.dart).join() === [2 * T + b, 4 * T + b].join() && G.qiShield(g) === 3 * T && G.armourDr(g) === oldDr(T) && G.actionCost(g, A.dart) === Math.round(2 * dampenMultiplier(T) * 10) / 10, `GW2: T${T} L1 as before (darts, shield, plates, cost)`);
+    }
+    assert([[1, 1, 0], [1, 5, 1], [2, 1, 2], [2, 5, 3], [3, 1, 4], [5, 1, 5]].every(([t, l, i]) => G.guardBonus(at(t, l)) === oldGuard[i]), 'GW2 U: guard at each form as before');
+    // nothing falls as Convergence rises (rank 1 … 100), and the gates stay on the tier
+    let prev = null, ok = true;
+    for (let r = 1; r <= 100; r++) {
+        const g = at(Math.floor((r - 1) / 10) + 1, ((r - 1) % 10) + 1);
+        const v = [G.boneMult(g), G.actionDmg(g, A.dart)[1], G.actionDmg(g, A.blade)[1], G.actionDmg(g, A.blast)[1], G.qiShield(g), G.guardBonus(g), G.armourDr(g)];
+        if (prev && v.some((x, i) => x < prev[i] - 1e-9)) { ok = false; assert(false, `GW2: nothing falls at rank ${r} (${v} after ${prev})`); break; }
+        prev = v;
+    }
+    assert(ok, 'GW2: damage, the blast, the shield, guard and plates never fall as Convergence rises');
+    assert(G.armourDr(at(2, 10)) === 0 && G.armourDr(at(3, 1)) === 1 && G.armourDr(at(3, 5)) === 1.4 && G.armourDr(at(9, 10)) === 7.9 && G.armourDr(at(10, 10)) === 8, 'GW2 U: the plates: from T3 L1, +0.1 a level, 8 at T10');
+    // Bw: the blast's multiplier is the larger of the weapons' and ×1.4 a step; P2's own curve from T7
+    for (const [t, l] of [[1, 1], [1, 8], [2, 1], [4, 6], [6, 10], [7, 1], [9, 5]]) { const g = at(t, l), m = G.boneMult(g); assert(near(G.blastMult(g), Math.max(m, 1.4 ** (m - 1))) && G.blastMult(g) >= m, `GW2 Bw: the blast's multiplier at T${t} L${l}`); }
+    assert(near(G.blastMult(at(7, 1)), 1.4 ** 6) && near(G.blastMult(at(6, 1)), 6), 'GW2 Bw: ×1.4 a tier passes the weapons at T7');
+    assert(near(G.qiShield(at(1, 10)), 4.5) && G.qiShield(at(1, 8)) === 4.2, 'GW2 Bw: the shield 4.5 at T1 L10, 4.2 at T1 L8');
+    // K: the fragile knife's swings
+    assert([1, 2, 3, 4, 5, 6, 7].map((l) => knifeSwings(at(1, l))).join() === '1,1,2,2,3,3,4' && knifeSwings(at(1, 8)) === Infinity, 'GW2 K: 1, 1, 2, 2, 3, 3, 4 swings; holds from T1 L8');
+    const swing = (l) => { const g = at(1, l); g.james.gu = { tier: 3, level: 1, xp: 0 }; ensureBars(g); g.james.qi = 99; G.startCombat(g, { id: 'gw2_test', enemies: [{ name: 'Post', hp: 999, dc: 0.1, atk: 0.1, dmg: 0 }], win: 'stream', lose: 'stream' });
+        const out = []; for (let i = 0; i < 4; i++) { const q = g.james.qi; const r = G.combatStep(g, 'blade'); out.push([Math.round((q - g.james.qi) * 10) / 10, r.lines.some((x) => /knife shatters/.test(x))]); } return out; };
+    const k1 = swing(1), k3 = swing(3);
+    assert(k1.every(([q, s]) => q > 0 && s), `GW2 K: at T1 L1 the knife still shatters every swing, Qi each time (${JSON.stringify(k1)})`);
+    assert(k3[0][0] > 0 && !k3[0][1] && k3[1][0] === 0 && k3[1][1] && k3[2][0] > 0 && !k3[2][1] && k3[3][1], `GW2 K: at T1 L3 two swings for one singing (${JSON.stringify(k3)})`);
+    // SH1 L4: the construct by level (2 × the multiplier, rounded): T7 L1 14, L6 15 (7.56 × 2), T10 20
+    const con = (t, l) => { const g = at(t, l); g.james.gu = { tier: 3, level: 1, xp: 0 }; ensureBars(g); g.james.qi = 99; G.startCombat(g, { id: 'gw2_con', enemies: [{ name: 'Post', hp: 999, dc: 0.1, atk: 0.1, dmg: 0 }], win: 'stream', lose: 'stream' }); const ln = G.combatStep(g, 'guard').lines.find((x) => /construct strikes/.test(x)); return ln && Number(/: (\d+)\./.exec(ln)[1]); };
+    assert(con(6, 10) === undefined && con(7, 1) === 14 && con(7, 6) === 15 && con(10, 10) === 20, `SH1 L4: the construct ${con(7, 1)} / ${con(7, 6)} / ${con(10, 10)}`);
+    // SH1 S1: the shield's tenths stay tenths in a real round (T1 L2: 3.2 against blows of 3 and 4; L8: 4.2)
+    for (const l of [2, 8]) { const g = at(1, l); g.james.gu = { tier: 1, level: 1, xp: 0 }; ensureBars(g); g.james.qi = 99; const hp0 = g.james.hp;
+        G.startCombat(g, { id: 'sh1_test', enemies: [{ name: 'Rat A', hp: 999, dc: 0.1, atk: 30, dmg: 3 + 1 }, { name: 'Rat B', hp: 999, dc: 0.1, atk: 30, dmg: 4 + 1 }], win: 'stream', lose: 'stream' });
+        const ls = G.combatStep(g, 'qshield').lines; const lost = Math.round((hp0 - g.james.hp) * 1e6) / 1e6;
+        assert(ls.some((x) => /soaked/.test(x)) && !ls.some((x) => /\d\.\d{2,}/.test(x)) && Math.abs(lost * 10 - Math.round(lost * 10)) < 1e-6, `SH1 S1: T1 L${l}: the soak in tenths, no float noise (HP −${lost}; ${ls.filter((x) => /soak|lands/.test(x)).join(' | ')})`); }
+    // the FAQ says so
+    const { FAQ } = await import('../js/core/faq.js').catch(() => ({}));
+    const fights = (FAQ || []).find?.((e) => e[0] === 'Fights');
+    if (fights) { const t = typeof fights[1] === 'function' ? fights[1]({}) : fights[1]; assert(/From T1 L8 the knife holds/.test(t) && /half as much again across a tier/.test(t) && /toward the next piece of armour/.test(t) && !/shatters on every swing/.test(t), 'GW2: the FAQ\'s Fights entry (Fable\'s lines)'); }
+    else assert(false, 'GW2: the FAQ\'s Fights entry found');
+}
+
 // v0.11.102 (owner 2026-11-09 18:18, pick QB1): the Qi blast's hit modifier 0, one under the weapons' +1: Convergence Use
 // trails GU (a median 3 ranks, 1.5 check points, at the bots' fights), so with Convergence 2 ranks (1 check point) behind GU
 // the blast's check clears its DC by as much as the knife's (the bands are a ratio, so they can still differ); still checked on Convergence Use (the owner's "pure Convergence" design)
@@ -1487,7 +1545,7 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     // N: the spear when he can sing it, else the blade (free once formed unless it's the fragile knife), darts, guard
     { const g = at(3, 1); g.combat.fieldUsed = true; assert(actionOpen(g, 'spear') && smartAction(g, 0) === 'spear', `BT1 N: the spear when open (${smartAction(g, 0)})`); g.james.qi = 0; g.combat.spearFormed = true; assert(smartAction(g, 1) === 'spear', 'BT1 N: a formed spear costs nothing'); }
     { const g = at(1, 9, 0); assert(actionOpen(g, 'spear') && !fragileKnife(g), 'BT1 test state: a knife and the spear'); g.combat.bladeFormed = true; assert(smartAction(g, 0) === 'blade', 'BT1 N: no Qi for the spear: the formed knife swings for free'); }
-    { const g = at(1, 6, 0); assert(fragileKnife(g) && actionOpen(g, 'dart'), 'BT1 test state: the fragile knife, darts open'); // the knife breaks every swing, so it is never formed at the bot's turn (review, medium 2)
+    { const g = at(1, 6, 0); assert(fragileKnife(g) && actionOpen(g, 'dart'), 'BT1 test state: the fragile knife, darts open'); // the knife isn't formed here (since v0.11.104, GW2 K, a fragile knife lasts 1–4 swings; the smart rule still prices it as unformed, kept as measured)
       g.james.qi = cost(g, A.blade); assert(smartAction(g, 0) === 'blade', 'BT1 N: the fragile knife while its Qi lasts');
       g.james.qi = cost(g, A.blade) - 0.1; assert(smartAction(g, 0) === 'dart', `BT1 N: the knife can't be paid: darts (${smartAction(g, 0)})`);
       g.james.qi = cost(g, A.dart) - 0.1; assert(smartAction(g, 0) === 'guard', 'BT1 N: nothing paid: guard'); }
@@ -1516,7 +1574,7 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
 }
 // v0.11.95 (owner 2026-11-09 12:26, pick Q1 at 12:43): every weapon sung with Convergence and checked on GU, one hit
 // modifier (+1), the weapons differ in damage and what they do; the Qi blast (Convergence Use, ignores armour) and the Qi
-// shield (soaks 3 × the Convergence tier that round), open from the start, never in a spar or a brawl
+// shield (soaks 3 × the Convergence tier that round; 3 × the bone multiplier since v0.11.104, GW2), open from the start, never in a spar or a brawl
 {
     const { QI_SHIELD_PER_TIER, qiShield, QI_SHIELD_TEXT, QI_BLAST_PIERCE } = await import('../js/core/game.js');
     const A = COMBAT_ACTIONS;
@@ -1529,7 +1587,7 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     { // P2 (owner 13:19): the blast ×1.4 damage and ×1.2 cost a tier; the shield's cost +10% of its base a tier; the rest as before
         const { actionCost: cost } = await import('../js/core/game.js');
         const mid = (d) => Math.round((d[0] + d[1]) / 2);
-        const want = { 1: [5, 4, 3], 2: [7, 4.8, 3.3], 3: [10, 5.8, 3.6], 5: [19, 8.3, 4.2], 7: [38, 11.9, 4.8], 10: [103, 20.6, 5.7] };
+        const want = { 1: [5, 4, 3], 2: [10, 4.8, 3.3], 3: [15, 5.8, 3.6], 5: [25, 8.3, 4.2], 7: [38, 11.9, 4.8], 10: [103, 20.6, 5.7] }; // v0.11.104 (GW2, Bw): the blast's damage at the weapons' pace until T7 (P2's T2 7, T3 10, T5 19)
         for (const [T, [d, c, s]] of Object.entries(want)) { const x = at(Number(T)); assert(mid(actionDmg(x, A.blast)) === d && cost(x, A.blast) === c && cost(x, A.qshield) === s, `P2: T${T}: blast ${mid(actionDmg(x, A.blast))} dmg for ${cost(x, A.blast)} Qi (want ${d}, ${c}), shield ${cost(x, A.qshield)} Qi (want ${s})`); }
         assert(cost(at(10), A.dart) < cost(at(1), A.dart) && cost(at(10), A.needle) < cost(at(1), A.needle), 'P2: darts and the needle still get cheaper with the tier');
         assert(actionDmg(at(3), A.blade).join() === actionDmg(at(3), { ...A.blade, pierce: undefined }).join(), 'P2: the blade unchanged');

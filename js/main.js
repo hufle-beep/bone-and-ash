@@ -1,5 +1,5 @@
 /** Bone and Ash — UI. Renders the story, combat, sheet, hammerspace, journal and saves. */
-import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel, hasForm } from './core/forms.js';
+import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel, hasForm, fragileKnife, knifeSwings } from './core/forms.js';
 import { coilMult, coilMultNext, wakeDay, fmtMult, clockParts } from './core/game.js';
 import {
     newGame, ensureBars, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, skillCheck, xpToNext, clockLabel, clockLabelG, realmName, yukiForm,
@@ -317,7 +317,8 @@ function renderCombatCards() {
         const v = n1(skillCheck(a.skill === 'GU' ? g.james.gu : g.james.skills[a.skill]) + (c.adapt?.[id] || 0));
         const tgt = c.enemies.find((e) => e.hp > 0);
         const plain = tgt && showChecks ? `${a.skill} ${v} / DC ${noDiceDc(tgt.dc + a.dcMod)} · ${Math.round((d[0] + d[1]) / 2)} dmg` : '';
-        return `<button class="card fightish" data-act="${id}" ${off ? 'disabled' : ''}>${esc(a.label)}<span class="tag">${a.guard ? `${showChecks ? 'GU ' : ''}defence +${guardBonus(g)} this round${hasForm(g, 'buckler') && !c.style ? ' · covers Yuki' : ''}` : a.qshield ? `soaks ${qiShield(g)} this round` : a.field ? `${FIELD_ROUNDS} rounds · ${fieldDamage(g)} to each attacker · once a fight` : plain}${a.reach ? ' · a full hit holds it off' : ''}${a.pierce ? ' · ignores armour' : ''}${cost ? ` · ${cost} Qi` : ''}${a.stagger ? ' · staggers' : ''}${off ? ' · not enough Qi' : ''}</span></button>`;
+        const sw = a.keeps === 'blade' && fragileKnife(g) ? (() => { const n = knifeSwings(g), left = c.bladeFormed ? n - (c.knifeSw || 0) : n; return `${plain ? ' · ' : ''}${c.bladeFormed ? `${left} swing${left === 1 ? '' : 's'} left` : `lasts ${n} swing${n === 1 ? '' : 's'}`}`; })() : ''; // v0.11.104 (GW2, K)
+        return `<button class="card fightish" data-act="${id}" ${off ? 'disabled' : ''}>${esc(a.label)}<span class="tag">${a.guard ? `${showChecks ? 'GU ' : ''}defence +${guardBonus(g)} this round${hasForm(g, 'buckler') && !c.style ? ' · covers Yuki' : ''}` : a.qshield ? `soaks ${qiShield(g)} this round` : a.field ? `${FIELD_ROUNDS} rounds · ${fieldDamage(g)} to each attacker · once a fight` : plain + sw}${a.reach ? ' · a full hit holds it off' : ''}${a.pierce ? ' · ignores armour' : ''}${cost ? ` · ${cost} Qi` : ''}${a.stagger ? ' · staggers' : ''}${off ? ' · not enough Qi' : ''}</span></button>`;
     }).join('');
     const flee = c.flee ? `<button class="card" data-flee="1">Run${showChecks ? `<span class="tag">GU ${n1(skillCheck(g.james.gu))} / DC ${noDiceDc(Math.max(...c.enemies.filter((e) => e.hp > 0).map((e) => e.atk)))}</span>` : ''}</button>` : '';
     const foes = c.enemies.map((e) => `<div class="foe${e.hp <= 0 ? ' down' : ''}"><span>${esc(e.name)}${e.staggered ? (c.style === 'unarmed' ? ' (down)' : ' (reeling)') : ''}</span><div class="stroke"><i style="width:${pct(Math.max(0, e.hp), e.hpMax)}"></i></div></div>`).join('');
@@ -732,7 +733,10 @@ function tipFor(b) {
         const a = COMBAT_ACTIONS[b.dataset.act];
         if (a) {
             const cost = actionCost(g, a);
-            if (cost) lines.push(`Costs ${cost} Qi${a.keeps ? ' to form, then free this fight' : ''}.`);
+            const fk = a.keeps === 'blade' && fragileKnife(g) ? knifeSwings(g) : 0; // v0.11.104 (GW2, K): the fragile knife lasts a few swings
+            const formedKnife = fk && g.combat?.bladeFormed; // v0.11.104 (SH1, L2): a sung knife costs nothing more; say what it has left
+            if (formedKnife) { const left = fk - (g.combat.knifeSw || 0); lines.push(`Formed; ${left} swing${left === 1 ? '' : 's'} left.`); }
+            else if (cost) lines.push(`Costs ${cost} Qi${fk ? ` to form; it shatters after ${fk} swing${fk === 1 ? '' : 's'}` : a.keeps ? ' to form, then free this fight' : ''}.`);
             if (a.guard) lines.push(`Braces: defence +${guardBonus(g)} this round${hasForm(g, 'buckler') && !g.combat?.style ? ', and the shield covers Yuki' : ''}.`);
             if (a.field) lines.push(`A field of bone spikes for ${FIELD_ROUNDS} rounds: ${fieldDamage(g)} back to each attacker. Once a fight.`);
             if (a.stagger) lines.push('Staggers what it hits.');

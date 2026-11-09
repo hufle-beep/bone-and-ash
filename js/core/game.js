@@ -5,7 +5,7 @@
  * open collateral Qi. New for a game without a narrator: every check is value ÷ DC (no dice; value + d6 until v0.9.3 / v0.11.45).
  * Pure — no DOM. The UI (main.js) and the tests drive it.
  */
-import { actionOpen, actionLabel, fragileKnife, lineState, FORM_LINES, hasForm, fightStyle } from './forms.js';
+import { actionOpen, actionLabel, fragileKnife, knifeSwings, lineState, FORM_LINES, hasForm, fightStyle, cuRank } from './forms.js';
 /** v0.11.4: how far along a form line James is (0 = its first form, −1 = none yet). */
 const formStep = (g, line) => { const n = lineState(g, line).now; return n ? FORM_LINES[line].forms.findIndex((f) => f.id === n.id) : -1; };
 import {
@@ -562,38 +562,64 @@ export const BONESINGER_TIERS = [
 ];
 /**
  * What the tier does in a fight (Convergence Use tier; the weapons are Bonesinger constructs, all checked on GU since v0.11.95):
- *   damage × tier (darts 2–4 → T10 20–40); Qi cost × engine dampen max(0.25, 1 − 0.0375·(T−1)); v0.11.95 (P2): the Qi blast's
- *   damage ×1.4 and cost ×1.2 a tier, the Qi shield's soak 3 × tier and cost +10% a tier (actionCost, actionDmg);
- *   T3+ pierces enemy DR (hardened steel) and James wears wraithbone plates: +1 DR per tier from T3 (T10: +8);
+ *   damage × the bone multiplier (boneMult: v0.11.104, owner pick GW2: the tier, plus half a step over the tier's ten levels;
+ *   darts 2–4 → T10 20–40); Qi cost × engine dampen max(0.25, 1 − 0.0375·(m−1)); v0.11.95 (P2): the Qi blast's
+ *   cost ×1.2 a step, its damage on the weapons' multiplier until ×1.4 a step passes it (T7; GW2, Bw), the Qi shield's
+ *   soak 3 × the multiplier and cost +10% a step (actionCost, actionDmg);
+ *   T3+ pierces enemy DR (hardened steel) and James wears wraithbone plates: DR 1 at T3 L1, +0.1 a level (GW2, U; T10: 8);
  *   T4+ darts strike two enemies (several pieces), T5+ every enemy (many pieces);
- *   T7+ a bone construct fights beside him (tier × 1–3 a round on the first enemy standing);
+ *   T7+ a bone construct fights beside him (2 × the bone multiplier, rounded, a round on the first enemy standing: T7 L1 14);
  *   T8+ the construct, on its own judgement, steps into the first blow aimed at him each round;
  *   T10 his constructs never miss (they cut what should not be cut); not the Qi blast, which is raw Qi, no bone (v0.11.100).
  */
 export const boneTier = (g) => Math.min(SKILL_MAX_TIER, g.james.skills['Convergence Use'].tier);
+/** v0.11.104 (owner 2026-11-09 20:13, pick GW2, D: DH): the bone multiplier. Today's tier at every L1, then half a step over
+ *  the tier's ten levels (T1 L1 1, T1 L8 1.39, T1 L10 1.5, T2 L1 2 …; T10 10). Damage, the Qi blast and shield, the dampened
+ *  costs, the plates and the construct read it; the gates (T3 pierce, T4–T5 volleys, T7–T8 constructs, T10 no miss) stay on the tier.
+ *  GW2_NOTE (the numbers before the pick, 300 bot games, 6,618 fight states each played both ways): smart 74.3 → 77.7%,
+ *  Act 1 86.9 → 90.3%; blade only 73.1 → 77.2%, blast only 74.3 → 77.0%; the rot ape 14.2 → 18.7%; the models' Act 1 Coil
+ *  Careful 4.07 → 3.70, Completionist 4.07 → 3.46 (the target 6: the retune, section 2). */
+export const LEVEL_STEP = 0.5;
+export const boneMult = (g) => {
+    const T = boneTier(g);
+    if (T >= SKILL_MAX_TIER) return T;
+    const L = Math.max(1, Math.min(10, g.james.skills['Convergence Use'].level || 1));
+    return T + LEVEL_STEP * (L - 1) / 9;
+};
 /** v0.11.95 (owner 12:47, pick P2 at 13:19): the Qi blast's damage ×1.4 and its cost ×1.2 a Convergence tier (K2); the Qi
- *  shield's cost +10% of its base a tier (S1). Every other move's cost falls with the engine's dampening, as before. */
+ *  shield's cost +10% of its base a tier (S1). Every other move's cost falls with the engine's dampening, as before.
+ *  v0.11.104 (GW2, Bw): each by the bone multiplier, so by level too; the blast's damage keeps pace with the weapons'
+ *  (the larger of the multiplier and ×1.4 a step: the weapons' until T7, then ×1.4 a tier as P2's table). */
 export const BLAST_DMG_STEP = 1.4, BLAST_COST_STEP = 1.2, QSHIELD_COST_STEP = 0.1;
 export const actionCost = (g, a) => {
-    const T = boneTier(g), r = (x) => Math.round(x * 10) / 10;
-    if (a.pierce) return r(a.qi * BLAST_COST_STEP ** (T - 1));
-    if (a.qshield) return r(a.qi * (1 + QSHIELD_COST_STEP * (T - 1)));
-    return a.qi ? r(a.qi * dampenMultiplier(T)) : 0;
+    const m = boneMult(g), r = (x) => Math.round(x * 10) / 10; // v0.11.104 (GW2): by level, not only by tier
+    if (a.pierce) return r(a.qi * BLAST_COST_STEP ** (m - 1));
+    if (a.qshield) return r(a.qi * (1 + QSHIELD_COST_STEP * (m - 1)));
+    return a.qi ? r(a.qi * dampenMultiplier(m)) : 0;
 };
-/** Damage × the Convergence Use tier; v0.11.4: dagger +1, sword +2 on the blade; the thrown lance +2 on darts. */
+/** v0.11.104 (GW2, Bw): the Qi blast's damage multiplier: the weapons' until ×1.4 a step passes it (T7). */
+export const blastMult = (g) => { const m = boneMult(g); return Math.max(m, BLAST_DMG_STEP ** (m - 1)); };
+/** Damage × the bone multiplier (the Convergence Use tier until v0.11.104); v0.11.4: dagger +1, sword +2 on the blade; the thrown lance +2 on darts. */
 export const formDmgBonus = (g, a) => (a.keeps === 'blade' ? Math.max(0, formStep(g, 'melee') - 1) : a.id === 'dart' && hasForm(g, 'lance') ? 2 : 0);
 export const actionDmg = (g, a) => {
     if (a.unarmed) { const t = Math.min(SKILL_MAX_TIER, g.james.gu.tier); return [a.dmg[0] * t, a.dmg[1] * t]; } // v0.11.82: fists by the GU tier
-    if (a.pierce) { const m = BLAST_DMG_STEP ** (boneTier(g) - 1); return [a.dmg[0] * m, a.dmg[1] * m]; } // v0.11.95 (P2): the Qi blast climbs ×1.4 a tier
-    const b = formDmgBonus(g, a); return [a.dmg[0] * boneTier(g) + b, a.dmg[1] * boneTier(g) + b];
+    if (a.pierce) { const m = blastMult(g); return [a.dmg[0] * m, a.dmg[1] * m]; } // v0.11.95 (P2): ×1.4 a tier; v0.11.104 (GW2, Bw): the weapons' pace until T7
+    const b = formDmgBonus(g, a), m = boneMult(g); return [a.dmg[0] * m + b, a.dmg[1] * m + b]; // v0.11.104 (GW2): by level
 };
-/** Guard's defence bonus: 2; v0.11.4: +0.5 per personal-defence form (bracer 2.5 … full armour 4.5). */
-export const guardBonus = (g) => (fightStyle(g) ? 2 : 2 + 0.5 * (formStep(g, 'defence') + 1)); // v0.11.82: no armour in a spar or a brawl
+/** Guard's defence bonus: 2; v0.11.4: +0.5 per personal-defence form (bracer 2.5 … full armour 4.5). v0.11.104 (GW2, U): and
+ *  level by level toward the next form (rank 8, between the bracer at 5 and the buckler at 11: 2.75 → 2.8 shown), to 0.1. */
+export const guardBonus = (g) => {
+    if (fightStyle(g)) return 2; // v0.11.82: no armour in a spar or a brawl
+    const st = formStep(g, 'defence'), fs = FORM_LINES.defence.forms, nx = fs[st + 1];
+    let b = 2 + 0.5 * (st + 1);
+    if (nx) { const lo = st >= 0 ? fs[st].at : 1; b += 0.5 * (cuRank(g) - lo) / (nx.at - lo); }
+    return Math.round(b * 10) / 10;
+};
 /** v0.11.4 spike field: rounds, and the damage each attacker takes (1; 2 from the slab). */
 export const FIELD_ROUNDS = 2;
 export const fieldDamage = (g) => (hasForm(g, 'slab') ? 2 : 1);
 /** v0.11.95 (Q1): what the Qi shield soaks this round (3 × the Convergence Use tier), and its lines (Fable's, rule 10). */
-export const qiShield = (g) => QI_SHIELD_PER_TIER * boneTier(g);
+export const qiShield = (g) => Math.round(QI_SHIELD_PER_TIER * boneMult(g) * 10) / 10; // v0.11.104 (GW2, Bw): by level
 export const QI_SHIELD_TEXT = {
     raise: 'Qi tightens over your skin like a held breath. It will not hold for long.',
     soak: '{foe} hits the Qi, not you: {n} soaked.',
@@ -601,7 +627,14 @@ export const QI_SHIELD_TEXT = {
 };
 /** v0.11.95 (Q1): the first time in a fight the Qi blast goes through armour the bone would have met (Fable's). */
 export const QI_BLAST_PIERCE = 'Raw Qi doesn\'t care what {foe} is wearing. It goes straight in.';
-export const armourDr = (g) => (fightStyle(g) ? 0 : Math.max(0, boneTier(g) - 2)); // v0.11.82: no bone plates in a spar or a brawl
+/** v0.11.82: no bone plates in a spar or a brawl. v0.11.104 (GW2, U): DR 1 at T3 L1 (the plates), +0.1 a level (T4 L1 2, as
+ *  before at every L1), T10 8 as before. */
+export const armourDr = (g) => {
+    const T = boneTier(g);
+    if (fightStyle(g) || T < 3) return 0;
+    if (T >= SKILL_MAX_TIER) return 8;
+    return Math.round((1 + (cuRank(g) - 21) / 10) * 10) / 10;
+};
 
 /* ---------------- inventory and food ---------------- */
 
@@ -805,7 +838,10 @@ function stepNoDice(g, actionId, targetIdx) {
             if (c.fieldUsed) lines.push('The ground is already broken. There is nothing left in it to sing.');
             else { c.field = FIELD_ROUNDS; c.fieldUsed = true; lines.push('Bone spikes punch up through the ground around you, ankle-high and very sincere.'); }
         } else {
-            if (act.keeps === 'blade' && fragileKnife(g)) { c.bladeFormed = false; lines.push('The knife shatters on the swing. You will have to sing another.'); } // v0.10.4: breaks every swing below T1 L8
+            if (act.keeps === 'blade' && fragileKnife(g)) { // v0.10.4: broke every swing below T1 L8; v0.11.104 (GW2, K): after knifeSwings swings
+                c.knifeSw = (c.knifeSw || 0) + 1;
+                if (c.knifeSw >= knifeSwings(g)) { c.knifeSw = 0; c.bladeFormed = false; lines.push('The knife shatters on the swing. You will have to sing another.'); }
+            }
             const T = c.style === 'unarmed' ? 1 : boneTier(g); // v0.11.82: fists pierce nothing
             const targets = act.id === 'dart' && T >= 4 ? living.slice(0, T >= 5 ? living.length : 2) : [target];
             const key = actionId;
@@ -828,7 +864,7 @@ function stepNoDice(g, actionId, targetIdx) {
         }
     }
     const ct = !c.style && boneTier(g) >= 7 ? c.enemies.find((e) => e.hp > 0) : null; // v0.11.82: no construct in a spar or a brawl
-    if (ct) { const dmg = boneTier(g) * 2; ct.hp -= dmg; lines.push(`Your bone construct strikes ${ct.name}: ${dmg}.`); }
+    if (ct) { const dmg = Math.round(boneMult(g) * 2); ct.hp -= dmg; lines.push(`Your bone construct strikes ${ct.name}: ${dmg}.`); } // v0.11.104 (GW2): by level
     let shield = !c.style && boneTier(g) >= 8;
     const yt = c.enemies.find((e) => e.hp > 0);
     if (yt && g.yuki.hp > 0 && !c.yukiOut) { // v0.11.82 (Y1): she watches a spar or a brawl unless human
@@ -863,7 +899,8 @@ function stepNoDice(g, actionId, targetIdx) {
         let dmg = hitDamage(e.dmg, e.realm, g.james.realm, jamesDr(g));
         const soaked = []; // v0.11.95 (Q1): the Qi shield soaks the blow first (as measured), what gets through is halved as before; its lines after the attack's (review)
         if (c.qshieldHp > 0 && dmg > 0) {
-            const a = Math.min(c.qshieldHp, dmg); c.qshieldHp -= a; dmg -= a;
+            const t1 = (x) => Math.round(x * 10) / 10; // v0.11.104 (SH1, S1): the soak is in tenths; every step to 0.1, so no float noise reaches the log or HP
+            const a = t1(Math.min(c.qshieldHp, dmg)); c.qshieldHp = t1(c.qshieldHp - a); dmg = t1(dmg - a);
             soaked.push(QI_SHIELD_TEXT.soak.replace('{foe}', e.name).replace('{n}', a));
             if (c.qshieldHp <= 0 && QI_SHIELD_TEXT.spent) soaked.push(QI_SHIELD_TEXT.spent);
             if (dmg <= 0) { lines.push(`${e.name} attacks: you defend (${checkText(r)}).`, ...soaked); continue; }

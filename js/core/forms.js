@@ -14,7 +14,7 @@ export const FORM_LINES = {
         { id: 'storm', at: R(5, 1), name: 'storm (many pieces)' },
     ] },
     melee: { label: 'Melee', forms: [
-        { id: 'fragile_knife', at: R(1, 1), name: 'fragile knife (breaks every swing)' },
+        { id: 'fragile_knife', at: R(1, 1), name: 'fragile knife (breaks after a few swings)' },
         { id: 'knife', at: R(1, 8), name: 'knife' },
         { id: 'dagger', at: R(2, 1), name: 'dagger' },
         { id: 'sword', at: R(2, 5), name: 'sword' },
@@ -72,8 +72,10 @@ export function actionOpen(g, id) {
     if (id === 'dart') return hasForm(g, 'dart');
     return true;
 }
-/** Below T1 L8 the knife breaks after every swing (owner's pick a: "if he dies, he dies"). */
+/** Below T1 L8 the knife breaks (owner's pick a: "if he dies, he dies"): after every swing until v0.11.104; since then
+ *  (owner pick GW2, K) after 1 swing at ranks 1–2, 2 at 3–4, 3 at 5–6, 4 at 7; from 8 it holds. */
 export const fragileKnife = (g) => cuRank(g) < AT.knife;
+export const knifeSwings = (g) => (fragileKnife(g) ? 1 + Math.floor((cuRank(g) - 1) / 2) : Infinity);
 export function actionLabel(g, id, base) {
     if (id === 'dart') return { storm: 'Bone storm', volley: 'Bone volley', lance: 'Thrown bone lance' }[best(g, 'ranged')] || 'Bone darts';
     if (id === 'blade') return { sword: 'Bone sword', dagger: 'Bone dagger', knife: 'Bone knife' }[best(g, 'melee')] || 'Fragile bone knife';

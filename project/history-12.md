@@ -2,6 +2,23 @@
 
 Started 2026-11-09 (v0.11.97), when `history-11.md` neared 45 KB. Newer than `history-11.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.104 (word for word)
+
+### From "Decided in chat"
+
+- **v0.11.101: the degree reads GU alone (Fable's review of v0.11.100, medium 1; the owner's "Continue" 16:35; Claude's options DG1–DG3; owner 16:41 "DG1 go"):**
+  - **The sub-items (a scratch probe: the random bots 1,000 games, 21,213 degree readings in armed fights; the models 300 games each, 36,758; the smart rule played on a copy wherever the one-move finish was offered; the 30 saves):** Convergence ahead of GU in 0 readings and 0 saves (the biggest gap the 0813 save, GU T7 L6 / Convergence T5 L6): every Convergence award gives GU the same XP (`awardXp`) on the same cost table, so `max(GU, Convergence)` was GU in play and Fable's probe states (GU T1 L1–L4, Convergence 12+ ranks ahead) can't be reached; the smart rule lost 0 of the fights offered for one move. **D** the degree on GU + 0.3 × realm (the fists' reading folded in): 0 of 57,971 readings change; one-move offers 3 (bots) / 1,225 (models, 3.33%), stomp texts 265 / 3,299 (8.97%), unchanged; the fight lab's power thirds unchanged. **I** a test: GU ≥ Convergence at every bot fight (the models: a NOTE) and in all 30 saves, `awardXp` pays GU the same share. **N** a note in group d's "weapons by Convergence" line: if a weapon moves to Convergence, the degree reads what the strikes read.
+  - **The options:** **DG1 🟢 D + I + N (recommended)** / DG2 🟡 I + N / DG3 🟠 N (colours: how well the gap is closed: in the code and guarded / guarded only / a note). **Picked: DG1.** Not picked: DG2, DG3.
+  - **As built:** see the version note.
+  - **Also:** `0e571a4` filled in for 0.11.100; after v0.11.100 Claude uploaded the changed docs; v0.11.98's notes to `history-12.md`.
+
+### From "Version notes"
+
+## v0.11.101 — the degree reads GU alone (DG1)
+
+- **Files:** `js/story/power.js` (D: `jamesPower` = the GU check + 0.3 × realm; `prepare` no longer special-cases fists, whose reading is now every fight's; the header comment), `tests/tasks.test.mjs` (the DG1 block: the power is GU's, Fable's probe state (GU T1 L1, Convergence T3 L5) gets no one-move finish, fists and weapons read the same; Convergence awards in every band, a fail, a part, Coil 1 and 3, and at the cap never leave GU behind; GU not behind in any of the 30 saves, read from the test's own folder; and an assert in the bots' fight loop at every fight), `tests/models.test.mjs` (a NOTE if GU is ever behind at a fight), `tests/README.md`, `project/roadmap.md` (section 0; N in group d), `sw.js`, docs (v0.11.98 to `history-12.md`). Saves unchanged, no id changed; the baseline unchanged. Without the change the DG1 block fails 3 asserts.
+- **Checks:** a game change (rule 2): the full `bash tools/check.sh`, two runs: 1 stopped at the browser part 2 flake ("missing ) after argument list", 14.2 s into part 2); run 2 exit 0, 0 drifted of 142, the same 5 past 5 as v0.11.100 (log only). The models (500 games): Careful 3.44 / 4.06, Completionist 3.79 / 4.09, the Sitter 2.66 / 2.66, the Farmer 3.75 / 4.07 (unchanged). **Fable, cold review:** no high, no medium. Fixed (tests only; then the tasks test and `bash tools/check.sh quick`, exit 0): low 1 (the test's degree used −2, not the fight's own raise minus the shift), low 2 (the save reading from the test's own folder, only `.json` / `.txt`, a bad file an assert), low 3 (the award test over every band, a fail, a part, the Coil bonus and the cap). Information: the invariant holds on every path Fable found (`awardXp`'s callers, the Long Forest's season floors, the Coil snapshot, the migrations; a fuzz of 2,000 games × 300 awards: 0 breaks); the fight lab's power thirds now sort by GU alone (the same for every state the game makes); `degreeOf`'s `power` parameter is unused by the game (kept for probes). Not fixed (older, outside this push): other blocks of the tasks test read `js/` relative to the folder it runs from.
+
 ## Moved from the handover in v0.11.103 (word for word)
 
 ### From "Decided in chat"
