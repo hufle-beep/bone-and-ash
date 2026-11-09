@@ -2,6 +2,24 @@
 
 Started 2026-11-09 (v0.11.86), when `history-10.md` passed 45 KB. Newer than `history-10.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.93 (word for word)
+
+### From "Decided in chat"
+
+- **v0.11.90: the Day 19 heal in the Heart (the v0.11.87 Fable review's first finding; owner 08:35 "let's look at the healing on day 19"; Claude's options at 08:40, owner 08:42 "R1."):**
+  - **The sub-items (measured, lab runs on the models, 400 Completionist games):** when: all 146 guardian fights on Day 16–17, every one at full HP and won; Careful never fights it, so the models never meet the case (a human does: the root-galleries on Day 19, then the guardian hurt). What a hurt James has from Day 19, 06:00–16:00: "Meditate: gather Qi" only while Qi isn't full; with full Qi nothing passes time but eating. How much HP matters (the same 146 states re-fought): won 100% at full, 75, 50, 35 and 25% HP; 75% at 15%; a loss is not the Coil (carried out at 3 HP or more; round the guardian on Day 19 for 40% HP and 10 Qi, or camp at 16:00 and fight on Day 20 at full). An hour's rest: 25% → full for a median James (11 → 44 of 44).
+  - **The options:** **R1 🟢 Rest stays while hurt (recommended)** / R2 🟡 "Meditate: gather Qi" also open when Qi is full and James is hurt (every resting place; the models would move, numbers first) / R0 🔴 keep (colours: how much of the gap each closes).
+  - **Picked:** **R1.** Not picked: R2, R0.
+  - **As built:** see the version note.
+  - **Also:** `926569b` filled in for 0.11.89; after v0.11.89 Claude uploaded 6 docs (handover, roadmap, roadmap-done-2, changelog, restore-points, history-11); the owner pasted the new `CLAUDE.md` into the project's Instructions (08:35); v0.11.87's notes to `history-11.md`; the "Open items" heading's version corrected.
+
+### From "Version notes"
+
+## v0.11.90 — a hurt James can rest in the Heart from Day 19 (R1)
+
+- **Files:** `js/story/act1_heart.js` ("Rest an hour.": `active(g) && (!late(g) || hp < max)`; the choice's index unchanged), tests: tasks (the v0.11.90 block: Days 19–21 Rest while hurt, none at full HP; the sit, Meditate's Cultivate and Cultivate until the limit shut while hurt; a 3-of-21 HP James rests 5 hours to full, then Rest is gone; after 18:00 the camp; Day 18 as before); `sw.js`, `tests/README.md`, timings, docs (v0.11.87 to `history-11.md`). Saves unchanged, no id or index changed.
+- **Checks:** a game change (rule 2): the full `bash tools/check.sh`: exit 0, 0 drifted of 139, 0 past 5; the models unchanged to the digit (Careful 3.51 / 6.71, Completionist 3.96 / 5.88, the Sitter 2.78 / 2.80, the Farmer 3.94 / 5.82); then the test's minute check tightened (an hour a rest exactly) and `bash tools/check.sh quick`. **Cold review on Fable:** the scope exact; Rest can't run the clock: with food it heals to full in 5 rests at most, at Fed 0 HP falls until James collapses; reopening Rest reopens no sit (`hubShut` keys off Cultivate); index 14 kept. Medium: the models' Rest below 60% HP could move their numbers (they didn't: unchanged). Low, older, not fixed (the owner's call, roadmap section 2, v0.11.90 line): gather Qi and meridian cards still pass the clock hour by hour from Day 19; at Fed 0 Rest stays until a collapse.
+
 ## Moved from the handover in v0.11.92 (word for word)
 
 ### From "Decided in chat"

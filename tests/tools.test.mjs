@@ -460,6 +460,10 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md'];
     const r8 = (rules.match(/^8\. .*$/m) || [''])[0];
     assert(/Claude uploads the changed `project\/` docs/.test(r8) && !/asks\*\* whether/.test(r8) && /project\/research\/` stays repo only/.test(r8), 'CLAUDE.md: rule 8 says Claude uploads the changed docs itself, research/ repo only, no question');
     assert(readFileSync(path.join(ROOT, 'project/working-agreement.md'), 'utf8').includes('**Since v0.11.79 (owner 2026-11-08 20:52'), 'working-agreement: the mirror rule of v0.11.79 is there');
+    // v0.11.93 (owner pick A): every option, everywhere, laid out in full, checked before sending (rule 1 and the working agreement)
+    const r1 = (rules.match(/^1\. .*$/m) || [''])[0], wa = readFileSync(path.join(ROOT, 'project/working-agreement.md'), 'utf8');
+    assert(/\*\*Every option, everywhere\*\*/.test(r1) && /\*\*Checked before sending:\*\*/.test(r1) && /open, options later/.test(r1), 'CLAUDE.md: rule 1 has every option, everywhere, and the check before sending (v0.11.93)');
+    assert(wa.includes('**Every option, everywhere**') && wa.includes('**Checked before sending:**'), 'working-agreement: the v0.11.93 layout rule is there');
 }
 // v0.11.80 (owner pick L1): the fight lab
 {

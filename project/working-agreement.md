@@ -13,6 +13,8 @@ Every change follows this sequence, with no exceptions:
    - **Then the options:** each option names the sub-items it contains (by their labels) and gives its combined numbers and trade-offs; the recommendation names its sub-items too.
    - **Colour by effectiveness:** each option carries a colour mark in order of effectiveness against the problem asked about (🟢 most, then 🟡, 🟠, 🔴 least), with one line saying what was measured.
    - **"(recommended)"** after the recommended option's name, in the options list and in the recommendation line.
+   - **Every option, everywhere** (owner 2026-11-09, v0.11.93, after T-a / T-b): any option or sub-option Claude names in any message (first options, follow-up questions, a stop-and-ask in the middle of a build, a side item at the end of a report) gets the full layout: its sub-items with numbers, the options naming them, the colours, the recommended one marked. Nothing is offered in passing; something not yet analysed is named only as "open, options later" and never put up for a pick. *(The owner's words, 11:08: "strengthen the rule to lay out all sub options again, since the T-a and b were missed."; pick A, 11:09.)*
+   - **Checked before sending:** Claude checks that every option label in the message has its layout; if one doesn't, it lays it out or takes the label out.
 3. **The owner picks an option. The pick is the go** (owner 2026-11-07, v0.11.28, pick R-a): Claude does not write the list out again for a double check.
 4. Claude builds it, checks it, and commits and pushes it. If building turns up anything the picked option didn't cover, Claude stops and asks before going on.
 

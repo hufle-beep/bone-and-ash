@@ -2,6 +2,12 @@
 
 Started in v0.11.88 (owner pick A, 2026-11-09 02:37, D2), so `roadmap-done.md` (part 1) stays readable in one go. Newer than `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.93 (word for word)
+
+### The "Last updated" line of v0.11.92
+
+Last updated: 2026-11-09 (v0.11.92, B push 2 (owner pick O1, 10:17): a night fight costs sleep (half the missing HP and Qi back at dawn, a flight too); group e's night line extended (the night-fight mornings' texts); **next: group d (combat)**, the owner's pick, options first; v0.11.91, B push 1). Update in every push.
+
 ## Moved in v0.11.92 (word for word)
 
 ### The "Last updated" line of v0.11.91
