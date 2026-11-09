@@ -1331,6 +1331,31 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
         assert(o?.done && g.minutes < night0 + 120, `v0.11.91: ${sc}${kind ? ` (${kind})` : ''} is over before 02:00 even at the round cap (${o?.done}, ${g.minutes - night0} min after midnight)`);
     }
 }
+// v0.11.97 (owner 2026-11-09 14:53, pick RQ1; Fable's review of v0.11.96, medium 1): the smart rule's spike field and Qi
+// shield only when Qi still pays for an attack after them (`attackReserve`), so the bot can't spend its last Qi on them
+// and guard to the round cap
+{
+    const { smartAction, attackReserve, SMART_SHIELD_AT } = await import('./lib/smartfight.mjs');
+    const { actionCost: cost } = await import('../js/core/game.js');
+    const A = COMBAT_ACTIONS;
+    const at = (cuT, cuL, qi = 99, foe = { name: 'Foe', hp: 99, dc: 3, atk: 3, dmg: 2 }) => { const g = ensureBars(newGame(9700 + cuT * 10 + cuL)); g.james.skills['Convergence Use'] = { tier: cuT, level: cuL, xp: 0 }; g.james.gu = { tier: 3, level: 1, xp: 0 }; ensureBars(g); startCombat(g, { id: 'rq1_test', enemies: [{ ...foe }], win: 'stream', lose: 'stream' }); g.james.qi = qi; return g; };
+    for (const t of [1, 3, 10]) { const g = at(t, 1); assert(cost(g, A.spear) === cost(g, A.blade), `RQ1: the spear costs what the blade costs at T${t} (the reserve counts the blade for both; review low 3)`); }
+    { const g = at(1, 1); assert(attackReserve(g) === 3 && at(1, 6) && attackReserve(at(1, 6)) === 2, `RQ1: the reserve is 3 at T1 L1 (the knife), 2 at T1 L6 (darts) (${attackReserve(g)}, ${attackReserve(at(1, 6))})`); }
+    { const g = at(1, 1); assert(fragileKnife(g) && !actionOpen(g, 'dart') && attackReserve(g) === cost(g, A.blade), `RQ1: the fragile knife, no darts: the reserve is the knife's cost (${attackReserve(g)})`); }
+    { const g = at(1, 6); assert(fragileKnife(g) && actionOpen(g, 'dart') && attackReserve(g) === Math.min(cost(g, A.blade), cost(g, A.dart)), `RQ1: darts open: the cheaper attack (${attackReserve(g)})`); }
+    { const g = at(1, 9); g.combat.bladeFormed = true; assert(!fragileKnife(g) && attackReserve(g) === 0, 'RQ1: a formed knife: no reserve'); }
+    { const g = at(3, 1); g.combat.spearFormed = true; assert(attackReserve(g) === 0, 'RQ1: a formed spear: no reserve'); }
+    { const g = at(1, 6); g.james.hp = SMART_SHIELD_AT * jamesHpMax(g); const need = cost(g, A.qshield) + attackReserve(g);
+      g.james.qi = need; assert(smartAction(g, 0) === 'qshield', `RQ1: the shield when Qi pays for it and an attack (${need})`);
+      g.james.qi = need - 0.1; assert(smartAction(g, 0) !== 'qshield', `RQ1: no shield when only the shield can be paid (${smartAction(g, 0)})`); }
+    { const g = at(1, 3); assert(actionOpen(g, 'spikes') && !actionOpen(g, 'dart'), 'RQ1 test state: the field open, no darts yet'); const need = Math.max(6, cost(g, A.spikes) + attackReserve(g)); assert(need === 7, `RQ1: at T1 L3 the reserve binds the field (4 + 3 = ${need}; from T1 L5 the old floor of 6 does)`); // the review's medium 1
+      g.james.qi = need; assert(smartAction(g, 0) === 'spikes', `RQ1: the field when Qi pays for it and an attack (${need})`);
+      g.james.qi = need - 0.1; assert(smartAction(g, 0) !== 'spikes', `RQ1: no field just under it (${smartAction(g, 0)})`); }
+    { // the review's case: CU T1 L1, 30% HP, 12 Qi against a 9 HP, DR 1 foe: the bot attacks, not only shields and guards
+      const g = at(1, 1, 12, { name: 'Gnawer', hp: 9, dc: 1, atk: 0.1, dmg: 1, dr: 1 }); g.james.hp = 0.3 * jamesHpMax(g); g.yuki.hp = 0;
+      const picks = []; let out = null; for (let t = 0; t < 12 && g.combat; t++) { const a = smartAction(g, t); picks.push(a); out = combatStep(g, a); }
+      assert(picks.some((a) => ['blade', 'dart', 'spear'].includes(a)) && out?.done === 'win', `RQ1: the bot keeps Qi for an attack and wins (${picks.join(', ')}; ${out?.done})`); }
+}
 // v0.11.96 (owner 2026-11-09 14:16, pick BT1): (N + S) one smart rule for every bot that fights smart
 // (tests/lib/smartfight.mjs); (H) the 19 story checks where James throws a dart or drives a needle, on GU with their XP
 // to Convergence Use, as in a fight; (F) the FAQ says so (Fable's sentence)
