@@ -2,6 +2,25 @@
 
 Started 2026-11-09 (v0.11.107), when `history-12.md` neared 45 KB. Newer than `history-12.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.110 (word for word)
+
+### From "Decided in chat"
+
+- **v0.11.107: the bone flail (group d's new weapon kinds; the handover message of 21:52; Claude's options NK1–NK4 repeated at 21:52; owner 21:53 "nk1"; Fable's texts and the built numbers shown 22:04; owner 22:05 "ok"):**
+  - **The sub-items and options:** in the roadmap's group d line ("bone weapons by Convergence", word for word as given at 21:10). **Picked: NK1 (FL + X).** Not picked: NK2, NK3, NK4.
+  - **The built numbers (the probe's method on the built game: 300 bot games, 7,589 fight states, each played smart with and without the flail, at the natural ranks and with Convergence and GU raised to T2 L1 where below):** raised: wins 97.2 → 97.2%, rounds 5.03 → 4.63 (two or more foes, 3,991 states: 3.62 → 2.87), HP left on a win 77.7 → 78.3% (means). Natural: 69 states at Convergence T2+, **36 change (0.5%; NK1 had said 0: corrected to the owner at 22:04)**, all at T2+ (rt_wolves 30, the elder 3, husks, root husks, cinder hawks 1 each), 0 wins or losses flip, rounds 147 → 142 in all.
+  - **Fable's texts (rule 10; shown 22:04, owner "ok" 22:05):** the James tab's line "Sweep" with "bone flail (hits two at a swing)"; the card "Bone flail"; the sung line "A short white haft sets in your fist; a length of knuckled bone swings from its end, looking for company: a bone flail."; the card's tag " · hits a second enemy too"; the hold line "Swings on into a second enemy, if one is standing; each is checked on its own."; the FAQ's Fights phrase "a <b>Bone flail</b> from T2 that hits a second enemy with every swing".
+  - **Kept as is (said at 22:04):** the flail stays out of a spar and a brawl (Ya's terms "her spear against my blade").
+  - **As built:** see the version note.
+  - **Also:** `815e0fa` filled in for 0.11.106; after v0.11.106 Claude uploaded 5 docs (handover, roadmap, changelog, restore points, history-12); v0.11.104's notes moved to the new `history-13.md` (part 12 would have passed 45 KB); v0.11.106's deploy checked (Pages and Restore points succeeded for `815e0fa`, 20:49 UTC).
+
+### From "Version notes"
+
+## v0.11.107 — the bone flail (NK1)
+
+- **Files:** `js/core/forms.js` (`FORM_LINES.sweep`: the flail at rank 11; `INC_ONLY_ACTIONS`), `js/core/game.js` (`COMBAT_ACTIONS.flail`: GU, +1, Qi 3 dampened, 2–4 × the bone multiplier, `keeps: 'flail'`, `sweep: 2`; `c.flailFormed`; the target and one more standing, each checked; `FLAIL_SUNG`; the tier comment), `js/main.js` (the card's cost, tag and hold line), `js/core/faq.js` (Fable's phrase), `tests/lib/smartfight.mjs` (the flail while two or more foes stand, after the field and the shield, before the spear; a sung flail a paid attack and a formed weapon; free on the last foe), `tests/tasks.test.mjs` (the NK1 block; the six lines), `tests/README.md`, `sw.js`, docs (v0.11.104 to the new `history-13.md`). Saves: no new saved field outside a fight (`flailFormed` in the fight's state; missing reads false), no id changed.
+- **Checks:** a game change (rule 2): the full `bash tools/check.sh`: twice (before and after the review's fixes): exit 0 both, 0 drifted of 144, 2 past 5 (log only, the random bots in the story test: the rot ape 53.3 → 59.2%, n 923 → 840; rt_wolves 97.6 → 91.4%, n 418 → 417, inside its noise band ±4.7; the random pick list grows by one at Convergence T2+, so later random picks shift); the Sitter 2.55 / 2.55, the Farmer 3.28 / 3.43. The models (500 games): Careful 3.27 / 3.73, Completionist 3.34 / 3.47 (unchanged). **Fable, cold review:** no high. Medium 1 noted in the code, not changed: the smart rule asks for the flail before a free formed spear or blade, so a sung spear with an unsung flail would pay for the flail; unreachable today (both open at T2, the same cost, the flail asked first, ranks don't rise mid-fight). Fixed: low 2 (tests: the second swing's targets, a target index past the end, a dead first foe), low 3 (tests: Qi exactly at the cost, a sung flail with no Qi on two foes, the shield let through by a sung flail), low 4 (the Q1 loop includes the flail), low 7 (`forms.js`'s header comment). Not fixed: low 5 (the hold text on a sung flail still says what forming costs, as the spear's always has), low 6 (the fight lab has no "flail only" tactic; for the retune). Information: the random bots' list grows at T2+ (the two log-only moves above); a swing counts two checks in the stats, as T4+ darts (no XP per check); `flailFormed` lives in the fight only.
+
 ## Moved from the handover in v0.11.109 (word for word)
 
 ### From "Decided in chat"

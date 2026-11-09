@@ -12,7 +12,8 @@ const cost = (g, id) => actionCost(g, COMBAT_ACTIONS[id]);
 
 /**
  * v0.11.97 (owner pick RQ1; Fable's review of v0.11.96, medium 1): the Qi an attack still needs after the field or the
- * shield: 0 when the spear or the blade is formed (and not the fragile knife, which breaks every swing), else the cheaper
+ * shield: 0 when the spear or the blade is formed (and not the fragile knife, which shatters after its few swings; v0.11.110,
+ * GD1 review low: its swings left are free, but the reserve still counts a new one, and the spike field's 6-Qi gate leaves no state where that changes the pick), else the cheaper
  * of the blade and darts (when open); the spear costs what the blade costs, so it is covered too (a test pins it). Without it the bot could spend its last Qi on them and guard to the round cap.
  */
 export function attackReserve(g) {
@@ -28,7 +29,7 @@ export function attackReserve(g) {
  * Fable's review of v0.11.97, medium 2: the reserve paid one swing, then the bot could guard to the cap); since v0.11.100
  * (owner pick SB1, M; Fable's review of v0.11.98, medium 1) the shield only once a weapon is formed (the spear, or a knife
  * that holds), so its attack is already paid and the reserve binds the field alone (lab: 0 of 6,461 fights changed);
- * then (v0.11.107, owner pick NK1, FL) the bone flail while two or more foes stand (sung, or Qi for it), then (N) the spear if James can sing it, else the blade (free once formed, unless it is the fragile knife), a sung flail
+ * then (v0.11.107, owner pick NK1, FL) the bone flail while two or more foes stand (sung, or Qi for it), then (N) the spear if James can sing it (since v0.11.110, FB1, not paid for while a holding blade is out), else the blade (free once formed; since v0.11.110 (GD1, KN) the fragile knife's swings left too), a sung flail
  * (free), darts when the blade can't be paid, else guard. Never the needle or the Qi blast (v0.11.96: the blast for every swing measured no gain;
  * v0.11.102, owner pick QB1: the blast in place of the fragile knife against an armoured foe does gain, lab 72.3 → 73.4% at
  * the old +1 and 74.9% at QB1's 0, but it moves the bots' numbers a lot (14 moves past 5 points, 2 past 20 with QB1), so it
@@ -43,12 +44,15 @@ export function smartAction(g, t = 0) { // eslint-disable-line no-unused-vars
     const formed = c.spearFormed || c.flailFormed || (c.bladeFormed && !fragileKnife(g)); // v0.11.100 (SB1, M): the shield waits for a formed weapon; v0.11.107: the flail too
     if (formed && actionOpen(g, 'qshield') && g.james.hp <= SMART_SHIELD_AT * jamesHpMax(g) && qi >= cost(g, 'qshield') + atk
         && living.some((e) => !e.staggered && !e.atBay)) return 'qshield';
-    // v0.11.107 (NK1, FL): two or more foes standing. Fable's review, medium 1 (noted, not changed): this comes before a
-    // free formed spear or blade, so a sung spear with an unsung flail would pay for the flail; unreachable today (both open
-    // at T2, the same cost, the flail asked first, ranks don't rise mid-fight). Revisit if their costs or gates ever part.
-    if (actionOpen(g, 'flail') && living.length >= 2 && (c.flailFormed || qi >= cost(g, 'flail'))) return 'flail';
-    if (actionOpen(g, 'spear') && (c.spearFormed || qi >= cost(g, 'spear'))) return 'spear';
-    if ((c.bladeFormed && !fragileKnife(g)) || qi >= cost(g, 'blade')) return 'blade';
+    // v0.11.107 (NK1, FL): two or more foes standing. v0.11.110 (owner pick GD1, FO; Fable's NK1 review, medium 1): an
+    // unsung flail is paid for only while no spear or holding blade is already formed (a formed one is free); unreachable
+    // in play today (0 of 26,906 bot fights), a test builds the case.
+    const freeFormed = c.spearFormed || (c.bladeFormed && !fragileKnife(g));
+    if (actionOpen(g, 'flail') && living.length >= 2 && (c.flailFormed || (!freeFormed && qi >= cost(g, 'flail')))) return 'flail';
+    // v0.11.110 (owner pick FB1, BS; Fable's GD1 review, medium 1): a holding blade already out swings free before a spear is paid for (0 bot fights reach it)
+    if (actionOpen(g, 'spear') && (c.spearFormed || (!(c.bladeFormed && !fragileKnife(g)) && qi >= cost(g, 'spear')))) return 'spear';
+    // v0.11.110 (owner pick GD1, KN): a formed fragile knife's swings left are free, so it swings them out before darts or guard
+    if (c.bladeFormed || qi >= cost(g, 'blade')) return 'blade';
     if (c.flailFormed && actionOpen(g, 'flail')) return 'flail'; // v0.11.107: a sung flail is free on the last foe too
     if (actionOpen(g, 'dart') && qi >= cost(g, 'dart')) return 'dart';
     return 'guard';

@@ -2,7 +2,7 @@
 import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel, hasForm, fragileKnife, knifeSwings } from './core/forms.js';
 import { coilMult, coilMultNext, wakeDay, fmtMult, clockParts } from './core/game.js';
 import {
-    newGame, ensureBars, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, skillCheck, xpToNext, clockLabel, clockLabelG, realmName, yukiForm,
+    newGame, ensureBars, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, skillCheck, checkValue, xpToNext, clockLabel, clockLabelG, realmName, yukiForm,
     startCombat, combatStep, combatFlee, COMBAT_ACTIONS, noDiceDc, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage, qiShield,
 } from './core/game.js';
 import { sceneView, choose, goTo, gives, choiceQi } from './core/story.js'; // v0.11.109 (FQ1): choiceQi
@@ -314,13 +314,13 @@ function renderCombatCards() {
         const d = actionDmg(g, a);
         const off = cost > g.james.qi;
         if (off) return ''; // v0.11.17 (pick 1a): a move he can't afford is hidden (Guard costs nothing)
-        const v = n1(skillCheck(a.skill === 'GU' ? g.james.gu : g.james.skills[a.skill]) + (c.adapt?.[id] || 0));
+        const v = n1(checkValue(g, a.skill, c.adapt?.[id] || 0)); // v0.11.110 (owner pick GD1, CV): hunger counted, as the check is
         const tgt = c.enemies.find((e) => e.hp > 0);
         const plain = tgt && showChecks ? `${a.skill} ${v} / DC ${noDiceDc(tgt.dc + a.dcMod)} · ${Math.round((d[0] + d[1]) / 2)} dmg` : '';
         const sw = a.keeps === 'blade' && fragileKnife(g) ? (() => { const n = knifeSwings(g), left = c.bladeFormed ? n - (c.knifeSw || 0) : n; return `${plain ? ' · ' : ''}${c.bladeFormed ? `${left} swing${left === 1 ? '' : 's'} left` : `lasts ${n} swing${n === 1 ? '' : 's'}`}`; })() : ''; // v0.11.104 (GW2, K)
         return `<button class="card fightish" data-act="${id}" ${off ? 'disabled' : ''}>${esc(a.label)}<span class="tag">${a.guard ? `${showChecks ? 'GU ' : ''}defence +${guardBonus(g)} this round${hasForm(g, 'buckler') && !c.style ? ' · covers Yuki' : ''}` : a.qshield ? `soaks ${qiShield(g)} this round` : a.field ? `${FIELD_ROUNDS} rounds · ${fieldDamage(g)} to each attacker · once a fight` : plain + sw}${a.reach ? ' · a full hit holds it off' : ''}${a.sweep ? ' · hits a second enemy too' : ''}${a.pierce ? ' · ignores armour' : ''}${cost ? ` · ${cost} Qi` : ''}${a.stagger ? ' · staggers' : ''}${off ? ' · not enough Qi' : ''}</span></button>`;
     }).join('');
-    const flee = c.flee ? `<button class="card" data-flee="1">Run${showChecks ? `<span class="tag">GU ${n1(skillCheck(g.james.gu))} / DC ${noDiceDc(Math.max(...c.enemies.filter((e) => e.hp > 0).map((e) => e.atk)))}</span>` : ''}</button>` : '';
+    const flee = c.flee ? `<button class="card" data-flee="1">Run${showChecks ? `<span class="tag">GU ${n1(checkValue(g, 'GU'))} / DC ${noDiceDc(Math.max(...c.enemies.filter((e) => e.hp > 0).map((e) => e.atk)))}</span>` : ''}</button>` : '';
     const foes = c.enemies.map((e) => `<div class="foe${e.hp <= 0 ? ' down' : ''}"><span>${esc(e.name)}${e.staggered ? (c.style === 'unarmed' ? ' (down)' : ' (reeling)') : ''}</span><div class="stroke"><i style="width:${pct(Math.max(0, e.hp), e.hpMax)}"></i></div></div>`).join('');
     const yuki = `<div class="foe"><span>Yuki${c.yukiOut ? ' (watching)' : ''}</span><div class="stroke" style="background:rgba(242,239,230,0.08)"><i style="width:${pct(g.yuki.hp, yukiHpMax(g))};background:var(--bone)"></i></div></div>`;
     view.innerHTML = `<section>

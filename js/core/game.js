@@ -309,6 +309,9 @@ let noDiceTune = {};
 /** The story layer hands over its per-fight no-dice tuning (js/story/nodice_tune.js). */
 export const setNoDiceTune = (t) => { noDiceTune = t || {}; };
 export const noDiceDc = (dc) => Math.max(0.5, Math.round((dc - NO_DICE_DC_SHIFT) * 10) / 10);
+/** v0.11.110 (owner pick GD1, CV): the value a check uses (hunger counted), to one decimal; the fight's cards show this same value. */
+export const checkValue = (g, skillName, bonus = 0) => Math.round((actingCheck(g, skillName) + bonus) * 10) / 10;
+
 /** How a check reads in the log: "GU 1 / DC 2". */
 export const checkText = (r) => `${r.skill} ${r.value} / DC ${r.dc}`;
 
@@ -317,7 +320,7 @@ export const checkText = (r) => `${r.skill} ${r.value} / DC ${r.dc}`;
  * @returns {{ skill, value, dc, ratio, success, crit }}
  */
 export function rollCheck(g, skillName, dc, bonus = 0) {
-    const value = Math.round((actingCheck(g, skillName) + bonus) * 10) / 10;
+    const value = checkValue(g, skillName, bonus);
     const d = noDiceDc(dc);
     const ratio = value / d;
     g.stats.checks += 1;

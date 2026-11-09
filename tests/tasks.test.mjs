@@ -425,6 +425,51 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     setSk(m, 1, 10); m.combat.flailFormed = false; m.combat.enemies[1].hp = 99; m.james.qi = 20; assert(smartAction(m) !== 'flail', 'NK1 smart: below T2, never the flail');
     assert(/<b>Bone flail<\/b> from T2 that hits a second enemy/.test(FAQ.find(([t]) => t === 'Fights')[1]()), 'NK1: the FAQ names the flail (Fable)');
 }
+// v0.11.110 (owner pick GD1): group d's small items in one push: CV (the fight's cards show the check's own value, hunger
+// counted), FO (the smart rule pays for an unsung flail only while no free formed weapon is out), KN (a formed fragile
+// knife's swings left are free, so the smart rule swings them out), FQ (the FAQ: the blast's difficulty one lower).
+{
+    const { checkValue, rollCheck, skillCheck } = await import('../js/core/game.js');
+    const { knifeSwings } = await import('../js/core/forms.js');
+    const { readFileSync } = await import('node:fs');
+    const { FAQ } = await import('../js/core/faq.js');
+    const setSk = (g, t, l) => { g.james.skills['Convergence Use'] = { tier: t, level: l, xp: 0 }; g.james.gu = { tier: t, level: l, xp: 0 }; };
+    const foe = (n) => ({ name: n, hp: 99, dc: 1, atk: 1, dmg: 0 });
+    // CV: the value with hunger, the same the check uses; the cards and Run read it
+    { const g = ensureBars(newGame(90, { closed: true })); setSk(g, 1, 6); const base = skillCheck(g.james.gu);
+      for (const [sat, less] of [[80, 0], [30, 0], [29.9, 1], [10, 1], [0, 2]]) { g.james.satiety = sat; // review low: the hunger edge (30 / 29.9) pinned
+          const v = checkValue(g, 'GU'), r = rollCheck(g, 'GU', 1);
+          assert(Math.abs(v - (base - less)) < 1e-9 && r.value === v, `CV: Fed ${sat}: the value ${v} = ${base} − ${less}, the check's ${r.value}`);
+          assert(checkValue(g, 'Convergence Use', 0.5) === rollCheck(g, 'Convergence Use', 1, 0.5).value, `CV: Fed ${sat}: Convergence Use with a bonus matches the check`); } }
+    { const main = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+      const cards = main.slice(main.indexOf('function renderCombatCards'), main.indexOf('view.innerHTML', main.indexOf('function renderCombatCards')));
+      assert(/checkValue\(g, a\.skill, c\.adapt\?\.\[id\] \|\| 0\)/.test(cards) && /checkValue\(g, 'GU'\)/.test(cards) && !/skillCheck\(/.test(cards), 'CV: the fight\'s cards and Run show checkValue, never skillCheck'); }
+    // FO: a formed spear (or a holding blade) is used before paying for an unsung flail; with none formed, the flail as before
+    { const m = ensureBars(newGame(91, { closed: true })); setSk(m, 2, 1); m.james.qi = 20;
+      sCombat(m, { id: 'jackals', intro: '', band: 'standard', enemies: [foe('A'), foe('B')], win: 'stream', lose: 'stream' }); m.combat.fieldUsed = true;
+      assert(smartAction(m) === 'flail', 'FO: two foes, nothing formed → the flail');
+      m.combat.spearFormed = true; assert(smartAction(m) === 'spear', 'FO: two foes, a sung spear, an unsung flail → the spear (free)');
+      m.combat.spearFormed = false; m.combat.bladeFormed = true; assert(!fragileKnife(m) && smartAction(m) === 'blade', 'FO + FB1: two foes, a holding blade formed → the blade (free), not a paid flail or spear');
+      m.combat.enemies[1].hp = 0; assert(smartAction(m) === 'blade', 'FB1: one foe, a holding blade formed → the blade, not a paid spear'); m.combat.enemies[1].hp = 99;
+      m.combat.bladeFormed = false; m.combat.enemies[1].hp = 0; assert(smartAction(m) === 'spear', 'FB1: one foe, nothing formed → the spear, as before'); m.combat.enemies[1].hp = 99; m.combat.bladeFormed = true;
+      m.combat.flailFormed = true; m.combat.spearFormed = true; assert(smartAction(m) === 'flail', 'FO: a sung flail on two foes still swings'); }
+    // KN: a formed fragile knife with swings left and no Qi for a new one → the blade, free; unformed with no Qi → guard
+    { const k = ensureBars(newGame(92, { closed: true })); setSk(k, 1, 3); k.james.qi = 40;
+      sCombat(k, { id: 'jackals', intro: '', band: 'standard', enemies: [foe('A')], win: 'stream', lose: 'stream' }); k.combat.fieldUsed = true;
+      assert(fragileKnife(k) && knifeSwings(k) === 2, `KN: T1 L3: the knife lasts 2 swings (${knifeSwings(k)})`);
+      cStep(k, 'blade'); assert(k.combat.bladeFormed && k.combat.knifeSw === 1, 'KN: the first swing sings it, one left');
+      k.james.qi = 0; assert(smartAction(k) === 'blade', 'KN: no Qi, a formed knife with a swing left → the blade');
+      const o = cStep(k, 'blade'); assert(k.james.qi === 0 && !o.lines.some((l) => /fall back on guarding/.test(l)) && !k.combat.bladeFormed, 'KN: the swing left is free, then it shatters');
+      assert(smartAction(k) === 'guard', 'KN: shattered, no Qi, no darts at T1 L3 → guard'); }
+    { // review low: instead of darts too (T1 L7: darts open at 2 Qi, a new knife 3)
+      const d = ensureBars(newGame(93, { closed: true })); setSk(d, 1, 7); d.james.qi = 40;
+      sCombat(d, { id: 'jackals', intro: '', band: 'standard', enemies: [foe('A')], win: 'stream', lose: 'stream' }); d.combat.fieldUsed = true;
+      cStep(d, 'blade'); d.james.qi = 2.5;
+      assert(fragileKnife(d) && actionOpen(d, 'dart') && d.combat.bladeFormed && smartAction(d) === 'blade', 'KN: a formed knife with swings left, Qi for darts only → the blade, not darts');
+      d.combat.bladeFormed = false; assert(smartAction(d) === 'dart', 'KN: no knife formed, Qi for darts only → darts, as before'); }
+    // FQ: Fable's clause
+    assert(/a Convergence Use check, no bone, its difficulty one lower than a weapon's\)/.test(FAQ.find(([t]) => t === 'Fights')[1]()), 'FQ: the FAQ says the blast\'s difficulty is one lower (Fable)');
+}
 // v0.10.4: Bonesinger forms — Incremental Mode shows only what James can sing
 {
     const setCu = (g, t, l) => { g.james.skills['Convergence Use'] = { tier: t, level: l, xp: 0 }; };
