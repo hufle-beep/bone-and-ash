@@ -2,7 +2,7 @@
  * Days 2–3 in the Blackroot Wilds: a free loop of foraging, hunting, exploring and training, with a random
  * night (a fight or a quiet one) after nights 1 and 2. The jackals come on night 3, or the night James leaves.
  */
-import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, clockParts, d6, awardYukiFightXp, awardXp, jamesHpMax, jamesQiMax, nightTo } from '../core/game.js';
+import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, clockParts, d6, awardYukiFightXp, awardXp, jamesHpMax, jamesQiMax, nightTo, nightRest } from '../core/game.js';
 import { condensationSatGain } from '../core/formulas.js';
 import { sitGain } from '../core/game.js';
 import { set, day, hour, daily, markDaily, forestScale, grow, eatBest, pantry, foodCount } from './common.js';
@@ -24,7 +24,7 @@ const nightFight = (kind) => (g) => {
         rats: { intro: 'Two mire-rats the size of dogs come up out of the stream, dripping, teeth first.', enemies: [{ name: 'Mire-rat', hp: 5, dc: 3, atk: 4, dmg: 3, prefersSmall: true }, { name: 'Mire-rat (scarred)', hp: 5, dc: 3, atk: 4, dmg: 3, prefersSmall: true }] },
         lizard: { intro: 'The thornback lifts the ridge of spines along its back with a sound like a drawn sword.', enemies: [{ name: 'Thornback lizard', hp: 9, dc: 4, atk: 5, dmg: 4, dr: 1 }] },
     }[kind];
-    return { id: kind, intro: base.intro, band: 'standard', enemies: base.enemies.map((e) => grow(e, s)), win: 'night_won', lose: 'night_lost', flee: kind === 'crows' ? null : 'night_fled' };
+    return { id: kind, night: true, intro: base.intro, band: 'standard', enemies: base.enemies.map((e) => grow(e, s)), win: 'night_won', lose: 'night_lost', flee: kind === 'crows' ? null : 'night_fled' };
 };
 
 const NIGHT_EVENTS = ['lights', 'rain', 'crows', 'rats', 'lizard', 'gift'];
@@ -122,7 +122,7 @@ Yuki washes a paw with tremendous dignity. You sit for a while with your heart g
         id: 'morning', title: (g) => `Day ${day(g)}`, art: 'forest_dawn', place: P,
         enter: (g) => {
             const lines = [];
-            if (hour(g) < 6 || hour(g) >= 20) { sleepUntil(g, 6); lines.push('Slept until 06:00. HP and Qi full.'); }
+            if (hour(g) < 6 || hour(g) >= 20) lines.push(nightRest(g)); // v0.11.92 (O1): half back after a night fight
             g.flags.forest_day = (g.flags.forest_day || 1) + 1;
             const out = eatBest(g);
             lines.push(out.length ? 'Breakfast. ' + out[0] : 'No breakfast. Your stomach files a formal complaint.');

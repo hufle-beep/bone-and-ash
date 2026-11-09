@@ -5,7 +5,7 @@
  * shared camp / fireside / night scenes, a seeded night event, and the Mei Lin – Ya – James romance arc.
  * Entry 'bl_start' (Day 11). Exit 'ht_start' (Day 16, 06:00). Region in g.flags.bl_region, expedition day in g.flags.bl_day (1–5).
  */
-import { addItem, hasItem, eat, advance, clockParts, d6, awardYukiFightXp, jamesHpMax, condense, dayHour, nightTo } from '../core/game.js';
+import { addItem, hasItem, eat, advance, clockParts, d6, awardYukiFightXp, jamesHpMax, condense, dayHour, nightTo, nightRest } from '../core/game.js';
 import { hasForm } from '../core/forms.js';
 import { daily, markDaily, eatBest, pantry, foodCount, hour } from './common.js';
 import { encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil } from './act1_common.js';
@@ -50,6 +50,7 @@ const nightFight = (kind) => (g) => {
     const intro = stake ? `${t.intro} ${STAKE_LINES[kind]}` : t.intro;
     const r = encounter(g, { id: `night_${kind}`, tier: 'small', intro, enemies: t.enemies, win: 'bl_night_won', lose: 'bl_night_lost', flee: kind === 'drowned' ? null : 'bl_morning' });
     if (stake) r.enemies[0] = { ...r.enemies[0], hp: Math.max(1, r.enemies[0].hp - stake) };
+    r.night = true; // v0.11.92 (O1): a night fight costs sleep (a flight too: the mark is set when it starts, and the flight goes straight to bl_morning)
     return r;
 };
 const STAKE_LINES = {
@@ -1046,7 +1047,7 @@ ${likesMei(g) ? 'Across the fire, Mei Lin opens one eye, sees, and closes it aga
         id: 'bl_morning', title: (g) => `Day ${clockParts(g.minutes).day}`, art: (g) => ({ rr: 'root_road', dw: 'drowned_wood', ah: 'ashen_hills' }[region(g)]), place: (g) => PLACE[region(g)],
         enter: (g) => {
             const lines = [];
-            if (hour(g) < 6 || hour(g) >= 19) { sleepUntil(g, 6); lines.push('Slept until 06:00. HP and Qi full.'); }
+            if (hour(g) < 6 || hour(g) >= 19) lines.push(nightRest(g)); // v0.11.92 (O1): half back after a night fight
             g.flags.bl_day = bday(g) + 1;
             g.flags.bl_stakes_night = false; // v0.11.25: the stakes last one night
             const out = eatBest(g, { fire: true });

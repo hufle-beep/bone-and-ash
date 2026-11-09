@@ -44,7 +44,7 @@ export function allies(g) {
  * An encounter for the combat engine. tier: 'small' | 'region' | 'boss' | 'climax' — sets XP band and how strongly the
  * enemies grow with a1Scale. Allies in the party shave HP off the first enemy.
  */
-export function encounter(g, { id, intro, enemies, win, lose, flee = null, tier = 'small', style, tail, opening }) {
+export function encounter(g, { id, intro, enemies, win, lose, flee = null, tier = 'small', style, tail, opening, night }) {
     const s = a1Scale(g);
     const growth = { small: { hp: 0.12, dc: 0.4, atk: 0.5 }, region: { hp: 0.12, dc: 0.4, atk: 0.5 }, boss: { hp: 0.1, dc: 0.35, atk: 0.45 }, climax: { hp: 0.08, dc: 0.35, atk: 0.45 } }[tier];
     const band = { small: 'standard', region: 'challenging', boss: 'major', climax: 'major' }[tier];
@@ -53,7 +53,7 @@ export function encounter(g, { id, intro, enemies, win, lose, flee = null, tier 
     const list = enemies.map((e) => grow(e, s, growth)).map((e) => (t ? { ...e, hp: Math.round(e.hp * (1 + 0.1 * t)), dc: half(e.dc + t), atk: half(e.atk + t) } : e));
     const a = allies(g);
     if (a && list[0]) list[0] = { ...list[0], hp: Math.max(3, list[0].hp - 2 * a) };
-    return { id, intro, band, enemies: list, win, lose, flee, ...(style ? { style } : {}), ...(tail ? { tail } : {}), ...(opening ? { opening } : {}) }; // v0.11.82: a spar's or a brawl's style, intro tail, first line
+    return { id, intro, band, enemies: list, win, lose, flee, ...(style ? { style } : {}), ...(tail ? { tail } : {}), ...(opening ? { opening } : {}), ...(night ? { night } : {}) }; // v0.11.82: a spar's or a brawl's style, intro tail, first line; v0.11.92: a night fight
 }
 
 /** Romance helpers. */

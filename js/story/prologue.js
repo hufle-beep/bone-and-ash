@@ -4,7 +4,7 @@
  * corpses of their rivals, and where Heaven answers every breakthrough with lightning. James needs none of it.
  * That is going to be a problem — for them.
  */
-import { addItem, hasItem, eat, bumpRel, sleepUntil, advance, clockParts, breakthrough, realmName, nightTo } from '../core/game.js';
+import { addItem, hasItem, eat, bumpRel, sleepUntil, advance, clockParts, breakthrough, realmName, nightTo, nightRest } from '../core/game.js';
 import { NO_DICE_TUNE } from './nodice_tune.js';
 import { setNoDiceTune } from '../core/game.js';
 setNoDiceTune(NO_DICE_TUNE);
@@ -40,7 +40,7 @@ const jackals = (g) => {
         ...(s >= 2 ? [{ name: 'Ashfang yearling', hp: 5, dc: 3, atk: 4, dmg: 3, prefersSmall: true }] : []),
     ];
     return {
-        id: 'jackals',
+        id: 'jackals', night: true, // v0.11.92 (O1): a night fight costs sleep
         intro: s >= 2 ? 'Three shapes peel off the dark — the ones that have been circling your camp for two nights: ash-grey, too many teeth, eyes like coals that forgot to go out.' : 'Two shapes peel off the dark: ash-grey, too many teeth, eyes like coals that forgot to go out.',
         band: 'standard',
         enemies: enemies.map((e) => grow(e, s, JACKAL_GROWTH)),
@@ -328,7 +328,7 @@ Ashfang jackals. You've never seen one before and you'd recognise them anywhere:
 In the chest of the larger one, where a heart should be, the omnitool flags a hard, cloudy knot the size of a walnut. *Beast core*, your threads suggest, cross-referencing nothing at all. Dense with that foul Qi.
 
 Something tells you the locals would kill for this. Something tells you that's literal.`,
-        choices: [{ text: 'Sleep. Properly, this time.', do: (g) => { sleepUntil(g, 6); return ['Slept until 06:00. HP and Qi full.']; }, to: 'dawn' }],
+        choices: [{ text: 'Sleep. Properly, this time.', do: (g) => [nightRest(g)], to: 'dawn' }], // v0.11.92 (O1): half back after the fight
     },
     jackals_lost: {
         id: 'jackals_lost', title: 'Teeth in the Dark', art: 'jackals', place: 'Blackroot Wilds — the dry rise',
@@ -342,11 +342,11 @@ You wake up an hour before dawn, alive, aching, and covered in cat.`,
     },
     jackals_fled: {
         id: 'jackals_fled', title: 'Retreat', art: 'stream', place: 'Blackroot Wilds — the stream',
-        enter: (g) => { g.flags.jackals = 'fled'; return []; },
+        enter: (g) => { g.flags.jackals = 'fled'; g.flags.night_fight = 'run'; return []; }, // v0.11.92 (O1, F): a run costs sleep like a fight
         text: `You end up waist-deep in black water, which the jackals hate more than they hate you. They pace the bank until the sky greys, then melt into the trees.
 
 You are cold, wet, alive and furious, and Yuki — perched on your shoulder, dry, smug — is only three of those things.`,
-        choices: [{ text: 'Climb out and get warm.', do: (g) => { sleepUntil(g, 6); g.james.hp = Math.ceil(g.james.hp * 0.8); return ['A miserable few hours of sleep. HP mostly back, Qi full.']; }, to: 'dawn' }],
+        choices: [{ text: 'Climb out and get warm.', do: (g) => [nightRest(g)], to: 'dawn' }], // v0.11.92 (O1, F): half the missing HP and Qi back (was HP 80%, Qi full)
     },
 
     /* ================= DAY 2 ================= */

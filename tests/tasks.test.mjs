@@ -884,6 +884,25 @@ let dayWalk = 0;
     assert(open.some((c) => c.id === 'rt_hunters:1'), `K1: Ashfall at 09:00 on Day 20 offers "Let Ya teach them" (${open.map((c) => c.id).join(', ')})`);
     for (const c of open) { const g = structuredClone(g0); runTask(g, SCENES, c.id); cardsSeen.add(c.id); dayWalk++; }
 }
+// v0.11.92 (owner pick K1, 10:51): since a night fight costs sleep (O1 + X1), fewer random bots reach Shen Qiu (about 2% of
+// games; 7 → 4 rewinds there in 1,000), so the count below fell under 5 by chance. A focused walk takes SHEN_WALKS games into
+// Act 1, to Shen Qiu (rt_taken), bites the tail there and rewinds to the start of Act 1; each counts toward the check below.
+const SHEN_WALKS = 5;
+let shenWalk = 0;
+for (let k = 0; k < SHEN_WALKS; k++) {
+    const g = ensureBars(newGame(919200 + k)); g.scene = 'epilogue'; g.flags.ending = 'paid'; g.minutes = 6 * 1440 + 15 * 60; choose(g, SCENES, 0);
+    goTo(g, SCENES, 'rt_taken');
+    const bite = sceneView(g, SCENES).choices.find((c) => !c.disabled && /Bite the tail/.test(c.label));
+    if (!bite) { assert(false, `K1 (v0.11.92): Shen Qiu offers the bite (walk ${k})`); continue; }
+    choose(g, SCENES, bite.index);
+    const act1 = g.scene === 'coil_end' && g.coil.why === 'shen' && sceneView(g, SCENES).choices.find((c) => !c.disabled && /start of Act 1/.test(c.label));
+    if (!act1) { assert(false, `K1 (v0.11.92): the bite at Shen Qiu leads to the Coil's end with the start of Act 1 (walk ${k}: ${g.scene}, ${g.coil.why})`); continue; }
+    choose(g, SCENES, act1.index);
+    for (let i = 0; i < 4 && g.scene === 'coil_dawn'; i++) { const c = sceneView(g, SCENES).choices.find((x) => !x.disabled); if (!c) break; choose(g, SCENES, c.index); }
+    const ok = g.coil.act === 1 && coilActive(g) && clockParts(g.minutes).day === 8;
+    assert(ok, `K1 (v0.11.92): the rewind at Shen Qiu wakes at the start of Act 1 (walk ${k}: act ${g.coil.act}, ${g.scene}, Day ${clockParts(g.minutes).day})`);
+    if (ok) shenWalk++;
+}
 const WALK_GAMES = 20;
 let walkEc = 0, walkE8 = 0, walkCards = 0;
 {
@@ -1309,6 +1328,86 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
         g.combat.enemies.forEach((x) => { x.hp = 999; x.atk = 0.1; }); // the longest fight: nobody falls, it runs to the round cap
         let o = null; for (let i = 0; i < NO_DICE_ROUND_CAP + 5 && g.combat; i++) o = combatStep(g, 'guard');
         assert(o?.done && g.minutes < night0 + 120, `v0.11.91: ${sc}${kind ? ` (${kind})` : ''} is over before 02:00 even at the round cap (${o?.done}, ${g.minutes - night0} min after midnight)`);
+    }
+}
+// v0.11.92 (owner 2026-11-09 10:17, pick O1, B push 2): a night fight costs sleep. A fight (or a run) in the night marks the
+// night; at dawn only half of the missing HP and Qi come back, James's and Yuki's; a night without a fight fills every bar
+{
+    const { NIGHT_FIGHT_HEAL, shortNight, nightRest, instantWin } = await import('../js/core/game.js');
+    const { yukiHpMax } = await import('../js/core/game.js');
+    const half = (v, m) => Math.min(m, Math.ceil(v + (m - v) * NIGHT_FIGHT_HEAL));
+    assert(NIGHT_FIGHT_HEAL === 0.5, 'v0.11.92: half the missing bars back after a night fight');
+    { // the rule itself, and a full night without the mark (an old save has none)
+        const g = ensureBars(newGame(9201)); g.minutes = 2 * 1440 + 90; g.flags.night_fight = true;
+        const hm = jamesHpMax(g), qm = jamesQiMax(g), ym = yukiHpMax(g), yqm = yukiQiMax(g);
+        g.james.hp = 3; g.james.qi = 1; g.yuki.hp = 2; g.yuki.qi = 0;
+        const line = nightRest(g);
+        assert(g.minutes === 2 * 1440 + 360 && g.james.hp === half(3, hm) && g.james.qi === half(1, qm) && g.yuki.hp === half(2, ym) && g.yuki.qi === half(0, yqm) && !g.flags.night_fight,
+            `v0.11.92: a marked night: HP ${g.james.hp}/${hm}, Qi ${g.james.qi}/${qm}, Yuki ${g.yuki.hp}/${ym} ${g.yuki.qi}/${yqm}, the mark cleared`);
+        assert(/after the fight: HP and Qi only half back\.$/.test(line) && !/\d+ \//.test(line), `v0.11.92: the line says so, without numbers (a regen tick may still land after it; the bars show it) (${line})`);
+        const f = ensureBars(newGame(9202)); f.minutes = 2 * 1440 + 90; f.james.hp = 3; f.james.qi = 1;
+        const l2 = nightRest(f);
+        assert(f.james.hp === jamesHpMax(f) && f.james.qi === jamesQiMax(f) && /HP and Qi full/.test(l2), 'v0.11.92: no mark, a full night');
+        const s = ensureBars(newGame(9203)); s.minutes = 2 * 1440 + 90; s.flags.night_fight = true; s.james.hp = 3; sleepUntil(s, 6);
+        assert(!s.flags.night_fight && s.james.hp === jamesHpMax(s), 'v0.11.92: any full night (sleepUntil) clears the mark');
+        assert(!KEEP_FLAGS.includes('night_fight'), 'v0.11.92: the mark is a world flag, so a rewind resets it');
+        const z = ensureBars(newGame(9204)); z.minutes = 2 * 1440 + 90; z.flags.night_fight = true; z.james.hp = jamesHpMax(z); z.james.qi = jamesQiMax(z); shortNight(z);
+        assert(z.james.hp === jamesHpMax(z) && z.james.qi === jamesQiMax(z), 'v0.11.92: an unhurt James stays full');
+    }
+    // every night fight marks the night when it starts, and the morning after a win is a short night
+    const nights = [
+        ['night_event', 'night_ev', 'crows', 2, 'night_won', 'morning'], ['night_event', 'night_ev', 'rats', 2, 'night_won', 'morning'],
+        ['night_event', 'night_ev', 'lizard', 2, 'night_won', 'morning'], ['night_attack', null, null, 1, 'jackals_won', 'dawn'],
+        ['bl_night_event', 'bl_ev', 'wolves', 10, 'bl_night_won', 'bl_morning'], ['bl_night_event', 'bl_ev', 'drowned', 10, 'bl_night_won', 'bl_morning'],
+        ['bl_night_event', 'bl_ev', 'serpent', 10, 'bl_night_won', 'bl_morning'], ['bl_night_event', 'bl_ev', 'hawks', 10, 'bl_night_won', 'bl_morning'],
+    ];
+    for (const [sc, flag, kind, d, won, morn] of nights) {
+        const g = ensureBars(newGame(9210 + d)); g.minutes = (d - 1) * 1440 + 22 * 60; g.scene = sc; g.flags.bl_region = kind === 'drowned' || kind === 'serpent' ? 'dw' : kind === 'hawks' ? 'ah' : 'rr'; g.flags.bl_day = 2;
+        SCENES[sc].enter?.(g); if (flag) g.flags[flag] = kind;
+        const ch = SCENES[sc].choices.find((c) => c.combat && (!c.show || c.show(g)));
+        const enc = combatHooks.before(g, ch.combat(g)); startCombat(g, enc);
+        assert(g.flags.night_fight === true && enc.night === true, `v0.11.92: ${kind || 'jackals'}: the fight marks the night`);
+        g.combat = null; g.james.hp = Math.round(jamesHpMax(g) * 0.4); g.james.qi = 2;
+        const hp0 = g.james.hp, hm = jamesHpMax(g), qm = jamesQiMax(g);
+        goTo(g, SCENES, won); const r = choose(g, SCENES, 0);
+        const near = (v, w, m) => v >= w && v <= w + 0.1 * m; // the choice's own minutes pass after the morning's enter: a regen tick may land
+        assert(g.scene === morn && clockParts(g.minutes).hh === 6 && near(g.james.hp, half(hp0, hm), hm) && near(g.james.qi, half(2, qm), qm) && g.james.hp < hm && !g.flags.night_fight && r.lines.some((l) => /only half back/.test(l)),
+            `v0.11.92: ${kind || 'jackals'} won: dawn at ${g.scene} with HP ${g.james.hp}/${hm} (from ${hp0}), Qi ${g.james.qi}/${qm}`);
+        // one move: the mark too
+        const o = ensureBars(newGame(9230 + d)); o.minutes = (d - 1) * 1440 + 22 * 60; o.scene = sc; o.flags.bl_region = g.flags.bl_region; o.flags.bl_day = 2; SCENES[sc].enter?.(o); if (flag) o.flags[flag] = kind;
+        instantWin(o, ch.combat(o)); assert(o.flags.night_fight === true, `v0.11.92: ${kind || 'jackals'} ended in one move marks the night`);
+    }
+    // F: a run in the night costs sleep like a fight (the jackals' bone wall; the forest's and the Blackroot's flights)
+    {
+        const j = ensureBars(newGame(9241)); j.minutes = 25 * 60 + 30; j.james.hp = 10; j.james.qi = 3; goTo(j, SCENES, 'jackals_fled');
+        const hm = jamesHpMax(j); const jr = choose(j, SCENES, 0);
+        assert(jr.lines.some((l) => /after the run: HP and Qi only half back/.test(l)), `v0.11.92 (F): the jackals' escape says "after the run" (${jr.lines.join(' | ')})`);
+        assert(j.scene === 'dawn' && j.james.hp >= half(10, hm) && j.james.hp <= half(10, hm) + 0.1 * hm && j.james.qi >= half(3, jamesQiMax(j)) && j.james.qi < jamesQiMax(j), `v0.11.92 (F): the jackals' bone wall and the water: half back (HP ${j.james.hp}/${hm}; was 80%)`);
+        for (const [sc, flag, kind, d, morn] of [['night_event', 'night_ev', 'rats', 2, 'morning'], ['bl_night_event', 'bl_ev', 'wolves', 10, 'bl_morning']]) {
+            const g = ensureBars(newGame(9250 + d)); g.minutes = (d - 1) * 1440 + 22 * 60; g.scene = sc; g.flags.bl_region = 'rr'; g.flags.bl_day = 2; SCENES[sc].enter?.(g); g.flags[flag] = kind;
+            const ch = SCENES[sc].choices.find((c) => c.combat && (!c.show || c.show(g)));
+            startCombat(g, combatHooks.before(g, ch.combat(g))); g.combat.enemies.forEach((x) => { x.atk = 0.1; }); g.james.hp = 6;
+            const out = combatFlee(g); assert(out?.done === 'flee', `v0.11.92 (F): ${kind}: the flight succeeds (${out?.done})`);
+            const hm = jamesHpMax(g); goTo(g, SCENES, out.next); if (g.scene === 'night_fled') choose(g, SCENES, 0);
+            assert(g.scene === morn && g.james.hp >= half(6, hm) && g.james.hp <= half(6, hm) + 0.1 * hm && g.james.hp < hm, `v0.11.92 (F): ${kind}: a flight in the night, dawn with HP ${g.james.hp}/${hm}`);
+        }
+    }
+    // X1 (owner 10:44): the two fights after bed outside the camps, Ashfall's arson (night 5) and the fallout's barley wolves
+    for (const [sc, to, d, morn] of [['village_night', 'arson_won', 5, 'village_morning'], ['fo_wolf', 'fo_wolf_won', 8, 'fo_morning']]) {
+        const g = ensureBars(newGame(9270 + d)); g.minutes = (d - 1) * 1440 + 23 * 60; g.scene = sc;
+        const ch = SCENES[sc].choices.find((c) => c.combat && c.to === to);
+        const enc = combatHooks.before(g, ch.combat(g)); startCombat(g, enc);
+        assert(g.flags.night_fight === true && enc.night === true, `v0.11.92 (X1): ${enc.id}: the fight marks the night`);
+        g.combat = null; g.james.hp = Math.round(jamesHpMax(g) * 0.4); g.james.qi = 2; const hp0 = g.james.hp, hm = jamesHpMax(g), qm = jamesQiMax(g);
+        goTo(g, SCENES, to); const r = choose(g, SCENES, 0);
+        assert(g.scene === morn && g.james.hp >= half(hp0, hm) && g.james.hp <= half(hp0, hm) + 0.1 * hm && g.james.hp < hm && g.james.qi < qm && !g.flags.night_fight && r.lines.some((l) => /only half back/.test(l)),
+            `v0.11.92 (X1): ${enc.id} won: dawn at ${g.scene} with HP ${g.james.hp}/${hm} (from ${hp0}), Qi ${g.james.qi}/${qm}`);
+    }
+    // a night without a fight (rain, the gift; song, stars) still fills every bar
+    for (const [sc, flag, kind, d, choice, morn] of [['night_event', 'night_ev', 'gift', 2, /Pluck it/, 'morning'], ['bl_night_event', 'bl_ev', 'stars', 10, /Go back to sleep/, 'bl_morning']]) {
+        const g = ensureBars(newGame(9260 + d)); g.minutes = (d - 1) * 1440 + 22 * 60; g.scene = sc; g.flags.bl_region = 'ah'; g.flags.bl_day = 2; SCENES[sc].enter?.(g); g.flags[flag] = kind;
+        g.james.hp = 5; g.james.qi = 1; const i = sceneView(g, SCENES).choices.find((c) => choice.test(c.label)).index; choose(g, SCENES, i);
+        assert(g.scene === morn && g.james.hp === jamesHpMax(g) && g.james.qi === jamesQiMax(g), `v0.11.92: ${kind}: no fight, full bars at dawn`);
     }
 }
 // v0.11.90 (owner 2026-11-09 08:42, pick R1, the v0.11.87 Fable review): from Day 19 the hall's Rest stays while James is
@@ -2223,7 +2322,7 @@ const dl = (o, name) => Object.entries(o).sort(([a], [b]) => a - b).filter(([n])
 console.log(`  deaths, prologue (HP 0 or a beast): ${dl(deaths.pro, 'pro')}`);
 console.log(`  deaths, Act 1: ${dl(deaths.a1, 'a1')}`);
 console.log(`  Meditate: ${medStats.mer} meridian screens, ${medStats.bt} breakthroughs, ${medStats.warn} seal warnings; Act 1: ${medStats.a1bites} rewinds at Shen Qiu, ends on ${JSON.stringify(Object.fromEntries(Object.entries(medStats.a1coils).sort(([a], [b]) => a - b)))}`);
-assert(!FULL || medStats.a1bites >= 5, `bots rewind Act 1 and reach its end (${medStats.a1bites})`);
+assert(!FULL || medStats.a1bites + shenWalk >= 5, `bots rewind Act 1 and reach its end (${medStats.a1bites} in the bot games + ${shenWalk} walked on purpose, K1 v0.11.92)`);
 console.log(`  ${stats.tasks.cards} cards run, ${stats.tasks.skipped} skipped, ${stats.tasks.collapses} collapses (HP 0), ${predicted} cards predicted by their dry run (1 game in ${FC_EVERY}), ${cardsSeen.size}/${all.size} cards played`);
 assert(badBars === 0, `no NaN / Infinity bar at the end of a bot game (${badBars})`);
 if (STATS_OUT) writeFileSync(STATS_OUT, JSON.stringify({ games: GAMES, deaths, byCoil, fights: fightStats, badBars, seen: touchedOut() })); // v0.11.3: for tools/sanity.mjs

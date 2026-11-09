@@ -2,6 +2,12 @@
 
 Started in v0.11.88 (owner pick A, 2026-11-09 02:37, D2), so `roadmap-done.md` (part 1) stays readable in one go. Newer than `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.92 (word for word)
+
+### The "Last updated" line of v0.11.91
+
+Last updated: 2026-11-09 (v0.11.91, B push 1 (owner pick B, 09:05; the 21:00 bed rule 09:16; K1, S1, Y1): Push through the night and Exhaustion gone, the day ends at 00:00, no bed before 21:00, the night encounters at 01:00 and over by 02:00; section 2's v0.11.87 line labelled, group e's new line (the story pass checks the exhaustion and night timing everywhere); **next: B's push 2, N1** (a night fight costs sleep), its numbers to the owner first; v0.11.90, the Day 19 heal in the Heart). Update in every push.
+
 ## Moved in v0.11.91 (word for word)
 
 ### The "Last updated" line of v0.11.90

@@ -2,6 +2,24 @@
 
 Started 2026-11-09 (v0.11.86), when `history-10.md` passed 45 KB. Newer than `history-10.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.92 (word for word)
+
+### From "Decided in chat"
+
+- **v0.11.89: the four small items (Claude's options 2026-11-09 07:22–08:14, restated at 08:20 in the options layout; owner 08:23 "P1"):**
+  - **The sub-items:** **F**, "Fists only." three times at Bao's brawl (the button, `stomp_act1.js` `rt_brawl`'s intro, `act1_return.js`'s round-1 opening): F1 drop it from the round-1 opening only (a deletion, no new words) / F0 keep. **T**, the spar's "terms agreed in the lane" intro on the forced path (`ya_forced`, after a failed talk and the slap; its only choice "Fine."): T3 the choice becomes `Fine. "Your spear against my blade. No armour. Nobody dies."` (the other path's exact words, Fable's) / T1 the forced path's intro skips the terms sentence / T0 keep. **X**, a won brawl's XP (`awardXp(g, 'GU')`: the pool on GU's tier, all to GU; 3–4× a small fight's GU; Act 1 end, CU T2 GU T3 Coil 5: small fight CU 36 GU 36 Yuki bond 36, brawl GU 108 Yuki 54; T1 / T2 Coil 3: 13 vs 54; met in about 2 of 300 games): X2 🟢 the normal pool and split without the CU half (GU 36, Yuki 36) / X3 🟡 the GU-tier pool, GU half (GU 54, Yuki 54) / X1 🟠 the pool on CU's tier like every fight, all to GU (GU 72, Yuki 36; the same total as any small fight) / X0 🔴 keep (colours: how far each cuts the brawl's lead over a small fight). **J**, the Journal's "checks rolled" (`main.js` `renderJournal`, Show checks on): J1 "checks made" / J0 keep.
+  - **The options:** **P1 F1 + T3 + X1 + J1 (recommended)** / P2 F1 + T3 + X2 + J1 / P3 F1 + T3 + J1 (X0, text only).
+  - **Picked:** **P1.** Not picked: P2, P3, F0, T1, T0, X2, X3, X0, J0.
+  - **As built:** see the version note.
+  - **Also:** `52275c2` filled in for 0.11.88; after v0.11.88 Claude uploaded 9 docs (handover, roadmap, roadmap-2, roadmap-done-2, roadmap-done, changelog, restore-points, working-agreement, history-11); v0.11.86's notes to `history-11.md`. The owner's to-do: paste the new `CLAUDE.md` into the claude.ai project's Instructions field (rule 1 changed in v0.11.87).
+
+### From "Version notes"
+
+## v0.11.89 — the four small items (P1: F1 + T3 + X1 + J1)
+
+- **Files:** `js/story/act1_return.js` (the brawl's round-1 `opening` without "Fists only."), `js/story/act1_fallout.js` (`ya_forced`'s choice text), `js/core/game.js` (`awardFightXp`; `awardXp`'s `poolTier` option; both award paths, `instantWin` and the combat win), `js/main.js` ("checks made"); tests: tasks (the v0.11.89 block; the v0.11.82 block's opening line); `sw.js`, `tests/README.md`, timings, docs (v0.11.86 to `history-11.md`). Saves unchanged, no id changed. Only Bao's brawl has `style: 'unarmed'`; the spar and every other fight pay as before.
+- **Checks:** a game change (rule 2): the full `bash tools/check.sh`: exit 0, 0 drifted of 139, 0 past 5; the models unchanged (Careful 3.51 / 6.71, Completionist 3.96 / 5.88, the Sitter 2.78 / 2.80, the Farmer 3.94 / 5.82); the four browser parts pass. **Cold review on Fable:** nothing high or medium; X1 right on both paths (mutation runs: each path's revert fails a test); no tool copies the formula; a missing CU falls back to GU's tier (the old pay). Low, not fixed (cosmetic, self-clearing): a save made inside the brawl before round 1 still shows the old opening once (`g.combat.opening` is saved).
+
 ## Moved from the handover in v0.11.91 (word for word)
 
 ### From "Decided in chat"

@@ -3,7 +3,7 @@
  * Day 21. Ashfall prepares. On Day 9 Ya walks out of the Blackroot. On Day 10 the expedition to the Old Tree is
  * planned, and at dawn on Day 11 it leaves (→ 'bl_start').
  */
-import { addItem, eat, condense, advance, sleepUntil, jamesHpMax, hasItem, awardYukiFightXp, yukiForm } from '../core/game.js';
+import { addItem, eat, condense, advance, sleepUntil, jamesHpMax, hasItem, awardYukiFightXp, yukiForm, nightRest } from '../core/game.js';
 import { daily, markDaily, hour, day, eatBest, pantry, foodCount } from './common.js';
 import { encounter, rel, likesMei, likesYa, trioStep, bumpRel } from './act1_common.js';
 
@@ -28,6 +28,7 @@ const wolfFight = (g) => encounter(g, {
     intro: 'Two ash-wolves come over the gap in the stakes, one high and one low, the way wolves do when they have already agreed on who dies first.',
     enemies: [{ name: 'Ash-wolf', hp: 8, dc: 5, atk: 6, dmg: 4 }, { name: 'Ash-wolf (lame)', hp: 6, dc: 4, atk: 5, dmg: 3 }],
     win: 'fo_wolf_won', lose: 'fo_wolf_lost', flee: 'fo_morning',
+    night: true, // v0.11.92 (X1): a fight after bed costs sleep
 });
 const yaBrawl = (g) => encounter(g, {
     id: 'ya_brawl', tier: 'small',
@@ -419,7 +420,7 @@ The goat's owner bows to you anyway, and thanks you for your effort, which is so
         id: 'fo_morning', title: (g) => `Day ${dd(g)}`, art: 'ashfall_dawn', place: P,
         enter: (g) => {
             const lines = [];
-            if (hour(g) < 6 || hour(g) >= 19) { sleepUntil(g, 6); lines.push('Slept until 06:00. HP and Qi full.'); }
+            if (hour(g) < 6 || hour(g) >= 19) lines.push(nightRest(g)); // v0.11.92 (X1): half back after the barley wolves
             if (g.flags.wolf === 'lost') g.james.hp = Math.ceil(g.james.hp * 0.85);
             eat(g, 20);
             lines.push('Breakfast at Mei Lin\'s: gruel and pickles, +20 satiety.');

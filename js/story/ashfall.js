@@ -2,7 +2,7 @@
  * Days 5–6 in Ashfall Hamlet (the long route): suppers at Mei Lin's, a free day loop around the village,
  * a night visit shaped by what James did to Gao Feng, and bonuses that pay off when the Sect comes on Day 7.
  */
-import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, d6, awardYukiFightXp, jamesHpMax } from '../core/game.js';
+import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, d6, awardYukiFightXp, jamesHpMax, nightRest } from '../core/game.js';
 import { set, day, hour, daily, markDaily, forestScale, villageScale, grow, eatBest, pantry, foodCount } from './common.js';
 
 const P = 'Ashfall Hamlet';
@@ -24,7 +24,8 @@ const farHunt = (g) => {
 };
 const arson = (g) => {
     const s = forestScale(g) + villageScale(g);
-    return { id: 'arson', intro: 'Pock-Face lifts his torch and grins. The two with him spread out, the way men do when they\'ve done this before.', band: 'challenging', enemies: [{ name: 'Lackey Pock-Face', hp: 7, dc: 3, atk: 4, dmg: 3 }, { name: 'Hired thug', hp: 5, dc: 3, atk: 4, dmg: 3 }, { name: 'Hired thug', hp: 5, dc: 3, atk: 4, dmg: 3 }].map((e) => grow(e, s)), win: 'arson_won', lose: 'arson_lost' };
+    // v0.11.92 (X1): a fight after bed (Mei Lin wakes James) costs sleep
+    return { id: 'arson', night: true, intro: 'Pock-Face lifts his torch and grins. The two with him spread out, the way men do when they\'ve done this before.', band: 'challenging', enemies: [{ name: 'Lackey Pock-Face', hp: 7, dc: 3, atk: 4, dmg: 3 }, { name: 'Hired thug', hp: 5, dc: 3, atk: 4, dmg: 3 }, { name: 'Hired thug', hp: 5, dc: 3, atk: 4, dmg: 3 }].map((e) => grow(e, s)), win: 'arson_won', lose: 'arson_lost' };
 };
 
 export const ASHFALL = {
@@ -143,7 +144,7 @@ Mei Lin stands in the lane with soot on her face, looking at the wreck, and says
         id: 'village_morning', title: (g) => `Day ${day(g)}`, art: 'village', place: P,
         enter: (g) => {
             const lines = [];
-            if (hour(g) < 6 || hour(g) >= 19) { sleepUntil(g, 6); lines.push('Slept until 06:00. HP and Qi full.'); }
+            if (hour(g) < 6 || hour(g) >= 19) lines.push(nightRest(g)); // v0.11.92 (X1): half back after the arson fight
             g.flags.vday = vday(g) + 1;
             eat(g, 20);
             lines.push('Breakfast at Mei Lin\'s: rice gruel and pickles, +20 satiety.');

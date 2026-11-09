@@ -429,6 +429,7 @@ export function nightTo(g, at = 60) {
  *  `bed: false` for a rest that isn't a bed, the Long Forest's seclusion, owner pick S1). */
 export function sleepUntil(g, hour = 6, { bed = true } = {}) {
     if (bed) eveningTo(g);
+    delete g.flags.night_fight; // v0.11.92: any full night clears a night fight's mark
     const p = clockParts(g.minutes);
     let target = (p.day - 1) * 1440 + hour * 60;
     if (target <= g.minutes) target += 1440;
@@ -443,6 +444,35 @@ export function sleepUntil(g, hour = 6, { bed = true } = {}) {
     g.yuki.qi = yukiQiMax(g);
     ensureBars(g);
     return span;
+}
+
+/**
+ * v0.11.92 (owner 2026-11-09 10:17, pick O1, B push 2; 10:42 X1): a night fight costs sleep. A fight after bed (`enc.night`:
+ * the jackals, the forest nights' crows, rats and thornback, the Blackroot's camp nights, Ashfall's arson, the fallout's barley
+ * wolves) marks `g.flags.night_fight` when it starts (`'run'` for the jackals' escape without a fight, F). The next morning only half of what is missing comes back, HP and Qi, James's
+ * and Yuki's (W1 + Q); without the mark a night fills every bar as before. Any full night (`sleepUntil`) clears the mark,
+ * and a rewind resets it with the other world flags.
+ */
+export const NIGHT_FIGHT_HEAL = 0.5;
+const halfBack = (v0, max) => { const v = Number.isFinite(v0) ? Math.max(0, v0) : 0; return Math.min(max, Math.ceil(v + (max - v) * NIGHT_FIGHT_HEAL)); };
+/** A night after a night fight: sleep to `hour`, then half the missing HP and Qi back. Returns the result line. */
+export function shortNight(g, hour = 6) {
+    const before = { hp: g.james.hp, qi: g.james.qi, yhp: g.yuki.hp, yqi: g.yuki.qi }, what = g.flags.night_fight === 'run' ? 'run' : 'fight';
+    sleepUntil(g, hour);
+    const hm = jamesHpMax(g), qm = jamesQiMax(g);
+    g.james.hp = halfBack(before.hp, hm);
+    g.james.qi = halfBack(before.qi, qm);
+    g.yuki.hp = halfBack(before.yhp, yukiHpMax(g));
+    g.yuki.qi = halfBack(before.yqi, yukiQiMax(g));
+    ensureBars(g);
+    // no numbers: the choice's own minutes still pass after this line (a regen tick may land; the bars show it)
+    return `Slept until ${String(hour).padStart(2, '0')}:00, what was left of the night after the ${what}: HP and Qi only half back.`;
+}
+/** The morning after a camp night: a short night after a night fight, a full one otherwise. Returns the result line. */
+export function nightRest(g, hour = 6) {
+    if (g.flags.night_fight) return shortNight(g, hour);
+    sleepUntil(g, hour);
+    return `Slept until ${String(hour).padStart(2, '0')}:00. HP and Qi full.`;
 }
 
 /* ---------------- Qi ---------------- */
@@ -679,6 +709,7 @@ export const yukiForm = (g) => (yukiForms(g).includes(g.yuki.form) ? g.yuki.form
 /** Win a fight outright (the one-move finish): XP and kills as a normal win, no combat screen. */
 export function instantWin(g, enc) {
     const e = combatHooks.before ? (combatHooks.before(g, enc) || enc) : enc;
+    if (e.night) g.flags.night_fight = true; // v0.11.92 (O1): a night fight costs sleep, even one ended in one move
     g.stats.kills += e.enemies.length;
     const xp = awardFightXp(g, e.style, e.band || 'standard').concat(yukiSitsOut(g, e) ? [] : awardYukiFightXp(g, e.band || 'standard')); // v0.11.82; v0.11.89 (X1) awardFightXp
     g.lastWin = { id: e.id, degree: e.degree || 3, next: e.win };
@@ -688,6 +719,7 @@ export function instantWin(g, enc) {
 
 export function startCombat(g, enc0) {
     const enc = combatHooks.before ? (combatHooks.before(g, enc0) || enc0) : enc0;
+    if (enc.night) g.flags.night_fight = true; // v0.11.92 (O1): a night fight costs sleep
     g.combat = {
         id: enc.id,
         round: 1,
