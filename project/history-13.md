@@ -2,6 +2,25 @@
 
 Started 2026-11-09 (v0.11.107), when `history-12.md` neared 45 KB. Newer than `history-12.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.113 (word for word)
+
+### From "Decided in chat"
+
+- **v0.11.110: group d's small items in one push (the owner's 23:27 "check if some of the group d option can be consolidated and processed in one push"; options GD1–GD4 at 23:31, owner 23:33 "GD1"; Fable's FAQ clause shown 23:35, owner 23:36 "ok"; FB1–FB3 after Fable's review, owner "FB1"):**
+  - **The sub-items (a scratch copy: Careful and Completionist 200 games each, the random bots 300, the fight lab 300):** **FQ** the FAQ's blast clause (Fable's; text only); **CV** the fight's cards and Run showed the value without hunger (−1 hungry, −2 starving): fights started hungry Careful 71 of 2,575 (2.8%), Completionist 47 of 4,768 (1.0%), random 1,236 of 19,563 (6.3%; starving 232, 1.2%); display only; **FO** the smart rule paid for an unsung flail beside a free formed weapon: 0 of 26,906 bot fights; **KN** a formed fragile knife's free swings skipped for darts or guard: 719 rounds (random bots' smart half), 0 for the models; lab smart 78.8 → 79.1%; the models unchanged; **LD** the ladder kept: at Foundation+ chosen in 19 of 202 (Careful), 13 of 202 (Completionist), 3 of 129 (random) games, every one passed; **LF** flown too (not picked: the climb would be the same, 20 min slower); **X** Fable's text (rule 10), tests, the full check, Fable's cold review (rule 9).
+  - **The options:** **GD1 🟢 FQ + CV + FO + KN + LD + X (recommended)** / GD2 🟡 FQ + CV + LD + X / GD3 🟠 FQ + CV + FO + KN + LF + X / GD4 🔴 no bundle (colours: open items closed in one push against what it moves). **Picked: GD1.** Flight in fights and the fight ideas: open, options later (balance; each its own push).
+  - **Fable's clause (rule 10; shown 23:35, owner "ok" 23:36):** "(a Convergence Use check, no bone, its difficulty one lower than a weapon's)" in the FAQ's Fights entry; "all equally hard to land" kept (true of the weapons).
+  - **FB (stop-and-ask; Fable's review, medium 1: with a holding blade out, the FO rule skipped the flail and paid for the spear):** **BS** a holding blade swings free before a paid spear or flail; **SO** FO for the spear only; **KP** keep (a paid spear); each 0 fights. **FB1 🟢 BS (recommended)** / FB2 🟡 SO / FB3 🟠 KP. **Picked: FB1.**
+  - **As built:** see the version note.
+  - **Also:** `013fd6a` filled in for 0.11.109 (Pages and Restore points succeeded, 22:22 UTC); after v0.11.109 Claude uploaded 5 docs (handover, roadmap, changelog, restore points, history-13); v0.11.107's notes to `history-13.md`.
+
+### From "Version notes"
+
+## v0.11.110 — group d's small items (GD1, FB1)
+
+- **Files:** `js/core/game.js` (`checkValue`, used by `rollCheck`), `js/main.js` (the fight's cards and Run show `checkValue`), `js/core/faq.js` (Fable's clause), `tests/lib/smartfight.mjs` (FO: no paid flail beside a formed spear or holding blade; FB1: no paid spear beside a holding blade; KN: a formed knife swings; the reserve's comment), `tests/tasks.test.mjs` (the GD1 block), `tests/README.md`, `sw.js`, docs (v0.11.107 to `history-13.md`). Saves: no new field, no id changed.
+- **Checks:** a game change (rule 2): the full `bash tools/check.sh` twice (GD1, then FB1 and the review's fixes): exit 0 both, 0 drifted of 144, 2 past 5 (log only: the elder smart in the tasks test 90.4 → 96.2%, n 52 → 53, the random bots' smart half playing KN; the story test's random rt_wolves 97.6 → 91.9%, as since v0.11.107). The models (500 games): Careful 3.27 / 3.73, Completionist 3.34 / 3.47, the Sitter 2.64 / 2.64 (150), the Farmer 3.28 / 3.43: as v0.11.109. **Fable, cold review:** no high; medium 1 → FB1 (above); lows fixed: KN instead of darts tested (T1 L7), the hunger edge (30 / 29.9) tested, the reserve's comment. Information: a card can show a negative value (the check's real one); the James tab's rows still show the skill without hunger (outside fights, the base figure); the FAQ clause holds wherever a foe's DC is 2.5 or more (the lowest in the game).
+
 ## Moved from the handover in v0.11.112 (word for word)
 
 ### From "Decided in chat"

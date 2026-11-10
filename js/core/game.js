@@ -773,7 +773,7 @@ function dmgRoll(g, [lo, hi]) {
 }
 
 /** Story-layer hooks: `before(g, enc)` may adjust an encounter (Long Forest scaling, posture text, degree). */
-export const combatHooks = { before: null, lose: null };
+export const combatHooks = { before: null, lose: null, steal: null }; // v0.11.113 (DA1, CS): steal(g) → a food item id the hammerspace holds, or null (story/common.js)
 /** Fights against people (v0.9.7): losing them keeps their written branches. Every other fight is a beast. */
 export const PEOPLE_FIGHTS = new Set(['gao', 'collectors', 'arson', 'ya_brawl', 'rt_brawl', 'elder', 'sect_watcher', 'lf_rogue', 'lf_bandits']); // v0.11.81 (T1): the Tan brothers too
 /** Task mode (v0.9.7, owner's pick 3a): every beast fight +0.5 DC and attack on top of its no-dice tuning. */
@@ -822,14 +822,64 @@ export function startCombat(g, enc0) {
             const t0 = noDiceTune[enc.id]; // v0.9.3: per-fight tuning for the no-dice rules
             const t = !PEOPLE_FIGHTS.has(enc.id) ? { ...(t0 || {}), up: ((t0 && t0.up) || 0) + BEAST_UP } : t0; // v0.9.7: beasts +0.5
             const x = t ? { ...e, dc: e.dc + (t.up || 0), atk: e.atk + (t.up || 0), hp: Math.max(1, Math.round(e.hp * (t.hp || 1))) } : e;
-            return { ...x, hpMax: x.hp, staggered: false };
+            return { ...x, hpMax: x.hp, staggered: false, ...(isHeavy(g, enc, e) ? { heavy: true } : {}) }; // v0.11.113 (DA1, TL)
         }),
         log: [enc.intro || 'Combat!'],
     };
+    g.combat.log.push(...traitLines(g, g.combat.enemies, enc.id)); // v0.11.113 (DA1, TD)
     if (enc.style) Object.assign(g.combat, { style: enc.style, yukiOut: yukiSitsOut(g, enc), ...(enc.opening ? { opening: enc.opening } : {}) }); // v0.11.82
     return g.combat;
 }
 
+/** v0.11.113 (owner pick DA1; research.md #43, #45, #133): foes show their hand. Each trait, read off the foe's fields, has a
+ *  tag (after its name on the fight screen) and a line (once, when the fight starts). Texts Fable's (rule 10). */
+export const FOE_TRAITS = {
+    yuki: { tag: 'goes for Yuki', line: '{foe} has looked you both over and settled on the smaller one.' },
+    flies: { tag: 'flies', line: '{foe} has wings. The air will not keep you out of its reach.', grounded: '{foe} has wings. You have the ground, for now.' },
+    plated: { tag: 'plated', line: '{foe} is armoured. Bone will lose some of itself on that; raw Qi will not.', pierced: '{foe} is armoured. Sung bone no longer minds; raw Qi never did.' },
+    heavy: { tag: 'hits hard', line: '{foe} hits hard, and winds up before its worst. Watch for it.', person: '{foe} hits hard, and settles into a stance before the worst of it. Watch for the stance.' },
+    moods: { tag: 'moods', line: '{foe} has moods, and wears them a round early. The singing inside it changes key.' },
+    thief: { tag: 'thief', line: '{foe} is watching your supplies more closely than it is watching you.' },
+};
+/** A foe's traits, in FOE_TRAITS order. */
+export const foeTraits = (e) => Object.keys(FOE_TRAITS).filter((k) => ({ yuki: e.prefersSmall, flies: e.flies, plated: (e.dr || 0) > 0, heavy: e.heavy, moods: e.moods, thief: e.thief })[k]);
+/** v0.11.113 (DB1, C): a foe's name into a line; "The …" is lower-cased when it doesn't start the line. */
+export const foeFill = (t, name) => t.replace('{foe}', t.indexOf('{foe}') > 0 && /^The /.test(name) ? `t${name.slice(1)}` : name);
+/** v0.11.113 (DB1, P, W): the line for a trait in this fight: people's wording for a heavy person (PEOPLE_FIGHTS); plated
+ *  once sung bone pierces armour (bone tier 3+); flies while James can't fight from the air. Texts Fable's. */
+export const traitLine = (g, k, id) => (k === 'heavy' && PEOPLE_FIGHTS.has(id) ? FOE_TRAITS.heavy.person : k === 'plated' && boneTier(g) >= 3 ? FOE_TRAITS.plated.pierced
+    : k === 'flies' && !airFights(g) ? FOE_TRAITS.flies.grounded : FOE_TRAITS[k].line);
+/** The trait lines for a fight's start: each trait once, named for the first foe that has it. */
+export const traitLines = (g, enemies, id) => Object.keys(FOE_TRAITS).map((k) => { const e = enemies.find((x) => foeTraits(x).includes(k)); return e ? foeFill(traitLine(g, k, id), e.name) : null; }).filter(Boolean);
+/** DA1 (TL): from Act 1, an armed fight's foes that hit for HEAVY_DMG or more land a big blow every TELL_EVERY rounds (× BIG_BLOW
+ *  damage), shown the round before; guard avoids it outright, the needle's stagger and the spear's hold stop it as any attack.
+ *  Not the rot ape (NO_TELL; measured: the story test's smart bots 47.4 → 35.0% there, Act 1's wall is the retune's). */
+export const HEAVY_DMG = 5, TELL_EVERY = 3, BIG_BLOW = 2;
+export const NO_TELL = new Set(['rot_ape']);
+const isHeavy = (g, enc, e) => !enc.style && (e.dmg || 0) >= HEAVY_DMG && inAct1(g) && !NO_TELL.has(enc.id);
+/** Is this foe's big blow (or, for a foe that goes for Yuki, its lunge) due this round? */
+export const bigBlowDue = (c, e) => !!(e.heavy && e.hp > 0 && c.round % TELL_EVERY === 0);
+/** DA1 (HD): a foe with moods (the Gardeners' Guardian): hungry rounds (James's hits heal it), proud rounds (his hits do double), plain. */
+export const moodOf = (c, e) => (e?.moods ? (c.round % 3 === 2 ? 'hungry' : c.round % 3 === 0 ? 'proud' : 'plain') : 'plain');
+export const TELL_TEXT = {
+    big: ['{foe} draws back and sets its weight. The next one will be the big one.', '{foe} goes very still, gathering. Something large is coming next round.', '{foe} rears up and takes its time about it. Next round, the big blow.'],
+    bigPerson: ['{foe} draws back a pace and sets both feet. The next one will be the big one.', '{foe} goes very still, gathering Qi. Something decisive is coming next round.', '{foe} lowers one hand and takes a long breath over it. Next round, the big blow.'], // DB1 (P): people's wording (Shen Qiu, Fang Wei)
+    bigAvoided: '{foe} brings the big blow down on the place you have just left.',
+    bigLands: '  The big blow: double.',
+    lunge: '{foe} has stopped looking at you. It is looking at Yuki. Next round it lunges.',
+    covered: '{foe} lunges at Yuki — and meets you instead. She watches from behind your guard.',
+    hungry: 'The singing inside {foe} thins to a whine. It is hungry: next round, your hits feed it.',
+    proud: '{foe} draws itself up to its full height, the voice swelling. Proud: next round, hits land double.',
+    fed: '{foe} takes the blow in and grows over it, pleased. +{n} HP.',
+    proudHit: '  It was too proud to move: double.',
+    theft: '{foe} makes off with your {item}.',
+    guardBig: 'avoids the big blow', guardYuki: 'covers Yuki',
+    holdBig: 'A big blow is coming this round: guarding avoids it outright.',
+    holdYuki: 'A lunge at Yuki is coming this round: guarding puts you between it and her.',
+};
+/** For the Guard card (this round): a big blow due from a foe guard would meet; a lunge at Yuki due. */
+export const bigBlowNow = (g) => !!g.combat && g.combat.enemies.some((e) => bigBlowDue(g.combat, e) && !e.staggered && !e.atBay);
+export const lungeNow = (g) => !!g.combat && !g.combat.style && g.yuki.hp > 0 && g.combat.round % TELL_EVERY === 0 && g.combat.enemies.some((e) => e.prefersSmall && e.hp > 0 && !e.staggered && !e.atBay);
 export const NO_DICE_ROUND_CAP = 30; // a no-dice fight still undecided after this many rounds is lost: James is spent
 const ADAPT_FIGHT_STEP = 0.5, ADAPT_FIGHT_MAX = 2;
 const bandOf = (ratio) => (ratio >= 2 ? 'double' : ratio >= 1 ? 'full' : ratio >= 0.5 ? 'glance' : 'miss');
@@ -886,8 +936,12 @@ function stepNoDice(g, actionId, targetIdx) {
                 if (band === 'glance') dmg = Math.floor(dmg / 2);
                 if (act.pierce && T < 3 && (tg.dr || 0) > 0 && !c.blastPierced) { c.blastPierced = true; lines.push(`  ${QI_BLAST_PIERCE.replace('{foe}', tg.name)}`); }
                 dmg = Math.max(0, dmg - (T >= 3 || act.pierce ? 0 : (tg.dr || 0))); // v0.11.95 (Q1): the Qi blast ignores armour
+                const mood = moodOf(c, tg); // v0.11.113 (DA1, HD)
+                if (mood === 'hungry' && dmg > 0) { const h0 = tg.hp; tg.hp = Math.min(tg.hpMax, tg.hp + dmg); lines.push(`  ${foeFill(TELL_TEXT.fed, tg.name).replace('{n}', Math.round((tg.hp - h0) * 10) / 10)}`); continue; } // DB1 (F): what it really healed
+                if (mood === 'proud' && dmg > 0) dmg *= 2;
                 tg.hp -= dmg;
                 lines.push(`  ${tg.name} takes ${dmg}${band === 'double' ? ' (double damage)' : ''}.`);
+                if (mood === 'proud' && dmg > 0) lines.push(TELL_TEXT.proudHit);
                 if (act.stagger && tg.hp > 0 && band !== 'glance') { tg.staggered = true; lines.push(act.unarmed ? `  ${tg.name} hits the dust and takes a moment to work out which way is up.` : `  ${tg.name} staggers.`); } // v0.11.82: the throw's line Fable's
                 if (act.reach && tg.hp > 0 && band !== 'glance') { tg.atBay = true; lines.push(`  ${tg.name} is held at the spear's length.`); }
             }
@@ -917,14 +971,17 @@ function stepNoDice(g, actionId, targetIdx) {
         if (e.staggered) { e.staggered = false; lines.push(c.style === 'unarmed' ? `${e.name} is still getting up.` : `${e.name} is still reeling.`); continue; }
         if (e.atBay) { e.atBay = false; lines.push(`${e.name} can't get past the spear.`); continue; }
         if (e.prefersSmall && g.yuki.hp > 0 && c.round % 3 === 0) { // every third round it goes for the small one
-            const dodge = skillCheck(g.yuki.fight) + 1 >= noDiceDc(e.atk) || (guard && !c.style && hasForm(g, 'buckler')); // v0.11.4: shield cover
-            lines.push(`${e.name} lunges at Yuki — ${dodge ? 'she is not there' : 'it connects'}.`);
+            const covered = guard && !c.style; // v0.11.113 (DA1, TY): the lunge is shown a round early, so any guard covers her (v0.11.4: the buckler only)
+            const dodge = covered || skillCheck(g.yuki.fight) + 1 >= noDiceDc(e.atk);
+            lines.push(covered ? foeFill(TELL_TEXT.covered, e.name) : `${e.name} lunges at Yuki — ${dodge ? 'she is not there' : 'it connects'}.`);
             if (!dodge) g.yuki.hp = Math.max(1, g.yuki.hp - hitDamage(e.dmg, e.realm, g.yuki.realm, yukiDr(g)));
             continue;
         }
         if (shield && !(c.aloft && !e.flies)) { shield = false; lines.push(`${e.name} attacks — your construct steps into the blow.`); continue; } // v0.11.112 (AF1, S): not spent on a foe that can't reach
         if (c.field > 0) { const th = fieldDamage(g); e.hp -= th; lines.push(`${e.name} comes through the spikes: ${th}.`); if (e.hp <= 0) continue; }
         if (c.aloft && !e.flies) { lines.push(AIR_TEXT.reach.replace('{foe}', e.name)); continue; } // v0.11.112 (FF1)
+        const big = bigBlowDue(c, e); // v0.11.113 (DA1, TL)
+        if (big && guard) { lines.push(foeFill(TELL_TEXT.bigAvoided, e.name)); continue; } // DB1 (P): Fable kept it for people too
         const r = rollCheck(g, 'GU', e.atk, guard ? guardBonus(g) : 0);
         if (r.ratio >= 1) { lines.push(`${e.name} attacks: you defend (${checkText(r)}) — avoided.`); continue; }
         let dmg = hitDamage(e.dmg, e.realm, g.james.realm, jamesDr(g));
@@ -937,8 +994,21 @@ function stepNoDice(g, actionId, targetIdx) {
             if (dmg <= 0) { lines.push(`${e.name} attacks: you defend (${checkText(r)}).`, ...soaked); continue; }
         }
         if (r.ratio >= 0.5) dmg = Math.floor(dmg / 2);
+        if (big) dmg *= BIG_BLOW;
         g.james.hp = Math.max(0, g.james.hp - dmg);
         lines.push(`${e.name} attacks: you defend (${checkText(r)}) — ${r.ratio >= 0.5 ? 'it only half lands' : 'it lands'}: ${dmg} (DR ${jamesDr(g)}).`, ...soaked);
+        if (big) lines.push(TELL_TEXT.bigLands);
+        if (e.thief && !c.stole && dmg > 0 && combatHooks.steal) { const k = combatHooks.steal(g); if (k) { g.inventory[k]--; c.stole = true; lines.push(foeFill(TELL_TEXT.theft, e.name).replace('{item}', itemNames[k]?.name || k)); } } // v0.11.113 (DA1, CS)
+    }
+    if (c.enemies.some((e) => e.hp > 0) && g.james.hp > 0 && c.round + 1 <= NO_DICE_ROUND_CAP) { // v0.11.113 (DA1): next round's moves, shown now; DB1 (L): only if that round comes
+        const next = c.round + 1, bigT = PEOPLE_FIGHTS.has(c.id) ? TELL_TEXT.bigPerson : TELL_TEXT.big;
+        for (const e of c.enemies) {
+            if (e.hp <= 0) continue;
+            if (e.heavy && next % TELL_EVERY === 0) lines.push(foeFill(bigT[Math.floor(next / TELL_EVERY) % bigT.length], e.name));
+            if (e.prefersSmall && !c.style && g.yuki.hp > 0 && next % TELL_EVERY === 0) lines.push(foeFill(TELL_TEXT.lunge, e.name));
+            const m = moodOf({ round: next }, e);
+            if (m !== 'plain') lines.push(foeFill(TELL_TEXT[m], e.name));
+        }
     }
     if (c.field > 0) c.field--;
     delete c.qshieldHp; // v0.11.95: the shield lasts the round

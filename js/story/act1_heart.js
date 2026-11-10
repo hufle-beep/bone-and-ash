@@ -33,7 +33,7 @@ const rootThings = (g) => encounter(g, {
 const guardianFight = (g) => encounter(g, {
     id: 'guardian', tier: 'boss', win: 'guardian_won', lose: 'guardian_lost',
     intro: 'The guardian unfolds: grown wood and old white bone, three times your height, and somewhere inside it a voice that is still, faintly, singing.',
-    enemies: [{ name: 'The Gardeners\' Guardian', hp: g.flags.guardian_weak ? 10 : 12, dc: 3, atk: 3, dmg: 5, dr: 1 }],
+    enemies: [{ name: 'The Gardeners\' Guardian', hp: g.flags.guardian_weak ? 10 : 12, dc: 3, atk: 3, dmg: 5, dr: 1, moods: true }], // v0.11.113 (DA1, HD): its moods (game.js moodOf)
 });
 
 /** Morning inside the trunk (also handles the sleep). */

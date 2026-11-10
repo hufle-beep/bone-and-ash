@@ -1,5 +1,5 @@
 /** Shared story helpers: flags, days, food, and how enemies grow with the days James spends training. */
-import { clockParts, addItem, eat, wakeDay, dayHour } from '../core/game.js';
+import { clockParts, addItem, eat, wakeDay, dayHour, combatHooks } from '../core/game.js';
 
 export const once = (flag) => (g) => !g.flags[flag];
 export const set = (...flags) => (g) => { for (const f of flags) g.flags[f] = true; return []; };
@@ -41,6 +41,8 @@ export const FOOD = {
     crimson_berry: [3, 3],
     venison: [40, 20],
 };
+/** v0.11.113 (DA1, CS): what a thief (the rot-crows) takes: the first food in FOOD's order the hammerspace holds. */
+combatHooks.steal = (g) => Object.keys(FOOD).find((k) => (g.inventory[k] || 0) > 0) || null;
 export const foodCount = (g) => Object.keys(FOOD).reduce((n, k) => n + (g.inventory[k] || 0), 0);
 /** Eat the most filling thing in the hammerspace (cooked if there's a fire). */
 export function eatBest(g, { fire = !!g.flags.fire } = {}) {

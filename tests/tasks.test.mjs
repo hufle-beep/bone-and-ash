@@ -478,6 +478,103 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     { const { FAQ } = await import('../js/core/faq.js'); const fl = FAQ.find(([t]) => t === 'Flight')[1]();
       assert(/<b>Fights:<\/b> from Act 1 on, never in the prologue, and only at <b>[^<]+<\/b> or above: in an armed fight, any round James throws <b>Bone darts<\/b> or the <b>Qi blast<\/b> he does it from the air/.test(fl) && !/not in the game yet/.test(fl), "FF1: the FAQ's Fights sentence (Fable)"); }
 }
+// v0.11.113 (owner pick DA1; research.md #43, #45, #133): foes show their hand. TD: traits as tags with a line at the start;
+// TL: from Act 1 a foe hitting for 5+ (not the rot ape, not a spar or a brawl) shows its big blow a round early, ×2, guard
+// avoids it, the needle's stagger stops it; TY: a shown lunge, any guard covers Yuki; HD: the guardian's moods (hungry: hits
+// heal it; proud: hits double); CS: a thief takes one food item on its first landed hit; the smart rule answers.
+{
+    const { FOE_TRAITS, foeTraits, traitLines, TELL_TEXT, bigBlowDue, moodOf, NO_TELL, HEAVY_DMG, BIG_BLOW, bigBlowNow, lungeNow, combatHooks } = await import('../js/core/game.js');
+    const { readFileSync } = await import('node:fs');
+    const setSk = (g, t, l) => { g.james.skills['Convergence Use'] = { tier: t, level: l, xp: 0 }; g.james.gu = { tier: t, level: l, xp: 0 }; };
+    const toAct1 = (g) => { g.flags.ending = g.flags.ending || 'victory'; g.minutes = Math.max(g.minutes, 7 * 1440 + 6 * 60); return g; };
+    const mk = (enemies, { act1 = true, id = 'test_da1', extra = {}, realm = 0, yuki = true } = {}) => { const g = ensureBars(newGame(96, { closed: true })); if (act1) toAct1(g); setSk(g, 1, 9); g.james.realm = realm; g.james.qi = 40; g.james.hp = jamesHpMax(g); if (!yuki) g.yuki.hp = 0;
+        sCombat(g, { id, intro: 'In.', band: 'standard', enemies, win: 'stream', lose: 'stream', ...extra }); g.combat.fieldUsed = true; return g; };
+    const brute = (n = 'Brute', x = {}) => ({ name: n, hp: 999, dc: 1, atk: 60, dmg: HEAVY_DMG, ...x });
+    const dealt = (o, n) => { const m = o.lines.map((l) => l.match(new RegExp(`^${n} attacks: .*: (\\d+(?:\\.\\d+)?) \\(DR`))).find(Boolean); return m ? Number(m[1]) : null; };
+    // TD
+    assert(foeTraits({ prefersSmall: true, flies: true, dr: 1, heavy: true, moods: true, thief: true }).join() === 'yuki,flies,plated,heavy,moods,thief' && foeTraits({ dr: 0 }).length === 0, 'DA1, TD: the traits, in order');
+    assert(Object.values(FOE_TRAITS).map((t) => t.tag).join() === 'goes for Yuki,flies,plated,hits hard,moods,thief', "DA1, TD: Fable's tags");
+    { const two = [{ name: 'Crow 1', flies: true }, { name: 'Crow 2', flies: true }]; const tl = traitLines(mk([], { act1: false }), two, 'test_da1');
+      assert(tl.length === 1 && tl[0] === FOE_TRAITS.flies.grounded.replace('{foe}', 'Crow 1'), 'DA1, TD: each trait once, named for the first foe');
+      const g = mk(two, { act1: false }); assert(g.combat.log[0] === 'In.' && g.combat.log[1] === tl[0] && g.combat.log.length === 2, 'DA1, TD: the line follows the intro'); }
+    // TL
+    { const g = mk([brute()]); assert(g.combat.enemies[0].heavy === true, 'DA1, TL: Act 1, dmg 5: heavy');
+      assert(!mk([brute()], { act1: false }).combat.enemies[0].heavy, 'DA1, TL: not in the prologue');
+      assert(NO_TELL.has('rot_ape') && !mk([brute()], { id: 'rot_ape' }).combat.enemies[0].heavy, 'DA1, TL: not the rot ape');
+      assert(!mk([brute()], { extra: { style: 'spar' } }).combat.enemies[0].heavy, 'DA1, TL: not in a spar');
+      assert(!mk([brute('B', { dmg: HEAVY_DMG - 1 })]).combat.enemies[0].heavy, 'DA1, TL: dmg 4: not heavy');
+      const o1 = cStep(g, 'blade'); assert(!o1.lines.some((l) => TELL_TEXT.big.some((t) => l === t.replace('{foe}', 'Brute'))), 'DA1, TL: no tell after round 1');
+      const d1 = dealt(o1, 'Brute');
+      const o2 = cStep(g, 'blade'); assert(o2.lines.some((l) => TELL_TEXT.big.some((t) => l === t.replace('{foe}', 'Brute'))), `DA1, TL: the tell after round 2 (${o2.lines.join(' | ')})`);
+      assert(bigBlowNow(g) && bigBlowDue(g.combat, g.combat.enemies[0]), 'DA1, TL: due on round 3');
+      const hp = g.james.hp; const o3 = cStep(g, 'guard'); assert(g.james.hp === hp && o3.lines.includes(TELL_TEXT.bigAvoided.replace('{foe}', 'Brute')), 'DA1, TL: guard avoids the big blow outright');
+      const h = mk([brute()]); h.combat.round = 3; const o = cStep(h, 'blade'); assert(d1 > 0 && dealt(o, 'Brute') === d1 * BIG_BLOW && o.lines.includes(TELL_TEXT.bigLands), `DA1, TL: unanswered it lands ×2 (${d1} → ${dealt(o, 'Brute')})`);
+      const n = mk([brute()]); n.combat.round = 3; const on = cStep(n, 'needle'); assert(on.lines.some((l) => /Brute is still reeling/.test(l)) && !on.lines.includes(TELL_TEXT.bigLands), 'DA1, TL: the needle\'s stagger stops it'); }
+    // TY: no buckler (T1 L9), a shown lunge, guard covers her
+    { const g = mk([{ name: 'Jackal', hp: 999, dc: 1, atk: 60, dmg: 3, prefersSmall: true }], { act1: false }); cStep(g, 'blade'); const o2 = cStep(g, 'blade');
+      assert(o2.lines.includes(TELL_TEXT.lunge.replace('{foe}', 'Jackal')) && lungeNow(g), 'DA1, TY: the lunge shown after round 2');
+      const yh = g.yuki.hp; const o3 = cStep(g, 'guard'); assert(g.yuki.hp === yh && o3.lines.includes(TELL_TEXT.covered.replace('{foe}', 'Jackal')), 'DA1, TY: any guard covers Yuki'); }
+    // HD
+    { const g = mk([{ name: 'Guardian', hp: 50, dc: 1, atk: 0.1, dmg: 5, moods: true }], { act1: false, yuki: false }); const e = g.combat.enemies[0];
+      assert(['plain', 'hungry', 'proud', 'plain'].every((m, i) => moodOf({ round: i + 1 }, e) === m) && moodOf({ round: 2 }, {}) === 'plain', 'DA1, HD: plain, hungry, proud');
+      const o1 = cStep(g, 'blade'); const d = 50 - e.hp; assert(d > 0 && o1.lines.includes(TELL_TEXT.hungry.replace('{foe}', 'Guardian')), 'DA1, HD: the hungry tell');
+      const o2 = cStep(g, 'blade'); assert(e.hp === 50 && o2.lines.some((l) => l.includes(TELL_TEXT.fed.replace('{foe}', 'Guardian').replace('{n}', d))) && o2.lines.includes(TELL_TEXT.proud.replace('{foe}', 'Guardian')), `DA1, HD: hungry: the hit heals it (${e.hp})`);
+      const o3 = cStep(g, 'blade'); assert(e.hp === 50 - 2 * d && o3.lines.includes(TELL_TEXT.proudHit), `DA1, HD: proud: double (${e.hp})`); }
+    // CS
+    { assert(typeof combatHooks.steal === 'function', 'DA1, CS: the story sets the hook');
+      const g = mk([{ name: 'Crow', hp: 999, dc: 1, atk: 60, dmg: 2, thief: true }], { act1: false }); g.inventory.hare_raw = 2; g.inventory.venison = 1;
+      const o1 = cStep(g, 'blade'); assert(g.inventory.hare_raw === 1 && g.inventory.venison === 1 && o1.lines.includes(TELL_TEXT.theft.replace('{foe}', 'Crow').replace('{item}', 'Glassback hare (dressed)')), `DA1, CS: the first hit takes the first food (${o1.lines.join(' | ')})`);
+      cStep(g, 'blade'); assert(g.inventory.hare_raw === 1, 'DA1, CS: once a fight');
+      const n = mk([{ name: 'Crow', hp: 999, dc: 1, atk: 60, dmg: 2, thief: true }], { act1: false }); for (const k of Object.keys(n.inventory)) n.inventory[k] = 0; const on = cStep(n, 'blade'); assert(!n.combat.stole && !on.lines.some((l) => /makes off/.test(l)), 'DA1, CS: no food, nothing taken'); }
+    // the smart rule
+    { const g = mk([brute()]); g.combat.round = 3; assert(smartAction(g) === 'guard', 'DA1 smart: a big blow due, no air → guard');
+      g.combat.spearFormed = true; assert(smartAction(g) === 'spear', 'DA1 smart: the spear formed and on it → the spear');
+      const a = mk([brute()], { realm: 1 }); a.combat.round = 3; assert(smartAction(a) === 'dart', 'DA1 smart: darts from the air first');
+      const s = mk([brute()]); s.combat.round = 2; assert(smartAction(s) !== 'guard', 'DA1 smart: nothing due: the old rule');
+      const m = mk([{ name: 'Guardian', hp: 50, dc: 1, atk: 1, dmg: 5, moods: true }], { act1: false, realm: 1 }); m.combat.round = 2; assert(smartAction(m) === 'guard', 'DA1 smart: hungry → guard'); }
+    // v0.11.113 (owner pick DB1; Fable's review of DA1): P people's wording, F the real heal, C "the" mid-line, L no tell for a
+    // round that never comes, W true trait lines, S the smart rule's two latent cases, Q the FAQ's shield clause; the review's gaps
+    { const { foeFill, traitLine, serialize, deserialize } = await import('../js/core/game.js');
+      const e = mk([brute('Outer Elder Shen Qiu')], { id: 'elder' }); assert(e.combat.log.includes(FOE_TRAITS.heavy.person.replace('{foe}', 'Outer Elder Shen Qiu')) && !e.combat.log.some((l) => / its /.test(l)), 'DB1, P: a heavy person: no "its"');
+      cStep(e, 'blade'); const o = cStep(e, 'blade'); assert(o.lines.includes(TELL_TEXT.bigPerson[1].replace('{foe}', 'Outer Elder Shen Qiu')), 'DB1, P: the people\'s tell');
+      assert(TELL_TEXT.bigPerson.length === 3 && [FOE_TRAITS.heavy.person, ...TELL_TEXT.bigPerson].every((t) => !/\bits\b/.test(t)), "DB1, P: Fable's people lines, no \"its\"");
+      // W
+      const lo = mk([], { act1: false }); assert(traitLine(lo, 'plated', 'x') === FOE_TRAITS.plated.line && traitLine(lo, 'flies', 'x') === FOE_TRAITS.flies.grounded, 'DB1, W: below T3, no air: the armour line, the grounded wings');
+      const hi = mk([], { realm: 1 }); setSk(hi, 3, 1); assert(traitLine(hi, 'plated', 'x') === FOE_TRAITS.plated.pierced && traitLine(hi, 'flies', 'x') === FOE_TRAITS.flies.line, 'DB1, W: T3: the bone pierces; Foundation in Act 1: the air line');
+      // C
+      assert(foeFill(TELL_TEXT.hungry, "The Gardeners' Guardian").startsWith("The singing inside the Gardeners' Guardian") && foeFill(TELL_TEXT.proud, "The Gardeners' Guardian").startsWith("The Gardeners' Guardian draws"), 'DB1, C: "the" mid-line, "The" first');
+      // F: the fed line says what it healed
+      const f = mk([{ name: 'Guardian', hp: 50, dc: 1, atk: 0.1, dmg: 4, moods: true }], { act1: false, yuki: false }); f.combat.round = 2; f.combat.enemies[0].hp = 49; const of = cStep(f, 'blade');
+      assert(f.combat.enemies[0].hp === 50 && of.lines.some((l) => l.includes(TELL_TEXT.fed.replace('{foe}', 'Guardian').replace('{n}', 1))), `DB1, F: at 49 / 50 the line says +1 (${of.lines.join(' | ')})`);
+      // L: no tell for a round that never comes
+      const l = mk([brute()]); cStep(l, 'blade'); l.james.hp = 1; const ol = cStep(l, 'blade'); assert(ol.done === 'lose' && !ol.lines.some((x) => TELL_TEXT.big.some((t) => x === t.replace('{foe}', 'Brute'))), 'DB1, L: James falls in round 2: no tell');
+      // the tells' rotation: rounds 3, 6, 9
+      const r = mk([brute('Brute', { atk: 0.1 })]); const seen = []; for (let i = 0; i < 8; i++) { const x = cStep(r, i % 3 === 1 ? 'blade' : 'guard'); const t = TELL_TEXT.big.findIndex((b) => x.lines.includes(b.replace('{foe}', 'Brute'))); if (t >= 0) seen.push(t); }
+      assert(seen.join() === '1,2,0', `DB1: the tells rotate (${seen.join()})`);
+      // S: two big blows, a heavy flyer
+      const two = mk([brute('B1'), brute('B2')]); two.combat.round = 3; two.combat.spearFormed = true; assert(smartAction(two) === 'guard', 'DB1, S: two big blows due: guard, not the spear');
+      const fl = mk([brute('Wolf', { dmg: 3 }), brute('Roc', { flies: true })], { realm: 1 }); fl.combat.round = 3; assert(smartAction(fl) === 'guard', 'DB1, S: a heavy flyer due: guard, not darts from the air');
+      const gr = mk([brute('Wolf', { dmg: 3 }), brute('Ox')], { realm: 1 }); gr.combat.round = 3; assert(smartAction(gr) === 'dart', 'DB1, S: a heavy ground foe: darts from the air as before');
+      // the Qi shield, the construct, the spike field with a big blow
+      const q = mk([brute('Brute', { dmg: 1 })]); q.combat.round = 3; const hq = q.james.hp; const oq = cStep(q, 'qshield'); assert(q.james.hp === hq && !oq.lines.includes(TELL_TEXT.bigLands), `DB1: the Qi shield soaks a small blow before the doubling (${oq.lines.join(' | ')})`);
+      const k = mk([brute()]); setSk(k, 8, 1); k.james.hp = jamesHpMax(k); k.combat.round = 3; const hk = k.james.hp; const ok = cStep(k, 'blade'); assert(k.james.hp === hk && ok.lines.some((x) => /your construct steps into the blow/.test(x)), 'DB1: the T8 construct takes the big blow');
+      const sp = mk([brute()]); sp.combat.field = 2; sp.combat.round = 3; const os = cStep(sp, 'blade'); assert(os.lines.some((x) => /through the spikes/.test(x)) && os.lines.includes(TELL_TEXT.bigLands), 'DB1: the spikes bite, then the big blow lands');
+      // the thief: soaked to 0, no hook
+      const t0 = mk([{ name: 'Crow', hp: 999, dc: 1, atk: 60, dmg: 1, thief: true }], { act1: false }); t0.inventory.hare_raw = 1; cStep(t0, 'qshield'); assert(t0.inventory.hare_raw === 1 && !t0.combat.stole, 'DB1: a hit soaked to 0 takes nothing');
+      const keep = combatHooks.steal; combatHooks.steal = null; try { const t1 = mk([{ name: 'Crow', hp: 999, dc: 1, atk: 60, dmg: 2, thief: true }], { act1: false }); t1.inventory.hare_raw = 1; cStep(t1, 'blade'); assert(t1.inventory.hare_raw === 1, 'DB1: no hook, nothing taken'); } finally { combatHooks.steal = keep; }
+      // saves: the new fields go round; an old mid-fight save without them plays as before
+      const sv = mk([brute(), { name: 'Crow', hp: 9, dc: 1, atk: 1, dmg: 1, thief: true, moods: true }]); sv.combat.stole = true; const back = deserialize(serialize(sv));
+      assert(back.combat.enemies[0].heavy === true && back.combat.enemies[1].moods === true && back.combat.enemies[1].thief === true && back.combat.stole === true, 'DB1: heavy, moods, thief and stole survive a save');
+      const old = mk([brute()]); delete old.combat.enemies[0].heavy; old.combat.round = 3; const oo = cStep(old, 'blade'); assert(!oo.lines.includes(TELL_TEXT.bigLands) && !bigBlowNow(old), 'DB1: an old mid-fight save: no big blow');
+      const { FAQ } = await import('../js/core/faq.js'); assert(/the <b>Qi shield<\/b> soaks the blow before it is doubled/.test(FAQ.find(([t]) => t === 'Fights')[1]()), "DB1, Q: the FAQ's shield clause (Fable's)"); }
+    // the data, the screen, the FAQ
+    { const src = (f) => readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
+      assert((src('js/story/act1_heart.js').match(/moods: true/g) || []).length === 1 && /Gardeners\\' Guardian'[^}]*moods: true/.test(src('js/story/act1_heart.js')), 'DA1, HD: the guardian alone has moods');
+      assert((src('js/story/wilds.js').match(/thief: true/g) || []).length === 1 && /Rot-crow \$\{i\}`[^}]*thief: true/.test(src('js/story/wilds.js')), 'DA1, CS: the rot-crows alone steal');
+      const main = src('js/main.js'); assert(/foeTraits\(e\)\.map/.test(main) && /bigBlowNow\(g\) \? ` · \$\{TELL_TEXT\.guardBig\}`/.test(main) && /lungeNow\(g\)\) lines\.push\(TELL_TEXT\.holdYuki\)/.test(main), 'DA1: the tags, the Guard card and its hold lines');
+      const { FAQ } = await import('../js/core/faq.js'); const fq = FAQ.find(([t]) => t === 'Fights')[1]();
+      assert(/<b>big blow<\/b> a round early: it does double damage, <b>Guard<\/b> avoids it outright/.test(fq) && /the rot ape doesn't do this/.test(fq) && /<b>mood<\/b>/.test(fq), "DA1: the FAQ (Fable's)"); }
+}
 // v0.11.110 (owner pick GD1): group d's small items in one push: CV (the fight's cards show the check's own value, hunger
 // counted), FO (the smart rule pays for an unsung flail only while no free formed weapon is out), KN (a formed fragile
 // knife's swings left are free, so the smart rule swings them out), FQ (the FAQ: the blast's difficulty one lower).
@@ -837,11 +934,11 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     assert(g.combat.spearFormed && q2 - g.james.qi === 3 && r3.lines.some((l) => /bone spear/.test(l)), 'the spear: 3 Qi to sing');
     const q3 = g.james.qi; combatStep(g, 'spear'); assert(g.james.qi === q3, 'then free while held');
     assert(r3.lines.some((l) => /held at the spear's length/.test(l)) ? r3.lines.some((l) => /can't get past the spear/.test(l)) : true, 'a full hit holds the foe off for the round');
-    // shield cover: from the buckler, guarding saves Yuki from a lunge
+    // shield cover: from the buckler, guarding saves Yuki from a lunge (v0.11.113, DA1 TY: any guard does, the lunge being shown a round early)
     const y = at(2, 1); y.yuki.fight.level = 1; ensureBars(y); const yh = y.yuki.hp;
     startCombat(y, { id: 'test_crows', name: 't', enemies: [{ name: 'Crow', hp: 99, dc: 9, atk: 30, dmg: 5, prefersSmall: true }], win: 'stream', lose: 'stream' });
     y.combat.round = 3; const ry = combatStep(y, 'guard');
-    assert(y.yuki.hp === yh && ry.lines.some((l) => /she is not there/.test(l)), 'shield cover: a guarded lunge at Yuki misses');
+    assert(y.yuki.hp === yh && ry.lines.some((l) => /^Crow lunges at Yuki — and meets you instead/.test(l)), 'shield cover: a guarded lunge at Yuki misses');
 }
 
 } // end of the static checks before the bots
