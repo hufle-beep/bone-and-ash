@@ -493,7 +493,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     const dealt = (o, n) => { const m = o.lines.map((l) => l.match(new RegExp(`^${n} attacks: .*: (\\d+(?:\\.\\d+)?) \\(DR`))).find(Boolean); return m ? Number(m[1]) : null; };
     // TD
     assert(foeTraits({ prefersSmall: true, flies: true, dr: 1, heavy: true, moods: true, thief: true }).join() === 'yuki,flies,plated,heavy,moods,thief' && foeTraits({ dr: 0 }).length === 0, 'DA1, TD: the traits, in order');
-    assert(Object.values(FOE_TRAITS).map((t) => t.tag).join() === 'goes for Yuki,flies,plated,hits hard,moods,thief', "DA1, TD: Fable's tags");
+    assert(Object.values(FOE_TRAITS).map((t) => t.tag).join() === 'goes for Yuki,flies,plated,hits hard,postures,moods,thief', "DA1, TD: Fable's tags (v0.11.114: postures)");
     { const two = [{ name: 'Crow 1', flies: true }, { name: 'Crow 2', flies: true }]; const tl = traitLines(mk([], { act1: false }), two, 'test_da1');
       assert(tl.length === 1 && tl[0] === FOE_TRAITS.flies.grounded.replace('{foe}', 'Crow 1'), 'DA1, TD: each trait once, named for the first foe');
       const g = mk(two, { act1: false }); assert(g.combat.log[0] === 'In.' && g.combat.log[1] === tl[0] && g.combat.log.length === 2, 'DA1, TD: the line follows the intro'); }
@@ -575,6 +575,122 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
       const { FAQ } = await import('../js/core/faq.js'); const fq = FAQ.find(([t]) => t === 'Fights')[1]();
       assert(/<b>big blow<\/b> a round early: it does double damage, <b>Guard<\/b> avoids it outright/.test(fq) && /the rot ape doesn't do this/.test(fq) && /<b>mood<\/b>/.test(fq), "DA1: the FAQ (Fable's)"); }
 }
+// v0.11.114 (owner pick PA2; research.md #132, #136, #63): fights with people. PT + SP: people (not Ya, not a heavy foe)
+// posture every third round from the prologue on, shown a round early; SS: Say something on a posture costs that foe this
+// round and the next, else nothing (no guard); SF: in a spar or a brawl a foe at half its HP is out; YD: Yield loses at once
+// with the HP kept; UM: every 10 rounds bare-handed +0.5 to the brawl's moves (Cover's defence too), up to +2, kept across Coils.
+{
+    const G = await import('../js/core/game.js');
+    const { SAY_TEXT, SPAR_TEXT, postureDue, postureNow, combatYield, unarmedMastery, NO_POSTURE, SAY_ROUNDS, UNARMED_EVERY, UNARMED_STEP, UNARMED_MAX, FOE_TRAITS, traitLines } = G;
+    const toAct1 = (g) => { g.flags.ending = g.flags.ending || 'victory'; g.minutes = Math.max(g.minutes, 7 * 1440 + 6 * 60); return g; };
+    const mk = (id, enemies, { act1 = false, style = null } = {}) => { const g = ensureBars(newGame(114, { closed: true })); if (act1) toAct1(g); g.james.qi = 40; g.james.hp = jamesHpMax(g); g.yuki.hp = 0;
+        sCombat(g, { id, intro: 'In.', band: 'standard', enemies, win: 'stream', lose: 'stream', ...(style ? { style } : {}) }); return g; };
+    const man = (n = 'Gao', x = {}) => ({ name: n, hp: 999, dc: 60, atk: 60, dmg: 2, ...x });
+    // PT: who postures
+    const p = mk('gao', [man('Gao', { dmg: 6 }), man('Pock')]);
+    assert(p.combat.enemies.every((e) => e.postures) && actionOpen(p, 'remark'), 'PA2, PT + SP: in the prologue every person postures, a hard hitter too (nobody is heavy there); Say something opens');
+    assert(p.combat.log.includes(FOE_TRAITS.postures.line.replace('{foe}', 'Gao')) && FOE_TRAITS.postures.tag === 'postures', "PA2, PT: the tag and the start line (Fable's)");
+    const el = mk('elder', [man('Shen', { dmg: 5 }), man('Lu', { dmg: 4 })], { act1: true });
+    assert(el.combat.enemies[0].heavy && !el.combat.enemies[0].postures && el.combat.enemies[1].postures, 'PA2, PT: in Act 1 a heavy person shows the big blow, not a posture');
+    const beast = mk('jackals', [man('Jackal')]); const ya = mk('ya_brawl', [man('Ya')], { act1: true, style: 'spar' });
+    assert(!beast.combat.enemies[0].postures && !actionOpen(beast, 'remark') && NO_POSTURE.has('ya_brawl') && !ya.combat.enemies[0].postures && !actionOpen(ya, 'remark'), 'PA2, PT: no posture from beasts or Ya; no Say something there');
+    // the tell, a round early; postureDue every third round
+    { const g = mk('gao', [man()]); const r1 = cStep(g, 'guard'); const r2 = cStep(g, 'guard');
+      assert(!r1.lines.some((l) => SAY_TEXT.tells.some((t) => l === t.replace('{foe}', 'Gao'))) && r2.lines.includes(SAY_TEXT.tells[1].replace('{foe}', 'Gao')), 'PA2, PT: the tell at the end of round 2, for round 3');
+      assert(g.combat.round === 3 && postureDue(g.combat, g.combat.enemies[0]) && postureNow(g), 'PA2, PT: round 3 is a posture round'); }
+    // SS: on a posture, the foe loses this round and the next; then attacks again
+    { const g = mk('gao', [man()]); cStep(g, 'guard'); cStep(g, 'guard'); const hp0 = g.james.hp;
+      const r3 = cStep(g, 'remark');
+      assert(r3.lines.includes(SAY_TEXT.landed[1].replace('{foe}', 'Gao')) && !r3.lines.some((l) => /^Gao attacks/.test(l)) && g.james.hp === hp0, 'PA2, SS: landed, no attack that round');
+      const r4 = cStep(g, 'guard');
+      assert(r4.lines.includes(SAY_TEXT.stunned.replace('{foe}', 'Gao')) && !r4.lines.some((l) => /^Gao attacks/.test(l)), 'PA2, SS: the next round lost too, with its line');
+      const r5 = cStep(g, 'guard'); assert(r5.lines.some((l) => /^Gao attacks/.test(l)) && SAY_ROUNDS === 2, 'PA2, SS: then it attacks again'); }
+    // SS: on any other round nothing, and no guard
+    { const g = mk('gao', [man()]); const hp0 = g.james.hp; const r = cStep(g, 'remark');
+      assert(r.lines.includes(SAY_TEXT.unheard) && r.lines.some((l) => /^Gao attacks/.test(l)) && !r.lines.some((l) => /give ground/.test(l)) && g.james.hp < hp0, 'PA2, SS: unheard, the foe hits, no guard'); }
+    // SF: a foe worn to half is out (spar and brawl), and the terms line; not in an ordinary fight
+    { const g = mk('ya_brawl', [{ name: 'Ya', hp: 50, dc: 0.1, atk: 60, dmg: 1 }], { act1: true, style: 'spar' });
+      assert(g.combat.log.includes(SPAR_TEXT.terms), 'PA2, SF: the terms at the start of a spar');
+      g.james.gu = { tier: 9, level: 1, xp: 0 }; g.james.skills['Convergence Use'] = { tier: 3, level: 1, xp: 0 }; // the knife holds, the hit lands (the spar's tune raises Ya's DC)
+      const o = cStep(g, 'blade'); assert(o.done === 'win' && o.lines.includes(SPAR_TEXT.out.replace('{foe}', 'Ya')), `PA2, SF: down to half, out (${o.lines.slice(-6).join(' | ')})`);
+      const n = mk('gao', [{ name: 'Gao', hp: 30, dc: 0.1, atk: 60, dmg: 1 }]); cStep(n, 'blade'); assert(n.combat && n.combat.enemies[0].hp > 0 && !n.combat.log.includes(SPAR_TEXT.terms), 'PA2, SF: an ordinary fight goes to 0'); }
+    // YD: Yield in a spar or a brawl only; the fight is lost and the HP kept
+    { const g = mk('rt_brawl', [man('Bao')], { act1: true, style: 'unarmed' }); g.james.hp = 17; const o = combatYield(g);
+      assert(o.done === 'lose' && o.next === 'stream' && o.lines[0] === SPAR_TEXT.yielded && g.james.hp === 17 && !g.combat, 'PA2, YD: yield loses at once, HP kept');
+      const n = mk('gao', [man()]); assert(combatYield(n) === null && n.combat, 'PA2, YD: no yield in an ordinary fight'); }
+    // UM: rounds bare-handed, +0.5 every 10 up to +2, Cover too; the start line; a spar doesn't count
+    { const g = mk('rt_brawl', [man('Bao')], { act1: true, style: 'unarmed' }); g.stats.unarmed = UNARMED_EVERY - 1;
+      assert(unarmedMastery(g) === 0 && guardBonus(g) === 2, 'PA2, UM: nothing below 10 rounds');
+      const o = cStep(g, 'cover'); assert(g.stats.unarmed === UNARMED_EVERY && unarmedMastery(g) === UNARMED_STEP && guardBonus(g) === 2 + UNARMED_STEP && o.lines.includes(SPAR_TEXT.masteryUp.replace('{b}', UNARMED_STEP)), 'PA2, UM: the tenth round, +0.5, Cover +0.5, its line');
+      g.stats.unarmed = 999; assert(unarmedMastery(g) === UNARMED_MAX, 'PA2, UM: up to +2');
+      const s2 = mk('rt_brawl', [man('Bao')], { act1: true }); s2.stats.unarmed = 25; s2.combat = null; sCombat(s2, { id: 'rt_brawl', intro: 'In.', band: 'standard', style: 'unarmed', enemies: [man('Bao')], win: 'stream', lose: 'stream' });
+      assert(s2.combat.log.includes(SPAR_TEXT.mastery.replace('{n}', 25).replace('{b}', 1)), 'PA2, UM: the start line with the rounds and the bonus');
+      const sp = mk('ya_brawl', [man('Ya')], { act1: true, style: 'spar' }); cStep(sp, 'guard'); assert(!sp.stats.unarmed, 'PA2, UM: a spar is not bare-handed');
+      const k = ensureBars(newGame(115, { closed: true })); k.stats.unarmed = 30; endCoil(k, 'choice', 'stream'); rewind(k); assert(k.stats.unarmed === 30, 'PA2, UM: kept across a Coil'); }
+    // the smart rule: Say something on a posture, not while a heavy foe stands, not instead of darts from the air
+    { const g = mk('gao', [man()]); cStep(g, 'guard'); cStep(g, 'guard'); assert(smartAction(g) === 'remark', 'PA2: the smart rule says something on a posture');
+      const e2 = mk('elder', [man('Shen', { dmg: 5 }), man('Lu', { dmg: 4 })], { act1: true }); cStep(e2, 'guard'); cStep(e2, 'guard'); assert(smartAction(e2) !== 'remark', 'PA2: not while a heavy foe stands'); }
+    // the screen and the FAQ
+    { const { readFileSync } = await import('node:fs'); const main = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+      assert(/data-yield="1"/.test(main) && /combatYield\(g\)/.test(main) && /SAY_TEXT\.holdNow/.test(main) && /SPAR_TEXT\.yieldHold/.test(main), 'PA2: the Yield card, its handler, the hold lines');
+      const { FAQ } = await import('../js/core/faq.js'); const fq = FAQ.find(([t]) => t === 'Fights')[1]();
+      assert(/<b>Yield<\/b> concedes at once/.test(fq) && /<b>unarmed mastery<\/b>/.test(fq) && /tagged <b>postures<\/b>/.test(fq) && /<b>Say something<\/b> on that round/.test(fq), "PA2: the FAQ (Fable's)"); }
+}
+// v0.11.114 (owner pick PB1; Fable's review of PA2): HC a stagger or hold on a stunned foe is spent with it; CV the brawl
+// cards count unarmed mastery; YC Yield's second tap; LY Yield to the fight's own lost scene; T the review's test gaps.
+{
+    const G = await import('../js/core/game.js');
+    const { SAY_TEXT, SPAR_TEXT, combatYield, unarmedMastery, UNARMED_MAX, airStrike, startActCoil: sac } = G;
+    const toAct1 = (g) => { g.flags.ending = g.flags.ending || 'victory'; g.minutes = Math.max(g.minutes, 7 * 1440 + 6 * 60); return g; };
+    const mk = (id, enemies, { act1 = false, style = null, realm = 0, gu = null } = {}) => { const g = ensureBars(newGame(116, { closed: true })); if (act1) toAct1(g); if (gu) { g.james.gu = { tier: gu[0], level: gu[1], xp: 0 }; g.james.skills['Convergence Use'] = { tier: gu[0], level: gu[1], xp: 0 }; } g.james.realm = realm; ensureBars(g); g.james.qi = 40; g.james.hp = jamesHpMax(g); g.yuki.hp = 0;
+        sCombat(g, { id, intro: 'In.', band: 'standard', enemies, win: 'stream', lose: 'stream', ...(style ? { style } : {}) }); return g; };
+    const man = (n = 'Gao', x = {}) => ({ name: n, hp: 999, dc: 0.1, atk: 60, dmg: 2, ...x });
+    const attacks = (o, n) => o.lines.some((l) => l.startsWith(`${n} attacks`));
+    // HC: remark in round 3, needle in round 4: the stagger is spent; round 5 the foe attacks (no "still reeling")
+    { const g = mk('gao', [man()], { gu: [5, 1] }); cStep(g, 'guard'); cStep(g, 'guard'); cStep(g, 'remark'); const r4 = cStep(g, 'needle');
+      assert(r4.lines.some((l) => /Gao staggers/.test(l)) && !attacks(r4, 'Gao'), 'PB1, HC: the needle lands on the stunned foe');
+      const r5 = cStep(g, 'guard'); assert(attacks(r5, 'Gao') && !r5.lines.some((l) => /still reeling/.test(l)), `PB1, HC: the stagger is spent with the stun: round 5 it attacks (${r5.lines.join(' | ')})`); }
+    { const g = mk('rt_brawl', [man('Bao')], { act1: true, style: 'unarmed', gu: [5, 1] }); cStep(g, 'cover'); cStep(g, 'cover'); cStep(g, 'remark'); cStep(g, 'throw'); const r5 = cStep(g, 'cover');
+      assert(attacks(r5, 'Bao') && !r5.lines.some((l) => /still getting up/.test(l)), 'PB1, HC: in the brawl the throw is spent too'); }
+    // two posturing foes: only the target (the first) is stunned, the other attacks
+    { const g = mk('gao', [man('Gao'), man('Pock')]); cStep(g, 'guard'); cStep(g, 'guard'); const r3 = cStep(g, 'remark');
+      assert(g.combat.enemies[0].flustered === 1 && !g.combat.enemies[1].flustered && !attacks(r3, 'Gao') && attacks(r3, 'Pock'), 'PB1, T: one remark stuns one foe');
+      cStep(g, 'guard'); cStep(g, 'guard'); assert(g.combat.round === 6 && G.postureDue(g.combat, g.combat.enemies[1]), 'PB1, T: round 6 is a posture round again'); }
+    // a closed remark (a beast fight, an old save's foes) falls back to guard
+    { const b = mk('jackals', [man('Jackal')]); const o = cStep(b, 'remark'); assert(o.lines.some((l) => /give ground/.test(l)) && !o.lines.includes(SAY_TEXT.unheard), 'PB1, T: a closed remark becomes guard'); }
+    // saves: postures and flustered kept mid-fight; an old mid-fight save (no postures) plays without the card or the tells
+    { const g = mk('gao', [man()]); cStep(g, 'guard'); cStep(g, 'guard'); cStep(g, 'remark'); const x = deserialize(serialize(g));
+      assert(x.combat.enemies[0].postures === true && x.combat.enemies[0].flustered === 1 && cStep(x, 'guard').lines.includes(SAY_TEXT.stunned.replace('{foe}', 'Gao')), 'PB1, T: a mid-fight save keeps the posture and the stun');
+      const o = mk('gao', [man()]); delete o.combat.enemies[0].postures; const y = deserialize(serialize(o)); const r1 = cStep(y, 'guard'), r2 = cStep(y, 'guard');
+      assert(!actionOpen(y, 'remark') && !r2.lines.some((l) => SAY_TEXT.tells.some((t) => l === t.replace('{foe}', 'Gao'))) && attacks(r1, 'Gao'), 'PB1, T: an old mid-fight save plays as before'); }
+    // the smart rule: not instead of darts from the air, not at a stunned foe, and in the brawl
+    { const g = mk('sect_watcher', [man('Watcher')], { act1: true, realm: 1, gu: [1, 6] }); g.combat.round = 3;
+      assert(airStrike(g, 'dart') && smartAction(g) === 'dart', 'PB1, T: darts from the air before a remark');
+      const f = mk('gao', [man()]); f.combat.round = 3; f.combat.enemies[0].flustered = 1; assert(smartAction(f) !== 'remark', 'PB1, T: no remark at a stunned foe');
+      const b = mk('rt_brawl', [man('Bao')], { act1: true, style: 'unarmed' }); assert(smartAction(b) === 'strike', 'PB1, T: the brawl strikes'); b.combat.round = 3; assert(smartAction(b) === 'remark', 'PB1, T: and says something on a posture'); }
+    // the half rule: exactly half is out, just above is not; a two-foe brawl with one out; James fights on below half
+    { const hit = (hp) => { const g = mk('test_brawl', [man('Bao', { hp }), man('Cousin', { dc: 99 })], { act1: true, style: 'unarmed', gu: [3, 1] }); /* not a story id: the story's hook would rescale it */ g.combat.enemies[0].hpMax = hp; const o = cStep(g, 'strike'); return { g, o }; };
+      const n = 999 - hit(999).g.combat.enemies[0].hp;
+      const a = hit(2 * n), b = hit(2 * n + 1);
+      assert(n > 0 && a.g.combat && a.g.combat.enemies[0].hp === 0 && a.o.lines.includes(SPAR_TEXT.out.replace('{foe}', 'Bao')) && a.g.combat.enemies[1].hp > 0, `PB1, T: exactly half is out, the cousin fights on (hit ${n})`);
+      assert(b.g.combat.enemies[0].hp === n + 1, 'PB1, T: just above half is not');
+      const j = mk('ya_brawl', [man('Ya', { dmg: 0 })], { act1: true, style: 'spar' }); j.james.hp = 2; cStep(j, 'guard'); assert(j.combat && j.james.hp === 2, 'PB1, T: James fights on below half'); }
+    // Yield: the spar under an active Coil goes to its own lost scene; HP 17 stays, 2 becomes 3; a yielded brawl adds no round
+    { const yaCh = SCENES.ya_challenge.choices.find((c) => c.combat);
+      for (const hp of [17, 2]) { const g = ensureBars(newGame(117, { closed: true })); toAct1(g); g.coil = g.coil || {}; startCombat(g, combatHooks.before(g, yaCh.combat(g)));
+        g.james.hp = hp; const o = combatYield(g); goTo(g, SCENES, o.next);
+        assert(o.next === 'ya_lost' && g.scene === 'ya_lost' && g.james.hp === Math.max(3, hp) && g.flags.ya_brawl === 'lost', `PB1, LY: a yielded spar is lost in its own scene, HP ${hp} → ${g.james.hp}`); }
+      const b = mk('rt_brawl', [man('Bao')], { act1: true, style: 'unarmed' }); b.stats.unarmed = 5; combatYield(b); assert(b.stats.unarmed === 5, 'PB1, T: a yield adds no round');
+      const { readFileSync } = await import('node:fs'); const main = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+      assert(/Date\.now\(\) - yieldArmed > 4000\) \{ yieldArmed = Date\.now\(\); note\(SPAR_TEXT\.yieldConfirm\)/.test(main) && SPAR_TEXT.yieldConfirm === 'Tap Yield again to concede the fight.', 'PB1, YC: Yield asks for a second tap');
+      assert(/a\.unarmed \? unarmedMastery\(g\) : 0\)\)\); \/\/ v0\.11\.110/.test(main) && /a\.remark \? `\$\{SAY_TEXT\.tag\}\$\{postureNow\(g\) \? ` · \$\{SAY_TEXT\.tagNow\}`/.test(main), 'PB1, CV: the brawl cards count mastery; the remark tag says when the speech is now'); }
+    // unarmed mastery reaches the check; a spar's guard stays 2; no line at the cap; the whole game again keeps it; none on a new game
+    { const val = (u) => { const g = mk('rt_brawl', [man('Bao', { dc: 50 })], { act1: true, style: 'unarmed' }); g.stats.unarmed = u; const l = cStep(g, 'strike').lines.find((x) => x.startsWith('Step in and hit:')); return Number(/GU ([\d.]+) \//.exec(l)[1]); };
+      assert(Math.round((val(20) - val(0)) * 10) / 10 === 1, `PB1, T: +1 at 20 rounds reaches the strike's check (${val(0)} → ${val(20)})`);
+      const sp = mk('ya_brawl', [man('Ya')], { act1: true, style: 'spar' }); sp.stats.unarmed = 40; assert(guardBonus(sp) === 2, 'PB1, T: a spar\'s guard has no mastery');
+      const c = mk('rt_brawl', [man('Bao')], { act1: true, style: 'unarmed' }); c.stats.unarmed = 49; const o = cStep(c, 'cover'); assert(unarmedMastery(c) === UNARMED_MAX && !o.lines.some((l) => /Bare-handed, you are now/.test(l)), 'PB1, T: no step line past the cap');
+      assert(unarmedMastery(ensureBars(newGame(118, { closed: true }))) === 0, 'PB1, T: a new game (or an old save) starts at 0'); }
+}
 // v0.11.110 (owner pick GD1): group d's small items in one push: CV (the fight's cards show the check's own value, hunger
 // counted), FO (the smart rule pays for an unsung flail only while no free formed weapon is out), KN (a formed fragile
 // knife's swings left are free, so the smart rule swings them out), FQ (the FAQ: the blast's difficulty one lower).
@@ -593,7 +709,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
           assert(checkValue(g, 'Convergence Use', 0.5) === rollCheck(g, 'Convergence Use', 1, 0.5).value, `CV: Fed ${sat}: Convergence Use with a bonus matches the check`); } }
     { const main = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
       const cards = main.slice(main.indexOf('function renderCombatCards'), main.indexOf('view.innerHTML', main.indexOf('function renderCombatCards')));
-      assert(/checkValue\(g, a\.skill, c\.adapt\?\.\[id\] \|\| 0\)/.test(cards) && /checkValue\(g, 'GU'\)/.test(cards) && !/skillCheck\(/.test(cards), 'CV: the fight\'s cards and Run show checkValue, never skillCheck'); }
+      assert(/checkValue\(g, a\.skill, \(c\.adapt\?\.\[id\] \|\| 0\) \+ \(a\.unarmed \? unarmedMastery\(g\) : 0\)\)/.test(cards) && /checkValue\(g, 'GU'\)/.test(cards) && !/skillCheck\(/.test(cards), 'CV: the fight\'s cards and Run show checkValue, never skillCheck (v0.11.114, PB1: with unarmed mastery)'); }
     // FO: a formed spear (or a holding blade) is used before paying for an unsung flail; with none formed, the flail as before
     { const m = ensureBars(newGame(91, { closed: true })); setSk(m, 2, 1); m.james.qi = 20;
       sCombat(m, { id: 'jackals', intro: '', band: 'standard', enemies: [foe('A'), foe('B')], win: 'stream', lose: 'stream' }); m.combat.fieldUsed = true;
@@ -1638,7 +1754,7 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     // the brawl: strike, throw, cover; damage by the GU tier, no Qi, no DR pierce; a win's XP to GU only
     const b = mk(3, 5, 3, 5); const be = start(b, baoCh);
     const bopen = Object.keys(COMBAT_ACTIONS).filter((id) => actionOpen(b, id));
-    assert(be.style === 'unarmed' && bopen.join() === 'strike,throw,cover', `brawl: only the three unarmed actions (${bopen})`);
+    assert(be.style === 'unarmed' && bopen.join() === 'strike,throw,cover,remark', `brawl: only the three unarmed actions, and Say something (v0.11.114: Bao postures) (${bopen})`);
     assert(actionDmg(b, COMBAT_ACTIONS.strike).join() === '6,12' && actionDmg(b, COMBAT_ACTIONS.throw).join() === '3,6' && guardBonus(b) === 2, 'brawl: strike 2–4 and throw 1–2 × GU tier 3, guard +2');
     assert(fightAction(b, 'dart') === 'strike' && fightAction(b, 'guard') === 'cover' && fightAction(b, 'blade') === 'strike', 'brawl: a bone action becomes a strike, guard becomes cover');
     const q0 = b.james.qi; const rb = combatStep(b, 'strike');

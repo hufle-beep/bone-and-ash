@@ -60,13 +60,14 @@ export const rankLabel = tl;
 /* ---- fights: which actions show, and what they are called ---- */
 const best = (g, line) => lineState(g, line).now?.id;
 /** v0.11.4: the spear and the spike field (the name is from when they existed only in Incremental Mode, not Story Mode). */
-export const INC_ONLY_ACTIONS = new Set(['spear', 'spikes', 'flail', 'strike', 'throw', 'cover']); // v0.11.82: and the unarmed brawl's three; v0.11.107 (NK1): the flail
+export const INC_ONLY_ACTIONS = new Set(['spear', 'spikes', 'flail', 'strike', 'throw', 'cover', 'remark']); // v0.11.82: and the unarmed brawl's three; v0.11.107 (NK1): the flail; v0.11.114 (PA2): Say something
 /** v0.11.82 (owner pick B1): a fight's style. 'unarmed' (Bao's brawl): only the three unarmed actions; 'spar' (Ya's brawl):
  *  only the sung weapon (blade, spear) and guard; no style: every bone action as before. */
 export const UNARMED_ACTIONS = new Set(['strike', 'throw', 'cover']);
 export const SPAR_ACTIONS = new Set(['blade', 'spear', 'guard']);
 export const fightStyle = (g) => g?.combat?.style || null;
 export function actionOpen(g, id) {
+    if (id === 'remark') return !!g?.combat?.enemies?.some((e) => e.postures); // v0.11.114 (owner pick PA2, SS): in a fight with a foe that postures
     const st = fightStyle(g);
     if (st === 'unarmed') return UNARMED_ACTIONS.has(id);
     if (UNARMED_ACTIONS.has(id)) return false;

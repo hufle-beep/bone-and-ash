@@ -3,7 +3,7 @@
 // every third round, else the blade, else darts", which lost to "the blade every round" (the fight lab: 67.0 against
 // 71.2% of 5,553 fight states); this rule won 71.8% (v0.11.96; with v0.11.97's reserve 73.1% of 6,242; with v0.11.98's
 // no shield on the fragile knife 73.2% of 6,259, against 72.9% on the same states). Tool code only: no game file imports it.
-import { COMBAT_ACTIONS, actionCost, jamesHpMax, airStrike, bigBlowDue, moodOf } from '../../js/core/game.js';
+import { COMBAT_ACTIONS, actionCost, jamesHpMax, airStrike, bigBlowDue, moodOf, postureDue } from '../../js/core/game.js';
 import { actionOpen, fragileKnife, fightStyle } from '../../js/core/forms.js';
 
 /** The share of James's max HP at or under which the bot raises the Qi shield (S). */
@@ -35,7 +35,17 @@ export function attackReserve(g) {
  * the old +1 and 74.9% at QB1's 0, but it moves the bots' numbers a lot (14 moves past 5 points, 2 past 20 with QB1), so it
  * waits for the retune: roadmap section 2). In a spar or a brawl the game turns a move that isn't open there into its own (`fightAction`).
  */
-export function smartAction(g, t = 0) { // eslint-disable-line no-unused-vars
+export function smartAction(g, t = 0) {
+    const a = baseAction(g, t), c = g.combat;
+    // v0.11.114 (owner pick PA2, SS): Say something when a foe postures this round (not stunned, staggered or held), while no heavy foe
+    // stands (its stance is answered as above) and darts from the air don't already keep the foes off (measured: without that,
+    // the elder's slow fights from the air ran into the round cap, 100 → 91.5%). Lab (300 games, the same states): collectors
+    // 22.9 → 28.7%, Gao 70.5 → 78.2%, the Sect watcher's HP left 88 → 93%, the elder unchanged.
+    if (!actionOpen(g, 'remark') || c.enemies.some((e) => e.hp > 0 && e.heavy) || (a === 'dart' && airStrike(g, 'dart'))) return a;
+    return c.enemies.some((e) => postureDue(c, e) && !e.staggered && !e.atBay && !(e.flustered > 0)) ? 'remark' : a;
+}
+/** The smart move before Say something (v0.11.96–v0.11.113). */
+function baseAction(g, t = 0) { // eslint-disable-line no-unused-vars
     const c = g.combat, qi = g.james.qi;
     if (fightStyle(g) === 'unarmed') return 'strike';
     // v0.11.113 (owner pick DA1, TL): a big blow shown for this round is answered (unless darts from the air already keep it off):

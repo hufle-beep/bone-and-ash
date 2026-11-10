@@ -3,7 +3,7 @@ import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel, fragileKnife
 import { coilMult, coilMultNext, wakeDay, fmtMult, clockParts } from './core/game.js';
 import {
     newGame, ensureBars, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, skillCheck, checkValue, xpToNext, clockLabel, clockLabelG, realmName, yukiForm,
-    startCombat, combatStep, combatFlee, COMBAT_ACTIONS, noDiceDc, airStrike, AIR_TEXT, FOE_TRAITS, foeTraits, TELL_TEXT, bigBlowNow, lungeNow, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage, qiShield,
+    startCombat, combatStep, combatFlee, combatYield, SAY_TEXT, SPAR_TEXT, postureNow, unarmedMastery, COMBAT_ACTIONS, noDiceDc, airStrike, AIR_TEXT, FOE_TRAITS, foeTraits, TELL_TEXT, bigBlowNow, lungeNow, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage, qiShield,
 } from './core/game.js';
 import { sceneView, choose, goTo, gives, choiceQi } from './core/story.js'; // v0.11.109 (FQ1): choiceQi
 import { showPicked, isTaskHub, isQueueScreen, isTaskChoice, taskCards, taskLabel, taskMinutes, taskOutcome, dryOutcome, outcomeOf, runTask, FAM, yukiLane, setYuki, nextStep } from './core/tasks.js';
@@ -314,13 +314,14 @@ function renderCombatCards() {
         const d = actionDmg(g, a);
         const off = cost > g.james.qi;
         if (off) return ''; // v0.11.17 (pick 1a): a move he can't afford is hidden (Guard costs nothing)
-        const v = n1(checkValue(g, a.skill, c.adapt?.[id] || 0)); // v0.11.110 (owner pick GD1, CV): hunger counted, as the check is
+        const v = n1(checkValue(g, a.skill, (c.adapt?.[id] || 0) + (a.unarmed ? unarmedMastery(g) : 0))); // v0.11.110 (owner pick GD1, CV): hunger counted, as the check is; v0.11.114 (PB1, CV): unarmed mastery too
         const tgt = c.enemies.find((e) => e.hp > 0);
         const plain = tgt && showChecks ? `${a.skill} ${v} / DC ${noDiceDc(tgt.dc + a.dcMod)} · ${Math.round((d[0] + d[1]) / 2)} dmg` : '';
         const sw = a.keeps === 'blade' && fragileKnife(g) ? (() => { const n = knifeSwings(g), left = c.bladeFormed ? n - (c.knifeSw || 0) : n; return `${plain ? ' · ' : ''}${c.bladeFormed ? `${left} swing${left === 1 ? '' : 's'} left` : `lasts ${n} swing${n === 1 ? '' : 's'}`}`; })() : ''; // v0.11.104 (GW2, K)
-        return `<button class="card fightish" data-act="${id}" ${off ? 'disabled' : ''}>${esc(a.label)}<span class="tag">${a.guard ? `${showChecks ? 'GU ' : ''}defence +${guardBonus(g)} this round${bigBlowNow(g) ? ` · ${TELL_TEXT.guardBig}` : ''}${lungeNow(g) ? ` · ${TELL_TEXT.guardYuki}` : ''}` : a.qshield ? `soaks ${qiShield(g)} this round` : a.field ? `${FIELD_ROUNDS} rounds · ${fieldDamage(g)} to each attacker · once a fight` : plain + sw}${a.reach ? ' · a full hit holds it off' : ''}${a.sweep ? ' · hits a second enemy too' : ''}${airStrike(g, id) ? ` · ${AIR_TEXT.tag}` : ''}${a.pierce ? ' · ignores armour' : ''}${cost ? ` · ${cost} Qi` : ''}${a.stagger ? ' · staggers' : ''}${off ? ' · not enough Qi' : ''}</span></button>`;
+        return `<button class="card fightish" data-act="${id}" ${off ? 'disabled' : ''}>${esc(a.label)}<span class="tag">${a.guard ? `${showChecks ? 'GU ' : ''}defence +${guardBonus(g)} this round${bigBlowNow(g) ? ` · ${TELL_TEXT.guardBig}` : ''}${lungeNow(g) ? ` · ${TELL_TEXT.guardYuki}` : ''}` : a.qshield ? `soaks ${qiShield(g)} this round` : a.field ? `${FIELD_ROUNDS} rounds · ${fieldDamage(g)} to each attacker · once a fight` : a.remark ? `${SAY_TEXT.tag}${postureNow(g) ? ` · ${SAY_TEXT.tagNow}` : ''}` : plain + sw}${a.reach ? ' · a full hit holds it off' : ''}${a.sweep ? ' · hits a second enemy too' : ''}${airStrike(g, id) ? ` · ${AIR_TEXT.tag}` : ''}${a.pierce ? ' · ignores armour' : ''}${cost ? ` · ${cost} Qi` : ''}${a.stagger ? ' · staggers' : ''}${off ? ' · not enough Qi' : ''}</span></button>`;
     }).join('');
     const flee = c.flee ? `<button class="card" data-flee="1">Run${showChecks ? `<span class="tag">GU ${n1(checkValue(g, 'GU'))} / DC ${noDiceDc(Math.max(...c.enemies.filter((e) => e.hp > 0).map((e) => e.atk)))}</span>` : ''}</button>` : '';
+    const yieldCard = c.style ? `<button class="card" data-yield="1">${esc(SPAR_TEXT.yieldLabel)}<span class="tag">${esc(SPAR_TEXT.yieldTag)}</span></button>` : ''; // v0.11.114 (PA2, YD)
     const foes = c.enemies.map((e) => `<div class="foe${e.hp <= 0 ? ' down' : ''}"><span>${esc(e.name)}${e.staggered ? (c.style === 'unarmed' ? ' (down)' : ' (reeling)') : ''}${e.hp > 0 ? foeTraits(e).map((k) => ` <small class="trait">· ${esc(FOE_TRAITS[k].tag)}</small>`).join('') : ''}</span><div class="stroke"><i style="width:${pct(Math.max(0, e.hp), e.hpMax)}"></i></div></div>`).join('');
     const yuki = `<div class="foe"><span>Yuki${c.yukiOut ? ' (watching)' : ''}</span><div class="stroke" style="background:rgba(242,239,230,0.08)"><i style="width:${pct(g.yuki.hp, yukiHpMax(g))};background:var(--bone)"></i></div></div>`;
     view.innerHTML = `<section>
@@ -330,7 +331,7 @@ ${statusHtml()}
 <div class="prose round">${shownLines(combatLog || c.log).map((l) => dieHtml(l)).join('<br>') || 'The fight begins.'}</div>
 <div class="below">
 <div class="foes">${foes}${yuki}</div>
-<h2>Fight</h2><div class="cards">${acts}${flee}</div>
+<h2>Fight</h2><div class="cards">${acts}${flee}${yieldCard}</div>
 </div>
 </section>`;
 }
@@ -745,9 +746,11 @@ function tipFor(b) {
             if (a.pierce) lines.push('Raw Qi: it ignores the enemy\'s armour.'); // v0.11.95 (review)
             if (airStrike(g, b.dataset.act)) lines.push(AIR_TEXT.hold); // v0.11.112 (FF1)
             if (a.qshield) lines.push(`Soaks ${qiShield(g)} damage this round; does not cover Yuki.`);
+            if (a.remark) lines.push(postureNow(g) ? SAY_TEXT.holdNow : SAY_TEXT.hold); // v0.11.114 (PA2, SS)
             if (showChecks) { const d = actionDmg(g, a); if (d[1] > 0) lines.push(`${a.skill} · ${n1(d[0])}–${n1(d[1])} damage.`); }
         }
     } else if (b.dataset.flee) lines.push('Tries to get away. Not every fight lets you.');
+    else if (b.dataset.yield) lines.push(SPAR_TEXT.yieldHold); // v0.11.114 (PA2, YD)
     else if (b.dataset.med) { const mc = medCards(g, SCENES).find((m) => m.id === b.dataset.med); if (mc?.open) mins = mc.minutes || 0; }
     if (/^mer:|^med:mer:/.test(b.dataset.run || b.dataset.med || '')) lines.push(`The map: ${meridianRow(g)}.`, 'Up to 2 hours and 2 Qi a sitting; the channel opens when its hours are done.'); // v0.11.13 (E1): the meridian screen's map, here now
     if (ch) {
@@ -871,7 +874,7 @@ view.addEventListener('click', (ev) => {
     const b = ev.target.closest('button');
     if (!b) return;
     if (recovery && !menu) { onRecovery(b); return; }
-    if (b.dataset.act || b.dataset.flee || b.dataset.run || b.dataset.med) { // v0.11.64: cards act at once, so they get the double-tap guard too
+    if (b.dataset.act || b.dataset.flee || b.dataset.yield || b.dataset.run || b.dataset.med) { // v0.11.64: cards act at once, so they get the double-tap guard too
         const now = Date.now();
         if (now - lastPress < 400) return; // double-tap guard: a fast second tap must not take the next scene's choice
         lastPress = now;
@@ -955,9 +958,11 @@ view.addEventListener('click', (ev) => {
             combatLog = out.lines;
             if (out.done) { const lines = out.lines.slice(); lines.push(...goTo(g, SCENES, out.next)); land(fightTitle, lines, out.done === 'lose', rel0); combatLog = null; } // v0.11.68
             autosave(); render();
-        } else if (b.dataset.flee) {
+        } else if (b.dataset.flee || b.dataset.yield) {
+            if (b.dataset.yield && Date.now() - yieldArmed > 4000) { yieldArmed = Date.now(); note(SPAR_TEXT.yieldConfirm); return; } // v0.11.114 (PB1, YC; review low 1): a second tap, as Bite the tail
+            yieldArmed = 0;
             const rel0 = relSnap(); const fightTitle = sceneTitle(g.scene);
-            const out = combatFlee(g);
+            const out = b.dataset.yield ? combatYield(g) : combatFlee(g); // v0.11.114 (PA2, YD): Yield ends it as Run's loss does
             combatLog = out.lines;
             if (out.done) { const lines = out.lines.slice(); lines.push(...goTo(g, SCENES, out.next)); land(fightTitle, lines, out.done === 'lose', rel0); combatLog = null; } // v0.11.68
             autosave(); render();
@@ -1001,6 +1006,7 @@ document.getElementById('tabs').addEventListener('click', (ev) => { const b = ev
 
 let newArmed = 0;
 let biteArmed = 0;
+let yieldArmed = 0; // v0.11.114 (PB1, YC)
 function confirmNew() {
     if (Date.now() - newArmed < 4000) return true;
     newArmed = Date.now();

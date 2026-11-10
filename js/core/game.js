@@ -631,7 +631,7 @@ export const actionDmg = (g, a) => {
 /** Guard's defence bonus: 2; v0.11.4: +0.5 per personal-defence form (bracer 2.5 … full armour 4.5). v0.11.104 (GW2, U): and
  *  level by level toward the next form (rank 8, between the bracer at 5 and the buckler at 11: 2.75 → 2.8 shown), to 0.1. */
 export const guardBonus = (g) => {
-    if (fightStyle(g)) return 2; // v0.11.82: no armour in a spar or a brawl
+    if (fightStyle(g)) return 2 + (fightStyle(g) === 'unarmed' ? unarmedMastery(g) : 0); // v0.11.82: no armour in a spar or a brawl; v0.11.114 (PA2, UM): Cover learns
     const st = formStep(g, 'defence'), fs = FORM_LINES.defence.forms, nx = fs[st + 1];
     let b = 2 + 0.5 * (st + 1);
     if (nx) { const lo = st >= 0 ? fs[st].at : 1; b += 0.5 * (cuRank(g) - lo) / (nx.at - lo); }
@@ -754,6 +754,8 @@ export const COMBAT_ACTIONS = {
     strike: { id: 'strike', label: 'Step in and hit', skill: 'GU', qi: 0, dmg: [2, 4], dcMod: 0, unarmed: true },
     throw: { id: 'throw', label: 'Hook and throw', skill: 'GU', qi: 0, dmg: [1, 2], dcMod: 2, stagger: true, unarmed: true },
     cover: { id: 'cover', label: 'Cover up and circle', skill: 'GU', qi: 0, dmg: [0, 0], dcMod: -1, guard: true, unarmed: true },
+    // v0.11.114 (owner pick PA2, SS; research.md #132): against people who posture; no check, no Qi (forms.js actionOpen). Label Fable's.
+    remark: { id: 'remark', label: 'Say something', skill: 'GU', qi: 0, dmg: [0, 0], dcMod: 0, remark: true },
 };
 /** v0.11.82: what a closed action becomes: in a brawl a strike (guard: cover), in a spar the blade (guard stays), else guard. */
 export function fightAction(g, id) {
@@ -776,6 +778,17 @@ function dmgRoll(g, [lo, hi]) {
 export const combatHooks = { before: null, lose: null, steal: null }; // v0.11.113 (DA1, CS): steal(g) → a food item id the hammerspace holds, or null (story/common.js)
 /** Fights against people (v0.9.7): losing them keeps their written branches. Every other fight is a beast. */
 export const PEOPLE_FIGHTS = new Set(['gao', 'collectors', 'arson', 'ya_brawl', 'rt_brawl', 'elder', 'sect_watcher', 'lf_rogue', 'lf_bandits']); // v0.11.81 (T1): the Tan brothers too
+/** v0.11.114 (owner pick PA2, PT + SP; research.md #132): people posture every TELL_EVERY rounds, shown a round early, from the
+ *  prologue on; not Ya (she is not one of the overly serious), not a heavy foe (Act 1: its stance is its big blow; in the prologue nobody is heavy).
+ *  "Say something" on a posture costs that foe this round's attack and the next (SAY_ROUNDS). */
+export const NO_POSTURE = new Set(['ya_brawl']);
+export const SAY_ROUNDS = 2;
+/** Does this foe posture this round? */
+export const postureDue = (c, e) => !!(e.postures && e.hp > 0 && c.round % TELL_EVERY === 0);
+/** v0.11.114 (owner pick PA2, UM; research.md #63): every round fought bare-handed counts (g.stats.unarmed, kept across every
+ *  Coil); each UNARMED_EVERY rounds give +UNARMED_STEP to the brawl's three moves (Cover's defence too), up to UNARMED_MAX. */
+export const UNARMED_EVERY = 10, UNARMED_STEP = 0.5, UNARMED_MAX = 2;
+export const unarmedMastery = (g) => Math.min(UNARMED_MAX, Math.floor((g.stats?.unarmed || 0) / UNARMED_EVERY) * UNARMED_STEP);
 /** Task mode (v0.9.7, owner's pick 3a): every beast fight +0.5 DC and attack on top of its no-dice tuning. */
 export const BEAST_UP = 0.5;
 /** v0.11.40 (E1): the no-dice raise to a fight's DC and attack (its tune plus BEAST_UP for a beast), as startCombat applies it. */
@@ -822,12 +835,17 @@ export function startCombat(g, enc0) {
             const t0 = noDiceTune[enc.id]; // v0.9.3: per-fight tuning for the no-dice rules
             const t = !PEOPLE_FIGHTS.has(enc.id) ? { ...(t0 || {}), up: ((t0 && t0.up) || 0) + BEAST_UP } : t0; // v0.9.7: beasts +0.5
             const x = t ? { ...e, dc: e.dc + (t.up || 0), atk: e.atk + (t.up || 0), hp: Math.max(1, Math.round(e.hp * (t.hp || 1))) } : e;
-            return { ...x, hpMax: x.hp, staggered: false, ...(isHeavy(g, enc, e) ? { heavy: true } : {}) }; // v0.11.113 (DA1, TL)
+            const heavy = isHeavy(g, enc, e);
+            return { ...x, hpMax: x.hp, staggered: false, ...(heavy ? { heavy: true } : {}), ...(!heavy && PEOPLE_FIGHTS.has(enc.id) && !NO_POSTURE.has(enc.id) ? { postures: true } : {}) }; // v0.11.113 (DA1, TL); v0.11.114 (PA2, PT)
         }),
         log: [enc.intro || 'Combat!'],
     };
     g.combat.log.push(...traitLines(g, g.combat.enemies, enc.id)); // v0.11.113 (DA1, TD)
-    if (enc.style) Object.assign(g.combat, { style: enc.style, yukiOut: yukiSitsOut(g, enc), ...(enc.opening ? { opening: enc.opening } : {}) }); // v0.11.82
+    if (enc.style) {
+        Object.assign(g.combat, { style: enc.style, yukiOut: yukiSitsOut(g, enc), ...(enc.opening ? { opening: enc.opening } : {}) }); // v0.11.82
+        g.combat.log.push(SPAR_TEXT.terms); // v0.11.114 (PA2, SF + YD)
+        if (enc.style === 'unarmed' && unarmedMastery(g) > 0) g.combat.log.push(SPAR_TEXT.mastery.replace('{n}', g.stats.unarmed).replace('{b}', unarmedMastery(g))); // UM
+    }
     return g.combat;
 }
 
@@ -838,11 +856,12 @@ export const FOE_TRAITS = {
     flies: { tag: 'flies', line: '{foe} has wings. The air will not keep you out of its reach.', grounded: '{foe} has wings. You have the ground, for now.' },
     plated: { tag: 'plated', line: '{foe} is armoured. Bone will lose some of itself on that; raw Qi will not.', pierced: '{foe} is armoured. Sung bone no longer minds; raw Qi never did.' },
     heavy: { tag: 'hits hard', line: '{foe} hits hard, and winds up before its worst. Watch for it.', person: '{foe} hits hard, and settles into a stance before the worst of it. Watch for the stance.' },
+    postures: { tag: 'postures', line: '{foe} came with things to say about face, and will stop the fight to say them. Listen for the breath before it.' }, // v0.11.114 (PA2, PT; Fable's)
     moods: { tag: 'moods', line: '{foe} has moods, and wears them a round early. The singing inside it changes key.' },
     thief: { tag: 'thief', line: '{foe} is watching your supplies more closely than it is watching you.' },
 };
 /** A foe's traits, in FOE_TRAITS order. */
-export const foeTraits = (e) => Object.keys(FOE_TRAITS).filter((k) => ({ yuki: e.prefersSmall, flies: e.flies, plated: (e.dr || 0) > 0, heavy: e.heavy, moods: e.moods, thief: e.thief })[k]);
+export const foeTraits = (e) => Object.keys(FOE_TRAITS).filter((k) => ({ yuki: e.prefersSmall, flies: e.flies, plated: (e.dr || 0) > 0, heavy: e.heavy, postures: e.postures, moods: e.moods, thief: e.thief })[k]);
 /** v0.11.113 (DB1, C): a foe's name into a line; "The …" is lower-cased when it doesn't start the line. */
 export const foeFill = (t, name) => t.replace('{foe}', t.indexOf('{foe}') > 0 && /^The /.test(name) ? `t${name.slice(1)}` : name);
 /** v0.11.113 (DB1, P, W): the line for a trait in this fight: people's wording for a heavy person (PEOPLE_FIGHTS); plated
@@ -877,6 +896,35 @@ export const TELL_TEXT = {
     holdBig: 'A big blow is coming this round: guarding avoids it outright.',
     holdYuki: 'A lunge at Yuki is coming this round: guarding puts you between it and her.',
 };
+/** v0.11.114 (owner pick PA2; texts Fable's, rule 10): posture and Say something (#132). */
+export const SAY_TEXT = {
+    tells: ['{foe} steps back, straightens, and arranges a grave expression. Next round, a speech about face.',
+        '{foe} lifts a chin and draws the breath of someone with ancestors to mention. Next round they get mentioned.',
+        '{foe} lowers both hands and looks at you the way a magistrate looks at a stain. Next round, a few words on what is owed.'],
+    landed: ['"Is there much more of this?" you ask. {foe} stops mid-sentence, loses the place, and will spend the next round looking for it.',
+        '"Sorry, how many generations was that? I lost count at the third." {foe} goes back to count, and is busy this round and the next.',
+        'You wait for the first pause. "Noted," you say. {foe} had a good deal more prepared and cannot now find any of it, this round or the next.'],
+    unheard: 'You say something dry. Nobody had stopped to make a speech, so it lands as a man talking with his hands down.',
+    stunned: '{foe} is still looking for the place in the speech.',
+    tag: 'cuts a speech short · no guard', tagNow: 'the speech is now',
+    hold: 'A dry word. Said into a speech, it costs the speaker this round\'s attack and the next; said at any other time it does nothing, and you are not guarding while you say it.',
+    holdNow: 'A speech is coming this round: say something and it never finishes.',
+};
+/** v0.11.114 (owner pick PA2; texts Fable's): spar rules (#136), Yield, unarmed mastery (#63). */
+export const SPAR_TEXT = {
+    out: '{foe} is in the dust, and by the terms stays there.',
+    terms: 'The terms: anyone you wear down to half is in the dust and stays there. You may yield whenever you like.',
+    yieldLabel: 'Yield', yieldTag: 'lose now · keep your HP',
+    yieldHold: 'Concede at once. The fight counts as lost, but you walk away with the HP you have instead of being beaten down to 3.',
+    yielded: 'You step back and open your hands. "Yours." It costs some face. You were not using it.',
+    yieldConfirm: 'Tap Yield again to concede the fight.', // PB1 (YC): as Bite the tail's
+    mastery: 'Your hands remember {n} rounds of this, whatever the Coil forgot: +{b} to your fists.',
+    masteryUp: 'Something in your knuckles settles into place. Bare-handed, you are now at +{b}.',
+};
+/** v0.11.114 (PA2): a foe postures this round (for the Say something card). */
+export const postureNow = (g) => !!g.combat && g.combat.enemies.some((e) => postureDue(g.combat, e) && !e.staggered && !e.atBay && !(e.flustered > 0));
+/** v0.11.114 (PA2, SF): in a spar or a brawl a foe worn down to half its HP is out. */
+const sparOut = (c, e, lines) => { if (c.style && e.hp > 0 && e.hp <= e.hpMax / 2) { e.hp = 0; lines.push(foeFill(SPAR_TEXT.out, e.name)); } };
 /** For the Guard card (this round): a big blow due from a foe guard would meet; a lunge at Yuki due. */
 export const bigBlowNow = (g) => !!g.combat && g.combat.enemies.some((e) => bigBlowDue(g.combat, e) && !e.staggered && !e.atBay);
 export const lungeNow = (g) => !!g.combat && !g.combat.style && g.yuki.hp > 0 && g.combat.round % TELL_EVERY === 0 && g.combat.enemies.some((e) => e.prefersSmall && e.hp > 0 && !e.staggered && !e.atBay);
@@ -911,6 +959,9 @@ function stepNoDice(g, actionId, targetIdx) {
         if (act.guard) {
             guard = true;
             lines.push('You give ground, watching for the opening.');
+        } else if (act.remark) { // v0.11.114 (PA2, SS): the target if it postures, else the first foe that does
+            const pe = [target, ...living].find((e) => e && postureDue(c, e) && !e.staggered && !e.atBay && !(e.flustered > 0));
+            if (pe) { pe.flustered = SAY_ROUNDS; lines.push(foeFill(SAY_TEXT.landed[Math.floor(c.round / TELL_EVERY) % SAY_TEXT.landed.length], pe.name)); } else lines.push(SAY_TEXT.unheard);
         } else if (act.qshield) {
             c.qshieldHp = qiShield(g); lines.push(QI_SHIELD_TEXT.raise); // v0.11.95 (Q1): this round only
         } else if (act.field) {
@@ -927,7 +978,7 @@ function stepNoDice(g, actionId, targetIdx) {
             const key = actionId;
             let learned = false;
             for (const tg of targets) {
-                const r = rollCheck(g, act.skill, tg.dc + act.dcMod, c.adapt[key] || 0);
+                const r = rollCheck(g, act.skill, tg.dc + act.dcMod, (c.adapt[key] || 0) + (act.unarmed ? unarmedMastery(g) : 0)); // v0.11.114 (PA2, UM)
                 const band = T >= 10 && r.ratio < 1 && act.id !== 'blast' ? 'full' : bandOf(r.ratio); // v0.11.100 (SB1, T): the T10 no-miss is the constructs' (the sung weapons'), not the Qi blast's
                 lines.push(`${act.label}${targets.length > 1 ? ` → ${tg.name}` : ''}: ${checkText(r)} — ${{ double: 'a clean, deep hit', full: 'hit', glance: 'a glancing blow', miss: 'miss' }[band]}`);
                 if ((band === 'glance' || band === 'miss') && !learned && (c.adapt[key] || 0) < ADAPT_FIGHT_MAX) { c.adapt[key] = (c.adapt[key] || 0) + ADAPT_FIGHT_STEP; learned = true; lines.push(`  You read the opening better. (+${ADAPT_FIGHT_STEP} to ${act.label} this fight)`); }
@@ -942,6 +993,7 @@ function stepNoDice(g, actionId, targetIdx) {
                 tg.hp -= dmg;
                 lines.push(`  ${tg.name} takes ${dmg}${band === 'double' ? ' (double damage)' : ''}.`);
                 if (mood === 'proud' && dmg > 0) lines.push(TELL_TEXT.proudHit);
+                sparOut(c, tg, lines); // v0.11.114 (PA2, SF)
                 if (act.stagger && tg.hp > 0 && band !== 'glance') { tg.staggered = true; lines.push(act.unarmed ? `  ${tg.name} hits the dust and takes a moment to work out which way is up.` : `  ${tg.name} staggers.`); } // v0.11.82: the throw's line Fable's
                 if (act.reach && tg.hp > 0 && band !== 'glance') { tg.atBay = true; lines.push(`  ${tg.name} is held at the spear's length.`); }
             }
@@ -963,11 +1015,12 @@ function stepNoDice(g, actionId, targetIdx) {
             let dmg = Math.round((form.dmg[0] + form.dmg[1]) / 2) * (band === 'double' ? 2 : 1);
             if (band === 'glance') dmg = Math.floor(dmg / 2);
             dmg = Math.max(0, dmg - (yt.dr || 0));
-            yt.hp -= dmg; lines.push(`  ${yt.name} takes ${dmg}.`);
+            yt.hp -= dmg; lines.push(`  ${yt.name} takes ${dmg}.`); sparOut(c, yt, lines); // v0.11.114 (PA2, SF)
         }
     }
     for (const e of c.enemies) {
         if (e.hp <= 0) continue;
+        if (e.flustered > 0) { const first = e.flustered === SAY_ROUNDS; e.flustered--; e.staggered = false; e.atBay = false; if (!first) lines.push(foeFill(SAY_TEXT.stunned, e.name)); continue; } // v0.11.114 (PA2, SS); PB1 (HC; Fable's review, high 1): a stagger or hold on a stunned foe is spent with it, so it loses two rounds, never more
         if (e.staggered) { e.staggered = false; lines.push(c.style === 'unarmed' ? `${e.name} is still getting up.` : `${e.name} is still reeling.`); continue; }
         if (e.atBay) { e.atBay = false; lines.push(`${e.name} can't get past the spear.`); continue; }
         if (e.prefersSmall && g.yuki.hp > 0 && c.round % 3 === 0) { // every third round it goes for the small one
@@ -1005,6 +1058,7 @@ function stepNoDice(g, actionId, targetIdx) {
         for (const e of c.enemies) {
             if (e.hp <= 0) continue;
             if (e.heavy && next % TELL_EVERY === 0) lines.push(foeFill(bigT[Math.floor(next / TELL_EVERY) % bigT.length], e.name));
+            if (e.postures && next % TELL_EVERY === 0) lines.push(foeFill(SAY_TEXT.tells[Math.floor(next / TELL_EVERY) % SAY_TEXT.tells.length], e.name)); // v0.11.114 (PA2, PT)
             if (e.prefersSmall && !c.style && g.yuki.hp > 0 && next % TELL_EVERY === 0) lines.push(foeFill(TELL_TEXT.lunge, e.name));
             const m = moodOf({ round: next }, e);
             if (m !== 'plain') lines.push(foeFill(TELL_TEXT[m], e.name));
@@ -1029,6 +1083,10 @@ function finishRound(g, lines) {
     if (hj > 0 && g.james.hp > 0 && g.james.hp < jamesHpMax(g)) { const before = g.james.hp; g.james.hp = Math.min(jamesHpMax(g), g.james.hp + hj); lines.push(`Your flesh closes: +${Math.round((g.james.hp - before) * 10) / 10} HP.`); }
     const hy = realmShockHpBonus(g.yuki.realm || 0);
     if (hy > 0 && g.yuki.hp > 0) g.yuki.hp = Math.min(yukiHpMax(g), g.yuki.hp + hy);
+    if (c.style === 'unarmed') { // v0.11.114 (PA2, UM): a round bare-handed, kept across every Coil (g.stats)
+        const b0 = unarmedMastery(g); g.stats.unarmed = (g.stats.unarmed || 0) + 1;
+        if (unarmedMastery(g) > b0) lines.push(SPAR_TEXT.masteryUp.replace('{b}', unarmedMastery(g)));
+    }
     c.round += 1;
     advance(g, 1);
     c.log = lines;
@@ -1050,6 +1108,16 @@ function finishRound(g, lines) {
         return { lines, done: 'lose', next };
     }
     return { lines, done: null };
+}
+
+/** v0.11.114 (owner pick PA2, YD; research.md #136): in a spar or a brawl James may yield: the fight is lost at once (its
+ *  written lost scene), and he keeps the HP he has. */
+export function combatYield(g) {
+    const c = g.combat;
+    if (!c || !c.style) return null;
+    g.combat = null;
+    advance(g, 1);
+    return { lines: [SPAR_TEXT.yielded], done: 'lose', next: c.lose }; // PB1 (LY; review low 2): the fight's own lost scene, never the Coil
 }
 
 export function combatFlee(g) {

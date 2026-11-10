@@ -2,6 +2,24 @@
 
 Started 2026-11-09 (v0.11.107), when `history-12.md` neared 45 KB. Newer than `history-12.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.114 (word for word)
+
+### From "Decided in chat"
+
+- **v0.11.111: the docs trimmed (the owner's 00:03 "the upload failed. Also, can you trim the documents to make them possible to upload again? Maybe just reference the roadmap instead of writing it over and over again? just am idea"; options TR1–TR4 at 00:04; the owner's 00:05 photo: the game still 0.11.109; options DP1–DP3; owner 00:06 "TR1 and DP1"):**
+  - **The deploy:** v0.11.110's Pages run (`6e07952`) timed out on GitHub's side after 11 min (build and deploy "Timeout reached"); the push and Restore points were fine, the docs had gone up. **DP1** (a new Pages build through the API) was refused by the session's proxy (HTTP 403); stop-and-ask DQ1 🟢 TP (recommended) / DQ2 🟡 RR + TP / DQ3 🟠 PH + TP (TP: this push's build publishes `main`; RR: re-run; PH: the owner re-runs); owner 00:08 "DQ1".
+  - **The sub-items:** **RD** the done roadmap lines (section 0's three, group d's blade's lead, the FAQ and card line, "End it in one move", the weapons line with the NK and TK options) word for word to `roadmap-done-2.md`, short open remainders kept: 59.3 → 46.5 KB; **RL** the "Last updated" line the current version only; **HN** the handover's NEXT list (1)–(24) word for word to `history-13.md`; **HP** its open items the roadmap, `lore.md` or `CLAUDE.md` hold (art, roadmap, Fable, flight, the E retune, the v0.11.46 lows, the targets, the story notes) word for word to `history-13.md`, one pointer line; Careful's targets added to the roadmap: 34.5 → 28.3 KB with this push's notes; **DR** the write-once rule (`working-agreement.md`); **X** docs checks, byte-for-byte checks of every moved block.
+  - **The options:** **TR1 🟢 RD + RL + HN + HP + DR + X (recommended)** / TR2 🟡 without DR / TR3 🟠 RD + RL + X / TR4 🔴 a third roadmap part. **Picked: TR1.**
+  - **As built:** see the version note.
+  - **Also:** `6e07952` filled in for 0.11.110; after v0.11.110 Claude uploaded 5 docs (handover, roadmap, changelog, restore points, history-13); v0.11.108's notes to `history-13.md`.
+
+### From "Version notes"
+
+## v0.11.111 — the docs trimmed (TR1)
+
+- **Files:** `project/roadmap.md` (59,297 → about 46.5 KB), `project/roadmap-done-2.md` (the moved lines, a v0.11.111 section), `project/handover.md`, `project/history-13.md` (the moved items; v0.11.108's notes), `project/working-agreement.md` (the write-once rule), `project/changelog.md`, `project/restore-points.md`, `sw.js`. Docs only: the game is 0.11.110's, saves and the baseline unchanged.
+- **Checks:** docs only (rule 2): `node tests/tools.test.mjs` and `bash tools/check.sh quick`; every moved block found byte for byte in its new place and gone from the old. Interaction: the consistency check reads the roadmap's "Last updated" version and the handover's size; no game file changed.
+
 ## Moved from the handover in v0.11.113 (word for word)
 
 ### From "Decided in chat"
