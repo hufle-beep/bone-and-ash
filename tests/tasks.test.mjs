@@ -930,6 +930,59 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
       const h = mk([post({ atk: 5, dmg: 6 })]); h.combat.enemies[0].heavy = true; h.combat.round = 3; h.combat.spearFormed = true; h.combat.wait = { spear: 4 }; assert(smartAction(h) === 'guard', 'WB1, RT: a big blow, the spear waiting, no song: guard');
       const m = mk([post({ atk: 5, moods: true })]); m.combat.round = 2; m.combat.song = 2; assert(smartAction(m) === 'guard', 'WB1, RT: a hungry round: guard, not the needle'); }
 }
+// v0.11.117 (owner pick TW1; research.md #62): the threat word. A fight choice is taken on a copy and its fight played with
+// the blade alone (plainFight); the band is the word (Fable's); the screen shows it, the bots never read it.
+{
+    const G = await import('../js/core/game.js');
+    const { plainFight, THREAT_TEXT, THREAT_LOW, THREAT_HIGH, combatHooks, takeCapNotes } = G;
+    const { threatOf, choose: chooseS } = await import('../js/core/story.js');
+    const { playFight } = await import('../tools/lib/fightlab.mjs');
+    const base = () => { const g = ensureBars(newGame(129, { closed: true })); g.james.gu = { tier: 3, level: 1, xp: 0 }; g.james.skills['Convergence Use'] = { tier: 1, level: 9, xp: 0 }; ensureBars(g); g.james.hp = jamesHpMax(g); g.yuki.hp = 0; return g; };
+    const enc = (e) => ({ id: 'test_tw1', intro: 'In.', band: 'standard', enemies: [{ name: 'Foe', hp: 10, dc: 1, atk: 0.1, dmg: 0, ...e }], win: 'stream', lose: 'stream' });
+    assert(THREAT_TEXT.words.join() === 'losing,narrow,costly,clean' && THREAT_TEXT.hold.length === 4 && THREAT_TEXT.hold[0] === 'With the blade alone, swing and guard, you lose this one. A better fight than that might not.' && THREAT_LOW === 30 && THREAT_HIGH === 70, "TW1: Fable's four words and hold lines, 30 / 70");
+    assert(plainFight(base(), enc({})) === 3 && plainFight(base(), enc({ hp: 999, dc: 99, atk: 99, dmg: 99 })) === 0, 'TW1: a soft foe is clean, an impossible one losing');
+    { const bands = []; for (let d = 1; d <= 40; d++) bands.push(plainFight(base(), enc({ hp: 30, atk: 99, dmg: d })));
+      assert(bands.includes(1) && bands.includes(2) && bands.every((b, i) => i === 0 || b <= bands[i - 1]), `TW1: harder blows, never a better word; narrow and costly both reached (${bands.join('')})`); }
+    { const b0 = combatHooks.before, l0 = combatHooks.lose; plainFight(base(), enc({})); let threw = false; try { plainFight(base(), { id: 'x', enemies: null }); } catch { threw = true; }
+      assert(threw && combatHooks.before === b0 && combatHooks.lose === l0, 'TW1: the story hooks are put back, even after a throw'); }
+    // TX1 (T; Fable's review): every fight choice in five states (strong, weak, hurt, Act 1, the Long Forest): the same band as the
+    // fight lab's blade tactic and as the real tap (choose, then startCombat with the hooks on); the save, the hooks and capNotes untouched
+    { const pct = (x) => Math.round((100 * Math.max(0, x.james.hp)) / jamesHpMax(x));
+      const bandOf = (win, h0, h1) => (!win ? 0 : (100 * h1) / h0 < THREAT_LOW ? 1 : (100 * h1) / h0 <= THREAT_HIGH ? 2 : 3);
+      const states = [base(), (() => { const g = base(); g.james.gu = { tier: 1, level: 2, xp: 0 }; g.james.skills['Convergence Use'] = { tier: 1, level: 2, xp: 0 }; ensureBars(g); return g; })(),
+          (() => { const g = base(); g.james.hp = Math.round(jamesHpMax(g) * 0.29); return g; })(), (() => { const g = base(); g.flags.ending = 'victory'; g.minutes = 7 * 1440 + 6 * 60; return g; })(),
+          (() => { const g = base(); g.flags.longforest = true; return g; })()];
+      let n = 0, words = 0, labBad = [], tapBad = [], dirty = 0; const b0 = combatHooks.before, l0 = combatHooks.lose;
+      for (const [k, st] of states.entries()) for (const [id, s] of Object.entries(SCENES)) (s.choices || []).forEach((ch, i) => { if (!ch.combat) return; n++;
+          const g = structuredClone(st); g.scene = id; const snap = serialize(g); const t = threatOf(g, SCENES, i);
+          if (serialize(g) !== snap || takeCapNotes().length || combatHooks.before !== b0 || combatHooks.lose !== l0) dirty++;
+          const c = JSON.parse(JSON.stringify(g)); let r = null; try { r = chooseS(c, SCENES, i); } catch { r = null; }
+          if (!r?.combat) { if (t !== null) labBad.push(`${k}:${id}#${i} no fight, word ${t?.band}`); return; }
+          let e = null; try { e = r.combat(c); } catch { if (t !== null) labBad.push(`${k}:${id}#${i} a fight that can't be built, word ${t?.band}`); return; } // a Long Forest fight needs its season's state
+          words++;
+          const lc = JSON.parse(JSON.stringify(c)); const h0 = pct(lc); const lab = playFight(lc, combatHooks.before(lc, e), 'blade'); const lb = bandOf(lab.win, h0, lab.hp);
+          if (!t || lb !== t.band || t.fists !== (e.style === 'unarmed')) labBad.push(`${k}:${id}#${i} lab ${lb} word ${t?.band}`);
+          const tc = JSON.parse(JSON.stringify(c)); const t0 = pct(tc); startCombat(tc, e); let o = null; for (let q = 0; q < 400 && tc.combat; q++) { o = combatStep(tc, 'blade'); if (o?.done) break; }
+          if (bandOf(o?.done === 'win', t0, pct(tc)) !== t?.band) tapBad.push(`${k}:${id}#${i}`); combatHooks.lose = l0; });
+      assert(words > 150 && !labBad.length, `TX1, T: every fight choice in five states has the fight lab's band (${words} words of ${n}; ${labBad.slice(0, 4).join(', ')})`);
+      assert(!tapBad.length, `TX1, T: and the real tap's band (${tapBad.slice(0, 4).join(', ')})`);
+      assert(!dirty && combatHooks.before === b0 && combatHooks.lose === l0, `TX1, T: the save, the hooks and capNotes untouched (${dirty})`);
+      const g = base(); g.scene = Object.entries(SCENES).find(([, s]) => (s.choices || []).some((c) => c.combat))[0]; const ni = SCENES[g.scene].choices.findIndex((x) => !x.combat);
+      if (ni >= 0) assert(threatOf(g, SCENES, ni) === null, 'TW1: no word on a choice with no fight');
+      assert(threatOf(g, SCENES, 1000) === null && threatOf(g, SCENES, 1000 + ni) === null, 'TX1, PF: the one-move card (1000+) gets none and is not played'); }
+    // HL: an untouched win from 29% HP is clean (it was narrow); a win that costs half of a full bar costly
+    { const low = base(); low.james.hp = Math.round(jamesHpMax(low) * 0.29); assert(plainFight(low, enc({})) === 3, 'TX1, HL: an untouched win from low HP reads clean');
+      const bands = []; for (let d = 1; d <= 40; d++) { const h = base(); h.james.hp = Math.round(jamesHpMax(h) * 0.5); bands.push(plainFight(h, enc({ hp: 30, atk: 99, dmg: d }))); }
+      assert(bands.includes(1) && bands.includes(2) && bands.every((x, i) => i === 0 || x <= bands[i - 1]), `TX1, HL: from half HP the cost bands still run in order (${bands.join('')})`); }
+    // UB: Bao's bare-handed brawl reads with the fists' lines (the blade is a strike every round there); a spar with the blade's
+    { let fists = null, spar = null; for (const [id, s] of Object.entries(SCENES)) (s.choices || []).forEach((ch, i) => { if (!ch.combat) return; for (const st of [base()]) { const g = structuredClone(st); g.scene = id; const t = threatOf(g, SCENES, i); const c = JSON.parse(JSON.stringify(g)); let e = null; try { const r = chooseS(c, SCENES, i); e = r.combat ? r.combat(c) : null; } catch { e = null; } if (t && e?.style === 'unarmed') fists = t; if (t && e?.style === 'spar') spar = t; } });
+      assert(fists?.fists === true && spar && spar.fists === false, 'TX1, UB: the brawl reads with fists, the spar with the blade');
+      assert(THREAT_TEXT.fists.length === 4 && THREAT_TEXT.fists[0] === 'With your fists alone, stepping in and hitting every round, you lose this one. A better fight than that might not.', "TX1, UB: Fable's brawl lines"); }
+    { const { readFileSync } = await import('node:fs'); const main = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8'); const faq = readFileSync(new URL('../js/core/faq.js', import.meta.url), 'utf8'); const bot = readFileSync(new URL('./lib/smartfight.mjs', import.meta.url), 'utf8');
+      assert(/threatOf\(g, SCENES, c\.index\)/.test(main) && /fight · \$\{THREAT_TEXT\.words\[th\.band\]\}/.test(main) && /\(th\.fists \? THREAT_TEXT\.fists : THREAT_TEXT\.hold\)\[th\.band\]/.test(main), 'TW1 + TX1: the card\'s tag and its hold line (the brawl\'s own)');
+      assert(/more than \$\{THREAT_HIGH\}% of the HP he has/.test(faq) && /less than \$\{THREAT_LOW\}% of it/.test(faq) && !/threatOf|plainFight/.test(bot), 'TW1: the FAQ reads the constants; the bots never read the word');
+      const { FAQ } = await import('../js/core/faq.js'); assert(FAQ.find(([q]) => q === 'Fights')[1]().includes('losing (he loses it), narrow (he wins, and it costs him more than 70% of the HP he has), costly (30–70% of it) or clean (less than 30% of it)'), "TW1 + TX1: the FAQ's sentence (Fable's)"); }
+}
 // v0.11.110 (owner pick GD1): group d's small items in one push: CV (the fight's cards show the check's own value, hunger
 // counted), FO (the smart rule pays for an unsung flail only while no free formed weapon is out), KN (a formed fragile
 // knife's swings left are free, so the smart rule swings them out), FQ (the FAQ: the blast's difficulty one lower).

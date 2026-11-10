@@ -4,7 +4,7 @@
  *             to | to(g), fail?, do?(g, r) → lines, failDo?(g, r) → lines, combat?: encounter, xp?: false }.
  * A check pays standard XP (25% on a fail) unless xp: false. Pure — no DOM.
  */
-import { rollCheck, awardXp, spendQi, advance, ensureBars, actingCheck, actingName, instantWin, itemFull, takeCapNotes, itemNames, setLootMult, noDiceDc, checkText, addItem, canFly, flightMinutes } from './game.js';
+import { rollCheck, awardXp, spendQi, advance, ensureBars, actingCheck, actingName, instantWin, itemFull, takeCapNotes, itemNames, setLootMult, noDiceDc, checkText, addItem, canFly, flightMinutes, plainFight } from './game.js';
 import { STOMP, degreeForChoice } from '../story/power.js';
 import { keepReplies } from './replies.js'; // v0.11.69 (P1)
 
@@ -303,4 +303,18 @@ export function choose(g, scenes, index, { task = false } = {}) {
 /** After a fight ends: go to its win / lose / flee scene. */
 export function goTo(g, scenes, id) {
     return go(g, scenes, id);
+}
+
+/** v0.11.117 (owner pick TW1, PW): the threat word for story choice `index`: { band (0 losing … 3 clean; game.js plainFight),
+ *  fists (TX1, UB: a bare-handed brawl, where the blade is a strike every round) }, or null when it leads to no fight. The choice is taken on a copy first (its time, Qi and effects), then its fight is played
+ *  with the blade alone, as the fight lab measured it. Called by the screen only (the bots never read it). */
+export function threatOf(g, scenes, index) {
+    if (!(index < 1000)) return null; // TX1 (PF; review low 5): the one-move card (1000+) never shows a word
+    try {
+        const c = JSON.parse(JSON.stringify(g));
+        const r = choose(c, scenes, index);
+        if (!r.combat) return null;
+        const enc = r.combat(c);
+        return { band: plainFight(c, enc), fists: enc.style === 'unarmed' };
+    } catch { return null; }
 }

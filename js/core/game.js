@@ -1153,6 +1153,43 @@ function stepNoDice(g, actionId, targetIdx) {
     return lines;
 }
 
+/** v0.11.117 (owner pick TW1, PW; research.md #62): the threat word. The fight a story choice leads to, played on a copy with the
+ *  plainest tactic (the blade alone: under the rhythm, swing then guard) from James's state now; the word says how it went.
+ *  Measured (the fight lab, 300 games, 7,642 fights): lost 22.6% (smart play still wins 28.3%, random 4.4%), won under
+ *  THREAT_LOW% HP 6.6% (random 57.7%), under THREAT_HIGH% 21.0% (94.7%), the rest 49.8% (99.3%). Words, no numbers; texts Fable's. */
+export const THREAT_LOW = 30, THREAT_HIGH = 70, THREAT_STEPS = 400;
+export const THREAT_TEXT = {
+    words: ['losing', 'narrow', 'costly', 'clean'],
+    hold: ['With the blade alone, swing and guard, you lose this one. A better fight than that might not.',
+        'With the blade alone, swing and guard, you win this one with very little of you left. A better fight costs less.',
+        'With the blade alone, swing and guard, you win this one and pay for it. A better fight costs less.',
+        'With the blade alone, swing and guard, you win this one and keep most of your HP. A better fight costs less still.'],
+    fists: ['With your fists alone, stepping in and hitting every round, you lose this one. A better fight than that might not.', // TX1 (UB; review low 3): Bao's brawl
+        'With your fists alone, stepping in and hitting every round, you win this one with very little of you left. A better fight costs less.',
+        'With your fists alone, stepping in and hitting every round, you win this one and pay for it. A better fight costs less.',
+        'With your fists alone, stepping in and hitting every round, you win this one and keep most of your HP. A better fight costs less still.'],
+};
+/** Play `enc` on `g` (already a copy: it is changed) with the blade alone; the story's hooks prepare it first, then stay off
+ *  (no second preparation, no Coil ending). Returns the band: 0 lost; else by the share of the HP James started with that the
+ *  fight cost (TX1, HL; Fable's review, mediums 1–2: an untouched win from low HP is clean): 1 more than THREAT_HIGH%,
+ *  2 THREAT_LOW–THREAT_HIGH%, 3 under THREAT_LOW%. HP to a whole percent, as the fight lab rounds it (TX1, LR). From full HP the
+ *  same bands as measured; from a hurt start 44 of 7,642 lab fights read better (35 costly → clean, 8 narrow → costly, 1 narrow → clean). */
+export function plainFight(g, enc0) {
+    const keep = { before: combatHooks.before, lose: combatHooks.lose };
+    try {
+        const enc = keep.before ? (keep.before(g, enc0) || enc0) : enc0;
+        combatHooks.before = null; combatHooks.lose = null;
+        const pct = () => Math.round((100 * Math.max(0, g.james.hp)) / jamesHpMax(g));
+        const hp0 = pct();
+        startCombat(g, enc);
+        let o = null;
+        for (let t = 0; t < THREAT_STEPS && g.combat; t++) { o = combatStep(g, 'blade'); if (o?.done) break; }
+        if (o?.done !== 'win') return 0;
+        const kept = hp0 > 0 ? (100 * pct()) / hp0 : 0; // the share of his starting HP he still has
+        return kept < THREAT_LOW ? 1 : kept <= THREAT_HIGH ? 2 : 3; // narrow: it cost over 70% of his HP; costly: 30–70%; clean: under 30%
+    } finally { combatHooks.before = keep.before; combatHooks.lose = keep.lose; }
+}
+
 export function combatStep(g, actionId, targetIdx = 0) {
     if (!g.combat) return null;
     return finishRound(g, stepNoDice(g, actionId, targetIdx));

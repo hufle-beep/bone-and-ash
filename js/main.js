@@ -3,9 +3,9 @@ import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel, fragileKnife
 import { coilMult, coilMultNext, wakeDay, fmtMult, clockParts } from './core/game.js';
 import {
     newGame, ensureBars, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, skillCheck, checkValue, xpToNext, clockLabel, clockLabelG, realmName, yukiForm,
-    startCombat, combatStep, combatFlee, combatYield, waitLeft, songPays, sungKey, SONG_TEXT, SONG_COST, SONG_MAX, SAY_TEXT, SPAR_TEXT, postureNow, unarmedMastery, fightAdapt, weaponMastery, COMBAT_ACTIONS, noDiceDc, airStrike, AIR_TEXT, FOE_TRAITS, foeTraits, TELL_TEXT, bigBlowNow, lungeNow, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage, qiShield,
+    startCombat, combatStep, combatFlee, combatYield, waitLeft, songPays, sungKey, THREAT_TEXT, SONG_TEXT, SONG_COST, SONG_MAX, SAY_TEXT, SPAR_TEXT, postureNow, unarmedMastery, fightAdapt, weaponMastery, COMBAT_ACTIONS, noDiceDc, airStrike, AIR_TEXT, FOE_TRAITS, foeTraits, TELL_TEXT, bigBlowNow, lungeNow, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage, qiShield,
 } from './core/game.js';
-import { sceneView, choose, goTo, gives, choiceQi } from './core/story.js'; // v0.11.109 (FQ1): choiceQi
+import { sceneView, choose, goTo, gives, choiceQi, threatOf } from './core/story.js'; // v0.11.109 (FQ1): choiceQi
 import { showPicked, isTaskHub, isQueueScreen, isTaskChoice, taskCards, taskLabel, taskMinutes, taskOutcome, dryOutcome, outcomeOf, runTask, FAM, yukiLane, setYuki, nextStep } from './core/tasks.js';
 import { SCENES, ITEMS } from './story/prologue.js';
 import { TASK_HUBS } from './story/task_hubs.js';
@@ -217,7 +217,8 @@ const PICKED_SR = '<span class="sr-only"> (picked before)</span>';
 const storyCardHtml = (c) => {
     const out = c.disabled ? null : storyOutcome(c.index); // v0.11.64 (A1, B1)
     const mins = out ? out.minutes : 0;
-    const tag = c.disabled ? c.reason : hideTag(c.tag);
+    const th = c.disabled || !/fight/.test(c.tag || '') ? null : threatOf(g, SCENES, c.index); // v0.11.117 (owner pick TW1): the threat word
+    const tag = c.disabled ? c.reason : hideTag(th == null ? c.tag : String(c.tag).replace(/\bfight\b/, `fight · ${THREAT_TEXT.words[th.band]}`));
     const pk = pickedMark(c);
     const dies = out?.death ? ` <b class="dies">${out.death === 'hunger' ? 'Starves here' : 'Collapses here'}</b>` : '';
     return `<button class="card story${/fight/.test(c.tag) ? ' fightish' : ''}${out?.death ? ' fatal' : ''}${pk ? ' picked' : ''}" data-story="${c.index}" ${c.disabled ? 'disabled aria-disabled="true"' : ''}>${md(c.label)}${dies}${pk ? PICKED_SR : ''}${tag ? `<span class="tag">${esc(tag)}</span>` : ''}<span class="len">${mins ? `${durLabel(mins)} ${endAt(out.end)}` : 'at once'}</span></button>`;
@@ -762,7 +763,7 @@ function tipFor(b) {
         const items = itemNames(ch);
         if (items.length) lines.push(`Can bring back: ${items.join(', ')}.`);
         if (choiceQi(g, ch)) lines.push(`Costs ${ch.qi} Qi.`); // v0.11.109 (FQ1): not for a sung crossing he flies
-        if (ch.combat) lines.push('Leads to a fight.');
+        if (ch.combat) { lines.push('Leads to a fight.'); const th = b.dataset.story != null && !b.disabled ? threatOf(g, SCENES, Number(b.dataset.story)) : null; if (th != null) lines.push((th.fists ? THREAT_TEXT.fists : THREAT_TEXT.hold)[th.band]); } // v0.11.117 (TW1); TX1 (UB): the brawl's own line
     }
     if (mins) lines.push(`Takes ${durLabel(mins)}, at once.`); // v0.11.64: every card at once
     { const id0 = b.dataset.run || b.dataset.med || ''; const k = medActivity(id0) || (/^(.+):(\d+)$/.test(id0) && isSitChoice(SCENES[id0.split(':')[0]]?.choices?.[Number(id0.split(':')[1])], id0.split(':')[0]) ? 'sit' : null); if (k) lines.push(useLine(g, k)); } // v0.11.15: speed by use
