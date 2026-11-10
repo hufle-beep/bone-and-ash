@@ -683,13 +683,123 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
       const b = mk('rt_brawl', [man('Bao')], { act1: true, style: 'unarmed' }); b.stats.unarmed = 5; combatYield(b); assert(b.stats.unarmed === 5, 'PB1, T: a yield adds no round');
       const { readFileSync } = await import('node:fs'); const main = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
       assert(/Date\.now\(\) - yieldArmed > 4000\) \{ yieldArmed = Date\.now\(\); note\(SPAR_TEXT\.yieldConfirm\)/.test(main) && SPAR_TEXT.yieldConfirm === 'Tap Yield again to concede the fight.', 'PB1, YC: Yield asks for a second tap');
-      assert(/a\.unarmed \? unarmedMastery\(g\) : 0\)\)\); \/\/ v0\.11\.110/.test(main) && /a\.remark \? `\$\{SAY_TEXT\.tag\}\$\{postureNow\(g\) \? ` · \$\{SAY_TEXT\.tagNow\}`/.test(main), 'PB1, CV: the brawl cards count mastery; the remark tag says when the speech is now'); }
+      assert(/a\.unarmed \? unarmedMastery\(g\) : a\.guard/.test(main) && /a\.remark \? `\$\{SAY_TEXT\.tag\}\$\{postureNow\(g\) \? ` · \$\{SAY_TEXT\.tagNow\}`/.test(main), 'PB1, CV: the brawl cards count mastery; the remark tag says when the speech is now'); }
     // unarmed mastery reaches the check; a spar's guard stays 2; no line at the cap; the whole game again keeps it; none on a new game
     { const val = (u) => { const g = mk('rt_brawl', [man('Bao', { dc: 50 })], { act1: true, style: 'unarmed' }); g.stats.unarmed = u; const l = cStep(g, 'strike').lines.find((x) => x.startsWith('Step in and hit:')); return Number(/GU ([\d.]+) \//.exec(l)[1]); };
       assert(Math.round((val(20) - val(0)) * 10) / 10 === 1, `PB1, T: +1 at 20 rounds reaches the strike's check (${val(0)} → ${val(20)})`);
       const sp = mk('ya_brawl', [man('Ya')], { act1: true, style: 'spar' }); sp.stats.unarmed = 40; assert(guardBonus(sp) === 2, 'PB1, T: a spar\'s guard has no mastery');
       const c = mk('rt_brawl', [man('Bao')], { act1: true, style: 'unarmed' }); c.stats.unarmed = 49; const o = cStep(c, 'cover'); assert(unarmedMastery(c) === UNARMED_MAX && !o.lines.some((l) => /Bare-handed, you are now/.test(l)), 'PB1, T: no step line past the cap');
       assert(unarmedMastery(ensureBars(newGame(118, { closed: true }))) === 0, 'PB1, T: a new game (or an old save) starts at 0'); }
+}
+// v0.11.115 (owner pick MA3; research.md #44, #65): FX foes remembered (every earlier meeting +0.5 to the attacks, up to +2
+// shared with the fight's own learning, not the tribute), W50 weapon familiarity (+0.5 a move for every 50 rounds, up to +2).
+{
+    const G = await import('../js/core/game.js');
+    const { MEMORY_TEXT, FOE_MEMORY_STEP, FOE_MEMORY_MAX, NO_MEMORY, meetFoe, fightAdapt, memoryLine, weaponMastery, weaponLine, WEAPON_EVERY, WEAPON_STEP, WEAPON_MAX, instantWin } = G;
+    // not story ids: the story's hook would rescale them
+    const mk = (id, enemies, { stats = null, style = null } = {}) => { const g = ensureBars(newGame(119, { closed: true })); g.james.gu = { tier: 3, level: 1, xp: 0 }; g.james.skills['Convergence Use'] = { tier: 3, level: 1, xp: 0 }; g.james.qi = 99;
+        if (stats) Object.assign(g.stats, structuredClone(stats)); sCombat(g, { id, intro: 'In.', band: 'standard', enemies, win: 'stream', lose: 'stream', ...(style ? { style } : {}) }); return g; };
+    const wolf = (x = {}) => ({ name: 'Wolf', hp: 999, dc: 4, atk: 0.1, dmg: 1, ...x });
+    const isMem = (l) => l.startsWith('You have fought this fight');
+    const learn = (o) => o.lines.some((l) => /You read the opening better/.test(l));
+    const val = (o) => Number(/GU ([\d.]+) \//.exec(o.lines.find((l) => /: GU [\d.]+ \/ DC/.test(l)))[1]);
+    // FX: a first meeting has no memory and no line; the third starts at +1 with Fable's line
+    { const g = mk('test_wolf', [wolf()]); assert(g.stats.foes.test_wolf === 1 && !g.combat.mem && !g.combat.log.some(isMem), 'MA3, FX: a first meeting, no memory, no line');
+      const h = mk('test_wolf', [wolf()], { stats: { foes: { test_wolf: 2 } } });
+      assert(h.combat.mem === 2 * FOE_MEMORY_STEP && h.stats.foes.test_wolf === 3 && h.combat.log.includes(memoryLine(2, 1)) && memoryLine(2, 1) === 'You have fought this fight twice before. Nobody else here has: +1 to your attacks.' && memoryLine(1, 0.5).includes(' once before') && memoryLine(3, 1.5).includes(' 3 times before'), "MA3, FX: twice before, +1, the line (Fable's)");
+      assert(meetFoe(ensureBars(newGame(120, { closed: true })), 'x') === 0 && (() => { const k = ensureBars(newGame(120, { closed: true })); k.stats.foes = { x: 9 }; return meetFoe(k, 'x') === FOE_MEMORY_MAX; })(), 'MA3, FX: up to +2'); }
+    // the memory reaches the attack's check from round 1 (+1 at two meetings), and only the attacks: guard's defence is as before
+    { const a = mk('test_wolf', [wolf()]), b = mk('test_wolf', [wolf()], { stats: { foes: { test_wolf: 2 } } });
+      assert(Math.round((val(cStep(b, 'blade')) - val(cStep(a, 'blade'))) * 10) / 10 === 1, 'MA3, FX: +1 on the first swing');
+      const d = (stats) => { const g = mk('test_wolf', [wolf({ atk: 60 })], { stats }); return Number(/defend \(GU ([\d.]+) \//.exec(cStep(g, 'guard').lines.find((l) => /attacks: you defend/.test(l)))[1]); };
+      assert(d(null) === d({ foes: { test_wolf: 4 } }), 'MA3, FX: not on defence'); }
+    // the cap is shared with the fight's own learning: memory +1.5, one miss lifts it to 2, then no more learning
+    { const g = mk('test_wolf', [wolf({ dc: 99 })], { stats: { foes: { test_wolf: 3 } } });
+      const r1 = cStep(g, 'blade'); assert(learn(r1) && fightAdapt(g.combat, 'blade') === FOE_MEMORY_MAX, 'MA3, FX: a miss learns up to the shared cap');
+      const r2 = cStep(g, 'blade'); assert(!learn(r2) && fightAdapt(g.combat, 'blade') === FOE_MEMORY_MAX && g.combat.adapt.blade === 0.5, 'MA3, FX: no learning past it');
+      const n = mk('test_wolf', [wolf({ dc: 99 })]); for (let i = 0; i < 6; i++) cStep(n, 'blade'); assert(fightAdapt(n.combat, 'blade') === 2 && n.combat.adapt.blade === 2, 'MA3, FX: with no memory the fight learns to +2 as before'); }
+    // not the tribute: counted, but no memory; a one-move finish counts as a meeting
+    { const k = ensureBars(newGame(121, { closed: true })); k.stats.foes = { collectors: 4 };
+      assert(NO_MEMORY.has('collectors') && NO_MEMORY.size === 1 && meetFoe(k, 'collectors') === 0 && k.stats.foes.collectors === 5, 'MA3, FX: the tribute has no memory');
+      const w = ensureBars(newGame(122, { closed: true })); instantWin(w, { id: 'test_wolf', intro: 'In.', band: 'standard', enemies: [wolf()], win: 'stream', lose: 'stream' });
+      assert(w.stats.foes.test_wolf === 1 && !w.combat, 'MA3, FX: a one-move finish is a meeting'); }
+    // W50: the 50th round of a move lifts it +0.5 with its line; up to +2; the blast's own line; it reaches the next check
+    { const g = mk('test_wolf', [wolf()], { stats: { weapons: { blade: WEAPON_EVERY - 1 } } }); assert(weaponMastery(g, 'blade') === 0, 'MA3, W50: nothing below 50');
+      const o = cStep(g, 'blade'); const lab = actionLabel(g, 'blade', 'Wraithbone blade');
+      assert(g.stats.weapons.blade === WEAPON_EVERY && weaponMastery(g, 'blade') === WEAPON_STEP && o.lines.includes(weaponLine(lab, 'blade', 50, 0.5)) && weaponLine(lab, 'blade', 50, 0.5) === `${lab}, 50 rounds in. Your hands have stopped consulting you about it: +0.5 to hit.`, "MA3, W50: the 50th round, +0.5, the line (Fable's)");
+      const v1 = val(cStep(g, 'blade')); const z = mk('test_wolf', [wolf()]); cStep(z, 'blade'); const v0 = val(cStep(z, 'blade'));
+      assert(Math.round((v1 - v0) * 10) / 10 === WEAPON_STEP, `MA3, W50: +0.5 reaches the check (${v0} → ${v1})`);
+      g.stats.weapons.blade = 9999; assert(weaponMastery(g, 'blade') === WEAPON_MAX && weaponMastery(g, 'dart') === 0, 'MA3, W50: up to +2, each move its own');
+      assert(weaponLine('Qi blast', 'blast', 100, 1) === 'Qi blast, 100 rounds in. There is no bone to blame, so it must be you getting better: +1 to hit.', "MA3, W50: the blast's own line (Fable's)");
+      const c = mk('test_wolf', [wolf()], { stats: { weapons: { blade: 4 * WEAPON_EVERY - 1 } } }); const oc = cStep(c, 'blade'); assert(oc.lines.some((l) => /rounds in\./.test(l)) && weaponMastery(c, 'blade') === WEAPON_MAX, 'MA3, W50: the line at +2');
+      const p = mk('test_wolf', [wolf()], { stats: { weapons: { blade: 4 * WEAPON_EVERY } } }); assert(!cStep(p, 'blade').lines.some((l) => /rounds in\./.test(l)), 'MA3, W50: no line past +2'); }
+    // only attacks count: guard, Say something, the shield and the brawl's fists don't; a spar's blade does
+    { const g = mk('test_wolf', [wolf()]); cStep(g, 'guard'); cStep(g, 'qshield'); assert(!Object.keys(g.stats.weapons || {}).length, 'MA3, W50: guard and the shield are not attacks');
+      const b = mk('test_brawl', [wolf({ name: 'Bao' })], { style: 'unarmed' }); cStep(b, 'strike'); assert(!Object.keys(b.stats.weapons || {}).length && b.stats.unarmed === 1, 'MA3, W50: fists count as unarmed mastery only');
+      const s2 = mk('test_spar', [wolf({ name: 'Ya' })], { style: 'spar' }); cStep(s2, 'blade'); assert(s2.stats.weapons.blade === 1, 'MA3, W50: a spar\'s blade counts'); }
+    // kept across a Coil and in a save; an old save (no fields) starts at 0 and fights
+    { const k = ensureBars(newGame(123, { closed: true })); k.stats.foes = { jackals: 3 }; k.stats.weapons = { blade: 120 }; endCoil(k, 'choice', 'stream'); rewind(k);
+      assert(k.stats.foes.jackals === 3 && k.stats.weapons.blade === 120, 'MA3: kept across a Coil');
+      const x = deserialize(serialize(k)); assert(x.stats.foes.jackals === 3 && weaponMastery(x, 'blade') === 1, 'MA3: kept in a save');
+      const o = ensureBars(newGame(124, { closed: true })); delete o.stats.foes; delete o.stats.weapons; const y = deserialize(serialize(o));
+      assert(weaponMastery(y, 'blade') === 0, 'MA3: an old save starts at 0'); sCombat(y, { id: 'test_wolf', intro: 'In.', band: 'standard', enemies: [wolf()], win: 'stream', lose: 'stream' }); cStep(y, 'blade');
+      assert(y.stats.foes.test_wolf === 1 && y.stats.weapons.blade === 1, 'MA3: an old save counts from its first fight'); }
+    // the cards and the FAQ
+    { const { readFileSync } = await import('node:fs'); const main = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+      assert(/a\.guard \|\| a\.remark \|\| a\.qshield \|\| a\.field \? \(c\.adapt\?\.\[id\] \|\| 0\) : fightAdapt\(c, id\)\) \+ \(a\.unarmed \? unarmedMastery\(g\) : a\.guard \|\| a\.remark \|\| a\.qshield \|\| a\.field \? 0 : weaponMastery\(g, id\)\)/.test(main), 'MA3: an attack card counts the memory and the familiarity');
+      const { FAQ } = await import('../js/core/faq.js'); const fq = FAQ.find(([t]) => t === 'Fights')[1]();
+      assert(/counts as <b>foes remembered<\/b>: \+0\.5/.test(fq) && /toward <b>weapon familiarity<\/b> with that move: \+0\.5 to hit with it for every 50 rounds/.test(fq) && MEMORY_TEXT.met && MEMORY_TEXT.up && MEMORY_TEXT.upQi, "MA3: the FAQ (Fable's)"); }
+}
+// v0.11.115 (owner pick MB1; Fable's review of MA3): FY a run or a yield is not a meeting; SA every target of a swing at
+// one value; CC one cap; FQ the FAQ's numbers from the constants; T the review's test gaps.
+{
+    const G = await import('../js/core/game.js');
+    const { meetFoe, fightAdapt, FOE_MEMORY_MAX, WEAPON_EVERY, combatYield: cYield, combatFlee: cFlee, memoryLine } = G;
+    const mk = (id, enemies, { stats = null, style = null, flee = null } = {}) => { const g = ensureBars(newGame(125, { closed: true })); g.james.gu = { tier: 3, level: 1, xp: 0 }; g.james.skills['Convergence Use'] = { tier: 3, level: 1, xp: 0 }; g.james.qi = 99;
+        if (stats) Object.assign(g.stats, structuredClone(stats)); sCombat(g, { id, intro: 'In.', band: 'standard', enemies, win: 'stream', lose: 'stream', ...(style ? { style } : {}), ...(flee ? { flee } : {}) }); return g; };
+    const wolf = (x = {}) => ({ name: 'Wolf', hp: 999, dc: 4, atk: 0.1, dmg: 1, ...x });
+    const isMem = (l) => l.startsWith('You have fought this fight');
+    const W = (g) => Object.keys(g.stats.weapons || {}).length;
+    // FY: a yield and a run that got clear take the meeting back; a failed run doesn't; a won fight keeps it
+    { const y = mk('test_spar', [wolf({ name: 'Ya' })], { style: 'spar' }); assert(y.stats.foes.test_spar === 1, 'MB1, FY: a meeting at the start');
+      cYield(y); assert(y.stats.foes.test_spar === 0, 'MB1, FY: a yield takes it back');
+      const f = mk('test_wolf', [wolf()], { flee: 'stream' }); const o = cFlee(f); assert(o.done === 'flee' && f.stats.foes.test_wolf === 0, 'MB1, FY: a run that got clear takes it back');
+      const h = mk('test_wolf', [wolf({ atk: 99 })], { flee: 'stream' }); const o2 = cFlee(h); assert(!o2.done && h.stats.foes.test_wolf === 1, 'MB1, FY: a failed run keeps it');
+      const w = mk('test_wolf', [wolf({ hp: 1, dc: 0.1 })]); const ow = cStep(w, 'blade'); assert(ow.done === 'win' && w.stats.foes.test_wolf === 1, 'MB1, FY: a won fight keeps it'); }
+    // a lost fight is a meeting, carried into the next Coil
+    { const g = mk('test_wolf', [wolf({ atk: 99, dmg: 999 })]); g.james.hp = 1; let o = null; for (let i = 0; i < 5 && g.combat; i++) o = cStep(g, 'guard');
+      assert(o.done === 'lose' && g.stats.foes.test_wolf === 1, 'MB1, T: a lost fight is a meeting');
+      endCoil(g, 'choice', 'stream'); rewind(g); sCombat(g, { id: 'test_wolf', intro: 'In.', band: 'standard', enemies: [wolf()], win: 'stream', lose: 'stream' });
+      assert(g.combat.mem === 0.5 && g.combat.log.includes(memoryLine(1, 0.5)), 'MB1, T: next Coil it is remembered'); }
+    // the tribute through startCombat: counted, no memory, no line
+    { const g = mk('collectors', [wolf({ name: 'Lu Han' })], { stats: { foes: { collectors: 3 } } }); assert(!g.combat.mem && !g.combat.log.some(isMem) && g.stats.foes.collectors === 4, 'MB1, T: the tribute shows no memory'); }
+    // not counted: Say something, the spike field, a Qi-short round; a closed move in a spar counts as the blade, in a brawl not at all
+    { const p = mk('gao', [wolf({ name: 'Gao' })]); cStep(p, 'remark'); assert(!W(p), 'MB1, T: Say something is not an attack');
+      const s2 = mk('test_wolf', [wolf()]); if (actionOpen(s2, 'spikes')) { cStep(s2, 'spikes'); assert(!W(s2), 'MB1, T: the spike field is not an attack'); }
+      const q = mk('test_wolf', [wolf()]); q.james.qi = 0; const oq = cStep(q, 'blade'); assert(oq.lines.some((l) => /fall back on guarding/.test(l)) && !W(q), 'MB1, T: a Qi-short round counts nothing');
+      const sp = mk('test_spar', [wolf({ name: 'Ya' })], { style: 'spar' }); cStep(sp, 'needle'); assert(sp.stats.weapons.blade === 1 && W(sp) === 1, 'MB1, T: a closed move in a spar counts as the blade');
+      const br = mk('test_brawl', [wolf({ name: 'Bao' })], { style: 'unarmed' }); cStep(br, 'blade'); assert(!W(br) && br.stats.unarmed === 1, 'MB1, T: a closed move in a brawl is a strike, not counted'); }
+    // SA + multi-target: one count a round, one learning a round, and every target checked at the same value
+    { const g = mk('test_pack', [wolf({ dc: 99 }), wolf({ name: 'Wolf two', dc: 99 })], { stats: { foes: { test_pack: 1 } } });
+      if (actionOpen(g, 'flail')) {
+        const o = cStep(g, 'flail'); const v = o.lines.filter((l) => /→ .*: GU [\d.]+ \//.test(l)).map((l) => /GU ([\d.]+) \//.exec(l)[1]);
+        assert(g.stats.weapons.flail === 1 && g.combat.adapt.flail === 0.5 && o.lines.filter((l) => /You read the opening better/.test(l)).length === 1, 'MB1, T: the flail on two foes: one count, one learning');
+        assert(v.length === 2 && v[0] === v[1], `MB1, SA: both targets at one value (${v.join(' / ')})`);
+      } else assert(false, 'MB1, T: the flail is open at Convergence T3'); }
+    // the memory reaches the Qi blast's check too; Yuki's own check is untouched
+    { const blastV = (stats) => { const g = mk('test_wolf', [wolf()], { stats }); const l = cStep(g, 'blast').lines.find((x) => x.startsWith('Qi blast:')); return { v: Number(/([\d.]+) \/ DC/.exec(l)[1]), y: cStep(g, 'guard') && g }; };
+      assert(Math.round((blastV({ foes: { test_wolf: 2 } }).v - blastV(null).v) * 10) / 10 === 1, 'MB1, T: the memory on the Qi blast');
+      const yk = (stats) => { const g = mk('test_wolf', [wolf()], { stats }); return cStep(g, 'guard').lines.find((l) => l.startsWith('Yuki:')); };
+      assert(yk(null) === yk({ foes: { test_wolf: 4 } }), 'MB1, T: Yuki\'s check has no memory'); }
+    // a mid-fight save keeps the memory and doesn't count again; the whole-game rewind keeps both counts
+    { const g = mk('test_wolf', [wolf()], { stats: { foes: { test_wolf: 2 } } }); const x = deserialize(serialize(g));
+      assert(x.combat.mem === 1 && x.stats.foes.test_wolf === 3 && fightAdapt(x.combat, 'blade') === 1, 'MB1, T: a mid-fight save keeps the memory, no recount');
+      const k = ensureBars(newGame(126, { closed: true })); k.stats.foes = { elder: 2 }; k.stats.weapons = { dart: 77 }; k.coil.act = 1; endCoil(k, 'choice', 'stream'); rewind(k, { to: 'game' });
+      assert(k.stats.foes.elder === 2 && k.stats.weapons.dart === 77, 'MB1, T: the whole-game rewind keeps both'); }
+    // CC: one cap; FQ: the FAQ reads the constants
+    { const { readFileSync } = await import('node:fs'); const src = readFileSync(new URL('../js/core/game.js', import.meta.url), 'utf8'); const faq = readFileSync(new URL('../js/core/faq.js', import.meta.url), 'utf8');
+      assert(/ADAPT_FIGHT_MAX = FOE_MEMORY_MAX;/.test(src) && FOE_MEMORY_MAX === 2, 'MB1, CC: the learning and the memory share one cap');
+      assert(/\$\{FOE_MEMORY_STEP\} to James's attacks/.test(faq) && /\$\{WEAPON_STEP\} to hit with it for every \$\{WEAPON_EVERY\} rounds, up to \+\$\{WEAPON_MAX\}/.test(faq) && WEAPON_EVERY === 50, 'MB1, FQ: the FAQ\'s numbers from the constants'); }
 }
 // v0.11.110 (owner pick GD1): group d's small items in one push: CV (the fight's cards show the check's own value, hunger
 // counted), FO (the smart rule pays for an unsung flail only while no free formed weapon is out), KN (a formed fragile
@@ -709,7 +819,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
           assert(checkValue(g, 'Convergence Use', 0.5) === rollCheck(g, 'Convergence Use', 1, 0.5).value, `CV: Fed ${sat}: Convergence Use with a bonus matches the check`); } }
     { const main = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
       const cards = main.slice(main.indexOf('function renderCombatCards'), main.indexOf('view.innerHTML', main.indexOf('function renderCombatCards')));
-      assert(/checkValue\(g, a\.skill, \(c\.adapt\?\.\[id\] \|\| 0\) \+ \(a\.unarmed \? unarmedMastery\(g\) : 0\)\)/.test(cards) && /checkValue\(g, 'GU'\)/.test(cards) && !/skillCheck\(/.test(cards), 'CV: the fight\'s cards and Run show checkValue, never skillCheck (v0.11.114, PB1: with unarmed mastery)'); }
+      assert(/checkValue\(g, a\.skill, \(a\.guard \|\| a\.remark \|\| a\.qshield \|\| a\.field \? \(c\.adapt\?\.\[id\] \|\| 0\) : fightAdapt\(c, id\)\) \+ \(a\.unarmed \? unarmedMastery\(g\) : /.test(cards) && /checkValue\(g, 'GU'\)/.test(cards) && !/skillCheck\(/.test(cards), 'CV: the fight\'s cards and Run show checkValue, never skillCheck (v0.11.114, PB1: with unarmed mastery; v0.11.115, MA3: the memory and familiarity)'); }
     // FO: a formed spear (or a holding blade) is used before paying for an unsung flail; with none formed, the flail as before
     { const m = ensureBars(newGame(91, { closed: true })); setSk(m, 2, 1); m.james.qi = 20;
       sCombat(m, { id: 'jackals', intro: '', band: 'standard', enemies: [foe('A'), foe('B')], win: 'stream', lose: 'stream' }); m.combat.fieldUsed = true;

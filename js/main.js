@@ -3,7 +3,7 @@ import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel, fragileKnife
 import { coilMult, coilMultNext, wakeDay, fmtMult, clockParts } from './core/game.js';
 import {
     newGame, ensureBars, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, skillCheck, checkValue, xpToNext, clockLabel, clockLabelG, realmName, yukiForm,
-    startCombat, combatStep, combatFlee, combatYield, SAY_TEXT, SPAR_TEXT, postureNow, unarmedMastery, COMBAT_ACTIONS, noDiceDc, airStrike, AIR_TEXT, FOE_TRAITS, foeTraits, TELL_TEXT, bigBlowNow, lungeNow, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage, qiShield,
+    startCombat, combatStep, combatFlee, combatYield, SAY_TEXT, SPAR_TEXT, postureNow, unarmedMastery, fightAdapt, weaponMastery, COMBAT_ACTIONS, noDiceDc, airStrike, AIR_TEXT, FOE_TRAITS, foeTraits, TELL_TEXT, bigBlowNow, lungeNow, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage, qiShield,
 } from './core/game.js';
 import { sceneView, choose, goTo, gives, choiceQi } from './core/story.js'; // v0.11.109 (FQ1): choiceQi
 import { showPicked, isTaskHub, isQueueScreen, isTaskChoice, taskCards, taskLabel, taskMinutes, taskOutcome, dryOutcome, outcomeOf, runTask, FAM, yukiLane, setYuki, nextStep } from './core/tasks.js';
@@ -314,7 +314,7 @@ function renderCombatCards() {
         const d = actionDmg(g, a);
         const off = cost > g.james.qi;
         if (off) return ''; // v0.11.17 (pick 1a): a move he can't afford is hidden (Guard costs nothing)
-        const v = n1(checkValue(g, a.skill, (c.adapt?.[id] || 0) + (a.unarmed ? unarmedMastery(g) : 0))); // v0.11.110 (owner pick GD1, CV): hunger counted, as the check is; v0.11.114 (PB1, CV): unarmed mastery too
+        const v = n1(checkValue(g, a.skill, (a.guard || a.remark || a.qshield || a.field ? (c.adapt?.[id] || 0) : fightAdapt(c, id)) + (a.unarmed ? unarmedMastery(g) : a.guard || a.remark || a.qshield || a.field ? 0 : weaponMastery(g, id)))); // v0.11.115 (MA3): an attack's memory and familiarity too // v0.11.110 (owner pick GD1, CV): hunger counted, as the check is; v0.11.114 (PB1, CV): unarmed mastery too
         const tgt = c.enemies.find((e) => e.hp > 0);
         const plain = tgt && showChecks ? `${a.skill} ${v} / DC ${noDiceDc(tgt.dc + a.dcMod)} · ${Math.round((d[0] + d[1]) / 2)} dmg` : '';
         const sw = a.keeps === 'blade' && fragileKnife(g) ? (() => { const n = knifeSwings(g), left = c.bladeFormed ? n - (c.knifeSw || 0) : n; return `${plain ? ' · ' : ''}${c.bladeFormed ? `${left} swing${left === 1 ? '' : 's'} left` : `lasts ${n} swing${n === 1 ? '' : 's'}`}`; })() : ''; // v0.11.104 (GW2, K)

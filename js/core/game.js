@@ -789,6 +789,31 @@ export const postureDue = (c, e) => !!(e.postures && e.hp > 0 && c.round % TELL_
  *  Coil); each UNARMED_EVERY rounds give +UNARMED_STEP to the brawl's three moves (Cover's defence too), up to UNARMED_MAX. */
 export const UNARMED_EVERY = 10, UNARMED_STEP = 0.5, UNARMED_MAX = 2;
 export const unarmedMastery = (g) => Math.min(UNARMED_MAX, Math.floor((g.stats?.unarmed || 0) / UNARMED_EVERY) * UNARMED_STEP);
+/** v0.11.115 (owner pick MA3, FX; research.md #44): foes remembered. Every meeting with a fight (its id; won, lost or ended in one
+ *  move, any Coil) counts in g.stats.foes, kept across every Coil; each earlier one starts James's attacks in that fight at
+ *  +FOE_MEMORY_STEP, up to FOE_MEMORY_MAX together with the fight's own learning (c.adapt shares the cap). Not the tribute
+ *  (NO_MEMORY; measured on a scratch copy: Careful's tribute 8.7 → 37.2%, its Coils 3.25 / 3.42 → 2.61 / 2.85). A fight run from or
+ *  yielded is not a meeting (MB1, FY; Fable's review, medium 1: yielding a spar at once would farm it). */
+export const FOE_MEMORY_STEP = 0.5, FOE_MEMORY_MAX = 2; // MB1 (CC): also the fight's own learning's cap (ADAPT_FIGHT_MAX)
+export const NO_MEMORY = new Set(['collectors']);
+/** Count a meeting with fight `id`; returns the memory bonus from the meetings before it. */
+export function meetFoe(g, id) {
+    const foes = g.stats.foes || (g.stats.foes = {});
+    const met = foes[id] || 0;
+    foes[id] = met + 1;
+    return NO_MEMORY.has(id) ? 0 : Math.min(FOE_MEMORY_MAX, met * FOE_MEMORY_STEP);
+}
+/** MB1 (FY): take a meeting back (a yield, a run that got clear). */
+export const unmeet = (g, id) => { if (g.stats.foes?.[id] > 0) g.stats.foes[id] -= 1; };
+/** v0.11.115 (owner pick MA3, W50; research.md #65): weapon familiarity. Every round a sung move or the Qi blast is used to
+ *  attack counts in g.stats.weapons (by move id; the blade from knife to sword is one move), kept across every Coil; each
+ *  WEAPON_EVERY rounds give +WEAPON_STEP to that move's check, up to WEAPON_MAX, on top of the fight's own learning (as
+ *  the fists' mastery). Both, as built (v0.11.115): the fight lab's smart bots 81.3 → 83.3%, random 72.3 → 74.0%; the models'
+ *  Coils within 0.06 (Careful 3.25 / 3.43 unchanged). */
+export const WEAPON_EVERY = 50, WEAPON_STEP = 0.5, WEAPON_MAX = 2;
+export const weaponMastery = (g, id) => Math.min(WEAPON_MAX, Math.floor((g.stats?.weapons?.[id] || 0) / WEAPON_EVERY) * WEAPON_STEP);
+/** The memory bonus a fight's attack gets now: its own learning plus the memory, within FOE_MEMORY_MAX (both start from 0). */
+export const fightAdapt = (c, key) => Math.min(FOE_MEMORY_MAX, (c.adapt?.[key] || 0) + (c.mem || 0));
 /** Task mode (v0.9.7, owner's pick 3a): every beast fight +0.5 DC and attack on top of its no-dice tuning. */
 export const BEAST_UP = 0.5;
 /** v0.11.40 (E1): the no-dice raise to a fight's DC and attack (its tune plus BEAST_UP for a beast), as startCombat applies it. */
@@ -811,6 +836,7 @@ export const yukiForm = (g) => (yukiForms(g).includes(g.yuki.form) ? g.yuki.form
 /** Win a fight outright (the one-move finish): XP and kills as a normal win, no combat screen. */
 export function instantWin(g, enc) {
     const e = combatHooks.before ? (combatHooks.before(g, enc) || enc) : enc;
+    meetFoe(g, e.id); // v0.11.115 (MA3, FX): a meeting all the same
     if (e.night) g.flags.night_fight = true; // v0.11.92 (O1): a night fight costs sleep, even one ended in one move
     g.stats.kills += e.enemies.length;
     const xp = awardFightXp(g, e.style, e.band || 'standard').concat(yukiSitsOut(g, e) ? [] : awardYukiFightXp(g, e.band || 'standard')); // v0.11.82; v0.11.89 (X1) awardFightXp
@@ -840,6 +866,8 @@ export function startCombat(g, enc0) {
         }),
         log: [enc.intro || 'Combat!'],
     };
+    const mem = meetFoe(g, enc.id); // v0.11.115 (MA3, FX)
+    if (mem > 0) { g.combat.mem = mem; g.combat.log.push(memoryLine(g.stats.foes[enc.id] - 1, mem)); }
     g.combat.log.push(...traitLines(g, g.combat.enemies, enc.id)); // v0.11.113 (DA1, TD)
     if (enc.style) {
         Object.assign(g.combat, { style: enc.style, yukiOut: yukiSitsOut(g, enc), ...(enc.opening ? { opening: enc.opening } : {}) }); // v0.11.82
@@ -921,6 +949,17 @@ export const SPAR_TEXT = {
     mastery: 'Your hands remember {n} rounds of this, whatever the Coil forgot: +{b} to your fists.',
     masteryUp: 'Something in your knuckles settles into place. Bare-handed, you are now at +{b}.',
 };
+/** v0.11.115 (owner pick MA3; texts Fable's, rule 10): foes remembered (FX), weapon familiarity (W50). */
+export const MEMORY_TEXT = {
+    met: 'You have fought this fight {times} before. Nobody else here has: +{b} to your attacks.',
+    up: '{move}, {n} rounds in. Your hands have stopped consulting you about it: +{b} to hit.',
+    upQi: 'Qi blast, {n} rounds in. There is no bone to blame, so it must be you getting better: +{b} to hit.',
+};
+const timesText = (n) => (n === 1 ? 'once' : n === 2 ? 'twice' : `${n} times`);
+/** The memory line at a fight's start: `n` earlier meetings, bonus `b`. */
+export const memoryLine = (n, b) => MEMORY_TEXT.met.replace('{times}', timesText(n)).replace('{b}', b);
+/** The familiarity line when a move's bonus rises (the Qi blast has its own wording). */
+export const weaponLine = (label, id, n, b) => (id === 'blast' ? MEMORY_TEXT.upQi : MEMORY_TEXT.up).replace('{move}', label).replace('{n}', n).replace('{b}', b);
 /** v0.11.114 (PA2): a foe postures this round (for the Say something card). */
 export const postureNow = (g) => !!g.combat && g.combat.enemies.some((e) => postureDue(g.combat, e) && !e.staggered && !e.atBay && !(e.flustered > 0));
 /** v0.11.114 (PA2, SF): in a spar or a brawl a foe worn down to half its HP is out. */
@@ -929,7 +968,7 @@ const sparOut = (c, e, lines) => { if (c.style && e.hp > 0 && e.hp <= e.hpMax / 
 export const bigBlowNow = (g) => !!g.combat && g.combat.enemies.some((e) => bigBlowDue(g.combat, e) && !e.staggered && !e.atBay);
 export const lungeNow = (g) => !!g.combat && !g.combat.style && g.yuki.hp > 0 && g.combat.round % TELL_EVERY === 0 && g.combat.enemies.some((e) => e.prefersSmall && e.hp > 0 && !e.staggered && !e.atBay);
 export const NO_DICE_ROUND_CAP = 30; // a no-dice fight still undecided after this many rounds is lost: James is spent
-const ADAPT_FIGHT_STEP = 0.5, ADAPT_FIGHT_MAX = 2;
+const ADAPT_FIGHT_STEP = 0.5, ADAPT_FIGHT_MAX = FOE_MEMORY_MAX; // v0.11.115 (MB1, CC): one cap, shared with the memory
 const bandOf = (ratio) => (ratio >= 2 ? 'double' : ratio >= 1 ? 'full' : ratio >= 0.5 ? 'glance' : 'miss');
 
 /** A no-dice round (v0.9.3): check ÷ DC in bands. Hits: ≥ 2 double, ≥ 1 full, ≥ 0.5 a glancing blow (half), below a miss.
@@ -977,11 +1016,12 @@ function stepNoDice(g, actionId, targetIdx) {
                 : act.sweep ? [target, ...living.filter((e) => e !== target).slice(0, act.sweep - 1)] : [target]; // v0.11.107 (NK1): the flail, the target and one more
             const key = actionId;
             let learned = false;
+            const w0 = weaponMastery(g, key), a0 = fightAdapt(c, key); // v0.11.115 (MA3, W50): counted below, after this round's checks; MB1 (SA): every target at the value the card shows
             for (const tg of targets) {
-                const r = rollCheck(g, act.skill, tg.dc + act.dcMod, (c.adapt[key] || 0) + (act.unarmed ? unarmedMastery(g) : 0)); // v0.11.114 (PA2, UM)
+                const r = rollCheck(g, act.skill, tg.dc + act.dcMod, a0 + (act.unarmed ? unarmedMastery(g) : w0)); // v0.11.114 (PA2, UM); v0.11.115 (MA3: the memory, FX; the move's familiarity, W50)
                 const band = T >= 10 && r.ratio < 1 && act.id !== 'blast' ? 'full' : bandOf(r.ratio); // v0.11.100 (SB1, T): the T10 no-miss is the constructs' (the sung weapons'), not the Qi blast's
                 lines.push(`${act.label}${targets.length > 1 ? ` → ${tg.name}` : ''}: ${checkText(r)} — ${{ double: 'a clean, deep hit', full: 'hit', glance: 'a glancing blow', miss: 'miss' }[band]}`);
-                if ((band === 'glance' || band === 'miss') && !learned && (c.adapt[key] || 0) < ADAPT_FIGHT_MAX) { c.adapt[key] = (c.adapt[key] || 0) + ADAPT_FIGHT_STEP; learned = true; lines.push(`  You read the opening better. (+${ADAPT_FIGHT_STEP} to ${act.label} this fight)`); }
+                if ((band === 'glance' || band === 'miss') && !learned && fightAdapt(c, key) < ADAPT_FIGHT_MAX) { c.adapt[key] = (c.adapt[key] || 0) + ADAPT_FIGHT_STEP; learned = true; lines.push(`  You read the opening better. (+${ADAPT_FIGHT_STEP} to ${act.label} this fight)`); } // v0.11.115 (MA3, FX): not past the cap the memory shares
                 if (band === 'miss') continue;
                 let dmg = dmgRoll(g, actionDmg(g, act)) * (band === 'double' ? 2 : 1);
                 if (band === 'glance') dmg = Math.floor(dmg / 2);
@@ -996,6 +1036,11 @@ function stepNoDice(g, actionId, targetIdx) {
                 sparOut(c, tg, lines); // v0.11.114 (PA2, SF)
                 if (act.stagger && tg.hp > 0 && band !== 'glance') { tg.staggered = true; lines.push(act.unarmed ? `  ${tg.name} hits the dust and takes a moment to work out which way is up.` : `  ${tg.name} staggers.`); } // v0.11.82: the throw's line Fable's
                 if (act.reach && tg.hp > 0 && band !== 'glance') { tg.atBay = true; lines.push(`  ${tg.name} is held at the spear's length.`); }
+            }
+            if (!act.unarmed) { // v0.11.115 (MA3, W50): a round of this move, kept across every Coil
+                const w = g.stats.weapons || (g.stats.weapons = {});
+                w[key] = (w[key] || 0) + 1;
+                if (weaponMastery(g, key) > w0) lines.push(weaponLine(act.label, key, w[key], weaponMastery(g, key)));
             }
         }
     }
@@ -1115,6 +1160,7 @@ function finishRound(g, lines) {
 export function combatYield(g) {
     const c = g.combat;
     if (!c || !c.style) return null;
+    unmeet(g, c.id); // v0.11.115 (MB1, FY): a yielded fight is not a meeting
     g.combat = null;
     advance(g, 1);
     return { lines: [SPAR_TEXT.yielded], done: 'lose', next: c.lose }; // PB1 (LY; review low 2): the fight's own lost scene, never the Coil
@@ -1127,6 +1173,7 @@ export function combatFlee(g) {
     const r = rollCheck(g, 'GU', worst);
     const lines = [`You run: ${checkText(r)} — ${r.success ? 'you get clear' : 'not fast enough'}.`];
     if (r.success) {
+        unmeet(g, c.id); // v0.11.115 (MB1, FY): nor one he got clear of
         const next = c.flee;
         g.combat = null;
         advance(g, 10);
