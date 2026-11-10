@@ -425,6 +425,59 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     setSk(m, 1, 10); m.combat.flailFormed = false; m.combat.enemies[1].hp = 99; m.james.qi = 20; assert(smartAction(m) !== 'flail', 'NK1 smart: below T2, never the flail');
     assert(/<b>Bone flail<\/b> from T2 that hits a second enemy/.test(FAQ.find(([t]) => t === 'Fights')[1]()), 'NK1: the FAQ names the flail (Fable)');
 }
+// v0.11.112 (owner pick FF1, TD): flight in fights: from Foundation, darts or the Qi blast are thrown from the air and foes
+// that don't fly get no attack that round; flyers still do; not in a spar or a brawl; the smart rule throws darts then.
+{
+    const { airStrike, AIR_TEXT, AIR_STRIKE_ACTIONS } = await import('../js/core/game.js');
+    const { readFileSync } = await import('node:fs');
+    const setSk = (g, t, l) => { g.james.skills['Convergence Use'] = { tier: t, level: l, xp: 0 }; g.james.gu = { tier: t, level: l, xp: 0 }; };
+    const ground = (n) => ({ name: n, hp: 99, dc: 1, atk: 50, dmg: 3 }), hawk = (n) => ({ name: n, hp: 99, dc: 1, atk: 50, dmg: 3, flies: true });
+    const toAct1 = (g) => { g.flags.ending = g.flags.ending || 'victory'; g.minutes = Math.max(g.minutes, 7 * 1440 + 6 * 60); return g; }; // AG1: the air is Act 1's
+    const mk = (realm, enemies, extra = {}, act1 = true) => { const g = ensureBars(newGame(95, { closed: true })); if (act1) toAct1(g); setSk(g, 1, 6); g.james.realm = realm; g.james.qi = 40; g.james.hp = jamesHpMax(g);
+        sCombat(g, { id: 'jackals', intro: '', band: 'standard', enemies, win: 'stream', lose: 'stream', ...extra }); g.combat.fieldUsed = true; return g; };
+    assert([...AIR_STRIKE_ACTIONS].join() === 'dart,blast', 'FF1: darts and the Qi blast only');
+    { const g = mk(1, [ground('Wolf'), hawk('Hawk')]); const o = cStep(g, 'dart');
+      assert(o.lines.includes(AIR_TEXT.reach.replace('{foe}', 'Wolf')) && !o.lines.some((l) => /^Wolf attacks/.test(l)) && o.lines.some((l) => /^Hawk attacks/.test(l)), `FF1: at Foundation the ground foe can't reach, the hawk still attacks (${o.lines.join(' | ')})`); }
+    { const g = mk(1, [ground('Wolf')]); const o = cStep(g, 'blast'); assert(o.lines.includes(AIR_TEXT.reach.replace('{foe}', 'Wolf')), 'FF1: the Qi blast too'); }
+    { const g = mk(0, [ground('Wolf')]); const o = cStep(g, 'dart'); assert(o.lines.some((l) => /^Wolf attacks/.test(l)) && !airStrike(g, 'dart'), 'FF1: Mortal: no flight, the foe attacks'); }
+    { const g = mk(1, [ground('Wolf')]); const o = cStep(g, 'blade'); assert(o.lines.some((l) => /^Wolf attacks/.test(l)) && !airStrike(g, 'blade'), 'FF1: the blade is on the ground'); }
+    { const g = mk(1, [ground('Wolf')]); g.james.qi = 0; const o = cStep(g, 'dart'); assert(o.lines.some((l) => /fall back on guarding/.test(l)) && o.lines.some((l) => /^Wolf attacks/.test(l)), 'FF1: no Qi for darts: guard, on the ground'); }
+    { const g = mk(1, [ground('Ya')], { style: 'spar' }); assert(!airStrike(g, 'dart') && !airStrike(g, 'blast'), 'FF1: not in a spar'); }
+    { // AG1, G1: the prologue at Foundation: no air in fights (the walks still fly: canFly)
+      const { canFly, airFights, inAct1 } = await import('../js/core/game.js');
+      const g = mk(1, [ground('Wolf')], {}, false); assert(canFly(g) && !inAct1(g) && !airFights(g) && !airStrike(g, 'dart'), 'AG1: the prologue: flies, but not in fights');
+      const o = cStep(g, 'dart'); assert(o.lines.some((l) => /^Wolf attacks/.test(l)) && !o.lines.some((l) => /can't reach you/.test(l)), 'AG1: the prologue: the wolf still attacks a dart round');
+      assert(smartAction(mk(1, [ground('Wolf'), ground('Wolf')], {}, false)) !== 'dart', 'AG1: the prologue: the smart rule as before'); }
+    { const g = mk(1, [hawk('Hawk')]); assert(!airStrike(g, 'dart'), 'FF1: only flyers standing: nothing to gain'); }
+    { const g = mk(1, [ground('Wolf')]); cStep(g, 'dart'); assert(g.combat.aloft === undefined, 'FF1: the air lasts the round'); const o = cStep(g, 'blade'); assert(o.lines.some((l) => /^Wolf attacks/.test(l)), 'FF1: next round on the ground, it attacks again'); }
+    // the smart rule
+    { const g = mk(1, [ground('Wolf'), ground('Wolf')]); assert(smartAction(g) === 'dart', 'FF1 smart: Foundation, ground foes, darts open and paid → darts');
+      g.james.qi = 0; assert(smartAction(g) !== 'dart', 'FF1 smart: no Qi for darts → the old rule');
+      // AF1, T (review low): the Mortal and hawks-only cases call smartAction and compare with the old rule's pick (the air off)
+      const old = (g) => { const r = g.james.realm; g.james.realm = 0; const a = smartAction(g); g.james.realm = r; return a; };
+      const h = mk(0, [ground('Wolf'), ground('Wolf')]); assert(!airStrike(h, 'dart') && smartAction(h) !== 'dart' && (h.james.realm = 1, smartAction(h) === 'dart'), `FF1 smart: Mortal: the old rule, not darts; the same fight at Foundation: darts`);
+      const k = mk(1, [hawk('Hawk'), hawk('Hawk')]); assert(!airStrike(k, 'dart') && smartAction(k) === old(k) && smartAction(k) !== 'dart', `FF1 smart: hawks only: the old rule (${smartAction(k)})`); }
+    // AF1, T: a spar round at Foundation stays on the ground; the construct isn't spent on a foe that can't reach; a Yuki-lunging foe still lunges
+    { const g = mk(1, [ground('Ya')], { style: 'spar' }); const o = cStep(g, 'blade'); assert(!g.combat?.aloft && o.lines.some((l) => /^Ya attacks/.test(l)), 'AF1: a spar round: no air'); }
+    { const g = mk(1, [{ ...ground('Wolf'), hp: 9999 }, { ...hawk('Hawk'), hp: 9999 }]); setSk(g, 8, 1); g.james.qi = 400; const o = cStep(g, 'blast');
+      assert(o.lines.includes(AIR_TEXT.reach.replace('{foe}', 'Wolf')) && o.lines.some((l) => /^Hawk attacks — your construct steps into the blow/.test(l)), `AF1, S: at T8 the construct waits for the hawk (${o.lines.join(' | ')})`); }
+    { const g = mk(1, [{ ...ground('Jackal'), prefersSmall: true }]); g.combat.round = 3; const o = cStep(g, 'dart');
+      assert(o.lines.some((l) => /^Jackal lunges at Yuki/.test(l)), 'AF1: a foe that goes for Yuki on round 3 still does (James is up, she is not)'); }
+    // AF1, M: an old mid-fight save's hawks and crows get `flies` by name; nothing else does
+    { const { fliesFill } = await import('../js/core/game.js'); const g = { combat: { enemies: [{ name: 'Cinder hawk 2' }, { name: 'Rot-crow 1' }, { name: 'Storm-hawk' }, { name: 'Ash-wolf' }, { name: 'Hawk', flies: false }] } };
+      fliesFill(g); assert(g.combat.enemies.map((e) => e.flies).join() === 'true,true,true,,false', `AF1, M: fliesFill (${g.combat.enemies.map((e) => e.flies).join()})`);
+      assert(fliesFill({}) && fliesFill(null) === null, 'AF1, M: no fight, no change'); }
+    // the data and the texts
+    { const src = ['js/story/act1_blackroot.js', 'js/story/longforest.js', 'js/story/wilds.js'].map((f) => readFileSync(new URL(`../${f}`, import.meta.url), 'utf8')).join('\n');
+      const foes = [...src.matchAll(/name: [`'](?:Cinder hawk|Storm-hawk|Rot-crow)(?: \$\{i\})?[`'][^}]*}/g)].map((m) => m[0]);
+      assert(foes.length === 6 && foes.every((f) => /flies: true/.test(f)), `FF1: the hawks and crows fly (${foes.length})`);
+      assert((src.match(/flies: true/g) || []).length === 6, 'FF1: nothing else flies');
+      const main = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+      assert(/airStrike\(g, id\) \? ` · \$\{AIR_TEXT\.tag\}`/.test(main) && /airStrike\(g, b\.dataset\.act\)\) lines\.push\(AIR_TEXT\.hold\)/.test(main), 'FF1: the card tag and the hold line');
+      assert(AIR_TEXT.reach === "{foe} can't reach you up there." && AIR_TEXT.tag === 'from the air', "FF1: Fable's lines"); }
+    { const { FAQ } = await import('../js/core/faq.js'); const fl = FAQ.find(([t]) => t === 'Flight')[1]();
+      assert(/<b>Fights:<\/b> from Act 1 on, never in the prologue, and only at <b>[^<]+<\/b> or above: in an armed fight, any round James throws <b>Bone darts<\/b> or the <b>Qi blast<\/b> he does it from the air/.test(fl) && !/not in the game yet/.test(fl), "FF1: the FAQ's Fights sentence (Fable)"); }
+}
 // v0.11.110 (owner pick GD1): group d's small items in one push: CV (the fight's cards show the check's own value, hunger
 // counted), FO (the smart rule pays for an unsung flail only while no free formed weapon is out), KN (a formed fragile
 // knife's swings left are free, so the smart rule swings them out), FQ (the FAQ: the blast's difficulty one lower).

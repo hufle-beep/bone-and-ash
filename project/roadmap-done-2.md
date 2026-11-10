@@ -2,6 +2,12 @@
 
 Started in v0.11.88 (owner pick A, 2026-11-09 02:37, D2), so `roadmap-done.md` (part 1) stays readable in one go. Newer than `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.112 (word for word; owner picks FF1, AF1, AG1)
+
+### From section 1, group d (as of v0.11.111; the open remainder stays in `roadmap.md` group d)
+
+- *(new in v0.11.77)* **Mechanics, flight (owner 20:33 and 20:39, F1; the canon in `lore.md`):** from Foundation James and Yuki fly with no limit but realm (speed) and GU (manoeuvrability): shorter walks between places as the realm rises (today a move costs 20 minutes by default, `DEFAULT_MINUTES` in `story.js`, and many choices set their own time; with section 2), escapes and chasing (the hunt's fowl, the run option), maybe flight in fights against foes who can't (no one in Act 1 flies: locals from Golden Core). A balance change: first the list of what it touches, then options with the numbers (the models too). **v0.11.109 (owner picks FL1 22:40, FQ1 22:50, FS1 23:02, MW1 23:15): flown from Foundation, built:** the 62 marked walks (`js/story/walks.js`; −25% / −21% of Act 1's travel at Foundation+) and the seven crossings (no check, Fable's lines; the two sung bridges free); the list, every option and their numbers in the handover (v0.11.109). Not picked: FL2–FL4, FQ2, FS2, FS3, MW2, MW3; F (a sure escape) measured, not built. **Still open (options later):** flight in fights; the sung ladder down the root shaft is not one of the seven (CU DC 4; **kept in v0.11.110, GD1, LD**: a real choice beside the flown climb, 40 min for 6 Qi); a new walk flies only once marked in `walks.js`.
+
 ## Moved in v0.11.111 (word for word; owner pick TR1)
 
 ### The "Last updated" line of v0.11.110

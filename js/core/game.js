@@ -367,6 +367,15 @@ export const wakeDay = (g) => wakeState(g).n;
  *  3.67 → 3.56, Completionist 3.50 → 3.48; the full check 0 drifted. Work cards keep their own times (their walks are work). */
 export const FLY_FROM_REALM = 1, FLY_MIN = 5;
 export const canFly = (g) => (g.james?.realm || 0) >= FLY_FROM_REALM;
+/** v0.11.112 (owner pick FF1, TD): from Foundation, in an armed fight, a round James throws darts or the Qi blast he does it
+ *  from the air: that round foes that don't fly (`flies` on the enemy) get no attack on him. Not in a spar or a brawl. */
+export const AIR_STRIKE_ACTIONS = new Set(['dart', 'blast']);
+export const AIR_TEXT = { reach: "{foe} can't reach you up there.", hold: "Done from the air: foes that don't fly can't reach you this round, so they get no attack on you.", tag: 'from the air' }; // Fable's (rule 10)
+/** v0.11.112 (owner pick AG1, G1): fights from the air only from Act 1 on (a Sitter at Foundation in the prologue won its tribute
+ *  from the air: whole game on Coil 1 16 → 52.7%); walks and crossings fly from Foundation everywhere. */
+export const airFights = (g) => canFly(g) && inAct1(g);
+/** Would this action be done from the air now (for the card and the smart rule): Foundation+, armed, a foe that doesn't fly standing. */
+export const airStrike = (g, actionId) => !!(g.combat && airFights(g) && !g.combat.style && AIR_STRIKE_ACTIONS.has(actionId) && g.combat.enemies.some((e) => e.hp > 0 && !e.flies));
 export const flightMinutes = (g, m) => (canFly(g) ? Math.min(m, Math.max(FLY_MIN, Math.round(m / (1 + g.james.realm)))) : m);
 
 export function advance(g, minutes, { resting = false } = {}) {
@@ -838,6 +847,7 @@ function stepNoDice(g, actionId, targetIdx) {
     const living = c.enemies.filter((e) => e.hp > 0);
     const target = living[Math.min(targetIdx, living.length - 1)];
     let guard = false;
+    c.aloft = false; // v0.11.112 (FF1): set below when this round's darts or blast are thrown from the air
     const formed = (act.keeps === 'blade' && c.bladeFormed) || (act.keeps === 'spear' && c.spearFormed) || (act.keeps === 'flail' && c.flailFormed) || (act.field && c.fieldUsed); // a used field costs nothing (and does nothing)
     const qiNeed = formed ? 0 : actionCost(g, act);
     if (qiNeed && !spendQi(g, qiNeed)) {
@@ -847,6 +857,7 @@ function stepNoDice(g, actionId, targetIdx) {
         if (act.keeps === 'blade' && !c.bladeFormed) { c.bladeFormed = true; lines.push(`White wraithbone slides out of your palm and sets: ${act.label.toLowerCase()}.`); }
         if (act.keeps === 'spear' && !c.spearFormed) { c.spearFormed = true; lines.push('A long white shaft grows out of your fist and keeps growing: a bone spear.'); }
         if (act.keeps === 'flail' && !c.flailFormed) { c.flailFormed = true; lines.push(FLAIL_SUNG); } // v0.11.107 (NK1)
+        if (airFights(g) && !c.style && AIR_STRIKE_ACTIONS.has(actionId)) c.aloft = true; // v0.11.112 (FF1, AG1): paid for, so thrown from the air (Act 1 on)
         if (act.guard) {
             guard = true;
             lines.push('You give ground, watching for the opening.');
@@ -911,8 +922,9 @@ function stepNoDice(g, actionId, targetIdx) {
             if (!dodge) g.yuki.hp = Math.max(1, g.yuki.hp - hitDamage(e.dmg, e.realm, g.yuki.realm, yukiDr(g)));
             continue;
         }
-        if (shield) { shield = false; lines.push(`${e.name} attacks — your construct steps into the blow.`); continue; }
+        if (shield && !(c.aloft && !e.flies)) { shield = false; lines.push(`${e.name} attacks — your construct steps into the blow.`); continue; } // v0.11.112 (AF1, S): not spent on a foe that can't reach
         if (c.field > 0) { const th = fieldDamage(g); e.hp -= th; lines.push(`${e.name} comes through the spikes: ${th}.`); if (e.hp <= 0) continue; }
+        if (c.aloft && !e.flies) { lines.push(AIR_TEXT.reach.replace('{foe}', e.name)); continue; } // v0.11.112 (FF1)
         const r = rollCheck(g, 'GU', e.atk, guard ? guardBonus(g) : 0);
         if (r.ratio >= 1) { lines.push(`${e.name} attacks: you defend (${checkText(r)}) — avoided.`); continue; }
         let dmg = hitDamage(e.dmg, e.realm, g.james.realm, jamesDr(g));
@@ -930,6 +942,7 @@ function stepNoDice(g, actionId, targetIdx) {
     }
     if (c.field > 0) c.field--;
     delete c.qshieldHp; // v0.11.95: the shield lasts the round
+    delete c.aloft; // v0.11.112 (FF1): so does the air
     return lines;
 }
 
@@ -1028,7 +1041,12 @@ export function migrate(g) {
     if (g.v === undefined) g.v = 1;
     if (g.v > SAVE_VERSION) throw new SaveError('tooNew', `This save is from a newer version of the game (state ${g.v}; this version reads up to ${SAVE_VERSION}).`);
     while (g.v < SAVE_VERSION) { const step = MIGRATIONS[g.v]; if (!step) throw new SaveError('notSave', `No migration from state ${g.v}.`); step(g); g.v += 1; }
-    return queueDrop(gaoFill(seenFill(oneCount(g))));
+    return fliesFill(queueDrop(gaoFill(seenFill(oneCount(g)))));
+}
+/** v0.11.112 (owner pick AF1, M; Fable's FF1 review, low 1): a fight saved before flight in fights has no `flies` on its hawks and crows; they get it by name. Fills only. */
+export function fliesFill(g) {
+    for (const e of g?.combat?.enemies || []) if (e && e.flies === undefined && /hawk|crow/i.test(e.name || '')) e.flies = true;
+    return g;
 }
 /** v0.11.64 (F): no queue any more: a saved queue is emptied (nothing in it had run) and a half-filled bar (`runPart`) dropped. The field stays, an empty list. */
 export function queueDrop(g) {

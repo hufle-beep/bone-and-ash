@@ -3,7 +3,7 @@
 // every third round, else the blade, else darts", which lost to "the blade every round" (the fight lab: 67.0 against
 // 71.2% of 5,553 fight states); this rule won 71.8% (v0.11.96; with v0.11.97's reserve 73.1% of 6,242; with v0.11.98's
 // no shield on the fragile knife 73.2% of 6,259, against 72.9% on the same states). Tool code only: no game file imports it.
-import { COMBAT_ACTIONS, actionCost, jamesHpMax } from '../../js/core/game.js';
+import { COMBAT_ACTIONS, actionCost, jamesHpMax, airStrike } from '../../js/core/game.js';
 import { actionOpen, fragileKnife, fightStyle } from '../../js/core/forms.js';
 
 /** The share of James's max HP at or under which the bot raises the Qi shield (S). */
@@ -38,6 +38,10 @@ export function attackReserve(g) {
 export function smartAction(g, t = 0) { // eslint-disable-line no-unused-vars
     const c = g.combat, qi = g.james.qi;
     if (fightStyle(g) === 'unarmed') return 'strike';
+    // v0.11.112 (owner pick FF1, TD): from Foundation, darts from the air while a foe that doesn't fly stands (it can't reach him that round).
+    // AF1, R (Fable's review, medium 1; kept as picked): below T3 darts lose to armour, so a raw-stat bench case (two root-lurkers, dr 1, T1 L6)
+    // loses; in the bots' own Foundation+ fights 0 of 3,791 wins turn into losses (275 losses into wins).
+    if (airStrike(g, 'dart') && actionOpen(g, 'dart') && qi >= cost(g, 'dart')) return 'dart';
     const living = c.enemies.filter((e) => e.hp > 0);
     const atk = attackReserve(g); // v0.11.97 (RQ1): the field and the shield only when an attack can still be paid after them
     if (actionOpen(g, 'spikes') && !c.fieldUsed && qi >= 6 && qi >= cost(g, 'spikes') + atk) return 'spikes';

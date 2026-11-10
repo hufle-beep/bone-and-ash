@@ -20,7 +20,7 @@ export const nightNext = (g) => (g.flags.leave_forest || (g.flags.forest_day || 
 const nightFight = (kind) => (g) => {
     const s = forestScale(g);
     const base = {
-        crows: { intro: 'Three rot-crows drop out of the dark in a stink of old meat, straight for your food — and your eyes.', enemies: [1, 2, 3].map((i) => ({ name: `Rot-crow ${i}`, hp: 3, dc: 3, atk: 4, dmg: 2, prefersSmall: true })) },
+        crows: { intro: 'Three rot-crows drop out of the dark in a stink of old meat, straight for your food — and your eyes.', enemies: [1, 2, 3].map((i) => ({ name: `Rot-crow ${i}`, hp: 3, dc: 3, atk: 4, dmg: 2, prefersSmall: true, flies: true })) },
         rats: { intro: 'Two mire-rats the size of dogs come up out of the stream, dripping, teeth first.', enemies: [{ name: 'Mire-rat', hp: 5, dc: 3, atk: 4, dmg: 3, prefersSmall: true }, { name: 'Mire-rat (scarred)', hp: 5, dc: 3, atk: 4, dmg: 3, prefersSmall: true }] },
         lizard: { intro: 'The thornback lifts the ridge of spines along its back with a sound like a drawn sword.', enemies: [{ name: 'Thornback lizard', hp: 9, dc: 4, atk: 5, dmg: 4, dr: 1 }] },
     }[kind];
