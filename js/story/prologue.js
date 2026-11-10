@@ -6,7 +6,7 @@
  */
 import { addItem, hasItem, eat, bumpRel, sleepUntil, advance, clockParts, breakthrough, realmName, nightTo, nightRest } from '../core/game.js';
 import { NO_DICE_TUNE } from './nodice_tune.js';
-import { setNoDiceTune } from '../core/game.js';
+import { setNoDiceTune, yukiFightSkill } from '../core/game.js'; // v0.11.118 (YK1 review, SB)
 setNoDiceTune(NO_DICE_TUNE);
 import { forestScale, villageScale, grow, NEW_ITEMS } from './common.js';
 import './power.js';
@@ -253,7 +253,7 @@ Fungus. Finally, something you actually have a doctorate in.`,
 Yuki is flat to the ground, tail tip twitching. Through the bond you get a single, crystalline thought: *mine.*`,
         choices: [
             { text: 'A bone dart, thrown from cover. Clean and quick.', qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 3 }, time: 10, do: (g) => { addItem(g, 'hare_raw', 2); return ['+2 Glassback hare (dressed). Yuki pretends she let you have it.']; }, to: 'stream', fail: 'hunt_miss' },
-            { text: 'Let Yuki drive it toward you, then grab.', check: { skill: 'GU', dc: 4, bonus: (g) => (g.yuki.fight.level >= 2 ? 1 : 0) }, time: 20, do: (g) => { addItem(g, 'hare_raw', 2); bumpRel(g, 'Yuki', 2, 0); return ['+2 Glassback hare (dressed). Teamwork. Disgusting, bloody teamwork.']; }, to: 'stream', fail: 'hunt_miss' },
+            { text: 'Let Yuki drive it toward you, then grab.', check: { skill: 'GU', dc: 4, bonus: (g) => (yukiFightSkill(g).level >= 2 ? 1 : 0) }, time: 20, do: (g) => { addItem(g, 'hare_raw', 2); bumpRel(g, 'Yuki', 2, 0); return ['+2 Glassback hare (dressed). Teamwork. Disgusting, bloody teamwork.']; }, to: 'stream', fail: 'hunt_miss' },
             { text: 'Leave it. Glass armour sounds like a learning experience you don\'t need.', to: 'stream' },
         ],
     },

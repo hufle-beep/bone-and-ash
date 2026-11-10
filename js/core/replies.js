@@ -38,6 +38,7 @@ const GAIN_BITS = [
     /— (success|failure|failed|partly|done|a double haul)\b/, // check results in words
     /×\d/, // a multiplier line (×1.5 and the like)
     /^Yuki: (cat|great root-kin|human) form\b/, // her form's note
+    /^Yuki Fight held\b/, // v0.11.118 (YK1 review, HG): her Fight held at James's GU
     /^\+ ?[A-Z']/, // an item without a count: "+Ya's wolf tooth.", "+ The watcher's ledger: …"
     /^The calendar starts again/, /^You stay until the Day \d+ dawn/, /few hours of sleep/, // the clock
     /\btakes \d+/, // fight damage

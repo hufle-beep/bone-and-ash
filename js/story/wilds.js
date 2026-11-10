@@ -4,7 +4,7 @@
  */
 import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, clockParts, d6, awardYukiFightXp, awardXp, jamesHpMax, jamesQiMax, nightTo, nightRest } from '../core/game.js';
 import { condensationSatGain } from '../core/formulas.js';
-import { sitGain } from '../core/game.js';
+import { sitGain, yukiFightSkill } from '../core/game.js'; // v0.11.118 (YK1 review, SB)
 import { set, day, hour, daily, markDaily, forestScale, grow, eatBest, pantry, foodCount } from './common.js';
 
 const P = 'Blackroot Wilds';
@@ -193,7 +193,7 @@ They've followed you.`,
         text: `Yuki is already low in the grass, tail tip ticking like a metronome. *Choose,* says the bond. *Quickly. I am starving. I have been starving since birth.*`,
         choices: [
             { text: 'Glassback hare. A dart from cover.', show: daily('hare'), qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 3 }, time: 50, do: (g) => { markDaily(g, 'hare'); addItem(g, 'hare_raw', 2); return ['+2 Glassback hare.']; }, failDo: (g) => { markDaily(g, 'hare'); return ['Rainbows, then nothing. Gone.']; }, to: 'wild_hunt' },
-            { text: 'Mire fowl. They fly badly but they fly — a dart on the rise.', show: daily('fowl'), qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 4, bonus: (g) => (g.yuki.fight.level >= 2 ? 1 : 0) }, time: 60, do: (g) => { markDaily(g, 'fowl'); addItem(g, 'fowl_raw', 1); return ['+1 Mire fowl.']; }, failDo: (g) => { markDaily(g, 'fowl'); return ['It flaps off honking what sounds like insults.']; }, to: 'wild_hunt' },
+            { text: 'Mire fowl. They fly badly but they fly — a dart on the rise.', show: daily('fowl'), qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 4, bonus: (g) => (yukiFightSkill(g).level >= 2 ? 1 : 0) }, time: 60, do: (g) => { markDaily(g, 'fowl'); addItem(g, 'fowl_raw', 1); return ['+1 Mire fowl.']; }, failDo: (g) => { markDaily(g, 'fowl'); return ['It flaps off honking what sounds like insults.']; }, to: 'wild_hunt' },
             { text: 'Stone-shell crab in the shallows. A needle into the joint of the shell.', show: daily('crab'), qi: 4, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 3 }, time: 40, do: (g) => { markDaily(g, 'crab'); addItem(g, 'crab_meat', 2); return ['+2 Stone-shell crab meat.']; }, failDo: (g) => { markDaily(g, 'crab'); g.james.hp -= 2; return ['It pinches back. −2 HP.']; }, to: 'wild_hunt' },
             { text: 'Let Yuki hunt on her own and just watch.', show: daily('yukihunt'), time: 60, do: (g) => { markDaily(g, 'yukihunt'); const got = d6(g) >= 4; if (got) addItem(g, 'hare_raw', 1); return [got ? 'She comes back with a hare and a look of mild contempt. +1 Glassback hare.' : 'She comes back with nothing, and pretends she wasn\'t trying.', ...awardYukiFightXp(g, 'standard')]; }, to: 'wild_hunt' },
             { text: 'Back to the stream.', to: 'wilds' },

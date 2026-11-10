@@ -176,6 +176,13 @@ export const realmName = (i) => realmStepLabel(i);
 
 /* ---------------- the save's random numbers ---------------- */
 
+/** v0.11.118 (owner pick YK1, D8): a d8 from the same stream as d6 (Yuki's haul on her job). */
+export function d8(g) {
+    let x = g.rng || 1;
+    x ^= x << 13; x >>>= 0; x ^= x >>> 17; x ^= x << 5; x >>>= 0;
+    g.rng = x;
+    return (x % 8) + 1;
+}
 /** Deterministic d6 from the save's own seed (a reload does not reroll). Since v0.11.45 no check or fight rolls it (no dice
  *  anywhere); the story still uses it for random events (night visitors, the far trail, Yuki's lone hunt…). */
 export function d6(g) {
@@ -296,10 +303,46 @@ export function awardFightXp(g, style, band = 'standard') {
     if (style !== 'unarmed') return awardXp(g, 'Convergence Use', band);
     return awardXp(g, 'GU', band, { poolTier: getSkill(g, actingName(g, 'Convergence Use')).tier });
 }
+/**
+ * v0.11.118 (owner pick YK1, CG): Yuki's Fight never passes James's GU. While it is at his GU or above it learns nothing
+ * (from her hauls, fights and story beats alike); an award that would carry her past it stops at his rank (the rest is lost).
+ * FE: in a fight she strikes and dodges with the lower of the two (`yukiFightSkill`), so a save from before YK1 with her
+ * already above him fights at his level at once; the saved number is not changed.
+ */
+const rankOf = (n) => 10 * ((n?.tier || 1) - 1) + (n?.level || 1);
+export const yukiHeld = (g) => rankOf(g.yuki.fight) >= rankOf(g.james.gu);
+export const yukiAbove = (g) => rankOf(g.yuki.fight) > rankOf(g.james.gu); // a save from before YK1 (also a Coil snapshot: coil.js, SN)
+export const yukiFightSkill = (g) => (yukiAbove(g) ? g.james.gu : g.yuki.fight);
+export const YUKI_HELD_TEXT = { // Fable's texts (owner 2026-11-10 20:23, the MAINs)
+    held: 'Yuki Fight held at James\'s GU (T{t} L{l})',
+    reach: 'Yuki Fight +{xp} → T{t} L{l}, level with James\'s GU (held)',
+    tab: 'level with James\'s GU: she waits for him to catch up',
+    above: 'above James\'s GU: in a fight she uses his, T{t} L{l}',
+};
+/** The Yuki tab's note on her Fight (YK1): level with his GU, above it (a save from before YK1), or nothing (both at T1 L1). */
+export const yukiHeldNote = (g) => {
+    const y = rankOf(g.yuki.fight), j = rankOf(g.james.gu);
+    if (y === 1 && j === 1) return ''; // TN (the review's low 8): not on a new game, where both start at T1 L1
+    return y > j ? YUKI_HELD_TEXT.above.replace('{t}', g.james.gu.tier).replace('{l}', g.james.gu.level) : y === j ? YUKI_HELD_TEXT.tab : '';
+};
+/** The XP that takes skill `n` from where it is to `rank` exactly (0 when it is there or above). */
+const xpToRank = (n, rank) => {
+    const c = { tier: n.tier, level: n.level, xp: n.xp || 0 };
+    let k = 0;
+    while (rankOf(c) < rank) { k += xpToNext(c) - c.xp; c.xp = 0; if (c.level < 10) c.level += 1; else { c.tier += 1; c.level = 1; } }
+    return k;
+};
 export function awardYukiFightXp(g, band = 'standard') {
-    const pool = Math.floor((XP_BANDS[band] ?? 30) * g.yuki.fight.tier * coilMult(g) * XP_RATE); // v0.11.85: the XP rate
-    const ups = addXp(g.yuki.fight, pool);
-    return [atSkillCap(g.yuki.fight) && !ups.length ? 'Yuki Fight at T10 L10 (cap)' : `Yuki Fight +${pool}${ups.length ? ` → ${ups.at(-1)}` : ''}`];
+    const y = g.yuki.fight, gu = g.james.gu;
+    if (yukiHeld(g)) return [YUKI_HELD_TEXT.held.replace('{t}', gu.tier).replace('{l}', gu.level)]; // at T10 L10 too (the old "(cap)" line can't happen: CP)
+    const pool = Math.floor((XP_BANDS[band] ?? 30) * y.tier * coilMult(g) * XP_RATE); // v0.11.85: the XP rate
+    const room = xpToRank(y, rankOf(gu));
+    if (pool >= room) { // CG: it stops at his rank; RX (the review's low 6): the line shows the XP she kept, not the whole pool
+        y.tier = gu.tier; y.level = gu.level; y.xp = 0;
+        return [YUKI_HELD_TEXT.reach.replace('{xp}', room).replace('{t}', gu.tier).replace('{l}', gu.level)];
+    }
+    const ups = addXp(y, pool);
+    return [`Yuki Fight +${pool}${ups.length ? ` → ${ups.at(-1)}` : ''}`];
 }
 
 /* No dice (v0.9.3; the only rules since v0.11.45, E step 2, when the dice code went): check ÷ DC decides; DCs move down by
@@ -1088,7 +1131,7 @@ function stepNoDice(g, actionId, targetIdx) {
     const yt = c.enemies.find((e) => e.hp > 0);
     if (yt && g.yuki.hp > 0 && !c.yukiOut) { // v0.11.82 (Y1): she watches a spar or a brawl unless human
         const form = YUKI_FORMS[yukiForm(g)];
-        const yv = Math.round((skillCheck(g.yuki.fight) + form.hit + (c.adapt.yuki || 0)) * 10) / 10;
+        const yv = Math.round((skillCheck(yukiFightSkill(g)) + form.hit + (c.adapt.yuki || 0)) * 10) / 10;
         const d = noDiceDc(yt.dc);
         const band = bandOf(yv / d);
         const verb = { cat: ['claws find a mark', 'a hiss and a swipe at air'], tiger: ['a paw the size of a shovel lands', 'jaws close on air'], human: ['a white blur and a strike', 'a sidestep, nothing more'] }[yukiForm(g)];
@@ -1108,7 +1151,7 @@ function stepNoDice(g, actionId, targetIdx) {
         if (e.atBay) { e.atBay = false; lines.push(`${e.name} can't get past the spear.`); continue; }
         if (e.prefersSmall && g.yuki.hp > 0 && c.round % 3 === 0) { // every third round it goes for the small one
             const covered = guard && !c.style; // v0.11.113 (DA1, TY): the lunge is shown a round early, so any guard covers her (v0.11.4: the buckler only)
-            const dodge = covered || skillCheck(g.yuki.fight) + 1 >= noDiceDc(e.atk);
+            const dodge = covered || skillCheck(yukiFightSkill(g)) + 1 >= noDiceDc(e.atk); // v0.11.118 (YK1, FE)
             lines.push(covered ? foeFill(TELL_TEXT.covered, e.name) : `${e.name} lunges at Yuki — ${dodge ? 'she is not there' : 'it connects'}.`);
             if (!dodge) g.yuki.hp = Math.max(1, g.yuki.hp - hitDamage(e.dmg, e.realm, g.yuki.realm, yukiDr(g)));
             continue;

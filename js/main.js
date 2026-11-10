@@ -2,11 +2,11 @@
 import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel, fragileKnife, knifeSwings } from './core/forms.js';
 import { coilMult, coilMultNext, wakeDay, fmtMult, clockParts } from './core/game.js';
 import {
-    newGame, ensureBars, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, skillCheck, checkValue, xpToNext, clockLabel, clockLabelG, realmName, yukiForm,
+    newGame, ensureBars, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, skillCheck, checkValue, xpToNext, clockLabel, clockLabelG, realmName, yukiForm, yukiHeldNote,
     startCombat, combatStep, combatFlee, combatYield, waitLeft, songPays, sungKey, THREAT_TEXT, SONG_TEXT, SONG_COST, SONG_MAX, SAY_TEXT, SPAR_TEXT, postureNow, unarmedMastery, fightAdapt, weaponMastery, COMBAT_ACTIONS, noDiceDc, airStrike, AIR_TEXT, FOE_TRAITS, foeTraits, TELL_TEXT, bigBlowNow, lungeNow, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage, qiShield,
 } from './core/game.js';
 import { sceneView, choose, goTo, gives, choiceQi, threatOf } from './core/story.js'; // v0.11.109 (FQ1): choiceQi
-import { showPicked, isTaskHub, isQueueScreen, isTaskChoice, taskCards, taskLabel, taskMinutes, taskOutcome, dryOutcome, outcomeOf, runTask, FAM, yukiLane, setYuki, nextStep } from './core/tasks.js';
+import { showPicked, isTaskHub, isQueueScreen, isTaskChoice, taskCards, taskLabel, taskMinutes, taskOutcome, dryOutcome, outcomeOf, runTask, FAM, yukiLane, setYuki, nextStep, YUKI_LANE_TEXT } from './core/tasks.js';
 import { SCENES, ITEMS } from './story/prologue.js';
 import { TASK_HUBS } from './story/task_hubs.js';
 import { landParts } from './core/replies.js'; // v0.11.68 (A1 + B2 + C1)
@@ -112,7 +112,8 @@ function summarize(lines) {
         for (const m of l.matchAll(/(?:^|[ .])(\+\d+ [A-Z][^.,]*?)(?=[.,]|$)/g)) if (!/XP|Qi Use|Fight/.test(m[1])) items.push(m[1]);
     }
     bits.push(...[...new Set(items)].slice(0, 3));
-    for (const l of lines) { const up = /^(.+?) \+\d+(?: XP)? → (T\d+ L\d+)$/.exec(l); if (up) bits.push(`${up[1].replace(' (bond)', '')} → ${up[2]}`); }
+    // v0.11.118 (YK1 review, RS): also her "level with James's GU" line, which has a tail after the rank
+    for (const l of lines) { const up = /^(.+?) \+\d+(?: XP)? → (T\d+ L\d+)(?:, .*)?$/.exec(l); if (up) bits.push(`${up[1].replace(' (bond)', '')} → ${up[2]}`); }
     let hp = 0;
     for (const l of lines) for (const m of l.matchAll(/−(\d+(?:\.\d+)?) HP/g)) hp += Number(m[1]);
     if (hp) bits.push(`−${Math.round(hp * 10) / 10} HP`);
@@ -275,7 +276,7 @@ function renderCardScreen() {
         const yl = yukiLane(g);
         // v0.11.64 (D1): her job counts James's game time (06:00–19:00); the screen says how much is left, no bar
         const yLeft = yl ? Math.max(1, yl.len - yl.progress) : 0;
-        const yHtml = yl ? `<div class="yuki-lane"><div><b>Yuki:</b> ${esc(yl.label)} <span class="note">${showChecks ? `Fight ${yl.check} / DC ${yl.dc} · ` : ''}${yl.on ? `next haul after ${durLabel(yLeft)} of your time (06:00–19:00)` : `${durLabel(yl.len)} a haul`} · ${FAM[yl.tier].name}</span></div><button class="btn${yl.on ? ' primary' : ''}" data-yuki="1">${yl.on ? 'On' : 'Off'}</button></div>` : '';
+        const yHtml = yl ? `<div class="yuki-lane"><div><b>Yuki:</b> ${esc(yl.label)} <span class="note">${showChecks ? `${YUKI_LANE_TEXT.roll} · ` : ''}${yl.on ? `next haul after ${durLabel(yLeft)} of your time (06:00–19:00)` : `${durLabel(yl.len)} a haul`} · ${FAM[yl.tier].name}</span></div><button class="btn${yl.on ? ' primary' : ''}" data-yuki="1">${yl.on ? 'On' : 'Off'}</button></div>` : '';
         const ns = store.get(NONEXT_KEY) === '1' ? '' : nextStep(g, SCENES); // v0.11.72 (N1): Selene's next-step line, ✕ hides it for good
         hubTop = `${ns ? `<div class="nstep"><b>Next step</b> <span>${esc(ns)}</span><button class="nstep-x" data-nonext="1" aria-label="Hide the next-step line">✕</button></div>` : ''}${yHtml}`;
         const work = workGroups(g.scene);
@@ -625,7 +626,7 @@ ${g.coil ? `<h2>The Coil</h2><p class="note">${g.coil.act === 1 ? 'Act 1, ' : ''
 <h2>Yuki</h2>
 <p class="note">His root-kin: a small white cat, born the same day, meridians mirroring his. Mortal Vessel.</p>
 <div class="row"><span>HP · Qi</span><span>${n1(g.yuki.hp)} / ${yukiHpMax(g)} · ${n1(g.yuki.qi)} / ${n1(yukiQiMax(g))}</span></div>
-${skillRow('Fight', g.yuki.fight)}${skillRow('Qi Use', g.yuki.qiUse, 'shares every award through the bond')}
+${skillRow('Fight', g.yuki.fight, yukiHeldNote(g))}${skillRow('Qi Use', g.yuki.qiUse, 'shares every award through the bond')}
 ${rel ? `<h2>People</h2>${rel}` : ''}
 <h2>The rules</h2>
 <p class="note">How checks, XP, regeneration and hunger work, and more as James gets further: the FAQ.</p><div class="btns"><button class="btn" data-tab-go="faq">Open the FAQ</button></div>

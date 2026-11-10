@@ -33,6 +33,8 @@ import { smartAction, attackReserve } from './lib/smartfight.mjs'; // v0.11.96 (
 import { GAMES, FULL, SHARD, WORKERS, SEED, SENSIBLE, REPORT, STATS_OUT, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
 import { seen as touched, track, noteView, noteCards, mergeSeen, seenOut as touchedOut } from './lib/seen.mjs'; // v0.11.22: for tools/leftovers.mjs
 let pass = 0, fail = 0;
+/** v0.11.118 (YK1, D8): a save stream whose next d8 is `roll` (the same xorshift step as d6 and d8). */
+const rngFor = (roll) => { for (let s = 1; ; s++) { let x = s; x ^= x << 13; x >>>= 0; x ^= x >>> 17; x ^= x << 5; x >>>= 0; if ((x % 8) + 1 === roll) return s; } };
 /** v0.11.116 (owner pick WA2, CDB): the older fight tests swing one move every round, as the game allowed before the rhythm; their
  *  helper clears the move's wait so they test what they tested. The WA2 block uses the real step (cStep0). */
 const cStep = (g, a, t) => { if (g.combat) delete g.combat.wait; return cStep0(g, a, t); };
@@ -298,7 +300,9 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     const base = xp1(g);
     endCoil(g, 'collapse'); rewind(g); endCoil(g, 'beast'); rewind(g); // v0.11.86 (#53): a death adds to the bonus (a bite by choice doesn't)
     assert(g.coil.n === 3 && coilMult(g) === 1.5 && xp1(g) === Math.floor(base * 1.5), `Coil 3: ×1.5 XP (${base} → ${xp1(g)})`);
-    const y0 = g.yuki.fight.xp; awardYukiFightXp(g, 'standard'); assert(g.yuki.fight.xp - y0 === 45 || g.yuki.fight.level > 1, `Yuki's XP ×1.5 too (${g.yuki.fight.xp - y0})`);
+    // v0.11.118 (YK1, CG): James's GU above her, so she learns; TA (the review's medium 2): the assert on its own line again
+    g.james.gu.tier = 5; const y0 = g.yuki.fight.xp; awardYukiFightXp(g, 'standard');
+    assert(g.yuki.fight.xp - y0 === 45 || g.yuki.fight.level > 1, `Yuki's XP ×1.5 too (${g.yuki.fight.xp - y0})`);
     // v0.11.41 (D2-a): the meridian DC ÷ the Coil bonus was Story Mode's checked sessions (gone)
     g.james.qi = 40; const s0 = g.james.saturation; const r = condense(g); const one = ensureBars(newGame(93, { closed: true })); one.james.qi = 40; const r1 = condense(one);
     assert(r.ok && Math.abs((g.james.saturation - s0) - r1.gain) < 0.2, `v0.11.15: a sit gives the same Saturation on Coil 3 (${r1.gain} → ${g.james.saturation - s0})`);
@@ -929,6 +933,93 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
       g.combat.wait = {}; g.combat.enemies[0].flustered = 1; assert(smartAction(g) !== 'needle', 'WB1, RT: not on a stunned foe');
       const h = mk([post({ atk: 5, dmg: 6 })]); h.combat.enemies[0].heavy = true; h.combat.round = 3; h.combat.spearFormed = true; h.combat.wait = { spear: 4 }; assert(smartAction(h) === 'guard', 'WB1, RT: a big blow, the spear waiting, no song: guard');
       const m = mk([post({ atk: 5, moods: true })]); m.combat.round = 2; m.combat.song = 2; assert(smartAction(m) === 'guard', 'WB1, RT: a hungry round: guard, not the needle'); }
+}
+// v0.11.118 (owner pick YK1): Yuki held at James's GU. CG: no Fight XP at or above it, from any source, and an award stops
+// at it; FE: in a fight she strikes and dodges with the lower of the two (a save from before YK1 fights at his level, its
+// number untouched); D8: her hauls by a d8 from the save's stream (1–2 nothing, 3–4 half, 5–6 the job's, 7–8 double), not her Fight.
+{
+    const G = await import('../js/core/game.js');
+    const { yukiHeld, yukiFightSkill, yukiHeldNote, YUKI_HELD_TEXT, d8, d6, skillCheck } = G;
+    const { yukiHaul, YUKI_D8, YUKI_LANE_TEXT } = await import('../js/core/tasks.js');
+    const mk = (yt, yl, gt, gl, seed = 1180) => { const g = ensureBars(newGame(seed, { closed: true })); g.yuki.fight = { tier: yt, level: yl, xp: 0 }; g.james.gu = { tier: gt, level: gl, xp: 0 }; return g; };
+    const rk = (n) => 10 * (n.tier - 1) + n.level;
+    const HELD22 = YUKI_HELD_TEXT.held.replace('{t}', 2).replace('{l}', 2);
+    // CG: level with him, nothing; under him, the usual award; an award that would carry her past him stops at his rank
+    { const g = mk(2, 3, 2, 3), out = awardYukiFightXp(g, 'major');
+      assert(yukiHeld(g) && g.yuki.fight.tier === 2 && g.yuki.fight.level === 3 && g.yuki.fight.xp === 0 && out.length === 1 && out[0] === YUKI_HELD_TEXT.held.replace('{t}', 2).replace('{l}', 3) && out[0] === "Yuki Fight held at James's GU (T2 L3)", `YK1, CG: level with his GU: no XP, the held line (${out[0]})`); }
+    { const g = mk(3, 4, 2, 1), out = awardYukiFightXp(g, 'major');
+      assert(rk(g.yuki.fight) === 24 && g.yuki.fight.xp === 0 && out[0] === YUKI_HELD_TEXT.held.replace('{t}', 2).replace('{l}', 1), `YK1, CG: above him (an old save): no XP either (${out[0]})`); }
+    { const g = mk(1, 1, 3, 1), out = awardYukiFightXp(g, 'standard');
+      assert(!yukiHeld(g) && out[0] === `Yuki Fight +${Math.floor(30 * 0.6)}` && g.yuki.fight.xp === 18, `YK1, CG: under him, the award as before (${out[0]})`); }
+    { const free = mk(1, 8, 9, 1); free.coil.n = 21; awardYukiFightXp(free, 'major'); // the same award with room: past T1 L9
+      const g = mk(1, 8, 1, 9); g.coil.n = 21; g.yuki.fight.xp = 3; const room = G.xpToNext(g.yuki.fight) - 3; const out = awardYukiFightXp(g, 'major'), pool = Math.floor(120 * coilMult(g) * 0.6);
+      assert(pool > room && rk(free.yuki.fight) > 9 && g.yuki.fight.tier === 1 && g.yuki.fight.level === 9 && g.yuki.fight.xp === 0 && out[0] === `Yuki Fight +${room} → T1 L9, level with James's GU (held)`, // RX: the XP she kept
+ `YK1, CG: an award past his rank stops at it (free ${rk(free.yuki.fight)}; ${out[0]})`); }
+    // CG from every source: the lane's haul, a won fight, a story beat
+    { const g = mk(2, 2, 2, 2, 1181); g.scene = 'wilds'; g.minutes = 1440 + 9 * 60; Object.assign(g.flags, { long: true, forest_day: 2 }); g.james.satiety = 90; g.james.qi = 30;
+      g.rng = rngFor(5); setYuki(g, true); g.tasks.yuki.progress = yukiLane(g).len - 1;
+      const id = taskCards(g, SCENES).find((c) => c.status === 'open' && /^Rest in the shade/.test(c.label))?.id, r = runTask(g, SCENES, id);
+      assert(!!id && r.lines.some((l) => /\+1 Glassback hare/.test(l)) && r.lines.includes(HELD22) && rk(g.yuki.fight) === 12 && g.yuki.fight.xp === 0, `YK1, CG: the lane's haul at his rank: the hare, no XP (${r.lines.join(' | ').slice(0, 200)})`); }
+    { const g = mk(2, 2, 2, 2, 1182); g.james.skills['Convergence Use'] = { tier: 3, level: 1, xp: 0 }; ensureBars(g); g.james.qi = jamesQiMax(g);
+      startCombat(g, { id: 'test_yk1', intro: 'In.', band: 'standard', enemies: [{ name: 'Rat', hp: 1, dc: 0.5, atk: 0.1, dmg: 0 }], win: 'stream', lose: 'stream' });
+      let o = null; for (let t = 0; t < 20 && g.combat; t++) o = cStep(g, 'blade');
+      assert(o?.done === 'win' && o.lines.includes(HELD22) && rk(g.yuki.fight) === 12 && g.yuki.fight.xp === 0, `YK1, CG: a won fight at his rank: no XP (${(o?.lines || []).slice(-3).join(' | ')})`); }
+    { const g = mk(2, 2, 2, 2, 1183); const ch = SCENES.wild_train.choices.find((c) => /^Footwork/.test(c.text)), out = ch.do(g);
+      assert(out.includes(HELD22) && rk(g.yuki.fight) === 12, `YK1, CG: a story beat at his rank: no XP (${out.join(' | ')})`); }
+    // FE: in a fight she strikes and dodges with the lower of the two; the saved number is not touched
+    { const g = mk(10, 10, 2, 5), h = mk(1, 1, 2, 5);
+      assert(yukiFightSkill(g) === g.james.gu && yukiFightSkill(h) === h.yuki.fight, 'YK1, FE: above him she fights at his GU; under him at her own');
+      g.james.skills['Convergence Use'] = { tier: 2, level: 1, xp: 0 }; ensureBars(g); g.james.qi = jamesQiMax(g);
+      startCombat(g, { id: 'test_yk1b', intro: 'In.', band: 'standard', enemies: [{ name: 'Wall', hp: 999, dc: 30, atk: 0.1, dmg: 0 }], win: 'stream', lose: 'stream' });
+      const o = cStep(g, 'guard'), l = o.lines.find((x) => /^Yuki: Fight /.test(x)) || '';
+      assert(l.startsWith(`Yuki: Fight ${Math.round(skillCheck(g.james.gu) * 10) / 10} / DC`) && g.yuki.fight.tier === 10 && g.yuki.fight.level === 10, `YK1, FE: her strike reads his GU (${l})`); }
+    { const lunge = (yt, gt) => { const g = mk(yt, 1, gt, 1, 1184); g.james.skills['Convergence Use'] = { tier: 2, level: 1, xp: 0 }; ensureBars(g); g.james.qi = jamesQiMax(g); // a lunge at DC 4: T1 misses it, T2 and up don't
+        startCombat(g, { id: 'test_yk1c', intro: 'In.', band: 'standard', enemies: [{ name: 'Hawk', hp: 999, dc: 30, atk: 6, dmg: 1, prefersSmall: true }], win: 'stream', lose: 'stream' });
+        g.combat.round = 3; return cStep(g, 'blade').lines.find((x) => /lunges at Yuki/.test(x)) || ''; };
+      assert(/it connects/.test(lunge(10, 1)) && /it connects/.test(lunge(1, 5)) && /she is not there/.test(lunge(5, 5)), `YK1, FE: her dodge reads the lower too (T10 by a T1 James: ${lunge(10, 1)}; T5 by T5: ${lunge(5, 5)})`); }
+    // the Yuki tab's note
+    assert(yukiHeldNote(mk(3, 1, 3, 1)) === YUKI_HELD_TEXT.tab && yukiHeldNote(mk(9, 9, 2, 5)) === YUKI_HELD_TEXT.above.replace('{t}', 2).replace('{l}', 5) && /T2 L5/.test(yukiHeldNote(mk(9, 9, 2, 5))) && yukiHeldNote(mk(1, 1, 2, 5)) === '', 'YK1: the tab note: level, above (with his rank), or none');
+    // D8: the roll, its stream, the haul's table, and not her Fight
+    { const g = { rng: 1 }, n = [0, 0, 0, 0, 0, 0, 0, 0, 0]; for (let i = 0; i < 8000; i++) n[d8(g)]++;
+      assert(n[0] === 0 && n.slice(1).every((k) => k > 900 && k < 1100), `YK1, D8: a fair d8 (${n.slice(1).join(' ')})`);
+      const a = { rng: 777 }, b = { rng: 777 }; d8(a); d6(b); assert(a.rng === b.rng && a.rng !== 777, 'YK1, D8: one step of the save\'s stream, as d6'); }
+    assert(YUKI_D8.join() === '0,0,0.5,0.5,1,1,2,2' && /1–2 nothing/.test(YUKI_LANE_TEXT.roll) && /7–8 double/.test(YUKI_LANE_TEXT.roll), 'YK1, D8: the table and the lane note');
+    { const one = { n: 1 }, two = { n: 2 }, at = (r, job) => { const g = { rng: rngFor(r) }; return yukiHaul(g, job); };
+      assert([1, 2, 5, 6, 7, 8].map((r) => at(r, one)).join() === '0,0,1,1,2,2' && [1, 2, 3, 4, 5, 6, 7, 8].map((r) => at(r, two)).join() === '0,0,1,1,2,2,4,4', 'YK1, D8: 1–2 nothing, 5–6 the job\'s, 7–8 double; half of a two');
+      const g = { rng: 4242 }; let got = 0, half = 0, halfOne = 0;
+      for (let i = 0; i < 8000; i++) { const s = g.rng; const k = yukiHaul(g, one); got += k; const t = { rng: s }; const r = d8(t); if (r === 3 || r === 4) { half++; halfOne += k; } }
+      assert(Math.abs(got / 8000 - 0.875) < 0.04 && Math.abs(halfOne / half - 0.5) < 0.05, `YK1, D8: a one-item job brings 0.875 a haul, half rolls one in two (${(got / 8000).toFixed(3)}, ${(halfOne / half).toFixed(3)})`); }
+    { const run = (yt) => { const g = mk(yt, 1, 10, 10, 1185); g.scene = 'wilds'; g.minutes = 1440 + 7 * 60; Object.assign(g.flags, { long: true, forest_day: 2 }); g.james.satiety = 90; g.rng = 99; setYuki(g, true);
+        for (let k = 0; k < 6; k++) { const id = taskCards(g, SCENES).find((c) => c.status === 'open' && /^Rest in the shade/.test(c.label))?.id; if (!id) break; runTask(g, SCENES, id); } return g.inventory.hare_raw || 0; };
+      assert(run(1) === run(10), `YK1, D8: her Fight doesn't set the haul (T1 ${run(1)}, T10 ${run(10)})`); }
+    assert(!('dc' in (yukiLane(Object.assign(mk(1, 1, 1, 1), { scene: 'wilds' })) || { dc: 1 })) && !('check' in (yukiLane(Object.assign(mk(1, 1, 1, 1), { scene: 'wilds' })) || {})), 'YK1, D8: the lane shows no Fight / DC');
+    // the review (YR1): HG the held line is a gain (Results), not story prose; RS the Results summary reads the reach line's rank;
+    // CP both at T10 L10: held; TN no tab note on a new game; SN a Coil snapshot above him rewinds her to his rank; SB the story's
+    // +1 for her Fight reads the lower; T a card's dry run matches its real run with her job on
+    { const { splitLine } = await import('../js/core/replies.js');
+      const h = splitLine(YUKI_HELD_TEXT.held.replace('{t}', 2).replace('{l}', 2)), r = splitLine(YUKI_HELD_TEXT.reach.replace('{xp}', 40).replace('{t}', 2).replace('{l}', 2));
+      assert(h.reply === '' && h.gain !== '' && r.reply === '' && r.gain !== '', `YR1, HG: the held and reach lines are gains (${JSON.stringify(h)})`);
+      const src = (await import('node:fs')).readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+      const lit = /const up = (\/\^\(\.\+\?\) .+?\$\/)\.exec\(l\)/.exec(src)?.[1], re = lit ? new RegExp(lit.slice(1, -1)) : null;
+      const m = re?.exec(YUKI_HELD_TEXT.reach.replace('{xp}', 40).replace('{t}', 2).replace('{l}', 3));
+      assert(!!m && m[1] === 'Yuki Fight' && m[2] === 'T2 L3' && re.exec('GU +5 XP → T1 L4')?.[2] === 'T1 L4' && !re.exec('GU +5 XP'), `YR1, RS: the summary's level-up pattern reads the reach line (${lit})`); }
+    { const g = mk(10, 10, 10, 10), out = awardYukiFightXp(g, 'major');
+      assert(out[0] === YUKI_HELD_TEXT.held.replace('{t}', 10).replace('{l}', 10) && rk(g.yuki.fight) === 100, `YR1, CP: both at T10 L10: the held line (${out[0]})`);
+      assert(yukiHeldNote(ensureBars(newGame(1186, { closed: true }))) === '' && yukiHeldNote(mk(1, 2, 1, 2)) === YUKI_HELD_TEXT.tab, 'YR1, TN: no tab note on a new game (both T1 L1); the note once they are level past it'); }
+    { const g = mk(1, 1, 1, 1, 1187); g.coil.snap.yuki.fight = { tier: 5, level: 9, xp: 40 }; g.coil.snap.james.gu = { tier: 4, level: 10, xp: 0 }; // the owner's 11-08 0813 snapshot: +9 ranks
+      rewind(g); const k = mk(1, 1, 1, 1, 1188); k.coil.snap.yuki.fight = { tier: 2, level: 3, xp: 7 }; k.coil.snap.james.gu = { tier: 3, level: 1, xp: 0 }; rewind(k);
+      assert(g.yuki.fight.tier === 4 && g.yuki.fight.level === 10 && g.yuki.fight.xp === 0 && k.yuki.fight.tier === 2 && k.yuki.fight.level === 3 && k.yuki.fight.xp === 7, `YR1, SN: a snapshot above him rewinds her to his rank; one under him as it was (T${g.yuki.fight.tier} L${g.yuki.fight.level})`); }
+    { const bonus = (yt, yl, gt, gl) => SCENES.wild_hunt.choices.find((c) => /^Mire fowl/.test(c.text)).check.bonus(mk(yt, yl, gt, gl));
+      const pb = (yt, yl, gt, gl) => { const c = Object.values(SCENES).flatMap((s) => s.choices || []).find((x) => /^Let Yuki drive it toward you/.test(x.text)); return c.check.bonus(mk(yt, yl, gt, gl)); };
+      assert(bonus(1, 5, 1, 1) === 0 && bonus(1, 5, 1, 3) === 1 && bonus(1, 2, 1, 5) === 1 && pb(1, 5, 1, 1) === 0 && pb(1, 3, 1, 4) === 1, 'YR1, SB: the two story +1s read the lower of her Fight and his GU'); }
+    { const g = mk(2, 2, 3, 1, 1189); g.scene = 'wilds'; g.minutes = 1440 + 7 * 60; Object.assign(g.flags, { long: true, forest_day: 2 }); g.james.satiety = 90; g.rng = 4243; setYuki(g, true); g.tasks.yuki.progress = yukiLane(g).len - 1;
+      const id = taskCards(g, SCENES).find((c) => c.status === 'open' && /^Rest in the shade/.test(c.label))?.id, d = taskOutcome(g, SCENES, id), rng0 = g.rng, m0 = g.minutes;
+      const copy = structuredClone(g); runTask(copy, SCENES, id); runTask(g, SCENES, id); const real = outcomeOf(g, m0);
+      assert(!!id && rng0 === 4243 && JSON.stringify(d) === JSON.stringify(real) && g.rng !== 4243 && g.rng === copy.rng && JSON.stringify(g.inventory) === JSON.stringify(copy.inventory), `YR1, T: with her job on, the card's forecast leaves the save's stream alone, and a copy rolls her d8 as the real run does (${JSON.stringify(d)} vs ${JSON.stringify(real)})`); }
+    // the owner's save from before YK1 (Yuki T10 L10, GU T7 L6): loads with her number kept, and fights at his GU
+    { const { gunzipSync } = await import('node:zlib'); const t = (await import('node:fs')).readFileSync(new URL('../saves/2026-11-08-0813-incremental-a1_end.txt', import.meta.url), 'utf8').trim();
+      const g = deserialize(t.startsWith('BAZ1:') ? gunzipSync(Buffer.from(t.slice(5), 'base64')).toString('utf8') : t);
+      assert(g.yuki.fight.tier === 10 && g.yuki.fight.level === 10 && g.james.gu.tier === 7 && g.james.gu.level === 6 && yukiFightSkill(g) === g.james.gu && deserialize(serialize(g)).yuki.fight.tier === 10, 'YK1: the owner\'s 11-08 save keeps Yuki T10 L10 and fights her at his T7 L6'); }
 }
 // v0.11.117 (owner pick TW1; research.md #62): the threat word. A fight choice is taken on a copy and its fight played with
 // the blade alone (plainFight); the band is the word (Fable's); the screen shows it, the bots never read it.
@@ -2017,7 +2108,7 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     // a fail pays 25% before the rate: floor(30 × 0.25) = 7 → floor(7 × 0.6) = 4, split 2 / 2
     { const g = fresh(3); const cu = g.james.skills['Convergence Use'].xp; awardXp(g, 'Convergence Use', 'standard', { fail: true }); assert(g.james.skills['Convergence Use'].xp - cu === 2, 'D: a fail: 7 × 0.6 = 4, split 2'); }
     // Yuki's fight XP: band × her tier × the Coil bonus × the rate
-    { const g = fresh(4); g.yuki.fight.tier = 2; const out = awardYukiFightXp(g, 'challenging');
+    { const g = fresh(4); g.yuki.fight.tier = 2; g.james.gu.tier = 5; const out = awardYukiFightXp(g, 'challenging'); // YK1: under his GU
       assert(Math.floor(XP_BANDS.challenging * 2 * 0.6) === 72 && /^Yuki Fight \+72\b/.test(out[0]), `D: Yuki's fight XP 60 × 2 × 0.6 = 72 (${out[0]})`); }
     // the routine band still pays nothing
     { const g = fresh(5); assert(awardXp(g, 'Convergence Use', 'routine').length === 0, 'D: routine pays nothing'); }
@@ -2601,7 +2692,7 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     // through the lane: a haul with hares full brings fowl, says so, and no false "+1 Glassback hare"; all full: she eats it, XP still
     const lane = (set) => {
         const g = ensureBars(newGame(7102, { closed: true })); g.scene = 'wilds'; g.minutes = 1440 + 9 * 60; Object.assign(g.flags, { long: true, forest_day: 2 });
-        g.james.satiety = 90; g.james.qi = 30; g.yuki.fight.tier = 3; set(g); setYuki(g, true);
+        g.james.satiety = 90; g.james.qi = 30; g.yuki.fight.tier = 3; g.james.gu.tier = 9; g.rng = rngFor(5); set(g); setYuki(g, true); // v0.11.118 (YK1, D8): a roll of 5, one haul
         const yl = yukiLane(g); g.tasks.yuki.progress = yl.len - 1;
         const id = taskCards(g, SCENES).find((c) => c.status === 'open' && /^Rest in the shade/.test(c.label))?.id; // an hour
         const inv0 = { ...g.inventory }, r = runTask(g, SCENES, id);
@@ -2612,7 +2703,7 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
         assert(!!id && /\+\d Mire fowl/.test(l) && (g.inventory.fowl_raw || 0) > (inv0.fowl_raw || 0) && g.inventory.hare_raw === itemCap('hare_raw') && !lines.some((x) => /\+\d Glassback hare/.test(x)), `Y1: the lane with hares full brings fowl (${l.slice(-60)})`); }
     { const { g, inv0, lines } = lane((g) => FULLK(g, ['hare_raw', 'fowl_raw', 'crab_meat']));
         assert(lines.includes(TASK_HUBS.wilds.yuki.full) && JSON.stringify(g.inventory) === JSON.stringify(inv0) && lines[lines.indexOf(TASK_HUBS.wilds.yuki.full) + 1]?.startsWith('Yuki Fight'), `Y1: everything full: the full line, nothing added, her XP still (${lines.join(' | ').slice(0, 160)})`); }
-    { const { g, inv0, lines } = lane((g) => { g.inventory.hare_raw = itemCap('hare_raw') - 1; g.yuki.fight.tier = 6; });
+    { const { g, inv0, lines } = lane((g) => { g.inventory.hare_raw = itemCap('hare_raw') - 1; g.rng = rngFor(7); }); // YK1 (D8): a 7, double
         const l = lines.find((x) => /\+\d (Glassback hare|Mire fowl)/.test(x)) || '', n = Number(/\+(\d)/.exec(l.slice(l.lastIndexOf('+')))?.[1]);
         assert(g.inventory.hare_raw + (g.inventory.fowl_raw || 0) - inv0.hare_raw - (inv0.fowl_raw || 0) === n && (n === 1 ? /Glassback hare/ : /Mire fowl/).test(l), `R1: one short of the cap, the lane's line says what landed (${l.slice(-40)}; hares ${g.inventory.hare_raw}, fowl ${g.inventory.fowl_raw || 0})`); }
     // the Long Forest's card: tiger venison → hares → fowl; else hares → fowl; hidden only when all three are full

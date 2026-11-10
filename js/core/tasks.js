@@ -9,12 +9,12 @@
  * - door: a choice into a scene with dialogue or a fight; runs through `choose`, the scene opens as a story stop.
  * Intuitive Aptitude: a result below full gives that card +0.5 check next time (up to +2); a quarter of every
  * completion goes to the other cards of its group. Drills give 0.2 to every card on the hub.
- * Yuki's lane: her job on the hub runs on game time while James works (no dice; her Fight check vs the job's DC).
+ * Yuki's lane: her job on the hub runs on game time while James works; since v0.11.118 (YK1, D8) each haul is a d8, not her Fight.
  * The story checks and fights keep the d6 until 3c.
  */
 import { hasForm } from './forms.js';
 import { choose, goTo, choiceOpen, choiceTag, gives, setTimeless, defaultMinutes, movesPlace, wasPicked, isMenuScene, isTimeless, setFamiliar } from './story.js';
-import { itemCap, yukiForm, advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, skillCheck, canBreakThrough, btMinutes, realmName, condense, sitMinutes, useSpeed, USE_N, nightLock, endsLate, sitUseless, jamesQiMax, SATIETY_PER_HOUR, breakAt, coilMult, fmtMult } from './game.js';
+import { d8, itemCap, yukiForm, advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, canBreakThrough, btMinutes, realmName, condense, sitMinutes, useSpeed, USE_N, nightLock, endsLate, sitUseless, jamesQiMax, SATIETY_PER_HOUR, breakAt, coilMult, fmtMult } from './game.js';
 import { CONDENSE_SIT_COST } from './formulas.js';
 import { btTarget, MER_LINES, lineWindow, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
@@ -337,6 +337,18 @@ export function yukiCatch(g, job, n = 1) {
     if (roomFor(g, job.item, n)) return { item: job.item, got: job.got };
     return (job.alts || []).find((a) => (!a.big || yukiForm(g) !== 'cat') && roomFor(g, a.item, n)) || null;
 }
+/**
+ * v0.11.118 (owner pick YK1, D8, the owner's d8): a haul is a d8 from the save's stream, not her Fight: 1–2 nothing, 3–4
+ * half (a one-item job: another d8, 1–4 one), 5–6 the job's own, 7–8 double. Her Fight (held at James's GU) no longer
+ * sets it; `job.dc` is kept in the data, unused.
+ */
+export const YUKI_D8 = [0, 0, 0.5, 0.5, 1, 1, 2, 2];
+export const YUKI_LANE_TEXT = { roll: 'd8 per haul: 1–2 nothing · 3–4 half · 5–6 full · 7–8 double' }; // Fable's (the MAIN)
+export function yukiHaul(g, job) {
+    const k = YUKI_D8[d8(g) - 1];
+    if (k !== 0.5) return job.n * k;
+    return job.n >= 2 ? Math.floor(job.n / 2) : d8(g) <= 4 ? 1 : 0;
+}
 /** Yuki's lane: her job runs on the game time that just passed. */
 function yukiTick(g, hubId, minutes) {
     const job = TASK_HUBS[hubId]?.yuki;
@@ -351,8 +363,7 @@ function yukiTick(g, hubId, minutes) {
         const len = Math.round((job.minutes * NEW_LENGTH) / yukiSpeed(f));
         if (y.progress < len) break;
         y.progress -= len;
-        const ratio = skillCheck(g.yuki.fight) / job.dc;
-        const n = ratio >= 2 ? job.n * 2 : ratio >= 1 ? job.n : ratio >= 0.5 ? Math.floor(job.n * ratio + 0.5) : 0;
+        const n = yukiHaul(g, job);
         const pick = n > 0 ? yukiCatch(g, job, n) : null;
         if (pick) { addItem(g, pick.item, n); lines.push(`${pick.got(n)} +${n} ${itemNames[pick.item]?.name || pick.item}.`, ...awardYukiFightXp(g, 'challenging')); }
         else if (n > 0) lines.push(job.full || job.none, ...awardYukiFightXp(g, 'challenging')); // v0.11.71 (Y1): everything she brings here is full: she eats it; XP and familiarity as a haul
@@ -369,7 +380,7 @@ export function yukiLane(g) {
     if (!job) return null;
     const y = st(g).yuki;
     const f = st(g).fam[job.id] || 0;
-    return { label: job.label, on: !!y.on, progress: y.progress || 0, len: Math.round((job.minutes * NEW_LENGTH) / yukiSpeed(f)), fam: f, tier: famTier(f), dc: job.dc, check: r1(skillCheck(g.yuki.fight)) };
+    return { label: job.label, on: !!y.on, progress: y.progress || 0, len: Math.round((job.minutes * NEW_LENGTH) / yukiSpeed(f)), fam: f, tier: famTier(f) }; // v0.11.118 (YK1, D8): no Fight / DC (the haul is a d8)
 }
 export function setYuki(g, on) { st(g).yuki.on = !!on; }
 

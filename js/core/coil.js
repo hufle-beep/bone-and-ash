@@ -17,7 +17,7 @@
  *   Relationships other than Yuki: max(snapshot value, 25% of the last Coil's peak), friendship and affection apart.
  * Pure — no DOM.
  */
-import { coilStart, coilSnap, ensureBars, SAVE_VERSION, newGame } from './game.js';
+import { coilStart, coilSnap, ensureBars, SAVE_VERSION, newGame, yukiAbove } from './game.js';
 import { famTier, FAM } from './tasks.js';
 
 /** What James knows and keeps (plus Yuki's own flags and the Long Forest run, so that run stays scaled; v0.11.31: and the speed gates, tasks.js maxSpeed). */
@@ -126,6 +126,8 @@ export function rewind(g, { to = 'act' } = {}) {
     // v0.11.0 (owner 2026-11-06, pick 1a): realm, Saturation, skills and meridians start over with the act; the Coil bonus makes them come back faster
     base.james = { ...clone(base.james), hp: null, qi: null, injuries: [] };
     base.yuki = { ...clone(base.yuki), hp: null, qi: null };
+    // v0.11.118 (YK1 review, SN): a snapshot from before YK1 with her Fight above his GU starts her at his rank (the snapshot itself is kept)
+    if (yukiAbove(base)) base.yuki.fight = { tier: base.james.gu.tier, level: base.james.gu.level, xp: 0 };
     const unwound = false;
     base.flags = { ...base.flags, ...kept };
     const rel = clone(base.rel || {});
