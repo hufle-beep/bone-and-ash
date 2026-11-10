@@ -14,7 +14,7 @@
  */
 import { hasForm } from './forms.js';
 import { choose, goTo, choiceOpen, choiceTag, gives, setTimeless, defaultMinutes, movesPlace, wasPicked, isMenuScene, isTimeless, setFamiliar } from './story.js';
-import { d8, itemCap, yukiForm, advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, canBreakThrough, btMinutes, realmName, condense, sitMinutes, useSpeed, USE_N, nightLock, endsLate, sitUseless, jamesQiMax, SATIETY_PER_HOUR, breakAt, coilMult, fmtMult } from './game.js';
+import { d8, itemCap, yukiForm, advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, canBreakThrough, btMinutes, realmName, condense, sitMinutes, useSpeed, USE_N, nightLock, endsLate, sitUseless, jamesQiMax, SATIETY_PER_HOUR, breakAt, coilMult, fmtMult, YUKI_HELD_TEXT } from './game.js';
 import { CONDENSE_SIT_COST } from './formulas.js';
 import { btTarget, MER_LINES, lineWindow, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
@@ -542,11 +542,15 @@ const SIT_SAT = /^Condensed: Saturation [\d.]+%\.$/;
 const SIT_XP = /^(.+?) \+([\d.]+)(?: XP)?(?: → (.+))?$/;
 const SIT_CAP = /^(.+?) at T10 L10 \(cap\)$/;
 const SIT_SKILLS = /^(Convergence Use|GU|Yuki \(bond\) Qi Use)$/;
+const SIT_SHARE = /^GU \+(\d+) XP(?: → (T\d+ L\d+))?, (.+)$/;
+const SHARE_KEY = 'share';
 export function sitSummary(lines) {
     const tot = new Map(), rest = [];
     const get = (name) => { if (!tot.has(name)) tot.set(name, { sum: 0, rank: '', cap: false, xp: !/^Yuki/.test(name) }); return tot.get(name); };
     for (const l of lines) {
         if (SIT_SAT.test(l)) continue;
+        const sh = SIT_SHARE.exec(l); // v0.11.120 (LX1 review, SS): James's share of Yuki's held XP: a total of its own, not his GU's
+        if (sh && sh[3] === YUKI_HELD_TEXT.share) { const t = get(SHARE_KEY); t.sum += Number(sh[1]); if (sh[2]) t.rank = sh[2]; continue; }
         const c = SIT_CAP.exec(l);
         if (c && SIT_SKILLS.test(c[1])) { get(c[1]).cap = true; continue; }
         const m = SIT_XP.exec(l);
@@ -556,6 +560,7 @@ export function sitSummary(lines) {
     const out = [];
     for (const [name, t] of tot) {
         const sum = Math.round(t.sum * 10) / 10;
+        if (name === SHARE_KEY) { if (sum > 0) out.push(`GU +${sum} XP${t.rank ? ` → ${t.rank}` : ''}, ${YUKI_HELD_TEXT.share}`); continue; }
         if (sum > 0) out.push(`${name} +${sum}${t.xp ? ' XP' : ''}${t.rank ? ` → ${t.rank}` : ''}`);
         if (t.cap) out.push(`${name} at T10 L10 (cap)`);
     }

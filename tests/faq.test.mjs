@@ -46,6 +46,7 @@ assert(plain(text('What carries over')).includes(`${Math.round(HEAD_START * 100)
 { const { YUKI_D8 } = await import('../js/core/tasks.js');
   assert(YUKI_D8.join() === '0,0,0.5,0.5,1,1,2,2' && plain(text('Yuki\'s job')).includes('Each haul is a d8: 1–2 nothing, 3–4 half the job\'s haul, 5–6 the haul, 7–8 double.'), 'YK1: Yuki\'s job tells the d8 the game rolls');
   assert(plain(text('Skills and checks')).includes('never past James\'s GU') && plain(text('Skills and checks')).includes('the lower of the two'), 'YK1: Skills and checks tells her Fight is held at his GU'); }
+assert(plain(text('Skills and checks')).includes("Of the XP she can't keep, 10% goes through the bond to his GU; the rest is lost."), 'LX1 (Fable\'s text): Skills and checks tells a tenth of what she can\'t keep goes to his GU');
 assert(plain(text('Yuki\'s job')).includes(`${String(YUKI_HOURS[0]).padStart(2, '0')}:00 and ${YUKI_HOURS[1]}:00`), 'Yuki\'s hours from tasks.js');
 assert(plain(text('Meridians')).includes(`${PRIMARIES.length} primaries and their ${COL_GROUPS.reduce((n, c) => n + c.size, 0)} collaterals`) && PRIMARIES.length === 12, 'the meridian counts from meridians.js (12 and 66)');
 { const gr = ensureBars(newGame(7, { closed: true })); bumpRel(gr, 'Mei Lin', 999, -999); assert(gr.rel['Mei Lin'].f === REL_MAX && gr.rel['Mei Lin'].a === -REL_MAX && plain(text('People, friendship and affection')).includes(`−${REL_MAX} to ${REL_MAX}`), 'the relationship range: the game clamps at the number the FAQ names'); }

@@ -305,7 +305,7 @@ export function awardFightXp(g, style, band = 'standard') {
 }
 /**
  * v0.11.118 (owner pick YK1, CG): Yuki's Fight never passes James's GU. While it is at his GU or above it learns nothing
- * (from her hauls, fights and story beats alike); an award that would carry her past it stops at his rank (the rest is lost).
+ * (from her hauls, fights and story beats alike); an award that would carry her past it stops at his rank (LX1: a tenth of the rest goes to his GU, `yukiShareToJames`).
  * FE: in a fight she strikes and dodges with the lower of the two (`yukiFightSkill`), so a save from before YK1 with her
  * already above him fights at his level at once; the saved number is not changed.
  */
@@ -318,6 +318,7 @@ export const YUKI_HELD_TEXT = { // Fable's texts (owner 2026-11-10 20:23, the MA
     reach: 'Yuki Fight +{xp} → T{t} L{l}, level with James\'s GU (held)',
     tab: 'level with James\'s GU: she waits for him to catch up',
     above: 'above James\'s GU: in a fight she uses his, T{t} L{l}',
+    share: 'from what Yuki couldn\'t keep', // LX1: the tail of his share's line (GU +{xp} XP[ → T L], {share})
 };
 /** The Yuki tab's note on her Fight (YK1): level with his GU, above it (a save from before YK1), or nothing (both at T1 L1). */
 export const yukiHeldNote = (g) => {
@@ -332,14 +333,27 @@ const xpToRank = (n, rank) => {
     while (rankOf(c) < rank) { k += xpToNext(c) - c.xp; c.xp = 0; if (c.level < 10) c.level += 1; else { c.tier += 1; c.level = 1; } }
     return k;
 };
+/**
+ * v0.11.120 (owner pick LX1): a tenth of the Fight XP she can't keep (held, or past his rank) goes to James's GU. The
+ * models: Act 1 mean Coil Careful 4.07 → 3.90, Completionist 3.68 → 3.45 (all of it would be 2.88 / 2.57).
+ */
+export const YUKI_LOST_SHARE = 0.1;
+function yukiShareToJames(g, lost) {
+    const xp = Math.floor(lost * YUKI_LOST_SHARE);
+    if (xp <= 0 || atSkillCap(g.james.gu)) return []; // at T10 L10 nothing to give (the old "(cap)" line isn't shown)
+    const ups = addXp(g.james.gu, xp);
+    ensureBars(g);
+    return [`GU +${xp} XP${ups.length ? ` → ${ups.at(-1)}` : ''}, ${YUKI_HELD_TEXT.share}`];
+}
 export function awardYukiFightXp(g, band = 'standard') {
     const y = g.yuki.fight, gu = g.james.gu;
-    if (yukiHeld(g)) return [YUKI_HELD_TEXT.held.replace('{t}', gu.tier).replace('{l}', gu.level)]; // at T10 L10 too (the old "(cap)" line can't happen: CP)
-    const pool = Math.floor((XP_BANDS[band] ?? 30) * y.tier * coilMult(g) * XP_RATE); // v0.11.85: the XP rate
+    const pool = Math.floor((XP_BANDS[band] ?? 30) * Math.min(y.tier, gu.tier) * coilMult(g) * XP_RATE); // v0.11.85: the XP rate; LX1 review (AP): an old save above him sized on his tier (under him hers is never higher)
+    if (yukiHeld(g)) return [YUKI_HELD_TEXT.held.replace('{t}', gu.tier).replace('{l}', gu.level), ...yukiShareToJames(g, pool)]; // at T10 L10 too (CP); LX1: his share
     const room = xpToRank(y, rankOf(gu));
     if (pool >= room) { // CG: it stops at his rank; RX (the review's low 6): the line shows the XP she kept, not the whole pool
-        y.tier = gu.tier; y.level = gu.level; y.xp = 0;
-        return [YUKI_HELD_TEXT.reach.replace('{xp}', room).replace('{t}', gu.tier).replace('{l}', gu.level)];
+        const t = gu.tier, l = gu.level; // LX1: her line names the rank she reached, before his share can raise it
+        y.tier = t; y.level = l; y.xp = 0;
+        return [YUKI_HELD_TEXT.reach.replace('{xp}', room).replace('{t}', t).replace('{l}', l), ...yukiShareToJames(g, pool - room)];
     }
     const ups = addXp(y, pool);
     return [`Yuki Fight +${pool}${ups.length ? ` → ${ups.at(-1)}` : ''}`];

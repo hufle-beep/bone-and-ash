@@ -113,7 +113,9 @@ function summarize(lines) {
     }
     bits.push(...[...new Set(items)].slice(0, 3));
     // v0.11.118 (YK1 review, RS): also her "level with James's GU" line, which has a tail after the rank
-    for (const l of lines) { const up = /^(.+?) \+\d+(?: XP)? → (T\d+ L\d+)(?:, .*)?$/.exec(l); if (up) bits.push(`${up[1].replace(' (bond)', '')} → ${up[2]}`); }
+    const ranks = new Map(); // v0.11.120 (LX1 review, SD): one bit a skill, its last rank (his own award and Yuki's share can both raise GU)
+    for (const l of lines) { const up = /^(.+?) \+\d+(?: XP)? → (T\d+ L\d+)(?:, .*)?$/.exec(l); if (up) ranks.set(up[1].replace(' (bond)', ''), up[2]); }
+    for (const [k, r] of ranks) bits.push(`${k} → ${r}`);
     let hp = 0;
     for (const l of lines) for (const m of l.matchAll(/−(\d+(?:\.\d+)?) HP/g)) hp += Number(m[1]);
     if (hp) bits.push(`−${Math.round(hp * 10) / 10} HP`);

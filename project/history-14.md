@@ -2,6 +2,24 @@
 
 Started 2026-11-10 (v0.11.116), when `history-13.md` passed 45 KB. Newer than `history-13.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.120 (word for word)
+
+### From "Decided in chat"
+
+- **v0.11.117: the threat word, group d's push 5 (TW1–TW4 at about 19:20; owner 19:23 "TW1 go"; Fable's texts shown, owner 19:24 "go for texts"; Fable's review: TX1–TX4, owner 19:37 "TX1"; Fable's TX1 texts shown):**
+  - **The sub-items (a scratch copy; the fight lab 300 games, 7,642 fights; 50 fight choices in 44 scenes, 34 beside another choice; the bots don't read the word: 0 numbers move):** **GW** a word from today's power gap (the degree): 61.6% of fights in its worst band, where smart still wins 79.7%; by band smart 79.7 / 87.5 / 99.7 / 100%, random 66.2 / 84.0 / 99.7 / 100%; **PW** the fight played on a copy with the blade alone (swing, guard): lost 22.6% (smart still wins 28.3%, random 4.4%), won under 30% HP 6.6% (smart 95.3, random 57.7), 30–70% 21.0% (100, 94.7), the rest 49.8% (100, 99.3); **SW** the smart bot's own outcome: lost 16.5% (random 1.7%), under 30% 4.7% (45.3), 30–70% 16.7% (87.1), the rest 62.1% (92.1); **WS** in the fight choice's tag and its hold line, words only; **DX** v0.11.116's two slips; **T** Fable's words, **X** tests and checks.
+  - **The options:** **TW1 🟢 PW + WS + DX + T + X (recommended)** (random play's spread 4.4 → 99.3%) / TW2 🟡 SW + … (1.7 → 92.1%) / TW3 🟠 GW + … (66.2 → 100%) / TW4 🔴 DX only (colours: how well the word predicts a typical player's result). **Picked: TW1.**
+  - **Fable's texts (rule 10; the MAINs; `THREAT_TEXT`, the FAQ):** the ALT words A deadly · bloody · hard · easy, B grim · close · rough · light; the hold lines' ALT A one template ("How it goes from here with the blade alone, swing and guard: {word}. That is the plainest fight you have; a better one does better."), B drier ("Fought the plain way, blade and guard and nothing else, …. You know more than the plain way."); the FAQ's ALT A (shorter) and B ("Before a fight, its story card reads it for you…").
+  - **TX (stop-and-ask: Fable's cold review, no high; 352 words against the real tap, 0 mismatches, 0 leaks):** **HL** (mediums 1–2) the band by the share of his starting HP the fight costs, not the HP left (an untouched win from 29% read narrow): 44 of 7,642 lab fights change, all from a hurt start (35 costly → clean, 8 narrow → costly, 1 narrow → clean); **UB** (low 3) Bao's brawl (the blade a strike every round) with the fists' hold lines: 1 of 7,642 fights; **LR** (low 4) HP to a whole percent as the lab; **PF** (low 5) no replay for the one-move card; **T** the review's test gaps. **TX1 🟢 HL + UB + LR + PF + T (recommended)** / TX2 🟡 without UB / TX3 🟠 without HL / TX4 🔴 T. **Picked: TX1.** Fable's TX1 texts (MAINs; ALTs: the FAQ's A shorter, B "Before a fight, its story card reads it for you…"; the brawl's A "Step in and hit, every round and nothing else, and …", B "Stepping in and hitting every round, with no throw and no cover, … A brawl with some thought in it …"). Kept: an error on the copy shows a plain "fight"; the word covers the first fight of a chain; it ignores Yuki downed and the crows' theft; with no Qi for the blade it reads losing.
+  - **Also:** as built: the version note; `741e314` filled in for 0.11.116; v0.11.114's notes to `history-14.md`; the handover's open-items heading and the roadmap's section 0 fixed (DX); after v0.11.116 the docs went up.
+
+### From "Version notes"
+
+## v0.11.117 — the threat word (TW1, TX1)
+
+- **Files:** `js/core/game.js` (`THREAT_LOW`, `THREAT_HIGH`, `THREAT_STEPS`, `THREAT_TEXT` with the brawl's `fists`, `plainFight`: the story hook prepares, then the hooks off, the blade until done, the band by the share of the starting HP it cost), `js/core/story.js` (`threatOf`: the choice on a copy, then its fight; { band, fists }; none for 1000+), `js/main.js` (the fight card's word, its hold line), `js/core/faq.js` (Fable's sentence, the constants), `tests/tasks.test.mjs` (the TW1 and TX1 blocks), `tests/README.md`, `sw.js`, docs (v0.11.114 to `history-14.md`). Saves unchanged, no id changed.
+- **Checks:** a game change (rule 2): the full `bash tools/check.sh` after TW1 and after TX1: exit 0, 0 drifted of 148, 0 past 5; the models as v0.11.116 (Careful 3.41 / 3.59); the baseline not re-saved. **Fable, cold review (TW1):** no high; mediums 1–2 and lows 3–5 and the test gaps fixed in TX1; lows 6–7 kept.
+
 ## Moved from the handover in v0.11.119 (word for word)
 
 ### From "Decided in chat"
