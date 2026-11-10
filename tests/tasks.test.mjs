@@ -2,7 +2,7 @@
 // Every card resolves; old saves get an empty queue; a dry run predicts the real run exactly;
 // 1,000 bot games (2,000 before v0.11.34) in task mode reach the end with no dead end (Incremental Mode only since v0.11.34, D1: the classic games and the Story Mode checks gone).
 import { SCENES, lfOpen, lfSeason, lfRank, LF_STOCK, LF_SEASON_MINUTES } from '../js/story/prologue.js';
-import { itemCap, MAX_REALM, combatStep as cStep, startCombat as sCombat, coilMult, awardXp, actSpeed, sitMinutes, awardYukiFightXp, condense, SAT_HOURS, sitGain, btMinutes, formDmgBonus, guardBonus, fieldDamage, FIELD_ROUNDS, actionDmg } from '../js/core/game.js';
+import { itemCap, MAX_REALM, combatStep as cStep0, startCombat as sCombat, coilMult, awardXp, actSpeed, sitMinutes, awardYukiFightXp, condense, SAT_HOURS, sitGain, btMinutes, formDmgBonus, guardBonus, fieldDamage, FIELD_ROUNDS, actionDmg } from '../js/core/game.js';
 import { FORM_LINES, hasForm, cuRank, actionOpen, actionLabel, fragileKnife, STORY_FORMS, INC_ONLY_ACTIONS } from '../js/core/forms.js';
 import { TASK_HUBS } from '../js/story/task_hubs.js';
 import { markDaily, daily, hour } from '../js/story/common.js';
@@ -33,6 +33,9 @@ import { smartAction, attackReserve } from './lib/smartfight.mjs'; // v0.11.96 (
 import { GAMES, FULL, SHARD, WORKERS, SEED, SENSIBLE, REPORT, STATS_OUT, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
 import { seen as touched, track, noteView, noteCards, mergeSeen, seenOut as touchedOut } from './lib/seen.mjs'; // v0.11.22: for tools/leftovers.mjs
 let pass = 0, fail = 0;
+/** v0.11.116 (owner pick WA2, CDB): the older fight tests swing one move every round, as the game allowed before the rhythm; their
+ *  helper clears the move's wait so they test what they tested. The WA2 block uses the real step (cStep0). */
+const cStep = (g, a, t) => { if (g.combat) delete g.combat.wait; return cStep0(g, a, t); };
 const assert = (c, l) => { if (c) { pass++; } else { fail++; if (fail < 30) console.error('  FAIL ', l); } };
 const kids = launch(import.meta.url); // v0.11.1: the bot games in worker processes, while this one runs the other checks
 /** v0.11.21: --bots-only plays the bot games and writes their stats, without the rule checks (tests/tools.test.mjs: 1 worker = 2 workers). */
@@ -746,7 +749,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
       assert(y.stats.foes.test_wolf === 1 && y.stats.weapons.blade === 1, 'MA3: an old save counts from its first fight'); }
     // the cards and the FAQ
     { const { readFileSync } = await import('node:fs'); const main = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
-      assert(/a\.guard \|\| a\.remark \|\| a\.qshield \|\| a\.field \? \(c\.adapt\?\.\[id\] \|\| 0\) : fightAdapt\(c, id\)\) \+ \(a\.unarmed \? unarmedMastery\(g\) : a\.guard \|\| a\.remark \|\| a\.qshield \|\| a\.field \? 0 : weaponMastery\(g, id\)\)/.test(main), 'MA3: an attack card counts the memory and the familiarity');
+      assert(/a\.guard \|\| a\.remark \|\| a\.qshield \|\| a\.field \? \(c\.adapt\?\.\[id\] \|\| 0\) : fightAdapt\(c, kk\)\) \+ \(a\.unarmed \? unarmedMastery\(g\) : a\.guard \|\| a\.remark \|\| a\.qshield \|\| a\.field \? 0 : weaponMastery\(g, kk\)\)/.test(main), 'MA3: an attack card counts the memory and the familiarity (v0.11.116, WA2: kk, the blade\'s for a needle the song pays for)');
       const { FAQ } = await import('../js/core/faq.js'); const fq = FAQ.find(([t]) => t === 'Fights')[1]();
       assert(/counts as <b>foes remembered<\/b>: \+0\.5/.test(fq) && /toward <b>weapon familiarity<\/b> with that move: \+0\.5 to hit with it for every 50 rounds/.test(fq) && MEMORY_TEXT.met && MEMORY_TEXT.up && MEMORY_TEXT.upQi, "MA3: the FAQ (Fable's)"); }
 }
@@ -801,6 +804,132 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
       assert(/ADAPT_FIGHT_MAX = FOE_MEMORY_MAX;/.test(src) && FOE_MEMORY_MAX === 2, 'MB1, CC: the learning and the memory share one cap');
       assert(/\$\{FOE_MEMORY_STEP\} to James's attacks/.test(faq) && /\$\{WEAPON_STEP\} to hit with it for every \$\{WEAPON_EVERY\} rounds, up to \+\$\{WEAPON_MAX\}/.test(faq) && WEAPON_EVERY === 50, 'MB1, FQ: the FAQ\'s numbers from the constants'); }
 }
+// v0.11.116 (owner pick WA2; research.md #64, #142): CDB the rhythm (the blade, the spear, the flail and the Qi blast wait a
+// round, the needle two); SG the song (a blade, spear or flail hit +1, up to 3; the needle for 2 song, the spike field for 3;
+// a needle the song pays for uses the blade's practice, SH, and staggers on a glancing hit, NS); the bots' rule; the cards;
+// the FAQ; Fable's texts. These use the real step (cStep0), wait and all.
+{
+    const G = await import('../js/core/game.js');
+    const { WAIT, waitLeft, songPays, SONG_MAX, SONG_COST, SONG_TEXT, checkValue, noDiceDc } = G;
+    const mk = (enemies, { style = null, qi = 99, field = true } = {}) => { const g = ensureBars(newGame(127, { closed: true })); g.james.gu = { tier: 3, level: 1, xp: 0 }; g.james.skills['Convergence Use'] = { tier: 3, level: 1, xp: 0 }; ensureBars(g); g.james.qi = qi; g.yuki.hp = 0;
+        sCombat(g, { id: 'test_wa2', intro: 'In.', band: 'standard', enemies, win: 'stream', lose: 'stream', ...(style ? { style } : {}) }); g.combat.fieldUsed = field; return g; };
+    const post = (x = {}) => ({ name: 'Post', hp: 999, dc: 0.1, atk: 0.1, dmg: 0, ...x });
+    const lab = (g, id) => actionLabel(g, id, G.COMBAT_ACTIONS[id].label);
+    // CDB: the waits
+    assert(JSON.stringify(WAIT) === '{"blade":1,"spear":1,"flail":1,"blast":1,"needle":2}', 'WA2, CDB: the blade, spear, flail and blast 1, the needle 2');
+    { const g = mk([post()]); cStep0(g, 'blade'); assert(waitLeft(g, 'blade') === 1 && waitLeft(g, 'spear') === 0, 'WA2, CDB: after the blade it waits one round, the spear not');
+      const o = cStep0(g, 'blade'); assert(o.lines.includes(SONG_TEXT.waiting.replace('{move}', lab(g, 'blade'))) && o.lines.includes('You give ground, watching for the opening.') && !o.lines.some((l) => l.startsWith(`${lab(g, 'blade')}:`)), "WA2, CDB: a waiting move guards instead, with Fable's line");
+      assert(waitLeft(g, 'blade') === 0, 'WA2, CDB: the round after, ready'); const o3 = cStep0(g, 'blade'); assert(o3.lines.some((l) => l.startsWith(`${lab(g, 'blade')}:`)), 'WA2, CDB: and it swings'); }
+    { const g = mk([post({ dc: 99 })]); cStep0(g, 'needle'); assert(waitLeft(g, 'needle') === 2, 'WA2, CDB: the needle waits two'); cStep0(g, 'guard'); assert(waitLeft(g, 'needle') === 1, 'WA2, CDB: one left'); cStep0(g, 'guard'); assert(waitLeft(g, 'needle') === 0, 'WA2, CDB: ready'); }
+    for (const id of ['blast', 'spear', 'flail']) { const g = mk([post({ dc: 99 }), post({ name: 'Post two', dc: 99 })]); cStep0(g, id); assert(waitLeft(g, id) === 1, `WA2, CDB: ${id} waits one, hit or miss`); }
+    for (const id of ['dart', 'guard', 'qshield']) { const g = mk([post()]); cStep0(g, id); cStep0(g, id); assert(waitLeft(g, id) === 0 && !g.combat.wait?.[id], `WA2, CDB: ${id} never waits`); }
+    { const g = mk([post()], { field: false }); cStep0(g, 'spikes'); assert(waitLeft(g, 'spikes') === 0, 'WA2, CDB: the spike field never waits'); }
+    { const g = mk([post()], { qi: 0 }); g.combat.song = 0; const o = cStep0(g, 'needle'); assert(o.lines.some((l) => /fall back on guarding/.test(l)) && waitLeft(g, 'needle') === 0, 'WA2, CDB: a move not paid for does not wait'); }
+    { const b = mk([post({ name: 'Bao' })], { style: 'unarmed' }); cStep0(b, 'strike'); cStep0(b, 'strike'); assert(!b.combat.wait && b.stats.unarmed === 2, 'WA2, CDB: the fists never wait'); }
+    // SG: the song rises on a landed blade, spear or flail hit, up to 3, with Fable's line; a miss or another move doesn't
+    { const g = mk([post()]); const o1 = cStep0(g, 'blade'); assert(g.combat.song === 1 && o1.lines.includes(SONG_TEXT.rise.replace('{weapon}', lab(g, 'blade')).replace('{n}', 1).replace('{max}', SONG_MAX)), "WA2, SG: a blade hit, song 1, Fable's line");
+      cStep0(g, 'spear'); cStep0(g, 'blade'); assert(g.combat.song === 3, 'WA2, SG: the spear and the blade, song 3'); const o4 = cStep0(g, 'spear'); assert(g.combat.song === SONG_MAX && !o4.lines.some((l) => /bone hums/.test(l)), 'WA2, SG: no further than 3, no line');
+      const m = mk([post({ dc: 99 })]); cStep0(m, 'blade'); assert(!m.combat.song, 'WA2, SG: a miss adds nothing');
+      const d = mk([post()]); cStep0(d, 'dart'); cStep0(d, 'blast'); assert(!d.combat.song, 'WA2, SG: darts and the blast add nothing'); }
+    // the needle for 2 song: no Qi, Fable's line, the blade's learning and familiarity, its own wait
+    { const g = mk([post({ dc: 99 })]); g.combat.song = 2; assert(songPays(g, 'needle') && !songPays(g, 'spikes'), 'WA2, SG: 2 song pays the needle, not the field');
+      g.james.qi = 10; const q = g.james.qi, w0 = g.stats.weapons?.needle || 0; const o = cStep0(g, 'needle'); // under the pool's top, so a Qi spend would show
+      assert(g.james.qi === q && g.combat.song === 0 && o.lines.includes(SONG_TEXT.needle.replace('{n}', SONG_COST.needle)), "WA2, SG: no Qi, 2 song spent, Fable's line");
+      assert(g.combat.adapt.blade === 0.5 && !g.combat.adapt.needle && g.stats.weapons.blade === 1 && (g.stats.weapons.needle || 0) === w0, 'WA2, SH: its miss teaches the blade, its round counts as the blade');
+      assert(o.lines.some((l) => l.includes(`to ${lab(g, 'blade')} this fight`)) && waitLeft(g, 'needle') === 2 && waitLeft(g, 'blade') === 0, "WA2, SH: the learning line names the blade; the needle's own wait, not the blade's");
+      const v = mk([post()]); v.stats.weapons = { blade: 4 * G.WEAPON_EVERY }; v.combat.adapt = { blade: 1 }; v.combat.song = 2; const lv = cStep0(v, 'needle').lines.find((l) => /^Needle to a joint:/.test(l));
+      const z = mk([post()]); z.combat.song = 2; const lz = cStep0(z, 'needle').lines.find((l) => /^Needle to a joint:/.test(l));
+      const num = (l) => Number(/GU ([\d.]+) \//.exec(l)[1]); assert(Math.round((num(lv) - num(lz)) * 10) / 10 === 3, `WA2, SH: the blade's +2 familiarity and +1 learning reach the sung needle (${num(lz)} → ${num(lv)})`); }
+    // NS: a sung needle staggers on a glancing hit; one paid with Qi does not
+    { let dc = null; for (let x = 1; x <= 30 && dc == null; x += 0.25) { const t = mk([post({ dc: x })]); const v = checkValue(t, 'GU', 0) / noDiceDc(x + 1); if (v >= 0.55 && v < 0.95) dc = x; }
+      const sung = mk([post({ dc })]); sung.combat.song = 2; const os = cStep0(sung, 'needle'); const qi = mk([post({ dc })]); const oq = cStep0(qi, 'needle');
+      assert(dc != null && os.lines.some((l) => /a glancing blow/.test(l)) && oq.lines.some((l) => /a glancing blow/.test(l)), `WA2, NS: both glance (dc ${dc})`);
+      assert(os.lines.includes('  Post staggers.') && !oq.lines.includes('  Post staggers.'), 'WA2, NS: the sung needle staggers on a glance, the Qi needle not'); }
+    // the spike field for 3 song
+    { const g = mk([post()], { field: false }); g.combat.song = 3; g.james.qi = 10; const q = g.james.qi; const o = cStep0(g, 'spikes');
+      assert(g.james.qi === q && g.combat.song === 0 && g.combat.fieldUsed && o.lines.includes(SONG_TEXT.spikes.replace('{n}', SONG_COST.spikes)), "WA2, SG: 3 song sings the field, no Qi, Fable's line");
+      const h = mk([post()], { field: false }); h.combat.song = 2; h.james.qi = 10; const qh = h.james.qi; cStep0(h, 'spikes'); assert(h.james.qi < qh && h.combat.song === 2, 'WA2, SG: 2 song: the field costs Qi as before');
+      const u = mk([post()]); u.combat.song = 3; assert(!songPays(u, 'spikes'), 'WA2, SG: a used field is not paid for again'); }
+    // a spar: the song builds, nothing spends it
+    { const s = mk([post({ name: 'Ya' })], { style: 'spar' }); cStep0(s, 'blade'); s.combat.song = 3; assert(!songPays(s, 'needle') && !songPays(s, 'spikes'), 'WA2, SG: in a spar no needle and no field to spend it on'); }
+    // a mid-fight save keeps the wait and the song
+    { const g = mk([post()]); cStep0(g, 'blade'); const x = deserialize(serialize(g)); assert(x.combat.song === 1 && waitLeft(x, 'blade') === 1, 'WA2: a mid-fight save keeps the song and the wait'); }
+    // the bots: the needle when the song pays and the first foe would strike; a formed spear while the blade waits; nothing waiting picked
+    { const g = mk([post({ atk: 5 })]); cStep0(g, 'blade'); g.combat.song = 2; assert(smartAction(g) === 'needle', 'WA2: the bot spends the song on the needle');
+      g.combat.enemies[0].staggered = true; assert(smartAction(g) !== 'needle', 'WA2: not on a foe already staggered'); g.combat.enemies[0].staggered = false;
+      g.combat.song = 1; g.combat.spearFormed = true; assert(smartAction(g) === 'spear', 'WA2: the blade waits, a formed spear swings');
+      g.combat.spearFormed = false; g.combat.wait.spear = g.combat.round + 1; const a = smartAction(g); assert(waitLeft(g, a) === 0, `WA2: never a waiting move (${a})`);
+      const h = mk([post({ atk: 5, dmg: 6 })]); h.combat.enemies[0].heavy = true; h.combat.round = 3; h.combat.song = 2; assert(smartAction(h) === 'needle', 'WA2: a shown big blow, no spear, the song pays: the needle stops it');
+      h.combat.song = 0; assert(smartAction(h) === 'guard', 'WA2: without the song, guard as before'); }
+    // Fable's texts, the cards, the hold lines and the FAQ
+    assert(SONG_TEXT.rise === '{weapon} lands, and the bone hums a little louder for it. Song {n} / {max}.' && SONG_TEXT.needle === "The song pays for the needle, {n} of it and no Qi. It goes in on the blade's rhythm." && SONG_TEXT.waiting === '{move} is still singing itself back together. You guard instead.' && SONG_TEXT.label === 'Song {n} / {max}' && SONG_TEXT.tagNext === 'next round' && SONG_TEXT.price === '{n} song', "WA2, T: Fable's MAINs");
+    { const { readFileSync } = await import('node:fs'); const main = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8'); const faq = readFileSync(new URL('../js/core/faq.js', import.meta.url), 'utf8');
+      assert(/class="card fightish\$\{wl \? ' wait' : ''\}"/.test(main) && /\$\{wl \? ' aria-disabled="true"' : ''\}/.test(main) && /SONG_TEXT\.tagIn\.replace\('\{n\}', wl\)/.test(main), 'WA2: a waiting card is greyed with its tag');
+      assert(/const wl = waitLeft\(g, b\.dataset\.act\);[^\n]*\n\s*if \(wl\) \{[^\n]*note\(/.test(main), 'WA2: a tap on a waiting card only says when it is ready');
+      assert(/SONG_TEXT\.label\.replace\('\{n\}', c\.song\)/.test(main) && /SONG_TEXT\.holdNeedle\.replace/.test(main) && /SONG_TEXT\.price\.replace\('\{n\}', SONG_COST\[id\]\)/.test(main), 'WA2: the song beside the foes, the needle hold line, the price tag');
+      assert(/up to \$\{SONG_MAX\}/.test(faq) && /\$\{SONG_COST\.needle\} song instead of its Qi/.test(faq) && /\$\{SONG_COST\.spikes\}/.test(faq), 'WA2, T: the FAQ reads the constants');
+      const { FAQ } = await import('../js/core/faq.js'); const fq = FAQ.find(([t]) => t === 'Fights')[1](); assert(fq.includes('<b>The rhythm:</b>') && fq.includes('up to 3; it lasts only for that fight') && fq.includes('2 song instead of its Qi'), "WA2, T: the FAQ's sentences (Fable's)"); }
+}
+// v0.11.116 (owner pick WB1; Fable's review of WA2): SP the sung needle uses the better practice; SD only a damaging hit raises
+// the song; FR a failed run is a round for the rhythm; SL no song shown in a spar; SR the bot sings the spear while a holding
+// blade waits; FT Fable's texts; RT the review's gaps: older mechanics through the real step (cStep0), old saves, edges.
+{
+    const G = await import('../js/core/game.js');
+    const { waitLeft, songPays, sungKey, SONG_TEXT, SONG_COST, AIR_TEXT, SAY_TEXT, SPAR_TEXT, TELL_TEXT, WEAPON_EVERY } = G;
+    const mk = (enemies, { cu = [3, 1], gu = [3, 1], qi = 99, field = true, id = 'test_wb1', act1 = false, realm = 0, ...extra } = {}) => { const g = ensureBars(newGame(128, { closed: true })); if (act1) { g.flags.ending = 'victory'; g.minutes = Math.max(g.minutes, 7 * 1440 + 6 * 60); }
+        g.james.gu = { tier: gu[0], level: gu[1], xp: 0 }; g.james.skills['Convergence Use'] = { tier: cu[0], level: cu[1], xp: 0 }; g.james.realm = realm; ensureBars(g); g.james.qi = qi; g.james.hp = jamesHpMax(g); g.yuki.hp = 0;
+        sCombat(g, { id, intro: 'In.', band: 'standard', enemies, win: 'stream', lose: 'stream', ...extra }); g.combat.fieldUsed = field; return g; };
+    const post = (x = {}) => ({ name: 'Post', hp: 999, dc: 0.1, atk: 0.1, dmg: 0, ...x });
+    const num = (l) => Number(/GU ([\d.]+) \//.exec(l)[1]);
+    // SP: the needle's own practice when it is better (and its round counts for the needle); a tie is the blade's
+    { const g = mk([post()]); g.stats.weapons = { needle: 4 * WEAPON_EVERY }; g.combat.adapt = { needle: 1.5 }; g.combat.song = 2; assert(sungKey(g) === 'needle', 'WB1, SP: the needle\'s own +3.5 beats the blade\'s 0');
+      const ls = cStep0(g, 'needle').lines.find((l) => /^Needle to a joint:/.test(l)); const q = mk([post()]); q.stats.weapons = { needle: 4 * WEAPON_EVERY }; q.combat.adapt = { needle: 1.5 }; const lq = cStep0(q, 'needle').lines.find((l) => /^Needle to a joint:/.test(l));
+      assert(num(ls) === num(lq) && g.stats.weapons.needle === 4 * WEAPON_EVERY + 1 && !g.stats.weapons.blade, `WB1, SP: the sung needle checks as the Qi needle (${num(ls)} = ${num(lq)}), its round the needle's`);
+      const t = mk([post()]); t.combat.song = 2; assert(sungKey(t) === 'blade', 'WB1, SP: a tie is the blade\'s');
+      const { readFileSync } = await import('node:fs'); assert(/kk = songed \? sungKey\(g\) : id/.test(readFileSync(new URL('../js/main.js', import.meta.url), 'utf8')), 'WB1, SP: the card shows the same practice'); }
+    // SD: a hungry hit, a hit armour soaks to 0: no song; a flail on two foes: +1, not +2
+    { const h = mk([post({ moods: true })]); cStep0(h, 'guard'); const o = cStep0(h, 'blade'); assert(o.lines.some((l) => /grows over it/.test(l)) && !h.combat.song, 'WB1, SD: a hungry foe\'s hit raises no song');
+      const a = mk([post({ dr: 99 })], { cu: [1, 9] }); const oa = cStep0(a, 'blade'); assert(oa.lines.some((l) => /takes 0/.test(l)) && !a.combat.song, 'WB1, SD: a hit armour soaks to 0 raises no song');
+      const f = mk([post(), post({ name: 'Post two' })]); cStep0(f, 'flail'); assert(f.combat.song === 1, 'WB1, SD: the flail on two foes: +1'); }
+    // FR: a failed run ticks the waits; a fight that can't be run from is unchanged
+    { const g = mk([post({ atk: 99, dmg: 1 })], { flee: 'stream' }); cStep0(g, 'blade'); assert(waitLeft(g, 'blade') === 1, 'WB1, FR: the blade waits');
+      const o = G.combatFlee(g); assert(!o.done && waitLeft(g, 'blade') === 0, 'WB1, FR: a failed run is a round for the rhythm');
+      cStep0(g, 'needle'); G.combatFlee(g); assert(waitLeft(g, 'needle') === 1, 'WB1, FR: the needle\'s two: one left after a failed run'); }
+    // SL, FT
+    { const { readFileSync } = await import('node:fs'); const main = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+      assert(/\(c\.song \|\| 0\) > 0 && c\.style !== 'spar'/.test(main) && /SONG_TEXT\.holdSpikes\.replace\('\{n\}', SONG_COST\[id\]\)/.test(main) && !/song instead of Qi\.`/.test(main), 'WB1, SL + FT: no song shown in a spar; the field\'s hold line is Fable\'s');
+      assert(SONG_TEXT.holdSpikes === 'The song pays for this one: {n} song and no Qi, and the spikes come up exactly as they would have.' && /whichever is better, and it staggers/.test(SONG_TEXT.holdNeedle), "WB1, FT: Fable's lines");
+      const { FAQ } = await import('../js/core/faq.js'); const fq = FAQ.find(([t]) => t === 'Fights')[1](); assert(fq.includes('every round it waits is a round of <b>Guard</b>: the blade swings every other round.') && fq.includes('whichever is better (practice is'), "WB1, FT: the FAQ's sentences (Fable's)"); }
+    // SR: a holding blade that waits, the spear unsung, Qi for it: the spear; while the blade is ready, the blade as before
+    { const g = mk([post({ atk: 5 })], { cu: [1, 9] }); g.combat.bladeFormed = true; assert(smartAction(g) === 'blade', 'WB1, SR: a ready holding blade swings (FB1 as before)');
+      g.combat.wait = { blade: g.combat.round + 1 }; g.combat.song = 0; assert(smartAction(g) === 'spear', 'WB1, SR: while it waits, the spear is sung'); }
+    // RT: the fragile knife across waits (T1 L3: two swings a singing)
+    { const g = mk([post()], { cu: [1, 3], gu: [3, 1], qi: 30 }); const seq = [];
+      for (let i = 0; i < 5; i++) { const q = g.james.qi; const o = cStep0(g, 'blade'); seq.push([Math.round((q - g.james.qi) * 10) / 10 > 0 ? 'paid' : 'free', o.lines.some((l) => /knife shatters/.test(l)) ? 'shatter' : o.lines.some((l) => /singing itself back/.test(l)) ? 'wait' : 'swing']); }
+      assert(JSON.stringify(seq) === JSON.stringify([['paid', 'swing'], ['free', 'wait'], ['free', 'shatter'], ['free', 'wait'], ['paid', 'swing']]), `WB1, RT: the knife: sing, wait, shatter, wait, sing again (${JSON.stringify(seq)})`); }
+    // RT: the spear's hold stops a shown big blow, through the waits
+    { const g = mk([post({ atk: 99, dmg: 6 })]); g.combat.enemies[0].heavy = true; cStep0(g, 'spear'); cStep0(g, 'blade'); assert(waitLeft(g, 'spear') === 0, 'WB1, RT: the spear ready in round 3');
+      const o = cStep0(g, 'spear'); assert(o.lines.includes("Post can't get past the spear.") && !o.lines.includes(TELL_TEXT.bigLands), 'WB1, RT: its hold stops the big blow'); }
+    // RT: darts from the air never wait; Say something on a posture with the blade waiting
+    { const g = mk([post({ name: 'Wolf', atk: 50, dmg: 3 })], { act1: true, realm: 1 }); const o1 = cStep0(g, 'dart'), o2 = cStep0(g, 'dart');
+      assert([o1, o2].every((o) => o.lines.includes(AIR_TEXT.reach.replace('{foe}', 'Wolf'))) && waitLeft(g, 'dart') === 0, 'WB1, RT: darts from the air, two rounds running'); }
+    { const g = mk([post({ name: 'Gao', atk: 5, dmg: 2 })], { id: 'gao' }); cStep0(g, 'blade'); cStep0(g, 'guard'); assert(waitLeft(g, 'blade') === 0, 'WB1, RT: Gao, round 3');
+      const o = cStep0(g, 'remark'); assert(o.lines.some((l) => SAY_TEXT.landed.some((t) => l === t.replace('{foe}', 'Gao'))) && g.combat.enemies[0].flustered > 0, 'WB1, RT: Say something lands on the posture'); }
+    // RT: spar-out through the waits (blade, wait, blade: out at half)
+    { const g = mk([post({ name: 'Ya', hp: 24, dc: 6 })], { style: 'spar', cu: [1, 9] }); const o1 = cStep0(g, 'blade'), o2 = cStep0(g, 'blade'); const o3 = cStep0(g, 'blade');
+      assert(!o1.done && o2.lines.some((l) => /singing itself back/.test(l)) && o3.done === 'win' && o3.lines.includes(SPAR_TEXT.out.replace('{foe}', 'Ya')), `WB1, RT: a spar: swing, guard, swing, out at half (${g.combat ? 'still on' : o3.done})`); }
+    // RT: an old mid-fight save without the wait or the song steps as before; a new fight starts clean
+    { const g = mk([post()]); delete g.combat.wait; delete g.combat.song; const x = deserialize(serialize(g)); const o = cStep0(x, 'blade'); assert(!o.done && x.combat.song === 1 && waitLeft(x, 'blade') === 1, 'WB1, RT: an old mid-fight save plays');
+      const n = mk([post()]); assert(!n.combat.song && !n.combat.wait && waitLeft(n, 'blade') === 0, 'WB1, RT: a new fight: no song, no waits'); }
+    // RT: an unpaid move never waits; a stale field tap at song 3 with the field used spends nothing
+    for (const id of ['blade', 'spear', 'flail', 'blast']) { const g = mk([post(), post({ name: 'Post two' })], { qi: 0 }); const o = cStep0(g, id); assert(o.lines.some((l) => /fall back on guarding/.test(l)) && waitLeft(g, id) === 0, `WB1, RT: ${id} not paid for, no wait`); }
+    { const g = mk([post()]); g.combat.song = 3; const o = cStep0(g, 'spikes'); assert(g.combat.song === 3 && o.lines.some((l) => /already broken/.test(l)), 'WB1, RT: a used field: no song spent'); }
+    // RT: the smart rule's edges
+    { const g = mk([post({ atk: 5 })]); g.combat.song = 2; g.combat.wait = { needle: g.combat.round + 1 }; assert(smartAction(g) !== 'needle', 'WB1, RT: a waiting needle is not picked, song or not');
+      g.combat.wait = {}; g.combat.enemies[0].flustered = 1; assert(smartAction(g) !== 'needle', 'WB1, RT: not on a stunned foe');
+      const h = mk([post({ atk: 5, dmg: 6 })]); h.combat.enemies[0].heavy = true; h.combat.round = 3; h.combat.spearFormed = true; h.combat.wait = { spear: 4 }; assert(smartAction(h) === 'guard', 'WB1, RT: a big blow, the spear waiting, no song: guard');
+      const m = mk([post({ atk: 5, moods: true })]); m.combat.round = 2; m.combat.song = 2; assert(smartAction(m) === 'guard', 'WB1, RT: a hungry round: guard, not the needle'); }
+}
 // v0.11.110 (owner pick GD1): group d's small items in one push: CV (the fight's cards show the check's own value, hunger
 // counted), FO (the smart rule pays for an unsung flail only while no free formed weapon is out), KN (a formed fragile
 // knife's swings left are free, so the smart rule swings them out), FQ (the FAQ: the blast's difficulty one lower).
@@ -819,7 +948,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
           assert(checkValue(g, 'Convergence Use', 0.5) === rollCheck(g, 'Convergence Use', 1, 0.5).value, `CV: Fed ${sat}: Convergence Use with a bonus matches the check`); } }
     { const main = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
       const cards = main.slice(main.indexOf('function renderCombatCards'), main.indexOf('view.innerHTML', main.indexOf('function renderCombatCards')));
-      assert(/checkValue\(g, a\.skill, \(a\.guard \|\| a\.remark \|\| a\.qshield \|\| a\.field \? \(c\.adapt\?\.\[id\] \|\| 0\) : fightAdapt\(c, id\)\) \+ \(a\.unarmed \? unarmedMastery\(g\) : /.test(cards) && /checkValue\(g, 'GU'\)/.test(cards) && !/skillCheck\(/.test(cards), 'CV: the fight\'s cards and Run show checkValue, never skillCheck (v0.11.114, PB1: with unarmed mastery; v0.11.115, MA3: the memory and familiarity)'); }
+      assert(/checkValue\(g, a\.skill, \(a\.guard \|\| a\.remark \|\| a\.qshield \|\| a\.field \? \(c\.adapt\?\.\[id\] \|\| 0\) : fightAdapt\(c, kk\)\) \+ \(a\.unarmed \? unarmedMastery\(g\) : /.test(cards) && /kk = songed \? sungKey\(g\) : id/.test(cards) && /checkValue\(g, 'GU'\)/.test(cards) && !/skillCheck\(/.test(cards), 'CV: the fight\'s cards and Run show checkValue, never skillCheck (v0.11.114, PB1: with unarmed mastery; v0.11.115, MA3: the memory and familiarity; v0.11.116, WA2 + WB1: a needle the song pays for shows the practice it uses)'); }
     // FO: a formed spear (or a holding blade) is used before paying for an unsung flail; with none formed, the flail as before
     { const m = ensureBars(newGame(91, { closed: true })); setSk(m, 2, 1); m.james.qi = 20;
       sCombat(m, { id: 'jackals', intro: '', band: 'standard', enemies: [foe('A'), foe('B')], win: 'stream', lose: 'stream' }); m.combat.fieldUsed = true;
@@ -834,13 +963,14 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
       sCombat(k, { id: 'jackals', intro: '', band: 'standard', enemies: [foe('A')], win: 'stream', lose: 'stream' }); k.combat.fieldUsed = true;
       assert(fragileKnife(k) && knifeSwings(k) === 2, `KN: T1 L3: the knife lasts 2 swings (${knifeSwings(k)})`);
       cStep(k, 'blade'); assert(k.combat.bladeFormed && k.combat.knifeSw === 1, 'KN: the first swing sings it, one left');
-      k.james.qi = 0; assert(smartAction(k) === 'blade', 'KN: no Qi, a formed knife with a swing left → the blade');
+      const calm = () => { delete k.combat.wait; k.combat.song = 0; }; // v0.11.116 (WA2): the knife's rule, without the rhythm's wait or the song's needle
+      calm(); k.james.qi = 0; assert(smartAction(k) === 'blade', 'KN: no Qi, a formed knife with a swing left → the blade');
       const o = cStep(k, 'blade'); assert(k.james.qi === 0 && !o.lines.some((l) => /fall back on guarding/.test(l)) && !k.combat.bladeFormed, 'KN: the swing left is free, then it shatters');
-      assert(smartAction(k) === 'guard', 'KN: shattered, no Qi, no darts at T1 L3 → guard'); }
+      calm(); assert(smartAction(k) === 'guard', 'KN: shattered, no Qi, no darts at T1 L3 → guard'); }
     { // review low: instead of darts too (T1 L7: darts open at 2 Qi, a new knife 3)
       const d = ensureBars(newGame(93, { closed: true })); setSk(d, 1, 7); d.james.qi = 40;
       sCombat(d, { id: 'jackals', intro: '', band: 'standard', enemies: [foe('A')], win: 'stream', lose: 'stream' }); d.combat.fieldUsed = true;
-      cStep(d, 'blade'); d.james.qi = 2.5;
+      cStep(d, 'blade'); d.james.qi = 2.5; delete d.combat.wait; d.combat.song = 0; // v0.11.116 (WA2): without the rhythm's wait or the song
       assert(fragileKnife(d) && actionOpen(d, 'dart') && d.combat.bladeFormed && smartAction(d) === 'blade', 'KN: a formed knife with swings left, Qi for darts only → the blade, not darts');
       d.combat.bladeFormed = false; assert(smartAction(d) === 'dart', 'KN: no knife formed, Qi for darts only → darts, as before'); }
     // FQ: Fable's clause
@@ -1961,7 +2091,7 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     // K: the fragile knife's swings
     assert([1, 2, 3, 4, 5, 6, 7].map((l) => knifeSwings(at(1, l))).join() === '1,1,2,2,3,3,4' && knifeSwings(at(1, 8)) === Infinity, 'GW2 K: 1, 1, 2, 2, 3, 3, 4 swings; holds from T1 L8');
     const swing = (l) => { const g = at(1, l); g.james.gu = { tier: 3, level: 1, xp: 0 }; ensureBars(g); g.james.qi = 99; G.startCombat(g, { id: 'gw2_test', enemies: [{ name: 'Post', hp: 999, dc: 0.1, atk: 0.1, dmg: 0 }], win: 'stream', lose: 'stream' });
-        const out = []; for (let i = 0; i < 4; i++) { const q = g.james.qi; const r = G.combatStep(g, 'blade'); out.push([Math.round((q - g.james.qi) * 10) / 10, r.lines.some((x) => /knife shatters/.test(x))]); } return out; };
+        const out = []; for (let i = 0; i < 4; i++) { const q = g.james.qi; delete g.combat.wait; /* v0.11.116 (WA2): swing by swing, without the rhythm's wait */ const r = G.combatStep(g, 'blade'); out.push([Math.round((q - g.james.qi) * 10) / 10, r.lines.some((x) => /knife shatters/.test(x))]); } return out; };
     const k1 = swing(1), k3 = swing(3);
     assert(k1.every(([q, s]) => q > 0 && s), `GW2 K: at T1 L1 the knife still shatters every swing, Qi each time (${JSON.stringify(k1)})`);
     assert(k3[0][0] > 0 && !k3[0][1] && k3[1][0] === 0 && k3[1][1] && k3[2][0] > 0 && !k3[2][1] && k3[3][1], `GW2 K: at T1 L3 two swings for one singing (${JSON.stringify(k3)})`);
@@ -2054,7 +2184,7 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
       const g = ensureBars(newGame(10002)); g.james.skills['Convergence Use'] = { tier: 1, level: 8, xp: 0 }; g.james.gu = { tier: 1, level: 5, xp: 0 }; ensureBars(g);
       startCombat(g, { id: 'sb1_case', enemies: [{ name: 'Foe', hp: 99, dc: 3, atk: 3, dmg: 2 }], win: 'stream', lose: 'stream' }); g.james.qi = 8; g.combat.fieldUsed = true; g.yuki.hp = 0; g.james.hp = SMART_SHIELD_AT * jamesHpMax(g);
       const picks = []; for (let t = 0; t < 6 && g.combat; t++) { const a = smartAction(g, t); picks.push(a); combatStep(g, a); }
-      assert(picks[0] !== 'qshield' && picks.filter((a) => ['blade', 'spear', 'dart'].includes(a)).length >= 4, `SB1 M: the review's case attacks (${picks.join(', ')})`); }
+      assert(picks[0] !== 'qshield' && picks.filter((a) => ['blade', 'spear', 'dart', 'needle'].includes(a)).length >= 4, `SB1 M: the review's case attacks (${picks.join(', ')})`); } // v0.11.116 (WA2): a needle the song pays for is an attack too
     // T: at T10 a sung weapon's miss lands as a hit; the Qi blast's miss stays a miss
     { const g = ensureBars(newGame(10003)); g.james.skills['Convergence Use'] = { tier: 10, level: 1, xp: 0 }; g.james.gu = { tier: 1, level: 1, xp: 0 }; ensureBars(g);
       startCombat(g, { id: 'sb1_t10', enemies: [{ name: 'Wall', hp: 9999, dc: 999, atk: 0.1, dmg: 0 }], win: 'stream', lose: 'stream' }); g.james.qi = 999;
@@ -2186,7 +2316,7 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     assert(actionOpen(g0, 'blast') && actionOpen(g0, 'qshield'), 'Q1: both Qi moves open from the start');
     for (const style of ['spar', 'unarmed']) { const s2 = at(1); s2.combat = { style, enemies: [] }; assert(!actionOpen(s2, 'blast') && !actionOpen(s2, 'qshield'), `Q1: no Qi move in a ${style}`); }
     // the blast goes through armour (DR 2 at T1), the blade does not; the pierce line once a fight
-    const hit = (id) => { const g = at(1); startCombat(g, { id: 'q1_test', enemies: [{ name: 'Plated', hp: 99, dc: 0.1, atk: 0.1, dmg: 0, dr: 2 }], win: 'stream', lose: 'stream' }); const rounds = [combatStep(g, id).lines, combatStep(g, id).lines]; return { rounds, lines: rounds.flat() }; };
+    const hit = (id) => { const g = at(1); startCombat(g, { id: 'q1_test', enemies: [{ name: 'Plated', hp: 99, dc: 0.1, atk: 0.1, dmg: 0, dr: 2 }], win: 'stream', lose: 'stream' }); const rounds = [combatStep(g, id).lines, (delete g.combat.wait, combatStep(g, id).lines)]; return { rounds, lines: rounds.flat() }; };
     const bl = hit('blast'), bd = hit('blade');
     const bmid = 5; // the middle hit at T1 (the blast 4–6, the knife 3–6)
     const per = (h) => h.rounds.map((ls) => { const a = ls.find((l) => /^(Qi blast|Fragile bone knife|Bone knife):/.test(l)) || ''; const t = ls.find((l) => /^  Plated takes/.test(l)); return t ? [/clean, deep hit/.test(a), Number(/takes (\d+)/.exec(t)[1])] : null; }).filter(Boolean);

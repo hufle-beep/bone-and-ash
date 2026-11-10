@@ -3,7 +3,7 @@
 // every third round, else the blade, else darts", which lost to "the blade every round" (the fight lab: 67.0 against
 // 71.2% of 5,553 fight states); this rule won 71.8% (v0.11.96; with v0.11.97's reserve 73.1% of 6,242; with v0.11.98's
 // no shield on the fragile knife 73.2% of 6,259, against 72.9% on the same states). Tool code only: no game file imports it.
-import { COMBAT_ACTIONS, actionCost, jamesHpMax, airStrike, bigBlowDue, moodOf, postureDue } from '../../js/core/game.js';
+import { COMBAT_ACTIONS, actionCost, jamesHpMax, airStrike, bigBlowDue, moodOf, postureDue, waitLeft, songPays } from '../../js/core/game.js';
 import { actionOpen, fragileKnife, fightStyle } from '../../js/core/forms.js';
 
 /** The share of James's max HP at or under which the bot raises the Qi shield (S). */
@@ -30,7 +30,9 @@ export function attackReserve(g) {
  * (owner pick SB1, M; Fable's review of v0.11.98, medium 1) the shield only once a weapon is formed (the spear, or a knife
  * that holds), so its attack is already paid and the reserve binds the field alone (lab: 0 of 6,461 fights changed);
  * then (v0.11.107, owner pick NK1, FL) the bone flail while two or more foes stand (sung, or Qi for it), then (N) the spear if James can sing it (since v0.11.110, FB1, not paid for while a holding blade is out), else the blade (free once formed; since v0.11.110 (GD1, KN) the fragile knife's swings left too), a sung flail
- * (free), darts when the blade can't be paid, else guard. Never the needle or the Qi blast (v0.11.96: the blast for every swing measured no gain;
+ * (free), darts when the blade can't be paid, else guard. v0.11.116 (owner pick WA2): every move only when it isn't waiting (the rhythm),
+ * a formed spear while the blade waits, and the needle whenever the song pays for it (also against a shown big blow).
+ * Never the Qi needle or the Qi blast (v0.11.96: the blast for every swing measured no gain;
  * v0.11.102, owner pick QB1: the blast in place of the fragile knife against an armoured foe does gain, lab 72.3 → 73.4% at
  * the old +1 and 74.9% at QB1's 0, but it moves the bots' numbers a lot (14 moves past 5 points, 2 past 20 with QB1), so it
  * waits for the retune: roadmap section 2). In a spar or a brawl the game turns a move that isn't open there into its own (`fightAction`).
@@ -53,7 +55,9 @@ function baseAction(g, t = 0) { // eslint-disable-line no-unused-vars
     // DB1 (S; Fable's review, mediums 3 and 4): two big blows due, or a heavy flyer (the air doesn't keep it off): guard (0 fights today)
     const bigs = c.enemies.filter((e) => bigBlowDue(c, e) && !e.staggered && !e.atBay);
     const airDart = airStrike(g, 'dart') && actionOpen(g, 'dart') && qi >= cost(g, 'dart') && !bigs.some((e) => e.flies);
-    if (!airDart && bigs.length) return bigs.length === 1 && c.spearFormed && c.enemies.filter((e) => e.hp > 0)[0] === bigs[0] ? 'spear' : 'guard';
+    // v0.11.116 (owner pick WA2): a waiting spear can't answer it; a needle the song pays for can (its stagger stops the blow)
+    const ready = (id) => waitLeft(g, id) === 0, first = c.enemies.filter((e) => e.hp > 0)[0];
+    if (!airDart && bigs.length) return bigs.length === 1 && first === bigs[0] ? (c.spearFormed && ready('spear') ? 'spear' : songPays(g, 'needle') && ready('needle') ? 'needle' : 'guard') : 'guard';
     // DA1 (HD): on a foe's hungry round James's hits would feed it: guard (before the air, as measured)
     if (c.enemies.some((e) => e.hp > 0 && moodOf(c, e) === 'hungry')) return 'guard';
     // v0.11.112 (owner pick FF1, TD): from Foundation, darts from the air while a foe that doesn't fly stands (it can't reach him that round).
@@ -61,6 +65,9 @@ function baseAction(g, t = 0) { // eslint-disable-line no-unused-vars
     // loses; in the bots' own Foundation+ fights 0 of 3,791 wins turn into losses (275 losses into wins).
     if (airStrike(g, 'dart') && actionOpen(g, 'dart') && qi >= cost(g, 'dart')) return 'dart';
     const living = c.enemies.filter((e) => e.hp > 0);
+    // v0.11.116 (owner pick WA2, SG): the needle whenever the song pays for it and the first foe would still strike this round.
+    // Lab (300 games, the same 7,552 states; with the rhythm): smart 83.3 → 83.6%, blade only 79.5 → 77.8%.
+    if (songPays(g, 'needle') && ready('needle') && first && !first.staggered && !first.atBay && !(first.flustered > 0)) return 'needle';
     const atk = attackReserve(g); // v0.11.97 (RQ1): the field and the shield only when an attack can still be paid after them
     if (actionOpen(g, 'spikes') && !c.fieldUsed && qi >= 6 && qi >= cost(g, 'spikes') + atk) return 'spikes';
     const formed = c.spearFormed || c.flailFormed || (c.bladeFormed && !fragileKnife(g)); // v0.11.100 (SB1, M): the shield waits for a formed weapon; v0.11.107: the flail too
@@ -70,12 +77,14 @@ function baseAction(g, t = 0) { // eslint-disable-line no-unused-vars
     // unsung flail is paid for only while no spear or holding blade is already formed (a formed one is free); unreachable
     // in play today (0 of 26,906 bot fights), a test builds the case.
     const freeFormed = c.spearFormed || (c.bladeFormed && !fragileKnife(g));
-    if (actionOpen(g, 'flail') && living.length >= 2 && (c.flailFormed || (!freeFormed && qi >= cost(g, 'flail')))) return 'flail';
+    if (actionOpen(g, 'flail') && ready('flail') && living.length >= 2 && (c.flailFormed || (!freeFormed && qi >= cost(g, 'flail')))) return 'flail';
     // v0.11.110 (owner pick FB1, BS; Fable's GD1 review, medium 1): a holding blade already out swings free before a spear is paid for (0 bot fights reach it)
-    if (actionOpen(g, 'spear') && (c.spearFormed || (!(c.bladeFormed && !fragileKnife(g)) && qi >= cost(g, 'spear')))) return 'spear';
+    // WB1 (SR; Fable's review, low 10): a holding blade that waits no longer makes the spear's one-time cost a waste
+    if (actionOpen(g, 'spear') && ready('spear') && (c.spearFormed || ((!(c.bladeFormed && !fragileKnife(g)) || !ready('blade')) && qi >= cost(g, 'spear')))) return 'spear';
     // v0.11.110 (owner pick GD1, KN): a formed fragile knife's swings left are free, so it swings them out before darts or guard
-    if (c.bladeFormed || qi >= cost(g, 'blade')) return 'blade';
-    if (c.flailFormed && actionOpen(g, 'flail')) return 'flail'; // v0.11.107: a sung flail is free on the last foe too
+    if (ready('blade') && (c.bladeFormed || qi >= cost(g, 'blade'))) return 'blade';
+    if (c.flailFormed && actionOpen(g, 'flail') && ready('flail')) return 'flail'; // v0.11.107: a sung flail is free on the last foe too
+    if (c.spearFormed && ready('spear')) return 'spear'; // v0.11.116 (WA2, CDB): a formed spear is free while the blade waits
     if (actionOpen(g, 'dart') && qi >= cost(g, 'dart')) return 'dart';
     return 'guard';
 }

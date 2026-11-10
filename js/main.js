@@ -3,7 +3,7 @@ import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel, fragileKnife
 import { coilMult, coilMultNext, wakeDay, fmtMult, clockParts } from './core/game.js';
 import {
     newGame, ensureBars, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, skillCheck, checkValue, xpToNext, clockLabel, clockLabelG, realmName, yukiForm,
-    startCombat, combatStep, combatFlee, combatYield, SAY_TEXT, SPAR_TEXT, postureNow, unarmedMastery, fightAdapt, weaponMastery, COMBAT_ACTIONS, noDiceDc, airStrike, AIR_TEXT, FOE_TRAITS, foeTraits, TELL_TEXT, bigBlowNow, lungeNow, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage, qiShield,
+    startCombat, combatStep, combatFlee, combatYield, waitLeft, songPays, sungKey, SONG_TEXT, SONG_COST, SONG_MAX, SAY_TEXT, SPAR_TEXT, postureNow, unarmedMastery, fightAdapt, weaponMastery, COMBAT_ACTIONS, noDiceDc, airStrike, AIR_TEXT, FOE_TRAITS, foeTraits, TELL_TEXT, bigBlowNow, lungeNow, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage, qiShield,
 } from './core/game.js';
 import { sceneView, choose, goTo, gives, choiceQi } from './core/story.js'; // v0.11.109 (FQ1): choiceQi
 import { showPicked, isTaskHub, isQueueScreen, isTaskChoice, taskCards, taskLabel, taskMinutes, taskOutcome, dryOutcome, outcomeOf, runTask, FAM, yukiLane, setYuki, nextStep } from './core/tasks.js';
@@ -310,20 +310,22 @@ function renderCombatCards() {
     const c = g.combat;
     const acts = Object.entries(COMBAT_ACTIONS).filter(([id]) => actionOpen(g, id) && !(id === 'spikes' && c.fieldUsed)).map(([id, a0]) => {
         const a = { ...a0, label: actionLabel(g, id, a0.label) }; // v0.10.4: only the forms James can sing, named for his best one
-        const cost = (a.keeps === 'blade' && c.bladeFormed) || (a.keeps === 'spear' && c.spearFormed) || (a.keeps === 'flail' && c.flailFormed) || (a.field && c.fieldUsed) ? 0 : actionCost(g, a); // v0.11.107 (NK1): the flail
+        const songed = songPays(g, id), wl = waitLeft(g, id), kk = songed ? sungKey(g) : id; // v0.11.116 (owner pick WA2): the song pays (and the needle uses the blade's practice); the rhythm's wait
+        const cost = songed || (a.keeps === 'blade' && c.bladeFormed) || (a.keeps === 'spear' && c.spearFormed) || (a.keeps === 'flail' && c.flailFormed) || (a.field && c.fieldUsed) ? 0 : actionCost(g, a); // v0.11.107 (NK1): the flail
         const d = actionDmg(g, a);
         const off = cost > g.james.qi;
         if (off) return ''; // v0.11.17 (pick 1a): a move he can't afford is hidden (Guard costs nothing)
-        const v = n1(checkValue(g, a.skill, (a.guard || a.remark || a.qshield || a.field ? (c.adapt?.[id] || 0) : fightAdapt(c, id)) + (a.unarmed ? unarmedMastery(g) : a.guard || a.remark || a.qshield || a.field ? 0 : weaponMastery(g, id)))); // v0.11.115 (MA3): an attack's memory and familiarity too // v0.11.110 (owner pick GD1, CV): hunger counted, as the check is; v0.11.114 (PB1, CV): unarmed mastery too
+        const v = n1(checkValue(g, a.skill, (a.guard || a.remark || a.qshield || a.field ? (c.adapt?.[id] || 0) : fightAdapt(c, kk)) + (a.unarmed ? unarmedMastery(g) : a.guard || a.remark || a.qshield || a.field ? 0 : weaponMastery(g, kk)))); // v0.11.115 (MA3): an attack's memory and familiarity too // v0.11.110 (owner pick GD1, CV): hunger counted, as the check is; v0.11.114 (PB1, CV): unarmed mastery too
         const tgt = c.enemies.find((e) => e.hp > 0);
         const plain = tgt && showChecks ? `${a.skill} ${v} / DC ${noDiceDc(tgt.dc + a.dcMod)} · ${Math.round((d[0] + d[1]) / 2)} dmg` : '';
         const sw = a.keeps === 'blade' && fragileKnife(g) ? (() => { const n = knifeSwings(g), left = c.bladeFormed ? n - (c.knifeSw || 0) : n; return `${plain ? ' · ' : ''}${c.bladeFormed ? `${left} swing${left === 1 ? '' : 's'} left` : `lasts ${n} swing${n === 1 ? '' : 's'}`}`; })() : ''; // v0.11.104 (GW2, K)
-        return `<button class="card fightish" data-act="${id}" ${off ? 'disabled' : ''}>${esc(a.label)}<span class="tag">${a.guard ? `${showChecks ? 'GU ' : ''}defence +${guardBonus(g)} this round${bigBlowNow(g) ? ` · ${TELL_TEXT.guardBig}` : ''}${lungeNow(g) ? ` · ${TELL_TEXT.guardYuki}` : ''}` : a.qshield ? `soaks ${qiShield(g)} this round` : a.field ? `${FIELD_ROUNDS} rounds · ${fieldDamage(g)} to each attacker · once a fight` : a.remark ? `${SAY_TEXT.tag}${postureNow(g) ? ` · ${SAY_TEXT.tagNow}` : ''}` : plain + sw}${a.reach ? ' · a full hit holds it off' : ''}${a.sweep ? ' · hits a second enemy too' : ''}${airStrike(g, id) ? ` · ${AIR_TEXT.tag}` : ''}${a.pierce ? ' · ignores armour' : ''}${cost ? ` · ${cost} Qi` : ''}${a.stagger ? ' · staggers' : ''}${off ? ' · not enough Qi' : ''}</span></button>`;
+        return `<button class="card fightish${wl ? ' wait' : ''}" data-act="${id}" ${off ? 'disabled' : ''}${wl ? ' aria-disabled="true"' : ''}>${esc(a.label)}<span class="tag">${a.guard ? `${showChecks ? 'GU ' : ''}defence +${guardBonus(g)} this round${bigBlowNow(g) ? ` · ${TELL_TEXT.guardBig}` : ''}${lungeNow(g) ? ` · ${TELL_TEXT.guardYuki}` : ''}` : a.qshield ? `soaks ${qiShield(g)} this round` : a.field ? `${FIELD_ROUNDS} rounds · ${fieldDamage(g)} to each attacker · once a fight` : a.remark ? `${SAY_TEXT.tag}${postureNow(g) ? ` · ${SAY_TEXT.tagNow}` : ''}` : plain + sw}${a.reach ? ' · a full hit holds it off' : ''}${a.sweep ? ' · hits a second enemy too' : ''}${airStrike(g, id) ? ` · ${AIR_TEXT.tag}` : ''}${a.pierce ? ' · ignores armour' : ''}${cost ? ` · ${cost} Qi` : ''}${songed ? ` · ${SONG_TEXT.price.replace('{n}', SONG_COST[id])}` : ''}${a.stagger ? ' · staggers' : ''}${off ? ' · not enough Qi' : ''}${wl ? ` · ${wl === 1 ? SONG_TEXT.tagNext : SONG_TEXT.tagIn.replace('{n}', wl)}` : ''}</span></button>`;
     }).join('');
     const flee = c.flee ? `<button class="card" data-flee="1">Run${showChecks ? `<span class="tag">GU ${n1(checkValue(g, 'GU'))} / DC ${noDiceDc(Math.max(...c.enemies.filter((e) => e.hp > 0).map((e) => e.atk)))}</span>` : ''}</button>` : '';
     const yieldCard = c.style ? `<button class="card" data-yield="1">${esc(SPAR_TEXT.yieldLabel)}<span class="tag">${esc(SPAR_TEXT.yieldTag)}</span></button>` : ''; // v0.11.114 (PA2, YD)
     const foes = c.enemies.map((e) => `<div class="foe${e.hp <= 0 ? ' down' : ''}"><span>${esc(e.name)}${e.staggered ? (c.style === 'unarmed' ? ' (down)' : ' (reeling)') : ''}${e.hp > 0 ? foeTraits(e).map((k) => ` <small class="trait">· ${esc(FOE_TRAITS[k].tag)}</small>`).join('') : ''}</span><div class="stroke"><i style="width:${pct(Math.max(0, e.hp), e.hpMax)}"></i></div></div>`).join('');
-    const yuki = `<div class="foe"><span>Yuki${c.yukiOut ? ' (watching)' : ''}</span><div class="stroke" style="background:rgba(242,239,230,0.08)"><i style="width:${pct(g.yuki.hp, yukiHpMax(g))};background:var(--bone)"></i></div></div>`;
+    const yuki = `<div class="foe"><span>Yuki${c.yukiOut ? ' (watching)' : ''}</span><div class="stroke" style="background:rgba(242,239,230,0.08)"><i style="width:${pct(g.yuki.hp, yukiHpMax(g))};background:var(--bone)"></i></div></div>`
+        + ((c.song || 0) > 0 && c.style !== 'spar' ? `<div class="foe song"><span>${esc(SONG_TEXT.label.replace('{n}', c.song).replace('{max}', SONG_MAX))}</span></div>` : ''); // v0.11.116 (WA2, SG)
     view.innerHTML = `<section>
 ${statusHtml()}
 <div class="plate">${sceneArt(val(SCENES[g.scene].art))}</div>
@@ -733,14 +735,17 @@ function tipFor(b) {
     } else if (b.dataset.act) {
         const a = COMBAT_ACTIONS[b.dataset.act];
         if (a) {
-            const cost = actionCost(g, a);
+            const id = b.dataset.act, songed = songPays(g, id), wl = waitLeft(g, id); // v0.11.116 (owner pick WA2)
+            if (wl) lines.push((wl === 1 ? SONG_TEXT.holdNext : SONG_TEXT.holdIn.replace('{n}', wl)).replace('{move}', actionLabel(g, id, a.label)));
+            if (songed) lines.push(id === 'needle' ? SONG_TEXT.holdNeedle.replace('{n}', SONG_COST.needle) : SONG_TEXT.holdSpikes.replace('{n}', SONG_COST[id])); // WB1 (FT)
+            const cost = songed ? 0 : actionCost(g, a);
             const fk = a.keeps === 'blade' && fragileKnife(g) ? knifeSwings(g) : 0; // v0.11.104 (GW2, K): the fragile knife lasts a few swings
             const formedKnife = fk && g.combat?.bladeFormed; // v0.11.104 (SH1, L2): a sung knife costs nothing more; say what it has left
             if (formedKnife) { const left = fk - (g.combat.knifeSw || 0); lines.push(`Formed; ${left} swing${left === 1 ? '' : 's'} left.`); }
             else if (cost) lines.push(`Costs ${cost} Qi${fk ? ` to form; it shatters after ${fk} swing${fk === 1 ? '' : 's'}` : a.keeps ? ' to form, then free this fight' : ''}.`);
             if (a.guard) { lines.push(`Braces: defence +${guardBonus(g)} this round.`); if (bigBlowNow(g)) lines.push(TELL_TEXT.holdBig); if (lungeNow(g)) lines.push(TELL_TEXT.holdYuki); } // v0.11.113 (DA1): any guard covers Yuki from a shown lunge
             if (a.field) lines.push(`A field of bone spikes for ${FIELD_ROUNDS} rounds: ${fieldDamage(g)} back to each attacker. Once a fight.`);
-            if (a.stagger) lines.push('Staggers what it hits.');
+            if (a.stagger && !songed) lines.push('Staggers what it hits.');
             if (a.reach) lines.push('A clean hit holds the enemy off for the round.');
             if (a.sweep) lines.push('Swings on into a second enemy, if one is standing; each is checked on its own.'); // v0.11.107 (NK1)
             if (a.pierce) lines.push('Raw Qi: it ignores the enemy\'s armour.'); // v0.11.95 (review)
@@ -953,6 +958,8 @@ view.addEventListener('click', (ev) => {
         if (b.dataset.nonext) { store.set(NONEXT_KEY, '1'); render(); return; } // v0.11.72 (N1)
         if (b.dataset.yuki) { const yl = yukiLane(g); setYuki(g, !yl.on); autosave(); render(); return; }
         if (b.dataset.act) {
+            const wl = waitLeft(g, b.dataset.act); // v0.11.116 (WA2, CDB): a waiting card says when it is ready and does nothing
+            if (wl) { const a = COMBAT_ACTIONS[b.dataset.act]; note((wl === 1 ? SONG_TEXT.holdNext : SONG_TEXT.holdIn.replace('{n}', wl)).replace('{move}', actionLabel(g, b.dataset.act, a.label))); return; }
             const rel0 = relSnap(); const fightTitle = sceneTitle(g.scene);
             const out = combatStep(g, b.dataset.act);
             combatLog = out.lines;

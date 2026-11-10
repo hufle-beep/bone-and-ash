@@ -812,6 +812,37 @@ export const unmeet = (g, id) => { if (g.stats.foes?.[id] > 0) g.stats.foes[id] 
  *  Coils within 0.06 (Careful 3.25 / 3.43 unchanged). */
 export const WEAPON_EVERY = 50, WEAPON_STEP = 0.5, WEAPON_MAX = 2;
 export const weaponMastery = (g, id) => Math.min(WEAPON_MAX, Math.floor((g.stats?.weapons?.[id] || 0) / WEAPON_EVERY) * WEAPON_STEP);
+/** v0.11.116 (owner pick WA2, CDB; research.md #64): the rhythm. A sung weapon needs time to sing itself again: after the blade,
+ *  the spear, the flail or the Qi blast attacks it waits a round, the needle two (c.wait[id]: the first round it is ready).
+ *  Darts, guard, the Qi shield, the spike field (once a fight) and the fists don't wait. Measured (the fight lab, 300 games,
+ *  the same 7,552 states; with SG below): smart 83.3 → 83.6%, blade only 79.5 → 77.8%, random 74.1 → 74.2%. */
+export const WAIT = { blade: 1, spear: 1, flail: 1, blast: 1, needle: 2 };
+/** Rounds until move `id` is ready again (0: ready now). */
+export const waitLeft = (g, id) => (g.combat ? Math.max(0, (g.combat.wait?.[id] || 0) - g.combat.round) : 0);
+/** v0.11.116 (owner pick WA2, SG; research.md #142): the song. Each round a blade, spear or flail hit lands (full or glancing)
+ *  the song rises by 1, up to SONG_MAX, for that fight only; the needle can be paid with SONG_COST.needle song instead of its Qi,
+ *  the spike field with SONG_COST.spikes. A needle the song pays for uses the blade's practice (its learning in the fight and its
+ *  familiarity, SH) and staggers even on a glancing hit (NS); measured: without SH and NS the song lost (smart 83.3 → 82.0%). */
+export const SONG_MAX = 3, SONG_COST = { needle: 2, spikes: 3 };
+/** Can the song pay for move `id` now? */
+export const songPays = (g, id) => !!g.combat && SONG_COST[id] != null && (g.combat.song || 0) >= SONG_COST[id] && actionOpen(g, id) && !(id === 'spikes' && g.combat.fieldUsed);
+/** v0.11.116 (WB1, SP; Fable's review, medium 1): whose practice a needle the song pays for uses: the blade's, unless the
+ *  needle's own (its learning in this fight plus its familiarity) is higher. That one also gets the round. Lab: 0 of 7,561 fights change. */
+export const sungKey = (g) => { const c = g.combat, prac = (k) => fightAdapt(c, k) + weaponMastery(g, k); return prac('needle') > prac('blade') ? 'needle' : 'blade'; };
+/** The rhythm and the song (Fable's, rule 10). */
+export const SONG_TEXT = {
+    rise: '{weapon} lands, and the bone hums a little louder for it. Song {n} / {max}.',
+    needle: 'The song pays for the needle, {n} of it and no Qi. It goes in on the blade\'s rhythm.',
+    spikes: 'The song goes into the ground, {n} of it, and comes up as spikes. Your Qi stays where it is.',
+    waiting: '{move} is still singing itself back together. You guard instead.',
+    tagNext: 'next round', tagIn: 'in {n} rounds',
+    price: '{n} song',
+    label: 'Song {n} / {max}',
+    holdNext: '{move} needs time to sing itself again: ready next round.',
+    holdIn: '{move} needs time to sing itself again: ready in {n} rounds.',
+    holdNeedle: 'The song pays for this one: {n} song and no Qi, struck with the blade\'s practice or the needle\'s own, whichever is better, and it staggers even on a glancing hit.', // WB1 (SP): Fable's revision
+    holdSpikes: 'The song pays for this one: {n} song and no Qi, and the spikes come up exactly as they would have.', // WB1 (FT; review low 8)
+};
 /** The memory bonus a fight's attack gets now: its own learning plus the memory, within FOE_MEMORY_MAX (both start from 0). */
 export const fightAdapt = (c, key) => Math.min(FOE_MEMORY_MAX, (c.adapt?.[key] || 0) + (c.mem || 0));
 /** Task mode (v0.9.7, owner's pick 3a): every beast fight +0.5 DC and attack on top of its no-dice tuning. */
@@ -980,13 +1011,16 @@ function stepNoDice(g, actionId, targetIdx) {
     const lines = [];
     actionId = fightAction(g, actionId); // v0.10.4: a form he can't sing yet; v0.11.82: and the fight's style
     if (c.opening && c.round === 1) lines.push(c.opening); // v0.11.82: the brawl's first line
+    if (waitLeft(g, actionId) > 0) { lines.push(SONG_TEXT.waiting.replace('{move}', actionLabel(g, actionId, COMBAT_ACTIONS[actionId].label))); actionId = 'guard'; } // v0.11.116 (WA2, CDB): a stale tap
     const act = { ...COMBAT_ACTIONS[actionId], label: actionLabel(g, actionId, COMBAT_ACTIONS[actionId].label) };
     const living = c.enemies.filter((e) => e.hp > 0);
     const target = living[Math.min(targetIdx, living.length - 1)];
     let guard = false;
     c.aloft = false; // v0.11.112 (FF1): set below when this round's darts or blast are thrown from the air
-    const formed = (act.keeps === 'blade' && c.bladeFormed) || (act.keeps === 'spear' && c.spearFormed) || (act.keeps === 'flail' && c.flailFormed) || (act.field && c.fieldUsed); // a used field costs nothing (and does nothing)
+    const songed = songPays(g, actionId); // v0.11.116 (WA2, SG): the song pays instead of Qi
+    const formed = songed || (act.keeps === 'blade' && c.bladeFormed) || (act.keeps === 'spear' && c.spearFormed) || (act.keeps === 'flail' && c.flailFormed) || (act.field && c.fieldUsed); // a used field costs nothing (and does nothing)
     const qiNeed = formed ? 0 : actionCost(g, act);
+    if (songed) { c.song -= SONG_COST[actionId]; lines.push(SONG_TEXT[actionId].replace('{n}', SONG_COST[actionId])); }
     if (qiNeed && !spendQi(g, qiNeed)) {
         lines.push(`Not enough Qi for ${act.label} — you fall back on guarding.`);
         guard = true;
@@ -1014,14 +1048,15 @@ function stepNoDice(g, actionId, targetIdx) {
             const T = c.style === 'unarmed' ? 1 : boneTier(g); // v0.11.82: fists pierce nothing
             const targets = act.id === 'dart' && T >= 4 ? living.slice(0, T >= 5 ? living.length : 2)
                 : act.sweep ? [target, ...living.filter((e) => e !== target).slice(0, act.sweep - 1)] : [target]; // v0.11.107 (NK1): the flail, the target and one more
-            const key = actionId;
-            let learned = false;
+            const key = songed ? sungKey(g) : actionId; // v0.11.116 (WA2, SH): a needle the song pays for uses the blade's practice; WB1 (SP): or its own, if better
+            const kLabel = key === 'blade' && songed ? actionLabel(g, 'blade', COMBAT_ACTIONS.blade.label) : act.label;
+            let learned = false, landed = false;
             const w0 = weaponMastery(g, key), a0 = fightAdapt(c, key); // v0.11.115 (MA3, W50): counted below, after this round's checks; MB1 (SA): every target at the value the card shows
             for (const tg of targets) {
                 const r = rollCheck(g, act.skill, tg.dc + act.dcMod, a0 + (act.unarmed ? unarmedMastery(g) : w0)); // v0.11.114 (PA2, UM); v0.11.115 (MA3: the memory, FX; the move's familiarity, W50)
                 const band = T >= 10 && r.ratio < 1 && act.id !== 'blast' ? 'full' : bandOf(r.ratio); // v0.11.100 (SB1, T): the T10 no-miss is the constructs' (the sung weapons'), not the Qi blast's
                 lines.push(`${act.label}${targets.length > 1 ? ` → ${tg.name}` : ''}: ${checkText(r)} — ${{ double: 'a clean, deep hit', full: 'hit', glance: 'a glancing blow', miss: 'miss' }[band]}`);
-                if ((band === 'glance' || band === 'miss') && !learned && fightAdapt(c, key) < ADAPT_FIGHT_MAX) { c.adapt[key] = (c.adapt[key] || 0) + ADAPT_FIGHT_STEP; learned = true; lines.push(`  You read the opening better. (+${ADAPT_FIGHT_STEP} to ${act.label} this fight)`); } // v0.11.115 (MA3, FX): not past the cap the memory shares
+                if ((band === 'glance' || band === 'miss') && !learned && fightAdapt(c, key) < ADAPT_FIGHT_MAX) { c.adapt[key] = (c.adapt[key] || 0) + ADAPT_FIGHT_STEP; learned = true; lines.push(`  You read the opening better. (+${ADAPT_FIGHT_STEP} to ${kLabel} this fight)`); } // v0.11.115 (MA3, FX): not past the cap the memory shares
                 if (band === 'miss') continue;
                 let dmg = dmgRoll(g, actionDmg(g, act)) * (band === 'double' ? 2 : 1);
                 if (band === 'glance') dmg = Math.floor(dmg / 2);
@@ -1031,17 +1066,20 @@ function stepNoDice(g, actionId, targetIdx) {
                 if (mood === 'hungry' && dmg > 0) { const h0 = tg.hp; tg.hp = Math.min(tg.hpMax, tg.hp + dmg); lines.push(`  ${foeFill(TELL_TEXT.fed, tg.name).replace('{n}', Math.round((tg.hp - h0) * 10) / 10)}`); continue; } // DB1 (F): what it really healed
                 if (mood === 'proud' && dmg > 0) dmg *= 2;
                 tg.hp -= dmg;
+                if (dmg > 0) landed = true; // WB1 (SD; review low 3): only a hit that does damage raises the song (not one armour soaks to 0 or a hungry foe takes in)
                 lines.push(`  ${tg.name} takes ${dmg}${band === 'double' ? ' (double damage)' : ''}.`);
                 if (mood === 'proud' && dmg > 0) lines.push(TELL_TEXT.proudHit);
                 sparOut(c, tg, lines); // v0.11.114 (PA2, SF)
-                if (act.stagger && tg.hp > 0 && band !== 'glance') { tg.staggered = true; lines.push(act.unarmed ? `  ${tg.name} hits the dust and takes a moment to work out which way is up.` : `  ${tg.name} staggers.`); } // v0.11.82: the throw's line Fable's
+                if (act.stagger && tg.hp > 0 && (band !== 'glance' || songed)) { tg.staggered = true; lines.push(act.unarmed ? `  ${tg.name} hits the dust and takes a moment to work out which way is up.` : `  ${tg.name} staggers.`); } // v0.11.82: the throw's line Fable's
                 if (act.reach && tg.hp > 0 && band !== 'glance') { tg.atBay = true; lines.push(`  ${tg.name} is held at the spear's length.`); }
             }
             if (!act.unarmed) { // v0.11.115 (MA3, W50): a round of this move, kept across every Coil
                 const w = g.stats.weapons || (g.stats.weapons = {});
                 w[key] = (w[key] || 0) + 1;
-                if (weaponMastery(g, key) > w0) lines.push(weaponLine(act.label, key, w[key], weaponMastery(g, key)));
+                if (weaponMastery(g, key) > w0) lines.push(weaponLine(kLabel, key, w[key], weaponMastery(g, key)));
             }
+            if (WAIT[actionId]) { c.wait = c.wait || {}; c.wait[actionId] = c.round + WAIT[actionId] + 1; } // v0.11.116 (WA2, CDB): the move's own wait
+            if (act.keeps && landed && (c.song || 0) < SONG_MAX) { c.song = (c.song || 0) + 1; lines.push(SONG_TEXT.rise.replace('{weapon}', act.label).replace('{n}', c.song).replace('{max}', SONG_MAX)); } // SG
         }
     }
     const ct = !c.style && boneTier(g) >= 7 ? c.enemies.find((e) => e.hp > 0) : null; // v0.11.82: no construct in a spar or a brawl
@@ -1183,6 +1221,7 @@ export function combatFlee(g) {
     const dmg = hitDamage(biter.dmg, biter.realm, g.james.realm, jamesDr(g));
     g.james.hp = Math.max(0, g.james.hp - dmg);
     lines.push(`Something bites on the way out: −${dmg} HP.`);
+    if (c.wait) for (const k of Object.keys(c.wait)) c.wait[k] -= 1; // v0.11.116 (WB1, FR; review low 4): a failed run is a round for the rhythm
     if (g.james.hp <= 0) { g.combat = null; g.james.hp = 1; const next = loseTo(g, c); return { lines, done: 'lose', next }; }
     return { lines, done: null };
 }
