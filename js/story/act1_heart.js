@@ -420,6 +420,7 @@ What do you do.`,
             { text: (g) => LOG_HOLD[ykShape(g)] || LOG_HOLD.cat, do: (g) => { g.flags.reaction = 'silent'; bumpRel(g, 'Yuki', 3, 0); return []; }, to: 'log_comfort' },
         ],
     },
+    // v0.11.129 (CS1, HC; Fable's MAIN): all four fall asleep with the human
     log_comfort: {
         id: 'log_comfort', title: (g) => (trio(g) >= 2 && both(g) ? 'Between Them' : 'Afterwards'), art: (g) => (trio(g) >= 2 && both(g) ? 'trio' : likesYa(g) && ya(g) ? 'ya_close' : 'mei_lin'), place: `${PIN} — the Patient Root`,
         enter: (g) => trioStep(g, 3),
@@ -435,7 +436,7 @@ Ya goes very still. Then she grins at the ceiling — that sharp, delighted, dan
 
 ${LOG_JUDGE[ykShape(g)] || LOG_JUDGE.cat}
 
-It's not a beginning, exactly. But it's not nothing. You fall asleep there, the three of you, in the bridge of a dead ship, and for the first time since the lab you don't dream about falling.`;
+It's not a beginning, exactly. But it's not nothing. You fall asleep there, ${byForm(g, 'the three of you', 'the three of you', 'all four of you')}, in the bridge of a dead ship, and for the first time since the lab you don't dream about falling.`;
             }
             if (likesYa(g) && ya(g) && !likesMei(g)) {
                 return `Ya doesn't do comfort. You find that out. What she does instead is sit down right in front of you, cross-legged, knees touching yours, and glare at you until you look at her.
@@ -469,6 +470,7 @@ After a while Mei Lin says, "Thank you for bringing us here. I think I'd rather 
     },
 
     /* ---------- nights inside the trunk ---------- */
+    // v0.11.129 (CS1, HC; Fable's MAIN): the human in the heap
     heart_camp: {
         id: 'heart_camp', title: 'Camp in the Hollow', art: (g) => (trio(g) >= 3 ? 'trio_fire' : 'night_watch'), place: PIN,
         enter: (g) => { const n = eatBest(g, { fire: true }); return n.length ? [`Supper. ${n[0]}`] : []; },
@@ -479,7 +481,7 @@ After a while Mei Lin says, "Thank you for bringing us here. I think I'd rather 
                 : !g.flags.guardian ? 'Since the log, nobody sleeps much. The singing from behind the bone door is faint, and constant, and once you\'ve heard it you can\'t not hear it.' : 'The singing has stopped. The tree is quieter than it has been in four hundred years.';
             return `Night ${n} of the expedition's end, inside the Old Tree. ${mood}
 
-${trio(g) >= 3 ? 'The three of you sleep in a heap by the fire now. Nobody has said anything about it. Nobody needs to. Ya sleeps in the middle, because Ya always ends up in the middle of everything.' : ya(g) ? 'Ya takes the first watch without being asked, perched on a gallery ledge above the fire like a gargoyle, humming something tuneless.' : 'Mei Lin takes the first watch.'}`;
+${trio(g) >= 3 ? byForm(g, 'The three', 'The three', 'The four') + ' of you sleep in a heap by the fire now. Nobody has said anything about it. Nobody needs to. Ya sleeps in the middle, because Ya always ends up in the middle of everything.' : ya(g) ? 'Ya takes the first watch without being asked, perched on a gallery ledge above the fire like a gargoyle, humming something tuneless.' : 'Mei Lin takes the first watch.'}`;
         },
         choices: [
             { text: 'Talk with Mei Lin by the fire.', show: (g) => !g.flags[`hc_mei@${day(g)}`], do: (g) => { g.flags[`hc_mei@${day(g)}`] = true; bumpRel(g, 'Mei Lin', 3, likesMei(g) ? 3 : 1); return ['She tells you the songs about the Old Tree her grandmother sang. Some of the words are your words, worn smooth by four hundred years of people who didn\'t know what they meant.']; }, to: 'heart_night' },

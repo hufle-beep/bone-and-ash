@@ -282,6 +282,7 @@ ${g.james.realm >= 7 ? 'The forest is very quiet around your camp these days. No
         choices: [{ text: 'Get up.', to: 'lf_hub' }],
     },
 
+    // v0.11.129 (CS1, LB; Fable's MAIN): the human's opinion aloud
     lf_exit: {
         id: 'lf_exit', title: 'Toward the Smoke', art: 'ridge', place: P,
         text: (g) => `You stand at the edge of the Long Forest and look back at it for a while: the camp, the stream, the trails you've worn into the black earth, the places where things tried to eat you and then, increasingly, didn't.
@@ -292,7 +293,7 @@ The thing nobody out there knows yet — the thing you've worked out from the be
 
 "This," you tell Yuki, "is going to be either very funny or very short."
 
-Yuki's opinion, through the bond: *both.*`,
+${byForm(g, 'Yuki\'s opinion, through the bond: *both.*', 'Yuki\'s opinion, through the bond: *both.*', 'Yuki\'s opinion, delivered aloud: "Both."')}`,
         choices: [{
             text: 'Walk toward the smoke. (Day 4 begins.)',
             do: (g) => {

@@ -896,6 +896,7 @@ ${pantry(g)}`,
             { text: 'Sleep.', to: 'bl_night' },
         ],
     },
+    // v0.11.129 (CB1, BF; CS1, BF2; Fable's MAINs): the loose ring and the dw night's settling count four with the human
     bl_fireside: {
         id: 'bl_fireside', title: 'Fireside', art: 'trio_fire', place: (g) => PLACE[region(g)],
         enter: (g) => { markDaily(g, 'bl_fire'); return []; },
@@ -918,10 +919,10 @@ When you finish, nobody says anything for a while. Then Ya says, "I'd like that.
 
 "*No*."
 
-${likesMei(g) && likesYa(g) ? 'Later, settling down, the three of you end up closer than strictly necessary — for warmth, Ya says, and nobody argues with her.' : 'Later the fire burns low, and the water goes on dripping, and none of you sleeps much.'}`;
+${likesMei(g) && likesYa(g) ? `Later, settling down, the ${byForm(g, 'three', 'three', 'four')} of you end up closer than strictly necessary — for warmth, Ya says, and nobody argues with her.` : 'Later the fire burns low, and the water goes on dripping, and none of you sleeps much.'}`;
             return `The blue fire. The dead tree. Tomorrow, or the day after, you'll walk into it.
 
-${both(g) ? 'Ya sits between you and Mei Lin, an arm round each of your necks, and nobody moves her. Mei Lin\'s head is on Ya\'s shoulder. You don\'t think she knows she\'s put it there.' : onlyYa(g) ? 'Ya sits pressed against your side, unashamed, her hand on your knee. Mei Lin sits across the fire and pretends not to see. Maybe she doesn\'t mind. Maybe she minds a great deal.' : onlyMei(g) ? 'Mei Lin sits close enough that her shoulder is against yours. Ya grins at you both across the fire, approving, like a matchmaker who has won a bet.' : 'The three of you sit in a loose ring, the way people sit when they\'ve been through things together and don\'t yet have a word for what that makes them.'}
+${both(g) ? 'Ya sits between you and Mei Lin, an arm round each of your necks, and nobody moves her. Mei Lin\'s head is on Ya\'s shoulder. You don\'t think she knows she\'s put it there.' : onlyYa(g) ? 'Ya sits pressed against your side, unashamed, her hand on your knee. Mei Lin sits across the fire and pretends not to see. Maybe she doesn\'t mind. Maybe she minds a great deal.' : onlyMei(g) ? 'Mei Lin sits close enough that her shoulder is against yours. Ya grins at you both across the fire, approving, like a matchmaker who has won a bet.' : `${byForm(g, 'The three', 'The three', 'The four')} of you sit in a loose ring, the way people sit when they've been through things together and don't yet have a word for what that makes them.`}
 
 "Whatever's in there," Mei Lin says, "we go in together."
 
@@ -1106,6 +1107,7 @@ ${likesMei(g) ? 'Across the fire, Mei Lin opens one eye, sees, and closes it aga
     },
 
     /* =================================== the last night =================================== */
+    // v0.11.129 (CB1, HV; Fable's MAIN): the human makes four; CS1 (TM, HG; Fable's MAINs): her "Tomorrow" aloud, the great root-kin round the bedroll
     heart_view: {
         id: 'heart_view', title: 'Under the Tree', art: 'heart_gate', place: `${P} — the roots of the dead tree`,
         enter: (g) => { toHour(g, 19); g.flags.bl_region = 'ah'; return []; },
@@ -1117,13 +1119,13 @@ At the base of the trunk, half buried in roots, is a gap. A doorway, almost. And
 
 Your Convergence is singing back. You can't stop it. You're not sure you want to.
 
-${both(g) && trio(g) >= 3 ? 'Mei Lin and Ya lie down on either side of you without discussing it, and Mei Lin, who has not said yes to anything, reaches across your chest in the dark and finds Ya\'s hand, and holds it.' : g.flags.ya_romance ? 'Ya lies down against you as if she\'s always done it. Mei Lin lies down on Yuki\'s other side, close, and says goodnight to both of you, and means it.' : g.flags.mei_bond || g.flags.romance ? 'Mei Lin lies down against you, her head on your shoulder. Ya lies across the bottom of the bedroll like a guard dog, spear in her arms, and grins at you both in the dark.' : 'The three of you lie down close, for warmth, for courage. Yuki takes the exact centre.'}
+${both(g) && trio(g) >= 3 ? 'Mei Lin and Ya lie down on either side of you without discussing it, and Mei Lin, who has not said yes to anything, reaches across your chest in the dark and finds Ya\'s hand, and holds it.' : g.flags.ya_romance ? `Ya lies down against you as if she's always done it. Mei Lin lies down ${byForm(g, 'on Yuki\'s other side', 'against Yuki\'s great white flank', 'on Yuki\'s other side')}, close, and says goodnight to both of you, and means it.` : g.flags.mei_bond || g.flags.romance ? 'Mei Lin lies down against you, her head on your shoulder. Ya lies across the bottom of the bedroll like a guard dog, spear in her arms, and grins at you both in the dark.' : byForm(g, 'The three of you lie down close, for warmth, for courage. Yuki takes the exact centre.', 'The three of you lie down close, for warmth, for courage. Yuki lies down round all of you, and regards that as the exact centre.', 'The four of you lie down close, for warmth, for courage. Yuki takes the exact centre.')}
 
 "Tomorrow," Ya says, to the dark.
 
 "Tomorrow," Mei Lin says.
 
-*Tomorrow,* says Yuki, and for once she doesn't sound sarcastic at all.`,
+${byForm(g, '*Tomorrow,*', '*Tomorrow,*', '"Tomorrow,"')} says Yuki, and for once she doesn't sound sarcastic at all.`,
         choices: [{ text: 'Sleep in the roots of the tree.', to: 'bl_end' }],
     },
     bl_end: {

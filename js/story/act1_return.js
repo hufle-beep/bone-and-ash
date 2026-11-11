@@ -223,25 +223,27 @@ Ya wades out to her waist, fishes around for a while, and comes back with a beas
 By the time Mei Lin and Ya find you, the serpent has gone back to sleep, and Ya is laughing so hard she has to sit in the mud. Mei Lin is not laughing. Mei Lin is checking your ribs with grave, furious hands and muttering things her mother would slap her for.`,
         choices: [{ text: 'Make camp. Dry out.', time: 90, to: 'rt_camp' }],
     },
+    // v0.11.129 (owner pick CB1; Fable's MAINs): the human makes four at the camp (CA) and in the talk's label (TL)
     rt_camp: {
         id: 'rt_camp', title: 'The Last Camp', art: 'trio_fire', place: `${BR} — the far bank`,
         enter: (g) => { toHour(g, 19); if (daily('rt_supper')(g)) { markDaily(g, 'rt_supper'); const out = eatBest(g, { fire: true }); if (!out.length) { eat(g, 20); return ['Ya\'s smoked meat, shared round the fire: +20 satiety.']; } return out; } return []; },
         text: (g) => `Last night in the Blackroot. Tomorrow, Ashfall.
 
-The fire is small, because Ya says big fires are for people who want to be eaten. The three of you sit round it with ${byForm(g, 'Yuki in the warmest lap available', 'Yuki laid behind you all like a white wall, her head in the warmest lap available', 'Yuki leaning on the warmest shoulder available')}, which tonight is ${both(g) ? 'Mei Lin\'s, and Ya keeps finding reasons to lean across her to poke the fire' : likesYa(g) ? 'Ya\'s, to everyone\'s surprise, especially Ya\'s' : 'Mei Lin\'s'}.
+The fire is small, because Ya says big fires are for people who want to be eaten. ${byForm(g, 'The three of you sit round it with Yuki in the warmest lap available', 'The three of you sit round it with Yuki laid behind you all like a white wall, her head in the warmest lap available', 'The four of you sit round it, Yuki leaning on the warmest shoulder available')}, which tonight is ${both(g) ? 'Mei Lin\'s, and Ya keeps finding reasons to lean across her to poke the fire' : likesYa(g) ? 'Ya\'s, to everyone\'s surprise, especially Ya\'s' : 'Mei Lin\'s'}.
 
 Somewhere out in the dark, the dead tree stands against the stars. You can feel it at your back, the way you'd feel someone watching you leave.`,
         choices: [
-            { text: 'Talk, the three of you, until the fire burns down.', show: (g) => !g.flags.rt_fire_talk, time: 90, do: set('rt_fire_talk'), to: 'rt_fire_talk' },
+            { text: (g) => byForm(g, 'Talk, the three of you, until the fire burns down.', 'Talk, the three of you, until the fire burns down.', 'Talk, the four of you, until the fire burns down.'), show: (g) => !g.flags.rt_fire_talk, time: 90, do: set('rt_fire_talk'), to: 'rt_fire_talk' },
             { text: 'Take the first watch with Ya.', show: (g) => !g.flags.rt_watch, time: 120, do: set('rt_watch'), to: 'rt_watch' },
             { text: 'Cultivate by the fire: one sit, 10 Qi.', req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`, ...r.xp] : []; }, to: 'rt_camp' },
             { text: 'Sleep.', to: 'rt_dawn' },
         ],
     },
+    // v0.11.129 (CB1, FT; Fable's MAINs): a beat for the human in each text; CS1 (FW): "according to Ya and Mei Lin" and her word in the joke's result
     rt_fire_talk: {
         id: 'rt_fire_talk', title: 'Around the Fire', art: 'trio_fire', place: `${BR} — the far bank`,
         text: (g) => (both(g)
-            ? `It starts as a game. Ya's idea: everyone tells the worst thing they've ever done. Ya's is a long story about a bear and a bet, and at the end of it the bear is dead and Ya is wearing it. Yours involves a grant committee and is, according to both women, not bad at all, merely sad.
+            ? `It starts as a game. Ya's idea: everyone tells the worst thing they've ever done. Ya's is a long story about a bear and a bet, and at the end of it the bear is dead and Ya is wearing it. Yours involves a grant committee and is, according to ${byForm(g, 'both women', 'both women', 'Ya and Mei Lin')}, not bad at all, merely sad.${byForm(g, '', '', ' Yuki, in her turn, says she has never done anything wrong in her life, and looks at each of you until the subject closes.')}
 
 Mei Lin's is that she laughed at Gao Feng. In front of the whole herb slope. "That's it," she says, glaring. "That's the worst thing. In Ashfall it nearly got me sold."
 
@@ -252,11 +254,11 @@ When she lets go, Mei Lin doesn't slap her. She looks at Ya. Then — a long, un
 "Well," says Ya, licking her lip, satisfied. "Now *that's* the worst thing you've done. Congratulations."`
             : `Ya tells the story of how she was raised: by an old hunter who found her in a burned village at four, taught her to track and kill, and died when she was twelve. After that, the forest raised her. "It's a better mother than most," she says, and Mei Lin, to her credit, doesn't argue.
 
-Mei Lin tells of her father. You tell of the lab, and the blast, and the people you'll never know about.
+Mei Lin tells of her father. You tell of the lab, and the blast, and the people you'll never know about.${byForm(g, '', '', ' Yuki says only that she slept through the blast, which is true, and that she has not forgiven the chamber, which is also true.')}
 
 When the fire is down to embers, nobody is talking any more, and it's comfortable.`),
         choices: [
-            { text: (g) => (both(g) ? '"Is this a good time to mention I\'m right here?"' : 'Bank the fire.'), do: (g) => { if (both(g)) { trioStep(g, 3); bumpRel(g, 'Ya', 2, 4); bumpRel(g, 'Mei Lin', 2, 4); return ['Ya laughs. Mei Lin, after a moment, does too. It sounds like something breaking open.']; } bumpRel(g, 'Ya', 3, 1); bumpRel(g, 'Mei Lin', 3, 1); return [`You bank the fire the way Ya taught you, so it keeps without showing. Nobody moves to sleep. Ya lies flat with her hands behind her head and says, to the stars, "That was a good one." Mei Lin, to everyone's surprise and especially her own, agrees.`]; }, to: 'rt_camp' },
+            { text: (g) => (both(g) ? '"Is this a good time to mention I\'m right here?"' : 'Bank the fire.'), do: (g) => { if (both(g)) { trioStep(g, 3); bumpRel(g, 'Ya', 2, 4); bumpRel(g, 'Mei Lin', 2, 4); return ['Ya laughs. Mei Lin, after a moment, does too. It sounds like something breaking open.' + byForm(g, '', '', ' Yuki does not laugh. She was right here too.')]; } bumpRel(g, 'Ya', 3, 1); bumpRel(g, 'Mei Lin', 3, 1); return [`You bank the fire the way Ya taught you, so it keeps without showing. Nobody moves to sleep. Ya lies flat with her hands behind her head and says, to the stars, "That was a good one." Mei Lin, to everyone's surprise and especially her own, agrees.`]; }, to: 'rt_camp' },
         ],
     },
     rt_watch: {
@@ -289,13 +291,14 @@ Ya stops at the treeline as if there were a wall there. For a moment she looks y
     },
 
     /* ======================================================== DAY 20 — Ashfall =========================================== */
+    // v0.11.129 (CS1, RA; Fable's MAIN): the street registers the human
     rt_arrive: {
         id: 'rt_arrive', title: 'The Return', art: 'ashfall_dawn', place: P,
         text: (g) => `Ashfall receives you the way Ashfall receives everything: in silence, in a line, with its hands folded.
 
 They have heard. Of course they have heard — hunters talk, and a party that walks into the Blackroot's heart and walks out again is a thing that has not happened in living memory. Old Wen stands at the front with his pipe cold in his hand. Behind him, the street. Nobody smiles. Somebody's grandmother touches her forehead to the dust as you pass, then gets up and does it again.
 
-Their eyes go to Ya and stay there. Bare arms, wolf-tooth necklace, spear, a scar through one eyebrow and a grin that is frankly a provocation.
+${byForm(g, 'Their eyes go to Ya and stay there.', 'Their eyes go to Ya and stay there.', 'Their eyes go to Yuki first — the white hair, the ears, the tail — and move on, gravely, as from a matter that belongs to the outlander and is therefore not to be looked at twice. Then they go to Ya and stay there.')} Bare arms, wolf-tooth necklace, spear, a scar through one eyebrow and a grin that is frankly a provocation.
 
 "She is with us," Mei Lin says, loud and clear, to the whole street. That is not a thing a woman of Ashfall says. The street notes it.
 
@@ -322,9 +325,10 @@ He sets down his cup with great care.
 "And then he will decide whether Ashfall continues to exist." Old Wen bows his head, formally, to you — the first time he has. "Whatever you carried out of that tree. If it is going to be planted, plant it today."`,
         choices: [{ text: 'Go and plant it.', time: 20, to: 'rt_plant' }],
     },
+    // v0.11.129 (CB1, MO; Fable's MAIN): the mother sees the human and counts four
     rt_mother: {
         id: 'rt_mother', title: 'The Mother', art: 'dinner', place: `${P} — Mei Lin's house`,
-        text: (g) => `Mei Lin's mother looks at her daughter, filthy and scratched from four days in the deep forest. She looks at you. She looks at Ya for a very long time.
+        text: (g) => `Mei Lin's mother looks at her daughter, filthy and scratched from four days in the deep forest. She looks at you.${byForm(g, '', '', ' She looks at Yuki, ears and all, and lets that wait.')} She looks at Ya for a very long time.
 
 "You took my daughter into the Blackroot," she says to you, perfectly level.
 
@@ -338,7 +342,7 @@ He sets down his cup with great care.
 
 The silence stretches.
 
-"Your father," she says at last, "was exactly the same." She steps aside from the door. "Wash. All three of you. You smell like the forest died on you."`,
+"Your father," she says at last, "was exactly the same." She steps aside from the door. "Wash. All ${byForm(g, 'three', 'three', 'four')} of you. You smell like the forest died on you."`,
         choices: [{ text: 'Wash. Then the seed.', time: 60, do: (g) => { bumpRel(g, 'Mei Lin', 3, 0); bumpRel(g, 'Village', 2, 0); return []; }, to: 'rt_plant' }],
     },
     rt_plant: {
