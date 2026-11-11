@@ -1,5 +1,7 @@
 /** Shared story helpers: flags, days, food, and how enemies grow with the days James spends training. */
-import { clockParts, addItem, eat, wakeDay, dayHour, combatHooks } from '../core/game.js';
+import { clockParts, addItem, eat, wakeDay, dayHour, combatHooks, yukiForm } from '../core/game.js';
+/** v0.11.125 (owner pick FM1): a story line by Yuki's current form, as the pictures draw her (the cat's line is the old one; texts by Fable). */
+export const byForm = (g, cat, tiger, human) => { const f = yukiForm(g); return f === 'tiger' ? tiger : f === 'human' ? human : cat; };
 
 export const once = (flag) => (g) => !g.flags[flag];
 export const set = (...flags) => (g) => { for (const f of flags) g.flags[f] = true; return []; };

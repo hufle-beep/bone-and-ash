@@ -11,7 +11,7 @@
  * g.flags.final_night records it; loveLine() writes the Act 1 epilogue line for each.
  */
 import { bumpRel, sleepUntil, yukiForms, yukiForm } from '../core/game.js';
-import { daily, markDaily } from './common.js';
+import { daily, markDaily, byForm } from './common.js';
 import { likesMei, likesYa, trio, rel, KISS_YA, logTrio, ykShape } from './act1_common.js';
 
 export const ykPath = (g) => g.flags.yk_path || null;
@@ -328,7 +328,7 @@ export function loveLine(g) {
     if (g.flags.throuple) return 'At night the three of you sleep in the herb loft, a tangle of limbs and hair and one aggrieved cat.' + (lover ? ' Some nights the cat isn\'t a cat, and nobody minds.' : sis) + ' Mei Lin\'s mother has stopped saying anything about it, which in Ashfall is roughly the same as a blessing.';
     if (g.flags.ya_romance && !g.flags.romance) return 'Ya sleeps in the grove most nights, and most nights you sleep there too. The village has given up pretending not to notice.' + (lover ? ' Neither has Yuki, who has started sleeping there too.' : sis);
     if (g.flags.romance) return 'Mei Lin\'s mother sets four places at the table now: three and a saucer. She has stopped asking when you\'ll leave.' + (lover ? ' Yuki has started having very quiet conversations with Mei Lin by the well.' : sis);
-    return lover ? 'You sleep by the stove with Yuki, in whatever shape she feels like. It\'s enough. It is, honestly, a great deal more than enough.' : ykSister(g) ? 'You sleep by the stove with Yuki on your chest. She says you\'re hopeless. She says it fondly. It\'s enough, for now.' : 'You sleep by the stove with Yuki. It\'s enough. For now, it\'s enough.';
+    return lover ? 'You sleep by the stove with Yuki, in whatever shape she feels like. It\'s enough. It is, honestly, a great deal more than enough.' : ykSister(g) ? `${byForm(g, 'You sleep by the stove with Yuki on your chest.', 'You sleep by the stove with Yuki\'s head on your chest, which is all of her that fits.', 'You sleep by the stove back to back with Yuki, her tail across your shins.')} She says you\'re hopeless. She says it fondly. It\'s enough, for now.` : 'You sleep by the stove with Yuki. It\'s enough. For now, it\'s enough.';
 }
 
 /** Append a beat (a paragraph) to an existing scene's text. */
@@ -360,14 +360,20 @@ export function installYukiPath(SCENES) {
     beat(SCENES, 'romance', (g) => (ykSister(g)
         ? 'Through the bond, from somewhere very far away and getting farther: *I am moving to the roof. I am living on the roof now. Do not look for me.*'
         : ykLover(g) ? 'Through the bond, sleepy and amused from the stove downstairs: *Told you. I share. Tell her about me later.* A pause. *Much later.*' : ''));
-    beat(SCENES, 'epilogue', (g) => (ykSister(g) ? 'Yuki, on your chest, opens one gold eye. *Not bad,* says the bond. *For a mycologist.*' : ykLover(g) && ykHuman(g) ? 'Yuki, on your chest, purrs. Just for a moment, in the dark, her hand is in yours instead of a paw.' : ''));
+    // v0.11.125 (owner picks FM1, XS1: RB; Fable's MAINs): the ridge, standing: her place by her current form (was "on your chest" in every form)
+    beat(SCENES, 'epilogue', (g) => (ykSister(g) ? `${byForm(g, 'Yuki, on your shoulder, opens one gold eye.', 'Yuki, at your side, gives you one sidelong gold eye.', 'Yuki, at your elbow, gives you one sidelong gold eye.')} *Not bad,* says the bond. *For a mycologist.*` // RW1 (SL): awake, standing
+        : ykLover(g) && ykHuman(g) ? byForm(g, 'Yuki, on your shoulder, purrs. Just for a moment, in the dusk, it is a hand on the back of your neck instead of a paw.',
+            'Yuki, against your hip, purrs; you feel it in your teeth. Just for a moment, in the dusk, the paw on your foot is a hand in yours.',
+            'Yuki, at your elbow, does not purr. Just for a moment, in the dusk, her hand is in yours, and it stays a hand.') : ''));
     beat(SCENES, 'ya_meets', (g) => (ykPath(g)
-        ? `Ya sniffs the air near your shoulder, frowns, sniffs again, and looks straight at the white cat. "That," she says, "isn't a cat." Yuki looks back at her with enormous calm. ${ykLover(g) ? 'Through the bond: *I like her. She can stay. She can maybe even share the spot.*' : 'Through the bond: *I like her. She\'s rude. Marry her.*'}`
+        ? `${byForm(g, 'Ya sniffs the air near your shoulder, frowns, sniffs again, and looks straight at the white cat. "That," she says, "isn\'t a cat." Yuki looks back at her with enormous calm.', // v0.11.125 (RW1, BC; Fable's MAINs)
+            'Ya sniffs the air near your hip, frowns, sniffs again, and looks straight at the great white cat. "That," she says, "isn\'t a cat." Yuki looks back at her with enormous calm.',
+            'Ya sniffs the air near your elbow, frowns, sniffs again, and looks straight at the white-haired woman. "That," she says, "isn\'t a woman." Yuki looks back at her with enormous calm.')} ${ykLover(g) ? 'Through the bond: *I like her. She can stay. She can maybe even share the spot.*' : 'Through the bond: *I like her. She\'s rude. Marry her.*'}`
         : ''));
     beat(SCENES, 'log_comfort', (g) => (!ykPath(g) || logTrio(g) ? '' // v0.11.124 (NF1, LC1): the trio branch places her itself
         : ykShape(g) === 'tiger' // v0.11.124 (NF1, BT; Fable's MAIN): the great root-kin
         ? `And Yuki: her forehead pushed hard against your temple, the way she has done since before either of you could see, except that now it moves you a hand's width sideways, and a purr going through you that you feel in your ribs. The bond is quiet. ${ykLover(g) ? 'She doesn\'t need to say anything.' : 'Sisters don\'t need to say anything.'}`
-        : !ykHuman(g) // v0.11.122 (LG1, YV; Fable's A4)
+        : ykShape(g) !== 'human' // v0.11.122 (LG1, YV; Fable's A4); v0.11.125 (FM1, PM): by her current form, as the picture
         ? `And Yuki: her forehead pushed hard against your temple, the way she has done since before either of you could see, and a purr going through you that you feel in your teeth. The bond is quiet. ${ykLover(g) ? 'She doesn\'t need to say anything.' : 'Sisters don\'t need to say anything.'}`
         : `And Yuki: not on your shoulder but beside you, human, her forehead against your temple, her arm round your back. She doesn't say anything. ${ykLover(g) ? 'She doesn\'t need to.' : 'Sisters don\'t need to.'}`));
     beat(SCENES, 'rt_camp', (g) => (!ykHuman(g) ? '' // v0.11.122 (LG1, YG): both lines have her human (the sister's needs hands)
@@ -400,9 +406,9 @@ export function installYukiPath(SCENES) {
     }
     beat(SCENES, 'rt_evening', (g) => (ykLover(g) && !ykHuman(g) ? '' // v0.11.122 (LG1, YG): it invites the nights with her, which need her human
         : ykLover(g)
-        ? `Yuki is on the stove in her small shape, watching you all with half-closed gold eyes. ${likesMei(g) || likesYa(g) ? 'Through the bond: *Your call. Any of it. All of it. I told you: I share a sunbeam.*' : 'Through the bond: *The grove is singing. Come and listen.*'}`
-        : ykSister(g) ? `Yuki, on the stove, cracks one eye. *If you sleep alone tonight,* says the bond, *I am disowning you.*` : ''));
-    beat(SCENES, 'rt_quiet_night', (g) => (ykSister(g) ? 'Yuki, on your chest, mutters: *Disowned.* She doesn\'t move.' : ''));
+        ? `${byForm(g, 'Yuki is on the stove in her small shape', 'Yuki lies before the stove in her great shape', 'Yuki sits on the bench by the stove')}, watching you all with half-closed gold eyes. ${likesMei(g) || likesYa(g) ? 'Through the bond: *Your call. Any of it. All of it. I told you: I share a sunbeam.*' : 'Through the bond: *The grove is singing. Come and listen.*'}`
+        : ykSister(g) ? `Yuki, ${byForm(g, 'on the stove', 'in front of the stove', 'on the bench by the stove')}, cracks one eye. *If you sleep alone tonight,* says the bond, *I am disowning you.*` : ''));
+    beat(SCENES, 'rt_quiet_night', (g) => (ykSister(g) ? `Yuki, ${byForm(g, 'on your chest', 'head still on your chest', 'at your back')}, mutters: *Disowned.* She doesn\'t move.` : '')); // v0.11.125 (XS1, XL)
 
     // v0.11.123 (owner picks EQ1, SC; EB1, YH; Fable's D3, D4): last in their lists, so saved choice positions keep their lines
     const foBoth = (g) => likesMei(g) && likesYa(g);

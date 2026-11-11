@@ -6,7 +6,7 @@
 import { addItem, hasItem, eat, condense, advance, clockParts, jamesQiMax, dayHour, yukiForm } from '../core/game.js';
 import { condensationSatGain } from '../core/formulas.js';
 import { coilMult, sitGain } from '../core/game.js';
-import { set, daily, markDaily, eatBest } from './common.js';
+import { set, daily, markDaily, eatBest, byForm } from './common.js';
 import { loveLine } from './yuki_path.js';
 import { encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil, hour, KISS_YA, KISS_MEI } from './act1_common.js';
 
@@ -91,7 +91,7 @@ Mei Lin is pale and quiet, which for her is a kind of shouting. Ya is already te
 
 Behind her, Mei Lin picks her way with the grim, formal dignity of a woman who has been told her whole life that forests are for herbs, not for running through. ${rel(g, 'Ya').f >= 20 ? 'Twice Ya waits for her. Twice Mei Lin pretends not to notice. Twice Ya notices her pretending, and laughs.' : 'Ya does not wait for her. Mei Lin does not ask her to.'}
 
-Yuki rides on your shoulder and supervises.`,
+${byForm(g, 'Yuki rides on your shoulder and supervises.', 'Yuki pads at your side and supervises.', 'Yuki walks at your elbow and supervises.')}`,
         choices: [
             { text: 'Walk with Ya at the front.', show: daily('rt_ya_walk'), time: 60, do: (g) => { markDaily(g, 'rt_ya_walk'); return []; }, to: 'rt_ya_talk' },
             { text: 'Drop back and walk with Mei Lin.', show: daily('rt_mei_walk'), time: 60, do: (g) => { markDaily(g, 'rt_mei_walk'); return []; }, to: 'rt_mei_talk' },
@@ -476,11 +476,11 @@ Mei Lin, arriving, takes in the scene: you in the trough, Ya on the roof, half t
     rt_evening: {
         id: 'rt_evening', title: 'The Last Supper Before', art: 'dinner', place: `${P} — Mei Lin's house`,
         enter: (g) => { toHour(g, 19); if (daily('rt_evening')(g)) { markDaily(g, 'rt_evening'); eat(g, 30); return ['Millet, greens, and everything the house has been saving: +30 satiety.']; } return []; },
-        text: (g) => `Mei Lin's mother serves four bowls and a saucer for the cat. She serves Ya last, and Ya, who has been watching the old woman all evening like a wolf watches a fire, says "thank you" in a small voice that nobody at the table has heard her use before.
+        text: (g) => `Mei Lin's mother serves four bowls ${byForm(g, 'and a saucer for the cat', 'and, after a long look at Yuki, the stew pot', 'and a fifth for Yuki, with the saucer beside it out of habit')}. She serves Ya last, and Ya, who has been watching the old woman all evening like a wolf watches a fire, says "thank you" in a small voice that nobody at the table has heard her use before.
 
 Nobody mentions tomorrow. Everybody thinks about it.
 
-Afterwards the mother goes to bed with pointed loudness. The lamp burns. Yuki takes the stove.
+Afterwards the mother goes to bed with pointed loudness. The lamp burns. ${byForm(g, 'Yuki takes the stove.', 'Yuki takes the floor in front of the stove. All of it.', 'Yuki takes the bench by the stove.')}
 
 ${trioReady(g)
             ? 'Ya and Mei Lin sit on either side of you. Neither of them is looking at the other. Both of them are very aware of the other. The air in the room is so thick you could sing bone out of it.'
@@ -488,7 +488,7 @@ ${trioReady(g)
                 ? 'Mei Lin is on one side of the table. Ya is on the other. Both of them are looking at you. Neither is looking at the other. It is, you reflect, a lot.'
                 : likesYa(g) ? 'Ya is watching you across the lamp with an expression that is not at all subtle. Mei Lin looks at Ya, looks at you, and goes up to the loft with a grave, private smile.'
                     : likesMei(g) ? 'Ya stretches, yawns hugely, and announces she is going to sleep in a tree. She winks at you on the way out. Mei Lin turns the lamp down.'
-                        : 'Ya goes out to sleep in the grove with the cat-shaped hole in the leaves. Mei Lin says goodnight with grave courtesy. It is a quiet house.'}`,
+                        : `Ya goes out to sleep in the grove ${byForm(g, 'with the cat-shaped hole in the leaves', 'with the tiger-sized hole in the leaves', 'with the cat-shaped hole in the leaves')}. Mei Lin says goodnight with grave courtesy. It is a quiet house.`}`,
         choices: [
             { text: 'Let Ya say what she has been trying to say for days.', show: trioReady, to: 'rt_trio' },
             { text: 'Climb to the herb loft with Mei Lin.', show: (g) => likesMei(g) && !trioReady(g), to: 'rt_mei_night' },
@@ -568,11 +568,11 @@ Much later she lies with her head on your shoulder and traces the line of your c
     },
     rt_quiet_night: {
         id: 'rt_quiet_night', title: 'By the Stove', art: 'village_night', place: `${P} — Mei Lin's house`,
-        text: (g) => `You sleep by the stove with Yuki on your chest. Through the shutters you can hear the grove — faint, a sound under sound, like a song you half remember from childhood.
+        text: (g) => `${byForm(g, 'You sleep by the stove with Yuki on your chest.', 'You sleep by the stove with Yuki\'s head on your chest.', 'You sleep by the stove, back to back with Yuki.')} Through the shutters you can hear the grove — faint, a sound under sound, like a song you half remember from childhood.
 
 You don't sleep much. You lie there running tomorrow through all nine threads, and every one of them comes back with the same answer: *you don't know*. ${both(g) ? 'Once, in the dark, you hear Ya and Mei Lin talking in low voices in the loft above, and then a laugh, quickly smothered. You decide that is a problem for the day after tomorrow.' : ''}
 
-Toward dawn Yuki puts her nose against your chin. *Stop thinking,* says the bond. *I am trying to sleep on you.*`,
+${byForm(g, 'Toward dawn Yuki puts her nose against your chin. *Stop thinking,* says the bond. *I am trying to sleep on you.*', 'Toward dawn Yuki\'s nose bumps your chin. *Stop thinking,* says the bond. *I am trying to sleep on you.*', 'Toward dawn Yuki\'s elbow finds your ribs. *Stop thinking,* says the bond. *I am trying to sleep.*')}`,
         choices: [{ text: 'Dawn.', do: (g) => { sleepUntil(g, 6); return ['Slept until 06:00. HP and Qi full.']; }, to: 'rt_elder' }],
     },
 
@@ -594,7 +594,7 @@ And it finds nothing. No root. No sea. No core. A mortal in a strange coat.
 
 For the first time, Shen Qiu's face changes. It is not anger. It is something much older and much colder: the expression of a man who has spent three hundred years knowing exactly what everything in front of him is, and has just met the exception. "I cannot feel you," he says, very softly. "Do you understand? Not hidden. Not sealed. *Absent.* As if Heaven had forgotten to write you down." His sleeves settle. "Tell me what you are, young man, and I will decide what to do with it."
 
-Behind you, Mei Lin's hand closes on her knife. Ya's lips draw back from her teeth. Yuki, on your shoulder, goes very still.`,
+Behind you, Mei Lin's hand closes on her knife. Ya's lips draw back from her teeth. Yuki, ${byForm(g, 'on your shoulder', 'at your side', 'at your elbow')}, goes very still.`,
         choices: [
             { text: 'Fight him. Here, in front of the grove.', combat: elderFight, to: 'rt_duel_won' },
             { text: 'Parley. Formally. Give him the face he needs and none of what he wants.', time: 30, to: 'rt_parley' },
@@ -715,9 +715,9 @@ Behind him, Ashfall has not moved. ${g.flags.a1_militia ? 'The hunters\' spears 
         enter: (g) => { g.flags.a1_outcome = 'taken'; bumpRel(g, 'Village', 25, 0); return []; },
         text: (g) => `You walk out to him. Behind you, the street makes a sound you will remember for the rest of your life: not a cry, not a word, just forty houses breathing in at once.
 
-Shen Qiu inclines his head, exactly as deeply as courtesy demands. "The grove stands," he says. "Ashfall's tribute is suspended for as long as you remain a guest of the Sect." *Guest.* "You may bring the cat. The Sect Master will want to see the cat."
+Shen Qiu inclines his head, exactly as deeply as courtesy demands. "The grove stands," he says. "Ashfall's tribute is suspended for as long as you remain a guest of the Sect." *Guest.* ${byForm(g, '"You may bring the cat. The Sect Master will want to see the cat."', '"You may bring the beast. The Sect Master will want to see the beast."', '"You may bring the root-kin. The Sect Master will want to see the root-kin."')}
 
-Yuki, on your shoulder, gives him a look of total contempt.
+Yuki, ${byForm(g, 'on your shoulder', 'at your side', 'at your elbow')}, gives him a look of total contempt.
 
 ${g.flags.throuple ? 'Mei Lin and Ya come to the edge of the road together, hands locked so hard their knuckles are white. "We\'re coming after you," Mei Lin says, formally, in front of the whole Sect. "Both of us." Ya says nothing. Ya just looks at Shen Qiu, and smiles, and the nearest disciple takes a step back.'
         : likesMei(g) || likesYa(g) ? `${likesMei(g) ? 'Mei Lin' : 'Ya'} comes to the edge of the road. "I'm coming after you," ${likesMei(g) ? 'she' : 'she'} says, not caring who hears. "Don't argue."` : 'Mei Lin bows to you, very formally, the bow owed to a man going to his death. Ya spits on the Sect\'s road and walks into the forest without looking back. You suspect you\'ll see her again.'}
@@ -746,7 +746,7 @@ ${love}`;
 
 Some nights you lie awake and listen, and under the grove's song you think you can hear another one, very far away, very faint: deep in the Blackroot, where the dead tree stands, something answering.
 
-Yuki, on your chest, opens one gold eye. *Not dead,* says the bond. *Sleeping. Like you should be.*
+Yuki, ${byForm(g, 'on your chest', 'her head on your chest', 'beside you')}, opens one gold eye. *Not dead,* says the bond. *Sleeping. Like you should be.*
 
 — **End of Act 1.** —`;
         },

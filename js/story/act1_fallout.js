@@ -4,7 +4,7 @@
  * planned, and at dawn on Day 11 it leaves (→ 'bl_start').
  */
 import { addItem, eat, condense, advance, sleepUntil, jamesHpMax, hasItem, awardYukiFightXp, yukiForm, nightRest, nightTo } from '../core/game.js';
-import { daily, markDaily, hour, day, eatBest, pantry, foodCount } from './common.js';
+import { daily, markDaily, hour, day, eatBest, pantry, foodCount, byForm } from './common.js';
 import { encounter, rel, likesMei, likesYa, trioStep, bumpRel, KISS_YA } from './act1_common.js';
 
 const P = 'Ashfall Hamlet';
@@ -467,7 +467,7 @@ Then she sees you. And Yuki. And her nostrils flare, and her face goes completel
     ya_meets: {
         id: 'ya_meets', title: 'Nothing Smells Like Nothing', art: 'ya_close', place: `${P} — the north path`,
         enter: (g) => { g.flags.ya_met = true; bumpRel(g, 'Ya', 2, 2); return []; },
-        text: (g) => `She walks right up to you, much too close, and *sniffs* you. Neck, hair, the collar of your coat. Yuki, on your shoulder, flattens her ears and allows it, which she has never allowed anyone.
+        text: (g) => `She walks right up to you, much too close, and *sniffs* you. Neck, hair, the collar of your coat. Yuki, ${byForm(g, 'on your shoulder', 'at your hip', 'at your elbow')}, flattens her ears and allows it, which she has never allowed anyone.
 
 "*You,*" the woman says. "Three nights I sat outside your little fire. Three nights. You smell like nothing. Nothing smells like nothing. Everything here smells like rot — the grass, the beasts, the Sect, *them*" — a thumb at the village — "everything that eats the air. You don't." She grins, all teeth. "I wanted to see if you'd taste like nothing too. Then the dogs came for you and you killed them, and I thought: he's mine. I'll come and get him when I'm hungry."
 
@@ -716,7 +716,7 @@ When you wake, she's gone — back on the shrine roof, sharpening her spear, as 
 
 The village lines the north path in silence: every family, every child, the hunters in their two straight lines. Nobody calls out. Nobody waves. As you pass, they bow, one row after another, like barley in wind.
 
-Mei Lin walks at your left with her father's knife at her hip and her basket on her back, not looking at her mother, because if she looks she won't go. Ya walks at your right, ahead, then behind, then off the path entirely, impatient as a dog on a lead. Yuki rides your shoulder facing north, tail curled round your neck.
+Mei Lin walks at your left with her father's knife at her hip and her basket on her back, not looking at her mother, because if she looks she won't go. Ya walks at your right, ahead, then behind, then off the path entirely, impatient as a dog on a lead. ${byForm(g, 'Yuki rides your shoulder facing north, tail curled round your neck.', 'Yuki paces at your knee facing north, tail laid against your leg.', 'Yuki walks half a step ahead of you facing north, tail curled round your sleeve.')}
 
 At the edge of the barley, where the white stakes end and the black trees begin, your Convergence stops humming and starts, unmistakably, to *sing*.
 

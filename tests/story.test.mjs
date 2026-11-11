@@ -8,6 +8,7 @@ import { btTarget } from '../js/story/meridians.js';
 import { loveLine } from '../js/story/yuki_path.js'; // v0.11.122 (RL1, T)
 import { likesMei, likesYa } from '../js/story/act1_common.js'; // v0.11.123 (EQ1, AB)
 import { KEEP_FLAGS, rewind } from '../js/core/coil.js'; // v0.11.123 (ER1, T3)
+import { againView } from '../js/story/again.js'; // v0.11.125 (RW1, T)
 import { writeFileSync } from 'node:fs';
 import { smartAction } from './lib/smartfight.mjs'; // v0.11.96 (BT1)
 import { GAMES, FULL, SHARD, WORKERS, STATS_OUT, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
@@ -229,6 +230,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         // the beats
         for (const path of ['sister', 'lover']) {
             const b = LG(52300 + yr, { yk_path: path }, [10, 10], yr);
+            if (human) b.yuki.form = 'human'; // v0.11.125 (FM1, PM): the log scene's beat follows her current form (the FM1 block covers a cat at realm 7)
             goTo(b, SCENES, 'log_comfort');
             const t = sceneView(b, SCENES).text;
             assert(/beside you, human/.test(t) === human && /purr going through you/.test(t) === !human, `LG1 (YG, YV): the log comfort has her ${human ? 'human' : 'as a cat'} (${path}, realm ${yr})`);
@@ -545,7 +547,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         Object.assign(g.flags, { long: true, forest_day: 3, vday: 3, mei_party: true, ya_party: true, ya_met: true, log_heard: true }, path ? { yk_path: path } : {}, trio ? { trio } : {});
         g.rel = { 'Mei Lin': { f: 40, a: rel[0] }, Ya: { f: 40, a: rel[1] }, Yuki: { f: 50, a: 50 }, Village: { f: 30, a: 0 } };
         const realm = shape === 'human' ? 7 : shape === 'tiger' || shape === 'cat2' ? 2 : 0;
-        g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = shape === 'tiger' ? 'tiger' : 'cat';
+        g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = shape === 'tiger' ? 'tiger' : shape === 'human' ? 'human' : 'cat'; // v0.11.125 (FM1, PM): the lines follow her current form
         return ensureBars(g);
     };
     const shapeOf = (s) => (s === 'cat2' ? 'cat' : s);
@@ -585,22 +587,24 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         const mt = sceneView(m, SCENES).text;
         assert(/^Mei Lin sits down next to you/.test(mt) && (mt.match(/\bYuki\b/g) || []).length === (path ? 1 : 0), `NF1: Mei Lin's branch names Yuki ${path ? 'once (the beat)' : 'never'} (${tag})`);
     }
-    // HS: her human form open but a cat on the shoulder now: the lines say human, as the beat does (v0.11.122's rule)
+    // v0.11.125 (FM1, PM; was NF1's HS): her human form open but a cat on the shoulder now: the lines follow the cat, as the picture
     {
         const g = LS(56400, 'sister', 'human', [10, 10], 0); g.yuki.form = 'cat'; goTo(g, SCENES, 'log_reaction');
-        assert(sceneView(g, SCENES).choices[3].label === HOLD.human, 'NF1 (HS): human open this Coil, a cat now: the label says human');
+        assert(sceneView(g, SCENES).choices[3].label === HOLD.cat && LOOK.cat.test(sceneView(g, SCENES).text), 'FM1 (PM): human open this Coil, a cat now: the look and the label follow the cat');
+        goTo(g, SCENES, 'log_comfort');
+        assert(/feel in your teeth/.test(sceneView(g, SCENES).text) && !/beside you, human/.test(sceneView(g, SCENES).text), 'FM1 (PM): human open, a cat now: the path beat is the cat\'s');
     }
-    // Fable's review (test gaps): human open with the great root-kin now: every line human
+    // Fable's review of NF1 (test gaps), under FM1's rule: human open with the great root-kin now: every line the great root-kin's
     {
         const r = LS(56410, 'lover', 'human', [80, 80], 3); r.yuki.form = 'tiger'; goTo(r, SCENES, 'log_reaction');
         const rv = sceneView(r, SCENES);
-        assert(LOOK.human.test(rv.text) && rv.choices[3].label === HOLD.human, 'NF1 (HS, review): human open, the great root-kin now: the look and the label human');
+        assert(LOOK.tiger.test(rv.text) && rv.choices[3].label === HOLD.tiger, 'FM1 (PM): human open, the great root-kin now: the look and the label hers');
         choose(r, SCENES, 3);
-        assert(wasPicked(r, 'log_reaction', 3) && JUDGE.human.test(sceneView(r, SCENES).text) && !BEAT.test(sceneView(r, SCENES).text), 'NF1 (review): the silent choice recorded at position 3; the trio line human, reached through the choice');
+        assert(wasPicked(r, 'log_reaction', 3) && JUDGE.tiger.test(sceneView(r, SCENES).text) && !BEAT.test(sceneView(r, SCENES).text), 'NF1 (review): the silent choice recorded at position 3; the trio line by her form, reached through the choice');
         const f = LS(56411, null, 'human', [10, 10], 0); f.yuki.form = 'tiger'; goTo(f, SCENES, 'log_comfort');
-        assert(SEAT.human.test(sceneView(f, SCENES).text), 'NF1 (HS, review): human open, the great root-kin now: the fallback clause human (no path, an old or hand-made save)');
+        assert(SEAT.tiger.test(sceneView(f, SCENES).text), 'FM1 (PM): human open, the great root-kin now: the fallback clause hers');
         const b = LS(56412, 'sister', 'human', [10, 10], 0); b.yuki.form = 'tiger'; goTo(b, SCENES, 'log_comfort');
-        assert(/beside you, human/.test(sceneView(b, SCENES).text) && !/sideways/.test(sceneView(b, SCENES).text), 'NF1 (HS, review): human open, the great root-kin now: the beat human');
+        assert(/sideways/.test(sceneView(b, SCENES).text) && !/beside you, human/.test(sceneView(b, SCENES).text), 'FM1 (PM): human open, the great root-kin now: the beat hers');
     }
     // stale stored forms (old saves): a form not open this Coil reads as the cat
     for (const [form, realm] of [['human', 0], ['tiger', 0], ['human', 2]]) {
@@ -623,6 +627,152 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         const g = LS(56450 + (path ? 1 : 0), path, 'cat', [10, 80], 0); goTo(g, SCENES, 'log_comfort');
         const tt = sceneView(g, SCENES).text;
         assert(/^Ya doesn't do comfort/.test(tt) && (tt.match(/\bYuki\b/g) || []).length === (path ? 1 : 0), `NF1 (review): Ya's branch names Yuki ${path ? 'once (the beat)' : 'never'}`);
+    }
+}
+
+// v0.11.125 (owner pick FM1; texts by Fable): the 18 lines that put the small cat on his shoulder, in his lap or on his chest now follow
+// her current form, as the pictures do (the cat keeps the old line)
+{
+    const FM = (seed, form, flags = {}, rel = [40, 40]) => {
+        const g = ensureBars(fresh(seed)); g.minutes = 9 * 1440 + 600;
+        Object.assign(g.flags, { long: true, forest_day: 3, vday: 3, mei_party: true, ya_party: true, ya_met: true, fire: true }, flags);
+        g.rel = { ...g.rel, 'Mei Lin': { f: 40, a: rel[0] }, Ya: { f: 40, a: rel[1] }, Yuki: { f: 50, a: 50 }, Village: { f: 30, a: 0 } };
+        const realm = form === 'human' ? 7 : form === 'tiger' ? 2 : 0;
+        g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; return ensureBars(g);
+    };
+    // [scene, flags, the cat's text, the great root-kin's, the human's]
+    const CASES = [
+        ['epilogue', {}, /ridge with Yuki on your shoulder/, /ridge with Yuki pacing at your side/, /ridge with Yuki at your elbow/],
+        ['rt_road', {}, /Yuki rides on your shoulder and supervises\./, /Yuki pads at your side and supervises\./, /Yuki walks at your elbow and supervises\./],
+        ['ya_meets', {}, /Yuki, on your shoulder, flattens her ears and allows it/, /Yuki, at your hip, flattens/, /Yuki, at your elbow, flattens/],
+        ['village_morning', { vday: 2 }, /on the doorstep like a small white guard dog\./, /across the doorstep like a large white guard dog\./, /eyes shut, like a small white guard dog in a black dress\./],
+        ['ya_mocks', {}, /Yuki, on your shoulder, sends a single thought/, /Yuki, at your side, sends/, /Yuki, at your elbow, sends/],
+        ['rt_quiet_night', {}, /^You sleep by the stove with Yuki on your chest\. Through/, /^You sleep by the stove with Yuki's head on your chest\. Through/, /^You sleep by the stove, back to back with Yuki\. Through/],
+        ['night', {}, /Yuki climbs into your lap, which she only does/, /Yuki lies down around you, which she only does/, /Yuki sits down against your side, which she only does/],
+        ['rt_evening', {}, /four bowls and a saucer for the cat\./, /four bowls and, after a long look at Yuki, the stew pot\./, /four bowls and a fifth for Yuki, with the saucer beside it out of habit\./],
+        ['rt_elder', {}, /Yuki, on your shoulder, goes very still\./, /Yuki, at your side, goes very still\./, /Yuki, at your elbow, goes very still\./],
+        ['ship_bridge', {}, /Yuki gets into your lap without being asked\./, /Yuki lays her head in your lap without being asked\./, /Yuki sits on the arm of your seat without being asked\./],
+        ['ht_leave', {}, /Yuki rides on your shoulder with her tail wrapped round your neck\./, /Yuki pads at your side with her tail hooked round your wrist\./, /Yuki walks at your shoulder with her tail wrapped round your wrist\./],
+        ['bl_end', {}, /Yuki is on your shoulder, claws in\./, /Yuki is at your side, claws out\./, /Yuki is at your shoulder, claws out\./],
+        ['hall_listen', {}, /Yuki puts her paw on the back of your hand\. Through the bond/, /Yuki rests her chin on the back of your hand\. Through the bond/, /Yuki puts her hand on the back of yours\. Through the bond/],
+        ['bl_start', {}, /A biologist, a cat, a herb-woman/, /A biologist, a very large cat, a herb-woman/, /A biologist, a cat in a black dress, a herb-woman/],
+        ['ah_hunt', {}, /"They'll go for the cat\."\n\nYuki, on your shoulder, flattens/, /"They won't go for the cat\. Not that cat\."\n\nYuki, at your side, flattens/, /"They'll go for the small one\."\n\nYuki, at your elbow, flattens/],
+    ];
+    let n = 0;
+    for (const [id, flags, ...want] of CASES) {
+        assert(!!SCENES[id], `FM1: scene ${id} exists`);
+        ['cat', 'tiger', 'human'].forEach((form, i) => {
+            const g = FM(57000 + n++, form, flags); goTo(g, SCENES, id);
+            const t = sceneView(g, SCENES).text;
+            assert(want[i].test(t) && want.filter((re) => re.test(t)).length === 1, `FM1: ${id} as ${form} (${t.slice(0, 80)}…)`);
+        });
+    }
+    // the locals' lines (tribute: Lu Han; elder: the village elder): where they see her, by form; "at its size" only for the cat
+    for (const [id, who] of [['tribute', 'Lu Han'], ['elder', 'the elder']]) {
+        for (const [form, spot] of [['cat', 'the beast on your shoulder'], ['tiger', 'the beast at your side'], ['human', 'the beast beside you']]) {
+            for (const prim of [12, 5, 0]) {
+                const g = FM(57200 + n++, form); g.yuki.primaries = prim; goTo(g, SCENES, id);
+                const t = sceneView(g, SCENES).text;
+                const others = ['the beast on your shoulder', 'the beast at your side', 'the beast beside you'].filter((x) => x !== spot);
+                assert(t.includes(spot) && !others.some((x) => t.includes(x)), `FM1: ${who}'s line as ${form}, ${prim} meridians`);
+                if (id === 'elder' && prim === 5) assert(t.includes({ cat: 'at its size', tiger: 'untaught', human: 'at its age' }[form]), `FM1: the elder's "at its size" as ${form}`);
+            }
+        }
+    }
+    // the sister's epilogue line (loveLine, a1_end)
+    for (const [form, re] of [['cat', /with Yuki on your chest\. She says you're hopeless/], ['tiger', /with Yuki's head on your chest, which is all of her that fits\. She says/], ['human', /back to back with Yuki, her tail across your shins\. She says/]]) {
+        const g = FM(57400 + n++, form, { yk_path: 'sister', ending: 'bluff' }, [10, 10]);
+        const line = loveLine(g);
+        assert(re.test(line), `FM1: the sister's last line as ${form} (${line.slice(0, 70)})`);
+    }
+    // v0.11.125 (owner pick XS1): XL, three more lines (the epilogue's tail, Act 1's last "Not dead", the sister's "Disowned"), and RB,
+    // the ridge's two path beats (standing, so never "on your chest")
+    for (const [form, tail, notDead, disowned, notBad, lover] of [
+        ['cat', /Yuki's tail curls around your neck\. Through the bond/, /Yuki, on your chest, opens one gold eye\. \*Not dead/, /Yuki, on your chest, mutters: \*Disowned/, /Yuki, on your shoulder, opens one gold eye\. \*Not bad/, /Yuki, on your shoulder, purrs\. Just for a moment, in the dusk, it is a hand on the back of your neck/],
+        ['tiger', /Yuki's tail curls around your wrist\. Through the bond/, /Yuki, her head on your chest, opens one gold eye\. \*Not dead/, /Yuki, head still on your chest, mutters: \*Disowned/, /Yuki, at your side, gives you one sidelong gold eye\. \*Not bad/, /Yuki, against your hip, purrs; you feel it in your teeth\./],
+        ['human', /Yuki's tail curls around your wrist\. Through the bond/, /Yuki, beside you, opens one gold eye\. \*Not dead/, /Yuki, at your back, mutters: \*Disowned/, /Yuki, at your elbow, gives you one sidelong gold eye\. \*Not bad/, /Yuki, at your elbow, does not purr\. Just for a moment, in the dusk, her hand is in yours, and it stays a hand\./],
+    ]) {
+        const e = FM(57600 + n++, form); goTo(e, SCENES, 'epilogue');
+        assert(tail.test(sceneView(e, SCENES).text), `XS1 (XL): the epilogue's tail as ${form}`);
+        const a = FM(57700 + n++, form, { ending: 'bluff' }); a.minutes = 21 * 1440 + 600; goTo(a, SCENES, 'a1_end');
+        assert(notDead.test(sceneView(a, SCENES).text), `XS1 (XL): Act 1's last "Not dead" as ${form}`);
+        const q = FM(57800 + n++, form, { yk_path: 'sister' }); goTo(q, SCENES, 'rt_quiet_night');
+        const qt = sceneView(q, SCENES).text;
+        assert(disowned.test(qt) && !/Yuki, on your chest, mutters/.test(qt) === (form !== 'cat'), `XS1 (XL): the sister's "Disowned" as ${form}`);
+        const r = FM(57900 + n++, form, { yk_path: 'sister' }); goTo(r, SCENES, 'epilogue');
+        assert(notBad.test(sceneView(r, SCENES).text) && !/on your chest/.test(sceneView(r, SCENES).text), `XS1 (RB): the ridge's sister beat as ${form}, standing`);
+        const l = FM(58000 + n++, form, { yk_path: 'lover' }); l.yuki.realm = 7; l.james.realm = 7; goTo(l, SCENES, 'epilogue');
+        assert(lover.test(sceneView(l, SCENES).text) && !/on your chest|in the dark/.test(sceneView(l, SCENES).text), `XS1 (RB): the ridge's lover beat as ${form} (human open this Coil)`);
+        const l0 = FM(58100 + n++, form, { yk_path: 'lover' }); goTo(l0, SCENES, 'epilogue');
+        assert(!/Just for a moment, in the dusk/.test(sceneView(l0, SCENES).text) === (form !== 'human'), `XS1 (RB): the ridge's lover beat only with her human form open (${form})`);
+    }
+    // v0.11.125 (owner pick RW1, Fable's review of FM1 + XS1): BC the scenes' own beats, SL the leftovers, AJ the next scene in each flow
+    const RW = [
+        // [scene, flags, minutes, cat, great root-kin, human]
+        ['rt_evening', {}, 19 * 1440 + 1200, /Yuki takes the stove\./, /Yuki takes the floor in front of the stove\. All of it\./, /Yuki takes the bench by the stove\./],
+        ['rt_quiet_night', {}, null, /Toward dawn Yuki puts her nose against your chin\./, /Toward dawn Yuki's nose bumps your chin\./, /Toward dawn Yuki's elbow finds your ribs\. \*Stop thinking,\* says the bond\. \*I am trying to sleep\.\*/],
+        ['epilogue', {}, null, /a fresh doctorate, a cat, an empty closet/, /a fresh doctorate, a cat the size of a tiger, an empty closet/, /a fresh doctorate, a cat who is currently a woman, an empty closet/],
+        ['ya_fight_start', {}, null, /Yuki climbs down off your shoulder and sits at a safe distance/, /Yuki walks off a little way and lies down at a safe distance/, /Yuki steps back and sits on a root at a safe distance/],
+        ['ah_hawks_won', {}, null, /riding your shoulder through the whole thing, claws in, spitting — leaps off and lands on it, and sits there/, /at your flank through the whole thing, claws out, snarling — puts one paw on it, and sits there/, /at your back through the whole thing, claws out, spitting — puts her foot on it, and stands there/],
+        ['rt_taken', {}, 21 * 1440 + 600, /"You may bring the cat\. The Sect Master will want to see the cat\."[\s\S]*Yuki, on your shoulder, gives him/, /"You may bring the beast\. The Sect Master will want to see the beast\."[\s\S]*Yuki, at your side, gives him/, /"You may bring the root-kin\. The Sect Master will want to see the root-kin\."[\s\S]*Yuki, at your elbow, gives him/],
+        ['fo_depart', {}, 10 * 1440 + 360, /Yuki rides your shoulder facing north, tail curled round your neck\./, /Yuki paces at your knee facing north, tail laid against your leg\./, /Yuki walks half a step ahead of you facing north, tail curled round your sleeve\./],
+        ['night_event', { night_ev: 'lights' }, null, /Yuki is awake on your chest, ears flat, not hissing\./, /Yuki is awake against your side, ears flat, not growling\./, /Yuki is awake beside you, ears flat, not speaking\./],
+        ['night_lost', {}, null, /Yuki sits on your chest until your heartbeat slows/, /Yuki rests one paw on your chest until your heartbeat slows/, /Yuki sits with her hand flat on your chest until your heartbeat slows/],
+    ];
+    for (const [id, flags, min, ...want] of RW) {
+        ['cat', 'tiger', 'human'].forEach((form, i) => {
+            const g = FM(58200 + n++, form, flags); if (min) g.minutes = min; goTo(g, SCENES, id);
+            if (id === 'night_event') g.flags.night_ev = 'lights';
+            const t = sceneView(g, SCENES).text;
+            assert(want[i].test(t) && want.filter((re) => re.test(t)).length === 1, `RW1: ${id} as ${form} (${t.slice(0, 70)}…)`);
+        });
+    }
+    // BC: the last evening's bowl, its stove line and her path beat agree in every form (sister any realm; lover with her human form open)
+    for (const path of ['sister', 'lover']) for (const [form, bowl, beat] of [
+        ['cat', /a saucer for the cat/, path === 'lover' ? /Yuki is on the stove in her small shape/ : /Yuki, on the stove, cracks one eye/],
+        ['tiger', /the stew pot/, path === 'lover' ? /Yuki lies before the stove in her great shape/ : /Yuki, in front of the stove, cracks one eye/],
+        ['human', /a fifth for Yuki/, path === 'lover' ? /Yuki sits on the bench by the stove, watching/ : /Yuki, on the bench by the stove, cracks one eye/],
+    ]) {
+        const g = FM(58400 + n++, form, { yk_path: path }); g.minutes = 19 * 1440 + 1200; if (path === 'lover') { g.yuki.realm = 7; g.james.realm = 7; }
+        goTo(g, SCENES, 'rt_evening');
+        const t = sceneView(g, SCENES).text;
+        assert(bowl.test(t) && beat.test(t) && (form === 'cat' || !/on the stove in her small shape|Yuki, on the stove|Yuki takes the stove\./.test(t)), `RW1 (BC): the last evening agrees with itself (${path}, ${form})`);
+    }
+    // BC: Ya's path beat at the meeting, by form
+    for (const [form, re] of [['cat', /near your shoulder[\s\S]*the white cat\. "That," she says, "isn't a cat\."/], ['tiger', /near your hip[\s\S]*the great white cat\. "That," she says, "isn't a cat\."/], ['human', /near your elbow[\s\S]*the white-haired woman\. "That," she says, "isn't a woman\."/]]) {
+        const g = FM(58500 + n++, form, { yk_path: 'sister' }); goTo(g, SCENES, 'ya_meets');
+        const t = sceneView(g, SCENES).text;
+        assert(re.test(t) && (form === 'cat' || !/near your shoulder|on your shoulder/.test(t)), `RW1 (BC): Ya's path beat as ${form}`);
+    }
+    // T (review gap): every touched scene, with its beats, never puts the great root-kin or the human on his shoulder, in his lap as the cat, or on the stove
+    const SMALL = /Yuki, on your shoulder|Yuki rides (on )?your shoulder|Yuki is on your shoulder|Yuki on your shoulder|Yuki climbs into your lap|Yuki gets into your lap|Yuki, on your chest|Yuki on your chest|in her small shape|Yuki, on the stove|Yuki takes the stove\.|beast on your shoulder|riding your shoulder|off your shoulder|Yuki is awake on your chest|Yuki sits on your chest|puts her paw on the back/;
+    const TOUCHED = ['epilogue', 'rt_road', 'ya_meets', 'tribute', 'elder', 'village_morning', 'ya_mocks', 'rt_quiet_night', 'night', 'rt_evening', 'rt_elder', 'ship_bridge', 'ht_leave', 'bl_end', 'hall_listen', 'bl_start', 'ah_hunt', 'log_reaction', 'log_comfort', 'a1_end', 'ya_fight_start', 'ah_hawks_won', 'rt_taken', 'fo_depart', 'night_event', 'night_lost'];
+    for (const id of TOUCHED) for (const form of ['tiger', 'human']) for (const path of [null, 'sister', 'lover']) {
+        const g = FM(58600 + n++, form, path ? { yk_path: path, night_ev: 'lights', ending: 'bluff' } : { night_ev: 'lights', ending: 'bluff' });
+        if (id === 'a1_end' || id === 'rt_taken') g.minutes = 21 * 1440 + 600;
+        goTo(g, SCENES, id); g.flags.night_ev = 'lights';
+        const t = sceneView(g, SCENES).text;
+        const m = t.match(SMALL);
+        assert(!m, `RW1 (T): ${id} as ${form} (${path || 'no path'}) never places her as the small cat (${m?.[0]})`);
+    }
+    // T (review gap): the five scenes whose text became a function still fold on a later Coil
+    for (const id of ['ya_mocks', 'bl_start', 'ah_hunt', 'bl_end', 'hall_listen', 'ya_fight_start', 'ah_hawks_won', 'night_lost']) {
+        const g = FM(58900 + n++, 'tiger'); goTo(g, SCENES, id); g.seen[id] = 1; g.coil.n = 2;
+        const v = sceneView(g, SCENES); const a = againView(g, v);
+        assert(typeof v.text === 'string' && (a.fold || v.text.split(/\n\s*\n/).filter((x) => x.trim()).length < 2), `RW1 (T): ${id} folds on a later Coil`);
+    }
+    // T (review gap): the lover's quiet night and the ridge beat with her human form open but a cat or the great root-kin now
+    for (const form of ['cat', 'tiger']) {
+        const g = FM(59000 + n++, form, { yk_path: 'lover' }); g.yuki.realm = 7; g.james.realm = 7; g.yuki.form = form; goTo(g, SCENES, 'epilogue');
+        const t = sceneView(g, SCENES).text;
+        assert((form === 'cat' ? /Yuki, on your shoulder, purrs/ : /Yuki, against your hip, purrs/).test(t) && !/and it stays a hand/.test(t), `RW1 (T): the ridge's lover beat follows her current form (${form}, human open)`);
+        const q = FM(59100 + n++, form, { yk_path: 'lover' }); goTo(q, SCENES, 'rt_quiet_night');
+        assert(!SMALL.test(sceneView(q, SCENES).text) || form === 'cat', `RW1 (T): the lover's quiet night as ${form}`);
+    }
+    // a stale stored form (old saves): a form not open this Coil reads as the cat
+    {
+        const g = FM(57500, 'cat'); g.yuki.form = 'human'; goTo(g, SCENES, 'rt_road');
+        assert(/Yuki rides on your shoulder and supervises\./.test(sceneView(g, SCENES).text), 'FM1: a stored human form below Nascent Soul reads as the cat');
     }
 }
 // v0.11.34 (owner pick A, 1,000 games): two scenes the random walks reached only by luck at 2,000 games, now on purpose

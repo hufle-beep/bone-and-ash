@@ -7,7 +7,7 @@
  */
 import { addItem, hasItem, eat, advance, clockParts, d6, awardYukiFightXp, jamesHpMax, condense, dayHour, nightTo, nightRest } from '../core/game.js';
 import { hasForm } from '../core/forms.js';
-import { daily, markDaily, eatBest, pantry, foodCount, hour } from './common.js';
+import { daily, markDaily, eatBest, pantry, foodCount, hour, byForm } from './common.js';
 import { encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil } from './act1_common.js';
 
 const P = 'Blackroot Wilds';
@@ -113,9 +113,9 @@ export const BLACKROOT = {
             g.flags.ya_party = true;
             return [];
         },
-        text: `Ashfall sees you off at dawn the way Ashfall does everything: formally, in silence, with too many people. Old Wen bows exactly as deep as he would to a sect elder. Mei Lin's mother presses a bundle of millet cakes into your hands and says, "Bring her back," in a voice that makes it a contract.
+        text: (g) => `Ashfall sees you off at dawn the way Ashfall does everything: formally, in silence, with too many people. Old Wen bows exactly as deep as he would to a sect elder. Mei Lin's mother presses a bundle of millet cakes into your hands and says, "Bring her back," in a voice that makes it a contract.
 
-Then the trees close behind you, and it's just the four of you. A biologist, a cat, a herb-woman with a basket and a knife, and Ya — barefoot, spear on her shoulder, walking backwards in front of you so she can watch your faces.
+Then the trees close behind you, and it's just the four of you. A biologist, ${byForm(g, 'a cat', 'a very large cat', 'a cat in a black dress')}, a herb-woman with a basket and a knife, and Ya — barefoot, spear on her shoulder, walking backwards in front of you so she can watch your faces.
 
 "Three days in, maybe four," Ya says. "If nothing eats us. Something will try. I'll let you know which." She grins at Mei Lin. "You bowed to the old man like your spine was on fire. Does it hurt, being that polite? Is there a cure?"
 
@@ -149,7 +149,7 @@ By noon you reach the first of the roots: grey-white, smooth as bone, wide as a 
     ya_mocks: {
         id: 'ya_mocks', title: 'Manners', art: 'root_road', place: PLACE.rr,
         enter: (g) => { g.flags.ya_mocked = true; eat(g, 15); return ['Millet cakes on a root the size of a road: +15 satiety.']; },
-        text: `Mei Lin sits, folds her legs under her, bows her head a fraction before she eats — the small thanks every child in Ashfall gives Heaven for food. Ya watches this with her mouth open, a millet cake halfway in.
+        text: (g) => `Mei Lin sits, folds her legs under her, bows her head a fraction before she eats — the small thanks every child in Ashfall gives Heaven for food. Ya watches this with her mouth open, a millet cake halfway in.
 
 Then she does an imitation. It is cruel, and it is accurate, and it involves a great deal of eyelash.
 
@@ -161,7 +161,7 @@ Ya goes still. Not the stillness of someone hurt. The stillness of something dec
 
 "*Animal.*"
 
-Yuki, on your shoulder, sends a single thought through the bond: *finally, some entertainment.*
+Yuki, ${byForm(g, 'on your shoulder', 'at your side', 'at your elbow')}, sends a single thought through the bond: *finally, some entertainment.*
 
 They are both looking at you now.`,
         choices: [
@@ -173,7 +173,7 @@ They are both looking at you now.`,
     ya_fight_start: {
         id: 'ya_fight_start', title: 'A Look', art: 'ya_fight', place: PLACE.rr,
         enter: (g) => { g.flags.ya_sparred = true; return []; },
-        text: `"You looked at me," Ya says. She has stopped in the middle of the root and planted her spear. "When I took the elk's eye out this morning. You looked at me like the Sect looks at a beast. Like you were *writing it down*."
+        text: (g) => `"You looked at me," Ya says. She has stopped in the middle of the root and planted her spear. "When I took the elk's eye out this morning. You looked at me like the Sect looks at a beast. Like you were *writing it down*."
 
 "I'm a biologist. I write everything down. I wrote down Mei Lin's hairpin."
 
@@ -181,7 +181,7 @@ They are both looking at you now.`,
 
 Mei Lin, holding a spear she didn't ask for, says, "Please don't hurt each other. I've only got so much thread."
 
-Yuki climbs down off your shoulder and sits at a safe distance, like someone who has bought a ticket.`,
+${byForm(g, 'Yuki climbs down off your shoulder and sits at a safe distance', 'Yuki walks off a little way and lies down at a safe distance', 'Yuki steps back and sits on a root at a safe distance')}, like someone who has bought a ticket.`,
         choices: [
             { text: 'Fight her. No bone, no Qi. Fair.', check: { skill: 'GU', dc: 6, band: 'challenging' }, time: 20, to: 'ya_spar_win', fail: 'ya_spar_lose' },
             { text: 'Apologise. Properly. Without a single joke.', do: (g) => { bumpRel(g, 'Ya', 2, 0); g.flags.ya_respected = true; return []; }, check: { skill: 'GU', dc: 5 }, to: 'ya_spar_win', fail: 'ya_spar_lose' },
@@ -640,11 +640,11 @@ She doesn't mean it. Everyone can tell she doesn't mean it. It makes it worse, s
     ah_hunt: {
         id: 'ah_hunt', title: 'Hawks', art: 'cinder_hawks', place: PLACE.ah,
         enter: (g) => { markDaily(g, 'ah_hunt'); return []; },
-        text: `The cinder hawks have been watching you since you crossed the line. They're bigger than eagles, ash-grey, and where their wings beat the air you can see faint sparks, as if they're made of coals that never quite went out.
+        text: (g) => `The cinder hawks have been watching you since you crossed the line. They're bigger than eagles, ash-grey, and where their wings beat the air you can see faint sparks, as if they're made of coals that never quite went out.
 
-"They hunt in threes," Ya says. "They'll go for the cat."
+"They hunt in threes," Ya says. ${byForm(g, '"They\'ll go for the cat."', '"They won\'t go for the cat. Not that cat."', '"They\'ll go for the small one."')}
 
-Yuki, on your shoulder, flattens her ears and sends you a thought that consists entirely of teeth.
+Yuki, ${byForm(g, 'on your shoulder', 'at your side', 'at your elbow')}, flattens her ears and sends you a thought that consists entirely of teeth.
 
 There are hill-hares in the gullies too: small, fast, ash-coloured. Less exciting. Less likely to set you on fire.`,
         choices: [
@@ -655,7 +655,7 @@ There are hill-hares in the gullies too: small, fast, ash-coloured. Less excitin
     ah_hawks_won: {
         id: 'ah_hawks_won', title: 'Feathers and Sparks', art: 'cinder_hawks', place: PLACE.ah,
         enter: (g) => { addItem(g, 'fowl_raw', 2); return ['+2 cinder hawk (as fowl). The meat is warm all on its own.', ...awardYukiFightXp(g, 'standard')]; },
-        text: `The last hawk goes down in a shower of sparks, and Yuki — who has been riding your shoulder through the whole thing, claws in, spitting — leaps off and lands on it, and sits there, and stares at the sky as if daring another one to try.
+        text: (g) => `The last hawk goes down in a shower of sparks, and Yuki — ${byForm(g, 'who has been riding your shoulder through the whole thing, claws in, spitting — leaps off and lands on it, and sits there', 'who has been at your flank through the whole thing, claws out, snarling — puts one paw on it, and sits there', 'who has been at your back through the whole thing, claws out, spitting — puts her foot on it, and stands there')}, and stares at the sky as if daring another one to try.
 
 "Little queen," Ya says to her, with enormous respect. Yuki accepts the title.`,
         choices: [{ text: 'Back to the ridge.', time: 30, to: 'ah_hub' }],
@@ -1134,11 +1134,11 @@ ${both(g) && trio(g) >= 3 ? 'Mei Lin and Ya lie down on either side of you witho
             if (clockParts(g.minutes).day < 16) g.minutes = 15 * 1440 + 6 * 60;
             return lines;
         },
-        text: `Morning comes grey and quiet in the roots.
+        text: (g) => `Morning comes grey and quiet in the roots.
 
 You wake to find the doorway in the trunk is wider than it was last night. Not much. But the moss around it has been pushed back, as if something inside had leaned against it in the dark, the way someone leans on a door they're waiting to open.
 
-Ya has her spear. Mei Lin has her knife and her basket and her chin up. Yuki is on your shoulder, claws in.
+Ya has her spear. Mei Lin has her knife and her basket and her chin up. ${byForm(g, 'Yuki is on your shoulder, claws in.', 'Yuki is at your side, claws out.', 'Yuki is at your shoulder, claws out.')}
 
 You have a fresh doctorate, a lab coat with a great many holes in it, and a gift this world has never seen. And somewhere in front of you, a thousand years dead, is a piece of home.
 

@@ -21,7 +21,7 @@
  *   a thousand years ago. While it lived it sang and filtered the world's Qi. The Crimson Lotus's founder killed it to
  *   harvest its heart; since then the Qi has been poisoned. The ship still holds a seed-sliver that can grow again.
  */
-import { clockParts, bumpRel, sleepUntil, yukiForms, yukiForm } from '../core/game.js';
+import { clockParts, bumpRel, sleepUntil, yukiForm } from '../core/game.js';
 import { forestScale, villageScale, grow, day, hour } from './common.js';
 import { TUNE } from './act1_tune.js';
 
@@ -72,9 +72,9 @@ export const KISS_YA = 45;
 export const trio = (g) => g.flags.trio || 0;
 /** v0.11.124 (owner picks NX1, NF1: LC1, HS): the log scene's trio branch (both liked, Ya along, the throuple at step 3), shared with Yuki's path beat. */
 export const logTrio = (g) => likesMei(g) && likesYa(g) && !!g.flags.ya_party && trio(g) >= 3;
-/** v0.11.124 (NF1, HS): the shape a story line gives Yuki: human when her human form is open this Coil (v0.11.122's rule, as `ykHuman`),
- *  otherwise her current form ('cat' or 'tiger', the great root-kin). */
-export const ykShape = (g) => (yukiForms(g).includes('human') ? 'human' : yukiForm(g));
+/** v0.11.124 (NF1); v0.11.125 (owner pick FM1, PM): the shape a story line gives Yuki: her current form ('cat', 'tiger' (the great
+ *  root-kin) or 'human'), as the pictures draw her (NF1's HS read human whenever her human form was open, against the picture). */
+export const ykShape = (g) => yukiForm(g);
 export function trioStep(g, to) { if (likesMei(g) && likesYa(g) && trio(g) < to) g.flags.trio = to; return []; }
 export { bumpRel, sleepUntil };
 

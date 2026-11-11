@@ -3,7 +3,7 @@
  * a night visit shaped by what James did to Gao Feng, and bonuses that pay off when the Sect comes on Day 7.
  */
 import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, d6, awardYukiFightXp, jamesHpMax, nightRest, nightTo } from '../core/game.js';
-import { set, day, hour, daily, markDaily, forestScale, villageScale, grow, eatBest, pantry, foodCount } from './common.js';
+import { set, day, hour, daily, markDaily, forestScale, villageScale, grow, eatBest, pantry, foodCount, byForm } from './common.js';
 
 const P = 'Ashfall Hamlet';
 const vday = (g) => g.flags.vday || 1;
@@ -160,7 +160,7 @@ Mei Lin stands in the lane with soot on her face, looking at the wreck, and says
 Two days until the collectors. The village is pretending to be normal very loudly. You've got two days to make sure that when the Crimson Lotus walks up that road, the thing waiting at the top of it is a lot stronger than a confused mycologist with a cat.`
             : `The last day. Tomorrow at sunrise, the collectors.
 
-Everyone in Ashfall is up early, and everyone has found a reason to walk past Mei Lin's house and see if you're still there. You are. ${g.flags.loft_burned ? 'The burned loft is still smoking a little.' : 'Yuki is sunning herself on the doorstep like a small white guard dog.'}`),
+Everyone in Ashfall is up early, and everyone has found a reason to walk past Mei Lin's house and see if you're still there. You are. ${g.flags.loft_burned ? 'The burned loft is still smoking a little.' : byForm(g, 'Yuki is sunning herself on the doorstep like a small white guard dog.', 'Yuki is sunning herself across the doorstep like a large white guard dog.', 'Yuki is sunning herself on the doorstep, eyes shut, like a small white guard dog in a black dress.')}`),
         choices: [{ text: 'Out into the village.', to: 'ashfall' }],
     },
 

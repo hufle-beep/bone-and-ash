@@ -4,7 +4,7 @@
  * Entry 'ht_start' (Day 16). Exit 'rt_start' (Day 19, dawn).
  */
 import { addItem, hasItem, condense, advance, jamesHpMax, d6 } from '../core/game.js';
-import { eatBest, pantry, foodCount, set } from './common.js';
+import { eatBest, pantry, foodCount, set, byForm } from './common.js';
 import { day, hour, encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil, logTrio, ykShape } from './act1_common.js';
 import { ykPath } from './yuki_path.js';
 
@@ -20,8 +20,8 @@ const guardianOpen = (g) => !!g.flags.log_heard && !g.flags.guardian;
 const ya = (g) => !!g.flags.ya_party;
 const both = (g) => likesMei(g) && likesYa(g);
 
-/* v0.11.124 (owner picks NX1, NF1; texts by Fable, MAINs): the log scene's Yuki lines by the shape she has (`ykShape`: human when her human
- * form is open this Coil, else the cat or the great root-kin). The cat lines are the old ones. */
+/* v0.11.124 (owner picks NX1, NF1; texts by Fable, MAINs): the log scene's Yuki lines by the shape she has (`ykShape`); since v0.11.125
+ * (FM1, PM) her current form, as the picture ('cat', 'tiger' (the great root-kin), 'human'). The cat lines are the old ones. */
 const LOG_LOOK = {
     cat: 'Yuki looks up at you. Through the bond: *what do we do.*',
     tiger: 'Yuki looks at you, level, gold eye to eye. Through the bond: *what do we do.*',
@@ -163,13 +163,13 @@ ${pantry(g)} ${g.james.hp < jamesHpMax(g) * 0.5 ? 'You are hurt.' : ''}${late(g)
 
     hall_listen: {
         id: 'hall_listen', title: 'The Grain', art: 'heart_hall', place: PIN,
-        text: `You sit in the middle of the hall with your palms flat on the floor and let your Convergence go down into the grain.
+        text: (g) => `You sit in the middle of the hall with your palms flat on the floor and let your Convergence go down into the grain.
 
 It's like reading a library by touch. Every ring is a year. Every year was a song: you can feel the shape of them, pressed into the wood like grooves in a record, centuries of them, one after another, each a little different, each *warm* — and then, about four hundred rings in from the bark, they stop.
 
 Not fade. Stop. The last ring is ragged, scorched, wrong. After it there is nothing but dead growth, grey on grey, the tree making wood out of habit while there was nothing left inside it to sing.
 
-Yuki puts her paw on the back of your hand. Through the bond, very simply: *someone did this.*`,
+${byForm(g, 'Yuki puts her paw on the back of your hand.', 'Yuki rests her chin on the back of your hand.', 'Yuki puts her hand on the back of yours.')} Through the bond, very simply: *someone did this.*`,
         choices: [
             { text: 'Read the last living ring, the scorched one. Carefully.', check: { skill: 'Convergence Use', dc: 4, band: 'challenging' }, time: 40, do: (g) => { g.flags.hall_song = true; return ['Fire, drawn with a brush. Hands — many hands. And a voice, very calm, giving orders. You will know that voice if you ever hear its echo.']; }, failDo: (g) => { g.flags.hall_song = true; g.james.hp -= 2; return ['It burns you back. Not much. Enough. −2 HP.']; }, to: 'heart_hub' },
             { text: 'Take your hands off the floor. Enough for now.', do: set('hall_song'), to: 'heart_hub' },
@@ -351,7 +351,7 @@ In the middle of the floor, on a pedestal grown up out of the deck, sits a knot 
 
 ${g.flags.ship_woke ? 'It\'s already glowing faintly, as if the ship has been holding it up for you to see.' : 'It\'s dark. When you pick it up, it warms in your hand.'}
 
-You sit in the nearest seat. ${ya(g) ? 'Ya perches on the back of another, crouched like a cat. Mei Lin stands.' : 'Mei Lin stands beside you.'} Yuki gets into your lap without being asked.
+You sit in the nearest seat. ${ya(g) ? 'Ya perches on the back of another, crouched like a cat. Mei Lin stands.' : 'Mei Lin stands beside you.'} ${byForm(g, 'Yuki gets into your lap without being asked.', 'Yuki lays her head in your lap without being asked.', 'Yuki sits on the arm of your seat without being asked.')}
 
 You close your hands around the log.`,
         choices: [{ text: 'Play it.', time: 30, to: 'ship_log' }],
@@ -672,7 +672,7 @@ Behind you, the Old Tree stands as it has stood for four hundred years, grey and
 
 Not a broken one. A whole one. Held, like someone humming as they fall asleep.
 
-${trio(g) >= 3 ? 'Ya walks in front, Mei Lin behind, and you in the middle, and every so often one of them reaches back or forward and touches your arm, as if checking you\'re still there.' : ya(g) ? 'Ya leads, as always, not looking back. Mei Lin walks beside you.' : 'Mei Lin walks beside you.'} Yuki rides on your shoulder with her tail wrapped round your neck.
+${trio(g) >= 3 ? 'Ya walks in front, Mei Lin behind, and you in the middle, and every so often one of them reaches back or forward and touches your arm, as if checking you\'re still there.' : ya(g) ? 'Ya leads, as always, not looking back. Mei Lin walks beside you.' : 'Mei Lin walks beside you.'} ${byForm(g, 'Yuki rides on your shoulder with her tail wrapped round your neck.', 'Yuki pads at your side with her tail hooked round your wrist.', 'Yuki walks at your shoulder with her tail wrapped round your wrist.')}
 
 In your hand, or near your heart, the seed sings all the way.`,
         choices: [{ text: 'Home. To Ashfall.', to: 'rt_start' }],

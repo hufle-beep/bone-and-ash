@@ -8,7 +8,7 @@ import { addItem, hasItem, eat, bumpRel, sleepUntil, advance, clockParts, breakt
 import { NO_DICE_TUNE } from './nodice_tune.js';
 import { setNoDiceTune, yukiFightSkill } from '../core/game.js'; // v0.11.118 (YK1 review, SB)
 setNoDiceTune(NO_DICE_TUNE);
-import { forestScale, villageScale, grow, NEW_ITEMS } from './common.js';
+import { forestScale, villageScale, grow, NEW_ITEMS, byForm } from './common.js';
 import './power.js';
 import './stomp_prologue.js';
 import './stomp_act1.js';
@@ -104,8 +104,10 @@ export const ITEMS = {
 Object.assign(itemNames, ITEMS);
 
 /** What locals sense of Yuki's meridians (v0.9.6: they may still be closed). */
-const yukiMerElder = (g) => { const n = g.yuki.primaries ?? 12; return n >= 12 ? 'And the beast on your shoulder has twelve meridians open. In ninety years I have seen that only in the heirs of great sects.' : n > 0 ? `And the beast on your shoulder has ${n === 1 ? 'a meridian' : `${n} meridians`} open, and is opening more, at its size, without a single pill. In ninety years I have seen that only in the heirs of great sects.` : 'And the beast on your shoulder holds Qi with every meridian shut, which is not possible, and which it is doing anyway.'; };
-const yukiMerLu = (g) => { const n = g.yuki.primaries ?? 12; return n >= 12 ? 'And yet the beast on your shoulder has its meridians open like a sect heir\'s.' : n > 0 ? `And yet the beast on your shoulder has ${n === 1 ? 'a meridian' : `${n} meridians`} open, and no pill-smell either. Like a sect heir's.` : 'And yet the beast on your shoulder holds Qi with its meridians shut, like a sealed jar that is somehow full.'; };
+/** v0.11.125 (owner pick FM1; Fable's MAINs): where the locals see her, by her current form. */
+const yukiSpot = (g) => byForm(g, 'the beast on your shoulder', 'the beast at your side', 'the beast beside you');
+const yukiMerElder = (g) => { const n = g.yuki.primaries ?? 12; const b = yukiSpot(g); return n >= 12 ? `And ${b} has twelve meridians open. In ninety years I have seen that only in the heirs of great sects.` : n > 0 ? `And ${b} has ${n === 1 ? 'a meridian' : `${n} meridians`} open, and is opening more, ${byForm(g, 'at its size', 'untaught', 'at its age')}, without a single pill. In ninety years I have seen that only in the heirs of great sects.` : `And ${b} holds Qi with every meridian shut, which is not possible, and which it is doing anyway.`; };
+const yukiMerLu = (g) => { const n = g.yuki.primaries ?? 12; const b = yukiSpot(g); return n >= 12 ? `And yet ${b} has its meridians open like a sect heir\'s.` : n > 0 ? `And yet ${b} has ${n === 1 ? 'a meridian' : `${n} meridians`} open, and no pill-smell either. Like a sect heir's.` : `And yet ${b} holds Qi with its meridians shut, like a sealed jar that is somehow full.`; };
 
 export const SCENES = {
     /* ================= DAY 1 ================= */
@@ -294,7 +296,7 @@ ${g.flags.fire ? 'The fire crackles.' : 'No fire yet.'} ${g.flags.stakes ? 'A ri
         id: 'night', title: 'Night', art: 'forest_night', place: 'Blackroot Wilds — the dry rise',
         text: (g) => `Night on this world is not a lack of light. It is a presence. The black trees drink the stars. Something far off screams, stops, and does not scream again.
 
-${g.flags.fire ? 'The fire makes a small, defiant room in the dark.' : 'Without fire, the dark comes right up to your knees.'} Yuki climbs into your lap, which she only does when she thinks one of you needs it.
+${g.flags.fire ? 'The fire makes a small, defiant room in the dark.' : 'Without fire, the dark comes right up to your knees.'} ${byForm(g, 'Yuki climbs into your lap', 'Yuki lies down around you', 'Yuki sits down against your side')}, which she only does when she thinks one of you needs it.
 
 ${(g.flags.forest_day || 1) > 1 ? 'Another night in the Blackroot. Your watch-thread is already spinning up before you ask.' : 'Your Parallel Cognition offers, unprompted, to spin up a thread for watch-keeping. Nine threads, and one of them never sleeps unless you tell it to.'}`,
         choices: [
@@ -769,7 +771,7 @@ Lu Han looks at them for a long time. At the sheer number of them. At what it wo
     epilogue: {
         id: 'epilogue', title: 'The Dead Tree', art: 'ridge', place: 'Blackroot Wilds — the ridge',
         enter: (g) => { const p = clockParts(g.minutes); g.minutes = (p.day - 1) * 1440 + 19 * 60; return []; },
-        text: (g) => `That evening you climb the ridge with Yuki on your shoulder ${g.flags.romance ? 'and Mei Lin\'s hand in yours' : g.rel['Mei Lin']?.f > 10 ? 'and Mei Lin a step behind you' : 'and nobody else'}.
+        text: (g) => `That evening you climb the ridge ${byForm(g, 'with Yuki on your shoulder', 'with Yuki pacing at your side', 'with Yuki at your elbow')} ${g.flags.romance ? 'and Mei Lin\'s hand in yours' : g.rel['Mei Lin']?.f > 10 ? 'and Mei Lin a step behind you' : 'and nobody else'}.
 
 Below, Ashfall's lamps come on one by one. Beyond it, the black forest rolls away to the horizon, and at its heart stands the thing you saw from here before: the corpse of a tree so vast it scrapes the clouds.
 
@@ -779,9 +781,9 @@ Your people grow their cities from trees like that. Their ships. Their homes. He
 
 "Something lived there," ${g.flags.romance || g.rel['Mei Lin']?.f > 10 ? 'Mei Lin says, watching your face' : 'you say to Yuki'}. "Something like us."
 
-Yuki's tail curls around your neck. Through the bond, very clearly: *then let's go and find out who killed it.*
+${byForm(g, 'Yuki\'s tail curls around your neck.', 'Yuki\'s tail curls around your wrist.', 'Yuki\'s tail curls around your wrist.')} Through the bond, very clearly: *then let's go and find out who killed it.*
 
-You're forty. You have a fresh doctorate, a cat, an empty closet the size of a universe, and a gift this world has never seen. Everything in it would like to eat you.
+You're forty. You have a fresh doctorate, ${byForm(g, 'a cat', 'a cat the size of a tiger', 'a cat who is currently a woman')}, an empty closet the size of a universe, and a gift this world has never seen. Everything in it would like to eat you.
 
 "Sure," you say. "What could possibly go wrong."
 

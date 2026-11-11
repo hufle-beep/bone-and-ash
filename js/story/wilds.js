@@ -5,7 +5,7 @@
 import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, clockParts, d6, awardYukiFightXp, awardXp, jamesHpMax, jamesQiMax, nightTo, nightRest } from '../core/game.js';
 import { condensationSatGain } from '../core/formulas.js';
 import { sitGain, yukiFightSkill } from '../core/game.js'; // v0.11.118 (YK1 review, SB)
-import { set, day, hour, daily, markDaily, forestScale, grow, eatBest, pantry, foodCount } from './common.js';
+import { set, day, hour, daily, markDaily, forestScale, grow, eatBest, pantry, foodCount, byForm } from './common.js';
 
 const P = 'Blackroot Wilds';
 const did = (key) => (g) => { markDaily(g, key); return []; };
@@ -49,7 +49,7 @@ export const WILDS = {
 
 Between the black trunks, low to the ground, pale lights are moving. Not fireflies — too big, too slow, too *deliberate*. They drift in a loose line, all going the same way: toward the heart of the forest, where the dead tree stands.
 
-Yuki is awake on your chest, ears flat, not hissing. Watching. Through the bond comes something that isn't a word. Closer to *grief*.`,
+${byForm(g, 'Yuki is awake on your chest, ears flat, not hissing.', 'Yuki is awake against your side, ears flat, not growling.', 'Yuki is awake beside you, ears flat, not speaking.')} Watching. Through the bond comes something that isn't a word. Closer to *grief*.`,
             rain: `It rains in the night: warm rain that tastes of iron and leaves a grey film on everything. The fire hisses and sulks.
 
 Yuki makes it clear, through the bond and through her claws, that she holds you personally responsible for the weather.`,
@@ -109,7 +109,7 @@ Yuki washes a paw with tremendous dignity. You sit for a while with your heart g
     night_lost: {
         id: 'night_lost', title: 'Bitten', art: 'forest_night', place: `${P} — the dry rise`,
         enter: (g) => { const id = ['hare_raw', 'fowl_raw', 'crab_meat', 'lizard_egg', 'jade_bracket'].find((k) => g.inventory[k] > 0); if (id) addItem(g, id, -1); return id ? ['You lose some food in the scramble.'] : []; },
-        text: `You lose. It isn't dramatic: you just end up on your back with a bleeding arm while whatever it was takes what it came for and leaves. Yuki sits on your chest until your heartbeat slows, which is either comfort or her checking whether you're still edible.`,
+        text: (g) => `You lose. It isn't dramatic: you just end up on your back with a bleeding arm while whatever it was takes what it came for and leaves. ${byForm(g, 'Yuki sits on your chest', 'Yuki rests one paw on your chest', 'Yuki sits with her hand flat on your chest')} until your heartbeat slows, which is either comfort or her checking whether you're still edible.`,
         choices: [{ text: 'Sleep, badly.', do: (g) => { sleepUntil(g, 6); g.james.hp = Math.ceil(g.james.hp * 0.7); return ['A bad night. HP partly back, Qi full.']; }, to: 'morning' }],
     },
     night_fled: {
