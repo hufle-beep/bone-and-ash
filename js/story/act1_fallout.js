@@ -237,7 +237,7 @@ Old Wen turns to you. "The stranger will speak."`
 
 Today they want to know about the Old Tree. Every hunter on the council has the same story from his grandfather: the forest's heart once *sang*, and the singing made the beasts gentle and the herbs clean. Then the Sect came, before the Sect was the Sect, and the singing stopped.
 
-"Your cat," Old Wen says, "faces north when she sleeps. So do you."`),
+${byForm(g, "\"Your cat,\" Old Wen says,", "\"Your cat,\" Old Wen says,", "\"Your companion,\" Old Wen says,")} "faces north when she sleeps. So do you."`),
         choices: [
             { text: (g) => (dd(g) === 8 ? 'Speak for the children: keep them close, keep them hidden, and build.' : '"It\'s calling me. I think it was one of ours — my people\'s. I need to see it."'), check: { skill: 'GU', dc: 4 }, time: 120, do: (g) => { g.flags[`council${dd(g)}`] = true; bumpRel(g, 'Old Wen', 4, 0); bumpRel(g, 'Village', 3, 0); return ['The council bows to you, one after another. It takes a long time. Nobody hurries.']; }, failDo: (g) => { g.flags[`council${dd(g)}`] = true; return ['You say it badly. They hear it anyway, and bow anyway, slightly less deeply.']; }, to: 'fo_ashfall' },
             { text: 'Listen. Say nothing. Learn how these people decide things.', time: 120, do: (g) => { g.flags[`council${dd(g)}`] = true; bumpRel(g, 'Old Wen', 2, 0); return ['Old Wen notices your silence, and approves of it, which is the first time anyone here has approved of anything you did.']; }, to: 'fo_ashfall' },
@@ -252,7 +252,7 @@ Today they want to know about the Old Tree. Every hunter on the council has the 
 ${(g.flags.militia || 0) >= 2 ? 'They remember everything you taught them before the tribute. They practise it with the terrible seriousness of men who expect to need it.' : 'They have never fought anything that could think. They are about to.'}${yaHere(g) ? '\n\nYa watches from the woodpile, eating a raw turnip and heckling. Old Hu pretends with enormous dignity that she does not exist.' : ''}`,
         choices: [
             { text: 'Drill the line: spears behind bone shields, nobody alone.', check: { skill: 'GU', dc: 4, band: 'challenging' }, time: 150, do: (g) => { g.flags.militia = (g.flags.militia || 0) + 1; bumpRel(g, 'Village', 3, 0); return ['They move like one animal now. A grim, silent animal.']; }, failDo: (g) => { bumpRel(g, 'Village', 1, 0); return ['A spear goes through a shield and nearly through a cousin. Nobody laughs. Nobody here ever laughs.']; }, to: 'fo_ashfall' },
-            { text: 'Spar with Yuki in front of them, so they see what fast looks like.', check: { skill: 'GU', dc: 5 }, time: 90, do: (g) => ['The hunters watch in absolute silence. Afterwards Old Hu bows to the cat.', ...awardYukiFightXp(g, 'standard')], failDo: (g) => { g.james.hp -= 2; return ['Yuki wins. Decisively. −2 HP.', ...awardYukiFightXp(g, 'standard')]; }, to: 'fo_ashfall' },
+            { text: 'Spar with Yuki in front of them, so they see what fast looks like.', check: { skill: 'GU', dc: 5 }, time: 90, do: (g) => [byForm(g, "The hunters watch in absolute silence. Afterwards Old Hu bows to the cat.", "The hunters watch in absolute silence. Afterwards Old Hu bows to the cat.", "The hunters watch in absolute silence. Afterwards Old Hu bows to Yuki. Only to Yuki."), ...awardYukiFightXp(g, 'standard')] /* v0.11.126 (NQ1): by her form, Fable's */, failDo: (g) => { g.james.hp -= 2; return ['Yuki wins. Decisively. −2 HP.', ...awardYukiFightXp(g, 'standard')]; }, to: 'fo_ashfall' },
             { text: 'Not today.', to: 'fo_ashfall' },
         ],
     },
@@ -343,9 +343,9 @@ You let him go, without the sword. He bows before he runs. Of course he does.`,
     fo_spy_lost: {
         id: 'fo_spy_lost', title: 'Correct', art: 'envoy', place: 'The ridge above Ashfall',
         enter: (g) => { g.flags.spy = 'lost'; return []; },
-        text: `He puts you on the ground with three precise movements, bows, apologises for the inconvenience, gathers his mat and his ledger and his rice cakes, and leaves at a brisk, correct walk.
+        text: (g) => `He puts you on the ground with three precise movements, bows, apologises for the inconvenience, gathers his mat and his ledger and his rice cakes, and leaves at a brisk, correct walk.
 
-You lie in the pine needles for a while, contemplating the Crimson Lotus's training programme. Yuki sits on your chest. *He folded his mat,* the bond observes. *While you were bleeding.*`,
+You lie in the pine needles for a while, contemplating the Crimson Lotus's training programme. ${byForm(g, "Yuki sits on your chest. *He folded his mat,* the bond observes. *While you were bleeding.*", "Yuki rests one paw on your chest. *He folded his mat,* the bond observes. *While you were bleeding.*", "Yuki sits down beside you. \"He folded his mat,\" she observes. \"While you were bleeding.\"")}`,
         choices: [{ text: 'Limp home.', time: 90, to: 'fo_ashfall' }],
     },
     fo_spy_fled: {
@@ -662,11 +662,11 @@ Mei Lin doesn't answer. But she doesn't leave, either. She sits there between th
 
 "Then we'll come back fast."
 
-She turns toward you in the dark. What happens after that is nobody's business, not even Yuki's, who goes and sleeps on the stove in protest.`;
+She turns toward you in the dark. ${byForm(g, "What happens after that is nobody's business, not even Yuki's, who goes and sleeps on the stove in protest.", "What happens after that is nobody's business, not even Yuki's, who goes down and sleeps in front of the stove in protest, across the whole floor.", "What happens after that is nobody's business, not even Yuki's, who goes and sleeps on the bench by the stove in protest.")}`;
             if (rel(g, 'Ya').a >= KISS_YA) return `There's a scrape at the loft window, and Ya climbs in without asking, as she does everything. She sits on the edge of the hay, watching you with eyes that catch the starlight like an animal's.
 
 "Tomorrow I take you home," she says. "My home. The warm place." Then, with no change of tone at all: "Do you want me to stay? I'll stay if you want. I'll go if you don't. I won't be offended." A pause. "I'll be a little offended."`;
-            return `The loft is quiet. The north wind moves in the thatch. Yuki curls into the hollow of your neck, and through the bond, very faintly, you can feel what she feels when she faces north: not fear. Something more like homesickness, for a home neither of you has ever seen.`;
+            return `The loft is quiet. The north wind moves in the thatch. ${byForm(g, "Yuki curls into the hollow of your neck,", "Yuki lies down along the length of you and fits her chin into the hollow of your neck, which is all of her that fits,", "Yuki lies down at your back, her tail across your shins,")} and through the bond, very faintly, you can feel what she feels when she faces north: not fear. Something more like homesickness, for a home neither of you has ever seen.`;
         },
         choices: [
             { text: 'Stay there, the three of you, until the sky goes grey.', show: (g) => likesMei(g) && likesYa(g), do: (g) => { bumpRel(g, 'Mei Lin', 3, 3); bumpRel(g, 'Ya', 3, 3); return trioStep(g, 1); }, to: 'fo_depart' },

@@ -7,7 +7,7 @@
  */
 import { addItem, hasItem, eat, condense, sleepUntil, advance, d6, awardXp, awardYukiFightXp, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, yukiForms, yukiForm, ensureBars, bumpRel, itemCap } from '../core/game.js';
 import { condensationSatGain } from '../core/formulas.js';
-import { daily, markDaily, hour, eatBest, pantry, foodCount } from './common.js';
+import { daily, markDaily, hour, eatBest, pantry, foodCount, byForm } from './common.js'; // v0.11.126 (NQ1): byForm
 import { registerStomp } from './power.js';
 
 /** v0.11.71 (owner pick Y1): the Long Forest's "Let Yuki hunt": { item, n, line }; the first kind with room for the whole haul (R1); item null: none, she eats it. */
@@ -142,7 +142,7 @@ It kneels. It puts its great dead hands flat on the ground on either side of you
         one: () => 'You sing one note into the hole in its chest. It kneels.',
     },
     lf_bandits: {
-        posture: (g, d) => `"Well, well," says Scarred Tan, who has clearly practised this. "A mortal. In a *white robe*. In the deep forest. With a *cat*." Little Tan laughs on cue, a beat late. "You must be very lost, uncle, or very stupid. Either way, the toll on this path is everything you're carrying and the robe."
+        posture: (g, d) => `"Well, well," says Scarred Tan, who has clearly practised this. ${byForm(g, "\"A mortal. In a *white robe*. In the deep forest. With a *cat*.\"", "\"A mortal. In a *white robe*. In the deep forest. With a —\" He looks at Yuki properly for the first time. He has practised this. \"*Cat*.\"", "\"A mortal. In a *white robe*. In the deep forest. With a *lady*. In *silk*.\"")} Little Tan laughs on cue, a beat late. "You must be very lost, uncle, or very stupid. Either way, the toll on this path is everything you're carrying and the robe."
 
 They can't feel anything from you. Not a ripple. To them you are exactly what you look like: a tall soft scholar who took a wrong turn. ${aside(d, 'They are not entirely wrong about the wrong turn.', 'You decide not to correct them. It will be more educational this way.', 'You decide not to correct them. You decide to let them finish the speech, too, because they\'ve clearly worked on it.')}`,
         win: {
@@ -153,9 +153,9 @@ They can't feel anything from you. Not a ripple. To them you are exactly what yo
 "Let's not get into the dung," you say. "Go home. Find a job that doesn't involve the word *toll*."
 
 They go. Little Tan has to be carried. Their jerky stays with you.`,
-            3: () => `You don't even take your hands out of your pockets for the first part. Scarred Tan's knife meets a bone needle that grows out of the air in front of it, point to point, and stops, and his arm keeps going without the knife, and his elbow learns something new about itself. Little Tan runs at you, trips on a root that was very definitely not there a second ago, and knocks himself out on his brother.
+            3: (g) => `You don't even take your hands out of your pockets for the first part. Scarred Tan's knife meets a bone needle that grows out of the air in front of it, point to point, and stops, and his arm keeps going without the knife, and his elbow learns something new about itself. Little Tan runs at you, trips on a root that was very definitely not there a second ago, and knocks himself out on his brother.
 
-When they wake up, you are sitting on a log, eating their jerky, with Yuki in your lap.
+When they wake up, you are sitting on a log, eating their jerky, with ${byForm(g, "Yuki in your lap.", "Yuki's head in your lap.", "Yuki beside you, eating the rest.")}
 
 They kowtow. They kowtow so hard they leave dents. Scarred Tan, between kowtows, swears on the graves of all eighteen of his ancestors that the Tan family will one day repay this humiliation tenfold. Little Tan, between kowtows, asks if you're taking disciples.
 
@@ -383,7 +383,7 @@ You don't go to it. Not yet. Something tells you the story will take you there w
 
 *Practical consequence: everyone I meet will underestimate me. Recommendation: let them.*
 
-Yuki, reading over your shoulder, adds her own entry with one claw: a single scratch, which you decide means *agreed.*`,
+${byForm(g, "Yuki, reading over your shoulder, adds her own entry with one claw: a single scratch, which you decide means *agreed.*", "Yuki, reading over your shoulder, adds her own entry with one claw: a single scratch, through that page and the next six, which you decide means *agreed.*", "Yuki, reading over your shoulder, takes the notebook and adds her own entry: a single stroke, which you decide means *agreed.*")}`,
         choices: [{ text: 'Close the notebook.', to: 'lf_hub' }],
     },
 
@@ -596,9 +596,9 @@ You don't kill him. You never do. You take the herbs he poached, as evidence, an
     lf_human_lost: {
         id: 'lf_human_lost', title: 'Robbed', art: lfTrailArt, place: `${P} — a game trail`,
         enter: (g) => { const id = ['hare_raw', 'fowl_raw', 'venison', 'honeycomb', 'jade_bracket', 'river_cress'].find((k) => g.inventory[k] > 0); if (id) addItem(g, id, -1); return id ? ['They take some of your food.'] : []; },
-        text: `You lose, which stings more than the bruises. They take what food they can find in your pockets (they don't know about the hammerspace; you're not about to tell them) and leave you lying on the trail, laughing about the mortal in the white coat.
+        text: (g) => `You lose, which stings more than the bruises. They take what food they can find in your pockets (they don't know about the hammerspace; you're not about to tell them) and leave you lying on the trail, laughing about the mortal in the white coat.
 
-Yuki sits on your chest until you get up. Through the bond: *we are coming back here. Later. Bigger.*`,
+${byForm(g, "Yuki sits on your chest until you get up. Through the bond: *we are coming back here. Later. Bigger.*", "Yuki keeps one paw on your chest until you get up. Through the bond: *we are coming back here. Later. Bigger.*", "Yuki sits beside you until you get up. \"We are coming back here,\" she says. \"Later. Bigger.\"")}`,
         choices: [{ text: 'Get up. Go home. Train.', do: (g) => { g.james.hp = Math.max(1, g.james.hp); return []; }, time: 60, to: 'lf_hub' }],
     },
 

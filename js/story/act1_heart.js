@@ -226,7 +226,7 @@ ${ya(g) ? (g.flags.romance ? 'Mei Lin goes red to the ears, looks at you, looks 
         choices: [
             { text: 'Get in. You\'re forty, filthy, and it\'s *warm*.', show: ya, time: 45, do: (g) => { advance(g, 0); g.james.hp = Math.min(jamesHpMax(g), g.james.hp + 6); bumpRel(g, 'Ya', 3, 5); if (likesMei(g)) bumpRel(g, 'Mei Lin', 0, 2); return ['+6 HP. Ya spends the whole time trying to drown you, then trying to get you to stop being so stiff, then, briefly, very effectively, not trying to do anything at all except sit closer.']; }, to: 'heart_hub' },
             { text: 'Wash, quickly, at the far end, with a reasonable amount of dignity left.', time: 30, do: (g) => { g.james.hp = Math.min(jamesHpMax(g), g.james.hp + 4); bumpRel(g, 'Mei Lin', 2, 1); return ['+4 HP. Mei Lin washes beside you and tells you, without looking, that you are a coward. She doesn\'t sound like she minds.']; }, to: 'heart_hub' },
-            { text: 'Sit by the water and let them have it.', time: 30, do: (g) => { advance(g, 30, { resting: true }); return ['You sit with your back to a warm wall and Yuki in your lap and listen to the water, and for half an hour nobody needs anything from you.']; }, to: 'heart_hub' },
+            { text: 'Sit by the water and let them have it.', time: 30, do: (g) => { advance(g, 30, { resting: true }); return [`You sit with your back to a warm wall and ${byForm(g, "Yuki in your lap", "Yuki's head in your lap", "Yuki's shoulder against yours")} and listen to the water, and for half an hour nobody needs anything from you.`]; /* v0.11.126 (NQ1): by her form, Fable's */ }, to: 'heart_hub' },
         ],
     },
 
@@ -269,7 +269,7 @@ Your heart starts going very fast.`,
 
 "*Alive*," you report. It comes out higher than you'd like.
 
-Yuki climbs down after you, perfectly, and sits on your chest, and looks at you.`,
+${byForm(g, "Yuki climbs down after you, perfectly, and sits on your chest, and looks at you.", "Yuki climbs down after you, perfectly, all four hundred pounds of her, and puts one paw on your chest, and looks at you.", "Yuki climbs down after you, perfectly, in a dress, and stands over you, and looks at you.")}`,
         choices: [{ text: 'Get up. Wait for the others. Go on.', time: 20, to: 'roots_dark' }],
     },
     roots_dark: {
@@ -484,7 +484,7 @@ ${trio(g) >= 3 ? 'The three of you sleep in a heap by the fire now. Nobody has s
         choices: [
             { text: 'Talk with Mei Lin by the fire.', show: (g) => !g.flags[`hc_mei@${day(g)}`], do: (g) => { g.flags[`hc_mei@${day(g)}`] = true; bumpRel(g, 'Mei Lin', 3, likesMei(g) ? 3 : 1); return ['She tells you the songs about the Old Tree her grandmother sang. Some of the words are your words, worn smooth by four hundred years of people who didn\'t know what they meant.']; }, to: 'heart_night' },
             { text: 'Climb up to Ya\'s ledge.', show: (g) => ya(g) && !g.flags[`hc_ya@${day(g)}`], do: (g) => { g.flags[`hc_ya@${day(g)}`] = true; bumpRel(g, 'Ya', 3, likesYa(g) ? 4 : 1); return ['She makes you sit on the very edge, then laughs when you hold on. Then she tells you, very seriously, how many days she followed you through the forest before she decided you were interesting. It was all of them.']; }, to: 'heart_night' },
-            { text: 'Sit up with Yuki and the hearth-log.', show: (g) => hasItem(g, 'hearth_log'), do: (g) => { bumpRel(g, 'Yuki', 2, 0); return ['You play the first part again, just Wren\'s voice, just the planting. Yuki purrs against your chest the whole way through.']; }, to: 'heart_night' },
+            { text: 'Sit up with Yuki and the hearth-log.', show: (g) => hasItem(g, 'hearth_log'), do: (g) => { bumpRel(g, 'Yuki', 2, 0); return [`You play the first part again, just Wren's voice, just the planting. ${byForm(g, "Yuki purrs against your chest the whole way through.", "Yuki purrs with her head on your chest the whole way through.", "Yuki leans against your shoulder and purrs, very quietly, the whole way through.")}`]; /* v0.11.126 (NQ1): by her form, Fable's */ }, to: 'heart_night' },
             { text: 'Story Mode only (removed in v0.11.41).', show: () => false, to: 'heart_night' }, // v0.11.41 (D2-a): Story Mode's sit; the place kept (choice indices)
             { text: 'Sleep.', to: 'heart_night' },
         ],

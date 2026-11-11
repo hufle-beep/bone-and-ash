@@ -1010,7 +1010,7 @@ Much later she lies along you with her hair loose over your arm, listening to th
     friends_watch: {
         id: 'friends_watch', title: 'Watch', art: 'night_watch', place: PLACE.ah,
         enter: (g) => { g.flags.bl_friends = true; bumpRel(g, 'Mei Lin', 4, 0); bumpRel(g, 'Ya', 4, 0); return []; },
-        text: `None of you can sleep, so none of you tries. You sit up together on the ridge, the three of you and the cat, and keep the watch as a group, which is tactically useless and exactly right.
+        text: (g) => `None of you can sleep, so none of you tries. You sit up together on the ridge, ${byForm(g, "the three of you and the cat,", "the three of you and the cat,", "all four of you,")} and keep the watch as a group, which is tactically useless and exactly right.
 
 Ya teaches Mei Lin a dirty song in a language nobody else speaks. Mei Lin teaches Ya the proper way to bow to an elder, then the proper way to bow to an enemy, which is the same bow with the eyes up. Ya thinks this is the funniest thing she has ever heard and practises it on a rock for an hour.
 

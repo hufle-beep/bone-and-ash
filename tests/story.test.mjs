@@ -9,6 +9,7 @@ import { loveLine } from '../js/story/yuki_path.js'; // v0.11.122 (RL1, T)
 import { likesMei, likesYa } from '../js/story/act1_common.js'; // v0.11.123 (EQ1, AB)
 import { KEEP_FLAGS, rewind } from '../js/core/coil.js'; // v0.11.123 (ER1, T3)
 import { againView } from '../js/story/again.js'; // v0.11.125 (RW1, T)
+import { STOMP } from '../js/story/power.js'; // v0.11.126 (NQ1)
 import { writeFileSync } from 'node:fs';
 import { smartAction } from './lib/smartfight.mjs'; // v0.11.96 (BT1)
 import { GAMES, FULL, SHARD, WORKERS, STATS_OUT, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
@@ -773,6 +774,173 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     {
         const g = FM(57500, 'cat'); g.yuki.form = 'human'; goTo(g, SCENES, 'rt_road');
         assert(/Yuki rides on your shoulder and supervises\./.test(sceneView(g, SCENES).text), 'FM1: a stored human form below Nascent Soul reads as the cat');
+    }
+    // v0.11.126 (owner pick NQ1; texts by Fable): the second pass: S1 the lines the bots met in another form, S0 the lines only a player
+    // reaches, RV the sister's "out loud" while she can't speak aloud. The cat keeps every old line; "keep" = the great root-kin keeps it too.
+    const NQ = [
+        // [scene, flags, minutes, cat, great root-kin, human]
+        ['fo_last_night', {}, null, /The north wind moves in the thatch\. Yuki curls into the hollow of your neck, and through the bond/, /Yuki lies down along the length of you and fits her chin into the hollow of your neck, which is all of her that fits, and through the bond/, /Yuki lies down at your back, her tail across your shins, and through the bond/],
+        ['tribute_dawn_sleep', {}, null, /^You sleep by the stove with a cat on your chest and the sound/, /^You sleep by the stove with a cat's head on your chest, which is all of her that fits, and the sound/, /^You sleep by the stove, back to back with Yuki, with the sound/],
+        ['tribute_dawn_talk', {}, null, /Yuki climbs into the gap between you as if she'd been invited\./, /Yuki lies down across both your feet as if she'd been invited\./, /Yuki sits down on your other side and takes the other shoulder, as if she'd been invited\./],
+        ['mei_lin', {}, null, /Yuki, from your shoulder, offers Mei Lin one slow blink\./, /Yuki, from your side, offers Mei Lin one slow blink\./, /Yuki, at your elbow, offers Mei Lin one slow blink\./],
+        ['gao_talked', {}, null, /with a cat on his shoulder and the bored tone/, /with a cat the size of a tiger at his side and the bored tone/, /with a cat-eared woman in a black dress at his elbow and the bored tone/],
+        ['friends_watch', {}, null, /the three of you and the cat, and keep the watch/, /the three of you and the cat, and keep the watch/, /on the ridge, all four of you, and keep the watch/],
+        ['rt_grove', {}, null, /Yuki walks into the middle of the ring, lies down, and purrs/, /Yuki walks into the middle of the ring, lies down, and purrs/, /Yuki walks into the middle of the ring, sits down in her black dress, and purrs/],
+        ['roots_fall', {}, null, /Yuki climbs down after you, perfectly, and sits on your chest, and looks at you\./, /perfectly, all four hundred pounds of her, and puts one paw on your chest, and looks at you\./, /perfectly, in a dress, and stands over you, and looks at you\./],
+        ['fo_spy_lost', {}, null, /Yuki sits on your chest\. \*He folded his mat,\* the bond observes/, /Yuki rests one paw on your chest\. \*He folded his mat,\* the bond observes/, /Yuki sits down beside you\. "He folded his mat," she observes\. "While you were bleeding\."/],
+        ['rt_serpent_lost', {}, null, /with Yuki standing on your chest, soaked/, /with Yuki standing over you, soaked/, /with Yuki kneeling on your chest, soaked/],
+        ['night_event', { night_ev: 'gift' }, null, /Yuki is sitting on you, very upright[\s\S]*nearly as big as she is[\s\S]*Through the bond: \*you hunt like a tree/, /The weight is one of Yuki's paws\.[\s\S]*about one mouthful to her[\s\S]*Through the bond: \*you hunt like a tree/, /Yuki is kneeling beside you[\s\S]*neck neatly wrung[\s\S]*"You hunt like a tree," she says\./],
+        ['jackals_fled', {}, null, /Yuki — perched on your shoulder, dry, smug —/, /Yuki — stretched out on the one rock in midstream, dry, smug —/, /Yuki — standing on the one rock in midstream with her hem held up, dry, smug —/],
+        ['lf_notes', {}, null, /adds her own entry with one claw: a single scratch, which you decide/, /adds her own entry with one claw: a single scratch, through that page and the next six, which you decide/, /takes the notebook and adds her own entry: a single stroke, which you decide/],
+        ['lf_human_lost', {}, null, /Yuki sits on your chest until you get up\. Through the bond: \*we are coming back/, /Yuki keeps one paw on your chest until you get up\. Through the bond: \*we are coming back/, /Yuki sits beside you until you get up\. "We are coming back here," she says\./],
+    ];
+    for (const [id, flags, min, ...want] of NQ) {
+        assert(!!SCENES[id], `NQ1: scene ${id} exists`);
+        ['cat', 'tiger', 'human'].forEach((form, i) => {
+            const g = FM(59200 + n++, form, flags); if (min) g.minutes = min; goTo(g, SCENES, id);
+            Object.assign(g.flags, flags); // the night's draw on entering (night_event) is set back to the case's
+            const t = sceneView(g, SCENES).text;
+            const hits = want.filter((re) => re.test(t)).length;
+            const same = want.filter((re) => re.source === want[i].source).length; // a "keep" form shares the cat's line
+            assert(want[i].test(t) && hits === same, `NQ1: ${id} as ${form} (${t.slice(0, 70)}…)`);
+        });
+    }
+    // the choices' results (scene, the choice's text, flags, cat, great root-kin, human)
+    const RES = [
+        ['fo_drill', /^Spar with Yuki in front of them/, {}, /Afterwards Old Hu bows to the cat\./, /Afterwards Old Hu bows to the cat\./, /Afterwards Old Hu bows to Yuki\. Only to Yuki\./],
+        ['heart_spring', /^Sit by the water/, {}, /a warm wall and Yuki in your lap and listen/, /a warm wall and Yuki's head in your lap and listen/, /a warm wall and Yuki's shoulder against yours and listen/],
+        ['heart_camp', /^Sit up with Yuki and the hearth-log/, {}, /Yuki purrs against your chest the whole way through\./, /Yuki purrs with her head on your chest the whole way through\./, /Yuki leans against your shoulder and purrs, very quietly, the whole way through\./],
+        ['wen_lesson', /^Listen\. Ask\./, { lore_realms: true }, /exactly it\. Yuki, on your knee, has not stopped/, /exactly it\. Yuki, her chin on your knee, has not stopped/, /exactly it\. Yuki, beside you, has not stopped/],
+        ['rt_ford', /^Cross carefully, stone by stone/, {}, /On the far bank Yuki shakes a wet paw at the river, formally/, /On the far bank Yuki shakes a wet paw at the river, formally/, /On the far bank Yuki wrings out the hem of her dress at the river, formally/],
+    ];
+    for (const [id, label, flags, ...want] of RES) {
+        const c = SCENES[id]?.choices?.find((x) => label.test(typeof x.text === 'function' ? '' : x.text));
+        assert(!!c && typeof c.do === 'function', `NQ1: ${id}'s choice exists`);
+        if (!c) continue;
+        ['cat', 'tiger', 'human'].forEach((form, i) => {
+            const g = FM(59400 + n++, form, flags); g.scene = id;
+            const t = (c.do(g) || []).filter((x) => typeof x === 'string').join('\n');
+            const same = want.filter((re) => re.source === want[i].source).length; // NR1 (T): its own line and no other form's
+            assert(want[i].test(t) && want.filter((re) => re.test(t)).length === same, `NQ1: ${id}'s result as ${form} (${t.slice(0, 70)}…)`);
+        });
+    }
+    // the Tans' crushing win (lf_bandits, degree 3)
+    const TANS = [['cat', /eating their jerky, with Yuki in your lap\./], ['tiger', /eating their jerky, with Yuki's head in your lap\./], ['human', /eating their jerky, with Yuki beside you, eating the rest\./]];
+    for (const [form, re] of TANS) {
+        const t = STOMP.lf_bandits.win[3](FM(59500 + n++, form));
+        assert(re.test(t) && TANS.filter(([, r]) => r.test(t)).length === 1, `NQ1: the Tans' crushing win as ${form}`);
+    }
+    // RV: the sister's last line in Act 1's epilogue: aloud only as a human
+    const COOK = [['cat', /grades everybody's cooking through the bond, which leaves you to read out the marks\./], ['tiger', /grades everybody's cooking by how much of the pot comes back\./], ['human', /grades everybody's cooking out loud\./]];
+    for (const host of [{ romance: true }, { ya_romance: true }, { throuple: true }]) for (const [form, re] of COOK) { // NR1 (T): every host of the clause
+        const line = loveLine(FM(59600 + n++, form, { yk_path: 'sister', ending: 'bluff', ...host }, [10, 10]));
+        assert(re.test(line) && COOK.filter(([, r]) => r.test(line)).length === 1, `NQ1 (RV): the sister's cooking line as ${form}, ${Object.keys(host)[0]} (${line.slice(0, 60)})`);
+    }
+    // T: the scenes whose text became a function still fold on a later Coil
+    for (const id of ['tribute_dawn_sleep', 'tribute_dawn_talk', 'mei_lin', 'gao_talked', 'friends_watch', 'fo_spy_lost', 'rt_serpent_lost', 'jackals_fled', 'lf_human_lost', 'gao_fight_start', 'jackals_lost', 'gao_lost']) {
+        for (const form of ['cat', 'tiger', 'human']) { // NR1 (T): every form, and the fold keeps the whole text
+            const g = FM(59700 + n++, form); goTo(g, SCENES, id); g.seen[id] = 1; g.coil.n = 2;
+            const v = sceneView(g, SCENES); const a = againView(g, v);
+            const paras = v.text.split(/\n\s*\n/).filter((x) => x.trim()).length;
+            assert(typeof v.text === 'string' && (paras < 2 || (a.fold && JSON.stringify(a).length >= v.text.length)), `NQ1 (T): ${id} folds on a later Coil as ${form}`);
+        }
+    }
+    // T: the new texts never place the great root-kin or the human as the small cat
+    const NQ_SMALL = /Yuki, from your shoulder|a cat on his shoulder|perched on your shoulder|Yuki in your lap|Yuki, on your knee|Yuki sits on your chest|Yuki standing on your chest|Yuki purrs against your chest|curls into the hollow of your neck,|climbs into the gap|a cat on your chest|Yuki is sitting on you|nearly as big as she is|grades everybody's cooking out loud/;
+    for (const [id, flags] of NQ.map(([id, f]) => [id, f])) for (const form of ['tiger', 'human']) {
+        const g = FM(59800 + n++, form, flags); goTo(g, SCENES, id); Object.assign(g.flags, flags);
+        const m = sceneView(g, SCENES).text.match(NQ_SMALL);
+        assert(!m, `NQ1 (T): ${id} as ${form} never places her as the small cat (${m?.[0]})`);
+    }
+    // v0.11.126 (owner pick NR1; texts by Fable): the leftovers of Fable's review: ST the lovers' loft, LV loveLine's hosts, PC "your cat"
+    // to a woman, TN the Tans' taunt, RT the rats and the rain, GA Gao and the great root-kin, JL the jackals' loss
+    const NR = [
+        // [scene, flags, minutes, cat, great root-kin, human]
+        ['fo_last_night', { romance: true }, null, /not even Yuki's, who goes and sleeps on the stove in protest\./, /not even Yuki's, who goes down and sleeps in front of the stove in protest, across the whole floor\./, /not even Yuki's, who goes and sleeps on the bench by the stove in protest\./],
+        ['fo_council', {}, null, /"Your cat," Old Wen says, "faces north/, /"Your cat," Old Wen says, "faces north/, /"Your companion," Old Wen says, "faces north/],
+        ['night_event', { night_ev: 'rats' }, null, /They've smelled the cat\. They seem to think she's dinner\. Yuki seems/, /They seem to think she's dinner, which means they haven't seen her yet\. Yuki seems/, /They've smelled a cat and found a woman\. They seem to think she's dinner either way\. Yuki seems/],
+        ['night_event', { night_ev: 'rain' }, null, /Yuki makes it clear, through the bond and through her claws, that/, /Yuki makes it clear, through the bond and by shaking herself dry all over you, that/, /Yuki makes it clear, aloud and at some length, from under your lab coat, that/],
+        ['gao_fight_start', {}, null, /you are alone, unarmed, and wearing a lab coat\. He has looked at you with his Qi-sense and felt nothing at all: a mortal\./, /you are unarmed, wearing a lab coat, and alone but for a cat\. He has looked at you both[\s\S]*a mortal's very large cat\./, /you are alone, unarmed, and wearing a lab coat\. He has looked at you with his Qi-sense and felt nothing at all: a mortal\./],
+        ['herb_girl', {}, null, /slide off a fence post\. You, apparently/, /slide off a fence post, and off Yuki the way they'd slide off a second, larger fence post\./, /slide off a fence post\. You, apparently/],
+        ['gao_lost', {}, null, /Eleven pounds of white cat land on his face, all claws, and while he's screaming and spinning, Mei Lin/, /Four hundred pounds of white cat take him off your neck and a fair way across the herb bed, and while he's screaming and rolling, Mei Lin/, /Yuki lands on his back in a black dress, all nails, and while he's screaming and spinning, Mei Lin/], // NS1 (GL)
+        ['jackals_lost', {}, null, /Yuki — all eleven pounds of her —[\s\S]*and covered in cat\./, /Yuki — all four hundred pounds of her —[\s\S]*underneath a good deal of cat\./, /Yuki — all of her, in a dress —[\s\S]*with your head in Yuki's lap\./],
+    ];
+    for (const [id, flags, min, ...want] of NR) {
+        ['cat', 'tiger', 'human'].forEach((form, i) => {
+            const g = FM(60000 + n++, form, flags, flags.romance ? [80, 10] : [40, 40]); if (min) g.minutes = min; goTo(g, SCENES, id);
+            Object.assign(g.flags, flags);
+            const t = sceneView(g, SCENES).text;
+            const same = want.filter((re) => re.source === want[i].source).length;
+            assert(want[i].test(t) && want.filter((re) => re.test(t)).length === same, `NR1: ${id} (${Object.values(flags).join(', ') || 'plain'}) as ${form} (${t.slice(0, 70)}…)`);
+        });
+    }
+    // PC: Old Wen's lesson (the scene's quote) and the Tans' taunt (the fight's posture)
+    for (const [form, wen, tans] of [
+        ['cat', /"Your cat's been staring toward it/, /In the deep forest\. With a \*cat\*\." Little Tan/],
+        ['tiger', /"Your cat's been staring toward it/, /With a —" He looks at Yuki properly for the first time\. He has practised this\. "\*Cat\*\." Little Tan/],
+        ['human', /"Your companion has been staring toward it/, /With a \*lady\*\. In \*silk\*\." Little Tan/],
+    ]) {
+        const g = FM(60200 + n++, form, { lore_realms: true }); goTo(g, SCENES, 'wen_lesson'); // the forest lesson, after the realms
+        assert(wen.test(sceneView(g, SCENES).text), `NR1 (PC): Old Wen's lesson as ${form}`);
+        assert(tans.test(STOMP.lf_bandits.posture(FM(60300 + n++, form), 3)), `NR1 (TN): the Tans' taunt as ${form}`);
+    }
+    // LV: loveLine's hosts by her form (the lover's 'yuki_mei' and 'yuki_ya' keep theirs; the human lover keeps the throuple's cat)
+    const HOSTS = [
+        // [flags, cat, great root-kin, human]
+        [{ yk_path: 'sister', romance: true }, /four places at the table now: three and a saucer\./, /four places at the table now: three and the stew pot\./, /four places at the table now, with a saucer by the fourth, out of habit\./],
+        [{ yk_path: 'sister', throuple: true }, /hair and one aggrieved cat\./, /in whatever room one aggrieved cat has left you\./, /one aggrieved white-haired woman on the bench by the stove below\./],
+        [{ yk_path: 'lover', throuple: true }, /hair and one aggrieved cat\. Some nights the cat isn't a cat/, /in whatever room one aggrieved cat has left you\. Some nights/, /hair and one aggrieved cat\. Some nights the cat isn't a cat/],
+        [{ yk_path: 'lover', final_night: 'all' }, /and the smallest of you is a white cat on top of the pile\. Mei Lin's mother sets five places at the table now — four and a saucer/, /the largest of you is a white cat and most of the bedding\.[\s\S]*four and the stew pot;/, /and one white tail, which ends up on top of the pile[\s\S]*five places at the table now, and a saucer/], // NS1 (AC): Yuki counted once in the cat's line
+        [{ yk_path: 'lover', final_night: 'yuki_mei' }, /why the cat needs a pillow\./, /why the cat needs a pillow\./, /why the cat needs a pillow\./],
+        [{ yk_path: 'lover', final_night: 'yuki' }, /the cat who curls up on your chest is[\s\S]*a lonely man with a cat\./, /the cat who lays her head on your chest, which is all of her that fits, is[\s\S]*a lonely man with a very large cat\./, /the cat who curls up on your chest is[\s\S]*a lonely man with a cat\./], // NS1 (YN); the human keeps hers (open)
+        [{ yk_path: 'lover', final_night: 'yuki_ya' }, /the huntress and the cat arguing/, /the huntress and the cat arguing/, /the huntress and the cat arguing/],
+    ];
+    for (const [flags, ...want] of HOSTS) ['cat', 'tiger', 'human'].forEach((form, i) => {
+        const g = FM(60400 + n++, form, { ending: 'bluff', ...flags }, [10, 10]); g.yuki.realm = 7; g.james.realm = 7; g.yuki.form = form; // her human form open: the lover lines
+        const line = loveLine(g);
+        const same = want.filter((re) => re.source === want[i].source).length;
+        assert(want[i].test(line) && want.filter((re) => re.test(line)).length === same, `NR1 (LV): ${Object.entries(flags).map(([k, v]) => `${k} ${v}`).join(', ')} as ${form} (${line.slice(0, 60)})`);
+    });
+    // T: the results through choose(), with the scene read first (a strong James, so every check passes); the positions pinned
+    for (const [id, idx, flags, wantRe] of [
+        ['fo_drill', 1, {}, { cat: /bows to the cat\./, tiger: /bows to the cat\./, human: /bows to Yuki\. Only to Yuki\./ }],
+        ['heart_spring', 2, {}, { cat: /Yuki in your lap/, tiger: /Yuki's head in your lap/, human: /Yuki's shoulder against yours/ }],
+        ['heart_camp', 3, {}, { cat: /purrs against your chest/, tiger: /purrs with her head on your chest/, human: /leans against your shoulder and purrs/ }],
+        ['wen_lesson', 0, { lore_realms: true }, { cat: /Yuki, on your knee,/, tiger: /Yuki, her chin on your knee,/, human: /Yuki, beside you,/ }],
+    ]) for (const form of ['cat', 'tiger', 'human']) {
+        const g = FM(60600 + n++, form, flags); g.inventory.hearth_log = 1; g.james.gu = { tier: 10, level: 10, xp: 0 }; ensureBars(g);
+        goTo(g, SCENES, id); Object.assign(g.flags, flags);
+        const host = sceneView(g, SCENES);
+        const c = host.choices.find((x) => x.index === idx);
+        assert(!!c && !c.disabled, `NR1 (T): ${id}'s choice ${idx} shown as ${form}`);
+        if (!c) continue;
+        const r = choose(g, SCENES, idx);
+        const t = r.lines.filter((x) => typeof x === 'string').join('\n');
+        const others = Object.entries(wantRe).filter(([f, re]) => f !== form && re.source !== wantRe[form].source).map(([, re]) => re);
+        assert(wantRe[form].test(t) && !others.some((re) => re.test(t)), `NR1 (T): ${id}'s result through choose() as ${form} (${t.slice(0, 60)})`);
+        if (form === 'human') assert(!/Your cat|on your knee|in your lap\b(?! and)/.test(host.text) || id === 'heart_spring', `NR1 (T): ${id}'s own text as the human`);
+    }
+    // NS1 (TR): the rats night's trunk, by form (a label that is a function; its place on the scene kept)
+    for (const [form, re] of [['cat', /^Up the fallen trunk with Yuki and wait them out\.$/], ['tiger', /^Up the fallen trunk behind Yuki and wait them out\.$/], ['human', /^Up the fallen trunk with Yuki and wait them out\.$/]]) {
+        const g = FM(60700 + n++, form, { night_ev: 'rats' }); goTo(g, SCENES, 'night_event'); g.flags.night_ev = 'rats';
+        const c = sceneView(g, SCENES).choices.find((x) => /^Up the fallen trunk/.test(x.label));
+        assert(!!c && re.test(c.label) && SCENES.night_event.choices[c.index] && /fallen trunk/.test(SCENES.night_event.choices[c.index].text(g)), `NS1 (TR): the trunk choice as ${form} (${c?.label})`);
+    }
+    // T: the positions of the touched choices (saves keep picks by position)
+    for (const [id, idx, re] of [['fo_drill', 1, /^Spar with Yuki/], ['heart_spring', 2, /^Sit by the water/], ['heart_camp', 3, /^Sit up with Yuki/], ['wen_lesson', 0, /^Listen\. Ask/], ['rt_ford', 0, /^Cross carefully/]]) {
+        assert(re.test(SCENES[id].choices[idx].text), `NR1 (T): ${id}'s touched choice stays at ${idx}`);
+    }
+    // T: the sweep, every touched scene with each path, the forms that are not the cat: no small-cat placement, and no voice aloud from
+    // the cat or the great root-kin
+    const NOT_SMALL = { tiger: /Yuki, from your shoulder|a cat on his shoulder|perched on your shoulder|Yuki in your lap|Yuki, on your knee|Yuki sits on your chest|Yuki standing on your chest|purrs against your chest|curls into the hollow of your neck,|climbs into the gap|with a cat on your chest|Yuki is sitting on you|nearly as big as she is|sleeps on the stove in protest|three and a saucer|alone, unarmed|eleven pounds|Eleven pounds|covered in cat|through her claws/, human: /Yuki, from your shoulder|a cat on his shoulder|perched on your shoulder|Yuki in your lap|Yuki, on your knee|Yuki sits on your chest|Yuki standing on your chest|purrs against your chest|curls into the hollow of your neck,|climbs into the gap|a cat on your chest|Yuki is sitting on you|nearly as big as she is|sleeps on the stove in protest|three and a saucer|eleven pounds|Eleven pounds|covered in cat|through her claws|Your cat|bows to the cat|the three of you and the cat|shakes a wet paw/ };
+    const ALOUD = /"He folded his mat," she observes|"You hunt like a tree," she says|"We are coming back here," she says|aloud and at some length|grades everybody's cooking out loud/;
+    const SWEEP = [...NQ.map(([id, f]) => [id, f]), ...NR.map(([id, f]) => [id, f]), ['wen_lesson', { lore_realms: true }]];
+    for (const [id, flags] of SWEEP) for (const form of ['cat', 'tiger', 'human']) for (const path of [null, 'sister', 'lover']) {
+        const g = FM(60800 + n++, form, path ? { ...flags, yk_path: path } : flags); goTo(g, SCENES, id); Object.assign(g.flags, flags);
+        const t = sceneView(g, SCENES).text;
+        const m = form !== 'cat' && t.match(NOT_SMALL[form]);
+        assert(!m, `NR1 (T): ${id} as ${form} (${path || 'no path'}) never places her as the small cat (${m?.[0]})`);
+        assert(form === 'human' || !ALOUD.test(t), `NR1 (T): ${id} as ${form} (${path || 'no path'}): no voice aloud`);
     }
 }
 // v0.11.34 (owner pick A, 1,000 games): two scenes the random walks reached only by luck at 2,000 games, now on purpose

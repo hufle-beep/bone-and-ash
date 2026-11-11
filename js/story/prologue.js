@@ -336,19 +336,19 @@ Something tells you the locals would kill for this. Something tells you that's l
     jackals_lost: {
         id: 'jackals_lost', title: 'Teeth in the Dark', art: 'jackals', place: 'Blackroot Wilds — the dry rise',
         enter: (g) => { g.flags.jackals = 'lost'; delete g.inventory.hare_raw; return ['The jackals take your food and some skin. You keep your throat.']; },
-        text: `You go down. The last thing you see is Yuki — all eleven pounds of her — standing over you with her fur on end, screaming a sound a cat should not be able to make.
+        text: (g) => `${byForm(g, "You go down. The last thing you see is Yuki — all eleven pounds of her — standing over you with her fur on end, screaming a sound a cat should not be able to make.", "You go down. The last thing you see is Yuki — all four hundred pounds of her — standing over you with her fur on end, making a sound a cat her size is fully entitled to make.", "You go down. The last thing you see is Yuki — all of her, in a dress — standing over you with her ears flat and her tail on end, screaming a sound a woman should not be able to make.")}
 
 The jackals hesitate. Then they take the hare and leave. Perhaps they didn't like her odds. Perhaps they didn't like what's in your blood.
 
-You wake up an hour before dawn, alive, aching, and covered in cat.`,
+${byForm(g, "You wake up an hour before dawn, alive, aching, and covered in cat.", "You wake up an hour before dawn, alive, aching, and underneath a good deal of cat.", "You wake up an hour before dawn, alive, aching, and with your head in Yuki's lap.")}`,
         choices: [{ text: 'Get up. Slowly.', do: (g) => { sleepUntil(g, 6); g.james.hp = Math.ceil(g.james.hp * 0.6); return ['You slept, badly. HP partly back, Qi full.']; }, to: 'dawn' }],
     },
     jackals_fled: {
         id: 'jackals_fled', title: 'Retreat', art: 'stream', place: 'Blackroot Wilds — the stream',
         enter: (g) => { g.flags.jackals = 'fled'; g.flags.night_fight = 'run'; return []; }, // v0.11.92 (O1, F): a run costs sleep like a fight
-        text: `You end up waist-deep in black water, which the jackals hate more than they hate you. They pace the bank until the sky greys, then melt into the trees.
+        text: (g) => `You end up waist-deep in black water, which the jackals hate more than they hate you. They pace the bank until the sky greys, then melt into the trees.
 
-You are cold, wet, alive and furious, and Yuki — perched on your shoulder, dry, smug — is only three of those things.`,
+You are cold, wet, alive and furious, and Yuki — ${byForm(g, "perched on your shoulder,", "stretched out on the one rock in midstream,", "standing on the one rock in midstream with her hem held up,")} dry, smug — is only three of those things.`,
         choices: [{ text: 'Climb out and get warm.', do: (g) => [nightRest(g)], to: 'dawn' }], // v0.11.92 (O1, F): half the missing HP and Qi back (was HP 80%, Qi full)
     },
 
@@ -381,7 +381,7 @@ A woman in a patched brown jacket, maybe mid-twenties, has her back to a boulder
 
 Your Parallel Cognition is already labelling him. Qi like a coal under ash: a few rungs past your own. A cultivator.
 
-He glances at you once, the quick appraising glance cultivators here give everyone — *root? realm? threat?* — and finds nothing. No root. No Qi. Not a flicker. His eyes slide off you the way they'd slide off a fence post. You, apparently, do not register. Of the local kind, and of the kind that likes it.`,
+He glances at you once, the quick appraising glance cultivators here give everyone — *root? realm? threat?* — and finds nothing. No root. No Qi. Not a flicker. ${byForm(g, "His eyes slide off you the way they'd slide off a fence post.", "His eyes slide off you the way they'd slide off a fence post, and off Yuki the way they'd slide off a second, larger fence post.", "His eyes slide off you the way they'd slide off a fence post.")} You, apparently, do not register. Of the local kind, and of the kind that likes it.`,
         choices: [
             { text: '"Morning. Is this a private extortion or can anyone join?"', check: { skill: 'GU', dc: 4 }, to: 'gao_talked', fail: 'gao_fight_start' },
             { text: 'A bone needle through the back of his hand, before he knows you\'re here.', show: (g) => !!g.flags.sneak, qi: 3, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 3 }, do: set('gao_hand'), to: 'gao_hand', fail: 'gao_fight_start' },
@@ -405,7 +405,7 @@ He stares at the white needle. Then at you. Then — and this is the interesting
     gao_talked: {
         id: 'gao_talked', title: 'Words', art: 'herb_girl', place: 'Blackroot Wilds — the herb slope',
         enter: (g) => { g.flags.gao_humiliated = true; bumpRel(g, 'Mei Lin', 8, 2); return []; },
-        text: `It turns out that a tall foreigner in a strange white coat, who walks into an extortion with a cat on his shoulder and the bored tone of a man complaining about a parking ticket, does not compute for Crimson Robes.
+        text: (g) => `It turns out that a tall foreigner in a strange white coat, who walks into an extortion with ${byForm(g, "a cat on his shoulder", "a cat the size of a tiger at his side", "a cat-eared woman in a black dress at his elbow")} and the bored tone of a man complaining about a parking ticket, does not compute for Crimson Robes.
 
 You talk. You are very, very sarcastic. At one point you describe his lotus embroidery as "a cry for help". The lackey goes rigid with outrage on his master's behalf, which is somehow funnier.
 
@@ -416,7 +416,7 @@ Crimson Robes — *Gao Feng, Outer Disciple of the Crimson Lotus Sect*, he infor
     },
     gao_fight_start: {
         id: 'gao_fight_start', title: 'Crimson Lotus', art: 'herb_girl', place: 'Blackroot Wilds — the herb slope',
-        text: `Gao Feng decides that whatever you are, you are alone, unarmed, and wearing a lab coat. He has looked at you with his Qi-sense and felt nothing at all: a mortal. "Pock-Face," he says, without turning his head, "teach the peasant to kneel." The lackey grins and cracks his knuckles at you, which is the first time anyone has done that outside a film.
+        text: (g) => `${byForm(g, "Gao Feng decides that whatever you are, you are alone, unarmed, and wearing a lab coat. He has looked at you with his Qi-sense and felt nothing at all: a mortal.", "Gao Feng decides that whatever you are, you are unarmed, wearing a lab coat, and alone but for a cat. He has looked at you both with his Qi-sense and felt nothing at all: a mortal, and a mortal's very large cat.", "Gao Feng decides that whatever you are, you are alone, unarmed, and wearing a lab coat. He has looked at you with his Qi-sense and felt nothing at all: a mortal.")} "Pock-Face," he says, without turning his head, "teach the peasant to kneel." The lackey grins and cracks his knuckles at you, which is the first time anyone has done that outside a film.
 
 All of it is true. None of it is the whole truth.`,
         choices: [{ text: 'Fight.', combat: gaoFight, to: 'gao_won' }],
@@ -446,9 +446,9 @@ That isn't sarcasm. You check. It isn't.`,
     gao_lost: {
         id: 'gao_lost', title: 'Face in the Dirt', art: 'gao_down', place: 'Blackroot Wilds — the herb slope',
         enter: (g) => { g.flags.gao_won_fight = true; bumpRel(g, 'Mei Lin', 6, 2); g.james.hp = Math.max(3, g.james.hp); return []; },
-        text: `You end up face down in the herbs with Gao Feng's boot on your neck and the taste of blood and mint in your mouth. He takes his time telling you what he's going to do to you.
+        text: (g) => `You end up face down in the herbs with Gao Feng's boot on your neck and the taste of blood and mint in your mouth. He takes his time telling you what he's going to do to you.
 
-He doesn't get to finish. Eleven pounds of white cat land on his face, all claws, and while he's screaming and spinning, Mei Lin puts her herb-knife through the lackey's thigh and her basket over Gao Feng's head.
+He doesn't get to finish. ${byForm(g, "Eleven pounds of white cat land on his face, all claws, and while he's screaming and spinning,", "Four hundred pounds of white cat take him off your neck and a fair way across the herb bed, and while he's screaming and rolling,", "Yuki lands on his back in a black dress, all nails, and while he's screaming and spinning,")} Mei Lin puts her herb-knife through the lackey's thigh and her basket over Gao Feng's head.
 
 By the time he's untangled himself, the three of you are fifty metres down the slope and running.
 
@@ -493,7 +493,7 @@ She looks at you for a long moment, and something in her face shifts — not agr
     mei_lin: {
         id: 'mei_lin', title: 'Mei Lin', art: 'mei_lin', place: 'Blackroot Wilds — the herb slope',
         enter: (g) => { addItem(g, 'spirit_grass', 1); return ['+1 Ninefold spirit grass (a thank-you, or a test).']; },
-        text: `Up close she's all edges: sharp cheekbones, sharp eyes, a sharp mouth that has clearly been getting her into trouble for years. Her hands are scarred from herb-knives and her jacket has been patched by someone who cared more about warmth than looks. She is studying you like you're a plant she can't classify.
+        text: (g) => `Up close she's all edges: sharp cheekbones, sharp eyes, a sharp mouth that has clearly been getting her into trouble for years. Her hands are scarred from herb-knives and her jacket has been patched by someone who cared more about warmth than looks. She is studying you like you're a plant she can't classify.
 
 "You have no spirit root," she says. "I'd feel it. I can't feel *anything* in you — no root, no Qi, not even the dirt-level hum every farmer has. To my senses you're a stone in a coat. You eat no pills — I can smell pill-eaters a li away. And you made *bone* out of *air*." She says it like an accusation. "That isn't possible. Mortals can't do that. And you are a mortal. I'd stake my life on it, and I'd lose." She holds out a stem of the glowing grass. "Eat this."
 
@@ -509,7 +509,7 @@ You take it. It hums against your skin, a little hungry, a little vicious — Qi
 
 "Depends who you ask."
 
-Yuki, from your shoulder, offers Mei Lin one slow blink. Mei Lin — to her eternal credit — blinks back.`,
+${byForm(g, "Yuki, from your shoulder,", "Yuki, from your side,", "Yuki, at your elbow,")} offers Mei Lin one slow blink. Mei Lin — to her eternal credit — blinks back.`,
         choices: [
             { text: '"Tell me about the tribute. And the tribulations. And why everyone here tastes like a funeral."', do: (g) => { g.flags.lore1 = true; bumpRel(g, 'Mei Lin', 3, 0); return []; }, time: 30, to: 'lore' },
             { text: '"Is there somewhere with a roof and food? I\'ll trade work."', time: 60, to: 'village' },
@@ -678,12 +678,12 @@ Much later, the lamp is out, the hay is everywhere, and Mei Lin is asleep with h
     },
     tribute_dawn_talk: {
         id: 'tribute_dawn_talk', title: 'Until It\'s Not Night', art: 'dinner', place: 'Ashfall Hamlet — Mei Lin\'s house',
-        text: `You talk until the lamp dies, and then in the dark, and then until the windows go grey. She falls asleep against your shoulder mid-sentence about a herb that blooms only in snow. You don't move. Yuki climbs into the gap between you as if she'd been invited.`,
+        text: (g) => `You talk until the lamp dies, and then in the dark, and then until the windows go grey. She falls asleep against your shoulder mid-sentence about a herb that blooms only in snow. You don't move. ${byForm(g, "Yuki climbs into the gap between you as if she'd been invited.", "Yuki lies down across both your feet as if she'd been invited.", "Yuki sits down on your other side and takes the other shoulder, as if she'd been invited.")}`,
         choices: [{ text: 'Dawn.', do: (g) => { sleepUntil(g, 5); g.james.hp = Math.ceil(g.james.hp); return ['A few hours of sleep. HP and Qi full.']; }, to: 'tribute' }],
     },
     tribute_dawn_sleep: {
         id: 'tribute_dawn_sleep', title: 'By the Stove', art: 'dinner', place: 'Ashfall Hamlet — Mei Lin\'s house',
-        text: `You sleep by the stove with a cat on your chest and the sound of somebody else's house breathing around you. It's the safest you've felt since the lab. It lasts until dawn.`,
+        text: (g) => `${byForm(g, "You sleep by the stove with a cat on your chest and the sound of somebody else's house breathing around you.", "You sleep by the stove with a cat's head on your chest, which is all of her that fits, and the sound of somebody else's house breathing around you.", "You sleep by the stove, back to back with Yuki, with the sound of somebody else's house breathing around you.")} It's the safest you've felt since the lab. It lasts until dawn.`,
         choices: [{ text: 'Dawn.', do: (g) => { sleepUntil(g, 5); return ['Slept until 05:00. HP and Qi full.']; }, to: 'tribute' }],
     },
 

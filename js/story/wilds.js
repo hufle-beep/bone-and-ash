@@ -52,21 +52,19 @@ Between the black trunks, low to the ground, pale lights are moving. Not firefli
 ${byForm(g, 'Yuki is awake on your chest, ears flat, not hissing.', 'Yuki is awake against your side, ears flat, not growling.', 'Yuki is awake beside you, ears flat, not speaking.')} Watching. Through the bond comes something that isn't a word. Closer to *grief*.`,
             rain: `It rains in the night: warm rain that tastes of iron and leaves a grey film on everything. The fire hisses and sulks.
 
-Yuki makes it clear, through the bond and through her claws, that she holds you personally responsible for the weather.`,
+Yuki makes it clear, ${byForm(g, "through the bond and through her claws,", "through the bond and by shaking herself dry all over you,", "aloud and at some length, from under your lab coat,")} that she holds you personally responsible for the weather.`,
             crows: `A sound like wet cloth tearing wakes you: wings. Three rot-crows, each the size of a cat, have landed on the fallen trunk above your head. Their feathers are moulting in clumps, their eyes are milky, and they smell exactly like you'd expect a bird named *rot-crow* to smell.
 
 They are staring at your food. Then, thoughtfully, at your eyes.`,
             rats: `Something splashes in the stream, then again. Then the reeds part, and two mire-rats the size of dogs climb onto the bank, slick and black, tails like whips.
 
-They've smelled the cat. They seem to think she's dinner. Yuki seems to think that's the funniest thing she's heard all week.`,
+${byForm(g, "They've smelled the cat. They seem to think she's dinner.", "They've smelled the cat. They seem to think she's dinner, which means they haven't seen her yet.", "They've smelled a cat and found a woman. They seem to think she's dinner either way.")} Yuki seems to think that's the funniest thing she's heard all week.`,
             lizard: `The ground under you is warm. That's the first thing. The second is the scrape of claws on rock, slow and heavy, and the third is the eye — gold, slit, the size of your palm — looking at you from the edge of the firelight.
 
 A thornback lizard, long as a canoe, a ridge of hollow spines down its back. Your camp, it turns out, is on top of its nest.`,
             gift: `You wake to a weight on your chest and a smell of fresh blood.
 
-Yuki is sitting on you, very upright, very pleased. On your sternum, laid out with ceremony, is a mire fowl — a fat, ugly, long-necked bird nearly as big as she is. She must have dragged it a hundred metres.
-
-Through the bond: *you hunt like a tree. I am fixing it.*`,
+${byForm(g, "Yuki is sitting on you, very upright, very pleased. On your sternum, laid out with ceremony, is a mire fowl — a fat, ugly, long-necked bird nearly as big as she is. She must have dragged it a hundred metres.\n\nThrough the bond: *you hunt like a tree. I am fixing it.*", "The weight is one of Yuki's paws. The rest of her sits beside you, very upright, very pleased. On your sternum, laid out with ceremony, is a mire fowl — a fat, ugly, long-necked bird, about one mouthful to her. She has carried it a hundred metres without eating it, and would like that noted.\n\nThrough the bond: *you hunt like a tree. I am fixing it.*", "Yuki is kneeling beside you, very upright, very pleased. On your sternum, laid out with ceremony, is a mire fowl — a fat, ugly, long-necked bird with its neck neatly wrung. There are feathers in her hair and not a mark on her dress.\n\n\"You hunt like a tree,\" she says. \"I am fixing it.\"")}`, // v0.11.126 (NQ1): by her form, Fable's
         }[g.flags.night_ev]),
         choices: [
             { text: 'Watch where the lights go. Let the threads map it.', show: ev('lights'), check: { skill: 'GU', dc: 3 }, do: (g) => { g.flags.saw_lights = true; return ['Mapped: the lights flow toward the dead tree, like blood toward a heart that stopped.']; }, to: 'morning' },
@@ -77,7 +75,7 @@ Through the bond: *you hunt like a tree. I am fixing it.*`,
             { text: 'Fight them off.', show: ev('crows'), combat: nightFight('crows'), to: 'night_won' },
             { text: 'Throw them the scraps and keep your eyes.', show: ev('crows'), do: (g) => { const id = ['crimson_berry', 'river_cress', 'jade_bracket', 'crab_meat', 'hare_raw', 'fowl_raw'].find((k) => g.inventory[k] > 0); if (id) addItem(g, id, -1); return [id ? 'The crows take some of your food and leave.' : 'You have nothing to throw. The crows leave anyway, disgusted.']; }, to: 'morning' },
             { text: 'Fight. Rats are just bad mice.', show: ev('rats'), combat: nightFight('rats'), to: 'night_won' },
-            { text: 'Up the fallen trunk with Yuki and wait them out.', show: ev('rats'), check: { skill: 'GU', dc: 3 }, failDo: (g) => { g.james.hp -= 3; return ['One gets your ankle on the way up: −3 HP.']; }, to: 'morning' },
+            { text: (g) => byForm(g, 'Up the fallen trunk with Yuki and wait them out.', 'Up the fallen trunk behind Yuki and wait them out.', 'Up the fallen trunk with Yuki and wait them out.') /* v0.11.126 (NS1, TR): Fable's */, show: ev('rats'), check: { skill: 'GU', dc: 3 }, failDo: (g) => { g.james.hp -= 3; return ['One gets your ankle on the way up: −3 HP.']; }, to: 'morning' },
             { text: 'Fight it. You\'re hungry, and it\'s made of meat.', show: ev('lizard'), combat: nightFight('lizard'), to: 'night_won' },
             { text: 'Back away slowly and give it its nest.', show: ev('lizard'), check: { skill: 'GU', dc: 4 }, time: 20, fail: 'night_lizard_forced', to: 'morning' },
             { text: 'Pluck it, dress it, and tell her she\'s the best hunter in two worlds.', show: ev('gift'), do: (g) => { addItem(g, 'fowl_raw', 1); bumpRel(g, 'Yuki', 3, 0); return ['+1 Mire fowl (dressed). Yuki accepts the praise as simple fact.', ...awardYukiFightXp(g, 'standard')]; }, to: 'morning' },

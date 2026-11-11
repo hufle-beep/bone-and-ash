@@ -182,7 +182,7 @@ Ya hauls you up by your coat. "You fight like a scholar," she says, disgusted. T
 
 "You don't. You're the loudest thinker I've ever met."`,
         choices: [
-            { text: 'Cross carefully, stone by stone.', check: { skill: 'GU', dc: 5 }, fly: "You cross carefully, a hand's width above every stone, and ferry the rest over the same way. The river sleeps on. Ya says you still think loud." /* v0.11.109 (owner pick FL1, C): flown from Foundation, Fable's line */, time: 40, do: () => [`You go stone to stone with Ya's chin for a map and your mind as quiet as you can make it, which Ya says, afterwards, is not very. Something long shifts under the brown water as Mei Lin passes over it, and doesn't wake. On the far bank Yuki shakes a wet paw at the river, formally, and walks on.`], to: 'rt_camp', fail: 'rt_ford_wake' },
+            { text: 'Cross carefully, stone by stone.', check: { skill: 'GU', dc: 5 }, fly: "You cross carefully, a hand's width above every stone, and ferry the rest over the same way. The river sleeps on. Ya says you still think loud." /* v0.11.109 (owner pick FL1, C): flown from Foundation, Fable's line */, time: 40, do: (g) => [`You go stone to stone with Ya's chin for a map and your mind as quiet as you can make it, which Ya says, afterwards, is not very. Something long shifts under the brown water as Mei Lin passes over it, and doesn't wake. On the far bank ${byForm(g, "Yuki shakes a wet paw at the river,", "Yuki shakes a wet paw at the river,", "Yuki wrings out the hem of her dress at the river,")} formally, and walks on.`] /* v0.11.126 (NQ1): by her form, Fable's */, to: 'rt_camp', fail: 'rt_ford_wake' },
             { text: 'Sing a bridge of bone from stone to stone.', qi: 8, check: { skill: 'Convergence Use', dc: 5 }, fly: "You sing no bridge. You fly the ford and carry the others over, one trip each. The stones stay stones. The thing in the middle stays asleep." /* v0.11.109 (owner pick FL1, C): flown from Foundation, Fable's line */, flyFree: true /* FQ1: no Qi when flown */, time: 40, do: (g) => { bumpRel(g, 'Mei Lin', 2, 0); return ['A white bridge, ribbed like a spine. Mei Lin crosses it like a woman walking into a temple.']; }, to: 'rt_camp', fail: 'rt_ford_wake' },
         ],
     },
@@ -218,7 +218,7 @@ Ya wades out to her waist, fishes around for a while, and comes back with a beas
     rt_serpent_lost: {
         id: 'rt_serpent_lost', title: 'Swept', art: 'drowned_wood', place: `${BR} — downstream`,
         enter: (g) => { g.james.hp = Math.max(3, Math.floor(g.james.hp)); return []; },
-        text: `The serpent throws you a long way downstream. You come up coughing in the reeds with Yuki standing on your chest, soaked and incandescent with rage.
+        text: (g) => `The serpent throws you a long way downstream. You come up coughing in the reeds with ${byForm(g, "Yuki standing on your chest,", "Yuki standing over you,", "Yuki kneeling on your chest,")} soaked and incandescent with rage.
 
 By the time Mei Lin and Ya find you, the serpent has gone back to sleep, and Ya is laughing so hard she has to sit in the mud. Mei Lin is not laughing. Mei Lin is checking your ribs with grave, furious hands and muttering things her mother would slap her for.`,
         choices: [{ text: 'Make camp. Dry out.', time: 90, to: 'rt_camp' }],
@@ -425,7 +425,7 @@ Not a sapling: a ring of them, seven white stems as tall as your knee, leaves un
 
 The children have crept closer. One small girl has her hand out flat, not touching, feeling the warmth. Her grandmother hisses at her to come away. The girl doesn't move.
 
-Yuki walks into the middle of the ring, lies down, and purrs so loudly that the leaves tremble.`,
+${byForm(g, "Yuki walks into the middle of the ring, lies down, and purrs so loudly that the leaves tremble.", "Yuki walks into the middle of the ring, lies down, and purrs so loudly that the leaves tremble.", "Yuki walks into the middle of the ring, sits down in her black dress, and purrs so loudly that the leaves tremble.")}`,
         choices: [
             { text: 'Sit among them and cultivate. Let the song in.', check: { skill: 'Convergence Use', dc: 4 }, time: 60, do: (g) => { g.flags.grove_attuned = true; const gain = sitGain(g, 2); g.james.saturation = Math.min(100, Math.round((g.james.saturation + gain) * 10) / 10); return [`The grove carries your Qi round and back, clean as a held breath. Saturation +${Math.round(gain * 10) / 10}% (${g.james.saturation}%), no Qi spent.`]; }, failDo: () => ['You try. You\'re too afraid of tomorrow to listen.'], to: 'rt_ashfall' },
             { text: 'Kneel by the girl and show her how to feel the song.', do: (g) => { bumpRel(g, 'Village', 5, 0); return ['Her grandmother watches, stiff as a post. Then, slowly, she kneels too.']; }, time: 30, to: 'rt_ashfall' },

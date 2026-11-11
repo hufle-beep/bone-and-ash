@@ -7,10 +7,11 @@
 // v0.11.39: tools/arthash.mjs (the ART fingerprints in sw.js) on a made-up folder and on the real repo.
 // v0.11.62: tools/art/patch.py on a made-up picture.
 // v0.11.22: tools/leftovers.mjs on small made-up inputs (every kind found, kept entries skipped) and tests/lib/seen.mjs's watch.
+// v0.11.126: tools/lint.mjs reads function texts on sample states (a planted old name in one form fails it).
 // v0.11.80: the fight lab (tools/fightlab.mjs, tools/lib/fightlab.mjs): its summary on made-up samples, one fight on a real
 // state, and a tiny real run (1 worker = 2 workers; the bots' own fights the same with and without the lab).
 import { spawn, execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -564,6 +565,22 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md'];
         assert(Number.isInteger(l1.j.oneMove) && l1.j.oneMove === l2.j.oneMove, `fightlab: one-move finishes counted apart, not as fights (${l1.j.oneMove})`);
         assert(/^Fight lab: 12 bot games/m.test(l1.log) && /Flags:/.test(l1.log), 'fightlab: the report prints its header and flags');
     }
+}
+// v0.11.126 (NQ1 review, LN): tools/lint.mjs reads scene texts that are functions of the state, on its sample states: an old mode
+// name that only the great root-kin's line carries fails the lint; the real game passes.
+{
+    const real = (() => { try { return { code: 0, out: execFileSync(process.execPath, ['tools/lint.mjs'], { cwd: ROOT, encoding: 'utf8' }) }; } catch (e) { return { code: e.status ?? 1, out: String(e.stdout || e) }; } })();
+    assert(real.code === 0 && /texts and labels that are functions read on 9 sample states/.test(real.out), `LN: the lint reads function texts and passes on the game (${real.out.split('\n').slice(-2).join(' ')})`);
+    const dir = path.join(TMP, 'lint'); mkdirSync(path.join(dir, 'tools'), { recursive: true });
+    cpSync(path.join(ROOT, 'js'), path.join(dir, 'js'), { recursive: true });
+    writeFileSync(path.join(dir, 'tools', 'lint.mjs'), readFileSync(path.join(ROOT, 'tools', 'lint.mjs')));
+    const pro = path.join(dir, 'js', 'story', 'prologue.js');
+    const src = readFileSync(pro, 'utf8');
+    assert(src.includes('a cat the size of a tiger at his side'), 'LN: the planted line is there to change');
+    writeFileSync(pro, src.replace('a cat the size of a tiger at his side', 'a cat in task mode at his side'));
+    let code = 0, out = '';
+    try { out = execFileSync(process.execPath, ['tools/lint.mjs'], { cwd: dir, encoding: 'utf8' }); } catch (e) { code = e.status ?? 1; out = String(e.stdout || e); }
+    assert(code === 1 && /gao_talked: text/.test(out), `LN: an old name in the great root-kin's line only fails the lint (exit ${code})`);
 }
 rmSync(TMP, { recursive: true, force: true });
 
