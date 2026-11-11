@@ -373,7 +373,9 @@ export function installYukiPath(SCENES) {
         ? '*She\'s pretty,* says the bond, appallingly loud inside your skull. *Bossy. You like bossy. Don\'t deny it, I\'ve met your thesis supervisor. Talk to her. TALK to her.*'
         : ykLover(g) ? '*She\'s pretty,* says the bond, appraising, unbothered. *I approve. Of her. Not of your face right now.*' : ''));
     beat(SCENES, 'romance', (g) => (ykSister(g)
-        ? 'Through the bond, from somewhere very far away and getting farther: *I am moving to the roof. I am living on the roof now. Do not look for me.*'
+        ? byForm(g, 'Through the bond, from somewhere very far away and getting farther: *I am moving to the roof. I am living on the roof now. Do not look for me.*',
+            "Through the bond, from somewhere very far away and getting farther: *I am moving to the roof.* A long creak of thatch. A pause for thought. *I am moving to the goat shed. I live in the goat shed now. Do not look for me.*",
+            'Through the bond, from somewhere very far away and getting farther: *I am moving to the roof. I am living on the roof now. Do not look for me.*') // v0.11.130 (YB1, SR; Fable's MAIN): the great root-kin and the thatch
         : ykLover(g) ? 'Through the bond, sleepy and amused from the stove downstairs: *Told you. I share. Tell her about me later.* A pause. *Much later.*' : ''));
     // v0.11.125 (owner picks FM1, XS1: RB; Fable's MAINs): the ridge, standing: her place by her current form (was "on your chest" in every form)
     beat(SCENES, 'epilogue', (g) => (ykSister(g) ? `${byForm(g, 'Yuki, on your shoulder, opens one gold eye.', 'Yuki, at your side, gives you one sidelong gold eye.', 'Yuki, at your elbow, gives you one sidelong gold eye.')} *Not bad,* says the bond. *For a mycologist.*` // RW1 (SL): awake, standing

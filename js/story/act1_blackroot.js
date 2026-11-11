@@ -261,9 +261,9 @@ You pick up a shed antler-tine. It's warm in your hand, and your Convergence tur
     rr_elk_lost: {
         id: 'rr_elk_lost', title: 'Antlers', art: 'bone_elk', place: PLACE.rr,
         enter: (g) => patchUp(g),
-        text: `The elk wins. It does so emphatically, with an antler through your coat and very nearly through you, and then it leaves at a dignified trot, having made its point.
+        text: (g) => `The elk wins. It does so emphatically, with an antler through your coat and very nearly through you, and then it leaves at a dignified trot, having made its point.
 
-Ya is furious — not at you, at the elk, which she curses in a language you don't think anyone else speaks. Mei Lin is just quietly stitching.`,
+Ya is furious — not at you, at the elk, which she curses in a language you don't think anyone else speaks. Mei Lin is just quietly stitching.${byForm(g, '', " The elk put Yuki through a thornbrake first, which is how it got to you. She comes out of it backwards, bristling, and sits down beside Mei Lin to wait her turn.", '')}`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line
         choices: [{ text: 'Back to the road, limping.', time: 40, to: 'rr_hub' }],
     },
     rr_scout: {
@@ -322,9 +322,9 @@ Something moves in the gap between the halves of the root — something long, ba
     },
     rr_bridge_fail: {
         id: 'rr_bridge_fail', title: 'Through, Then', art: 'root_wyrm', place: `${P} — the split`,
-        text: `The wyrm rears out of the split with half your bridge in its mouth, bark-scales grinding, and turns its eyeless head toward the warm thing that made it. You.
+        text: (g) => `The wyrm rears out of the split with half your bridge in its mouth, bark-scales grinding, and turns its eyeless head toward the warm thing that made it. You.
 
-"Through, then!" Ya yells, absolutely delighted, and charges.`,
+"Through, then!" Ya yells, absolutely delighted, and charges.${byForm(g, '', " Yuki goes with her, low and silent, which is how you learn the two of them have been waiting for the bridge to fail.", '')}`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line
         choices: [{ text: 'Fight.', combat: wyrmFight, to: 'wyrm_won' }],
     },
     wyrm_won: {
@@ -346,15 +346,15 @@ Mei Lin watches her go. Something in her face softens, and then she notices it s
     wyrm_lost: {
         id: 'wyrm_lost', title: 'Over the Edge', art: 'root_wyrm', place: `${P} — the split`,
         enter: (g) => patchUp(g),
-        text: `You lose the fight and win the crossing, which is the worst kind of win: the wyrm's tail takes you off the root and you fall, and Ya jumps after you, and Mei Lin — swearing a blue streak you will remember for the rest of your life — jumps after *her*.
+        text: (g) => `You lose the fight and win the crossing, which is the worst kind of win: the wyrm's tail takes you off the root and you fall, and Ya jumps after you, and Mei Lin — swearing a blue streak you will remember for the rest of your life — jumps after *her*.
 
-You all hit the water forty metres down in the Drowned Wood. The wyrm doesn't follow. Wyrms, it turns out, don't swim.
+You all hit the water forty metres down in the Drowned Wood. The wyrm doesn't follow. Wyrms, it turns out, don't swim.${byForm(g, '', " Yuki follows a moment later, shaken off the wyrm's neck like a burr, and lands like a dropped piano. Cats, it turns out, do swim. They hold it against you.", '')}
 
 "*Never*," Mei Lin says, crawling out onto a drowned trunk, "do that again."
 
 "You jumped," Ya points out, delighted.
 
-"I know I jumped. Shut up."`,
+"I know I jumped. Shut up."`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line
         choices: [{ text: 'Drag yourself onto the drowned trunks.', time: 60, to: 'dw_enter' }],
     },
 
@@ -438,9 +438,9 @@ You decide you didn't hear it. She decides you didn't either.`,
     dw_serpent_lost: {
         id: 'dw_serpent_lost', title: 'The Water Wins', art: 'mire_serpent', place: PLACE.dw,
         enter: (g) => patchUp(g),
-        text: `The serpent drags you under. For a long, cold, silent moment the Drowned Wood shows you exactly why the people down here never left.
+        text: (g) => `The serpent drags you under. For a long, cold, silent moment the Drowned Wood shows you exactly why the people down here never left.
 
-Then four hands haul you out by the coat — one pair rough and fast, one pair careful — and you're coughing black water onto a trunk while two women shout at you in stereo.`,
+Then four hands haul you out by the coat — one pair rough and fast, one pair careful — and you're coughing black water onto a trunk while two women shout at you in stereo.${byForm(g, '', "\n\nYuki surfaces a moment later with a length of serpent in her mouth that is no longer attached to anything, climbs out, and shakes four hundred pounds of swamp over all three of you. *It let go,* says the bond. *Eventually. You're welcome.*", '')}`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line
         choices: [{ text: 'Breathe. Then go back.', time: 30, to: 'dw_hub' }],
     },
     dw_scout: {
@@ -663,7 +663,7 @@ There are hill-hares in the gullies too: small, fast, ash-coloured. Less excitin
     ah_hawks_lost: {
         id: 'ah_hawks_lost', title: 'Burned', art: 'cinder_hawks', place: PLACE.ah,
         enter: (g) => patchUp(g),
-        text: `The hawks take the fight and some of your coat, which is now smouldering, and leave you face-down in the ash with Mei Lin beating out the sparks with her basket.
+        text: (g) => `The hawks take the fight and some of your coat, which is now smouldering, and leave you face-down in the ash with Mei Lin beating out the sparks with her basket.
 
 "Your coat," Ya says, inspecting the holes, "is getting very holy."
 
@@ -671,7 +671,7 @@ There are hill-hares in the gullies too: small, fast, ash-coloured. Less excitin
 
 "It was already ugly."
 
-"*Thank* you."`,
+"*Thank* you."${byForm(g, '', "\n\nYuki sits upwind with a hawk's tail feathers in her teeth and a scorched stripe down one flank. *Mine is also holy,* says the bond. *Nobody is reviewing mine.*", '')}`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line
         choices: [{ text: 'Back to the ridge.', time: 30, to: 'ah_hub' }],
     },
     ah_scout: {
@@ -792,11 +792,11 @@ You give them the time. Yuki sits beside you and watches the dead tree.
     ape_lost: {
         id: 'ape_lost', title: 'Through, Somehow', art: 'rot_ape', place: `${P} — the last pass`,
         enter: (g) => patchUp(g),
-        text: `The ape breaks you. It's not even a contest: it hits you once and you're in the ash, and everything goes white.
+        text: (g) => `The ape breaks you. It's not even a contest: it hits you once and you're in the ash, and everything goes white.
 
 What saves you is Ya, who goes up its back like a squirrel up a tree and puts her mother's old spear-head — snatched from the bone pile — into the base of its skull. It doesn't die. But it goes, crashing off down the far side of the ridge, howling, and doesn't come back.
 
-You wake with Mei Lin's hands on your face and Ya sitting beside you, holding a rusted spear-head, crying without any sound at all.`,
+You wake with Mei Lin's hands on your face and Ya sitting beside you, holding a rusted spear-head, crying without any sound at all.${byForm(g, '', "\n\nYuki lies along your other side with one foreleg held off the ground. The ape threw her before it hit you, and she came back on three legs, in time to see it go. She is purring, low, the purr that isn't for pleasure.", '')}`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line
         choices: [{ text: 'Get up. The tree is waiting.', time: 90, to: 'heart_view' }],
     },
 
@@ -1078,7 +1078,7 @@ ${likesMei(g) ? 'Across the fire, Mei Lin opens one eye, sees, and closes it aga
     bl_night_lost: {
         id: 'bl_night_lost', title: 'Bad Night', art: 'night_watch', place: (g) => PLACE[region(g)],
         enter: (g) => patchUp(g),
-        text: `It goes badly. In the end it's Ya's spear and Mei Lin's knife and a great deal of shouting that drive it off, and you spend the rest of the night being stitched and told off in two voices.`,
+        text: (g) => `It goes badly. In the end it's Ya's spear and Mei Lin's knife and a great deal of shouting that drive it off, and you spend the rest of the night being stitched and told off in two voices.${byForm(g, '', " Yuki, who had hold of it until it had hold of her ear, lies across your feet with the ear at half-mast. *Three voices,* says the bond. *I am also telling you off. I am just doing it quietly.*", '')}`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line; RB2 (NK): Fable's redraft after the review
         choices: [{ text: 'Sleep, badly.', to: 'bl_morning' }],
     },
     bl_morning: {

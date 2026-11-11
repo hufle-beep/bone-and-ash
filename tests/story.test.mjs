@@ -860,8 +860,8 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         ['fo_council', {}, null, /"Your cat," Old Wen says, "faces north/, /"Your cat," Old Wen says, "faces north/, /"Your companion," Old Wen says, "faces north/],
         ['night_event', { night_ev: 'rats' }, null, /They've smelled the cat\. They seem to think she's dinner\. Yuki seems/, /They seem to think she's dinner, which means they haven't seen her yet\. Yuki seems/, /They've smelled a cat and found a woman\. They seem to think she's dinner either way\. Yuki seems/],
         ['night_event', { night_ev: 'rain' }, null, /Yuki makes it clear, through the bond and through her claws, that/, /Yuki makes it clear, through the bond and by shaking herself dry all over you, that/, /Yuki makes it clear, aloud and at some length, from under your lab coat, that/],
-        ['gao_fight_start', {}, null, /you are alone, unarmed, and wearing a lab coat\. He has looked at you with his Qi-sense and felt nothing at all: a mortal\./, /you are unarmed, wearing a lab coat, and alone but for a cat\. He has looked at you both[\s\S]*a mortal's very large cat\./, /you are alone, unarmed, and wearing a lab coat\. He has looked at you with his Qi-sense and felt nothing at all: a mortal\./],
-        ['herb_girl', {}, null, /slide off a fence post\. You, apparently/, /slide off a fence post, and off Yuki the way they'd slide off a second, larger fence post\./, /slide off a fence post\. You, apparently/],
+        ['gao_fight_start', {}, null, /you are alone, unarmed, and wearing a lab coat\. He has looked at you with his Qi-sense and felt nothing at all: a mortal\./, /you are unarmed, wearing a lab coat, and alone but for a cat\. He has looked at you both[\s\S]*a mortal's very large cat\./, /you are unarmed, wearing a lab coat, and alone but for a slight woman in a black dress\./], // v0.11.130 (YB1, GA): the human's own
+        ['herb_girl', {}, null, /slide off a fence post\. You, apparently/, /slide off a fence post, and off Yuki the way they'd slide off a second, larger fence post\./, /off Yuki the way they'd slide off a second, shorter fence post: they catch on the ears/], // v0.11.130 (YB1, HG): the human's own
         ['gao_lost', {}, null, /Eleven pounds of white cat land on his face, all claws, and while he's screaming and spinning, Mei Lin/, /Four hundred pounds of white cat take him off your neck and a fair way across the herb bed, and while he's screaming and rolling, Mei Lin/, /Yuki lands on his back in a black dress, all nails, and while he's screaming and spinning, Mei Lin/], // NS1 (GL)
         ['jackals_lost', {}, null, /Yuki — all eleven pounds of her —[\s\S]*and covered in cat\./, /Yuki — all four hundred pounds of her —[\s\S]*underneath a good deal of cat\./, /Yuki — all of her, in a dress —[\s\S]*with your head in Yuki's lap\./],
     ];
@@ -1216,7 +1216,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         ['heart_view', { ya_romance: true }, [0, 80], /Mei Lin lies down on Yuki's other side, close, and says goodnight/, /Mei Lin lies down against Yuki's great white flank, close, and says goodnight/, /Mei Lin lies down on Yuki's other side, close, and says goodnight/], // HG
         ['lf_exit', { yk_path: undefined }, undefined, /Yuki's opinion, through the bond: \*both\.\*$/, /Yuki's opinion, through the bond: \*both\.\*$/, /Yuki's opinion, delivered aloud: "Both\."$/], // LB (no path: nothing follows)
         ['lf_exit', { yk_path: 'sister' }, undefined, /Yuki's opinion, through the bond: \*both\.\*\n\n/, /Yuki's opinion, through the bond: \*both\.\*\n\n/, /Yuki's opinion, delivered aloud: "Both\."\n\nYuki walks the first mile beside you on two bare feet/],
-        ['rt_arrive', {}, [0, 0], /\n\nTheir eyes go to Ya and stay there\. Bare arms/, /\n\nTheir eyes go to Ya and stay there\. Bare arms/, /\n\nTheir eyes go to Yuki first — the white hair, the ears, the tail — and move on, gravely, as from a matter that belongs to the outlander and is therefore not to be looked at twice\. Then they go to Ya and stay there\. Bare arms/], // RA
+        ['rt_arrive', {}, [0, 0], /\n\nTheir eyes go to Ya and stay there\. Bare arms/, /\n\nTheir eyes go to Yuki first: four hundred pounds of white cat[\s\S]*Then they go to Ya and stay there\. Bare arms/, /\n\nTheir eyes go to Yuki first — the white hair, the ears, the tail — and move on, gravely, as from a matter that belongs to the outlander and is therefore not to be looked at twice\. Then they go to Ya and stay there\. Bare arms/], // RA; v0.11.130 (YB1, RA): the great root-kin's own
         ['heart_camp', { trio: 3 }, [80, 80], /The three of you sleep in a heap by the fire now\./, /The three of you sleep in a heap by the fire now\./, /The four of you sleep in a heap by the fire now\./], // HC
         ['log_comfort', { trio: 3 }, [80, 80], /You fall asleep there, the three of you, in the bridge of a dead ship/, /You fall asleep there, the three of you, in the bridge of a dead ship/, /You fall asleep there, all four of you, in the bridge of a dead ship/],
         ['mei_lin', { yk_path: 'sister' }, undefined, /\n\n\*She's pretty,\* says the bond, appallingly loud inside your skull\./, /\n\n\*She's pretty,\* says the bond, appallingly loud inside your skull\./, /blinks back\.\n\nMei Lin's eyes go to the ears, then to the tail, then back to the ears\.[\s\S]*"Are those real\?" asks Mei Lin\.[\s\S]*\n\n\*She's pretty,\* says the bond instead, for you alone, appallingly loud inside your skull, from a woman standing at your elbow/], // ML
@@ -1238,6 +1238,74 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         const g = LPG(64200 + n++, 'human', { yk_path: undefined }); goTo(g, SCENES, 'mei_lin');
         assert(!/Are those real|She's pretty/.test(sceneView(g, SCENES).text), 'CS1 (ML): no path, no beat as the human');
         for (const path of ['sister', 'lover']) { const h = LPG(64300 + n++, 'human', { yk_path: path }); goTo(h, SCENES, 'romance'); assert(/Through the bond, (?:from somewhere very far away|sleepy and amused from the stove)/.test(sceneView(h, SCENES).text), `CS1 (ML): the ${path}'s romance beat stays the bond's, from a distance`); }
+    }
+    // v0.11.130 (owner pick YB1; Fable's MAINs): LL the 19 lose / flee / fail scenes place the great root-kin; the cat's and the
+    // human's texts unchanged (the tiger's text less its line is the cat's, word for word); roots_lost's no-Ya clause by form
+    const YB = [
+        // [scene, flags, the great root-kin's line, [her clause, the cat's clause] where the text also swaps one]
+        ["ah_hawks_lost", {}, "\n\nYuki sits upwind with a hawk's tail feathers in her teeth and a scorched stripe down one flank. *Mine is also holy,* says the bond. *Nobody is reviewing mine.*"],
+        ["ape_lost", {}, "\n\nYuki lies along your other side with one foreleg held off the ground. The ape threw her before it hit you, and she came back on three legs, in time to see it go. She is purring, low, the purr that isn't for pleasure."],
+        ["arson_lost", {}, " Yuki has one of them flat in the lane under both forepaws, and it is the wrong one: the torch was in the other man's hand."],
+        ["bl_night_lost", {}, " Yuki, who had hold of it until it had hold of her ear, lies across your feet with the ear at half-mast. *Three voices,* says the bond. *I am also telling you off. I am just doing it quietly.*"],
+        ["collectors_lost", {}, "\n\nThen he flicks two fingers, and the net comes off Yuki: a spirit-beast net, thrown from his sleeve in the first breath of the fight, before he so much as drew. She has been under it since your knees went. She walks over on legs that aren't quite steady and stands across you. Nobody asks her to move."],
+        ["dw_serpent_lost", {}, "\n\nYuki surfaces a moment later with a length of serpent in her mouth that is no longer attached to anything, climbs out, and shakes four hundred pounds of swamp over all three of you. *It let go,* says the bond. *Eventually. You're welcome.*"],
+        ["far_lost", {}, " Yuki comes in behind you on three good legs and lies down across the doorway. Mei Lin steps over her without breaking off, comes back with the salve, and starts on the cat. The lecture now covers you both."],
+        ["fo_spy_fled", {}, "\n\nYuki's portrait has the whole facing page, and its margin says only *large*, underlined twice. She watches the mountain until he is off the last switchback. *Uphill,* says the bond. *No.*"],
+        ["fo_wolf_lost", {}, " Yuki comes out of the barley the other way a moment later, with grey fur in her teeth and no goat: she went after the one that came at her, the lame one, while the other went round. Wolves do that."],
+        ["mire_lost", {}, " Yuki retreats beside you, black to the shoulder, having learnt that the mire holds four hundred pounds a great deal better than it holds eleven. *We do not speak of this,* says the bond."],
+        ["night_fled", {}, " Yuki walks behind with the blanket in her mouth, which keeps her from saying what she thinks of running from something she outweighs. The bond says it anyway."],
+        ["ring_lost", {}, " Yuki is already out: she backed the whole length of the gallery ahead of you, because the rings were grown for gardeners and there is nowhere in them to turn four hundred pounds of cat round. She sits down and starts on the splinters in her forepaw."],
+        ['roots_lost', {}, " The collar is in Yuki's teeth. She climbs the shaft backwards with you swinging under her chin like a kitten, and when she sets you down at the top there are husk-lines raked down both her flanks, which neither of you mentions."],
+        ["rr_bridge_fail", {}, " Yuki goes with her, low and silent, which is how you learn the two of them have been waiting for the bridge to fail."],
+        ["rr_elk_lost", {}, " The elk put Yuki through a thornbrake first, which is how it got to you. She comes out of it backwards, bristling, and sits down beside Mei Lin to wait her turn."],
+        ["rt_brawl_lost", {}, "\n\nFrom the wine-shop bench, most of which she is, Yuki yawns to the back teeth. *Fists only,* says the bond. *Your rule. I kept it for you.*"],
+        ["rt_duel_lost", {}, "\n\nOne hand was for you. The other, you gather, was for Yuki, who lies ten paces up the road, a long white shape getting its legs under it one at a time."],
+        ["rt_parley_fail", {}, " The two on Yuki's side stop a spear's length further off than the others. She watches them do it without getting up."],
+        ["wyrm_lost", {}, " Yuki follows a moment later, shaken off the wyrm's neck like a burr, and lands like a dropped piano. Cats, it turns out, do swim. They hold it against you."],
+        ['roots_lost', { ya_party: false }, " The collar is in Yuki's teeth. She climbs the shaft backwards with you swinging under her chin like a kitten, and when she sets you down at the top there are husk-lines raked down both her flanks, which neither of you mentions.", ['Mei Lin calling the handholds down from the lip of the shaft in a voice that is very nearly steady', 'Mei Lin and Yuki between them, which should not be physically possible']],
+        ['ring_lost', { ya_party: false }, " Yuki is already out: she backed the whole length of the gallery ahead of you, because the rings were grown for gardeners and there is nowhere in them to turn four hundred pounds of cat round. She sits down and starts on the splinters in her forepaw."],
+    ];
+    for (const [id, flags, line, swap] of YB) {
+        const [cat, tiger, human] = ['cat', 'tiger', 'human'].map((form) => { const g = FM(65000 + n++, form, flags); goTo(g, SCENES, id); return sceneView(g, SCENES).text; });
+        assert(tiger.includes(line) && !cat.includes(line) && !human.includes(line), `YB1 (LL): ${id} ${JSON.stringify(flags)}: the great root-kin's line, hers alone`);
+        assert((swap ? tiger.replace(swap[0], swap[1]) : tiger).replace(line, '') === cat && human === cat, `YB1 (LL): ${id} ${JSON.stringify(flags)}: the cat's and the human's texts unchanged`);
+    }
+    {   // v0.11.130 (owner pick RB2; Fable's review of YB1): WC two wolves, RL out before the shelf, NK no foe's body part, CL no count
+        // and no "his disciples" with Gao broken or turned or the militia, BR the camp's blanket
+        const tiger = (id, flags) => { const g = FM(65800 + n++, 'tiger', flags); goTo(g, SCENES, id); return sceneView(g, SCENES).text; };
+        assert(!/\bthree\b|the rest went round/.test(tiger('fo_wolf_lost', {})) && /the lame one, while the other went round/.test(tiger('fo_wolf_lost', {})), 'RB2 (WC): two wolves');
+        for (const f of [{}, { ya_party: false }]) { const t = tiger('ring_lost', f); assert(t.indexOf('drops a shelf') < t.indexOf('Yuki is already out') && !/comes out last/.test(t), `RB2 (RL): she is out before the shelf ${JSON.stringify(f)}`); }
+        assert(!/haunch|wing|tail|coil/.test(tiger('bl_night_lost', {}).split('Yuki, who')[1] || 'x') && /had hold of it until it had hold of her ear/.test(tiger('bl_night_lost', {})), 'RB2 (NK): no foe\'s body in her line');
+        for (const f of [{}, { gao_broken: true }, { gao_turned: true }, { militia: true }]) { const t = tiger('collectors_lost', f); assert(/the net comes off Yuki/.test(t) && !/three of them|his disciples/.test(t), `RB2 (CL): no count, no "his disciples" ${JSON.stringify(f)}`); }
+        assert(/with the blanket in her mouth/.test(tiger('night_fled', {})) && !/bedroll/.test(tiger('night_fled', {})), 'RB2 (BR): the blanket');
+    }
+    {   // the sweep: no lose / flee / fail scene leaves the great root-kin out (gao_dead is a win; bluff_fail names her by the bond)
+        const LOSE = Object.keys(SCENES).filter((k) => /(_lost|_fled|_fail|_taken)$/.test(k));
+        const miss = [];
+        for (const id of LOSE) for (const flags of [{}, { ya_party: false }]) { const g = FM(65500 + n++, 'tiger', flags); goTo(g, SCENES, id); if (!/\bYuki\b|\bcat\b|says the bond/.test(sceneView(g, SCENES).text)) miss.push(`${id}${flags.ya_party === false ? ' (no Ya)' : ''}`); }
+        assert(LOSE.length >= 36 && !miss.length, `YB1 (LL): every lose / flee / fail scene places the great root-kin (${LOSE.length} scenes; missing: ${miss.join(', ') || 'none'})`);
+    }
+    // RA, BL, GA, HG, SR: [scene, flags, the cat's, the great root-kin's, the human's]
+    const YB2 = [
+        ['rt_arrive', {}, /\n\nTheir eyes go to Ya and stay there\. Bare arms/, /\n\nTheir eyes go to Yuki first: four hundred pounds of white cat, pacing at your heel like a dog that has never heard of dogs\. Ashfall has seen the outlander's beast before\. It has not got smaller\. They look, gravely, once, as at a matter that belongs to the outlander and is therefore not to be remarked on\. Then they go to Ya and stay there\. Bare arms/, /\n\nTheir eyes go to Yuki first — the white hair, the ears, the tail — and move on/],
+        ['bluff_fail', {}, /announce himself\. You have dishonoured yourself[\s\S]*"The second is the one that matters\."$/, /announce himself\. Nor is a great beast at a man's heel a senior's Qi\. It is a treasure, and treasures are carried by servants\. You have dishonoured yourself[\s\S]*"The second is the one that matters\."\n\n\*Servant,\* says the bond, as four hundred pounds of treasure gets to its feet beside you\. \*He's half right\. You do carry things\.\*$/, /announce himself\. You have dishonoured yourself[\s\S]*"The second is the one that matters\."$/],
+        ['gao_fight_start', {}, /^Gao Feng decides that whatever you are, you are alone, unarmed, and wearing a lab coat\. He has looked at you with his Qi-sense and felt nothing at all: a mortal\. "Pock-Face,"/, /^Gao Feng decides that whatever you are, you are unarmed, wearing a lab coat, and alone but for a cat\./, /^Gao Feng decides that whatever you are, you are unarmed, wearing a lab coat, and alone but for a slight woman in a black dress\. He has looked at you both with his Qi-sense and felt nothing at all: a mortal, and a mortal's woman, with something about her ears that it is beneath an outer disciple to notice\. "Pock-Face,"/],
+        ['herb_girl', {}, /Not a flicker\. His eyes slide off you the way they'd slide off a fence post\. You, apparently/, /Not a flicker\. His eyes slide off you the way they'd slide off a fence post, and off Yuki the way they'd slide off a second, larger fence post\. You, apparently/, /Not a flicker\. His eyes slide off you the way they'd slide off a fence post, and off Yuki the way they'd slide off a second, shorter fence post: they catch on the ears for exactly as long as dignity permits, which is not long\. You, apparently/],
+    ];
+    for (const [id, flags, ...want] of YB2) ['cat', 'tiger', 'human'].forEach((form, i) => {
+        const g = FM(66000 + n++, form, flags); goTo(g, SCENES, id);
+        const t = sceneView(g, SCENES).text;
+        const same = want.filter((re) => re.source === want[i].source).length;
+        assert(want[i].test(t) && want.filter((re) => re.test(t)).length === same, `YB1: ${id} as ${form} (${t.slice(0, 70)}…)`);
+    });
+    {   // SR: the sister's beat by form; the lover's unchanged
+        const ROOF = 'Through the bond, from somewhere very far away and getting farther: *I am moving to the roof. I am living on the roof now. Do not look for me.*';
+        const SHED = 'Through the bond, from somewhere very far away and getting farther: *I am moving to the roof.* A long creak of thatch. A pause for thought. *I am moving to the goat shed. I live in the goat shed now. Do not look for me.*';
+        for (const form of ['cat', 'tiger', 'human']) {
+            const g = LPG(66500 + n++, form, { yk_path: 'sister' }); goTo(g, SCENES, 'romance'); const t = sceneView(g, SCENES).text;
+            assert(t.includes(form === 'tiger' ? SHED : ROOF) && !t.includes(form === 'tiger' ? ROOF : SHED), `YB1 (SR): the sister's beat as ${form}`);
+            const h = LPG(66600 + n++, form, { yk_path: 'lover' }); goTo(h, SCENES, 'romance'); assert(/Through the bond, sleepy and amused from the stove downstairs/.test(sceneView(h, SCENES).text), `YB1 (SR): the lover's beat as ${form} unchanged`);
+        }
     }
 }
 // v0.11.34 (owner pick A, 1,000 games): two scenes the random walks reached only by luck at 2,000 games, now on purpose

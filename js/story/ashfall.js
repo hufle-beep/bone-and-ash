@@ -137,9 +137,9 @@ That's the moment Ashfall decides you're theirs.`,
     arson_lost: {
         id: 'arson_lost', title: 'Smoke', art: 'arson', place: `${P} — the lane`,
         enter: (g) => { g.flags.night5_done = true; g.flags.loft_burned = true; return []; },
-        text: `They get past you. The loft goes up like paper — a year of Mei Lin's herbs, dried and bundled, gone in a roar of sweet smoke. The street puts it out before it takes the house. Barely.
+        text: (g) => `They get past you.${byForm(g, '', " Yuki has one of them flat in the lane under both forepaws, and it is the wrong one: the torch was in the other man's hand.", '')} The loft goes up like paper — a year of Mei Lin's herbs, dried and bundled, gone in a roar of sweet smoke. The street puts it out before it takes the house. Barely.
 
-Mei Lin stands in the lane with soot on her face, looking at the wreck, and says nothing at all. That's worse than anything she could say.`,
+Mei Lin stands in the lane with soot on her face, looking at the wreck, and says nothing at all. That's worse than anything she could say.`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line
         choices: [{ text: 'Sleep in the kitchen. If you can.', do: (g) => { bumpRel(g, 'Mei Lin', 0, -3); return []; }, to: 'village_morning' }],
     },
 
@@ -289,7 +289,7 @@ Mortal Vessel. Foundation. Core Formation. The realms go up like a ladder into c
     },
     far_lost: {
         id: 'far_lost', title: 'Not Today', art: 'herb_slope', place: 'Blackroot Wilds — past the oak hollow',
-        text: `You get away, which is the most important part of losing. You get back to Ashfall bleeding, and Mei Lin patches you up while telling you, at length, how stupid you are.`,
+        text: (g) => `You get away, which is the most important part of losing. You get back to Ashfall bleeding, and Mei Lin patches you up while telling you, at length, how stupid you are.${byForm(g, '', " Yuki comes in behind you on three good legs and lies down across the doorway. Mei Lin steps over her without breaking off, comes back with the salve, and starts on the cat. The lecture now covers you both.", '')}`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line
         choices: [{ text: 'Accept the lecture.', time: 60, do: (g) => { bumpRel(g, 'Mei Lin', 2, 2); return [`You let her finish. It takes a while, and she sews while she talks, and her stitches get smaller and neater the angrier she gets. When she ties off the last one she presses her thumb against it, hard, and says, "Next time, take me." You don't point out that that isn't an argument. It isn't meant to be.`]; }, to: 'ashfall' }],
     },
 

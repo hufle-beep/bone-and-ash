@@ -319,6 +319,9 @@ export const YUKI_HELD_TEXT = { // Fable's texts (owner 2026-11-10 20:23, the MA
     tab: 'level with James\'s GU: she waits for him to catch up',
     above: 'above James\'s GU: in a fight she uses his, T{t} L{l}',
     share: 'from what Yuki couldn\'t keep', // LX1: the tail of his share's line (GU +{xp} XP[ → T L], {share})
+    // v0.11.130 (owner pick YB1, HL; Fable's MAINs): when his share raises his GU in the same award, "held at James's GU" named a rank he had just passed
+    heldPast: 'Yuki Fight held at T{t} L{l}, where James\'s GU stood',
+    reachPast: 'Yuki Fight +{xp} → T{t} L{l}, where James\'s GU stood (held)',
 };
 /** The Yuki tab's note on her Fight (YK1): level with his GU, above it (a save from before YK1), or nothing (both at T1 L1). */
 export const yukiHeldNote = (g) => {
@@ -348,12 +351,18 @@ function yukiShareToJames(g, lost) {
 export function awardYukiFightXp(g, band = 'standard') {
     const y = g.yuki.fight, gu = g.james.gu;
     const pool = Math.floor((XP_BANDS[band] ?? 30) * Math.min(y.tier, gu.tier) * coilMult(g) * XP_RATE); // v0.11.85: the XP rate; LX1 review (AP): an old save above him sized on his tier (under him hers is never higher)
-    if (yukiHeld(g)) return [YUKI_HELD_TEXT.held.replace('{t}', gu.tier).replace('{l}', gu.level), ...yukiShareToJames(g, pool)]; // at T10 L10 too (CP); LX1: his share
+    const r0 = rankOf(gu); // YB1 (HL): his rank before his share
+    if (yukiHeld(g)) { // at T10 L10 too (CP); LX1: his share
+        const t = gu.tier, l = gu.level, share = yukiShareToJames(g, pool);
+        const past = rankOf(g.james.gu) > r0 && rankOf(y) === r0; // RB2 (HA; Fable's review, medium 1): above him (a save from before YK1) the held line stays
+        return [YUKI_HELD_TEXT[past ? 'heldPast' : 'held'].replace('{t}', t).replace('{l}', l), ...share];
+    }
     const room = xpToRank(y, rankOf(gu));
     if (pool >= room) { // CG: it stops at his rank; RX (the review's low 6): the line shows the XP she kept, not the whole pool
         const t = gu.tier, l = gu.level; // LX1: her line names the rank she reached, before his share can raise it
         y.tier = t; y.level = l; y.xp = 0;
-        return [YUKI_HELD_TEXT.reach.replace('{xp}', room).replace('{t}', t).replace('{l}', l), ...yukiShareToJames(g, pool - room)];
+        const share = yukiShareToJames(g, pool - room);
+        return [YUKI_HELD_TEXT[rankOf(g.james.gu) > r0 ? 'reachPast' : 'reach'].replace('{xp}', room).replace('{t}', t).replace('{l}', l), ...share]; // YB1 (HL)
     }
     const ups = addXp(y, pool);
     return [`Yuki Fight +${pool}${ups.length ? ` → ${ups.at(-1)}` : ''}`];

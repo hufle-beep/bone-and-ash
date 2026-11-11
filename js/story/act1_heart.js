@@ -208,9 +208,9 @@ You stand there holding it for longer than you'd like anyone to see. ${ya(g) ? '
     ring_lost: {
         id: 'ring_lost', title: 'Retreat', art: 'heart_hall', place: `${PIN} — the galleries`,
         enter: (g) => { g.flags.rings_done = true; return []; },
-        text: (g) => `You back out of the rings with grubs on your heels and splinters in your arms, and ${ya(g) ? 'Ya' : 'Mei Lin'} drops a shelf on the doorway behind you. It holds. Mostly.
+        text: (g) => `You back out of the rings with grubs on your heels and splinters in your arms, and ${ya(g) ? 'Ya' : 'Mei Lin'} drops a shelf on the doorway behind you. It holds. Mostly.${byForm(g, '', " Yuki is already out: she backed the whole length of the gallery ahead of you, because the rings were grown for gardeners and there is nowhere in them to turn four hundred pounds of cat round. She sits down and starts on the splinters in her forepaw.", '')}
 
-"We'll leave those rooms to the bugs," ${ya(g) ? 'Ya says, picking a splinter out of her own forearm with her teeth' : 'Mei Lin says, white-faced'}. Nobody argues.`,
+"We'll leave those rooms to the bugs," ${ya(g) ? 'Ya says, picking a splinter out of her own forearm with her teeth' : 'Mei Lin says, white-faced'}. Nobody argues.`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line; RB2 (RL): Fable's redraft after the review
         choices: [{ text: 'Back to the hall.', time: 30, to: 'heart_hub' }],
     },
 
@@ -296,9 +296,9 @@ Beyond the chamber, the tunnel turns, and the walls change. They stop being root
         choices: [{ text: 'Go on.', time: 20, to: 'ship_wreck' }],
     },
     roots_lost: {
-        id: 'roots_lost', title: 'Dragged', art: 'heart_roots', place: `${PIN} — the root-galleries`,
+        id: 'roots_lost', title: 'Dragged', art: 'heart_roots', place: `${PIN} — the root-galleries`, // v0.11.130 (YB1, LL; Fable's MAINs): the great root-kin's clause (no Ya) and line
         enter: (g) => { g.james.hp = Math.max(1, Math.ceil(g.james.hp)); return []; },
-        text: (g) => `You go down under the husks, and the next thing you know is being hauled up the shaft by the collar of your coat, ${ya(g) ? 'Ya swearing above you in three languages, one of which you\'re fairly sure she invented on the spot' : 'Mei Lin and Yuki between them, which should not be physically possible'}.
+        text: (g) => `You go down under the husks, and the next thing you know is being hauled up the shaft by the collar of your coat, ${ya(g) ? 'Ya swearing above you in three languages, one of which you\'re fairly sure she invented on the spot' : byForm(g, 'Mei Lin and Yuki between them, which should not be physically possible', "Mei Lin calling the handholds down from the lip of the shaft in a voice that is very nearly steady", 'Mei Lin and Yuki between them, which should not be physically possible')}.${byForm(g, '', " The collar is in Yuki's teeth. She climbs the shaft backwards with you swinging under her chin like a kitten, and when she sets you down at the top there are husk-lines raked down both her flanks, which neither of you mentions.", '')}
 
 You'll have to go back down. You both know it. Just — not right now.`,
         choices: [{ text: 'Back to the hall. Lick your wounds.', time: 60, to: 'heart_hub' }],

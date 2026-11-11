@@ -381,7 +381,7 @@ A woman in a patched brown jacket, maybe mid-twenties, has her back to a boulder
 
 Your Parallel Cognition is already labelling him. Qi like a coal under ash: a few rungs past your own. A cultivator.
 
-He glances at you once, the quick appraising glance cultivators here give everyone — *root? realm? threat?* — and finds nothing. No root. No Qi. Not a flicker. ${byForm(g, "His eyes slide off you the way they'd slide off a fence post.", "His eyes slide off you the way they'd slide off a fence post, and off Yuki the way they'd slide off a second, larger fence post.", "His eyes slide off you the way they'd slide off a fence post.")} You, apparently, do not register. Of the local kind, and of the kind that likes it.`,
+He glances at you once, the quick appraising glance cultivators here give everyone — *root? realm? threat?* — and finds nothing. No root. No Qi. Not a flicker. ${byForm(g, "His eyes slide off you the way they'd slide off a fence post.", "His eyes slide off you the way they'd slide off a fence post, and off Yuki the way they'd slide off a second, larger fence post.", "His eyes slide off you the way they'd slide off a fence post, and off Yuki the way they'd slide off a second, shorter fence post: they catch on the ears for exactly as long as dignity permits, which is not long.")} You, apparently, do not register. Of the local kind, and of the kind that likes it.`, // v0.11.130 (YB1, HG; Fable's MAIN): the human's glance
         choices: [
             { text: '"Morning. Is this a private extortion or can anyone join?"', check: { skill: 'GU', dc: 4 }, to: 'gao_talked', fail: 'gao_fight_start' },
             { text: 'A bone needle through the back of his hand, before he knows you\'re here.', show: (g) => !!g.flags.sneak, qi: 3, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 3 }, do: set('gao_hand'), to: 'gao_hand', fail: 'gao_fight_start' },
@@ -416,9 +416,9 @@ Crimson Robes — *Gao Feng, Outer Disciple of the Crimson Lotus Sect*, he infor
     },
     gao_fight_start: {
         id: 'gao_fight_start', title: 'Crimson Lotus', art: 'herb_girl', place: 'Blackroot Wilds — the herb slope',
-        text: (g) => `${byForm(g, "Gao Feng decides that whatever you are, you are alone, unarmed, and wearing a lab coat. He has looked at you with his Qi-sense and felt nothing at all: a mortal.", "Gao Feng decides that whatever you are, you are unarmed, wearing a lab coat, and alone but for a cat. He has looked at you both with his Qi-sense and felt nothing at all: a mortal, and a mortal's very large cat.", "Gao Feng decides that whatever you are, you are alone, unarmed, and wearing a lab coat. He has looked at you with his Qi-sense and felt nothing at all: a mortal.")} "Pock-Face," he says, without turning his head, "teach the peasant to kneel." The lackey grins and cracks his knuckles at you, which is the first time anyone has done that outside a film.
+        text: (g) => `${byForm(g, "Gao Feng decides that whatever you are, you are alone, unarmed, and wearing a lab coat. He has looked at you with his Qi-sense and felt nothing at all: a mortal.", "Gao Feng decides that whatever you are, you are unarmed, wearing a lab coat, and alone but for a cat. He has looked at you both with his Qi-sense and felt nothing at all: a mortal, and a mortal's very large cat.", "Gao Feng decides that whatever you are, you are unarmed, wearing a lab coat, and alone but for a slight woman in a black dress. He has looked at you both with his Qi-sense and felt nothing at all: a mortal, and a mortal's woman, with something about her ears that it is beneath an outer disciple to notice.")} "Pock-Face," he says, without turning his head, "teach the peasant to kneel." The lackey grins and cracks his knuckles at you, which is the first time anyone has done that outside a film.
 
-All of it is true. None of it is the whole truth.`,
+All of it is true. None of it is the whole truth.`, // v0.11.130 (YB1, GA; Fable's MAIN): the human, not alone
         choices: [{ text: 'Fight.', combat: gaoFight, to: 'gao_won' }],
     },
     gao_fled: {
@@ -707,9 +707,9 @@ Lu Han's gaze passes over the baskets, over the people, and stops on you. On Yuk
     },
     bluff_fail: {
         id: 'bluff_fail', title: 'Called', art: 'collectors', place: 'Ashfall Hamlet — the tribute post',
-        text: `Lu Han watches your performance in silence, the way a judge watches a defendant perjure himself. Then he shakes his head, once, with something close to regret.
+        text: (g) => `Lu Han watches your performance in silence, the way a judge watches a defendant perjure himself. Then he shakes his head, once, with something close to regret.
 
-"No," he says. "A true senior does not need to announce himself. You have dishonoured yourself, and mocked the Sect." He draws his sword. "The second is the one that matters."`,
+"No," he says. "A true senior does not need to announce himself.${byForm(g, '', " Nor is a great beast at a man's heel a senior's Qi. It is a treasure, and treasures are carried by servants.", '')} You have dishonoured yourself, and mocked the Sect." He draws his sword. "The second is the one that matters."${byForm(g, '', "\n\n*Servant,* says the bond, as four hundred pounds of treasure gets to its feet beside you. *He's half right. You do carry things.*", '')}`, // v0.11.130 (YB1, BL; Fable's MAIN): the great root-kin at his heel
         choices: [{ text: 'Fight.', combat: collectorsFight, to: 'collectors_won' }],
     },
     bluff_win: {
@@ -757,7 +757,7 @@ You've given people hope.`,
     collectors_lost: {
         id: 'collectors_lost', title: 'Kneel', art: 'collectors', place: 'Ashfall Hamlet — the tribute post',
         enter: (g) => { g.flags.ending = 'lost'; g.james.hp = 1; return []; },
-        text: `You go down hard. Lu Han's boot is on your chest and his blade is at your throat and he is looking at you with honest regret.
+        text: (g) => `You go down hard. Lu Han's boot is on your chest and his blade is at your throat and he is looking at you with honest regret.
 
 "Such a waste," he says. "To be born perfect and act like a fool."
 
@@ -765,7 +765,7 @@ What saves you is Ashfall. All of it: the boy's mother, the old hunters, the her
 
 Lu Han looks at them for a long time. At the sheer number of them. At what it would cost.
 
-"Next season," he says finally, sheathing his sword, "the tribute doubles. And the Bone-Maker comes with us, or the village burns." He steps off you. "Rest well, senior. You have a year."`,
+"Next season," he says finally, sheathing his sword, "the tribute doubles. And the Bone-Maker comes with us, or the village burns." He steps off you. "Rest well, senior. You have a year."${byForm(g, '', "\n\nThen he flicks two fingers, and the net comes off Yuki: a spirit-beast net, thrown from his sleeve in the first breath of the fight, before he so much as drew. She has been under it since your knees went. She walks over on legs that aren't quite steady and stands across you. Nobody asks her to move.", '')}`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line; RB2 (CL): Fable's redraft after the review
         choices: [{ text: 'Get up.', do: (g) => { advance(g, 120, { resting: true }); return []; }, to: 'epilogue' }],
     },
     epilogue: {

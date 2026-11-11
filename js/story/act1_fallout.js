@@ -352,9 +352,9 @@ You lie in the pine needles for a while, contemplating the Crimson Lotus's train
     fo_spy_fled: {
         id: 'fo_spy_fled', title: 'Gone', art: 'envoy', place: 'The ridge above Ashfall',
         enter: (g) => { g.flags.spy = 'fled'; g.flags.elder_intel = true; return []; },
-        text: `The watcher is three switchbacks up the mountain before you've finished your sentence. His ledger lies in the dust. It's very thorough. The Elder comes by the north road, at noon, with four disciples.
+        text: (g) => `The watcher is three switchbacks up the mountain before you've finished your sentence. His ledger lies in the dust. It's very thorough. The Elder comes by the north road, at noon, with four disciples.
 
-Also, in the margin next to your portrait: *does not bow*.`,
+Also, in the margin next to your portrait: *does not bow*.${byForm(g, '', "\n\nYuki's portrait has the whole facing page, and its margin says only *large*, underlined twice. She watches the mountain until he is off the last switchback. *Uphill,* says the bond. *No.*", '')}`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line
         choices: [{ text: 'Back down to Ashfall.', time: 60, to: 'fo_ashfall' }],
     },
 
@@ -419,9 +419,9 @@ It might. Wolves here aren't stupid. Neither, it turns out, are the hunters.`,
     fo_wolf_lost: {
         id: 'fo_wolf_lost', title: 'Grey on Grey', art: 'wolves', place: `${P} — the barley line`,
         enter: (g) => { g.flags.wolf = 'lost'; bumpRel(g, 'Village', -2, 0); return []; },
-        text: `They get past you and take a goat, and you get a bite through the forearm that will scar. The hunters arrive in time to see the grey shapes vanish into the barley with the goat between them.
+        text: (g) => `They get past you and take a goat, and you get a bite through the forearm that will scar. The hunters arrive in time to see the grey shapes vanish into the barley with the goat between them.${byForm(g, '', " Yuki comes out of the barley the other way a moment later, with grey fur in her teeth and no goat: she went after the one that came at her, the lame one, while the other went round. Wolves do that.", '')}
 
-The goat's owner bows to you anyway, and thanks you for your effort, which is somehow the worst thing that's happened all week.`,
+The goat's owner bows to you anyway, and thanks you for your effort, which is somehow the worst thing that's happened all week.`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line; RB2 (WC): Fable's redraft after the review
         choices: [{ text: 'Bandage it. Sleep.', to: 'fo_morning' }],
     },
 

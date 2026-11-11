@@ -298,11 +298,11 @@ Ya stops at the treeline as if there were a wall there. For a moment she looks y
 
 They have heard. Of course they have heard — hunters talk, and a party that walks into the Blackroot's heart and walks out again is a thing that has not happened in living memory. Old Wen stands at the front with his pipe cold in his hand. Behind him, the street. Nobody smiles. Somebody's grandmother touches her forehead to the dust as you pass, then gets up and does it again.
 
-${byForm(g, 'Their eyes go to Ya and stay there.', 'Their eyes go to Ya and stay there.', 'Their eyes go to Yuki first — the white hair, the ears, the tail — and move on, gravely, as from a matter that belongs to the outlander and is therefore not to be looked at twice. Then they go to Ya and stay there.')} Bare arms, wolf-tooth necklace, spear, a scar through one eyebrow and a grin that is frankly a provocation.
+${byForm(g, 'Their eyes go to Ya and stay there.', "Their eyes go to Yuki first: four hundred pounds of white cat, pacing at your heel like a dog that has never heard of dogs. Ashfall has seen the outlander's beast before. It has not got smaller. They look, gravely, once, as at a matter that belongs to the outlander and is therefore not to be remarked on. Then they go to Ya and stay there.", 'Their eyes go to Yuki first — the white hair, the ears, the tail — and move on, gravely, as from a matter that belongs to the outlander and is therefore not to be looked at twice. Then they go to Ya and stay there.')} Bare arms, wolf-tooth necklace, spear, a scar through one eyebrow and a grin that is frankly a provocation.
 
 "She is with us," Mei Lin says, loud and clear, to the whole street. That is not a thing a woman of Ashfall says. The street notes it.
 
-${g.flags.sky_witness ? 'And they look at you the way they looked at you after the sky came and went away again: as if you are weather.' : 'And they look at you, the stranger who went into the forest and came back, as if they\'re no longer sure what you are.'}`,
+${g.flags.sky_witness ? 'And they look at you the way they looked at you after the sky came and went away again: as if you are weather.' : 'And they look at you, the stranger who went into the forest and came back, as if they\'re no longer sure what you are.'}`, // v0.11.130 (YB1, RA; Fable's MAIN): the street sees the great root-kin
         choices: [
             { text: 'Go to Old Wen first. Formally.', time: 30, to: 'rt_wen' },
             { text: 'Mei Lin\'s mother is in the doorway. Face her.', time: 30, to: 'rt_mother' },
@@ -468,11 +468,11 @@ Ya has no idea what to do with this. She stares at him. Then she bows back, badl
     rt_brawl_lost: {
         id: 'rt_brawl_lost', title: 'Settled, Badly', art: 'ya_fight', place: `${P} — outside the wine shop`,
         enter: (g) => { g.flags.ya_brawled = 'lost'; g.james.hp = Math.max(3, g.james.hp); return []; },
-        text: `You end up in the horse trough. Ya ends up on the wine-shop roof, which she insists was deliberate. Bao and his cousins walk off with the stiff satisfaction of men whose honour has been restored by the correct procedure.
+        text: (g) => `You end up in the horse trough. Ya ends up on the wine-shop roof, which she insists was deliberate. Bao and his cousins walk off with the stiff satisfaction of men whose honour has been restored by the correct procedure.
 
 Mei Lin, arriving, takes in the scene: you in the trough, Ya on the roof, half the street watching with their hands folded.
 
-"I leave you alone," she says, "for *one hour*."`,
+"I leave you alone," she says, "for *one hour*."${byForm(g, '', "\n\nFrom the wine-shop bench, most of which she is, Yuki yawns to the back teeth. *Fists only,* says the bond. *Your rule. I kept it for you.*", '')}`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line
         choices: [{ text: 'Climb out with what dignity you have left.', time: 30, to: 'rt_ashfall' }],
     },
 
@@ -623,11 +623,11 @@ ${g.flags.ending === 'bluff' ? 'He remembers the bluff at the tribute post; Lu H
     },
     rt_parley_fail: {
         id: 'rt_parley_fail', title: 'Refused', art: 'elder_parley', place: `${P} — the tribute post`,
-        text: `Shen Qiu listens to all of it with perfect courtesy. Then he says, gently, as if explaining to a child: "The Crimson Lotus does not negotiate with its property."
+        text: (g) => `Shen Qiu listens to all of it with perfect courtesy. Then he says, gently, as if explaining to a child: "The Crimson Lotus does not negotiate with its property."
 
-The disciples spread out along the road.
+The disciples spread out along the road.${byForm(g, '', " The two on Yuki's side stop a spear's length further off than the others. She watches them do it without getting up.", '')}
 
-"Kneel," says Shen Qiu, "and come with me, and I will leave the grove standing out of respect for its beauty. Refuse, and I will burn it, and the village with it, and take you anyway." He folds his hands in his sleeves. "Those are the choices. They are generous."`,
+"Kneel," says Shen Qiu, "and come with me, and I will leave the grove standing out of respect for its beauty. Refuse, and I will burn it, and the village with it, and take you anyway." He folds his hands in his sleeves. "Those are the choices. They are generous."`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line
         choices: [
             { text: 'Refuse. Fight.', combat: elderFight, to: 'rt_duel_won' },
             { text: 'Kneel. Go with him. Ashfall lives.', to: 'rt_taken' },
@@ -707,11 +707,11 @@ Ashfall has just declared war on the Crimson Lotus. Everyone in the street knows
         enter: (g) => { g.james.hp = 1; return []; },
         text: (g) => `You are on your back in the road and you don't remember falling. Shen Qiu stands over you, not even breathing hard, sleeves still folded.
 
-"Interesting," he says. "Very interesting. Untrained, undisciplined, and still you made me use both hands." He looks down at you with something close to approval. "The Sect Master will want you alive."
+"Interesting," he says. "Very interesting. Untrained, undisciplined, and still you made me use both hands." He looks down at you with something close to approval. "The Sect Master will want you alive."${byForm(g, '', "\n\nOne hand was for you. The other, you gather, was for Yuki, who lies ten paces up the road, a long white shape getting its legs under it one at a time.", '')}
 
 Behind him, Ashfall has not moved. ${g.flags.a1_militia ? 'The hunters\' spears are levelled.' : 'People are holding hoes and kitchen knives.'} Mei Lin is standing with her knife out and her face white. Ya is being held back by ${g.flags.ya_brawled === 'won' ? 'Hunter Bao, of all people' : 'three hunters'}, snarling.
 
-"Call them off," Shen Qiu says, "and I will not burn the grove. Or don't, and watch."`,
+"Call them off," Shen Qiu says, "and I will not burn the grove. Or don't, and watch."`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line
         choices: [{ text: 'Call them off. Go with him.', to: 'rt_taken' }],
     },
     rt_taken: {

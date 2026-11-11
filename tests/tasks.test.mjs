@@ -1097,7 +1097,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
         const src = (await import('node:fs')).readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
         const lit = /const up = (\/\^\(\.\+\?\) .+?\$\/)\.exec\(l\)/.exec(src)?.[1], re = lit ? new RegExp(lit.slice(1, -1)) : null, m = re?.exec(out[1] || '');
         const { splitLine } = await import('../js/core/replies.js'), sp = splitLine(out[1] || '');
-        assert(out[0] === YUKI_HELD_TEXT.held.replace('{t}', 3).replace('{l}', 4) && out[1] === `GU +${Math.floor(Math.floor(120 * 3 * 0.6) * 0.1)} XP → T3 L5, ${SHARE}` && g.james.gu.level === 5 && !!m && m[1] === 'GU' && m[2] === 'T3 L5' && sp.reply === '' && sp.gain !== '' && !yukiHeld(g),
+        assert(out[0] === YUKI_HELD_TEXT.heldPast.replace('{t}', 3).replace('{l}', 4) && out[1] === `GU +${Math.floor(Math.floor(120 * 3 * 0.6) * 0.1)} XP → T3 L5, ${SHARE}` && g.james.gu.level === 5 && !!m && m[1] === 'GU' && m[2] === 'T3 L5' && sp.reply === '' && sp.gain !== '' && !yukiHeld(g),
           `LX1: a share that raises his GU: the rank on the line, read by the summary, a gain; she is free again (${out.join(' | ')})`); }
       { const g = mk(2, 2, 2, 2, 1190); g.scene = 'wilds'; g.minutes = 1440 + 9 * 60; Object.assign(g.flags, { long: true, forest_day: 2 }); g.james.satiety = 90; g.james.qi = 30;
         g.rng = rngFor(5); setYuki(g, true); g.tasks.yuki.progress = yukiLane(g).len - 1; const xp0 = g.james.gu.xp;
@@ -1121,7 +1121,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
       const out = found ? awardYukiFightXp(found.g, 'standard') : [];
       assert(!!found && out.length === 1 && /level with James's GU \(held\)$/.test(out[0]) && found.g.james.gu.xp === 0, `LR1, T: a reach whose share floors to 0 gives no line (x ${found?.x}; ${out.join(' | ')})`); }
     { const g = mk(1, 8, 1, 9); g.coil.n = 21; g.james.gu.xp = G.xpToNext(g.james.gu) - 1; const out = awardYukiFightXp(g, 'major');
-      assert(out[0].endsWith('→ T1 L9, level with James\'s GU (held)') && /^GU \+\d+ XP → T1 L10, /.test(out[1] || '') && rk(g.yuki.fight) === 9 && rk(g.james.gu) === 10, `LR1, T: a reach whose share raises his GU: her line keeps T1 L9 (${out.join(' | ')})`); }
+      assert(out[0].endsWith('→ T1 L9, where James\'s GU stood (held)') && /^GU \+\d+ XP → T1 L10, /.test(out[1] || '') && rk(g.yuki.fight) === 9 && rk(g.james.gu) === 10, `LR1, T: a reach whose share raises his GU: her line keeps T1 L9 (${out.join(' | ')})`); }
     { const g = mk(2, 2, 2, 2, 1191); g.james.skills['Convergence Use'] = { tier: 2, level: 1, xp: 0 }; ensureBars(g); g.james.qi = jamesQiMax(g);
       startCombat(g, { id: 'test_lx1', intro: 'In.', band: 'standard', enemies: [{ name: 'Rat', hp: 1, dc: 0.5, atk: 0.1, dmg: 0 }], win: 'stream', lose: 'stream' });
       let o = null; for (let t = 0; t < 20 && g.combat; t++) o = cStep(g, 'blade');
@@ -1130,6 +1130,38 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
       const k = mk(2, 2, 2, 2, 1192), w = G.instantWin(k, { id: 'test_lx1b', intro: 'In.', band: 'standard', enemies: [{ name: 'Rat', hp: 1, dc: 0.5, atk: 0.1, dmg: 0 }], win: 'stream', lose: 'stream' });
       const j = w.lines.indexOf(HELD22);
       assert(j > 0 && w.lines[j + 1] === share, `LR1, T: the one-move finish the same (${w.lines.join(' | ')})`); }
+    // v0.11.130 (owner pick YB1, HL; Fable's MAINs): when his share raises his GU in the same award, her line names the rank
+    // where his GU stood (heldPast / reachPast), not "held at James's GU"; with no rank-up the old lines stay
+    { const { splitLine } = await import('../js/core/replies.js');
+      assert(YUKI_HELD_TEXT.heldPast === "Yuki Fight held at T{t} L{l}, where James's GU stood" && YUKI_HELD_TEXT.reachPast === "Yuki Fight +{xp} → T{t} L{l}, where James's GU stood (held)", 'YB1, HL: Fable\'s two MAINs word for word');
+      { const g = mk(3, 4, 3, 4); g.james.gu.xp = G.xpToNext(g.james.gu) - 1; const out = awardYukiFightXp(g, 'major');
+        assert(out[0] === 'Yuki Fight held at T3 L4, where James\'s GU stood' && /^GU \+\d+ XP → T3 L5, /.test(out[1] || '') && rk(g.yuki.fight) === 24 && rk(g.james.gu) === 25, `YB1, HL: held, his share moves him on: heldPast with her rank (${out.join(' | ')})`); }
+      { const g = mk(3, 4, 3, 4); const out = awardYukiFightXp(g, 'major');
+        assert(out[0] === YUKI_HELD_TEXT.held.replace('{t}', 3).replace('{l}', 4) && !/→/.test(out[1] || ''), `YB1, HL: held, his share doesn't move him: the held line as before (${out.join(' | ')})`); }
+      { const g = mk(1, 8, 1, 9); g.coil.n = 21; const out = awardYukiFightXp(g, 'major');
+        assert(/^Yuki Fight \+\d+ → T1 L9, level with James's GU \(held\)$/.test(out[0]) && !/→/.test(out[1] || '') && rk(g.james.gu) === 9, `YB1, HL: a reach with no rank-up keeps "level with" (${out.join(' | ')})`); }
+      const sh = splitLine(YUKI_HELD_TEXT.heldPast.replace('{t}', 3).replace('{l}', 4)), sh0 = splitLine(YUKI_HELD_TEXT.held.replace('{t}', 3).replace('{l}', 4));
+      assert(JSON.stringify(Object.keys(sh)) === JSON.stringify(Object.keys(sh0)) && sh.reply === sh0.reply && (sh.gain === '') === (sh0.gain === ''), `YB1, HL: the replies read heldPast as they read held (${JSON.stringify(sh)} / ${JSON.stringify(sh0)})`);
+      const src = (await import('node:fs')).readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+      const lit = /const up = (\/\^\(\.\+\?\) .+?\$\/)\.exec\(l\)/.exec(src)?.[1], re = lit ? new RegExp(lit.slice(1, -1)) : null, m = re?.exec(YUKI_HELD_TEXT.reachPast.replace('{xp}', 40).replace('{t}', 2).replace('{l}', 3));
+      assert(!!m && m[1] === 'Yuki Fight' && m[2] === 'T2 L3', `YB1, HL: the Results summary reads reachPast's rank (${m?.slice(1).join(' / ')})`); }
+    // v0.11.130 (owner pick RB2; Fable's review of YB1): HA above him (a save from before YK1) the held line stays; TG a share
+    // two ranks up, heldPast through the Results summary, a whole fight ending in reachPast
+    { { const g = mk(10, 10, 7, 6); g.james.gu.xp = G.xpToNext(g.james.gu) - 1; const out = awardYukiFightXp(g, 'major');
+        assert(out[0] === YUKI_HELD_TEXT.held.replace('{t}', 7).replace('{l}', 6) && /^GU \+\d+ XP → T7 L7, /.test(out[1] || '') && rk(g.yuki.fight) === 100, `RB2 (HA): above him, a share that moves him on keeps the held line (${out.join(' | ')})`); }
+      { const g = mk(3, 10, 3, 10); g.coil.n = 16; g.james.gu.xp = G.xpToNext(g.james.gu) - 1; ensureBars(g); const out = awardYukiFightXp(g, 'major');
+        assert(out[0] === 'Yuki Fight held at T3 L10, where James\'s GU stood' && /^GU \+\d+ XP → T4 L2, /.test(out[1] || '') && rk(g.james.gu) === 32, `RB2 (TG): a share two ranks up: heldPast, his last rank on his line (${out.join(' | ')})`); }
+      { const src = (await import('node:fs')).readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+        const body = src.slice(src.indexOf('function summarize(lines) {'), src.indexOf('\n}\n', src.indexOf('function summarize(lines) {')) + 2);
+        const summarize = new Function(`${body}; return summarize;`)();
+        const t = summarize([YUKI_HELD_TEXT.heldPast.replace('{t}', 3).replace('{l}', 4), `GU +14 XP → T3 L5, ${YUKI_HELD_TEXT.share}`]);
+        assert(t.includes('GU → T3 L5') && !/Yuki Fight →|T3 L4/.test(t), `RB2 (TG): the Results summary reads heldPast as held: his rank only (${t})`); }
+      { const fight = () => ({ id: 'test_rb2', intro: 'In.', band: 'standard', enemies: [{ name: 'Rat', hp: 1, dc: 0.5, atk: 0.1, dmg: 0 }], win: 'stream', lose: 'stream' });
+        const prep = (gx) => { const g = mk(1, 8, 1, 9, 1193); g.yuki.fight.xp = G.xpToNext(g.yuki.fight) - 1; g.james.gu.xp = gx; g.james.skills['Convergence Use'] = { tier: 2, level: 1, xp: 0 }; ensureBars(g); g.james.qi = jamesQiMax(g); return g; };
+        const run = (g) => { startCombat(g, fight()); let o = null; for (let t = 0; t < 20 && g.combat; t++) o = cStep(g, 'blade'); return o; };
+        const dry = run(prep(0)), own = Number(/^GU \+(\d+) XP/.exec((dry?.lines || []).find((l) => /^GU \+\d+ XP(?! .*couldn't keep)/.test(l) && !/couldn't keep/.test(l)) || '')?.[1] || 0);
+        const g = prep(G.xpToNext({ tier: 1, level: 9, xp: 0 }) - own - 1), o = run(g), i = (o?.lines || []).findIndex((l) => /where James's GU stood \(held\)$/.test(l));
+        assert(o?.done === 'win' && own > 0 && i > 0 && /^GU \+\d+ XP → T1 L10, from what Yuki couldn't keep$/.test(o.lines[i + 1] || ''), `RB2 (TG): a won fight ends in reachPast, then his share (own ${own}; ${(o?.lines || []).slice(-4).join(' | ')})`); } }
     // the owner's save from before YK1 (Yuki T10 L10, GU T7 L6): loads with her number kept, and fights at his GU
     { const { gunzipSync } = await import('node:zlib'); const t = (await import('node:fs')).readFileSync(new URL('../saves/2026-11-08-0813-incremental-a1_end.txt', import.meta.url), 'utf8').trim();
       const g = deserialize(t.startsWith('BAZ1:') ? gunzipSync(Buffer.from(t.slice(5), 'base64')).toString('utf8') : t);

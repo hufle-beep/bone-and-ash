@@ -34,7 +34,7 @@ import { INC_ONLY_ACTIONS, actionOpen } from '../js/core/forms.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
 import { isTaskHub, isTaskChoice, taskCards, taskOpen, runTask, taskState, setYuki, yukiLane } from '../js/core/tasks.js';
 import { medCards, runMed, canMeditate } from '../js/core/meditate.js';
-import { writeFileSync } from 'node:fs';
+import { writeFileSync, readFileSync } from 'node:fs';
 import { smartAction } from './lib/smartfight.mjs'; // v0.11.96 (BT1)
 import { SHARD, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
 
@@ -156,7 +156,7 @@ function play(run, model, st, yuki) {
     }
     const cn = () => g.coil.n - off;
     const mem = { done: {}, tried: new Set(), tribLost: 0, shenBites: 0 };
-    let coilKey = '', deadKey = '', takenKey = '', crossed = false, bitShen = false;
+    let coilKey = '', deadKey = '', takenKey = '', nightKey = '', crossed = false, bitShen = false;
     const seenTrib = new Set();
     const maxSteps = model === 'sitter' ? STEPS_SITTER : STEPS;
     for (let steps = 0; steps < maxSteps; steps++) {
@@ -174,6 +174,8 @@ function play(run, model, st, yuki) {
         if (g.scene === 'coil_end' && (g.coil.why === 'collapse' || g.coil.why === 'beast') && deadKey !== coilKey) {
             deadKey = coilKey; row.dead++; if (g.coil.why === 'beast') row.beast++; else if (g.james.satiety <= 0) row.starve++;
         }
+        // v0.11.130 (owner pick YB1, LN): the last night taken, once a Coil (g.flags.final_night: Act 1's last evening)
+        if (g.flags.final_night && nightKey !== coilKey) { nightKey = coilKey; const k = NIGHT_KIND[g.flags.final_night] || 'other'; st.nights[k] = (st.nights[k] || 0) + 1; }
         const tOut = { bluff_win: 'won', collectors_won: 'won', tribute_paid: 'paid', collectors_lost: 'lost' }[g.scene];
         if (tOut && !seenTrib.has(cn())) { seenTrib.add(cn()); const b = st.tribute[cn()] || (st.tribute[cn()] = { won: 0, paid: 0, lost: 0 }); b[tOut]++; }
         const v = sceneView(g, SCENES);
@@ -239,7 +241,10 @@ function play(run, model, st, yuki) {
 }
 const foodLeft = (g) => Object.entries(g.inventory || {}).some(([k, n]) => n > 0 && /raw|meat|berry|cress|honey|crab|fowl|hare|venison|egg/.test(k));
 
-const blank = () => ({ games: 0, finished: 0, gaveUp: 0, stuck: 0, cards: 0, work: 0, forced: 0, oneCoil: 0, hungry: 0, cuAhead: 0, deaths: {}, tribute: {}, prologueClear: {}, act1Clear: {}, endings: {}, fights: {} });
+/** v0.11.130 (YB1, LN): the last-night split, by g.flags.final_night (yuki_path.js): her four nights count as Yuki's. */
+const NIGHT_KIND = { none: 'quiet', mei: 'Mei Lin', ya: 'Ya', trio: 'trio', yuki: 'Yuki', yuki_mei: 'Yuki', yuki_ya: 'Yuki', all: 'Yuki' };
+const NIGHT_ORDER = ['quiet', 'Mei Lin', 'Ya', 'trio', 'Yuki', 'other'];
+const blank = () => ({ nights: {}, games: 0, finished: 0, gaveUp: 0, stuck: 0, cards: 0, work: 0, forced: 0, oneCoil: 0, hungry: 0, cuAhead: 0, deaths: {}, tribute: {}, prologueClear: {}, act1Clear: {}, endings: {}, fights: {} });
 const all = {};
 const playInto = (st, run, m, yuki) => { st.games++; const r = play(run, m, st, yuki); if (r === 'end') st.finished++; else if (r === 'stuck') st.stuck++; };
 for (const m of PLAY) {
@@ -277,6 +282,17 @@ if (!SHARD) { // the completionist really runs every open card of the wilds befo
     if (missed.length) notes.push(`completionist: left the wilds with these cards unrun: ${missed.join(', ')}`); else pass++;
 }
 
+// v0.11.130 (YB1, LN): every last night the story can set has its bucket in the split, and no game lands in 'other'
+{
+    const src = ['yuki_path.js', 'act1_return.js', 'act1_fallout.js'].map((f) => readFileSync(new URL(`../js/story/${f}`, import.meta.url), 'utf8')).join('\n');
+    const kinds = new Set([...src.matchAll(/final_night = '(\w+)'/g), ...src.matchAll(/\['rt_\w+_night', '(\w+)'\]/g)].map((m) => m[1]));
+    const miss = [...kinds].filter((k) => !NIGHT_KIND[k]);
+    assert(kinds.size >= 8 && !miss.length, `the last-night split names every final_night the story sets (${[...kinds].join(', ')}; missing: ${miss.join(', ') || 'none'})`);
+    for (const [m, st] of Object.entries(all)) assert(!st.nights?.other, `${m}: no last night outside the split (${st.nights?.other || 0})`);
+    // RB2 (TG; Fable's review): once a Coil: never more last nights than Act 1 Coils played
+    for (const [m, st] of Object.entries(all)) { const nt = Object.values(st.nights || {}).reduce((a, b) => a + b, 0), a1 = Object.values(st.deaths[1] || {}).reduce((a, d) => a + d.coils, 0); assert(nt <= a1, `${m}: at most one last night a Coil (${nt} nights, ${a1} Act 1 Coils)`); }
+}
+
 const pct = (a, b) => (b ? `${Math.round((1000 * a) / b) / 10}%` : '—');
 const KEY_FIGHTS = ['jackals', 'lizard', 'crows', 'rats', 'boar', 'gao', 'collectors', 'rot_ape', 'elder'];
 for (const [m, st] of Object.entries(all)) {
@@ -294,6 +310,8 @@ for (const [m, st] of Object.entries(all)) {
     if (st.farmN) console.log(`  farmer: ${FARM_BITES} bites by choice at the first dawn first, then ×${(st.farmMult / st.farmN).toFixed(2)} (a bite by choice adds no bonus); Coils above counted from its first real one`);
     const fl = KEY_FIGHTS.filter((k) => st.fights[k]).map((k) => { const f = st.fights[k]; const n = f.win + f.lose + (f.flee || 0); return `${k} ${pct(f.win, n)} (${n})`; });
     console.log(`  key fights won: ${fl.join(' · ') || '—'}`);
+    const nt = Object.values(st.nights || {}).reduce((a, b) => a + b, 0); // v0.11.130 (YB1, LN)
+    console.log(`  last nights: ${nt ? NIGHT_ORDER.filter((k) => k !== 'other' || st.nights.other).map((k) => `${k} ${st.nights[k] || 0}`).join(' / ') + ` (of ${nt} last evenings)` : '—'}`);
 }
 if (JSON_OUT) writeFileSync(JSON_OUT, JSON.stringify(all));
 for (const n of notes) console.log(`  NOTE  ${n}`);

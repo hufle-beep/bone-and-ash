@@ -112,7 +112,7 @@ Yuki washes a paw with tremendous dignity. You sit for a while with your heart g
     },
     night_fled: {
         id: 'night_fled', title: 'Somewhere Else', art: 'forest_night', place: `${P} — further downstream`,
-        text: `You grab what you can and move camp in the dark, two hundred metres downstream, swearing in a whisper the whole way.`,
+        text: (g) => `You grab what you can and move camp in the dark, two hundred metres downstream, swearing in a whisper the whole way.${byForm(g, '', " Yuki walks behind with the blanket in her mouth, which keeps her from saying what she thinks of running from something she outweighs. The bond says it anyway.", '')}`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line; RB2 (BR): Fable's redraft after the review
         choices: [{ text: 'Sleep.', to: 'morning' }],
     },
 
@@ -258,7 +258,7 @@ Something moves under the water. Several somethings.`,
     mire_lost: {
         id: 'mire_lost', title: 'The Mire', art: 'mire', place: `${P} — the Mire`,
         enter: (g) => { g.flags.mire_fight = true; return []; },
-        text: `You retreat with a bitten calf, a boot full of black water and the strong impression that the mire won that round on points.`,
+        text: (g) => `You retreat with a bitten calf, a boot full of black water and the strong impression that the mire won that round on points.${byForm(g, '', " Yuki retreats beside you, black to the shoulder, having learnt that the mire holds four hundred pounds a great deal better than it holds eleven. *We do not speak of this,* says the bond.", '')}`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line
         choices: [{ text: 'Limp back to the stream.', time: 60, to: 'wilds' }],
     },
     hollow: {
