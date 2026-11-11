@@ -192,7 +192,7 @@ ${ya(g) ? '"Bugs," Ya says, with deep satisfaction, and shifts her grip on her s
     },
     ring_forced: {
         id: 'ring_forced', title: 'The Ring-Chambers', art: 'heart_hall', place: `${PIN} — the galleries`,
-        text: `The bone wall comes out thin, and they come through it like it's paper.`,
+        text: (g) => `The bone wall comes out thin, and they come through it like it's paper.${byForm(g, '', " Yuki has the gallery behind you, all of it, wall to wall. *I can't turn round in here,* says the bond. *So we are going forward.*", '')}`, /* v0.11.131 (XB2, FL; Fable's MAIN): the great root-kin */
         choices: [{ text: 'Fine.', combat: (g) => husks(g, 'ring_won', 'ring_lost'), to: 'ring_won' }],
     },
     ring_won: {
@@ -298,7 +298,7 @@ Beyond the chamber, the tunnel turns, and the walls change. They stop being root
     roots_lost: {
         id: 'roots_lost', title: 'Dragged', art: 'heart_roots', place: `${PIN} — the root-galleries`, // v0.11.130 (YB1, LL; Fable's MAINs): the great root-kin's clause (no Ya) and line
         enter: (g) => { g.james.hp = Math.max(1, Math.ceil(g.james.hp)); return []; },
-        text: (g) => `You go down under the husks, and the next thing you know is being hauled up the shaft by the collar of your coat, ${ya(g) ? 'Ya swearing above you in three languages, one of which you\'re fairly sure she invented on the spot' : byForm(g, 'Mei Lin and Yuki between them, which should not be physically possible', "Mei Lin calling the handholds down from the lip of the shaft in a voice that is very nearly steady", 'Mei Lin and Yuki between them, which should not be physically possible')}.${byForm(g, '', " The collar is in Yuki's teeth. She climbs the shaft backwards with you swinging under her chin like a kitten, and when she sets you down at the top there are husk-lines raked down both her flanks, which neither of you mentions.", '')}
+        text: (g) => `You go down under the husks, and the next thing you know is being hauled up the shaft by the collar of your coat, ${ya(g) ? 'Ya swearing above you in three languages, one of which you\'re fairly sure she invented on the spot' : byForm(g, 'Mei Lin and Yuki between them, which should not be physically possible', "Mei Lin calling the handholds down from the lip of the shaft in a voice that is very nearly steady", "Mei Lin and Yuki between them, Yuki in a black dress that has not picked up so much as one husk, which should not be physically possible") /* v0.11.131 (XB2, RH; Fable's MAIN): the human's own */}.${byForm(g, '', " The collar is in Yuki's teeth. She climbs the shaft backwards with you swinging under her chin like a kitten, and when she sets you down at the top there are husk-lines raked down both her flanks, which neither of you mentions.", '')}
 
 You'll have to go back down. You both know it. Just — not right now.`,
         choices: [{ text: 'Back to the hall. Lick your wounds.', time: 60, to: 'heart_hub' }],
@@ -550,10 +550,10 @@ For a moment it stops. The broken note stutters. The green in its chest flares, 
 
 Then the madness closes back over it like water over a stone. *Who comes,* it sings, louder, wrong. *WHO COMES TO THE HEART.*
 
-But it's slower now. Uncertain. Part of it is still listening.
+But it's slower now. Uncertain. Part of it is still listening.${byForm(g, '', " So is Yuki, ears forward, quite still. She heard that song in the same grove you did.", '')}
 
 ${ya(g) ? '"That was pretty," Ya says, levelling her spear. "Now duck."' : '"James," Mei Lin says, very quietly. "Move."'}`,
-        choices: [{ text: 'Fight it — gently, if that\'s a thing.', combat: guardianFight, to: 'guardian_won' }],
+        choices: [{ text: 'Fight it — gently, if that\'s a thing.', combat: guardianFight, to: 'guardian_won' }], // v0.11.131 (XB2, FL; RC2, L4; Fable's MAINs): the great root-kin listens too
     },
     guardian_calmed: {
         id: 'guardian_calmed', title: 'Rest', art: 'guardian', place: `${PIN} — the heart-chamber`,

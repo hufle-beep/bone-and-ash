@@ -69,6 +69,7 @@ for (const run of kids ? [] : myRuns()) {
             assert(!g.combat, `combat ends (${g.scene}, run ${run})`);
         }
         if (!(Number.isFinite(g.james.hp) && g.james.hp >= 0 && Number.isFinite(g.james.qi))) assert(false, `bars finite in ${g.scene}`); else pass++;
+        if ((g.yuki.realm || 0) > (g.james.realm || 0)) assert(false, `Yuki's realm above James's in ${g.scene} (the great root-kin must always fly: v0.11.131, RC2 TG)`); else pass++;
     }
     maxSteps = Math.max(maxSteps, steps);
     assert(steps < STEP_CAP, `run ${run} finishes`);
@@ -1245,14 +1246,14 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         // [scene, flags, the great root-kin's line, [her clause, the cat's clause] where the text also swaps one]
         ["ah_hawks_lost", {}, "\n\nYuki sits upwind with a hawk's tail feathers in her teeth and a scorched stripe down one flank. *Mine is also holy,* says the bond. *Nobody is reviewing mine.*"],
         ["ape_lost", {}, "\n\nYuki lies along your other side with one foreleg held off the ground. The ape threw her before it hit you, and she came back on three legs, in time to see it go. She is purring, low, the purr that isn't for pleasure."],
-        ["arson_lost", {}, " Yuki has one of them flat in the lane under both forepaws, and it is the wrong one: the torch was in the other man's hand."],
+        ["arson_lost", {}, " Yuki has one of them flat in the lane under both forepaws, and it is the wrong one: the torch was in the other man's hand. She keeps him all the same, and when the street has finished with the fire it finds it still has somebody to be grave at."], // v0.11.131 (XB2, AP): she keeps him
         ["bl_night_lost", {}, " Yuki, who had hold of it until it had hold of her ear, lies across your feet with the ear at half-mast. *Three voices,* says the bond. *I am also telling you off. I am just doing it quietly.*"],
         ["collectors_lost", {}, "\n\nThen he flicks two fingers, and the net comes off Yuki: a spirit-beast net, thrown from his sleeve in the first breath of the fight, before he so much as drew. She has been under it since your knees went. She walks over on legs that aren't quite steady and stands across you. Nobody asks her to move."],
-        ["dw_serpent_lost", {}, "\n\nYuki surfaces a moment later with a length of serpent in her mouth that is no longer attached to anything, climbs out, and shakes four hundred pounds of swamp over all three of you. *It let go,* says the bond. *Eventually. You're welcome.*"],
+        ["dw_serpent_lost", { fly: true }, "\n\nYuki surfaces a moment later with a length of serpent in her mouth that is no longer attached to anything, climbs out, and shakes four hundred pounds of swamp over all three of you. *It let go,* says the bond. *Eventually. You're welcome.*"],
         ["far_lost", {}, " Yuki comes in behind you on three good legs and lies down across the doorway. Mei Lin steps over her without breaking off, comes back with the salve, and starts on the cat. The lecture now covers you both."],
         ["fo_spy_fled", {}, "\n\nYuki's portrait has the whole facing page, and its margin says only *large*, underlined twice. She watches the mountain until he is off the last switchback. *Uphill,* says the bond. *No.*"],
         ["fo_wolf_lost", {}, " Yuki comes out of the barley the other way a moment later, with grey fur in her teeth and no goat: she went after the one that came at her, the lame one, while the other went round. Wolves do that."],
-        ["mire_lost", {}, " Yuki retreats beside you, black to the shoulder, having learnt that the mire holds four hundred pounds a great deal better than it holds eleven. *We do not speak of this,* says the bond."],
+        ["mire_lost", { fly: true }, " Yuki rises beside you, black to the shoulder, having learnt that the mire holds four hundred pounds a great deal better than it holds eleven, and lets go of them a great deal more slowly. *We do not speak of this,* says the bond."], // v0.11.131 (XB2, FY): for a flier
         ["night_fled", {}, " Yuki walks behind with the blanket in her mouth, which keeps her from saying what she thinks of running from something she outweighs. The bond says it anyway."],
         ["ring_lost", {}, " Yuki is already out: she backed the whole length of the gallery ahead of you, because the rings were grown for gardeners and there is nowhere in them to turn four hundred pounds of cat round. She sits down and starts on the splinters in her forepaw."],
         ['roots_lost', {}, " The collar is in Yuki's teeth. She climbs the shaft backwards with you swinging under her chin like a kitten, and when she sets you down at the top there are husk-lines raked down both her flanks, which neither of you mentions."],
@@ -1261,14 +1262,15 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         ["rt_brawl_lost", {}, "\n\nFrom the wine-shop bench, most of which she is, Yuki yawns to the back teeth. *Fists only,* says the bond. *Your rule. I kept it for you.*"],
         ["rt_duel_lost", {}, "\n\nOne hand was for you. The other, you gather, was for Yuki, who lies ten paces up the road, a long white shape getting its legs under it one at a time."],
         ["rt_parley_fail", {}, " The two on Yuki's side stop a spear's length further off than the others. She watches them do it without getting up."],
-        ["wyrm_lost", {}, " Yuki follows a moment later, shaken off the wyrm's neck like a burr, and lands like a dropped piano. Cats, it turns out, do swim. They hold it against you."],
-        ['roots_lost', { ya_party: false }, " The collar is in Yuki's teeth. She climbs the shaft backwards with you swinging under her chin like a kitten, and when she sets you down at the top there are husk-lines raked down both her flanks, which neither of you mentions.", ['Mei Lin calling the handholds down from the lip of the shaft in a voice that is very nearly steady', 'Mei Lin and Yuki between them, which should not be physically possible']],
+        ["wyrm_lost", { fly: true }, " Yuki lets go of the wyrm's neck when she is ready and comes down the forty metres at a walk, on nothing. She stops a hand's width above the water. Cats, it turns out, don't have to swim. This one looks at the three of you who did."], // v0.11.131 (XB2, FY): for a flier
+        ['roots_lost', { ya_party: false }, " The collar is in Yuki's teeth. She climbs the shaft backwards with you swinging under her chin like a kitten, and when she sets you down at the top there are husk-lines raked down both her flanks, which neither of you mentions.", ['Mei Lin calling the handholds down from the lip of the shaft in a voice that is very nearly steady', 'Mei Lin and Yuki between them, which should not be physically possible'], ['Yuki in a black dress that has not picked up so much as one husk, ', '']], // v0.11.131 (XB2, RH): the human's own clause
         ['ring_lost', { ya_party: false }, " Yuki is already out: she backed the whole length of the gallery ahead of you, because the rings were grown for gardeners and there is nowhere in them to turn four hundred pounds of cat round. She sits down and starts on the splinters in her forepaw."],
     ];
-    for (const [id, flags, line, swap] of YB) {
-        const [cat, tiger, human] = ['cat', 'tiger', 'human'].map((form) => { const g = FM(65000 + n++, form, flags); goTo(g, SCENES, id); return sceneView(g, SCENES).text; });
+    for (const [id, { fly, ...flags }, line, swap, hswap] of YB) {
+        // v0.11.131 (XB2, FY): a flight row compares her with the cat at Foundation (who flies too: realm 1), as she always flies
+        const [cat, tiger, human] = ['cat', 'tiger', 'human'].map((form) => { const g = FM(65000 + n++, form, flags); if (fly && form === 'cat') { g.yuki.realm = 1; g.james.realm = 1; } goTo(g, SCENES, id); return sceneView(g, SCENES).text; });
         assert(tiger.includes(line) && !cat.includes(line) && !human.includes(line), `YB1 (LL): ${id} ${JSON.stringify(flags)}: the great root-kin's line, hers alone`);
-        assert((swap ? tiger.replace(swap[0], swap[1]) : tiger).replace(line, '') === cat && human === cat, `YB1 (LL): ${id} ${JSON.stringify(flags)}: the cat's and the human's texts unchanged`);
+        assert((swap ? tiger.replace(swap[0], swap[1]) : tiger).replace(line, '') === cat && (hswap ? human.replace(hswap[0], hswap[1]) : human) === cat, `YB1 (LL): ${id} ${JSON.stringify(flags)}: the cat's and the human's texts unchanged`);
     }
     {   // v0.11.130 (owner pick RB2; Fable's review of YB1): WC two wolves, RL out before the shelf, NK no foe's body part, CL no count
         // and no "his disciples" with Gao broken or turned or the militia, BR the camp's blanket
@@ -1280,7 +1282,14 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         assert(/with the blanket in her mouth/.test(tiger('night_fled', {})) && !/bedroll/.test(tiger('night_fled', {})), 'RB2 (BR): the blanket');
     }
     {   // the sweep: no lose / flee / fail scene leaves the great root-kin out (gao_dead is a win; bluff_fail names her by the bond)
-        const LOSE = Object.keys(SCENES).filter((k) => /(_lost|_fled|_fail|_taken)$/.test(k));
+        // v0.11.131 (owner picks XB2, FQ1; SW): also every choice's fail target and the _forced / _caught / _wake lead-ins; not the
+        // fail targets that are no fight (NOT_FIGHT), nor U4: reached only by failing a crossing that is flown from Foundation, so
+        // never as the great root-kin (checked: every way in is a flown check, and nothing leads there otherwise)
+        const NOT_FIGHT = ['scan_bad', 'stream', 'ya_found'], U4 = ['roots_caught', 'rt_ambush_forced', 'rt_ford_wake', 'rt_serpent_forced'];
+        const ways = (id) => Object.values(SCENES).flatMap((s) => (Array.isArray(s.choices) ? s.choices : []).filter((c) => c.fail === id || c.to === id));
+        for (const id of U4) assert(ways(id).length > 0 && ways(id).every((c) => c.fail === id && c.to !== id && c.check && c.fly), `XB2 (FQ1): ${id} is reached only by failing a flown crossing`);
+        const FAILS = Object.values(SCENES).flatMap((s) => (Array.isArray(s.choices) ? s.choices : []).map((c) => c.fail)).filter((f) => typeof f === 'string');
+        const LOSE = [...new Set([...Object.keys(SCENES).filter((k) => /(_lost|_fled|_fail|_taken|_forced|_caught|_wake)$/.test(k)), ...FAILS])].filter((k) => SCENES[k] && !NOT_FIGHT.includes(k) && !U4.includes(k));
         const miss = [];
         for (const id of LOSE) for (const flags of [{}, { ya_party: false }]) { const g = FM(65500 + n++, 'tiger', flags); goTo(g, SCENES, id); if (!/\bYuki\b|\bcat\b|says the bond/.test(sceneView(g, SCENES).text)) miss.push(`${id}${flags.ya_party === false ? ' (no Ya)' : ''}`); }
         assert(LOSE.length >= 36 && !miss.length, `YB1 (LL): every lose / flee / fail scene places the great root-kin (${LOSE.length} scenes; missing: ${miss.join(', ') || 'none'})`);
@@ -1298,6 +1307,54 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         const same = want.filter((re) => re.source === want[i].source).length;
         assert(want[i].test(t) && want.filter((re) => re.test(t)).length === same, `YB1: ${id} as ${form} (${t.slice(0, 70)}…)`);
     });
+    {   // v0.11.131 (owner picks XB2, FQ1; Fable's MAINs): FL the great root-kin in the eight fight lead-ins she can reach (the cat's
+        // and the human's texts unchanged); HP Lu Han answers the hairpin, not a bluff; FY James's fall, the mire and the serpent by flight
+        const view = (id, form, flags = {}, realm) => { const g = FM(67000 + n++, form, flags); if (realm !== undefined) { g.yuki.realm = realm; g.james.realm = realm; } goTo(g, SCENES, id); return sceneView(g, SCENES).text; };
+        const FL = [
+            ['arson_start', {}, " Behind you the loft boards creak as four hundred pounds of cat gets up. *He's only counted one of us,* says the bond."],
+            ['fo_wolf_forced', {}, ' Yuki did not stop for a headband. She is sitting in the middle of the lane, washing one paw, and the wolves have slowed. They have not stopped.'],
+            ['ring_forced', {}, " Yuki has the gallery behind you, all of it, wall to wall. *I can't turn round in here,* says the bond. *So we are going forward.*"],
+            ['night_attack_forced', {}, ' Yuki, who was never going to run, gets up. *Good,* says the bond. *I outweigh them. All of them, together.*'],
+            ['night_lizard_forced', {}, ' Yuki, who has crossed the whole rise without bending a grass stem, turns her head and looks at you. *Four hundred pounds,* says the bond. *Not a sound. Remarkable what one can do.*'],
+            ['ya_forced', {}, ' Then the whole village looks at Yuki. Yuki looks at the fence. This is, evidently, between people.'],
+            ['rt_brawl_start', {}, ' Yuki looks at the wine-shop bench, and at the cousins sitting on it. She can wait. They are about to get up.'],
+            ['guardian_half', {}, ' So is Yuki, ears forward, quite still. She heard that song in the same grove you did.'],
+            ['guardian_half', { ya_party: false }, ' So is Yuki, ears forward, quite still. She heard that song in the same grove you did.'],
+        ];
+        for (const [id, flags, line] of FL) {
+            const [cat, tiger, human] = ['cat', 'tiger', 'human'].map((form) => view(id, form, flags));
+            assert(tiger.includes(line) && tiger.replace(line, '') === cat && human === cat, `XB2 (FL): ${id} ${JSON.stringify(flags)}: her line, hers alone`);
+        }
+        assert(/step through it/.test(view('night_attack_forced', 'tiger')), 'XB2 (FL): night_attack_forced keeps Incremental Mode\'s hedge');
+        // HP: each offer marks itself when it fails; both fail to bluff_fail
+        const tc = SCENES.tribute.choices;
+        assert(tc[1].fail === 'bluff_fail' && tc[2].fail === 'bluff_fail' && /^Bluff/.test(tc[1].text) && /hairpin/.test(tc[2].text), 'XB2 (HP): the bluff and the hairpin fail to bluff_fail');
+        for (const [i, want] of [[1, 'bluff'], [2, 'hairpin']]) { const g = FM(67500 + n++, 'cat'); tc[i].failDo(g); assert(g.flags.tribute_fail === want, `XB2 (HP): a failed ${want} sets tribute_fail`); }
+        const T1 = ' Nor does a mortal bargain with a trinket while the true treasure stands at his heel. That one would have paid for thirty years.';
+        const T2 = "\n\n*Thirty years,* says the bond, as four hundred pounds of the true treasure gets to its feet beside you. *I'd have said forty. He's rounding down.*"; // RC2 (M2): his own words
+        const [hc, ht, hh] = ['cat', 'tiger', 'human'].map((form) => view('bluff_fail', form, { tribute_fail: 'hairpin' }));
+        assert(/^The song goes wrong in the first bar\./.test(hc) && /"The second is the one that matters\."$/.test(hc) && !/performance|announce himself|nearly|crack|Servant/.test(hc + ht + hh), 'XB2 (HP); RC2 (L1, M2): the hairpin\'s own text, a clear failure, no bluff and no "Servant" in it');
+        assert(ht.includes(T1) && ht.includes(T2) && ht.replace(T1, '').replace(T2, '') === hc && hh === hc, 'XB2 (HP): the great root-kin\'s two lines, hers alone');
+        for (const f of [{}, { tribute_fail: 'bluff' }]) assert(/^Lu Han watches your performance/.test(view('bluff_fail', 'cat', f)), `XB2 (HP): the bluff's text ${JSON.stringify(f)}`);
+        // RC2 (TG): through the real picks (a failed bluff, a failed hairpin), then a rewind clears the flag; M1: never folded
+        for (const [i, want] of [[1, 'bluff'], [2, 'hairpin']]) {
+            const g = ensureBars(fresh(67600 + n++)); g.minutes = 2 * 1440 + 480; goTo(g, SCENES, 'tribute'); g.james.qi = 99;
+            choose(g, SCENES, i);
+            const t = sceneView(g, SCENES).text;
+            assert(g.scene === 'bluff_fail' && g.flags.tribute_fail === want && t === (want === 'hairpin' ? hc : view('bluff_fail', 'cat')), `RC2 (TG): a failed ${want} reads its own bluff_fail`);
+            g.seen.bluff_fail = 0; g.coil.n = 2; // read in an earlier Coil, maybe by the other offer
+            assert(!againView(g, sceneView(g, SCENES)).fold, `RC2 (M1): bluff_fail is never folded (${want})`);
+            rewind(g);
+            assert(!g.flags.tribute_fail && !KEEP_FLAGS.includes('tribute_fail'), `RC2 (TG): a rewind clears tribute_fail (${want})`);
+        }
+        // FY: by flight (any form from Foundation; the cat below it keeps the old text)
+        for (const [id, walk, fly] of [['wyrm_lost', /takes you off the root and you fall[\s\S]*Wyrms, it turns out, don't swim\./, /takes you out of the air like a shuttlecock[\s\S]*Wyrms, it turns out, neither swim nor fly\./], ['mire_lost', /^You retreat with a bitten calf/, /^You leave straight up, with a bitten calf[\s\S]*As replies go, it isn't one\./], ['dw_serpent_lost', /^The serpent drags you under\. For a long/, /^The serpent takes you out of the air by one ankle[\s\S]*drags you under\. For a long/]]) {
+            const t0 = view(id, 'cat', {}, 0), t1 = view(id, 'cat', {}, 1);
+            assert(walk.test(t0) && !fly.test(t0) && fly.test(t1) && !walk.test(t1) && fly.test(view(id, 'tiger')) && fly.test(view(id, 'human')), `XB2 (FY): ${id} by flight`);
+        }
+        // RH: the human's own clause in roots_lost with no Ya; the cat's joke stays the cat's
+        assert(/Mei Lin and Yuki between them, Yuki in a black dress that has not picked up so much as one husk, which should not be physically possible\./.test(view('roots_lost', 'human', { ya_party: false })) && !/black dress/.test(view('roots_lost', 'cat', { ya_party: false })), 'XB2 (RH): the human\'s clause');
+    }
     {   // SR: the sister's beat by form; the lover's unchanged
         const ROOF = 'Through the bond, from somewhere very far away and getting farther: *I am moving to the roof. I am living on the roof now. Do not look for me.*';
         const SHED = 'Through the bond, from somewhere very far away and getting farther: *I am moving to the roof.* A long creak of thatch. A pause for thought. *I am moving to the goat shed. I live in the goat shed now. Do not look for me.*';

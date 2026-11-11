@@ -405,7 +405,7 @@ There's no palisade. There's a chalk line and a lot of good intentions.`,
     },
     fo_wolf_forced: {
         id: 'fo_wolf_forced', title: 'In the Barley', art: 'wolves', place: `${P} — the barley line`,
-        text: `The hunters come, but slowly — they stop to put on their headbands, properly, because a man does not go to his death untidy — and the wolves are already in the lane.`,
+        text: (g) => `The hunters come, but slowly — they stop to put on their headbands, properly, because a man does not go to his death untidy — and the wolves are already in the lane.${byForm(g, '', " Yuki did not stop for a headband. She is sitting in the middle of the lane, washing one paw, and the wolves have slowed. They have not stopped.", '')}`, /* v0.11.131 (XB2, FL; Fable's MAIN): the great root-kin */
         choices: [{ text: 'Then it\'s you.', combat: wolfFight, to: 'fo_wolf_won' }],
     },
     fo_wolf_won: {
@@ -500,7 +500,7 @@ Old Hu looks at you with something like hope. If you take the fight, his face is
     },
     ya_forced: {
         id: 'ya_forced', title: 'She Hits You Anyway', art: 'ya_fight', place: `${P} — the lane`,
-        text: `It's an open-handed slap that nearly takes your head off. The whole village inhales at once.`,
+        text: (g) => `It's an open-handed slap that nearly takes your head off. The whole village inhales at once.${byForm(g, '', " Then the whole village looks at Yuki. Yuki looks at the fence. This is, evidently, between people.", '')}`, /* v0.11.131 (XB2, FL; Fable's MAIN): the great root-kin */
         choices: [{ text: 'Fine. "Your spear against my blade. No armour. Nobody dies."', combat: yaBrawl, to: 'ya_won' }], // v0.11.89 (owner pick T3): the terms said on this path too, the other path's words (Fable's)
     },
     ya_won: {

@@ -450,7 +450,7 @@ As far as you can reconstruct it: Bao told her to cover her arms in front of dec
     },
     rt_brawl_start: {
         id: 'rt_brawl_start', title: 'Honour', art: 'ya_fight', place: `${P} — outside the wine shop`,
-        text: `Bao takes off his jacket and folds it, neatly, and hands it to his cousin. In Ashfall, apparently, even a brawl has a ritual. Ya does not take anything off. Ya has already hit him.`,
+        text: (g) => `Bao takes off his jacket and folds it, neatly, and hands it to his cousin. In Ashfall, apparently, even a brawl has a ritual. Ya does not take anything off. Ya has already hit him.${byForm(g, '', " Yuki looks at the wine-shop bench, and at the cousins sitting on it. She can wait. They are about to get up.", '')}`, /* v0.11.131 (XB2, FL; Fable's MAIN): the great root-kin */
         choices: [{ text: 'Fists only. Nobody dies the day before the Elder.', combat: brawl, to: 'rt_brawl_won' }],
     },
     rt_brawl_won: {

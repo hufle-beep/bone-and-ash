@@ -5,7 +5,7 @@
  * shared camp / fireside / night scenes, a seeded night event, and the Mei Lin – Ya – James romance arc.
  * Entry 'bl_start' (Day 11). Exit 'ht_start' (Day 16, 06:00). Region in g.flags.bl_region, expedition day in g.flags.bl_day (1–5).
  */
-import { addItem, hasItem, eat, advance, clockParts, d6, awardYukiFightXp, jamesHpMax, condense, dayHour, nightTo, nightRest } from '../core/game.js';
+import { addItem, hasItem, eat, advance, clockParts, d6, awardYukiFightXp, jamesHpMax, condense, dayHour, nightTo, nightRest, canFly } from '../core/game.js';
 import { hasForm } from '../core/forms.js';
 import { daily, markDaily, eatBest, pantry, foodCount, hour, byForm } from './common.js';
 import { encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil } from './act1_common.js';
@@ -343,12 +343,10 @@ Ya is grinning through a mask of sap. Mei Lin has a cut along her cheekbone that
 Mei Lin watches her go. Something in her face softens, and then she notices it softening and stops it.`,
         choices: [{ text: 'Climb down into the Drowned Wood.', time: 90, to: 'dw_enter' }],
     },
-    wyrm_lost: {
+    wyrm_lost: { // v0.11.131 (XB2, FY; Fable's MAINs): James's fall by flight; the great root-kin comes down the air
         id: 'wyrm_lost', title: 'Over the Edge', art: 'root_wyrm', place: `${P} — the split`,
         enter: (g) => patchUp(g),
-        text: (g) => `You lose the fight and win the crossing, which is the worst kind of win: the wyrm's tail takes you off the root and you fall, and Ya jumps after you, and Mei Lin — swearing a blue streak you will remember for the rest of your life — jumps after *her*.
-
-You all hit the water forty metres down in the Drowned Wood. The wyrm doesn't follow. Wyrms, it turns out, don't swim.${byForm(g, '', " Yuki follows a moment later, shaken off the wyrm's neck like a burr, and lands like a dropped piano. Cats, it turns out, do swim. They hold it against you.", '')}
+        text: (g) => `${canFly(g) ? "You lose the fight and win the crossing, which is the worst kind of win: the wyrm's tail takes you out of the air like a shuttlecock, and flying turns out to need the breath it has just knocked out of you. You fall. Ya jumps after you, and Mei Lin — swearing a blue streak you will remember for the rest of your life — jumps after *her*.\n\nYou all hit the water forty metres down in the Drowned Wood. The wyrm doesn't follow. Wyrms, it turns out, neither swim nor fly." : "You lose the fight and win the crossing, which is the worst kind of win: the wyrm's tail takes you off the root and you fall, and Ya jumps after you, and Mei Lin — swearing a blue streak you will remember for the rest of your life — jumps after *her*.\n\nYou all hit the water forty metres down in the Drowned Wood. The wyrm doesn't follow. Wyrms, it turns out, don't swim."}${byForm(g, '', " Yuki lets go of the wyrm's neck when she is ready and comes down the forty metres at a walk, on nothing. She stops a hand's width above the water. Cats, it turns out, don't have to swim. This one looks at the three of you who did.", '')}
 
 "*Never*," Mei Lin says, crawling out onto a drowned trunk, "do that again."
 
@@ -435,10 +433,10 @@ Mei Lin, dripping, says, "You're insane," and then, quieter, so that only you he
 You decide you didn't hear it. She decides you didn't either.`,
         choices: [{ text: 'Back to the trunks.', time: 30, to: 'dw_hub' }],
     },
-    dw_serpent_lost: {
+    dw_serpent_lost: { // v0.11.131 (XB2, FY; Fable's MAIN): taken out of the air when he flies
         id: 'dw_serpent_lost', title: 'The Water Wins', art: 'mire_serpent', place: PLACE.dw,
         enter: (g) => patchUp(g),
-        text: (g) => `The serpent drags you under. For a long, cold, silent moment the Drowned Wood shows you exactly why the people down here never left.
+        text: (g) => `${canFly(g) ? 'The serpent takes you out of the air by one ankle, at a height you would have said was out of its reach, and drags you under.' : 'The serpent drags you under.'} For a long, cold, silent moment the Drowned Wood shows you exactly why the people down here never left.
 
 Then four hands haul you out by the coat — one pair rough and fast, one pair careful — and you're coughing black water onto a trunk while two women shout at you in stereo.${byForm(g, '', "\n\nYuki surfaces a moment later with a length of serpent in her mouth that is no longer attached to anything, climbs out, and shakes four hundred pounds of swamp over all three of you. *It let go,* says the bond. *Eventually. You're welcome.*", '')}`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line
         choices: [{ text: 'Breathe. Then go back.', time: 30, to: 'dw_hub' }],

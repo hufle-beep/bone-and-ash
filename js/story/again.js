@@ -12,7 +12,7 @@ import { sceneView, choose, seenBefore, isMenuScene, isTimeless } from '../core/
 import { TASK_HUBS } from './task_hubs.js';
 
 /** Scenes whose text follows an outcome or a level that may differ from the read before (Fable review): never folded. */
-export const OUTCOME_SCENES = new Set(['epilogue', 'fo_start', 'breakthrough', 'a1_again', 'a1_end', 'elder']);
+export const OUTCOME_SCENES = new Set(['epilogue', 'fo_start', 'breakthrough', 'a1_again', 'a1_end', 'elder', 'bluff_fail']); // v0.11.131 (RC2, M1): bluff_fail reads the bluff's or the hairpin's text
 /** The fold leaves these alone: the task screens and their menus (day-to-day state), the Coil's and the meta screens, the outcome scenes. */
 export const noFold = (id) => !!TASK_HUBS[id] || isMenuScene(id) || isTimeless(id) || OUTCOME_SCENES.has(id);
 

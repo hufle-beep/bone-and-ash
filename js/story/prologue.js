@@ -27,6 +27,8 @@ import { installYukiPath } from './yuki_path.js';
 import { installCoil } from './coil_scenes.js';
 import { installOnce } from './oneoff.js';
 import { markWalks } from './walks.js'; // v0.11.109 (owner pick MW1)
+/** v0.11.131 (XB2, FL; RC2, L5): the great root-kin's line in night_attack_forced, both texts (Fable's MAIN). */
+const NA_TIGER = " Yuki, who was never going to run, gets up. *Good,* says the bond. *I outweigh them. All of them, together.*";
 
 const once = (flag) => (g) => !g.flags[flag];
 const set = (...flags) => (g) => { for (const f of flags) g.flags[f] = true; return []; };
@@ -320,7 +322,7 @@ Ashfang jackals. You've never seen one before and you'd recognise them anywhere:
     },
     night_attack_forced: {
         id: 'night_attack_forced', title: 'Ashfangs', art: 'jackals', place: 'Blackroot Wilds — the dry rise',
-        text: `The wall comes out knee-high and full of holes. The jackals step over it with an air of professional courtesy. Running is off the table.`,
+        text: (g) => `The wall comes out knee-high and full of holes. The jackals step over it with an air of professional courtesy. Running is off the table.${byForm(g, '', NA_TIGER, '')}`, /* v0.11.131 (XB2, FL; Fable's MAIN): the great root-kin */
         choices: [{ text: 'Fine. Fight.', combat: jackals, to: 'jackals_won' }],
     },
     jackals_won: {
@@ -701,15 +703,19 @@ Lu Han's gaze passes over the baskets, over the people, and stops on you. On Yuk
 "I've been offered worse," you say. "Not recently."`,
         choices: [
             { text: 'Step forward. "I\'m not kneeling, and nobody\'s paying you today."', combat: collectorsFight, to: 'collectors_won' },
-            { text: 'Bluff: a wandering senior of a hidden sect, testing the Crimson Lotus\'s manners. Let a little bone show.', qi: 4, check: { skill: 'GU', dc: 7, bonus: (g) => (g.flags.healed === true ? 1 : 0) + (g.flags.boar ? 1 : 0) + (g.flags.gao_beaten ? 1 : 0) + (g.flags.scouted ? 1 : 0) + (g.flags.gao_turned || g.flags.gao_warned ? 1 : 0) + (g.flags.token_silenced ? 1 : 0) + ((g.rel.Village?.f || 0) >= 40 ? 1 : 0) - Math.floor((forestScale(g) + villageScale(g)) / 2) }, to: 'bluff_win', fail: 'bluff_fail' },
-            { text: 'Offer tribute they\'ve never seen: sing a wraithbone hairpin, flawless, and pay the village\'s due with it.', qi: 8, check: { skill: 'Convergence Use', dc: 5, bonus: (g) => -Math.floor((forestScale(g) + villageScale(g)) / 2) }, do: (g) => { addItem(g, 'hairpin', 1); return []; }, to: 'tribute_paid', fail: 'bluff_fail' },
+            { text: 'Bluff: a wandering senior of a hidden sect, testing the Crimson Lotus\'s manners. Let a little bone show.', qi: 4, check: { skill: 'GU', dc: 7, bonus: (g) => (g.flags.healed === true ? 1 : 0) + (g.flags.boar ? 1 : 0) + (g.flags.gao_beaten ? 1 : 0) + (g.flags.scouted ? 1 : 0) + (g.flags.gao_turned || g.flags.gao_warned ? 1 : 0) + (g.flags.token_silenced ? 1 : 0) + ((g.rel.Village?.f || 0) >= 40 ? 1 : 0) - Math.floor((forestScale(g) + villageScale(g)) / 2) }, failDo: (g) => { g.flags.tribute_fail = 'bluff'; return []; } /* v0.11.131 (XB2, HP): which offer Lu Han called */, to: 'bluff_win', fail: 'bluff_fail' },
+            { text: 'Offer tribute they\'ve never seen: sing a wraithbone hairpin, flawless, and pay the village\'s due with it.', qi: 8, check: { skill: 'Convergence Use', dc: 5, bonus: (g) => -Math.floor((forestScale(g) + villageScale(g)) / 2) }, do: (g) => { addItem(g, 'hairpin', 1); return []; }, failDo: (g) => { g.flags.tribute_fail = 'hairpin'; return []; } /* v0.11.131 (XB2, HP) */, to: 'tribute_paid', fail: 'bluff_fail' },
         ],
     },
     bluff_fail: {
         id: 'bluff_fail', title: 'Called', art: 'collectors', place: 'Ashfall Hamlet — the tribute post',
-        text: (g) => `Lu Han watches your performance in silence, the way a judge watches a defendant perjure himself. Then he shakes his head, once, with something close to regret.
+        text: (g) => (g.flags.tribute_fail === 'hairpin' ? `The song goes wrong in the first bar. What comes up out of your palm is white, and that is the last thing it has in common with a hairpin: it droops, it has a lump where the leaves should begin, and one end of it is already coming off as powder. You hold it out anyway.
 
-"No," he says. "A true senior does not need to announce himself.${byForm(g, '', " Nor is a great beast at a man's heel a senior's Qi. It is a treasure, and treasures are carried by servants.", '')} You have dishonoured yourself, and mocked the Sect." He draws his sword. "The second is the one that matters."${byForm(g, '', "\n\n*Servant,* says the bond, as four hundred pounds of treasure gets to its feet beside you. *He's half right. You do carry things.*", '')}`, // v0.11.130 (YB1, BL; Fable's MAIN): the great root-kin at his heel
+Lu Han does not take it. He looks at it for as long as courtesy requires, the way a magistrate looks at a petition written in the wrong hand, with something close to regret.
+
+"No," he says. "The Sect's due is weighed, and it is whole.${byForm(g, '', " Nor does a mortal bargain with a trinket while the true treasure stands at his heel. That one would have paid for thirty years.", '')} You have failed your village in front of its own elders, and offered the Crimson Lotus sweepings." What is left of it falls out of your fingers without being asked. He draws his sword. "The second is the one that matters."${byForm(g, '', "\n\n*Thirty years,* says the bond, as four hundred pounds of the true treasure gets to its feet beside you. *I'd have said forty. He's rounding down.*", '')}` : `Lu Han watches your performance in silence, the way a judge watches a defendant perjure himself. Then he shakes his head, once, with something close to regret.
+
+"No," he says. "A true senior does not need to announce himself.${byForm(g, '', " Nor is a great beast at a man's heel a senior's Qi. It is a treasure, and treasures are carried by servants.", '')} You have dishonoured yourself, and mocked the Sect." He draws his sword. "The second is the one that matters."${byForm(g, '', "\n\n*Servant,* says the bond, as four hundred pounds of treasure gets to its feet beside you. *He's half right. You do carry things.*", '')}`), // v0.11.130 (YB1, BL; Fable's MAIN): the great root-kin at his heel; v0.11.131 (XB2, HP; RC2, L1 + M2; Fable's MAINs): the hairpin's own, a clear failure
         choices: [{ text: 'Fight.', combat: collectorsFight, to: 'collectors_won' }],
     },
     bluff_win: {
@@ -982,7 +988,7 @@ SCENES.lf_hub.choices.push({
         if (out) { const d = c.do; c.do = (g, r) => (d(g, r) || []).map((l) => (l === out[0] ? out[1] : l)); }
     };
     reword('night_attack', /^Bone wall between you/, 'A hedge of bone spikes between you and them, then run for the water.');
-    SCENES.night_attack_forced.text = 'The hedge comes out knee-high and full of gaps. The jackals step through it with an air of professional courtesy. Running is off the table.';
+    SCENES.night_attack_forced.text = (g) => `The hedge comes out knee-high and full of gaps. The jackals step through it with an air of professional courtesy. Running is off the table.${byForm(g, '', NA_TIGER, '')}`; /* v0.11.131 (XB2, FL; Fable's MAIN): the great root-kin */
     reword('rt_ford', /bridge of bone/, 'Sing stepping-stones of bone from stone to stone.', ['A white bridge, ribbed like a spine. Mei Lin crosses it like a woman walking into a temple.', 'White stepping-stones, ribbed like vertebrae, rise between the black ones. Mei Lin crosses them like a woman walking into a temple.']);
     reword('rt_ambush', /wall of bone/, 'A slab of bone between you and them, then down to the river.');
     reword('ring_chambers', /wall of bone/, 'Seal the fourth ring\'s doorway with a slab of bone and leave them to it.', ['A white wall, floor to ceiling. The chewing goes on behind it, disappointed.', 'A white slab, man-high, jammed into the doorway. The chewing goes on behind it, disappointed.']);

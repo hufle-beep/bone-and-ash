@@ -121,7 +121,7 @@ Gao Feng's lackey has come to settle Gao Feng's grudge. With a torch. At night. 
     },
     arson_start: {
         id: 'arson_start', title: 'Torches', art: 'arson', place: `${P} — the lane`,
-        text: `The street doesn't wake fast enough. Pock-Face sees you at the window and laughs.`,
+        text: (g) => `The street doesn't wake fast enough. Pock-Face sees you at the window and laughs.${byForm(g, '', " Behind you the loft boards creak as four hundred pounds of cat gets up. *He's only counted one of us,* says the bond.", '')}`, /* v0.11.131 (XB2, FL; Fable's MAIN): the great root-kin */
         choices: [{ text: 'Then it\'s just you.', combat: arson, to: 'arson_won' }],
     },
     arson_won: {
@@ -137,9 +137,9 @@ That's the moment Ashfall decides you're theirs.`,
     arson_lost: {
         id: 'arson_lost', title: 'Smoke', art: 'arson', place: `${P} — the lane`,
         enter: (g) => { g.flags.night5_done = true; g.flags.loft_burned = true; return []; },
-        text: (g) => `They get past you.${byForm(g, '', " Yuki has one of them flat in the lane under both forepaws, and it is the wrong one: the torch was in the other man's hand.", '')} The loft goes up like paper — a year of Mei Lin's herbs, dried and bundled, gone in a roar of sweet smoke. The street puts it out before it takes the house. Barely.
+        text: (g) => `They get past you.${byForm(g, '', " Yuki has one of them flat in the lane under both forepaws, and it is the wrong one: the torch was in the other man's hand. She keeps him all the same, and when the street has finished with the fire it finds it still has somebody to be grave at.", '')} The loft goes up like paper — a year of Mei Lin's herbs, dried and bundled, gone in a roar of sweet smoke. The street puts it out before it takes the house. Barely.
 
-Mei Lin stands in the lane with soot on her face, looking at the wreck, and says nothing at all. That's worse than anything she could say.`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line
+Mei Lin stands in the lane with soot on her face, looking at the wreck, and says nothing at all. That's worse than anything she could say.`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line; v0.11.131 (XB2, AP): she keeps him
         choices: [{ text: 'Sleep in the kitchen. If you can.', do: (g) => { bumpRel(g, 'Mei Lin', 0, -3); return []; }, to: 'village_morning' }],
     },
 

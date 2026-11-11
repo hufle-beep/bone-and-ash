@@ -4,7 +4,7 @@
  */
 import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, clockParts, d6, awardYukiFightXp, awardXp, jamesHpMax, jamesQiMax, nightTo, nightRest } from '../core/game.js';
 import { condensationSatGain } from '../core/formulas.js';
-import { sitGain, yukiFightSkill } from '../core/game.js'; // v0.11.118 (YK1 review, SB)
+import { sitGain, yukiFightSkill, canFly } from '../core/game.js'; // v0.11.118 (YK1 review, SB); v0.11.131 (XB2, FY): canFly
 import { set, day, hour, daily, markDaily, forestScale, grow, eatBest, pantry, foodCount, byForm } from './common.js';
 
 const P = 'Blackroot Wilds';
@@ -83,7 +83,7 @@ ${byForm(g, "Yuki is sitting on you, very upright, very pleased. On your sternum
     },
     night_lizard_forced: {
         id: 'night_lizard_forced', title: 'Thornback', art: 'lizard', place: `${P} — the dry rise`,
-        text: `You step on a dry branch. The lizard takes this personally.`,
+        text: (g) => `You step on a dry branch. The lizard takes this personally.${byForm(g, '', " Yuki, who has crossed the whole rise without bending a grass stem, turns her head and looks at you. *Four hundred pounds,* says the bond. *Not a sound. Remarkable what one can do.*", '')}`, /* v0.11.131 (XB2, FL; Fable's MAIN): the great root-kin */
         choices: [{ text: 'Fine. Fight.', combat: nightFight('lizard'), to: 'night_won' }],
     },
     night_won: {
@@ -258,7 +258,7 @@ Something moves under the water. Several somethings.`,
     mire_lost: {
         id: 'mire_lost', title: 'The Mire', art: 'mire', place: `${P} — the Mire`,
         enter: (g) => { g.flags.mire_fight = true; return []; },
-        text: (g) => `You retreat with a bitten calf, a boot full of black water and the strong impression that the mire won that round on points.${byForm(g, '', " Yuki retreats beside you, black to the shoulder, having learnt that the mire holds four hundred pounds a great deal better than it holds eleven. *We do not speak of this,* says the bond.", '')}`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line
+        text: (g) => `${canFly(g) ? "You leave straight up, with a bitten calf, a boot full of black water and the strong impression that the mire won that round on points. The boot drips on it from ten metres. As replies go, it isn't one." : "You retreat with a bitten calf, a boot full of black water and the strong impression that the mire won that round on points."}${byForm(g, '', " Yuki rises beside you, black to the shoulder, having learnt that the mire holds four hundred pounds a great deal better than it holds eleven, and lets go of them a great deal more slowly. *We do not speak of this,* says the bond.", '')}`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line; v0.11.131 (XB2, FY; Fable's MAINs): by flight
         choices: [{ text: 'Limp back to the stream.', time: 60, to: 'wilds' }],
     },
     hollow: {
