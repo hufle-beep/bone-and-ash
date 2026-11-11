@@ -10,6 +10,7 @@ import { likesMei, likesYa } from '../js/story/act1_common.js'; // v0.11.123 (EQ
 import { KEEP_FLAGS, rewind } from '../js/core/coil.js'; // v0.11.123 (ER1, T3)
 import { againView, noteRead } from '../js/story/again.js'; // v0.11.125 (RW1, T); v0.11.133 (FP2): noteRead
 import { STOMP } from '../js/story/power.js'; // v0.11.126 (NQ1)
+import { coilStamp, dayIndex, textDay } from '../js/core/lines.js'; // v0.11.135 (NT1, EV1)
 import { writeFileSync } from 'node:fs';
 import { smartAction } from './lib/smartfight.mjs'; // v0.11.96 (BT1)
 import { GAMES, FULL, SHARD, WORKERS, STATS_OUT, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
@@ -196,6 +197,60 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     choose(g, SCENES, ans.index);
     assert(g.scene === to && g.flags.yk_path === (to === 'yk_lover' ? 'lover' : 'sister'), `v0.11.91 (Y1): the answer leads to ${to} (${g.scene}, ${g.flags.yk_path})`);
     assert(walkFrom(g, g.scene, new Set(['bl_camp']), 50, true) === true, `v0.11.91 (Y1): from ${to} on to the Blackroot camp (run ${run}, at ${g.scene})`);
+}
+// v0.11.135 (owner picks NT1, EV1): the 27 scenes that repeated across days in a Coil: on each later day a new text (Fable's),
+// every form, the original first; the event scenes per event; the talks' beats follow the day too.
+{
+    const onDay = (g, k) => { const today = textDay(g); const days = [...Array(k).keys()].map((i) => -1 - i).concat([today]); g.lines = { c: coilStamp(g), p: {}, last: {}, cur: {}, at: null, said: [], d: new Proxy({}, { get: (_, key) => (typeof key === 'string' ? days : undefined) }) }; return g; };
+    // [scene, texts that must differ day by day, flags]
+    const NT = [
+        ['bl_night_won', 4, { bl_ev: 'drowned' }], ['bl_night_won', 4, { bl_ev: 'wolves' }], ['guardian_approach', 3, {}], ['heart_spring', 3, {}],
+        ['talk_mei', 5, {}], ['talk_ya', 5, {}], ['heart_morning', 3, {}], ['rr_elk_won', 2, {}], ['bl_fireside', 2, { bl_region: 'dw' }],
+        ['rr_hunt', 2, {}], ['ah_hunt', 2, {}], ['night', 2, { fire: true }], ['wen_lesson', 2, { lore_realms: true }], ['ah_hawks_won', 2, {}],
+        ['bl_night', 2, { bl_region: 'dw' }], ['far_won', 2, {}],
+        ...['lights'].map((e) => ['bl_night_event', 3, { bl_ev: e }]), ...['drowned', 'serpent', 'mei', 'warm', 'rain'].map((e) => ['bl_night_event', 2, { bl_ev: e }]),
+        ...['rats', 'rain', 'gift', 'crows', 'lights'].map((e) => ['night_event', 2, { night_ev: e }]),
+        ['heart_night', 3, { heart_night_roll: 1 }], ['heart_night', 3, { heart_night_roll: 5 }],
+        ...['wolves', 'bull', 'deer'].map((e) => ['far_hunt', 2, { far_kind: e }]),
+        ['fo_ashfall', 2, {}], ['camp', 2, {}], ['ashfall', 2, {}], ['wilds', 2, {}],
+    ];
+    let n = 0;
+    for (const [id, want, flags] of NT) for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) {
+        const texts = [];
+        for (let k = 0; k < want; k++) {
+            const g = ensureBars(fresh(5100)); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; Object.assign(g.flags, flags);
+            g.scene = id; onDay(g, k); texts.push(sceneView(g, SCENES).text);
+        }
+        const g0 = ensureBars(fresh(5100)); g0.yuki.realm = realm; g0.james.realm = realm; g0.yuki.form = form; Object.assign(g0.flags, flags); g0.scene = id;
+        assert(texts[0] === sceneView(g0, SCENES).text, `NT1: ${id} ${JSON.stringify(flags)} (${form}): the first day's text is the original`);
+        assert(new Set(texts).size === want && texts.every((t) => t && !/undefined|\$\{|\bNaN\b/.test(t)), `NT1: ${id} ${JSON.stringify(flags)} (${form}): ${want} different texts on ${want} days (${new Set(texts).size})`);
+        n++;
+    }
+    // RN2 (M1; Fable's review): the screens that never show on a second day keep one text (their later texts were taken out)
+    for (const [id, flags] of [['rr_hub', { bl_day: 2 }], ['dw_hub', {}], ['rt_camp', {}], ['village', {}]]) {
+        const t = [0, 1, 2].map((k) => { const g = ensureBars(fresh(5101)); Object.assign(g.flags, flags); g.scene = id; onDay(g, k); return sceneView(g, SCENES).text; });
+        assert(t[0] === t[1] && t[1] === t[2], `RN2 (M1): ${id} has one text`);
+    }
+    // RN2 (M2): the talks' order: beats 0 and 1, the settled text at 2, the two new beats at 3 and 4, the settled text again from 5
+    for (const [id, settled] of [['talk_mei', /^You walk together a while without talking/], ['talk_ya', /^Ya is in a good mood/]]) {
+        const t = [0, 1, 2, 3, 4, 5].map((k) => { const g = ensureBars(fresh(5103)); g.scene = id; onDay(g, k); return sceneView(g, SCENES).text; });
+        assert(settled.test(t[2]) && settled.test(t[5]) && !settled.test(t[3]) && !settled.test(t[4]) && new Set(t.slice(0, 5)).size === 5, `RN2 (M2): ${id}: the settled text third, the new beats fourth and fifth`);
+    }
+    // RN2 (H1): a night scene entered before midnight and shown after it is still that night (the text day runs from 05:00)
+    for (const id of ['night', 'bl_night_event']) {
+        const g = ensureBars(fresh(5104)); g.flags.fire = true; g.flags.bl_region = 'dw';
+        g.minutes = Math.floor(g.minutes / 1440) * 1440 + 2 * 1440 + 23 * 60 + 50; goTo(g, SCENES, id);
+        const before = sceneView(g, SCENES).text; g.minutes += 25; const after = sceneView(g, SCENES).text;
+        assert(before === after && dayIndex(g, id) === 0, `RN2 (H1): ${id} entered at 23:50 shows the same, first, text at 00:15`);
+    }
+    // RN2 (L1): the whispering night has its own key
+    { const g = ensureBars(fresh(5105)); g.flags.ya_party = true; g.flags.trio = 2; g.flags.heart_night_roll = 5; assert(SCENES.heart_night.dayKey(g) === 'heart_night:whisper' && /whispering/.test(sceneView(Object.assign(g, { scene: 'heart_night' }), SCENES).text), 'RN2 (L1): the whispering night is keyed as whisper'); g.flags.trio = 0; assert(SCENES.heart_night.dayKey(g) === 'heart_night:quiet', 'RN2 (L1): the quiet night as quiet'); }
+    // the talks' beat follows the day even when a talk was left without a beat counted
+    const tm = ensureBars(fresh(5102)); tm.scene = 'talk_mei'; tm.flags.mei_talks = 0; onDay(tm, 2);
+    const tm2 = ensureBars(fresh(5102)); tm2.scene = 'talk_mei'; tm2.flags.mei_talks = 2;
+    assert(sceneView(tm, SCENES).text === sceneView(tm2, SCENES).text, 'NT1: talk_mei on its third day shows the third beat even if the counter stayed at 0');
+    assert(dayIndex(tm2, 'talk_mei') === 0, 'NT1: dayIndex reads 0 with no record');
+    assert(n === NT.length * 3, `NT1: ${n} scene × form checks`);
 }
 // v0.11.122 (owner pick LG1): Yuki's human scenes need her human form this Coil (YG), her bond lines below it (YV, Fable's
 // A1–A5), the first kisses at Mei Lin 30 / Ya 45 (K, S), and a choice of Ya or Mei Lin alone where both like him (BC, B0–B7).

@@ -7,6 +7,7 @@
 import { rollCheck, awardXp, spendQi, advance, ensureBars, actingCheck, actingName, instantWin, itemFull, takeCapNotes, itemNames, setLootMult, noDiceDc, checkText, addItem, canFly, flightMinutes, plainFight } from './game.js';
 import { STOMP, degreeForChoice } from '../story/power.js';
 import { keepReplies } from './replies.js'; // v0.11.69 (P1)
+import { noteDay } from './lines.js'; // v0.11.135 (NT1, EV1)
 
 const ONE_MOVE = 1000; // virtual choice index offset: "End it in one move."
 /** HP 0 outside a fight (v0.9.7): the Coil takes it (set by coil_scenes.js). Returns lines, or null when nothing happens. */
@@ -124,6 +125,8 @@ function go(g, scenes, to) {
     if (skip) g.coil.skipEnter = false;
     if (g.flags.med_back && g.flags.med_back === id) { skip = true; delete g.flags.med_back; } // back from the Meditate card (v0.9.5)
     const lines = s.enter && !skip ? (s.enter(g) || []) : [];
+    noteDay(g, id); // v0.11.135 (owner picks NT1, EV1): the days this Coil it shows (lines.js byDay)
+    if (s.dayKey) noteDay(g, s.dayKey(g)); // an event scene: the days this Coil each event showed
     ensureBars(g);
     return lines;
 }

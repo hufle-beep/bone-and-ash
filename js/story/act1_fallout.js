@@ -4,7 +4,7 @@
  * planned, and at dawn on Day 11 it leaves (→ 'bl_start').
  */
 import { addItem, eat, condense, advance, sleepUntil, jamesHpMax, hasItem, awardYukiFightXp, yukiForm, nightRest, nightTo } from '../core/game.js';
-import { daily, markDaily, hour, day, eatBest, pantry, foodCount, byForm } from './common.js';
+import { daily, markDaily, hour, day, eatBest, pantry, foodCount, byForm, byDay } from './common.js';
 import { encounter, rel, likesMei, likesYa, trioStep, bumpRel, KISS_YA } from './act1_common.js';
 
 const P = 'Ashfall Hamlet';
@@ -185,11 +185,14 @@ Thirteen days. You can spend them building walls. Or you can go and find out wha
         id: 'fo_ashfall', title: (g) => `Ashfall — Day ${dd(g)}`, art: 'village', place: P,
         text: (g) => {
             const h = hour(g);
-            const when = h < 11 ? 'Morning. Hammers, axes, the steady chant of people working because the alternative is thinking.' : h < 15 ? 'Midday. The palisade line is chalked out in white across the barley.' : h < 19 ? 'Late afternoon. Smoke from forty chimneys, and nobody laughing at the well.' : 'Dusk. Lamps behind every shutter.';
+            const d2 = byDay(g, [0, 1], 'fo_ashfall'); // NT1 (Fable's draft): a second set of the times of day and of Ya's lines
+            const when = d2
+                ? (h < 11 ? `Morning. The hammers started before the light did, and nobody has asked them to stop.` : h < 15 ? `Midday. The chalk line across the barley has been walked so often that it is a path.` : h < 19 ? `Late afternoon. The well is busy and silent, which in Ashfall is how you know people are frightened.` : `Dusk. Shutters closed, lamps lit, every door barred out of habit.`)
+                : (h < 11 ? 'Morning. Hammers, axes, the steady chant of people working because the alternative is thinking.' : h < 15 ? 'Midday. The palisade line is chalked out in white across the barley.' : h < 19 ? 'Late afternoon. Smoke from forty chimneys, and nobody laughing at the well.' : 'Dusk. Lamps behind every shutter.');
             const days = 21 - dd(g);
             return `${when} ${days} days until the Elder.
 
-${yaHere(g) ? (g.flags.ya_party ? 'Ya is asleep on the shrine roof with one leg dangling, apparently on purpose, to offend the god.' : 'Somewhere in the village, Ya is offending someone. You can tell by the silence.') : ''}
+${yaHere(g) ? (g.flags.ya_party ? (d2 ? `Ya is on the shrine roof again, awake this time, eating something with its legs still on and watching the street like a play.` : 'Ya is asleep on the shrine roof with one leg dangling, apparently on purpose, to offend the god.') : (d2 ? `Ya is somewhere in the village. A dog is barking at one end of it and a grandmother is shouting at the other, so she is moving fast.` : 'Somewhere in the village, Ya is offending someone. You can tell by the silence.')) : ''}
 
 ${pantry(g)} ${g.james.satiety < 30 ? 'You are hungry.' : ''} ${g.james.hp < jamesHpMax(g) * 0.5 ? 'You are hurt.' : ''}`;
         },

@@ -18,7 +18,7 @@ import { XP_RATE, XP_BANDS } from '../js/core/game.js'; // v0.11.85
 import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, advance, STARVE_HP_PER_HOUR, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1, bumpRel as relBump, startActCoil, REL_CATCHUP } from '../js/core/game.js';
 import { canPrimary, canColGroup, colGroupsOpen, btTarget, COL_GROUPS, priHours, colHours, merMinutesOf } from '../js/story/meridians.js';
 import { sceneView, choose, goTo, wasPicked, isMenuScene, notePicked, seenBefore, noteSeen } from '../js/core/story.js';
-import { linesOf, pickLine, visitLine, noteVisit, coilStamp, SAID_MAX } from '../js/core/lines.js'; // v0.11.134 (LP2: PK)
+import { linesOf, pickLine, visitLine, noteVisit, coilStamp, SAID_MAX, noteDay, dayIndex, byDay, textDay, TEXT_DAY_FROM } from '../js/core/lines.js'; // v0.11.134 (LP2: PK); v0.11.135 (NT1): the day record
 import { coilSnap } from '../js/core/game.js'; // v0.11.134 (LP2)
 import { replyKey, quietFilter, noteSaid, landReply } from '../js/core/replies.js'; // v0.11.134 (LP2: QR; RQ1)
 /** v0.11.134 (LP2, QR): what main.js does for one action and its screen: filter, then record what was drawn. */
@@ -3429,6 +3429,40 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     const strip = (x) => { const { lines: _l, ...rest } = x; return JSON.stringify(rest); };
     const z0 = strip(z); againView(z, zv); againView(z, zv, { id: zv.id, text: zv.text }); quietReplies(z, ['A.']); landReply(z, ['A.', 'B.']); noteSaid(z, ['B.']);
     assert(strip(z) === z0, 'RQ1 (TG): the fold, the visit and quiet repeats change nothing in the save but `lines`');
+}
+// v0.11.135 (owner picks NT1, EV1): a scene's text for the day (lines.js noteDay / dayIndex / byDay; story.js go() records the days)
+{
+    const g = ensureBars(newGame(4301, { closed: true }));
+    assert(dayIndex(g, 'x') === 0 && !g.lines, 'NT1: dayIndex reads only (no record made), a key never shown is on its first day');
+    const D = 1440;
+    noteDay(g, 'x'); noteDay(g, 'x');
+    assert(dayIndex(g, 'x') === 0, 'NT1: the same day twice is one day');
+    g.minutes += D; assert(dayIndex(g, 'x') === 1, 'NT1: a later day not noted yet counts as the next'); noteDay(g, 'x');
+    g.minutes += 2 * D; noteDay(g, 'x');
+    assert(dayIndex(g, 'x') === 2 && byDay(g, ['a', 'b', 'c'], 'x') === 'c' && byDay(g, ['a', (q) => `b${q.coil.n}`], 'x') === 'a', 'NT1: the third day takes the third text; past the last, from the start again');
+    g.minutes -= 2 * D; assert(byDay(g, ['a', (q) => `b${q.coil.n}`], 'x') === 'b1', 'NT1: a function text is called with the game');
+    g.coil.n = 2; assert(dayIndex(g, 'x') === 0, 'NT1: a new Coil starts every scene on its first day again');
+    // go() records the scene, and an event scene's event (dayKey)
+    const h = ensureBars(newGame(4302, { closed: true }));
+    goTo(h, SCENES, 'bone_field');
+    const d0 = textDay(h);
+    assert(JSON.stringify(h.lines?.d?.bone_field) === JSON.stringify([d0]), 'NT1: entering a scene notes its day');
+    h.minutes += D; goTo(h, SCENES, 'mire'); goTo(h, SCENES, 'bone_field');
+    assert(dayIndex(h, 'bone_field') === 1 && h.lines?.d?.bone_field?.length === 2, 'NT1: entered on a second day: its second day');
+    const keyed = Object.values(SCENES).filter((x) => typeof x.dayKey === 'function').map((x) => x.id).sort();
+    assert(JSON.stringify(keyed) === JSON.stringify(['bl_fireside', 'bl_night', 'bl_night_event', 'far_hunt', 'heart_night', 'night_event', 'wen_lesson']), `NT1: the scenes keyed by event or region (${keyed})`);
+    const e = ensureBars(newGame(4303, { closed: true })); e.flags.bl_region = 'dw'; goTo(e, SCENES, 'bl_night_event');
+    assert(e.flags.bl_ev && e.lines.d[`bl_night_event:${e.flags.bl_ev}`]?.length === 1 && e.lines.d.bl_night_event?.length === 1, `NT1: an event scene notes its event's day too (${e.flags.bl_ev})`);
+    // the record stays out of the Coil snapshot and the dry runs (as LP2's), and a save keeps it
+    assert(!('lines' in coilSnap(h)) && !('lines' in dryClone(h)) && JSON.stringify(deserialize(serialize(h)).lines?.d) === JSON.stringify(h.lines?.d) && !!h.lines?.d?.bone_field, 'NT1: kept by a save, left out of the snapshot and the dry runs');
+    // RN2 (H1): the text day runs from 05:00: 23:50 and 04:59 the next morning are one day; 05:00 a new one
+    const n = ensureBars(newGame(4305, { closed: true })); const base = Math.floor(n.minutes / 1440) * 1440 + 1440;
+    n.minutes = base + 23 * 60 + 50; noteDay(n, 'z'); n.minutes = base + 1440 + 4 * 60 + 59;
+    assert(TEXT_DAY_FROM === 300 && dayIndex(n, 'z') === 0 && textDay(n) === textDay({ minutes: base + 23 * 60 + 50 }), 'RN2 (H1): 23:50 and 04:59 the next morning are one text day');
+    n.minutes += 1; assert(dayIndex(n, 'z') === 1, 'RN2 (H1): from 05:00 a new text day');
+    // a v0.11.134 record (no `d`) gains the day list without losing what it holds
+    const o = ensureBars(newGame(4304)); o.lines = { c: coilStamp(o), p: { mem: [1] }, last: {}, cur: {}, at: 'x', said: ['k'] };
+    noteDay(o, 'y'); assert(o.lines.said[0] === 'k' && o.lines.p.mem[0] === 1 && o.lines.d.y.length === 1, 'NT1: an older record gains the day list, keeping the rest');
 }
 // v0.11.37 (owner 12:59–14:27, picks A1 + B2 + C-a + D-a + E-a + F1): the day ends at 02:00, Push through only at night,
 // at once vs a bar, the Long Forest's two exits, no useless sit, familiar story choices

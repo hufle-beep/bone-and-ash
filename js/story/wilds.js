@@ -5,7 +5,7 @@
 import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, clockParts, d6, awardYukiFightXp, awardXp, jamesHpMax, jamesQiMax, nightTo, nightRest } from '../core/game.js';
 import { condensationSatGain } from '../core/formulas.js';
 import { sitGain, yukiFightSkill, canFly } from '../core/game.js'; // v0.11.118 (YK1 review, SB); v0.11.131 (XB2, FY): canFly
-import { set, day, hour, daily, markDaily, forestScale, grow, eatBest, pantry, foodCount, byForm } from './common.js';
+import { set, day, hour, daily, markDaily, forestScale, grow, eatBest, pantry, foodCount, byForm, byDay } from './common.js';
 
 const P = 'Blackroot Wilds';
 const did = (key) => (g) => { markDaily(g, key); return []; };
@@ -33,6 +33,7 @@ const ev = (k) => (g) => g.flags.night_ev === k;
 
 export const WILDS = {
     night_event: {
+        dayKey: (g) => `night_event:${g.flags.night_ev}`, // v0.11.135 (NT1, EV1)
         id: 'night_event', title: (g) => ({ lights: 'Lights', rain: 'Iron Rain', crows: 'Rot-crows', rats: 'Mire-rats', lizard: 'Thornback', gift: 'A Gift' }[g.flags.night_ev] || 'Night'), place: `${P} — the dry rise`,
         art: (g) => ({ lights: 'lights', rain: 'rain', crows: 'crows', rats: 'rats', lizard: 'lizard', gift: 'gift' }[g.flags.night_ev] || 'forest_night'),
         enter: (g) => {
@@ -45,26 +46,38 @@ export const WILDS = {
             return [];
         },
         text: (g) => ({
-            lights: `You wake for no reason at all, which in your experience is the worst reason.
+            lights: byDay(g, [`You wake for no reason at all, which in your experience is the worst reason.
 
 Between the black trunks, low to the ground, pale lights are moving. Not fireflies — too big, too slow, too *deliberate*. They drift in a loose line, all going the same way: toward the heart of the forest, where the dead tree stands.
 
-${byForm(g, 'Yuki is awake on your chest, ears flat, not hissing.', 'Yuki is awake against your side, ears flat, not growling.', 'Yuki is awake beside you, ears flat, not speaking.')} Watching. Through the bond comes something that isn't a word. Closer to *grief*.`,
-            rain: `It rains in the night: warm rain that tastes of iron and leaves a grey film on everything. The fire hisses and sulks.
+${byForm(g, 'Yuki is awake on your chest, ears flat, not hissing.', 'Yuki is awake against your side, ears flat, not growling.', 'Yuki is awake beside you, ears flat, not speaking.')} Watching. Through the bond comes something that isn't a word. Closer to *grief*.`, `You wake all at once, with nothing to blame for it. You are beginning to know what that means here.
 
-Yuki makes it clear, ${byForm(g, "through the bond and through her claws,", "through the bond and by shaking herself dry all over you,", "aloud and at some length, from under your lab coat,")} that she holds you personally responsible for the weather.`,
-            crows: `A sound like wet cloth tearing wakes you: wings. Three rot-crows, each the size of a cat, have landed on the fallen trunk above your head. Their feathers are moulting in clumps, their eyes are milky, and they smell exactly like you'd expect a bird named *rot-crow* to smell.
+The lights are back between the trunks: pale, low, unhurried, strung out in their loose line and all bound the same way, toward the heart of the forest and the dead tree. Tonight you count them, because counting is what you do when you don't know what else to do. You count twice and get two totals, and you are not a man who miscounts.
 
-They are staring at your food. Then, thoughtfully, at your eyes.`,
-            rats: `Something splashes in the stream, then again. Then the reeds part, and two mire-rats the size of dogs climb onto the bank, slick and black, tails like whips.
+${byForm(g, 'Yuki is sitting up on your chest, ears flat, silent.', 'Yuki is sitting up beside you, ears flat, silent.', 'Yuki is sitting up beside you, ears flat, saying nothing.')} She does not look at you. What comes through the bond is the same as before, only quieter, the way grief gets quieter without getting any smaller.`], `night_event:lights`),
+            rain: byDay(g, [`It rains in the night: warm rain that tastes of iron and leaves a grey film on everything. The fire hisses and sulks.
 
-${byForm(g, "They've smelled the cat. They seem to think she's dinner.", "They've smelled the cat. They seem to think she's dinner, which means they haven't seen her yet.", "They've smelled a cat and found a woman. They seem to think she's dinner either way.")} Yuki seems to think that's the funniest thing she's heard all week.`,
+Yuki makes it clear, ${byForm(g, "through the bond and through her claws,", "through the bond and by shaking herself dry all over you,", "aloud and at some length, from under your lab coat,")} that she holds you personally responsible for the weather.`, `Rain again, warm and tasting of iron. By now you know the order of events: first the fire sulks, then the grey film creeps over everything you own, then the complaints begin.
+
+Yuki ${byForm(g, "delivers them through the bond, with her claws for punctuation,", "delivers them through the bond, from as far under your lab coat as she fits, which is her head,", "delivers them aloud, from under your lab coat, in order of importance,")} and concludes that a competent human would have arranged a roof.`], `night_event:rain`),
+            crows: byDay(g, [`A sound like wet cloth tearing wakes you: wings. Three rot-crows, each the size of a cat, have landed on the fallen trunk above your head. Their feathers are moulting in clumps, their eyes are milky, and they smell exactly like you'd expect a bird named *rot-crow* to smell.
+
+They are staring at your food. Then, thoughtfully, at your eyes.`, `Wings again, that wet tearing sound, and the smell arrives a moment before the birds do. Three rot-crows settle along the fallen trunk, shuffling for places like magistrates taking a bench. One of them is missing most of its tail and does not seem to feel the lack.
+
+They look at your food. They look at you. They have the air of creditors come about a second payment, and willing to take it in eyes.`], `night_event:crows`),
+            rats: byDay(g, [`Something splashes in the stream, then again. Then the reeds part, and two mire-rats the size of dogs climb onto the bank, slick and black, tails like whips.
+
+${byForm(g, "They've smelled the cat. They seem to think she's dinner.", "They've smelled the cat. They seem to think she's dinner, which means they haven't seen her yet.", "They've smelled a cat and found a woman. They seem to think she's dinner either way.")} Yuki seems to think that's the funniest thing she's heard all week.`, `A splash, a pause, a second splash. You know the sound now. The reeds bend, and two mire-rats haul themselves onto the bank, black and streaming, big as dogs, and stand there working their noses at the dark.
+
+${byForm(g, "They have smelled the cat again. Hope, in a rat, is a terrible thing.", "They have smelled the cat again. They follow the smell up, and further up, and stop.", "They have smelled a cat again, and found a woman in a black dress looking back at them. It gives them a moment's thought, and no more.")} Yuki yawns, slowly, so that they can see all of it.`], `night_event:rats`),
             lizard: `The ground under you is warm. That's the first thing. The second is the scrape of claws on rock, slow and heavy, and the third is the eye — gold, slit, the size of your palm — looking at you from the edge of the firelight.
 
 A thornback lizard, long as a canoe, a ridge of hollow spines down its back. Your camp, it turns out, is on top of its nest.`,
-            gift: `You wake to a weight on your chest and a smell of fresh blood.
+            gift: byDay(g, [`You wake to a weight on your chest and a smell of fresh blood.
 
-${byForm(g, "Yuki is sitting on you, very upright, very pleased. On your sternum, laid out with ceremony, is a mire fowl — a fat, ugly, long-necked bird nearly as big as she is. She must have dragged it a hundred metres.\n\nThrough the bond: *you hunt like a tree. I am fixing it.*", "The weight is one of Yuki's paws. The rest of her sits beside you, very upright, very pleased. On your sternum, laid out with ceremony, is a mire fowl — a fat, ugly, long-necked bird, about one mouthful to her. She has carried it a hundred metres without eating it, and would like that noted.\n\nThrough the bond: *you hunt like a tree. I am fixing it.*", "Yuki is kneeling beside you, very upright, very pleased. On your sternum, laid out with ceremony, is a mire fowl — a fat, ugly, long-necked bird with its neck neatly wrung. There are feathers in her hair and not a mark on her dress.\n\n\"You hunt like a tree,\" she says. \"I am fixing it.\"")}`, // v0.11.126 (NQ1): by her form, Fable's
+${byForm(g, "Yuki is sitting on you, very upright, very pleased. On your sternum, laid out with ceremony, is a mire fowl — a fat, ugly, long-necked bird nearly as big as she is. She must have dragged it a hundred metres.\n\nThrough the bond: *you hunt like a tree. I am fixing it.*", "The weight is one of Yuki's paws. The rest of her sits beside you, very upright, very pleased. On your sternum, laid out with ceremony, is a mire fowl — a fat, ugly, long-necked bird, about one mouthful to her. She has carried it a hundred metres without eating it, and would like that noted.\n\nThrough the bond: *you hunt like a tree. I am fixing it.*", "Yuki is kneeling beside you, very upright, very pleased. On your sternum, laid out with ceremony, is a mire fowl — a fat, ugly, long-necked bird with its neck neatly wrung. There are feathers in her hair and not a mark on her dress.\n\n\"You hunt like a tree,\" she says. \"I am fixing it.\"")}`, `A weight on your chest and the smell of blood, again.
+
+${byForm(g, "Yuki is sitting on your sternum with her tail wrapped round her feet. Tonight's offering is another mire fowl, laid out with its neck straight and its wings folded, a little bigger than the last. She has been keeping count.\n\nThrough the bond: *you still hunt like a tree. I am still fixing it.*", "The weight is a paw. Beside it, set down with care, is another mire fowl, neck straight, wings folded. Yuki's nose is an inch above it, and she is very obviously not eating it. She would like the restraint noted a second time.\n\nThrough the bond: *you still hunt like a tree. I am still fixing it.*", "Yuki is kneeling at your side with her hands folded in her lap. On your sternum lies another mire fowl, neck wrung, wings folded, as neat as a parcel. There is one feather behind her ear. She has decided that you will not mention it.\n\n\"You still hunt like a tree,\" she says. \"I am still fixing it.\"")}`], `night_event:gift`), // v0.11.126 (NQ1): by her form, Fable's
         }[g.flags.night_ev]),
         choices: [
             { text: 'Watch where the lights go. Let the threads map it.', show: ev('lights'), check: { skill: 'GU', dc: 3 }, do: (g) => { g.flags.saw_lights = true; return ['Mapped: the lights flow toward the dead tree, like blood toward a heart that stopped.']; }, to: 'morning' },
@@ -142,12 +155,15 @@ ${g.flags.saw_lights ? 'And the lights. You keep thinking about the lights.' : '
         id: 'wilds', title: 'The Blackroot', art: 'stream', place: `${P} — the stream`,
         text: (g) => {
             const h = hour(g);
-            const when = h < 11 ? 'Morning light comes through the canopy in red bars.' : h < 15 ? 'The day is hot and still and loud with insects.' : h < 18 ? 'The light is going amber.' : 'Dusk. The forest is getting ready to be something else.';
-            return `${when} ${g.james.satiety < 30 ? 'You are hungry enough that it\'s getting into your hands.' : ''}
+            const d2 = byDay(g, [0, 1], 'wilds'); // NT1 (Fable's draft): a second set of the times of day, and of the hungry and hurt lines
+            const when = d2
+                ? (h < 11 ? `Morning. The red light lies in bars across the stream, and the midges have already found you.` : h < 15 ? `Midday. The heat sits in the trees like a lid, and everything with wings is saying so.` : h < 18 ? `The shadows are stretching out, and the light is turning the colour of honey.` : `Dusk. The birds have stopped, which is the forest clearing its throat.`)
+                : (h < 11 ? 'Morning light comes through the canopy in red bars.' : h < 15 ? 'The day is hot and still and loud with insects.' : h < 18 ? 'The light is going amber.' : 'Dusk. The forest is getting ready to be something else.');
+            return `${when} ${g.james.satiety < 30 ? (d2 ? `You are hungry enough to have started assessing the moss.` : 'You are hungry enough that it\'s getting into your hands.') : ''}
 
 ${pantry(g)}
 
-${g.james.hp < jamesHpMax(g) * 0.5 ? 'You are hurt. Resting would be smart. You have a doctorate; you can do smart.' : ''}`;
+${g.james.hp < jamesHpMax(g) * 0.5 ? (d2 ? `You are hurt, and the rest of you would like a word about it. Lying down would be the intelligent choice. You are told you are intelligent.` : 'You are hurt. Resting would be smart. You have a doctorate; you can do smart.') : ''}`;
         },
         choices: [
             { text: 'Forage.', show: (g) => hour(g) < 19, time: 15, to: 'wild_forage' },

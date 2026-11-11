@@ -7,7 +7,7 @@
  */
 import { addItem, hasItem, eat, advance, clockParts, d6, awardYukiFightXp, jamesHpMax, condense, dayHour, nightTo, nightRest, canFly } from '../core/game.js';
 import { hasForm } from '../core/forms.js';
-import { daily, markDaily, eatBest, pantry, foodCount, hour, byForm } from './common.js';
+import { daily, markDaily, eatBest, pantry, foodCount, hour, byForm, byDay, dayIndex } from './common.js';
 import { encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil } from './act1_common.js';
 
 const P = 'Blackroot Wilds';
@@ -19,6 +19,8 @@ const late = (g) => hour(g) >= 19;
 /** v0.11.123 (EQ1, SC; Fable's D1 lead-in): Ya's word when Mei Lin takes James to the far end of the raft and Ya likes him too. */
 const MEI_RAFT_YA = `Ya watches the two of you get up. Her nose wrinkles, and then she grins to the back teeth. "Go. Tonight I guard." She drags her bedroll round so her back is to the far end of the raft, with the air of a wolf doing someone a favour, and lays the spear across her knees. "I'm not listening," she tells the black water, loudly. "I have very bad ears. Everybody says." She is not put out. Her foot taps the trunk, twice. She is possibly a little put out.`;
 const both = (g) => likesMei(g) && likesYa(g);
+/** bl_night's second paragraph (NT1: the Drowned Wood's second night has its own, by day). */
+const BL_WATCHES = 'Watches to set. Ya says she doesn\'t need sleep, which is a lie; Mei Lin says she can\'t sleep out here anyway, which is true. Your Parallel Cognition offers its usual watch-thread.';
 const onlyYa = (g) => likesYa(g) && !likesMei(g);
 /* v0.11.122 (owner pick LG1, BC; texts by Fable, B0–B3): when both like him, the hot spring and the Ashen Hollow camp offer Ya alone too. */
 const SPRING_BOTH_WAIT = 'Nobody says anything for a long time. Mei Lin has come to the very edge of the bank, arms folded, glaring at the stars as if they started it. She hasn\'t left. She hasn\'t come in. She is, you realise, waiting to see what you do.';
@@ -232,7 +234,7 @@ Mei Lin turns the colour of the cinderberries and walks on ahead without a word.
     rr_hunt: {
         id: 'rr_hunt', title: 'Bone-Elk', art: 'bone_elk', place: PLACE.rr,
         enter: (g) => { markDaily(g, 'rr_hunt'); return []; },
-        text: `Ya smells it before anyone sees it. She lifts her face, nostrils flaring, and points with her chin.
+        text: (g) => byDay(g, [`Ya smells it before anyone sees it. She lifts her face, nostrils flaring, and points with her chin.
 
 A bone-elk, grazing on the moss between two roots: grey hide, and antlers that are not antler but raw bone, white, branching, growing in spirals out of its skull and down along its neck like a mane of knives. Your Convergence goes very quiet and attentive, the way a musician goes quiet hearing another instrument tune up.
 
@@ -240,7 +242,15 @@ A bone-elk, grazing on the moss between two roots: grey hide, and antlers that a
 
 "I have a name," Mei Lin whispers back.
 
-"Scream it, then."`,
+"Scream it, then."`, `Ya stops with one foot in the air. She doesn't point this time. She just looks at you, and then along the root, and waits to see whether you can find it yourself.
+
+It takes you a while. A bone-elk, head up in the moss between two roots: bigger than the last one, or closer. The bone runs back along its neck in white spirals, and one tine is broken short. Your Convergence notices the break before you do, and winces.
+
+"Old one," Ya breathes. "Clever. It's heard us already. It's deciding." Her grin is all teeth. "Same as before. You left, me right."
+
+"And I stay behind the root," Mei Lin whispers, "and scream."
+
+"See? She learns."`], 'rr_hunt'),
         choices: [
             { text: 'Take the bone-elk.', combat: elkFight, to: 'rr_elk_won' },
             { text: 'Leave the elk. Snare root-hares instead.', qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 4 }, time: 60, do: (g) => { addItem(g, 'hare_raw', 2); return ['+2 root-hares (as hare). Ya sulks about the elk all afternoon.']; }, failDo: () => ['Nothing. Ya does not let you forget it.'], to: 'rr_hub' },
@@ -249,13 +259,17 @@ A bone-elk, grazing on the moss between two roots: grey hide, and antlers that a
     rr_elk_won: {
         id: 'rr_elk_won', title: 'Big Mean Meat', art: 'bone_elk', place: PLACE.rr,
         enter: (g) => { addItem(g, 'venison', 3); addItem(g, 'elk_antler', 1); bumpRel(g, 'Ya', 3, 2); return ['+3 elk meat (as venison), +1 Bone-elk antler.']; },
-        text: `The elk goes down in a clatter of bone. Ya is on it before it stops moving, knife out, opening the throat with a neatness that would get her a surgical residency where you come from.
+        text: (g) => byDay(g, [`The elk goes down in a clatter of bone. Ya is on it before it stops moving, knife out, opening the throat with a neatness that would get her a surgical residency where you come from.
 
 She looks up at you with blood to the elbows and the happiest face you've seen on this world.
 
 "You," she says, "can come hunting with me *any time*."
 
-You pick up a shed antler-tine. It's warm in your hand, and your Convergence turns it over like a jeweller with a stone: the grain, the density, the way it *wants* to be shaped. You think you could make something remarkable out of this. You put it in the hammerspace.`,
+You pick up a shed antler-tine. It's warm in your hand, and your Convergence turns it over like a jeweller with a stone: the grain, the density, the way it *wants* to be shaped. You think you could make something remarkable out of this. You put it in the hammerspace.`, `This one goes down harder, and takes a strip of bark off the root with it. Ya lets it finish. Then she kneels, lays her palm flat on the grey hide for one breath, which she did not do for the first, and gets out her knife.
+
+"Once is luck," she says, working. "Twice is a hunter." She looks you over, blood to the wrists, as if pricing you. "A bad hunter. Loud feet. But a hunter."
+
+You take an antler-tine again: a short one, snapped off clean in the fight. Your Convergence weighs it against the memory of the other and finds them different, the way two voices are different. This one is denser. It would hold an edge. It goes into the hammerspace, and Ya watches the air close over it and shakes her head.`], 'rr_elk_won'),
         choices: [{ text: 'Back to the road.', time: 40, to: 'rr_hub' }],
     },
     rr_elk_lost: {
@@ -638,13 +652,19 @@ She doesn't mean it. Everyone can tell she doesn't mean it. It makes it worse, s
     ah_hunt: {
         id: 'ah_hunt', title: 'Hawks', art: 'cinder_hawks', place: PLACE.ah,
         enter: (g) => { markDaily(g, 'ah_hunt'); return []; },
-        text: (g) => `The cinder hawks have been watching you since you crossed the line. They're bigger than eagles, ash-grey, and where their wings beat the air you can see faint sparks, as if they're made of coals that never quite went out.
+        text: (g) => byDay(g, [(g) => `The cinder hawks have been watching you since you crossed the line. They're bigger than eagles, ash-grey, and where their wings beat the air you can see faint sparks, as if they're made of coals that never quite went out.
 
 "They hunt in threes," Ya says. ${byForm(g, '"They\'ll go for the cat."', '"They won\'t go for the cat. Not that cat."', '"They\'ll go for the small one."')}
 
 Yuki, ${byForm(g, 'on your shoulder', 'at your side', 'at your elbow')}, flattens her ears and sends you a thought that consists entirely of teeth.
 
-There are hill-hares in the gullies too: small, fast, ash-coloured. Less exciting. Less likely to set you on fire.`,
+There are hill-hares in the gullies too: small, fast, ash-coloured. Less exciting. Less likely to set you on fire.`, (g) => `The cinder hawks are back over the ridge, turning in the ash haze, shedding sparks at the top of every wingbeat. They found you faster today. You suspect they have been talking.
+
+"Three again," Ya says, shading her eyes. ${byForm(g, '"Same as before. They want the cat."', '"They keep looking at the cat and then looking somewhere else. Smart birds."', '"They want the small one. They always want the small one."')}
+
+Yuki, ${byForm(g, 'on your shoulder', 'at your side', 'at your elbow')}, does not flatten her ears this time. She watches them with the stillness of someone doing sums. ${byForm(g, '*Three,* says the bond.', '*Three,* says the bond.', '"Three," she says.')} It is not a count. It is an order.
+
+The hill-hares are still in the gullies: still small, still ash-coloured, and still entirely free of fire.`], 'ah_hunt'),
         choices: [
             { text: 'Take the hawks before they take Yuki.', combat: hawksFight, to: 'ah_hawks_won' },
             { text: 'Darts at the hill-hares instead.', qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 5 }, time: 50, do: (g, r) => { addItem(g, 'hare_raw', 2); return [r && r.ratio < 1 ? `The darts go out flat through the ash haze and most of them hit ash. One hare stops being fast. Ya fetches it without being asked and holds it up by the ears, considering it. "Thin," she says. "Like you." Above you the hawks wheel off, unimpressed, trailing sparks.` : `The darts go out flat through the ash haze and the hares stop being fast. Ya fetches them without being asked and comes back holding them up by the ears. "Small," she says. "But you hit what you aimed at. Rare, for you." Above you the hawks wheel off, disappointed, trailing sparks.`, '+2 hill-hares.']; }, failDo: () => ['Ash-coloured hares on ash-coloured hills. You hit a lot of ash.'], to: 'ah_hub' },
@@ -653,9 +673,11 @@ There are hill-hares in the gullies too: small, fast, ash-coloured. Less excitin
     ah_hawks_won: {
         id: 'ah_hawks_won', title: 'Feathers and Sparks', art: 'cinder_hawks', place: PLACE.ah,
         enter: (g) => { addItem(g, 'fowl_raw', 2); return ['+2 cinder hawk (as fowl). The meat is warm all on its own.', ...awardYukiFightXp(g, 'standard')]; },
-        text: (g) => `The last hawk goes down in a shower of sparks, and Yuki — ${byForm(g, 'who has been riding your shoulder through the whole thing, claws in, spitting — leaps off and lands on it, and sits there', 'who has been at your flank through the whole thing, claws out, snarling — puts one paw on it, and sits there', 'who has been at your back through the whole thing, claws out, spitting — puts her foot on it, and stands there')}, and stares at the sky as if daring another one to try.
+        text: (g) => byDay(g, [(g) => `The last hawk goes down in a shower of sparks, and Yuki — ${byForm(g, 'who has been riding your shoulder through the whole thing, claws in, spitting — leaps off and lands on it, and sits there', 'who has been at your flank through the whole thing, claws out, snarling — puts one paw on it, and sits there', 'who has been at your back through the whole thing, claws out, spitting — puts her foot on it, and stands there')}, and stares at the sky as if daring another one to try.
 
-"Little queen," Ya says to her, with enormous respect. Yuki accepts the title.`,
+"Little queen," Ya says to her, with enormous respect. Yuki accepts the title.`, (g) => `The last hawk hits the ash and rolls, trailing smoke, and Yuki — ${byForm(g, 'who has spent the fight on your shoulder with her claws through your coat — is down and on it before it stops, and plants herself there', 'who has spent the fight a pace ahead of you, taking sparks on her fur without seeming to notice — drops a paw on it, and settles there', 'who has spent the fight at your back, ash to the elbows — sets her heel on it, and stays there')}, looking up, counting an empty sky.
+
+"Little queen," Ya says again, and this time she bows: badly, from the waist, with her eyes on the hawk. Yuki considers the bow, and allows it.`], 'ah_hawks_won'),
         choices: [{ text: 'Back to the ridge.', time: 30, to: 'ah_hub' }],
     },
     ah_hawks_lost: {
@@ -814,7 +836,7 @@ You wake with Mei Lin's hands on your face and Ya sitting beside you, holding a 
         id: 'talk_mei', title: 'Mei Lin', art: 'mei_lin', place: (g) => PLACE[region(g)],
         enter: (g) => { markDaily(g, 'tmei'); return []; },
         text: (g) => {
-            const n = g.flags.mei_talks || 0;
+            const n = Math.max(g.flags.mei_talks || 0, dayIndex(g, 'talk_mei')); // v0.11.135 (NT1): the beat follows the day too; RN2 (M2): beats 0, 1, the old settled text at 2, the two new beats at 3 and 4, the settled text again from 5, so a talk left by the romance choice doesn't show the same beat the next day
             if (n === 0) return `Mei Lin walks beside you with her basket on her hip and her eyes on everything: herbs, tracks, Ya's back.
 
 "My mother thinks I'll come back married or not at all," she says. "Those are the only two shapes a woman can come back from the forest in, in Ashfall. Married or dead or *ruined*." A thin smile. "Three, then."
@@ -831,6 +853,28 @@ You wake with Mei Lin's hands on your face and Ya sitting beside you, holding a 
 "You sound jealous."
 
 "I'm not jealous." Hack. "I'm *curious*. It's different. It's a scholar's word. You use it all the time."`;
+            if (n === 3) return `"Where you come from," Mei Lin says, not looking up from the stem she is stripping, "what does a woman do, at twenty-six, with no husband?"
+
+"Whatever she likes. Most of mine are still at school at twenty-six. Several of them outrank me."
+
+She takes that in with her knife gone still. "And nobody asks whose daughter she is."
+
+"They ask what she's working on."
+
+"Hm." The knife starts again, faster. "I would be terrible at it. I'd spend the first ten years asking leave of people who weren't in the room." A sideways look, and the corner of her mouth goes. "Is there a form to fill in? You look like a people with forms."
+
+"There are several forms."
+
+"Good," says Mei Lin. "I'm very good at forms. I'm from Ashfall."`;
+            if (n === 4) return `"I shouted this morning," Mei Lin says. "At the trees. You were asleep. Ya wasn't."
+
+"What did you shout?"
+
+"Nothing. A noise." She steps over a fallen branch with her basket held high. "I have never in my life made a noise that wasn't for something. Calling someone in to eat. Calling for help. Ya said do it again, lower, from the belly, so I did, and a bird fell off its branch." She is trying very hard not to look pleased. "In Ashfall there would have been a meeting. My mother would have gone round the neighbours to apologise. Here it just went out, and didn't come back, and nobody wrote it down."
+
+"I'm writing it down."
+
+"You would." She walks on a few steps. "When we go home I'm supposed to put it all away again. The noise. Walking where I like." Her chin comes up. "I've decided I'm not going to. I haven't decided how."`;
             return `You walk together a while without talking. It's easy, now. She shows you a herb that grows only where a beast has died; you show her a fungus that grows only where a beast is about to. She calls you morbid. You call her a pot calling a kettle.
 
 ${likesMei(g) ? 'At one point, climbing over a fallen trunk, she takes your hand and doesn\'t let go of it on the other side. Neither of you mentions it.' : 'She laughs, properly, and then looks round, as if afraid someone from Ashfall might have heard.'}`;
@@ -845,7 +889,7 @@ ${likesMei(g) ? 'At one point, climbing over a fallen trunk, she takes your hand
         id: 'talk_ya', title: 'Ya', art: 'ya_close', place: (g) => PLACE[region(g)],
         enter: (g) => { markDaily(g, 'tya'); return []; },
         text: (g) => {
-            const n = g.flags.ya_talks || 0;
+            const n = Math.max(g.flags.ya_talks || 0, dayIndex(g, 'talk_ya')); // v0.11.135 (NT1, RN2 M2): as talk_mei
             if (n === 0) return `Ya walks next to you, swinging her spear, and looks you up and down for a while with total candour.
 
 "You're old," she says.
@@ -862,6 +906,34 @@ You are momentarily lost for a sarcastic reply, which has not happened to you si
 "I've noticed."
 
 "She taught me words. Some. Spear. Snares. Then the ape got her, at the pass, when I was twelve. After that it was just me." She shrugs. "Fifteen years. I don't go to villages. They throw stones. One time they threw a priest." She swings her legs. "He bounced."`;
+            if (n === 3) return `"Words," Ya says, walking backwards in front of you so she can watch your mouth. "The herb girl has one for everything. Today she called me *improper*. What is it?"
+
+"Not done the right way. Against the rules."
+
+"Whose rules?"
+
+"Nobody knows. That's how you can tell they're rules."
+
+Ya thinks about this with her whole face. "So. Everything I do."
+
+"Most of it."
+
+"*Improper.*" She tries it twice more, pleased, like a new knife. "I'll keep that one." She turns to walk the right way round, and for a few steps she isn't loud at all. "Fifteen years I talked to the spear. It's a good spear. It never said one word back." She knocks her shoulder into your arm, hard. "You say too many. But you say them back."`;
+            if (n === 4) return `Ya drops back to walk beside you, which she does when she wants something and hasn't worked out how to take it yet.
+
+"I wake up in the night now," she says, accusing. "And I count. One scholar. One herb girl. ${byForm(g, 'One cat.', 'One cat, big.', 'One cat in a dress.')} Before, I counted one. Me. Easy." She jabs the butt of the spear at the ground as she walks. "Now if the count comes out wrong I have to get up and go and look."
+
+"That's called worrying."
+
+"It's stupid."
+
+"It is. Everybody does it."
+
+"All the time? In the villages?"
+
+"Constantly."
+
+Ya walks on for a bit, scowling at the idea. "No wonder they throw things," she says.`;
             return `Ya is in a good mood, which with Ya means loud.
 
 ${likesYa(g) ? 'She walks so close that her hip knocks yours every few steps, on purpose, grinning each time like it\'s the best joke in the world. When you catch her hand to stop her, she twists it round and laces her fingers into yours and keeps walking as if that was the plan all along.' : 'She tells you a long story about a bear, which may be true, and ends it by punching your arm, which definitely is.'}
@@ -896,6 +968,7 @@ ${pantry(g)}`,
     },
     // v0.11.129 (CB1, BF; CS1, BF2; Fable's MAINs): the loose ring and the dw night's settling count four with the human
     bl_fireside: {
+        dayKey: (g) => `bl_fireside:${region(g)}`, // v0.11.135 (NT1): by region (only the Drowned Wood has two nights)
         id: 'bl_fireside', title: 'Fireside', art: 'trio_fire', place: (g) => PLACE[region(g)],
         enter: (g) => { markDaily(g, 'bl_fire'); return []; },
         text: (g) => {
@@ -907,7 +980,7 @@ ${pantry(g)}`,
 So you do. You tell them about the Hearth Trees, and the cities grown out of them, and how a child learns to sing to the wood before she learns to read. Ya listens with her chin on her knees, wide-eyed as a child. Mei Lin listens with her eyes closed.
 
 When you finish, nobody says anything for a while. Then Ya says, "I'd like that. A tree that sang back." And Mei Lin says, "So would I," and they look at each other across the fire, startled to agree about anything.`;
-            if (r === 'dw') return `Nobody wants to talk about the drowned. So Ya talks about everything else, loudly, until Mei Lin laughs despite herself — a real laugh, the kind Ashfall trained out of her — and claps her hand over her mouth as if she'd sworn in a temple.
+            if (r === 'dw') return byDay(g, [(g) => `Nobody wants to talk about the drowned. So Ya talks about everything else, loudly, until Mei Lin laughs despite herself — a real laugh, the kind Ashfall trained out of her — and claps her hand over her mouth as if she'd sworn in a temple.
 
 "Do that again," Ya says.
 
@@ -917,7 +990,17 @@ When you finish, nobody says anything for a while. Then Ya says, "I'd like that.
 
 "*No*."
 
-${likesMei(g) && likesYa(g) ? `Later, settling down, the ${byForm(g, 'three', 'three', 'four')} of you end up closer than strictly necessary — for warmth, Ya says, and nobody argues with her.` : 'Later the fire burns low, and the water goes on dripping, and none of you sleeps much.'}`;
+${likesMei(g) && likesYa(g) ? `Later, settling down, the ${byForm(g, 'three', 'three', 'four')} of you end up closer than strictly necessary — for warmth, Ya says, and nobody argues with her.` : 'Later the fire burns low, and the water goes on dripping, and none of you sleeps much.'}`, (g) => `The second night in the Drowned Wood is quieter than the first, because Ya has run out of everything else to talk about. She lasts a good while in silence, for Ya. Then she leans over and flicks a beetle into Mei Lin's bowl.
+
+Mei Lin picks it out with her chopsticks, gravely, and sets it on the trunk between them like an exhibit.
+
+"That was food."
+
+"That was an insult."
+
+"It can be both," Ya says, and Mei Lin's mouth goes tight at the corners with the effort of not laughing, and Ya watches her not do it with the patience of something sitting by a burrow.
+
+${likesMei(g) && likesYa(g) ? `Later, lying down, the ${byForm(g, 'three', 'three', 'four')} of you leave less room between the bedrolls than last night, and nobody remarks on the arithmetic.` : `Later the fire sinks, and the dripping goes on, and you all lie awake listening to each other not sleeping.`}`], 'bl_fireside:dw');
             return `The blue fire. The dead tree. Tomorrow, or the day after, you'll walk into it.
 
 ${both(g) ? 'Ya sits between you and Mei Lin, an arm round each of your necks, and nobody moves her. Mei Lin\'s head is on Ya\'s shoulder. You don\'t think she knows she\'s put it there.' : onlyYa(g) ? 'Ya sits pressed against your side, unashamed, her hand on your knee. Mei Lin sits across the fire and pretends not to see. Maybe she doesn\'t mind. Maybe she minds a great deal.' : onlyMei(g) ? 'Mei Lin sits close enough that her shoulder is against yours. Ya grins at you both across the fire, approving, like a matchmaker who has won a bet.' : `${byForm(g, 'The three', 'The three', 'The four')} of you sit in a loose ring, the way people sit when they've been through things together and don't yet have a word for what that makes them.`}
@@ -1017,10 +1100,11 @@ You tell them about the stars. Which ones you think yours might be near. Ya says
         choices: [{ text: 'Sleep, at last.', to: 'bl_night' }],
     },
     bl_night: {
+        dayKey: (g) => `bl_night:${region(g)}`, // v0.11.135 (NT1): by region
         id: 'bl_night', title: 'Night', art: 'night_watch', place: (g) => PLACE[region(g)],
         text: (g) => `${region(g) === 'dw' ? 'Water dripping, all night, from very high up.' : region(g) === 'ah' ? 'The wind over the ridges, and the dead tree breathing above you — you\'d swear it was breathing.' : 'The root is warm under you. Far off, wolves.'}
 
-Watches to set. Ya says she doesn't need sleep, which is a lie; Mei Lin says she can't sleep out here anyway, which is true. Your Parallel Cognition offers its usual watch-thread.`,
+${region(g) === 'dw' ? byDay(g, [BL_WATCHES, `Watches again. Ya says she will take all of them, and yawns in the middle of saying it; Mei Lin says she would sooner be awake than dream in this place, and means it. Your Parallel Cognition puts its watch-thread forward, as it does every night, like a clerk with a form.`], 'bl_night:dw') : BL_WATCHES}`,
         choices: [
             { text: 'Ya takes first watch. You take second.', do: (g) => { g.flags.bl_watch = 'ya'; return []; }, to: 'bl_night_event' },
             { text: 'Mei Lin and Ya together; you and a thread after.', do: (g) => { g.flags.bl_watch = 'both'; bumpRel(g, 'Mei Lin', 0, 1); bumpRel(g, 'Ya', 0, 1); return []; }, to: 'bl_night_event' },
@@ -1028,6 +1112,7 @@ Watches to set. Ya says she doesn't need sleep, which is a lie; Mei Lin says she
         ],
     },
     bl_night_event: {
+        dayKey: (g) => `bl_night_event:${g.flags.bl_ev}`, // v0.11.135 (NT1, EV1): the days this Coil each event showed (byDay)
         id: 'bl_night_event', title: (g) => ({ wolves: 'Wolves', drowned: 'The Drowned', serpent: 'Serpent', hawks: 'Sparks in the Dark', lights: 'Lights', song: 'Ya Sings', rut: 'The Rut', warm: 'Cold', rain: 'Rain on Water', mei: 'Awake', stars: 'Stars' }[g.flags.bl_ev] || 'Night'),
         art: (g) => ({ wolves: 'wolves', drowned: 'drowned_dead', serpent: 'mire_serpent', hawks: 'cinder_hawks' }[g.flags.bl_ev] || 'night_watch'),
         place: (g) => PLACE[region(g)],
@@ -1042,21 +1127,25 @@ Watches to set. Ya says she doesn't need sleep, which is a lie; Mei Lin says she
         },
         text: (g) => ({
             wolves: `${g.flags.bl_watch === 'thread' ? 'The watch-thread yanks you awake.' : 'Ya\'s hand on your mouth, her breath in your ear: "Wolves."'} Two ash-wolves, grey on grey, at the edge of the firelight. They have seen the cat.`,
-            drowned: `Mei Lin wakes you without a word. She just points. At the edge of the trunks, up to their waists in the black water, two of the drowned are standing, quite still, facing the fire. Watching. Waiting.`,
-            serpent: `Something heavy drags itself up onto the trunks. The fire shows a long wet body, a head like a split log, sliding toward the warmth.`,
+            drowned: byDay(g, [`Mei Lin wakes you without a word. She just points. At the edge of the trunks, up to their waists in the black water, two of the drowned are standing, quite still, facing the fire. Watching. Waiting.`, `Ya wakes you this time, with two fingers on your wrist and no joke ready, which tells you what it is before you look. The drowned are back. Two of them, waist-deep in the black water at the edge of the trunks, standing as they stood before, facing the fire. The firelight does not get into their eyes. Mei Lin is already on her feet, knife out, her other hand pressed over her own mouth.`], `bl_night_event:drowned`),
+            serpent: byDay(g, [`Something heavy drags itself up onto the trunks. The fire shows a long wet body, a head like a split log, sliding toward the warmth.`, `A slow scrape along the underside of the trunks, from one end of the camp to the other, as of something taking a measurement. Then the weight comes up over the edge: the wet length of it, the head like a split log, swinging from side to side. Whether it is the one from before you cannot tell. It holds the same opinion about your fire.`], `bl_night_event:serpent`),
             hawks: `Sparks in the dark, falling — then screaming. Cinder hawks hunt by night too, it turns out, and they've decided the fire is a challenge.`,
-            lights: `${g.flags.saw_lights ? 'The lights again. The same ones you saw from the stream on your first nights in this world.' : 'Lights, low among the trunks.'} Pale, slow, deliberate, flowing past the camp toward the dead tree like a procession. Ya is awake, very still, holding Mei Lin's wrist. Neither of them speaks. Up close, you can hear them: the faintest sound, almost under hearing. They are singing. They are singing the middle of the song the roots are missing.`,
+            lights: byDay(g, [`${g.flags.saw_lights ? 'The lights again. The same ones you saw from the stream on your first nights in this world.' : 'Lights, low among the trunks.'} Pale, slow, deliberate, flowing past the camp toward the dead tree like a procession. Ya is awake, very still, holding Mei Lin's wrist. Neither of them speaks. Up close, you can hear them: the faintest sound, almost under hearing. They are singing. They are singing the middle of the song the roots are missing.`, `${g.flags.saw_lights ? 'The lights come again. You have stopped counting the nights you have seen them, which is not like you.' : 'The lights come again.'} Fewer tonight, or strung out further, each keeping its distance from the next like mourners who have been told where to stand. This time Mei Lin is awake before anyone. She has her hands folded and her head down, and it takes you a moment to see that she is paying her respects, properly, the way Ashfall does when a procession passes. Ya copies her, badly, with one eye open. The song is still there, at the edge of hearing: the same missing middle, going by toward the dead tree. Your Convergence leans after it.`, `${g.flags.saw_lights ? 'The lights. You could keep time by them now, and one of your threads has started to.' : 'The lights.'} They pass closer than before, so close that the nearest lays a pale wash over Ya's face. She doesn't blink. Mei Lin has hold of Ya's sleeve tonight, and neither of them seems to know which one is holding on. You listen harder than you did. One line of song, over and over, going by like a hand along a wall in the dark, feeling for the door. All of it flows toward the dead tree.`], `bl_night_event:lights`),
             song: `You wake to Ya singing on watch. No words — just a long, low, wavering call, half human and half wolf, to the dark. Something far away answers it. Then something else. Then the forest is quiet again, as if it had been reassured.
 
 Mei Lin is awake too, lying very still, listening. When it's over she says, very quietly, "That was beautiful," and Ya, on watch, pretends not to hear, and grins at the dark.`,
             rut: `All night, somewhere off the road, two bone-elk fight over something. The crack of bone on bone, again and again, like a woodcutter who hates trees. Nobody sleeps much. Ya keeps up a running commentary on who's winning.`,
-            warm: `It's cold. Truly cold, for the first time. Ya, without asking, without any warning at all, crawls into your bedroll, wraps herself around you like a vine, and goes instantly back to sleep. Her feet are ice.
+            warm: byDay(g, [`It's cold. Truly cold, for the first time. Ya, without asking, without any warning at all, crawls into your bedroll, wraps herself around you like a vine, and goes instantly back to sleep. Her feet are ice.
 
-${likesMei(g) ? 'Across the fire, Mei Lin opens one eye, sees, and closes it again. After a while, very quietly, she drags her own bedroll over and lies down on your other side, back to you, stiff as a board. "I\'m *cold*," she informs nobody.' : 'Yuki, displaced, settles on Ya\'s hip and glares at you as if this is your fault.'}`,
-            rain: `Rain on the black water: millions of tiny rings, all night, and the mist lifting and settling. Under the sound you think you hear voices sometimes. You decide, as a scientist, that it's the rain.`,
-            mei: `You wake in the small hours. Mei Lin is sitting up on watch with her knees drawn up, staring at the dark, and she's crying, quite silently.
+${likesMei(g) ? 'Across the fire, Mei Lin opens one eye, sees, and closes it again. After a while, very quietly, she drags her own bedroll over and lies down on your other side, back to you, stiff as a board. "I\'m *cold*," she informs nobody.' : 'Yuki, displaced, settles on Ya\'s hip and glares at you as if this is your fault.'}`, `Cold again, the kind that comes up through the bedroll. You hear Ya get up, walk round the fire and stand over you. This time she announces it. "I'm coming in," she says, as if reporting a change in the weather, and does, all elbows, and puts her frozen feet on your shins with a sigh of real contentment. She is asleep before you have finished objecting.
 
-"It's nothing," she says, when she sees you're awake. "It's this place. It's the drowned. They looked like people from Ashfall. Like my *mother*." She wipes her face, angry. "Go back to sleep."`,
+${likesMei(g) ? `Mei Lin does not pretend to be asleep tonight. She gets up, brings her bedroll over with great formality, and lies down at your other side with exactly a hand's width of cold air between you. "It is only sensible," she tells the dark. The hand's width does not last till morning.` : `Yuki, put out of her place a second time, sits down on the far side of the fire and looks at the pair of you until you can feel it through your eyelids.`}`], `bl_night_event:warm`),
+            rain: byDay(g, [`Rain on the black water: millions of tiny rings, all night, and the mist lifting and settling. Under the sound you think you hear voices sometimes. You decide, as a scientist, that it's the rain.`, `Rain again on the black water, fine and steady, and the mist comes down to meet it until there is no telling where one leaves off. The fire shrinks to a red eye. Somewhere under the hiss there is a sound like people talking in the next room: low, unhurried, about nothing urgent. You listen for a while, as a scientist. Then you pull your coat up over your ears, also as a scientist.`], `bl_night_event:rain`),
+            mei: byDay(g, [`You wake in the small hours. Mei Lin is sitting up on watch with her knees drawn up, staring at the dark, and she's crying, quite silently.
+
+"It's nothing," she says, when she sees you're awake. "It's this place. It's the drowned. They looked like people from Ashfall. Like my *mother*." She wipes her face, angry. "Go back to sleep."`, `Mei Lin is awake again in the small hours, sitting up with her knees under her chin. She isn't crying tonight. She is counting something on her fingers, lips moving, and when she sees you watching she stops, caught.
+
+"The names," she says. "Everybody in Ashfall. Forty houses. I say them over, so that if I see a face out there in the dark I'll know it isn't one of ours." She folds the hand shut. "It isn't sensible. Don't tell me it isn't sensible. Go back to sleep, James."`], `bl_night_event:mei`),
             stars: `The haze clears, for one hour, and the stars over the Ashen Hills come out so bright they cast shadows. Ya wakes everyone up to see. Nobody minds.`,
         }[g.flags.bl_ev]),
         choices: [
@@ -1070,7 +1159,17 @@ ${likesMei(g) ? 'Across the fire, Mei Lin opens one eye, sees, and closes it aga
     bl_night_won: {
         id: 'bl_night_won', title: 'Quiet Again', art: 'night_watch', place: (g) => PLACE[region(g)],
         enter: (g) => { if (g.flags.bl_ev === 'wolves') addItem(g, 'venison', 2); if (g.flags.bl_ev === 'hawks') addItem(g, 'fowl_raw', 1); return g.flags.bl_ev === 'wolves' ? ['+2 wolf meat (as venison).'] : g.flags.bl_ev === 'hawks' ? ['+1 cinder hawk (as fowl).'] : []; },
-        text: (g) => `${g.flags.bl_ev === 'drowned' ? 'The drowned go back under the black water when you\'ve finished with them, slowly, almost gratefully. Mei Lin sits with her arms round her knees for the rest of the night, and Ya sits with her, and doesn\'t make a single joke.' : 'It\'s over quickly, and messily. Ya cleans her spear and says it was good practice. Mei Lin cleans your cuts and says nothing about practice at all.'}`,
+        text: (g) => byDay(g, [(g) => `${g.flags.bl_ev === 'drowned' ? 'The drowned go back under the black water when you\'ve finished with them, slowly, almost gratefully. Mei Lin sits with her arms round her knees for the rest of the night, and Ya sits with her, and doesn\'t make a single joke.' : 'It\'s over quickly, and messily. Ya cleans her spear and says it was good practice. Mei Lin cleans your cuts and says nothing about practice at all.'}`,
+            (g) => (g.flags.bl_ev === 'drowned'
+                ? `They go down quietly, in the end. The black water closes over them without a ripple, and you stand there still braced for the next one, feeling like a man who has shouted at a funeral. Mei Lin says a few words over the water: formal ones, the kind Ashfall keeps for its own. Ya waits until she has finished before she spits in it.`
+                : `It's over before the fire has properly caught again. Ya goes to look at what is left of the other side and comes back satisfied. Mei Lin goes over you with a wet cloth and a face like a magistrate, and sees to your cuts as if you had got them on purpose.`),
+            (g) => (g.flags.bl_ev === 'drowned'
+                ? `When it's done the drowned sink where they stood, and the rings spread out and are gone. Nobody lies down again. Ya sharpens her spear, which does not need it. Mei Lin feeds the fire one stick at a time and watches the water over the top of it, and when Ya shifts over to sit closer, she lets her.`
+                : `Short, loud and untidy. Ya walks the edge of the camp afterwards, prodding the dark with the butt of her spear to be sure it has finished, and pronounces the night improved. Mei Lin looks at the state of your coat and says that a scholar ought to own a second one.`),
+            (g) => (g.flags.bl_ev === 'drowned'
+                ? `They go under again, one after another, with no more fuss than people leaving a room. Ya wipes her spear on the bark and says, to nobody, that they fight as if they were sorry about it. Mei Lin tells her to be quiet. Then, a while later, in a small voice, that she's right.`
+                : `Done. You stand there breathing, and your threads go on tracking the fight for a moment after there is no fight left to track. Ya is asleep again already, or says she is. Mei Lin takes your hand, turns it over, finds the cut you hadn't noticed and deals with it without a word, which from her is a lecture.`),
+        ], 'bl_night_won'),
         choices: [{ text: 'Sleep, what\'s left of it.', to: 'bl_morning' }],
     },
     bl_night_lost: {

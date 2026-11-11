@@ -4,7 +4,7 @@
  * Entry 'ht_start' (Day 16). Exit 'rt_start' (Day 19, dawn).
  */
 import { addItem, hasItem, condense, advance, jamesHpMax, d6 } from '../core/game.js';
-import { eatBest, pantry, foodCount, set, byForm } from './common.js';
+import { eatBest, pantry, foodCount, set, byForm, byDay } from './common.js';
 import { day, hour, encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil, logTrio, ykShape } from './act1_common.js';
 import { ykPath } from './yuki_path.js';
 
@@ -217,12 +217,22 @@ You stand there holding it for longer than you'd like anyone to see. ${ya(g) ? '
     heart_spring: {
         id: 'heart_spring', title: 'The Spring', art: 'hot_spring', place: `${PIN} — the spring`,
         enter: (g) => { g.flags.spring_found = true; g.flags[`spring@${day(g)}`] = true; return []; },
-        text: (g) => `Down one gallery, where the floor dips, there's water: a pool in a basin of grown wood, fed by a seep somewhere in the walls, warm from something deep below. Steam lies on the surface like breath on a mirror.
+        text: (g) => byDay(g, [(g) => `Down one gallery, where the floor dips, there's water: a pool in a basin of grown wood, fed by a seep somewhere in the walls, warm from something deep below. Steam lies on the surface like breath on a mirror.
 
 It's clean. Your omnitool says so, twice, as if it can't believe it either. The only clean water you have found on this whole world, and it's inside the corpse of a Hearth Tree.
 
 ${ya(g) ? `Ya has her clothes off and is in it before you've finished reading the analysis. "Warm!" she reports, delighted, from the middle of the pool. "Come in. Both of you. I don't bite. I bite a *little*."` : 'Mei Lin kneels and puts her hands in it and just leaves them there.'}
-${ya(g) ? (g.flags.romance ? 'Mei Lin goes red to the ears, looks at you, looks at Ya, and says something in a dialect you don\'t know that is clearly not a blessing.' : 'Mei Lin turns her back on the pool with enormous dignity. Her ears are red.') : ''}`,
+${ya(g) ? (g.flags.romance ? 'Mei Lin goes red to the ears, looks at you, looks at Ya, and says something in a dialect you don\'t know that is clearly not a blessing.' : 'Mei Lin turns her back on the pool with enormous dignity. Her ears are red.') : ''}`, (g) => `The spring is where you left it, which on this world you no longer take for granted. Steam on the surface. The basin of grown wood has a lip worn smooth along one side, at sitting height, and it takes you a moment to understand that forty gardeners wore it smooth.
+
+Your omnitool tests the water again without being asked, and reports it clean again, in what you choose to read as a calmer tone.
+
+${ya(g) ? `Ya goes in off the edge with a whoop that comes back down from the galleries a good while later. "Still warm!" she announces, surfacing. "I thought it might have run out. Get in before it does."` : `Mei Lin rolls her sleeves to the elbow and washes her hands and face slowly, the way people wash at a shrine.`}
+${ya(g) ? (g.flags.romance ? `Mei Lin says that springs do not run out, that is what makes them springs, and then stands there holding her own collar shut with one hand and looking at neither of you.` : `Mei Lin says that springs do not run out, that is what makes them springs, and goes to wash at the far end with her back turned like a shut door.`) : ''}`, (g) => `Back to the spring. You have stopped being surprised by the water and started noticing the room: a row of pegs grown out of the wall at shoulder height, each one worn pale where a hand reached for it every day for years.
+
+You don't run the analysis this time. You just put your hand in.
+
+${ya(g) ? `Ya is already floating on her back in the middle, her necklace of teeth adrift round her collarbones. "You're slow," she tells the ceiling. "Both of you. The water says so."` : `Mei Lin sits on the worn lip of the basin with her feet in the water and her eyes shut, and for once does not look as if she is waiting to be told off.`}
+${ya(g) ? (g.flags.romance ? `Mei Lin looks at the pool, and at Ya, and at you, and says, in the voice of a woman reading out a sentence, that she will be keeping her shift on. Nobody had asked.` : `Mei Lin informs the wall that some people were raised in a den, and unpins her hair at the far end of the pool, facing away.`) : ''}`], 'heart_spring'),
         choices: [
             { text: 'Get in. You\'re forty, filthy, and it\'s *warm*.', show: ya, time: 45, do: (g) => { advance(g, 0); g.james.hp = Math.min(jamesHpMax(g), g.james.hp + 6); bumpRel(g, 'Ya', 3, 5); if (likesMei(g)) bumpRel(g, 'Mei Lin', 0, 2); return ['+6 HP. Ya spends the whole time trying to drown you, then trying to get you to stop being so stiff, then, briefly, very effectively, not trying to do anything at all except sit closer.']; }, to: 'heart_hub' },
             { text: 'Wash, quickly, at the far end, with a reasonable amount of dignity left.', time: 30, do: (g) => { g.james.hp = Math.min(jamesHpMax(g), g.james.hp + 4); bumpRel(g, 'Mei Lin', 2, 1); return ['+4 HP. Mei Lin washes beside you and tells you, without looking, that you are a coward. She doesn\'t sound like she minds.']; }, to: 'heart_hub' },
@@ -492,6 +502,7 @@ ${trio(g) >= 3 ? byForm(g, 'The three', 'The three', 'The four') + ' of you slee
         ],
     },
     heart_night: {
+        dayKey: (g) => `heart_night:${g.flags.heart_night_roll <= 2 ? 'knock' : both(g) && ya(g) && trio(g) >= 2 && g.flags.heart_night_roll >= 4 ? 'whisper' : 'quiet'}`, // v0.11.135 (NT1, EV1); RN2 (L1): the whispering night its own key, as its text's own branch
         id: 'heart_night', title: 'Night Inside the Tree', art: 'night_watch', place: PIN,
         enter: (g) => { g.flags.heart_night_roll = d6(g); return []; },
         text: (g) => {
@@ -506,25 +517,33 @@ When you open your eyes properly, Mei Lin is looking at you across the fire. She
 You decide, as a scientist, that this is data you are not yet equipped to interpret, and go back to sleep.`;
             }
             if (r <= 2) {
-                return 'In the night, something knocks three times from somewhere deep in the trunk — slow, deliberate, like a knuckle on a door. Then nothing. Yuki growls at the dark for an hour. Nobody sleeps well.';
+                return byDay(g, ['In the night, something knocks three times from somewhere deep in the trunk — slow, deliberate, like a knuckle on a door. Then nothing. Yuki growls at the dark for an hour. Nobody sleeps well.',
+                    `The knocking again, in the dead middle of the night. Three, slow, from deep in the trunk. This time you are awake for it, and you time the gaps, and the gaps are exactly even. Wood settling does not keep time. Yuki sits facing the sound until morning, ears forward. Nobody sleeps well.`,
+                    `Three knocks, deep in the trunk. You have started waiting for them, which is worse than being woken by them. You cannot tell whether they come from the same place as before; the hall gives nothing away. Yuki doesn't growl this time. She looks at the dark, and then at you, and then at the dark. Nobody sleeps well.`], 'heart_night:knock');
             }
-            return 'The night is quiet. The dark at the top of the hall is very far away. Somewhere below you, the ship hums in its sleep, and if you listen hard enough, you can almost hear forty gardeners breathing.';
+            return byDay(g, ['The night is quiet. The dark at the top of the hall is very far away. Somewhere below you, the ship hums in its sleep, and if you listen hard enough, you can almost hear forty gardeners breathing.',
+                `A quiet night. The embers tick. Far up in the dark a flake of dead bark lets go and takes a long time to land. Under the floor the ship keeps up its one low note, and you fall asleep trying to work out the key.`,
+                `Nothing happens in the night, and you lie awake for a while appreciating it. The hall holds the fire's warmth better than a dead thing should. Below you the ship hums on, patient, like a house with one lamp left burning for somebody who is late.`], 'heart_night:quiet');
         },
         choices: [{ text: 'Morning.', to: 'heart_morning' }],
     },
     heart_morning: {
         id: 'heart_morning', title: (g) => `Day ${day(g)}`, art: 'heart_hall', place: PIN,
         enter: wake,
-        text: (g) => `Grey light comes down the cracks. Mei Lin is ${trio(g) >= 3 ? 'tangled with Ya, both of them still asleep, and you lie there for a minute not wanting to move' : 'already up, making tea from the spring water'}. ${ya(g) ? 'Ya appears from somewhere she shouldn\'t have been, with something she shouldn\'t have, and offers you half of it.' : ''}
+        text: (g) => byDay(g, [(g) => `Grey light comes down the cracks. Mei Lin is ${trio(g) >= 3 ? 'tangled with Ya, both of them still asleep, and you lie there for a minute not wanting to move' : 'already up, making tea from the spring water'}. ${ya(g) ? 'Ya appears from somewhere she shouldn\'t have been, with something she shouldn\'t have, and offers you half of it.' : ''}
 
-${late(g) && !g.flags.seed ? 'You can feel it this morning, the way you can feel weather: the tree is tired of waiting. Today.' : ''}`,
+${late(g) && !g.flags.seed ? 'You can feel it this morning, the way you can feel weather: the tree is tired of waiting. Today.' : ''}`, (g) => `The light in the cracks goes from black to grey without stopping at any colour on the way. Mei Lin is ${trio(g) >= 3 ? `asleep with her face in Ya's shoulder and one hand closed in your sleeve, and you spend a while working out how to get up without waking either of them, and then don't get up` : `up before you again, sorting yesterday's herbs into rows on a flat root as if the tree might inspect them`}. ${ya(g) ? `Ya's first act of the day is to hold something up for you to smell. You decline. She eats it.` : ''}
+
+${late(g) && !g.flags.seed ? `The hall feels different this morning. Like a held breath. Whatever the tree has been waiting for, it is done waiting. Today.` : ''}`, (g) => `Morning, by the evidence: a thin grey line down each crack, and dust turning in it. Mei Lin is ${trio(g) >= 3 ? `still asleep under Ya's arm, frowning, as if being comfortable were a thing she would have to answer for later, and you stay where you are and let her` : `awake and combing her hair by feel, the ivory pin held in her teeth`}. ${ya(g) ? `Ya, with her eyes still shut, informs the hall that she dreamt of elk, and that she holds all of you responsible for there not being any.` : ''}
+
+${late(g) && !g.flags.seed ? `You wake already knowing it, the way you know rain is coming: the tree has run out of patience. Today.` : ''}`], 'heart_morning'),
         choices: [{ text: 'Up.', to: 'heart_hub' }],
     },
 
     /* ---------- the guardian ---------- */
     guardian_approach: {
         id: 'guardian_approach', title: 'The Bone Door', art: 'guardian', place: `${PIN} — the heart-chamber door`,
-        text: (g) => `Deeper than the ship, past where the roots knot together into one great braid, there's a door. Not grown wood. Bone — white, ribbed, beautiful, sung into shape by somebody with your gift and far more skill.
+        text: (g) => byDay(g, [(g) => `Deeper than the ship, past where the roots knot together into one great braid, there's a door. Not grown wood. Bone — white, ribbed, beautiful, sung into shape by somebody with your gift and far more skill.
 
 It opens as you come near. Behind it, in a chamber like the inside of a seed, something is standing up.
 
@@ -534,7 +553,23 @@ And it's singing. The same note you heard at the gate. Broken, now, and repeatin
 
 *Who comes,* it sings, in your language. *Who comes. Who comes to the heart.*
 
-${g.flags.guardian_lost_day ? 'It remembers you. The note goes harder and stranger when it sees you.' : ''}`,
+${g.flags.guardian_lost_day ? 'It remembers you. The note goes harder and stranger when it sees you.' : ''}`, (g) => `The braid of roots again, and the bone door at the end of it. You notice the hinges this time: there aren't any. Whoever sang it grew the door and the frame as one piece and taught it to open. You have a doctorate, and you could not do that.
+
+It opens as you come near. In the seed-shaped chamber the guardian is already on its feet, moss swinging from its arms, the smooth white head turned toward the doorway. The green in the hollow of its chest is no brighter than before. No dimmer, either.
+
+The note hasn't changed. One line of a lullaby, worn down to the groove.
+
+*Who comes,* it sings. *Who comes. Who comes to the heart.*
+
+${g.flags.guardian_lost_day ? `It knows you. The note climbs when it sees you, harder and stranger, like a question it has already heard you answer wrong.` : ''}`, (g) => `Down the braid of roots once more. You could walk it with your eyes shut, and your Convergence very nearly does: it has been leaning toward this door since the gate, the way a compass leans.
+
+The door opens. The chamber breathes out air that smells of green wood and old dust. The guardian stands where it always stands, a gardener the size of a house with no face to read, and you find you are reading it anyway. The way it holds its arms. It is standing over the glow in its chest like someone shielding a candle.
+
+Four hundred years of the same question, put to an empty doorway.
+
+*Who comes,* it sings, in your language. *Who comes. Who comes to the heart.*
+
+${g.flags.guardian_lost_day ? `It remembers you. The note goes hard and strange at the sight of you, and the moss on its arms shivers.` : ''}`], 'guardian_approach'),
         choices: [
             { text: 'Answer it. In the old way: with your Convergence, with the song.', show: (g) => !g.flags.guardian_talked, check: { skill: 'Convergence Use', dc: 7, bonus: (g) => (g.flags.gate_listened ? 1 : 0) + (g.flags.hall_song ? 1 : 0) + (g.flags.ship_woke ? 1 : 0) + (g.flags.reaction === 'grief' ? 1 : 0) + (g.james.realm >= 1 ? 1 : 0), band: 'major' }, qi: 6, time: 30, to: 'guardian_calmed', fail: 'guardian_half' },
             { text: 'Fight it. Whatever it was, it\'s mad now, and it stands between you and the heart.', combat: guardianFight, to: 'guardian_won' },

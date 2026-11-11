@@ -8,7 +8,7 @@ import { addItem, hasItem, eat, bumpRel, sleepUntil, advance, clockParts, breakt
 import { NO_DICE_TUNE } from './nodice_tune.js';
 import { setNoDiceTune, yukiFightSkill } from '../core/game.js'; // v0.11.118 (YK1 review, SB)
 setNoDiceTune(NO_DICE_TUNE);
-import { forestScale, villageScale, grow, NEW_ITEMS, byForm } from './common.js';
+import { forestScale, villageScale, grow, NEW_ITEMS, byForm, byDay } from './common.js';
 import './power.js';
 import './stomp_prologue.js';
 import './stomp_act1.js';
@@ -282,9 +282,9 @@ She does not accept your defence.`,
 
     camp: {
         id: 'camp', title: 'Camp', art: 'camp', place: 'Blackroot Wilds — the dry rise',
-        text: (g) => `A dry rise above the water, a fallen trunk to put your back against, a sky turning the colour of wine.
+        text: (g) => `${byDay(g, ['A dry rise above the water, a fallen trunk to put your back against, a sky turning the colour of wine.', `The dry rise again, and the fallen trunk, which has kept the shape of your back. The sky is going from bruise to wine, on schedule.`], 'camp')}
 
-${foodCount(g) ? `You have food: ${[g.inventory.hare_raw ? `${g.inventory.hare_raw} hare` : '', g.inventory.jade_bracket ? `${g.inventory.jade_bracket} fungus` : ''].filter(Boolean).join(', ')}.` : 'You have no food. You have a cat, who is looking at you like *you* are the food.'}
+${foodCount(g) ? `${byDay(g, ['You have food', 'In the larder, such as it is'], 'camp')}: ${[g.inventory.hare_raw ? `${g.inventory.hare_raw} hare` : '', g.inventory.jade_bracket ? `${g.inventory.jade_bracket} fungus` : ''].filter(Boolean).join(', ')}.` : byDay(g, ['You have no food. You have a cat, who is looking at you like *you* are the food.', `You have no food. Yuki has noticed, and is letting you know that she has noticed.`], 'camp')}
 ${g.flags.fire ? 'The fire crackles.' : 'No fire yet.'} ${g.flags.stakes ? 'A ring of bone stakes leans outward around the camp.' : ''}`,
         choices: [
             { text: 'Make fire: a bone bow-drill and a lot of swearing.', show: once('fire'), check: { skill: 'GU', dc: 3 }, time: 25, do: set('fire'), failDo: (g) => { advance(g, 20); g.flags.fire = true; return ['It takes three times as long and one blister, but there is fire.']; }, to: 'camp' },
@@ -296,11 +296,15 @@ ${g.flags.fire ? 'The fire crackles.' : 'No fire yet.'} ${g.flags.stakes ? 'A ri
     },
     night: {
         id: 'night', title: 'Night', art: 'forest_night', place: 'Blackroot Wilds — the dry rise',
-        text: (g) => `Night on this world is not a lack of light. It is a presence. The black trees drink the stars. Something far off screams, stops, and does not scream again.
+        text: (g) => byDay(g, [(g) => `Night on this world is not a lack of light. It is a presence. The black trees drink the stars. Something far off screams, stops, and does not scream again.
 
 ${g.flags.fire ? 'The fire makes a small, defiant room in the dark.' : 'Without fire, the dark comes right up to your knees.'} ${byForm(g, 'Yuki climbs into your lap', 'Yuki lies down around you', 'Yuki sits down against your side')}, which she only does when she thinks one of you needs it.
 
-${(g.flags.forest_day || 1) > 1 ? 'Another night in the Blackroot. Your watch-thread is already spinning up before you ask.' : 'Your Parallel Cognition offers, unprompted, to spin up a thread for watch-keeping. Nine threads, and one of them never sleeps unless you tell it to.'}`,
+${(g.flags.forest_day || 1) > 1 ? 'Another night in the Blackroot. Your watch-thread is already spinning up before you ask.' : 'Your Parallel Cognition offers, unprompted, to spin up a thread for watch-keeping. Nine threads, and one of them never sleeps unless you tell it to.'}`, (g) => `The dark comes down the way it did before: all at once, and personally. The black trees take the stars one at a time. Somewhere off to the left something large walks a slow circle round the rise and does not come closer, which you decide to take as manners.
+
+${g.flags.fire ? `The fire holds its small room open against the dark.` : `With no fire, the dark sits down beside you like an acquaintance.`} ${byForm(g, 'Yuki is in your lap before you have finished sitting down', 'Yuki has laid herself round you before you have finished sitting down', 'Yuki has settled against your side before you have finished sitting down')}, and neither of you mentions it.
+
+${(g.flags.forest_day || 1) > 1 ? `Another night in the Blackroot. The watch-thread is up and turning before you have thought to ask.` : `Your Parallel Cognition puts a thread forward for the watch again, unasked. Nine threads, and one of them is content never to sleep.`}`], 'night'),
         choices: [
             { text: 'Leave a thread on watch and sleep.', do: set('watch'), to: nightNext },
             { text: 'Story Mode only (removed in v0.11.41).', show: () => false, to: nightNext }, // v0.11.41 (D2-a): Story Mode's sit; the place kept (choice indices)

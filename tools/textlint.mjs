@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // v0.11.132 (owner picks PL1, E1): the story-text lint, log only (it never fails). Every scene text and choice label,
-// rendered as the screen would on 9 sample states (Yuki as the cat, the great root-kin and human; no path, sister,
+// rendered as the screen would on 9 sample states, each also on a later day (v0.11.135) (Yuki as the cat, the great root-kin and human; no path, sister,
 // lover; as tools/lint.mjs), counted by the rules in tools/lib/textlint.mjs: SH reused passages, FV favourite phrases,
 // TC tics, BD broken text (and spacing the screen drops), RD texts that render on no sample state. SN: the counts per
 // story area against the saved snapshot tools/text-baseline.json; each change is a log-only NOTE line (the measure for
@@ -10,6 +10,7 @@
 //   node tools/textlint.mjs --save    save the counts as the new snapshot (with the push that changes the texts)
 // v0.11.134 (owner pick LP2, LR): and the line pools: again.js's memory lines, Yuki's haul lines (task_hubs.js), the aptitude reply
 // (tasks.js): per pool lines, words, a line twice, lines sharing a 5-word chunk with a scene text, tics, broken, spacing.
+// v0.11.135 (NT1, EV1): every sample state also on a scene's 2nd–4th day this Coil, so the later-day texts are read.
 // Not read yet: the result lines of choices and cards, the task cards' texts (open, options later).
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
@@ -31,10 +32,13 @@ const areaOf = {};
 for (const [name, file, key] of AREAS) { const m = await import(js(`story/${file}.js`)); for (const id of Object.keys(m[key])) areaOf[id] = name; }
 
 const SAMPLES = [];
-for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) for (const p of [null, 'sister', 'lover']) {
+// v0.11.135 (owner picks NT1, EV1): each sample also on a scene's 2nd, 3rd and 4th day this Coil (lines.js byDay), so the later-day texts are read
+const { coilStamp, textDay } = await import(js('core/lines.js'));
+const onDay = (g, k) => { const today = textDay(g); const days = [...Array(k).keys()].map((i) => -1 - i).concat([today]); g.lines = { c: coilStamp(g), p: {}, last: {}, cur: {}, at: null, said: [], d: new Proxy({}, { get: (_, key) => (typeof key === 'string' ? days : undefined) }) }; return g; };
+for (const k of [0, 1, 2, 3]) for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) for (const p of [null, 'sister', 'lover']) {
     const g = ensureBars(newGame(1234, { closed: true }));
     g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; if (p) g.flags.yk_path = p;
-    SAMPLES.push(ensureBars(g));
+    SAMPLES.push(k ? onDay(ensureBars(g), k) : ensureBars(g));
 }
 const renders = (x) => {
     if (typeof x === 'string') return [x];

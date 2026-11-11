@@ -3,7 +3,7 @@
  * a night visit shaped by what James did to Gao Feng, and bonuses that pay off when the Sect comes on Day 7.
  */
 import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, d6, awardYukiFightXp, jamesHpMax, nightRest, nightTo } from '../core/game.js';
-import { set, day, hour, daily, markDaily, forestScale, villageScale, grow, eatBest, pantry, foodCount, byForm } from './common.js';
+import { set, day, hour, daily, markDaily, forestScale, villageScale, grow, eatBest, pantry, foodCount, byForm, byDay } from './common.js';
 
 const P = 'Ashfall Hamlet';
 const vday = (g) => g.flags.vday || 1;
@@ -169,7 +169,9 @@ Everyone in Ashfall is up early, and everyone has found a reason to walk past Me
         id: 'ashfall', title: 'Ashfall', art: 'village', place: P,
         text: (g) => {
             const h = hour(g);
-            const when = h < 11 ? 'Morning. The village is up and working.' : h < 15 ? 'Midday heat. The chickens have given up.' : h < 18 ? 'Late afternoon, long shadows, the smell of cooking fires.' : 'Dusk. Lamps coming on behind the shutters.';
+            const when = byDay(g, [0, 1], 'ashfall') // NT1 (Fable's draft): a second set of the times of day
+                ? (h < 11 ? `Morning. Smoke going straight up, and the sound of somebody splitting wood as if it had wronged him.` : h < 15 ? `Midday. The well rope is too hot to hold and the dogs have gone under the houses.` : h < 18 ? `Late afternoon. The shadows of the houses have reached the far side of the street, and the cooking smells begin.` : `Dusk. Shutters closing one after another down the street, like a sentence being finished.`)
+                : (h < 11 ? 'Morning. The village is up and working.' : h < 15 ? 'Midday heat. The chickens have given up.' : h < 18 ? 'Late afternoon, long shadows, the smell of cooking fires.' : 'Dusk. Lamps coming on behind the shutters.');
             return `${when} ${vday(g) === 3 ? 'The tribute post\'s red banners hang dead still. Tomorrow.' : 'Two days to the tribute.'}
 
 ${pantry(g)} ${g.james.satiety < 30 ? 'You are hungry.' : ''} ${g.james.hp < jamesHpMax(g) * 0.5 ? 'You are hurt.' : ''}`;
@@ -252,27 +254,31 @@ ${g.flags.militia ? 'Second day. They\'re faster now. They\'re standing differen
     },
 
     wen_lesson: {
+        dayKey: (g) => `wen_lesson:${g.flags.lore_realms ? 'forest' : 'realms'}`, // NT1 (Fable's draft): the forest talk's own days, so its first day is its first text
         id: 'wen_lesson', title: 'Old Wen', art: 'elder', place: `${P} — the elder's house`,
         enter: (g) => { markDaily(g, 'wen'); return []; },
         text: (g) => (!g.flags.lore_realms
             ? `Old Wen pours tea and talks about cultivation the way an old farmer talks about weather: without hope, without fear, with a great deal of precise detail.
 
 Mortal Vessel. Foundation. Core Formation. The realms go up like a ladder into cloud. Every rung costs more. The Sect buys rungs with villages like this one: grass, grain, children. "A ladder," he says, "is only a ladder if somebody holds the bottom."`
-            : `Today he talks about the forest. About the Old Tree at its heart — "before the Sect, before my grandfather's grandfather" — and how the hunters' tales say it once sang, and the singing made the forest kind.
+            : byDay(g, [(g) => `Today he talks about the forest. About the Old Tree at its heart — "before the Sect, before my grandfather's grandfather" — and how the hunters' tales say it once sang, and the singing made the forest kind.
 
-"Then one day it stopped. And the forest stopped being kind." He looks at you with his good eye. ${byForm(g, "\"Your cat's been staring toward it since you came.", "\"Your cat's been staring toward it since you came.", "\"Your companion has been staring toward it since you came.")} So have you."`),
+"Then one day it stopped. And the forest stopped being kind." He looks at you with his good eye. ${byForm(g, "\"Your cat's been staring toward it since you came.", "\"Your cat's been staring toward it since you came.", "\"Your companion has been staring toward it since you came.")} So have you."`, (g) => `He comes back to the forest today, as you thought he might. To the Old Tree — "older than the Sect, older than the oldest grave on the hill" — and to what the hunters' grandfathers said of it: that in the years it sang, a child could sleep under any branch in the Blackroot and wake with nothing worse than dew.
+
+"I do not say it is true. I say it was said, and by serious men." He turns his cup a quarter turn, exactly. ${byForm(g, "\"Your cat sits facing it. Every day, the same way, like a needle.", "\"Your cat sits facing it. Every day, the same way, like a needle.", "\"Your companion sits facing it. Every day, the same way, like a needle.")} You do the same, and do not know that you do it."`], 'wen_lesson:forest')),
         choices: [
             { text: 'Listen. Ask. Take notes in a mind with nine threads.', check: { skill: 'GU', dc: 2 }, time: 120, do: (g) => { const first = !g.flags.lore_realms; if (first) g.flags.lore_realms = true; else g.flags.lore_tree = true; bumpRel(g, 'Old Wen', 4, 0); return [first ? `You take it down rung by rung, in a thread of its own, and ask who holds the bottom of the ladder here. Old Wen looks at you with his good eye for a long moment. "Now you have asked the right question," he says. "Nobody in Ashfall has asked it since my father's time."` : `You ask what the hunters' tales say the singing sounded like. He thinks about it with great seriousness. "Like something you have already heard," he says at last, "and cannot name." You don't tell him that's exactly it. ${byForm(g, "Yuki, on your knee,", "Yuki, her chin on your knee,", "Yuki, beside you,")} has not stopped looking toward the forest.`]; }, failDo: (g) => { if (!g.flags.lore_realms) g.flags.lore_realms = true; else g.flags.lore_tree = true; return ['You drift. He notices, and forgives it.']; }, to: 'ashfall' },
         ],
     },
 
     far_hunt: {
+        dayKey: (g) => `far_hunt:${g.flags.far_kind}`, // v0.11.135 (NT1, EV1)
         id: 'far_hunt', title: 'Past the Oak Hollow', art: (g) => (g.flags.far_kind === 'wolves' ? 'wolves' : g.flags.far_kind === 'bull' ? 'lizard' : 'herb_slope'), place: 'Blackroot Wilds — past the oak hollow',
         enter: (g) => { markDaily(g, 'far'); const r = d6(g); g.flags.far_kind = r <= 2 ? 'wolves' : r <= 4 ? 'bull' : 'deer'; return []; },
         text: (g) => ({
-            wolves: 'The hunters warned you about the ash-wolves. You thought they were exaggerating. They were not exaggerating.',
-            bull: 'A thornback, but a big one — a bull, twice the size of the one at your camp, spines like a hedge of spears.',
-            deer: 'Ash-deer: grey, delicate, and fast. The hunters say nobody has taken one with an arrow in ten years.',
+            wolves: byDay(g, ['The hunters warned you about the ash-wolves. You thought they were exaggerating. They were not exaggerating.', `The ash-wolves again. They have not got fewer since the hunters warned you, and they have not got politer. The hunters, to be fair, never said they would.`], `far_hunt:wolves`),
+            bull: byDay(g, ['A thornback, but a big one — a bull, twice the size of the one at your camp, spines like a hedge of spears.', `A thornback bull again: big as a hay cart, spines like a rack of spears, standing square in the path with the calm of something that has never once had to move.`], `far_hunt:bull`),
+            deer: byDay(g, ['Ash-deer: grey, delicate, and fast. The hunters say nobody has taken one with an arrow in ten years.', `The ash-deer are in the birches again, grey among grey trunks, stepping as if the ground might complain. One lifts its head and looks straight at you from a hundred paces. The hunters say that is as close as anyone gets.`], `far_hunt:deer`),
         }[g.flags.far_kind]),
         choices: [
             { text: 'Fight.', show: (g) => g.flags.far_kind !== 'deer', combat: farHunt, to: 'far_won' },
@@ -284,7 +290,7 @@ Mortal Vessel. Foundation. Core Formation. The realms go up like a ladder into c
     far_won: {
         id: 'far_won', title: 'Meat and Cores', art: (g) => (g.flags.far_kind === 'wolves' ? 'wolves' : 'lizard'), place: 'Blackroot Wilds — past the oak hollow',
         enter: (g) => { addItem(g, 'beast_core', 1); addItem(g, g.flags.far_kind === 'wolves' ? 'venison' : 'lizard_egg', 2); bumpRel(g, 'Village', 5, 0); return [`+1 Murky beast core, +2 ${g.flags.far_kind === 'wolves' ? 'wolf meat (as venison)' : 'thornback eggs'}.`]; },
-        text: `You drag it back to Ashfall in pieces. The hunters receive each load in silence and bow to it, the way you bow to a fallen enemy. Then, gravely, to you.`,
+        text: (g) => byDay(g, [`You drag it back to Ashfall in pieces. The hunters receive each load in silence and bow to it, the way you bow to a fallen enemy. Then, gravely, to you.`, `You carry it home in loads. This time the hunters meet you at the oak hollow, unasked, and take the weight from you in order of age. Nobody says well done. The eldest looks at the kill, then at you, and inclines his head by the width of a finger, and you understand that you have been promoted.`], 'far_won'),
         choices: [{ text: 'Back to the village.', time: 60, to: 'ashfall' }],
     },
     far_lost: {

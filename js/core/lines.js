@@ -8,8 +8,11 @@
  * The save's `lines` record (reset at every new Coil; an old save gets it on first use; an older version ignores it):
  *   { c: "act:n", p: { pool: [plays per line] }, last: { pool: index }, cur: { pool: index }, at: scene id, said: [keys] }
  * `said` (QR): the reply parts already shown this Coil (replies.js quietFilter / noteSaid).
+ * v0.11.135 (owner picks NT1, EV1): `d`, the days this Coil each scene (or a scene's event, `dayKey`) was entered, in order
+ * (story.js go() records them; a day runs from 05:00, RN2 H1); `byDay` gives a scene's text for the day: its first text on the first day, the next one on the next
+ * day it shows, and so on (a pool in order; past the last, it starts again).
  */
-import { fnv1a } from './game.js';
+import { fnv1a, clockParts } from './game.js';
 
 /** A usable record: a plain object for this Coil. */
 const isRec = (r) => !!r && typeof r === 'object' && !Array.isArray(r);
@@ -22,9 +25,10 @@ export function linesOf(g) {
     const c = coilStamp(g);
     let L = g.lines;
     if (!isRec(L) || L.c !== c || !isRec(L.p) || !isRec(L.cur) || !isRec(L.last) || !Array.isArray(L.said)) {
-        L = { c, p: {}, last: {}, cur: {}, at: isRec(L) && typeof L.at === 'string' ? L.at : null, said: [] };
+        L = { c, p: {}, last: {}, cur: {}, at: isRec(L) && typeof L.at === 'string' ? L.at : null, said: [], d: {} };
         g.lines = L;
     }
+    if (!isRec(L.d)) L.d = {}; // v0.11.135: a v0.11.134 record gains the day list
     return L;
 }
 
@@ -73,4 +77,29 @@ export function noteVisit(g, id) {
     L.at = id;
     if (fresh) L.cur = {};
     return fresh;
+}
+
+/** v0.11.135 (RN2, H1; Fable's review): a text's day runs from 05:00 (the earliest wake) to 05:00, not midnight, so a night scene
+ *  entered before midnight and shown after it is still that night (the last camp no longer turned into its "next night" text). */
+export const TEXT_DAY_FROM = 5 * 60;
+export const textDay = (g) => clockParts((g.minutes || 0) - TEXT_DAY_FROM).day;
+/** v0.11.135 (NT1, EV1): note that `key` (a scene id, or a scene's event) shows today. */
+export function noteDay(g, key) {
+    if (!g || !key) return;
+    const L = linesOf(g);
+    const d = textDay(g);
+    const a = Array.isArray(L.d[key]) ? L.d[key] : (L.d[key] = []);
+    if (!a.includes(d)) a.push(d);
+}
+/** v0.11.135: which day of this Coil `key` shows on today: 0 its first, 1 its second… (read only; a day not noted yet counts as the next). */
+export function dayIndex(g, key) {
+    const L = g?.lines;
+    const a = isRec(L) && L.c === coilStamp(g) && isRec(L.d) && Array.isArray(L.d[key]) ? L.d[key] : [];
+    const i = a.indexOf(textDay(g));
+    return i >= 0 ? i : a.length;
+}
+/** v0.11.135: the text for today from `list` (strings or functions of g), by `key` (the scene by default); past the last, from the start again. */
+export function byDay(g, list, key = g?.scene) {
+    const t = list[dayIndex(g, key) % list.length];
+    return typeof t === 'function' ? t(g) : t;
 }
