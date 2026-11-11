@@ -466,6 +466,52 @@ def again(pg, url):
         else: notes.append('a scene read before folds, reads in full, the skip walks to the wilds, and the screen records the scenes that can fold (not the task screens)')
     check_text(pg, 'after the skip', strict=True)
 
+def lp2(pg, url):
+    """v0.11.134 (owner pick LP2): QR, a reply already shown this Coil is not shown again (a card that fails twice: "You see what
+    went wrong." under the text once, its Intuitive Aptitude gain in Results both times: two forage cards that fail); SV, a scene shown again with the same text
+    right after an action that kept you there folds, with no memory line (the Bone Field's bone-meal, on Coil 1); RQ1: a save slot
+    loaded on that scene shows it in full (a new visit)."""
+    st = json.loads((ROOT / 'saves/v0.11.7-coil2-day1.json').read_text())
+    st = json.loads(st['data']) if 'data' in st and isinstance(st.get('data'), str) else st
+    st['combat'] = None; st['scene'] = 'wilds'; st.pop('lines', None)
+    # two forage cards that both fail on this save (the game's checks have no dice): the same aptitude reply, from two cards
+    fresh(pg, url, "a => { localStorage.clear(); localStorage.setItem('boneash.groups', JSON.stringify({ Forage: true })); localStorage.setItem('boneash.auto', a); }", json.dumps(st))
+    replies, gains = [], []
+    for k, cid in enumerate(['wild_forage:1', 'wild_forage:2']):
+        el = pg.query_selector(f'button.card:not([disabled])[data-run="{cid}"]')
+        if not el: fails.append(f'LP2 (QR): no {cid} card at the wilds (tap {k + 1})'); return
+        n0 = len(pg.query_selector_all('.pane.results details.res'))
+        tap(pg, el); until(pg, f'document.querySelectorAll(".pane.results details.res").length > {n0}', 3000)
+        r = pg.query_selector('.prose.reply'); replies.append(r.inner_text() if r else '')
+        top = pg.query_selector('.pane.results details.res'); gains.append(top.text_content() if top else '')
+    if not ('You see what went wrong.' in replies[0] and 'You see what went wrong.' not in replies[1]):
+        fails.append(f'LP2 (QR): the aptitude reply should show once in a Coil (first: {replies[0][:80]!r}, second: {replies[1][:80]!r})')
+    elif not all('Intuitive Aptitude' in x for x in gains):
+        fails.append(f'LP2 (QR): the aptitude gain should go to Results both times ({[x[:60] for x in gains]})')
+    else: notes.append('LP2 (QR): a repeated reply shows once a Coil, its gain in Results each time')
+    st2 = dict(st); st2['scene'] = 'bone_field'; st2['inventory'] = {k: v for k, v in (st.get('inventory') or {}).items() if k != 'bone_meal'}
+    st2['coil'] = dict(st['coil'], n=1); st2['seen'] = {}; st2['read'] = {}
+    fresh(pg, url, "a => { localStorage.clear(); localStorage.setItem('boneash.auto', a); }", json.dumps(st2))
+    if pg.query_selector('.prose.again'): fails.append('LP2 (SV): the Bone Field folded on its first view'); return
+    grind = next((e for e in pg.query_selector_all('button.card:not([disabled])[data-story]') if 'Grind a pouch' in e.inner_text()), None)
+    if not grind: fails.append('LP2 (SV): no "Grind a pouch of old bone" choice at the Bone Field'); return
+    tap(pg, grind); until(pg, 'document.querySelector(".prose.again") || !document.querySelector(".head .title") || document.querySelector(".head .title").textContent !== "The Bone Field"', 3000)
+    title = pg.query_selector('.head .title'); title = title.inner_text() if title else ''
+    if title != 'The Bone Field': fails.append(f'LP2 (SV): the bone-meal left the Bone Field ({title!r})')
+    elif not pg.query_selector('.prose.again button.readall') or pg.query_selector('.prose.again .memory'):
+        fails.append('LP2 (SV): the Bone Field shown again on the same visit should fold, with Read it all again and no memory line')
+    else: notes.append('LP2 (SV): a scene shown again on the same visit folds, no memory line')
+    check_text(pg, 'after the same-visit fold', strict=True)
+    # RQ1 (TG): loading a save slot is a new visit: the same scene and text, in full
+    pg.evaluate("localStorage.setItem('boneash.slot1', localStorage.getItem('boneash.auto'))")
+    open_saves(pg)
+    ld = pg.query_selector('button[data-load="1"]')
+    if not ld: fails.append('RQ1 (TG): no Load button for slot 1'); return
+    ld.click(); on_tab(pg, 'story')
+    title = pg.query_selector('.head .title'); title = title.inner_text() if title else ''
+    if title != 'The Bone Field' or pg.query_selector('.prose.again'): fails.append(f'RQ1 (TG): a slot loaded on the same scene should show it in full ({title!r}, folded: {bool(pg.query_selector(".prose.again"))})')
+    else: notes.append('RQ1: a loaded slot shows the scene in full')
+
 def poll(pg, js, ms=20000):
     """v0.11.39: evaluate js (may return a promise) until it is truthy; the last value (falsy when the time ran out)."""
     end = time.time() + ms / 1000; v = None
@@ -647,6 +693,8 @@ def main(part=0):
                 picked(pg, url)
                 # 10. a scene read before: the fold, the memory line, the skip (v0.11.35)
                 again(pg, url)
+                # 13. quiet repeats and the same-visit fold (v0.11.134, LP2)
+                lp2(pg, url)
                 # 12. the FAQ (v0.11.83)
                 faq(pg, url)
             if three:

@@ -9,7 +9,7 @@ import { sceneView, choose, goTo, gives, choiceQi, threatOf } from './core/story
 import { showPicked, isTaskHub, isQueueScreen, isTaskChoice, taskCards, taskLabel, taskMinutes, taskOutcome, dryOutcome, outcomeOf, runTask, FAM, yukiLane, setYuki, nextStep, YUKI_LANE_TEXT, YUKI_HOURS } from './core/tasks.js';
 import { SCENES, ITEMS } from './story/prologue.js';
 import { TASK_HUBS } from './story/task_hubs.js';
-import { landParts } from './core/replies.js'; // v0.11.68 (A1 + B2 + C1)
+import { landParts, landReply, noteSaid } from './core/replies.js'; // v0.11.68 (A1 + B2 + C1); v0.11.134 (LP2, QR; RQ1): landReply, noteSaid
 import { againView, skipPlan, skipRun, noteRead, noFold } from './story/again.js'; // v0.11.35 (P1-a); v0.11.133 (FP2): noteRead, noFold
 import { coilActive, endCoil, targetsText, tabWhy } from './core/coil.js';
 import { medCards, runMed, isSitChoice, medActivity, useLine, LATE_TAG, canMeditate } from './core/meditate.js';
@@ -35,6 +35,9 @@ let lastResult = null; // { lines, fail }: since v0.11.68 only warnings (a card 
 // v0.11.68 (owner picks A1 + B2 + C1): the reply to the last choice or card shows under the scene text; its gains and the
 // friendship / affection it moved go to Results (js/core/replies.js sorts the lines)
 let lastReply = [];
+// v0.11.134 (owner pick LP2, SV): the story screen shown last ({ id, text, g }), and that screen when the last action kept you on it
+let shownScreen = null;
+let sameVisit = null;
 let combatLog = null;
 const view = document.getElementById('view');
 
@@ -151,12 +154,16 @@ function addResult(title, lines, fail, { sumLines = lines, quiet = false } = {})
 const relSnap = () => ({ rel: JSON.parse(JSON.stringify(g?.rel || {})), coil: `${g?.coil?.n}|${g?.coil?.act}` });
 /** v0.11.68: one action's lines: the reply under the scene text, the gains and relationship changes as a Results entry
  * (`always`: an entry even with no gains, as a task card always had). */
-function land(title, lines, fail, snap0, { always = false } = {}) {
+function land(title, lines, fail, snap0, { always = false, quiet = true } = {}) {
     const p = landParts(lines, snap0.rel, g.rel, { coilChanged: snap0.coil !== `${g.coil?.n}|${g.coil?.act}` });
-    lastReply = p.reply;
+    sameVisit = shownScreen && shownScreen.g === g && shownScreen.id === g.scene ? shownScreen : null; // v0.11.134 (LP2, SV): the action kept you on the screen
     lastResult = null;
     const sum = summarize(p.sumLines);
     const entry = p.gains.length || always || /collapsed/.test(sum);
+    // v0.11.134 (LP2, QR; RQ1): a reply part already shown this Coil is not shown again (its gains still go to Results); a fight's
+    // end (`quiet: false`, M1) and an action with nothing else to show (M2) keep theirs; replyHtml records what it draws (L2)
+    p.reply = landReply(g, p.reply, { quiet, entry: !!entry });
+    lastReply = p.reply;
     if (entry) addResult(title, p.gains, fail, { sumLines: p.sumLines, quiet: true });
     // one announcement: the reply, then what landed in Results (render() then skips the scene title, so the reply is heard)
     const say = `${p.reply.join(' ')}${entry ? ` ${title}${sum ? `: ${sum}` : ''}` : ''}`.trim();
@@ -246,11 +253,12 @@ function resultsPaneHtml() {
 /** v0.11.35 (P1-a): a scene read in an earlier Coil folds to its first paragraph under a memory line; "Read it all again" opens it. */
 let readAllScene = null;
 function proseHtml(v) {
-    const a = againView(g, v);
+    const a = againView(g, v, sameVisit && sameVisit.g === g ? sameVisit : null);
+    shownScreen = { id: v.id, text: v.text, g };
     if (!noFold(v.id) && !v.end) noteRead(g, v.text); // v0.11.133 (FP2): what the screen shows is read; RF1 (M2): only screens that can fold (their record is what a later Coil's fold reads)
     if (!a.fold) return `<div class="prose">${paras(v.text)}</div>`;
     const all = readAllScene === `${g.scene}#${g.coil?.n || 1}`; // per scene and Coil (Fable review)
-    return `<div class="prose again"><p class="memory">${md(a.memory)}</p>${paras(a.first)}${all ? paras(a.rest) : '<button class="readall" data-readall="1" aria-expanded="false"><span aria-hidden="true">▸ </span>Read it all again</button>'}</div>`;
+    return `<div class="prose again">${a.memory ? `<p class="memory">${md(a.memory)}</p>` : ''}${paras(a.first)}${all ? paras(a.rest) : '<button class="readall" data-readall="1" aria-expanded="false"><span aria-hidden="true">▸ </span>Read it all again</button>'}</div>`;
 }
 function renderCardScreen() {
     const v = sceneView(g, SCENES);
@@ -592,6 +600,7 @@ function statusHtml() {
 
 /** v0.11.68 (A1): the reply to the last choice or card, under the scene text. */
 function replyHtml() {
+    if (lastReply.length && g) noteSaid(g, lastReply); // v0.11.134 (RQ1, L2): a reply counts as said when the screen draws it
     return lastReply.length ? `<div class="prose reply">${lastReply.map((l) => paras(l)).join('')}</div>` : ''; // paras: a multi-paragraph reply keeps its paragraphs
 }
 function resultHtml() {
@@ -969,7 +978,7 @@ view.addEventListener('click', (ev) => {
             const rel0 = relSnap(); const fightTitle = sceneTitle(g.scene);
             const out = combatStep(g, b.dataset.act);
             combatLog = out.lines;
-            if (out.done) { const lines = out.lines.slice(); lines.push(...goTo(g, SCENES, out.next)); land(fightTitle, lines, out.done === 'lose', rel0); combatLog = null; } // v0.11.68
+            if (out.done) { const lines = out.lines.slice(); lines.push(...goTo(g, SCENES, out.next)); land(fightTitle, lines, out.done === 'lose', rel0, { quiet: false }); combatLog = null; } // v0.11.68
             autosave(); render();
         } else if (b.dataset.flee || b.dataset.yield) {
             if (b.dataset.yield && Date.now() - yieldArmed > 4000) { yieldArmed = Date.now(); note(SPAR_TEXT.yieldConfirm); return; } // v0.11.114 (PB1, YC; review low 1): a second tap, as Bite the tail
@@ -977,7 +986,7 @@ view.addEventListener('click', (ev) => {
             const rel0 = relSnap(); const fightTitle = sceneTitle(g.scene);
             const out = b.dataset.yield ? combatYield(g) : combatFlee(g); // v0.11.114 (PA2, YD): Yield ends it as Run's loss does
             combatLog = out.lines;
-            if (out.done) { const lines = out.lines.slice(); lines.push(...goTo(g, SCENES, out.next)); land(fightTitle, lines, out.done === 'lose', rel0); combatLog = null; } // v0.11.68
+            if (out.done) { const lines = out.lines.slice(); lines.push(...goTo(g, SCENES, out.next)); land(fightTitle, lines, out.done === 'lose', rel0, { quiet: false }); combatLog = null; } // v0.11.68
             autosave(); render();
         } else if (b.dataset.new) {
             if ((menu || tab !== 'story') && !confirmNew()) return;

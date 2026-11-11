@@ -7,6 +7,8 @@
  * are listed below by hand (GAIN_LINES, REPLY_LINES). tests/tasks.test.mjs sorts every line of a walk of random games and fails
  * on a sentence it can't place (a gain sentence with speech in it, a reply sentence with a stat in it).
  */
+import { fnv1a } from './game.js';
+import { linesOf, SAID_MAX } from './lines.js'; // v0.11.134 (LP2, QR)
 
 /** Whole lines that are gains whatever they say (system lines). */
 export const GAIN_LINES = [
@@ -129,4 +131,40 @@ export function relLines(before, after) {
         if (parts.length) out.push(`${k}: ${parts.join(', ')}`);
     }
     return out;
+}
+
+/** v0.11.134 (owner pick LP2, QR): a reply part's key in the save's `said` list (FNV-1a in base 36, as again.js's paraKey). */
+export const replyKey = (r) => parseInt(fnv1a(String(r).trim()), 16).toString(36);
+/**
+ * v0.11.134 (owner pick LP2, QR): quiet repeats. A reply part already shown this Coil is not shown again under the scene text
+ * (its gains still go to Results; the record starts over with each Coil, js/core/lines.js). Measured (200 Careful games, the
+ * screen's own actions; RQ1, L1: corrected, the first count took in the bots' dry runs): 72,347 reply parts shown → 34,752 (−52%);
+ * Yuki's haul lines are about 69% of the repeats.
+ * RQ1 (L2, Fable's review): `quietFilter` only reads the record; `noteSaid` records the parts when the screen draws them, so a
+ * reply a reload, a crash or a fight screen kept from view is not counted as seen.
+ */
+export function quietFilter(g, reply) {
+    if (!g || !Array.isArray(reply)) return reply || [];
+    const said = new Set(linesOf(g).said);
+    const out = [];
+    for (const r of reply) { const k = replyKey(r); if (said.has(k)) continue; said.add(k); out.push(r); }
+    return out;
+}
+/** RQ1 (L2): the reply parts the screen drew: recorded as said this Coil (once each; bounded at SAID_MAX, the oldest go first). */
+export function noteSaid(g, reply) {
+    if (!g || !Array.isArray(reply)) return;
+    const L = linesOf(g);
+    for (const r of reply) { const k = replyKey(r); if (!L.said.includes(k)) L.said.push(k); }
+    if (L.said.length > SAID_MAX) L.said.splice(0, L.said.length - SAID_MAX);
+}
+/**
+ * RQ1 (M1 + M2, Fable's review): what an action shows under the text. `quiet: false` (a fight's end) shows it all (Careful
+ * 200 games: 899 of 2,629 fight endings had lost their whole reply, 304 part of it); and an action whose reply would go quiet
+ * with no Results entry either (`entry`) shows its reply anyway, so a tap never shows nothing at all (302 actions).
+ */
+export function landReply(g, reply, { quiet = true, entry = false } = {}) {
+    const all = Array.isArray(reply) ? reply : [];
+    if (!quiet) return all;
+    const f = quietFilter(g, all);
+    return !f.length && all.length && !entry ? all : f;
 }

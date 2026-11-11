@@ -160,7 +160,29 @@ export function lintCounts(rows) {
     return { totals, areas, lists: { reused: sh.reused, favourites: fv, tics: tc, broken: bd, spacing: sp, unrendered: rd } };
 }
 
-/** SN: what changed against a saved snapshot: [{ where, key, was, now }] (totals first, then the areas). */
+/**
+ * v0.11.134 (owner pick LP2, LR): the line pools (again.js's memory lines, Yuki's haul lines, the aptitude reply): per pool
+ * { lines, words, dupes (a line twice in its pool), sceneShared (lines sharing a 5-word chunk with a scene text), tics, broken,
+ * spacing }. `pools`: { name: [string] }; `sceneTexts`: [string].
+ */
+export function poolCounts(pools, sceneTexts) {
+    const sceneSh = new Set(sceneTexts.flatMap((t) => [...shingles(t)]));
+    const out = {};
+    for (const [name, lines] of Object.entries(pools)) {
+        out[name] = {
+            lines: lines.length,
+            words: lines.reduce((n, t) => n + wc(t), 0),
+            dupes: lines.length - new Set(lines).size,
+            sceneShared: lines.filter((t) => [...shingles(t)].some((x) => sceneSh.has(x))).length,
+            tics: lines.reduce((n, t) => n + tics(t).length, 0),
+            broken: lines.filter((t) => broken(t).length).length,
+            spacing: lines.filter(spacing).length,
+        };
+    }
+    return out;
+}
+
+/** SN: what changed against a saved snapshot: [{ where, key, was, now }] (totals first, then the areas, then (v0.11.134, LR) the pools). */
 export function snapshotDiff(old, now) {
     const out = [];
     if (!old) return out;
@@ -169,6 +191,10 @@ export function snapshotDiff(old, now) {
     for (const a of [...names].sort()) for (const k of Object.keys(now.areas[a] || old.areas[a])) {
         const was = old.areas?.[a]?.[k] ?? null, n = now.areas[a]?.[k] ?? null;
         if (was !== n) out.push({ where: a, key: k, was, now: n });
+    }
+    if (now.pools) for (const p of Object.keys(now.pools).sort()) for (const k of Object.keys(now.pools[p])) {
+        const was = old.pools?.[p]?.[k] ?? null, n = now.pools[p][k];
+        if (was !== n) out.push({ where: `pool ${p}`, key: k, was, now: n });
     }
     return out;
 }

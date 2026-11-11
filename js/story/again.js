@@ -2,7 +2,7 @@
  * Bone and Ash — a scene read in an earlier Coil (v0.11.35, P1-a; owner 13:16 "the repetitions verbatim could make the game very
  * frustrating to some players", pick 15:42). Incremental Mode only (the only mode since v0.11.34).
  *  - The fold: the text folds to its first paragraph, with "Read it all again" (main.js).
- *  - A memory line on top, from James or Yuki, picked by scene and Coil (the same line every time for that scene on that Coil).
+ *  - A memory line on top, from James or Yuki (since v0.11.134 from the line picker, js/core/lines.js: one per visit; see below).
  *  - "Skip to the next choice": on a one-choice scene read before, walk the stretch at once. Every choice is taken with
  *    choose(), exactly as tapping through would take it (effects, clock, results); it stops at a real choice, a check, a fight,
  *    a task screen, a menu, an end, an unread scene or the Coil's own screens.
@@ -11,10 +11,14 @@
  * rewind). A scene folds only when every paragraph of the text it shows now was read on an earlier Coil, so a text that changed
  * (Yuki's form, a path, an outcome, a rewrite) shows in full; the skip walks only such screens. main.js records what it shows
  * (noteRead). An old save starts with an empty record (owner pick FP2, ME): its scenes show in full once more, then fold.
+ * v0.11.134 (owner pick LP2): the memory line comes from the line picker (js/core/lines.js, ML): every line once before any
+ * comes back in a Coil, never the same twice running, the same line on every redraw of a visit. SV: a scene shown again with
+ * the same text right after an action that kept you there folds too (no memory line; main.js passes the screen before).
  */
 import { sceneView, choose, seenBefore, isMenuScene, isTimeless } from '../core/story.js';
 import { fnv1a } from '../core/game.js';
 import { TASK_HUBS } from './task_hubs.js';
+import { noteVisit, visitLine } from '../core/lines.js'; // v0.11.134 (LP2: PK, ML)
 
 /** Scenes whose text follows an outcome or a level that may differ from the read before (Fable review): never folded. */
 export const OUTCOME_SCENES = new Set(['epilogue', 'fo_start', 'breakthrough', 'a1_again', 'a1_end', 'elder', 'bluff_fail']); // v0.11.131 (RC2, M1): bluff_fail reads the bluff's or the hairpin's text
@@ -48,12 +52,9 @@ export const MEMORY_LINES = [
     'Nothing here has changed except you, and you only a little.',
 ];
 
-/** A small stable hash of the scene id and the Coil: the same line for that scene every time on that Coil. */
-function pick(id, n) {
-    let h = 2166136261;
-    for (const ch of `${id}#${n}`) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; }
-    return MEMORY_LINES[h % MEMORY_LINES.length];
-}
+/** v0.11.134 (LP2, ML): this visit's memory line, from the picker (was: a hash of the scene and the Coil, 49.5% of Careful's
+ *  lines a repeat within their Coil). */
+const memoryLine = (g) => MEMORY_LINES[visitLine(g, 'mem', MEMORY_LINES)];
 
 const parasOf = (t) => String(t).split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
 
@@ -78,15 +79,21 @@ export function readBefore(g, text) {
 }
 
 /**
- * How the current scene's text shows: { fold, first, rest, memory }. `fold` only on a scene read in an earlier Coil with more
- * than one paragraph; `first` and `rest` are text (paragraphs joined by a blank line), so main.js renders them as before.
+ * How the current scene's text shows: { fold, first, rest, memory, same }. `fold` on a scene read in an earlier Coil with more
+ * than one paragraph (with a memory line), or (v0.11.134, SV; `same`) on one shown again with the same text right after an
+ * action that kept you there (`prev`: the screen shown before that action, { id, text }; no memory line). `first` and `rest`
+ * are text (paragraphs joined by a blank line), so main.js renders them as before. Every call notes the visit (lines.js).
  */
-export function againView(g, v) {
+export function againView(g, v, prev = null) {
     const id = v?.id || g.scene;
+    noteVisit(g, id);
     const ps = parasOf(v?.text || '');
+    const whole = { fold: false, first: v?.text || '', rest: '', memory: null, same: false };
+    if (noFold(id) || v?.end || ps.length < 2) return whole;
     const variant = g.lastWin && g.lastWin.next === id && g.lastWin.degree >= 2; // a lopsided win's own text (story.js): not the one read before
-    if (!seenBefore(g, id) || noFold(id) || variant || v?.end || ps.length < 2 || !readBefore(g, v.text)) return { fold: false, first: v?.text || '', rest: '', memory: null };
-    return { fold: true, first: ps[0], rest: ps.slice(1).join('\n\n'), memory: pick(id, g.coil?.n || 1) };
+    if (seenBefore(g, id) && !variant && readBefore(g, v.text)) return { fold: true, first: ps[0], rest: ps.slice(1).join('\n\n'), memory: memoryLine(g), same: false };
+    if (prev && prev.id === id && prev.text === v.text) return { fold: true, first: ps[0], rest: ps.slice(1).join('\n\n'), memory: null, same: true }; // SV
+    return whole;
 }
 
 /** The one choice the skip may take here, or -1: a scene read before, one open story choice, no check, fight or fail branch,

@@ -128,5 +128,34 @@
    "spacing": 1,
    "unrendered": 0
   }
+ },
+ "pools": {
+  "memory": {
+   "lines": 24,
+   "words": 330,
+   "dupes": 0,
+   "sceneShared": 0,
+   "tics": 0,
+   "broken": 0,
+   "spacing": 0
+  },
+  "yuki": {
+   "lines": 44,
+   "words": 1135,
+   "dupes": 0,
+   "sceneShared": 0,
+   "tics": 0,
+   "broken": 0,
+   "spacing": 0
+  },
+  "aptitude": {
+   "lines": 1,
+   "words": 5,
+   "dupes": 0,
+   "sceneShared": 0,
+   "tics": 0,
+   "broken": 0,
+   "spacing": 0
+  }
  }
 }

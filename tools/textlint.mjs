@@ -8,11 +8,13 @@
 //   node tools/textlint.mjs           counts, and what changed against the snapshot
 //   node tools/textlint.mjs --list    every hit
 //   node tools/textlint.mjs --save    save the counts as the new snapshot (with the push that changes the texts)
-// Not read yet: the result lines of choices and cards, the task cards' texts, again.js's memory lines (open, options later).
+// v0.11.134 (owner pick LP2, LR): and the line pools: again.js's memory lines, Yuki's haul lines (task_hubs.js), the aptitude reply
+// (tasks.js): per pool lines, words, a line twice, lines sharing a 5-word chunk with a scene text, tics, broken, spacing.
+// Not read yet: the result lines of choices and cards, the task cards' texts (open, options later).
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { lintCounts, snapshotDiff } from './lib/textlint.mjs';
+import { lintCounts, snapshotDiff, poolCounts } from './lib/textlint.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SNAP = path.join(ROOT, 'tools/text-baseline.json');
@@ -54,13 +56,27 @@ for (const s of Object.values(SCENES)) {
 }
 const now = lintCounts(rows);
 const T = now.totals;
-const snap = { totals: now.totals, areas: now.areas };
+// v0.11.134 (LP2, LR): the line pools
+const { MEMORY_LINES } = await import(js('story/again.js'));
+const { TASK_HUBS } = await import(js('story/task_hubs.js'));
+const { ADAPT_REPLY } = await import(js('core/tasks.js'));
+const yukiLines = [];
+for (const h of Object.values(TASK_HUBS)) {
+    const j = h.yuki; if (!j) continue;
+    const add = (t) => { if (typeof t === 'string' && !yukiLines.includes(t)) yukiLines.push(t); };
+    for (const k of [j, ...(j.alts || [])]) for (const n of [1, 2]) add(typeof k.got === 'function' ? k.got(n) : k.got);
+    add(j.none); add(j.full);
+}
+const POOLS = { memory: [...MEMORY_LINES], yuki: yukiLines, aptitude: [ADAPT_REPLY] };
+const pools = poolCounts(POOLS, rows.filter((r) => r.kind === 'text').flatMap((r) => r.renders));
+const snap = { totals: now.totals, areas: now.areas, pools };
 
 console.log(`text lint (log only): ${T.scenes} scenes, ${T.labels} choice labels; ${T.words} words of base text, ${T.variantWords} in variants, ${T.labelWords} in labels`);
 console.log(`  SH reused passages: ${T.sharedChunks} 5-word chunks shared by two scenes or more (${T.sharedScenes} scenes); ${T.reused} scene pairs share 5+: ${now.lists.reused.slice(0, 5).map(([p, n]) => `${p} ${n}`).join(', ')}`);
 console.log(`  FV favourite phrases (in 4+ scenes; names and canon terms left out): ${T.favourites}: ${now.lists.favourites.slice(0, 6).map((f) => `"${f.phrase}" ${f.scenes.size}`).join(', ')}`);
 console.log(`  TC tics (2–3 words 3+ times in one text): ${T.tics}: ${now.lists.tics.slice(0, 5).map((x) => `${x.id} "${x.phrase}" ×${x.n}`).join(', ')}`);
 console.log(`  BD broken text: ${T.broken}${T.broken ? `: ${now.lists.broken.slice(0, 5).map((x) => `${x.id} (${x.kind}) ${x.what}`).join(', ')}` : ''}; spacing the screen drops: ${T.spacing}`);
+console.log(`  LR line pools: ${Object.entries(pools).map(([p, v]) => `${p} ${v.lines} lines / ${v.words} words (twice ${v.dupes}, shared with a scene ${v.sceneShared}, tics ${v.tics}, broken ${v.broken}, spacing ${v.spacing})`).join('; ')}`);
 console.log(`  RD texts rendered on none of the 9 sample states: ${T.unrendered}${T.unrendered ? `: ${now.lists.unrendered.map((x) => `${x.id} (${x.kind})`).join(', ')}` : ''}`);
 
 if (LIST) {
@@ -70,6 +86,7 @@ if (LIST) {
     console.log('\nbroken:'); for (const x of now.lists.broken) console.log(`  ${x.id} (${x.kind}): ${x.what}`);
     console.log('\nspacing:'); for (const x of now.lists.spacing) console.log(`  ${x.id} (${x.kind})`);
     console.log('\nunrendered:'); for (const x of now.lists.unrendered) console.log(`  ${x.id} (${x.kind})`);
+    console.log('\npools:'); for (const [p, v] of Object.entries(POOLS)) { console.log(`  ${p}:`); for (const t of v) console.log(`    ${t}`); }
     console.log('\nper area:'); for (const [a, v] of Object.entries(now.areas)) console.log(`  ${a.padEnd(16)}${JSON.stringify(v)}`);
 }
 

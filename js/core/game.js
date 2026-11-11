@@ -89,6 +89,7 @@ export function coilSnap(g) {
     s.log = []; s.combat = null; s.lastWin = null;
     if (s.tasks) s.tasks.queue = [];
     delete s.read; // v0.11.133 (RF1, L1): a rewind takes the record from the game itself (coil.js), never from the snapshot
+    delete s.lines; // v0.11.134 (LP2): the line picker's record is per Coil (js/core/lines.js); a rewind starts a new one
     return s;
 }
 /** What James is at the start of a Coil (the Coil screen compares against it). */

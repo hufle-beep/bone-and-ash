@@ -18,6 +18,11 @@ import { XP_RATE, XP_BANDS } from '../js/core/game.js'; // v0.11.85
 import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, advance, STARVE_HP_PER_HOUR, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1, bumpRel as relBump, startActCoil, REL_CATCHUP } from '../js/core/game.js';
 import { canPrimary, canColGroup, colGroupsOpen, btTarget, COL_GROUPS, priHours, colHours, merMinutesOf } from '../js/story/meridians.js';
 import { sceneView, choose, goTo, wasPicked, isMenuScene, notePicked, seenBefore, noteSeen } from '../js/core/story.js';
+import { linesOf, pickLine, visitLine, noteVisit, coilStamp, SAID_MAX } from '../js/core/lines.js'; // v0.11.134 (LP2: PK)
+import { coilSnap } from '../js/core/game.js'; // v0.11.134 (LP2)
+import { replyKey, quietFilter, noteSaid, landReply } from '../js/core/replies.js'; // v0.11.134 (LP2: QR; RQ1)
+/** v0.11.134 (LP2, QR): what main.js does for one action and its screen: filter, then record what was drawn. */
+const quietReplies = (g, reply) => { const out = quietFilter(g, reply); noteSaid(g, out); return out; };
 import { againView, skipStep, skipRun, skipPlan, MEMORY_LINES, noFold, SKIP_MAX, noteRead, readBefore, paraKey, STATE_PARA, isRecord } from '../js/story/again.js'; // v0.11.35 (P1-a)
 import { medCards, runMed, canMeditate, NO_MEDITATE, isSitChoice, MED_SCREENS } from '../js/core/meditate.js';
 import { defaultMinutes, DEFAULT_MINUTES } from '../js/core/story.js';
@@ -3335,6 +3340,95 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     assert(w.coil.snap && !('read' in w.coil.snap), 'RF1 (L1): Act 1\'s Coil snapshot, taken with a record in the game, leaves it out');
     w.flags.a1_outcome = 'victory'; goTo(w, SCENES, 'a1_end'); rewind(w, { to: 'game' });
     assert(JSON.stringify(w.read) === w0 && readBefore(w, 'One.\n\nTwo.'), 'RF1 (TG): the whole-game rewind keeps the record');
+}
+// v0.11.134 (owner pick LP2): PK the line picker, ML the memory lines on it, SV the same-visit fold, QR quiet repeats, the save's `lines`
+{
+    const items = Array.from({ length: 24 }, (_, i) => `line ${i}`);
+    // PK: a pool of N shows every line once before any comes back, never the same twice running (across the wrap too)
+    let wrapOk = true, roundOk = true;
+    for (let seed = 1; seed <= 60; seed++) {
+        const g = ensureBars(newGame(4100 + seed));
+        const got = []; for (let k = 0; k < 72; k++) got.push(pickLine(g, 'mem', items));
+        for (let r = 0; r < 3; r++) if (new Set(got.slice(24 * r, 24 * r + 24)).size !== 24) roundOk = false;
+        for (let k = 1; k < got.length; k++) if (got[k] === got[k - 1]) wrapOk = false;
+    }
+    assert(roundOk, 'LP2 (PK): every line once per round through the pool (60 seeds, 3 rounds)');
+    assert(wrapOk, 'LP2 (PK): never the same line twice running, across the wrap too');
+    const d1 = ensureBars(newGame(4201)), d2 = ensureBars(newGame(4201)), d3 = ensureBars(newGame(4202));
+    const ord = (g) => Array.from({ length: 24 }, () => pickLine(g, 'mem', items)).join(',');
+    const o1 = ord(d1), o2 = ord(d2), o3 = ord(d3);
+    assert(o1 === o2 && o1 !== o3, 'LP2 (PK): the order follows the save\'s seed (the same seed, the same order; another seed, another)');
+    const d4 = ensureBars(newGame(4201)); d4.coil.n = 2; assert(ord(d4) !== o1, 'LP2 (PK): another Coil, another order');
+    // the order: conditions, then fewest plays, then the most specific
+    const c = ensureBars(newGame(4203));
+    const cond = [{ text: 'never', when: () => false }, { text: 'plain' }, { text: 'specific', spec: 2 }, 'bare'];
+    const cp = []; for (let k = 0; k < 6; k++) cp.push(pickLine(c, 'cond', cond));
+    assert(!cp.includes(0) && cp[0] === 2 && new Set(cp.slice(0, 3)).size === 3, `LP2 (PK): a failed condition never plays; the most specific first among the least played (${cp})`);
+    assert(pickLine(c, 'none', [{ text: 'x', when: () => false }]) === -1, 'LP2 (PK): no open line: -1');
+    // the record: per Coil; a bad one is replaced, never throws
+    const r = ensureBars(newGame(4204)); pickLine(r, 'mem', items);
+    assert(r.lines && r.lines.c === coilStamp(r) && r.lines.p.mem.reduce((a, b) => a + b, 0) === 1, 'LP2 (PK): the play is counted in the save\'s record');
+    r.coil.n = 2; assert(!Object.keys(linesOf(r).p).length && linesOf(r).c === coilStamp(r), 'LP2 (PK): a new Coil starts a new record');
+    for (const bad of [null, 'x', [], 7, { c: '0:1', p: [] }, { c: '0:1', p: {}, cur: {}, last: {}, said: 'x' }]) {
+        const b = ensureBars(newGame(4205)); b.lines = bad; let ok = true; try { pickLine(b, 'mem', items); quietReplies(b, ['A']); noteVisit(b, 'x'); } catch { ok = false; }
+        assert(ok && Array.isArray(b.lines.said) && b.lines.said.length === 1, `LP2 (PK): a bad record (${JSON.stringify(bad)}) is replaced, nothing throws`);
+    }
+    // ML: the memory line on a folded scene, through the picker, once per visit
+    const f = ensureBars(newGame(4206, { closed: true })); f.coil.n = 2;
+    const ids = Object.keys(SCENES).filter((id) => !noFold(id)).slice(0, 30);
+    const seenLines = [];
+    for (const id of ids) {
+        f.seen[id] = 1; const t = { id, text: `${id} one.\n\n${id} two.` }; noteRead(f, t.text, 1);
+        const a1 = againView(f, t), a2 = againView(f, t);
+        assert(a1.fold && MEMORY_LINES.includes(a1.memory) && a2.memory === a1.memory, `LP2 (ML): ${id}: folded, a memory line, the same on a redraw`);
+        seenLines.push(a1.memory);
+    }
+    assert(new Set(seenLines.slice(0, 24)).size === 24 && seenLines.every((x, i) => i === 0 || x !== seenLines[i - 1]), 'LP2 (ML): 24 visits, 24 different lines; never the same twice running');
+    const back = { id: ids[0], text: `${ids[0]} one.\n\n${ids[0]} two.` }; againView(f, { id: 'wilds', text: 'hub' }); const a3 = againView(f, back);
+    assert(a3.memory !== seenLines[0] || seenLines.length > 48, 'LP2 (ML): a new visit to a scene draws a new line');
+    // SV: shown again with the same text right after an action that kept you there (any Coil, read before or not): folded, no memory line
+    const sv = ensureBars(newGame(4207, { closed: true })); goTo(sv, SCENES, 'bone_field'); const vb = sceneView(sv, SCENES);
+    const prev = { id: vb.id, text: vb.text };
+    assert(!againView(sv, vb).fold, 'LP2 (SV): the first view of a scene never read: in full');
+    const s1 = againView(sv, vb, prev);
+    assert(s1.fold && s1.same && s1.memory === null && `${s1.first}\n\n${s1.rest}` === vb.text.split(/\n\s*\n/).map((x) => x.trim()).filter(Boolean).join('\n\n'), 'LP2 (SV): the same text again on the same visit: the first paragraph, the rest behind Read it all again, no memory line');
+    assert(!againView(sv, { id: vb.id, text: `${vb.text}\n\nSomething changed.` }, prev).fold, 'LP2 (SV): a text that changed shows in full');
+    assert(!againView(sv, vb, { id: 'mire', text: vb.text }).fold, 'LP2 (SV): another scene before it: in full');
+    assert(!againView(sv, { id: 'wilds', text: 'a\n\nb' }, { id: 'wilds', text: 'a\n\nb' }).fold, 'LP2 (SV): never on the task screens and menus');
+    assert(!againView(sv, { id: 'bone_field', text: 'one paragraph' }, { id: 'bone_field', text: 'one paragraph' }).fold, 'LP2 (SV): never on one paragraph');
+    assert(!againView(sv, { id: 'bone_field', text: 'a\n\nb', end: true }, { id: 'bone_field', text: 'a\n\nb' }).fold, 'LP2 (SV): never on an end');
+    // QR: quiet repeats
+    const q = ensureBars(newGame(4208));
+    const q1 = quietReplies(q, ['Yuki leaves a hare.', 'Teamwork.']), q2 = quietReplies(q, ['Yuki leaves a hare.', 'Something new.']), q3 = quietReplies(q, ['Twice.', 'Twice.']);
+    assert(q1.length === 2 && q2.length === 1 && q2[0] === 'Something new.' && q3.length === 1, `LP2 (QR): a reply part already shown this Coil is not shown again (${JSON.stringify([q1, q2, q3])})`);
+    q.coil.n = 2; assert(quietReplies(q, ['Yuki leaves a hare.']).length === 1, 'LP2 (QR): a new Coil shows it again');
+    for (let k = 0; k < SAID_MAX + 50; k++) quietReplies(q, [`line ${k}`]);
+    assert(q.lines.said.length === SAID_MAX && q.lines.said[SAID_MAX - 1] === replyKey(`line ${SAID_MAX + 49}`), 'LP2 (QR): the record is bounded, the oldest go first');
+    assert(JSON.stringify(quietReplies(null, ['x'])) === '["x"]' && quietReplies(q, undefined).length === 0, 'LP2 (QR): no state or no reply never throws');
+    // the save: kept by save and load, left out of the Coil snapshot and the dry runs; a rewind starts a new one
+    const sv2 = deserialize(serialize(q)); assert(JSON.stringify(sv2.lines) === JSON.stringify(q.lines), 'LP2: the record loads unchanged');
+    const old = ensureBars(newGame(4209)); delete old.lines; const lo = deserialize(serialize(old)); let ok = true; try { againView(lo, { id: 'bone_field', text: 'a\n\nb' }); } catch { ok = false; }
+    assert(ok && lo.lines && lo.lines.c === coilStamp(lo), 'LP2: an old save gets the record on first use');
+    const rw = ensureBars(newGame(4210, { closed: true })); quietReplies(rw, ['A.']); pickLine(rw, 'mem', items);
+    assert('lines' in rw && !('lines' in dryClone(rw)) && !('lines' in coilSnap(rw)), 'LP2: the dry runs and the Coil snapshot leave the record out (taken with a record in the game)');
+    endCoil(rw, 'choice', rw.scene); rewind(rw);
+    assert(quietReplies(rw, ['A.']).length === 1 && !Object.keys(linesOf(rw).p).length, 'LP2: a rewind starts a new record (its first reply shows again)');
+    assert(visitLine(rw, 'mem', items) === visitLine(rw, 'mem', items), 'LP2 (PK): one line per visit');
+    // RQ1 (Fable's review of LP2): L2 only what the screen drew counts as said; M1 a fight's end keeps its reply; M2 never nothing at all
+    const h = ensureBars(newGame(4211));
+    assert(quietFilter(h, ['Seen?']).length === 1 && quietFilter(h, ['Seen?']).length === 1 && !h.lines.said.length, 'RQ1 (L2): filtering records nothing (a reply never drawn stays unsaid)');
+    noteSaid(h, ['Seen?']); noteSaid(h, ['Seen?']);
+    assert(h.lines.said.length === 1 && !quietFilter(h, ['Seen?']).length, 'RQ1 (L2): a drawn reply is recorded once, then quiet');
+    assert(landReply(h, ['Seen?', 'It is over.'], { quiet: false }).length === 2, 'RQ1 (M1): a fight\'s end shows its whole reply');
+    assert(landReply(h, ['Seen?'], { entry: false }).length === 1 && !landReply(h, ['Seen?'], { entry: true }).length, 'RQ1 (M2): a reply that would go quiet with no Results entry shows anyway; with one it goes quiet');
+    assert(JSON.stringify(landReply(h, ['Seen?', 'New.'], { entry: false })) === '["New."]', 'RQ1 (M2): a part still new: only it shows');
+    // L4: a hand-edited pick is drawn again
+    for (const bad of ['length', 2.5, -1, 99, null]) { const v = ensureBars(newGame(4212)); linesOf(v).cur.mem = bad; const i = visitLine(v, 'mem', items); assert(Number.isInteger(i) && i >= 0 && i < items.length, `RQ1 (L4): a bad pick (${JSON.stringify(bad)}) is drawn again (${i})`); }
+    // TG: the fold, the visit and quiet repeats change nothing in the save but `lines`
+    const z = ensureBars(newGame(4213, { closed: true })); goTo(z, SCENES, 'bone_field'); const zv = sceneView(z, SCENES);
+    const strip = (x) => { const { lines: _l, ...rest } = x; return JSON.stringify(rest); };
+    const z0 = strip(z); againView(z, zv); againView(z, zv, { id: zv.id, text: zv.text }); quietReplies(z, ['A.']); landReply(z, ['A.', 'B.']); noteSaid(z, ['B.']);
+    assert(strip(z) === z0, 'RQ1 (TG): the fold, the visit and quiet repeats change nothing in the save but `lines`');
 }
 // v0.11.37 (owner 12:59–14:27, picks A1 + B2 + C-a + D-a + E-a + F1): the day ends at 02:00, Push through only at night,
 // at once vs a bar, the Long Forest's two exits, no useless sit, familiar story choices

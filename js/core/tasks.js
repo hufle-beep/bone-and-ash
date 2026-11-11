@@ -316,7 +316,7 @@ function resolveWork(g, scenes, hubId, card, id) {
     for (const i of new Set(takeCapNotes())) lines.push(`Hammerspace: ${itemNames[i]?.name || i} is full — the rest stays behind.`);
     if ((band === 'partial' || band === 'fail') && c.check) {
         const a = t.adapt[id] || 0;
-        if (a < ADAPT_MAX) { t.adapt[id] = Math.min(ADAPT_MAX, a + ADAPT_STEP); lines.push(`You see what went wrong. (Intuitive Aptitude: +${ADAPT_STEP} on this next time.)`); }
+        if (a < ADAPT_MAX) { t.adapt[id] = Math.min(ADAPT_MAX, a + ADAPT_STEP); lines.push(`${ADAPT_REPLY} (Intuitive Aptitude: +${ADAPT_STEP} on this next time.)`); }
     }
     learn(g, scenes, hubId, card, id, band === 'fail' ? 0.5 : 1);
     const dest = band === 'fail' ? (c.fail ?? c.to) : c.to;
@@ -388,6 +388,8 @@ export function setYuki(g, on) { st(g).yuki.on = !!on; }
  * Run card `id` now (at once, v0.11.64). Returns { lines, fail, stopped }: `stopped` means the story
  * left the hub (a door, a fail scene, a collapse), so the screen changes.
  */
+/** v0.11.134 (LP2, LR): the reply of a failed or partial card's Intuitive Aptitude line (its gain goes to Results); the text lint reads it. */
+export const ADAPT_REPLY = 'You see what went wrong.';
 export function runTask(g, scenes, id) {
     const hubId = g.scene;
     if (!runsHere(g, scenes, id)) throw new Error(`Not a task hub: ${hubId}`); // v0.11.14: Meditate cards also on the resting places
@@ -441,7 +443,7 @@ const fullClone = (g) => JSON.parse(JSON.stringify(g));
  * rules) and shares the Coil snapshot (only ever copied from, never changed in place): about 6× faster, the same numbers.
  */
 export function dryClone(g) {
-    const { log, coil, picked, read, ...rest } = g; // v0.11.32: picked choices change nothing a dry run measures; a copy starts its own (v0.11.133: the paragraphs read too)
+    const { log, coil, picked, read, lines, ...rest } = g; // v0.11.32: picked choices change nothing a dry run measures; a copy starts its own (v0.11.133: the paragraphs read too; v0.11.134: the line picker's record)
     const c = JSON.parse(JSON.stringify(rest));
     c.log = [];
     if (coil) { const { snap, ...cr } = coil; c.coil = JSON.parse(JSON.stringify(cr)); if (snap !== undefined) c.coil.snap = snap; }

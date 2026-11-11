@@ -27,7 +27,7 @@ import { artFiles, fingerprint, readArt, checkArt, writeArt, ART_RE } from '../t
 import { TACTICS, FIXED, rank, rankLabel, stream, isOneMove, playFight, sampleFight, sampleOrder, tacticStats, thirds, guNeeded, summarize, summarizeAll, tableLines } from '../tools/lib/fightlab.mjs'; // v0.11.80
 import { SCENES } from '../js/story/prologue.js'; // v0.11.80: the story's hooks, for the fight lab's real fight
 import { newGame, ensureBars, combatHooks, startCombat, combatStep } from '../js/core/game.js'; // v0.11.80
-import { shingles, reusedPassages, favouritePhrases, tics, broken, spacing, snapshotDiff, shareNote } from '../tools/lib/textlint.mjs'; // v0.11.132 (E1)
+import { shingles, reusedPassages, favouritePhrases, tics, broken, spacing, snapshotDiff, shareNote, poolCounts } from '../tools/lib/textlint.mjs'; // v0.11.132 (E1); v0.11.134 (LP2, LR): poolCounts
 import { docFindings, newestHistory, newestResearch, HANDOVER_MAX, HISTORY_MAX, RESEARCH_MAX, DOC_TOOL_MAX } from '../tools/lib/docs.mjs'; // v0.11.73; v0.11.78 the research parts
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -620,6 +620,18 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md'];
     const bad = run(dir);
     assert(bad.code === 0 && /BD broken text: 1: gao_talked \(text\) code/.test(bad.out) && /NOTE {2}text \(log only\): all broken 0 → 1/.test(bad.out) && /NOTE {2}text \(log only\): prologue\+shared broken 0 → 1/.test(bad.out),
         `E1: a template leftover in the great root-kin's line is counted and noted against the snapshot, log only (exit ${bad.code})`);
+    // v0.11.134 (owner pick LP2, LR): the line pools: counted on made-up pools; printed on the game; a planted fault in a memory line noted, log only
+    const pc = poolCounts({ a: ['One two three.', 'One two three.', `Here: ${passage}`], b: ['She says *nothing.'] }, [`Scene. ${passage}`]);
+    assert(pc.a.lines === 3 && pc.a.dupes === 1 && pc.a.sceneShared === 1 && pc.b.broken === 1 && pc.a.words === 7 + passage.split(' ').length && pc.b.lines === 1, `LR: lines, a line twice, a line sharing a scene's passage, broken (${JSON.stringify(pc)})`);
+    const dp = snapshotDiff({ totals: {}, areas: {} }, { totals: {}, areas: {}, pools: { memory: { lines: 24 } } });
+    assert(dp.length === 1 && dp[0].where === 'pool memory' && dp[0].was === null && dp[0].now === 24, `LR: a pool not in the snapshot is noted (${JSON.stringify(dp)})`);
+    assert(/LR line pools: memory 24 lines \/ \d+ words \(twice 0, shared with a scene \d+, tics \d+, broken 0, spacing 0\); yuki \d+ lines \/ \d+ words .*; aptitude 1 lines \/ 5 words/.test(game.out), `LR: the lint reads the memory lines, Yuki's haul lines and the aptitude reply (${(game.out.match(/LR line pools.*/) || [''])[0]})`);
+    writeFileSync(pro, src); // the planted line back
+    const ag = path.join(dir, 'js', 'story', 'again.js'); const asrc = readFileSync(ag, 'utf8');
+    writeFileSync(ag, asrc.replace("'The forest has not rehearsed. You have.',", "'The forest has not rehearsed. ${you} have.',"));
+    const badPool = run(dir);
+    assert(badPool.code === 0 && /NOTE {2}text \(log only\): pool memory broken 0 → 1/.test(badPool.out) && !/NOTE {2}text \(log only\): all /.test(badPool.out), `LR: a template leftover in a memory line is noted against the pool's snapshot, log only, the scenes untouched (exit ${badPool.code})`);
+    writeFileSync(ag, asrc);
 
     // the bot models: Act 1 endings and repeated screens printed; a saved copy far from the run gives a log-only NOTE
     const md = path.join(TMP, 'models'); mkdirSync(path.join(md, 'tools'), { recursive: true });

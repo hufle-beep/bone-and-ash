@@ -168,6 +168,7 @@ function play(run, model, st, yuki) {
     const cn = () => g.coil.n - off;
     const mem = { done: {}, tried: new Set(), tribLost: 0, shenBites: 0 };
     let coilKey = '', deadKey = '', takenKey = '', nightKey = '', crossed = false, bitShen = false;
+    let lastShown = null; // v0.11.134 (LP2, SV)
     const seenTrib = new Set();
     const maxSteps = model === 'sitter' ? STEPS_SITTER : STEPS;
     for (let steps = 0; steps < maxSteps; steps++) {
@@ -190,11 +191,15 @@ function play(run, model, st, yuki) {
         const tOut = { bluff_win: 'won', collectors_won: 'won', tribute_paid: 'paid', collectors_lost: 'lost' }[g.scene];
         if (tOut && !seenTrib.has(cn())) { seenTrib.add(cn()); const b = st.tribute[cn()] || (st.tribute[cn()] = { won: 0, paid: 0, lost: 0 }); b[tOut]++; }
         const v = sceneView(g, SCENES);
+        // v0.11.134 (LP2, SV): the screen before this step's view, when the last action kept the bot on it (every step after the first follows an action)
+        const prevShown = TEXTS && lastShown && lastShown.id === g.scene ? lastShown : null;
+        const av = TEXTS && v.text ? againView(g, v, prevShown) : null; // every screen, as main.js draws it (the visit and its memory line)
+        if (TEXTS) lastShown = v.text ? { id: g.scene, text: v.text } : null;
         if (TEXTS && v.text && !(noFold(g.scene) && !OUTCOME_SCENES.has(g.scene))) { // v0.11.132 (E1, RP): hubs and menus left out
             const tx = st.texts || (st.texts = { screens: 0, repeats: 0, scenes: {} });
             const k = `${g.scene}\n${v.text}`;
             tx.screens++;
-            if (mem.texts.has(k)) { if (!againView(g, v).fold) { tx.repeats++; tx.scenes[g.scene] = (tx.scenes[g.scene] || 0) + 1; } } else mem.texts.add(k);
+            if (mem.texts.has(k)) { if (!av.fold) { tx.repeats++; tx.scenes[g.scene] = (tx.scenes[g.scene] || 0) + 1; } } else mem.texts.add(k);
         }
         if (TEXTS && v.text && !noFold(g.scene) && !v.end) noteRead(g, v.text); // v0.11.133 (FP2, RF1): the bot reads what the screen shows, as main.js records it
         if (v.end || g.scene === 'a1_end') {
