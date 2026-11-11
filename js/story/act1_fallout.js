@@ -4,8 +4,26 @@
  * planned, and at dawn on Day 11 it leaves (→ 'bl_start').
  */
 import { addItem, eat, condense, advance, sleepUntil, jamesHpMax, hasItem, awardYukiFightXp, yukiForm, nightRest, nightTo } from '../core/game.js';
-import { daily, markDaily, hour, day, eatBest, pantry, foodCount, byForm, byDay } from './common.js';
+import { daily, markDaily, hour, day, eatBest, pantry, foodCount, byForm, byDay, dayReply } from './common.js';
 import { encounter, rel, likesMei, likesYa, trioStep, bumpRel, KISS_YA } from './act1_common.js';
+
+/* v0.11.136 (owner pick NC1, NT1's push 2): replies by day (js/core/lines.js dayReply): the first text is the old reply, the rest Fable's, one for each later day of a Coil. */
+const DR_PALISADE_F = dayReply("fo_palisade:0:f", [
+    "Half the stakes come out brittle. The hunters replace them with wood, without comment, which is worse than comment.",
+    "Too many of the stakes ring dull when you tap them. The hunters pull those and set timber in the gaps, and Old Hu thanks you for the rest, formally, with a bow. You would have preferred to be shouted at.",
+]);
+const DR_COUNCIL_F = dayReply("fo_council:0:f", [
+    "You say it badly. They hear it anyway, and bow anyway, slightly less deeply.",
+    "It comes out in the wrong order, the end before the reasons. They wait for you to finish, with perfect courtesy, and bow as the form requires. No further than that.",
+]);
+const DR_FO_SPAR_F = dayReply("fo_drill:1:f", [
+    "Yuki wins. Decisively.",
+    "They wanted to see fast. They saw it. You mostly heard it.",
+]);
+const DR_FO_CLINIC_F = dayReply("fo_clinic:0:f", [
+    "Mostly. You'll check the split scalp again tonight.",
+    "Nearly all of it. One of the torn hands worries you; you'll look in on it after dark.",
+]);
 
 const P = 'Ashfall Hamlet';
 const late = (g) => hour(g) >= 19;
@@ -222,7 +240,7 @@ ${pantry(g)} ${g.james.satiety < 30 ? 'You are hungry.' : ''} ${g.james.hp < jam
 
 You sing the stakes out of the ground and out of the old bone the hunters bring you — jackal, boar, the long shin of something nobody wants to name. Each one costs Qi and a little of something else, the part of you that is still surprised you can do this.`,
         choices: [
-            { text: 'Sing a full stretch of the line.', qi: 6, check: { skill: 'Convergence Use', dc: 4 }, time: 180, do: (g) => { g.flags.palisade = (g.flags.palisade || 0) + 1; bumpRel(g, 'Village', 4, 0); return [`Palisade: ${g.flags.palisade}/3 stretches.`]; }, failDo: (g) => { bumpRel(g, 'Village', 1, 0); return ['Half the stakes come out brittle. The hunters replace them with wood, without comment, which is worse than comment.']; }, to: 'fo_ashfall' },
+            { text: 'Sing a full stretch of the line.', qi: 6, check: { skill: 'Convergence Use', dc: 4 }, time: 180, do: (g) => { g.flags.palisade = (g.flags.palisade || 0) + 1; bumpRel(g, 'Village', 4, 0); return [`Palisade: ${g.flags.palisade}/3 stretches.`]; }, failDo: (g) => { bumpRel(g, 'Village', 1, 0); return [DR_PALISADE_F(g)]; }, to: 'fo_ashfall' },
             { text: 'Teach the hunters to set your stakes in pits, angled, the way the jackals taught you.', check: { skill: 'GU', dc: 4 }, time: 150, do: (g) => { g.flags.palisade = (g.flags.palisade || 0) + 1; return [`Palisade: ${g.flags.palisade}/3 stretches. The pits are ugly. The pits will work.`]; }, failDo: () => ['The ground is stone under a foot of soil. You learn this the hard way.'], to: 'fo_ashfall' },
             { text: 'Not now.', to: 'fo_ashfall' },
         ],
@@ -243,7 +261,7 @@ Today they want to know about the Old Tree. Every hunter on the council has the 
 
 ${byForm(g, "\"Your cat,\" Old Wen says,", "\"Your cat,\" Old Wen says,", "\"Your companion,\" Old Wen says,")} "faces north when she sleeps. So do you."`),
         choices: [
-            { text: (g) => (dd(g) === 8 ? 'Speak for the children: keep them close, keep them hidden, and build.' : '"It\'s calling me. I think it was one of ours — my people\'s. I need to see it."'), check: { skill: 'GU', dc: 4 }, time: 120, do: (g) => { g.flags[`council${dd(g)}`] = true; bumpRel(g, 'Old Wen', 4, 0); bumpRel(g, 'Village', 3, 0); return ['The council bows to you, one after another. It takes a long time. Nobody hurries.']; }, failDo: (g) => { g.flags[`council${dd(g)}`] = true; return ['You say it badly. They hear it anyway, and bow anyway, slightly less deeply.']; }, to: 'fo_ashfall' },
+            { text: (g) => (dd(g) === 8 ? 'Speak for the children: keep them close, keep them hidden, and build.' : '"It\'s calling me. I think it was one of ours — my people\'s. I need to see it."'), check: { skill: 'GU', dc: 4 }, time: 120, do: (g) => { g.flags[`council${dd(g)}`] = true; bumpRel(g, 'Old Wen', 4, 0); bumpRel(g, 'Village', 3, 0); return ['The council bows to you, one after another. It takes a long time. Nobody hurries.']; }, failDo: (g) => { g.flags[`council${dd(g)}`] = true; return [DR_COUNCIL_F(g)]; }, to: 'fo_ashfall' },
             { text: 'Listen. Say nothing. Learn how these people decide things.', time: 120, do: (g) => { g.flags[`council${dd(g)}`] = true; bumpRel(g, 'Old Wen', 2, 0); return ['Old Wen notices your silence, and approves of it, which is the first time anyone here has approved of anything you did.']; }, to: 'fo_ashfall' },
         ],
     },
@@ -256,7 +274,7 @@ ${byForm(g, "\"Your cat,\" Old Wen says,", "\"Your cat,\" Old Wen says,", "\"You
 ${(g.flags.militia || 0) >= 2 ? 'They remember everything you taught them before the tribute. They practise it with the terrible seriousness of men who expect to need it.' : 'They have never fought anything that could think. They are about to.'}${yaHere(g) ? '\n\nYa watches from the woodpile, eating a raw turnip and heckling. Old Hu pretends with enormous dignity that she does not exist.' : ''}`,
         choices: [
             { text: 'Drill the line: spears behind bone shields, nobody alone.', check: { skill: 'GU', dc: 4, band: 'challenging' }, time: 150, do: (g) => { g.flags.militia = (g.flags.militia || 0) + 1; bumpRel(g, 'Village', 3, 0); return ['They move like one animal now. A grim, silent animal.']; }, failDo: (g) => { bumpRel(g, 'Village', 1, 0); return ['A spear goes through a shield and nearly through a cousin. Nobody laughs. Nobody here ever laughs.']; }, to: 'fo_ashfall' },
-            { text: 'Spar with Yuki in front of them, so they see what fast looks like.', check: { skill: 'GU', dc: 5 }, time: 90, do: (g) => [byForm(g, "The hunters watch in absolute silence. Afterwards Old Hu bows to the cat.", "The hunters watch in absolute silence. Afterwards Old Hu bows to the cat.", "The hunters watch in absolute silence. Afterwards Old Hu bows to Yuki. Only to Yuki."), ...awardYukiFightXp(g, 'standard')] /* v0.11.126 (NQ1): by her form, Fable's */, failDo: (g) => { g.james.hp -= 2; return ['Yuki wins. Decisively. −2 HP.', ...awardYukiFightXp(g, 'standard')]; }, to: 'fo_ashfall' },
+            { text: 'Spar with Yuki in front of them, so they see what fast looks like.', check: { skill: 'GU', dc: 5 }, time: 90, do: (g) => [byForm(g, "The hunters watch in absolute silence. Afterwards Old Hu bows to the cat.", "The hunters watch in absolute silence. Afterwards Old Hu bows to the cat.", "The hunters watch in absolute silence. Afterwards Old Hu bows to Yuki. Only to Yuki."), ...awardYukiFightXp(g, 'standard')] /* v0.11.126 (NQ1): by her form, Fable's */, failDo: (g) => { g.james.hp -= 2; return [`${DR_FO_SPAR_F(g)} −2 HP.`, ...awardYukiFightXp(g, 'standard')]; }, to: 'fo_ashfall' },
             { text: 'Not today.', to: 'fo_ashfall' },
         ],
     },
@@ -270,7 +288,7 @@ They wait in order of age, oldest first, and refuse to change the order even whe
 
 ${hasItem(g, 'jade_bracket') ? 'You have jade bracket. It will have to stretch.' : 'You have no fungus left. You have clean water, a bone needle and fifteen years of reading about infection.'}`,
         choices: [
-            { text: 'Work through the line properly.', check: { skill: 'GU', dc: 4, bonus: (g) => (hasItem(g, 'jade_bracket') ? 2 : 0) }, time: 150, do: (g) => { if (hasItem(g, 'jade_bracket')) addItem(g, 'jade_bracket', -1); g.flags.clinics = (g.flags.clinics || 0) + 1; bumpRel(g, 'Village', 6, 0); return ['Everyone walks home. The boy walks home last, because he is youngest, and he walks home alive.']; }, failDo: (g) => { bumpRel(g, 'Village', 2, 0); return ['Mostly. You\'ll check the split scalp again tonight.']; }, to: 'fo_ashfall' },
+            { text: 'Work through the line properly.', check: { skill: 'GU', dc: 4, bonus: (g) => (hasItem(g, 'jade_bracket') ? 2 : 0) }, time: 150, do: (g) => { if (hasItem(g, 'jade_bracket')) addItem(g, 'jade_bracket', -1); g.flags.clinics = (g.flags.clinics || 0) + 1; bumpRel(g, 'Village', 6, 0); return ['Everyone walks home. The boy walks home last, because he is youngest, and he walks home alive.']; }, failDo: (g) => { bumpRel(g, 'Village', 2, 0); return [DR_FO_CLINIC_F(g)]; }, to: 'fo_ashfall' },
             { text: 'Treat the boy first, and take the old woman\'s disapproval.', time: 120, check: { skill: 'GU', dc: 3 }, do: (g) => { bumpRel(g, 'Village', 1, 0); bumpRel(g, 'Mei Lin', 2, 1); g.flags.clinics = (g.flags.clinics || 0) + 1; return ['The old woman watches you break the order with the expression of someone watching a temple burn. Mei Lin, passing, catches your eye and almost smiles.']; }, failDo: () => ['You get to the boy first. It doesn\'t help as much as you wanted.'], to: 'fo_ashfall' },
             { text: 'Not today.', to: 'fo_ashfall' },
         ],

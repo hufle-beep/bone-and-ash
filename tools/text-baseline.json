@@ -156,6 +156,15 @@
    "tics": 0,
    "broken": 0,
    "spacing": 0
+  },
+  "replies": {
+   "lines": 104,
+   "words": 2570,
+   "dupes": 0,
+   "sceneShared": 6,
+   "tics": 1,
+   "broken": 0,
+   "spacing": 0
   }
  }
 }

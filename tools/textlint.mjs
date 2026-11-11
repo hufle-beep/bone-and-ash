@@ -11,7 +11,8 @@
 // v0.11.134 (owner pick LP2, LR): and the line pools: again.js's memory lines, Yuki's haul lines (task_hubs.js), the aptitude reply
 // (tasks.js): per pool lines, words, a line twice, lines sharing a 5-word chunk with a scene text, tics, broken, spacing.
 // v0.11.135 (NT1, EV1): every sample state also on a scene's 2nd–4th day this Coil, so the later-day texts are read.
-// Not read yet: the result lines of choices and cards, the task cards' texts (open, options later).
+// v0.11.136 (NC1): and the replies by day (lines.js DAY_REPLIES) as the pool `replies`.
+// Not read yet: the other result lines of choices and cards, the task cards' texts (open, options later).
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -71,7 +72,11 @@ for (const h of Object.values(TASK_HUBS)) {
     for (const k of [j, ...(j.alts || [])]) for (const n of [1, 2]) add(typeof k.got === 'function' ? k.got(n) : k.got);
     add(j.none); add(j.full);
 }
-const POOLS = { memory: [...MEMORY_LINES], yuki: yukiLines, aptitude: [ADAPT_REPLY] };
+// v0.11.136 (owner pick NC1): the replies by day (js/core/lines.js DAY_REPLIES), every text in every form
+const { DAY_REPLIES } = await import(js('core/lines.js'));
+const dayReplies = [];
+for (const list of Object.values(DAY_REPLIES)) for (const t of list) for (const r of renders(t)) if (!dayReplies.includes(r)) dayReplies.push(r);
+const POOLS = { memory: [...MEMORY_LINES], yuki: yukiLines, aptitude: [ADAPT_REPLY], replies: dayReplies };
 const pools = poolCounts(POOLS, rows.filter((r) => r.kind === 'text').flatMap((r) => r.renders));
 const snap = { totals: now.totals, areas: now.areas, pools };
 

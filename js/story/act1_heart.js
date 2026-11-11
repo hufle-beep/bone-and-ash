@@ -4,9 +4,39 @@
  * Entry 'ht_start' (Day 16). Exit 'rt_start' (Day 19, dawn).
  */
 import { addItem, hasItem, condense, advance, jamesHpMax, d6 } from '../core/game.js';
-import { eatBest, pantry, foodCount, set, byForm, byDay } from './common.js';
+import { eatBest, pantry, foodCount, set, byForm, byDay, dayReply } from './common.js';
 import { day, hour, encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil, logTrio, ykShape } from './act1_common.js';
 import { ykPath } from './yuki_path.js';
+
+/* v0.11.136 (owner pick NC1, NT1's push 2): replies by day (js/core/lines.js dayReply): the first text is the old reply, the rest Fable's, one for each later day of a Coil. */
+const DR_HC_MEI = dayReply("heart_camp:1", [
+    "She tells you the songs about the Old Tree her grandmother sang. Some of the words are your words, worn smooth by four hundred years of people who didn't know what they meant.",
+    "Tonight it is the planting songs, the ones Ashfall sings over the barley in spring. She gives you the words flat, without the tune, like a recipe. Halfway through one you could finish the line for her. You don't, and she sees you not doing it.",
+    "She asks for one of yours, for a change. You give her a cradle song, quietly, the way it was given to you. She listens with her head down, like a woman going over accounts, and at the end she says her grandmother had the second verse wrong, and that she means to keep it wrong.",
+]);
+const DR_HC_YA = dayReply("heart_camp:2", [
+    "She makes you sit on the very edge, then laughs when you hold on. Then she tells you, very seriously, how many days she followed you through the forest before she decided you were interesting. It was all of them.",
+    (g) => `She has saved you the worst part of the ledge, and says so. Then she tells you, gravely, what each sound in the hall is: bark settling, ${g.flags.ship_found ? 'the ship' : 'water somewhere under the roots'}, Mei Lin pretending to be asleep. She has been listening to all of it so that nobody else would have to. She doesn't say that part. She leans on you instead, hard, as if testing a branch.`, // RV2 (M1, Fable's review): the ship only once it is found
+]);
+const DR_HC_LOG = dayReply("heart_camp:3", [
+    (g) => byForm(g, "You play the first part again, just Wren's voice, just the planting. Yuki purrs against your chest the whole way through.", "You play the first part again, just Wren's voice, just the planting. Yuki purrs with her head on your chest the whole way through.", "You play the first part again, just Wren's voice, just the planting. Yuki leans against your shoulder and purrs, very quietly, the whole way through."),
+    (g) => byForm(g, "You let it run a little further tonight, as far as the first green shoot, and stop it there. Yuki kneads your coat through the whole of it, slowly, and the bond says nothing at all.", "You let it run a little further tonight, as far as the first green shoot, and stop it there. Yuki lies along your side with one paw across your knees, as if the log might try to leave, and the bond says nothing at all.", "You let it run a little further tonight, as far as the first green shoot, and stop it there. Yuki sits against you with her ears tipped toward Wren's voice. \"She sounds tired,\" she says at the end. \"She sounds like you.\""),
+]);
+const DR_SP_IN = dayReply("heart_spring:0", [
+    "Ya spends the whole time trying to drown you, then trying to get you to stop being so stiff, then, briefly, very effectively, not trying to do anything at all except sit closer.",
+    "Ya has given up on drowning you and taken up floating you instead, one hand under your back, issuing instructions. You are bad at it. She is patient about that, which is new, and stays close after the lesson is over, which isn't.",
+]);
+const DR_SP_WASH = dayReply("heart_spring:1", [
+    "Mei Lin washes beside you and tells you, without looking, that you are a coward. She doesn't sound like she minds.",
+    "Mei Lin takes the place next to yours at the far end and passes you the washcloth without turning her head. Cowards, she remarks, at least get clean.",
+    "Mei Lin keeps her eyes on the wall and her elbow, now and then, against yours. She says the far end is the respectable end. She has clearly decided this herself.",
+]);
+// RV2 (L5, Fable's review): day 3 on the steps above the basin (without Ya, the worn lip is Mei Lin's seat in the scene)
+const DR_SP_SIT = dayReply("heart_spring:2", [
+    (g) => byForm(g, "You sit with your back to a warm wall and Yuki in your lap and listen to the water, and for half an hour nobody needs anything from you.", "You sit with your back to a warm wall and Yuki's head in your lap and listen to the water, and for half an hour nobody needs anything from you.", "You sit with your back to a warm wall and Yuki's shoulder against yours and listen to the water, and for half an hour nobody needs anything from you."),
+    (g) => byForm(g, "You find the warm stretch of wall again and sit, with Yuki asleep across your knees, and watch the steam go up into the dark. Nobody asks you a single question. You had forgotten that could happen.", "You find the warm stretch of wall again and sit, with Yuki's chin heavy on your knee, and watch the steam go up into the dark. Nobody asks you a single question. You had forgotten that could happen.", "You find the warm stretch of wall again and sit, with Yuki sitting close beside you, and watch the steam go up into the dark. Nobody asks you a single question. You had forgotten that could happen."),
+    (g) => byForm(g, "You sit on the steps above the basin with your feet in the water and Yuki curled in the crook of your arm, and think about nothing at all, with every thread you have.", "You sit on the steps above the basin with your feet in the water and Yuki stretched along the floor behind you like a warm bolster, and think about nothing at all, with every thread you have.", "You sit on the steps above the basin with your feet in the water and Yuki next to you, her tail held carefully clear of the pool, and think about nothing at all, with every thread you have."),
+]);
 
 export const BREAK_HUBS = ['heart_hub', 'heart_camp'];
 
@@ -234,9 +264,9 @@ You don't run the analysis this time. You just put your hand in.
 ${ya(g) ? `Ya is already floating on her back in the middle, her necklace of teeth adrift round her collarbones. "You're slow," she tells the ceiling. "Both of you. The water says so."` : `Mei Lin sits on the worn lip of the basin with her feet in the water and her eyes shut, and for once does not look as if she is waiting to be told off.`}
 ${ya(g) ? (g.flags.romance ? `Mei Lin looks at the pool, and at Ya, and at you, and says, in the voice of a woman reading out a sentence, that she will be keeping her shift on. Nobody had asked.` : `Mei Lin informs the wall that some people were raised in a den, and unpins her hair at the far end of the pool, facing away.`) : ''}`], 'heart_spring'),
         choices: [
-            { text: 'Get in. You\'re forty, filthy, and it\'s *warm*.', show: ya, time: 45, do: (g) => { advance(g, 0); g.james.hp = Math.min(jamesHpMax(g), g.james.hp + 6); bumpRel(g, 'Ya', 3, 5); if (likesMei(g)) bumpRel(g, 'Mei Lin', 0, 2); return ['+6 HP. Ya spends the whole time trying to drown you, then trying to get you to stop being so stiff, then, briefly, very effectively, not trying to do anything at all except sit closer.']; }, to: 'heart_hub' },
-            { text: 'Wash, quickly, at the far end, with a reasonable amount of dignity left.', time: 30, do: (g) => { g.james.hp = Math.min(jamesHpMax(g), g.james.hp + 4); bumpRel(g, 'Mei Lin', 2, 1); return ['+4 HP. Mei Lin washes beside you and tells you, without looking, that you are a coward. She doesn\'t sound like she minds.']; }, to: 'heart_hub' },
-            { text: 'Sit by the water and let them have it.', time: 30, do: (g) => { advance(g, 30, { resting: true }); return [`You sit with your back to a warm wall and ${byForm(g, "Yuki in your lap", "Yuki's head in your lap", "Yuki's shoulder against yours")} and listen to the water, and for half an hour nobody needs anything from you.`]; /* v0.11.126 (NQ1): by her form, Fable's */ }, to: 'heart_hub' },
+            { text: 'Get in. You\'re forty, filthy, and it\'s *warm*.', show: ya, time: 45, do: (g) => { advance(g, 0); g.james.hp = Math.min(jamesHpMax(g), g.james.hp + 6); bumpRel(g, 'Ya', 3, 5); if (likesMei(g)) bumpRel(g, 'Mei Lin', 0, 2); return [`+6 HP. ${DR_SP_IN(g)}`]; }, to: 'heart_hub' },
+            { text: 'Wash, quickly, at the far end, with a reasonable amount of dignity left.', time: 30, do: (g) => { g.james.hp = Math.min(jamesHpMax(g), g.james.hp + 4); bumpRel(g, 'Mei Lin', 2, 1); return [`+4 HP. ${DR_SP_WASH(g)}`]; }, to: 'heart_hub' },
+            { text: 'Sit by the water and let them have it.', time: 30, do: (g) => { advance(g, 30, { resting: true }); return [DR_SP_SIT(g)]; /* v0.11.126 (NQ1): by her form, Fable's; v0.11.136 (NC1): by the day */ }, to: 'heart_hub' },
         ],
     },
 
@@ -494,9 +524,9 @@ After a while Mei Lin says, "Thank you for bringing us here. I think I'd rather 
 ${trio(g) >= 3 ? byForm(g, 'The three', 'The three', 'The four') + ' of you sleep in a heap by the fire now. Nobody has said anything about it. Nobody needs to. Ya sleeps in the middle, because Ya always ends up in the middle of everything.' : ya(g) ? 'Ya takes the first watch without being asked, perched on a gallery ledge above the fire like a gargoyle, humming something tuneless.' : 'Mei Lin takes the first watch.'}`;
         },
         choices: [
-            { text: 'Talk with Mei Lin by the fire.', show: (g) => !g.flags[`hc_mei@${day(g)}`], do: (g) => { g.flags[`hc_mei@${day(g)}`] = true; bumpRel(g, 'Mei Lin', 3, likesMei(g) ? 3 : 1); return ['She tells you the songs about the Old Tree her grandmother sang. Some of the words are your words, worn smooth by four hundred years of people who didn\'t know what they meant.']; }, to: 'heart_night' },
-            { text: 'Climb up to Ya\'s ledge.', show: (g) => ya(g) && !g.flags[`hc_ya@${day(g)}`], do: (g) => { g.flags[`hc_ya@${day(g)}`] = true; bumpRel(g, 'Ya', 3, likesYa(g) ? 4 : 1); return ['She makes you sit on the very edge, then laughs when you hold on. Then she tells you, very seriously, how many days she followed you through the forest before she decided you were interesting. It was all of them.']; }, to: 'heart_night' },
-            { text: 'Sit up with Yuki and the hearth-log.', show: (g) => hasItem(g, 'hearth_log'), do: (g) => { bumpRel(g, 'Yuki', 2, 0); return [`You play the first part again, just Wren's voice, just the planting. ${byForm(g, "Yuki purrs against your chest the whole way through.", "Yuki purrs with her head on your chest the whole way through.", "Yuki leans against your shoulder and purrs, very quietly, the whole way through.")}`]; /* v0.11.126 (NQ1): by her form, Fable's */ }, to: 'heart_night' },
+            { text: 'Talk with Mei Lin by the fire.', show: (g) => !g.flags[`hc_mei@${day(g)}`], do: (g) => { g.flags[`hc_mei@${day(g)}`] = true; bumpRel(g, 'Mei Lin', 3, likesMei(g) ? 3 : 1); return [DR_HC_MEI(g)]; }, to: 'heart_night' },
+            { text: 'Climb up to Ya\'s ledge.', show: (g) => ya(g) && !g.flags[`hc_ya@${day(g)}`], do: (g) => { g.flags[`hc_ya@${day(g)}`] = true; bumpRel(g, 'Ya', 3, likesYa(g) ? 4 : 1); return [DR_HC_YA(g)]; }, to: 'heart_night' },
+            { text: 'Sit up with Yuki and the hearth-log.', show: (g) => hasItem(g, 'hearth_log'), do: (g) => { bumpRel(g, 'Yuki', 2, 0); return [DR_HC_LOG(g)]; /* v0.11.126 (NQ1): by her form, Fable's; v0.11.136 (NC1): by the day */ }, to: 'heart_night' },
             { text: 'Story Mode only (removed in v0.11.41).', show: () => false, to: 'heart_night' }, // v0.11.41 (D2-a): Story Mode's sit; the place kept (choice indices)
             { text: 'Sleep.', to: 'heart_night' },
         ],

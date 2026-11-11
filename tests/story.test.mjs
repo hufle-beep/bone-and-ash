@@ -2,7 +2,7 @@
 // Incremental Mode since v0.11.34 (D1: Story Mode dropped from the game)
 import { SCENES, START_SCENE } from '../js/story/prologue.js';
 import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, itemCap, yukiSitsOut, migrate } from '../js/core/game.js'; // v0.11.127 (LQ2, TG): yukiSitsOut, migrate
-import { sceneView, choose, goTo, wasPicked } from '../js/core/story.js';
+import { sceneView, choose, goTo, wasPicked, threatOf } from '../js/core/story.js'; // v0.11.136 (RV2, TG): threatOf
 import { actionOpen } from '../js/core/forms.js';
 import { btTarget } from '../js/story/meridians.js';
 import { loveLine } from '../js/story/yuki_path.js'; // v0.11.122 (RL1, T)
@@ -10,7 +10,9 @@ import { likesMei, likesYa } from '../js/story/act1_common.js'; // v0.11.123 (EQ
 import { KEEP_FLAGS, rewind } from '../js/core/coil.js'; // v0.11.123 (ER1, T3)
 import { againView, noteRead } from '../js/story/again.js'; // v0.11.125 (RW1, T); v0.11.133 (FP2): noteRead
 import { STOMP } from '../js/story/power.js'; // v0.11.126 (NQ1)
-import { coilStamp, dayIndex, textDay } from '../js/core/lines.js'; // v0.11.135 (NT1, EV1)
+import { coilStamp, dayIndex, textDay, DAY_REPLIES } from '../js/core/lines.js'; // v0.11.135 (NT1, EV1); v0.11.136 (NC1): DAY_REPLIES
+import { splitReply, splitLine, landReply, noteSaid } from '../js/core/replies.js'; // v0.11.136 (NC1); RV2 (TG): landReply, noteSaid
+import { runTask, taskOutcome, cardCheck } from '../js/core/tasks.js'; // v0.11.136 (RV2, TG)
 import { writeFileSync } from 'node:fs';
 import { smartAction } from './lib/smartfight.mjs'; // v0.11.96 (BT1)
 import { GAMES, FULL, SHARD, WORKERS, STATS_OUT, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
@@ -251,6 +253,122 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     assert(sceneView(tm, SCENES).text === sceneView(tm2, SCENES).text, 'NT1: talk_mei on its third day shows the third beat even if the counter stayed at 0');
     assert(dayIndex(tm2, 'talk_mei') === 0, 'NT1: dayIndex reads 0 with no record');
     assert(n === NT.length * 3, `NT1: ${n} scene × form checks`);
+}
+// v0.11.136 (owner pick NC1, NT1's push 2): the replies that came back on another day of a Coil (38 lists, 52 new texts, Fable's):
+// the first day's reply is the old one (as the bots measured it before), each later day the next text, the gains the same every day.
+{
+    const onDay = (g, k) => { const today = textDay(g); const days = [...Array(k).keys()].map((i) => -1 - i).concat([today]); g.lines = { c: coilStamp(g), p: {}, last: {}, cur: {}, at: null, said: [], d: new Proxy({}, { get: (_, key) => (typeof key === 'string' ? days : undefined) }) }; return g; };
+    // [key, the old reply (the small cat's, where it goes by her form)]
+    const NC = [
+        ["bl_camp:2", "A ring of white points, leaning outward. Ya approves of anything with points."],
+        ["heart_camp:1", "She tells you the songs about the Old Tree her grandmother sang. Some of the words are your words, worn smooth by four hundred years of people who didn't know what they meant."],
+        ["talk_ya:0", "She looks at you like you're a bone-elk and she's hungry."],
+        ["talk_ya:3", "She bares her teeth at you and walks on ahead. She'll get over it. Probably."],
+        ["supper:2", "Her mother tells you, in a low and formal voice, which families owe the Sect what, which houses have lost children to the road, and which neighbours would sell you for a sack of millet. She does not smile once. It is the most useful hour you've spent on this world."],
+        ["wen_lesson:forest", "You ask what the hunters' tales say the singing sounded like. He thinks about it with great seriousness. \"Like something you have already heard,\" he says at last, \"and cannot name.\" You don't tell him that's exactly it. Yuki, on your knee, has not stopped looking toward the forest."],
+        ["bl_night_event:1", "You follow until the roots close. The lights go on into the tree, through a crack too small for a person, and the song goes with them."],
+        ["talk_mei:1", "She tells you you're impossible. She's smiling while she says it."],
+        ["herb_slopes:0", "Mei Lin grudgingly admits you have hands."],
+        ["heart_spring:0", "Ya spends the whole time trying to drown you, then trying to get you to stop being so stiff, then, briefly, very effectively, not trying to do anything at all except sit closer."],
+        ["heart_spring:1", "Mei Lin washes beside you and tells you, without looking, that you are a coward. She doesn't sound like she minds."],
+        ["night_event:11", "Yuki accepts the praise as simple fact."],
+        ["heart_spring:2", "You sit with your back to a warm wall and Yuki in your lap and listen to the water, and for half an hour nobody needs anything from you."],
+        ["rr_hunt:1", "Ya sulks about the elk all afternoon."],
+        ["bl_fireside:2", "What happens is that Ya steals your food and Mei Lin falls asleep on your shoulder. You call it a draw."],
+        ["night_event:2", "A ribbed white roof. Dry, smug, asleep."],
+        ["heart_camp:2", "She makes you sit on the very edge, then laughs when you hold on. Then she tells you, very seriously, how many days she followed you through the forest before she decided you were interesting. It was all of them."],
+        ["heart_camp:3", "You play the first part again, just Wren's voice, just the planting. Yuki purrs against your chest the whole way through."],
+        ["night_event:0", "Mapped: the lights flow toward the dead tree, like blood toward a heart that stopped."],
+        ["bl_train:0", "She throws you twice. You throw her once. She's thrilled."],
+        ["ah_forage:0", "Earthy. Magnificent. Your career peaks."],
+        ["wild_forage:2", "The bees are still arguing about it."],
+        ["wild_train:2:f", "Scratched."],
+        ["workshop:0:f", "Some come out brittle. Still, fishhooks."],
+        ["fo_palisade:0:f", "Half the stakes come out brittle. The hunters replace them with wood, without comment, which is worse than comment."],
+        ["clinic:1:f", "You do what you can. It isn't enough for everyone."],
+        ["fo_drill:1:f", "Yuki wins. Decisively."],
+        ["workshop:2:f", "It snaps on a root. The farmers bow and say nothing at all, which is much worse."],
+        ["bl_train:0:f", "She throws you four times. She's thrilled."],
+        ["wild_forage:2:f", "Stung. A lot."],
+        ["drill:1:f", "The twelve-year-old puts you on your back, then helps you up and apologises with great formality for the disrespect. That is somehow worse."],
+        ["ah_forage:1", "She feeds you one off her palm without seeming to notice she did it."],
+        ["rr_forage:1", "She corrects your knife-grip without looking up."],
+        ["wild_hunt:2:f", "It pinches back."],
+        ["wild_forage:1:f", "Leeches."],
+        ["drill:0:f", "Two of them hit each other. Still: progress."],
+        ["fo_council:0:f", "You say it badly. They hear it anyway, and bow anyway, slightly less deeply."],
+        ["fo_clinic:0:f", "Mostly. You'll check the split scalp again tonight."]
+    ];
+    // the Results lines each reply sat with before NC1 (the game as of v0.11.135, the same state), so a gain dropped or changed on every day is caught
+    const OLD_GAINS = {"bl_camp:2":[],"heart_camp:1":[],"talk_ya:0":[],"talk_ya:3":[],"supper:2":[],"wen_lesson:forest":[],"bl_night_event:1":[],"talk_mei:1":[],"herb_slopes:0":["+2 Ninefold spirit grass (trade goods)."],"heart_spring:0":["+6 HP."],"heart_spring:1":["+4 HP."],"night_event:11":["+1 Mire fowl (dressed).","Yuki Fight held at James's GU (T1 L1)","GU +1 XP, from what Yuki couldn't keep"],"heart_spring:2":[],"rr_hunt:1":["+2 root-hares (as hare)."],"bl_fireside:2":[],"night_event:2":[],"heart_camp:2":[],"heart_camp:3":[],"night_event:0":[],"bl_train:0":[],"ah_forage:0":["+2 ash-truffles (as jade bracket), and one eaten on the spot: +10 satiety."],"wild_forage:2":["+2 Wild honeycomb."],"wild_train:2:f":["−1 HP.","Yuki Fight held at James's GU (T1 L1)","GU +1 XP, from what Yuki couldn't keep"],"workshop:0:f":[],"fo_palisade:0:f":[],"clinic:1:f":[],"fo_drill:1:f":["−2 HP.","Yuki Fight held at James's GU (T1 L1)","GU +1 XP, from what Yuki couldn't keep"],"workshop:2:f":[],"bl_train:0:f":["−2 HP."],"wild_forage:2:f":["+1 Wild honeycomb, −3 HP."],"drill:1:f":["−2 HP.","Yuki Fight held at James's GU (T1 L1)","GU +1 XP, from what Yuki couldn't keep"],"ah_forage:1":["+6 cinderberries (as needleberries)."],"rr_forage:1":["+4 root-sorrel (counts as river cress)."],"wild_hunt:2:f":["−2 HP."],"wild_forage:1:f":["+2 River cress anyway."],"drill:0:f":[],"fo_council:0:f":[],"fo_clinic:0:f":[]};
+    // RV2 (TG, Fable's review): the old first-day replies of the three lists that go by Yuki's form (the game as of v0.11.135)
+    const OLD_FORMS = {"tiger":{"heart_camp:3":"You play the first part again, just Wren's voice, just the planting. Yuki purrs with her head on your chest the whole way through.","heart_spring:2":"You sit with your back to a warm wall and Yuki's head in your lap and listen to the water, and for half an hour nobody needs anything from you.","wen_lesson:forest":"You ask what the hunters' tales say the singing sounded like. He thinks about it with great seriousness. \"Like something you have already heard,\" he says at last, \"and cannot name.\" You don't tell him that's exactly it. Yuki, her chin on your knee, has not stopped looking toward the forest."},"human":{"heart_camp:3":"You play the first part again, just Wren's voice, just the planting. Yuki leans against your shoulder and purrs, very quietly, the whole way through.","heart_spring:2":"You sit with your back to a warm wall and Yuki's shoulder against yours and listen to the water, and for half an hour nobody needs anything from you.","wen_lesson:forest":"You ask what the hunters' tales say the singing sounded like. He thinks about it with great seriousness. \"Like something you have already heard,\" he says at last, \"and cannot name.\" You don't tell him that's exactly it. Yuki, beside you, has not stopped looking toward the forest."}};
+    const keys = Object.keys(DAY_REPLIES);
+    assert(keys.length === 38 && keys.reduce((s, k) => s + DAY_REPLIES[k].length - 1, 0) === 52, `NC1: 38 reply lists with 52 new texts (${keys.length})`);
+    assert(JSON.stringify([...keys].sort()) === JSON.stringify(NC.map(([k]) => k).sort()), 'NC1: a list for every reply the bots saw on two days, and no other');
+    const state = (g) => { const { lines, log, ...rest } = g; return JSON.stringify(rest); }; // RV2 (TG): the whole game but the day record and the log
+    let n = 0;
+    for (const [key, old] of NC) for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) {
+        const fail = key.endsWith(':f');
+        const [scene, i] = key === 'wen_lesson:forest' ? ['wen_lesson', 0] : key.replace(/:f$/, '').split(':');
+        const c = SCENES[scene]?.choices?.[Number(i)];
+        if (!c) { assert(false, `NC1: ${key} has no choice`); continue; }
+        const run = (k) => {
+            const g = ensureBars(fresh(5200)); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; g.scene = scene;
+            g.minutes = Math.floor(g.minutes / 1440) * 1440 + 2 * 1440 + 12 * 60; g.inventory.hearth_log = 1;
+            if (key === 'wen_lesson:forest') g.flags.lore_realms = true;
+            onDay(g, k); const before = state(ensureBars(g));
+            const lines = (fail ? c.failDo : c.do)(g, { success: !fail, ratio: fail ? 0.2 : 1 }) || [];
+            const sp = splitReply(lines);
+            return { reply: sp.reply.join(' '), gains: JSON.stringify(sp.gains), delta: [before, state(g)] };
+        };
+        const list = DAY_REPLIES[key].map((t) => { const g = ensureBars(fresh(5200)); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; return typeof t === 'function' ? t(g) : t; });
+        const days = list.map((_, k) => run(k));
+        if (form === 'cat') assert(days[0].reply === old && days[0].gains === JSON.stringify(OLD_GAINS[key]), `NC1: ${key}: the first day's reply and its gains are the old ones (${days[0].reply} | ${days[0].gains})`);
+        else if (OLD_FORMS[form][key]) assert(days[0].reply === OLD_FORMS[form][key], `NC1 (RV2, TG): ${key} (${form}): the first day's reply is the old one`);
+        else assert(days[0].reply === old, `NC1 (RV2, TG): ${key} (${form}): one first-day reply in every form, the old one`);
+        assert(days.every((d, k) => d.reply === list[k]), `NC1: ${key} (${form}): day k shows text k`);
+        assert(new Set(days.map((d) => d.reply)).size === list.length, `NC1: ${key} (${form}): a different reply each day`);
+        assert(days.every((d) => d.gains === days[0].gains && JSON.stringify(d.delta) === JSON.stringify(days[0].delta)), `NC1: ${key} (${form}): the same gains and effects every day`);
+        assert(list.every((t) => t && !/undefined|\$\{|\bNaN\b/.test(t) && splitLine(t).gain === '' && splitLine(t).reply === t), `NC1: ${key} (${form}): every text is reply only (no sentence the screen would move to Results)`);
+        assert(run(list.length).reply === list[0], `NC1: ${key}: past the last text, from the first again`);
+        n++;
+    }
+    assert(n === NC.length * 3, `NC1: ${n} reply × form checks`);
+    // the day is noted under r:<key> as the reply is drawn: the same day twice is one day, the next day the next text, a new Coil the first again
+    const g = ensureBars(fresh(5201)); g.minutes = Math.floor(g.minutes / 1440) * 1440 + 2 * 1440 + 12 * 60; g.scene = 'bl_camp';
+    const stakes = () => splitReply(SCENES.bl_camp.choices[2].do(g)).reply[0];
+    const a = stakes(), b = stakes(); g.minutes += 1440; const c2 = stakes();
+    assert(a === DAY_REPLIES['bl_camp:2'][0] && b === a && c2 === DAY_REPLIES['bl_camp:2'][1] && g.lines.d['r:bl_camp:2'].length === 2, 'NC1: the stakes reply by the day it is drawn (noted as r:bl_camp:2)');
+    g.coil.n += 1; assert(stakes() === DAY_REPLIES['bl_camp:2'][0], 'NC1: a new Coil starts the replies on their first text again');
+    // RV2 (TG, Fable's review): end to end through the card and the screen's landing: day 2 shows text 2, the wrap on day 3 goes
+    // quiet (said this Coil), a thin haul keeps the reply; the dry run and the threat word leave the day record alone
+    {
+        const h = ensureBars(fresh(5300)); h.scene = 'wilds'; const d0 = Math.floor(h.minutes / 1440) * 1440 + 2 * 1440 + 9 * 60;
+        const L = DAY_REPLIES['wild_forage:2:f'];
+        const shown = [0, 1, 2].map((k) => {
+            h.minutes = d0 + k * 1440; h.james.hp = 40; h.james.qi = 20; h.james.satiety = 80; h.scene = 'wilds';
+            const rec = JSON.stringify(h.lines?.d || {}); taskOutcome(h, SCENES, 'wild_forage:2');
+            assert(JSON.stringify(h.lines?.d || {}) === rec, `NC1 (RV2, TG): the dry run leaves the day record alone (day ${k + 1})`);
+            const r = runTask(h, SCENES, 'wild_forage:2'); const s2 = landReply(h, splitReply(r.lines).reply, { entry: true }); noteSaid(h, s2); return s2;
+        });
+        assert(shown[0].includes(L[0]) && shown[1].includes(L[1]) && !shown[2].includes(L[0]) && !shown[2].includes(L[1]), `NC1 (RV2, TG): the honey card's failure: day 1 the old reply, day 2 the new one, day 3's wrap quiet (${JSON.stringify(shown)})`);
+        const p = ensureBars(fresh(5301)); p.scene = 'wilds'; p.james.gu = { tier: 1, level: 4, xp: 0 }; ensureBars(p); p.minutes = d0 + 1440; p.lines = null;
+        p.lines = { c: coilStamp(p), p: {}, last: {}, cur: {}, at: null, said: [], d: { 'r:wild_forage:2': [textDay(p) - 1] } };
+        assert(cardCheck(p, 'wild_forage:2', SCENES.wild_forage.choices[2]).band === 'partial', 'NC1 (RV2, TG): the honey card is a thin haul at GU T1 L4');
+        const pr = splitReply(runTask(p, SCENES, 'wild_forage:2').lines).reply;
+        assert(pr.includes(DAY_REPLIES['wild_forage:2'][1]), `NC1 (RV2, TG): a thin haul keeps the day's reply (${JSON.stringify(pr)})`);
+        const t = ensureBars(fresh(5302)); t.scene = 'talk_ya'; const rec = JSON.stringify(t.lines || null);
+        assert(threatOf(t, SCENES, 0) === null && JSON.stringify(t.lines || null) === rec, 'NC1 (RV2, TG): the threat word leaves the day record alone');
+        const c = ensureBars(fresh(5303)); c.scene = 'talk_ya'; const r0 = splitReply(choose(c, SCENES, 0).lines).reply;
+        assert(r0.includes(DAY_REPLIES['talk_ya:0'][0]) && c.lines.d['r:talk_ya:0'].length === 1, 'NC1 (RV2, TG): a story choice through choose() shows the first text and notes its day');
+    }
+    // RV2 (M1, Fable's review): Ya names the ship on her ledge only once it has been found
+    {
+        const y = ensureBars(fresh(5304)); onDay(y, 1); const t0 = SCENES.heart_camp.choices[2].do(y)[0];
+        y.flags.ship_found = true; const t1 = SCENES.heart_camp.choices[2].do(y)[0];
+        assert(!/the ship/.test(t0) && /water somewhere under the roots/.test(t0) && /bark settling, the ship,/.test(t1), 'NC1 (RV2, M1): the ledge names the ship only after ship_found');
+    }
 }
 // v0.11.122 (owner pick LG1): Yuki's human scenes need her human form this Coil (YG), her bond lines below it (YV, Fable's
 // A1–A5), the first kisses at Mei Lin 30 / Ya 45 (K, S), and a choice of Ya or Mei Lin alone where both like him (BC, B0–B7).

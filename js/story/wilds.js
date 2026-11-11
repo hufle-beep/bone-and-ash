@@ -5,7 +5,41 @@
 import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, clockParts, d6, awardYukiFightXp, awardXp, jamesHpMax, jamesQiMax, nightTo, nightRest } from '../core/game.js';
 import { condensationSatGain } from '../core/formulas.js';
 import { sitGain, yukiFightSkill, canFly } from '../core/game.js'; // v0.11.118 (YK1 review, SB); v0.11.131 (XB2, FY): canFly
-import { set, day, hour, daily, markDaily, forestScale, grow, eatBest, pantry, foodCount, byForm, byDay } from './common.js';
+import { set, day, hour, daily, markDaily, forestScale, grow, eatBest, pantry, foodCount, byForm, byDay, dayReply } from './common.js';
+
+/* v0.11.136 (owner pick NC1, NT1's push 2): replies by day (js/core/lines.js dayReply): the first text is the old reply, the rest Fable's, one for each later day of a Coil. */
+const DR_MAP = dayReply("night_event:0", [
+    "Mapped: the lights flow toward the dead tree, like blood toward a heart that stopped.",
+    "Mapped again: the same line, straight to the dead tree, as if the road had been worn there before the forest was.",
+]);
+const DR_LEANTO = dayReply("night_event:2", [
+    "A ribbed white roof. Dry, smug, asleep.",
+    "White ribs overhead, straighter than your last attempt. Rain drums on bone all night, like applause, and you sleep through it.",
+]);
+const DR_GIFT = dayReply("night_event:11", [
+    "Yuki accepts the praise as simple fact.",
+    "Yuki hears the praise out to the end, and lets it be understood that the wording could be longer.",
+]);
+const DR_HONEY = dayReply("wild_forage:2", [
+    "The bees are still arguing about it.",
+    "The bees hold an inquiry. You are gone before the findings.",
+]);
+const DR_HONEY_F = dayReply("wild_forage:2:f", [
+    "Stung. A lot.",
+    "The bees saw you coming. They had time to organise.",
+]);
+const DR_CRESS_F = dayReply("wild_forage:1:f", [
+    "Leeches.",
+    "Leeches, in numbers. They seem to regard the cress as theirs.",
+]);
+const DR_CRAB_F = dayReply("wild_hunt:2:f", [
+    "It pinches back.",
+    "The needle skates off the shell. The claw doesn't miss.",
+]);
+const DR_FEET_F = dayReply("wild_train:2:f", [
+    "Scratched.",
+    "She was already where you dodged to.",
+]);
 
 const P = 'Blackroot Wilds';
 const did = (key) => (g) => { markDaily(g, key); return []; };
@@ -80,9 +114,9 @@ ${byForm(g, "Yuki is sitting on you, very upright, very pleased. On your sternum
 ${byForm(g, "Yuki is sitting on your sternum with her tail wrapped round her feet. Tonight's offering is another mire fowl, laid out with its neck straight and its wings folded, a little bigger than the last. She has been keeping count.\n\nThrough the bond: *you still hunt like a tree. I am still fixing it.*", "The weight is a paw. Beside it, set down with care, is another mire fowl, neck straight, wings folded. Yuki's nose is an inch above it, and she is very obviously not eating it. She would like the restraint noted a second time.\n\nThrough the bond: *you still hunt like a tree. I am still fixing it.*", "Yuki is kneeling at your side with her hands folded in her lap. On your sternum lies another mire fowl, neck wrung, wings folded, as neat as a parcel. There is one feather behind her ear. She has decided that you will not mention it.\n\n\"You still hunt like a tree,\" she says. \"I am still fixing it.\"")}`], `night_event:gift`), // v0.11.126 (NQ1): by her form, Fable's
         }[g.flags.night_ev]),
         choices: [
-            { text: 'Watch where the lights go. Let the threads map it.', show: ev('lights'), check: { skill: 'GU', dc: 3 }, do: (g) => { g.flags.saw_lights = true; return ['Mapped: the lights flow toward the dead tree, like blood toward a heart that stopped.']; }, to: 'morning' },
+            { text: 'Watch where the lights go. Let the threads map it.', show: ev('lights'), check: { skill: 'GU', dc: 3 }, do: (g) => { g.flags.saw_lights = true; return [DR_MAP(g)]; }, to: 'morning' },
             { text: 'Pull the blanket over your head. Not your business. Not tonight.', show: ev('lights'), to: 'morning' },
-            { text: 'Sing a bone lean-to over the camp.', show: ev('rain'), qi: 2, check: { skill: 'Convergence Use', dc: 2 }, do: (g) => { return ['A ribbed white roof. Dry, smug, asleep.']; }, failDo: (g) => { g.james.hp -= 2; return ['It collapses in the night. Wet, cold, −2 HP.']; }, to: 'morning' },
+            { text: 'Sing a bone lean-to over the camp.', show: ev('rain'), qi: 2, check: { skill: 'Convergence Use', dc: 2 }, do: (g) => { return [DR_LEANTO(g)]; }, failDo: (g) => { g.james.hp -= 2; return ['It collapses in the night. Wet, cold, −2 HP.']; }, to: 'morning' },
             { text: 'Story Mode only (removed in v0.11.41).', show: () => false, to: 'morning' }, // v0.11.41 (D2-a): Story Mode's sit; the place kept (choice indices)
             { text: 'Get wet. Sleep anyway.', show: ev('rain'), to: 'morning' },
             { text: 'Fight them off.', show: ev('crows'), combat: nightFight('crows'), to: 'night_won' },
@@ -91,7 +125,7 @@ ${byForm(g, "Yuki is sitting on your sternum with her tail wrapped round her fee
             { text: (g) => byForm(g, 'Up the fallen trunk with Yuki and wait them out.', 'Up the fallen trunk behind Yuki and wait them out.', 'Up the fallen trunk with Yuki and wait them out.') /* v0.11.126 (NS1, TR): Fable's */, show: ev('rats'), check: { skill: 'GU', dc: 3 }, failDo: (g) => { g.james.hp -= 3; return ['One gets your ankle on the way up: −3 HP.']; }, to: 'morning' },
             { text: 'Fight it. You\'re hungry, and it\'s made of meat.', show: ev('lizard'), combat: nightFight('lizard'), to: 'night_won' },
             { text: 'Back away slowly and give it its nest.', show: ev('lizard'), check: { skill: 'GU', dc: 4 }, time: 20, fail: 'night_lizard_forced', to: 'morning' },
-            { text: 'Pluck it, dress it, and tell her she\'s the best hunter in two worlds.', show: ev('gift'), do: (g) => { addItem(g, 'fowl_raw', 1); bumpRel(g, 'Yuki', 3, 0); return ['+1 Mire fowl (dressed). Yuki accepts the praise as simple fact.', ...awardYukiFightXp(g, 'standard')]; }, to: 'morning' },
+            { text: 'Pluck it, dress it, and tell her she\'s the best hunter in two worlds.', show: ev('gift'), do: (g) => { addItem(g, 'fowl_raw', 1); bumpRel(g, 'Yuki', 3, 0); return [`+1 Mire fowl (dressed). ${DR_GIFT(g)}`, ...awardYukiFightXp(g, 'standard')]; }, to: 'morning' },
         ],
     },
     night_lizard_forced: {
@@ -194,8 +228,8 @@ They've followed you.`,
         text: (g) => `You know three good spots by now. ${pantry(g)}`,
         choices: [
             { text: 'The mushroom ring under the black oaks.', show: daily('ring'), check: { skill: 'GU', dc: 3, bonus: () => 2 }, time: 50, do: (g) => { markDaily(g, 'ring'); addItem(g, 'jade_bracket', 3); return ['+3 Jade bracket fungus.']; }, failDo: (g) => { markDaily(g, 'ring'); addItem(g, 'jade_bracket', 1); g.james.hp -= 2; return ['One good cap, and one that wasn\'t: +1 Jade bracket, −2 HP.']; }, to: 'wild_forage' },
-            { text: 'River cress in the shallows.', show: daily('cress'), check: { skill: 'GU', dc: 2 }, time: 40, do: (g) => { markDaily(g, 'cress'); addItem(g, 'river_cress', 4); return ['+4 River cress.']; }, failDo: (g) => { markDaily(g, 'cress'); addItem(g, 'river_cress', 2); return ['Leeches. +2 River cress anyway.']; }, to: 'wild_forage' },
-            { text: 'The honey tree Yuki found. A needle through the comb\'s stalk, from below.', show: daily('honey'), qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 4 }, time: 45, do: (g) => { markDaily(g, 'honey'); addItem(g, 'honeycomb', 2); return ['+2 Wild honeycomb. The bees are still arguing about it.']; }, failDo: (g) => { markDaily(g, 'honey'); addItem(g, 'honeycomb', 1); g.james.hp -= 3; return ['Stung. A lot. +1 Wild honeycomb, −3 HP.']; }, to: 'wild_forage' },
+            { text: 'River cress in the shallows.', show: daily('cress'), check: { skill: 'GU', dc: 2 }, time: 40, do: (g) => { markDaily(g, 'cress'); addItem(g, 'river_cress', 4); return ['+4 River cress.']; }, failDo: (g) => { markDaily(g, 'cress'); addItem(g, 'river_cress', 2); return [`${DR_CRESS_F(g)} +2 River cress anyway.`]; }, to: 'wild_forage' },
+            { text: 'The honey tree Yuki found. A needle through the comb\'s stalk, from below.', show: daily('honey'), qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 4 }, time: 45, do: (g) => { markDaily(g, 'honey'); addItem(g, 'honeycomb', 2); return [`+2 Wild honeycomb. ${DR_HONEY(g)}`]; }, failDo: (g) => { markDaily(g, 'honey'); addItem(g, 'honeycomb', 1); g.james.hp -= 3; return [`${DR_HONEY_F(g)} +1 Wild honeycomb, −3 HP.`]; }, to: 'wild_forage' },
             { text: 'Needleberries, if the bushes have any left.', show: daily('berries'), check: { skill: 'GU', dc: 2 }, xp: false, time: 20, do: (g) => { markDaily(g, 'berries'); addItem(g, 'crimson_berry', 5); return ['+5 Crimson needleberries.']; }, failDo: (g) => { markDaily(g, 'berries'); return ['Birds got there first.']; }, to: 'wild_forage' },
             { text: 'Back to the stream.', to: 'wilds' },
         ],
@@ -208,7 +242,7 @@ They've followed you.`,
         choices: [
             { text: 'Glassback hare. A dart from cover.', show: daily('hare'), qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 3 }, time: 50, do: (g) => { markDaily(g, 'hare'); addItem(g, 'hare_raw', 2); return ['+2 Glassback hare.']; }, failDo: (g) => { markDaily(g, 'hare'); return ['Rainbows, then nothing. Gone.']; }, to: 'wild_hunt' },
             { text: 'Mire fowl. They fly badly but they fly — a dart on the rise.', show: daily('fowl'), qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 4, bonus: (g) => (yukiFightSkill(g).level >= 2 ? 1 : 0) }, time: 60, do: (g) => { markDaily(g, 'fowl'); addItem(g, 'fowl_raw', 1); return ['+1 Mire fowl.']; }, failDo: (g) => { markDaily(g, 'fowl'); return ['It flaps off honking what sounds like insults.']; }, to: 'wild_hunt' },
-            { text: 'Stone-shell crab in the shallows. A needle into the joint of the shell.', show: daily('crab'), qi: 4, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 3 }, time: 40, do: (g) => { markDaily(g, 'crab'); addItem(g, 'crab_meat', 2); return ['+2 Stone-shell crab meat.']; }, failDo: (g) => { markDaily(g, 'crab'); g.james.hp -= 2; return ['It pinches back. −2 HP.']; }, to: 'wild_hunt' },
+            { text: 'Stone-shell crab in the shallows. A needle into the joint of the shell.', show: daily('crab'), qi: 4, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 3 }, time: 40, do: (g) => { markDaily(g, 'crab'); addItem(g, 'crab_meat', 2); return ['+2 Stone-shell crab meat.']; }, failDo: (g) => { markDaily(g, 'crab'); g.james.hp -= 2; return [`${DR_CRAB_F(g)} −2 HP.`]; }, to: 'wild_hunt' },
             { text: 'Let Yuki hunt on her own and just watch.', show: daily('yukihunt'), time: 60, do: (g) => { markDaily(g, 'yukihunt'); const got = d6(g) >= 4; if (got) addItem(g, 'hare_raw', 1); return [got ? 'She comes back with a hare and a look of mild contempt. +1 Glassback hare.' : 'She comes back with nothing, and pretends she wasn\'t trying.', ...awardYukiFightXp(g, 'standard')]; }, to: 'wild_hunt' },
             { text: 'Back to the stream.', to: 'wilds' },
         ],
@@ -221,7 +255,7 @@ They've followed you.`,
         choices: [
             { text: 'Darts at marks on the trunks, from further and further away.', show: daily('t_darts'), qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 3 }, time: 60, do: did('t_darts'), failDo: did('t_darts'), to: 'wild_train' },
             { text: 'Blade forms: grow it, move, dissolve it, again.', show: daily('t_blade'), qi: 3, check: { skill: 'GU', dc: 3 }, time: 60, do: did('t_blade'), failDo: did('t_blade'), to: 'wild_train' },
-            { text: 'Footwork: let Yuki pounce at you from cover and try not to be there.', show: daily('t_feet'), check: { skill: 'GU', dc: 4 }, time: 60, do: (g) => { markDaily(g, 't_feet'); return awardYukiFightXp(g, 'standard'); }, failDo: (g) => { markDaily(g, 't_feet'); g.james.hp -= 1; return ['Scratched. −1 HP.', ...awardYukiFightXp(g, 'standard')]; }, to: 'wild_train' },
+            { text: 'Footwork: let Yuki pounce at you from cover and try not to be there.', show: daily('t_feet'), check: { skill: 'GU', dc: 4 }, time: 60, do: (g) => { markDaily(g, 't_feet'); return awardYukiFightXp(g, 'standard'); }, failDo: (g) => { markDaily(g, 't_feet'); g.james.hp -= 1; return [`${DR_FEET_F(g)} −1 HP.`, ...awardYukiFightXp(g, 'standard')]; }, to: 'wild_train' },
             { text: 'Needle drills: one point, one knuckle-width, a hundred times.', show: daily('t_needle'), qi: 4, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 4 }, time: 60, do: did('t_needle'), failDo: did('t_needle'), to: 'wild_train' },
             { text: 'Enough. Back to the stream.', to: 'wilds' },
         ],

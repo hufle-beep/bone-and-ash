@@ -103,3 +103,17 @@ export function byDay(g, list, key = g?.scene) {
     const t = list[dayIndex(g, key) % list.length];
     return typeof t === 'function' ? t(g) : t;
 }
+
+/**
+ * v0.11.136 (owner pick NC1, NT1's push 2): replies by day. A story choice's or a task card's reply that came back on another day
+ * of the same Coil now has a new text for each later day (Fable's), picked like a scene's text: `dayReply(key, list)` registers
+ * the list (the first entry is the old reply, kept for the first day) and returns `(g) => text`, which notes the day under
+ * `r:<key>` in the save's day record (`d`) and returns the text for that day (past the last, from the start again). Only the
+ * reply sentences are in a list; the gains stay in the line around it. The text lint reads every list (`DAY_REPLIES`).
+ */
+export const DAY_REPLIES = {};
+export function dayReply(key, list) {
+    DAY_REPLIES[key] = list;
+    const k = `r:${key}`;
+    return (g) => { noteDay(g, k); return byDay(g, list, k); };
+}

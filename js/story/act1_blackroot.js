@@ -7,8 +7,70 @@
  */
 import { addItem, hasItem, eat, advance, clockParts, d6, awardYukiFightXp, jamesHpMax, condense, dayHour, nightTo, nightRest, canFly } from '../core/game.js';
 import { hasForm } from '../core/forms.js';
-import { daily, markDaily, eatBest, pantry, foodCount, hour, byForm, byDay, dayIndex } from './common.js';
+import { daily, markDaily, eatBest, pantry, foodCount, hour, byForm, byDay, dayIndex, dayReply } from './common.js';
 import { encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil } from './act1_common.js';
+
+/* v0.11.136 (owner pick NC1, NT1's push 2): replies by day (js/core/lines.js dayReply): the first text is the old reply, the rest Fable's, one for each later day of a Coil. */
+const DR_STAKES = dayReply("bl_camp:2", [
+    "A ring of white points, leaning outward. Ya approves of anything with points.",
+    "White points again, all the way round. Ya tests one with her thumb and nods, as if she had ordered them herself.",
+    "The ring comes up quicker tonight. Mei Lin counts the stakes under her breath, arrives at an even number, and seems reassured by it.",
+    "Another ring, leaning out at the dark. Yuki inspects it from the inside, which is the correct side, and goes back to the fire.",
+]);
+// RV2 (L4, Fable's review): day 2's grin reworded ("with every tooth she owns" is ya_fight_start's)
+const DR_YA_FLIRT = dayReply("talk_ya:0", [
+    "She looks at you like you're a bone-elk and she's hungry.",
+    "She grins with all of her teeth and walks a slow circle round you, the way she does round anything she means to keep.",
+    "She tells you your flirting is getting better. Then she tells you what it was like before, in detail, with gestures.",
+    "She stops, sniffs the air beside your neck, and announces to nobody in particular that the scholar is learning.",
+]);
+const DR_YA_OFF = dayReply("talk_ya:3", [
+    "She bares her teeth at you and walks on ahead. She'll get over it. Probably.",
+    "She spits to one side, with accuracy, and lengthens her stride until all you can see of her is her back. It is an expressive back.",
+    "She says a word she did not learn from Mei Lin, and goes on ahead to be offended where you can watch.",
+    "She stares at you until one of you blinks. It's you. Then she stalks off in front, and the spear takes it out on the scenery.",
+]);
+const DR_LIGHTS = dayReply("bl_night_event:1", [
+    "You follow until the roots close. The lights go on into the tree, through a crack too small for a person, and the song goes with them.",
+    "You go after them as far as the roots let you. They slip through a gap you couldn't get an arm into, one by one, without hurrying, and the song thins out behind them like a door being closed gently.",
+    "You follow as far as there is anywhere to stand. The last light waits at the crack a moment longer than the others, or you'd like to think so, and then goes in after the song.",
+]);
+const DR_MEI_FLIRT = dayReply("talk_mei:1", [
+    "She tells you you're impossible. She's smiling while she says it.",
+    "She says that in Ashfall a man would be fined for that. She does not say she would report him.",
+    "She checks over her shoulder first, from habit. Then she laughs anyway, out loud, and looks pleased with the crime.",
+]);
+const DR_SNARE = dayReply("rr_hunt:1", [
+    "Ya sulks about the elk all afternoon.",
+    "Ya carries the catch by the ears and tells it, personally, that it is not an elk.", // RV2 (L3, Fable's review): one hare on a thin haul
+]);
+const DR_BETWEEN = dayReply("bl_fireside:2", [
+    "What happens is that Ya steals your food and Mei Lin falls asleep on your shoulder. You call it a draw.",
+    "What happens is that Mei Lin corrects the way Ya holds her bowl, Ya corrects the way Mei Lin sits, and you are elbowed from both sides at once. Nobody moves away.",
+]);
+const DR_SPAR_YA = dayReply("bl_train:0", [
+    "She throws you twice. You throw her once. She's thrilled.",
+    "You land one clean sweep. She lands on her feet anyway, and then on you. She calls it your best day yet.",
+    "She has started explaining each throw while you're in the air. It helps less than she thinks. You get her down once, mid-sentence.",
+    "Honours roughly even, by her count, which gives extra for biting. You don't dispute the count.",
+    "Today you see the hip throw coming and are somewhere else. She is so pleased that she tries it again, and that time it works.",
+]);
+const DR_SPAR_YA_F = dayReply("bl_train:0:f", [
+    "She throws you four times. She's thrilled.",
+    "Down, and down again, and after that you lose count. Ya keeps it for you, out loud. She's delighted.",
+]);
+const DR_TRUFFLE = dayReply("ah_forage:0", [
+    "Earthy. Magnificent. Your career peaks.",
+    "Still magnificent. You make notes for a paper nobody on this world will referee.",
+]);
+const DR_CINDER = dayReply("ah_forage:1", [
+    "She feeds you one off her palm without seeming to notice she did it.",
+    "She wipes juice off your chin with her thumb, mid-sentence, and carries on with the sentence.",
+]);
+const DR_SORREL = dayReply("rr_forage:1", [
+    "She corrects your knife-grip without looking up.",
+    "She looks at your knife-grip, once, and goes back to her own row. You take it as a certificate.",
+]);
 
 const P = 'Blackroot Wilds';
 const PLACE = { rr: `${P} — the Root Road`, dw: `${P} — the Drowned Wood`, ah: `${P} — the Ashen Hills` };
@@ -227,7 +289,7 @@ Mei Lin turns the colour of the cinderberries and walks on ahead without a word.
 "Not *everything*." She winks. It is a very aggressive wink.`,
         choices: [
             { text: 'The ivory brackets. Spore print, omnitool, the full liturgy.', check: { skill: 'GU', dc: 4, bonus: () => 2 }, time: 50, do: (g) => { addItem(g, 'jade_bracket', 3); return ['+3 Jade bracket fungus (the root variety, almost sweet).']; }, failDo: (g) => { addItem(g, 'jade_bracket', 1); return ['One good shelf, two that crumble. +1 Jade bracket.']; }, to: 'rr_hub' },
-            { text: 'Help Mei Lin with the root-sorrel.', check: { skill: 'GU', dc: 3 }, time: 50, do: (g) => { addItem(g, 'river_cress', 4); bumpRel(g, 'Mei Lin', 2, 1); return ['+4 root-sorrel (counts as river cress). She corrects your knife-grip without looking up.']; }, failDo: (g) => { addItem(g, 'river_cress', 2); return ['You cut it wrong. She sighs. +2 root-sorrel.']; }, to: 'rr_hub' },
+            { text: 'Help Mei Lin with the root-sorrel.', check: { skill: 'GU', dc: 3 }, time: 50, do: (g) => { addItem(g, 'river_cress', 4); bumpRel(g, 'Mei Lin', 2, 1); return [`+4 root-sorrel (counts as river cress). ${DR_SORREL(g)}`]; }, failDo: (g) => { addItem(g, 'river_cress', 2); return ['You cut it wrong. She sighs. +2 root-sorrel.']; }, to: 'rr_hub' },
             { text: 'Eat the grub.', do: (g) => { eat(g, 10); bumpRel(g, 'Ya', 3, 2); return ['It pops. It tastes like nutty cream and regret. +10 satiety. Ya cheers.']; }, to: 'rr_hub' },
         ],
     },
@@ -253,7 +315,7 @@ It takes you a while. A bone-elk, head up in the moss between two roots: bigger 
 "See? She learns."`], 'rr_hunt'),
         choices: [
             { text: 'Take the bone-elk.', combat: elkFight, to: 'rr_elk_won' },
-            { text: 'Leave the elk. Snare root-hares instead.', qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 4 }, time: 60, do: (g) => { addItem(g, 'hare_raw', 2); return ['+2 root-hares (as hare). Ya sulks about the elk all afternoon.']; }, failDo: () => ['Nothing. Ya does not let you forget it.'], to: 'rr_hub' },
+            { text: 'Leave the elk. Snare root-hares instead.', qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 4 }, time: 60, do: (g) => { addItem(g, 'hare_raw', 2); return [`+2 root-hares (as hare). ${DR_SNARE(g)}`]; }, failDo: () => ['Nothing. Ya does not let you forget it.'], to: 'rr_hub' },
         ],
     },
     rr_elk_won: {
@@ -644,8 +706,8 @@ She doesn't mean it. Everyone can tell she doesn't mean it. It makes it worse, s
 
 "I'm watching to make sure you *die*."`,
         choices: [
-            { text: 'Dig for the ash-truffles.', check: { skill: 'GU', dc: 5, bonus: () => 2 }, time: 60, do: (g) => { addItem(g, 'jade_bracket', 2); eat(g, 10); return ['+2 ash-truffles (as jade bracket), and one eaten on the spot: +10 satiety. Earthy. Magnificent. Your career peaks.']; }, failDo: () => ['Ash, ash, ash, and a beetle. Ya eats the beetle.'], to: 'ah_hub' },
-            { text: 'Cinderberries with Mei Lin.', check: { skill: 'GU', dc: 3 }, time: 40, do: (g) => { addItem(g, 'crimson_berry', 6); bumpRel(g, 'Mei Lin', 2, 2); return ['+6 cinderberries (as needleberries). She feeds you one off her palm without seeming to notice she did it.']; }, failDo: (g) => { addItem(g, 'crimson_berry', 2); return ['Thorns. +2 cinderberries.']; }, to: 'ah_hub' },
+            { text: 'Dig for the ash-truffles.', check: { skill: 'GU', dc: 5, bonus: () => 2 }, time: 60, do: (g) => { addItem(g, 'jade_bracket', 2); eat(g, 10); return [`+2 ash-truffles (as jade bracket), and one eaten on the spot: +10 satiety. ${DR_TRUFFLE(g)}`]; }, failDo: () => ['Ash, ash, ash, and a beetle. Ya eats the beetle.'], to: 'ah_hub' },
+            { text: 'Cinderberries with Mei Lin.', check: { skill: 'GU', dc: 3 }, time: 40, do: (g) => { addItem(g, 'crimson_berry', 6); bumpRel(g, 'Mei Lin', 2, 2); return [`+6 cinderberries (as needleberries). ${DR_CINDER(g)}`]; }, failDo: (g) => { addItem(g, 'crimson_berry', 2); return ['Thorns. +2 cinderberries.']; }, to: 'ah_hub' },
             { text: 'Eat a fire-beetle. For science.', do: (g) => { eat(g, 6); bumpRel(g, 'Ya', 3, 3); return ['It is spicy. Genuinely, chemically spicy. +6 satiety. Ya looks at you like you just proposed.']; }, to: 'ah_hub' },
         ],
     },
@@ -825,7 +887,7 @@ You wake with Mei Lin's hands on your face and Ya sitting beside you, holding a 
         id: 'bl_train', title: 'Practice', art: 'ya_fight', place: (g) => PLACE[region(g)],
         text: (g) => `${region(g) === 'dw' ? 'A dry trunk, long enough to move on.' : region(g) === 'ah' ? 'A flat of ash between two ridges.' : 'The broad back of the root.'} Ya watches you train with the critical eye of someone who has never had a lesson in her life and has never lost a fight she wanted to win. Mei Lin watches Ya watching you, and pretends she isn't.`,
         choices: [
-            { text: 'Spar with Ya.', show: daily('bt_ya'), check: { skill: 'GU', dc: 5 }, time: 60, do: (g) => { markDaily(g, 'bt_ya'); bumpRel(g, 'Ya', 2, 2); return ['She throws you twice. You throw her once. She\'s thrilled.']; }, failDo: (g) => { markDaily(g, 'bt_ya'); g.james.hp -= 2; bumpRel(g, 'Ya', 1, 1); return ['She throws you four times. −2 HP. She\'s thrilled.']; }, to: 'bl_train' },
+            { text: 'Spar with Ya.', show: daily('bt_ya'), check: { skill: 'GU', dc: 5 }, time: 60, do: (g) => { markDaily(g, 'bt_ya'); bumpRel(g, 'Ya', 2, 2); return [DR_SPAR_YA(g)]; }, failDo: (g) => { markDaily(g, 'bt_ya'); g.james.hp -= 2; bumpRel(g, 'Ya', 1, 1); return [`${DR_SPAR_YA_F(g)} −2 HP.`]; }, to: 'bl_train' },
             { text: 'Darts at a knot in the bark, from farther and farther.', show: daily('bt_dart'), qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 5 }, time: 60, do: (g) => { markDaily(g, 'bt_dart'); return []; }, failDo: (g) => { markDaily(g, 'bt_dart'); return []; }, to: 'bl_train' },
             { text: 'Needle drills, slow and exact.', show: daily('bt_needle'), qi: 4, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 6 }, time: 60, do: (g) => { markDaily(g, 'bt_needle'); return []; }, failDo: (g) => { markDaily(g, 'bt_needle'); return []; }, to: 'bl_train' },
             { text: 'Footwork with Yuki.', show: daily('bt_yuki'), check: { skill: 'GU', dc: 5 }, time: 60, do: (g) => { markDaily(g, 'bt_yuki'); return awardYukiFightXp(g, 'standard'); }, failDo: (g) => { markDaily(g, 'bt_yuki'); return awardYukiFightXp(g, 'standard'); }, to: 'bl_train' },
@@ -881,7 +943,7 @@ ${likesMei(g) ? 'At one point, climbing over a fallen trunk, she takes your hand
         },
         choices: [
             { text: 'Listen. Ask questions. Let her talk.', do: (g) => { g.flags.mei_talks = (g.flags.mei_talks || 0) + 1; bumpRel(g, 'Mei Lin', 3, 2); return []; }, time: 40, to: hubFor },
-            { text: 'Flirt. Lightly. Dangerously.', do: (g) => { g.flags.mei_talks = (g.flags.mei_talks || 0) + 1; bumpRel(g, 'Mei Lin', 1, 5); return ['She tells you you\'re impossible. She\'s smiling while she says it.']; }, time: 40, to: hubFor },
+            { text: 'Flirt. Lightly. Dangerously.', do: (g) => { g.flags.mei_talks = (g.flags.mei_talks || 0) + 1; bumpRel(g, 'Mei Lin', 1, 5); return [DR_MEI_FLIRT(g)]; }, time: 40, to: hubFor },
             { text: 'Stop walking. Stay with her a while, just the two of you.', show: (g) => likesMei(g) && !g.flags.mei_bond && rel(g, 'Mei Lin').a >= rel(g, 'Ya').a + 8, time: 30, do: (g) => { g.flags.mb_day = true; return []; }, to: 'mei_bond' },
         ],
     },
@@ -941,10 +1003,10 @@ ${likesYa(g) ? 'She walks so close that her hip knocks yours every few steps, on
 ${likesMei(g) && likesYa(g) ? '"She looked at me today," she says, low. "The herb girl. When I was washing. Properly looked." A slow, wolfish smile. "She\'s coming round."' : ''}`;
         },
         choices: [
-            { text: 'Flirt back. She started it.', do: (g) => { g.flags.ya_talks = (g.flags.ya_talks || 0) + 1; bumpRel(g, 'Ya', 2, 6); return ['She looks at you like you\'re a bone-elk and she\'s hungry.']; }, time: 40, to: hubFor },
+            { text: 'Flirt back. She started it.', do: (g) => { g.flags.ya_talks = (g.flags.ya_talks || 0) + 1; bumpRel(g, 'Ya', 2, 6); return [DR_YA_FLIRT(g)]; }, time: 40, to: hubFor },
             { text: 'Ask about her life. Listen.', do: (g) => { g.flags.ya_talks = (g.flags.ya_talks || 0) + 1; bumpRel(g, 'Ya', 4, 2); return []; }, time: 40, to: hubFor },
             { text: 'When she grabs your wrist and drags you off the path, go.', show: (g) => likesYa(g) && !g.flags.ya_romance && rel(g, 'Ya').a >= rel(g, 'Mei Lin').a + 8, do: (g) => { g.flags.yr_day = true; return []; }, time: 60, to: 'ya_romance' },
-            { text: '"Ya. Knock it off."', do: (g) => { g.flags.ya_talks = (g.flags.ya_talks || 0) + 1; bumpRel(g, 'Ya', -2, -2); return ['She bares her teeth at you and walks on ahead. She\'ll get over it. Probably.']; }, time: 10, to: hubFor },
+            { text: '"Ya. Knock it off."', do: (g) => { g.flags.ya_talks = (g.flags.ya_talks || 0) + 1; bumpRel(g, 'Ya', -2, -2); return [DR_YA_OFF(g)]; }, time: 10, to: hubFor },
         ],
     },
 
@@ -961,7 +1023,7 @@ ${likesMei(g) && likesYa(g) ? '"She looked at me today," she says, low. "The her
 ${pantry(g)}`,
         choices: [
             { text: 'Cook and eat.', show: (g) => foodCount(g) > 0 && daily('bl_cook')(g), time: 30, do: (g) => { markDaily(g, 'bl_cook'); return eatBest(g, { fire: true }); }, to: 'bl_camp' },
-            { text: 'Sing a ring of bone stakes around the camp.', show: daily('bl_stakes'), qi: 3, check: { skill: 'Convergence Use', dc: 4 }, time: 15, do: (g) => { markDaily(g, 'bl_stakes'); g.flags.bl_stakes_night = true; return ['A ring of white points, leaning outward. Ya approves of anything with points.']; }, failDo: (g) => { markDaily(g, 'bl_stakes'); g.flags.bl_stakes_night = false; return ['They come out soft. Ya kicks one over.']; }, to: 'bl_camp' },
+            { text: 'Sing a ring of bone stakes around the camp.', show: daily('bl_stakes'), qi: 3, check: { skill: 'Convergence Use', dc: 4 }, time: 15, do: (g) => { markDaily(g, 'bl_stakes'); g.flags.bl_stakes_night = true; return [DR_STAKES(g)]; }, failDo: (g) => { markDaily(g, 'bl_stakes'); g.flags.bl_stakes_night = false; return ['They come out soft. Ya kicks one over.']; }, to: 'bl_camp' },
             { text: 'Sit by the fire with the others.', show: daily('bl_fire'), time: 20, to: 'bl_fireside' },
             { text: 'Sleep.', to: 'bl_night' },
         ],
@@ -1012,7 +1074,7 @@ ${both(g) ? 'Ya sits between you and Mei Lin, an arm round each of your necks, a
         choices: [
             { text: 'Sit beside Mei Lin.', show: (g) => region(g) !== 'ah', do: (g) => { bumpRel(g, 'Mei Lin', 2, 3); return []; }, to: 'bl_night' },
             { text: 'Sit beside Ya.', show: (g) => region(g) !== 'ah', do: (g) => { bumpRel(g, 'Ya', 2, 3); return []; }, to: 'bl_night' },
-            { text: 'Sit between them, and see what happens.', show: (g) => region(g) !== 'ah' && both(g), do: (g) => { bumpRel(g, 'Mei Lin', 1, 2); bumpRel(g, 'Ya', 1, 2); return ['What happens is that Ya steals your food and Mei Lin falls asleep on your shoulder. You call it a draw.']; }, to: 'bl_night' },
+            { text: 'Sit between them, and see what happens.', show: (g) => region(g) !== 'ah' && both(g), do: (g) => { bumpRel(g, 'Mei Lin', 1, 2); bumpRel(g, 'Ya', 1, 2); return [DR_BETWEEN(g)]; }, to: 'bl_night' },
             { text: 'When Ya takes your hand and tugs you toward the dark, go.', show: (g) => region(g) === 'ah' && (onlyYa(g) || both(g)) && !g.flags.ya_romance, to: 'ya_romance' }, // v0.11.122 (LG1, BC): also when both like him
             { text: 'Stay up with Mei Lin after the others sleep.', show: (g) => region(g) === 'ah' && onlyMei(g) && !g.flags.mei_bond, to: 'mei_bond' },
             { text: 'Take the first watch together, all of you.', show: (g) => region(g) === 'ah' && !both(g) && !g.flags.bl_friends, to: 'friends_watch' },
@@ -1150,7 +1212,7 @@ ${likesMei(g) ? `Mei Lin does not pretend to be asleep tonight. She gets up, bri
         }[g.flags.bl_ev]),
         choices: [
             { text: 'Fight.', show: (g) => FIGHTS.includes(g.flags.bl_ev), combat: (g) => nightFight(g.flags.bl_ev)(g), to: 'bl_night_won' },
-            { text: 'Follow the lights a little way.', show: nev('lights'), check: { skill: 'GU', dc: 4 }, time: 60, do: (g) => { g.flags.bl_followed_lights = true; return ['You follow until the roots close. The lights go on into the tree, through a crack too small for a person, and the song goes with them.']; }, failDo: () => ['You lose them among the trunks. Ya pulls you back before the dark gets interested.'], to: 'bl_morning' },
+            { text: 'Follow the lights a little way.', show: nev('lights'), check: { skill: 'GU', dc: 4 }, time: 60, do: (g) => { g.flags.bl_followed_lights = true; return [DR_LIGHTS(g)]; }, failDo: () => ['You lose them among the trunks. Ya pulls you back before the dark gets interested.'], to: 'bl_morning' },
             { text: 'Watch them pass. Don\'t move.', show: nev('lights'), to: 'bl_morning' },
             { text: 'Sit up with her until she falls asleep.', show: nev('mei'), do: (g) => { bumpRel(g, 'Mei Lin', 3, 3); return []; }, to: 'bl_morning' },
             { text: 'Go back to sleep.', show: (g) => !FIGHTS.includes(g.flags.bl_ev) && g.flags.bl_ev !== 'lights' && g.flags.bl_ev !== 'mei', do: (g) => { if (g.flags.bl_ev === 'warm') bumpRel(g, 'Ya', 1, 3); if (g.flags.bl_ev === 'song') bumpRel(g, 'Ya', 1, 2); return []; }, to: 'bl_morning' },

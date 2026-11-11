@@ -3,7 +3,41 @@
  * a night visit shaped by what James did to Gao Feng, and bonuses that pay off when the Sect comes on Day 7.
  */
 import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, d6, awardYukiFightXp, jamesHpMax, nightRest, nightTo } from '../core/game.js';
-import { set, day, hour, daily, markDaily, forestScale, villageScale, grow, eatBest, pantry, foodCount, byForm, byDay } from './common.js';
+import { set, day, hour, daily, markDaily, forestScale, villageScale, grow, eatBest, pantry, foodCount, byForm, byDay, dayReply } from './common.js';
+
+/* v0.11.136 (owner pick NC1, NT1's push 2): replies by day (js/core/lines.js dayReply): the first text is the old reply, the rest Fable's, one for each later day of a Coil. */
+const DR_DISHES = dayReply("supper:2", [
+    "Her mother tells you, in a low and formal voice, which families owe the Sect what, which houses have lost children to the road, and which neighbours would sell you for a sack of millet. She does not smile once. It is the most useful hour you've spent on this world.",
+    "Tonight it is the Sect's own people, delivered over the washing water in the same low voice: which collector can be shamed in front of his juniors, which one counts the sacks twice, which one takes more than is written. She dries a bowl as she finishes each name. When the last bowl is put away she inclines her head to you, slightly, as one does to a man who has been handed something to carry.",
+]);
+const DR_WEN_FOREST = dayReply("wen_lesson:forest", [
+    (g) => byForm(g, "You ask what the hunters' tales say the singing sounded like. He thinks about it with great seriousness. \"Like something you have already heard,\" he says at last, \"and cannot name.\" You don't tell him that's exactly it. Yuki, on your knee, has not stopped looking toward the forest.", "You ask what the hunters' tales say the singing sounded like. He thinks about it with great seriousness. \"Like something you have already heard,\" he says at last, \"and cannot name.\" You don't tell him that's exactly it. Yuki, her chin on your knee, has not stopped looking toward the forest.", "You ask what the hunters' tales say the singing sounded like. He thinks about it with great seriousness. \"Like something you have already heard,\" he says at last, \"and cannot name.\" You don't tell him that's exactly it. Yuki, beside you, has not stopped looking toward the forest."),
+    (g) => byForm(g, "You ask when it stopped: what season, what year. He gives you the season, and is ashamed that he cannot give the year. \"It was told to me as a man tells of a death in the house,\" he says. \"Quietly. Once.\" You put that in a thread of its own. Yuki, on your knee, has turned her ears toward the forest and left them there.", "You ask when it stopped: what season, what year. He gives you the season, and is ashamed that he cannot give the year. \"It was told to me as a man tells of a death in the house,\" he says. \"Quietly. Once.\" You put that in a thread of its own. Yuki, her chin on your knee, has turned her ears toward the forest and left them there.", "You ask when it stopped: what season, what year. He gives you the season, and is ashamed that he cannot give the year. \"It was told to me as a man tells of a death in the house,\" he says. \"Quietly. Once.\" You put that in a thread of its own. Yuki, beside you, has turned her ears toward the forest and left them there."),
+]);
+const DR_SLOPES = dayReply("herb_slopes:0", [
+    "Mei Lin grudgingly admits you have hands.",
+    "Mei Lin checks your cuts stand by stand, finds no fault, and reports it as if it were bad news.",
+]);
+const DR_CLINIC_F = dayReply("clinic:1:f", [
+    "You do what you can. It isn't enough for everyone.",
+    "Boiled water and a steady hand go as far as they go. Today that is most of the line, and not all of it.",
+]);
+const DR_HOOKS_F = dayReply("workshop:0:f", [
+    "Some come out brittle. Still, fishhooks.",
+    "A few snap in the testing. The rest will hold a fish, if the fish is reasonable.",
+]);
+const DR_PLOUGH_F = dayReply("workshop:2:f", [
+    "It snaps on a root. The farmers bow and say nothing at all, which is much worse.",
+    "This one lasts a whole furrow before it cracks along the grain. The farmers carry the pieces back to you on a cloth, with both hands, like something that died in office.",
+]);
+const DR_DRILL_F = dayReply("drill:0:f", [
+    "Two of them hit each other. Still: progress.",
+    "The shields turn left. The spears turn right. Both halves do it together, at least.",
+]);
+const DR_DRILL_SPAR_F = dayReply("drill:1:f", [
+    "The twelve-year-old puts you on your back, then helps you up and apologises with great formality for the disrespect. That is somehow worse.",
+    "One of the old ones hooks your ankle with a boar spear and sets you down like a sack of barley. He then asks, gravely, whether the honoured guest fell on purpose, to teach them something. You say yes.",
+]);
 
 const P = 'Ashfall Hamlet';
 const vday = (g) => g.flags.vday || 1;
@@ -55,7 +89,7 @@ Mei Lin clears the bowls very loudly through all of this. When her mother is don
 "*Mei Lin.*" Her mother says it once, like a door shutting. "You do not speak of your father so." Mei Lin doesn't apologise. She doesn't stop smiling, either, and she doesn't look at her mother for the rest of the meal.`),
         choices: [
             { text: 'Climb out onto the roof with Mei Lin and watch the stars come out.', do: (g) => { bumpRel(g, 'Mei Lin', 3, 4); return []; }, time: 60, to: 'supper_roof' },
-            { text: 'Help her mother with the dishes, and listen.', do: (g) => { bumpRel(g, 'Village', 3, 0); bumpRel(g, 'Mei Lin', 2, 0); return ['Her mother tells you, in a low and formal voice, which families owe the Sect what, which houses have lost children to the road, and which neighbours would sell you for a sack of millet. She does not smile once. It is the most useful hour you\'ve spent on this world.']; }, time: 60, to: 'village_night' },
+            { text: 'Help her mother with the dishes, and listen.', do: (g) => { bumpRel(g, 'Village', 3, 0); bumpRel(g, 'Mei Lin', 2, 0); return [DR_DISHES(g)]; }, time: 60, to: 'village_night' },
             { text: 'Go up to the loft early. Tomorrow will want everything you have.', to: 'village_night' },
         ],
     },
@@ -210,7 +244,7 @@ ${g.flags.mei_bruised ? 'Her split lip has scabbed over. She catches you looking
 
 She talks about her father again, a little. About how he used to bring her up here and name every plant wrong on purpose, so she'd correct him.`),
         choices: [
-            { text: 'Learn properly. Ask questions, take samples, run the omnitool on everything.', check: { skill: 'GU', dc: 3 }, time: 150, do: (g) => { addItem(g, 'spirit_grass', 2); bumpRel(g, 'Mei Lin', 4, 2); return ['+2 Ninefold spirit grass (trade goods). Mei Lin grudgingly admits you have hands.']; }, failDo: (g) => { addItem(g, 'spirit_grass', 1); bumpRel(g, 'Mei Lin', 2, 1); return ['You cut one stand wrong. She sighs at you like a teacher. +1 Ninefold spirit grass.']; }, to: 'ashfall' },
+            { text: 'Learn properly. Ask questions, take samples, run the omnitool on everything.', check: { skill: 'GU', dc: 3 }, time: 150, do: (g) => { addItem(g, 'spirit_grass', 2); bumpRel(g, 'Mei Lin', 4, 2); return [`+2 Ninefold spirit grass (trade goods). ${DR_SLOPES(g)}`]; }, failDo: (g) => { addItem(g, 'spirit_grass', 1); bumpRel(g, 'Mei Lin', 2, 1); return ['You cut one stand wrong. She sighs at you like a teacher. +1 Ninefold spirit grass.']; }, to: 'ashfall' },
             { text: 'Answer her question. Honestly.', do: (g) => { bumpRel(g, 'Mei Lin', 3, 5); return ['"Because you\'re here," you say, and then, appalled at yourself: "And the grass is fascinating." She laughs so hard she has to sit down. On the next terrace an old herb-woman straightens up and stares at her until she stops. It takes a while.']; }, time: 150, to: 'ashfall' },
         ],
     },
@@ -223,7 +257,7 @@ She talks about her father again, a little. About how he used to bring her up he
 ${g.inventory.jade_bracket ? 'You have jade bracket in the hammerspace. Fifteen years of mycology, and it comes down to this: a stone well and a queue.' : 'You have no fungus left. You have hands, a bone lancet, boiling water and a doctorate. It will have to do.'}`,
         choices: [
             { text: 'Treat them with the jade bracket.', show: (g) => hasItem(g, 'jade_bracket'), check: { skill: 'GU', dc: 4, bonus: () => 2 }, time: 150, do: (g) => { addItem(g, 'jade_bracket', -1); bumpRel(g, 'Village', 8, 0); g.flags.clinics = (g.flags.clinics || 0) + 1; return ['Everyone goes home better than they came. Ashfall keeps score.']; }, failDo: (g) => { addItem(g, 'jade_bracket', -1); bumpRel(g, 'Village', 3, 0); return ['Most of them. Not the hunter. You\'ll check on him tonight.']; }, to: 'ashfall' },
-            { text: 'Treat them with what you have.', check: { skill: 'GU', dc: 5 }, time: 150, do: (g) => { bumpRel(g, 'Village', 6, 0); g.flags.clinics = (g.flags.clinics || 0) + 1; return ['Clean water and a sharp knife, applied with a lot of confidence. It works.']; }, failDo: (g) => { bumpRel(g, 'Village', 2, 0); return ['You do what you can. It isn\'t enough for everyone.']; }, to: 'ashfall' },
+            { text: 'Treat them with what you have.', check: { skill: 'GU', dc: 5 }, time: 150, do: (g) => { bumpRel(g, 'Village', 6, 0); g.flags.clinics = (g.flags.clinics || 0) + 1; return ['Clean water and a sharp knife, applied with a lot of confidence. It works.']; }, failDo: (g) => { bumpRel(g, 'Village', 2, 0); return [DR_CLINIC_F(g)]; }, to: 'ashfall' },
             { text: 'Not today. Back to the village.', to: 'ashfall' },
         ],
     },
@@ -233,9 +267,9 @@ ${g.inventory.jade_bracket ? 'You have jade bracket in the hammerspace. Fifteen 
         enter: (g) => { markDaily(g, 'workshop'); return []; },
         text: `The smith lends you his bench and stands well back. You sing bone into shapes that Ashfall has needed for years and can't afford in iron. Children gather at a safe distance, then at an unsafe one.`,
         choices: [
-            { text: 'Needles and fishhooks for half the village.', qi: 3, check: { skill: 'Convergence Use', dc: 3 }, time: 120, do: (g) => { bumpRel(g, 'Village', 5, 0); return ['Every house gets a set. The seamstress bows to you three times, very low, and cannot be persuaded to stop.']; }, failDo: (g) => { bumpRel(g, 'Village', 2, 0); return ['Some come out brittle. Still, fishhooks.']; }, to: 'ashfall' },
+            { text: 'Needles and fishhooks for half the village.', qi: 3, check: { skill: 'Convergence Use', dc: 3 }, time: 120, do: (g) => { bumpRel(g, 'Village', 5, 0); return ['Every house gets a set. The seamstress bows to you three times, very low, and cannot be persuaded to stop.']; }, failDo: (g) => { bumpRel(g, 'Village', 2, 0); return [DR_HOOKS_F(g)]; }, to: 'ashfall' },
             { text: 'Spearheads for the hunters. They\'ll need them tomorrow.', show: (g) => !g.flags.spears, qi: 5, check: { skill: 'Convergence Use', dc: 4, band: 'challenging' }, time: 120, do: (g) => { g.flags.spears = true; bumpRel(g, 'Village', 4, 0); return ['Six white spearheads, hard as antler, sharp as an insult.']; }, failDo: (g) => { bumpRel(g, 'Village', 1, 0); return ['They crack on the first test. Tomorrow, maybe.']; }, to: 'ashfall' },
-            { text: 'A bone plough-share for the barley field.', show: (g) => !g.flags.plough, qi: 6, check: { skill: 'Convergence Use', dc: 4, band: 'challenging' }, time: 150, do: (g) => { g.flags.plough = true; bumpRel(g, 'Village', 10, 0); return ['It cuts the black earth like butter. Old Wen comes out to watch and doesn\'t say anything for a long time.']; }, failDo: (g) => { bumpRel(g, 'Village', 2, 0); return ['It snaps on a root. The farmers bow and say nothing at all, which is much worse.']; }, to: 'ashfall' },
+            { text: 'A bone plough-share for the barley field.', show: (g) => !g.flags.plough, qi: 6, check: { skill: 'Convergence Use', dc: 4, band: 'challenging' }, time: 150, do: (g) => { g.flags.plough = true; bumpRel(g, 'Village', 10, 0); return ['It cuts the black earth like butter. Old Wen comes out to watch and doesn\'t say anything for a long time.']; }, failDo: (g) => { bumpRel(g, 'Village', 2, 0); return [DR_PLOUGH_F(g)]; }, to: 'ashfall' },
             { text: 'Not today. Back to the village.', to: 'ashfall' },
         ],
     },
@@ -247,8 +281,8 @@ ${g.inventory.jade_bracket ? 'You have jade bracket in the hammerspace. Fifteen 
 
 ${g.flags.militia ? 'Second day. They\'re faster now. They\'re standing differently. That might be the most dangerous thing you\'ve done here.' : 'You are not a soldier. You are, however, a man who has just spent days learning to stay alive against things with more teeth than you. You can teach that.'}`,
         choices: [
-            { text: 'Teach them to fight together: shields of bone, spears behind, nobody alone.', check: { skill: 'GU', dc: 3, band: 'challenging' }, time: 150, do: (g) => { g.flags.militia = (g.flags.militia || 0) + 1; bumpRel(g, 'Village', 4, 0); return ['By the end they move like one animal. A clumsy animal. But one.']; }, failDo: (g) => { bumpRel(g, 'Village', 1, 0); return ['Two of them hit each other. Still: progress.']; }, to: 'ashfall' },
-            { text: 'Spar with the best of them, and let Yuki show them what speed looks like.', check: { skill: 'GU', dc: 4 }, time: 120, do: (g) => { bumpRel(g, 'Village', 3, 0); return ['You win, mostly. Yuki wins completely.', ...awardYukiFightXp(g, 'standard')]; }, failDo: (g) => { g.james.hp -= 2; return ['The twelve-year-old puts you on your back, then helps you up and apologises with great formality for the disrespect. −2 HP. That is somehow worse.', ...awardYukiFightXp(g, 'standard')]; }, to: 'ashfall' },
+            { text: 'Teach them to fight together: shields of bone, spears behind, nobody alone.', check: { skill: 'GU', dc: 3, band: 'challenging' }, time: 150, do: (g) => { g.flags.militia = (g.flags.militia || 0) + 1; bumpRel(g, 'Village', 4, 0); return ['By the end they move like one animal. A clumsy animal. But one.']; }, failDo: (g) => { bumpRel(g, 'Village', 1, 0); return [DR_DRILL_F(g)]; }, to: 'ashfall' },
+            { text: 'Spar with the best of them, and let Yuki show them what speed looks like.', check: { skill: 'GU', dc: 4 }, time: 120, do: (g) => { bumpRel(g, 'Village', 3, 0); return ['You win, mostly. Yuki wins completely.', ...awardYukiFightXp(g, 'standard')]; }, failDo: (g) => { g.james.hp -= 2; return [`${DR_DRILL_SPAR_F(g)} −2 HP.`, ...awardYukiFightXp(g, 'standard')]; }, to: 'ashfall' },
             { text: 'Not today. Back to the village.', to: 'ashfall' },
         ],
     },
@@ -267,7 +301,7 @@ Mortal Vessel. Foundation. Core Formation. The realms go up like a ladder into c
 
 "I do not say it is true. I say it was said, and by serious men." He turns his cup a quarter turn, exactly. ${byForm(g, "\"Your cat sits facing it. Every day, the same way, like a needle.", "\"Your cat sits facing it. Every day, the same way, like a needle.", "\"Your companion sits facing it. Every day, the same way, like a needle.")} You do the same, and do not know that you do it."`], 'wen_lesson:forest')),
         choices: [
-            { text: 'Listen. Ask. Take notes in a mind with nine threads.', check: { skill: 'GU', dc: 2 }, time: 120, do: (g) => { const first = !g.flags.lore_realms; if (first) g.flags.lore_realms = true; else g.flags.lore_tree = true; bumpRel(g, 'Old Wen', 4, 0); return [first ? `You take it down rung by rung, in a thread of its own, and ask who holds the bottom of the ladder here. Old Wen looks at you with his good eye for a long moment. "Now you have asked the right question," he says. "Nobody in Ashfall has asked it since my father's time."` : `You ask what the hunters' tales say the singing sounded like. He thinks about it with great seriousness. "Like something you have already heard," he says at last, "and cannot name." You don't tell him that's exactly it. ${byForm(g, "Yuki, on your knee,", "Yuki, her chin on your knee,", "Yuki, beside you,")} has not stopped looking toward the forest.`]; }, failDo: (g) => { if (!g.flags.lore_realms) g.flags.lore_realms = true; else g.flags.lore_tree = true; return ['You drift. He notices, and forgives it.']; }, to: 'ashfall' },
+            { text: 'Listen. Ask. Take notes in a mind with nine threads.', check: { skill: 'GU', dc: 2 }, time: 120, do: (g) => { const first = !g.flags.lore_realms; if (first) g.flags.lore_realms = true; else g.flags.lore_tree = true; bumpRel(g, 'Old Wen', 4, 0); return [first ? `You take it down rung by rung, in a thread of its own, and ask who holds the bottom of the ladder here. Old Wen looks at you with his good eye for a long moment. "Now you have asked the right question," he says. "Nobody in Ashfall has asked it since my father's time."` : DR_WEN_FOREST(g)]; }, failDo: (g) => { if (!g.flags.lore_realms) g.flags.lore_realms = true; else g.flags.lore_tree = true; return ['You drift. He notices, and forgives it.']; }, to: 'ashfall' },
         ],
     },
 

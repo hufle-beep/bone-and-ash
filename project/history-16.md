@@ -2,6 +2,26 @@
 
 Started 2026-11-11 (v0.11.131), when `history-15.md` would have passed about 45 KB. Newer than `history-15.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.136 (word for word)
+
+### From "Open items"
+
+- **The fold by paragraph: done in v0.11.133** (FP2, RF1; numbers in "Decided in chat"): folds that hid never-read text (Careful 2,290 of 13,476 in 200 games) → 0; the skip never passes unread text (540 of 5,713 skippable Careful screens); old saves start empty (the owner's saves: 181–200 scenes show in full once more); Fable's review fixed (M1 the camp's food stock line, M2 only foldable screens recorded, L1–L4); the record at a bot game's end: median 632 paragraphs, 7.3 KB (max 8.3 KB) on about 48 KB. **Next (PL1's order): LP, the line picker and texts in sequence (open, options later)**, then RL, RS, the rewrite parts, CM. **Open, options later:** L6 pruning the record after the rewrite (about 1,000 old entries); the FAQ's sentence on the fold ("A scene you read in an earlier Coil folds…": now only when all of it was read); a partial fold (FB, measured: 734 more screens partly folded, 31,571 words, Careful 200 games).
+
+### From "Decided in chat"
+
+- **v0.11.133: the fold by paragraph (e2's options FP1–FP4 at about 17:45, owner 17:46 "FP2"; Fable's review: RF1–RF4 at about 18:55, owner 19:04 "RF1"):**
+  - **FP (200 games each of Careful, Completionist, Random, 100 of the Sitter; the owner's 22 saves):** folds today / hiding never-read text / hidden words / kept under FA: Careful 13,476 / 2,290 / 99,252 / 10,779; Completionist 12,127 / 1,848 / 75,334 / 9,542; Random 25,800 / 5,261 / 162,402 / 20,130; Sitter 2,059 / 401 / 13,368 / 1,601. **FA** a paragraph record (median 785 a game, +9 KB); **FB** a partial fold (734 more screens, 31,571 words); **FC** a whole-text record (10,737 folds, +3.7 KB); **SK** the skip respects it (540 of 5,713); **ME** old saves start empty (181–200 scenes show in full once); **MS** seeded at first load (a save first loaded after the rewrite would mark Fable's text read). **FP1 🟢 FA + FB + SK + ME + T** / **FP2 🟡 FA + SK + ME + T (recommended)** / FP3 🟠 FC + SK + ME + T / FP4 🔴 FA + SK + MS + T. **Picked: FP2.**
+  - **RF (stop-and-ask: Fable's cold review of FP2, no high; the full check exit 0, 0 drifted):** **M1** `bl_camp` folded 7 of 161 later-Coil showings (its food stock line; the only foldable scene with it); **M2** hubs, menus, the Coil screen and ends recorded too: 25% of entries, saves +16–17 KB (+37%) at Coils 4–6; **L1** the Coil snapshot's dead copy 2.7–3.3 KB; **L2** an array accepted as a record; **L3** `noteRead` on no state throws; **L4** a misleading comment; **TG** never-fold screens, a bad record, the whole-game rewind and Act 1's step, the camp's fold. No change: L5, L7, L8; L6 open. **RF1 🟢 M1 + M2 + L1 + L2 + L3 + L4 + TG (recommended)** / RF2 🟡 without M1 / RF3 🟠 M2 + TG / RF4 🔴 TG. **Picked: RF1.**
+  - **Also:** as built: the version note; `c7bb5d5` filled in for 0.11.132; v0.11.130's notes to `history-16.md`.
+
+### From "Version notes"
+
+### v0.11.133 — The fold by paragraph (FP2, RF1)
+
+- **Files:** `js/story/again.js` (`paraKey`, `noteRead`, `readBefore`, `STATE_PARA`, `isRecord`; the fold and the skip read the record), `js/core/game.js` (`newGame`'s `read`, `readFill` in `migrate`, `coilSnap` leaves it out), `js/core/coil.js` (a rewind keeps it), `js/core/tasks.js` (dry runs leave it out), `js/main.js` (the screen records foldable scenes), `tests/tasks.test.mjs` (the FP2 and RF1 blocks; P1-a's setups; the bots and the R1 walk read their screens), `tests/story.test.mjs`, `tests/models.test.mjs`, `tools/browser.py` (`again`), `tests/README.md`, `sw.js`, docs. Saves: one new field, `read` (an older version ignores it; an old save loads with `{}`); no id, flag or choice position changed.
+- **Checks:** a game change (rule 2): the full check after FP2 and after RF1: exit 0, 0 drifted of 147, the same four log only; models unchanged; repeated screens 3.1 → 3.2% (Careful), 4.4 → 4.7%, Sitter 5.2 → 5.5%, Farmer 4.3 → 4.6% (log only, no note; the saved copy not re-saved). Mutation: FP2's three rules 17 tests fail, main.js's record the browser test; RF1's four lines 1 + 2 tests and the browser test. **Fable's review (FP2):** no high; M1, M2, L1–L4 and the test gaps fixed in RF1.
+
 ## Moved from the handover in v0.11.135 (word for word)
 
 ### From "Open items"
