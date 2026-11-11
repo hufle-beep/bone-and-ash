@@ -573,7 +573,7 @@ ${both(g) ? SPRING_BOTH_WAIT : onlyYa(g) ? 'Mei Lin gets up and walks away witho
 
 "I am going to say this once and then never again, and if you laugh I'll put a needle in you." She takes a breath. "She makes me *furious*. She has no shame and no manners and she ate a frog in front of me with its legs still kicking. And I can't stop thinking about her mouth." Her hands are clenched in her lap. "And I can't stop thinking about yours. And in Ashfall that makes me a whore or a madwoman, and I don't know which, and I'm *curious*, and I *hate* being curious, and it's all your fault, both of you."
 
-Yuki, from your lap, sends one very clear thought: *finally.*
+Yuki, ${byForm(g, 'from your lap', 'a white hill at your back', 'across the fire and apparently asleep')}, sends one very clear thought: *finally.*
 
 "I'm not asking you anything," Mei Lin says. "I'm telling you. So you know." She stands, abruptly. "Don't say anything."
 

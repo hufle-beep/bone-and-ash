@@ -53,9 +53,9 @@ const back = (g) => g.flags.yk_back || g.flags.yuki_return || 'stream';
  *  when James chose her (`fo_pick`, set by the choice, cleared at `fo_depart`): the quiet loft, Ya at the window, the three on the roof.
  *  Hidden when Mei Lin is already his lover in the hay (YH: the rule Ya's "Stay." follows), so Fable's lead-in (ii) is not used. */
 const YK_FO_LEAD = {
-    yk: `Yuki gets up from beside you, goes to the loft window, and looks back at you, once. Forty years have taught you that look. It means *now*, and it means *don't make me ask*. You follow her out onto the thatch.`,
-    yk_ya: `"Not tonight," you say. "Tonight is the cat's." Ya looks at Yuki, and Yuki looks at Ya, and something is settled between them that you are not consulted on. "The not-cat," Ya says, and grins with every tooth. "Fine. She was first. I can count to one." She goes out by the window, then puts her head back in upside down. "A little offended," she adds, for accuracy, and is gone. Yuki goes out after her, the other way, up. You follow.`,
-    yk_roof: `You say nothing, which Ya hears perfectly. She looks at Yuki, who is looking at nothing, very hard, and laughs under her breath. "Come, herb girl. I'll show you how to sleep on a god." "I shall sleep in a bed," says Mei Lin, "like a person," and she goes in at the window with her dignity intact, touching your shoulder once on the way, as she'd touch a doorpost for luck. Ya takes the shrine roof in one jump, and the thatch is yours.`,
+    yk: (g) => byForm(g, `Yuki gets up from beside you, goes to the loft window, and looks back at you, once. Forty years have taught you that look. It means *now*, and it means *don't make me ask*. You follow her out onto the thatch.`, `Yuki gets up from beside you, goes to the loft window, considers it, and looks back at you, once. Forty years have taught you that look. It means *now*, and it means *don't make me ask*. She goes through a shoulder at a time, and the frame survives, narrowly. You follow her out onto the thatch.`, `Yuki gets up from beside you, goes to the loft window, and looks back at you, once. Forty years have taught you that look. It means *now*, and it means *don't make me ask*. You follow her out onto the thatch.`), // v0.11.128 (RV2, FO; Fable's MAIN): the great root-kin and the window
+    yk_ya: (g) => `"Not tonight," you say. ${byForm(g, '"Tonight is the cat\'s."', '"Tonight is the cat\'s."', '"Tonight is Yuki\'s."')} Ya looks at Yuki, and Yuki looks at Ya, and something is settled between them that you are not consulted on. ${byForm(g, '"The not-cat,"', '"The not-cat,"', '"The not-woman,"')} Ya says, and grins with every tooth. "Fine. She was first. I can count to one." She goes out by the window, then puts her head back in upside down. "A little offended," she adds, for accuracy, and is gone. Yuki goes out after her, the other way, up. You follow.`,
+    yk_roof: () => `You say nothing, which Ya hears perfectly. She looks at Yuki, who is looking at nothing, very hard, and laughs under her breath. "Come, herb girl. I'll show you how to sleep on a god." "I shall sleep in a bed," says Mei Lin, "like a person," and she goes in at the window with her dignity intact, touching your shoulder once on the way, as she'd touch a doorpost for luck. Ya takes the shrine roof in one jump, and the thatch is yours.`,
 };
 const SCENES_YK = {
     yk_choice: {
@@ -156,7 +156,7 @@ In the morning Mei Lin and Yuki walk ahead of you on the path, side by side, hea
         text: (g) => {
             const n = g.flags.yk_sis_talks || 1;
             const lines = [
-                `Yuki corners you by the water, in her human form, which she only uses for things she considers important. Today, that's your love life.
+                `${byForm(g, 'Yuki corners you by the water, in her human form, which she only uses for things she considers important.', 'Yuki corners you by the water, in her human form, which she only uses for things she considers important.', 'Yuki corners you by the water, which she does by standing exactly where you meant to go. She only does it for things she considers important.')} Today, that's your love life.
 
 "Mei Lin," she says, "brought chopsticks into the Blackroot. For you. She doesn't say it's for you. She's been eating with them very slowly next to you for three days." She folds her arms. "And Ya bit off a wolf's tooth and *gave it to you*. Do you know what that means where she's from?"
 
@@ -182,7 +182,7 @@ In the morning Mei Lin and Yuki walk ahead of you on the path, side by side, hea
     yk_night_solo: {
         id: 'yk_night_solo', title: 'Just Her', art: 'yuki_human', place: 'Ashfall — the grove',
         enter: (g) => { g.flags.final_night = 'yuki'; bumpRel(g, 'Yuki', 0, 10); return []; },
-        text: (g) => `${byForm(g, 'You go out to the grove, and the white cat goes with you, and inside the ring of white trunks the cat is a woman, and the woman is Yuki.', 'You go out to the grove, and the white cat goes with you, and inside the ring of white trunks the cat is a woman, and the woman is Yuki.', 'You go out to the grove, and Yuki goes with you, on two feet, down the middle of the lane, and inside the ring of white trunks she stops minding who is watching, because nobody is.')}
+        text: (g) => `${byForm(g, 'You go out to the grove, and the white cat goes with you, and inside the ring of white trunks the cat is a woman, and the woman is Yuki.', 'You go out to the grove, and the great white cat goes with you, down the middle of the lane, there being no other part of the lane left, and inside the ring of white trunks there is suddenly a good deal more room, and a woman in it, and the woman is Yuki.', 'You go out to the grove, and Yuki goes with you, on two feet, down the middle of the lane, and inside the ring of white trunks she stops minding who is watching, because nobody is.')}
 
 "Tomorrow a very old man comes to try to take you," she says, lying back in the moss with her hair everywhere and the grove's song humming in the trunks around you. "I want to point out that I bit a wolf in half for you once. I'll do worse to him."
 
@@ -194,21 +194,22 @@ The grove sings. You stop thinking about him.
 
 *
 
-${byForm(g, 'Toward dawn she is on your chest in her small shape, purring, as if nothing ever happened, and then — just for a second, as the light comes up — she isn\'t, and she kisses you once, and says, "Go and win," and is a cat again before you can answer.', 'Toward dawn she is on your chest in her small shape, purring, as if nothing ever happened, and then — just for a second, as the light comes up — she isn\'t, and she kisses you once, and says, "Go and win," and is a cat again before you can answer.', 'Toward dawn she is asleep on your chest, as she has been for forty years, except for the arm thrown over you and the hair in your mouth, and then — just for a second, as the light comes up — she isn\'t asleep, and she kisses you once, and says, "Go and win," and is asleep again before you can answer.')}`, // v0.11.127 (LP1, CP; Fable's MAINs): openly human, no change of shape
+${byForm(g, 'Toward dawn she is on your chest in her small shape, purring, as if nothing ever happened, and then — just for a second, as the light comes up — she isn\'t, and she kisses you once, and says, "Go and win," and is a cat again before you can answer.', 'Toward dawn she is round you in her great shape, her head on your chest, which is all of her that fits, purring, as if nothing ever happened, and then — just for a second, as the light comes up — she isn\'t, and she kisses you once, and says, "Go and win," and is four hundred pounds of cat again before you can answer.', 'Toward dawn she is asleep on your chest, as she has been for forty years, except for the arm thrown over you and the hair in your mouth, and then — just for a second, as the light comes up — she isn\'t asleep, and she kisses you once, and says, "Go and win," and is asleep again before you can answer.')}`, // v0.11.127 (LP1, CP; Fable's MAINs): openly human, no change of shape; v0.11.128 (OF2, SD): the great root-kin's dawn ends great
         choices: [{ text: 'Dawn.', do: (g) => { sleepUntil(g, 6); return ['Slept until 06:00. HP and Qi full.']; }, to: 'rt_elder' }],
     },
     yk_night_mei: {
-        id: 'yk_night_mei', title: 'The Herb Loft, and the Cat', art: 'roof', place: 'Ashfall — the herb loft',
+        id: 'yk_night_mei', title: (g) => byForm(g, 'The Herb Loft, and the Cat', 'The Herb Loft, and the Cat', 'The Herb Loft, and Yuki'), // v0.11.128 (RV2, MT; Fable's MAIN)
+        art: 'roof', place: 'Ashfall — the herb loft',
         enter: (g) => { g.flags.final_night = 'yuki_mei'; g.flags.romance = true; bumpRel(g, 'Mei Lin', 5, 12); bumpRel(g, 'Yuki', 0, 8); return []; },
-        text: `Mei Lin climbs the ladder to the loft ahead of you, and a white cat climbs it ahead of her, and at the top there is no cat.
+        text: (g) => `${byForm(g, 'Mei Lin climbs the ladder to the loft ahead of you, and a white cat climbs it ahead of her, and at the top there is no cat.', 'Mei Lin climbs the ladder to the loft ahead of you, past two rungs that four hundred pounds of cat cracked on the way up, and at the top there is no cat.', 'Mei Lin climbs the ladder to the loft ahead of you, and the lamp at the top is already lit, and it was not Mei Lin who lit it.')}
 
-Mei Lin stops on the last rung. Yuki is sitting in the hay in her human shape, ears forward, perfectly composed, as if she has been waiting for an appointment.
+Mei Lin stops on the last rung. Yuki is sitting in the hay${byForm(g, ' in her human shape', ' in her human shape', '')}, ears forward, perfectly composed, as if she has been waiting for an appointment.
 
 "I've been talking to her," Yuki says to you. "For days. You weren't invited."
 
 "In Ashfall," Mei Lin says, very low, "a woman who—"
 
-"In Ashfall," says Yuki, "they think I'm a cat." She holds out a hand. "I'm not asking you to be shameless. I'm asking you to be honest. You've been honest with me all week. Be honest with him."
+${byForm(g, '"In Ashfall," says Yuki, "they think I\'m a cat."', '"In Ashfall," says Yuki, "they think I\'m a cat."', '"In Ashfall," says Yuki, "they have all looked at my ears, gravely, and agreed not to see them."')} She holds out a hand. "I'm not asking you to be shameless. I'm asking you to be honest. You've been honest with me all week. Be honest with him."
 
 Mei Lin looks at Yuki's hand for a long moment. Then she laughs — the laugh, the one that got her into trouble her whole life — and takes it, and climbs the last rung.
 
@@ -218,9 +219,9 @@ It is, you discover, possible for two women to agree on absolutely everything ab
     yk_night_ya: {
         id: 'yk_night_ya', title: 'Two Predators', art: 'grove_sprout', place: 'Ashfall — the grove',
         enter: (g) => { g.flags.final_night = 'yuki_ya'; g.flags.ya_romance = true; bumpRel(g, 'Ya', 5, 12); bumpRel(g, 'Yuki', 0, 8); return []; },
-        text: `Ya is waiting in the grove. So, it turns out, is Yuki: human, sitting cross-legged in the moss opposite the huntress, the two of them regarding each other with the calm, total attention of two large predators who have decided not to fight over the kill.
+        text: (g) => `Ya is waiting in the grove. So, it turns out, is Yuki: ${byForm(g, 'human, ', 'human, ', '')}sitting cross-legged in the moss opposite the huntress, the two of them regarding each other with the calm, total attention of two large predators who have decided not to fight over the kill.
 
-"Your cat," Ya says, without looking round, "is a woman."
+${byForm(g, '"Your cat," Ya says, without looking round, "is a woman."', '"Your cat," Ya says, without looking round, "is a woman."', '"Your woman," Ya says, without looking round, "is a cat."')}
 
 "I know."
 
@@ -232,21 +233,21 @@ It is, you discover, possible for two women to agree on absolutely everything ab
 
 *
 
-Toward dawn you wake in the moss with Ya sprawled across your legs, snoring, and a white cat curled in the small of her back, purring, and the grove singing over all three of you.`,
+${byForm(g, 'Toward dawn you wake in the moss with Ya sprawled across your legs, snoring, and a white cat curled in the small of her back, purring, and the grove singing over all three of you.', 'Toward dawn you wake in the moss with Ya sprawled across your legs, snoring, and a great white cat curled round the pair of you, purring, and the grove singing over all three of you.', 'Toward dawn you wake in the moss with Ya sprawled across your legs, snoring, and Yuki curled into the small of her back, white hair over both of them, and the grove singing over all three of you.')}`, // v0.11.128 (OF2, YA; Fable's MAINs): the dawn by her form
         choices: [{ text: 'Dawn.', do: (g) => { sleepUntil(g, 6); return ['Slept until 06:00. HP and Qi full.']; }, to: 'rt_elder' }],
     },
     yk_night_all: {
         id: 'yk_night_all', title: 'Four', art: 'trio', place: 'Ashfall — the herb loft',
         enter: (g) => { g.flags.final_night = 'all'; g.flags.throuple = true; g.flags.romance = true; g.flags.ya_romance = true; bumpRel(g, 'Mei Lin', 6, 15); bumpRel(g, 'Ya', 6, 15); bumpRel(g, 'Yuki', 0, 10); return []; },
-        text: `"Right," says Ya, standing up from the table. "I'm tired of this."
+        text: (g) => `"Right," says Ya, standing up from the table. "I'm tired of this."
 
-"So am I," says Yuki, and stands up too, in her human shape, which makes Mei Lin's mother — on her way to bed — stop dead on the stairs, look at the white-haired woman with cat's ears at her table for a long, grave moment, and then continue up the stairs without a word, which in Ashfall is roughly a blessing.
+${byForm(g, '"So am I," says Yuki, and stands up too, in her human shape, which makes Mei Lin\'s mother — on her way to bed — stop dead on the stairs, look at the white-haired woman with cat\'s ears at her table for a long, grave moment, and then continue up the stairs without a word, which in Ashfall is roughly a blessing.', '"So am I," says Yuki, and stands up too, in her human shape, which makes Mei Lin\'s mother — on her way to bed — stop dead on the stairs, look at the white-haired woman with cat\'s ears at her table for a long, grave moment, and then continue up the stairs without a word, which in Ashfall is roughly a blessing.', '"So am I," says Yuki, and stands up too, from the bench by the stove, which makes Mei Lin\'s mother — on her way to bed — stop dead on the stairs, look at the white-haired woman she set a fifth bowl for this evening, and then at her daughter, for a long, grave moment, and then continue up the stairs without a word, leaving them the lamp, which in Ashfall is roughly a blessing.')}
 
 Ya points at Mei Lin. "You want him." She points at you. "You want her." She points at Yuki. "She wants everybody, she's a cat." She shrugs. "And everybody wants me, because I'm wonderful."
 
 "I have spoken to her for a week," Yuki says to Mei Lin, quieter. "Every night. You know what I'm going to say."
 
-Mei Lin looks at the three of you — the scholar, the huntress, the cat — and her face goes through pride, and fury, and fear, and then something else entirely.
+Mei Lin looks at the three of you — the scholar, the huntress, ${byForm(g, 'the cat', 'the cat', 'the woman with the ears')} — and her face goes through pride, and fury, and fear, and then something else entirely.
 
 "Build something else," she says. "That's what you told me." She stands up. "Fine. The loft. And if my mother hears one sound—"
 
@@ -256,16 +257,16 @@ Up in the loft it smells of mint and hay. Everyone has opinions. Nobody is shy a
 
 *
 
-Toward dawn: Mei Lin's head on your chest; Ya across both of you like a fallen tree; and a white cat on top of the whole pile, as high as she can get, purring like an engine. *Best spot,* says the bond.`,
+${byForm(g, 'Toward dawn: Mei Lin\'s head on your chest; Ya across both of you like a fallen tree; and a white cat on top of the whole pile, as high as she can get, purring like an engine. *Best spot,* says the bond.', 'Toward dawn: Mei Lin\'s head on your chest; Ya across both of you like a fallen tree; and a great white cat round the whole pile, since she can no longer get on top of it, purring like a larger engine. *Best spot,* says the bond.', 'Toward dawn: Mei Lin\'s head on your chest; Ya across both of you like a fallen tree; and Yuki on top of the whole pile, as high as she can get, her tail across somebody\'s face. "Best spot," she says, without opening her eyes.')}`, // v0.11.128 (OF2, YA; Fable's MAINs): the "So am I" line and the dawn by her form
         choices: [{ text: 'A few more hours. Then the Elder.', do: (g) => { sleepUntil(g, 6); return ['Slept until 06:00. HP and Qi full.']; }, to: 'rt_elder' }],
     },
     /* ---------- v0.11.123 (owner picks EQ1, SC; EB1): her night at the Fallout and her walk on the way home (Fable's D3, D4 MAINs; ER1 (TX): R2–R4, the log, the north, any form) ---------- */
     yk_night_fo: {
         id: 'yk_night_fo', title: 'The Wrong Stars', art: 'yuki_human', place: 'Ashfall Hamlet — the roof',
         enter: (g) => { bumpRel(g, 'Yuki', 0, 8); return []; },
-        text: (g) => `${YK_FO_LEAD[g.flags.fo_pick] || YK_FO_LEAD.yk}
+        text: (g) => `${(YK_FO_LEAD[g.flags.fo_pick] || YK_FO_LEAD.yk)(g)}
 
-The thatch is cold, and the stars are the wrong stars, as they have been every night since the lab. By the time you are out on the thatch she is on the ridge, facing north, and whatever she went up as, it is a woman sitting there now, knees drawn up, white hair lifting in the wind, tail wrapped round her bare feet.
+The thatch is cold, and the stars are the wrong stars, as they have been every night since the lab. By the time you are out on the thatch she is on the ridge, facing north, and ${byForm(g, 'whatever she went up as, it is a woman sitting there now', 'whatever she went up as, it is a woman sitting there now', 'she has had time to arrange herself as if she had never been anywhere else')}, knees drawn up, white hair lifting in the wind, tail wrapped round her bare feet.
 
 "Don't say anything clever," says Yuki. "I came out here to be sincere and I'd like to get it over with."
 
@@ -275,9 +276,9 @@ The thatch is cold, and the stars are the wrong stars, as they have been every n
 
 "It was very good."
 
-"I know. I rehearsed it on the stove."
+${byForm(g, '"I know. I rehearsed it on the stove."', '"I know. I rehearsed it in front of the stove. I no longer fit on it."', '"I know. I rehearsed it on the bench by the stove."')}
 
-She leans in, and it is the oldest weight in your life, her head against your jaw; only this time there is a mouth with it, unhurried and sure of its welcome. Her hand goes inside the ridiculous coat as if she had always kept her things there. Below you sleeps a village that put down a saucer of fish scraps for her at supper. She laughs about it, without a sound, against your throat.
+She leans in, and it is the oldest weight in your life, her head against your jaw; only this time there is a mouth with it, unhurried and sure of its welcome. Her hand goes inside the ridiculous coat as if she had always kept her things there. Below you sleeps a village that ${byForm(g, 'put down a saucer of fish scraps for her at supper', 'set the stew pot down for her at supper, with great ceremony and from a distance', 'set a bowl for her at supper and then, after grave consideration, a saucer of fish scraps beside it')}. She laughs about it, without a sound, against your throat.
 
 "Quietly," you say.
 
@@ -287,14 +288,14 @@ The thatch keeps secrets. So does the north wind. The rest is nobody's business.
 
 *
 
-${byForm(g, 'You wake in grey light with a small white cat in the hollow of your neck, purring as if she had never been anything else. Down in the lane the first doors are opening. *Up,* says the bond. *They\'re going to bow at you. Try to look like a man who slept.*', 'You wake in grey light with a small white cat in the hollow of your neck, purring as if she had never been anything else. Down in the lane the first doors are opening. *Up,* says the bond. *They\'re going to bow at you. Try to look like a man who slept.*', 'You wake in grey light with Yuki asleep against your neck, one arm across you and her tail over your eyes, as if she had never slept any other way. Down in the lane the first doors are opening. "Up," she says, without moving. "They\'re going to bow at you. Try to look like a man who slept."')}`, // v0.11.127 (LQ2, HL; Fable's MAIN): the human's dawn
+${byForm(g, 'You wake in grey light with a small white cat in the hollow of your neck, purring as if she had never been anything else. Down in the lane the first doors are opening. *Up,* says the bond. *They\'re going to bow at you. Try to look like a man who slept.*', 'You wake in grey light with a great white cat laid along the ridge beside you and her head on your chest, purring as if she had never been anything else. The thatch has held, which neither of you expected. Down in the lane the first doors are opening. *Up,* says the bond. *They\'re going to bow at you. Try to look like a man who slept.*', 'You wake in grey light with Yuki asleep against your neck, one arm across you and her tail over your eyes, as if she had never slept any other way. Down in the lane the first doors are opening. "Up," she says, without moving. "They\'re going to bow at you. Try to look like a man who slept."')}`, // v0.11.127 (LQ2, HL; Fable's MAIN): the human's dawn; v0.11.128 (OF2, FD): the great root-kin's dawn and the supper by her form
         choices: [{ text: 'Dawn.', to: 'fo_depart' }],
     },
     rt_yk_talk: {
         id: 'rt_yk_talk', title: 'Arithmetic', art: 'yuki_human', place: 'Blackroot Wilds — the deer paths',
         text: (g) => `You let the others draw ahead until the path bends and takes them. Through the bond, you feel her decide something. ${byForm(g, 'When you look round, Yuki is walking beside you on two bare feet, hands clasped behind her back, tail keeping her steady on the roots, as if she\'d been doing it all morning and you had only now noticed.', 'When you look round, Yuki is walking beside you on two bare feet, hands clasped behind her back, tail keeping her steady on the roots, as if she\'d been doing it all morning and you had only now noticed.', 'When you look round, Yuki has dropped back to walk beside you on two bare feet, hands clasped behind her back, tail keeping her steady on the roots, as if she had merely happened to be there and you had only now noticed.')}
 
-"Forty gardeners," she says. "I was in your lap for the log. It poured into me as well. Nobody came for them."
+"Forty gardeners," she says. ${byForm(g, '"I was in your lap for the log.', '"I had my head in your lap for the log.', '"I was on the arm of your chair for the log.')} It poured into me as well. Nobody came for them."
 
 "No."
 
@@ -377,12 +378,12 @@ export function installYukiPath(SCENES) {
         : ykShape(g) !== 'human' // v0.11.122 (LG1, YV; Fable's A4); v0.11.125 (FM1, PM): by her current form, as the picture
         ? `And Yuki: her forehead pushed hard against your temple, the way she has done since before either of you could see, and a purr going through you that you feel in your teeth. The bond is quiet. ${ykLover(g) ? 'She doesn\'t need to say anything.' : 'Sisters don\'t need to say anything.'}`
         : `And Yuki: not on your shoulder but beside you, human, her forehead against your temple, her arm round your back. She doesn't say anything. ${ykLover(g) ? 'She doesn\'t need to.' : 'Sisters don\'t need to.'}`));
-    beat(SCENES, 'rt_camp', (g) => (!ykHuman(g) ? '' // v0.11.122 (LG1, YG): both lines have her human (the sister's needs hands)
+    beat(SCENES, 'rt_camp', (g) => (!ykHuman(g) ? '' // v0.11.122 (LG1, YG): both lines need her human form open; v0.11.128 (RV2, M4; Fable's MAINs): the sister's gesture by her form (only the human has hands)
         : ykLover(g)
         ? byForm(g, 'Later, when the others are asleep, the warmest lap is yours, and the cat in it isn\'t a cat, and nobody mentions it in the morning.',
             'Later, when the others are asleep, the great white wall at your back gets a good deal smaller and a good deal warmer, and has arms, and is a wall again by morning, and nobody mentions it.',
             'Later, when the others are asleep, Yuki moves her bedroll the last arm\'s length without a sound, and the best spot is taken, and nobody mentions it in the morning.') // v0.11.127 (LP1, CP + RC; Fable's MAINs)
-        : ykSister(g) ? 'Yuki, in the firelight, catches your eye and makes a small, filthy gesture at the two women, and then at you, and then goes to sleep looking very pleased with herself.' : ''));
+        : ykSister(g) ? byForm(g, 'Yuki, in the firelight, catches your eye from the lap in question and looks, slowly, at the two women, and then at you. *There is a gesture for this,* says the bond. *It needs hands. Imagine it.* Then she goes to sleep looking very pleased with herself.', 'Yuki, in the firelight, opens one gold eye at you, and the tip of her tail, which is as thick as your wrist, points at the two women, and then at you. *There is a gesture for this,* says the bond. *It needs hands. Imagine it.* Then she goes to sleep looking very pleased with herself.', 'Yuki, in the firelight, catches your eye and makes a small, filthy gesture at the two women, and then at you, and then goes to sleep looking very pleased with herself.') : ''));
 
     // camp choices in the Blackroot
     SCENES.bl_camp.choices.splice(SCENES.bl_camp.choices.length - 1, 0,
@@ -399,7 +400,7 @@ export function installYukiPath(SCENES) {
     ev.choices.splice(ev.choices.length - 1, 0,
         // v0.11.122 (LG1, YG): every one of these has her human, so her human form this Coil as well as the path
         { text: 'Go out to the grove with Yuki. Just Yuki.', show: (g) => ykLover(g) && ykHuman(g), to: 'yk_night_solo' },
-        { text: (g) => byForm(g, 'Climb to the loft with Mei Lin. The cat is already up there.', 'Climb to the loft with Mei Lin. The cat is already up there.', 'Climb to the loft with Mei Lin. Yuki is already up there.'), show: (g) => ykLover(g) && ykHuman(g) && likesMei(g) && meiOpen(g), to: 'yk_night_mei' }, // v0.11.127 (LQ2, HL): the label by her form (the great root-kin keeps "the cat")
+        { text: (g) => byForm(g, 'Climb to the loft with Mei Lin. The cat is already up there.', 'Climb to the loft with Mei Lin. The cat is already up there.', 'Climb to the loft with Mei Lin. Yuki is already up there.'), show: (g) => ykLover(g) && ykHuman(g) && likesMei(g) && meiOpen(g), to: 'yk_night_mei' }, // v0.11.127 (LQ2, HL): the label by her form (the great root-kin keeps "the cat"); v0.11.128 (OF2, MO): the scene's opening too
         { text: 'Follow Ya to the grove. Yuki follows you.', show: (g) => ykLover(g) && ykHuman(g) && likesYa(g), to: 'yk_night_ya' },
         { text: 'All of you. Let Ya and Yuki say it.', show: (g) => ykLover(g) && ykHuman(g) && likesMei(g) && likesYa(g) && (trioReady(g) || meiOpen(g)), to: 'yk_night_all' });
     for (const [id, f] of [['rt_trio_night', 'trio'], ['rt_mei_night', 'mei'], ['rt_ya_night', 'ya'], ['rt_quiet_night', 'none']]) {
@@ -416,7 +417,7 @@ export function installYukiPath(SCENES) {
     // v0.11.123 (owner picks EQ1, SC; EB1, YH; Fable's D3, D4): last in their lists, so saved choice positions keep their lines
     const foBoth = (g) => likesMei(g) && likesYa(g);
     SCENES.fo_last_night.choices.push({
-        text: (g) => (foBoth(g) ? 'Tonight, Yuki. Wait until the roof is yours.' : 'Follow the cat out onto the roof.'),
+        text: (g) => (foBoth(g) ? 'Tonight, Yuki. Wait until the roof is yours.' : byForm(g, 'Follow the cat out onto the roof.', 'Follow the cat out onto the roof.', 'Follow Yuki out onto the roof.')), // v0.11.128 (OF2, FL; Fable's MAIN): the human's label
         show: (g) => ykLover(g) && ykHuman(g) && (foBoth(g) || !g.flags.romance), // YH: hidden when Mei Lin is his lover in the hay, as Ya's "Stay."
         do: (g) => {
             const ya = !foBoth(g) && rel(g, 'Ya').a >= KISS_YA;

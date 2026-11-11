@@ -228,7 +228,7 @@ By the time Mei Lin and Ya find you, the serpent has gone back to sleep, and Ya 
         enter: (g) => { toHour(g, 19); if (daily('rt_supper')(g)) { markDaily(g, 'rt_supper'); const out = eatBest(g, { fire: true }); if (!out.length) { eat(g, 20); return ['Ya\'s smoked meat, shared round the fire: +20 satiety.']; } return out; } return []; },
         text: (g) => `Last night in the Blackroot. Tomorrow, Ashfall.
 
-The fire is small, because Ya says big fires are for people who want to be eaten. The three of you sit round it with Yuki in the warmest lap available, which tonight is ${both(g) ? 'Mei Lin\'s, and Ya keeps finding reasons to lean across her to poke the fire' : likesYa(g) ? 'Ya\'s, to everyone\'s surprise, especially Ya\'s' : 'Mei Lin\'s'}.
+The fire is small, because Ya says big fires are for people who want to be eaten. The three of you sit round it with ${byForm(g, 'Yuki in the warmest lap available', 'Yuki laid behind you all like a white wall, her head in the warmest lap available', 'Yuki leaning on the warmest shoulder available')}, which tonight is ${both(g) ? 'Mei Lin\'s, and Ya keeps finding reasons to lean across her to poke the fire' : likesYa(g) ? 'Ya\'s, to everyone\'s surprise, especially Ya\'s' : 'Mei Lin\'s'}.
 
 Somewhere out in the dark, the dead tree stands against the stars. You can feel it at your back, the way you'd feel someone watching you leave.`,
         choices: [

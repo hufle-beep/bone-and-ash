@@ -525,7 +525,7 @@ Mei Lin, on the step, has put the knife down. She is staring at Ya with an expre
 
 "Eventually." She doesn't. Behind her, you can see Mei Lin on the step, white-knuckled around her knife, and Old Hu, who has replaced his headband with tremendous dignity, because a fight was had and his face, by proxy, is saved.
 
-${yukiForm(g) === 'human' ? 'Yuki, who was asked to stand on the left and not to rescue anyone, stands on the left and rescues no one.' : 'Yuki sits on the fence and offers no help whatsoever.'}`, // v0.11.82: Fable's human-form line
+${yukiForm(g) === 'human' ? 'Yuki, who was asked to stand on the left and not to rescue anyone, stands on the left and rescues no one.' : yukiForm(g) === 'tiger' ? 'Yuki leans on the fence, which leans, and offers no help whatsoever.' : 'Yuki sits on the fence and offers no help whatsoever.'}`, // v0.11.82: Fable's human-form line; v0.11.128 (OF2, YF; Fable's MAIN): the great root-kin's
         choices: [{ text: '"Eventually would be now."', to: 'ya_talk' }],
     },
     ya_talk: {

@@ -963,7 +963,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     const LPT = [
         // [scene, flags, rel, cat, great root-kin, human]
         ['rt_camp', {}, undefined, /the warmest lap is yours, and the cat in it isn't a cat/, /the great white wall at your back gets a good deal smaller/, /Yuki moves her bedroll the last arm's length without a sound/],
-        ['yk_night_solo', {}, undefined, /the white cat goes with you[\s\S]*is a cat again before you can answer/, /the white cat goes with you[\s\S]*is a cat again before you can answer/, /Yuki goes with you, on two feet, down the middle of the lane[\s\S]*is asleep again before you can answer/],
+        ['yk_night_solo', {}, undefined, /the white cat goes with you[\s\S]*is a cat again before you can answer/, /the great white cat goes with you[\s\S]*is four hundred pounds of cat again before you can answer/, /Yuki goes with you, on two feet, down the middle of the lane[\s\S]*is asleep again before you can answer/],
         ['yk_camp', {}, [90, 10], /a white cat pads after you[\s\S]*Yuki falls into step[\s\S]*the white cat on your shoulder[\s\S]*human, and very deliberately so/, /a white cat pads after you[\s\S]*Yuki falls into step[\s\S]*the great white cat stretched out along the far side of the fire[\s\S]*human, and very deliberately so/, /so does Yuki\. She falls into step[\s\S]*eating breakfast with perfect composure[\s\S]*who has plainly chosen her moment/],
     ];
     for (const [id, flags, rel, ...want] of LPT) ['cat', 'tiger', 'human'].forEach((form, i) => {
@@ -1009,7 +1009,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     }
     // the sweep: the touched scenes, each path, her human form open: the human is never the small cat or "the cat" in these lines,
     // the great root-kin never in a lap
-    const NOT_LP = { human: /a white cat pads after you|the white cat goes with you|is a cat again before|the white cat on your shoulder|the cat in it isn't a cat/, tiger: /the warmest lap is yours/ };
+    const NOT_LP = { human: /a white cat pads after you|the white cat goes with you|is a cat again before|the white cat on your shoulder|the cat in it isn't a cat|Yuki in the warmest lap/, tiger: /the warmest lap is yours|Yuki in the warmest lap|in her small shape, purring/ }; // v0.11.128 (OF2, WL + SD)
     for (const id of ['rt_camp', 'yk_night_solo', 'yk_camp']) for (const form of ['tiger', 'human']) for (const path of ['sister', 'lover']) {
         const g = FM(61500 + n++, 'human', { yk_path: path }, [90, 10]); g.yuki.form = form; goTo(g, SCENES, id);
         const m = sceneView(g, SCENES).text.match(NOT_LP[form]);
@@ -1045,7 +1045,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     // LQ2 (HL, CN; Fable's MAINs): each form reads its own line only
     const LQT = [
         // [scene, flags, rel, cat, great root-kin, human]
-        ['yk_night_fo', { fo_pick: 'yk' }, undefined, /with a small white cat in the hollow of your neck[\s\S]*\*Up,\* says the bond/, /with a small white cat in the hollow of your neck[\s\S]*\*Up,\* says the bond/, /with Yuki asleep against your neck, one arm across you[\s\S]*"Up," she says, without moving\./],
+        ['yk_night_fo', { fo_pick: 'yk' }, undefined, /with a small white cat in the hollow of your neck[\s\S]*\*Up,\* says the bond/, /with a great white cat laid along the ridge beside you[\s\S]*The thatch has held[\s\S]*\*Up,\* says the bond/, /with Yuki asleep against your neck, one arm across you[\s\S]*"Up," she says, without moving\./],
         ['rt_yk_talk', {}, undefined, /When you look round, Yuki is walking beside you on two bare feet[\s\S]*as if she'd been doing it all morning/, /When you look round, Yuki is walking beside you on two bare feet[\s\S]*as if she'd been doing it all morning/, /When you look round, Yuki has dropped back to walk beside you[\s\S]*as if she had merely happened to be there/],
         ['yk_camp', { yk_nights: 1 }, [10, 10], /The second time[\s\S]*She simply turns human in your bedroll, which is efficient/, /The second time[\s\S]*She simply turns human in your bedroll, which is efficient/, /The second time[\s\S]*She simply gets into your bedroll, which is efficient/],
         ['yk_camp', { yk_nights: 2 }, [10, 10], /It has become a thing: the fire burns low, the cat goes out into the dark, and a little later/, /It has become a thing: the fire burns low, the cat goes out into the dark, and a little later/, /It has become a thing: the fire burns low, Yuki gets up and walks out into the dark without a word of excuse, and a little later/],
@@ -1060,6 +1060,79 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         const i = SCENES.rt_evening.choices.findIndex((c) => c.to === 'yk_night_mei'), c = SCENES.rt_evening.choices[i];
         assert(typeof c?.text === 'function', `LQ2 (HL): rt_evening's loft choice is a label function (at ${i})`);
         if (c) for (const form of ['cat', 'tiger', 'human']) assert(c.text(LPG(61900 + n++, form)) === (form === 'human' ? 'Climb to the loft with Mei Lin. Yuki is already up there.' : 'Climb to the loft with Mei Lin. The cat is already up there.'), `LQ2 (HL): the loft label as ${form}`);
+    }
+    // v0.11.128 (owner pick OF2; Fable's MAINs): the camp's lap, Mei Lin's confession, the last nights' openings and dawns, the roof label, Ya's fence
+    const OF = [
+        // [scene, flags, rel, the cat's, the great root-kin's, the human's]
+        ['rt_camp', {}, [80, 80], /Yuki in the warmest lap available, which tonight is Mei Lin's, and Ya keeps/, /Yuki laid behind you all like a white wall, her head in the warmest lap available, which tonight is Mei Lin's, and Ya keeps/, /Yuki leaning on the warmest shoulder available, which tonight is Mei Lin's, and Ya keeps/], // WL
+        ['rt_camp', {}, [0, 80], /Yuki in the warmest lap available, which tonight is Ya's, to everyone's surprise/, /a white wall, her head in the warmest lap available, which tonight is Ya's, to everyone's surprise/, /Yuki leaning on the warmest shoulder available, which tonight is Ya's, to everyone's surprise/],
+        ['rt_camp', {}, [80, 0], /Yuki in the warmest lap available, which tonight is Mei Lin's\./, /a white wall, her head in the warmest lap available, which tonight is Mei Lin's\./, /Yuki leaning on the warmest shoulder available, which tonight is Mei Lin's\./],
+        ['mei_curious', {}, [80, 80], /Yuki, from your lap, sends one very clear thought/, /Yuki, a white hill at your back, sends one very clear thought/, /Yuki, across the fire and apparently asleep, sends one very clear thought/], // CL
+        ['yk_night_solo', {}, undefined, /Toward dawn she is on your chest in her small shape[\s\S]*is a cat again before you can answer\./, /Toward dawn she is round you in her great shape[\s\S]*is four hundred pounds of cat again before you can answer\./, /Toward dawn she is asleep on your chest, as she has been for forty years[\s\S]*is asleep again before you can answer\./], // SD
+        ['yk_night_fo', { fo_pick: 'yk' }, undefined, /a village that put down a saucer of fish scraps for her at supper\./, /a village that set the stew pot down for her at supper, with great ceremony and from a distance\./, /a village that set a bowl for her at supper and then, after grave consideration, a saucer of fish scraps beside it\./], // FD
+        ['yk_night_mei', {}, undefined, /^Mei Lin climbs the ladder to the loft ahead of you, and a white cat climbs it ahead of her/, /^Mei Lin climbs the ladder to the loft ahead of you, past two rungs that four hundred pounds of cat cracked/, /^Mei Lin climbs the ladder to the loft ahead of you, and the lamp at the top is already lit/], // MO
+        ['yk_night_mei', {}, undefined, /sitting in the hay in her human shape, ears forward[\s\S]*"In Ashfall," says Yuki, "they think I'm a cat\."/, /sitting in the hay in her human shape, ears forward[\s\S]*"In Ashfall," says Yuki, "they think I'm a cat\."/, /sitting in the hay, ears forward[\s\S]*"In Ashfall," says Yuki, "they have all looked at my ears, gravely, and agreed not to see them\."/],
+        ['yk_night_ya', {}, undefined, /and a white cat curled in the small of her back, purring/, /and a great white cat curled round the pair of you, purring/, /and Yuki curled into the small of her back, white hair over both of them/], // YA
+        ['yk_night_all', {}, [80, 80], /stands up too, in her human shape, which makes Mei Lin's mother[\s\S]*and a white cat on top of the whole pile, as high as she can get, purring like an engine\./, /stands up too, in her human shape, which makes Mei Lin's mother[\s\S]*and a great white cat round the whole pile, since she can no longer get on top of it/, /stands up too, from the bench by the stove[\s\S]*leaving them the lamp[\s\S]*her tail across somebody's face\. "Best spot," she says, without opening her eyes\./],
+        ['ya_lost', {}, undefined, /Yuki sits on the fence and offers no help whatsoever\./, /Yuki leans on the fence, which leans, and offers no help whatsoever\./, /Yuki, who was asked to stand on the left and not to rescue anyone/], // YF (the human's line since v0.11.82)
+    ];
+    for (const [id, flags, rel, ...want] of OF) ['cat', 'tiger', 'human'].forEach((form, i) => {
+        const g = LPG(62000 + n++, form, flags, rel); goTo(g, SCENES, id);
+        const t = sceneView(g, SCENES).text;
+        const same = want.filter((re) => re.source === want[i].source).length;
+        assert(want[i].test(t) && want.filter((re) => re.test(t)).length === same, `OF2: ${id} ${JSON.stringify(rel || [])} as ${form} (${t.slice(0, 70)}…)`);
+        if (form !== 'cat' && ['rt_camp', 'mei_curious'].includes(id)) assert(!/from your lap|Yuki in the warmest lap/.test(t), `OF2 (WL, CL): ${id} has no small-cat lap as ${form}`);
+        if (form === 'human' && /^yk_night_/.test(id)) assert(!/\bis a cat again\b|\ba white cat\b|\bthey think I'm a cat\b|\bsaucer of fish scraps for her at supper\./.test(t), `OF2: ${id} has the openly human as no cat`);
+        if (form === 'tiger' && /^yk_night_/.test(id)) assert(!/small shape[^.]*again|small white cat|\ba white cat (?:curled|on top)/.test(t), `OF2: ${id} keeps the great root-kin great at dawn`);
+    });
+    // v0.11.128 (owner pick RV2; Fable's MAINs): the review's and Fable's notes
+    const RV = [
+        // [scene, flags, rel, the cat's, the great root-kin's, the human's]
+        ['yk_night_all', {}, [80, 80], /in her human shape, which makes Mei Lin's mother[\s\S]*the scholar, the huntress, the cat —/, /in her human shape, which makes Mei Lin's mother[\s\S]*the scholar, the huntress, the cat —/, /stands up too, from the bench by the stove, which makes Mei Lin's mother[\s\S]*the white-haired woman she set a fifth bowl for this evening[\s\S]*the scholar, the huntress, the woman with the ears —/], // M1, M2
+        ['yk_night_ya', {}, undefined, /So, it turns out, is Yuki: human, sitting[\s\S]*"Your cat," Ya says, without looking round, "is a woman\."/, /So, it turns out, is Yuki: human, sitting[\s\S]*"Your cat," Ya says, without looking round, "is a woman\."/, /So, it turns out, is Yuki: sitting[\s\S]*"Your woman," Ya says, without looking round, "is a cat\."/], // M3
+        ['rt_camp', { yk_path: 'sister' }, [80, 80], /catches your eye from the lap in question and looks, slowly, at the two women[\s\S]*\*It needs hands\. Imagine it\.\*/, /the tip of her tail, which is as thick as your wrist, points at the two women[\s\S]*\*It needs hands\. Imagine it\.\*/, /catches your eye and makes a small, filthy gesture at the two women/], // M4
+        ['yk_night_fo', { fo_pick: 'yk' }, undefined, /goes to the loft window, and looks back at you, once\.[\s\S]*whatever she went up as, it is a woman sitting there now[\s\S]*"I know\. I rehearsed it on the stove\."/, /goes to the loft window, considers it, and looks back[\s\S]*She goes through a shoulder at a time, and the frame survives, narrowly\.[\s\S]*whatever she went up as[\s\S]*"I know\. I rehearsed it in front of the stove\. I no longer fit on it\."/, /goes to the loft window, and looks back at you, once\.[\s\S]*she has had time to arrange herself as if she had never been anywhere else[\s\S]*"I know\. I rehearsed it on the bench by the stove\."/], // FO (b–d)
+        ['yk_night_fo', { fo_pick: 'yk_ya' }, undefined, /"Tonight is the cat's\."[\s\S]*"The not-cat," Ya says/, /"Tonight is the cat's\."[\s\S]*"The not-cat," Ya says/, /"Tonight is Yuki's\."[\s\S]*"The not-woman," Ya says/], // FO (a)
+        ['yk_night_solo', {}, undefined, /and the white cat goes with you, and inside the ring of white trunks the cat is a woman/, /and the great white cat goes with you, down the middle of the lane, there being no other part of the lane left/, /and Yuki goes with you, on two feet, down the middle of the lane/], // SO
+        ['rt_yk_talk', {}, undefined, /"I was in your lap for the log\. It poured/, /"I had my head in your lap for the log\. It poured/, /"I was on the arm of your chair for the log\. It poured/], // YT
+        ['yk_sister_talk', { yk_path: 'sister' }, undefined, /^Yuki corners you by the water, in her human form, which she only uses/, /^Yuki corners you by the water, in her human form, which she only uses/, /^Yuki corners you by the water, which she does by standing exactly where you meant to go\. She only does it/], // ST
+    ];
+    for (const [id, flags, rel, ...want] of RV) ['cat', 'tiger', 'human'].forEach((form, i) => {
+        const g = LPG(62200 + n++, form, flags, rel); goTo(g, SCENES, id);
+        const t = sceneView(g, SCENES).text;
+        const same = want.filter((re) => re.source === want[i].source).length;
+        assert(want[i].test(t) && want.filter((re) => re.test(t)).length === same, `RV2: ${id} ${JSON.stringify(flags)} as ${form} (${t.slice(0, 70)}…)`);
+    });
+    {   // MT: the title by her form
+        for (const form of ['cat', 'tiger', 'human']) { const g = LPG(62300 + n++, form); goTo(g, SCENES, 'yk_night_mei'); assert(sceneView(g, SCENES).title === (form === 'human' ? 'The Herb Loft, and Yuki' : 'The Herb Loft, and the Cat'), `RV2 (MT): yk_night_mei's title as ${form}`); }
+    }
+    {   // T (the review's gaps): the cat's whole lines pinned; the human's nights call her "the cat" only in speech; the great root-kin's "Best spot" stays the bond's
+        const PIN = [
+            ['yk_night_solo', {}, `Toward dawn she is on your chest in her small shape, purring, as if nothing ever happened, and then — just for a second, as the light comes up — she isn't, and she kisses you once, and says, "Go and win," and is a cat again before you can answer.`],
+            ['yk_night_fo', { fo_pick: 'yk' }, `You wake in grey light with a small white cat in the hollow of your neck, purring as if she had never been anything else. Down in the lane the first doors are opening. *Up,* says the bond. *They're going to bow at you. Try to look like a man who slept.*`],
+            ['yk_night_fo', { fo_pick: 'yk' }, `Below you sleeps a village that put down a saucer of fish scraps for her at supper. She laughs about it, without a sound, against your throat.`],
+            ['yk_night_ya', {}, `Toward dawn you wake in the moss with Ya sprawled across your legs, snoring, and a white cat curled in the small of her back, purring, and the grove singing over all three of you.`],
+            ['yk_night_all', {}, `Toward dawn: Mei Lin's head on your chest; Ya across both of you like a fallen tree; and a white cat on top of the whole pile, as high as she can get, purring like an engine. *Best spot,* says the bond.`],
+            ['yk_night_mei', {}, `Mei Lin climbs the ladder to the loft ahead of you, and a white cat climbs it ahead of her, and at the top there is no cat.`],
+            ['rt_camp', {}, `The three of you sit round it with Yuki in the warmest lap available, which tonight is Mei Lin's, and Ya keeps finding reasons to lean across her to poke the fire.`],
+        ];
+        for (const [id, flags, line] of PIN) { const g = LPG(62400 + n++, 'cat', flags, [80, 80]); goTo(g, SCENES, id); assert(sceneView(g, SCENES).text.includes(line), `RV2 (T): ${id}: the cat's line word for word`); }
+        for (const id of ['yk_night_solo', 'yk_night_mei', 'yk_night_ya', 'yk_night_all']) for (const fo_pick of [undefined]) {
+            const g = LPG(62500 + n++, 'human', {}, [80, 80]); goTo(g, SCENES, id);
+            const prose = sceneView(g, SCENES).text.replace(/"[^"]*"/g, '');
+            const m = prose.match(/\bthe cat\b|\ba white cat\b|\bsmall shape\b/);
+            assert(!m, `RV2 (T): ${id}'s narration doesn't call the human a cat (${m?.[0]})`);
+        }
+        for (const pick of ['yk', 'yk_ya', 'yk_roof']) { const g = LPG(62600 + n++, 'human', { fo_pick: pick }); goTo(g, SCENES, 'yk_night_fo'); const prose = sceneView(g, SCENES).text.replace(/"[^"]*"/g, ''); assert(!/\bthe cat\b|small white cat|whatever she went up as/.test(prose), `RV2 (T): yk_night_fo (${pick})'s narration doesn't make the human a cat`); }
+        { const g = LPG(62700 + n++, 'tiger', {}, [80, 80]); goTo(g, SCENES, 'yk_night_all'); assert(/purring like a larger engine\. \*Best spot,\* says the bond\.$/.test(sceneView(g, SCENES).text), "RV2 (T): the great root-kin's \"Best spot\" stays the bond's"); }
+    }
+    {   // FL: the roof label by her form, at its place (saves keep picks by position); both hosts keep their own label
+        const i = SCENES.fo_last_night.choices.findIndex((c) => c.to === 'yk_night_fo'), c = SCENES.fo_last_night.choices[i];
+        assert(i === SCENES.fo_last_night.choices.length - 1 && typeof c?.text === 'function', `OF2 (FL): fo_last_night's roof choice is a label function, last (at ${i})`);
+        if (c) for (const form of ['cat', 'tiger', 'human']) {
+            assert(c.text(LPG(62100 + n++, form, {}, [0, 0])) === (form === 'human' ? 'Follow Yuki out onto the roof.' : 'Follow the cat out onto the roof.'), `OF2 (FL): the roof label as ${form}`);
+            assert(c.text(LPG(62100 + n++, form, {}, [80, 80])) === 'Tonight, Yuki. Wait until the roof is yours.', `OF2 (FL): both hosts keep their label as ${form}`);
+        }
     }
 }
 // v0.11.34 (owner pick A, 1,000 games): two scenes the random walks reached only by luck at 2,000 games, now on purpose
