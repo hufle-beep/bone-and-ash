@@ -8,7 +8,7 @@ import { condensationSatGain } from '../core/formulas.js';
 import { coilMult, sitGain } from '../core/game.js';
 import { set, daily, markDaily, eatBest } from './common.js';
 import { loveLine } from './yuki_path.js';
-import { encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil, hour } from './act1_common.js';
+import { encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil, hour, KISS_YA } from './act1_common.js';
 
 const P = 'Ashfall Hamlet';
 const BR = 'Blackroot Wilds';
@@ -113,7 +113,7 @@ She laughs, a bark that sends birds up. Then, abruptly, she's in your space, clo
 ${both(g) ? '"And *she*," Ya adds, jerking her chin back at Mei Lin, "looks at me like I\'m a fire she wants to stand next to and is too proud to. I\'m working on it."' : ''}`,
         choices: [
             { text: '"You\'re not dirt. You\'re a menace. It\'s different."', do: (g) => { bumpRel(g, 'Ya', 4, 3); return ['She shoves you, hard, which you are learning is affection.']; }, to: 'rt_road' },
-            { text: 'Kiss her, there on the path, since she\'s standing right there.', show: (g) => rel(g, 'Ya').a >= 10 || !!g.flags.ya_romance, do: (g) => { bumpRel(g, 'Ya', 3, 8); g.flags.ya_romance = true; return ['She kisses back like she\'s trying to win. She probably is.']; }, to: 'rt_road' },
+            { text: 'Kiss her, there on the path, since she\'s standing right there.', show: (g) => rel(g, 'Ya').a >= KISS_YA || !!g.flags.ya_romance, do: (g) => { bumpRel(g, 'Ya', 3, 8); g.flags.ya_romance = true; return ['She kisses back like she\'s trying to win. She probably is.']; }, to: 'rt_road' },
             { text: '"Leave Mei Lin alone."', show: both, do: (g) => { bumpRel(g, 'Ya', -2, 0); return ['"No," Ya says cheerfully. "She doesn\'t want me to either. She just doesn\'t know it yet."']; }, to: 'rt_road' },
         ],
     },

@@ -2,6 +2,25 @@
 
 Started 2026-11-10 (v0.11.116), when `history-13.md` passed 45 KB. Newer than `history-13.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.122 (word for word)
+
+### From "Open items"
+
+- **The air stalemate: done in v0.11.121** (N1, AS1, RV1; numbers in "Decided in chat"); the lane's typed hours done with it (LH). Kept (no option): with no Qi a dart round falls back to guard on the ground, so the count starts again and such a fight still runs to round 30 (1 of 272 ape fights in the lab); Yuki's own wounds don't count; the lines name the first foe standing; the warning shows once. **Open, options later:** the bots reacting to the warning (moves numbers). **Next:** group f's love gates done in v0.11.122 (NS1); EQ1 picked for the next push (above); then group e (its first push measured in N's TL: the story-text lint) and the retune (section 2, with Act 1 without Yuki's carry), open, options later.
+- **Yuki is too strong: done in v0.11.118** (YK1, YD1, YR1; numbers in `history-14.md` since v0.11.121). Three new open items from it, in the roadmap's section 2: the air stalemate (done in v0.11.121, AS1), Act 1 without Yuki's carry (open, options later; the retune), the lane's typed hours (done in v0.11.121, LH).
+- **A bug for the story pass (owner 2026-11-08 23:22, new in v0.11.83; a bug report): done in v0.11.122** (LG1, YG + YV): Yuki's love-life talk in her human form at Origin Core (save `saves/2026-11-08-2320-incremental-yuki_form.txt`, `4d43d89`) now plays through the bond below Nascent Soul; every scene that has her human needs her human form this Coil.
+
+### From "Decided in chat"
+
+- **v0.11.119: docs only, the next point (the owner's question of 20:49, answered: no, her held XP is dropped; owner 20:50 "put it as the next point, update the roadmap and the docs, then give me the handover message"; NP1–NP2 at 20:50; owner 20:51 "NP1"):** **NX** the point first in the roadmap's section 0 and on top of the handover's open items; **DOC** the four docs, `836c241` filled in for 0.11.118, `sw.js` 0.11.119, v0.11.116's notes to `history-14.md`; **HM** the handover message for the new chat after the push. **NP1 🟢 NX + DOC + HM (recommended)** / NP2 🟡 the point in section 2 with the retune's Yuki lines (colours: where the next chat finds it). **Picked: NP1.**
+
+### From "Version notes"
+
+## v0.11.119 — docs only, the next point (NP1)
+
+- **Files:** docs only (`project/handover.md`, `roadmap.md`, `changelog.md`, `restore-points.md`, `history-14.md`: v0.11.116's notes), `sw.js`. The game is identical to 0.11.118.
+- **Checks:** a docs push (rule 2): `bash tools/check.sh quick` and `node tools/consistency.mjs` (the version, the doc sizes); the game files unchanged, so nothing else can move.
+
 ## Moved from the handover in v0.11.121 (word for word)
 
 ### From "Decided in chat"

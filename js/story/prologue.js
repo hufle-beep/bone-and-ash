@@ -16,7 +16,7 @@ import { STORY_FORMS, hasForm } from '../core/forms.js';
 import { yukiForms, itemNames, itemCap, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, ensureBars, MAX_REALM, wakeState, clockLabel, dayHour } from '../core/game.js';
 import { WILDS, nightNext } from './wilds.js';
 import { ASHFALL, hubOf, nextEvening } from './ashfall.js';
-import { ACT1_ITEMS } from './act1_common.js';
+import { ACT1_ITEMS, KISS_MEI } from './act1_common.js';
 import { FALLOUT, BREAK_HUBS as B1 } from './act1_fallout.js';
 import { BLACKROOT, BREAK_HUBS as B2 } from './act1_blackroot.js';
 import { HEART, BREAK_HUBS as B3 } from './act1_heart.js';
@@ -650,7 +650,7 @@ The lamp gutters. Neither of you fixes it.
 
 "Tomorrow they come," she says quietly. "Gao Feng's friends. Maybe worse. Maybe they take you, or me, or the boy you ${g.flags.healed ? 'saved' : 'tried to help'}." Her thumb moves slowly across your knuckles. "I don't want to spend tonight being afraid of tomorrow."`,
         choices: [
-            { text: 'Kiss her.', req: (g) => ((g.rel['Mei Lin']?.a || 0) >= 8 ? true : 'she isn\'t there yet'), do: (g) => { bumpRel(g, 'Mei Lin', 5, 15); g.flags.romance = true; return []; }, to: 'romance' },
+            { text: 'Kiss her.', req: (g) => ((g.rel['Mei Lin']?.a || 0) >= KISS_MEI ? true : 'she isn\'t there yet'), do: (g) => { bumpRel(g, 'Mei Lin', 5, 15); g.flags.romance = true; return []; }, to: 'romance' },
             { text: '"Then don\'t be. Stay up and talk to me until it\'s not night any more."', do: (g) => { bumpRel(g, 'Mei Lin', 8, 4); return []; }, to: 'tribute_dawn_talk' },
             { text: 'Gently, regretfully, say goodnight.', do: (g) => { bumpRel(g, 'Mei Lin', 4, 0); return []; }, to: 'tribute_dawn_sleep' },
         ],

@@ -60,6 +60,9 @@ export function encounter(g, { id, intro, enemies, win, lose, flee = null, tier 
 export const rel = (g, who) => g.rel[who] || { f: 0, a: 0 };
 export const likesMei = (g) => !!g.flags.romance || rel(g, 'Mei Lin').a >= 60;
 export const likesYa = (g) => !!g.flags.ya_romance || rel(g, 'Ya').a >= 85;
+/** v0.11.122 (owner pick LG1, K and S): the first kisses need real affection: Mei Lin's in the prologue (was 8), Ya's "Stay." and the path kiss (was 10). */
+export const KISS_MEI = 30;
+export const KISS_YA = 45;
 /** The throuple track: 0 none … 4 together. Advances only when James is drawn to both. */
 export const trio = (g) => g.flags.trio || 0;
 export function trioStep(g, to) { if (likesMei(g) && likesYa(g) && trio(g) < to) g.flags.trio = to; return []; }

@@ -5,12 +5,20 @@
  */
 import { addItem, eat, condense, advance, sleepUntil, jamesHpMax, hasItem, awardYukiFightXp, yukiForm, nightRest, nightTo } from '../core/game.js';
 import { daily, markDaily, hour, day, eatBest, pantry, foodCount } from './common.js';
-import { encounter, rel, likesMei, likesYa, trioStep, bumpRel } from './act1_common.js';
+import { encounter, rel, likesMei, likesYa, trioStep, bumpRel, KISS_YA } from './act1_common.js';
 
 const P = 'Ashfall Hamlet';
 const late = (g) => hour(g) >= 19;
 const ending = (g) => g.flags.ending || 'bluff';
 const meiLovers = (g) => !!g.flags.romance;
+/** v0.11.122 (owner pick LG1, BC; text by Fable, B5): the bridge into Ya's night when both liked him and he chose Ya on the roof (g.flags.fo_pick). */
+const FO_YA_STAY = `"Ya," you say. "Stay."
+
+Mei Lin is on her feet before the word has finished, brushing thatch from her skirt with great dignity. "Good. I intend to walk tomorrow, and one of us should have slept." At the loft window she stops, one hand on the frame. "The floor is thin and my mother sleeps lightly. I say this as the one who has to look her in the eye in the morning." Then, to Ya, with the laugh still in her voice: "Don't break him. He carries the basket."
+
+"No promises," says Ya.
+
+The ladder creaks, and then nothing. Ya looks at you with eyes that catch the starlight like an animal's, takes your wrist, and pulls you in through the window after her.`;
 const yaHere = (g) => !!g.flags.ya_met;
 /** Day 8, 9 or 10. */
 const dd = (g) => Math.max(8, Math.min(10, day(g)));
@@ -655,20 +663,40 @@ Mei Lin doesn't answer. But she doesn't leave, either. She sits there between th
 "Then we'll come back fast."
 
 She turns toward you in the dark. What happens after that is nobody's business, not even Yuki's, who goes and sleeps on the stove in protest.`;
-            if (rel(g, 'Ya').a >= 10) return `There's a scrape at the loft window, and Ya climbs in without asking, as she does everything. She sits on the edge of the hay, watching you with eyes that catch the starlight like an animal's.
+            if (rel(g, 'Ya').a >= KISS_YA) return `There's a scrape at the loft window, and Ya climbs in without asking, as she does everything. She sits on the edge of the hay, watching you with eyes that catch the starlight like an animal's.
 
 "Tomorrow I take you home," she says. "My home. The warm place." Then, with no change of tone at all: "Do you want me to stay? I'll stay if you want. I'll go if you don't. I won't be offended." A pause. "I'll be a little offended."`;
             return `The loft is quiet. The north wind moves in the thatch. Yuki curls into the hollow of your neck, and through the bond, very faintly, you can feel what she feels when she faces north: not fear. Something more like homesickness, for a home neither of you has ever seen.`;
         },
         choices: [
             { text: 'Stay there, the three of you, until the sky goes grey.', show: (g) => likesMei(g) && likesYa(g), do: (g) => { bumpRel(g, 'Mei Lin', 3, 3); bumpRel(g, 'Ya', 3, 3); return trioStep(g, 1); }, to: 'fo_depart' },
-            { text: '"Stay."', show: (g) => !(likesMei(g) && likesYa(g)) && !meiLovers(g) && rel(g, 'Ya').a >= 10, do: (g) => { g.flags.ya_romance = true; bumpRel(g, 'Ya', 6, 10); return []; }, to: 'fo_ya_night' },
-            { text: (g) => (meiLovers(g) && !(likesMei(g) && likesYa(g)) ? 'Hold her.' : 'Sleep.'), show: (g) => !(likesMei(g) && likesYa(g)), do: (g) => { if (meiLovers(g)) bumpRel(g, 'Mei Lin', 3, 6); else if (rel(g, 'Ya').a >= 10) bumpRel(g, 'Ya', -1, 0); return []; }, to: 'fo_depart' },
+            { text: '"Stay."', show: (g) => !(likesMei(g) && likesYa(g)) && !meiLovers(g) && rel(g, 'Ya').a >= KISS_YA, do: (g) => { g.flags.ya_romance = true; bumpRel(g, 'Ya', 6, 10); return []; }, to: 'fo_ya_night' },
+            { text: (g) => (meiLovers(g) && !(likesMei(g) && likesYa(g)) ? 'Hold her.' : 'Sleep.'), show: (g) => !(likesMei(g) && likesYa(g)), do: (g) => { if (meiLovers(g)) bumpRel(g, 'Mei Lin', 3, 6); else if (rel(g, 'Ya').a >= KISS_YA) bumpRel(g, 'Ya', -1, 0); return []; }, to: 'fo_depart' },
+            { text: 'Tonight, Ya. Say it plainly: "Stay."', show: (g) => likesMei(g) && likesYa(g), do: (g) => { g.flags.ya_romance = true; g.flags.fo_pick = 'ya'; bumpRel(g, 'Ya', 6, 10); return []; }, to: 'fo_ya_night' }, // v0.11.122 (LG1, BC; Fable's B4): as "Stay." above; last, so saved choice positions keep their lines
+            { text: 'Tonight, Mei Lin. Go down to the herb loft with her.', show: (g) => likesMei(g) && likesYa(g), to: 'fo_mei_night' }, // v0.11.122 (LG1, BC; Fable's B6)
         ],
+    },
+    fo_mei_night: { // v0.11.122 (owner pick LG1, BC; text by Fable, B7): Mei Lin alone when both like him; as "Hold her." with her romance
+        id: 'fo_mei_night', title: 'The Herb Loft', art: 'village_night', place: `${P} — the herb loft`,
+        enter: (g) => { g.flags.romance = true; bumpRel(g, 'Mei Lin', 3, 6); return []; },
+        text: `"Mei Lin," you say, and find you don't need the rest of the sentence.
+
+Ya looks from you to her and grins, all teeth, not offended. Perhaps a little offended. "Good. Tonight she gets the hay. I get the warm place, and the whole road there." She stands up on the ridge, stretches until her spine cracks, and points at Mei Lin. "Bite him once for me." Then she's gone, one jump to the shrine roof, where she lies down across the god as if he'd been keeping her place.
+
+"She's impossible," says Mei Lin.
+
+"Yes."
+
+"I wasn't complaining." She takes your hand and climbs in at the loft window ahead of you. The loft smells of mint and dry hay. She puts the lamp out herself and stands close in the dark, and you can feel her deciding not to be the old Mei Lin for one night more.
+
+"Quietly," she says against your mouth. "I mean it." She doesn't mean it; the laugh is already getting out.
+
+She pulls the shutter closed. What happens after that is nobody's business. Not even Yuki's.`,
+        choices: [{ text: 'Dawn.', to: 'fo_depart' }],
     },
     fo_ya_night: {
         id: 'fo_ya_night', title: 'Wild', art: 'ya_close', place: `${P} — the herb loft`,
-        text: `She doesn't stay politely.
+        text: (g) => `${g.flags.fo_pick === 'ya' ? `${FO_YA_STAY}\n\n` : ''}She doesn't stay politely.
 
 She kisses the way she fights: all at once, laughing, with teeth, and absolutely no idea of where civilised people draw lines. At some point she bites your shoulder, hard, and then licks it like an apology, and says against your neck, "*Still* nothing. How do you taste like *nothing*," as if it were an accusation and a compliment at once.
 
@@ -683,7 +711,7 @@ When you wake, she's gone — back on the shrine roof, sharpening her spear, as 
     },
     fo_depart: {
         id: 'fo_depart', title: 'North', art: 'ashfall_dawn', place: `${P} — the north path`,
-        enter: (g) => { g.flags.mei_party = true; g.flags.ya_party = true; return []; },
+        enter: (g) => { g.flags.mei_party = true; g.flags.ya_party = true; delete g.flags.fo_pick; return []; }, // RL1 (L4): the bridge's flag cleared
         text: (g) => `Day eleven. Ten days to the Elder.
 
 The village lines the north path in silence: every family, every child, the hunters in their two straight lines. Nobody calls out. Nobody waves. As you pass, they bow, one row after another, like barley in wind.

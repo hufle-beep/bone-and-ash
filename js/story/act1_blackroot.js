@@ -18,6 +18,11 @@ const hubFor = (g) => ({ rr: 'rr_hub', dw: 'dw_hub', ah: 'ah_hub' }[region(g)]);
 const late = (g) => hour(g) >= 19;
 const both = (g) => likesMei(g) && likesYa(g);
 const onlyYa = (g) => likesYa(g) && !likesMei(g);
+/* v0.11.122 (owner pick LG1, BC; texts by Fable, B0–B3): when both like him, the hot spring and the Ashen Hollow camp offer Ya alone too. */
+const SPRING_BOTH_WAIT = 'Nobody says anything for a long time. Mei Lin has come to the very edge of the bank, arms folded, glaring at the stars as if they started it. She hasn\'t left. She hasn\'t come in. She is, you realise, waiting to see what you do.';
+const SPRING_BOTH_SPLASH = '"Turn around, both of you," says Mei Lin, in a voice you have never heard her use: small, furious, and something else. There is a splash, and then she is in the water too, on Ya\'s other side, arms folded over her chest.';
+const SPRING_JUST_YA = ['"I am going to see to the fire," Mei Lin tells the steam, with great dignity. "It will take me a long time. I will be loud coming back." She goes, her back very straight. Three steps into the trees you hear her laugh, once, and stop herself.', 'Ya puts her hand flat on your chest, under the water. "Just me, then," she says. "For now." Her mouth finds yours. The steam does the rest.'];
+const CAMP_BOTH_MEI = 'Mei Lin watches you go with her chin on her knees and calls after you, quite clearly, "Bring him back in one piece, I only brought so much thread," and then puts a hand over her mouth as if the words had got out on their own.'; // RL1 (L3): Fable's ALT A, after the fireside
 const onlyMei = (g) => likesMei(g) && !likesYa(g);
 /** Move the clock forward to hour h today (time passes: hunger, regen). */
 function toHour(g, h) {
@@ -550,11 +555,12 @@ She's looking at you with no grin at all. Just looking.
 
 On the bank, Mei Lin has gone very still, and has very definitely heard.
 
-${both(g) ? 'Nobody says anything for a long time. Then Mei Lin, in a voice you have never heard her use — small, furious, and something else — says: "Turn around, both of you." And there is a splash, and then she is in the water too, on Ya\'s other side, arms folded over her chest, glaring at the stars as if they started it.' : onlyYa(g) ? 'Mei Lin gets up and walks away without a word. Ya watches her go, then turns back to you and puts her hand flat on your chest, under the water. "Just you, then," she says. "For now." Her mouth finds yours. The steam does the rest.' : 'Mei Lin gets up and walks away without a word. Ya watches her go, and shrugs, and sinks under the water, and comes up somewhere else, and talks about frogs for the rest of the evening as if nothing happened.'}`,
+${both(g) ? SPRING_BOTH_WAIT : onlyYa(g) ? 'Mei Lin gets up and walks away without a word. Ya watches her go, then turns back to you and puts her hand flat on your chest, under the water. "Just you, then," she says. "For now." Her mouth finds yours. The steam does the rest.' : 'Mei Lin gets up and walks away without a word. Ya watches her go, and shrugs, and sinks under the water, and comes up somewhere else, and talks about frogs for the rest of the evening as if nothing happened.'}`,
         choices: [
-            { text: 'Stay as long as the heat lasts.', show: both, do: (g) => { trioStep(g, 2); bumpRel(g, 'Mei Lin', 2, 4); bumpRel(g, 'Ya', 2, 4); return []; }, to: 'mei_curious' },
+            { text: 'Stay as long as the heat lasts.', show: both, do: (g) => { trioStep(g, 2); bumpRel(g, 'Mei Lin', 2, 4); bumpRel(g, 'Ya', 2, 4); return [SPRING_BOTH_SPLASH]; }, to: 'mei_curious' },
             { text: 'Let the steam close over everything.', show: onlyYa, do: (g) => { g.flags.ya_romance = true; bumpRel(g, 'Ya', 4, 8); return ['Much later, Ya falls asleep against you on the warm rocks, one arm across your chest like a claim.']; }, to: 'dw_hub' },
             { text: 'Get out. Get dry. Get back to camp.', show: (g) => !both(g) && !onlyYa(g), to: 'dw_hub' },
+            { text: 'Tonight, just Ya. Let the steam close over everything.', show: both, do: (g) => { g.flags.ya_romance = true; trioStep(g, 2); bumpRel(g, 'Ya', 4, 8); return SPRING_JUST_YA; }, to: 'dw_hub' }, // RL1 (L2): the trio step as the shared night // v0.11.122 (LG1, BC; Fable's B1, B2); last, so saved choice positions (g.picked) keep their lines
         ],
     },
     mei_curious: {
@@ -923,7 +929,7 @@ ${both(g) ? 'Ya sits between you and Mei Lin, an arm round each of your necks, a
             { text: 'Sit beside Mei Lin.', show: (g) => region(g) !== 'ah', do: (g) => { bumpRel(g, 'Mei Lin', 2, 3); return []; }, to: 'bl_night' },
             { text: 'Sit beside Ya.', show: (g) => region(g) !== 'ah', do: (g) => { bumpRel(g, 'Ya', 2, 3); return []; }, to: 'bl_night' },
             { text: 'Sit between them, and see what happens.', show: (g) => region(g) !== 'ah' && both(g), do: (g) => { bumpRel(g, 'Mei Lin', 1, 2); bumpRel(g, 'Ya', 1, 2); return ['What happens is that Ya steals your food and Mei Lin falls asleep on your shoulder. You call it a draw.']; }, to: 'bl_night' },
-            { text: 'When Ya takes your hand and tugs you toward the dark, go.', show: (g) => region(g) === 'ah' && onlyYa(g) && !g.flags.ya_romance, to: 'ya_romance' },
+            { text: 'When Ya takes your hand and tugs you toward the dark, go.', show: (g) => region(g) === 'ah' && (onlyYa(g) || both(g)) && !g.flags.ya_romance, to: 'ya_romance' }, // v0.11.122 (LG1, BC): also when both like him
             { text: 'Stay up with Mei Lin after the others sleep.', show: (g) => region(g) === 'ah' && onlyMei(g) && !g.flags.mei_bond, to: 'mei_bond' },
             { text: 'Take the first watch together, all of you.', show: (g) => region(g) === 'ah' && !both(g) && !g.flags.bl_friends, to: 'friends_watch' },
             { text: 'Sleep.', to: 'bl_night' },
@@ -933,7 +939,7 @@ ${both(g) ? 'Ya sits between you and Mei Lin, an arm round each of your necks, a
         id: 'ya_romance', title: 'Wild', art: 'night_watch',
         enter: (g) => { g.flags.ya_romance = true; bumpRel(g, 'Ya', 5, 10); return []; },
         place: (g) => PLACE[region(g)],
-        text: (g) => `${g.flags.yr_day ? 'She drags you off the path into a hollow between two great roots, out of sight, and turns round, and doesn\'t wait for anything.' : 'She leads you out past the firelight to a hollow in the ash where the wind doesn\'t reach, and turns round, and doesn\'t wait for anything.'}
+        text: (g) => `${!g.flags.yr_day && both(g) ? `${CAMP_BOTH_MEI}\n\n` : ''}${g.flags.yr_day ? 'She drags you off the path into a hollow between two great roots, out of sight, and turns round, and doesn\'t wait for anything.' : 'She leads you out past the firelight to a hollow in the ash where the wind doesn\'t reach, and turns round, and doesn\'t wait for anything.'}
 
 Ya kisses like she fights: all at once, teeth first, laughing into your mouth when you catch up. Her hands are rough and quick and sure, and she gets your coat off your shoulders in one movement like she's skinning a hare, and makes a pleased, growling sound when she finds what's under it. "Scholar," she says against your throat, delighted. "You *lied*. You're not soft at all."
 
