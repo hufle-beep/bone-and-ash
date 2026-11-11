@@ -58,8 +58,13 @@ export function encounter(g, { id, intro, enemies, win, lose, flee = null, tier 
 
 /** Romance helpers. */
 export const rel = (g, who) => g.rel[who] || { f: 0, a: 0 };
-export const likesMei = (g) => !!g.flags.romance || rel(g, 'Mei Lin').a >= 60;
-export const likesYa = (g) => !!g.flags.ya_romance || rel(g, 'Ya').a >= 85;
+/** v0.11.123 (owner picks EQ1, AB; EB1): one bar of 72 for both (was Mei Lin 60, Ya 85); a night's flag still counts, a kiss's no longer does. */
+export const LIKES_BAR = 72;
+/** v0.11.123 (ER1, GF): a started throuple (trio ≥ 1, only ever stepped while both were liked) keeps both liked, so a save made under the old
+ *  bars (Mei Lin 60, Ya 85) keeps its thread; 0 numbers move in new play (Careful, Completionist, 500 games each). */
+const trioStarted = (g) => (g.flags.trio || 0) >= 1;
+export const likesMei = (g) => !!g.flags.romance || rel(g, 'Mei Lin').a >= LIKES_BAR || trioStarted(g);
+export const likesYa = (g) => !!g.flags.ya_romance || rel(g, 'Ya').a >= LIKES_BAR || trioStarted(g);
 /** v0.11.122 (owner pick LG1, K and S): the first kisses need real affection: Mei Lin's in the prologue (was 8), Ya's "Stay." and the path kiss (was 10). */
 export const KISS_MEI = 30;
 export const KISS_YA = 45;

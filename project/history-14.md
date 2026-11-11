@@ -2,6 +2,28 @@
 
 Started 2026-11-10 (v0.11.116), when `history-13.md` passed 45 KB. Newer than `history-13.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.123 (word for word)
+
+### From "Open items"
+
+- **Yuki's lost XP to James: done in v0.11.120** (LX1, LR1; numbers in "Decided in chat"): a tenth to his GU. Kept (no option): when his share raises his GU in the same award, the held / reach line above it still says "held" (true in order; new words would be Fable's). A bigger share (G25 / G50 / G100, measured) can come with the retune (section 2).
+
+### From "Decided in chat"
+
+- **v0.11.120: Yuki's lost XP, a tenth to James (the measurement and LX1–LX4 at about 21:15; owner 21:21 "Lx1 go"; Fable's texts and review: LR1–LR4 at about 22:25, owner 22:29 "Lr1 go", taken as the texts' OK too):**
+  - **The sub-items (a scratch copy; the models 500 games each, Careful / Completionist / Farmer / Sitter; the fight lab driven by the Careful and Completionist models, 300 games; Act 1 mean Coil, today 4.07 / 3.68 / 3.75 / 2.64, before YK1 3.59 / 3.57):** **LS** the loss today, per game (Careful / Completionist): prologue 1,883 / 1,760 of her 3,759 / 3,860 (50 / 46%), Act 1 4,708 / 5,381 of 8,191 / 8,447 (57 / 64%); by source hauls 96 / 88%, fights 2 / 7%, story beats 2 / 4%; 0.9× / 1.0× James's own GU XP (7,037 / 7,282); the Sitter 46% in the prologue, 13% in Act 1; **G100** all to his GU: 2.88 / 2.57 / 2.56 / 2.50, his GU at Act 1's end +3.3 / +3.7 ranks, her Fight +2.5 / +3.1; the lab's smart (rot ape, mire serpent, tribute; today 78.0 / 79.7 / 11.1) 98.8 / 82.8 / 24.2; **G50** 3.19 / 2.96 / 2.96 / 2.53 (97.1 / 87.1 / 20.7); **G25** 3.42 / 3.16 / 3.16 / 2.58 (93.6 / 81.7 / 18.6); **G10** 3.90 / 3.45 / 3.45 / 2.61 (81.7 / 76.6 / 13.4); **SP** split GU / CU as `awardXp`: 3.00 / 2.80 / 2.80 / 2.35 (91.0 / 83.8 / 22.9), SP50 3.37 / 3.12 / 3.14 / 2.48; **CU** all to CU: 3.58 / 3.34 / 3.33 / 2.34, GU behind CU at 1,979 / 5,745 fights (0 today), Bao's brawl 91.4 → 57.2%, the serpent 59.5%; **YQ** to her Qi Use: 0 numbers move (her Qi is never spent), her Qi Use +6 / +10 ranks; **T** Fable's texts; **X** tests, the full check, Fable's review.
+  - **The options (colours: how far James gets a share while Act 1 stays near today's pace):** **LX1 🟢 G10 + T + X (recommended)** (3.90 / 3.45) / LX2 🟡 G25 + T + X (3.42 / 3.16) / LX3 🟠 G100 + T + X (2.88 / 2.57) / LX4 🔴 YQ + T + X (James gets nothing). **Picked: LX1.**
+  - **Fable's texts (rule 10; the MAINs; `YUKI_HELD_TEXT.share`, the FAQ's "Skills and checks"):** the share line's tail "from what Yuki couldn't keep" (ALTs: A "passed on through the bond from Yuki", B "the bond's cut of Yuki's lost XP"); the FAQ's added sentence "Of the XP she can't keep, 10% goes through the bond to his GU; the rest is lost." (ALTs: A "Level with it, she keeps nothing more until his rises, and 10% of what she can't keep goes to his GU instead.", B "The bond that holds her passes 10% of what she can't keep on to his GU. She has not been asked."); the tab note kept (ALTs A / B with the share, not used).
+  - **LR (stop-and-ask: Fable's cold review, no high; the full check after LX1: exit 0, 0 drifted of 147, 0 past 5):** **SS** (medium) the sit loop's summary folded a share line that raised his GU into his own GU total ("GU +31 XP → T3 L5, from what Yuki couldn't keep" = his 10 + her 21, then her 21 again): the share has its own total; **AP** (low) an old save with her above him paid the share on her tier (the owner's 11-08 ranks +72 a major award, not +50, until the next rewind): sized on the lower tier; **SD** (low) the Results summary showed "GU → T3 L5 · GU → T3 L6": one bit a skill, the last rank; **CM** (low) a stale comment; **T** the review's test gaps (a reach whose share floors to 0, a reach whose share raises his GU, a won fight while held, the one-move finish); 0 bot numbers move. **LR1 🟢 SS + AP + SD + CM + T (recommended)** / LR2 🟡 SS + CM + T / LR3 🟠 SS + T / LR4 🔴 CM + T. **Picked: LR1.** Kept (no option): the held / reach line says "held" when his share raised his GU in the same award (true in order; new words would be Fable's).
+  - **Also:** as built: the version note; `eafe5e7` filled in for 0.11.119; v0.11.117's notes to `history-14.md`.
+
+### From "Version notes"
+
+## v0.11.120 — Yuki's lost XP, a tenth to James (LX1, LR1)
+
+- **Files:** `js/core/game.js` (`YUKI_LOST_SHARE` 0.1, `yukiShareToJames`, `YUKI_HELD_TEXT.share`; `awardYukiFightXp`: the held and reach paths add his share's line; the pool on the lower of the two tiers, AP), `js/core/tasks.js` (`sitSummary`: the share's own total, SS), `js/main.js` (the Results summary: one bit a skill, SD), `js/core/faq.js` (Fable's sentence), `tests/tasks.test.mjs` (the LX1 and LR1 blocks; the YK1 held test expects two lines), `tests/faq.test.mjs`, `tests/README.md`, `sw.js`, docs (v0.11.117 to `history-14.md`). Saves: no new field, no id changed.
+- **Checks:** a game change (rule 2): the full `bash tools/check.sh` after LX1 and after LR1: exit 0, 0 drifted of 147, 0 past 5; the baseline not re-saved. The models (the full check): Careful 3.45 / 3.90, Completionist 3.19 / 3.45, the Sitter 2.55 (whole game on Coil 1 25.3%), the Farmer 3.09 / 3.40. **Fable, cold review (LX1):** no high; the medium, lows 1, 3, 5 and the test gaps fixed in LR1; low 2 kept.
+
 ## Moved from the handover in v0.11.122 (word for word)
 
 ### From "Open items"

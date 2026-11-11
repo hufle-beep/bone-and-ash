@@ -39,7 +39,7 @@ function seedState(g, run) {
         gao_broken: run % 6 === 1, gao_spared: run % 6 === 2, gao_humiliated: run % 6 > 2, militia: run % 3, mei_party: part !== 'fallout', ya_party: part !== 'fallout' && run % 7 !== 0, ya_met: part !== 'fallout',
         ya_romance: run % 4 === 1, trio: part === 'return' ? run % 5 : part === 'heart' ? run % 4 : 0 };
     g.rel = { 'Mei Lin': { f: 30 + (run % 20), a: run % 3 === 0 ? 25 : run % 30 }, Village: { f: 40, a: 0 }, Ya: { f: part === 'fallout' ? 0 : 20, a: part === 'fallout' ? 0 : run % 30 } };
-    // v0.11.44 (P2): a focused start: 1 run in 40 after the fallout with Ya's affection at 86 (likesYa needs 85; the walks reached
+    // v0.11.44 (P2): a focused start: 1 run in 40 after the fallout with Ya's affection at 86 (likesYa needed 85, 72 since v0.11.123; the walks reached
     // ya_romance once in 1,000 runs with dice, never without), and without the Ya romance flag (run % 4 === 3)
     if (part !== 'fallout' && run % 40 === 7) g.rel.Ya.a = 86;
     // v0.11.44 (P2): James's strength from the bot models at this part's entry (fo_start, bl_start, ht_start, rt_start; 300 games each of

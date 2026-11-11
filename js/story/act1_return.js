@@ -8,7 +8,7 @@ import { condensationSatGain } from '../core/formulas.js';
 import { coilMult, sitGain } from '../core/game.js';
 import { set, daily, markDaily, eatBest } from './common.js';
 import { loveLine } from './yuki_path.js';
-import { encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil, hour, KISS_YA } from './act1_common.js';
+import { encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil, hour, KISS_YA, KISS_MEI } from './act1_common.js';
 
 const P = 'Ashfall Hamlet';
 const BR = 'Blackroot Wilds';
@@ -113,7 +113,7 @@ She laughs, a bark that sends birds up. Then, abruptly, she's in your space, clo
 ${both(g) ? '"And *she*," Ya adds, jerking her chin back at Mei Lin, "looks at me like I\'m a fire she wants to stand next to and is too proud to. I\'m working on it."' : ''}`,
         choices: [
             { text: '"You\'re not dirt. You\'re a menace. It\'s different."', do: (g) => { bumpRel(g, 'Ya', 4, 3); return ['She shoves you, hard, which you are learning is affection.']; }, to: 'rt_road' },
-            { text: 'Kiss her, there on the path, since she\'s standing right there.', show: (g) => rel(g, 'Ya').a >= KISS_YA || !!g.flags.ya_romance, do: (g) => { bumpRel(g, 'Ya', 3, 8); g.flags.ya_romance = true; return ['She kisses back like she\'s trying to win. She probably is.']; }, to: 'rt_road' },
+            { text: 'Kiss her, there on the path, since she\'s standing right there.', show: (g) => rel(g, 'Ya').a >= KISS_YA || !!g.flags.ya_romance, do: (g) => { bumpRel(g, 'Ya', 3, 8); return ['She kisses back like she\'s trying to win. She probably is.']; }, to: 'rt_road' }, // v0.11.123 (EB1, KN): a kiss no longer sets her romance flag (the bar of 72 decides)
             { text: '"Leave Mei Lin alone."', show: both, do: (g) => { bumpRel(g, 'Ya', -2, 0); return ['"No," Ya says cheerfully. "She doesn\'t want me to either. She just doesn\'t know it yet."']; }, to: 'rt_road' },
         ],
     },
@@ -130,6 +130,7 @@ ${both(g) ? `After a while she says, very low: "Ya kissed me. Last night. By the
             { text: '"Some things grow wherever they\'re planted. Even when the soil says no."', do: (g) => { bumpRel(g, 'Mei Lin', 3, 4); trioStep(g, 2); return []; }, to: 'rt_road' },
             { text: 'Take her hand and say nothing. She doesn\'t need a lecture.', do: (g) => { bumpRel(g, 'Mei Lin', 4, 5); return []; }, to: 'rt_road' },
             { text: '"Your father didn\'t die for a theft. He died for a lie. We can fix the lie."', do: (g) => { bumpRel(g, 'Mei Lin', 6, 2); g.flags.mei_vow = true; return ['She is quiet for a long time. Then she nods, once, like someone signing a contract.']; }, to: 'rt_road' },
+            { text: 'Kiss her, there on the path, before she finds something else to hold.', show: (g) => rel(g, 'Mei Lin').a >= KISS_MEI || !!g.flags.romance, do: (g) => { const lover = !!g.flags.romance; bumpRel(g, 'Mei Lin', 3, 8); return [lover ? 'She kisses back with the knife held carefully out to one side, like a woman who was brought up properly. "Later," she says, and this time she says when.' : 'She kisses back with the knife held carefully out to one side, like a woman who was brought up properly. "We will discuss that," she says, and does not say when.']; }, to: 'rt_road' }, // v0.11.123 (EQ1, SC; Fable's D2; EB1, KN: sets no flag); last, so saved choice positions keep their lines
         ],
     },
     rt_ambush: {
@@ -550,7 +551,7 @@ She is exactly as unrestrained as you'd expect, and twice as funny, and at one p
     },
     rt_mei_night: {
         id: 'rt_mei_night', title: 'The Loft', art: 'roof', place: `${P} — the herb loft`,
-        text: (g) => `${g.flags.romance ? 'The herb loft again. Mint and hay and the lamp turned low. It feels like a hundred years since the first time.' : 'The herb loft. Mint and hay and the lamp turned low. She climbs the ladder ahead of you and does not look back to see if you\'re following.'}
+        text: (g) => `${g.flags.romance && g.flags.mei_first === 'raft' ? 'The herb loft. Mint and hay and the lamp turned low. Four walls this time, and a floor that stays where it\'s put. She climbs the ladder ahead of you as if she\'d planned that too.' : g.flags.romance ? 'The herb loft again. Mint and hay and the lamp turned low. It feels like a hundred years since the first time.' : 'The herb loft. Mint and hay and the lamp turned low. She climbs the ladder ahead of you and does not look back to see if you\'re following.'}
 
 "Tomorrow the Elder comes," Mei Lin says, unbuttoning her jacket with steady fingers. "My mother says I'm shameless. The street says I'm shameless. Tonight I'm going to be exactly as shameless as they say."
 

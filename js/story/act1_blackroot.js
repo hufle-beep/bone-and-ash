@@ -16,6 +16,8 @@ const region = (g) => g.flags.bl_region || 'rr';
 const bday = (g) => g.flags.bl_day || 1;
 const hubFor = (g) => ({ rr: 'rr_hub', dw: 'dw_hub', ah: 'ah_hub' }[region(g)]);
 const late = (g) => hour(g) >= 19;
+/** v0.11.123 (EQ1, SC; Fable's D1 lead-in): Ya's word when Mei Lin takes James to the far end of the raft and Ya likes him too. */
+const MEI_RAFT_YA = `Ya watches the two of you get up. Her nose wrinkles, and then she grins to the back teeth. "Go. Tonight I guard." She drags her bedroll round so her back is to the far end of the raft, with the air of a wolf doing someone a favour, and lays the spear across her knees. "I'm not listening," she tells the black water, loudly. "I have very bad ears. Everybody says." She is not put out. Her foot taps the trunk, twice. She is possibly a little put out.`;
 const both = (g) => likesMei(g) && likesYa(g);
 const onlyYa = (g) => likesYa(g) && !likesMei(g);
 /* v0.11.122 (owner pick LG1, BC; texts by Fable, B0–B3): when both like him, the hot spring and the Ashen Hollow camp offer Ya alone too. */
@@ -933,6 +935,7 @@ ${both(g) ? 'Ya sits between you and Mei Lin, an arm round each of your necks, a
             { text: 'Stay up with Mei Lin after the others sleep.', show: (g) => region(g) === 'ah' && onlyMei(g) && !g.flags.mei_bond, to: 'mei_bond' },
             { text: 'Take the first watch together, all of you.', show: (g) => region(g) === 'ah' && !both(g) && !g.flags.bl_friends, to: 'friends_watch' },
             { text: 'Sleep.', to: 'bl_night' },
+            { text: 'When the fire burns low, follow Mei Lin to the far end of the raft.', show: (g) => region(g) === 'dw' && likesMei(g) && !g.flags.mei_raft, to: 'mei_raft' }, // v0.11.123 (EQ1, SC; Fable's D1): Mei Lin's Blackroot night, once a Coil; last, so saved choice positions keep their lines
         ],
     },
     ya_romance: {
@@ -964,7 +967,7 @@ Much later, she's dozing with her face in your neck and one bare leg thrown over
 
 "Then don't."
 
-"Easy for you. You're from the sky." But she leans against you, and after a while she turns her face up, and you kiss her: slowly, carefully, the opposite of the first time in the herb loft, as if you've both got all the time in the world instead of two days and a dead tree.
+"Easy for you. You're from the sky." But she leans against you, and after a while she turns her face up, and you kiss her: slowly, carefully, ${!g.flags.romance ? 'for the first time, and with nothing clever ready for afterwards,' : g.flags.mei_first === 'raft' ? 'the way she did at the far end of the raft, only with no swamp to shock this time,' : 'the opposite of the first time in the herb loft,'} as if you've both got all the time in the world instead of two days and a dead tree.
 
 "Whatever's in there," she says against your mouth, "I'm not letting you go in first."
 
@@ -975,6 +978,34 @@ Much later, she's dozing with her face in your neck and one bare leg thrown over
             { text: 'Sleep with her head on your chest.', show: (g) => !g.flags.mb_day, to: 'bl_night' },
             { text: 'Catch up with the others, eventually.', show: (g) => !!g.flags.mb_day, do: (g) => { g.flags.mb_day = false; return []; }, to: hubFor },
         ],
+    },
+    mei_raft: { // v0.11.123 (owner picks EQ1, SC; EB1; text by Fable, D1 MAIN): Mei Lin's own Blackroot night, the counterpart of Ya's spring
+        id: 'mei_raft', title: 'The Far End', art: 'night_watch', place: PLACE.dw,
+        enter: (g) => { g.flags.mei_raft = true; if (!g.flags.romance) g.flags.mei_first = 'raft'; g.flags.romance = true; bumpRel(g, 'Mei Lin', 5, 10); return []; }, // ER1 (TX, R1): mei_first when the raft is her first night
+        text: (g) => `${likesYa(g) ? `${MEI_RAFT_YA}\n\n` : ''}The far end of the raft is one great trunk fallen across the rest, its root-plate standing up out of the water like a wall. Behind it there is room for a bedroll and nothing to see you but the dark. Mei Lin has, you notice, already put a bedroll there. She notices you noticing.
+
+"I gather herbs," she says. "I plan ahead. Don't look pleased."
+
+"This is my ordinary face."
+
+"It's a pleased face." She hangs her jacket on a broken branch, squarely, the way she'd hang it on a peg at home, and then stands looking at it. "In Ashfall there are four walls and a mother. Here there's a stump and a swamp, and I am *still* listening for the stairs."
+
+Far out, something breaks the surface and goes under. She jumps, and says a word you didn't know she had, and then the laugh gets out: the real one, the bird one, much too loud for a drowned wood. Both hands go over her mouth. Then, slowly, she takes them down again.
+
+"No," she says. "Let it hear."
+
+She kisses you frankly and without hurry, a woman who has made up her mind and intends to enjoy having done it, and her cold fingers find their way under the ridiculous coat and stay there. The raft shifts. The water drips. She pulls the blanket up over the branch and across the gap, and that is a door.
+
+What happens behind it is nobody's business. Least of all the swamp's.
+
+*
+
+Much later she lies along you with her hair loose over your arm, listening to the water. "If you tell anyone I planned this," she says, "I'll deny it, and I'll be believed. I have a very respectable face."
+
+"You do."
+
+"Stop agreeing with me. It's unsettling." She is asleep before you are. From the fire, through the bond: *The raft moves when you do. All of it. I want that on the record.*`,
+        choices: [{ text: 'Sleep. Let the swamp do the dripping.', to: 'bl_night' }],
     },
     friends_watch: {
         id: 'friends_watch', title: 'Watch', art: 'night_watch', place: PLACE.ah,

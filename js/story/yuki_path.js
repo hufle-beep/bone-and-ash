@@ -12,7 +12,7 @@
  */
 import { bumpRel, sleepUntil, yukiForms, yukiForm } from '../core/game.js';
 import { daily, markDaily } from './common.js';
-import { likesMei, likesYa, trio } from './act1_common.js';
+import { likesMei, likesYa, trio, rel, KISS_YA } from './act1_common.js';
 
 export const ykPath = (g) => g.flags.yk_path || null;
 export const ykLover = (g) => ykPath(g) === 'lover';
@@ -49,6 +49,14 @@ const SIS_TALK_BOND_GREAT = `Yuki corners you by the water. In her great shape t
 export const meiOpen = (g) => trio(g) >= 3 || (g.flags.yk_mei || 0) >= 2;
 const back = (g) => g.flags.yk_back || g.flags.yuki_return || 'stream';
 
+/** v0.11.123 (owner picks EQ1, SC; EB1, YH; texts by Fable, D3 MAIN): the lead-ins of her Fallout night, by the state the loft was in
+ *  when James chose her (`fo_pick`, set by the choice, cleared at `fo_depart`): the quiet loft, Ya at the window, the three on the roof.
+ *  Hidden when Mei Lin is already his lover in the hay (YH: the rule Ya's "Stay." follows), so Fable's lead-in (ii) is not used. */
+const YK_FO_LEAD = {
+    yk: `Yuki gets up from beside you, goes to the loft window, and looks back at you, once. Forty years have taught you that look. It means *now*, and it means *don't make me ask*. You follow her out onto the thatch.`,
+    yk_ya: `"Not tonight," you say. "Tonight is the cat's." Ya looks at Yuki, and Yuki looks at Ya, and something is settled between them that you are not consulted on. "The not-cat," Ya says, and grins with every tooth. "Fine. She was first. I can count to one." She goes out by the window, then puts her head back in upside down. "A little offended," she adds, for accuracy, and is gone. Yuki goes out after her, the other way, up. You follow.`,
+    yk_roof: `You say nothing, which Ya hears perfectly. She looks at Yuki, who is looking at nothing, very hard, and laughs under her breath. "Come, herb girl. I'll show you how to sleep on a god." "I shall sleep in a bed," says Mei Lin, "like a person," and she goes in at the window with her dignity intact, touching your shoulder once on the way, as she'd touch a doorpost for luck. Ya takes the shrine roof in one jump, and the thatch is yours.`,
+};
 const SCENES_YK = {
     yk_choice: {
         id: 'yk_choice', title: 'The Last Fire', art: 'yuki_human', place: 'The Long Forest',
@@ -251,6 +259,61 @@ Up in the loft it smells of mint and hay. Everyone has opinions. Nobody is shy a
 Toward dawn: Mei Lin's head on your chest; Ya across both of you like a fallen tree; and a white cat on top of the whole pile, as high as she can get, purring like an engine. *Best spot,* says the bond.`,
         choices: [{ text: 'A few more hours. Then the Elder.', do: (g) => { sleepUntil(g, 6); return ['Slept until 06:00. HP and Qi full.']; }, to: 'rt_elder' }],
     },
+    /* ---------- v0.11.123 (owner picks EQ1, SC; EB1): her night at the Fallout and her walk on the way home (Fable's D3, D4 MAINs; ER1 (TX): R2–R4, the log, the north, any form) ---------- */
+    yk_night_fo: {
+        id: 'yk_night_fo', title: 'The Wrong Stars', art: 'yuki_human', place: 'Ashfall Hamlet — the roof',
+        enter: (g) => { bumpRel(g, 'Yuki', 0, 8); return []; },
+        text: (g) => `${YK_FO_LEAD[g.flags.fo_pick] || YK_FO_LEAD.yk}
+
+The thatch is cold, and the stars are the wrong stars, as they have been every night since the lab. By the time you are out on the thatch she is on the ridge, facing north, and whatever she went up as, it is a woman sitting there now, knees drawn up, white hair lifting in the wind, tail wrapped round her bare feet.
+
+"Don't say anything clever," says Yuki. "I came out here to be sincere and I'd like to get it over with."
+
+"Go on."
+
+"Something up north is pulling. Not at you. At me, by the scruff. It has been at it since sundown, and it makes me miss a place I've never set a paw in, which is ridiculous, and I resent it." Gold eyes, sideways. "You're the only home I've had that came with me. So tomorrow you don't walk in front. You walk next to me. That's all. That was the sincere part."
+
+"It was very good."
+
+"I know. I rehearsed it on the stove."
+
+She leans in, and it is the oldest weight in your life, her head against your jaw; only this time there is a mouth with it, unhurried and sure of its welcome. Her hand goes inside the ridiculous coat as if she had always kept her things there. Below you sleeps a village that put down a saucer of fish scraps for her at supper. She laughs about it, without a sound, against your throat.
+
+"Quietly," you say.
+
+"I have been quiet for forty years," says Yuki. "One more night won't kill me."
+
+The thatch keeps secrets. So does the north wind. The rest is nobody's business.
+
+*
+
+You wake in grey light with a small white cat in the hollow of your neck, purring as if she had never been anything else. Down in the lane the first doors are opening. *Up,* says the bond. *They're going to bow at you. Try to look like a man who slept.*`,
+        choices: [{ text: 'Dawn.', to: 'fo_depart' }],
+    },
+    rt_yk_talk: {
+        id: 'rt_yk_talk', title: 'Arithmetic', art: 'yuki_human', place: 'Blackroot Wilds — the deer paths',
+        text: `You let the others draw ahead until the path bends and takes them. Through the bond, you feel her decide something. When you look round, Yuki is walking beside you on two bare feet, hands clasped behind her back, tail keeping her steady on the roots, as if she'd been doing it all morning and you had only now noticed.
+
+"Forty gardeners," she says. "I was in your lap for the log. It poured into me as well. Nobody came for them."
+
+"No."
+
+"Nobody is coming for us either. I've done the arithmetic. It's the same arithmetic." She steps over a root without looking at it. "I thought I'd mind. I've been waiting to mind since the Heart. Instead I keep thinking that I was born beside you and I'm walking beside you, and the part in between was mostly you talking to mushrooms."
+
+"That was forty years of research."
+
+"That was forty years of me sitting on the research so you'd go to bed." Her ears turn toward the front of the line, and back. "An old man is coming to take you. His Sect has had four hundred years of a heart it cut out of somebody. I've had forty of one nobody had to cut. I like my odds." Gold eyes, level, very dry. "That was me being frightened, by the way. In case it was hard to tell."
+
+"It was a little hard to tell."
+
+"Good."
+
+Somewhere ahead, Ya laughs at nothing. She has a very good nose.`,
+        choices: [
+            { text: 'Stop walking. Kiss her before the path straightens.', do: (g) => { bumpRel(g, 'Yuki', 0, 6); return ['She kisses you as if she has all forty years to hand and is in no hurry to spend them. Then there\'s a cat on your shoulder, washing a paw, innocent of everything.']; }, to: 'rt_road' },
+            { text: '"The best spot is still yours. Elder or no Elder."', do: (g) => { bumpRel(g, 'Yuki', 0, 3); return ['"Obviously," she says, and holds your hand for exactly eleven steps. On the twelfth there\'s a cat on your shoulder again, purring where only you can hear it.']; }, to: 'rt_road' },
+        ],
+    },
 };
 
 /** Act 1 epilogue line for every arrangement. */
@@ -339,5 +402,20 @@ export function installYukiPath(SCENES) {
         ? `Yuki is on the stove in her small shape, watching you all with half-closed gold eyes. ${likesMei(g) || likesYa(g) ? 'Through the bond: *Your call. Any of it. All of it. I told you: I share a sunbeam.*' : 'Through the bond: *The grove is singing. Come and listen.*'}`
         : ykSister(g) ? `Yuki, on the stove, cracks one eye. *If you sleep alone tonight,* says the bond, *I am disowning you.*` : ''));
     beat(SCENES, 'rt_quiet_night', (g) => (ykSister(g) ? 'Yuki, on your chest, mutters: *Disowned.* She doesn\'t move.' : ''));
+
+    // v0.11.123 (owner picks EQ1, SC; EB1, YH; Fable's D3, D4): last in their lists, so saved choice positions keep their lines
+    const foBoth = (g) => likesMei(g) && likesYa(g);
+    SCENES.fo_last_night.choices.push({
+        text: (g) => (foBoth(g) ? 'Tonight, Yuki. Wait until the roof is yours.' : 'Follow the cat out onto the roof.'),
+        show: (g) => ykLover(g) && ykHuman(g) && (foBoth(g) || !g.flags.romance), // YH: hidden when Mei Lin is his lover in the hay, as Ya's "Stay."
+        do: (g) => {
+            const ya = !foBoth(g) && rel(g, 'Ya').a >= KISS_YA;
+            g.flags.fo_pick = foBoth(g) ? 'yk_roof' : ya ? 'yk_ya' : 'yk';
+            if (ya) bumpRel(g, 'Ya', -1, 0); // turning Ya down, as "Sleep."
+            return [];
+        },
+        to: 'yk_night_fo',
+    });
+    SCENES.rt_road.choices.push({ text: 'Let the other two get ahead, and walk a stretch with the cat.', show: (g) => ykLover(g) && ykHuman(g) && daily('rt_yk_walk')(g), time: 60, do: (g) => { markDaily(g, 'rt_yk_walk'); return []; }, to: 'rt_yk_talk' });
 }
 
