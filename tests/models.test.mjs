@@ -9,6 +9,12 @@
 //   node tests/models.test.mjs --off-models careful   v0.11.28: only these models play the Yuki-off games (default: all but Random)
 //   node tests/models.test.mjs --sitter-games 200     v0.11.85: the Sitter's own game count (default: --games; it plays ~20× the cards)
 //   node tests/models.test.mjs --farmer-games 100     v0.11.86: the Farmer's own game count (default: --games)
+//   node tests/models.test.mjs --texts                v0.11.132 (owner picks PL1, E1, RP): count the screens whose text the game already
+//                                                     showed in full this Coil (hubs and menus left out); the full check passes it
+//   node tests/models.test.mjs --save-baseline        v0.11.132 (E1, EB): save the Act 1 endings, last nights and repeated screens as
+//                                                     tools/models-baseline.json; without it they are compared with it, log only (a NOTE
+//                                                     past 5 points and past 3 × the noise; tools/lib/textlint.mjs shareNote). Save
+//                                                     only with the owner's go on an intended change, as tools/baseline.json.
 //
 // The models (tests/README.md has the details):
 //   random         the tasks test's bot (tests/tasks.test.mjs): random cards and story choices, half its games fight at
@@ -34,7 +40,9 @@ import { INC_ONLY_ACTIONS, actionOpen } from '../js/core/forms.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
 import { isTaskHub, isTaskChoice, taskCards, taskOpen, runTask, taskState, setYuki, yukiLane } from '../js/core/tasks.js';
 import { medCards, runMed, canMeditate } from '../js/core/meditate.js';
-import { writeFileSync, readFileSync } from 'node:fs';
+import { writeFileSync, readFileSync, existsSync } from 'node:fs';
+import { noFold, OUTCOME_SCENES, againView } from '../js/story/again.js'; // v0.11.132 (E1, RP)
+import { shareNote } from '../tools/lib/textlint.mjs'; // v0.11.132 (E1, EB)
 import { smartAction } from './lib/smartfight.mjs'; // v0.11.96 (BT1)
 import { SHARD, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
 
@@ -45,6 +53,9 @@ const ONLY = opt('model', 'all');
 const PLAY = ONLY === 'all' ? MODELS : ONLY.split(',');
 for (const m of PLAY) if (!MODELS.includes(m)) { console.error(`unknown model ${m} (${MODELS.join(', ')})`); process.exit(2); }
 const JSON_OUT = opt('json', null);
+const TEXTS = argv.includes('--texts'); // v0.11.132 (E1, RP)
+const SAVE_BASE = argv.includes('--save-baseline'); // v0.11.132 (E1, EB)
+const MODELS_BASE = new URL('../tools/models-baseline.json', import.meta.url);
 const OFF = Math.max(0, Number(opt('off', 300)) || 0);
 const SITTER_GAMES = opt('sitter-games', null); // v0.11.85
 if (SITTER_GAMES != null && !(Number(SITTER_GAMES) >= 0)) { console.error(`--sitter-games needs a number of games (${SITTER_GAMES})`); process.exit(2); }
@@ -164,7 +175,7 @@ function play(run, model, st, yuki) {
         const act = g.coil.act || 0;
         const key = `${act}:${cn()}`;
         if (key !== coilKey) { // a new Coil: the days start over
-            coilKey = key; mem.done = {}; mem.qi = {}; // v0.11.85 (Fable review): the Sitter's gather-Qi hours start over too (a rewind restores the day count)
+            coilKey = key; mem.done = {}; mem.qi = {}; mem.texts = new Set(); // v0.11.132 (E1, RP): the texts shown this Coil; v0.11.85 (Fable review): the Sitter's gather-Qi hours start over too (a rewind restores the day count)
             const d = st.deaths[act] || (st.deaths[act] = {});
             (d[cn()] || (d[cn()] = { coils: 0, dead: 0, beast: 0, starve: 0, taken: 0 })).coils++;
         }
@@ -179,6 +190,12 @@ function play(run, model, st, yuki) {
         const tOut = { bluff_win: 'won', collectors_won: 'won', tribute_paid: 'paid', collectors_lost: 'lost' }[g.scene];
         if (tOut && !seenTrib.has(cn())) { seenTrib.add(cn()); const b = st.tribute[cn()] || (st.tribute[cn()] = { won: 0, paid: 0, lost: 0 }); b[tOut]++; }
         const v = sceneView(g, SCENES);
+        if (TEXTS && v.text && !(noFold(g.scene) && !OUTCOME_SCENES.has(g.scene))) { // v0.11.132 (E1, RP): hubs and menus left out
+            const tx = st.texts || (st.texts = { screens: 0, repeats: 0, scenes: {} });
+            const k = `${g.scene}\n${v.text}`;
+            tx.screens++;
+            if (mem.texts.has(k)) { if (!againView(g, v).fold) { tx.repeats++; tx.scenes[g.scene] = (tx.scenes[g.scene] || 0) + 1; } } else mem.texts.add(k);
+        }
         if (v.end || g.scene === 'a1_end') {
             const o = g.flags.a1_outcome || 'none';
             st.endings[o] = (st.endings[o] || 0) + 1;
@@ -244,6 +261,7 @@ const foodLeft = (g) => Object.entries(g.inventory || {}).some(([k, n]) => n > 0
 /** v0.11.130 (YB1, LN): the last-night split, by g.flags.final_night (yuki_path.js): her four nights count as Yuki's. */
 const NIGHT_KIND = { none: 'quiet', mei: 'Mei Lin', ya: 'Ya', trio: 'trio', yuki: 'Yuki', yuki_mei: 'Yuki', yuki_ya: 'Yuki', all: 'Yuki' };
 const NIGHT_ORDER = ['quiet', 'Mei Lin', 'Ya', 'trio', 'Yuki', 'other'];
+const ENDING_ORDER = ['accord', 'revelation', 'victory', 'taken', 'none']; // v0.11.132 (E1, EB): g.flags.a1_outcome (act1_return.js)
 const blank = () => ({ nights: {}, games: 0, finished: 0, gaveUp: 0, stuck: 0, cards: 0, work: 0, forced: 0, oneCoil: 0, hungry: 0, cuAhead: 0, deaths: {}, tribute: {}, prologueClear: {}, act1Clear: {}, endings: {}, fights: {} });
 const all = {};
 const playInto = (st, run, m, yuki) => { st.games++; const r = play(run, m, st, yuki); if (r === 'end') st.finished++; else if (r === 'stuck') st.stuck++; };
@@ -311,9 +329,38 @@ for (const [m, st] of Object.entries(all)) {
     const fl = KEY_FIGHTS.filter((k) => st.fights[k]).map((k) => { const f = st.fights[k]; const n = f.win + f.lose + (f.flee || 0); return `${k} ${pct(f.win, n)} (${n})`; });
     console.log(`  key fights won: ${fl.join(' · ') || '—'}`);
     const nt = Object.values(st.nights || {}).reduce((a, b) => a + b, 0); // v0.11.130 (YB1, LN)
+    const en = Object.values(st.endings || {}).reduce((a, b) => a + b, 0); // v0.11.132 (E1, EB)
+    console.log(`  Act 1 endings: ${en ? ENDING_ORDER.filter((k) => k !== 'none' || st.endings.none).map((k) => `${k} ${st.endings[k] || 0}`).join(' / ') + ` (of ${en})` : '—'}`);
+    if (st.texts) { const tx = st.texts; const top = Object.entries(tx.scenes).sort((a, b) => b[1] - a[1]).slice(0, 5); console.log(`  repeated screens (the same text again in a Coil, shown in full; hubs and menus left out): ${tx.repeats} of ${tx.screens} (${pct(tx.repeats, tx.screens)})${top.length ? `: ${top.map(([k, n]) => `${k} ${n}`).join(', ')}` : ''}`); }
     console.log(`  last nights: ${nt ? NIGHT_ORDER.filter((k) => k !== 'other' || st.nights.other).map((k) => `${k} ${st.nights[k] || 0}`).join(' / ') + ` (of ${nt} last evenings)` : '—'}`);
 }
 if (JSON_OUT) writeFileSync(JSON_OUT, JSON.stringify(all));
+
+// v0.11.132 (owner picks PL1, E1, EB and RP): the Act 1 endings, the last nights and the repeated screens against the saved copy, log only
+function shareTable(all) {
+    const out = {};
+    const shares = (o) => { const n = Object.values(o || {}).reduce((a, b) => a + b, 0); return Object.fromEntries(Object.entries(o || {}).map(([k, v]) => [k, { v: Math.round((1000 * v) / n) / 10, n }])); };
+    for (const [m, st] of Object.entries(all)) {
+        out[m] = { games: st.games, endings: shares(st.endings), nights: shares(st.nights) };
+        if (st.texts?.screens) out[m].repeats = { v: Math.round((1000 * st.texts.repeats) / st.texts.screens) / 10, n: st.texts.screens };
+    }
+    return out;
+}
+if (!SHARD) {
+    const now = shareTable(all);
+    if (SAVE_BASE) { writeFileSync(MODELS_BASE, `${JSON.stringify({ saved: new Date().toISOString().slice(0, 10), args: argv.filter((a) => a !== '--save-baseline').join(' '), models: now }, null, 1)}\n`); console.log(`\n  models baseline saved: tools/models-baseline.json`); }
+    else if (existsSync(MODELS_BASE)) {
+        const was = JSON.parse(readFileSync(MODELS_BASE, 'utf8')).models || {};
+        for (const [m, t] of Object.entries(now)) {
+            const w = was[m]; if (!w) continue;
+            for (const part of ['endings', 'nights']) for (const k of new Set([...Object.keys(w[part] || {}), ...Object.keys(t[part] || {})])) {
+                const a = w[part]?.[k] || { v: 0, n: Object.values(w[part] || {})[0]?.n || 0 }, b = t[part]?.[k] || { v: 0, n: Object.values(t[part] || {})[0]?.n || 0 };
+                if (shareNote(a, b) === 'note') notes.push(`${part === 'endings' ? 'Act 1 endings' : 'last nights'} (log only): ${m} ${k} ${a.v}% → ${b.v}% (n ${a.n} → ${b.n})`);
+            }
+            if (w.repeats && t.repeats && shareNote(w.repeats, t.repeats) === 'note') notes.push(`repeated screens (log only): ${m} ${w.repeats.v}% → ${t.repeats.v}% of screens (n ${w.repeats.n} → ${t.repeats.n})`);
+        }
+    }
+}
 for (const n of notes) console.log(`  NOTE  ${n}`);
 for (const f of fails) console.error(`  FAIL  ${f}`);
 console.log(`\n${pass} passed, ${fail} failed${notes.length ? `, ${notes.length} notes` : ''}`);

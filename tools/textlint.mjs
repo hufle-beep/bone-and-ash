@@ -1,0 +1,86 @@
+#!/usr/bin/env node
+// v0.11.132 (owner picks PL1, E1): the story-text lint, log only (it never fails). Every scene text and choice label,
+// rendered as the screen would on 9 sample states (Yuki as the cat, the great root-kin and human; no path, sister,
+// lover; as tools/lint.mjs), counted by the rules in tools/lib/textlint.mjs: SH reused passages, FV favourite phrases,
+// TC tics, BD broken text (and spacing the screen drops), RD texts that render on no sample state. SN: the counts per
+// story area against the saved snapshot tools/text-baseline.json; each change is a log-only NOTE line (the measure for
+// group e's rewrite pass: each part prints old → new).
+//   node tools/textlint.mjs           counts, and what changed against the snapshot
+//   node tools/textlint.mjs --list    every hit
+//   node tools/textlint.mjs --save    save the counts as the new snapshot (with the push that changes the texts)
+// Not read yet: the result lines of choices and cards, the task cards' texts, again.js's memory lines (open, options later).
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { lintCounts, snapshotDiff } from './lib/textlint.mjs';
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const SNAP = path.join(ROOT, 'tools/text-baseline.json');
+const argv = process.argv.slice(2);
+const LIST = argv.includes('--list'), SAVE = argv.includes('--save');
+const js = (f) => path.join(ROOT, 'js', f);
+
+const { SCENES } = await import(js('story/prologue.js'));
+const { newGame, ensureBars } = await import(js('core/game.js'));
+
+/** The story areas: the scene tables of each file; everything else (the prologue, the Coil, Yuki's path, the one-offs) is 'prologue+shared'. */
+export const AREAS = [['wilds', 'wilds', 'WILDS'], ['ashfall', 'ashfall', 'ASHFALL'], ['fallout', 'act1_fallout', 'FALLOUT'], ['blackroot', 'act1_blackroot', 'BLACKROOT'], ['heart', 'act1_heart', 'HEART'], ['return', 'act1_return', 'RETURN'], ['longforest', 'longforest', 'LONGFOREST']];
+const areaOf = {};
+for (const [name, file, key] of AREAS) { const m = await import(js(`story/${file}.js`)); for (const id of Object.keys(m[key])) areaOf[id] = name; }
+
+const SAMPLES = [];
+for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) for (const p of [null, 'sister', 'lover']) {
+    const g = ensureBars(newGame(1234, { closed: true }));
+    g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; if (p) g.flags.yk_path = p;
+    SAMPLES.push(ensureBars(g));
+}
+const renders = (x) => {
+    if (typeof x === 'string') return [x];
+    if (typeof x !== 'function') return [];
+    const out = [];
+    for (const g of SAMPLES) { try { const t = x(g); if (typeof t === 'string' && !out.includes(t)) out.push(t); } catch { /* needs more state */ } }
+    return out;
+};
+
+const rows = [];
+for (const s of Object.values(SCENES)) {
+    const area = areaOf[s.id] || 'prologue+shared';
+    const r = renders(s.text);
+    rows.push({ id: s.id, area, kind: 'text', renders: r, fn: typeof s.text === 'function', unrendered: typeof s.text === 'function' && !r.length });
+    for (const c of s.choices || []) {
+        const l = renders(c.text);
+        rows.push({ id: s.id, area, kind: 'label', renders: l, fn: typeof c.text === 'function', unrendered: typeof c.text === 'function' && !l.length });
+    }
+}
+const now = lintCounts(rows);
+const T = now.totals;
+const snap = { totals: now.totals, areas: now.areas };
+
+console.log(`text lint (log only): ${T.scenes} scenes, ${T.labels} choice labels; ${T.words} words of base text, ${T.variantWords} in variants, ${T.labelWords} in labels`);
+console.log(`  SH reused passages: ${T.sharedChunks} 5-word chunks shared by two scenes or more (${T.sharedScenes} scenes); ${T.reused} scene pairs share 5+: ${now.lists.reused.slice(0, 5).map(([p, n]) => `${p} ${n}`).join(', ')}`);
+console.log(`  FV favourite phrases (in 4+ scenes; names and canon terms left out): ${T.favourites}: ${now.lists.favourites.slice(0, 6).map((f) => `"${f.phrase}" ${f.scenes.size}`).join(', ')}`);
+console.log(`  TC tics (2–3 words 3+ times in one text): ${T.tics}: ${now.lists.tics.slice(0, 5).map((x) => `${x.id} "${x.phrase}" ×${x.n}`).join(', ')}`);
+console.log(`  BD broken text: ${T.broken}${T.broken ? `: ${now.lists.broken.slice(0, 5).map((x) => `${x.id} (${x.kind}) ${x.what}`).join(', ')}` : ''}; spacing the screen drops: ${T.spacing}`);
+console.log(`  RD texts rendered on none of the 9 sample states: ${T.unrendered}${T.unrendered ? `: ${now.lists.unrendered.map((x) => `${x.id} (${x.kind})`).join(', ')}` : ''}`);
+
+if (LIST) {
+    console.log('\nreused passages (scene pair, shared chunks):'); for (const [p, n] of now.lists.reused) console.log(`  ${p} ${n}`);
+    console.log('\nfavourite phrases (scenes):'); for (const f of now.lists.favourites) console.log(`  "${f.phrase}" ${f.scenes.size}: ${[...f.scenes].sort().join(', ')}`);
+    console.log('\ntics:'); for (const x of now.lists.tics) console.log(`  ${x.id}: "${x.phrase}" ×${x.n}`);
+    console.log('\nbroken:'); for (const x of now.lists.broken) console.log(`  ${x.id} (${x.kind}): ${x.what}`);
+    console.log('\nspacing:'); for (const x of now.lists.spacing) console.log(`  ${x.id} (${x.kind})`);
+    console.log('\nunrendered:'); for (const x of now.lists.unrendered) console.log(`  ${x.id} (${x.kind})`);
+    console.log('\nper area:'); for (const [a, v] of Object.entries(now.areas)) console.log(`  ${a.padEnd(16)}${JSON.stringify(v)}`);
+}
+
+let changed = 0;
+if (SAVE) {
+    writeFileSync(SNAP, `${JSON.stringify({ saved: new Date().toISOString().slice(0, 10), ...snap }, null, 1)}\n`);
+    console.log(`  snapshot saved: ${path.relative(ROOT, SNAP)}`);
+} else if (existsSync(SNAP)) {
+    const d = snapshotDiff(JSON.parse(readFileSync(SNAP, 'utf8')), snap);
+    changed = d.length;
+    for (const x of d) console.log(`  NOTE  text (log only): ${x.where} ${x.key} ${x.was ?? '—'} → ${x.now ?? '—'}`);
+} else console.log('  NOTE  text (log only): no snapshot yet (node tools/textlint.mjs --save)');
+
+console.log(`text lint (log only): ${T.reused} reused passages, ${T.favourites} favourite phrases, ${T.tics} tics, ${T.broken} broken, ${T.unrendered} unrendered; ${SAVE ? 'snapshot saved' : `${changed} changed against the snapshot`}`);

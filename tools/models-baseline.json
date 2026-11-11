@@ -1,0 +1,237 @@
+{
+ "saved": "2026-11-11",
+ "args": "--model careful,completionist,rusher,sitter,farmer --games 500 --sitter-games 150 --farmer-games 100 --off 300 --off-models careful,completionist --texts",
+ "models": {
+  "careful": {
+   "games": 500,
+   "endings": {
+    "accord": {
+     "v": 94.4,
+     "n": 500
+    },
+    "revelation": {
+     "v": 5.6,
+     "n": 500
+    }
+   },
+   "nights": {
+    "trio": {
+     "v": 16.4,
+     "n": 500
+    },
+    "Mei Lin": {
+     "v": 22.8,
+     "n": 500
+    },
+    "quiet": {
+     "v": 46.8,
+     "n": 500
+    },
+    "Ya": {
+     "v": 14,
+     "n": 500
+    }
+   },
+   "repeats": {
+    "v": 3.1,
+    "n": 115750
+   }
+  },
+  "careful:yukiOff": {
+   "games": 300,
+   "endings": {
+    "accord": {
+     "v": 92.7,
+     "n": 300
+    },
+    "revelation": {
+     "v": 7.3,
+     "n": 300
+    }
+   },
+   "nights": {
+    "Mei Lin": {
+     "v": 20.3,
+     "n": 300
+    },
+    "quiet": {
+     "v": 41.7,
+     "n": 300
+    },
+    "Ya": {
+     "v": 23.7,
+     "n": 300
+    },
+    "trio": {
+     "v": 14.3,
+     "n": 300
+    }
+   },
+   "repeats": {
+    "v": 2.9,
+    "n": 70994
+   }
+  },
+  "completionist": {
+   "games": 500,
+   "endings": {
+    "revelation": {
+     "v": 35.2,
+     "n": 500
+    },
+    "victory": {
+     "v": 34.4,
+     "n": 500
+    },
+    "accord": {
+     "v": 30.4,
+     "n": 500
+    }
+   },
+   "nights": {
+    "quiet": {
+     "v": 25.4,
+     "n": 500
+    },
+    "trio": {
+     "v": 36,
+     "n": 500
+    },
+    "Ya": {
+     "v": 33,
+     "n": 500
+    },
+    "Mei Lin": {
+     "v": 5.6,
+     "n": 500
+    }
+   },
+   "repeats": {
+    "v": 4.4,
+    "n": 124271
+   }
+  },
+  "completionist:yukiOff": {
+   "games": 300,
+   "endings": {
+    "accord": {
+     "v": 30.3,
+     "n": 300
+    },
+    "victory": {
+     "v": 36.7,
+     "n": 300
+    },
+    "revelation": {
+     "v": 33,
+     "n": 300
+    }
+   },
+   "nights": {
+    "trio": {
+     "v": 32.3,
+     "n": 300
+    },
+    "quiet": {
+     "v": 31,
+     "n": 300
+    },
+    "Ya": {
+     "v": 29.7,
+     "n": 300
+    },
+    "Mei Lin": {
+     "v": 7,
+     "n": 300
+    }
+   },
+   "repeats": {
+    "v": 4.4,
+    "n": 77288
+   }
+  },
+  "rusher": {
+   "games": 500,
+   "endings": {},
+   "nights": {},
+   "repeats": {
+    "v": 0,
+    "n": 48510
+   }
+  },
+  "sitter": {
+   "games": 150,
+   "endings": {
+    "revelation": {
+     "v": 18,
+     "n": 150
+    },
+    "victory": {
+     "v": 57.3,
+     "n": 150
+    },
+    "accord": {
+     "v": 24.7,
+     "n": 150
+    }
+   },
+   "nights": {
+    "quiet": {
+     "v": 82.7,
+     "n": 150
+    },
+    "Mei Lin": {
+     "v": 14.7,
+     "n": 150
+    },
+    "Yuki": {
+     "v": 2.7,
+     "n": 150
+    }
+   },
+   "repeats": {
+    "v": 5.2,
+    "n": 27289
+   }
+  },
+  "farmer": {
+   "games": 100,
+   "endings": {
+    "revelation": {
+     "v": 30,
+     "n": 100
+    },
+    "victory": {
+     "v": 32,
+     "n": 100
+    },
+    "accord": {
+     "v": 38,
+     "n": 100
+    }
+   },
+   "nights": {
+    "Ya": {
+     "v": 36,
+     "n": 100
+    },
+    "trio": {
+     "v": 39,
+     "n": 100
+    },
+    "Mei Lin": {
+     "v": 4,
+     "n": 100
+    },
+    "quiet": {
+     "v": 21,
+     "n": 100
+    }
+   },
+   "repeats": {
+    "v": 4.3,
+    "n": 24688
+   }
+  }
+ }
+}

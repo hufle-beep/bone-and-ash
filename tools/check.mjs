@@ -51,7 +51,7 @@ const jobs = [
     // (300 games) only for Careful and Completionist (the Rusher dies at the jackals either way)
     // v0.11.85 (owner pick M1): the Sitter too (it cultivates whenever it can), 150 games (20 in quick): it plays ~20× the cards
     // v0.11.86 (#53): the Farmer too (10 bites by choice at the first dawn, then the completionist), 100 games (20 in quick)
-    { name: `bot models (${QUICK ? 50 : 500} games each, the Sitter ${QUICK ? 20 : 150}, the Farmer ${QUICK ? 20 : 100}, log only)`, key: 'models', show: 'models', blocks: QUICK ? 5 : 7, cmd: node('tests/models.test.mjs', '--model', 'careful,completionist,rusher,sitter,farmer', '--games', QUICK ? '50' : '500', '--sitter-games', QUICK ? '20' : '150', '--farmer-games', QUICK ? '20' : '100', '--off', QUICK ? '0' : '300', '--off-models', 'careful,completionist'), heavy: true },
+    { name: `bot models (${QUICK ? 50 : 500} games each, the Sitter ${QUICK ? 20 : 150}, the Farmer ${QUICK ? 20 : 100}, log only)`, key: 'models', show: 'models', blocks: QUICK ? 5 : 7, cmd: node('tests/models.test.mjs', '--model', 'careful,completionist,rusher,sitter,farmer', '--games', QUICK ? '50' : '500', '--sitter-games', QUICK ? '20' : '150', '--farmer-games', QUICK ? '20' : '100', '--off', QUICK ? '0' : '300', '--off-models', 'careful,completionist', '--texts'), heavy: true }, // v0.11.132 (E1): --texts, the repeated screens (RP)
     { name: 'syntax', key: 'syntax', fn: syntax },
     { name: 'consistency (offline files, versions)', key: 'consistency', cmd: node('tools/consistency.mjs') },
     { name: 'engine numbers', key: 'rules', cmd: node('tests/rules.test.mjs') },
@@ -61,6 +61,7 @@ const jobs = [
     { name: 'the FAQ (gates, unfolding, numbers)', key: 'faq', cmd: node('tests/faq.test.mjs') }, // v0.11.83
     { name: 'picture palette (art/pic)', key: 'palette', cmd: ['python3', ['-I', 'tools/art/palette_check.py']] }, // v0.11.24
     { name: 'content lint (old names, duplicate labels)', key: 'lint', last: true, cmd: node('tools/lint.mjs') }, // v0.11.21: those two strict
+    { name: 'text lint (reused passages, phrases, tics, broken text; log only)', key: 'textlint', last: true, cmd: node('tools/textlint.mjs') }, // v0.11.132 (owner picks PL1, E1)
     { name: 'test tools (shard merge, 1 = 2 workers, job list)', key: 'tools', cmd: node('tests/tools.test.mjs') }, // v0.11.21
     ...['fallout', 'blackroot', 'heart', 'return'].map((p) => ({ name: `Act 1 part: ${p}`, key: `part:${p}`, cmd: node('tests/part.test.mjs', p) })),
     // v0.11.22: the leftover check (strict since v0.11.23, choices log only). Full runs add what the bot games touched: the story test watches its flags and items

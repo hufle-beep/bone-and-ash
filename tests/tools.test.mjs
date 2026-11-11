@@ -8,6 +8,8 @@
 // v0.11.62: tools/art/patch.py on a made-up picture.
 // v0.11.22: tools/leftovers.mjs on small made-up inputs (every kind found, kept entries skipped) and tests/lib/seen.mjs's watch.
 // v0.11.126: tools/lint.mjs reads function texts on sample states (a planted old name in one form fails it).
+// v0.11.132 (owner picks PL1, E1): the story-text lint (tools/textlint.mjs, tools/lib/textlint.mjs) and the bot models' Act 1 endings,
+// repeated screens and their saved copy (tests/models.test.mjs --texts, tools/models-baseline.json).
 // v0.11.80: the fight lab (tools/fightlab.mjs, tools/lib/fightlab.mjs): its summary on made-up samples, one fight on a real
 // state, and a tiny real run (1 worker = 2 workers; the bots' own fights the same with and without the lab).
 import { spawn, execFileSync } from 'node:child_process';
@@ -25,6 +27,7 @@ import { artFiles, fingerprint, readArt, checkArt, writeArt, ART_RE } from '../t
 import { TACTICS, FIXED, rank, rankLabel, stream, isOneMove, playFight, sampleFight, sampleOrder, tacticStats, thirds, guNeeded, summarize, summarizeAll, tableLines } from '../tools/lib/fightlab.mjs'; // v0.11.80
 import { SCENES } from '../js/story/prologue.js'; // v0.11.80: the story's hooks, for the fight lab's real fight
 import { newGame, ensureBars, combatHooks, startCombat, combatStep } from '../js/core/game.js'; // v0.11.80
+import { shingles, reusedPassages, favouritePhrases, tics, broken, spacing, snapshotDiff, shareNote } from '../tools/lib/textlint.mjs'; // v0.11.132 (E1)
 import { docFindings, newestHistory, newestResearch, HANDOVER_MAX, HISTORY_MAX, RESEARCH_MAX, DOC_TOOL_MAX } from '../tools/lib/docs.mjs'; // v0.11.73; v0.11.78 the research parts
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -581,6 +584,54 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md'];
     let code = 0, out = '';
     try { out = execFileSync(process.execPath, ['tools/lint.mjs'], { cwd: dir, encoding: 'utf8' }); } catch (e) { code = e.status ?? 1; out = String(e.stdout || e); }
     assert(code === 1 && /gao_talked: text/.test(out), `LN: an old name in the great root-kin's line only fails the lint (exit ${code})`);
+}
+// v0.11.132 (owner picks PL1, E1): the story-text lint's rules (tools/lib/textlint.mjs) on made-up texts, the lint on the game
+// and on a copy with planted faults (log only: exit 0 either way; the snapshot notes the change), and the bot models' Act 1
+// endings, repeated screens and their saved copy (a planted copy far from the run gives a log-only NOTE).
+{
+    const passage = 'The wind comes down off the ridge and the reeds bow to it like tired old courtiers before a minor prince.';
+    assert(!shingles('and then he said to the').size && shingles(passage).size > 5, 'SH: a chunk of small words is no chunk; a real sentence has many');
+    const sh = reusedPassages([{ id: 'a', t: `First. ${passage}` }, { id: 'b', t: `${passage} Second.` }, { id: 'c', t: 'Nothing alike at all, honestly, by any measure.' }]);
+    assert(sh.reused.length === 1 && sh.reused[0][0] === 'a~b' && sh.scenes.size === 2, `SH: two scenes sharing a sentence are one reused passage (${JSON.stringify(sh.reused)})`);
+    const fv = favouritePhrases(['alpha', 'bravo', 'charlie', 'delta'].map((id) => ({ id, t: `${id} four hundred pounds of cat. Mei Lin walks. The Crimson Lotus waits.` })));
+    assert(fv.length === 1 && fv[0].phrase === 'four hundred pounds of cat' && fv[0].scenes.size === 4, `FV: overlapping runs chained into one phrase; names ("mei lin walks") and canon terms ("the crimson lotus waits") left out (${fv.map((f) => f.phrase).join(' | ')})`);
+    assert(favouritePhrases(['p', 'q', 'r'].map((id) => ({ id, t: 'four hundred pounds of cat' }))).length === 0, 'FV: three scenes are not enough');
+    const tc = tics('The water was cold. The water was dark. The water was everywhere, and the water won.');
+    assert(tc.length === 1 && tc[0].phrase === 'the water was' && tc[0].n === 3, `TC: a 3-word tic, its 2-word part not counted again (${JSON.stringify(tc)})`);
+    assert(!tics('the cat the cat the cat').length, 'TC: no tic without a word of 5+ letters');
+    assert(!broken('Slowly.\n\n*\n\nMuch later, *the lamp* is out.').length, 'BD: the lone "*" scene break and paired asterisks are fine');
+    assert(broken('She says *nothing.').includes('asterisks') && broken('Gold: ${gold}').includes('code') && broken('undefined').includes('code') && broken(`${'a'.repeat(31)}`).includes('glued'), 'BD: a stray asterisk, a template leftover, undefined, glued words');
+    assert(spacing('Zero snacks.  ') && spacing('One.\n\n\n\nTwo.') && !spacing('One.\n\nTwo.'), 'BD: spacing the screen drops counted apart');
+    const d = snapshotDiff({ totals: { tics: 2 }, areas: { wilds: { tics: 1 } } }, { totals: { tics: 3 }, areas: { wilds: { tics: 1 }, ashfall: { tics: 2 } } });
+    assert(d.length === 2 && d[0].where === 'all' && d[0].was === 2 && d[0].now === 3 && d[1].where === 'ashfall' && d[1].was === null, `SN: the totals first, then the areas that changed (${JSON.stringify(d)})`);
+    assert(shareNote({ v: 50, n: 500 }, { v: 53, n: 500 }) === 'ok' && shareNote({ v: 50, n: 500 }, { v: 62, n: 500 }) === 'note' && shareNote({ v: 50, n: 60 }, { v: 62, n: 60 }) === 'ok' && shareNote({ v: 50, n: 40 }, { v: 90, n: 500 }) === 'ok',
+        'EB: a note past 5 points and 3 × the noise (12 points on 60 games is noise), never under 50 samples');
+
+    const run = (cwd, args = []) => { try { return { code: 0, out: execFileSync(process.execPath, ['tools/textlint.mjs', ...args], { cwd, encoding: 'utf8' }) }; } catch (e) { return { code: e.status ?? 1, out: String(e.stdout || e) }; } };
+    const game = run(ROOT);
+    assert(game.code === 0 && /^text lint \(log only\): \d+ reused passages, \d+ favourite phrases, \d+ tics, 0 broken, \d+ unrendered; 0 changed against the snapshot$/m.test(game.out), `E1: the text lint runs on the game, 0 broken, the snapshot current (${game.out.trim().split('\n').pop()})`);
+    const dir = path.join(TMP, 'textlint'); mkdirSync(path.join(dir, 'tools', 'lib'), { recursive: true });
+    cpSync(path.join(ROOT, 'js'), path.join(dir, 'js'), { recursive: true });
+    for (const f of ['tools/textlint.mjs', 'tools/lib/textlint.mjs', 'tools/text-baseline.json']) writeFileSync(path.join(dir, f), readFileSync(path.join(ROOT, f)));
+    const pro = path.join(dir, 'js', 'story', 'prologue.js');
+    const src = readFileSync(pro, 'utf8');
+    assert(src.includes('a cat the size of a tiger at his side'), 'E1: the planted line is there to change');
+    writeFileSync(pro, src.replace('a cat the size of a tiger at his side', 'a cat the size of a ${tiger} at his side'));
+    const bad = run(dir);
+    assert(bad.code === 0 && /BD broken text: 1: gao_talked \(text\) code/.test(bad.out) && /NOTE {2}text \(log only\): all broken 0 → 1/.test(bad.out) && /NOTE {2}text \(log only\): prologue\+shared broken 0 → 1/.test(bad.out),
+        `E1: a template leftover in the great root-kin's line is counted and noted against the snapshot, log only (exit ${bad.code})`);
+
+    // the bot models: Act 1 endings and repeated screens printed; a saved copy far from the run gives a log-only NOTE
+    const md = path.join(TMP, 'models'); mkdirSync(path.join(md, 'tools'), { recursive: true });
+    for (const f of ['js', 'tests', 'tools/lib']) cpSync(path.join(ROOT, f), path.join(md, f), { recursive: true });
+    writeFileSync(path.join(md, 'tools', 'models-baseline.json'), JSON.stringify({ models: { careful: { endings: { accord: { v: 0, n: 500 }, revelation: { v: 100, n: 500 } }, nights: {}, repeats: { v: 60, n: 5000 } } } }));
+    let mo = '', mc = 0;
+    try { mo = execFileSync(process.execPath, ['tests/models.test.mjs', '--model', 'careful', '--games', '60', '--off', '0', '--workers', '1', '--texts'], { cwd: md, encoding: 'utf8' }); } catch (e) { mc = e.status ?? 1; mo = String(e.stdout || e); }
+    const rp = mo.match(/repeated screens \(the same text again in a Coil, shown in full; hubs and menus left out\): (\d+) of (\d+) \([\d.]+%\): (.*)/);
+    assert(mc === 0 && /Act 1 endings: accord \d+ \/ revelation \d+ \/ victory \d+ \/ taken \d+ \(of 60\)/.test(mo) && rp && Number(rp[2]) > 1000, `E1 (EB, RP): the models print the Act 1 endings and the repeated screens (exit ${mc})`);
+    const { TASK_HUBS } = await import('../js/story/task_hubs.js');
+    assert(rp && rp[3].split(', ').every((x) => !TASK_HUBS[x.split(' ')[0]]), `E1 (RP): no hub among the repeated screens (${rp?.[3]})`);
+    assert(/NOTE {2}Act 1 endings \(log only\): careful accord 0% → [\d.]+% \(n 500 → 60\)/.test(mo) && /NOTE {2}repeated screens \(log only\): careful 60% → [\d.]+% of screens/.test(mo), 'E1 (EB): a saved copy far from the run is noted, log only');
 }
 rmSync(TMP, { recursive: true, force: true });
 
