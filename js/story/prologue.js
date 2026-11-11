@@ -423,11 +423,11 @@ All of it is true. None of it is the whole truth.`,
     },
     gao_fled: {
         id: 'gao_fled', title: 'Retreat with Honour (Allegedly)', art: 'herb_girl', place: 'Blackroot Wilds — the herb slope',
-        text: `Gao Feng pulls the needle out with his teeth, which is either very brave or very stupid, and backs away with his lackey. "The Crimson Lotus will hear of you," he hisses.
+        text: (g) => `Gao Feng pulls the needle out with his teeth, which is either very brave or very stupid, and backs away with his lackey.${byForm(g, '', ' He keeps his eyes on Yuki the whole way down, which is the first sensible thing he has done all day. Yuki, at your side, yawns at him. It takes a while and shows him everything.', '')} "The Crimson Lotus will hear of you," he hisses.
 
 "Wonderful. Tell them I'm free on Thursdays."
 
-The needle dissolves in his mouth halfway down the hill. You can hear him spit for a long time.`,
+The needle dissolves in his mouth halfway down the hill. You can hear him spit for a long time.`, // v0.11.127 (LP1, FL; Fable's MAIN): the great root-kin's lines
         choices: [{ text: 'Turn to the woman with the knife.', to: 'mei_lin' }],
     },
     gao_won: {
@@ -617,7 +617,7 @@ It finds you before you find it. It is the size of a small car and it has *opini
     boar_lost: {
         id: 'boar_lost', title: 'Ironhide Wins', art: 'boar', place: 'Blackroot Wilds — the oak hollow',
         enter: (g) => { g.james.hp = Math.max(1, Math.floor(g.james.hp * 0.7)); return []; },
-        text: `You end up up a tree. The boar ends up bored. You both agree to call it a draw, and you limp back to Ashfall with bark in places bark should not go.`,
+        text: (g) => byForm(g, 'You end up up a tree. The boar ends up bored. You both agree to call it a draw, and you limp back to Ashfall with bark in places bark should not go.', 'You end up up a tree. Yuki ends up on the far side of the hollow with a mouthful of ironhide bristle and nothing else. *It has armour,* says the bond. *I have standards.* The boar ends up bored. You both agree to call it a draw, and you limp back to Ashfall with bark in places bark should not go.', 'You end up up a tree. The boar ends up bored. You both agree to call it a draw, and you limp back to Ashfall with bark in places bark should not go.'), // v0.11.127 (LP1, FL; LQ2, TN: Fable's ALT A): the great root-kin's own
         choices: [{ text: (g) => (g.flags.long && dayHour(g) < 16 ? 'Back to the village.' : 'Evening.'), time: 30, to: (g) => (g.flags.long ? (dayHour(g) >= 16 ? nextEvening(g) : hubOf(g)) : 'evening') }],
     },
     evening: {

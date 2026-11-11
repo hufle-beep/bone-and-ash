@@ -1,7 +1,7 @@
 // Run: node tests/story.test.mjs — story graph integrity + 1,000 random playthroughs (2,000 before v0.11.34) (no crash, no dead end, always reaches the end);
 // Incremental Mode since v0.11.34 (D1: Story Mode dropped from the game)
 import { SCENES, START_SCENE } from '../js/story/prologue.js';
-import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, itemCap } from '../js/core/game.js';
+import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, itemCap, yukiSitsOut, migrate } from '../js/core/game.js'; // v0.11.127 (LQ2, TG): yukiSitsOut, migrate
 import { sceneView, choose, goTo, wasPicked } from '../js/core/story.js';
 import { actionOpen } from '../js/core/forms.js';
 import { btTarget } from '../js/story/meridians.js';
@@ -892,7 +892,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         [{ yk_path: 'lover', throuple: true }, /hair and one aggrieved cat\. Some nights the cat isn't a cat/, /in whatever room one aggrieved cat has left you\. Some nights/, /hair and one aggrieved cat\. Some nights the cat isn't a cat/],
         [{ yk_path: 'lover', final_night: 'all' }, /and the smallest of you is a white cat on top of the pile\. Mei Lin's mother sets five places at the table now — four and a saucer/, /the largest of you is a white cat and most of the bedding\.[\s\S]*four and the stew pot;/, /and one white tail, which ends up on top of the pile[\s\S]*five places at the table now, and a saucer/], // NS1 (AC): Yuki counted once in the cat's line
         [{ yk_path: 'lover', final_night: 'yuki_mei' }, /why the cat needs a pillow\./, /why the cat needs a pillow\./, /why the cat needs a pillow\./],
-        [{ yk_path: 'lover', final_night: 'yuki' }, /the cat who curls up on your chest is[\s\S]*a lonely man with a cat\./, /the cat who lays her head on your chest, which is all of her that fits, is[\s\S]*a lonely man with a very large cat\./, /the cat who curls up on your chest is[\s\S]*a lonely man with a cat\./], // NS1 (YN); the human keeps hers (open)
+        [{ yk_path: 'lover', final_night: 'yuki' }, /the cat who curls up on your chest is[\s\S]*a lonely man with a cat\./, /the cat who lays her head on your chest, which is all of her that fits, is[\s\S]*a lonely man with a very large cat\./, /Yuki sleeps there too, and walks back in at dawn beside you with moss in her hair\. The village has agreed, gravely and without a meeting, that the ears are not to be mentioned\./], // NS1 (YN); LP1 (CP), LQ2 (TN): the human's own
         [{ yk_path: 'lover', final_night: 'yuki_ya' }, /the huntress and the cat arguing/, /the huntress and the cat arguing/, /the huntress and the cat arguing/],
     ];
     for (const [flags, ...want] of HOSTS) ['cat', 'tiger', 'human'].forEach((form, i) => {
@@ -941,6 +941,125 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         const m = form !== 'cat' && t.match(NOT_SMALL[form]);
         assert(!m, `NR1 (T): ${id} as ${form} (${path || 'no path'}) never places her as the small cat (${m?.[0]})`);
         assert(form === 'human' || !ALOUD.test(t), `NR1 (T): ${id} as ${form} (${path || 'no path'}): no voice aloud`);
+    }
+    // v0.11.127 (owner pick LP1; texts by Fable): LF the lover's pick puts her back in her small shape, as its text says; CP the
+    // lover's lines for her openly human, RC the camp beat for the great root-kin, FL gao_fled and boar_lost for the great root-kin.
+    // LPG: her human form open (realm 7), her current form `form`, the lover's path.
+    const LPG = (seed, form, flags = {}, rel) => { const g = FM(seed, 'human', { yk_path: 'lover', ...flags }, rel); g.yuki.form = form; return g; };
+    // LF: through the game: yk_choice → "More." → yk_lover → its one choice (and the sister's, as before)
+    for (const [re, to] of [[/^"More\."/, 'yk_lover'], [/^"Family/, 'yk_sister']]) {
+        const g = FM(61000 + n++, 'human', { ending: 'bluff', yk_back: 'bl_camp' });
+        goTo(g, SCENES, 'yk_choice');
+        const ans = sceneView(g, SCENES).choices.find((c) => !c.disabled && re.test(c.label));
+        assert(!!ans && g.yuki.form === 'human', `LP1 (LF): yk_choice offers ${to} with her human`);
+        if (!ans) continue;
+        choose(g, SCENES, ans.index);
+        assert(g.scene === to && sceneView(g, SCENES).choices.length === 1, `LP1 (LF): on to ${to} (${g.scene})`);
+        const r = choose(g, SCENES, 0);
+        assert(g.yuki.form === 'cat' && g.scene === 'bl_camp', `LP1 (LF): after ${to} she is the cat (${g.yuki.form}, ${g.scene})`);
+        assert(to !== 'yk_lover' || (g.flags.yk_kissed === true && r.lines.some((l) => /flows back into a cat on your shoulder/.test(l))), 'LP1 (LF): the lover\'s pick keeps its flag and its line');
+    }
+    // the texts: each form reads its own line only (the cat keeps every old line; "keep" = the great root-kin shares it)
+    const LPT = [
+        // [scene, flags, rel, cat, great root-kin, human]
+        ['rt_camp', {}, undefined, /the warmest lap is yours, and the cat in it isn't a cat/, /the great white wall at your back gets a good deal smaller/, /Yuki moves her bedroll the last arm's length without a sound/],
+        ['yk_night_solo', {}, undefined, /the white cat goes with you[\s\S]*is a cat again before you can answer/, /the white cat goes with you[\s\S]*is a cat again before you can answer/, /Yuki goes with you, on two feet, down the middle of the lane[\s\S]*is asleep again before you can answer/],
+        ['yk_camp', {}, [90, 10], /a white cat pads after you[\s\S]*Yuki falls into step[\s\S]*the white cat on your shoulder[\s\S]*human, and very deliberately so/, /a white cat pads after you[\s\S]*Yuki falls into step[\s\S]*the great white cat stretched out along the far side of the fire[\s\S]*human, and very deliberately so/, /so does Yuki\. She falls into step[\s\S]*eating breakfast with perfect composure[\s\S]*who has plainly chosen her moment/],
+    ];
+    for (const [id, flags, rel, ...want] of LPT) ['cat', 'tiger', 'human'].forEach((form, i) => {
+        const g = LPG(61100 + n++, form, flags, rel); goTo(g, SCENES, id);
+        const t = sceneView(g, SCENES).text;
+        const same = want.filter((re) => re.source === want[i].source).length;
+        assert(want[i].test(t) && want.filter((re) => re.test(t)).length === same, `LP1: ${id} as ${form} (${t.slice(0, 70)}…)`);
+    });
+    for (const [id, cat, tiger] of [['gao_fled', /backs away with his lackey\. "The Crimson Lotus/, /He keeps his eyes on Yuki the whole way down[\s\S]*yawns at him/], ['boar_lost', /^You end up up a tree\. The boar ends up bored\. You both agree/, /Yuki ends up on the far side of the hollow with a mouthful of ironhide bristle[\s\S]*\*I have standards\.\*/]]) {
+        for (const form of ['cat', 'tiger', 'human']) for (const path of [null, 'sister', 'lover']) {
+            const g = FM(61200 + n++, form, path ? { yk_path: path } : {}); g.scene = id;
+            const t = sceneView(g, SCENES).text;
+            const want = form === 'tiger' ? tiger : cat, other = form === 'tiger' ? cat : tiger;
+            assert(want.test(t) && !other.test(t), `LP1 (FL): ${id} as ${form} (${path || 'no path'})`);
+        }
+    }
+    // the labels: by her form, at their old places (saves keep picks by position)
+    const lbl = (sc, to) => { const i = SCENES[sc].choices.findIndex((c) => c.to === to); return [i, SCENES[sc].choices[i]]; };
+    for (const [sc, to, idx, cat, human] of [['bl_camp', 'yk_camp', 4, 'Walk out past the firelight. The cat follows.', 'Walk out past the firelight. Yuki follows.'], ['rt_road', 'rt_yk_talk', 3, 'Let the other two get ahead, and walk a stretch with the cat.', 'Let the other two get ahead, and wait for Yuki to drop back.']]) {
+        const [i, c] = lbl(sc, to);
+        assert(i === idx && typeof c?.text === 'function', `LP1 (CP): ${sc}'s choice to ${to} stays at ${idx} (${i})`);
+        if (!c) continue;
+        for (const form of ['cat', 'tiger', 'human']) assert(c.text(LPG(61300 + n++, form)) === (form === 'human' ? human : cat), `LP1 (CP): ${sc}'s label as ${form}`);
+    }
+    {   // the bl_camp label through the screen, with her human
+        const g = LPG(61350 + n++, 'human'); goTo(g, SCENES, 'bl_camp');
+        assert(sceneView(g, SCENES).choices.some((c) => !c.disabled && c.label === 'Walk out past the firelight. Yuki follows.'), 'LP1 (CP): bl_camp shows the human label');
+    }
+    // the walk's results, also through choose(): by her form, the bond still bumped
+    const WALK = [
+        [/^Stop walking\. Kiss her/, /Then there's a cat on your shoulder, washing a paw/, /Then there are four hundred pounds of cat on the path beside you/, /Then she walks on, hands clasped behind her back, innocent of everything\./], // LQ2 (TS): the great root-kin's own
+        [/^"The best spot is still yours/, /On the twelfth there's a cat on your shoulder again/, /On the twelfth your hand is on a great white shoulder instead/, /On the twelfth the path straightens, and she lets go, and purrs through the bond/],
+    ];
+    for (const [label, cat, tiger, human] of WALK) for (const form of ['cat', 'tiger', 'human']) {
+        const g = LPG(61400 + n++, form); goTo(g, SCENES, 'rt_yk_talk');
+        const c = sceneView(g, SCENES).choices.find((x) => label.test(x.label));
+        assert(!!c, `LP1 (CP): rt_yk_talk offers ${label} as ${form}`);
+        if (!c) continue;
+        const a0 = g.rel.Yuki.a;
+        const t = choose(g, SCENES, c.index).lines.join('\n');
+        const all = { cat, tiger, human }, want = all[form];
+        assert(want.test(t) && Object.values(all).filter((re) => re.test(t)).length === 1 && g.rel.Yuki.a > a0 && g.scene === 'rt_road', `LP1 (CP): rt_yk_talk's result as ${form} (${t.slice(0, 60)}…)`);
+    }
+    // the sweep: the touched scenes, each path, her human form open: the human is never the small cat or "the cat" in these lines,
+    // the great root-kin never in a lap
+    const NOT_LP = { human: /a white cat pads after you|the white cat goes with you|is a cat again before|the white cat on your shoulder|the cat in it isn't a cat/, tiger: /the warmest lap is yours/ };
+    for (const id of ['rt_camp', 'yk_night_solo', 'yk_camp']) for (const form of ['tiger', 'human']) for (const path of ['sister', 'lover']) {
+        const g = FM(61500 + n++, 'human', { yk_path: path }, [90, 10]); g.yuki.form = form; goTo(g, SCENES, id);
+        const m = sceneView(g, SCENES).text.match(NOT_LP[form]);
+        assert(!m, `LP1 (T): ${id} as ${form} (${path}) (${m?.[0]})`);
+    }
+    // v0.11.127 (owner pick LQ2, TG): the review's gaps
+    {   // LF through "Ask her to stay like this for a while." (yuki_human_after) → yk_choice → "More." → the pick: the cat (the pick's text decides; KP not picked)
+        const g = FM(61600 + n++, 'human', { ending: 'bluff', yk_back: 'bl_camp' }); g.yuki.form = 'cat'; goTo(g, SCENES, 'yuki_human_after');
+        const stay = sceneView(g, SCENES).choices.find((c) => /^Ask her to stay like this/.test(c.label));
+        assert(!!stay, 'LQ2 (TG): yuki_human_after offers "Ask her to stay"');
+        if (stay) {
+            choose(g, SCENES, stay.index);
+            const more = g.scene === 'yk_choice' && sceneView(g, SCENES).choices.find((c) => /^"More\."/.test(c.label));
+            assert(!!more && g.yuki.form === 'human', `LQ2 (TG): on to yk_choice with her human (${g.scene}, ${g.yuki.form})`);
+            if (more) { choose(g, SCENES, more.index); choose(g, SCENES, 0); }
+            assert(g.yuki.form === 'cat' && g.flags.yk_path === 'lover' && g.scene === 'lf_hub', `LQ2 (TG): after the lover's pick she is the cat, back at the Long Forest's fire (${g.yuki.form}, ${g.scene})`);
+            assert(yukiSitsOut(g, { style: 'spar' }) && yukiSitsOut(g, { style: 'brawl' }), 'LQ2 (TG): as the cat she sits out a spar and a brawl (Y1)');
+            g.yuki.form = 'human';
+            assert(!yukiSitsOut(g, { style: 'spar' }), 'LQ2 (TG): switched back to human she joins a spar');
+        }
+    }
+    {   // the rt_road label on screen, by her form
+        for (const [form, label] of [['cat', 'Let the other two get ahead, and walk a stretch with the cat.'], ['tiger', 'Let the other two get ahead, and walk a stretch with the cat.'], ['human', 'Let the other two get ahead, and wait for Yuki to drop back.']]) {
+            const g = LPG(61650 + n++, form); goTo(g, SCENES, 'rt_road');
+            const labels = sceneView(g, SCENES).choices.filter((c) => !c.disabled).map((c) => c.label);
+            assert(labels.includes(label) && labels.filter((l) => /^Let the other two get ahead/.test(l)).length === 1, `LQ2 (TG): rt_road shows the walk as ${form}`);
+        }
+    }
+    {   // OS kept: a save past the lover's pick with her human keeps its form through migrate() and reads the human's lines
+        const g = LPG(61700 + n++, 'human', { yk_kissed: true }); migrate(g); ensureBars(g); goTo(g, SCENES, 'rt_camp');
+        assert(g.yuki.form === 'human' && /Yuki moves her bedroll the last arm's length/.test(sceneView(g, SCENES).text), 'LQ2 (TG, OS kept): an old lover save with her human keeps her human');
+    }
+    // LQ2 (HL, CN; Fable's MAINs): each form reads its own line only
+    const LQT = [
+        // [scene, flags, rel, cat, great root-kin, human]
+        ['yk_night_fo', { fo_pick: 'yk' }, undefined, /with a small white cat in the hollow of your neck[\s\S]*\*Up,\* says the bond/, /with a small white cat in the hollow of your neck[\s\S]*\*Up,\* says the bond/, /with Yuki asleep against your neck, one arm across you[\s\S]*"Up," she says, without moving\./],
+        ['rt_yk_talk', {}, undefined, /When you look round, Yuki is walking beside you on two bare feet[\s\S]*as if she'd been doing it all morning/, /When you look round, Yuki is walking beside you on two bare feet[\s\S]*as if she'd been doing it all morning/, /When you look round, Yuki has dropped back to walk beside you[\s\S]*as if she had merely happened to be there/],
+        ['yk_camp', { yk_nights: 1 }, [10, 10], /The second time[\s\S]*She simply turns human in your bedroll, which is efficient/, /The second time[\s\S]*She simply turns human in your bedroll, which is efficient/, /The second time[\s\S]*She simply gets into your bedroll, which is efficient/],
+        ['yk_camp', { yk_nights: 2 }, [10, 10], /It has become a thing: the fire burns low, the cat goes out into the dark, and a little later/, /It has become a thing: the fire burns low, the cat goes out into the dark, and a little later/, /It has become a thing: the fire burns low, Yuki gets up and walks out into the dark without a word of excuse, and a little later/],
+    ];
+    for (const [id, flags, rel, ...want] of LQT) ['cat', 'tiger', 'human'].forEach((form, i) => {
+        const g = LPG(61800 + n++, form, flags, rel); goTo(g, SCENES, id); // yk_camp's enter counts the night: yk_nights 1 → the second, 2 → the third
+        const t = sceneView(g, SCENES).text;
+        const same = want.filter((re) => re.source === want[i].source).length;
+        assert(want[i].test(t) && want.filter((re) => re.test(t)).length === same, `LQ2: ${id} ${JSON.stringify(flags)} as ${form} (${t.slice(0, 70)}…)`);
+    });
+    {   // HL: the loft label by her form, at its place (saves keep picks by position)
+        const i = SCENES.rt_evening.choices.findIndex((c) => c.to === 'yk_night_mei'), c = SCENES.rt_evening.choices[i];
+        assert(typeof c?.text === 'function', `LQ2 (HL): rt_evening's loft choice is a label function (at ${i})`);
+        if (c) for (const form of ['cat', 'tiger', 'human']) assert(c.text(LPG(61900 + n++, form)) === (form === 'human' ? 'Climb to the loft with Mei Lin. Yuki is already up there.' : 'Climb to the loft with Mei Lin. The cat is already up there.'), `LQ2 (HL): the loft label as ${form}`);
     }
 }
 // v0.11.34 (owner pick A, 1,000 games): two scenes the random walks reached only by luck at 2,000 games, now on purpose
