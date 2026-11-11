@@ -143,6 +143,7 @@ export function rewind(g, { to = 'act' } = {}) {
     if (whole) { base.stats.pass = c.n + 1; delete base.stats.passUnknown; } // v0.11.72 (T1): the whole game again starts a new pass
     if (g.picked) base.picked = clone(g.picked); // v0.11.32 (P2-a): picked choices are remembered across every rewind
     if (g.seen) base.seen = clone(g.seen); // v0.11.35 (P1-a): so are the scenes read
+    if (g.read) base.read = clone(g.read); // v0.11.133 (FP2): and the paragraphs read
     base.log = g.log.slice(-150);
     base.rng = g.rng;
     base.combat = null; base.lastWin = null;

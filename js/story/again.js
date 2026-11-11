@@ -7,8 +7,13 @@
  *    choose(), exactly as tapping through would take it (effects, clock, results); it stops at a real choice, a check, a fight,
  *    a task screen, a menu, an end, an unread scene or the Coil's own screens.
  * Uses `g.seen` (story.js noteSeen / seenBefore; kept across every rewind, coil.js).
+ * v0.11.133 (owner pick FP2): and `g.read`, the paragraphs read (a hash of each → the Coil it was first shown; kept across every
+ * rewind). A scene folds only when every paragraph of the text it shows now was read on an earlier Coil, so a text that changed
+ * (Yuki's form, a path, an outcome, a rewrite) shows in full; the skip walks only such screens. main.js records what it shows
+ * (noteRead). An old save starts with an empty record (owner pick FP2, ME): its scenes show in full once more, then fold.
  */
 import { sceneView, choose, seenBefore, isMenuScene, isTimeless } from '../core/story.js';
+import { fnv1a } from '../core/game.js';
 import { TASK_HUBS } from './task_hubs.js';
 
 /** Scenes whose text follows an outcome or a level that may differ from the read before (Fable review): never folded. */
@@ -52,6 +57,26 @@ function pick(id, n) {
 
 const parasOf = (t) => String(t).split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
 
+/** v0.11.133 (FP2): a paragraph's key in `g.read`: its FNV-1a hash in base 36 (5–7 characters). */
+export const paraKey = (p) => parseInt(fnv1a(p), 16).toString(36);
+/** v0.11.133 (RF1, M1; Fable's review): a paragraph that opens with the food stock (common.js `pantry`, on `bl_camp` among the
+ *  scenes that fold) changes with every haul: it is neither recorded nor checked, so the scene folds as before FP2. */
+export const STATE_PARA = /^(In the hammerspace:|The hammerspace holds no food)/;
+const storyParas = (t) => parasOf(t).filter((p) => !STATE_PARA.test(p));
+/** v0.11.133 (RF1, L2): a usable record is a plain object (not null, not an array). */
+export const isRecord = (r) => !!r && typeof r === 'object' && !Array.isArray(r);
+/** v0.11.133 (FP2): record a text's paragraphs as read on Coil `n` (this Coil by default); the first Coil is kept. */
+export function noteRead(g, text, n = g?.coil?.n || 1) {
+    if (!g || !text) return;
+    if (!isRecord(g.read)) g.read = {};
+    for (const p of storyParas(text)) { const k = paraKey(p); if (g.read[k] == null || g.read[k] > n) g.read[k] = n; }
+}
+/** v0.11.133 (FP2): every story paragraph of `text` was read on an earlier Coil. */
+export function readBefore(g, text) {
+    const n = g.coil?.n || 1, ps = storyParas(text), r = isRecord(g.read) ? g.read : {};
+    return ps.length > 0 && ps.every((p) => { const c = r[paraKey(p)]; return c != null && c < n; });
+}
+
 /**
  * How the current scene's text shows: { fold, first, rest, memory }. `fold` only on a scene read in an earlier Coil with more
  * than one paragraph; `first` and `rest` are text (paragraphs joined by a blank line), so main.js renders them as before.
@@ -60,11 +85,12 @@ export function againView(g, v) {
     const id = v?.id || g.scene;
     const ps = parasOf(v?.text || '');
     const variant = g.lastWin && g.lastWin.next === id && g.lastWin.degree >= 2; // a lopsided win's own text (story.js): not the one read before
-    if (!seenBefore(g, id) || noFold(id) || variant || v?.end || ps.length < 2) return { fold: false, first: v?.text || '', rest: '', memory: null };
+    if (!seenBefore(g, id) || noFold(id) || variant || v?.end || ps.length < 2 || !readBefore(g, v.text)) return { fold: false, first: v?.text || '', rest: '', memory: null };
     return { fold: true, first: ps[0], rest: ps.slice(1).join('\n\n'), memory: pick(id, g.coil?.n || 1) };
 }
 
-/** The one choice the skip may take here, or -1: a scene read before, one open story choice, no check, fight or fail branch. */
+/** The one choice the skip may take here, or -1: a scene read before, one open story choice, no check, fight or fail branch,
+ *  and (v0.11.133, FP2) every paragraph it shows read on an earlier Coil. */
 export function skipStep(g, scenes) {
     const s = scenes[g.scene];
     if (!s || g.combat || s.end || !seenBefore(g) || noFold(g.scene)) return -1;
@@ -74,6 +100,7 @@ export function skipStep(g, scenes) {
     if (open.length !== 1 || open[0].index >= 1000) return -1;
     const c = s.choices[open[0].index];
     if (!c || c.check || c.combat || c.fail) return -1;
+    if (!readBefore(g, v.text)) return -1; // v0.11.133 (FP2, SK): never past text not read on an earlier Coil
     return open[0].index;
 }
 

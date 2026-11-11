@@ -441,7 +441,7 @@ const fullClone = (g) => JSON.parse(JSON.stringify(g));
  * rules) and shares the Coil snapshot (only ever copied from, never changed in place): about 6× faster, the same numbers.
  */
 export function dryClone(g) {
-    const { log, coil, picked, ...rest } = g; // v0.11.32: picked choices change nothing a dry run measures; a copy starts its own
+    const { log, coil, picked, read, ...rest } = g; // v0.11.32: picked choices change nothing a dry run measures; a copy starts its own (v0.11.133: the paragraphs read too)
     const c = JSON.parse(JSON.stringify(rest));
     c.log = [];
     if (coil) { const { snap, ...cr } = coil; c.coil = JSON.parse(JSON.stringify(cr)); if (snap !== undefined) c.coil.snap = snap; }

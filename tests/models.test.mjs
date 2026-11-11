@@ -41,7 +41,7 @@ import { sceneView, choose, goTo } from '../js/core/story.js';
 import { isTaskHub, isTaskChoice, taskCards, taskOpen, runTask, taskState, setYuki, yukiLane } from '../js/core/tasks.js';
 import { medCards, runMed, canMeditate } from '../js/core/meditate.js';
 import { writeFileSync, readFileSync, existsSync } from 'node:fs';
-import { noFold, OUTCOME_SCENES, againView } from '../js/story/again.js'; // v0.11.132 (E1, RP)
+import { noFold, OUTCOME_SCENES, againView, noteRead } from '../js/story/again.js'; // v0.11.132 (E1, RP); v0.11.133 (FP2): noteRead
 import { shareNote } from '../tools/lib/textlint.mjs'; // v0.11.132 (E1, EB)
 import { smartAction } from './lib/smartfight.mjs'; // v0.11.96 (BT1)
 import { SHARD, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
@@ -196,6 +196,7 @@ function play(run, model, st, yuki) {
             tx.screens++;
             if (mem.texts.has(k)) { if (!againView(g, v).fold) { tx.repeats++; tx.scenes[g.scene] = (tx.scenes[g.scene] || 0) + 1; } } else mem.texts.add(k);
         }
+        if (TEXTS && v.text && !noFold(g.scene) && !v.end) noteRead(g, v.text); // v0.11.133 (FP2, RF1): the bot reads what the screen shows, as main.js records it
         if (v.end || g.scene === 'a1_end') {
             const o = g.flags.a1_outcome || 'none';
             st.endings[o] = (st.endings[o] || 0) + 1;

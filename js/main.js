@@ -10,7 +10,7 @@ import { showPicked, isTaskHub, isQueueScreen, isTaskChoice, taskCards, taskLabe
 import { SCENES, ITEMS } from './story/prologue.js';
 import { TASK_HUBS } from './story/task_hubs.js';
 import { landParts } from './core/replies.js'; // v0.11.68 (A1 + B2 + C1)
-import { againView, skipPlan, skipRun } from './story/again.js'; // v0.11.35 (P1-a)
+import { againView, skipPlan, skipRun, noteRead, noFold } from './story/again.js'; // v0.11.35 (P1-a); v0.11.133 (FP2): noteRead, noFold
 import { coilActive, endCoil, targetsText, tabWhy } from './core/coil.js';
 import { medCards, runMed, isSitChoice, medActivity, useLine, LATE_TAG, canMeditate } from './core/meditate.js';
 import { FAQ_KEY, FAQ_TAB, faqState, faqText, faqCheck, faqList, faqHasNew, faqSeen, faqMatch } from './core/faq.js'; // v0.11.83 (P1 + T1 + R1)
@@ -247,6 +247,7 @@ function resultsPaneHtml() {
 let readAllScene = null;
 function proseHtml(v) {
     const a = againView(g, v);
+    if (!noFold(v.id) && !v.end) noteRead(g, v.text); // v0.11.133 (FP2): what the screen shows is read; RF1 (M2): only screens that can fold (their record is what a later Coil's fold reads)
     if (!a.fold) return `<div class="prose">${paras(v.text)}</div>`;
     const all = readAllScene === `${g.scene}#${g.coil?.n || 1}`; // per scene and Coil (Fable review)
     return `<div class="prose again"><p class="memory">${md(a.memory)}</p>${paras(a.first)}${all ? paras(a.rest) : '<button class="readall" data-readall="1" aria-expanded="false"><span aria-hidden="true">▸ </span>Read it all again</button>'}</div>`;

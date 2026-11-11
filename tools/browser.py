@@ -430,6 +430,14 @@ def again(pg, url):
     st['scene'] = 'night_won'; st['combat'] = None
     st['flags'].update({'long': True, 'forest_day': 2}); st['minutes'] = 1440 + 22 * 60 + 360
     st['coil']['n'] = 2; st['seen'] = {'night_won': 1, 'morning': 1, 'wilds': 1, 'arrival': 1}
+    # v0.11.133 (FP2): a fold needs every paragraph read on an earlier Coil: the record Coil 1 left, from the game's own code
+    js = ("import { SCENES } from './js/story/prologue.js'; import { sceneView, choose } from './js/core/story.js';"
+          "import { noteRead } from './js/story/again.js'; import { migrate, ensureBars } from './js/core/game.js';"
+          "const st = JSON.parse(process.argv[1]); const c = ensureBars(migrate(JSON.parse(JSON.stringify(st)))); const read = {};"
+          "const g = { read, coil: { n: 1 } };"
+          "for (let k = 0; k < 3 && c.scene !== 'wilds'; k++) { noteRead(g, sceneView(c, SCENES).text, 1); choose(c, SCENES, sceneView(c, SCENES).choices.filter((x) => !x.disabled)[0].index); }"
+          "console.log(JSON.stringify(read));")
+    st['read'] = json.loads(subprocess.run(['node', '--input-type=module', '-e', js, json.dumps(st)], cwd=ROOT, capture_output=True, text=True, check=True).stdout)
     fresh(pg, url, "a => { localStorage.clear(); localStorage.setItem('boneash.auto', a); }", json.dumps(st))
     mem = pg.query_selector('.prose.again .memory')
     if not mem: fails.append('again: no memory line on a scene read before'); return
@@ -444,7 +452,18 @@ def again(pg, url):
     tap(pg, sk); until(pg, "JSON.parse(JSON.parse(localStorage.getItem('boneash.auto')).data || localStorage.getItem('boneash.auto')).scene === 'wilds'", 5000)
     raw = pg.evaluate("localStorage.getItem('boneash.auto')"); o = json.loads(raw); o = json.loads(o['data']) if isinstance(o.get('data'), str) else o
     if o.get('scene') != 'wilds': fails.append(f'again: the skip ended on {o.get("scene")}, not the wilds')
-    else: notes.append('a scene read before folds, reads in full, and the skip walks to the wilds')
+    else:  # v0.11.133 (FP2, RF1): the screen records what it shows, but only screens that can fold; a reload saves the game on close
+        def saved():
+            pg.reload(); pg.wait_for_load_state('load'); time.sleep(0.5)
+            r = json.loads(pg.evaluate("localStorage.getItem('boneash.auto')")); return json.loads(r['data']) if isinstance(r.get('data'), str) else r
+        r2 = saved()
+        hub_ok = len(r2.get('read') or {}) == len(st['read'])  # RF1 (M2): the wilds is a task screen: nothing recorded
+        st2 = dict(st); st2['coil'] = dict(st['coil'], n=1); st2['read'] = {}; st2['seen'] = {'night_won': 1}
+        fresh(pg, url, "a => { localStorage.clear(); localStorage.setItem('boneash.auto', a); }", json.dumps(st2))
+        r3 = saved()
+        if not hub_ok: fails.append(f'RF1 (M2): the wilds (a task screen) added paragraphs to the record ({len(st["read"])} → {len(r2.get("read") or {})})')
+        elif len(r3.get('read') or {}) < 2: fails.append(f'FP2: the screen recorded no paragraph of night_won ({len(r3.get("read") or {})})')
+        else: notes.append('a scene read before folds, reads in full, the skip walks to the wilds, and the screen records the scenes that can fold (not the task screens)')
     check_text(pg, 'after the skip', strict=True)
 
 def poll(pg, js, ms=20000):

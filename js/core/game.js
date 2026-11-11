@@ -76,6 +76,7 @@ export function newGame(seed = Date.now(), { closed = false } = {}) {
     };
     g.coil = makeCoil(g);
     g.seen = { [g.scene]: 1 }; // v0.11.35 (P1-a): the start scene, first read on Coil 1
+    g.read = {}; // v0.11.133 (FP2): the paragraphs read (again.js noteRead); the screen records what it shows
     return g;
 }
 
@@ -87,6 +88,7 @@ export function coilSnap(g) {
     delete s.coil;
     s.log = []; s.combat = null; s.lastWin = null;
     if (s.tasks) s.tasks.queue = [];
+    delete s.read; // v0.11.133 (RF1, L1): a rewind takes the record from the game itself (coil.js), never from the snapshot
     return s;
 }
 /** What James is at the start of a Coil (the Coil screen compares against it). */
@@ -1394,7 +1396,7 @@ export function migrate(g) {
     if (g.v === undefined) g.v = 1;
     if (g.v > SAVE_VERSION) throw new SaveError('tooNew', `This save is from a newer version of the game (state ${g.v}; this version reads up to ${SAVE_VERSION}).`);
     while (g.v < SAVE_VERSION) { const step = MIGRATIONS[g.v]; if (!step) throw new SaveError('notSave', `No migration from state ${g.v}.`); step(g); g.v += 1; }
-    return fliesFill(queueDrop(gaoFill(seenFill(oneCount(g)))));
+    return readFill(fliesFill(queueDrop(gaoFill(seenFill(oneCount(g))))));
 }
 /** v0.11.112 (owner pick AF1, M; Fable's FF1 review, low 1): a fight saved before flight in fights has no `flies` on its hawks and crows; they get it by name. Fills only. */
 export function fliesFill(g) {
@@ -1416,6 +1418,10 @@ export function gaoFill(g) {
  * v0.11.35 (P1-a): a save from before has no `seen` record. Past Coil 1, the scenes it picked a choice on count as read in an
  * earlier Coil (0); on Coil 1 it starts empty. Fills a missing field only.
  */
+export function readFill(g) { // v0.11.133 (owner pick FP2, ME): a save from before starts with an empty record (its scenes show in full once more)
+    if (g && !(g.read && typeof g.read === 'object' && !Array.isArray(g.read))) g.read = {}; // RF1 (L2): an array is no record
+    return g;
+}
 export function seenFill(g) {
     if (!g || (g.seen && typeof g.seen === 'object')) return g;
     g.seen = {};

@@ -18,7 +18,7 @@ import { XP_RATE, XP_BANDS } from '../js/core/game.js'; // v0.11.85
 import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, advance, STARVE_HP_PER_HOUR, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1, bumpRel as relBump, startActCoil, REL_CATCHUP } from '../js/core/game.js';
 import { canPrimary, canColGroup, colGroupsOpen, btTarget, COL_GROUPS, priHours, colHours, merMinutesOf } from '../js/story/meridians.js';
 import { sceneView, choose, goTo, wasPicked, isMenuScene, notePicked, seenBefore, noteSeen } from '../js/core/story.js';
-import { againView, skipStep, skipRun, skipPlan, MEMORY_LINES, noFold, SKIP_MAX } from '../js/story/again.js'; // v0.11.35 (P1-a)
+import { againView, skipStep, skipRun, skipPlan, MEMORY_LINES, noFold, SKIP_MAX, noteRead, readBefore, paraKey, STATE_PARA, isRecord } from '../js/story/again.js'; // v0.11.35 (P1-a)
 import { medCards, runMed, canMeditate, NO_MEDITATE, isSitChoice, MED_SCREENS } from '../js/core/meditate.js';
 import { defaultMinutes, DEFAULT_MINUTES } from '../js/core/story.js';
 import { coilActive, rewind, endCoil, KEEP_FLAGS, REMEMBER } from '../js/core/coil.js';
@@ -1731,6 +1731,7 @@ function play(run, tasks) {
         }
         const v = sceneView(g, SCENES);
         noteView(g, v);
+        if (tasks && !noFold(g.scene) && !v.end) noteRead(g, v.text); // v0.11.133 (FP2, RF1): the bots read what the screen shows, as main.js records it, so the skip check below still runs
         if (v.end) { const e = g.flags.ending || 'none'; st.endings[e] = (st.endings[e] || 0) + 1; st.games++; if (!barsOk(g)) badBars++; return true; }
         if (tasks && isTaskHub(g)) {
             const all = taskCards(g, SCENES); // v0.11.15 (B1): the bots take the sit and the meridian cards too
@@ -1959,6 +1960,7 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
         if (run % 3 === 1) { g.james.realm = 2; ensureBars(g); }
         for (let step = 0; step < 3000; step++) {
             const v = sceneView(g, SCENES);
+            if (!noFold(g.scene) && !v.end) noteRead(g, v.text); // v0.11.133 (FP2, RF1): the walk reads what the screen shows, so later Coils can skip it
             if (v.end) break;
             if (g.scene === 'coil_end') rewinds++;
             if (g.flags.lf_active) lf++;
@@ -3227,6 +3229,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     const f = ensureBars(newGame(3506, { closed: true })); f.flags.long = true; f.flags.forest_day = 2; f.minutes += 1440 + 22 * 60;
     goTo(f, SCENES, 'night_won'); const v1 = sceneView(f, SCENES);
     assert(!againView(f, v1).fold && againView(f, v1).first === v1.text, 'P1-a: Coil 1: the text in full, no memory line');
+    noteRead(f, v1.text); noteRead(f, 'a\n\nb'); // v0.11.133 (FP2): the screen showed them on Coil 1
     f.coil.n = 2; const a = againView(f, v1);
     assert(a.fold && MEMORY_LINES.includes(a.memory) && `${a.first}\n\n${a.rest}` === v1.text.split(/\n\s*\n/).map((x) => x.trim()).filter(Boolean).join('\n\n'), 'P1-a: read on an earlier Coil: the first paragraph, the rest behind Read it all again, a memory line');
     assert(againView(f, v1).memory === a.memory, 'P1-a: the same line for that scene on that Coil');
@@ -3237,6 +3240,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     assert(!againView(f, { id: 'night_won', text: 'one paragraph only' }).fold, 'P1-a: a one-paragraph scene does not fold');
     // the skip: night_won → morning → wilds (a task screen), two steps, the same as tapping
     const s0 = ensureBars(newGame(3507, { closed: true })); s0.flags.long = true; s0.flags.forest_day = 2; s0.minutes += 1440 + 22 * 60; goTo(s0, SCENES, 'night_won'); goTo(s0, SCENES, 'morning'); goTo(s0, SCENES, 'night_won');
+    { const r0 = JSON.parse(JSON.stringify(s0)); for (let k = 0; k < 3 && r0.scene !== 'wilds'; k++) { noteRead(s0, sceneView(r0, SCENES).text); choose(r0, SCENES, sceneView(r0, SCENES).choices.filter((c) => !c.disabled)[0].index); } } // v0.11.133 (FP2): Coil 1 read the stretch
     s0.coil.n = 2;
     const pl = skipPlan(s0, SCENES);
     assert(pl.steps === 2 && pl.to === 'wilds' && s0.scene === 'night_won', `P1-a: the plan: 2 steps to the wilds, the game untouched (${pl.steps}, ${pl.to})`);
@@ -3256,11 +3260,81 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     const dy = JSON.parse(JSON.stringify(s0)); dy.james.hp = 0.5; dy.james.satiety = 0; const dp = skipPlan(dy, SCENES);
     { const t = JSON.parse(JSON.stringify(dy)); skipRun(t, SCENES); assert(t.scene !== 'coil_end' || dp.steps === 0, `P1-a: a stretch that ends in a collapse is not offered (${dp.steps}, ${t.scene})`); }
     const ab = ensureBars(newGame(3510, { closed: true })); ab.coil.n = 2; ab.flags.ending = 'bluff'; ab.minutes = 6 * 1440 + 900; ab.seen = { bluff_win: 1, epilogue: 1, fo_start: 1, fo_envoy: 1 }; ab.scene = 'bluff_win';
+    noteRead(ab, sceneView(ab, SCENES).text, 1); // v0.11.133 (FP2): read on Coil 1
     { const t = JSON.parse(JSON.stringify(ab)); const r2 = skipRun(t, SCENES); assert((t.coil.act || 0) === 0 && t.scene === 'epilogue' && r2.steps === 1, `P1-a: the skip stops at the prologue's end (the epilogue, an outcome scene), never crossing into Act 1 (${t.scene}, ${r2.steps} steps)`); }
     for (const id of ['epilogue', 'fo_start', 'breakthrough', 'a1_end']) { f.seen[id] = 1; assert(!againView(f, { id, text: 'a\n\nb' }).fold, `P1-a: an outcome scene never folds (${id})`); }
     f.seen.night_won = 1; f.lastWin = { next: 'night_won', degree: 2, id: 'crows' }; assert(!againView(f, { id: 'night_won', text: 'a\n\nb' }).fold, 'P1-a: a lopsided win\'s own text never folds'); f.lastWin = null;
     if (FULL) assert(skipChecked >= 1000, `v0.11.35: the bot games compared the skip with tapping through often enough (${skipChecked})`);
     else console.log(`  skip = tapping through, checked in the bot games (quick, log only): ${skipChecked}`);
+}
+// v0.11.133 (owner pick FP2: FA + SK + ME + T): the fold by paragraph. A scene folds only when every paragraph it shows now was
+// read on an earlier Coil (g.read); the skip walks only such screens; an old save starts with an empty record.
+{
+    const k = paraKey('x');
+    assert(/^[0-9a-z]{1,7}$/.test(k) && paraKey('x') === k && paraKey('y') !== k, `FP2: a paragraph's key is a short base-36 hash, the same for the same text (${k})`);
+    const g = ensureBars(newGame(3601, { closed: true }));
+    assert(g.read && typeof g.read === 'object' && !Object.keys(g.read).length, 'FP2: a new game starts with an empty record');
+    noteRead(g, 'One.\n\nTwo.'); g.coil.n = 3; noteRead(g, 'One.\n\n  Three.  ');
+    assert(g.read[paraKey('One.')] === 1 && g.read[paraKey('Two.')] === 1 && g.read[paraKey('Three.')] === 3, 'FP2: each paragraph keeps the Coil it was first read (trimmed)');
+    assert(readBefore(g, 'One.\n\nTwo.') && !readBefore(g, 'One.\n\nThree.') && !readBefore(g, ''), 'FP2: read before = every paragraph on an earlier Coil');
+    // FA: a text with a paragraph never read shows in full; once read, it folds on a later Coil
+    const f = ensureBars(newGame(3602, { closed: true })); f.flags.long = true; f.flags.forest_day = 2; f.minutes += 1440 + 22 * 60; goTo(f, SCENES, 'night_won');
+    const t1 = sceneView(f, SCENES).text; noteRead(f, t1); f.coil.n = 2;
+    const changed = `${t1.split(/\n\s*\n/)[0]}\n\nA paragraph written since.`;
+    assert(t1.split(/\n\s*\n/).filter((x) => x.trim()).length >= 2 && againView(f, { id: 'night_won', text: t1 }).fold, 'FP2: the text read on Coil 1 folds on Coil 2');
+    assert(!againView(f, { id: 'night_won', text: changed }).fold, 'FP2: a text with a paragraph never read shows in full (a rewrite, a form, an outcome)');
+    noteRead(f, changed); assert(!againView(f, { id: 'night_won', text: changed }).fold, 'FP2: read on this Coil: in full until a later Coil');
+    f.coil.n = 3; assert(againView(f, { id: 'night_won', text: changed }).fold, 'FP2: and folded on the next');
+    // real variants: scenes whose text differs with Yuki's form; read as the cat, shown as the great root-kin on a later Coil
+    let variants = 0;
+    for (const [id, sc] of Object.entries(SCENES)) {
+        if (typeof sc.text !== 'function' || noFold(id) || variants >= 12) continue;
+        const c = ensureBars(newGame(3610, { closed: true })); c.scene = id;
+        let tc, tt; try { tc = sceneView(c, SCENES).text; c.yuki.form = 'tiger'; c.yuki.realm = 2; c.james.realm = 2; tt = sceneView(c, SCENES).text; } catch { continue; }
+        if (!tc || !tt || tc === tt || tt.split(/\n\s*\n/).filter((x) => x.trim()).length < 2) continue;
+        c.seen = { [id]: 1 }; noteRead(c, tc, 1); c.coil.n = 2; variants++;
+        assert(!againView(c, { id, text: tt }).fold, `FP2: ${id} read as the cat shows in full as the great root-kin`);
+        assert(againView(c, { id, text: tc }).fold || tc.split(/\n\s*\n/).filter((x) => x.trim()).length < 2, `FP2: ${id} as the cat again folds`);
+    }
+    assert(variants >= 5, `FP2: the form check met enough real variants (${variants})`);
+    // SK: the skip stops at text not read on an earlier Coil
+    const s = ensureBars(newGame(3603, { closed: true })); s.flags.long = true; s.flags.forest_day = 2; s.minutes += 1440 + 22 * 60;
+    goTo(s, SCENES, 'night_won'); goTo(s, SCENES, 'morning'); goTo(s, SCENES, 'night_won'); s.coil.n = 2;
+    assert(skipStep(s, SCENES) < 0, 'FP2 (SK): a scene seen but with nothing read: no skip');
+    noteRead(s, sceneView(s, SCENES).text, 1);
+    const sp = skipPlan(s, SCENES);
+    assert(sp.steps === 1 && sp.to === 'morning', `FP2 (SK): only night_won read: the skip stops at the morning, whose text wasn't (${sp.steps}, ${sp.to})`);
+    // ME: an old save starts with an empty record, a present one loads unchanged; rewinds keep it; dry runs leave it out
+    const o = ensureBars(newGame(3604)); delete o.read; o.seen = { night_won: 1 }; o.coil.n = 2;
+    const lo = deserialize(serialize(o));
+    assert(lo.read && !Object.keys(lo.read).length && !againView(lo, { id: 'night_won', text: t1 }).fold, 'FP2 (ME): an old save loads with an empty record: its scenes show in full once more');
+    const p = ensureBars(newGame(3605)); noteRead(p, 'One.\n\nTwo.'); assert(JSON.stringify(deserialize(serialize(p)).read) === JSON.stringify(p.read), 'FP2: a present record loads unchanged');
+    const r = ensureBars(newGame(3606, { closed: true })); noteRead(r, 'One.\n\nTwo.'); const r0 = JSON.stringify(r.read); endCoil(r, 'choice', r.scene); rewind(r);
+    assert(r.coil.n === 2 && JSON.stringify(r.read) === r0 && readBefore(r, 'One.\n\nTwo.'), 'FP2: a rewind keeps the record (Coil 2 has read them before)');
+    assert(!('read' in dryClone(p)), 'FP2: a dry run leaves the record out (it measures nothing there)');
+    // RF1 (Fable's review of FP2): M1 the food stock paragraph is neither recorded nor checked
+    const bc = ensureBars(newGame(3620, { closed: true })); bc.scene = 'bl_camp';
+    const b1 = sceneView(bc, SCENES).text; bc.inventory.hare_raw = 7; bc.inventory.river_cress = 2; const b2 = sceneView(bc, SCENES).text;
+    assert(b1 !== b2 && /In the hammerspace:|holds no food/.test(b1) && b1.split(/\n\s*\n/).length >= 2, 'RF1 (M1): bl_camp shows the food stock, and it changed');
+    bc.seen = { bl_camp: 1 }; noteRead(bc, b1, 1); bc.coil.n = 2;
+    assert(againView(bc, { id: 'bl_camp', text: b2 }).fold && !Object.keys(bc.read).some((x) => x === paraKey(b1.split(/\n\s*\n/).map((q) => q.trim()).find((q) => STATE_PARA.test(q)))), 'RF1 (M1): bl_camp folds on a later Coil when only its food stock changed; the stock paragraph is not recorded');
+    assert(!againView(bc, { id: 'bl_camp', text: `${b2}\n\nSomething new happened at camp.` }).fold, 'RF1 (M1): a new story paragraph still shows it in full');
+    // L1: the Coil snapshot carries no copy of the record; L2 / L3: a bad record or a missing state never throws
+    assert(!('read' in p.coil.snap), 'RF1 (L1): the Coil snapshot leaves the record out (a rewind takes it from the game)');
+    for (const bad of [null, 'x', [], 7]) {
+        const b = ensureBars(newGame(3621)); b.read = bad; const lb = deserialize(serialize(b));
+        assert(lb.read && typeof lb.read === 'object' && !Array.isArray(lb.read) && !Object.keys(lb.read).length, `RF1 (L2): a bad record (${JSON.stringify(bad)}) loads as an empty one`);
+        const m = ensureBars(newGame(3622)); m.read = bad; let ok = true; try { readBefore(m, 'One.\n\nTwo.'); noteRead(m, 'One.\n\nTwo.'); } catch { ok = false; }
+        assert(ok && isRecord(m.read) && !Array.isArray(m.read) && m.read[paraKey('One.')] === 1, `RF1 (L2): noteRead replaces a bad record with a plain one (${JSON.stringify(bad)})`);
+    }
+    { let ok = true; try { noteRead(null, 'x'); noteRead(undefined, 'x'); } catch { ok = false; } assert(ok, 'RF1 (L3): noteRead with no state does nothing'); }
+    // TG: the step into Act 1 and the whole-game rewind keep the record
+    const w = ensureBars(newGame(3623, { closed: true })); w.scene = 'epilogue'; w.flags.ending = 'bluff'; w.minutes = 6 * 1440 + 900; noteRead(w, 'One.\n\nTwo.'); const w0 = JSON.stringify(w.read);
+    choose(w, SCENES, 0);
+    assert((w.coil.act || 0) === 1 && JSON.stringify(w.read) === w0, 'RF1 (TG): the step into Act 1 keeps the record');
+    assert(w.coil.snap && !('read' in w.coil.snap), 'RF1 (L1): Act 1\'s Coil snapshot, taken with a record in the game, leaves it out');
+    w.flags.a1_outcome = 'victory'; goTo(w, SCENES, 'a1_end'); rewind(w, { to: 'game' });
+    assert(JSON.stringify(w.read) === w0 && readBefore(w, 'One.\n\nTwo.'), 'RF1 (TG): the whole-game rewind keeps the record');
 }
 // v0.11.37 (owner 12:59–14:27, picks A1 + B2 + C-a + D-a + E-a + F1): the day ends at 02:00, Push through only at night,
 // at once vs a bar, the Long Forest's two exits, no useless sit, familiar story choices
