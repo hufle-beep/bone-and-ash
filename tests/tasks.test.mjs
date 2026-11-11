@@ -485,6 +485,70 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     { const { FAQ } = await import('../js/core/faq.js'); const fl = FAQ.find(([t]) => t === 'Flight')[1]();
       assert(/<b>Fights:<\/b> from Act 1 on, never in the prologue, and only at <b>[^<]+<\/b> or above: in an armed fight, any round James throws <b>Bone darts<\/b> or the <b>Qi blast<\/b> he does it from the air/.test(fl) && !/not in the game yet/.test(fl), "FF1: the FAQ's Fights sentence (Fable)"); }
 }
+// v0.11.121 (owner pick AS1, EL6 + W): the air stalemate: a round from the air in which nobody takes damage while every foe
+// standing can't fly is a stuck round; the third in a row warns, the sixth ends the fight, lost; any damage starts the count again.
+{
+    const { AIR_STALL_WARN, AIR_STALL_END, AIR_STALL_TEXT, foeFillAll, TELL_TEXT, combatFlee } = await import('../js/core/game.js');
+    const { FAQ } = await import('../js/core/faq.js');
+    const { readFileSync } = await import('node:fs');
+    const toAct1 = (g) => { g.flags.ending = g.flags.ending || 'victory'; g.minutes = Math.max(g.minutes, 7 * 1440 + 6 * 60); return g; };
+    const mk = (enemies, realm = 1, extra = {}) => { const g = ensureBars(newGame(96, { closed: true })); toAct1(g);
+        g.james.skills['Convergence Use'] = { tier: 1, level: 6, xp: 0 }; g.james.gu = { tier: 1, level: 6, xp: 0 }; g.james.realm = realm; g.james.qi = 200; g.james.hp = jamesHpMax(g);
+        sCombat(g, { id: 'jackals', intro: '', band: 'standard', enemies, win: 'stream', lose: 'stream', ...extra }); g.combat.fieldUsed = true; if (!extra.yuki) g.yuki.hp = 0; return g; };
+    const wall = (n) => ({ name: n, hp: 99, dc: 99, atk: 1, dmg: 3 });
+    const warn = (n) => foeFillAll(AIR_STALL_TEXT.warn, n), end = (n) => foeFillAll(AIR_STALL_TEXT.end, n);
+    const { AIR_TEXT: AT } = await import('../js/core/game.js'); const AIR_TEXT_REACH = (n) => AT.reach.replace('{foe}', n);
+    assert(AIR_STALL_WARN === 3 && AIR_STALL_END === 6, 'AS1: warn at 3, end at 6');
+    assert(!warn('Rot-ape').includes('{foe}') && warn('Rot-ape').startsWith('Three rounds from the air, and nothing you send down has hurt Rot-ape. Rot-ape can') && end('Rot-ape').startsWith('Six rounds from the air, and none of them hurt Rot-ape.'), "AS1, T: Fable's lines, every {foe} filled");
+    assert(!/darts|mark on|nothing is left/i.test(AIR_STALL_TEXT.warn + AIR_STALL_TEXT.end + AIR_STALL_TEXT.warnPerson + AIR_STALL_TEXT.endPerson) && !/\bit\b/.test(AIR_STALL_TEXT.warnPerson + AIR_STALL_TEXT.endPerson), 'AS1, RV1 PT: no weapon named, nothing that can be false, a person never "it"');
+    assert(foeFillAll(AIR_STALL_TEXT.warn, 'The Rot Ape').startsWith('Three rounds from the air, and nothing you send down has hurt the Rot Ape. The Rot Ape can'), 'AS1, TG: a "The …" name, lower-cased mid-line only');
+    { const g = mk([wall('Rot-ape')]); const outs = [];
+      for (let i = 0; i < AIR_STALL_END && g.combat; i++) outs.push(cStep(g, 'dart'));
+      const at = outs.map((o) => o.lines.includes(warn('Rot-ape')));
+      assert(outs.length === 6 && at.join() === 'false,false,true,false,false,false', `AS1, W: the warning in the third stuck round only (${at})`);
+      assert(outs.slice(0, 5).every((o) => !o.done) && outs[5].done === 'lose' && !g.combat, `AS1, EL6: lost in the sixth (${outs.map((o) => o.done)})`);
+      assert(outs[5].lines.includes(end('Rot-ape')) && !outs[5].lines.some((l) => /Thirty exchanges/.test(l)) && g.james.hp === 1, 'AS1: the stall\'s own line, not the round cap\'s');
+      assert(!outs[5].lines.some((l) => /draws back|next round/i.test(l)), 'AS1: no next-round tells after the last round'); }
+    { const g = mk([{ ...wall('Rot-ape'), dmg: 8 }]); const outs = []; for (let i = 0; i < 6 && g.combat; i++) outs.push(cStep(g, 'dart'));
+      const tell = (o) => o.lines.some((l) => TELL_TEXT.big.some((t) => l === foeFillAll(t, 'Rot-ape')));
+      assert(g.combat === null && outs[5].done === 'lose' && tell(outs[1]) && tell(outs[4]) && !tell(outs[5]), `AS1, TG: a heavy foe's tell in rounds 2 and 5, none after the last (${outs.map(tell)})`); }
+    { const g = mk([wall('Rot-ape')]); const outs = []; for (let i = 0; i < 6 && g.combat; i++) outs.push(cStep(g, 'blast'));
+      assert(outs[0].lines.includes(AIR_TEXT_REACH('Rot-ape')) && outs[2].lines.includes(warn('Rot-ape')) && outs[5]?.done === 'lose', `AS1, TG: the Qi blast stalls the same (${outs.map((o) => o.done)})`); }
+    { const g = mk([wall('Elder Shen')], 1, { id: 'elder' }); const outs = []; for (let i = 0; i < 6 && g.combat; i++) outs.push(cStep(g, 'dart'));
+      const pw = foeFillAll(AIR_STALL_TEXT.warnPerson, 'Elder Shen'), pe = foeFillAll(AIR_STALL_TEXT.endPerson, 'Elder Shen');
+      assert(outs[2].lines.includes(pw) && outs[5].done === 'lose' && outs[5].lines.includes(pe) && !outs[5].lines.includes(end('Elder Shen')), 'AS1, RV1 PT: a people fight gets the people lines'); }
+    { const g = mk([{ ...wall('Rot-ape'), atk: 999 }], 1, { flee: 'stream' }); for (let i = 0; i < 5; i++) cStep(g, 'dart');
+      const hp = g.james.hp; const f = combatFlee(g);
+      assert(!f.done && g.james.hp < hp && g.combat.stall === 0, `AS1, RV1 FR: a failed run starts the count again (${g.combat?.stall})`);
+      const o = cStep(g, 'dart'); assert(!o.done && g.combat.stall === 1, 'AS1, RV1 FR: and the next dart is stuck round 1, not the loss'); }
+    { const g = mk([wall('Rot-ape')]); for (let i = 0; i < 4; i++) cStep(g, 'dart'); g.james.qi = 0;
+      const o = cStep(g, 'dart'); assert(o.lines.some((l) => /fall back on guarding/.test(l)) && g.combat.stall === 0, 'AS1, TG: no Qi: the dart falls back to guard on the ground, the count starts again'); }
+    { const g = mk([wall('Rot-ape')], 1, { yuki: true }); assert(g.yuki.hp > 0, 'AS1, TG: Yuki in the fight'); const outs = []; for (let i = 0; i < 6 && g.combat; i++) outs.push(cStep(g, 'dart'));
+      assert(outs[5]?.done === 'lose' && outs[2].lines.includes(warn('Rot-ape')), 'AS1, TG: Yuki missing too changes nothing (no damage either side)'); }
+    { const g = mk([{ ...wall('Plain'), dc: 1 }, { ...wall('Hungry'), dc: 1, moods: true }]);
+      g.james.skills['Convergence Use'] = { tier: 4, level: 1, xp: 0 }; g.james.gu = { tier: 4, level: 1, xp: 0 }; g.combat.enemies[1].hp = 50; g.combat.round = 2;
+      const a0 = g.combat.enemies[0].hp, b0 = g.combat.enemies[1].hp; cStep(g, 'dart');
+      assert(g.combat.enemies[0].hp < a0 && g.combat.enemies[1].hp > b0 && g.combat.stall === 0, `AS1, RV1 PF: one foe hurt while another heals is not stuck (${g.combat.stall}; ${a0}→${g.combat.enemies[0].hp}, ${b0}→${g.combat.enemies[1].hp})`); }
+    { const g = mk([wall('Rot-ape')]); cStep(g, 'dart'); cStep(g, 'dart'); g.combat.enemies[0].dc = 1; cStep(g, 'dart'); g.combat.enemies[0].dc = 99;
+      assert(g.combat.stall === 0, `AS1: a hit starts the count again (${g.combat.stall})`);
+      const outs = []; for (let i = 0; i < 6 && g.combat; i++) outs.push(cStep(g, 'dart'));
+      assert(outs[2].lines.includes(warn('Rot-ape')) && outs[5].done === 'lose' && outs.slice(0, 5).every((o) => !o.done), 'AS1: then three to the warning, six to the end'); }
+    { const g = mk([wall('Wolf'), { ...wall('Hawk'), flies: true }]); let o = null;
+      for (let i = 0; i < 8; i++) o = cStep(g, 'dart');
+      assert(g.combat && !o.done && !g.combat.stall, 'AS1: no stalemate while a flyer stands (it can reach him)'); }
+    { const g = mk([wall('Rot-ape')]); let o = null;
+      for (let i = 0; i < 8; i++) o = cStep(g, 'blade');
+      assert(g.combat && !o.done && !g.combat.stall, 'AS1: no stalemate on the ground (the blade)'); }
+    { const g = mk([wall('Rot-ape')], 0); let o = null;
+      for (let i = 0; i < 8; i++) o = cStep(g, 'dart');
+      assert(g.combat && !o.done && !g.combat.stall, 'AS1: no stalemate at Mortal (no flight)'); }
+    { const g = mk([wall('Rot-ape')]); cStep(g, 'dart'); cStep(g, 'dart');
+      delete g.combat.stall; const o = cStep(g, 'dart'); assert(g.combat.stall === 1 && !o.lines.includes(warn('Rot-ape')), 'AS1: a fight saved before the stall count starts it at 0'); }
+    { const fl = FAQ.find(([t]) => t === 'Flight')[1]();
+      assert(fl.includes("While no flying foe is standing, a round from the air in which nobody takes damage (no foe, not James) is a stalemate round: after 3 in a row the log warns you, and after 6 in a row the fight is lost, because James's attacks from the air are doing nothing and he has to come down to a foe that is ready for him; any damage on either side starts the count again.") && !/stay up forever/.test(fl), "AS1, RV1 PT: the FAQ's stalemate sentence (Fable)"); }
+    { const main = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+      assert(!main.includes('06:00–19:00') && /YUKI_HOURS\.map/.test(main), 'AS1, LH: the lane note reads YUKI_HOURS'); }
+}
 // v0.11.113 (owner pick DA1; research.md #43, #45, #133): foes show their hand. TD: traits as tags with a line at the start;
 // TL: from Act 1 a foe hitting for 5+ (not the rot ape, not a spar or a brawl) shows its big blow a round early, ×2, guard
 // avoids it, the needle's stagger stops it; TY: a shown lunge, any guard covers Yuki; HD: the guardian's moods (hungry: hits

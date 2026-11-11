@@ -428,6 +428,23 @@ export const canFly = (g) => (g.james?.realm || 0) >= FLY_FROM_REALM;
  *  from the air: that round foes that don't fly (`flies` on the enemy) get no attack on him. Not in a spar or a brawl. */
 export const AIR_STRIKE_ACTIONS = new Set(['dart', 'blast']);
 export const AIR_TEXT = { reach: "{foe} can't reach you up there.", hold: "Done from the air: foes that don't fly can't reach you this round, so they get no attack on you.", tag: 'from the air' }; // Fable's (rule 10)
+/** v0.11.121 (owner pick AS1, EL6 + W): the air stalemate. A round thrown from the air in which nobody takes damage (no foe,
+ *  not James) while every foe standing can't fly is a stuck round; at AIR_STALL_WARN in a row the log warns, at AIR_STALL_END
+ *  in a row the fight is lost (as at the round cap). Any damage starts the count again. Measured before the pick (a scratch
+ *  copy; the fight lab, 300 games, the same states; the models, 500 games): the rot ape's and the mire serpent's 30-round
+ *  losses (46 and 59, every one from the air) end in round 6; ape 81.1 → 79.0%, serpent 67.8 → 61.1%, elder 95.8 → 93.8%;
+ *  Act 1 Coils Careful 3.90 → 3.92, Completionist 3.45 → 3.48. */
+export const AIR_STALL_WARN = 3, AIR_STALL_END = 6;
+export const AIR_STALL_TEXT = { // Fable's (rule 10; the MAINs; RV1 PT: no weapon named, nothing that can be false, people never "it")
+    warn: "Three rounds from the air, and nothing you send down has hurt {foe}. {foe} can't reach you either. *We could do this all day,* Yuki says. *We shouldn't.*",
+    end: 'Six rounds from the air, and none of them hurt {foe}. It still stands below. Finishing this means coming down, and it has had time to get ready.',
+    warnPerson: 'Three rounds from the air, and nothing you send down has hurt {foe}. {foe} cannot reach you, and waits below with the patience of someone owed an apology.',
+    endPerson: 'Six rounds from the air, and none of them hurt {foe}. {foe} still stands below, unhurried. To finish this you have to come down, and they are ready for you.',
+};
+/** RV1 (PT): the line for this fight: people's wording in a people fight (PEOPLE_FIGHTS). */
+export const airStallLine = (c, kind, name) => foeFillAll(AIR_STALL_TEXT[PEOPLE_FIGHTS.has(c.id) ? `${kind}Person` : kind], name);
+/** Every {foe} in a line; "The …" lower-cased only mid-sentence (RV1, TG: a later {foe} can start a sentence). */
+export const foeFillAll = (t, name) => t.replace(/\{foe\}/g, (m, at) => (/^The /.test(name) && !/(^|[.!?*]\s*)$/.test(t.slice(0, at)) ? `t${name.slice(1)}` : name));
 /** v0.11.112 (owner pick AG1, G1): fights from the air only from Act 1 on (a Sitter at Foundation in the prologue won its tribute
  *  from the air: whole game on Coil 1 16 → 52.7%); walks and crossings fly from Foundation everywhere. */
 export const airFights = (g) => canFly(g) && inAct1(g);
@@ -1074,6 +1091,7 @@ function stepNoDice(g, actionId, targetIdx) {
     const target = living[Math.min(targetIdx, living.length - 1)];
     let guard = false;
     c.aloft = false; // v0.11.112 (FF1): set below when this round's darts or blast are thrown from the air
+    const foeHp0 = c.enemies.map((e) => e.hp), jamesHp0 = g.james.hp; // v0.11.121 (AS1): for the stalemate; RV1 (PF): each foe's own
     const songed = songPays(g, actionId); // v0.11.116 (WA2, SG): the song pays instead of Qi
     const formed = songed || (act.keeps === 'blade' && c.bladeFormed) || (act.keeps === 'spear' && c.spearFormed) || (act.keeps === 'flail' && c.flailFormed) || (act.field && c.fieldUsed); // a used field costs nothing (and does nothing)
     const qiNeed = formed ? 0 : actionCost(g, act);
@@ -1193,7 +1211,14 @@ function stepNoDice(g, actionId, targetIdx) {
         if (big) lines.push(TELL_TEXT.bigLands);
         if (e.thief && !c.stole && dmg > 0 && combatHooks.steal) { const k = combatHooks.steal(g); if (k) { g.inventory[k]--; c.stole = true; lines.push(foeFill(TELL_TEXT.theft, e.name).replace('{item}', itemNames[k]?.name || k)); } } // v0.11.113 (DA1, CS)
     }
-    if (c.enemies.some((e) => e.hp > 0) && g.james.hp > 0 && c.round + 1 <= NO_DICE_ROUND_CAP) { // v0.11.113 (DA1): next round's moves, shown now; DB1 (L): only if that round comes
+    // v0.11.121 (owner pick AS1): the air stalemate: a stuck round, the warning at the third, the fight lost at the sixth
+    const standing = c.enemies.filter((e) => e.hp > 0);
+    const stuck = c.aloft && standing.length > 0 && standing.every((e) => !e.flies) && g.james.hp >= jamesHp0
+        && c.enemies.every((e, i) => e.hp >= foeHp0[i]);
+    c.stall = stuck ? (c.stall || 0) + 1 : 0;
+    if (c.stall === AIR_STALL_WARN) lines.push(airStallLine(c, 'warn', standing[0].name));
+    if (c.stall >= AIR_STALL_END) c.stalled = standing[0].name;
+    if (!c.stalled && c.enemies.some((e) => e.hp > 0) && g.james.hp > 0 && c.round + 1 <= NO_DICE_ROUND_CAP) { // v0.11.113 (DA1): next round's moves, shown now; DB1 (L): only if that round comes
         const next = c.round + 1, bigT = PEOPLE_FIGHTS.has(c.id) ? TELL_TEXT.bigPerson : TELL_TEXT.big;
         for (const e of c.enemies) {
             if (e.hp <= 0) continue;
@@ -1277,8 +1302,8 @@ function finishRound(g, lines) {
         g.combat = null;
         return { lines, done: 'win', next };
     }
-    if (g.james.hp <= 0 || c.round > NO_DICE_ROUND_CAP) {
-        if (g.james.hp > 0) lines.push('', 'Thirty exchanges in, your arms stop answering. You are spent, and they are not.');
+    if (g.james.hp <= 0 || c.round > NO_DICE_ROUND_CAP || c.stalled) { // v0.11.121 (AS1): or the air stalemate's sixth round
+        if (g.james.hp > 0) lines.push('', c.stalled ? airStallLine(c, 'end', c.stalled) : 'Thirty exchanges in, your arms stop answering. You are spent, and they are not.');
         g.combat = null;
         g.james.hp = 1;
         const next = loseTo(g, c);
@@ -1316,6 +1341,7 @@ export function combatFlee(g) {
     g.james.hp = Math.max(0, g.james.hp - dmg);
     lines.push(`Something bites on the way out: −${dmg} HP.`);
     if (c.wait) for (const k of Object.keys(c.wait)) c.wait[k] -= 1; // v0.11.116 (WB1, FR; review low 4): a failed run is a round for the rhythm
+    c.stall = 0; // v0.11.121 (AS1, RV1 FR): a failed run is a round on the ground, so the air stalemate's count starts again
     if (g.james.hp <= 0) { g.combat = null; g.james.hp = 1; const next = loseTo(g, c); return { lines, done: 'lose', next }; }
     return { lines, done: null };
 }

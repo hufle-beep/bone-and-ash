@@ -6,7 +6,7 @@ import {
     startCombat, combatStep, combatFlee, combatYield, waitLeft, songPays, sungKey, THREAT_TEXT, SONG_TEXT, SONG_COST, SONG_MAX, SAY_TEXT, SPAR_TEXT, postureNow, unarmedMastery, fightAdapt, weaponMastery, COMBAT_ACTIONS, noDiceDc, airStrike, AIR_TEXT, FOE_TRAITS, foeTraits, TELL_TEXT, bigBlowNow, lungeNow, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage, qiShield,
 } from './core/game.js';
 import { sceneView, choose, goTo, gives, choiceQi, threatOf } from './core/story.js'; // v0.11.109 (FQ1): choiceQi
-import { showPicked, isTaskHub, isQueueScreen, isTaskChoice, taskCards, taskLabel, taskMinutes, taskOutcome, dryOutcome, outcomeOf, runTask, FAM, yukiLane, setYuki, nextStep, YUKI_LANE_TEXT } from './core/tasks.js';
+import { showPicked, isTaskHub, isQueueScreen, isTaskChoice, taskCards, taskLabel, taskMinutes, taskOutcome, dryOutcome, outcomeOf, runTask, FAM, yukiLane, setYuki, nextStep, YUKI_LANE_TEXT, YUKI_HOURS } from './core/tasks.js';
 import { SCENES, ITEMS } from './story/prologue.js';
 import { TASK_HUBS } from './story/task_hubs.js';
 import { landParts } from './core/replies.js'; // v0.11.68 (A1 + B2 + C1)
@@ -276,9 +276,10 @@ function renderCardScreen() {
             return `<button class="card${c.kind === 'door' ? ' door' : ''}${out?.death ? ' fatal' : ''}${c.check && showChecks ? ` b-${c.check.band}` : ''}" data-run="${esc(c.id)}" ${c.status !== 'open' ? 'disabled' : ''}>${md(c.label)}${dies}${tag ? `<span class="tag">${esc(tag)}</span>` : ''}${c.status === 'open' ? `<span class="len">${mins ? durLabel(mins) : 'at once'}${when}${fam}</span>` : ''}</button>`;
         };
         const yl = yukiLane(g);
-        // v0.11.64 (D1): her job counts James's game time (06:00–19:00); the screen says how much is left, no bar
+        // v0.11.64 (D1): her job counts James's game time (YUKI_HOURS); the screen says how much is left, no bar
         const yLeft = yl ? Math.max(1, yl.len - yl.progress) : 0;
-        const yHtml = yl ? `<div class="yuki-lane"><div><b>Yuki:</b> ${esc(yl.label)} <span class="note">${showChecks ? `${YUKI_LANE_TEXT.roll} · ` : ''}${yl.on ? `next haul after ${durLabel(yLeft)} of your time (06:00–19:00)` : `${durLabel(yl.len)} a haul`} · ${FAM[yl.tier].name}</span></div><button class="btn${yl.on ? ' primary' : ''}" data-yuki="1">${yl.on ? 'On' : 'Off'}</button></div>` : '';
+        const laneHours = YUKI_HOURS.map((h) => `${String(h).padStart(2, '0')}:00`).join('–'); // v0.11.121 (AS1, LH): from YUKI_HOURS, no longer typed
+        const yHtml = yl ? `<div class="yuki-lane"><div><b>Yuki:</b> ${esc(yl.label)} <span class="note">${showChecks ? `${YUKI_LANE_TEXT.roll} · ` : ''}${yl.on ? `next haul after ${durLabel(yLeft)} of your time (${laneHours})` : `${durLabel(yl.len)} a haul`} · ${FAM[yl.tier].name}</span></div><button class="btn${yl.on ? ' primary' : ''}" data-yuki="1">${yl.on ? 'On' : 'Off'}</button></div>` : '';
         const ns = store.get(NONEXT_KEY) === '1' ? '' : nextStep(g, SCENES); // v0.11.72 (N1): Selene's next-step line, ✕ hides it for good
         hubTop = `${ns ? `<div class="nstep"><b>Next step</b> <span>${esc(ns)}</span><button class="nstep-x" data-nonext="1" aria-label="Hide the next-step line">✕</button></div>` : ''}${yHtml}`;
         const work = workGroups(g.scene);
