@@ -12,7 +12,7 @@
  */
 import { bumpRel, sleepUntil, yukiForms, yukiForm } from '../core/game.js';
 import { daily, markDaily } from './common.js';
-import { likesMei, likesYa, trio, rel, KISS_YA } from './act1_common.js';
+import { likesMei, likesYa, trio, rel, KISS_YA, logTrio, ykShape } from './act1_common.js';
 
 export const ykPath = (g) => g.flags.yk_path || null;
 export const ykLover = (g) => ykPath(g) === 'lover';
@@ -364,11 +364,12 @@ export function installYukiPath(SCENES) {
     beat(SCENES, 'ya_meets', (g) => (ykPath(g)
         ? `Ya sniffs the air near your shoulder, frowns, sniffs again, and looks straight at the white cat. "That," she says, "isn't a cat." Yuki looks back at her with enormous calm. ${ykLover(g) ? 'Through the bond: *I like her. She can stay. She can maybe even share the spot.*' : 'Through the bond: *I like her. She\'s rude. Marry her.*'}`
         : ''));
-    beat(SCENES, 'log_comfort', (g) => (ykPath(g) && !ykHuman(g) // v0.11.122 (LG1, YV; Fable's A4)
+    beat(SCENES, 'log_comfort', (g) => (!ykPath(g) || logTrio(g) ? '' // v0.11.124 (NF1, LC1): the trio branch places her itself
+        : ykShape(g) === 'tiger' // v0.11.124 (NF1, BT; Fable's MAIN): the great root-kin
+        ? `And Yuki: her forehead pushed hard against your temple, the way she has done since before either of you could see, except that now it moves you a hand's width sideways, and a purr going through you that you feel in your ribs. The bond is quiet. ${ykLover(g) ? 'She doesn\'t need to say anything.' : 'Sisters don\'t need to say anything.'}`
+        : !ykHuman(g) // v0.11.122 (LG1, YV; Fable's A4)
         ? `And Yuki: her forehead pushed hard against your temple, the way she has done since before either of you could see, and a purr going through you that you feel in your teeth. The bond is quiet. ${ykLover(g) ? 'She doesn\'t need to say anything.' : 'Sisters don\'t need to say anything.'}`
-        : ykPath(g)
-        ? `And Yuki: not on your shoulder but beside you, human, her forehead against your temple, her arm round your back. She doesn't say anything. ${ykLover(g) ? 'She doesn\'t need to.' : 'Sisters don\'t need to.'}`
-        : ''));
+        : `And Yuki: not on your shoulder but beside you, human, her forehead against your temple, her arm round your back. She doesn't say anything. ${ykLover(g) ? 'She doesn\'t need to.' : 'Sisters don\'t need to.'}`));
     beat(SCENES, 'rt_camp', (g) => (!ykHuman(g) ? '' // v0.11.122 (LG1, YG): both lines have her human (the sister's needs hands)
         : ykLover(g)
         ? 'Later, when the others are asleep, the warmest lap is yours, and the cat in it isn\'t a cat, and nobody mentions it in the morning.'

@@ -5,7 +5,8 @@
  */
 import { addItem, hasItem, condense, advance, jamesHpMax, d6 } from '../core/game.js';
 import { eatBest, pantry, foodCount, set } from './common.js';
-import { day, hour, encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil } from './act1_common.js';
+import { day, hour, encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil, logTrio, ykShape } from './act1_common.js';
+import { ykPath } from './yuki_path.js';
 
 export const BREAK_HUBS = ['heart_hub', 'heart_camp'];
 
@@ -18,6 +19,30 @@ const late = (g) => day(g) >= 19;
 const guardianOpen = (g) => !!g.flags.log_heard && !g.flags.guardian;
 const ya = (g) => !!g.flags.ya_party;
 const both = (g) => likesMei(g) && likesYa(g);
+
+/* v0.11.124 (owner picks NX1, NF1; texts by Fable, MAINs): the log scene's Yuki lines by the shape she has (`ykShape`: human when her human
+ * form is open this Coil, else the cat or the great root-kin). The cat lines are the old ones. */
+const LOG_LOOK = {
+    cat: 'Yuki looks up at you. Through the bond: *what do we do.*',
+    tiger: 'Yuki looks at you, level, gold eye to eye. Through the bond: *what do we do.*',
+    human: 'Yuki looks down at you. "What do we do," she says. It doesn\'t come out as a question.',
+};
+const LOG_HOLD = {
+    cat: 'Say nothing. Hold the log. Hold the cat.',
+    tiger: 'Say nothing. Hold the log. Lean on the cat.',
+    human: 'Say nothing. Hold the log. Hold Yuki\'s hand.',
+};
+const LOG_JUDGE = {
+    cat: 'Yuki sits in the middle of the three of you like a small white judge, and through the bond, very primly: *about time.*',
+    tiger: 'Yuki lies down around the three of you like a large white verdict, her tail across everybody\'s feet, and through the bond, very primly: *about time.*',
+    human: 'Yuki sits down facing the three of you, human, her tail tucked round her feet, like a small judge in a black dress. "About time," she says aloud, very primly.',
+};
+/** The fallback branch's clause; left out when her path beat follows (NF1, FB: it places her). */
+const LOG_SEAT = {
+    cat: 'and Yuki sits on the hearth-log',
+    tiger: 'and Yuki lies round the foot of the chair like a white rug with opinions',
+    human: 'and Yuki sits on the arm of the chair with her tail round your wrist',
+};
 
 /* ---------- encounters ---------- */
 const husks = (g, win, lose) => encounter(g, {
@@ -385,21 +410,21 @@ You sit in the gardeners' chair with the cold memory seed in your hands, and you
 
 ${g.flags.hall_song ? 'You think of the scorched ring in the hall, the calm voice giving orders. Now you know whose voice it was.\n\n' : ''}${ya(g) ? '"So," Ya says at last, very carefully, which is how you know she\'s furious. "The red men killed the singing tree. And then made everybody eat their pills to fix what *they* broke." She looks at the spear in her hand as though she\'s only just remembered what it\'s for. "I want to bite something. I want to bite something *a lot*."\n\n' : ''}Mei Lin is crying without making any sound at all, the way people in Ashfall have learned to cry. "My father," she says. "My father went up that road to be *honoured*."
 
-Yuki looks up at you. Through the bond: *what do we do.*
+${LOG_LOOK[ykShape(g)] || LOG_LOOK.cat}
 
 What do you do.`,
         choices: [
             { text: 'Rage. Let it out. All of it. Somebody should scream for this place, and the gardeners can\'t.', do: (g) => { g.flags.reaction = 'rage'; bumpRel(g, 'Ya', 4, 2); return ['You scream until the bridge rings with it. The ship, faintly, hums along.']; }, to: 'log_comfort' },
             { text: 'Grieve. Quietly. These were your people, and they were *gardeners*.', do: (g) => { g.flags.reaction = 'grief'; bumpRel(g, 'Mei Lin', 4, 3); return []; }, to: 'log_comfort' },
             { text: 'Think. A heart can be cut out. Which means a heart can be put back.', check: { skill: 'GU', dc: 4, band: 'challenging' }, do: (g) => { g.flags.reaction = 'study'; g.flags.regrow_idea = true; return ['Somewhere in this ship there is a seed-vault. There is always a seed-vault.']; }, failDo: (g) => { g.flags.reaction = 'study'; return ['The thought slips away from you. It\'ll come back.']; }, to: 'log_comfort' },
-            { text: 'Say nothing. Hold the log. Hold the cat.', do: (g) => { g.flags.reaction = 'silent'; bumpRel(g, 'Yuki', 3, 0); return []; }, to: 'log_comfort' },
+            { text: (g) => LOG_HOLD[ykShape(g)] || LOG_HOLD.cat, do: (g) => { g.flags.reaction = 'silent'; bumpRel(g, 'Yuki', 3, 0); return []; }, to: 'log_comfort' },
         ],
     },
     log_comfort: {
         id: 'log_comfort', title: (g) => (trio(g) >= 2 && both(g) ? 'Between Them' : 'Afterwards'), art: (g) => (trio(g) >= 2 && both(g) ? 'trio' : likesYa(g) && ya(g) ? 'ya_close' : 'mei_lin'), place: `${PIN} — the Patient Root`,
         enter: (g) => trioStep(g, 3),
         text: (g) => {
-            if (both(g) && ya(g) && trio(g) >= 3) {
+            if (logTrio(g)) { // v0.11.124 (NF1, LC1): the same test as Yuki's path beat, which skips this branch
                 return `Later — you don't know how much later — you're sitting on the floor of the bridge with your back against a gardener's chair, and you are not alone.
 
 Mei Lin is on your left, her head on your shoulder, her hand wound into your sleeve as though you might float away. Ya is on your right, sprawled, one leg over yours, her fingers moving slowly through your hair the way she'd gentle a spooked animal. Neither of them is talking. For once in her life, Ya isn't talking.
@@ -408,7 +433,7 @@ At some point, without looking, Mei Lin reaches across you and finds Ya's hand, 
 
 Ya goes very still. Then she grins at the ceiling — that sharp, delighted, dangerous grin — and doesn't say a single word about it, which is, you suspect, the most restraint she has ever shown about anything.
 
-Yuki sits in the middle of the three of you like a small white judge, and through the bond, very primly: *about time.*
+${LOG_JUDGE[ykShape(g)] || LOG_JUDGE.cat}
 
 It's not a beginning, exactly. But it's not nothing. You fall asleep there, the three of you, in the bridge of a dead ship, and for the first time since the lab you don't dream about falling.`;
             }
@@ -434,7 +459,7 @@ She puts her forehead against your shoulder and stays there. ${ya(g) ? 'Across t
             }
             return `Nobody comforts anybody, exactly. That's not what this is.
 
-${ya(g) ? 'Ya prowls the bridge touching things she shouldn\'t, angry and restless. ' : ''}Mei Lin sits with her back to the wall and her knees up, staring at nothing. You sit in Wren Aldous's chair with the hearth-log in your lap, and Yuki sits on the hearth-log, and the ship hums faintly to itself, the way the very old hum to themselves when they think nobody's listening.
+${ya(g) ? 'Ya prowls the bridge touching things she shouldn\'t, angry and restless. ' : ''}Mei Lin sits with her back to the wall and her knees up, staring at nothing. You sit in Wren Aldous's chair with the hearth-log in your lap${ykPath(g) ? '' : `, ${LOG_SEAT[ykShape(g)] || LOG_SEAT.cat}`}, and the ship hums faintly to itself, the way the very old hum to themselves when they think nobody's listening.
 
 After a while Mei Lin says, "Thank you for bringing us here. I think I'd rather know."
 

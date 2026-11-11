@@ -2,7 +2,7 @@
 // Incremental Mode since v0.11.34 (D1: Story Mode dropped from the game)
 import { SCENES, START_SCENE } from '../js/story/prologue.js';
 import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, itemCap } from '../js/core/game.js';
-import { sceneView, choose, goTo } from '../js/core/story.js';
+import { sceneView, choose, goTo, wasPicked } from '../js/core/story.js';
 import { actionOpen } from '../js/core/forms.js';
 import { btTarget } from '../js/story/meridians.js';
 import { loveLine } from '../js/story/yuki_path.js'; // v0.11.122 (RL1, T)
@@ -535,6 +535,95 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     }
     assert(fo > 0 && rt > 0, `ER1 (T8): random lover walks at Nascent Soul reach yk_night_fo (${fo} of 12) and rt_yk_talk (${rt} of 12)`);
     void before;
+}
+
+// v0.11.124 (owner picks NX1, NF1; texts by Fable): the log scene's Yuki lines by her shape (HS: human when her human form is open this Coil,
+// else her current form), placed once (LC1, FB: the path beat skips the trio branch, the fallback drops its clause when the beat follows)
+{
+    const LS = (seed, path, shape, rel, trio) => {
+        const g = ensureBars(fresh(seed)); g.minutes = 16 * 1440 + 900;
+        Object.assign(g.flags, { long: true, forest_day: 3, vday: 3, mei_party: true, ya_party: true, ya_met: true, log_heard: true }, path ? { yk_path: path } : {}, trio ? { trio } : {});
+        g.rel = { 'Mei Lin': { f: 40, a: rel[0] }, Ya: { f: 40, a: rel[1] }, Yuki: { f: 50, a: 50 }, Village: { f: 30, a: 0 } };
+        const realm = shape === 'human' ? 7 : shape === 'tiger' || shape === 'cat2' ? 2 : 0;
+        g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = shape === 'tiger' ? 'tiger' : 'cat';
+        return ensureBars(g);
+    };
+    const shapeOf = (s) => (s === 'cat2' ? 'cat' : s);
+    const HOLD = { cat: 'Say nothing. Hold the log. Hold the cat.', tiger: 'Say nothing. Hold the log. Lean on the cat.', human: 'Say nothing. Hold the log. Hold Yuki\'s hand.' };
+    const LOOK = { cat: /Yuki looks up at you\. Through the bond: \*what do we do\.\*/, tiger: /gold eye to eye\. Through the bond: \*what do we do\.\*/, human: /Yuki looks down at you\. "What do we do," she says\./ };
+    const JUDGE = { cat: /like a small white judge/, tiger: /like a large white verdict/, human: /like a small judge in a black dress\. "About time,"/ };
+    const SEAT = { cat: /, and Yuki sits on the hearth-log, and the ship hums/, tiger: /, and Yuki lies round the foot of the chair like a white rug with opinions, and the ship hums/, human: /, and Yuki sits on the arm of the chair with her tail round your wrist, and the ship hums/ };
+    const BEAT = /And Yuki: /;
+    let n = 0;
+    for (const path of [null, 'sister', 'lover']) for (const shape of ['cat', 'cat2', 'tiger', 'human']) {
+        const sh = shapeOf(shape), tag = `${path || 'no path'}, ${shape}`;
+        // the reaction: the look and the silent choice's label (LC3, LU), the label still 4th and still +3 Yuki
+        const r = LS(56000 + n++, path, shape, [80, 80], 3); goTo(r, SCENES, 'log_reaction');
+        const rv = sceneView(r, SCENES);
+        assert(LOOK[sh].test(rv.text) && Object.values(LOOK).filter((re) => re.test(rv.text)).length === 1, `NF1 (LU): log_reaction's look for ${tag}`);
+        assert(rv.choices[3]?.label === HOLD[sh] && rv.choices.length === 4, `NF1 (LC3): the silent choice reads "${HOLD[sh]}" and stays 4th (${tag}; ${rv.choices[3]?.label})`);
+        const f0 = r.rel.Yuki.f; choose(r, SCENES, 3);
+        assert(r.scene === 'log_comfort' && r.flags.reaction === 'silent' && r.rel.Yuki.f === f0 + 3, `NF1 (LC3): the silent choice still leads on, +3 Yuki (${tag})`);
+        // the trio branch: her line by shape, once, no path beat (LC1, LC2)
+        const t = LS(56100 + n++, path, shape, [80, 80], 3); goTo(t, SCENES, 'log_comfort');
+        const tt = sceneView(t, SCENES).text;
+        assert(/Between Them/.test(sceneView(t, SCENES).title) && JUDGE[sh].test(tt) && Object.values(JUDGE).filter((re) => re.test(tt)).length === 1 && !BEAT.test(tt), `NF1 (LC1, LC2): the trio branch places Yuki once, as ${sh} (${tag})`);
+        // the fallback branch: the clause by shape without a path; with a path, no clause and the beat (FB)
+        const f = LS(56200 + n++, path, shape, [10, 10], 0); goTo(f, SCENES, 'log_comfort');
+        const ft = sceneView(f, SCENES).text;
+        assert(/^Nobody comforts anybody/.test(ft), `NF1: the fallback branch (${tag})`);
+        if (path) assert(!/and Yuki (sits|lies)/.test(ft) && /in your lap, and the ship hums/.test(ft) && (ft.match(BEAT) || []).length === 1, `NF1 (FB): with her path the fallback drops its clause and the beat places her (${tag})`);
+        else assert(SEAT[sh].test(ft) && !BEAT.test(ft), `NF1 (FB): without a path the fallback's clause by shape (${tag})`);
+        // the beat by shape (HS; BT): human when open this Coil, the great root-kin's own line, else the cat's
+        if (path) {
+            const want = sh === 'human' ? /not on your shoulder but beside you, human/ : sh === 'tiger' ? /a hand's width sideways/ : /a purr going through you that you feel in your teeth/;
+            assert(want.test(ft) && (sh !== 'tiger' || !/in your teeth/.test(ft)), `NF1 (BT, HS): the path beat as ${sh} (${tag})`);
+            assert(new RegExp(path === 'lover' ? "She doesn't need to" : "Sisters don't need to").test(ft), `NF1: the beat's ${path} ending (${tag})`);
+        }
+        // Mei Lin's branch: the beat alone places her (no Yuki line of its own)
+        const m = LS(56300 + n++, path, shape, [80, 10], 0); goTo(m, SCENES, 'log_comfort');
+        const mt = sceneView(m, SCENES).text;
+        assert(/^Mei Lin sits down next to you/.test(mt) && (mt.match(/\bYuki\b/g) || []).length === (path ? 1 : 0), `NF1: Mei Lin's branch names Yuki ${path ? 'once (the beat)' : 'never'} (${tag})`);
+    }
+    // HS: her human form open but a cat on the shoulder now: the lines say human, as the beat does (v0.11.122's rule)
+    {
+        const g = LS(56400, 'sister', 'human', [10, 10], 0); g.yuki.form = 'cat'; goTo(g, SCENES, 'log_reaction');
+        assert(sceneView(g, SCENES).choices[3].label === HOLD.human, 'NF1 (HS): human open this Coil, a cat now: the label says human');
+    }
+    // Fable's review (test gaps): human open with the great root-kin now: every line human
+    {
+        const r = LS(56410, 'lover', 'human', [80, 80], 3); r.yuki.form = 'tiger'; goTo(r, SCENES, 'log_reaction');
+        const rv = sceneView(r, SCENES);
+        assert(LOOK.human.test(rv.text) && rv.choices[3].label === HOLD.human, 'NF1 (HS, review): human open, the great root-kin now: the look and the label human');
+        choose(r, SCENES, 3);
+        assert(wasPicked(r, 'log_reaction', 3) && JUDGE.human.test(sceneView(r, SCENES).text) && !BEAT.test(sceneView(r, SCENES).text), 'NF1 (review): the silent choice recorded at position 3; the trio line human, reached through the choice');
+        const f = LS(56411, null, 'human', [10, 10], 0); f.yuki.form = 'tiger'; goTo(f, SCENES, 'log_comfort');
+        assert(SEAT.human.test(sceneView(f, SCENES).text), 'NF1 (HS, review): human open, the great root-kin now: the fallback clause human (no path, an old or hand-made save)');
+        const b = LS(56412, 'sister', 'human', [10, 10], 0); b.yuki.form = 'tiger'; goTo(b, SCENES, 'log_comfort');
+        assert(/beside you, human/.test(sceneView(b, SCENES).text) && !/sideways/.test(sceneView(b, SCENES).text), 'NF1 (HS, review): human open, the great root-kin now: the beat human');
+    }
+    // stale stored forms (old saves): a form not open this Coil reads as the cat
+    for (const [form, realm] of [['human', 0], ['tiger', 0], ['human', 2]]) {
+        const g = LS(56420 + realm, 'sister', 'cat', [10, 10], 0); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; goTo(g, SCENES, 'log_reaction');
+        assert(sceneView(g, SCENES).choices[3].label === HOLD.cat && LOOK.cat.test(sceneView(g, SCENES).text), `NF1 (review): a stored ${form} at realm ${realm} reads as the cat`);
+    }
+    // the trio raised by the scene's own step (0–2 → 3 with both liked and Ya along); both liked without Ya: Mei Lin's branch and the beat
+    for (const t of [0, 1, 2]) {
+        const g = LS(56430 + t, 'lover', 'tiger', [80, 80], t); goTo(g, SCENES, 'log_comfort');
+        const tt = sceneView(g, SCENES).text;
+        assert(g.flags.trio === 3 && JUDGE.tiger.test(tt) && !BEAT.test(tt), `NF1 (LC1, review): trio ${t} raised to 3 on entering: the trio line, no beat`);
+    }
+    {
+        const g = LS(56440, 'lover', 'tiger', [80, 80], 0); g.flags.ya_party = false; goTo(g, SCENES, 'log_comfort');
+        const tt = sceneView(g, SCENES).text;
+        assert(/^Mei Lin sits down next to you/.test(tt) && (tt.match(BEAT) || []).length === 1 && /sideways/.test(tt), 'NF1 (review): both liked, Ya not along: Mei Lin\'s branch and the great root-kin beat');
+    }
+    // Ya's branch (Ya liked, Mei Lin not): Yuki once with a path, never without
+    for (const path of [null, 'sister']) {
+        const g = LS(56450 + (path ? 1 : 0), path, 'cat', [10, 80], 0); goTo(g, SCENES, 'log_comfort');
+        const tt = sceneView(g, SCENES).text;
+        assert(/^Ya doesn't do comfort/.test(tt) && (tt.match(/\bYuki\b/g) || []).length === (path ? 1 : 0), `NF1 (review): Ya's branch names Yuki ${path ? 'once (the beat)' : 'never'}`);
+    }
 }
 // v0.11.34 (owner pick A, 1,000 games): two scenes the random walks reached only by luck at 2,000 games, now on purpose
 for (let run = 0; run < 20; run++) { // running from the mire-rats at night: night_fled
