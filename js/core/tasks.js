@@ -13,7 +13,7 @@
  * The story checks and fights keep the d6 until 3c.
  */
 import { hasForm } from './forms.js';
-import { choose, goTo, choiceOpen, choiceTag, gives, setTimeless, defaultMinutes, movesPlace, wasPicked, isMenuScene, isTimeless, setFamiliar } from './story.js';
+import { choose, goTo, choiceOpen, choiceTag, gives, setTimeless, defaultMinutes, movesPlace, wasPicked, isMenuScene, isTimeless, setFamiliar, doorMinutes } from './story.js';
 import { d8, itemCap, yukiForm, advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, canBreakThrough, btMinutes, realmName, condense, sitMinutes, useSpeed, USE_N, nightLock, endsLate, sitUseless, jamesQiMax, SATIETY_PER_HOUR, breakAt, coilMult, fmtMult, YUKI_HELD_TEXT } from './game.js';
 import { CONDENSE_SIT_COST } from './formulas.js';
 import { btTarget, MER_LINES, lineWindow, lineIndex, lineName } from '../story/meridians.js';
@@ -80,8 +80,13 @@ const WORK_SUBS = (scenes) => workSubs || (workSubs = new Set(Object.keys(TASK_H
  */
 export function showPicked(g, scenes, index, label) {
     const i = index >= 1000 ? index - 1000 : index;
+    return wasPicked(g, g.scene, i) && canBeFamiliar(g, scenes, index, label);
+}
+/** v0.11.140 (owner pick RV1, L1): could this choice ever be sped as familiar (showPicked without the mark)? Only these count their picks. */
+export function canBeFamiliar(g, scenes, index, label) {
+    const i = index >= 1000 ? index - 1000 : index;
     const hub = !!TASK_HUBS[g.scene];
-    if (!wasPicked(g, g.scene, i) || (isMenuScene(g.scene) && !hub)) return false;
+    if (isTimeless(g.scene) || (isMenuScene(g.scene) && !hub)) return false; // the Coil's screens and meridians keep no marks (story.js notePicked)
     if (hub && isTaskChoice(scenes, g.scene, i)) return false;
     const ch = scenes[g.scene]?.choices?.[i];
     if (!ch) return false;
@@ -91,7 +96,7 @@ export function showPicked(g, scenes, index, label) {
     return !/^Back\b/.test(String(label));
 }
 
-setFamiliar((g, scenes, index, label) => showPicked(g, scenes, index, label)); // v0.11.37 (F1): the sepia choices are the familiar ones
+setFamiliar((g, scenes, index, label) => showPicked(g, scenes, index, label), (g, scenes, index, label) => canBeFamiliar(g, scenes, index, label)); // v0.11.37 (F1): the sepia choices are the familiar ones; v0.11.140 (L1): only those that could be count their picks
 
 /** v0.10.0: "Next meridian session" — a queueable hub card that takes the first open session on the meridian screen. */
 export const MER_TASK = 'mer:next';
@@ -426,7 +431,8 @@ export function runTask(g, scenes, id) {
         lines.push(...resolveWork(g, scenes, hubId, card, id));
         fail = g.stats.checks > checks && g.stats.wins === before;
     } else {
-        const take = (index) => { const r = choose(g, scenes, index, { task: true }); lines.push(...r.lines); if (r.roll && !r.roll.success) fail = true; if (r.combat) throw new Error(`A task can't start a fight (${id})`); };
+        const speed = card.kind === 'door' ? cardSpeed(st(g).fam[id] || 0) : 0; // v0.11.140 (owner pick FM2, FD): a door card's walk ÷ its own familiarity, as a work card's
+        const take = (index) => { const r = choose(g, scenes, index, { task: true, speed }); lines.push(...r.lines); if (r.roll && !r.roll.success) fail = true; if (r.combat) throw new Error(`A task can't start a fight (${id})`); };
         if (card.menu) take(card.entryIndex);
         if (!card.menu || g.scene === card.menu) take(card.p.index);
         if (card.kind === 'chore' || card.kind === 'door') learn(g, scenes, hubId, card, id, 1);
@@ -460,7 +466,8 @@ export function taskMinutes(g, scenes, id) {
     if (card?.kind === 'door') { // only the walk: the scene's own time belongs to the story
         const from = card.menu || c.scene;
         const to = typeof card.c.to === 'string' ? card.c.to : null;
-        return (card.entry?.time || 0) + (card.c.time || 0) + (to ? defaultMinutes(scenes, from, card.c, to, movesPlace(c, scenes, from, to)) : 0);
+        const sp = cardSpeed(st(c).fam[id] || 0); // v0.11.140 (FD): each step as runTask times it (story.js doorMinutes)
+        return doorMinutes(card.entry?.time || 0, sp) + doorMinutes(card.c.time || 0, sp) + (to ? doorMinutes(defaultMinutes(scenes, from, card.c, to, movesPlace(c, scenes, from, to)), sp) : 0);
     }
     runTask(c, scenes, id);
     return Math.max(0, c.minutes - m0);

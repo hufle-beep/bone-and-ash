@@ -3859,6 +3859,170 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
         assert(taskOutcome(late, SCENES, 'village:2').death === null && ol.death === 'hunger' && ol.end === late.minutes + 60 && ol.deathAt === rl.minutes && ol.deathAt > ol.end && rl.scene === 'coil_end', `review: a death inside the scene walked into: the card still ends at the walk, the warning says when (${ol.end} → ${ol.deathAt})`);
     }
 }
+// v0.11.140 (owner pick FM2): FD door cards speed up with their own familiarity; FS story beats with their own picks
+{
+    const { doorMinutes, pickedSpeed, pickCount, pickKey, PICK_N } = await import('../js/core/story.js');
+    // FS: the curve
+    assert(pickedSpeed(0) === 2 && pickedSpeed(1) === 2 && pickedSpeed(2) === 2 && pickedSpeed(3) === 2.5 && pickedSpeed(9) === 5.5 && pickedSpeed(17) === 9.5 && pickedSpeed(18) === 10 && pickedSpeed(40) === 10 && PICK_N === 18 && PICKED_SPEED === 2,
+        `FS: ÷ max(2, 1 + 9 × picks ÷ 18), up to ×10 (${[0, 1, 3, 9, 18, 40].map(pickedSpeed).join(' / ')})`);
+    assert(pickedMinutes(60) === 30 && pickedMinutes(60, 0) === 30 && pickedMinutes(60, 9) === 11 && pickedMinutes(60, 18) === 6 && pickedMinutes(5, 18) === 1, 'FS: pickedMinutes by picks, never under 1');
+    // FD: the walk's minutes
+    assert(doorMinutes(0, 10) === 0 && doorMinutes(60, 1) === 60 && doorMinutes(60, 5) === 12 && doorMinutes(60, 10) === 6 && doorMinutes(4, 10) === 1 && doorMinutes(5, 10) === 1, 'FD: doorMinutes: 0 stays 0, ÷ speed, never under 1');
+    // FD: a door card (Ashfall's sick child, 60 min) at familiarity 0, 8, 18, 40: the walk ÷ cardSpeed, the scene inside unchanged
+    const door = (fam) => { const g = ensureBars(newGame(6620, { closed: true })); g.scene = 'village'; g.location = 'village'; g.minutes = 9 * 60; g.james.satiety = 90; taskState(g).fam['village:2'] = fam; return g; };
+    const walk = SCENES.village.choices[2].time;
+    const runs = [0, 8, 18, 40].map((f) => { const g = door(f); const m0 = g.minutes; const fc = taskMinutes(g, SCENES, 'village:2'); const oc = taskOutcome(g, SCENES, 'village:2').minutes; runTask(g, SCENES, 'village:2'); return { f, fc, oc, total: g.minutes - m0, fam: taskState(g).fam['village:2'], use: Object.keys(g.tasks.use || {}).filter((k) => k.startsWith('pick:')).length }; });
+    assert(walk === 60 && runs.map((r) => r.fc).join() === [60, 12, 6, 6].join(), `FD: the door card's walk 60 / 12 / 6 / 6 min at familiarity 0 / 8 / 18 / 40 (${runs.map((r) => r.fc).join(' / ')})`);
+    assert(runs.every((r) => r.oc === r.fc), 'FD: the card shows the sped walk (taskOutcome = taskMinutes)');
+    assert(runs.every((r) => r.total - r.fc === runs[0].total - runs[0].fc), `FD: the scene inside the door takes the same time at every familiarity (${runs.map((r) => r.total - r.fc).join(' / ')})`);
+    assert(runs.every((r) => r.fam === r.f + 1), 'FD: a door card still counts +1 familiarity a use');
+    assert(runs.every((r) => r.use === 0), 'FS: a door card (a task card) counts no story pick');
+    // FD: a door menu (the wilds' Explore): the hub's entry and the place's own time, each ÷ the card's speed; the forecast is the real run
+    {
+        const w = ensureBars(newGame(6621, { closed: true })); w.scene = 'wilds'; w.location = 'wilds'; w.minutes = 8 * 60; w.james.satiety = 90; w.james.hp = jamesHpMax(w);
+        const dc = taskCards(w, SCENES).find((c) => c.kind === 'door' && c.id.startsWith('wild_explore:'));
+        assert(!!dc, 'FD: the wilds offer an Explore door card');
+        if (dc) {
+            const ei = SCENES.wilds.choices.findIndex((c) => c.to === 'wild_explore'), entry = SCENES.wilds.choices[ei].time || 0, own = SCENES.wild_explore.choices[Number(dc.id.split(':')[1])].time || 0;
+            const results = [0, 8, 18].map((f) => { const g = structuredClone(w); taskState(g).fam[dc.id] = f; const sp = cardSpeed(f); const fc = taskMinutes(g, SCENES, dc.id); return { f, fc, want: doorMinutes(entry, sp) + doorMinutes(own, sp) }; });
+            assert(results.every((r) => r.fc === r.want) && results[2].fc < results[0].fc, `FD: Explore's entry (${entry}) and place (${own}) both sped: ${results.map((r) => r.fc).join(' / ')} min at 0 / 8 / 18`);
+            const g = structuredClone(w); taskState(g).fam[dc.id] = 8; const m0 = g.minutes; const fc = taskMinutes(g, SCENES, dc.id); const sceneTime = (() => { const h = structuredClone(w); taskState(h).fam[dc.id] = 0; const m = h.minutes; runTask(h, SCENES, dc.id); return h.minutes - m - taskMinutes(w, SCENES, dc.id); })();
+            runTask(g, SCENES, dc.id);
+            assert(g.minutes - m0 === fc + sceneTime, `FD: Explore at familiarity 8: the real run is the forecast walk plus the scene's own time (${g.minutes - m0} = ${fc} + ${sceneTime})`);
+        }
+    }
+    // FD: a chore and a work card keep their own rules (a chore no familiarity speed; a work card ×2 new ÷ cardSpeed as before)
+    {
+        const ch = ensureBars(newGame(6622, { closed: true })); ch.scene = 'ashfall'; ch.location = 'ashfall'; ch.minutes = 4 * 1440 + 9 * 60; ch.james.satiety = 20; ch.inventory = { hare_cooked: 3, berries: 5 };
+        const eat = taskCards(ch, SCENES).find((c) => c.kind === 'chore' && /^Eat/.test(c.label));
+        if (eat) { const a = structuredClone(ch), b = structuredClone(ch); taskState(b).fam[eat.id] = 18; const ma = a.minutes, mb = b.minutes; runTask(a, SCENES, eat.id); runTask(b, SCENES, eat.id); assert(a.minutes - ma > 0 && a.minutes - ma === b.minutes - mb, `FD: a chore keeps its time at any familiarity (${a.minutes - ma} / ${b.minutes - mb})`); }
+        else assert(false, 'FD: Ashfall offers an Eat chore');
+    }
+    // FS: a story choice: the first pick full, then ÷ max(2, …) by the picks before; the count in g.tasks.use
+    {
+        let sc = null, ci = -1;
+        for (const [id, x] of Object.entries(SCENES)) {
+            if (sc || TASK_HUBS[id] || isMenuScene(id) || x.end) continue;
+            (x.choices || []).forEach((c, i) => { if (sc || !(c.time >= 60) || c.walk || c.show || c.req || c.check || c.combat || c.qi || typeof c.to !== 'string' || SCENES[c.to]?.enter || typeof c.text !== 'string' || /^Back\b/.test(c.text)) return; sc = id; ci = i; });
+        }
+        assert(!!sc, 'FS: a story choice of 60+ minutes to test on');
+        if (sc) {
+            const t = SCENES[sc].choices[ci].time;
+            const take = (g) => { g.scene = sc; g.james.satiety = 90; g.minutes = 8 * 60 + (g.minutes % 1440 > 20 * 60 ? 1440 : 0); const m0 = g.minutes; choose(g, SCENES, ci); return g.minutes - m0; };
+            const g = ensureBars(newGame(6623)); g.minutes = 8 * 60;
+            const first = take(g), second = take(g), third = take(g);
+            assert(first === t && pickCount(g, sc, ci) === 3 && g.tasks.use[pickKey(sc, ci)] === 3, `FS: ${sc}:${ci}: three picks counted (${pickCount(g, sc, ci)})`);
+            assert(second === pickedMinutes(t, 1) && third === pickedMinutes(t, 2), `FS: ${sc}:${ci} ${t} min: 1st ${first}, 2nd ${second} (×2), 3rd ${third} (×2)`);
+            g.tasks.use[pickKey(sc, ci)] = 9; const nine = take(g); g.tasks.use[pickKey(sc, ci)] = 18; const top = take(g); g.tasks.use[pickKey(sc, ci)] = 40; const past = take(g);
+            assert(nine === pickedMinutes(t, 9) && top === Math.max(1, Math.round(t / 10)) && past === top, `FS: after 9 picks ÷ 5.5 (${nine}), after 18 ÷ 10 (${top}), no more past it (${past})`);
+            // an old save: picked (sepia) but no count: ×2 as F1
+            const o = ensureBars(newGame(6624)); o.minutes = 8 * 60; notePicked(o, sc, ci); delete o.tasks.use;
+            assert(take(o) === pickedMinutes(t) && pickCount(o, sc, ci) === 1, 'FS: an old save\'s picked choice with no count takes half (F1), then counts from 1');
+            // the forecast on a copy (main.js) leaves the count alone; a save keeps it; a Coil keeps it
+            const k = ensureBars(newGame(6625)); k.minutes = 8 * 60; take(k); take(k);
+            const before = JSON.stringify(k.tasks.use); const cp = JSON.parse(JSON.stringify(k)); cp.scene = sc; choose(cp, SCENES, ci);
+            assert(JSON.stringify(k.tasks.use) === before, 'FS: a pick on a copy (the forecast) counts nothing on the game');
+            assert(pickCount(deserialize(serialize(k)), sc, ci) === 2, 'FS: the count survives a save');
+            endCoil(k, 'choice', 'stream'); rewind(k);
+            assert(pickCount(k, sc, ci) === 2 && wasPicked(k, sc, ci), `FS: the count is kept across a Coil (${pickCount(k, sc, ci)})`);
+            // a task card through choose (task: true) counts nothing
+            const tk = ensureBars(newGame(6626)); tk.scene = sc; tk.minutes = 8 * 60; choose(tk, SCENES, ci, { task: true });
+            assert(pickCount(tk, sc, ci) === 0, 'FS: a card (task: true) counts no pick');
+        }
+        // FS + flight: a marked walk picked 18 times at Foundation: ÷ 10 first, then flown
+        const { WALKS } = await import('../js/story/walks.js');
+        const { flightMinutes } = await import('../js/core/game.js');
+        const wk = WALKS.map(([id, i]) => [id, i, SCENES[id].choices[i]]).find(([id, , c]) => c.time >= 60 && !c.show && !c.req && typeof c.to === 'string' && !SCENES[c.to]?.enter && SCENES[id].place && SCENES[c.to]?.place && SCENES[id].place !== SCENES[c.to].place);
+        if (wk) {
+            const [id, i, c] = wk; const f = ensureBars(newGame(6627)); f.james.realm = 1; f.scene = id; f.location = typeof SCENES[id].place === 'string' ? SCENES[id].place : f.location; f.minutes = 8 * 60; f.james.satiety = 90;
+            notePicked(f, id, i); f.tasks.use = { [pickKey(id, i)]: 18 }; const m0 = f.minutes; choose(f, SCENES, i);
+            assert(f.minutes - m0 === flightMinutes(f, Math.max(1, Math.round(c.time / 10))), `FS: ${id}:${i} (${c.time} min, a walk) after 18 picks at Foundation: ÷ 10, then flown (${f.minutes - m0})`);
+        } else assert(false, 'FS: a marked walk of 60+ minutes between two places');
+    }
+}
+// v0.11.140 (owner pick RV1: Fable's review of FM2): MK the door menus' share kept, L1 only choices that could be sped count, DS, TG
+{
+    const { doorMinutes, pickCount, pickKey, threatOf } = await import('../js/core/story.js');
+    const { skipPlan } = await import('../js/story/again.js');
+    const { canBeFamiliar, TRANSFER } = await import('../js/core/tasks.js');
+    // MK: a use of one Explore place gives the others TRANSFER of a use, and their walks speed up with it (as work menus)
+    {
+        const w = ensureBars(newGame(6630, { closed: true })); w.scene = 'wilds'; w.location = 'wilds'; w.minutes = 8 * 60; w.james.satiety = 90; w.james.hp = jamesHpMax(w);
+        const doors = taskCards(w, SCENES).filter((c) => c.kind === 'door' && c.id.startsWith('wild_explore:'));
+        assert(doors.length >= 2, `MK: the wilds' Explore menu has two or more door cards (${doors.length})`);
+        if (doors.length >= 2) {
+            const [a, b] = doors; const g = structuredClone(w); const tb = taskMinutes(g, SCENES, b.id);
+            runTask(g, SCENES, a.id);
+            assert(taskState(g).fam[a.id] === 1 && taskState(g).fam[b.id] === Math.round(TRANSFER * 10) / 10, `MK: ${a.id} used once: itself 1, ${b.id} ${taskState(g).fam[b.id]} (TRANSFER ${TRANSFER}, kept to one decimal)`);
+            const h = structuredClone(w); taskState(h).fam[b.id] = 5.4; const sp = cardSpeed(5.4);
+            const ei = SCENES.wilds.choices.findIndex((c) => c.to === 'wild_explore'), entry = SCENES.wilds.choices[ei].time || 0, own = SCENES.wild_explore.choices[Number(b.id.split(':')[1])].time || 0;
+            assert(Math.abs(sp - 3.7) < 1e-9 && taskMinutes(h, SCENES, b.id) === doorMinutes(entry, sp) + doorMinutes(own, sp) && taskMinutes(h, SCENES, b.id) < tb, `TG: a door at familiarity 5.4 (a share): ÷ ${sp} (${tb} → ${taskMinutes(h, SCENES, b.id)} min)`);
+            assert(taskOutcome(h, SCENES, b.id).minutes === taskMinutes(h, SCENES, b.id), 'TG: a door menu\'s card shows its sped walk (taskOutcome = taskMinutes)');
+        }
+    }
+    // TG: a door that would end past midnight is open once its walk is short enough (the lock reads the sped walk)
+    {
+        const late = (fam) => { const g = ensureBars(newGame(6631, { closed: true })); g.scene = 'village'; g.location = 'village'; g.minutes = 1440 + 23 * 60 + 30; g.james.satiety = 90; taskState(g).fam['village:2'] = fam; return taskCards(g, SCENES).find((c) => c.id === 'village:2')?.status; };
+        assert(late(0) === 'late' && late(18) === 'open', `TG: village:2 at 23:30: late at familiarity 0 (60 min), open at 18 (6 min) (${late(0)} / ${late(18)})`);
+    }
+    // DS: the screen shows a door card's familiarity (main.js, no new words)
+    {
+        const { readFileSync } = await import('node:fs');
+        const main = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+        assert(/const fam = c\.kind === 'work' \|\| c\.kind === 'door' \?/.test(main) && /card\.kind === 'work' \|\| card\.kind === 'door'\)\) lines\.push\(`Familiarity:/.test(main) && /card\.kind === 'work' \? ' Familiar work goes faster\.' : ''/.test(main), 'DS: a door card shows its step and count, and its hold line its familiarity (the work line\'s sentence for work only)');
+        const v = ensureBars(newGame(6632, { closed: true })); v.scene = 'village'; v.location = 'village'; v.minutes = 9 * 60; taskState(v).fam['village:2'] = 3;
+        const dc = taskCards(v, SCENES).find((c) => c.id === 'village:2');
+        assert(dc && dc.kind === 'door' && dc.tier === famTier(3) && dc.fam === 3 && dc.next != null, `DS: the door card carries its tier and count (${dc?.tier}, ${dc?.fam}/${dc?.next})`);
+    }
+    // L1: picks counted only where a choice could ever be sped
+    {
+        // the meridian screen and a Coil screen: no mark, no count
+        const m = ensureBars(newGame(6633, { closed: true })); m.scene = 'meridians'; m.minutes = 9 * 60; m.james.satiety = 90;
+        const mi = merChoice(m, SCENES);
+        if (mi >= 0) { const t0 = m.minutes; choose(m, SCENES, mi); const t1 = m.minutes - t0; const c1 = pickCount(m, 'meridians', mi); m.scene = 'meridians'; m.tasks.use[pickKey('meridians', mi)] = 18; const m2 = structuredClone(m); m2.scene = 'meridians'; const u0 = m2.minutes;
+            choose(m2, SCENES, merChoice(m2, SCENES), { task: true });
+            assert(c1 === 0 && pickCount(m, 'meridians', mi) === 18 && !canBeFamiliar({ ...m, scene: 'meridians' }, SCENES, mi, ''), 'L1: a meridian session taken on its screen counts no pick (only the planted 18)');
+            assert(m2.minutes - u0 > 0 && t1 > 0, `TG: a meridian session keeps its own time (${t1} min; ${m2.minutes - u0} with 18 planted picks)`); }
+        else assert(false, 'L1: a closed start offers a meridian session');
+        // a "Back…" and a hub's card through choose count nothing; a plain story choice counts
+        let back = null;
+        for (const [id, x] of Object.entries(SCENES)) { if (back || TASK_HUBS[id] || isMenuScene(id) || x.end || x.enter) continue; const i = (x.choices || []).findIndex((c) => typeof c.text === 'string' && /^Back\b/.test(c.text) && !c.show && !c.req && !c.check && !c.combat && !c.qi && typeof c.to === 'string'); if (i >= 0) back = [id, i]; }
+        if (back) { const g = ensureBars(newGame(6634)); g.scene = back[0]; g.minutes = 9 * 60; g.james.satiety = 90; choose(g, SCENES, back[1]); assert(pickCount(g, ...back) === 0 && wasPicked(g, ...back), `L1: "Back…" (${back.join(':')}) is marked but counts no pick`); }
+        else assert(false, 'L1: a Back choice to test on');
+        const hb = ensureBars(newGame(6635, { closed: true })); hb.scene = 'village'; hb.location = 'village'; hb.minutes = 9 * 60; hb.james.satiety = 90; choose(hb, SCENES, 2);
+        assert(pickCount(hb, 'village', 2) === 0, 'L1: a hub\'s card taken as a story choice counts no pick');
+    }
+    // TG: a one-move finish counts under its fight choice; threatOf and skipPlan (copies) count nothing; a whole-game rewind keeps the counts
+    {
+        let done = false;
+        for (const [id, x] of Object.entries(SCENES)) {
+            if (done || TASK_HUBS[id] || isMenuScene(id) || x.end || x.enter) continue;
+            (x.choices || []).forEach((c, i) => {
+                if (done || !c.combat || c.show || c.req || c.check || c.qi) return;
+                const g = ensureBars(newGame(6636)); g.scene = id; g.minutes = 9 * 60; g.james.satiety = 90;
+                if (!canBeFamiliar(g, SCENES, i, String(typeof c.text === 'function' ? c.text(g) : c.text))) return;
+                const before = JSON.stringify(g.tasks.use || {});
+                let th = null; try { th = threatOf(g, SCENES, i); } catch { th = null; }
+                assert(JSON.stringify(g.tasks.use || {}) === before, `TG: threatOf on ${id}:${i} counts nothing on the game`);
+                try { choose(g, SCENES, 1000 + i); } catch { return; }
+                assert(pickCount(g, id, i) === 1 && pickCount(g, id, 1000 + i) === 0, `TG: a one-move finish on ${id}:${i} counts under the fight choice (${pickCount(g, id, i)})`);
+                done = true;
+            });
+        }
+        assert(done, 'TG: a fight choice finished in one move');
+        // skipPlan on a copy (the P1-a setup: night_won → morning → wilds), then the real skip counts like tapping
+        const s0 = ensureBars(newGame(3507, { closed: true })); s0.flags.long = true; s0.flags.forest_day = 2; s0.minutes += 1440 + 22 * 60; goTo(s0, SCENES, 'night_won'); goTo(s0, SCENES, 'morning'); goTo(s0, SCENES, 'night_won');
+        { const r0 = JSON.parse(JSON.stringify(s0)); for (let k = 0; k < 3 && r0.scene !== 'wilds'; k++) { noteRead(s0, sceneView(r0, SCENES).text); choose(r0, SCENES, sceneView(r0, SCENES).choices.filter((c) => !c.disabled)[0].index); } }
+        s0.coil.n = 2; const u0 = JSON.stringify(s0.tasks.use || {});
+        const pl = skipPlan(s0, SCENES);
+        assert(pl.steps === 2 && JSON.stringify(s0.tasks.use || {}) === u0, `TG: skipPlan (${pl.steps} steps) counts nothing on the game`);
+        const A = JSON.parse(JSON.stringify(s0)), B = JSON.parse(JSON.stringify(s0)); skipRun(A, SCENES);
+        for (let k = 0; k < pl.steps; k++) choose(B, SCENES, sceneView(B, SCENES).choices.filter((c) => !c.disabled)[0].index);
+        assert(JSON.stringify(A.tasks.use || {}) === JSON.stringify(B.tasks.use || {}), 'TG: the real skip counts its picks as tapping through does');
+        const k = ensureBars(newGame(6638, { closed: true })); k.tasks.use = { [pickKey('supper', 1)]: 7, 'act:sit': 3 }; k.coil.act = 1; endCoil(k, 'choice', 'stream'); rewind(k, { to: 'game' });
+        assert(pickCount(k, 'supper', 1) === 7 && k.tasks.use['act:sit'] === 3, `TG: the whole game again keeps the counts (${pickCount(k, 'supper', 1)})`);
+    }
+}
 const pctOf = (o, n) => Object.entries(o).sort().map(([k, v]) => `${k} ${((v / n) * 100).toFixed(1)}%`).join(', ');
 console.log(`  tribute, tasks:   ${pctOf(stats.tasks.endings, stats.tasks.games)}`);
 console.log(`  work-card results: ${Object.entries(bands).sort().map(([k, v]) => `${k} ${v}`).join(', ')} · Yuki brought home ${yukiRuns} times`);

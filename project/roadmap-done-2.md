@@ -2,6 +2,12 @@
 
 Started in v0.11.88 (owner pick A, 2026-11-09 02:37, D2), so `roadmap-done.md` (part 1) stays readable in one go. Newer than `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.140 (word for word; owner picks FM2, RV1)
+
+### From section 0, "Next, before everything else" (the done line of v0.11.136, as of v0.11.139)
+
+- *(new in v0.11.136, owner picks NC1, RV2)* **New texts on later days, push 2 (the replies): done:** 38 replies to story choices and task cards that came back on another day of the same Coil have 52 new texts by Fable, one a day (`dayReply` in `js/core/lines.js`, the save's day record), the old reply first, the same gains; repeats across days (200 games each, Careful / Completionist / Sitter / Random) choices 197 / 299 / 417 / 561 → 0, cards 2,164 / 1,856 / 307 / 953 → 0; numbers in the handover's v0.11.136 entry. NT1 done. **Next: RL (open, options later).** **Open, options later:** the failed palisade's third day wraps quiet (L1); the text day against the daily reset (L6); replies and scenes the bots never reach on two days.
+
 ## Moved in v0.11.139 (word for word; owner picks MW1, MR1, DX1)
 
 ### From section 0, "Next, before everything else" (done lines of v0.11.134–v0.11.135, as of v0.11.138)

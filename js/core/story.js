@@ -4,7 +4,7 @@
  *             to | to(g), fail?, do?(g, r) → lines, failDo?(g, r) → lines, combat?: encounter, xp?: false }.
  * A check pays standard XP (25% on a fail) unless xp: false. Pure — no DOM.
  */
-import { rollCheck, awardXp, spendQi, advance, ensureBars, actingCheck, actingName, instantWin, itemFull, takeCapNotes, itemNames, setLootMult, noDiceDc, checkText, addItem, canFly, flightMinutes, plainFight } from './game.js';
+import { rollCheck, awardXp, spendQi, advance, ensureBars, actingCheck, actingName, instantWin, itemFull, takeCapNotes, itemNames, setLootMult, noDiceDc, checkText, addItem, canFly, flightMinutes, plainFight, useSpeed } from './game.js';
 import { STOMP, degreeForChoice } from '../story/power.js';
 import { keepReplies } from './replies.js'; // v0.11.69 (P1)
 import { noteDay } from './lines.js'; // v0.11.135 (NT1, EV1)
@@ -156,10 +156,28 @@ export function notePicked(g, sceneId, index) {
  * tasks.js `showPicked`, set at load) takes half its time: its own `time` and the default walk or talk. Not the clock jumps
  * a scene sets (waits, sleep), not fights, not task cards (their own familiarity), Incremental Mode only.
  */
-let familiar = null;
-export const setFamiliar = (fn) => { familiar = fn; };
+let familiar = null, countable = null;
+export const setFamiliar = (fn, can = null) => { familiar = fn; countable = can; };
 export const PICKED_SPEED = 2;
-export const pickedMinutes = (m) => Math.max(1, Math.round(m / PICKED_SPEED));
+/**
+ * v0.11.140 (owner pick FM2, FS): the speed grows with the picks: ÷ max(2, 1 + 9 × picks ÷ 18), up to ×10 (the work cards'
+ * curve, game.js `useSpeed`). `picks` = the times this choice was taken as a story choice before (not as a card, not on a
+ * dry run's copy; RV1, L1: only a choice that could ever be sped, tasks.js `canBeFamiliar`), kept across Coils in `g.tasks.use['pick:<scene>:<index>']` (no new save field). A choice marked picked
+ * with no count (a save from before) is ×2, as F1.
+ */
+export const PICK_N = 18;
+export const pickedSpeed = (picks = 0) => Math.max(PICKED_SPEED, useSpeed(picks, PICK_N));
+export const pickedMinutes = (m, picks = 0) => Math.max(1, Math.round(m / pickedSpeed(picks)));
+export const pickKey = (sceneId, index) => `pick:${sceneId}:${index}`;
+export const pickCount = (g, sceneId, index) => g?.tasks?.use?.[pickKey(sceneId, index)] || 0;
+function countPick(g, sceneId, index) {
+    if (!g.tasks || typeof g.tasks !== 'object') return; // Story Mode's old saves: no task state, nothing counted
+    if (!g.tasks.use || typeof g.tasks.use !== 'object') g.tasks.use = {};
+    const k = pickKey(sceneId, index);
+    g.tasks.use[k] = (g.tasks.use[k] || 0) + 1;
+}
+/** v0.11.140 (owner pick FM2, FD): a door card's walk ÷ its own speed (tasks.js `cardSpeed`); 0 stays 0, never under 1 minute. */
+export const doorMinutes = (m, speed) => (m > 0 ? Math.max(1, Math.round(m / speed)) : 0);
 /** v0.11.33: called on every choice taken (oneoff.js counts the once-per-Coil work); set once at load. */
 let onChoose = null;
 export const setOnChoose = (fn) => { onChoose = fn; };
@@ -210,13 +228,14 @@ export function movesPlace(g, scenes, fromId, toId) {
 /**
  * Take choice `index`. Returns { lines, roll, combat } — lines are what happened (rolls, XP, items).
  */
-export function choose(g, scenes, index, { task = false } = {}) {
+export function choose(g, scenes, index, { task = false, speed = 0 } = {}) { // v0.11.140 (FD): `speed` = a door card's own speed
     const s = currentScene(g, scenes);
     g.lastWin = null;
     if (index >= ONE_MOVE) {
         const c = (s.choices || [])[index - ONE_MOVE];
         if (!c || !c.combat) throw new Error('No fight to finish');
         notePicked(g, s.id, index - ONE_MOVE);
+        if (!task && countable?.(g, scenes, index, asText(c.text, g))) countPick(g, s.id, index - ONE_MOVE); // v0.11.140 (FS; RV1 L1: only a choice that could be sped)
         if (onChoose) onChoose(g, s.id, index - ONE_MOVE, c);
         const r = instantWin(g, c.combat(g));
         const st = STOMP[r.enc.id];
@@ -236,7 +255,10 @@ export function choose(g, scenes, index, { task = false } = {}) {
     const lines = [];
     if (choiceQi(g, c) && !spendQi(g, c.qi)) throw new Error('Not enough Qi');
     const fast = !task && !!familiar && familiar(g, scenes, index, asText(c.text, g)); // v0.11.37 (F1): before this pick marks it
+    const picks = pickCount(g, s.id, index); // v0.11.140 (FS): the picks before this one
     notePicked(g, s.id, index);
+    if (!task && countable?.(g, scenes, index, asText(c.text, g))) countPick(g, s.id, index); // RV1 (L1): only a choice that could be sped
+    const sped = (m) => (task && speed > 0 ? doorMinutes(m, speed) : fast ? pickedMinutes(m, picks) : m); // FD: a door card; FS: a story choice picked before
     let roll = null;
     let ok = true;
     let partial = false;
@@ -257,7 +279,7 @@ export function choose(g, scenes, index, { task = false } = {}) {
     }
     if (onChoose && ok) onChoose(g, s.id, index, c); // v0.11.33: once-per-Coil work counts only when it succeeds (owner 14:05)
     if (c.time) {
-        const t0 = fast ? pickedMinutes(c.time) : c.time;
+        const t0 = sped(c.time);
         const t = walkOnly && typeof c.to === 'string' && movesPlace(g, scenes, s.id, c.to) && !(TIMELESS_PAIR.has(s.id) && TIMELESS_PAIR.has(c.to)) ? flightMinutes(g, t0) : t0; // v0.11.109 (FL1 + FS1, WP): a pure walk elsewhere is flown
         if (t < t0) lines.push(flownLine(g, t, t0));
         lines.push(...advance(g, t, { work: true }));
@@ -292,7 +314,7 @@ export function choose(g, scenes, index, { task = false } = {}) {
     lines.push(...go(g, scenes, dest));
     const extra = defaultMinutes(scenes, s.id, c, g.scene, g.location !== loc0);
     if (extra) {
-        const t0 = fast ? pickedMinutes(extra) : extra;
+        const t0 = sped(extra);
         const t = walkOnly && g.location !== loc0 ? flightMinutes(g, t0) : t0; // v0.11.109 (FL1 + FS1, WP)
         if (t < t0) lines.push(flownLine(g, t, t0));
         lines.push(...advance(g, t, { work: true }));

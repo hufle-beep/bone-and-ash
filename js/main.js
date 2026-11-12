@@ -277,7 +277,7 @@ function renderCardScreen() {
         const cardHtml = (c) => {
             const out = c.status === 'open' ? safeOutcome(() => taskOutcome(g, SCENES, c.id)) : null; // v0.11.64 (A1, B1): one dry run: its time, where it ends, whether it ends the Coil
             const mins = out ? out.minutes : c.minutes;
-            const fam = c.kind === 'work' ? ` · ${FAM[c.tier].name}${c.next != null ? ` ${c.fam}/${c.next}` : ''}` : '';
+            const fam = c.kind === 'work' || c.kind === 'door' ? ` · ${FAM[c.tier].name}${c.next != null ? ` ${c.fam}/${c.next}` : ''}` : '';
             const ctag = hideTag(c.tag);
             const tag = c.status === 'late' ? LATE_TAG : c.status !== 'open' ? 'done for today — back tomorrow' : c.kind === 'door' ? `opens the scene${ctag ? ` · ${ctag}` : ''}` : (ctag || (showChecks ? 'no check' : ''));
             const dies = out?.death ? ` <b class="dies">${out.death === 'hunger' ? 'Starves here' : 'Collapses here'}</b>` : '';
@@ -783,7 +783,7 @@ function tipFor(b) {
     }
     if (mins) lines.push(`Takes ${durLabel(mins)}, at once.`); // v0.11.64: every card at once
     { const id0 = b.dataset.run || b.dataset.med || ''; const k = medActivity(id0) || (/^(.+):(\d+)$/.test(id0) && isSitChoice(SCENES[id0.split(':')[0]]?.choices?.[Number(id0.split(':')[1])], id0.split(':')[0]) ? 'sit' : null); if (k) lines.push(useLine(g, k)); } // v0.11.15: speed by use
-    if (card && card.kind === 'work') lines.push(`Familiarity: ${FAM[card.tier].name}${card.next != null ? `, ${card.fam} of ${card.next} to ${FAM[card.tier + 1].name}` : ' (the top)'}. Familiar work goes faster.`);
+    if (card && (card.kind === 'work' || card.kind === 'door')) lines.push(`Familiarity: ${FAM[card.tier].name}${card.next != null ? `, ${card.fam} of ${card.next} to ${FAM[card.tier + 1].name}` : ' (the top)'}.${card.kind === 'work' ? ' Familiar work goes faster.' : ''}`); // v0.11.140 (RV1, DS): a door card too (its walk speeds up), no new words
     if (card && card.status === 'late') lines.push('It would end past midnight, when the day is over. Sleep.');
     else if (card && card.status !== 'open') lines.push('Done for today. Back tomorrow.');
     if (b.disabled && !card) { const tag = b.querySelector('.tag')?.textContent; lines.push(tag ? `Not now: ${tag}.` : 'Not now.'); }
