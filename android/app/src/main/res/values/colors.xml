@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The game's paper and ink (css/style.css --paper, --ink) and its red accent -->
+    <color name="paper">#ECE8DF</color>
+    <color name="ink">#23211E</color>
+    <color name="red">#9E2B35</color>
+</resources>

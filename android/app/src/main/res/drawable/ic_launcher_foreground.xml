@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- icons/icon.svg redrawn (v0.11.145): the red sun, the bone blade and its pommel, the green stroke.
+     The 512-unit drawing is scaled by 0.1328 and moved so its shapes sit inside the 66dp safe circle. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <group android:scaleX="0.1328" android:scaleY="0.1328" android:translateX="20.4" android:translateY="18.1">
+        <path android:fillColor="#9E2B35"
+            android:pathData="M244,180 A86,86 0 1,0 416,180 A86,86 0 1,0 244,180 Z" />
+        <path android:fillColor="#00000000" android:strokeColor="#F2EFE6" android:strokeWidth="30" android:strokeLineCap="round"
+            android:pathData="M110,410 L380,140" />
+        <path android:fillColor="#F2EFE6"
+            android:pathData="M354,140 A26,26 0 1,0 406,140 A26,26 0 1,0 354,140 Z" />
+        <path android:fillColor="#00000000" android:strokeColor="#6FA58F" android:strokeWidth="12" android:strokeLineCap="round"
+            android:pathData="M96,430 Q150,360 220,372" />
+    </group>
+</vector>

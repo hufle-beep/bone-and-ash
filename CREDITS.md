@@ -11,6 +11,10 @@ The game is programmed and written with the help of AI (Claude by Anthropic). Th
 - **Rules Engine C** (`hufle-beep/Shared-ST`, `st/rules-engine-c/`): the Qi rules. `js/core/formulas.js` is the engine's own file, unchanged. Ideas from the engine's other modules are listed in `project/design.md` and `project/research.md`.
 - **Selene: Tidelocked / The Long Patience** (`hufle-beep/Long-patience`): the hybrid design (tasks and the Coil, `project/design.md`), the save safety, the tools and tests, and the docs and working rules.
 
+## The Android app (in the APK only)
+
+- **AndroidX WebKit** and **AndroidX Core** (Google, Apache-2.0), built into the app by Gradle (v0.11.145).
+
 ## Fonts
 
 - **Literata** and **Shippori Mincho**, from Google Fonts, under the SIL Open Font License 1.1.

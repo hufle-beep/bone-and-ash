@@ -1,0 +1,49 @@
+plugins { id 'com.android.application' }
+
+// v0.11.145 (owner pick AP1), adapted from Selene (hufle-beep/Long-patience).
+// The version code comes from the CI run number, so every build installs over the last one.
+def ciBuild = (System.getenv('GITHUB_RUN_NUMBER') ?: '1') as Integer
+// The version name carries the game's version from sw.js (bumped on every push), e.g. "0.11.145 (build 3)".
+def swFile = rootProject.file('../sw.js')
+def swMatch = swFile.exists() ? (swFile.text =~ /VERSION = 'bone-ash-([^']+)'/) : null
+def gameVersion = (swMatch != null && swMatch.find()) ? swMatch.group(1) : 'dev'
+
+android {
+    namespace 'io.github.hufle.boneandash'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'io.github.hufle.boneandash'
+        minSdk 26
+        targetSdk 34
+        versionCode ciBuild
+        versionName "${gameVersion} (build ${ciBuild})"
+    }
+
+    signingConfigs {
+        release {
+            // A fixed key in the repo (decision 2026-11-05 #7), so updates install over the previous version and keep saves.
+            storeFile file(System.getenv('BA_KEYSTORE') ?: '../boneandash.keystore')
+            storePassword System.getenv('BA_STORE_PASS') ?: 'boneandash'
+            keyAlias System.getenv('BA_KEY_ALIAS') ?: 'boneandash'
+            keyPassword System.getenv('BA_KEY_PASS') ?: 'boneandash'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'androidx.webkit:webkit:1.11.0'
+    implementation 'androidx.core:core:1.13.1'
+}

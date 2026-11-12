@@ -1,0 +1,7 @@
+.gradle/
+build/
+app/build/
+local.properties
+# The game is copied into the app at build time by .github/workflows/android.yml (v0.11.145); only .gitkeep is kept
+app/src/main/assets/*
+!app/src/main/assets/.gitkeep

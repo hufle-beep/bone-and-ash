@@ -1,0 +1,124 @@
+name: Android app
+
+# v0.11.145 (owner pick AP1), adapted from Selene's (hufle-beep/Long-patience).
+# Rebuilds the APK whenever the game or the app changes, and puts it on the "android-latest" release
+# with a fixed download link: https://github.com/hufle-beep/bone-and-ash/releases/download/android-latest/BoneAndAsh.apk
+# sw.js is left out of the paths on purpose: VERSION is bumped on every push (docs too), and the app runs no service worker.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'manifest.webmanifest'
+      - 'js/**'
+      - 'css/**'
+      - 'art/**'
+      - 'icons/**'
+      - 'android/**'
+      - '.github/workflows/android.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-build
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Copy the game into the app
+        run: |
+          A=android/app/src/main/assets
+          cp index.html manifest.webmanifest sw.js "$A/"
+          cp -r js css art icons "$A/"
+          # every file the game's offline list names must be in the app (a missing one is a blank screen or a missing picture)
+          node -e "
+            const fs = require('fs');
+            const t = fs.readFileSync('sw.js', 'utf8');
+            const files = [...t.matchAll(/'((?:js|css|art|icons)\/[^']+|index\.html|manifest\.webmanifest)'/g)].map((m) => m[1]);
+            const missing = files.filter((f) => !fs.existsSync('$A/' + f));
+            if (!files.length || missing.length) { console.error('missing in the app:', files.length ? missing : 'no files read from sw.js'); process.exit(1); }
+            console.log(files.length + ' files from sw.js are in the app');
+          "
+          du -sh "$A"
+
+      - name: Build signed APK
+        working-directory: android
+        env:
+          # Optional: set these repository secrets to use your own key instead of the bundled one
+          BA_KEYSTORE_B64: ${{ secrets.BA_KEYSTORE_B64 }}
+          BA_STORE_PASS: ${{ secrets.BA_STORE_PASS }}
+          BA_KEY_ALIAS: ${{ secrets.BA_KEY_ALIAS }}
+          BA_KEY_PASS: ${{ secrets.BA_KEY_PASS }}
+        run: |
+          if [ -n "$BA_KEYSTORE_B64" ]; then
+            echo "$BA_KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.keystore"
+            export BA_KEYSTORE="$RUNNER_TEMP/release.keystore"
+          else
+            unset BA_STORE_PASS BA_KEY_ALIAS BA_KEY_PASS
+          fi
+          gradle assembleRelease --no-daemon
+          cp app/build/outputs/apk/release/app-release.apk "$RUNNER_TEMP/BoneAndAsh.apk"
+          ls -l "$RUNNER_TEMP/BoneAndAsh.apk"
+
+      - name: Publish to the android-latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          GAME=$(sed -n "s/.*VERSION = 'bone-ash-\([^']*\)'.*/\1/p" sw.js)
+          NOTES="Build ${GITHUB_RUN_NUMBER} from commit ${GITHUB_SHA::7} (game ${GAME}), $(date -u '+%Y-%m-%d %H:%M UTC').
+
+          Download BoneAndAsh.apk below and open it on your Android phone to install or update.
+          Updates install over the previous version and keep your saves."
+          TITLE="Bone and Ash for Android (build ${GITHUB_RUN_NUMBER})"
+          if ! gh release view android-latest >/dev/null 2>&1; then
+            # first time only: create the release (its title names a build once the file is up)
+            gh release create android-latest --title "Bone and Ash for Android" --notes "$NOTES" --target "$GITHUB_SHA"
+          fi
+          # Upload the new file under a temporary name first, so the download link never points at nothing,
+          # then swap it in and only then announce the new build number (the app reads it from the title).
+          cp "$RUNNER_TEMP/BoneAndAsh.apk" "$RUNNER_TEMP/BoneAndAsh-next.apk"
+          for try in 1 2 3 4 5; do gh release upload android-latest "$RUNNER_TEMP/BoneAndAsh-next.apk" --clobber && break; echo "retrying the upload"; sleep 10; done
+          REPO="${GITHUB_REPOSITORY}"
+          ids() { gh api "repos/$REPO/releases/tags/android-latest" --jq ".assets[] | select(.name==\"$1\") | .id"; }
+          # (retried: the API sometimes answers with an empty body; --silent stops gh from parsing it)
+          for try in 1 2 3; do
+            for id in $(ids BoneAndAsh.apk); do gh api -X DELETE "repos/$REPO/releases/assets/$id" --silent || true; done
+            for id in $(ids BoneAndAsh-next.apk); do gh api -X PATCH "repos/$REPO/releases/assets/$id" -f name=BoneAndAsh.apk --silent || true; done
+            [ -n "$(ids BoneAndAsh.apk)" ] && [ -z "$(ids BoneAndAsh-next.apk)" ] && break
+            sleep 5
+          done
+          [ -n "$(ids BoneAndAsh.apk)" ] || { echo "BoneAndAsh.apk missing after swap"; exit 1; }
+          for try in 1 2 3 4 5; do gh release edit android-latest --title "$TITLE" --notes "$NOTES" && break; echo "retrying the title update"; sleep 10; done
+          [ "$(gh api "repos/$REPO/releases/tags/android-latest" --jq .name)" = "$TITLE" ] || { echo "title not updated"; exit 1; }
+
+      - name: Keep a backup of this build (the newest 5 are kept)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # A separate pre-release per build, so the last 5 builds stay downloadable as restore points.
+          # It never touches android-latest (the app's update check only reads that one).
+          TAG="android-build-${GITHUB_RUN_NUMBER}"
+          for try in 1 2 3; do
+            gh release create "$TAG" "$RUNNER_TEMP/BoneAndAsh.apk" --prerelease --target "$GITHUB_SHA" \
+              --title "Bone and Ash for Android (build ${GITHUB_RUN_NUMBER}) - backup" \
+              --notes "Backup copy of build ${GITHUB_RUN_NUMBER} (commit ${GITHUB_SHA::7}). Install over the current app to roll back; saves are kept." && break
+            echo "retrying the backup release"; sleep 10
+          done
+          # keep the newest 5 backups, remove older backup releases and their tags (git history itself is untouched)
+          gh api "repos/${GITHUB_REPOSITORY}/releases?per_page=100" --jq '.[].tag_name' | grep '^android-build-' \
+            | sort -t- -k3 -n -r | tail -n +6 | while read -r old; do gh release delete "$old" --yes --cleanup-tag || true; done

@@ -4,6 +4,8 @@
     "files": {
       "project/*": "the project docs (named only in other docs, which the file scan skips)",
       ".github/*": "GitHub runs the workflows by itself",
+      "android/*": "v0.11.145 (owner pick LK1): Gradle builds the app from it on GitHub (.github/workflows/android.yml); tests/android.test.mjs checks it",
+      "tests/android-stubs/*": "v0.11.145 (owner pick LK1): javac compiles them in tests/android.test.mjs (it reads the folder)",
       "saves/*": "tests/saves.test.mjs loads every file in the folder",
       "tools/bg.py": "by hand: makes the background crops in art/bg (handover, Files)"
     },

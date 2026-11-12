@@ -2,6 +2,21 @@
 
 Started 2026-11-12 (v0.11.138), when `history-16.md` would have passed about 45 KB. Newer than `history-16.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.145 (word for word)
+
+### Decided in chat
+
+- **v0.11.142: the Cultivator bot model (the open item "freed time and cultivation"; options CV1–CV4 at about 13:58, owner 14:03 "CV1 go"):**
+  - **CV (a scratch copy of the models, 200 games each; cultivation h a game · realm at Act 1's end · Act 1's mean Coil):** today Careful 70.6 h · 1.00 · 3.87, Completionist 67.5 h · 1.00 · 3.60; **SP18** (the day's cards done, sit / meridians / gather Qi until 18:00): Completionist 114.8 h · 4.75 · 3.24, Careful 155.5 h · 6.65 · 2.80 (Act 1 C2 deaths 63 → 25%); **SP16** Completionist 91.6 h · 3.50 · 3.42; the Sitter 118 h · 9.13 · 2.47; about +20 s on the full check. **CV1 🟢 a new model, the Cultivator (Completionist + SP18), last in the list, and a cultivation line for every model (recommended)** / CV2 🟡 the same with SP16 / CV3 🟠 SP18 in Careful and Completionist themselves (old references lost) / CV4 🔴 no change (colours: how well the bots model the owner's play, with today's references kept). **Picked: CV1.**
+  - **As built (500 games, the full check's step):** the Cultivator 130.2 h a game (sits 21.1, meridians 42.8, gather Qi 59.0, breakthroughs 7.3), realm 4.73 at Act 1's end, Act 1 on mean Coil 3.35, prologue C1 dead 48.2%, 192 spare-time cards a game; the Sitter 9.21; Careful, Completionist, the Farmer 1.00; the other models' numbers unchanged (Careful 3.38 / 3.87, Completionist 3.34 / 3.58). The hours differ from the scratch's 114.8 because the cultivation line counts a hub's own Cultivate chore as a sit (Completionist 67.5 → 70.9 h), and the new model has its own seed. The rule in `tests/lib/spare.mjs` (gather Qi past 6 h while Qi is under 10: without it a bot with no Qi and no doors looped on a screen).
+  - **Also:** `03a4762` filled in for 0.11.141; v0.11.139's notes to `history-17.md`; `roadmap.md`'s v0.11.138 done line to `roadmap-done-2.md`.
+
+### Version notes
+
+## v0.11.142 — The Cultivator bot model (CV1)
+
+- **Files:** `tests/models.test.mjs` (`cultivator` last in `MODELS`, the `cultivation:` line for every model), `tests/lib/spare.mjs` (new, `sparePlan`), `tools/check.mjs` (the models step: the Cultivator, 500 / 50 games, 8 / 6 blocks), `tools/lib/report.mjs` (the digest's realm), `tests/tools.test.mjs` (CV1), `tools/models-baseline.json` (the Cultivator's copy added alone), `tests/README.md`, `project/reference.md`, `sw.js`, docs. Saves: unchanged; the game unchanged.
+- **Checks:** a tools and tests push (rule 2): the tools test (261 passed; mutation: the window's end, the gather-Qi cap, the meridian step and a Cultivator that never uses spare time each fail it), `bash tools/check.sh quick` (exit 0), and the full check's models step alone at its full size (exit 0, 8 blocks read, no NOTE from the saved copy). Interaction: no game file and no drift-baseline bot changed (the sanity check reads the tasks and story tests only); the models step takes about 20 s more.
 ## Moved from the handover in v0.11.144 (word for word)
 
 ### Decided in chat
