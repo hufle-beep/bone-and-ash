@@ -2,6 +2,21 @@
 
 Started 2026-11-12 (v0.11.138), when `history-16.md` would have passed about 45 KB. Newer than `history-16.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.146 (word for word)
+
+### Decided in chat
+
+- **v0.11.143: sleep before the night's attack (the owner 14:25 "ok, let's go with what we do from section 1d"; options NF1–NF4 at about 14:40, owner 14:42 "NF1 go"; Fable's review: RN1–RN4 at about 14:57, owner 14:59 "RN1 go"):**
+  - **Group d measured (scratch hooks; 300 games each, the Sitter 150):** **RA** the rot ape (the fight lab, 300 games, 271 states): darts 76.8%, smart 72.0%, the blade 11.0% (the roadmap's "favours the blade" was stale since flight in fights); **HK** the knitting bone and the crushing mass: Act 1 fight states at Convergence T6+ the Sitter 58 of 1,042 (5.6%), 3 at T9, the Cultivator 0 (top rank 44), Careful 0 (10), the Completionist 0 (15) (in no option); **NQ** the night's attack after cultivating: `nightTo`'s asleep span (21:00 → 01:00) gave nothing back; the Cultivator's Qi at the prologue's night fights 57–59% (20–27% under a quarter; Completionist 88–90%), crows won 41.9% (Completionist 83.8%). **NR-full** the asleep span regenerates as a rest: crows 78.4% (Completionist 93.7%), Qi 90–92%, Cultivator 3.15 / 3.38 → 2.84 / 3.09, Completionist 3.39 / 3.62 → 3.31 / 3.55, Careful unchanged; 0 drifted, 18 moved; **KB** (bots) the Cultivator keeps 60% Qi from 15:00: crows 70.0%, 2.92 / 3.20, realm 4.74 → 4.08; **NR-half** half the missing back before the attack: crows 58.4%, Qi 80–82%, 2.90 / 3.15; 0 drifted, 13 moved. **NF1 🟢 NR-full + RA + T (recommended)** / NF2 🟡 KB + RA + T / NF3 🟠 NR-half + RA + T / NF4 🔴 RA (colours: how far the Cultivator's crows wins come back). **Picked: NF1.**
+  - **RN (stop-and-ask: Fable's cold review, no high; the full check exit 0, 0 drifted of 145, 17 moved):** **FP** (M1) the asleep span's Fed cliff (Fed 6.1 at bed: full bars by 01:00, Fed 6.0: nothing; 113 of 14,765 bot nights started with too little Fed, 0 at Fed 0): regenerate the fed share only; **TG** (L1) the v0.11.92 dawn tolerance one real tick instead of the `regenCarry` reset, (L2) states that can't cap, Yuki's Qi, Fed running out, a bed before 21:00, no starving asleep, a real quiet village night, HP and Yuki in the scene loop; **FQ** the FAQ clause (Fable): **FQ-A** "The hours he sleeps before it give HP and Convergence back as resting does, so an early bed meets it with more." / FQ-B "(sleep before it counts as rest)"; no change: L3 (the Qi-priced night choices nearly always affordable), L4 (no line), L5 (timings). **RN1 🟢 FP + TG + FQ-A (recommended)** / RN2 🟡 FP + TG + FQ-B / RN3 🟠 TG + FQ-A / RN4 🔴 TG. **Picked: RN1.**
+  - **Also:** as built: the FAQ clause tagged "(v0.11.143)" like the entry's other rule changes; `f2c31b6` filled in for 0.11.142; v0.11.140's notes to `history-17.md`; `roadmap.md`'s v0.11.139 done line to `roadmap-done-2.md`.
+
+### Version notes
+
+## v0.11.143 — Sleep before the night's attack (NF1, RN1)
+
+- **Files:** `js/core/game.js` (`regenFor`, shared by `advance`; `nightTo` regenerates the asleep span at the resting rate, the fed share only), `js/core/faq.js` (Fable's clause in "Days, sleep and the night"), `tests/tasks.test.mjs` (NF1, FP, TG; the v0.11.92 dawn tolerance), `tests/faq.test.mjs`, `tests/README.md`, `project/reference.md`, `sw.js`, docs. Saves: unchanged; no id, flag or key changed.
+- **Checks:** a game change (rule 2): the full check after NF1 (exit 0, 0 drifted of 145, 17 moved) and after RN1 (exit 0, 0 drifted of 145, 19 moved past 5, log only; the most: crows smart +17.2, lizard random +11.6, tribute C5 won −11.6, the story test's collectors random −9.8); models Careful 3.39 / 3.87, Completionist 3.26 / 3.51, Sitter 2.39 / 2.39, Farmer 3.26 / 3.48, Cultivator 2.81 / 3.09 (realm 4.71). Mutation: NF1 off 11 tests, the fed share off 1 (the Fed 0 gate is redundant: an equivalent mutant). **Fable's review:** no high; M1, L1, L2 fixed in RN1; L3–L5 no change.
 ## Moved from the handover in v0.11.145 (word for word)
 
 ### Decided in chat

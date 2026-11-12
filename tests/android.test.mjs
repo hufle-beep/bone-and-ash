@@ -158,5 +158,18 @@ const runOf = (name) => {
     assert(!/windowLightNavigationBar/.test(read(`${res}/values/styles.xml`)) && /windowLightNavigationBar/.test(read(`${res}/values-v27/styles.xml`)), 'F: the light navigation bar only from Android 8.1 (API 27), where it exists');
 }
 
+// AF1 (owner pick, v0.11.146): every XML file in android/ is well-formed (build 1 failed on "--" inside a comment in colors.xml)
+{
+    const xml = []; const walk = (d) => { for (const e of readdirSync(R(d), { withFileTypes: true })) { const p = `${d}/${e.name}`; if (e.isDirectory()) { if (e.name !== 'assets' && e.name !== 'build') walk(p); } else if (p.endsWith('.xml')) xml.push(p); } };
+    walk('android');
+    if (has('python3')) {
+        const py = 'import sys, xml.dom.minidom as m\nbad = []\nfor f in sys.argv[1:]:\n    try: m.parse(f)\n    except Exception as e: bad.append(f + ": " + str(e))\nprint("\\n".join(bad))\nsys.exit(1 if bad else 0)';
+        const r = spawnSync('python3', ['-I', '-c', py, ...xml.map(R)], { encoding: 'utf8' });
+        assert(xml.length >= 10 && r.status === 0, `AF1: every XML file in android/ parses (${xml.length} files${r.stdout.trim() ? `; ${r.stdout.trim().split('\n').join(' | ')}` : ''})`);
+    } else skipped('AF1: python3 not installed, the XML files not parsed');
+    const comments = xml.flatMap((f) => [...read(f).matchAll(/<!--([\s\S]*?)-->/g)].filter((m) => m[1].includes('--')).map(() => f));
+    assert(comments.length === 0, `AF1: no "--" inside an XML comment, which Android's resource merger rejects (${comments.join(', ') || 'none'})`);
+}
+
 console.log(`\n${pass} passed, ${fail} failed${skip ? `, ${skip} skipped` : ''}`);
 process.exit(fail === 0 ? 0 : 1);
