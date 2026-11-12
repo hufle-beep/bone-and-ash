@@ -2,6 +2,23 @@
 
 Started 2026-11-12 (v0.11.148), when `history-17.md` would have passed about 45 KB. Newer than `history-17.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.153 (word for word)
+
+### Decided in chat
+
+- **v0.11.150: the Android app, push 5 (BL) (options BL1–BL4 at about 19:10, owner 19:19 "Bl1"; after the cold review RW1–RW4, owner 19:38 "RW1"):**
+  - **BL (Selene's build label and "What's new (R20)", `index.html` 3298, 3659–3696):** **LB** the menu's line "Version 0.11.150 · build 6 · Incremental Mode" in the app, Copy status "Android app build N" / "browser"; **WN** What's new on the main menu, the notes since the version this phone last opened (`boneash.seen`, never in a save; first run: with a save this version's note, a new player none; kept at once; ✕ for the visit); **WL** Settings → What's new, the whole list, folded; **N-1** one note (0.11.150) / N-6 / N-14; **WK** the working rule (a note per push that changes what a player sees; Claude's plain words); **VN** browser only: a new version taking over while the game is open shows "Version X is ready" with **Reload** (saves first); **UC** the browser asks again when the game comes back on screen, at most every 30 minutes; **FQ-e** the FAQ's "The Android app" (Fable, about 240 words, every fact) / FQ-s one sentence; **TS**; **CR** Opus. **BL1 🟢 LB + WN + WL + N-1 + WK + VN + UC + FQ-e + TS + CR (recommended)** / BL2 🟢 with N-6 / BL3 🟡 without UC, FQ-s / BL4 🟠 LB + WN + N-1 + TS + CR (colours: the four parts reaching a player on build 6 and in the browser, judged). **Picked: BL1.** Also built: the version from `sw.js` first (the cache's name lags a page that already has new files), `sw.js` not cached by the worker.
+  - **The cold review (Opus):** no high; M1 What's new redrew the menu while New game was armed; M2 no test of "no notice when the page already runs the arriving version", nor of the label offline; L3 no time limit on reading `sw.js`; L4 the export reminder could replace a Reload notice; L5 a new player tapping Begin before `sw.js` answered saw the note later; L6 a hard reload with old JS from the 10-minute HTTP cache (rare; no change); L7 Settings' list folded on every redraw; L8 "the FAQ new for everyone" (not so: start entries are never new; no change).
+  - **RW (stop-and-ask):** **AR** no redraw while armed; **NT** + **OL** part 3's two checks; **TO** 3 s for `sw.js`, then the cache's name; **KR** the reminder waits while Reload shows; **HS** "had a save" at load; **KO** the list stays open. **RW1 🟢 all (recommended)** / RW2 🟡 AR + NT + OL + HS / RW3 🟠 AR / RW4 🔴 none (colours: the 7 findings fixed and guarded by a test). **Picked: RW1.** Built with it, for OL: the worker says its own version (a `message` on a MessageChannel; the caches' names only as a fallback): OL showed an old version's cache written again by a late request after it was deleted, so the names alone could name the wrong version (and miss the notice).
+  - **Also:** `719813e` filled in for 0.11.149; v0.11.147's notes to `history-18.md`; v0.11.141–143's done lines to the new `roadmap-done-3.md`.
+
+### From "Version notes"
+
+## v0.11.150 — The Android app, push 5: the build label, What's new, the new-version notice (BL1, RW1)
+
+- **Files:** `js/core/news.js` (new: `NOTES`, `newsSince`, `versionLabel`, `statusPlace`, `takeoverNotice`, `recheckDue`, `SEEN_KEY`), `js/main.js` (the label, What's new on the menu and in Settings, the notice bar's Reload, the takeover and the re-ask, `gameVersion` from `sw.js` first with 3 s, `workerVersion`), `sw.js` (the module offline, `sw.js` not cached, the `message` answer), `css/style.css`, `js/core/faq.js` (The Android app), `tests/news.test.mjs` (new), `tests/faq.test.mjs`, `tests/appfiles.test.mjs`, `tools/browser.py` (part 2 `news_box`, part 3 VN, NT, OL), `tools/check.mjs`, `tests/README.md`, `project/reference.md`, `project/working-agreement.md` (WK), docs. Story, balance and saves unchanged; one new phone key, `boneash.seen`.
+- **Checks:** a game-file push (rule 2): the full check after BL1 and after RW1 (exit 0 both; 0 drifted of 145, 19 moved more than 5, log only, the same game); the news test (19 passed; 18 mutants), the FAQ test (60), part 3 four runs in a row clean after the settle and the worker's answer.
+
 ## Moved from the handover in v0.11.152 (word for word)
 
 ### Open items, as of v0.11.151
