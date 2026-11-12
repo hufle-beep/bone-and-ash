@@ -1852,19 +1852,26 @@ for (let run = 0; run < 20; run++) { // the hunters too slow for the wolves: fo_
 /** v0.11.34 (D1): scenes only Story Mode reached; kept in the files (D2 deletes Story Mode's code later), never reached in
  * Incremental Mode's games. The owner decides keep-list or removal. Log only if one is reached after all. */
 const STORY_ONLY = {
-    lost: ['jackals_lost', 'night_lost', 'mire_lost', 'far_lost', 'fo_wolf_lost', 'ring_lost', 'lf_trial_lost', 'rt_serpent_lost'], // a lost beast fight ends the Coil
+    lost: ['jackals_lost', 'night_lost', 'mire_lost', 'far_lost', 'fo_wolf_lost', 'lf_trial_lost'], // a lost beast fight ends the Coil
     screen: ['meridians'], // the meridian screen (Meditate cards since v0.11.13)
-    failed: ['scan_bad', 'first_bone_fail', 'hunt_got', 'night_attack_forced', 'arson_start', 'ring_forced', 'rt_ambush_forced', 'rt_ford_wake', 'rt_serpent_forced'], // failed checks: possible for a very weak James, never failed in these games (roots_caught is: the sister walk)
+    failed: ['scan_bad', 'first_bone_fail', 'night_attack_forced', 'ring_forced', 'rt_ambush_forced'], // failed checks: possible for a very weak James, never failed in these games (roots_caught is: the sister walk)
     never: ['rt_serpent_won'], // the ford serpent never fights (both ways across always pass)
 };
+/** v0.11.151 (owner pick WD1, SO): reached in Incremental Mode now, in some full runs, not all (a weak James's lost fights and
+ *  failed checks; the ford's far bank since flight, v0.11.109): not required each run, no note when reached, and still walked
+ *  as an old save below. Moved from STORY_ONLY's lost and failed lists. */
+const RARE = ['ring_lost', 'rt_serpent_lost', 'hunt_got', 'arson_start', 'rt_ford_wake', 'rt_serpent_forced'];
 const storyOnly = new Set(Object.values(STORY_ONLY).flat());
-const unreached = Object.keys(SCENES).filter((k) => !seen.has(k) && !storyOnly.has(k));
+const rare = new Set(RARE); // v0.11.151 (WD1, SO)
+assert(RARE.every((k) => SCENES[k] && !storyOnly.has(k)), 'v0.11.151 (SO): every rare scene exists and is not also Story-only');
+const unreached = Object.keys(SCENES).filter((k) => !seen.has(k) && !storyOnly.has(k) && !rare.has(k));
 assert(!FULL || unreached.length === 0, `every scene reachable (unreached: ${unreached.join(', ')})`);
 assert([...storyOnly].every((k) => SCENES[k]), 'v0.11.34: every Story-only scene still exists');
 const reachedAnyway = [...storyOnly].filter((k) => seen.has(k));
+const rareMissed = RARE.filter((k) => !seen.has(k)); // v0.11.151 (RV1, RL; Fable's L5): a full run names the rare scenes it didn't reach (log only)
 // v0.11.34 (cold review): an old Story Mode save may sit on one of them; each walks on with no dead end, open meridians (as an old save) and closed
 const ACT1 = (k) => /^(fo_|ring_|roots_|rt_)/.test(k);
-for (const k of storyOnly) for (let run = 0; run < 30; run++) {
+for (const k of [...storyOnly, ...rare]) for (let run = 0; run < 30; run++) { // v0.11.151 (SO): the rare scenes walk on as old saves too
     const g = ensureBars(run % 2 ? fresh(run + 51515) : newGame(run + 51515));
     if (ACT1(k)) { g.scene = 'epilogue'; g.flags.ending = ['fought', 'bluff', 'paid'][run % 3]; g.minutes = 6 * 1440 + 900; choose(g, SCENES, 0); g.minutes = (k.startsWith('rt_') ? 18 : k.startsWith('fo_') ? 9 : 15) * 1440 + 8 * 60; Object.assign(g.flags, { mei_party: true, ya_party: true, ya_met: true }); }
     else if (k === 'lf_trial_lost') Object.assign(g.flags, { longforest: true, lf_active: true, bone_ok: true });
@@ -1876,6 +1883,7 @@ for (const k of storyOnly) for (let run = 0; run < 30; run++) {
     assert(r === true || r === 'end', `v0.11.34: an old save on Story-only ${k} walks on (run ${run}: ${r}, at ${g.scene})`);
 }
 if (reachedAnyway.length) console.log(`  NOTE  Story-only scenes reached in Incremental Mode (log only): ${reachedAnyway.join(', ')}`);
+if (FULL && rareMissed.length) console.log(`  NOTE  rare scenes not reached in this full run (log only; one never reached again may have become unreachable): ${rareMissed.join(', ')}`);
 if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).length - storyOnly.size - unreached.length} of ${Object.keys(SCENES).length - storyOnly.size} scenes reached (${storyOnly.size} Story-only left out)`); // v0.11.21
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));
 console.log('fights', sorted(fights));

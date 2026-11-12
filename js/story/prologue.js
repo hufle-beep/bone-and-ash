@@ -315,7 +315,7 @@ ${(g.flags.forest_day || 1) > 1 ? `Another night in the Blackroot. The watch-thr
     },
     night_attack: {
         id: 'night_attack', title: 'Ashfangs', art: 'jackals', place: 'Blackroot Wilds — the dry rise',
-        enter: (g) => { nightTo(g, 80); /* v0.11.40 (N1): never back (entered after 01:20, the clock stays); v0.11.91: after the bed (from 21:00), at 01:20 */ return []; },
+        enter: (g) => nightTo(g, 80), /* v0.11.40 (N1): never back (entered after 01:20, the clock stays); v0.11.91: after the bed (from 21:00), at 01:20; v0.11.151 (WD1, LN): the slept line */
         text: (g) => `${g.flags.watch ? 'The watch-thread yanks you awake a full three seconds before anything happens. Three seconds is a lot.' : 'Yuki\'s claws in your thigh wake you. That, and the smell.'}
 
 ${g.flags.stakes ? 'Something yelps on your bone stakes — one of them is already bleeding.' : ''} Two shapes at the edge of the ${g.flags.fire ? 'firelight' : 'dark'}: grey hides, black lips peeled back from teeth that drip something that smokes when it hits the moss.

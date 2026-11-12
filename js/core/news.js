@@ -13,6 +13,7 @@ export const RECHECK_MS = 30 * 60e3;
  * that changes what a player sees adds one line here, in plain words; a docs-only push adds none. */
 export const NOTES = [
     ['0.11.150', 'The Android app is complete: it finds new builds by itself (Settings → App updates), saves and shares files through Android, and carries its own fonts, so it works offline from the first start. Its saves are apart from the browser\'s (FAQ: The Android app). New everywhere: this What\'s new box (the whole list is in Settings), the app\'s build number on the menu, and in the browser a Reload bar when a new version arrives while the game is open.'],
+    ['0.11.151', 'A night that wakes you (an attack, a visitor, the weather) now says what the hours of sleep before it gave back: "Slept until 01:00: +12 HP, +30 Qi." The sleep itself is unchanged.'],
 ];
 
 const parts = (v) => (/^\d+(\.\d+)*$/.test(String(v ?? '')) ? String(v).split('.').map(Number) : null);

@@ -477,7 +477,20 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md'];
     assert(r1.includes('`roadmap-2.md`') && r2.includes('`roadmap.md`'), 'roadmap: each part names the other');
     const d1 = readFileSync(path.join(ROOT, 'project/roadmap-done.md'), 'utf8'), d2 = readFileSync(path.join(ROOT, 'project/roadmap-done-2.md'), 'utf8');
     assert(d1.includes('`roadmap-done-2.md`') && /^## Moved in v0\.11\.88 \(word for word\)$/m.test(d2) && d2.indexOf('## Moved in v0.11.88') < d2.indexOf('### The old "Last updated" line'), 'roadmap: roadmap-done.md points at roadmap-done-2.md, which starts with v0.11.88');
-    for (const t of ['**The fight lab, built:**', '**Fight ideas from the games', '**What the sitting loop\'s fix left', '**The game on a PC, a wide layout', '**Act 2** (open).']) assert((r1 + r2).includes(t), `roadmap: the open line "${t.replace(/\*/g, '')}" is still in an open part`);
+    for (const t of ['**What the sitting loop\'s fix left', '**The game on a PC, a wide layout', '**Act 2** (open).']) assert((r1 + r2).includes(t), `roadmap: the open line "${t.replace(/\*/g, '')}" is still in an open part`);
+    // v0.11.151 (owner pick WD1, RF): group d closed: its section and section 0's "Next: group d" moved word for word to
+    // roadmap-done-3.md (not left behind); its open parts re-filed: section 2 (the rot ape, DA2's three, the lab's table),
+    // roadmap-2.md section 4 (stances, clean or barbed, #66) and section 5 (the knitting bone and the crushing mass, Act 2),
+    // the weapon-to-Convergence note in reference.md
+    {
+        const d3 = readFileSync(path.join(ROOT, 'project/roadmap-done-3.md'), 'utf8'), ref = readFileSync(path.join(ROOT, 'project/reference.md'), 'utf8');
+        const sec = (t, a, b) => t.slice(t.indexOf(a), b ? t.indexOf(b) : undefined);
+        for (const t of ['**The fight lab, built:**', '**Fight ideas from the games', '**Fight ideas from the cultivation games', '**Bone weapons by Convergence', '**Mechanics, flight', '**When a weapon moves to Convergence:**', '- **Next: group d (combat)**']) assert(d3.includes(t) && !(r1 + r2).includes(t), `WD1 (RF): "${t.replace(/\*/g, '')}" moved to roadmap-done-3.md`);
+        assert(/^## Moved in v0\.11\.151 /m.test(d3) && d3.indexOf('## Moved in v0.11.151') < d3.indexOf('## Moved in v0.11.150'), 'WD1 (RF): roadmap-done-3.md has v0.11.151\'s move, newest first');
+        assert(/### d\. Combat\n\n\*\(v0\.11\.151, owner pick WD1: closed/.test(r1) && r1.includes('**Group d (combat): closed.**'), 'WD1 (RF): group d\'s heading says closed, section 0 says where its parts went');
+        assert(sec(r1, '## 2. ', null).includes('**Group d\'s fights for the retune') && sec(r2, '## 4. ', '## 5. ').includes('**Fight ideas that wait for Insights and crafting') && sec(r2, '## 5. ', '## 6. ').includes('**For Act 2, the knitting bone (T6) and the crushing mass (T9)**'), 'WD1 (RF): the open parts in section 2, section 4 and section 5');
+        assert(/\*\*When a weapon moves to Convergence\*\* \(moved here from group d in v0\.11\.151/.test(ref), 'WD1 (RF): the weapon-to-Convergence note in reference.md');
+    }
     for (const t of ['**Round 1 done (owner picks I1 + L1 + E1', "**The owner's calls for the next pushes", '**Mechanics and story, unarmed fights']) assert(d2.includes(t) && !(r1 + r2).includes(t), `roadmap: the done line "${t.replace(/\*/g, '')}" moved to roadmap-done-2.md`);
 }
 // v0.11.144 (owner pick TB1): everything tabled; the Android app is section 0's first item, its five pushes in order, Selene's
@@ -531,7 +544,8 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md'];
     assert(/\*\*Flight \(owner[^\n]*Foundation[^\n]*realm and GU/.test(sec('## James Green')), 'lore: James flies from Foundation, limited only by realm and GU');
     assert(/\*\*Flight:\*\*/.test(sec('## Yuki')), 'lore: Yuki flies too');
     assert(/\*\*Flight on this world[^\n]*Golden Core/.test(sec('## The world')), 'lore: locals fly only from Golden Core');
-    for (const t of ['**Story, flight', '**Mechanics, flight', "**Flight's walk times"]) assert(roadmap.includes(t), `roadmap: the flight line "${t.replace(/\*/g, '')}" is there`);
+    for (const t of ['**Story, flight', "**Flight's walk times"]) assert(roadmap.includes(t), `roadmap: the flight line "${t.replace(/\*/g, '')}" is there`);
+    assert(readFileSync(path.join(ROOT, 'project/roadmap-done-3.md'), 'utf8').includes('**Mechanics, flight'), 'roadmap: the flight line "Mechanics, flight" (done) is in roadmap-done-3.md since v0.11.151 (WD1)');
 }
 // v0.11.79 (owner pick R1): hard rule 8, Claude uploads the changed docs itself after every push (no question), in CLAUDE.md and the working agreement
 {

@@ -544,7 +544,9 @@ export function eveningTo(g, h = BED_FROM_HOUR) {
  *  way, only the share of the span he was still fed for (no all-or-nothing at the last Fed point). */
 export function nightTo(g, at = 60) {
     doorEnds(g, null);
+    const b0 = { hp: g.james.hp, qi: g.james.qi }, m0 = g.minutes; // v0.11.151 (RV1, EV): the line counts from the bed tap
     eveningTo(g);
+    const fire = g.minutes > m0; // an evening by the fire to 21:00 came first
     const p = clockParts(g.minutes), n0 = (p.hh < 6 ? p.day - 1 : p.day) * 1440; // before 06:00 it is still this night
     const t = Math.max(g.minutes, n0 + at), span = t - g.minutes;
     wakeState(g); g.minutes = t; g.wake.lastX = X4(t);
@@ -552,6 +554,19 @@ export function nightTo(g, at = 60) {
     const fedShare = fed0 <= 0 ? 0 : drop > 0 ? Math.min(1, fed0 / drop) : 1; // v0.11.143 (RN1, FP): only the hours he was still fed for
     if (span > 0 && fedShare > 0) { regenFor(g, Math.round(span * fedShare), true); ensureBars(g); } // v0.11.143 (NF1)
     g.james.satiety = Math.max(0, fed0 - drop);
+    return sleptLine(t, b0, { hp: g.james.hp, qi: g.james.qi }, fire);
+}
+/** v0.11.151 (owner pick WD1, LN; Fable's L4 of v0.11.143): the night scene says what the hours asleep gave back, James's
+ *  bars only (Yuki's are not in it), each part only from 1 point; nothing came back, no line. Returns 0 or 1 lines.
+ *  RV1 (Fable's review): EV from the bed tap, so an evening by the fire to 21:00 (`fire`) is counted and named; BR the gain
+ *  is the shown value after less the shown value before (each bar shows one decimal), so it never differs from the bars. */
+export function sleptLine(t, before, after, fire = false) {
+    const r1 = (x) => Math.round(x * 10) / 10, p = clockParts(t);
+    const d = (k) => r1(r1(after[k]) - r1(before[k]));
+    const dHp = d('hp'), dQi = d('qi');
+    const parts = [dHp >= 1 ? `+${dHp} HP` : '', dQi >= 1 ? `+${dQi} Qi` : ''].filter(Boolean);
+    const at = `${String(p.hh).padStart(2, '0')}:${String(p.mm).padStart(2, '0')}`;
+    return parts.length ? [`${fire ? `By the fire to ${String(BED_FROM_HOUR).padStart(2, '0')}:00, then asleep until ${at}` : `Slept until ${at}`}: ${parts.join(', ')}.`] : [];
 }
 /** A full night (or long rest): bars to Max, clock to the given hour of the next morning (v0.11.91: never a bed before 21:00;
  *  `bed: false` for a rest that isn't a bed, the Long Forest's seclusion, owner pick S1). */

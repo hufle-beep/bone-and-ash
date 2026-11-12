@@ -2,6 +2,27 @@
 
 Started 2026-11-12 (v0.11.148), when `history-17.md` would have passed about 45 KB. Newer than `history-17.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.151 (word for word)
+
+### The open items' group d bullet, as of v0.11.150
+
+- **Group d's open items, measured (the owner, 14:25: "what we do from section 1d"); the night's attack after cultivating (NQ): done in v0.11.143** (NF1, RN1; numbers in "Decided in chat"). **Open, options later:** stances (#58) and clean or barbed (#145) need Insights (their numbers from v0.11.115–116, to measure again); #66 waits for crafting; the knitting bone and the crushing mass (only the Sitter reaches T6, 5.6% of its Act 1 fight states); the rot ape decided by darts from the air (the retune); Fable's L3 (the Qi-priced night choices now nearly always affordable, information) and L4 (no line when the bars come back; new text); the keep-list's `fo_morning#2` now reached (log only); `rt_serpent_forced` now among the Story-only scenes the bots reach (log only).
+
+### Decided in chat
+
+- **v0.11.148: the Android app, push 3 (EX + NS) (options EX1–EX4 at about 16:59, owner 17:00 "Go EX1"; after the cold review RX1–RX4, owner 17:11 "Rx1 go"):**
+  - **The analysis:** seven places hand a save or text out; in the app four did nothing (Download save file, Export all saves, the notice bar's Download now, the recovery screen's damaged save: a blob link the WebView ignores), two copy (Copy status, the error bar; untested in the app), Share to GitHub works (opens the browser). Push 1's bridge: `shareFile` (the share sheet, answers only failures) and `exportFile` (the file picker, answers `window.onAndroidExport`, unhandled until now); a save about 25–30 KB, Export all at most about 0.5 MB. **EX-S** Selene's `exportText` for the four; **EX-F** "Save to a file" / "Save all to a file" (app only); **RP** the answer shown; **CP** a failed copy to the share sheet as `.txt`; **NS** no service worker in the app; **XM** the reminder marked at the tap (no change); **LB** labels unchanged; **TS** tests; **CR** Opus. **EX1 🟢 all (recommended)** / EX2 🟡 without EX-F / EX3 🟠 the file picker only + RP + NS + TS + CR / EX4 🔴 NS (colours: the 6 places working on build 4, judged). **Picked: EX1.**
+  - **The cold review (Opus):** no high; M1 "Saved msf:1000012345." (Android's id from Downloads or Drive, not the name), M2 seven `main.js` mutants passed the test, L3 the note on any page's `saveNote` (the James tab's Coil section), L4 the GitHub fallback's line promised a page, L5 the killed-picker case left an empty file and no word (Java), L6 an old service worker would stay (none seen; no change), L7 VERSION (with the docs), L8 the share window's "Share save file".
+  - **RX (stop-and-ask, options RX1–RX4 at about 17:08, owner 17:11):** **FN** the asked name unless Android gives a `.json` name; **TB** exact conditions and the `main.js` mutants; **NL** the note only on Saves or recovery, else the notice bar; **GW** the line reworded; **JE** `MainActivity.java` reports the killed picker once the page has loaded (`onPageFinished`; its stand-in added); **JT** "Share file". **RX1 🟢 FN + TB + NL + GW + JE + JT (recommended)** / RX2 🟡 without JE, JT / RX3 🟠 FN + TB / RX4 🔴 none (colours: the 6 findings fixed and guarded by a test). **Picked: RX1.** Built: `tests/appfiles.test.mjs` 9 `app.js` and 14 `main.js` mutants caught.
+  - **Also:** `45b0f4b` filled in for 0.11.147; v0.11.145's notes to the new `history-18.md` (part 17 would have passed 45 KB).
+
+### Version notes
+
+## v0.11.148 — The Android app, push 3: the game's files (EX1, RX1)
+
+- **Files:** `js/core/app.js` (new: `exportRoute`, `canSaveToFile`, `wantsServiceWorker`, `savedName`, `resultPlace`, `FILE_TEXT`), `js/main.js` (`exportText`, `shareText`, the two app-only buttons, `window.onAndroidExport`, the copy fallbacks, the notice bar's button, no service worker in the app), `android/.../MainActivity.java` (JE, JT), `tests/android-stubs/android/webkit/WebViewClient.java` (`onPageFinished`), `tests/appfiles.test.mjs` (new), `tools/check.mjs` (the appfiles step), `sw.js` (the module offline), `tests/README.md`, `project/reference.md`, docs. Story, balance, saves and keys unchanged.
+- **Checks:** a game-file push (rule 2): the full check after EX1 and after RX1 (exit 0 both; 0 drifted of 145, 19 moved more than 5, log only, the same game); the appfiles test (9 `app.js` and 14 `main.js` mutants caught), the Android test (javac with the new stand-in). A scratch headless run with a fake bridge: the four buttons in the app (two in a browser), share and picker routes, "Saved <the asked name>." for Android's `msf:` id, the status fallback, the notice-bar result, no service worker in the app, the browser download.
+
 ## Moved from the handover in v0.11.150 (word for word)
 
 ### The open items' first bullet, as of v0.11.149

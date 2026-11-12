@@ -22,7 +22,6 @@
       "meridians#5": "Story Mode only, after switching a closed-meridian game from Incremental Mode: reachable, not by bots",
       "meridians#6": "Story Mode only, after switching a closed-meridian game from Incremental Mode: reachable, not by bots",
       "coil_end#4": "'Not yet.': only after the browser's Bite the tail button (why = 'choice', or 'clear' at the end of a won Act 1, v0.11.106): reachable, not by bots",
-      "fo_morning#2": "a door no path uses now: hide it if ever, never delete (task card ids are scene:index in saves)",
       "heart_hub#7": "a door no path uses now: hide it if ever, never delete (task card ids are scene:index in saves)",
       "heart_hub#8": "a door no path uses now: hide it if ever, never delete (task card ids are scene:index in saves)",
       "heart_hub#11": "a door no path uses now: hide it if ever, never delete (task card ids are scene:index in saves)"

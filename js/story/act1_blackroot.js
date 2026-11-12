@@ -1184,8 +1184,7 @@ ${region(g) === 'dw' ? byDay(g, [BL_WATCHES, `Watches again. Ya says she will ta
             if (pick === g.flags.bl_last_ev) pick = pool[d6(g) - 1];
             g.flags.bl_ev = pick;
             g.flags.bl_last_ev = pick;
-            nightTo(g, 60); // v0.11.40 (N1): never back; v0.11.91: after the bed (from 21:00; it was 19:00 here), at 01:00
-            return [];
+            return nightTo(g, 60); // v0.11.40 (N1): never back; v0.11.91: after the bed (from 21:00; it was 19:00 here), at 01:00; v0.11.151 (WD1, LN): the slept line
         },
         text: (g) => ({
             wolves: `${g.flags.bl_watch === 'thread' ? 'The watch-thread yanks you awake.' : 'Ya\'s hand on your mouth, her breath in your ear: "Wolves."'} Two ash-wolves, grey on grey, at the edge of the firelight. They have seen the cat.`,

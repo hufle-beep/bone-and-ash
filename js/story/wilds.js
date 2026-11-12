@@ -76,8 +76,7 @@ export const WILDS = {
             if (pick === g.flags.last_ev) pick = NIGHT_EVENTS[d6(g) - 1];
             g.flags.night_ev = pick;
             g.flags.last_ev = pick;
-            nightTo(g, 60); // v0.11.40 (N1): never back; v0.11.91: after the bed (from 21:00), at 01:00
-            return [];
+            return nightTo(g, 60); // v0.11.40 (N1): never back; v0.11.91: after the bed (from 21:00), at 01:00; v0.11.151 (WD1, LN): the slept line
         },
         text: (g) => ({
             lights: byDay(g, [`You wake for no reason at all, which in your experience is the worst reason.

@@ -413,7 +413,7 @@ ${meiLovers(g)
     },
     fo_wolf: {
         id: 'fo_wolf', title: 'In the Barley', art: 'wolves', place: `${P} — the barley line`,
-        enter: (g) => { g.flags.wolf = 'came'; nightTo(g, 60); return []; }, // v0.11.94 (T-b1): after the bed, at 01:00, like the camp nights
+        enter: (g) => { g.flags.wolf = 'came'; return nightTo(g, 60); }, // v0.11.94 (T-b1): after the bed, at 01:00, like the camp nights; v0.11.151 (WD1, LN): the slept line
         text: `Yuki wakes you at the second hour with her claws and one word: *barley*.
 
 Something is moving through the barley toward the houses, low and silent, two shapes, grey on grey. Ash-wolves — drawn, maybe, by the blood from the clinic, or by the smell of a village that has stopped sleeping.

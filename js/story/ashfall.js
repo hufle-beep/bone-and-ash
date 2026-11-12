@@ -121,7 +121,7 @@ Then she's quiet for a long time, and then she leans her shoulder against yours,
         // v0.11.94 (owner 2026-11-09 11:35, pick T-b1): night 2's beats (the arson, Gao's token, Gao at the window) come after
         // the bed at 01:00, like the camp nights (never back; the fight taken at once is over by 02:00, one after a failed
         // "Wake the street" starts at 01:50, like the camps' forced fights); a quiet night is untouched
-        enter: (g) => { if (vday(g) === 2 && !g.flags.night5_done) nightTo(g, 60); return []; },
+        enter: (g) => (vday(g) === 2 && !g.flags.night5_done ? nightTo(g, 60) : []), // v0.11.151 (WD1, LN): the slept line
         text: (g) => {
             if (vday(g) !== 2 || g.flags.night5_done) return 'The herb loft smells of mint and drying ginseng. Below, the house breathes. Yuki takes the exact centre of your chest and the exact centre of your sleep, and you let her.';
             if (g.flags.gao_broken) return `Mei Lin shakes you awake in the dark. She has something in her fist, wrapped in cloth: Gao Feng's jade token, the one she took from his sleeve while he lay in the herbs with his arm on backwards.

@@ -1,5 +1,5 @@
 /* Bone and Ash — offline cache. Bump VERSION on every release so phones pick up the new files. */
-const VERSION = 'bone-ash-0.11.150';
+const VERSION = 'bone-ash-0.11.151';
 /* v0.11.39 (Z2-b): pictures, backgrounds and icons live in their own cache, kept across versions. Its name must not start with
    'bone-ash-' (main.js reads the game's version from that cache's name). Each file is stored under its path plus '?v=' and its
    fingerprint from ART (checked against the bytes before it is stored), and downloaded again only when that fingerprint changes. File names never change: replace a file, then

@@ -115,6 +115,8 @@ function summarize(lines) {
         const keep = /(?:you keep|in total): (.+)\.$/.exec(l);
         if (keep) { items.length = 0; items.push(...keep[1].split(', ')); continue; }
         if (/^Yuki (comes|leaves)/.test(l)) continue; // her haul has its own bit below
+        const slept = /^(?:Slept until|By the fire to) [^:]+:\d\d(?:, then asleep until \d\d:\d\d)?: (.+)\.$/.exec(l); // v0.11.151 (RV1, SM): the night's slept line, decimals and all
+        if (slept) { items.push(...slept[1].split(', ')); continue; }
         for (const m of l.matchAll(/(?:^|[ .])(\+\d+ [A-Z][^.,]*?)(?=[.,]|$)/g)) if (!/XP|Qi Use|Fight/.test(m[1])) items.push(m[1]);
     }
     bits.push(...[...new Set(items)].slice(0, 3));

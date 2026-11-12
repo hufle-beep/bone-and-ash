@@ -4141,6 +4141,61 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     // L2: a quiet night in Ashfall (not night 2) doesn't call nightTo: the clock and the bars stay
     { const g = low(9460, 4 * 1440 + 22 * 60); g.flags.vday = 1; g.scene = 'village_night'; const m0 = g.minutes; SCENES.village_night.enter?.(g);
       assert(g.minutes === m0 && g.james.qi === 1 && g.james.hp === 3, `NF1 (L2): a quiet village night is untouched (${g.minutes - m0} min, Qi ${g.james.qi})`); }
+    // v0.11.151 (owner pick WD1, LN; Fable's L4 of v0.11.143): the night scene says what the hours asleep gave back, James's
+    // bars only, each part from 1 point; nothing back, no line; a Results line (a gain), never a reply. RV1 (Fable's review):
+    // EV counted from the bed tap (an evening by the fire to 21:00 counted and named), BR the shown value after less the shown
+    // value before (the bars show one decimal), SM the Results summary takes both parts, TT expectations from the bars before
+    {
+        const { sleptLine, BED_FROM_HOUR } = await import('../js/core/game.js');
+        const { splitLine, landParts } = await import('../js/core/replies.js');
+        const r1 = (x) => Math.round(x * 10) / 10, shown = (a, b) => r1(r1(a) - r1(b));
+        const LN_RE = /^(Slept until|By the fire to 21:00, then asleep until) 01:(00|20): \+([\d.]+) HP, \+([\d.]+) Qi\.$/;
+        // every night scene, a bed at 22:00 (asleep only), 18:00 and 15:00 (the evening by the fire first): the numbers from the bars before the call
+        for (const bed of [22, 18, 15]) for (const [sc, d, flags] of scenes) {
+            const g = low(9470 + d + bed, (d - 1) * 1440 + bed * 60); Object.assign(g.flags, flags); g.scene = sc;
+            const hp0 = g.james.hp, qi0 = g.james.qi;
+            const lines = SCENES[sc].enter?.(g) || [];
+            const m = lines.length === 1 && LN_RE.exec(lines[0]);
+            const want = { hp: shown(g.james.hp, hp0), qi: shown(g.james.qi, qi0) };
+            assert(!!m && Number(m[3]) === want.hp && Number(m[4]) === want.qi && m[2] === (sc === 'night_attack' ? '20' : '00') && (m[1] === 'Slept until') === (bed >= BED_FROM_HOUR),
+                `LN (EV, BR): ${sc}, a bed at ${bed}:00, shows what the bed gave back, as the bars show it (${JSON.stringify(lines)}; want HP +${want.hp}, Qi +${want.qi})`);
+            assert(splitLine(lines[0] || '').gain === lines[0], `LN: ${sc}'s line goes to Results, not the reply (bed ${bed}:00)`);
+        }
+        for (const [sc, d, flags] of scenes) {
+            // full bars: nothing came back, no line (and the scene's own text is untouched)
+            const f = ensureBars(newGame(9480 + d)); f.minutes = (d - 1) * 1440 + 18 * 60; f.james.satiety = 90; Object.assign(f.flags, flags); f.scene = sc;
+            f.james.hp = jamesHpMax(f); f.james.qi = jamesQiMax(f);
+            const fl = SCENES[sc].enter?.(f) || [];
+            assert(Array.isArray(fl) && fl.length === 0, `LN: ${sc} with full bars shows no line (${JSON.stringify(fl)})`);
+        }
+        // at Fed 0, and entered after its hour: nothing came back, no line; a quiet village night: no line
+        { const g = low(9491, 22 * 60, 0); assert(nightTo(g, 60).length === 0, 'LN: at Fed 0 no line'); }
+        { const g = low(9492, 1440 + 90); assert(nightTo(g, 60).length === 0, 'LN: entered after its hour, no line'); }
+        { const g = low(9493, 4 * 1440 + 22 * 60); g.flags.vday = 1; g.scene = 'village_night'; const l = SCENES.village_night.enter?.(g) || [];
+          assert(Array.isArray(l) && l.length === 0, `LN: a quiet village night shows no line (${JSON.stringify(l)})`); }
+        // the parts: each from 1 point as the bars show it; neither, no line; the fire named only when there was one
+        const t1 = 1440 + 60, t2 = 1440 + 80, B = (hp, qi) => ({ hp, qi });
+        assert(JSON.stringify(sleptLine(t1, B(3, 1.3), B(15.34, 31.3))) === '["Slept until 01:00: +12.3 HP, +30 Qi."]', `LN: both parts (${sleptLine(t1, B(3, 1.3), B(15.34, 31.3))})`);
+        assert(JSON.stringify(sleptLine(t2, B(5, 2), B(5.94, 6.05), true)) === '["By the fire to 21:00, then asleep until 01:20: +4.1 Qi."]', `LN (EV): Qi only, HP under 1 point left out, the fire named (${sleptLine(t2, B(5, 2), B(5.94, 6.05), true)})`);
+        assert(JSON.stringify(sleptLine(t1, B(2, 0), B(3, 0))) === '["Slept until 01:00: +1 HP."]', `LN: HP only, from exactly 1 point (${sleptLine(t1, B(2, 0), B(3, 0))})`);
+        assert(sleptLine(t1, B(1, 1), B(1.9, 1.94)).length === 0 && sleptLine(t1, B(1, 1), B(1, 1)).length === 0 && sleptLine(t1, B(5, 5), B(3, 4), true).length === 0, 'LN: under 1 point each, or nothing, or a loss: no line');
+        // BR: the bars' own rounding: Qi 0.36 → 40.53 shows 0.4 → 40.5, so +40.1 (the raw gain would say +40.2); HP 0.96 → 1.94 shows 1 → 1.9: under 1, out
+        assert(JSON.stringify(sleptLine(t1, B(0.96, 0.36), B(1.94, 40.53))) === '["Slept until 01:00: +40.1 Qi."]', `LN (BR): the gain as the bars show it (${sleptLine(t1, B(0.96, 0.36), B(1.94, 40.53))})`);
+        // through the real path: the Blackroot camp's last tap of the evening (18:00, so the fire first) lands the line in Results, and the
+        // Results summary reads both parts, decimals and all (SM; main.js's own summarize)
+        { const g = low(9494, 11 * 1440 + 18 * 60); Object.assign(g.flags, { bl_region: 'rr', bl_day: 2 }); g.scene = 'bl_night';
+          const i = sceneView(g, SCENES).choices.findIndex((c) => !c.disabled && /^Leave the thread on watch/.test(c.label));
+          const r = i >= 0 ? choose(g, SCENES, i) : { lines: [] };
+          const p = landParts(r.lines, g.rel, g.rel), line = p.gains.find((l) => LN_RE.test(l)) || '';
+          const src = (await import('node:fs')).readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+          const body = src.slice(src.indexOf('function summarize(lines) {'), src.indexOf('\n}\n', src.indexOf('function summarize(lines) {')) + 2);
+          const summarize = new Function(`${body}; return summarize;`)();
+          const m = LN_RE.exec(line), sum = summarize(p.gains);
+          assert(g.scene === 'bl_night_event' && !!m && m[1].startsWith('By the fire') && !p.reply.some((l) => LN_RE.test(l)), `LN (TT): the camp's tap at 18:00 lands the fire line in Results (${JSON.stringify(r.lines)})`);
+          assert(!!m && sum.includes(`+${m[3]} HP`) && sum.includes(`+${m[4]} Qi`), `LN (SM): the Results summary shows both parts (${sum})`);
+          assert(summarize(['Slept until 01:00: +12.3 HP, +30 Qi.']) === '+12.3 HP · +30 Qi' || /\+12\.3 HP.*\+30 Qi/.test(summarize(['Slept until 01:00: +12.3 HP, +30 Qi.'])), `LN (SM): "+12.3 HP" is in the summary (${summarize(['Slept until 01:00: +12.3 HP, +30 Qi.'])})`);
+          assert(/\+5 HP/.test(summarize(['By the fire to 21:00, then asleep until 01:20: +5 HP.'])), `LN (SM): the fire line's part too (${summarize(['By the fire to 21:00, then asleep until 01:20: +5 HP.'])})`); }
+    }
 }
 const pctOf = (o, n) => Object.entries(o).sort().map(([k, v]) => `${k} ${((v / n) * 100).toFixed(1)}%`).join(', ');
 console.log(`  tribute, tasks:   ${pctOf(stats.tasks.endings, stats.tasks.games)}`);
