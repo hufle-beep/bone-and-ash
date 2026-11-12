@@ -479,6 +479,20 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md'];
     for (const t of ['**The fight lab, built:**', '**Fight ideas from the games', '**What the sitting loop\'s fix left', '**The game on a PC, a wide layout', '**Act 2** (open).']) assert((r1 + r2).includes(t), `roadmap: the open line "${t.replace(/\*/g, '')}" is still in an open part`);
     for (const t of ['**Round 1 done (owner picks I1 + L1 + E1', "**The owner's calls for the next pushes", '**Mechanics and story, unarmed fights']) assert(d2.includes(t) && !(r1 + r2).includes(t), `roadmap: the done line "${t.replace(/\*/g, '')}" moved to roadmap-done-2.md`);
 }
+// v0.11.144 (owner pick TB1): everything tabled; the Android app is section 0's first item, its five pushes in order, Selene's
+// files named; the handover's open items start with the same; the four done lines moved word for word, not left behind
+{
+    const r1 = readFileSync(path.join(ROOT, 'project/roadmap.md'), 'utf8'), d2 = readFileSync(path.join(ROOT, 'project/roadmap-done-2.md'), 'utf8'), ho = readFileSync(path.join(ROOT, 'project/handover.md'), 'utf8');
+    const s0 = r1.slice(r1.indexOf('## 0. '), r1.indexOf('## 1. '));
+    const first = s0.split('\n').find((l) => l.startsWith('- '));
+    assert(/\*\*TABLED: everything else in this roadmap waits\*\*/.test(first || '') && /NEXT: the Android app, Selene's way/.test(first || ''), 'TB1: section 0 opens with the Tabled note and the Android app');
+    const order = ['1. **WR + CI', '2. **UP', '3. **EX + NS', '4. **FN', '5. **BL'].map((t) => s0.indexOf(t));
+    assert(order.every((x, i) => x > 0 && (i === 0 || x > order[i - 1])), `TB1: the five Android pushes in order (${order.join(', ')})`);
+    assert(['`MainActivity.java`', '`android.yml`', '`io.github.hufle.boneandash`', '`BoneAndAsh.apk`', '`android-latest`', '`hufle-beep/Long-patience`'].every((t) => s0.includes(t)), 'TB1: the plan names Selene\'s files, the app ID, the APK and the release');
+    const ho0 = ho.slice(ho.indexOf('## Open items'));
+    assert(/^- \*\*TABLED: everything below waits until the Android app is done\*\*/m.test(ho0.split('\n').slice(2).join('\n')) && ho0.indexOf('**TABLED') < ho0.indexOf('**Group d'), 'TB1: the handover\'s open items start with the Tabled note');
+    for (const t of ['v0.11.140, owner picks FM2, RV1', 'v0.11.133, owner picks FP2, RF1', 'v0.11.132, owner picks PL1, E1', 'v0.11.119, pick NP1']) assert(d2.includes(`- *(new in ${t}`) && !r1.includes(`- *(new in ${t}`), `TB1 (TR): the done line of ${t.split(",")[0]} moved to roadmap-done-2.md`);
+}
 // v0.11.74 (group i round 1, I1; v0.11.75: round 2's wave 1, W1; v0.11.76: wave 2, V1; v0.11.78: read across the research parts, S1): every group i candidate in project/research.md is placed in the roadmap, and every roadmap line marked "from group i" (or "from group i round 2") names a real one
 {
     const parts = readdirSync(path.join(ROOT, 'project')).filter((f) => /^research(-\d+)?\.md$/.test(f)).sort((x, y) => (x === 'research.md' ? 1 : Number(x.match(/\d+/)[0])) - (y === 'research.md' ? 1 : Number(y.match(/\d+/)[0])));

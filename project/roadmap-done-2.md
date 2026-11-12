@@ -2,6 +2,15 @@
 
 Started in v0.11.88 (owner pick A, 2026-11-09 02:37, D2), so `roadmap-done.md` (part 1) stays readable in one go. Newer than `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.144 (word for word; owner pick TB1)
+
+### From section 0, "Next, before everything else" (done lines of v0.11.119–v0.11.140, as of v0.11.143; TR, the roadmap kept under 60 KB)
+
+- *(new in v0.11.140, owner picks FM2, RV1)* **Familiarity on door cards and story beats: done:** a door card's own time (the hub choice's and a door menu's entry) ÷ `cardSpeed` of its familiarity (×1 → ×10 over 18 uses; the door menus' share kept as work menus'; the scene inside unchanged); a story choice picked before ÷ max(2, 1 + 9 × picks ÷ 18) (picks in `tasks.use`, kept across Coils; only choices that could be sped count); door cards show their step and count. Hours saved a game (doors / story): Completionist 6.7 / 2.2, Careful 0.4 / 1.4, Random 6.8 / 4.6, Sitter 1.9 / 1.3; 0 drifted. Open, options later: the FAQ's sentence; FC (story checks by familiarity) for the retune.
+- *(new in v0.11.133, owner picks FP2, RF1)* **The fold by paragraph: done:** a scene read on an earlier Coil folds only when every paragraph it shows now was read on an earlier Coil (the save's `read` record; the food stock line left out), so changed text shows in full (Careful: 2,290 of 13,476 folds hid never-read text → 0), the skip never passes unread text, old saves start empty; numbers in the handover's v0.11.133 entry. **Next: LP (open, options later).** **Open, options later:** pruning the record after the rewrite (Fable's L6); the FAQ's fold sentence; a partial fold (FB).
+- *(new in v0.11.132, owner picks PL1, E1)* **Group e's plan, and the story-text lint: done:** group e runs in PL1's order (group e below, "The order"); push e1: the story-text lint, log only (`tools/textlint.mjs`: 67 reused passages, 32 favourite phrases, 19 tics, 0 broken, 3 unrendered; a snapshot per area), and in the bot report Act 1's endings and the screens repeated within a Coil (3.1–5.2% of screens), with a saved copy compared log only; numbers in the handover's v0.11.132 entry. **Next: e2, the fold by paragraph (open, options later).**
+- *(new in v0.11.119, pick NP1; done in v0.11.120, picks LX1, LR1)* **Yuki's lost XP to James: done:** a tenth of the Fight XP she can't keep goes to his GU (Act 1 3.90 / 3.45 Coils, was 4.07 / 3.68; the measurement and the bigger shares in the handover's v0.11.120 entry). A bigger share can come with the retune (section 2). Kept: the held / reach line says "held" when his share raised his GU in the same award.
+
 ## Moved in v0.11.143 (word for word; owner picks NF1, RN1)
 
 ### From section 0, "Next, before everything else" (the done line of v0.11.139, as of v0.11.142)

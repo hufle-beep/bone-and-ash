@@ -2,6 +2,23 @@
 
 Started 2026-11-12 (v0.11.138), when `history-16.md` would have passed about 45 KB. Newer than `history-16.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.144 (word for word)
+
+### Decided in chat
+
+- **v0.11.141: familiarity everywhere it fits (owner 12:57 "why don't the scenes behind the doors gain familiarity? everything should. Allowing more time for cultivation. that is the main point. the fights will be balanced to compensate, as we decided earlier."; options FX1–FX4 at about 13:15, owner 13:19 "FX1, ok, but please investigate overall, through the whole game what gains familiarity and what does notm this should be established now. (yes, my point is to use the freed time (not including the evening waits, that is ok) for manual cultivation, opening meridians and Qi condensation)"; Fable's review: RW1–RW4 at about 13:38, owner 13:40 "RW1 go"):**
+  - **FX (a scratch time account, 200 games each of Completionist / Careful / Random / Sitter; hours a game):** **DI** the scenes behind a door at its speed: door-scene time 40.0 → 34.3, 13.8 → 13.1, 42.3 → 38.2, 6.8 → 6.2; **SA** every story choice from its second pick (F1's and L1's exclusions gone): 0.1–1 h; **CH** chores by their own familiarity: 9.8 → 6.3, 9.0 → 5.6, 11.3 → 6.6, 7.8 → 5.5; DI + SA + CH 9.7 / 3.4 / 10.9 / 2.6 h freed, 0 drifted of 145. Most freed time goes to the fixed-hour waits (supper at 19:00, the camps); the Sitter turns about 3–5 h into cultivation. **FX1 🟢 DI + SA + CH (recommended)** / FX2 🟡 DI + CH / FX3 🟠 DI / FX4 🔴 SA. **Picked: FX1.**
+  - **The audit (the owner's 13:19):** `reference.md`'s last section (what speeds, what doesn't and why, where a game's hours go).
+  - **RW (stop-and-ask: Fable's cold review, no high; the full check exit 0, 0 drifted of 146, 17 moved):** **M1** the door mark ran on through the evening, the night and the next morning (a door ending the day: supper 60 → 6 min): **M1a** ends on reaching a task screen, menu or meta screen and at any sleep or night (freed 9.5 / 3.3 / 10.7 / 2.5 h) / **M1b** M1a + the clock passing 19:00 or midnight (9.5 / 3.3 / 10.0 / 2.5); **NF** the story's three sits and the spring's rest `noFam` (60 → 30 min from the second Coil before), `noFam` on story choices too; **CL** the door speed at most ×10, a Meditate card ends the mark; **TG**. **RW1 🟢 M1b + NF + CL + TG (recommended)** / RW2 🟡 M1a + NF + CL + TG / RW3 🟠 M1b + CL + TG / RW4 🔴 TG. **Picked: RW1.**
+  - **Also:** the ER1 (T8) story test's lover walks 24 → 80 (a Fallout walk reaches the roof about 1 in 8: 120 walks 20 before, 15 now; 12 missed it about 1 time in 5); `61ad7e4` filled in for 0.11.140; v0.11.138's notes to `history-17.md`; `roadmap.md`'s v0.11.137 done line to `roadmap-done-2.md`.
+
+### Version notes
+
+## v0.11.141 — Familiarity everywhere it fits (FX1, RW1)
+
+- **Files:** `js/core/story.js` (`choose`: every story choice off the meta screens counts and speeds, the door's speed inside its scenes, `noFam`; `go` ends the mark on a task screen), `js/core/tasks.js` (the door mark `tasks.door`, `choreSpeeds`; `canBeFamiliar` display only), `js/core/game.js` (`doorEnds`: 19:00, midnight, sleep, night, the evening jump), `js/core/meditate.js`, `noFam` on `hollow`, `rr_roots`, `rt_grove`, `heart_spring` and the Long Forest's season, `tests/tasks.test.mjs` (FX1, RW1; L1's and FD's chore asserts turned), `tests/story.test.mjs` (ER1 T8 80 walks), `tests/README.md`, `project/reference.md` (the audit), `sw.js`, docs. Saves: one new optional field `tasks.door` (an older version ignores it; a rewind drops it); more `pick:` keys (up to about 18 KB in all); no id, flag or key changed.
+- **Checks:** a game change (rule 2): the full check after FX1 (exit 0 after the leftover fix: `pickedMinutes` used again; 0 drifted of 146, 17 moved) and after RW1 (exit 0, 0 drifted of 146, 17 moved past 5, log only; the most: Gao random −10.9, the root wyrm random −8.5); models Careful 3.38 / 3.87, Completionist 3.34 / 3.58, Sitter 2.53 / 2.55, Farmer 3.30 / 3.54. Mutation: DI off 1, SA off 1, CH off 1, `doorEnds` off 3+, the screen's end 1, `noFam` 4, the cap 1, the Meditate end 1. **Fable's review:** no high; M1, L1–L5 in RW1.
+
 ## Moved from the handover in v0.11.143 (word for word)
 
 ### Decided in chat
