@@ -17,7 +17,7 @@ The game is programmed and written with the help of AI (Claude by Anthropic). Th
 
 ## Fonts
 
-- **Literata** and **Shippori Mincho**, from Google Fonts, under the SIL Open Font License 1.1.
+- **Literata** (© 2017 The Literata Project Authors) and **Shippori Mincho** (© 2021 The Shippori Mincho Project Authors), under the SIL Open Font License 1.1. Since v0.11.149 they ship with the game (`css/fonts/`), trimmed to the characters it uses by `tools/fonts.py` from [google/fonts](https://github.com/google/fonts); neither font has a Reserved Font Name, so the trimmed files keep their names; the licence texts are beside them (`OFL-Literata.txt`, `OFL-ShipporiMincho.txt`).
 
 ## Paintings
 

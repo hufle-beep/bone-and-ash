@@ -3,16 +3,16 @@
 // again only when its fingerprint here changes. File names never change: replace the file, then run
 //   node tools/arthash.mjs --write    (rewrites the ART table in sw.js)
 //   node tools/arthash.mjs            (checks it; tools/consistency.mjs runs the same check)
-import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 
-/** v0.11.39: which files are art (the art cache) rather than game files: images under art/ (any depth) and icons/. tools/consistency.mjs uses the same rule. */
-export const ART_RE = /^(art\/.*\.(jpg|png|svg|webp)|icons\/.*\.(png|svg))$/;
+/** v0.11.39: which files are art (the art cache) rather than game files: images under art/ (any depth) and icons/; v0.11.149 (FN1): the fonts in css/fonts/ (kept across versions too). tools/consistency.mjs uses the same rule. */
+export const ART_RE = /^(art\/.*\.(jpg|png|svg|webp)|icons\/.*\.(png|svg)|css\/fonts\/.*\.woff2?)$/;
 /** The files that go in the art cache: every picture, background and icon (sorted). */
 export function artFiles(root = '.') {
-    const walk = (dir) => readdirSync(`${root}/${dir}`, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(`${dir}/${e.name}`) : [`${dir}/${e.name}`]));
-    return [...walk('art'), ...walk('icons')].filter((f) => ART_RE.test(f)).sort();
+    const walk = (dir) => (existsSync(`${root}/${dir}`) ? readdirSync(`${root}/${dir}`, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(`${dir}/${e.name}`) : [`${dir}/${e.name}`])) : []); // v0.11.149: css/fonts may be absent (a test's temp copy)
+    return [...walk('art'), ...walk('icons'), ...walk('css/fonts')].filter((f) => ART_RE.test(f)).sort();
 }
 /** A file's fingerprint: the first 10 hex digits of its SHA-256. */
 export const fingerprint = (path) => createHash('sha256').update(readFileSync(path)).digest('hex').slice(0, 10);
@@ -32,7 +32,7 @@ export function checkArt(sw, root = '.') {
         if (!(f in art)) fail.push(`sw.js ART is missing ${f} (run node tools/arthash.mjs --write)`);
         else if (art[f] !== fingerprint(`${root}/${f}`)) fail.push(`sw.js ART: ${f} changed, its fingerprint is stale (run node tools/arthash.mjs --write)`);
     }
-    for (const f of Object.keys(art)) if (!files.includes(f)) fail.push(`sw.js ART lists ${f}, which is not a picture, background or icon in the repo`);
+    for (const f of Object.keys(art)) if (!files.includes(f)) fail.push(`sw.js ART lists ${f}, which is not a picture, background, icon or font in the repo`);
     return fail;
 }
 /** sw.js with its ART table rewritten from the files on disk. */

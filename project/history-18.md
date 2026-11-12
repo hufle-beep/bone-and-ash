@@ -2,6 +2,33 @@
 
 Started 2026-11-12 (v0.11.148), when `history-17.md` would have passed about 45 KB. Newer than `history-17.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Trimmed in the handover in v0.11.149 (the v0.11.147 entry in full, word for word; the handover keeps a short form)
+
+- **v0.11.147: the Android app, push 2 (UP, the in-game update check) (options UP1–UP4 at about 16:12, owner 16:19 "UP1 go"; after the cold review RV1–RV4, owner 16:36 "RV1 go"):**
+  - **The analysis (Selene's `index.html` 5673–5730 read; our `MainActivity.java` already has the download, install and version parts; the live title "… (build 2)"):** **CK** the check: one request to `releases/tags/android-latest`, "(build N)" from the title against `AndroidBridge.versionCode()`, only in the app (GitHub allows 60 an hour; one per start); **AU** at start, 2.5 s after the app opens, a switch (on), the new phone key `boneash.update` (no key renamed, no save field); **AI** install automatically (off; Android still asks); **ST** Settings → App updates (installed and latest build, Check now, Download and install build N, a status line, progress in 5% steps); **MN** a main-menu button (the app opens on the menu; not the notice bar, whose button is "Download now"); **SV** autosave before the download (the same key: saves kept); **RT** a 404 retried 3 × 30 s; **BR** in a browser one line with the APK link; **MD** the pure parts in `js/core/update.js`; **TS** `tests/update.test.mjs` (the title reader against `android.yml`'s `TITLE=`, the link against the workflow's repo and file, the rules, mutants); **FQ** a FAQ line naming App updates (Fable's words, one more round trip); **CR** a cold review on Opus (no game logic, rule 9). Build 2 has no update code: build 3 by hand once. **UP1 🟢 CK + AU + AI + ST + MN + SV + RT + BR + MD + TS + CR (recommended)** / UP2 🟢 UP1 + FQ / UP3 🟡 UP1 without MD / UP4 🟠 CK + ST + SV + TS (colours: how much of Selene's flow works on the first install, judged). **Picked: UP1.** The FAQ line for the app: open, options later (with push 5, BL).
+  - **As built:** `main.js` 1,051 → 1,088 lines, `update.js` 121, the module in `sw.js`'s list (268 files in the app). A scratch headless-Chromium run with a fake bridge (not committed, run after UP1 and RV1): menu button, panel, switches, 404 → retry → installer, no request with the switch off, the browser's line, no page errors.
+  - **The cold review (Opus):** no high; M1 the menu redrawn at start even for "latest" (the New game note wiped while armed; the button moved the menu about 35 px), M2 a second download and installer through the retry wait or after "permission", L3 every failure "offline", L4 install automatically silent mid-game, L5 VERSION (bumped with the docs), L6 `main.js`'s logic untested and a check that couldn't fail, L7 build 0 looked old, WF a bare 404 after a cancelled build. Links, title, bridge, messages, escaping, CORS, rate limit, load order and saves fine.
+  - **RV (stop-and-ask after the review, options RV1–RV4 at about 16:33, owner 16:36 "RV1 go"):** **R2** the retry timer kept, busy through the wait and after "permission", a start by hand ends the wait; **RD** Settings redrawn always, the menu only for a newer build; **NA** no menu redraw while New game is armed (4 s); **RL** a 403/429 line, a mistake logged, not "offline"; **AM** install automatically only when the menu or Settings is on screen; **UB** build 0 "unknown build", no button; **LM** a missing-file line after the third 404; **TC** the busy, retry and timer rules in `update.js` (`makeUpdater`) with a Node test on a fake app and timers / **TB** the scratch run into browser part 2 instead; **TK** the key check over every `boneash.*` key in `js/`. **RV1 🟢 R2 + RD + NA + RL + AM + UB + LM + TC + TK (recommended)** / RV2 🟡 the same with TB / RV3 🟠 R2 + RD + NA + TK / RV4 🔴 no change (colours: how many of the 7 findings are fixed and then guarded by a test in the full check, judged). **Picked: RV1.** Built: `makeUpdater` (21 cases on fakes, 24 mutants).
+  - **Also:** `3a819c6` filled in for 0.11.146; v0.11.144's notes to `history-17.md`.
+- **v0.11.146: the Android build fixed (stop-and-report after v0.11.145's push: the GitHub run #1 failed at `:app:mergeReleaseResources`, "The string \"--\" is not permitted within comments", `colors.xml` 3:52; options AF1–AF2 at about 15:57, owner 15:59 "AF1 go"):**
+  - **CM** the comment in `colors.xml` without `--` (1 of the 10 XML files in `android/` failed Python's parser; the other 9 parsed); **XT** the Android test parses every XML file in `android/` and fails a `--` inside an XML comment (the old comment and an unclosed `strings.xml` each fail it); **DC** the docs: the first APK will be `android-build-2` (version code 2), not `-1`. **AF1 🟢 CM + XT + DC (recommended)** / AF2 🟡 CM + DC (colours: how sure the next build gets past this kind of mistake, judged). **Picked: AF1.**
+  - **Also:** `b632376` filled in for 0.11.145; v0.11.143's notes to `history-17.md`; the message said 11 XML files: there are 10.
+
+## Moved from the handover in v0.11.149 (word for word)
+
+### Decided in chat
+
+- **v0.11.146: the Android build fixed (stop-and-report after v0.11.145's push: the GitHub run #1 failed at `:app:mergeReleaseResources`, "The string \"--\" is not permitted within comments", `colors.xml` 3:52; options AF1–AF2 at about 15:57, owner 15:59 "AF1 go"):**
+  - **CM** the comment in `colors.xml` without `--` (1 of the 10 XML files in `android/` failed Python's parser; the other 9 parsed); **XT** the Android test parses every XML file in `android/` and fails a `--` inside an XML comment (the old comment and an unclosed `strings.xml` each fail it); **DC** the docs: the first APK will be `android-build-2` (version code 2), not `-1`. **AF1 🟢 CM + XT + DC (recommended)** / AF2 🟡 CM + DC (colours: how sure the next build gets past this kind of mistake, judged). **Picked: AF1.**
+  - **Also:** `b632376` filled in for 0.11.145; v0.11.143's notes to `history-17.md`; the message said 11 XML files: there are 10.
+
+### Version notes
+
+## v0.11.146 — The Android build fixed (AF1)
+
+- **Files:** `android/app/src/main/res/values/colors.xml` (the comment), `tests/android.test.mjs` (AF1), `tests/README.md`, `sw.js`, docs. The game, saves and bots unchanged.
+- **Checks:** a build-file, test and docs push (rule 2): the Android test (42 passed; the old comment and an unclosed `strings.xml` each fail it), `bash tools/check.sh quick` (exit 0). Interaction: none with the game; the APK is checked by the GitHub run.
+
 ## Moved from the handover in v0.11.148 (word for word)
 
 ### Decided in chat

@@ -370,6 +370,7 @@ for (const [name] of RUNS) {
     const artCache = (real.match(/const ART_CACHE = '([^']+)'/) || [])[1];
     assert(artCache && !/^bone-ash-/.test(artCache), `arthash: sw.js's art cache name (${artCache}) does not start with 'bone-ash-' (main.js reads the version from that prefix)`);
     assert(artFiles(ROOT).every((f) => ART_RE.test(f)) && ART_RE.test('art/bg/x.webp') && ART_RE.test('art/pic/sub/y.webp') && !ART_RE.test('art/bg/CREDITS.md'), 'arthash: one rule for art files (ART_RE), any depth under art/');
+    assert(ART_RE.test('css/fonts/Literata.woff') && artFiles(ROOT).filter((f) => f.startsWith('css/fonts/')).length === 4 && !ART_RE.test('css/fonts/OFL-Literata.txt') && !ART_RE.test('css/style.css'), 'arthash: v0.11.149 (FN1): the four fonts in the art cache, not their licence texts or the stylesheet');
 }
 
 // v0.11.62: tools/art/patch.py (the second round of small fixes) on a made-up 60x40 picture: a layer pastes only inside its mask,

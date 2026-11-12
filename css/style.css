@@ -1,4 +1,10 @@
 /* Bone and Ash — ink on rice paper. One accent: cinnabar red (HP, danger, the Sect, seals). */
+/* v0.11.149 (owner pick FN1): the two fonts ship with the game (css/fonts/, trimmed by tools/fonts.py; SIL OFL 1.1, the licence
+   texts beside them), the same cuts the game asked Google Fonts for until now. */
+@font-face { font-family: "Literata"; src: url("fonts/Literata.woff") format("woff"); font-weight: 400 600; font-style: normal; font-display: swap; }
+@font-face { font-family: "Literata"; src: url("fonts/Literata-Italic.woff") format("woff"); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: "Shippori Mincho"; src: url("fonts/ShipporiMincho-SemiBold.woff") format("woff"); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: "Shippori Mincho"; src: url("fonts/ShipporiMincho-ExtraBold.woff") format("woff"); font-weight: 800; font-style: normal; font-display: swap; }
 :root {
   --paper: #ece8df;
   --paper-2: #e3ded3;

@@ -154,6 +154,51 @@ def main_menu(pg, url):
     if not pg.query_selector('.main-menu'): fails.append('menu: the ☰ Menu tab did not open the menu')
     enter(pg)
 
+FONT_FACES = {'Literata|400 600|normal', 'Literata|400|italic', 'Shippori Mincho|600|normal', 'Shippori Mincho|800|normal'}
+
+def drawn_fonts(pg):
+    """v0.11.149 (FX1, FL): the platform fonts Chromium used for sample text in the game's own styles (CDP CSS.getPlatformFontsForNode)."""
+    pg.evaluate("""() => { const d = document.createElement('div'); d.id = 'fontprobe'; d.innerHTML = '<p id="fp-body">The bone sings — Ashfall.</p><p id="fp-bold"><b>The bone sings.</b></p><p id="fp-italic"><i>The bone sings.</i></p><h1 id="fp-title" style="font-family: var(--display); font-weight: 800">Bone and Ash</h1><h2 id="fp-heading" style="font-family: var(--display); font-weight: 600">Saves</h2>'; document.body.appendChild(d); return document.fonts.ready.then(() => 1); }""")
+    cdp = pg.context.new_cdp_session(pg)
+    try:
+        cdp.send('DOM.enable'); cdp.send('CSS.enable')
+        root = cdp.send('DOM.getDocument')['root']['nodeId']
+        out = {}
+        for k in ('body', 'bold', 'italic', 'title', 'heading'):
+            node = cdp.send('DOM.querySelector', {'nodeId': root, 'selector': f'#fp-{k}'})['nodeId']
+            kid = cdp.send('DOM.describeNode', {'nodeId': node, 'depth': 2})['node']
+            text = next((c for c in kid.get('children', []) if c.get('nodeType') == 3), None) or next((g for c in kid.get('children', []) for g in c.get('children', []) if g.get('nodeType') == 3), None)
+            target = cdp.send('DOM.pushNodesByBackendIdsToFrontend', {'backendNodeIds': [text['backendNodeId']]})['nodeIds'][0] if text else node
+            out[k] = [f['familyName'] for f in cdp.send('CSS.getPlatformFontsForNode', {'nodeId': target})['fonts']]
+        return out
+    finally:
+        cdp.detach(); pg.evaluate("document.getElementById('fontprobe')?.remove()")
+
+def fonts_local(pg, url):
+    """v0.11.149 (owner pick FN1): the four fonts load from the game's own css/fonts/ with Google Fonts blocked, and nothing asks Google."""
+    asked = []
+    google = re.compile(r'https://fonts\.(googleapis|gstatic)\.com/.*')
+    def block(route): asked.append(route.request.url); route.abort()
+    pg.context.route(google, block)
+    try:
+        fresh(pg, url, "localStorage.clear()")
+        faces = pg.evaluate("Promise.all([...document.fonts].map((f) => f.load().then(() => f, () => f))).then((fs) => fs.map((f) => [f.family.replace(/\"/g, ''), f.weight, f.style, f.status].join('|')))")
+        got = {'|'.join(f.split('|')[:3]) for f in faces if f.endswith('|loaded')}
+        bad = [f for f in faces if not f.endswith('|loaded')]
+        drawn = pg.evaluate("['16px Literata', '600 16px Literata', 'italic 16px Literata', '600 16px \"Shippori Mincho\"', '800 16px \"Shippori Mincho\"'].filter((f) => !document.fonts.check(f))")
+        if got != FONT_FACES or bad: fails.append(f'fonts: the local faces {sorted(got)} (failed {bad}), expected {sorted(FONT_FACES)}')
+        elif drawn: fails.append(f'fonts: not ready to draw {drawn}')
+        elif asked: fails.append(f'fonts: the page still asked Google Fonts ({asked[:2]})')
+        else:
+            # v0.11.149 (FX1, FL): which font Chromium really draws each kind of text with (not just that the faces loaded)
+            used = drawn_fonts(pg)
+            want = {'body': 'Literata', 'bold': 'Literata', 'italic': 'Literata', 'title': 'Shippori Mincho', 'heading': 'Shippori Mincho'}
+            off = {k: v for k, v in used.items() if not v or not v[0].startswith(want[k]) or len(v) > 1}
+            if off or set(used) != set(want): fails.append(f'fonts: drawn with {used}')
+            else: notes.append('the four fonts from css/fonts/, nothing asked of Google; body, bold, italic, title and headings drawn with them (' + ', '.join(f'{k} {v[0]}' for k, v in used.items()) + ')')
+    finally:
+        pg.context.unroute(google, block)
+
 def comfort(pg, url):
     fresh(pg, url, "localStorage.clear()")
     if len(pg.query_selector_all('.status [role="progressbar"][aria-valuenow]')) != 3: fails.append('a11y: the status bars lack progress values')
@@ -570,14 +615,16 @@ def update_test(b):
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     base = f'http://127.0.0.1:{srv.server_port}/bone-and-ash/'
     sw = (site / 'sw.js').read_text()
-    art = dict(re.findall(r"'((?:art|icons)/[^']+)': '([0-9a-f]+)'", sw))
+    art = dict(re.findall(r"'((?:art|icons|css/fonts)/[^']+)': '([0-9a-f]+)'", sw))  # v0.11.149 (FN1): the fonts are in the art cache too
     ver = re.search(r"const VERSION = '([^']+)'", sw).group(1)
     def with_version(text, v): return text.replace(f"const VERSION = '{ver}'", f"const VERSION = '{v}'")
-    art_hits = lambda: [x for x in log if re.match(r'^/bone-and-ash/(art/.*\.(jpg|png|svg|webp)|icons/)', x)]
+    art_hits = lambda: [x for x in log if re.match(r'^/bone-and-ash/(art/.*\.(jpg|png|svg|webp)|icons/|css/fonts/.*\.woff2?$)', x)]
     entries = "async () => (await (await caches.open('boneash-art')).keys()).map(r => r.url.replace(location.origin, ''))"
     def update_to(pg, v, ms=20000):
         log.clear(); pg.evaluate("navigator.serviceWorker.getRegistration().then(r => r.update())")
-        return poll(pg, f"caches.keys().then(k => k.includes('{v}') && k.includes('boneash-art') && k.filter(x => /^bone-ash-/.test(x)).length === 1)", ms)
+        # v0.11.149 (PX1, AW): and the new worker fully activated, nothing installing or waiting: its activate step prunes the art
+        # cache after it deletes the old version cache, so the old-cache test alone could pass in between (an old picture still there)
+        return poll(pg, f"Promise.all([caches.keys(), navigator.serviceWorker.getRegistration()]).then(([k, r]) => k.includes('{v}') && k.includes('boneash-art') && k.filter(x => /^bone-ash-/.test(x)).length === 1 && !!r && !r.installing && !r.waiting && !!r.active && r.active.state === 'activated')", ms)
     def bad(msg): fails.append(f'update: {msg}')
     try:
         ctx = b.new_context(viewport={'width': 390, 'height': 844})
@@ -587,13 +634,19 @@ def update_test(b):
         pg.goto(base + 'index.html')
         if not poll(pg, "caches.open('bone-ash-0.11.38').then(c => c.match('art/pic/james.webp')).then(r => !!r)"): bad('the 0.11.38 worker did not cache its pictures'); return
         pg.reload(); poll(pg, "navigator.serviceWorker.controller ? 1 : 0", 10000)
+        # v0.11.149 (FX1, PF): let the page's own requests (the fonts through the old worker, which caches without waiting) and the
+        # navigation's update check settle first, so a late write can't bring the old cache back after the update deleted it
+        pg.wait_for_load_state('networkidle'); pg.evaluate("document.fonts.ready.then(() => navigator.serviceWorker.getRegistration()).then((r) => r && r.update()).then(() => 1, () => 1)")
         # 1. the update to this version (Z2-b)
         (site / 'sw.js').write_text(with_version(sw, 'bone-ash-9.9.8'))
-        if not update_to(pg, 'bone-ash-9.9.8'): bad(f'the update from 0.11.38 never took over (caches {pg.evaluate("caches.keys()")})'); return
+        if not update_to(pg, 'bone-ash-9.9.8'):
+            state = pg.evaluate("navigator.serviceWorker.getRegistration().then((r) => r ? [r.installing?.state, r.waiting?.state, r.active?.state].map(String).join(' / ') : 'none')")
+            bad(f'the update from 0.11.38 never took over (caches {pg.evaluate("caches.keys()")}; installing / waiting / active: {state}; sw.js fetched {log.count("/bone-and-ash/sw.js")}×)'); return
         have = pg.evaluate(entries); hits = art_hits()
         if len(have) != len(art) or sorted(hits) != sorted('/bone-and-ash/' + f for f in art): bad(f'from 0.11.38: {len(have)} art files cached, {len(hits)} downloaded ({len(set(hits))} distinct), expected {len(art)} each once')
         log.clear()
         if pg.evaluate("fetch('art/pic/james.webp').then(r => r.status)") != 200 or art_hits(): bad(f'a cached picture went to the network ({art_hits()})')
+        if pg.evaluate("fetch('css/fonts/Literata.woff').then(r => r.status)") != 200 or art_hits(): bad(f'a cached font went to the network ({art_hits()})')  # v0.11.149 (FX1, FL)
         # 2. one picture replaced, same name
         changed, donor = 'art/pic/ridge.webp', 'art/pic/hollow.webp'
         shutil.copyfile(site / donor, site / changed)
@@ -627,8 +680,10 @@ def update_test(b):
         ctx.set_offline(True)
         size = pg.evaluate(f"fetch('{changed}').then(r => r.ok ? r.arrayBuffer().then(a => a.byteLength) : -r.status).catch(e => String(e))")
         if size != (site / donor).stat().st_size: bad(f'offline, {changed} gave {size}, not the new file ({(site / donor).stat().st_size} bytes)')
+        fsize = pg.evaluate("fetch('css/fonts/ShipporiMincho-ExtraBold.woff').then(r => r.ok ? r.arrayBuffer().then(a => a.byteLength) : -r.status).catch(e => String(e))")  # v0.11.149 (FX1, FL)
+        if fsize != (site / 'css/fonts/ShipporiMincho-ExtraBold.woff').stat().st_size: bad(f'offline, the ExtraBold font gave {fsize}')
         ctx.set_offline(False)
-        if not any(f for f in fails if f.startswith('update')): notes.append(f'update: from 0.11.38 every art file once ({len(art)}); a new version downloaded only the 1 changed picture, old copy pruned; a stale file rejected (the install failed, the version stayed); a miss stored again; served offline')
+        if not any(f for f in fails if f.startswith('update')): notes.append(f'update: from 0.11.38 every art file once ({len(art)}); a new version downloaded only the 1 changed picture, old copy pruned; a stale file rejected (the install failed, the version stayed); a miss stored again; served offline (a font too)')
         ctx.close()
     finally:
         srv.shutdown(); shutil.rmtree(tmp, ignore_errors=True)
@@ -715,6 +770,8 @@ def main(part=0):
                 saves(pg, url)
                 # 6. the main menu (v0.11.10)
                 main_menu(pg, url)
+                # 6b. the fonts from the game's own files (v0.11.149, FN1)
+                fonts_local(pg, url)
                 # 7. tooltip, bars, scroll (v0.11.11)
                 comfort(pg, url)
                 # 8. Meditate only on the resting places (v0.11.14); Cultivate until the limit (v0.11.64)
