@@ -1,11 +1,13 @@
 // Run: node tests/story.test.mjs — story graph integrity + 1,000 random playthroughs (2,000 before v0.11.34) (no crash, no dead end, always reaches the end);
 // Incremental Mode since v0.11.34 (D1: Story Mode dropped from the game)
 import { SCENES, START_SCENE } from '../js/story/prologue.js';
-import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, itemCap, yukiSitsOut, migrate, REL_HIDDEN, REL_MAX, serialize, deserialize } from '../js/core/game.js'; // v0.11.127 (LQ2, TG): yukiSitsOut, migrate; v0.11.137 (HV1): REL_HIDDEN, REL_MAX
+import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, itemCap, yukiSitsOut, migrate, REL_HIDDEN, REL_MAX, serialize, deserialize, sleepUntil } from '../js/core/game.js'; // v0.11.127 (LQ2, TG): yukiSitsOut, migrate; v0.11.137 (HV1): REL_HIDDEN, REL_MAX
 import { sceneView, choose, goTo, wasPicked, threatOf } from '../js/core/story.js'; // v0.11.136 (RV2, TG): threatOf
 import { actionOpen } from '../js/core/forms.js';
 import { btTarget } from '../js/story/meridians.js';
-import { loveLine } from '../js/story/yuki_path.js'; // v0.11.122 (RL1, T)
+import { loveLine, YK_QUESTION, ykAskAgain, YK_HERE } from '../js/story/yuki_path.js'; // v0.11.122 (RL1, T); v0.11.137 (TR1, YR; QA2)
+import { YT_HUBS, YT_BODY, YT_CLOSE, YT_LABEL, YT_GAIN, ytPool } from '../js/story/yuki_time.js'; // v0.11.137 (TR1)
+import { TASK_HUBS } from '../js/story/task_hubs.js'; // v0.11.137 (TR1, YB)
 import { likesMei, likesYa } from '../js/story/act1_common.js'; // v0.11.123 (EQ1, AB)
 import { KEEP_FLAGS, rewind } from '../js/core/coil.js'; // v0.11.137 (HV1, Fable L2): rewind on an old save // v0.11.123 (ER1, T3)
 import { againView, noteRead } from '../js/story/again.js'; // v0.11.125 (RW1, T); v0.11.133 (FP2): noteRead
@@ -190,7 +192,7 @@ for (let run = 0; run < 20; run++) { // Yuki's sister path: the interrogation at
 // games reached "More." (yk_lover) about once in 1,000, and the new night clock (bed from 21:00, the day's end at 00:00) shifted that
 for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_lover'], [2, /^"Family/, 'yk_sister'], [3, /^"More\."/, 'yk_lover']]) {
     const g = ensureBars(fresh(run + 49494)); g.minutes = 10 * 1440 + 21 * 60; g.james.realm = 7; g.yuki.realm = 7;
-    Object.assign(g.flags, { long: true, forest_day: 3, vday: 3, ending: 'bluff', mei_party: true, ya_party: true, ya_met: true, yk_back: 'bl_camp' });
+    Object.assign(g.flags, { long: true, forest_day: 3, vday: 3, ending: 'bluff', mei_party: true, ya_party: true, ya_met: true, yk_back: 'bl_camp', lf_active: true }); // v0.11.137 (QA2): the Long Forest's fire
     g.rel = { 'Mei Lin': { f: 40, a: 10 }, Ya: { f: 40, a: 10 }, Yuki: { f: 150, a: 150 }, Village: { f: 30, a: 0 } }; ensureBars(g);
     goTo(g, SCENES, 'yk_choice'); seen.add('yk_choice');
     const ans = sceneView(g, SCENES).choices.find((c) => !c.disabled && re.test(c.label));
@@ -396,6 +398,163 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     rewind(back); rewind(back);
     assert(back.rel['Old Hu'] && Number.isFinite(back.rel['Old Hu'].f), `HV1 (T, Fable L2): Old Hu's key survives two rewinds, with the head start (${JSON.stringify(back.rel['Old Hu'])})`);
     assert(REL_MAX === 150, 'HV1 (VD): the Village has the same cap, 150');
+}
+// v0.11.137 (owner pick TR1, the tree's push 1): Yuki's daily scene (YB), her closing lines by level (YT), her pace (YG-A), her question (YR)
+{
+    const D = 1440;
+    // YB: every resting place has the card, last (no choice position changes), a door card, once a waking day
+    for (const hub of Object.keys(YT_HUBS)) {
+        const cs = SCENES[hub].choices, last = cs[cs.length - 1];
+        assert(last.to === 'yk_time' && last.time === 10 && cs.filter((c) => c.to === 'yk_time').length === 1, `TR1 (YB; DR2): ${hub}'s last choice is Yuki's card, 10 min`);
+        assert((TASK_HUBS[hub].doors || []).includes('yk_time'), `TR1 (YB): ${hub} shows it as a door card`);
+    }
+    // every slot has three texts, every text is used, every pool three lines
+    const used = new Set(Object.values(YT_HUBS).flat().flatMap((k) => (typeof k === 'function' ? [k({ flags: { ya_met: true } }), k({ flags: {} })] : [k])));
+    assert(used.size === Object.keys(YT_BODY).length && [...used].every((k) => YT_BODY[k]?.length === 3 && YT_BODY[k].every((t) => typeof t === 'string' && t.length > 80)), `TR1 (YB): ${used.size} slots, each with its three texts (${Object.keys(YT_BODY).length} written)`);
+    assert(Object.keys(YT_CLOSE).length === 11 && Object.values(YT_CLOSE).every((l) => l.length === 3), 'TR1 (YT): 11 closing pools of three');
+    assert(YT_LABEL.CAT && YT_LABEL.GREAT && YT_LABEL.HUMAN, 'TR1 (YB): a label per form');
+    const YG = (seed, form, hub, rel = { f: 0, a: 0 }, flags = {}) => {
+        const g = ensureBars(fresh(seed)); g.minutes = (hub.startsWith('fo_') ? 8 : hub.startsWith('rr') ? 10 : 3) * D + 600;
+        const realm = form === 'human' ? 7 : form === 'tiger' ? 2 : 0; g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form;
+        Object.assign(g.flags, flags); g.rel = { ...g.rel, Yuki: { ...rel } }; goTo(ensureBars(g), SCENES, hub); return g;
+    };
+    const tap = (g) => { const i = SCENES[g.scene].choices.findIndex((c) => c.to === 'yk_time'); return choose(g, SCENES, i); };
+    // YG-A: +3 then +2, friendship and affection; once a waking day; by form; the closer by level
+    {
+        const g = YG(63001, 'cat', 'ashfall'); tap(g);
+        assert(g.scene === 'yk_time' && g.rel.Yuki.f === 3 && g.rel.Yuki.a === 3, `TR1 (YG-A): the first scene +3 / +3 (${JSON.stringify(g.rel.Yuki)})`);
+        const t = sceneView(g, SCENES).text;
+        assert(t.startsWith(YT_BODY['ashfall:1'][0]) && YT_CLOSE['CAT LOW'].some((l) => t.endsWith(l)), 'TR1 (YB, YT): the cat\'s first Ashfall text, a CAT LOW closer');
+        assert(sceneView(g, SCENES).text === t, 'TR1 (YT): the closer stays the same on a redraw');
+        choose(g, SCENES, sceneView(g, SCENES).choices.find((c) => c.label === 'Go on.').index);
+        assert(g.scene === 'ashfall' && !SCENES.ashfall.choices.at(-1).show(g), `TR1 (YB): back at the place, the card done for today (${g.scene})`);
+        sleepUntil(g, 6); goTo(g, SCENES, 'ashfall'); tap(g);
+        assert(g.rel.Yuki.f === 5 && g.rel.Yuki.a === 5 && sceneView(g, SCENES).text.startsWith(YT_BODY['ashfall:2'][0]), `TR1 (YG-A, YB): the next day +2 / +2 and the second text (${JSON.stringify(g.rel.Yuki)})`);
+    }
+    for (const [form, k] of [['tiger', 1], ['human', 2]]) {
+        const g = YG(63010 + k, form, 'rr_hub', { f: 40, a: 10 }); tap(g);
+        const t = sceneView(g, SCENES).text, pool = form === 'tiger' ? 'GREAT MID' : 'HUMAN MID';
+        assert(t.startsWith(YT_BODY['rr_hub:1'][k]) && YT_CLOSE[pool].some((l) => t.endsWith(l)), `TR1 (YB, YT): ${form} reads its own text and a ${pool} closer`);
+    }
+    for (const [path, pool] of [['lover', 'HUMAN HIGH LOVER'], ['sister', 'HUMAN HIGH SISTER'], [null, 'HUMAN HIGH UNDECIDED']]) {
+        const g = YG(63020, 'human', 'rr_hub', { f: 20, a: 80 }, path ? { yk_path: path } : {});
+        assert(ytPool(g) === pool, `TR1 (YT): human at 72+ with ${path || 'no'} path reads ${pool} (${ytPool(g)})`);
+    }
+    assert(ytPool(YG(63021, 'tiger', 'rr_hub', { f: 90, a: 0 })) === 'GREAT HIGH', 'TR1 (YT): the higher of the two numbers sets the level');
+    // the Fallout's second day: before or after Ya's arrival
+    for (const [met, key] of [[false, 'fo_ashfall:2-before-ya'], [true, 'fo_ashfall:2']]) {
+        const g = YG(63030, 'cat', 'fo_ashfall', undefined, met ? { ya_met: true } : {}); tap(g); choose(g, SCENES, sceneView(g, SCENES).choices.find((c) => c.label === 'Go on.').index);
+        sleepUntil(g, 6); goTo(g, SCENES, 'fo_ashfall'); tap(g);
+        assert(sceneView(g, SCENES).text.startsWith(YT_BODY[key][0]), `TR1 (YB): the Fallout's second day reads ${key}`);
+    }
+    // YR: "More." from affection 72; below it "Not yet" (kept across Coils); the daily scene reopens it
+    {
+        const g = YG(63040, 'human', 'rr_hub', { f: 50, a: 60 }, { yk_back: 'rr_hub' }); goTo(g, SCENES, 'yk_choice');
+        const v = sceneView(g, SCENES).choices;
+        assert(!v.some((c) => /^"More\."/.test(c.label)) && v.some((c) => c.label === YK_QUESTION.notYet && c.index === 2), 'TR1 (YR): at 60 no "More.", "Not yet" in third place');
+        const r = choose(g, SCENES, 2);
+        assert(g.flags.yk_wait === true && !g.flags.yk_path && r.lines.includes(YK_QUESTION.notYetResult) && g.scene === 'rr_hub', `TR1 (YR): Not yet: the path open, her reply, back (${g.scene})`);
+        assert(KEEP_FLAGS.includes('yk_wait'), 'TR1 (YR): "Not yet" is kept across Coils');
+        assert(!ykAskAgain(g), 'TR1 (YR): below the bar her scene does not reopen it');
+        g.rel.Yuki.a = 72; tap(g);
+        const ask = sceneView(g, SCENES).choices.find((c) => c.label === YK_QUESTION.answer);
+        assert(!!ask, 'TR1 (YR): at 72 her daily scene in human form reopens the question');
+        choose(g, SCENES, ask.index);
+        const w = sceneView(g, SCENES);
+        seen.add('yk_time'); seen.add('yk_choice_again'); // walked on purpose (the random games rarely say "Not yet" and reach 72 later)
+        assert(g.scene === 'yk_choice_again' && w.choices.some((c) => /^"More\."/.test(c.label)) && w.choices.some((c) => /^"Family/.test(c.label)), 'TR1 (YR): the question again, both answers');
+        choose(g, SCENES, w.choices.find((c) => /^"More\."/.test(c.label)).index);
+        assert(g.flags.yk_path === 'lover' && !g.flags.yk_wait && g.scene === 'yk_lover_here', `TR1 (YR; QA2): "More." sets the path, clears the wait, away from the fire (${g.scene})`);
+        const h = YG(63041, 'human', 'rr_hub', { f: 50, a: 72 }); goTo(h, SCENES, 'yk_choice');
+        const hv = sceneView(h, SCENES).choices;
+        assert(hv.some((c) => /^"More\."/.test(c.label) && c.index === 1) && !hv.some((c) => c.label === YK_QUESTION.notYet), 'TR1 (YR): at 72 "More." in its old place, no "Not yet"');
+        const o = YG(63042, 'cat', 'rr_hub', { f: 50, a: 0 }, { yk_path: 'lover' });
+        assert(o.flags.yk_path === 'lover', 'TR1 (YR): a save already on a path keeps it');
+    }
+    assert(YT_GAIN.reduce((a, b) => a + b, 0) / YT_GAIN.length === 2.5, 'TR1 (YG-A): 2.5 a scene on average');
+}
+// v0.11.137 (owner pick RT1): Fable's review of TR1 push 1: M1 the closer on a redraw, M2 the question only in human form, M3 her shape
+// back after the question, L1 "Family." below 72, L4 the text by the day at the place, and its test gaps (the Long Forest's card, the minutes)
+{
+    const D = 1440;
+    const base = (seed, form, hub = 'rr_hub', rel = { f: 0, a: 0 }, flags = {}, day = 10) => {
+        const g = ensureBars(fresh(seed)); g.minutes = day * D + 600; const realm = form === 'human' ? 7 : form === 'tiger' ? 2 : 0;
+        g.yuki.realm = Math.max(realm, flags.realm || 0); g.james.realm = g.yuki.realm; g.yuki.form = form; delete flags.realm;
+        Object.assign(g.flags, flags); g.rel = { ...g.rel, Yuki: { ...rel } }; goTo(ensureBars(g), SCENES, hub); return g;
+    };
+    const tap = (g) => choose(g, SCENES, SCENES[g.scene].choices.findIndex((c) => c.to === 'yk_time'));
+    const labels = (g) => sceneView(g, SCENES).choices.map((c) => c.label);
+    // M1: the screen draws the text, then records the visit; the closer must not change on the redraw
+    {
+        const g = base(65001, 'cat'); tap(g);
+        const v1 = sceneView(g, SCENES); againView(g, v1, null); const v2 = sceneView(g, SCENES); againView(g, v2, null);
+        assert(v1.text === v2.text && v2.text === sceneView(g, SCENES).text, 'RT1 (M1): the closer stays the same across redraws in the screen\'s order');
+    }
+    // M2: a cat who could be human doesn't get the question; the human does
+    for (const [form, want] of [['cat', false], ['human', true]]) {
+        const g = base(65010, form, 'rr_hub', { f: 50, a: 80 }, { yk_wait: true, realm: 7 }); tap(g);
+        assert(labels(g).includes(YK_QUESTION.answer) === want, `RT1 (M2): as ${form} at 80 the question ${want ? 'is' : 'is not'} offered`);
+    }
+    // M3: "Promise." (the cat), then the question, then "Not yet": the cat again
+    {
+        const g = base(65020, 'human', 'rr_hub', { f: 50, a: 40 }, { yk_back: 'rr_hub' }); goTo(g, SCENES, 'yuki_human_after');
+        choose(g, SCENES, sceneView(g, SCENES).choices.find((c) => c.label === 'Promise.').index);
+        assert(g.scene === 'yk_choice' && g.yuki.form === 'human' && g.flags.yk_form_before === 'cat', `RT1 (M3): "Promise." (the cat) leads into the question, asked in her human shape (${g.scene}, ${g.flags.yk_form_before})`);
+        choose(g, SCENES, 2);
+        assert(g.yuki.form === 'cat' && g.flags.yk_wait && !g.flags.yk_form_before, `RT1 (M3): after "Not yet" the cat again (${g.yuki.form})`);
+    }
+    // L1: below 72 the human can still be told "Family."; an old save that saw her human with no answer gets the question
+    {
+        const g = base(65030, 'human', 'rr_hub', { f: 50, a: 50 }, { yk_wait: true }); tap(g);
+        const fam = sceneView(g, SCENES).choices.find((c) => /^"Family/.test(c.label));
+        assert(!!fam && !labels(g).includes(YK_QUESTION.answer), 'RT1 (L1): below 72 "Family." from her scene, not the question');
+        choose(g, SCENES, fam.index);
+        assert(g.scene === 'yk_sister_here' && g.flags.yk_path === 'sister' && !g.flags.yk_wait, `RT1 (L1): on to the sister's scene (${g.scene})`);
+        choose(g, SCENES, 0);
+        assert(g.scene === 'rr_hub' && g.yuki.form === 'human', `RT1 (L1): back at the place, still human (${g.scene}, ${g.yuki.form})`);
+        const o = base(65031, 'human', 'rr_hub', { f: 50, a: 80 }, { yuki_human_seen: true }); tap(o);
+        assert(labels(o).includes(YK_QUESTION.answer), 'RT1 (L1): an old save that saw her human with no answer gets the question at 72');
+        const p = base(65032, 'human', 'rr_hub', { f: 50, a: 80 }, { yk_path: 'lover', yuki_human_seen: true }); tap(p);
+        assert(!labels(p).includes(YK_QUESTION.answer) && !labels(p).some((l) => /^"Family/.test(l)), 'RT1 (L1): a chosen path is never asked again');
+    }
+    // L4: the first scene on the Fallout's third day reads the third day's text
+    {
+        const g = ensureBars(fresh(65040)); g.flags.ya_met = true;
+        for (const day of [8, 9, 10]) { g.minutes = day * D + 480; goTo(g, SCENES, 'fo_ashfall'); }
+        tap(g);
+        assert(sceneView(g, SCENES).text.startsWith(YT_BODY['fo_ashfall:3'][0]), 'RT1 (L4): the place\'s third day, the third text');
+    }
+    // the Long Forest's card, and the minutes: 10 on the card, 10 on "Go on."
+    {
+        const g = ensureBars(fresh(65050)); g.minutes = 12 * D + 600; goTo(g, SCENES, 'lf_hub');
+        const i = SCENES.lf_hub.choices.findIndex((c) => c.to === 'yk_time');
+        assert(i >= 0 && SCENES.lf_hub.choices[i].show(g), 'RT1 (TG): the Long Forest has the card');
+        const m0 = g.minutes; choose(g, SCENES, i);
+        assert(sceneView(g, SCENES).text.startsWith(YT_BODY['lf_hub:1'][0]) && g.minutes - m0 === 10, `RT1 (TG): its first text, 10 minutes (${g.minutes - m0})`);
+        choose(g, SCENES, sceneView(g, SCENES).choices.find((c) => c.label === 'Go on.').index);
+        assert(g.minutes - m0 === 20 && g.scene === 'lf_hub', `RT1 (L2): 20 minutes in all, like the talks (${g.minutes - m0})`);
+    }
+}
+// v0.11.137 (owner pick QA2): her question away from the Long Forest's fire: its own text, label and answer scenes; at the fire, as before
+{
+    for (const fire of [true, false]) for (const [k, to] of [[0, 'sister'], [1, 'lover']]) {
+        const g = ensureBars(fresh(64000 + k + (fire ? 10 : 0))); g.yuki.realm = 7; g.james.realm = 7; g.yuki.form = fire ? 'human' : 'cat';
+        g.rel.Yuki = { f: 50, a: 72 }; g.flags.yk_back = fire ? 'lf_hub' : 'rr_hub'; if (fire) g.flags.lf_active = true;
+        goTo(g, SCENES, 'yk_choice');
+        const v = sceneView(g, SCENES);
+        assert(fire ? v.text.startsWith('The last night before you walk out of the Long Forest') : v.text === YK_HERE.first, `QA2: the question's text ${fire ? 'at the fire' : 'away from it'}`);
+        const more = v.choices.find((c) => c.index === 1);
+        assert(fire ? /across the fire/.test(more.label) : more.label === YK_HERE.more, `QA2: "More." ${fire ? 'across the fire' : 'without it'}`);
+        choose(g, SCENES, k);
+        const here = `yk_${to}${fire ? '' : '_here'}`;
+        assert(g.scene === here && g.flags.yk_path === to, `QA2: ${to} leads to ${here} (${g.scene})`);
+        if (fire) continue;
+        seen.add(here);
+        const w = sceneView(g, SCENES);
+        assert(!/fire|treeline|smoke|dawn/i.test(w.text + w.choices.map((c) => c.label).join(' ')), `QA2: ${here} names no fire, treeline, smoke or dawn`);
+        const r = choose(g, SCENES, 0);
+        assert(g.yuki.form === 'cat' && g.scene === 'rr_hub' && r.lines.includes(to === 'lover' ? YK_HERE.loverResult : YK_HERE.sisterResult) && (to !== 'lover' || g.flags.yk_kissed), `QA2 (RT1, M3): ${here}: back to the shape she had (the cat), her line, back (${g.yuki.form}, ${g.scene})`);
+    }
 }
 // v0.11.122 (owner pick LG1): Yuki's human scenes need her human form this Coil (YG), her bond lines below it (YV, Fable's
 // A1–A5), the first kisses at Mei Lin 30 / Ya 45 (K, S), and a choice of Ya or Mei Lin alone where both like him (BC, B0–B7).
@@ -1149,7 +1308,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     const LPG = (seed, form, flags = {}, rel) => { const g = FM(seed, 'human', { yk_path: 'lover', ...flags }, rel); g.yuki.form = form; return g; };
     // LF: through the game: yk_choice → "More." → yk_lover → its one choice (and the sister's, as before)
     for (const [re, to] of [[/^"More\."/, 'yk_lover'], [/^"Family/, 'yk_sister']]) {
-        const g = FM(61000 + n++, 'human', { ending: 'bluff', yk_back: 'bl_camp' });
+        const g = FM(61000 + n++, 'human', { ending: 'bluff', yk_back: 'bl_camp', lf_active: true }); g.rel.Yuki.a = 72; // v0.11.137 (QA2): the fire's scenes // v0.11.137 (TR1, YR): "More." from affection 72
         goTo(g, SCENES, 'yk_choice');
         const ans = sceneView(g, SCENES).choices.find((c) => !c.disabled && re.test(c.label));
         assert(!!ans && g.yuki.form === 'human', `LP1 (LF): yk_choice offers ${to} with her human`);
@@ -1218,7 +1377,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     }
     // v0.11.127 (owner pick LQ2, TG): the review's gaps
     {   // LF through "Ask her to stay like this for a while." (yuki_human_after) → yk_choice → "More." → the pick: the cat (the pick's text decides; KP not picked)
-        const g = FM(61600 + n++, 'human', { ending: 'bluff', yk_back: 'bl_camp' }); g.yuki.form = 'cat'; goTo(g, SCENES, 'yuki_human_after');
+        const g = FM(61600 + n++, 'human', { ending: 'bluff', yk_back: 'bl_camp', lf_active: true }); g.yuki.form = 'cat'; g.rel.Yuki.a = 72; goTo(g, SCENES, 'yuki_human_after'); // v0.11.137 (TR1, YR): "More." from 72; (QA2) at the fire
         const stay = sceneView(g, SCENES).choices.find((c) => /^Ask her to stay like this/.test(c.label));
         assert(!!stay, 'LQ2 (TG): yuki_human_after offers "Ask her to stay"');
         if (stay) {

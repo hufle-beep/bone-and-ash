@@ -37,6 +37,8 @@ One Coil per act. James never dies (engine canon: at HP 0 the main character is 
 
 > **v0.11.137 (owner pick HV1): whose relationships are tracked.** Yuki, Mei Lin and Ya (the romance options; Yuki never resets, and her romance is still paced and gated, quick with her human form); Old Wen and Mother (strictly non-romantic, below the three); the Village (friendship only, −150 to 150, on the James tab, last). Old Hu is no longer tracked (`REL_HIDDEN`; an old save keeps his numbers, unshown). The choice / reply / increase tree builds on this set (group e).
 
+> **v0.11.138 (owner picks TR1, DR2, QA2, RT1): the tree, push 1, Yuki.** A daily card on every resting place (`yk_time`, 20 minutes in all): a text by place, day there and her form, a closing line by her level (the higher of friendship and affection: under 30, 30–71, 72 and up); +3 / +2 friendship and affection by turns, never reset, so she is about level with Mei Lin and Ya by the end of a first Act 1 Coil and keeps climbing; her lover's answer needs affection 72 like the others (below it "Not yet", kept; "Family." from her scene; the question again at 72). Push 2: Mother and Old Wen.
+
 Targets: the first Coil's deadline fight about 30% win, the third about 80%; a strong player can still finish on one Coil.
 
 ## Selene's mechanics, mapped

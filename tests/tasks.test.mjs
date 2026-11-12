@@ -3450,7 +3450,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     h.minutes += D; goTo(h, SCENES, 'mire'); goTo(h, SCENES, 'bone_field');
     assert(dayIndex(h, 'bone_field') === 1 && h.lines?.d?.bone_field?.length === 2, 'NT1: entered on a second day: its second day');
     const keyed = Object.values(SCENES).filter((x) => typeof x.dayKey === 'function').map((x) => x.id).sort();
-    assert(JSON.stringify(keyed) === JSON.stringify(['bl_fireside', 'bl_night', 'bl_night_event', 'far_hunt', 'heart_night', 'night_event', 'wen_lesson']), `NT1: the scenes keyed by event or region (${keyed})`);
+    assert(JSON.stringify(keyed) === JSON.stringify(['bl_fireside', 'bl_night', 'bl_night_event', 'far_hunt', 'heart_night', 'night_event', 'wen_lesson', 'yk_time']), `NT1: the scenes keyed by event or region (${keyed})`);
     const e = ensureBars(newGame(4303, { closed: true })); e.flags.bl_region = 'dw'; goTo(e, SCENES, 'bl_night_event');
     assert(e.flags.bl_ev && e.lines.d[`bl_night_event:${e.flags.bl_ev}`]?.length === 1 && e.lines.d.bl_night_event?.length === 1, `NT1: an event scene notes its event's day too (${e.flags.bl_ev})`);
     // the record stays out of the Coil snapshot and the dry runs (as LP2's), and a save keeps it
@@ -3568,7 +3568,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     fe.minutes = 4 * 1440 + 130; assert(fec && !dayOver(fe, SCENES, fec.id) && taskOpen(fe, SCENES, fec.id), 'review: at 02:10 a meal still runs');
     const dm = at(3743, 'ashfall', 3 * 1440 + 23 * 60 + 45); dm.james.qi = 999; dm.james.primaries = 3; // 23:45 (v0.11.91: the day ends at 00:00)
     const dmed = medCards(dm, SCENES), dmIds = new Set(dmed.filter((m) => m.task).map((m) => m.task));
-    const lateHub = taskCards(dm, SCENES).filter((c) => c.status === 'late');
+    const lateHub = taskCards(dm, SCENES).filter((c) => c.status === 'late' && SCENES[String(c.id).split(':')[0]]?.choices?.[Number(String(c.id).split(':')[1])]?.to !== 'yk_time'); // v0.11.137 (TR1): Yuki's 20-minute card is late at 23:45 like any card; this check is about Meditate's
     assert(lateHub.length > 0 && lateHub.every((c) => dmIds.has(c.id)), `review: a late Meditate card keeps its task id, so the hub list doesn't show it twice (${lateHub.map((c) => c.id).join(', ')})`);
     // v0.11.66 (S1): a sit gains something up to realm 13
     for (const [r, open] of [[7, true], [8, true], [13, true], [MAX_REALM, false]]) { const cp = at(3744 + r, 'camp', 20 * 60); cp.james.realm = r; cp.james.qi = 999; cp.james.saturation = 0; assert(taskCards(cp, SCENES).some((c) => c.id === SIT_TASK) === open, `review: the camp's queueable sit at realm ${r}: ${open ? 'offered' : 'hidden'}`); }

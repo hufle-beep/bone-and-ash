@@ -23,6 +23,7 @@ import { HEART, BREAK_HUBS as B3 } from './act1_heart.js';
 import { RETURN, BREAK_HUBS as B4 } from './act1_return.js';
 import { LONGFOREST, BREAK_HUBS as B0 } from './longforest.js';
 import { MERIDIANS, EXTRA_FROM } from './meridians.js';
+import { installYukiTime } from './yuki_time.js'; // v0.11.137 (TR1)
 import { installYukiPath } from './yuki_path.js';
 import { installCoil } from './coil_scenes.js';
 import { installOnce } from './oneoff.js';
@@ -997,5 +998,8 @@ SCENES.lf_hub.choices.push({
     reword('rt_ambush', /wall of bone/, 'A slab of bone between you and them, then down to the river.');
     reword('ring_chambers', /wall of bone/, 'Seal the fourth ring\'s doorway with a slab of bone and leave them to it.', ['A white wall, floor to ceiling. The chewing goes on behind it, disappointed.', 'A white slab, man-high, jammed into the doorway. The chewing goes on behind it, disappointed.']);
 }
+
+// v0.11.137 (owner pick TR1): Yuki's daily scene, appended last on every resting place (after every other choice above), so no position changes
+installYukiTime(SCENES);
 
 export const START_SCENE = 'arrival';
