@@ -266,7 +266,7 @@ ${ya(g) ? (g.flags.romance ? `Mei Lin looks at the pool, and at Ya, and at you, 
         choices: [
             { text: 'Get in. You\'re forty, filthy, and it\'s *warm*.', show: ya, time: 45, do: (g) => { advance(g, 0); g.james.hp = Math.min(jamesHpMax(g), g.james.hp + 6); bumpRel(g, 'Ya', 3, 5); if (likesMei(g)) bumpRel(g, 'Mei Lin', 0, 2); return [`+6 HP. ${DR_SP_IN(g)}`]; }, to: 'heart_hub' },
             { text: 'Wash, quickly, at the far end, with a reasonable amount of dignity left.', time: 30, do: (g) => { g.james.hp = Math.min(jamesHpMax(g), g.james.hp + 4); bumpRel(g, 'Mei Lin', 2, 1); return [`+4 HP. ${DR_SP_WASH(g)}`]; }, to: 'heart_hub' },
-            { text: 'Sit by the water and let them have it.', time: 30, do: (g) => { advance(g, 30, { resting: true }); return [DR_SP_SIT(g)]; /* v0.11.126 (NQ1): by her form, Fable's; v0.11.136 (NC1): by the day */ }, to: 'heart_hub' },
+            { text: 'Sit by the water and let them have it.', noFam: true /* v0.11.141 (RW1, NF): cultivation or rest by its own rule */, time: 30, do: (g) => { advance(g, 30, { resting: true }); return [DR_SP_SIT(g)]; /* v0.11.126 (NQ1): by her form, Fable's; v0.11.136 (NC1): by the day */ }, to: 'heart_hub' },
         ],
     },
 

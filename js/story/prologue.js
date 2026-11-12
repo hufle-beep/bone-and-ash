@@ -951,7 +951,7 @@ SCENES.arrival.choices.push({
 });
 SCENES.lf_hub.choices.push({
     text: (g) => `Withdraw for a season: ${realmName(g.james.realm)} → ${realmName(g.james.realm + 1)}.`,
-    show: (g) => g.james.realm < MAX_REALM, time: LF_SEASON_MINUTES, do: lfSeason, to: 'lf_hub',
+    show: (g) => g.james.realm < MAX_REALM, time: LF_SEASON_MINUTES, noFam: true /* v0.11.141 (FX1, CH): a season is the climb itself, no familiarity */, do: lfSeason, to: 'lf_hub',
 });
 const LF_FULL = 'The hammerspace is full: the Long Forest\'s pantry comes with you.';
 const lfStock = (g) => { for (const id of LF_STOCK) g.inventory[id] = Math.max(g.inventory[id] || 0, itemCap(id)); };

@@ -3891,11 +3891,12 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
             assert(g.minutes - m0 === fc + sceneTime, `FD: Explore at familiarity 8: the real run is the forecast walk plus the scene's own time (${g.minutes - m0} = ${fc} + ${sceneTime})`);
         }
     }
-    // FD: a chore and a work card keep their own rules (a chore no familiarity speed; a work card ×2 new ÷ cardSpeed as before)
+    // v0.11.141 (FX1, CH): a chore's own time ÷ its familiarity (FD's test before: a chore kept its time)
     {
+        const b0 = (x, id) => { const y = structuredClone(x); taskState(y).fam[id] = 18; return y; };
         const ch = ensureBars(newGame(6622, { closed: true })); ch.scene = 'ashfall'; ch.location = 'ashfall'; ch.minutes = 4 * 1440 + 9 * 60; ch.james.satiety = 20; ch.inventory = { hare_cooked: 3, berries: 5 };
         const eat = taskCards(ch, SCENES).find((c) => c.kind === 'chore' && /^Eat/.test(c.label));
-        if (eat) { const a = structuredClone(ch), b = structuredClone(ch); taskState(b).fam[eat.id] = 18; const ma = a.minutes, mb = b.minutes; runTask(a, SCENES, eat.id); runTask(b, SCENES, eat.id); assert(a.minutes - ma > 0 && a.minutes - ma === b.minutes - mb, `FD: a chore keeps its time at any familiarity (${a.minutes - ma} / ${b.minutes - mb})`); }
+        if (eat) { const a = structuredClone(ch), b = structuredClone(ch); taskState(b).fam[eat.id] = 18; const ma = a.minutes, mb = b.minutes; runTask(a, SCENES, eat.id); runTask(b, SCENES, eat.id); const ct = SCENES.ashfall.choices[Number(eat.id.split(':')[1])].time; assert(ct > 0 && (a.minutes - ma) - (b.minutes - mb) === ct - doorMinutes(ct, 10) && taskMinutes(b0(ch, eat.id), SCENES, eat.id) === b.minutes - mb, `CH: ${eat.label} ${ct} min ÷ 10 at familiarity 18 (${a.minutes - ma} → ${b.minutes - mb}), the card shows it`); }
         else assert(false, 'FD: Ashfall offers an Eat chore');
     }
     // FS: a story choice: the first pick full, then ÷ max(2, …) by the picks before; the count in g.tasks.use
@@ -3974,7 +3975,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
         const dc = taskCards(v, SCENES).find((c) => c.id === 'village:2');
         assert(dc && dc.kind === 'door' && dc.tier === famTier(3) && dc.fam === 3 && dc.next != null, `DS: the door card carries its tier and count (${dc?.tier}, ${dc?.fam}/${dc?.next})`);
     }
-    // L1: picks counted only where a choice could ever be sped
+    // L1 (v0.11.140), since v0.11.141 (FX1, SA): every story choice off the meta screens counts its picks; the meta screens never
     {
         // the meridian screen and a Coil screen: no mark, no count
         const m = ensureBars(newGame(6633, { closed: true })); m.scene = 'meridians'; m.minutes = 9 * 60; m.james.satiety = 90;
@@ -3987,10 +3988,10 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
         // a "Back…" and a hub's card through choose count nothing; a plain story choice counts
         let back = null;
         for (const [id, x] of Object.entries(SCENES)) { if (back || TASK_HUBS[id] || isMenuScene(id) || x.end || x.enter) continue; const i = (x.choices || []).findIndex((c) => typeof c.text === 'string' && /^Back\b/.test(c.text) && !c.show && !c.req && !c.check && !c.combat && !c.qi && typeof c.to === 'string'); if (i >= 0) back = [id, i]; }
-        if (back) { const g = ensureBars(newGame(6634)); g.scene = back[0]; g.minutes = 9 * 60; g.james.satiety = 90; choose(g, SCENES, back[1]); assert(pickCount(g, ...back) === 0 && wasPicked(g, ...back), `L1: "Back…" (${back.join(':')}) is marked but counts no pick`); }
+        if (back) { const g = ensureBars(newGame(6634)); g.scene = back[0]; g.minutes = 9 * 60; g.james.satiety = 90; choose(g, SCENES, back[1]); assert(pickCount(g, ...back) === 1 && wasPicked(g, ...back), `SA: "Back…" (${back.join(':')}) counts its pick`); }
         else assert(false, 'L1: a Back choice to test on');
         const hb = ensureBars(newGame(6635, { closed: true })); hb.scene = 'village'; hb.location = 'village'; hb.minutes = 9 * 60; hb.james.satiety = 90; choose(hb, SCENES, 2);
-        assert(pickCount(hb, 'village', 2) === 0, 'L1: a hub\'s card taken as a story choice counts no pick');
+        assert(pickCount(hb, 'village', 2) === 1, 'SA: a hub\'s choice taken as a story choice counts its pick (taken as a card it counts none)');
     }
     // TG: a one-move finish counts under its fight choice; threatOf and skipPlan (copies) count nothing; a whole-game rewind keeps the counts
     {
@@ -4022,6 +4023,75 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
         const k = ensureBars(newGame(6638, { closed: true })); k.tasks.use = { [pickKey('supper', 1)]: 7, 'act:sit': 3 }; k.coil.act = 1; endCoil(k, 'choice', 'stream'); rewind(k, { to: 'game' });
         assert(pickCount(k, 'supper', 1) === 7 && k.tasks.use['act:sit'] === 3, `TG: the whole game again keeps the counts (${pickCount(k, 'supper', 1)})`);
     }
+}
+// v0.11.141 (owner pick FX1): DI the scenes behind a door card at its speed, SA every story choice from its second pick, CH chores
+{
+    const { doorMinutes, pickCount, pickedMinutes: pm } = await import('../js/core/story.js');
+    const { choreSpeeds } = await import('../js/core/tasks.js');
+    // DI: Ashfall's sick child (village:2) at familiarity 0 and 18: inside, "Drain and clean it" (60 min, a check) ÷ the door's speed on its first pick
+    const run = (fam) => { const g = ensureBars(newGame(6640, { closed: true })); g.scene = 'village'; g.location = 'village'; g.minutes = 1440 + 9 * 60; g.james.satiety = 90; taskState(g).fam['village:2'] = fam; runTask(g, SCENES, 'village:2'); return g; };
+    const d0 = run(0), d18 = run(18);
+    assert(d0.scene === 'heal' && d18.scene === 'heal' && d18.tasks.door?.id === 'village:2' && d18.tasks.door.speed === 10 && d0.tasks.door?.speed === 1, `DI: the door card leaves its screen and marks the door with its speed (${JSON.stringify(d18.tasks.door)})`);
+    const inside = (g) => { const m0 = g.minutes; choose(g, SCENES, 1); return g.minutes - m0; };
+    const fc18 = (() => { const c = JSON.parse(JSON.stringify(d18)); const m = c.minutes; choose(c, SCENES, 1); return c.minutes - m; })();
+    const t0 = inside(d0), t18 = inside(d18);
+    assert(t0 === 60 && t18 === doorMinutes(60, 10) && fc18 === t18 && pickCount(d18, 'heal', 1) === 1, `DI: inside, "Drain and clean it" 60 min at familiarity 0, ${t18} at 18 on its first pick; a copy (the forecast) the same (${fc18})`);
+    // the mark goes on a task screen, its menus, a meta screen or the next card
+    const back = run(18); back.scene = 'village';
+    choose(back, SCENES, SCENES.village.choices.findIndex((c) => c.to === 'elder'));
+    assert(!back.tasks.door, 'DI: a story choice taken on a task screen clears the mark');
+    const nx = run(18); nx.scene = 'village'; const other = taskCards(nx, SCENES).find((c) => c.status === 'open' && c.kind !== 'door');
+    if (other) { runTask(nx, SCENES, other.id); assert(!nx.tasks.door, `DI: the next card (${other.id}) clears it`); } else assert(false, 'DI: Ashfall offers a card that is not a door');
+    { const m = run(18); m.scene = 'meridians'; const mi = merChoice(m, SCENES); if (mi >= 0) { choose(m, SCENES, mi); assert(!m.tasks.door, 'DI: a meta screen clears it'); } }
+    // a save keeps the mark; a Coil drops it; an old save has none
+    assert(deserialize(serialize(run(18))).tasks.door?.speed === 10, 'DI: a save keeps the mark');
+    { const k = run(18); endCoil(k, 'choice', 'stream'); rewind(k); assert(!k.tasks.door, 'DI: a rewind drops it'); }
+    // SA: a check inside a card scene (heal:1, 60 min) speeds from its second pick (F1's exclusion gone)
+    { const g = run(0); const a = inside(g); g.scene = 'heal'; g.minutes = 2 * 1440 + 9 * 60; delete g.tasks.door; const m = g.minutes; choose(g, SCENES, 1); const b = g.minutes - m;
+      assert(a === 60 && b === pm(60, 1) && pickCount(g, 'heal', 1) === 2, `SA: a check inside a card scene: 1st pick ${a}, 2nd ${b} (×2)`); }
+    // CH: every hub chore with its own time speeds but a sit, a rest and the Long Forest's season
+    const chores = []; for (const [h, cfg] of Object.entries(TASK_HUBS)) (SCENES[h]?.choices || []).forEach((c, i) => { if (c.to === h && !c.combat && (c.do || c.check || c.time || c.qi) && !(c.check && !cfg.plainChecks)) chores.push([h, i, c]); });
+    const sp = chores.filter(([h, , c]) => choreSpeeds(h, c)), sits = chores.filter(([, , c]) => /condense\(g\)/.test(String(c.do))), rests = chores.filter(([, , c]) => /resting: true/.test(String(c.do)));
+    assert(sp.length >= 10 && sits.length >= 9 && rests.length >= 8 && !sits.some(([h, , c]) => choreSpeeds(h, c)) && !rests.some(([h, , c]) => choreSpeeds(h, c)) && SCENES.lf_hub.choices.some((c) => c.noFam && c.time === 120 && !choreSpeeds('lf_hub', c)), `CH: ${sp.length} chores speed (eating, cooking, the camp's fire and stakes); ${sits.length} sits, ${rests.length} rests and the season keep their time`);
+    { const r0 = ensureBars(newGame(6641, { closed: true })); r0.scene = 'wilds'; r0.location = 'wilds'; r0.minutes = 1440 + 10 * 60; r0.james.hp = 5; const rid = taskCards(r0, SCENES).find((c) => /^Rest in the shade/.test(c.label))?.id;
+      if (rid) { const a = structuredClone(r0), b = structuredClone(r0); taskState(b).fam[rid] = 18; const ma = a.minutes, mb = b.minutes; runTask(a, SCENES, rid); runTask(b, SCENES, rid); assert(a.minutes - ma === 60 && b.minutes - mb === 60, `CH: a rest keeps its hour at any familiarity (${b.minutes - mb})`); } else assert(false, 'CH: the wilds offer a rest'); }
+}
+// v0.11.141 (owner pick RW1, Fable's review of FX1): M1b the door's scenes end with the day, NF, CL
+{
+    const { doorEnds, eveningTo, nightTo } = await import('../js/core/game.js');
+    const { pickKey } = await import('../js/core/story.js');
+    const marked = (min, speed = 10) => { const g = ensureBars(newGame(6650, { closed: true })); g.minutes = min; g.james.satiety = 90; g.tasks.door = { id: 'village:2', speed }; return g; };
+    // M1b: the clock passing 19:00 or midnight, a sleep, a night, the evening jump end it; a step that passes neither keeps it
+    { const g = marked(1440 + 18 * 60 + 50); advance(g, 5); const kept = !!g.tasks.door; advance(g, 10); assert(kept && !g.tasks.door, 'M1b: 18:55 keeps the mark, past 19:00 it ends'); }
+    { const g = marked(1440 + 23 * 60 + 50); advance(g, 15); assert(!g.tasks.door, 'M1b: past midnight it ends'); }
+    { const g = marked(1440 + 20 * 60); advance(g, 30); assert(!!g.tasks.door, 'M1b: a door taken after 19:00 keeps its mark until midnight'); }
+    for (const [name, fn] of [['sleep', (g) => sleepUntil(g, 6)], ['the evening jump', (g) => eveningTo(g)], ['a night', (g) => nightTo(g, 60)]]) { const g = marked(1440 + 10 * 60); fn(g); assert(!g.tasks.door, `M1b: ${name} ends it`); }
+    { const g = marked(1440 + 10 * 60); doorEnds(g, 30); assert(!!g.tasks.door, 'M1b: doorEnds keeps it inside the day'); }
+    // M1b, walked: Ashfall's sick child at familiarity 18, then on to a scene and back to the task screen by goTo (as a choice's `to` does)
+    { const g = ensureBars(newGame(6651, { closed: true })); g.scene = 'village'; g.location = 'village'; g.minutes = 1440 + 9 * 60; g.james.satiety = 90; taskState(g).fam['village:2'] = 18; runTask(g, SCENES, 'village:2');
+      const had = g.tasks.door?.speed === 10; goTo(g, SCENES, 'village'); assert(had && !g.tasks.door, 'M1b: arriving on the task screen ends it (not only a choice taken there)'); }
+    // the review's case: the same supper with and without a mark, after 19:00 has passed
+    { const a = ensureBars(newGame(6652, { closed: true })), b = ensureBars(newGame(6652, { closed: true }));
+      for (const x of [a, b]) { x.scene = 'ashfall'; x.location = 'ashfall'; x.minutes = 1440 + 17 * 60; x.james.satiety = 60; }
+      b.tasks.door = { id: 'village:2', speed: 10 };
+      goTo(a, SCENES, 'supper'); goTo(b, SCENES, 'supper');
+      const oa = sceneView(a, SCENES).choices.filter((c) => !c.disabled && c.index < 1000)[0];
+      if (oa) { const ma = a.minutes, mb = b.minutes; choose(a, SCENES, oa.index); choose(b, SCENES, oa.index); assert(!b.tasks.door && a.minutes - ma === b.minutes - mb, `M1b: supper after a door: the mark ended at 19:00, the same time as without (${a.minutes - ma} / ${b.minutes - mb})`); }
+      else assert(false, 'M1b: supper offers a choice'); }
+    // NF: the story's sits and the spring's rest keep their time on a second pick and behind a door; the season through choose too
+    const NF = [['hollow', 0], ['rr_roots', 0], ['rt_grove', 0], ['heart_spring', 2]];
+    assert(NF.every(([id, i]) => SCENES[id].choices[i].noFam === true) && SCENES.lf_hub.choices.some((c) => c.noFam && c.time === 120), 'NF: the three story sits, the spring\'s rest and the season are noFam');
+    { let checked = 0;
+      for (const [id, i] of NF) { const c = SCENES[id].choices[i]; const g = ensureBars(newGame(6653)); g.scene = id; g.minutes = 1440 + 9 * 60; g.james.satiety = 90; g.james.qi = 999; notePicked(g, id, i); g.tasks.use = { [pickKey(id, i)]: 18 }; g.tasks.door = { id: 'village:2', speed: 10 };
+        const m0 = g.minutes; try { choose(g, SCENES, i); } catch { continue; } assert(g.minutes - m0 >= c.time, `NF: ${id}:${i} keeps its ${c.time} min after 18 picks and behind a door (${g.minutes - m0})`); checked++; }
+      assert(checked >= 3, `NF: checked ${checked} of 4`); }
+    { const si = SCENES.lf_hub.choices.findIndex((c) => c.noFam); const g = ensureBars(newGame(6654)); g.coil.n = 2; g.scene = 'lf_hub'; g.flags.lf_active = true; g.minutes = 1440 + 9 * 60; g.james.satiety = 90; notePicked(g, 'lf_hub', si); g.tasks.use = { [pickKey('lf_hub', si)]: 9 };
+      const m0 = g.minutes; let ok = true; try { choose(g, SCENES, si); } catch { ok = false; } if (ok) assert(g.minutes - m0 >= 120, `NF: the season taken as a story choice keeps its 120 min (${g.minutes - m0})`); }
+    // CL: a door speed past ×10 reads as ×10; a Meditate card ends the mark
+    { const a = marked(1440 + 9 * 60, 1e9), b = marked(1440 + 9 * 60, 10); for (const x of [a, b]) { x.scene = 'heal'; } const ma = a.minutes, mb = b.minutes; choose(a, SCENES, 1); choose(b, SCENES, 1);
+      assert(a.minutes - ma === b.minutes - mb && b.minutes - mb === 6, `CL: a mark of ×1e9 reads as ×10 (${a.minutes - ma} / ${b.minutes - mb} min)`); }
+    { const g = ensureBars(newGame(6655, { closed: true })); g.scene = 'wilds'; g.location = 'wilds'; g.minutes = 1440 + 9 * 60; g.james.satiety = 90; g.tasks.door = { id: 'x', speed: 10 };
+      const mc = medCards(g, SCENES).find((c) => c.open); if (mc) { try { runMed(g, SCENES, mc.id); } catch { /* */ } assert(!g.tasks.door, `CL: a Meditate card (${mc.id}) ends the mark`); } else assert(false, 'CL: a Meditate card open in the wilds'); }
 }
 const pctOf = (o, n) => Object.entries(o).sort().map(([k, v]) => `${k} ${((v / n) * 100).toFixed(1)}%`).join(', ');
 console.log(`  tribute, tasks:   ${pctOf(stats.tasks.endings, stats.tasks.games)}`);

@@ -467,6 +467,7 @@ export const flightMinutes = (g, m) => (canFly(g) ? Math.min(m, Math.max(FLY_MIN
 export function advance(g, minutes, { resting = false } = {}) {
     const m = Math.max(0, Math.round(minutes));
     if (!m) return [];
+    doorEnds(g, m);
     const notes = [];
     const w = wakeState(g);
     if (m >= 1440) { w.n += Math.floor(m / 1440); w.slept = clockParts(g.minutes + m).day; } // a span of a day or more has its nights in it
@@ -519,13 +520,22 @@ export const endsLate = (g, minutes) => g.minutes + Math.max(0, minutes || 0) > 
 /** v0.11.91 (owner 2026-11-09 09:16, with pick B's push 1): no bed before 21:00 anywhere: an earlier bed first spends the
  *  evening by the fire until 21:00 (time passes, resting). Dinner and night scenes before the bed are untouched. */
 export const BED_FROM_HOUR = 21;
+/** v0.11.141 (owner pick RW1, M1b): the scenes behind a door card (story.js, `g.tasks.door`) end with the day: when the clock passes
+ *  19:00 or midnight, or at any sleep or night; a task screen, its menus or a meta screen end them too (story.js go). */
+export function doorEnds(g, m = 0) {
+    if (!g?.tasks?.door) return;
+    const d = g.minutes % 1440;
+    if (m === null || (d < 19 * 60 && d + m >= 19 * 60) || d + m >= 1440) delete g.tasks.door;
+}
 export function eveningTo(g, h = BED_FROM_HOUR) {
+    doorEnds(g, null);
     const dh = dayHour(g);
     if (dh >= 6 && dh < h) { const p = clockParts(g.minutes); advance(g, (p.day - 1) * 1440 + h * 60 - g.minutes, { resting: true }); }
 }
 /** v0.11.91: a night encounter comes after the bed (from 21:00), at `at` minutes past the coming midnight (01:00; the jackals
  *  01:20), never back; the wait is asleep (Fed at the sleeping rate), so the fight is over before 02:00. */
 export function nightTo(g, at = 60) {
+    doorEnds(g, null);
     eveningTo(g);
     const p = clockParts(g.minutes), n0 = (p.hh < 6 ? p.day - 1 : p.day) * 1440; // before 06:00 it is still this night
     const t = Math.max(g.minutes, n0 + at), span = t - g.minutes;
@@ -535,6 +545,7 @@ export function nightTo(g, at = 60) {
 /** A full night (or long rest): bars to Max, clock to the given hour of the next morning (v0.11.91: never a bed before 21:00;
  *  `bed: false` for a rest that isn't a bed, the Long Forest's seclusion, owner pick S1). */
 export function sleepUntil(g, hour = 6, { bed = true } = {}) {
+    doorEnds(g, null);
     if (bed) eveningTo(g);
     delete g.flags.night_fight; // v0.11.92: any full night clears a night fight's mark
     const p = clockParts(g.minutes);

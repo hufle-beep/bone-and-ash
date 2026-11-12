@@ -82,7 +82,8 @@ export function showPicked(g, scenes, index, label) {
     const i = index >= 1000 ? index - 1000 : index;
     return wasPicked(g, g.scene, i) && canBeFamiliar(g, scenes, index, label);
 }
-/** v0.11.140 (owner pick RV1, L1): could this choice ever be sped as familiar (showPicked without the mark)? Only these count their picks. */
+/** v0.11.140 (owner pick RV1, L1): is this choice recoloured once picked (showPicked without the mark)? Since v0.11.141 (FX1, SA) display only:
+ *  every story choice off the meta screens counts its picks and speeds up. */
 export function canBeFamiliar(g, scenes, index, label) {
     const i = index >= 1000 ? index - 1000 : index;
     const hub = !!TASK_HUBS[g.scene];
@@ -96,7 +97,7 @@ export function canBeFamiliar(g, scenes, index, label) {
     return !/^Back\b/.test(String(label));
 }
 
-setFamiliar((g, scenes, index, label) => showPicked(g, scenes, index, label), (g, scenes, index, label) => canBeFamiliar(g, scenes, index, label)); // v0.11.37 (F1): the sepia choices are the familiar ones; v0.11.140 (L1): only those that could be count their picks
+setFamiliar((g, scenes, index, label) => showPicked(g, scenes, index, label)); // v0.11.37 (F1): an old save's sepia marks (no count yet) are ×2
 
 /** v0.10.0: "Next meridian session" — a queueable hub card that takes the first open session on the meridian screen. */
 export const MER_TASK = 'mer:next';
@@ -222,6 +223,8 @@ export function taskCards(g, scenes, only = null) {
  */
 const NIGHT_OK = /^(Eat|Cook and eat|Chew a ghost-gill)\b/;
 const isNightOk = (c) => c.kind === 'chore' && NIGHT_OK.test(String(c.label));
+/** v0.11.141 (owner pick FX1, CH): a chore whose own time speeds with its familiarity: not a sit, a rest or a season (`noFam`). */
+export const choreSpeeds = (hubId, c) => !!c && c.time > 0 && !isSitChore(c, hubId) && !c.noFam && !/resting: true/.test(String(c.do));
 const isSitChore = (c, hubId) => c.to === hubId && /^(Cultivate|Condense)/.test(String(typeof c.text === 'function' ? '' : c.text)) && /condense\(g\)/.test(String(c.do));
 function nightCards(g, scenes, cards, only) {
     if (nightLock(g)) return cards.filter(isNightOk);
@@ -397,6 +400,7 @@ export function setYuki(g, on) { st(g).yuki.on = !!on; }
 export const ADAPT_REPLY = 'You see what went wrong.';
 export function runTask(g, scenes, id) {
     const hubId = g.scene;
+    if (g.tasks?.door) delete g.tasks.door; // v0.11.141 (FX1, DI): back on a task screen
     if (!runsHere(g, scenes, id)) throw new Error(`Not a task hub: ${hubId}`); // v0.11.14: Meditate cards also on the resting places
     const card = cardOf(scenes, hubId, id);
     if (!card) throw new Error(`No card ${id} on ${hubId}`);
@@ -431,11 +435,14 @@ export function runTask(g, scenes, id) {
         lines.push(...resolveWork(g, scenes, hubId, card, id));
         fail = g.stats.checks > checks && g.stats.wins === before;
     } else {
-        const speed = card.kind === 'door' ? cardSpeed(st(g).fam[id] || 0) : 0; // v0.11.140 (owner pick FM2, FD): a door card's walk ÷ its own familiarity, as a work card's
+        // v0.11.140 (owner pick FM2, FD): a door card's walk ÷ its own familiarity, as a work card's; v0.11.141 (FX1, CH): a chore's own
+        // time too (not a sit, a rest or the Long Forest's season: their time is cultivation or healing, by their own rules)
+        const speed = card.kind === 'door' || (card.kind === 'chore' && choreSpeeds(g.scene, card.c)) ? cardSpeed(st(g).fam[id] || 0) : 0;
         const take = (index) => { const r = choose(g, scenes, index, { task: true, speed }); lines.push(...r.lines); if (r.roll && !r.roll.success) fail = true; if (r.combat) throw new Error(`A task can't start a fight (${id})`); };
         if (card.menu) take(card.entryIndex);
         if (!card.menu || g.scene === card.menu) take(card.p.index);
         if (card.kind === 'chore' || card.kind === 'door') learn(g, scenes, hubId, card, id, 1);
+        if (card.kind === 'door' && g.scene !== hubId) st(g).door = { id, speed }; // v0.11.141 (FX1, DI): the scenes behind it run at its speed (story.js)
     }
     lines.push(...yukiTick(g, hubId, g.minutes - m0));
     let stopped = g.scene !== hubId;

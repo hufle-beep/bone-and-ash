@@ -86,6 +86,7 @@ export const LATE_TAG = DAY_END_HOUR === 0 ? 'ends past midnight' : `ends past $
 const LATE = { open: false, late: true, tag: LATE_TAG, reason: LATE_TAG };
 /** Run a Meditate card that isn't a hub task. Returns { lines, moved }. */
 export function runMed(g, scenes, id) {
+    if (g.tasks?.door) delete g.tasks.door; // v0.11.141 (RW1, CL): a Meditate card ends a door's scenes, as any card (tasks.js runTask)
     if (!canMeditate(g, scenes)) throw new Error('Not here');
     const back0 = g.scene;
     if (id === 'med:sitall') { // v0.11.64 (C1): each sit exactly one tap of the sit card

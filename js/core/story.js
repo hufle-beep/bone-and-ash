@@ -4,7 +4,7 @@
  *             to | to(g), fail?, do?(g, r) → lines, failDo?(g, r) → lines, combat?: encounter, xp?: false }.
  * A check pays standard XP (25% on a fail) unless xp: false. Pure — no DOM.
  */
-import { rollCheck, awardXp, spendQi, advance, ensureBars, actingCheck, actingName, instantWin, itemFull, takeCapNotes, itemNames, setLootMult, noDiceDc, checkText, addItem, canFly, flightMinutes, plainFight, useSpeed } from './game.js';
+import { rollCheck, awardXp, spendQi, advance, ensureBars, actingCheck, actingName, instantWin, itemFull, takeCapNotes, itemNames, setLootMult, noDiceDc, checkText, addItem, canFly, flightMinutes, plainFight, useSpeed, USE_CAP } from './game.js';
 import { STOMP, degreeForChoice } from '../story/power.js';
 import { keepReplies } from './replies.js'; // v0.11.69 (P1)
 import { noteDay } from './lines.js'; // v0.11.135 (NT1, EV1)
@@ -118,6 +118,7 @@ function go(g, scenes, to) {
     const id = typeof to === 'function' ? to(g) : to;
     if (!scenes[id]) throw new Error(`Choice leads to unknown scene "${id}"`);
     g.scene = id;
+    if (g.tasks?.door && (TIMELESS_PAIR.has(id) || TIMELESS.has(id))) delete g.tasks.door; // v0.11.141 (RW1, M1b): a task screen, its menus or a meta screen reached ends the door's scenes
     noteSeen(g, id); // v0.11.35 (P1-a)
     const s = scenes[id];
     if (s.place) g.location = asText(s.place, g);
@@ -156,13 +157,13 @@ export function notePicked(g, sceneId, index) {
  * tasks.js `showPicked`, set at load) takes half its time: its own `time` and the default walk or talk. Not the clock jumps
  * a scene sets (waits, sleep), not fights, not task cards (their own familiarity), Incremental Mode only.
  */
-let familiar = null, countable = null;
-export const setFamiliar = (fn, can = null) => { familiar = fn; countable = can; };
+let familiar = null;
+export const setFamiliar = (fn) => { familiar = fn; };
 export const PICKED_SPEED = 2;
 /**
  * v0.11.140 (owner pick FM2, FS): the speed grows with the picks: ÷ max(2, 1 + 9 × picks ÷ 18), up to ×10 (the work cards'
  * curve, game.js `useSpeed`). `picks` = the times this choice was taken as a story choice before (not as a card, not on a
- * dry run's copy; RV1, L1: only a choice that could ever be sped, tasks.js `canBeFamiliar`), kept across Coils in `g.tasks.use['pick:<scene>:<index>']` (no new save field). A choice marked picked
+ * dry run's copy; v0.11.141, FX1 (SA): every story choice off the meta screens), kept across Coils in `g.tasks.use['pick:<scene>:<index>']` (no new save field). A choice marked picked
  * with no count (a save from before) is ×2, as F1.
  */
 export const PICK_N = 18;
@@ -176,7 +177,8 @@ function countPick(g, sceneId, index) {
     const k = pickKey(sceneId, index);
     g.tasks.use[k] = (g.tasks.use[k] || 0) + 1;
 }
-/** v0.11.140 (owner pick FM2, FD): a door card's walk ÷ its own speed (tasks.js `cardSpeed`); 0 stays 0, never under 1 minute. */
+/** v0.11.140 (owner pick FM2, FD): a door card's walk ÷ its own speed (tasks.js `cardSpeed`); 0 stays 0, never under 1 minute.
+ *  v0.11.141 (FX1, CH): a chore's own time the same way. */
 export const doorMinutes = (m, speed) => (m > 0 ? Math.max(1, Math.round(m / speed)) : 0);
 /** v0.11.33: called on every choice taken (oneoff.js counts the once-per-Coil work); set once at load. */
 let onChoose = null;
@@ -235,7 +237,7 @@ export function choose(g, scenes, index, { task = false, speed = 0 } = {}) { // 
         const c = (s.choices || [])[index - ONE_MOVE];
         if (!c || !c.combat) throw new Error('No fight to finish');
         notePicked(g, s.id, index - ONE_MOVE);
-        if (!task && countable?.(g, scenes, index, asText(c.text, g))) countPick(g, s.id, index - ONE_MOVE); // v0.11.140 (FS; RV1 L1: only a choice that could be sped)
+        if (!task && !TIMELESS.has(s.id)) countPick(g, s.id, index - ONE_MOVE); // v0.11.140 (FS); v0.11.141 (FX1, SA): every story choice off the meta screens
         if (onChoose) onChoose(g, s.id, index - ONE_MOVE, c);
         const r = instantWin(g, c.combat(g));
         const st = STOMP[r.enc.id];
@@ -254,11 +256,22 @@ export function choose(g, scenes, index, { task = false, speed = 0 } = {}) { // 
     if (c.req && c.req(g) !== true) throw new Error(`Locked: ${c.req(g)}`);
     const lines = [];
     if (choiceQi(g, c) && !spendQi(g, c.qi)) throw new Error('Not enough Qi');
-    const fast = !task && !!familiar && familiar(g, scenes, index, asText(c.text, g)); // v0.11.37 (F1): before this pick marks it
     const picks = pickCount(g, s.id, index); // v0.11.140 (FS): the picks before this one
+    // v0.11.141 (owner pick FX1, SA): every story choice off the meta screens speeds from its second pick (the checks, gathering and
+    // "Back…" inside card scenes too); an old save's picked mark with no count is ×2, as F1
+    const fast = !task && !c.noFam && !TIMELESS.has(s.id) && (picks >= 1 || (!!familiar && familiar(g, scenes, index, asText(c.text, g)))); // RW1 (NF): `noFam` keeps its time
+    // v0.11.141 (FX1, DI): inside the scenes behind a door card (until a task screen, its menus or a meta screen) a choice's own time
+    // and its default walk or talk ÷ that door's speed when higher (tasks.js sets `g.tasks.door` when a door card leaves its screen)
+    if (!task && g.tasks?.door && (TIMELESS_PAIR.has(s.id) || TIMELESS.has(s.id))) delete g.tasks.door;
+    const doorSpeed = !task && !c.noFam && g.tasks?.door ? Math.min(USE_CAP, Math.max(1, Number(g.tasks.door.speed) || 1)) : 1; // RW1 (CL): at most ×10
     notePicked(g, s.id, index);
-    if (!task && countable?.(g, scenes, index, asText(c.text, g))) countPick(g, s.id, index); // RV1 (L1): only a choice that could be sped
-    const sped = (m) => (task && speed > 0 ? doorMinutes(m, speed) : fast ? pickedMinutes(m, picks) : m); // FD: a door card; FS: a story choice picked before
+    if (!task && !TIMELESS.has(s.id)) countPick(g, s.id, index);
+    const sped = (m) => { // FD + CH: a door card's or a chore's own speed (tasks.js); FS + SA: the picks; DI: the door's speed inside
+        if (!(m > 0)) return m;
+        if (task) return speed > 0 ? doorMinutes(m, speed) : m;
+        if (doorSpeed > (fast ? pickedSpeed(picks) : 1)) return Math.max(1, Math.round(m / doorSpeed));
+        return fast ? pickedMinutes(m, picks) : m;
+    };
     let roll = null;
     let ok = true;
     let partial = false;

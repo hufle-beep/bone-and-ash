@@ -169,3 +169,24 @@ node tools/sanity.mjs --update                # new baseline, only after the own
 - Player at the jackals: GU check ~2.8, Convergence Use ~1.7 after two full forest days (was 1.2 / 0.6 on night 1).
 - Old saves (no `long` flag) keep the original numbers and route.
 - Re-tune with the balance script pattern: random hub choices, smart combat, group win rate by `s` (see git history, `bal.mjs` in the session that built v0.4.0).
+
+## What gains familiarity (the whole-game audit, v0.11.141; owner 2026-11-12 13:19, "investigate overall, through the whole game what gains familiarity and what does not, this should be established now"; the point: the freed time goes to manual cultivation, opening meridians and condensing Qi; the evening waits are fine)
+
+**Speeds up with use (as of v0.11.141):**
+1. **Work cards** (forage, hunt, practice, explore): their own familiarity, ×1 → ×10 over 18 completions (a new card takes twice as long), easier checks by tier; a quarter of each use to the others in their menu, a drill a fifth to every card on the screen (`tasks.js` `cardSpeed`, `learn`; since v0.9.2 / v0.11.15).
+2. **Door cards' walk** (the hub choice's time and a door menu's entry): their own familiarity, the same curve; the door menus' share (FD, v0.11.140).
+3. **The scenes behind a door card**, until a task screen, its menus or a meta screen is reached, the next card (a Meditate card too), the clock passing 19:00 or midnight, or any sleep or night (RW1, M1b: so supper and the evening keep their own times): every choice's own time and default walk or talk ÷ that door's speed (at most ×10), or the choice's own pick speed if higher, even on a first pick (DI, v0.11.141; `g.tasks.door`, `doorEnds` in `game.js`).
+4. **Story choices**, everywhere off the meta screens, the checks, gathering and "Back…" inside card scenes included: from the second pick ÷ max(2, 1 + 9 × picks ÷ 18), up to ×10, the default walk or talk too (F1 v0.11.37, FS v0.11.140, SA v0.11.141; picks in `tasks.use` `pick:<scene>:<index>`); flight from Foundation after it (÷ (1 + realm), the 62 marked walks).
+5. **Chores** (eating, cooking, the camp's fire and stakes): their own familiarity, the same curve (CH, v0.11.141; `choreSpeeds`).
+6. **Cultivation itself:** a sit ×1 → ×10 over 30 sits, a meridian session over 30, a breakthrough over 6 (`actSpeed`, v0.11.15). The story's own sits (the Hollow, the Root Road's singing root, the grove) keep their hour (`noFam`, RW1 NF), as does the hot spring's sit by the water (a rest).
+7. **Yuki's job:** her own familiarity, up to `YUKI_CAP`.
+
+**Doesn't (by design, or open):**
+- a choice's **first pick** outside a door's scenes (nothing to be familiar with yet);
+- **sleep, the nights and the evening wait to 21:00**, and the waits to a fixed hour inside scenes (supper at 19:00 in Ashfall, the Fallout and the farewell; the Blackroot camps, the hot spring and the Drowned Wood from 18:00–19:00, `toHour`): the owner, 13:19: "not including the evening waits, that is ok";
+- the story's **calendar jumps** (an act's first dawn, leaving the Heart for Day 17's evening, the Fallout's departure, the epilogue): fixed dates;
+- **rests** (an hour heals by the hour; the Coil screen's two hours), and **Meditate: gather Qi** (an hour at the resting rate): their time is the healing or the Qi;
+- **the Long Forest's season** (two hours, the climb itself; `noFam`, as a card or a story choice) and the four story sits and rests marked `noFam` (item 6);
+- **fights** (a minute a round) and a few minute-long clock steps inside a choice's own effect (the arrival's 5 minutes, the failed fire).
+
+**Where a game's hours go** (v0.11.140, 200 games each, hours a game; Completionist / Careful / Random / Sitter): sleep and the nights 223 / 251 / 238 / 154; work cards 169 / 174 / 128 / 67; the fixed waits and calendar jumps 109 / 190 / 166 / 50; story choices 73 / 90 / 83 / 55 (mostly first picks); cultivation 72 / 77 / 54 / 211; the scenes behind doors 40 / 14 / 42 / 7; door walks 30 / 6 / 29 / 9; rests 10 / 21 / 47 / 17; chores 10 / 9 / 11 / 8. FX1 with RW1 (DI + SA + CH, the door's scenes ending with the day) frees 9.5 / 3.3 / 10.0 / 2.5 h a game; the Sitter turns about 3 h of it into cultivation, the others fill it with work by their rules.

@@ -374,7 +374,7 @@ Mei Lin is watching you, not the root. "Your face," she says. "You look like som
 
 ${g.flags.roots ? 'You think of the root you followed out of the Hollow, and the thing at the end of it that wasn\'t entirely dead. You\'re walking toward it now.' : ''}`,
         choices: [
-            { text: 'Let the song in. Cultivate with it.', check: { skill: 'Convergence Use', dc: 4 }, time: 60, do: (g) => { g.james.saturation = Math.min(100, Math.round((g.james.saturation + 12) * 10) / 10); return [`The root carries your Qi round like a held breath. Saturation +12% (${g.james.saturation}%), no Qi spent.`]; }, failDo: () => ['The song slides off you. Not yet, it seems to say.'], to: 'rr_hub' },
+            { text: 'Let the song in. Cultivate with it.', check: { skill: 'Convergence Use', dc: 4 }, noFam: true /* v0.11.141 (RW1, NF): cultivation or rest by its own rule */, time: 60, do: (g) => { g.james.saturation = Math.min(100, Math.round((g.james.saturation + 12) * 10) / 10); return [`The root carries your Qi round like a held breath. Saturation +12% (${g.james.saturation}%), no Qi spent.`]; }, failDo: () => ['The song slides off you. Not yet, it seems to say.'], to: 'rr_hub' },
             { text: '"It\'s one of ours," you tell them. "Was."', do: (g) => { bumpRel(g, 'Mei Lin', 3, 2); bumpRel(g, 'Ya', 2, 0); g.flags.told_hearth = true; return ['You tell them about Hearth Trees. Neither of them laughs.']; }, time: 30, to: 'rr_hub' },
         ],
     },

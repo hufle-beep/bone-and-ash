@@ -988,14 +988,14 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     // gap 8: lover walks at Nascent Soul reach Yuki's two new scenes in play (not by hand)
     const before = { fo: seen.has('yk_night_fo'), rt: seen.has('rt_yk_talk') };
     let fo = 0, rt = 0;
-    for (let run = 0; run < 24; run++) {
+    for (let run = 0; run < 80; run++) { // v0.11.141 (FX1): 24 → 80 walks (about 1 Fallout walk in 8 reaches the roof: 12 missed it about 1 time in 5, 40 about 1 in 200)
         const from = run % 2 ? 'rt_start' : 'fo_start';
         const g = LG(55100 + run, { yk_path: 'lover' }, [10 + (run % 3) * 40, 10 + (run % 4) * 30], 7); g.minutes = (from === 'fo_start' ? 7 : 18) * 1440 + 360;
         g.james.gu.level = 9; g.james.skills['Convergence Use'].level = 6; ensureBars(g);
         walkFrom(g, from, new Set(from === 'fo_start' ? ['bl_start'] : ['a1_end']), 2500);
         if (g.seen?.yk_night_fo != null) fo++; if (g.seen?.rt_yk_talk != null) rt++;
     }
-    assert(fo > 0 && rt > 0, `ER1 (T8): random lover walks at Nascent Soul reach yk_night_fo (${fo} of 12) and rt_yk_talk (${rt} of 12)`);
+    assert(fo > 0 && rt > 0, `ER1 (T8): random lover walks at Nascent Soul reach yk_night_fo (${fo} of 40) and rt_yk_talk (${rt} of 40)`);
     void before;
 }
 

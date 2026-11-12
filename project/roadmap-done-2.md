@@ -2,6 +2,12 @@
 
 Started in v0.11.88 (owner pick A, 2026-11-09 02:37, D2), so `roadmap-done.md` (part 1) stays readable in one go. Newer than `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.141 (word for word; owner picks FX1, RW1)
+
+### From section 0, "Next, before everything else" (the done line of v0.11.137, as of v0.11.140)
+
+- *(new in v0.11.137, owner pick HV1)* **Whose relationships to track (RL): done:** tracked: Yuki, Mei Lin and Ya (the romance options), Old Wen and Mother (strictly non-romantic, below the three), the Village (friendship only, cap 150, now on the James tab, last); Old Hu dropped (nothing moves him; an old save keeps his numbers, unshown); the owner's goals for the tree in the handover's v0.11.137 entry (Yuki: more scenes in each form by form and friendship / affection, about equal to Ya and Mei Lin, no reset, her romance paced and gated, quick with her human form). **Next: the tree (open, options later).** **Open, options later:** Fable's L5 (the FAQ's People entry and the hidden list).
+
 ## Moved in v0.11.140 (word for word; owner picks FM2, RV1)
 
 ### From section 0, "Next, before everything else" (the done line of v0.11.136, as of v0.11.139)
