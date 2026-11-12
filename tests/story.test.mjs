@@ -1,19 +1,19 @@
 // Run: node tests/story.test.mjs — story graph integrity + 1,000 random playthroughs (2,000 before v0.11.34) (no crash, no dead end, always reaches the end);
 // Incremental Mode since v0.11.34 (D1: Story Mode dropped from the game)
 import { SCENES, START_SCENE } from '../js/story/prologue.js';
-import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, itemCap, yukiSitsOut, migrate } from '../js/core/game.js'; // v0.11.127 (LQ2, TG): yukiSitsOut, migrate
+import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, itemCap, yukiSitsOut, migrate, REL_HIDDEN, REL_MAX, serialize, deserialize } from '../js/core/game.js'; // v0.11.127 (LQ2, TG): yukiSitsOut, migrate; v0.11.137 (HV1): REL_HIDDEN, REL_MAX
 import { sceneView, choose, goTo, wasPicked, threatOf } from '../js/core/story.js'; // v0.11.136 (RV2, TG): threatOf
 import { actionOpen } from '../js/core/forms.js';
 import { btTarget } from '../js/story/meridians.js';
 import { loveLine } from '../js/story/yuki_path.js'; // v0.11.122 (RL1, T)
 import { likesMei, likesYa } from '../js/story/act1_common.js'; // v0.11.123 (EQ1, AB)
-import { KEEP_FLAGS, rewind } from '../js/core/coil.js'; // v0.11.123 (ER1, T3)
+import { KEEP_FLAGS, rewind } from '../js/core/coil.js'; // v0.11.137 (HV1, Fable L2): rewind on an old save // v0.11.123 (ER1, T3)
 import { againView, noteRead } from '../js/story/again.js'; // v0.11.125 (RW1, T); v0.11.133 (FP2): noteRead
 import { STOMP } from '../js/story/power.js'; // v0.11.126 (NQ1)
 import { coilStamp, dayIndex, textDay, DAY_REPLIES } from '../js/core/lines.js'; // v0.11.135 (NT1, EV1); v0.11.136 (NC1): DAY_REPLIES
 import { splitReply, splitLine, landReply, noteSaid } from '../js/core/replies.js'; // v0.11.136 (NC1); RV2 (TG): landReply, noteSaid
 import { runTask, taskOutcome, cardCheck } from '../js/core/tasks.js'; // v0.11.136 (RV2, TG)
-import { writeFileSync } from 'node:fs';
+import { writeFileSync, readFileSync, readdirSync } from 'node:fs'; // v0.11.137 (HV1, T): the story files read for bumpRel
 import { smartAction } from './lib/smartfight.mjs'; // v0.11.96 (BT1)
 import { GAMES, FULL, SHARD, WORKERS, STATS_OUT, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
 import { seen as touched, track as watchGame, noteView, mergeSeen, seenOut as touchedOut } from './lib/seen.mjs'; // v0.11.22: for tools/leftovers.mjs
@@ -369,6 +369,33 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         y.flags.ship_found = true; const t1 = SCENES.heart_camp.choices[2].do(y)[0];
         assert(!/the ship/.test(t0) && /water somewhere under the roots/.test(t0) && /bark settling, the ship,/.test(t1), 'NC1 (RV2, M1): the ledge names the ship only after ship_found');
     }
+}
+// v0.11.137 (owner pick HV1): whose relationships are tracked (RL): Yuki, Mei Lin and Ya (romance), Old Wen and Mother (non-romantic),
+// the Village (friendship only); Old Hu dropped (HD): nothing moves him, an old save keeps his numbers. The James tab: tools/browser.py hv1.
+{
+    const dir = new URL('../js/', import.meta.url);
+    const src = ['story', 'core'].flatMap((d) => readdirSync(new URL(`${d}/`, dir)).filter((f) => f.endsWith('.js')).map((f) => readFileSync(new URL(`${d}/${f}`, dir), 'utf8'))).join('\n');
+    const lit = [...src.matchAll(/bumpRel\(g, '([^']+)'/g)];
+    const who = new Set(lit.map((m) => m[1]));
+    const main = readFileSync(new URL('main.js', dir), 'utf8');
+    assert(lit.length === (src.match(/bumpRel\(/g) || []).length - 1 && !/bumpRel\(/.test(main), `HV1 (T, Fable L4): every bumpRel call names its person (${lit.length} of ${(src.match(/bumpRel\(/g) || []).length - 1}), none in main.js`); // −1: its own definition
+    assert(JSON.stringify([...who].sort()) === JSON.stringify(['Mei Lin', 'Mother', 'Old Wen', 'Village', 'Ya', 'Yuki']), `HV1 (HD): only the tracked people are moved (${[...who].sort().join(', ')})`);
+    assert(REL_HIDDEN.length === 1 && REL_HIDDEN[0] === 'Old Hu' && REL_HIDDEN.every((k) => !who.has(k)), 'HV1 (HD): Old Hu hidden and moved nowhere');
+    const vil = [...src.matchAll(/bumpRel\(g, 'Village', ([^)]*)\)/g)].map((m) => m[1]);
+    assert(vil.length > 0 && vil.every((a) => /^[^,]+, 0$/.test(a.trim())), `HV1 (VD; Fable L3): every Village move leaves affection at 0 (${vil.filter((a) => !/^[^,]+, 0$/.test(a.trim())).join(' | ') || vil.length})`);
+    for (const id of ['ya_won', 'ya_lost']) {
+        const g = ensureBars(fresh(5401)); g.rel['Old Hu'] = { f: 9, a: 0 }; g.scene = id;
+        SCENES[id].enter(g);
+        assert(g.rel['Old Hu'].f === 9 && g.rel.Ya.f > 0, `HV1 (HD): ${id} leaves Old Hu where he was and still moves Ya`);
+    }
+    const old = ensureBars(migrate(JSON.parse(JSON.stringify({ ...fresh(5402), rel: { 'Old Hu': { f: 12, a: 0 }, Village: { f: 30, a: 0 } } }))));
+    assert(old.rel['Old Hu']?.f === 12 && old.rel.Village.f === 30, 'HV1 (T): an old save keeps Old Hu\'s numbers');
+    const back = deserialize(serialize(old)); // Fable L2: the save round trip and a rewind, the paths that rebuild g.rel
+    assert(back.rel['Old Hu']?.f === 12, `HV1 (T, Fable L2): Old Hu survives a save and load (${JSON.stringify(back.rel['Old Hu'])})`);
+    back.coil.peak = { ...(back.coil.peak || {}), 'Old Hu': { f: 12, a: 0 } }; // a real old save: every move of his wrote the Coil's peak
+    rewind(back); rewind(back);
+    assert(back.rel['Old Hu'] && Number.isFinite(back.rel['Old Hu'].f), `HV1 (T, Fable L2): Old Hu's key survives two rewinds, with the head start (${JSON.stringify(back.rel['Old Hu'])})`);
+    assert(REL_MAX === 150, 'HV1 (VD): the Village has the same cap, 150');
 }
 // v0.11.122 (owner pick LG1): Yuki's human scenes need her human form this Coil (YG), her bond lines below it (YV, Fable's
 // A1–A5), the first kisses at Mei Lin 30 / Ya 45 (K, S), and a choice of Ya or Mei Lin alone where both like him (BC, B0–B7).

@@ -1,6 +1,6 @@
 /** Bone and Ash — UI. Renders the story, combat, sheet, hammerspace, journal and saves. */
 import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel, fragileKnife, knifeSwings } from './core/forms.js';
-import { coilMult, coilMultNext, wakeDay, fmtMult, clockParts } from './core/game.js';
+import { coilMult, coilMultNext, wakeDay, fmtMult, clockParts, REL_HIDDEN } from './core/game.js'; // v0.11.137 (HV1): REL_HIDDEN
 import {
     newGame, ensureBars, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, skillCheck, checkValue, xpToNext, clockLabel, clockLabelG, realmName, yukiForm, yukiHeldNote,
     startCombat, combatStep, combatFlee, combatYield, waitLeft, songPays, sungKey, THREAT_TEXT, SONG_TEXT, SONG_COST, SONG_MAX, SAY_TEXT, SPAR_TEXT, postureNow, unarmedMastery, fightAdapt, weaponMastery, COMBAT_ACTIONS, noDiceDc, airStrike, AIR_TEXT, FOE_TRAITS, foeTraits, TELL_TEXT, bigBlowNow, lungeNow, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage, qiShield,
@@ -620,7 +620,9 @@ function skillRow(name, nd, sub = '') {
 function renderSheet() {
     const j = g.james;
     const cu = j.skills['Convergence Use'];
-    const rel = Object.entries(g.rel).filter(([k]) => k !== 'Village').map(([k, r]) => `<div class="row"><span>${esc(k)}</span><span>friendship ${r.f} · affection ${r.a}</span></div>`).join('');
+    // v0.11.137 (owner pick HV1): Old Hu is no longer tracked (HD; an old save keeps his numbers, unshown); the Village is shown, last, with friendship only (VD)
+    const relRow = (k, r) => `<div class="row"><span>${esc(k)}</span><span>${k === 'Village' ? `friendship ${r.f}` : `friendship ${r.f} · affection ${r.a}`}</span></div>`;
+    const rel = [...Object.entries(g.rel).filter(([k]) => !REL_HIDDEN.includes(k) && k !== 'Village'), ...(g.rel.Village ? [['Village', g.rel.Village]] : [])].map(([k, r]) => relRow(k, r)).join('');
     view.innerHTML = `<section class="page">
 <h1>James Green</h1>
 <p class="lede">Forty, a doctorate three days old (mycology and computational biology). From a civilisation that grows its cities, tools and ships from qi-attuned wood. Now: here.</p>

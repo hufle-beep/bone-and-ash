@@ -526,7 +526,7 @@ Old Hu looks at you with something like hope. If you take the fight, his face is
     },
     ya_won: {
         id: 'ya_won', title: 'Pinned', art: 'ya_fight', place: `${P} — the lane`,
-        enter: (g) => { g.flags.ya_brawl = 'won'; bumpRel(g, 'Ya', 6, 6); bumpRel(g, 'Village', 4, 0); bumpRel(g, 'Old Hu', 6, 0); return []; },
+        enter: (g) => { g.flags.ya_brawl = 'won'; bumpRel(g, 'Ya', 6, 6); bumpRel(g, 'Village', 4, 0); return []; }, // v0.11.137 (owner pick HV1, HD): Old Hu no longer tracked (was +6)
         text: `It ends with Ya on her back in the dust, her spear a long way from her hand, and the flat of a white bone blade laid across her collarbones, holding her to the lane the way a ruler holds down a page. She's bleeding from the lip and laughing so hard she can't breathe.
 
 "*Again,*" she says. "Do that again. Later. Somewhere with fewer goats."
@@ -538,7 +538,7 @@ Mei Lin, on the step, has put the knife down. She is staring at Ya with an expre
     },
     ya_lost: {
         id: 'ya_lost', title: 'Pinned (You)', art: 'ya_fight', place: `${P} — the lane`,
-        enter: (g) => { g.flags.ya_brawl = 'lost'; bumpRel(g, 'Ya', 4, 5); bumpRel(g, 'Old Hu', 3, 0); g.james.hp = Math.max(3, g.james.hp); return []; },
+        enter: (g) => { g.flags.ya_brawl = 'lost'; bumpRel(g, 'Ya', 4, 5); g.james.hp = Math.max(3, g.james.hp); return []; }, // v0.11.137 (HV1, HD): Old Hu no longer tracked (was +3)
         text: (g) => `It ends with you on your back in the dust and Ya sitting on your chest, one knee on each of your arms, grinning down at you upside-down with her hair hanging around both your faces like a curtain.
 
 "You're good," she says. "You're not *good* good. But you're good." She leans down, very close, and sniffs your hair again. "Still nothing."

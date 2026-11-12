@@ -786,6 +786,8 @@ export function eat(g, satiety, { yuki = true } = {}) {
  */
 export const REL_CATCHUP = 3;
 export const REL_MAX = 150; // v0.11.83: friendship and affection run −150 to 150 (named for the FAQ; unchanged)
+/** v0.11.137 (owner pick HV1, HD): people no longer tracked: nothing moves them and the James tab leaves them out; an old save keeps their numbers (no key removed). */
+export const REL_HIDDEN = ['Old Hu'];
 function catchUp(cur, d, top) {
     if (d <= 0 || cur >= top) return cur + d;
     const fast = Math.min(top - cur, d * REL_CATCHUP);

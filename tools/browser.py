@@ -512,6 +512,36 @@ def lp2(pg, url):
     if title != 'The Bone Field' or pg.query_selector('.prose.again'): fails.append(f'RQ1 (TG): a slot loaded on the same scene should show it in full ({title!r}, folded: {bool(pg.query_selector(".prose.again"))})')
     else: notes.append('RQ1: a loaded slot shows the scene in full')
 
+def hv1(pg, url):
+    """v0.11.137 (owner pick HV1): the James tab lists the people with friendship and affection, the Village last with friendship
+    only (VD), and no Old Hu (HD); a save holding Old Hu keeps his numbers after a reload."""
+    st = json.loads((ROOT / 'saves/v0.11.7-coil2-day1.json').read_text())
+    st = json.loads(st['data']) if 'data' in st and isinstance(st.get('data'), str) else st
+    st['combat'] = None; st['scene'] = 'wilds'
+    st['rel'] = {'Village': {'f': 44, 'a': 0}, 'Old Hu': {'f': 12, 'a': 0}, 'Mei Lin': {'f': 20, 'a': 11}, 'Yuki': {'f': 5, 'a': 2}}
+    fresh(pg, url, "a => { localStorage.clear(); localStorage.setItem('boneash.auto', a); }", json.dumps(st))
+    pg.click('#tabs [data-tab="sheet"]'); on_tab(pg, 'sheet')
+    rows = pg.eval_on_selector_all('#view .row', "els => els.map(e => [...e.children].map(c => c.textContent.trim()))")
+    people = [r for r in rows if len(r) >= 2 and r[0] in ('Village', 'Old Hu', 'Mei Lin', 'Yuki')]
+    names = [r[0] for r in people]
+    vil = next((r for r in people if r[0] == 'Village'), None)
+    if 'Old Hu' in names: fails.append(f'HV1 (HD): Old Hu is still on the James tab ({names})')
+    elif not vil or vil[1] != 'friendship 44': fails.append(f'HV1 (VD): the Village should show "friendship 44" only ({vil})')
+    elif names[-1] != 'Village' or names[:2] != ['Mei Lin', 'Yuki']: fails.append(f'HV1 (VD): the people in their order, the Village last ({names})')
+    elif next(r for r in people if r[0] == 'Mei Lin')[1] != 'friendship 20 · affection 11': fails.append('HV1: Mei Lin should keep both numbers')
+    else:
+        # Fable L1: make the game write its save first (a card at the wilds), so the check reads the game's save, not the one put in
+        before = pg.evaluate("localStorage.getItem('boneash.auto')")
+        pg.click('#tabs [data-tab="story"]'); on_tab(pg, 'story')
+        card = next((e for e in pg.query_selector_all('button.card:not([disabled])[data-run]') if e.is_visible()), None)
+        if not card: fails.append('HV1 (T): no card to play at the wilds'); return
+        tap(pg, card); until(pg, f"localStorage.getItem('boneash.auto') !== {json.dumps(before)}", 5000)
+        r = json.loads(pg.evaluate("localStorage.getItem('boneash.auto')")); r = json.loads(r['data']) if isinstance(r.get('data'), str) else r
+        if pg.evaluate("localStorage.getItem('boneash.auto')") == before: fails.append('HV1 (T): the game never wrote its save after a card')
+        elif (r.get('rel') or {}).get('Old Hu', {}).get('f') != 12: fails.append(f'HV1 (T): the save lost Old Hu\'s numbers ({(r.get("rel") or {}).get("Old Hu")})')
+        else: notes.append('HV1: the James tab shows the Village last with friendship only and no Old Hu; the game\'s own save keeps his numbers')
+    check_text(pg, 'the James tab (HV1)', strict=False)
+
 def poll(pg, js, ms=20000):
     """v0.11.39: evaluate js (may return a promise) until it is truthy; the last value (falsy when the time ran out)."""
     end = time.time() + ms / 1000; v = None
@@ -695,6 +725,8 @@ def main(part=0):
                 again(pg, url)
                 # 13. quiet repeats and the same-visit fold (v0.11.134, LP2)
                 lp2(pg, url)
+                # 14. whose relationships are shown (v0.11.137, HV1)
+                hv1(pg, url)
                 # 12. the FAQ (v0.11.83)
                 faq(pg, url)
             if three:

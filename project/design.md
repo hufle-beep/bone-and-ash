@@ -35,6 +35,8 @@ One Coil per act. James never dies (engine canon: at HP 0 the main character is 
 | World flags, quests | | ✓ |
 | Relationships other than Yuki | | ✓, with a 25% head start from the last Coil's peak |
 
+> **v0.11.137 (owner pick HV1): whose relationships are tracked.** Yuki, Mei Lin and Ya (the romance options; Yuki never resets, and her romance is still paced and gated, quick with her human form); Old Wen and Mother (strictly non-romantic, below the three); the Village (friendship only, −150 to 150, on the James tab, last). Old Hu is no longer tracked (`REL_HIDDEN`; an old save keeps his numbers, unshown). The choice / reply / increase tree builds on this set (group e).
+
 Targets: the first Coil's deadline fight about 30% win, the third about 80%; a strong player can still finish on one Coil.
 
 ## Selene's mechanics, mapped

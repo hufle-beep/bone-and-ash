@@ -50,6 +50,7 @@ assert(plain(text('Skills and checks')).includes("Of the XP she can't keep, 10% 
 assert(plain(text('Yuki\'s job')).includes(`${String(YUKI_HOURS[0]).padStart(2, '0')}:00 and ${YUKI_HOURS[1]}:00`), 'Yuki\'s hours from tasks.js');
 assert(plain(text('Meridians')).includes(`${PRIMARIES.length} primaries and their ${COL_GROUPS.reduce((n, c) => n + c.size, 0)} collaterals`) && PRIMARIES.length === 12, 'the meridian counts from meridians.js (12 and 66)');
 { const gr = ensureBars(newGame(7, { closed: true })); bumpRel(gr, 'Mei Lin', 999, -999); assert(gr.rel['Mei Lin'].f === REL_MAX && gr.rel['Mei Lin'].a === -REL_MAX && plain(text('People, friendship and affection')).includes(`−${REL_MAX} to ${REL_MAX}`), 'the relationship range: the game clamps at the number the FAQ names'); }
+assert(plain(text('People, friendship and affection')).includes('the Village, last, has friendship only'), 'v0.11.137 (HV1, VD; Fable L6): the FAQ says the Village shows friendship only');
 assert(inAct1({ flags: { ending: 'won' }, scene: 'fo_start', minutes: 7 * 1440 + 6 * 60 }) && plain(text('Act 1')).includes('Day 8'), 'Act 1 starts on Day 8 (inAct1), as the FAQ says');
 // v0.11.109 (owner pick FL1): the Flight entry's numbers from game.js, and its gate at Foundation
 { const { FLY_MIN, FLY_FROM_REALM, flightMinutes } = await import('../js/core/game.js');
