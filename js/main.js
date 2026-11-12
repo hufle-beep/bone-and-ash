@@ -15,6 +15,7 @@ import { coilActive, endCoil, targetsText, tabWhy } from './core/coil.js';
 import { medCards, runMed, isSitChoice, medActivity, useLine, LATE_TAG, canMeditate } from './core/meditate.js';
 import { FAQ_KEY, FAQ_TAB, faqState, faqText, faqCheck, faqList, faqHasNew, faqSeen, faqMatch } from './core/faq.js'; // v0.11.83 (P1 + T1 + R1)
 import { meridianRow } from './story/meridians.js';
+import { APK_URL, UPDATE_KEY, CHECK_DELAY, updPrefs, inApp, makeUpdater } from './core/update.js'; // v0.11.147 (UP1; RV1: makeUpdater)
 import { realmShockHpBonus } from './core/formulas.js';
 import * as ART from './art/art.js';
 const sceneArt = (key) => { ART.setArtState?.({ yukiForm: yukiForm(g) }); return ART.sceneArt(key); };
@@ -695,6 +696,7 @@ function renderSettings() {
 <div class="btns"><button class="btn${showChecks ? ' primary' : ''}" data-showchecks="1">Show checks: ${showChecks ? 'on' : 'off'}</button></div>
 <h2>Saving</h2>
 <div class="btns"><button class="btn${expState().off ? '' : ' primary'}" data-expremind="1">Remind me to download: ${expState().off ? 'off' : 'on'}</button></div>
+${updatePanel()}
 <div class="btns"><button class="btn" data-menu="main">Back</button></div>
 <p class="note" id="saveNote"></p></section>`;
 }
@@ -710,7 +712,7 @@ function renderMenu() {
 <div class="mseal" aria-hidden="true">骨</div>
 <h1 class="mtitle">Bone and Ash</h1>
 <p class="note mver">Version <span id="menuVer">…</span> · Incremental Mode</p>
-<div class="mbtns">${cont}${hadSave && !recovery ? '<button class="btn big" data-new="1">New game</button>' : ''}<button class="btn big" data-menu="saves">Saves</button><button class="btn big" data-menu="settings">Settings</button></div>
+<div class="mbtns">${cont}${hadSave && !recovery ? '<button class="btn big" data-new="1">New game</button>' : ''}<button class="btn big" data-menu="saves">Saves</button><button class="btn big" data-menu="settings">Settings</button>${appUpd()?.newer ? `<button class="btn big" data-menu="settings">App update available (build ${appUpd().build})<small>You have build ${appUpd().mine}. Settings → App updates; saves are kept.</small></button>` : ''}</div>
 <p class="note" id="saveNote"></p></section>`;
     gameVersion().then((v) => { const el = document.getElementById('menuVer'); if (el) el.textContent = v; });
 }
@@ -931,6 +933,9 @@ view.addEventListener('click', (ev) => {
             return;
         }
         if (b.dataset.expremind) { const o = expState(); o.off = !o.off; if (!o.off) { o.t = Date.now(); o.pl = bakMeta().play; } expWrite(o); render(); return; }
+        if (b.dataset.updauto || b.dataset.updinst) { const k = b.dataset.updauto ? 'auto' : 'autoInstall'; upd[k] = !upd[k]; store.set(UPDATE_KEY, JSON.stringify(upd)); render(); return; } // v0.11.147 (UP1)
+        if (b.dataset.updcheck) { checkAppUpdate(true); return; }
+        if (b.dataset.updgo) { updater.start(); return; }
         if (b.dataset.pausedeath) { askFatal = !askFatal; store.set(PAUSE_DEATH_KEY, askFatal ? '1' : '0'); render(); return; }
         if (b.dataset.readall) { readAllScene = `${g.scene}#${g.coil?.n || 1}`; render(); return; } // v0.11.35 (P1-a)
         if (b.dataset.skip) { // v0.11.35 (P1-a): the stretch read before, at once; each choice as a tap would take it
@@ -1039,6 +1044,37 @@ function confirmNew() {
 }
 function note(t) { const n = document.getElementById('saveNote'); if (n) n.textContent = t; }
 
+/* ---------------- v0.11.147 (owner pick UP1): the Android app's update check, Selene's (js/core/update.js) ---------------- */
+
+const upd = updPrefs(store.get(UPDATE_KEY)); // the two switches, kept on this phone
+// v0.11.147 (RV1, TC): the rules live in update.js (makeUpdater); main.js only says what is on screen and draws
+const updater = makeUpdater({
+    bridge: () => (inApp(window) ? window.AndroidBridge : null),
+    fetch: (url, opts) => fetch(url, opts),
+    setTimeout: (f, ms) => setTimeout(f, ms), clearTimeout: (t) => clearTimeout(t),
+    save: () => { if (g && !recovery) closeSave(); }, // the game saved before the installer replaces the app (the same key: the saves stay)
+    screen: () => (menu === 'settings' ? 'settings' : menu === 'main' ? (Date.now() - newArmed < 4000 ? 'main-armed' : 'main') : null), // NA
+    redraw: () => render(),
+    status: (msg) => { const el = document.getElementById('updSt'); if (el) el.textContent = msg; },
+    autoInstall: () => upd.autoInstall,
+});
+const appUpd = () => updater.st.found; // { build, mine, newer, unknown? } from the last check
+/** Settings → App updates in the app; in a browser, one line with the app's link. */
+function updatePanel() {
+    if (!inApp(window)) return `<h2>Android app</h2>
+<p class="note">In a browser the game is always the newest version. The Android app (saves apart from the browser's): <a href="${APK_URL}" rel="noopener">${esc(APK_URL)}</a></p>`;
+    const u = appUpd(), mine = updater.mine(), go = u?.newer && !updater.st.busy;
+    return `<h2>App updates</h2>
+<p class="note">Installed: ${mine ? `build ${mine}` : 'unknown build'}${u ? ` · latest on GitHub: build ${u.build}` : ''}. An update installs over this app and keeps your saves.</p>
+<div class="btns"><button class="btn${upd.auto ? ' primary' : ''}" data-updauto="1">Check at start: ${upd.auto ? 'on' : 'off'}</button><button class="btn${upd.autoInstall ? ' primary' : ''}" data-updinst="1">Install automatically: ${upd.autoInstall ? 'on' : 'off'}</button></div>
+<p class="note">Install automatically downloads a new build as soon as it is found (from the menu or Settings) and opens Android's installer, which still asks you to confirm.</p>
+<div class="btns"><button class="btn" data-updcheck="1">Check now</button><button class="btn${go ? ' primary' : ''}" data-updgo="1"${go ? '' : ' disabled'}>${u?.newer ? `Download and install build ${u.build}` : 'Up to date'}</button></div>
+<p class="note" id="updSt" role="status">${esc(updater.st.msg)}</p>`;
+}
+const checkAppUpdate = (manual) => updater.check(manual).catch((err) => console.error('update check', err)); // RL: a mistake is logged, not "offline"
+/** Called by the app (MainActivity.java's post). */
+window.onAppUpdate = (state, msg) => updater.onMessage(state, msg);
+
 load();
 // v0.11.5: save when the app is hidden or closed (Android may kill a backgrounded page)
 // v0.11.8: only if the stored save is still the one this tab last wrote or loaded (another tab may have saved since)
@@ -1046,6 +1082,7 @@ const closeSave = () => { if (store.get(AUTO) === lastWritten) autosave(); };
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') closeSave(); });
 window.addEventListener('pagehide', closeSave);
 render();
+if (inApp(window) && upd.auto) setTimeout(() => checkAppUpdate(false), CHECK_DELAY); // v0.11.147 (UP1): once per app start
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
     navigator.serviceWorker.register('sw.js').catch(() => { /* offline install is optional */ });
 }

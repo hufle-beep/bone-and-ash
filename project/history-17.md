@@ -2,6 +2,21 @@
 
 Started 2026-11-12 (v0.11.138), when `history-16.md` would have passed about 45 KB. Newer than `history-16.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.147 (word for word)
+
+### Decided in chat
+
+- **v0.11.144: everything tabled, the Android app next (the owner 15:23 "table everything and create the android app, based on the update system and methods of the Selene project. indicate this in the roadmap and give me the handover message for a new chat."; options TB1–TB3 at about 15:24, owner 15:25 "TB1 go"):**
+  - **The analysis (Selene read: `MainActivity.java` 320 lines, `android.yml`, `app/build.gradle`, the update check in its `index.html`):** **WR** the wrapper as `io.github.hufle.boneandash` serving the whole game (`index.html`, `js/` 41 files 1.5 MB, `css/`, `art/` 220 files 17 MB, `icons/`: about 19 MB; Selene ships one `index.html`); **CI** the workflow (`BoneAndAsh.apk` on `android-latest`, upload then swap, the build number in the title, the newest 5 `android-build-N`); **UP** the update check (the release title against `versionCode()`, the download, the installer; saves kept by the fixed key); **EX + NS** five download and copy places in `main.js` through the app, no service worker in the app; **FN** Literata and Shippori Mincho in the app (OFL); **SV** the app's saves apart from the browser's (export, then import); **BL** step 6 D; the APK built only on GitHub (Gradle and Maven blocked here); developer verification from 2027. **TB** the rest tabled; **TR** four done lines to `roadmap-done-2.md` (the roadmap 59.1 KB, under 60 after the plan); **HM** the handover message. **TB1 🟢 TB + TR + the plan in five pushes + HM (recommended)** / TB2 🟡 one line, the order worked out in the new chat / TB3 🔴 the message only (colours: how ready the new chat is to start building). **Picked: TB1.**
+  - **Also:** `425c9b2` filled in for 0.11.143; v0.11.141's notes to `history-17.md`; `roadmap-done-2.md` is now 46.8 KB, past its own ~45 KB mark: the next move opens `roadmap-done-3.md`.
+
+### Version notes
+
+## v0.11.144 — Everything tabled; the Android app next (TB1)
+
+- **Files:** `project/roadmap.md` (section 0: the Tabled note and the Android plan; four done lines out), `project/roadmap-done-2.md`, `project/roadmap-2.md` (step 6's label), `tests/tools.test.mjs` (TB1), `tests/README.md`, `sw.js`, docs. The game, saves and bots unchanged.
+- **Checks:** a docs-and-test push (rule 2): the tools test and `bash tools/check.sh quick`. Interaction: none with the game; the roadmap stays under 60 KB.
+
 ## Moved from the handover in v0.11.146 (word for word)
 
 ### Decided in chat
