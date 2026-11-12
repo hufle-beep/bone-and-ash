@@ -243,6 +243,13 @@ body.menu-on #tabs { display: none; }
 .main-menu .mseal { align-self: center; width: 3.2rem; height: 3.2rem; line-height: 3.2rem; border-radius: 6px; background: var(--red); color: var(--paper); font-family: var(--display); font-weight: 800; font-size: 1.9rem; margin-bottom: 0.9rem; }
 .main-menu .mtitle { font-size: clamp(2.4rem, 11vw, 3.4rem); margin-bottom: 0.2rem; }
 .main-menu .mver { margin: 0 0 1.6rem; }
+/* v0.11.150 (BL1, WN): What's new on the menu, and its whole list in Settings */
+.wnew-box { text-align: left; margin: -0.8rem 0 1.4rem; padding: 0.6rem 0.8rem; border: 1.5px solid var(--ink); border-radius: 4px 10px 4px 10px; background: var(--paper); }
+.wnew-head { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
+.wnew-head .btn { padding: 0.25rem 0.6rem; }
+.wnew { margin: 0.4rem 0 0.3rem; padding-left: 1.1rem; font-size: 0.9rem; }
+.wnew li { margin: 0.25rem 0; }
+.wnew-all summary { cursor: pointer; color: var(--ink-dim); }
 .mbtns { display: flex; flex-direction: column; gap: 0.7rem; align-items: stretch; max-width: 22rem; width: 100%; margin: 0 auto; }
 .btn.big { padding: 0.85rem 1rem; font-size: 1.05rem; }
 .btn.big small { display: block; margin-top: 0.2rem; font-size: 0.78rem; font-weight: 400; opacity: 0.8; }

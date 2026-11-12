@@ -1,5 +1,5 @@
 /* Bone and Ash — offline cache. Bump VERSION on every release so phones pick up the new files. */
-const VERSION = 'bone-ash-0.11.149';
+const VERSION = 'bone-ash-0.11.150';
 /* v0.11.39 (Z2-b): pictures, backgrounds and icons live in their own cache, kept across versions. Its name must not start with
    'bone-ash-' (main.js reads the game's version from that cache's name). Each file is stored under its path plus '?v=' and its
    fingerprint from ART (checked against the bytes before it is stored), and downloaded again only when that fingerprint changes. File names never change: replace a file, then
@@ -7,7 +7,7 @@ const VERSION = 'bone-ash-0.11.149';
 const ART_CACHE = 'boneash-art';
 const FILES = [
     './', 'index.html', 'manifest.webmanifest', 'css/style.css',
-    'js/main.js', 'js/core/game.js', 'js/core/story.js', 'js/core/tasks.js', 'js/core/coil.js', 'js/core/meditate.js', 'js/core/replies.js', 'js/core/lines.js', 'js/core/forms.js', 'js/core/faq.js', 'js/core/update.js', 'js/core/app.js', 'css/fonts/OFL-Literata.txt', 'css/fonts/OFL-ShipporiMincho.txt', 'js/story/coil_scenes.js', 'js/story/oneoff.js', 'js/story/walks.js', 'js/story/again.js', 'js/story/task_hubs.js', 'js/story/nodice_tune.js', 'js/core/formulas.js', 'js/story/prologue.js', 'js/story/common.js', 'js/story/wilds.js', 'js/story/ashfall.js', 'js/story/act1_common.js', 'js/story/act1_tune.js', 'js/story/act1_fallout.js', 'js/story/act1_blackroot.js', 'js/story/act1_heart.js', 'js/story/act1_return.js', 'js/story/power.js', 'js/story/fight_tune.js', 'js/story/meridians.js', 'js/story/yuki_path.js', 'js/story/yuki_time.js', 'js/story/house_time.js', 'js/story/house_texts.js', 'js/story/stomp_prologue.js', 'js/story/stomp_act1.js', 'js/story/longforest.js', 'js/art/art.js', 'js/art/portrait.js', 'js/art/figures-clamp.js', 'js/art/clamp2.js',
+    'js/main.js', 'js/core/game.js', 'js/core/story.js', 'js/core/tasks.js', 'js/core/coil.js', 'js/core/meditate.js', 'js/core/replies.js', 'js/core/lines.js', 'js/core/forms.js', 'js/core/faq.js', 'js/core/update.js', 'js/core/app.js', 'js/core/news.js', 'css/fonts/OFL-Literata.txt', 'css/fonts/OFL-ShipporiMincho.txt', 'js/story/coil_scenes.js', 'js/story/oneoff.js', 'js/story/walks.js', 'js/story/again.js', 'js/story/task_hubs.js', 'js/story/nodice_tune.js', 'js/core/formulas.js', 'js/story/prologue.js', 'js/story/common.js', 'js/story/wilds.js', 'js/story/ashfall.js', 'js/story/act1_common.js', 'js/story/act1_tune.js', 'js/story/act1_fallout.js', 'js/story/act1_blackroot.js', 'js/story/act1_heart.js', 'js/story/act1_return.js', 'js/story/power.js', 'js/story/fight_tune.js', 'js/story/meridians.js', 'js/story/yuki_path.js', 'js/story/yuki_time.js', 'js/story/house_time.js', 'js/story/house_texts.js', 'js/story/stomp_prologue.js', 'js/story/stomp_act1.js', 'js/story/longforest.js', 'js/art/art.js', 'js/art/portrait.js', 'js/art/figures-clamp.js', 'js/art/clamp2.js',
 ];
 const ART = {
     'art/bg/cliffs.jpg': '67c4b00b31',
@@ -270,12 +270,17 @@ self.addEventListener('activate', (e) => {
         .then(async (c) => { for (const r of await c.keys()) if (!keep.has(r.url)) await c.delete(r); })
         .then(() => self.clients.claim()));
 });
+// v0.11.150 (RW1, OL): the page asks the worker that serves it for its version (over a MessageChannel port): an old version's
+// cache can be written again by a late request after it was deleted, so the caches' names alone can name the wrong version.
+self.addEventListener('message', (e) => { if (e.data === 'version' && e.ports && e.ports[0]) e.ports[0].postMessage(VERSION); });
 self.addEventListener('fetch', (e) => {
     const req = e.request;
     if (req.method !== 'GET') return;
     const url = new URL(req.url);
     // v0.11.149 (FN1): the fonts ship with the game (css/fonts/, in ART like the pictures); nothing is fetched from Google Fonts.
     if (url.origin !== location.origin) return;
+    // v0.11.150 (BL1): sw.js itself is never cached here, so the game reads its version from the server, or from the cache's name offline.
+    if (url.pathname === `${SCOPE}sw.js`) return;
     // v0.11.39: pictures, backgrounds and icons from the art cache first (a fingerprint names one exact file), the network only on a miss.
     const p = artPath(url);
     if (p) {

@@ -17,6 +17,7 @@ import { FAQ_KEY, FAQ_TAB, faqState, faqText, faqCheck, faqList, faqHasNew, faqS
 import { meridianRow } from './story/meridians.js';
 import { APK_URL, UPDATE_KEY, CHECK_DELAY, updPrefs, inApp, makeUpdater } from './core/update.js'; // v0.11.147 (UP1; RV1: makeUpdater)
 import { exportRoute, canSaveToFile, wantsServiceWorker, savedName, resultPlace, FILE_TEXT } from './core/app.js'; // v0.11.148 (EX1; RX1: savedName, resultPlace)
+import { SEEN_KEY, NOTES, newsSince, versionLabel, statusPlace, takeoverNotice, recheckDue, READY_TEXT } from './core/news.js'; // v0.11.150 (BL1)
 import { realmShockHpBonus } from './core/formulas.js';
 import * as ART from './art/art.js';
 const sceneArt = (key) => { ART.setArtState?.({ yukiForm: yukiForm(g) }); return ART.sceneArt(key); };
@@ -511,6 +512,7 @@ const expWrite = (o) => store.set(EXP_KEY, JSON.stringify(o));
 function expMark() { const o = expState(); o.t = Date.now(); o.pl = bakMeta().play; expWrite(o); }
 function expRemind() {
     const o = expState(); if (o.off) return;
+    if (reloadShown()) return; // v0.11.150 (RW1, KR): a Reload notice on screen stays; the reminder comes on a later visit
     const pl = bakMeta().play, now = Date.now();
     if (o.t == null || o.t > now) { o.t = now; o.pl = pl; expWrite(o); return; } // first time, or the clock went back
     if (o.pl == null || o.pl > pl) { o.pl = pl; expWrite(o); return; }
@@ -519,15 +521,35 @@ function expRemind() {
 }
 
 // "Copy status as text" for bug reports.
-async function gameVersion() {
+// v0.11.150 (BL1): sw.js first (the app's own copy, or the server's: a page opened online runs the server's files), then the
+// cache's name (offline, the page runs the cache's files); sw.js no longer goes through the service worker's cache.
+/** v0.11.150 (RW1, OL): the version of the service worker serving this page (it answers on a MessageChannel); null without one,
+ * from a worker older than 0.11.150 (no answer in 1 s) or on an error. */
+function workerVersion(w = navigator.serviceWorker?.controller) {
+    if (!w || typeof MessageChannel === 'undefined') return Promise.resolve(null);
+    return new Promise((ok) => {
+        const ch = new MessageChannel(), t = setTimeout(() => ok(null), 1000);
+        ch.port1.onmessage = (e) => { clearTimeout(t); ok(String(e.data || '')); };
+        try { w.postMessage('version', [ch.port2]); } catch { clearTimeout(t); ok(null); }
+    });
+}
+async function cacheVersion() {
+    const wv = /^bone-ash-(.+)$/.exec(await workerVersion() || ''); if (wv) return wv[1]; // the worker's own word first
     try { const k = (await caches.keys()).find((x) => /^bone-ash-/.test(x)); if (k) return k.replace('bone-ash-', ''); } catch { /* no cache */ }
-    try { const t = await (await fetch('sw.js', { cache: 'no-store' })).text(); const m = /VERSION = 'bone-ash-([^']+)'/.exec(t); if (m) return m[1]; } catch { /* offline */ }
     return '?';
 }
+async function gameVersion() {
+    const signal = typeof AbortSignal !== 'undefined' && AbortSignal.timeout ? AbortSignal.timeout(VERSION_WAIT) : undefined; // RW1 (TO): a stalled line gives up
+    try { const t = await (await fetch('sw.js', { cache: 'no-store', signal })).text(); const m = /VERSION = 'bone-ash-([^']+)'/.exec(t); if (m) return m[1]; } catch { /* offline, or too slow */ }
+    return cacheVersion();
+}
+const VERSION_WAIT = 3000; // v0.11.150 (RW1, TO): ms to wait for sw.js before the cache's name
+let pageVersion = null; // v0.11.150 (BL1): the version this page opened with (a promise, read once at start)
+const runningVersion = () => (pageVersion ||= gameVersion());
 async function statusText() {
     const j = g.james;
     const lines = [
-        `Bone and Ash ${await gameVersion()} · ${new Date().toISOString()}`,
+        `Bone and Ash ${await runningVersion()} · ${statusPlace(inApp(window), updater.mine())} · ${new Date().toISOString()}`, // v0.11.150 (LB)
         `Mode: Incremental (every action at once) · tab ${tab}`,
         `Scene: ${g.scene} (${sceneTitle(g.scene)}) · ${clockLabel(g.minutes)}${g.coil ? ` · ${g.coil.act === 1 ? 'Act 1' : 'Prologue'}, Coil ${g.coil.n}` : ''}${g.combat ? ' · in a fight' : ''}`,
         `James: ${realmName(j.realm)}, Saturation ${n1(j.saturation)}% · HP ${n1(j.hp)} / ${jamesHpMax(g)} · Convergence ${n1(j.qi)} / ${n1(jamesQiMax(g))} · Fed ${Math.round(j.satiety)} · days slept ${wakeDay(g)}`,
@@ -595,14 +617,17 @@ function fallbackCopy(text, done, fail) {
 
 const notebar = document.createElement('div');
 notebar.id = 'notebar'; notebar.setAttribute('role', 'status'); notebar.hidden = true;
-notebar.innerHTML = '<span class="msg"></span><button class="btn" data-note="export">Download now</button><button class="btn" data-note="close" aria-label="Close">✕</button>';
+notebar.innerHTML = '<span class="msg"></span><button class="btn" data-note="export">Download now</button><button class="btn primary" data-note="reload" hidden>Reload</button><button class="btn" data-note="close" aria-label="Close">✕</button>'; // v0.11.150 (VN): Reload
 document.body.appendChild(notebar);
-function showNotice(msg, exportBtn = true) { notebar.querySelector('.msg').textContent = msg; notebar.querySelector('[data-note="export"]').hidden = !exportBtn; notebar.hidden = false; } // EX1 (RP): a result line has no Download button
+/** v0.11.150 (RW1, KR): the new-version notice is on screen. */
+const reloadShown = () => !notebar.hidden && !notebar.querySelector('[data-note="reload"]').hidden;
+function showNotice(msg, exportBtn = true, reloadBtn = false) { notebar.querySelector('.msg').textContent = msg; notebar.querySelector('[data-note="export"]').hidden = !exportBtn; notebar.querySelector('[data-note="reload"]').hidden = !reloadBtn; notebar.hidden = false; } // EX1 (RP): a result line has no Download button; v0.11.150 (VN): Reload
 notebar.addEventListener('click', (ev) => {
     const b = ev.target.closest('button[data-note]');
     if (!b) return;
     notebar.hidden = true;
     if (b.dataset.note === 'export' && g) { expMark(); exportText(saveFileName(), serialize(g)); } // EX1
+    if (b.dataset.note === 'reload') { closeSave(); location.reload(); } // v0.11.150 (VN): save first (as on closing), then the new version
 });
 window.addEventListener('error', (ev) => showError(ev.error || ev.message));
 window.addEventListener('unhandledrejection', (ev) => showError(ev.reason));
@@ -715,6 +740,8 @@ function renderSettings() {
 <h2>Saving</h2>
 <div class="btns"><button class="btn${expState().off ? '' : ' primary'}" data-expremind="1">Remind me to download: ${expState().off ? 'off' : 'on'}</button></div>
 ${updatePanel()}
+<h2>What's new</h2>
+<details class="wnew-all" data-wnew="1"${wnewOpen ? ' open' : ''}><summary>Every change a player sees, newest first (${NOTES.length})</summary>${notesHtml([...NOTES].reverse())}</details>
 <div class="btns"><button class="btn" data-menu="main">Back</button></div>
 <p class="note" id="saveNote"></p></section>`;
 }
@@ -730,9 +757,9 @@ function renderMenu() {
 <div class="mseal" aria-hidden="true">骨</div>
 <h1 class="mtitle">Bone and Ash</h1>
 <p class="note mver">Version <span id="menuVer">…</span> · Incremental Mode</p>
-<div class="mbtns">${cont}${hadSave && !recovery ? '<button class="btn big" data-new="1">New game</button>' : ''}<button class="btn big" data-menu="saves">Saves</button><button class="btn big" data-menu="settings">Settings</button>${appUpd()?.newer ? `<button class="btn big" data-menu="settings">App update available (build ${appUpd().build})<small>You have build ${appUpd().mine}. Settings → App updates; saves are kept.</small></button>` : ''}</div>
+${newsBox()}<div class="mbtns">${cont}${hadSave && !recovery ? '<button class="btn big" data-new="1">New game</button>' : ''}<button class="btn big" data-menu="saves">Saves</button><button class="btn big" data-menu="settings">Settings</button>${appUpd()?.newer ? `<button class="btn big" data-menu="settings">App update available (build ${appUpd().build})<small>You have build ${appUpd().mine}. Settings → App updates; saves are kept.</small></button>` : ''}</div>
 <p class="note" id="saveNote"></p></section>`;
-    gameVersion().then((v) => { const el = document.getElementById('menuVer'); if (el) el.textContent = v; });
+    runningVersion().then((v) => { const el = document.getElementById('menuVer'); if (el) el.textContent = versionLabel(v, inApp(window) ? updater.mine() : 0); }); // v0.11.150 (LB)
 }
 function openMenu(page = 'main') {
     if (!menu && g && !recovery) autosave();
@@ -832,6 +859,7 @@ document.addEventListener('click', (ev) => { if (Date.now() < swallowUntil && sw
 tipEl.addEventListener('click', (ev) => { if (ev.target.closest('[data-tip]')) tipEl.hidden = true; });
 view.addEventListener('toggle', (ev) => {
     const d = ev.target;
+    if (d.matches?.('[data-wnew]') && d.isConnected) wnewOpen = d.open; // v0.11.150 (RW1, KO)
     if (d.dataset?.rid) { const id = Number(d.dataset.rid); if (d.open) openResults.add(id); else openResults.delete(id); }
     if (d.dataset?.grp != null && d.isConnected) setGroupOpen(d.dataset.grp, d.open, d.dataset.dflt === '1'); // v0.11.67 (D2)
     if (d.dataset?.faq && d.isConnected) { if (d.open) { faqOpen.add(d.dataset.faq); if (faqSeen(faqLoad(), d.dataset.faq)) { faqSave(); faqUpdate(); } d.querySelector('.fnew')?.remove(); } else faqOpen.delete(d.dataset.faq); } // v0.11.83
@@ -928,6 +956,7 @@ view.addEventListener('click', (ev) => {
             if (m === 'continue' || m === 'recovery') { hadSave = true; menu = null; setTab('story'); return; }
             openMenu(m); return;
         }
+        if (b.dataset.newsclose) { news = []; render(); return; } // v0.11.150 (WN): the box closes for this visit (the version is already kept)
         if (b.dataset.textsize) { textSize = Number(b.dataset.textsize); store.set(TEXT_SIZE_KEY, String(textSize)); applyTextSize(); render(); return; }
         if (b.dataset.showchecks) { showChecks = !showChecks; store.set(SHOW_CHECKS_KEY, showChecks ? '1' : '0'); render(); return; }
         if (b.dataset.bak) {
@@ -1077,6 +1106,14 @@ const updater = makeUpdater({
     status: (msg) => { const el = document.getElementById('updSt'); if (el) el.textContent = msg; },
     autoInstall: () => upd.autoInstall,
 });
+let news = []; // v0.11.150 (WN): the What's new notes shown on the menu this visit (newest first)
+let wnewOpen = false; // v0.11.150 (RW1, KO): Settings → What's new stays open across redraws
+const notesHtml = (list) => `<ul class="wnew">${list.map(([v, t]) => `<li><b>${esc(v)}</b>: ${esc(t)}</li>`).join('')}</ul>`;
+/** v0.11.150 (WN): the menu's What's new box. */
+function newsBox() {
+    if (!news.length) return '';
+    return `<div class="wnew-box" role="status"><div class="wnew-head"><b>What's new</b><button class="btn" data-newsclose="1" aria-label="Close What's new">✕</button></div>${notesHtml(news)}<p class="note">The whole list: Settings → What's new.</p></div>`;
+}
 const appUpd = () => updater.st.found; // { build, mine, newer, unknown? } from the last check
 /** Settings → App updates in the app; in a browser, one line with the app's link. */
 function updatePanel() {
@@ -1106,7 +1143,32 @@ const closeSave = () => { if (store.get(AUTO) === lastWritten) autosave(); };
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') closeSave(); });
 window.addEventListener('pagehide', closeSave);
 render();
+// v0.11.150 (BL1, WN): What's new since the version this phone last opened; kept as seen at once (Selene's), shown until ✕
+const hadSaveAtLoad = hadSave; // RW1 (HS): Begin sets hadSave; a new player stays a new player
+runningVersion().then((v) => {
+    const r = newsSince(store.get(SEEN_KEY), v, hadSaveAtLoad);
+    if (r.record) store.set(SEEN_KEY, r.record);
+    news = r.list;
+    if (news.length && menu === 'main' && Date.now() - newArmed >= 4000) render(); // RW1 (AR): never while New game is armed (the box waits for the next redraw)
+});
 if (inApp(window) && upd.auto) setTimeout(() => checkAppUpdate(false), CHECK_DELAY); // v0.11.147 (UP1): once per app start
 if (wantsServiceWorker(window, location.protocol)) { // v0.11.148 (EX1, NS): not inside the app
+    let controlled = !!navigator.serviceWorker.controller; // v0.11.150 (VN): a first install takes over too; no notice for it
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        const hadController = controlled; controlled = true; // a version ran this page before this one took over
+        // the page changes hands when the new worker starts activating: its version is read once it has deleted the old caches
+        const w = navigator.serviceWorker.controller;
+        const settled = !w || w.state === 'activated' ? Promise.resolve() : new Promise((ok) => w.addEventListener('statechange', () => { if (w.state === 'activated' || w.state === 'redundant') ok(); }));
+        Promise.all([runningVersion(), settled.then(cacheVersion)]).then(([running, arrived]) => {
+            if (takeoverNotice({ inApp: inApp(window), hadController, running, arrived })) showNotice(READY_TEXT(arrived), false, true);
+        }).catch(() => { /* no notice */ });
+    });
     navigator.serviceWorker.register('sw.js').catch(() => { /* offline install is optional */ });
+    // v0.11.150 (UC): the browser looks for a new version when the game comes back on screen, at most every 30 minutes
+    let asked = Date.now(); // opening the page has just asked
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState !== 'visible' || !recheckDue(Date.now(), asked)) return;
+        asked = Date.now();
+        navigator.serviceWorker.getRegistration().then((reg) => reg?.update()).catch(() => { /* offline: next time */ });
+    });
 }

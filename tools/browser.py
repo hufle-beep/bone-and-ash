@@ -154,6 +154,47 @@ def main_menu(pg, url):
     if not pg.query_selector('.main-menu'): fails.append('menu: the ☰ Menu tab did not open the menu')
     enter(pg)
 
+def news_box(pg, url):
+    """v0.11.150 (BL1): the build label (with the build only in the app), What's new on the menu (first run: a new player sees
+    nothing; a save and an older kept version: the notes since, newest first; ✕ closes it; the version kept at once), the whole
+    list in Settings. Before VERSION is bumped with the docs the newest note may be one patch ahead: then no box is expected."""
+    ver = re.search(r"VERSION = 'bone-ash-([^']+)'", (ROOT / 'sw.js').read_text()).group(1)
+    notes_src = (ROOT / 'js/core/news.js').read_text()
+    shown = [v for v in re.findall(r"\['(\d+\.\d+\.\d+)', '", notes_src) if tuple(map(int, v.split('.'))) <= tuple(map(int, ver.split('.')))]
+    pg.goto(url.replace('index.html', 'art/bg/CREDITS.md')); pg.evaluate("localStorage.clear()")
+    pg.goto(url); until(pg, '#menuVer:not(:empty)', 5000, 'attached'); until(pg, "document.getElementById('menuVer')?.textContent !== '…'", 5000)
+    label = pg.inner_text('.mver')
+    if label != f'Version {ver} · Incremental Mode': fails.append(f'BL1 (LB): the browser menu says {label!r}, not Version {ver} · Incremental Mode')
+    until(pg, f"localStorage.getItem('boneash.seen') === '{ver}'", 3000)
+    if pg.query_selector('.wnew-box') or pg.evaluate("localStorage.getItem('boneash.seen')") != ver: fails.append('BL1 (WN): a new player saw What\'s new, or the version was not kept')
+    save = (ROOT / 'saves/v0.11.7-long-forest-coil2.json').read_text()
+    pg.goto(url.replace('index.html', 'art/bg/CREDITS.md')); pg.evaluate("s => { localStorage.clear(); localStorage.setItem('boneash.auto', s); localStorage.setItem('boneash.seen', '0.11.140'); }", save)
+    pg.goto(url); until(pg, f"localStorage.getItem('boneash.seen') === '{ver}'", 5000)
+    if shown: until(pg, '.wnew-box li', 3000, 'visible')
+    got = pg.eval_on_selector_all('.wnew-box li b', 'els => els.map(e => e.textContent)')
+    if got != list(reversed(shown)): fails.append(f'BL1 (WN): the box listed {got}, not {list(reversed(shown))}')
+    elif shown:
+        pg.click('button[data-newsclose]'); until(pg, '.wnew-box', 3000, 'detached')
+        if pg.query_selector('.wnew-box'): fails.append('BL1 (WN): ✕ did not close What\'s new')
+        pg.goto(url); until(pg, '.main-menu', 10000, 'attached'); pg.wait_for_timeout(400)
+        if pg.query_selector('.wnew-box'): fails.append('BL1 (WN): What\'s new came back on the next open')
+    pg.click('button[data-menu="settings"]'); until(pg, 'details.wnew-all', 5000, 'attached')
+    n = pg.eval_on_selector_all('details.wnew-all li', 'els => els.length')
+    # v0.11.150 (RW1, KO): the list stays open when Settings redraws
+    pg.click('details.wnew-all > summary'); pg.click('button[data-showchecks]'); until(pg, "localStorage.getItem('boneash.showchecks') === '1'", 3000)
+    if not pg.evaluate("document.querySelector('details.wnew-all')?.open"): fails.append('RW1 (KO): Settings → What\'s new folded itself on a redraw')
+    pg.click('button[data-showchecks]'); until(pg, "localStorage.getItem('boneash.showchecks') === '0'", 3000)
+    if n != len(re.findall(r"\['\d+\.\d+\.\d+', '", notes_src)): fails.append(f'BL1 (WL): Settings → What\'s new lists {n} notes')
+    check_text(pg, 'Settings (What\'s new)')
+    # in the app (a fake bridge): the build on the label and in Copy status; no update check at start
+    pa = pg.context.new_page()
+    pa.add_init_script("window.AndroidBridge = { versionCode: () => 6, isApp: () => true }; try { localStorage.setItem('boneash.update', JSON.stringify({ auto: false, autoInstall: false })); } catch {}")
+    pa.goto(url); until(pa, "document.getElementById('menuVer')?.textContent.includes('build')", 5000)
+    al = pa.inner_text('.mver')
+    if al != f'Version {ver} · build 6 · Incremental Mode': fails.append(f'BL1 (LB): the app\'s menu says {al!r}')
+    else: notes.append(f'BL1: the label ({al}), What\'s new ({len(shown)} on the menu{", ✕" if shown else ", none before the bump"}), Settings\' list ({n})')
+    pa.close()
+
 FONT_FACES = {'Literata|400 600|normal', 'Literata|400|italic', 'Shippori Mincho|600|normal', 'Shippori Mincho|800|normal'}
 
 def drawn_fonts(pg):
@@ -306,7 +347,7 @@ def faq(pg, url):
     new. Search filters (every word) and says when nothing matches; the FAQ opened from a tab opens that tab's entry; the James
     tab's old dice rules are gone (its button opens the FAQ)."""
     save = (ROOT / 'saves/v0.11.7-long-forest-coil2.json').read_text()
-    start = ["James and Yuki", "What is the goal?", "How do I play?", "HP, Convergence and Fed", "Days, sleep and the night", "Results and the Journal", "Saving and settings", "Skills and checks", "The hammerspace"]
+    start = ["James and Yuki", "What is the goal?", "How do I play?", "HP, Convergence and Fed", "Days, sleep and the night", "Results and the Journal", "Saving and settings", "The Android app", "Skills and checks", "The hammerspace"]
     kept = json.dumps({'u': {'start': 1}, 'seen': {q: 1 for q in start}})
     fresh(pg, url, "a => { localStorage.clear(); localStorage.setItem('boneash.auto', a[0]); localStorage.setItem('boneash.faq.v1', a[1]); }", [save, kept])
     row = pg.eval_on_selector_all('#tabs button', "els => els.map(e => Math.round(e.getBoundingClientRect().top))")
@@ -642,6 +683,9 @@ def update_test(b):
         if not update_to(pg, 'bone-ash-9.9.8'):
             state = pg.evaluate("navigator.serviceWorker.getRegistration().then((r) => r ? [r.installing?.state, r.waiting?.state, r.active?.state].map(String).join(' / ') : 'none')")
             bad(f'the update from 0.11.38 never took over (caches {pg.evaluate("caches.keys()")}; installing / waiting / active: {state}; sw.js fetched {log.count("/bone-and-ash/sw.js")}×)'); return
+        # v0.11.150 (BL1, VN): the page opened under 0.11.38's worker; the new version's takeover shows the notice, Reload, no Download
+        if not poll(pg, "(() => { const n = document.getElementById('notebar'); return !!n && !n.hidden && n.textContent.includes('Version 9.9.8 is ready') && !n.querySelector('[data-note=reload]').hidden && n.querySelector('[data-note=export]').hidden; })()", 5000):
+            bad(f'VN: no "Version 9.9.8 is ready" notice with Reload after the takeover (bar: {pg.evaluate("document.getElementById(\'notebar\')?.hidden")}, {pg.evaluate("document.getElementById(\'notebar\')?.textContent")!r})')
         have = pg.evaluate(entries); hits = art_hits()
         if len(have) != len(art) or sorted(hits) != sorted('/bone-and-ash/' + f for f in art): bad(f'from 0.11.38: {len(have)} art files cached, {len(hits)} downloaded ({len(set(hits))} distinct), expected {len(art)} each once')
         log.clear()
@@ -683,6 +727,29 @@ def update_test(b):
         fsize = pg.evaluate("fetch('css/fonts/ShipporiMincho-ExtraBold.woff').then(r => r.ok ? r.arrayBuffer().then(a => a.byteLength) : -r.status).catch(e => String(e))")  # v0.11.149 (FX1, FL)
         if fsize != (site / 'css/fonts/ShipporiMincho-ExtraBold.woff').stat().st_size: bad(f'offline, the ExtraBold font gave {fsize}')
         ctx.set_offline(False)
+        # v0.11.150 (BL1, VN + WN): Reload saves and opens the new version: its label, no notice, and What's new since 0.11.38
+        pg.click('#notebar [data-note="reload"]'); pg.wait_for_load_state('load'); pg.wait_for_load_state('networkidle')  # PF: the page's own requests settle first
+        poll(pg, "document.getElementById('menuVer')?.textContent === '9.9.9' ? 1 : 0", 10000)
+        lbl = pg.evaluate("document.getElementById('menuVer')?.textContent")
+        box = pg.eval_on_selector_all('.wnew-box li b', 'els => els.map(e => e.textContent)')
+        saved = pg.evaluate("!!localStorage.getItem('boneash.auto')")
+        if lbl != '9.9.9' or not pg.evaluate("document.getElementById('notebar').hidden") or not box or pg.evaluate("localStorage.getItem('boneash.seen')") != '9.9.9' or not saved:
+            bad(f'VN: after Reload the label {lbl!r}, the bar hidden {pg.evaluate("document.getElementById(\'notebar\').hidden")}, What\'s new {box}, kept {pg.evaluate("localStorage.getItem(\'boneash.seen\')")!r}, saved {saved}')
+        # v0.11.150 (RW1, NT): a page opened online already runs the new files: the takeover that follows shows no notice
+        (site / 'sw.js').write_text(sw2.replace('bone-ash-9.9.9', 'bone-ash-9.9.11'))
+        pg.reload(); pg.wait_for_load_state('load'); pg.wait_for_load_state('networkidle')
+        if not update_to(pg, 'bone-ash-9.9.11', 30000): bad(f'NT: 9.9.11 never took over (caches {pg.evaluate("caches.keys()")})')
+        pg.wait_for_timeout(600)
+        nt = pg.evaluate("[document.getElementById('menuVer')?.textContent, document.getElementById('notebar').hidden]")
+        if nt != ['9.9.11', True]: bad(f'NT: a page already on the arriving version: label and bar hidden {nt}, expected 9.9.11 and no notice')
+        # v0.11.150 (RW1, OL): offline the label comes from the cache's name (sw.js is not cached by the worker)
+        ctx.set_offline(True)
+        pg.reload(); pg.wait_for_load_state('load')
+        poll(pg, "document.getElementById('menuVer')?.textContent === '9.9.11' ? 1 : 0", 8000)
+        ol = pg.evaluate("document.getElementById('menuVer')?.textContent")
+        if ol != '9.9.11': bad(f'OL: offline the menu says {ol!r}, not 9.9.11')
+        ctx.set_offline(False)
+        if not any(f for f in fails if f.startswith('update')): notes.append('VN: the takeover\'s notice with Reload; Reload saved, opened 9.9.9 and showed What\'s new; a page already on the arriving version: no notice; offline the label from the cache')
         if not any(f for f in fails if f.startswith('update')): notes.append(f'update: from 0.11.38 every art file once ({len(art)}); a new version downloaded only the 1 changed picture, old copy pruned; a stale file rejected (the install failed, the version stayed); a miss stored again; served offline (a font too)')
         ctx.close()
     finally:
@@ -770,6 +837,8 @@ def main(part=0):
                 saves(pg, url)
                 # 6. the main menu (v0.11.10)
                 main_menu(pg, url)
+                # 6c. the build label and What's new (v0.11.150, BL1)
+                news_box(pg, url)
                 # 6b. the fonts from the game's own files (v0.11.149, FN1)
                 fonts_local(pg, url)
                 # 7. tooltip, bars, scroll (v0.11.11)

@@ -18,7 +18,7 @@ const plain = (s) => s.replace(/<[^>]+>/g, '');
 
 // the list itself
 const qs = FAQ.map(([q]) => q);
-assert(FAQ.length === 21 && new Set(qs).size === qs.length, `21 entries, no question twice (v0.11.109: Flight) (${FAQ.length})`);
+assert(FAQ.length === 22 && new Set(qs).size === qs.length, `22 entries, no question twice (v0.11.109: Flight; v0.11.150: The Android app) (${FAQ.length})`);
 assert(FAQ.every(([, , gate]) => gate in FAQ_TEST), 'every entry has a known gate');
 assert(Object.keys(FAQ_TEST).every((k) => FAQ.some(([, , gate]) => gate === k)), 'every gate opens at least one entry');
 assert(Object.values(FAQ_TAB).every((q) => FAQ.find(([x]) => x === q)?.[2] === 'start'), 'every tab\'s entry exists and is there from a new game (the James tab\'s button finds its entry on Day 1)');
@@ -27,6 +27,14 @@ const fresh = ensureBars(newGame(7, { closed: true }));
 assert(FAQ.every(([q, a]) => !/undefined|NaN|\[object/.test(typeof a === 'function' ? a(fresh) : a) && !/undefined|NaN/.test(typeof a === 'function' ? a({}) : a)), 'no answer shows undefined or NaN (a game, and none)');
 assert(FAQ.every(([, a]) => !/\bd6\b|🎲|a 6 always/.test(typeof a === 'function' ? a(fresh) : a)), 'no answer talks of dice');
 
+// v0.11.150 (owner pick BL1, FQ-e; Fable's text): the Android app entry, there from the start, its link from update.js, and every
+// button it names drawn by main.js (so a renamed button can't leave the FAQ stale)
+{ const { APK_URL } = await import('../js/core/update.js');
+  const app = text('The Android app'), main = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+  assert(FAQ.find(([q]) => q === 'The Android app')[2] === 'start' && app.includes(`<a href="${APK_URL}">${APK_URL}</a>`), 'FQ-e: the Android app entry is there from the start, with the APK link from update.js');
+  const named = [...app.matchAll(/<b>([^<]+)<\/b>/g)].map((m) => m[1]).filter((x) => !['Saves', 'Settings'].includes(x));
+  const missing = named.filter((x) => !main.includes(x.replace(/'/g, "\\'")) && !main.includes(x));
+  assert(named.length >= 10 && !missing.length, `FQ-e: every button the entry names is drawn by main.js (${named.length} named; missing: ${missing.join(', ') || 'none'})`); }
 // the numbers come from the game
 const fed = plain(text('HP, Convergence and Fed'));
 assert(fed.includes(`drops ${SATIETY_PER_HOUR} an hour (${SATIETY_PER_HOUR + FED_EXTRA_PER_HOUR} while working`) && fed.includes(`Below ${HUNGRY_AT}`) && fed.includes(`${STARVE_HP_PER_HOUR} HP an hour`), 'Fed: the rates, the hunger line and starving from game.js / tasks.js');
@@ -103,10 +111,10 @@ assert(!faqHasNew(st) && faqList(st, g2).every((e) => !e.isNew) && faqList(st, g
 st = faqState(faqText({ u: { start: 1 }, seen: {} }));
 assert(!st.fresh, 'a kept state is not fresh');
 faqCheck(st, fresh);
-assert(!faqHasNew(st) && faqList(st, fresh).length === 9, 'the start entries (9) are never new');
+assert(!faqHasNew(st) && faqList(st, fresh).length === 10, 'the start entries (10) are never new');
 const changed = faqCheck(st, g2);
 const list = faqList(st, g2);
-assert(changed && faqHasNew(st) && list.filter((e) => e.isNew).length === list.length - 9, `a later save on a phone that has the FAQ: its new entries are new (${list.filter((e) => e.isNew).map((e) => e.q)})`);
+assert(changed && faqHasNew(st) && list.filter((e) => e.isNew).length === list.length - 10, `a later save on a phone that has the FAQ: its new entries are new (${list.filter((e) => e.isNew).map((e) => e.q)})`);
 const first = list.find((e) => e.isNew).q;
 assert(faqSeen(st, first) && !faqSeen(st, first) && !faqList(st, g2).find((e) => e.q === first).isNew, 'opening an entry marks it seen, once');
 const back = faqState(faqText(st));

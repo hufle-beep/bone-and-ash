@@ -58,7 +58,7 @@ function checkMain(src) {
     t(has('b.dataset.exportfile') && has('b.dataset.exportallfile'), 'B: data-exportfile and data-exportallfile handled');
     t(has("    else if (how === 'file') { askedName = name; AB.exportFile(name, text); }"), 'B: the name asked of the file picker remembered (FN)');
     t(has("window.onAndroidExport = (ok, msg) => {\n    const line = ok ? FILE_TEXT.saved(savedName(msg, askedName)) : FILE_TEXT.failed(msg);\n    if (resultPlace(menu, !!recovery) === 'note' && document.getElementById('saveNote')) note(line); else showNotice(line, false);"), 'B: the app\'s answer: the asked name (FN), under the buttons on Saves or recovery, else the notice bar (RP, NL)');
-    t(has('function showNotice(msg, exportBtn = true) {') && has(`notebar.querySelector('[data-note="export"]').hidden = !exportBtn;`), 'B: the notice bar keeps Download now unless a result line asks otherwise');
+    t(has('function showNotice(msg, exportBtn = true, reloadBtn = false) {') && has(`notebar.querySelector('[data-note="export"]').hidden = !exportBtn;`), 'B: the notice bar keeps Download now unless a result line asks otherwise');
     t(/expMark\(\); showNotice\('No save downloaded for over a day\.[^']*'\);/.test(src), 'B: the export reminder keeps its Download now button');
     t(/const fail = \(\) => \{ if \(shareText\(`bone-and-ash-error-\$\{stamp\(\)\}\.txt`, text\)\) \{[^\n]*\n    if \(navigator\.clipboard\?\.writeText\) navigator\.clipboard\.writeText\(text\)\.then\(done, \(\) => fallbackCopy\(text, done, fail\)\); else fallbackCopy\(text, done, fail\);\n\}\);/.test(src), 'B: the error bar\'s Copy falls back to the share sheet (CP)');
     t(has("if (!ok && shareText(ghFileName('txt'), body)) { note(FILE_TEXT.ghShared); return; }"), 'B: Share to GitHub\'s long save falls back to the share sheet only when the copy failed (CP, GW)');
@@ -73,7 +73,7 @@ function checkMain(src) {
     assert(!bad.length, `B on js/main.js (${bad.join('; ') || 'all hold'})`);
     for (const l of bad) console.error('        ', l);
     const mutants = [ // the cold review's seven (RX1, TB), and the rest of the wiring
-        ['the reminder loses Download now', 'function showNotice(msg, exportBtn = true) {', 'function showNotice(msg, exportBtn = false) {'],
+        ['the reminder loses Download now', 'function showNotice(msg, exportBtn = true, reloadBtn = false) {', 'function showNotice(msg, exportBtn = false, reloadBtn = false) {'], // v0.11.150 (BL1, VN): Reload
         ['the answer always on the notice bar', "if (resultPlace(menu, !!recovery) === 'note' && document.getElementById('saveNote')) note(line); else showNotice(line, false);", 'showNotice(line, false);'],
         ['the error bar without its fallback', '.then(done, () => fallbackCopy(text, done, fail)); else fallbackCopy(text, done, fail);\n});', '.then(done, () => fallbackCopy(text, done)); else fallbackCopy(text, done);\n});'],
         ['the GitHub fallback inverted', "if (!ok && shareText(ghFileName('txt'), body))", "if (ok && shareText(ghFileName('txt'), body))"],

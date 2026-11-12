@@ -491,7 +491,11 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md'];
     assert(order.every((x, i) => x > 0 && (i === 0 || x > order[i - 1])), `TB1: the five Android pushes in order (${order.join(', ')})`);
     assert(['`MainActivity.java`', '`android.yml`', '`io.github.hufle.boneandash`', '`BoneAndAsh.apk`', '`android-latest`', '`hufle-beep/Long-patience`'].every((t) => s0.includes(t)), 'TB1: the plan names Selene\'s files, the app ID, the APK and the release');
     const ho0 = ho.slice(ho.indexOf('## Open items'));
-    assert(/^- \*\*TABLED: everything below waits until the Android app is done\*\*/m.test(ho0.split('\n').slice(2).join('\n')) && ho0.indexOf('**TABLED') < ho0.indexOf('**Group d'), 'TB1: the handover\'s open items start with the Tabled note');
+    // v0.11.150 (BL1): the app done, the tabling ends: the handover's open items start with that; the Tabled bullet moved to history-18.md
+    const h18 = readFileSync(path.join(ROOT, 'project/history-18.md'), 'utf8'), d3 = readFileSync(path.join(ROOT, 'project/roadmap-done-3.md'), 'utf8');
+    assert(/^- \*\*The Android app: done\*\* \(v0\.11\.145–v0\.11\.150/m.test(ho0.split('\n').slice(2).join('\n')) && ho0.indexOf('**The tabling ends**') < ho0.indexOf('**Group d') && !ho0.includes('**TABLED') && h18.includes('- **TABLED: everything below waits until the Android app is done**'), 'BL1: the handover\'s open items start with the app done and the tabling ended; the Tabled bullet in history-18.md');
+    assert(s0.includes('5. **BL, comfort:** **Done in v0.11.150**') && s0.includes('**the tabling ends**'), 'BL1: the roadmap marks push 5 done and the tabling ended');
+    for (const t of ['v0.11.143, owner picks NF1, RN1', 'v0.11.142, owner pick CV1', 'v0.11.141, owner picks FX1, RW1']) assert(d3.includes(`- *(new in ${t}`) && !r1.includes(`- *(new in ${t}`), `BL1 (the roadmap under 60 KB): the done line of ${t.split(",")[0]} moved to roadmap-done-3.md`);
     for (const t of ['v0.11.140, owner picks FM2, RV1', 'v0.11.133, owner picks FP2, RF1', 'v0.11.132, owner picks PL1, E1', 'v0.11.119, pick NP1']) assert(d2.includes(`- *(new in ${t}`) && !r1.includes(`- *(new in ${t}`), `TB1 (TR): the done line of ${t.split(",")[0]} moved to roadmap-done-2.md`);
 }
 // v0.11.74 (group i round 1, I1; v0.11.75: round 2's wave 1, W1; v0.11.76: wave 2, V1; v0.11.78: read across the research parts, S1): every group i candidate in project/research.md is placed in the roadmap, and every roadmap line marked "from group i" (or "from group i round 2") names a real one

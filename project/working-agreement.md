@@ -49,6 +49,7 @@ Automated "commit and push your changes" reminders from the tooling do **not** o
 ## Standing rules
 - **Numbers first:** show the numbers (before and after) before any balance change or any one-time change to saves.
 - **Bump `VERSION` in `sw.js` on every push** (format `bone-ash-X.Y.Z`), or installed copies keep the old files. After each push, tell the owner to reopen the game once or twice (the Pages site updates in 1–2 minutes).
+- **What's new** (owner pick BL1, v0.11.150, WK): every push that changes what a player sees adds one line to `NOTES` in `js/core/news.js` (its version and plain words; Claude writes it, like the changelog); a docs-only push adds none. The game shows the notes since the version a phone last opened on the main menu, and the whole list in Settings → What's new.
 - **Saves are never orphaned.** Scene ids, item ids, flags and the storage keys (`boneash.auto`, `boneash.slot1–3`) never change, because saves store progress under them. Old saves get a migration, never a rejection.
 - **The owner is not a programmer:** tap-by-tap steps for anything he does on GitHub.
 - **Short answers**, with a list of choices when there's something to decide.
