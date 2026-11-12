@@ -106,6 +106,13 @@ export function byDay(g, list, key = g?.scene) {
     return typeof t === 'function' ? t(g) : t;
 }
 
+/** v0.11.154 (owner pick RV1, Fable's review, L2 CL): like byDay, but past the last text it stays on the last one instead of starting again (the Heart's
+ *  lists: a stay past their last day shows the last day's text, not the first day's). */
+export function byDayLast(g, list, key = g?.scene) {
+    const t = list[Math.min(dayIndex(g, key), list.length - 1)];
+    return typeof t === 'function' ? t(g) : t;
+}
+
 /**
  * v0.11.136 (owner pick NC1, NT1's push 2): replies by day. A story choice's or a task card's reply that came back on another day
  * of the same Coil now has a new text for each later day (Fable's), picked like a scene's text: `dayReply(key, list)` registers

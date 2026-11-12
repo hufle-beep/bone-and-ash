@@ -12,7 +12,7 @@
  */
 import { bumpRel } from '../core/game.js';
 import { daily, markDaily, byForm } from './common.js';
-import { byDay, pickLine } from '../core/lines.js';
+import { byDay, byDayLast, pickLine } from '../core/lines.js';
 import { LIKES_BAR } from './act1_common.js';
 import { ykPath, ykAskAgain, ykFamilyNow, YK_QUESTION } from './yuki_path.js';
 import { TASK_HUBS } from './task_hubs.js';
@@ -147,6 +147,11 @@ export const YT_BODY = {
         "There is a hollow in one of the ledges, worn smooth, the size of something that slept curled. Yuki has walked round it for three days. Today she is in it, and you sit below with a hand up on her back. *It fits,* says the bond. *Someone kept it warm once. I'm only minding it.* She does not get out.",
         "There is a hollow in one of the ledges, worn smooth by something that slept curled, and it would fit one of Yuki's paws. She has put one paw in it, with care, and the rest of her against you. *Someone kept that warm once,* says the bond. *I walked round it for three days. I'm only minding it.* The paw stays.",
         "There is a hollow in one of the ledges, worn smooth by something that slept curled. Yuki has walked round it for three days. Today she sits on the ledge beside it with her hand resting inside, and you sit with her. \"Someone kept it warm once,\" she says. \"I'm only minding it.\" A moment. \"Don't write that down.\""
+    ],
+    "heart_hub:5": [
+        "The dust was a thousand years deep when you came, and Yuki's were the only prints in it. Now she rides your shoulder round the hall and reviews the rest: yours in circles, everybody's round the fire. *It was a grave,* says the bond. *It's been lived in since. Badly.* She drops into the hood. *Leave the fire laid when we go. You do, in a house.*",
+        "The dust was a thousand years deep when you came. Now it is trodden flat in a ring round the fire, and Yuki lies across the ring with you propped against her, reviewing the tracks. *It was a grave,* says the bond. *It's been lived in since. Badly.* Her tail sweeps one clean arc in it. *Leave the fire laid when we go. You do, in a house.*",
+        "The dust was a thousand years deep when you came. Now it is trodden flat round the fire, and Yuki sits in it beside you with her tail over her feet, reading the tracks. \"It was a grave,\" she says. \"It's been lived in since. Badly, by us.\" She leans into your shoulder. \"Leave the fire laid when we go. You do, in a house.\""
     ],
     "rt_camp:1": [
         "Yuki sits on your knee and has you go through the omnitool's inventory aloud, item by item, like a story. It arrived empty. It is no longer empty. *That's a great deal of dead animal,* says the bond, when you finish. \"You caught a fair share of it.\" *I know. I wanted to hear it said.* She kneads your leg, a cat of property.",
@@ -375,7 +380,7 @@ export const YT_HUBS = {
     rr_hub: ['rr_hub:1', 'rr_hub:2'],
     dw_hub: ['dw_hub:1', 'dw_hub:2'],
     ah_hub: ['ah_hub:1', 'ah_hub:2'],
-    heart_hub: ['heart_hub:1', 'heart_hub:2', 'heart_hub:3', 'heart_hub:4'],
+    heart_hub: ['heart_hub:1', 'heart_hub:2', 'heart_hub:3', 'heart_hub:4', 'heart_hub:5'], // v0.11.154 (owner pick PS1, RP1 push 2; Fable's, "ok for texts" 23:05): the 5th Heart day (ST5)
     rt_camp: ['rt_camp:1', 'rt_camp:2'],
     rt_ashfall: ['rt_ashfall:1'],
     lf_hub: ['lf_hub:1', 'lf_hub:2'],
@@ -394,7 +399,7 @@ export function ytPool(g) {
 const hubOf = (g) => (YT_HUBS[g.flags.yk_time_hub] ? g.flags.yk_time_hub : 'camp');
 const dayKeyOf = (g) => `yk_time:${hubOf(g)}`;
 /** YB: today's slot at this place. */
-export const ytSlot = (g) => byDay(g, YT_HUBS[hubOf(g)], hubOf(g)); // v0.11.137 (RT1, L4): the day at the place, not the count of Yuki scenes there
+export const ytSlot = (g) => (hubOf(g) === 'heart_hub' ? byDayLast : byDay)(g, YT_HUBS[hubOf(g)], hubOf(g)); // v0.11.154 (owner pick RV1, Fable's review, L2 CL): the Heart keeps its fifth // v0.11.137 (RT1, L4): the day at the place, not the count of Yuki scenes there
 
 export const SCENES_YT = {
     yk_time: {

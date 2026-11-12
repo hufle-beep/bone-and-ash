@@ -221,14 +221,17 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         ...['wolves', 'bull', 'deer'].map((e) => ['far_hunt', 2, { far_kind: e }]),
         ['fo_ashfall', 2, {}], ['camp', 2, {}], ['ashfall', 2, {}], ['wilds', 2, {}],
     ];
+    // v0.11.154 (RV1, CF + FX): the camp goes by the night in the forest, the Fallout hub by the story's day, not by the day record
+    const SETDAY = { camp: (g, k) => { g.flags.forest_day = k + 1; }, fo_ashfall: (g, k) => { g.minutes = (7 + k) * 1440 + 9 * 60; } };
     let n = 0;
     for (const [id, want, flags] of NT) for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) {
         const texts = [];
         for (let k = 0; k < want; k++) {
             const g = ensureBars(fresh(5100)); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; Object.assign(g.flags, flags);
-            g.scene = id; onDay(g, k); texts.push(sceneView(g, SCENES).text);
+            g.scene = id; onDay(g, k); if (SETDAY[id]) SETDAY[id](g, k); texts.push(sceneView(g, SCENES).text);
         }
         const g0 = ensureBars(fresh(5100)); g0.yuki.realm = realm; g0.james.realm = realm; g0.yuki.form = form; Object.assign(g0.flags, flags); g0.scene = id;
+        if (SETDAY[id]) SETDAY[id](g0, 0);
         assert(texts[0] === sceneView(g0, SCENES).text, `NT1: ${id} ${JSON.stringify(flags)} (${form}): the first day's text is the original`);
         assert(new Set(texts).size === want && texts.every((t) => t && !/undefined|\$\{|\bNaN\b/.test(t)), `NT1: ${id} ${JSON.stringify(flags)} (${form}): ${want} different texts on ${want} days (${new Set(texts).size})`);
         n++;
@@ -308,7 +311,8 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     const OLD_GAINS = {"bl_camp:2":[],"heart_camp:1":[],"talk_ya:0":[],"talk_ya:3":[],"supper:2":[],"wen_lesson:forest":[],"bl_night_event:1":[],"talk_mei:1":[],"herb_slopes:0":["+2 Ninefold spirit grass (trade goods)."],"heart_spring:0":["+6 HP."],"heart_spring:1":["+4 HP."],"night_event:11":["+1 Mire fowl (dressed).","Yuki Fight held at James's GU (T1 L1)","GU +1 XP, from what Yuki couldn't keep"],"heart_spring:2":[],"rr_hunt:1":["+2 root-hares (as hare)."],"bl_fireside:2":[],"night_event:2":[],"heart_camp:2":[],"heart_camp:3":[],"night_event:0":[],"bl_train:0":[],"ah_forage:0":["+2 ash-truffles (as jade bracket), and one eaten on the spot: +10 satiety."],"wild_forage:2":["+2 Wild honeycomb."],"wild_train:2:f":["−1 HP.","Yuki Fight held at James's GU (T1 L1)","GU +1 XP, from what Yuki couldn't keep"],"workshop:0:f":[],"fo_palisade:0:f":[],"clinic:1:f":[],"fo_drill:1:f":["−2 HP.","Yuki Fight held at James's GU (T1 L1)","GU +1 XP, from what Yuki couldn't keep"],"workshop:2:f":[],"bl_train:0:f":["−2 HP."],"wild_forage:2:f":["+1 Wild honeycomb, −3 HP."],"drill:1:f":["−2 HP.","Yuki Fight held at James's GU (T1 L1)","GU +1 XP, from what Yuki couldn't keep"],"ah_forage:1":["+6 cinderberries (as needleberries)."],"rr_forage:1":["+4 root-sorrel (counts as river cress)."],"wild_hunt:2:f":["−2 HP."],"wild_forage:1:f":["+2 River cress anyway."],"drill:0:f":[],"fo_council:0:f":[],"fo_clinic:0:f":[]};
     // RV2 (TG, Fable's review): the old first-day replies of the three lists that go by Yuki's form (the game as of v0.11.135)
     const OLD_FORMS = {"tiger":{"heart_camp:3":"You play the first part again, just Wren's voice, just the planting. Yuki purrs with her head on your chest the whole way through.","heart_spring:2":"You sit with your back to a warm wall and Yuki's head in your lap and listen to the water, and for half an hour nobody needs anything from you.","wen_lesson:forest":"You ask what the hunters' tales say the singing sounded like. He thinks about it with great seriousness. \"Like something you have already heard,\" he says at last, \"and cannot name.\" You don't tell him that's exactly it. Yuki, her chin on your knee, has not stopped looking toward the forest."},"human":{"heart_camp:3":"You play the first part again, just Wren's voice, just the planting. Yuki leans against your shoulder and purrs, very quietly, the whole way through.","heart_spring:2":"You sit with your back to a warm wall and Yuki's shoulder against yours and listen to the water, and for half an hour nobody needs anything from you.","wen_lesson:forest":"You ask what the hunters' tales say the singing sounded like. He thinks about it with great seriousness. \"Like something you have already heard,\" he says at last, \"and cannot name.\" You don't tell him that's exactly it. Yuki, beside you, has not stopped looking toward the forest."}};
-    const keys = Object.keys(DAY_REPLIES);
+    const ST6K = ['rr_forage:2', 'rr_forage:2:after', 'ah_forage:2', 'ah_forage:2:after', 'ah_hunt:1:part', 'ah_hunt:1:full']; // v0.11.154 (PS1, ST6): their own test (RP1 push 2's block)
+    const keys = Object.keys(DAY_REPLIES).filter((k) => !ST6K.includes(k));
     assert(keys.length === 38 && keys.reduce((s, k) => s + DAY_REPLIES[k].length - 1, 0) === 63, `NC1: 38 reply lists with 52 new texts; v0.11.152 (RP1): 11 more (${keys.length}, ${keys.reduce((s, k) => s + DAY_REPLIES[k].length - 1, 0)})`);
     assert(JSON.stringify([...keys].sort()) === JSON.stringify(NC.map(([k]) => k).sort()), 'NC1: a list for every reply the bots saw on two days, and no other');
     const state = (g) => { const { lines, log, ...rest } = g; return JSON.stringify(rest); }; // RV2 (TG): the whole game but the day record and the log
@@ -2036,6 +2040,127 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         const picks = []; for (let k = 0; k < 11; k++) picks.push(pickLine(g, 'yt:TEST', items));
         assert(picks.every((i) => i >= 3) && distinct(picks), `RV1 (L4): the three lines already played stay played; the eleven new ones come first (${picks.join(',')})`);
         assert(linesOf(g).p['yt:TEST'].slice(0, 3).join() === '1,1,1', 'RV1 (L4): the old counts kept');
+    }
+}
+
+// v0.11.154 (owner pick PS1, RP1 push 2; Fable's texts, "ok for texts" 23:05): ST1–ST6, the last repeats inside a Coil from the map.
+// Each slot is walked through go() on every day the calendar allows, and each occurrence must read differently.
+{
+    const D = 1440;
+    const distinct = (a) => new Set(a).size === a.length;
+    const forms = ['cat', 'tiger', 'human'];
+    const RG = (seed, form, flags = {}) => {
+        const g = ensureBars(fresh(seed));
+        const realm = form === 'human' ? 7 : form === 'tiger' ? 2 : 0; g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form;
+        Object.assign(g.flags, flags); return ensureBars(g);
+    };
+    const at = (g, day, hh, id) => { g.minutes = (day - 1) * D + hh * 60; goTo(g, SCENES, id); return sceneView(g, SCENES).text; };
+    // ST1: the prologue's camp and night, three nights, fire or not, food or not, every form
+    for (const form of forms) for (const fire of [false, true]) for (const food of [false, true]) {
+        const g = RG(58400, form, { fire }); if (food) g.inventory.hare_raw = 2; else { g.inventory.hare_raw = 0; g.inventory.jade_bracket = 0; }
+        const camps = [], nights = [];
+        for (let d = 1; d <= 3; d++) { g.flags.forest_day = d; camps.push(at(g, d, 19, 'camp')); nights.push(at(g, d, 21, 'night')); }
+        assert(distinct(camps.map((t) => t.split('\n\n')[0])) && distinct(camps.map((t) => t.split('\n\n')[1].split('\n')[0])), `ST1: the camp's opener and food line differ on three nights (${form}, fire ${fire}, food ${food})`);
+        assert(distinct(nights.map((t) => t.split('\n\n')[0])) && distinct(nights.map((t) => t.split('\n\n')[1])) && distinct(nights.map((t) => t.split('\n\n')[2])), `ST1: the night's three paragraphs differ on three nights (${form}, fire ${fire})`);
+    }
+    // ST2: the Fallout hub's first line and Ya's line on Days 8, 9 and 10, each time of day, Ya in the party or not
+    for (const party of [false, true]) for (const hh of [8, 12, 17, 20]) {
+        const g = RG(58410 + hh, 'cat', { ya_met: true, ya_party: party });
+        const ts = [8, 9, 10].map((d) => at(g, d, hh, 'fo_ashfall').split('\n\n'));
+        assert(distinct(ts.map((t) => t[0].replace(/\d+ days until/, ''))) && distinct(ts.map((t) => t[1])), `ST2: fo_ashfall's time line and Ya's line differ on Days 8–10 (${hh}:00, party ${party})`);
+    }
+    // ST3: the Blackroot's four nights (the Root Road, the Drowned Wood twice, the Ashen Hills): the watch paragraph differs every night,
+    // the Drowned Wood's opener on its two nights, and its camp paragraph on its two days
+    {
+        const g = RG(58420, 'cat');
+        const nights = [], camps = [];
+        for (const [d, r] of [[11, 'rr'], [12, 'dw'], [13, 'dw'], [14, 'ah']]) { g.flags.bl_region = r; camps.push(at(g, d, 19, 'bl_camp')); nights.push(at(g, d, 21, 'bl_night').split('\n\n')); }
+        assert(distinct(nights.map((n) => n[1])), 'ST3: the watch paragraph differs on all four nights');
+        assert(nights[1][0] !== nights[2][0], 'ST3: the Drowned Wood night\'s opener differs on its second night');
+        assert(camps[1].split('\n\n')[0] !== camps[2].split('\n\n')[0] && g.lines.d['bl_camp:dw']?.length === 2, 'ST3: the Drowned Wood camp differs on its second day (bl_camp keyed by region)');
+        assert(nights[0][1].startsWith('Watches to set. Ya says she doesn') && camps[1].startsWith('Camp on a raft of fallen trunks'), 'ST3: the Root Road\'s watches and the Drowned Wood\'s first camp keep the old texts');
+    }
+    // ST4: a breakthrough text for each realm from 2 to 14, by night and by day; the village's closer, but not where the sky didn't come
+    const BTR = await import('../js/story/prologue.js');
+    {
+        const bodies = [], nights = [], days = [];
+        for (let r = 2; r <= 14; r++) {
+            const g = RG(58430 + r, 'cat'); g.james.realm = r; g.flags.bt_return = 'stream';
+            g.minutes = 10 * D + 23 * 60; const n = SCENES.breakthrough.text(g); g.minutes = 10 * D + 12 * 60; const d = SCENES.breakthrough.text(g);
+            const p = n.split('\n\n'); bodies.push(p.slice(0, -1).join('\n\n')); nights.push(p.at(-1)); days.push(d.split('\n\n').at(-1));
+            if (r >= 3) { const { BT_REALMS: B } = BTR; assert(nights.at(-1) === B[r].night && days.at(-1) === B[r].day, `RV1 (TG): realm ${r}: the night closer by night, the day closer by day`); }
+            g.flags.bt_return = 'ashfall'; const seen = SCENES.breakthrough.text(g);
+            assert(/Ashfall watches it go/.test(seen) === ![10, 11].includes(r), `ST4: realm ${r}: the village's closer ${[10, 11].includes(r) ? 'left out (no sky came)' : 'kept'}`);
+        }
+        assert(distinct(bodies) && distinct(nights) && distinct(days), 'ST4: thirteen realms, thirteen texts, each closer its own');
+        assert(bodies[0].startsWith('The loop closes again, one rung higher. Core Formation.') && bodies[12].startsWith('Heavenly Immortal.'), 'ST4: Core Formation keeps the old text; the top realm has its own');
+    }
+    // ST5: the Heart: the hall's time line over five days, the mornings over four, the quiet and knocking nights over four, Yuki's fifth day
+    for (const hh of [3, 8, 13, 18]) {
+        const g = RG(58440 + hh, 'cat', { ship_found: true });
+        const ts = [16, 17, 18, 19, 20].map((d) => at(g, d, hh, 'heart_hub').split('\n\n')[0]);
+        assert(distinct(ts), `ST5: the hall's ${hh}:00 line differs on five days`);
+    }
+    for (const [trio, party] of [[0, false], [0, true], [3, true]]) {
+        const g = RG(58450, 'cat', { trio, ya_party: party });
+        const ts = [17, 18, 19, 20].map((d) => at(g, d, 6, 'heart_morning'));
+        assert(distinct(ts) && ts.every((t) => !/undefined/.test(t)), `ST5: four Heart mornings differ (trio ${trio}, Ya ${party})`);
+        assert(/Today\.$/.test(ts[3].trim()) === true, 'ST5: the 4th morning says the tree is done waiting (Day 20, late)');
+    }
+    { // RV1 (TG): through go(), the scene's own roll and dayKey: four quiet and four knocking nights, each its own text
+        const g = RG(58460, 'cat'); const got = { quiet: [], knock: [] };
+        for (let d = 16; d < 120 && (got.quiet.length < 4 || got.knock.length < 4); d++) {
+            g.minutes = (d - 1) * D + 23 * 60; goTo(g, SCENES, 'heart_night'); const kind = SCENES.heart_night.dayKey(g).split(':')[1];
+            if (got[kind] && got[kind].length < 4) got[kind].push(sceneView(g, SCENES).text);
+        }
+        for (const kind of ['quiet', 'knock']) assert(got[kind].length === 4 && distinct(got[kind]), `ST5: four ${kind} nights through go(), four texts (${got[kind].length})`);
+    }
+    assert(YT_HUBS.heart_hub.length === 5 && YT_BODY['heart_hub:5']?.length === 3 && distinct(YT_HUBS.heart_hub.flatMap((k) => YT_BODY[k])), 'ST5: Yuki\'s scene has a 5th Heart day in every form, none twice');
+    // the text lint's broken-text check on the texts it samples only at realms 0, 2 and 7 (ST4) or not at all (the lists)
+    {
+        const { broken, spacing } = await import('../tools/lib/textlint.mjs');
+        const { BT_REALMS } = await import('../js/story/prologue.js');
+        const all = [...Object.values(BT_REALMS).flatMap((o) => [o.body, o.night, o.day]), ...YT_BODY['heart_hub:5']];
+        const bad = all.filter((t) => broken(t).length || spacing(t));
+        assert(Object.keys(BT_REALMS).join() === '3,4,5,6,7,8,9,10,11,12,13,14' && !bad.length, `ST4/ST5: ${all.length} new texts, none broken (${bad.map((t) => t.slice(0, 30))})`);
+    }
+    // RV1 (CF): the camp goes by the night in the forest: a breakthrough that ends after 05:00 on the first night doesn't move it ahead
+    {
+        const g = RG(58480, 'cat', { fire: true }); g.flags.forest_day = 1;
+        const first = at(g, 1, 19, 'camp').split('\n\n')[0];
+        const after = at(g, 2, 5.2, 'camp').split('\n\n')[0]; // 05:12 on Day 2, still the first night (the day record now has two days)
+        assert(g.lines.d.camp.length === 2 && after === first, 'RV1 (CF): still the first night\'s camp after a breakthrough past 05:00');
+    }
+    // RV1 (CL): a stay in the Heart past its texts' days keeps the last one, not the first
+    {
+        const g = RG(58481, 'cat', { ship_found: true });
+        const ts = [16, 17, 18, 19, 20, 21].map((d) => at(g, d, 13, 'heart_hub').split('\n\n')[0]);
+        assert(ts[5] === ts[4] && ts[5] !== ts[0], 'RV1 (CL): the hall\'s sixth day keeps the fifth day\'s line');
+        const m = RG(58482, 'cat'); const ms = [17, 18, 19, 20, 21].map((d) => at(m, d, 6, 'heart_morning'));
+        assert(ms[4] === ms[3] && ms[4] !== ms[0], 'RV1 (CL): a fifth Heart morning keeps the fourth\'s text');
+    }
+    // RV1 (FX): the Fallout hub by the story's day from 05:00: up past midnight stays the day before; a Day 11 morning stays Day 10's set
+    {
+        const g = RG(58483, 'cat');
+        const set = (day, hh) => at(g, day, hh, 'fo_ashfall').split('\n\n')[0].replace(/ \d+ days until.*/, '');
+        assert(set(9, 1) === set(8, 21), 'RV1 (FX): 01:00 on Day 9 (the hub\'s dusk) still shows Day 8\'s set');
+        assert(set(11, 7) === set(10, 9) && set(10, 9) !== set(8, 9), 'RV1 (FX): Day 11 shows Day 10\'s set, not Day 8\'s');
+    }
+    // ST6: the grub, the fire-beetle and the darts: a second day's text; the first day's as before; the darts follow the day, not the outcome
+    for (const k of ['rr_forage:2', 'rr_forage:2:after', 'ah_forage:2', 'ah_forage:2:after', 'ah_hunt:1:part', 'ah_hunt:1:full']) assert(DAY_REPLIES[k]?.length === 2 && distinct(DAY_REPLIES[k]), `ST6: ${k} has two texts`);
+    {
+        const g = RG(58470, 'cat'); g.flags.bl_region = 'rr';
+        const eatGrub = (d) => { g.minutes = (d - 1) * D + 10 * 60; g.scene = 'rr_forage'; const i = SCENES.rr_forage.choices.findIndex((c) => c.text === 'Eat the grub.'); return SCENES.rr_forage.choices[i].do(g).join(' '); };
+        assert(eatGrub(11) === 'It pops. It tastes like nutty cream and regret. +10 satiety. Ya cheers.', 'ST6: the grub\'s first day reads as before');
+        assert(/^It pops again\..* \+10 satiety\. Ya is already/.test(eatGrub(12)), 'ST6: the grub\'s second day, the gain in its place');
+        const beetle = (d) => { g.minutes = (d - 1) * D + 10 * 60; g.scene = 'ah_forage'; return SCENES.ah_forage.choices.find((c) => /fire-beetle/.test(c.text)).do(g).join(' '); };
+        assert(beetle(14) === 'It is spicy. Genuinely, chemically spicy. +6 satiety. Ya looks at you like you just proposed.', 'RV1 (TG): the beetle\'s first day reads as before (through its choice)');
+        assert(/^Still spicy\..* \+6 satiety\. Ya holds up two fingers/.test(beetle(15)), 'RV1 (TG): the beetle\'s second day, the gain in its place');
+        const darts = SCENES.ah_hunt.choices.find((c) => /^Darts/.test(c.text));
+        g.minutes = 13 * D + 10 * 60; const p1 = darts.do(g, { ratio: 0.5 })[0];
+        g.minutes = 14 * D + 10 * 60; const f2 = darts.do(g, { ratio: 1.2 })[0];
+        assert(p1 === `The darts go out flat through the ash haze and most of them hit ash. One hare stops being fast. Ya fetches it without being asked and holds it up by the ears, considering it. "Thin," she says. "Like you." Above you the hawks wheel off, unimpressed, trailing sparks.` && DAY_REPLIES['ah_hunt:1:full'][0] === `The darts go out flat through the ash haze and the hares stop being fast. Ya fetches them without being asked and comes back holding them up by the ears. "Small," she says. "But you hit what you aimed at. Rare, for you." Above you the hawks wheel off, disappointed, trailing sparks.`, 'RV1 (TG): the darts\' old first-day texts, word for word');
+        assert(p1 === DAY_REPLIES['ah_hunt:1:part'][0] && f2 === DAY_REPLIES['ah_hunt:1:full'][1], 'ST6: the darts: day 1 some hares (old), day 2 all hares (its second-day text)');
     }
 }
 

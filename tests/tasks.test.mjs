@@ -3454,7 +3454,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     h.minutes += D; goTo(h, SCENES, 'mire'); goTo(h, SCENES, 'bone_field');
     assert(dayIndex(h, 'bone_field') === 1 && h.lines?.d?.bone_field?.length === 2, 'NT1: entered on a second day: its second day');
     const keyed = Object.values(SCENES).filter((x) => typeof x.dayKey === 'function').map((x) => x.id).sort();
-    assert(JSON.stringify(keyed) === JSON.stringify(['bl_fireside', 'bl_night', 'bl_night_event', 'far_hunt', 'heart_camp', 'heart_night', 'night_event', 'wen_lesson', 'yk_time']), `NT1; v0.11.152 (RV1, M2): heart_camp by its paragraph's version: the scenes keyed by event or region (${keyed})`);
+    assert(JSON.stringify(keyed) === JSON.stringify(['bl_camp', 'bl_fireside', 'bl_night', 'bl_night_event', 'far_hunt', 'heart_camp', 'heart_night', 'night_event', 'wen_lesson', 'yk_time']), `NT1; v0.11.152 (RV1, M2): heart_camp by its paragraph's version; v0.11.154 (PS1, ST3): bl_camp by region: the scenes keyed by event or region (${keyed})`);
     const e = ensureBars(newGame(4303, { closed: true })); e.flags.bl_region = 'dw'; goTo(e, SCENES, 'bl_night_event');
     assert(e.flags.bl_ev && e.lines.d[`bl_night_event:${e.flags.bl_ev}`]?.length === 1 && e.lines.d.bl_night_event?.length === 1, `NT1: an event scene notes its event's day too (${e.flags.bl_ev})`);
     // the record stays out of the Coil snapshot and the dry runs (as LP2's), and a save keeps it

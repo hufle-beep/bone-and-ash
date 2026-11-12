@@ -113,6 +113,10 @@ const yukiSpot = (g) => byForm(g, 'the beast on your shoulder', 'the beast at yo
 const yukiMerElder = (g) => { const n = g.yuki.primaries ?? 12; const b = yukiSpot(g); return n >= 12 ? `And ${b} has twelve meridians open. In ninety years I have seen that only in the heirs of great sects.` : n > 0 ? `And ${b} has ${n === 1 ? 'a meridian' : `${n} meridians`} open, and is opening more, ${byForm(g, 'at its size', 'untaught', 'at its age')}, without a single pill. In ninety years I have seen that only in the heirs of great sects.` : `And ${b} holds Qi with every meridian shut, which is not possible, and which it is doing anyway.`; };
 const yukiMerLu = (g) => { const n = g.yuki.primaries ?? 12; const b = yukiSpot(g); return n >= 12 ? `And yet ${b} has its meridians open like a sect heir\'s.` : n > 0 ? `And yet ${b} has ${n === 1 ? 'a meridian' : `${n} meridians`} open, and no pill-smell either. Like a sect heir's.` : `And yet ${b} holds Qi with its meridians shut, like a sealed jar that is somehow full.`; };
 
+/** v0.11.154 (owner pick RV1, Fable's review, L1 CF): the camp's text by the night in the forest (forest_day 1–3), not by the clock's day, so a long
+ *  breakthrough at the camp that ends after 05:00 doesn't move it a day ahead. */
+const byNight = (g, list) => { const t = list[Math.max(0, Math.min(list.length - 1, (g.flags.forest_day || 1) - 1))]; return typeof t === 'function' ? t(g) : t; };
+
 export const SCENES = {
     /* ================= DAY 1 ================= */
     arrival: {
@@ -284,9 +288,9 @@ She does not accept your defence.`,
 
     camp: {
         id: 'camp', title: 'Camp', art: 'camp', place: 'Blackroot Wilds — the dry rise',
-        text: (g) => `${byDay(g, ['A dry rise above the water, a fallen trunk to put your back against, a sky turning the colour of wine.', `The dry rise again, and the fallen trunk, which has kept the shape of your back. The sky is going from bruise to wine, on schedule.`], 'camp')}
+        text: (g) => `${byNight(g, ['A dry rise above the water, a fallen trunk to put your back against, a sky turning the colour of wine.', `The dry rise again, and the fallen trunk, which has kept the shape of your back. The sky is going from bruise to wine, on schedule.`, `The dry rise, the fallen trunk, the sky going to wine. You could draw it from memory, and one thread already has. The moss where you sit has given up.`])}
 
-${foodCount(g) ? `${byDay(g, ['You have food', 'In the larder, such as it is'], 'camp')}: ${[g.inventory.hare_raw ? `${g.inventory.hare_raw} hare` : '', g.inventory.jade_bracket ? `${g.inventory.jade_bracket} fungus` : ''].filter(Boolean).join(', ')}.` : byDay(g, ['You have no food. You have a cat, who is looking at you like *you* are the food.', `You have no food. Yuki has noticed, and is letting you know that she has noticed.`], 'camp')}
+${foodCount(g) ? `${byNight(g, ['You have food', 'In the larder, such as it is', `Tonight's menu, in full`])}: ${[g.inventory.hare_raw ? `${g.inventory.hare_raw} hare` : '', g.inventory.jade_bracket ? `${g.inventory.jade_bracket} fungus` : ''].filter(Boolean).join(', ')}.` : byNight(g, ['You have no food. You have a cat, who is looking at you like *you* are the food.', `You have no food. Yuki has noticed, and is letting you know that she has noticed.`, `You have no food. Yuki has stopped looking at you and started looking at the trees, which is worse: she is drawing up alternatives.`])}
 ${g.flags.fire ? 'The fire crackles.' : 'No fire yet.'} ${g.flags.stakes ? 'A ring of bone stakes leans outward around the camp.' : ''}`,
         choices: [
             { text: 'Make fire: a bone bow-drill and a lot of swearing.', show: once('fire'), check: { skill: 'GU', dc: 3 }, time: 25, do: set('fire'), failDo: (g) => { advance(g, 20); g.flags.fire = true; return ['It takes three times as long and one blister, but there is fire.']; }, to: 'camp' },
@@ -306,7 +310,12 @@ ${(g.flags.forest_day || 1) > 1 ? 'Another night in the Blackroot. Your watch-th
 
 ${g.flags.fire ? `The fire holds its small room open against the dark.` : `With no fire, the dark sits down beside you like an acquaintance.`} ${byForm(g, 'Yuki is in your lap before you have finished sitting down', 'Yuki has laid herself round you before you have finished sitting down', 'Yuki has settled against your side before you have finished sitting down')}, and neither of you mentions it.
 
-${(g.flags.forest_day || 1) > 1 ? `Another night in the Blackroot. The watch-thread is up and turning before you have thought to ask.` : `Your Parallel Cognition puts a thread forward for the watch again, unasked. Nine threads, and one of them is content never to sleep.`}`], 'night'),
+${(g.flags.forest_day || 1) > 1 ? `Another night in the Blackroot. The watch-thread is up and turning before you have thought to ask.` : `Your Parallel Cognition puts a thread forward for the watch again, unasked. Nine threads, and one of them is content never to sleep.`}`, // v0.11.154 (owner pick PS1, RP1 push 2; Fable's, "ok for texts" 23:05): the third night (ST1)
+            (g) => `Night arrives without the courtesy of a dusk. The black trees have the stars put away before you can count them. Tonight nothing screams, and nothing walks a circle round the rise. The forest is quiet in the way of a room where people have just stopped talking about you.
+
+${g.flags.fire ? `The fire keeps its small room, and tonight the dark stands at the door of it and does not pretend to be anywhere else.` : `With no fire, the dark has nothing to stay outside of, and doesn't.`} ${byForm(g, `Yuki gets into your lap and stays sitting up, ears turning, facing out.`, `Yuki lies down round you with her head up and her ears turning, facing out.`, `Yuki sits down against your side with her back half to you, ears turning, facing out.`)}
+
+One of your nine threads has taken the watch before you have decided anything, and settles to it like a dog on a doorstep.`], 'night'),
         choices: [
             { text: 'Leave a thread on watch and sleep.', do: set('watch'), to: nightNext },
             { text: 'Story Mode only (removed in v0.11.41).', show: () => false, to: nightNext }, // v0.11.41 (D2-a): Story Mode's sit; the place kept (choice indices)
@@ -823,6 +832,78 @@ installYukiPath(SCENES);
 
 /* ---------- breakthrough: offered at calm moments whenever Saturation is 100% ---------- */
 const VILLAGE_SCENES = ['village', 'ashfall', 'supper'];
+/** v0.11.154 (owner pick PS1, RP1 push 2; Fable's, "ok for texts" 23:05): a breakthrough text for each realm from True Core (3) to Heavenly Immortal (14), each with its own closer
+ *  by night and by day; Core Formation (2) keeps the old text. The village's closer (the prologue only) stays the old one, except
+ *  on the two realms where the sky doesn't come (10, 11), which keep their own closer. (ST4) */
+export const BT_REALMS = {
+    3: { body: `True Core. The loop closes, and what was formed sets, the way a thing does when it stops being new.
+
+The sky comes anyway. Fewer clouds than before, and the hum has dropped a tone. The lightning goes over you the way a man goes through his pockets for a key he already knows is on the table: thoroughly, and without hope. Then it goes. The air, when you try it, runs a little quicker under you than it did.`,
+        night: `Yuki opens one eye, confirms the sky, and closes it. Out in the dark, something that had been coming closer does the arithmetic and turns round.`,
+        day: `Yuki opens one eye, confirms the sky, and closes it.` },
+    4: { body: `Golden Core. On this world it is the rung where people at last leave the ground, slowly, and with ceremony. You have been leaving the ground since Foundation; all that changes is how fast it falls away.
+
+The sky makes an effort for this one. A proper bank of cloud, real thunder, the lightning pacing: the storm it keeps for people who matter. It searches you from end to end, finds the same clean nothing, and breaks up in the middle of a rumble, like a man who has lost the thread of his own sermon.`,
+        night: `Yuki, risen beside you in the same breath, yawns at the last of the thunder. Nothing in the dark comes to see what the noise was.`,
+        day: `Yuki, risen beside you in the same breath, yawns at the last of the thunder.` },
+    5: { body: `Origin Core. The loop closes on its own tail, a rung further up. You are beginning to know the feeling the way you know a stair in your own house.
+
+One cloud comes. It is a respectable cloud, dark and low, and it has plainly been sent alone. It hums for a while. A little lightning looks out of it, looks at you, and goes back in. The cloud leaves the way it came, and not quickly, in the manner of something that intends to say it searched.`,
+        night: `Yuki's ear turns toward the cloud and back. That is the whole of her interest. The dark round you stays empty, and gives the impression of having chosen to.`,
+        day: `Yuki's ear turns toward the cloud and back. That is the whole of her interest.` },
+    6: { body: `Soul Embryo. Something small and exact takes shape at the centre of the loop, and the loop goes on turning round it, unbothered, as a garden goes on round a new seed.
+
+The sky is late. The thing is done and you are already stretching your legs when the clouds arrive, out of breath, and find nothing left to interrupt. They hum anyway. A bolt is produced, held up, and put away again. You have seen clerks stamp a form with more conviction.`,
+        night: `Yuki, who rose with you and was asleep again before the clouds turned up, has missed it entirely. Whatever hunts in this dark has learnt to miss it too.`,
+        day: `Yuki, who rose with you and was asleep again before the clouds turned up, has missed it entirely.` },
+    7: { body: `Nascent Soul. The small exact thing at the centre of the loop opens its eyes. They are yours, and the two of you agree at once about everything. Every door that was going to open has opened; the rest are wall now.
+
+The sky has heard about this one. It brings the whole range: cloud to the horizon, thunder you feel in your knees, lightning in ranks. It is magnificent. It inspects you for four slow breaths, finds what it has found six times already, and stands down rank by rank, with the stiff dignity of an army sent to the wrong address.`,
+        night: `Through the bond you feel Yuki rise with you, as always. She does not go back to sleep this time. In the dark, nothing moves at all.`,
+        day: `Through the bond you feel Yuki rise with you, as always. She does not go back to sleep this time.` },
+    8: { body: `Spirit Transformation. The name promises more than it delivers: you are transformed chiefly in that the air now gets out of your way before you ask.
+
+After its last performance, the sky has thought again about expense. One bolt, no cloud, out of a clear sky and a good mile off, where it can be said to have been sent. You hear it some time after you see it. It sounds like a door being closed in another part of the house, by someone who would like you to know they closed it.`,
+        night: `Yuki doesn't open her eyes. Her tail remarks on the thunder, once. Far out in the dark, something large changes its mind about the whole district.`,
+        day: `Yuki doesn't open her eyes. Her tail remarks on the thunder, once.` },
+    9: { body: `Immortal Ascension. By the name, this is where you are meant to leave: up through the roof of the world, to trouble it no further. The loop closes, and you stay where you were sitting, ascended and still here, which you put down to a filing error in your favour.
+
+The sky sends no weather. Something passes over, very high up, as a figure passes a window, and there is one mutter of thunder with no lightning attached. It is the sound of a thing being noted.`,
+        night: `Yuki sighs in her sleep, a realm higher than she lay down. The dark keeps a respectful distance; it has had practice.`,
+        day: `Yuki sighs in her sleep, a realm higher than she lay down.` },
+    10: { body: `Mahayana. A grand name for sitting very still while the loop does the work. It closes. You wait for the sky.
+
+The sky does not come.
+
+You give it a decent interval. No cloud, no hum, not so much as a change in the wind. Nine times it has come and looked and found nothing, and it has finally taken the hint. You are surprised to find that you are a little offended. A man likes to be suspected.`,
+        night: `Yuki opens one eye, finds no storm to ignore, and looks at you as if you had forgotten to order it. The dark, at any rate, still keeps its distance.`,
+        day: `Yuki opens one eye, finds no storm to ignore, and looks at you as if you had forgotten to order it.` },
+    11: { body: `Earth Immortal. You try the phrase on, and it fits like the lab coat: slightly ridiculous, and yours. The earth, for its part, does not appear to have been told.
+
+No sky again. It is sulking, and doing it thoroughly: such clouds as happen to be overhead have drawn off to the edges and left a bare patch above you, the way a street empties round a man nobody means to greet. You wave. Nothing waves back. It is the rudest thing Heaven has done to you yet, and the most honest.`,
+        night: `Yuki stretches, a realm longer in the spine than she was a moment ago, and resettles. Nothing stirs in the dark. Word has got round.`,
+        day: `Yuki stretches, a realm longer in the spine than she was a moment ago, and resettles.` },
+    12: { body: `True Immortal. The loop closes with a sound you feel and do not hear, like a lid finding its jar.
+
+And the sky, which has sulked through two realms, loses its temper. No clouds, no looking: one bolt, out of nothing, straight down. For the first time it does not miss. It takes you squarely between the shoulders.
+
+It tastes of tin. That is all. The Ouroboros Axiom turns it over once, as it turns over everything this world hands you, and puts it to use. Somewhere very high up there is a silence, like a man looking at his own fist.`,
+        night: `Every hair on Yuki is standing up. She looks at the sky, and then at you, and holds you responsible. For a mile round, the dark has been vacated.`,
+        day: `Every hair on Yuki is standing up. She looks at the sky, and then at you, and holds you responsible.` },
+    13: { body: `Golden Immortal. After True comes Golden; you stopped asking who names these some realms ago. The loop closes, and the air takes your weight like an old friend taking your coat.
+
+The sky attends. That is the word for it. Cloud, at a great and careful height; no hum; the lightning kept well back, where it cannot be accused of anything. It has the manner of a man walking past a house where he once made a scene. It stays exactly as long as form requires. You tip it a hat you are not wearing. It pretends not to see.`,
+        night: `Yuki watches it go with one eye, which is one more than it has had from her in some time. The dark is empty, and tidy with it.`,
+        day: `Yuki watches it go with one eye, which is one more than it has had from her in some time.` },
+    14: { body: `Heavenly Immortal. The last rung has Heaven's own name on it, and it goes to a man Heaven has failed to convict thirteen times. The loop closes, quietly.
+
+The clouds come once more, and they bring no lightning. They gather, and hum, low, almost civil. Then they draw apart, directly overhead, and hold there. Through the gap the sky is clean: plain, and deep, and for a breath very like the one you were born under. It is not an apology. Heaven does not make them. But it is, you would swear to this in any court, a nod.
+
+"Huh," you say. It seems to be traditional.`,
+        night: `Yuki looks up at the gap and blinks at it, slowly, as she does at people she has decided to permit. The dark says nothing. It has been saying nothing for realms.`,
+        day: `Yuki looks up at the gap and blinks at it, slowly, as she does at people she has decided to permit.` },
+};
+const BT_NO_SKY = [10, 11];
 SCENES.breakthrough = {
     id: 'breakthrough', title: (g) => realmName(g.james.realm), art: 'tribulation', place: (g) => g.location,
     enter: (g) => {
@@ -876,6 +957,10 @@ ${witness}
 
 *Foundation.* Mortal Vessel no longer. You feel heavier, and steadier, and exactly the same amount of sarcastic.`;
         }
+        const own = BT_REALMS[g.james.realm]; // ST4
+        if (own) return `${own.body}
+
+${seen && !BT_NO_SKY.includes(g.james.realm) ? 'Ashfall watches it go in total silence. Then, one by one, people bow — not to the sky. To you. You would very much prefer they didn\'t.' : night ? own.night : own.day}`;
         return `The loop closes again, one rung higher. ${realmName(g.james.realm)}.
 
 The sky tries again, as the sky apparently must: clouds, humming, lightning looking for something to burn. It finds nothing. It leaves faster this time, as if it's learning.

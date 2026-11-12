@@ -8,6 +8,7 @@
 import { addItem, hasItem, eat, advance, clockParts, d6, awardYukiFightXp, jamesHpMax, condense, dayHour, nightTo, nightRest, canFly } from '../core/game.js';
 import { hasForm } from '../core/forms.js';
 import { daily, markDaily, eatBest, pantry, foodCount, hour, byForm, byDay, dayIndex, dayReply } from './common.js';
+import { noteDay, DAY_REPLIES } from '../core/lines.js';
 import { encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil } from './act1_common.js';
 
 /* v0.11.136 (owner pick NC1, NT1's push 2): replies by day (js/core/lines.js dayReply): the first text is the old reply, the rest Fable's, one for each later day of a Coil. */
@@ -73,6 +74,16 @@ const DR_CINDER = dayReply("ah_forage:1", [
     "She feeds you one off her palm without seeming to notice she did it.",
     "She wipes juice off your chin with her thumb, mid-sentence, and carries on with the sentence.",
 ]);
+// v0.11.154 (owner pick PS1, RP1 push 2; Fable's, "ok for texts" 23:05): the grub's, the fire-beetle's and the darts' second day (ST6); the gains stay outside the lists
+const DR_GRUB = dayReply('rr_forage:2', ['It pops. It tastes like nutty cream and regret.', `It pops again. Nutty cream, and less regret than last time, which worries you.`]);
+const DR_GRUB_AFTER = dayReply('rr_forage:2:after', ['Ya cheers.', `Ya is already finding you another.`]);
+const DR_BEETLE = dayReply('ah_forage:2', ['It is spicy. Genuinely, chemically spicy.', `Still spicy. You were braced for it this time, and it made no difference.`]);
+const DR_BEETLE_AFTER = dayReply('ah_forage:2:after', ['Ya looks at you like you just proposed.', `Ya holds up two fingers, for the second proposal, and shows them to Mei Lin.`]);
+/** The darts: two outcomes, one day record (r:ah_hunt:1), so the second day's text follows the day, not the outcome. */
+const DARTS_PART = [`The darts go out flat through the ash haze and most of them hit ash. One hare stops being fast. Ya fetches it without being asked and holds it up by the ears, considering it. "Thin," she says. "Like you." Above you the hawks wheel off, unimpressed, trailing sparks.`, `The darts go out low under the haze, and the haze keeps most of them. One hare stays where it was. Ya walks out for it, taking her time, and brings it back by the hind legs, swinging. "One," she says. "I counted for you." Above you the hawks slide off down the wind, unconvinced, shedding sparks.`];
+const DARTS_FULL = [`The darts go out flat through the ash haze and the hares stop being fast. Ya fetches them without being asked and comes back holding them up by the ears. "Small," she says. "But you hit what you aimed at. Rare, for you." Above you the hawks wheel off, disappointed, trailing sparks.`, `The darts go out low under the haze and every one arrives. The hares stop where they are. Ya walks out for them and comes back with one in each fist, turning them over for a fault. "Clean," she says, annoyed. "Now I have nothing to say." Above you the hawks slide off down the wind, put out, shedding sparks.`];
+DAY_REPLIES['ah_hunt:1:part'] = DARTS_PART; DAY_REPLIES['ah_hunt:1:full'] = DARTS_FULL; // the text lint reads them
+export const dartsReply = (g, full) => { noteDay(g, 'r:ah_hunt:1'); return byDay(g, full ? DARTS_FULL : DARTS_PART, 'r:ah_hunt:1'); };
 const DR_SORREL = dayReply("rr_forage:1", [
     "She corrects your knife-grip without looking up.",
     "She looks at your knife-grip, once, and goes back to her own row. You take it as a certificate.",
@@ -89,6 +100,12 @@ const MEI_RAFT_YA = `Ya watches the two of you get up. Her nose wrinkles, and th
 const both = (g) => likesMei(g) && likesYa(g);
 /** bl_night's second paragraph (NT1: the Drowned Wood's second night has its own, by day). */
 const BL_WATCHES = 'Watches to set. Ya says she doesn\'t need sleep, which is a lie; Mei Lin says she can\'t sleep out here anyway, which is true. Your Parallel Cognition offers its usual watch-thread.';
+/** v0.11.154 (owner pick PS1, RP1 push 2; Fable's, "ok for texts" 23:05): the Drowned Wood's first night and the Ashen Hills' night have their own watch paragraph (BL_WATCHES was on
+ *  three of the four nights); the Drowned Wood's second night its own opener, and its second camp its own paragraph (ST3). */
+const BL_WATCH_DW1 = `Watches to set, and nowhere dry to set them from. Ya wants the end of the raft nearest the water, so that whatever comes meets her first; Mei Lin wants the middle, and has counted the trunks. Your watch-thread, at least, does not mind the damp.`;
+const BL_WATCH_AH = `The last watches of the road. Ya says nobody can sleep under a thing like that, and yawns; Mei Lin means to sit up and keep an eye on it, in case it moves. Your watch-thread comes forward already facing north.`;
+const BL_DW_OPEN = ['Water dripping, all night, from very high up.', `Still dripping. By now you know which drop comes next.`];
+const BL_DW_CAMP = ['Camp on a raft of fallen trunks above black water. The fire hisses. Things drip. Every so often, far off, something breaks the surface and goes under again.', `Another raft of fallen trunks, better chosen; you are learning. The fire hisses. Mei Lin has hung the wet things up to drip with everything else. Whatever keeps surfacing out there has come no nearer. You checked.`];
 const onlyYa = (g) => likesYa(g) && !likesMei(g);
 /* v0.11.122 (owner pick LG1, BC; texts by Fable, B0–B3): when both like him, the hot spring and the Ashen Hollow camp offer Ya alone too. */
 const SPRING_BOTH_WAIT = 'Nobody says anything for a long time. Mei Lin has come to the very edge of the bank, arms folded, glaring at the stars as if they started it. She hasn\'t left. She hasn\'t come in. She is, you realise, waiting to see what you do.';
@@ -296,7 +313,7 @@ Mei Lin turns the colour of the cinderberries and walks on ahead without a word.
         choices: [
             { text: 'The ivory brackets. Spore print, omnitool, the full liturgy.', check: { skill: 'GU', dc: 4, bonus: () => 2 }, time: 50, do: (g) => { addItem(g, 'jade_bracket', 3); return ['+3 Jade bracket fungus (the root variety, almost sweet).']; }, failDo: (g) => { addItem(g, 'jade_bracket', 1); return ['One good shelf, two that crumble. +1 Jade bracket.']; }, to: 'rr_hub' },
             { text: 'Help Mei Lin with the root-sorrel.', check: { skill: 'GU', dc: 3 }, time: 50, do: (g) => { addItem(g, 'river_cress', 4); bumpRel(g, 'Mei Lin', 2, 1); return [`+4 root-sorrel (counts as river cress). ${DR_SORREL(g)}`]; }, failDo: (g) => { addItem(g, 'river_cress', 2); return ['You cut it wrong. She sighs. +2 root-sorrel.']; }, to: 'rr_hub' },
-            { text: 'Eat the grub.', do: (g) => { eat(g, 10); bumpRel(g, 'Ya', 3, 2); return ['It pops. It tastes like nutty cream and regret. +10 satiety. Ya cheers.']; }, to: 'rr_hub' },
+            { text: 'Eat the grub.', do: (g) => { eat(g, 10); bumpRel(g, 'Ya', 3, 2); return [`${DR_GRUB(g)} +10 satiety. ${DR_GRUB_AFTER(g)}`]; }, to: 'rr_hub' },
         ],
     },
     rr_hunt: {
@@ -714,7 +731,7 @@ She doesn't mean it. Everyone can tell she doesn't mean it. It makes it worse, s
         choices: [
             { text: 'Dig for the ash-truffles.', check: { skill: 'GU', dc: 5, bonus: () => 2 }, time: 60, do: (g) => { addItem(g, 'jade_bracket', 2); eat(g, 10); return [`+2 ash-truffles (as jade bracket), and one eaten on the spot: +10 satiety. ${DR_TRUFFLE(g)}`]; }, failDo: () => ['Ash, ash, ash, and a beetle. Ya eats the beetle.'], to: 'ah_hub' },
             { text: 'Cinderberries with Mei Lin.', check: { skill: 'GU', dc: 3 }, time: 40, do: (g) => { addItem(g, 'crimson_berry', 6); bumpRel(g, 'Mei Lin', 2, 2); return [`+6 cinderberries (as needleberries). ${DR_CINDER(g)}`]; }, failDo: (g) => { addItem(g, 'crimson_berry', 2); return ['Thorns. +2 cinderberries.']; }, to: 'ah_hub' },
-            { text: 'Eat a fire-beetle. For science.', do: (g) => { eat(g, 6); bumpRel(g, 'Ya', 3, 3); return ['It is spicy. Genuinely, chemically spicy. +6 satiety. Ya looks at you like you just proposed.']; }, to: 'ah_hub' },
+            { text: 'Eat a fire-beetle. For science.', do: (g) => { eat(g, 6); bumpRel(g, 'Ya', 3, 3); return [`${DR_BEETLE(g)} +6 satiety. ${DR_BEETLE_AFTER(g)}`]; }, to: 'ah_hub' },
         ],
     },
     ah_hunt: {
@@ -735,7 +752,7 @@ Yuki, ${byForm(g, 'on your shoulder', 'at your side', 'at your elbow')}, does no
 The hill-hares are still in the gullies: still small, still ash-coloured, and still entirely free of fire.`], 'ah_hunt'),
         choices: [
             { text: 'Take the hawks before they take Yuki.', combat: hawksFight, to: 'ah_hawks_won' },
-            { text: 'Darts at the hill-hares instead.', qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 5 }, time: 50, do: (g, r) => { addItem(g, 'hare_raw', 2); return [r && r.ratio < 1 ? `The darts go out flat through the ash haze and most of them hit ash. One hare stops being fast. Ya fetches it without being asked and holds it up by the ears, considering it. "Thin," she says. "Like you." Above you the hawks wheel off, unimpressed, trailing sparks.` : `The darts go out flat through the ash haze and the hares stop being fast. Ya fetches them without being asked and comes back holding them up by the ears. "Small," she says. "But you hit what you aimed at. Rare, for you." Above you the hawks wheel off, disappointed, trailing sparks.`, '+2 hill-hares.']; }, failDo: () => ['Ash-coloured hares on ash-coloured hills. You hit a lot of ash.'], to: 'ah_hub' },
+            { text: 'Darts at the hill-hares instead.', qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 5 }, time: 50, do: (g, r) => { addItem(g, 'hare_raw', 2); return [dartsReply(g, !(r && r.ratio < 1)), '+2 hill-hares.']; }, failDo: () => ['Ash-coloured hares on ash-coloured hills. You hit a lot of ash.'], to: 'ah_hub' },
         ],
     },
     ah_hawks_won: {
@@ -1018,11 +1035,12 @@ ${likesMei(g) && likesYa(g) ? '"She looked at me today," she says, low. "The her
 
     /* =================================== camp and night =================================== */
     bl_camp: {
+        dayKey: (g) => `bl_camp:${region(g)}`, // v0.11.154 (owner pick PS1, RP1 push 2; Fable's, "ok for texts" 23:05): by region, for the Drowned Wood's second camp (ST3)
         id: 'bl_camp', title: 'Camp', art: (g) => ({ rr: 'root_camp', dw: 'drowned_camp', ah: 'ashen_camp' }[region(g)]), place: (g) => PLACE[region(g)],
         enter: (g) => { toHour(g, 19); return []; },
         text: (g) => `${{
             rr: 'Camp on the broad back of the root, a fire in a hollow of bark, the forest dark and enormous all around you. The root is warm under your bedroll.',
-            dw: 'Camp on a raft of fallen trunks above black water. The fire hisses. Things drip. Every so often, far off, something breaks the surface and goes under again.',
+            dw: byDay(g, BL_DW_CAMP, 'bl_camp:dw'),
             ah: 'Camp in the lee of a black ridge, out of the wind. The fire burns strangely here: low and blue, as if the ash remembers being fire. The dead tree blots out a third of the stars.',
         }[region(g)]}
 
@@ -1170,9 +1188,9 @@ You tell them about the stars. Which ones you think yours might be near. Ya says
     bl_night: {
         dayKey: (g) => `bl_night:${region(g)}`, // v0.11.135 (NT1): by region
         id: 'bl_night', title: 'Night', art: 'night_watch', place: (g) => PLACE[region(g)],
-        text: (g) => `${region(g) === 'dw' ? 'Water dripping, all night, from very high up.' : region(g) === 'ah' ? 'The wind over the ridges, and the dead tree breathing above you — you\'d swear it was breathing.' : 'The root is warm under you. Far off, wolves.'}
+        text: (g) => `${region(g) === 'dw' ? byDay(g, BL_DW_OPEN, 'bl_night:dw') : region(g) === 'ah' ? 'The wind over the ridges, and the dead tree breathing above you — you\'d swear it was breathing.' : 'The root is warm under you. Far off, wolves.'}
 
-${region(g) === 'dw' ? byDay(g, [BL_WATCHES, `Watches again. Ya says she will take all of them, and yawns in the middle of saying it; Mei Lin says she would sooner be awake than dream in this place, and means it. Your Parallel Cognition puts its watch-thread forward, as it does every night, like a clerk with a form.`], 'bl_night:dw') : BL_WATCHES}`,
+${region(g) === 'dw' ? byDay(g, [BL_WATCH_DW1, `Watches again. Ya says she will take all of them, and yawns in the middle of saying it; Mei Lin says she would sooner be awake than dream in this place, and means it. Your Parallel Cognition puts its watch-thread forward, as it does every night, like a clerk with a form.`], 'bl_night:dw') : region(g) === 'ah' ? BL_WATCH_AH : BL_WATCHES}`,
         choices: [
             { text: 'Ya takes first watch. You take second.', do: (g) => { g.flags.bl_watch = 'ya'; return []; }, to: 'bl_night_event' },
             { text: 'Mei Lin and Ya together; you and a thread after.', do: (g) => { g.flags.bl_watch = 'both'; bumpRel(g, 'Mei Lin', 0, 1); bumpRel(g, 'Ya', 0, 1); return []; }, to: 'bl_night_event' },

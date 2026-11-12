@@ -34,10 +34,11 @@ const areaOf = {};
 for (const [name, file, key] of AREAS) { const m = await import(js(`story/${file}.js`)); for (const id of Object.keys(m[key])) areaOf[id] = name; }
 
 const SAMPLES = [];
-// v0.11.135 (owner picks NT1, EV1): each sample also on a scene's 2nd, 3rd and 4th day this Coil (lines.js byDay), so the later-day texts are read
+// v0.11.135 (owner picks NT1, EV1): each sample also on a scene's 2nd, 3rd and 4th day this Coil (lines.js byDay), so the later-day texts are read;
+// v0.11.154 (PS1, ST5): and its 5th (the Heart's hall and Yuki's scene there run five days)
 const { coilStamp, textDay } = await import(js('core/lines.js'));
 const onDay = (g, k) => { const today = textDay(g); const days = [...Array(k).keys()].map((i) => -1 - i).concat([today]); g.lines = { c: coilStamp(g), p: {}, last: {}, cur: {}, at: null, said: [], d: new Proxy({}, { get: (_, key) => (typeof key === 'string' ? days : undefined) }) }; return g; };
-for (const k of [0, 1, 2, 3]) for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) for (const p of [null, 'sister', 'lover']) {
+for (const k of [0, 1, 2, 3, 4]) for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) for (const p of [null, 'sister', 'lover']) {
     const g = ensureBars(newGame(1234, { closed: true }));
     g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; if (p) g.flags.yk_path = p;
     SAMPLES.push(k ? onDay(ensureBars(g), k) : ensureBars(g));

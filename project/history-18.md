@@ -2,6 +2,23 @@
 
 Started 2026-11-12 (v0.11.148), when `history-17.md` would have passed about 45 KB. Newer than `history-17.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.154 (word for word)
+
+### Decided in chat
+
+- **v0.11.151: group d closed (the owner 20:07 "let's wrap up what we can of 1d"; options WD1–WD4 at about 20:18, owner 20:19 "WD1 go"; after Fable's review RV1–RV4 at about 20:33, owner 20:34 "Rv1 go"):**
+  - **Measured (scratch hooks; 200 games a bot model; the fight lab 300 games, 7,247 states):** blocked: stances (#58) and clean or barbed (#145) need Insights (not built); #66 crafting; the knitting bone and the crushing mass Act 2 (the Sitter's 5.6% of fight states at T6+); the rot ape the retune (darts from the air 79.3%, smart 73.1%, the blade 15.3%). **LN** a line when the bed gives bars back (Fable's L4 of v0.11.143): shown on 30.0% of Careful's night scenes, the Completionist 26.8%, the Cultivator 32.9%, the Sitter 41.6%; a plain system line; **LF** the same by Fable (drafts first); **QC** L3 closed, no change: 0 of 18,202 bot nights below 4 Qi at a night choice (prices 2–4); **KL** `fo_morning#2` off the keep-list (reached); **SO** six Story-only scenes reached now (`ring_lost`, `rt_serpent_lost`, `hunt_got`, `arson_start`, `rt_ford_wake`, `rt_serpent_forced`) to a `RARE` list; **RF** the blocked items to their homes, DA2's three to the retune, the lab's new table, group d to `roadmap-done-3.md`; **T** tests, a What's new line, the full check, the handover's v0.11.148 entries moved. **WD1 🟢 LN + QC + KL + SO + RF + T (recommended)** / WD2 🟡 LF + QC + KL + SO + RF + T / WD3 🟠 QC + KL + SO + RF + T / WD4 🔴 RF (colours: how much of 1d this push closes). **Picked: WD1.**
+  - **Fable's cold review (rule 9):** H1 a bed before 21:00 rests by the fire first and that regen was left out (bots 0.1–1.1% of nights; the tests' walks 7.9–20.7%); M1 the Results summary took "+30 Qi" but not "+12.3 HP"; M2 the tests would pass with H1; L1 0.1 off the bars (Careful 0.1%, Completionist 0.2%, Cultivator 4.3%, Sitter 5.4% of nights); L5 a rare scene gone unreachable would never show; L6 the note's dev wording; no change: L2 the 1-point threshold (as picked), L3 Yuki's bars not in it (as picked; the comment says so), L4 quiet repeats as elsewhere.
+  - **RV (stop-and-ask):** **EV** counted from the bed tap, "By the fire to 21:00, then asleep until 01:00: …" after an evening by the fire (shown on 30.1 / 27.0 / 33.7 / 41.8%); **SM** the summary reads both parts; **TT** beds at 15:00 and 18:00 against the bars before the call, the Blackroot camp's tap through `choose`, `landParts` and `summarize`; **BR** the shown value after less the shown value before; **RL** a full run logs the rare scenes it missed; **NW** "The sleep itself is unchanged." **RV1 🟢 EV + SM + TT + BR + RL + NW (recommended)** / RV2 🟡 EV + SM + TT + BR / RV3 🟠 EV + TT / RV4 🔴 none (colours: the six findings fixed and guarded by a test). **Picked: RV1.**
+  - **Also:** `edaab42` filled in for 0.11.150; v0.11.148's notes and the group d bullet to `history-18.md`; the docs tests follow group d's lines (group i markers kept).
+
+### From "Version notes"
+
+## v0.11.151 — Group d closed: the night's slept line (WD1, RV1)
+
+- **Files:** `js/core/game.js` (`nightTo` returns the line, counted from the bed tap; `sleptLine`), the five night scenes' `enter` (`prologue.js` `night_attack`, `wilds.js` `night_event`, `act1_blackroot.js` `bl_night_event`, `act1_fallout.js` `fo_wolf`, `ashfall.js` `village_night`), `js/main.js` (`summarize` reads the line), `js/core/news.js` (the 0.11.151 note), `tools/leftovers-keep.json` (`fo_morning#2` out), `tests/tasks.test.mjs` (LN, EV, BR, SM, TT), `tests/story.test.mjs` (`RARE`, RL), `tests/tools.test.mjs` (the roadmap's group d moved), `tests/README.md`, `project/reference.md`, `sw.js`, docs. Balance and saves unchanged; no id, flag or key changed.
+- **Checks:** a game change (rule 2): the full check after WD1 (exit 0; 0 drifted of 145, 19 moved more than 5, log only, the same as 0.11.150; the two log notes gone) and after RV1 (exit 0; the same; no rare scene missed); mutation: 5 WD1 mutants and 6 RV1 mutants each caught by the LN tests. **Fable's review:** no data bug; H1, M1, M2, L1, L5, L6 fixed in RV1.
+
 ## Moved from the handover in v0.11.153 (word for word)
 
 ### Decided in chat

@@ -5,10 +5,17 @@
  */
 import { addItem, hasItem, condense, advance, jamesHpMax, d6 } from '../core/game.js';
 import { eatBest, pantry, foodCount, set, byForm, byDay, dayReply } from './common.js';
+import { byDayLast } from '../core/lines.js'; // v0.11.154 (owner pick RV1, Fable's review, L2 CL)
 import { day, hour, encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil, logTrio, ykShape } from './act1_common.js';
 import { ykPath } from './yuki_path.js';
 
 /* v0.11.136 (owner pick NC1, NT1's push 2): replies by day (js/core/lines.js dayReply): the first text is the old reply, the rest Fable's, one for each later day of a Coil. */
+/** v0.11.154 (owner pick PS1, RP1 push 2; Fable's, "ok for texts" 23:05): the hall's time of day by the day there, five days (ST5): [night, morning, midday, evening]. */
+const HALL_WHEN = [['Night. The shafts of light are gone; the hall is lit by your fire and by nothing else.', 'Morning light slides down the cracks like water down a well.', 'Midday. The grey shafts have turned almost white.', 'Evening. The light up in the cracks is going red.'],
+    [`Night. The fire lights the same ten paces of floor as it did before, and you find that you know them.`, `The light comes down the cracks in the same order as yesterday, one side of the hall and then the other, like someone opening shutters.`, `Midday. The white shafts stand in the hall like pillars, and Mei Lin walks round them, not through.`, `Evening. The red in the cracks climbs the wall a hand at a time, and then lets go.`],
+    [`Night. The hall has shrunk to the fire again, and the fire has acquired a woodpile, a drying line and settled views on who sits where.`, `Grey light, then the dust in it, then the far wall: the hall puts itself back together each morning, and always in that order.`, `Midday. For a quarter of an hour the tallest white shaft reaches the floor, and somebody has scratched a mark in the dust where it lands.`, `Evening. The cracks go red and the dust goes gold, and nobody remarks on it any more.`],
+    [`Night. You crossed the hall in the dark just now without putting a hand out, and only noticed afterwards.`, `Morning comes down the cracks late and thin, like a guest who knows the house.`, `Midday. The white shaft lands a finger's width past the scratched mark; the year is turning, even in here.`, `Evening. The red light picks out the paths you have all worn in the dust, and shows how few places any of you go.`],
+    [`Night. The fire, the dark, the long way up: by now the hall is only large when you think about it.`, `The light slides down the cracks as it did on the first morning, and the difference is in you: you know where it will land.`, `Midday. The shafts have gone white on schedule, and the hall is as bright as it ever gets, which you now know is not very.`, `Evening. The cracks are going red for the fifth time, and you catch yourself counting the evenings you have left.`]];
 const DR_HC_MEI = dayReply("heart_camp:1", [
     "She tells you the songs about the Old Tree her grandmother sang. Some of the words are your words, worn smooth by four hundred years of people who didn't know what they meant.",
     "Tonight it is the planting songs, the ones Ashfall sings over the barley in spring. She gives you the words flat, without the tune, like a recipe. Halfway through one you could finish the line for her. You don't, and she sees you not doing it.",
@@ -191,7 +198,8 @@ Both, you think. Mostly the second.`,
         id: 'heart_hub', title: 'Inside the Old Tree', art: 'heart_hall', place: PIN,
         text: (g) => {
             const h = hour(g);
-            const when = h < 6 || h >= 20 ? 'Night. The shafts of light are gone; the hall is lit by your fire and by nothing else.' : h < 11 ? 'Morning light slides down the cracks like water down a well.' : h < 16 ? 'Midday. The grey shafts have turned almost white.' : 'Evening. The light up in the cracks is going red.';
+            const w = byDayLast(g, HALL_WHEN, 'heart_hub'); // ST5; RV1 (CL): a stay past five days keeps the fifth
+            const when = h < 6 || h >= 20 ? w[0] : h < 11 ? w[1] : h < 16 ? w[2] : w[3];
             const where = !g.flags.roots_done ? 'The hall goes down as well as up: there are root-galleries below, black and deep.' : !g.flags.ship_found ? 'Below the roots, you know, there is something that isn\'t tree.' : !g.flags.log_heard ? 'The ship is waiting. So is whatever it has to say.' : !g.flags.guardian ? 'Deeper than the ship, past a door of grown bone, something is still singing in its sleep.' : !g.flags.seed ? 'The heart-chamber is open now.' : 'You have what you came for. The tree knows it, too.';
             return `${when}
 
@@ -569,7 +577,7 @@ ${byDay(g, HC_POOLS[hcPool(g)], `heart_camp:${hcPool(g)}`)}`; // v0.11.152 (owne
         text: (g) => {
             const r = g.flags.heart_night_roll;
             if (both(g) && ya(g) && trio(g) >= 2 && r >= 4) {
-                return byDay(g, [`You wake in the small hours to whispering.
+                return byDayLast(g, [`You wake in the small hours to whispering.
 
 Ya and Mei Lin, by the embers, their heads close. You can't hear the words. You hear Mei Lin say "No," sharply, and then, a while later, less sharply, "*No*," and then something that is either a laugh or a sob, and then Ya's low, rough voice going on and on, patient as a hunter.
 
@@ -600,26 +608,31 @@ You open your eyes, since there is no longer any point in not. Mei Lin is alread
 The observer, you note, has been written into the experiment. The method will have to be revised. You close the notebook, in a manner of speaking, and do not get back to sleep for some time.`], 'heart_night:whisper');
             }
             if (r <= 2) {
-                return byDay(g, ['In the night, something knocks three times from somewhere deep in the trunk — slow, deliberate, like a knuckle on a door. Then nothing. Yuki growls at the dark for an hour. Nobody sleeps well.',
+                return byDayLast(g, ['In the night, something knocks three times from somewhere deep in the trunk — slow, deliberate, like a knuckle on a door. Then nothing. Yuki growls at the dark for an hour. Nobody sleeps well.',
                     `The knocking again, in the dead middle of the night. Three, slow, from deep in the trunk. This time you are awake for it, and you time the gaps, and the gaps are exactly even. Wood settling does not keep time. Yuki sits facing the sound until morning, ears forward. Nobody sleeps well.`,
-                    `Three knocks, deep in the trunk. You have started waiting for them, which is worse than being woken by them. You cannot tell whether they come from the same place as before; the hall gives nothing away. Yuki doesn't growl this time. She looks at the dark, and then at you, and then at the dark. Nobody sleeps well.`], 'heart_night:knock');
+                    `Three knocks, deep in the trunk. You have started waiting for them, which is worse than being woken by them. You cannot tell whether they come from the same place as before; the hall gives nothing away. Yuki doesn't growl this time. She looks at the dark, and then at you, and then at the dark. Nobody sleeps well.`,
+                    `The three knocks come just when you have decided that tonight they won't. Slow, even, deep in the trunk. Before you can think better of it you knock back, once, on the floor, with one knuckle. Nothing answers. Yuki looks at you for a long time. Nobody sleeps well, and you least of all.`], 'heart_night:knock'); // v0.11.154 (owner pick PS1, RP1 push 2; Fable's, "ok for texts" 23:05): the 4th (ST5)
             }
-            return byDay(g, ['The night is quiet. The dark at the top of the hall is very far away. Somewhere below you, the ship hums in its sleep, and if you listen hard enough, you can almost hear forty gardeners breathing.',
+            return byDayLast(g, ['The night is quiet. The dark at the top of the hall is very far away. Somewhere below you, the ship hums in its sleep, and if you listen hard enough, you can almost hear forty gardeners breathing.',
                 `A quiet night. The embers tick. Far up in the dark a flake of dead bark lets go and takes a long time to land. Under the floor the ship keeps up its one low note, and you fall asleep trying to work out the key.`,
-                `Nothing happens in the night, and you lie awake for a while appreciating it. The hall holds the fire's warmth better than a dead thing should. Below you the ship hums on, patient, like a house with one lamp left burning for somebody who is late.`], 'heart_night:quiet');
+                `Nothing happens in the night, and you lie awake for a while appreciating it. The hall holds the fire's warmth better than a dead thing should. Below you the ship hums on, patient, like a house with one lamp left burning for somebody who is late.`,
+                `A quiet night, and by now you can tell the hall's quiet from the forest's: this one has a roof on it. The fire settles. Somebody turns over. Under the floor the one low note goes on, and for once you don't try to name it. You let it count you to sleep.`], 'heart_night:quiet'); // v0.11.154 (owner pick PS1, RP1 push 2; Fable's, "ok for texts" 23:05): the 4th (ST5)
         },
         choices: [{ text: 'Morning.', to: 'heart_morning' }],
     },
     heart_morning: {
         id: 'heart_morning', title: (g) => `Day ${day(g)}`, art: 'heart_hall', place: PIN,
         enter: wake,
-        text: (g) => byDay(g, [(g) => `Grey light comes down the cracks. Mei Lin is ${trio(g) >= 3 ? 'tangled with Ya, both of them still asleep, and you lie there for a minute not wanting to move' : 'already up, making tea from the spring water'}. ${ya(g) ? 'Ya appears from somewhere she shouldn\'t have been, with something she shouldn\'t have, and offers you half of it.' : ''}
+        text: (g) => byDayLast(g, [(g) => `Grey light comes down the cracks. Mei Lin is ${trio(g) >= 3 ? 'tangled with Ya, both of them still asleep, and you lie there for a minute not wanting to move' : 'already up, making tea from the spring water'}. ${ya(g) ? 'Ya appears from somewhere she shouldn\'t have been, with something she shouldn\'t have, and offers you half of it.' : ''}
 
 ${late(g) && !g.flags.seed ? 'You can feel it this morning, the way you can feel weather: the tree is tired of waiting. Today.' : ''}`, (g) => `The light in the cracks goes from black to grey without stopping at any colour on the way. Mei Lin is ${trio(g) >= 3 ? `asleep with her face in Ya's shoulder and one hand closed in your sleeve, and you spend a while working out how to get up without waking either of them, and then don't get up` : `up before you again, sorting yesterday's herbs into rows on a flat root as if the tree might inspect them`}. ${ya(g) ? `Ya's first act of the day is to hold something up for you to smell. You decline. She eats it.` : ''}
 
 ${late(g) && !g.flags.seed ? `The hall feels different this morning. Like a held breath. Whatever the tree has been waiting for, it is done waiting. Today.` : ''}`, (g) => `Morning, by the evidence: a thin grey line down each crack, and dust turning in it. Mei Lin is ${trio(g) >= 3 ? `still asleep under Ya's arm, frowning, as if being comfortable were a thing she would have to answer for later, and you stay where you are and let her` : `awake and combing her hair by feel, the ivory pin held in her teeth`}. ${ya(g) ? `Ya, with her eyes still shut, informs the hall that she dreamt of elk, and that she holds all of you responsible for there not being any.` : ''}
 
-${late(g) && !g.flags.seed ? `You wake already knowing it, the way you know rain is coming: the tree has run out of patience. Today.` : ''}`], 'heart_morning'),
+${late(g) && !g.flags.seed ? `You wake already knowing it, the way you know rain is coming: the tree has run out of patience. Today.` : ''}`, // v0.11.154 (owner pick PS1, RP1 push 2; Fable's, "ok for texts" 23:05): the 4th morning (ST5)
+            (g) => `Grey light again, arriving down the cracks with the punctuality of something that kept this up for four hundred years with nobody in. Mei Lin is ${trio(g) >= 3 ? `awake before Ya for once, lying quite still under her arm with her eyes open, like a woman who has found that she doesn't mind and is checking the result; when she sees you looking she shuts them, too late` : `up already, washing her face at the spring water with her sleeves pinned back, and humming something under her breath that stops the moment she sees you are awake`}. ${ya(g) ? `Ya has been up for hours, by her own account, and has laid out four dead things in a row by the fire, in order of size, to be praised.` : ''}
+
+${late(g) && !g.flags.seed ? `The dust hangs in the light this morning without turning, as if the hall had stopped breathing to listen. The tree is finished with waiting. Today.` : ''}`], 'heart_morning'),
         choices: [{ text: 'Up.', to: 'heart_hub' }],
     },
 
