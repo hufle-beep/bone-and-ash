@@ -20,6 +20,7 @@ import { canPrimary, canColGroup, colGroupsOpen, btTarget, COL_GROUPS, priHours,
 import { sceneView, choose, goTo, wasPicked, isMenuScene, notePicked, seenBefore, noteSeen } from '../js/core/story.js';
 import { linesOf, pickLine, visitLine, noteVisit, coilStamp, SAID_MAX, noteDay, dayIndex, byDay, textDay, TEXT_DAY_FROM } from '../js/core/lines.js'; // v0.11.134 (LP2: PK); v0.11.135 (NT1): the day record
 import { coilSnap } from '../js/core/game.js'; // v0.11.134 (LP2)
+import { hpRegenPct } from '../js/core/game.js'; // v0.11.143 (RN1, L1)
 import { replyKey, quietFilter, noteSaid, landReply } from '../js/core/replies.js'; // v0.11.134 (LP2: QR; RQ1)
 /** v0.11.134 (LP2, QR): what main.js does for one action and its screen: filter, then record what was drawn. */
 const quietReplies = (g, reply) => { const out = quietFilter(g, reply); noteSaid(g, out); return out; };
@@ -2721,8 +2722,11 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
         g.combat = null; g.james.hp = Math.round(jamesHpMax(g) * 0.4); g.james.qi = 2;
         const hp0 = g.james.hp, hm = jamesHpMax(g), qm = jamesQiMax(g);
         goTo(g, SCENES, won); const r = choose(g, SCENES, 0);
-        const near = (v, w, m) => v >= w && v <= w + 0.1 * m; // the choice's own minutes pass after the morning's enter: a regen tick may land
-        assert(g.scene === morn && clockParts(g.minutes).hh === 6 && near(g.james.hp, half(hp0, hm), hm) && near(g.james.qi, half(2, qm), qm) && g.james.hp < hm && !g.flags.night_fight && r.lines.some((l) => /only half back/.test(l)),
+        // the choice's own minutes pass after the morning's enter: one regen tick may land (v0.11.143, RN1 L1: one real tick,
+        // HP hpRegenPct and Qi qiRegenPct of the bar; it was 0.1 of the bar, under one Qi tick, so the night's carry tripped it)
+        const near = (v, w, tick) => v >= w && v <= w + tick + 1e-9;
+        const tHp = (hpRegenPct(g.james.realm) / 100) * hm, tQi = (qiRegenPct(g, g.james.collaterals) / 100) * qm;
+        assert(g.scene === morn && clockParts(g.minutes).hh === 6 && near(g.james.hp, half(hp0, hm), tHp) && near(g.james.qi, half(2, qm), tQi) && g.james.hp < hm && !g.flags.night_fight && r.lines.some((l) => /only half back/.test(l)),
             `v0.11.92: ${kind || 'jackals'} won: dawn at ${g.scene} with HP ${g.james.hp}/${hm} (from ${hp0}), Qi ${g.james.qi}/${qm}`);
         // one move: the mark too
         const o = ensureBars(newGame(9230 + d)); o.minutes = (d - 1) * 1440 + 22 * 60; o.scene = sc; o.flags.bl_region = g.flags.bl_region; o.flags.bl_day = 2; SCENES[sc].enter?.(o); if (flag) o.flags[flag] = kind;
@@ -4092,6 +4096,51 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
       assert(a.minutes - ma === b.minutes - mb && b.minutes - mb === 6, `CL: a mark of ×1e9 reads as ×10 (${a.minutes - ma} / ${b.minutes - mb} min)`); }
     { const g = ensureBars(newGame(6655, { closed: true })); g.scene = 'wilds'; g.location = 'wilds'; g.minutes = 1440 + 9 * 60; g.james.satiety = 90; g.tasks.door = { id: 'x', speed: 10 };
       const mc = medCards(g, SCENES).find((c) => c.open); if (mc) { try { runMed(g, SCENES, mc.id); } catch { /* */ } assert(!g.tasks.door, `CL: a Meditate card (${mc.id}) ends the mark`); } else assert(false, 'CL: a Meditate card open in the wilds'); }
+}
+// v0.11.143 (owner pick NF1; RN1 after Fable's review): the hours asleep before a night encounter (21:00 → 01:00 / 01:20,
+// nightTo) give HP and Qi back at the resting rate, as any rest does; Fed still drops at the sleeping rate; if Fed runs out
+// on the way only the share he was fed for (FP); none at Fed 0 (and no starving asleep, as before); the clock and the waking
+// day as before
+{
+    const { nightTo, eveningTo } = await import('../js/core/game.js');
+    const low = (seed, mins, fed = 90) => { const g = ensureBars(newGame(seed)); g.minutes = mins; g.james.satiety = fed; g.james.hp = 3; g.james.qi = 1; g.yuki.hp = 2; g.yuki.qi = 1; g.regenCarry = 0; g.starveCarry = 0; return g; };
+    const bars = (g) => [g.james.hp, g.james.qi, g.yuki.hp, g.yuki.qi, g.regenCarry];
+    const same = (a, b) => JSON.stringify(bars(a)) === JSON.stringify(bars(b));
+    // the asleep span = the same span resting (advance), bars and carry; from 22:00 to 01:00 / 01:20
+    for (const at of [60, 80]) {
+        const g = low(9431 + at, 22 * 60), c = low(9431 + at, 22 * 60);
+        const n0 = wakeDay(g), fed0 = g.james.satiety;
+        nightTo(g, at); const span = g.minutes - c.minutes; advance(c, span, { resting: true });
+        assert(clockParts(g.minutes).hh === 1 && clockParts(g.minutes).mm === at - 60 && span === 120 + at && wakeDay(g) === n0, `NF1: nightTo(${at}) wakes at 01:${String(at - 60).padStart(2, '0')}, same waking day (span ${span})`);
+        assert(same(g, c) && g.james.hp > 3 && g.yuki.hp > 2, `NF1: ${span} min asleep = the same span resting (${bars(g).map((x) => x.toFixed?.(2)).join(' / ')} vs ${bars(c).map((x) => x.toFixed?.(2)).join(' / ')})`);
+        assert(Math.abs(g.james.satiety - (fed0 - (3 * span) / 60 / 2)) < 1e-9, `NF1: Fed at the sleeping rate (${g.james.satiety})`);
+    }
+    // L2: a short span that can't reach the caps (00:30 → 01:00): every bar and the carry match, none full
+    { const g = low(9435, 1440 + 30), c = low(9435, 1440 + 30); nightTo(g, 60); advance(c, 30, { resting: true });
+      assert(same(g, c) && g.james.qi > 1 && g.james.qi < jamesQiMax(g) && g.yuki.qi > 1 && g.yuki.qi < yukiQiMax(g) && g.james.hp < jamesHpMax(g), `NF1 (L2): 30 min asleep, nothing capped: ${bars(g).map((x) => x.toFixed(2)).join(' / ')} = ${bars(c).map((x) => x.toFixed(2)).join(' / ')}`); }
+    // FP: Fed runs out on the way: only the share he was fed for (Fed 3 of a 6-point drop: half the span); Fed ends at 0
+    { const g = low(9436, 21 * 60, 3), c = low(9436, 21 * 60); nightTo(g, 60); advance(c, 120, { resting: true });
+      assert(same(g, c) && g.james.satiety === 0 && g.james.hp > 3, `FP: Fed 3 for a 6-point night regenerates 120 of 240 min (${bars(g).map((x) => x.toFixed(2)).join(' / ')} vs ${bars(c).map((x) => x.toFixed(2)).join(' / ')})`);
+      const a = low(9437, 21 * 60, 6.0), b = low(9437, 21 * 60, 5.9); nightTo(a, 60); nightTo(b, 60);
+      assert(a.james.hp >= b.james.hp && b.james.hp > 3 && b.james.qi > 1, `FP: no cliff at the last Fed point (Fed 6.0: HP ${a.james.hp.toFixed(2)}, Fed 5.9: HP ${b.james.hp.toFixed(2)}, Qi ${b.james.qi.toFixed(2)})`); }
+    // at Fed 0 nothing comes back, no starving asleep (as before)
+    { const g = low(9441, 22 * 60, 0); nightTo(g, 60); assert(g.james.hp === 3 && g.james.qi === 1 && g.yuki.hp === 2 && g.starveCarry === 0, `NF1: at Fed 0 no regen and no starving (HP ${g.james.hp}, Qi ${g.james.qi}, carry ${g.starveCarry})`); }
+    // entered after its hour (never back): no span, nothing changes
+    { const g = low(9442, 1440 + 90); nightTo(g, 60); assert(g.minutes === 1440 + 90 && g.james.qi === 1 && g.james.hp === 3 && g.yuki.hp === 2, `NF1: entered after 01:00, nothing passes (${g.minutes})`); }
+    // a bed before 21:00: the evening by the fire to 21:00 (resting, as before), then asleep to 01:00
+    { const g = low(9443, 18 * 60), c = low(9443, 18 * 60); nightTo(g, 60); eveningTo(c); const mid = bars(c).slice(); advance(c, 240, { resting: true });
+      assert(clockParts(g.minutes).hh === 1 && g.james.hp === c.james.hp && g.james.hp > mid[0], `NF1 (L2): a bed at 18:00 waits to 21:00, then sleeps to 01:00 (HP ${g.james.hp.toFixed(2)} = ${c.james.hp.toFixed(2)})`); }
+    // every night encounter's scene gets it: a James and Yuki who sat themselves empty meet the night with bars back
+    const scenes = [['night_event', 2, {}], ['night_attack', 3, {}], ['bl_night_event', 12, { bl_region: 'rr', bl_day: 2 }], ['village_night', 5, { vday: 2 }], ['fo_wolf', 8, {}]];
+    for (const [sc, d, flags] of scenes) {
+        const g = low(9450 + d, (d - 1) * 1440 + 22 * 60); Object.assign(g.flags, flags); g.scene = sc;
+        SCENES[sc].enter?.(g);
+        assert(clockParts(g.minutes).hh === 1 && g.james.qi > 0.5 * jamesQiMax(g) && g.james.hp > 3 && g.yuki.hp > 2,
+            `NF1: ${sc}: at ${clockParts(g.minutes).hh}:${String(clockParts(g.minutes).mm).padStart(2, '0')} with Qi ${g.james.qi.toFixed(1)} of ${jamesQiMax(g).toFixed(1)}, HP ${g.james.hp.toFixed(1)}, Yuki HP ${g.yuki.hp.toFixed(1)}`);
+    }
+    // L2: a quiet night in Ashfall (not night 2) doesn't call nightTo: the clock and the bars stay
+    { const g = low(9460, 4 * 1440 + 22 * 60); g.flags.vday = 1; g.scene = 'village_night'; const m0 = g.minutes; SCENES.village_night.enter?.(g);
+      assert(g.minutes === m0 && g.james.qi === 1 && g.james.hp === 3, `NF1 (L2): a quiet village night is untouched (${g.minutes - m0} min, Qi ${g.james.qi})`); }
 }
 const pctOf = (o, n) => Object.entries(o).sort().map(([k, v]) => `${k} ${((v / n) * 100).toFixed(1)}%`).join(', ');
 console.log(`  tribute, tasks:   ${pctOf(stats.tasks.endings, stats.tasks.games)}`);

@@ -483,6 +483,13 @@ export function advance(g, minutes, { resting = false } = {}) {
         g.starveCarry -= (loss * 60) / STARVE_HP_PER_HOUR;
         if (loss > 0) { g.james.hp -= loss; notes.push(`Starving: −${loss} HP`); }
     } else g.starveCarry = 0;
+    regenFor(g, m, resting);
+    ensureBars(g);
+    return notes;
+}
+/** HP and Qi back for `m` minutes (James and Yuki), by Cycles; ×2 when resting; none at Fed 0. v0.11.143 (owner pick NF1):
+ *  shared by `advance` and the asleep wait before a night encounter (`nightTo`). */
+function regenFor(g, m, resting) {
     const cycle = cycleTimeMinutes(Math.max(g.james.gu.tier, g.james.skills['Convergence Use'].tier));
     g.regenCarry += m * (resting ? 2 : 1);
     const ticks = Math.floor(g.regenCarry / cycle);
@@ -494,8 +501,6 @@ export function advance(g, minutes, { resting = false } = {}) {
         g.yuki.hp = Math.min(yukiHpMax(g), g.yuki.hp + (yukiHpMax(g) * hpRegenPct(g.yuki.realm) * ticks) / 100);
         g.yuki.qi = Math.min(yukiQiMax(g), g.yuki.qi + (yukiQiMax(g) * qiRegenPct(g, g.yuki.collaterals) * ticks) / 100);
     }
-    ensureBars(g);
-    return notes;
 }
 
 /*
@@ -533,14 +538,20 @@ export function eveningTo(g, h = BED_FROM_HOUR) {
     if (dh >= 6 && dh < h) { const p = clockParts(g.minutes); advance(g, (p.day - 1) * 1440 + h * 60 - g.minutes, { resting: true }); }
 }
 /** v0.11.91: a night encounter comes after the bed (from 21:00), at `at` minutes past the coming midnight (01:00; the jackals
- *  01:20), never back; the wait is asleep (Fed at the sleeping rate), so the fight is over before 02:00. */
+ *  01:20), never back; the wait is asleep (Fed at the sleeping rate), so the fight is over before 02:00. v0.11.143 (owner pick
+ *  NF1): the hours asleep give HP and Qi back at the resting rate, as any rest does (before, nothing came back until the
+ *  morning, so a day of cultivating met the night's attack on the Qi its sits had left); RN1 (FP): if Fed runs out on the
+ *  way, only the share of the span he was still fed for (no all-or-nothing at the last Fed point). */
 export function nightTo(g, at = 60) {
     doorEnds(g, null);
     eveningTo(g);
     const p = clockParts(g.minutes), n0 = (p.hh < 6 ? p.day - 1 : p.day) * 1440; // before 06:00 it is still this night
     const t = Math.max(g.minutes, n0 + at), span = t - g.minutes;
     wakeState(g); g.minutes = t; g.wake.lastX = X4(t);
-    g.james.satiety = Math.max(0, g.james.satiety - (SATIETY_PER_HOUR * span) / 60 / 2);
+    const drop = (SATIETY_PER_HOUR * span) / 60 / 2, fed0 = g.james.satiety;
+    const fedShare = fed0 <= 0 ? 0 : drop > 0 ? Math.min(1, fed0 / drop) : 1; // v0.11.143 (RN1, FP): only the hours he was still fed for
+    if (span > 0 && fedShare > 0) { regenFor(g, Math.round(span * fedShare), true); ensureBars(g); } // v0.11.143 (NF1)
+    g.james.satiety = Math.max(0, fed0 - drop);
 }
 /** A full night (or long rest): bars to Max, clock to the given hour of the next morning (v0.11.91: never a bed before 21:00;
  *  `bed: false` for a rest that isn't a bed, the Long Forest's seclusion, owner pick S1). */

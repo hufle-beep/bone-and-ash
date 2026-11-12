@@ -2,6 +2,22 @@
 
 Started 2026-11-12 (v0.11.138), when `history-16.md` would have passed about 45 KB. Newer than `history-16.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.143 (word for word)
+
+### Decided in chat
+
+- **v0.11.140: familiarity on door cards and story beats (FM2 picked 11:48 "texts ok, FM2", owner 12:16 "include it in the next push"; Fable's review: RV1–RV4 at about 12:40, owner 12:43 "RV1 go"):**
+  - **As built (FD + FS):** a door card's own time (the hub choice's, and a door menu's entry) ÷ `cardSpeed(fam)` (×1 → ×10 over 18 uses), each step rounded, never under 1 minute (`doorMinutes`); the scene inside unchanged; a story choice picked before ÷ max(2, 1 + 9 × picks ÷ 18) (`pickedSpeed`), the picks before this one in `g.tasks.use['pick:<scene>:<index>']` (kept across Coils and the whole game; no new save field; an old save's picked choice with no count ×2, as F1), flight after it. **Measured on the build (200 games each; hours saved a game, doors / story):** Completionist 6.7 / 2.2, Careful 0.4 / 1.4, Random 6.8 / 4.6, Sitter 1.9 / 1.3 (the scratch measure: 7.1 / 2.4, 0.4 / 1.4, 6.8 / 5.2, 1.1 / 0.7).
+  - **RV (stop-and-ask: Fable's cold review, no high; the full check exit 0, 0 drifted of 144, 14 moved):** **M1** the door menus' share (Explore, Go deep; 7 cards): a use gives the others a quarter of a use (`TRANSFER` 0.25, kept to one decimal), as work menus; without it Completionist 6.7 → 5.8 h, Random 6.8 → 6.0 h saved (the 7.1 h shown at the pick had it): **MK** keep / **MO** own uses only; **L1** picks counted only on choices that could be sped (no meridian or Coil screens, "Back…", work inside card scenes, hub cards): keys a game Completionist 223 → 197, Random 191 → 167, the save about 6 → 5 KB, no time changes; **DS** door cards show their step and count and the hold line's familiarity (no new words; "Familiar work goes faster." for work only); **TG** the review's test gaps; no change: L3 a late door opens once its walk is short enough (the lock reads the sped walk). **RV1 🟢 MK + L1 + DS + TG (recommended)** / RV2 🟡 MO + L1 + DS + TG / RV3 🟠 MK + L1 + TG / RV4 🔴 TG (colours: the review's points fixed with the picked numbers kept). **Picked: RV1.**
+  - **Also:** as built: `canBeFamiliar` (tasks.js; `showPicked` = the mark and it); `4692280` filled in for 0.11.139; v0.11.137's notes to `history-17.md`; `roadmap.md`'s v0.11.136 done line to `roadmap-done-2.md`.
+
+### Version notes
+
+## v0.11.140 — Familiarity on door cards and story beats (FM2, RV1)
+
+- **Files:** `js/core/story.js` (`PICK_N`, `pickedSpeed`, `pickedMinutes` by picks, `pickKey`, `pickCount`, `countPick`, `doorMinutes`, `choose`'s `speed`), `js/core/tasks.js` (`runTask` passes a door card's speed, `taskMinutes` times a door by it, `canBeFamiliar`), `js/main.js` (a door card's familiarity on the card and the hold line), `tests/tasks.test.mjs` (FM2, RV1), `tests/README.md`, `sw.js`, docs. Saves: no new field; new keys `pick:<scene>:<index>` in the existing `tasks.use`; no id, flag or key changed.
+- **Checks:** a game change (rule 2): the full check after FM2 (exit 0, 0 drifted of 144, 14 moved past 5, log only; the most: the story test's collectors random −11.0, root wyrm random −10.3) and after RV1 (the same numbers: L1 changes no time); models Careful 3.46 / 3.92, Completionist 3.30 / 3.55, Sitter 2.62 / 2.62, Farmer 3.29 / 3.53; text lint 0 changed. Mutation: FD off 2 tests, FS's count off, F1's flat half back 2, L1 off 3, DS off 1. **Fable's review:** no high; M1 (kept, MK), L1, L2 (DS), L4 (TG) in RV1; L3 no change.
+
 ## Moved from the handover in v0.11.142 (word for word)
 
 ### Decided in chat

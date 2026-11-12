@@ -2,6 +2,12 @@
 
 Started in v0.11.88 (owner pick A, 2026-11-09 02:37, D2), so `roadmap-done.md` (part 1) stays readable in one go. Newer than `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.143 (word for word; owner picks NF1, RN1)
+
+### From section 0, "Next, before everything else" (the done line of v0.11.139, as of v0.11.142)
+
+- *(new in v0.11.139, owner picks MW1, MR1, DX1)* **The tree, push 2 (Old Wen and the mother): done:** once a waking day on Ashfall's three resting places (the prologue's village once met this Coil, the Fallout, the return; shut from 19:00), time with Old Wen (`wen_time`) and Mei Lin's mother (`mother_time`), 20 minutes each like Yuki's: 13 texts by place and the story's day (one for the burned loft) and 12 closing lines by friendship (under 30, 30 and up), all Fable's; +3 friendship a scene, friendship only; their gains in eight choices they are already in (MB); a Completionist's first Act 1 Coil about Wen 51, the mother 33 (Yuki 71, Ya 85, Mei Lin 92); numbers in the handover's v0.11.139 entry. **Next: familiarity on door cards and story beats (FM2: FD + FS, picked 11:48; its own push).** **Open, options later:** Careful takes no door cards (its Wen 22, the mother 14 come from MB alone, Wen above its Yuki 7); with the loft burned, the Act 1 night still smells of mint and ginseng (`fo_night`, older).
+
 ## Moved in v0.11.142 (word for word; owner pick CV1)
 
 ### From section 0, "Next, before everything else" (the done line of v0.11.138, as of v0.11.141)
