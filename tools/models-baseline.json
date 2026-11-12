@@ -232,6 +232,50 @@
     "v": 4.3,
     "n": 24688
    }
+  },
+  "cultivator": {
+   "games": 500,
+   "endings": {
+    "revelation": {
+     "v": 30.8,
+     "n": 500
+    },
+    "victory": {
+     "v": 33.2,
+     "n": 500
+    },
+    "accord": {
+     "v": 36,
+     "n": 500
+    }
+   },
+   "nights": {
+    "Ya": {
+     "v": 37.2,
+     "n": 500
+    },
+    "trio": {
+     "v": 34.6,
+     "n": 500
+    },
+    "quiet": {
+     "v": 26,
+     "n": 500
+    },
+    "Mei Lin": {
+     "v": 2.2,
+     "n": 500
+    }
+   },
+   "repeats": {
+    "v": 1.8,
+    "n": 142058
+   }
   }
+ },
+ "cultivator": {
+  "saved": "2026-11-12",
+  "args": "--model cultivator --games 500 --off 0 --texts",
+  "note": "v0.11.142 (owner pick CV1): the Cultivator added alone; the other models keep the saved copy above"
  }
 }

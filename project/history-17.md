@@ -2,6 +2,24 @@
 
 Started 2026-11-12 (v0.11.138), when `history-16.md` would have passed about 45 KB. Newer than `history-16.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.142 (word for word)
+
+### Decided in chat
+
+- **v0.11.139: the tree, push 2: Old Wen and Mei Lin's mother (options MW1–MW4 at about 10:50, owner 11:04 "MW1 go"; 11:05 "an additional suggestion. weigh adding familiarity to story beats and door cards please."; the drafts sent; the stop-and-ask MR1–MR4 and FM1–FM4 at about 11:40, owner 11:48 "texts ok, FM2", 11:50 "MR1"; the MR1 drafts and DX1–DX3 sent, owner 12:03 "Texts ok, DX1"):**
+  - **MW (a scratch hook on `bumpRel` and the scenes, dry runs left out; 200 games each of Careful / Completionist / Sitter / Random; a Coil's peak at the end of the Coil that reaches Act 1):** today Wen 6 / 17 / 6 / 13, the mother 5 / 2 / 2 / 15 (both 0 in prologue Coils); the three (Completionist) Mei Lin 103, Ya 87, Yuki 73 (Careful's Yuki 7). **MB** gains on 8 existing choices (as built): Wen 22 / 30 / 16 / 27, the mother 14 / 10 / 10 / 24, the bots unchanged; **MS** the cards, 20 minutes, a Coil Completionist 4.3, Sitter 3.3, Random 2.5, Careful 0; 0 drifted, 24 moved; Completionist's Mei Lin 103 → 92; **MG2** +2 (with MB: Wen 43, the mother 24) / **MG3** +3 (51 / 33); **MT** closers by level, 12. **MW1 🟢 MB + MS + MG3 + MT (recommended)** / MW2 🟡 MG2 / MW3 🟠 no MT / MW4 🔴 MB. **Picked: MW1.**
+  - **Fable's texts (rule 10):** `mw1-fable-drafts.md`, `mr1-fable-drafts.md` (as built in `house_texts.js`). As built: the slot by the story's own day, not by visits.
+  - **MR (stop-and-ask: Fable's cold review, no high; the full check exit 0, 0 drifted, 26 moved):** M1 23:50 read the next day's text; M2 open 19:00–23:50 (13% of random scenes); M3 the version; M4 the burned eve; L5 a `ready` change never ran (reverted); L6, L7, L9, L11 clashing lines; L8 old saves; L12 the place; TG. **MR1 🟢 all + TG (recommended)** / MR2 🟡 without L7, L8, L12 / MR3 🟠 M1 + M2 + M4 + TG / MR4 🔴 M1 + TG. **Picked: MR1.** **DX:** X1 the mother's Day 8 hammers, X2 her LOW "door" line: **DX1 🟢 both (recommended)** / DX2 🟡 X1 / DX3 🔴 neither. **Picked: DX1.**
+  - **FM (the owner's suggestion, 11:05; measured on 200 games each on top of MW1; a scratch copy):** **FD** door cards speed up by their familiarity like work cards (÷ ×1 → ×10 over 18 uses; the card's own time, not the scene inside): hours saved a game Completionist 7.1 (−14.5%), Random 6.8, Sitter 1.1, Careful 0.4; 0 drifted, 18 moved; **FS** story beats: the flat half after the first pick (F1) grows with picks, ÷ max(2, 1 + 9 × picks ÷ 18) (pick counts in the kept `tasks.use`): saved 2.4 / 1.4 / 5.2 / 0.7 h; 0 drifted, 23 moved; **FC** story checks DC −1 from the 2nd pick, −2 from the 18th: eased 4–14% of story checks; Careful 3.44 / 3.90 → 3.37 / 3.84; 0 drifted, 26 moved. FM1 🟢 FD + FS + FC / **FM2 🟡 FD + FS (recommended)** / FM3 🟠 FD / FM4 🔴 FS. **Picked: FM2** (the next push).
+  - **Also:** as built: Wen met by the `elder` flag, the mother by her `supper@<day>` flag; `152edb8` filled in for 0.11.138; v0.11.136's notes to `history-17.md`; `roadmap.md`'s v0.11.134 and v0.11.135 done lines to `roadmap-done-2.md`.
+
+### Version notes
+
+## v0.11.139 — The tree, push 2: Old Wen and Mei Lin's mother (MW1, MR1, DX1)
+
+- **Files:** `js/story/house_time.js`, `js/story/house_texts.js` (new), `js/story/prologue.js`, `js/story/oneoff.js`, MB in `ashfall.js`, `act1_fallout.js`, `act1_return.js`, `tests/story.test.mjs` (MW1, MR1), `tests/data.test.mjs`, `tools/textlint.mjs` (pool `house`), `tools/text-baseline.json`, `tests/README.md`, `sw.js`, docs. Saves: new world flags (`wen_time_hub`, `wen_time_close`, `mother_time_hub`, `mother_time_close`, the daily keys); the cards follow Yuki's on each hub: no id, flag or choice position changed.
+- **Checks:** a game change (rule 2): the full check after MW1 (exit 0, 0 drifted, 26 moved), after MR1 (exit 0, 0 drifted, 22 moved) and after DX1 (exit 0, 0 drifted, 22 moved, log only; the most: collectors random −12.4); models Careful 3.45 / 3.90, Completionist 3.28 / 3.52, Sitter 2.64 / 2.66, Farmer 3.24 / 3.45; text lint 68 / 38 / 19 / 0 / 3, pool `house` 24 lines, snapshot saved. **Fable's review:** no high; M1–M4, L5–L12 fixed in MR1.
+
 ## Moved from the handover in v0.11.141 (word for word)
 
 ### Decided in chat

@@ -23,6 +23,7 @@ import { noise, band, flagged, K, MIN, LIMIT, NOTE_AT, driftKind } from '../tool
 import { strip, scanFunctions, scanFlags, flagFindings, scanCss, scanMarkers, scanStorage, scanFiles, applyKeep, loadKeep, KINDS, strictFailures, STRICT_KINDS } from '../tools/leftovers.mjs'; // v0.11.22; strict v0.11.23
 import { seen as touched, track, noteView, seenOut } from './lib/seen.mjs'; // v0.11.22
 import { stepLine, flagLines, leftoverFound, modelDigest } from '../tools/lib/report.mjs'; // v0.11.28
+import { sparePlan, SPARE_FROM, SPARE_UNTIL, SPARE_QI_HOURS, SPARE_FED_MIN } from './lib/spare.mjs'; // v0.11.142 (owner pick CV1)
 import { artFiles, fingerprint, readArt, checkArt, writeArt, ART_RE } from '../tools/arthash.mjs'; // v0.11.39
 import { TACTICS, FIXED, rank, rankLabel, stream, isOneMove, playFight, sampleFight, sampleOrder, tacticStats, thirds, guNeeded, summarize, summarizeAll, tableLines } from '../tools/lib/fightlab.mjs'; // v0.11.80
 import { SCENES } from '../js/story/prologue.js'; // v0.11.80: the story's hooks, for the fight lab's real fight
@@ -278,7 +279,7 @@ for (const mode of ['full', 'quick']) {
     const heads = [...rep.matchAll(/^\[([^\]]+)\] (\d+) games/gm)].map((m) => `${m[1]} ${m[2]}`).join();
     assert(heads === 'careful 4,careful:yukiOff 2,rusher 4', `models --off-models careful: Yuki off only for Careful, no Random (${heads})`);
     const dg = modelDigest(rep);
-    assert(dg?.length === 3 && dg.every((l) => /prologue C1 dead [\d.]+% · mean Coil ([\d.]+|—) \/ ([\d.]+|—) · whole game C1 [\d.]+%( · \d+ gave up)?$/.test(l)), `modelDigest reads the real report, one line per model (${dg?.join(' | ') ?? 'null'})`);
+    assert(dg?.length === 3 && dg.every((l) => /prologue C1 dead [\d.]+% · mean Coil ([\d.]+|—) \/ ([\d.]+|—) · whole game C1 [\d.]+%( · realm [\d.]+)?( · \d+ gave up)?$/.test(l)), `modelDigest reads the real report, one line per model (${dg?.join(' | ') ?? 'null'})`);
     assert(modelDigest(rep, 3)?.length === 3 && modelDigest(rep, 4) === null, 'modelDigest: a missing model block prints the whole report');
     const gaveUp = modelDigest('[rusher] 9 games, 1 cards (1 forced: a screen with no story exit), 7 gave up after Coil 8\n  prologue: C1 dead 100% (n 9)\n  cleared: prologue 22.2% (mean Coil 7.00) · Act 1 22.2% (mean Coil 7.00) · the whole game on Coil 1 0%');
     assert(/· 7 gave up$/.test(gaveUp?.[0] ?? ''), `modelDigest keeps the games that gave up (${gaveUp?.[0]})`);
@@ -288,7 +289,7 @@ for (const mode of ['full', 'quick']) {
     // v0.11.85 (owner pick M1): the Sitter in the models step (its own game count), and a tiny real Sitter run
     const mj = list().jobs?.find((j) => j.key === 'models'), mq = list('quick').jobs?.find((j) => j.key === 'models');
     const src = readFileSync(path.join(ROOT, 'tools/check.mjs'), 'utf8'); // --list gives names only: the job's arguments read from the source
-    assert(/the Sitter 150/.test(mj?.name ?? '') && /the Sitter 20/.test(mq?.name ?? '') && src.includes("'--model', 'careful,completionist,rusher,sitter,farmer'") && src.includes("'--sitter-games', QUICK ? '20' : '150'") && src.includes("blocks: QUICK ? 5 : 7"), `the models step plays the Sitter: 150 games (20 quick), 7 / 5 blocks (v0.11.86: with the Farmer) (${mj?.name}; ${mq?.name})`);
+    assert(/the Sitter 150/.test(mj?.name ?? '') && /the Sitter 20/.test(mq?.name ?? '') && src.includes("'--model', 'careful,completionist,rusher,sitter,farmer,cultivator'") && src.includes("'--sitter-games', QUICK ? '20' : '150'") && src.includes("blocks: QUICK ? 6 : 8"), `the models step plays the Sitter: 150 games (20 quick), 8 / 6 blocks (v0.11.86: with the Farmer; v0.11.142: the Cultivator) (${mj?.name}; ${mq?.name})`);
     let sit = '';
     try { sit = execFileSync(process.execPath, ['tests/models.test.mjs', '--model', 'careful,sitter', '--games', '3', '--sitter-games', '2', '--off', '0', '--workers', '1'], { cwd: ROOT, encoding: 'utf8' }); } catch (e) { sit = String(e.stdout || e); }
     const sh = [...sit.matchAll(/^\[([^\]]+)\] (\d+) games, (\d+) cards/gm)].map((m) => `${m[1]} ${m[2]}`).join();
@@ -307,6 +308,30 @@ for (const mode of ['full', 'quick']) {
     let badF = 0;
     try { execFileSync(process.execPath, ['tests/models.test.mjs', '--model', 'farmer', '--games', '1', '--farmer-games', 'abc'], { cwd: ROOT, stdio: 'ignore' }); } catch (e) { badF = e.status; }
     assert(badF === 2, `models --farmer-games abc exits 2 (${badF})`);
+    // v0.11.142 (owner pick CV1): the Cultivator in the models step (500 games, 50 quick), its spare-time rule, the cultivation line
+    assert(/the Cultivator 500/.test(mj?.name ?? '') && /the Cultivator 50/.test(mq?.name ?? ''), `the models step plays the Cultivator: 500 games (50 quick) (${mj?.name}; ${mq?.name})`);
+    {
+        const card = (id, kind, label = id) => ({ id, kind, label, status: 'open' });
+        const at = (hh, qi = 20, sat = 50, fed = 80) => ({ minutes: 2 * 1440 + hh * 60, james: { qi, saturation: sat, satiety: fed } });
+        const all = [card('w', 'work', 'Forage'), card('sit', 'sit', 'Cultivate: one sit'), card('m', 'mer'), card('q', 'qi')];
+        const p = (g, cards = all, mem = {}) => sparePlan(g, cards, mem, 'hub@3')?.join() ?? 'story';
+        assert(p(at(SPARE_FROM)) === 'sit' && p(at(SPARE_UNTIL - 1)) === 'sit' && p(at(SPARE_UNTIL)) === 'story' && p(at(SPARE_FROM - 1)) === 'story' && p(at(23)) === 'story',
+            `CV1: spare time is ${SPARE_FROM}:00–${SPARE_UNTIL - 1}:59 (${[SPARE_FROM - 1, SPARE_FROM, SPARE_UNTIL - 1, SPARE_UNTIL, 23].map((h) => p(at(h))).join(', ')})`);
+        assert(p(at(10, 20, 95)) === 'm' && p(at(10, 9)) === 'q' && p(at(10, 20, 50), [card('h', 'chore', 'Cultivate an hour.'), card('q', 'qi')]) === 'h' && p(at(10, 20, 50), [card('q', 'qi')]) === 'q',
+            'CV1: a sit first (the screen\'s own Cultivate too), a meridian session at Saturation 95, gather Qi under 10 Qi');
+        const mem = {}; const six = Array.from({ length: 7 }, () => p(at(10, 20, 95), [card('q', 'qi')], mem));
+        assert(six.slice(0, SPARE_QI_HOURS).every((x) => x === 'q') && six[SPARE_QI_HOURS] === 'story' && p(at(10, 5, 95), [card('q', 'qi')], mem) === 'q' && p(at(10, 20, 95), [card('q', 'qi')], {}) === 'q',
+            `CV1: gather Qi ${SPARE_QI_HOURS} h a waking day, more only under 10 Qi (${six.join()})`);
+        assert(p(at(10, 5, 50, SPARE_FED_MIN)) === 'story' && p(at(10, 20, 50), [card('w', 'work'), { ...card('sit', 'sit'), status: 'locked' }]) === 'story', 'CV1: no gather Qi at Fed 30 or under; locked and work cards are not spare time');
+    }
+    let cul = '';
+    try { cul = execFileSync(process.execPath, ['tests/models.test.mjs', '--model', 'completionist,cultivator', '--games', '3', '--off', '0', '--workers', '1'], { cwd: ROOT, encoding: 'utf8' }); } catch (e) { cul = String(e.stdout || e); }
+    const ch = [...cul.matchAll(/^\[([^\]]+)\] (\d+) games/gm)].map((m) => `${m[1]} ${m[2]}`).join();
+    const cult = (m) => Number(cul.match(new RegExp(`^\\[${m}\\][\\s\\S]*?\\n {2}cultivation: ([\\d.]+) h a game on task screens \\(sits [\\d.]+, meridians [\\d.]+, gather Qi [\\d.]+, breakthroughs [\\d.]+\\) · realm at Act 1's end ([\\d.]+|—)`, 'm'))?.[1] ?? NaN);
+    const spare = (m) => Number(cul.match(new RegExp(`^\\[${m}\\][\\s\\S]*?· spare-time cards ([\\d.]+) a game`, 'm'))?.[1] ?? NaN);
+    assert(ch === 'completionist 3,cultivator 3' && / 0 failed/.test(cul) && cult('cultivator') > 0 && spare('cultivator') > 0 && spare('completionist') === 0, `CV1: a tiny real run: the Cultivator plays, nothing fails, it queues cards in its spare time and the completionist doesn't (${ch}; ${cult('cultivator')} h; spare ${spare('cultivator')} / ${spare('completionist')} a game)`);
+    const dgC = modelDigest(cul, 2);
+    assert(dgC?.length === 2 && dgC.every((l) => / · realm [\d.]+$/.test(l)), `CV1: modelDigest shows the realm at Act 1's end (${dgC?.join(' | ') ?? 'null'})`);
 }
 
 const canon = (v) => (Array.isArray(v) ? v.map(canon) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, canon(v[k])])) : v);

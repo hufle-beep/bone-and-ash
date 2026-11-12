@@ -9,6 +9,7 @@
 //   node tests/models.test.mjs --off-models careful   v0.11.28: only these models play the Yuki-off games (default: all but Random)
 //   node tests/models.test.mjs --sitter-games 200     v0.11.85: the Sitter's own game count (default: --games; it plays ~20× the cards)
 //   node tests/models.test.mjs --farmer-games 100     v0.11.86: the Farmer's own game count (default: --games)
+//   node tests/models.test.mjs --model cultivator     v0.11.142 (owner pick CV1): the Cultivator alone
 //   node tests/models.test.mjs --texts                v0.11.132 (owner picks PL1, E1, RP): count the screens whose text the game already
 //                                                     showed in full this Coil (hubs and menus left out); the full check passes it
 //   node tests/models.test.mjs --save-baseline        v0.11.132 (E1, EB): save the Act 1 endings, last nights and repeated screens as
@@ -30,6 +31,10 @@
 //   farmer         v0.11.86 (#53, owner picks C1 + G1 + W1): bites the tail by choice 10 times at the first dawn (the James
 //                  tab's path, through the Coil screens), then plays like the completionist; its Coils are counted from its
 //                  first real one (so its line reads like the completionist's), and the bites by choice add no bonus
+//   cultivator     v0.11.142 (owner pick CV1; the owner 13:19: the freed time goes to manual cultivation): plays like the
+//                  completionist; when a task screen's cards for the day are done and it is 05:00–17:59, it sits (Qi ≥ 10,
+//                  Saturation < 95), else a meridian session (Qi ≥ 10), else "Meditate: gather Qi" (up to 6 h a waking day, or
+//                  any time Qi is under 10; Fed over 30); then the story, as the completionist (tests/lib/spare.mjs)
 // Careful, Completionist and Rusher fight smart, keep Yuki's lane on (the "yukiOff" lines: the same with it off), rewind a
 // lost tribute up to 3 times, bite the tail when Shen Qiu takes James up to 3 times (the start of Act 1), and stop after
 // Coil 8. A rewind forgets the cards done (the days start over).
@@ -44,11 +49,12 @@ import { writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { noFold, OUTCOME_SCENES, againView, noteRead } from '../js/story/again.js'; // v0.11.132 (E1, RP); v0.11.133 (FP2): noteRead
 import { shareNote } from '../tools/lib/textlint.mjs'; // v0.11.132 (E1, EB)
 import { smartAction } from './lib/smartfight.mjs'; // v0.11.96 (BT1)
+import { sparePlan } from './lib/spare.mjs'; // v0.11.142 (owner pick CV1): the Cultivator's spare time
 import { SHARD, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
 
 const argv = process.argv.slice(2);
 const opt = (n, d) => { const i = argv.indexOf(`--${n}`); return i >= 0 && argv[i + 1] != null ? argv[i + 1] : d; };
-export const MODELS = ['random', 'careful', 'completionist', 'rusher', 'sitter', 'farmer']; // v0.11.85: the Sitter last, so the others' seeds don't move; v0.11.86: the Farmer after it
+export const MODELS = ['random', 'careful', 'completionist', 'rusher', 'sitter', 'farmer', 'cultivator']; // v0.11.85: the Sitter last, so the others' seeds don't move; v0.11.86: the Farmer after it; v0.11.142 (CV1): the Cultivator after it
 const ONLY = opt('model', 'all');
 const PLAY = ONLY === 'all' ? MODELS : ONLY.split(',');
 for (const m of PLAY) if (!MODELS.includes(m)) { console.error(`unknown model ${m} (${MODELS.join(', ')})`); process.exit(2); }
@@ -108,6 +114,13 @@ const runCombat = (g, r, st, smart) => { if (r?.combat) { startCombat(g, r.comba
 
 /** What a model queues on a task screen this visit (card ids), or null to take a story stop. */
 export function hubPlan(model, g, cards, mem, noExit = false) {
+    if (model === 'cultivator') { // v0.11.142 (CV1; tests/lib/spare.mjs): the completionist's plan, else the spare time
+        const base = hubPlan('completionist', g, cards, mem, noExit);
+        if (base) return base;
+        const sp = sparePlan(g, cards, mem, dayKey(g));
+        if (sp && mem.st) mem.st.spare = (mem.st.spare || 0) + 1;
+        return sp;
+    }
     const open = cards.filter((c) => c.status === 'open');
     const fed = g.james.satiety, hp = g.james.hp / jamesHpMax(g);
     const eat = open.find((c) => EAT.test(c.label));
@@ -144,6 +157,7 @@ export function hubPlan(model, g, cards, mem, noExit = false) {
 
 /** A story choice (index) for a model. */
 function storyPick(model, g, choices, mem) {
+    if (model === 'cultivator') model = 'completionist'; // v0.11.142 (CV1)
     if (model === 'careful') { const calm = choices.filter((c) => !/fight/.test(c.tag || '')); return pick(calm.length ? calm : choices).index; }
     if (model === 'completionist') { const untried = choices.filter((c) => !mem.tried.has(`${g.scene}:${c.index}`)); return pick(untried.length ? untried : choices).index; }
     return pick(choices).index;
@@ -166,7 +180,7 @@ function play(run, model, st, yuki) {
         model = 'completionist';
     }
     const cn = () => g.coil.n - off;
-    const mem = { done: {}, tried: new Set(), tribLost: 0, shenBites: 0 };
+    const mem = { done: {}, tried: new Set(), tribLost: 0, shenBites: 0, st }; // v0.11.142 (CV1): st for the spare-time count
     let coilKey = '', deadKey = '', takenKey = '', nightKey = '', crossed = false, bitShen = false;
     let lastShown = null; // v0.11.134 (LP2, SV)
     const seenTrib = new Set();
@@ -203,6 +217,7 @@ function play(run, model, st, yuki) {
         }
         if (TEXTS && v.text && !noFold(g.scene) && !v.end) noteRead(g, v.text); // v0.11.133 (FP2, RF1): the bot reads what the screen shows, as main.js records it
         if (v.end || g.scene === 'a1_end') {
+            st.endRealm[g.james.realm] = (st.endRealm[g.james.realm] || 0) + 1; // v0.11.142 (CV1): the realm at Act 1's end (the realm starts over each Coil)
             const o = g.flags.a1_outcome || 'none';
             st.endings[o] = (st.endings[o] || 0) + 1;
             if (o !== 'taken' && o !== 'none') { st.act1Clear[cn()] = (st.act1Clear[cn()] || 0) + 1; if (cn() === 1) st.oneCoil++; }
@@ -227,7 +242,10 @@ function play(run, model, st, yuki) {
                     doneSet(mem, g).add(id);
                     const c = cards.find((x) => x.id === id);
                     if (c && !EAT.test(c.label)) st.work++;
+                    const m0 = g.minutes;
                     runTask(g, SCENES, id); st.cards++;
+                    const ck = c && (c.kind === 'chore' && /^(Cultivate|Condense)/.test(c.label) ? 'sit' : c.kind); // a hub's own Cultivate chore is a sit
+                    if (CULT_KINDS.includes(ck)) st.cult[ck] = (st.cult[ck] || 0) + (g.minutes - m0); // v0.11.142 (CV1): cultivation on task screens
                 }
                 q.length = 0;
                 continue;
@@ -268,7 +286,9 @@ const foodLeft = (g) => Object.entries(g.inventory || {}).some(([k, n]) => n > 0
 const NIGHT_KIND = { none: 'quiet', mei: 'Mei Lin', ya: 'Ya', trio: 'trio', yuki: 'Yuki', yuki_mei: 'Yuki', yuki_ya: 'Yuki', all: 'Yuki' };
 const NIGHT_ORDER = ['quiet', 'Mei Lin', 'Ya', 'trio', 'Yuki', 'other'];
 const ENDING_ORDER = ['accord', 'revelation', 'victory', 'taken', 'none']; // v0.11.132 (E1, EB): g.flags.a1_outcome (act1_return.js)
-const blank = () => ({ nights: {}, games: 0, finished: 0, gaveUp: 0, stuck: 0, cards: 0, work: 0, forced: 0, oneCoil: 0, hungry: 0, cuAhead: 0, deaths: {}, tribute: {}, prologueClear: {}, act1Clear: {}, endings: {}, fights: {} });
+const CULT_KINDS = ['sit', 'mer', 'qi', 'bt']; // v0.11.142 (CV1)
+const CULT_NAMES = { sit: 'sits', mer: 'meridians', qi: 'gather Qi', bt: 'breakthroughs' };
+const blank = () => ({ cult: {}, endRealm: {}, spare: 0, nights: {}, games: 0, finished: 0, gaveUp: 0, stuck: 0, cards: 0, work: 0, forced: 0, oneCoil: 0, hungry: 0, cuAhead: 0, deaths: {}, tribute: {}, prologueClear: {}, act1Clear: {}, endings: {}, fights: {} });
 const all = {};
 const playInto = (st, run, m, yuki) => { st.games++; const r = play(run, m, st, yuki); if (r === 'end') st.finished++; else if (r === 'stuck') st.stuck++; };
 for (const m of PLAY) {
@@ -338,6 +358,12 @@ for (const [m, st] of Object.entries(all)) {
     const en = Object.values(st.endings || {}).reduce((a, b) => a + b, 0); // v0.11.132 (E1, EB)
     console.log(`  Act 1 endings: ${en ? ENDING_ORDER.filter((k) => k !== 'none' || st.endings.none).map((k) => `${k} ${st.endings[k] || 0}`).join(' / ') + ` (of ${en})` : '—'}`);
     if (st.texts) { const tx = st.texts; const top = Object.entries(tx.scenes).sort((a, b) => b[1] - a[1]).slice(0, 5); console.log(`  repeated screens (the same text again in a Coil, shown in full; hubs and menus left out): ${tx.repeats} of ${tx.screens} (${pct(tx.repeats, tx.screens)})${top.length ? `: ${top.map(([k, n]) => `${k} ${n}`).join(', ')}` : ''}`); }
+    { // v0.11.142 (owner pick CV1): hours a game on the Meditate cards of task screens, and the realm at Act 1's end
+        const h = (m) => Math.round((10 * m) / 60 / Math.max(1, st.games)) / 10;
+        const tot = CULT_KINDS.reduce((a, k) => a + (st.cult[k] || 0), 0);
+        const en = sum(st.endRealm);
+        console.log(`  cultivation: ${h(tot)} h a game on task screens (${CULT_KINDS.map((k) => `${CULT_NAMES[k]} ${h(st.cult[k] || 0)}`).join(', ')}) · realm at Act 1's end ${en ? `${avg(st.endRealm)} (n ${en})` : '—'} · spare-time cards ${h(60 * (st.spare || 0))} a game`);
+    }
     console.log(`  last nights: ${nt ? NIGHT_ORDER.filter((k) => k !== 'other' || st.nights.other).map((k) => `${k} ${st.nights[k] || 0}`).join(' / ') + ` (of ${nt} last evenings)` : '—'}`);
 }
 if (JSON_OUT) writeFileSync(JSON_OUT, JSON.stringify(all));

@@ -2,6 +2,12 @@
 
 Started in v0.11.88 (owner pick A, 2026-11-09 02:37, D2), so `roadmap-done.md` (part 1) stays readable in one go. Newer than `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.142 (word for word; owner pick CV1)
+
+### From section 0, "Next, before everything else" (the done line of v0.11.138, as of v0.11.141)
+
+- *(new in v0.11.138, owner picks TR1, DR2, QA2, RT1)* **The tree, push 1 (Yuki): done:** once a waking day on 13 resting places, time with Yuki (`yk_time`, 20 minutes in all like the talks): a text by place, day there and form (87 by Fable), a closing line by her level (33), +3 / +2 friendship and affection by turns (about level with Mei Lin and Ya by the end of a first Act 1 Coil); her question's "More." at affection 72 (below it "Not yet", kept across Coils; "Family." from her scene; the question again at 72); away from the Long Forest's fire the question and its answers place-neutral (QA2); numbers in the handover's v0.11.138 entry. **Push 2, Mother and Old Wen: done in v0.11.139 (MW1).** **Open, options later:** L3, L5 (Fable's review, no change); no bot sees her great or human form.
+
 ## Moved in v0.11.141 (word for word; owner picks FX1, RW1)
 
 ### From section 0, "Next, before everything else" (the done line of v0.11.137, as of v0.11.140)

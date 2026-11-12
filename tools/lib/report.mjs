@@ -20,7 +20,7 @@ export const leftoverFound = (out) => /choices log only: [1-9]/.test(out);
 
 /**
  * One line per bot model from tests/models.test.mjs's report: games, prologue Coil 1 deaths, the mean Coil that clears
- * the prologue and Act 1, the whole game on Coil 1, and the games that gave up. `expect`: the number of blocks there must be.
+ * the prologue and Act 1, the whole game on Coil 1, the realm at Act 1's end (v0.11.142, when the report has it) and the games that gave up. `expect`: the number of blocks there must be.
  * Returns null when a block can't be read (the caller then prints the
  * whole report, so a changed report format never hides the numbers).
  */
@@ -35,7 +35,8 @@ export function modelDigest(out, expect = 0) {
         const p1 = b.match(/\n {2}prologue: C1 dead ([\d.]+%)/);
         const cl = b.match(/cleared: prologue [\d.]+% \(mean Coil ([\d.]+|—)\) · Act 1 [\d.]+% \(mean Coil ([\d.]+|—)\) · the whole game on Coil 1 ([\d.]+%)/);
         if (!head || !p1 || !cl) return null;
-        rows.push(`  ${`${head[1]} ${head[2]}`.padEnd(26)}prologue C1 dead ${p1[1]} · mean Coil ${cl[1]} / ${cl[2]} · whole game C1 ${cl[3]}${gave ? ` · ${gave[1]} gave up` : ''}`);
+        const rl = b.match(/realm at Act 1's end ([\d.]+) \(n \d+\)/); // v0.11.142 (owner pick CV1): the realm at Act 1's end, when the report has it
+        rows.push(`  ${`${head[1]} ${head[2]}`.padEnd(26)}prologue C1 dead ${p1[1]} · mean Coil ${cl[1]} / ${cl[2]} · whole game C1 ${cl[3]}${rl ? ` · realm ${rl[1]}` : ''}${gave ? ` · ${gave[1]} gave up` : ''}`);
     }
     return rows;
 }
