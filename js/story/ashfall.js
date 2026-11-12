@@ -89,7 +89,7 @@ Mei Lin clears the bowls very loudly through all of this. When her mother is don
 "*Mei Lin.*" Her mother says it once, like a door shutting. "You do not speak of your father so." Mei Lin doesn't apologise. She doesn't stop smiling, either, and she doesn't look at her mother for the rest of the meal.`),
         choices: [
             { text: 'Climb out onto the roof with Mei Lin and watch the stars come out.', do: (g) => { bumpRel(g, 'Mei Lin', 3, 4); return []; }, time: 60, to: 'supper_roof' },
-            { text: 'Help her mother with the dishes, and listen.', do: (g) => { bumpRel(g, 'Village', 3, 0); bumpRel(g, 'Mei Lin', 2, 0); return [DR_DISHES(g)]; }, time: 60, to: 'village_night' },
+            { text: 'Help her mother with the dishes, and listen.', do: (g) => { bumpRel(g, 'Village', 3, 0); bumpRel(g, 'Mei Lin', 2, 0); bumpRel(g, 'Mother', 2, 0); return [DR_DISHES(g)]; }, time: 60, to: 'village_night' }, // v0.11.139 (owner pick MW1, MB): Mother +2
             { text: 'Go up to the loft early. Tomorrow will want everything you have.', to: 'village_night' },
         ],
     },

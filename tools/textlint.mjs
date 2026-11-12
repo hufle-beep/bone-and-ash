@@ -12,6 +12,7 @@
 // (tasks.js): per pool lines, words, a line twice, lines sharing a 5-word chunk with a scene text, tics, broken, spacing.
 // v0.11.135 (NT1, EV1): every sample state also on a scene's 2nd–4th day this Coil, so the later-day texts are read.
 // v0.11.136 (NC1): and the replies by day (lines.js DAY_REPLIES) as the pool `replies`.
+// v0.11.139 (MW1): and Old Wen's and the mother's daily scenes (house_texts.js) as the pool `house`.
 // Not read yet: the other result lines of choices and cards, the task cards' texts (open, options later).
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
@@ -76,7 +77,10 @@ for (const h of Object.values(TASK_HUBS)) {
 const { DAY_REPLIES } = await import(js('core/lines.js'));
 const dayReplies = [];
 for (const list of Object.values(DAY_REPLIES)) for (const t of list) for (const r of renders(t)) if (!dayReplies.includes(r)) dayReplies.push(r);
-const POOLS = { memory: [...MEMORY_LINES], yuki: yukiLines, aptitude: [ADAPT_REPLY], replies: dayReplies };
+// v0.11.139 (owner pick MW1): Old Wen's and the mother's daily scenes, every body and closer (the samples read one slot only)
+const { HT_BODY, HT_CLOSE } = await import(js('story/house_texts.js'));
+const houseLines = [...Object.values(HT_BODY).flatMap((b) => Object.values(b)), ...Object.values(HT_CLOSE).flat()];
+const POOLS = { memory: [...MEMORY_LINES], yuki: yukiLines, aptitude: [ADAPT_REPLY], replies: dayReplies, house: houseLines };
 const pools = poolCounts(POOLS, rows.filter((r) => r.kind === 'text').flatMap((r) => r.renders));
 const snap = { totals: now.totals, areas: now.areas, pools };
 

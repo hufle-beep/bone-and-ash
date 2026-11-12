@@ -24,6 +24,7 @@ import { RETURN, BREAK_HUBS as B4 } from './act1_return.js';
 import { LONGFOREST, BREAK_HUBS as B0 } from './longforest.js';
 import { MERIDIANS, EXTRA_FROM } from './meridians.js';
 import { installYukiTime } from './yuki_time.js'; // v0.11.137 (TR1)
+import { installHouseTime } from './house_time.js'; // v0.11.139 (MW1)
 import { installYukiPath } from './yuki_path.js';
 import { installCoil } from './coil_scenes.js';
 import { installOnce } from './oneoff.js';
@@ -585,7 +586,7 @@ ${g.flags.long ? 'The tribute is due in three days, at dawn. You can feel the wh
 "Then let me give you an old man's advice." He sets his cup down. "${g.flags.long ? 'In three days' : 'Tomorrow'}, the collectors come. If you're here, they'll see you. If they see you, they'll want you. You can run ${g.flags.long ? 'before then' : 'tonight'}. Nobody would blame you." A pause. "Or you can stand in front of us. Nobody has done that in forty years."
 
 ${g.flags.gao_beaten || g.flags.gao_humiliated ? '"You have also," he adds, without inflection, "already shamed an outer disciple of the Sect on our slope. Running may no longer be yours to choose."' : ''}`,
-        choices: [{ text: 'Thank him. Think about it.', to: hubOf }],
+        choices: [{ text: 'Thank him. Think about it.', do: (g) => { bumpRel(g, 'Old Wen', 3, 0); return []; }, to: hubOf }], // v0.11.139 (owner pick MW1, MB): Wen +3
     },
     heal: {
         id: 'heal', title: 'The Coughing House', art: 'healer', place: 'Ashfall Hamlet — the coughing house',
@@ -1001,5 +1002,7 @@ SCENES.lf_hub.choices.push({
 
 // v0.11.137 (owner pick TR1): Yuki's daily scene, appended last on every resting place (after every other choice above), so no position changes
 installYukiTime(SCENES);
+// v0.11.139 (owner pick MW1, MS): Old Wen's and Mei Lin's mother's daily scenes, after Yuki's card on Ashfall's three resting places
+installHouseTime(SCENES);
 
 export const START_SCENE = 'arrival';

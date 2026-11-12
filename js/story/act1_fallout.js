@@ -628,7 +628,7 @@ Your Convergence is humming so loudly you're surprised nobody else can hear it.
 "I have to go there," you say. "Before the Elder comes."
 
 "Yes," says Old Wen, as if you'd said the sun was up. "But nobody from Ashfall has gone past the Hollow in forty years. You'll need someone who has."`,
-        choices: [{ text: 'You know someone who has.', to: 'fo_price' }],
+        choices: [{ text: 'You know someone who has.', do: (g) => { bumpRel(g, 'Old Wen', 3, 0); return []; }, to: 'fo_price' }], // v0.11.139 (owner pick MW1, MB): Wen +3
     },
     fo_price: {
         id: 'fo_price', title: 'The Price', art: 'ya_close', place: `${P} — the shrine roof`,
@@ -667,7 +667,7 @@ Mei Lin takes it with both hands. Neither of them cries. You have the strong imp
 ${g.flags.palisade >= 2 ? 'Behind it all, the palisade stands white along the barley, two-thirds done or better. The hunters swear on their ancestors to finish it before you come back.' : 'The palisade is half a line of white stakes and a lot of chalk. The hunters swear on their ancestors to finish it.'}
 
 Ya eats on the roof, alone, with her back to the gathering, because "people saying things in a row" makes her want to bite them. Halfway through, she drops a smoked haunch of something through the smoke-hole onto the table. It lands in the soup. Mei Lin's mother looks at it for a long time. Then she serves it.`,
-        choices: [{ text: 'Go up to the loft.', to: 'fo_last_night' }],
+        choices: [{ text: 'Go up to the loft.', do: (g) => { bumpRel(g, 'Old Wen', 3, 0); bumpRel(g, 'Mother', 3, 0); return []; }, to: 'fo_last_night' }], // v0.11.139 (owner pick MW1, MB): Wen +3, Mother +3
     },
     fo_last_night: {
         id: 'fo_last_night', title: 'The Night Before', art: (g) => (likesMei(g) && likesYa(g) ? 'roof' : 'village_night'), place: `${P} — the herb loft`,
@@ -743,6 +743,6 @@ Mei Lin walks at your left with her father's knife at her hip and her basket on 
 At the edge of the barley, where the white stakes end and the black trees begin, your Convergence stops humming and starts, unmistakably, to *sing*.
 
 ${likesMei(g) && likesYa(g) ? '"Three of us," Ya says, to nobody, very pleased. Mei Lin doesn\'t answer. But she doesn\'t correct her, either.' : '"Into the warm," says Ya, and steps under the trees.'}`,
-        choices: [{ text: 'Into the Blackroot.', do: (g) => { g.minutes = 9 * 1440 + 23 * 60; sleepUntil(g, 6); g.flags.mei_party = true; g.flags.ya_party = true; return []; }, to: 'bl_start' }],
+        choices: [{ text: 'Into the Blackroot.', do: (g) => { g.minutes = 9 * 1440 + 23 * 60; sleepUntil(g, 6); g.flags.mei_party = true; g.flags.ya_party = true; bumpRel(g, 'Mother', 2, 0); return []; }, to: 'bl_start' }], // v0.11.139 (owner pick MW1, MB): Mother +2
     },
 };

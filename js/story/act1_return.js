@@ -323,7 +323,7 @@ He sets down his cup with great care.
 "And then?"
 
 "And then he will decide whether Ashfall continues to exist." Old Wen bows his head, formally, to you — the first time he has. "Whatever you carried out of that tree. If it is going to be planted, plant it today."`,
-        choices: [{ text: 'Go and plant it.', time: 20, to: 'rt_plant' }],
+        choices: [{ text: 'Go and plant it.', time: 20, do: (g) => { bumpRel(g, 'Old Wen', 4, 0); return []; }, to: 'rt_plant' }], // v0.11.139 (owner pick MW1, MB): Wen +4
     },
     // v0.11.129 (CB1, MO; Fable's MAIN): the mother sees the human and counts four
     rt_mother: {
@@ -343,7 +343,7 @@ He sets down his cup with great care.
 The silence stretches.
 
 "Your father," she says at last, "was exactly the same." She steps aside from the door. "Wash. All ${byForm(g, 'three', 'three', 'four')} of you. You smell like the forest died on you."`,
-        choices: [{ text: 'Wash. Then the seed.', time: 60, do: (g) => { bumpRel(g, 'Mei Lin', 3, 0); bumpRel(g, 'Village', 2, 0); return []; }, to: 'rt_plant' }],
+        choices: [{ text: 'Wash. Then the seed.', time: 60, do: (g) => { bumpRel(g, 'Mei Lin', 3, 0); bumpRel(g, 'Village', 2, 0); bumpRel(g, 'Mother', 4, 0); return []; }, to: 'rt_plant' }], // v0.11.139 (owner pick MW1, MB): Mother +4
     },
     rt_plant: {
         id: 'rt_plant', title: 'The Seed', art: 'seed_planting', place: P,

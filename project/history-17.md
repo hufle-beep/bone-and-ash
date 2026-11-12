@@ -2,6 +2,24 @@
 
 Started 2026-11-12 (v0.11.138), when `history-16.md` would have passed about 45 KB. Newer than `history-16.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.139 (word for word)
+
+### Decided in chat
+
+- **v0.11.136: new texts on later days, push 2: the replies (options NC1–NC4 at about 22:03, owner 22:09 "NC1 and PG1"; the drafts sent, owner 22:18 "texts are ok"; Fable's review: RV1–RV4 at about 22:38, owner 22:40 "Rv2"):**
+  - **PG (owner 22:06 "the upload failed"):** the docs were current; v0.11.135's Pages build never got a runner and failed. **PG1 🟢 re-run (recommended)** / PG2 🔴 the next push. **Picked: PG1** (the owner re-ran it, 22:18).
+  - **NC (a scratch hook, 200 games each of Careful / Completionist / Sitter / Random; dry runs left out; a repeat = the same reply on a later day of the Coil; eating, rest, sits, meridians, Yuki's hauls left out):** **CR** 19 choices, 21 texts, 32 new, about 670 words, repeats 1,474 (197 / 299 / 417 / 561); **CR50** the 7 with 50+ repeats, 15 texts, about 340 words (→ 132); **TK** 19 cards, 22 new, about 200 words, 5,280 (2,164 / 1,856 / 307 / 953; Spar with Ya 2,951); **TK50** 7 cards, 10 texts, about 90 words (→ 64); **PK** the wiring (by the day, in the day record); **T**; **FD** Fable's drafts first. *(This remeasure replaced NT's estimates, CR 19 / 30 / 620, TK 25 / 25 / 320.)* **NC1 🟢 CR + TK + PK + T + FD (recommended)** / NC2 🟡 CR50 + TK50 + PK + T + FD (−97%) / NC3 🟠 TK + PK + T + FD (−78%) / NC4 🔴 CR + PK + T + FD (−22%) (colours: repeated replies removed, of 6,754). **Picked: NC1.**
+  - **RV (stop-and-ask: Fable's cold review of NC1, no high; the full check exit 0, 0 drifted; every `do` / `failDo` against HEAD: 0 state differences; landed: 38,710 of 38,711 shown, 0 hidden wrongly):** **M1** Ya's ledge names the ship before `ship_found` (3 draws, all after it); **L3** "the hares" on a one-hare haul (0); **L4** "with every tooth she owns" also in `ya_fight_start`; **L5** the spring's day 3 seat is Mei Lin's without Ya; **L1** the palisade's third failed day wraps quiet (1 of 38,711); **TG** test gaps. No change: L2 (two failure lines' "−2 HP" now after the reply; the Journal only), L6. **RV1 🟢 M1 + L3 + L4 + L5 + L1 + TG** / **RV2 🟡 M1 + L3 + L4 + L5 + TG (recommended)** / RV3 🟠 M1 + TG / RV4 🔴 TG (colours: wrong or clashing lines fixed). **Picked: RV2.**
+  - **Fable's texts (rule 10):** sent as `nc1-fable-drafts.md` (52 days, 60 strings with the forms; the spring's spare great root-kin day built; Old Hu's bow, "one of the old ones", the cradle song, the collectors' list confirmed with the texts); RV2's rewordings (Fable's, in the RV message): "water somewhere under the roots" until the ship is found, "carries the catch by the ears and tells it", "grins with all of her teeth", "on the steps above the basin".
+  - **Also:** as built: Wen's forest reply keyed `wen_lesson:forest`; the lint's pool `replies` (104 strings, snapshot saved); `9ead5cf` filled in for 0.11.135; v0.11.133's notes to `history-16.md`.
+
+### Version notes
+
+## v0.11.136 — New texts on later days, push 2: the replies (NC1, RV2)
+
+- **Files:** `js/core/lines.js` (`DAY_REPLIES`, `dayReply`), `js/story/common.js` (re-exports `dayReply`), the replies by day in `act1_blackroot.js` (12 lists), `act1_heart.js` (6), `ashfall.js` (8), `wilds.js` (8), `act1_fallout.js` (4), `tools/textlint.mjs` (the pool `replies`), `tools/text-baseline.json`, `tests/story.test.mjs` (the NC1 and RV2 checks), `tests/README.md`, `sw.js`, docs. Saves: the per-Coil day record (`lines.d`) gains `r:<key>` entries (the bots' largest record 2.5 KB; reset each Coil); no new field, no id, flag or choice position changed.
+- **Checks:** a game change (rule 2): the full check after NC1 and after RV2: exit 0, 0 drifted of 147, the same four log only; models unchanged; repeated screens unchanged (Careful 0.9%, Completionist 1.1%). Remeasured: later-day reply repeats 6,754 → 0. Mutation: replies always the first text 229 tests; a gain dropped 1; the ship always named 1; no day noted: an error. **Fable's review (NC1):** no high; M1, L3, L4, L5 and the test gaps fixed in RV2; L1, L6 open.
+
 ## Moved from the handover in v0.11.138 (word for word)
 
 ### From "Open items"

@@ -2,6 +2,13 @@
 
 Started in v0.11.88 (owner pick A, 2026-11-09 02:37, D2), so `roadmap-done.md` (part 1) stays readable in one go. Newer than `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.139 (word for word; owner picks MW1, MR1, DX1)
+
+### From section 0, "Next, before everything else" (done lines of v0.11.134–v0.11.135, as of v0.11.138)
+
+- *(new in v0.11.135, owner picks NT1, EV1, RN2)* **New texts on later days, push 1: done** (the owner's "no repeated texts", 20:24 and 20:29: a scene shown on another day of the same Coil gets a new text with the same options and bonuses): 23 scenes (the talks, the Blackroot and prologue nights and their events, the night inside the tree, the firesides, the spring, the hunts, the camps' and villages' time-of-day lines) have 45 new texts by Fable, one a day through the picker (`byDay`; a text's day from 05:00); repeats across days 984 / 1,597 / 1,038 / 1,735 → 0 / 0 / 4 / 8 (200 games each, Careful / Completionist / Sitter / Random); numbers in the handover's v0.11.135 entry. **Next: push 2, the replies to story choices and the task cards' replies (CR + TK; its own options and pick).** **Open, options later:** the same kinds of scenes the bots never reach on two days; quiet repeats keep or off; the event draw skipping events met this Coil (balance).
+- *(new in v0.11.134, owner picks LP2, RQ1)* **The line picker, quiet repeats and the same-visit fold: done:** `js/core/lines.js` picks repeating lines (fewest plays this Coil, then the most specific, then the save's seed; never the same twice running; one per visit; the save's `lines`, per Coil): the memory lines on folded scenes repeat in a Coil 1,554 times instead of 5,663 (Careful, 200 games), never twice running across visits; a reply part already shown this Coil is not shown again (reply parts shown 72,347 → 34,752), except a fight's end and an action with nothing else to show; a scene shown again with the same text right after an action folds (repeated screens Careful 3.1 → 2.3%); the text lint reads the line pools. Numbers in the handover's v0.11.134 entry. **Next: RL (open, options later).** **Open, options later:** 24 more memory lines (MX, with the rewrite's first part: repeats 1,554 → 17); the nights' and talks' texts in sequence ride with the rewrite parts (TR, in RD below).
+
 ## Moved in v0.11.134 (word for word; owner picks LP2, RQ1)
 
 ### From section 0, "Next, before everything else" (done lines of v0.11.128–v0.11.131, as of v0.11.133)

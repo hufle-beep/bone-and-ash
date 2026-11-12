@@ -8,13 +8,14 @@ import { btTarget } from '../js/story/meridians.js';
 import { loveLine, YK_QUESTION, ykAskAgain, YK_HERE } from '../js/story/yuki_path.js'; // v0.11.122 (RL1, T); v0.11.137 (TR1, YR; QA2)
 import { YT_HUBS, YT_BODY, YT_CLOSE, YT_LABEL, YT_GAIN, ytPool } from '../js/story/yuki_time.js'; // v0.11.137 (TR1)
 import { TASK_HUBS } from '../js/story/task_hubs.js'; // v0.11.137 (TR1, YB)
+import { HT_HUBS, HT_BODY, HT_CLOSE, HT_LABEL, HT_GAIN, HT_MID, htPool, htSlot } from '../js/story/house_time.js'; // v0.11.139 (MW1)
 import { likesMei, likesYa } from '../js/story/act1_common.js'; // v0.11.123 (EQ1, AB)
 import { KEEP_FLAGS, rewind } from '../js/core/coil.js'; // v0.11.137 (HV1, Fable L2): rewind on an old save // v0.11.123 (ER1, T3)
 import { againView, noteRead } from '../js/story/again.js'; // v0.11.125 (RW1, T); v0.11.133 (FP2): noteRead
 import { STOMP } from '../js/story/power.js'; // v0.11.126 (NQ1)
 import { coilStamp, dayIndex, textDay, DAY_REPLIES } from '../js/core/lines.js'; // v0.11.135 (NT1, EV1); v0.11.136 (NC1): DAY_REPLIES
 import { splitReply, splitLine, landReply, noteSaid } from '../js/core/replies.js'; // v0.11.136 (NC1); RV2 (TG): landReply, noteSaid
-import { runTask, taskOutcome, cardCheck } from '../js/core/tasks.js'; // v0.11.136 (RV2, TG)
+import { runTask, taskOutcome, cardCheck, taskCards } from '../js/core/tasks.js'; // v0.11.136 (RV2, TG); v0.11.139 (MW1): taskCards
 import { writeFileSync, readFileSync, readdirSync } from 'node:fs'; // v0.11.137 (HV1, T): the story files read for bumpRel
 import { smartAction } from './lib/smartfight.mjs'; // v0.11.96 (BT1)
 import { GAMES, FULL, SHARD, WORKERS, STATS_OUT, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
@@ -404,7 +405,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     const D = 1440;
     // YB: every resting place has the card, last (no choice position changes), a door card, once a waking day
     for (const hub of Object.keys(YT_HUBS)) {
-        const cs = SCENES[hub].choices, last = cs[cs.length - 1];
+        const cs = SCENES[hub].choices.filter((c) => !/^(wen|mother)_time$/.test(c.to)), last = cs[cs.length - 1]; // v0.11.139 (MW1): Wen's and the mother's cards follow hers
         assert(last.to === 'yk_time' && last.time === 10 && cs.filter((c) => c.to === 'yk_time').length === 1, `TR1 (YB; DR2): ${hub}'s last choice is Yuki's card, 10 min`);
         assert((TASK_HUBS[hub].doors || []).includes('yk_time'), `TR1 (YB): ${hub} shows it as a door card`);
     }
@@ -534,6 +535,104 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         choose(g, SCENES, sceneView(g, SCENES).choices.find((c) => c.label === 'Go on.').index);
         assert(g.minutes - m0 === 20 && g.scene === 'lf_hub', `RT1 (L2): 20 minutes in all, like the talks (${g.minutes - m0})`);
     }
+}
+// v0.11.139 (owner pick MW1, the tree's push 2): Old Wen's and Mei Lin's mother's daily scenes (MS, MG3, MT) and their gains in
+// the scenes they are already in (MB)
+{
+    const D = 1440;
+    const HT_SLOTS = ['ashfall:1', 'ashfall:2', 'fo_ashfall:1', 'fo_ashfall:2', 'fo_ashfall:3', 'rt_ashfall:1'];
+    // MS: on Ashfall's three resting places, after Yuki's card, door cards of 10 minutes, once a waking day
+    for (const hub of Object.keys(HT_HUBS)) {
+        const cs = SCENES[hub].choices, tail = cs.slice(-3).map((c) => c.to);
+        assert(JSON.stringify(tail) === '["yk_time","wen_time","mother_time"]', `MW1 (MS): ${hub} ends with Yuki's, Wen's and the mother's cards (${tail})`);
+        for (const k of ['wen', 'mother']) {
+            const c = cs.find((x) => x.to === `${k}_time`);
+            assert(c.time === 10 && c.text === HT_LABEL[k] && c.show.dailyKey === `${k}_time` && (TASK_HUBS[hub].doors || []).includes(`${k}_time`), `MW1 (MS): ${hub}'s ${k} card: 10 min, its label, daily, a door`);
+        }
+    }
+    for (const k of ['wen', 'mother']) {
+        assert(HT_SLOTS.every((sl) => typeof HT_BODY[k][sl] === 'string' && HT_BODY[k][sl].length > 200) && Object.keys(HT_BODY[k]).filter((x) => !x.endsWith('-burned')).length === HT_SLOTS.length, `MW1 (MS): ${k}: a text for each of the ${HT_SLOTS.length} slots`);
+        assert(['LOW', 'MID'].every((lv) => HT_CLOSE[`${k} ${lv}`]?.length === 3), `MW1 (MT): ${k}: three closers per level`);
+    }
+    assert(new Set([...Object.values(HT_BODY.wen), ...Object.values(HT_BODY.mother)]).size === 13, 'MW1 (MS): thirteen different texts (MR1: the burned eve)');
+    const MW = (seed, hub, day, flags = {}) => {
+        const g = ensureBars(fresh(seed)); g.minutes = (day - 1) * D + 600; Object.assign(g.flags, flags); goTo(ensureBars(g), SCENES, hub); return g;
+    };
+    const idx = (g, k) => SCENES[g.scene].choices.findIndex((c) => c.to === `${k}_time`);
+    const open = (g, k) => SCENES[g.scene].choices[idx(g, k)].show(g);
+    // the prologue: Wen after the elder's house (its world flag), the mother after her supper this Coil; hidden before, not "back tomorrow"
+    {
+        const g = MW(65001, 'ashfall', 2, { long: true, vday: 2 });
+        assert(!open(g, 'wen') && !open(g, 'mother'), 'MW1 (MS): not met this Coil: neither card');
+        const ids = taskCards(g, SCENES).map((c) => c.id);
+        assert(!ids.includes(`ashfall:${idx(g, 'wen')}`) && !ids.includes(`ashfall:${idx(g, 'mother')}`), 'MW1 (MS): not met: not shown as "back tomorrow" either');
+        g.flags.elder = true;
+        assert(open(g, 'wen') && !open(g, 'mother'), 'MW1 (MS): after the elder\'s house, Wen\'s card');
+        goTo(g, SCENES, 'supper'); g.minutes = D + 600; goTo(g, SCENES, 'ashfall'); // supper moves the clock to 19:00 (the cards shut then, M2)
+        assert(open(g, 'mother'), 'MW1 (MS): after her supper this Coil, the mother\'s card');
+        // MR1 (TG, L8): a save from before the text-day record: her supper's daily flag is enough
+        const old = JSON.parse(JSON.stringify(g)); delete old.lines;
+        assert(open(old, 'mother'), 'MR1 (L8): an old save without the text-day record: the mother met by her supper\'s flag');
+        // MR1 (TG): a real rewind starts the Coil over: neither met
+        const r = ensureBars(fresh(65003)); r.minutes = D + 600; Object.assign(r.flags, { long: true, vday: 2 }); goTo(r, SCENES, 'supper'); r.minutes = D + 600; r.flags.elder = true; goTo(r, SCENES, 'ashfall');
+        assert(open(r, 'wen') && open(r, 'mother'), 'MR1 (TG): both met before the rewind');
+        rewind(r); r.minutes = D + 600; Object.assign(r.flags, { long: true, vday: 2 }); goTo(r, SCENES, 'ashfall');
+        assert(!open(r, 'wen') && !open(r, 'mother'), 'MR1 (TG): after a rewind neither card until met again');
+    }
+    // MR1 (M2): shut from 19:00, like every villager's door; MR1 (M1): the Fallout's text day runs from 05:00
+    {
+        const g = MW(65004, 'fo_ashfall', 8); g.minutes = 7 * D + 18 * 60 + 50;
+        assert(open(g, 'wen') && open(g, 'mother'), 'MR1 (M2): open at 18:50');
+        g.minutes = 7 * D + 19 * 60;
+        assert(!open(g, 'wen') && !open(g, 'mother'), 'MR1 (M2): shut at 19:00');
+        g.flags.wen_time_hub = 'fo_ashfall'; g.minutes = 8 * D + 2 * 60;
+        assert(htSlot(g, 'wen') === 'fo_ashfall:1', `MR1 (M1): 02:00 on Day 9 still reads Day 8's text (${htSlot(g, 'wen')})`);
+    }
+    // MR1 (TG, L12): 20 minutes in all (10 on the card, 10 on "Go on."), the scene at its own place, the text stable on a redraw
+    for (const k of ['wen', 'mother']) {
+        const g = MW(65005, 'fo_ashfall', 9); const m0 = g.minutes;
+        choose(g, SCENES, idx(g, k));
+        const v = sceneView(g, SCENES).text;
+        assert(/the elder's house|Mei Lin's house/.test(g.location) && sceneView(g, SCENES).text === v, `MR1 (L12, TG): ${k}: at ${g.location}, the same text on a redraw`);
+        choose(g, SCENES, 0);
+        assert(g.scene === 'fo_ashfall' && g.minutes - m0 === 20 && g.location === 'Ashfall Hamlet', `MR1 (TG): ${k}: 20 minutes in all, back in the village (${g.minutes - m0}, ${g.location})`);
+    }
+    {
+        const g = MW(65002, 'fo_ashfall', 8);
+        assert(open(g, 'wen') && open(g, 'mother'), 'MW1 (MS): in Act 1\'s villages both cards from the start');
+    }
+    // MG3 + MT + the slot by the story's day; once a waking day
+    for (const [k, who] of [['wen', 'Old Wen'], ['mother', 'Mother']]) {
+        const g = MW(65010, 'fo_ashfall', 8);
+        choose(g, SCENES, idx(g, k)); seen.add(`${k}_time`);
+        assert(g.scene === `${k}_time` && g.rel[who].f === HT_GAIN && g.rel[who].a === 0, `MW1 (MG3): ${who} +${HT_GAIN} friendship, no affection (${JSON.stringify(g.rel[who])})`);
+        const t = sceneView(g, SCENES).text;
+        assert(t.startsWith(HT_BODY[k]['fo_ashfall:1']) && HT_CLOSE[`${k} LOW`].some((l) => t.endsWith(l)) && sceneView(g, SCENES).text === t, `MW1 (MS, MT): ${k}: Day 8's text, a LOW closer, the same on a redraw`);
+        choose(g, SCENES, 0);
+        assert(g.scene === 'fo_ashfall' && !open(g, k), `MW1 (MS): back at the place, ${k}'s card done for today`);
+        g.rel[who] = { f: HT_MID, a: 0 }; g.minutes = 9 * D + 600; goTo(g, SCENES, 'fo_ashfall'); choose(g, SCENES, idx(g, k));
+        const t2 = sceneView(g, SCENES).text;
+        assert(t2.startsWith(HT_BODY[k]['fo_ashfall:3']) && HT_CLOSE[`${k} MID`].some((l) => t2.endsWith(l)) && htPool(g, k) === `${k} MID`, `MW1 (MS, MT): ${k}: Day 10 (Day 9 skipped) reads Day 10's text, a MID closer at ${HT_MID}`);
+    }
+    for (const [hub, day, flags, slot] of [['ashfall', 2, { long: true, vday: 2, elder: true }, 'ashfall:1'], ['ashfall', 3, { long: true, vday: 3, elder: true }, 'ashfall:2'], ['fo_ashfall', 9, {}, 'fo_ashfall:2'], ['fo_ashfall', 11, {}, 'fo_ashfall:3'], ['rt_ashfall', 20, {}, 'rt_ashfall:1']]) {
+        const g = MW(65020 + day, hub, day, flags); choose(g, SCENES, idx(g, 'wen'));
+        assert(htSlot(g, 'wen') === slot && sceneView(g, SCENES).text.startsWith(HT_BODY.wen[slot]), `MW1 (MS): ${hub} on Day ${day} reads ${slot} (${htSlot(g, 'wen')})`);
+    }
+    // MR1 (M4): after the arson night, the mother's eve reads its own text (Wen's is the same)
+    for (const burned of [false, true]) {
+        const g = MW(65030, 'ashfall', 3, { long: true, vday: 3, elder: true, 'supper@2': true, ...(burned ? { loft_burned: true } : {}) });
+        choose(g, SCENES, idx(g, 'mother'));
+        assert(sceneView(g, SCENES).text.startsWith(HT_BODY.mother[burned ? 'ashfall:2-burned' : 'ashfall:2']), `MR1 (M4): the loft ${burned ? 'burned' : 'standing'}: the mother's eve text`);
+    }
+    assert(Object.keys(HT_BODY.mother).filter((k) => k.endsWith('-burned')).join() === 'ashfall:2-burned' && !Object.keys(HT_BODY.wen).some((k) => k.endsWith('-burned')), 'MR1 (M4): one burned text, the mother\'s eve');
+    // MB: the gains in the scenes they are already in
+    const MB = [['elder', 0, 'Old Wen', 3], ['fo_plan', 0, 'Old Wen', 3], ['fo_farewell', 0, 'Old Wen', 3], ['fo_farewell', 0, 'Mother', 3], ['rt_wen', 0, 'Old Wen', 4], ['supper', 2, 'Mother', 2], ['rt_mother', 0, 'Mother', 4], ['fo_depart', 0, 'Mother', 2]];
+    for (const [id, i, who, n] of MB) {
+        const g = ensureBars(fresh(65100)); g.rel = {};
+        SCENES[id].choices[i].do(g);
+        assert((g.rel[who]?.f || 0) === n && (g.rel[who]?.a || 0) === 0, `MW1 (MB): ${id}'s choice ${i}: ${who} +${n} (${JSON.stringify(g.rel[who])})`);
+    }
+    assert(/her mother with the dishes/.test(SCENES.supper.choices[2].text), 'MW1 (MB): supper\'s choice 2 is the dishes');
 }
 // v0.11.137 (owner pick QA2): her question away from the Long Forest's fire: its own text, label and answer scenes; at the fire, as before
 {
