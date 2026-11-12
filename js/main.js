@@ -16,6 +16,7 @@ import { medCards, runMed, isSitChoice, medActivity, useLine, LATE_TAG, canMedit
 import { FAQ_KEY, FAQ_TAB, faqState, faqText, faqCheck, faqList, faqHasNew, faqSeen, faqMatch } from './core/faq.js'; // v0.11.83 (P1 + T1 + R1)
 import { meridianRow } from './story/meridians.js';
 import { APK_URL, UPDATE_KEY, CHECK_DELAY, updPrefs, inApp, makeUpdater } from './core/update.js'; // v0.11.147 (UP1; RV1: makeUpdater)
+import { exportRoute, canSaveToFile, wantsServiceWorker, savedName, resultPlace, FILE_TEXT } from './core/app.js'; // v0.11.148 (EX1; RX1: savedName, resultPlace)
 import { realmShockHpBonus } from './core/formulas.js';
 import * as ART from './art/art.js';
 const sceneArt = (key) => { ART.setArtState?.({ yukiForm: yukiForm(g) }); return ART.sceneArt(key); };
@@ -403,6 +404,22 @@ function download(text, name) {
     a.download = name;
     a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
+/** v0.11.148 (EX1, Selene's exportText): a file goes to the app's share sheet, or its file picker (toFile), else a browser download. */
+let askedName = ''; // RX1 (FN): the name the file picker was asked for, shown when Android doesn't hand one back
+function exportText(name, text, toFile = false) {
+    const AB = window.AndroidBridge, how = exportRoute(AB, toFile);
+    if (how === 'share') AB.shareFile(name, text);
+    else if (how === 'file') { askedName = name; AB.exportFile(name, text); }
+    else download(text, name);
+    return how;
+}
+/** EX1 (CP): in the app, text that couldn't be copied goes to the share sheet as a .txt file. True if it did. */
+function shareText(name, text) {
+    const AB = window.AndroidBridge;
+    if (exportRoute(AB, false) !== 'share') return false;
+    AB.shareFile(name, text); return true;
+}
+const saveFileName = () => `bone-and-ash-${clockLabel(g.minutes).replace(/[^\w]+/g, '-')}.json`;
 const stamp = () => new Date().toISOString().slice(0, 16).replace(/[^\d]/g, '');
 
 function backupList() {
@@ -453,7 +470,7 @@ async function shareToGitHub() {
     const full = `${base}&value=${encodeURIComponent(body)}`;
     expMark();
     if (full.length <= GH_URL_MAX) { openOut(full); note('GitHub opens with the save filled in. Sign in, then tap "Commit changes".'); return; }
-    const go = (ok) => { openOut(base); note(ok ? `Save copied (${Math.round(body.length / 1024)} KB): too long for a link. On GitHub, paste it into the empty file, then tap "Commit changes".` : 'The save could not be copied. Use "Download save file" instead.'); };
+    const go = (ok) => { if (!ok && shareText(ghFileName('txt'), body)) { note(FILE_TEXT.ghShared); return; } openOut(base); note(ok ? `Save copied (${Math.round(body.length / 1024)} KB): too long for a link. On GitHub, paste it into the empty file, then tap "Commit changes".` : 'The save could not be copied. Use "Download save file" instead.'); };
     copyText(body, () => go(true), () => go(false));
 }
 
@@ -466,7 +483,7 @@ function allSaves() {
     const m = bakMeta();
     return { boneashAllSaves: 1, saved: Date.now(), auto: store.get(AUTO), slots, backups, when: m.when || {}, label: m.label || '' };
 }
-function exportAll() { autosave(); expMark(); download(JSON.stringify(allSaves()), `bone-and-ash-all-saves-${stamp()}.json`); }
+function exportAll(toFile = false) { autosave(); expMark(); return exportText(`bone-and-ash-all-saves-${stamp()}.json`, JSON.stringify(allSaves()), toFile); }
 let pendingAll = null; // an all-saves file waiting for its confirm tap
 function readAll(text) {
     let o; try { o = JSON.parse(text); } catch { return null; }
@@ -537,7 +554,7 @@ function leaveRecovery(next) {
     g = next; recovery = null; prevScene = g.scene; lastResult = null; lastReply = []; combatLog = null; autosave(); setTab('story');
 }
 function onRecovery(b) {
-    if (b.dataset.rec === 'export') return download(recovery.raw, `bone-and-ash-damaged-${stamp()}.json`);
+    if (b.dataset.rec === 'export') return exportText(`bone-and-ash-damaged-${stamp()}.json`, recovery.raw); // EX1
     if (b.dataset.rec === 'fresh') return leaveRecovery(freshGame());
     try {
         if (b.dataset.rec === 'anyway') return leaveRecovery(checkScene(deserialize(recovery.raw, { force: true })));
@@ -563,7 +580,8 @@ errbar.addEventListener('click', (ev) => {
     if (b.dataset.err === 'close') { errbar.hidden = true; return; }
     const text = errbar.dataset.full || '';
     const done = () => { b.textContent = 'Copied'; setTimeout(() => { b.textContent = 'Copy'; }, 1500); };
-    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(text).then(done, () => fallbackCopy(text, done)); else fallbackCopy(text, done);
+    const fail = () => { if (shareText(`bone-and-ash-error-${stamp()}.txt`, text)) { b.textContent = FILE_TEXT.errorShared; setTimeout(() => { b.textContent = 'Copy'; }, 1500); } }; // EX1 (CP)
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(text).then(done, () => fallbackCopy(text, done, fail)); else fallbackCopy(text, done, fail);
 });
 function fallbackCopy(text, done, fail) {
     const t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select();
@@ -579,12 +597,12 @@ const notebar = document.createElement('div');
 notebar.id = 'notebar'; notebar.setAttribute('role', 'status'); notebar.hidden = true;
 notebar.innerHTML = '<span class="msg"></span><button class="btn" data-note="export">Download now</button><button class="btn" data-note="close" aria-label="Close">✕</button>';
 document.body.appendChild(notebar);
-function showNotice(msg) { notebar.querySelector('.msg').textContent = msg; notebar.hidden = false; }
+function showNotice(msg, exportBtn = true) { notebar.querySelector('.msg').textContent = msg; notebar.querySelector('[data-note="export"]').hidden = !exportBtn; notebar.hidden = false; } // EX1 (RP): a result line has no Download button
 notebar.addEventListener('click', (ev) => {
     const b = ev.target.closest('button[data-note]');
     if (!b) return;
     notebar.hidden = true;
-    if (b.dataset.note === 'export' && g) { expMark(); download(serialize(g), `bone-and-ash-${clockLabel(g.minutes).replace(/[^\w]+/g, '-')}.json`); }
+    if (b.dataset.note === 'export' && g) { expMark(); exportText(saveFileName(), serialize(g)); } // EX1
 });
 window.addEventListener('error', (ev) => showError(ev.error || ev.message));
 window.addEventListener('unhandledrejection', (ev) => showError(ev.reason));
@@ -673,11 +691,11 @@ ${slot(1)}${slot(2)}${slot(3)}
 <p class="note">Kept by themselves after 5 minutes, 30 minutes and 2 hours of play, and before a risky move. Restoring one keeps this game as the "before" backup.</p>
 ${bak.length ? bak.map((b) => `<div class="row"><span>${esc(b.name)}</span><span class="note">${esc(descOf(b.raw))}${b.when ? ` · saved ${esc(new Date(b.when).toLocaleString())}` : ''}</span><div class="btns sub"><button class="btn" data-bak="${b.k}">Restore</button></div></div>`).join('') : '<p class="note">No backups yet.</p>'}
 <h2>Move a save to another device</h2>
-<div class="btns"><button class="btn" data-export="1">Download save file</button><label class="btn">Load save file<input type="file" accept="application/json,.json,text/plain,.txt" data-import="1" hidden></label></div>
+<div class="btns"><button class="btn" data-export="1">Download save file</button>${canSaveToFile(window.AndroidBridge) ? '<button class="btn" data-exportfile="1">Save to a file</button>' : ''}<label class="btn">Load save file<input type="file" accept="application/json,.json,text/plain,.txt" data-import="1" hidden></label></div>
 <div class="btns"><button class="btn" data-share="1">Share to GitHub</button><button class="btn" data-status="1">Copy status as text</button></div>
 <p class="note">Share to GitHub opens GitHub's page for a new file in the game's saves folder with this save filled in; sign in and tap "Commit changes". Copy status is for bug reports.</p>
 <h2>All saves</h2>
-<div class="btns"><button class="btn" data-exportall="1">Export all saves</button><label class="btn">Restore all saves<input type="file" accept="application/json,.json" data-import="1" hidden></label></div>
+<div class="btns"><button class="btn" data-exportall="1">Export all saves</button>${canSaveToFile(window.AndroidBridge) ? '<button class="btn" data-exportallfile="1">Save all to a file</button>' : ''}<label class="btn">Restore all saves<input type="file" accept="application/json,.json" data-import="1" hidden></label></div>
 ${pendingAll ? `<p class="note">This file holds a game at ${esc(descOf(pendingAll.auto))}, ${Object.keys(pendingAll.slots).length} slot${Object.keys(pendingAll.slots).length === 1 ? '' : 's'} and ${Object.keys(pendingAll.backups).length} backup${Object.keys(pendingAll.backups).length === 1 ? '' : 's'}${pendingAll.saved ? `, exported ${esc(new Date(pendingAll.saved).toLocaleString())}` : ''}${pendingAll.skipped ? ` (${pendingAll.skipped} unreadable, left out)` : ''}. Restoring replaces your autosave, slots and backups; this game is kept as the "before" backup.</p><div class="btns"><button class="btn primary" data-restoreall="1">Restore all</button><button class="btn" data-restoreall="">Cancel</button></div>` : ''}
 <div class="btns"><button class="btn" data-menu="main">Back</button></div>
 <p class="note" id="saveNote"></p></section>`;
@@ -921,10 +939,10 @@ view.addEventListener('click', (ev) => {
         }
         if (b.dataset.share) { shareToGitHub().catch((err) => note(`Sharing didn't work: ${err.message || err}`)); return; }
         if (b.dataset.status) {
-            statusText().then((text) => copyText(text, () => note('Status copied. Paste it into the chat.'), () => note('The status could not be copied.')), (err) => note(`No status: ${err.message || err}`));
+            statusText().then((text) => copyText(text, () => note('Status copied. Paste it into the chat.'), () => note(shareText(`bone-and-ash-status-${stamp()}.txt`, text) ? FILE_TEXT.statusShared : 'The status could not be copied.')), (err) => note(`No status: ${err.message || err}`)); // EX1 (CP)
             return;
         }
-        if (b.dataset.exportall) { exportAll(); note('All saves downloaded.'); return; }
+        if (b.dataset.exportall || b.dataset.exportallfile) { const how = exportAll(!!b.dataset.exportallfile); note(how === 'download' ? FILE_TEXT.allDownloaded : how === 'share' ? FILE_TEXT.share : ''); return; } // EX1: the file picker answers through onAndroidExport
         if (b.dataset.restoreall != null) {
             const p = pendingAll; pendingAll = null;
             if (!b.dataset.restoreall || !p) { render(); return; }
@@ -1009,8 +1027,9 @@ view.addEventListener('click', (ev) => {
             try { next = checkScene(deserialize(store.get(SLOT(b.dataset.load)))); } catch (err) { note(`Slot ${b.dataset.load} can't be loaded: ${err.message}`); return; }
             backupBefore(`loading slot ${b.dataset.load}`);
             g = next; lastResult = null; lastReply = []; combatLog = null; autosave(); setTab('story');
-        } else if (b.dataset.export) {
-            download(serialize(g), `bone-and-ash-${clockLabel(g.minutes).replace(/[^\w]+/g, '-')}.json`); expMark();
+        } else if (b.dataset.export || b.dataset.exportfile) {
+            const how = exportText(saveFileName(), serialize(g), !!b.dataset.exportfile); expMark(); // EX1
+            if (how === 'share') note(FILE_TEXT.share);
         }
     } catch (err) {
         lastResult = { lines: [String(err.message || err)], fail: true }; lastReply = []; render();
@@ -1074,6 +1093,11 @@ function updatePanel() {
 const checkAppUpdate = (manual) => updater.check(manual).catch((err) => console.error('update check', err)); // RL: a mistake is logged, not "offline"
 /** Called by the app (MainActivity.java's post). */
 window.onAppUpdate = (state, msg) => updater.onMessage(state, msg);
+/** v0.11.148 (EX1, RP): the app's file picker (and a failed share) answers here: under the buttons, else on the notice bar. */
+window.onAndroidExport = (ok, msg) => {
+    const line = ok ? FILE_TEXT.saved(savedName(msg, askedName)) : FILE_TEXT.failed(msg);
+    if (resultPlace(menu, !!recovery) === 'note' && document.getElementById('saveNote')) note(line); else showNotice(line, false); // RX1 (NL)
+};
 
 load();
 // v0.11.5: save when the app is hidden or closed (Android may kill a backgrounded page)
@@ -1083,6 +1107,6 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 window.addEventListener('pagehide', closeSave);
 render();
 if (inApp(window) && upd.auto) setTimeout(() => checkAppUpdate(false), CHECK_DELAY); // v0.11.147 (UP1): once per app start
-if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+if (wantsServiceWorker(window, location.protocol)) { // v0.11.148 (EX1, NS): not inside the app
     navigator.serviceWorker.register('sw.js').catch(() => { /* offline install is optional */ });
 }

@@ -48,6 +48,8 @@ public class MainActivity extends Activity {
 
     private WebView web;
     private String pendingExport;
+    /** v0.11.148 (RX1, JE): a picker result that came back after Android closed the app; told to the game once its page has loaded. */
+    private String pendingReport;
     private ValueCallback<Uri[]> fileCallback;
 
     @Override
@@ -83,6 +85,11 @@ public class MainActivity extends Activity {
                 // Open outside links (token page, GitHub) in the phone's browser
                 try { startActivity(new Intent(Intent.ACTION_VIEW, u)); } catch (Exception ignored) { }
                 return true;
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                if (pendingReport != null) { String m = pendingReport; pendingReport = null; report(false, m); }
             }
         });
 
@@ -147,7 +154,7 @@ public class MainActivity extends Activity {
                     s.putExtra(Intent.EXTRA_SUBJECT, name);
                     s.setClipData(ClipData.newRawUri(name, uri));
                     s.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    Intent c = Intent.createChooser(s, "Share save file");
+                    Intent c = Intent.createChooser(s, "Share file"); // RX1 (JT): saves, the status and error texts
                     c.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     startActivity(c);
                 } catch (Exception e) {
@@ -229,6 +236,9 @@ public class MainActivity extends Activity {
                 } catch (Exception e) {
                     report(false, e.getMessage() == null ? "could not write the file" : e.getMessage());
                 }
+            } else if (resultCode == RESULT_OK && data != null && data.getData() != null) {
+                // RX1 (JE): Android closed the app while the picker was open, so the text to write is gone (the picker made an empty file)
+                pendingReport = "the game was closed while the picker was open; try again";
             }
             pendingExport = null;
         } else if (requestCode == REQ_INSTALL_PERM) {

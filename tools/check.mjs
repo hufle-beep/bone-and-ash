@@ -62,6 +62,7 @@ const jobs = [
     { name: 'the FAQ (gates, unfolding, numbers)', key: 'faq', cmd: node('tests/faq.test.mjs') }, // v0.11.83
     { name: 'the Android app (app ID, key, build, copy, javac)', key: 'android', cmd: node('tests/android.test.mjs') }, // v0.11.145 (owner pick AP1)
     { name: 'the app update check (links, title, retry)', key: 'update', cmd: node('tests/update.test.mjs') }, // v0.11.147 (owner pick UP1)
+    { name: 'the app\'s files (share sheet, file picker)', key: 'appfiles', cmd: node('tests/appfiles.test.mjs') }, // v0.11.148 (owner pick EX1)
     { name: 'picture palette (art/pic)', key: 'palette', cmd: ['python3', ['-I', 'tools/art/palette_check.py']] }, // v0.11.24
     { name: 'content lint (old names, duplicate labels)', key: 'lint', last: true, cmd: node('tools/lint.mjs') }, // v0.11.21: those two strict
     { name: 'text lint (reused passages, phrases, tics, broken text; log only)', key: 'textlint', last: true, cmd: node('tools/textlint.mjs') }, // v0.11.132 (owner picks PL1, E1)
