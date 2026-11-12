@@ -18,6 +18,16 @@ const trioReady = (g) => both(g) && trio(g) >= 3;
 const luHanHere = (g) => g.flags.ending !== 'fought';
 // v0.11.37: after midnight (24+) the hour has passed. v0.11.47 (N1, the Fable review of v0.11.46): an evening hour is not jumped to
 // before 06:00 (04:00–05:59, or a night pushed through: it is still the night; it used to skip 14–18 h); the mornings (6, 8) as before
+/** v0.11.152 (owner 21:11, pick E1, BK): Day 21 went from the last night straight to Shen Qiu at 08:00 with no breakfast and no
+ *  eat card (bot saves at his arrival: Fed 10–51, the middle 16–35). Breakfast at Mei Lin's, +20 satiety, at once, as the Fallout's
+ *  mornings; once a Coil (a world flag). */
+export const DAY21_BREAKFAST = 'Breakfast at Mei Lin\'s: gruel and pickles, +20 satiety.';
+export function dayTwentyOneBreakfast(g) {
+    if (g.flags.a1_breakfast) return [];
+    g.flags.a1_breakfast = true;
+    eat(g, 20);
+    return [DAY21_BREAKFAST];
+}
 const toHour = (g, h) => { const p = clockParts(g.minutes); const dh = dayHour(g); if (dh < h && (h < 12 || dh >= 6)) g.minutes = (p.day - 1) * 1440 + h * 60; };
 /** Preparations that blunt the Elder (count). */
 const preps = (g) => (g.flags.a1_palisade ? 1 : 0) + (g.flags.a1_militia ? 1 : 0) + (g.flags.grove_attuned ? 1 : 0) + (g.flags.council_unity ? 1 : 0);
@@ -583,7 +593,7 @@ ${byForm(g, 'Toward dawn Yuki puts her nose against your chin. *Stop thinking,* 
     /* ======================================================== DAY 21 — Shen Qiu =========================================== */
     rt_elder: {
         id: 'rt_elder', title: 'Outer Elder Shen Qiu', art: 'elder_arrives', place: `${P} — the tribute post`,
-        enter: (g) => { toHour(g, 8); return []; },
+        enter: (g) => { toHour(g, 8); return dayTwentyOneBreakfast(g); }, // v0.11.152 (owner pick E1, BK): Day 21's breakfast, as every other morning
         text: (g) => `He comes up the road at the hour of the snake, on foot, with twelve disciples behind him in crimson ${luHanHere(g) ? 'and Lu Han at his right hand, face like a frozen pond' : 'and, conspicuously, no Lu Han'}.${g.flags.gao_broken ? ' At the very back, carried in an open litter, sword arm still bound to his chest, rides Gao Feng. He has come to watch. His lips move the whole time, the same few words over and over, and you are fairly sure they are your name.' : ''}
 
 Outer Elder Shen Qiu is old in the way mountains are old. His hair is white and bound up under a red jade crown. His robe is the deep red of dried blood, embroidered with a single lotus. He walks slowly, and the air walks with him: heavy, sweet, rotten, the poisoned Qi of this world drawn so thick around him that the grass at the roadside greys as he passes.

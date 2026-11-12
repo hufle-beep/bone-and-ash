@@ -13,18 +13,48 @@ const DR_HC_MEI = dayReply("heart_camp:1", [
     "She tells you the songs about the Old Tree her grandmother sang. Some of the words are your words, worn smooth by four hundred years of people who didn't know what they meant.",
     "Tonight it is the planting songs, the ones Ashfall sings over the barley in spring. She gives you the words flat, without the tune, like a recipe. Halfway through one you could finish the line for her. You don't, and she sees you not doing it.",
     "She asks for one of yours, for a change. You give her a cradle song, quietly, the way it was given to you. She listens with her head down, like a woman going over accounts, and at the end she says her grandmother had the second verse wrong, and that she means to keep it wrong.",
+    "Tonight neither of you sings. She asks instead what the worn words meant, and you go through them one at a time: root, keep, morning, home. She says each of them once after you, carefully, the way she would take down a debt. Then she says that Ashfall has been singing a letter all this time without knowing who it was addressed to, and looks into the fire as if it might have the name.", // v0.11.152 (RP1, RM6; Fable's): the 4th night
 ]);
 const DR_HC_YA = dayReply("heart_camp:2", [
     "She makes you sit on the very edge, then laughs when you hold on. Then she tells you, very seriously, how many days she followed you through the forest before she decided you were interesting. It was all of them.",
     (g) => `She has saved you the worst part of the ledge, and says so. Then she tells you, gravely, what each sound in the hall is: bark settling, ${g.flags.ship_found ? 'the ship' : 'water somewhere under the roots'}, Mei Lin pretending to be asleep. She has been listening to all of it so that nobody else would have to. She doesn't say that part. She leans on you instead, hard, as if testing a branch.`, // RV2 (M1, Fable's review): the ship only once it is found
+    // v0.11.152 (RP1, RM6; Fable's): the 3rd and 4th nights
+    "She moves over for you tonight, a hand's width, which from Ya is a deed of land. She points out the places in the dark where she would set a snare, if the dark had anything in it, and then the place where she would put you, which is here. She appears to have given it thought.",
+    "Tonight she takes the edge herself and has you hold her by the wrist, in case, she says, though you have seen her sleep in a tree. For a long time she says nothing, which with Ya is the loudest thing she does. Then she tells you she has decided the tree is not a bad den. It is the highest thing you have heard her say about indoors.",
 ]);
 const DR_HC_LOG = dayReply("heart_camp:3", [
     (g) => byForm(g, "You play the first part again, just Wren's voice, just the planting. Yuki purrs against your chest the whole way through.", "You play the first part again, just Wren's voice, just the planting. Yuki purrs with her head on your chest the whole way through.", "You play the first part again, just Wren's voice, just the planting. Yuki leans against your shoulder and purrs, very quietly, the whole way through."),
     (g) => byForm(g, "You let it run a little further tonight, as far as the first green shoot, and stop it there. Yuki kneads your coat through the whole of it, slowly, and the bond says nothing at all.", "You let it run a little further tonight, as far as the first green shoot, and stop it there. Yuki lies along your side with one paw across your knees, as if the log might try to leave, and the bond says nothing at all.", "You let it run a little further tonight, as far as the first green shoot, and stop it there. Yuki sits against you with her ears tipped toward Wren's voice. \"She sounds tired,\" she says at the end. \"She sounds like you.\""),
+    // v0.11.152 (RP1, RM6; Fable's): the 3rd and 4th nights
+    (g) => byForm(g, "You don't play it tonight. You only hold it. Yuki sits on your knee with one paw resting on the log, as on a pulse. *Still there,* says the bond, and that is the whole of the evening.", "You don't play it tonight. You only hold it. Yuki lies with her chin on your knee and her nose against the log, as against a pulse. *Still there,* says the bond, and that is the whole of the evening.", "You don't play it tonight. You only hold it. Yuki sits beside you with two fingers resting on the log, as on a pulse. \"Still there,\" she says, and that is the whole of the evening."),
+    (g) => byForm(g, "You play the planting once more, low, so that it won't carry. By now you both know where Wren breathes. The tip of Yuki's tail taps your wrist a beat before each breath, keeping the place. *Forty of them,* says the bond at the end. *And then us. Somebody was always going to come and listen.*", "You play the planting once more, low, so that it won't carry. By now you both know where Wren breathes. Yuki's ear flicks a beat before each breath, keeping the place, and stirs your hair every time. *Forty of them,* says the bond at the end. *And then us. Somebody was always going to come and listen.*", "You play the planting once more, low, so that it won't carry. By now you both know where Wren breathes. Yuki's finger taps your wrist a beat before each breath, keeping the place. \"Forty of them,\" she says at the end. \"And then us. Somebody was always going to come and listen.\""),
 ]);
+/* v0.11.152 (owner pick RP1, RM6; Fable's): heart_camp's second paragraph by the night (the first is the old one). */
+const HC_HEAP = [
+    (g) => `${byForm(g, 'The three', 'The three', 'The four')} of you sleep in a heap by the fire now. Nobody has said anything about it. Nobody needs to. Ya sleeps in the middle, because Ya always ends up in the middle of everything.`,
+    (g) => byForm(g, 'Nobody lays out three bedrolls any more. There is one heap by the fire, and it has rules. Mei Lin has the side away from the draught. Ya has the middle, by right of conquest. You have the edge, and one corner of a blanket, on a long lease. Yuki has the top.', 'Nobody lays out three bedrolls any more. There is one heap by the fire, and it has rules. Mei Lin has the side away from the draught. Ya has the middle, by right of conquest. You have the edge, and one corner of a blanket, on a long lease. Yuki goes round the outside, like a wall.', 'Nobody lays out four bedrolls any more. There is one heap by the fire, and it has rules. Mei Lin has the side away from the draught. Ya has the middle, by right of conquest. You have the place between Ya and the edge, and one corner of a blanket, on a long lease. Yuki has the edge, and your other side, and the rest of the blanket.'), // RV1 (L7; Fable's): the human's own arrangement
+    (g) => `By now the ${byForm(g, 'three', 'three', 'four')} of you lie down by the fire in the order you got up in, without discussion, like a thing that has always been done. Ya is in the middle before anyone else has sat. Mei Lin folds her outer robe first, squarely, and sets it where she can reach it, in case of ancestors.`,
+    (g) => `Somebody dragged the bedrolls together before supper was over, and nobody owns up to it. The ${byForm(g, 'three', 'three', 'four')} of you go down by the fire like tired dogs. Ya, in the middle, has an arm across each neighbour and most of the blanket, and announces that she will be asleep first. She generally is.`,
+];
+const HC_YA_WATCH = [
+    'Ya takes the first watch without being asked, perched on a gallery ledge above the fire like a gargoyle, humming something tuneless.',
+    'Ya is on her ledge again before the bowls are empty, legs hanging over the fire, the spear across her knees. Nobody asked her tonight either. The humming has still not found a tune.',
+    'Ya has the first watch, as she has had it every night, and would take the offer of the second as an insult. From the gallery ledge she drops a small piece of bark on each of you in turn, to show that she is paying attention.',
+    'Up on the gallery ledge Ya keeps the first watch, crouched and still, a shape with a spear against the dark. She has given up the humming. The tree doesn\'t care for the tune, she says, and she says it quite seriously, and nobody laughs.',
+];
+const HC_MEI_WATCH = [
+    'Mei Lin takes the first watch.',
+    'Mei Lin takes the first watch again. She sits very straight, with her herb-knife laid across her knees like a magistrate\'s seal.',
+    'Mei Lin has the first watch. She has told you, formally, that it is her turn, and has declined to hear the arithmetic.',
+    'The first watch is Mei Lin\'s, by a custom now three nights old, which in Ashfall would make it law.',
+];
+const HC_POOLS = { heap: HC_HEAP, ya: HC_YA_WATCH, mei: HC_MEI_WATCH };
+/** RV1 (M2): which version of heart_camp's second paragraph tonight. */
+const hcPool = (g) => (trio(g) >= 3 ? 'heap' : ya(g) ? 'ya' : 'mei');
 const DR_SP_IN = dayReply("heart_spring:0", [
     "Ya spends the whole time trying to drown you, then trying to get you to stop being so stiff, then, briefly, very effectively, not trying to do anything at all except sit closer.",
     "Ya has given up on drowning you and taken up floating you instead, one hand under your back, issuing instructions. You are bad at it. She is patient about that, which is new, and stays close after the lesson is over, which isn't.",
+    "Ya has ruled that you can float and moved on to the next lesson, which is holding your breath, and which she teaches by sitting on you. You come up to find her laughing and Mei Lin, at the far end, very carefully not. Afterwards Ya leans back against your chest as if you were the side of the pool, and stays there.", // v0.11.152 (RP1, RM8; Fable's): the 3rd day
 ]);
 const DR_SP_WASH = dayReply("heart_spring:1", [
     "Mei Lin washes beside you and tells you, without looking, that you are a coward. She doesn't sound like she minds.",
@@ -512,6 +542,7 @@ After a while Mei Lin says, "Thank you for bringing us here. I think I'd rather 
     /* ---------- nights inside the trunk ---------- */
     // v0.11.129 (CS1, HC; Fable's MAIN): the human in the heap
     heart_camp: {
+        dayKey: (g) => `heart_camp:${hcPool(g)}`, // v0.11.152 (RV1, M2; Fable's review): the heap, Ya's watch and Mei Lin's watch each count their own nights, so the first heap night is the heap's first text
         id: 'heart_camp', title: 'Camp in the Hollow', art: (g) => (trio(g) >= 3 ? 'trio_fire' : 'night_watch'), place: PIN,
         enter: (g) => { const n = eatBest(g, { fire: true }); return n.length ? [`Supper. ${n[0]}`] : []; },
         text: (g) => {
@@ -521,7 +552,7 @@ After a while Mei Lin says, "Thank you for bringing us here. I think I'd rather 
                 : !g.flags.guardian ? 'Since the log, nobody sleeps much. The singing from behind the bone door is faint, and constant, and once you\'ve heard it you can\'t not hear it.' : 'The singing has stopped. The tree is quieter than it has been in four hundred years.';
             return `Night ${n} of the expedition's end, inside the Old Tree. ${mood}
 
-${trio(g) >= 3 ? byForm(g, 'The three', 'The three', 'The four') + ' of you sleep in a heap by the fire now. Nobody has said anything about it. Nobody needs to. Ya sleeps in the middle, because Ya always ends up in the middle of everything.' : ya(g) ? 'Ya takes the first watch without being asked, perched on a gallery ledge above the fire like a gargoyle, humming something tuneless.' : 'Mei Lin takes the first watch.'}`;
+${byDay(g, HC_POOLS[hcPool(g)], `heart_camp:${hcPool(g)}`)}`; // v0.11.152 (owner pick RP1, RM6; Fable's): a new paragraph each night (up to four); RV1 (M2): each version counted on its own
         },
         choices: [
             { text: 'Talk with Mei Lin by the fire.', show: (g) => !g.flags[`hc_mei@${day(g)}`], do: (g) => { g.flags[`hc_mei@${day(g)}`] = true; bumpRel(g, 'Mei Lin', 3, likesMei(g) ? 3 : 1); return [DR_HC_MEI(g)]; }, to: 'heart_night' },
@@ -538,13 +569,35 @@ ${trio(g) >= 3 ? byForm(g, 'The three', 'The three', 'The four') + ' of you slee
         text: (g) => {
             const r = g.flags.heart_night_roll;
             if (both(g) && ya(g) && trio(g) >= 2 && r >= 4) {
-                return `You wake in the small hours to whispering.
+                return byDay(g, [`You wake in the small hours to whispering.
 
 Ya and Mei Lin, by the embers, their heads close. You can't hear the words. You hear Mei Lin say "No," sharply, and then, a while later, less sharply, "*No*," and then something that is either a laugh or a sob, and then Ya's low, rough voice going on and on, patient as a hunter.
 
 When you open your eyes properly, Mei Lin is looking at you across the fire. She doesn't look away. Ya, beside her, winks.
 
-You decide, as a scientist, that this is data you are not yet equipped to interpret, and go back to sleep.`;
+You decide, as a scientist, that this is data you are not yet equipped to interpret, and go back to sleep.`, // v0.11.152 (owner pick RP1, RM7; Fable's): the 2nd and 3rd whispering nights
+                    `The whispering again, in the small hours. You know the two voices now without opening your eyes.
+
+Tonight it is Mei Lin who does most of it, low and quick, like a woman reading out a list of objections she has had ready for some days. Ya answers each one with a grunt. You catch "my mother", twice, and "the ancestors", once, and Ya saying, quite clearly, that the ancestors are dead and can mind their own fire. A silence. Then the laugh, the real one, strangled at once against somebody's shoulder.
+
+When you risk a look, Ya has Mei Lin's hand flat between both of hers and is studying it, the way she studies a track. Mei Lin is letting her.
+
+You enter it under preliminary results, and shut your eyes before either of them can catch you taking notes.`,
+                    `Whispering, in the small hours. By now you would be disappointed to sleep through it.
+
+Nobody says "No" tonight. Mei Lin is asking questions, short ones, in the level voice she keeps for the price of herbs, and Ya is answering them at length and, from the sound of it, with gestures. Once Mei Lin says, "*All* of us?" and Ya says, "It's warmer," as if that settled it. For Ya, it does.
+
+Neither of them pretends this time when you open your eyes. Mei Lin meets your look across the embers, chin up, pink to the ears and holding her ground. Ya doesn't wink. She only grins, slowly, like someone whose snare has at last been walked into.
+
+The sample, you note, has become aware of the observer. You go back to sleep regardless. It takes longer than it did before.`,
+                    // RV1 (L3; Fable's): the 4th whispering night (all four Heart nights rolling it)
+                    `Whispering, in the small hours. It has stopped being whispering, strictly. Nobody is troubling to keep it down.
+
+The questions are finished. Tonight Mei Lin is laying down terms, one at a time, in the voice of a woman counting out coin, and Ya is agreeing to each of them before it is fully out. You catch "not in front of the village", and "my mother is never to hear of it", and Ya's "Yes. Yes. Also yes." Then Mei Lin, more quietly: "And you don't laugh at me." A pause. "Only a little," Ya says, which from Ya is an oath.
+
+You open your eyes, since there is no longer any point in not. Mei Lin is already looking at you, pink to the ears, chin up. "He's awake," she says. "He is *always* awake," says Ya, and shifts over by the embers, leaving a space that is not accidental.
+
+The observer, you note, has been written into the experiment. The method will have to be revised. You close the notebook, in a manner of speaking, and do not get back to sleep for some time.`], 'heart_night:whisper');
             }
             if (r <= 2) {
                 return byDay(g, ['In the night, something knocks three times from somewhere deep in the trunk — slow, deliberate, like a knuckle on a door. Then nothing. Yuki growls at the dark for an hour. Nobody sleeps well.',

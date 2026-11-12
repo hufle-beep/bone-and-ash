@@ -179,57 +179,189 @@ export const YT_CLOSE = {
     "CAT LOW": [
         "*That will do,* says the bond, and she goes back to being a cat at you.",
         "She gives you one slow blink, which you have always been told is affection, and which she has never confirmed.",
-        "She has had enough of you for now, and lets you know it kindly, by her standards."
+        "She has had enough of you for now, and lets you know it kindly, by her standards.",
+        // v0.11.152 (owner pick RP1, RM10, YT14; Fable's): eleven more, so a Coil never repeats one
+        "*Noted,* says the bond, and she turns her back on you, which among cats is either trust or a review.",
+        "She washes the place where your hand was, thoroughly, and without malice.",
+        "Her tail goes up like a flag over a closed office.",
+        "*You may go,* says the bond. You had not been aware of asking.",
+        "She looks past your left ear at something more interesting. You check. There is nothing there.",
+        "One ear stays turned your way as she leaves off. It is the minimum, and she has measured it.",
+        "*Same time tomorrow,* says the bond. *Or don't. I'll be somewhere.*",
+        "She yawns, pink and unhurried, and files you with the rest of the day.",
+        "She stretches, front and then back, every toe spread, and walks through the end of your sentence.",
+        "*Adequate,* says the bond. From her it is not quite an insult. It isn't the other thing either.",
+        "She closes her eyes at you. It is not sleep. It is a door."
     ],
     "CAT MID": [
         "She stays where she is a while after there is any reason to, and neither of you remarks on it.",
         "The purr starts late and unasked, and you are careful not to look pleased.",
-        "*You'll do,* says the bond, which after forty years is still the highest mark she gives."
+        "*You'll do,* says the bond, which after forty years is still the highest mark she gives.",
+        // v0.11.152 (owner pick RP1, RM10, YT14; Fable's): eleven more, so a Coil never repeats one
+        "She sets one paw on your wrist, claws in, and leaves it there like a paperweight.",
+        "*Don't read anything into it,* says the bond, as she turns round twice and settles against you.",
+        "Her tail lies along your arm. She appears not to know about it.",
+        "She washes your knuckle, twice, in passing, as one might straighten a picture in somebody else's house.",
+        "*You were less tiresome today,* says the bond. *I've made a note. It's a short note.*",
+        "She tucks her nose under your thumb and goes to sleep there, or says she does.",
+        "She bumps her head into your palm, once, hard, and then looks at the hand as if it had started it.",
+        "*Stay there,* says the bond. *You're the right temperature.*",
+        "Her eyes go to slits and her ears stay on you, and that is as near as she comes to saying it.",
+        "She kneads you twice, catches herself at it, and sits very upright for some time.",
+        "*Forty years,* says the bond, *and you still scratch a little too far left. I've decided to find it restful.*"
     ],
     "CAT HIGH": [
         "The bond sits wide open between you, and for a while you could not say where you stop and she starts. Neither of you goes looking for the line.",
         "She presses her forehead to yours and holds it there, and everything that isn't the two of you goes quiet. *Mine,* says the bond, of nothing in particular.",
-        "*Wherever you go, I go,* says the bond. *That isn't a promise. It's a description.*"
+        "*Wherever you go, I go,* says the bond. *That isn't a promise. It's a description.*",
+        // v0.11.152 (owner pick RP1, RM10, YT14; Fable's): eleven more, so a Coil never repeats one
+        "She fits herself under your chin, where she has fitted since the grove, and the bond closes over you both like water.",
+        "*I know what you're about to think,* says the bond. *I've known since the grove. Think it anyway. I like the company.*",
+        "She breathes when you breathe. Neither of you is doing it on purpose, and neither of you could stop.",
+        "*If they sent you back without me,* says the bond, *I'd walk. Between universes. I'd complain the whole way, and I'd arrive.*",
+        "She sets her teeth on the heel of your hand, without pressure, and holds them there: the oldest thing she knows how to say.",
+        "For a moment you see yourself as the bond has you: tall, slow, badly groomed, and the fixed point of the world. *Don't let it go to your head,* she says.",
+        "*We were born on one day,* says the bond. *I don't intend to manage any of the other days without you either.*",
+        "Her purr drops until it is less a sound than a place, and you are both in it.",
+        "*Two universes,* says the bond, *and I've only found the one of you. I looked. I'm thorough.*",
+        "She puts her whole small weight on your heart, on purpose, like a seal on a letter.",
+        "*Home,* says the bond, and it doesn't mean the grove. She shuts her eyes before you can answer."
     ],
     "GREAT LOW": [
         "*That will do,* says the bond, and she turns her attention to something more deserving, which today is a leaf.",
         "She yawns in your face, all of it, and considers the matter closed.",
-        "She puts up with you a little longer, with the patience of something that could simply lie down on the problem."
+        "She puts up with you a little longer, with the patience of something that could simply lie down on the problem.",
+        // v0.11.152 (owner pick RP1, RM10, YT14; Fable's): eleven more, so a Coil never repeats one
+        "*Enough,* says the bond, and she rolls onto her other side, which takes a moment and ends the discussion.",
+        "She gets up, and the space she leaves is larger than you are. You are left in it.",
+        "Her tail passes over your head on the way round, not quite by accident.",
+        "She looks down at you from a short way up, at length, the way one reads a notice.",
+        "*You may go,* says the bond. *I would, but I'm comfortable.*",
+        "She breathes out through her nose, and your hair moves. That appears to be the verdict.",
+        "One ear the size of your hand swings toward you, and swings away again.",
+        "She stretches until every claw is out and the ground has four new furrows in it, and none of that was for you.",
+        "*Tomorrow,* says the bond. *If nothing better is on.*",
+        "She shuts one gold eye. The other stays on you a moment longer, on general principle, and then follows it.",
+        "She rests her chin on her paws and regards the middle distance, where you are not."
     ],
     "GREAT MID": [
         "Her weight settles against you by slow degrees, as trust does in a thing that size, and you find you are holding up more cat than you planned for.",
         "The purr comes up through the ground and into your ribs, unasked. You are careful not to look pleased.",
-        "*You'll do,* says the bond, and her tail comes down across your feet to see that you stay done."
+        "*You'll do,* says the bond, and her tail comes down across your feet to see that you stay done.",
+        // v0.11.152 (owner pick RP1, RM10, YT14; Fable's): eleven more, so a Coil never repeats one
+        "She walks once round you before she lets you go, slowly, at her full length, like a wall being built.",
+        "One great paw arrives on your knee with no weight in it at all, which is the whole of the compliment.",
+        "*You're warm,* says the bond. *That's the entire reason.* Her head stays on your shoulder a good deal longer than the reason does.",
+        "She washes the side of your head in one pass. Your glasses will need finding.",
+        "Her tail goes round your ankles, the way a traveller keeps one foot on his bag.",
+        "*You were tolerable today,* says the bond. *At this size I have more room for tolerance.*",
+        "She moves over to give you the better ground, and then lies down on most of it.",
+        "Her ruff closes over your hand to the wrist. She lets on that it has gone missing and she can't think where.",
+        "She puts herself between you and whatever is behind you, and looks elsewhere.",
+        "*Sit still,* says the bond. *I've only just got you arranged.*",
+        "She sighs, hugely, like a contented bellows, and then looks at you to see whether you mean to make something of it."
     ],
     "GREAT HIGH": [
         "She lays her head over your heart and leaves it there, and the bond opens so wide you could walk about in it. Neither of you mentions it.",
         "*Wherever you go, I go,* says the bond. *I take up more of the road now. Nothing else has changed.*",
-        "Her breathing and yours have fallen into step, as they have since the grove. *Mine,* says the bond, of nothing in particular, and one great paw closes over your hand."
+        "Her breathing and yours have fallen into step, as they have since the grove. *Mine,* says the bond, of nothing in particular, and one great paw closes over your hand.",
+        // v0.11.152 (owner pick RP1, RM10, YT14; Fable's): eleven more, so a Coil never repeats one
+        "She curls round you until there is cat on every side, and the bond comes down over the pair of you like a roof.",
+        "*I used to fit in your hood,* says the bond. *Now you fit in me. I find I don't mind which.*",
+        "You can feel her heart through your back, slow and enormous, and yours slows down to keep it company.",
+        "*Anything that wants you,* says the bond, *comes through me first. There is a good deal of me now. I've been looking forward to it.*",
+        "She closes her jaws on your shoulder, with no more pressure than a hand, and lets go. Among her kind that is a signature.",
+        "*I've stopped looking for the grove in this sky,* says the bond. *It turns out I brought the part I needed.* Her eye closes.",
+        "Her nose comes to rest in the hollow of your neck, cold, vast and exact, and she breathes you in as if checking that nothing had been changed.",
+        "The purr is too low to hear now. You know it by the way your bones have stopped being separate things.",
+        "*Forty years,* says the bond, *and I've never once had to wonder where you were. Keep it that way. I'm too large to go looking quietly.*",
+        "Through the bond you get, for a moment, how you smell to her: lab coat, ash, and under both of them the grove. She has kept it all this time, like a pressed leaf.",
+        "She says nothing, and the bond says nothing, and it is the least lonely silence you have ever been part of."
     ],
     "HUMAN LOW": [
         "\"That will do,\" she says, getting up, and brushes off her dress as though you had been the dusty part.",
         "She gives you the slow blink. On a face it is harder to deny, and she denies it anyway.",
-        "\"Same again tomorrow,\" she says. \"Bring better conversation.\""
+        "\"Same again tomorrow,\" she says. \"Bring better conversation.\"",
+        // v0.11.152 (owner pick RP1, RM10, YT14; Fable's): eleven more, so a Coil never repeats one
+        "\"Noted,\" she says, and examines her fingernails, which she still considers a poor exchange for claws.",
+        "She stands and looks down at you for a moment, enjoying the angle. It doesn't come up often.",
+        "\"You may go,\" she says. \"Or I will. One of us should, and I've the better exit.\"",
+        "Her ear turns toward you. The rest of her does not see why it should.",
+        "\"I've heard worse,\" she says. \"From you, mostly. Across four decades.\"",
+        "She tucks her tail round her ankles, out of your reach, with the care of someone putting away the good china.",
+        "\"That was nearly a conversation,\" she says. \"Keep at it.\"",
+        "She yawns behind her hand, which she has learned, and looks at you over the top of it, which she never had to.",
+        "\"Don't get up,\" she says, already going. \"You'll only loom.\"",
+        "She straightens your collar with two fingers, as one might correct a spelling, and takes the fingers back at once.",
+        "\"Adequate,\" she says. \"I'd say more, but then you'd expect it.\""
     ],
     "HUMAN MID": [
         "She bumps her head against your shoulder, once, exactly as she did when she weighed nothing, and looks straight ahead afterwards.",
         "\"You'll do,\" she says. It has been her highest mark for forty years, and it sounds different aloud. She seems to notice that too.",
-        "She stays a while after there is any reason to. Her tail has settled against your back, and neither of you remarks on it."
+        "She stays a while after there is any reason to. Her tail has settled against your back, and neither of you remarks on it.",
+        // v0.11.152 (owner pick RP1, RM10, YT14; Fable's): eleven more, so a Coil never repeats one
+        "She leans her shoulder into yours and addresses the middle distance. \"Don't read anything into it. I'm resting.\"",
+        "Her hand lands on your head, briefly and flat, the way yours has landed on hers for forty years. She appears to find the view from that side instructive.",
+        "\"You were less tiresome today,\" she says. \"I checked twice.\"",
+        "She picks something off your sleeve, inspects it, and doesn't say what it was. Her hand stays on the sleeve.",
+        "One white ear rests against your temple. She seems to think you won't notice if she doesn't.",
+        "\"Stay there,\" she says. \"You're the right temperature, and I've lost the fur.\"",
+        "She hums, low in her chest, where the purr used to be kept, and stops when she hears herself.",
+        "\"I had words for you for forty years,\" she says. \"It's strange to need a mouth for them. You're still not getting the long ones.\"",
+        "She puts her feet across your knees without asking, as she always has. There are simply fewer of them now, and more of each.",
+        "Her fingers find the spot behind your ear and scratch it, twice. \"There,\" she says. \"Now you know what it's like.\"",
+        "She gets up, and then sits down again closer, as though the first place had been a clerical error."
     ],
     "HUMAN HIGH LOVER": [
         "She kisses the corner of your mouth, unhurried, like someone with forty years of you who wants the rest as well. \"Later,\" she says against your cheek, and makes the word a promise.",
         "Her hand finds yours and her tail finds your wrist, and she is in no hurry to give either back. \"Forty years I had the warm side of you,\" she says. \"It turns out there was more.\"",
-        "She leans in until her forehead rests on yours, gold eyes too close to focus on. \"Tonight,\" she says, very dry, \"you're not having the blanket to yourself.\""
+        "She leans in until her forehead rests on yours, gold eyes too close to focus on. \"Tonight,\" she says, very dry, \"you're not having the blanket to yourself.\"",
+        // v0.11.152 (owner pick RP1, RM10, YT14; Fable's): eleven more, so a Coil never repeats one
+        "She turns your arm over and kisses the inside of the forearm, where the omnitool sits under the skin. \"It's seen everything already,\" she says. \"It's very discreet.\"", // RV1 (L6; Fable's): the omnitool is in his forearm (lore.md)
+        "\"I know how you sleep,\" she says, close to your ear. \"I've known for forty years. I'm still learning how you don't.\"",
+        "She settles into your lap, since it was always hers, and puts her arms round your neck, since that part is new. \"Same seat,\" she says. \"Better view.\"",
+        "Her tail slides round your waist under the lab coat and stays, and her face admits to nothing. \"It does that,\" she says. \"I've stopped apologising for it.\"",
+        "She bites your lower lip, lightly, and soothes it after. \"Old habit,\" she says. \"New place.\"",
+        "\"You hum when you're happy,\" she says into your collar. \"Through the bond. You always have. It's a great deal louder from this close.\"",
+        "She draws one fingernail slowly down the back of your neck and watches the result with a naturalist's interest. \"Noted,\" she says. \"I'm compiling.\"",
+        "Her mouth finds the place under your jaw, unhurried, and stays for the length of a breath. When she sits back her ears are forward and her eyes are very gold. \"Hold that thought,\" she says. \"I intend to.\"",
+        "\"I used to sleep on your chest and listen to your heart,\" she says, with her palm flat over it. \"I'd like it known that I can make it go faster now. I've tested.\"",
+        "She kisses you properly, slowly, like something she means to go on with, and stops exactly when she chooses to. \"There's more of that,\" she says. \"It keeps.\"",
+        "She smooths your coat closed again, button by button, with great care. \"I'm only doing these up,\" she says, \"so that I know where I left them.\""
     ],
     "HUMAN HIGH SISTER": [
         "She flicks your ear, hard, and then tidies your hair where she disturbed it. \"Family,\" she says, as other people say \"checkmate\".",
         "\"If anything out there hurts you,\" she says, quite pleasantly, \"I'll eat it. I'm telling you now so that you don't make a fuss when it happens.\"",
-        "\"You're hopeless,\" she says, and leans her whole weight on you so that you can't get up and prove otherwise. \"Lucky for you I came with the bond.\""
+        "\"You're hopeless,\" she says, and leans her whole weight on you so that you can't get up and prove otherwise. \"Lucky for you I came with the bond.\"",
+        // v0.11.152 (owner pick RP1, RM10, YT14; Fable's): eleven more, so a Coil never repeats one
+        "She licks her thumb and rubs a mark off your cheek, over your objections. \"Forty years I did that with my tongue,\" she says. \"Be grateful for thumbs.\"",
+        "\"Whoever you bring home,\" she says, \"comes past me first. I'll be fair. I'll be seen to be fair. They'll never know what happened.\"",
+        "She takes the larger share of the seat and most of your coat. \"Sibling's portion,\" she says.",
+        "\"You're my brother,\" she says, \"which means only I get to say what's wrong with you. I keep a list. It's alphabetical.\"",
+        "She punches your arm, not gently, and leaves her knuckles resting there. \"That's affection. I've read about it.\"",
+        "\"I'd step in front of lightning for you,\" she says. \"I'd also mention it afterwards, daily, for eight hundred years. Think carefully before you need it.\"",
+        "She fixes your glasses, which were straight, and then your hair, which wasn't. \"Somebody's mother ought to,\" she says. \"You got me instead.\"",
+        "\"Born the same day,\" she says, \"and I've been the elder since lunchtime of it.\" She pats your knee, twice, as one dismisses a pupil.",
+        "She puts her head down on your shoulder and is asleep in four breaths, as she has been in hoods, pockets and lecture halls. You are not to move. You know the rules.",
+        "\"If you cry at anything,\" she says, \"I didn't see it. If I do, you didn't. That's the whole treaty. It's held for forty years.\"",
+        "She hooks her tail through your arm, as other people's sisters take an elbow, and walks you three steps in the direction she has chosen. \"There,\" she says. \"Go on by yourself. I'll be watching.\""
     ],
     "HUMAN HIGH UNDECIDED": [
         "\"I asked you a question once,\" she says, not looking at you. \"No hurry. I've only forty years invested.\"",
         "She looks at you a breath longer than the moment needs, then away. \"Still waiting,\" she says. \"I'm good at it. I once watched a mousehole through an entire conference.\"",
-        "Her tail curls once round your wrist and lets go. \"That wasn't a hint,\" she says. \"When I hint, you'll know. I'll use small words.\""
+        "Her tail curls once round your wrist and lets go. \"That wasn't a hint,\" she says. \"When I hint, you'll know. I'll use small words.\"",
+        // v0.11.152 (owner pick RP1, RM10, YT14; Fable's): eleven more, so a Coil never repeats one
+        "\"Don't answer yet,\" she says, though you hadn't opened your mouth. \"You've got your thesis face on. I'm not being a footnote.\"",
+        "She starts to lean on you, stops halfway, makes a decision, and leans. \"This doesn't count toward anything,\" she says.",
+        "\"Whichever you say,\" she says, \"I'm keeping the blanket. I thought you'd want the stakes laid out.\"",
+        "Her hand rests beside yours, a finger's width off, and stays exactly that far. She has measured it. So have you.",
+        "\"I can feel you thinking about it,\" she says. \"Through the bond. It's like living over a mill.\"",
+        "She looks at your mouth, then at your eyes, then at the weather. \"Nothing,\" she says. \"I was thinking. It happens.\"",
+        "\"Family or more,\" she says lightly. \"It's two options. You sorted four hundred fungi by gill spacing with less ceremony.\"",
+        "Her ears go forward when you turn to her and back when you don't speak. She is aware of both, and annoyed about one.",
+        "\"I'm not waiting,\" she says. \"I'm here anyway. The waiting is incidental.\"",
+        "She gets as far as saying your name, and stops, and shakes her head. \"No. It's your turn,\" she says. \"It has been your turn for some time.\"",
+        "\"Ask me how patient I am,\" she says. \"No, don't. I'd have to be honest, and we'd both regret it.\""
     ]
 };
 /** The slots of each resting place, by its day this Coil (past the last, from the start again). Ya's arrival decides the Fallout's second day. */

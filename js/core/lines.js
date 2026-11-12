@@ -42,7 +42,9 @@ const rank = (g, pool, round, i) => parseInt(fnv1a(`${g.seed >>> 0}#${pool}#${co
 export function pickLine(g, pool, items) {
     const L = linesOf(g);
     const n = items.length;
-    const plays = Array.isArray(L.p[pool]) && L.p[pool].length === n ? L.p[pool] : (L.p[pool] = new Array(n).fill(0));
+    // v0.11.152 (RV1, L4; Fable's review): a pool that grew (Yuki's closers 3 → 14) keeps its counts this Coil, the new lines at 0
+    const old = Array.isArray(L.p[pool]) ? L.p[pool] : [];
+    const plays = old.length === n ? old : (L.p[pool] = Array.from({ length: n }, (_, i) => (Number(old[i]) > 0 ? Number(old[i]) : 0)));
     let open = [];
     for (let i = 0; i < n; i++) { const it = items[i]; if (!(it && typeof it === 'object' && typeof it.when === 'function' && !it.when(g))) open.push(i); }
     if (!open.length) return -1;

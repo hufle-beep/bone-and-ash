@@ -401,11 +401,12 @@ The mother drops her chopsticks.` : 'Supper. Quiet. The mother watches the north
     },
     fo_night: {
         id: 'fo_night', title: 'Night', art: 'village_night', place: `${P} — the herb loft`,
-        text: (g) => `${dd(g) === 8 && !g.flags.palisade ? 'There is no palisade yet. You lie awake listening to the barley.' : 'The loft smells of mint and drying ginseng.'}
+        // v0.11.152 (owner pick RP1, RM9; Fable's): the second night (Day 9) has its own opening line and Mei Lin's own paragraph
+        text: (g) => `${dd(g) === 8 && !g.flags.palisade ? 'There is no palisade yet. You lie awake listening to the barley.' : dd(g) === 9 ? 'The mint in the rafters has been joined by a new row of something bitter, hung up that afternoon. The loft is being provisioned for a siege, like the rest of the house.' : 'The loft smells of mint and drying ginseng.'}
 
 ${meiLovers(g)
-        ? 'Mei Lin climbs the ladder after her mother\'s snoring has settled into its rhythm. She doesn\'t say anything. She doesn\'t have to. Thirteen days is a long time, and also no time at all, and she means to use every night of it.'
-        : 'Mei Lin\'s lamp is still burning below, late. Once, you hear her laugh — alone, at something — and then stop herself, as if someone might hear.'}${yaHere(g) ? '\n\nAnd on the shrine roof across the lane, a silhouette is sitting cross-legged against the stars, watching your window, not even pretending not to.' : ''}`,
+        ? (dd(g) === 9 ? 'Mei Lin comes up the ladder earlier tonight, before the snoring below is properly established, which for Mei Lin is recklessness. She sits down on the edge of your blanket and unpins her hair. "Twelve," she says, and that is all the arithmetic either of you does.' : 'Mei Lin climbs the ladder after her mother\'s snoring has settled into its rhythm. She doesn\'t say anything. She doesn\'t have to. Thirteen days is a long time, and also no time at all, and she means to use every night of it.')
+        : (dd(g) === 9 ? 'Below, Mei Lin\'s lamp burns late again. You hear the knock of her herb-knife on the board, steady, and then not, and then a snort of laughter that she turns into a cough, for the benefit of the wall.' : 'Mei Lin\'s lamp is still burning below, late. Once, you hear her laugh — alone, at something — and then stop herself, as if someone might hear.')}${yaHere(g) ? '\n\nAnd on the shrine roof across the lane, a silhouette is sitting cross-legged against the stars, watching your window, not even pretending not to.' : ''}`,
         choices: [
             { text: (g) => (meiLovers(g) ? 'Let the night be just this.' : 'Sleep.'), do: (g) => { if (meiLovers(g)) bumpRel(g, 'Mei Lin', 2, 4); return []; }, to: (g) => (dd(g) === 8 && !g.flags.palisade && !g.flags.wolf ? 'fo_wolf' : 'fo_morning') },
             { text: 'Story Mode only (removed in v0.11.41).', show: () => false, to: 'fo_morning' }, // v0.11.41 (D2-a): Story Mode's sit; the place kept (choice indices)

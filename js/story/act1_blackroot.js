@@ -23,12 +23,14 @@ const DR_YA_FLIRT = dayReply("talk_ya:0", [
     "She grins with all of her teeth and walks a slow circle round you, the way she does round anything she means to keep.",
     "She tells you your flirting is getting better. Then she tells you what it was like before, in detail, with gestures.",
     "She stops, sniffs the air beside your neck, and announces to nobody in particular that the scholar is learning.",
+    "She hears you out to the end, which is new, and then explains that where she comes from all of that is said with one shove. She demonstrates. You get up again.", // v0.11.152 (owner pick RP1, RM2; Fable's): the 5th talk
 ]);
 const DR_YA_OFF = dayReply("talk_ya:3", [
     "She bares her teeth at you and walks on ahead. She'll get over it. Probably.",
     "She spits to one side, with accuracy, and lengthens her stride until all you can see of her is her back. It is an expressive back.",
     "She says a word she did not learn from Mei Lin, and goes on ahead to be offended where you can watch.",
     "She stares at you until one of you blinks. It's you. Then she stalks off in front, and the spear takes it out on the scenery.",
+    "She laughs at you, which is worse than the teeth, and tells Mei Lin at the top of her voice that the scholar is giving orders again. Then she goes on in front anyway, just slowly enough to be followed.", // v0.11.152 (RP1, RM2; Fable's)
 ]);
 const DR_LIGHTS = dayReply("bl_night_event:1", [
     "You follow until the roots close. The lights go on into the tree, through a crack too small for a person, and the song goes with them.",
@@ -39,6 +41,9 @@ const DR_MEI_FLIRT = dayReply("talk_mei:1", [
     "She tells you you're impossible. She's smiling while she says it.",
     "She says that in Ashfall a man would be fined for that. She does not say she would report him.",
     "She checks over her shoulder first, from habit. Then she laughs anyway, out loud, and looks pleased with the crime.",
+    // v0.11.152 (owner pick RP1, RM1; Fable's): the 4th and 5th talks (up to 5 Blackroot days)
+    "She informs you, in her temple voice, that she is ignoring you. Her ears have gone pink, and she walks a little closer for the rest of the mile.",
+    "She answers you in kind this time, and worse, and then stares into her basket as if the basket had said it. You are fairly sure she has been practising.",
 ]);
 const DR_SNARE = dayReply("rr_hunt:1", [
     "Ya sulks about the elk all afternoon.",
@@ -47,6 +52,7 @@ const DR_SNARE = dayReply("rr_hunt:1", [
 const DR_BETWEEN = dayReply("bl_fireside:2", [
     "What happens is that Ya steals your food and Mei Lin falls asleep on your shoulder. You call it a draw.",
     "What happens is that Mei Lin corrects the way Ya holds her bowl, Ya corrects the way Mei Lin sits, and you are elbowed from both sides at once. Nobody moves away.",
+    "What happens is that the dripping gets no quieter, Ya puts her cold feet under your leg without asking, and Mei Lin, after a long and formal silence, does the same from the other side. You are furniture. It's a living.", // v0.11.152 (RP1, RM3; Fable's): the 3rd night it's offered (the Drowned Wood's second)
 ]);
 const DR_SPAR_YA = dayReply("bl_train:0", [
     "She throws you twice. You throw her once. She's thrilled.",

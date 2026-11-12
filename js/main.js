@@ -259,6 +259,7 @@ function resultsPaneHtml() {
 let readAllScene = null;
 function proseHtml(v) {
     const a = againView(g, v, sameVisit && sameVisit.g === g ? sameVisit : null);
+    if (a.newVisit) readAllScene = null; // v0.11.152 (RV1, L2; Fable's review): "Read it all again" shuts with each new visit
     shownScreen = { id: v.id, text: v.text, g };
     if (!noFold(v.id) && !v.end) noteRead(g, v.text); // v0.11.133 (FP2): what the screen shows is read; RF1 (M2): only screens that can fold (their record is what a later Coil's fold reads)
     if (!a.fold) return `<div class="prose">${paras(v.text)}</div>`;

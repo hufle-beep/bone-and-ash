@@ -697,10 +697,10 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md'];
     writeFileSync(path.join(md, 'tools', 'models-baseline.json'), JSON.stringify({ models: { careful: { endings: { accord: { v: 0, n: 500 }, revelation: { v: 100, n: 500 } }, nights: {}, repeats: { v: 60, n: 5000 } } } }));
     let mo = '', mc = 0;
     try { mo = execFileSync(process.execPath, ['tests/models.test.mjs', '--model', 'careful', '--games', '60', '--off', '0', '--workers', '1', '--texts'], { cwd: md, encoding: 'utf8' }); } catch (e) { mc = e.status ?? 1; mo = String(e.stdout || e); }
-    const rp = mo.match(/repeated screens \(the same text again in a Coil, shown in full; hubs and menus left out\): (\d+) of (\d+) \([\d.]+%\): (.*)/);
+    const rp = mo.match(/repeated screens \(the same text again in a Coil, shown in full; hubs and menus left out\): (\d+) of (\d+) \([\d.]+%\)(?:: (.*))?/); // v0.11.152 (RP1, SD): the list is empty when nothing repeats (60 Careful games: 0)
     assert(mc === 0 && /Act 1 endings: accord \d+ \/ revelation \d+ \/ victory \d+ \/ taken \d+ \(of 60\)/.test(mo) && rp && Number(rp[2]) > 1000, `E1 (EB, RP): the models print the Act 1 endings and the repeated screens (exit ${mc})`);
     const { TASK_HUBS } = await import('../js/story/task_hubs.js');
-    assert(rp && rp[3].split(', ').every((x) => !TASK_HUBS[x.split(' ')[0]]), `E1 (RP): no hub among the repeated screens (${rp?.[3]})`);
+    assert(rp && (rp[3] || '').split(', ').filter(Boolean).every((x) => !TASK_HUBS[x.split(' ')[0]]), `E1 (RP): no hub among the repeated screens (${rp?.[3] || 'none'})`);
     assert(/NOTE {2}Act 1 endings \(log only\): careful accord 0% → [\d.]+% \(n 500 → 60\)/.test(mo) && /NOTE {2}repeated screens \(log only\): careful 60% → [\d.]+% of screens/.test(mo), 'E1 (EB): a saved copy far from the run is noted, log only');
 }
 rmSync(TMP, { recursive: true, force: true });

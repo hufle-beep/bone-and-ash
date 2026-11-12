@@ -3,7 +3,7 @@
  "totals": {
   "scenes": 327,
   "words": 34064,
-  "variantWords": 31358,
+  "variantWords": 31513,
   "labels": 830,
   "labelWords": 5654,
   "sharedChunks": 329,
@@ -89,7 +89,7 @@
   "heart": {
    "scenes": 38,
    "words": 3910,
-   "variantWords": 3117,
+   "variantWords": 3272,
    "labels": 80,
    "labelWords": 509,
    "sharedScenes": 24,
@@ -158,17 +158,17 @@
    "spacing": 0
   },
   "replies": {
-   "lines": 104,
-   "words": 2570,
+   "lines": 119,
+   "words": 3285,
    "dupes": 0,
-   "sceneShared": 6,
+   "sceneShared": 7,
    "tics": 1,
    "broken": 0,
    "spacing": 0
   },
   "house": {
-   "lines": 25,
-   "words": 1224,
+   "lines": 29,
+   "words": 1348,
    "dupes": 0,
    "sceneShared": 5,
    "tics": 0,

@@ -37,6 +37,12 @@ const SIS_TALK_BOND = [
     `Yuki doesn't say anything this time, not even through the bond. She just sits down against you at the edge of the camp and leans, with everything she has, until you lean back.
 
 *You're happier,* says the bond eventually. *Than at home. Than in the lab. Since them.* A small, dry pause. *Don't ruin it. I'm watching.*`,
+    // v0.11.152 (owner pick RP1, RM5; Fable's): the 4th night (up to four Blackroot nights), by her shape
+    (g) => `*Progress report,* says the bond. Yuki has sat down across from you and is drawing in the dirt with ${byForm(g, 'one claw, very neatly', 'one claw, the length of your finger, with surprising neatness', 'one claw, very neatly')}: a row of scratches for Mei Lin, a row for Ya. *I've stopped grading. You were dragging down the average of the whole expedition.*
+
+"And now?"
+
+*Now I count.* The claw rests on one row. *Mei Lin laughed four times today where people could hear her. Before you, I'm told, the figure was none.* The other row. *Ya sat still through an entire meal. Nobody has a previous figure for that.* She looks at the scratches a moment longer than the joke needs, then ${byForm(g, 'rubs them out with a paw and sits on the place', 'wipes them out with one sweep of a paw, along with some moss and most of your bootlace', 'rubs them out with a paw and sits on the place')}. *I don't know what you're doing. Don't tell me, you'll only explain it. Go and do more of it.*`,
 ];
 const SIS_TALK_BOND_GREAT = `Yuki corners you by the water. In her great shape this takes no effort at all: she lies down across the path, and the path is over. She only does it for things she considers important. Today, that's your love life.
 
@@ -186,14 +192,32 @@ She pulls you down into the dark between two great roots, and for a while the Bl
 "Penance," she says. "For the lab coat. All of it. Every year of it."
 
 Then she stops talking for a long time.`
-                    : `It has become a thing: the fire burns low, ${byForm(g, 'the cat goes out into the dark', 'the cat goes out into the dark', 'Yuki gets up and walks out into the dark without a word of excuse')}, and a little later so do you. Ya has started whistling when you get up. Mei Lin has started pretending to be asleep, badly.
+                    : n === 3 ? `It has become a thing: the fire burns low, ${byForm(g, 'the cat goes out into the dark', 'the cat goes out into the dark', 'Yuki gets up and walks out into the dark without a word of excuse')}, and a little later so do you. Ya has started whistling when you get up. Mei Lin has started pretending to be asleep, badly.
 
-Yuki is laughing against your shoulder about it, low and dry, when she stops laughing.`;
+Yuki is laughing against your shoulder about it, low and dry, when she stops laughing.`
+                    // v0.11.152 (owner pick RP1, RM4; Fable's): the 4th night (up to four Blackroot nights)
+                    : `The fourth night, nobody at the fire so much as looks up. ${byForm(g, 'The cat stretches, one leg at a time, and strolls out into the dark', 'The cat stretches, one leg at a time, and strolls out into the dark', 'Yuki stands, says "Well," to nobody, and strolls out into the dark')}, and Ya passes you your coat without being asked, like an innkeeper handing a regular his hat.
+
+Yuki is waiting between the roots${byForm(g, ', on two feet', ', on two feet', '')}, combing out her hair with her fingers.
+
+"We've become a routine," she says. "I've been one for forty years. You'd think I'd object more."
+
+"Do you?"
+
+She gives it honest thought, ears turning. "No," she says, and takes hold of your collar with both hands. "Ask me again in another forty."
+
+After that the Blackroot keeps its own counsel, and so do you.`;
             const mei = likesMei(g)
                 ? ((g.flags.yk_mei || 0) === 1
                     ? `\n\n*
 
 ${byForm(g, 'In the morning Mei Lin looks at you, and at the white cat on your shoulder, and at the long white hair on your collar, and goes red to the ears, and says nothing at all with tremendous force. Later, at the stream, you see Yuki — human, and very deliberately so — sitting beside her on a rock, talking quietly. Mei Lin\'s back is very straight. She does not leave.', 'In the morning Mei Lin looks at you, and at the great white cat stretched out along the far side of the fire, and at the long white hair on your collar, which is a good deal longer than anything on the cat, and goes red to the ears, and says nothing at all with tremendous force. Later, at the stream, you see Yuki — human, and very deliberately so — sitting beside her on a rock, talking quietly. Mei Lin\'s back is very straight. She does not leave.', 'In the morning Mei Lin looks at you, and at Yuki, who is eating breakfast with perfect composure, and at the long white hair on your collar, and goes red to the ears, and says nothing at all with tremendous force. Later, at the stream, you see Yuki — who has plainly chosen her moment — sitting beside her on a rock, talking quietly. Mei Lin\'s back is very straight. She does not leave.')}`
+                    : (g.flags.yk_mei || 0) === 3 ? `\n\n*
+
+In the morning Mei Lin pours the tea, and hands the first bowl to ${byForm(g, 'Yuki, who has turned human to receive it,', 'Yuki, who has turned human to receive it,', 'Yuki')} before she hands one to you, which in Ashfall is a statement about rank. Yuki takes it in both hands, gravely, as it was given. Neither of them looks at you. They are both very obviously not looking at you. Ya leans over and tells you, in what she believes to be a whisper, that you have been outvoted, and that nobody even asked her to vote.` // v0.11.152 (RP1, RM4; Fable's): the mornings after the 3rd and 4th nights
+                    : (g.flags.yk_mei || 0) >= 4 ? `\n\n*
+
+In the morning Mei Lin is braiding Yuki's hair, all of it, which is a morning's work, with the ivory pin held in her teeth. Yuki${byForm(g, ', human for the purpose,', ', human for the purpose,', '')} sits for it with her eyes half shut and her tail very still. "She asked," Mei Lin says round the pin, before you can say anything at all. Then, because she is Mei Lin: "She asked nicely. One of you can." Ya wants to know who is going to braid hers. Nobody volunteers. She looks at you.`
                     : `\n\n*
 
 In the morning Mei Lin and Yuki walk ahead of you on the path, side by side, heads together. At one point Mei Lin laughs — the forbidden laugh, the one Ashfall trained out of her — and claps a hand over her mouth, and Yuki looks back over her shoulder at you with an expression of pure feline triumph. Ya, beside you, says, "Your cat is better at this than I am," and sounds thrilled about it.`)
@@ -223,9 +247,16 @@ In the morning Mei Lin and Yuki walk ahead of you on the path, side by side, hea
                 `Yuki doesn't say anything this time. She just sits down next to you at the edge of the camp, human, shoulder to shoulder, and leans on you until you lean back.
 
 "You're happier," she says eventually. "Than at home. Than in the lab. Since them." A small, dry pause. "Don't ruin it. I'm watching."`,
+                // v0.11.152 (owner pick RP1, RM5; Fable's): the 4th night
+                `"Progress report," says Yuki. She has sat down across from you, human, with a twig, and is drawing in the dirt: a column for Mei Lin, a column for Ya. There are marks in both. "I've stopped grading. You were dragging down the average of the whole expedition."
+
+"And now?"
+
+"Now I count." The twig taps one column. "Mei Lin laughed four times today where people could hear her. Before you, I'm told, the figure was none." Tap. "Ya sat still through an entire meal. Nobody has a previous figure for that." She looks at the marks a moment longer than the joke needs, then rubs them out with her foot. "I don't know what you're doing. Don't tell me, you'll only explain it. Go and do more of it."`,
             ];
             if (!ykHuman(g) && n <= 1 && yukiForm(g) === 'tiger') return SIS_TALK_BOND_GREAT; // RL1 (NT): Fable's ALT B for the great root-kin
-            return (ykHuman(g) ? lines : SIS_TALK_BOND)[Math.min(n, 3) - 1]; // v0.11.122 (LG1, YV)
+            const t = (ykHuman(g) ? lines : SIS_TALK_BOND)[Math.min(n, 4) - 1]; // v0.11.122 (LG1, YV); v0.11.152 (RP1, RM5): a 4th night
+            return typeof t === 'function' ? t(g) : t;
         },
         choices: [{ text: 'Go and sit with them. As instructed.', time: 30, to: 'bl_camp' }],
     },

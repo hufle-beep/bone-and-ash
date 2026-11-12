@@ -18,7 +18,7 @@
 import { sceneView, choose, seenBefore, isMenuScene, isTimeless } from '../core/story.js';
 import { fnv1a } from '../core/game.js';
 import { TASK_HUBS } from './task_hubs.js';
-import { noteVisit, visitLine } from '../core/lines.js'; // v0.11.134 (LP2: PK, ML)
+import { noteVisit, visitLine, linesOf, textDay } from '../core/lines.js'; // v0.11.134 (LP2: PK, ML); v0.11.152 (RP1, SD): linesOf, textDay
 
 /** Scenes whose text follows an outcome or a level that may differ from the read before (Fable review): never folded. */
 export const OUTCOME_SCENES = new Set(['epilogue', 'fo_start', 'breakthrough', 'a1_again', 'a1_end', 'elder', 'bluff_fail']); // v0.11.131 (RC2, M1): bluff_fail reads the bluff's or the hairpin's text
@@ -86,15 +86,44 @@ export function readBefore(g, text) {
  */
 export function againView(g, v, prev = null) {
     const id = v?.id || g.scene;
-    noteVisit(g, id);
+    const before = linesOf(g).at; // RV1 (L1): the screen shown before this one
+    const fresh = noteVisit(g, id);
+    const newVisit = fresh && !(before && META_BACK(before)); // RV1 (L1): back from a meta screen is the same visit for "Read it all again" (L2)
+    const sd = sameDayAgain(g, id, v, fresh); // v0.11.152 (owner pick RP1, SD); LB1 (owner 22:30): back from a meta screen or the breakthrough folds too (bots' repeated screens Sitter 1.1% → 0.1%, Cultivator 0.9% → 0.1%)
     const ps = parasOf(v?.text || '');
-    const whole = { fold: false, first: v?.text || '', rest: '', memory: null, same: false };
+    const whole = { fold: false, first: v?.text || '', rest: '', memory: null, same: false, newVisit };
     if (noFold(id) || v?.end || ps.length < 2) return whole;
     const variant = g.lastWin && g.lastWin.next === id && g.lastWin.degree >= 2; // a lopsided win's own text (story.js): not the one read before
-    if (seenBefore(g, id) && !variant && readBefore(g, v.text)) return { fold: true, first: ps[0], rest: ps.slice(1).join('\n\n'), memory: memoryLine(g), same: false };
-    if (prev && prev.id === id && prev.text === v.text) return { fold: true, first: ps[0], rest: ps.slice(1).join('\n\n'), memory: null, same: true }; // SV
+    if (seenBefore(g, id) && !variant && readBefore(g, v.text)) return { fold: true, first: ps[0], rest: ps.slice(1).join('\n\n'), memory: memoryLine(g), same: false, newVisit };
+    if (prev && prev.id === id && prev.text === v.text) return { fold: true, first: ps[0], rest: ps.slice(1).join('\n\n'), memory: null, same: true, newVisit }; // SV
+    if (sd) return { fold: true, first: ps[0], rest: ps.slice(1).join('\n\n'), memory: null, same: true, newVisit }; // SD
     return whole;
 }
+
+/**
+ * v0.11.152 (owner pick RP1, SD; the owner's "no repeated texts", 2026-11-12): a scene entered again on the same day (a text day,
+ * from 05:00) with the same text as its last visit that day folds to its first paragraph under "Read it all again", as SV does:
+ * the road after each talk, the gate, the mire, the guardian after backing away, the camp after Yuki's scenes. Decided once per
+ * visit (`fresh`, on its first draw; every redraw keeps it), recorded in the Coil's `lines` record as `sd` (scene → "day|text
+ * hash"; reset with each Coil; an older version ignores it) and `sdFold` (the scene this visit folds, or null). The task screens,
+ * menus, meta screens and outcome scenes never fold (noFold). RV1 (Fable's review): M1 the fold holds only while the text on
+ * screen is still the one folded; L1 + LB1 back from a meta screen or the breakthrough folds but keeps "Read it all again" as it
+ * was (META_BACK); L2 `newVisit` on the view tells main.js to shut "Read it all again". Measured before (200 games each, Careful / Completionist / Sitter /
+ * Cultivator / Random): 1,875 / 1,617 / 1,267 / 2,090 / 3,785 screens shown again in full on their day.
+ */
+export function sameDayAgain(g, id, v, fresh) {
+    if (!g || !id) return false;
+    const L = linesOf(g);
+    if (!isRecord(L.sd)) L.sd = {};
+    const key = `${textDay(g)}|${paraKey(String(v?.text || ''))}`;
+    if (fresh) L.sdFold = !noFold(id) && !v?.end && L.sd[id] === key ? { id, key } : null;
+    L.sd[id] = key; // RV1 (M1): the text last shown today, after any change within the visit
+    const f = L.sdFold;
+    return !!f && typeof f === 'object' && f.id === id && f.key === key; // RV1 (M1, Fable's review): only while the text is still the one folded
+}
+/** RV1 (L1, Fable's review): screens a visit can step out to and come back from without leaving (the meta screens, the
+ *  breakthrough): the scene after them keeps "Read it all again" as it was (L2); LB1 (owner 22:30): it still folds (SD). */
+export const META_BACK = (id) => isTimeless(id) || id === 'breakthrough';
 
 /** The one choice the skip may take here, or -1: a scene read before, one open story choice, no check, fight or fail branch,
  *  and (v0.11.133, FP2) every paragraph it shows read on an earlier Coil. */

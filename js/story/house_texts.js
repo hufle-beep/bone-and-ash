@@ -30,21 +30,25 @@ export const HT_CLOSE = {
     "wen LOW": [
         "Old Wen turns his cup a quarter turn and says nothing further, which you are learning is how the audience ends.",
         "\"The stranger may come again,\" he says. It is a ruling, not an invitation, and he does not look up.",
-        "He hears your thanks out, weighs it, and inclines his head by the width of a tea leaf."
+        "He hears your thanks out, weighs it, and inclines his head by the width of a tea leaf.",
+        "Old Wen sets the lid back on the pot with both hands. It makes a small sound, and the small sound is addressed to you." // v0.11.152 (owner pick RP1, HT; Fable's): a fourth (four visits an Act 1 Coil)
     ],
     "wen MID": [
         "When you rise, Old Wen rises too. At ninety this takes some time, and you have noticed that he does not spend it on the council.",
         "\"You listen,\" says Old Wen. \"It is rarer than cultivation.\" It is the whole of his praise, and he sees no reason to add to it or to vary it.",
-        "He rinses your cup himself and puts it back in its place, on the shelf beside his own and apart from the guests'. Neither of you has ever mentioned it."
+        "He rinses your cup himself and puts it back in its place, on the shelf beside his own and apart from the guests'. Neither of you has ever mentioned it.",
+        "He walks you as far as the doorpost and stands with one hand on it, considering the sky with his good eye. \"Tomorrow the water will be hot at the same hour,\" he says, to the sky." // v0.11.152 (owner pick RP1, HT; Fable's): a fourth (four visits an Act 1 Coil)
     ],
     "mother LOW": [
         "She inclines her head a finger's width, which closes the interview. You have been dismissed by universities with less finish.",
         "\"The stranger has been of use,\" she says, in the tone of a woman entering it in a ledger.",
-        "She watches you go, to see that you manage it correctly."
+        "She watches you go, to see that you manage it correctly.",
+        "\"Mind the step,\" she says. It is the same step as on the way in. You understand that it has been asked to keep an eye on you." // v0.11.152 (owner pick RP1, HT; Fable's): a fourth (four visits an Act 1 Coil)
     ],
     "mother MID": [
         "To the ancestors and the street you are \"the stranger\". At her own door she says \"James,\" and frowns a little each time, as at a word that comes easier than is proper.",
         "Afterwards you find a seam of the lab coat put right, in small severe stitches. The coat has many seams, and she appears to be taking them in order. Nothing is said about it.",
-        "\"You are too thin,\" she says. From her, you have learned, this is warmth, and it will have consequences at supper."
+        "\"You are too thin,\" she says. From her, you have learned, this is warmth, and it will have consequences at supper.",
+        "She puts a millet cake wrapped in cloth into your hand as you go, and closes your fingers on it herself. \"For the road,\" she says. The road is the width of her yard." // v0.11.152 (owner pick RP1, HT; Fable's): a fourth (four visits an Act 1 Coil)
     ]
 };

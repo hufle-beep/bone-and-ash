@@ -13,11 +13,13 @@ import { likesMei, likesYa } from '../js/story/act1_common.js'; // v0.11.123 (EQ
 import { KEEP_FLAGS, rewind } from '../js/core/coil.js'; // v0.11.137 (HV1, Fable L2): rewind on an old save // v0.11.123 (ER1, T3)
 import { againView, noteRead } from '../js/story/again.js'; // v0.11.125 (RW1, T); v0.11.133 (FP2): noteRead
 import { STOMP } from '../js/story/power.js'; // v0.11.126 (NQ1)
-import { coilStamp, dayIndex, textDay, DAY_REPLIES } from '../js/core/lines.js'; // v0.11.135 (NT1, EV1); v0.11.136 (NC1): DAY_REPLIES
+import { coilStamp, dayIndex, textDay, DAY_REPLIES, noteDay, linesOf, pickLine } from '../js/core/lines.js'; // v0.11.135 (NT1, EV1); v0.11.136 (NC1): DAY_REPLIES
 import { splitReply, splitLine, landReply, noteSaid } from '../js/core/replies.js'; // v0.11.136 (NC1); RV2 (TG): landReply, noteSaid
 import { runTask, taskOutcome, cardCheck, taskCards } from '../js/core/tasks.js'; // v0.11.136 (RV2, TG); v0.11.139 (MW1): taskCards
 import { writeFileSync, readFileSync, readdirSync } from 'node:fs'; // v0.11.137 (HV1, T): the story files read for bumpRel
 import { smartAction } from './lib/smartfight.mjs'; // v0.11.96 (BT1)
+import { DAY21_BREAKFAST } from '../js/story/act1_return.js'; // v0.11.152 (E1, BK)
+const clockHour = (g) => Math.floor(((g.minutes % 1440) + 1440) % 1440 / 60); // v0.11.152 (E1, BK)
 import { GAMES, FULL, SHARD, WORKERS, STATS_OUT, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
 import { seen as touched, track as watchGame, noteView, mergeSeen, seenOut as touchedOut } from './lib/seen.mjs'; // v0.11.22: for tools/leftovers.mjs
 /** v0.11.22: flags and items are watched only with --track (tools/check.mjs: a separate 300-game run); the shown choices always. */
@@ -307,7 +309,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     // RV2 (TG, Fable's review): the old first-day replies of the three lists that go by Yuki's form (the game as of v0.11.135)
     const OLD_FORMS = {"tiger":{"heart_camp:3":"You play the first part again, just Wren's voice, just the planting. Yuki purrs with her head on your chest the whole way through.","heart_spring:2":"You sit with your back to a warm wall and Yuki's head in your lap and listen to the water, and for half an hour nobody needs anything from you.","wen_lesson:forest":"You ask what the hunters' tales say the singing sounded like. He thinks about it with great seriousness. \"Like something you have already heard,\" he says at last, \"and cannot name.\" You don't tell him that's exactly it. Yuki, her chin on your knee, has not stopped looking toward the forest."},"human":{"heart_camp:3":"You play the first part again, just Wren's voice, just the planting. Yuki leans against your shoulder and purrs, very quietly, the whole way through.","heart_spring:2":"You sit with your back to a warm wall and Yuki's shoulder against yours and listen to the water, and for half an hour nobody needs anything from you.","wen_lesson:forest":"You ask what the hunters' tales say the singing sounded like. He thinks about it with great seriousness. \"Like something you have already heard,\" he says at last, \"and cannot name.\" You don't tell him that's exactly it. Yuki, beside you, has not stopped looking toward the forest."}};
     const keys = Object.keys(DAY_REPLIES);
-    assert(keys.length === 38 && keys.reduce((s, k) => s + DAY_REPLIES[k].length - 1, 0) === 52, `NC1: 38 reply lists with 52 new texts (${keys.length})`);
+    assert(keys.length === 38 && keys.reduce((s, k) => s + DAY_REPLIES[k].length - 1, 0) === 63, `NC1: 38 reply lists with 52 new texts; v0.11.152 (RP1): 11 more (${keys.length}, ${keys.reduce((s, k) => s + DAY_REPLIES[k].length - 1, 0)})`);
     assert(JSON.stringify([...keys].sort()) === JSON.stringify(NC.map(([k]) => k).sort()), 'NC1: a list for every reply the bots saw on two days, and no other');
     const state = (g) => { const { lines, log, ...rest } = g; return JSON.stringify(rest); }; // RV2 (TG): the whole game but the day record and the log
     let n = 0;
@@ -412,7 +414,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     // every slot has three texts, every text is used, every pool three lines
     const used = new Set(Object.values(YT_HUBS).flat().flatMap((k) => (typeof k === 'function' ? [k({ flags: { ya_met: true } }), k({ flags: {} })] : [k])));
     assert(used.size === Object.keys(YT_BODY).length && [...used].every((k) => YT_BODY[k]?.length === 3 && YT_BODY[k].every((t) => typeof t === 'string' && t.length > 80)), `TR1 (YB): ${used.size} slots, each with its three texts (${Object.keys(YT_BODY).length} written)`);
-    assert(Object.keys(YT_CLOSE).length === 11 && Object.values(YT_CLOSE).every((l) => l.length === 3), 'TR1 (YT): 11 closing pools of three');
+    assert(Object.keys(YT_CLOSE).length === 11 && Object.values(YT_CLOSE).every((l) => l.length === 14), 'TR1 (YT); v0.11.152 (RP1, YT14): 11 closing pools of fourteen');
     assert(YT_LABEL.CAT && YT_LABEL.GREAT && YT_LABEL.HUMAN, 'TR1 (YB): a label per form');
     const YG = (seed, form, hub, rel = { f: 0, a: 0 }, flags = {}) => {
         const g = ensureBars(fresh(seed)); g.minutes = (hub.startsWith('fo_') ? 8 : hub.startsWith('rr') ? 10 : 3) * D + 600;
@@ -552,7 +554,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     }
     for (const k of ['wen', 'mother']) {
         assert(HT_SLOTS.every((sl) => typeof HT_BODY[k][sl] === 'string' && HT_BODY[k][sl].length > 200) && Object.keys(HT_BODY[k]).filter((x) => !x.endsWith('-burned')).length === HT_SLOTS.length, `MW1 (MS): ${k}: a text for each of the ${HT_SLOTS.length} slots`);
-        assert(['LOW', 'MID'].every((lv) => HT_CLOSE[`${k} ${lv}`]?.length === 3), `MW1 (MT): ${k}: three closers per level`);
+        assert(['LOW', 'MID'].every((lv) => HT_CLOSE[`${k} ${lv}`]?.length === 4), `MW1 (MT); v0.11.152 (RP1, HT): ${k}: four closers per level`);
     }
     assert(new Set([...Object.values(HT_BODY.wen), ...Object.values(HT_BODY.mother)]).size === 13, 'MW1 (MS): thirteen different texts (MR1: the burned eve)');
     const MW = (seed, hub, day, flags = {}) => {
@@ -1885,6 +1887,158 @@ for (const k of [...storyOnly, ...rare]) for (let run = 0; run < 30; run++) { //
 if (reachedAnyway.length) console.log(`  NOTE  Story-only scenes reached in Incremental Mode (log only): ${reachedAnyway.join(', ')}`);
 if (FULL && rareMissed.length) console.log(`  NOTE  rare scenes not reached in this full run (log only; one never reached again may have become unreachable): ${rareMissed.join(', ')}`);
 if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).length - storyOnly.size - unreached.length} of ${Object.keys(SCENES).length - storyOnly.size} scenes reached (${storyOnly.size} Story-only left out)`); // v0.11.21
+// v0.11.152 (owner 21:11, pick E1, BK): Day 21's breakfast. Every last night leads to the Elder's arrival at 08:00, which now
+// serves breakfast at Mei Lin's (+20 satiety, at once, capped at 100), once a Coil.
+{
+    const NIGHTS = ['rt_quiet_night', 'rt_mei_night', 'rt_ya_night', 'rt_trio_night', 'yk_night_solo', 'yk_night_mei', 'yk_night_ya', 'yk_night_all'];
+    let n = 0;
+    for (const id of NIGHTS) {
+        assert(!!SCENES[id], `E1 (BK): the last night ${id} exists`);
+        const g = ensureBars(newGame(58100 + n++));
+        g.minutes = 19 * 1440 + 22 * 60; g.james.satiety = 40;
+        goTo(g, SCENES, id);
+        const open = sceneView(g, SCENES).choices.filter((c) => !c.disabled);
+        const w = JSON.parse(JSON.stringify(g)); w.flags.a1_breakfast = true; choose(w, SCENES, open[0].index); // the same night without the breakfast
+        const s0 = w.james.satiety; // Fed at the Elder's arrival before breakfast (the night's sleep drains some)
+        const r = choose(g, SCENES, open[0].index);
+        const lines = (r.lines || []).map(String);
+        assert(g.scene === 'rt_elder', `E1 (BK): ${id} leads to the Elder's arrival (at ${g.scene})`);
+        assert(lines.includes(DAY21_BREAKFAST), `E1 (BK): ${id} → rt_elder serves breakfast (lines: ${lines.join(' | ')})`);
+        assert(Math.abs(g.james.satiety - Math.min(100, s0 + 20)) < 1e-9, `E1 (BK): ${id}: Fed at arrival ${s0} → ${g.james.satiety} after breakfast, +20`);
+        assert(g.flags.a1_breakfast === true, `E1 (BK): ${id}: the once-a-Coil flag is set`);
+    }
+    const g = ensureBars(newGame(58200)); g.minutes = 20 * 1440 + 7 * 60; g.james.satiety = 95;
+    const first = goTo(g, SCENES, 'rt_elder').map(String);
+    assert(first.includes(DAY21_BREAKFAST) && g.james.satiety === 100, `E1 (BK): capped at 100 (Fed ${g.james.satiety})`);
+    g.james.satiety = 50;
+    const again = goTo(g, SCENES, 'rt_elder').map(String);
+    assert(!again.includes(DAY21_BREAKFAST) && g.james.satiety === 50, 'E1 (BK): once a Coil: entering the arrival again serves nothing');
+    const h = ensureBars(newGame(58201)); h.minutes = 20 * 1440 + 7 * 60; h.james.satiety = 10;
+    goTo(h, SCENES, 'rt_elder');
+    assert(h.james.satiety === 30 && clockHour(h) === 8, `E1 (BK): the lowest bot arrival (Fed 10) leaves breakfast at Fed 30, at 08:00 (${h.james.satiety}, ${clockHour(h)}:00)`);
+}
+
+// v0.11.152 (owner picks RP1 push 1, "ok for texts" 21:37): the repeats inside a Coil, mapped from the code (2026-11-12): the
+// romance texts (RM1–RM9), Yuki's closing lines at fourteen a group (RM10, YT14), Wen's and Mother's at four (HT), and the
+// same-day fold (SD). Each slot below gets a different text on each occurrence the calendar allows.
+{
+    const D = 1440;
+    const distinct = (a) => new Set(a).size === a.length;
+    const forms = ['cat', 'tiger', 'human'];
+    const RG = (seed, form, flags = {}, rel = {}) => {
+        const g = ensureBars(fresh(seed));
+        const realm = form === 'human' ? 7 : form === 'tiger' ? 2 : 0; g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form;
+        Object.assign(g.flags, flags); g.rel = { ...g.rel, ...rel }; return ensureBars(g);
+    };
+    // RM1–RM3, RM6, RM8: the replies by day, as long as the days the choice can come up (talks 5, the fireside 3, the Heart's nights 4, its spring 3)
+    const WANT = { 'talk_mei:1': 5, 'talk_ya:0': 5, 'talk_ya:3': 5, 'bl_fireside:2': 3, 'heart_camp:1': 4, 'heart_camp:2': 4, 'heart_camp:3': 4, 'heart_spring:0': 3 };
+    for (const [k, n] of Object.entries(WANT)) {
+        const l = DAY_REPLIES[k];
+        assert(l?.length === n, `RP1 (RM): ${k} has ${n} replies (${l?.length})`);
+        for (const form of forms) { const g = RG(58300, form, { ship_found: true }); assert(distinct(l.map((t) => (typeof t === 'function' ? t(g) : t))), `RP1 (RM): ${k}'s replies all differ (${form})`); }
+    }
+    // RM4: Yuki's camp nights 1–4 and the Mei Lin mornings after them, every form she can take there
+    for (const form of forms) {
+        const ts = [], ms = [];
+        const g = RG(58310, form, { yk_path: 'lover' }, { 'Mei Lin': { f: 90, a: 90 } }); // RV1 (L9): through go(), so the count in enter is covered
+        for (let n = 1; n <= 4; n++) {
+            g.minutes = (10 + n) * D + 21 * 60; goTo(g, SCENES, 'yk_camp');
+            assert(g.flags.yk_nights === n && g.flags.yk_mei === n, `RP1 (RM4): night ${n} counted in enter (${g.flags.yk_nights}, ${g.flags.yk_mei})`);
+            const t = sceneView(g, SCENES).text; const [night, mei] = t.split('\n\n*\n\n');
+            ts.push(night); ms.push(mei);
+        }
+        assert(distinct(ts), `RP1 (RM4): yk_camp's four nights differ (${form})`);
+        assert(ms.every(Boolean) && distinct(ms), `RP1 (RM4): the Mei Lin mornings after nights 1–4 differ (${form})`);
+    }
+    // RM5: the sister's four talks, human and through the bond
+    for (const form of forms) {
+        const ts = [];
+        const g = RG(58320, form, { yk_path: 'sister' }); // RV1 (L9): through go()
+        for (let n = 1; n <= 4; n++) { g.minutes = (10 + n) * D + 20 * 60; goTo(g, SCENES, 'yk_sister_talk'); ts.push(sceneView(g, SCENES).text); }
+        assert(g.flags.yk_sis_talks === 4, `RP1 (RM5): four talks counted in enter (${g.flags.yk_sis_talks})`);
+        assert(ts.every((t) => typeof t === 'string' && t.length > 100) && distinct(ts), `RP1 (RM5): the four sister talks differ (${form})`);
+    }
+    // RM6: the Heart camp's second paragraph over four nights, for the heap, Ya's watch and Mei Lin's watch
+    const HC = { heap: { trio: 3, ya_party: true }, ya: { ya_party: true }, mei: {} };
+    for (const [kind, flags] of Object.entries(HC)) for (const form of forms) {
+        const g = RG(58330, form, flags, { 'Mei Lin': { f: 90, a: 90 }, Ya: { f: 90, a: 90 } });
+        const paras = [];
+        for (let k = 0; k < 4; k++) { g.minutes = (16 + k) * D + 20 * 60; goTo(g, SCENES, 'heart_camp'); paras.push(sceneView(g, SCENES).text.split('\n\n')[1]); }
+        assert(distinct(paras), `RP1 (RM6): heart_camp's ${kind} paragraph differs on each of four nights (${form})`);
+    }
+    // RV1 (M2): the heap formed mid-stay starts at the heap's own first text; (L7) the human's heap leaves him off the edge
+    {
+        const g = RG(58335, 'human', { ya_party: true }, { 'Mei Lin': { f: 90, a: 90 }, Ya: { f: 90, a: 90 } });
+        const p2 = () => sceneView(g, SCENES).text.split('\n\n')[1];
+        const got = [];
+        for (let k = 0; k < 4; k++) { if (k === 2) g.flags.trio = 3; g.minutes = (16 + k) * D + 20 * 60; goTo(g, SCENES, 'heart_camp'); got.push(p2()); }
+        assert(got[0].startsWith('Ya takes the first watch') && got[1].startsWith('Ya is on her ledge again'), 'RV1 (M2): Ya\'s watch, nights 1 and 2');
+        assert(/sleep in a heap by the fire now/.test(got[2]) && /^Nobody lays out four bedrolls/.test(got[3]), `RV1 (M2): the heap formed on night 3 starts at its first text, then its second (${got[2].slice(0, 40)} | ${got[3].slice(0, 40)})`);
+        assert(!/You have the edge/.test(got[3]) && /Yuki has the edge/.test(got[3]), 'RV1 (L7): the human heap: Yuki has the edge, not James');
+    }
+    // RM7: whispering nights
+    {
+        const g = RG(58340, 'cat', { trio: 2, ya_party: true }, { 'Mei Lin': { f: 90, a: 90 }, Ya: { f: 90, a: 90 } });
+        const ts = []; // RV1 (L9): through go(), the scene's own roll and dayKey; RV1 (L3): four whispering nights, four texts
+        for (let k = 0; k < 80 && ts.length < 4; k++) { g.minutes = (16 + k) * D + 23 * 60; goTo(g, SCENES, 'heart_night'); if (g.flags.heart_night_roll >= 4) ts.push(sceneView(g, SCENES).text); }
+        assert(ts.length === 4 && ts.every((t) => /whisper/i.test(t)) && distinct(ts), `RP1 (RM7; RV1 L3): four whispering nights, four texts (${ts.length})`);
+    }
+    // RM9: the Fallout's two nights (Days 8 and 9): the opening line and Mei Lin's paragraph differ, lovers or not
+    for (const lovers of [false, true]) {
+        const at = (day) => { const g = RG(58350 + day, 'cat', { palisade: 1, romance: lovers }); g.minutes = (day - 1) * D + 22 * 60; goTo(g, SCENES, 'fo_night'); return sceneView(g, SCENES).text.split('\n\n'); };
+        const [a, b] = [at(8), at(9)];
+        assert(a[0] !== b[0] && a[1] !== b[1], `RP1 (RM9): fo_night's Day 8 and Day 9 differ (${lovers ? 'lovers' : 'her lamp'})`);
+    }
+    assert(YT_CLOSE['HUMAN HIGH LOVER'].some((t) => /inside of the forearm, where the omnitool/.test(t)) && !YT_CLOSE['HUMAN HIGH LOVER'].some((t) => /inside of the wrist, where the omnitool/.test(t)), 'RV1 (L6): the omnitool in his forearm');
+    // RM10 + HT: every line distinct, everywhere
+    const yt = Object.values(YT_CLOSE).flat(), ht = Object.values(HT_CLOSE).flat();
+    assert(distinct(yt) && distinct(ht), `RP1 (RM10, HT): ${yt.length} closing lines for Yuki, ${ht.length} for Wen and Mother, none twice`);
+    assert(Object.values(YT_CLOSE).every((l) => l.every((t) => typeof t === 'string' && t.length > 30)), 'RP1 (RM10): every closing line is a sentence');
+    // SD: a scene entered again the same day with the same text folds to its first paragraph; the next day it shows in full; hubs never fold
+    {
+        const g = ensureBars(fresh(58360)); g.minutes = 3 * D + 9 * 60;
+        const show = (id) => { g.scene = id; const v = sceneView(g, SCENES); return againView(g, v, null); };
+        const id = 'herb_girl';
+        const v0 = show(id);
+        assert(!v0.fold && v0.first.split('\n\n').length >= 2, `RP1 (SD): ${id} shows in full the first time (it has paragraphs to fold)`);
+        assert(!show(id).fold, 'RP1 (SD): a redraw of the same visit is the same view');
+        show('wilds');
+        const v1 = show(id);
+        assert(v1.fold && v1.same && v1.memory === null && v1.rest.length > 0, 'RP1 (SD): back the same day, the same text folds under "Read it all again", no memory line');
+        assert(show(id).fold, 'RP1 (SD): and every redraw of that visit keeps the fold');
+        show('wilds');
+        g.minutes += D;
+        assert(!show(id).fold, 'RP1 (SD): the next day it shows in full again');
+        show('ashfall'); const h1 = show('wilds'); show('ashfall'); const h2 = show('wilds');
+        assert(!h1.fold && !h2.fold, 'RP1 (SD): a task screen never folds');
+        assert(typeof linesOf(g).sd === 'object' && linesOf(g).sd[id], 'RP1 (SD): the day record sits in the Coil\'s lines record');
+        // RV1 (M1): a folded visit whose text changes shows the new text in full
+        const vx = (t) => againView(g, { id, text: t }, null);
+        g.minutes += D; show('wilds'); vx('One.\n\nTwo.'); show('wilds');
+        assert(vx('One.\n\nTwo.').fold, 'RV1 (M1): back the same day with the same text: folded');
+        const changed = vx('One.\n\nTwo.\n\nThree, new.');
+        assert(!changed.fold, 'RV1 (M1): the text changed within the visit: in full');
+        // RV1 (L1) + LB1 (owner 22:30): out to a meta screen and back folds (same day, same text), but is no new visit for "Read it all again"
+        g.minutes += D; show('wilds'); vx('Alpha.\n\nBeta.');
+        const m1 = againView(g, { id: 'yuki_form', text: 'Which?\n\nForms.' }, null);
+        const back = vx('Alpha.\n\nBeta.');
+        assert(back.fold && back.newVisit === false, 'RV1 (L1) + LB1: back from the form menu: folded, not a new visit');
+        const bt = againView(g, { id: 'breakthrough', text: 'Sky.\n\nNothing.' }, null); const back2 = vx('Alpha.\n\nBeta.');
+        assert(back2.fold && back2.newVisit === false, 'RV1 (L1) + LB1: back from a breakthrough: folded, not a new visit');
+        // RV1 (L2): main.js shuts "Read it all again" on newVisit: a new visit says so, a redraw does not
+        show('wilds'); const nv = vx('Alpha.\n\nBeta.'); const rd = vx('Alpha.\n\nBeta.');
+        assert(nv.newVisit === true && rd.newVisit === false, 'RV1 (L2): newVisit on a new visit only');
+    }
+    // RV1 (L4): a pool that grows mid-Coil keeps its counts
+    {
+        const g = ensureBars(fresh(58370)); linesOf(g).p['yt:TEST'] = [1, 1, 1];
+        const items = Array.from({ length: 14 }, (_, i) => `line ${i}`);
+        const picks = []; for (let k = 0; k < 11; k++) picks.push(pickLine(g, 'yt:TEST', items));
+        assert(picks.every((i) => i >= 3) && distinct(picks), `RV1 (L4): the three lines already played stay played; the eleven new ones come first (${picks.join(',')})`);
+        assert(linesOf(g).p['yt:TEST'].slice(0, 3).join() === '1,1,1', 'RV1 (L4): the old counts kept');
+    }
+}
+
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));
 console.log('fights', sorted(fights));
 console.log('endings', sorted(endings), 'longest run', maxSteps, 'scenes', Object.keys(SCENES).length);
