@@ -12,7 +12,7 @@ export const stepLine = (key, secs, slow = '') => `ok  ${key.padEnd(15)}${String
 
 /** Lines a passing step flags and that must stay visible: NOTE lines, DRIFT lines, the noise-scaled drift's log-only flags,
  *  the leftover check's stale keep-list entries (log only). */
-export const FLAG = /^\s+(NOTE|DRIFT|WARN|noise-scaled \(log only\) {2}|keep-list entries that match nothing now)/;
+export const FLAG = /^\s+(NOTE|DRIFT|WARN|FLAKE|noise-scaled \(log only\) {2}|keep-list entries that match nothing now)/;
 export const flagLines = (out) => out.split('\n').filter((l) => FLAG.test(l)).map((l) => l.trimEnd());
 
 /** The leftover report found something: any finding fails the strict check, so on a pass only log-only choices count. */

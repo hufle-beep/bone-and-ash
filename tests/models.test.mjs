@@ -55,6 +55,7 @@ import { noFold, OUTCOME_SCENES, againView, noteRead } from '../js/story/again.j
 import { shareNote } from '../tools/lib/textlint.mjs'; // v0.11.132 (E1, EB)
 import { smartAction } from './lib/smartfight.mjs'; // v0.11.96 (BT1)
 import { SOCIAL } from './lib/social.mjs'; // v0.11.160 (NX2, CN): the Sociable's talk doors
+import { forcedPick, oldForcedPick, skipNotNow, hungryLine } from './lib/forced.mjs'; // v0.11.163 (owner pick W1): RS and NN
 import { sparePlan } from './lib/spare.mjs'; // v0.11.142 (owner pick CV1): the Cultivator's spare time
 import { SHARD, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
 
@@ -169,7 +170,10 @@ export function hubPlan(model, g, cards, mem, noExit = false) {
 /** A story choice (index) for a model. */
 function storyPick(model, g, choices, mem) {
     if (model === 'cultivator') model = 'completionist'; // v0.11.142 (CV1)
-    if (careLike(model)) { const calm = choices.filter((c) => !/fight/.test(c.tag || '')); return pick(calm.length ? calm : choices).index; }
+    // v0.11.163 (W1, NN): every model but Random takes "Not now." only when nothing else is open; Careful's calm choices first,
+    // so it never fights to avoid "Not now."
+    if (careLike(model)) { const calm = choices.filter((c) => !/fight/.test(c.tag || '')); return pick(skipNotNow(calm.length ? calm : choices)).index; }
+    if (model !== 'random') choices = skipNotNow(choices);
     if (model === 'completionist') { const untried = choices.filter((c) => !mem.tried.has(`${g.scene}:${c.index}`)); return pick(untried.length ? untried : choices).index; }
     return pick(choices).index;
 }
@@ -201,7 +205,8 @@ function play(run, model, st, yuki) {
         const act = g.coil.act || 0;
         const key = `${act}:${cn()}`;
         if (key !== coilKey) { // a new Coil: the days start over
-            coilKey = key; mem.done = {}; mem.qi = {}; mem.texts = new Set(); // v0.11.132 (E1, RP): the texts shown this Coil; v0.11.85 (Fable review): the Sitter's gather-Qi hours start over too (a rewind restores the day count)
+            coilKey = key; mem.done = {}; mem.walked = new Set(); // v0.11.163 (W1, RS): the doors walked into while forced, this Coil
+            mem.qi = {}; mem.texts = new Set(); // v0.11.132 (E1, RP): the texts shown this Coil; v0.11.85 (Fable review): the Sitter's gather-Qi hours start over too (a rewind restores the day count)
             const d = st.deaths[act] || (st.deaths[act] = {});
             (d[cn()] || (d[cn()] = { coils: 0, dead: 0, beast: 0, starve: 0, taken: 0 })).coils++;
         }
@@ -266,7 +271,7 @@ function play(run, model, st, yuki) {
                 const open = cards.filter((c) => c.status === 'open');
                 if (!open.length) { assert(false, `${model}: dead end at task screen ${g.scene} (run ${run})`); return 'stuck'; }
                 const done = doneSet(mem, g);
-                const c = open.find((x) => x.kind === 'door') || open.find((x) => !done.has(x.id)) || open[0];
+                const c = careLike(model) ? forcedPick(open, done, mem.walked, dayKey(g)) : oldForcedPick(open, done); // v0.11.163 (W1, RS; tests/lib/forced.mjs)
                 done.add(c.id); st.forced++; st.cards++;
                 runTask(g, SCENES, c.id);
                 continue;
@@ -287,7 +292,10 @@ function play(run, model, st, yuki) {
         if (!open.length) { assert(false, `${model}: no choice left at ${g.scene} (run ${run})`); return 'stuck'; }
         const i = storyPick(model, g, open, mem); mem.tried.add(`${g.scene}:${i}`);
         runCombat(g, choose(g, SCENES, i), st, smart);
-        if (careLike(model) && g.james.satiety < 30 && foodLeft(g)) st.hungry++; // RV1 (HN): the Sociable too
+        if (careLike(model) && g.james.satiety < 30 && foodLeft(g)) { // RV1 (HN): the Sociable too; v0.11.163 (owner pick HN1): where, and how low
+            st.hungry++; st.hungryAt[g.scene] = (st.hungryAt[g.scene] || 0) + 1;
+            const b = g.james.satiety < 10 ? 'f0' : g.james.satiety < 20 ? 'f10' : 'f20'; st.hungryFed[b] = (st.hungryFed[b] || 0) + 1;
+        }
     }
     assert(false, `${model}: run ${run} finishes in ${maxSteps} steps (at ${g.scene})`);
     return 'stuck';
@@ -300,7 +308,7 @@ const NIGHT_ORDER = ['quiet', 'Mei Lin', 'Ya', 'trio', 'Yuki', 'other'];
 const ENDING_ORDER = ['accord', 'revelation', 'victory', 'taken', 'none']; // v0.11.132 (E1, EB): g.flags.a1_outcome (act1_return.js)
 const CULT_KINDS = ['sit', 'mer', 'qi', 'bt']; // v0.11.142 (CV1)
 const CULT_NAMES = { sit: 'sits', mer: 'meridians', qi: 'gather Qi', bt: 'breakthroughs' };
-const blank = () => ({ cult: {}, endRealm: {}, spare: 0, nights: {}, games: 0, finished: 0, gaveUp: 0, stuck: 0, cards: 0, work: 0, forced: 0, oneCoil: 0, hungry: 0, cuAhead: 0, deaths: {}, tribute: {}, prologueClear: {}, act1Clear: {}, endings: {}, fights: {} });
+const blank = () => ({ hungryAt: {}, hungryFed: {}, cult: {}, endRealm: {}, spare: 0, nights: {}, games: 0, finished: 0, gaveUp: 0, stuck: 0, cards: 0, work: 0, forced: 0, oneCoil: 0, hungry: 0, cuAhead: 0, deaths: {}, tribute: {}, prologueClear: {}, act1Clear: {}, endings: {}, fights: {} });
 const all = {};
 const playInto = (st, run, m, yuki) => { st.games++; const r = play(run, m, st, yuki); if (r === 'end') st.finished++; else if (r === 'stuck') st.stuck++; };
 for (const m of PLAY) {
@@ -323,7 +331,8 @@ const notes = [];
 for (const [m, st] of Object.entries(all)) assert(!st.stuck, `${m}: every game ends or gives up after Coil ${MAX_COIL} (${st.stuck} stuck)`);
 if (all.rusher?.work) notes.push(`rusher: ${all.rusher.work} work cards queued (it should queue only meals)`);
 for (const [m, st] of Object.entries(all)) if (st.cuAhead) notes.push(`${m}: GU behind Convergence Use at ${st.cuAhead} fights (v0.11.101, DG1: the degree reads GU alone; it should never be)`);
-for (const m of ['careful', 'sociable']) if (all[m]?.hungry) notes.push(`${m}: under Fed 30 with food in the hammerspace ${all[m].hungry} times`); // RV1 (HN)
+const hungryLines = []; // v0.11.163 (owner pick HN1): a log line, not a NOTE (tests/lib/forced.mjs hungryLine)
+for (const m of ['careful', 'sociable']) if (all[m]?.hungry) hungryLines.push(hungryLine(m, all[m])); // RV1 (HN)
 if (!SHARD) { // the completionist really runs every open card of the wilds before it leaves
     const g = ensureBars(newGame(77, { closed: true })); goTo(g, SCENES, 'wilds'); g.minutes += 1440;
     const mem = { done: {}, tried: new Set() };
@@ -406,6 +415,7 @@ if (!SHARD) {
         }
     }
 }
+for (const h of hungryLines) console.log(`  ${h}`); // v0.11.163 (HN1): log only, no NOTE
 for (const n of notes) console.log(`  NOTE  ${n}`);
 for (const f of fails) console.error(`  FAIL  ${f}`);
 console.log(`\n${pass} passed, ${fail} failed${notes.length ? `, ${notes.length} notes` : ''}`);

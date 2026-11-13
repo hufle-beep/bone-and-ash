@@ -3,7 +3,7 @@
  "totals": {
   "scenes": 327,
   "words": 34067,
-  "variantWords": 32785,
+  "variantWords": 32961,
   "labels": 833,
   "labelWords": 5660,
   "sharedChunks": 336,
@@ -75,7 +75,7 @@
   "blackroot": {
    "scenes": 60,
    "words": 6530,
-   "variantWords": 5138,
+   "variantWords": 5314,
    "labels": 180,
    "labelWords": 1053,
    "sharedScenes": 33,

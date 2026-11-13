@@ -353,6 +353,49 @@ for (const mode of ['full', 'quick']) {
     assert(SOCIAL.test('Find Mei Lin.') && SOCIAL.test('Find Mei Lin and Ya. They went for water an hour ago.') && !SOCIAL.test('Find Mei Lining') && !SOCIAL.test('Talk to Yan.'), 'SX: each label is matched whole, up to its first full stop');
 }
 
+{ // v0.11.163 (owner picks W1 + HN1; tests/lib/forced.mjs): RS, NN and the hungry log line
+    const { forcedPick, oldForcedPick, skipNotNow, hungryLine, NOT_NOW, REST_HOUR } = await import('./lib/forced.mjs');
+    const L = (label, extra = {}) => ({ label, ...extra });
+    const ch = [L('Go for the serpent.', { tag: 'fight' }), L('Darts at the roosting fowl.'), L('Not now.')];
+    assert(skipNotNow(ch).map((c) => c.label).join('|') === 'Go for the serpent.|Darts at the roosting fowl.' && skipNotNow([L('Not now.')]).length === 1 && skipNotNow([]).length === 0, 'NN: "Not now." left out while another choice is open, kept when it is the only one');
+    const A = { id: 'h:2', kind: 'door', label: 'Hunt.' }, B = { id: 'h:5', kind: 'door', label: 'Talk to Ya.' }, R = { id: 'h:8', kind: 'chore', label: 'Rest an hour.' }, W = { id: 'h:1', kind: 'work', label: 'Forage.' };
+    const walked = new Set(), done = new Set();
+    const seq = [forcedPick([A, B, R, W], done, walked, 'h@3'), forcedPick([A, B, R, W], done, walked, 'h@3'), forcedPick([A, B, R, W], done, walked, 'h@3'), forcedPick([A, B, R, W], done, walked, 'h@3'), forcedPick([A, B, R, W], done, walked, 'h@4')].map((c) => c.id);
+    assert(seq.join() === 'h:2,h:5,h:8,h:8,h:2', `RS: each door once a day, then "Rest an hour.", the doors again the next day (${seq.join()})`);
+    assert(forcedPick([A, W], done, new Set(['h:2@h@3']), 'h@3') === A && forcedPick([B, A, W], done, new Set(['h:5@h@3', 'h:2@h@3']), 'h@3') === B && forcedPick([W], new Set(), new Set(), 'h@3') === W && oldForcedPick([W, A], new Set()) === A && oldForcedPick([W], new Set(['h:1'])) === W, 'RS: every door walked and no rest card: the old rule (the first door, else a card not done today, else the first; RV1, Opus\'s M2: the walked keys as forcedPick writes them)');
+    { const w2 = new Set(); forcedPick([A, R], done, w2, 'h@3'); assert([...w2].join() === 'h:2@h@3', `RS: the walked key is id@day (${[...w2].join()})`); }
+    const { SCENES: SC } = await import('../js/story/prologue.js');
+    const labels = (id) => (SC[id]?.choices || []).map((c) => (typeof c.text === 'string' ? c.text : ''));
+    const hunts = ['rr_hunt', 'dw_hunt', 'ah_hunt'].filter((id) => labels(id).some((t) => NOT_NOW.test(t)));
+    const rests = ['dw_hub', 'ah_hub'].filter((id) => labels(id).some((t) => REST_HOUR.test(t)));
+    assert(hunts.length === 3 && rests.length === 2, `RS + NN: the patterns match the game's cards ("Not now." on ${hunts.join(', ')}; "Rest an hour." on ${rests.join(', ')})`);
+    const line = hungryLine('careful', { games: 300, hungry: 893, hungryAt: { heart_gate: 145, rt_ford: 59, a: 1, b: 1, c: 1, d: 1 }, hungryFed: { f20: 676, f10: 191, f0: 26 } });
+    assert(line === 'careful: under Fed 30 with food, on story screens with no Eat card: 893 times, 3.0 a game (Fed 20–29 / 10–19 / 0–9: 676 / 191 / 26); most at heart_gate 145, rt_ford 59, a 1, b 1, c 1', `HN1: the hungry log line (${line})`);
+    { // RV1 (Opus's L6): the hungry counters of two worker processes add up (tests/lib/shard.mjs mergeInto)
+        const m = mergeInto(mergeInto({}, { careful: { games: 2, hungry: 3, hungryAt: { heart_gate: 2, rt_ford: 1 }, hungryFed: { f20: 2, f0: 1 } } }), { careful: { games: 1, hungry: 2, hungryAt: { heart_gate: 1, bl_end: 1 }, hungryFed: { f20: 1, f10: 1 } } }).careful;
+        assert(hungryLine('careful', m) === 'careful: under Fed 30 with food, on story screens with no Eat card: 5 times, 1.7 a game (Fed 20–29 / 10–19 / 0–9: 3 / 1 / 1); most at heart_gate 3, rt_ford 1, bl_end 1', `HN1: merged across workers (${hungryLine('careful', m)})`);
+    }
+    const src = readFileSync(path.join(ROOT, 'tests/models.test.mjs'), 'utf8');
+    assert(!/notes\.push\(`\$\{m\}: under Fed/.test(src) && /hungryLines\.push\(hungryLine\(/.test(src) && /careLike\(model\) \? forcedPick\(/.test(src) && /model !== 'random'\) choices = skipNotNow/.test(src), 'HN1 + RS + NN: models.test.mjs prints the hungry line, not a NOTE; RS for Careful and the Sociable; NN for every model but Random');
+}
+
+{ // v0.11.163 (owner pick F1): a browser part runs once more after a failure; a pass on the retry counts, with a FLAKE line the report shows
+    const { retryOnce } = await import('../tools/lib/jobs.mjs');
+    const seq = (...rs) => { let i = 0; const calls = []; return { go: async () => { calls.push(i); return rs[i++]; }, calls }; };
+    const ok = seq({ code: 0, out: 'all good' }); const r0 = await retryOnce(ok.go);
+    assert(r0.code === 0 && r0.out === 'all good' && ok.calls.length === 1, 'F1: a pass runs once, unchanged');
+    assert(/stopping = true;/.test(readFileSync(path.join(ROOT, 'tools/lib/jobs.mjs'), 'utf8').split('export function killAll')[1] || ''), 'F1 (RV1, M1): killAll marks the check as stopping');
+    const fl = seq({ code: 1, out: '  NOTE  a note of the first try\nVN: no notice' }, { code: 0, out: 'passed' }); const r1 = await retryOnce(fl.go, () => false);
+    assert(r1.code === 0 && r1.flake === true && fl.calls.length === 2 && flagLines(r1.out).join('|') === '  FLAKE  failed once, passed on the retry (first try: VN: no notice)' && /VN: no notice[\s\S]*passed/.test(r1.out), `F1: a fail then a pass: exit 0, the FLAKE line shown by the report, both outputs kept (${flagLines(r1.out).join(' | ')})`);
+    const bad = seq({ code: 1, out: 'first' }, { code: 2, out: 'second' }); const r2 = await retryOnce(bad.go, () => false);
+    assert(r2.code === 2 && bad.calls.length === 2 && /second[\s\S]*failed twice; the first try ended: first/.test(r2.out), 'F1: two failures fail, with both endings');
+    const killed = seq({ code: 1, out: 'killed' }, { code: 0, out: 'passed' }); const r3 = await retryOnce(killed.go, () => true);
+    assert(r3.code === 1 && killed.calls.length === 1, 'F1 (RV1, Opus\'s M1): no retry once the check is stopping (a job killed by another failure is not a flake)');
+    const ck = readFileSync(path.join(ROOT, 'tools/check.mjs'), 'utf8');
+    assert(/times\[j\.key\] = r\.flake && was != null \? was :/.test(ck) && /!r\.flake && was/.test(ck), 'F1 (RV1, Opus\'s L3): a flaked step keeps its stored time and warns of no slowdown');
+    assert((ck.match(/key: 'browser[1-4]', fn: browserPart\('[1-4]'\)/g) || []).length === 4 && !/tools\/browser\.py', '--part', '[1-4]'\]\] \}/.test(ck), 'F1: all four browser parts run through the retry');
+}
+
 const canon = (v) => (Array.isArray(v) ? v.map(canon) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, canon(v[k])])) : v);
 const results = await Promise.all(pending);
 for (const [name] of RUNS) {
@@ -704,6 +747,21 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md'];
     assert(dp.length === 1 && dp[0].where === 'pool memory' && dp[0].was === null && dp[0].now === 24, `LR: a pool not in the snapshot is noted (${JSON.stringify(dp)})`);
     assert(/LR line pools: memory 24 lines \/ \d+ words \(twice 0, shared with a scene \d+, tics \d+, broken 0, spacing 0\); yuki \d+ lines \/ \d+ words .*; aptitude 1 lines \/ 5 words/.test(game.out), `LR: the lint reads the memory lines, Yuki's haul lines and the aptitude reply (${(game.out.match(/LR line pools.*/) || [''])[0]})`);
     writeFileSync(pro, src); // the planted line back
+    { // v0.11.163 (owner pick TL2): the used-today sample reads a hunt's return line (shown only after a hunt option is used today)
+        const bl = path.join(dir, 'js', 'story', 'act1_blackroot.js'); const bsrc = readFileSync(bl, 'utf8');
+        assert(bsrc.includes('The pool has gone flat again.'), 'TL2: the planted return line is there to change');
+        writeFileSync(bl, bsrc.replace('The pool has gone flat again.', 'The pool has gone \\${flat} again.'));
+        const hb = run(dir);
+        assert(hb.code === 0 && /BD broken text: 1: dw_hunt \(text\) code/.test(hb.out), `TL2: a template leftover in the Drowned Wood's return line is counted (${(hb.out.match(/BD broken text: [^\n]*/) || [''])[0]})`);
+        // RV1 (Opus's L6): the root road's and the Ashen Hills' return lines too
+        for (const [from, id] of [['the gravity of a magistrate', 'rr_hunt'], ['The haze over the ridge has nothing in it now.', 'ah_hunt']]) {
+            assert(bsrc.includes(from), `TL2: the planted ${id} line is there to change`);
+            writeFileSync(bl, bsrc.replace(from, `${from} \\$${'{'}x}`)); // a literal \${x} in the template source
+            const h2 = run(dir);
+            assert(h2.code === 0 && new RegExp(`BD broken text: 1: ${id} \\(text\\) code`).test(h2.out), `TL2: a template leftover in ${id}'s return line is counted (${(h2.out.match(/BD broken text: [^\n]*/) || [''])[0]})`);
+        }
+        writeFileSync(bl, bsrc);
+    }
     const ag = path.join(dir, 'js', 'story', 'again.js'); const asrc = readFileSync(ag, 'utf8');
     writeFileSync(ag, asrc.replace("'The forest has not rehearsed. You have.',", "'The forest has not rehearsed. ${you} have.',"));
     const badPool = run(dir);

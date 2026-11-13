@@ -17,7 +17,7 @@ import { readFileSync, writeFileSync, existsSync, mkdtempSync, rmSync } from 'no
 import { tmpdir, availableParallelism, cpus } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { validateJobs, run, runPool, onSignals } from './lib/jobs.mjs'; // v0.11.21
+import { validateJobs, run, runPool, onSignals, retryOnce } from './lib/jobs.mjs'; // v0.11.21; v0.11.163 (F1): retryOnce
 import { LOG, stepLine, flagLines, leftoverFound, modelDigest } from './lib/report.mjs'; // v0.11.28
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -36,14 +36,17 @@ const SLOWER = 1.25, MIN_WARN_S = 3;
 const node = (...a) => [process.execPath, a];
 const files = LIST ? [] : execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '*.js', '*.mjs'], { cwd: ROOT, encoding: 'utf8' }).split('\n').filter(Boolean);
 
+/** v0.11.163 (owner pick F1): a browser part runs once more after a failure (tools/lib/jobs.mjs retryOnce; a FLAKE line when the retry passes). */
+const browserPart = (n) => () => retryOnce(() => run('python3', ['tools/browser.py', '--part', n], ROOT));
+
 /** The jobs, in start order (longest first). `after`: names that must pass first. `heavy`: uses every core by itself. */
 const jobs = [
     { name: `tasks (${GAMES} bot games${QUICK ? ', quick' : ''})`, key: 'tasks', cmd: node('tests/tasks.test.mjs', '--games', String(GAMES), '--stats-out', path.join(ST, 'tasks.json')), heavy: true },
     ...(QUICK ? [] : [
-        { name: 'browser part 1 (Incremental taps, no mode switch)', key: 'browser1', cmd: ['python3', ['tools/browser.py', '--part', '1']] },
-        { name: 'browser part 4 (the reload, two tabs)', key: 'browser4', cmd: ['python3', ['tools/browser.py', '--part', '4']] }, // v0.11.41: split off part 1
-        { name: 'browser part 2 (saves, menu, tooltip, resting places)', key: 'browser2', cmd: ['python3', ['tools/browser.py', '--part', '2']] },
-        { name: 'browser part 3 (the art cache across an update, service worker on)', key: 'browser3', cmd: ['python3', ['tools/browser.py', '--part', '3']] }, // v0.11.39
+        { name: 'browser part 1 (Incremental taps, no mode switch)', key: 'browser1', fn: browserPart('1') },
+        { name: 'browser part 4 (the reload, two tabs)', key: 'browser4', fn: browserPart('4') }, // v0.11.41: split off part 1
+        { name: 'browser part 2 (saves, menu, tooltip, resting places)', key: 'browser2', fn: browserPart('2') },
+        { name: 'browser part 3 (the art cache across an update, service worker on)', key: 'browser3', fn: browserPart('3') }, // v0.11.39
     ]),
     { name: `story (${GAMES} full games${QUICK ? ', quick' : ''})`, key: 'story', cmd: node('tests/story.test.mjs', '--games', String(GAMES), '--stats-out', path.join(ST, 'story.json')), heavy: true },
     // v0.11.27: the bot models, log only: the summary per model is printed, nothing compared yet. v0.11.28 (owner pick S1): Random
@@ -120,18 +123,19 @@ onSignals(() => { rmSync(ST, { recursive: true, force: true }); log.push('== sto
 const { failed, stuck } = await runPool(jobs, {
     limit: JOBS, cwd: ROOT,
     onDone: (j, r, s, first) => {
-        times[j.key] = Math.round(s * 10) / 10;
         const was = old?.steps?.[j.key];
-        const slow = !QUICK && was && s > MIN_WARN_S && s > was * SLOWER ? `  (slower: ${was} s before)` : '';
-        log.push(`== ${j.name} (${first ? 'FAILED' : 'ok'}, ${times[j.key]} s)`, r.out.trim(), '');
+        times[j.key] = r.flake && was != null ? was : Math.round(s * 10) / 10; // v0.11.163 (RV1, Opus's L3): a flaked step (two runs) keeps its stored time
+        const slow = !QUICK && !r.flake && was && s > MIN_WARN_S && s > was * SLOWER ? `  (slower: ${was} s before)` : '';
+        const secs = Math.round(s * 10) / 10;
+        log.push(`== ${j.name} (${first ? 'FAILED' : 'ok'}, ${secs} s)`, r.out.trim(), '');
         if (!first && VERBOSE) {
-            console.log(`${j.name.padEnd(56)}ok  ${String(times[j.key]).padStart(5)} s  ${last(r.out)}${slow}`);
+            console.log(`${j.name.padEnd(56)}ok  ${String(secs).padStart(5)} s  ${last(r.out)}${slow}`);
             if (j.show) console.log(body(r.out)); // v0.11.22: the leftover report in full
         } else if (!first) {
-            console.log(stepLine(j.key, times[j.key], slow));
+            console.log(stepLine(j.key, secs, slow));
             for (const l of compact(j, r.out)) console.log(l);
         } else {
-            console.log(`${j.name.padEnd(56)}FAILED  (${times[j.key]} s)`);
+            console.log(`${j.name.padEnd(56)}FAILED  (${secs} s)`);
             console.log(r.out.trim().split('\n').slice(-20).join('\n'));
         }
     },

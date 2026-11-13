@@ -13,6 +13,7 @@
 // v0.11.135 (NT1, EV1): every sample state also on a scene's 2nd–4th day this Coil, so the later-day texts are read.
 // v0.11.136 (NC1): and the replies by day (lines.js DAY_REPLIES) as the pool `replies`.
 // v0.11.139 (MW1): and Old Wen's and the mother's daily scenes (house_texts.js) as the pool `house`.
+// v0.11.163 (TL2): one more sample, every once-a-day key used today (the return lines after a hunt).
 // Not read yet: the other result lines of choices and cards, the task cards' texts (open, options later).
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
@@ -43,6 +44,13 @@ for (const k of [0, 1, 2, 3, 4]) for (const [form, realm] of [['cat', 0], ['tige
     g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; if (p) g.flags.yk_path = p;
     SAMPLES.push(k ? onDay(ensureBars(g), k) : ensureBars(g));
 }
+// v0.11.163 (owner pick TL2): and one sample with every once-a-day key known when the game loads (js/story/common.js DAILY_KEYS)
+// marked used today, so a text shown only after a card or option is used today is read (v0.11.161's three return lines, HUNT_AGAIN;
+// the only three in v0.11.163). RV1 (Opus's L5): keys made while a scene runs (`rel_<card>`, house_time.js's `<who>_time`) are not marked.
+const { DAILY_KEYS, markDaily } = await import(js('story/common.js'));
+const USED_TODAY = ensureBars(newGame(1234, { closed: true }));
+for (const k of DAILY_KEYS) markDaily(USED_TODAY, k);
+SAMPLES.push(USED_TODAY);
 const renders = (x) => {
     if (typeof x === 'string') return [x];
     if (typeof x !== 'function') return [];

@@ -45,8 +45,27 @@ export function run(cmd, args, cwd) {
     });
 }
 
+/**
+ * v0.11.163 (owner pick F1): a step that may flake (the browser parts: 8 stops in about 19 full runs over v0.11.152–161, each
+ * part passing alone every time) runs once more after a failure. A pass on the second try counts, with a FLAKE line first
+ * (the first try's last line) and `flake: true`; the first try's output follows with each line behind "  | ", so its own
+ * NOTE or WARN lines don't show twice in the compact report (RV1, Opus's L3). Two failures fail. No retry once the check is
+ * stopping (RV1, Opus's M1: a job killed by the first failure elsewhere is not a flake). `stopped`: for the tools test.
+ */
+export async function retryOnce(go, stopped = () => stopping) {
+    const a = await go();
+    if (a.code === 0 || stopped()) return a;
+    const b = await go();
+    const why = (a.out.trim().split('\n').pop() || '').slice(0, 200);
+    const first = a.out.trim().split('\n').map((l) => `  | ${l}`).join('\n');
+    if (b.code === 0) return { code: 0, flake: true, out: `  FLAKE  failed once, passed on the retry (first try: ${why})\n  | == the first try ==\n${first}\n== the retry ==\n${b.out}` };
+    return { code: b.code || 1, out: `${b.out.trim()}\n(failed twice; the first try ended: ${why})` };
+}
+
+let stopping = false; // v0.11.163 (RV1, M1): set by killAll; retryOnce starts no second try after it
 /** SIGTERM to every running child's whole process group. */
 export function killAll() {
+    stopping = true;
     for (const ch of children) {
         if (!ch.pid) continue;
         try { process.kill(-ch.pid, 'SIGTERM'); } catch { try { ch.kill('SIGTERM'); } catch { /* already gone */ } }
