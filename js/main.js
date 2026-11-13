@@ -294,7 +294,7 @@ function renderCardScreen() {
         // v0.11.64 (D1): her job counts James's game time (YUKI_HOURS); the screen says how much is left, no bar
         const yLeft = yl ? Math.max(1, yl.len - yl.progress) : 0;
         const laneHours = YUKI_HOURS.map((h) => `${String(h).padStart(2, '0')}:00`).join('–'); // v0.11.121 (AS1, LH): from YUKI_HOURS, no longer typed
-        const yHtml = yl ? `<div class="yuki-lane"><div><b>Yuki:</b> ${esc(yl.label)} <span class="note">${showChecks ? `${YUKI_LANE_TEXT.roll} · ` : ''}${yl.on ? `next haul after ${durLabel(yLeft)} of your time (${laneHours})` : `${durLabel(yl.len)} a haul`} · ${FAM[yl.tier].name}</span></div><button class="btn${yl.on ? ' primary' : ''}" data-yuki="1">${yl.on ? 'On' : 'Off'}</button></div>` : '';
+        const yHtml = yl ? `<div class="yuki-lane"><div><b>Yuki:</b> ${esc(yl.label)} <span class="note">${showChecks ? `${YUKI_LANE_TEXT.roll} · ` : ''}${yl.on ? `next haul after ${durLabel(yLeft)} of your time (${laneHours})` : `${durLabel(yl.len)} a haul`} · ${esc(yl.speedLine)}</span></div><button class="btn${yl.on ? ' primary' : ''}" data-yuki="1">${yl.on ? 'On' : 'Off'}</button></div>` : '';
         const ns = store.get(NONEXT_KEY) === '1' ? '' : nextStep(g, SCENES); // v0.11.72 (N1): Selene's next-step line, ✕ hides it for good
         hubTop = `${ns ? `<div class="nstep"><b>Next step</b> <span>${esc(ns)}</span><button class="nstep-x" data-nonext="1" aria-label="Hide the next-step line">✕</button></div>` : ''}${yHtml}`;
         const work = workGroups(g.scene);

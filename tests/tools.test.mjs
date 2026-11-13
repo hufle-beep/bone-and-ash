@@ -703,6 +703,22 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md'];
     assert(rp && (rp[3] || '').split(', ').filter(Boolean).every((x) => !TASK_HUBS[x.split(' ')[0]]), `E1 (RP): no hub among the repeated screens (${rp?.[3] || 'none'})`);
     assert(/NOTE {2}Act 1 endings \(log only\): careful accord 0% → [\d.]+% \(n 500 → 60\)/.test(mo) && /NOTE {2}repeated screens \(log only\): careful 60% → [\d.]+% of screens/.test(mo), 'E1 (EB): a saved copy far from the run is noted, log only');
 }
+const RP2_SHA = 'e5088b2cf6accc566581cf0d59f7ff00532bef028e8bef831b2f37295c4aefc2'; // v0.11.158 (RV1, RT): the 91 rows moved to restore-points-2.md, as moved (part 2 never changes)
+// v0.11.158 (owner pick NX2, RP): restore-points.md split at 0.11.69 (as the changelog in v0.11.105): every row in exactly one part,
+// the old ones in restore-points-2.md, newest first in each, the first part under the project tool's limit with a pointer line
+{
+    const p1 = readFileSync(path.join(ROOT, 'project/restore-points.md'), 'utf8'), p2 = readFileSync(path.join(ROOT, 'project/restore-points-2.md'), 'utf8');
+    const rows = (t) => t.split('\n').filter((l) => /^\| \d+\.\d+\.\d+ \|/.test(l)).map((l) => l.split('|')[1].trim().split('.').map(Number));
+    const cmp = (a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2];
+    const r1 = rows(p1), r2 = rows(p2), all = [...r1, ...r2].map((v) => v.join('.'));
+    assert(r2.length === 91 && r2.every((v) => cmp(v, [0, 11, 69]) <= 0) && r1.every((v) => cmp(v, [0, 11, 70]) >= 0), `RP: 0.11.69 and before in part 2 (${r2.length}), the rest in part 1 (${r1.length})`);
+    assert(new Set(all).size === all.length && [r1, r2].every((r) => r.every((v, i) => i === 0 || cmp(r[i - 1], v) > 0)), 'RP: no row twice, each part newest first');
+    const { createHash } = await import('node:crypto');
+    const part2Rows = p2.split('\n').filter((l) => /^\| \d+\.\d+\.\d+ \|/.test(l)).join('\n');
+    assert(r1.length + r2.length >= 179 && createHash('sha256').update(part2Rows).digest('hex') === RP2_SHA, `RT (RV1): every row kept (${r1.length} + ${r2.length}), part 2's rows exactly as moved (sha256 ${createHash('sha256').update(part2Rows).digest('hex').slice(0, 12)}…)`);
+    assert(Buffer.byteLength(p1) <= DOC_TOOL_MAX && p1.includes('Older versions (0.11.69 and before): `restore-points-2.md`') && /\| 0\.8\.1 \| `0c82c10` \|/.test(p2), `RP: part 1 under ${DOC_TOOL_MAX} bytes (${Buffer.byteLength(p1)}) with its pointer; part 2 ends at 0.8.1`);
+}
+
 rmSync(TMP, { recursive: true, force: true });
 
 console.log(`(${((Date.now() - t0) / 1000).toFixed(1)} s)`);

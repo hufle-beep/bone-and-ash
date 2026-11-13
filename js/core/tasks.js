@@ -14,7 +14,7 @@
  */
 import { hasForm } from './forms.js';
 import { choose, goTo, choiceOpen, choiceTag, gives, setTimeless, defaultMinutes, movesPlace, wasPicked, isMenuScene, isTimeless, setFamiliar, doorMinutes } from './story.js';
-import { d8, itemCap, yukiForm, advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, canBreakThrough, btMinutes, realmName, condense, sitMinutes, useSpeed, USE_N, nightLock, endsLate, sitUseless, jamesQiMax, SATIETY_PER_HOUR, breakAt, coilMult, fmtMult, YUKI_HELD_TEXT } from './game.js';
+import { d8, itemCap, yukiForm, advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, canBreakThrough, btMinutes, realmName, condense, sitMinutes, useSpeed, USE_N, USE_CAP, nightLock, endsLate, sitUseless, jamesQiMax, SATIETY_PER_HOUR, breakAt, coilMult, fmtMult, YUKI_HELD_TEXT } from './game.js';
 import { CONDENSE_SIT_COST } from './formulas.js';
 import { btTarget, MER_LINES, lineWindow, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
@@ -42,6 +42,12 @@ export const famTier = (f) => (f >= 18 ? 3 : f >= 8 ? 2 : f >= 2 ? 1 : 0);
 /** v0.11.18 (owner pick c): Yuki's job has its own slower curve, N 90, capped at ×3 (Incremental Mode). */
 export const YUKI_N = 90, YUKI_CAP = 3;
 export const yukiSpeed = (f) => Math.min(YUKI_CAP, useSpeed(f, YUKI_N));
+/** v0.11.158 (owner pick NX2, YS; Fable's L3 of v0.11.155): her lane names her own speed, not the cards' steps (whose ×5 / ×10
+ * she never reaches): "×1.8 of ×3 · 8/20 to her best", then "×3, her best" from the count that reaches the cap (20 at N 90).
+ * RV1 (the Opus review): RD the speed rounded down, so ×3 shows only at her best (19.5 is ×2.95); WB the count is her practice,
+ * not hauls (an empty haul counts half), worded as the cards' "5/8 to Skilled". */
+export const YUKI_BEST = Math.ceil(((YUKI_CAP - 1) * YUKI_N) / (USE_CAP - 1));
+export const yukiSpeedLine = (f) => (yukiSpeed(f) >= YUKI_CAP ? `×${YUKI_CAP}, her\u00a0best` : `×${Math.floor(yukiSpeed(f) * 10 + 1e-9) / 10}\u00a0of\u00a0×${YUKI_CAP} · ${Math.round((f || 0) * 10) / 10}/${YUKI_BEST}\u00a0to\u00a0her\u00a0best`);
 export const cardSpeed = (f) => useSpeed(f, USE_N.card);
 const nextAt = (f) => FAM.find((t) => t.at > f)?.at ?? null;
 /** v0.11.155 (FD1, NX): a work or door card's familiarity line names the next step ("Practised · 5/8 to Skilled"); "Mastered" at the top.
@@ -386,13 +392,13 @@ function yukiTick(g, hubId, minutes) {
     return lines;
 }
 
-/** Yuki's job on this hub, for the screen: { label, on, progress, len, fam, tier } or null. */
+/** Yuki's job on this hub, for the screen: { label, on, progress, len, fam, tier, speedLine } or null. */
 export function yukiLane(g) {
     const job = TASK_HUBS[g.scene]?.yuki;
     if (!job) return null;
     const y = st(g).yuki;
     const f = st(g).fam[job.id] || 0;
-    return { label: job.label, on: !!y.on, progress: y.progress || 0, len: Math.round((job.minutes * NEW_LENGTH) / yukiSpeed(f)), fam: f, tier: famTier(f) }; // v0.11.118 (YK1, D8): no Fight / DC (the haul is a d8)
+    return { label: job.label, on: !!y.on, progress: y.progress || 0, len: Math.round((job.minutes * NEW_LENGTH) / yukiSpeed(f)), fam: f, tier: famTier(f), speedLine: yukiSpeedLine(f) }; // v0.11.158 (YS): speedLine for the lane // v0.11.118 (YK1, D8): no Fight / DC (the haul is a d8)
 }
 export function setYuki(g, on) { st(g).yuki.on = !!on; }
 

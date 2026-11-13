@@ -204,6 +204,23 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
       assert([DRILL_AGAIN.hard, DRILL_AGAIN.hardFail].some((t) => res.lines.includes(t)) && JSON.stringify(g.rel) === rel0 && Object.keys(g.flags).filter((k) => k.startsWith('oo:')).length === oo0, `LT: a repeat "Drill them hard" through runTask: T3 or T4, no relationship, no once-a-Coil mark (${res.lines})`);
       g.minutes = 19 * 1440 + 19 * 60 + 5; assert(!grp(g, 'Militia').some((c) => c.status === 'open'), 'LT: the practice drill closes at 19:00'); }
 }
+// v0.11.158 (owner pick NX2, YS; Fable's L3 of v0.11.155): Yuki's lane names her own speed and her count to her best, not the
+// cards' step names (Practised / Skilled / Mastered mean ×2 / ×5 / ×10 on a card; she runs ×1.2 / ×1.8 / ×2.8 there, ×3 at 20);
+// RV1 (the Opus review): RD the speed rounded down (×3 only at her best), WB "8/20 to her best" (her practice, not hauls)
+{
+    const { yukiSpeed, yukiSpeedLine, YUKI_BEST, YUKI_CAP } = await import('../js/core/tasks.js');
+    assert(YUKI_BEST === 20 && yukiSpeed(YUKI_BEST) === YUKI_CAP && yukiSpeed(YUKI_BEST - 1) < YUKI_CAP, `YS: her best comes at ${YUKI_BEST} hauls, the first count at ×${YUKI_CAP}`);
+    const nb = (t) => t.replace(/\u00a0/g, ' ');
+    assert(nb(yukiSpeedLine(0)) === '×1 of ×3 · 0/20 to her best' && nb(yukiSpeedLine(8)) === '×1.8 of ×3 · 8/20 to her best' && nb(yukiSpeedLine(18)) === '×2.8 of ×3 · 18/20 to her best' && nb(yukiSpeedLine(12.5)) === '×2.2 of ×3 · 12.5/20 to her best' && nb(yukiSpeedLine(19.5)) === '×2.9 of ×3 · 19.5/20 to her best', `YS + RD + WB: the line at 0, 8, 18, 12.5, 19.5 (${[0, 8, 18, 12.5, 19.5].map(yukiSpeedLine)})`);
+    assert(nb(yukiSpeedLine(20)) === '×3, her best' && nb(yukiSpeedLine(31)) === '×3, her best', 'YS: from 20 hauls "×3, her best"');
+    for (let f = 0; f < 20; f += 0.5) { const m = /^×([\d.]+)\sof/.exec(yukiSpeedLine(f)); assert(m && +m[1] <= yukiSpeed(f) + 1e-9 && yukiSpeed(f) - +m[1] < 0.1 && +m[1] < YUKI_CAP, `RD: below her best the shown speed is hers rounded down, never ×3 (${f}: ${m?.[1]} vs ${yukiSpeed(f)})`); }
+    assert(yukiSpeedLine(8).includes('\u00a0of\u00a0') && yukiSpeedLine(8).includes('/20\u00a0to\u00a0her\u00a0best') && yukiSpeedLine(20).includes('her\u00a0best') && !/haul/.test(yukiSpeedLine(8)), 'YS + WB: non-breaking spaces keep the speed and the count whole on a narrow phone; no "hauls"');
+    const g = ensureBars(newGame(15801)); g.scene = 'wilds'; g.tasks.fam['yuki:wilds'] = 8;
+    assert(yukiLane(g)?.speedLine === yukiSpeedLine(8), `YS: the lane carries her line (${yukiLane(g)?.speedLine})`);
+    const MAIN = (await import('node:fs')).readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+    const lane = MAIN.slice(MAIN.indexOf('<div class="yuki-lane">'), MAIN.indexOf('</span></div><button', MAIN.indexOf('<div class="yuki-lane">')));
+    assert(lane.includes('${esc(yl.speedLine)}') && !lane.includes('FAM['), 'YS: main.js draws her line on the lane, no card step name');
+}
 // v0.11.157 (owner pick NX1, PA): the prologue Ashfall's Clinic, Workshop and Militia run more than one card a day, as Act 1's
 // (v0.11.156, OA): each card still once a Coil (a success uses it up), the menus' day marks only hold "Call it a day" as before
 {
