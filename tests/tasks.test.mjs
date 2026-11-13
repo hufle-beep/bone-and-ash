@@ -139,9 +139,11 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
         assert(f0.length >= 2, `OF: ${hub} offers its forage cards (${f0.map((c) => c.id)})`);
         const id = f0.find((c) => !/grub|beetle/.test(c.label)).id; runTask(g, SCENES, id);
         const f1 = grp(g, 'Forage');
-        assert(g.scene === hub && f1.find((c) => c.id === id)?.status === 'open' && f1.filter((c) => !/grub|beetle/.test(c.label)).every((c) => c.status === 'open'), `OF: ${hub}'s forage after one card: the same card and the others still open the same day (${f1.map((c) => `${c.id} ${c.status}`)})`);
-        const fam = taskState(g).fam[id] || 0; runTask(g, SCENES, id);
-        assert(g.scene === hub && (taskState(g).fam[id] || 0) > fam, `OF: ${hub}'s forage card runs again the same day and gains familiarity (${fam} → ${taskState(g).fam[id]})`);
+        // v0.11.161 (owner pick PO2, FG): the card taken waits for tomorrow; the menu's other cards stay open the same day
+        assert(g.scene === hub && f1.find((c) => c.id === id)?.status === 'tomorrow' && f1.filter((c) => c.id !== id && !/grub|beetle/.test(c.label)).every((c) => c.status === 'open'), `OF + FG: ${hub}'s forage after one card: that card tomorrow, the others still open the same day (${f1.map((c) => `${c.id} ${c.status}`)})`);
+        const other = f1.find((c) => c.id !== id && c.status === 'open' && !/grub|beetle/.test(c.label)).id; const fam = taskState(g).fam[other] || 0; runTask(g, SCENES, other);
+        assert(g.scene === hub && (taskState(g).fam[other] || 0) > fam, `OF: ${hub}'s second forage card runs the same day and gains familiarity (${fam} → ${taskState(g).fam[other]})`);
+        g.minutes += 1440; assert(grp(g, 'Forage').find((c) => c.id === id)?.status === 'open', `FG: ${hub}'s card open again the next day`);
     }
     { const g = at('rr_hub', 13, 15602); const s0 = grp(g, 'Scout').filter((c) => c.status === 'open'); assert(s0.length === 2, `OS: two scout cards (${s0.map((c) => c.id)})`);
       runTask(g, SCENES, 'rr_scout:1'); const s1 = grp(g, 'Scout');
@@ -3142,6 +3144,93 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
       assert(m.coil.act === 1 && m.coil.n === 2 && m.coil.start.fam['yuki:wilds'] === 1 && String(m.coil.start.gu) === String([m.james.gu.tier, m.james.gu.level]), `TG: a state-4 save mid-Act 1 keeps its Coil start's familiarity, the skills as loaded (${JSON.stringify(m.coil.start)})`);
       const n = ensureBars(newGame(7221, { closed: true })); delete n.coil; startActCoil(n, 1);
       assert(n.coil.act === 1 && n.coil.start && n.coil.start.fam, 'CS: with no Coil before the start is the moment Act 1 begins'); }
+}
+// v0.11.161 (owner pick PO2, FG + HO; the owner 11:25 "once a day PER OPTION, not overall"): each Blackroot forage card and each hunt
+// option once a waking day, a try counted whatever its outcome (as the Wilds'); the Hunt card open while either option is left
+{
+    const { onceADay } = await import('../js/story/act1_blackroot.js');
+    const at = (hub, day, seed) => { const g = ensureBars(newGame(seed)); g.scene = hub; g.coil.act = 1; g.minutes = (day - 1) * 1440 + 8 * 60; g.james.qi = 60; g.james.satiety = 90; g.flags.ya_joined = true; return g; };
+    const FORAGE = { rr_forage: ['rr_bracket', 'rr_sorrel', null], dw_forage: ['dw_gill', 'dw_chestnut', 'dw_frog'], ah_forage: ['ah_truffle', 'ah_cinder', null] };
+    const HUNTS = { rr_hunt: ['rr_elk', 'rr_snare', 'rr_hub', 13], dw_hunt: ['dw_serpent', 'dw_fowl', 'dw_hub', 15], ah_hunt: ['ah_hawks', 'ah_hares', 'ah_hub', 17] };
+    // every forage card but the grub and the beetle (already once a day), and both options of every hunt, carry their own day key
+    for (const [m, keys] of Object.entries(FORAGE)) keys.forEach((k, i) => { if (!k) return; const c = SCENES[m].choices[i]; assert(c.show?.dailyKey === k && typeof c.failDo === 'function', `FG: ${m}:${i} is once a day (${k}), its failure counted too`); });
+    for (const [m, [a, b, hub]] of Object.entries(HUNTS)) assert(SCENES[m].choices.length === 3 && SCENES[m].choices[0].combat && !SCENES[m].choices[1].combat && SCENES[m].choices[2].text === 'Not now.' && SCENES[m].choices[2].to === hub && !SCENES[m].choices[2].do && !SCENES[m].enter, `HO + LV: ${m} has its fight, its small game and "Not now." last, and no day mark on entering`);
+    // RV1 (GV, Fable's H1): every wrapped card still names its items (story.js's gives: thin hauls, double hauls, full stock, the card's
+    // item names), the same lists as before the wrapper; the frogs and the fights give none
+    { const { gives } = await import('../js/core/story.js'); const { cardCheck } = await import('../js/core/tasks.js');
+      const WANT = { 'rr_forage:0': ['jade_bracket'], 'rr_forage:1': ['river_cress'], 'dw_forage:0': ['ghost_gill'], 'dw_forage:1': ['river_cress'], 'dw_forage:2': [], 'ah_forage:0': ['jade_bracket'], 'ah_forage:1': ['crimson_berry'], 'rr_hunt:1': ['hare_raw'], 'dw_hunt:1': ['fowl_raw'], 'ah_hunt:1': ['hare_raw'], 'rr_hunt:0': [], 'dw_hunt:0': [], 'ah_hunt:0': [] };
+      const bad = Object.entries(WANT).filter(([id, w]) => { const [m, i] = id.split(':'); return JSON.stringify(gives(SCENES[m].choices[+i])) !== JSON.stringify(w); });
+      assert(!bad.length, `GV: the wrapped cards name their items as before (${bad.map(([id]) => `${id} ${JSON.stringify(gives(SCENES[id.split(':')[0]].choices[+id.split(':')[1]]))}`).join(', ') || 'all'})`);
+      // a thin haul in each Forage menu: a check between half and the full DC still brings something back, and uses the day
+      for (const [m, hub, day, i, item] of [['rr_forage', 'rr_hub', 13, 0, 'jade_bracket'], ['dw_forage', 'dw_hub', 15, 0, 'ghost_gill'], ['ah_forage', 'ah_hub', 17, 0, 'jade_bracket']]) {
+          const g = at(hub, day, 16150 + day); const id = `${m}:${i}`; let lv = 0;
+          for (let r = 1; r <= 40; r++) { g.james.gu = { tier: 1 + Math.floor((r - 1) / 10), level: 1 + ((r - 1) % 10), xp: 0 }; if (cardCheck(g, id, SCENES[m].choices[i]).band === 'partial') { lv = r; break; } }
+          if (!lv) { assert(false, `GV: no GU gives ${id} a partial band`); continue; }
+          const n0 = g.inventory[item] || 0; const out = runTask(g, SCENES, id);
+          assert((g.inventory[item] || 0) > n0 && !SCENES[m].choices[i].show(g), `GV: ${id} at a partial band brings a thin haul (+${(g.inventory[item] || 0) - n0} ${item}) and uses the day (${out.lines.join(' | ')})`);
+      } }
+    // a failed forage try counts too (failDo marks), as a success does; the next day it is back
+    { const g = at('rr_hub', 13, 16101); const c = SCENES.rr_forage.choices[0]; assert(c.show(g), 'FG: the brackets open in the morning');
+      c.failDo(g); assert(!c.show(g), 'FG: a failed try uses the day'); g.minutes += 1440; assert(c.show(g), 'FG: open again the next day');
+      c.do(g); assert(!c.show(g) && SCENES.rr_forage.choices[1].show(g), 'FG: a success uses the day, the sorrel still open'); }
+    for (const [m, [fight, small, hub, day]] of Object.entries(HUNTS)) {
+        const g = at(hub, day, 16110 + day); g.james.skills['Convergence Use'] = { tier: 3, level: 1, xp: 0 }; const hunt = () => taskCards(g, SCENES).find((c) => c.label === 'Hunt.'); // darts sung (the form gate, prologue.js)
+        const open = () => sceneView(g, SCENES).choices.filter((c) => !c.disabled && c.index < 1000).map((c) => SCENES[m].choices[c.index]);
+        assert(hunt()?.status === 'open', `HO: ${hub}'s Hunt card open in the morning`);
+        runTask(g, SCENES, hunt().id); assert(g.scene === m && open().length === 3, `HO + LV: the first visit offers the fight, the small game and "Not now." (${g.scene}: ${open().map((c) => c.text)})`);
+        choose(g, SCENES, 2); assert(g.scene === hub && !Object.keys(g.flags).some((k) => k.startsWith(`${fight}@`) || k.startsWith(`${small}@`)) && hunt()?.status === 'open', `LV: "Not now." goes back to ${hub}, uses nothing, the Hunt card still open`);
+        runTask(g, SCENES, hunt().id); choose(g, SCENES, 1);
+        assert(g.scene === hub && hunt()?.status === 'open', `HO: after the small game the Hunt card is still open the same day (${g.scene}, ${hunt()?.status})`);
+        runTask(g, SCENES, hunt().id);
+        assert(open().length === 2 && open()[0].combat && open()[1].text === 'Not now.', `HO + LV: the second visit offers the fight or "Not now.", never a forced fight (${open().map((c) => c.text)})`);
+        const r = choose(g, SCENES, 0); assert(r.combat && Object.keys(g.flags).some((k) => k.startsWith(`${fight}@`)), `HO: taking the fight marks ${fight} for the day (won, lost or fled)`);
+        g.combat = null; g.scene = hub; assert(hunt() === undefined, `HO: with both options taken the Hunt card is gone for the day (${hunt()?.status})`);
+        g.minutes += 1440; assert(hunt()?.status === 'open', `HO: ${hub}'s Hunt card open again the next day`);
+    }
+    // the fight first, then fled or lost (marked before the fight): the Hunt card stays open for the small game; with Qi under 2 the
+    // small game is locked, so the card goes (never a scene with only "Not now.")
+    { const g = at('rr_hub', 13, 16160); const hunt = () => taskCards(g, SCENES).find((c) => c.label === 'Hunt.');
+      runTask(g, SCENES, hunt().id); const r = choose(g, SCENES, 0); g.combat = null; g.scene = 'rr_hub';
+      assert(r.combat && hunt()?.status === 'open', 'HO: the fight taken (and fled): the Hunt card open for the snare');
+      g.james.qi = 1; assert(hunt() === undefined, `HO: Qi under 2 with only the snare left: the Hunt card is gone (${hunt()?.status})`); }
+    // RV1 (SD, owner pick SD1; Fable's texts): a same-day return after the fight shows its own opening, the first visit the old one
+    { const { HUNT_AGAIN } = await import('../js/story/act1_blackroot.js');
+      assert(HUNT_AGAIN.rr.startsWith('Ya has gone back to the torn ground') && HUNT_AGAIN.dw.startsWith('The pool has gone flat again.') && HUNT_AGAIN.ah.startsWith('The haze over the ridge has nothing in it now.'), 'SD1: rr b, dw a, ah a, word for word');
+      for (const [m, k, hub, day, key] of [['rr_hunt', 'rr_elk', 'rr_hub', 13, 'rr'], ['dw_hunt', 'dw_serpent', 'dw_hub', 15, 'dw'], ['ah_hunt', 'ah_hawks', 'ah_hub', 17, 'ah']]) {
+          const g = at(hub, day, 16170 + day); g.scene = m; const t0 = sceneView(g, SCENES).text;
+          assert(!t0.includes(HUNT_AGAIN[key]), `SD: ${m}'s first visit keeps its own opening`);
+          SCENES[m].choices[0].do(g); const t1 = sceneView(g, SCENES).text;
+          assert(t1 === HUNT_AGAIN[key], `SD: ${m} after the fight opens on its return text (${t1.slice(0, 50)})`);
+          g.minutes += 1440; assert(sceneView(g, SCENES).text !== HUNT_AGAIN[key], `SD: ${m} the next day opens as before`);
+      } }
+    // RV1 (L2): every byOption menu's cards are gated by the day alone (so "all used" means done for the day)
+    { const { TASK_HUBS } = await import('../js/story/task_hubs.js');
+      const menus = Object.values(TASK_HUBS).flatMap((h) => Object.entries(h.menus || {}).filter(([, m]) => m.byOption).map(([id]) => id));
+      assert(menus.length === 3 && menus.every((id) => SCENES[id].choices.every((c) => c.show?.dailyKey)), `L2: the byOption menus (${menus}) gate every card by the day`); }
+    { const y = onceADay('x_test2', { text: 't', show: () => true, check: { skill: 'GU', dc: 1 }, do: () => [], failDo: () => [], to: 'rr_hub' });
+      assert(y.show.dailyKey === 'x_test2', 'L1: a card with its own show keeps the day key (tomorrow, not hidden)'); }
+    // with every forage card used, the group stays on the screen as tomorrow (as the Wilds', the grub and the beetle), while its entry
+    // is closed, so the menu is never entered with nothing left (the story test's dead end)
+    { const g = at('rr_hub', 13, 16140); g.james.satiety = 40; const grp = () => taskCards(g, SCENES).filter((c) => c.group === 'Forage');
+      for (const c of grp().filter((x) => x.status === 'open')) runTask(g, SCENES, c.id);
+      const entry = SCENES.rr_hub.choices.find((c) => c.to === 'rr_forage');
+      assert(grp().length === 3 && grp().every((c) => c.status === 'tomorrow') && !entry.show(g), `FG: all three used: the group shows them as tomorrow, the entry closed (${grp().map((c) => `${c.id} ${c.status}`)})`);
+      const h = at('rr_hub', 13, 16141); h.minutes = 12 * 1440 + 23 * 60; assert(!taskCards(h, SCENES).some((c) => c.group === 'Forage' && c.status === 'tomorrow'), 'FG: late in the day the group is not shown as tomorrow'); }
+    // a James who can't sing darts has only the fight in the Drowned Wood and the Ashen Hills: once it is taken the Hunt card waits for
+    // tomorrow (never an empty hunt scene); the root road's snare needs no form
+    for (const [m, hub, day] of [['dw_hunt', 'dw_hub', 15], ['ah_hunt', 'ah_hub', 17]]) {
+        const g = at(hub, day, 16130 + day); g.james.skills['Convergence Use'] = { tier: 1, level: 1, xp: 0 }; const hunt = () => taskCards(g, SCENES).find((c) => c.label === 'Hunt.');
+        assert(SCENES[m].choices[1].form === 'dart' && !SCENES[m].choices[1].show(g) && hunt()?.status === 'open', `HO: ${m}'s darts hidden without the form, the Hunt card open for the fight`);
+        runTask(g, SCENES, hunt().id); const r = choose(g, SCENES, 0); g.combat = null; g.scene = hub;
+        assert(r.combat && hunt() === undefined, `HO: ${hub} with the fight taken (through the scene) and no darts: the Hunt card is gone for the day (${hunt()?.status})`);
+    }
+    // the one-move finish marks the fight too (story.js runs the choice's `do` there, as before a fight)
+    { const g = at('rr_hub', 13, 16120); g.scene = 'rr_hunt'; const i = SCENES.rr_hunt.choices.findIndex((c) => c.combat);
+      g.james.gu = { tier: 10, level: 10, xp: 0 }; g.james.realm = 9; g.james.hp = 999;
+      try { choose(g, SCENES, 1000 + i); } catch (e) { assert(false, `HO: the one-move finish runs (${e.message})`); }
+      assert(Object.keys(g.flags).some((k) => k.startsWith('rr_elk@')), 'HO: the one-move finish uses the elk for the day');
+      const y = onceADay('x_test', { text: 't', combat: () => null, to: 'rr_hub' }); const h = at('rr_hub', 13, 16121);
+      assert(y.show(h) && JSON.stringify(y.do(h)) === '[]' && !y.show(h) && !('failDo' in y), 'HO: onceADay on a fight: show by the day, a do that only marks, no failDo added'); }
 }
 // every card that was ever offered was also played at least once
 const all = cardsListed;

@@ -239,9 +239,10 @@ export function choose(g, scenes, index, { task = false, speed = 0 } = {}) { // 
         notePicked(g, s.id, index - ONE_MOVE);
         if (!task && !TIMELESS.has(s.id)) countPick(g, s.id, index - ONE_MOVE); // v0.11.140 (FS); v0.11.141 (FX1, SA): every story choice off the meta screens
         if (onChoose) onChoose(g, s.id, index - ONE_MOVE, c);
+        const pre = c.do ? (c.do(g) || []) : []; // v0.11.161 (owner pick PO2, HO): a fight choice's `do` runs before the fight here too, as below (the hunts' once-a-day mark)
         const r = instantWin(g, c.combat(g));
         const st = STOMP[r.enc.id];
-        const lines = [];
+        const lines = [...pre];
         if (st?.posture) lines.push(st.posture(g, 3));
         lines.push(st?.one ? st.one(g) : 'One move. It is over before it starts.', ...r.lines);
         const keep = g.lastWin;

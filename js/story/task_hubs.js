@@ -81,8 +81,9 @@ export const TASK_HUBS = {
     // v0.11.67 (owner pick F1, one hub format): the Blackroot's "Train." (bl_train) is a Practice group on the list, not a gate card
     // v0.11.156 (owner pick DM1, OF + OS + OA): the Blackroot's Forage and Scout, and the Fallout's Palisade, Militia and Clinic, have no
     // `daily`: more than one card a day (Forage repeats as in the Wilds; the once-a-Coil cards stay once a Coil); the Council stays daily
+    // v0.11.161 (owner pick PO2, FG): each Blackroot forage card once a day (`onceADay` in act1_blackroot.js); `byOption` shows them all as tomorrow once every one is used
     rr_hub: {
-        menus: { rr_forage: { label: 'Forage' }, rr_scout: { label: 'Scout' }, bl_train: { label: 'Practice' } },
+        menus: { rr_forage: { label: 'Forage', byOption: true }, rr_scout: { label: 'Scout' }, bl_train: { label: 'Practice' } },
         doors: ['ya_mocks', 'rr_hunt', 'rr_roots', 'talk_mei', 'talk_ya'],
         own: 'The root road',
         yuki: {
@@ -99,7 +100,7 @@ export const TASK_HUBS = {
         evening: 'rr_hub',
     },
     dw_hub: {
-        menus: { dw_forage: { label: 'Forage' }, bl_train: { label: 'Practice' } },
+        menus: { dw_forage: { label: 'Forage', byOption: true }, bl_train: { label: 'Practice' } },
         doors: ['dw_hunt', 'dw_scout', 'talk_mei', 'talk_ya', 'hot_spring'],
         own: 'The drowned wood',
         yuki: {
@@ -117,7 +118,7 @@ export const TASK_HUBS = {
         evening: 'dw_hub',
     },
     ah_hub: {
-        menus: { ah_forage: { label: 'Forage' }, bl_train: { label: 'Practice' } },
+        menus: { ah_forage: { label: 'Forage', byOption: true }, bl_train: { label: 'Practice' } },
         doors: ['ya_offended', 'trio_kiss', 'ah_hunt', 'ah_scout', 'talk_mei', 'talk_ya'],
         own: 'The ashen hills',
         yuki: {

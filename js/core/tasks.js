@@ -205,7 +205,10 @@ export function taskCards(g, scenes, only = null) {
         if (ei < 0) continue;
         const entry = hub.choices[ei];
         const door = !!(cfg.doorMenus || {})[menu];
-        const doneToday = m.daily && !daily(m.daily)(g);
+        // v0.11.161 (owner pick PO2, FG): a menu whose options are each once a day (`byOption`) shows them all as tomorrow once every one is used.
+        // RV1 (L2, Fable's review): only for menus whose every card is gated by the day alone (the Blackroot's Forage; the tasks test checks it):
+        // a card hidden for another reason (a form, a Back) would otherwise read as done for the day
+        const doneToday = (m.daily && !daily(m.daily)(g)) || (m.byOption && !(scenes[menu].choices || []).some((c) => !c.show || c.show(g)));
         if (!doneToday && !choiceOpen(g, entry)) continue;
         (scenes[menu].choices || []).forEach((c, i) => {
             if (door ? (typeof c.to !== 'string' || c.to === hubId) : !hasWork(c)) return;

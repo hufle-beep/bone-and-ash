@@ -22,6 +22,7 @@ export const NOTES = [
     ['0.11.158', 'Yuki\'s job line now shows how fast she really is: "×1.8 of ×3 · 8/20 to her best", and "×3, her best" once she gets there (a haul that brings nothing counts half). Before, it showed the cards\' steps (Practised, Skilled, Mastered), which promise ×5 and ×10, speeds she never reaches.'],
     ['0.11.159', 'The Coil screen now gives Yuki her own line, "Yuki\'s hunting", with each job she practised that Coil and how fast she is at it in brackets, the same as her job line; she no longer counts among the cards closest to their next step or in the cards that went up a step. The FAQ\'s Yuki\'s job entry says she is at her best at 20 practice, and that a haul with no catch counts half (a catch she eats herself still counts 1).'],
     ['0.11.160', 'The Coil screen of the Coil that carries you from the prologue into Act 1 now counts that whole Coil, from its first dawn: the cards and Yuki\'s jobs you practised before Day 8 show there too. Before, it counted only from Day 8.'],
+    ['0.11.161', 'On the Blackroot road, in the Drowned Wood and in the Ashen Hills, each forage card is now once a day, as in the Wilds (a failed try counts), and so is each hunt: the fight (the elk, the serpent, the hawks) and the small game are each once a day, so the Hunt card stays open while either is left to take. Each hunt also has "Not now.", so going back for the small game never forces the fight.'],
 ];
 
 const parts = (v) => (/^\d+(\.\d+)*$/.test(String(v ?? '')) ? String(v).split('.').map(Number) : null);
