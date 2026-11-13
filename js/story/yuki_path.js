@@ -137,38 +137,38 @@ const SCENES_YK = {
     },
     yk_sister: {
         id: 'yk_sister', title: 'Family', art: 'yuki_human', place: 'The Long Forest',
-        text: `Yuki looks at you for a long second. Then she nods, once, the way a cat settles a matter, and something in her shoulders comes down an inch.
+        text: `Yuki studies you across the fire for one breath. Then she nods, once only, a cat marking a matter settled, and her shoulders drop an inch she had not admitted to holding.
 
 "Good," she says. "Sister. I'm keeping the blanket."
 
-"You were always keeping the blanket."
+"The blanket has never once been in dispute."
 
-"Now it's official." She stands, walks round the fire, and drops down beside you, shoulder to shoulder, and bumps her head against yours exactly the way she did when she was a cat, which you suppose she still is. "Rules. One: I get to be horrible about every woman you look at. Two: if any of them hurts you, I eat them. Three —" she holds up a finger — "you are forty, you are lonely, and you are hopeless. The next pretty woman who doesn't run screaming from your lab coat, you are going to *talk* to her. I will be supervising."
+"Now it is on the record." She rises, walks round the fire and drops down at your side, shoulder against shoulder, and butts her head into yours exactly as she did as a cat, which, you suppose, she still is. "Rules. One: I may be horrible about every woman you so much as glance at. Two: any of them hurts you, I eat her. Three," and up goes a finger, "you are forty, you are lonely, and you are a lost cause. The next woman with a pretty face and the nerve to stand near that lab coat, you are going to *talk* to her. I will be supervising."
 
 "That's not a rule, that's a threat."
 
-"Sisters," says Yuki, with enormous satisfaction, "are allowed both."`,
+"A sister," says Yuki, with vast contentment, "is entitled to both."`,
         choices: [{ text: 'Sleep. Tomorrow, the smoke.', do: (g) => { bumpRel(g, 'Yuki', 0, 0); delete g.flags.yk_form_before; g.yuki.form = 'cat'; return ['Yuki: your sister. Back in her small form, on your chest, purring like a smug engine.']; }, to: back }],
     },
     yk_lover: {
         id: 'yk_lover', title: 'More', art: 'yuki_human', place: 'The Long Forest',
-        text: `Her hand is warm. You don't know why that surprises you. Forty years of her sleeping on your chest and you never thought about her hands.
+        text: `Her hand is warm, and it startles you, which is absurd. Forty years of her sleeping on your chest, a warm weight and nothing more, and it never crossed your mind that the warmth would come with fingers.
 
-"Oh," says Yuki, very quietly, and for once she doesn't have anything dry to follow it with.
+"Oh," says Yuki, hardly louder than the fire. No dry remark arrives behind it. You wait, and none does.
 
-She comes round the fire on her knees, slowly, giving you every chance to laugh it off. You don't. She stops close enough that her hair falls over your arm, and her ears go flat and then forward, and her tail curls once around your ankle like a question.
+She comes round the fire on her knees, slowly, and at every inch you could still make a joke of it. You let each chance go by. She stops where her hair spills over your arm. Her ears flatten, then come forward, and her tail takes one turn about your ankle, asking.
 
-"I'm going to kiss you," she says. "I've been thinking about how for a while. I have notes."
+"I am going to kiss you," she says. "The method has had some thought. I made notes."
 
-"Of course you have notes."
+"Of course you made notes."
 
-The notes, it turns out, are good. She kisses like she does everything else: unhurried, certain, and entirely on her own terms, and when you pull her into your lap she makes a low sound you've felt through the bond a thousand times and never once heard with your ears. Her dress was the bond's idea. It is the bond's idea, a few minutes later, to stop being a dress.
+The notes are excellent. She kisses exactly as she hunts, sleeps and argues: in her own time, with no doubt of the result. You draw her into your lap, and she makes a low sound the bond has carried to you a thousand times and your ears have never had. Her dress was the bond's idea. A few minutes on, the bond has a better one, and there is no dress.
 
-The fire burns down. Nobody tends it.
+The fire burns low. Nobody gets up to feed it.
 
 *
 
-Toward dawn she is asleep on your chest, which is the most familiar thing in the world, except that she has a face pressed into your neck and an arm thrown over you and is snoring very slightly. Through the bond, half asleep: *I told you I'd get the best spot.*`,
+By first light she is asleep on your chest, the most familiar weight you own, except that tonight it has a face tucked into your neck, an arm flung across you, and a very small snore. The bond, mostly asleep: *I said I would get the best spot.*`,
         choices: [{ text: 'Let her sleep. Tomorrow, the smoke.', do: (g) => { bumpRel(g, 'Yuki', 0, 0); delete g.flags.yk_form_before; g.flags.yk_kissed = true; g.yuki.form = 'cat'; return ['Yuki: your lover. She stays human until the treeline, holding your hand, and then flows back into a cat on your shoulder. "Nobody needs to know yet," she says, before she does. "I like being underestimated."']; }, to: back }], // v0.11.127 (LP1, LF): back in her small shape, as the text says (the sister's pick does the same)
     },
 
@@ -181,17 +181,17 @@ Toward dawn she is asleep on your chest, which is the most familiar thing in the
             const first = n === 1 // v0.11.127 (LP1, CP; LQ2, TS + CN; Fable's MAINs): the nights and the morning after by her form
                 ? `${byForm(g, 'You walk out past the firelight, and a white cat pads after you, and somewhere between one root and the next she stops being a cat.', 'You walk out past the firelight, and a white cat pads after you, and somewhere between one root and the next she stops being a cat.', 'You walk out past the firelight, and a little later, in no hurry at all, so does Yuki.')} ${byForm(g, 'Yuki', 'Yuki', 'She')} falls into step beside you, barefoot on the bark, and takes your hand as though she's done it all her life.
 
-"They're going to notice," you say.
+"The others are going to notice," you say.
 
-"Ya noticed the day she met me. She sniffed me and grinned like a wolf." Yuki tilts her head back at the fire. "Mei Lin hasn't. Mei Lin is going to have an extremely interesting morning."
+"Ya knew the day we met. One sniff, and she grinned like a wolf who has found another wolf." Yuki tips her head back toward the fire. "Mei Lin has not. Mei Lin has a very instructive morning ahead of her."
 
-She pulls you down into the dark between two great roots, and for a while the Blackroot is very far away.`
+She draws you down into the dark between two great roots, and the Blackroot goes a long way off and stays there until late.`
                 : n === 2
                     ? `The second time, Yuki doesn't bother with the walk. ${byForm(g, 'She simply turns human in your bedroll', 'She simply turns human in your bedroll', 'She simply gets into your bedroll')}, which is efficient and also cold, because her feet are freezing, and she puts both of them on you with great deliberation.
 
-"Penance," she says. "For the lab coat. All of it. Every year of it."
+"Penance," she says. "For the lab coat. The whole garment. Every year you wore it."
 
-Then she stops talking for a long time.`
+After that she has no more to say, and takes her time not saying it.`
                     : n === 3 ? `It has become a thing: the fire burns low, ${byForm(g, 'the cat goes out into the dark', 'the cat goes out into the dark', 'Yuki gets up and walks out into the dark without a word of excuse')}, and a little later so do you. Ya has started whistling when you get up. Mei Lin has started pretending to be asleep, badly.
 
 Yuki is laughing against your shoulder about it, low and dry, when she stops laughing.`
@@ -220,7 +220,7 @@ In the morning Mei Lin pours the tea, and hands the first bowl to ${byForm(g, 'Y
 In the morning Mei Lin is braiding Yuki's hair, all of it, which is a morning's work, with the ivory pin held in her teeth. Yuki${byForm(g, ', human for the purpose,', ', human for the purpose,', '')} sits for it with her eyes half shut and her tail very still. "She asked," Mei Lin says round the pin, before you can say anything at all. Then, because she is Mei Lin: "She asked nicely. One of you can." Ya wants to know who is going to braid hers. Nobody volunteers. She looks at you.`
                     : `\n\n*
 
-In the morning Mei Lin and Yuki walk ahead of you on the path, side by side, heads together. At one point Mei Lin laughs — the forbidden laugh, the one Ashfall trained out of her — and claps a hand over her mouth, and Yuki looks back over her shoulder at you with an expression of pure feline triumph. Ya, beside you, says, "Your cat is better at this than I am," and sounds thrilled about it.`)
+In the morning Mei Lin and Yuki walk ahead of you on the path, side by side and deep in conference. Once Mei Lin laughs, the forbidden laugh, the one Ashfall trained out of her; she claps a hand over her mouth and looks round to see who heard. Yuki glances back at you over her shoulder, a cat with the whole bird in her mouth. Ya, at your side, says, "Your cat is better at this than I am," and sounds delighted to lose.`)
                 : '';
             return first + mei;
         },
@@ -234,19 +234,19 @@ In the morning Mei Lin and Yuki walk ahead of you on the path, side by side, hea
             const lines = [
                 `${byForm(g, 'Yuki corners you by the water, in her human form, which she only uses for things she considers important.', 'Yuki corners you by the water, in her human form, which she only uses for things she considers important.', 'Yuki corners you by the water, which she does by standing exactly where you meant to go. She only does it for things she considers important.')} Today, that's your love life.
 
-"Mei Lin," she says, "brought chopsticks into the Blackroot. For you. She doesn't say it's for you. She's been eating with them very slowly next to you for three days." She folds her arms. "And Ya bit off a wolf's tooth and *gave it to you*. Do you know what that means where she's from?"
+"Mei Lin," she says, "carried chopsticks into the Blackroot. On your account. She will not say so. She has been eating with them beside you, very slowly, for three days, waiting to be noticed." She folds her arms. "And Ya, who bit a tooth out of a wolf, *gave you the tooth*. Have you any idea what that means among her people?"
 
-"I'm choosing not to ask."
+"I have chosen not to ask."
 
-"It means you're an idiot," says Yuki. "Universally. Go and sit next to one of them. Either. Both. I don't care. Your face is depressing me."`,
-                `"Grade," says Yuki, sitting on a root with her ears very upright. "Your conversation with Mei Lin at the fire. I'd give it a four. Out of ten. You made a joke about spore prints. She *laughed*, which is the only reason it's not a two."
+"It means you are an idiot," says Yuki. "In every culture. Now go and sit beside one of them. Either one. Both. It is all the same to me, but that face of yours is lowering my spirits."`,
+                `"Your grade," says Yuki, seated on a root with her ears at full height. "The conversation with Mei Lin at the fire: four. Out of ten. You told a joke about spore prints. She *laughed*, and that alone lifts it from a two."
 
-"I thought it went well."
+"I thought it went rather well."
 
-"It went well because she likes you. Not because of the spore prints. Never again the spore prints." She considers. "Ya you're doing better with. Ya likes being insulted. You're good at that. Keep insulting Ya."`,
-                `Yuki doesn't say anything this time. She just sits down next to you at the edge of the camp, human, shoulder to shoulder, and leans on you until you lean back.
+"It went well because she likes you. The spore prints contributed nothing. The spore prints are retired." She thinks it over. "With Ya you are doing better. Ya enjoys being insulted, and there you have a real gift. Go on insulting Ya."`,
+                `This time Yuki has nothing to say. She comes and sits by you at the edge of the camp, human, shoulder pressed to shoulder, and leans until you give in and lean back.
 
-"You're happier," she says eventually. "Than at home. Than in the lab. Since them." A small, dry pause. "Don't ruin it. I'm watching."`,
+"You are happier," she says at last. "Than at home. Than in the lab. Since those two." A short pause, dry as the rest of her. "Do not spoil it. I am watching."`,
                 // v0.11.152 (owner pick RP1, RM5; Fable's): the 4th night
                 `"Progress report," says Yuki. She has sat down across from you, human, with a twig, and is drawing in the dirt: a column for Mei Lin, a column for Ya. There are marks in both. "I've stopped grading. You were dragging down the average of the whole expedition."
 
@@ -267,13 +267,13 @@ In the morning Mei Lin and Yuki walk ahead of you on the path, side by side, hea
         enter: (g) => { g.flags.final_night = 'yuki'; bumpRel(g, 'Yuki', 0, 10); return []; },
         text: (g) => `${byForm(g, 'You go out to the grove, and the white cat goes with you, and inside the ring of white trunks the cat is a woman, and the woman is Yuki.', 'You go out to the grove, and the great white cat goes with you, down the middle of the lane, there being no other part of the lane left, and inside the ring of white trunks there is suddenly a good deal more room, and a woman in it, and the woman is Yuki.', 'You go out to the grove, and Yuki goes with you, on two feet, down the middle of the lane, and inside the ring of white trunks she stops minding who is watching, because nobody is.')}
 
-"Tomorrow a very old man comes to try to take you," she says, lying back in the moss with her hair everywhere and the grove's song humming in the trunks around you. "I want to point out that I bit a wolf in half for you once. I'll do worse to him."
+"Tomorrow a very old man comes to try to take you," she says, lying back in the moss, her hair everywhere, the grove's song humming in the trunks all round you. "He will look at me and not see what I am. I once bit a wolf in half on your account. He gets worse."
 
 "I know."
 
-"Good." She pulls you down. "Then stop thinking about him."
+"Good." She pulls you down beside her. "Then he gets no more of your evening."
 
-The grove sings. You stop thinking about him.
+The grove sings. He gets none of it.
 
 *
 
@@ -288,15 +288,15 @@ ${byForm(g, 'Toward dawn she is on your chest in her small shape, purring, as if
 
 Mei Lin stops on the last rung. Yuki is sitting in the hay${byForm(g, ' in her human shape', ' in her human shape', '')}, ears forward, perfectly composed, as if she has been waiting for an appointment.
 
-"I've been talking to her," Yuki says to you. "For days. You weren't invited."
+"She and I have been talking," Yuki tells you. "For days. You were not asked to attend."
 
-"In Ashfall," Mei Lin says, very low, "a woman who—"
+"In Ashfall," Mei Lin says, low and quick, "a woman who—"
 
 ${byForm(g, '"In Ashfall," says Yuki, "they think I\'m a cat."', '"In Ashfall," says Yuki, "they think I\'m a cat."', '"In Ashfall," says Yuki, "they have all looked at my ears, gravely, and agreed not to see them."')} She holds out a hand. "I'm not asking you to be shameless. I'm asking you to be honest. You've been honest with me all week. Be honest with him."
 
-Mei Lin looks at Yuki's hand for a long moment. Then she laughs — the laugh, the one that got her into trouble her whole life — and takes it, and climbs the last rung.
+Mei Lin considers the offered hand for three slow breaths. Then the laugh comes, the one that has got her into trouble all her life. She checks the ladder for listeners, takes the hand, and climbs the last rung.
 
-It is, you discover, possible for two women to agree on absolutely everything about you, at length, in detail, and out loud. Your Parallel Cognition files nine separate complaints and then gives up. The lamp goes out. Nobody relights it.`,
+Two women, you learn, can be of one mind about you on every point, at length, in detail and aloud. Parallel Cognition lodges nine separate objections and is overruled on all nine. The lamp goes out. It stays out.`,
         choices: [{ text: 'A few hours. Then the Elder.', do: (g) => { sleepUntil(g, 6); return ['Slept until 06:00. HP and Qi full.']; }, to: 'rt_elder' }],
     },
     yk_night_ya: {
@@ -308,11 +308,11 @@ ${byForm(g, '"Your cat," Ya says, without looking round, "is a woman."', '"Your 
 
 "I know."
 
-"I knew the first day. She smelled wrong. Good wrong." Ya grins, all teeth. "She says she gets the best spot."
+"I knew on the first day. She smelled wrong. The good wrong." Ya shows her teeth, most of them. "She tells me the best spot is hers."
 
-"She always gets the best spot."
+"The best spot has always been hers."
 
-"We'll see," says Ya, and Yuki's ears go flat with delight, and that is the last coherent conversation anyone has in the grove for some time. Ya bites. Yuki, it turns out, bites back. You are, at several points, mostly furniture, and you have never been happier about anything.
+"We'll see," says Ya, and Yuki's ears go flat with delight, and nothing said in the grove after that would survive being written down. Ya bites. Yuki, it emerges, bites back. For long stretches you are chiefly furniture, and no furniture was ever happier in its work.
 
 *
 
@@ -328,17 +328,17 @@ ${byForm(g, 'Toward dawn you wake in the moss with Ya sprawled across your legs,
 
 ${byForm(g, 'The white cat on the bench beside you stands up too, and goes on standing up, and by the end of it there is a white-haired woman with cat\'s ears where the cat was sitting, in front of everybody. "So am I," says Yuki, which makes Mei Lin\'s mother — on her way to bed — stop dead on the stairs, look at the white-haired woman with cat\'s ears at her table for a long, grave moment, and then continue up the stairs without a word, which in Ashfall is roughly a blessing.', 'The great white cat on the floor by the stove gets up too, and goes on getting up, and by the end of it there is a white-haired woman with cat\'s ears standing on the hearthstones, in front of everybody. "So am I," says Yuki, which makes Mei Lin\'s mother — on her way to bed — stop dead on the stairs, look from the woman to the stretch of floor where four hundred pounds of cat lay at supper for a long, grave moment, and then continue up the stairs without a word, which in Ashfall is roughly a blessing.', '"So am I," says Yuki, and stands up too, from the bench by the stove, which makes Mei Lin\'s mother — on her way to bed — stop dead on the stairs, look at the white-haired woman she set a fifth bowl for this evening, and then at her daughter, for a long, grave moment, and then continue up the stairs without a word, leaving them the lamp, which in Ashfall is roughly a blessing.')}
 
-Ya points at Mei Lin. "You want him." She points at you. "You want her." She points at Yuki. "She wants everybody, she's a cat." She shrugs. "And everybody wants me, because I'm wonderful."
+Ya points at Mei Lin. "You want him." The finger moves to you. "You want her." To Yuki. "That one wants everybody. Cats do." A shrug. "And everybody wants me, because I am wonderful."
 
-"I have spoken to her for a week," Yuki says to Mei Lin, quieter. "Every night. You know what I'm going to say."
+"You and I have talked for a week," Yuki says to Mei Lin, more quietly. "Every night. You know what I am about to say."
 
 Mei Lin looks at the three of you — the scholar, the huntress, ${byForm(g, 'the cat', 'the woman who was a cat at supper', 'the woman with the ears')} — and her face goes through pride, and fury, and fear, and then something else entirely.
 
-"Build something else," she says. "That's what you told me." She stands up. "Fine. The loft. And if my mother hears one sound—"
+"Build something else," she says. "Those were your words to me." She gets to her feet. "Very well. The loft. And if my mother hears a single sound—"
 
-"Liar," say Ya and Yuki, at the same time, and look at each other, and grin.
+"Liar," say Ya and Yuki, in one breath, then look at each other, and grin.
 
-Up in the loft it smells of mint and hay. Everyone has opinions. Nobody is shy about them. Somewhere in the middle of it your Parallel Cognition gives up entirely, and for the first time in your life all nine threads are thinking about exactly the same thing.
+Upstairs the air is mint and hay. Everyone holds opinions, and no one is shy with them. Somewhere in the middle of it Parallel Cognition surrenders outright, and all nine threads, which have never in your life agreed on a subject, settle on one.
 
 *
 

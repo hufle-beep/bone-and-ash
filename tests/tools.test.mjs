@@ -777,7 +777,7 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md'];
     assert(pc.a.lines === 3 && pc.a.dupes === 1 && pc.a.sceneShared === 1 && pc.b.broken === 1 && pc.a.words === 7 + passage.split(' ').length && pc.b.lines === 1, `LR: lines, a line twice, a line sharing a scene's passage, broken (${JSON.stringify(pc)})`);
     const dp = snapshotDiff({ totals: {}, areas: {} }, { totals: {}, areas: {}, pools: { memory: { lines: 24 } } });
     assert(dp.length === 1 && dp[0].where === 'pool memory' && dp[0].was === null && dp[0].now === 24, `LR: a pool not in the snapshot is noted (${JSON.stringify(dp)})`);
-    assert(/LR line pools: memory 24 lines \/ \d+ words \(twice 0, shared with a scene \d+, tics \d+, broken 0, spacing 0\); yuki \d+ lines \/ \d+ words .*; aptitude 1 lines \/ 5 words/.test(game.out), `LR: the lint reads the memory lines, Yuki's haul lines and the aptitude reply (${(game.out.match(/LR line pools.*/) || [''])[0]})`);
+    assert(/LR line pools: memory 48 lines \/ \d+ words \(twice 0, shared with a scene \d+, tics \d+, broken 0, spacing 0\); yuki \d+ lines \/ \d+ words .*; aptitude 1 lines \/ 5 words/.test(game.out), `LR: the lint reads the memory lines, Yuki's haul lines and the aptitude reply (${(game.out.match(/LR line pools.*/) || [''])[0]})`);
     writeFileSync(pro, src); // the planted line back
     { // v0.11.163 (owner pick TL2): the used-today sample reads a hunt's return line (shown only after a hunt option is used today)
         const bl = path.join(dir, 'js', 'story', 'act1_blackroot.js'); const bsrc = readFileSync(bl, 'utf8');

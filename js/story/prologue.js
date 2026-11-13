@@ -46,7 +46,7 @@ const jackals = (g) => {
     ];
     return {
         id: 'jackals', night: true, // v0.11.92 (O1): a night fight costs sleep
-        intro: s >= 2 ? 'Three shapes peel off the dark — the ones that have been circling your camp for two nights: ash-grey, too many teeth, eyes like coals that forgot to go out.' : 'Two shapes peel off the dark: ash-grey, too many teeth, eyes like coals that forgot to go out.',
+        intro: s >= 2 ? 'Three shapes come loose from the dark, the same three that have walked rings round your camp for two nights: ash-grey hides, a surplus of teeth, eyes like coals nobody remembered to put out.' : 'Two shapes come loose from the dark: ash-grey hides, a surplus of teeth, eyes like coals nobody remembered to put out.',
         band: 'standard',
         enemies: enemies.map((e) => grow(e, s, JACKAL_GROWTH)),
         win: 'jackals_won', lose: 'jackals_lost', flee: 'jackals_fled',
@@ -59,7 +59,7 @@ const BOAR_GROWTH = { hp: 0.15, dc: 0.45, atk: 0.6 };
 const LU_GROWTH = { hp: 0.05, dc: 0.35, atk: 0.5 };
 const gaoFight = (g) => ({
     id: 'gao',
-    intro: 'Gao Feng\'s sleeve snaps out and Qi crackles along it, red as a fresh cut. His lackey grins and draws a hatchet.',
+    intro: 'Gao Feng snaps his sleeve straight and Qi runs crackling down it, red as a fresh cut. Behind him the lackey grins and frees his hatchet.',
     band: 'challenging',
     enemies: [
         { name: 'Gao Feng', hp: g.flags.gao_hand ? 6 : 9, dc: 4, atk: 5, dmg: 4, dr: 1 },
@@ -79,7 +79,7 @@ const collectorsFight = (g) => {
     if (militia) enemies[0].hp = Math.max(6, enemies[0].hp - 2 * militia);
     return {
         id: 'collectors',
-        intro: militia ? 'Inner Disciple Lu Han does not hurry. Behind you, eight hunters with white bone spearheads step up and don\'t kneel. That, finally, makes him hurry.' : 'Inner Disciple Lu Han does not hurry. People who are used to winning never do.',
+        intro: militia ? 'Inner Disciple Lu Han does not hurry. Then eight hunters with white bone spearheads step up behind you, and not one of them kneels. That, at last, hurries him.' : 'Inner Disciple Lu Han does not hurry. No mortal has ever given him a reason to.',
         band: 'major',
         enemies,
         win: 'collectors_won', lose: 'collectors_lost',
@@ -88,20 +88,20 @@ const collectorsFight = (g) => {
 
 const cookMeal = (g) => {
     const out = [];
-    if (hasItem(g, 'hare_raw')) { addItem(g, 'hare_raw', -1); eat(g, 35); out.push('Roast hare: +35 satiety (Yuki gets the liver and considers you forgiven).'); }
+    if (hasItem(g, 'hare_raw')) { addItem(g, 'hare_raw', -1); eat(g, 35); out.push('Roast hare: +35 satiety (the liver goes to Yuki, and your pardon comes back).'); }
     else if (hasItem(g, 'jade_bracket')) { addItem(g, 'jade_bracket', -1); eat(g, 15); out.push('Seared jade bracket: +15 satiety.'); }
     return out;
 };
 const foodCount = (g) => (g.inventory.hare_raw || 0) + (g.inventory.jade_bracket || 0);
 
 export const ITEMS = {
-    hare_raw: { name: 'Glassback hare (dressed)', note: 'Raw. Better cooked. Much better cooked.' },
-    jade_bracket: { name: 'Jade bracket fungus', note: 'Edible, mildly antibiotic. Your doctorate is finally paying for itself.' },
-    crimson_berry: { name: 'Crimson needleberries', note: 'Tested safe. Taste like regret and vitamin C.' },
-    spirit_grass: { name: 'Ninefold spirit grass', note: 'What locals eat to cultivate. You can feel it trying to bite your meridians.' },
-    hairpin: { name: 'Wraithbone hairpin', note: 'Too pretty for a man who was eating raw hare yesterday.' },
-    jackal_fang: { name: 'Ashfang fangs', note: 'Trophies. Yuki keeps trying to bury them.' },
-    beast_core: { name: 'Murky beast core', note: 'Locals swallow these to cultivate. You\'d rather swallow a battery.' },
+    hare_raw: { name: 'Glassback hare (dressed)', note: 'Raw. Cooking would improve it. So would nearly anything.' },
+    jade_bracket: { name: 'Jade bracket fungus', note: 'Edible, mildly antibiotic. The doctorate\'s first return on investment.' },
+    crimson_berry: { name: 'Crimson needleberries', note: 'Tested safe. The flavour is vitamin C with a grievance.' },
+    spirit_grass: { name: 'Ninefold spirit grass', note: 'What the locals eat to cultivate. It keeps testing your meridians for a soft place to bite.' },
+    hairpin: { name: 'Wraithbone hairpin', note: 'Finer work than a man lately seen eating raw hare has any right to carry.' },
+    jackal_fang: { name: 'Ashfang fangs', note: 'Trophies. Yuki buries them whenever your back is turned.' },
+    beast_core: { name: 'Murky beast core', note: 'The locals swallow these to cultivate. You would sooner swallow a battery.' },
     ...NEW_ITEMS,
     ...ACT1_ITEMS,
 };
@@ -121,15 +121,15 @@ export const SCENES = {
     /* ================= DAY 1 ================= */
     arrival: {
         id: 'arrival', title: 'Bone and Ash', art: 'james', place: 'Unknown forest',
-        text: `Three days ago you defended a doctorate in mycology and computational biology. Yesterday you celebrated. This morning, as far as you can reconstruct it, you went into the resonance lab to "just check one reading", Yuki asleep in the hood of your lab coat, and the spatial seed chamber decided to have opinions.
+        text: `Three days ago you defended a doctorate in mycology and computational biology. Yesterday you celebrated it. This morning, as near as you can piece it together, you went into the resonance lab to "just check one reading", with Yuki asleep in the hood of your lab coat, and the spatial seed chamber decided to have opinions.
 
 Now you are lying on your back in a forest made of black bark and grey moss, under a sky the colour of a bruise, and something small and white is standing on your sternum, staring at you with the deep, personal disappointment only a cat can manage.
 
-"Good morning," you tell her. "I want it on record that I did not touch anything."
+"Good morning," you tell her. "For the record, I touched nothing."
 
-Yuki does not believe you. Neither do you.
+Yuki doesn't believe a word of it. Neither do you.
 
-Your omnitool hums awake under the skin of your forearm, organic and warm and blessedly alive. Its hammerspace — the pocket of folded space your people grow into every citizen at birth — reports in. It is the most expensive empty closet in two universes. Clothes on your back. Lab coat. A cat. That is the inventory.`,
+You straighten your glasses, thin and rectangular and somehow unbroken. The ouroboros on your left forearm is a closed ring, the serpent eating its own tail; under the skin beneath it your omnitool hums awake, warm and blessedly alive. Its hammerspace, the pocket of folded space your people grow into every citizen at birth, reports in: the most expensive empty closet in two universes. Clothes on your back. Lab coat. A cat. End of inventory.`,
         choices: [
             { text: 'Check Yuki over first — paws, ribs, the bond between you.', to: 'yuki_check' },
             { text: 'Run a full environmental scan with the omnitool.', check: { skill: 'GU', dc: 2 }, time: 10, to: 'scan_ok', fail: 'scan_bad' },
@@ -139,16 +139,16 @@ Your omnitool hums awake under the skin of your forearm, organic and warm and bl
     yuki_check: {
         id: 'yuki_check', title: 'Root-kin', art: 'yuki_close', place: 'Unknown forest',
         enter: (g) => { bumpRel(g, 'Yuki', 2, 1); advance(g, 5); return ['Yuki: bond steady.']; },
-        text: (g) => `She lets you do it, which is how you know she was scared. ${(g.yuki.primaries ?? 12) >= 12 && (g.yuki.collaterals ?? 66) >= 66
-        ? 'Twelve primaries open, sixty-six collaterals, the same as yours — you were born on the same day, in the same grove, and her meridians have always mirrored yours like a reflection in still water.'
-        : `Her meridians are grey. ${g.yuki.primaries ? `${g.yuki.primaries} of twelve primaries lit, ${g.yuki.collaterals} of sixty-six collaterals` : 'All twelve primaries, all sixty-six collaterals'}${g.yuki.primaries ? ', the rest' : ','} shut under a crust of ash, the same as yours. The crossing did that: this world's Qi came in through every open door and burned out the frames. You were born on the same day, in the same grove, and her meridians have always mirrored yours like a reflection in still water. Even this. Especially this. The Axiom is already chewing at the ash. It will take sessions, plural.`}
-Mortal Vessel, both of you. Young, by your people's standards. Practically larval.
+        text: (g) => `She holds still for all of it, which tells you how frightened she was. ${(g.yuki.primaries ?? 12) >= 12 && (g.yuki.collaterals ?? 66) >= 66
+        ? 'Twelve primaries open and sixty-six collaterals, a match for yours. You were born on the same day, in the same grove, and her meridians have kept step with yours ever since, a reflection in still water.'
+        : `Her meridians have gone grey. ${g.yuki.primaries ? `${g.yuki.primaries} of twelve primaries lit, ${g.yuki.collaterals} of sixty-six collaterals` : 'All twelve primaries and all sixty-six collaterals'}${g.yuki.primaries ? ', the rest' : ','} sealed under a crust of ash, exactly like yours. The crossing did it: this world's Qi walked in through every open door and burned the frames out behind it. You were born on the same day, in the same grove, and her meridians have kept step with yours ever since, a reflection in still water. Even in this. In this most of all. The Axiom is already gnawing at the ash. Clearing it will take sessions, plural.`}
+Mortal Vessel, the pair of you. Young, as your people count it. Larval, near enough.
 
-Through the bond she sends you a feeling that translates roughly as: *the air tastes wrong and you smell like burnt lab.*
+Down the bond comes a feeling that translates, roughly, as: *the air tastes wrong and you smell of burnt lab.*
 
-"Fair on both counts."
+"No argument on either."
 
-The air does taste wrong. There is Qi here — thick, heavy, everywhere — but it sits on the tongue like smoke from something that died angry.`,
+The air does taste wrong. There is Qi here, thick and heavy and everywhere, but it lies on the tongue like smoke off something that died angry.`,
         choices: [
             { text: 'Scan the environment now that she\'s settled.', check: { skill: 'GU', dc: 2 }, time: 10, to: 'scan_ok', fail: 'scan_bad' },
             { text: 'Get moving.', to: 'clearing' },
@@ -156,31 +156,31 @@ The air does taste wrong. There is Qi here — thick, heavy, everywhere — but 
     },
     scan_ok: {
         id: 'scan_ok', title: 'Readings', art: 'omnitool', place: 'Unknown forest',
-        text: `The omnitool unfolds a holographic pane in your vision. Oxygen: slightly rich. Gravity: 0.97 of home. Spectrum of the sun: hotter, redder. No signal. No satellites. No network. No anyone.
+        text: `The omnitool opens a pane of light across your vision. Oxygen: a little rich. Gravity: 0.97 of home. The sun's spectrum: hotter, redder. No signal. No satellites. No network. Nobody.
 
-And the Qi. The tool renders it as a slow fog of particles, and every particle is tagged with something your people's instruments call *intent residue*. This world's Qi remembers how it was used. Most of it was used to kill.
+Then the Qi. The tool draws it as a slow fog of particles, and every particle carries a tag your people's instruments call *intent residue*. This world's Qi remembers what it was used for. Mostly, it was used for killing.
 
 "Lovely," you murmur. "A planet with a grudge."
 
-Your Ouroboros Axiom — the pillar every one of your people carries, the loop that runs the body like a closed garden — is already working. Whatever comes in through your meridians gets filtered, turned over, composted. You can breathe this. You suspect most things here can't, not without help.`,
+Your Ouroboros Axiom, the pillar every one of your people carries, the loop that runs the body like a closed garden, has already gone to work. Whatever enters through your meridians is filtered, turned over, composted. You can breathe this. Most things here, you suspect, can't. Not without help.`,
         choices: [{ text: 'Find out what "help" looks like around here. Later. First: the clearing ahead.', to: 'clearing' }],
     },
     scan_bad: {
         id: 'scan_bad', title: 'Readings (partial)', art: 'omnitool', place: 'Unknown forest',
-        text: `The omnitool gives you oxygen, gravity, a sun that is redder than it should be, and then a long, wounded string of error codes about the ambient Qi it cannot classify.
+        text: `The omnitool manages oxygen, gravity and a sun redder than it has any business being, then trails off into a wounded column of error codes about ambient Qi it cannot classify.
 
-"You and me both," you tell it.
+"That makes two of us," you tell it.
 
-No signal. No network. You are, in the technical sense, extremely lost.`,
+No signal. No network. You are, in the strict technical sense, extremely lost.`,
         choices: [{ text: 'Head for the light between the trees.', to: 'clearing' }],
     },
     clearing: {
         id: 'clearing', title: 'The Clearing', art: 'clearing', place: 'Blackroot Wilds — a clearing',
-        text: (g) => `The trees open onto a clearing of grey grass and old stones. Somewhere beyond it, water is running. Your stomach mentions — politely, for now — that you skipped breakfast and possibly a whole universe.
+        text: (g) => `The trees give way to a clearing of grey grass and old stones. Beyond it, out of sight, water is running. Your stomach points out, politely for now, that you skipped breakfast and possibly an entire universe.
 
-${g.flags.bone_ok ? 'The little white needle you grew is still in your fingers. It feels like a promise.' : 'You have one thing nobody here can take: your Bonesinger gift, the rare one, braided so tightly into your cultivation that the two became a single Convergence. Your people would call it *the white song*. You call it the only reason you survived your teenage years.'}
+${g.flags.bone_ok ? 'Your palm is still warm where the bone came through. It feels like a promise.' : 'One thing you own, nobody here can take: your Bonesinger gift, the rare one, braided so tightly into your cultivation that the two became a single Convergence. Your people would call it *the white song*. You call it the only reason you survived your teenage years.'}
 
-${g.flags.sat_once ? '' : 'You could also sit for a moment and taste this world\'s Qi properly. Cultivators at home do that before they drink from a strange well.'}`,
+${g.flags.sat_once ? '' : 'You could also sit down first and taste this world\'s Qi properly. Cultivators at home do as much before drinking from a strange well.'}`,
         choices: [
             { text: 'Sing a single bone needle into your hand. Start small.', show: once('bone_ok'), qi: 1, check: { skill: 'Convergence Use', dc: 2 }, time: 2, do: set('bone_ok'), to: 'first_bone', fail: 'first_bone_fail' },
             { text: 'Sit, breathe, and taste the Qi.', show: once('sat_once'), time: 20, do: set('sat_once'), to: 'meditate1' },
@@ -189,24 +189,24 @@ ${g.flags.sat_once ? '' : 'You could also sit for a moment and taste this world\
     },
     first_bone: {
         id: 'first_bone', title: 'The White Song', art: 'bone_needle', place: 'Blackroot Wilds — a clearing',
-        text: `You don't gather anything. That's the part nobody back home ever believes until they see it: the material comes from nowhere, from the folded place where Bonesinger and Qi meet, and it comes *instantly*.
+        text: `You gather nothing. That is the part nobody back home believes until they watch it happen: the material comes from nowhere, from the folded place where Bonesinger and Qi meet, and it comes *instantly*.
 
-A white needle, the length of your finger, slides out of your palm and sets — warm, then cool, hard as fresh antler. You flick it at a tree. It sinks in with a satisfying *tok*.
+Your right sleeve has ridden up past the tree inked on that forearm: curling roots, red streaks, a raven perched in it. From the palm below it a white needle the length of your finger slides out and sets, warm, then cool, hard as fresh antler. You flick it at a trunk. It goes in with a satisfying *tok*.
 
-Yuki trots over, sniffs it, and looks at you as if to say: *you could have done that when the chamber exploded.*
+Yuki trots over, sniffs the needle, and gives you a look that says: *you could have done that when the chamber exploded.*
 
-"I was busy being unconscious."
+"I was occupied. Being unconscious."
 
-Darts, then. Needles. A knife-length blade if you push. At your current level that's the menu, and it is a better menu than *nothing*.`,
+Darts, then. Needles. A blade as long as a knife, if you push. At your present level that is the whole menu, and it beats the menu called *nothing*.`,
         choices: [{ text: 'Follow the water.', time: 15, to: 'stream' }, { text: 'Taste the Qi first.', show: once('sat_once'), time: 20, do: set('sat_once'), to: 'meditate1' }],
     },
     first_bone_fail: {
         id: 'first_bone_fail', title: 'The White Song (out of tune)', art: 'bone_needle', place: 'Blackroot Wilds — a clearing',
-        text: `What comes out of your palm is less *needle* and more *sad white noodle*. It droops. It crumbles. Yuki bats the remains into the grass with surgical contempt.
+        text: `What leaves your palm is not so much *needle* as *sad white noodle*. It droops. It crumbles. Yuki bats the wreckage into the grass with surgical contempt.
 
 "Warm-up," you say. "Everyone needs a warm-up."
 
-Still: it came. Instantly, from nowhere, the way it always has. The song is in you. You are just out of practice and, possibly, concussed.`,
+Still: it came. At once, out of nowhere, as it always has. The song is in you. You are merely out of practice and, quite possibly, concussed.`,
         enter: set('bone_ok'),
         choices: [{ text: 'Follow the water.', time: 15, to: 'stream' }, { text: 'Taste the Qi first.', show: once('sat_once'), time: 20, do: set('sat_once'), to: 'meditate1' }],
     },
@@ -214,9 +214,9 @@ Still: it came. Instantly, from nowhere, the way it always has. The song is in y
         id: 'meditate1', title: 'The Taste of Ash', art: 'meditation', place: 'Blackroot Wilds — a clearing',
         text: (g) => `You sit. You breathe. You let the world in.
 
-It comes in like a crowd of angry ghosts — grief, hunger, the iron of old blood — and your Ouroboros Axiom catches every one of them, turns them over, and hands them back clean. The Qi that settles in your dantian afterwards is just Qi. Warm. Neutral. Yours.
+It arrives like a crowd of angry ghosts: grief, hunger, the iron of old blood. Your Ouroboros Axiom catches each of them, turns it over and hands it back clean. What settles in your dantian afterwards is only Qi. Warm. Neutral. Yours.
 
-You have a strong, immediate suspicion that nobody on this world can do that. That they need *something* — medicine, herbs, ritual — to scrub what they breathe, and that whatever they use, it isn't enough.
+You suspect, strongly and at once, that nobody on this world can do that. That they need *something*, medicine or herbs or ritual, to scrub what they breathe, and that whatever they use falls short.
 
 `,
         choices: [
@@ -226,13 +226,13 @@ You have a strong, immediate suspicion that nobody on this world can do that. Th
     },
     stream: {
         id: 'stream', title: 'Blackwater', art: 'stream', place: 'Blackroot Wilds — the stream',
-        text: (g) => `The stream runs dark over black stones, cold enough to hurt your teeth just looking at it. ${g.flags.drank ? 'You\'ve had your fill.' : 'You are very thirsty.'}
+        text: (g) => `The stream runs dark over black stones, so cold that your teeth ache from looking at it. ${g.flags.drank ? 'You have drunk your fill.' : 'You are very thirsty.'}
 
-${dayHour(g) >= 17 ? 'The light is going amber. Night here will be properly dark.' : 'The red sun is climbing. You have the day — use it.'}
+${dayHour(g) >= 17 ? 'The light is turning amber. Night here will be dark in earnest.' : 'The red sun is climbing. The day is yours, and it will not keep.'}
 
-${g.james.satiety < 40 ? 'Your stomach has stopped being polite.' : ''}`,
+${g.james.satiety < 40 ? 'Your stomach has given up on politeness.' : ''}`,
         choices: [
-            { text: 'Test the water with the omnitool before drinking.', show: once('drank'), check: { skill: 'GU', dc: 2 }, xp: false, time: 5, do: set('drank'), failDo: (g) => { g.flags.drank = true; g.james.hp -= 2; return ['You drink before the analysis finishes. Your gut files a complaint: −2 HP.']; }, to: 'stream' },
+            { text: 'Test the water with the omnitool before drinking.', show: once('drank'), check: { skill: 'GU', dc: 2 }, xp: false, time: 5, do: set('drank'), failDo: (g) => { g.flags.drank = true; g.james.hp -= 2; return ['You drink before the analysis is done. Your gut takes the matter up at once: −2 HP.']; }, to: 'stream' },
             { text: 'Forage along the bank — berries, fungi, anything that isn\'t trying to eat you.', show: (g) => !g.flags.foraged, time: 40, to: 'forage' },
             { text: 'Hunt. Yuki has been staring at something in the reeds for a while.', show: (g) => !g.flags.hunted, time: 30, to: 'hunt' },
             { text: 'Make camp on the dry rise above the stream.', show: (g) => !!(g.flags.foraged || g.flags.hunted), time: 20, to: 'camp' },
@@ -242,25 +242,25 @@ ${g.james.satiety < 40 ? 'Your stomach has stopped being polite.' : ''}`,
     forage: {
         id: 'forage', title: 'Foraging', art: 'forage', place: 'Blackroot Wilds — the stream',
         enter: set('foraged'),
-        text: `Grey moss, black bark, a riot of things that are absolutely not on any field guide you own. You own zero field guides. You are the field guide now.
+        text: `Grey moss, black bark, and a riot of growth that appears in none of the field guides you own. You own no field guides. You are the field guide now.
 
-Two candidates: a thorny shrub dripping with fat red berries that look *exactly* like the kind of thing a planet with a grudge would grow, and a shelf of pale green bracket fungus on a dead log, smelling faintly of almonds and wet paper.
+Two candidates. A thorny shrub hung with fat red berries, *exactly* what a planet with a grudge would grow; and a shelf of pale green bracket fungus on a dead log, smelling faintly of almonds and wet paper.
 
-Fungus. Finally, something you actually have a doctorate in.`,
+Fungus. At last, a thing you hold an actual doctorate in.`,
         choices: [
             { text: 'The bracket fungus. Spore print, tissue test, the whole ritual.', check: { skill: 'GU', dc: 3, bonus: () => 2 }, time: 20, do: (g) => { addItem(g, 'jade_bracket', 3); g.flags.fungus = true; return [`Spore print on a bone sheet, a sliver under the omnitool, a cautious nibble: edible, mild, and quietly murderous to most of the bacteria you can name. Yuki watches the whole ritual from the log and sends you a thought that translates roughly as *you could just eat it.* You could not just eat it. You have standards.`, '+3 Jade bracket fungus (edible, mildly antibiotic).']; }, failDo: (g) => { addItem(g, 'jade_bracket', 1); return ['You get one clean piece before the rest crumbles. +1 Jade bracket fungus.']; }, to: 'stream' },
-            { text: 'The berries. Omnitool analysis, then a tiny taste.', check: { skill: 'GU', dc: 3 }, time: 15, do: (g) => { addItem(g, 'crimson_berry', 6); eat(g, 8, { yuki: false }); return ['Safe. +6 Crimson needleberries, and you eat a handful: +8 satiety.']; }, failDo: (g) => { g.james.hp -= 3; return ['The analysis said "probably". Your intestines said "absolutely not". −3 HP.']; }, to: 'stream' },
+            { text: 'The berries. Omnitool analysis, then a tiny taste.', check: { skill: 'GU', dc: 3 }, time: 15, do: (g) => { addItem(g, 'crimson_berry', 6); eat(g, 8, { yuki: false }); return ['They pass. +6 Crimson needleberries, and a handful go straight down: +8 satiety.']; }, failDo: (g) => { g.james.hp -= 3; return ['The analysis said "probably". Your intestines overrule it. −3 HP.']; }, to: 'stream' },
             { text: 'Both. You\'re hungry and the day isn\'t getting longer.', check: { skill: 'GU', dc: 4, bonus: () => 1 }, time: 35, do: (g, r) => { addItem(g, 'jade_bracket', 3); addItem(g, 'crimson_berry', 6); eat(g, 8, { yuki: false }); g.flags.fungus = true; return [r && r.ratio < 1 ? `You do it the fast way, which turns out not to be the right way: half the shelf crumbles and the berries are mostly thorns. Yuki sniffs a berry, stares at it, and bats it into the stream, which you choose to take as peer review.` : `You do it the fast way and the right way at once, a thread on the fungus and a thread on the berries, and for a moment it's almost like working in a lab again, except for the cat and a sky the colour of a bruise. Yuki sniffs a berry, stares at it, and bats it into the stream, which you choose to take as peer review.`, '+3 Jade bracket fungus, +6 Crimson needleberries, +8 satiety.']; }, failDo: (g) => { addItem(g, 'jade_bracket', 1); g.james.hp -= 2; return ['+1 Jade bracket fungus, and one berry too many: −2 HP.']; }, to: 'stream' },
         ],
     },
     hunt: {
         id: 'hunt', title: 'The Hunt', art: 'hunt', place: 'Blackroot Wilds — the reeds',
         enter: set('hunted'),
-        text: `In the reeds sits a hare. Probably a hare. It has the right ears and the right nose, but its back is a ridge of translucent, glassy plates, and the light coming through them throws little rainbows on the mud.
+        text: `A hare sits in the reeds. Probably a hare. The ears are right and the nose is right, but along its back runs a ridge of clear, glassy plates, and the light passing through them scatters small rainbows over the mud.
 
-"Glassback," you whisper, because naming things is how biologists cope.
+"Glassback," you whisper, because biologists cope by naming things.
 
-Yuki is flat to the ground, tail tip twitching. Through the bond you get a single, crystalline thought: *mine.*`,
+Yuki lies flat to the ground, tail-tip twitching. One thought comes down the bond, clear as crystal: *mine.*`,
         choices: [
             { text: 'A bone dart, thrown from cover. Clean and quick.', qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 3 }, time: 10, do: (g) => { addItem(g, 'hare_raw', 2); return ['+2 Glassback hare (dressed). Yuki pretends she let you have it.']; }, to: 'stream', fail: 'hunt_miss' },
             { text: 'Let Yuki drive it toward you, then grab.', check: { skill: 'GU', dc: 4, bonus: (g) => (yukiFightSkill(g).level >= 2 ? 1 : 0) }, time: 20, do: (g) => { addItem(g, 'hare_raw', 2); bumpRel(g, 'Yuki', 2, 0); return ['+2 Glassback hare (dressed). Teamwork. Disgusting, bloody teamwork.']; }, to: 'stream', fail: 'hunt_miss' },
@@ -269,11 +269,11 @@ Yuki is flat to the ground, tail tip twitching. Through the bond you get a singl
     },
     hunt_miss: {
         id: 'hunt_miss', title: 'The One That Got Away', art: 'hunt', place: 'Blackroot Wilds — the reeds',
-        text: `The hare goes off like a firework of rainbows and is gone. Yuki stalks back out of the reeds with mud to her elbows and the expression of someone composing a formal complaint.
+        text: `The hare goes up like a firework made of rainbows and is gone. Yuki stalks out of the reeds, mud to the elbows, with the face of someone drafting a letter to your superiors.
 
 "In my defence," you say, "it was made of glass."
 
-She does not accept your defence.`,
+The defence is not accepted.`,
         choices: [
             { text: 'Try again further downstream.', show: (g) => !g.flags.hunt2, time: 30, do: set('hunt2'), check: { skill: 'GU', xpTo: 'Convergence Use', dc: 3 }, qi: 2, xp: true, failDo: () => [`Downstream there is a second hare, and a bone dart, and the dart ends up in the mud a hand's width from where the hare was. Yuki does not come back out of the reeds for some time. When she does, she walks past you to the water and drinks, slowly, with her back turned.`], to: 'hunt_got', fail: 'stream' },
             { text: 'Back to the stream.', to: 'stream' },
@@ -282,7 +282,7 @@ She does not accept your defence.`,
     hunt_got: {
         id: 'hunt_got', title: 'Second Chances', art: 'hunt', place: 'Blackroot Wilds — the reeds',
         enter: (g) => { addItem(g, 'hare_raw', 1); return ['+1 Glassback hare (dressed).']; },
-        text: `The second one is slower, or you are faster, or the universe owes you one. The dart takes it behind the ear. You dress it with a little bone knife that you grow, use, and dissolve, because you can, and because the alternative is your teeth.`,
+        text: `The second one is slower, or you are quicker, or the universe owed you. The dart takes it behind the ear. You dress it with a small bone knife that you grow, use and dissolve, because you can, and because the other tool on offer is your teeth.`,
         choices: [{ text: 'Back to the stream.', to: 'stream' }],
     },
 
@@ -291,11 +291,11 @@ She does not accept your defence.`,
         text: (g) => `${byNight(g, ['A dry rise above the water, a fallen trunk to put your back against, a sky turning the colour of wine.', `The dry rise again, and the fallen trunk, which has kept the shape of your back. The sky is going from bruise to wine, on schedule.`, `The dry rise, the fallen trunk, the sky going to wine. You could draw it from memory, and one thread already has. The moss where you sit has given up.`])}
 
 ${foodCount(g) ? `${byNight(g, ['You have food', 'In the larder, such as it is', `Tonight's menu, in full`])}: ${[g.inventory.hare_raw ? `${g.inventory.hare_raw} hare` : '', g.inventory.jade_bracket ? `${g.inventory.jade_bracket} fungus` : ''].filter(Boolean).join(', ')}.` : byNight(g, ['You have no food. You have a cat, who is looking at you like *you* are the food.', `You have no food. Yuki has noticed, and is letting you know that she has noticed.`, `You have no food. Yuki has stopped looking at you and started looking at the trees, which is worse: she is drawing up alternatives.`])}
-${g.flags.fire ? 'The fire crackles.' : 'No fire yet.'} ${g.flags.stakes ? 'A ring of bone stakes leans outward around the camp.' : ''}`,
+${g.flags.fire ? byNight(g, ['The fire crackles and spits, pleased with itself.', `The fire crackles like something with tenure, and holds views on damp wood.`, `The fire keeps low and even, with nothing left to prove.`]) : 'No fire yet.'} ${g.flags.stakes ? byNight(g, ['A ring of bone stakes leans outward round the camp, white and new.', `Round the camp the stakes stand in their circle, bone gone grey at dusk, each tip tilted toward the treeline.`, `The bone stakes lean outward in their ring, points to the dark. Whatever circles out there tonight will have to mean it.`]) : ''}`,
         choices: [
-            { text: 'Make fire: a bone bow-drill and a lot of swearing.', show: once('fire'), check: { skill: 'GU', dc: 3 }, time: 25, do: set('fire'), failDo: (g) => { advance(g, 20); g.flags.fire = true; return ['It takes three times as long and one blister, but there is fire.']; }, to: 'camp' },
+            { text: 'Make fire: a bone bow-drill and a lot of swearing.', show: once('fire'), check: { skill: 'GU', dc: 3 }, time: 25, do: set('fire'), failDo: (g) => { advance(g, 20); g.flags.fire = true; return ['Three times the work and one blister later, there is fire.']; }, to: 'camp' },
             { text: 'Cook and eat.', show: (g) => g.flags.fire && foodCount(g) > 0, time: 20, do: (g) => cookMeal(g), to: 'camp' },
-            { text: 'Eat it raw. Civilisation is a state of mind.', show: (g) => !g.flags.fire && g.inventory.hare_raw > 0, check: { skill: 'GU', dc: 2 }, xp: false, do: (g) => { addItem(g, 'hare_raw', -1); eat(g, 18); return ['Raw hare: +18 satiety. You will not be telling anyone about this.']; }, failDo: (g) => { addItem(g, 'hare_raw', -1); eat(g, 10); g.james.hp -= 2; return ['Raw hare: +10 satiety, −2 HP. You will definitely not be telling anyone about this.']; }, to: 'camp' },
+            { text: 'Eat it raw. Civilisation is a state of mind.', show: (g) => !g.flags.fire && g.inventory.hare_raw > 0, check: { skill: 'GU', dc: 2 }, xp: false, do: (g) => { addItem(g, 'hare_raw', -1); eat(g, 18); return ['Raw hare: +18 satiety. You resolve never to mention it.']; }, failDo: (g) => { addItem(g, 'hare_raw', -1); eat(g, 10); g.james.hp -= 2; return ['Raw hare: +10 satiety, −2 HP. You resolve, more firmly, never to mention it.']; }, to: 'camp' },
             { text: 'Sing a ring of bone stakes around the camp, points outward.', show: once('stakes'), qi: 3, check: { skill: 'Convergence Use', dc: 2 }, time: 15, do: set('stakes'), to: 'camp' },
             { text: 'Night falls. Settle in.', to: 'night', do: (g) => { const p = clockParts(g.minutes); if (p.hh < 21 && p.hh >= 6) g.minutes = (p.day - 1) * 1440 + 21 * 60; return []; } },
         ],
@@ -325,11 +325,11 @@ One of your nine threads has taken the watch before you have decided anything, a
     night_attack: {
         id: 'night_attack', title: 'Ashfangs', art: 'jackals', place: 'Blackroot Wilds — the dry rise',
         enter: (g) => nightTo(g, 80), /* v0.11.40 (N1): never back (entered after 01:20, the clock stays); v0.11.91: after the bed (from 21:00), at 01:20; v0.11.151 (WD1, LN): the slept line */
-        text: (g) => `${g.flags.watch ? 'The watch-thread yanks you awake a full three seconds before anything happens. Three seconds is a lot.' : 'Yuki\'s claws in your thigh wake you. That, and the smell.'}
+        text: (g) => `${g.flags.watch ? 'The watch-thread hauls you awake a full three seconds before anything happens. Three seconds is plenty.' : 'Yuki\'s claws in your thigh wake you. Those, and the smell.'}
 
-${g.flags.stakes ? 'Something yelps on your bone stakes — one of them is already bleeding.' : ''} Two shapes at the edge of the ${g.flags.fire ? 'firelight' : 'dark'}: grey hides, black lips peeled back from teeth that drip something that smokes when it hits the moss.
+${g.flags.stakes ? 'Something yelps on your bone stakes: one of the visitors is bleeding before it has begun.' : ''} Shapes at the edge of the ${g.flags.fire ? 'firelight' : 'dark'}: grey hides, black lips drawn back from teeth, and from the teeth a drip that smokes where it lands on the moss.
 
-Ashfang jackals. You've never seen one before and you'd recognise them anywhere: they look exactly like everything this world's Qi tastes like.`,
+Ashfang jackals. You have never seen one, and you would know them anywhere: they look exactly as this world's Qi tastes.`,
         choices: [
             { text: 'Fight.', combat: jackals, to: 'jackals_won' },
             { text: 'Bone wall between you and them, then run for the water.', qi: 4, check: { skill: 'Convergence Use', dc: 4 }, to: 'jackals_fled', fail: 'night_attack_forced' },
@@ -343,22 +343,22 @@ Ashfang jackals. You've never seen one before and you'd recognise them anywhere:
     jackals_won: {
         id: 'jackals_won', title: 'Teeth in the Dark', art: 'jackals_dead', place: 'Blackroot Wilds — the dry rise',
         enter: (g) => { addItem(g, 'jackal_fang', 4); addItem(g, 'beast_core', 1); g.flags.jackals = 'won'; return ['+4 Ashfang fangs, +1 Murky beast core.']; },
-        text: `When it's over you are breathing hard, there is white bone sticking out of two grey bodies, and Yuki is washing her face with the deep calm of someone who has done this before. She hasn't. Neither have you.
+        text: `When it is over you are breathing hard, white bone stands out of the grey bodies, and Yuki is washing her face with the deep calm of an old hand at this. She isn't one. Neither are you.
 
-In the chest of the larger one, where a heart should be, the omnitool flags a hard, cloudy knot the size of a walnut. *Beast core*, your threads suggest, cross-referencing nothing at all. Dense with that foul Qi.
+In the chest of the largest, where a heart ought to be, the omnitool flags a hard, cloudy knot the size of a walnut. *Beast core*, your threads supply, cross-referencing nothing whatsoever. Dense with that foul Qi.
 
-Something tells you the locals would kill for this. Something tells you that's literal.`,
-        choices: [{ text: 'Sleep. Properly, this time.', do: (g) => [nightRest(g)], to: 'dawn' }], // v0.11.92 (O1): half back after the fight
+You suspect the locals would kill for it, and that this is no figure of speech. It will keep. What remains of the night is short, and the sleep in it will be the thin kind.`,
+        choices: [{ text: 'Sleep. What\'s left of the night.', do: (g) => [nightRest(g)], to: 'dawn' }], // v0.11.92 (O1): half back after the fight; v0.11.167 (CA1, RV1 M4): the label fits it
     },
     jackals_lost: {
         id: 'jackals_lost', title: 'Teeth in the Dark', art: 'jackals', place: 'Blackroot Wilds — the dry rise',
-        enter: (g) => { g.flags.jackals = 'lost'; delete g.inventory.hare_raw; return ['The jackals take your food and some skin. You keep your throat.']; },
+        enter: (g) => { g.flags.jackals = 'lost'; delete g.inventory.hare_raw; return ['The jackals take your food and a little skin. Your throat, you keep.']; },
         text: (g) => `${byForm(g, "You go down. The last thing you see is Yuki — all eleven pounds of her — standing over you with her fur on end, screaming a sound a cat should not be able to make.", "You go down. The last thing you see is Yuki — all four hundred pounds of her — standing over you with her fur on end, making a sound a cat her size is fully entitled to make.", "You go down. The last thing you see is Yuki — all of her, in a dress — standing over you with her ears flat and her tail on end, screaming a sound a woman should not be able to make.")}
 
-The jackals hesitate. Then they take the hare and leave. Perhaps they didn't like her odds. Perhaps they didn't like what's in your blood.
+The jackals hesitate. Then they take the hare and go. Perhaps they disliked her odds. Perhaps they disliked what runs in your blood.
 
 ${byForm(g, "You wake up an hour before dawn, alive, aching, and covered in cat.", "You wake up an hour before dawn, alive, aching, and underneath a good deal of cat.", "You wake up an hour before dawn, alive, aching, and with your head in Yuki's lap.")}`,
-        choices: [{ text: 'Get up. Slowly.', do: (g) => { sleepUntil(g, 6); g.james.hp = Math.ceil(g.james.hp * 0.6); return ['You slept, badly. HP partly back, Qi full.']; }, to: 'dawn' }],
+        choices: [{ text: 'Get up. Slowly.', do: (g) => { sleepUntil(g, 6); g.james.hp = Math.ceil(g.james.hp * 0.6); return ['You slept, and not well. HP partly back, Qi full.']; }, to: 'dawn' }],
     },
     jackals_fled: {
         id: 'jackals_fled', title: 'Retreat', art: 'stream', place: 'Blackroot Wilds — the stream',
@@ -372,11 +372,11 @@ You are cold, wet, alive and furious, and Yuki — ${byForm(g, "perched on your 
     /* ================= DAY 2 ================= */
     dawn: {
         id: 'dawn', title: (g) => (g.flags.long ? 'Day Four' : 'Day Two'), art: 'forest_dawn', place: 'Blackroot Wilds',
-        text: (g) => `Morning comes red. You eat ${foodCount(g) ? 'what\'s left' : 'nothing, which is a meal you are getting very good at'}, and you're working out which way is *away* when the scream comes.
+        text: (g) => `Morning comes up red. You eat ${foodCount(g) ? 'what\'s left' : 'nothing, a meal you are getting very good at'}, and you are working out which direction counts as *away* when the scream comes.
 
-Human. Female. Furious more than frightened — the kind of scream that has a lot of swearing folded into it. A few hundred metres east, down the slope.
+Human. A woman's. More fury in it than fear, and a good deal of swearing folded in. A few hundred metres east, down the slope.
 
-Yuki is already looking at you. You are already moving. Apparently you have a type of stupid, and it's this one.`,
+Yuki is already looking at you. You are already moving. You have a type of stupid, it seems, and this is the one.`,
         enter: (g) => cookMealMorning(g),
         choices: [
             { text: 'Run straight toward it.', time: 5, to: 'herb_girl' },
@@ -386,17 +386,17 @@ Yuki is already looking at you. You are already moving. Apparently you have a ty
     },
     herb_girl: {
         id: 'herb_girl', title: 'Outer Disciple', art: 'herb_girl', place: 'Blackroot Wilds — the herb slope',
-        text: (g) => `${g.flags.sneak ? 'From the rocks above, you get the whole picture before anyone gets you.' : 'You come over the rise faster than is dignified.'}
+        text: (g) => `${g.flags.sneak ? 'From the rocks above you get the whole picture before anyone gets you.' : 'You come over the rise faster than dignity allows.'}
 
-A woman in a patched brown jacket, maybe mid-twenties, has her back to a boulder and a herb-knife in her fist. Her basket is on the ground, spilling something that glows faintly green. In front of her: a young man in crimson robes, sleeves embroidered with a lotus that looks like it's bleeding, and a pock-faced hulk carrying a hatchet.
+A woman of perhaps twenty-five, in a white jacket with a red sash and a long dark skirt, a red ribbon in her black hair, stands with her back to a boulder and a herb-knife in her fist. Her basket lies on its side, spilling something that glows a faint green. Facing her: a young man in crimson robes, a lotus stitched on each sleeve as though it were bleeding, and a pock-faced hulk with a hatchet.
 
-"The tribute is due ${g.flags.long ? 'in three days' : 'tomorrow'}," Crimson Robes is saying, with the grave, unhurried patience of a magistrate reading out a sentence. "And you laughed at an outer disciple of the Crimson Lotus in front of the whole slope, Mei Lin. Face is owed. The Ninefold grass is forfeit, and you will serve tea in my quarters tonight, as penance. Or the Elder learns your mother has been hiding a spirit root in that house."
+"The tribute is due ${g.flags.long ? 'in three days' : 'tomorrow'}," Crimson Robes is saying, with the grave, unhurried patience of a magistrate reading a sentence. "And you laughed at an outer disciple of the Crimson Lotus before the whole slope, Mei Lin. Face is owed. The Ninefold grass is forfeit, and tonight you will serve tea in my quarters, as penance. Otherwise the Elder learns that your mother has been hiding a spirit root in that house."
 
 "My mother is *sixty*, you overdressed rooster—"
 
-"Then she will serve the Sect for as many years as Heaven leaves her," he says, without heat. "That is the law. You should have thought of her before you laughed."
+"Then she will serve the Sect for as many years as Heaven leaves her," he says, without heat. "That is the law. You ought to have remembered her before you laughed."
 
-Your Parallel Cognition is already labelling him. Qi like a coal under ash: a few rungs past your own. A cultivator.
+Your Parallel Cognition has him labelled already. Qi like a coal under ash, banked and mean: one clear rung above a mortal, and worn like a mountain. A cultivator.
 
 He glances at you once, the quick appraising glance cultivators here give everyone — *root? realm? threat?* — and finds nothing. No root. No Qi. Not a flicker. ${byForm(g, "His eyes slide off you the way they'd slide off a fence post.", "His eyes slide off you the way they'd slide off a fence post, and off Yuki the way they'd slide off a second, larger fence post.", "His eyes slide off you the way they'd slide off a fence post, and off Yuki the way they'd slide off a second, shorter fence post: they catch on the ears for exactly as long as dignity permits, which is not long.")} You, apparently, do not register. Of the local kind, and of the kind that likes it.`, // v0.11.130 (YB1, HG; Fable's MAIN): the human's glance
         choices: [
@@ -407,11 +407,11 @@ He glances at you once, the quick appraising glance cultivators here give everyo
     },
     gao_hand: {
         id: 'gao_hand', title: 'A Point Made', art: 'herb_girl', place: 'Blackroot Wilds — the herb slope',
-        text: `The needle goes in between two knuckles and out the other side, and pins Crimson Robes' hand to his own sleeve. He makes a noise like a kettle.
+        text: `The needle goes in between two knuckles, comes out the far side, and pins Crimson Robes' hand to his own sleeve. He makes a noise like a kettle.
 
-"Hi," you say, standing up on the rocks so the morning sun is behind you, which is cheap, and works. "I'm going to need you to leave her alone."
+"Hi," you say, and stand up on the rocks with the morning sun behind you, which is cheap, and works. "I need you to leave her alone."
 
-He stares at the white needle. Then at you. Then — and this is the interesting part — he looks *afraid*. Not of the hole in his hand. Of the bone.
+He stares at the white needle. Then at you. Then, and here it gets interesting, he looks *afraid*. Not of the hole in his hand. Of the bone.
 
 "Not a beast," he says. "Not a sect. What *are* you?"`,
         choices: [
@@ -424,9 +424,9 @@ He stares at the white needle. Then at you. Then — and this is the interesting
         enter: (g) => { g.flags.gao_humiliated = true; bumpRel(g, 'Mei Lin', 8, 2); return []; },
         text: (g) => `It turns out that a tall foreigner in a strange white coat, who walks into an extortion with ${byForm(g, "a cat on his shoulder", "a cat the size of a tiger at his side", "a cat-eared woman in a black dress at his elbow")} and the bored tone of a man complaining about a parking ticket, does not compute for Crimson Robes.
 
-You talk. You are very, very sarcastic. At one point you describe his lotus embroidery as "a cry for help". The lackey goes rigid with outrage on his master's behalf, which is somehow funnier.
+You talk. Your sarcasm is thorough. At one point you call his lotus embroidery "a cry for help". The lackey goes rigid with outrage on his master's behalf, which is, if anything, funnier.
 
-Crimson Robes — *Gao Feng, Outer Disciple of the Crimson Lotus Sect*, he informs you, as if that should mean something — decides his face cannot survive another minute of this. Before he leaves he turns, bows a precise, furious quarter-bow, and formally declares, before Heaven and witnesses, that the insult will be repaid in blood.
+Crimson Robes (*Gao Feng, Outer Disciple of the Crimson Lotus Sect, of Foundation rank*, he informs you, as if either half should mean something) concludes that his face will not survive another minute of this. Before he goes he turns, bows a precise and furious quarter-bow, and declares formally, before Heaven and witnesses, that the insult will be repaid in blood.
 
 "Put it on my tab," you tell his back.`,
         choices: [{ text: 'Turn to the woman with the knife.', to: 'mei_lin' }],
@@ -450,13 +450,13 @@ The needle dissolves in his mouth halfway down the hill. You can hear him spit f
     gao_won: {
         id: 'gao_won', title: 'Crimson on the Grass', art: 'gao_down', place: 'Blackroot Wilds — the herb slope',
         enter: (g) => { g.flags.gao_beaten = true; bumpRel(g, 'Mei Lin', 12, 4); return []; },
-        text: `Gao Feng ends up on his back with a bone needle through his sleeve and into the ground, and the lackey ends up halfway to the next valley. You are bleeding a little. You are, you realise, grinning, which is a thing you will have to think about later.
+        text: `Gao Feng ends on his back, a bone needle through his sleeve and into the ground, and the lackey ends halfway to the next valley. You are bleeding a little. You are also, you notice, grinning, and that will want thinking about later.
 
-"Kill him," says the woman with the knife, very calmly. "If he goes back, they'll come for my mother. They'll come for the village."
+"Kill him," says the woman with the knife, quite calmly. "If he goes back, they will come for my mother. They will come for the village."
 
 That isn't sarcasm. You check. It isn't.`,
         choices: [
-            { text: 'Break him. Not dead — you don\'t do that. Just finished.', do: (g) => { g.flags.gao_broken = true; bumpRel(g, 'Mei Lin', 6, 2); return ['Gao Feng will live. He will not cultivate again for a long time, and he will never forget who did it.']; }, to: 'gao_dead' },
+            { text: 'Break him. Not dead — you don\'t do that. Just finished.', do: (g) => { g.flags.gao_broken = true; bumpRel(g, 'Mei Lin', 6, 2); return ['Gao Feng will live. He will never forget who saw to that.']; }, to: 'gao_dead' },
             { text: 'Let him crawl home. You\'re a biologist, not an executioner.', do: (g) => { g.flags.gao_spared = true; return []; }, to: 'gao_spared' },
         ],
     },
@@ -467,7 +467,7 @@ That isn't sarcasm. You check. It isn't.`,
 
 He doesn't get to finish. ${byForm(g, "Eleven pounds of white cat land on his face, all claws, and while he's screaming and spinning,", "Four hundred pounds of white cat take him off your neck and a fair way across the herb bed, and while he's screaming and rolling,", "Yuki lands on his back in a black dress, all nails, and while he's screaming and spinning,")} Mei Lin puts her herb-knife through the lackey's thigh and her basket over Gao Feng's head.
 
-By the time he's untangled himself, the three of you are fifty metres down the slope and running.
+By the time he has fought his way out of it, the three of you are fifty metres down the slope and running.
 
 "You," Mei Lin pants, "are the worst rescuer I have ever had."
 
@@ -478,53 +478,53 @@ By the time he's untangled himself, the three of you are fifty metres down the s
     },
     gao_dead: {
         id: 'gao_dead', title: 'The First Rule, Amended', art: 'gao_down', place: 'Blackroot Wilds — the herb slope',
-        text: `You don't kill him. You're a biologist; you know exactly how much of a body you can break without ending it, and you go right up to that line and stop.
+        text: `You do not kill him. You are a biologist: you know precisely how much of a body can be broken without ending it, and you walk up to that line and stop.
 
-A needle through each of the three meridian knots in his sword arm, precise as a lab protocol. You feel the Qi in them crack like ice on a puddle. Then you take the arm itself, at the elbow, the wrong way, and the sound he makes is not dignified at all. He'll heal. He will not hold a sword, or gather Qi into that arm, for a very long time.
+One needle through each of the three meridian knots in his sword arm, exact as a lab protocol. You feel the Qi in them crack like ice on a puddle. Then you take the arm itself, at the elbow, the wrong way, and the sound he makes has no dignity in it at all. He will heal. He will not hold a sword in that arm, or gather Qi into it, for more seasons than he will want to count.
 
-He lies in the herbs, white, sweating, staring at you. "Mortal," he whispers, as if the word has betrayed him. "You're a *mortal*. I'd feel it if you weren't. There's nothing in you. *Nothing.*"
+He lies in the herbs, white and sweating, staring up at you. "Mortal," he whispers, as if the word had betrayed him. "You're a *mortal*. The Foundation feels every vessel beneath it. I would feel you. There is nothing in you. *Nothing.*"
 
-"Yes," you agree. "Think about that on the way home."
+"Yes," you agree. "Think it over on the walk home."
 
-Mei Lin goes through his sleeves while he lies there and takes a pouch of rough grey pills and a jade token. She hands you the pouch. Her hands are not quite steady.
+Mei Lin goes through his sleeves while he lies there, and comes out with a pouch of rough grey pills and a jade token. The pouch she hands to you. Her hands are not quite steady.
 
-"I told you to kill him," she says, very quietly. "Now he goes home alive, and broken, and he tells them a mortal did this. Do you understand what you've *done*?" She looks at you as if you've grown a second head. "In this world, the dead stay quiet. The shamed never do."
+"I told you to kill him," she says, very quietly. "Now he goes home alive and broken, and tells them a mortal did it. Do you understand what you have *done*?" She looks at you as though you had grown a second head. "In this world the dead keep quiet. The shamed never do."
 
-"I'll take my chances with loud," you say. "I don't do the other thing. Not to people."
+"I'll take my chances with loud," you say. "The other thing, I don't do. Not to people."
 
-She stares at you for a long moment. Then, under her breath, something that might be *idiot* and might, possibly, be *thank you*.`,
+She holds the stare well past the point of manners. Then, under her breath, a word that could be *idiot* and could, just possibly, be *thank you*.`,
         enter: (g) => { g.flags.gao_broken = true; addItem(g, 'beast_core', 1); return ['+1 Murky beast core (from Gao Feng\'s pouch). Mei Lin keeps his jade token.']; },
         choices: [{ text: 'Go with her. Behind you, Gao Feng is still swearing — slowly, and in great detail — what his Sect will do to you.', to: 'mei_lin' }],
     },
     gao_spared: {
         id: 'gao_spared', title: 'Mercy, Probably a Mistake', art: 'gao_down', place: 'Blackroot Wilds — the herb slope',
-        text: `Gao Feng crawls, and then limps, and then runs. Mei Lin watches him go with her jaw tight.
+        text: `Gao Feng crawls, then limps, then runs. Mei Lin watches him all the way down with her jaw set.
 
-"That," she says, "is going to come back with friends."
+"That," she says, "will come back with friends."
 
-"Most problems do," you admit. "I'd still rather be the kind of person who has that problem."
+"Most problems do," you admit. "I would still sooner be the sort of person who has that problem."
 
-She looks at you for a long moment, and something in her face shifts — not agreement. Curiosity.`,
+She studies you. Something in her face shifts. Not agreement. Curiosity.`,
         choices: [{ text: 'Go with her.', to: 'mei_lin' }],
     },
     mei_lin: {
         id: 'mei_lin', title: 'Mei Lin', art: 'mei_lin', place: 'Blackroot Wilds — the herb slope',
         enter: (g) => { addItem(g, 'spirit_grass', 1); return ['+1 Ninefold spirit grass (a thank-you, or a test).']; },
-        text: (g) => `Up close she's all edges: sharp cheekbones, sharp eyes, a sharp mouth that has clearly been getting her into trouble for years. Her hands are scarred from herb-knives and her jacket has been patched by someone who cared more about warmth than looks. She is studying you like you're a plant she can't classify.
+        text: (g) => `Up close she's all edges: sharp cheekbones, sharp eyes, a sharp mouth that has clearly been getting her into trouble for years. Her hands are scarred from herb-knives and her white jacket, tied with a red sash, has been patched by someone who cared more about warmth than looks. She is studying you like you're a plant she can't classify.
 
-"You have no spirit root," she says. "I'd feel it. I can't feel *anything* in you — no root, no Qi, not even the dirt-level hum every farmer has. To my senses you're a stone in a coat. You eat no pills — I can smell pill-eaters a li away. And you made *bone* out of *air*." She says it like an accusation. "That isn't possible. Mortals can't do that. And you are a mortal. I'd stake my life on it, and I'd lose." She holds out a stem of the glowing grass. "Eat this."
+"You have no spirit root," she says. "I'd feel one. I feel *nothing* in you: no root, no Qi, not even the low hum a farmer carries home from his field. To my senses you are a stone wearing a coat. You take no pills, either; a pill-eater I can smell from a li off. And you made *bone* out of *air*." It comes out as a charge read before a magistrate. "Which can't be done. Mortals can't. And you are a mortal. I would stake my life on it, and I would lose." She holds out a stem of the glowing grass. "Eat this."
 
-You take it. It hums against your skin, a little hungry, a little vicious — Qi packed tight with the same foul residue as everything else, bound up in something that wants to be swallowed.
+You take it. The stem hums against your palm, hungry and faintly spiteful: Qi packed tight, carrying the same foul residue as everything else here, wrapped in a plant whose one ambition is to be swallowed.
 
 "No thank you."
 
-"Everyone needs grass. Pills. Cores. Or you cultivate dirt and die at the first tribulation." She squints. "Unless you're a demon. Are you a demon?"
+"Everybody needs grass. Or pills. Or cores. Otherwise you cultivate on dirt, and the first tribulation kills you." Her eyes narrow. "Unless you're a demon. Are you a demon?"
 
 "I'm a mycologist."
 
 "Is that worse?"
 
-"Depends who you ask."
+"Ask a botanist."
 
 ${byForm(g, "Yuki, from your shoulder,", "Yuki, from your side,", "Yuki, at your elbow,")} offers Mei Lin one slow blink. Mei Lin — to her eternal credit — blinks back.`,
         choices: [
@@ -534,49 +534,49 @@ ${byForm(g, "Yuki, from your shoulder,", "Yuki, from your side,", "Yuki, at your
     },
     lore: {
         id: 'lore', title: 'The Way of Heaven, Locally', art: 'mei_lin', place: 'Blackroot Wilds — the path down',
-        text: `She tells you as you walk, in the flat voice of someone listing the weather.
+        text: `She tells you on the way down, flatly, as other people report the weather.
 
-Cultivators drink the world's Qi, but the world's Qi is poisoned by everything that has ever died in it. So they eat spirit herbs to scrub it — Ninefold grass, blood ginseng, things that grow on graves. They eat beast cores. They eat pills refined from both. They eat each other's cores, when they can get them. Every rung on the ladder, they buy with something.
+Cultivators drink the world's Qi, and the world's Qi carries everything that ever died in it. So they scrub it with spirit herbs: Ninefold grass, blood ginseng, whatever comes up on graves. They eat beast cores. They eat pills refined from both. When they can get them, they eat each other's cores. Every rung of the ladder is bought with something. The first, Foundation, makes a disciple; the ones above it make elders.
 
-And at every great threshold, Heaven sends lightning. "Tribulations," she says. "The sky decides you're impure and tries to burn you clean. Most people it just burns."
+And at each rung Heaven sends lightning. "Tribulations," she says. "The sky decides you're impure and tries to burn you clean. Most people it just burns."
 
 "How many survive?"
 
-"In the outer sect? One in thirty. That's why they need so many of us."
+"Of the outer sect? One in thirty. Which is why they need so many of us."
 
-The Crimson Lotus Sect owns these mountains. Villages pay tribute in herbs, in grain, and every year in children with spirit roots. The children who come back are not children any more. Mostly, they don't come back.
+These mountains belong to the Crimson Lotus Sect. The villages pay it in herbs, in grain, and once a year in any child born with a spirit root. A child who comes back has stopped being one. Most don't come back.
 
-You think about your own cultivation: no herbs, no pills, no lightning. A loop that eats the poison and hands back clean Qi. Your people's Qi doesn't remember anything. It just *is*.
+You consider your own cultivation: no herbs, no pills, no lightning. A loop that takes the poison in and hands clean Qi back. At home the Qi remembers nothing. It simply *is*.
 
-You think, very carefully, about what a world like this does with an outlier.
+Then you consider, with some care, what a world like this does with an outlier.
 
-"You've gone quiet," Mei Lin observes.
+"You went quiet," Mei Lin observes.
 
-"I'm realising I'm the most valuable lab animal on the continent."`,
+"I've just worked out that I'm the most valuable lab animal on the continent."`,
         choices: [{ text: 'Walk on to her village.', time: 40, to: 'village' }],
     },
     ridge_alone: {
         id: 'ridge_alone', title: 'The Ridge', art: 'ridge', place: 'Blackroot Wilds — the ridge',
         enter: set('ignored'),
-        text: `From the ridge you see the shape of things: black forest rolling to the horizon, mountains like broken teeth, and — at the forest's heart — something enormous and dead. A tree, or the corpse of one, taller than anything that should be able to stand. Even from here, your Convergence *answers* it, a faint, sad hum.
+        text: `The ridge shows you the lie of the land: black forest out to the horizon, mountains like a jaw of broken teeth, and at the forest's heart something enormous and dead. A tree, or what is left of one, taller than anything has a right to stand. Even at this distance your Convergence *answers* it with a faint, sad hum.
 
-Below the ridge: a village of grey stone and grey thatch, smoke rising. People.
+Under the ridge sits a village: grey stone, grey thatch, smoke going straight up. People.
 
-On the way down you pass the herb slope. There's a spilled basket. There's blood on a boulder. Nobody is there any more.
+The way down crosses the herb slope. A basket lies spilled. A boulder has blood on it. Whoever was here has gone.
 
-Yuki doesn't look at you for a long time.`,
+Yuki does not look at you. She keeps it up all the way down.`,
         choices: [{ text: 'Go down to the village.', time: 60, to: 'village' }],
     },
     village: {
         id: 'village', title: 'Ashfall', art: 'village', place: 'Ashfall Hamlet',
         enter: (g) => { if (g.flags.ignored) g.flags.mei_bruised = true; if (g.flags.long && !g.flags.vday) g.flags.vday = 1; return []; },
-        text: (g) => `Ashfall Hamlet is forty houses of grey stone around a well, a shrine to a god whose face has been chiselled off, and a tall wooden post hung with red lotus banners. The tribute post. People move around it the way you'd move around a sleeping dog.
+        text: (g) => `Ashfall Hamlet is forty houses of grey stone around a well, a shrine to a god whose face someone has chiselled off, and a tall wooden post hung with red lotus banners. The tribute post. People give it the berth they would give a sleeping dog.
 
 ${g.flags.ignored
-        ? 'A woman in a patched brown jacket limps past you with a split lip and an empty basket, and the whole street goes quiet around her. Someone mutters "Gao Feng". Nobody looks at you, the stranger who came down from the ridge at exactly the wrong time.'
-        : 'Mei Lin walks you in like a stray she has decided to keep. "He\'s with me," she tells the street, and the street goes quiet in the particular way of people who have watched Mei Lin say the wrong thing to the wrong person for twenty years. An old woman at the well makes a warding sign. A man spits, precisely, to one side.'}
+        ? 'A woman in a patched white jacket and a red sash limps past you with a split lip and an empty basket, and the street falls silent around her. Someone mutters "Gao Feng". Nobody looks at you, the stranger who came down off the ridge at exactly the wrong hour.'
+        : 'Mei Lin walks you in like a stray she has decided to keep. "He\'s with me," she tells the street, and the street answers with the silence of people who have spent twenty years watching Mei Lin say the wrong thing to the wrong person. An old woman at the well makes a warding sign. A man turns his head and spits, precisely.'}
 
-${g.flags.long ? 'The tribute is due in three days, at dawn. You can feel the whole village counting them.' : 'The tribute is due at dawn tomorrow. You can feel the whole village holding its breath about it.'}`,
+${g.flags.long ? 'The tribute falls due in three days, at dawn. The whole village is counting them, and not aloud.' : 'The tribute falls due tomorrow at dawn. The whole village is holding its breath over it.'}`,
         choices: [
             { text: 'Ask for the village elder.', show: once('elder'), time: 30, do: set('elder'), to: 'elder' },
             { text: 'There\'s a sick child — you can hear the coughing. Offer to help.', show: once('healed_try'), time: 60, to: 'heal' },
@@ -586,49 +586,49 @@ ${g.flags.long ? 'The tribute is due in three days, at dawn. You can feel the wh
     },
     elder: {
         id: 'elder', title: 'Old Wen', art: 'elder', place: 'Ashfall Hamlet — the elder\'s house',
-        text: (g) => `Old Wen is ninety, blind in one eye, and pours tea with the steadiness of a man who has outlived three sect masters and plans to outlive a fourth.
+        text: (g) => `Old Wen is ninety in a village where sixty is Heaven being kind. He is blind in one eye, and he pours tea with the steady hand of a man who has outlived three sect masters and intends to outlive a fourth.
 
-"You don't eat pills," he says, before you've finished sitting down. "You don't smell of grass. And when I reach for you with what little sense ninety years have left me, I find nothing. No root. No sea of Qi. As if there were no one sitting in that chair." He frowns at the chair. "Yet Mei Lin says you made a needle out of air. One of those things is untrue, and I am too old to think it is her. ${yukiMerElder(g)}" He sips. "I would know what you are before the Crimson Lotus does. They will want to cut you open to learn it."
+"You eat no pills," he says, before you have finished sitting down. "You carry no smell of grass. And when I reach for you with the little sense ninety years have left me, I find nothing. No root. No sea of Qi. That chair might as well be empty." He frowns at the chair. "Yet Mei Lin says you made a needle out of air. One of these things is untrue, and I am too old to believe it is her. ${yukiMerElder(g)}" He sips. "I would know what you are before the Crimson Lotus does. Their way of learning it is to cut you open."
 
-"That seems to be the consensus."
+"There does seem to be a consensus."
 
-"Then let me give you an old man's advice." He sets his cup down. "${g.flags.long ? 'In three days' : 'Tomorrow'}, the collectors come. If you're here, they'll see you. If they see you, they'll want you. You can run ${g.flags.long ? 'before then' : 'tonight'}. Nobody would blame you." A pause. "Or you can stand in front of us. Nobody has done that in forty years."
+"Then hear an old man's advice." He sets the cup down. "${g.flags.long ? 'In three days' : 'Tomorrow'}, the collectors come. An inner disciple leads them: Foundation, a rung no one in Ashfall has stood on. If you are here, they will see you. If they see you, they will want you. You may run ${g.flags.long ? 'before then' : 'tonight'}. No one would blame you." A pause. "Or you may stand in front of us. No one has done that in forty years."
 
-${g.flags.gao_beaten || g.flags.gao_humiliated ? '"You have also," he adds, without inflection, "already shamed an outer disciple of the Sect on our slope. Running may no longer be yours to choose."' : ''}`,
+${g.flags.gao_beaten || g.flags.gao_humiliated ? '"You have also," he adds, with no change of voice, "shamed an outer disciple of the Sect on our slope already. Running may no longer be yours to choose."' : ''}`,
         choices: [{ text: 'Thank him. Think about it.', do: (g) => { bumpRel(g, 'Old Wen', 3, 0); return []; }, to: hubOf }], // v0.11.139 (owner pick MW1, MB): Wen +3
     },
     heal: {
         id: 'heal', title: 'The Coughing House', art: 'healer', place: 'Ashfall Hamlet — the coughing house',
         enter: set('healed_try'),
-        text: (g) => `A boy of six or seven, flushed with fever, a wound on his calf gone red and angry and wet. The mother has been packing it with spirit-herb paste, which is roughly like packing it with angry ghosts.
+        text: (g) => `A boy of six or seven, bright with fever, and on his calf a wound gone red and swollen and wet. His mother has been packing it with spirit-herb paste, which comes to much the same as packing it with angry ghosts.
 
-You are not a doctor. You are, however, a man who has spent fifteen years thinking about what fungi do to bacteria, and ${g.inventory.jade_bracket ? 'you have a pocket full of a bracket fungus that your omnitool swears is quietly, beautifully antibiotic.' : 'you saw a bracket fungus by the stream that might have been the answer, and you didn\'t pick it.'}`,
+You are not a doctor. You are a man who has spent fifteen years on the question of what fungi do to bacteria, and ${g.inventory.jade_bracket ? 'you have a pocketful of bracket fungus that your omnitool swears is quietly, beautifully antibiotic.' : 'by the stream you saw a bracket fungus that may well have been the answer, and you left it on its log.'}`,
         choices: [
-            { text: 'Clean it with a bone lancet, dress it with the jade bracket.', show: (g) => (g.inventory.jade_bracket || 0) > 0, check: { skill: 'GU', dc: 3, bonus: () => 2 }, time: 60, do: (g) => { addItem(g, 'jade_bracket', -1); g.flags.healed = true; bumpRel(g, 'Village', 15, 0); return ['The fever breaks before dark. The village will remember.']; }, failDo: (g) => { addItem(g, 'jade_bracket', -1); g.flags.healed = 'partly'; bumpRel(g, 'Village', 6, 0); return ['It helps — slowly. He\'ll live, probably.']; }, to: hubOf },
+            { text: 'Clean it with a bone lancet, dress it with the jade bracket.', show: (g) => (g.inventory.jade_bracket || 0) > 0, check: { skill: 'GU', dc: 3, bonus: () => 2 }, time: 60, do: (g) => { addItem(g, 'jade_bracket', -1); g.flags.healed = true; bumpRel(g, 'Village', 15, 0); return ['The fever breaks before dark. Ashfall will remember it.']; }, failDo: (g) => { addItem(g, 'jade_bracket', -1); g.flags.healed = 'partly'; bumpRel(g, 'Village', 6, 0); return ['It helps, slowly. He will probably live.']; }, to: hubOf },
             { text: 'Drain and clean it, and ask what herbs they have that don\'t taste of death.', check: { skill: 'GU', dc: 4 }, time: 60, do: (g) => { g.flags.healed = 'partly'; bumpRel(g, 'Village', 8, 0); return ['Better. Not well. But better.']; }, failDo: () => [`You drain it and clean it and dress it with the least murderous herb they have, and by the time you leave the boy is no cooler and the wound is no quieter. The mother thanks you, formally, with a bow that goes to the floor, which is worse than if she'd shouted. You walk out into the street with the taste of it in your mouth: the thing you know how to do, and didn't do well enough.`], to: hubOf },
             { text: 'Go back to the stream for the fungus. It\'s two hours there and back.', show: (g) => !(g.inventory.jade_bracket > 0), time: 120, do: (g) => { addItem(g, 'jade_bracket', 2); return ['+2 Jade bracket fungus.']; }, to: 'heal_again' },
         ],
     },
     heal_again: {
         id: 'heal_again', title: 'The Coughing House', art: 'healer', place: 'Ashfall Hamlet — the coughing house',
-        text: `You come back muddy to the knees with two shelves of pale green fungus, and the mother looks at you like you've brought her the moon.`,
-        choices: [{ text: 'Get to work.', check: { skill: 'GU', dc: 3, bonus: () => 2 }, time: 60, do: (g) => { addItem(g, 'jade_bracket', -1); g.flags.healed = true; bumpRel(g, 'Village', 15, 0); return ['The fever breaks before dark. The village will remember.']; }, failDo: (g) => { addItem(g, 'jade_bracket', -1); g.flags.healed = 'partly'; bumpRel(g, 'Village', 6, 0); return ['It helps — slowly.']; }, to: hubOf }],
+        text: `You come back mud to the knees, carrying two shelves of pale green fungus, and the mother looks at them as if you had brought her the moon.`,
+        choices: [{ text: 'Get to work.', check: { skill: 'GU', dc: 3, bonus: () => 2 }, time: 60, do: (g) => { addItem(g, 'jade_bracket', -1); g.flags.healed = true; bumpRel(g, 'Village', 15, 0); return ['The fever breaks before dark. Ashfall will remember it.']; }, failDo: (g) => { addItem(g, 'jade_bracket', -1); g.flags.healed = 'partly'; bumpRel(g, 'Village', 6, 0); return ['It helps, slowly.']; }, to: hubOf }],
     },
     village_hunt: {
         id: 'village_hunt', title: 'Ironhide', art: 'boar', place: 'Blackroot Wilds — the oak hollow',
         enter: set('village_hunt'),
-        text: `The village hunters won't go past the oak hollow any more: there's an ironhide boar there with tusks like plough-blades and, they swear, a beast core the size of a fist.
+        text: `The village hunters no longer go past the oak hollow. An ironhide boar holds it now, with tusks like plough-blades and, they swear, a beast core the size of a fist.
 
-It finds you before you find it. It is the size of a small car and it has *opinions*.`,
+It finds you before you find it. It is the size of a small car, and it has taken your visit *personally*.`,
         choices: [
-            { text: 'Darts to the eyes, then the blade.', combat: (g) => ({ id: 'boar', intro: 'The boar paws the black earth. The ground shakes when it does.', band: 'challenging', enemies: [grow({ name: 'Ironhide boar', hp: 10, dc: 4, atk: 4, dmg: 5, dr: 1 }, forestScale(g), BOAR_GROWTH)], win: 'boar_won', lose: 'boar_lost', flee: hubOf(g) }), to: 'boar_won' },
+            { text: 'Darts to the eyes, then the blade.', combat: (g) => ({ id: 'boar', intro: 'The boar paws at the black earth, and the earth shakes under it.', band: 'challenging', enemies: [grow({ name: 'Ironhide boar', hp: 10, dc: 4, atk: 4, dmg: 5, dr: 1 }, forestScale(g), BOAR_GROWTH)], win: 'boar_won', lose: 'boar_lost', flee: hubOf(g) }), to: 'boar_won' },
             { text: 'A pit and a bed of bone spikes. Make it come to you.', qi: 6, check: { skill: 'Convergence Use', dc: 4, bonus: (g) => -Math.floor(forestScale(g) / 2) }, time: 60, to: 'boar_won', fail: 'boar_lost' },
         ],
     },
     boar_won: {
         id: 'boar_won', title: 'Meat for Forty Houses', art: 'boar', place: 'Ashfall Hamlet',
         enter: (g) => { addItem(g, 'beast_core', 1); eat(g, 40); bumpRel(g, 'Village', 12, 0); g.flags.boar = true; return ['+1 Murky beast core. You eat with the village: +40 satiety.']; },
-        text: `They come out with carts. By sunset half of Ashfall is grilling ironhide, the children carry the tusks to the shrine in solemn procession, and a hunter old enough to be your grandfather kneels in the dust and formally presents you with his own boar spear, which you gather is roughly equivalent to a knighthood. You accept it. You have nowhere to put a spear. Then you remember you own an infinite closet.`,
+        text: `They come out with carts. By sunset half of Ashfall is grilling ironhide, the children are carrying the tusks to the shrine in solemn procession, and a white-bearded hunter kneels in the dust and formally presents you with his own boar spear, which you take to be the local knighthood. You accept. You have nowhere to keep a spear. Then you remember that you own an infinite closet.`,
         choices: [{ text: (g) => (g.flags.long && dayHour(g) < 16 ? 'Back to the village.' : 'Evening.'), time: 30, to: (g) => (g.flags.long ? (dayHour(g) >= 16 ? nextEvening(g) : hubOf(g)) : 'evening') }],
     },
     boar_lost: {
@@ -641,18 +641,18 @@ It finds you before you find it. It is the size of a small car and it has *opini
         id: 'evening', title: 'Dinner', art: 'dinner', place: 'Ashfall Hamlet — Mei Lin\'s house',
         enter: (g) => { const p = clockParts(g.minutes); if (dayHour(g) < 19) g.minutes = (p.day - 1) * 1440 + 19 * 60; /* v0.11.37: after midnight (24+) it is already evening: no jump back to 19:00 */ if (!g.flags.ate_dinner) { eat(g, 30); g.flags.ate_dinner = true; return ['Millet, greens and a little smoked fish: +30 satiety.']; } return []; },
         text: (g) => `${g.flags.ignored
-        ? 'You find her house by asking. You apologise on her doorstep, properly, no sarcasm. She lets you in, which you did not deserve, and puts a bowl in front of you, which you deserved even less.'
-        : g.flags.long ? 'Third supper at Mei Lin\'s. Her mother serves you first now, which in Ashfall is roughly the same as a signed adoption certificate.' : 'Mei Lin\'s house is two rooms and a herb loft, and her mother is a tiny fierce woman who looks at you once and starts adding more millet to the pot.'}
+        ? 'You find her house by asking. On her doorstep you apologise, properly, with the sarcasm left out. She lets you in, which you had not earned, and sets a bowl in front of you, which you had earned even less.'
+        : g.flags.long ? 'Third supper at Mei Lin\'s. Her mother serves you first now, which in Ashfall carries about the weight of a signed adoption certificate.' : 'Mei Lin\'s house is two rooms and a herb loft, and her mother is a small, fierce woman who gives you one look and starts adding millet to the pot.'}
 
-Afterwards the mother tells Mei Lin, in a low, severe voice you are clearly meant to overhear, that a respectable daughter does not drink plum wine with strange men under her mother's roof. Then she goes to bed. Mei Lin pours herself a second cup the moment the door shuts, and it's just Mei Lin, a clay lamp, a jar of something that might once have been plum wine, and you. Yuki has claimed the warmest spot on the stove and is pretending to be asleep in a way that fools nobody.
+Afterwards her mother informs Mei Lin, in a low, severe voice pitched for you to overhear, that a respectable daughter does not drink plum wine with strange men under her mother's roof. Then she goes to bed. Mei Lin pours herself a second cup the moment the door shuts, and that leaves Mei Lin, a clay lamp, a jar of what may once have been plum wine, and you. Yuki has claimed the warmest place by the stove and is pretending to be asleep, convincing nobody.
 
-Mei Lin's eyes are bright in the lamplight. She's taken her jacket off; underneath, a thin linen shirt and a collarbone that your Parallel Cognition has, without consulting you, dedicated an entire thread to.
+The lamp makes Mei Lin's eyes bright. The white jacket is off, its red sash folded on the bench; under them she wears a thin linen shirt, and a collarbone to which your Parallel Cognition has, without consulting you, assigned a whole thread.
 
 "So," she says. "Mycologist."
 
 "Mycologist."
 
-"Tell me what that means. Slowly. I've had wine."`,
+"Explain what that is. Slowly. I've had wine."`,
         choices: [
             { text: 'Tell her. Fungi, the forest that talks underground, the home you lost. Let it be honest.', do: (g) => { bumpRel(g, 'Mei Lin', 6, 6); g.flags.honest = true; return []; }, to: 'evening2' },
             { text: 'Flirt back. Shamelessly. You\'re forty, not dead.', do: (g) => { bumpRel(g, 'Mei Lin', 3, 10); g.flags.flirted = true; return []; }, to: 'evening2' },
@@ -662,12 +662,12 @@ Mei Lin's eyes are bright in the lamplight. She's taken her jacket off; undernea
     evening2: {
         id: 'evening2', title: 'Lamplight', art: 'dinner', place: 'Ashfall Hamlet — Mei Lin\'s house',
         text: (g) => `${g.flags.honest
-        ? 'You tell her about home — the grown cities, the Hearth Trees, the woods that sing back when you sing to them. You don\'t mean to tell her about the lab, but you do, and about how you don\'t know if anyone survived the blast, and somewhere in there your voice stops being sarcastic and just stays broken for a sentence or two. She doesn\'t say anything. She just puts her hand on yours and leaves it there.'
-        : 'You flirt. She flirts back like it\'s a duel and she\'s been training for years. At one point she leans across the table and tells you, very seriously, that your coat is ridiculous and she\'d like to see what\'s under it, and then she laughs at your face for a full minute.'}
+        ? 'You tell her about home: the grown cities, the Hearth Trees, the woods that sing back when you sing to them. The lab you had meant to leave out, and it comes anyway, along with not knowing whether anyone lived through the blast, and somewhere in there your voice gives up on sarcasm and stays broken for a sentence or two. She says nothing. She puts her hand on yours and leaves it there.'
+        : 'You flirt. She flirts back as if it were a duel she has trained for since girlhood. At one point she leans across the table and informs you, in all seriousness, that your coat is ridiculous and she would like to see what is under it. Then she laughs at your face for a full minute, and checks her mother\'s door afterwards.'}
 
-The lamp gutters. Neither of you fixes it.
+The lamp gutters. Neither of you gets up to trim it.
 
-"Tomorrow they come," she says quietly. "Gao Feng's friends. Maybe worse. Maybe they take you, or me, or the boy you ${g.flags.healed ? 'saved' : 'tried to help'}." Her thumb moves slowly across your knuckles. "I don't want to spend tonight being afraid of tomorrow."`,
+"They come tomorrow," she says quietly. "Gao Feng's friends. Worse, perhaps. Perhaps they take you, or me, or the boy you ${g.flags.healed ? 'saved' : 'tried to help'}." Her thumb moves slowly over your knuckles. "I don't want to spend tonight afraid of tomorrow."`,
         choices: [
             { text: 'Kiss her.', req: (g) => ((g.rel['Mei Lin']?.a || 0) >= KISS_MEI ? true : 'she isn\'t there yet'), do: (g) => { bumpRel(g, 'Mei Lin', 5, 15); g.flags.romance = true; return []; }, to: 'romance' },
             { text: '"Then don\'t be. Stay up and talk to me until it\'s not night any more."', do: (g) => { bumpRel(g, 'Mei Lin', 8, 4); return []; }, to: 'tribute_dawn_talk' },
@@ -678,19 +678,19 @@ The lamp gutters. Neither of you fixes it.
         id: 'romance', title: 'Not Afraid', art: 'romance', place: 'Ashfall Hamlet — the herb loft',
         text: `She kisses like she argues: first, hard, and to win.
 
-Her hands are already pushing the ridiculous coat off your shoulders, and then the shirt under it, and she makes a small, approving sound against your mouth when she finds there's more under there than she expected — the hard, lean body cultivation gives even a man who spends his life in a lab. You get her linen shirt over her head. Her skin is warm in the lamplight and scarred in small honest places from herb-knives and thorns, and you kiss every one of them you can find while she laughs, breathless, and pulls you by the hair toward the ladder to the herb loft.
+Her hands are already pushing the ridiculous coat off your shoulders, then the shirt under it. She stops at your forearms: on the left a serpent closed into a ring, eating its own tail; on the right the inked tree and its raven. "Later you explain those," she says, and makes a small approving sound against your mouth at the rest: the hard, lean body cultivation gives even a man who lives in a lab. You lift her linen shirt over her head. Her skin is warm in the lamplight, scarred in small honest places by herb-knives and thorns, and you kiss each one you can find while she laughs, out of breath, and tows you by the wrist toward the ladder to the herb loft.
 
-Up there it smells of dried mint and sun-warm hay. She pushes you down into it and climbs over you, knees either side of your hips, her hair coming loose, and looks down at you with that sharp, delighted, slightly dangerous expression that you are fairly sure is going to get you killed one day and that you would follow straight into a tribulation.
+The loft smells of dried mint and sun-warm hay. She pushes you down into it and climbs over you, a knee on either side of your hips, the red ribbon gone and her black hair coming loose, and looks down with the sharp, delighted, faintly dangerous expression that you are fairly sure will get you killed one day, and that you would follow straight into a tribulation.
 
 "Slowly," she says. "I told you. I've had wine."
 
-You do it slowly. For a while.
+Slowly, then. For a while.
 
 Then not slowly at all.
 
 *
 
-Much later, the lamp is out, the hay is everywhere, and Mei Lin is asleep with her face in your neck and one leg thrown over you like she's staking a claim. Downstairs, Yuki sends a single, aggrieved thought up through the bond: *finally. Now be quiet.*`,
+Much later the lamp is out, the hay has got everywhere, and Mei Lin is asleep against you with an arm across your chest, a claim staked. From downstairs the bond delivers Yuki's verdict, short and sour: *finally. Now be quiet.*`,
         choices: [{ text: 'Sleep. For a few hours, the world is just this.', do: (g) => { sleepUntil(g, 5); return ['Slept until 05:00. HP and Qi full.']; }, to: 'tribute' }],
     },
     tribute_dawn_talk: {
@@ -707,13 +707,13 @@ Much later, the lamp is out, the hay is everywhere, and Mei Lin is asleep with h
     /* ================= DAY 3 ================= */
     tribute: {
         id: 'tribute', title: 'The Collectors', art: 'collectors', place: 'Ashfall Hamlet — the tribute post',
-        text: (g) => `They come with the sun: four men in crimson, walking up the road like they own it, because they do. At their head, a tall man in deeper red with a sword on his back and a face as calm as a frozen pond — *Inner Disciple Lu Han*, the whisper goes round. ${g.flags.gao_broken ? 'Gao Feng is with them — carried in a litter at the back, his sword arm bound to his chest, his face grey. He sees you and says nothing. His eyes say everything.' : `Beside him, ${g.flags.gao_beaten ? 'bandaged, his face a mask of cold, formal hatred' : 'his face carefully blank, his eyes not'}, is Gao Feng.`}
+        text: (g) => `They come with the sun: four men in crimson, walking up the road as if they owned it, which they do. At their head is a tall man in a deeper red, a long sword on his back and a face as still as a frozen pond. *Inner Disciple Lu Han*, the whisper runs down the line, and after it, lower, *Foundation*, said as other villages say *flood*. ${g.flags.gao_broken ? 'Gao Feng is with them, carried in a litter at the rear, his sword arm bound to his chest and his face grey. He sees you and says nothing. His eyes cover the rest.' : `Beside him, ${g.flags.gao_beaten ? 'bandaged, his face a mask of cold and formal hatred' : 'his face carefully blank and his eyes not'}, is Gao Feng.`}
 
-The village is lined up at the tribute post with its baskets of grass and grain. ${g.flags.healed === true ? 'The mother of the boy you healed is standing very close behind you. So is half the street.' : ''}
+Ashfall stands in line at the tribute post with its baskets of grass and grain. ${g.flags.healed === true ? 'The mother of the boy you healed has placed herself very close behind you. So has half the street.' : ''}
 
-Lu Han's gaze passes over the baskets, over the people, and stops on you. On Yuki. It stays there.
+Lu Han's gaze goes over the baskets, over the people, and stops at you. Then at Yuki. There it stays.
 
-"Interesting," he says. He reaches for you with his Qi-sense — you feel it pass over you like a draught under a door — and finds nothing. "No root. No pill-smell. No cultivation at all. A mortal." His gaze moves to Yuki, and sharpens. "${yukiMerLu(g)} A mortal holding a treasure he cannot possibly understand." He tilts his head. "Kneel, stranger, and come with us. The Sect Master will wish to dissect you personally. It is an honour. Few are offered it."
+"Interesting," he says. His Qi-sense reaches for you — it goes over you like a draught under a door — and finds nothing. "No root. No pill-smell. No cultivation at all. A mortal." The same sense moves on to Yuki and reads no realm there either. His gaze sharpens all the same. "${yukiMerLu(g)} A mortal holding a treasure he cannot possibly understand." He tilts his head. "Kneel, stranger, and come with us. The Sect Master will wish to dissect you personally. It is an honour. Few are offered it."
 
 "I've been offered worse," you say. "Not recently."`,
         choices: [
@@ -736,41 +736,41 @@ Lu Han does not take it. He looks at it for as long as courtesy requires, the wa
     bluff_win: {
         id: 'bluff_win', title: 'Senior', art: 'collectors', place: 'Ashfall Hamlet — the tribute post',
         enter: (g) => { g.flags.ending = 'bluff'; bumpRel(g, 'Village', 20, 0); return []; },
-        text: `You don't raise your voice. You let a crown of white bone rise out of the earth around the tribute post, slow and silent and beautiful, and you let Lu Han feel your Qi: clean, utterly clean, without a trace of the death that soaks everything he has ever eaten.
+        text: `You don't raise your voice. You let a crown of white bone rise from the earth around the tribute post, slow and silent and beautiful, and you let the Qi in it reach Lu Han: clean, utterly clean, with no trace of the death that soaks everything he has ever eaten. Of the man who made it, his senses still tell him nothing, and a Foundation disciple knows one polite reason why they wouldn't.
 
-To someone from this world, it must feel like standing next to the sky.
+To a man of this world, it must be like standing beside the sky.
 
 Lu Han goes still. Then — perfectly, precisely — he bows. Not deep. Just enough.
 
-"This one did not recognise a senior," he says. "The Crimson Lotus will ask no tribute of Ashfall this season. My master will wish to… extend an invitation."
+"This one failed to recognise a senior," he says. "The Crimson Lotus asks no tribute of Ashfall this season. My master will wish to… extend an invitation."
 
 "I'll check my calendar."
 
-They leave. Gao Feng looks back once. It is not a look that means *goodbye*.`,
+They go. Gao Feng looks back once. The look does not mean *goodbye*.`,
         choices: [{ text: 'Breathe out.', to: 'epilogue' }],
     },
     tribute_paid: {
         id: 'tribute_paid', title: 'Heavenly Material', art: 'hairpin', place: 'Ashfall Hamlet — the tribute post',
         enter: (g) => { addItem(g, 'hairpin', -1); g.flags.ending = 'paid'; bumpRel(g, 'Village', 12, 0); return []; },
-        text: `It takes everything you have: a hairpin as long as your hand, white as moonlight, carved in a spiral of tiny leaves so fine the light passes through them. It's the best thing you've ever made. You hand it over like it's nothing.
+        text: `It takes everything you have: a hairpin the length of your hand, white as moonlight, turned in a spiral of leaves so fine that the light goes through them. You have never made anything better. You hand it over as though it were small change.
 
-Lu Han turns it in his fingers for a long time. Then he puts it inside his robe, very carefully, next to his heart.
+Lu Han turns it over in his fingers until the men behind him begin to shift. Then he puts it away inside his robe, with great care, over his heart.
 
-"Ashfall's tribute is paid," he says. "In full. For three years." He looks at you. "Whoever you are, Bone-Maker, the Sect will hear of this. Pray they hear it from me."
+"Ashfall's tribute is paid," he says. "In full. For three years." His eyes come back to you. "Whoever you are, Bone-Maker, the Sect will hear of this. Pray that it hears it from me."
 
-They leave the baskets where they are.`,
+The baskets stay where they stand. Nobody in crimson touches one.`,
         choices: [{ text: 'Breathe out.', to: 'epilogue' }],
     },
     collectors_won: {
         id: 'collectors_won', title: 'Red Snow', art: 'collectors_down', place: 'Ashfall Hamlet — the tribute post',
         enter: (g) => { g.flags.ending = 'fought'; bumpRel(g, 'Village', 25, 0); addItem(g, 'beast_core', 2); return ['+2 Murky beast cores.']; },
-        text: `When it's done the snow of white bone around the tribute post is speckled red, Lu Han is kneeling with your blade at his throat, and the other collectors are a long way down the road and still running.
+        text: `When it is over, the white bone lying like snow around the tribute post is speckled red, Lu Han is on his knees with your blade at his throat, and the other collectors are far down the road and have not stopped running.
 
-Your hands are shaking. Not from fear. From the fact that it worked.
+Your hands are shaking. It isn't fear. It is that the thing worked.
 
 "Go home," you tell him. "Tell your Sect Master Ashfall has a new neighbour. Tell him the neighbour doesn't eat grass, doesn't eat pills, and doesn't eat people, and would very much like to keep it that way."
 
-He goes. The whole village watches him go. Then, very slowly, they turn and look at you — and you realise that in this world, you've just done the one thing more dangerous than kneeling.
+He goes. All of Ashfall watches him down the road. Then, slowly, they turn to look at you: the mortal who put a man of Foundation on his knees, which by every rule they were raised on cannot happen. In this world you have just done the one thing more dangerous than kneeling.
 
 You've given people hope.`,
         choices: [{ text: 'Breathe out.', to: 'epilogue' }],
@@ -780,11 +780,11 @@ You've given people hope.`,
         enter: (g) => { g.flags.ending = 'lost'; g.james.hp = 1; return []; },
         text: (g) => `You go down hard. Lu Han's boot is on your chest and his blade is at your throat and he is looking at you with honest regret.
 
-"Such a waste," he says. "To be born perfect and act like a fool."
+"A waste," he says. "To be born flawless, and to conduct oneself as a fool."
 
-What saves you is Ashfall. All of it: the boy's mother, the old hunters, the herb-women, Old Wen with his tea, Mei Lin with her knife — forty houses of grey people standing up at once and stepping between the Crimson Lotus and the stranger who wouldn't kneel.
+Ashfall is what saves you. All of it: the boy's mother, the old hunters, the herb-women, Old Wen with his tea, Mei Lin with her knife. Forty houses of grey people rise as one and step between the Crimson Lotus and the stranger who would not kneel.
 
-Lu Han looks at them for a long time. At the sheer number of them. At what it would cost.
+Lu Han looks them over, unhurried. At how many there are. At what a village costs to replace.
 
 "Next season," he says finally, sheathing his sword, "the tribute doubles. And the Bone-Maker comes with us, or the village burns." He steps off you. "Rest well, senior. You have a year."${byForm(g, '', "\n\nThen he flicks two fingers, and the net comes off Yuki: a spirit-beast net, thrown from his sleeve in the first breath of the fight, before he so much as drew. She has been under it since your knees went. She walks over on legs that aren't quite steady and stands across you. Nobody asks her to move.", '')}`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line; RB2 (CL): Fable's redraft after the review
         choices: [{ text: 'Get up.', do: (g) => { advance(g, 120, { resting: true }); return []; }, to: 'epilogue' }],
@@ -794,13 +794,13 @@ Lu Han looks at them for a long time. At the sheer number of them. At what it wo
         enter: (g) => { const p = clockParts(g.minutes); g.minutes = (p.day - 1) * 1440 + 19 * 60; return []; },
         text: (g) => `That evening you climb the ridge ${byForm(g, 'with Yuki on your shoulder', 'with Yuki pacing at your side', 'with Yuki at your elbow')} ${g.flags.romance ? 'and Mei Lin\'s hand in yours' : g.rel['Mei Lin']?.f > 10 ? 'and Mei Lin a step behind you' : 'and nobody else'}.
 
-Below, Ashfall's lamps come on one by one. Beyond it, the black forest rolls away to the horizon, and at its heart stands the thing you saw from here before: the corpse of a tree so vast it scrapes the clouds.
+Below you Ashfall's lamps are lit, one after another. Past them the black forest runs out to the horizon, and at its heart stands what you saw from here before: the corpse of a tree vast enough to scrape the clouds.
 
 Your Convergence *sings* to it. Faint, sad, unmistakable.
 
-Your people grow their cities from trees like that. Their ships. Their homes. Hearth Trees. You never thought you'd see one dead.
+Your people grow their cities out of trees like that one. Their ships. Their homes. Hearth Trees. You never expected to see a dead one.
 
-"Something lived there," ${g.flags.romance || g.rel['Mei Lin']?.f > 10 ? 'Mei Lin says, watching your face' : 'you say to Yuki'}. "Something like us."
+"Something lived there," ${g.flags.romance || g.rel['Mei Lin']?.f > 10 ? 'Mei Lin says, watching your face' : 'you say to Yuki'}. "People, maybe. Like us."
 
 ${byForm(g, 'Yuki\'s tail curls around your neck.', 'Yuki\'s tail curls around your wrist.', 'Yuki\'s tail curls around your wrist.')} Through the bond, very clearly: *then let's go and find out who killed it.*
 
@@ -917,29 +917,29 @@ SCENES.breakthrough = {
         const knows = !!(g.flags.lore1 || g.flags.lore_realms || g.rel['Mei Lin']);
         const h = clockParts(g.minutes).hh;
         const night = h >= 20 || h < 6;
-        const sky = night ? 'The stars go out one by one, as if someone is pinching candles.' : 'The red sun goes out behind them like a coin dropped in ink.';
+        const sky = night ? 'The stars go out one at a time, pinched like candles.' : 'Behind them the red sun goes out, a coin dropped into ink.';
         if (g.james.realm === 1) {
             const recognise = knows
-                ? `You know what this is. Mei Lin told you, in her flat weather-report voice: *the sky decides you're impure and tries to burn you clean. Most people it just burns.* Tribulation. Heaven's verdict. It has come for you.`
-                : `You have no word for this. Your nine threads cross-reference everything you know about weather, atmospheric charge and the physics of a world you landed on less than a week ago, and come back with nothing. But the shape of it is obvious enough. The lightning isn't wandering. It's *aiming*. This is a judgment, and the defendant is you.`;
+                ? `You know what this is. Mei Lin gave it to you in her weather voice: *the sky decides you're impure and tries to burn you clean. Most people it just burns.* Tribulation. Heaven's verdict, and it has your name on it.`
+                : `You have no word for this. Everything you know about weather, atmospheric charge and the physics of a world you landed on less than a week ago comes back with nothing. The shape of it is plain enough, though. That lightning is not wandering. It is *aiming*. This is a judgment, and the defendant is you.`;
             const witness = seen
-                ? `Ashfall saw it. Every soul in the village is standing in the street with their faces turned up, and nobody is speaking. Somebody's grandmother is on her knees in the dust, forehead to the ground, praying in a fast, shaking whisper. The hunters have their hands on their spears as if a spear could help. And the thing that frightens them most is this: they can't *feel* you. Every cultivator in the village is reaching for you with their Qi-sense right now — you can feel the brush of it, a dozen nervous fingertips — and finding exactly what they've always found. Nothing. A mortal, sitting in the dust, while Heaven argues with him and loses.
+                ? `Ashfall saw it. The whole village is out in the street with its faces turned up, and no one is speaking. Somebody's grandmother kneels in the dust with her forehead to the ground, praying in a fast, shaking whisper. The hunters grip their spears as though a spear had a say in this. What frightens them most is that they can't *feel* you. Everyone in Ashfall with any sense for Qi is reaching for you now — it brushes you like a dozen nervous fingertips — and finding what they have always found. Nothing. A mortal, sitting in the dust, while Heaven argues with him and loses.
 
-Old Wen stands in his doorway with his pipe gone cold in his hand, and when he finally looks at you, it is the look of a man revising, very carefully, everything he thought he knew about Heaven.
+Old Wen stands in his doorway, his pipe gone cold in his hand. When at last he looks at you, it is as a man revising, with great care, everything he believed he knew about Heaven.
 
-"A tribulation that refuses its own judgment," he says to no one, quietly and formally, the way you'd read out a death in the family. "This has not happened in the history of the mountain."
+"A tribulation that withdraws its own verdict," he says to no one, quietly and formally, as one reads out a death in the family. "A cloud over one roof and a few strokes: so Foundation is paid for. Never this. Not in the history of the mountain."
 
-Somewhere, you suspect, someone is already running up the road to the Crimson Lotus.`
+And someone, you suspect, is already running up the road to the Crimson Lotus.`
                 : night
-                    ? 'Nobody saw it but the trees and whatever lives in them. Out here, at night, that\'s the best kind of miracle.'
-                    : 'Nobody saw it but the trees. Out here, you suspect, that\'s the best kind of miracle.';
+                    ? 'Nobody saw it except the trees and whatever lives in them. Out here, at night, a miracle without witnesses is the best kind.'
+                    : 'Nobody saw it except the trees. Out here, you suspect, a miracle without witnesses is the best kind.';
             return `You sit, and you let the loop close.
 
-Saturation has been pressing at the inside of you like a held breath, and now you let it go — not out, but *down*, into the foundations. The Ouroboros Axiom turns once, slowly, like a great wheel finding its rest. Everything you've eaten from this world's poisoned Qi, composted, made clean, settles into you like bedrock.
+Saturation has been pressing on the inside of you like a held breath, and now you release it: not out but *down*, into the foundations. The Ouroboros Axiom turns once, slowly, a great wheel finding its rest. Everything you have taken in of this world's poisoned Qi, composted and made clean, settles into you as bedrock.
 
 Then the sky notices.
 
-Clouds come from nowhere: black, low, piling over you, humming with a sound you feel in your back teeth. ${sky} Lightning walks around inside them, looking.
+Clouds arrive from nowhere: black and low, piling up over you, humming at a pitch you feel in your back teeth. ${sky} Lightning walks about inside them, looking.
 
 ${recognise}
 
@@ -947,15 +947,15 @@ It looks.
 
 It looks for a long time.
 
-And then — you would swear to this in any court — the storm sort of *shrugs*. There's nothing impure to burn. Nothing to punish. A single bolt drops, wanders down to the ground beside you, fizzles out in the ${seen ? 'dust' : 'moss'} with a sound like a disappointed sigh, and the clouds come apart and drift away in embarrassed directions.
+And then — you would swear to this in any court — the storm more or less *shrugs*. It has found nothing impure to burn. Nothing to punish. One bolt comes down, strolls to the ground beside you and fizzles out in the ${seen ? 'dust' : 'moss'} with the sound of a disappointed sigh, and the clouds come apart and drift off in embarrassed directions.
 
 "Huh," you say.
 
-Yuki, who rose with you — you felt her meridians widen in the same breath as yours — opens one eye, sees the clear sky, and goes back to sleep.
+Yuki rose with you; you felt her meridians widen in the same breath as yours. She opens one eye, notes the clear sky, and goes back to sleep.
 
 ${witness}
 
-*Foundation.* Mortal Vessel no longer. You feel heavier, and steadier, and exactly the same amount of sarcastic.`;
+*Foundation.* Mortal Vessel no longer: the rung where this world's sect disciples stand, and you came by it without a pill. You feel heavier, and steadier, and precisely as sarcastic as before.`;
         }
         const own = BT_REALMS[g.james.realm]; // ST4
         if (own) return `${own.body}
@@ -963,11 +963,11 @@ ${witness}
 ${seen && !BT_NO_SKY.includes(g.james.realm) ? 'Ashfall watches it go in total silence. Then, one by one, people bow — not to the sky. To you. You would very much prefer they didn\'t.' : night ? own.night : own.day}`;
         return `The loop closes again, one rung higher. ${realmName(g.james.realm)}.
 
-The sky tries again, as the sky apparently must: clouds, humming, lightning looking for something to burn. It finds nothing. It leaves faster this time, as if it's learning.
+The sky tries again, as the sky apparently must: clouds, the hum, lightning hunting for something to burn. It finds nothing. It leaves sooner this time, as if it were learning.
 
 ${seen
         ? 'Ashfall watches it go in total silence. Then, one by one, people bow — not to the sky. To you. You would very much prefer they didn\'t.'
-        : night ? 'Yuki doesn\'t even open her eyes. Somewhere in the dark, something large decides not to come any closer.' : 'Yuki doesn\'t even open her eyes.'}`;
+        : night ? 'Yuki does not so much as open an eye. Off in the dark, something large thinks better of coming any closer.' : 'Yuki does not so much as open an eye.'}`;
     },
     choices: [{ text: 'Get up.', to: (g) => {
         const back = g.flags.bt_return || 'stream';
@@ -1001,11 +1001,11 @@ export const LF_SEASON_MINUTES = 120;
 const rankOf = (s) => (s ? 10 * ((s.tier || 1) - 1) + (s.level || 1) : 0);
 const fromRank = (n) => { const t = Math.floor((n - 1) / 10) + 1; return { tier: t, level: n - 10 * (t - 1), xp: 0 }; };
 const SEASON_LINES = [
-    'You sit behind the falls until the moss grows over your boots. Yuki keeps the moss off hers. Something gives.',
-    'A season of not talking. Yuki says it was the best season of your life. She says it through the bond, which is cheating.',
-    'The leaves turn, fall, and come back. So do you, a rung higher. The forest pretends not to notice.',
-    'You count your breaths. Somewhere past a million you stop needing to.',
-    'Snow on the cave mouth, then rain, then green again. You were busy.',
+    'You sit behind the falls until moss has grown over your boots. Yuki does not permit moss. Something gives.',
+    'A season without a word spoken. Yuki calls it the best season of your life. She calls it that through the bond, which is cheating.',
+    'The leaves turn, fall and come back. So do you, one rung up. The forest affects not to notice.',
+    'You count breaths. Somewhere past a million the counting stops being necessary.',
+    'Snow across the cave mouth, then rain, then green again. You were busy.',
 ];
 export function lfSeason(g) {
     const j = g.james, y = g.yuki;
@@ -1031,7 +1031,7 @@ const lfFrom = (from) => (g) => { g.flags.lf_from = from; g.flags.lf_at = g.minu
 SCENES.clearing.choices.push({ text: 'Stay lost. (The Long Forest: climb the realms one season at a time.)', show: lfOpen, do: lfFrom('clearing'), to: 'lf_enter' });
 SCENES.arrival.choices.push({
     text: 'You remember this. Stay lost. (The Long Forest.)', show: lfOpen, time: 30,
-    do: (g) => { for (const f of ['bone_ok', 'sat_once']) g.flags[f] = true; lfFrom('arrival')(g); return ['You skip the parts you know by heart, and walk the other way from the water.']; },
+    do: (g) => { for (const f of ['bone_ok', 'sat_once']) g.flags[f] = true; lfFrom('arrival')(g); return ['The parts you know by heart you skip, and you walk away from the water instead of toward it.']; },
     to: 'lf_enter',
 });
 SCENES.lf_hub.choices.push({
@@ -1079,7 +1079,7 @@ SCENES.lf_hub.choices.push({
         if (out) { const d = c.do; c.do = (g, r) => (d(g, r) || []).map((l) => (l === out[0] ? out[1] : l)); }
     };
     reword('night_attack', /^Bone wall between you/, 'A hedge of bone spikes between you and them, then run for the water.');
-    SCENES.night_attack_forced.text = (g) => `The hedge comes out knee-high and full of gaps. The jackals step through it with an air of professional courtesy. Running is off the table.${byForm(g, '', NA_TIGER, '')}`; /* v0.11.131 (XB2, FL; Fable's MAIN): the great root-kin */
+    SCENES.night_attack_forced.text = (g) => `The hedge comes up knee-high and mostly gaps. The jackals step through it with professional courtesy. Running is off the table.${byForm(g, '', NA_TIGER, '')}`; /* v0.11.131 (XB2, FL; Fable's MAIN): the great root-kin */
     reword('rt_ford', /bridge of bone/, 'Sing stepping-stones of bone from stone to stone.', ['A white bridge, ribbed like a spine. Mei Lin crosses it like a woman walking into a temple.', 'White stepping-stones, ribbed like vertebrae, rise between the black ones. Mei Lin crosses them like a woman walking into a temple.']);
     reword('rt_ambush', /wall of bone/, 'A slab of bone between you and them, then down to the river.');
     reword('ring_chambers', /wall of bone/, 'Seal the fourth ring\'s doorway with a slab of bone and leave them to it.', ['A white wall, floor to ceiling. The chewing goes on behind it, disappointed.', 'A white slab, man-high, jammed into the doorway. The chewing goes on behind it, disappointed.']);

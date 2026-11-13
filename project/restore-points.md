@@ -6,9 +6,10 @@
 | Branch | What it holds |
 |---|---|
 | `fallback/2026-11-06-before-pivot` | 0.11.4, the game before the copy-over from Selene and Rules Engine C (made with 0.11.5). |
+| `fallback/2026-11-13-before-rewrite` | 0.11.166 (`fb0ffac`), the game before Fable's rewrite pass (made with 0.11.167, owner picks P1A, CA1: part 1 of 8). |
 | `fallback/2026-11-09-before-difficulty` | 0.11.84 (`5eb5683`), the game before the XP rate ×0.6 and the targets 4 / 6 (made with 0.11.85, owner pick D: "at least twice as hard"). |
 
-The next one is made before the whole-game rewrite pass (group e) and before the retune (section 2), in those pushes.
+The next one is made before the retune (section 2), in that push.
 
 ## Known-good versions (newest first)
 
@@ -16,7 +17,8 @@ Older versions (0.11.69 and before): `restore-points-2.md` (moved word for word 
 
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.166 | (this push) | RW1 (FL), FT1, SP1, RW-A and RV1 (NW + M2 + L1 + L2): `js/core/lines.js` (`coilReply`, `actCoil`), `js/story/act1_blackroot.js` (the two flirts by Coil), `js/core/news.js`, `tests/story.test.mjs`, `tests/README.md`, `tools/text-baseline.json` (re-saved). Saves unchanged (no field); drift baseline unchanged; full check exit 0. Rolling back brings back one set of five each Coil. |
+| 0.11.167 | (this push) | P1A, CA1 and RV1: the text of `js/story/prologue.js`, `yuki_path.js`, `coil_scenes.js`, `meridians.js` and `again.js` (24 memory lines), `js/core/news.js`, `tests/story.test.mjs`, `tests/tools.test.mjs`, `tests/README.md`, `tools/text-baseline.json`, `project/research/rewrite-part1-*.md`. Saves unchanged; drift baseline unchanged; full check exit 0. Rolling back brings the old part 1 text back (or the branch `fallback/2026-11-13-before-rewrite`). |
+| 0.11.166 | `fb0ffac` | RW1 (FL), FT1, SP1, RW-A and RV1 (NW + M2 + L1 + L2): `js/core/lines.js` (`coilReply`, `actCoil`), `js/story/act1_blackroot.js` (the two flirts by Coil), `js/core/news.js`, `tests/story.test.mjs`, `tests/README.md`, `tools/text-baseline.json` (re-saved). Saves unchanged (no field); drift baseline unchanged; full check exit 0. Rolling back brings back one set of five each Coil. |
 | 0.11.165 | `6ccb28a` | Docs and a test only (LO1: `project/lore.md`, `project/roadmap-2.md` section 5, `project/roadmap.md` group e; `tests/tools.test.mjs`, `tests/README.md`; v0.11.162's entries to `history-19.md`). The game is identical to 0.11.161. |
 | 0.11.164 | `1982947` | Docs, a test and a save only (N1: the realm sheet in `project/lore.md`; `tests/tools.test.mjs`, `tests/README.md`; `saves/2026-11-13-1356-incremental-a1_again.json`, the owner's; `project/research-2.md` #123; v0.11.161's entries to `history-19.md`). The game is identical to 0.11.161. |
 | 0.11.163 | `263615f` | The bots, the tools and the tests only (W1, HN1, TL2, F1, D1, RV1): `tests/lib/forced.mjs` (new), `tests/models.test.mjs`, `tests/tools.test.mjs`, `tools/textlint.mjs`, `tools/check.mjs`, `tools/lib/jobs.mjs`, `tools/lib/report.mjs`, `tools/baseline.json` and `tools/text-baseline.json` re-saved. The game is identical to 0.11.161. |

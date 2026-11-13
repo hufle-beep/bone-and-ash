@@ -11,7 +11,7 @@ import { TASK_HUBS } from '../js/story/task_hubs.js'; // v0.11.137 (TR1, YB)
 import { HT_HUBS, HT_BODY, HT_CLOSE, HT_LABEL, HT_GAIN, HT_MID, htPool, htSlot } from '../js/story/house_time.js'; // v0.11.139 (MW1)
 import { likesMei, likesYa } from '../js/story/act1_common.js'; // v0.11.123 (EQ1, AB)
 import { KEEP_FLAGS, rewind } from '../js/core/coil.js'; // v0.11.137 (HV1, Fable L2): rewind on an old save // v0.11.123 (ER1, T3)
-import { againView, noteRead } from '../js/story/again.js'; // v0.11.125 (RW1, T); v0.11.133 (FP2): noteRead
+import { againView, noteRead, MEMORY_LINES } from '../js/story/again.js'; // v0.11.167 (CA1): MEMORY_LINES // v0.11.125 (RW1, T); v0.11.133 (FP2): noteRead
 import { STOMP } from '../js/story/power.js'; // v0.11.126 (NQ1)
 import { coilStamp, dayIndex, textDay, DAY_REPLIES, COIL_SETS, actCoil, noteDay, linesOf, pickLine } from '../js/core/lines.js'; // v0.11.166 (RW1): COIL_SETS, actCoil; // v0.11.135 (NT1, EV1); v0.11.136 (NC1): DAY_REPLIES
 import { splitReply, splitLine, landReply, noteSaid } from '../js/core/replies.js'; // v0.11.136 (NC1); RV2 (TG): landReply, noteSaid
@@ -434,6 +434,25 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
             const r2 = deserialize(serialize(o2));
             assert(actCoil(r2) === want, `RW1 (RV1, L2): ${f} keeps its set through a save and load`);
         }
+    }
+    // v0.11.167 (owner picks P1A, CA1; Fable's rewrite of part 1): the riders in the text, the camp by night, the 48 memory lines
+    {
+        const txt = (id, g) => { const t = SCENES[id].text; return typeof t === 'function' ? t(g) : t; };
+        const g0 = ensureBars(fresh(5500));
+        const herb = txt('herb_girl', g0);
+        assert(/white jacket with a red sash/.test(herb) && !/patched brown/.test(herb), 'CA1: Mei Lin wears her white jacket and red sash on the herb slope (rider 1)');
+        assert(/glasses/.test(txt('arrival', g0)) && /ouroboros/.test(txt('arrival', g0)), 'CA1: the arrival names his glasses and the ouroboros (rider 2)');
+        assert(/Foundation/.test(txt('gao_talked', g0)), 'CA1: Gao Feng names himself of the Foundation (rider 6)');
+        const camp = [1, 2, 3].map((night) => { const g = ensureBars(fresh(5501)); g.flags.fire = true; g.flags.stakes = true; g.flags.forest_day = night; g.scene = 'camp'; return txt('camp', g); }); // byNight reads the forest night
+        const fire = camp.map((t) => t.split('\n').find((l) => /fire/i.test(l) && /stake|bone/i.test(l)) || '');
+        assert(new Set(fire).size === 3 && fire.every(Boolean), `CA1: the camp's fire and stakes line differs on each of three nights (rider 5) (${fire.map((f) => f.slice(0, 30)).join(' | ')})`);
+        assert(MEMORY_LINES.length === 48 && new Set(MEMORY_LINES).size === 48 && MEMORY_LINES.every((l) => l.split(/\s+/).length <= 22 && !/\$\{|undefined/.test(l)), `CA1 (MX): 48 memory lines, none twice, short (${MEMORY_LINES.length})`);
+        assert(MEMORY_LINES.slice(24).every((l) => !/shoulder|I am a cat|I'm a cat|lap\b/i.test(l)), 'CA1 (MX): the new memory lines fit every form of Yuki');
+        // RV1 (the Opus review): the camp's nights 2–3 don't presume the night before; the jackals' label fits the thin night; Yuki's last night
+        assert(camp.slice(1).every((t) => !/last night|three nights|as you left it/i.test(t)), 'CA1 (RV1, H1): the camp on nights 2 and 3 reads true without an earlier fire or ring');
+        assert(SCENES.jackals_won.choices[0].text === "Sleep. What's left of the night." && /thin/.test(txt('jackals_won', g0)), 'CA1 (RV1, M4): the jackals label and the thin night agree');
+        assert(readFileSync(new URL('../js/story/yuki_path.js', import.meta.url), 'utf8').includes('He will look at me and not see what I am.'), 'CA1 (RV1, H3): Yuki\'s last night no longer says Shen Qiu will not look twice');
+        assert(!MEMORY_LINES.some((l) => /^You are the whole audience/.test(l)), 'CA1 (RV1, L8): Yuki remembers too');
     }
     // RV2 (M1, Fable's review): Ya names the ship on her ledge only once it has been found
     {

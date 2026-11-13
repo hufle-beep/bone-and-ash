@@ -9,26 +9,26 @@ import { coilActive, endCoil, rewind, coilReport, actOf, actWon, willUnwind, not
 import { yukiJobLabel, yukiSpeedLine } from '../core/tasks.js'; // v0.11.159 (owner pick NX2, CL)
 
 const WHY = {
-    collapse: `Somewhere between the ground and the dark, the Ouroboros Axiom turns.
+    collapse: `Halfway between standing and the dark, the Ouroboros Axiom turns.
 
-It isn't the slow wheel of a breakthrough. It's a hard, practical snap, like a hand closing on a cup before it hits the floor. This world's poisoned Qi was quite prepared to keep you. The loop has other plans.`,
-    tribute: `Lu Han's boots crunch away down the road. Ashfall stands around the tribute post in a silence so formal you could frame it, and nobody looks at you, which is its own kind of verdict.
+This is not the slow wheel of a breakthrough. It is one hard, practical snap: a hand closing on a cup an inch above the floor. This world's poisoned Qi had every intention of keeping you. The loop was not consulted, and disagrees.`,
+    tribute: `Lu Han's boots crunch away down the road, in no hurry. Ashfall stays ringed about the tribute post, silent in strict order of rank. Nobody looks at you. Here that is a verdict, read out in full.
 
-The village can live with this. Or you can decline to let it have happened.`,
-    beast: `Teeth, then the ground, then nothing in particular.
+The village can live with this; it has had the practice. Or you can decline to let it have happened.`,
+    beast: `Teeth. Then the ground. Then nothing worth describing.
 
-Whatever it was does not stop to consider that you are a doctor of mycology from a civilisation of eight-hundred-year lifespans. It considers that you are meat. On the evidence, it has a point.
+Whatever it was does not pause over your doctorate in mycology, or over a people who live eight hundred years. It has you down as meat, and the evidence is on its side.
 
-Then the Ouroboros Axiom turns, with the hard snap of a hand catching a cup. This world was ready to digest you. The loop declines on your behalf.`,
-    shen: `The crimson robes take the road down the mountain, and you walk between them. Behind you, the grove sings, faint and stubborn, and Ashfall stands at the tribute post in a silence so formal it could be carved on a stele.
+Then the Ouroboros Axiom turns, with the flat snap of a hand catching a cup. This world had begun to digest you. The loop sends its regrets.`,
+    shen: `The crimson robes take the road, and you walk in the middle of them, a guest in every word they use. Behind you the grove sings, faint and stubborn, and Ashfall stands at the tribute post, so still and so correct it might have been carved there.
 
-You could go with him. It is a written ending, and not the worst one. Or you can decline to let it have happened.`,
+You could go with him. It is an ending somebody took the trouble to write, and not the worst on offer. Or you can bite down, and it never took place.`,
     clear: `The grove is singing behind you, and Shen Qiu is somewhere down the mountain, thinking about things. This is an ending. You read it to the last line and set it down.
 
 Then you pick it up again. The Ouroboros Axiom turns, slow this time, not a hand catching a cup but a season closing. You did this once, start to finish, and your hands know it now. A thread wakes to hold it.`,
-    choice: `You could keep going. It's an option. People do it all the time.
+    choice: `You could simply carry on. People do. Whole civilisations are built on it.
 
-Or you could close the loop yourself: bite the tail, and wake at a dawn you have already seen, with what you remember and nothing you've carried.`,
+Or you could close the loop with your own teeth: bite the tail, and wake at a dawn you have already used once, with everything you remember and nothing you were carrying.`,
 };
 
 /** v0.11.72 (S1): a card's name for the Coil screen, from its id ("scene:index"). v0.11.159 (RV1, DC): Yuki's jobs have their own line (`yukiJobLabel`). */
@@ -67,7 +67,7 @@ ${r.near.length ? `
 
 **Targets:** ${targetsText(g)}
 
-Yuki remembers everything. She always does, through the bond, and she will bring it up.
+Yuki remembers all of it, through the bond, as she always has. Expect to hear it quoted.
 
 **Next Coil:** your realm, skills and meridians start over. ${g.coil?.why === 'clear' ? `Act 1 is won, and a bite from a won act counts like a hard one: you will learn ×${fmtMult(coilMultNext(g, false))} as fast.` : g.coil?.why === 'choice' ? `A Coil you end by choice adds nothing to the faster learning: you will learn as fast as now${coilMultNext(g, true) > 1 ? ` (×${fmtMult(coilMultNext(g, true))})` : ''}.` : `What you remember makes them come back faster: you will learn ×${fmtMult(coilMultNext(g, false))} as fast.`}${willUnwind(g) ? `
 
@@ -88,21 +88,21 @@ Yuki remembers everything. She always does, through the bond, and she will bring
             const times = 'before'; // v0.11.26: one count per save, so the number of this dawn's visits is unknown (Fable review)
             const unwound = g.coil.unwound ? `
 
-One thing is missing, and you feel its shape like a pulled tooth: Foundation. The Axiom took it back with the seal. Mortal Vessel again, and the sealed threads warm and open to you, waiting.` : '';
-            if (actOf(g) === 1) return `Grey light over the palisade. Smoke from forty chimneys. A rooster with no sense of occasion. You have seen this morning ${times}, and Ashfall has not.
+One thing is gone, and you keep finding the gap, as a tongue finds a pulled tooth: Foundation. The Axiom took it back along with the seal. Mortal Vessel again, and the threads that were sealed lie warm and open, waiting for you.` : '';
+            if (actOf(g) === 1) return `Grey light over the palisade. Forty chimneys, forty threads of smoke. A rooster announcing a day it believes to be new. You have seen this morning ${times}. Ashfall has not.
 
-Your hammerspace reports in: whatever the tribute left you, and nothing you earned since. Your body has forgotten the road to the dead tree; your head has not. It will come back faster this time.${unwound}
+The hammerspace reports in: what the tribute left you, and not one thing earned since. Your body has lost the road to the dead tree. Your head kept the map, and the body will learn it back the faster for that.${unwound}
 
-Somewhere down the street Mei Lin is already arguing with someone about herbs. She doesn't know what she said to you at the tree. You do. That is going to be a strange conversation.
+Down the street Mei Lin is already arguing with somebody about herbs, and winning. She has no idea what she said to you at the tree. You have every word of it. The next conversation is going to be strange for exactly one of you.
 
-Yuki is sitting on the windowsill, tail around her feet. The look says: *again. Fine. Try not to get taken this time.*`;
-            return `Black bark. Grey moss. A sky the colour of a bruise. You have seen this sky ${times}, and it has not improved.
+Yuki is sitting on the windowsill, tail wrapped over her feet. The look says: *again. Fine. My remarks on the last one will keep until breakfast.*`;
+            return `Black bark. Grey moss. Overhead, the same bruise of a sky. You have seen this sky ${times}, and it has not spent the interval improving.
 
-Your hammerspace reports in: empty. Your body reports in too, and that report is short: it has forgotten everything. Your meridians are ash again. Your head, though, is a library nobody thought to burn, and it knows the way back.${unwound}
+The hammerspace reports in: empty. Your body files a report of its own, and a short one: it remembers nothing. The meridians are ash again. Your head is another matter, a library nobody thought to burn, with the way back shelved where you left it.${unwound}
 
-Yuki is standing on your sternum. The look says: *you have done this before. I was there. Try to remember it this time.*
+Yuki is standing on your sternum, on all four feet. The look says: *we have been here. I was paying attention. This time you will be, too.*
 
-"I did not touch anything," you tell her. Out of habit.`;
+"I did not touch anything," you tell her. By now it is a greeting.`;
         },
         choices: [{ text: 'Get up.', do: (g) => { g.coil.skipEnter = true; g.coil.unwound = false; return []; }, to: (g) => g.coil.wake || 'arrival' }],
     };
@@ -112,7 +112,7 @@ Yuki is standing on your sternum. The look says: *you have done this before. I w
         g.james.hp = 1;
         if (g.tasks) g.tasks.queue.length = 0;
         endCoil(g, 'collapse');
-        return ['Your body runs out before the day does. You fold up where you stand, and the last thing you see is Yuki\'s face, very close, very unimpressed.', ...goTo(g, scenes, 'coil_end')];
+        return ['The day outlasts your body. You fold up where you stand, joint by joint, and the last thing you see is Yuki\'s face, very close and not at all impressed.', ...goTo(g, scenes, 'coil_end')];
     });
     combatHooks.lose = (g, c) => {
         if (PEOPLE_FIGHTS.has(c.id) || !coilActive(g)) return null;
@@ -126,11 +126,11 @@ Yuki is standing on your sternum. The look says: *you have done this before. I w
     // v0.11.26 (owner 11:07, E1): the end of Act 1 can go round again, every outcome (Incremental Mode)
     SCENES.a1_again = {
         id: 'a1_again', title: 'Go Round Again', art: 'meditation', place: 'The Ouroboros Axiom',
-        text: (g) => `The ending holds still, the way endings do, and waits to see if you will leave it alone.
+        text: (g) => `The ending holds still, as endings will, and waits to learn whether you can leave it alone.
 
-You don't have to. The Axiom is right there, coiled under your breastbone, tail in its mouth. Bite down and this ending is one you remember, not one that happened: ${g.flags.a1_outcome === 'taken' ? 'the road up the mountain, the crimson robes, all of it' : 'the grove, the Sect, the whole hard-won shape of it'}. What you learned stays. What you won does not.
+Nothing obliges you to. The Axiom lies coiled under your breastbone, tail in its mouth, well within reach. Bite down, and this ending is one you remember and not one that happened: ${g.flags.a1_outcome === 'taken' ? 'the road up the mountain, the crimson robes, all of it' : 'the grove, the Sect, the whole hard-won shape of it'}. What you learned stays. What you won does not.
 
-Yuki opens one eye. *Again?* says the bond. *Fine. I'll remember it for both of us.*`,
+Yuki opens one eye. *Go on, then,* says the bond. *You bite. I will keep the record for us both.*`,
         choices: [
             // v0.11.86 (G1): going round again is a Coil ended by choice: no faster learning from it;
             // v0.11.106 (owner pick RA1, W): after an Act 1 James won (victory, accord, revelation) it adds to it ('clear'); after 'taken' as before
@@ -158,7 +158,7 @@ Yuki opens one eye. *Again?* says the bond. *Fine. I'll remember it for both of 
         text: 'You remember this. Skip to the stream.',
         show: (g) => (g.coil?.n || 1) > 1,
         time: 30,
-        do: (g) => { for (const f of ['bone_ok', 'sat_once']) g.flags[f] = true; return ['You skip the parts you know by heart: Yuki is fine, the Qi is poison, the bone sings, the clearing is a clearing.']; },
+        do: (g) => { for (const f of ['bone_ok', 'sat_once']) g.flags[f] = true; return ['You take the opening as read: Yuki is unhurt, the Qi is poison, the bone still sings, and the clearing remains a clearing.']; },
         to: 'stream',
     });
 }

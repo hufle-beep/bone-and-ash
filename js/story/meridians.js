@@ -20,18 +20,18 @@ import { extraRegen, qiRegenPct, advance, awardXp, actSpeed, actUse } from '../c
  * primaries (game.js breakBlock); collaterals still closed then are sealed (game.js breakthrough), and only a rewind
  * undoes it, by unwinding the breakthrough (coil.js rewind). Yuki's counts mirror James's through the bond. */
 export const PRIMARIES = [
-    { name: 'the Lung meridian', line: 'It opens on an inhale, and for the first time since the crossing the air here tastes merely bad instead of hostile.' },
-    { name: 'the Large Intestine meridian', line: 'Index finger to the side of the nose. Not a glamorous channel. It works anyway, which puts it ahead of most of your committees.' },
-    { name: 'the Stomach meridian', line: 'Face to foot, the long way. Your stomach growls, approvingly or in protest. Hard to tell. Same as always.' },
-    { name: 'the Spleen meridian', line: 'Big toe up to the ribs. It turns food into something useful, which out here is a skill worth having twice.' },
-    { name: 'the Heart meridian', line: 'Armpit to little finger. It opens quietly, and your pulse settles half a beat slower, like a man sitting down.' },
-    { name: 'the Small Intestine meridian', line: 'Little finger to the ear. It sorts the clean from the foul. The Axiom files a note of thanks.' },
-    { name: 'the Bladder meridian', line: 'Sixty-seven points, eye to little toe, all down the back. It takes the full two hours and every one of them is an opinion.' },
-    { name: 'the Kidney meridian', line: 'The sole of the foot to the chest. The root of things, your teachers called it. It feels like standing on bedrock.' },
-    { name: 'the Pericardium meridian', line: 'The heart\'s bodyguard. It opens with the air of something that has been on duty the whole time and would like that noted.' },
-    { name: 'the Triple Burner meridian', line: 'Ring finger to the brow. Three furnaces, one channel. The warmth comes back to your hands like a pilot light catching.' },
-    { name: 'the Gallbladder meridian', line: 'It zigzags across the skull like a man who lost the map. Decisiveness, the old texts say. You decide you like it.' },
-    { name: 'the Liver meridian', line: 'The last of twelve. Big toe to the ribs, and when it opens the whole circuit closes with a sound only you and Yuki hear. Foundation can come now. Something in you knows it.' },
+    { name: 'the Lung meridian', line: 'It opens on an inhale. The air here has tasted hostile ever since the crossing; now it tastes merely bad, and you take that as a welcome.' },
+    { name: 'the Large Intestine meridian', line: 'Index finger to the side of the nose. Nobody writes poems about this one. It simply works, which no committee of yours ever managed.' },
+    { name: 'the Stomach meridian', line: 'Face to foot, by the scenic route. Your stomach growls, in welcome or in protest. You have never been able to tell which.' },
+    { name: 'the Spleen meridian', line: 'Big toe up to the ribs. Its trade is turning food into something you can use, and out here you would gladly hire a second.' },
+    { name: 'the Heart meridian', line: 'Armpit to little finger. It opens without any fuss, and your pulse drops half a beat and stays down, a man who has finally found a chair.' },
+    { name: 'the Small Intestine meridian', line: 'Little finger to the ear. It sorts the clean from the foul, and the Axiom, overworked, sends its thanks.' },
+    { name: 'the Bladder meridian', line: 'Sixty-seven points, eye to little toe, the whole length of your back. It takes the full two hours, and each of them arrives with an opinion.' },
+    { name: 'the Kidney meridian', line: 'Sole of the foot to the chest. The root of things, your teachers said. For once they undersold it: bedrock, wherever you happen to sit.' },
+    { name: 'the Pericardium meridian', line: 'The heart\'s bodyguard. It opens like a sentry found still at his post after the war: on duty throughout, and wanting that entered in the record.' },
+    { name: 'the Triple Burner meridian', line: 'Ring finger to the brow. Three furnaces on a single flue. Warmth returns to your hands all at once, a pilot light catching.' },
+    { name: 'the Gallbladder meridian', line: 'It zigzags across the skull like a man sold a bad map. The old texts say it governs decisiveness. You decide, at once, to approve.' },
+    { name: 'the Liver meridian', line: 'The last of twelve. Big toe to the ribs, and as it opens the whole circuit closes, with a sound that reaches nobody but you and Yuki. Foundation can come now. Nobody has to tell you.' },
 ];
 /** The 66 collaterals in 8 groups: size, and how many primaries must be open first. */
 export const COL_GROUPS = [
@@ -94,14 +94,14 @@ function workChoice(k) {
                     const c = m(g).c, step = ecStep(c), n = ecPairName(c);
                     for (let i = 1; i < step; i++) xx.push(...awardXp(g, 'Convergence Use', 'challenging'));
                     g.james.extraCollaterals = c + step;
-                    return [`Opened ${n} (${g.james.extraCollaterals}/28). ${step === 2 ? 'Two fine, bright threads, no thicker than a hair, side by side.' : 'A fine, bright thread, no thicker than a hair.'}`, ...after(g), ...xx];
+                    return [`Opened ${n} (${g.james.extraCollaterals}/28). ${step === 2 ? 'Two fine, bright threads, each thinner than a hair, lit side by side.' : 'A fine, bright thread, thinner than a hair.'}`, ...after(g), ...xx];
                 }
                 const v = JUNCTIONS[m(g).j]; g.james.junctions = m(g).j + 1; return [`Opened ${v.name} (${g.james.junctions}/10). ${v.line}`, ...after(g), ...xx];
             }
             const xp = awardXp(g, 'Convergence Use', 'standard'); // once per channel opened (v0.11.2 pick 1a)
             if (k === 'pri') { const v = PRIMARIES[P(g)]; g.james.primaries = P(g) + 1; mirror(g); return [`Opened ${v.name} (${g.james.primaries}/12). ${v.line}`, 'Qi Max +1.25 (Yuki +1).', ...xp]; }
             const gr = COL_GROUPS[colGroupsOpen(g)]; g.james.collaterals = COL_GROUPS.slice(0, colGroupsOpen(g) + 1).reduce((a, x) => a + x.size, 0); mirror(g);
-            return [`Opened ${gr.name} (${g.james.collaterals}/66). Fine threads, lighting up one after another like a city at dusk.`, ...after(g), ...xp];
+            return [`Opened ${gr.name} (${g.james.collaterals}/66). Fine threads, catching one after another, a city putting on its lamps at dusk.`, ...after(g), ...xp];
         },
         to: 'meridians',
     };
@@ -112,14 +112,14 @@ export const canColGroup = (g) => { const k = colGroupsOpen(g); return (g.james.
 const baseRegen = (g) => qiRegenPct(g, C(g));
 
 export const EXTRA8 = [
-    { name: 'the Governing Vessel', line: 'It runs up the spine and over the crown like a cable being pulled taut. Every vertebra reports in. You have, apparently, been slouching for forty years.' },
-    { name: 'the Conception Vessel', line: 'Down the front of the body, chin to pelvis, and it opens with a warmth that is frankly too intimate for a medical procedure. Yuki looks away, politely.' },
-    { name: 'the Thrusting Vessel', line: 'The deep one, through the core of you. It goes in like a well being drilled and comes up like a spring. Your heartbeat shifts key.' },
-    { name: 'the Girdle Vessel', line: 'The only one that runs sideways, a belt of Qi around the waist. It closes like a buckle. You stand straighter without deciding to.' },
-    { name: 'the Yin Linking Vessel', line: 'It ties the yin channels together like someone finally labelling the cables behind a server rack. Very quiet. Very satisfying.' },
-    { name: 'the Yang Linking Vessel', line: 'The outer net. It knits the yang channels into one weave, and for a moment you feel every inch of skin at once. Including the ones under the lab coat.' },
-    { name: 'the Yin Heel Vessel', line: 'From the inner ankle up to the eyes. When it opens, you close your eyes and still know exactly where your feet are. Sleep, your body informs you, will be better now.' },
-    { name: 'the Yang Heel Vessel', line: 'Outer ankle to the eyes. It opens on a step and the step lands lighter. Yuki, watching, decides that you are now permitted to chase her.' },
+    { name: 'the Governing Vessel', line: 'Up the spine and over the crown, a cable drawn taut. Each vertebra reports in, in order. The finding is unanimous: you have slouched for forty years.' },
+    { name: 'the Conception Vessel', line: 'Down the front of the body, chin to pelvis. It opens with a warmth far too familiar for anything you would call a procedure. Yuki, tactfully, finds something else to look at.' },
+    { name: 'the Thrusting Vessel', line: 'The deep one, straight through the core of you. It goes down as a drilled well and comes up as a spring. Your heartbeat changes key and keeps the new one.' },
+    { name: 'the Girdle Vessel', line: 'The only one that runs sideways: a belt of Qi about the waist, closing with the click of a buckle. You find yourself standing straighter, and nobody asked you to.' },
+    { name: 'the Yin Linking Vessel', line: 'It ties the yin channels together, the work of somebody who has finally gone behind the lab bench and labelled every cable. Quiet. Deeply satisfying.' },
+    { name: 'the Yang Linking Vessel', line: 'The outer net. It knits the yang channels into a single weave, and for one breath you feel every inch of your skin at once, the inches under the lab coat included.' },
+    { name: 'the Yin Heel Vessel', line: 'Inner ankle up to the eyes. It opens, you shut your eyes, and you still know to the inch where your feet are. Your body adds a notice: sleep will be better from now on.' },
+    { name: 'the Yang Heel Vessel', line: 'Outer ankle to the eyes. It opens in the middle of a step, and the step lands lighter than it left. Yuki, watching, rules that you may now attempt to chase her.' },
 ];
 /** Collaterals of the Extraordinary 8: 28, grouped by vessel. */
 export const EXTRA_COLL = [
@@ -133,16 +133,16 @@ export const EXTRA_COLL = [
     ['Yang Heel', ['outer ankle thread', 'flank thread', 'eye-corner thread']],
 ].flatMap(([v, ts]) => ts.map((t) => `the ${v} ${t}`));
 export const JUNCTIONS = [
-    { name: 'the Crown Junction', line: 'Where every yang channel meets at the top of the skull. It opens like a skylight.' },
-    { name: 'the Brow Junction', line: 'Between the eyes. Parallel Cognition notices it first and files nine reports about it.' },
-    { name: 'the Throat Junction', line: 'Your voice drops half a tone and stays there. Yuki says nothing, which means she likes it.' },
-    { name: 'the Heart-Hall Junction', line: 'Behind the sternum. It opens, and for a second you miss your mother so much it hurts. Then the Qi runs on.' },
-    { name: 'the Solar Junction', line: 'Under the ribs, where the Thrusting and the Girdle cross. It hums like a well-made machine.' },
-    { name: 'the Sea-of-Qi Junction', line: 'Below the navel. The dantian everyone here worships, you have been using as a storage room. Now it has better shelving.' },
-    { name: 'the Gate of Life Junction', line: 'In the small of the back. Your Ouroboros Axiom sighs and loosens its grip, like a man taking off his tie.' },
-    { name: 'the Twin Palm Junctions', line: 'Both palms at once. The next dart you sing comes out of your hand already warm.' },
-    { name: 'the Twin Sole Junctions', line: 'Both soles. You can feel the forest\'s roots through the ground now, faintly, like conversation in another room.' },
-    { name: 'the Bridge Junction', line: 'The last one, where the Extraordinary net closes on itself. Everything connects. The Qi stops flowing through you and starts flowing as you.' },
+    { name: 'the Crown Junction', line: 'Top of the skull, where every yang channel meets. It opens like a skylight; the room gets taller.' },
+    { name: 'the Brow Junction', line: 'Between the eyes. Parallel Cognition gets there first and files nine reports, each marked urgent.' },
+    { name: 'the Throat Junction', line: 'Your voice settles half a tone lower, for good. Yuki offers no comment, which from her is applause.' },
+    { name: 'the Heart-Hall Junction', line: 'Behind the sternum. It opens, and for the length of one heartbeat you miss your mother so badly it has an edge. Then the Qi runs on.' },
+    { name: 'the Solar Junction', line: 'Under the ribs, where the Thrusting and the Girdle cross. It hums low and even, a machine built with care.' },
+    { name: 'the Sea-of-Qi Junction', line: 'Below the navel: the dantian, which this whole world reveres and you have been using as a storeroom. It now has proper shelving.' },
+    { name: 'the Gate of Life Junction', line: 'The small of the back. Your Ouroboros Axiom breathes out and eases its grip, a man loosening his tie after the meeting.' },
+    { name: 'the Twin Palm Junctions', line: 'Both palms together. The next dart you sing leaves your hand warm, as if it had been waiting.' },
+    { name: 'the Twin Sole Junctions', line: 'Both soles. The roots of the forest come up through the ground to you now, faint as talk in the next room.' },
+    { name: 'the Bridge Junction', line: 'The last, where the Extraordinary net closes on itself. Everything is joined to everything. The Qi no longer flows through you; it flows as you.' },
 ];
 
 const m = (g) => ({ e: g.james.extra8 || 0, c: g.james.extraCollaterals || 0, j: g.james.junctions || 0 });
@@ -194,22 +194,22 @@ export const MERIDIANS = {
         text: (g) => {
             const x = m(g);
             const parts = [];
-            if (P(g) >= 12 && C(g) >= 66) parts.push(`You sit, close your eyes, and let Parallel Cognition draw the map. Twelve primaries, sixty-six collaterals: lit, all of them. Around and between them, the second net. ${x.e}/8 Extraordinary vessels, ${x.c}/28 of their collaterals, ${x.j}/10 junctions open.`);
+            if (P(g) >= 12 && C(g) >= 66) parts.push(`You sit, shut your eyes, and Parallel Cognition draws you the map. Twelve primaries, sixty-six collaterals, every one of them lit. Round and between them lies the second net: ${x.e}/8 Extraordinary vessels, ${x.c}/28 of their collaterals, ${x.j}/10 junctions open.`);
             else {
-                parts.push(`You sit, close your eyes, and let Parallel Cognition draw the map. It is mostly grey. The crossing ashed your channels shut, and this world's Qi settled in the ash like soot in a chimney. ${P(g)}/12 primaries open, ${C(g)}/66 collaterals (${colGroupsOpen(g)}/8 groups). The Axiom composts the seal one channel at a time: sittings of two hours and two Qi, as many as you can stand, until the channel gives. ${P(g) < 12 ? `${nameOf(g, 'pri')}: ${fmtH(work(g, 'pri'))} of ${fmtH(need(g, 'pri'))} done.` : ''}`);
-                if (g.james.satiety < MER_FED_MIN) parts.push('Your stomach files a formal complaint. Too hungry to sit. Eat first.');
-                if (P(g) < 12) parts.push(`Foundation won't hold on an open circuit. All twelve primaries first. ${12 - P(g)} to go.`);
-                if (g.james.colSealed) parts.push(`${66 - C(g)} collaterals sealed when you broke through to Foundation: scar tissue, now, and Mortal Vessel was their only window. Only the Coil can give that window back, and it will take the breakthrough with it.`);
-                else if ((g.james.realm || 0) === 0 && C(g) < 66) parts.push('The collaterals open only while you are Mortal Vessel. Break through with any of them closed and they seal.');
+                parts.push(`You sit, shut your eyes, and Parallel Cognition draws you the map. Most of it is grey. The crossing ashed your channels shut, and this world's Qi has settled into the ash as soot settles in a flue. ${P(g)}/12 primaries open, ${C(g)}/66 collaterals (${colGroupsOpen(g)}/8 groups). The Axiom composts the seal a channel at a time: sittings of two hours and two Qi, as many as you can bear, until the channel gives. ${P(g) < 12 ? `${nameOf(g, 'pri')}: ${fmtH(work(g, 'pri'))} of ${fmtH(need(g, 'pri'))} done.` : ''}`);
+                if (g.james.satiety < MER_FED_MIN) parts.push('Your stomach raises an objection, and is upheld. Too hungry to sit. Eat first.');
+                if (P(g) < 12) parts.push(`Foundation will not hold on a broken circuit. All twelve primaries first. ${12 - P(g)} to go.`);
+                if (g.james.colSealed) parts.push(`${66 - C(g)} collaterals sealed when you broke through to Foundation. They are scar tissue now; Mortal Vessel was the only window they had. Only the Coil can open that window again, and it takes the breakthrough as its fee.`);
+                else if ((g.james.realm || 0) === 0 && C(g) < 66) parts.push('The collaterals open only while you are still Mortal Vessel. Break through with any left closed, and those seal.');
                 if ((g.james.realm || 0) >= 1 || x.e || x.c || x.j) parts.push(`The second net: ${x.e}/8 Extraordinary vessels, ${x.c}/28 of their collaterals, ${x.j}/10 junctions.`);
             }
-            if (R(g) < EXTRA_FROM && x.e < 8) parts.push(x.e ? `${8 - x.e} of the Extraordinary vessels are still sealed, like doors painted on a wall. Your people open them at Golden Core. Not before.` : 'The Extraordinary vessels are there, but sealed, like doors painted on a wall. Your people open them at Golden Core. Not before.');
-            if (R(g) < EXTRA_FROM && x.e >= 8 && x.c < 28) parts.push(`All eight vessels open. Their twenty-eight collaterals wait for Golden Core: ${28 - x.c} still closed.`); // v0.11.66 (G4): an older save that opened them early
-            else if (R(g) >= EXTRA_FROM && R(g) <= 6 && x.e < 8) parts.push(`They open between Golden Core and Soul Embryo, and only then: at Nascent Soul the window shuts for good. ${8 - x.e} still closed.`);
-            if (R(g) >= 7 && x.e < 8) parts.push('The vessels you didn\'t open in time are scar tissue now, and their collaterals with them. You knew the rule. You were busy.');
-            if (R(g) >= EXTRA_FROM && R(g) <= 6 && x.e >= 8 && x.c < 28) parts.push(`With all eight vessels open, their collaterals are within reach: twenty-eight fine threads, ${28 - x.c} still closed. They open in pairs. The same window: at Nascent Soul it shuts on them for good.`);
-            if (R(g) >= 7 && x.e >= 8 && x.c < 28) parts.push(`${28 - x.c} of the vessels' collaterals sealed at Nascent Soul. Scar tissue, fine as hair. You knew the rule. You were busy.`);
-            parts.push('Yuki curls against your hip. Whatever you open, she opens too; the bond doesn\'t do things by halves.');
+            if (R(g) < EXTRA_FROM && x.e < 8) parts.push(x.e ? `${8 - x.e} of the Extraordinary vessels are still sealed, like doors painted on a wall. Your people open them at Golden Core. Not before.` : 'The Extraordinary vessels are all there, and all sealed, like doors painted on a wall. Your people open them at Golden Core. Not before.');
+            if (R(g) < EXTRA_FROM && x.e >= 8 && x.c < 28) parts.push(`All eight vessels are open. Their twenty-eight collaterals wait for Golden Core: ${28 - x.c} still closed.`); // v0.11.66 (G4): an older save that opened them early
+            else if (R(g) >= EXTRA_FROM && R(g) <= 6 && x.e < 8) parts.push(`They open between Golden Core and Soul Embryo and at no other time: at Nascent Soul the window shuts, and stays shut. ${8 - x.e} still closed.`);
+            if (R(g) >= 7 && x.e < 8) parts.push('The vessels you left closed are scar tissue now, and their collaterals went with them. You knew the rule. You had other things on.');
+            if (R(g) >= EXTRA_FROM && R(g) <= 6 && x.e >= 8 && x.c < 28) parts.push(`With all eight vessels open, their collaterals come within reach: twenty-eight fine threads, ${28 - x.c} still closed. They open in pairs, and inside the same window: at Nascent Soul it shuts on them too, for good.`);
+            if (R(g) >= 7 && x.e >= 8 && x.c < 28) parts.push(`${28 - x.c} of the vessels' collaterals sealed at Nascent Soul: scar tissue, fine as hair. The rule was never a secret. You were busy.`);
+            parts.push('Yuki settles against you. Whatever you open, she opens too; the bond has never done anything by halves.');
             return parts.join('\n\n');
         },
         choices: [
@@ -228,11 +228,11 @@ export const MERIDIANS = {
     },
     ns_warn: {
         id: 'ns_warn', title: 'Before Nascent Soul', art: 'tribulation', place: (g) => g.location,
-        text: (g) => `Saturation sits at the brim. One more step and you're Nascent Soul.
+        text: (g) => `Saturation is full to the last drop. One more step and you are Nascent Soul, a realm this world keeps in its stories.
 
-Parallel Cognition raises a hand, the way it does when it has read the fine print. *${m(g).e < 8 ? `${8 - m(g).e} of the eight Extraordinary vessels are still closed. They open between Golden Core and Soul Embryo. Break through now, and they seal for good, and their twenty-eight collaterals with them.` : `${28 - m(g).c} of the vessels' twenty-eight collaterals are still closed. They open only before Nascent Soul. Break through now, and they seal for good.`}*
+Parallel Cognition raises a hand, as it does whenever it has read the terms to the end. *${m(g).e < 8 ? `${8 - m(g).e} of the eight Extraordinary vessels are still closed. They open between Golden Core and Soul Embryo. Break through now, and they seal for good, and their twenty-eight collaterals with them.` : `${28 - m(g).c} of the vessels' twenty-eight collaterals are still closed. They open only before Nascent Soul. Break through now, and they seal for good.`}*
 
-Yuki looks at you. *Your call,* says the bond. *I'd open them. But I'm a cat. I'd also eat the curtains.*`,
+Yuki looks at you. *Your decision,* says the bond. *I would open them. I would also eat the curtains, so weigh the source.*`,
         choices: [
             { text: (g) => (m(g).e < 8 ? 'Not yet. Open the vessels first.' : 'Not yet. Open the collaterals first.'), to: (g) => g.flags.bt_return || 'stream' },
             { text: 'Break through anyway. Let them seal.', to: 'breakthrough' },
@@ -243,13 +243,13 @@ Yuki looks at you. *Your call,* says the bond. *I'd open them. But I'm a cat. I'
 /** Foundation with collaterals still closed (v0.9.6): they seal. Shown before the breakthrough. */
 MERIDIANS.col_warn = {
     id: 'col_warn', title: 'Before Foundation', art: 'tribulation', place: (g) => g.location,
-    text: (g) => `Saturation sits at the brim, and all twelve primaries are open. Foundation is one breath away.
+    text: (g) => `Saturation stands at the brim, and all twelve primaries are open. Foundation is a single breath off.
 
-Parallel Cognition raises a hand. *${66 - C(g)} of the sixty-six collaterals are still closed. They open only in Mortal Vessel. Break through now and they seal: Qi regen stays at ${baseRegen(g).toFixed(1)}% per Cycle instead of ${(baseRegen(g) + 0.1 * (66 - C(g))).toFixed(1)}%, for good.*
+Parallel Cognition puts a finger on the small print. *${66 - C(g)} of the sixty-six collaterals are still closed. They open only in Mortal Vessel. Break through now and they seal: Qi regen stays at ${baseRegen(g).toFixed(1)}% per Cycle instead of ${(baseRegen(g) + 0.1 * (66 - C(g))).toFixed(1)}%, for good.*
 
 *Footnote,* it adds. *The Coil can undo it. A rewind would unwind the breakthrough itself: back to Mortal Vessel, every realm since gone, Saturation at zero. That is not a discount. That is the full price.*
 
-Yuki looks at you. *Finish the threads,* says the bond. *Then show off.*`,
+*Threads first,* says the bond, from wherever Yuki has got to. *Showing off after.*`,
     choices: [
         { text: 'Not yet. Open the collaterals first.', to: (g) => g.flags.bt_return || 'stream' },
         { text: 'Break through anyway. Let them seal.', to: 'breakthrough' },
