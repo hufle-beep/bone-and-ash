@@ -6,7 +6,7 @@ import {
     startCombat, combatStep, combatFlee, combatYield, waitLeft, songPays, sungKey, THREAT_TEXT, SONG_TEXT, SONG_COST, SONG_MAX, SAY_TEXT, SPAR_TEXT, postureNow, unarmedMastery, fightAdapt, weaponMastery, COMBAT_ACTIONS, noDiceDc, airStrike, AIR_TEXT, FOE_TRAITS, foeTraits, TELL_TEXT, bigBlowNow, lungeNow, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage, qiShield,
 } from './core/game.js';
 import { sceneView, choose, goTo, gives, choiceQi, threatOf } from './core/story.js'; // v0.11.109 (FQ1): choiceQi
-import { showPicked, isTaskHub, isQueueScreen, isTaskChoice, taskCards, taskLabel, taskMinutes, taskOutcome, dryOutcome, outcomeOf, runTask, FAM, yukiLane, setYuki, nextStep, YUKI_LANE_TEXT, YUKI_HOURS } from './core/tasks.js';
+import { showPicked, isTaskHub, isQueueScreen, isTaskChoice, taskCards, taskLabel, taskMinutes, taskOutcome, dryOutcome, outcomeOf, runTask, FAM, famLine, yukiLane, setYuki, nextStep, YUKI_LANE_TEXT, YUKI_HOURS } from './core/tasks.js';
 import { SCENES, ITEMS } from './story/prologue.js';
 import { TASK_HUBS } from './story/task_hubs.js';
 import { landParts, landReply, noteSaid } from './core/replies.js'; // v0.11.68 (A1 + B2 + C1); v0.11.134 (LP2, QR; RQ1): landReply, noteSaid
@@ -283,7 +283,7 @@ function renderCardScreen() {
         const cardHtml = (c) => {
             const out = c.status === 'open' ? safeOutcome(() => taskOutcome(g, SCENES, c.id)) : null; // v0.11.64 (A1, B1): one dry run: its time, where it ends, whether it ends the Coil
             const mins = out ? out.minutes : c.minutes;
-            const fam = c.kind === 'work' || c.kind === 'door' ? ` · ${FAM[c.tier].name}${c.next != null ? ` ${c.fam}/${c.next}` : ''}` : '';
+            const fam = c.kind === 'work' || c.kind === 'door' ? ` · ${famLine(c)}` : ''; // v0.11.155 (FD1, NX)
             const ctag = hideTag(c.tag);
             const tag = c.status === 'late' ? LATE_TAG : c.status !== 'open' ? 'done for today — back tomorrow' : c.kind === 'door' ? `opens the scene${ctag ? ` · ${ctag}` : ''}` : (ctag || (showChecks ? 'no check' : ''));
             const dies = out?.death ? ` <b class="dies">${out.death === 'hunger' ? 'Starves here' : 'Collapses here'}</b>` : '';

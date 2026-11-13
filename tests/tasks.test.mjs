@@ -28,7 +28,7 @@ import { againView, skipStep, skipRun, skipPlan, MEMORY_LINES, noFold, SKIP_MAX,
 import { medCards, runMed, canMeditate, NO_MEDITATE, isSitChoice, MED_SCREENS } from '../js/core/meditate.js';
 import { defaultMinutes, DEFAULT_MINUTES } from '../js/core/story.js';
 import { coilActive, rewind, endCoil, KEEP_FLAGS, REMEMBER } from '../js/core/coil.js';
-import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskMinutes, taskOutcome, dryOutcome, outcomeOf, sitLoop, sitLoopPlan, sitTaskId, SIT_STOP_TEXT, runTask, taskState, setYuki, yukiLane, famTier, merChoice, MER_TASK, BT_TASK, SIT_TASK, merLineTask, lineOfTask, isQueueScreen, runsHere, cardSpeed } from '../js/core/tasks.js';
+import { isTaskHub, isTaskChoice, taskCards, taskOpen, taskMinutes, taskOutcome, dryOutcome, outcomeOf, sitLoop, sitLoopPlan, sitTaskId, SIT_STOP_TEXT, runTask, taskState, setYuki, yukiLane, famTier, famLine, FAM, merChoice, MER_TASK, BT_TASK, SIT_TASK, merLineTask, lineOfTask, isQueueScreen, runsHere, cardSpeed } from '../js/core/tasks.js';
 /** v0.11.64: the game has no queue; the bots keep their plan of cards in the save's old queue field (emptied by the Coil screens and a collapse, as the queue was), so they play exactly as before. */
 const planOf = (g) => taskState(g).queue;
 /** v0.11.37 (D-a): card `id` can't run because the day is over (the day's end passed, or it would end past it; 00:00 since v0.11.91); the bots' plan stops there, as the queue did. A test helper since v0.11.64. */
@@ -2964,6 +2964,27 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     const ra = runTask(a, SCENES, 'wild_forage:0'), rb = runTask(b, SCENES, 'wild_forage:0');
     assert(JSON.stringify(ra.lines) === JSON.stringify(rb.lines) && JSON.stringify(a.inventory) === JSON.stringify(b.inventory), 'work cards ignore the dice');
     assert(famTier(0) === 0 && famTier(2) === 1 && famTier(8) === 2 && famTier(18) === 3, 'familiarity tiers at 2 / 8 / 18');
+}
+// v0.11.155 (FD1, NX; RV1 TS, NB): a work or door card's line names the next step, the steps read from FAM; the same on every
+// hub's cards; "N/M to Step" never breaks inside (non-breaking spaces); main.js shows it
+{
+    const nb = (t) => t.replace(/ /g, '\u00a0');
+    const step = (f) => FAM[famTier(f)], nextOf = (f) => FAM[famTier(f) + 1] || null;
+    const expect = (f) => (nextOf(f) ? `${step(f).name}\u00a0· ${f}/${nextOf(f).at}\u00a0to\u00a0${nextOf(f).name}` : step(f).name);
+    const want = [[0, 'New · 0/2 to Practised'], [1.5, 'New · 1.5/2 to Practised'], [2, 'Practised · 2/8 to Skilled'], [5, 'Practised · 5/8 to Skilled'], [8, 'Skilled · 8/18 to Mastered'], [12, 'Skilled · 12/18 to Mastered'], [18, 'Mastered'], [40, 'Mastered']];
+    for (const [f, line] of want) { const got = famLine({ tier: famTier(f), fam: f, next: nextOf(f)?.at ?? null }); assert(got.replace(/\u00a0/g, ' ') === line && got === expect(f), `NX: familiarity ${f} reads "${line}" (${got})`); }
+    assert(famLine({ tier: 1, fam: 5, next: 8 }) === `Practised\u00a0· 5/8${nb(' to Skilled')}` && !/\d \S|to (?=\S)/.test(famLine({ tier: 2, fam: 12.5, next: 18 })), 'NB: no breaking space inside "12.5/18 to Mastered" or before its "·"');
+    const hubs = ['camp', 'stream', 'wilds', 'village', 'ashfall', 'fo_ashfall', 'rr_hub', 'dw_hub', 'ah_hub', 'heart_hub', 'rt_camp', 'rt_ashfall'];
+    const seen = new Set(), bad = [];
+    for (const [i, hub] of hubs.entries()) for (const f of [0, 1.5, 3, 7.9, 9, 20]) {
+        const g = ensureBars(newGame(9100 + i)); g.scene = hub; g.minutes += 8 * 1440 + 9 * 60; g.james.qi = 30; g.james.satiety = 70; Object.assign(g.flags, { long: true, forest_day: 2 });
+        const t = taskState(g);
+        for (const c of taskCards(g, SCENES)) if (c.kind === 'work' || c.kind === 'door') t.fam[c.id] = f;
+        for (const c of taskCards(g, SCENES)) if (c.kind === 'work' || c.kind === 'door') { seen.add(c.id); const l = famLine(c); if (l !== expect(f)) bad.push(`${c.id} at ${f}: ${l}`); }
+    }
+    assert(!bad.length && seen.size >= 80, `NX: every work and door card on ${hubs.length} hubs names its step and the next one, from FAM (${seen.size} cards; ${bad.slice(0, 3).join('; ') || 'all hold'})`);
+    const MAIN = (await import('node:fs')).readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+    assert(/const fam = c\.kind === 'work' \|\| c\.kind === 'door' \? ` · \$\{famLine\(c\)\}` : ''/.test(MAIN) && !/\$\{c\.fam\}\/\$\{c\.next\}/.test(MAIN), 'NX: main.js puts famLine on work and door cards; the old "Practised 5/8" (c.fam/c.next) is gone');
 }
 
 // v0.10.0: meridian sessions, a card that would end the Coil, starving 1.5 HP an hour, rest and sleep at once (the queue went in v0.11.64)

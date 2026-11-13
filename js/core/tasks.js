@@ -44,6 +44,9 @@ export const YUKI_N = 90, YUKI_CAP = 3;
 export const yukiSpeed = (f) => Math.min(YUKI_CAP, useSpeed(f, YUKI_N));
 export const cardSpeed = (f) => useSpeed(f, USE_N.card);
 const nextAt = (f) => FAM.find((t) => t.at > f)?.at ?? null;
+/** v0.11.155 (FD1, NX): a work or door card's familiarity line names the next step ("Practised · 5/8 to Skilled"); "Mastered" at the top.
+ * RV1 (NB): non-breaking spaces keep "5/8 to Skilled" whole, so a narrow card wraps only after a "·" (a 390 px phone: 4 of 4 mid-phrase breaks → 0). */
+export const famLine = (card) => (card.next != null ? `${FAM[card.tier].name}\u00a0· ${card.fam}/${card.next}\u00a0to\u00a0${FAM[card.tier + 1].name}` : FAM[card.tier].name);
 
 export const isTaskHub = (g) => !!TASK_HUBS[g.scene] && !g.combat;
 function st(g) {

@@ -2,6 +2,12 @@
 
 Started in v0.11.150, when `roadmap-done-2.md` had passed about 45 KB. Newer than `roadmap-done-2.md` and `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.155 (word for word; owner picks FD1, D1, RV1: the familiarity display done)
+
+### From section 1, as of v0.11.154
+
+- *(new in v0.11.153, owner 21:25 "some things get mastery on 8 and some on 18"; pick FD1 22:44, "put it next after the repeat pushes")* **The familiarity display (FD1, picked; built after the repeats' push 2):** one scale for every work and door card (Practised 2, Skilled 8, Mastered 18); the card line shows the count to the *next* tier, which read as two mastery points. **NX** the card names the next step ("Practised · 5/8 to Skilled", "Skilled · 12/18 to Mastered", "Mastered"; 103 cards) + **FQ** one FAQ sentence by Fable (drafts in chat first); numbers in the handover's "Decided in chat".
+
 ## Moved in v0.11.151 (word for word; owner pick WD1: group d closed)
 
 ### From section 0, "Next: group d", as of v0.11.150

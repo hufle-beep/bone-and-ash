@@ -40,6 +40,7 @@ const fed = plain(text('HP, Convergence and Fed'));
 assert(fed.includes(`drops ${SATIETY_PER_HOUR} an hour (${SATIETY_PER_HOUR + FED_EXTRA_PER_HOUR} while working`) && fed.includes(`Below ${HUNGRY_AT}`) && fed.includes(`${STARVE_HP_PER_HOUR} HP an hour`), 'Fed: the rates, the hunger line and starving from game.js / tasks.js');
 const fam = plain(text('Work cards and familiarity'));
 assert([1, 2, 3].every((t) => fam.includes(`${FAM[t].name} at ${FAM[t].at}`) && fam.includes(`×${FAM[t].speed}`)) && fam.includes(`×${USE_CAP}`), 'familiarity: the three steps, their counts and speeds from FAM');
+assert(fam.includes(`not towards ${FAM[3].name} (${FAM[1].name} · 5/${FAM[2].at} to ${FAM[2].name})`) && fam.includes(`the same steps of ${FAM[1].at}, ${FAM[2].at} and ${FAM[3].at}`) && !fam.includes('step and count') && fam.includes('to every work card on the screen'), 'familiarity (v0.11.155, FD1, D1): the count is to the next step, the same steps on every card, as the card line reads (tasks.js famLine); RV1 (FW): a drill shares to work cards only (tasks.js learn)');
 const g2 = load('v0.11.7-long-forest-coil2.json');
 const coil = plain(text('The Coil', g2));
 assert(coil.includes(`1 + ${COIL_GROWTH} × earlier Coils`) && coil.includes(`×${fmtMult(coilMult(g2))} this Coil`) && g2.coil.n === 2 && coilMult(g2) === 1 + COIL_GROWTH, 'the Coil: the bonus from COIL_GROWTH, this Coil\'s from the save (Coil 2)');

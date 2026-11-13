@@ -2,6 +2,24 @@
 
 Started 2026-11-12 (v0.11.148), when `history-17.md` would have passed about 45 KB. Newer than `history-17.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.155 (word for word)
+
+### Decided in chat
+
+- **v0.11.152: the repeats map, push 1, and Day 21's breakfast (owner 20:51 "1e. carefully check if there are any repetitions inside a coil outside where they were allowed (fights and short texts)"; 21:07 "read the texts and map instead of using a bot"; 21:11 Day 21 has no eat option; 21:21 "Go with your recommendations": RP1, E1; 21:37 "ok for texts"; 21:42 BX1; 22:00 CS1; 22:07 RV1; 22:30 LB1):**
+  - **The map (read from the code; every repeatable scene and reply rendered for each occurrence and romance state, against the calendar):** romance RM1 `talk_mei` flirt 3 replies / 5 talks; RM2 `talk_ya` flirt and "knock it off" 4 / 5; RM3 "Sit between them" 2 / 3 nights; RM4 `yk_camp` 3 nights + 2 Mei Lin mornings / 4 nights; RM5 the sister talk 3 / 4; RM6 the Heart camp's second paragraph 1 / 4 nights, its replies 3, 2, 2 / 4; RM7 the whisper 1 / several; RM8 the spring's Ya 2 / 3 days; RM9 `fo_night` Days 8 and 9 the same; RM10 Yuki's closers 3 a mood / up to 13 scenes; HT Wen's and Mother's 3 / 4 visits. Other: ST1–ST6 (push 2, `roadmap.md` 1e); SD same-day returns (bots: 1,875 / 1,617 / 1,267 / 2,090 / 3,785 screens per 200 games). Allowed: fights, system screens, meal / rest / sit lines, Yuki's hauls, memory and flight lines. **RP1 🟢 (recommended) / RP2 🟢 YT7 / RP3 🟡 romance only / RP4 🟠 ST only. Picked: RP1** (push 1: RM1–RM10 with YT14 + HT + SD; push 2 its own pick). Fable's 155 texts, "ok for texts".
+  - **E1 (BK):** breakfast at the Elder's arrival, +20, once a Coil (bot arrivals Fed 10–51 → 30–71). **BX (stop-and-ask):** the story test's smart Elder duel 84.6% → 91.7% (B10: 85.2%, many still hungry). **BX1 🟢 B20 (recommended) / BX2 🟡 B10. Picked: BX1.**
+  - **CS (stop-and-ask):** the 21:12 and 21:25 saves cut at 20,000 characters failed the saves test. **CS1 🟢 MV to `saves/cut-off/`, RE later (recommended) / CS2 🟡 SK / CS3 🟠 RE first. Picked: CS1** (the owner has no copies).
+  - **Fable's cold review (rule 9):** M1 the same-day fold stuck after a text change (128 of 1,168 folds); M2 the heap counted by the camp's night (38 of 231); L1 a meta screen's round trip folded; L2 "Read it all again" stayed open all Coil; L3 a 4th whisper night; L4 a grown pool lost its counts; L6 the omnitool in the wrist; L7 the human heap's edge; L9 three tests by hand. **RV1 🟢 all, Fable's three texts (recommended) / RV2 🟡 M1 + M2 + L4 + L9 / RV3 🟠 M1 + M2 / RV4 🔴 none. Picked: RV1.**
+  - **LB (stop-and-ask, 22:2x):** L1 as built showed a scene in full again after a breakthrough or a meta screen (bots' repeated screens Sitter 1.1%, Cultivator 0.9%). **LB1 🟢 FB: it folds, "Read it all again" kept (0.1% / 0.1%) (recommended) / LB2 🟡 AS. Picked: LB1** (22:30).
+
+### From "Version notes"
+
+## v0.11.152 — The repeats map, push 1; breakfast on Day 21 (RP1, E1, BX1, CS1, RV1, LB1)
+
+- **Files:** `js/story/act1_return.js` (`dayTwentyOneBreakfast`), `act1_blackroot.js`, `yuki_path.js`, `act1_heart.js` (`HC_POOLS`, `hcPool`, heart_camp's `dayKey`, the whisper by day), `act1_fallout.js`, `yuki_time.js`, `house_texts.js`, `js/story/again.js` (`sameDayAgain`, `META_BACK`, `newVisit`), `js/core/lines.js` (`pickLine` keeps counts), `js/main.js` (L2), `js/core/news.js`, `tests/story.test.mjs`, `tools/text-baseline.json`, `saves/cut-off/`, `sw.js`, docs. Save: `lines.sd`, `lines.sdFold`, flag `a1_breakfast`.
+- **Checks:** a game change (rule 2): the full check after the build, after RV1 and after LB1 (exit 0; 0 drifted of 145, 20 moved more than 5, log only: the new one the Elder duel, BX1); the bots' repeated screens 0–0.1% (were 0.9–2.1% after v0.11.135); browser part 3 flaked in 2 full runs (the bar showed "Download now" with Reload), alone 6 of 6, part 2 once, alone 2 of 2 (open, options later); mutation: 2 E1, 3 RP1, 4 RV1 mutants caught. **Fable's review:** no high; M1, M2, L1–L4, L6, L7, L9 fixed (RV1, LB1).
+
 ## Moved from the handover in v0.11.154 (word for word)
 
 ### Decided in chat
