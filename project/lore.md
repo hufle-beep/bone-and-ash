@@ -39,6 +39,8 @@
 
 **The owner, 22:58:** "Consider making a fork of the game, one for me, a personalized one with all the music references, and a sanitized one with only general references. The only difference should be the texts and references, the framework should stay the same." *(Open, options later, with CM: the texts by edition, one framework.)*
 
+**The owner, 23:15 (with the pick NX2, v0.11.170):** "for the act 1 journey, his cooking should also be very appreciated by the party, when we get there in the rewrite, mention it. Also make some throwaway mentions by other characters over all of the game as more of his character is revealed that how despite his nonchalance and seming deadpan his love of cooking and feeding people and his tastes in music and culture reveal him to be a deeply caring and warm person." *(In the rewrite from part 4 on, each part's brief: CW; parts 1–3 have none yet: open, options later.)*
+
 **For Fable (a scan list; the owner's words above win):**
 - **Cooking:** a very good cook who loves feeding people; Central and Eastern European, Italian, Japanese, Chinese, Korean. Favourites: green pesto pasta (his own noodles when he can), shakshuka, dödölle with sour cream and fried diced pork belly, spenótfőzelék with sunny-side-up eggs, plain French toast (eggs, salt, pepper), spaghetti bolognese. With trust he shares, then takes over, Mei Lin's mother's kitchen; with the village's, he joins the communal meals and is accepted more and more. Most of it has no frame of reference in this world.
 - **Descent:** Hungarian, British, German and Serbian; his Earth has no nation states, the cultures persist.
@@ -46,6 +48,7 @@
 - **At least once, with the most impact:** "Trøllabundin" (Eivør); "The Song of Dúrin", "The Song of Hammerdeep", "Dwarven Forge" (Clamavi de Profundis); "Music Box of Fate" and "Breathe" (Ironmouse); "The Eater's Call" (Nyanners and Lord Athelstan); "Boof Pack" (Lord Athelstan: Ya delighted, Mei Lin horrified, Yuki amused); "Mumei" (Nanashi Mumei); "Genesis" (Holoadvent); "Non-Fiction" (Holomyth); "Reflect" (Gawr Gura).
 - **His archive:** music, clips and streams; and the books, games, films and series above (science fiction, games, fantasy and urban fantasy).
 - **Pacing:** spread across the Prologue and Act 1, not all at once; further still once Act 2 exists.
+- **Under the deadpan (23:15):** the party loves his cooking on the Act 1 journey (say so when the rewrite gets there); and across the game, throwaway remarks by others (never a speech) show that his cooking, his feeding people and his music and culture make him a deeply caring, warm man, whatever his nonchalance. Music in these remarks stays generic until CM settles the songs and the editions.
 
 ## Yuki
 

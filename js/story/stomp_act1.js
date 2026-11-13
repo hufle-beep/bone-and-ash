@@ -16,57 +16,57 @@ const yuShort = (g) => ({ cat: 'Yuki', tiger: 'Yuki, all four hundred pounds of 
 registerStomp({
     /* ============================================================ PART 1 — FALLOUT ======================================= */
     sect_watcher: {
-        posture: (g, d) => `The watcher on the ridge rises from his rice cake with the slow contempt of a man who has been told what you are. "Mortal," he says, and bows, because the Sect bows even to things it is about to kill. "No root, no Qi, no master. You are a beggar who found a trick with bones. I will take your hands, and the Elder will thank me."
+        posture: (g, d) => `The watcher looks up, sets his rice cake down on its lotus leaf, and rises without haste: his senses have gone over you and found nothing there to hurry for. "A mortal," he says, and bows, since the Sect bows even to what it is about to cut. "No root. No Qi. No master. A beggar who has found a trick with bones. I will take your hands, and the Elder will thank me for them."
 
-${pick(d, 'He is fast. You can see that he is fast.', 'You watch him draw. You could have made tea during the draw.', 'You genuinely consider apologising to him in advance. It seems only polite.')}`,
+${pick(d, 'He is fast. You can see that he is fast.', 'You watch him draw. There would have been time to make tea.', 'You consider apologising to him in advance. It seems only civil.')}`,
         win: {
-            2: () => `It isn't a fight so much as a correction. His sword comes down; it is no longer in his hand; he is on his knees with a white bone needle through the sleeve of his sword-arm, pinning it, gently, to the ridge.
+            2: () => `It is less a fight than a correction. His sword comes down, and is no longer in his hand; he is on his knees with a sliver of white bone through the sleeve of his sword-arm, pinning it, gently, to the ridge.
 
-He stares at the needle. At you. At the place in you where Qi should be and, to his senses, isn't.
+He looks at the sliver. At you. At the place in you where his senses insist there is no Qi at all.
 
-"That is not possible," he says, with great formality.
+"That is not possible," he says, with great formality. Then, one correct act being left to him, he reaches for the sword with his free hand and holds it out to you, hilt first.
 
-"Noted," you say. "Ledger, please."
+"Noted," you say. "And the ledger."
 
-He yields it with both hands, as if it were the sword. It is meticulous: the Elder comes by the north road, at noon, with four disciples. There's a note about Mei Lin — *the herb-girl who laughs* — and one about Ya: a drawing of a wolf's skull and a question mark.
+It is meticulous. Shen Qiu, by the north road, at noon, four disciples with him. A note on Mei Lin, *the herb-girl who laughs*. A note on Ya, which is a drawing of a wolf's skull and a question mark. Yuki is in it too, and lets her entry stand.
 
-You let him go, without the sword. He bows before he runs. Of course he does.`,
-            3: () => `You don't move. That's the problem, from his point of view: you don't move, and then his sword is in three pieces in the grass, his belt has been cut so that his trousers are a matter of active negotiation, and a cage of white bone has closed round both his wrists with the delicacy of a jeweller's clasp.
+You send him home without the sword. He bows before he runs. The Sect trains them thoroughly.`,
+            3: () => `You do not move. From where he stands, that is the difficulty: you do not move, and then his sword is lying in the pine needles in three pieces, his belt has been cut so that his trousers are a matter of ongoing negotiation, and a cuff of white bone has closed round both his wrists as lightly as a jeweller's clasp.
 
-He falls over. Into the rice cake.
+He falls over. Into the rice cakes.
 
-"I— This one— *Senior*," he gasps, forehead to the dirt, which is a significant reversal on "beggar". "This one had no eyes. This one's master had no eyes. Spare this one's hands—"
+"I— This one— *Senior*," he gasps, forehead in the dirt, which is some distance from "beggar". "This one had no eyes. This one's master had no eyes. Spare this one's hands—"
 
-"Your hands are fine," you say. "Your dignity, I can't help with. Ledger."
+"Your hands are fine," you say. "Your dignity I can't help with. Ledger."
 
-It comes up over his head in both trembling hands. The Elder: north road, noon, four disciples. A note on Mei Lin, *the herb-girl who laughs*. A wolf's skull and a question mark for Ya.
+He holds it up over his head in both bound hands, and after it the hilt of the sword, the correct way round, the form having nothing to say about blades in three pieces. The ledger is meticulous. The Elder: north road, noon, four disciples. A note on Mei Lin, *the herb-girl who laughs*. For Ya, a wolf's skull and a question mark. Yuki has a page, which she inspects and permits.
 
-You let him go, holding his trousers up with one hand. He bows anyway. Of course he does. At the bottom of the ridge he turns and shrieks that the Crimson Lotus will grind your bones to paste, and then trips.`,
+You take the cuff off and send him home without the hilt, one hand holding up his trousers. He bows all the same. At the foot of the ridge he turns and shrieks that the Crimson Lotus will grind your bones to paste, and then trips.`,
         },
-        one: () => 'You flick one needle. It takes his sword, his belt and his confidence, in that order.',
+        one: () => 'One sliver of bone, flicked. It takes his sword, his belt and his confidence, in that order.',
     },
     palisade_wolf: {
-        posture: (g, d) => `Two ash-wolves at the gap in the new stakes, heads low, lips back, the lame one hanging behind to make sure you watch the other. Their eyes are the colour of old coals and they have quite clearly done this to villages before.
+        posture: (g, d) => `Two ash-wolves stand on the chalk line where a palisade is going to be, heads low, lips back, the lame one hanging behind to make sure you watch the other. Their eyes are the colour of old coals, and they have plainly done this to villages before.
 
-${pick(d, 'Two of them. One of you. The arithmetic is not great.', '"Sit," you suggest. They decline.', `${yu(g)} yawns at them. Through the bond: *they're babies.*`)}`,
+${pick(d, 'Two of them. One of you. The arithmetic could be better.', '"Sit," you suggest. They decline.', `${yu(g)} yawns at them. Through the bond: *they're babies.*`)}`,
         win: {
-            2: () => `The first wolf learns what a bone needle through the shoulder feels like and does not enjoy the lesson; the lame one learns from watching. It's over before the hunters on the wall have finished nocking their arrows.
+            2: () => `The first wolf learns what a dart of white bone through the shoulder is like, and does not care for the lesson; the lame one learns by watching, a breath too late to use it. It is over before the first shutter in the lane has opened.
 
-Two grey bodies in the trampled barley. By morning the hunters have skinned them, rendered them, and hung the skulls on the chalk line, facing outward, with the solemn conviction that this will warn the others.
+Two grey shapes lie in the flattened barley. By morning the hunters have skinned them, rendered them, and hung the skulls along the chalk line, facing outward, in the solemn conviction that this will warn the rest.
 
-Old Hu walks the line twice, looking at the clean holes in the skulls, and doesn't say anything for a long time. Then he moves the skulls a hand's width further apart, so there is room for more.`,
-            3: (g) => `The big wolf launches. You step aside. It lands, turns, and finds you already standing exactly where it isn't, holding a single white dart and looking faintly apologetic. ${yuShort(g)} sits on the lame one, which has given up and is lying very flat with its ears back, making a high, unhappy whine.
+Old Hu walks the line twice, studying the clean holes in the skulls, and keeps his own counsel. Then he moves the skulls a hand's width further apart, so that there is room for more.`,
+            3: (g) => `The big wolf launches. You step aside. It lands, turns, and finds you standing exactly where it is not, with one white dart in your hand and a faintly apologetic look. ${yuShort(g)} sits on the lame one, which has given up and lies very flat with its ears back, keening.
 
-It is, in the end, still two grey bodies in the barley by morning, because ash-wolves do not learn and Ashfall cannot afford wolves that come back. But the hunters skin them in silence, and when they hang the skulls on the chalk line they hang them facing *inward* — at you — and nobody can quite explain why that feels right.
+It comes to two grey bodies in the barley by morning all the same, since ash-wolves do not learn and Ashfall cannot afford wolves that come back. But the hunters skin them in silence, and when they hang the skulls on the chalk line they hang them facing *inward*, toward you, and not one of them can say why that seems correct.
 
-Old Hu moves the skulls back round. Then, after a while, he moves one of them back again.`,
+Old Hu turns the skulls outward again. Later, alone, he turns one of them back.`,
         },
-        one: () => 'You throw one dart and the fight becomes a burial detail.',
+        one: () => 'You throw once. The fight is reclassified as a burial detail.',
     },
     ya_brawl: {
-        posture: (g, d) => `Ya rolls her neck until it cracks, spits in the dust, and grins at you with every one of her teeth. "No root. No Qi. Smells of *nothing*." She beckons with two fingers. "Come on, nothing. If you win, I'll let you buy me a drink. If I win, I'm taking that coat. And then whatever's under it."
+        posture: (g, d) => `Ya rolls her neck until it cracks, spits in the dust, and shows you every tooth she owns. "Three nights at your fire and I never smelled a thing on you. No rot. No fear. *Nothing*." She beckons with two fingers. "Come on, Nothing. If you win, you buy my salt. If I win, I take the coat. Then whatever's under it."
 
-${pick(d, 'She is very fast, and she knows it.', 'She is fast, for someone who is about to have a very educational afternoon.', 'You find you are already sorry, mostly for the goats.')}`,
+${pick(d, 'She is very fast, and she knows it.', 'She is fast, and about to have an educational morning.', 'You find you are sorry in advance, chiefly on behalf of the goats.')}`,
         win: {
             2: () => `It ends with Ya flat on her back in the dust, her spear lying in the barley where it went when it left her hands, and the flat of a white bone blade laid across her collarbones, holding her to the lane the way a ruler holds down a page. She never landed a touch; the spear never found anything to hit. She's bleeding from the lip anyway, mostly from laughing.
 

@@ -12,7 +12,7 @@ import { HT_HUBS, HT_BODY, HT_CLOSE, HT_LABEL, HT_GAIN, HT_MID, htPool, htSlot }
 import { likesMei, likesYa } from '../js/story/act1_common.js'; // v0.11.123 (EQ1, AB)
 import { KEEP_FLAGS, rewind } from '../js/core/coil.js'; // v0.11.137 (HV1, Fable L2): rewind on an old save // v0.11.123 (ER1, T3)
 import { againView, noteRead, MEMORY_LINES } from '../js/story/again.js'; // v0.11.167 (CA1): MEMORY_LINES // v0.11.125 (RW1, T); v0.11.133 (FP2): noteRead
-import { STOMP } from '../js/story/power.js'; import { ASHFALL } from '../js/story/ashfall.js'; // v0.11.169 (P3A): ASHFALL // v0.11.126 (NQ1)
+import { STOMP } from '../js/story/power.js'; import { ASHFALL } from '../js/story/ashfall.js'; import { FALLOUT } from '../js/story/act1_fallout.js'; // v0.11.170 (NX2): FALLOUT // v0.11.169 (P3A): ASHFALL // v0.11.126 (NQ1)
 import { coilStamp, dayIndex, textDay, DAY_REPLIES, COIL_SETS, actCoil, noteDay, linesOf, pickLine } from '../js/core/lines.js'; // v0.11.166 (RW1): COIL_SETS, actCoil; // v0.11.135 (NT1, EV1); v0.11.136 (NC1): DAY_REPLIES
 import { splitReply, splitLine, landReply, noteSaid } from '../js/core/replies.js'; // v0.11.136 (NC1); RV2 (TG): landReply, noteSaid
 import { runTask, taskOutcome, cardCheck, taskCards, yukiSays as yukiSaysS } from '../js/core/tasks.js'; // v0.11.169 (CA1, YH): yukiSays // v0.11.136 (RV2, TG); v0.11.139 (MW1): taskCards
@@ -315,7 +315,8 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     const ST6K = ['rr_forage:2', 'rr_forage:2:after', 'ah_forage:2', 'ah_forage:2:after', 'ah_hunt:1:part', 'ah_hunt:1:full']; // v0.11.154 (PS1, ST6): their own test (RP1 push 2's block)
     const SWK = ['wild_forage:0', 'wild_forage:1', 'wild_forage:3', 'wild_hunt:0', 'wild_hunt:1', 'wild_hunt:2', 'wild_train:0', 'wild_train:1', 'wild_train:2', 'wild_train:3']; // v0.11.168 (P2A, SW): their own test (P2A's block)
     const SRK = ['clinic:0', 'clinic:1', 'workshop:0', 'drill:0', 'drill:1']; // v0.11.169 (P3A, SR): their own test (P3A's block)
-    const keys = Object.keys(DAY_REPLIES).filter((k) => !ST6K.includes(k) && !SWK.includes(k) && !SRK.includes(k));
+    const SR4K = ['fo_palisade:0', 'fo_palisade:1', 'fo_palisade:1:f', 'fo_council:0', 'fo_council:1', 'fo_drill:0', 'fo_drill:0:f', 'fo_drill:1', 'fo_clinic:0', 'fo_clinic:1', 'fo_clinic:1:f']; // v0.11.170 (NX2, SR): their own test (NX2's block)
+    const keys = Object.keys(DAY_REPLIES).filter((k) => !ST6K.includes(k) && !SWK.includes(k) && !SRK.includes(k) && !SR4K.includes(k));
     const first = (k) => COIL_SETS[k]?.[0] ?? DAY_REPLIES[k]; // v0.11.166 (RW1): a Coil's set for the lists by Coil
     assert(keys.length === 38 && keys.reduce((s, k) => s + first(k).length - 1, 0) === 63, `NC1: 38 reply lists with 52 new texts; v0.11.152 (RP1): 11 more (${keys.length}, ${keys.reduce((s, k) => s + first(k).length - 1, 0)})`);
     assert(JSON.stringify([...keys].sort()) === JSON.stringify(NC.map(([k]) => k).sort()), 'NC1: a list for every reply the bots saw on two days, and no other');
@@ -548,7 +549,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
             for (const [form] of FORMS) {
                 const L = DAY_REPLIES[k].map((t) => (typeof t === 'function' ? t(F(seed++, form)) : t));
                 assert(L.every((t) => !bad(t) && t.split(/\s+/).length >= 5 && t.split(/\s+/).length <= 40) && L[0] !== L[1], `P3A (SR): ${k} (${form}): two different short texts (${L.join(' | ')})`);
-                const runs = [0, 1].map((d) => { const g = F(5790, form); g.scene = scene; g.inventory.jade_bracket = 3; onDay(g, d); const out = SCENES[scene].choices[i].do(g, { success: true, ratio: 1 }); const { lines, log, ...rest } = g; return { out, rel: JSON.stringify(g.rel), flags: JSON.stringify(Object.fromEntries(Object.entries(g.flags).filter(([f]) => !/^oo:|@/.test(f)))), inv: JSON.stringify(g.inventory) }; });
+                const runs = [0, 1].map((d) => { const g = F(5790, form, 2 + d); onDay(g, 0); /* v0.11.170 (RV1, P3D): by the village day */ g.scene = scene; g.inventory.jade_bracket = 3; onDay(g, d); const out = SCENES[scene].choices[i].do(g, { success: true, ratio: 1 }); const { lines, log, ...rest } = g; return { out, rel: JSON.stringify(g.rel), flags: JSON.stringify(Object.fromEntries(Object.entries(g.flags).filter(([f]) => !/^oo:|@|^vday$/.test(f)))), inv: JSON.stringify(g.inventory) }; });
                 assert(runs.every((r, d) => r.out[0] === L[d]), `P3A (SR): ${k} (${form}): day ${'1 and 2'} show their texts (${runs.map((r) => r.out[0]).join(' | ')})`);
                 assert(runs[0].rel === runs[1].rel && runs[0].flags === runs[1].flags && runs[0].inv === runs[1].inv, `P3A (SR): ${k} (${form}): the same gains both days`);
             }
@@ -624,7 +625,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
             delete g.lines; ensureBars(g);
             const f1 = c.failDo(g)[0]; const s1 = c.do(g)[0]; const s2 = c.do(g)[0];
             assert(s1 === DAY_REPLIES['workshop:0'][0] && s2 === s1 && !DAY_REPLIES['workshop:0'].includes(f1), `P3A (RV1, TG5): a failure, then two successes on one day: the first text twice (${s1} | ${s2})`);
-            g.minutes += 1440; const s3 = c.do(g)[0];
+            g.minutes += 1440; g.flags.vday = 3; /* v0.11.170 (RV1, P3D): by the village day */ const s3 = c.do(g)[0];
             assert(s3 === DAY_REPLIES['workshop:0'][1], `P3A (RV1, TG5): the next day the second text (${s3})`);
             const h = F(seed++, 'cat'); delete h.lines; const r = deserialize(serialize(h)); r.scene = 'workshop';
             assert(SCENES.workshop.choices[0].do(r)[0] === DAY_REPLIES['workshop:0'][0], 'P3A (RV1, TG5): a save with no day record starts from the first text');
@@ -643,6 +644,144 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
             const pa = txt('supper', a).split('\n\n').slice(1).join('\n\n'), pb = txt('supper', b).split('\n\n').slice(1).join('\n\n');
             assert(pa === pb && /Three days/.test(pa) && !/lower than she did to you/.test(pa), `P3A (RV1, TG8, M1): supper's form paragraph the same after both openings as ${form}`);
         }
+    }
+    // v0.11.170 (owner picks NX2, CA1; Fable's rewrite of part 4, the Fallout): SR the hub's repeatable cards speak by day (Days 8–10)
+    // and the council has a Day 10 text; YF every Yuki text in every form; CW the six lines on who he is; ST the three fights' stomp
+    // texts; LB five labels; the continuity fixes; every Fallout scene rendered in every form and day under each flag set
+    {
+        const FORMS = [['cat', 0], ['tiger', 2], ['human', 7]];
+        const F = (seed, form, d = 9, flags = {}) => { const g = ensureBars(fresh(seed)); const r = { cat: 0, tiger: 2, human: 7 }[form]; g.yuki.realm = r; g.james.realm = r; g.yuki.form = form; g.minutes = (d - 1) * 1440 + 12 * 60; Object.assign(g.flags, { ending: 'fought' }, flags); return ensureBars(g); };
+        const bad = (t) => typeof t !== 'string' || /TODO|\$\{|undefined|\bNaN\b/.test(t);
+        const txt = (id, g) => { const t = SCENES[id].text; return typeof t === 'function' ? t(g) : t; };
+        const SRC = readFileSync(new URL('../js/story/act1_fallout.js', import.meta.url), 'utf8');
+        let seed = 7700;
+        // SR: three texts a list (Days 8, 9, 10), different, short, in every form; the card's day shows its text, the gains the same each day
+        const SR = { 'fo_palisade:0': ['fo_palisade', 0, 'do'], 'fo_palisade:1': ['fo_palisade', 1, 'do'], 'fo_palisade:1:f': ['fo_palisade', 1, 'failDo'], 'fo_council:0': ['fo_council', 0, 'do'], 'fo_council:1': ['fo_council', 1, 'do'], 'fo_drill:0': ['fo_drill', 0, 'do'], 'fo_drill:0:f': ['fo_drill', 0, 'failDo'], 'fo_drill:1': ['fo_drill', 1, 'do'], 'fo_clinic:0': ['fo_clinic', 0, 'do'], 'fo_clinic:1': ['fo_clinic', 1, 'do'], 'fo_clinic:1:f': ['fo_clinic', 1, 'failDo'] };
+        for (const [k, [scene, i, fn]] of Object.entries(SR)) {
+            assert(DAY_REPLIES[k]?.length === 3, `NX2 (SR): ${k} has three texts`);
+            for (const [form] of FORMS) {
+                const L = DAY_REPLIES[k].map((t) => (typeof t === 'function' ? t(F(seed++, form)) : t));
+                assert(L.every((t) => !bad(t) && t.split(/\s+/).length >= 5 && t.split(/\s+/).length <= 45) && new Set(L).size === 3, `NX2 (SR): ${k} (${form}): three different short texts (${L.join(' | ')})`);
+                const runs = [0, 1, 2].map((d) => { const g = fn === 'do' ? F(7790, form, 8 + d) : F(7790, form); g.scene = scene; g.inventory.jade_bracket = 3; g.james.qi = 99; onDay(g, fn === 'do' ? 0 : d); /* v0.11.170 (RV1, SD): a success by the story's day, a failure by the count of days */ const out = SCENES[scene].choices[i][fn](g, { success: fn === 'do', ratio: fn === 'do' ? 1 : 0.2 }); const fl = { ...g.flags }; for (const f of Object.keys(fl)) if (/^council\d+$/.test(f)) delete fl[f]; return { out, rel: JSON.stringify(g.rel), flags: JSON.stringify(fl), inv: JSON.stringify(g.inventory), hp: g.james.hp }; });
+                assert(runs.every((r, d) => r.out[0].endsWith(L[d]) && (scene !== 'fo_palisade' || fn === 'failDo' || /^Palisade: \d\/3 stretches\. /.test(r.out[0]))), `NX2 (SR): ${k} (${form}): days 1–3 show their texts (${runs.map((r) => r.out[0]).join(' | ')})`);
+                assert(runs.every((r) => r.rel === runs[0].rel && r.flags === runs[0].flags && r.inv === runs[0].inv && r.hp === runs[0].hp), `NX2 (SR): ${k} (${form}): the same gains every day`);
+            }
+        }
+        { // the council: its own text on each day; Day 10 leads to Day 9's choices
+            const t = FORMS.map(([f]) => [8, 9, 10].map((d) => txt('fo_council', F(seed++, f, d))));
+            assert(t.every((r) => r.every((x) => !bad(x)) && new Set(r).size === 3 && !/Second council/.test(r[2])), 'NX2 (SR): the council reads differently on Days 8, 9 and 10');
+            const labs = (d) => JSON.stringify(SCENES.fo_council.choices.map((c) => (typeof c.text === 'function' ? c.text(F(seed++, 'cat', d)) : c.text)));
+            assert(labs(10) === labs(9) && labs(9) !== labs(8), 'NX2 (SR): Day 10 offers Day 9\'s choices');
+        }
+        // YF: the three texts written for the cat only now read by form; Old Wen and Old Hu name the great root-kin as such
+        for (const [id, d, flags] of [['fo_supper', 8, {}], ['fo_wolf', 8, {}], ['fo_ya_night', 10, { ya_met: true }]]) {
+            const v = FORMS.map(([form]) => txt(id, F(seed++, form, d, flags)));
+            assert(v.every((t) => !bad(t) && t.length > 40) && new Set(v).size === 3, `NX2 (YF): ${id} reads differently in each form`);
+        }
+        assert(/"Your great beast," Old Wen says/.test(txt('fo_council', F(seed++, 'tiger', 9))), 'NX2 (YF): Old Wen names the great root-kin as such');
+        assert(DAY_REPLIES['fo_drill:1'].every((t) => !/bows to the cat/.test(t(F(seed++, 'tiger')))), 'NX2 (YF): Old Hu never bows to the great root-kin as "the cat"');
+        // CW: the six lines (the owner 23:15), generic music only (no artist, title or lyric in the Fallout)
+        for (const [where, frag] of [['fo_supper', 'whoever salted her pot'], ['fo_mother', 'that the best of your bowl ends in hers'], ['fo_farewell', 'decided is a hymn'], ['ya_talk', 'the best of the meat before you ate'], ['fo_mei', 'a man watching a child cross a river'], ['DR_FO_BOY', 'a boiled egg appears at your elbow']]) assert(SRC.includes(frag), `NX2 (CW): ${where}: "${frag}"`);
+        assert(!/Sabbath|Maiden|Purple|Gojira|Disturbed|Lacuna|Birthday Massacre|Ashbury|The Cure|Nitzer|VNV|Depeche|Saor|Alcest|Hololive|Gura|Mumei|Calliope|Nerissa|Ironmouse|Nyanners|Athelstan|Neuro|Rachie|Miracle of Sound|Eivør|Trøllabundin|Clamavi|Dúrin|Hammerdeep/i.test(SRC), 'NX2 (CW): no artist or song named in the Fallout (CM and the editions are open)');
+        // ST: the stomp texts of the three fights, every degree and form, with the facts kept
+        for (const id of ['sect_watcher', 'palisade_wolf', 'ya_brawl']) for (const [form] of FORMS) {
+            const g = F(seed++, form); const S = STOMP[id];
+            const all = [1, 2, 3].map((d) => S.posture(g, d)).concat([S.win[2](g), S.win[3](g), S.one(g)]);
+            assert(all.every((t) => !bad(t) && t.length > 20 && !/a bone needle/.test(t)), `NX2 (ST): ${id}'s stomp texts render as ${form}`); // "four hundred pounds" only from yuShort (stomp_act1.js; other fights share it)
+        }
+        { const g = F(seed++, 'cat'); const W = STOMP.sect_watcher, P = STOMP.palisade_wolf, Y = STOMP.ya_brawl;
+          assert([W.win[2](g), W.win[3](g)].every((t) => /ledger/i.test(t) && /\bbow/.test(t)) && [1, 2, 3].every((d) => !/gap in the stakes/.test(P.posture(g, d)) && !/No Qi/.test(Y.posture(g, d))), 'NX2 (ST): the watcher\'s ledger and bow; no stakes on the wolves\' night; Ya smells, she doesn\'t sense Qi'); }
+        // LB and the continuity fixes
+        const lab = (id, g = F(seed++, 'cat', 10)) => SCENES[id].choices.map((c) => (typeof c.text === 'function' ? c.text(g) : c.text));
+        assert(lab('fo_ashfall').includes('Somebody has been watching Ashfall from the ridge. Go and see.') && lab('fo_clinic')[1] === 'Treat the youngest first, and take the old woman\'s disapproval.' && lab('fo_wolf')[0] === 'Go down and meet them in the field.' && lab('fo_wolf_forced')[0] === 'Then it\'s the hard way.' && lab('fo_ya_time')[0] === '"Thank you. I mean that."', 'NX2 (LB): the five labels');
+        assert(SRC.includes('Thirteen days, where we had a year') && !/gap in the stakes/.test(SRC) && !/Ten days sooner/.test(SRC), 'NX2 (continuity): Old Hu\'s count; no stakes on the wolves\' night');
+        // every Fallout scene in every form, on Days 8–10, under each flag set; the choices' results too
+        const TICS = /four hundred pounds|a bone needle/i;
+        const FLAGSETS = [{}, { ending: 'bluff' }, { ending: 'paid' }, { ending: 'lost' }, { ya_met: true }, { ya_met: true, ya_party: true }, { romance: true }, { loft_burned: true }, { palisade: 1 }, { palisade: 3, militia: 2 }, { sky_witness: true, gao_broken: true }, { gao_turned: true, spy: true }];
+        let rendered = 0;
+        for (const id of Object.keys(FALLOUT)) for (const flags of FLAGSETS) for (const d of [8, 9, 10]) for (const [form] of FORMS) {
+            const g = F(seed++, form, d, flags); g.scene = id;
+            let t; try { t = txt(id, g); } catch (e) { t = `THREW ${e.message}`; }
+            if (bad(t) || TICS.test(t)) { assert(false, `NX2 (render): ${id} as ${form}, Day ${d}, ${JSON.stringify(flags)} (${String(t).slice(0, 90)})`); continue; }
+            rendered++;
+            for (const c of SCENES[id].choices || []) for (const fn of [c.do, c.failDo]) {
+                if (typeof fn !== 'function') continue;
+                const h = F(seed++, form, d, flags); h.scene = id; h.inventory.jade_bracket = 2; h.james.qi = 99; let out;
+                try { out = (fn(h, { success: fn === c.do, ratio: fn === c.do ? 1 : 0.2 }) || []).filter((x) => typeof x === 'string'); } catch (e) { out = [`THREW ${e.message}`]; }
+                if (out.some((x) => bad(x) || TICS.test(x))) assert(false, `NX2 (render): ${id} "${String(typeof c.text === 'function' ? c.text(h) : c.text).slice(0, 30)}" as ${form}: ${out.join(' | ').slice(0, 120)}`);
+            }
+        }
+        assert(rendered === Object.keys(FALLOUT).length * FLAGSETS.length * 3 * 3, `NX2 (render): every Fallout scene rendered (${rendered})`);
+        // RV1 (TG1, Fable's review M1): through the engine (runTask), a real game on each day. A success closes its card for the Coil
+        // (ONCE_MENUS), so the successes go by the story's day: each day's first success shows that day's text, and the card is gone the
+        // next day; a failure leaves the card open, and the failures go by the count of days (Days 8, 9, 10: the first, second, third)
+        const mkG = (seed, hub, d, strong, flags = {}) => { const g = F(seed, 'cat', d, flags); g.scene = hub; g.minutes = (d - 1) * 1440 + 8 * 60; const sk = () => (strong ? { tier: 4, level: 10, xp: 0 } : { tier: 1, level: 1, xp: 0 }); g.james.gu = sk(); g.james.skills['Convergence Use'] = sk(); g.james.qi = 99; g.james.hp = 40; g.inventory.jade_bracket = 3; return ensureBars(g); };
+        const openCard = (g, id) => taskCards(g, SCENES).some((c) => c.id === id && c.status === 'open');
+        const said = (g, id, w) => { const r = splitReply(runTask(g, SCENES, id).lines); return r.reply.concat(r.gains).some((x) => x.includes(w)); };
+        const pickT = (t, g) => (typeof t === 'function' ? t(g) : t);
+        let flowed = 0;
+        for (const [k, [scene, i, fn]] of Object.entries(SR)) {
+            const id = `${scene}:${i}`;
+            if (fn === 'do') for (const d of [8, 9, 10]) {
+                const g = mkG(7900 + d, 'fo_ashfall', d, true);
+                if (!openCard(g, id)) { assert(false, `NX2 (RV1, TG1): ${id} open on Day ${d}`); continue; }
+                const w = pickT(DAY_REPLIES[k][d - 8], g);
+                assert(said(g, id, w), `NX2 (RV1, TG1): ${id} on Day ${d} shows that day's text (${w})`);
+                g.minutes += 1440; g.scene = 'fo_ashfall';
+                assert(!openCard(g, id), `NX2 (RV1, TG1): ${id} closed for the Coil after a success`);
+                flowed++;
+            } else {
+                const g = mkG(7950, 'fo_ashfall', 8, false);
+                for (const d of [8, 9, 10]) {
+                    if (d > 8) { g.minutes = (d - 1) * 1440 + 8 * 60; g.scene = 'fo_ashfall'; }
+                    const c = SCENES[scene].choices[i];
+                    assert(openCard(g, id) && ['fail', 'partial'].includes(cardCheck(g, id, c).band), `NX2 (RV1, TG1): ${id} open and failing on Day ${d}`); // a partial with nothing in hand runs the failure (the XP of the failures before it can lift a fail to a partial)
+                    assert(said(g, id, pickT(DAY_REPLIES[k][d - 8], g)), `NX2 (RV1, TG1): ${id} failed on its ${d - 7}. day shows text ${d - 7}`);
+                    g.scene = 'fo_ashfall'; flowed++;
+                }
+            }
+        }
+        // RV1 (P3D): the prologue Ashfall's five the same way, by the village day (Day 5: the first text; Day 6: the second)
+        for (const [k, id] of [['clinic:0', 'clinic:0'], ['clinic:1', 'clinic:1'], ['workshop:0', 'workshop:0'], ['drill:0', 'drill:0'], ['drill:1', 'drill:1']]) for (const vd of [2, 3]) {
+            const g = mkG(7980 + vd, 'ashfall', 3 + vd, true, { long: true, vday: vd, healed_try: true }); if (k === 'clinic:1') delete g.inventory.jade_bracket;
+            if (!openCard(g, id)) { assert(false, `P3A (RV1, P3D): ${id} open on village day ${vd} (${taskCards(g, SCENES).map((c) => `${c.id}:${c.status}`).join(' ')})`); continue; }
+            assert(said(g, id, pickT(DAY_REPLIES[k][vd - 2], g)), `P3A (RV1, P3D): ${id} on Day ${3 + vd} shows its day's text`);
+            g.minutes += 1440; g.flags.vday = vd + 1; g.scene = 'ashfall';
+            assert(!openCard(g, id), `P3A (RV1, P3D): ${id} closed for the Coil after a success`);
+            flowed++;
+        }
+        assert(flowed === 8 * 3 + 3 * 3 + 5 * 2, `NX2 (RV1, TG1): every card played (${flowed})`);
+        // RV1 (TG3): the relationship branches render, and the last night reads four ways over the romance and the two affections
+        {
+            const RELS = [[0, 0], [60, 0], [0, 90], [60, 90]]; const last = new Set();
+            for (const romance of [false, true]) for (const [a, b] of RELS) for (const [form] of FORMS) for (const id of ['fo_last_night', 'fo_ya_night', 'fo_mei_night', 'fo_mei_insists', 'ya_share', 'fo_farewell']) {
+                const g = F(seed++, form, 10, { romance, ya_met: true, ya_party: true, fo_pick: b ? 'ya' : undefined }); g.minutes = 9 * 1440 + 22 * 60; g.rel['Mei Lin'] = { f: 50, a }; g.rel.Ya = { f: 50, a: b };
+                let t; try { t = txt(id, g); } catch (e) { t = `THREW ${e.message}`; }
+                assert(!bad(t), `NX2 (RV1, TG3): ${id} as ${form}, romance ${romance}, Mei Lin ${a}, Ya ${b}`);
+                if (id === 'fo_last_night' && form === 'cat') last.add(t);
+            }
+            assert(last.size === 4, `NX2 (RV1, TG3): the last night reads four ways over the two affections (${last.size})`);
+        }
+        // RV1 (TG4, TG5): the night hours (01:00, 21:00) render; the calendar words follow the day
+        for (const id of ['fo_wolf', 'fo_wolf_won', 'fo_wolf_forced', 'fo_wolf_lost', 'fo_night', 'fo_morning', 'fo_last_night']) for (const [form] of FORMS) for (const [d, h] of [[8, 21], [9, 1], [9, 21], [10, 1]]) {
+            const g = F(seed++, form, d, { romance: true }); g.minutes = (d - 1) * 1440 + h * 60; let t; try { t = txt(id, g); } catch (e) { t = `THREW ${e.message}`; }
+            assert(!bad(t), `NX2 (RV1, TG4): ${id} as ${form} on Day ${d} at ${h}:00`);
+        }
+        const at = (id, d, h, flags = {}) => { const g = F(seed++, 'cat', d, flags); g.minutes = (d - 1) * 1440 + h * 60; return txt(id, g); };
+        assert(/There is no palisade yet/.test(at('fo_night', 8, 21, { palisade: 0 })) && /Thirteen/.test(at('fo_night', 8, 21, { romance: true })) && /Twelve/.test(at('fo_night', 9, 21, { romance: true })), 'NX2 (RV1, TG4/TG5): the loft at night: no palisade on Day 8; thirteen, then twelve');
+        assert(/Twelve days to the Elder/.test(at('fo_morning', 9, 7)) && /eleven days/i.test(at('fo_council', 10, 12)) && /Ten days to the Elder/.test(at('fo_depart', 11, 6)) && /Five days in, maybe six/.test(at('fo_price', 10, 12, { ya_met: true })) && !/Tomorrow I take you to the tree/.test(SRC), 'NX2 (RV1, TG5): the calendar words by day');
+        // RV1 (TG6, M3): each of the six lines once; the mother's names no supper that hasn't happened on Day 8
+        for (const frag of ['whoever salted her pot', 'that the best of your bowl ends in hers', 'decided is a hymn', 'the best of the meat before you ate', 'a man watching a child cross a river', 'a boiled egg appears at your elbow']) assert(SRC.split(frag).length === 2, `NX2 (RV1, TG6): "${frag}" once`);
+        assert(!/drawing on my table/.test(at('fo_mother', 8, 9)), 'NX2 (RV1, M3): the mother\'s line true from Day 8\'s morning');
+        // RV1 (TG7): the stomp wins keep their scenes' facts
+        for (const [form] of FORMS) {
+            const g = F(seed++, form); const W = STOMP.sect_watcher, P = STOMP.palisade_wolf, Y = STOMP.ya_brawl;
+            assert([W.win[2](g), W.win[3](g)].every((t) => ['north road', 'noon', 'four disciples', 'herb-girl who laughs', 'wolf\'s skull', 'hilt'].every((x) => t.includes(x))), `NX2 (RV1, TG7): the watcher's wins keep the ledger's facts (${form})`);
+            assert([P.win[2](g), P.win[3](g)].every((t) => ['skulls', 'chalk line', 'Old Hu'].every((x) => t.includes(x))) && P.win[2](g).includes('skinned') && (form !== 'tiger' || P.win[3](g).includes('four hundred pounds')), `NX2 (RV1, TG7): the wolves' wins keep the skulls, the chalk line and Old Hu; Yuki by form (${form})`);
+            assert([1, 2, 3].every((d) => /coat/.test(Y.posture(g, d)) && /salt/.test(Y.posture(g, d))), `NX2 (RV1, TG7): Ya goes by smell: the coat and the salt (${form})`);
+        }
+        // RV1 (TG8, M4, PF): the farewell's palisade at 0–3 stretches
+        assert([0, 1].every((p) => /more chalk than stakes/.test(at('fo_farewell', 10, 19, { palisade: p }))) && [2, 3].every((p) => { const t = at('fo_farewell', 10, 19, { palisade: p }); return /two thirds/.test(t) && !/to finish it/.test(t); }), 'NX2 (RV1, TG8): the farewell\'s palisade reads true at every count');
     }
     // RV2 (M1, Fable's review): Ya names the ship on her ledge only once it has been found
     {
@@ -1544,7 +1683,8 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     }
     // the choices' results (scene, the choice's text, flags, cat, great root-kin, human)
     const RES = [
-        ['fo_drill', /^Spar with Yuki in front of them/, {}, /Afterwards Old Hu bows to the cat\./, /Afterwards Old Hu bows to the cat\./, /Afterwards Old Hu bows to Yuki\. Only to Yuki\./],
+        ['fo_drill', /^Spar with Yuki in front of them/, {}, /Afterwards Old Hu bows to the cat\./, /Afterwards Old Hu bows to the great beast, from a distance/, // v0.11.170 (NX2, SR): the great root-kin's own
+        /Afterwards Old Hu bows to Yuki\. Only to Yuki\./],
         ['heart_spring', /^Sit by the water/, {}, /a warm wall and Yuki in your lap and listen/, /a warm wall and Yuki's head in your lap and listen/, /a warm wall and Yuki's shoulder against yours and listen/],
         ['heart_camp', /^Sit up with Yuki and the hearth-log/, {}, /Yuki purrs against your chest the whole way through\./, /Yuki purrs with her head on your chest the whole way through\./, /Yuki leans against your shoulder and purrs, very quietly, the whole way through\./],
         ['wen_lesson', /^Listen\. Ask\./, { lore_realms: true }, /exactly right\. Yuki, on your knee, has not once/, /exactly right\. Yuki, her chin on your knee, has not once/, /exactly right\. Yuki, beside you, has not once/], // v0.11.169 (P3A): Fable's rewrite
@@ -1555,7 +1695,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         assert(!!c && typeof c.do === 'function', `NQ1: ${id}'s choice exists`);
         if (!c) continue;
         ['cat', 'tiger', 'human'].forEach((form, i) => {
-            const g = FM(59400 + n++, form, flags); g.scene = id;
+            const g = FM(59400 + n++, form, flags); g.scene = id; if (id === 'fo_drill') g.minutes = 7 * 1440 + 600; // v0.11.170 (RV1, SD): the spar's Day 8 text (by the story's day)
             const t = (c.do(g) || []).filter((x) => typeof x === 'string').join('\n');
             const same = want.filter((re) => re.source === want[i].source).length; // NR1 (T): its own line and no other form's
             assert(want[i].test(t) && want.filter((re) => re.test(t)).length === same, `NQ1: ${id}'s result as ${form} (${t.slice(0, 70)}…)`);
@@ -1594,7 +1734,8 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     const NR = [
         // [scene, flags, minutes, cat, great root-kin, human]
         ['fo_last_night', { romance: true }, null, /not even Yuki's, who goes and sleeps on the stove in protest\./, /not even Yuki's, who goes down and sleeps in front of the stove in protest, across the whole floor\./, /not even Yuki's, who goes and sleeps on the bench by the stove in protest\./],
-        ['fo_council', {}, null, /"Your cat," Old Wen says, "faces north/, /"Your cat," Old Wen says, "faces north/, /"Your companion," Old Wen says, "faces north/],
+        ['fo_council', {}, 12240, /"Your cat," Old Wen says, "faces north/, /"Your great beast," Old Wen says, "faces north/, // v0.11.170 (NX2): Day 9 (Day 10 has its own council); YF the great root-kin's
+        /"Your companion," Old Wen says, "faces north/],
         ['night_event', { night_ev: 'rats' }, null, /They've smelled the cat\. They seem to think she's dinner\. Yuki seems/, /They seem to think she's dinner, which means they haven't seen her yet\. Yuki seems/, /They've smelled a cat and found a woman\. They seem to think she's dinner either way\. Yuki seems/],
         ['night_event', { night_ev: 'rain' }, null, /Yuki makes it clear, through the bond and through her claws, that/, /Yuki makes it clear, through the bond and by shaking herself dry all over you, that/, /Yuki makes it clear, aloud and at some length, from under your lab coat, that/],
         ['gao_fight_start', {}, null, /you are alone, unarmed, and wearing a lab coat\. He has looked at you with his Qi-sense and felt nothing at all: a mortal\./, /you are unarmed, wearing a lab coat, and alone but for a cat\. He has looked at you both[\s\S]*a mortal's very large cat\./, /you are unarmed, wearing a lab coat, and alone but for a slight woman in a black dress\./], // v0.11.130 (YB1, GA): the human's own
@@ -1640,12 +1781,12 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     });
     // T: the results through choose(), with the scene read first (a strong James, so every check passes); the positions pinned
     for (const [id, idx, flags, wantRe] of [
-        ['fo_drill', 1, {}, { cat: /bows to the cat\./, tiger: /bows to the cat\./, human: /bows to Yuki\. Only to Yuki\./ }],
+        ['fo_drill', 1, {}, { cat: /bows to the cat\./, tiger: /bows to the great beast, from a distance he has plainly measured\./, /* v0.11.170 (NX2) */ human: /bows to Yuki\. Only to Yuki\./ }],
         ['heart_spring', 2, {}, { cat: /Yuki in your lap/, tiger: /Yuki's head in your lap/, human: /Yuki's shoulder against yours/ }],
         ['heart_camp', 3, {}, { cat: /purrs against your chest/, tiger: /purrs with her head on your chest/, human: /leans against your shoulder and purrs/ }],
         ['wen_lesson', 0, { lore_realms: true }, { cat: /Yuki, on your knee,/, tiger: /Yuki, her chin on your knee,/, human: /Yuki, beside you,/ }],
     ]) for (const form of ['cat', 'tiger', 'human']) {
-        const g = FM(60600 + n++, form, flags); g.inventory.hearth_log = 1; g.james.gu = { tier: 10, level: 10, xp: 0 }; ensureBars(g);
+        const g = FM(60600 + n++, form, flags); if (id === 'fo_drill') g.minutes = 7 * 1440 + 600; /* v0.11.170 (RV1, SD): Day 8 */ g.inventory.hearth_log = 1; g.james.gu = { tier: 10, level: 10, xp: 0 }; ensureBars(g);
         goTo(g, SCENES, id); Object.assign(g.flags, flags);
         const host = sceneView(g, SCENES);
         const c = host.choices.find((x) => x.index === idx);
@@ -1987,7 +2128,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         ["collectors_lost", {}, "\n\nThen he flicks two fingers, and the net comes off Yuki: a spirit-beast net, thrown from his sleeve in the first breath of the fight, before he so much as drew. She has been under it since your knees went. She walks over on legs that aren't quite steady and stands across you. Nobody asks her to move."],
         ["dw_serpent_lost", { fly: true }, "\n\nYuki surfaces a moment later with a length of serpent in her mouth that is no longer attached to anything, climbs out, and shakes four hundred pounds of swamp over all three of you. *It let go,* says the bond. *Eventually. You're welcome.*"],
         ["far_lost", {}, " Yuki comes in behind you on three good legs and lies down across the doorway. Mei Lin steps over her without breaking off, comes back with the salve, and starts on the cat. The lecture now covers you both.", null, [" Yuki comes in behind you holding one arm with the other, and sits on the doorstep without a word. Mei Lin does not break off. She fetches the salve, turns the arm to the light, and starts on it. The lecture now covers you both.", '']], // v0.11.169 (P3A, YF): and the woman's line
-        ["fo_spy_fled", {}, "\n\nYuki's portrait has the whole facing page, and its margin says only *large*, underlined twice. She watches the mountain until he is off the last switchback. *Uphill,* says the bond. *No.*"],
+        // fo_spy_fled: v0.11.170 (NX2, CA1 FB) its own check below (the cat's and the woman's lines now too)
         ["fo_wolf_lost", {}, " Yuki comes out of the barley the other way a moment later, with grey fur in her teeth and no goat: she went after the one that came at her, the lame one, while the other went round. Wolves do that."],
         ["mire_lost", { fly: true }, " Yuki rises beside you, black to the shoulder, having learnt that the mire holds four hundred pounds a great deal better than it holds eleven, and lets go of them a great deal more slowly. *We do not speak of this,* says the bond."], // v0.11.131 (XB2, FY): for a flier
         ["night_fled", {}, " Yuki walks behind with the blanket in her mouth, which keeps her from saying what she thinks of running from something she outweighs. The bond says it anyway."],
@@ -2007,6 +2148,12 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         const [cat, tiger, human] = ['cat', 'tiger', 'human'].map((form) => { const g = FM(65000 + n++, form, flags); if (fly && form === 'cat') { g.yuki.realm = 1; g.james.realm = 1; } goTo(g, SCENES, id); return sceneView(g, SCENES).text; });
         assert(tiger.includes(line) && !cat.includes(line) && !human.includes(line), `YB1 (LL): ${id} ${JSON.stringify(flags)}: the great root-kin's line, hers alone`);
         assert((swap ? tiger.replace(swap[0], swap[1]) : tiger).replace(line, '') === cat && (hswap ? human.replace(hswap[0], hswap[1]) : human) === cat, `YB1 (LL): ${id} ${JSON.stringify(flags)}: the cat's and the human's texts unchanged`);
+    }
+    {   // v0.11.170 (owner picks NX2, CA1 FB; Fable's): fo_spy_fled has the great root-kin's line and now the cat's and the woman's, each hers alone
+        const L = { cat: "\n\nYuki is in the portrait as well: a small smudge on your drawn shoulder, labelled *pet?*. The bond says nothing, at some length.", tiger: "\n\nYuki's portrait has the whole facing page, and its margin says only *large*, underlined twice. She watches the mountain until he is off the last switchback. *Uphill,* says the bond. *No.*", human: "\n\nYuki has the facing page to herself, ears and tail drawn with care, and a margin that says *the lady: do not approach*. \"Accurate,\" she says, and closes the ledger for you." };
+        const v = ['cat', 'tiger', 'human'].map((form) => { const g = FM(65900 + n++, form, {}); goTo(g, SCENES, 'fo_spy_fled'); return [form, sceneView(g, SCENES).text]; });
+        const base = v[1][1].replace(L.tiger, '');
+        assert(v.every(([f, t]) => t.includes(L[f]) && t.replace(L[f], '') === base), 'YB1 (LL) / NX2 (FB): fo_spy_fled: her line in each form, hers alone');
     }
     {   // v0.11.130 (owner pick RB2; Fable's review of YB1): WC two wolves, RL out before the shelf, NK no foe's body part, CL no count
         // and no "his disciples" with Gao broken or turned or the militia, BR the camp's blanket
@@ -2047,11 +2194,9 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         // and the human's texts unchanged); HP Lu Han answers the hairpin, not a bluff; FY James's fall, the mire and the serpent by flight
         const view = (id, form, flags = {}, realm) => { const g = FM(67000 + n++, form, flags); if (realm !== undefined) { g.yuki.realm = realm; g.james.realm = realm; } goTo(g, SCENES, id); return sceneView(g, SCENES).text; };
         const FL = [
-            ['fo_wolf_forced', {}, ' Yuki did not stop for a headband. She is sitting in the middle of the lane, washing one paw, and the wolves have slowed. They have not stopped.'],
             ['ring_forced', {}, " Yuki has the gallery behind you, all of it, wall to wall. *I can't turn round in here,* says the bond. *So we are going forward.*"],
             ['night_attack_forced', {}, ' Yuki, who was never going to run, gets up. *Good,* says the bond. *I outweigh them. All of them, together.*'],
             ['night_lizard_forced', {}, ' Yuki, who has crossed the whole rise without bending a grass stem, turns her head and looks at you. *Four hundred pounds,* says the bond. *Not a sound. Remarkable what one can do.*'],
-            ['ya_forced', {}, ' Then the whole village looks at Yuki. Yuki looks at the fence. This is, evidently, between people.'],
             ['rt_brawl_start', {}, ' Yuki looks at the wine-shop bench, and at the cousins sitting on it. She can wait. They are about to get up.'],
             ['guardian_half', {}, ' So is Yuki, ears forward, quite still. She heard that song in the same grove you did.'],
             ['guardian_half', { ya_party: false }, ' So is Yuki, ears forward, quite still. She heard that song in the same grove you did.'],
@@ -2064,6 +2209,13 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
             const [cat, tiger, human] = ['cat', 'tiger', 'human'].map((form) => view('arson_start', form));
             const T = " Behind you the loft boards creak as Yuki gets up, all of her. *He's only counted one of us,* says the bond.", H = " Behind you Yuki is standing already. \"He has counted one of us,\" she says, without much interest.";
             assert(tiger.includes(T) && tiger.replace(T, '') === cat && human.includes(H) && human.replace(H, '') === cat, 'XB2 (FL) / P3A (YF): arson_start: the great root-kin\'s line and the woman\'s, each hers alone');
+        }
+        for (const [id, T, H] of [ // v0.11.170 (owner picks NX2, CA1 FB; Fable's): the woman's lines in two of the Fallout's lead-ins, each hers alone
+            ['fo_wolf_forced', ' Yuki did not stop for a headband. She is sitting in the middle of the lane, washing one paw, and the wolves have slowed. They have not stopped.', ' Yuki did not stop for anything. She is standing in the middle of the lane in black silk, hands in her sleeves, and the wolves, who can count, are counting again.'],
+            ['ya_forced', ' Then the whole village looks at Yuki. Yuki looks at the fence. This is, evidently, between people.', ' Then every eye goes to the woman in black by the fence. Yuki inspects a cuff. "He has another cheek," she says, aloud.'],
+        ]) {
+            const [cat, tiger, human] = ['cat', 'tiger', 'human'].map((form) => view(id, form));
+            assert(tiger.includes(T) && tiger.replace(T, '') === cat && human.includes(H) && human.replace(H, '') === cat, `XB2 (FL) / NX2 (FB): ${id}: the great root-kin's line and the woman's, each hers alone`);
         }
         assert(/step through it/.test(view('night_attack_forced', 'tiger')), 'XB2 (FL): night_attack_forced keeps Incremental Mode\'s hedge');
         // HP: each offer marks itself when it fails; both fail to bluff_fail

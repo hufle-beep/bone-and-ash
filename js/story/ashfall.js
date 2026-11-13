@@ -41,25 +41,29 @@ const DR_DRILL_SPAR_F = dayReply("drill:1:f", [
 
 /* v0.11.169 (owner pick P3A, SR; Fable's texts, rule 10): the five cards that can run more than once (no `daily` since v0.11.157)
  * answered every success with the same line; now a line by day like their failures (the first text the old reply, rewritten). */
-const DR_CLINIC_J = dayReply("clinic:0", [
+/** v0.11.170 (owner pick RV1, P3D; Fable's review of part 4, M1): a success closes its card for the rest of the Coil (oneoff.js
+ * ONCE_MENUS), so a count of days only ever reached the first text; the five lists go by the village day instead (Day 6, vday 3 →
+ * the second text). Registered as before (DAY_REPLIES). No save field. */
+const onVillageDay = (key, list) => { dayReply(key, list); return (g) => { const t = list[(g.flags.vday || 1) >= 3 ? 1 : 0]; return typeof t === 'function' ? t(g) : t; }; };
+const DR_CLINIC_J = onVillageDay("clinic:0", [
     "Nobody goes home worse, and most go home mended. Ashfall is keeping count.",
     "The jade bracket works its way down the queue. Those who limped to the well walk home slowly, so that the whole street can see.",
 ]);
-const DR_CLINIC = dayReply("clinic:1", [
+const DR_CLINIC = onVillageDay("clinic:1", [
     "Clean water, a sharp lancet, and more confidence than the doctorate strictly covers. It holds.",
-    "The lancet is quicker now, and the water never comes off the boil. By the last patient the queue is shorter than the row of people watching it.",
+    "The water never comes off the boil, and the lancet keeps pace with it. By the last patient the queue is shorter than the row of people watching it.",
 ]);
-const DR_HOOKS = dayReply("workshop:0", [
+const DR_HOOKS = onVillageDay("workshop:0", [
     "A set for every house. The seamstress bows to you three times, very low, and is working up to a fourth.",
-    "Finer work today: needles for the thin cloth kept for weddings, hooks for the small fish. The seamstress has brought her daughters to bow with her, in order of height.",
+    "Fine work: needles for the thin cloth kept for weddings, hooks for the small fish. The seamstress has brought her daughters to bow with her, in order of height.",
 ]);
-const DR_DRILL = dayReply("drill:0", [
+const DR_DRILL = onVillageDay("drill:0", [
     "By the end the eight of them move as one animal. Not a graceful animal. But one.",
-    "The wall closes before you call it. When the twelve-year-old stumbles, two shields cover him before he lands. Nobody alone: they have it.",
+    "By the last pass the wall closes on the call. When the twelve-year-old stumbles, two shields cover him before he lands. Nobody alone: they have it.",
 ]);
-const DR_SPAR = dayReply("drill:1", [
+const DR_SPAR = onVillageDay("drill:1", [
     (g) => byForm(g, "You win most of yours. Yuki wins all of hers.", "You win most of yours. Yuki is conceded hers with a bow, and demonstrates anyway, so that they know what was spared.", "You win most of yours. Yuki wins all of hers in a long dress, and hands each man back his spear."),
-    (g) => byForm(g, "Today your man lasts twice as long, and says so. The one who drew Yuki reports, with pride, that this time he saw her. Once.", "Today your man lasts twice as long. The one who drew Yuki finds he can still move his legs while she looks at him. The others count it a win.", "Today your man lasts twice as long. Yuki fights hers one-handed and tells him, aloud, that his feet have improved. He bows as if given a title."),
+    (g) => byForm(g, "Your man lasts longer than he expected to, and says so. The one who drew Yuki reports, with pride, that he saw her. Once.", "Your man lasts long enough to be proud of it. The one who drew Yuki finds he can still move his legs while she looks at him. The others count it a win.", "Your man makes you work for it. Yuki fights hers one-handed and tells him, aloud, that his feet are sound. He bows as if given a title."),
 ]);
 const P = 'Ashfall Hamlet';
 const vday = (g) => g.flags.vday || 1;
