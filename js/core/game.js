@@ -110,7 +110,11 @@ export function startActCoil(g, act = 1) {
     g.coil.wake = g.scene;
     if (old) { g.coil.n = old.n || 1; g.coil.known = [...(old.known || [])]; g.stats[`coils${old.act || 0}`] = old.n; // v0.11.26 (owner 11:12, N1): crossing into Act 1 continues the Coil (one count per save)
         if (old.best) g.coil.best = JSON.parse(JSON.stringify(old.best));
-        if (old.free) g.coil.free = old.free; } // v0.11.86 (#53): the Coils ended by choice carry into Act 1 // v0.11.16: best-ever relationships carry into Act 1
+        if (old.free) g.coil.free = old.free; // v0.11.86 (#53): the Coils ended by choice carry into Act 1 // v0.11.16: best-ever relationships carry into Act 1
+        // v0.11.160 (owner pick NX2, CS; Opus's L4 of v0.11.159): the Coil that crosses keeps its Day 1 familiarity, so its Coil screen counts
+        // the cards and Yuki's practice from the prologue part too (both carry over every Coil). RV1 (SL, Opus's M1): the realm, GU,
+        // Convergence Use and Yuki's Fight lines still count from Day 8, the act's rewind point, so they show only what an act rewind takes away
+        if (old.start?.fam) g.coil.start = { ...g.coil.start, fam: JSON.parse(JSON.stringify(old.start.fam)) }; }
 }
 /** Is a state in Act 1? (Act 1 starts on Day 8 06:00, after the tribute's outcome and the epilogue.) */
 export const inAct1 = (g) => !!g.flags?.ending && g.scene !== 'epilogue' && g.minutes >= 7 * 1440 + 6 * 60;

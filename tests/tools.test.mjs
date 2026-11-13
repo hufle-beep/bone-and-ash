@@ -289,7 +289,7 @@ for (const mode of ['full', 'quick']) {
     // v0.11.85 (owner pick M1): the Sitter in the models step (its own game count), and a tiny real Sitter run
     const mj = list().jobs?.find((j) => j.key === 'models'), mq = list('quick').jobs?.find((j) => j.key === 'models');
     const src = readFileSync(path.join(ROOT, 'tools/check.mjs'), 'utf8'); // --list gives names only: the job's arguments read from the source
-    assert(/the Sitter 150/.test(mj?.name ?? '') && /the Sitter 20/.test(mq?.name ?? '') && src.includes("'--model', 'careful,completionist,rusher,sitter,farmer,cultivator'") && src.includes("'--sitter-games', QUICK ? '20' : '150'") && src.includes("blocks: QUICK ? 6 : 8"), `the models step plays the Sitter: 150 games (20 quick), 8 / 6 blocks (v0.11.86: with the Farmer; v0.11.142: the Cultivator) (${mj?.name}; ${mq?.name})`);
+    assert(/the Sitter 150/.test(mj?.name ?? '') && /the Sitter 20/.test(mq?.name ?? '') && src.includes("'--model', 'careful,completionist,rusher,sitter,farmer,cultivator,sociable'") && src.includes("'--sitter-games', QUICK ? '20' : '150'") && src.includes("blocks: QUICK ? 7 : 9") && /the Sociable 500/.test(mj?.name ?? '') && /the Sociable 50,/.test(mq?.name ?? ''), `the models step plays the Sitter: 150 games (20 quick), 9 / 7 blocks (v0.11.86: with the Farmer; v0.11.142: the Cultivator; v0.11.160: the Sociable) (${mj?.name}; ${mq?.name})`);
     let sit = '';
     try { sit = execFileSync(process.execPath, ['tests/models.test.mjs', '--model', 'careful,sitter', '--games', '3', '--sitter-games', '2', '--off', '0', '--workers', '1'], { cwd: ROOT, encoding: 'utf8' }); } catch (e) { sit = String(e.stdout || e); }
     const sh = [...sit.matchAll(/^\[([^\]]+)\] (\d+) games, (\d+) cards/gm)].map((m) => `${m[1]} ${m[2]}`).join();
@@ -332,6 +332,25 @@ for (const mode of ['full', 'quick']) {
     assert(ch === 'completionist 3,cultivator 3' && / 0 failed/.test(cul) && cult('cultivator') > 0 && spare('cultivator') > 0 && spare('completionist') === 0, `CV1: a tiny real run: the Cultivator plays, nothing fails, it queues cards in its spare time and the completionist doesn't (${ch}; ${cult('cultivator')} h; spare ${spare('cultivator')} / ${spare('completionist')} a game)`);
     const dgC = modelDigest(cul, 2);
     assert(dgC?.length === 2 && dgC.every((l) => / · realm [\d.]+$/.test(l)), `CV1: modelDigest shows the realm at Act 1's end (${dgC?.join(' | ') ?? 'null'})`);
+    // v0.11.160 (owner pick NX2, CN; RV1): the Sociable takes the talk doors with Ya and Mei Lin, Careful none (no talk line at all);
+    // every label it looks for is a door card on a task screen, and every hub card its pattern matches is one of its labels (SX, Opus's M2)
+    let soc = '';
+    try { soc = execFileSync(process.execPath, ['tests/models.test.mjs', '--model', 'careful,sociable', '--games', '3', '--off', '0', '--workers', '1'], { cwd: ROOT, encoding: 'utf8' }); } catch (e) { soc = String(e.stdout || e); }
+    const sh2 = [...soc.matchAll(/^\[([^\]]+)\] (\d+) games/gm)].map((m) => `${m[1]} ${m[2]}`).join();
+    const block = (m) => soc.split(/\n(?=\[)/).find((b) => b.trim().startsWith(`[${m}]`)) || '';
+    const talks = (m) => Number(block(m).match(/\n {2}talk doors: ([\d.]+) a game/)?.[1] ?? NaN);
+    assert(sh2 === 'careful 3,sociable 3' && / 0 failed/.test(soc) && talks('sociable') >= 5 && block('careful').length > 0 && !/talk doors:/.test(block('careful')), `CN: a tiny real run: the Sociable plays and takes talk doors, Careful shows no talk line (${sh2}; ${talks('sociable')} a game)`);
+    const { SOCIAL, SOCIAL_LABELS } = await import('./lib/social.mjs');
+    const { SCENES: SC } = await import('../js/story/prologue.js');
+    const { TASK_HUBS: TH } = await import('../js/story/task_hubs.js');
+    const hubDoors = []; // every door card on a task screen: [hub, label]
+    for (const [hid, cfg] of Object.entries(TH)) for (const c of SC[hid]?.choices || []) if (typeof c.text === 'string' && (cfg.doors || []).includes(c.to)) hubDoors.push([hid, c.text]);
+    const stem = (t) => t.replace(/\..*$/s, '');
+    const missing = SOCIAL_LABELS.filter((l) => !hubDoors.some(([, t]) => stem(t) === l));
+    const extra = hubDoors.filter(([, t]) => SOCIAL.test(t) && !SOCIAL_LABELS.includes(stem(t))).map(([h, t]) => `${h}: ${t}`);
+    const everyCard = Object.keys(TH).flatMap((h) => (SC[h]?.choices || []).filter((c) => typeof c.text === 'string' && SOCIAL.test(c.text)).map((c) => `${h}: ${c.text}`));
+    assert(SOCIAL_LABELS.length === 7 && !missing.length && !extra.length && everyCard.length === hubDoors.filter(([, t]) => SOCIAL.test(t)).length, `CN + SX: the seven labels are door cards on task screens, and the pattern takes no other card (missing: ${missing.join(', ') || 'none'}; extra: ${[...extra, ...everyCard.filter((x) => !hubDoors.some(([h, t]) => `${h}: ${t}` === x))].join(', ') || 'none'})`);
+    assert(SOCIAL.test('Find Mei Lin.') && SOCIAL.test('Find Mei Lin and Ya. They went for water an hour ago.') && !SOCIAL.test('Find Mei Lining') && !SOCIAL.test('Talk to Yan.'), 'SX: each label is matched whole, up to its first full stop');
 }
 
 const canon = (v) => (Array.isArray(v) ? v.map(canon) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, canon(v[k])])) : v);

@@ -15,7 +15,7 @@ import { serialize, deserialize } from '../js/core/game.js';
 import { PEOPLE_FIGHTS, combatHooks } from '../js/core/game.js'; // v0.11.81
 import { fightAction, yukiSitsOut, armourDr as armourDrOf, jamesDr as jamesDrOf } from '../js/core/game.js'; // v0.11.82
 import { XP_RATE, XP_BANDS } from '../js/core/game.js'; // v0.11.85
-import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, advance, STARVE_HP_PER_HOUR, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1, bumpRel as relBump, startActCoil, REL_CATCHUP } from '../js/core/game.js';
+import { jamesHpMax, canBreakThrough, newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, migrate, SAVE_VERSION, advance, STARVE_HP_PER_HOUR, jamesQiMax, yukiQiMax, qiRegenPct, breakthrough, inAct1, bumpRel as relBump, startActCoil, REL_CATCHUP, coilStart } from '../js/core/game.js';
 import { canPrimary, canColGroup, colGroupsOpen, btTarget, COL_GROUPS, priHours, colHours, merMinutesOf } from '../js/story/meridians.js';
 import { sceneView, choose, goTo, wasPicked, isMenuScene, notePicked, seenBefore, noteSeen } from '../js/core/story.js';
 import { linesOf, pickLine, visitLine, noteVisit, coilStamp, SAID_MAX, noteDay, dayIndex, byDay, textDay, TEXT_DAY_FROM } from '../js/core/lines.js'; // v0.11.134 (LP2: PK); v0.11.135 (NT1): the day record
@@ -3116,6 +3116,32 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
       const w = hub(7219, 'wilds', 2); w.tasks.fam['yuki:wilds'] = 5; endCoil(w, 'choice', 'wilds'); rewind(w, { to: 'game' });
       assert(w.coil.start.fam['yuki:wilds'] === 5 && coilReport(w).yuki.length === 0, `TG: after a rewind her practice is the new Coil's start, nothing listed yet (${JSON.stringify(w.coil.start.fam)})`);
       w.tasks.fam['yuki:wilds'] = 6.5; assert(JSON.stringify(coilReport(w).yuki) === JSON.stringify([{ id: 'yuki:wilds', f: 6.5 }]), 'TG: then only the growth since the rewind lists her'); }
+    // v0.11.160 (owner pick NX2, CS; Opus's L4 of v0.11.159): the Coil that crosses into Act 1 keeps its Day 1 familiarity, so its Coil
+    // screen counts the cards and Yuki's practice from the prologue part too; RV1 (SL, Opus's M1): the realm and skill lines count from
+    // Day 8 (what an act rewind takes away); the rewind point is still Day 8, and a rewind in Act 1 starts every count again from Day 8
+    { const x = hub(7220, 'wilds', 2); x.tasks.fam = { 'wild_forage:0': 1, 'yuki:wilds': 2 }; x.james.gu = { tier: 1, level: 1, xp: 0 }; x.coil.start = coilStart(x); const day1 = JSON.stringify(x.coil.start.fam);
+      x.tasks.fam = { 'wild_forage:0': 9, 'yuki:wilds': 12, 'fo_drill:0': 3 }; x.james.gu = { tier: 1, level: 9, xp: 0 }; x.james.realm = (x.james.realm || 0) + 1;
+      Object.assign(x.flags, { ending: 'bluff' }); x.minutes = 7 * 1440 + 6 * 60;
+      const oldFam = x.coil.start.fam; startActCoil(x, 1);
+      assert(x.coil.act === 1 && x.coil.start.fam !== oldFam && JSON.stringify(x.coil.start.fam) === day1 && x.coil.snap.tasks.fam['yuki:wilds'] === 12, `CS: crossing keeps the Day 1 familiarity (a copy), the snapshot is Day 8 (${JSON.stringify(x.coil.start.fam)})`);
+      assert(String(x.coil.start.gu) === '1,9' && x.coil.start.realm === x.james.realm, `SL: the realm and GU start at Day 8, not Day 1 (${x.coil.start.gu}; realm ${x.coil.start.realm})`);
+      x.tasks.fam['yuki:wilds'] = 14; let r = coilReport(x);
+      assert(JSON.stringify(r.yuki) === JSON.stringify([{ id: 'yuki:wilds', f: 14 }]) && r.gained.includes('1 card Skilled') && r.gained.includes('1 card Practised'), `CS: the cards and Yuki count from Day 1 of the Coil (her 2 → 14; the forage 1 → 9 Skilled, the drill 0 → 3 Practised) (${r.gained.join(' · ')})`);
+      assert(!r.gained.some((l) => /^GU |^realm /.test(l)), `SL: the prologue's GU and realm, kept by an act rewind, are not on the screen (${r.gained.join(' · ')})`);
+      x.james.gu = { tier: 1, level: 10, xp: 0 }; r = coilReport(x);
+      assert(r.gained.includes('GU T1 L9 → T1 L10'), `SL: Act 1's own GU growth shows from Day 8 (${r.gained.join(' · ')})`);
+      endCoil(x, 'collapse', null); rewind(x);
+      assert(x.coil.act === 1 && x.coil.start.fam['yuki:wilds'] === 14 && coilReport(x).yuki.length === 0, `CS: a rewind in Act 1 starts the count from Day 8 again (${JSON.stringify(x.coil.start.fam)})`);
+      // RV1 TG: the game's own way into Act 1 (fo_start's enter, coil_scenes.js) carries the familiarity the same way
+      const f = hub(7222, 'wilds', 2); f.tasks.fam = { 'yuki:wilds': 1 }; f.coil.start = coilStart(f); f.tasks.fam = { 'yuki:wilds': 9 }; Object.assign(f.flags, { ending: 'bluff' }); f.minutes = 7 * 1440 + 6 * 60;
+      SCENES.fo_start.enter(f);
+      assert(f.coil.act === 1 && f.coil.start.fam['yuki:wilds'] === 1 && JSON.stringify(coilReport(f).yuki) === JSON.stringify([{ id: 'yuki:wilds', f: 9 }]), `TG: fo_start's enter crosses with the Day 1 familiarity (${JSON.stringify(f.coil.start.fam)})`);
+      // RV1 TG: an old save (state 4) loaded mid-Act 1: MIGRATIONS[4] crosses with the save's own Coil start (familiarity), skills as loaded
+      const m = hub(7223, 'wilds', 2); m.tasks.fam = { 'yuki:wilds': 3 }; m.coil = { act: 0, n: 2, snap: null, start: { ...coilStart(m), fam: { 'yuki:wilds': 1 } }, peak: {}, known: [] };
+      Object.assign(m.flags, { ending: 'bluff' }); m.minutes = 8 * 1440 + 9 * 60; m.scene = 'fo_hub'; m.v = 4; migrate(m);
+      assert(m.coil.act === 1 && m.coil.n === 2 && m.coil.start.fam['yuki:wilds'] === 1 && String(m.coil.start.gu) === String([m.james.gu.tier, m.james.gu.level]), `TG: a state-4 save mid-Act 1 keeps its Coil start's familiarity, the skills as loaded (${JSON.stringify(m.coil.start)})`);
+      const n = ensureBars(newGame(7221, { closed: true })); delete n.coil; startActCoil(n, 1);
+      assert(n.coil.act === 1 && n.coil.start && n.coil.start.fam, 'CS: with no Coil before the start is the moment Act 1 begins'); }
 }
 // every card that was ever offered was also played at least once
 const all = cardsListed;

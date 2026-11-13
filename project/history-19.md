@@ -2,6 +2,23 @@
 
 Started 2026-11-13 (v0.11.157), when `history-18.md` would have passed about 45 KB. Newer than `history-18.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.160 (word for word)
+
+### Decided in chat
+
+- **v0.11.157: the prologue Ashfall's menus (NX1) (options at about 08:40 after the trace and measures; the owner 08:48 "NX1 go"; after Fable's review, RV options at about 08:58, owner 09:00 "RV1 go"):**
+  - **CT, Careful's Ya drop after v0.11.156, traced (scratch tracer, 300 games, v0.11.155 → v0.11.156; all from OF):** (a) Act 1 got easier for Careful: its Coil 3 deaths 58% → 4.8% (rot ape won 67.6 → 87.7%), 102 of 300 games end Act 1 on Coil 3 instead of 4, Ya at the end 111.1 / 124.3 → 67.8 / 66.9 for those games (fewer Coils of head start); mean Coil 3.85 → 3.52; (b) its fallback picks (no plan, no story exit: a door first) 3,396 → 1,525, so fewer visits to `ya_mocks`: `ya_spar_win` 6.2 → 0.9 Ya friendship a game, `ya_found` 5.6 → 0.8; same final Coil 69.6 → 66.1; last nights Ya 53 → 14, trio 46 → 15, Mei Lin 73 → 143 (of 300). No game fault: a player who opens Ya's door gets her arc as before.
+  - **Measured, not picked:** **HU** the Blackroot hunts more than once a day (a scratch Hunter: the Completionist, then spare time 05:00–17:59 on the hunts, HP ≥ 60%, always the fight; 300 games): hunts in the last Coil 3.3 → 18.6 (Ashen Hills 1.9 → 11.6, the root road 0.3 → 4.4, the Drowned Wood 1.0 → 2.6), fights won elk 116 → 1,331, hawks 577 → 3,479, serpent 300 → 775, no new losses; Act 1 Coil 3.43 both; Ya 97.2 / 101.1 → 99.9 / 103.1; Careful's fallbacks 1,525 → 1,786; needs RG (the elk's Ya +3 / +2 once a day) and HT (about 6 same-day texts, Fable). **YS** Yuki's lane: her speed and count to her best ("×1.8 of ×3 · 9/20 hauls"; "×3, her best").
+  - **PA built:** the three menus' `daily` and entry gates out (`task_hubs.js`, `ashfall.js`), the day marks only for "Call it a day" (`DAY_DONE`). Measured (1,000 games): Careful prologue Coil 3.35 → 3.18, tribute won on Coil 3 62.4 → 77.5% (Coil 2 13.0 → 16.1%), Act 1 3.49 → 3.35; Completionist prologue 3.25 → 3.29, tribute Coil 3 56.4 → 52.0%, Coil 4 63.5 → 55.5% (its days on the 2–2.5 h menu cards). **NX1 🟢 PA + DO (recommended) / NX2 🟡 YS + DO / NX3 🟠 HU + DO / NX4 🔴 DO** (colours: what a player gets, from the bots). **Picked: NX1.**
+  - **Fable's cold review (rule 9):** no high or medium; L1 a failed card can be tried again the same day (weak James: three clinic fails Village +6, was +2; three jade brackets in a day, was 1; in the bots' numbers already); L2 "You'll check on him tonight." and "Tomorrow, maybe." read wrong on a retry; L3 test gaps; L4 "Call it a day" with cards open today (as Act 1's; no change); L5 the workshop's Village per Coil +19 at most, was +15 (Village 20 and 40 a little easier; no change); L6 housekeeping. **RV1 🟢 FW + FT + TG (recommended) / RV2 🟡 FW + TG / RV3 🟠 TG / RV4 🔴 none** (colours: L1–L3 closed). **Picked: RV1.** FW What's new says a failed try can be made again the same day; FT Fable's picks, word for word: "Most of them. Not the hunter. He thanks you gravely anyway, which is worse." and "They crack on the first test. The smith says nothing, with great formality." (alternatives: "Most of them go home better. Not the hunter. The bracket did what it could, and his wound still smells wrong." / "They crack on the first test. Bone, it turns out, has opinions about being rushed."); TG the tests.
+
+### From "Version notes"
+
+## v0.11.157 — The prologue Ashfall's menus opened (NX1, RV1)
+
+- **Files:** `js/story/task_hubs.js` (the three menus' `daily` out), `js/story/ashfall.js` (the entries' gates, the marks' comments, `JADE_FAIL`, `SPEARS_FAIL`), `js/story/oneoff.js` (`DAY_DONE`), `js/core/news.js`, `tests/tasks.test.mjs`, `tests/README.md`, `tools/timings.json`, `sw.js`, docs (`history-19.md` new: v0.11.154's entries and v0.11.156's full entry). Saves, ids, flags and keys unchanged; the baseline not re-saved.
+- **Checks:** a game and balance change (rule 2): the full check after PA (exit 0; 0 drifted of 145, 6 moved more than 5, log only: the tasks bots' tribute C2 won 17.2 → 10.4%, C5 won 30.1 → 42.1%, the collectors smart 18.8 → 24.3%) and after RV1 (browser part 4 flaked once, "element is not attached"; alone 3 of 3; the rerun exit 0, the same numbers); text lint 0 changed; mutation 8 of 8. **Fable's review:** no high or medium; L1–L3 fixed (RV1), L4 and L5 no change.
+
 ## Moved from the handover in v0.11.159 (word for word)
 
 ### Decided in chat

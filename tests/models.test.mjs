@@ -10,6 +10,7 @@
 //   node tests/models.test.mjs --sitter-games 200     v0.11.85: the Sitter's own game count (default: --games; it plays ~20× the cards)
 //   node tests/models.test.mjs --farmer-games 100     v0.11.86: the Farmer's own game count (default: --games)
 //   node tests/models.test.mjs --model cultivator     v0.11.142 (owner pick CV1): the Cultivator alone
+//   node tests/models.test.mjs --model sociable       v0.11.160 (owner pick NX2, CN): the Sociable alone
 //   node tests/models.test.mjs --texts                v0.11.132 (owner picks PL1, E1, RP): count the screens whose text the game already
 //                                                     showed in full this Coil (hubs and menus left out); the full check passes it
 //   node tests/models.test.mjs --save-baseline        v0.11.132 (E1, EB): save the Act 1 endings, last nights and repeated screens as
@@ -35,6 +36,10 @@
 //                  completionist; when a task screen's cards for the day are done and it is 05:00–17:59, it sits (Qi ≥ 10,
 //                  Saturation < 95), else a meridian session (Qi ≥ 10), else "Meditate: gather Qi" (up to 6 h a waking day, or
 //                  any time Qi is under 10; Fed over 30); then the story, as the completionist (tests/lib/spare.mjs)
+//   sociable       v0.11.160 (owner pick NX2, CN; RV1): Careful, but once a waking day it takes each talk door with Ya and
+//                  Mei Lin first (Talk to / Find Ya, Talk to / Find Mei Lin, Eat with the others, Ya's gone, Find Mei Lin and Ya;
+//                  SOCIAL in tests/lib/social.mjs); Careful stays as it is (the retune's reference player); its story choices,
+//                  meals and rests are Careful's, and so are its dice (PS: each game the same as Careful's until a talk door)
 // Careful, Completionist and Rusher fight smart, keep Yuki's lane on (the "yukiOff" lines: the same with it off), rewind a
 // lost tribute up to 3 times, bite the tail when Shen Qiu takes James up to 3 times (the start of Act 1), and stop after
 // Coil 8. A rewind forgets the cards done (the days start over).
@@ -49,12 +54,13 @@ import { writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { noFold, OUTCOME_SCENES, againView, noteRead } from '../js/story/again.js'; // v0.11.132 (E1, RP); v0.11.133 (FP2): noteRead
 import { shareNote } from '../tools/lib/textlint.mjs'; // v0.11.132 (E1, EB)
 import { smartAction } from './lib/smartfight.mjs'; // v0.11.96 (BT1)
+import { SOCIAL } from './lib/social.mjs'; // v0.11.160 (NX2, CN): the Sociable's talk doors
 import { sparePlan } from './lib/spare.mjs'; // v0.11.142 (owner pick CV1): the Cultivator's spare time
 import { SHARD, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
 
 const argv = process.argv.slice(2);
 const opt = (n, d) => { const i = argv.indexOf(`--${n}`); return i >= 0 && argv[i + 1] != null ? argv[i + 1] : d; };
-export const MODELS = ['random', 'careful', 'completionist', 'rusher', 'sitter', 'farmer', 'cultivator']; // v0.11.85: the Sitter last, so the others' seeds don't move; v0.11.86: the Farmer after it; v0.11.142 (CV1): the Cultivator after it
+export const MODELS = ['random', 'careful', 'completionist', 'rusher', 'sitter', 'farmer', 'cultivator', 'sociable']; // v0.11.160 (NX2, CN): the Sociable last, so the others' seeds don't move; v0.11.85: the Sitter last, so the others' seeds don't move; v0.11.86: the Farmer after it; v0.11.142 (CV1): the Cultivator after it
 const ONLY = opt('model', 'all');
 const PLAY = ONLY === 'all' ? MODELS : ONLY.split(',');
 for (const m of PLAY) if (!MODELS.includes(m)) { console.error(`unknown model ${m} (${MODELS.join(', ')})`); process.exit(2); }
@@ -91,6 +97,7 @@ const EAT = /^(Eat|Cook|Roast)\b|communal pot|Cook and eat/i;
 const REST = /^(Rest|Sleep)\b/;
 const FOOD_GROUP = /Forage|Hunt|food/i;
 const TRAIN_GROUP = /Practice|Militia|Workshop|Train|Drill/i;
+const careLike = (m) => m === 'careful' || m === 'sociable';
 const dayKey = (g) => `${g.scene}@${g.wake?.n ?? clockParts(g.minutes).day}`;
 const doneSet = (mem, g) => { const k = dayKey(g); return mem.done[k] || (mem.done[k] = new Set()); };
 
@@ -132,7 +139,7 @@ export function hubPlan(model, g, cards, mem, noExit = false) {
         const q = []; for (let k = 1 + rnd(4); k > 0; k--) q.push(pick(open).id); return q;
     }
     if (model === 'rusher') return eat && fed < 15 ? [eat.id] : null;
-    if (eat && fed < (model === 'careful' ? 50 : 60)) return [eat.id];
+    if (eat && fed < (careLike(model) ? 50 : 60)) return [eat.id];
     if (rest && hp < 0.6) return [rest.id];
     const bt = open.find((c) => c.kind === 'bt');
     if (bt && fresh(bt)) return [bt.id];
@@ -146,7 +153,11 @@ export function hubPlan(model, g, cards, mem, noExit = false) {
         if (qi && (sit || mer) && (mem.qi[dk] || 0) < 6 && g.james.satiety > 30) { mem.qi[dk] = (mem.qi[dk] || 0) + 1; return [qi.id]; }
     }
     const todo = open.filter((c) => fresh(c) && !EAT.test(c.label) && !REST.test(c.label));
-    if (model === 'careful') {
+    if (model === 'sociable') { // v0.11.160 (NX2, CN): its talk doors first, once a waking day each, then Careful's plan
+        const d = open.find((c) => c.kind === 'door' && fresh(c) && SOCIAL.test(c.label));
+        if (d) return [d.id]; // RV1 (TC): counted once it has run (the main loop)
+    }
+    if (careLike(model)) {
         const work = todo.filter((c) => c.kind !== 'door');
         const want = (fed < 70 && work.find((c) => FOOD_GROUP.test(c.group || ''))) || work.find((c) => TRAIN_GROUP.test(c.group || '')) || work[0];
         return want ? [want.id] : null;
@@ -158,14 +169,14 @@ export function hubPlan(model, g, cards, mem, noExit = false) {
 /** A story choice (index) for a model. */
 function storyPick(model, g, choices, mem) {
     if (model === 'cultivator') model = 'completionist'; // v0.11.142 (CV1)
-    if (model === 'careful') { const calm = choices.filter((c) => !/fight/.test(c.tag || '')); return pick(calm.length ? calm : choices).index; }
+    if (careLike(model)) { const calm = choices.filter((c) => !/fight/.test(c.tag || '')); return pick(calm.length ? calm : choices).index; }
     if (model === 'completionist') { const untried = choices.filter((c) => !mem.tried.has(`${g.scene}:${c.index}`)); return pick(untried.length ? untried : choices).index; }
     return pick(choices).index;
 }
 
 /** One game. Returns 'end' (an Act 1 ending), 'gaveUp' (past Coil 8) or 'stuck'. */
 function play(run, model, st, yuki) {
-    rs = seedOf(run, 7 + MODELS.indexOf(model) + (yuki === 'off' ? 50 : 0));
+    rs = seedOf(run, 7 + MODELS.indexOf(model === 'sociable' ? 'careful' : model) + (yuki === 'off' ? 50 : 0)); // RV1 (PS): the Sociable on Careful's dice, so the two compare game for game
     const smart = model !== 'random' || run % 2 === 0;
     const g = ensureBars(newGame(run + 1 + 900000, { closed: true }));
     let off = 0; // v0.11.86: the Farmer's bites by choice, through the scenes the James tab's button leads to
@@ -244,6 +255,7 @@ function play(run, model, st, yuki) {
                     if (c && !EAT.test(c.label)) st.work++;
                     const m0 = g.minutes;
                     runTask(g, SCENES, id); st.cards++;
+                    if (model === 'sociable' && c?.kind === 'door' && SOCIAL.test(c.label)) st.talks = (st.talks || 0) + 1; // v0.11.160 (NX2, CN; RV1 TC)
                     const ck = c && (c.kind === 'chore' && /^(Cultivate|Condense)/.test(c.label) ? 'sit' : c.kind); // a hub's own Cultivate chore is a sit
                     if (CULT_KINDS.includes(ck)) st.cult[ck] = (st.cult[ck] || 0) + (g.minutes - m0); // v0.11.142 (CV1): cultivation on task screens
                 }
@@ -275,7 +287,7 @@ function play(run, model, st, yuki) {
         if (!open.length) { assert(false, `${model}: no choice left at ${g.scene} (run ${run})`); return 'stuck'; }
         const i = storyPick(model, g, open, mem); mem.tried.add(`${g.scene}:${i}`);
         runCombat(g, choose(g, SCENES, i), st, smart);
-        if (model === 'careful' && g.james.satiety < 30 && foodLeft(g)) st.hungry++;
+        if (careLike(model) && g.james.satiety < 30 && foodLeft(g)) st.hungry++; // RV1 (HN): the Sociable too
     }
     assert(false, `${model}: run ${run} finishes in ${maxSteps} steps (at ${g.scene})`);
     return 'stuck';
@@ -311,7 +323,7 @@ const notes = [];
 for (const [m, st] of Object.entries(all)) assert(!st.stuck, `${m}: every game ends or gives up after Coil ${MAX_COIL} (${st.stuck} stuck)`);
 if (all.rusher?.work) notes.push(`rusher: ${all.rusher.work} work cards queued (it should queue only meals)`);
 for (const [m, st] of Object.entries(all)) if (st.cuAhead) notes.push(`${m}: GU behind Convergence Use at ${st.cuAhead} fights (v0.11.101, DG1: the degree reads GU alone; it should never be)`);
-if (all.careful?.hungry) notes.push(`careful: under Fed 30 with food in the hammerspace ${all.careful.hungry} times`);
+for (const m of ['careful', 'sociable']) if (all[m]?.hungry) notes.push(`${m}: under Fed 30 with food in the hammerspace ${all[m].hungry} times`); // RV1 (HN)
 if (!SHARD) { // the completionist really runs every open card of the wilds before it leaves
     const g = ensureBars(newGame(77, { closed: true })); goTo(g, SCENES, 'wilds'); g.minutes += 1440;
     const mem = { done: {}, tried: new Set() };
@@ -351,6 +363,7 @@ for (const [m, st] of Object.entries(all)) {
     const avg = (o) => { let s = 0, n = 0; for (const [k, v] of Object.entries(o)) { s += Number(k) * v; n += v; } return n ? (s / n).toFixed(2) : '—'; };
     const sum = (o) => Object.values(o).reduce((a, b) => a + b, 0);
     console.log(`  cleared: prologue ${pct(sum(st.prologueClear), st.games)} (mean Coil ${avg(st.prologueClear)}) · Act 1 ${pct(sum(st.act1Clear), st.games)} (mean Coil ${avg(st.act1Clear)}) · the whole game on Coil 1 ${pct(st.oneCoil, st.games)}`);
+    if (st.talks) console.log(`  talk doors: ${(st.talks / Math.max(1, st.games)).toFixed(1)} a game (Ya and Mei Lin)`); // v0.11.160 (NX2, CN)
     if (st.farmN) console.log(`  farmer: ${FARM_BITES} bites by choice at the first dawn first, then ×${(st.farmMult / st.farmN).toFixed(2)} (a bite by choice adds no bonus); Coils above counted from its first real one`);
     const fl = KEY_FIGHTS.filter((k) => st.fights[k]).map((k) => { const f = st.fights[k]; const n = f.win + f.lose + (f.flee || 0); return `${k} ${pct(f.win, n)} (${n})`; });
     console.log(`  key fights won: ${fl.join(' · ') || '—'}`);
