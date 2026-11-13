@@ -50,6 +50,34 @@
 - **Flight on this world (owner 20:33, 20:39):** this world's people can fly too, the same way (riding the Qi flows), but only from **Golden Core**, and slower and clumsier. So no one James meets in the prologue or Act 1 flies: the highest of them, Shen Qiu, is Core Formation (`ENEMY_REALM`, `power.js`).
 - **The Coil:** each act loops to a deadline: the prologue to the tribute on Day 7, Act 1 to Shen Qiu on Day 21. James never dies. The Ouroboros Axiom is universal among his people, but on this world the poisoned Qi turns it into a loop.
 
+## The realms (the realm sheet)
+
+*New in v0.11.164 (owner pick N1, 2026-11-13 14:01; roadmap group e, RS, `research.md` #123). How this world sees each realm, for Fable's texts. The owner's bands (2026-11-08 01:15): Mortal Vessel normal, Foundation relatively common, Golden Core rare, Nascent Soul almost unprecedented, the Immortal realms with no documented person. N1 placed the four between them: Core Formation and True Core uncommon, Origin Core and Soul Embryo very rare. Realms 8–10 sit above Nascent Soul, so they follow its band: none documented. The names are the game's (`formulas.js` `REALM_STEP_NAMES`). The owner can change any line.*
+
+**What the sheet is about:** the locals and their own climb. James and Yuki climb on their own rules: no tribulation, and the sky's visits to them are their own (one text per realm, `prologue.js` `BT_REALMS`, realms 3–14; no sky at 10 and 11). Locals can't sense either of them, so they place James by what they see, never by a realm they feel (realm flavour by evidence, #122). Flight is the strongest evidence: locals fly only from Golden Core.
+
+| # | Realm | Who holds it here | How many | The lifespan locals believe | How such a person is addressed | What locals assume they can do | The sky at that breakthrough (locals) |
+|---|---|---|---|---|---|---|---|
+| 0 | Mortal Vessel | everyone: Ashfall, the hunters, Mei Lin, her mother, Old Wen | nearly all | sixty if Heaven is kind; Old Wen at 90 is a wonder | by name, family name or trade | work, hunt, pay the tribute, die of a fever | none |
+| 1 | Foundation | sect disciples: Gao Feng, Lu Han, Fang Wei, the sect's watchers | hundreds in a sect like the Crimson Lotus | about a hundred and twenty | "Disciple", "young master" | outrun a horse, break a hunter with one hand, feel the Qi in anyone below them | a dark cloud over one roof and a few strokes of lightning; the household and the neighbours see it |
+| 2 | Core Formation | outer elders: Shen Qiu, the highest of anyone in the prologue and Act 1 | uncommon: a few dozen in a great sect, a few in a region | about two hundred | "Elder", "Senior" | hold a village's fate in one hand; no number of disciples can stand against one | a storm over the valley, seen from the next village |
+| 3 | True Core | inner elders | uncommon: perhaps a dozen in a great sect | about two hundred and fifty | "Elder", "Senior" | the same, surer: hold a valley | the same storm, longer and lower |
+| 4 | Golden Core | sect masters; the first rung that flies, slowly and with ceremony | rare: a handful in a region | about four hundred | "Senior", "Esteemed Senior", with a bow to the ground | fly, go a season without food, level a village | the storm Heaven keeps for people who matter, seen a day's walk away; sects send someone to watch |
+| 5 | Origin Core | the patriarchs of the great sects, behind closed doors | very rare: a handful on the world, known by name and seldom by sight | about five hundred | "Patriarch" | end a small sect | a storm seen across a province; sects date things by it |
+| 6 | Soul Embryo | the same few, after centuries in seclusion | very rare: fewer than the fingers on one hand | about seven hundred, say the scrolls | "Patriarch", "Ancestor" | the same, and see a province from a mountain | the same, and longer; told for a generation |
+| 7 | Nascent Soul | almost unprecedented: one or two names in all the records, half of them disputed | almost none | a thousand years, in the stories | "Venerable Ancestor", in the stories | whatever the story needs | the whole sky, in the stories ("the year the sky burned") |
+| 8 | Spirit Transformation | nobody documented | none | the stories don't say | the stories don't say | the stories don't say | none seen |
+| 9 | Immortal Ascension | nobody documented; the name promises leaving the world | none | forever, they say | "Immortal", in prayers only | leave the world | none seen |
+| 10 | Mahayana | nobody documented | none | forever, they say | "Immortal", in prayers only | the stories don't say | none seen |
+| 11–14 | Earth, True, Golden, Heavenly Immortal | nobody documented: the Immortal realms | none | forever, they say | "Immortal", in prayers only | anything | none seen |
+
+**Notes for the texts:**
+- **The lifespans are short for the realm:** the poisoned Qi takes its share from everyone who cultivates in it, which is why the locals are "hard, and short-lived, and hungry" (the Old Tree, above). James's people live 800–900 years with no realm talk at all.
+- **A realm gap is absolute among the locals:** no one beats a higher realm, whatever the numbers; the Sect's order rests on it. James and Yuki are the only exceptions, and nobody here knows the rule has any.
+- **The tribulation:** Heaven's lightning at each breakthrough is real for the locals, and it kills some of them. The Sect calls a death in it Heaven's verdict, and a survivor's rise Heaven's approval.
+- **The ladder is paid for:** Old Wen's lesson (`ashfall.js` `wen_lesson`): every rung costs more, and the Sect buys rungs with villages like Ashfall (grass, grain, children).
+- **A local's guess at James:** he looks mortal, so he is addressed as a mortal until he does something that only a high realm explains. Seeing him fly makes him at least Golden Core to them, though they still can't feel it.
+
 ## Places and people
 
 - **The wilds** (prologue Days 1–3): a forest of black bark and grey moss under a bruise-coloured sky. The bone field, the mire, the hollow.

@@ -2,6 +2,23 @@
 
 Started 2026-11-13 (v0.11.157), when `history-18.md` would have passed about 45 KB. Newer than `history-18.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.164 (word for word)
+
+### Open items (the NEXT bullet as of v0.11.163)
+
+- **The seven leftovers of v0.11.161 (MK1's NEXT list): done in v0.11.163** (W1, HN1, TL2, F1, D1, RV1; LF0 and L4-a: no change; numbers in "Decided in chat"). **Next: the owner's pick among the rest** (groups e and f, the retune, the art pass, systems; all "open, options later"). **Open, options later (new in v0.11.163):** an Eat button on story screens (the stretches with no Eat card: the Heart's gate and hall, the road home; a bot that eats anywhere: Careful's hungry count 921 → 0, Act 1 3.33 → 3.35 Coils); the story test's rot ape (smart) −6 points since v0.11.161 under four seeds (its random bots hunt less under once a day; not "Not now.": skipping it gives back 1–2 points): an input for the retune (section 2). *(The NEXT bullet as of v0.11.162 moved word for word to `history-19.md`.)*
+
+### Decided in chat
+
+- **v0.11.161: the Blackroot's forage and hunts once a day per option (PO2, RV1, SD1):** the full entry trimmed in v0.11.163 (the handover past 35 KB), word for word in `history-19.md`. In short: FG each forage card once a day, HO each hunt option once a day (the Hunt card open while either is left); measured: the spare-time player's forage 23.1 → 15.7 cards a game, hunts 3.4 → 4.8; Fable's review H1 (the wrapper hid the cards' items), M1–M3, L1–L6; RV1 GV (the items through a getter) + LV ("Not now." on the three hunts) + SD (Fable's three return lines, `HUNT_AGAIN`; SD1: rr b + dw a + ah a) + TF; L3 and L4 no change (answered in v0.11.163).
+
+### Version notes
+
+## v0.11.161 — The Blackroot's forage and hunts once a day per option (PO2, RV1, SD1)
+
+- **Files:** `js/story/act1_blackroot.js` (`onceADay`, `optionLeft`, `HUNT_AGAIN`; the forage cards and hunt options wrapped; the Hunt cards and Forage entries by `optionLeft`; the hunts' `enter` out; "Not now." last on the three hunts), `js/story/task_hubs.js` (`byOption`), `js/core/tasks.js` (`byOption` read), `js/core/story.js` (the one-move finish runs a fight choice's `do`), `js/core/news.js`, `tests/tasks.test.mjs` (the v0.11.156 OF test runs a second card; the PO2 and RV1 blocks), `tests/README.md`, `tools/text-baseline.json` (re-saved: the three "Not now." labels, +3 labels, +6 words), `tools/timings.json`, `sw.js`, docs (v0.11.158's entries to `history-19.md`). Saves: new day-mark keys only; no id, flag or choice position changed ("Not now." appended last). The drift baseline not re-saved.
+- **Checks:** a game and balance change (rule 2): the full check after PO2 stopped by hand (Fable's H1 found while it ran); after RV1: the tools test stopped on the text snapshot (the three "Not now." labels; re-saved, `node tools/textlint.mjs --save`; the return lines are not on the lint's sample states), browser part 2 flaked once (a click waiting for a stable button; alone 3 of 3); the rerun exit 0: 0 drifted of 145, 14 moved more than 5 (log only; the 6 before and 8 new from the random bots: inc mire serpent smart +6.2, sect watcher random +7.8, story-test rot ape smart −7.0 and random −5.4, elder smart −6.0, night hawks random +7.2, collectors random +6.4, guardian random +6.7); the models Careful 3.17 / 3.34, Completionist 3.31 / 3.52, Cultivator 2.82 / 3.06, Sociable 3.17 / 3.58; the story and four part tests pass; mutation: PO2 4 (11, 2, 1, 1 fails), RV1 GV 3, the LV gate 6, SD 1. **Fable's review:** H1, M1, M2, M3, L1, L2, L5, L6 fixed (RV1, SD1); L3 and L4 no change.
+
 ## Moved from the handover in v0.11.163 (word for word)
 
 ### Open items (the NEXT bullet as of v0.11.162)

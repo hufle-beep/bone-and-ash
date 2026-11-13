@@ -609,6 +609,22 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md'];
     for (const t of ['**Story, flight', "**Flight's walk times"]) assert(roadmap.includes(t), `roadmap: the flight line "${t.replace(/\*/g, '')}" is there`);
     assert(readFileSync(path.join(ROOT, 'project/roadmap-done-3.md'), 'utf8').includes('**Mechanics, flight'), 'roadmap: the flight line "Mechanics, flight" (done) is in roadmap-done-3.md since v0.11.151 (WD1)');
 }
+// v0.11.164 (owner pick N1): the realm sheet in lore.md: one row per realm in the game's order (11–14 in one row), the owner's bands and N1's placements
+{
+    const lore = readFileSync(path.join(ROOT, 'project/lore.md'), 'utf8');
+    const { REALM_STEP_NAMES } = await import(new URL('../js/core/formulas.js', import.meta.url));
+    const a = lore.indexOf('## The realms (the realm sheet)'), b = lore.indexOf('\n## ', a + 1);
+    const sheet = a < 0 ? '' : lore.slice(a, b < 0 ? undefined : b);
+    const rows = [...sheet.matchAll(/^\| (\d+(?:–\d+)?) \| ([^|]+) \| ([^|]+) \| ([^|]+) \|/gm)].map((m) => ({ n: m[1], name: m[2].trim(), who: m[3], many: m[4] }));
+    assert(sheet && rows.length === 12, `lore: the realm sheet has 12 rows, 0–10 and 11–14 (${rows.length})`);
+    const names = rows.slice(0, 11).map((r) => r.name);
+    assert(names.join('|') === REALM_STEP_NAMES.slice(0, 11).join('|') && rows.slice(0, 11).every((r, i) => r.n === String(i)), 'lore: the sheet names realms 0–10 as REALM_STEP_NAMES, in order');
+    assert(rows[11]?.n === '11–14' && /Immortal realms/.test(rows[11].who), 'lore: realms 11–14 in one row, the Immortal realms');
+    const band = (n) => `${rows[n]?.who} ${rows[n]?.many}`;
+    assert(/nearly all/.test(band(0)) && /hundreds/.test(band(1)) && /uncommon/.test(band(2)) && /uncommon/.test(band(3)) && /rare/.test(band(4)) && /very rare/.test(band(5)) && /very rare/.test(band(6)) && /almost unprecedented/.test(band(7)), 'lore: the owner\'s bands and N1\'s placements (2–3 uncommon, 5–6 very rare)');
+    assert([8, 9, 10, 11].every((n) => /nobody documented/.test(band(n))), 'lore: realms 8–14 have no documented person');
+    assert(/Shen Qiu/.test(band(2)) && /BT_REALMS/.test(sheet) && /#122/.test(sheet), 'lore: Shen Qiu at Core Formation; the sheet points to BT_REALMS and #122');
+}
 // v0.11.79 (owner pick R1): hard rule 8, Claude uploads the changed docs itself after every push (no question), in CLAUDE.md and the working agreement
 {
     const rules = readFileSync(path.join(ROOT, 'CLAUDE.md'), 'utf8');
