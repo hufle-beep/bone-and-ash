@@ -79,8 +79,11 @@ const yukiLines = [];
 for (const h of Object.values(TASK_HUBS)) {
     const j = h.yuki; if (!j) continue;
     const add = (t) => { if (typeof t === 'string' && !yukiLines.includes(t)) yukiLines.push(t); };
-    for (const k of [j, ...(j.alts || [])]) for (const n of [1, 2]) add(typeof k.got === 'function' ? k.got(n) : k.got);
-    add(j.none); add(j.full);
+    // v0.11.169 (owner picks CA1, YH): a job's lines may be by Yuki's form (Ashfall's): each read on every sample state
+    for (const g of SAMPLES) {
+        for (const k of [j, ...(j.alts || [])]) for (const n of [1, 2]) add(typeof k.got === 'function' ? k.got(n, g) : k.got);
+        for (const t of [j.none, j.full]) add(typeof t === 'function' ? t(g) : t);
+    }
 }
 // v0.11.136 (owner pick NC1): the replies by day (js/core/lines.js DAY_REPLIES), every text in every form
 const { DAY_REPLIES } = await import(js('core/lines.js'));

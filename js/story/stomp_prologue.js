@@ -10,6 +10,8 @@ import { yukiForm } from '../core/game.js';
 const yk = (g) => ({ tiger: 'Yuki — currently the size of a Bengal tiger and twice as bored', human: 'Yuki, white hair stirring, ears flat, arms folded', cat: 'Yuki, eleven pounds of white cat' }[yukiForm(g)]);
 const ykShort = (g) => ({ tiger: 'the great white root-kin at your side', human: 'the white-haired woman at your side', cat: 'the cat on your shoulder' }[yukiForm(g)]);
 const aside = (degree, a, b, c) => (degree >= 3 ? c : degree === 2 ? b : a);
+/** v0.11.169 (owner picks P3A, CA1, ST): a text by Yuki's form (cat, great root-kin, human), like common.js byForm. */
+const stompForm = (g, cat, tiger, human) => ({ tiger, human }[yukiForm(g)] ?? cat);
 
 registerStomp({
     jackals: {
@@ -169,55 +171,55 @@ You fish one of the casualties out. A small, sour beast core. The silence of the
     },
 
     wolves: {
-        posture: (g, d) => `The ash-wolves step out of the oaks together, the way a pair of knives comes out of a sleeve. They don't growl. They don't need to. They split left and right without looking at each other.
+        posture: (g, d) => `Out of the oaks come the ash-wolves, a pair, grey and narrow, with not a sound between them. Neither growls. Growling is for animals with doubts. They part to left and right, and neither checks where the other has gone.
 
-${aside(d, 'You put your back to a tree.', 'You put your hands behind your back.', `You put your hand on ${ykShort(g)} — not to hold her back. To keep her from showing off.`)}`,
+${aside(d, 'You put a tree at your back.', 'You clasp your hands behind you and wait.', `You rest a hand on ${ykShort(g)}. It is not there to hold her back. It is there to stop her showing off.`)}`,
         win: {
-            2: (g) => `They are clever, and fast, and they hunt like a single animal with two mouths. It takes them a long minute to understand that you are not prey. They don't get a second minute.
+            2: (g) => `They are clever and quick, and they hunt as one animal that happens to own two sets of teeth. Working out that you are not prey takes them the better part of a minute. Nothing after that takes them any time at all.
 
-You drag them back to Ashfall in pieces. The hunters receive each load in silence and bow to it, the way you bow to a fallen enemy. Then, gravely, to you.`,
-            3: (g) => `The first wolf leaps. You catch it by the scruff in mid-air, the way you'd catch a kitten, and put it down. It stays down. The second wolf skids to a halt, looks at its partner, looks at you, and lies down flat with its ears back, whining, until ${yk(g)} walks over and sits next to it.
+Ashfall gets them in loads. The hunters accept every load in silence and give it the bow owed to an enemy who fell well. Afterwards, no less solemnly, they bow to you.`,
+            3: (g) => `The first wolf jumps. You pick it from the air by the scruff, as a kitten is lifted, and set it on the ground, where it remains. The second brakes hard in the leaf litter, studies its partner, studies you, and goes down on its belly, ears laid back, whining. Before long it has company, seated at its shoulder: ${yk(g)}.
 
-You only take one of them back to Ashfall. The other follows you to the edge of the oaks at a respectful distance, and stops. The hunters receive the meat in silence and bow — to the wolf, and then, gravely, to you.`,
+Only one of them comes home with you. The other trails behind to the last of the oaks, keeping a polite distance, and goes no further. In Ashfall the hunters say nothing over the meat. They bow: to the wolf first, and then, with full ceremony, to you.`,
         },
-        one: (g) => `Two needles, two wolves, one breath: they lie down in the bracken as if someone had told them, very kindly, that the hunt was over.`,
+        one: (g) => `You close one hand on empty air, as on a scruff. The hunt changes owners there and then, and the wolves are the last to hear of it.`,
     },
 
     thornback: {
-        posture: (g, d) => `The thornback bull rises out of the bracken, twice the size of any you've seen, spines up like a hedge of spears, hissing like a kettle the size of a cart.
+        posture: (g, d) => `The thornback bull heaves itself up from the bracken, twice the size of any you have met, every spine stood on end, a palisade with a temper. It hisses like a kettle built for a garrison.
 
-${aside(d, 'You check how many spines. All of them. It has all of them.', 'You count the spines and pick which one to break off first.', `${yk(g)} looks at you, then at the bull, then back at you, as if asking whether she may.`)}`,
+${aside(d, 'You count the spines. It has brought all of them.', 'You count the spines and choose the one that comes off first.', `You get a look from ${yk(g)}. It asks whether she may.`)}`,
         win: {
-            2: (g) => `It is enormous, armoured, and furious, and none of that turns out to matter as much as it was hoping. By the end it is lying on its side in the bracken, spines flat, breathing slowly, its gold eye following you with an expression you'd almost call respect.
+            2: (g) => `It is huge, plated and enraged, and it had been counting on those three things to carry more weight than they do. At the end it lies on its side among the ferns with its spines laid flat and its breath coming slow, and one gold eye tracks you with what, in a politer animal, would be respect.
 
-You drag it back to Ashfall in pieces, with the eggs from its nest. The hunters receive each load in silence and bow to it, the way you bow to a fallen enemy. Then, gravely, to you.`,
-            3: (g) => `The bull charges. ${yukiForm(g) === 'tiger' ? 'Yuki meets it head-on, which is not a sentence you expected to think, and the bull bounces.' : 'You step aside and put one hand flat on its flank as it passes, and push.'} It rolls three times through the bracken and ends on its back, legs in the air, spines folded tight, perfectly still. Playing dead. Badly.
+Afterwards you bring it to Ashfall in loads, and the eggs out of its nest with the last of them. The hunters meet each load without speaking and bow over it as over an enemy fallen with honour; then, just as gravely, to you.`,
+            3: (g) => `The bull charges. ${stompForm(g, 'You move one pace to the side, lay a palm on its flank as it goes by, and lean.', 'Yuki takes the charge chest to chest, a thing you had never planned on watching, and it is the bull that rebounds.', 'Yuki walks into its path, takes the foremost spine in one hand, and turns, as one shows a guest through a door.')} Three full rolls through the bracken bring it to rest belly up, legs in the air, every spine clamped shut, not moving at all. It is playing dead. It is not good at it.
 
-You let it keep playing. You take the eggs. The hunters, when you walk back into Ashfall carrying a nest of thornback eggs and not a scratch on you, put down what they're doing and bow — first to the eggs, and then, very gravely, to you.`,
+You leave it to its performance and take the eggs. In Ashfall the hunters see you come up the lane with a nest of thornback eggs in your arms and no mark on you, and they set down their work and bow: to the eggs first, and then, with great gravity, to you.`,
         },
-        one: (g) => `You point. The bull's spines fold flat one by one from nose to tail, like a fan closing, and it lies down in the bracken and doesn't move again.`,
+        one: (g) => `The charge shakes the ground for four strides, and then there is no charge. The bracken comes down slowly over a bull with every spine folded away like a fan.`,
     },
 
     arson: {
-        posture: (g, d) => `Pock-Face lifts his torch and grins at you up at the window. "That's him. The mortal. No root, no Qi, nothing. Elder Brother Gao says he had a trick with bones and a lot of luck." He spits. "Luck runs out. Come down, mortal, or we come up — and then the house goes up with you in it."
+        posture: (g, d) => `Pock-Face holds his torch high and grins up at the window. "There he is. The mortal. Not a root in him, not a breath of Qi, nothing. Elder Brother Gao says it was a trick with bones, and luck besides." He spits in the lane. "Luck gets spent. You come down, mortal, or we come up, and after that the house burns with you inside it."
 
-The two hired men spread out the way men do when they've done this before.
+His two hired men move apart unprompted, with the ease of long practice.
 
-${aside(d, 'You come down.', 'You come down. Slowly. In your own time.', 'You come down, still in your sleeping clothes, carrying a cup of tea, which you do not spill.')}`,
+${aside(d, 'You join them in the lane.', 'You join them in the lane, once you are ready.', 'You join them in the lane in your sleeping clothes, polishing your glasses on the hem, and put them on to see who it is.')}`,
         win: {
-            2: (g) => `By the time the shutters open, it's over: two thugs running, Pock-Face face-down in the lane with a bone needle pinning his sleeve to the dirt, his torch hissing out in the gutter. He never laid a hand on you. He's trying to work out how.
+            2: (g) => `The shutters come open on a finished thing. Both hired men are already running. Pock-Face lies on his face in the lane with his sleeve pegged to the dirt by a white splinter of bone, and the gutter is putting out his torch. He did not touch you once, nor the house, nor anyone in it, and he is still searching the dirt for where it went wrong.
 
-Half the street comes out in nightclothes. Nobody says anything. Then Mei Lin's mother walks up, looks down at Pock-Face, and says in the voice of a magistrate passing sentence: "You came by night to burn a widow's house. Your ancestors will hear of it from me." She goes back to bed. Pock-Face, you notice, is crying.
+The lane fills with people in nightclothes, half of Ashfall, and none of them speaks. Mei Lin's mother comes through them, looks down at the man by her feet, and speaks as a magistrate does: "You came by night to burn a widow's house. Your ancestors will hear of it from me." Then she returns to her bed. Pock-Face has begun to cry.
 
-That's the moment Ashfall decides you're theirs.`,
-            3: (g) => `It takes about as long as the tea stays hot. The two hired men decide, upon meeting ${ykShort(g)}, that they were never hired. Pock-Face swings his torch at you; you take it out of his hand and put it out in the gutter, then put him down in the lane with both thumbs dislocated, which will heal, and his pride, which won't.
+That is the moment Ashfall decides you are theirs.`,
+            3: (g) => `It lasts about as long as glasses take to settle on a nose. The two hired men rush you together and are sitting in the dirt before either knows how; then they notice ${ykShort(g)} watching them, conclude that nobody ever hired them, and go. Pock-Face swings his torch. You take it from him, drown it in the gutter, and lay him out in the lane with both thumbs out of joint. The thumbs will mend. His pride has no such prospects.
 
-"Elder Brother Gao will hear of this," he sobs into the dirt. "He'll come back with the whole Sect. He'll— you'll—"
+"Elder Brother Gao will hear of it," he weeps into the dirt. "He'll bring the whole Sect down on this midden. He'll— you'll—"
 
-Half the street comes out in nightclothes. Mei Lin's mother walks up and looks down at him, and says in the voice of a magistrate passing sentence: "You came by night to burn a widow's house. Your ancestors will hear of it from me." She goes back to bed. Pock-Face cries harder.
+Half the lane is out in nightclothes by now, and nobody in the house has a singed hair. Through them comes Mei Lin's mother, in hers. She regards him and pronounces, in the voice a magistrate keeps for sentencing: "You came by night to burn a widow's house. Your ancestors will hear of it from me." She returns to bed. Pock-Face weeps harder.
 
-That's the moment Ashfall decides you're theirs.`,
+That is the moment Ashfall decides you are theirs.`,
         },
-        one: (g) => `You open the shutter, and three torches go out at once, each pinned to the lane by a white needle through the haft — and then, a breath later, so do the three men holding them.`,
+        one: (g) => `You step into the lane, and the matter ends there: three torches falter, and the men holding them begin, one after another, to reconsider the errand.`,
     },
 });

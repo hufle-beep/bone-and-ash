@@ -9,7 +9,7 @@ import { markDaily, daily, hour } from '../js/story/common.js';
 import { dayEnd, nightLock, dayHour, endsLate, sitUseless } from '../js/core/game.js'; // v0.11.37 (v0.11.91: no push)
 import { pickedMinutes, PICKED_SPEED } from '../js/core/story.js'; // v0.11.37 (F1)
 import { wakeDay, sleepUntil, clockParts } from '../js/core/game.js';
-import { yukiSpeed, setDryClone, dryClone, showPicked } from '../js/core/tasks.js';
+import { yukiSpeed, yukiSays, setDryClone, dryClone, showPicked } from '../js/core/tasks.js';
 import { e8Hours, ecHours, jnHours } from '../js/story/meridians.js';
 import { serialize, deserialize } from '../js/core/game.js';
 import { PEOPLE_FIGHTS, combatHooks } from '../js/core/game.js'; // v0.11.81
@@ -2982,7 +2982,8 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     const { gives } = await import('../js/core/story.js');
     const FULLK = (g, ids) => { for (const id of ids) g.inventory[id] = itemCap(id); };
     const jobs = [...new Set(Object.values(TASK_HUBS).map((h) => h.yuki).filter(Boolean))];
-    assert(jobs.length === 5 && jobs.every((j) => Array.isArray(j.alts) && j.alts.length >= 2 && typeof j.full === 'string' && j.alts.every((a) => a.item !== j.item && Object.hasOwn(itemNames, a.item) && typeof a.got(1) === 'string' && a.got(1) !== a.got(2))), `Y1: every Yuki job has its other kinds, each with a one and a two text, and a full line (${jobs.length})`);
+    const YG = ensureBars(newGame(7100)); // v0.11.169 (CA1, YH): Ashfall's lines are by Yuki's form, so each is read with a game
+    assert(jobs.length === 5 && jobs.every((j) => Array.isArray(j.alts) && j.alts.length >= 2 && typeof yukiSays(YG, j.full) === 'string' && j.alts.every((a) => a.item !== j.item && Object.hasOwn(itemNames, a.item) && typeof a.got(1, YG) === 'string' && a.got(1, YG) !== a.got(2, YG))), `Y1: every Yuki job has its other kinds, each with a one and a two text, and a full line (${jobs.length})`);
     for (const j of jobs) {
         const g = ensureBars(newGame(7101));
         assert(yukiCatch(g, j).item === j.item, `Y1 (${j.id}): her own kind first`);
@@ -3012,6 +3013,26 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
         assert(!!id && /\+\d Mire fowl/.test(l) && (g.inventory.fowl_raw || 0) > (inv0.fowl_raw || 0) && g.inventory.hare_raw === itemCap('hare_raw') && !lines.some((x) => /\+\d Glassback hare/.test(x)), `Y1: the lane with hares full brings fowl (${l.slice(-60)})`); }
     { const { g, inv0, lines } = lane((g) => FULLK(g, ['hare_raw', 'fowl_raw', 'crab_meat']));
         assert(lines.includes(TASK_HUBS.wilds.yuki.full) && JSON.stringify(g.inventory) === JSON.stringify(inv0) && lines[lines.indexOf(TASK_HUBS.wilds.yuki.full) + 1]?.startsWith('Yuki Fight'), `Y1: everything full: the full line, nothing added, her XP still (${lines.join(' | ').slice(0, 160)})`); }
+    // v0.11.169 (owner picks P3A, CA1, RV1; Fable's review TG1, TG2): Ashfall's lane in every form, through runTask: her form's haul line and
+    // the item; everything full: her form's full line, nothing added, her XP still, and every line a string (yukiSays on both paths)
+    for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) {
+        const ash = (fill) => {
+            const g = ensureBars(newGame(7140 + realm, { closed: true })); g.scene = 'ashfall'; g.minutes = 4 * 1440 + 9 * 60; Object.assign(g.flags, { long: true, vday: 2, elder: true, healed_try: true });
+            g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; ensureBars(g);
+            g.james.satiety = 90; g.james.qi = 30; g.yuki.fight.tier = 3; g.james.gu.tier = 9; g.rng = rngFor(5); setYuki(g, true); if (fill) fill(g);
+            g.tasks.yuki.progress = yukiLane(g).len - 1;
+            const id = taskCards(g, SCENES).find((c) => c.status === 'open' && /^Rest an hour in the shade by the well/.test(c.label))?.id;
+            const inv0 = { ...g.inventory }, r = id ? runTask(g, SCENES, id) : { lines: [] };
+            return { g, inv0, lines: r.lines, id };
+        };
+        const J = TASK_HUBS.ashfall.yuki;
+        { const { g, inv0, lines, id } = ash();
+          const n = (g.inventory.hare_raw || 0) - (inv0.hare_raw || 0), want = `${J.got(n, g)} +${n} ${itemNames.hare_raw.name}.`;
+          assert(!!id && n > 0 && lines.includes(want) && lines.every((l) => typeof l === 'string'), `P3A (RV1, TG2): Ashfall's lane as ${form}: her form's haul line and the hare (${lines.join(' | ').slice(0, 200)})`); }
+        { const { g, inv0, lines } = ash((g) => FULLK(g, ['hare_raw', 'fowl_raw', 'venison']));
+          const full = yukiSays(g, J.full);
+          assert(typeof full === 'string' && lines.includes(full) && JSON.stringify(g.inventory) === JSON.stringify(inv0) && lines[lines.indexOf(full) + 1]?.startsWith('Yuki Fight') && lines.every((l) => typeof l === 'string'), `P3A (RV1, TG1): Ashfall's lane as ${form}, everything full: her full line, nothing added, her XP still (${lines.join(' | ').slice(0, 200)})`); }
+    }
     { const { g, inv0, lines } = lane((g) => { g.inventory.hare_raw = itemCap('hare_raw') - 1; g.rng = rngFor(7); }); // YK1 (D8): a 7, double
         const l = lines.find((x) => /\+\d (Glassback hare|Mire fowl)/.test(x)) || '', n = Number(/\+(\d)/.exec(l.slice(l.lastIndexOf('+')))?.[1]);
         assert(g.inventory.hare_raw + (g.inventory.fowl_raw || 0) - inv0.hare_raw - (inv0.fowl_raw || 0) === n && (n === 1 ? /Glassback hare/ : /Mire fowl/).test(l), `R1: one short of the cap, the lane's line says what landed (${l.slice(-40)}; hares ${g.inventory.hare_raw}, fowl ${g.inventory.fowl_raw || 0})`); }

@@ -12,10 +12,10 @@ import { HT_HUBS, HT_BODY, HT_CLOSE, HT_LABEL, HT_GAIN, HT_MID, htPool, htSlot }
 import { likesMei, likesYa } from '../js/story/act1_common.js'; // v0.11.123 (EQ1, AB)
 import { KEEP_FLAGS, rewind } from '../js/core/coil.js'; // v0.11.137 (HV1, Fable L2): rewind on an old save // v0.11.123 (ER1, T3)
 import { againView, noteRead, MEMORY_LINES } from '../js/story/again.js'; // v0.11.167 (CA1): MEMORY_LINES // v0.11.125 (RW1, T); v0.11.133 (FP2): noteRead
-import { STOMP } from '../js/story/power.js'; // v0.11.126 (NQ1)
+import { STOMP } from '../js/story/power.js'; import { ASHFALL } from '../js/story/ashfall.js'; // v0.11.169 (P3A): ASHFALL // v0.11.126 (NQ1)
 import { coilStamp, dayIndex, textDay, DAY_REPLIES, COIL_SETS, actCoil, noteDay, linesOf, pickLine } from '../js/core/lines.js'; // v0.11.166 (RW1): COIL_SETS, actCoil; // v0.11.135 (NT1, EV1); v0.11.136 (NC1): DAY_REPLIES
 import { splitReply, splitLine, landReply, noteSaid } from '../js/core/replies.js'; // v0.11.136 (NC1); RV2 (TG): landReply, noteSaid
-import { runTask, taskOutcome, cardCheck, taskCards } from '../js/core/tasks.js'; // v0.11.136 (RV2, TG); v0.11.139 (MW1): taskCards
+import { runTask, taskOutcome, cardCheck, taskCards, yukiSays as yukiSaysS } from '../js/core/tasks.js'; // v0.11.169 (CA1, YH): yukiSays // v0.11.136 (RV2, TG); v0.11.139 (MW1): taskCards
 import { writeFileSync, readFileSync, readdirSync } from 'node:fs'; // v0.11.137 (HV1, T): the story files read for bumpRel
 import { smartAction } from './lib/smartfight.mjs'; // v0.11.96 (BT1)
 import { DAY21_BREAKFAST } from '../js/story/act1_return.js'; // v0.11.152 (E1, BK)
@@ -272,11 +272,11 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         ["heart_camp:1", "She tells you the songs about the Old Tree her grandmother sang. Some of the words are your words, worn smooth by four hundred years of people who didn't know what they meant."],
         ["talk_ya:0", "She looks at you like you're a bone-elk and she's hungry."],
         ["talk_ya:3", "She bares her teeth at you and walks on ahead. She'll get over it. Probably."],
-        ["supper:2", "Her mother tells you, in a low and formal voice, which families owe the Sect what, which houses have lost children to the road, and which neighbours would sell you for a sack of millet. She does not smile once. It is the most useful hour you've spent on this world."],
-        ["wen_lesson:forest", "You ask what the hunters' tales say the singing sounded like. He thinks about it with great seriousness. \"Like something you have already heard,\" he says at last, \"and cannot name.\" You don't tell him that's exactly it. Yuki, on your knee, has not stopped looking toward the forest."],
+        ["supper:2", "Over the washing water her mother tells you, low and formal, which families owe the Sect what, which houses have lost a child to the road, and which neighbours would sell you for a sack of millet. She does not smile once. It is the most useful hour you have spent on this world."],
+        ["wen_lesson:forest", "You ask what the singing sounded like, in the hunters' tales. He weighs the question with great seriousness. \"Like a thing you have heard before,\" he says at last, \"and cannot name.\" You do not tell him that this is exactly right. Yuki, on your knee, has not once looked away from the forest."],
         ["bl_night_event:1", "You follow until the roots close. The lights go on into the tree, through a crack too small for a person, and the song goes with them."],
         ["talk_mei:1", "She tells you you're impossible. She's smiling while she says it."],
-        ["herb_slopes:0", "Mei Lin grudgingly admits you have hands."],
+        ["herb_slopes:0", "Mei Lin concedes, with reluctance, that you have hands."],
         ["heart_spring:0", "Ya spends the whole time trying to drown you, then trying to get you to stop being so stiff, then, briefly, very effectively, not trying to do anything at all except sit closer."],
         ["heart_spring:1", "Mei Lin washes beside you and tells you, without looking, that you are a coward. She doesn't sound like she minds."],
         ["night_event:11", "Yuki accepts the praise as simple fact."],
@@ -291,11 +291,11 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         ["ah_forage:0", "Earthy. Magnificent. Your career peaks."],
         ["wild_forage:2", "The bees are still arguing about it."],
         ["wild_train:2:f", "Scratched."],
-        ["workshop:0:f", "Some come out brittle. Still, fishhooks."],
+        ["workshop:0:f", "A few come out brittle. Fishhooks, all the same."],
         ["fo_palisade:0:f", "Half the stakes come out brittle. The hunters replace them with wood, without comment, which is worse than comment."],
-        ["clinic:1:f", "You do what you can. It isn't enough for everyone."],
+        ["clinic:1:f", "You do what two hands can. The line was longer than that."],
         ["fo_drill:1:f", "Yuki wins. Decisively."],
-        ["workshop:2:f", "It snaps on a root. The farmers bow and say nothing at all, which is much worse."],
+        ["workshop:2:f", "It breaks on a root. The farmers bow to the two halves and say nothing. You would have preferred words."],
         ["bl_train:0:f", "She throws you four times. She's thrilled."],
         ["wild_forage:2:f", "Stung. A lot."],
         ["drill:1:f", "The twelve-year-old puts you on your back, then helps you up and apologises with great formality for the disrespect. That is somehow worse."],
@@ -303,17 +303,19 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         ["rr_forage:1", "She corrects your knife-grip without looking up."],
         ["wild_hunt:2:f", "It pinches back."],
         ["wild_forage:1:f", "Leeches."],
-        ["drill:0:f", "Two of them hit each other. Still: progress."],
+        ["drill:0:f", "Two of them hit each other. The apologies are faultless."],
         ["fo_council:0:f", "You say it badly. They hear it anyway, and bow anyway, slightly less deeply."],
         ["fo_clinic:0:f", "Mostly. You'll check the split scalp again tonight."]
     ];
+    // v0.11.169 (owner picks P3A, CA1): Ashfall's seven first-day texts above (supper:2 … drill:0:f) are Fable's rewrite of the old ones
     // the Results lines each reply sat with before NC1 (the game as of v0.11.135, the same state), so a gain dropped or changed on every day is caught
     const OLD_GAINS = {"bl_camp:2":[],"heart_camp:1":[],"talk_ya:0":[],"talk_ya:3":[],"supper:2":[],"wen_lesson:forest":[],"bl_night_event:1":[],"talk_mei:1":[],"herb_slopes:0":["+2 Ninefold spirit grass (trade goods)."],"heart_spring:0":["+6 HP."],"heart_spring:1":["+4 HP."],"night_event:11":["+1 Mire fowl (dressed).","Yuki Fight held at James's GU (T1 L1)","GU +1 XP, from what Yuki couldn't keep"],"heart_spring:2":[],"rr_hunt:1":["+2 root-hares (as hare)."],"bl_fireside:2":[],"night_event:2":[],"heart_camp:2":[],"heart_camp:3":[],"night_event:0":[],"bl_train:0":[],"ah_forage:0":["+2 ash-truffles (as jade bracket), and one eaten on the spot: +10 satiety."],"wild_forage:2":["+2 Wild honeycomb."],"wild_train:2:f":["−1 HP.","Yuki Fight held at James's GU (T1 L1)","GU +1 XP, from what Yuki couldn't keep"],"workshop:0:f":[],"fo_palisade:0:f":[],"clinic:1:f":[],"fo_drill:1:f":["−2 HP.","Yuki Fight held at James's GU (T1 L1)","GU +1 XP, from what Yuki couldn't keep"],"workshop:2:f":[],"bl_train:0:f":["−2 HP."],"wild_forage:2:f":["+1 Wild honeycomb, −3 HP."],"drill:1:f":["−2 HP.","Yuki Fight held at James's GU (T1 L1)","GU +1 XP, from what Yuki couldn't keep"],"ah_forage:1":["+6 cinderberries (as needleberries)."],"rr_forage:1":["+4 root-sorrel (counts as river cress)."],"wild_hunt:2:f":["−2 HP."],"wild_forage:1:f":["+2 River cress anyway."],"drill:0:f":[],"fo_council:0:f":[],"fo_clinic:0:f":[]};
     // RV2 (TG, Fable's review): the old first-day replies of the three lists that go by Yuki's form (the game as of v0.11.135)
-    const OLD_FORMS = {"tiger":{"heart_camp:3":"You play the first part again, just Wren's voice, just the planting. Yuki purrs with her head on your chest the whole way through.","heart_spring:2":"You sit with your back to a warm wall and Yuki's head in your lap and listen to the water, and for half an hour nobody needs anything from you.","wen_lesson:forest":"You ask what the hunters' tales say the singing sounded like. He thinks about it with great seriousness. \"Like something you have already heard,\" he says at last, \"and cannot name.\" You don't tell him that's exactly it. Yuki, her chin on your knee, has not stopped looking toward the forest."},"human":{"heart_camp:3":"You play the first part again, just Wren's voice, just the planting. Yuki leans against your shoulder and purrs, very quietly, the whole way through.","heart_spring:2":"You sit with your back to a warm wall and Yuki's shoulder against yours and listen to the water, and for half an hour nobody needs anything from you.","wen_lesson:forest":"You ask what the hunters' tales say the singing sounded like. He thinks about it with great seriousness. \"Like something you have already heard,\" he says at last, \"and cannot name.\" You don't tell him that's exactly it. Yuki, beside you, has not stopped looking toward the forest."}};
+    const OLD_FORMS = {"tiger":{"heart_camp:3":"You play the first part again, just Wren's voice, just the planting. Yuki purrs with her head on your chest the whole way through.","heart_spring:2":"You sit with your back to a warm wall and Yuki's head in your lap and listen to the water, and for half an hour nobody needs anything from you.","wen_lesson:forest":"You ask what the singing sounded like, in the hunters' tales. He weighs the question with great seriousness. \"Like a thing you have heard before,\" he says at last, \"and cannot name.\" You do not tell him that this is exactly right. Yuki, her chin on your knee, has not once looked away from the forest."},"human":{"heart_camp:3":"You play the first part again, just Wren's voice, just the planting. Yuki leans against your shoulder and purrs, very quietly, the whole way through.","heart_spring:2":"You sit with your back to a warm wall and Yuki's shoulder against yours and listen to the water, and for half an hour nobody needs anything from you.","wen_lesson:forest":"You ask what the singing sounded like, in the hunters' tales. He weighs the question with great seriousness. \"Like a thing you have heard before,\" he says at last, \"and cannot name.\" You do not tell him that this is exactly right. Yuki, beside you, has not once looked away from the forest."}};
     const ST6K = ['rr_forage:2', 'rr_forage:2:after', 'ah_forage:2', 'ah_forage:2:after', 'ah_hunt:1:part', 'ah_hunt:1:full']; // v0.11.154 (PS1, ST6): their own test (RP1 push 2's block)
     const SWK = ['wild_forage:0', 'wild_forage:1', 'wild_forage:3', 'wild_hunt:0', 'wild_hunt:1', 'wild_hunt:2', 'wild_train:0', 'wild_train:1', 'wild_train:2', 'wild_train:3']; // v0.11.168 (P2A, SW): their own test (P2A's block)
-    const keys = Object.keys(DAY_REPLIES).filter((k) => !ST6K.includes(k) && !SWK.includes(k));
+    const SRK = ['clinic:0', 'clinic:1', 'workshop:0', 'drill:0', 'drill:1']; // v0.11.169 (P3A, SR): their own test (P3A's block)
+    const keys = Object.keys(DAY_REPLIES).filter((k) => !ST6K.includes(k) && !SWK.includes(k) && !SRK.includes(k));
     const first = (k) => COIL_SETS[k]?.[0] ?? DAY_REPLIES[k]; // v0.11.166 (RW1): a Coil's set for the lists by Coil
     assert(keys.length === 38 && keys.reduce((s, k) => s + first(k).length - 1, 0) === 63, `NC1: 38 reply lists with 52 new texts; v0.11.152 (RP1): 11 more (${keys.length}, ${keys.reduce((s, k) => s + first(k).length - 1, 0)})`);
     assert(JSON.stringify([...keys].sort()) === JSON.stringify(NC.map(([k]) => k).sort()), 'NC1: a list for every reply the bots saw on two days, and no other');
@@ -529,6 +531,117 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
             assert(fed.some((l) => /^Breakfast\. /.test(l)) && hungry.some((l) => /^No breakfast\. /.test(l)), `P2A (RV1, TG4): the Wilds' morning opens "Breakfast. " / "No breakfast. " (${fed.concat(hungry).join(' | ')})`);
             const n = ensureBars(fresh(5692)); n.james.hp = 20; const lost = SCENES.night_lost.choices[0].do(n);
             assert(lost.some((l) => /HP partly back, Qi full\.$/.test(l)), `P2A (RV1, TG5): the lost night keeps "HP partly back, Qi full." (${lost})`);
+        }
+    }
+    // v0.11.169 (owner picks P3A, CA1; Fable's rewrite of part 3, Ashfall): SR the five repeatable successes speak by day; YF every
+    // Yuki text in every form; YH the barley-field haul by form; ST the three fights' stomp texts; LB the labels; the continuity fixes
+    {
+        const FORMS = [['cat', 0], ['tiger', 2], ['human', 7]];
+        const F = (seed, form, vday = 2) => { const g = ensureBars(fresh(seed)); const r = { cat: 0, tiger: 2, human: 7 }[form]; g.yuki.realm = r; g.james.realm = r; g.yuki.form = form; g.flags.long = true; g.flags.vday = vday; return ensureBars(g); };
+        const bad = (t) => typeof t !== 'string' || /TODO|\$\{|undefined|\bNaN\b/.test(t);
+        const txt = (id, g) => { const t = SCENES[id].text; return typeof t === 'function' ? t(g) : t; };
+        let seed = 5700;
+        // SR: two texts a list (Day 5, Day 6), different, short, in every form; the card's day shows its text, the gains the same both days
+        const SR = { 'clinic:0': ['clinic', 0], 'clinic:1': ['clinic', 1], 'workshop:0': ['workshop', 0], 'drill:0': ['drill', 0], 'drill:1': ['drill', 1] };
+        for (const [k, [scene, i]] of Object.entries(SR)) {
+            assert(DAY_REPLIES[k]?.length === 2, `P3A (SR): ${k} has two texts`);
+            for (const [form] of FORMS) {
+                const L = DAY_REPLIES[k].map((t) => (typeof t === 'function' ? t(F(seed++, form)) : t));
+                assert(L.every((t) => !bad(t) && t.split(/\s+/).length >= 5 && t.split(/\s+/).length <= 40) && L[0] !== L[1], `P3A (SR): ${k} (${form}): two different short texts (${L.join(' | ')})`);
+                const runs = [0, 1].map((d) => { const g = F(5790, form); g.scene = scene; g.inventory.jade_bracket = 3; onDay(g, d); const out = SCENES[scene].choices[i].do(g, { success: true, ratio: 1 }); const { lines, log, ...rest } = g; return { out, rel: JSON.stringify(g.rel), flags: JSON.stringify(Object.fromEntries(Object.entries(g.flags).filter(([f]) => !/^oo:|@/.test(f)))), inv: JSON.stringify(g.inventory) }; });
+                assert(runs.every((r, d) => r.out[0] === L[d]), `P3A (SR): ${k} (${form}): day ${'1 and 2'} show their texts (${runs.map((r) => r.out[0]).join(' | ')})`);
+                assert(runs[0].rel === runs[1].rel && runs[0].flags === runs[1].flags && runs[0].inv === runs[1].inv, `P3A (SR): ${k} (${form}): the same gains both days`);
+            }
+            assert(DAY_REPLIES[k][0] !== undefined && SCENES[scene].choices[i].failDo, `P3A (SR): ${k} keeps its failure`);
+        }
+        // YF: the seven texts written for the cat only now read by form: three different texts, none broken, on every Ashfall day
+        const YF = [
+            ['supper', 1, {}, (t) => t.split('\n\n').slice(1).join('\n\n')],
+            ['village_night', 1, {}, (t) => t],
+            ['village_night', 2, {}, (t) => t.split('\n\n')[0]],
+            ['mei_walk', 2, {}, (t) => t],
+        ];
+        for (const [id, vday, flags, part] of YF) {
+            const v = FORMS.map(([form]) => { const g = F(seed++, form, vday); Object.assign(g.flags, flags); return part(txt(id, g)); });
+            assert(v.every((t) => !bad(t) && t.length > 40) && new Set(v).size === 3, `P3A (YF): ${id} (day ${vday}) reads differently in each form`);
+        }
+        { const v = FORMS.map(([form]) => { const g = F(seed++, form, 2); return SCENES.mei_walk.choices[0].do(g)[0]; }); assert(new Set(v).size === 3 && v.every((t) => !bad(t)), 'P3A (YF): the Day 5 walk home reads differently in each form'); }
+        for (const id of Object.keys(ASHFALL)) for (const vday of [1, 2, 3]) for (const [form] of FORMS) {
+            const g = F(seed++, form, vday); g.flags.far_kind = 'wolves'; let t; try { t = txt(id, g); } catch (e) { t = `THREW ${e.message}`; }
+            assert(!bad(t) && !/four hundred pounds of cat|a bone needle/.test(t), `P3A (YF): ${id} renders as ${form} on Ashfall day ${vday}, without the listed tics`);
+        }
+        assert(/"Your great beast has been staring/.test(txt('wen_lesson', Object.assign(F(seed++, 'tiger'), { flags: { ...F(seed++, 'tiger').flags, lore_realms: true } }))), 'P3A (YF): Old Wen names the great root-kin as such');
+        // YH: Ashfall's haul lines by form (tasks.js hands g to them), the count kept, the venison the big forms' only
+        const J = TASK_HUBS.ashfall.yuki;
+        assert(TASK_HUBS.fo_ashfall.yuki === J && TASK_HUBS.rt_ashfall.yuki === J, 'P3A (YH): Act 1\'s Ashfall uses the same job');
+        const hv = FORMS.map(([form]) => { const g = F(seed++, form); return [J.got(3, g), J.got(1, g), yukiSaysS(g, J.none), yukiSaysS(g, J.full), J.alts[0].got(2, g), J.alts[0].got(1, g)]; });
+        assert(hv.every((r) => r.every((t) => !bad(t)) && r[0].includes('3 hares')), 'P3A (YH): every haul line renders, the count kept');
+        for (let i = 0; i < 6; i++) assert(new Set(hv.map((r) => r[i])).size === (i === 3 ? 2 : 3), `P3A (YH): haul line ${i} by form (${hv.map((r) => r[i].slice(0, 30)).join(' | ')})`);
+        { const t = F(seed++, 'tiger'), h = F(seed++, 'human'); assert(J.alts[1].big && J.alts[1].got(1, t) !== J.alts[1].got(1, h) && J.alts[1].got(2, t) !== J.alts[1].got(2, h), 'P3A (YH): the venison lines, the great root-kin\'s and the woman\'s'); }
+        assert(/pick\.got\(n, g\)/.test(readFileSync(new URL('../js/core/tasks.js', import.meta.url), 'utf8')) && /yukiSays\(g, job\.none\)/.test(readFileSync(new URL('../js/core/tasks.js', import.meta.url), 'utf8')), 'P3A (YH): Yuki\'s lane hands the game to her lines');
+        // ST: the stomp texts of the three fights, every degree and form; the arson's degree-2 win no longer the scene's twin
+        for (const id of ['wolves', 'thornback', 'arson']) for (const [form] of FORMS) {
+            const g = F(seed++, form); const S = STOMP[id];
+            const all = [1, 2, 3].map((d) => S.posture(g, d)).concat([S.win[2](g), S.win[3](g), S.one(g)]);
+            assert(all.every((t) => !bad(t) && t.length > 20), `P3A (ST): ${id}'s stomp texts render as ${form}`);
+        }
+        { const v = FORMS.map(([form]) => STOMP.thornback.win[3](F(seed++, form)).split('\n\n')[0]); assert(new Set(v).size === 3, 'P3A (ST): the thornback\'s crushing win in each form'); }
+        { const g = F(seed++, 'cat'); const w2 = STOMP.arson.win[2](g), w = txt('arson_won', g); const sent = 'You came by night to burn a widow\'s house. Your ancestors will hear of it from me.';
+          assert(w2 !== w && w2.includes(sent) && w.includes(sent) && STOMP.arson.win[3](g).includes(sent), 'P3A (ST): the arson\'s wins keep the mother\'s sentence, and degree 2 is its own text'); }
+        // LB and the continuity fixes
+        const lab = (id) => SCENES[id].choices.map((c) => c.text);
+        assert(lab('ashfall').includes('Drill the village hunters. They\'ll be standing next to you at the post.') && lab('workshop').includes('Spearheads for the hunters. They\'ll need them when the collectors come.') && lab('arson_start')[0] === 'Then it\'s the hard way.', 'P3A (LB): the three labels');
+        assert(FORMS.every(([form]) => !/tomorrow/i.test(txt('mei_walk', F(seed++, form, 2)))), 'P3A (rider 1): the Day 5 walk says no "tomorrow"');
+        assert(!/older than Old Wen/.test(txt('drill', F(seed++, 'cat'))), 'P3A (rider 2): no hunter older than Old Wen');
+        // RV1 (Fable's review): TG4 every Ashfall scene in every form under each flag set; TG3 the listed tics nowhere in those texts, the
+        // choices' results or the stomp texts; TG5 a success twice on one day, a failure first, a save with no day record; TG6 the stomp facts;
+        // TG8 the clinic's second-day lines name no first-day patient, and supper's form paragraph follows both openings
+        const TICS = /four hundred pounds of cat|a bone needle|a long moment|for a moment|the way a\b|something like|a long time/i;
+        const FLAGSETS = [{}, { ignored: true, mei_bruised: true }, { loft_burned: true }, { gao_broken: true }, { gao_spared: true }, { night5_done: true }, { militia: 1 }, { far_kind: 'bull' }, { far_kind: 'deer' }, { far_kind: 'wolves' }, { lore_realms: true }, { lore_realms: true, lore_tree: true }];
+        let rendered = 0;
+        for (const id of Object.keys(ASHFALL)) for (const flags of FLAGSETS) for (const vday of [1, 2, 3]) for (const [form] of FORMS) for (const d of [0, 1]) {
+            const g = F(seed++, form, vday); Object.assign(g.flags, flags); if (!g.flags.far_kind) g.flags.far_kind = 'wolves'; onDay(g, d); g.scene = id;
+            let t; try { t = txt(id, g); } catch (e) { t = `THREW ${e.message}`; }
+            if (bad(t) || TICS.test(t)) { assert(false, `P3A (RV1, TG4/TG3): ${id} as ${form}, day ${vday}, ${JSON.stringify(flags)}, text day ${d + 1} (${String(t).slice(0, 90)})`); continue; }
+            rendered++;
+            for (const c of SCENES[id].choices || []) {
+                for (const fn of [c.do, c.failDo]) {
+                    if (typeof fn !== 'function') continue;
+                    const h = F(seed++, form, vday); Object.assign(h.flags, g.flags); onDay(h, d); h.scene = id; h.inventory.jade_bracket = 2; h.inventory.ghost_gill = 1; h.james.qi = 99; let out;
+                    try { out = (fn(h, { success: fn === c.do, ratio: fn === c.do ? 1 : 0.2 }) || []).filter((x) => typeof x === 'string'); } catch (e) { out = [`THREW ${e.message}`]; }
+                    if (out.some((x) => bad(x) || TICS.test(x))) assert(false, `P3A (RV1, TG3): ${id} "${String(c.text).slice(0, 30)}" as ${form}: ${out.join(' | ').slice(0, 120)}`);
+                }
+            }
+        }
+        assert(rendered === Object.keys(ASHFALL).length * FLAGSETS.length * 3 * 3 * 2, `P3A (RV1, TG4): every Ashfall scene rendered (${rendered})`);
+        for (const id of ['wolves', 'thornback', 'arson']) for (const [form] of FORMS) {
+            const g = F(seed++, form); const S = STOMP[id]; const all = [1, 2, 3].map((d) => S.posture(g, d)).concat([S.win[2](g), S.win[3](g), S.one(g)]);
+            assert(!all.some((t) => TICS.test(t)), `P3A (RV1, TG3): ${id}'s stomp texts as ${form} without the listed tics`);
+        }
+        // TG5
+        {
+            const g = F(seed++, 'cat'); g.scene = 'workshop'; const c = SCENES.workshop.choices[0];
+            delete g.lines; ensureBars(g);
+            const f1 = c.failDo(g)[0]; const s1 = c.do(g)[0]; const s2 = c.do(g)[0];
+            assert(s1 === DAY_REPLIES['workshop:0'][0] && s2 === s1 && !DAY_REPLIES['workshop:0'].includes(f1), `P3A (RV1, TG5): a failure, then two successes on one day: the first text twice (${s1} | ${s2})`);
+            g.minutes += 1440; const s3 = c.do(g)[0];
+            assert(s3 === DAY_REPLIES['workshop:0'][1], `P3A (RV1, TG5): the next day the second text (${s3})`);
+            const h = F(seed++, 'cat'); delete h.lines; const r = deserialize(serialize(h)); r.scene = 'workshop';
+            assert(SCENES.workshop.choices[0].do(r)[0] === DAY_REPLIES['workshop:0'][0], 'P3A (RV1, TG5): a save with no day record starts from the first text');
+        }
+        // TG6
+        {
+            const g = F(seed++, 'tiger'); const W = STOMP.wolves, T = STOMP.thornback, A = STOMP.arson;
+            assert([T.win[2](g), T.win[3](g)].every((t) => /eggs/.test(t)) && [W.win[2](g), W.win[3](g), T.win[2](g), T.win[3](g)].every((t) => /\bbow/.test(t)), 'P3A (RV1, TG6): the thornback\'s eggs in both wins; the hunters\' bows in every win');
+            assert(/the wolf first/.test(W.win[3](g)) && [A.win[2](g), A.win[3](g)].every((t) => /Ashfall decides you are theirs\.$/.test(t)) && /Elder Brother Gao will hear/.test(A.win[3](g)), 'P3A (RV1, TG6): one wolf home; the arson ends on Ashfall\'s decision; Pock-Face\'s threat');
+            assert(new Set([W.one(g), T.one(g), A.one(g)].map((t) => t.split(/\s+/).slice(0, 3).join(' '))).size === 3, 'P3A (RV1, TG6, L5): the three one-move lines open differently');
+        }
+        // TG8
+        assert(['clinic:0', 'clinic:1'].every((k) => !/purple|burn|first day/i.test(DAY_REPLIES[k][1])), 'P3A (RV1, TG8, M2): the clinic\'s second-day lines name no patient of the queue');
+        for (const [form] of FORMS) {
+            const a = F(seed++, form, 1), b = F(seed++, form, 1); b.flags.ignored = true;
+            const pa = txt('supper', a).split('\n\n').slice(1).join('\n\n'), pb = txt('supper', b).split('\n\n').slice(1).join('\n\n');
+            assert(pa === pb && /Three days/.test(pa) && !/lower than she did to you/.test(pa), `P3A (RV1, TG8, M1): supper's form paragraph the same after both openings as ${form}`);
         }
     }
     // RV2 (M1, Fable's review): Ya names the ship on her ledge only once it has been found
@@ -1434,7 +1547,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         ['fo_drill', /^Spar with Yuki in front of them/, {}, /Afterwards Old Hu bows to the cat\./, /Afterwards Old Hu bows to the cat\./, /Afterwards Old Hu bows to Yuki\. Only to Yuki\./],
         ['heart_spring', /^Sit by the water/, {}, /a warm wall and Yuki in your lap and listen/, /a warm wall and Yuki's head in your lap and listen/, /a warm wall and Yuki's shoulder against yours and listen/],
         ['heart_camp', /^Sit up with Yuki and the hearth-log/, {}, /Yuki purrs against your chest the whole way through\./, /Yuki purrs with her head on your chest the whole way through\./, /Yuki leans against your shoulder and purrs, very quietly, the whole way through\./],
-        ['wen_lesson', /^Listen\. Ask\./, { lore_realms: true }, /exactly it\. Yuki, on your knee, has not stopped/, /exactly it\. Yuki, her chin on your knee, has not stopped/, /exactly it\. Yuki, beside you, has not stopped/],
+        ['wen_lesson', /^Listen\. Ask\./, { lore_realms: true }, /exactly right\. Yuki, on your knee, has not once/, /exactly right\. Yuki, her chin on your knee, has not once/, /exactly right\. Yuki, beside you, has not once/], // v0.11.169 (P3A): Fable's rewrite
         ['rt_ford', /^Cross carefully, stone by stone/, {}, /On the far bank Yuki shakes a wet paw at the river, formally/, /On the far bank Yuki shakes a wet paw at the river, formally/, /On the far bank Yuki wrings out the hem of her dress at the river, formally/],
     ];
     for (const [id, label, flags, ...want] of RES) {
@@ -1498,10 +1611,10 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
             assert(want[i].test(t) && want.filter((re) => re.test(t)).length === same, `NR1: ${id} (${Object.values(flags).join(', ') || 'plain'}) as ${form} (${t.slice(0, 70)}…)`);
         });
     }
-    // PC: Old Wen's lesson (the scene's quote) and the Tans' taunt (the fight's posture)
+    // PC: Old Wen's lesson (the scene's quote; v0.11.169, P3A YF: "Your great beast" of the great root-kin) and the Tans' taunt (the fight's posture)
     for (const [form, wen, tans] of [
-        ['cat', /"Your cat's been staring toward it/, /In the deep forest\. With a \*cat\*\." Little Tan/],
-        ['tiger', /"Your cat's been staring toward it/, /With a —" He looks at Yuki properly for the first time\. He has practised this\. "\*Cat\*\." Little Tan/],
+        ['cat', /"Your cat has been staring toward it/, /In the deep forest\. With a \*cat\*\." Little Tan/],
+        ['tiger', /"Your great beast has been staring toward it/, /With a —" He looks at Yuki properly for the first time\. He has practised this\. "\*Cat\*\." Little Tan/],
         ['human', /"Your companion has been staring toward it/, /With a \*lady\*\. In \*silk\*\." Little Tan/],
     ]) {
         const g = FM(60200 + n++, form, { lore_realms: true }); goTo(g, SCENES, 'wen_lesson'); // the forest lesson, after the realms
@@ -1869,11 +1982,11 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         // [scene, flags, the great root-kin's line, [her clause, the cat's clause] where the text also swaps one]
         ["ah_hawks_lost", {}, "\n\nYuki sits upwind with a hawk's tail feathers in her teeth and a scorched stripe down one flank. *Mine is also holy,* says the bond. *Nobody is reviewing mine.*"],
         ["ape_lost", {}, "\n\nYuki lies along your other side with one foreleg held off the ground. The ape threw her before it hit you, and she came back on three legs, in time to see it go. She is purring, low, the purr that isn't for pleasure."],
-        ["arson_lost", {}, " Yuki has one of them flat in the lane under both forepaws, and it is the wrong one: the torch was in the other man's hand. She keeps him all the same, and when the street has finished with the fire it finds it still has somebody to be grave at."], // v0.11.131 (XB2, AP): she keeps him
+        ["arson_lost", {}, " Yuki has one of them flat in the lane under both forepaws, and it is the wrong one: the torch was in the other man's hand. She keeps him all the same, and when the street has finished with the fire it finds it still has somebody to be grave at.", null, [" Yuki has one of them pinned in the lane with her knee between his shoulders, and it is the wrong one: the other man had the torch. She keeps him all the same, so that when the street has finished with the fire there is still somebody left for it to be grave at.", '']], // v0.11.169 (P3A, YF): and the woman's line // v0.11.131 (XB2, AP): she keeps him
         ["bl_night_lost", {}, " Yuki, who had hold of it until it had hold of her ear, lies across your feet with the ear at half-mast. *Three voices,* says the bond. *I am also telling you off. I am just doing it quietly.*"],
         ["collectors_lost", {}, "\n\nThen he flicks two fingers, and the net comes off Yuki: a spirit-beast net, thrown from his sleeve in the first breath of the fight, before he so much as drew. She has been under it since your knees went. She walks over on legs that aren't quite steady and stands across you. Nobody asks her to move."],
         ["dw_serpent_lost", { fly: true }, "\n\nYuki surfaces a moment later with a length of serpent in her mouth that is no longer attached to anything, climbs out, and shakes four hundred pounds of swamp over all three of you. *It let go,* says the bond. *Eventually. You're welcome.*"],
-        ["far_lost", {}, " Yuki comes in behind you on three good legs and lies down across the doorway. Mei Lin steps over her without breaking off, comes back with the salve, and starts on the cat. The lecture now covers you both."],
+        ["far_lost", {}, " Yuki comes in behind you on three good legs and lies down across the doorway. Mei Lin steps over her without breaking off, comes back with the salve, and starts on the cat. The lecture now covers you both.", null, [" Yuki comes in behind you holding one arm with the other, and sits on the doorstep without a word. Mei Lin does not break off. She fetches the salve, turns the arm to the light, and starts on it. The lecture now covers you both.", '']], // v0.11.169 (P3A, YF): and the woman's line
         ["fo_spy_fled", {}, "\n\nYuki's portrait has the whole facing page, and its margin says only *large*, underlined twice. She watches the mountain until he is off the last switchback. *Uphill,* says the bond. *No.*"],
         ["fo_wolf_lost", {}, " Yuki comes out of the barley the other way a moment later, with grey fur in her teeth and no goat: she went after the one that came at her, the lame one, while the other went round. Wolves do that."],
         ["mire_lost", { fly: true }, " Yuki rises beside you, black to the shoulder, having learnt that the mire holds four hundred pounds a great deal better than it holds eleven, and lets go of them a great deal more slowly. *We do not speak of this,* says the bond."], // v0.11.131 (XB2, FY): for a flier
@@ -1934,7 +2047,6 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         // and the human's texts unchanged); HP Lu Han answers the hairpin, not a bluff; FY James's fall, the mire and the serpent by flight
         const view = (id, form, flags = {}, realm) => { const g = FM(67000 + n++, form, flags); if (realm !== undefined) { g.yuki.realm = realm; g.james.realm = realm; } goTo(g, SCENES, id); return sceneView(g, SCENES).text; };
         const FL = [
-            ['arson_start', {}, " Behind you the loft boards creak as four hundred pounds of cat gets up. *He's only counted one of us,* says the bond."],
             ['fo_wolf_forced', {}, ' Yuki did not stop for a headband. She is sitting in the middle of the lane, washing one paw, and the wolves have slowed. They have not stopped.'],
             ['ring_forced', {}, " Yuki has the gallery behind you, all of it, wall to wall. *I can't turn round in here,* says the bond. *So we are going forward.*"],
             ['night_attack_forced', {}, ' Yuki, who was never going to run, gets up. *Good,* says the bond. *I outweigh them. All of them, together.*'],
@@ -1947,6 +2059,11 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         for (const [id, flags, line] of FL) {
             const [cat, tiger, human] = ['cat', 'tiger', 'human'].map((form) => view(id, form, flags));
             assert(tiger.includes(line) && tiger.replace(line, '') === cat && human === cat, `XB2 (FL): ${id} ${JSON.stringify(flags)}: her line, hers alone`);
+        }
+        {   // v0.11.169 (P3A, YF): arson_start has the great root-kin's line (Fable's rewrite) and now the woman's, each hers alone
+            const [cat, tiger, human] = ['cat', 'tiger', 'human'].map((form) => view('arson_start', form));
+            const T = " Behind you the loft boards creak as Yuki gets up, all of her. *He's only counted one of us,* says the bond.", H = " Behind you Yuki is standing already. \"He has counted one of us,\" she says, without much interest.";
+            assert(tiger.includes(T) && tiger.replace(T, '') === cat && human.includes(H) && human.replace(H, '') === cat, 'XB2 (FL) / P3A (YF): arson_start: the great root-kin\'s line and the woman\'s, each hers alone');
         }
         assert(/step through it/.test(view('night_attack_forced', 'tiger')), 'XB2 (FL): night_attack_forced keeps Incremental Mode\'s hedge');
         // HP: each offer marks itself when it fails; both fail to bluff_fail

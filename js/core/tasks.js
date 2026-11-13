@@ -350,6 +350,8 @@ function resolveWork(g, scenes, hubId, card, id) {
     return lines;
 }
 
+/** v0.11.169 (owner picks P3A, CA1, YH): a Yuki job's `none` / `full` line, a string or a function of `g` (Ashfall's by her form). */
+export const yukiSays = (g, t) => (typeof t === 'function' ? t(g) : t);
 /**
  * v0.11.71 (owner pick Y1): what Yuki brings on this job: her own kind, or once it can't take the whole haul (`n`; after
  * the cold review, R1) the first of the job's `alts` that can (a `big` one, venison, only in tiger or human form);
@@ -388,9 +390,9 @@ function yukiTick(g, hubId, minutes) {
         y.progress -= len;
         const n = yukiHaul(g, job);
         const pick = n > 0 ? yukiCatch(g, job, n) : null;
-        if (pick) { addItem(g, pick.item, n); lines.push(`${pick.got(n)} +${n} ${itemNames[pick.item]?.name || pick.item}.`, ...awardYukiFightXp(g, 'challenging')); }
-        else if (n > 0) lines.push(job.full || job.none, ...awardYukiFightXp(g, 'challenging')); // v0.11.71 (Y1): everything she brings here is full: she eats it; XP and familiarity as a haul
-        else lines.push(job.none);
+        if (pick) { addItem(g, pick.item, n); lines.push(`${pick.got(n, g)} +${n} ${itemNames[pick.item]?.name || pick.item}.`, ...awardYukiFightXp(g, 'challenging')); }
+        else if (n > 0) lines.push(yukiSays(g, job.full || job.none), ...awardYukiFightXp(g, 'challenging')); // v0.11.71 (Y1): everything she brings here is full: she eats it; XP and familiarity as a haul
+        else lines.push(yukiSays(g, job.none));
         takeCapNotes();
         st(g).fam[job.id] = r1(f + (n > 0 ? 1 : 0.5));
     }

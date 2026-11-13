@@ -10,17 +10,29 @@
  * `evening`: where James comes to if he collapses (HP 0) during a task — the stand-in until the Coil (3c).
  */
 import { nextEvening } from './ashfall.js';
+import { byForm } from './common.js';
+/** The great root-kin's or the woman's text (the venison lines: never the cat's, `big`). */
+const bigForm = (g, tiger, human) => byForm(g, tiger, tiger, human);
 
+/* v0.11.169 (owner picks P3A, CA1, YH; texts Fable's, rule 10): the barley-field lines by Yuki's form (cat, great root-kin,
+ * human; `byForm`); tasks.js hands `g` to `got`, and `none` / `full` may be functions of `g`. The venison lines show in the
+ * great root-kin's and the woman's forms only (`big`). */
 const YUKI_ASHFALL = {
     id: 'yuki:ashfall', label: 'Hunt the barley fields', minutes: 75, dc: 1.5, item: 'hare_raw', n: 1,
-    got: (n) => (n > 1 ? `Yuki leaves ${n} hares on Mei Lin's step. Mei Lin's mother bows to the cat. The cat accepts.` : 'Yuki leaves a hare on Mei Lin\'s step, in a precise line with the door.'),
-    none: 'Yuki comes back from the barley with nothing but burrs, and a grievance against the farmer\'s dog.',
+    got: (n, g) => (n > 1
+        ? byForm(g, `Yuki leaves ${n} hares on Mei Lin's step, in a row, by size. Mei Lin's mother bows to the cat. The cat accepts.`, `Yuki leaves ${n} hares on Mei Lin's step, set down one at a time from a mouth that could have carried twenty. Mei Lin's mother bows from inside the doorway.`, `Yuki brings ${n} hares to Mei Lin's door by the ears and hands them over. Mei Lin's mother receives them with both hands, as one receives a gift from a magistrate.`)
+        : byForm(g, "Yuki leaves a hare on Mei Lin's step, squared exactly to the door.", "Yuki leaves a hare on Mei Lin's step. In her mouth it looked like a mouse; on the step it is a hare again.", "Yuki sets a hare on Mei Lin's step, straightens it with one foot, and goes to wash her hands.")),
+    none: (g) => byForm(g, "Yuki comes back from the barley with burrs, no hare, and a grievance against the farmer's dog.", "Yuki comes back from the barley with nothing. Every hare in the field saw her coming, and so did the farmer's dog, which has not been seen since.", "Yuki comes back from the barley with burrs in her hair, no hare, and a low opinion of the farmer's dog. She does not discuss it."),
     // v0.11.71 (owner pick Y1, texts Fable's): her own kind full → the next of these not full (big: tiger or human form only); all full → `full`
     alts: [
-        { item: 'fowl_raw', got: (n) => (n > 1 ? "Yuki leaves two mire fowl on Mei Lin's step. Mei Lin's mother bows, lower than for the hares. The cat finds this appropriate; you had hares enough." : "Yuki leaves a mire fowl on Mei Lin's step, dead straight, with the gravity of a cat who knows you have run out of room for hares.") },
-        { item: 'venison', big: true, got: (n) => (n > 1 ? "Yuki leaves most of an ash-deer on Mei Lin's step and the whole household comes out to be solemn at it. Nobody asks about hares. The hares have been seen to, and then some." : "Yuki leaves a haunch of ash-deer on Mei Lin's step. The step was not built for it. The hares, it is understood, are no longer a question.") }
+        { item: 'fowl_raw', got: (n, g) => (n > 1
+            ? byForm(g, "Yuki leaves two mire fowl on Mei Lin's step. Mei Lin's mother bows, lower than for the hares. The cat finds this appropriate; you had hares enough.", "Yuki leaves two mire fowl on Mei Lin's step. Mei Lin's mother bows, lower than for the hares. Yuki allows it; you had hares enough.", "Yuki hands Mei Lin's mother two mire fowl at the door. The bow is lower than for the hares. \"You had hares enough,\" Yuki says, which is all the explanation there is.")
+            : byForm(g, "Yuki leaves a mire fowl on Mei Lin's step, dead straight, with the gravity of a cat who knows you have run out of room for hares.", "Yuki leaves a mire fowl on Mei Lin's step, dead straight, with the gravity of something very large being exact about something very small.", "Yuki lays a mire fowl on Mei Lin's step, dead straight, and remarks that you have run out of room for hares.")) },
+        { item: 'venison', big: true, got: (n, g) => (n > 1
+            ? bigForm(g, "Yuki drags most of an ash-deer up to Mei Lin's step and the whole household comes out to be solemn at it. Nobody asks about hares.", "Yuki walks up the lane with most of an ash-deer over one shoulder and sets it on Mei Lin's step. The whole household comes out to be solemn at it, and at her. Nobody asks about hares.")
+            : bigForm(g, "Yuki leaves a haunch of ash-deer on Mei Lin's step. The step was not built for it, or for her.", "Yuki leaves a haunch of ash-deer on Mei Lin's step, carried in one hand like a parcel. The hares, it is understood, are no longer a question.")) }
     ],
-    full: "Yuki comes back from the barley fed and unhurried, and leaves nothing on the step. You already carry everything the fields have to offer. She ate the rest, out of principle.",
+    full: (g) => byForm(g, "Yuki comes back from the barley fed and unhurried, and leaves nothing on the step. You already carry everything the fields have to offer. She ate the rest, out of principle.", "Yuki comes back from the barley fed and unhurried, and leaves nothing on the step. You already carry everything the fields have to offer. She ate the rest, out of principle.", "Yuki comes back from the barley unhurried, with nothing for the step. You already carry everything the fields have to offer, she says, so she ate the rest. It was adequate."),
 };
 
 export const TASK_HUBS = {
