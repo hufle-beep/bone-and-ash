@@ -48,6 +48,8 @@ export const yukiSpeed = (f) => Math.min(YUKI_CAP, useSpeed(f, YUKI_N));
  * not hauls (an empty haul counts half), worded as the cards' "5/8 to Skilled". */
 export const YUKI_BEST = Math.ceil(((YUKI_CAP - 1) * YUKI_N) / (USE_CAP - 1));
 export const yukiSpeedLine = (f) => (yukiSpeed(f) >= YUKI_CAP ? `×${YUKI_CAP}, her\u00a0best` : `×${Math.floor(yukiSpeed(f) * 10 + 1e-9) / 10}\u00a0of\u00a0×${YUKI_CAP} · ${Math.round((f || 0) * 10) / 10}/${YUKI_BEST}\u00a0to\u00a0her\u00a0best`);
+/** v0.11.159 (owner pick NX2, CL): a Yuki job's label by its id (`yuki:<hub>`), for the Coil screen's own line for her. */
+export const yukiJobLabel = (id) => Object.values(TASK_HUBS).find((h) => h.yuki?.id === id)?.yuki.label || 'Yuki\'s hunting';
 export const cardSpeed = (f) => useSpeed(f, USE_N.card);
 const nextAt = (f) => FAM.find((t) => t.at > f)?.at ?? null;
 /** v0.11.155 (FD1, NX): a work or door card's familiarity line names the next step ("Practised · 5/8 to Skilled"); "Mastered" at the top.

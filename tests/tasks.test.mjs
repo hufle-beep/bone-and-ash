@@ -3096,9 +3096,26 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
       rewind(x, { to: 'game' }); assert(!x.stats.passUnknown && x.stats.pass === x.coil.n && passCoils(x) === 1, 'R1: the next whole-game rewind starts a known pass'); }
     // S1: the closest cards (only those that grew this Coil), the screen's new lines
     { const x = hub(7211, 'wilds', 2); x.coil.start.fam = { 'wild_forage:0': 1.5, 'wild_forage:1': 5 }; x.tasks.fam = { 'wild_forage:0': 1.5, 'wild_forage:1': 7, 'wild_hunt:0': 1, 'wild_train:0': 19, 'yuki:wilds': 17 };
-      const r = coilReport(x); assert(JSON.stringify(r.near.map((n) => [n.id, n.at, n.tier])) === JSON.stringify([['yuki:wilds', 18, 'Mastered'], ['wild_forage:1', 8, 'Skilled'], ['wild_hunt:0', 2, 'Practised']]), `S1: the closest three, grown this Coil, none at the top tier (${JSON.stringify(r.near)})`);
+      const r = coilReport(x); assert(JSON.stringify(r.near.map((n) => [n.id, n.at, n.tier])) === JSON.stringify([['wild_forage:1', 8, 'Skilled'], ['wild_hunt:0', 2, 'Practised']]), `S1 + CL (v0.11.159): the closest cards, grown this Coil, none at the top tier, Yuki's job not among them (${JSON.stringify(r.near)})`);
+      assert(JSON.stringify(r.yuki) === JSON.stringify([{ id: 'yuki:wilds', f: 17 }]) && !r.gained.some((l) => /Skilled/.test(l)) && r.gained.includes('1 card Mastered'), `CL: her job in her own list, not counted among the cards (her 0 → 17 would have been "1 card Skilled") (${r.gained.join(' · ')})`);
       endCoil(x, 'choice', 'wilds'); goTo(x, SCENES, 'coil_end'); const t = sceneView(x, SCENES).text;
-      assert(/\*\*Closest to the next tier:\*\* Yuki's hunting 17\/18 \(Mastered\) · River cress in the shallows 7\/8 \(Skilled\) · /.test(t) && /\*\*Carries over:\*\* familiarity with every card/.test(t) && t.includes(`**Targets:** ${targetsText(x)}`), `S1 + T1: the Coil screen's lines (${t.slice(t.indexOf('**Closest'), t.indexOf('**Closest') + 160)})`); }
+      const { yukiSpeedLine: ysl } = await import('../js/core/tasks.js');
+      assert(/\*\*Closest to the next tier:\*\* River cress in the shallows 7\/8 \(Skilled\) · /.test(t) && !/Closest to the next tier:[^\n]*Yuki/.test(t) && t.includes(`**Yuki's hunting:** Hunt alone in the reeds (${ysl(17)})`) && /\*\*Carries over:\*\* familiarity with every card and Yuki's practice, /.test(t) && t.includes(`**Targets:** ${targetsText(x)}`), `S1 + T1 + CL: the Coil screen's lines (${t.slice(t.indexOf('**Closest'), t.indexOf('**Closest') + 260)})`); }
+    // CL (v0.11.159): only jobs that grew this Coil, each by its label, in id order; none grown, no line
+    { const x = hub(7216, 'wilds', 2); x.coil.start.fam = { 'yuki:wilds': 8, 'yuki:rr': 2 }; x.tasks.fam = { 'yuki:wilds': 8, 'yuki:rr': 4.5, 'yuki:ah': 20 };
+      const r = coilReport(x); const { yukiJobLabel: yjl, yukiSpeedLine: ysl } = await import('../js/core/tasks.js');
+      assert(JSON.stringify(r.yuki.map((y) => y.id)) === JSON.stringify(['yuki:ah', 'yuki:rr']) && yjl('yuki:rr') === 'Hunt along the roots' && yjl('yuki:ah') === 'Hunt the ash slopes' && yjl('yuki:ashfall') === 'Hunt the barley fields', `CL: the grown jobs only, in id order, by their labels (${JSON.stringify(r.yuki)})`);
+      endCoil(x, 'choice', 'wilds'); goTo(x, SCENES, 'coil_end'); const t = sceneView(x, SCENES).text;
+      assert(t.includes(`**Yuki's hunting:** Hunt the ash slopes (${ysl(20)}) · Hunt along the roots (${ysl(4.5)})`), `CL + BR (RV1): two jobs on one line, each speed in brackets (${t.slice(t.indexOf("**Yuki's"), t.indexOf("**Yuki's") + 160)})`);
+      const y = hub(7217, 'wilds', 2); y.coil.start.fam = { 'yuki:wilds': 8 }; y.tasks.fam = { 'yuki:wilds': 8 }; endCoil(y, 'choice', 'wilds'); goTo(y, SCENES, 'coil_end');
+      assert(!sceneView(y, SCENES).text.includes("**Yuki's hunting:**"), 'CL: no line when her practice did not grow');
+      // RV1 TG: an unknown id's label; the screen's blank lines when only her line shows; after a rewind only the growth since it
+      assert(yjl('yuki:nowhere') === "Yuki's hunting", 'TG: an unknown job id falls back to "Yuki\'s hunting"');
+      const z = hub(7218, 'wilds', 2); z.coil.start.fam = {}; z.tasks.fam = { 'yuki:wilds': 3 }; endCoil(z, 'choice', 'wilds'); goTo(z, SCENES, 'coil_end'); const tz = sceneView(z, SCENES).text;
+      assert(!tz.includes('**Closest to the next tier:**') && /\n\n\*\*Yuki's hunting:\*\* Hunt alone in the reeds \([^)]*\)\n\n\*\*Carries over:\*\*/.test(tz) && !/\n\n\n/.test(tz), `TG: only her line, one blank line either side (${JSON.stringify(tz.slice(tz.indexOf('**James'), tz.indexOf('**Targets')))})`);
+      const w = hub(7219, 'wilds', 2); w.tasks.fam['yuki:wilds'] = 5; endCoil(w, 'choice', 'wilds'); rewind(w, { to: 'game' });
+      assert(w.coil.start.fam['yuki:wilds'] === 5 && coilReport(w).yuki.length === 0, `TG: after a rewind her practice is the new Coil's start, nothing listed yet (${JSON.stringify(w.coil.start.fam)})`);
+      w.tasks.fam['yuki:wilds'] = 6.5; assert(JSON.stringify(coilReport(w).yuki) === JSON.stringify([{ id: 'yuki:wilds', f: 6.5 }]), 'TG: then only the growth since the rewind lists her'); }
 }
 // every card that was ever offered was also played at least once
 const all = cardsListed;

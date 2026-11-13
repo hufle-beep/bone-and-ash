@@ -19,6 +19,7 @@
  */
 import { coilStart, coilSnap, ensureBars, SAVE_VERSION, newGame, yukiAbove } from './game.js';
 import { famTier, FAM } from './tasks.js';
+const isYukiJob = (id) => id.startsWith('yuki:'); // v0.11.159 (owner pick NX2, CL): her jobs are not cards; the Coil screen gives her her own line
 
 /** What James knows and keeps (plus Yuki's own flags and the Long Forest run, so that run stays scaled; v0.11.31: and the speed gates, tasks.js maxSpeed). */
 export const KEEP_FLAGS = ['lore1', 'lore_realms', 'lore_tree', 'saw_lights', 'yuki_tiger_seen', 'yuki_human_seen', 'yk_path', 'yk_wait', 'long', 'longforest', 'lf_instant', 'spd_pro', 'spd_a1'];
@@ -72,18 +73,21 @@ export function coilReport(g) {
     up('Convergence Use', s.cu, g.james.skills['Convergence Use']);
     up('Yuki\'s Fight', s.yf, g.yuki.fight);
     const tiers = [0, 0, 0, 0];
-    for (const [id, f] of Object.entries(g.tasks.fam || {})) { const t = famTier(f); if (t > famTier(s.fam[id] || 0)) tiers[t]++; }
+    for (const [id, f] of Object.entries(g.tasks.fam || {})) { if (isYukiJob(id)) continue; const t = famTier(f); if (t > famTier(s.fam[id] || 0)) tiers[t]++; }
     for (let t = 1; t < 4; t++) if (tiers[t]) gained.push(`${tiers[t]} card${tiers[t] > 1 ? 's' : ''} ${FAM[t].name}`);
     const known = c.known.map((f) => REMEMBER[f] || KNOW_TEXT[f]).filter(Boolean);
     // v0.11.72 (owner pick S1): the cards that grew this Coil and are closest to their next tier (up to 3)
     const near = [];
     for (const [id, f] of Object.entries(g.tasks.fam || {})) {
+        if (isYukiJob(id)) continue;
         const t = famTier(f), next = FAM[t + 1];
         if (!next || f <= (s.fam[id] || 0)) continue;
         near.push({ id, f, at: next.at, tier: next.name, frac: (f - FAM[t].at) / (next.at - FAM[t].at) });
     }
     near.sort((a, b) => b.frac - a.frac || a.id.localeCompare(b.id));
-    return { n: c.n, why: c.why, gained, known, near: near.slice(0, 3) };
+    // v0.11.159 (NX2, CL): each Yuki job whose practice grew this Coil, in id order (her lane's speed line on the screen)
+    const yuki = Object.entries(g.tasks.fam || {}).filter(([id, f]) => isYukiJob(id) && f > (s.fam[id] || 0)).map(([id, f]) => ({ id, f })).sort((a, b) => a.id.localeCompare(b.id));
+    return { n: c.n, why: c.why, gained, known, near: near.slice(0, 3), yuki };
 }
 
 /* ---------- v0.11.72 (owner pick T1): a target per act and the personal best ---------- */

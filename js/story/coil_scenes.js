@@ -6,6 +6,7 @@
 import { advance, startActCoil, combatHooks, PEOPLE_FIGHTS, coilMult, coilMultNext, fmtMult } from '../core/game.js';
 import { setDeathHook, goTo } from '../core/story.js';
 import { coilActive, endCoil, rewind, coilReport, actOf, actWon, willUnwind, noteClear, targetsText } from '../core/coil.js';
+import { yukiJobLabel, yukiSpeedLine } from '../core/tasks.js'; // v0.11.159 (owner pick NX2, CL)
 
 const WHY = {
     collapse: `Somewhere between the ground and the dark, the Ouroboros Axiom turns.
@@ -30,10 +31,9 @@ Then you pick it up again. The Ouroboros Axiom turns, slow this time, not a hand
 Or you could close the loop yourself: bite the tail, and wake at a dawn you have already seen, with what you remember and nothing you've carried.`,
 };
 
-/** v0.11.72 (S1): a card's name for the Coil screen, from its id ("scene:index"; Yuki's job by its label). */
+/** v0.11.72 (S1): a card's name for the Coil screen, from its id ("scene:index"). v0.11.159 (RV1, DC): Yuki's jobs have their own line (`yukiJobLabel`). */
 function cardName(g, id) {
     const [scene, i] = [id.slice(0, id.lastIndexOf(':')), Number(id.slice(id.lastIndexOf(':') + 1))];
-    if (scene === 'yuki') return 'Yuki\'s hunting';
     const c = cardScenes[scene]?.choices?.[i];
     const t = c ? String(typeof c.text === 'function' ? c.text(g) : c.text) : id;
     return t.length > 40 ? `${t.slice(0, 38).replace(/[\s,.:;—-]+\S*$/, '')}…` : t.replace(/\.$/, '');
@@ -60,8 +60,10 @@ export function installCoil(SCENES) {
 **James remembers:** ${r.known.length ? `${r.known.join('; ')}.` : 'the way the moss smells. Not much else worth writing down.'}
 ${r.near.length ? `
 **Closest to the next tier:** ${r.near.map((x) => `${cardName(g, x.id)} ${x.f}/${x.at} (${x.tier})`).join(' · ')}
+` : ''}${r.yuki?.length ? `
+**Yuki's hunting:** ${r.yuki.map((y) => `${yukiJobLabel(y.id)} (${yukiSpeedLine(y.f)})`).join(' · ')}
 ` : ''}
-**Carries over:** familiarity with every card, what James remembers, the faster learning, Yuki's bond, and a quarter of each relationship's best as a head start.
+**Carries over:** familiarity with every card and Yuki's practice, what James remembers, the faster learning, Yuki's bond, and a quarter of each relationship's best as a head start.
 
 **Targets:** ${targetsText(g)}
 

@@ -2,6 +2,20 @@
 
 Started 2026-11-13 (v0.11.157), when `history-18.md` would have passed about 45 KB. Newer than `history-18.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.159 (word for word)
+
+### Decided in chat
+
+- **v0.11.156: Act 1's once-a-day cards (DM1, TX1, TX-A, RV1, PX1):** the full entry moved word for word to `history-19.md` in v0.11.157 (the handover past 35 KB). In short: OF the Blackroot's forage repeats (the grub and the beetle once a day, a card's relationship gain once a day), OS both Scout cards on one day, OA the Fallout's Palisade, Militia and Clinic more than one a day (the Council daily), OM the last day's drill for practice ("Militia · practice only", Fable's T3–T5); PX1 the baseline re-saved (178 numbers).
+  - **Fable's T1, not in the game (TD):** "The first stretch stands along a third of the line, white and sharp and still humming. The hunters have not put their mallets down. Neither, apparently, have you."
+
+### From "Version notes"
+
+## v0.11.156 — Act 1's once-a-day cards (DM1, TX1, TX-A, RV1, PX1)
+
+- **Files:** `js/story/task_hubs.js` (the six menus' `daily` out; `rt_hunters`' note), `js/story/act1_blackroot.js` (the entries' gates and marks; `relToday`; the grub and the beetle daily; the scout's day mark), `js/story/act1_fallout.js` (the entries' gates; the three menus' day marks), `js/story/act1_return.js` (`DRILL_AGAIN`, the drill shown after the militia), `js/story/oneoff.js` (`PRACTICE_MENUS`, `DAY_DONE`), `js/core/tasks.js` (`groupNote`), `js/main.js` (`groupHtml`'s note), `js/core/news.js`, `tests/tasks.test.mjs`, `tools/baseline.json` (re-saved, PX1), `tools/text-baseline.json`, `tools/timings.json`, `sw.js`, docs. Saves: new day-mark keys (`rel_<card>@<day>`, `rr_grub@`, `ah_beetle@`); old `rr_forage@` and the like unread; no id or flag renamed.
+- **Checks:** a game and balance change (rule 2): the full check after DM1 (exit 0; 0 drifted, 33 moved more than 5), after TX-A (the same), after RV1 (stopped: `bumpRel` with a variable name, fixed; then 1 drifted, PX), after PX1 (exit 0 with the re-saved baseline); mutation 5 of 5 DM1 and 4 of 4 RV1. **Fable's review:** H1, M2, M3 and the lows fixed (RV1).
+
 ## Moved from the handover in v0.11.158 (word for word)
 
 ### Decided in chat
