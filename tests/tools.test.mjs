@@ -624,6 +624,22 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md'];
     assert(/nearly all/.test(band(0)) && /hundreds/.test(band(1)) && /uncommon/.test(band(2)) && /uncommon/.test(band(3)) && /rare/.test(band(4)) && /very rare/.test(band(5)) && /very rare/.test(band(6)) && /almost unprecedented/.test(band(7)), 'lore: the owner\'s bands and N1\'s placements (2–3 uncommon, 5–6 very rare)');
     assert([8, 9, 10, 11].every((n) => /nobody documented/.test(band(n))), 'lore: realms 8–14 have no documented person');
     assert(/Shen Qiu/.test(band(2)) && /BT_REALMS/.test(sheet) && /#122/.test(sheet), 'lore: Shen Qiu at Core Formation; the sheet points to BT_REALMS and #122');
+    // v0.11.165 (owner pick LO1, 14:17 / 14:21): the lifespans fit Shen Qiu's three hundred years; this world's lifespans are normal, James's world the outlier; his people climb by the same multiples
+    const life = [...sheet.matchAll(/^\| (\d+(?:–\d+)?) \| [^|]+ \| [^|]+ \| [^|]+ \| ([^|]+) \|/gm)].map((m) => m[2]);
+    const shen = (readFileSync(path.join(ROOT, 'js/story/act1_return.js'), 'utf8').match(/I have lived (\w+) hundred years/) || [])[1];
+    assert(shen === 'three' && /four hundred \(Shen Qiu has lived three hundred\)/.test(life[2] || ''), `lore: Core Formation's lifespan above Shen Qiu's ${shen} hundred years (${life[2]})`);
+    const words = { 'a hundred and twenty': 120, 'four hundred': 400, 'five hundred': 500, 'six hundred': 600, 'seven hundred': 700, 'nine hundred': 900, 'a thousand': 1000, sixty: 60 };
+    const yrs = life.slice(0, 8).map((t) => Object.entries(words).find(([w]) => t.includes(w))?.[1] ?? NaN);
+    assert(yrs.every((y, i) => y > (yrs[i - 1] ?? 0)), `lore: the lifespans rise with every realm 0–7 (${yrs.join(', ')})`);
+    assert(/\*\*The lifespans are normal\*\*/.test(sheet) && !/short for the realm/.test(sheet), 'lore: the sheet calls the lifespans normal (owner 14:17)');
+    const mult = (sheet.match(/\*\*James's people climb by the same multiples\*\*[^\n]*/) || [''])[0];
+    const pairs = [...mult.matchAll(/×(\d+)(⅔|⅓)?[^(]*\((?:about )?([\d,]+)–([\d,]+)/g)].map((m) => [Number(m[1]) + (m[2] === '⅔' ? 2 / 3 : m[2] === '⅓' ? 1 / 3 : 0), Number(m[3].replace(',', '')), Number(m[4].replace(',', ''))]);
+    assert(pairs.length === 7 && pairs.every(([k, lo, hi]) => Math.abs(lo - 800 * k) <= 0.02 * 800 * k + 5 && Math.abs(hi - 900 * k) <= 0.02 * 900 * k + 5), `lore: James's people's spans are 800–900 × each rung's multiple (${pairs.map((p) => p.join('/')).join('; ')})`);
+    const ks = [2, 400 / 60, 500 / 60, 10, 700 / 60, 15, 1000 / 60];
+    assert(pairs.every(([k], i) => Math.abs(k - ks[i]) < 0.01), 'lore: each multiple is the rung\'s span over a mortal\'s sixty');
+    const world = (lore.match(/^- \*\*James's place in it[^\n]*/m) || [''])[0];
+    assert(/James's world is the outlier/.test(world) && /ship_log3/.test(world) && /Act 2/.test(world), 'lore: James\'s world is the outlier; ship_log3 marked for the rewrite; an Act 2 plot point');
+    assert(/pure, and that pure Qi was part of their evolution/.test(lore), 'lore: why his people live long (pure Qi, their evolution)');
 }
 // v0.11.79 (owner pick R1): hard rule 8, Claude uploads the changed docs itself after every push (no question), in CLAUDE.md and the working agreement
 {
