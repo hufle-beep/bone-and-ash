@@ -126,3 +126,20 @@ export function dayReply(key, list) {
     const k = `r:${key}`;
     return (g) => { noteDay(g, k); return byDay(g, list, k); };
 }
+
+/**
+ * v0.11.166 (owner picks RW1, FT1; Fable's texts): replies by day and by Coil. The Act 1 flirts showed the same five replies again in
+ * every Coil (one a day, from the first again each Coil). `coilReply(key, sets)` keeps one set of day texts per Coil: the act's first
+ * Coil the first set (the old replies), the next the second, then the third, then round again (`actCoil`: Coils since this save
+ * crossed into the act, `stats.coils0`, the one count kept across acts). The day record (`r:<key>`) is the same as `dayReply`'s; the
+ * text lint and the tests read every set (`DAY_REPLIES[key]` all sets in order, `COIL_SETS[key]` the sets). No save field.
+ */
+export const COIL_SETS = {};
+const whole = (v, d) => { const n = Math.floor(Number(v)); return Number.isFinite(n) && n > 0 ? n : d; }; // RV1 (L1, Fable's review): a hand-edited count reads as the default
+export const actCoil = (g) => Math.max(0, whole(g?.coil?.n, 1) - ((g?.coil?.act || 0) === 1 ? whole(g?.stats?.coils0, 1) : 1));
+export function coilReply(key, sets) {
+    COIL_SETS[key] = sets;
+    DAY_REPLIES[key] = sets.flat();
+    const k = `r:${key}`;
+    return (g) => { noteDay(g, k); return byDay(g, sets[actCoil(g) % sets.length], k); };
+}

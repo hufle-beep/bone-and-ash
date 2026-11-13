@@ -9,7 +9,7 @@ import { addItem, hasItem, eat, advance, clockParts, d6, awardYukiFightXp, james
 import { hasForm } from '../core/forms.js';
 import { choiceOpen, gives } from '../core/story.js'; // v0.11.161 (PO2): `optionLeft`; RV (GV, Fable's H1): the wrapper carries the card's items
 import { daily, markDaily, eatBest, pantry, foodCount, hour, byForm, byDay, dayIndex, dayReply } from './common.js';
-import { noteDay, DAY_REPLIES } from '../core/lines.js';
+import { noteDay, DAY_REPLIES, coilReply } from '../core/lines.js'; // v0.11.166 (RW1): coilReply, the flirts by Coil
 import { encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil } from './act1_common.js';
 
 /* v0.11.136 (owner pick NC1, NT1's push 2): replies by day (js/core/lines.js dayReply): the first text is the old reply, the rest Fable's, one for each later day of a Coil. */
@@ -20,13 +20,26 @@ const DR_STAKES = dayReply("bl_camp:2", [
     "Another ring, leaning out at the dark. Yuki inspects it from the inside, which is the correct side, and goes back to the fire.",
 ]);
 // RV2 (L4, Fable's review): day 2's grin reworded ("with every tooth she owns" is ya_fight_start's)
-const DR_YA_FLIRT = dayReply("talk_ya:0", [
+// v0.11.166 (owner picks RW1, FT1; Fable's): a set of five a Coil (coilReply): the first set the old replies, then two new sets, then round again
+const DR_YA_FLIRT = coilReply("talk_ya:0", [[
     "She looks at you like you're a bone-elk and she's hungry.",
     "She grins with all of her teeth and walks a slow circle round you, the way she does round anything she means to keep.",
     "She tells you your flirting is getting better. Then she tells you what it was like before, in detail, with gestures.",
     "She stops, sniffs the air beside your neck, and announces to nobody in particular that the scholar is learning.",
     "She hears you out to the end, which is new, and then explains that where she comes from all of that is said with one shove. She demonstrates. You get up again.", // v0.11.152 (owner pick RP1, RM2; Fable's): the 5th talk
-]);
+], [
+    "She stops dead and watches your mouth, in case more falls out. \"Small words,\" she says. \"But you threw them at me.\" She appears to count it as your first kill.",
+    "Her laugh is loud enough to end the hunting for a mile. She tells you that was a good one, and that you may try again tomorrow, since you have plainly used up everything you had.",
+    "She takes your chin in her hand and turns your face left, then right, checking for fever. No fever. \"Then you meant it,\" she says, satisfied, and lets go a little later than she needs to.",
+    "For three steps she is offended, because she thinks you were mocking her. Then she works it out, comes back twice as pleased, and makes you carry her spear a while as a mark of favour.",
+    "She says nothing, and from Ya that is a great deal. She pulls a tooth off her necklace, looks at it, looks at you, and threads it back on. \"Not yet,\" she tells the tooth. \"Close.\"",
+], [
+    "Ya squints at you. \"Is that the thing villages do? With the talking first?\" You say it is. She says it's slow, and that you should carry on, because she wants to see how it ends.",
+    "Two fingers in your ribs, hard, to find out what the words are made of. You hold still. \"Hm,\" says Ya. \"More in there than I thought.\" From her, you happen to know, that's poetry.",
+    "She answers by lifting you clear of the ground, briefly, to check your weight, and setting you down. \"Heavy enough,\" she says. You ask what for. She looks at you with real pity.",
+    "She flirts back at once and louder: a boast about what she can carry, how far, and uphill. Up ahead Mei Lin's step falters. Ya notices, raises her voice, and adds a river.",
+    "She frowns, because nobody ever taught her what to do when one lands. So she digs out the best strip of dried meat she has, the one she was saving, and watches you eat every bit.",
+]]);
 const DR_YA_OFF = dayReply("talk_ya:3", [
     "She bares her teeth at you and walks on ahead. She'll get over it. Probably.",
     "She spits to one side, with accuracy, and lengthens her stride until all you can see of her is her back. It is an expressive back.",
@@ -39,14 +52,27 @@ const DR_LIGHTS = dayReply("bl_night_event:1", [
     "You go after them as far as the roots let you. They slip through a gap you couldn't get an arm into, one by one, without hurrying, and the song thins out behind them like a door being closed gently.",
     "You follow as far as there is anywhere to stand. The last light waits at the crack a moment longer than the others, or you'd like to think so, and then goes in after the song.",
 ]);
-const DR_MEI_FLIRT = dayReply("talk_mei:1", [
+// v0.11.166 (owner picks RW1, FT1; Fable's): a set of five a Coil (coilReply): the first set the old replies, then two new sets, then round again
+const DR_MEI_FLIRT = coilReply("talk_mei:1", [[
     "She tells you you're impossible. She's smiling while she says it.",
     "She says that in Ashfall a man would be fined for that. She does not say she would report him.",
     "She checks over her shoulder first, from habit. Then she laughs anyway, out loud, and looks pleased with the crime.",
     // v0.11.152 (owner pick RP1, RM1; Fable's): the 4th and 5th talks (up to 5 Blackroot days)
     "She informs you, in her temple voice, that she is ignoring you. Her ears have gone pink, and she walks a little closer for the rest of the mile.",
     "She answers you in kind this time, and worse, and then stares into her basket as if the basket had said it. You are fairly sure she has been practising.",
-]);
+], [
+    "One eyebrow goes up. She asks whether that line works where you come from. You admit the data is thin. She says she can tell, and hides her mouth behind a sprig of something bitter.",
+    "\"Shameless,\" she says, in the tone her mother keeps for hail damage, and holds it almost to the end of the word. Then she walks on ahead so you can't see her face. Her shoulders are laughing.",
+    "She puts a leaf in your hand and tells you it's for swelling of the head. It's for nothing; you know the plant. You keep it anyway, and she sees you keep it.",
+    "Today she laughs without looking behind her first. A few steps on she notices, and goes quiet, working out what that cost her. Nothing, apparently. She seems to find the price suspicious.",
+    "She stops, sets the basket down, and tugs your coat straight at the shoulders, where it was already straight. \"There,\" she says. \"Now you may say it again.\" You say it again. She listens to all of it.",
+], [
+    "She tells you, gravely, that a respectable woman would walk away. She goes on walking beside you at exactly the same pace. You point this out. \"I'm considering it,\" she says. \"Respectably.\"",
+    "The wind took it, she claims, and makes you say it twice. There is no wind. The second time she takes it in word by word, like a buyer, and says she has heard worse from better men.",
+    "A seed pod goes past your ear, a yard wide. You tell her the aim needs work. She says that one was a warning, picks up a second, and doesn't miss.",
+    "In her most proper voice she gives you what three Ashfall matrons would say to that, one matron at a time. The third sounds a good deal like agreement. Yuki's ears turn to catch it.",
+    "She hands you the basket. You hold the basket. With both hands free she resets her hairpin, slowly, tassel and all, and asks you to go on. You gather the view is being improved on purpose.",
+]]);
 const DR_SNARE = dayReply("rr_hunt:1", [
     "Ya sulks about the elk all afternoon.",
     "Ya carries the catch by the ears and tells it, personally, that it is not an elk.", // RV2 (L3, Fable's review): one hare on a thin haul

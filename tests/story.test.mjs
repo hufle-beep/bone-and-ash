@@ -1,7 +1,7 @@
 // Run: node tests/story.test.mjs — story graph integrity + 1,000 random playthroughs (2,000 before v0.11.34) (no crash, no dead end, always reaches the end);
 // Incremental Mode since v0.11.34 (D1: Story Mode dropped from the game)
 import { SCENES, START_SCENE } from '../js/story/prologue.js';
-import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, itemCap, yukiSitsOut, migrate, REL_HIDDEN, REL_MAX, serialize, deserialize, sleepUntil } from '../js/core/game.js'; // v0.11.127 (LQ2, TG): yukiSitsOut, migrate; v0.11.137 (HV1): REL_HIDDEN, REL_MAX
+import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, itemCap, yukiSitsOut, migrate, REL_HIDDEN, REL_MAX, serialize, deserialize, sleepUntil, startActCoil } from '../js/core/game.js'; // v0.11.166 (RV1, M2): startActCoil // v0.11.127 (LQ2, TG): yukiSitsOut, migrate; v0.11.137 (HV1): REL_HIDDEN, REL_MAX
 import { sceneView, choose, goTo, wasPicked, threatOf } from '../js/core/story.js'; // v0.11.136 (RV2, TG): threatOf
 import { actionOpen } from '../js/core/forms.js';
 import { btTarget } from '../js/story/meridians.js';
@@ -13,7 +13,7 @@ import { likesMei, likesYa } from '../js/story/act1_common.js'; // v0.11.123 (EQ
 import { KEEP_FLAGS, rewind } from '../js/core/coil.js'; // v0.11.137 (HV1, Fable L2): rewind on an old save // v0.11.123 (ER1, T3)
 import { againView, noteRead } from '../js/story/again.js'; // v0.11.125 (RW1, T); v0.11.133 (FP2): noteRead
 import { STOMP } from '../js/story/power.js'; // v0.11.126 (NQ1)
-import { coilStamp, dayIndex, textDay, DAY_REPLIES, noteDay, linesOf, pickLine } from '../js/core/lines.js'; // v0.11.135 (NT1, EV1); v0.11.136 (NC1): DAY_REPLIES
+import { coilStamp, dayIndex, textDay, DAY_REPLIES, COIL_SETS, actCoil, noteDay, linesOf, pickLine } from '../js/core/lines.js'; // v0.11.166 (RW1): COIL_SETS, actCoil; // v0.11.135 (NT1, EV1); v0.11.136 (NC1): DAY_REPLIES
 import { splitReply, splitLine, landReply, noteSaid } from '../js/core/replies.js'; // v0.11.136 (NC1); RV2 (TG): landReply, noteSaid
 import { runTask, taskOutcome, cardCheck, taskCards } from '../js/core/tasks.js'; // v0.11.136 (RV2, TG); v0.11.139 (MW1): taskCards
 import { writeFileSync, readFileSync, readdirSync } from 'node:fs'; // v0.11.137 (HV1, T): the story files read for bumpRel
@@ -313,7 +313,8 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     const OLD_FORMS = {"tiger":{"heart_camp:3":"You play the first part again, just Wren's voice, just the planting. Yuki purrs with her head on your chest the whole way through.","heart_spring:2":"You sit with your back to a warm wall and Yuki's head in your lap and listen to the water, and for half an hour nobody needs anything from you.","wen_lesson:forest":"You ask what the hunters' tales say the singing sounded like. He thinks about it with great seriousness. \"Like something you have already heard,\" he says at last, \"and cannot name.\" You don't tell him that's exactly it. Yuki, her chin on your knee, has not stopped looking toward the forest."},"human":{"heart_camp:3":"You play the first part again, just Wren's voice, just the planting. Yuki leans against your shoulder and purrs, very quietly, the whole way through.","heart_spring:2":"You sit with your back to a warm wall and Yuki's shoulder against yours and listen to the water, and for half an hour nobody needs anything from you.","wen_lesson:forest":"You ask what the hunters' tales say the singing sounded like. He thinks about it with great seriousness. \"Like something you have already heard,\" he says at last, \"and cannot name.\" You don't tell him that's exactly it. Yuki, beside you, has not stopped looking toward the forest."}};
     const ST6K = ['rr_forage:2', 'rr_forage:2:after', 'ah_forage:2', 'ah_forage:2:after', 'ah_hunt:1:part', 'ah_hunt:1:full']; // v0.11.154 (PS1, ST6): their own test (RP1 push 2's block)
     const keys = Object.keys(DAY_REPLIES).filter((k) => !ST6K.includes(k));
-    assert(keys.length === 38 && keys.reduce((s, k) => s + DAY_REPLIES[k].length - 1, 0) === 63, `NC1: 38 reply lists with 52 new texts; v0.11.152 (RP1): 11 more (${keys.length}, ${keys.reduce((s, k) => s + DAY_REPLIES[k].length - 1, 0)})`);
+    const first = (k) => COIL_SETS[k]?.[0] ?? DAY_REPLIES[k]; // v0.11.166 (RW1): a Coil's set for the lists by Coil
+    assert(keys.length === 38 && keys.reduce((s, k) => s + first(k).length - 1, 0) === 63, `NC1: 38 reply lists with 52 new texts; v0.11.152 (RP1): 11 more (${keys.length}, ${keys.reduce((s, k) => s + first(k).length - 1, 0)})`);
     assert(JSON.stringify([...keys].sort()) === JSON.stringify(NC.map(([k]) => k).sort()), 'NC1: a list for every reply the bots saw on two days, and no other');
     const state = (g) => { const { lines, log, ...rest } = g; return JSON.stringify(rest); }; // RV2 (TG): the whole game but the day record and the log
     let n = 0;
@@ -331,7 +332,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
             const sp = splitReply(lines);
             return { reply: sp.reply.join(' '), gains: JSON.stringify(sp.gains), delta: [before, state(g)] };
         };
-        const list = DAY_REPLIES[key].map((t) => { const g = ensureBars(fresh(5200)); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; return typeof t === 'function' ? t(g) : t; });
+        const list = first(key).map((t) => { const g = ensureBars(fresh(5200)); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; return typeof t === 'function' ? t(g) : t; });
         const days = list.map((_, k) => run(k));
         if (form === 'cat') assert(days[0].reply === old && days[0].gains === JSON.stringify(OLD_GAINS[key]), `NC1: ${key}: the first day's reply and its gains are the old ones (${days[0].reply} | ${days[0].gains})`);
         else if (OLD_FORMS[form][key]) assert(days[0].reply === OLD_FORMS[form][key], `NC1 (RV2, TG): ${key} (${form}): the first day's reply is the old one`);
@@ -371,6 +372,68 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         assert(threatOf(t, SCENES, 0) === null && JSON.stringify(t.lines || null) === rec, 'NC1 (RV2, TG): the threat word leaves the day record alone');
         const c = ensureBars(fresh(5303)); c.scene = 'talk_ya'; const r0 = splitReply(choose(c, SCENES, 0).lines).reply;
         assert(r0.includes(DAY_REPLIES['talk_ya:0'][0]) && c.lines.d['r:talk_ya:0'].length === 1, 'NC1 (RV2, TG): a story choice through choose() shows the first text and notes its day');
+    }
+    // v0.11.166 (owner picks RW1, FT1; Fable's texts): the flirts by Coil: three sets of five, the first the old replies; the act's
+    // first Coil the first set, the next the second, then the third, then round again; a day's text within the Coil's set as before
+    {
+        const OLD = { 'talk_ya:0': "She looks at you like you're a bone-elk and she's hungry.", 'talk_mei:1': "She tells you you're impossible. She's smiling while she says it." };
+        const NEW1 = { 'talk_ya:0': 'She stops dead and watches your mouth, in case more falls out.', 'talk_mei:1': 'One eyebrow goes up. She asks whether that line works where you come from.' };
+        const NEW2 = { 'talk_ya:0': 'Ya squints at you. "Is that the thing villages do?', 'talk_mei:1': 'She tells you, gravely, that a respectable woman would walk away.' };
+        assert(JSON.stringify(Object.keys(COIL_SETS).sort()) === JSON.stringify(['talk_mei:1', 'talk_ya:0']), `RW1: the two flirts go by Coil, nothing else (${Object.keys(COIL_SETS)})`);
+        const all = [];
+        for (const [key, idx] of [['talk_ya:0', 0], ['talk_mei:1', 1]]) {
+            const sets = COIL_SETS[key];
+            assert(sets.length === 3 && sets.every((x) => x.length === 5) && DAY_REPLIES[key].length === 15, `RW1: ${key}: three sets of five, all fifteen for the lint`);
+            assert(sets[0][0] === OLD[key] && sets[1][0].startsWith(NEW1[key]) && sets[2][0].startsWith(NEW2[key]), `RW1: ${key}: set 1 the old replies, sets 2 and 3 Fable's`);
+            all.push(...sets.flat());
+            for (const t of sets.flat()) assert(typeof t === 'string' && (sets[0].includes(t) || t.split(/\s+/).length >= 20) && t.split(/\s+/).length <= 45 && !/undefined|\$\{/.test(t) && splitLine(t).gain === '' && splitLine(t).reply === t, `RW1: ${key}: a reply only, 20–45 words (${t.slice(0, 40)})`);
+            for (const coil of [0, 1, 2, 3, 4]) for (const day of [0, 1, 2, 3, 4, 5]) {
+                const g = ensureBars(fresh(5400 + coil)); g.scene = key === 'talk_ya:0' ? 'talk_ya' : 'talk_mei'; g.coil.act = 1; g.stats.coils0 = 3; g.coil.n = 3 + coil;
+                g.minutes = Math.floor(g.minutes / 1440) * 1440 + 11 * 1440 + 9 * 60;
+                for (let d = 0; d < day; d++) { noteDay(g, `r:${key}`); g.minutes += 1440; }
+                const r = splitReply(SCENES[g.scene].choices[idx].do(g)).reply.join(' ');
+                assert(actCoil(g) === coil && r === sets[coil % 3][day % 5], `RW1: ${key}: the act's Coil ${coil + 1}, day ${day + 1} shows set ${(coil % 3) + 1}, text ${(day % 5) + 1} (${r.slice(0, 40)})`);
+            }
+        }
+        assert(new Set(all).size === 30, 'RW1: the thirty flirt replies all differ');
+        const shingles = (t) => { const w = t.toLowerCase().replace(/[^a-z' ]/g, ' ').split(/\s+/).filter(Boolean); const o = new Set(); for (let i = 0; i + 4 < w.length; i++) o.add(w.slice(i, i + 5).join(' ')); return o; };
+        const seen = new Map(); let shared = 0;
+        for (const t of all) for (const sh of shingles(t)) { if (seen.has(sh) && seen.get(sh) !== t) shared++; seen.set(sh, t); }
+        assert(shared === 0, `RW1: no five-word passage shared between two flirt replies (${shared})`);
+        // the old count without coilsN (a save before the crossing count): the one count's Coil from its start
+        const o = ensureBars(fresh(5410)); o.coil.act = 1; delete o.stats.coils0; o.coil.n = 2;
+        assert(actCoil(o) === 1 && actCoil({ coil: { act: 0, n: 1 } }) === 0 && actCoil(null) === 0, 'RW1: actCoil on a save without coils0, the prologue and no game');
+        // RV1 (L1, Fable's review): a hand-edited count (not a number, a fraction, below 1) reads as the default, never NaN
+        for (const [n, c0, want] of [['x', 1, 0], [2.5, 1, 1], [4, 'y', 3], [-3, 1, 0], [3, 0, 2], [3, 1.9, 2]]) {
+            const b = { coil: { act: 1, n }, stats: { coils0: c0 } };
+            assert(actCoil(b) === want, `RW1 (RV1, L1): actCoil with n ${n}, coils0 ${c0} is ${want} (${actCoil(b)})`);
+        }
+        const bad = ensureBars(fresh(5411)); bad.scene = 'talk_ya'; bad.coil.act = 1; bad.coil.n = 'x'; bad.stats.coils0 = 'y';
+        assert(splitReply(SCENES.talk_ya.choices[0].do(bad)).reply.join(' ') === COIL_SETS['talk_ya:0'][0][0], 'RW1 (RV1, L1): a hand-edited save still flirts (set 1)');
+        // RV1 (M2, Fable's review): the real Coil flow: the crossing, Act 1 rewinds (set 2, 3, then 1 again), the whole game again and
+        // the next crossing (set 1 again), each Coil starting on its set's first text, a day's text within the Coil's set
+        const ya = (g) => splitReply(SCENES.talk_ya.choices[0].do(g)).reply.join(' ');
+        const S = COIL_SETS['talk_ya:0'];
+        const g = ensureBars(fresh(5420)); g.coil.n = 3; g.scene = 'bl_start'; g.minutes = 10 * 1440 + 6 * 60;
+        startActCoil(g, 1); g.scene = 'talk_ya';
+        const atDay = (d) => { g.minutes = (10 + d) * 1440 + 9 * 60; g.scene = 'talk_ya'; return ya(g); };
+        const seq = [];
+        seq.push(atDay(0), atDay(0), atDay(1)); for (const d of [2, 3, 4]) atDay(d); seq.push(atDay(5)); // the sixth day it is drawn wraps
+        assert(seq[0] === S[0][0] && seq[1] === S[0][0] && seq[2] === S[0][1] && seq[3] === S[0][0] && actCoil(g) === 0, `RW1 (RV1, M2): the crossing Coil: set 1, the same day twice the same, day 2 text 2, day 6 wraps (${seq.map((t) => t.slice(0, 20)).join(' | ')})`);
+        for (const want of [1, 2, 0]) {
+            rewind(g); assert(g.coil.act === 1 && actCoil(g) % 3 === want && atDay(0) === S[want][0] && atDay(1) === S[want][1], `RW1 (RV1, M2): an Act 1 rewind: set ${want + 1}, from its first text (Coil ${g.coil.n})`);
+        }
+        rewind(g, { to: 'game' }); assert(g.coil.act === 0, 'RW1 (RV1, M2): the whole game again is the prologue');
+        g.coil.n += 1; startActCoil(g, 1); g.scene = 'talk_ya';
+        assert(actCoil(g) === 0 && atDay(0) === S[0][0] && g.stats.coils0 === g.coil.n, `RW1 (RV1, M2): the next crossing starts over with set 1 (Coil ${g.coil.n})`);
+        rewind(g); assert(actCoil(g) === 1 && atDay(0) === S[1][0], 'RW1 (RV1, M2): and its Act 1 rewind brings set 2');
+        // RV1 (L2, Fable's review): the old Act 1 saves load with the right set (v0.11.7's Coil 1 and Coil 2, through deserialize's count)
+        for (const [f, want] of [['v0.11.7-act1-coil1.json', 0], ['v0.11.7-act1-coil2.json', 1]]) {
+            const o2 = deserialize(readFileSync(new URL(`../saves/${f}`, import.meta.url), 'utf8'), { force: true });
+            assert(o2.coil.act === 1 && actCoil(o2) === want, `RW1 (RV1, L2): ${f} loads with set ${want + 1} (n ${o2.coil.n}, coils0 ${o2.stats.coils0})`);
+            const r2 = deserialize(serialize(o2));
+            assert(actCoil(r2) === want, `RW1 (RV1, L2): ${f} keeps its set through a save and load`);
+        }
     }
     // RV2 (M1, Fable's review): Ya names the ship on her ledge only once it has been found
     {
@@ -1937,7 +2000,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     // RM1–RM3, RM6, RM8: the replies by day, as long as the days the choice can come up (talks 5, the fireside 3, the Heart's nights 4, its spring 3)
     const WANT = { 'talk_mei:1': 5, 'talk_ya:0': 5, 'talk_ya:3': 5, 'bl_fireside:2': 3, 'heart_camp:1': 4, 'heart_camp:2': 4, 'heart_camp:3': 4, 'heart_spring:0': 3 };
     for (const [k, n] of Object.entries(WANT)) {
-        const l = DAY_REPLIES[k];
+        const l = COIL_SETS[k]?.[0] ?? DAY_REPLIES[k]; // v0.11.166 (RW1): the first Coil's set for the lists by Coil
         assert(l?.length === n, `RP1 (RM): ${k} has ${n} replies (${l?.length})`);
         for (const form of forms) { const g = RG(58300, form, { ship_found: true }); assert(distinct(l.map((t) => (typeof t === 'function' ? t(g) : t))), `RP1 (RM): ${k}'s replies all differ (${form})`); }
     }

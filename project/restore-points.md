@@ -16,7 +16,8 @@ Older versions (0.11.69 and before): `restore-points-2.md` (moved word for word 
 
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.165 | (this push) | Docs and a test only (LO1: `project/lore.md`, `project/roadmap-2.md` section 5, `project/roadmap.md` group e; `tests/tools.test.mjs`, `tests/README.md`; v0.11.162's entries to `history-19.md`). The game is identical to 0.11.161. |
+| 0.11.166 | (this push) | RW1 (FL), FT1, SP1, RW-A and RV1 (NW + M2 + L1 + L2): `js/core/lines.js` (`coilReply`, `actCoil`), `js/story/act1_blackroot.js` (the two flirts by Coil), `js/core/news.js`, `tests/story.test.mjs`, `tests/README.md`, `tools/text-baseline.json` (re-saved). Saves unchanged (no field); drift baseline unchanged; full check exit 0. Rolling back brings back one set of five each Coil. |
+| 0.11.165 | `6ccb28a` | Docs and a test only (LO1: `project/lore.md`, `project/roadmap-2.md` section 5, `project/roadmap.md` group e; `tests/tools.test.mjs`, `tests/README.md`; v0.11.162's entries to `history-19.md`). The game is identical to 0.11.161. |
 | 0.11.164 | `1982947` | Docs, a test and a save only (N1: the realm sheet in `project/lore.md`; `tests/tools.test.mjs`, `tests/README.md`; `saves/2026-11-13-1356-incremental-a1_again.json`, the owner's; `project/research-2.md` #123; v0.11.161's entries to `history-19.md`). The game is identical to 0.11.161. |
 | 0.11.163 | `263615f` | The bots, the tools and the tests only (W1, HN1, TL2, F1, D1, RV1): `tests/lib/forced.mjs` (new), `tests/models.test.mjs`, `tests/tools.test.mjs`, `tools/textlint.mjs`, `tools/check.mjs`, `tools/lib/jobs.mjs`, `tools/lib/report.mjs`, `tools/baseline.json` and `tools/text-baseline.json` re-saved. The game is identical to 0.11.161. |
 | 0.11.162 | `4296674` | Docs only (MK1: the NEXT list in the handover and the roadmap; v0.11.159's entries to `history-19.md`). The game is identical to 0.11.161. |
