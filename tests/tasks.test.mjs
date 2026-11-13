@@ -204,6 +204,60 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
       assert([DRILL_AGAIN.hard, DRILL_AGAIN.hardFail].some((t) => res.lines.includes(t)) && JSON.stringify(g.rel) === rel0 && Object.keys(g.flags).filter((k) => k.startsWith('oo:')).length === oo0, `LT: a repeat "Drill them hard" through runTask: T3 or T4, no relationship, no once-a-Coil mark (${res.lines})`);
       g.minutes = 19 * 1440 + 19 * 60 + 5; assert(!grp(g, 'Militia').some((c) => c.status === 'open'), 'LT: the practice drill closes at 19:00'); }
 }
+// v0.11.157 (owner pick NX1, PA): the prologue Ashfall's Clinic, Workshop and Militia run more than one card a day, as Act 1's
+// (v0.11.156, OA): each card still once a Coil (a success uses it up), the menus' day marks only hold "Call it a day" as before
+{
+    const { oneOffLeft, onceKey } = await import('../js/story/oneoff.js');
+    const { markDaily: mark } = await import('../js/story/common.js');
+    const { wakeDay: wd } = await import('../js/core/game.js');
+    const at = (seed) => { const g = ensureBars(newGame(seed, { closed: true })); g.minutes = 4 * 1440 + 7 * 60; goTo(g, SCENES, 'ashfall'); Object.assign(g.flags, { healed_try: true, elder: true }); g.james.gu = { tier: 3, level: 10, xp: 0 }; g.james.skills['Convergence Use'] = { tier: 3, level: 10, xp: 0 }; g.james.qi = 60; g.james.satiety = 95; g.inventory.jade_bracket = 2; ensureBars(g); g.james.qi = 60; return g; };
+    const grp = (g, name) => taskCards(g, SCENES).filter((c) => c.group === name);
+    for (const [k, [menu, name]] of [['clinic', 'Clinic'], ['workshop', 'Workshop'], ['drill', 'Militia']].entries()) {
+        const g = at(15701 + k);
+        const c0 = grp(g, name).filter((c) => c.status === 'open');
+        assert(c0.length >= 2 && c0.every((c) => c.id.startsWith(`${menu}:`)), `PA: ${name} offers its cards on the morning of Day 5 (${c0.map((c) => c.id)})`);
+        const first = c0[0].id; const r = runTask(g, SCENES, first);
+        assert(g.scene === 'ashfall' && !r.fail, `PA: ${name}'s first card succeeds for a strong James (${r.lines})`);
+        const c1 = grp(g, name);
+        assert(!c1.some((c) => c.id === first) && c1.length >= 1 && c1.every((c) => c.status === 'open'), `PA: ${name} after one card: that card gone for the Coil, the rest open the same day (${c1.map((c) => `${c.id} ${c.status}`)})`);
+        assert(g.flags[onceKey(menu, +first.split(':')[1])] === true && g.flags[`${menu}@${wd(g)}`] === true, `PA: ${name}'s card marked once a Coil, the menu's day marked`);
+        const second = c1[0].id; runTask(g, SCENES, second);
+        assert(g.scene === 'ashfall' && !grp(g, name).some((c) => c.id === first || c.id === second), `PA: ${name}'s second card the same day, both gone for the Coil (${grp(g, name).map((c) => c.id)})`);
+    }
+    // "Call it a day": one card from each menu today counts as that menu done for the button, as before
+    const base = () => { const g = at(15710); Object.assign(g.flags, { 'oo:wen_lesson': 2, 'oo:herb_slopes': 2, village_hunt: true }); return g; };
+    const unmarked = base(); const marked = base(); for (const k of ['clinic', 'workshop', 'drill']) mark(marked, k);
+    const allDone = base(); for (const m of ['clinic', 'workshop', 'drill']) SCENES[m].choices.forEach((c, i) => { allDone.flags[onceKey(m, i)] = true; });
+    assert(oneOffLeft(unmarked, SCENES, 'ashfall') === true, 'PA (DAY_DONE): with the three menus open and none taken today, "Call it a day" waits');
+    assert(oneOffLeft(marked, SCENES, 'ashfall') === false && oneOffLeft(allDone, SCENES, 'ashfall') === false, 'PA (DAY_DONE): one card from each menu today, or all done for the Coil, lets the button show');
+    const two = base(); for (const k of ['clinic', 'workshop']) mark(two, k);
+    assert(oneOffLeft(two, SCENES, 'ashfall') === true, 'PA (DAY_DONE): a menu with no card today still holds the button back');
+    // the hub's entries no longer read the day marks (the late cutoff stays)
+    const e = at(15711); for (const k of ['clinic', 'workshop', 'drill']) mark(e, k);
+    for (const m of ['clinic', 'workshop', 'drill']) { const c = SCENES.ashfall.choices.find((x) => x.to === m); assert(c.show(e), `PA: the ${m} entry shows after a card today`); }
+    e.minutes = 4 * 1440 + 23 * 60; assert(['clinic', 'workshop', 'drill'].every((m) => !SCENES.ashfall.choices.find((x) => x.to === m).show(e)), 'PA: the entries still close late in the evening');
+    // RV1 (Fable's review, L1–L3): a failed try stays open the same day (no once-a-Coil mark; the day marked; a bracket spent), says
+    // Fable's lines (FT, no "tonight" / "tomorrow"), and "Call it a day" can show after it while that card is still open
+    const { JADE_FAIL, SPEARS_FAIL } = await import('../js/story/ashfall.js');
+    const weak = (seed) => { const w = at(seed); w.james.gu = { tier: 1, level: 1, xp: 0 }; w.james.skills['Convergence Use'] = { tier: 1, level: 1, xp: 0 }; w.james.satiety = 0; w.tasks.fam = {}; ensureBars(w); w.james.qi = 60; return w; };
+    { const w = weak(15712); const ji = SCENES.clinic.choices.findIndex((c) => /jade bracket/.test(c.text)); const b0 = w.inventory.jade_bracket;
+      const r = runTask(w, SCENES, `clinic:${ji}`);
+      if (r.fail) {
+          assert(!w.flags[onceKey('clinic', ji)] && w.flags[`clinic@${wd(w)}`] === true && w.inventory.jade_bracket === b0 - 1, `TG: a failed jade-bracket clinic: no once-a-Coil mark, the day marked, a bracket spent (${b0} → ${w.inventory.jade_bracket})`);
+          assert(grp(w, 'Clinic').find((c) => c.id === `clinic:${ji}`)?.status === 'open', 'TG (L1): the failed card is open again the same day');
+          assert(r.lines.join(' ').includes(JADE_FAIL) && !/tonight/.test(r.lines.join(' ')), `FT: the failed clinic says Fable's line, no "tonight" (${r.lines})`);
+          Object.assign(w.flags, { 'oo:wen_lesson': 2, 'oo:herb_slopes': 2, village_hunt: true }); mark(w, 'workshop'); mark(w, 'drill');
+          assert(oneOffLeft(w, SCENES, 'ashfall') === false && grp(w, 'Clinic').some((c) => c.status === 'open'), 'TG (L4, as Act 1\'s): "Call it a day" shows after a failed try, the card still open');
+      } else assert(false, `TG: the weak-James jade clinic was meant to fail (test setup; ${r.lines})`); }
+    { const w = weak(15713); const si = SCENES.workshop.choices.findIndex((c) => /^Spearheads/.test(c.text));
+      const { hasForm } = await import('../js/core/forms.js'); const sp = SCENES.workshop.choices[si];
+      for (let n = 0; n < 100 && !hasForm(w, sp.form); n++) { const cu = w.james.skills['Convergence Use']; if (cu.level < 10) cu.level++; else { cu.tier++; cu.level = 1; } } // the least Bonesinger that sings the spear
+      assert(hasForm(w, sp.form) && grp(w, 'Workshop').some((c) => c.id === `workshop:${si}`), `TG: the spearheads offered at the least Bonesinger that sings them (${JSON.stringify(w.james.skills['Convergence Use'])})`);
+      const r = runTask(w, SCENES, `workshop:${si}`);
+      if (r.fail || /— partly/.test(r.lines.join(' '))) assert(r.lines.join(' ').includes(SPEARS_FAIL) && !/Tomorrow/.test(r.lines.join(' ')) && !w.flags.spears && grp(w, 'Workshop').find((c) => c.id === `workshop:${si}`)?.status === 'open', `FT: the failed spearheads say Fable's line, no "Tomorrow", and stay open today (${r.lines})`);
+      else assert(false, `TG: the weak-James spearheads were meant to fail (test setup; ${r.lines})`); }
+    assert(!/tonight|[Tt]omorrow/.test(JADE_FAIL + SPEARS_FAIL) && SCENES.clinic.choices.some((c) => c.failDo && String(c.failDo).includes('JADE_FAIL')) && SCENES.workshop.choices.some((c) => c.failDo && String(c.failDo).includes('SPEARS_FAIL')), 'FT: the two lines are wired to their failures and promise no later time');
+}
 // v0.11.20: the lean dry-run copy gives exactly what the old full copy gave (forecast rows, card minutes)
 {
     const hubs = ['camp', 'stream', 'wilds', 'village', 'ashfall', 'fo_ashfall', 'rr_hub', 'dw_hub', 'ah_hub', 'heart_hub', 'rt_camp', 'rt_ashfall'];
@@ -3255,9 +3309,10 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     runTask(g, SCENES, 'drill:0');
     assert(g.flags[onceKey('drill', 0)] === true, 'once: a militia choice done is recorded for the Coil');
     const d1 = taskCards(g, SCENES).find((c) => c.id === 'drill:1');
-    assert(!ids(g).includes('drill:0') && d1?.status === 'tomorrow', 'once: the done choice is gone, the other waits for tomorrow (one per menu per day, B)');
-    delete g.flags[`drill@${wd(g)}`]; // the next day
-    assert(!ids(g).includes('drill:0') && taskCards(g, SCENES).find((c) => c.id === 'drill:1')?.status === 'open', 'once: the next day only the other choice is open');
+    assert(!ids(g).includes('drill:0') && d1?.status === 'open', 'once: the done choice is gone for the Coil, the other open the same day (v0.11.157, NX1 PA: no longer one per menu per day, B)');
+    assert(g.flags[`drill@${wd(g)}`] === true, 'once (PA): the menu still marks the day, for "Call it a day" only');
+    const day0 = wd(g); g.minutes += 1440; // the next day (RV1 TG: a real day on, not a deleted mark)
+    assert(wd(g) === day0 + 1 && !g.flags[`drill@${wd(g)}`] && !ids(g).includes('drill:0') && taskCards(g, SCENES).find((c) => c.id === 'drill:1')?.status === 'open', 'once: the next day the done choice is still gone (once a Coil), the other open');
     const nt = SCENES.drill.choices.findIndex((c) => /^Not today/.test(c.text)); noteOnce(g, 'drill', nt, SCENES.drill.choices[nt]);
     assert(!g.flags[onceKey('drill', nt)], 'once: "Not today" is not work');
     endCoil(g, 'choice'); rewind(g);

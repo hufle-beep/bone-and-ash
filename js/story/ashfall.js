@@ -46,6 +46,10 @@ const meiRel = (g) => g.rel['Mei Lin'] || { f: 0, a: 0 };
 export const hubOf = (g) => (g.flags.long && vday(g) >= 2 ? 'ashfall' : 'village');
 export const nextEvening = (g) => (g.flags.long && vday(g) < 3 ? 'supper' : 'evening');
 const late = (g) => hour(g) >= 19;
+/** v0.11.157 (owner picks NX1, RV1 FT; Fable's lines): a failed clinic or spearhead card can be tried again the same day, so its reply
+ * promises no later time (was "You'll check on him tonight." / "Tomorrow, maybe."). */
+export const JADE_FAIL = 'Most of them. Not the hunter. He thanks you gravely anyway, which is worse.';
+export const SPEARS_FAIL = 'They crack on the first test. The smith says nothing, with great formality.';
 
 /* ---------- day fights past the oak hollow (grow with all the days) ---------- */
 const farHunt = (g) => {
@@ -215,9 +219,9 @@ ${pantry(g)} ${g.james.satiety < 30 ? 'You are hungry.' : ''} ${g.james.hp < jam
             { text: 'Go to the coughing house. A child is sick.', show: (g) => !g.flags.healed_try && !late(g), time: 30, to: 'heal' },
             { text: 'Hunt the ironhide boar past the oak hollow.', show: (g) => !g.flags.village_hunt && hour(g) < 15, time: 90, to: 'village_hunt' },
             { text: 'Gather herbs with Mei Lin on the slopes.', show: (g) => daily('slopes')(g) && hour(g) < 15, time: 30, to: 'herb_slopes' },
-            { text: 'Run a clinic: the sick and the hurt line up at the well.', show: (g) => daily('clinic')(g) && !!g.flags.healed_try && !late(g), time: 20, to: 'clinic' },
-            { text: 'Bone workshop: make things the village needs.', show: (g) => daily('workshop')(g) && !late(g), time: 10, to: 'workshop' },
-            { text: 'Drill the village hunters. They\'ll be standing next to you tomorrow.', show: (g) => daily('drill')(g) && !late(g), time: 10, to: 'drill' },
+            { text: 'Run a clinic: the sick and the hurt line up at the well.', show: (g) => !!g.flags.healed_try && !late(g), time: 20, to: 'clinic' },
+            { text: 'Bone workshop: make things the village needs.', show: (g) => !late(g), time: 10, to: 'workshop' },
+            { text: 'Drill the village hunters. They\'ll be standing next to you tomorrow.', show: (g) => !late(g), time: 10, to: 'drill' },
             { text: 'Sit with Old Wen and listen.', show: (g) => !!g.flags.elder && daily('wen')(g) && !late(g), time: 20, to: 'wen_lesson' },
             { text: 'Hunt beyond the oak hollow.', show: (g) => daily('far')(g) && hour(g) < 16, time: 60, to: 'far_hunt' },
             { text: 'Scout the tribute road.', show: (g) => vday(g) === 3 && !g.flags.scouted_try && hour(g) < 17, time: 30, to: 'scout' },
@@ -251,12 +255,12 @@ She talks about her father again, a little. About how he used to bring her up he
 
     clinic: {
         id: 'clinic', title: 'The Well', art: 'healer', place: `${P} — by the well`,
-        enter: (g) => { markDaily(g, 'clinic'); return []; },
+        enter: (g) => { markDaily(g, 'clinic'); return []; }, // v0.11.157 (NX1, PA): a mark for "Call it a day" only, no longer a gate
         text: (g) => `Word got round about the boy. Now there's a line at the well: an old man with a hand gone purple, a girl with a burn, a hunter with a wound that smells wrong, a mother holding a baby who won't stop crying.
 
 ${g.inventory.jade_bracket ? 'You have jade bracket in the hammerspace. Fifteen years of mycology, and it comes down to this: a stone well and a queue.' : 'You have no fungus left. You have hands, a bone lancet, boiling water and a doctorate. It will have to do.'}`,
         choices: [
-            { text: 'Treat them with the jade bracket.', show: (g) => hasItem(g, 'jade_bracket'), check: { skill: 'GU', dc: 4, bonus: () => 2 }, time: 150, do: (g) => { addItem(g, 'jade_bracket', -1); bumpRel(g, 'Village', 8, 0); g.flags.clinics = (g.flags.clinics || 0) + 1; return ['Everyone goes home better than they came. Ashfall keeps score.']; }, failDo: (g) => { addItem(g, 'jade_bracket', -1); bumpRel(g, 'Village', 3, 0); return ['Most of them. Not the hunter. You\'ll check on him tonight.']; }, to: 'ashfall' },
+            { text: 'Treat them with the jade bracket.', show: (g) => hasItem(g, 'jade_bracket'), check: { skill: 'GU', dc: 4, bonus: () => 2 }, time: 150, do: (g) => { addItem(g, 'jade_bracket', -1); bumpRel(g, 'Village', 8, 0); g.flags.clinics = (g.flags.clinics || 0) + 1; return ['Everyone goes home better than they came. Ashfall keeps score.']; }, failDo: (g) => { addItem(g, 'jade_bracket', -1); bumpRel(g, 'Village', 3, 0); return [JADE_FAIL]; }, to: 'ashfall' },
             { text: 'Treat them with what you have.', check: { skill: 'GU', dc: 5 }, time: 150, do: (g) => { bumpRel(g, 'Village', 6, 0); g.flags.clinics = (g.flags.clinics || 0) + 1; return ['Clean water and a sharp knife, applied with a lot of confidence. It works.']; }, failDo: (g) => { bumpRel(g, 'Village', 2, 0); return [DR_CLINIC_F(g)]; }, to: 'ashfall' },
             { text: 'Not today. Back to the village.', to: 'ashfall' },
         ],
@@ -264,11 +268,11 @@ ${g.inventory.jade_bracket ? 'You have jade bracket in the hammerspace. Fifteen 
 
     workshop: {
         id: 'workshop', title: 'Bone Workshop', art: 'workshop', place: `${P} — the smithy, borrowed`,
-        enter: (g) => { markDaily(g, 'workshop'); return []; },
+        enter: (g) => { markDaily(g, 'workshop'); return []; }, // v0.11.157 (NX1, PA): a mark for "Call it a day" only, no longer a gate
         text: `The smith lends you his bench and stands well back. You sing bone into shapes that Ashfall has needed for years and can't afford in iron. Children gather at a safe distance, then at an unsafe one.`,
         choices: [
             { text: 'Needles and fishhooks for half the village.', qi: 3, check: { skill: 'Convergence Use', dc: 3 }, time: 120, do: (g) => { bumpRel(g, 'Village', 5, 0); return ['Every house gets a set. The seamstress bows to you three times, very low, and cannot be persuaded to stop.']; }, failDo: (g) => { bumpRel(g, 'Village', 2, 0); return [DR_HOOKS_F(g)]; }, to: 'ashfall' },
-            { text: 'Spearheads for the hunters. They\'ll need them tomorrow.', show: (g) => !g.flags.spears, qi: 5, check: { skill: 'Convergence Use', dc: 4, band: 'challenging' }, time: 120, do: (g) => { g.flags.spears = true; bumpRel(g, 'Village', 4, 0); return ['Six white spearheads, hard as antler, sharp as an insult.']; }, failDo: (g) => { bumpRel(g, 'Village', 1, 0); return ['They crack on the first test. Tomorrow, maybe.']; }, to: 'ashfall' },
+            { text: 'Spearheads for the hunters. They\'ll need them tomorrow.', show: (g) => !g.flags.spears, qi: 5, check: { skill: 'Convergence Use', dc: 4, band: 'challenging' }, time: 120, do: (g) => { g.flags.spears = true; bumpRel(g, 'Village', 4, 0); return ['Six white spearheads, hard as antler, sharp as an insult.']; }, failDo: (g) => { bumpRel(g, 'Village', 1, 0); return [SPEARS_FAIL]; }, to: 'ashfall' },
             { text: 'A bone plough-share for the barley field.', show: (g) => !g.flags.plough, qi: 6, check: { skill: 'Convergence Use', dc: 4, band: 'challenging' }, time: 150, do: (g) => { g.flags.plough = true; bumpRel(g, 'Village', 10, 0); return ['It cuts the black earth like butter. Old Wen comes out to watch and doesn\'t say anything for a long time.']; }, failDo: (g) => { bumpRel(g, 'Village', 2, 0); return [DR_PLOUGH_F(g)]; }, to: 'ashfall' },
             { text: 'Not today. Back to the village.', to: 'ashfall' },
         ],
@@ -276,7 +280,7 @@ ${g.inventory.jade_bracket ? 'You have jade bracket in the hammerspace. Fifteen 
 
     drill: {
         id: 'drill', title: 'The Hunters', art: 'drill', place: `${P} — the threshing floor`,
-        enter: (g) => { markDaily(g, 'drill'); return []; },
+        enter: (g) => { markDaily(g, 'drill'); return []; }, // v0.11.157 (NX1, PA): a mark for "Call it a day" only, no longer a gate
         text: (g) => `Eight hunters, two of them older than Old Wen and one of them twelve. They have bows, boar spears and the expression of men who have knelt to the Crimson Lotus every year of their lives.
 
 ${g.flags.militia ? 'Second day. They\'re faster now. They\'re standing differently. That might be the most dangerous thing you\'ve done here.' : 'You are not a soldier. You are, however, a man who has just spent days learning to stay alive against things with more teeth than you. You can teach that.'}`,

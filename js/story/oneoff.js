@@ -2,7 +2,8 @@
  * v0.11.33 (owner 13:34–13:40, picks B + F1 + T1 + S1): the task screens' one-off work. Incremental Mode only; Story Mode
  * and the Long Forest keep their rules.
  * - ONCE_MENUS: every work choice in these menus once per Coil (world flag `oo:<menu>#<i>`; a rewind resets the world, so
- *   it comes back on the next Coil). The menu's daily gate stays (B: at most one per menu per day). Only a success
+ *   it comes back on the next Coil). The menu's daily gate stays (B: at most one per menu per day; gone for Act 1's menus in
+ *   v0.11.156, DM1, and the prologue Ashfall's in v0.11.157, NX1 PA: their day marks only hold "Call it a day", DAY_DONE). Only a success
  *   counts: a failed (or a partial, empty-handed) try can be made again (owner 14:05).
  * - ONCE_STAGES: progressive door scenes (Wen's lessons, the herb slopes): that many visits per Coil (`oo:<scene>`), daily stays.
  * - Repeatable as before: hunts, self-training, foraging (F1), Cultivate, Meditate, rest, eating; talks one each per day (T1).
@@ -24,7 +25,7 @@ const REPEAT_MENUS = new Set(['wild_forage', 'wild_hunt', 'wild_train', 'rr_fora
 const PRACTICE_MENUS = { rt_hunters: (g) => !!g.flags.a1_militia };
 /** v0.11.156 (owner pick DM1, RV1 CD; Fable's review M3): the once-a-Coil menus opened to more than one card a day still count as done
  * for today's "Call it a day" after one card (their old day marks), so the button comes when it did before. */
-const DAY_DONE = { fo_palisade: 'a1_palisade', fo_drill: 'a1_drill', fo_clinic: 'a1_clinic', rr_scout: 'rr_scout' };
+const DAY_DONE = { fo_palisade: 'a1_palisade', fo_drill: 'a1_drill', fo_clinic: 'a1_clinic', rr_scout: 'rr_scout', clinic: 'clinic', workshop: 'workshop', drill: 'drill' }; // v0.11.157 (NX1, PA): the prologue Ashfall's three
 /** The hubs with a set evening (the hour their evening exit shows). */
 export const EVENING_HOUR = { wilds: 15, ashfall: 16, fo_ashfall: 16, rr_hub: 16, dw_hub: 16, ah_hub: 16, heart_hub: 16, rt_ashfall: 15 };
 

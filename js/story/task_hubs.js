@@ -63,7 +63,9 @@ export const TASK_HUBS = {
     },
     ashfall: {
         doors: ['heal', 'village_hunt', 'herb_slopes', 'wen_lesson', 'far_hunt', 'scout'],
-        menus: { clinic: { label: 'Clinic', daily: 'clinic' }, workshop: { label: 'Workshop', daily: 'workshop' }, drill: { label: 'Militia', daily: 'drill', drill: true } },
+        // v0.11.157 (owner pick NX1, PA): the prologue Ashfall's Clinic, Workshop and Militia have no `daily`: more than one card a day,
+        // each still once a Coil (as Act 1's, v0.11.156 OA); their day marks only for "Call it a day" (oneoff.js DAY_DONE)
+        menus: { clinic: { label: 'Clinic' }, workshop: { label: 'Workshop' }, drill: { label: 'Militia', drill: true } },
         own: 'Around the village',
         yuki: YUKI_ASHFALL,
         evening: nextEvening,
