@@ -83,6 +83,10 @@ const DR_BEETLE_AFTER = dayReply('ah_forage:2:after', ['Ya looks at you like you
 const DARTS_PART = [`The darts go out flat through the ash haze and most of them hit ash. One hare stops being fast. Ya fetches it without being asked and holds it up by the ears, considering it. "Thin," she says. "Like you." Above you the hawks wheel off, unimpressed, trailing sparks.`, `The darts go out low under the haze, and the haze keeps most of them. One hare stays where it was. Ya walks out for it, taking her time, and brings it back by the hind legs, swinging. "One," she says. "I counted for you." Above you the hawks slide off down the wind, unconvinced, shedding sparks.`];
 const DARTS_FULL = [`The darts go out flat through the ash haze and the hares stop being fast. Ya fetches them without being asked and comes back holding them up by the ears. "Small," she says. "But you hit what you aimed at. Rare, for you." Above you the hawks wheel off, disappointed, trailing sparks.`, `The darts go out low under the haze and every one arrives. The hares stop where they are. Ya walks out for them and comes back with one in each fist, turning them over for a fault. "Clean," she says, annoyed. "Now I have nothing to say." Above you the hawks slide off down the wind, put out, shedding sparks.`];
 DAY_REPLIES['ah_hunt:1:part'] = DARTS_PART; DAY_REPLIES['ah_hunt:1:full'] = DARTS_FULL; // the text lint reads them
+/** v0.11.156 (owner pick DM1, RV1 G1; Fable's review H1): the Blackroot's forage repeats the same day, but a forage card's
+ * relationship gain counts once a day per card (as before DM1); the grub and the fire-beetle stay once a day each. */
+const relToday = (g, key) => { if (!daily(`rel_${key}`)(g)) return false; markDaily(g, `rel_${key}`); return true; };
+
 export const dartsReply = (g, full) => { noteDay(g, 'r:ah_hunt:1'); return byDay(g, full ? DARTS_FULL : DARTS_PART, 'r:ah_hunt:1'); };
 const DR_SORREL = dayReply("rr_forage:1", [
     "She corrects your knife-grip without looking up.",
@@ -224,9 +228,9 @@ By noon you reach the first of the roots: grey-white, smooth as bone, wide as a 
             // v0.11.48 (owner pick M1): at any Fed, as the old midday meal (the Fed < 85 gate hid it all morning after a full supper)
             { text: 'Eat with the others.', show: (g) => !g.flags.ya_mocked && !late(g), time: 30, to: 'ya_mocks' },
             { text: 'Ya has been staring at you for an hour. Ask her what her problem is.', show: (g) => !!g.flags.ya_mocked && !g.flags.ya_sparred && !late(g), time: 10, to: 'ya_fight_start' },
-            { text: 'Forage along the roots.', show: (g) => daily('rr_forage')(g) && !late(g), time: 15, to: 'rr_forage' },
+            { text: 'Forage along the roots.', show: (g) => !late(g), time: 15, to: 'rr_forage' },
             { text: 'Hunt.', show: (g) => daily('rr_hunt')(g) && !late(g), time: 15, to: 'rr_hunt' },
-            { text: 'Scout ahead with Ya.', show: (g) => daily('rr_scout')(g) && !late(g), time: 20, to: 'rr_scout' },
+            { text: 'Scout ahead with Ya.', show: (g) => !late(g), time: 20, to: 'rr_scout' },
             { text: 'Put your hand flat on the root and listen.', show: (g) => !g.flags.rr_listened && !late(g), time: 30, to: 'rr_roots' },
             ...hubChoices('rr_hub'),
             { text: 'Make camp on the root.', show: (g) => bday(g) === 1 && hour(g) >= 16, time: 20, to: 'bl_camp' },
@@ -302,7 +306,6 @@ Mei Lin turns the colour of the cinderberries and walks on ahead without a word.
     },
     rr_forage: {
         id: 'rr_forage', title: 'Root-Foraging', art: 'root_road', place: PLACE.rr,
-        enter: (g) => { markDaily(g, 'rr_forage'); return []; },
         text: `Three experts, three opinions. Mei Lin goes for the herbs in the root-shadows. You go for the fungus — bracket shelves the colour of old ivory on every crack in the bark. Ya goes for something under a loose flap of root-bark and comes back chewing.
 
 "Grubs," she says, offering you a fat white one. "Good fat. Better than your mushrooms."
@@ -312,8 +315,8 @@ Mei Lin turns the colour of the cinderberries and walks on ahead without a word.
 "Not *everything*." She winks. It is a very aggressive wink.`,
         choices: [
             { text: 'The ivory brackets. Spore print, omnitool, the full liturgy.', check: { skill: 'GU', dc: 4, bonus: () => 2 }, time: 50, do: (g) => { addItem(g, 'jade_bracket', 3); return ['+3 Jade bracket fungus (the root variety, almost sweet).']; }, failDo: (g) => { addItem(g, 'jade_bracket', 1); return ['One good shelf, two that crumble. +1 Jade bracket.']; }, to: 'rr_hub' },
-            { text: 'Help Mei Lin with the root-sorrel.', check: { skill: 'GU', dc: 3 }, time: 50, do: (g) => { addItem(g, 'river_cress', 4); bumpRel(g, 'Mei Lin', 2, 1); return [`+4 root-sorrel (counts as river cress). ${DR_SORREL(g)}`]; }, failDo: (g) => { addItem(g, 'river_cress', 2); return ['You cut it wrong. She sighs. +2 root-sorrel.']; }, to: 'rr_hub' },
-            { text: 'Eat the grub.', do: (g) => { eat(g, 10); bumpRel(g, 'Ya', 3, 2); return [`${DR_GRUB(g)} +10 satiety. ${DR_GRUB_AFTER(g)}`]; }, to: 'rr_hub' },
+            { text: 'Help Mei Lin with the root-sorrel.', check: { skill: 'GU', dc: 3 }, time: 50, do: (g) => { addItem(g, 'river_cress', 4); (relToday(g, 'rr_sorrel') && bumpRel(g, 'Mei Lin', 2, 1)); return [`+4 root-sorrel (counts as river cress). ${DR_SORREL(g)}`]; }, failDo: (g) => { addItem(g, 'river_cress', 2); return ['You cut it wrong. She sighs. +2 root-sorrel.']; }, to: 'rr_hub' },
+            { text: 'Eat the grub.', show: daily('rr_grub'), do: (g) => { markDaily(g, 'rr_grub'); eat(g, 10); bumpRel(g, 'Ya', 3, 2); return [`${DR_GRUB(g)} +10 satiety. ${DR_GRUB_AFTER(g)}`]; }, to: 'rr_hub' },
         ],
     },
     rr_hunt: {
@@ -367,7 +370,7 @@ Ya is furious — not at you, at the elk, which she curses in a language you don
     },
     rr_scout: {
         id: 'rr_scout', title: 'Nose First', art: 'root_road', place: PLACE.rr,
-        enter: (g) => { markDaily(g, 'rr_scout'); return []; },
+        enter: (g) => { markDaily(g, 'rr_scout'); return []; }, // v0.11.156 (RV1, CD): a mark for "Call it a day" only, no longer a gate
         text: (g) => `Ya teaches you to track the way she learned: nose first.
 
 "Eyes lie," she says, crouched on the root with her face nearly in the moss. "Ears lie. Nose doesn't. Wolf passed here before dawn. Pissed on that, see? Young male. Showing off." She sniffs again. "And *that's* you."
@@ -476,7 +479,7 @@ You find a raft of fallen trunks wedged between two trees, high and dry enough. 
             ? 'The far edge of the Drowned Wood. The water is shallower here, and warmer — Ya says there\'s a spring nearby, where the hill-fire comes up under the water.'
             : 'You move from trunk to trunk, wading where you have to. Somewhere ahead is a hollow where the water is deep and the trees lean together like mourners. Ya says you have to cross it. She says it without any jokes at all.'),
         choices: [
-            { text: 'Forage on the drowned trunks.', show: (g) => daily('dw_forage')(g) && !late(g), time: 15, to: 'dw_forage' },
+            { text: 'Forage on the drowned trunks.', show: (g) => !late(g), time: 15, to: 'dw_forage' },
             { text: 'Hunt.', show: (g) => daily('dw_hunt')(g) && !late(g), time: 15, to: 'dw_hunt' },
             { text: 'Look at the carvings on the drowned shrine.', show: (g) => !g.flags.dw_carving && !late(g), time: 30, to: 'dw_scout' },
             ...hubChoices('dw_hub'),
@@ -487,7 +490,6 @@ You find a raft of fallen trunks wedged between two trees, high and dry enough. 
     },
     dw_forage: {
         id: 'dw_forage', title: 'Wet Harvest', art: 'drowned_wood', place: PLACE.dw,
-        enter: (g) => { markDaily(g, 'dw_forage'); return []; },
         text: `The drowned trees are thick with growth: gill-fungi in pale tiers, water-chestnut in the shallows, and frogs, which Ya regards as a gift from whatever god she doesn't believe in.
 
 Mei Lin wades out to the chestnuts with her skirts knotted at her hip and her jaw set against the cold. Ya watches her legs with frank, appreciative interest and does not pretend otherwise.
@@ -499,8 +501,8 @@ Mei Lin wades out to the chestnuts with her skirts knotted at her hip and her ja
 "*That.*"`,
         choices: [
             { text: 'The pale gill-fungi on the drowned trunks.', check: { skill: 'GU', dc: 5, bonus: () => 2 }, time: 50, do: (g) => { addItem(g, 'ghost_gill', 2); return ['+2 Ghost-gill. Your omnitool is ecstatic. You are mildly ecstatic.']; }, failDo: (g) => { g.james.hp -= 2; return ['Leeches. The fungi win this round. −2 HP.']; }, to: 'dw_hub' },
-            { text: 'Wade out and help with the chestnuts.', check: { skill: 'GU', dc: 3 }, time: 50, do: (g) => { addItem(g, 'river_cress', 4); bumpRel(g, 'Mei Lin', 2, 2); return ['+4 water-chestnuts (as river cress). Mei Lin\'s lips are blue and she\'s laughing about something Yuki did.']; }, failDo: (g) => { addItem(g, 'river_cress', 1); return ['You slip. +1 chestnut, one soaked biologist.']; }, to: 'dw_hub' },
-            { text: 'Go frogging with Ya.', check: { skill: 'GU', xpTo: 'Convergence Use', dc: 4 }, time: 50, do: (g) => { eat(g, 18); bumpRel(g, 'Ya', 3, 3); return ['Needles through frogs, frogs on a stick, frogs in your mouth. +18 satiety. Ya kisses you on the ear for a good throw, as if that\'s normal.']; }, failDo: (g) => { bumpRel(g, 'Ya', 1, 0); return ['The frogs are faster than you. Ya is faster than the frogs. She shares. Eventually.']; }, to: 'dw_hub' },
+            { text: 'Wade out and help with the chestnuts.', check: { skill: 'GU', dc: 3 }, time: 50, do: (g) => { addItem(g, 'river_cress', 4); (relToday(g, 'dw_chestnut') && bumpRel(g, 'Mei Lin', 2, 2)); return ['+4 water-chestnuts (as river cress). Mei Lin\'s lips are blue and she\'s laughing about something Yuki did.']; }, failDo: (g) => { addItem(g, 'river_cress', 1); return ['You slip. +1 chestnut, one soaked biologist.']; }, to: 'dw_hub' },
+            { text: 'Go frogging with Ya.', check: { skill: 'GU', xpTo: 'Convergence Use', dc: 4 }, time: 50, do: (g) => { eat(g, 18); (relToday(g, 'dw_frog') && bumpRel(g, 'Ya', 3, 3)); return ['Needles through frogs, frogs on a stick, frogs in your mouth. +18 satiety. Ya kisses you on the ear for a good throw, as if that\'s normal.']; }, failDo: (g) => { (relToday(g, 'dw_frog') && bumpRel(g, 'Ya', 1, 0)); return ['The frogs are faster than you. Ya is faster than the frogs. She shares. Eventually.']; }, to: 'dw_hub' },
         ],
     },
     dw_hunt: {
@@ -710,7 +712,7 @@ She doesn't mean it. Everyone can tell she doesn't mean it. It makes it worse, s
         choices: [
             { text: 'Ya\'s gone. So is her spear.', show: (g) => bday(g) >= 4 && !g.flags.ya_off_done && !late(g), time: 10, to: 'ya_offended' },
             { text: 'Find Mei Lin and Ya. They went for water an hour ago.', show: (g) => both(g) && trio(g) >= 2 && !g.flags.trio_kiss_seen && !late(g), time: 30, to: 'trio_kiss' },
-            { text: 'Forage in the ash.', show: (g) => daily('ah_forage')(g) && !late(g), time: 15, to: 'ah_forage' },
+            { text: 'Forage in the ash.', show: (g) => !late(g), time: 15, to: 'ah_forage' },
             { text: 'Hunt.', show: (g) => daily('ah_hunt')(g) && !late(g), time: 15, to: 'ah_hunt' },
             { text: 'Climb to the cairn on the high ridge.', show: (g) => !g.flags.ah_cairn && !late(g), time: 40, to: 'ah_scout' },
             ...hubChoices('ah_hub'),
@@ -720,7 +722,6 @@ She doesn't mean it. Everyone can tell she doesn't mean it. It makes it worse, s
     },
     ah_forage: {
         id: 'ah_forage', title: 'Ash and Embers', art: 'ashen_hills', place: PLACE.ah,
-        enter: (g) => { markDaily(g, 'ah_forage'); return []; },
         text: `There's food in the ash, if you know where to look. Mei Lin knows the cinderberry bushes that grow in the gullies where the stone glassed. You know the truffles — black, wrinkled, fruiting underground where the old fire left the soil rich. Ya knows the fire-beetles, which she eats alive, crunching, while maintaining eye contact with Mei Lin.
 
 "Disgusting," Mei Lin says.
@@ -730,8 +731,8 @@ She doesn't mean it. Everyone can tell she doesn't mean it. It makes it worse, s
 "I'm watching to make sure you *die*."`,
         choices: [
             { text: 'Dig for the ash-truffles.', check: { skill: 'GU', dc: 5, bonus: () => 2 }, time: 60, do: (g) => { addItem(g, 'jade_bracket', 2); eat(g, 10); return [`+2 ash-truffles (as jade bracket), and one eaten on the spot: +10 satiety. ${DR_TRUFFLE(g)}`]; }, failDo: () => ['Ash, ash, ash, and a beetle. Ya eats the beetle.'], to: 'ah_hub' },
-            { text: 'Cinderberries with Mei Lin.', check: { skill: 'GU', dc: 3 }, time: 40, do: (g) => { addItem(g, 'crimson_berry', 6); bumpRel(g, 'Mei Lin', 2, 2); return [`+6 cinderberries (as needleberries). ${DR_CINDER(g)}`]; }, failDo: (g) => { addItem(g, 'crimson_berry', 2); return ['Thorns. +2 cinderberries.']; }, to: 'ah_hub' },
-            { text: 'Eat a fire-beetle. For science.', do: (g) => { eat(g, 6); bumpRel(g, 'Ya', 3, 3); return [`${DR_BEETLE(g)} +6 satiety. ${DR_BEETLE_AFTER(g)}`]; }, to: 'ah_hub' },
+            { text: 'Cinderberries with Mei Lin.', check: { skill: 'GU', dc: 3 }, time: 40, do: (g) => { addItem(g, 'crimson_berry', 6); (relToday(g, 'ah_cinder') && bumpRel(g, 'Mei Lin', 2, 2)); return [`+6 cinderberries (as needleberries). ${DR_CINDER(g)}`]; }, failDo: (g) => { addItem(g, 'crimson_berry', 2); return ['Thorns. +2 cinderberries.']; }, to: 'ah_hub' },
+            { text: 'Eat a fire-beetle. For science.', show: daily('ah_beetle'), do: (g) => { markDaily(g, 'ah_beetle'); eat(g, 6); bumpRel(g, 'Ya', 3, 3); return [`${DR_BEETLE(g)} +6 satiety. ${DR_BEETLE_AFTER(g)}`]; }, to: 'ah_hub' },
         ],
     },
     ah_hunt: {

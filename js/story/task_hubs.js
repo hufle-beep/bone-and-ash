@@ -70,15 +70,17 @@ export const TASK_HUBS = {
     },
     // v0.11.19 (owner 20:39, pick B): Act 1's seven resting places as task screens, like the prologue's
     fo_ashfall: {
-        menus: { fo_palisade: { label: 'Palisade', daily: 'a1_palisade' }, fo_council: { label: 'Council', daily: 'a1_council' }, fo_drill: { label: 'Militia', daily: 'a1_drill', drill: true }, fo_clinic: { label: 'Clinic', daily: 'a1_clinic' } },
+        menus: { fo_palisade: { label: 'Palisade' }, fo_council: { label: 'Council', daily: 'a1_council' }, fo_drill: { label: 'Militia', drill: true }, fo_clinic: { label: 'Clinic' } },
         doors: ['fo_mei', 'fo_mother', 'fo_ya_time', 'fo_spy'],
         own: 'Around Ashfall',
         yuki: YUKI_ASHFALL,
         evening: 'fo_ashfall',
     },
     // v0.11.67 (owner pick F1, one hub format): the Blackroot's "Train." (bl_train) is a Practice group on the list, not a gate card
+    // v0.11.156 (owner pick DM1, OF + OS + OA): the Blackroot's Forage and Scout, and the Fallout's Palisade, Militia and Clinic, have no
+    // `daily`: more than one card a day (Forage repeats as in the Wilds; the once-a-Coil cards stay once a Coil); the Council stays daily
     rr_hub: {
-        menus: { rr_forage: { label: 'Forage', daily: 'rr_forage' }, rr_scout: { label: 'Scout', daily: 'rr_scout' }, bl_train: { label: 'Practice' } },
+        menus: { rr_forage: { label: 'Forage' }, rr_scout: { label: 'Scout' }, bl_train: { label: 'Practice' } },
         doors: ['ya_mocks', 'rr_hunt', 'rr_roots', 'talk_mei', 'talk_ya'],
         own: 'The root road',
         yuki: {
@@ -95,7 +97,7 @@ export const TASK_HUBS = {
         evening: 'rr_hub',
     },
     dw_hub: {
-        menus: { dw_forage: { label: 'Forage', daily: 'dw_forage' }, bl_train: { label: 'Practice' } },
+        menus: { dw_forage: { label: 'Forage' }, bl_train: { label: 'Practice' } },
         doors: ['dw_hunt', 'dw_scout', 'talk_mei', 'talk_ya', 'hot_spring'],
         own: 'The drowned wood',
         yuki: {
@@ -113,7 +115,7 @@ export const TASK_HUBS = {
         evening: 'dw_hub',
     },
     ah_hub: {
-        menus: { ah_forage: { label: 'Forage', daily: 'ah_forage' }, bl_train: { label: 'Practice' } },
+        menus: { ah_forage: { label: 'Forage' }, bl_train: { label: 'Practice' } },
         doors: ['ya_offended', 'trio_kiss', 'ah_hunt', 'ah_scout', 'talk_mei', 'talk_ya'],
         own: 'The ashen hills',
         yuki: {
@@ -142,7 +144,7 @@ export const TASK_HUBS = {
         evening: 'rt_camp',
     },
     rt_ashfall: {
-        menus: { rt_hunters: { label: 'Militia', drill: true } },
+        menus: { rt_hunters: { label: 'Militia', drill: true, note: (g) => (g.flags.a1_militia ? 'practice only' : '') } }, // v0.11.156 (DM1, TX-A): the heading says the drill is practice once the militia is ready
         doors: ['rt_council', 'rt_grove', 'rt_ya_village'],
         own: 'Ashfall',
         yuki: YUKI_ASHFALL,

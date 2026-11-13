@@ -148,7 +148,7 @@ function setGroupOpen(name, open, dflt) {
 }
 /** The menus' labels on this hub: the groups that start folded. */
 const workGroups = (hubId) => { const cfg = TASK_HUBS[hubId]; return new Set(cfg ? [...Object.values(cfg.menus || {}), ...Object.values(cfg.doorMenus || {})].map((m) => m.label) : []); };
-const groupHtml = (name, cards, dflt) => `<details class="grp" data-grp="${esc(name)}" data-dflt="${dflt ? 1 : 0}"${isGroupOpen(name, dflt) ? ' open' : ''}><summary><h2>${esc(name)} <span class="count">· ${cards.length}</span></h2></summary><div class="cards">${cards.join('')}</div></details>`;
+const groupHtml = (name, cards, dflt, note = '') => `<details class="grp" data-grp="${esc(name)}" data-dflt="${dflt ? 1 : 0}"${isGroupOpen(name, dflt) ? ' open' : ''}><summary><h2>${esc(name)}${note ? ` · ${esc(note)}` : ''} <span class="count">· ${cards.length}</span></h2></summary><div class="cards">${cards.join('')}</div></details>`;
 function addResult(title, lines, fail, { sumLines = lines, quiet = false } = {}) {
     const sum = summarize(sumLines); // v0.11.68 (the Opus review): the summary reads all the action's lines (Yuki's haul, a collapse)
     taskResults.unshift({ id: ++resultSeq, title, sum, lines, fail });
@@ -279,7 +279,7 @@ function renderCardScreen() {
     if (qs) {
         const cards = taskCards(g, SCENES).filter((c) => !medIds.has(c.id) && (c.status === 'open' || c.status === 'late')); // v0.11.37 (D-a): 'late' = would end past the day's end (00:00 since v0.11.91), shown locked // v0.11.17 (owner pick 1a): "done for today" cards are hidden
         const groups = [];
-        for (const c of cards) { let gr = groups.find((x) => x.name === c.group); if (!gr) groups.push(gr = { name: c.group, cards: [] }); gr.cards.push(c); }
+        for (const c of cards) { let gr = groups.find((x) => x.name === c.group); if (!gr) groups.push(gr = { name: c.group, cards: [], note: '' }); gr.cards.push(c); if (c.groupNote) gr.note = c.groupNote; }
         const cardHtml = (c) => {
             const out = c.status === 'open' ? safeOutcome(() => taskOutcome(g, SCENES, c.id)) : null; // v0.11.64 (A1, B1): one dry run: its time, where it ends, whether it ends the Coil
             const mins = out ? out.minutes : c.minutes;
@@ -298,7 +298,7 @@ function renderCardScreen() {
         const ns = store.get(NONEXT_KEY) === '1' ? '' : nextStep(g, SCENES); // v0.11.72 (N1): Selene's next-step line, ✕ hides it for good
         hubTop = `${ns ? `<div class="nstep"><b>Next step</b> <span>${esc(ns)}</span><button class="nstep-x" data-nonext="1" aria-label="Hide the next-step line">✕</button></div>` : ''}${yHtml}`;
         const work = workGroups(g.scene);
-        hubHtml = groups.map((gr) => groupHtml(gr.name, gr.cards.map(cardHtml), !work.has(gr.name))).join(''); // v0.11.67 (D2)
+        hubHtml = groups.map((gr) => groupHtml(gr.name, gr.cards.map(cardHtml), !work.has(gr.name), gr.note)).join(''); // v0.11.67 (D2)
     }
     const sk = v.end || hub ? { steps: 0 } : skipPlan(g, SCENES); // v0.11.35 (P1-a): a stretch read before, 2 steps or more
     const skipHtml = sk.steps >= 2 ? `<button class="card story skip" data-skip="1">Skip to the next choice.<span class="tag">${sk.steps} scenes you know</span><span class="len">${esc(durLabel(sk.minutes))} · at once</span></button>` : '';

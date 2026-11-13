@@ -10,6 +10,7 @@
  *   (`oneOffLeft`): the clock to the evening hour at once, as rest; the evening exit then shows as usual.
  */
 import { advance, clockParts } from '../core/game.js';
+import { daily } from './common.js';
 import { TASK_HUBS } from './task_hubs.js';
 import { setOnChoose } from '../core/story.js';
 
@@ -19,6 +20,11 @@ export const ONCE_STAGES = { wen_lesson: 2, herb_slopes: 2 };
 const REPEAT_DOORS = new Set(['far_hunt', 'rr_hunt', 'dw_hunt', 'ah_hunt', 'talk_mei', 'talk_ya', 'fo_mei', 'fo_ya_time', 'heart_spring', 'yk_time', 'wen_time', 'mother_time']); // v0.11.137 (TR1, YB): Yuki's daily scene repeats like the talks; v0.11.139 (MW1, MS): Wen's and the mother's too // v0.11.67: bl_train is a menu now (REPEAT_MENUS)
 /** Menus that stay repeatable (foraging, hunting, practice): they never hold "Call it a day" back. */
 const REPEAT_MENUS = new Set(['wild_forage', 'wild_hunt', 'wild_train', 'rr_forage', 'dw_forage', 'ah_forage', 'bl_train']); // v0.11.67 (R1): the Blackroot's Practice, a menu since F1
+/** v0.11.156 (owner pick DM1, OM): menus that stay open for practice once their one-off is done; then they never hold "Call it a day" back. */
+const PRACTICE_MENUS = { rt_hunters: (g) => !!g.flags.a1_militia };
+/** v0.11.156 (owner pick DM1, RV1 CD; Fable's review M3): the once-a-Coil menus opened to more than one card a day still count as done
+ * for today's "Call it a day" after one card (their old day marks), so the button comes when it did before. */
+const DAY_DONE = { fo_palisade: 'a1_palisade', fo_drill: 'a1_drill', fo_clinic: 'a1_clinic', rr_scout: 'rr_scout' };
 /** The hubs with a set evening (the hour their evening exit shows). */
 export const EVENING_HOUR = { wilds: 15, ashfall: 16, fo_ashfall: 16, rr_hub: 16, dw_hub: 16, ah_hub: 16, heart_hub: 16, rt_ashfall: 15 };
 
@@ -56,9 +62,10 @@ export function oneOffLeft(g, scenes, hubId) {
         if (c.to === hubId) { if (c.check) return true; continue; } // a chore: only a checked one is one-off work
         if (typeof c.to !== 'string') { if (!META.test(String(c.to))) return true; continue; }
         if (META.test(c.to) || scenes[c.to]?.end) continue;
+        if (DAY_DONE[c.to] && !daily(DAY_DONE[c.to])(g)) continue; // v0.11.156 (RV1, CD): one card from it today, as when the menu closed for the day
         if (ONCE_MENUS.has(c.to)) { if (scenes[c.to].choices.some((x, i) => isWork(x) && onceOpen(g, c.to, i) && shows(x))) return true; continue; }
         if ((cfg.doorMenus || {})[c.to]) { if (scenes[c.to].choices.some((x) => typeof x.to === 'string' && x.to !== hubId && shows(x))) return true; continue; }
-        if (menus[c.to]) { if (!REPEAT_MENUS.has(c.to)) return true; continue; }
+        if (menus[c.to]) { if (!REPEAT_MENUS.has(c.to) && !(PRACTICE_MENUS[c.to] && PRACTICE_MENUS[c.to](g))) return true; continue; }
         if (REPEAT_DOORS.has(c.to)) continue;
         return true; // a one-time door, or a story stop leading on
     }

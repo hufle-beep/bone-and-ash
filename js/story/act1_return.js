@@ -21,6 +21,15 @@ const luHanHere = (g) => g.flags.ending !== 'fought';
 /** v0.11.152 (owner 21:11, pick E1, BK): Day 21 went from the last night straight to Shen Qiu at 08:00 with no breakfast and no
  *  eat card (bot saves at his arrival: Fed 10–51, the middle 16–35). Breakfast at Mei Lin's, +20 satiety, at once, as the Fallout's
  *  mornings; once a Coil (a world flag). */
+/** v0.11.156 (owner pick DM1, OM; texts T2–T5, Fable's, TX1): the last day's drill, again for practice once the militia is ready:
+ * the check's XP and the cards' familiarity only (no second preparation, no Village or Ya change). */
+export const DRILL_AGAIN = {
+    label: 'Drill the hunters again. Practice only.',
+    hard: 'Cleaner than the first time. Nothing changes but the blisters, and they bow to thank you for those.',
+    hardFail: "Ragged this time. They had it earlier and they'll have it tomorrow; right now they are tired, and too dignified to say so.",
+    ya: "Ya runs them round the threshing floor until they stop looking like villagers. 'Better,' she says. 'Still handsome but afraid.'",
+};
+
 export const DAY21_BREAKFAST = 'Breakfast at Mei Lin\'s: gruel and pickles, +20 satiety.';
 export function dayTwentyOneBreakfast(g) {
     if (g.flags.a1_breakfast) return [];
@@ -394,7 +403,7 @@ ${g.flags.a1_palisade ? 'The bone palisade stands white along the north lane.' :
         },
         choices: [
             { text: 'Raise a palisade of bone along the north lane.', show: (g) => !g.flags.a1_palisade && hour(g) < 19, qi: 8, check: { skill: 'Convergence Use', dc: 5, band: 'challenging' }, time: 150, do: set('a1_palisade'), failDo: () => ['It comes out patchy. You\'ll try again before dark.'], to: 'rt_ashfall' },
-            { text: 'Drill the hunters one last time.', show: (g) => !g.flags.a1_militia && hour(g) < 19, time: 30, to: 'rt_hunters' },
+            { text: (g) => (g.flags.a1_militia ? DRILL_AGAIN.label : 'Drill the hunters one last time.'), show: (g) => hour(g) < 19, time: 30, to: 'rt_hunters' }, // v0.11.156 (DM1, OM): open again for practice once the militia is ready
             { text: 'Sit with the elders in council.', show: (g) => !g.flags.council_done && hour(g) < 19, time: 30, to: 'rt_council' },
             { text: 'Go and look at the place you planted the seed.', show: (g) => !!g.flags.grove && !g.flags.grove_visit && hour(g) < 20, time: 30, to: 'rt_grove' },
             { text: 'Find out where Ya has got to. You have a bad feeling.', show: (g) => !g.flags.ya_village && hour(g) < 19, time: 20, to: 'rt_ya_village' },
@@ -413,8 +422,8 @@ Ya watches from the fence, chewing a grass stem, offering commentary. "That one 
 
 "I'm *helping*."`,
         choices: [
-            { text: 'Drill them hard: shields of bone, spears behind, nobody alone.', check: { skill: 'GU', dc: 5, band: 'challenging' }, time: 150, do: (g) => { g.flags.a1_militia = true; bumpRel(g, 'Village', 4, 0); return ['By sunset they move as one. Whether that will matter against an Elder, nobody says aloud.']; }, failDo: (g) => { bumpRel(g, 'Village', 1, 0); return ['It doesn\'t come together. They\'ll stand anyway. That\'s the worst part.']; }, to: 'rt_ashfall' },
-            { text: 'Let Ya teach them how she hunts. What could go wrong.', time: 150, do: (g) => { g.flags.a1_militia = true; bumpRel(g, 'Ya', 4, 2); bumpRel(g, 'Village', -2, 0); return ['Two black eyes, one dislocated finger, and a squad of hunters who now move like something hungry. The village elders are deeply offended. It works.']; }, to: 'rt_ashfall' },
+            { text: 'Drill them hard: shields of bone, spears behind, nobody alone.', check: { skill: 'GU', dc: 5, band: 'challenging' }, time: 150, do: (g) => { if (g.flags.a1_militia) return [DRILL_AGAIN.hard]; g.flags.a1_militia = true; bumpRel(g, 'Village', 4, 0); return ['By sunset they move as one. Whether that will matter against an Elder, nobody says aloud.']; }, failDo: (g) => { if (g.flags.a1_militia) return [DRILL_AGAIN.hardFail]; bumpRel(g, 'Village', 1, 0); return ['It doesn\'t come together. They\'ll stand anyway. That\'s the worst part.']; }, to: 'rt_ashfall' },
+            { text: 'Let Ya teach them how she hunts. What could go wrong.', time: 150, do: (g) => { if (g.flags.a1_militia) return [DRILL_AGAIN.ya]; g.flags.a1_militia = true; bumpRel(g, 'Ya', 4, 2); bumpRel(g, 'Village', -2, 0); return ['Two black eyes, one dislocated finger, and a squad of hunters who now move like something hungry. The village elders are deeply offended. It works.']; }, to: 'rt_ashfall' },
         ],
     },
     rt_council: {

@@ -2,6 +2,12 @@
 
 Started in v0.11.150, when `roadmap-done-2.md` had passed about 45 KB. Newer than `roadmap-done-2.md` and `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.156 (word for word; owner picks DM1, TX1, TX-A, RV1, PX1: Act 1's once-a-day cards done)
+
+### From section 1, as of v0.11.155
+
+- *(new in v0.11.154, owner 2026-11-12 23:52)* **Act 1's once-a-day cards (DM1 picked 2026-11-13 00:38, texts TX1 00:54; the next push):** OF the Blackroot's three Forage menus repeat as in the Wilds; OS both Scout cards on one day; OA Ashfall's Palisade, Militia and Clinic more than one a day (the Council stays one a day); OM the post-Tree drill repeatable for practice; Fable's texts T1a–T5a and the numbers in the handover's "Decided in chat". Open, options later: the Blackroot hunts; the prologue Ashfall's three menus. The report: "in act 1 some of the categories disappear daily after I pick one of them, as opposed to the prologue… I would have the time to perform multiple forages, or building and other options in camps and hubs, like I have the chance to do in the prologue… before entering the Tree. Also The militia options after returning to Ashfall after the Tree." Save `Day-21-08-38` (Act 1's end, another Coil).
+
 ## Moved in v0.11.155 (word for word; owner picks FD1, D1, RV1: the familiarity display done)
 
 ### From section 1, as of v0.11.154

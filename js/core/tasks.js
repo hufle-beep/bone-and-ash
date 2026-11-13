@@ -208,6 +208,7 @@ export function taskCards(g, scenes, only = null) {
             else if (c.show && !c.show(g)) { if (c.show.dailyKey && (!c.form || hasForm(g, c.form))) status = 'tomorrow'; else return; } // v0.10.4: a form he can't sing yet stays hidden
             else if (!choiceOpen(g, c)) return;
             push(`${menu}:${i}`, door ? 'door' : 'work', m.label, c, (entry.time || 0) + (c.time || 0), status);
+            if (m.note) cards[cards.length - 1].groupNote = m.note(g) || ''; // v0.11.156 (DM1, TX-A): a note after the group's heading
         });
     }
     hub.choices.forEach((c, i) => {

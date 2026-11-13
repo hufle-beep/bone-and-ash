@@ -2,6 +2,29 @@
 
 Started 2026-11-12 (v0.11.148), when `history-17.md` would have passed about 45 KB. Newer than `history-17.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.156 (word for word)
+
+### Decided in chat
+
+- **v0.11.153 (docs only): the familiarity display (the owner 21:25 "check familiarity and mastery over all of the game… some things get mastery on 8 and some on 18. check if its a display error or intentional design"; options at 22:42, owner 22:44 "FD1. put it next after the repeat pushes"):**
+  - **Found:** one scale for all 103 work and door cards (42 work, 61 doors; `FAM` in `js/core/tasks.js`): Practised 2, Skilled 8, Mastered 18; the card line shows the tier and the count to the *next* tier ("Practised 5/8", "Skilled 12/18"), so "/8" read as mastery; the held card already says "5 of 8 to Skilled". Speeds by their own counts, no tier names: a sit or meridian session full speed at 30, a breakthrough at 6, a story choice at 18, Yuki's job ×3 at most.
+  - **NX** the card names the next step ("Practised · 5/8 to Skilled", "Skilled · 12/18 to Mastered", "Mastered"; 103 cards, about 12 characters longer; `js/main.js` + a test); **MX** always to Mastered ("Practised · 5/18"; hides the ×2 / ×5 steps); **FQ** one FAQ sentence by Fable (drafts in chat first). **FD1 🟢 NX + FQ (recommended) / FD2 🟡 NX / FD3 🟠 MX / FD4 🔴 FQ** (colours: how plainly a card says what its number counts to, judged). **Picked: FD1**, built after RP1's push 2 (its own push: a What's new line, tests, the full check).
+
+### From "Version notes"
+
+## v0.11.153 — Docs only: the familiarity display picked (FD1)
+
+- **Files:** `project/handover.md`, `roadmap.md`, `changelog.md`, `restore-points.md`, `history-18.md` (v0.11.150's entries moved), `sw.js`. The game is identical to 0.11.152.
+- **Checks:** docs only (rule 2): the tools test (the docs) and `bash tools/check.sh quick`; no game file touched.
+
+## Trimmed in the handover in v0.11.156 (the v0.11.154 entry in full, word for word; the handover keeps a short form)
+
+- **v0.11.154: the repeats map, push 2 (ST1–ST6) (options PS1–PS4 at about 22:53, owner 22:55 "PS1 go"; Fable's drafts, owner 23:05 "ok for texts"; after Fable's review RV1–RV4 at about 23:45, owner 23:52 "RV1"):**
+  - **Measured** (scratch bot runs, 200 games a model, the Sitter 60; the share of Coils that showed each repeat, Careful / Completionist / Sitter / Cultivator): **ST1** the prologue's third camp and night (+4 short texts) 43 / 73 / 57 / 75%; **ST2** `fo_ashfall` Day 10 (+6) 85 / 94 / 61 / 96%; **ST3** the Blackroot's watch paragraph on 3 of 4 nights, the Drowned Wood's second opener and camp (+4) 100 / 83 / 100 / 83%; **ST4** a breakthrough text per realm (+12, realms 3–14; Core Formation keeps the old) 0 / 0 / 70 / 25%; **ST5** the Heart (about +27: the hall's lines 6 / 71 / 100 / 100%, the mornings and Yuki's 5th day the Cultivator 79%, a 4th quiet night 14%, a 4th knocking night 0); **ST6** three work replies (+3) 82–100%. The owner's saves (Day 12, Day 21 08:11) hit ST2, ST3, ST4 (9 breakthroughs on 4 days), ST5, ST6.
+  - **PS1 🟢 ST1–ST6 (recommended) / PS2 🟡 ST1 + ST2 + ST3 + ST6 / PS3 🟠 ST4 + ST5 / PS4 🔴 ST2 + ST6** (colours: the measured repeats gone). **Picked: PS1.** Fable's 88 texts (61 slots; the breakthroughs with a night and a day closer each; the darts' two outcomes), "ok for texts". Fable's lore additions, accepted with the texts: the bolt that lands at True Immortal ("It tastes of tin"), the clean sky's nod at Heavenly Immortal, Golden Core's flight ceremony, the scratch mark in the hall, "Leave the fire laid when we go", Ashfall's village colour.
+  - **Built:** the village's closer kept on the realm texts except realms 10 and 11 (no sky came; bots never break through in the village past realm 5); `bl_camp` keyed by region; the grub's and beetle's gains kept in place between two lists; the darts' two outcomes on one day record.
+  - **Fable's cold review (rule 9):** no high, no medium; L1 a breakthrough at the prologue camp past 05:00 moved the camp a day ahead (bots 0 of 6,469 nights); L2 the Heart has no day cap (a stay to Day 21 wrapped to the first texts; bots 0); L3 a 4th `fo_ashfall` text day showed Day 8's set (bots 0); L4 breakthrough texts under a roof (open); L5 test gaps; L6 the bump and docs (done in the push). **RV1 🟢 CF + CL + FX + TG (recommended) / RV2 🟡 CF + FX + TG / RV3 🟠 TG / RV4 🔴 none** (colours: the three wrap paths closed and tested). **Picked: RV1.** CF the camp by the forest night; CL `byDayLast` for the Heart's lists and Yuki's Heart slots (past the last day the last text stays, a repeat of the last rather than the first: said plainly here, the options' line overstated it); FX the hub by the story day from 05:00 (`textDay`), not `dd`, so 01:00 stays the day before; TG the old literals pinned, the beetle through its choice, the closers by the clock, the Heart nights through `go()`.
+
 ## Moved from the handover in v0.11.155 (word for word)
 
 ### Decided in chat

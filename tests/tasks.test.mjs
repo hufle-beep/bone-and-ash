@@ -99,7 +99,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
         scn.choices.forEach((c, i) => { r.flags[onceKey(hub, i)] = true; });
         for (const m of Object.keys(TASK_HUBS[hub].menus)) SCENES[m].choices.forEach((c, i) => { r.flags[onceKey(m, i)] = true; });
         Object.assign(r.flags, { ya_mocked: true, ya_sparred: true, rr_listened: true, ya_back: true, trio_found: true });
-        for (const k of ['rr_forage', 'rr_scout', 'rr_hunt', 'dw_forage', 'dw_hunt', 'dw_scout', 'ah_forage', 'ah_hunt', 'ah_scout', 'tmei', 'tya', 'hot_spring']) markDaily(r, k);
+        for (const k of ['rr_scout', 'rr_hunt', 'dw_hunt', 'dw_scout', 'ah_hunt', 'ah_scout', 'tmei', 'tya', 'hot_spring']) markDaily(r, k); // v0.11.156 (RV1, LT): the forage menus' marks gone (no longer read)
         const open = !oneOffLeft(r, SCENES, hub);
         const drills = taskCards(r, SCENES).filter((c) => c.status === 'open' && c.group === 'Practice').length;
         for (const k of ['bt_ya', 'bt_dart', 'bt_needle', 'bt_yuki']) markDaily(r, k);
@@ -123,7 +123,86 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     assert(isTaskHub(f) && ['Palisade', 'Council', 'Militia', 'Clinic'].every((gr) => fc.some((c) => c.group === gr && c.kind === 'work')) && fc.some((c) => c.kind === 'door' && c.group === 'Around Ashfall') && fc.some((c) => c.id === 'fo_ashfall:11'), `v0.11.19: Ashfall (fallout) on Day 9: work, doors, its own sit (${[...new Set(fc.map((c) => c.group))]})`);
     const pid = fc.find((c) => c.group === 'Palisade').id, fm0 = taskMinutes(f, SCENES, pid), f0 = f.minutes;
     runTask(f, SCENES, pid);
-    assert(f.scene === 'fo_ashfall' && f.minutes - f0 === fm0 && taskCards(f, SCENES).filter((c) => c.group === 'Palisade').every((c) => c.status === 'tomorrow'), 'v0.11.19: a palisade card runs as forecast, stays on the screen, and is done for the day');
+    assert(f.scene === 'fo_ashfall' && f.minutes - f0 === fm0 && taskCards(f, SCENES).filter((c) => c.group === 'Palisade').length >= 1 && taskCards(f, SCENES).filter((c) => c.group === 'Palisade').every((c) => c.status === 'open'), 'v0.11.19 (v0.11.156, DM1: no longer done for the day): a palisade card runs as forecast and stays on the screen; the other is still open');
+}
+// v0.11.156 (owner pick DM1: OF + OS + OA + OM; texts TX1): Act 1's once-a-day menus opened. The Blackroot's Forage repeats the
+// same day (as the Wilds'), Scout's and the Fallout's Palisade, Militia and Clinic cards run more than one a day (each still once a
+// Coil), the Council stays one a day (T1, the palisade's same-day opening, taken out again in RV1: menu texts are never drawn); the last day's drill stays
+// open for practice once the militia is ready (no second preparation, no relationship change) and then never holds "Call it a day" back
+{
+    const { DRILL_AGAIN } = await import('../js/story/act1_return.js');
+    const { oneOffLeft } = await import('../js/story/oneoff.js');
+    const at = (hub, day, seed) => { const g = ensureBars(newGame(seed)); g.scene = hub; g.coil.act = 1; g.minutes = (day - 1) * 1440 + 8 * 60; g.james.qi = 60; g.james.satiety = 90; g.flags.ya_joined = true; return g; };
+    const grp = (g, name) => taskCards(g, SCENES).filter((c) => c.group === name);
+    for (const [hub, day] of [['rr_hub', 13], ['dw_hub', 15], ['ah_hub', 17]]) {
+        const g = at(hub, day, 15601); const f0 = grp(g, 'Forage').filter((c) => c.status === 'open');
+        assert(f0.length >= 2, `OF: ${hub} offers its forage cards (${f0.map((c) => c.id)})`);
+        const id = f0.find((c) => !/grub|beetle/.test(c.label)).id; runTask(g, SCENES, id);
+        const f1 = grp(g, 'Forage');
+        assert(g.scene === hub && f1.find((c) => c.id === id)?.status === 'open' && f1.filter((c) => !/grub|beetle/.test(c.label)).every((c) => c.status === 'open'), `OF: ${hub}'s forage after one card: the same card and the others still open the same day (${f1.map((c) => `${c.id} ${c.status}`)})`);
+        const fam = taskState(g).fam[id] || 0; runTask(g, SCENES, id);
+        assert(g.scene === hub && (taskState(g).fam[id] || 0) > fam, `OF: ${hub}'s forage card runs again the same day and gains familiarity (${fam} → ${taskState(g).fam[id]})`);
+    }
+    { const g = at('rr_hub', 13, 15602); const s0 = grp(g, 'Scout').filter((c) => c.status === 'open'); assert(s0.length === 2, `OS: two scout cards (${s0.map((c) => c.id)})`);
+      runTask(g, SCENES, 'rr_scout:1'); const s1 = grp(g, 'Scout');
+      assert(!s1.some((c) => c.id === 'rr_scout:1') && s1.find((c) => c.id === 'rr_scout:0')?.status === 'open', `OS: after "You followed me for two days?" the other scout card is open the same day, the one taken gone for the Coil (${s1.map((c) => `${c.id} ${c.status}`)})`); }
+    { for (const [k, name] of ['Palisade', 'Militia', 'Clinic'].entries()) {
+          const g = at('fo_ashfall', 8, 15610 + k);
+          const cs = grp(g, name).filter((c) => c.status === 'open'); assert(cs.length >= 2, `OA: ${name} offers two cards (${cs.map((c) => c.id)})`);
+          runTask(g, SCENES, cs[0].id);
+          const after = grp(g, name);
+          assert(after.length >= 1 && after.every((c) => c.status === 'open'), `OA: ${name} after one card: the rest open the same day (${after.map((c) => `${c.id} ${c.status}`)})`);
+      }
+      const g = at('fo_ashfall', 8, 15603); const c0 = grp(g, 'Council').find((c) => c.status === 'open'); runTask(g, SCENES, c0.id);
+      assert(grp(g, 'Council').length >= 1 && grp(g, 'Council').every((c) => c.status === 'tomorrow'), `OA: the Council stays one a day (its Day 8 and Day 9 stories) (${grp(g, 'Council').map((c) => `${c.id} ${c.status}`)})`); }
+    { const g = at('rt_ashfall', 20, 15606); const entry = SCENES.rt_ashfall.choices.find((c) => c.to === 'rt_hunters');
+      assert(entry.text(g) === 'Drill the hunters one last time.' && grp(g, 'Militia').length === 2, 'OM: before the militia is ready, the drill as before');
+      assert(grp(g, 'Militia').every((c) => c.groupNote === ''), 'TX-A: no note on the heading before the militia is ready');
+      g.flags.a1_militia = true; const rel0 = JSON.stringify(g.rel);
+      assert(entry.text(g) === DRILL_AGAIN.label && entry.show(g) && grp(g, 'Militia').every((c) => c.status === 'open'), 'OM: once ready, both cards stay open for practice (T2 the entry\'s label)');
+      assert(grp(g, 'Militia').every((c) => c.groupNote === 'practice only'), 'TX-A: once ready, the Militia heading reads "Militia · practice only"');
+      assert(grp(at('fo_ashfall', 8, 15608), 'Militia').every((c) => !c.groupNote), 'TX-A: the Fallout\'s Militia has no note');
+      const MAIN = (await import('node:fs')).readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+      assert(MAIN.includes("${esc(name)}${note ? ` · ${esc(note)}` : ''}") && MAIN.includes('if (c.groupNote) gr.note = c.groupNote;') && MAIN.includes('!work.has(gr.name), gr.note)'), 'TX-A: main.js draws the note after the heading, the group keyed by its name');
+      const ya = runTask(g, SCENES, 'rt_hunters:1');
+      assert(ya.lines.includes(DRILL_AGAIN.ya) && JSON.stringify(g.rel) === rel0 && g.flags.a1_militia === true, `OM: a repeat "Let Ya teach them" says T5 and moves no relationship (${ya.lines})`);
+      const hard = SCENES.rt_hunters.choices[0];
+      assert(JSON.stringify(hard.do(g)) === JSON.stringify([DRILL_AGAIN.hard]) && JSON.stringify(hard.failDo(g)) === JSON.stringify([DRILL_AGAIN.hardFail]) && JSON.stringify(g.rel) === rel0, 'OM: a repeat "Drill them hard" says T3, a failed one T4, no relationship moves');
+      const g0 = at('rt_ashfall', 20, 15607); const r0 = JSON.stringify(g0.rel);
+      assert(SCENES.rt_hunters.choices[0].do(g0)[0].startsWith('By sunset') && g0.flags.a1_militia && JSON.stringify(g0.rel) !== r0, 'OM: the first success still readies the militia and moves the Village');
+      Object.assign(g.flags, { a1_palisade: true, council_done: true, ya_village: true });
+      assert(!oneOffLeft(g, SCENES, 'rt_ashfall'), 'OM: the practice drill does not hold "Call it a day" back'); }
+    // RV1 (Fable's review): G1 relationships once a day per card, the grub and the beetle once a day; CD "Call it a day" after one
+    // card from each opened once-a-Coil menu; LT the repeat drill through runTask, the 19:00 cutoff, no once-a-Coil mark
+    for (const [hub, day, card, who] of [['rr_hub', 13, 'rr_forage:1', 'Mei Lin'], ['dw_hub', 15, 'dw_forage:1', 'Mei Lin'], ['dw_hub', 15, 'dw_forage:2', 'Ya'], ['ah_hub', 17, 'ah_forage:1', 'Mei Lin']]) {
+        const g = at(hub, day, 15620); const r0 = JSON.stringify(g.rel[who] || {});
+        const [sc, i] = card.split(':'); const c = SCENES[sc].choices[+i];
+        c.do(g); const r1 = JSON.stringify(g.rel[who]); c.do(g); (c.failDo || c.do)(g);
+        assert(r1 !== r0 && JSON.stringify(g.rel[who]) === r1, `G1: ${card}'s ${who} gain once a day (${r0} → ${r1} → ${JSON.stringify(g.rel[who])})`);
+        g.minutes += 1440; c.do(g); assert(JSON.stringify(g.rel[who]) !== r1, `G1: ${card}'s ${who} gain again the next day`);
+    }
+    for (const [hub, day, label] of [['rr_hub', 13, /grub/], ['ah_hub', 17, /beetle/]]) {
+        const g = at(hub, day, 15621); g.james.satiety = 40; const c0 = grp(g, 'Forage').find((c) => label.test(c.label));
+        assert(c0?.status === 'open', `G1: ${hub}'s ${c0?.label} open in the morning`);
+        const rel0 = JSON.stringify(g.rel.Ya || {}); runTask(g, SCENES, c0.id); const rel1 = JSON.stringify(g.rel.Ya);
+        assert(rel1 !== rel0 && grp(g, 'Forage').find((c) => c.id === c0.id)?.status === 'tomorrow', `G1: ${c0.label} once a day (back tomorrow), Ya moved once`);
+        g.minutes += 1440; assert(grp(g, 'Forage').find((c) => c.id === c0.id)?.status === 'open', `G1: ${c0.label} open again the next day`);
+    }
+    { const { onceKey } = await import('../js/story/oneoff.js'); const { markDaily: mark } = await import('../js/story/common.js');
+      const base = () => { const g = at('fo_ashfall', 8, 15622); Object.assign(g.flags, { council_done: true, fo_mother: true, spy: true }); for (const k of ['a1_council', 'a1_mei', 'yk_time', 'wen_time', 'mother_time']) mark(g, k); return g; };
+      const allDone = base(); for (const m of ['fo_palisade', 'fo_drill', 'fo_clinic']) SCENES[m].choices.forEach((c, i) => { allDone.flags[onceKey(m, i)] = true; });
+      const marked = base(); for (const k of ['a1_palisade', 'a1_drill', 'a1_clinic']) mark(marked, k);
+      const unmarked = base();
+      assert(oneOffLeft(unmarked, SCENES, 'fo_ashfall') === true, 'CD: with the Fallout\'s once-a-Coil cards open and none taken today, "Call it a day" waits');
+      assert(oneOffLeft(allDone, SCENES, 'fo_ashfall') === false && oneOffLeft(marked, SCENES, 'fo_ashfall') === false, `CD: one card from each group today counts as those groups done for the button (${oneOffLeft(marked, SCENES, 'fo_ashfall')} / ${oneOffLeft(allDone, SCENES, 'fo_ashfall')})`);
+      const p = base(); const pid = taskCards(p, SCENES).find((c) => c.group === 'Palisade' && c.status === 'open').id; runTask(p, SCENES, pid);
+      assert(Object.keys(p.flags).some((k) => k.startsWith('a1_palisade@')) && grp(p, 'Palisade').some((c) => c.status === 'open'), 'CD: a palisade card marks the day for the button, and the palisade stays open');
+      const r = at('rr_hub', 13, 15623); r.scene = 'rr_hub'; runTask(r, SCENES, 'rr_scout:1');
+      assert(r.flags[`rr_scout@${Object.keys(r.flags).find((k) => k.startsWith('rr_scout@'))?.split('@')[1]}`] === true && grp(r, 'Scout').find((c) => c.id === 'rr_scout:0')?.status === 'open', 'CD: the scout card marks the day for the button, and the other card stays open'); }
+    { const g = at('rt_ashfall', 20, 15624); g.flags.a1_militia = true; const rel0 = JSON.stringify(g.rel); const oo0 = Object.keys(g.flags).filter((k) => k.startsWith('oo:')).length;
+      g.minutes = 19 * 1440 + 9 * 60; const res = runTask(g, SCENES, 'rt_hunters:0');
+      assert([DRILL_AGAIN.hard, DRILL_AGAIN.hardFail].some((t) => res.lines.includes(t)) && JSON.stringify(g.rel) === rel0 && Object.keys(g.flags).filter((k) => k.startsWith('oo:')).length === oo0, `LT: a repeat "Drill them hard" through runTask: T3 or T4, no relationship, no once-a-Coil mark (${res.lines})`);
+      g.minutes = 19 * 1440 + 19 * 60 + 5; assert(!grp(g, 'Militia').some((c) => c.status === 'open'), 'LT: the practice drill closes at 19:00'); }
 }
 // v0.11.20: the lean dry-run copy gives exactly what the old full copy gave (forecast rows, card minutes)
 {

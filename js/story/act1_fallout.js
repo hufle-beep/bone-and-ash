@@ -219,10 +219,10 @@ ${yaHere(g) ? (g.flags.ya_party ? (d2 === 2 ? `Ya is on the shrine roof, honing 
 ${pantry(g)} ${g.james.satiety < 30 ? 'You are hungry.' : ''} ${g.james.hp < jamesHpMax(g) * 0.5 ? 'You are hurt.' : ''}`;
         },
         choices: [
-            { text: 'Build the bone palisade: stakes along the barley line.', show: (g) => daily('a1_palisade')(g) && !late(g), time: 20, to: 'fo_palisade' },
+            { text: 'Build the bone palisade: stakes along the barley line.', show: (g) => !late(g), time: 20, to: 'fo_palisade' },
             { text: 'Sit in council with Old Wen.', show: (g) => daily('a1_council')(g) && !late(g), time: 20, to: 'fo_council' },
-            { text: 'Drill the hunters.', show: (g) => daily('a1_drill')(g) && !late(g), time: 10, to: 'fo_drill' },
-            { text: 'Run the clinic at the well.', show: (g) => daily('a1_clinic')(g) && !late(g), time: 10, to: 'fo_clinic' },
+            { text: 'Drill the hunters.', show: (g) => !late(g), time: 10, to: 'fo_drill' },
+            { text: 'Run the clinic at the well.', show: (g) => !late(g), time: 10, to: 'fo_clinic' },
             { text: 'Find Mei Lin.', show: (g) => daily('a1_mei')(g) && !late(g), time: 20, to: 'fo_mei' },
             { text: 'Pay your respects to Mei Lin\'s mother.', show: (g) => !g.flags.fo_mother && !late(g), time: 20, to: 'fo_mother' },
             { text: 'Find Ya. Follow the sound of offended people.', show: (g) => yaHere(g) && daily('a1_ya')(g) && !late(g), time: 20, to: 'fo_ya_time' },
@@ -237,7 +237,7 @@ ${pantry(g)} ${g.james.satiety < 30 ? 'You are hungry.' : ''} ${g.james.hp < jam
 
     fo_palisade: {
         id: 'fo_palisade', title: 'The Palisade', art: 'palisade', place: `${P} — the barley line`,
-        enter: (g) => { markDaily(g, 'a1_palisade'); return []; },
+        enter: (g) => { markDaily(g, 'a1_palisade'); return []; }, // v0.11.156 (RV1, CD): a mark for "Call it a day" only, no longer a gate
         text: (g) => `${(g.flags.palisade || 0) === 0
             ? 'The hunters have marked the line with chalk and string, perfectly straight, as if straightness itself were a defence. Maybe here it is. Every man and woman who can lift a mallet is waiting for you to begin.'
             : (g.flags.palisade || 0) === 1 ? 'Yesterday\'s stakes stand along a third of the line, white and sharp and faintly humming. The children have already started touching them for luck. Nobody has told them to stop.' : 'Two thirds of the line. From the ridge, Ashfall is starting to look like something with teeth.'}
@@ -272,7 +272,7 @@ ${byForm(g, "\"Your cat,\" Old Wen says,", "\"Your cat,\" Old Wen says,", "\"You
 
     fo_drill: {
         id: 'fo_drill', title: 'The Hunters', art: 'drill', place: `${P} — the threshing floor`,
-        enter: (g) => { markDaily(g, 'a1_drill'); return []; },
+        enter: (g) => { markDaily(g, 'a1_drill'); return []; }, // v0.11.156 (RV1, CD): a mark for "Call it a day" only, no longer a gate
         text: (g) => `The hunters are waiting in two straight lines when you arrive, spears grounded, faces set. Old Hu, the head hunter, salutes you as if you were a general, which you find more alarming than any wolf.
 
 ${(g.flags.militia || 0) >= 2 ? 'They remember everything you taught them before the tribute. They practise it with the terrible seriousness of men who expect to need it.' : 'They have never fought anything that could think. They are about to.'}${yaHere(g) ? '\n\nYa watches from the woodpile, eating a raw turnip and heckling. Old Hu pretends with enormous dignity that she does not exist.' : ''}`,
@@ -285,7 +285,7 @@ ${(g.flags.militia || 0) >= 2 ? 'They remember everything you taught them before
 
     fo_clinic: {
         id: 'fo_clinic', title: 'The Well', art: 'healer', place: `${P} — by the well`,
-        enter: (g) => { markDaily(g, 'a1_clinic'); return []; },
+        enter: (g) => { markDaily(g, 'a1_clinic'); return []; }, // v0.11.156 (RV1, CD): a mark for "Call it a day" only, no longer a gate
         text: (g) => `The line at the well is longer than before the tribute, and different: not fevers now but hands torn on stakes, a split scalp from a falling beam, a boy who tried to sharpen a scythe the way the hunters sharpen spears.
 
 They wait in order of age, oldest first, and refuse to change the order even when the boy is bleeding. When you object, an old woman explains to you, kindly, the way you'd explain to a child, that the order is the order.
