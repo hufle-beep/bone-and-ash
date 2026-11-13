@@ -43,8 +43,8 @@ export const TASK_HUBS = {
         notJames: (c) => /^Let Yuki hunt/.test(String(c.text)),
         yuki: {
             id: 'yuki:wilds', label: 'Hunt alone in the reeds', minutes: 75, dc: 1, item: 'hare_raw', n: 1,
-            got: (n) => (n > 1 ? `Yuki comes back with ${n} hares and the air of someone owed an apology.` : 'Yuki comes back with a hare and a look of mild contempt.'),
-            none: 'Yuki comes back with nothing, and pretends she wasn\'t trying.',
+            got: (n) => (n > 1 ? `Yuki comes back with ${n} hares and no remarks, having decided the hares are remark enough.` : 'Yuki comes back with a hare and drops it on your boots.'),
+            none: 'Yuki comes back with nothing, and blames the wind before you ask.',
             // v0.11.71 (owner pick Y1, texts Fable's): her own kind full → the next of these not full (big: tiger or human form only); all full → `full`
             alts: [
                 { item: 'fowl_raw', got: (n) => (n > 1 ? "Yuki comes back from the Mire's edge with two mire fowl, wet to the chest and above comment. Hares were not what you were short of." : "Yuki comes back from the stream edge with a mire fowl instead of a hare. You already have more hares than a man should. She has counted.") },

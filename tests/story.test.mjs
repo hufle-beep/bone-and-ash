@@ -312,7 +312,8 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     // RV2 (TG, Fable's review): the old first-day replies of the three lists that go by Yuki's form (the game as of v0.11.135)
     const OLD_FORMS = {"tiger":{"heart_camp:3":"You play the first part again, just Wren's voice, just the planting. Yuki purrs with her head on your chest the whole way through.","heart_spring:2":"You sit with your back to a warm wall and Yuki's head in your lap and listen to the water, and for half an hour nobody needs anything from you.","wen_lesson:forest":"You ask what the hunters' tales say the singing sounded like. He thinks about it with great seriousness. \"Like something you have already heard,\" he says at last, \"and cannot name.\" You don't tell him that's exactly it. Yuki, her chin on your knee, has not stopped looking toward the forest."},"human":{"heart_camp:3":"You play the first part again, just Wren's voice, just the planting. Yuki leans against your shoulder and purrs, very quietly, the whole way through.","heart_spring:2":"You sit with your back to a warm wall and Yuki's shoulder against yours and listen to the water, and for half an hour nobody needs anything from you.","wen_lesson:forest":"You ask what the hunters' tales say the singing sounded like. He thinks about it with great seriousness. \"Like something you have already heard,\" he says at last, \"and cannot name.\" You don't tell him that's exactly it. Yuki, beside you, has not stopped looking toward the forest."}};
     const ST6K = ['rr_forage:2', 'rr_forage:2:after', 'ah_forage:2', 'ah_forage:2:after', 'ah_hunt:1:part', 'ah_hunt:1:full']; // v0.11.154 (PS1, ST6): their own test (RP1 push 2's block)
-    const keys = Object.keys(DAY_REPLIES).filter((k) => !ST6K.includes(k));
+    const SWK = ['wild_forage:0', 'wild_forage:1', 'wild_forage:3', 'wild_hunt:0', 'wild_hunt:1', 'wild_hunt:2', 'wild_train:0', 'wild_train:1', 'wild_train:2', 'wild_train:3']; // v0.11.168 (P2A, SW): their own test (P2A's block)
+    const keys = Object.keys(DAY_REPLIES).filter((k) => !ST6K.includes(k) && !SWK.includes(k));
     const first = (k) => COIL_SETS[k]?.[0] ?? DAY_REPLIES[k]; // v0.11.166 (RW1): a Coil's set for the lists by Coil
     assert(keys.length === 38 && keys.reduce((s, k) => s + first(k).length - 1, 0) === 63, `NC1: 38 reply lists with 52 new texts; v0.11.152 (RP1): 11 more (${keys.length}, ${keys.reduce((s, k) => s + first(k).length - 1, 0)})`);
     assert(JSON.stringify([...keys].sort()) === JSON.stringify(NC.map(([k]) => k).sort()), 'NC1: a list for every reply the bots saw on two days, and no other');
@@ -453,6 +454,82 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         assert(SCENES.jackals_won.choices[0].text === "Sleep. What's left of the night." && /thin/.test(txt('jackals_won', g0)), 'CA1 (RV1, M4): the jackals label and the thin night agree');
         assert(readFileSync(new URL('../js/story/yuki_path.js', import.meta.url), 'utf8').includes('He will look at me and not see what I am.'), 'CA1 (RV1, H3): Yuki\'s last night no longer says Shen Qiu will not look twice');
         assert(!MEMORY_LINES.some((l) => /^You are the whole audience/.test(l)), 'CA1 (RV1, L8): Yuki remembers too');
+    }
+    // v0.11.168 (owner picks P2A, CA1; Fable's rewrite of part 2, the Wilds): SW the silent work cards' successes speak by day; the fixes
+    {
+        const txt = (id, g) => { const t = SCENES[id].text; return typeof t === 'function' ? t(g) : t; };
+        for (const k of SWK) {
+            const l = DAY_REPLIES[k];
+            assert(Array.isArray(l) && l.length === 2 && l[0] !== l[1] && l.every((t) => typeof t === 'string' && !/TODO|\$\{|undefined/.test(t) && t.split(/\s+/).length >= 8 && t.split(/\s+/).length <= 24), `P2A (SW): ${k} has two different short texts`);
+        }
+        const SW_GAIN = { 'wild_forage:0': ['+3 Jade bracket fungus.', 'jade_bracket', 3], 'wild_forage:1': ['+4 River cress.', 'river_cress', 4], 'wild_forage:3': ['+5 Crimson needleberries.', 'crimson_berry', 5],
+            'wild_hunt:0': ['+2 Glassback hare.', 'hare_raw', 2], 'wild_hunt:1': ['+1 Mire fowl.', 'fowl_raw', 1], 'wild_hunt:2': ['+2 Stone-shell crab meat.', 'crab_meat', 2],
+            'wild_train:0': [null], 'wild_train:1': [null], 'wild_train:2': [null], 'wild_train:3': [null] };
+        for (const [k, [gain, item, n]] of Object.entries(SW_GAIN)) {
+            const [scene, i] = k.split(':');
+            const outs = [0, 1].map((d) => {
+                const g = ensureBars(fresh(5600)); g.scene = scene; onDay(g, d); const before = item ? (g.inventory[item] || 0) : 0;
+                const out = SCENES[scene].choices[Number(i)].do(g);
+                if (item) assert((g.inventory[item] || 0) - before === n, `P2A (SW): ${k} still gives +${n} ${item}`);
+                return out;
+            });
+            const first = outs.map((o) => o[0]);
+            assert(first[0] !== first[1] && first.every((t, d) => t.includes(DAY_REPLIES[k][d])), `P2A (SW): ${k} says its day's text (${first.join(' | ')})`);
+            if (gain) assert(first.every((t) => t.startsWith(gain + ' ')), `P2A (SW): ${k} keeps its gain first, exactly (${first[0]})`);
+            if (k === 'wild_train:2') assert(outs.every((o) => o.length > 1), 'P2A (SW): footwork still adds Yuki\'s XP line after its text');
+        }
+        const g0 = ensureBars(fresh(5601));
+        const yh = SCENES.wild_hunt.choices[3].do(ensureBars(fresh(5602)))[0];
+        const haul = [TASK_HUBS.wilds.yuki.got(1), TASK_HUBS.wilds.yuki.got(2), TASK_HUBS.wilds.yuki.none];
+        assert(!haul.some((h) => yh.includes(h.replace(/^Yuki /, ''))) && !/mild contempt/.test(haul.join(' ')), 'P2A (OT): Yuki\'s haul in the Wilds and the yukihunt reply are different texts');
+        assert(!/three good spots/.test(txt('wild_forage', g0)) && !/Two rats/.test(txt('mire_won', g0)), 'P2A (OT): four forage spots, three mire-rats (no wrong count)');
+        g0.flags.night_ev = 'rats'; assert(/sleep is left will not be enough/.test(txt('night_won', g0)), 'P2A (OT, rider 1; RV1 L6): a won night says the sleep left is short');
+        // RV1 (TG, Fable's review): TG1 every SW card through the engine (runTask) in each band it can reach: a failure (and a drill's partial) shows no success
+        // text and notes no day; a thin, full or double haul shows the day's text; M1 no text names a count or a whole haul
+        const mkW = (gu, seed) => { const g = ensureBars(fresh(seed)); g.scene = 'wilds'; g.james.skills['Convergence Use'] = { tier: 1, level: 1, xp: 0 }; g.james.gu = { tier: gu[0], level: gu[1], xp: 0 }; ensureBars(g);
+            g.minutes = Math.floor(g.minutes / 1440) * 1440 + 2 * 1440 + 9 * 60; g.james.qi = 99; g.james.hp = 40; return g; };
+        let bands = 0;
+        for (const k of SWK) {
+            const [scene, i] = k.split(':'); const c = SCENES[scene].choices[Number(i)]; const L = DAY_REPLIES[k]; const seen = new Set();
+            for (let t = 1; t <= 3; t++) for (let l = 1; l <= 10; l++) {
+                const g = mkW([t, l], 5610); const band = cardCheck(g, k, c).band; if (seen.has(band)) continue; seen.add(band); bands++;
+                const r = splitReply(runTask(g, SCENES, k).lines); const all = r.reply.concat(r.gains).join(' | ');
+                const failed = band === 'fail' || (band === 'partial' && scene === 'wild_train'); // a drill's partial runs its failure (half XP)
+                if (failed) assert(!L.some((x) => all.includes(x)) && !g.lines?.d?.[`r:${k}`], `P2A (RV1, TG1): ${k} failed: no success text, no day noted (${all})`);
+                else assert(r.reply.some((x) => x.includes(L[0])), `P2A (RV1, TG1): ${k} ${band}: the first day's text (${all})`);
+            }
+            assert(seen.has('partial') && seen.has('full'), `P2A (RV1, TG1): ${k} reached a thin and a full haul (${[...seen]})`);
+        }
+        assert(bands >= 37, `P2A (RV1, TG1): the bands run (${bands})`);
+        assert(['wild_forage:0', 'wild_hunt:0'].every((k) => DAY_REPLIES[k].every((t) => !/\bfull ring\b|\beach\b|\btwo\b|\bboth\b/i.test(t))), 'P2A (RV1, M1): the ring and hare texts name no count or whole haul');
+        // TG2: a real two days (no faked day record): Day 2 a failure, Day 3 a success shows the first text; Day 4 a success the second
+        {
+            const g = mkW([1, 1], 5611); const k = 'wild_forage:1'; const L = DAY_REPLIES[k];
+            assert(cardCheck(g, k, SCENES.wild_forage.choices[1]).band === 'fail', 'P2A (RV1, TG2): the cress fails at GU T1 L1');
+            const r1 = splitReply(runTask(g, SCENES, k).lines); assert(!r1.reply.concat(r1.gains).some((x) => L.some((y) => x.includes(y))), 'P2A (RV1, TG2): Day 2 failed, no success text');
+            g.james.gu = { tier: 1, level: 5, xp: 0 }; ensureBars(g); g.minutes += 1440; g.scene = 'wilds';
+            const r2 = splitReply(runTask(g, SCENES, k).lines); g.minutes += 1440; g.scene = 'wilds';
+            const r3 = splitReply(runTask(g, SCENES, k).lines);
+            assert(r2.reply.some((x) => x.includes(L[0])) && r3.reply.some((x) => x.includes(L[1])), `P2A (RV1, TG2): the first success shows text 1 (no "yesterday"), the next day text 2 (${r2.reply} | ${r3.reply})`);
+        }
+        // TG3: Yuki's watched hunt, both ways, against her own haul lines
+        {
+            const yk = SCENES.wild_hunt.choices[3]; const outs = new Map();
+            for (let s = 5620; s < 5680 && outs.size < 2; s++) { const g = ensureBars(fresh(s)); const before = g.inventory.hare_raw || 0; const o = yk.do(g)[0]; outs.set((g.inventory.hare_raw || 0) > before, o); }
+            assert(outs.size === 2 && /\+1 Glassback hare\.$/.test(outs.get(true)) && !/Glassback/.test(outs.get(false)), `P2A (RV1, TG3): the watched hunt catches and misses (${[...outs.values()].join(' | ')})`);
+            assert(haul.every((h) => ![...outs.values()].some((o) => o.includes(h.replace(/^Yuki comes back with /, '')))), 'P2A (RV1, TG3): neither branch repeats her haul lines');
+        }
+        // TG4: the Wilds' own lines keep the openings the screen sorts by; TG5: the lost night keeps its mechanical words
+        {
+            const g = ensureBars(fresh(5690)); g.scene = 'wilds'; g.minutes = Math.floor(g.minutes / 1440) * 1440 + 2 * 1440 + 10 * 60;
+            const rest = SCENES.wilds.choices.find((c) => /^Rest in the shade/.test(c.text)).do(g);
+            assert(rest.some((l) => /^An hour of rest/.test(l)), `P2A (RV1, TG4): the Wilds' rest line opens "An hour of rest" (${rest.slice(-1)})`);
+            const m = ensureBars(fresh(5691)); m.scene = 'morning'; m.inventory.hare_raw = 1; m.minutes = Math.floor(m.minutes / 1440) * 1440 + 1440 + 7 * 60;
+            const fed = SCENES.morning.enter(m); m.inventory = {}; const hungry = SCENES.morning.enter(m);
+            assert(fed.some((l) => /^Breakfast\. /.test(l)) && hungry.some((l) => /^No breakfast\. /.test(l)), `P2A (RV1, TG4): the Wilds' morning opens "Breakfast. " / "No breakfast. " (${fed.concat(hungry).join(' | ')})`);
+            const n = ensureBars(fresh(5692)); n.james.hp = 20; const lost = SCENES.night_lost.choices[0].do(n);
+            assert(lost.some((l) => /HP partly back, Qi full\.$/.test(l)), `P2A (RV1, TG5): the lost night keeps "HP partly back, Qi full." (${lost})`);
+        }
     }
     // RV2 (M1, Fable's review): Ya names the ship on her ledge only once it has been found
     {
