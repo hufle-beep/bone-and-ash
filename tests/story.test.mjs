@@ -1299,6 +1299,186 @@ for (const form of ['cat', 'human']) {
       for (let i = 0; i < 8; i++) { got.push(SCENES.rt_hunters.choices.find((c) => /Ya teach/.test(c.text)).do(g)[0]); g = ensureBars(deserialize(serialize(g))); }
       assert(new Set(got.slice(0, 4)).size === 4 && new Set(got.slice(4)).size === 4 && got.every((t, i) => i === 0 || t !== got[i - 1]) && got.every((t) => DRILL_AGAIN.ya.includes(t)), 'P7A (RV1, TG10): eight practice drills through a save round trip: two full rounds, never the same twice running'); }
 }
+// v0.11.175 (owner pick P8A; Fable's rewrite of part 8, the Long Forest): OT the older text, CO the second Coil (he knows the week),
+// DY the first screen on day 0, YF Yuki's three forms (the morning, the autumn season, the trials' win, the storm, Fang Wei's look),
+// FX (no weeks counted, eight or nine hundred years, the hare's miss, the pony, the secret of her voice), RP the daily scenes' later
+// visits (world flags lf_seen_<key>, per Coil), SW the drills' lines (the picker), SS a season line per rung, IN the ten intros
+// emptied (never shown), YA Yuki's form scenes, ST the ten fights' stomp texts; the scenes' ids, labels, places, art, targets, times
+// and checks pinned as in v0.11.174
+{
+    const { LONGFOREST, LF_DRILL } = await import('../js/story/longforest.js');
+    const { lfSeason } = await import('../js/story/prologue.js');
+    const LSRC = readFileSync(new URL('../js/story/longforest.js', import.meta.url), 'utf8'), PSRC = readFileSync(new URL('../js/story/prologue.js', import.meta.url), 'utf8');
+    const FORMS = [['cat', 0], ['tiger', 2], ['human', 7]];
+    const L = (seed, form, realm, flags = {}, hour = 10) => { const g = ensureBars(fresh(seed)); g.coil.n = 2; g.yuki.realm = Math.max(realm, { cat: 0, tiger: 2, human: 7 }[form]); g.james.realm = g.yuki.realm; g.yuki.form = form; g.minutes = 2 * 1440 + hour * 60; Object.assign(g.flags, { longforest: true, lf_active: true, lf_days: 0 }, flags); return ensureBars(g); };
+    const bad = (t) => typeof t !== 'string' || /TODO|\$\{|undefined|\bNaN\b|\[object|\bnull\b/.test(t);
+    const txt = (id, g) => { const t = SCENES[id].text; return typeof t === 'function' ? t(g) : t; };
+    const results = (g, c) => { const out = []; if (c.show && !c.show(g)) return out; for (const f of [c.do, c.failDo]) if (typeof f === 'function') { const h = JSON.parse(JSON.stringify(g)); try { out.push(...(f(ensureBars(h)) || []).filter((x) => typeof x === 'string')); } catch (e) { out.push(`ERR ${e.message}`); } } return out; }; // only the choices on screen
+    let seed = 8800;
+    // every Long Forest scene: three forms, realms 0/3/9, days 0 and 4, both encounters, first and later visits, with its choices' results
+    const KEYS = ['falls', 'ride', 'notes', 'bored', 'bathe', 'bone', 'mire', 'ridge', 'storm', 'roots', 'trial_lost', 'lf_bandits', 'lf_rogue'];
+    let n = 0; const badL = [];
+    for (const id of Object.keys(LONGFOREST)) for (const [form, r0] of FORMS) for (const realm of [r0, 3, 9]) for (const days of [0, 4]) for (const who of ['lf_bandits', 'lf_rogue']) for (const vis of [0, 2]) {
+        const flags = { lf_days: days, lf_human: who, lf_last: who, lf_trials_won: vis ? 3 : 1, lf_seasons: 1 + (realm % 4) };
+        for (const k of KEYS) if (vis) flags[`lf_seen_${k}`] = vis;
+        const g = L(seed++, form, realm, flags); g.scene = id;
+        let t; try { t = txt(id, g); } catch (e) { t = `ERR ${e.message}`; }
+        const res = (SCENES[id].choices || []).flatMap((c) => results(g, c));
+        n++; if (bad(t) || res.some(bad)) badL.push(`${id}/${form}/${realm}/${vis}`);
+    }
+    assert(n > 2000 && !badL.length, `P8A: every Long Forest scene renders clean in every form, realm, day, encounter and visit, with its choices' results (${n}; ${[...new Set(badL)].slice(0, 6)})`);
+    // RP: the first visit reads the first text, a later visit another; the counter is a plain world flag per key
+    for (const [id, k] of [['lf_falls', 'falls'], ['lf_ride', 'ride'], ['lf_notes', 'notes'], ['lf_bored', 'bored'], ['lf_bathe', 'bathe'], ['lf_bone_depths', 'bone'], ['lf_black_mire', 'mire'], ['lf_thunder_ridge', 'ridge'], ['lf_storm', 'storm'], ['lf_old_roots', 'roots'], ['lf_trial_lost', 'trial_lost']]) {
+        const g = L(seed++, 'cat', 3, { lf_last: 'lf_bone_hounds' }); const m0 = g.minutes;
+        goTo(g, SCENES, id); const first = sceneView(g, SCENES).text;
+        assert(g.flags[`lf_seen_${k}`] === 1, `P8A (RP): ${id} counts its first visit (${g.flags[`lf_seen_${k}`]})`);
+        goTo(g, SCENES, 'lf_hub'); g.minutes += 1440; goTo(g, SCENES, id); const again = sceneView(g, SCENES).text; // v0.11.175 (RV1, C7): a later visit is another day
+        assert(g.flags[`lf_seen_${k}`] === 2 && first !== again && again.length > 60 && !bad(again), `P8A (RP): ${id}'s later visit has its own text`);
+        void m0;
+    }
+    for (const who of ['lf_bandits', 'lf_rogue']) {
+        const g = L(seed++, 'cat', 3); const meet = () => { goTo(g, SCENES, 'lf_wanderers'); g.flags.lf_human = who; g.flags.lf_last = who; g.flags[`lf_seen_${who}`] = (g.flags[`lf_seen_${who}`] || 1); return txt('lf_wanderers', g); };
+        const a = meet(); const ta = txt('lf_human_talked', g), wa = txt('lf_human_won', g), la = txt('lf_human_lost', g);
+        g.flags[`lf_seen_${who}`] = 2; const b = txt('lf_wanderers', g), tb = txt('lf_human_talked', g), wb = txt('lf_human_won', g), lb = txt('lf_human_lost', g);
+        assert(a !== b && ta !== tb && wa !== wb && la !== lb && ![b, tb, wb, lb].some(bad), `P8A (RP): ${who} met again: their own meeting, talk, win and robbery texts`);
+    }
+    { const g = L(seed++, 'cat', 3, { lf_last: 'lf_ossuary' }); goTo(g, SCENES, 'lf_trial_won'); const w1 = sceneView(g, SCENES).text; goTo(g, SCENES, 'lf_trial_won'); const w2 = sceneView(g, SCENES).text;
+      assert(g.flags.lf_trials_won === 2 && w1 !== w2 && /Ossuary Wyrm/.test(w2), `P8A (RP): the second trial won reads its own text and names the beast (${w2.slice(0, 80)})`); }
+    { const g = L(seed++, 'human', 7); goTo(g, SCENES, 'lf_ride'); g.minutes += 1440; goTo(g, SCENES, 'lf_ride'); const c = SCENES.lf_ride.choices[0]; const r = c.do(g);
+      assert(typeof r[0] === 'string' && !/The flat ones from the slow water/.test(r[0]) && !bad(r[0]), 'P8A (RP): the ride\'s later thanks is its own line'); }
+    { const g = L(seed++, 'cat', 3); goTo(g, SCENES, 'lf_falls'); const snap = JSON.parse(JSON.stringify(g)); const s2 = deserialize(serialize(g));
+      assert(s2.flags.lf_seen_falls === 1 && snap.flags.lf_seen_falls === 1, 'P8A (RP): the visit counter survives a save'); }
+    // SW: the drills speak, each list in turn (all three before any comes back)
+    for (const [i, k, kf] of [[0, 't1', 't1Fail'], [1, 't2', 't2Fail'], [2, 't3', null], [3, 't4', 't4Fail']]) {
+        const c = SCENES.lf_train.choices[i]; const g = L(seed++, 'cat', 3);
+        const seen = new Set(); for (let j = 0; j < 3; j++) seen.add(c.do(g).find((x) => LF_DRILL[k].includes(x)));
+        assert(seen.size === 3, `P8A (SW): ${k}'s three lines before any comes back (${seen.size})`);
+        if (kf) { const f = new Set(); for (let j = 0; j < 3; j++) f.add(c.failDo(g).find((x) => LF_DRILL[kf].includes(x))); assert(f.size === 3, `P8A (SW): ${kf}'s three lines (${f.size})`); }
+    }
+    assert(Object.values(LF_DRILL).flat().every((x) => !bad(x) && x.length > 30) && new Set(Object.values(LF_DRILL).flat()).size === 21, 'P8A (SW): 21 drill lines, all different');
+    // SS: a season line per rung
+    { const g = L(seed++, 'cat', 0); g.james.realm = 0; g.yuki.realm = 0; const got = [];
+      for (let r = 1; r <= 14; r++) { const out = lfSeason(g); got.push(out[0]); assert(/^Realm: /.test(out[1]) && g.james.realm === r, `P8A (SS): the season to rung ${r} keeps its mechanical line`); }
+      assert(new Set(got).size === 14 && got.every((x) => !bad(x) && x.length > 40) && !/SS TODO/.test(PSRC), `P8A (SS): fourteen season lines, one per rung (${new Set(got).size})`); }
+    // DY, YF
+    { const g0 = L(seed++, 'cat', 0, { lf_days: 0 }), g1 = L(seed++, 'cat', 0, { lf_days: 1 });
+      assert(!/stopped counting/.test(txt('lf_hub', g0)) && /stopped counting/.test(txt('lf_hub', g1)), 'P8A (DY): the hub counts nothing on day 0, has stopped counting from day 1'); }
+    for (const [id, flags] of [['lf_morning', { lf_days: 6 }], ['lf_seclusion', { lf_seasons: 4 }], ['lf_trial_won', { lf_last: 'lf_ossuary', lf_trials_won: 1 }], ['lf_storm', {}], ['lf_wanderers', { lf_human: 'lf_rogue' }]]) {
+        const t = FORMS.map(([form]) => txt(id, L(seed++, form, 7, flags)));
+        assert(new Set(t).size === 3 && t.every((x) => !bad(x)), `P8A (YF): ${id} by Yuki's form`);
+    }
+    // FX, CO, IN
+    assert(!/several weeks|for a long moment|a good deal|size of a pony|Don't tell anyone I can talk|I know nothing about this world|Your people live for nine hundred|Rainbows, then nothing|gold eyes, level/.test(LSRC) && /eight or nine hundred/.test(LSRC), 'P8A (FX, CO): the fixed phrases are gone; his people\'s eight or nine hundred years');
+    { const intros = [...LSRC.matchAll(/intro: '([^']*)'/g)].map((m) => m[1]);
+      const ids = ['lf_bone_hounds', 'lf_ossuary', 'lf_mire_brood', 'lf_bog_mother', 'lf_storm_hawks', 'lf_thunder_ram', 'lf_root_lurkers', 'lf_heartless', 'lf_bandits', 'lf_rogue'];
+      assert(intros.length === 10 && intros.every((x) => x === '') && ids.every((id) => typeof STOMP[id]?.posture === 'function' && STOMP[id].win?.[2] && STOMP[id].win?.[3] && STOMP[id].one), 'P8A (IN): the ten intros emptied, each fight opened by its posture at every degree');
+      let k = 0; for (const id of ids) for (const [form] of FORMS) for (const d of [1, 2, 3]) { const g = L(seed++, form, 7); const p = STOMP[id].posture(g, d), w = STOMP[id].win[d === 1 ? 2 : d](g), o = STOMP[id].one(g); k++; assert(![p, w, o].some(bad), `P8A (ST): ${id} as ${form} at degree ${d}`); }
+      assert(k === 90, 'P8A (ST): ninety stomp renders'); }
+    // the scenes' frame as in v0.11.174 (ids, titles, places, art, labels, targets, times, checks)
+    { const lab = (c) => (typeof c.text === 'function' ? '(fn)' : c.text); const out = {};
+      for (const id of Object.keys(LONGFOREST)) { const s = SCENES[id]; out[id] = [s.title, typeof s.place === 'string' ? s.place : '(fn)', typeof s.art === 'string' ? s.art : '(fn)', (s.choices || []).map((c) => [lab(c), typeof c.to === 'string' ? c.to : '(fn)', c.time || 0, c.check ? `${c.check.skill}/${c.check.dc}` : ''].join('|'))]; }
+      const h = createHash('sha1').update(JSON.stringify(out)).digest('hex');
+      assert(h === '47cdc01d6b4ab6a7e13145655586d82285767d62', `P8A: the Long Forest's ids, titles, places, art, labels, targets, times and checks as in v0.11.174 (${h}; update only with a push that means to change them)`); }
+}
+// v0.11.175 (owner pick RV1; Fable's cold review of part 8, TG1–TG14): a visit counted once a day (C1/C2: the storm's way down the
+// ridge, a zone twice a day), the encounters' second fight openings (T6/C3), the great form's scene before the human one (T8), the
+// lint reading the later texts (C4); first and later texts each in their place, the drills' pools, the season by rung, the forms, the
+// real flow of a second meeting, the people named, the beasts named, the daily marks, the rewind, the frame, no weeks on day 0
+{
+    const { LONGFOREST, LF_DRILL } = await import('../js/story/longforest.js');
+    const { lfSeason, SEASON_LINES } = await import('../js/story/prologue.js');
+    const FORMS = [['cat', 0], ['tiger', 2], ['human', 7]];
+    const L = (seed, form, realm, flags = {}, hour = 10) => { const g = ensureBars(fresh(seed)); g.coil.n = 2; g.yuki.realm = Math.max(realm, { cat: 0, tiger: 2, human: 7 }[form]); g.james.realm = g.yuki.realm; g.yuki.form = form; g.minutes = 2 * 1440 + hour * 60; Object.assign(g.flags, { longforest: true, lf_active: true, lf_days: 0 }, flags); return ensureBars(g); };
+    const txt = (id, g) => { const t = SCENES[id].text; return typeof t === 'function' ? t(g) : t; };
+    const nextDay = (g) => { goTo(g, SCENES, 'lf_hub'); g.minutes += 1440; };
+    let seed = 9100;
+    // TG12 (C1, C2): the ridge, the storm and back down: one visit; a zone twice in a day: one; the next day: the later text
+    { const g = L(seed++, 'cat', 3); goTo(g, SCENES, 'lf_thunder_ridge'); const r1 = sceneView(g, SCENES).text; goTo(g, SCENES, 'lf_storm'); goTo(g, SCENES, 'lf_thunder_ridge'); const r2 = sceneView(g, SCENES).text;
+      assert(g.flags.lf_seen_ridge === 1 && g.flags.lf_seen_storm === 1 && r1 === r2, `TG12 (C1): the storm's way back down counts no second visit (${g.flags.lf_seen_ridge})`);
+      for (let i = 0; i < 3; i++) { goTo(g, SCENES, 'lf_hub'); goTo(g, SCENES, 'lf_bone_depths'); }
+      assert(g.flags.lf_seen_bone === 1, `TG12 (C2): a zone three times in a day is one visit (${g.flags.lf_seen_bone})`);
+      nextDay(g); goTo(g, SCENES, 'lf_thunder_ridge'); assert(g.flags.lf_seen_ridge === 2 && sceneView(g, SCENES).text !== r1, 'TG12: the next day reads the later text'); }
+    // TG2: one save, three days, the drills each day through a save: three different lines each, seven pools of their own
+    { let g = L(seed++, 'cat', 3); const got = {};
+      for (let d = 0; d < 3; d++) {
+          for (const [i, k, kf] of [[0, 't1', 't1Fail'], [1, 't2', 't2Fail'], [2, 't3', null], [3, 't4', 't4Fail']]) { const c = SCENES.lf_train.choices[i]; (got[k] ||= []).push(c.do(g).find((x) => LF_DRILL[k].includes(x))); if (kf) (got[kf] ||= []).push(c.failDo(g).find((x) => LF_DRILL[kf].includes(x))); }
+          g = ensureBars(deserialize(serialize(g))); g.minutes += 1440;
+      }
+      assert(Object.entries(got).every(([, v]) => new Set(v).size === 3 && v.every(Boolean)), `TG2: each drill's three lines over three days, through saves (${Object.entries(got).map(([k, v]) => `${k} ${new Set(v).size}`)})`);
+      const pools = Object.keys(g.lines?.p || {}).filter((k) => /^lf_t/.test(k)).sort();
+      assert(JSON.stringify(pools) === JSON.stringify(['lf_t1', 'lf_t1Fail', 'lf_t2', 'lf_t2Fail', 'lf_t3', 'lf_t4', 'lf_t4Fail']), `TG2: seven drill pools, by name (${pools})`); }
+    // TG1: each scene's first text on the first visit and its later text after (markers of each)
+    for (const [id, k, f, l] of [['lf_falls', 'falls', /An hour upstream a waterfall/, /The cliff has not moved/], ['lf_ride', 'ride', /In her great form Yuki is the size of a Bengal tiger/, /still does not do saddles/],
+        ['lf_notes', 'notes', /\*Key finding/, /\*Further entries/], ['lf_bored', 'bored', /a bone mouse on a thread/, /So you compete with yourself/], ['lf_bathe', 'bathe', /a flat rock for your coat/, /The same cold black river/],
+        ['lf_bone_depths', 'bone', /Beyond the giant skulls/, /raked smooth since you were last here/], ['lf_black_mire', 'mire', /The mire beyond the mire/, /The ink has closed over/],
+        ['lf_thunder_ridge', 'ridge', /A spine of black rock above the treeline/, /The ridge again/], ['lf_storm', 'storm', /like the idiot in a/, /You take the top rock again/],
+        ['lf_old_roots', 'roots', /Deeper in than the Hollow/, /The white roots lie as you left them/], ['lf_trial_lost', 'trial_lost', /You lose\. It happens\./, /You lose again\./]]) {
+        const g = L(seed++, 'cat', 3, { lf_last: 'lf_bone_hounds' }); goTo(g, SCENES, id); const a = sceneView(g, SCENES).text; nextDay(g); goTo(g, SCENES, id); const b = sceneView(g, SCENES).text;
+        assert(f.test(a) && !l.test(a) && l.test(b) && !f.test(b), `TG1: ${id}: the first text first, the later one after`);
+    }
+    // TG3: the season line by rung (with the old count of seasons set, which no longer decides)
+    { const g = L(seed++, 'cat', 0); g.james.realm = 0; g.yuki.realm = 0; g.flags.lf_seasons = 5; const got = [];
+      for (let r = 1; r <= 14; r++) got.push(lfSeason(g)[0]);
+      assert(/ledge above the falls/.test(got[0]) && /poured soft at/.test(got[2]) && /second attention/.test(got[5]) && /committee/.test(got[6]) && /top rung/.test(got[13]) && got.every((x, i) => x === SEASON_LINES[i]), `TG3: rung 1 the ledge, 3 the set centre, 6 the second attention, 7 the committee, 14 the top rung (${got.map((x) => x.slice(0, 20))})`); }
+    // TG4: the form spots, first and later: the cat and the great root-kin never speak aloud, the woman does
+    { const SPOTS = [['lf_morning', { lf_days: 6 }], ['lf_seclusion', { lf_seasons: 4 }], ['lf_trial_won', { lf_last: 'lf_ossuary', lf_trials_won: 1 }], ['lf_trial_won', { lf_last: 'lf_ossuary', lf_trials_won: 2 }], ['lf_storm', {}], ['lf_storm', { lf_seen_storm: 2 }]];
+      for (const [id, flags] of SPOTS) {
+          const t = FORMS.map(([form]) => txt(id, L(seed++, form, 7, flags)));
+          const own = t.map((x, i) => x.split(/(?<=[.!?*"])\s+/).filter((sen) => !t.some((y, j) => j !== i && y.includes(sen))).join(' '));
+          assert(new Set(t).size === 3 && !/["“]/.test(own[0]) && !/["“]/.test(own[1]) && (id === 'lf_morning' || /["“]/.test(own[2])), `TG4: ${id} ${JSON.stringify(flags)}: the cat and the great root-kin through the bond, the woman aloud (${own.map((x) => x.slice(0, 50))})`);
+      } }
+    // TG5: a second meeting by the real flow (the test writes no counter): first texts, then the later ones; the fight opens on it too
+    for (const who of ['lf_bandits', 'lf_rogue']) {
+        const g = L(seed++, 'cat', 3); let met = 0, first = null, later = null, p1 = null, p2 = null;
+        for (let day = 0; day < 40 && met < 2; day++) {
+            goTo(g, SCENES, 'lf_wanderers');
+            if (g.flags.lf_human === who) { met++; const t = sceneView(g, SCENES).text, p = STOMP[who].posture(g, 2); if (met === 1) { first = t; p1 = p; assert(g.flags[`lf_seen_${who}`] === 1, `TG5: ${who} counted once at the first meeting`); } else { later = t; p2 = p; } }
+            nextDay(g);
+        }
+        assert(met === 2 && g.flags[`lf_seen_${who}`] === 2 && first !== later && p1 !== p2 && !/TODO/.test(later + p2), `TG5 (T6): ${who} met twice: the later meeting and its own fight opening (${met})`);
+    }
+    // TG6: the later texts name their own people (and Fang Wei's later meeting doesn't name him before he says it)
+    for (const who of ['lf_bandits', 'lf_rogue']) {
+        const g = L(seed++, 'cat', 3, { lf_human: who, lf_last: who, [`lf_seen_${who}`]: 2 });
+        const t = ['lf_wanderers', 'lf_human_talked', 'lf_human_won'].map((id) => txt(id, g)).join('\n') + STOMP[who].posture(g, 1);
+        assert(who === 'lf_bandits' ? /Tan/.test(t) && !/Fang Wei/.test(t) : !/\bTan\b|Tans/.test(t), `TG6: ${who}'s later texts are their own`);
+        if (who === 'lf_rogue') assert(!/Fang Wei/.test(txt('lf_wanderers', g)), 'TG6 (T6): the later meeting doesn\'t name Fang Wei before he does');
+    }
+    // TG7: the first trial win names its beast, every fight of the zones
+    for (const id of ['lf_bone_hounds', 'lf_ossuary', 'lf_mire_brood', 'lf_bog_mother', 'lf_storm_hawks', 'lf_thunder_ram', 'lf_root_lurkers', 'lf_heartless']) {
+        const g = L(seed++, 'cat', 3, { lf_last: id, lf_trials_won: 1 }); const t = txt('lf_trial_won', g);
+        assert(/Bone-hound|Ossuary Wyrm|Mire-brood|Bog-Mother|Storm-hawk|Thunder-horn Ram|Root-lurker|Heartless/.test(t) && !/\b[Tt]he [Tt]he\b/.test(t), `TG7: ${id}'s win names it (${t.slice(0, 120)})`);
+    }
+    // TG8: each daily scene marks its day: its hub card is gone after a visit
+    for (const [id, re] of [['lf_falls', /cold falls/], ['lf_ride', /Ride Yuki/], ['lf_notes', /Take stock/], ['lf_bored', /Yuki is bored/], ['lf_bathe', /Wash in the river/], ['lf_wanderers', /game trails/]]) {
+        const g = L(seed++, 'tiger', 3, { lf_days: 2 }); const card = () => SCENES.lf_hub.choices.find((c) => typeof c.text === 'string' && re.test(c.text));
+        assert(card() && card().show(g), `TG8: ${id}'s card shows before`); goTo(g, SCENES, id); assert(!card().show(g), `TG8: ${id} marks its day`);
+    }
+    // TG9: a rewind clears the counters, the day flags and the drill pools
+    { const g = L(seed++, 'cat', 3); goTo(g, SCENES, 'lf_falls'); SCENES.lf_train.choices[0].do(g); rewind(g);
+      assert(!Object.keys(g.flags).some((k) => /^lf_seen_/.test(k)) && !Object.keys(g.lines?.p || {}).some((k) => /^lf_t/.test(k)) && !KEEP_FLAGS.some((f) => /lf_seen/.test(f)), 'TG9: a rewind forgets the visits and the drills'); }
+    // TG10: the frame, wider: Qi costs, the checks' bands and bonuses and xpTo, gives, and the code of every do, failDo and enter with its strings taken out
+    { const strip = (f) => (typeof f === 'function' ? f.toString().replace(/`(?:[^`\\]|\\.)*`|'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"/g, 'S') : String(f ?? ''));
+      const out = {}; for (const id of Object.keys(LONGFOREST)) { const s = SCENES[id]; out[id] = [strip(s.enter), (s.choices || []).map((c) => [c.qi || 0, c.check ? `${c.check.band || ''}/${c.check.xpTo || ''}/${c.check.bonus ? strip(c.check.bonus) : ''}` : '', (c.gives || []).join(','), strip(c.do), strip(c.failDo), strip(c.show)].join('|'))]; }
+      const h = createHash('sha1').update(JSON.stringify(out)).digest('hex');
+      assert(h === '3069b671168a0f938203a737b010cef55d646f3c', `TG10: the Long Forest's code with its strings taken out, as in v0.11.175 (${h}; update only with a push that means to change it)`); }
+    // TG11: the first visits on day 0 count no weeks, months or days
+    for (const id of Object.keys(LONGFOREST)) for (const [form] of FORMS) { const g = L(seed++, form, 7); g.scene = id; let t = ''; try { t = txt(id, g); } catch { t = ''; } const SPENT = /\b(?:several|many|for|after) (?:weeks|months|days)\b|\bweeks of\b|\ba while ago\b/; assert(!SPENT.test(t), `TG11: ${id} as ${form} on day 0 counts no time spent here (${(t.match(/.{0,30}(?:weeks|months|days|a while ago).{0,20}/) || [''])[0]})`); } // a week's walk, this week (the prologue's), a lie's month: not time spent here
+    // TG13 (C5): a drill card on the task screen shows a drill line in every band it reaches
+    { const lf0 = deserialize(readFileSync(new URL('../saves/v0.11.7-long-forest-coil2.json', import.meta.url), 'utf8')); const bands = new Set();
+      for (const tier of [1, 3, 6, 9]) for (let i = 0; i < 4; i++) { const g = ensureBars(deserialize(serialize(lf0))); g.james.gu = { tier, level: 5, xp: 0 }; g.james.qi = 60; g.james.satiety = 80; g.seed += i;
+          const card = taskCards(g, SCENES).find((c) => c.id === `lf_train:${i}`); if (!card || card.status !== 'open') continue;
+          const r = runTask(g, SCENES, card.id); bands.add(card.check?.band); const all = Object.values(LF_DRILL).flat();
+          assert((r.lines.some((x) => all.includes(x) || (i === 2 && /−3 HP\.$/.test(x))) || (i === 2 && /partly/.test(r.lines[0] || ''))), `TG13 (C5): lf_train:${i} at T${tier} (${card.check?.band}) shows a drill line (${r.lines.slice(0, 3)})`); }
+      assert(bands.size >= 2, `TG13: more than one band reached (${[...bands]})`); }
+    // TG14 (C4): the lint reads the Long Forest's later texts, the drills and the season lines (the saved snapshot)
+    { const snap = JSON.parse(readFileSync(new URL('../tools/text-baseline.json', import.meta.url), 'utf8'));
+      assert(snap.pools?.lf_drill?.lines === 21 && snap.pools?.lf_season?.lines === 14 && snap.areas.longforest.variantWords > 4000, `TG14 (C4): the lint's pools and the later-visit samples (${snap.pools?.lf_drill?.lines}, ${snap.pools?.lf_season?.lines}, ${snap.areas?.longforest?.variantWords})`); }
+    // T8: the great form's scene before the human one
+    { const g = L(seed++, 'human', 7); g.flags.yuki_tiger_seen = false; g.flags.yuki_human_seen = false;
+      const hum = SCENES.lf_hub.choices.find((c) => c.to === 'yuki_human_awaken'), tig = SCENES.lf_hub.choices.find((c) => c.to === 'yuki_tiger_awaken');
+      assert(tig.show(g) && !hum.show(g), 'T8: the great form\'s scene comes first'); g.flags.yuki_tiger_seen = true; assert(hum.show(g) && !tig.show(g), 'T8: then the human one'); }
+}
 // v0.11.137 (owner pick HV1): whose relationships are tracked (RL): Yuki, Mei Lin and Ya (romance), Old Wen and Mother (non-romantic),
 // the Village (friendship only); Old Hu dropped (HD): nothing moves him, an old save keeps his numbers. The James tab: tools/browser.py hv1.
 {
@@ -2176,8 +2356,10 @@ for (const form of ['cat', 'human']) {
         ['rt_serpent_lost', {}, null, /with Yuki standing on your chest, soaked/, /with Yuki standing over you, soaked/, /with Yuki kneeling on your chest, soaked/],
         ['night_event', { night_ev: 'gift' }, null, /Yuki is sitting on you, very upright[\s\S]*nearly as big as she is[\s\S]*Through the bond: \*you hunt like a tree/, /The weight is one of Yuki's paws\.[\s\S]*about one mouthful to her[\s\S]*Through the bond: \*you hunt like a tree/, /Yuki is kneeling beside you[\s\S]*neck neatly wrung[\s\S]*"You hunt like a tree," she says\./],
         ['jackals_fled', {}, null, /Yuki — perched on your shoulder, dry, smug —/, /Yuki — stretched out on the one rock in midstream, dry, smug —/, /Yuki — standing on the one rock in midstream with her hem held up, dry, smug —/],
-        ['lf_notes', {}, null, /adds her own entry with one claw: a single scratch, which you decide/, /adds her own entry with one claw: a single scratch, through that page and the next six, which you decide/, /takes the notebook and adds her own entry: a single stroke, which you decide/],
-        ['lf_human_lost', {}, null, /Yuki sits on your chest until you get up\. Through the bond: \*we are coming back/, /Yuki keeps one paw on your chest until you get up\. Through the bond: \*we are coming back/, /Yuki sits beside you until you get up\. "We are coming back here," she says\./],
+        ['lf_notes', {}, null, /adds an entry of her own with one claw: a single scratch, which you decide/, /adds an entry of her own with one claw: a single scratch, through that page and the next six, which you decide/, // v0.11.175 (P8A): Fable's rewrite
+            /takes the notebook and adds her own entry: a single stroke, which you decide/],
+        ['lf_human_lost', {}, null, /Yuki sits on your chest until you move\. Through the bond: \*we are coming back/, /Yuki plants one forepaw on your sternum, which is plenty, until you move\. Through the bond: \*we are coming back/, // v0.11.175 (P8A)
+            /Yuki sits beside you until you get up\. "We are coming back here," she says\./],
     ];
     for (const [id, flags, min, ...want] of NQ) {
         assert(!!SCENES[id], `NQ1: scene ${id} exists`);
@@ -2211,7 +2393,7 @@ for (const form of ['cat', 'human']) {
         });
     }
     // the Tans' crushing win (lf_bandits, degree 3)
-    const TANS = [['cat', /eating their jerky, with Yuki in your lap\./], ['tiger', /eating their jerky, with Yuki's head in your lap\./], ['human', /eating their jerky, with Yuki beside you, eating the rest\./]];
+    const TANS = [['cat', /eating their jerky, with Yuki in your lap\./], ['tiger', /eating their jerky, with Yuki's head in your lap\./], ['human', /eating their jerky, with Yuki next to you, eating the rest\./]]; // v0.11.175 (P8A): Fable's rewrite
     for (const [form, re] of TANS) {
         const t = STOMP.lf_bandits.win[3](FM(59500 + n++, form));
         assert(re.test(t) && TANS.filter(([, r]) => r.test(t)).length === 1, `NQ1: the Tans' crushing win as ${form}`);
@@ -2264,7 +2446,7 @@ for (const form of ['cat', 'human']) {
     // PC: Old Wen's lesson (the scene's quote; v0.11.169, P3A YF: "Your great beast" of the great root-kin) and the Tans' taunt (the fight's posture)
     for (const [form, wen, tans] of [
         ['cat', /"Your cat has been staring toward it/, /In the deep forest\. With a \*cat\*\." Little Tan/],
-        ['tiger', /"Your great beast has been staring toward it/, /With a —" He looks at Yuki properly for the first time\. He has practised this\. "\*Cat\*\." Little Tan/],
+        ['tiger', /"Your great beast has been staring toward it/, /With a—" He looks at Yuki properly, and at some length\. A rehearsed man does not improvise\. "\*Cat\*\." Little Tan/], // v0.11.175 (P8A)
         ['human', /"Your companion has been staring toward it/, /With a \*lady\*\. In \*silk\*\." Little Tan/],
     ]) {
         const g = FM(60200 + n++, form, { lore_realms: true }); goTo(g, SCENES, 'wen_lesson'); // the forest lesson, after the realms

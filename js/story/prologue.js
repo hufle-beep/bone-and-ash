@@ -1000,12 +1000,22 @@ export const lfRank = (r) => (r >= MAX_REALM ? 100 : 7 * r);
 export const LF_SEASON_MINUTES = 120;
 const rankOf = (s) => (s ? 10 * ((s.tier || 1) - 1) + (s.level || 1) : 0);
 const fromRank = (n) => { const t = Math.floor((n - 1) / 10) + 1; return { tier: t, level: n - 10 * (t - 1), xp: 0 }; };
-const SEASON_LINES = [
-    'You sit behind the falls until moss has grown over your boots. Yuki does not permit moss. Something gives.',
-    'A season without a word spoken. Yuki calls it the best season of your life. She calls it that through the bond, which is cheating.',
-    'The leaves turn, fall and come back. So do you, one rung up. The forest affects not to notice.',
-    'You count breaths. Somewhere past a million the counting stops being necessary.',
-    'The cave mouth fills with snow, then rain, then green. You were otherwise engaged.',
+/** v0.11.175 (P8A, SS): one line per rung reached (index realm − 1: Foundation … the fourteenth); before, five lines in turn. */
+export const SEASON_LINES = [
+    "A season of sitting still on the ledge above the falls. By its end the ground has only a courtesy claim on you. You stay put. Flying can wait for somewhere to be.",
+    "A season without a word spoken. Yuki calls it your best work, and says so through the bond, more than once. Toward the end your shoulder starts to complain of her weight.",
+    "The rains come through and move on. What was poured soft at your centre has set. Yuki tests it through the bond, as one knocks on a melon.",
+    "A hot season. Insects settle on you as on any warm stone, and learn otherwise, and tell the others. By the end you sit in a tidy circle of nothing.",
+    "You sit through a season of fruit. It ripens, drops and ferments round you; the wasps get drunk and quarrelsome. Nothing in you is distracted. You find that slightly sad.",
+    "Fog for a season. Somewhere in it you become aware of a second attention behind your own, small, and not yet opinionated. Yuki's view is that this will not last.",
+    "Hard frost, none of it on you. When you stand, something inside stands half a beat later: quieter than you, and surer. You are now, technically, a committee.",
+    "The season's birds nest, hatch, fledge and leave within arm's reach of you. Not one of them registers a man. You have been reclassified as terrain.",
+    "A dry season. The stream drops, the grass yellows, and you sit through it without thirst, which you note, and without boredom, which Yuki notes, with suspicion.",
+    "All season something undescribed fruits on the log at your back, peaks and rots. You, a mycologist, never open an eye. This, apparently, is progress.",
+    "A season of gales. Old trees come down to left and right of you; none falls your way. The forest no longer holds opinions about you. It makes arrangements.",
+    "Seeds sprout in the lee of you, a whole season's worth, leaning your way as they would toward a window. You get up carefully. Yuki walks through them anyway.",
+    "The river floods up to where you sit, considers the matter, and goes round. At the season's end you are one dry fact in a wide field of mud.",
+    "The last season is the quietest. Nothing gives, nothing breaks, nothing arrives. You simply run out of ladder, and sit a while longer on the top rung out of habit.",
 ];
 export function lfSeason(g) {
     const j = g.james, y = g.yuki;
@@ -1024,7 +1034,7 @@ export function lfSeason(g) {
     ensureBars(g);
     g.flags.lf_seasons = (g.flags.lf_seasons || 0) + 1;
     const s = j.gu;
-    return [SEASON_LINES[(g.flags.lf_seasons - 1) % SEASON_LINES.length], `Realm: ${realmName(was)} → ${realmName(r)}. GU, Convergence Use, Yuki's Fight and Qi Use: at least T${s.tier} L${s.level}.`];
+    return [SEASON_LINES[Math.min(r, SEASON_LINES.length) - 1], `Realm: ${realmName(was)} → ${realmName(r)}. GU, Convergence Use, Yuki's Fight and Qi Use: at least T${s.tier} L${s.level}.`];
 }
 /** v0.11.37 (owner 12:59, pick A1): where James walked into the Long Forest, and when (flags `lf_from`, `lf_at`), for "Go back the way you came". */
 const lfFrom = (from) => (g) => { g.flags.lf_from = from; g.flags.lf_at = g.minutes; return []; };
