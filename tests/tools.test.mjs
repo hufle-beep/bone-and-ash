@@ -863,6 +863,26 @@ const RP2_SHA = 'e5088b2cf6accc566581cf0d59f7ff00532bef028e8bef831b2f37295c4aefc
     assert(Buffer.byteLength(p1) <= DOC_TOOL_MAX && p1.includes('Older versions (0.11.69 and before): `restore-points-2.md`') && /\| 0\.8\.1 \| `0c82c10` \|/.test(p2), `RP: part 1 under ${DOC_TOOL_MAX} bytes (${Buffer.byteLength(p1)}) with its pointer; part 2 ends at 0.8.1`);
 }
 
+const CL3_SHA = '2eecaa7c2318459eee87ac90e7ca4d6b62c70d0939adf8a19dbb68feaf7aed48'; // v0.11.176 (CL1): the 70 rows moved to changelog-3.md, as moved (part 3 never changes)
+// v0.11.176 (owner pick CL1): changelog.md split again at 0.11.139: 0.11.70–0.11.139 in changelog-3.md, 0.11.69 and before in changelog-2.md
+// (v0.11.105, CS1); every row in exactly one part, newest first in each, part 1 under the project tool's limit with its pointer line
+{
+    const read = (f) => readFileSync(path.join(ROOT, 'project', f), 'utf8');
+    const [p1, p2, p3] = ['changelog.md', 'changelog-2.md', 'changelog-3.md'].map(read);
+    const rowLines = (t) => t.split('\n').filter((l) => /^\| \d+\.\d+\.\d+ \|/.test(l));
+    const rows = (t) => rowLines(t).map((l) => l.split('|')[1].trim().split('.').map(Number));
+    const cmp = (a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2];
+    const r1 = rows(p1), r2 = rows(p2), r3 = rows(p3), all = [...r1, ...r3, ...r2].map((v) => v.join('.'));
+    assert(r3.length === 70 && r3.every((v) => cmp(v, [0, 11, 70]) >= 0 && cmp(v, [0, 11, 139]) <= 0) && r1.every((v) => cmp(v, [0, 11, 140]) >= 0) && r2.every((v) => cmp(v, [0, 11, 69]) <= 0),
+        `CL1: 0.11.70–0.11.139 in part 3 (${r3.length}), 0.11.140 on in part 1 (${r1.length}), 0.11.69 and before in part 2 (${r2.length})`);
+    assert(new Set(all).size === all.length && [r1, r2, r3].every((r) => r.every((v, i) => i === 0 || cmp(r[i - 1], v) > 0)), 'CL1: no row twice, each part newest first');
+    const { createHash } = await import('node:crypto');
+    const sha = createHash('sha256').update(rowLines(p3).join('\n')).digest('hex');
+    assert(r1.length >= 37 && sha === CL3_SHA, `CL1: part 3's rows exactly as moved (sha256 ${sha.slice(0, 12)}…), part 1 keeps 0.11.140 on (${r1.length})`);
+    assert(Buffer.byteLength(p1) <= DOC_TOOL_MAX && Buffer.byteLength(p3) <= DOC_TOOL_MAX && p1.includes('0.11.70–0.11.139 in `changelog-3.md`') && p1.includes('0.11.69 and before in `changelog-2.md`') && p3.includes('Newer versions: `changelog.md`'),
+        `CL1: parts 1 and 3 under ${DOC_TOOL_MAX} bytes (${Buffer.byteLength(p1)}, ${Buffer.byteLength(p3)}) with their pointers`);
+}
+
 rmSync(TMP, { recursive: true, force: true });
 
 console.log(`(${((Date.now() - t0) / 1000).toFixed(1)} s)`);
