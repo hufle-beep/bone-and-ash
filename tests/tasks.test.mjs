@@ -1,4 +1,5 @@
 // Run: node tests/tasks.test.mjs — task cards and the queue (v0.9.0, "Tasks (preview)").
+import { DEAD_MENUS } from './lib/deadmenus.mjs'; // v0.11.177 (RV1 TG10)
 // Every card resolves; old saves get an empty queue; a dry run predicts the real run exactly;
 // 1,000 bot games (2,000 before v0.11.34) in task mode reach the end with no dead end (Incremental Mode only since v0.11.34, D1: the classic games and the Story Mode checks gone).
 import { SCENES, lfOpen, lfSeason, lfRank, LF_STOCK, LF_SEASON_MINUTES } from '../js/story/prologue.js';
@@ -1919,6 +1920,7 @@ function play(run, tasks) {
                     if (card?.check) bands[card.check.band] = (bands[card.check.band] || 0) + 1;
                     const fam0 = taskState(g).fam[id] || 0;
                     const r = runTask(g, SCENES, id);
+                    if (DEAD_MENUS.has(g.scene)) assert(false, `v0.11.177 (RV1 TG10): a card left the bot in an emptied menu (${id} → ${g.scene})`); else pass++;
                     if (r.lines.some((l) => /^Yuki (comes|leaves)/.test(l))) yukiRuns++;
                     if (card?.kind === 'work') { if ((taskState(g).fam[id] || 0) > fam0) pass++; else assert(false, `familiarity grows on ${id}`); } // v0.11.21: the label only on a failure
                     st.cards++;

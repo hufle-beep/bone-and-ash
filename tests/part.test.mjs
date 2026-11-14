@@ -1,5 +1,5 @@
 // Run: node tests/part.test.mjs <part>   (fallout | blackroot | heart | return)
-import { deadMenuOk, DEAD_MENUS } from './lib/deadmenus.mjs'; // v0.11.177 (P9A): the emptied menu texts
+import { deadMenuOk } from './lib/deadmenus.mjs'; // v0.11.177 (P9A): the emptied menu texts
 // Tests one Act 1 part on its own: links, reachability from its entry, 1,000 random walks to its exit, fights resolve.
 // Other parts' entry scenes count as exits, so parts can be written in parallel.
 // v0.11.44 (E step 1, owner pick P2): Incremental Mode (no dice), like the game; James's strength comes from the bots' range

@@ -515,7 +515,7 @@ ${g.james.saturation >= 100 ? 'Saturation sits at the very top of you and presse
     lf_bone_depths: {
         id: 'lf_bone_depths', title: 'The Bone Field Depths', art: 'lf_bone_depths', place: `${P} — the Bone Field depths`,
         enter: (g) => visit(g, 'bone'), // v0.11.175 (P8A, RP)
-        text: (g) => (later(g, 'bone') ? `The white sand lies raked smooth, by wind or by something tidy, and keeps no record of you. Under the great ribs the population is at full strength: your Convergence counts skeletons it has counted before, and one or two that haven't been told about you. All of them are listening to your boots.` : `Beyond the giant skulls the Bone Field keeps going down: a valley inside the valley, floored with white sand that was bone once, roofed in places by ribs like the vaults of a church with the lead stolen. Things live among the ribs. Your Convergence can feel each of their skeletons, which is either a tactical advantage or the most unsettling experience of your life.`),
+        text: (g) => (later(g, 'bone') ? `The white sand lies raked smooth, by wind or by something tidy, and keeps no record of you. Under the great ribs the population is at full strength: your Convergence counts skeletons it has counted before, none of which has been told about you. All of them are listening to your boots.` : `Beyond the giant skulls the Bone Field keeps going down: a valley inside the valley, floored with white sand that was bone once, roofed in places by ribs like the vaults of a church with the lead stolen. Things live among the ribs. Your Convergence can feel each of their skeletons, which is either a tactical advantage or the most unsettling experience of your life.`),
         choices: [
             fightChoice('lf_bone_hounds', 'Take on the bone-hounds.'),
             fightChoice('lf_ossuary', 'Wake the Ossuary Wyrm.'),
@@ -535,7 +535,7 @@ ${g.james.saturation >= 100 ? 'Saturation sits at the very top of you and presse
     lf_thunder_ridge: {
         id: 'lf_thunder_ridge', title: 'The Thunder Ridge', art: 'lf_thunder_ridge', place: `${P} — the Thunder Ridge`,
         enter: (g) => visit(g, 'ridge'), // v0.11.175 (P8A, RP)
-        text: (g) => `${later(g, 'ridge') ? `The ridge again: black rock, and the afternoon storm stacking up on time, as if under contract. There is glass where you remember plain rock. The sky keeps its hand in.` : `A spine of black rock above the treeline, where it storms every afternoon whatever the weather is doing elsewhere. Where the lightning lands, the rock has run to glass. The sky up here is in the habit of hitting things.`}
+        text: (g) => `${later(g, 'ridge') ? `The ridge again: black rock, and the afternoon storm stacking up on time, as if under contract. The glass lies where the lightning left it. The sky keeps its hand in.` : `A spine of black rock above the treeline, where it storms every afternoon whatever the weather is doing elsewhere. Where the lightning lands, the rock has run to glass. The sky up here is in the habit of hitting things.`}
 
 ${g.james.realm >= 1 ? 'As you step onto the ridge the storm overhead falters. You get the clear impression that it knows you, and has decided not to meet your eye.' : 'The storm overhead crackles at you, by way of a test. It finds nothing to test, and sulks.'}`,
         choices: [
@@ -630,9 +630,9 @@ His senses go over you again. Nothing. Whatever passed between you before, he ha
 "The mortal again," he says. "Heaven sends a man the same insect twice only when it means him to step on it."`) : g.flags.lf_human === 'lf_bandits'
             ? `Two men step onto the trail ahead of you: one broad and scarred, one narrow and twitchy, each with the sort of knife that is mainly for being seen. Brothers, going by the faces. Bandits, going by everything else.
 
-"Tan," says the scarred one, by way of introduction. "The Tan brothers. You will have heard of us." The narrow one asks whether the uncle cooks, since he looks to him like a man who feeds people, and is looked at until he stops.
+"Tan," says the scarred one, by way of introduction. "The Tan brothers. You will have heard of us." The narrow one asks whether the uncle cooks, since his sleeves are rolled like a cook's, and is looked at until he stops.
 
-You have not heard of them, you tell him; you have been in a forest. It turns out to be the wrong answer.`
+You have not heard of them, you tell the scarred one; you have been in a forest. It turns out to be the wrong answer.`
             : `A young man in faded crimson kneels in a clearing, cutting Ninefold grass with a jade knife, very fast, with glances over his shoulder. Sect robes, and the lotus picked off the sleeve. A poacher, then, on ground the Crimson Lotus calls its own.
 
 He sees you. He takes in the white coat, ${byForm(g, 'the cat', 'the white beast with no more Qi on it than a house cat', 'the silent woman in black silk')}, and the complete absence of anything on the Qi senses he is so proud of. His shoulders come down. His smile comes up.

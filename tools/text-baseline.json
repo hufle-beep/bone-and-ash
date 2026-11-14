@@ -3,14 +3,14 @@
  "totals": {
   "scenes": 328,
   "words": 36714,
-  "variantWords": 42876,
+  "variantWords": 42874,
   "labels": 835,
   "labelWords": 5675,
   "sharedChunks": 137,
   "sharedScenes": 112,
   "reused": 45,
   "favourites": 10,
-  "tics": 8,
+  "tics": 7,
   "broken": 0,
   "spacing": 8,
   "unrendered": 3
@@ -25,7 +25,7 @@
    "sharedScenes": 30,
    "reused": 0,
    "favScenes": 14,
-   "tics": 6,
+   "tics": 5,
    "broken": 0,
    "spacing": 0,
    "unrendered": 0
@@ -117,7 +117,7 @@
   "longforest": {
    "scenes": 31,
    "words": 2849,
-   "variantWords": 5508,
+   "variantWords": 5506,
    "labels": 90,
    "labelWords": 523,
    "sharedScenes": 11,
@@ -159,7 +159,7 @@
   },
   "replies": {
    "lines": 260,
-   "words": 7091,
+   "words": 7093,
    "dupes": 0,
    "sceneShared": 7,
    "tics": 0,

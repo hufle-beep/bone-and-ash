@@ -42,16 +42,16 @@ const DR_FEET_F = dayReply("wild_train:2:f", [
 ]);
 /* Part 9 (run C, item 10): the drills' failures get a line by day, like DR_FEET_F (Fable's). */
 const DR_DARTS_F = dayReply("wild_train:0:f", [
-    "Your threads total up the throws and report, with tact, that the marks were never in danger. The undergrowth took losses.",
-    "The marks have not moved overnight. The darts land as though they had. Yuki follows one into the ferns with her eyes and says nothing, at length.",
+    "Your threads total up the throws and report, with tact, that the marks were grazed oftener than struck. The undergrowth took losses.",
+    "The marks have not moved overnight. Half the darts land as if they had. Yuki watches one into the ferns and says nothing, slowly.",
 ]);
 const DR_BLADE_F = dayReply("wild_train:1:f", [
-    "The blade arrives late, leaves early, and once comes out as a spoon. Yuki, who has views, shares only the short ones.",
-    "Grow, cut, dissolve. Today it dissolves on the cut, and you finish the form holding a fistful of white dust and your dignity, in that order.",
+    "The blade keeps time on most cuts, and once comes out as a spoon. Yuki, who has views, shares only the short ones.",
+    "Grow, cut, dissolve. Today it dissolves on every third cut, and you finish the form holding white dust and your dignity, in that order.",
 ]);
 const DR_NEEDLE_F = dayReply("wild_train:3:f", [
-    "A hundred needles, and the bark holds a hundred opinions on where the point was. Forty in the knuckle-width, if you are generous. Your threads are not.",
-    "Sixty in the mark, by the threads' count, which is the only count on offer. The other forty have founded a colony in the next trunk.",
+    "A hundred needles, and the bark holds several opinions on the point. Seventy in the knuckle-width, if you are generous. Your threads are not.",
+    "Eighty in the mark, by the threads' count, the only count offered. The other twenty have founded a colony a thumb to the left.",
 ]);
 
 /* v0.11.168 (owner pick P2A, SW): the silent work cards' successes get a line by day (Fable's); the gains stay as they were. */

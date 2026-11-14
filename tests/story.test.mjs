@@ -11,7 +11,7 @@ import { YT_HUBS, YT_BODY, YT_CLOSE, YT_LABEL, YT_GAIN, ytPool } from '../js/sto
 import { TASK_HUBS } from '../js/story/task_hubs.js'; // v0.11.137 (TR1, YB)
 import { HT_HUBS, HT_BODY, HT_CLOSE, HT_LABEL, HT_GAIN, HT_MID, htPool, htSlot } from '../js/story/house_time.js'; // v0.11.139 (MW1)
 import { likesMei, likesYa, rel } from '../js/story/act1_common.js'; // v0.11.123 (EQ1, AB); v0.11.172 (P5A): rel
-import { KEEP_FLAGS, rewind } from '../js/core/coil.js'; // v0.11.137 (HV1, Fable L2): rewind on an old save // v0.11.123 (ER1, T3)
+import { KEEP_FLAGS, rewind, endCoil } from '../js/core/coil.js'; // v0.11.137 (HV1, Fable L2): rewind on an old save // v0.11.123 (ER1, T3)
 import { againView, noteRead, MEMORY_LINES } from '../js/story/again.js'; // v0.11.167 (CA1): MEMORY_LINES // v0.11.125 (RW1, T); v0.11.133 (FP2): noteRead
 import { STOMP } from '../js/story/power.js'; import { ASHFALL } from '../js/story/ashfall.js'; import { FALLOUT } from '../js/story/act1_fallout.js'; import { BLACKROOT } from '../js/story/act1_blackroot.js'; // v0.11.172 (P5A): BLACKROOT; v0.11.170 (NX2): FALLOUT // v0.11.169 (P3A): ASHFALL // v0.11.126 (NQ1)
 import { coilStamp, dayIndex, textDay, DAY_REPLIES, COIL_SETS, actCoil, noteDay, linesOf, pickLine } from '../js/core/lines.js'; // v0.11.166 (RW1): COIL_SETS, actCoil; // v0.11.135 (NT1, EV1); v0.11.136 (NC1): DAY_REPLIES
@@ -1360,7 +1360,14 @@ for (const form of ['cat', 'human']) {
             const t1 = LONGFOREST.lf_human_talked.text(g); g.flags[`lf_seen_${who}`] = 2; const t2 = LONGFOREST.lf_human_talked.text(g);
             assert(t1 !== t2, `P9A (P8): ${who} remember nothing of an earlier Coil (their first meeting this Coil reads the first text)`);
         }
-        const s = serialize(L(9504, 2)); void s;
+        // RV1 TG2: a real rewind keeps lf_known and clears the counters; the next Coil's first visit reads the later text; a save keeps it
+        { const g = L(9504, 2); goTo(g, SCENES, 'lf_falls'); goTo(g, SCENES, 'lf_hub'); goTo(g, SCENES, 'lf_wanderers'); const known = JSON.stringify(g.flags.lf_known);
+          assert(!('lf_bandits' in g.flags.lf_known) && !('lf_rogue' in g.flags.lf_known), 'P9A (RV1, C6): the two people are not stored');
+          endCoil(g, 'choice'); rewind(g); g.coil.n = 3; g.scene = 'lf_hub';
+          assert(JSON.stringify(g.flags.lf_known) === known && !Object.keys(g.flags).some((k) => /^lf_seen_/.test(k)), `TG2: a rewind keeps lf_known (${JSON.stringify(g.flags.lf_known)}) and clears the counters`);
+          goTo(g, SCENES, 'lf_falls'); const t3 = sceneView(g, SCENES).text;
+          assert(t3 === again, 'TG2: after the rewind the first visit reads the later text');
+          assert(JSON.stringify(deserialize(serialize(g)).flags.lf_known) === JSON.stringify(g.flags.lf_known), 'TG2: lf_known survives a save'); }
     }
     // P1 (run C): Old Wen and Lu Han judge Yuki by what they see (no sensing), every branch and form; the road's direction agrees;
     // the bond-only path lines are their own texts; Wen's needle line not on the ignored path; no "for three days"
@@ -1391,6 +1398,46 @@ for (const form of ['cat', 'human']) {
         { const g = ensureBars(fresh(9810)); g.coil.n = 2; g.scene = 'lf_spar'; const out = SCENES.lf_train.choices[2].failDo(g); assert(out.some((x) => LF_DRILL.t3Fail.includes(x)), 'P9A (P8): the spar\'s failure draws its pool'); }
         { const g = ensureBars(fresh(9820)); g.coil.n = 2; g.flags.lf_last = 'lf_heartless'; g.flags.lf_trials_won = 1; g.scene = 'lf_trial_won'; const t = SCENES.lf_trial_won.text(g);
           assert(/Heartless/.test(t) && !bad(t), 'P9A (P8): the Heartless has its own grave win text'); }
+    }
+    // RV1 TG1: a failed Wilds drill still uses up its day; TG3 the Heartless's own win; TG4 ya_found's two places; TG6 the road;
+    // TG10 mei_bond's day branch takes 10 minutes in every region (C1); C2 a save resting in an emptied menu opens on its hub
+    {
+        for (const i of [0, 1, 3]) { const g = ensureBars(fresh(9900 + i)); g.scene = 'wild_train'; g.minutes += 1440; g.james.skills['Convergence Use'] = { tier: 2, level: 1, xp: 0 }; ensureBars(g); const c = SCENES.wild_train.choices[i];
+            assert(c.show(g), `TG1: wild_train:${i} shows before`); c.failDo(g); assert(!c.show(g), `TG1: a failed wild_train:${i} uses up its day`); }
+        for (const [form, r] of [['cat', 0], ['tiger', 2], ['human', 7]]) for (const won of [1, 3]) {
+            const g = ensureBars(fresh(9910)); g.coil.n = 2; g.yuki.realm = r; g.james.realm = r; g.yuki.form = form; g.flags.lf_trials_won = won; g.scene = 'lf_trial_won';
+            g.flags.lf_last = 'lf_heartless'; const h = SCENES.lf_trial_won.text(g); g.flags.lf_last = 'lf_root_lurkers'; const o = SCENES.lf_trial_won.text(g);
+            assert(/^It is done\. Among the white roots/.test(h) && h !== o && !bad(h), `TG3: the Heartless's own grave win (${form}, won ${won})`);
+        }
+        { const pl = (flags) => { const g = ensureBars(fresh(9920)); Object.assign(g.flags, flags); const p = SCENES.ya_found.place; return typeof p === 'function' ? p(g) : p; };
+          const ah = pl({ ya_waited: true }), other = pl({}); assert(/Ashen/.test(ah) && /burnt gully/.test(other), `TG4: ya_found's places (${ah} / ${other})`); }
+        { const g = ensureBars(fresh(9930)); g.flags.a1_outcome = 'taken'; g.scene = 'a1_again'; const again = SCENES.a1_again.text(g); const CS = readFileSync(new URL('../js/story/coil_scenes.js', import.meta.url), 'utf8');
+          assert(/up the mountain|up into the mountains/.test(again) && !/down the mountain/.test(again) && !/down the mountain/.test(CS), 'TG6: the Sect is up the mountain in both Coil texts'); }
+        for (const r of ['rr', 'dw', 'ah']) {
+            const g = ensureBars(fresh(9940)); g.flags.bl_region = r; goTo(g, SCENES, 'mei_bond'); g.flags.mb_day = true; const m0 = g.minutes;
+            const v = sceneView(g, SCENES); const i = v.choices.findIndex((x) => /^Catch up with the others/.test(x.label));
+            assert(i >= 0, `TG10 (C1): mei_bond's day branch has its way out (${r})`); if (i >= 0) { choose(g, SCENES, v.choices[i].index ?? i);
+            assert(g.minutes - m0 === 10, `TG10 (C1): leaving mei_bond's day branch in ${r} takes 10 minutes (${g.minutes - m0})`); }
+        }
+        const { deadMenuHub } = await import('../js/core/tasks.js');
+        for (const [sc, flags, hub] of [['wild_hunt', {}, 'wilds'], ['wild_train', {}, 'wilds'], ['bl_train', { bl_region: 'rr' }, 'rr_hub'], ['bl_train', { bl_region: 'dw' }, 'dw_hub'], ['bl_train', { bl_region: 'ah' }, 'ah_hub'], ['lf_trials', {}, 'lf_hub'], ['wilds', {}, null]]) {
+            const g = ensureBars(fresh(9950)); g.scene = sc; Object.assign(g.flags, flags);
+            assert(deadMenuHub(g, SCENES) === hub, `P9A (RV1, C2): a save resting in ${sc} opens on ${hub} (${deadMenuHub(g, SCENES)})`);
+        }
+    }
+    // RV1 TG5: the notebook's sky count at realms 0, 1, 2; TG7: Wen and Lu Han's middle branch by measure, not by count (n 1, 5, 9)
+    {
+        for (const [r, want] of [[0, /has not yet tried to strike me/], [1, /strike me 1 time and/], [2, /strike me 2 times and/]]) {
+            const g = ensureBars(fresh(9960)); g.coil.n = 2; g.james.realm = r; g.yuki.realm = r; g.scene = 'lf_notes'; const t = SCENES.lf_notes.text(g);
+            assert(want.test(t) && !/\b0 time/.test(t), `TG5: the notebook's sky at realm ${r}`);
+        }
+        const PS = readFileSync(new URL('../js/story/prologue.js', import.meta.url), 'utf8');
+        for (const [n, w] of [[1, 'faintly'], [5, 'plainly'], [9, '']]) {
+            const g = ensureBars(fresh(9970)); g.yuki.primaries = n;
+            const lines = Object.keys(SCENES).map((k) => { const s = SCENES[k]; if (typeof s.text !== 'function') return ''; try { return s.text(g); } catch { return ''; } }).filter((x) => /You eat no pills|No pill-smell/.test(x));
+            assert(lines.length >= 2 && lines.every((x) => !/\b\d+ times\b|\bOnce the steam\b|\bonce since\b/.test(x)) && (!w || lines.some((x) => x.includes(w))), `TG7: n ${n}: Wen and Lu Han by measure (${lines.length})`);
+        }
+        void PS;
     }
     // P2 (run C): the emptied menus are menus and empty; the Wilds drills' failures speak by day
     {
@@ -1458,7 +1505,7 @@ for (const form of ['cat', 'human']) {
     { const g = L(seed++, 'cat', 3); goTo(g, SCENES, 'lf_falls'); const snap = JSON.parse(JSON.stringify(g)); const s2 = deserialize(serialize(g));
       assert(s2.flags.lf_seen_falls === 1 && snap.flags.lf_seen_falls === 1, 'P8A (RP): the visit counter survives a save'); }
     // SW: the drills speak, each list in turn (all three before any comes back)
-    for (const [i, k, kf] of [[0, 't1', 't1Fail'], [1, 't2', 't2Fail'], [2, 't3', null], [3, 't4', 't4Fail']]) {
+    for (const [i, k, kf] of [[0, 't1', 't1Fail'], [1, 't2', 't2Fail'], [2, 't3', 't3Fail'], [3, 't4', 't4Fail']]) {
         const c = SCENES.lf_train.choices[i]; const g = L(seed++, 'cat', 3);
         const seen = new Set(); for (let j = 0; j < 3; j++) seen.add(c.do(g).find((x) => LF_DRILL[k].includes(x)));
         assert(seen.size === 3, `P8A (SW): ${k}'s three lines before any comes back (${seen.size})`);
@@ -1510,12 +1557,12 @@ for (const form of ['cat', 'human']) {
     // TG2: one save, three days, the drills each day through a save: three different lines each, seven pools of their own
     { let g = L(seed++, 'cat', 3); const got = {};
       for (let d = 0; d < 3; d++) {
-          for (const [i, k, kf] of [[0, 't1', 't1Fail'], [1, 't2', 't2Fail'], [2, 't3', null], [3, 't4', 't4Fail']]) { const c = SCENES.lf_train.choices[i]; (got[k] ||= []).push(c.do(g).find((x) => LF_DRILL[k].includes(x))); if (kf) (got[kf] ||= []).push(c.failDo(g).find((x) => LF_DRILL[kf].includes(x))); }
+          for (const [i, k, kf] of [[0, 't1', 't1Fail'], [1, 't2', 't2Fail'], [2, 't3', 't3Fail'], [3, 't4', 't4Fail']]) { const c = SCENES.lf_train.choices[i]; (got[k] ||= []).push(c.do(g).find((x) => LF_DRILL[k].includes(x))); if (kf) (got[kf] ||= []).push(c.failDo(g).find((x) => LF_DRILL[kf].includes(x))); }
           g = ensureBars(deserialize(serialize(g))); g.minutes += 1440;
       }
       assert(Object.entries(got).every(([, v]) => new Set(v).size === 3 && v.every(Boolean)), `TG2: each drill's three lines over three days, through saves (${Object.entries(got).map(([k, v]) => `${k} ${new Set(v).size}`)})`);
       const pools = Object.keys(g.lines?.p || {}).filter((k) => /^lf_t/.test(k)).sort();
-      assert(JSON.stringify(pools) === JSON.stringify(['lf_t1', 'lf_t1Fail', 'lf_t2', 'lf_t2Fail', 'lf_t3', 'lf_t4', 'lf_t4Fail']), `TG2: seven drill pools, by name (${pools})`); }
+      assert(JSON.stringify(pools) === JSON.stringify(['lf_t1', 'lf_t1Fail', 'lf_t2', 'lf_t2Fail', 'lf_t3', 'lf_t3Fail', 'lf_t4', 'lf_t4Fail']), `TG2: eight drill pools, by name (v0.11.177, P9A: the spar's lf_t3Fail) (${pools})`); }
     // TG1: each scene's first text on the first visit and its later text after (markers of each)
     for (const [id, k, f, l] of [['lf_falls', 'falls', /An hour upstream a waterfall/, /The cliff has not moved/], ['lf_ride', 'ride', /In her great form Yuki is the size of a Bengal tiger/, /still does not do saddles/],
         ['lf_notes', 'notes', /\*Key finding/, /\*Further entries/], ['lf_bored', 'bored', /a bone mouse on a thread/, /So you compete with yourself/], ['lf_bathe', 'bathe', /a flat rock for your coat/, /The same cold black river/],
@@ -1578,7 +1625,7 @@ for (const form of ['cat', 'human']) {
       for (const tier of [1, 3, 6, 9]) for (let i = 0; i < 4; i++) { const g = ensureBars(deserialize(serialize(lf0))); g.james.gu = { tier, level: 5, xp: 0 }; g.james.qi = 60; g.james.satiety = 80; g.seed += i;
           const card = taskCards(g, SCENES).find((c) => c.id === `lf_train:${i}`); if (!card || card.status !== 'open') continue;
           const r = runTask(g, SCENES, card.id); bands.add(card.check?.band); const all = Object.values(LF_DRILL).flat();
-          assert((r.lines.some((x) => all.includes(x) || (i === 2 && /−3 HP\.$/.test(x))) || (i === 2 && /partly/.test(r.lines[0] || ''))), `TG13 (C5): lf_train:${i} at T${tier} (${card.check?.band}) shows a drill line (${r.lines.slice(0, 3)})`); }
+          assert(r.lines.some((x) => all.includes(x)), `TG13 (C5; v0.11.177 RV1 TG9: the spar has its own pool, no exceptions): lf_train:${i} at T${tier} (${card.check?.band}) shows a drill line (${r.lines.slice(0, 3)})`); }
       assert(bands.size >= 2, `TG13: more than one band reached (${[...bands]})`); }
     // TG14 (C4): the lint reads the Long Forest's later texts, the drills and the season lines (the saved snapshot; v0.11.177, P9A: 24 drill lines with the spar's three)
     { const snap = JSON.parse(readFileSync(new URL('../tools/text-baseline.json', import.meta.url), 'utf8'));
