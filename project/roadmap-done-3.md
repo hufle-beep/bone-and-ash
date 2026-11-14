@@ -2,6 +2,21 @@
 
 Started in v0.11.150, when `roadmap-done-2.md` had passed about 45 KB. Newer than `roadmap-done-2.md` and `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.171 (word for word; owner pick RA1: the roadmap kept under 60 KB)
+
+### From section 0, as of v0.11.170
+
+- *(v0.11.162, owner pick MK1; **done in v0.11.163**: W1 the bots' forced pick and "Not now.", HN1 the hungry log line, TL2 the text lint's used-today sample, F1 the browser parts' retry, D1 the drift baseline re-saved, RV1 the Opus review's fixes; L3 and L4 no change, details in the handover)* **NEXT: this session's leftovers, checked first in the next session** (the list of seven in the handover's open items: L3 a hunt's familiarity twice a day, L4 old saves' one extra day, the 8 new log-only moves, Careful's walk-ins after "Not now.", the return lines off the text lint, the two browser flakes, the hungry-with-food NOTE; each with its options).
+
+### From section 2, as of v0.11.170
+
+- *(new in v0.11.116, the owner's report 2026-11-10 18:12 and 18:14)* **Yuki is too strong: done in v0.11.118** (YK1: her Fight held at James's GU from any source, the lower of the two in a fight, her haul a d8; YD1 the baseline re-saved; YR1 Fable's review; the numbers in the handover's "Decided in chat").
+- *(new in v0.11.118, Fable's note; done in v0.11.121, LH with AS1)* **The lane's typed hours:** `js/main.js`'s lane note says "06:00–19:00" in the text instead of reading `YUKI_HOURS`.
+
+### From section 1, group e, as of v0.11.170
+
+- *(new in v0.11.154, owner 2026-11-12 23:52; done in v0.11.156, owner picks DM1, TX1, TX-A, RV1, PX1; the line as of v0.11.155 in `roadmap-done-3.md`)* **Act 1's once-a-day cards: done** (numbers in the handover). *(v0.11.157, owner picks NX1, RV1)* **The prologue Ashfall's three menus: done**; **Careful's Ya and last nights after DM1: traced** (CT, no game fault: Careful clears Act 1 a Coil earlier and takes Ya's door less often; numbers in the handover). *(v0.11.158, owner picks NX2, RV1)* **Yuki's lane: done** (her own speed, "×1.8 of ×3 · 8/20 to her best"). *(v0.11.159, owner picks NX2, RV1)* **The Coil screen's Yuki line and the FAQ: done.** *(v0.11.160, owner pick NX2)* **The crossing Coil's screen counts the cards and Yuki from its Day 1 (CS; Opus's L4 of v0.11.159; RV1 SL: the realm and skills from Day 8) and the Sociable bot (CN, in place of a Careful that takes Ya's door; RV1: seven doors, Careful's dice): done** (numbers in the handover). *(v0.11.161, owner picks PO2, RV1, SD1)* **The Blackroot's forage and hunts once a day per option: done** (the owner 2026-11-13 10:59 and 11:25, "Blackroot forage and hunts should be limited to once a day PER OPTION, not overall"; each forage card and each hunt option once a day, "Not now." on the hunts, Fable's return lines; numbers in the handover; the Blackroot hunts more than once a day (HU) answered by it).
+
 ## Moved in v0.11.156 (word for word; owner picks DM1, TX1, TX-A, RV1, PX1: Act 1's once-a-day cards done)
 
 ### From section 1, as of v0.11.155

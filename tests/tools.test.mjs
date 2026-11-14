@@ -530,16 +530,16 @@ print(json.dumps({"n": len(R['masks']), "bad": bad, "bitmaps": sum('bitmap' in m
 // v0.11.88 (owner pick A: T1 + D2 + S1 + X): the roadmap's open work in two parts, sections 0–2 in roadmap.md (with the
 // "Last updated" line) and 3–6 with Decided in roadmap-2.md, each pointing at the other; the done lines in roadmap-done.md
 // (closed) and roadmap-done-2.md; the tests that read the roadmap read every open part
-const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md'];
+const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md', 'roadmap-act2.md']; // v0.11.171 (owner pick RA1): Act 2's own part
 {
-    const [r1, r2] = ROADMAP_PARTS.map((f) => readFileSync(path.join(ROOT, 'project', f), 'utf8'));
+    const [r1, r2, ra] = ROADMAP_PARTS.map((f) => readFileSync(path.join(ROOT, 'project', f), 'utf8'));
     const secs = (t) => [...t.matchAll(/^## (\d)\. /gm)].map((m) => Number(m[1]));
     assert(secs(r1).join() === '0,1,2' && secs(r2).join() === '3,4,5,6', `roadmap: sections 0–2 in roadmap.md, 3–6 in roadmap-2.md (${secs(r1).join()} / ${secs(r2).join()})`);
     assert(/^Last updated: /m.test(r1) && !/^Last updated: /m.test(r2) && /^## Decided$/m.test(r2) && !/^## Decided$/m.test(r1), 'roadmap: the "Last updated" line in roadmap.md, Decided in roadmap-2.md');
     assert(r1.includes('`roadmap-2.md`') && r2.includes('`roadmap.md`'), 'roadmap: each part names the other');
     const d1 = readFileSync(path.join(ROOT, 'project/roadmap-done.md'), 'utf8'), d2 = readFileSync(path.join(ROOT, 'project/roadmap-done-2.md'), 'utf8');
     assert(d1.includes('`roadmap-done-2.md`') && /^## Moved in v0\.11\.88 \(word for word\)$/m.test(d2) && d2.indexOf('## Moved in v0.11.88') < d2.indexOf('### The old "Last updated" line'), 'roadmap: roadmap-done.md points at roadmap-done-2.md, which starts with v0.11.88');
-    for (const t of ['**What the sitting loop\'s fix left', '**The game on a PC, a wide layout', '**Act 2** (open).']) assert((r1 + r2).includes(t), `roadmap: the open line "${t.replace(/\*/g, '')}" is still in an open part`);
+    for (const t of ['**What the sitting loop\'s fix left', '**The game on a PC, a wide layout', '**Act 2** (open).']) assert((r1 + r2 + ra).includes(t), `roadmap: the open line "${t.replace(/\*/g, '')}" is still in an open part`);
     // v0.11.151 (owner pick WD1, RF): group d closed: its section and section 0's "Next: group d" moved word for word to
     // roadmap-done-3.md (not left behind); its open parts re-filed: section 2 (the rot ape, DA2's three, the lab's table),
     // roadmap-2.md section 4 (stances, clean or barbed, #66) and section 5 (the knitting bone and the crushing mass, Act 2),
@@ -550,10 +550,27 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md'];
         for (const t of ['**The fight lab, built:**', '**Fight ideas from the games', '**Fight ideas from the cultivation games', '**Bone weapons by Convergence', '**Mechanics, flight', '**When a weapon moves to Convergence:**', '- **Next: group d (combat)**']) assert(d3.includes(t) && !(r1 + r2).includes(t), `WD1 (RF): "${t.replace(/\*/g, '')}" moved to roadmap-done-3.md`);
         assert(/^## Moved in v0\.11\.151 /m.test(d3) && d3.indexOf('## Moved in v0.11.151') < d3.indexOf('## Moved in v0.11.150'), 'WD1 (RF): roadmap-done-3.md has v0.11.151\'s move, newest first');
         assert(/### d\. Combat\n\n\*\(v0\.11\.151, owner pick WD1: closed/.test(r1) && r1.includes('**Group d (combat): closed.**'), 'WD1 (RF): group d\'s heading says closed, section 0 says where its parts went');
-        assert(sec(r1, '## 2. ', null).includes('**Group d\'s fights for the retune') && sec(r2, '## 4. ', '## 5. ').includes('**Fight ideas that wait for Insights and crafting') && sec(r2, '## 5. ', '## 6. ').includes('**For Act 2, the knitting bone (T6) and the crushing mass (T9)**'), 'WD1 (RF): the open parts in section 2, section 4 and section 5');
+        assert(sec(r1, '## 2. ', null).includes('**Group d\'s fights for the retune') && sec(r2, '## 4. ', '## 5. ').includes('**Fight ideas that wait for Insights and crafting') && ra.includes('**For Act 2, the knitting bone (T6) and the crushing mass (T9)**') /* v0.11.171 (RA1): moved to roadmap-act2.md */, 'WD1 (RF): the open parts in section 2, section 4 and section 5');
         assert(/\*\*When a weapon moves to Convergence\*\* \(moved here from group d in v0\.11\.151/.test(ref), 'WD1 (RF): the weapon-to-Convergence note in reference.md');
     }
     for (const t of ['**Round 1 done (owner picks I1 + L1 + E1', "**The owner's calls for the next pushes", '**Mechanics and story, unarmed fights']) assert(d2.includes(t) && !(r1 + r2).includes(t), `roadmap: the done line "${t.replace(/\*/g, '')}" moved to roadmap-done-2.md`);
+}
+// v0.11.171 (owner pick RA1): Act 2 in its own part, roadmap-act2.md, named between group f and section 2 in roadmap.md, with the
+// owner's words of 2026-11-14 01:02, the Act 2 lines moved from roadmap-2.md section 5 (not left behind) and its facts in lore.md;
+// the handover's open items placed on the roadmap (group e's parts 5–9, section 2, roadmap-2.md sections 4 and 6), the handover pointing there
+{
+    const rd = (f) => readFileSync(path.join(ROOT, 'project', f), 'utf8');
+    const r1 = rd('roadmap.md'), r2 = rd('roadmap-2.md'), ra = rd('roadmap-act2.md'), lore = rd('lore.md'), ho = rd('handover.md'), h20 = rd('history-20.md');
+    const f = r1.indexOf('### f. Romance'), a2 = r1.indexOf('## A2. Act 2'), s2 = r1.indexOf('## 2. The balance retune');
+    assert(f > 0 && a2 > f && s2 > a2 && r1.slice(a2, s2).includes('`roadmap-act2.md`'), 'RA1: roadmap.md names roadmap-act2.md between group f and section 2');
+    assert(ra.includes('"one item after the romance and before the act 1 retune.') && ra.includes('and he has a doctorate in biology...)"') && ra.includes('`roadmap.md`') && ra.includes('`roadmap-2.md`'), 'RA1: the owner\'s words word for word, and the parts named');
+    for (const t of ['- **Act 2** (open).', '**Plot point for Act 2: James\'s world is the outlier.**', '**For Act 2, the knitting bone (T6) and the crushing mass (T9)**', '**For Act 2, from the cultivation games:**', 'Universal-service gifts (organic armour']) assert(ra.includes(t) && !r2.includes(t), `RA1: "${t.replace(/\*/g, '').slice(0, 40)}" moved to roadmap-act2.md`);
+    assert(/^## Act 2 \(the owner, 2026-11-14 01:02/m.test(lore) && /never be truly alive again, nor regenerate enough to fly/.test(lore) && /biology, engineering, agriculture, horticulture and gardening are mostly the same thing/.test(lore), 'RA1: Act 2\'s facts in lore.md');
+    assert(/Now: e, f, Act 2 \(`roadmap-act2\.md`\), then section 2/.test(r1), 'RA1: the order names Act 2 between f and the retune');
+    for (const t of ['**Part 5, the Blackroot:**', '**Part 6, the Heart:**', '**Part 7, the Return:**', '**Part 8, the Long Forest:**', '**Part 9 (new), the leftovers of parts 1–4:**', '**The label pass:**', '**CM, after part 9**']) assert(r1.slice(r1.indexOf('### e. '), f).includes(t), `RA1: group e has "${t.replace(/\*/g, '')}"`);
+    assert(r1.slice(s2).includes('**For the retune, from the open items:**') && r2.slice(r2.indexOf('## 4. '), r2.indexOf('## 5. ')).includes('**Systems from the open items:**') && r2.slice(r2.indexOf('## 6. ')).includes('**The owner\'s calls on the texts:**'), 'RA1: the placed items in section 2, section 4 and section 6');
+    const ho0 = ho.slice(ho.indexOf('## Open items'), ho.indexOf('## Decided in chat'));
+    assert(ho0.includes('every open, options later item is on the roadmap') && !/Open, options later \(new in v0\.11\.1\d\d/.test(ho0) && h20.includes('### Open items (v0.11.170; details where noted)'), 'RA1: the handover\'s open items point to the roadmap; the old ones in history-20.md');
 }
 // v0.11.144 (owner pick TB1): everything tabled; the Android app is section 0's first item, its five pushes in order, Selene's
 // files named; the handover's open items start with the same; the four done lines moved word for word, not left behind

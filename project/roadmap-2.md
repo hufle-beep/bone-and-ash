@@ -32,6 +32,7 @@ Split out of `roadmap.md` in v0.11.88 (owner pick A, 2026-11-09 02:37, S1): sect
 *(v0.11.72: F, the copy-over push 5, done in group g)*
 6. **F, the copy-over push 5 (the Coil)**, then **G** (engine systems, crafting and threads, Android; steps 4, 6, 7 below).
 
+- *(v0.11.171, owner pick RA1: the handover's open items placed here; each its own pick, options first)* **Systems from the open items:** (a) **a menu's own text is never drawn on a task screen** (a work card goes to its menu and straight back, `tasks.js` `resolveWork`; known since v0.11.157; the Fallout's four menus and its Day 10 council text, about 150 words, render only from a save resting on the menu; Fable's T1 of v0.11.156, word for word in `history-19.md`, kept for it); (b) a **"sit until supper" card** (the player can't see when the next fixed wait comes; from CV, v0.11.142); (c) an **Eat button on story screens** (the stretches with no Eat card: the Heart's gate and hall, the road home; a bot that eats anywhere: Careful's hungry count 921 → 0, Act 1 3.33 → 3.35 Coils; from v0.11.163); (d) **SF2**: at the cap every result still prints "… at T10 L10 (cap)" two or three times (about 150 results on Days 18–21 gained nothing; the owner's save of v0.11.164); (e) **the cut-off saves (SF3)**: two saves shared with "Share to GitHub" arrived cut at exactly 20,001 bytes; a 114,939-character save (35,253 packed) would be cut too; trace that path (Selene had a save-format change for cut-off saves; a save-format change gets a fallback branch, rule 5); (f) **the fork's framework** (the owner 2026-11-13 22:58: a personal edition with all the references and a general one, the framework the same: the texts by edition), with CM (group e).
 - *(new in v0.11.65)* **Threads need a new design:** they were planned to work queued tasks; since v0.11.64 there is no queue, so what a thread does (and when it wakes) is an open question for the owner before step 4 is built.
 
 ### The copy-over (owner 2026-11-06 15:43 / 15:47)
@@ -55,15 +56,12 @@ The hybrid with Selene (design in `design.md`). Safety comes before the rewrite,
 ## 5. Later (not scheduled)
 
 - *(new in v0.11.74, from group i; `research.md` #86, #93)* **From the games:** sound in an ink palette (a wooden tok, a plucked string, a singing bowl; ZzFX, MIT; the owner listens first), with the Sound line below; a great work inside one Coil (Act 2). (#94, an heirloom that survives a rewind, goes nowhere unless the owner reopens Loot.)
-- *(new in v0.11.76, from group i round 2; `research.md` #125, #140, #141)* **For Act 2, from the cultivation games:** locals cultivating and breaking through on their own calendar as an ongoing system (#125's dated beats first, in group e); Gao Feng's return as a rival on his own calendar; the world before tribulations as an Act 2 thread.
 
 - *(new in v0.11.73, from group h; `research.md` #11, #14, #16, #26, #34, #42)* **Docs and habits (each its own pick):** one register of forks and design law (Rules Engine C's `REDESIGN_C_FREEZE.md`; today spread over four docs, the forks line missing the vessels from Golden Core and Saturation by time, `design.md` J's eight forms against the code's three); a `project/README.md` (the docs' reading order) and a `saves/README.md` (tool saves and the owner's apart); a before-release list (the test switches to turn off); rule 4 also after several hours of chat; a tool listing the docs changed since the last upload to the project (`docs_sync.mjs`); comparisons with other games on the same phone.
 
-- **Act 2** (open).
-- *(new in v0.11.165, owner 2026-11-13 14:17, pick LO1)* **Plot point for Act 2: James's world is the outlier.** James discovers and confirms that his homeworld's pure Qi, part of his people's evolution, is the exception: Qi is impure on every world, this world's lifespans are normal, and his people's 800–900 years (×2 at Foundation and on, by the same multiples as here) are what is unusual. Canon in `lore.md` (James's people, the world, the realm sheet); the game's `ship_log3` says the opposite until Fable's rewrite (roadmap group e).
-- *(new in v0.11.151, owner pick WD1, RF; moved here from group d)* **For Act 2, the knitting bone (T6) and the crushing mass (T9)** (designed in v0.11.108, TK1; the line with its options in `roadmap-done-2.md`): built when Act 2 gives foes at those rungs, options again then, numbers first. Act 1's reach (v0.11.143): fight states at Convergence T6+ the Sitter 58 of 1,042 (5.6%), 3 at T9; the Cultivator 0 (top rank 44), Careful 0, the Completionist 0.
+- *(v0.11.171, owner pick RA1)* **Act 2 has its own part of the roadmap: `roadmap-act2.md`** (after group f, before section 2). Moved there word for word: "Act 2 (open)", the plot point "James's world is the outlier", the knitting bone and the crushing mass, "For Act 2, from the cultivation games" and the Universal-service gifts in the ship.
+- *(v0.11.171, owner pick RA1, placed from the handover)* **Docs and tests:** `changelog.md` past 60 KB (62.8 KB in v0.11.170): a trimming pass, then a split (options first); the rare scene `rt_serpent_forced` not reached in some full runs (log only since v0.11.165).
 - **Sound** (optional; Selene's ZzFX effects and generated music).
-- Universal-service gifts (organic armour, qi sidearm, hilt blade) as finds in the ship (Act 2 idea).
 - Later, if wanted: an in-game list of shared saves from GitHub (Selene's; option B2 of push 3).
 - *(was: The story and mechanics pass)*
   **Story idea, later acts (owner 2026-11-08 01:15):** immortals pulling the strings from behind, evil and good both, aware of James and of where he is from, having learnt it from the ship, or even survivors of the original shipwreck (the *Patient Root*); a late boss or a story beat. Options and drafts when the later acts are planned.
@@ -72,6 +70,7 @@ The hybrid with Selene (design in `design.md`). Safety comes before the rewrite,
 
 ## 6. Waiting on the owner
 
+- *(v0.11.171, owner pick RA1, placed from the handover)* **The owner's calls on the texts:** Gao Feng as Lu Han's "cousin" (not in `lore.md`); "four hundred pounds" for the great root-kin (`yuShort` in `stomp_act1.js`, and other texts; not in `lore.md`); the arson's 01:00 tea, now James polishing his glasses (v0.11.169, L4: the tea back if wanted); the watcher's ledger noting Ya on Day 8, before she walks into Ashfall (kept in v0.11.170); Foundation named early in the prologue (Old Wen's ladder talk in Act 1 loses a little; v0.11.167's Opus review, L9).
 - One or two real saves from the phone for `saves/`: ☰ Menu → Saves → **Share to GitHub** (v0.11.9; steps in the handover), or Download save file and attach it.
 
 ## Decided
