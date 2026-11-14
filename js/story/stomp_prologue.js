@@ -15,99 +15,99 @@ const stompForm = (g, cat, tiger, human) => ({ tiger, human }[yukiForm(g)] ?? ca
 
 registerStomp({
     jackals: {
-        posture: (g, d) => `The ashfangs come out of the dark low and slow, heads down, lips peeled back from teeth that smoke where the drool lands. The matriarch circles wide, testing the firelight, making the deep rattling growl that has emptied a hundred camps before yours.
+        posture: (g, d) => `The ashfangs come in low and unhurried, heads down, lips drawn off teeth whose drool smokes on the moss. The matriarch takes the wide way round your camp, testing its edge, and runs the deep rattling growl that has emptied a hundred camps before this one.
 
-${aside(d, 'You count teeth. There are a great many teeth.', 'You count teeth. You count your own options. One of these numbers is a lot bigger than the other, and it isn\'t theirs.', `You find yourself apologising to them in advance, under your breath. ${yk(g)} yawns.`)}`,
+${aside(d, 'You count teeth. The count runs long.', 'You count teeth, then your own options. One of the two numbers is much the larger, and it is not theirs.', `You catch yourself apologising to them in advance, under your breath. ${stompForm(g, 'On your shoulder, Yuki yawns.', 'Beside you Yuki yawns, and the yawn outranks every tooth in the pack.', '"Don\'t apologise," says Yuki, and covers a yawn with two fingers. "It only encourages them."')}`)}`,
         win: {
-            2: (g) => `It isn't a fight so much as a correction. The first jackal lunges and meets a dart in the shoulder; the matriarch comes in behind it and finds a bone blade already waiting where her throat was going to be. They try twice more, because they are jackals and nobody has ever told them no. Then they stop trying.
+            2: (g) => `It is a correction, and a short one. The first jackal lunges into a dart. The matriarch comes in behind it and finds a bone blade waiting where her throat was about to be. The pack tries twice more, being jackals, whom nobody has ever told no. Then there is no pack left to try.
 
-Two grey bodies by the fire. ${yk(g)} sniffs one with professional disdain.
+Grey bodies on the moss. The nearest gets one sniff of professional disdain from ${yk(g)}.
 
-In the chest of the larger one, where a heart should be, the omnitool flags a hard, cloudy knot the size of a walnut. *Beast core*, your threads suggest. Dense with that foul Qi. Something tells you the locals would kill for this. Something tells you that's literal.`,
-            3: (g) => `The matriarch lunges. You lean, very slightly, to the left. She sails past, and on the way you tap her behind the ear with two fingers and a sliver of bone, the way you'd tap a tuning fork. She lands, does not get up, and is very surprised about it for the remaining four seconds of her life.
+Under the largest one's ribs, in the heart's place, the omnitool marks a hard, cloudy, walnut-sized knot. *Beast core*, your threads offer. Thick with that foul Qi. Something tells you the locals would kill for this. Something tells you that is not a manner of speaking.`,
+            3: (g) => `The matriarch lunges. You lean a little to the left. She sails by, and in passing you tap her behind the ear with two fingers and a sliver of bone, as one taps a tuning fork. She lands, stays landed, and spends the remaining four seconds of her life very surprised about it.
 
-Her mate looks at her. Looks at you. Lies down, rolls over and shows you his belly, whimpering — which is when ${yk(g)} sits on him.
+What is left of the pack looks at her. Looks at you. Then it lies down, rolls over and offers its belly, whimpering. ${stompForm(g, 'That is when Yuki hops down and sits on it.', 'That is when Yuki lays one paw across it and leaves the paw there.', 'That is when Yuki looks down at it and says, "Noted."')}
 
-You make it quick. Out here there's no one to explain mercy to. In the matriarch's chest the omnitool finds a cloudy knot the size of a walnut: a *beast core*, dense with foul Qi. Something tells you the locals would kill for this. Literally.`,
+You make it quick. Out here there is nobody to explain mercy to. In the matriarch's chest the omnitool turns up a cloudy, walnut-sized knot: a *beast core*, dense with foul Qi. Something tells you the locals would kill for this. Literally.`,
         },
-        one: (g) => `You don't stand up. A single white needle leaves your fingers, threads both jackals through the same gap in the dark, and they fold like dropped laundry. ${yukiForm(g) === 'cat' ? 'Yuki doesn\'t even open her eyes.' : 'Yuki doesn\'t bother to move.'}`,
+        one: (g) => `You stay sitting. One white needle leaves your fingers, finds the single line in the dark that runs through every jackal, and the pack folds like dropped laundry. ${yukiForm(g) === 'cat' ? 'Yuki doesn\'t even open her eyes.' : 'Yuki doesn\'t bother to move.'}`,
     },
 
     gao: {
-        posture: (g, d) => `Gao Feng straightens his crimson sleeves with great care, one and then the other, the way a man does before an execution.
+        posture: (g, d) => `Gao Feng puts his crimson sleeves in order, first one and then the other, with the care of a man dressing for somebody else's execution.
 
-"Mortal," he says. "I feel nothing in you. No root, no Qi, no cultivation at all — a tall empty jar in a ridiculous white coat. You have interfered with the business of the Crimson Lotus Sect. By the law of these mountains, the life of a mortal who raises his hand to a disciple is forfeit." His lackey grins and draws a hatchet. "I will be merciful. I will only break your legs."
+"Mortal," he says. "I feel nothing in you. No root, no Qi, no cultivation of any kind: a tall empty jar in a ridiculous white coat. You have interfered in the business of the Crimson Lotus Sect. By the law of these mountains, a mortal who raises his hand to a disciple has forfeited his life." His lackey grins and draws a hatchet. "I shall be merciful. I shall only break your legs."
 
-${aside(d, 'He has a point about the coat.', 'You check, politely, whether he means it. He means it. You feel a little sorry for him.', 'You feel genuinely, profoundly sorry for him. You try to communicate this with your eyebrows. It does not land.')}`,
+${aside(d, 'He has a point about the coat.', 'You check, politely, whether he means it. He does. You feel a little sorry for him.', 'You feel deeply, sincerely sorry for him, and try to say so with your eyebrows. It does not land.')}`,
         win: {
-            2: (g) => `Gao Feng discovers, in rapid succession, that his Qi strike doesn't reach you, his second Qi strike doesn't reach you, and his lackey is now asleep in a bush. He tries a technique with a name — he shouts the name — and you step through it and put him on his back with a bone needle through his sleeve and into the ground.
+            2: (g) => `Gao Feng learns three things in quick order: his Qi strike does not reach you, his second Qi strike does not reach you either, and his lackey has gone to sleep in a bush. That leaves the technique with a name. He shouts the name. You walk through the technique and lay him out flat, his sleeve pinned to the turf by a needle of bone.
 
 He stares up at you, white to the lips. "You have no cultivation," he says. "I *felt* it. You have *nothing*."
 
-"I hear that a lot."
+"You did mention it."
 
-The woman with the knife steps up beside you, looks down at him, and speaks very calmly. "If he goes back, they'll come for my mother. They'll come for the village." She looks at you. "You can't just let him walk away."
+The woman with the knife steps up next to you and looks down at him. "Kill him," she says, quite calmly. "He goes back, and they come for my mother. Then for the village."
 
-That isn't a figure of speech. You check. It isn't.`,
-            3: (g) => `Gao Feng shouts the name of his technique. Before he reaches the second syllable you are standing beside him, holding his wrist, and the red Qi along his sleeve has nowhere to go and goes out like a candle.
+You check whether that was a manner of speaking. It wasn't.`,
+            3: (g) => `Gao Feng shouts the name of his technique. He is still short of its second syllable when you are standing next to him with his wrist in your hand, and the red Qi along his sleeve, finding nowhere to go, goes out like a candle.
 
-You put him down. Gently, the way you'd put down a specimen jar. The lackey looks at his master on the ground, at you, at ${ykShort(g)}, and lays his hatchet on the grass with both hands and backs away bowing.
+You put him down gently, as you would a specimen jar. The lackey looks at his master on the grass, at you, at ${ykShort(g)}, then lays his hatchet down with both hands and backs away bowing.
 
-Gao Feng is weeping with rage. "I will remember your face," he gasps. "The Sect will remember. My elder brother is an inner disciple — he will grind your bones to—" You take his other wrist. He stops.
+Gao Feng weeps with rage. "I will remember your face," he gasps. "The Sect will remember it. My elder brother is an inner disciple. He will have your bones ground for—" You take the other wrist. He stops.
 
-The woman with the knife looks at him for a long, cold moment. "If he goes back," she says, "they'll come for my mother. They'll come for the village. You can't let him walk away as he is."
+The woman with the knife gives him one cold look, and takes her time over it. "Kill him," she says. "He goes back, and they come for my mother. Then for the village."
 
-She isn't being dramatic. You check. She isn't.`,
+She is not being dramatic. You check. She isn't.`,
         },
-        one: (g) => `You flick one white needle. It goes through Gao Feng's sleeve, his lackey's sleeve, and pins both men to the same pine, mid-sentence; neither of them finishes the sentence.`,
+        one: (g) => `One white needle, flicked. It passes through Gao Feng's sleeve, then his lackey's, and fixes both men to the same pine mid-sentence. Neither goes on to finish it.`,
     },
 
     boar: {
-        posture: (g, d) => `The ironhide boar comes out of the oak hollow like a cart someone forgot to stop. It plants itself, tusks lowered, and paws a trench in the black earth, snorting gouts of steam. The ground does actually shake. The village hunters, watching from a very safe distance, make the sign against evil.
+        posture: (g, d) => `The ironhide boar leaves the oak hollow like a cart nobody remembered to stop. It plants itself with its tusks low and digs a trench in the black earth with one forefoot, blowing steam. The ground does in fact shake. The village hunters, watching from a very safe distance, make the sign against evil.
 
-${aside(d, 'It is the size of a small car. It has opinions.', 'It is the size of a small car. You have parked worse.', `It is the size of a small car. ${yk(g)} looks at it the way one looks at a sandwich.`)}`,
+${aside(d, 'It is the size of a small car, and it holds opinions.', 'It is the size of a small car. You have parked worse.', `It is the size of a small car. The look it gets is the one kept for a sandwich, and it comes from ${yk(g)}.`)}`,
         win: {
-            2: (g) => `The boar charges. You step aside and leave a dart in its eye. It charges again; you leave a dart in the other one. The third charge, it can't see, and you put the blade where its iron hide meets its skull and it goes down like a felled oak and stays down.
+            2: (g) => `The boar charges. You step aside and leave a dart in its eye. It charges again, and you leave one in the other. The third charge is made blind; you set the blade where the iron hide meets the skull, and the boar comes down like a felled oak and makes no further plans.
 
-The hunters come out of the trees one by one. They don't cheer. They walk around the boar slowly, then around you, and bow, very low, and say nothing at all.
+The hunters come out of the trees one at a time. Nobody cheers. They walk slowly round the boar, then round you, and bow very low, and say nothing whatever.
 
-They come back with carts. By sunset half of Ashfall is grilling ironhide, the children carry the tusks to the shrine in solemn procession, and a hunter old enough to be your grandfather kneels in the dust and formally presents you with his own boar spear. You accept it. You have nowhere to put a spear. Then you remember you own an infinite closet.`,
-            3: (g) => `The boar charges. You hold up one hand, palm out, the universal gesture for *please don't*, and a white bone wall grows out of the earth in front of it. It hits the wall at full speed. The wall wins. The boar sits down, cross-eyed, and makes a small confused noise, and ${yk(g)} walks up and pats it on the snout.
+Then they fetch carts. Come sunset there is ironhide on every grill in Ashfall, the children walk the tusks up to the shrine two by two without a smile among them, and the eldest of the hunters, white to the beard, goes down on both knees to hand you his own boar spear, with ceremony. You accept. A spear is a hard thing to pocket. Then you recall that your closet has no back wall.`,
+            3: (g) => `The boar charges. You raise one hand, palm out, the universal sign for *please don't*, and a wall of white bone grows out of the earth in its path. It meets the wall at full speed. The wall wins. The boar sits down cross-eyed and makes a small, confused noise, which earns it no sympathy at all from ${yk(g)}.
 
-You finish it cleanly while it is still deciding what happened.
+You finish it cleanly while it is still working out what happened.
 
-The village hunters come out of the trees in total silence. One of them drops his bow. The old one kneels first, then all of them. That night half of Ashfall grills ironhide, the children carry the tusks to the shrine in solemn procession, and the old hunter formally presents you with his own boar spear. You put it in an infinite closet. He watches it vanish and kneels again.`,
+The hunters come out of the trees in complete silence. One drops his bow. The eldest kneels first, and then they all do. That night there is ironhide on every grill in Ashfall, the children walk the tusks up to the shrine without a smile among them, and the eldest hunter hands you his own boar spear with full ceremony. It goes into a closet that has no back wall. He watches it vanish and kneels again.`,
         },
-        one: (g) => `The boar takes one step. A single needle enters just behind its ear, and the ironhide boar lies down in the leaves like a dog by a hearth, and doesn't get up.`,
+        one: (g) => `The boar takes one step. One needle goes in just behind its ear, and the ironhide boar lies down in the leaves like a dog at a hearth and does not get up again.`,
     },
 
     collectors: {
-        posture: (g, d) => `Lu Han does not hurry. He draws his sword the way a priest unwraps a relic, and his three men fan out behind him in a practised crescent.
+        posture: (g, d) => `Lu Han sees no call for haste. He draws his sword as a priest unwraps a relic, and his three disciples spread behind him in a practised crescent.
 
-"I have examined you," he says, with the grave courtesy of a man reading a death sentence aloud. "There is no cultivation in you. None. You are a mortal with a trick of bone and an animal with open meridians. The Crimson Lotus does not fear tricks. Kneel, and you will be carried to the Sect alive. Stand, and you will be carried in pieces. Either way, you will be carried."
+"I have examined you," he says, with the grave courtesy of a man reading a sentence of death aloud. "There is no cultivation in you. None. You are a mortal with a trick of bone and a treasure you did not earn. The Crimson Lotus does not fear tricks. Kneel, and you will be carried to the Sect alive. Stand, and you will be carried in pieces. In either case you will be carried."
 
-${aside(d, 'You decide not to be carried.', 'You decide not to be carried. You also decide not to enjoy this, and fail.', 'You honestly consider kneeling, just to spare him what\'s coming. Then you remember the baskets, and the children, and don\'t.')}`,
+${aside(d, 'You decide against being carried.', 'You decide against being carried. You also decide not to enjoy this, and fail.', 'You give honest thought to kneeling, purely to spare him what comes next. Then you think of the baskets, and of the children, and stay standing.')}`,
         win: {
-            2: (g) => `Lu Han is very good. That is the problem: he is good enough to understand, by the fourth exchange, exactly how badly he is losing. His sword finds white bone wherever it goes. His men find ${ykShort(g)} and decide, collectively, to be somewhere else.
+            2: (g) => `Lu Han is very good. That is his misfortune: he is good enough to know, by the fourth exchange, exactly how badly he is losing. Wherever his sword goes, white bone has got there first. His three disciples meet ${ykShort(g)} and reach, together, the decision to be elsewhere.
 
-When it's done the snow of white bone around the tribute post is speckled red, Lu Han is on his knees with your blade at his throat, and the collectors are a long way down the road and still running.
+At the end the white bone lies round the tribute post like snow, with red in it; Lu Han is on his knees under your blade; and the other three are well down the road, still running.
 
-"Go home," you tell him. "Tell your Sect Master Ashfall has a new neighbour. Tell him the neighbour doesn't eat grass, doesn't eat pills, and doesn't eat people, and would very much like to keep it that way."
+"Go home," you say. "Let your Sect Master know that Ashfall has acquired a neighbour. He eats no grass, no pills and no people, and he would like very much to go on that way."
 
-He goes. The whole village watches him go. Then, very slowly, they turn and look at you — and you realise that in this world, you've just done the one thing more dangerous than kneeling.
+He goes. The whole village sees him off without a word. Then, slowly, every face turns to you, and you see what it is you have actually done. In this world it is more dangerous than kneeling.
 
-You've given people hope.`,
-            3: (g) => `Lu Han attacks with everything: a sword-form forty years in the making, Qi blazing red along the blade. You catch the blade between two fingers. It stops. Everything stops. Somewhere behind you a grandmother drops a basket of millet.
+You have handed people hope.`,
+            3: (g) => `Lu Han attacks with all of it: a sword-form older than he is, Qi burning red down the blade. You catch the blade between two fingers. It stops. Everything stops. Somewhere behind you a grandmother drops a basket of millet.
 
-You take the sword away from him, gently, like taking scissors from a child, and snap it over your knee. Then you put him on the ground — one arm that will heal in a season, one that will take a year — while his men throw down their weapons and run, one of them crying for his mother.
+You take the sword from him gently, as scissors are taken from a child, and break it over your knee. Then you put him on the ground, with one arm that will mend in a season and one that will want a year, while his three disciples throw down their weapons and run. One of them is calling for his mother.
 
-He looks up at you from the dust of the tribute post, and his calm face finally cracks. "You have no cultivation," he whispers. "I would have *felt* it."
+He looks up at you out of the dust by the tribute post, and the still face cracks at last. "You have no cultivation," he whispers. "I would have *felt* it."
 
-"Go home," you tell him. "Tell your Sect Master Ashfall has a new neighbour. The neighbour doesn't eat grass, doesn't eat pills, doesn't eat people, and would very much like to keep it that way."
+"Home," you tell him. "And tell the Sect Master that Ashfall has a neighbour now. The neighbour eats no grass, no pills and no people, and means to keep it so."
 
-He goes, holding his arm. The whole village watches him go, then turns and looks at you, and you realise you've done the one thing more dangerous than kneeling. You've given people hope.`,
+He goes, nursing the worse arm. The whole village watches him go, then turns to look at you, and only then does it arrive: this is the one thing here more dangerous than kneeling. You have handed people hope.`,
         },
-        one: (g) => `Lu Han's blade comes down. A wall of white bone rises under it, closes round it like a hand, and turns it to splinters; the same hand sets Lu Han down very firmly on his back. His men are already running.`,
+        one: (g) => `Lu Han's blade comes down. A wall of white bone comes up to meet it, shuts on it like a hand, and returns it as splinters; the same hand lays Lu Han on his back, firmly. His three disciples have already started running.`,
     },
 
     crows: {
