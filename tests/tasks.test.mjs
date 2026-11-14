@@ -167,11 +167,11 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
       const MAIN = (await import('node:fs')).readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
       assert(MAIN.includes("${esc(name)}${note ? ` · ${esc(note)}` : ''}") && MAIN.includes('if (c.groupNote) gr.note = c.groupNote;') && MAIN.includes('!work.has(gr.name), gr.note)'), 'TX-A: main.js draws the note after the heading, the group keyed by its name');
       const ya = runTask(g, SCENES, 'rt_hunters:1');
-      assert(ya.lines.includes(DRILL_AGAIN.ya) && JSON.stringify(g.rel) === rel0 && g.flags.a1_militia === true, `OM: a repeat "Let Ya teach them" says T5 and moves no relationship (${ya.lines})`);
+      assert(DRILL_AGAIN.ya.some((t) => ya.lines.includes(t)) && JSON.stringify(g.rel) === rel0 && g.flags.a1_militia === true, `OM: a repeat "Let Ya teach them" says T5 and moves no relationship (${ya.lines})`);
       const hard = SCENES.rt_hunters.choices[0];
-      assert(JSON.stringify(hard.do(g)) === JSON.stringify([DRILL_AGAIN.hard]) && JSON.stringify(hard.failDo(g)) === JSON.stringify([DRILL_AGAIN.hardFail]) && JSON.stringify(g.rel) === rel0, 'OM: a repeat "Drill them hard" says T3, a failed one T4, no relationship moves');
+      assert(DRILL_AGAIN.hard.includes(hard.do(g)[0]) && hard.do(g).length === 1 && DRILL_AGAIN.hardFail.includes(hard.failDo(g)[0]) && JSON.stringify(g.rel) === rel0, 'OM: a repeat "Drill them hard" says T3, a failed one T4, no relationship moves');
       const g0 = at('rt_ashfall', 20, 15607); const r0 = JSON.stringify(g0.rel);
-      assert(SCENES.rt_hunters.choices[0].do(g0)[0].startsWith('By sunset') && g0.flags.a1_militia && JSON.stringify(g0.rel) !== r0, 'OM: the first success still readies the militia and moves the Village');
+      assert(SCENES.rt_hunters.choices[0].do(g0)[0].startsWith('By the end they move as one body') && g0.flags.a1_militia && JSON.stringify(g0.rel) !== r0, 'OM: the first success still readies the militia and moves the Village');
       Object.assign(g.flags, { a1_palisade: true, council_done: true, ya_village: true });
       assert(!oneOffLeft(g, SCENES, 'rt_ashfall'), 'OM: the practice drill does not hold "Call it a day" back'); }
     // RV1 (Fable's review): G1 relationships once a day per card, the grub and the beetle once a day; CD "Call it a day" after one
@@ -203,7 +203,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
       assert(r.flags[`rr_scout@${Object.keys(r.flags).find((k) => k.startsWith('rr_scout@'))?.split('@')[1]}`] === true && grp(r, 'Scout').find((c) => c.id === 'rr_scout:0')?.status === 'open', 'CD: the scout card marks the day for the button, and the other card stays open'); }
     { const g = at('rt_ashfall', 20, 15624); g.flags.a1_militia = true; const rel0 = JSON.stringify(g.rel); const oo0 = Object.keys(g.flags).filter((k) => k.startsWith('oo:')).length;
       g.minutes = 19 * 1440 + 9 * 60; const res = runTask(g, SCENES, 'rt_hunters:0');
-      assert([DRILL_AGAIN.hard, DRILL_AGAIN.hardFail].some((t) => res.lines.includes(t)) && JSON.stringify(g.rel) === rel0 && Object.keys(g.flags).filter((k) => k.startsWith('oo:')).length === oo0, `LT: a repeat "Drill them hard" through runTask: T3 or T4, no relationship, no once-a-Coil mark (${res.lines})`);
+      assert([...DRILL_AGAIN.hard, ...DRILL_AGAIN.hardFail].some((t) => res.lines.includes(t)) && JSON.stringify(g.rel) === rel0 && Object.keys(g.flags).filter((k) => k.startsWith('oo:')).length === oo0, `LT: a repeat "Drill them hard" through runTask: T3 or T4, no relationship, no once-a-Coil mark (${res.lines})`);
       g.minutes = 19 * 1440 + 19 * 60 + 5; assert(!grp(g, 'Militia').some((c) => c.status === 'open'), 'LT: the practice drill closes at 19:00'); }
 }
 // v0.11.158 (owner pick NX2, YS; Fable's L3 of v0.11.155): Yuki's lane names her own speed and her count to her best, not the
@@ -2465,7 +2465,7 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     assert(!n.combat.style && actionOpen(n, 'dart') && !actionOpen(n, 'strike') && guardBonus(n) > 2 && armourDrOf(n) === 5.4 && fightAction(n, 'strike') === 'guard', 'no style: every bone action as before (plates DR 5.4 at T7 L5: GW2, U), the unarmed ones closed');
     // the texts (Fable's)
     assert(yaCh.text === 'Take the fight. "Your spear against my blade. No armour. Nobody dies."', 'texts: the spar choice');
-    assert(/flat of a white bone blade laid across her collarbones/.test(SCENES.ya_won.text) && !/cage/.test(SCENES.ya_won.text), 'texts: ya_won without the bone cage');
+    assert(/a white bone blade lies flat across her collarbones/.test(SCENES.ya_won.text) && !/cage/.test(SCENES.ya_won.text), 'texts: ya_won without the bone cage');
     const lostCat = SCENES.ya_lost.text(mk(1, 1)); const lostHuman = SCENES.ya_lost.text(h);
     assert(/offers no help whatsoever/.test(lostCat) && /rescues no one/.test(lostHuman), 'texts: ya_lost by her form');
     const pr = mk(1, 1); pr.flags.ya_brawl = 'won';

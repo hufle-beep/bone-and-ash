@@ -10,11 +10,11 @@ import { textDay } from '../core/lines.js'; // RV1 (FX)
 
 /* v0.11.136 (owner pick NC1, NT1's push 2): replies by day (js/core/lines.js dayReply): the first text is the old reply, the rest Fable's, one for each later day of a Coil. */
 const DR_PALISADE_F = dayReply("fo_palisade:0:f", [
-    "Half the stakes come out brittle. The hunters replace them with wood, without comment, which is worse than comment.",
+    "Every other stake crumbles at a mallet's first tap. The hunters cut pine for the gaps, wordlessly, and the silence says the rest.",
     "Too many of the stakes ring dull when you tap them. The hunters pull those and set timber in the gaps, and Old Hu thanks you for the rest, formally, with a bow. You would have preferred to be shouted at.",
 ]);
 const DR_COUNCIL_F = dayReply("fo_council:0:f", [
-    "You say it badly. They hear it anyway, and bow anyway, slightly less deeply.",
+    "The words come out lame. The council takes the meaning regardless, and bows a finger's width short.",
     "It comes out in the wrong order, the end before the reasons. They wait for you to finish, with perfect courtesy, and bow as the form requires. No further than that.",
 ]);
 const DR_FO_SPAR_F = dayReply("fo_drill:1:f", [
@@ -41,7 +41,7 @@ const DR_FO_LISTEN = onStoryDay("fo_council:1", ["Old Wen marks your silence, an
 const DR_FO_DRILL = onStoryDay("fo_drill:0", ["The line closes, opens and closes again without a word spoken. One animal, grim and silent, with a great many spears.", "The shields lock on the call, and stay locked when you walk into them, twice. Old Hu permits himself one nod, at the ground.", "Halfway through you stop calling the changes, and the line makes them anyway, to a count Old Hu taps on his spear. It will not need you tomorrow, which is the point."]);
 const DR_FO_DRILL_F = dayReply("fo_drill:0:f", ["A spear goes through a bone shield and all but through a cousin. Nobody laughs. Nobody here was ever going to.", "The line holds until the first feint, and then becomes a dozen separate opinions. Old Hu apologises to you for each of them, by name.", "Someone grounds his spear on someone else's foot, and the line comes apart around the injury, politely. You send the foot to the well."]);
 const DR_FO_SPAR = onStoryDay("fo_drill:1", [
-    (g) => byForm(g, "The hunters watch in absolute silence. Afterwards Old Hu bows to the cat.", "The hunters watch in absolute silence. Afterwards Old Hu bows to the great beast, from a distance he has plainly measured.", "The hunters watch in absolute silence. Afterwards Old Hu bows to Yuki. Only to Yuki."),
+    (g) => byForm(g, "Not a hunter breathes until it is over. Then Old Hu bows to the cat.", "Not a hunter breathes until it is over. Then Old Hu bows to the great beast, from a distance he has plainly measured.", "Not a hunter breathes until it is over. Then Old Hu bows to Yuki, and to nobody else."),
     (g) => byForm(g, "Yuki goes over your blade, off your shoulder and onto the butt of Old Hu's spear, and sits. The hunters reconstruct the route afterwards, with pebbles.", "Yuki slows down for them, which is still faster than you. The hunters learn what a charge looks like from the side, and are grateful for the side.", "Yuki fights with her hands in her sleeves until the last exchange. Afterwards she tells the line, aloud, which three of them blinked."),
     (g) => byForm(g, "Three passes, and on the third you very nearly catch her tail. The hunters breathe out together. Yuki washes the tail, pointedly.", "You turn her charge instead of leaving its path. Once. The line marks it with a grunt; Yuki marks it by sitting on you.", "You last four exchanges before she takes your blade away and hands it back across her sleeve. Old Hu has the younger hunters memorise the fourth."),
 ]);
@@ -116,47 +116,47 @@ No collectors, no banners, no gong. Only the inner disciple in his deep-red robe
 He stops at Mei Lin's house, where you are sitting on the step with a bowl of gruel and Yuki. He studies you until the gruel has gone cold. Then, unasked, he sits down on the step beside you, which in this world is roughly equivalent to undressing in the street.
 
 "The hairpin," he says. "I have not slept since you made it."`,
-    lost: `You wake with Lu Han's boot-print still on your chest, in bruise, and forty houses of grim, careful kindness waiting outside the door. Somebody has left eggs on the step. Somebody has mended your coat overnight, badly, in red thread, red being the only thread they had.
+    lost: `You wake to find that Lu Han's boot has left its print on your chest, heel and all, in black and blue. Outside the door forty houses are being kind to you, grimly and with great care. There are eggs on the step. Your coat was mended while you slept, badly, in red thread; Ashfall owns no other colour.
 
-The ultimatum stands: a year, and then the Bone-Maker goes up the road with the Sect, or the village burns. Ashfall has taken this as it takes winter. Nobody mentions it. Everybody is thinking about it.
+The terms have not changed. One year, and then the Bone-Maker walks up the road with the Sect, or the village burns. Ashfall has received this as it receives winter: nobody speaks of it, and nobody thinks of anything else.
 
-At the hour of the dragon a rider in crimson comes down the switchbacks with a lacquered tube, and it becomes clear that the year has just got shorter.`,
+At the hour of the dragon a rider in crimson comes down the switchbacks carrying a lacquered tube, and the year turns out to have been an estimate.`,
 };
 const LETTER = {
-    fought: `Old Wen reads it in the elder's house, before the council, in the voice of a man reading out his own epitaph and checking it for errors.
+    fought: `Old Wen reads it aloud in the elder's house with the council seated before him, slowly, like a man proofing the inscription for his own gravestone.
 
-*The Crimson Lotus records that the village of Ashfall, in the ninth month, raised its hand against the Sect. The Sect records also the name of the stranger who led it. In accordance with the law of the mountain, the Outer Hall will send Outer Elder Shen Qiu to Ashfall on the twenty-first day, to weigh the village and the stranger, and to pass sentence.*
+*The Crimson Lotus sets down that in the ninth month the village of Ashfall lifted its hand against the Sect. It sets down likewise the name of the stranger at its head. By the law of the mountain the Outer Hall sends Outer Elder Shen Qiu to Ashfall on the twenty-first day. He will weigh the village, and the stranger, and give sentence.*
 
-He rolls it up. Nobody speaks. At the back a hunter is weeping, quietly, with no change of expression, which is how men weep here.
+The scroll goes back into its tube. No one says a word. One of the hunters at the back has tears running down a face that does not otherwise move; men here are taught to.
 
-"Thirteen days," says Old Wen. "The law holds that a village must have time to set its affairs in order before it is weighed." His good eye finds you. "This is considered a mercy."
+"Thirteen days," says Old Wen. "A village must be given time to put its affairs in order before the weighing. So the law has it." His one good eye picks you out. "We are to understand this as mercy."
 
-"It's very well organised," you say. "I'll give them that."`,
-    bluff: `The youth in pale silk unrolls his scroll and reads it out in a high, carrying voice of perfect sincerity:
+"They're very organised," you say. "Credit where it's due."`,
+    bluff: `The youth in pale silk opens the scroll to arm's length and delivers it in a high, clear voice, meaning every syllable:
 
-*To the honoured Senior who graces the village of Ashfall: the Crimson Lotus, having been informed of its discourtesy, offers its humble apology, and invites him to the Outer Court, to drink tea with the Outer Hall, that the Sect may learn the name of his mountain and the depth of his cultivation.*
+*To the honoured Senior who lends his presence to the village of Ashfall: the Crimson Lotus has learned of its own discourtesy and humbly begs his pardon. It invites him to the Outer Court to take tea with the Outer Hall, so that the Sect may hear the name of his mountain and the depth of his cultivation.*
 
-He bows. The attendants bow. The canopy bows.
+He bows. Both attendants bow. The canopy, having no choice, bows with them.
 
-"And if this one has other plans?" you ask.
+"And if this one is otherwise engaged?" you ask.
 
-He looks honestly pained. "Then Outer Elder Shen Qiu will come here himself, on the twenty-first day. The Elder is most eager to drink tea." He hesitates. "The Elder's tea is… very strong, Senior."`,
-    paid: `"The material," Lu Han says quietly, "is not bone. No bone that I know. When I hold it my Qi goes *still*. Clean. As if someone had wiped a window." He turns his hands over and studies them. "I have eaten grass since I was six. Pills since I was twelve. In all my life I had not been clean for the length of one breath, until I held your hairpin."
+The pain on his face is perfectly sincere. "Then Outer Elder Shen Qiu will call here in person, on the twenty-first day. The Elder greatly looks forward to the tea." A swallow. "The Elder's tea is… very strong, Senior."`,
+    paid: `"It is not bone," Lu Han says, low. "Not any bone I know. With it in my hand my Qi goes *quiet*. Clean, like a window someone has wiped." He turns his palms up and looks into them. "They fed me grass from the age of six. Pills from twelve. I had never been clean, not for one breath of my life, until I held your hairpin."
 
-He is not threatening you. That is what makes it frightening.
+There is no threat anywhere in him. That is the frightening part.
 
-"I gave it to the Outer Hall," he says. "As I was bound to. Outer Elder Shen Qiu took it out of my hands himself. He comes here on the twenty-first, to ask you where it came from." A pause. "He will not ask as I am asking."
+"I surrendered it to the Outer Hall," he says. "I was bound to. Outer Elder Shen Qiu lifted it from my hands himself. On the twenty-first he comes here, to ask where such a thing comes from." He lets a breath go by. "He will not ask as I am asking."
 
-He stands, bows, deeper than a stranger is owed, and walks back up the road alone.`,
-    lost: `Old Wen reads it in the elder's house, standing, with the council seated round him.
+He rises, bows lower than any stranger is owed, and goes back up the road by himself.`,
+    lost: `Old Wen reads it on his feet in the elder's house, the council sitting in a ring about him.
 
-*The Outer Hall has learned that on the day of the tribute the sky over Ashfall gathered tribulation for a stranger, and withdrew without striking. Heaven does not withdraw. The Outer Hall wishes to understand why. Outer Elder Shen Qiu will come to Ashfall on the twenty-first day to collect the Bone-Maker in person, and to observe him, as one observes a portent.*
+*It has come to the Outer Hall that on the day of the tribute the sky above Ashfall gathered tribulation over a stranger, and went away without striking. Heaven does not go away. The Outer Hall desires to know why. On the twenty-first day Outer Elder Shen Qiu will come to Ashfall, collect the Bone-Maker with his own hands, and study him as one studies a portent.*
 
-"Thirteen days, where we had a year," says the head hunter, Old Hu, flatly. "Because Heaven was afraid of him."
+"Thirteen days, where we had a year," says Old Hu, the head hunter, without inflection. "Because Heaven took fright at him."
 
-"I don't think Heaven was afraid," you say. "I think Heaven was confused. It's different."
+"I wouldn't say fright," you say. "I'd say Heaven lost its place. That's a different problem."
 
-Nobody in the room finds this reassuring. Nobody in any room here has yet found anything you say reassuring. You are beginning to take it personally.`,
+The room is not comforted. No room in this village has ever been comforted by a thing you said, and you have started to keep count.`,
 };
 
 export const BREAK_HUBS = ['fo_ashfall'];
@@ -195,7 +195,7 @@ ${g.flags.romance ? 'Mei Lin, at the back of the room, says nothing. She has no 
         choices: [
             { text: 'Stall, like a senior: "This one is in seclusion. Return when the plum trees flower."', check: { skill: 'GU', dc: 5 }, do: (g) => { g.flags.envoy = 'stalled'; bumpRel(g, 'Village', 3, 0); return ['His bow goes so deep that one attendant has to steady the canopy, and the other has to steady him.']; }, failDo: (g) => { g.flags.envoy = 'doubted'; return ['He bows, but on the way up his eyes stop at your coat and take inventory. The Elder will be told that the senior dresses like nothing in the registers.']; }, to: 'fo_elder_named' },
             { text: 'Refuse plainly: "I don\'t drink tea with people who tax children."', do: (g) => { g.flags.envoy = 'refused'; bumpRel(g, 'Village', 5, 0); return ['He goes the colour of his own scroll, and bows regardless. Manners here would survive a flood.']; }, to: 'fo_elder_named' },
-            { text: 'Ask him, quietly, what the Elder is like.', check: { skill: 'GU', dc: 4 }, do: (g) => { g.flags.envoy = 'asked'; g.flags.elder_intel = true; return ['"Patient," he whispers, hardly moving his lips. "He has never lost a duel. He has never needed to hurry one."']; }, failDo: (g) => { g.flags.envoy = 'asked'; return ['All he will say is: "The Elder is very correct, Senior." Even that much plainly frightens him.']; }, to: 'fo_elder_named' },
+            { text: 'Ask him, quietly, what the Elder is like.', check: { skill: 'GU', dc: 4 }, do: (g) => { g.flags.envoy = 'asked'; g.flags.elder_intel = true; return ['"Patient," he breathes, with his lips all but shut. "He has never lost a duel. He has never needed to hurry one."']; }, failDo: (g) => { g.flags.envoy = 'asked'; return ['All he will say is: "The Elder is very correct, Senior." Even that much plainly frightens him.']; }, to: 'fo_elder_named' },
         ],
     },
     fo_lu_han: {
@@ -233,7 +233,7 @@ Thirteen days. You can spend them building walls. Or you can go and find out wha
                 ? (h < 11 ? `Morning. The hammers have found a rhythm overnight, and the children have made a skipping game of it, which nobody has had the heart to forbid.` : h < 15 ? `Midday. Somebody has set a bowl of barley at the shrine, and somebody else has set a second, larger one beside it.` : h < 19 ? `Late afternoon. The wind has gone round to the north, and you are the only one in the street who turns his head.` : `Dusk. The lamps are lit early and trimmed low; Ashfall has begun counting its oil.`)
                 : d2
                 ? (h < 11 ? `Morning. The hammers started before the light did, and nobody has asked them to stop.` : h < 15 ? `Midday. The chalk line across the barley has been walked so often that it is a path.` : h < 19 ? `Late afternoon. The well is busy and silent, which in Ashfall is how you know people are frightened.` : `Dusk. Shutters closed, lamps lit, every door barred out of habit.`)
-                : (h < 11 ? 'Morning. Hammers, axes, the steady chant of people working because the alternative is thinking.' : h < 15 ? 'Midday. The palisade line is chalked out in white across the barley.' : h < 19 ? 'Late afternoon. Smoke from forty chimneys, and nobody laughing at the well.' : 'Dusk. Lamps behind every shutter.');
+                : (h < 11 ? 'Morning. Axes, hammers, and a work-chant kept going so that nobody has to think.' : h < 15 ? 'Midday. A white chalk line runs through the barley where the palisade is to stand.' : h < 19 ? 'Late afternoon. Forty chimneys smoking, and not one laugh at the well all day.' : 'Dusk. Lamps behind every shutter.');
             const days = 21 - dd(g);
             return `${when} ${days} days until the Elder.
 
@@ -251,7 +251,7 @@ ${pantry(g)} ${g.james.satiety < 30 ? 'You are hungry.' : ''} ${g.james.hp < jam
             { text: 'Find Ya. Follow the sound of offended people.', show: (g) => yaHere(g) && daily('a1_ya')(g) && !late(g), time: 20, to: 'fo_ya_time' },
             { text: 'Somebody has been watching Ashfall from the ridge. Go and see.', show: (g) => !g.flags.spy && dd(g) <= 9 && hour(g) < 16, time: 60, to: 'fo_spy' },
             { text: 'Eat something.', show: (g) => foodCount(g) > 0 && g.james.satiety < 85, time: 15, do: (g) => eatBest(g, { fire: true }), to: 'fo_ashfall' },
-            { text: 'Eat at the communal pot.', show: (g) => daily('a1_pot')(g) && g.james.satiety < 80 && !late(g), time: 30, do: (g) => { markDaily(g, 'a1_pot'); eat(g, 25); return ['Barley and bean stew, served in silence, with a small bow: +25 satiety.']; }, to: 'fo_ashfall' },
+            { text: 'Eat at the communal pot.', show: (g) => daily('a1_pot')(g) && g.james.satiety < 80 && !late(g), time: 30, do: (g) => { markDaily(g, 'a1_pot'); eat(g, 25); return ['Bean and barley stew, ladled out wordlessly and handed over with a short bow: +25 satiety.']; }, to: 'fo_ashfall' },
             { text: 'Cultivate behind the shrine: one sit, 10 Qi.', show: (g) => !late(g), req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`, ...r.xp] : []; }, to: 'fo_ashfall' },
             { text: 'Rest an hour.', show: (g) => !late(g), do: (g) => advance(g, 60, { resting: true }).concat(['An hour of rest.']), to: 'fo_ashfall' },
             { text: (g) => (dd(g) >= 10 ? 'Evening. The last one in Ashfall for a while.' : 'Evening. Go home to Mei Lin\'s.'), show: (g) => hour(g) >= 16, time: 20, to: toEvening },
@@ -265,7 +265,7 @@ ${pantry(g)} ${g.james.satiety < 30 ? 'You are hungry.' : ''} ${g.james.hp < jam
             ? 'The hunters have laid out the line in chalk and string, dead straight, as though straightness were itself a defence. Here it may be. Everyone in Ashfall who can lift a mallet is standing along it, waiting for you to begin.'
             : (g.flags.palisade || 0) === 1 ? 'The stakes already sung stand along a third of the line, white and sharp and faintly humming. The children have taken to touching them for luck. Nobody has told them to stop.' : 'Most of the line stands now. From the ridge, Ashfall is beginning to look like a thing with teeth.'}
 
-You sing the stakes up out of the ground and out of the old bone the hunters bring you: jackal, boar, the long shin of an animal nobody cares to name. Each one costs Qi, and a little of something else besides: the part of you that is still surprised you can do this.`,
+The stakes rise to your singing, out of the earth and out of whatever old bone the hunters carry to you: jackal, boar, one long shin from a beast no one will put a name to. Every stake is paid for in Qi, and in a second coin as well: a little more of the man who is still astonished that he can do it.`,
         choices: [
             { text: 'Sing a full stretch of the line.', qi: 6, check: { skill: 'Convergence Use', dc: 4 }, time: 180, do: (g) => { g.flags.palisade = (g.flags.palisade || 0) + 1; bumpRel(g, 'Village', 4, 0); return [`Palisade: ${g.flags.palisade}/3 stretches. ${DR_FO_SING(g)}`]; }, failDo: (g) => { bumpRel(g, 'Village', 1, 0); return [DR_PALISADE_F(g)]; }, to: 'fo_ashfall' },
             { text: 'Teach the hunters to set your stakes in pits, angled, the way the jackals taught you.', check: { skill: 'GU', dc: 4 }, time: 150, do: (g) => { g.flags.palisade = (g.flags.palisade || 0) + 1; return [`Palisade: ${g.flags.palisade}/3 stretches. ${DR_FO_PITS(g)}`]; }, failDo: (g) => [DR_FO_PITS_F(g)], to: 'fo_ashfall' },
@@ -282,11 +282,11 @@ You sing the stakes up out of the ground and out of the old bone the hunters bri
 The question before them is whether the children should be sent over the pass to the salt villages. It is debated in full form: each speaker stands, bows to Old Wen, sets out the case for and the case against, and sits. Nobody interrupts. Nobody raises a voice. A woman with three grandchildren on the list speaks for sending them, in a voice steady enough to hold up a roof.
 
 Old Wen turns to you. "The stranger will speak."`
-            : dd(g) === 9 ? `Second council. The tea is weaker. The children's question has been settled; they stay, because the salt villages would sell them to the Sect for less than Ashfall's tribute.
+            : dd(g) === 9 ? `Second council, on thinner tea. The matter of the children is closed: they stay. The salt villages would hand them to the Sect for less than Ashfall pays in tribute.
 
-Today they want to know about the Old Tree. Every hunter on the council has the same story from his grandfather: the forest's heart once *sang*, and the singing made the beasts gentle and the herbs clean. Then the Sect came, before the Sect was the Sect, and the singing stopped.
+Today's business is the Old Tree. Each hunter at the table had the same tale from his grandfather. Once the forest's heart *sang*, and while it sang the beasts were mild and the herbs grew clean. Then the Sect came, in the days before it was called the Sect, and the song ended.
 
-${byForm(g, "\"Your cat,\" Old Wen says,", "\"Your great beast,\" Old Wen says,", "\"Your companion,\" Old Wen says,")} "faces north when she sleeps. So do you."`
+${byForm(g, "\"Your cat,\" Old Wen says,", "\"Your great beast,\" Old Wen says,", "\"Your companion,\" Old Wen says,")} "faces north in her sleep. As you do."`
             : `Third council, and the last before the north path. The tea has gone beyond weak into memory: hot water, served with the full ceremony of tea. The map still lies on the table from this morning. Nobody has presumed to roll it up.
 
 The business is short. Who answers for the palisade line. Who drills the line. Who keeps the well while the Bone-Maker is in the Blackroot with the herb-gatherer and the wild woman, and eleven days stand on the tally. Each matter is stood for, bowed over and settled. Nobody says *if he comes back*. It sits at the table all the same, an eighth elder.
@@ -332,13 +332,13 @@ ${hasItem(g, 'jade_bracket') ? 'You have jade bracket. It will have to stretch.'
         id: 'fo_mei', title: 'Mei Lin', art: (g) => (dd(g) === 9 ? 'herb_slope' : 'mei_lin'), place: (g) => (dd(g) === 9 ? `${P} — the herb slopes` : `${P} — Mei Lin's house`),
         enter: (g) => { markDaily(g, 'a1_mei'); return []; },
         text: (g) => {
-            if (dd(g) === 8) return `You find her in the herb loft${g.flags.loft_burned ? ' — what is left of it, the charred beams scrubbed and oiled as if scrubbing could unburn them —' : ''}, sorting roots with the ferocity of a woman who has resolved not to think.
+            if (dd(g) === 8) return `She is up in the herb loft${g.flags.loft_burned ? ' — what is left of it, the charred beams scrubbed and oiled as if scrubbing could unburn them —' : ''}, sorting roots as if each one had personally offended her, which is how Mei Lin avoids thinking.
 
-"Thirteen days," she says, not looking up. "And everyone is so calm. My mother has been calm since dawn. The headman is calm. Old Hu is so calm I think he may have died." A bundle hits the board. "I am going to scream, James. In the street. Only to hear somebody do it."
+"Thirteen days," she says to the roots. "And all of Ashfall so calm. My mother has been calm since before it was light. The headman is calm. Old Hu is calm enough that somebody ought to check him for a pulse." A bundle slaps down on the board. "I shall scream, James. Out in the street. Just so that I have heard one person do it."
 
-"That," you say, "would be extremely bad for your reputation."
+"Your reputation," you say, "would never recover."
 
-"I *have* a reputation. It's 'that Mei Lin.' They all say it the same. *That* Mei Lin." ${meiLovers(g) ? 'She looks at you at last, and her face turns soft and furious together. "And now I\'m *that* Mei Lin who took a foreign demon up to her loft. They are praying for my soul, did you know? Aloud. At the shrine."' : 'She looks at you at last. "Laughing in public. Speaking in council. Talking to foreign demons. It adds up."'}`;
+"I already *have* a reputation. It is 'that Mei Lin.' Every one of them says it in the same voice. *That* Mei Lin." ${meiLovers(g) ? 'She looks at you at last, and her face turns soft and furious together. "And now I\'m *that* Mei Lin who took a foreign demon up to her loft. They are praying for my soul, did you know? Aloud. At the shrine."' : 'She looks at you at last. "Laughing in public. Speaking in council. Talking to foreign demons. It adds up."'}`;
             if (dd(g) === 9) return `The herb slopes, late in the morning. She cuts Ninefold grass in short, angry strokes and talks without stopping, which for Mei Lin is what thinking sounds like.
 
 ${yaHere(g) ? '"That woman," she says, "asked me this morning whether you were *mine*. In the street. In front of Grandmother Lao." Slash. "And when I told her that is not a question decent people ask, she asked whether I was *decent*, then, because she had heard otherwise." Slash. "And then she *laughed*. Do you know what it is to hear someone laugh in this village? It sounded like glass breaking."\n\nThe knife stops. "I liked it," she says, very low, as one owns up to a crime. "That\'s the worst part."' : 'She does not mention the Elder once, which is how you know he is all she is thinking about.'}`;
@@ -382,7 +382,7 @@ He has been counting your stakes. He has drawn the barley line, accurately, with
 He has not seen you yet.`,
         choices: [
             { text: 'Take him.', combat: spyFight, to: 'fo_spy_won' },
-            { text: 'Talk. "Your ledger\'s very good. Shame about the perspective on the stakes."', check: { skill: 'GU', dc: 5 }, do: (g) => { g.flags.spy = 'talked'; g.flags.elder_intel = true; return ['He stares. Then, being very young and very correct, he corrects you on the perspective. It takes an hour, with diagrams. He goes home with his ledger, and you go home knowing that the Elder means to arrive at noon, by the north road, with four disciples.']; }, failDo: () => ['He is off like a hare from its form. You let him go; the ledger drops out of his robe on the second bound.'], fail: 'fo_spy_fled', to: 'fo_ashfall' },
+            { text: 'Talk. "Your ledger\'s very good. Shame about the perspective on the stakes."', check: { skill: 'GU', dc: 5 }, do: (g) => { g.flags.spy = 'talked'; g.flags.elder_intel = true; return ['He stares. Then, being very young and very correct, he corrects you on the perspective. It takes an hour, with diagrams. He goes home with his ledger, and you go home knowing that the Elder means to arrive in the morning, by the north road, with twelve disciples.']; }, failDo: () => ['He is off like a hare from its form. You let him go; the ledger drops out of his robe on the second bound.'], fail: 'fo_spy_fled', to: 'fo_ashfall' },
             { text: 'Leave him. Let the Sect see exactly how ready you are.', do: (g) => { g.flags.spy = 'left'; return []; }, to: 'fo_ashfall' },
         ],
     },
@@ -391,7 +391,7 @@ He has not seen you yet.`,
         enter: (g) => { g.flags.spy = 'caught'; g.flags.elder_intel = true; bumpRel(g, 'Village', 4, 0); return ['+ The watcher\'s ledger: the Elder\'s road, hour and escort.']; },
         text: `He yields the instant your blade touches his throat: kneels, and offers you his sword in both hands, hilt first, in full form. It is plainly the one correct act left to him, and he performs it well.
 
-The ledger is meticulous. Shen Qiu arrives by the north road. At noon. Four disciples with him. There is a note on Mei Lin: *the herb-girl who laughs*. There is a note on Ya, which is only a drawing of a wolf's skull and a question mark. Yuki has an entry too; she reads it once and lets it stand.
+The ledger is meticulous. Shen Qiu arrives by the north road. In the morning. Twelve disciples with him. There is a note on Mei Lin: *the herb-girl who laughs*. There is a note on Ya, which is only a drawing of a wolf's skull and a question mark. Yuki has an entry too; she reads it once and lets it stand.
 
 You send him home without the sword. He bows before he runs. The Sect trains them thoroughly.`,
         choices: [{ text: 'Back down to Ashfall.', time: 60, to: 'fo_ashfall' }],
@@ -399,17 +399,17 @@ You send him home without the sword. He bows before he runs. The Sect trains the
     fo_spy_lost: {
         id: 'fo_spy_lost', title: 'Correct', art: 'envoy', place: 'The ridge above Ashfall',
         enter: (g) => { g.flags.spy = 'lost'; return []; },
-        text: (g) => `He puts you on the ground with three precise movements, bows, apologises for the inconvenience, gathers his mat and his ledger and his rice cakes, and leaves at a brisk, correct walk.
+        text: (g) => `Three exact movements, and you are on your back. He bows. He regrets the inconvenience. He folds his mat, collects ledger and rice cakes, and departs at a brisk and proper walk.
 
-You lie in the pine needles for a while, contemplating the Crimson Lotus's training programme. ${byForm(g, "Yuki sits on your chest. *He folded his mat,* the bond observes. *While you were bleeding.*", "Yuki rests one paw on your chest. *He folded his mat,* the bond observes. *While you were bleeding.*", "Yuki sits down beside you. \"He folded his mat,\" she observes. \"While you were bleeding.\"")}`,
+The pine needles are comfortable enough. You stay in them, reviewing the Crimson Lotus's training syllabus. ${byForm(g, "Yuki sits on your chest. *He folded his mat,* the bond observes. *While you were bleeding.*", "Yuki rests one paw on your chest. *He folded his mat,* the bond observes. *While you were bleeding.*", "Yuki sits down beside you. \"He folded his mat,\" she observes. \"While you were bleeding.\"")}`,
         choices: [{ text: 'Limp home.', time: 90, to: 'fo_ashfall' }],
     },
     fo_spy_fled: {
         id: 'fo_spy_fled', title: 'Gone', art: 'envoy', place: 'The ridge above Ashfall',
         enter: (g) => { g.flags.spy = 'fled'; g.flags.elder_intel = true; return []; },
-        text: (g) => `The watcher is three switchbacks up the mountain before you've finished your sentence. His ledger lies in the dust. It's very thorough. The Elder comes by the north road, at noon, with four disciples.
+        text: (g) => `Your sentence is not finished when the watcher is three switchbacks further up the mountain. His ledger lies in the dust where it fell, and it is thorough work. The Elder is expected by the north road, in the morning, with twelve disciples.
 
-Also, in the margin next to your portrait: *does not bow*.${byForm(g, "\n\nYuki is in the portrait as well: a small smudge on your drawn shoulder, labelled *pet?*. The bond says nothing, at some length.", "\n\nYuki's portrait has the whole facing page, and its margin says only *large*, underlined twice. She watches the mountain until he is off the last switchback. *Uphill,* says the bond. *No.*", "\n\nYuki has the facing page to herself, ears and tail drawn with care, and a margin that says *the lady: do not approach*. \"Accurate,\" she says, and closes the ledger for you.")}`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line
+And beside your portrait, in the margin: *does not bow*.${byForm(g, "\n\nYuki is in the portrait as well: a small smudge on your drawn shoulder, labelled *pet?*. The bond says nothing, at some length.", "\n\nYuki's portrait has the whole facing page, and its margin says only *large*, underlined twice. She watches the mountain until he is off the last switchback. *Uphill,* says the bond. *No.*", "\n\nYuki has the facing page to herself, ears and tail drawn with care, and a margin that says *the lady: do not approach*. \"Accurate,\" she says, and closes the ledger for you.")}`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line
         choices: [{ text: 'Back down to Ashfall.', time: 60, to: 'fo_ashfall' }],
     },
 
@@ -418,9 +418,9 @@ Also, in the margin next to your portrait: *does not bow*.${byForm(g, "\n\nYuki 
         id: 'fo_supper', title: 'Supper', art: 'dinner', place: `${P} — Mei Lin's house`,
         enter: (g) => { if (hour(g) < 19) advance(g, (19 - hour(g)) * 60); if (daily('a1_supper')(g)) { markDaily(g, 'a1_supper'); eat(g, 30); return ['Millet, pickled greens, a sliver of salt pork: +30 satiety.']; } return []; },
         text: (g) => (dd(g) === 8
-            ? `Supper is very quiet. Mei Lin's mother says grace to the ancestors at twice its usual length, and adds a line at the end about the stranger, which you choose to take as a blessing.
+            ? `Nobody talks at supper. Mei Lin's mother gives the ancestors their grace at double length, with one line tacked on at the end concerning the stranger. You decide it was a blessing.
 
-Mei Lin eats with one hand and with the other draws the palisade line in spilled tea on the table, arguing with it. ${byForm(g, "Yuki eats a sliver of salt pork that nobody at this table offered her.", "Yuki, along the far wall, has been served a whole smoked hare in the washing basin, unasked. The mother pays her tolls promptly.", "Yuki, seated at the head by the mother's ruling, eats her sliver of salt pork with chopsticks, faultlessly, and is offered a second before you are.")}`
+Mei Lin has one hand for her bowl. The other is tracing the palisade line across the table in spilled tea, and she is losing an argument with it. ${byForm(g, "Yuki eats a sliver of salt pork that nobody at this table offered her.", "Yuki, along the far wall, has been served a whole smoked hare in the washing basin, unasked. The mother pays her tolls promptly.", "Yuki, seated at the head by the mother's ruling, eats her sliver of salt pork with chopsticks, faultlessly, and is offered a second before you are.")}`
             : `${yaHere(g) ? `Ya comes to supper. Nobody invited her. She simply arrives at the door, walks in, sits at the table on the *wrong side* — the host's side — and eats with her fingers, fast, hunched, watching the door the whole time like a wolf at a kill.
 
 Mei Lin's mother serves her anyway, because a guest is a guest even if she is an animal, and sits through the whole meal with the face of a woman enduring a tribulation. Your bowl she fills past the line, informing the ladle that whoever salted her pot while she was at the shrine was not seen, and has improved it.
@@ -461,23 +461,23 @@ There is no palisade. There is a chalk line, and a great many good intentions.`,
     },
     fo_wolf_forced: {
         id: 'fo_wolf_forced', title: 'In the Barley', art: 'wolves', place: `${P} — the barley line`,
-        text: (g) => `The hunters come, but slowly — they stop to put on their headbands, properly, because a man does not go to his death untidy — and the wolves are already in the lane.${byForm(g, '', " Yuki did not stop for a headband. She is sitting in the middle of the lane, washing one paw, and the wolves have slowed. They have not stopped.", " Yuki did not stop for anything. She is standing in the middle of the lane in black silk, hands in her sleeves, and the wolves, who can count, are counting again.")}`, /* v0.11.131 (XB2, FL; Fable's MAIN): the great root-kin */
+        text: (g) => `The hunters do come. They come late, each man having stopped to tie on his headband and tie it straight, since nobody here goes to his death untidy; and by then the wolves are in the lane.${byForm(g, '', " Yuki did not stop for a headband. She is sitting in the middle of the lane, washing one paw, and the wolves have slowed. They have not stopped.", " Yuki did not stop for anything. She is standing in the middle of the lane in black silk, hands in her sleeves, and the wolves, who can count, are counting again.")}`, /* v0.11.131 (XB2, FL; Fable's MAIN): the great root-kin */
         choices: [{ text: 'Then it\'s the hard way.', combat: wolfFight, to: 'fo_wolf_won' }],
     },
     fo_wolf_won: {
         id: 'fo_wolf_won', title: 'Grey on Grey', art: 'wolves', place: `${P} — the barley line`,
         enter: (g) => { g.flags.wolf = 'killed'; addItem(g, 'beast_core', 1); bumpRel(g, 'Village', 5, 0); return ['+1 Murky beast core.']; },
-        text: `Two grey bodies in the flattened barley. By morning the hunters have skinned them, rendered them, and hung the skulls on the chalk line, facing outward, in the solemn conviction that this will warn the others.
+        text: `The barley is trampled flat round two grey carcasses. Before sunrise the hunters have the pelts off and the fat rendered, and both skulls are up on the chalk line, looking outward. This is done gravely, as a notice to other wolves.
 
-It might. The wolves here are not stupid. Neither, as it turns out, are the hunters.`,
+Perhaps it will be read. Ash-wolves are no fools. Nor, you are learning, are Ashfall's hunters.`,
         choices: [{ text: 'Back to bed.', to: 'fo_morning' }],
     },
     fo_wolf_lost: {
         id: 'fo_wolf_lost', title: 'Grey on Grey', art: 'wolves', place: `${P} — the barley line`,
         enter: (g) => { g.flags.wolf = 'lost'; bumpRel(g, 'Village', -2, 0); return []; },
-        text: (g) => `They get past you and take a goat, and you get a bite through the forearm that will scar. The hunters arrive in time to see the grey shapes vanish into the barley with the goat between them.${byForm(g, '', " Yuki comes out of the barley the other way a moment later, with grey fur in her teeth and no goat: she went after the one that came at her, the lame one, while the other went round. Wolves do that.", '')}
+        text: (g) => `They go round you. A goat goes with them, and you keep a bite clean through the forearm, the kind that leaves a scar. The hunters reach the field in time to watch two grey backs sink into the barley, carrying the goat between them.${byForm(g, '', " Yuki comes out of the barley the other way a moment later, with grey fur in her teeth and no goat: she went after the one that came at her, the lame one, while the other went round. Wolves do that.", '')}
 
-The goat's owner bows to you anyway, and thanks you for your effort, which is somehow the worst thing that's happened all week.`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line; RB2 (WC): Fable's redraft after the review
+Its owner bows to you regardless and thanks you for the attempt. Nothing else this week has been as hard to take.`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line; RB2 (WC): Fable's redraft after the review
         choices: [{ text: 'Bandage it. Sleep.', to: 'fo_morning' }],
     },
 
@@ -497,7 +497,7 @@ The goat's owner bows to you anyway, and thanks you for your effort, which is so
 You are on the step with a bowl of gruel when Ashfall goes silent at your back. It is not the careful silence you have grown used to. It is sharp and complete, like a plate dropped in a temple.
 
 Someone is walking out of the Blackroot: down the north path, through the barley, hauling something heavy behind her on a rope.`
-            : `Day ${dd(g)}. ${21 - dd(g)} days to the Elder. The north wind is up, and your Convergence is singing along with it, whether you approve or not.`),
+            : `Day ${dd(g)}. ${21 - dd(g)} days to the Elder. The wind has come round to the north again, and your Convergence hums along under it without having asked your leave.`),
         choices: [
             { text: 'Look.', show: (g) => dd(g) === 9 && !yaHere(g), to: 'ya_arrives' },
             { text: 'Old Wen has called for you. Today is the day you decide.', show: (g) => dd(g) >= 10 && !g.flags.fo_plan, to: 'fo_plan' },
@@ -524,15 +524,15 @@ Then she sees you. And Yuki. Her nostrils flare, and all the play leaves her fac
     ya_meets: {
         id: 'ya_meets', title: 'Nothing Smells Like Nothing', art: 'ya_close', place: `${P} — the north path`,
         enter: (g) => { g.flags.ya_met = true; bumpRel(g, 'Ya', 2, 2); return []; },
-        text: (g) => `She walks right up to you, much too close, and *sniffs* you. Neck, hair, the collar of your coat. Yuki, ${byForm(g, 'on your shoulder', 'at your hip', 'at your elbow')}, flattens her ears and allows it, which she has never allowed anyone.
+        text: (g) => `She comes straight up to you, far closer than anyone here would stand, and *smells* you: the neck, the hair, the collar of the coat. Yuki, ${byForm(g, 'on your shoulder', 'at your hip', 'at your elbow')}, sets her ears back and lets it happen. She has let nobody do it before.
 
-"*You,*" the woman says. "Three nights I sat outside your little fire. Three nights. You smell like nothing. Nothing smells like nothing. Everything here smells like rot — the grass, the beasts, the Sect, *them*" — a thumb at the village — "everything that eats the air. You don't." She grins, all teeth. "I wanted to see if you'd taste like nothing too. Then the dogs came for you and you killed them, and I thought: he's mine. I'll come and get him when I'm hungry."
+"*You,*" says the woman. "Three nights I sat outside your little fire. Three. You smell like nothing. Nothing smells like nothing. It all stinks of rot here: the grass, the beasts, the Sect, *them*" — her thumb goes at the village — "whatever eats this air. Not you." A grin, every tooth in it. "I wondered what you'd taste of. Then the dogs came at you, and you killed them, and I thought: mine. I'll fetch him when I get hungry."
 
-"I'm not sure I follow the 'mine' part."
+"I'd like the 'mine' part explained."
 
-"I'm Ya." She looks you up and down with frank, unhurried interest, the way she probably looks at a deer. "You're tall. That's good. And who's *that*?"
+"I'm Ya." Her eyes travel down you and back up, openly and in no hurry; she must look at deer like this. "You're tall. That's good. And who's *that*?"
 
-She's looking past you, at Mei Lin, who has come out onto the step with a knife in one hand and a bundle of herbs in the other and an expression of pure outrage. ${meiLovers(g) ? 'Ya\'s nose wrinkles. She looks from Mei Lin to you and back. "Oh. *Oh.* You two." She sounds pleased, the way a fox sounds pleased to find two hens.' : 'Ya\'s grin widens. "Oh, I like her. She looks like she bites."'}`,
+She means Mei Lin, behind you, who has come out on the step with a knife in one fist and a bunch of herbs in the other, and outrage all over her face. ${meiLovers(g) ? 'Ya\'s nose wrinkles. She looks from Mei Lin to you and back. "Oh. *Oh.* You two." She sounds pleased, the way a fox sounds pleased to find two hens.' : 'Ya\'s grin widens. "Oh, I like her. She looks like she bites."'}`,
         choices: [
             { text: '"James. That\'s Mei Lin. The one behind you is Old Hu, and he\'s about to challenge you."', to: 'ya_challenge' },
             { text: '"You followed me for three days and didn\'t say hello?"', do: (g) => { bumpRel(g, 'Ya', 3, 2); return ['"Saying hello is how you get speared," she says, patiently, as one explains fire to the very young.']; }, to: 'ya_challenge' },
@@ -540,15 +540,15 @@ She's looking past you, at Mei Lin, who has come out onto the step with a knife 
     },
     ya_challenge: {
         id: 'ya_challenge', title: 'A Matter of Face', art: 'ya_fight', place: `${P} — the lane`,
-        text: `Old Hu is indeed about to challenge her. He has taken off his headband, folded it, and handed it to his nephew, which in Ashfall amounts to a declaration of war. His face is grey with formal fury. She insulted him in the lane, before the village, and this world knows only two answers to that, and he is too old for either.
+        text: `Old Hu is, in fact, about to challenge her. The headband is off already, folded, and given into his nephew's keeping, and in Ashfall wars have been declared with less. Formal fury has turned his face grey. She insulted him in the lane before every soul in Ashfall; this world allows a man two answers to that, and his years have put both out of reach.
 
-Ya sees it and *lights up*. "A fight? Good. I've been walking for four days."
+Ya notices, and *brightens*. "A fight? Good. Four days I've been walking."
 
 "Old Hu," you say, "is seventy."
 
-"Then *you* fight me." The delighted, feral grin swings round to you. "Come on, Nothing. Show me what you did to the dogs."
+"Then *you* fight me." The grin comes round to you, feral and delighted. "Come on, Nothing. Show me what you did to the dogs."
 
-Old Hu looks at you, and what is in his face is close to hope. If you take the fight, his face is saved. If you do not, he will have to.`,
+Old Hu's eyes are on you now, and what is in them is nearly hope. Take the fight, and his face is saved. Decline it, and he must fight her himself.`,
         choices: [
             { text: 'Take the fight. "Your spear against my blade. No armour. Nobody dies."', combat: yaBrawl, to: 'ya_won' }, // v0.11.82: Fable's
             { text: 'Talk her down: "You came for salt. Insulting the salt-keeper is a bad trade."', check: { skill: 'GU', dc: 6 }, do: (g) => { g.flags.ya_brawl = 'talked'; bumpRel(g, 'Ya', -1, 1); bumpRel(g, 'Village', 2, 0); return ['She turns it over. Then she bows to Old Hu, badly and sideways, a dog\'s impression of a person, and says, "Sorry your face smells like a goat." Old Hu, in visible agony, accepts this as an apology.']; }, failDo: (g) => { bumpRel(g, 'Ya', -3, 0); return ['"Coward," she says, offended down to the marrow. Then she hits you regardless.']; }, fail: 'ya_forced', to: 'ya_talk' },
@@ -556,68 +556,68 @@ Old Hu looks at you, and what is in his face is close to hope. If you take the f
     },
     ya_forced: {
         id: 'ya_forced', title: 'She Hits You Anyway', art: 'ya_fight', place: `${P} — the lane`,
-        text: (g) => `It's an open-handed slap that nearly takes your head off. The whole village inhales at once.${byForm(g, '', " Then the whole village looks at Yuki. Yuki looks at the fence. This is, evidently, between people.", " Then every eye goes to the woman in black by the fence. Yuki inspects a cuff. \"He has another cheek,\" she says, aloud.")}`, /* v0.11.131 (XB2, FL; Fable's MAIN): the great root-kin */
+        text: (g) => `She does it with an open hand, and your head very nearly leaves with it. Forty houses draw one breath.${byForm(g, '', " Then the whole village looks at Yuki. Yuki looks at the fence. This is, evidently, between people.", " Then every eye goes to the woman in black by the fence. Yuki inspects a cuff. \"He has another cheek,\" she says, aloud.")}`, /* v0.11.131 (XB2, FL; Fable's MAIN): the great root-kin */
         choices: [{ text: 'Fine. "Your spear against my blade. No armour. Nobody dies."', combat: yaBrawl, to: 'ya_won' }], // v0.11.89 (owner pick T3): the terms said on this path too, the other path's words (Fable's)
     },
     ya_won: {
         id: 'ya_won', title: 'Pinned', art: 'ya_fight', place: `${P} — the lane`,
         enter: (g) => { g.flags.ya_brawl = 'won'; bumpRel(g, 'Ya', 6, 6); bumpRel(g, 'Village', 4, 0); return []; }, // v0.11.137 (owner pick HV1, HD): Old Hu no longer tracked (was +6)
-        text: `It ends with Ya on her back in the dust, her spear a long way from her hand, and the flat of a white bone blade laid across her collarbones, holding her to the lane the way a ruler holds down a page. She's bleeding from the lip and laughing so hard she can't breathe.
+        text: `When it is over Ya is flat on her back in the lane. Her spear lies well out of reach, and a white bone blade lies flat across her collarbones and keeps her there, as a ruler keeps a page from turning. Her lip is split. She cannot breathe for laughing.
 
 "*Again,*" she says. "Do that again. Later. Somewhere with fewer goats."
 
-Old Hu replaces his headband with tremendous dignity. His face has been saved, by proxy, and in this world that counts. He bows to you. Then, after a long and visible internal struggle, he bows to Ya, because she fought, and fighting is a thing that can be respected even in an animal.
+Old Hu ties his headband back on, with immense dignity. At second hand his face is saved, and this world accepts that as legal tender. He bows to you. Then a struggle crosses his features, slow and plain to see, and he bows to Ya as well: she fought, and a fight can be honoured even in an animal.
 
-Mei Lin, on the step, has put the knife down. She is staring at Ya with an expression you can't read at all.`,
+Mei Lin, up on her step, has laid her knife down. She is looking at Ya, and you cannot make out what the look means.`,
         choices: [{ text: 'Let her up.', to: 'ya_talk' }],
     },
     ya_lost: {
         id: 'ya_lost', title: 'Pinned (You)', art: 'ya_fight', place: `${P} — the lane`,
         enter: (g) => { g.flags.ya_brawl = 'lost'; bumpRel(g, 'Ya', 4, 5); g.james.hp = Math.max(3, g.james.hp); return []; }, // v0.11.137 (HV1, HD): Old Hu no longer tracked (was +3)
-        text: (g) => `It ends with you on your back in the dust and Ya sitting on your chest, one knee on each of your arms, grinning down at you upside-down with her hair hanging around both your faces like a curtain.
+        text: (g) => `It finishes with the lane against your shoulder-blades and Ya astride your ribs, a knee pinning each arm. She grins down at you, upside-down, and her hair hangs round both your faces like a tent.
 
-"You're good," she says. "You're not *good* good. But you're good." She leans down, very close, and sniffs your hair again. "Still nothing."
+"You're good," she says. "Not *good* good. But good." Down she leans, very near, for another sniff at your hair. "Still nothing."
 
-"Are you going to get off me?"
+"Do you plan to get off me?"
 
-"Eventually." She doesn't. Behind her, you can see Mei Lin on the step, white-knuckled around her knife, and Old Hu, who has replaced his headband with tremendous dignity, because a fight was had and his face, by proxy, is saved.
+"Eventually." She stays where she is. Past her shoulder you have a view of the step, where Mei Lin stands with her knuckles white on her knife, and of Old Hu, whose headband is on again and whose dignity is whole: there was a fight, so his face is saved, whoever did the fighting.
 
 ${yukiForm(g) === 'human' ? 'Yuki, who was asked to stand on the left and not to rescue anyone, stands on the left and rescues no one.' : yukiForm(g) === 'tiger' ? 'Yuki leans on the fence, which leans, and offers no help whatsoever.' : 'Yuki sits on the fence and offers no help whatsoever.'}`, // v0.11.82: Fable's human-form line; v0.11.128 (OF2, YF; Fable's MAIN): the great root-kin's
         choices: [{ text: '"Eventually would be now."', to: 'ya_talk' }],
     },
     ya_talk: {
         id: 'ya_talk', title: 'Salt and Iron', art: 'ya_close', place: `${P} — Mei Lin's step`,
-        text: (g) => `She sits down on Mei Lin's step unasked, helps herself to Mei Lin's gruel, and explains between mouthfuls that she lives in the deep Blackroot, beyond the Hollow, beyond where the hunters turn back. Always has. Her mother was "a hunter who went in and didn't come out" and her father was "maybe a wolf, I never asked." Twice a year she comes out for salt and iron and to start fights.
+        text: (g) => `She plants herself on Mei Lin's step without being asked, takes over Mei Lin's gruel, and tells you between mouthfuls where she lives: the deep Blackroot, past the Hollow, past the place where hunters turn round. Always has. Her mother was "a hunter. An ape got her." Her father was "maybe a wolf, I never asked." Twice a year she walks out for salt, for iron, and to start fights.
 
 "And the dead tree?" you ask. "The big one. At the heart."
 
-She stops chewing. The grin is gone; you had not seen her without it.
+The chewing stops. So does the grin.
 
-"I sleep in its roots in winter," she says. "It's warm. Nothing else in the forest is warm." A pause. "Sometimes it hums. Only when I'm asleep. When I wake, it stops." Her eyes narrow. "It hummed louder the nights I was near *you*."
+"I sleep in its roots in winter," she says. "It's warm. Nothing else in the forest is warm." She is quiet for a breath. "Sometimes it hums. Only while I sleep. I wake up, and it stops." Her eyes go narrow. "The nights I was near *you*, it hummed louder."
 
-Then the grin is back, and wider. "Anyway. Salt. Iron. And you. You gave the white one the best of the meat before you ate, three nights running. I watched." She aims her spoon at Mei Lin. "And maybe you."
+Then the grin comes back, wider than before. "Anyway. Salt. Iron. And you. You gave the white one the best of the meat before you ate, three nights running. I watched." The spoon swings round to Mei Lin. "And maybe you."
 
-Mei Lin makes a noise like a kettle.`,
+Mei Lin answers with the noise of a kettle.`,
         choices: [
-            { text: 'Make her a set of bone needles and a skinning knife, as a guest-gift.', qi: 4, check: { skill: 'Convergence Use', dc: 4 }, do: (g) => { g.flags.ya_gift = true; bumpRel(g, 'Ya', 6, 4); addItem(g, 'ya_tooth', 1); return ['She turns the knife in the light as other people turn jewellery, then bites a wolf\'s tooth off her necklace and presses it into your palm. +Ya\'s wolf tooth. You decide not to ask.']; }, failDo: (g) => { bumpRel(g, 'Ya', 2, 1); return ['The knife cracks along the spine. She keeps it. "It\'s ugly. I like ugly things."']; }, to: (g) => (meiLovers(g) || likesMei(g) ? 'ya_share' : 'fo_ashfall') },
+            { text: 'Make her a set of bone needles and a skinning knife, as a guest-gift.', qi: 4, check: { skill: 'Convergence Use', dc: 4 }, do: (g) => { g.flags.ya_gift = true; bumpRel(g, 'Ya', 6, 4); addItem(g, 'ya_tooth', 1); return ['She tilts the knife to the light, as another woman might a jade bracelet, then snaps a wolf\'s tooth from her necklace with her own teeth and folds your fingers over it. +Ya\'s wolf tooth. You elect not to enquire.']; }, failDo: (g) => { bumpRel(g, 'Ya', 2, 1); return ['The knife cracks along the spine. She keeps it. "It\'s ugly. I like ugly things."']; }, to: (g) => (meiLovers(g) || likesMei(g) ? 'ya_share' : 'fo_ashfall') },
             { text: 'Get her salt from the communal store, and pay for it yourself.', do: (g) => { bumpRel(g, 'Ya', 3, 2); bumpRel(g, 'Village', 2, 0); return ['Two jars of grey salt. She carries one in the crook of each arm, like twins.']; }, time: 60, to: (g) => (meiLovers(g) || likesMei(g) ? 'ya_share' : 'fo_ashfall') },
         ],
     },
     ya_share: {
         id: 'ya_share', title: 'An Indecent Proposal', art: 'ya_close', place: `${P} — Mei Lin's step`,
-        text: (g) => `Ya has been watching the pair of you as a predator watches: patiently, and missing nothing. ${meiLovers(g) ? 'She saw Mei Lin\'s hand find your sleeve on the step. She saw the hay still in Mei Lin\'s hair from two nights ago.' : 'She saw how the two of you keep not looking at each other.'}
+        text: (g) => `Ya has been studying the two of you as a predator studies anything: with patience, and with nothing overlooked. ${meiLovers(g) ? 'She saw Mei Lin\'s hand find your sleeve on the step. She saw the hay still in Mei Lin\'s hair from two nights ago.' : 'She saw how the two of you keep not looking at each other.'}
 
-"So," she says, licking gruel off her thumb. "You two are a pair. Good. I don't mind. In the forest, when there's a good kill, everybody eats." She looks Mei Lin over with frank, friendly appreciation. "You're pretty when you're angry. You're angry a lot, so that's lucky."
+"So," she says, and licks gruel from her thumb. "You two are a pair. Good. I don't mind. In the forest, when the kill is good, everybody eats." Her eyes go over Mei Lin, frank and friendly and approving. "You're pretty when you're angry. You're angry a lot. Lucky."
 
-The silence that follows rings.
+The quiet after that could be struck like a bell.
 
-"I," says Mei Lin, very high, "am not a *deer carcass*."
+"I," says Mei Lin, a full octave up, "am not a *deer carcass*."
 
 "No," Ya agrees. "Deer don't talk back. You'd be better."
 
-"You can't — *nobody* says — " Mei Lin rounds on you. "Say something!"
+"You can't — *nobody* says — " Mei Lin wheels on you. "Say something!"
 
-Ya's grin has slipped. She is reading Mei Lin's face, and you watch her work out, slowly, that she has given offence; and then you watch her *take* offence at the offence, hackles rising like a dog's. "What? I was being *nice*."`,
+Ya's grin has gone uncertain. She is reading Mei Lin's face, and you can watch the conclusion arrive, slowly: she has offended. Then you can watch her take offence at *that*, hackles lifting like a dog's. "What? I was being *nice*."`,
         choices: [
             { text: 'To Ya: "In Ashfall, you ask that quietly, in private, after several years."', do: (g) => { bumpRel(g, 'Ya', 1, 3); bumpRel(g, 'Mei Lin', 2, 0); trioStep(g, 1); return ['Ya gives this real thought. "Several *years*? You\'ll all be dead."']; }, to: 'fo_ashfall' },
             { text: 'To Mei Lin: "She meant it as a compliment. I think. In wolf."', do: (g) => { bumpRel(g, 'Mei Lin', 1, 1); bumpRel(g, 'Ya', 2, 2); trioStep(g, 1); return ['Mei Lin stalks indoors. Then the door opens again, and she comes out, sits down at the far end of the step, and says nothing. But she stays.']; }, to: 'fo_ashfall' },
@@ -628,20 +628,20 @@ Ya's grin has slipped. She is reading Mei Lin's face, and you watch her work out
         id: 'fo_ya_time', title: 'Ya', art: (g) => (dd(g) === 10 ? 'ya_close' : 'ya_fight'), place: `${P} — wherever Ya is`,
         enter: (g) => { markDaily(g, 'a1_ya'); return []; },
         text: (g) => (dd(g) === 9
-            ? `You find her on the threshing floor, where she has challenged three of the younger hunters at once to a wrestling match. She is winning. She is also furious, because they keep stopping to bow.
+            ? `She is on the threshing floor, having challenged three of the younger hunters to wrestle her, all three together. She is winning. She is also in a rage, since they will keep breaking off to bow.
 
-"They *bow*," she says, outraged, with one of them pinned by the neck. "In the middle. Why do they *bow*?"
+"They *bow*," she tells you, scandalised, with one of them held down by the neck. "Halfway through. Why do they *bow*?"
 
 "It's polite."
 
-"It's *slow*." She lets the boy up. He bows. She shows him her teeth and he runs. "Come here. You're not slow. Throw me."`
-            : `She is on the shrine roof, working a stone along her spear, with her legs hanging over the god's chiselled-off face.
+"It's *slow*." The boy is released. He bows. She bares her teeth at him, and he is gone. "Come here. You're not slow. Throw me."`
+            : `She is up on the shrine roof, drawing a stone down the edge of her spear, her legs dangling in front of the god's chiselled-off face.
 
-"Tomorrow we start for the tree," she says, without looking down. "You and the angry one." A pause. "She doesn't like me."
+"Tomorrow we start for the tree," she says, and does not look down. "You, and the angry one." The stone makes two more strokes. "She doesn't like me."
 
 "She doesn't know what to do with you. Nobody here does."
 
-"I know." She tries the point on her thumb. A bead of blood. "I don't like it when people don't like me. It makes me want to bite them. I'm trying not to bite her." Another pause. "For you."`),
+"I know." She tests the point against her thumb. One bead of blood. "I don't like it when people don't like me. It makes me want to bite them. I'm trying not to bite her." The stone stops. "For you."`),
         choices: [
             { text: (g) => (dd(g) === 9 ? 'Throw her.' : '"Thank you. I mean that."'), do: (g) => { bumpRel(g, 'Ya', 4, dd(g) === 9 ? 5 : 3); return likesMei(g) && likesYa(g) ? trioStep(g, 1) : []; }, time: 120, to: 'fo_ashfall' },
             { text: (g) => (dd(g) === 9 ? 'Let her throw you. Several times. It seems important to her.' : 'Climb up and sit with her for a while.'), do: (g) => { bumpRel(g, 'Ya', 3, 4); g.james.hp = Math.max(1, g.james.hp - (dd(g) === 9 ? 2 : 0)); return dd(g) === 9 ? ['Eleven times she puts you in the chaff, and is happier each time. −2 HP.', ...awardYukiFightXp(g, 'standard')] : ['You sit. She leans her shoulder into yours, hard, as one wolf leans on another.']; }, time: 120, to: 'fo_ashfall' },
@@ -667,13 +667,13 @@ Your Convergence is humming so loudly that it seems remiss of everyone else not 
     },
     fo_price: {
         id: 'fo_price', title: 'The Price', art: 'ya_close', place: `${P} — the shrine roof`,
-        text: (g) => `You find Ya ${g.flags.ya_brawl === 'won' ? 'practising the disarm that took her spear, on a sack of millet, slowly, and losing to it on purpose' : 'asleep on the shrine roof in full sun like a lizard'}. You explain. She listens with her head on one side.
+        text: (g) => `You find Ya ${g.flags.ya_brawl === 'won' ? 'practising the disarm that took her spear, on a sack of millet, slowly, and losing to it on purpose' : 'asleep on the shrine roof in full sun like a lizard'}. You lay it out for her. She hears you through with her head tilted.
 
-"I'll take you," she says. "Five days in, maybe six. There are things past the Hollow that eat hunters like rice. There's a wet wood where the dead walk. There are hills where the birds are on fire. I know all of it." She grins. "My price."
+"I'll take you," she says. "Five days in, maybe six. Past the Hollow there are things that eat hunters like rice. A wet wood, where the dead walk. Hills where the birds are on fire. I know all of it." The grin. "My price."
 
 "Salt? Iron?"
 
-"Salt and iron," she agrees. "And a fight every three days. A real one, no bowing." She holds up a finger. "And when we sleep in the forest, I sleep next to you, not on the other side of the fire like a guest." A second finger. "And *she* comes." She points across the lane at Mei Lin's house. "Because you'll be miserable if she doesn't, and I don't travel with miserable people. They taste of fear."`,
+"Salt and iron," she agrees. "And a fight every three days. A real one. No bowing." One finger goes up. "And in the forest I sleep next to you. Not across the fire, like a guest." A second finger. "And *she* comes." Both fingers swing to Mei Lin's house, over the lane. "You'll be miserable without her, and I don't travel with miserable people. They taste of fear."`,
         choices: [
             { text: '"Done. All of it."', do: (g) => { g.flags.ya_price = 'all'; bumpRel(g, 'Ya', 5, 4); return likesMei(g) && likesYa(g) ? trioStep(g, 1) : []; }, to: 'fo_mei_insists' },
             { text: '"Salt, iron and the fights. The sleeping arrangements, we negotiate."', check: { skill: 'GU', dc: 5 }, do: (g) => { g.flags.ya_price = 'haggled'; bumpRel(g, 'Ya', 4, 2); return ['"Negotiate," she says, trying the word out, delighted, as if you had offered her a new sort of fight.']; }, failDo: (g) => { g.flags.ya_price = 'all'; bumpRel(g, 'Ya', 2, 3); return ['"No," she says. The negotiation has now been held.']; }, to: 'fo_mei_insists' },
@@ -682,21 +682,21 @@ Your Convergence is humming so loudly that it seems remiss of everyone else not 
     fo_mei_insists: {
         id: 'fo_mei_insists', title: 'Not Optional', art: 'mei_lin', place: `${P} — Mei Lin's house`,
         enter: (g) => { g.flags.mei_party = true; g.flags.ya_party = true; return []; },
-        text: (g) => `When you tell Mei Lin, she has already packed.
+        text: (g) => `Mei Lin's basket is packed before you have told her anything.
 
-"Of course I'm coming," she says. "I was always coming. Somebody has to keep you from eating the wrong mushroom, and *her*" — a jerk of the head toward the shrine — "from eating *you*."
+"Of course I'm coming," she says. "I was coming from the start. Somebody must stop you eating the wrong mushroom, and stop *her*" — her chin jerks at the shrine — "eating *you*."
 
-Her mother is standing in the doorway and has heard every word. She does not argue. In Ashfall, you are coming to understand, nobody argues with a decision once it has been spoken aloud; they only make it as correct as it can be made.
+Her mother stands in the doorway. She has heard all of it, and she offers no argument. You are starting to grasp how Ashfall works: a decision, once said aloud, is not disputed. It is only made as correct as it can be.
 
-She goes inside. She comes back with her late husband's hunting knife, wrapped in red cloth, and holds it out to her daughter in both hands.
+She goes into the house and returns with a bundle in red cloth: her dead husband's hunting knife. She holds it out to her daughter on both palms.
 
-Mei Lin takes it in both hands. Neither of them cries. You have the strong impression that both will, later, separately, where nobody can see.${likesMei(g) && likesYa(g) ? '\n\nAs you leave, you catch Mei Lin glancing at the shrine roof, where Ya is lying in the sun, and away again, too quickly.' : ''}`,
+Mei Lin receives it on both of hers. Nobody cries. You are fairly sure that each of them will, later, alone, where the other cannot see.${likesMei(g) && likesYa(g) ? '\n\nAs you leave, you catch Mei Lin glancing at the shrine roof, where Ya is lying in the sun, and away again, too quickly.' : ''}`,
         choices: [{ text: 'One more day of walls. Then the forest.', to: 'fo_ashfall' }],
     },
 
     fo_farewell: {
         id: 'fo_farewell', title: 'The Last Supper in Ashfall', art: 'dinner', place: `${P} — Mei Lin's house`,
-        enter: (g) => { if (hour(g) < 19) advance(g, (19 - hour(g)) * 60); eat(g, 35); return ['A farewell supper: fish, millet, the last of the plum wine. +35 satiety.']; },
+        enter: (g) => { if (hour(g) < 19) advance(g, (19 - hour(g)) * 60); eat(g, 35); return ['Supper, as a send-off: fish, millet, the plum wine to its dregs. +35 satiety.']; },
         text: (g) => `Half of Ashfall comes to Mei Lin's house, a family at a time, each with a small gift and a short, formal speech. Old Hu brings a coil of rope and bows to the floor. The boy from the clinic brings a pebble he has ruled to be lucky, and hums as he hands it over: four bars of the low, strange music that plays from your arm, which the children have decided is a hymn. Old Wen brings nothing, sits in the corner with his weak tea, and leaves without a goodbye, which you are told afterwards is the highest honour in his gift: it means he expects to see you again.
 
 ${g.flags.palisade >= 2 ? 'Beyond the door the palisade stands white along the barley, two thirds done or better. The hunters swear on their ancestors that it will stand whole, and manned, when you are back.' : 'The palisade is still more chalk than stakes. The hunters swear on their ancestors to finish it.'}
@@ -708,22 +708,22 @@ Ya eats on the roof, alone, with her back to the gathering, because "people sayi
         id: 'fo_last_night', title: 'The Night Before', art: (g) => (likesMei(g) && likesYa(g) ? 'roof' : 'village_night'), place: `${P} — the herb loft`,
         text: (g) => {
             const both = likesMei(g) && likesYa(g);
-            if (both) return `You can't sleep. Nor, it appears, can anybody else. When you climb out onto the roof Mei Lin is there already, knees drawn up, watching the north. Then the thatch creaks and Ya drops down beside you both from the shrine roof, uninvited and entirely at home, like a cat coming off a wall.
+            if (both) return `Sleep won't come, and it seems you are not alone in that. When you get out onto the thatch Mei Lin is already sitting there with her knees pulled up, facing north. Then the thatch creaks, and Ya lands next to you both, down from the shrine roof, unasked and perfectly at home, a cat stepping off a wall.
 
-Nobody speaks at first. Then Ya says, to the stars: "Tomorrow we go where it's warm. All three of us. I like that. I like that it's three." A sideways look at Mei Lin. "You can sleep next to him on one side and I'll sleep on the other and nobody has to bite anybody."
+For a while no one says anything. Then Ya tells the stars: "Tomorrow we go where it's warm. All three. I like that. I like that it's three." Her eyes slide to Mei Lin. "You sleep on one side of him, I sleep on the other, and nobody has to bite anybody."
 
-Mei Lin doesn't answer. She doesn't leave, either. She sits between the two of you in the dark with her shoulder very carefully not touching Ya's; and at last, very quietly, she laughs, at the absurdity of it, at herself, at everything, and does not stop herself.`;
-            if (meiLovers(g)) return `Mei Lin comes up the ladder late, with the lamp already out, and lies down beside you in the hay without a word, and for a long time you just breathe together, listening to the north wind.
+Mei Lin gives her no answer. She doesn't go, either. She stays where she is, between the pair of you in the dark, keeping her shoulder a careful finger's width from Ya's. And in the end, very low, she laughs: at how absurd it is, at herself, at all of it. She makes no attempt to stop.`;
+            if (meiLovers(g)) return `It is late when Mei Lin comes up, her lamp out before she is off the ladder. She says nothing. She lies down in the hay at your side, and the two of you breathe, and listen to the wind come down from the north.
 
-"I'm afraid," she says at last. "Not of the forest. Of coming back and finding them all — " She doesn't finish.
+"I'm afraid," she says finally. "Not of the forest. Of coming home and finding all of them — " The sentence stops there.
 
-"Then we'll come back fast."
+"Then we come home fast."
 
-She turns toward you in the dark. ${byForm(g, "What happens after that is nobody's business, not even Yuki's, who goes and sleeps on the stove in protest.", "What happens after that is nobody's business, not even Yuki's, who goes down and sleeps in front of the stove in protest, across the whole floor.", "What happens after that is nobody's business, not even Yuki's, who goes and sleeps on the bench by the stove in protest.")}`;
-            if (rel(g, 'Ya').a >= KISS_YA) return `There's a scrape at the loft window, and Ya climbs in without asking, as she does everything. She sits on the edge of the hay, watching you with eyes that catch the starlight like an animal's.
+In the dark she turns to face you. ${byForm(g, "What happens after that is nobody's business, not even Yuki's, who goes and sleeps on the stove in protest.", "What happens after that is nobody's business, not even Yuki's, who goes down and sleeps in front of the stove in protest, across the whole floor.", "What happens after that is nobody's business, not even Yuki's, who goes and sleeps on the bench by the stove in protest.")}`;
+            if (rel(g, 'Ya').a >= KISS_YA) return `Something scrapes at the loft window, and Ya comes in over the sill. She has not asked; she never asks. She settles on the edge of the hay and watches you, and what starlight there is collects in her eyes, as in a fox's.
 
-"Tomorrow I take you home," she says. "My home. The warm place." Then, with no change of tone at all: "Do you want me to stay? I'll stay if you want. I'll go if you don't. I won't be offended." A pause. "I'll be a little offended."`;
-            return `The loft is quiet. The north wind moves in the thatch. ${byForm(g, "Yuki curls into the hollow of your neck,", "Yuki lies down along the length of you and fits her chin into the hollow of your neck, which is all of her that fits,", "Yuki lies down at your back, her tail across your shins,")} and through the bond, very faintly, you can feel what she feels when she faces north: not fear. Something more like homesickness, for a home neither of you has ever seen.`;
+"Tomorrow I take you home," she says. "My home. The warm place." And then, in exactly the same voice: "Do you want me to stay? I'll stay if you want. I'll go if you don't. I won't be offended." She considers. "I'll be a little offended."`;
+            return `Nothing stirs in the loft but the north wind, fingering the thatch. ${byForm(g, "Yuki curls into the hollow of your neck,", "Yuki lies down along the length of you and fits her chin into the hollow of your neck, which is all of her that fits,", "Yuki lies down at your back, her tail across your shins,")} and the bond carries you, faintly, what is in her whenever she faces north. It isn't fear. It is nearer to homesickness, for a home that you and she have never seen.`;
         },
         choices: [
             { text: 'Stay there, the three of you, until the sky goes grey.', show: (g) => likesMei(g) && likesYa(g), do: (g) => { bumpRel(g, 'Mei Lin', 3, 3); bumpRel(g, 'Ya', 3, 3); return trioStep(g, 1); }, to: 'fo_depart' },
@@ -753,17 +753,17 @@ She pulls the shutter closed. What happens after that is nobody's business. Not 
     },
     fo_ya_night: {
         id: 'fo_ya_night', title: 'Wild', art: 'ya_close', place: `${P} — the herb loft`,
-        text: (g) => `${g.flags.fo_pick === 'ya' ? `${FO_YA_STAY}\n\n` : ''}She doesn't stay politely.
+        text: (g) => `${g.flags.fo_pick === 'ya' ? `${FO_YA_STAY}\n\n` : ''}Ya does not stay politely.
 
-She kisses the way she fights: all at once, laughing, with teeth, and absolutely no idea of where civilised people draw lines. At some point she bites your shoulder, hard, and then licks it like an apology, and says against your neck, "*Still* nothing. How do you taste like *nothing*," as if it were an accusation and a compliment at once.
+Her kissing is her fighting: everything at once, with laughter and with teeth, and no notion at all of where civilised people keep their lines. Somewhere in it she bites your shoulder, hard, licks the place by way of apology, and says into your neck, "*Still* nothing. How do you taste like *nothing*," making it a charge and a compliment in one breath.
 
-The hay is everywhere. The loft ladder, at one point, is somewhere it should not be. Below, Mei Lin's mother coughs, once, pointedly, through the floorboards, and Ya laughs so hard she has to put her face in your chest.
+Hay gets into everything. The loft ladder spends part of the night somewhere a ladder has no business being. Under the floorboards Mei Lin's mother coughs: once, and with intent. Ya laughs until she has to bury her face in your chest.
 
-What comes after that is no one's concern. ${byForm(g, "Not even Yuki's, who goes out by the window in protest and is not seen again before breakfast.", "Not even Yuki's, who goes down the hatch in protest without troubling the ladder. The house shakes once, and the cough below is not repeated.", "Not even Yuki's. \"I shall be at the stove,\" she informs the rafters, aloud, and takes the spare blanket down the ladder with her.")}
+The rest is nobody's concern. ${byForm(g, "Not even Yuki's, who goes out by the window in protest and is not seen again before breakfast.", "Not even Yuki's, who goes down the hatch in protest without troubling the ladder. The house shakes once, and the cough below is not repeated.", "Not even Yuki's. \"I shall be at the stove,\" she informs the rafters, aloud, and takes the spare blanket down the ladder with her.")}
 
 *
 
-When you wake, she's gone — back on the shrine roof, sharpening her spear, as if nothing happened. But when you come down the ladder she looks over at you and grins, and it's a different grin. Softer at the edges. Hers.`,
+She is gone when you wake: back up on the shrine roof, working at her spear, as though the night had been any other. But as you come down the ladder she turns her head and grins at you, and the grin is new. Softer at its edges. Hers.`,
         choices: [{ text: 'Dawn.', to: 'fo_depart' }],
     },
     fo_depart: {
@@ -771,11 +771,11 @@ When you wake, she's gone — back on the shrine roof, sharpening her spear, as 
         enter: (g) => { g.flags.mei_party = true; g.flags.ya_party = true; delete g.flags.fo_pick; return []; }, // RL1 (L4): the bridge's flag cleared
         text: (g) => `Day eleven. Ten days to the Elder.
 
-The village lines the north path in silence: every family, every child, the hunters in their two straight lines. Nobody calls out. Nobody waves. As you pass, they bow, one row after another, like barley in wind.
+All of Ashfall stands along the north path and makes no sound: each family, each child, the hunters in their two ruled lines. No one calls out. No one lifts a hand. They bow as you go by, row upon row, like barley when the wind crosses it.
 
-Mei Lin walks at your left with her father's knife at her hip and her basket on her back, not looking at her mother, because if she looks she won't go. Ya walks at your right, ahead, then behind, then off the path entirely, impatient as a dog on a lead. ${byForm(g, 'Yuki rides your shoulder facing north, tail curled round your neck.', 'Yuki paces at your knee facing north, tail laid against your leg.', 'Yuki walks half a step ahead of you facing north, tail curled round your sleeve.')}
+On your left walks Mei Lin, her father's knife at her hip, the basket on her back, her eyes kept off her mother; one look, and she would not leave. On your right walks Ya, or ahead of you, or behind, or nowhere near the path, with all the patience of a dog on a rope. ${byForm(g, 'Yuki rides your shoulder facing north, tail curled round your neck.', 'Yuki paces at your knee facing north, tail laid against your leg.', 'Yuki walks half a step ahead of you facing north, tail curled round your sleeve.')}
 
-At the edge of the barley, where the white stakes end and the black trees begin, your Convergence stops humming and starts, unmistakably, to *sing*.
+Where the barley stops and the black trees start, your Convergence leaves off humming and begins, beyond any mistaking, to *sing*.
 
 ${likesMei(g) && likesYa(g) ? '"Three of us," Ya says, to nobody, very pleased. Mei Lin doesn\'t answer. But she doesn\'t correct her, either.' : '"Into the warm," says Ya, and steps under the trees.'}`,
         choices: [{ text: 'Into the Blackroot.', do: (g) => { g.minutes = 9 * 1440 + 23 * 60; sleepUntil(g, 6); g.flags.mei_party = true; g.flags.ya_party = true; bumpRel(g, 'Mother', 2, 0); return []; }, to: 'bl_start' }], // v0.11.139 (owner pick MW1, MB): Mother +2

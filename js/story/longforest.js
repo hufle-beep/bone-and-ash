@@ -628,7 +628,7 @@ Then, as you watch, she shrinks back down to eleven pounds in a single breath, c
         enter: (g) => { g.flags.yuki_human_seen = true; return []; },
         text: `You feel it start through the bond before you see it: a long, slow unfolding, like a hand opening.
 
-Yuki walks out of the shade where she's been lying, and with every step she is less of a cat. Not smaller, not larger — *different*. Taller. Upright. A slender woman steps out of the light where a cat stepped into it: long white hair falling past her waist, white cat's ears among it that turn toward you, a long white tail behind her, gold eyes with slit pupils that are, unmistakably, hers. She is wearing a simple black dress that the bond, apparently, considered appropriate. She's barefoot. She looks at her own hands for a long moment, turning them over.
+Yuki walks out of the shade where she's been lying, and with every step she is less of a cat. Not smaller, not larger — *different*. Taller. Upright. A slender woman steps out of the light where a cat stepped into it: long white hair falling past her waist, white cat's ears among it that turn toward you, a long white tail behind her, gold eyes with slit pupils that are, unmistakably, hers. She is wearing a long black high-collared qipao with red piping that the bond, apparently, considered appropriate. She's barefoot. She looks at her own hands for a long moment, turning them over.
 
 Then she looks at you, and opens her mouth, and for the first time in your life you hear your root-kin's voice. It is low, and dry, and exactly what you'd expect.
 
@@ -660,7 +660,7 @@ She can still do the cat thing. She shows you: one breath, and there's a small w
     },
     yuki_form: {
         id: 'yuki_form', title: 'Yuki', art: 'yuki_form', place: (g) => g.location || P,
-        text: (g) => `${{ cat: 'Yuki is in her small form: eleven pounds of white cat, currently draped over the warmest available part of you.', tiger: 'Yuki is in her great form: a white root-kin the size of a Bengal tiger, lying in the shade with her chin on her paws, taking up more room than seems strictly necessary.', human: 'Yuki is in her human form: long white hair, ears and tail, a black dress, sitting on a root with her knees drawn up, watching you with gold eyes.' }[yukiForm(g)]}
+        text: (g) => `${{ cat: 'Yuki is in her small form: eleven pounds of white cat, currently draped over the warmest available part of you.', tiger: 'Yuki is in her great form: a white root-kin the size of a Bengal tiger, lying in the shade with her chin on her paws, taking up more room than seems strictly necessary.', human: 'Yuki is in her human form: long white hair, ears and tail, the black qipao, sitting on a root with her knees drawn up, watching you with gold eyes.' }[yukiForm(g)]}
 
 Through the bond, a question that isn't quite a question: *which?*`,
         choices: [

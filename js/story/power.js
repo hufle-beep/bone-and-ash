@@ -9,7 +9,9 @@
  *   (v0.11.40, E1: in Incremental Mode ep includes the fight's no-dice raise, noDiceUp: the fight as it will be fought;
  *    v0.11.100, owner pick SB1, E: and the no-dice shift, −NO_DICE_DC_SHIFT, that every combat check takes off the DC)
  *   gap = jp − ep  →  1 "beaten" (gap < 1)   2 "outclassed" (1 ≤ gap < 4)   3 "roflstomp" (gap ≥ 4)
- *   Degree 1 shows each fight's original texts. Degrees 2 and 3 use STOMP texts when a fight has them.
+ *   A fight with STOMP texts opens with its posture at every degree (its degree-1 branch at degree 1); its own `intro` shows
+ *   only for a fight without a posture (v0.11.174, RV1 L10: the comment said degree 1 showed the original texts; the code never did).
+ *   Degrees 2 and 3 also use the STOMP win texts.
  *   Degree 3 also offers "End it in one move." (skips the combat screen).
  *
  * LONG FOREST SCALING (g.flags.longforest): enemies grow with James's actual checks, but only up to a ceiling

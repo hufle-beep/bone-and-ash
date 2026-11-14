@@ -9,7 +9,7 @@ import { set, day, hour, daily, markDaily, forestScale, grow, eatBest, pantry, f
 
 /* v0.11.136 (owner pick NC1, NT1's push 2): replies by day (js/core/lines.js dayReply): the first text is the old reply, the rest Fable's, one for each later day of a Coil. */
 const DR_MAP = dayReply("night_event:0", [
-    "Mapped: the lights flow toward the dead tree, like blood toward a heart that stopped.",
+    "Mapped: every light is bound for the dead tree, like blood still running to a heart that has quit.",
     "Mapped again: the same line, straight to the dead tree, as if the road had been worn there before the forest was.",
 ]);
 const DR_LEANTO = dayReply("night_event:2", [
@@ -101,25 +101,25 @@ ${byForm(g, 'Yuki is awake on your chest, ears flat, not hissing.', 'Yuki is awa
 The lights are back between the trunks: pale, low, unhurried, strung out in their loose line and all bound the same way, toward the heart of the forest and the dead tree. Tonight you count them, because counting is what you do when you don't know what else to do. You count twice and get two totals, and you are not a man who miscounts.
 
 ${byForm(g, 'Yuki is sitting up on your chest, ears flat, silent.', 'Yuki is sitting up beside you, ears flat, silent.', 'Yuki is sitting up beside you, ears flat, saying nothing.')} She does not look at you. What comes through the bond is the same as before, only quieter, the way grief gets quieter without getting any smaller.`], `night_event:lights`),
-            rain: byDay(g, [`It rains in the night: warm rain that tastes of iron and leaves a grey film on everything. The fire hisses and sulks.
+            rain: byDay(g, [`Rain comes in the night, warm, with iron in the taste of it, and whatever it touches dries under a grey film. The fire spits and sulks.
 
-Yuki makes it clear, ${byForm(g, "through the bond and through her claws,", "through the bond and by shaking herself dry all over you,", "aloud and at some length, from under your lab coat,")} that she holds you personally responsible for the weather.`, `Rain again, warm and tasting of iron. By now you know the order of events: first the fire sulks, then the grey film creeps over everything you own, then the complaints begin.
+Yuki lets you know, ${byForm(g, "through the bond and through her claws,", "through the bond and by shaking herself dry all over you,", "aloud and at some length, from under your lab coat,")} that the weather is your doing, and that she had expected better of you.`, `Rain again, warm and tasting of iron. By now you know the order of events: first the fire sulks, then the grey film creeps over everything you own, then the complaints begin.
 
 Yuki ${byForm(g, "delivers them through the bond, with her claws for punctuation,", "delivers them through the bond, from as far under your lab coat as she fits, which is her head,", "delivers them aloud, from under your lab coat, in order of importance,")} and concludes that a competent human would have arranged a roof.`], `night_event:rain`),
-            crows: byDay(g, [`A sound like wet cloth tearing wakes you: wings. Three rot-crows, each the size of a cat, have landed on the fallen trunk above your head. Their feathers are moulting in clumps, their eyes are milky, and they smell exactly like you'd expect a bird named *rot-crow* to smell.
+            crows: byDay(g, [`Wings wake you, with a noise like wet cloth being torn in half. Three rot-crows have come down on the fallen trunk over your head, cat-sized, every one. They shed feathers by the clump, their eyes have clouded to milk, and the smell answers any question you had about the name *rot-crow*.
 
-They are staring at your food. Then, thoughtfully, at your eyes.`, `Wings again, that wet tearing sound, and the smell arrives a moment before the birds do. Three rot-crows settle along the fallen trunk, shuffling for places like magistrates taking a bench. One of them is missing most of its tail and does not seem to feel the lack.
+Your food has their whole attention. Then, after some thought, your eyes do.`, `Wings again, that wet tearing sound, and the smell arrives a moment before the birds do. Three rot-crows settle along the fallen trunk, shuffling for places like magistrates taking a bench. One of them is missing most of its tail and does not seem to feel the lack.
 
 They look at your food. They look at you. They have the air of creditors come about a second payment, and willing to take it in eyes.`], `night_event:crows`),
-            rats: byDay(g, [`Something splashes in the stream, then again. Then the reeds part, and two mire-rats the size of dogs climb onto the bank, slick and black, tails like whips.
+            rats: byDay(g, [`A splash in the stream. Another, nearer. The reeds open, and two mire-rats heave out onto the bank, each as big as a dog, black and oiled with water, dragging tails like whips.
 
-${byForm(g, "They've smelled the cat. They seem to think she's dinner.", "They've smelled the cat. They seem to think she's dinner, which means they haven't seen her yet.", "They've smelled a cat and found a woman. They seem to think she's dinner either way.")} Yuki seems to think that's the funniest thing she's heard all week.`, `A splash, a pause, a second splash. You know the sound now. The reeds bend, and two mire-rats haul themselves onto the bank, black and streaming, big as dogs, and stand there working their noses at the dark.
+${byForm(g, "They've smelled the cat. They seem to think she's dinner.", "They've smelled the cat. They seem to think she's dinner, which means they haven't seen her yet.", "They've smelled a cat and found a woman. They seem to think she's dinner either way.")} Yuki finds this the best joke anyone has told her all week.`, `A splash, a pause, a second splash. You know the sound now. The reeds bend, and two mire-rats haul themselves onto the bank, black and streaming, big as dogs, and stand there working their noses at the dark.
 
-${byForm(g, "They have smelled the cat again. Hope, in a rat, is a terrible thing.", "They have smelled the cat again. They follow the smell up, and further up, and stop.", "They have smelled a cat again, and found a woman in a black dress looking back at them. It gives them a moment's thought, and no more.")} Yuki yawns, slowly, so that they can see all of it.`], `night_event:rats`),
+${byForm(g, "They have smelled the cat again. Hope, in a rat, is a terrible thing.", "They have smelled the cat again. They follow the smell up, and further up, and stop.", "They have smelled a cat again, and found a woman with white ears and a tail looking back at them. It gives them a moment's thought, and no more.")} Yuki yawns, slowly, so that they can see all of it.`], `night_event:rats`),
             lizard: `You wake to three observations, in order. One: the ground under you is warm. Two: claws are scraping on rock, slowly, with weight behind them. Three: at the edge of the firelight there is an eye, gold and slit and as wide as your palm, and it has been making observations for longer than you have.
 
 It belongs to a thornback lizard as long as a canoe, with a ridge of hollow spines down its back. The warm ground is its nest. You have pitched camp on its eggs.`,
-            gift: byDay(g, [`You wake to a weight on your chest and a smell of fresh blood.
+            gift: byDay(g, [`Two things wake you: a weight on your chest, and fresh blood, near enough to smell.
 
 ${byForm(g, "Yuki is sitting on you, very upright, very pleased. On your sternum, laid out with ceremony, is a mire fowl — a fat, ugly, long-necked bird nearly as big as she is. She must have dragged it a hundred metres.\n\nThrough the bond: *you hunt like a tree. I am fixing it.*", "The weight is one of Yuki's paws. The rest of her sits beside you, very upright, very pleased. On your sternum, laid out with ceremony, is a mire fowl — a fat, ugly, long-necked bird, about one mouthful to her. She has carried it a hundred metres without eating it, and would like that noted.\n\nThrough the bond: *you hunt like a tree. I am fixing it.*", "Yuki is kneeling beside you, very upright, very pleased. On your sternum, laid out with ceremony, is a mire fowl — a fat, ugly, long-necked bird with its neck neatly wrung. There are feathers in her hair and not a mark on her dress.\n\n\"You hunt like a tree,\" she says. \"I am fixing it.\"")}`, `A weight on your chest and the smell of blood, again.
 
@@ -320,7 +320,7 @@ Under the water something moves. Then several more somethings.`,
     mire_lost: {
         id: 'mire_lost', title: 'The Mire', art: 'mire', place: `${P} — the Mire`,
         enter: (g) => { g.flags.mire_fight = true; return []; },
-        text: (g) => `${canFly(g) ? "You leave straight up, with a bitten calf, a boot full of black water and the strong impression that the mire won that round on points. The boot drips on it from ten metres. As replies go, it isn't one." : "You retreat with a bitten calf, a boot full of black water and the strong impression that the mire won that round on points."}${byForm(g, '', " Yuki rises beside you, black to the shoulder, having learnt that the mire holds four hundred pounds a great deal better than it holds eleven, and lets go of them a great deal more slowly. *We do not speak of this,* says the bond.", '')}`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line; v0.11.131 (XB2, FY; Fable's MAINs): by flight
+        text: (g) => `${canFly(g) ? "You leave straight up, with a bitten calf, a boot full of black water and the strong impression that the mire won that round on points. The boot drips on it from ten metres. As replies go, it isn't one." : "You retreat with a bitten calf, a boot full of black water and the strong impression that the mire won that round on points."}${byForm(g, '', " Yuki rises beside you, black to the shoulder, having learnt that the mire holds a tiger's weight a great deal better than it holds a cat's, and lets go of it a great deal more slowly. *We do not speak of this,* says the bond.", '')}`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line; v0.11.131 (XB2, FY; Fable's MAINs): by flight
         choices: [{ text: 'Limp back to the stream.', time: 60, to: 'wilds' }],
     },
     hollow: {

@@ -11,7 +11,7 @@ const meiOn = (g) => !!g.flags.mei_party;
 const luHere = (g) => g.flags.ending !== 'fought' && !g.flags.a1_militia;
 /** Yuki, as she currently is, in a few words. */
 const yu = (g) => ({ cat: 'Yuki, on your shoulder,', tiger: 'Yuki, the size of a tiger and twice as bored,', human: 'Yuki, in her human form, arms folded,' }[yukiForm(g)]);
-const yuShort = (g) => ({ cat: 'Yuki', tiger: 'Yuki, all four hundred pounds of her,', human: 'Yuki' }[yukiForm(g)]);
+const yuShort = (g) => ({ cat: 'Yuki', tiger: 'Yuki, large, white and in no doubt,', human: 'Yuki' }[yukiForm(g)]);
 
 registerStomp({
     /* ============================================================ PART 1 — FALLOUT ======================================= */
@@ -28,7 +28,7 @@ He looks at the sliver. At you. At the place in you where his senses insist ther
 
 "Noted," you say. "And the ledger."
 
-It is meticulous. Shen Qiu, by the north road, at noon, four disciples with him. A note on Mei Lin, *the herb-girl who laughs*. A note on Ya, which is a drawing of a wolf's skull and a question mark. Yuki is in it too, and lets her entry stand.
+It is meticulous. Shen Qiu, by the north road, in the morning, twelve disciples with him. A note on Mei Lin, *the herb-girl who laughs*. A note on Ya, which is a drawing of a wolf's skull and a question mark. Yuki is in it too, and lets her entry stand.
 
 You send him home without the sword. He bows before he runs. The Sect trains them thoroughly.`,
             3: () => `You do not move. From where he stands, that is the difficulty: you do not move, and then his sword is lying in the pine needles in three pieces, his belt has been cut so that his trousers are a matter of ongoing negotiation, and a cuff of white bone has closed round both his wrists as lightly as a jeweller's clasp.
@@ -39,7 +39,7 @@ He falls over. Into the rice cakes.
 
 "Your hands are fine," you say. "Your dignity I can't help with. Ledger."
 
-He holds it up over his head in both bound hands, and after it the hilt of the sword, the correct way round, the form having nothing to say about blades in three pieces. The ledger is meticulous. The Elder: north road, noon, four disciples. A note on Mei Lin, *the herb-girl who laughs*. For Ya, a wolf's skull and a question mark. Yuki has a page, which she inspects and permits.
+He holds it up over his head in both bound hands, and after it the hilt of the sword, the correct way round, the form having nothing to say about blades in three pieces. The ledger is meticulous. The Elder: north road, the morning, twelve disciples. A note on Mei Lin, *the herb-girl who laughs*. For Ya, a wolf's skull and a question mark. Yuki has a page, which she inspects and permits.
 
 You take the cuff off and send him home without the hilt, one hand holding up his trousers. He bows all the same. At the foot of the ridge he turns and shrieks that the Crimson Lotus will grind your bones to paste, and then trips.`,
         },
@@ -380,125 +380,137 @@ You keep two pieces of the frame. They are still warm.`,
 
     /* ============================================================ PART 4 — RETURN ======================================= */
     rt_wolves: {
-        posture: (g, d) => `Four ash-wolves come out of the birches in a line, the way water comes through a broken dam. Ya laughs out loud and drops into a crouch. ${meiOn(g) ? 'Mei Lin draws her knife and says something very rude under her breath, which is new.' : ''}
+        posture: (g, d) => `Grey comes down through the birches: three ash-wolves, heads low, fanning out to take the path at both ends. Ya sinks into a crouch and laughs aloud. ${meiOn(g) ? 'Mei Lin, knife out, says a word under her breath that she did not learn at home.' : ''}
 
-${pick(d, 'Four is a lot of wolf.', 'Four wolves. You\'ve been inside a dead god this week. You\'re fine.', 'You count four wolves and feel a little sorry for the birches.')}`,
+${pick(d, 'Three wolves, and you have two hands. You do the sum again.', 'Three wolves. After the week you have had, three wolves is a rest.', 'Three wolves. You hope, for their sake, that they are quick learners.')}`,
         win: {
-            2: () => `It's quick. Ya gets one, Mei Lin — astonishingly — gets one, and you get the other two before they've finished deciding which of you to eat. When it's done, Ya is standing on the biggest wolf with her spear through its throat, howling at the sky like a lunatic, and Mei Lin is wiping her knife on the grass with an expression of grave, scandalised satisfaction.
+            2: () => `The wolves had a plan. It lasted about as long as saying so. You put one down before it has settled which of you to eat; Ya takes the second on her spear; and the third, to the surprise of everyone and of Mei Lin most, runs straight onto Mei Lin's knife.
 
-"You," Mei Lin says to Ya, "are an animal."
+When the noise stops, Ya is up on the biggest carcass with her spear planted in its throat, howling her win at the clouds. Mei Lin wipes her blade on the grass, grave, appalled, and visibly pleased with herself.
 
-"Yes," Ya agrees, delighted. "You fight like one too. It was very attractive." She jumps down. "Both of you. Very attractive. I'm going to think about it all day."
+"You," she informs Ya, "are an animal."
 
-Mei Lin walks off very fast. You decide not to think about anything at all.`,
-            3: (g) => `${yuShort(g)} steps out in front of you and simply *looks* at the wolves, and the wolves look at her, and then they look at you behind her, and the lead wolf lies down in the road and rolls over and shows its belly, and the other three, after a short and embarrassing internal debate, do the same.
+"Yes." Ya is delighted. "So are you, with a knife. Very attractive." She jumps down. "Both of you. Very attractive. I will think about it all day."
 
-Ya stares. "No," she says. "No. *Get up.* I want to *fight* you." The wolves do not get up.
+Mei Lin leaves at a brisk walk. You elect to have no thoughts whatever.`,
+            3: (g) => `${yuShort(g)} is in the path ahead of you before the last wolf has finished arriving. She does nothing. She regards them. They regard her, and then what is standing behind her, which is you; and the grey-muzzled leader thinks it over, lies down among the fallen leaves and offers the sky its belly. The other two hold a brief and humiliating conference and follow suit.
 
-In the end she fights one anyway, purely to restore the dignity of the road, and wins, and stands on it howling at the sky like a lunatic, and Mei Lin wipes her own clean knife on the grass with an expression of grave, scandalised satisfaction.
+Ya stares. "No. No. *Get up.* I came to *fight* you." Nobody gets up.
 
-"You," Mei Lin says to Ya, "are an animal."
+She fights one regardless, to give the ridge its dignity back, and has to insult it onto its feet first. She wins, climbs onto it, and howls her win at the clouds. Mei Lin wipes a perfectly clean knife on the grass, grave, appalled, and enjoying herself.
 
-"Yes," Ya agrees, delighted. "You're very attractive when you're scandalised. Both of you are. I'm going to think about it all day."
+"You," she informs Ya, "are an animal."
 
-Mei Lin walks off very fast. The other three wolves follow her a little way, hopefully, like dogs.`,
+"Yes," says Ya, delighted. "You are very attractive when you are appalled. Both of you. I will think about it all day."
+
+Mei Lin leaves at a brisk walk. Two wolves trail after her a little way, hopeful as dogs at a kitchen door.`,
         },
-        one: () => 'Yuki looks at the wolves. The wolves lie down and show their bellies. Ya is furious.',
+        one: () => 'Yuki looks at the wolves. The wolves look past her at you, and lie down. Ya takes it personally.',
     },
     rt_serpent: {
-        posture: (g, d) => `The black water at the ford folds upward into a neck as thick as a man, and the neck has a face, and the face has opinions about you.
+        posture: (g, d) => `Brown water sheets off a head as long as a coffin, and then off a good many yards of neck. On the front of it is the face Ya promised. It studies you as a cook studies a fish.
 
-${pick(d, 'You are standing in a river. It is a river creature. This is not ideal.', 'You are standing in a river, which matters a lot less than it used to.', 'You are standing in a river and you\'d like to get across it before lunch.')}`,
+${pick(d, 'You are knee-deep in its house, and it knows where every stone is.', 'You are knee-deep in its river. Three weeks ago that would have worried you.', 'You are knee-deep in its river, and mostly you notice your boots are wet.')}`,
         win: {
-            2: () => `The serpent sinks back into the brown water with your blade in its eye, and the river goes flat and quiet as if nothing has ever happened in it, ever. Ya wades out to her waist, fishes around, and comes back with a beast core the size of a plum, which she drops into your hand like a cat leaving a mouse on a doorstep.
+            2: () => `It strikes twice and misses twice, and on the third try it meets your blade coming the other way. The serpent goes down into the brown water with the blade still standing in its eye, and the river closes over both and lies flat, innocent as a pond.
 
-"For you," she says. "Eat it."
+Ya wades out to her waist, ducks under, and surfaces holding a murky beast core, plum-sized. She sets it in your palm as a cat sets a mouse on a doorstep.
 
-"I don't eat cores."
-
-"I know. I like watching your face when I say it."`,
-            3: () => `You lay your palm on the surface of the river and grow a bridge — a long white arch of bone, ford to bank, with the serpent's head neatly caught underneath the first span like a cork in a bottle. It struggles. The bridge disagrees. It stops struggling.
-
-You walk across. Everyone walks across. Yuki walks across with great ceremony and stops in the middle to look down at it.
-
-Ya, last over, leans down, says something to the serpent you choose not to translate, and comes up with a beast core the size of a plum that it apparently coughed up in its distress. She drops it into your hand like a cat leaving a mouse on a doorstep. "For you. Eat it."
+"For you. Eat it."
 
 "I don't eat cores."
 
-"I know. I like watching your face when I say it. Also you built a *bridge on a snake*."`,
+"I know. I like your face when I say it."`,
+            3: () => `You lay a hand on the river and sing. White bone climbs out of the water in one long arch, ford to bank, and its first pier comes down across the serpent's neck and holds it to the riverbed like a thumb on a worm. It thrashes. The bridge has no opinion. It stops thrashing.
+
+You walk over. Everybody walks over. Mei Lin crosses with her eyes lowered, as in a temple; Yuki stops at the middle of the span to look down at what is under it, at her leisure.
+
+Ya comes last. She crouches at the edge, tells the serpent a thing you decline to translate, and straightens up holding a murky beast core, plum-sized, which it has coughed up in its distress. She sets it in your palm as a cat sets a mouse on a doorstep. "For you. Eat it."
+
+"I don't eat cores."
+
+"I know. I like your face when I say it. Also you built a *bridge* on a *snake*."`,
         },
-        one: () => 'You grow a bridge across the ford. The serpent is under the first span. It stays there.',
+        one: () => 'You sing a bridge across the ford and set its first pier on the serpent. The serpent reconsiders its day.',
     },
     rt_brawl: {
-        posture: (g, d) => `Hunter Bao rolls his shoulders. His cousins rise from the bench behind him. "You have no root, outlander, and no Qi," Bao says gravely. "You have a woman of the wilds and a witch's cat and a great deal of luck. We will see what is under the luck. With respect."
+        posture: (g, d) => `Hunter Bao sets his feet a careful shoulder-width apart. One cousin comes off the bench to stand at his elbow; the other has the jacket, and holds it like an office. "Outlander," he says gravely, "the Sect's people looked for Qi in you and found none. You have a wild woman, a white shadow, and more luck than is decent. We shall learn what stands under the luck. With respect."
 
-Ya, delighted, cracks her knuckles one at a time.
+Ya cracks her knuckles, one hand and then the other, glowing.
 
-${pick(d, 'Fists only. You remind yourself of that twice.', 'Fists only. Your fists are fine. Their fists are going to have a bad evening.', 'Fists only. You will have to be so, so careful.')}`,
+${pick(d, 'Fists only. You go over the rule twice, in case it has changed.', 'Fists only. You resolve to use about a third of each fist.', 'Fists only. You will have to be so very gentle.')}`,
         win: {
-            2: () => `Bao sits in the dust with a split lip and great dignity. He never touched you; he isn't sure how. After a while he gets up, puts his jacket back on, and bows to Ya — a proper, formal hunter's bow, the one they give to a boar that died well. Then, after visible thought, a deeper one to you.
+            2: () => `Bao sits in the dust with a split lip, his dignity whole, and a puzzle: he swung at you nine times and cannot say where any of them went. His cousin is studying the sky from flat on his back. The other one holds the jacket a little higher, in case it is next.
 
-Ya has no idea what to do with this. She stares at him. Then she bows back, badly, like someone who has only seen it done.
+In his own time Bao rises, shrugs his jacket back on, and gives Ya the full hunter's bow, the one kept for a boar that died well. Then he thinks, visibly, and gives you a deeper one.
 
-"Tomorrow," Bao says gravely, "stand on my left. I am slow on the left."
+Ya has no notion what a person does with a bow. She stares. Then she returns it, badly, from memory of other people's.
 
-"Everyone's slow on the left," Ya says. But she's grinning.`,
-            3: () => `It takes four seconds. You don't hit anyone. You simply step, and step, and step, and Bao and both cousins find themselves sitting in a neat row in the dust, legs crossed, hands in their laps, with no clear memory of having sat down.
+"Tomorrow," says Bao, grave as a headstone, "stand on my left. I am slow on the left."
 
-There is a long silence in the lane.
+"Everyone's slow on the left." But Ya is grinning.`,
+            3: () => `It takes four seconds, and you hit nobody. You step, and step again, and Bao and his cousin are sitting in the dust side by side, legs crossed, hands in their laps, neither of them able to say when he sat down. Bao's lip is split; that was Ya, earlier.
 
-Bao gets up. Puts his jacket back on with great care. Kneels, formally, forehead to the dust — not to Ya: to you. "This one had no eyes," he says. "This one begs the outlander's pardon. This one's cousins also have no eyes." The cousins, mortified, kneel too.
+The lane is very quiet.
+
+Bao stands and gets back into his jacket. To Ya he gives the formal hunter's bow, the one kept for a boar that died well; Ya stares, then bows back as badly as only a watcher of bows can. Then he turns to you, kneels, and sets his forehead in the dust. "I took a boar for a piglet," he says. "I beg the outlander's pardon. My cousins also took it for a piglet." The cousins, scarlet, kneel as well, the elder holding the jacket clear of the dust.
 
 "Get up," you say. "It was a brawl. It's supposed to be fun."
 
-"It was not fun," says the smaller cousin, with deep sincerity.
+"It was not fun," says the younger cousin, from the heart.
 
-Ya is laughing so hard she has to hold onto the well. "Tomorrow," Bao says, still on his knees, to her, "stand on my left. I am slow on the left. And *he* should stand in front of everyone."
+Ya is holding on to the well for laughing. "Tomorrow," Bao tells her, still on his knees, "stand on my left. I am slow on the left. And *he* stands in front of everybody."
 
-"Everyone's slow on the left," Ya says. "But yes. Him in front."`,
+"Everyone's slow on the left," says Ya. "But yes. Him in front."`,
         },
-        one: () => 'Four seconds. Three grown hunters sitting cross-legged in the dust, wondering how.',
+        one: () => 'Four seconds. Two grown hunters sit cross-legged in the dust, trying to recall sitting down.',
     },
     elder: {
-        posture: (g, d) => `Outer Elder Shen Qiu draws no sword. He folds his hands into his sleeves and regards you with the grave, courteous patience of a man who has outlived three hundred students. "Outlander. I sense no root in you. No cultivation. No Qi at all. A mortal, who grows bones and bends a village's knees the wrong way." He inclines his head, exactly the correct depth for a superior addressing a condemned man. "The Crimson Lotus does not hate you. It merely corrects. Kneel, and I will make it quick."${luHere(g) ? ' Behind him, Lu Han says nothing, and watches you with something that is no longer quite contempt.' : ''}
+        posture: (g, d) => `Outer Elder Shen Qiu draws nothing; nothing here merits steel. A closed fan of red lacquer slides from his sleeve into his left hand; the right he leaves empty. "Three hundred years," he says, courteous as a physician, "and you are the one thing in them I cannot feel. Such a thing is a mortal, or it is an error. The Crimson Lotus corrects both, and hates neither." His head dips to the depth a superior owes a man already judged. "Kneel now, outlander, and you will reach the Sect Master's gate still able to walk."${luHere(g) ? ' At his shoulder Lu Han keeps a hand on his sword, and the look he has for you is no longer quite contempt.' : ''}
 
-He lifts one hand, palm out, and the air between you goes red and heavy as wet silk.
+He raises the empty hand, palm outward. The road between you fills with red, slow and thick, and the sweet rot of it reaches you ahead of the weight.
 
-${pick(d, 'This is the most dangerous man you have ever met.', 'He is very strong. He is also, you notice, entirely wrong about you, and that is going to be his problem.', 'He thinks you\'re a mortal. You feel, for a moment, genuinely sorry for him.')}`,
+${pick(d, 'He is the most dangerous man you have ever faced, and he has not yet begun.', 'He is very strong. He is also wrong about you, with complete confidence, and that will be the expensive part.', 'He has decided you are a mortal. You are sorry for him, and surprised to find you mean it.')}`,
         win: {
-            2: () => `He is strong, and old, and very good, and none of it is enough. Every red wave breaks on white bone; every strike finds you already elsewhere. You never draw blood. You just keep taking things away from him — his footing, his reach, his breath — until there's nothing left to take.
+            2: () => `Three hundred years have made him good, and it falls short. Each red wave breaks on white bone; each strike finds the place you just left. You take his footing, then his reach, then his breath, until the cupboard is bare.
 
-It ends with Shen Qiu on one knee in the road, a white wraithbone blade at his throat, his red jade crown in the dust.
+Shen Qiu finishes on one knee, your white wraithbone blade under his chin, the red jade crown in the dust, his beard bloody from a lip he bit through sooner than cry out.
 
-Nobody in Ashfall breathes. Three hundred years, and an Outer Elder of the Crimson Lotus is kneeling to a mycologist in a lab coat.
+Ashfall has stopped breathing. An Outer Elder of the Crimson Lotus, three hundred years old, kneels to a mycologist in a lab coat.
 
-"Kill me," Shen Qiu says calmly, though his hands are shaking, "and the Sect Master comes with every disciple he has, and burns this valley to the bedrock."
+"Kill me," he says calmly, though his fan hand shakes, "and the Sect Master comes with every disciple he has and burns this valley down to the bedrock."
 
-"I don't kill people."
+"And if I don't?"
 
-He stares at you. "Then I go home in disgrace, and the Sect Master comes anyway, a little later, a little angrier, and I am a laughing-stock for the rest of my life."
+"Then I go home in disgrace, and the Sect Master comes anyway, a little later and a little angrier, and I am a laughing-stock for what remains of my life." He weighs you. "I think you will let me live. You have that face."
 
-You let him live. His disciples carry him down the road. He does not look back.
+You do, though not whole: three needles through the meridian knots of his right arm while he watches, a fourth through the tendon of the fan hand. He will cultivate again. Not this season. "I don't kill people," you tell him. "I find it gives them time to think."
 
-Ashfall has just declared war on the Crimson Lotus. Everyone in the street knows it. Nobody says it. Old Wen lights his pipe with steady hands.`,
-            3: () => `The red wave comes. You walk through it as if it were mist. He strikes; his hand stops an inch from your chest against nothing at all, and you watch the exact moment Outer Elder Shen Qiu — three hundred years of cultivation, the terror of the valley — understands that he has been feeling for your power in the wrong *direction*, the way a man feels for the floor in the dark and finds the edge of a cliff.
+His disciples bear him off down the road, and he never looks back.
 
-His composure doesn't crack. It shatters. Audibly.
+Ashfall has declared war on the Crimson Lotus. The whole street knows; nobody says so. Old Wen lights his pipe. His hands are steady.`,
+            3: () => `The red wave arrives. You walk through it like kettle steam. He strikes, and his palm stops a finger's width short of your chest, against nothing. You watch Outer Elder Shen Qiu, terror of this valley, work it out from the evidence alone: he has been sounding the sea with a walking stick, and calling it dry.
+
+His composure does not crack. It breaks, and the whole road hears it go.
 
 "*What are you,*" he whispers.
 
-"Late for lunch," you say, and put two fingers against his sternum, and he sits down in the road. Hard. His crown goes one way. His fan goes the other. A thread of white bone binds both his wrists, gently, and both his ankles, less gently, and he finds he cannot stand up, and that he will not be able to stand up properly for about a season, and that you have decided this, precisely, to the day.
+"Late for lunch," you say, and lay two fingers on his breastbone. He sits down in the road, hard, and bites his tongue doing it: blood in his beard. The red jade crown rolls away. He tries to rise, meets a white wraithbone blade under his chin, and gets as far as one knee.
 
-Nobody in Ashfall breathes.
+Ashfall has stopped breathing. Three hundred years of cultivation kneel to a mycologist in a lab coat.
 
-"Kill me," Shen Qiu manages, "and the Sect Master—"
+"Kill me," Shen Qiu says, nearly calm, "and the Sect Master comes with every disciple he has and burns this valley down to the bedrock."
 
-"I don't kill people. I just make them wish I had." You pick up his crown and hand it back to him. He takes it with both hands. They're shaking. "Go home. Tell him."
+"And if I don't?"
 
-His disciples carry him down the road. Halfway down, he finds his voice and swears, in a high, cracking scream, that the Crimson Lotus will tear the sky down on this valley. A sparrow lands on his crown.
+"Then I go home in disgrace, and the Sect Master comes anyway, a little later and a little angrier, and I am a laughing-stock for what remains of my life." He weighs you, and takes his time over it. "I think you will let me live. You have that face."
 
-Ashfall has just declared war on the Crimson Lotus. Everyone in the street knows it. Nobody says it. Old Wen lights his pipe with steady hands, then puts it down, then laughs — once, quietly, for the first time in forty years.`,
+You do, though not whole: three needles through the meridian knots of his right arm while he watches, a fourth through the tendon of the hand that holds the fan, each measured to the day. He will cultivate again. Not this season. "I don't kill people," you tell him. "I find it gives them time to think."
+
+His disciples bear him off down the road. He never looks back, but halfway down he promises the valley, in a high cracked scream, that the Sect will pull the sky down on it. A sparrow lands on him and is not corrected.
+
+Ashfall has declared war on the Crimson Lotus. The whole street knows; nobody says so. Old Wen lights his pipe with steady hands, sets it down, and laughs: once, quietly, a sound nobody under forty here has heard him make.`,
         },
-        one: () => 'Two fingers to the Elder\'s sternum. Three hundred years of cultivation sits down in the road.',
+        one: () => 'Two fingers on the Elder\'s breastbone. Three hundred years of cultivation sit down in the road, hard.',
     },
 });

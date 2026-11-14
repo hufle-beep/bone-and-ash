@@ -286,7 +286,7 @@ export const BLACKROOT = {
         },
         text: (g) => `Ashfall sees you off at dawn as it does everything else: formally, in silence, and with more people than the job needs. At the last stake Old Wen bows to exactly the depth he would give a sect elder, and holds it. Mei Lin's mother puts a bundle of millet cakes into your hands and says, "Bring her back," and from her it is not a wish. It is a clause.
 
-Then the trees shut behind you and there are four of you. A biologist, ${byForm(g, 'a cat', 'a very large cat', 'a cat in a black dress')}, a herb-woman with a basket and a knife, and Ya: barefoot, spear across her shoulders, walking backwards ahead of you so that she can watch your faces.
+Then the trees shut behind you and there are four of you. A biologist, ${byForm(g, 'a cat', 'a very large cat', 'a cat on two legs')}, a herb-woman with a basket and a knife, and Ya: barefoot, spear across her shoulders, walking backwards ahead of you so that she can watch your faces.
 
 "Five days in," Ya says. "Six, if I end up carrying one of you. Something will try to eat us on the way. I'll say which, when I smell it." She grins at Mei Lin. "You bowed to the old man like your spine was on fire. Does it hurt, being that polite? Is there a cure?"
 
@@ -344,15 +344,15 @@ And now the pair of them turn to you.`,
     ya_fight_start: {
         id: 'ya_fight_start', title: 'A Look', art: 'ya_fight', place: PLACE.rr,
         enter: (g) => { g.flags.ya_sparred = true; return []; },
-        text: (g) => `"You looked at me," Ya says. She has stopped dead in the middle of the root, with her spear planted. "When she called me *animal*. You looked at me like the Sect looks at a beast. Like you were *writing it down*."
+        text: (g) => `"You looked at me," Ya says. She has stopped in the middle of the root and driven her spear upright into the bark. "When she said *animal*. You looked at me like the Sect looks at a beast. Like you were *writing it down*."
 
-"I'm a biologist. I write everything down. I wrote down Mei Lin's hairpin."
+"I'm a biologist. Everything gets written down. Mei Lin's hairpin got written down."
 
-"Don't be clever. I hate clever." She throws the spear to Mei Lin, who catches it out of pure reflex, and squares up to you bare-handed and barefoot, grinning with every tooth she owns. "You want to study the animal? Come and study it."
+"Don't be clever. I hate clever." The spear goes to Mei Lin, who catches it because her hands decide before she does. Ya sets herself in front of you with no weapon and no shoes, showing every tooth she has. "You want to study the animal? Come and study it."
 
-Mei Lin, holding a spear she never asked for, says, "Please don't hurt each other. I've only got so much thread."
+Mei Lin considers the spear nobody consulted her about. "Please don't hurt each other," she says. "I've only got so much thread."
 
-${byForm(g, 'Yuki climbs down off your shoulder and sits at a safe distance', 'Yuki walks off a little way and lies down at a safe distance', 'Yuki steps back and sits on a root at a safe distance')}, like someone who has paid for her seat.`,
+${byForm(g, 'Yuki climbs down off your shoulder and sits at a safe distance', 'Yuki walks off a little way and lies down at a safe distance', 'Yuki steps back and sits on a root at a safe distance')}, like somebody holding a ticket for the front row.`,
         choices: [
             { text: 'Fight her. No bone, no Qi. Fair.', check: { skill: 'GU', dc: 6, band: 'challenging' }, time: 20, to: 'ya_spar_win', fail: 'ya_spar_lose' },
             { text: 'Apologise. Properly. Without a single joke.', do: (g) => { bumpRel(g, 'Ya', 2, 0); g.flags.ya_respected = true; return []; }, check: { skill: 'GU', dc: 5 }, to: 'ya_spar_win', fail: 'ya_spar_lose' },
@@ -530,9 +530,9 @@ Mei Lin watches her go. Her face softens; she catches it softening, and puts a s
         enter: (g) => patchUp(g),
         text: (g) => `${canFly(g) ? "You lose the fight and win the crossing, which is the worst way there is to win anything: the wyrm's tail takes you out of the air like a shuttlecock, and flying needs the breath it has just knocked out of you. You fall. Ya jumps after you, and Mei Lin, swearing a streak you intend to carry to your grave, jumps after *her*.\n\nYou hit the water forty metres down, one after another, in the Drowned Wood. The wyrm does not come after you. Wyrms, it turns out, neither swim nor fly." : "You lose the fight and win the crossing, which is the worst way there is to win anything: the wyrm's tail takes you off the root and you fall, and Ya jumps after you, and Mei Lin, swearing a streak you intend to carry to your grave, jumps after *her*.\n\nYou hit the water forty metres down, one after another, in the Drowned Wood. The wyrm does not come after you. Wyrms, it turns out, don't swim."}${byForm(g, '', " Yuki lets go of the wyrm's neck when she is ready and comes down the forty metres at a walk, on nothing. She stops a hand's width above the water. Cats, it turns out, don't have to swim. This one looks at the three of you who did.", " Yuki lets go of the wyrm when it suits her and comes down the forty metres of air like a woman on a staircase. She stops a hand above the water and looks the three of you over. \"I didn't jump,\" she says. \"I'd like that noted.\"")}
 
-"*Never*," says Mei Lin, hauling herself onto a drowned trunk, "do that again."
+"*Never*," says Mei Lin, with one knee on a drowned trunk and the other still in the swamp, "do that again."
 
-"You jumped," Ya points out, delighted.
+"You jumped," says Ya, and could not be happier about it.
 
 "I know I jumped. Shut up."`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line
         choices: [{ text: 'Drag yourself onto the drowned trunks.', time: 60, to: 'dw_enter' }],
@@ -587,17 +587,17 @@ Mei Lin wades out to the chestnuts with her skirts knotted at the hip and her ja
     },
     dw_hunt: {
         id: 'dw_hunt', title: 'Something Under the Water', art: 'mire_serpent', place: PLACE.dw,
-        text: (g) => (!daily('dw_serpent')(g) ? HUNT_AGAIN.dw : `Marsh fowl roost in the drowned branches by the dozen, fat, stupid and loud. There is something else, down in the water: a long wake, travelling against no current at all.
+        text: (g) => (!daily('dw_serpent')(g) ? HUNT_AGAIN.dw : `The drowned branches are full of roosting marsh fowl, dozens of them, fat and loud and without a thought among them. Under them something else is moving: one long wake, drawn across water that has no current to draw it.
 
-"Serpent," says Ya. "Good meat. Bad temper. Like me." She grins at Mei Lin. "Like you."
+"Serpent," says Ya. "Good meat. Bad temper. Like me." Her grin turns on Mei Lin. "Like you."
 
-"I have an *excellent* temper."
+"My temper is *excellent*."
 
-"You threatened to geld me this morning."
+"This morning you said you'd geld me."
 
-"You put a frog in my bedroll."
+"There was a frog in my bedroll. You put it there."
 
-"It was a *present*."`),
+"A *present*."`),
         choices: [
             onceADay('dw_serpent', { text: 'Go for the serpent.', combat: serpentFight, to: 'dw_serpent_won' }),
             onceADay('dw_fowl', { text: 'Darts at the roosting fowl.', qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 5 }, time: 50, do: (g) => { addItem(g, 'fowl_raw', 2); return ['+2 Marsh fowl.']; }, failDo: () => ['A storm of honking and feathers, and not one bird in it for you.'], to: 'dw_hub' }),
@@ -619,27 +619,27 @@ You decide you didn't hear it. So does she.`,
         enter: (g) => patchUp(g),
         text: (g) => `${canFly(g) ? 'The serpent takes you out of the air by one ankle, at a height you would have said was out of its reach, and drags you under.' : 'The serpent drags you under.'} For a long, cold, silent while the Drowned Wood shows you exactly why the people down here never left.
 
-Then four hands have you by the coat, two of them rough and fast, two of them careful, and you are coughing black water onto a trunk while two women shout at you, one into each ear.${byForm(g, '', "\n\nYuki surfaces a moment later with a length of serpent in her mouth that is no longer attached to anything, climbs out, and shakes four hundred pounds of swamp over all three of you. *It let go,* says the bond. *Eventually. You're welcome.*", "\n\nYuki comes up last, some way off, with her hair plastered flat and a length of serpent in one fist that is attached to nothing any more. She wades out and wrings her tail over all three of you. \"It let go,\" she says. \"Eventually. You're welcome.\"")}`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line
+Then four hands have you by the coat, two of them rough and fast, two of them careful, and you are coughing black water onto a trunk while two women shout at you, one into each ear.${byForm(g, '', "\n\nYuki surfaces a moment later with a length of serpent in her mouth that is no longer attached to anything, climbs out, and shakes a tiger's worth of swamp over all three of you. *It let go,* says the bond. *Eventually. You're welcome.*", "\n\nYuki comes up last, some way off, with her hair plastered flat and a length of serpent in one fist that is attached to nothing any more. She wades out and wrings her tail over all three of you. \"It let go,\" she says. \"Eventually. You're welcome.\"")}`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line
         choices: [{ text: 'Breathe. Then go back.', time: 30, to: 'dw_hub' }],
     },
     dw_scout: {
         id: 'dw_scout', title: 'The Drowned Shrine', art: 'drowned_wood', place: PLACE.dw,
         enter: (g) => { g.flags.dw_carving = true; return []; },
-        text: (g) => `A shrine, half under water: a stone roof on four stone posts, older than anything in Ashfall. On the lintel, cut deep and packed with moss, there is a carving.
+        text: (g) => `Half sunk in the water stands a shrine: four stone posts and a stone roof, older than anything Ashfall has to show. Somebody cut a carving deep into the lintel, and the moss has filled every line of it.
 
-A tree. A great tree, its roots spreading to the edges of the stone. And in the heart of it, where the trunk thickens, a shape: long, smooth, pointed at one end, like a seed, or a boat, or both.
+It is a tree. A huge one, with roots that run out to the edges of the stone. Inside it, at the thick of the trunk, sits a shape: long and smooth and coming to a point at one end, as a seed does, or a boat, or a thing that is both.
 
-Your breath stops.
+You stop breathing.
 
-You know that shape. You grew up with it: on banners, on coins, on the flank of every seed-ship in the registry. At six you stood under one on a school trip, holding your mother's hand.
+That shape is as familiar as your own hand. It was on the banners and the coins you grew up with, and on the flank of every seed-ship in the registry. You were six when you stood under one, on a school trip, with your fingers in your mother's.
 
-"Old people's god," says Ya. "From before the Sect. They say it sang."
+"Old people's god," says Ya. "From before the Sect. It sang, they say."
 
-Mei Lin is looking at you. "You know what it is."
+Mei Lin's eyes are on you, not the stone. "You know what it is."
 
 ${g.flags.saw_lights || g.flags.lore_tree ? 'You think of the lights, flowing toward the tree. Of Old Wen\'s story: *it sang, and the singing made the forest kind.*' : ''}
 
-"Yes," you say. "I think I came here in one."`,
+"Yes," you say. "Where I come from, we grow them."`,
         choices: [
             { text: 'Copy the carving into the omnitool, every line.', check: { skill: 'GU', dc: 3 }, time: 30, do: (g) => { g.flags.ship_glyph = true; return ['Saved. The omnitool runs it against the registry and comes back with: *partial match. Ship class: Deep Grove. Lost.*']; }, to: 'dw_hub' },
             { text: 'Tell them everything. The ship. Home. All of it.', do: (g) => { bumpRel(g, 'Mei Lin', 4, 3); bumpRel(g, 'Ya', 4, 2); g.flags.told_ship = true; return ['Ya hears you out without one interruption, which you suspect is a record. Mei Lin takes your hand and holds it, hard, and says nothing whatever.']; }, time: 40, to: 'dw_hub' },
@@ -711,15 +711,15 @@ You go and look at a tree. It is a very interesting tree. Yuki comes and looks a
     hot_spring: {
         id: 'hot_spring', title: 'The Spring', art: 'hot_spring', place: `${P} — the hot spring`,
         enter: (g) => { g.flags.spring_done = true; toHour(g, 18); return []; },
-        text: `Where the Drowned Wood gives out and the hills begin, hot water rises under the cold: a pool among black rocks, steaming in the dusk, smelling of iron and stone.
+        text: `The Drowned Wood ends where the hills start, and there hot water comes up under the cold: a pool ringed with black rock, steaming into the dusk, with a smell of iron and wet stone.
 
-Ya strips without a flicker of hesitation and is in before anyone can object, whooping at the heat. Mei Lin stays on the bank with her arms crossed, thoroughly scandalised and thoroughly not leaving.
+Ya is out of her clothes and into the water before an objection can be formed, and whoops at the heat. Mei Lin remains on the bank, arms folded, scandalised to the roots of her hair and plainly going nowhere.
 
-"In Ashfall," she informs the steam, "men and women bathe on *separate days*."
+"In Ashfall," she tells the steam, "men and women bathe on *separate days*."
 
-"We're not in Ashfall," says Ya, floating on her back. "Nobody here but trees, and trees don't tell. Come in. I won't bite." A pause. "Much. Where you'd notice."
+"This isn't Ashfall," says Ya, on her back, afloat. "It's us and the trees, and trees keep their mouths shut. Get in. I won't bite." She thinks about it. "Much. Anywhere it shows."
 
-Mei Lin looks at you. You look at the steam. Yuki looks at all three of you with the tired patience of the only adult present.`,
+Mei Lin looks at you. You look at the steam. Yuki regards the lot of you with the worn patience of the only grown-up within a day's walk.`,
         choices: [
             { text: 'Turn your back and keep watch. Somebody has to be a gentleman, and it might as well be the one from space.', do: (g) => { bumpRel(g, 'Mei Lin', 4, 2); bumpRel(g, 'Ya', 0, 1); return []; }, time: 60, to: 'mei_curious' },
             { text: 'Get in. Your bruises have bruises.', do: (g) => { bumpRel(g, 'Ya', 2, 5); bumpRel(g, 'Mei Lin', 0, 3); advance(g, 60, { resting: true }); return ['The heat finds every bruise you own. You sit in it up to the shoulders and study the stars, with great care, and nothing but the stars.']; }, to: 'spring_ya' },
@@ -728,13 +728,13 @@ Mei Lin looks at you. You look at the steam. Yuki looks at all three of you with
     },
     spring_ya: {
         id: 'spring_ya', title: 'Steam', art: 'hot_spring', place: `${P} — the hot spring`,
-        text: (g) => `Ya drifts across to you through the steam until her shoulder rests against yours. She says nothing, and that is so unlike her that you look round.
+        text: (g) => `Ya comes over to you through the steam, unhurried, and stops when her shoulder is resting on yours. She doesn't speak. From Ya that is strange enough to turn your head.
 
-There is no grin on her at all. She is only looking.
+The grin is gone. All that is left is the looking.
 
-"I don't know how it's done, where you're from," she says. "Here, if you want a thing, you take it, or something else takes it first. I want you." She tips her head at the bank. "I want her too. I'm not stupid. I can see you want her." A shrug, wet shoulders in the dark. "Why is that a problem? It's only a problem in villages."
+"Where you're from, I don't know how people do this," she says. "Here you take what you want, or something else gets there before you. I want you." Her chin goes toward the bank. "Her too. I'm not stupid. You want her, I've got eyes." She shrugs, wet shoulders in the dark. "So where's the problem? Only villages have that problem."
 
-On the bank Mei Lin has gone very still. She has, beyond question, heard.
+Mei Lin, up on the bank, is not moving a muscle. There is no chance whatever that she missed it.
 
 ${both(g) ? SPRING_BOTH_WAIT : onlyYa(g) ? 'Mei Lin gets up and goes, without a word. Ya watches her out of sight. Then she turns back to you and sets her palm against your chest, below the waterline. "Just you, then," she says. "For now." She kisses you, and the steam sees to the rest.' : 'Mei Lin gets up and goes, without a word. Ya watches her out of sight, shrugs, sinks under the water, surfaces somewhere else, and talks about frogs until bedtime as if nothing had been said.'}`,
         choices: [
@@ -748,15 +748,15 @@ ${both(g) ? SPRING_BOTH_WAIT : onlyYa(g) ? 'Mei Lin gets up and goes, without a 
         id: 'mei_curious', title: 'Curious', art: 'drowned_camp', place: PLACE.dw,
         enter: (g) => trioStep(g, 2),
         text: (g) => (both(g)
-            ? `Later, while Ya is off checking snares, Mei Lin dries her hair by the fire. Then she comes and sits next to you, close, and says with no preamble at all:
+            ? `Later, with Ya away looking at her snares, Mei Lin dries her hair at the fire. When it is done she comes over, settles close against you, and starts without any run-up:
 
-"I'm going to say this once and never again, and if you laugh I'll put a needle in you." A breath. "She makes me *furious*. She has no shame and no manners and she ate a frog in front of me while its legs were still kicking. And I can't stop thinking about her mouth." Her hands are fists in her lap. "And I can't stop thinking about yours. And in Ashfall that makes me a whore or a madwoman, I don't know which, and I'm *curious*, and I *hate* being curious, and it's your fault, the pair of you."
+"You get this one time. After that I never said it, and if you laugh, you get a needle." She breathes in. "She makes me *furious*. No shame. No manners. She ate a frog in front of me and its legs were still going. And her mouth won't leave my head." Her hands have closed into fists on her knees. "Nor will yours. In Ashfall that's a whore or a madwoman, I never learnt which, and I'm *curious*, and I *hate* being curious, and I blame you for it, both of you."
 
 Yuki, ${byForm(g, 'from your lap', 'a white hill at your back', 'across the fire and apparently asleep')}, sends one very clear thought: *finally.*
 
-"I'm not asking you anything," Mei Lin says. "I'm telling you. So that you know." She stands up, abruptly. "Don't say anything."
+"That wasn't a question," Mei Lin says. "It was a report. So that you know." She gets up as if the ground had turned hot. "Don't say anything."
 
-You don't. It is the cleverest thing you have done all week.`
+You say nothing. All week you have done nothing smarter.`
             : `Later, by the fire, Mei Lin dries her hair and does not mention the spring. Your arm is playing low: a woman singing in no language spoken here. "You put her on when one of us is cold," Mei Lin says. "I've counted."
 
 "In Ashfall they'd have burned Ya for a demon," she says presently, watching Ya prowl the rim of the firelight. "She'd have laughed all through it." Envy in her voice, perhaps, or homesickness for a life with fewer rules in it. "I can't tell whether I want to be her or strangle her."
@@ -1087,7 +1087,7 @@ Ya thinks about this with her whole face. "So. Everything I do."
 "*Improper.*" She tries it twice more, pleased, like a new knife. "I'll keep that one." She turns to walk the right way round, and for a few steps she isn't loud at all. "Fifteen years I talked to the spear. It's a good spear. It never said one word back." She knocks her shoulder into your arm, hard. "You say too many. But you say them back."`;
             if (n === 4) return `Ya drops back to walk beside you, which she does when she wants something and hasn't worked out how to take it yet.
 
-"I wake up in the night now," she says, accusing. "And I count. One scholar. One herb girl. ${byForm(g, 'One cat.', 'One cat, big.', 'One cat in a dress.')} Before, I counted one. Me. Easy." She jabs the butt of the spear at the ground as she walks. "Now if the count comes out wrong I have to get up and go and look."
+"I wake up in the night now," she says, accusing. "And I count. One scholar. One herb girl. ${byForm(g, 'One cat.', 'One cat, big.', 'One cat on two legs.')} Before, I counted one. Me. Easy." She jabs the butt of the spear at the ground as she walks. "Now if the count comes out wrong I have to get up and go and look."
 
 "That's called worrying."
 

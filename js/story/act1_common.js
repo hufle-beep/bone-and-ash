@@ -17,9 +17,10 @@
  *   Outer Elder Shen Qiu of the Crimson Lotus: arrives at Ashfall on Day 21. The act's climax.
  * Tone: James and Yuki deadpan. Locals grave, formal, humourless about honour, face, hierarchy, Heaven and the Sect.
  *   Mei Lin and Ya are the exceptions. Romance is frank and sensual up to the door, then fades to black. Adults only.
- * Lore: the dead tree at the forest's heart is a Hearth Tree grown around a crashed seed-ship of James's people, about
- *   a thousand years ago. While it lived it sang and filtered the world's Qi. The Crimson Lotus's founder killed it to
- *   harvest its heart; since then the Qi has been poisoned. The ship still holds a seed-sliver that can grow again.
+ * Lore: the dead tree at the forest's heart is a Hearth Tree grown around Selene, a seed-ship of James's people (one of his
+ *   Earth's first, lost to a spacetime anomaly), about a thousand years ago. While it lived it sang and filtered the world's Qi.
+ *   The Crimson Lotus's founder killed it to harvest its heart; since then the Qi has been poisoned. Its heart-chamber still
+ *   holds a seed-sliver that can grow again. From Wren's log on, she is Selene, she, her: never "the ship" (owner 2026-11-14).
  */
 import { clockParts, bumpRel, sleepUntil, yukiForm } from '../core/game.js';
 import { forestScale, villageScale, grow, day, hour } from './common.js';
@@ -80,12 +81,12 @@ export { bumpRel, sleepUntil };
 
 /** Act 1 items (merged into ITEMS). */
 export const ACT1_ITEMS = {
-    seed_sliver: { name: 'Seed-sliver', note: 'A splinter of living heartwood from the seed-ship. It hums against your palm like a second pulse.' },
+    seed_sliver: { name: 'Seed-sliver', note: 'A splinter of living heartwood from the Old Tree\'s heart-chamber. It hums like a second pulse against whoever carries it.' },
     ship_shard: { name: 'Hull-shard', note: 'Grown wood, harder than steel, a thousand years old and still faintly warm.' },
     elk_antler: { name: 'Bone-elk antler', note: 'Your Convergence likes it. A lot.' },
     wyrm_scale: { name: 'Root-wyrm scale', note: 'Barklike, overlapping. Ya says it makes good armour. Ya says many things.' },
     ya_tooth: { name: 'Ya\'s wolf tooth', note: 'She bit it off the wolf herself. She gave it to you. You are choosing not to ask what that means.' },
-    hearth_log: { name: 'Hearth-log (memory seed)', note: 'The ship\'s record, grown into a knot of wood. It plays when you hold it.' },
+    hearth_log: { name: 'Hearth-log (memory seed)', note: 'A seed-ship\'s record, grown into a knot of wood. It plays when you hold it.' },
     smoked_meat: { name: 'Smoked meat', note: 'Ya\'s. Do not ask what animal.' },
 };
 

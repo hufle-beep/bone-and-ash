@@ -20,7 +20,7 @@ import { ACT1_ITEMS, KISS_MEI } from './act1_common.js';
 import { FALLOUT, BREAK_HUBS as B1 } from './act1_fallout.js';
 import { BLACKROOT, BREAK_HUBS as B2 } from './act1_blackroot.js';
 import { HEART, BREAK_HUBS as B3 } from './act1_heart.js';
-import { RETURN, BREAK_HUBS as B4 } from './act1_return.js';
+import { RETURN, BREAK_HUBS as B4, installSelene } from './act1_return.js';
 import { LONGFOREST, BREAK_HUBS as B0 } from './longforest.js';
 import { MERIDIANS, EXTRA_FROM } from './meridians.js';
 import { installYukiTime } from './yuki_time.js'; // v0.11.137 (TR1)
@@ -110,8 +110,8 @@ Object.assign(itemNames, ITEMS);
 /** What locals sense of Yuki's meridians (v0.9.6: they may still be closed). */
 /** v0.11.125 (owner pick FM1; Fable's MAINs): where the locals see her, by her current form. */
 const yukiSpot = (g) => byForm(g, 'the beast on your shoulder', 'the beast at your side', 'the beast beside you');
-const yukiMerElder = (g) => { const n = g.yuki.primaries ?? 12; const b = yukiSpot(g); return n >= 12 ? `And ${b} has twelve meridians open. In ninety years I have seen that only in the heirs of great sects.` : n > 0 ? `And ${b} has ${n === 1 ? 'a meridian' : `${n} meridians`} open, and is opening more, ${byForm(g, 'at its size', 'untaught', 'at its age')}, without a single pill. In ninety years I have seen that only in the heirs of great sects.` : `And ${b} holds Qi with every meridian shut, which is not possible, and which it is doing anyway.`; };
-const yukiMerLu = (g) => { const n = g.yuki.primaries ?? 12; const b = yukiSpot(g); return n >= 12 ? `And yet ${b} has its meridians open like a sect heir\'s.` : n > 0 ? `And yet ${b} has ${n === 1 ? 'a meridian' : `${n} meridians`} open, and no pill-smell either. Like a sect heir's.` : `And yet ${b} holds Qi with its meridians shut, like a sealed jar that is somehow full.`; };
+const yukiMerElder = (g) => { const n = g.yuki.primaries ?? 12; const b = yukiSpot(g); return n >= 12 ? `And ${b} carries twelve open meridians. I am ninety, and I have met that only in the heirs of great sects.` : n > 0 ? `And ${b} has ${n === 1 ? 'a meridian' : `${n} meridians`} open already and is opening the rest, ${byForm(g, 'at its size', 'untaught', 'at its age')}, with not one pill behind it. I am ninety, and I have met that only in the heirs of great sects.` : `And ${b} is holding Qi with all its meridians shut. That cannot be done. It is being done in front of me.`; };
+const yukiMerLu = (g) => { const n = g.yuki.primaries ?? 12; const b = yukiSpot(g); return n >= 12 ? `And yet ${b} has its meridians open like a sect heir\'s.` : n > 0 ? `And yet ${b} has ${n === 1 ? 'a meridian' : `${n} meridians`} open, and no pill-smell about it. So would a sect's heir.` : `And yet ${b} holds Qi behind shut meridians: a sealed jar, and nevertheless a full one.`; };
 
 /** v0.11.154 (owner pick RV1, Fable's review, L1 CF): the camp's text by the night in the forest (forest_day 1–3), not by the clock's day, so a long
  *  breakthrough at the camp that ends after 05:00 doesn't move it a day ahead. */
@@ -121,15 +121,15 @@ export const SCENES = {
     /* ================= DAY 1 ================= */
     arrival: {
         id: 'arrival', title: 'Bone and Ash', art: 'james', place: 'Unknown forest',
-        text: `Three days ago you defended a doctorate in mycology and computational biology. Yesterday you celebrated it. This morning, as near as you can piece it together, you went into the resonance lab to "just check one reading", with Yuki asleep in the hood of your lab coat, and the spatial seed chamber decided to have opinions.
+        text: `Your doctorate in mycology and computational biology is three days old. You defended it, and yesterday you celebrated it, thoroughly. This morning, by the best reconstruction available, you stepped into the resonance lab to "just check one reading", Yuki asleep in the hood of your lab coat, and the spatial seed chamber decided to have opinions.
 
-Now you are lying on your back in a forest made of black bark and grey moss, under a sky the colour of a bruise, and something small and white is standing on your sternum, staring at you with the deep, personal disappointment only a cat can manage.
+The result is you, horizontal, in a forest of black bark and grey moss, beneath a sky the colour of a bruise. Something small and white stands on your sternum and regards you with a disappointment so deep and so personal that only a cat could carry it.
 
-"Good morning," you tell her. "For the record, I touched nothing."
+"Morning," you say to her. "Let the record show I touched nothing."
 
-Yuki doesn't believe a word of it. Neither do you.
+Yuki believes none of it. You don't either.
 
-You straighten your glasses, thin and rectangular and somehow unbroken. The ouroboros on your left forearm is a closed ring, the serpent eating its own tail; under the skin beneath it your omnitool hums awake, warm and blessedly alive. Its hammerspace, the pocket of folded space your people grow into every citizen at birth, reports in: the most expensive empty closet in two universes. Clothes on your back. Lab coat. A cat. End of inventory.`,
+Your glasses are still on your face, thin, rectangular and unbroken, which is more than the day deserves; you push them straight. On your left forearm the ouroboros sits in its closed ring, the serpent with its tail in its mouth, and under the skin beneath it the omnitool hums awake, warm and blessedly alive. Its hammerspace, the pocket of folded space your people grow into every citizen at birth, reports in: the most expensive empty closet in two universes. The clothes you are lying in. One lab coat. One cat. That is the list.`,
         choices: [
             { text: 'Check Yuki over first — paws, ribs, the bond between you.', to: 'yuki_check' },
             { text: 'Run a full environmental scan with the omnitool.', check: { skill: 'GU', dc: 2 }, time: 10, to: 'scan_ok', fail: 'scan_bad' },
@@ -248,7 +248,7 @@ Two candidates. A thorny shrub hung with fat red berries, *exactly* what a plane
 
 Fungus. At last, a thing you hold an actual doctorate in.`,
         choices: [
-            { text: 'The bracket fungus. Spore print, tissue test, the whole ritual.', check: { skill: 'GU', dc: 3, bonus: () => 2 }, time: 20, do: (g) => { addItem(g, 'jade_bracket', 3); g.flags.fungus = true; return [`Spore print on a bone sheet, a sliver under the omnitool, a cautious nibble: edible, mild, and quietly murderous to most of the bacteria you can name. Yuki watches the whole ritual from the log and sends you a thought that translates roughly as *you could just eat it.* You could not just eat it. You have standards.`, '+3 Jade bracket fungus (edible, mildly antibiotic).']; }, failDo: (g) => { addItem(g, 'jade_bracket', 1); return ['You get one clean piece before the rest crumbles. +1 Jade bracket fungus.']; }, to: 'stream' },
+            { text: 'The bracket fungus. Spore print, tissue test, the whole ritual.', check: { skill: 'GU', dc: 3, bonus: () => 2 }, time: 20, do: (g) => { addItem(g, 'jade_bracket', 3); g.flags.fungus = true; return [`Spore print on a bone sheet, a sliver under the omnitool, a cautious nibble: edible, mild, and quietly murderous to most of the bacteria you can name. Yuki watches the whole ritual from the log and sends you a thought that translates roughly as *you could just eat it.* You could not just eat it. You have standards.`, '+3 Jade bracket fungus (edible, mildly antibiotic).']; }, failDo: (g) => { addItem(g, 'jade_bracket', 1); return ['One piece comes away whole, and the rest of the shelf goes to crumbs. +1 Jade bracket fungus.']; }, to: 'stream' },
             { text: 'The berries. Omnitool analysis, then a tiny taste.', check: { skill: 'GU', dc: 3 }, time: 15, do: (g) => { addItem(g, 'crimson_berry', 6); eat(g, 8, { yuki: false }); return ['They pass. +6 Crimson needleberries, and a handful go straight down: +8 satiety.']; }, failDo: (g) => { g.james.hp -= 3; return ['The analysis said "probably". Your intestines overrule it. −3 HP.']; }, to: 'stream' },
             { text: 'Both. You\'re hungry and the day isn\'t getting longer.', check: { skill: 'GU', dc: 4, bonus: () => 1 }, time: 35, do: (g, r) => { addItem(g, 'jade_bracket', 3); addItem(g, 'crimson_berry', 6); eat(g, 8, { yuki: false }); g.flags.fungus = true; return [r && r.ratio < 1 ? `You do it the fast way, which turns out not to be the right way: half the shelf crumbles and the berries are mostly thorns. Yuki sniffs a berry, stares at it, and bats it into the stream, which you choose to take as peer review.` : `You do it the fast way and the right way at once, a thread on the fungus and a thread on the berries, and for a moment it's almost like working in a lab again, except for the cat and a sky the colour of a bruise. Yuki sniffs a berry, stares at it, and bats it into the stream, which you choose to take as peer review.`, '+3 Jade bracket fungus, +6 Crimson needleberries, +8 satiety.']; }, failDo: (g) => { addItem(g, 'jade_bracket', 1); g.james.hp -= 2; return ['+1 Jade bracket fungus, and one berry too many: −2 HP.']; }, to: 'stream' },
         ],
@@ -282,7 +282,7 @@ The defence is not accepted.`,
     hunt_got: {
         id: 'hunt_got', title: 'Second Chances', art: 'hunt', place: 'Blackroot Wilds — the reeds',
         enter: (g) => { addItem(g, 'hare_raw', 1); return ['+1 Glassback hare (dressed).']; },
-        text: `The second one is slower, or you are quicker, or the universe owed you. The dart takes it behind the ear. You dress it with a small bone knife that you grow, use and dissolve, because you can, and because the other tool on offer is your teeth.`,
+        text: `This hare is slower than the last, or you have got quicker, or the universe is settling a debt. Your dart finds the spot behind its ear. For the dressing you grow a small bone knife, use it, and let it dissolve: partly because you can, mostly because the alternative is your teeth.`,
         choices: [{ text: 'Back to the stream.', to: 'stream' }],
     },
 
@@ -302,9 +302,9 @@ ${g.flags.fire ? byNight(g, ['The fire crackles and spits, pleased with itself.'
     },
     night: {
         id: 'night', title: 'Night', art: 'forest_night', place: 'Blackroot Wilds — the dry rise',
-        text: (g) => byDay(g, [(g) => `Night on this world is not a lack of light. It is a presence. The black trees drink the stars. Something far off screams, stops, and does not scream again.
+        text: (g) => byDay(g, [(g) => `Night on this world is not light going away. It is something else arriving. Overhead the black trees drink the stars. Far off a thing screams, breaks off, and is not heard from again.
 
-${g.flags.fire ? 'The fire makes a small, defiant room in the dark.' : 'Without fire, the dark comes right up to your knees.'} ${byForm(g, 'Yuki climbs into your lap', 'Yuki lies down around you', 'Yuki sits down against your side')}, which she only does when she thinks one of you needs it.
+${g.flags.fire ? 'The fire makes a small, defiant room in the dark.' : 'Without fire, the dark comes right up to your knees.'} ${byForm(g, 'Yuki climbs into your lap', 'Yuki lies down around you', 'Yuki sits down against your side')}, a habit she saves for the times she thinks one of you needs it.
 
 ${(g.flags.forest_day || 1) > 1 ? 'Another night in the Blackroot. Your watch-thread is already spinning up before you ask.' : 'Your Parallel Cognition offers, unprompted, to spin up a thread for watch-keeping. Nine threads, and one of them never sleeps unless you tell it to.'}`, (g) => `The dark comes down the way it did before: all at once, and personally. The black trees take the stars one at a time. Somewhere off to the left something large walks a slow circle round the rise and does not come closer, which you decide to take as manners.
 
@@ -337,7 +337,7 @@ Ashfang jackals. You have never seen one, and you would know them anywhere: they
     },
     night_attack_forced: {
         id: 'night_attack_forced', title: 'Ashfangs', art: 'jackals', place: 'Blackroot Wilds — the dry rise',
-        text: (g) => `The wall comes out knee-high and full of holes. The jackals step over it with an air of professional courtesy. Running is off the table.${byForm(g, '', NA_TIGER, '')}`, /* v0.11.131 (XB2, FL; Fable's MAIN): the great root-kin */
+        text: (g) => `Your wall rises as far as the knee and is mostly holes. The jackals step over it one after another, courteous as professionals. So much for running.${byForm(g, '', NA_TIGER, '')}`, /* v0.11.131 (XB2, FL; Fable's MAIN): the great root-kin */
         choices: [{ text: 'Fine. Fight.', combat: jackals, to: 'jackals_won' }],
     },
     jackals_won: {
@@ -353,7 +353,7 @@ You suspect the locals would kill for it, and that this is no figure of speech. 
     jackals_lost: {
         id: 'jackals_lost', title: 'Teeth in the Dark', art: 'jackals', place: 'Blackroot Wilds — the dry rise',
         enter: (g) => { g.flags.jackals = 'lost'; delete g.inventory.hare_raw; return ['The jackals take your food and a little skin. Your throat, you keep.']; },
-        text: (g) => `${byForm(g, "You go down. The last thing you see is Yuki — all eleven pounds of her — standing over you with her fur on end, screaming a sound a cat should not be able to make.", "You go down. The last thing you see is Yuki — all four hundred pounds of her — standing over you with her fur on end, making a sound a cat her size is fully entitled to make.", "You go down. The last thing you see is Yuki — all of her, in a dress — standing over you with her ears flat and her tail on end, screaming a sound a woman should not be able to make.")}
+        text: (g) => `${byForm(g, "You go down. The last thing you see is Yuki — all eleven pounds of her — standing over you with her fur on end, screaming a sound a cat should not be able to make.", "You go down. The last thing you see is Yuki — every tiger-sized inch of her — standing over you with her fur on end, making a sound a cat her size is fully entitled to make.", "You go down. The last thing you see is Yuki — all of her, qipao and all — standing over you with her ears flat and her tail on end, screaming a sound a woman should not be able to make.")}
 
 The jackals hesitate. Then they take the hare and go. Perhaps they disliked her odds. Perhaps they disliked what runs in your blood.
 
@@ -363,9 +363,9 @@ ${byForm(g, "You wake up an hour before dawn, alive, aching, and covered in cat.
     jackals_fled: {
         id: 'jackals_fled', title: 'Retreat', art: 'stream', place: 'Blackroot Wilds — the stream',
         enter: (g) => { g.flags.jackals = 'fled'; g.flags.night_fight = 'run'; return []; }, // v0.11.92 (O1, F): a run costs sleep like a fight
-        text: (g) => `You end up waist-deep in black water, which the jackals hate more than they hate you. They pace the bank until the sky greys, then melt into the trees.
+        text: (g) => `The running ends waist-deep in black water. The jackals hate the water even more than they hate you, so they walk the bank until the sky pales and then dissolve into the trees.
 
-You are cold, wet, alive and furious, and Yuki — ${byForm(g, "perched on your shoulder,", "stretched out on the one rock in midstream,", "standing on the one rock in midstream with her hem held up,")} dry, smug — is only three of those things.`,
+Cold, wet, alive, furious: you are all four. Yuki — ${byForm(g, "perched on your shoulder,", "stretched out on the one rock in midstream,", "standing on the one rock in midstream with her hem held up,")} dry, smug — manages only three.`,
         choices: [{ text: 'Climb out and get warm.', do: (g) => [nightRest(g)], to: 'dawn' }], // v0.11.92 (O1, F): half the missing HP and Qi back (was HP 80%, Qi full)
     },
 
@@ -388,17 +388,17 @@ Yuki is already looking at you. You are already moving. You have a type of stupi
         id: 'herb_girl', title: 'Outer Disciple', art: 'herb_girl', place: 'Blackroot Wilds — the herb slope',
         text: (g) => `${g.flags.sneak ? 'From the rocks above you get the whole picture before anyone gets you.' : 'You come over the rise faster than dignity allows.'}
 
-A woman of perhaps twenty-five, in a white jacket with a red sash and a long dark skirt, a red ribbon in her black hair, stands with her back to a boulder and a herb-knife in her fist. Her basket lies on its side, spilling something that glows a faint green. Facing her: a young man in crimson robes, a lotus stitched on each sleeve as though it were bleeding, and a pock-faced hulk with a hatchet.
+With her back against a boulder and a herb-knife in her fist stands a woman of about twenty-five: white jacket, red sash, long dark skirt, a red ribbon in black hair. Her basket has gone over, and what spills out of it glows a faint green. Two men face her. The young one wears crimson robes with a lotus stitched on each sleeve, done so that it seems to bleed. The other is a pock-faced slab of a man holding a hatchet.
 
-"The tribute is due ${g.flags.long ? 'in three days' : 'tomorrow'}," Crimson Robes is saying, with the grave, unhurried patience of a magistrate reading a sentence. "And you laughed at an outer disciple of the Crimson Lotus before the whole slope, Mei Lin. Face is owed. The Ninefold grass is forfeit, and tonight you will serve tea in my quarters, as penance. Otherwise the Elder learns that your mother has been hiding a spirit root in that house."
+"The tribute falls due ${g.flags.long ? 'in three days' : 'tomorrow'}," Crimson Robes is telling her, grave and unhurried, a magistrate partway through a sentence. "And before the whole slope, Mei Lin, you laughed at an outer disciple of the Crimson Lotus. Face is owed. The Ninefold grass is forfeit. Tonight you will serve tea in my quarters, as penance. Refuse, and the Elder hears that your mother has kept a spirit root hidden in that house."
 
 "My mother is *sixty*, you overdressed rooster—"
 
-"Then she will serve the Sect for as many years as Heaven leaves her," he says, without heat. "That is the law. You ought to have remembered her before you laughed."
+"Then the Sect will have her service for whatever years Heaven leaves her." There is no heat in it. "Such is the law. The time to think of her was before you laughed."
 
-Your Parallel Cognition has him labelled already. Qi like a coal under ash, banked and mean: one clear rung above a mortal, and worn like a mountain. A cultivator.
+Your Parallel Cognition filed him before he finished speaking. His Qi sits like a coal under ash, banked and mean: one clear rung above a mortal, and he wears that rung like a mountain. A cultivator, then. The local kind, and the kind that enjoys it.
 
-He glances at you once, the quick appraising glance cultivators here give everyone — *root? realm? threat?* — and finds nothing. No root. No Qi. Not a flicker. ${byForm(g, "His eyes slide off you the way they'd slide off a fence post.", "His eyes slide off you the way they'd slide off a fence post, and off Yuki the way they'd slide off a second, larger fence post.", "His eyes slide off you the way they'd slide off a fence post, and off Yuki the way they'd slide off a second, shorter fence post: they catch on the ears for exactly as long as dignity permits, which is not long.")} You, apparently, do not register. Of the local kind, and of the kind that likes it.`, // v0.11.130 (YB1, HG; Fable's MAIN): the human's glance
+He gives you one glance, the quick weighing kind that cultivators here spend on everybody — *root? realm? threat?* — and it comes back empty. No root. No Qi. Not a flicker. ${byForm(g, "His eyes slide off you the way they'd slide off a fence post.", "His eyes slide off you the way they'd slide off a fence post, and off Yuki the way they'd slide off a second, larger fence post.", "His eyes slide off you the way they'd slide off a fence post, and off Yuki the way they'd slide off a second, shorter fence post: they catch on the ears for exactly as long as dignity permits, which is not long.")} By his reckoning, you are scenery.`, // v0.11.130 (YB1, HG; Fable's MAIN): the human's glance
         choices: [
             { text: '"Morning. Is this a private extortion or can anyone join?"', check: { skill: 'GU', dc: 4 }, to: 'gao_talked', fail: 'gao_fight_start' },
             { text: 'A bone needle through the back of his hand, before he knows you\'re here.', show: (g) => !!g.flags.sneak, qi: 3, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 3 }, do: set('gao_hand'), to: 'gao_hand', fail: 'gao_fight_start' },
@@ -407,13 +407,13 @@ He glances at you once, the quick appraising glance cultivators here give everyo
     },
     gao_hand: {
         id: 'gao_hand', title: 'A Point Made', art: 'herb_girl', place: 'Blackroot Wilds — the herb slope',
-        text: `The needle goes in between two knuckles, comes out the far side, and pins Crimson Robes' hand to his own sleeve. He makes a noise like a kettle.
+        text: `Your needle enters between two of his knuckles, leaves through the palm, and nails Crimson Robes' hand to his own sleeve. The sound he produces belongs to a kettle.
 
-"Hi," you say, and stand up on the rocks with the morning sun behind you, which is cheap, and works. "I need you to leave her alone."
+"Hi." You get to your feet on the rocks, where the morning sun happens to be directly behind you. It is a cheap trick. It works. "You're going to leave her alone now."
 
-He stares at the white needle. Then at you. Then, and here it gets interesting, he looks *afraid*. Not of the hole in his hand. Of the bone.
+His stare goes to the white needle. To you. And then comes the interesting part: he is *afraid*, and it is not the hole in his hand that frightens him. It is the bone.
 
-"Not a beast," he says. "Not a sect. What *are* you?"`,
+"No beast grows that," he says. "No sect makes it. What *are* you?"`,
         choices: [
             { text: '"Leaving. Is what you are. Now."', check: { skill: 'GU', dc: 3 }, do: (g) => { g.flags.gao_humiliated = true; bumpRel(g, 'Mei Lin', 10, 3); return []; }, to: 'gao_fled', fail: 'gao_fight_start' },
             { text: 'Don\'t answer. Grow a blade instead.', to: 'gao_fight_start' },
@@ -422,29 +422,29 @@ He stares at the white needle. Then at you. Then, and here it gets interesting, 
     gao_talked: {
         id: 'gao_talked', title: 'Words', art: 'herb_girl', place: 'Blackroot Wilds — the herb slope',
         enter: (g) => { g.flags.gao_humiliated = true; bumpRel(g, 'Mei Lin', 8, 2); return []; },
-        text: (g) => `It turns out that a tall foreigner in a strange white coat, who walks into an extortion with ${byForm(g, "a cat on his shoulder", "a cat the size of a tiger at his side", "a cat-eared woman in a black dress at his elbow")} and the bored tone of a man complaining about a parking ticket, does not compute for Crimson Robes.
+        text: (g) => `Crimson Robes, it emerges, has no category for a tall foreigner in a strange white coat who strolls into an extortion with ${byForm(g, "a cat on his shoulder", "a cat the size of a tiger at his side", "a cat-eared woman in a black qipao at his elbow")} and the voice of a man disputing a parking ticket.
 
-You talk. Your sarcasm is thorough. At one point you call his lotus embroidery "a cry for help". The lackey goes rigid with outrage on his master's behalf, which is, if anything, funnier.
+So you talk, and you are sarcastic at length and in detail. Somewhere in the middle you refer to his lotus embroidery as "a cry for help". The lackey stiffens with outrage on behalf of his master, and that turns out to be the funnier half.
 
-Crimson Robes (*Gao Feng, Outer Disciple of the Crimson Lotus Sect, of Foundation rank*, he informs you, as if either half should mean something) concludes that his face will not survive another minute of this. Before he goes he turns, bows a precise and furious quarter-bow, and declares formally, before Heaven and witnesses, that the insult will be repaid in blood.
+He is *Gao Feng, Outer Disciple of the Crimson Lotus Sect, of Foundation rank*: he tells you so himself, plainly expecting both parts to land. Neither does, and he works out that another minute of this will cost him what face he has left. He goes. First, though, he turns, gives you a quarter-bow that is exact and furious, and swears formally, before Heaven and witnesses, that this insult will be repaid in blood.
 
-"Put it on my tab," you tell his back.`,
+"Put it on my tab," you call after him.`,
         choices: [{ text: 'Turn to the woman with the knife.', to: 'mei_lin' }],
     },
     gao_fight_start: {
         id: 'gao_fight_start', title: 'Crimson Lotus', art: 'herb_girl', place: 'Blackroot Wilds — the herb slope',
-        text: (g) => `${byForm(g, "Gao Feng decides that whatever you are, you are alone, unarmed, and wearing a lab coat. He has looked at you with his Qi-sense and felt nothing at all: a mortal.", "Gao Feng decides that whatever you are, you are unarmed, wearing a lab coat, and alone but for a cat. He has looked at you both with his Qi-sense and felt nothing at all: a mortal, and a mortal's very large cat.", "Gao Feng decides that whatever you are, you are unarmed, wearing a lab coat, and alone but for a slight woman in a black dress. He has looked at you both with his Qi-sense and felt nothing at all: a mortal, and a mortal's woman, with something about her ears that it is beneath an outer disciple to notice.")} "Pock-Face," he says, without turning his head, "teach the peasant to kneel." The lackey grins and cracks his knuckles at you, which is the first time anyone has done that outside a film.
+        text: (g) => `${byForm(g, "Gao Feng decides that whatever you are, you are alone, unarmed, and wearing a lab coat. He has looked at you with his Qi-sense and felt nothing at all: a mortal.", "Gao Feng decides that whatever you are, you are unarmed, wearing a lab coat, and alone but for a cat. He has looked at you both with his Qi-sense and felt nothing at all: a mortal, and a mortal's very large cat.", "Gao Feng decides that whatever you are, you are unarmed, wearing a lab coat, and alone but for a slight woman in a high-collared qipao. He has looked at you both with his Qi-sense and felt nothing at all: a mortal, and a mortal's woman, with something about her ears that it is beneath an outer disciple to notice.")} "Pock-Face." He doesn't bother to turn his head. "Teach the peasant to kneel." The lackey grins and cracks his knuckles in your direction. Until now you had only ever seen that done in films.
 
-All of it is true. None of it is the whole truth.`, // v0.11.130 (YB1, GA; Fable's MAIN): the human, not alone
+Each thing Gao Feng has decided is accurate. The list is merely incomplete.`, // v0.11.130 (YB1, GA; Fable's MAIN): the human, not alone
         choices: [{ text: 'Fight.', combat: gaoFight, to: 'gao_won' }],
     },
     gao_fled: {
         id: 'gao_fled', title: 'Retreat with Honour (Allegedly)', art: 'herb_girl', place: 'Blackroot Wilds — the herb slope',
-        text: (g) => `Gao Feng pulls the needle out with his teeth, which is either very brave or very stupid, and backs away with his lackey.${byForm(g, '', ' He keeps his eyes on Yuki the whole way down, which is the first sensible thing he has done all day. Yuki, at your side, yawns at him. It takes a while and shows him everything.', '')} "The Crimson Lotus will hear of you," he hisses.
+        text: (g) => `Gao Feng draws the needle with his teeth, an act of great courage or great stupidity, and backs off down the slope, lackey in tow.${byForm(g, '', ' He keeps his eyes on Yuki the whole way down, which is the first sensible thing he has done all day. Yuki, at your side, yawns at him. It takes a while and shows him everything.', '')} "The Crimson Lotus shall hear of this, stranger," he hisses.
 
-"Wonderful. Tell them I'm free on Thursdays."
+"Good. Tell them I can do Thursdays."
 
-The needle dissolves in his mouth halfway down the hill. You can hear him spit for a long time.`, // v0.11.127 (LP1, FL; Fable's MAIN): the great root-kin's lines
+Halfway down the hill the needle dissolves in his mouth. The spitting carries up the slope well after he is out of sight.`, // v0.11.127 (LP1, FL; Fable's MAIN): the great root-kin's lines
         choices: [{ text: 'Turn to the woman with the knife.', to: 'mei_lin' }],
     },
     gao_won: {
@@ -463,15 +463,15 @@ That isn't sarcasm. You check. It isn't.`,
     gao_lost: {
         id: 'gao_lost', title: 'Face in the Dirt', art: 'gao_down', place: 'Blackroot Wilds — the herb slope',
         enter: (g) => { g.flags.gao_won_fight = true; bumpRel(g, 'Mei Lin', 6, 2); g.james.hp = Math.max(3, g.james.hp); return []; },
-        text: (g) => `You end up face down in the herbs with Gao Feng's boot on your neck and the taste of blood and mint in your mouth. He takes his time telling you what he's going to do to you.
+        text: (g) => `It ends with your face in the herb bed, Gao Feng's boot across your neck, and a mouthful of blood and mint. He is in no hurry. He explains, item by item, what is going to happen to you.
 
-He doesn't get to finish. ${byForm(g, "Eleven pounds of white cat land on his face, all claws, and while he's screaming and spinning,", "Four hundred pounds of white cat take him off your neck and a fair way across the herb bed, and while he's screaming and rolling,", "Yuki lands on his back in a black dress, all nails, and while he's screaming and spinning,")} Mei Lin puts her herb-knife through the lackey's thigh and her basket over Gao Feng's head.
+The list is never completed. ${byForm(g, "Eleven pounds of white cat land on his face, all claws, and while he's screaming and spinning,", "A tiger's weight of white cat takes him off your neck and a fair way across the herb bed, and while he's screaming and rolling,", "Yuki lands on his back, white tail lashing, all nails, and while he's screaming and spinning,")} Mei Lin drives her herb-knife into the lackey's thigh and jams her basket down over Gao Feng's head.
 
-By the time he has fought his way out of it, the three of you are fifty metres down the slope and running.
+He needs a while to fight clear of it. By then the three of you are fifty metres down the slope and still accelerating.
 
-"You," Mei Lin pants, "are the worst rescuer I have ever had."
+"You," pants Mei Lin, "are the worst rescuer I have ever had."
 
-"How many have you had?"
+"Out of how many?"
 
 "*One.*"`,
         choices: [{ text: 'Keep running. Then walk. Then breathe.', time: 20, to: 'mei_lin' }],
@@ -493,7 +493,7 @@ Mei Lin goes through his sleeves while he lies there, and comes out with a pouch
 "I'll take my chances with loud," you say. "The other thing, I don't do. Not to people."
 
 She holds the stare well past the point of manners. Then, under her breath, a word that could be *idiot* and could, just possibly, be *thank you*.`,
-        enter: (g) => { g.flags.gao_broken = true; addItem(g, 'beast_core', 1); return ['+1 Murky beast core (from Gao Feng\'s pouch). Mei Lin keeps his jade token.']; },
+        enter: (g) => { g.flags.gao_broken = true; addItem(g, 'beast_core', 1); return ['+1 Murky beast core (it was in Gao Feng\'s pouch, under the pills). The jade token stays with Mei Lin.']; },
         choices: [{ text: 'Go with her. Behind you, Gao Feng is still swearing — slowly, and in great detail — what his Sect will do to you.', to: 'mei_lin' }],
     },
     gao_spared: {
@@ -570,7 +570,7 @@ Yuki does not look at you. She keeps it up all the way down.`,
     village: {
         id: 'village', title: 'Ashfall', art: 'village', place: 'Ashfall Hamlet',
         enter: (g) => { if (g.flags.ignored) g.flags.mei_bruised = true; if (g.flags.long && !g.flags.vday) g.flags.vday = 1; return []; },
-        text: (g) => `Ashfall Hamlet is forty houses of grey stone around a well, a shrine to a god whose face someone has chiselled off, and a tall wooden post hung with red lotus banners. The tribute post. People give it the berth they would give a sleeping dog.
+        text: (g) => `Ashfall Hamlet: forty grey stone houses gathered round a well, a shrine to some god whose face has been chiselled away, and one tall wooden post dressed in red lotus banners. That is the tribute post. The villagers walk wide of it, as people walk wide of a dog that is only asleep.
 
 ${g.flags.ignored
         ? 'A woman in a patched white jacket and a red sash limps past you with a split lip and an empty basket, and the street falls silent around her. Someone mutters "Gao Feng". Nobody looks at you, the stranger who came down off the ridge at exactly the wrong hour.'
@@ -617,9 +617,9 @@ You are not a doctor. You are a man who has spent fifteen years on the question 
     village_hunt: {
         id: 'village_hunt', title: 'Ironhide', art: 'boar', place: 'Blackroot Wilds — the oak hollow',
         enter: set('village_hunt'),
-        text: `The village hunters no longer go past the oak hollow. An ironhide boar holds it now, with tusks like plough-blades and, they swear, a beast core the size of a fist.
+        text: `Past the oak hollow the village hunters have stopped going. The hollow belongs to an ironhide boar these days: tusks like plough-blades and, on the hunters' oath, a beast core as big as a fist.
 
-It finds you before you find it. It is the size of a small car, and it has taken your visit *personally*.`,
+You are still looking for it when it finds you. It has the dimensions of a small car, and it regards your visit as a *personal* matter.`,
         choices: [
             { text: 'Darts to the eyes, then the blade.', combat: (g) => ({ id: 'boar', intro: 'The boar paws at the black earth, and the earth shakes under it.', band: 'challenging', enemies: [grow({ name: 'Ironhide boar', hp: 10, dc: 4, atk: 4, dmg: 5, dr: 1 }, forestScale(g), BOAR_GROWTH)], win: 'boar_won', lose: 'boar_lost', flee: hubOf(g) }), to: 'boar_won' },
             { text: 'A pit and a bed of bone spikes. Make it come to you.', qi: 6, check: { skill: 'Convergence Use', dc: 4, bonus: (g) => -Math.floor(forestScale(g) / 2) }, time: 60, to: 'boar_won', fail: 'boar_lost' },
@@ -634,7 +634,7 @@ It finds you before you find it. It is the size of a small car, and it has taken
     boar_lost: {
         id: 'boar_lost', title: 'Ironhide Wins', art: 'boar', place: 'Blackroot Wilds — the oak hollow',
         enter: (g) => { g.james.hp = Math.max(1, Math.floor(g.james.hp * 0.7)); return []; },
-        text: (g) => byForm(g, 'You end up up a tree. The boar ends up bored. You both agree to call it a draw, and you limp back to Ashfall with bark in places bark should not go.', 'You end up up a tree. Yuki ends up on the far side of the hollow with a mouthful of ironhide bristle and nothing else. *It has armour,* says the bond. *I have standards.* The boar ends up bored. You both agree to call it a draw, and you limp back to Ashfall with bark in places bark should not go.', 'You end up up a tree. The boar ends up bored. You both agree to call it a draw, and you limp back to Ashfall with bark in places bark should not go.'), // v0.11.127 (LP1, FL; LQ2, TN: Fable's ALT A): the great root-kin's own
+        text: (g) => byForm(g, 'The fight ends with you in a tree and the boar underneath it, losing interest. Eventually the two of you settle on a draw. You limp home to Ashfall carrying bark in places where bark has no business.', 'You end up up a tree. Yuki ends up on the far side of the hollow with a mouthful of ironhide bristle and nothing else. *It has armour,* says the bond. *I have standards.* The boar ends up bored. You both agree to call it a draw, and you limp back to Ashfall with bark in places bark should not go.', 'You finish the fight in one tree and Yuki in the next, her tail tucked up out of reach. The boar gets bored first. "A draw," she rules, and you limp back to Ashfall with bark where bark has no business.'), // v0.11.127 (LP1, FL; LQ2, TN: Fable's ALT A): the great root-kin's own
         choices: [{ text: (g) => (g.flags.long && dayHour(g) < 16 ? 'Back to the village.' : 'Evening.'), time: 30, to: (g) => (g.flags.long ? (dayHour(g) >= 16 ? nextEvening(g) : hubOf(g)) : 'evening') }],
     },
     evening: {
@@ -695,12 +695,12 @@ Much later the lamp is out, the hay has got everywhere, and Mei Lin is asleep ag
     },
     tribute_dawn_talk: {
         id: 'tribute_dawn_talk', title: 'Until It\'s Not Night', art: 'dinner', place: 'Ashfall Hamlet — Mei Lin\'s house',
-        text: (g) => `You talk until the lamp dies, and then in the dark, and then until the windows go grey. She falls asleep against your shoulder mid-sentence about a herb that blooms only in snow. You don't move. ${byForm(g, "Yuki climbs into the gap between you as if she'd been invited.", "Yuki lies down across both your feet as if she'd been invited.", "Yuki sits down on your other side and takes the other shoulder, as if she'd been invited.")}`,
+        text: (g) => `You talk the lamp out, go on in the dark, and are still at it when the windows turn grey. Halfway through a sentence about a herb that flowers only in snow, sleep takes her, head on your shoulder. You keep perfectly still. ${byForm(g, "Yuki climbs into the gap between you as if she'd been invited.", "Yuki lies down across both your feet as if she'd been invited.", "Yuki sits down on your other side and takes the other shoulder, as if she'd been invited.")}`,
         choices: [{ text: 'Dawn.', do: (g) => { sleepUntil(g, 5); g.james.hp = Math.ceil(g.james.hp); return ['A few hours of sleep. HP and Qi full.']; }, to: 'tribute' }],
     },
     tribute_dawn_sleep: {
         id: 'tribute_dawn_sleep', title: 'By the Stove', art: 'dinner', place: 'Ashfall Hamlet — Mei Lin\'s house',
-        text: (g) => `${byForm(g, "You sleep by the stove with a cat on your chest and the sound of somebody else's house breathing around you.", "You sleep by the stove with a cat's head on your chest, which is all of her that fits, and the sound of somebody else's house breathing around you.", "You sleep by the stove, back to back with Yuki, with the sound of somebody else's house breathing around you.")} It's the safest you've felt since the lab. It lasts until dawn.`,
+        text: (g) => `${byForm(g, "You sleep by the stove with a cat on your chest and the sound of somebody else's house breathing around you.", "You sleep by the stove with a cat's head on your chest, which is all of her that fits, and the sound of somebody else's house breathing around you.", "You sleep by the stove, back to back with Yuki, with the sound of somebody else's house breathing around you.")} Nothing on this world has felt as safe. It holds until dawn.`,
         choices: [{ text: 'Dawn.', do: (g) => { sleepUntil(g, 5); return ['Slept until 05:00. HP and Qi full.']; }, to: 'tribute' }],
     },
 
@@ -728,9 +728,9 @@ Lu Han's gaze goes over the baskets, over the people, and stops at you. Then at 
 
 Lu Han does not take it. He looks at it for as long as courtesy requires, the way a magistrate looks at a petition written in the wrong hand, with something close to regret.
 
-"No," he says. "The Sect's due is weighed, and it is whole.${byForm(g, '', " Nor does a mortal bargain with a trinket while the true treasure stands at his heel. That one would have paid for thirty years.", '')} You have failed your village in front of its own elders, and offered the Crimson Lotus sweepings." What is left of it falls out of your fingers without being asked. He draws his sword. "The second is the one that matters."${byForm(g, '', "\n\n*Thirty years,* says the bond, as four hundred pounds of the true treasure gets to its feet beside you. *I'd have said forty. He's rounding down.*", '')}` : `Lu Han watches your performance in silence, the way a judge watches a defendant perjure himself. Then he shakes his head, once, with something close to regret.
+"No," he says. "The Sect's due is weighed, and it is whole.${byForm(g, '', " Nor does a mortal bargain with a trinket while the true treasure stands at his heel. That one would have paid for thirty years.", '')} You have failed your village in front of its own elders, and offered the Crimson Lotus sweepings." What is left of it falls out of your fingers without being asked. He draws his sword. "The second is the one that matters."${byForm(g, '', "\n\n*Thirty years,* says the bond, as a tiger's weight of the true treasure gets to its feet beside you. *I'd have said forty. He's rounding down.*", '')}` : `Lu Han hears the whole performance out without a word, as a judge sits through a defendant's perjury. At the end of it he shakes his head once. He looks nearly sorry.
 
-"No," he says. "A true senior does not need to announce himself.${byForm(g, '', " Nor is a great beast at a man's heel a senior's Qi. It is a treasure, and treasures are carried by servants.", '')} You have dishonoured yourself, and mocked the Sect." He draws his sword. "The second is the one that matters."${byForm(g, '', "\n\n*Servant,* says the bond, as four hundred pounds of treasure gets to its feet beside you. *He's half right. You do carry things.*", '')}`), // v0.11.130 (YB1, BL; Fable's MAIN): the great root-kin at his heel; v0.11.131 (XB2, HP; RC2, L1 + M2; Fable's MAINs): the hairpin's own, a clear failure
+"No." His voice is level. "A true senior has no need to announce himself.${byForm(g, '', " Nor is a great beast at a man's heel a senior's Qi. It is a treasure, and treasures are carried by servants.", '')} You have dishonoured yourself, and you have mocked the Sect." The sword comes out of its sheath. "Of the two, only the second matters."${byForm(g, '', "\n\n*Servant,* says the bond, as rather a lot of treasure gets to its feet beside you. *He's half right. You do carry things.*", '')}`), // v0.11.130 (YB1, BL; Fable's MAIN): the great root-kin at his heel; v0.11.131 (XB2, HP; RC2, L1 + M2; Fable's MAINs): the hairpin's own, a clear failure
         choices: [{ text: 'Fight.', combat: collectorsFight, to: 'collectors_won' }],
     },
     bluff_win: {
@@ -778,35 +778,35 @@ You've given people hope.`,
     collectors_lost: {
         id: 'collectors_lost', title: 'Kneel', art: 'collectors', place: 'Ashfall Hamlet — the tribute post',
         enter: (g) => { g.flags.ending = 'lost'; g.james.hp = 1; return []; },
-        text: (g) => `You go down hard. Lu Han's boot is on your chest and his blade is at your throat and he is looking at you with honest regret.
+        text: (g) => `You hit the ground hard. Lu Han sets a boot on your chest and the point of his blade at your throat, and the look he gives you from up there is one of honest regret.
 
-"A waste," he says. "To be born flawless, and to conduct oneself as a fool."
+"A waste," he says. "Flawless by birth, and a fool by conduct."
 
-Ashfall is what saves you. All of it: the boy's mother, the old hunters, the herb-women, Old Wen with his tea, Mei Lin with her knife. Forty houses of grey people rise as one and step between the Crimson Lotus and the stranger who would not kneel.
+What saves you is Ashfall, and all of it: the boy's mother, the old hunters, the herb-women, Old Wen with his tea, Mei Lin with her knife. Forty houses of grey people get to their feet together and walk in between the Crimson Lotus and the stranger who refused to kneel.
 
-Lu Han looks them over, unhurried. At how many there are. At what a village costs to replace.
+Lu Han takes his time over them. He counts heads. He counts what a village costs to replace.
 
-"Next season," he says finally, sheathing his sword, "the tribute doubles. And the Bone-Maker comes with us, or the village burns." He steps off you. "Rest well, senior. You have a year."${byForm(g, '', "\n\nThen he flicks two fingers, and the net comes off Yuki: a spirit-beast net, thrown from his sleeve in the first breath of the fight, before he so much as drew. She has been under it since your knees went. She walks over on legs that aren't quite steady and stands across you. Nobody asks her to move.", '')}`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line; RB2 (CL): Fable's redraft after the review
+"Next season," he says at last, and sheathes the sword, "the tribute doubles. And the Bone-Maker comes with us, or the village burns." His boot lifts from your chest. "Rest well, senior. You have a year."${byForm(g, '', "\n\nThen he flicks two fingers, and the net comes off Yuki: a spirit-beast net, thrown from his sleeve in the first breath of the fight, before he so much as drew. She has been under it since your knees went. She walks over on legs that aren't quite steady and stands across you. Nobody asks her to move.", '')}`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line; RB2 (CL): Fable's redraft after the review
         choices: [{ text: 'Get up.', do: (g) => { advance(g, 120, { resting: true }); return []; }, to: 'epilogue' }],
     },
     epilogue: {
         id: 'epilogue', title: 'The Dead Tree', art: 'ridge', place: 'Blackroot Wilds — the ridge',
         enter: (g) => { const p = clockParts(g.minutes); g.minutes = (p.day - 1) * 1440 + 19 * 60; return []; },
-        text: (g) => `That evening you climb the ridge ${byForm(g, 'with Yuki on your shoulder', 'with Yuki pacing at your side', 'with Yuki at your elbow')} ${g.flags.romance ? 'and Mei Lin\'s hand in yours' : g.rel['Mei Lin']?.f > 10 ? 'and Mei Lin a step behind you' : 'and nobody else'}.
+        text: (g) => `By evening you are up on the ridge, ${byForm(g, 'with Yuki on your shoulder', 'with Yuki pacing at your side', 'with Yuki at your elbow')} ${g.flags.romance ? 'and Mei Lin\'s hand in yours' : g.rel['Mei Lin']?.f > 10 ? 'and Mei Lin a step behind you' : 'and nobody else'}.
 
-Below you Ashfall's lamps are lit, one after another. Past them the black forest runs out to the horizon, and at its heart stands what you saw from here before: the corpse of a tree vast enough to scrape the clouds.
+Down below, Ashfall lights its lamps, window by window. Beyond them the black forest rolls on to the horizon, and in the middle of it stands the thing you saw from this spot before: a dead tree, its corpse so vast that it scrapes the clouds.
 
-Your Convergence *sings* to it. Faint, sad, unmistakable.
+Your Convergence *sings* across to it. Thin, mournful, not to be mistaken.
 
-Your people grow their cities out of trees like that one. Their ships. Their homes. Hearth Trees. You never expected to see a dead one.
+Your people raise whole cities out of trees of that kind. Ships, too. Homes. Hearth Trees. A dead one was never among the sights you expected to meet.
 
-"Something lived there," ${g.flags.romance || g.rel['Mei Lin']?.f > 10 ? 'Mei Lin says, watching your face' : 'you say to Yuki'}. "People, maybe. Like us."
+"Somebody lived there once," ${g.flags.romance || g.rel['Mei Lin']?.f > 10 ? 'Mei Lin says, watching your face' : 'you say to Yuki'}. "People, perhaps. People like us."
 
-${byForm(g, 'Yuki\'s tail curls around your neck.', 'Yuki\'s tail curls around your wrist.', 'Yuki\'s tail curls around your wrist.')} Through the bond, very clearly: *then let's go and find out who killed it.*
+${byForm(g, 'Yuki\'s tail curls around your neck.', 'Yuki\'s tail curls around your wrist.', 'Yuki\'s tail curls around your wrist.')} Down the bond comes her answer, perfectly clear: *then let's go and find out who killed it.*
 
-You're forty. You have a fresh doctorate, ${byForm(g, 'a cat', 'a cat the size of a tiger', 'a cat who is currently a woman')}, an empty closet the size of a universe, and a gift this world has never seen. Everything in it would like to eat you.
+You are forty. Your assets: a fresh doctorate, ${byForm(g, 'a cat', 'a cat the size of a tiger', 'a cat who is currently a woman')}, an empty closet the size of a universe, and a gift nobody on this world has seen. Everything that lives here would like to eat you.
 
-"Sure," you say. "What could possibly go wrong."
+"Sure," you say. "I don't see how that could go wrong."
 
 — **End of the Prologue.** —`,
         choices: [{ text: 'Act 1: The Hearth Tree.', do: (g) => { const d = Math.floor(g.minutes / 1440) + 1; g.minutes = Math.max(d, 7) * 1440 + 6 * 60; g.james.hp = Math.max(g.james.hp, 1); return []; }, to: 'fo_start' }],
@@ -920,8 +920,8 @@ SCENES.breakthrough = {
         const sky = night ? 'The stars go out one at a time, pinched like candles.' : 'Behind them the red sun goes out, a coin dropped into ink.';
         if (g.james.realm === 1) {
             const recognise = knows
-                ? `You know what this is. Mei Lin gave it to you in her weather voice: *the sky decides you're impure and tries to burn you clean. Most people it just burns.* Tribulation. Heaven's verdict, and it has your name on it.`
-                : `You have no word for this. Everything you know about weather, atmospheric charge and the physics of a world you landed on less than a week ago comes back with nothing. The shape of it is plain enough, though. That lightning is not wandering. It is *aiming*. This is a judgment, and the defendant is you.`;
+                ? `This one you have a name for. Mei Lin described it once, in the tone she keeps for weather: *the sky decides you're impure and tries to burn you clean. Most people it just burns.* A tribulation. Heaven is handing down a verdict, and the name written on it is yours.`
+                : `For this you have no word at all. You consult what you know of weather, of atmospheric charge, of the physics of a planet you have been on for under a week, and all of it returns a blank. Its outline you can read anyway. Lightning that drifts does not behave like that. This lightning is *aiming*. Somebody is being judged here, and it is you.`;
             const witness = seen
                 ? `Ashfall saw it. The whole village is out in the street with its faces turned up, and no one is speaking. Somebody's grandmother kneels in the dust with her forehead to the ground, praying in a fast, shaking whisper. The hunters grip their spears as though a spear had a say in this. What frightens them most is that they can't *feel* you. Everyone in Ashfall with any sense for Qi is reaching for you now — it brushes you like a dozen nervous fingertips — and finding what they have always found. Nothing. A mortal, sitting in the dust, while Heaven argues with him and loses.
 
@@ -961,9 +961,9 @@ ${witness}
         if (own) return `${own.body}
 
 ${seen && !BT_NO_SKY.includes(g.james.realm) ? 'Ashfall watches it go in total silence. Then, one by one, people bow — not to the sky. To you. You would very much prefer they didn\'t.' : night ? own.night : own.day}`;
-        return `The loop closes again, one rung higher. ${realmName(g.james.realm)}.
+        return `Once more the loop closes, a rung further up. ${realmName(g.james.realm)}.
 
-The sky tries again, as the sky apparently must: clouds, the hum, lightning hunting for something to burn. It finds nothing. It leaves sooner this time, as if it were learning.
+The sky has another go, since apparently the sky is obliged to: clouds, the hum, lightning casting about for something to burn. Nothing turns up. It gives up sooner than last time, like something that can be taught.
 
 ${seen
         ? 'Ashfall watches it go in total silence. Then, one by one, people bow — not to the sky. To you. You would very much prefer they didn\'t.'
@@ -1005,7 +1005,7 @@ const SEASON_LINES = [
     'A season without a word spoken. Yuki calls it the best season of your life. She calls it that through the bond, which is cheating.',
     'The leaves turn, fall and come back. So do you, one rung up. The forest affects not to notice.',
     'You count breaths. Somewhere past a million the counting stops being necessary.',
-    'Snow across the cave mouth, then rain, then green again. You were busy.',
+    'The cave mouth fills with snow, then rain, then green. You were otherwise engaged.',
 ];
 export function lfSeason(g) {
     const j = g.james, y = g.yuki;
@@ -1038,7 +1038,7 @@ SCENES.lf_hub.choices.push({
     text: (g) => `Withdraw for a season: ${realmName(g.james.realm)} → ${realmName(g.james.realm + 1)}.`,
     show: (g) => g.james.realm < MAX_REALM, time: LF_SEASON_MINUTES, noFam: true /* v0.11.141 (FX1, CH): a season is the climb itself, no familiarity */, do: lfSeason, to: 'lf_hub',
 });
-const LF_FULL = 'The hammerspace is full: the Long Forest\'s pantry comes with you.';
+const LF_FULL = 'The hammerspace is full: you leave with the Long Forest\'s whole pantry in it.';
 const lfStock = (g) => { for (const id of LF_STOCK) g.inventory[id] = Math.max(g.inventory[id] || 0, itemCap(id)); };
 { // leaving in task mode: the hammerspace goes out full
     const exit = SCENES.lf_exit.choices[0];
@@ -1056,7 +1056,7 @@ SCENES.lf_hub.choices.push({
         g.james.hp = jamesHpMax(g); g.james.qi = jamesQiMax(g); g.yuki.hp = yukiHpMax(g); g.yuki.qi = yukiQiMax(g);
         ensureBars(g);
         lfStock(g);
-        return [`You walk out of the Long Forest the way you came in. The calendar starts again where you left it: ${clockLabel(g.minutes)}.`, LF_FULL];
+        return [`The Long Forest lets you out where it let you in. The calendar starts again where you left it: ${clockLabel(g.minutes)}.`, LF_FULL];
     },
     to: (g) => g.flags.lf_from,
 });
@@ -1080,7 +1080,7 @@ SCENES.lf_hub.choices.push({
     };
     reword('night_attack', /^Bone wall between you/, 'A hedge of bone spikes between you and them, then run for the water.');
     SCENES.night_attack_forced.text = (g) => `The hedge comes up knee-high and mostly gaps. The jackals step through it with professional courtesy. Running is off the table.${byForm(g, '', NA_TIGER, '')}`; /* v0.11.131 (XB2, FL; Fable's MAIN): the great root-kin */
-    reword('rt_ford', /bridge of bone/, 'Sing stepping-stones of bone from stone to stone.', ['A white bridge, ribbed like a spine. Mei Lin crosses it like a woman walking into a temple.', 'White stepping-stones, ribbed like vertebrae, rise between the black ones. Mei Lin crosses them like a woman walking into a temple.']);
+    reword('rt_ford', /bridge of bone/, 'Sing stepping-stones of bone from stone to stone.', ['A white bridge rises stone to stone, ribbed like a backbone. Mei Lin walks over it with temple manners, eyes down, feet careful.', 'White stepping-stones rise between the black ones, ribbed like vertebrae. Mei Lin walks over them with temple manners, eyes down, feet careful.']);
     reword('rt_ambush', /wall of bone/, 'A slab of bone between you and them, then down to the river.');
     reword('ring_chambers', /wall of bone/, 'Seal the fourth ring\'s doorway with a slab of bone and leave them to it.', ['A white wall, floor to ceiling. The chewing goes on behind it, disappointed.', 'A white slab, man-high, jammed into the doorway. The chewing goes on behind it, disappointed.']);
 }
@@ -1089,5 +1089,7 @@ SCENES.lf_hub.choices.push({
 installYukiTime(SCENES);
 // v0.11.139 (owner pick MW1, MS): Old Wen's and Mei Lin's mother's daily scenes, after Yuki's card on Ashfall's three resting places
 installHouseTime(SCENES);
+// v0.11.174 (owner pick SL1, SC): the Selene story at the last camp, appended after everything else on rt_camp, so no position changes
+installSelene(SCENES);
 
 export const START_SCENE = 'arrival';

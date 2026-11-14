@@ -17,6 +17,7 @@ const S = { ...mod[NAME] };
 // prologue scenes a part may link back to (hubs reused); stub them as exits
 const stub = (id) => ({ id, title: id, art: 'village', place: '', text: 'x'.repeat(60), end: true, choices: [] });
 for (const id of EXITS) if (!S[id]) S[id] = stub(id);
+if (mod.installSelene) mod.installSelene(S); // v0.11.174 (P7A, SC): the Selene story, appended last on rt_camp as the game does (prologue.js)
 // v0.11.44 (P2): the bots' range at each part's entry (low / middle / high): [GU tier, level, Convergence tier, level, realm, Yuki fight]
 const BANDS = {
     fallout: [[1, 8, 1, 5, 0, 4], [1, 9, 1, 6, 0, 8], [2, 4, 1, 8, 1, 9]],
@@ -37,7 +38,8 @@ function seedState(g, run) {
     g.minutes = { fallout: 7, blackroot: 10, heart: 15, return: 18 }[part] * 1440 + 6 * 60;
     g.flags = { long: true, forest_day: 3, vday: 3, ending: ['fought', 'bluff', 'paid', 'lost'][run % 4], romance: run % 3 === 0, healed: true, boar: run % 2 === 0, sky_witness: run % 5 === 0 ? 1 : 0,
         gao_broken: run % 6 === 1, gao_spared: run % 6 === 2, gao_humiliated: run % 6 > 2, militia: run % 3, mei_party: part !== 'fallout', ya_party: part !== 'fallout' && run % 7 !== 0, ya_met: part !== 'fallout',
-        ya_romance: run % 4 === 1, trio: part === 'return' ? run % 5 : part === 'heart' ? run % 4 : 0 };
+        ya_romance: run % 4 === 1, trio: part === 'return' ? run % 5 : part === 'heart' ? run % 4 : 0,
+        ...(part === 'return' ? { log_heard: run % 3 !== 2, seed: run % 6 !== 5, mei_carried_seed: run % 4 === 3 } : {}) }; // v0.11.174 (P7A): the Return comes after the log (the Selene story), the seed in his hammerspace or Mei Lin's sleeve, now and then none
     g.rel = { 'Mei Lin': { f: 30 + (run % 20), a: run % 3 === 0 ? 25 : run % 30 }, Village: { f: 40, a: 0 }, Ya: { f: part === 'fallout' ? 0 : 20, a: part === 'fallout' ? 0 : run % 30 } };
     // v0.11.44 (P2): a focused start: 1 run in 40 after the fallout with Ya's affection at 86 (likesYa needed 85, 72 since v0.11.123; the walks reached
     // ya_romance once in 1,000 runs with dice, never without), and without the Ya romance flag (run % 4 === 3)

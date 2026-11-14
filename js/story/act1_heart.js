@@ -11,26 +11,26 @@ import { ykPath } from './yuki_path.js';
 
 /* v0.11.136 (owner pick NC1, NT1's push 2): replies by day (js/core/lines.js dayReply): the first text is the old reply, the rest Fable's, one for each later day of a Coil. */
 /** v0.11.154 (owner pick PS1, RP1 push 2; Fable's, "ok for texts" 23:05): the hall's time of day by the day there, five days (ST5): [night, morning, midday, evening]. */
-const HALL_WHEN = [['Night. The shafts have gone out, and the hall is ten paces of firelit floor and a rumour of wall.', 'Morning. Light slides down the cracks like water let down a well.', 'Midday. The grey shafts have bleached almost to white, and the dust in them hardly moves.', 'Evening. High in the cracks the light is turning red, one crack after another.'],
+const HALL_WHEN = [['Night. The shafts have gone out, and the hall is ten paces of firelit floor and a rumour of wall.', 'Morning. Grey light slides down the cracks, slow as water down a well wall.', 'Midday. The grey shafts have bleached almost to white, and the dust in them hardly moves.', 'Evening. High in the cracks the light is turning red, one crack after another.'],
     [`Night. The fire lights the same ten paces of floor as it did before, and you find that you know them.`, `The light comes down the cracks in the same order as yesterday, one side of the hall and then the other, like someone opening shutters.`, `Midday. The white shafts stand in the hall like pillars, and Mei Lin walks round them, not through.`, `Evening. The red in the cracks climbs the wall a hand at a time, and then lets go.`],
     [`Night. The hall has shrunk to the fire again, and the fire has acquired a woodpile, a drying line and settled views on who sits where.`, `Grey light, then the dust in it, then the far wall: the hall puts itself back together each morning, and always in that order.`, `Midday. For a quarter of an hour the tallest white shaft reaches the floor, and somebody has scratched a mark in the dust where it lands.`, `Evening. The cracks go red and the dust goes gold, and nobody remarks on it any more.`],
     [`Night. You crossed the hall in the dark just now without putting a hand out, and only noticed afterwards.`, `Morning comes down the cracks late and thin, like a guest who knows the house.`, `Midday. The white shaft lands a finger's width past the scratched mark; the year is turning, even in here.`, `Evening. The red light picks out the paths you have all worn in the dust, and shows how few places any of you go.`],
     [`Night. The fire, the dark, the long way up: by now the hall is only large when you think about it.`, `The light slides down the cracks as it did on the first morning, and the difference is in you: you know where it will land.`, `Midday. The shafts have gone white on schedule, and the hall is as bright as it ever gets, which you now know is not very.`, `Evening. The cracks are going red for the fifth time, and you catch yourself counting the evenings you have left.`]];
 const DR_HC_MEI = dayReply("heart_camp:1", [
-    "She tells you the songs about the Old Tree her grandmother sang. Some of the words are your words, worn smooth by four hundred years of people who didn't know what they meant.",
+    "She goes through her grandmother's songs about the Old Tree for you. Here and there a word is one of yours, a word from home, rubbed smooth by four centuries of mouths that never knew what it meant.",
     "Tonight it is the planting songs, the ones Ashfall sings over the barley in spring. She gives you the words flat, without the tune, like a recipe. Halfway through one you could finish the line for her. You don't, and she sees you not doing it.",
     "She asks for one of yours, for a change. You give her a cradle song, quietly, the way it was given to you. She listens with her head down, like a woman going over accounts, and at the end she says her grandmother had the second verse wrong, and that she means to keep it wrong.",
     "Tonight neither of you sings. She asks instead what the worn words meant, and you go through them one at a time: root, keep, morning, home. She says each of them once after you, carefully, the way she would take down a debt. Then she says that Ashfall has been singing a letter all this time without knowing who it was addressed to, and looks into the fire as if it might have the name.", // v0.11.152 (RP1, RM6; Fable's): the 4th night
 ]);
 const DR_HC_YA = dayReply("heart_camp:2", [
     "She gives you the very edge of the ledge, and laughs when you hold on to it. Then, with great seriousness, she tells you how many days she tracked you through the forest before she decided you were interesting. All of them, it turns out. Your fire settled it, she says: a man who gives Yuki the best piece is not as cold as he talks.",
-    (g) => `She has saved you the worst part of the ledge, and says so. Then she tells you, gravely, what each sound in the hall is: bark settling, ${g.flags.ship_found ? 'the ship' : 'water somewhere under the roots'}, Mei Lin pretending to be asleep. She has been listening to all of it so that nobody else would have to. She doesn't say that part. She leans on you instead, hard, as if testing a branch.`, // RV2 (M1, Fable's review): the ship only once it is found
+    (g) => `She has saved you the worst part of the ledge, and says so. Then she tells you, gravely, what each sound in the hall is: bark settling, ${g.flags.ship_found ? (g.flags.log_heard ? 'Selene humming under the floor' : 'the ship') : 'water somewhere under the roots'}, Mei Lin pretending to be asleep. She has been listening to all of it so that nobody else would have to. She doesn't say that part. She leans on you instead, hard, as if testing a branch.`, // RV2 (M1, Fable's review): the ship only once it is found
     // v0.11.152 (RP1, RM6; Fable's): the 3rd and 4th nights
     "She moves over for you tonight, a hand's width, which from Ya is a deed of land. She points out the places in the dark where she would set a snare, if the dark had anything in it, and then the place where she would put you, which is here. She appears to have given it thought.",
     "Tonight she takes the edge herself and has you hold her by the wrist, in case, she says, though you have seen her sleep in a tree. For a long time she says nothing, which with Ya is the loudest thing she does. Then she tells you she has decided the tree is not a bad den. It is the highest thing you have heard her say about indoors.",
 ]);
 const DR_HC_LOG = dayReply("heart_camp:3", [
-    (g) => byForm(g, "You play the first part again, just Wren's voice, just the planting. Yuki purrs against your chest the whole way through.", "You play the first part again, just Wren's voice, just the planting. Yuki purrs with her head on your chest the whole way through.", "You play the first part again, just Wren's voice, just the planting. Yuki leans against your shoulder and purrs, very quietly, the whole way through."),
+    (g) => byForm(g, "You play the opening again: only Wren's voice, only the planting. Yuki purrs against your chest from her first word to her last.", "You play the opening again: only Wren's voice, only the planting. Yuki's head is on your chest, and she purrs from her first word to her last.", "You play the opening again: only Wren's voice, only the planting. Yuki leans on your shoulder and purrs, very quietly, from her first word to her last."),
     (g) => byForm(g, "You let it run a little further tonight, as far as the first green shoot, and stop it there. Yuki kneads your coat through the whole of it, slowly, and the bond says nothing at all.", "You let it run a little further tonight, as far as the first green shoot, and stop it there. Yuki lies along your side with one paw across your knees, as if the log might try to leave, and the bond says nothing at all.", "You let it run a little further tonight, as far as the first green shoot, and stop it there. Yuki sits against you with her ears tipped toward Wren's voice. \"She sounds tired,\" she says at the end. \"She sounds like you.\""),
     // v0.11.152 (RP1, RM6; Fable's): the 3rd and 4th nights
     (g) => byForm(g, "You don't play it tonight. You only hold it. Yuki sits on your knee with one paw resting on the log, as on a pulse. *Still there,* says the bond, and that is the whole of the evening.", "You don't play it tonight. You only hold it. Yuki lies with her chin on your knee and her nose against the log, as against a pulse. *Still there,* says the bond, and that is the whole of the evening.", "You don't play it tonight. You only hold it. Yuki sits beside you with two fingers resting on the log, as on a pulse. \"Still there,\" she says, and that is the whole of the evening."),
@@ -59,12 +59,12 @@ const HC_POOLS = { heap: HC_HEAP, ya: HC_YA_WATCH, mei: HC_MEI_WATCH };
 /** RV1 (M2): which version of heart_camp's second paragraph tonight. */
 const hcPool = (g) => (trio(g) >= 3 ? 'heap' : ya(g) ? 'ya' : 'mei');
 const DR_SP_IN = dayReply("heart_spring:0", [
-    "Ya spends the whole time trying to drown you, then trying to get you to stop being so stiff, then, briefly, very effectively, not trying to do anything at all except sit closer.",
+    "Ya gives the first half to drowning you and the second to making you less stiff. Then, briefly and to great effect, she drops every project but one, which is sitting closer.",
     "Ya has given up on drowning you and taken up floating you instead, one hand under your back, issuing instructions. You are bad at it. She is patient about that, which is new, and stays close after the lesson is over, which isn't.",
     "Ya has ruled that you can float and moved on to the next lesson, which is holding your breath, and which she teaches by sitting on you. You come up to find her laughing and Mei Lin, at the far end, very carefully not. Afterwards Ya leans back against your chest as if you were the side of the pool, and stays there.", // v0.11.152 (RP1, RM8; Fable's): the 3rd day
 ]);
 const DR_SP_WASH = dayReply("heart_spring:1", [
-    "Mei Lin washes beside you and tells you, without looking, that you are a coward. She doesn't sound like she minds.",
+    "Mei Lin washes next to you, eyes front, and informs the wall that you are a coward. She says it fondly enough.",
     "Mei Lin takes the place next to yours at the far end and passes you the washcloth without turning her head. Cowards, she remarks, at least get clean.",
     "Mei Lin keeps her eyes on the wall and her elbow, now and then, against yours. She says the far end is the respectable end. She has clearly decided this herself.",
 ]);
@@ -90,7 +90,7 @@ const both = (g) => likesMei(g) && likesYa(g);
 /* v0.11.124 (owner picks NX1, NF1; texts by Fable, MAINs): the log scene's Yuki lines by the shape she has (`ykShape`); since v0.11.125
  * (FM1, PM) her current form, as the picture ('cat', 'tiger' (the great root-kin), 'human'). The cat lines are the old ones. */
 const LOG_LOOK = {
-    cat: 'Yuki looks up at you. Through the bond: *what do we do.*',
+    cat: 'From your lap, Yuki looks up at you. Through the bond: *what do we do.*',
     tiger: 'Yuki looks at you, level, gold eye to eye. Through the bond: *what do we do.*',
     human: 'Yuki looks down at you. "What do we do," she says. It doesn\'t come out as a question.',
 };
@@ -100,7 +100,7 @@ const LOG_HOLD = {
     human: 'Say nothing. Hold the log. Hold Yuki\'s hand.',
 };
 const LOG_JUDGE = {
-    cat: 'Yuki sits in the middle of the three of you like a small white judge, and through the bond, very primly: *about time.*',
+    cat: 'Yuki installs herself between the three of you like a small white judge taking the bench, and through the bond, very primly: *about time.*',
     tiger: 'Yuki lies down around the three of you like a large white verdict, her tail across everybody\'s feet, and through the bond, very primly: *about time.*',
     human: 'Yuki sits down facing the three of you, human, her tail tucked round her feet, like a small judge in a high black collar. "About time," she says aloud, very primly.',
 };
@@ -196,7 +196,7 @@ Both, you think. More the second.`,
             const h = hour(g);
             const w = byDayLast(g, HALL_WHEN, 'heart_hub'); // ST5; RV1 (CL): a stay past five days keeps the fifth
             const when = h < 6 || h >= 20 ? w[0] : h < 11 ? w[1] : h < 16 ? w[2] : w[3];
-            const where = !g.flags.roots_done ? 'The hall goes down as well as up. Under its floor the root-galleries begin, black and deep.' : !g.flags.ship_found ? 'Under the roots, you now know, lies a thing that is not tree.' : !g.flags.log_heard ? 'The ship is down there, waiting, and so is whatever it means to tell you.' : !g.flags.guardian ? 'Below the ship, behind a door of grown bone, something sings on in its sleep.' : !g.flags.seed ? 'The way into the heart-chamber stands open.' : 'You have what you came for, and the tree knows that as well as you do.';
+            const where = !g.flags.roots_done ? 'The hall goes down as well as up. Under its floor the root-galleries begin, black and deep.' : !g.flags.ship_found ? 'Under the roots, you now know, lies a thing that is not tree.' : !g.flags.log_heard ? 'The ship is down there, waiting, and so is whatever it means to tell you.' : !g.flags.guardian ? 'Below Selene, behind a door of grown bone, something sings on in its sleep.' : !g.flags.seed ? 'The way into the heart-chamber stands open.' : 'You have what you came for, and the tree knows that as well as you do.';
             return `${when}
 
 ${where}
@@ -227,13 +227,13 @@ ${pantry(g)} ${g.james.hp < jamesHpMax(g) * 0.5 ? 'You are hurt.' : ''}${late(g)
 
     hall_listen: {
         id: 'hall_listen', title: 'The Grain', art: 'heart_hall', place: PIN,
-        text: (g) => `You sit in the middle of the hall with your palms flat on the floor and let your Convergence go down into the grain.
+        text: (g) => `You sit down in the middle of the hall, lay both palms flat on the floor, and send your Convergence down into the grain.
 
-It's like reading a library by touch. Every ring is a year. Every year was a song: you can feel the shape of them, pressed into the wood like grooves in a record, centuries of them, one after another, each a little different, each *warm* — and then, about four hundred rings in from the bark, they stop.
+It is a library read by touch. A ring for every year, and in every year a song: they are pressed into the wood like the grooves of a record, century upon century, no two alike, every one of them *warm*. Then, some four hundred rings in from the bark, they stop.
 
-Not fade. Stop. The last ring is ragged, scorched, wrong. After it there is nothing but dead growth, grey on grey, the tree making wood out of habit while there was nothing left inside it to sing.
+They don't fade. They stop. The last ring is ragged, scorched, wrong. Beyond it there is only dead growth, grey on grey: a tree laying down wood out of habit, with nothing left inside it to sing.
 
-${byForm(g, 'Yuki puts her paw on the back of your hand.', 'Yuki rests her chin on the back of your hand.', 'Yuki puts her hand on the back of yours.')} Through the bond, very simply: *someone did this.*`,
+${byForm(g, 'Yuki puts her paw on the back of your hand. Through the bond, very simply: *someone did this.*', 'Yuki rests her chin on the back of your hand. Through the bond, very simply: *someone did this.*', 'Yuki puts her hand on the back of yours. "Someone did this," she says, very simply.')}`,
         choices: [
             { text: 'Read the last living ring, the scorched one. Carefully.', check: { skill: 'Convergence Use', dc: 4, band: 'challenging' }, time: 40, do: (g) => { g.flags.hall_song = true; return ['Fire, drawn on with a brush. Hands, a great many hands. And over them one voice, perfectly calm, giving orders. If you ever meet so much as its echo, you will know it.']; }, failDo: (g) => { g.flags.hall_song = true; g.james.hp -= 2; return ['The ring burns you back. Not badly. Badly enough. −2 HP.']; }, to: 'heart_hub' },
             { text: 'Take your hands off the floor. Enough for now.', do: set('hall_song'), to: 'heart_hub' },
@@ -256,7 +256,7 @@ ${ya(g) ? '"Bugs," says Ya, deeply satisfied, and takes a new grip on her spear.
     },
     ring_forced: {
         id: 'ring_forced', title: 'The Ring-Chambers', art: 'heart_hall', place: `${PIN} — the galleries`,
-        text: (g) => `The bone wall comes out thin, and they come through it like it's paper.${byForm(g, '', " Yuki has the gallery behind you, all of it, wall to wall. *I can't turn round in here,* says the bond. *So we are going forward.*", " Yuki looks at the hole, then at you. \"I have watched you make thicker soup,\" she says, and comes up level with your shoulder.")}`, /* v0.11.131 (XB2, FL; Fable's MAIN): the great root-kin */
+        text: (g) => `Your wall of bone comes up thin, and the grubs come through it as through wet paper.${byForm(g, '', " Yuki has the gallery behind you, all of it, wall to wall. *I can't turn round in here,* says the bond. *So we are going forward.*", " Yuki looks at the hole, then at you. \"I have watched you make thicker soup,\" she says, and comes up level with your shoulder.")}`, /* v0.11.131 (XB2, FL; Fable's MAIN): the great root-kin */
         choices: [{ text: 'Fine.', combat: (g) => husks(g, 'ring_won', 'ring_lost'), to: 'ring_won' }],
     },
     ring_won: {
@@ -272,9 +272,9 @@ You hold it for longer than you would want anybody to see. ${ya(g) ? 'Ya sees. S
     ring_lost: {
         id: 'ring_lost', title: 'Retreat', art: 'heart_hall', place: `${PIN} — the galleries`,
         enter: (g) => { g.flags.rings_done = true; return []; },
-        text: (g) => `You back out of the rings with grubs on your heels and splinters in your arms, and ${ya(g) ? 'Ya' : 'Mei Lin'} drops a shelf on the doorway behind you. It holds. Mostly.${byForm(g, '', " Yuki is already out: she backed the whole length of the gallery ahead of you, because the rings were grown for gardeners and there is nowhere in them to turn that much cat round. She sits down and starts on the splinters in her forepaw.", " Yuki is out already, standing clear with her tail held up off the floor, taking splinters out of her sleeve one by one. \"They have the shelves,\" she says. \"I don't see why they need us as well.\"")}
+        text: (g) => `You leave the rings backwards, with grubs at your heels and splinters in both arms, and ${ya(g) ? 'Ya' : 'Mei Lin'} brings a shelf down across the doorway after you. It holds. Mostly.${byForm(g, '', " Yuki is already out: she backed the whole length of the gallery ahead of you, because the rings were grown for gardeners and there is nowhere in them to turn that much cat round. She sits down and starts on the splinters in her forepaw.", " Yuki is out already, standing clear with her tail held up off the floor, taking splinters out of her sleeve one by one. \"They have the shelves,\" she says. \"I don't see why they need us as well.\"")}
 
-"We'll leave those rooms to the bugs," ${ya(g) ? 'Ya says, picking a splinter out of her own forearm with her teeth' : 'Mei Lin says, white-faced'}. Nobody argues.`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line; RB2 (RL): Fable's redraft after the review
+"The bugs can keep those rooms," ${ya(g) ? 'says Ya, and draws a splinter out of her own forearm with her teeth' : 'says Mei Lin, white to the lips'}. Nobody argues.`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line; RB2 (RL): Fable's redraft after the review
         choices: [{ text: 'Back to the hall.', time: 30, to: 'heart_hub' }],
     },
 
@@ -339,11 +339,11 @@ Your heart begins to go very fast.`,
     roots_fall: {
         id: 'roots_fall', title: 'The Shaft', art: 'heart_roots', place: `${PIN} — the roots`,
         enter: (g) => { g.james.hp = Math.max(1, g.james.hp - 4); return ['You come down the last few metres all at once. −4 HP.']; },
-        text: (g) => `Something gives — a ridge, a rung, your grip — and you do the last bit the fast way. You land on your back in dust that has had four hundred years to get this soft, and lie there looking up at ${ya(g) ? 'Ya\'s face at the top of the shaft, which is laughing so hard she has to hold on to the wall' : 'Mei Lin\'s face at the top of the shaft, white and furious'}.
+        text: (g) => `Something lets go (a ridge, a rung, your own hand) and you take the rest of the shaft at speed. You land flat on your back in dust that has spent four centuries getting this soft, and stay there, looking up at ${ya(g) ? 'Ya\'s face at the top of the shaft; she is laughing so hard that she needs the wall to stay upright' : 'Mei Lin\'s face at the top of the shaft, white and furious'}.
 
-"*Alive*," you report. It comes out higher than you'd like.
+"*Alive*," you report, rather higher than you meant to.
 
-${byForm(g, "Yuki climbs down after you, perfectly, and sits on your chest, and looks at you.", "Yuki climbs down after you, perfectly, the whole white length of her, and puts one paw on your chest, and looks at you.", "Yuki climbs down after you, perfectly, in a dress, and stands over you, and looks at you.")}`,
+${byForm(g, "Yuki climbs down after you, perfectly, and sits on your chest, and looks at you.", "Yuki climbs down after you, perfectly, the whole white length of her, and puts one paw on your chest, and looks at you.", "Yuki climbs down after you, perfectly, in a floor-length qipao, and stands over you, and looks at you.")}`,
         choices: [{ text: 'Get up. Wait for the others. Go on.', time: 20, to: 'roots_dark' }],
     },
     roots_dark: {
@@ -372,9 +372,9 @@ Past the chamber the tunnel bends, and the walls change. They leave off being ro
     roots_lost: {
         id: 'roots_lost', title: 'Dragged', art: 'heart_roots', place: `${PIN} — the root-galleries`, // v0.11.130 (YB1, LL; Fable's MAINs): the great root-kin's clause (no Ya) and line
         enter: (g) => { g.james.hp = Math.max(1, Math.ceil(g.james.hp)); return []; },
-        text: (g) => `You go down under the husks, and the next thing you know is being hauled up the shaft by the collar of your coat, ${ya(g) ? 'Ya swearing above you in three languages, one of which you\'re fairly sure she invented on the spot' : byForm(g, 'Mei Lin and Yuki between them, which should not be physically possible', "Mei Lin calling the handholds down from the lip above in a voice that is very nearly steady", "Mei Lin and Yuki between them, Yuki in a qipao that has not picked up so much as a thread of husk, which should not be physically possible") /* v0.11.131 (XB2, RH; Fable's MAIN): the human's own */}.${byForm(g, '', " The collar is in Yuki's teeth. She climbs the shaft backwards with you swinging under her chin like a kitten, and when she sets you down at the top there are husk-lines raked down both her flanks, which neither of you mentions.", '')}
+        text: (g) => `The husks close over you. The next thing you know is your own coat collar, and somebody hauling you up the shaft by it: ${ya(g) ? 'Ya, swearing above you in three languages, one of which she has plainly just invented' : byForm(g, 'Mei Lin and Yuki between them, which ought not to be physically possible', "Mei Lin calling the handholds down from the lip above in a voice that is very nearly steady", "Mei Lin and Yuki between them, Yuki in a qipao that has not picked up so much as a thread of husk, which ought not to be physically possible") /* v0.11.131 (XB2, RH; Fable's MAIN): the human's own */}.${byForm(g, '', " The collar is in Yuki's teeth. She climbs the shaft backwards with you swinging under her chin like a kitten, and when she sets you down at the top there are husk-lines raked down both her flanks, which neither of you mentions.", '')}
 
-You'll have to go back down. You both know it. Just — not right now.`,
+You will have to go back down. Everybody here knows it. Not just yet, though.`,
         choices: [{ text: 'Back to the hall. Lick your wounds.', time: 60, to: 'heart_hub' }],
     },
 
@@ -387,9 +387,7 @@ Of course it is. Some part of you has known since the ridge. Knowing it and stan
 
 A seed-ship. One of yours: older than anything you have met outside a museum, and not to be mistaken for anything else. The long teardrop hull, grown out of a single seed. The ribs, curved like the inside of a shell. The hatches, made to open as leaves do. It came down hard, and the front third of it is crushed. Afterwards the tree grew round it and held on, as a hand closes on a thing it is afraid to drop.
 
-There is a name on the hull, in the letters you were taught before you could walk.
-
-*PATIENT ROOT.*
+A ship's name is grown into its bow, in the letters you were taught before you could walk, and you go looking for this one's. The bow is the crushed third. What the fall left of it, the bark has closed over. From where you stand you can see the foot of one letter below the bark's edge, perhaps of two, and nothing you can read.
 
 "James," says Mei Lin, with care. "You're crying."
 
@@ -402,7 +400,7 @@ ${ya(g) ? 'Ya says nothing whatever. She plants herself next to you, shoulder ag
         ],
     },
     ship_touch: {
-        id: 'ship_touch', title: 'Hull', art: 'ship_wreck', place: `${PIN} — the Patient Root`,
+        id: 'ship_touch', title: 'Hull', art: 'ship_wreck', place: `${PIN} — the seed-ship`,
         text: (g) => `The hull is warm.
 
 Not as a stone by the fire is warm. As *skin* is. Your Convergence goes into it without asking, exactly as it goes into your own bones, and the ship *answers*. Faintly; drowsily; like a sleeper half woken in the night who wants to know who's there.
@@ -417,28 +415,34 @@ Mei Lin makes a small sound, one sharp breath in. ${ya(g) ? 'Ya makes a far larg
         choices: [{ text: 'Go in.', time: 15, do: (g) => { g.flags.ship_woke = true; return []; }, to: 'ship_bridge' }],
     },
     ship_bridge: {
-        id: 'ship_bridge', title: 'The Bridge', art: 'ship_bridge', place: `${PIN} — the Patient Root`,
+        id: 'ship_bridge', title: 'The Bridge', art: 'ship_bridge', place: `${PIN} — the seed-ship`,
         enter: (g) => { if (!hasItem(g, 'hearth_log')) { addItem(g, 'hearth_log', 1); return ['+1 Hearth-log (memory seed).']; } return []; },
-        text: (g) => `The bridge is a round room at the heart of the ship, its walls grown in soft folds like the inside of a flower. Seats for six. Nobody in them. You were braced for bodies, and there are none, and you don't know if that's better.
+        text: (g) => `The bridge is a round room at the heart of the ship, and its walls are grown in soft folds, like the inside of a flower. Six seats. All six empty. You had braced yourself for bodies; there are none, and you can't decide whether that is better.
 
-In the middle of the floor, on a pedestal grown up out of the deck, sits a knot of wood the size of two fists, polished by hands. A memory seed. A hearth-log. Every ship carries one. Every child on your world learns how to play one.
+In the middle of the floor the deck has grown itself a pedestal, and on the pedestal sits a knot of wood the size of two fists, polished by hands. A memory seed. A hearth-log. Every ship carries one. Every child on your world is taught to play one.
 
-${g.flags.ship_woke ? 'It\'s already glowing faintly, as if the ship has been holding it up for you to see.' : 'It\'s dark. When you pick it up, it warms in your hand.'}
+${g.flags.ship_woke ? 'It is glowing already, faintly, as though the ship had been holding it up for you to find.' : 'It is dark. It warms when you lift it.'}
 
-You sit in the nearest seat. ${ya(g) ? 'Ya perches on the back of another, crouched like a cat. Mei Lin stands.' : 'Mei Lin stands beside you.'} ${byForm(g, 'Yuki gets into your lap without being asked.', 'Yuki lays her head in your lap without being asked.', 'Yuki sits on the arm of your seat without being asked.')}
+You take the nearest seat. ${ya(g) ? 'Ya perches on the back of another, folded up there like a hunting bird. Mei Lin stays on her feet.' : 'Mei Lin stands at your side.'} ${byForm(g, 'Yuki gets into your lap without being asked.', 'Yuki lays her head in your lap without being asked.', 'Yuki sits on the arm of your seat without being asked.')}
 
-You close your hands around the log.`,
+You close both hands round the log.`,
         choices: [{ text: 'Play it.', time: 30, to: 'ship_log' }],
     },
     ship_log: {
-        id: 'ship_log', title: 'Hearth-Log: Arrival', art: 'ship_log', place: `${PIN} — the Patient Root`,
+        id: 'ship_log', title: 'Hearth-Log: Arrival', art: 'ship_log', place: `${PIN} — the seed-ship`, // v0.11.174 (RV1, M1): her name is Wren's to give
         text: `It doesn't play as a recording plays. It comes in like a memory that belongs to someone else, poured into you.
 
-*A woman's voice, tired and steady. Head Gardener Wren Aldous, of the seed-ship Patient Root, out of the Ninth Grove. Forty souls aboard, and every one a gardener: soil people, seed people. Not one of them has ever held a weapon.*
+*A woman's voice, tired and steady. Head Gardener Wren Aldous, of Selene, out of the Ninth Grove. Forty souls aboard, and every one a gardener: soil people, seed people. Not one of them has ever held a weapon.*
 
-*The drive failed. They don't know why. The fall went on and on. It ended here.*
+Selene.
 
-*"The Qi on this world is sick,"* she says. You can feel her hands, sore from the work. *"Something died here, long before us. A lot of somethings. It's in the air, the water, the soil, and the people here breathe it. It makes them hard, and hungry, and short-lived. Short as we measure a life, at least; I have no other measure with me. We can't mend the drive. So we'll do what we know."*
+You come up out of the memory like a man out of cold water. Every child at home knows that name: one of your Earth's first seed-ships, sent to plant a new world and never heard from again. Nobody ever learned what became of her. She is taught as a question, and you are sitting on her bridge.
+
+Wren hasn't waited.
+
+*She was on course, and then the stars were wrong. Wren is a gardener and says it as one: space folded like a leaf closing, Selene in the crease, and opened on a sky nobody aboard could name. Then her drive failed. The fall went on and on. It ended here.*
+
+*"The Qi on this world is sick,"* she says. You can feel her hands, sore from the work. *"Something died here, long before us. A lot of somethings. It's in the air, the water, the soil, and the people here breathe it. It makes them hard, and hungry, and short-lived. Short as we measure a life, at least; I have no other measure with me. We can't mend her drive. So we'll do what we know."*
 
 *They planted a Hearth.*
 
@@ -446,7 +450,7 @@ The memory shows it to you. Forty people on their knees in a black clearing, sin
         choices: [{ text: 'Keep listening.', time: 30, to: 'ship_log2' }],
     },
     ship_log2: {
-        id: 'ship_log2', title: 'Hearth-Log: The Song', art: 'ship_log', place: `${PIN} — the Patient Root`,
+        id: 'ship_log2', title: 'Hearth-Log: The Song', art: 'ship_log', place: `${PIN} — Selene`,
         text: `*Centuries go by in the log like seasons. Wren is old, and then she is not there. Others speak. The voices change; the song doesn't.*
 
 *The Hearth grows, and keeps growing. Its roots go out under the whole forest, then under the mountains, then past them. Wherever they go, the Qi comes up clean. Animals return. People return. The locals name it the Old Tree. They bring it gifts. They sing to it, badly, in a language it doesn't speak, and it sings back regardless.*
@@ -461,7 +465,7 @@ Next to you, Mei Lin has a hand over her mouth.
         choices: [{ text: 'You know what comes next. Keep listening.', time: 30, to: 'ship_log3' }],
     },
     ship_log3: {
-        id: 'ship_log3', title: 'Hearth-Log: The Lotus', art: 'ship_log', place: `${PIN} — the Patient Root`,
+        id: 'ship_log3', title: 'Hearth-Log: The Lotus', art: 'ship_log', place: `${PIN} — Selene`,
         enter: (g) => { g.flags.log_heard = true; return []; },
         text: (g) => `*Four hundred years ago. The last voice in the log is the tree's own. It has no words, only feeling, and you have never wanted so much to feel nothing.*
 
@@ -479,16 +483,16 @@ You sit in the gardeners' chair with the memory seed going cold in your hands, a
         choices: [{ text: '...', to: 'log_reaction' }],
     },
     log_reaction: {
-        id: 'log_reaction', title: 'What Now', art: 'ship_bridge', place: `${PIN} — the Patient Root`,
-        text: (g) => `Nobody speaks for a while.
+        id: 'log_reaction', title: 'What Now', art: 'ship_bridge', place: `${PIN} — Selene`,
+        text: (g) => `For a while nobody on the bridge says a word.
 
-${g.flags.hall_song ? 'You think of the scorched ring in the hall, the calm voice giving orders. Now you know whose voice it was.\n\n' : ''}${ya(g) ? '"So," Ya says at last, very carefully, which is how you know she\'s furious. "The red men killed the singing tree. And then made everybody eat their pills to fix what *they* broke." She looks at the spear in her hand as though she\'s only just remembered what it\'s for. "I want to bite something. I want to bite something *a lot*."\n\n' : ''}Mei Lin is crying without making any sound at all, the way people in Ashfall have learned to cry. "My father," she says. "My father went up that road to be *honoured*."
+${g.flags.hall_song ? 'You think of the scorched ring in the hall, the calm voice giving orders. Now you know whose voice it was.\n\n' : ''}${ya(g) ? '"So," Ya says at last, very carefully, which is how you know she\'s furious. "The red men killed the singing tree. And then made everybody eat their pills to fix what *they* broke." She looks at the spear in her hand as though she\'s only just remembered what it\'s for. "I want to bite something. I want to bite something *a lot*."\n\n' : ''}Mei Lin is crying without a sound, as people in Ashfall learn to cry. "My father," she says. "My father went up that road to be *honoured*."
 
 ${LOG_LOOK[ykShape(g)] || LOG_LOOK.cat}
 
-What do you do.`,
+And what do you do.`,
         choices: [
-            { text: 'Rage. Let it out. All of it. Somebody should scream for this place, and the gardeners can\'t.', do: (g) => { g.flags.reaction = 'rage'; bumpRel(g, 'Ya', 4, 2); return ['You scream until the whole bridge rings. Faintly, the ship hums with you.']; }, to: 'log_comfort' },
+            { text: 'Rage. Let it out. All of it. Somebody should scream for this place, and the gardeners can\'t.', do: (g) => { g.flags.reaction = 'rage'; bumpRel(g, 'Ya', 4, 2); return ['You scream until the whole bridge rings. Faintly, Selene hums with you.']; }, to: 'log_comfort' },
             { text: 'Grieve. Quietly. These were your people, and they were *gardeners*.', do: (g) => { g.flags.reaction = 'grief'; bumpRel(g, 'Mei Lin', 4, 3); return []; }, to: 'log_comfort' },
             { text: 'Think. A heart can be cut out. Which means a heart can be put back.', check: { skill: 'GU', dc: 4, band: 'challenging' }, do: (g) => { g.flags.reaction = 'study'; g.flags.regrow_idea = true; return ['Somewhere aboard there is a seed-vault. No ship was ever grown without one.']; }, failDo: (g) => { g.flags.reaction = 'study'; return ['The thought gets away from you. It will be back.']; }, to: 'log_comfort' },
             { text: (g) => LOG_HOLD[ykShape(g)] || LOG_HOLD.cat, do: (g) => { g.flags.reaction = 'silent'; bumpRel(g, 'Yuki', 3, 0); return []; }, to: 'log_comfort' },
@@ -496,21 +500,21 @@ What do you do.`,
     },
     // v0.11.129 (CS1, HC; Fable's MAIN): all four fall asleep with the human
     log_comfort: {
-        id: 'log_comfort', title: (g) => (trio(g) >= 2 && both(g) ? 'Between Them' : 'Afterwards'), art: (g) => (trio(g) >= 2 && both(g) ? 'trio' : likesYa(g) && ya(g) ? 'ya_close' : 'mei_lin'), place: `${PIN} — the Patient Root`,
+        id: 'log_comfort', title: (g) => (trio(g) >= 2 && both(g) ? 'Between Them' : 'Afterwards'), art: (g) => (trio(g) >= 2 && both(g) ? 'trio' : likesYa(g) && ya(g) ? 'ya_close' : 'mei_lin'), place: `${PIN} — Selene`,
         enter: (g) => trioStep(g, 3),
         text: (g) => {
             if (logTrio(g)) { // v0.11.124 (NF1, LC1): the same test as Yuki's path beat, which skips this branch
-                return `Later — you don't know how much later — you're sitting on the floor of the bridge with your back against a gardener's chair, and you are not alone.
+                return `Later (how much later, you couldn't say) you are on the floor of the bridge with your back against a gardener's chair, and you are not alone.
 
-Mei Lin is on your left, her head on your shoulder, her hand wound into your sleeve as though you might float away. Ya is on your right, sprawled, one leg over yours, her fingers moving slowly through your hair the way she'd gentle a spooked animal. Neither of them is talking. For once in her life, Ya isn't talking.
+Mei Lin is on your left, with her head on your shoulder and one hand wound into your sleeve, in case you float off. Ya is on your right, sprawled, a leg thrown over yours, her fingers going slowly through your hair as she would gentle a spooked animal. Neither of them is talking. Ya, for once in her life, is not talking.
 
-At some point, without looking, Mei Lin reaches across you and finds Ya's hand, and holds it.
+At some point Mei Lin, without looking, reaches across you, finds Ya's hand, and holds it.
 
-Ya goes very still. Then she grins at the ceiling — that sharp, delighted, dangerous grin — and doesn't say a single word about it, which is, you suspect, the most restraint she has ever shown about anything.
+Ya goes perfectly still. Then she grins up at the ceiling, the sharp, delighted, dangerous grin, and says nothing whatever about it; you suspect it is the most restraint she has shown about anything, ever.
 
 ${LOG_JUDGE[ykShape(g)] || LOG_JUDGE.cat}
 
-It's not a beginning, exactly. But it's not nothing. You fall asleep there, ${byForm(g, 'the three of you', 'the three of you', 'all four of you')}, in the bridge of a dead ship, and it is the one night on this world that you don't dream about falling.`;
+It isn't a beginning, quite. It isn't nothing, either. You fall asleep there, ${byForm(g, 'the three of you', 'the three of you', 'all four of you')}, on Selene's bridge, with her asleep all around you, and it is the one night on this world when you don't dream of falling.`;
             }
             if (likesYa(g) && ya(g) && !likesMei(g)) {
                 return `Ya does not do comfort. You learn this now. What she does is fold down cross-legged right in front of you, her knees against yours, and glare until you look at her.
@@ -532,13 +536,13 @@ She isn't wrong.`;
 
 She leans her forehead on your shoulder and leaves it there. ${ya(g) ? 'From across the bridge Ya watches you both, chin on her knees, with an odd considering look, and for once keeps her mouth shut.' : ''}`;
             }
-            return `Nobody comforts anybody, exactly. That's not what this is.
+            return `Nobody comforts anybody, quite. It isn't that kind of hour.
 
-${ya(g) ? 'Ya prowls the bridge touching things she shouldn\'t, angry and restless. ' : ''}Mei Lin sits with her back to the wall and her knees up, staring at nothing. You sit in Wren Aldous's chair with the hearth-log in your lap${ykPath(g) ? '' : `, ${LOG_SEAT[ykShape(g)] || LOG_SEAT.cat}`}, and the ship hums faintly to itself, the way the very old hum to themselves when they think nobody's listening.
+${ya(g) ? 'Ya prowls the bridge touching things she shouldn\'t, angry and restless. ' : ''}Mei Lin has her back to the wall and her knees drawn up, and looks at nothing. You stay in Wren Aldous's chair with the hearth-log in your lap${ykPath(g) ? '' : `, ${LOG_SEAT[ykShape(g)] || LOG_SEAT.cat}`}, and Selene hums faintly to herself, as the very old do when they think nobody's listening.
 
-After a while Mei Lin says, "Thank you for bringing us here. I think I'd rather know."
+In the end it is Mei Lin who speaks. "Thank you for bringing us here. I think I would rather know."
 
-"Me too," you say. You mean it. It's the worst thing you've ever learned, and you'd rather know.`;
+"So would I," you say, and mean it. It is the worst thing you have ever learned, and you would rather know.`;
         },
         choices: [{ text: 'Go back up to the hall. You all need air, even dead air.', time: 60, to: 'heart_hub' }],
     },
@@ -610,9 +614,9 @@ The observer, you note, has been written into the experiment. The method will ha
                     `Three knocks, deep in the trunk. You have started waiting for them, which is worse than being woken by them. You cannot tell whether they come from the same place as before; the hall gives nothing away. Yuki doesn't growl this time. She looks at the dark, and then at you, and then at the dark. Nobody sleeps well.`,
                     `The three knocks come just when you have decided that tonight they won't. Slow, even, deep in the trunk. Before you can think better of it you knock back, once, on the floor, with one knuckle. Nothing answers. Yuki gives you a long look. Nobody sleeps well, and you least of all.`], 'heart_night:knock'); // v0.11.154 (owner pick PS1, RP1 push 2; Fable's, "ok for texts" 23:05): the 4th (ST5)
             }
-            return byDayLast(g, [`The night is quiet, and the top of the hall is very far off in the dark. ${g.flags.ship_found ? 'Somewhere under you the ship hums in its sleep, and if you listen hard enough you can almost hear forty gardeners breathing.' : 'Somewhere under you a warmth you have no name for yet comes up through the floor, and if you listen hard enough the dead wood almost seems to breathe.'}`,
-                `A quiet night. The embers tick. Far up in the dark a flake of dead bark lets go and takes its time landing. ${g.flags.ship_found ? 'Under the floor the ship keeps up its one low note' : 'Under the floor something you can\'t put a name to yet keeps up one low note'}, and you fall asleep trying to work out the key.`,
-                `Nothing happens in the night, and you lie awake for a while appreciating it. The hall holds the fire's warmth better than a dead thing should. ${g.flags.ship_found ? 'Below you the ship hums on, patient, like a house with one lamp left burning for somebody who is late.' : 'Below you the sap you smelled at the doorway is still moving, slow and patient, like a house with one lamp left burning for somebody who is late.'}`,
+            return byDayLast(g, [`The night is quiet, and the top of the hall is very far off in the dark. ${g.flags.ship_found ? (g.flags.log_heard ? 'Somewhere under you Selene hums in her sleep, and if you listen hard enough you can almost hear forty gardeners breathing along with her.' : 'Somewhere under you the ship hums in its sleep, and if you listen hard enough you can almost hear a crew breathing along with it.') : 'Somewhere under you a warmth you have no name for yet comes up through the floor, and if you listen hard enough the dead wood almost seems to breathe.'}`,
+                `A quiet night. The embers tick. Far up in the dark a flake of dead bark lets go and takes its time landing. ${g.flags.ship_found ? (g.flags.log_heard ? 'Under the floor Selene holds her one low note, asleep and still in tune' : 'Under the floor the ship keeps up its one low note') : 'Under the floor something you can\'t put a name to yet keeps up one low note'}, and you fall asleep trying to work out the key.`,
+                `Nothing happens in the night, and you lie awake for a while appreciating it. The hall holds the fire's warmth better than a dead thing should. ${g.flags.ship_found ? (g.flags.log_heard ? 'Below you Selene hums on, patient, like a house with one lamp left burning for somebody who is a thousand years late.' : 'Below you the ship hums on, patient, like a house with one lamp left burning for somebody who is late.') : 'Below you the sap you smelled at the doorway is still moving, slow and patient, like a house with one lamp left burning for somebody who is late.'}`,
                 `A quiet night, and by now you can tell the hall's quiet from the forest's: this one has a roof on it. The fire settles. Somebody turns over. Under the floor the one low note goes on, and for once you don't try to name it. You let it count you to sleep.`], 'heart_night:quiet'); // v0.11.154 (owner pick PS1, RP1 push 2; Fable's, "ok for texts" 23:05): the 4th (ST5)
         },
         choices: [{ text: 'Morning.', to: 'heart_morning' }],
@@ -636,7 +640,7 @@ ${late(g) && !g.flags.seed ? `The dust hangs in the light this morning without t
     /* ---------- the guardian ---------- */
     guardian_approach: {
         id: 'guardian_approach', title: 'The Bone Door', art: 'guardian', place: `${PIN} — the heart-chamber door`,
-        text: (g) => byDay(g, [(g) => `Below the ship, beyond the place where the roots plait themselves into a single huge braid, there is a door. It isn't grown wood. It is bone: white, ribbed, beautiful, sung into its shape by someone who had your gift and many times your skill.
+        text: (g) => byDay(g, [(g) => `Below Selene, beyond the place where the roots plait themselves into a single huge braid, there is a door. It isn't grown wood. It is bone: white, ribbed, beautiful, sung into its shape by someone who had your gift and many times your skill.
 
 It opens as you come up to it. Behind it lies a chamber like the inside of a seed, and in the chamber something is getting to its feet.
 
@@ -672,13 +676,13 @@ ${g.flags.guardian_lost_day ? `It remembers you. The note goes hard and strange 
     guardian_half: {
         id: 'guardian_half', title: 'Half a Song', art: 'guardian', place: `${PIN} — the heart-chamber`,
         enter: (g) => { g.flags.guardian_talked = true; g.flags.guardian_weak = true; return ['It falters. Part of it is listening. Not a large enough part.']; },
-        text: (g) => `You sing to it. Not out loud — with the Convergence, the way children on your world sing to the house-trees at night so they'll grow straight. *Home. Grove. Gardener. Rest.*
+        text: (g) => `You sing to it. Not with your voice: with the Convergence, as the children of your world sing to the house-trees at night, so that they grow straight. *Home. Grove. Gardener. Rest.*
 
-For a breath it stops. The broken note stutters. The green in its chest flares, and you feel it *recognise* the shape of the words, the shape of you.
+For one breath it stops. The broken note stutters. The green in its chest flares, and you feel it *know* the shape of the words, and the shape of you.
 
-Then the madness closes back over it like water over a stone. *Who comes,* it sings, louder, wrong. *WHO COMES TO THE HEART.*
+Then the madness closes over it again, as water closes over a stone. *Who comes,* it sings, louder, and wrong. *WHO COMES TO THE HEART.*
 
-But it's slower now. Uncertain. Part of it is still listening.${byForm(g, '', " So is Yuki, ears forward, quite still. She heard that song in the same grove you did.", " So is Yuki, ears forward, quite still. \"I know that one,\" she says, to nobody. \"They sang it over both of us.\"")}
+It is slower now, though. Unsure. Some part of it is listening still.${byForm(g, '', " So is Yuki, ears forward, quite still. She heard that song in the same grove you did.", " So is Yuki, ears forward, quite still. \"I know that one,\" she says, to nobody. \"They sang it over both of us.\"")}
 
 ${ya(g) ? '"That was pretty," Ya says, levelling her spear. "Now duck."' : '"James," Mei Lin says, very quietly. "Move."'}`,
         choices: [{ text: 'Fight it — gently, if that\'s a thing.', combat: guardianFight, to: 'guardian_won' }], // v0.11.131 (XB2, FL; RC2, L4; Fable's MAINs): the great root-kin listens too
@@ -799,13 +803,13 @@ ${g.flags.reaction === 'rage' ? 'And after that, you think, somebody in red is g
         },
         text: (g) => `You come out through the split at dawn ${g.flags.guardian === 'calmed' ? 'and the roots are full of birds. You can\'t remember hearing birds here before.' : 'into roots exactly as silent as they were when you came.'}
 
-Behind you, the Old Tree stands as it has stood these four hundred years, grey and enormous and dead. But you look back at it from the last of the roots, and your Convergence brushes it one last time, and from somewhere very deep, very faint, you get a single note.
+At your back the Old Tree stands as it has stood for four centuries: grey, enormous, dead. From the last of the roots you turn all the same, and let your Convergence touch it once more; and out of the deep of it, very faint, comes one note.
 
-Not a broken one. A whole one. Held, like someone humming as they fall asleep.
+Not a broken note. A whole one, and held, as somebody hums who is nearly asleep.
 
 ${trio(g) >= 3 ? 'Ya walks in front, Mei Lin behind, and you in the middle, and every so often one of them reaches back or forward and touches your arm, as if checking you\'re still there.' : ya(g) ? 'Ya leads, as always, not looking back. Mei Lin walks beside you.' : 'Mei Lin walks beside you.'} ${byForm(g, 'Yuki rides on your shoulder with her tail wrapped round your neck.', 'Yuki pads at your side with her tail hooked round your wrist.', 'Yuki walks at your shoulder with her tail wrapped round your wrist.')}
 
-In your hand, or near your heart, the seed sings all the way.`,
+And the seed, whoever has the carrying of it, sings every step of the way.`,
         choices: [{ text: 'Home. To Ashfall.', to: 'rt_start' }],
     },
 };

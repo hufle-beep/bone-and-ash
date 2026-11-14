@@ -7,7 +7,7 @@ import { set, day, hour, daily, markDaily, forestScale, villageScale, grow, eatB
 
 /* v0.11.136 (owner pick NC1, NT1's push 2): replies by day (js/core/lines.js dayReply): the first text is the old reply, the rest Fable's, one for each later day of a Coil. */
 const DR_DISHES = dayReply("supper:2", [
-    "Over the washing water her mother tells you, low and formal, which families owe the Sect what, which houses have lost a child to the road, and which neighbours would sell you for a sack of millet. She does not smile once. It is the most useful hour you have spent on this world.",
+    "Her mother washes the bowls, and over the water she gives you the village, low-voiced and in correct form: what each family owes the Sect, which houses the road has cost a child, which neighbours would hand you over for a measure of millet. Not one smile in all of it. No hour on this world has taught you more.",
     "Tonight it is the Sect's own people, delivered over the washing water in the same low voice: which collector can be shamed in front of his juniors, which one counts the sacks twice, which one takes more than is written. She dries a bowl as she finishes each name. When the last bowl is put away she inclines her head to you, slightly, as one does to a man who has been handed something to carry.",
 ]);
 const DR_WEN_FOREST = dayReply("wen_lesson:forest", [
@@ -35,7 +35,7 @@ const DR_DRILL_F = dayReply("drill:0:f", [
     "The shields turn left. The spears turn right. Both halves do it together, at least.",
 ]);
 const DR_DRILL_SPAR_F = dayReply("drill:1:f", [
-    "The twelve-year-old puts you on your back, then helps you up and apologises with great formality for the disrespect. That is somehow worse.",
+    "The twelve-year-old tips you onto your back, hauls you up again, and begs pardon in full form for the disrespect. Of the two, the pardon hurts more.",
     "One of the old ones hooks your ankle with a boar spear and sets you down like a sack of barley. He then asks, gravely, whether the honoured guest fell on purpose, to teach them something. You say yes.",
 ]);
 
@@ -158,16 +158,16 @@ After that she says nothing until the jar is nearly empty. Then she lets her sho
         enter: (g) => (vday(g) === 2 && !g.flags.night5_done ? nightTo(g, 60) : []), // v0.11.151 (WD1, LN): the slept line
         text: (g) => {
             if (vday(g) !== 2 || g.flags.night5_done) return byForm(g, 'The herb loft smells of mint and drying ginseng, and under it the house breathes. Yuki settles on the middle of your chest, which is also the middle of your sleep. You let her have both.', 'The herb loft smells of mint and drying ginseng, and under it the house breathes. Yuki takes the loft, and leaves you a strip along the wall and one flank for a pillow. The posts creak, consider the matter, and hold.', 'The herb loft smells of mint and drying ginseng, and under it the house breathes. Yuki gives up the stove once the house is dark, stretches out behind you, and takes most of the blanket without discussion. You let her keep it.');
-            if (g.flags.gao_broken) return `Mei Lin shakes you awake in the dark. There is something in her fist, wrapped in cloth: Gao Feng's jade token, which she lifted from his sleeve while he lay in the herbs with his arm on backwards.
+            if (g.flags.gao_broken) return `It is still dark when Mei Lin's hand on your shoulder wakes you. Her other hand is closed on a twist of cloth, and in the cloth is Gao Feng's jade token: she had it out of his sleeve while he was lying in the herbs with his arm pointing the wrong way.
 
-It is warm. It is *pulsing*, faint and slow, like a thing with a heartbeat.
+The jade is warm. It *beats*, slow and faint, as if it kept a pulse of its own.
 
-"Sect tokens talk to each other," she whispers. "Gao got home today. They'll have had his account by now: a mortal, no root, no Qi, who broke a disciple of the Crimson Lotus like a twig." She isn't smiling. "Nobody will believe him. That's worse. They'll want to see for themselves, and this thing will show them exactly where to look."`;
-            if (g.flags.gao_spared) return `A pebble against the shutter wakes you. Then a second.
+"Sect tokens talk to one another," she whispers. "Gao reached home today. By now they've heard him out: a mortal with no root and no Qi snapped a Crimson Lotus disciple like kindling." No smile comes with it. "They won't believe a word. That's the worse half. They'll come and look for themselves, and this will tell them exactly where to stand."`;
+            if (g.flags.gao_spared) return `A pebble clicks off the shutter and wakes you. A second follows it.
 
-Down in the lane, alone in the moonlight, stands Gao Feng. His hand is bandaged and his crimson robe is grey with road dust. He looks younger than he did on the herb slope, and a great deal more frightened.
+Gao Feng is standing in the lane below, by himself, in the moonlight. One hand is in bandages, and the road has dusted his crimson robe grey. On the herb slope he looked older than this, and nowhere near as afraid.
 
-"I have not come to fight," he says, very quietly, and bows: a true bow, the full depth, to a man in a lab coat at a window. "You spared my life. That is a debt. I do not know why you did it, and a debt I do not understand is a debt I cannot repay. It gives me no rest."`;
+"I am not here to fight," he says, hardly above a breath, and he bows: the whole bow, to its full depth, to a man in a lab coat at a window. "You left me my life. That is a debt. Why you did it, I cannot tell, and a debt I do not understand is one I cannot repay. I have not slept on it."`;
             return `${byForm(g, 'Yuki wakes you with four claws and one urgent thought: *fire.*', 'Yuki wakes you with one heavy paw, laid on your chest, and one urgent thought: *fire.*', 'Yuki wakes you with a hand on your shoulder and one word, spoken almost without breath: "Fire."')}
 
 Down in the lane, torchlight. Three men are creeping toward the side of the house, where Mei Lin's herb loft, the one you are sleeping in, stands on its dry wooden posts. The man in front has a pocked face you remember from the herb slope.
@@ -181,15 +181,15 @@ Gao Feng's lackey has come to settle Gao Feng's grudge. With a torch. By night. 
             { text: 'Carry it far into the forest and bury it in the mire.', show: (g) => vday(g) === 2 && !g.flags.night5_done && !!(g.flags.gao_broken), time: 120, check: { skill: 'GU', dc: 3 }, do: (g) => { g.flags.night5_done = true; g.flags.token_silenced = true; return ['Lu Han is welcome to search a swamp for his cousin.']; }, failDo: (g) => { g.flags.night5_done = true; g.james.hp -= 3; return ['You get it buried, and something in the mire bites you for your trouble: −3 HP.']; }, to: 'village_morning' },
             // Gao spared: the visit
             { text: '"Because I\'m not from here. Where I\'m from, we don\'t kill people for being stupid. Go home, Gao."', show: (g) => vday(g) === 2 && !g.flags.night5_done && !!g.flags.gao_spared, check: { skill: 'GU', dc: 3 }, do: (g) => { g.flags.night5_done = true; g.flags.gao_turned = true; return ['He looks up at you until the silence is awkward. Then he tells you all of it: Lu Han is bringing four men, not two. He wants you alive. He takes you for the heir of a hidden sect. "Let him go on thinking so," Gao says, and is gone.']; }, failDo: (g) => { g.flags.night5_done = true; g.flags.gao_warned = true; return ['He does not believe you. He warns you anyway: Lu Han wants you alive. Then the lane is empty.']; }, to: 'village_morning' },
-            { text: 'A bone needle into the post an inch from his ear. "Ask me again and I\'ll explain it slower."', show: (g) => vday(g) === 2 && !g.flags.night5_done && !!g.flags.gao_spared, qi: 3, do: (g) => { g.flags.night5_done = true; g.flags.gao_warned = true; return ['He goes white and tells you, very quickly, that Lu Han wants you alive. Then he runs.']; }, to: 'village_morning' },
+            { text: 'A bone needle into the post an inch from his ear. "Ask me again and I\'ll explain it slower."', show: (g) => vday(g) === 2 && !g.flags.night5_done && !!g.flags.gao_spared, qi: 3, do: (g) => { g.flags.night5_done = true; g.flags.gao_warned = true; return ['The colour leaves his face. Lu Han wants you alive, he says, all in one breath, and then he is running.']; }, to: 'village_morning' },
             // Gao alive and humiliated: arson
             { text: 'Drop out of the loft into the middle of them.', show: (g) => vday(g) === 2 && !g.flags.night5_done && !(g.flags.gao_broken) && !g.flags.gao_spared, combat: arson, to: 'arson_won' },
-            { text: 'Wake the street. Let forty houses deal with three men.', show: (g) => vday(g) === 2 && !g.flags.night5_done && !(g.flags.gao_broken) && !g.flags.gao_spared, check: { skill: 'GU', dc: 4, bonus: (g) => ((g.rel.Village?.f || 0) >= 20 ? 2 : 0) }, do: (g) => { g.flags.night5_done = true; bumpRel(g, 'Village', 6, 0); return ['Shutters bang open the length of the lane. Pock-Face and his friends find themselves facing pitchforks, and leave with fewer teeth than they brought.']; }, fail: 'arson_start', to: 'village_morning' },
+            { text: 'Wake the street. Let forty houses deal with three men.', show: (g) => vday(g) === 2 && !g.flags.night5_done && !(g.flags.gao_broken) && !g.flags.gao_spared, check: { skill: 'GU', dc: 4, bonus: (g) => ((g.rel.Village?.f || 0) >= 20 ? 2 : 0) }, do: (g) => { g.flags.night5_done = true; bumpRel(g, 'Village', 6, 0); return ['Up and down the lane the shutters crash back. Pock-Face and his two friends turn round into a hedge of pitchforks, and go home lighter by several teeth.']; }, fail: 'arson_start', to: 'village_morning' },
         ],
     },
     arson_start: {
         id: 'arson_start', title: 'Torches', art: 'arson', place: `${P} — the lane`,
-        text: (g) => `The street does not wake fast enough. Pock-Face sees you at the window and laughs.${byForm(g, '', " Behind you the loft boards creak as Yuki gets up, all of her. *He's only counted one of us,* says the bond.", " Behind you Yuki is standing already. \"He has counted one of us,\" she says, without much interest.")}`, /* v0.11.131 (XB2, FL; Fable's MAIN): the great root-kin */
+        text: (g) => `The street is too slow to wake. Pock-Face finds you at the window, and he laughs.${byForm(g, '', " Behind you the loft boards creak as Yuki gets up, all of her. *He's only counted one of us,* says the bond.", " Behind you Yuki is standing already. \"He has counted one of us,\" she says, without much interest.")}`, /* v0.11.131 (XB2, FL; Fable's MAIN): the great root-kin */
         choices: [{ text: 'Then it\'s the hard way.', combat: arson, to: 'arson_won' }], // v0.11.169 (CA1, LB; Fable's wording): was "Then it's just you." (Yuki is there in two forms)
     },
     arson_won: {
@@ -205,9 +205,9 @@ That is the moment Ashfall decides you are theirs.`,
     arson_lost: {
         id: 'arson_lost', title: 'Smoke', art: 'arson', place: `${P} — the lane`,
         enter: (g) => { g.flags.night5_done = true; g.flags.loft_burned = true; return []; },
-        text: (g) => `They get past you.${byForm(g, '', " Yuki has one of them flat in the lane under both forepaws, and it is the wrong one: the torch was in the other man's hand. She keeps him all the same, and when the street has finished with the fire it finds it still has somebody to be grave at.", " Yuki has one of them pinned in the lane with her knee between his shoulders, and it is the wrong one: the other man had the torch. She keeps him all the same, so that when the street has finished with the fire there is still somebody left for it to be grave at.")} The loft goes up like paper: a year of Mei Lin's herbs, dried and bundled, gone in one roar of sweet smoke. The street puts it out before it takes the house. Only just.
+        text: (g) => `You don't stop them.${byForm(g, '', " Yuki has one of them flat in the lane under both forepaws, and it is the wrong one: the torch was in the other man's hand. She keeps him all the same, and when the street has finished with the fire it finds it still has somebody to be grave at.", " Yuki has one of them pinned in the lane with her knee between his shoulders, and it is the wrong one: the other man had the torch. She keeps him all the same, so that when the street has finished with the fire there is still somebody left for it to be grave at.")} The loft catches like paper. A year of Mei Lin's herbs, dried, sorted and tied, goes up in a single roar of sweet smoke. The street has the fire out before the house takes, and not by much.
 
-Mei Lin stands in the lane with soot on her face, looking at what is left, and does not say a word. Anything she said would be easier to bear.`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line; v0.11.131 (XB2, AP): she keeps him
+Mei Lin stands in the lane, soot across her face, and looks at what is left. She says nothing at all. Any word from her would be easier to carry than that.`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line; v0.11.131 (XB2, AP): she keeps him
         choices: [{ text: 'Sleep in the kitchen. If you can.', do: (g) => { bumpRel(g, 'Mei Lin', 0, -3); return []; }, to: 'village_morning' }],
     },
 
@@ -228,7 +228,7 @@ Mei Lin stands in the lane with soot on her face, looking at what is left, and d
 Two days until the collectors. The village is being ordinary as loudly as it can. You have those two days to make sure that when the Crimson Lotus walks up that road, what waits at the top of it is a good deal stronger than one confused mycologist and Yuki. The mycologist is where the work is.`
             : `The last day. Tomorrow at sunrise, the collectors.
 
-All of Ashfall is up early, and all of it has found some errand that leads past Mei Lin's house, to see whether you are still there. You are. ${g.flags.loft_burned ? 'What is left of the loft is still smoking a little.' : byForm(g, 'Yuki is sunning herself on the doorstep like a small white guard dog.', 'Yuki is sunning herself across the doorstep like a large white guard dog.', 'Yuki is sunning herself on the doorstep, eyes shut, like a small white guard dog in a black dress.')}`),
+All of Ashfall is up early, and all of it has found some errand that leads past Mei Lin's house, to see whether you are still there. You are. ${g.flags.loft_burned ? 'What is left of the loft is still smoking a little.' : byForm(g, 'Yuki is sunning herself on the doorstep like a small white guard dog.', 'Yuki is sunning herself across the doorstep like a large white guard dog.', 'Yuki is sunning herself on the doorstep, eyes shut, like a white guard dog in a high black collar.')}`),
         choices: [{ text: 'Out into the village.', to: 'ashfall' }],
     },
 
@@ -274,12 +274,12 @@ ${[pantry(g), g.james.satiety < 30 ? 'You are hungry.' : '', g.james.hp < jamesH
 "You don't need any of this," she says, without looking at you. "Why are you here?"
 
 ${g.flags.mei_bruised ? 'Her split lip has scabbed over. She catches you looking at it, and stares back until you look somewhere else.' : ''}`
-            : `The last day on the slopes before the tribute. She cuts twice what she needs and does not say why. You do not ask. You both know: if tomorrow goes badly, there will be no next season for her to cut it in.
+            : `It is the last day on the slopes before the tribute. She cuts double what she needs and offers no reason. You ask for none. It needs no saying: should tomorrow go wrong, she will have no next season to cut in. Halfway along the terrace, with her back to you and the knife still working, she asks again what a man who needs none of this is doing up here.
 
-She talks about her father again, a little. He used to bring her up here and name every plant wrong on purpose, so that she would correct him.`),
+Her father comes up again, briefly. He would walk her up here and get the name of every plant wrong, on purpose, so that she had to put him right.`),
         choices: [
             { text: 'Learn properly. Ask questions, take samples, run the omnitool on everything.', check: { skill: 'GU', dc: 3 }, time: 150, do: (g) => { addItem(g, 'spirit_grass', 2); bumpRel(g, 'Mei Lin', 4, 2); return [`+2 Ninefold spirit grass (trade goods). ${DR_SLOPES(g)}`]; }, failDo: (g) => { addItem(g, 'spirit_grass', 1); bumpRel(g, 'Mei Lin', 2, 1); return ['You cut one stand wrong. She sighs at you as teachers sigh. +1 Ninefold spirit grass.']; }, to: 'ashfall' },
-            { text: 'Answer her question. Honestly.', do: (g) => { bumpRel(g, 'Mei Lin', 3, 5); return ['"Because you\'re here," you say, and then, appalled at yourself: "And the grass is fascinating." She laughs until she has to sit down. On the next terrace an old herb-woman straightens up and stares at her until she stops. It takes some time.']; }, time: 150, to: 'ashfall' },
+            { text: 'Answer her question. Honestly.', do: (g) => { bumpRel(g, 'Mei Lin', 3, 5); return ['"Because you\'re here," you say. You hear it, are appalled, and add: "The grass is also fascinating." She laughs until her legs give up and she sits down in it. One terrace over, an old herb-woman unbends and fixes her with a stare until the laughing stops. The stare is needed for a while.']; }, time: 150, to: 'ashfall' },
         ],
     },
 
@@ -329,9 +329,9 @@ ${g.flags.militia ? 'They are faster than they were, and they stand differently.
             ? `Old Wen pours tea and talks of cultivation as an old farmer talks of weather: without hope, without fear, and in a great deal of exact detail.
 
 Mortal Vessel. Foundation. Core Formation. The realms go up like a ladder into cloud, and each rung costs more than the last. The Sect buys its rungs with villages like this one: grass, grain, children. "A ladder," he says, "is only a ladder while somebody holds the bottom."`
-            : byDay(g, [(g) => `Today he talks about the forest. About the Old Tree at its heart — "before the Sect, before my grandfather's grandfather" — and how, in the hunters' tales, it once sang, and the singing made the forest kind.
+            : byDay(g, [(g) => `The forest is today's lesson. He begins with the Old Tree that stands in the midst of it — "there before the Sect, there before my grandfather's grandfather" — and with what the hunters' tales hold: that it once sang, and the singing made the forest kind.
 
-"Then one day it stopped. And the forest stopped being kind." He turns his good eye on you. ${byForm(g, "\"Your cat has been staring toward it since you came.", "\"Your great beast has been staring toward it since you came.", "\"Your companion has been staring toward it since you came.")} So have you."`, (g) => `He comes back to the forest today, as you thought he might. To the Old Tree — "older than the Sect, older than the oldest grave on the hill" — and to what the hunters' grandfathers said of it: that in the years it sang, a child could sleep under any branch in the Blackroot and wake with nothing worse than dew.
+"Then a day came when it sang no more. And the forest was kind no more." He turns the good eye your way. ${byForm(g, "\"Your cat has been staring toward it since you came.", "\"Your great beast has been staring toward it since you came.", "\"Your companion has been staring toward it since you came.")} So have you."`, (g) => `He comes back to the forest today, as you thought he might. To the Old Tree — "older than the Sect, older than the oldest grave on the hill" — and to what the hunters' grandfathers said of it: that in the years it sang, a child could sleep under any branch in the Blackroot and wake with nothing worse than dew.
 
 "I do not say it is true. I say it was said, and by serious men." He turns his cup a quarter turn, exactly. ${byForm(g, "\"Your cat sits facing it. Every day, the same way, like a needle.", "\"Your great beast lies facing it. Every day, the same way, like a needle.", "\"Your companion sits facing it. Every day, the same way, like a needle.")} You do the same, and do not know that you do it."`], 'wen_lesson:forest')),
         choices: [
@@ -346,7 +346,7 @@ Mortal Vessel. Foundation. Core Formation. The realms go up like a ladder into c
         text: (g) => ({
             wolves: byDay(g, ['The hunters warned you about the ash-wolves, and you took it for exaggeration. It was not exaggeration.', `The ash-wolves again. They have not got fewer since the hunters warned you, and they have not got politer. The hunters, to be fair, never said they would.`], `far_hunt:wolves`),
             bull: byDay(g, ['A thornback, and a large one: a bull, twice the size of the one that came to your camp, wearing its spines like a hedge somebody has sharpened.', `A thornback bull again: big as a hay cart, spines like a rack of spears, standing square in the path with the calm of something that has never once had to move.`], `far_hunt:bull`),
-            deer: byDay(g, ['Ash-deer: grey, fine-boned and fast. The hunters say nobody has taken one with an arrow in ten years.', `The ash-deer are in the birches again, grey among grey trunks, stepping as if the ground might complain. One lifts its head and looks straight at you from a hundred paces. The hunters say that is as close as anyone gets.`], `far_hunt:deer`),
+            deer: byDay(g, ['Ash-deer, grey and fast, with bones like reeds. The hunters reckon it ten years since an arrow last brought one down.', `The ash-deer are in the birches again, grey among grey trunks, stepping as if the ground might complain. One lifts its head and looks straight at you from a hundred paces. The hunters say that is as close as anyone gets.`], `far_hunt:deer`),
         }[g.flags.far_kind]),
         choices: [
             { text: 'Fight.', show: (g) => g.flags.far_kind !== 'deer', combat: farHunt, to: 'far_won' },
@@ -363,14 +363,14 @@ Mortal Vessel. Foundation. Core Formation. The realms go up like a ladder into c
     },
     far_lost: {
         id: 'far_lost', title: 'Not Today', art: 'herb_slope', place: 'Blackroot Wilds — past the oak hollow',
-        text: (g) => `You get away, which is the most important part of losing. You reach Ashfall bleeding, and Mei Lin patches you up while explaining, at length, how stupid you are.${byForm(g, '', " Yuki comes in behind you on three good legs and lies down across the doorway. Mei Lin steps over her without breaking off, comes back with the salve, and starts on the cat. The lecture now covers you both.", " Yuki comes in behind you holding one arm with the other, and sits on the doorstep without a word. Mei Lin does not break off. She fetches the salve, turns the arm to the light, and starts on it. The lecture now covers you both.")}`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line
+        text: (g) => `Losing has one part that matters, and you manage it: you get away. You bleed all the road to Ashfall, where Mei Lin patches you and lists, with examples, the ways you are a fool.${byForm(g, '', " Yuki comes in behind you on three good legs and lies down across the doorway. Mei Lin steps over her without breaking off, comes back with the salve, and starts on the cat. The lecture now covers you both.", " Yuki comes in behind you holding one arm with the other, and sits on the doorstep without a word. Mei Lin does not break off. She fetches the salve, turns the arm to the light, and starts on it. The lecture now covers you both.")}`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line
         choices: [{ text: 'Accept the lecture.', time: 60, do: (g) => { bumpRel(g, 'Mei Lin', 2, 2); return [`You let her finish. It takes a while. She sews while she talks, and the angrier she gets, the smaller and neater the stitches become. When she has tied off the last one she presses her thumb on it, hard, and says, "Next time, take me." You do not point out that this is not an argument. It was never meant as one.`]; }, to: 'ashfall' }],
     },
 
     scout: {
         id: 'scout', title: 'The Tribute Road', art: 'ridge', place: 'The road to the Crimson Lotus',
         enter: set('scouted_try'),
-        text: `The road climbs out of Ashfall in long switchbacks toward the mountains. Halfway up stands a waystation: a roofed bench, a shrine with a red lotus carved into it, and, your threads note, fresh marks in the dust where somebody has stood and watched the village.`,
+        text: `Out of Ashfall the road goes up toward the mountains, one long switchback after another. A waystation sits at the halfway turn: a bench under a roof, a shrine with a red lotus cut into the stone, and dust that your threads flag. The marks in it are fresh. Somebody has been standing here, watching the village.`,
         choices: [
             { text: 'Read the ground. Who\'s been here, how many, how long?', check: { skill: 'GU', dc: 4 }, time: 150, do: (g) => { g.flags.scouted = true; return ['Two watchers, three days running, in outer-sect boots. By tomorrow they will know exactly what you are, or believe they do. Good. That can be used.']; }, failDo: () => ['The marks run into one another. Somebody watched. The ground says no more.'], to: 'ashfall' },
         ],

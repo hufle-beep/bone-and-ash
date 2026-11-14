@@ -568,12 +568,21 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md', 'roadmap-act2.md']; // v0.1
     assert(/^## Act 2 \(the owner, 2026-11-14 01:02/m.test(lore) && /never be truly alive again, nor regenerate enough to fly/.test(lore) && /biology, engineering, agriculture, horticulture and gardening are mostly the same thing/.test(lore), 'RA1: Act 2\'s facts in lore.md');
     assert(/Now: e, f, Act 2 \(`roadmap-act2\.md`\), then section 2/.test(r1), 'RA1: the order names Act 2 between f and the retune');
     // v0.11.173 (P6A): parts 5 and 6 done, their lines moved word for word to roadmap-done-3.md; the stasis note in roadmap-act2.md
-    { const d3 = rd('roadmap-done-3.md'); assert(r1.slice(r1.indexOf('### e. '), f).includes('**Parts 5 and 6: done**') && d3.includes('**Part 5, the Blackroot:** **done in v0.11.172**') && d3.includes('**Part 6, the Heart:**') && d3.includes('**Done in v0.11.173**'), 'P6A: parts 5 and 6 done, their lines in roadmap-done-3.md'); }
-    assert(ra.includes('It\'s called the "Sneaky Bastard"') && ra.includes('we will square it when we get there...') && r1.includes('`mei_carried_seed`'), 'P6A (rule 6): the owner\'s 03:50 and 03:57 note in roadmap-act2.md; SD in part 7');
-    for (const t of ['**Part 7, the Return:**', '**Part 8, the Long Forest:**', '**Part 9 (new), the leftovers of parts 1–4:**', '**The label pass:**', '**CM, after part 9**']) assert(r1.slice(r1.indexOf('### e. '), f).includes(t), `RA1: group e has "${t.replace(/\*/g, '')}"`);
+    { const d3 = rd('roadmap-done-3.md'); assert(r1.slice(r1.indexOf('### e. '), f).includes('**Parts 5, 6 and 7: done**') && d3.includes('**Part 5, the Blackroot:** **done in v0.11.172**') && d3.includes('**Part 7, the Return:** **done in v0.11.174**') && d3.includes('**Part 6, the Heart:**') && d3.includes('**Done in v0.11.173**'), 'P6A: parts 5 and 6 done, their lines in roadmap-done-3.md (v0.11.174, P7A: and part 7)'); }
+    assert(ra.includes('It\'s called the "Sneaky Bastard"') && ra.includes('we will square it when we get there...') && rd('roadmap-done-3.md').includes('`mei_carried_seed`'), 'P6A (rule 6): the owner\'s 03:50 and 03:57 note in roadmap-act2.md; SD in part 7');
+    for (const t of ['**Part 8, the Long Forest:**', '**Part 9 (new), the leftovers of parts 1–4:**', '**The label pass:**', '**CM, after part 9**']) assert(r1.slice(r1.indexOf('### e. '), f).includes(t), `RA1: group e has "${t.replace(/\*/g, '')}"`);
     assert(r1.slice(s2).includes('**For the retune, from the open items:**') && r2.slice(r2.indexOf('## 4. '), r2.indexOf('## 5. ')).includes('**Systems from the open items:**') && r2.slice(r2.indexOf('## 6. ')).includes('**The owner\'s calls on the texts:**'), 'RA1: the placed items in section 2, section 4 and section 6');
     const ho0 = ho.slice(ho.indexOf('## Open items'), ho.indexOf('## Decided in chat'));
-    assert(ho0.includes('every open, options later item is on the roadmap') && !/Open, options later \(new in v0\.11\.1\d\d/.test(ho0) && h20.includes('### Open items (v0.11.170; details where noted)'), 'RA1: the handover\'s open items point to the roadmap; the old ones in history-20.md');
+    assert(/every open, options later item is on the roadmap/i.test(ho0) && !/Open, options later \(new in v0\.11\.1\d\d/.test(ho0) && h20.includes('### Open items (v0.11.170; details where noted)'), 'RA1: the handover\'s open items point to the roadmap; the old ones in history-20.md');
+}
+// v0.11.174 (owner picks P7A, SL1, CN1, CA1, RV1; rule 6): the Selene canon in lore.md, Luna in roadmap-act2.md, parallel work in the
+// handover, all word for word; part 7's line in roadmap-done-3.md
+{
+    const rd = (f) => readFileSync(path.join(ROOT, 'project', f), 'utf8');
+    const lore = rd('lore.md'), ra = rd('roadmap-act2.md'), ho = rd('handover.md');
+    assert(lore.includes('## Selene (the owner, 2026-11-14; v0.11.174, picks SL1 and CN1)') && lore.includes('Instead of a meteor shower, she is knocked off course by a spacetime anomaly.') && lore.includes('Never "The ship" "The ship Selene" etc.'), 'P7A (rule 6): the owner\'s Selene words in lore.md');
+    assert(ra.includes('The new, young ship should be called Luna in honour of Selene."') && ra.includes('There was a compartmentalized hammerspace on the ship too'), 'P7A (rule 6): the owner\'s Luna note in roadmap-act2.md');
+    assert(ho.includes('it\'s really different to spending a few more tokens vs to wait for a job to finish for an hours if it can be done in 10 minutes with parallelization...'), 'P7A (rule 6): the owner\'s note on parallel work in the handover');
 }
 // v0.11.144 (owner pick TB1): everything tabled; the Android app is section 0's first item, its five pushes in order, Selene's
 // files named; the handover's open items start with the same; the four done lines moved word for word, not left behind
