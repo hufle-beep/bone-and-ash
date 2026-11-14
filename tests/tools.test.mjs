@@ -588,7 +588,9 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md', 'roadmap-act2.md', 'roadmap
     { const d3 = rd('roadmap-done-3.md'); assert(r1.slice(r1.indexOf('### e. '), f).includes('**Parts 5, 6, 7 and 8: done**') && d3.includes('its stomp texts. **Done in v0.11.175**') && d3.includes('**Part 5, the Blackroot:** **done in v0.11.172**') && d3.includes('**Part 7, the Return:** **done in v0.11.174**') && d3.includes('**Part 6, the Heart:**') && d3.includes('**Done in v0.11.173**'), 'P6A: parts 5 and 6 done, their lines in roadmap-done-3.md (v0.11.174, P7A: and part 7)'); }
     assert(ra.includes('It\'s called the "Sneaky Bastard"') && ra.includes('we will square it when we get there...') && rd('roadmap-done-3.md').includes('`mei_carried_seed`'), 'P6A (rule 6): the owner\'s 03:50 and 03:57 note in roadmap-act2.md; SD in part 7');
     // v0.11.179 (LB1): the label pass done, its old line word for word in roadmap-done-3.md; group e keeps its done line and names CP next
-    assert(rd('roadmap-done-3.md').includes('## Moved in v0.11.179') && rd('roadmap-done-3.md').includes('  - **The label pass:** *(v0.11.178)* measured at 14:16') && r1.slice(r1.indexOf('### e. '), f).includes('**The label pass:** **done in v0.11.179**') && r1.slice(r1.indexOf('### e. '), f).includes('**CP, context packets: next**'), 'LB1: the label pass\'s line moved word for word; CP next in group e');
+    assert(rd('roadmap-done-3.md').includes('## Moved in v0.11.179') && rd('roadmap-done-3.md').includes('  - **The label pass:** *(v0.11.178)* measured at 14:16') && r1.slice(r1.indexOf('### e. '), f).includes('**The label pass:** **done in v0.11.179**') && r1.slice(r1.indexOf('### e. '), f).includes('**CP, context packets:** **done in v0.11.180**'), 'LB1: the label pass\'s line moved word for word; CP done in group e (v0.11.180)');
+    // v0.11.180 (CP1, SZ1): the CP line word for word in roadmap-done-3.md, newest first; group e names CM next
+    assert(rd('roadmap-done-3.md').indexOf('## Moved in v0.11.180') >= 0 && rd('roadmap-done-3.md').indexOf('## Moved in v0.11.180') < rd('roadmap-done-3.md').indexOf('## Moved in v0.11.179') && rd('roadmap-done-3.md').includes('  - **CP, context packets: next** *(v0.11.179, the owner 16:42') && r1.slice(r1.indexOf('### e. '), f).includes('**Next: CM**'), 'CP1: the CP line moved word for word (newest first); CM next in group e');
     // v0.11.177 (P9A): part 9 done, its line word for word in roadmap-done-3.md; group e keeps its done line with part 9's open items
     assert(rd('roadmap-done-3.md').includes('## Moved in v0.11.177') && rd('roadmap-done-3.md').includes('  - **Part 9 (new), the leftovers of parts 1–4:**'), 'P9A: part 9\'s line moved word for word to roadmap-done-3.md');
     for (const t of ['**Part 9, the leftovers: done in v0.11.177**', // v0.11.175 (P8A): part 8 done, in roadmap-done-3.md
@@ -927,6 +929,56 @@ const CL4_SHA = 'bac3bac02069f5cc5ba315d41219d66a55cf75e0fc1aae93dd85c8de5985d1c
     try { out = execFileSync(process.execPath, ['tools/mutate.mjs', path.join(TMP, 'faults.json'), '--root', tree, '--cmd', `"${process.execPath}" check.mjs`, '--jobs', '2', '--out', path.join(TMP, 'mutate.md')], { cwd: ROOT, encoding: 'utf8' }); } catch (e) { code = e.status ?? 1; out = String(e.stdout || e); }
     const md = existsSync(path.join(TMP, 'mutate.md')) ? readFileSync(path.join(TMP, 'mutate.md'), 'utf8') : '';
     assert(code === 1 && /\| F1 \|[^\n]*\| caught \|/.test(md) && /\| F2 \|[^\n]*\| missed \|/.test(md) && /\| F3 \|[^\n]*find not in the file/.test(md) && /\| F4 \|[^\n]*no such file/.test(md) && md.indexOf('| F1 |') < md.indexOf('| F4 |') && readFileSync(path.join(tree, 'js/a.js'), 'utf8').includes('A = 1;'), `PF: caught, missed and not applied, in order, exit 1, the source tree untouched (exit ${code}: ${out.trim().split('\n').pop()})`);
+}
+
+// v0.11.180 (owner picks CP1, SZ1): tools/packet.mjs, the context packets: each field (C1–C7) on the lines v0.11.179's label pass
+// got wrong for want of it (project/research/label-pass-*.md), so a packet that drops one fails here
+{
+    const P = await import('../tools/packet.mjs');
+    const entry = (hub, to) => SCENES[hub].choices.findIndex((c) => c.to === to);
+    // C3: a work menu's text is never drawn, and the hub's entry to it is no label at all (H, R11)
+    assert(P.sceneStatus('rr_scout').kind === 'work menu' && !P.sceneStatus('rr_scout').drawn && P.sceneStatus('rr_hub').kind === 'hub' && P.sceneStatus('rt_ya_talk').kind === 'story', 'CP (C3): rr_scout a work menu (text never drawn), rr_hub a hub, rt_ya_talk a story screen');
+    assert(/^NOT drawn/.test(P.choiceStatus('rr_hub', entry('rr_hub', 'rr_scout'))) && /^NOT drawn/.test(P.choiceStatus('wilds', entry('wilds', 'wild_train'))) && P.choiceStatus('rr_scout', 0) === 'a work card: label, then the result', 'CP (C3): the entries to rr_scout and wild_train not drawn; rr_scout\'s options are work cards');
+    // C4: rt_evening's text by all three forms (W1, R6)
+    const ev = P.byForms(SCENES.rt_evening.text).filter((r) => !r.later).map((r) => r.forms.join('/'));
+    assert(ev.includes('cat') && ev.includes('great') && ev.includes('human'), `CP (C4): rt_evening's three forms apart (${ev.join(', ')})`);
+    // C1: a hidden choice's result (forced), a check's success and failure, and the screen after with its labels (R7, R2, R9)
+    const kiss = SCENES.rt_ya_talk.choices.findIndex((c) => c.show && /romance/.test(String(c.show)));
+    const kr = P.forcedResults('rt_ya_talk', kiss);
+    assert(kiss >= 0 && kr.results.some((r) => /kisses back/.test(r.t)) && /^rt_road/.test(kr.then), `CP (C1): rt_ya_talk's hidden kiss forced: its result and rt_road after (${kr.results.map((r) => r.t.slice(0, 30)).join(' | ')})`);
+    const sc = P.forcedResults('rr_scout', 0).results.flatMap((r) => r.how);
+    assert(sc.includes('success') && sc.includes('failure'), `CP (C1): rr_scout's check as a success and a failure (${sc.join(', ')})`);
+    const adv = SCENES.lf_hub.choices.findIndex((c) => /Advances the story/.test(String(c.text)));
+    assert(adv >= 0 && /lf_exit/.test(P.forcedResults('lf_hub', adv).then) && /\[its labels: /.test(P.forcedResults('lf_hub', adv).then), 'CP (C1): lf_hub\'s story choice shows lf_exit after it, with its labels');
+    assert(P.storyLines(['GU 0.5 / DC 2 — failure', 'GU +2 XP', 'Starving: −2 HP', 'You see what went wrong. (Intuitive Aptitude: +0.5 on this next time.)', 'You smell moss.']).join('|') === 'You smell moss.', 'CP (C1): the engine\'s lines left out of a result');
+    // C2: the bot run (20 games): days, hours, picks per game; rt_ashfall reached after noon (R3), a drill taken more than once (F1)
+    const seen = P.seenAt(20, new Set(['rt_ya_talk']));
+    assert(seen.rt_ashfall && seen.rt_ashfall.hours[1] > 12 && Object.keys(seen).some((k) => /^fo_drill:\d+$/.test(k) && seen[k].maxPicks > 1), `CP (C2): rt_ashfall seen till hour ${seen.rt_ashfall?.hours[1]}; a Fallout drill picked twice in a game`);
+    assert(P.whenCode({ show: Object.assign(() => true, { dailyKey: 'x' }) })[0] === 'once a day (key x)' && /^show: /.test(P.whenCode({ show: (g) => g.flags.a })[0]), 'CP (C2): a daily key in words, other conditions as code');
+    // C5 + C6 + the packet: whole texts by paragraph, the labels that lead in, results only for marked lines
+    const pk = P.packet(['rt_ya_talk', 'rr_scout'], { marks: new Set([`rt_ya_talk:${kiss}`]), seen });
+    const yk = pk.slice(pk.indexOf('## rt_ya_talk'), pk.indexOf('## rr_scout'));
+    assert(/^¶1 /m.test(pk) && /led in by \(C6\): rt_road\[\d+\]/.test(yk) && /work menu of rr_hub/.test(pk) && (yk.match(/result \(C1/g) || []).length >= 1 && (yk.match(/^> \[/gm) || []).length === SCENES.rt_ya_talk.choices.length && /◆/.test(yk), 'CP: the packet has ¶ texts, C6, C3, and every label with the marked one\'s result');
+    const unmarked = yk.split(/\n(?=> \[)/).filter((b) => b.startsWith('> [') && !b.includes('◆'));
+    assert(unmarked.length && unmarked.every((b) => !/result \(C1/.test(b) && /when \(C2\)/.test(b) && /drawn \(C3\)/.test(b)), 'CP: the other labels on the screen with C2 and C3, no results');
+    assert(P.packet(['rr_scout'], { seen }).includes('result (C1, success'), 'CP: a scene named bare gets every line\'s result');
+    // tags for whole-game reads
+    const tg = P.tags(['rr_scout', 'rr_hub'], seen);
+    assert(/^rr_scout \[work menu, text never drawn/m.test(tg) && /NOT drawn: the entry to the work menu rr_scout/.test(tg), 'CP (tags): rr_scout\'s text and the hub\'s entry marked never drawn');
+    // C7: the check before a handover, on drafts the label pass had (F4, R10, W7, R3)
+    const notes = P.checkDrafts([{ key: 'rt_yk_talk', text: 'Gold eyes, level.' }, { key: 'yuki_path', text: 'Her ears stay forward.' }, { key: 'fo_drill:0', text: 'Drill the line: shields of bone, spears behind, nobody alone.' }, { key: 'rt_ashfall', text: 'Cleaner than this morning\'s.' }, { key: 'x', text: 'A plain new line.' }], { seen });
+    const has = (kind, key) => notes.some((n) => n.kind === kind && n.key === key);
+    assert(has('tic', 'rt_yk_talk') && has('pair', 'yuki_path') && has('run', 'fo_drill:0') && has('time', 'rt_ashfall') && !notes.some((n) => n.key === 'x'), `CP (C7): the tic, "ears … forward", the drill's reused run, "this morning" found; a plain line passes (${notes.map((n) => `${n.kind}:${n.key}`).join(', ')})`);
+    // the command line writes a packet file
+    let cli = '';
+    try { cli = execFileSync(process.execPath, ['tools/packet.mjs', 'rr_scout:1', '--games', '3', '--out', path.join(TMP, 'pk.md')], { cwd: ROOT, encoding: 'utf8' }); } catch (e) { cli = String(e.stdout || e); }
+    const pf = existsSync(path.join(TMP, 'pk.md')) ? readFileSync(path.join(TMP, 'pk.md'), 'utf8') : '';
+    assert(/^packet: /.test(cli) && pf.startsWith('## rr_scout') && pf.includes('◆'), 'CP: node tools/packet.mjs writes the packet (--out)');
+    // the rules point at it
+    const rules = readFileSync(path.join(ROOT, 'CLAUDE.md'), 'utf8');
+    const r10 = (rules.match(/^10\. .*$/m) || [''])[0];
+    assert(/context packets/.test(r10) && /tools\/packet\.mjs/.test(r10) && /--check/.test(r10), 'CP: rule 10 names the context packets, tools/packet.mjs and its --check');
+    assert(/tools\/packet\.mjs/.test(readFileSync(path.join(ROOT, 'project/review-checklist.md'), 'utf8')) && /tools\/packet\.mjs/.test(readFileSync(path.join(ROOT, 'project/working-agreement.md'), 'utf8')), 'CP: the review checklist and the working agreement name tools/packet.mjs');
 }
 
 rmSync(TMP, { recursive: true, force: true });

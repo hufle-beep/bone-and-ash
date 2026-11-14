@@ -2,6 +2,12 @@
 
 Started in v0.11.150, when `roadmap-done-2.md` had passed about 45 KB. Newer than `roadmap-done-2.md` and `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.180 (word for word; owner picks CP1, SZ1: the context packets done)
+
+### From section 1, group e, as of v0.11.179
+
+  - **CP, context packets: next** *(v0.11.179, the owner 16:42, word for word: "make the next step in the next push the context thing, because this is not good")*: the label pass needed five picks where two are usual, because the lean packets (U1, FP) gave Fable and the read each line with 220 characters of its text and no more: not its result, when it shows (the day, the hour, the flags, repeats), whether its text is drawn in task mode, its form branches. Options first, with numbers.
+
 ## Moved in v0.11.179 (word for word; owner picks LB1, X1, D1, F1, H1, RV2: the label pass done)
 
 ### From section 1, group e, as of v0.11.178
