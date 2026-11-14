@@ -56,6 +56,21 @@ const nextAt = (f) => FAM.find((t) => t.at > f)?.at ?? null;
  * RV1 (NB): non-breaking spaces keep "5/8 to Skilled" whole, so a narrow card wraps only after a "·" (a 390 px phone: 4 of 4 mid-phrase breaks → 0). */
 export const famLine = (card) => (card.next != null ? `${FAM[card.tier].name}\u00a0· ${card.fam}/${card.next}\u00a0to\u00a0${FAM[card.tier + 1].name}` : FAM[card.tier].name);
 
+/** v0.11.177 (owner picks P9A, RV1 C2; Fable's review C): a save resting inside a work menu whose never-drawn text P9A emptied would
+ *  draw an empty screen (no live route leaves the player there; only an old save can). On load it is moved to that menu's hub, without
+ *  running the hub's `enter`. A menu shared by several hubs (the Blackroot's Practice) goes to the hub its last "back" choice names. */
+export function deadMenuHub(g, scenes) {
+    const s = scenes[g?.scene];
+    if (!s) return null;
+    let text; try { text = typeof s.text === 'function' ? s.text(g) : s.text; } catch { return null; }
+    if (text !== '') return null;
+    const hubs = Object.entries(TASK_HUBS).filter(([, cfg]) => (cfg.menus || {})[g.scene] || (cfg.doorMenus || {})[g.scene]).map(([h]) => h);
+    if (!hubs.length) return null;
+    if (hubs.length === 1) return hubs[0];
+    const back = [...(s.choices || [])].reverse().find((c) => c.to);
+    let to; try { to = typeof back?.to === 'function' ? back.to(g) : back?.to; } catch { to = null; }
+    return hubs.includes(to) ? to : hubs[0];
+}
 export const isTaskHub = (g) => !!TASK_HUBS[g.scene] && !g.combat;
 function st(g) {
     if (!g.tasks || typeof g.tasks !== 'object') g.tasks = {};

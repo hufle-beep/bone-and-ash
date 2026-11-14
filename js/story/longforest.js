@@ -39,7 +39,7 @@ const visit = (g, k) => {
     const d = dayKey(g);
     if (g.flags[`lf_seen_${k}_d`] !== d) { g.flags[`lf_seen_${k}_d`] = d; g.flags[`lf_seen_${k}`] = seenOf(g, k) + 1; }
     const known = g.flags.lf_known || {};
-    if (!known[k]) g.flags.lf_known = { ...known, [k]: coilNo(g) };
+    if (!known[k] && !FORGETS.has(k)) g.flags.lf_known = { ...known, [k]: coilNo(g) }; // RV1 (C6): the two people aren't stored
     return [];
 };
 const knownBefore = (g, k) => { const c = (g.flags.lf_known || {})[k]; return !!c && c < coilNo(g); };
