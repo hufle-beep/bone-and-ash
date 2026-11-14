@@ -31,13 +31,19 @@
 ## Mechanics the text touches
 - Times, gains, items and flags unchanged where the brief says so (part 9 C1); a partial result printing a failure line (C5); kept flags that also record what they shouldn't (C6).
 - Loot against the text (cores, items named).
+- **Result lines and the reply splitter (v0.11.181 M1, L1):** a result with speech outside `GAIN_LINES` puts its stat in the reply; a two-sentence result leaves a fragment in the reply. Run every new result through `splitLine`.
+- **Gates that cross another pool's gate on one screen (v0.11.181 L5):** a stage text by friendship next to a closer pool with its own level.
 
 ## Text quality
+- **A voice habit spreading (v0.11.181 M4):** count one image family (here legal words) across the new texts, and from one character to others.
+- **James's expertise against fact and against the game (v0.11.181 M2, M3):** real-world mycology and cooking; what he has already done ("until today").
 - The tic list (`canon-card.md`); new habits replacing old tics (part 4 L9; part 7 L9; part 8 T15).
 - Sentences broken across paragraphs; the lowercase start after a comma (part 8 T18).
 - Beats and jokes lost from the old text (part 8 T16; part 9 T13).
 
 ## Tests (TG)
+- **The usual path, not only a fresh state (v0.11.181 TG1):** a gate tested from zero misses the stage already seen before the return.
+- **New text pools join textlint's POOLS (v0.11.181 TG4)**, or tics and reused runs in them go unchecked.
 - Each new text reachable in a real game, not only with a faked day record (part 4 TG1; part 5 TG1).
 - The render pass covers the branches by day, hour, flag and form (part 4 TG3; part 5 TG3, TG9).
 - Leftovers in the tests (unused imports, dead constants; part 9 C7).

@@ -5,3 +5,6 @@
 export const SOCIAL_LABELS = ['Eat with the others', 'Talk to Ya', 'Find Ya', "Ya's gone", 'Talk to Mei Lin', 'Find Mei Lin', 'Find Mei Lin and Ya'];
 const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 export const SOCIAL = new RegExp(`^(${SOCIAL_LABELS.map(esc).join('|')})(?:\\.|$)`);
+
+// v0.11.181 (RV1, TG7): the bots' eating cards by label (tests/models.test.mjs), here so the story test's CM block reads the same one.
+export const EAT = /^(Eat|Cook|Roast)\b|communal pot|Cook and eat/i;

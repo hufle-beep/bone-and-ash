@@ -14,6 +14,7 @@ import { daily, markDaily, hour } from './common.js';
 import { pickLine, textDay } from '../core/lines.js';
 import { TASK_HUBS } from './task_hubs.js';
 import { HT_LABEL, HT_BODY, HT_CLOSE } from './house_texts.js';
+import { kitchenOnce, kitchenText, kitchenLabel } from './kitchen.js'; // v0.11.181 (SP1, KG1): the mother's kitchen by her friendship
 
 export { HT_LABEL, HT_BODY, HT_CLOSE };
 export const HT_MINUTES = 10; // like Yuki's card (DR2)
@@ -53,7 +54,8 @@ function textOf(g, k) {
     const body = (g.flags.loft_burned && HT_BODY[k][`${slot}-burned`]) || HT_BODY[k][slot]; // MR1 (M4): after the arson night
     const [pool, i] = String(g.flags[`${k}_time_close`] || '').split('|');
     const line = HT_CLOSE[pool]?.[Number(i)];
-    return line ? `${body}\n\n${line}` : body;
+    const kit = k === 'mother' ? kitchenText(g) : ''; // v0.11.181 (KG1): between her day's text and the closer
+    return [body, kit, line].filter(Boolean).join('\n\n');
 }
 
 export const SCENES_HT = {
@@ -65,7 +67,7 @@ export const SCENES_HT = {
     },
     mother_time: {
         id: 'mother_time', title: 'Mei Lin\'s Mother', art: 'dinner', place: 'Ashfall Hamlet — Mei Lin\'s house', // MR1 (L12)
-        enter: (g) => { markDaily(g, 'mother_time'); bumpRel(g, 'Mother', HT_GAIN, 0); closeOnce(g, 'mother'); return []; },
+        enter: (g) => { markDaily(g, 'mother_time'); bumpRel(g, 'Mother', HT_GAIN, 0); closeOnce(g, 'mother'); kitchenOnce(g, htSlot(g, 'mother')); return []; }, // v0.11.181 (KG1)
         text: (g) => textOf(g, 'mother'),
         choices: [{ text: 'Go on.', time: HT_MINUTES, to: (g) => hubOf(g, 'mother') }], // MR1 (L12): the talk's 10 minutes set here, as the scene now has its own place (no walk)
     },
@@ -80,7 +82,7 @@ export function installHouseTime(SCENES) {
         for (const k of ['wen', 'mother']) {
             const open = daily(`${k}_time`);
             s.choices.push({
-                text: HT_LABEL[k],
+                text: k === 'mother' ? (g) => kitchenLabel(g, HT_LABEL.mother) : HT_LABEL[k], // v0.11.181 (KG1): her label by the kitchen's stage
                 // hidden before the person is met, from 19:00 (M2) and once used today (a hub door, as Yuki's: MR1, L5)
                 show: Object.assign((g) => HT_MET[k](g, hub) && hour(g) < HT_UNTIL && open(g), { dailyKey: `${k}_time` }),
                 time: HT_MINUTES,

@@ -1256,7 +1256,7 @@ for (const form of ['cat', 'human']) {
             if (!/\s/.test(c)) out += c; i++; } return out; }; return code(false); };
       const hash = (t) => createHash('sha256').update(t).digest('hex').slice(0, 16);
       const LABELS = Object.values(RETURN).flatMap((sc) => (sc.choices || []).map((c) => (typeof c.text === 'string' ? c.text : '(fn)')));
-      const PIN = { 'act1_return.js': 'b8f64404a59727db', labels: '898cbbde857ef2e6' }; // v0.11.179 (LB1): the labels re-pinned (the label pass)
+      const PIN = { 'act1_return.js': 'b8f64404a59727db', labels: '58e59f4e08e64332' }; // v0.11.179 (LB1): the labels re-pinned (the label pass); v0.11.181 (KG1): again, the mother's card label on rt_ashfall became a function (by the kitchen's stage)
       const got = { 'act1_return.js': hash(skel(RSRC)), labels: hash(JSON.stringify(LABELS)) };
       for (const [k, v] of Object.entries(PIN)) assert(got[k] === v, `P7A (RV1, TG1): ${k}'s code and ids as pinned in v0.11.174 (${got[k]}; update the pin only with a push that means to change them)`); }
     // TG2: the mechanical parts of the Return's result lines, exactly
@@ -1669,7 +1669,7 @@ for (const form of ['cat', 'human']) {
     const D = 1440;
     // YB: every resting place has the card, last (no choice position changes), a door card, once a waking day
     for (const hub of Object.keys(YT_HUBS)) {
-        const cs = SCENES[hub].choices.filter((c) => !/^(wen|mother)_time$/.test(c.to) && c.to !== 'rt_selene'), last = cs[cs.length - 1]; // v0.11.139 (MW1): Wen's and the mother's cards follow hers; v0.11.174 (SL1, SC): and the Selene story on rt_camp
+        const cs = SCENES[hub].choices.filter((c) => !/^(wen|mother)_time$/.test(c.to) && c.to !== 'rt_selene' && !/^(fo_)?pot_cook$/.test(c.to)), last = cs[cs.length - 1]; // v0.11.139 (MW1): Wen's and the mother's cards follow hers; v0.11.174 (SL1, SC): and the Selene story on rt_camp; v0.11.181 (SP1, PS): and the cook cards
         assert(last.to === 'yk_time' && last.time === 10 && cs.filter((c) => c.to === 'yk_time').length === 1, `TR1 (YB; DR2): ${hub}'s last choice is Yuki's card, 10 min`);
         assert((TASK_HUBS[hub].doors || []).includes('yk_time'), `TR1 (YB): ${hub} shows it as a door card`);
     }
@@ -1807,11 +1807,11 @@ for (const form of ['cat', 'human']) {
     const HT_SLOTS = ['ashfall:1', 'ashfall:2', 'fo_ashfall:1', 'fo_ashfall:2', 'fo_ashfall:3', 'rt_ashfall:1'];
     // MS: on Ashfall's three resting places, after Yuki's card, door cards of 10 minutes, once a waking day
     for (const hub of Object.keys(HT_HUBS)) {
-        const cs = SCENES[hub].choices, tail = cs.slice(-3).map((c) => c.to);
+        const cs = SCENES[hub].choices.filter((c) => !/^(fo_)?pot_cook$/.test(c.to)), tail = cs.slice(-3).map((c) => c.to); // v0.11.181 (SP1, PS): the cook cards come after (kitchen_install.js)
         assert(JSON.stringify(tail) === '["yk_time","wen_time","mother_time"]', `MW1 (MS): ${hub} ends with Yuki's, Wen's and the mother's cards (${tail})`);
         for (const k of ['wen', 'mother']) {
             const c = cs.find((x) => x.to === `${k}_time`);
-            assert(c.time === 10 && c.text === HT_LABEL[k] && c.show.dailyKey === `${k}_time` && (TASK_HUBS[hub].doors || []).includes(`${k}_time`), `MW1 (MS): ${hub}'s ${k} card: 10 min, its label, daily, a door`);
+            assert(c.time === 10 && (typeof c.text === 'function' ? c.text(ensureBars(fresh(1))) : c.text) === HT_LABEL[k] && c.show.dailyKey === `${k}_time` && (TASK_HUBS[hub].doors || []).includes(`${k}_time`), `MW1 (MS): ${hub}'s ${k} card: 10 min, its label, daily, a door`);
         }
     }
     for (const k of ['wen', 'mother']) {
@@ -3141,6 +3141,127 @@ for (let run = 0; run < 20; run++) { // the hunters too slow for the wolves: fo_
     choose(g, SCENES, wake.index);
     assert(g.scene === 'fo_wolf_forced', `v0.11.34: a weak James fails it: fo_wolf_forced (${g.scene})`);
     assert(walkFrom(g, g.scene, new Set(['bl_start', 'coil_end', 'fo_start', 'arrival']), 1500) === true, `v0.11.34: from fo_wolf_forced the walk goes on (run ${run})`);
+}
+// v0.11.181 (owner picks SP1, KG1, D1; group e's CM, push 1): the mother's kitchen by her friendship (K), the communal pot by the
+// village's (PS) and the cook-with-the-women scenes (kitchen.js, kitchen_texts.js, kitchen_install.js)
+{
+    const K = await import('../js/story/kitchen.js');
+    const D = 1440;
+    const { SOCIAL, EAT: EATLIKE } = await import('./lib/social.mjs'); // RV1 (TG7): the bots' own regexes
+    const all = [...Object.values(K.KT_LABEL), ...Object.values(K.KT_UP), ...Object.values(K.KT_DAY).flat(), ...Object.values(K.KT_RETURN), ...K.POT_LINE.ashfall, ...K.POT_LINE.fo, ...Object.values(K.POT_COOK).flatMap((o) => Object.values(o))];
+    assert(all.length === 31 && all.every((t) => typeof t === 'string' && t.length > 10 && !/\[|\]|TODO/.test(t)) && new Set(all).size === 31, `CM (KG1, PS): 31 texts, all filled and distinct (${all.length})`);
+    assert(JSON.stringify(K.KG) === '[8,15,25]' && K.POT_GATE === 90, 'CM (KG1): the gates 8 / 15 / 25; PS: the village\'s 90');
+    const labels = [...Object.values(K.KT_LABEL), K.POT_COOK.ashfall.label, K.POT_COOK.fo.label];
+    assert(labels.every((t) => !EATLIKE.test(t) && !SOCIAL.test(t) && /\.$/.test(t) && t.length < 45), 'CM: the card labels are not read as eating or a talk by the bots, end with a full stop, under 45 characters');
+    assert([...K.POT_LINE.ashfall, ...K.POT_LINE.fo, K.POT_COOK.ashfall.result, K.POT_COOK.fo.result].every((t) => !/[.!?:]$/.test(t)), 'CM (PS): the pot lines and results end bare (the code adds ": +25 satiety.")');
+    { const { GAIN_LINES } = await import('../js/core/replies.js'); // B1: a pot line with speech in it is a meal line (as the old prologue one)
+      const q = [...K.POT_LINE.ashfall, ...K.POT_LINE.fo].filter((t) => /"/.test(t));
+      assert(q.length === 2 && q.every((t) => GAIN_LINES.some((r) => r.test(`${t}: +25 satiety.`))), `CM (B1): the two pot lines with speech are meal lines (${q.length})`); }
+    assert(!/dödölle[\s\S]*dödölle/.test(all.join(' ')) && all.filter((t) => /dödölle|shakshuka/i.test(t)).length === 2, 'CM: two dishes named in all (KU3, KD3b)');
+    // the stage by her friendship
+    const at = (f) => { const g = ensureBars(fresh(66001)); g.rel.Mother = { f, a: 0 }; return g; };
+    assert([0, 7, 8, 14, 15, 24, 25, 150].map((f) => K.kitchenStage(at(f))).join() === '0,0,1,1,2,2,3,3', 'CM (KG1): the stage by her friendship');
+    // her card on the Fallout: the label by stage before the gain, the text after it; body, kitchen, closer
+    const MK = (seed, hub, day, f, flags = {}) => { const g = ensureBars(fresh(seed)); g.coil.act = hub === 'ashfall' ? 0 : 1; g.minutes = (day - 1) * D + 600; Object.assign(g.flags, flags); g.rel.Mother = { f, a: 0 }; goTo(g, SCENES, hub); return g; };
+    const mIdx = (g) => SCENES[g.scene].choices.findIndex((c) => c.to === 'mother_time');
+    const label = (g) => SCENES[g.scene].choices[mIdx(g)].text(g);
+    {
+        const g = MK(66002, 'fo_ashfall', 8, 12);
+        assert(label(g) === K.KT_LABEL[1], `CM (KG1): at 12 the label is stage 1's (${label(g)})`);
+        choose(g, SCENES, mIdx(g));
+        const t = sceneView(g, SCENES).text, paras = t.split('\n\n');
+        assert(g.rel.Mother.f === 15 && paras.length === 3 && paras[0] === HT_BODY.mother['fo_ashfall:1'] && paras[1] === K.KT_UP[2], `CM (KG1): 12 + 3 = 15: stage 2's paragraph, between her day's text and the closer (${paras.length})`);
+        assert(sceneView(g, SCENES).text === t, 'CM: the same text on a redraw');
+        choose(g, SCENES, 0);
+        g.minutes = 8 * D + 600; goTo(g, SCENES, 'fo_ashfall');
+        assert(label(g) === K.KT_LABEL[2], 'CM (KG1): the next day the label is stage 2\'s');
+        choose(g, SCENES, mIdx(g));
+        const p2 = sceneView(g, SCENES).text.split('\n\n');
+        assert(K.KT_DAY[2].includes(p2[1]) && p2[0] === HT_BODY.mother['fo_ashfall:2'], 'CM (KG1): a stage already seen this Coil: a short line of its stage');
+    }
+    {
+        const g = MK(66003, 'fo_ashfall', 9, 0);
+        assert(label(g) === HT_LABEL.mother, 'CM (KG1): stage 0 keeps the old label');
+        choose(g, SCENES, mIdx(g));
+        const p = sceneView(g, SCENES).text.split('\n\n');
+        assert(p.length === 2 && p[0] === HT_BODY.mother['fo_ashfall:2'] && !g.flags.mother_kitchen, 'CM (KG1): below 8 her text as before (body and closer)');
+    }
+    {
+        const g = MK(66004, 'fo_ashfall', 10, 30);
+        choose(g, SCENES, mIdx(g));
+        assert(sceneView(g, SCENES).text.split('\n\n')[1] === K.KT_UP[3] && g.flags.kitchen_seen === 3, 'CM (KG1): a Coil that starts high shows the highest stage\'s paragraph, not the ones below');
+    }
+    for (const [f, s] of [[6, 1], [13, 2], [24, 3]]) { // the return's day: its own line by stage
+        const g = MK(66005 + s, 'rt_ashfall', 20, f);
+        choose(g, SCENES, mIdx(g));
+        assert(sceneView(g, SCENES).text.split('\n\n')[1] === K.KT_RETURN[s], `CM (KG1): the return's day, stage ${s}: its line`);
+    }
+    {
+        const g = MK(66009, 'fo_ashfall', 8, 20, { kitchen_seen: 2 });
+        assert(!KEEP_FLAGS.includes('kitchen_seen') && !KEEP_FLAGS.includes('mother_kitchen') && !KEEP_FLAGS.includes('pot_cook') && !KEEP_FLAGS.includes('fo_pot_cook'), 'CM: the kitchen\'s and the cook scenes\' flags are world flags (they reset with the Coil)');
+        rewind(g); assert(!g.flags.kitchen_seen, 'CM: a rewind forgets the kitchen');
+    }
+    { // RV1 (TG1): the usual path: a stage reached in the Fallout, then the return's day shows its return line
+        const g = MK(66030, 'fo_ashfall', 8, 12); choose(g, SCENES, mIdx(g)); choose(g, SCENES, 0);
+        assert(g.flags.kitchen_seen === 2, 'CM (TG1): stage 2 seen in the Fallout');
+        g.minutes = 19 * D + 600; goTo(g, SCENES, 'rt_ashfall'); choose(g, SCENES, mIdx(g));
+        assert(sceneView(g, SCENES).text.split('\n\n')[1] === K.KT_RETURN[2] && g.rel.Mother.f === 18, 'CM (TG1): then the return\'s day: its stage 2 line, not a day line');
+    }
+    { // RV1 (TG6): the later days' lines vary (pickLine)
+        const g = MK(66031, 'fo_ashfall', 8, 5); const got = []; // 8, 11, 14: stage 1 all three days
+        for (const day of [8, 9, 10]) { g.minutes = (day - 1) * D + 600; goTo(g, SCENES, 'fo_ashfall'); choose(g, SCENES, mIdx(g)); got.push(sceneView(g, SCENES).text.split('\n\n')[1]); choose(g, SCENES, 0); }
+        assert(got[0] === K.KT_UP[1] && K.KT_DAY[1].includes(got[1]) && K.KT_DAY[1].includes(got[2]) && got[1] !== got[2], `CM (TG6): stage 1's paragraph, then two different day lines (${got.map((t) => t.slice(0, 20)).join(' | ')})`);
+    }
+    { // RV1 (TG5; M1, L1): every new result line puts its stat in the gains, none in the reply
+        const { splitLine } = await import('../js/core/replies.js');
+        const res = [...K.POT_LINE.ashfall, ...K.POT_LINE.fo, K.POT_COOK.ashfall.result, K.POT_COOK.fo.result].map((t) => `${t}: +25 satiety.`);
+        const bad = res.filter((t) => { const sp = splitLine(t); return sp.reply !== '' || !/\+25 satiety/.test(sp.gain); });
+        assert(bad.length === 0, `CM (TG5): the stat in the gains, no reply fragment (${bad.map((t) => t.slice(0, 30)).join(' | ')})`);
+    }
+    { // RV1 (TG4): the canon card's tics and the review's habit words in none of the new texts
+        const card = readFileSync(new URL('../project/canon-card.md', import.meta.url), 'utf8');
+        const tics = [...(card.split('\n').find((l) => /\*\*Tics to avoid:\*\*/.test(l)) || '').matchAll(/"([^"]{4,40})"/g)].map((m) => m[1].toLowerCase()).filter((t) => !/[{}]/.test(t));
+        const txt = all.join(' ').toLowerCase();
+        const hit = tics.filter((t) => txt.includes(t));
+        assert(tics.length > 5 && hit.length === 0, `CM (TG4): no canon-card tic in the new texts (${hit.join(', ')})`);
+        const legal = (all.join(' ').match(/acquittal|jurisdiction|objection|charge sheet|finding|ruling|treaty|boundary stone|hostage|concede|witness|argument/gi) || []).length;
+        assert(legal <= 4, `CM (RV1, M4): legal images at most 4 (${legal})`);
+    }
+    // PS: the pot's line by the village's friendship and the day
+    const pot = (hub, day, v, flags = {}) => { const g = ensureBars(fresh(66010 + day)); g.coil.act = hub === 'ashfall' ? 0 : 1; g.minutes = (day - 1) * D + 600; Object.assign(g.flags, flags); g.rel.Village = { f: v, a: 0 }; g.james.satiety = 40; goTo(g, SCENES, hub);
+        const i = SCENES[hub].choices.findIndex((c) => c.text === 'Eat at the communal pot.'); return { g, out: choose(g, SCENES, i) }; };
+    for (const [day, i] of [[8, 0], [9, 1], [10, 2]]) {
+        const hi = pot('fo_ashfall', day, 90), lo = pot('fo_ashfall', day, 89);
+        assert(K.potLine(hi.g, 'fo') === `${K.POT_LINE.fo[i]}: +25 satiety.`, `CM (PS): the Fallout's Day ${day}, from 90: its line`);
+        assert(K.potLine(lo.g, 'fo') === null, 'CM (PS): below 90 the old line');
+        assert([hi, lo].every((r) => r.g.james.satiety > 60 && r.g.james.satiety <= 65), `CM (PS): the pot still gives 25 (less the half hour's hunger: ${hi.g.james.satiety})`);
+    }
+    assert(K.potLine(pot('ashfall', 5, 120, { vday: 2, long: true }).g, 'ashfall') === `${K.POT_LINE.ashfall[0]}: +25 satiety.` && /banners/.test(K.POT_LINE.ashfall[1]) && !/banners/.test(K.POT_LINE.ashfall[0]), 'CM (RV1, TG2): vday 2 reads the first slot; the red banners only on the eve\'s');
+    assert(K.potLine(pot('ashfall', 4, 120, { vday: 1, long: true }).g, 'ashfall') === `${K.POT_LINE.ashfall[0]}: +25 satiety.` && K.potLine(pot('ashfall', 6, 120, { vday: 3, long: true }).g, 'ashfall') === `${K.POT_LINE.ashfall[1]}: +25 satiety.`, 'CM (PS): the prologue\'s two slots (the eve from vday 3, as the house texts)');
+    {
+        const src = readFileSync(new URL('../js/story/ashfall.js', import.meta.url), 'utf8') + readFileSync(new URL('../js/story/act1_fallout.js', import.meta.url), 'utf8');
+        assert((src.match(/potLine\(g, '(ashfall|fo)'\) \?\? '/g) || []).length === 2, 'CM (PS): both pots fall back to their old line');
+    }
+    // PS: the cook scene: the gate, the hours, once a Coil, 30 + 60 minutes, the gains, the pot closed for the day
+    for (const [hub, scene, flag, day, act] of [['ashfall', 'pot_cook', 'pot_cook', 5, 0], ['fo_ashfall', 'fo_pot_cook', 'fo_pot_cook', 9, 1]]) {
+        const mk = (v, h) => { const g = ensureBars(fresh(66020)); g.coil.act = act; g.minutes = (day - 1) * D + h * 60; Object.assign(g.flags, { long: true, vday: 2 }); g.rel.Village = { f: v, a: 0 }; g.rel.Mother = { f: 10, a: 0 }; g.james.satiety = 40; goTo(g, SCENES, hub); return g; };
+        const ci = (g) => SCENES[hub].choices.findIndex((c) => c.to === scene);
+        const open = (g) => SCENES[hub].choices[ci(g)].show(g);
+        assert((TASK_HUBS[hub].doors || []).includes(scene) && ci(mk(150, 10)) === SCENES[hub].choices.length - 1, `CM (PS): ${hub}: the cook card is the last choice, a door card`);
+        assert(!open(mk(89, 10)) && open(mk(90, 10)) && !open(mk(150, 8)) && open(mk(150, 9)) && open(mk(150, 14)) && !open(mk(150, 15)), `CM (PS): ${hub}: from the village's 90, 09:00–14:59`);
+        const g = mk(150, 10), m0 = g.minutes;
+        choose(g, SCENES, ci(g));
+        assert(g.scene === scene && g.flags[flag] === true && sceneView(g, SCENES).text === K.POT_COOK[hub === 'ashfall' ? 'ashfall' : 'fo'].text, `CM (PS): ${scene}: its text, the flag set`);
+        choose(g, SCENES, 0);
+        const mum = hub === 'fo_ashfall' ? 12 : 10; // RV1 (L4): Mother +2 only in the Fallout's, where she is in the scene
+        assert(g.scene === hub && g.minutes - m0 === 90 && g.james.satiety > 58 && g.james.satiety <= 65 && g.rel.Mother.f === mum && g.rel.Village.f === 150, `CM (PS): ${scene}: 90 minutes, +25 satiety, Mother ${mum - 10 ? '+2' : 'unchanged'}, the village capped (${g.minutes - m0}, ${g.james.satiety}, ${g.rel.Mother.f}, ${g.rel.Village.f})`);
+        assert(!open(g) && !SCENES[hub].choices.find((c) => c.text === 'Eat at the communal pot.').show(g), `CM (PS): ${scene}: then neither the card nor the pot today`);
+        g.minutes += D; assert(!open(g), `CM (PS): ${scene}: once a Coil`);
+        { const e = mk(150, 10); choose(e, SCENES, SCENES[hub].choices.findIndex((c) => c.text === 'Eat at the communal pot.'));
+          assert(e.scene === hub && !open(e), `CM (RV1, TG3): ${hub}: once the pot was used today, no cook card`); }
+        const v = mk(100, 10); choose(v, SCENES, ci(v)); choose(v, SCENES, 0);
+        assert(v.rel.Village.f === 103, 'CM (PS): Village +3 below the cap');
+    }
 }
 /** v0.11.34 (D1): scenes only Story Mode reached; kept in the files (D2 deletes Story Mode's code later), never reached in
  * Incremental Mode's games. The owner decides keep-list or removal. Log only if one is reached after all. */

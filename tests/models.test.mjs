@@ -54,7 +54,7 @@ import { writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { noFold, OUTCOME_SCENES, againView, noteRead } from '../js/story/again.js'; // v0.11.132 (E1, RP); v0.11.133 (FP2): noteRead
 import { shareNote } from '../tools/lib/textlint.mjs'; // v0.11.132 (E1, EB)
 import { smartAction } from './lib/smartfight.mjs'; // v0.11.96 (BT1)
-import { SOCIAL } from './lib/social.mjs'; // v0.11.160 (NX2, CN): the Sociable's talk doors
+import { SOCIAL, EAT } from './lib/social.mjs'; // v0.11.160 (NX2, CN): the Sociable's talk doors; v0.11.181 (RV1, TG7): EAT moved there
 import { forcedPick, oldForcedPick, skipNotNow, hungryLine } from './lib/forced.mjs'; // v0.11.163 (owner pick W1): RS and NN
 import { sparePlan } from './lib/spare.mjs'; // v0.11.142 (owner pick CV1): the Cultivator's spare time
 import { SHARD, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
@@ -94,7 +94,6 @@ let rs = 1;
 const rnd = (n) => { rs = (rs * 1103515245 + 12345) >>> 0; return (rs >>> 8) % n; };
 const pick = (a) => a[rnd(a.length)];
 
-const EAT = /^(Eat|Cook|Roast)\b|communal pot|Cook and eat/i;
 const REST = /^(Rest|Sleep)\b/;
 const FOOD_GROUP = /Forage|Hunt|food/i;
 const TRAIN_GROUP = /Practice|Militia|Workshop|Train|Drill/i;

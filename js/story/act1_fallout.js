@@ -7,6 +7,7 @@ import { addItem, eat, condense, advance, sleepUntil, jamesHpMax, hasItem, award
 import { daily, markDaily, hour, day, eatBest, pantry, foodCount, byForm, byDay, dayReply } from './common.js';
 import { encounter, rel, likesMei, likesYa, trioStep, bumpRel, KISS_YA } from './act1_common.js';
 import { textDay } from '../core/lines.js'; // RV1 (FX)
+import { potLine } from './kitchen.js'; // v0.11.181 (SP1, PS)
 
 /* v0.11.136 (owner pick NC1, NT1's push 2): replies by day (js/core/lines.js dayReply): the first text is the old reply, the rest Fable's, one for each later day of a Coil. */
 const DR_PALISADE_F = dayReply("fo_palisade:0:f", [
@@ -255,7 +256,7 @@ ${pantry(g)} ${g.james.satiety < 30 ? 'You are hungry.' : ''} ${g.james.hp < jam
             { text: 'Find Ya. Follow the sound of offended people.', show: (g) => yaHere(g) && daily('a1_ya')(g) && !late(g), time: 20, to: 'fo_ya_time' },
             { text: 'Somebody has been watching Ashfall from the ridge. Go and see.', show: (g) => !g.flags.spy && dd(g) <= 9 && hour(g) < 16, time: 60, to: 'fo_spy' },
             { text: 'Eat something.', show: (g) => foodCount(g) > 0 && g.james.satiety < 85, time: 15, do: (g) => eatBest(g, { fire: true }), to: 'fo_ashfall' },
-            { text: 'Eat at the communal pot.', show: (g) => daily('a1_pot')(g) && g.james.satiety < 80 && !late(g), time: 30, do: (g) => { markDaily(g, 'a1_pot'); eat(g, 25); return ['Bean and barley stew, ladled out wordlessly and handed over with a short bow: +25 satiety.']; }, to: 'fo_ashfall' },
+            { text: 'Eat at the communal pot.', show: (g) => daily('a1_pot')(g) && g.james.satiety < 80 && !late(g), time: 30, do: (g) => { markDaily(g, 'a1_pot'); eat(g, 25); return [potLine(g, 'fo') ?? 'Bean and barley stew, ladled out wordlessly and handed over with a short bow: +25 satiety.']; }, to: 'fo_ashfall' }, // v0.11.181 (SP1, PS): from the village's 90, potLine
             { text: 'Cultivate behind the shrine: one sit, 10 Qi.', show: (g) => !late(g), req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`, ...r.xp] : []; }, to: 'fo_ashfall' },
             { text: 'Rest an hour.', show: (g) => !late(g), do: (g) => advance(g, 60, { resting: true }).concat(['An hour of rest.']), to: 'fo_ashfall' },
             { text: (g) => (dd(g) >= 10 ? 'Evening. The last one in Ashfall for a while.' : 'Evening. Go home to Mei Lin\'s.'), show: (g) => hour(g) >= 16, time: 20, to: toEvening },

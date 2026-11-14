@@ -25,6 +25,7 @@ import { LONGFOREST, BREAK_HUBS as B0 } from './longforest.js';
 import { MERIDIANS, EXTRA_FROM } from './meridians.js';
 import { installYukiTime } from './yuki_time.js'; // v0.11.137 (TR1)
 import { installHouseTime } from './house_time.js'; // v0.11.139 (MW1)
+import { installKitchen } from './kitchen_install.js'; // v0.11.181 (SP1, PS)
 import { installYukiPath } from './yuki_path.js';
 import { installCoil } from './coil_scenes.js';
 import { installOnce } from './oneoff.js';
@@ -1099,6 +1100,8 @@ SCENES.lf_hub.choices.push({
 installYukiTime(SCENES);
 // v0.11.139 (owner pick MW1, MS): Old Wen's and Mei Lin's mother's daily scenes, after Yuki's card on Ashfall's three resting places
 installHouseTime(SCENES);
+// v0.11.181 (owner picks SP1, KG1; CM push 1): the cook-with-the-women cards, after the house cards on the prologue's and the Fallout's Ashfall
+installKitchen(SCENES);
 // v0.11.174 (owner pick SL1, SC): the Selene story at the last camp, appended after everything else on rt_camp, so no position changes
 installSelene(SCENES);
 

@@ -1,0 +1,114 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/kitchen.js",
+  "find": "KG.filter((t) => relF(g, 'Mother') >= t)",
+  "replace": "KG.filter((t) => relF(g, 'Mother') > t)",
+  "note": "stage off at the gates (8/15/25 exact)"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/house_time.js",
+  "find": "enter: (g) => { markDaily(g, 'mother_time'); bumpRel(g, 'Mother', HT_GAIN, 0); closeOnce(g, 'mother'); kitchenOnce(g, htSlot(g, 'mother'));",
+  "replace": "enter: (g) => { markDaily(g, 'mother_time'); kitchenOnce(g, htSlot(g, 'mother')); bumpRel(g, 'Mother', HT_GAIN, 0); closeOnce(g, 'mother');",
+  "note": "text stage taken before the gain"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/kitchen.js",
+  "find": "    if (s > seen) g.flags.kitchen_seen = s;\n",
+  "replace": "",
+  "note": "seen never recorded: the stage paragraph every day"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/house_time.js",
+  "find": "return [body, kit, line].filter(Boolean).join('\\n\\n');",
+  "replace": "return [body, line, kit].filter(Boolean).join('\\n\\n');",
+  "note": "kitchen text after the closer"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/kitchen.js",
+  "find": "textDay(g) - 7)) - 1",
+  "replace": "textDay(g) - 8)) - 1",
+  "note": "Fallout pot line a day late"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/kitchen.js",
+  "find": "((g.flags.vday || 1) >= 3 ? 1 : 0)",
+  "replace": "((g.flags.vday || 1) >= 2 ? 1 : 0)",
+  "note": "prologue banners line from vday 2 (not the eve)"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/kitchen.js",
+  "find": "hour(g) < POT_UNTIL && daily(c.daily)(g);",
+  "replace": "hour(g) < POT_UNTIL;",
+  "note": "cook card shows after eating at the pot"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/kitchen.js",
+  "find": "export const POT_FROM = 9, POT_UNTIL = 15;",
+  "replace": "export const POT_FROM = 9, POT_UNTIL = 16;",
+  "note": "cook card open till 15:59"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/house_time.js",
+  "find": "text: k === 'mother' ? (g) => kitchenLabel(g, HT_LABEL.mother) : HT_LABEL[k],",
+  "replace": "text: (g) => kitchenLabel(g, HT_LABEL[k]),",
+  "note": "Wen's card takes the mother's kitchen label"
+ },
+ {
+  "id": "F11",
+  "file": "js/story/kitchen.js",
+  "find": "KT_DAY[s]?.[Number(i)]",
+  "replace": "KT_DAY[s]?.[0]",
+  "note": "the day line always the first of its stage"
+ },
+ {
+  "id": "F12",
+  "file": "js/story/kitchen_texts.js",
+  "find": "        \"Barley and bean stew. The woman with the ladle has dropped \\\"honoured guest\\\" and says \\\"sit\\\" instead, and fills the bowl to the brim, which is the ruling\",\n        \"Bean stew, eaten under the red banners. You are served in your turn between two hunters, and nobody at the pot looks up to see who it is\",",
+  "replace": "        \"Bean stew, eaten under the red banners. You are served in your turn between two hunters, and nobody at the pot looks up to see who it is\",\n        \"Barley and bean stew. The woman with the ladle has dropped \\\"honoured guest\\\" and says \\\"sit\\\" instead, and fills the bowl to the brim, which is the ruling\",",
+  "note": "prologue pot lines swapped: the banners line before the eve"
+ },
+ {
+  "id": "F13",
+  "file": "js/story/kitchen.js",
+  "find": "enter: (g) => { g.flags[c.flag] = true; return []; },",
+  "replace": "enter: () => [],",
+  "note": "cook scene not once a Coil"
+ },
+ {
+  "id": "F14",
+  "file": "js/story/kitchen.js",
+  "find": "    if (!s) { delete g.flags.mother_kitchen; return; }\n",
+  "replace": "    if (!s) return;\n",
+  "note": "a stale kitchen text after her friendship drops below 8"
+ },
+ {
+  "id": "F15",
+  "file": "js/story/kitchen.js",
+  "find": "fo_ashfall: { scene: 'fo_pot_cook', flag: 'fo_pot_cook',",
+  "replace": "fo_ashfall: { scene: 'fo_pot_cook', flag: 'pot_cook',",
+  "note": "one flag for both acts: the prologue's cook blocks the Fallout's"
+ },
+ {
+  "id": "F16",
+  "file": "js/story/kitchen.js",
+  "find": "if (String(slot).startsWith('rt_ashfall')) g.flags.mother_kitchen",
+  "replace": "if (String(slot).startsWith('rt_ashfall') && s > seen) g.flags.mother_kitchen",
+  "note": "the return's line only for a new stage (the usual case: the day line)"
+ },
+ {
+  "id": "F17",
+  "file": "js/story/kitchen_texts.js",
+  "find": "She corrects it twice.",
+  "replace": "She corrects it twice, for a moment.",
+  "note": "a canon-card tic in a new text"
+ }
+]

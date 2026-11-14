@@ -102,7 +102,10 @@ for (const list of Object.values(DAY_REPLIES)) for (const t of list) for (const 
 const { HT_BODY, HT_CLOSE } = await import(js('story/house_texts.js'));
 const houseLines = [...Object.values(HT_BODY).flatMap((b) => Object.values(b)), ...Object.values(HT_CLOSE).flat()];
 const { LF_DRILL } = await import(js('story/longforest.js')); const { SEASON_LINES } = await import(js('story/prologue.js')); // v0.11.175 (RV1, C4)
-const POOLS = { memory: [...MEMORY_LINES], yuki: yukiLines, aptitude: [ADAPT_REPLY], replies: dayReplies, house: houseLines, lf_drill: Object.values(LF_DRILL).flat(), lf_season: [...SEASON_LINES] };
+// v0.11.181 (RV1, TG4): the kitchen's and the pot's texts (kitchen_texts.js) as the pool `kitchen`: they show only with a flag or in a result
+const KT = await import(js('story/kitchen_texts.js'));
+const kitchenLines = [...Object.values(KT.KT_UP), ...Object.values(KT.KT_DAY).flat(), ...Object.values(KT.KT_RETURN), ...KT.POT_LINE.ashfall, ...KT.POT_LINE.fo, KT.POT_COOK.ashfall.result, KT.POT_COOK.fo.result];
+const POOLS = { memory: [...MEMORY_LINES], yuki: yukiLines, aptitude: [ADAPT_REPLY], replies: dayReplies, house: houseLines, kitchen: kitchenLines, lf_drill: Object.values(LF_DRILL).flat(), lf_season: [...SEASON_LINES] };
 const pools = poolCounts(POOLS, rows.filter((r) => r.kind === 'text').flatMap((r) => r.renders));
 const snap = { totals: now.totals, areas: now.areas, pools };
 

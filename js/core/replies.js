@@ -20,6 +20,9 @@ export const GAIN_LINES = [
     /^(Breakfast\. |Supper\. )?You eat: /, // eating: what and how much
     /^HP [\d.]+ → [\d.]+, Convergence /, // the breakthrough's bars ("… Both full.")
     /^Barley and bean stew, ladled by a woman who addresses you as "honoured guest"/, // a meal line with speech in it (ashfall)
+    /^Barley and bean stew\. The woman with the ladle has dropped "honoured guest"/, // v0.11.181 (B1): the prologue's pot from the village's 90 (kitchen_texts.js POT_LINE.ashfall[0])
+    /^Stew, and a second ladle you did not ask for\. "You work,"/, // v0.11.181 (B1): the Fallout's Day 10 pot from the village's 90 (POT_LINE.fo[2])
+    /^Barley, beans and corpse-ears, renamed/, // v0.11.181 (RV1, M1): the prologue's cook scene's result (POT_COOK.ashfall.result)
     // the Opus review (R1): system lines the shapes put in the reply
     /^Two Qi and \d+ minutes into the ash around/, // a vessel sitting
     /^\S.* lunges at Yuki — /, // a fight's last round: the attack on Yuki

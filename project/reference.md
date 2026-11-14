@@ -81,6 +81,7 @@ The bible and the contract between the four part files are at the top of `js/sto
 | `js/story/common.js` | Shared helpers: daily flags, `forestScale` / `villageScale`, `grow()` (enemy growth), food table and `eatBest()`, new items. |
 | `js/story/wilds.js` | Forest Days 2–3 and the random nights (v0.4.0). |
 | `js/story/ashfall.js` | Village Days 5–6, suppers, the night-5 Gao event (v0.4.0). |
+| `js/story/kitchen.js`, `kitchen_texts.js`, `kitchen_install.js` | v0.11.181 (owner picks SP1, KG1; CM push 1): the mother's kitchen by her friendship (on `mother_time`, house_time.js: stages from 8 / 15 / 25, `kitchen_seen`, `mother_kitchen`), the communal pot's line from the village's 90 (`potLine`, read by ashfall.js and act1_fallout.js) and the cook-with-the-women scenes `pot_cook`, `fo_pot_cook` (once a Coil each; installed apart so kitchen.js needn't import task_hubs.js: a cycle through ashfall.js). Texts Fable's. |
 | `js/story/prologue.js` | `SCENES` (52), `ITEMS`, and the encounters (jackals, Gao Feng, boar, collectors). |
 | `js/art/portrait.js` | Close-ups in manhua style: `meiPortrait()`, `yukiPortrait()` (clean lines, flat cel tone, big eyes, glossy-hair highlights). |
 | `art/bg/*.jpg`, `art/bg/CREDITS.md` | Six background crops of public-domain paintings (Dong Qichang, Wen Zhengming, the Met's *Misty Landscape*), toned to the paper. Made with `tools/bg.py` (crop → 1200×750 → luminance mapped to ink `#23211e`…paper `#ece8df`, reds kept). |
