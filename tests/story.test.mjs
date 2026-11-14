@@ -1,4 +1,5 @@
 // Run: node tests/story.test.mjs — story graph integrity + 1,000 random playthroughs (2,000 before v0.11.34) (no crash, no dead end, always reaches the end);
+import { deadMenuOk, DEAD_MENUS } from './lib/deadmenus.mjs'; // v0.11.177 (P9A): the emptied menu texts
 // Incremental Mode since v0.11.34 (D1: Story Mode dropped from the game)
 import { SCENES, START_SCENE } from '../js/story/prologue.js';
 import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, itemCap, yukiSitsOut, migrate, REL_HIDDEN, REL_MAX, serialize, deserialize, sleepUntil, startActCoil, jamesHpMax, jamesQiMax, clockParts } from '../js/core/game.js'; // v0.11.172 (P5A RV1, TG1): jamesHpMax, jamesQiMax, clockParts; v0.11.166 (RV1, M2): startActCoil // v0.11.127 (LQ2, TG): yukiSitsOut, migrate; v0.11.137 (HV1): REL_HIDDEN, REL_MAX
@@ -58,7 +59,7 @@ for (const run of kids ? [] : myRuns()) {
         const v = sceneView(g, SCENES);
         noteView(g, v);
         // v0.11.21: per-step checks build their label only when they fail (about 14% of this test's time)
-        if (!(typeof v.text === 'string' && v.text.length > 40)) assert(false, `text renders in ${g.scene}`); else pass++;
+        if (!(typeof v.text === 'string' && (v.text.length > 40 || deadMenuOk(g.scene, v.text)))) assert(false, `text renders in ${g.scene}`); else pass++;
         if (/undefined|NaN|\[object/.test(v.text)) assert(false, `no undefined/NaN in ${g.scene}`); else pass++;
         if (v.end) { endings[g.flags.ending || 'none'] = (endings[g.flags.ending || 'none'] || 0) + 1; break; }
         const open = v.choices.filter((c) => !c.disabled);
@@ -95,7 +96,7 @@ function walkFrom(g, entry, stopAt, budget = 1500, entered = false) { // v0.11.3
         track(g); // v0.11.22
         const v = sceneView(g, SCENES);
         noteView(g, v);
-        if (!(typeof v.text === 'string' && v.text.length > 40)) assert(false, `text renders in ${g.scene}`); else pass++;
+        if (!(typeof v.text === 'string' && (v.text.length > 40 || deadMenuOk(g.scene, v.text)))) assert(false, `text renders in ${g.scene}`); else pass++;
         if (v.end) return 'end'; // v0.11.21: an ending is not the target (the walk checks below want `=== true`)
         const open = v.choices.filter((c) => !c.disabled);
         if (!open.length) { assert(false, `dead end at ${g.scene}`); return false; }
@@ -320,7 +321,8 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     const SRK = ['clinic:0', 'clinic:1', 'workshop:0', 'drill:0', 'drill:1']; // v0.11.169 (P3A, SR): their own test (P3A's block)
     const SR4K = ['fo_palisade:0', 'fo_palisade:1', 'fo_palisade:1:f', 'fo_council:0', 'fo_council:1', 'fo_drill:0', 'fo_drill:0:f', 'fo_drill:1', 'fo_clinic:0', 'fo_clinic:1', 'fo_clinic:1:f']; // v0.11.170 (NX2, SR): their own test (NX2's block)
     const P5K = ['bl_camp:0', 'bl_train:1', 'bl_train:2']; // v0.11.172 (P5A, CW + SW): their own test (P5A's block)
-    const keys = Object.keys(DAY_REPLIES).filter((k) => !ST6K.includes(k) && !SWK.includes(k) && !SRK.includes(k) && !SR4K.includes(k) && !P5K.includes(k));
+    const P9K = ['wild_train:0:f', 'wild_train:1:f', 'wild_train:3:f']; // v0.11.177 (P9A, P2): the Wilds drills' failures, their own test (P9A's block)
+    const keys = Object.keys(DAY_REPLIES).filter((k) => !ST6K.includes(k) && !SWK.includes(k) && !SRK.includes(k) && !SR4K.includes(k) && !P5K.includes(k) && !P9K.includes(k));
     const first = (k) => COIL_SETS[k]?.[0] ?? DAY_REPLIES[k]; // v0.11.166 (RW1): a Coil's set for the lists by Coil
     assert(keys.length === 38 && keys.reduce((s, k) => s + first(k).length - 1, 0) === 63, `NC1: 38 reply lists with 52 new texts; v0.11.152 (RP1): 11 more (${keys.length}, ${keys.reduce((s, k) => s + first(k).length - 1, 0)})`);
     assert(JSON.stringify([...keys].sort()) === JSON.stringify(NC.map(([k]) => k).sort()), 'NC1: a list for every reply the bots saw on two days, and no other');
@@ -1335,12 +1337,12 @@ for (const form of ['cat', 'human']) {
     assert(!/not moving at all\. I\n/.test(PSTOMP), 'P9A (TB): no stray fragment after the thornback plays dead');
     // P5: the stake line is the night fight's tail: after the plain intro, and after a stomp posture at degree 3
     {
-        const g = ensureBars(fresh(9400)); g.scene = 'bl_night'; g.flags.bl_region = 'rr'; g.flags.bl_ev = 'wolves'; g.flags.bl_stakes_night = true;
-        const c = SCENES.bl_night.choices.find((x) => x.text === 'Fight.'); const enc = c.combat(g);
+        const g = ensureBars(fresh(9400)); g.scene = 'bl_night_event'; g.flags.bl_region = 'rr'; g.flags.bl_ev = 'wolves'; g.flags.bl_stakes_night = true;
+        const c = SCENES.bl_night_event.choices.find((x) => x.text === 'Fight.'); const enc = c.combat(g);
         assert(enc.tail && /stakes/.test(enc.tail) && !enc.intro.includes(enc.tail), `P9A (P5): the stake line rides as the fight's tail (${enc.tail})`);
         g.james.gu = { tier: 9, level: 10, xp: 0 }; ensureBars(g); const p = prepare(g, c.combat(g));
         assert(p.degree >= 2 && p.intro.endsWith(enc.tail), `P9A (P5): at degree ${p.degree} the stake line follows the posture`);
-        const h = ensureBars(fresh(9401)); h.scene = 'bl_night'; h.flags.bl_region = 'rr'; h.flags.bl_ev = 'wolves';
+        const h = ensureBars(fresh(9401)); h.scene = 'bl_night_event'; h.flags.bl_region = 'rr'; h.flags.bl_ev = 'wolves';
         assert(!c.combat(h).tail, 'P9A (P5): no stakes, no stake line');
     }
     // P8: lf_known is kept across Coils; a later Coil's first visit reads the later text; the Tans and Fang Wei forget
@@ -1359,6 +1361,36 @@ for (const form of ['cat', 'human']) {
             assert(t1 !== t2, `P9A (P8): ${who} remember nothing of an earlier Coil (their first meeting this Coil reads the first text)`);
         }
         const s = serialize(L(9504, 2)); void s;
+    }
+    // P1 (run C): Old Wen and Lu Han judge Yuki by what they see (no sensing), every branch and form; the road's direction agrees;
+    // the bond-only path lines are their own texts; Wen's needle line not on the ignored path; no "for three days"
+    {
+        const PSRC = readFileSync(new URL('../js/story/prologue.js', import.meta.url), 'utf8'), YSRC = readFileSync(new URL('../js/story/yuki_path.js', import.meta.url), 'utf8');
+        const CSRC = readFileSync(new URL('../js/story/coil_scenes.js', import.meta.url), 'utf8');
+        const elder = PSRC.match(/const yukiMerElder = [^\n]*/)[0] + PSRC.match(/const yukiMerLu = [^\n]*/)[0];
+        assert(!/\bsens(e|es|ed)\b[^`]{0,40}\bmeridian|carries twelve open meridians|meridians open like/.test(elder), 'P9A (P1, MS): Old Wen and Lu Han read no meridians by sense');
+        assert(!/up the mountain, the crimson robes/.test(CSRC) || !/down the mountain/.test(CSRC), 'P9A (P1, RD): the Sect is one way up or down in both Coil texts');
+        assert(!/for three days/.test(YSRC), 'P9A (P1, TD): no "for three days" in the chopsticks talk');
+        for (const ign of [false, true]) {
+            const g = ensureBars(fresh(9600 + ign)); g.flags.ignored = ign; g.scene = 'elder';
+            const ids = Object.keys(SCENES).filter((k) => { const s = SCENES[k]; try { return typeof s.text === 'function' && /you made a needle|You eat no pills/.test(s.text(g)); } catch { return false; } });
+            const hits = ids.map((k) => SCENES[k].text(g)).filter((x) => /You eat no pills/.test(x));
+            assert(hits.length >= 1 && hits.every((x) => /made a needle/.test(x) === !ign), `P9A (P1, NE): Wen's needle line only where Mei Lin saw it (ignored ${ign})`);
+        }
+    }
+    // P2 (run C): the emptied menus are menus and empty; the Wilds drills' failures speak by day
+    {
+        const menuOf = (id) => Object.values(TASK_HUBS).some((h) => (h.menus || {})[id] || (h.doorMenus || {})[id]);
+        for (const id of DEAD_MENUS) {
+            const g = ensureBars(fresh(9700)); g.scene = id; const s = SCENES[id]; const tx = typeof s.text === 'function' ? s.text(g) : s.text;
+            assert(menuOf(id) && tx === '' && (s.choices || []).length >= 2, `P9A (P2, P5, P8): ${id} is a work menu whose never-drawn text is empty`);
+        }
+        for (const [i, k] of [[0, 'wild_train:0:f'], [1, 'wild_train:1:f'], [3, 'wild_train:3:f']]) {
+            const l = DAY_REPLIES[k];
+            assert(Array.isArray(l) && l.length === 2 && l[0] !== l[1] && l.every((x) => typeof x === 'string' && x.split(/\s+/).length >= 8 && !bad(x)), `P9A (P2): ${k} has two failure lines`);
+            const c = SCENES.wild_train.choices[i]; const g = ensureBars(fresh(9710 + i)); g.scene = 'wild_train'; const out = c.failDo(g);
+            assert(out.some((x) => l.includes(x)), `P9A (P2): the ${['darts', 'blade', '', 'needles'][i]} drill's failure says its line`);
+        }
     }
 }
 
@@ -2304,7 +2336,7 @@ for (const form of ['cat', 'human']) {
                 const t = sceneView(g, SCENES).text;
                 const others = ['the beast on your shoulder', 'the beast at your side', 'the beast beside you'].filter((x) => x !== spot);
                 assert(t.includes(spot) && !others.some((x) => t.includes(x)), `FM1: ${who}'s line as ${form}, ${prim} meridians`);
-                if (id === 'elder' && prim === 5) assert(t.includes({ cat: 'at its size', tiger: 'untaught', human: 'at its age' }[form]), `FM1: the elder's "at its size" as ${form}`);
+                if (id === 'elder' && prim === 5) assert(t.includes({ cat: 'small as it is', tiger: 'no hand ever trained it', human: 'young as it looks' }[form]), `FM1: the elder's "at its size" as ${form} (v0.11.177, P9A MS: Fable's words)`);
             }
         }
     }
@@ -2852,8 +2884,8 @@ for (const form of ['cat', 'human']) {
         ['rt_arrive', {}, [0, 0], /\n\nTheir eyes go to Ya and stay there\. Bare arms/, /\n\nTheir eyes go to Yuki first: white, long as a handcart[\s\S]*Then they go to Ya and stay there\. Bare arms/, /\n\nTheir eyes go to Yuki first — the white hair, the ears, the tail — and move on, gravely, as from a matter that belongs to the outlander and is therefore not to be looked at twice\. Then they go to Ya and stay there\. Bare arms/], // RA; v0.11.130 (YB1, RA): the great root-kin's own
         ['heart_camp', { trio: 3 }, [80, 80], /The three of you sleep in a heap by the fire now\./, /The three of you sleep in a heap by the fire now\./, /The four of you sleep in a heap by the fire now\./], // HC
         ['log_comfort', { trio: 3 }, [80, 80], /You fall asleep there, the three of you, on Selene's bridge/, /You fall asleep there, the three of you, on Selene's bridge/, /You fall asleep there, all four of you, on Selene's bridge/], // v0.11.174 (P7A): she is asleep, not dead
-        ['mei_lin', { yk_path: 'sister' }, undefined, /\n\n\*She's pretty,\* says the bond, appallingly loud inside your skull\./, /\n\n\*She's pretty,\* says the bond, appallingly loud inside your skull\./, /blinks back\.\n\nMei Lin's eyes go to the ears, then to the tail, then back to the ears\.[\s\S]*"Are those real\?" asks Mei Lin\.[\s\S]*\n\n\*She's pretty,\* says the bond instead, for you alone, appallingly loud inside your skull, from a woman standing at your elbow/], // ML
-        ['mei_lin', { yk_path: 'lover' }, undefined, /\n\n\*She's pretty,\* says the bond, appraising, unbothered\. \*I approve/, /\n\n\*She's pretty,\* says the bond, appraising, unbothered\. \*I approve/, /"Are those real\?" asks Mei Lin\.[\s\S]*\*She's pretty,\* says the bond instead, for you alone, appraising, unbothered, while its owner stands at your elbow and looks at the hills\./],
+        ['mei_lin', { yk_path: 'sister' }, undefined, /\n\n\*Pretty,\* the bond announces, at a volume your skull/, /\n\n\*Pretty,\* the bond announces, at a volume your skull/, /blinks back\.\n\nMei Lin's eyes go to the ears, then to the tail, then back to the ears\.[\s\S]*"Are those real\?" asks Mei Lin\.[\s\S]*\n\n\*She's pretty,\* says the bond instead, for you alone, appallingly loud inside your skull, from a woman standing at your elbow/], // ML
+        ['mei_lin', { yk_path: 'lover' }, undefined, /\n\n\*Pretty,\* the bond remarks, in the tone of a buyer[\s\S]*\*I approve/, /\n\n\*Pretty,\* the bond remarks, in the tone of a buyer[\s\S]*\*I approve/, /"Are those real\?" asks Mei Lin\.[\s\S]*\*She's pretty,\* says the bond instead, for you alone, appraising, unbothered, while its owner stands at your elbow and looks at the hills\./],
         ['yk_night_all', {}, [80, 80], /^"Right,"[^\n]*\n\nThe white cat on the bench beside you stands up too, and goes on standing up[\s\S]*the scholar, the huntress, the cat —[\s\S]*and Yuki, a white cat again since some time in the night, on top/, /the scholar, the huntress, the woman who was a cat at supper —[\s\S]*since at some point in the night she went back to being one and can no longer get on top of it/, /stands up too, from the bench by the stove[\s\S]*the scholar, the huntress, the woman with the ears —/], // YC, NM, ND
     ];
     for (const [id, flags, rel, ...want] of CS) ['cat', 'tiger', 'human'].forEach((form, i) => {
@@ -3010,10 +3042,13 @@ for (const form of ['cat', 'human']) {
     }
     {   // SR: the sister's beat by form; the lover's unchanged
         const ROOF = 'Through the bond, from somewhere very far away and getting farther: *I am moving to the roof. I am living on the roof now. Do not look for me.*';
-        const SHED = 'Through the bond, from somewhere very far away and getting farther: *I am moving to the roof.* A long creak of thatch. A pause for thought. *I am moving to the goat shed. I live in the goat shed now. Do not look for me.*';
+        // v0.11.177 (P9A, YP): the cat's and the great root-kin's bond lines are their own texts (Fable's); the woman's unchanged
+        const CATR = 'The bond, already distant and still receding: *I am going up on the roof. The roof is my address from tonight. Forward nothing.*';
+        const SHED = 'The bond, already distant and still receding: *I am going up on the roof.* Thatch groans, at length. A silence follows, in which engineering is reconsidered. *The goat shed. My address is the goat shed. Forward nothing.*';
+        const BY = { cat: CATR, tiger: SHED, human: ROOF };
         for (const form of ['cat', 'tiger', 'human']) {
             const g = LPG(66500 + n++, form, { yk_path: 'sister' }); goTo(g, SCENES, 'romance'); const t = sceneView(g, SCENES).text;
-            assert(t.includes(form === 'tiger' ? SHED : ROOF) && !t.includes(form === 'tiger' ? ROOF : SHED), `YB1 (SR): the sister's beat as ${form}`);
+            assert(t.includes(BY[form]) && Object.entries(BY).every(([f, s]) => f === form || !t.includes(s)), `YB1 (SR): the sister's beat as ${form}`);
             const h = LPG(66600 + n++, form, { yk_path: 'lover' }); goTo(h, SCENES, 'romance'); assert(/Through the bond, sleepy and amused from the stove downstairs/.test(sceneView(h, SCENES).text), `YB1 (SR): the lover's beat as ${form} unchanged`);
         }
     }
