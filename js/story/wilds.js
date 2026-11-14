@@ -67,7 +67,6 @@ const DR_FEET = dayReply("wild_train:2", ["She lands where you were. You are som
 const DR_NEEDLE = dayReply("wild_train:3", ["A hundred needles into one knuckle-width of bark. Call it ninety-one. Your threads are keeping the real count.", "A hundred, and the hole in the bark is no wider than the first needle made it. Ninety-seven, say the threads."]);
 
 const P = 'Blackroot Wilds';
-const did = (key) => (g) => { markDaily(g, key); return []; };
 const didSay = (key, dr) => (g) => { markDaily(g, key); return [dr(g)]; }; // v0.11.168 (P2A, SW)
 /** v0.11.71 (owner pick X1; owner 2026-11-07 21:31): from Coil 2 Explore is not once a day: another trip while it is before 16:00. */
 export const replayExplore = (g) => ((g.coil && g.coil.n) || 1) >= 2;
