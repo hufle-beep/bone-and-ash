@@ -53,6 +53,7 @@ export const LF_DRILL = {
     t2: ["Past the three-hundredth cut your arms drop their objections. The blade goes where it is sent, and the air closes up behind it.", "The forms run together into one long line. When you stop, the white blade is humming, and so, unaccountably, are you.", "You halve a drop of dew as it falls, then one of the halves. Yuki was watching. She maintains that she was not."],
     t2Fail: ["Your arms submit their argument in full, with appendices. Somewhere past the middle the blade goes soft along the edge, and you let it dissolve.", "The forms hold as far as the seventh, which ends with the blade in a root and your hand elsewhere. You dissolve the evidence.", "Your arms argue, and carry more points than they should. You finish the set at half speed, like a man conducting a very slow orchestra."],
     t3: ["An hour of it, and you are still on your feet and she has begun to plan. She does not plan for people who don't worry her.", "You land one clean touch on her shoulder. She lands eleven on you, and rules the one inadmissible.", "She does not hold back, and you find you can read her half a breath early. The bond helps. She calls that cheating."],
+    t3Fail: ["She was asked not to hold back, and she has honoured it. You kept pace for longer than either of you expected. Not for long enough.", "You saw her coming, twice. The third time you saw what she meant you to see, and went where it pointed.", "It ends with you on your back inside the ring of bone stakes she keeps as a scratching post. You nearly had her once. She disputes the nearly."],
     t4: ["Around the six-hundredth needle you stop deciding to throw. They go anyway, one after another, into a mark the width of a knuckle.", "You stop seeing the tree. There is a point, and a needle, and a thousand small agreements between the two.", "One thousand, by the threads' count. The last needle splits the one before it, which was not the drill. Nobody objects."],
     t4Fail: ["A thousand needles, and a spread nearer your palm than your knuckle. The brief said knuckle. The tree declines to see the difference.", "Your focus thins somewhere after the middle. The remainder are thrown by a man thinking about lunch, and the grouping says so.", "The needles come true for a while, then bent, then brittle. Your Qi has voted. You sit down and call it a rest interval."],
 };
@@ -345,7 +346,7 @@ ${byForm(g, 'Yuki\'s opinion, through the bond: *both.*', 'Yuki\'s opinion, thro
     /* ---------- daily activities ---------- */
     lf_forage: {
         id: 'lf_forage', title: 'Foraging', art: 'forage', place: `${P} — the banks`,
-        text: (g) => `You know every good patch for a day's walk in any direction now. ${pantry(g)}`,
+        text: '',
         choices: [
             { text: 'The mushroom ring under the black oaks.', show: daily('lf_ring'), check: { skill: 'GU', dc: 3, bonus: () => 2 }, time: 40, do: (g) => { markDaily(g, 'lf_ring'); addItem(g, 'jade_bracket', 3); return ['+3 Jade bracket fungus.']; }, failDo: (g) => { markDaily(g, 'lf_ring'); addItem(g, 'jade_bracket', 1); return ['+1 Jade bracket fungus.']; }, to: 'lf_forage' },
             { text: 'River cress and the honey tree.', show: daily('lf_cress'), check: { skill: 'GU', dc: 3 }, time: 50, do: (g) => { markDaily(g, 'lf_cress'); addItem(g, 'river_cress', 4); addItem(g, 'honeycomb', 1); return ['+4 River cress, +1 Wild honeycomb.']; }, failDo: (g) => { markDaily(g, 'lf_cress'); addItem(g, 'river_cress', 2); return ['+2 River cress. The honey stays with the bees, who felt strongly about it.']; }, to: 'lf_forage' },
@@ -355,7 +356,7 @@ ${byForm(g, 'Yuki\'s opinion, through the bond: *both.*', 'Yuki\'s opinion, thro
     },
     lf_hunt: {
         id: 'lf_hunt', title: 'The Hunt', art: 'hunt', place: `${P} — the reeds`,
-        text: 'Yuki is low in the grass, tail ticking. The Long Forest, it turns out, has a lot of breakfast in it.',
+        text: '',
         choices: [
             { text: 'Glassback hare. A dart from cover.', show: daily('lf_hare'), qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 3 }, time: 40, do: (g) => { markDaily(g, 'lf_hare'); addItem(g, 'hare_raw', 2); return ['+2 Glassback hare.']; }, failDo: (g) => { markDaily(g, 'lf_hare'); return ['A wink of glass in the reeds, and your dart finds mud.']; }, to: 'lf_hunt' },
             { text: 'Mire fowl on the rise.', show: daily('lf_fowl'), qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 4 }, time: 50, do: (g) => { markDaily(g, 'lf_fowl'); addItem(g, 'fowl_raw', 2); return ['+2 Mire fowl.']; }, failDo: (g) => { markDaily(g, 'lf_fowl'); return ['It honks at you from just out of range, a distance it has clearly measured.']; }, to: 'lf_hunt' },
@@ -366,11 +367,11 @@ ${byForm(g, 'Yuki\'s opinion, through the bond: *both.*', 'Yuki\'s opinion, thro
     },
     lf_train: {
         id: 'lf_train', title: 'Practice', art: 'clearing', place: `${P} — the clearing`,
-        text: (g) => `The clearing is scarred with your practice: trunks pocked with dart holes, a boulder neatly halved, a ring of bone stakes Yuki uses as a scratching post. ${g.james.realm >= 3 ? 'The trunks are running out of places to hit.' : ''}`,
+        text: '',
         choices: [
             { text: 'Darts at moving targets: leaves, as they fall.', show: daily('lf_t1'), qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 4, band: 'challenging' }, time: 60, do: (g) => { markDaily(g, 'lf_t1'); return [lfDrill(g, 't1')]; }, failDo: (g) => { markDaily(g, 'lf_t1'); return [lfDrill(g, 't1Fail')]; }, to: 'lf_train' },
             { text: 'Blade forms until your arms stop arguing.', show: daily('lf_t2'), qi: 3, check: { skill: 'GU', dc: 4, band: 'challenging' }, time: 60, do: (g) => { markDaily(g, 'lf_t2'); return [lfDrill(g, 't2')]; }, failDo: (g) => { markDaily(g, 'lf_t2'); return [lfDrill(g, 't2Fail')]; }, to: 'lf_train' },
-            { text: 'Spar with Yuki. Properly. No holding back on her side.', show: daily('lf_t3'), check: { skill: 'GU', dc: 5, band: 'challenging' }, time: 60, do: (g) => { markDaily(g, 'lf_t3'); return [lfDrill(g, 't3'), ...awardYukiFightXp(g, 'challenging')]; }, failDo: (g) => { markDaily(g, 'lf_t3'); g.james.hp = Math.max(1, g.james.hp - 3); return ["She was asked not to hold back, and she has honoured it. −3 HP.", ...awardYukiFightXp(g, 'challenging')]; }, to: 'lf_train' },
+            { text: 'Spar with Yuki. Properly. No holding back on her side.', show: daily('lf_t3'), check: { skill: 'GU', dc: 5, band: 'challenging' }, time: 60, do: (g) => { markDaily(g, 'lf_t3'); return [lfDrill(g, 't3'), ...awardYukiFightXp(g, 'challenging')]; }, failDo: (g) => { markDaily(g, 'lf_t3'); g.james.hp = Math.max(1, g.james.hp - 3); return [lfDrill(g, 't3Fail'), '−3 HP.', ...awardYukiFightXp(g, 'challenging')]; }, to: 'lf_train' },
             { text: 'Needle drills: one point, one knuckle-width, a thousand times.', show: daily('lf_t4'), qi: 4, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 5, band: 'challenging' }, time: 60, do: (g) => { markDaily(g, 'lf_t4'); return [lfDrill(g, 't4')]; }, failDo: (g) => { markDaily(g, 'lf_t4'); return [lfDrill(g, 't4Fail')]; }, to: 'lf_train' },
             { text: 'Back to camp.', to: 'lf_hub' },
         ],
@@ -417,9 +418,9 @@ You don't go to it. Not from here, and not yet. It has the look of a thing that 
         enter: (g) => { markDaily(g, 'lf_notes'); return visit(g, 'notes'); },
         text: (g) => `You take stock as you would in the lab, in a notebook grown for the purpose out of thin sheets of bone.
 
-*Subject: James Green. Realm: ${['Mortal Vessel', 'Foundation', 'Core Formation', 'True Core', 'Golden Core', 'Origin Core', 'Soul Embryo', 'Nascent Soul', 'Spirit Transformation', 'Immortal Ascension', 'Mahayana', 'Earth Immortal', 'True Immortal', 'Golden Immortal', 'Heavenly Immortal'][g.james.realm] || 'unclear'}. Saturation: ${Math.round(g.james.saturation)}%. Observations: the local fauna attempts predation less often than it did. The exceptions are optimists. The sky has tried to strike me ${g.james.realm} time${g.james.realm === 1 ? '' : 's'} and thought better of it ${g.james.realm} time${g.james.realm === 1 ? '' : 's'}.*
+*Subject: James Green. Realm: ${['Mortal Vessel', 'Foundation', 'Core Formation', 'True Core', 'Golden Core', 'Origin Core', 'Soul Embryo', 'Nascent Soul', 'Spirit Transformation', 'Immortal Ascension', 'Mahayana', 'Earth Immortal', 'True Immortal', 'Golden Immortal', 'Heavenly Immortal'][g.james.realm] || 'unclear'}. Saturation: ${Math.round(g.james.saturation)}%. Observations: the local fauna attempts predation less often than it did. The exceptions are optimists. ${g.james.realm === 0 ? 'The sky has not yet tried to strike me. I gather it gets round to everyone.' : `The sky has tried to strike me ${g.james.realm} time${g.james.realm === 1 ? '' : 's'} and thought better of it ${g.james.realm} time${g.james.realm === 1 ? '' : 's'}.`}*
 
-${later(g, 'notes') ? `*Further entries. The trial grounds restock overnight, always to the same headcount. Either this forest breeds faster than any ecology should, or it keeps a waiting list. Hypothesis: organised.*
+${later(g, 'notes') ? `*Further entries. Whatever I take out of this forest is replaced overnight, to the same headcount: hares, fowl, things with teeth. Either it breeds faster than any ecology should, or it keeps a waiting list. Hypothesis: organised.*
 
 *Yuki's review of this notebook, given unasked: too many words, no fish. Noted. Recommendation unchanged: let them all underestimate me.*` : `*Key finding, reported to me last time by a local, to my face, and now confirmed on a proper sample: nothing here can sense my cultivation. Whatever has looked at me in this forest has found none. I read as an empty vessel, every time. Hypothesis: the Ouroboros loop leaks nothing (no residue, no pressure, no smell of pills or grass), and residue is all their senses were built to find.*
 
@@ -448,7 +449,7 @@ You have, it appears, invented a toy. Your threads file the design under *publis
     lf_bathe: {
         id: 'lf_bathe', title: 'The River', art: 'stream', place: `${P} — the river`,
         enter: (g) => { markDaily(g, 'lf_bathe'); return visit(g, 'bathe'); },
-        text: (g) => `${later(g, 'bathe') ? `The same cold black river. The flat rock takes your coat without comment, and nothing in the water shows an interest. You wash and take inventory: the scholar's stoop has gone. The river hands back a man with fewer apologies in his shoulders.` : `Cold black water, a flat rock for your coat and, for once, nothing that wants to eat you. You scrub off a layer of forest you had stopped noticing. The body under it, you observe, is changing: leaner, harder, a fighter's body growing over a scholar's bones without asking leave.`}
+        text: (g) => `${later(g, 'bathe') ? `The same cold black river. The flat rock takes your coat without comment, and nothing in the water shows an interest. You wash and take inventory: two arms, two legs, one beard on which the forest holds views. The river hands back a man with fewer apologies in his shoulders.` : `Cold black water, a flat rock for your coat and, for once, nothing that wants to eat you. You scrub off a layer of forest you had stopped noticing. The body under it, you observe, is changing: leaner, harder, a fighter's body growing over a scholar's bones without asking leave.`}
 
 ${yukiForm(g) === 'cat' ? 'Yuki observes from the rock, with the horror of a cat watching a person enter water by choice.' : yukiForm(g) === 'tiger' ? 'Yuki, in her great form, wades in to the chest, establishes that she hates water at this size as well, and climbs out with immense dignity and most of the river, which she then shakes onto you.' : 'Yuki sits on the bank in her human form with her tail wrapped round her ankles. "No," she says, before you have asked her anything.'}`,
         choices: [{ text: 'Dry off. Back to camp.', do: (g) => advance(g, 30, { resting: true }), to: 'lf_hub' }],
@@ -502,7 +503,7 @@ ${g.james.saturation >= 100 ? 'Saturation sits at the very top of you and presse
     /* ---------- trials ---------- */
     lf_trials: {
         id: 'lf_trials', title: 'Going Deep', art: 'clearing', place: P,
-        text: `Your map has four places on it marked in red, in your own handwriting: *where the things that eat the things that eat you live.* Each one, you've noticed, seems to have restocked itself by the next morning. The Long Forest is generous that way.`,
+        text: '',
         choices: [
             { text: 'The Bone Field depths.', time: 60, to: 'lf_bone_depths' },
             { text: 'The Black Mire.', time: 60, to: 'lf_black_mire' },
@@ -514,7 +515,7 @@ ${g.james.saturation >= 100 ? 'Saturation sits at the very top of you and presse
     lf_bone_depths: {
         id: 'lf_bone_depths', title: 'The Bone Field Depths', art: 'lf_bone_depths', place: `${P} — the Bone Field depths`,
         enter: (g) => visit(g, 'bone'), // v0.11.175 (P8A, RP)
-        text: (g) => (later(g, 'bone') ? `The white sand has been raked smooth since you were last here, by wind or by something tidy. Under the great ribs the population is back to strength: your Convergence counts skeletons it has counted before, and one or two that haven't been told about you. All of them are listening to your boots.` : `Beyond the giant skulls the Bone Field keeps going down: a valley inside the valley, floored with white sand that was bone once, roofed in places by ribs like the vaults of a church with the lead stolen. Things live among the ribs. Your Convergence can feel each of their skeletons, which is either a tactical advantage or the most unsettling experience of your life.`),
+        text: (g) => (later(g, 'bone') ? `The white sand lies raked smooth, by wind or by something tidy, and keeps no record of you. Under the great ribs the population is at full strength: your Convergence counts skeletons it has counted before, and one or two that haven't been told about you. All of them are listening to your boots.` : `Beyond the giant skulls the Bone Field keeps going down: a valley inside the valley, floored with white sand that was bone once, roofed in places by ribs like the vaults of a church with the lead stolen. Things live among the ribs. Your Convergence can feel each of their skeletons, which is either a tactical advantage or the most unsettling experience of your life.`),
         choices: [
             fightChoice('lf_bone_hounds', 'Take on the bone-hounds.'),
             fightChoice('lf_ossuary', 'Wake the Ossuary Wyrm.'),
@@ -524,7 +525,7 @@ ${g.james.saturation >= 100 ? 'Saturation sits at the very top of you and presse
     lf_black_mire: {
         id: 'lf_black_mire', title: 'The Black Mire', art: 'lf_black_mire', place: `${P} — the Black Mire`,
         enter: (g) => visit(g, 'mire'), // v0.11.175 (P8A, RP)
-        text: (g) => (later(g, 'mire') ? `The ink has closed over whatever you did here last. The ghost-gill stumps are occupied again, and a few of the logs drift further off as you reach the bank. Logs, as a rule, don't.` : `The mire beyond the mire. Its water is the colour of ink and holds twice the opinions. Drowned trees stand in it like the masts of a sunk fleet. Whatever lives here is either hungry, or playing a log so that something else will come and be hungry nearby.`),
+        text: (g) => (later(g, 'mire') ? `The ink has closed over whatever you did here last. The ghost-gill stumps are occupied again, and a few of the logs turn, slowly, to keep you in view as you reach the bank. Logs, as a rule, don't.` : `The mire beyond the mire. Its water is the colour of ink and holds twice the opinions. Drowned trees stand in it like the masts of a sunk fleet. Whatever lives here is either hungry, or playing a log so that something else will come and be hungry nearby.`),
         choices: [
             fightChoice('lf_mire_brood', 'Clear the mire-brood from the ghost-gill stumps.'),
             fightChoice('lf_bog_mother', 'Call up the Bog-Mother.'),
@@ -534,7 +535,7 @@ ${g.james.saturation >= 100 ? 'Saturation sits at the very top of you and presse
     lf_thunder_ridge: {
         id: 'lf_thunder_ridge', title: 'The Thunder Ridge', art: 'lf_thunder_ridge', place: `${P} — the Thunder Ridge`,
         enter: (g) => visit(g, 'ridge'), // v0.11.175 (P8A, RP)
-        text: (g) => `${later(g, 'ridge') ? `The ridge again: black rock, and the afternoon storm stacking up on time, as if under contract. There is fresh glass since your last climb. The sky has kept its hand in.` : `A spine of black rock above the treeline, where it storms every afternoon whatever the weather is doing elsewhere. Where the lightning lands, the rock has run to glass. The sky up here is in the habit of hitting things.`}
+        text: (g) => `${later(g, 'ridge') ? `The ridge again: black rock, and the afternoon storm stacking up on time, as if under contract. There is glass where you remember plain rock. The sky keeps its hand in.` : `A spine of black rock above the treeline, where it storms every afternoon whatever the weather is doing elsewhere. Where the lightning lands, the rock has run to glass. The sky up here is in the habit of hitting things.`}
 
 ${g.james.realm >= 1 ? 'As you step onto the ridge the storm overhead falters. You get the clear impression that it knows you, and has decided not to meet your eye.' : 'The storm overhead crackles at you, by way of a test. It finds nothing to test, and sulks.'}`,
         choices: [
@@ -549,7 +550,7 @@ ${g.james.realm >= 1 ? 'As you step onto the ridge the storm overhead falters. Y
         enter: (g) => visit(g, 'storm'), // v0.11.175 (P8A, RP)
         text: (g) => (later(g, 'storm') ? `You take the top rock again, arms out, like a man in a parable who hasn't reached the moral.
 
-The bolt arrives on schedule, white and sure of itself, and brakes a foot above your scalp. It has been down this checklist before, and goes down it again anyway, faster, like a clerk who knows the form will come back blank. *Pills? Grass? Cores? No. Still no.*
+The bolt arrives on schedule, white and sure of itself, and brakes a foot above your scalp. It goes down its checklist. You know the items by now, and could prompt it; the answers have not changed either. *Pills? Grass? Cores? No. As before.*
 
 It withdraws upward. The cloud mutters over it, like a colleague saying *told you*.
 
@@ -569,7 +570,7 @@ You stay as you are a minute longer, arms still out. ${byForm(g, 'From under a r
         enter: (g) => visit(g, 'roots'), // v0.11.175 (P8A, RP)
         text: (g) => (later(g, 'roots') ? `The white roots lie as you left them, every one pointing at the dead tree. Put a palm to the nearest and it is still there under the silence, no louder and no fainter: a tune somebody has stopped humming.
 
-The grey shapes are back along the white, holding very still. They have had practice at being left behind.` : `Deeper in than the Hollow the white roots come up out of the earth, thick as houses, and lie across the forest like the fallen pillars of a temple. Every one of them runs the same way: toward the dead tree. Lay a hand on one and your Convergence hears something beneath the silence. Not a song. The memory of one.
+The grey shapes keep their places along the white, holding very still. They have had practice at being left behind.` : `Deeper in than the Hollow the white roots come up out of the earth, thick as houses, and lie across the forest like the fallen pillars of a temple. Every one of them runs the same way: toward the dead tree. Lay a hand on one and your Convergence hears something beneath the silence. Not a song. The memory of one.
 
 Things live in them. Things made out of what the tree left behind.`),
         choices: [
@@ -584,6 +585,12 @@ Things live in them. Things made out of what the tree left behind.`),
         text: (g) => {
             const f = FIGHTS[g.flags.lf_last];
             const name = f ? f.enemies[0].name.replace(/ \(.*\)/, '') : 'it';
+            // v0.11.177 (P9A, P8; review T22): the one grave fight keeps a grave ending, on any win
+            if (name === 'The Heartless') return `It is done. Among the white roots nothing moves, and you find you have no remark ready, which is rare enough to note.
+
+Tomorrow the Heartless will be on its feet here again. It is made of what the dead tree left behind, and that does not run out.
+
+${byForm(g, 'Yuki does not wash. She sits against your ankle, looking toward the dead tree, and the bond carries nothing at all.', 'Yuki does not wash. She stands with her shoulder against your hip, looking toward the dead tree, and the bond carries nothing at all.', 'Yuki leaves her sleeves as they are. She stands close at your side, looking toward the dead tree, and offers no opinion.')}`;
             if ((g.flags.lf_trials_won || 0) >= 2) return `Done. You count your limbs, a habit this forest taught you early. The count comes out right again.
 
 The ${name.toLowerCase().startsWith('the ') ? name.slice(4) : name} will be back tomorrow, or something filling the same post; the Long Forest leaves no vacancy open.
@@ -616,16 +623,16 @@ There is no shame in it. Losing is what the Long Forest is for.`),
 
 "You," he says. "The mortal in the robe." Whatever happened last time has been gone over at home, and has come out as a version in which the Tan brothers did well. "The toll has gone up. For repeat travellers."
 
-Little Tan asks what was in the pot this morning, and is looked at. Neither of them feels a thing on you.` : `Faded crimson, a jade knife, another clearing: the poacher has moved his business and not improved it. He spins round, sees who it is, and relaxes.
+Little Tan asks whether the uncle is still cooking, and is looked at. Neither of them feels a thing on you.` : `Faded crimson, a jade knife, another clearing: the poacher has moved his business and not improved it. He spins round, sees who it is, and relaxes.
 
 His senses go over you again. Nothing. Whatever passed between you before, he has explained it to himself since, and the explanation did not require you to be anything.
 
 "The mortal again," he says. "Heaven sends a man the same insect twice only when it means him to step on it."`) : g.flags.lf_human === 'lf_bandits'
             ? `Two men step onto the trail ahead of you: one broad and scarred, one narrow and twitchy, each with the sort of knife that is mainly for being seen. Brothers, going by the faces. Bandits, going by everything else.
 
-"Tan," says the scarred one, by way of introduction. "The Tan brothers. You will have heard of us." The narrow one adds that the fire back upstream smells as if somebody is expected home to it, and is looked at until he stops.
+"Tan," says the scarred one, by way of introduction. "The Tan brothers. You will have heard of us." The narrow one asks whether the uncle cooks, since he looks to him like a man who feeds people, and is looked at until he stops.
 
-You haven't heard of them. You have been in a forest. You say so, and it turns out to be the wrong answer.`
+You have not heard of them, you tell him; you have been in a forest. It turns out to be the wrong answer.`
             : `A young man in faded crimson kneels in a clearing, cutting Ninefold grass with a jade knife, very fast, with glances over his shoulder. Sect robes, and the lotus picked off the sleeve. A poacher, then, on ground the Crimson Lotus calls its own.
 
 He sees you. He takes in the white coat, ${byForm(g, 'the cat', 'the white beast with no more Qi on it than a house cat', 'the silent woman in black silk')}, and the complete absence of anything on the Qi senses he is so proud of. His shoulders come down. His smile comes up.
