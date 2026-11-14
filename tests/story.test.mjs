@@ -1299,6 +1299,69 @@ for (const form of ['cat', 'human']) {
       for (let i = 0; i < 8; i++) { got.push(SCENES.rt_hunters.choices.find((c) => /Ya teach/.test(c.text)).do(g)[0]); g = ensureBars(deserialize(serialize(g))); }
       assert(new Set(got.slice(0, 4)).size === 4 && new Set(got.slice(4)).size === 4 && got.every((t, i) => i === 0 || t !== got[i - 1]) && got.every((t) => DRILL_AGAIN.ya.includes(t)), 'P7A (RV1, TG10): eight practice drills through a save round trip: two full rounds, never the same twice running'); }
 }
+// v0.11.177 (owner pick P9A; Fable's rewrite, part 9, the leftovers): ST the prologue's eight older stomp texts (jackals, Gao, boar, Lu
+// Han's men, crows, rats, lizard, mire), YV no verb straight after Yuki's phrase, FM four men at the tribute, TB the far hunt's kill
+// (the core comes out of a dead beast) and its second-day twin (byDay on far_won's record); P5 the stake line as the fight's tail; P8
+// the Long Forest's places remembered across Coils (`lf_known`, kept; the Tans and Fang Wei forget)
+{
+    const { prepare } = await import('../js/story/power.js');
+    const { LONGFOREST } = await import('../js/story/longforest.js');
+    const PSTOMP = readFileSync(new URL('../js/story/stomp_prologue.js', import.meta.url), 'utf8');
+    const bad = (t) => typeof t !== 'string' || /TODO|\$\{|undefined|\bNaN\b|\[object|\bnull\b/.test(t);
+    const FORMS = [['cat', 0], ['tiger', 2], ['human', 7]];
+    const G = (seed, form, scene = 'far_won') => { const g = ensureBars(fresh(seed)); g.yuki.realm = { cat: 0, tiger: 2, human: 7 }[form]; g.james.realm = g.yuki.realm; g.yuki.form = form; g.scene = scene; return g; };
+    // ST: the old openings are gone
+    const OLD = ['The ashfangs come out of the dark low and slow', "It isn't a fight so much as a correction", 'Gao Feng straightens his crimson sleeves', 'Gao Feng discovers, in rapid succession',
+        'The ironhide boar comes out of the oak hollow like a cart', 'Lu Han does not hurry', 'The three rot-crows spread their moulting wings', 'The mire-rats come up the bank shoulder to shoulder',
+        'The thornback lifts its ridge of hollow spines', 'The mire-rats come out of the black water in a rush'];
+    const left = OLD.filter((o) => PSTOMP.includes(o));
+    assert(!left.length, `P9A (ST): the eight fights' older openings rewritten (${left})`);
+    // YV + FM: every prologue stomp text, three forms, every degree, clean; no verb straight after Yuki's phrase; Lu Han's men never "two"
+    const IDS = ['jackals', 'gao', 'boar', 'collectors', 'crows', 'rats', 'lizard', 'mire', 'wolves', 'thornback', 'arson'];
+    let n = 0; const badS = [];
+    for (const id of IDS) for (const [form] of FORMS) {
+        const g = G(9100 + n, form); const st = STOMP[id];
+        const outs = [1, 2, 3].map((d) => st.posture(g, d)).concat([2, 3].map((d) => (typeof st.win[d] === 'function' ? st.win[d](g) : st.win[d])), [typeof st.one === 'function' ? st.one(g) : st.one]);
+        for (const o of outs) { n++; if (bad(o) || /(arms folded|twice as bored|Yuki, eleven pounds of white cat) [a-z]+s\b/.test(o) || (id === 'collectors' && /\btwo (men|disciples)\b/i.test(o))) badS.push(`${id}/${form}`); }
+    }
+    assert(n === IDS.length * 3 * 6 && !badS.length, `P9A (ST, YV, FM): the prologue's stomp texts render clean in every form and degree (${n}; ${[...new Set(badS)]})`);
+    // TB: the far hunt's wins name the core (it comes out of a dead beast) and read a second text on the second day, on far_won's own record
+    for (const id of ['wolves', 'thornback']) for (const d of [2, 3]) for (const [form] of FORMS) {
+        const g = G(9300, form); g.lines = null; const first = STOMP[id].win[d](g);
+        noteDay(g, 'far_won'); g.minutes += 1440; noteDay(g, 'far_won');
+        const second = STOMP[id].win[d](g);
+        assert(/\bcore\b/.test(first) && /\bcore\b/.test(second) && first !== second && !bad(second) && dayIndex(g, 'far_won') === 1, `P9A (TB): ${id} win ${d} (${form}) names the core and has its second-day twin`);
+    }
+    assert(!/not moving at all\. I\n/.test(PSTOMP), 'P9A (TB): no stray fragment after the thornback plays dead');
+    // P5: the stake line is the night fight's tail: after the plain intro, and after a stomp posture at degree 3
+    {
+        const g = ensureBars(fresh(9400)); g.scene = 'bl_night'; g.flags.bl_region = 'rr'; g.flags.bl_ev = 'wolves'; g.flags.bl_stakes_night = true;
+        const c = SCENES.bl_night.choices.find((x) => x.text === 'Fight.'); const enc = c.combat(g);
+        assert(enc.tail && /stakes/.test(enc.tail) && !enc.intro.includes(enc.tail), `P9A (P5): the stake line rides as the fight's tail (${enc.tail})`);
+        g.james.gu = { tier: 9, level: 10, xp: 0 }; ensureBars(g); const p = prepare(g, c.combat(g));
+        assert(p.degree >= 2 && p.intro.endsWith(enc.tail), `P9A (P5): at degree ${p.degree} the stake line follows the posture`);
+        const h = ensureBars(fresh(9401)); h.scene = 'bl_night'; h.flags.bl_region = 'rr'; h.flags.bl_ev = 'wolves';
+        assert(!c.combat(h).tail, 'P9A (P5): no stakes, no stake line');
+    }
+    // P8: lf_known is kept across Coils; a later Coil's first visit reads the later text; the Tans and Fang Wei forget
+    {
+        assert(KEEP_FLAGS.includes('lf_known'), 'P9A (P8): lf_known is a knowledge flag kept across Coils');
+        const L = (seed, coilN) => { const g = ensureBars(fresh(seed)); g.coil.n = coilN; g.minutes = 2 * 1440 + 10 * 60; g.scene = 'lf_hub'; return g; };
+        const a = L(9500, 2); goTo(a, SCENES, 'lf_falls'); const first = sceneView(a, SCENES).text; goTo(a, SCENES, 'lf_hub'); a.minutes += 1440; goTo(a, SCENES, 'lf_falls'); const again = sceneView(a, SCENES).text;
+        assert(a.flags.lf_known?.falls === 2 && first !== again, `P9A (P8): the first visit is noted with its Coil (${JSON.stringify(a.flags.lf_known)})`);
+        const b = L(9501, 3); b.flags.lf_known = { ...a.flags.lf_known }; goTo(b, SCENES, 'lf_falls');
+        assert(b.flags.lf_seen_falls === 1 && sceneView(b, SCENES).text === again, 'P9A (P8): from a later Coil the first visit reads the later text');
+        const c2 = L(9502, 2); c2.flags.lf_known = { falls: 2 }; goTo(c2, SCENES, 'lf_falls');
+        assert(sceneView(c2, SCENES).text === first, 'P9A (P8): the Coil of the first visit still reads the first text');
+        for (const who of ['lf_bandits', 'lf_rogue']) {
+            const g = L(9503, 3); g.flags.lf_known = { [who]: 2 }; g.flags.lf_human = who; g.flags.lf_last = who; g.flags[`lf_seen_${who}`] = 1;
+            const t1 = LONGFOREST.lf_human_talked.text(g); g.flags[`lf_seen_${who}`] = 2; const t2 = LONGFOREST.lf_human_talked.text(g);
+            assert(t1 !== t2, `P9A (P8): ${who} remember nothing of an earlier Coil (their first meeting this Coil reads the first text)`);
+        }
+        const s = serialize(L(9504, 2)); void s;
+    }
+}
+
 // v0.11.175 (owner pick P8A; Fable's rewrite of part 8, the Long Forest): OT the older text, CO the second Coil (he knows the week),
 // DY the first screen on day 0, YF Yuki's three forms (the morning, the autumn season, the trials' win, the storm, Fang Wei's look),
 // FX (no weeks counted, eight or nine hundred years, the hare's miss, the pony, the secret of her voice), RP the daily scenes' later
