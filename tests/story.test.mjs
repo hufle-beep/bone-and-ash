@@ -1,7 +1,7 @@
 // Run: node tests/story.test.mjs — story graph integrity + 1,000 random playthroughs (2,000 before v0.11.34) (no crash, no dead end, always reaches the end);
 // Incremental Mode since v0.11.34 (D1: Story Mode dropped from the game)
 import { SCENES, START_SCENE } from '../js/story/prologue.js';
-import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, itemCap, yukiSitsOut, migrate, REL_HIDDEN, REL_MAX, serialize, deserialize, sleepUntil, startActCoil } from '../js/core/game.js'; // v0.11.166 (RV1, M2): startActCoil // v0.11.127 (LQ2, TG): yukiSitsOut, migrate; v0.11.137 (HV1): REL_HIDDEN, REL_MAX
+import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, itemCap, yukiSitsOut, migrate, REL_HIDDEN, REL_MAX, serialize, deserialize, sleepUntil, startActCoil, jamesHpMax, jamesQiMax, clockParts } from '../js/core/game.js'; // v0.11.172 (P5A RV1, TG1): jamesHpMax, jamesQiMax, clockParts; v0.11.166 (RV1, M2): startActCoil // v0.11.127 (LQ2, TG): yukiSitsOut, migrate; v0.11.137 (HV1): REL_HIDDEN, REL_MAX
 import { sceneView, choose, goTo, wasPicked, threatOf } from '../js/core/story.js'; // v0.11.136 (RV2, TG): threatOf
 import { actionOpen } from '../js/core/forms.js';
 import { btTarget } from '../js/story/meridians.js';
@@ -9,10 +9,10 @@ import { loveLine, YK_QUESTION, ykAskAgain, YK_HERE } from '../js/story/yuki_pat
 import { YT_HUBS, YT_BODY, YT_CLOSE, YT_LABEL, YT_GAIN, ytPool } from '../js/story/yuki_time.js'; // v0.11.137 (TR1)
 import { TASK_HUBS } from '../js/story/task_hubs.js'; // v0.11.137 (TR1, YB)
 import { HT_HUBS, HT_BODY, HT_CLOSE, HT_LABEL, HT_GAIN, HT_MID, htPool, htSlot } from '../js/story/house_time.js'; // v0.11.139 (MW1)
-import { likesMei, likesYa } from '../js/story/act1_common.js'; // v0.11.123 (EQ1, AB)
+import { likesMei, likesYa, rel } from '../js/story/act1_common.js'; // v0.11.123 (EQ1, AB); v0.11.172 (P5A): rel
 import { KEEP_FLAGS, rewind } from '../js/core/coil.js'; // v0.11.137 (HV1, Fable L2): rewind on an old save // v0.11.123 (ER1, T3)
 import { againView, noteRead, MEMORY_LINES } from '../js/story/again.js'; // v0.11.167 (CA1): MEMORY_LINES // v0.11.125 (RW1, T); v0.11.133 (FP2): noteRead
-import { STOMP } from '../js/story/power.js'; import { ASHFALL } from '../js/story/ashfall.js'; import { FALLOUT } from '../js/story/act1_fallout.js'; // v0.11.170 (NX2): FALLOUT // v0.11.169 (P3A): ASHFALL // v0.11.126 (NQ1)
+import { STOMP } from '../js/story/power.js'; import { ASHFALL } from '../js/story/ashfall.js'; import { FALLOUT } from '../js/story/act1_fallout.js'; import { BLACKROOT } from '../js/story/act1_blackroot.js'; // v0.11.172 (P5A): BLACKROOT; v0.11.170 (NX2): FALLOUT // v0.11.169 (P3A): ASHFALL // v0.11.126 (NQ1)
 import { coilStamp, dayIndex, textDay, DAY_REPLIES, COIL_SETS, actCoil, noteDay, linesOf, pickLine } from '../js/core/lines.js'; // v0.11.166 (RW1): COIL_SETS, actCoil; // v0.11.135 (NT1, EV1); v0.11.136 (NC1): DAY_REPLIES
 import { splitReply, splitLine, landReply, noteSaid } from '../js/core/replies.js'; // v0.11.136 (NC1); RV2 (TG): landReply, noteSaid
 import { runTask, taskOutcome, cardCheck, taskCards, yukiSays as yukiSaysS } from '../js/core/tasks.js'; // v0.11.169 (CA1, YH): yukiSays // v0.11.136 (RV2, TG); v0.11.139 (MW1): taskCards
@@ -242,7 +242,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         assert(t[0] === t[1] && t[1] === t[2], `RN2 (M1): ${id} has one text`);
     }
     // RN2 (M2): the talks' order: beats 0 and 1, the settled text at 2, the two new beats at 3 and 4, the settled text again from 5
-    for (const [id, settled] of [['talk_mei', /^You walk together a while without talking/], ['talk_ya', /^Ya is in a good mood/]]) {
+    for (const [id, settled] of [['talk_mei', /^For a while you walk and neither of you talks/], ['talk_ya', /^Ya is in a good mood/]]) {
         const t = [0, 1, 2, 3, 4, 5].map((k) => { const g = ensureBars(fresh(5103)); g.scene = id; onDay(g, k); return sceneView(g, SCENES).text; });
         assert(settled.test(t[2]) && settled.test(t[5]) && !settled.test(t[3]) && !settled.test(t[4]) && new Set(t.slice(0, 5)).size === 5, `RN2 (M2): ${id}: the settled text third, the new beats fourth and fifth`);
     }
@@ -268,27 +268,27 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     const onDay = (g, k) => { const today = textDay(g); const days = [...Array(k).keys()].map((i) => -1 - i).concat([today]); g.lines = { c: coilStamp(g), p: {}, last: {}, cur: {}, at: null, said: [], d: new Proxy({}, { get: (_, key) => (typeof key === 'string' ? days : undefined) }) }; return g; };
     // [key, the old reply (the small cat's, where it goes by her form)]
     const NC = [
-        ["bl_camp:2", "A ring of white points, leaning outward. Ya approves of anything with points."],
+        ["bl_camp:2", "White points in a ring, all tilted outward. Ya approves of anything sharp at one end."],
         ["heart_camp:1", "She tells you the songs about the Old Tree her grandmother sang. Some of the words are your words, worn smooth by four hundred years of people who didn't know what they meant."],
-        ["talk_ya:0", "She looks at you like you're a bone-elk and she's hungry."],
-        ["talk_ya:3", "She bares her teeth at you and walks on ahead. She'll get over it. Probably."],
+        ["talk_ya:0", "She sizes you up like a bone-elk at the end of a hungry winter."],
+        ["talk_ya:3", "Her teeth come out, and she walks on ahead. She will get over it. Probably."],
         ["supper:2", "Over the washing water her mother tells you, low and formal, which families owe the Sect what, which houses have lost a child to the road, and which neighbours would sell you for a sack of millet. She does not smile once. It is the most useful hour you have spent on this world."],
         ["wen_lesson:forest", "You ask what the singing sounded like, in the hunters' tales. He weighs the question with great seriousness. \"Like a thing you have heard before,\" he says at last, \"and cannot name.\" You do not tell him that this is exactly right. Yuki, on your knee, has not once looked away from the forest."],
-        ["bl_night_event:1", "You follow until the roots close. The lights go on into the tree, through a crack too small for a person, and the song goes with them."],
-        ["talk_mei:1", "She tells you you're impossible. She's smiling while she says it."],
+        ["bl_night_event:1", "You follow until the roots knit shut across the way. The lights pass through a gap no person could use, and the song goes through with them."],
+        ["talk_mei:1", "\"Impossible,\" she says. The smile gets out before the word is finished."],
         ["herb_slopes:0", "Mei Lin concedes, with reluctance, that you have hands."],
         ["heart_spring:0", "Ya spends the whole time trying to drown you, then trying to get you to stop being so stiff, then, briefly, very effectively, not trying to do anything at all except sit closer."],
         ["heart_spring:1", "Mei Lin washes beside you and tells you, without looking, that you are a coward. She doesn't sound like she minds."],
         ["night_event:11", "Yuki accepts the praise as simple fact."],
         ["heart_spring:2", "You sit with your back to a warm wall and Yuki in your lap and listen to the water, and for half an hour nobody needs anything from you."],
-        ["rr_hunt:1", "Ya sulks about the elk all afternoon."],
-        ["bl_fireside:2", "What happens is that Ya steals your food and Mei Lin falls asleep on your shoulder. You call it a draw."],
+        ["rr_hunt:1", "Ya mourns the elk until dark, aloud, in instalments."],
+        ["bl_fireside:2", "What happens is that Ya eats off your plate and Mei Lin goes to sleep against your shoulder. You score it a draw."],
         ["night_event:2", "A ribbed white roof. Dry, smug, asleep."],
         ["heart_camp:2", "She makes you sit on the very edge, then laughs when you hold on. Then she tells you, very seriously, how many days she followed you through the forest before she decided you were interesting. It was all of them."],
         ["heart_camp:3", "You play the first part again, just Wren's voice, just the planting. Yuki purrs against your chest the whole way through."],
         ["night_event:0", "Mapped: the lights flow toward the dead tree, like blood toward a heart that stopped."],
-        ["bl_train:0", "She throws you twice. You throw her once. She's thrilled."],
-        ["ah_forage:0", "Earthy. Magnificent. Your career peaks."],
+        ["bl_train:0", "Two throws to her, one to you. She could not be happier."],
+        ["ah_forage:0", "Earth, smoke. Magnificent. Your career peaks here."],
         ["wild_forage:2", "The bees are still arguing about it."],
         ["wild_train:2:f", "Scratched."],
         ["workshop:0:f", "A few come out brittle. Fishhooks, all the same."],
@@ -296,17 +296,19 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         ["clinic:1:f", "You do what two hands can. The line was longer than that."],
         ["fo_drill:1:f", "Yuki wins. Decisively."],
         ["workshop:2:f", "It breaks on a root. The farmers bow to the two halves and say nothing. You would have preferred words."],
-        ["bl_train:0:f", "She throws you four times. She's thrilled."],
+        ["bl_train:0:f", "Four throws, all hers. She enjoys each one."],
         ["wild_forage:2:f", "Stung. A lot."],
         ["drill:1:f", "The twelve-year-old puts you on your back, then helps you up and apologises with great formality for the disrespect. That is somehow worse."],
-        ["ah_forage:1", "She feeds you one off her palm without seeming to notice she did it."],
-        ["rr_forage:1", "She corrects your knife-grip without looking up."],
+        ["ah_forage:1", "She holds one out on her palm for you to eat, and her hand seems not to know it."],
+        ["rr_forage:1", "Her hand resets your knife-grip. Her eyes stay put."],
         ["wild_hunt:2:f", "It pinches back."],
         ["wild_forage:1:f", "Leeches."],
         ["drill:0:f", "Two of them hit each other. The apologies are faultless."],
         ["fo_council:0:f", "You say it badly. They hear it anyway, and bow anyway, slightly less deeply."],
         ["fo_clinic:0:f", "Mostly. You'll check the split scalp again tonight."]
     ];
+    // v0.11.172 (owner picks P5A, CA1): the Blackroot's twelve first-day texts above (bl_camp:2, talk_ya:0 / :3, bl_night_event:1, talk_mei:1, rr_hunt:1,
+    // bl_fireside:2, bl_train:0 / :0:f, ah_forage:0 / :1, rr_forage:1) are Fable's rewrite of the old ones (set 1 for the lists by Coil)
     // v0.11.169 (owner picks P3A, CA1): Ashfall's seven first-day texts above (supper:2 … drill:0:f) are Fable's rewrite of the old ones
     // the Results lines each reply sat with before NC1 (the game as of v0.11.135, the same state), so a gain dropped or changed on every day is caught
     const OLD_GAINS = {"bl_camp:2":[],"heart_camp:1":[],"talk_ya:0":[],"talk_ya:3":[],"supper:2":[],"wen_lesson:forest":[],"bl_night_event:1":[],"talk_mei:1":[],"herb_slopes:0":["+2 Ninefold spirit grass (trade goods)."],"heart_spring:0":["+6 HP."],"heart_spring:1":["+4 HP."],"night_event:11":["+1 Mire fowl (dressed).","Yuki Fight held at James's GU (T1 L1)","GU +1 XP, from what Yuki couldn't keep"],"heart_spring:2":[],"rr_hunt:1":["+2 root-hares (as hare)."],"bl_fireside:2":[],"night_event:2":[],"heart_camp:2":[],"heart_camp:3":[],"night_event:0":[],"bl_train:0":[],"ah_forage:0":["+2 ash-truffles (as jade bracket), and one eaten on the spot: +10 satiety."],"wild_forage:2":["+2 Wild honeycomb."],"wild_train:2:f":["−1 HP.","Yuki Fight held at James's GU (T1 L1)","GU +1 XP, from what Yuki couldn't keep"],"workshop:0:f":[],"fo_palisade:0:f":[],"clinic:1:f":[],"fo_drill:1:f":["−2 HP.","Yuki Fight held at James's GU (T1 L1)","GU +1 XP, from what Yuki couldn't keep"],"workshop:2:f":[],"bl_train:0:f":["−2 HP."],"wild_forage:2:f":["+1 Wild honeycomb, −3 HP."],"drill:1:f":["−2 HP.","Yuki Fight held at James's GU (T1 L1)","GU +1 XP, from what Yuki couldn't keep"],"ah_forage:1":["+6 cinderberries (as needleberries)."],"rr_forage:1":["+4 root-sorrel (counts as river cress)."],"wild_hunt:2:f":["−2 HP."],"wild_forage:1:f":["+2 River cress anyway."],"drill:0:f":[],"fo_council:0:f":[],"fo_clinic:0:f":[]};
@@ -316,7 +318,8 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     const SWK = ['wild_forage:0', 'wild_forage:1', 'wild_forage:3', 'wild_hunt:0', 'wild_hunt:1', 'wild_hunt:2', 'wild_train:0', 'wild_train:1', 'wild_train:2', 'wild_train:3']; // v0.11.168 (P2A, SW): their own test (P2A's block)
     const SRK = ['clinic:0', 'clinic:1', 'workshop:0', 'drill:0', 'drill:1']; // v0.11.169 (P3A, SR): their own test (P3A's block)
     const SR4K = ['fo_palisade:0', 'fo_palisade:1', 'fo_palisade:1:f', 'fo_council:0', 'fo_council:1', 'fo_drill:0', 'fo_drill:0:f', 'fo_drill:1', 'fo_clinic:0', 'fo_clinic:1', 'fo_clinic:1:f']; // v0.11.170 (NX2, SR): their own test (NX2's block)
-    const keys = Object.keys(DAY_REPLIES).filter((k) => !ST6K.includes(k) && !SWK.includes(k) && !SRK.includes(k) && !SR4K.includes(k));
+    const P5K = ['bl_camp:0', 'bl_train:1', 'bl_train:2']; // v0.11.172 (P5A, CW + SW): their own test (P5A's block)
+    const keys = Object.keys(DAY_REPLIES).filter((k) => !ST6K.includes(k) && !SWK.includes(k) && !SRK.includes(k) && !SR4K.includes(k) && !P5K.includes(k));
     const first = (k) => COIL_SETS[k]?.[0] ?? DAY_REPLIES[k]; // v0.11.166 (RW1): a Coil's set for the lists by Coil
     assert(keys.length === 38 && keys.reduce((s, k) => s + first(k).length - 1, 0) === 63, `NC1: 38 reply lists with 52 new texts; v0.11.152 (RP1): 11 more (${keys.length}, ${keys.reduce((s, k) => s + first(k).length - 1, 0)})`);
     assert(JSON.stringify([...keys].sort()) === JSON.stringify(NC.map(([k]) => k).sort()), 'NC1: a list for every reply the bots saw on two days, and no other');
@@ -380,10 +383,10 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     // v0.11.166 (owner picks RW1, FT1; Fable's texts): the flirts by Coil: three sets of five, the first the old replies; the act's
     // first Coil the first set, the next the second, then the third, then round again; a day's text within the Coil's set as before
     {
-        const OLD = { 'talk_ya:0': "She looks at you like you're a bone-elk and she's hungry.", 'talk_mei:1': "She tells you you're impossible. She's smiling while she says it." };
+        const OLD = { 'talk_ya:0': "She sizes you up like a bone-elk at the end of a hungry winter.", 'talk_mei:1': "\"Impossible,\" she says. The smile gets out before the word is finished." }; // v0.11.172 (P5A, FL): set 1 is Fable's rewrite of the old replies
         const NEW1 = { 'talk_ya:0': 'She stops dead and watches your mouth, in case more falls out.', 'talk_mei:1': 'One eyebrow goes up. She asks whether that line works where you come from.' };
         const NEW2 = { 'talk_ya:0': 'Ya squints at you. "Is that the thing villages do?', 'talk_mei:1': 'She tells you, gravely, that a respectable woman would walk away.' };
-        assert(JSON.stringify(Object.keys(COIL_SETS).sort()) === JSON.stringify(['talk_mei:1', 'talk_ya:0']), `RW1: the two flirts go by Coil, nothing else (${Object.keys(COIL_SETS)})`);
+        assert(JSON.stringify(Object.keys(COIL_SETS).sort()) === JSON.stringify(['talk_mei:1', 'talk_ya:0', 'talk_ya:3']), `RW1: the two flirts and (v0.11.172, P5A KO) Ya's "Knock it off" go by Coil, nothing else (${Object.keys(COIL_SETS)})`);
         const all = [];
         for (const [key, idx] of [['talk_ya:0', 0], ['talk_mei:1', 1]]) {
             const sets = COIL_SETS[key];
@@ -788,6 +791,165 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         const y = ensureBars(fresh(5304)); onDay(y, 1); const t0 = SCENES.heart_camp.choices[2].do(y)[0];
         y.flags.ship_found = true; const t1 = SCENES.heart_camp.choices[2].do(y)[0];
         assert(!/the ship/.test(t0) && /water somewhere under the roots/.test(t0) && /bark settling, the ship,/.test(t1), 'NC1 (RV2, M1): the ledge names the ship only after ship_found');
+    }
+    // v0.11.172 (owner picks P5A, CA1; Fable's rewrite of part 5, the Blackroot): KO Ya's "Knock it off" by Coil (three sets of five);
+    // CW the cooking replies by day and the six lines on who he is; SW the Practice drills' successes by day; CL the calendar and Ya's
+    // tracks; LB three labels; YF the cat-only texts; ST the ten fights' stomp texts; every Blackroot scene in every form and region
+    {
+        const FORMS = [['cat', 0], ['tiger', 2], ['human', 7]];
+        const B = (seed, form, region = 'rr', bday = 1, flags = {}) => { const g = ensureBars(fresh(seed)); const r = { cat: 0, tiger: 2, human: 7 }[form]; g.yuki.realm = r; g.james.realm = r; g.yuki.form = form; g.minutes = (9 + bday) * 1440 + 12 * 60; Object.assign(g.flags, { bl_region: region, bl_day: bday }, flags); return ensureBars(g); };
+        const bad = (t) => typeof t !== 'string' || /TODO|\$\{|undefined|\bNaN\b/.test(t);
+        const txt = (id, g) => { const t = SCENES[id].text; return typeof t === 'function' ? t(g) : t; };
+        const SRC = readFileSync(new URL('../js/story/act1_blackroot.js', import.meta.url), 'utf8');
+        const words = (t) => t.split(/\s+/).length;
+        let seed = 7900;
+        // KO: three sets of five, all fifteen different, replies only; the act's Coil picks the set, the day the text; −2 / −2 to Ya every time
+        const KO = COIL_SETS['talk_ya:3'];
+        assert(KO?.length === 3 && KO.every((s) => s.length === 5) && new Set(KO.flat()).size === 15 && DAY_REPLIES['talk_ya:3'].length === 15, 'P5A (KO): "Knock it off" has three sets of five, all different');
+        assert(KO.flat().every((t) => !bad(t) && words(t) >= 8 && words(t) <= 45 && splitLine(t).gain === '' && splitLine(t).reply === t), 'P5A (KO): each a reply only, 8–45 words');
+        const ko = SCENES.talk_ya.choices.find((c) => c.text === '"Ya. Knock it off."');
+        for (const coil of [0, 1, 2, 3]) for (const day of [0, 1, 4]) {
+            const g = B(seed++, 'cat'); g.scene = 'talk_ya'; g.coil.act = 1; g.stats.coils0 = 2; g.coil.n = 2 + coil; onDay(g, day);
+            g.rel = { ...g.rel, Ya: { f: 40, a: 40 } }; const before = { ...rel(g, 'Ya') }; const r = splitReply(ko.do(g)).reply.join(' '); const after = { ...rel(g, 'Ya') };
+            assert(r === KO[coil % 3][day] && after.f === before.f - 2 && after.a === before.a - 2, `P5A (KO): the act's Coil ${coil + 1}, day ${day + 1}: set ${(coil % 3) + 1}, text ${day + 1}, −2 / −2 (${r.slice(0, 30)})`);
+        }
+        // CW: "Cook and eat." says the satiety line, then the day's reply (five, in every form); the six throwaway lines; no artist or song
+        const cook = SCENES.bl_camp.choices.find((c) => c.text === 'Cook and eat.');
+        assert(DAY_REPLIES['bl_camp:0']?.length === 4, 'P5A (CW; RV1 M1): four cooking replies, one a camp (Days 11–14)');
+        for (const [form] of FORMS) {
+            const L = DAY_REPLIES['bl_camp:0'].map((t) => (typeof t === 'function' ? t(B(seed++, form)) : t));
+            assert(L.every((t) => !bad(t) && words(t) >= 10 && words(t) <= 45 && splitLine(t).gain === '' && splitLine(t).reply === t) && new Set(L).size === 4, `P5A (CW): the cooking replies as ${form}: four different, 10–45 words, replies only (RV1, TG6)`);
+            for (const day of [0, 1, 2, 3]) {
+                const g = B(seed++, form, 'ah', 4); g.scene = 'bl_camp'; g.inventory.venison = 2; g.james.satiety = 40; onDay(g, day);
+                const out = cook.do(g);
+                const sp = splitReply(out);
+                assert(out.length === 2 && /^You eat: .*, cooked\. \+\d+ satiety\.$/.test(out[0]) && out[1] === L[day] && sp.gains.length === 1 && sp.reply.length === 1, `P5A (CW): cooking as ${form}, day ${day + 1}: the satiety line, then its reply (${String(out[1]).slice(0, 30)})`);
+            }
+        }
+        { const g = B(seed++, 'cat'); g.scene = 'bl_camp'; assert(cook.do(g).length === 0, 'P5A (CW): nothing to cook, nothing said'); }
+        { const g = B(seed++, 'cat'); g.scene = 'bl_camp'; g.inventory.honeycomb = 1; const out = cook.do(g); assert(out.length === 1 && /honeycomb/.test(out[0]) && !/cooked/.test(out[0]), `P5A (RV1, L4): food that isn't cooked gets no word from the others (${out.join(' | ')})`); }
+        assert(new Set(['cat', 'tiger', 'human'].map((f) => DAY_REPLIES['bl_camp:0'][2](B(seed++, f)))).size === 3, 'P5A (CW, YF): the third cooking reply has Yuki in her own form');
+        for (const frag of ['You fed the cat first, so: not Sect', 'cook twice as much for them', 'You put her on when one of us is cold', 'you gave the best piece away, which', 'you hum when you cook', 'kept the last of the meat warm for whoever came off watch']) assert(SRC.includes(frag), `P5A (CW): the line "${frag}"`);
+        const CWL = ['You fed the cat first', 'cook twice as much for them', 'You put her on when one of us is cold', 'you gave the best piece away', 'you hum when you cook', 'kept the last of the meat warm'];
+        assert(CWL.every((f) => SRC.split(f).length === 2) && (SRC.match(/your arm (?:plays|is playing)|Your arm is playing/gi) || []).length === 1 && !/only put that one on for people you like|best piece away again/.test(SRC), 'P5A (RV1, L10, L13, TG6): the six CW lines once each, one music line, no "again" on the first night');
+        assert(!/\b(?:Sabbath|Maiden|Purple|Gojira|Disturbed|Lacuna|Birthday Massacre|Ashbury|The Cure|Nitzer|VNV|Depeche|Saor|Alcest|Hololive|Gura|Mumei|Calliope|Nerissa|Ironmouse|Nyanners|Athelstan|Neuro|Rachie|Miracle of Sound|Eivør|Trøllabundin|Clamavi|Dúrin|Hammerdeep)\b/.test(SRC), 'P5A (CW): no artist or song named in the Blackroot');
+        // SW: the darts' and the needles' successes say a line by day (five each, different); their failures stay silent
+        for (const [i, key, label] of [[1, 'bl_train:1', 'Darts at a mark, from farther and farther.'], [2, 'bl_train:2', 'Needle drills, slow and exact.']]) {
+            const c = SCENES.bl_train.choices[i]; const L = DAY_REPLIES[key];
+            assert(c.text === label && L?.length === 5 && new Set(L).size === 5 && L.every((t) => !bad(t) && words(t) >= 8 && words(t) <= 35), `P5A (SW): ${key}: five different lines (${label})`);
+            for (const day of [0, 1, 4]) { const g = B(seed++, 'cat'); g.scene = 'bl_train'; onDay(g, day); const out = c.do(g); assert(out.length === 1 && out[0] === L[day], `P5A (SW): ${key} day ${day + 1} says its line`); }
+            { const g = B(seed++, 'cat'); g.scene = 'bl_train'; assert(c.failDo(g).length === 0, `P5A (SW): ${key}'s failure stays silent`); }
+        }
+        // CL and LB: five days, not three or four; Ya's tracks ten days back; the three labels
+        { const g = B(seed++, 'cat'); g.scene = 'bl_start'; const t = txt('bl_start', g); assert(/Five days in/.test(t) && !/Three days in|four-day/.test(SRC), 'P5A (CL): the expedition is five days (bl_start, the label)'); }
+        { const g = B(seed++, 'cat'); g.scene = 'rr_scout'; const t = txt('rr_scout', g); assert(/Ten days back, before the village/.test(t) && !/Three days ago/.test(t) && /two days/i.test(t), 'P5A (CL): Ya smelled his stream camp ten days back, and followed him two days'); }
+        // RV1 (M2, TG2): the menu's text is never drawn on a task screen, so the fix and the CW line are in the card's reply, which is
+        { const g = B(seed++, 'cat', 'rr', 1); g.scene = 'rr_hub'; const r = runTask(g, SCENES, 'rr_scout:1'); const j = r.lines.join(' '); assert(g.scene === 'rr_hub' && /Ten days back\. Your first camp, by the stream/.test(j) && /You fed the cat first, so: not Sect/.test(j), `P5A (RV1, M2): "You followed me for two days?" says ten days back and the cat fed first, on the hub (${j.slice(0, 80)})`); }
+        { const g = B(seed++, 'cat', 'rr', 1); g.scene = 'rr_hub'; g.james.gu = { tier: 4, level: 10, xp: 0 }; const r = runTask(g, SCENES, 'rr_scout:0'); assert(/Eyes lie\. Ears lie\. Nose doesn't/.test(r.lines.join(' ')), 'P5A (RV1, M2): the lesson\'s first words in its success line'); }
+        const labs = (id) => SCENES[id].choices.map((c) => c.text);
+        assert(labs('ya_mocks').includes('Defuse it. "We have a five-day walk and no doctor. Pick a fight with the forest."') && labs('bl_train').includes('Darts at a mark, from farther and farther.') && labs('bl_night').includes('Mei Lin and Ya together; you and a watch-thread after.'), 'P5A (LB): the three labels');
+        assert(!/finish what the darts began|Your darts have one of its eyes/.test(SRC) && !/The day after tomorrow you walk inside/.test(SRC), 'P5A (DG, CL): the ape lure needs no darts; the Ashen Hills fireside is true on both nights');
+        // YF: the cat-only texts read in every form (the wolves see Yuki; no laugh "of a cat"; the spring; the serpent's "Your cat")
+        assert(!/They have seen the cat|sound of a cat laughing|Nobody here but trees and the cat/.test(SRC) && !/"Your cat," Ya says/.test(readFileSync(new URL('../js/story/stomp_act1.js', import.meta.url), 'utf8')), 'P5A (YF): no cat-only text without a switch');
+        // ST: the ten fights' stomp texts in every degree and form
+        for (const id of ['bone_elk', 'root_wyrm', 'mire_serpent', 'drowned', 'cinder_hawks', 'rot_ape', 'night_wolves', 'night_drowned', 'night_serpent', 'night_hawks']) for (const [form] of FORMS) {
+            const g = B(seed++, form, id.includes('hawks') || id === 'rot_ape' ? 'ah' : id.includes('drowned') || id.includes('serpent') ? 'dw' : 'rr'); const S = STOMP[id];
+            const all = [1, 2, 3].map((d) => S.posture(g, d)).concat([S.win[2](g), S.win[3](g), S.one(g)]);
+            assert(all.every((t) => !bad(t) && t.length > 20 && !/a bone needle/.test(t)) && new Set([1, 2, 3].map((d) => S.posture(g, d))).size === 3, `P5A (ST): ${id}'s stomp texts render as ${form}`);
+        }
+        { const g = B(seed++, 'cat', 'rr'); assert(!/mother's spear/.test(STOMP.root_wyrm.posture(g, 1)) && /Fifteen years/.test(STOMP.rot_ape.win[2](g) + STOMP.rot_ape.win[3](g)), 'P5A (FX): the wyrm never had her mother\'s spear; the ape: fifteen years'); }
+        // every Blackroot scene in every form, region and expedition day, under each flag set; the choices' results too
+        const TICS = /\bundefined\b/; // (the tics are the text lint's to count, log only)
+        const FLAGSETS = [{}, { ya_party: true, mei_party: true }, { romance: true }, { ya_romance: true }, { mei_bond: true }, { saw_lights: true }, { bl_tracker: true }, { trio: 3 }, { bl_ev: 'wolves' }, { bl_ev: 'drowned' }, { bl_ev: 'hawks' }, { bl_ev: 'serpent' }, ...['song', 'lights', 'rut', 'warm', 'rain', 'stars', 'mei'].map((e) => ({ bl_ev: e, saw_lights: e === 'lights' }))];
+        let rendered = 0;
+        for (const id of Object.keys(BLACKROOT)) for (const flags of FLAGSETS) for (const [region, bday] of [['rr', 1], ['rr', 2], ['dw', 3], ['ah', 4], ['ah', 5]]) for (const [form] of FORMS) {
+            if (id === 'bl_night_event' && !flags.bl_ev) { rendered++; continue; } // a seeded event: rendered under its four bl_ev flag sets (and 'song', 'rain', … below)
+            const g = B(seed++, form, region, bday, flags); g.scene = id;
+            let t; try { t = txt(id, g); } catch (e) { t = `THREW ${e.message}`; }
+            if (bad(t) || TICS.test(t)) { assert(false, `P5A (render): ${id} as ${form}, ${region} day ${bday}, ${JSON.stringify(flags)} (${String(t).slice(0, 90)})`); continue; }
+            rendered++;
+            for (const c of SCENES[id].choices || []) for (const fn of [c.do, c.failDo]) {
+                if (typeof fn !== 'function') continue;
+                const h = B(seed++, form, region, bday, flags); h.scene = id; h.inventory.venison = 2; h.james.qi = 99; let out;
+                try { out = (fn(h, { success: fn === c.do, ratio: fn === c.do ? 1 : 0.2 }) || []).filter((x) => typeof x === 'string'); } catch (e) { out = [`THREW ${e.message}`]; }
+                if (out.some((x) => bad(x) || TICS.test(x))) assert(false, `P5A (render): ${id} "${String(typeof c.text === 'function' ? c.text(h) : c.text).slice(0, 30)}" as ${form}: ${out.join(' | ').slice(0, 120)}`);
+            }
+        }
+        assert(rendered === Object.keys(BLACKROOT).length * FLAGSETS.length * 5 * 3, `P5A (render): every Blackroot scene rendered (${rendered})`);
+        // RV1 (TG3): the scene texts behind the day record, the relationships and eight more flags (texts only; the pass above runs the choices)
+        let rendered2 = 0;
+        const MORE = [{ yr_day: true }, { mb_day: true }, { ya_waited: true }, { ya_respected: true }, { romance: true, mei_first: 'raft' }, { drowned_done: true }, { ape_lured: true }, { bl_watch: 'thread' }, { bl_watch: 'both' }, {}];
+        for (const id of Object.keys(BLACKROOT)) for (const flags of MORE) for (const k of [1, 2, 3]) for (const rl of [[0, 0], [80, 0], [0, 80], [80, 80]]) for (const [region, bday] of [['rr', 1], ['dw', 3], ['ah', 4]]) for (const [form] of FORMS) {
+            const fl = id === 'bl_night_event' ? { ...flags, bl_ev: ['song', 'wolves', 'lights', 'warm'][k] } : flags;
+            const g = B(seed++, form, region, bday, fl); g.scene = id; g.rel = { ...g.rel, 'Mei Lin': { f: 60, a: rl[0] }, Ya: { f: 60, a: rl[1] } }; onDay(g, k);
+            let t; try { t = txt(id, g); } catch (e) { t = `THREW ${e.message}`; }
+            if (bad(t)) { assert(false, `P5A (RV1, TG3): ${id} as ${form}, ${region}, day ${k + 1}, ${JSON.stringify(fl)} ${rl} (${String(t).slice(0, 90)})`); continue; }
+            rendered2++;
+            // TG9: one form's words in another form's text
+            const tq = t.replace(/\*[^*]+\*/g, '');
+            if (form === 'human' && /\bpaws?\b|\bpurr|whiskers|on your shoulder, claws in/.test(tq)) assert(false, `P5A (RV1, TG9): ${id}: a cat's body on the woman (${t.match(/.{40}(?:paws?|purr|whiskers|on your shoulder, claws in).{20}/)?.[0]})`);
+            if (form !== 'human' && /"[^"]+," (?:says Yuki|Yuki says)|her foot on it|her heel on it/.test(t)) assert(false, `P5A (RV1, TG9): ${id}: Yuki speaks aloud or stands as a woman in the ${form}'s text`);
+            if (form === 'tiger' && /Yuki, on your shoulder|from your lap/.test(t)) assert(false, `P5A (RV1, TG9): ${id}: the great root-kin on his shoulder`);
+        }
+        assert(rendered2 === Object.keys(BLACKROOT).length * MORE.length * 3 * 4 * 3 * 3, `P5A (RV1, TG3): every scene behind the day record (${rendered2})`);
+        // TG4: the stomp wins keep their scenes' facts, at both degrees and in every form
+        const FACTS = { bone_elk: [/antler-tine/, /hammerspace/], root_wyrm: [/nine/], mire_serpent: [/That was beautiful/], drowned: [/You came in after me/], cinder_hawks: [/Little queen/], rot_ape: [/spear-head/, /Mei Lin/] };
+        for (const [id, res] of Object.entries(FACTS)) for (const [form] of FORMS) {
+            const g = B(seed++, form, id === 'cinder_hawks' || id === 'rot_ape' ? 'ah' : id === 'bone_elk' || id === 'root_wyrm' ? 'rr' : 'dw');
+            for (const d of [2, 3]) { const t = STOMP[id].win[d](g); assert(res.every((re) => re.test(t)), `P5A (RV1, TG4): ${id}'s degree-${d} win as ${form} keeps ${res.filter((re) => !re.test(t)).join(', ') || 'its facts'}`); }
+        }
+        { const g = B(seed++, 'cat', 'rr'); assert(!/Antlers first/.test(STOMP.root_wyrm.posture(g, 1)) && !/off its rock|leaves its rock/.test(STOMP.rot_ape.posture(g, 1) + SRC), 'P5A (RV1, L6, L7): the wyrm\'s posture doesn\'t repeat rr_end; the ape no longer comes off its rock'); }
+        // TG5: the nights' rule: no full night after a night fight
+        const NIGHT_RE = /full night|sleep(?:s|ing)? (?:soundly|through)|the rest of the night asleep/i;
+        for (const [form] of FORMS) for (const ev of ['wolves', 'drowned', 'serpent', 'hawks']) for (const k of [0, 1, 2, 3]) {
+            const g = B(seed++, form, ev === 'hawks' ? 'ah' : ev === 'wolves' ? 'rr' : 'dw', 2, { bl_ev: ev }); onDay(g, k);
+            for (const id of ['bl_night_won', 'bl_night_lost']) { g.scene = id; const t = txt(id, g); assert(!NIGHT_RE.test(t), `P5A (RV1, TG5): ${id} (${ev}, day ${k + 1}, ${form}) promises no full night`); }
+            const S = STOMP[`night_${ev}`]; assert(![S.win[2](g), S.win[3](g)].some((t) => NIGHT_RE.test(t)), `P5A (RV1, TG5): night_${ev}'s stomp wins promise no full night (${form})`);
+        }
+        // TG7: the calendar words, and the drills and cooking that go by the count (no "yesterday")
+        assert(/in two days/.test(SRC) && /"Two days,"/.test(SRC) && /Not tonight, but soon now/.test(SRC) && /a few days and a dead tree/.test(SRC) && /when I was twelve/.test(SRC) && /Fifteen years/.test(SRC) && !/two days and a dead tree|Three days ago|a thousand years/.test(SRC), 'P5A (RV1, TG7): the calendar words of the walk');
+        assert(['bl_train:1', 'bl_train:2', 'talk_ya:3'].every((k) => DAY_REPLIES[k].every((t) => !/yesterday/i.test(t))) && DAY_REPLIES['bl_camp:0'].every((t) => !/yesterday/i.test(typeof t === 'function' ? t(B(seed++, 'cat')) : t)), 'P5A (RV1, L1, TG7): the lists by count say no "yesterday"');
+        assert(!/the knot|Fifty paces/.test(DAY_REPLIES['bl_train:1'].join(' ')) && /A white spike has one of its eyes/.test(SRC) && /finish what the spike began/.test(SRC), 'P5A (RV1, L2, L3, L8): the darts\' lines fit every place; the lure\'s white spike');
+        assert(/as far as the next rise/.test(SRC) && /she observes, on the bond, where it will not carry/.test(SRC) && /the joke goes cold in your mouth/.test(SRC), 'P5A (RV1, L9, L11, L12): the waited branch outside the camp; the bond line beside the woman; set 3\'s first line');
+        assert(/three loops running/.test(readFileSync(new URL('../js/core/news.js', import.meta.url), 'utf8')), 'P5A (RV1, L14): What\'s new says three loops');
+    }
+}
+// v0.11.172 (owner picks P5A, RV1; Fable's review TG1, TG8): the Blackroot played for real, three Coils with a real rewind, Days 11 to
+// 16 06:00: every day's Practice card through taskCards / runTask, "Knock it off" through choose, cooking at every camp; what each by-day
+// list showed (the darts and the needles five of five, the cooking four of four, "Knock it off" the Coil's set from its first text)
+for (const form of ['cat', 'human']) {
+    const g = ensureBars(newGame(77, { closed: true }));
+    g.minutes = 7 * 1440 + 6 * 60; Object.assign(g.flags, { ending: 'fought', long: true, ya_met: true });
+    const strong = () => { const r = { cat: 0, tiger: 2, human: 7 }[form]; g.james.realm = r; g.yuki.realm = r; g.yuki.form = form; g.james.gu = { tier: 4, level: 5, xp: 0 }; g.james.skills['Convergence Use'] = { tier: 4, level: 5, xp: 0 }; ensureBars(g); g.james.hp = jamesHpMax(g); g.james.qi = jamesQiMax(g); g.rel['Mei Lin'] = { f: 60, a: 30 }; g.rel.Ya = { f: 60, a: 30 }; g.inventory.venison = 20; g.james.satiety = 50; };
+    strong(); g.scene = 'fo_start'; startActCoil(g, 1);
+    const KEYS = ['bl_camp:0', 'bl_train:1', 'bl_train:2', 'talk_ya:3'];
+    const idxOf = (key, text) => DAY_REPLIES[key].findIndex((t) => text.includes(typeof t === 'function' ? t(g) : t));
+    const pick = (label) => sceneView(g, SCENES).choices.find((c) => !c.disabled && (label instanceof RegExp ? label.test(c.label) : c.label === label)) || null;
+    const fight = (r) => { startCombat(g, r.combat(g)); for (let t = 0; t < 120 && g.combat; t++) { const out = combatStep(g, smartAction(g, t)); if (out?.done) { goTo(g, SCENES, out.next); break; } } };
+    for (let coil = 0; coil < 3; coil++) {
+        const log = {}; const note = (lines) => { const text = (lines || []).join(' | '); for (const k of KEYS) { const i = idxOf(k, text); if (i >= 0) (log[k] ||= []).push(i); } };
+        const take = (c) => { const r = choose(g, SCENES, c.index); note(r.lines); if (r.combat) fight(r); return r; };
+        goTo(g, SCENES, 'bl_start'); let steps = 0;
+        for (; steps < 900 && g.scene !== 'ht_start'; steps++) {
+            const id = g.scene; const v = sceneView(g, SCENES);
+            if (TASK_HUBS[id] && /_hub$/.test(id)) {
+                const card = taskCards(g, SCENES).find((c) => c.group === 'Practice' && c.status === 'open');
+                if (card) { note(runTask(g, SCENES, card.id).lines); continue; }
+                const ty = pick('Talk to Ya.'); if (ty) { take(ty); take(pick('"Ya. Knock it off."')); continue; }
+                const next = pick('Eat with the others.') || pick('Cross the mourning hollow.') || pick(/^Push on to the end/) || pick(/^Climb to the pass/) || pick(/^Make camp/) || pick('Rest an hour.') || pick(/^Cultivate/);
+                if (!next) break; take(next); continue;
+            }
+            if (id === 'bl_camp') { take(pick('Cook and eat.') || pick(/^Sing a ring/) || pick('Sit by the fire with the others.') || pick('Sleep.')); continue; }
+            const open = v.choices.filter((c) => !c.disabled); if (!open.length) break;
+            take(open.find((c) => /^Fight|^Through it|Straight at it|Sleep/.test(c.label)) || open[0]);
+        }
+        const day = clockParts(g.minutes).day;
+        assert(g.scene === 'ht_start' && day === 16, `P5A (RV1, TG1): the Blackroot walked to the Heart, Day 16 (${form}, Coil ${coil + 1}: ${g.scene}, Day ${day}, ${steps} steps)`);
+        const seq = (k, n, off = 0) => JSON.stringify(log[k] || []) === JSON.stringify([...Array(n).keys()].map((i) => i + off));
+        assert(seq('bl_train:1', DAY_REPLIES['bl_train:1'].length) && seq('bl_train:2', DAY_REPLIES['bl_train:2'].length), `P5A (RV1, TG1): the darts and the needles show all five lines, Days 11–15 (${form}, Coil ${coil + 1}: ${log['bl_train:1']} / ${log['bl_train:2']})`);
+        assert(seq('bl_camp:0', DAY_REPLIES['bl_camp:0'].length), `P5A (RV1, TG1, M1): the cooking shows all four lines at the four camps (${form}, Coil ${coil + 1}: ${log['bl_camp:0']})`);
+        assert(seq('talk_ya:3', COIL_SETS['talk_ya:3'][coil].length, 5 * coil) && actCoil(g) === coil, `P5A (RV1, TG8): "Knock it off" shows set ${coil + 1} from its first text after ${coil} real rewind(s) (${form}: ${log['talk_ya:3']})`);
+        if (coil < 2) { rewind(g); strong(); g.flags.long = true; }
     }
 }
 // v0.11.137 (owner pick HV1): whose relationships are tracked (RL): Yuki, Mei Lin and Ya (romance), Old Wen and Mother (non-romantic),
@@ -1374,11 +1536,11 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         const loft = LG(55041, { romance: true, bl_region: 'dw' }, [80, 10], 0); goTo(loft, SCENES, 'mei_raft');
         assert(loft.flags.mei_first === undefined, 'ER1 (R1): the raft after the loft leaves mei_first unset');
         loft.flags.bl_region = 'ah'; goTo(loft, SCENES, 'mei_bond');
-        assert(/opposite of the first time in the herb loft/.test(sceneView(loft, SCENES).text), 'ER1 (R1b): the loft clause after a loft-first romance');
+        assert(/with none of the herb loft's hurry/.test(sceneView(loft, SCENES).text), 'ER1 (R1b): the loft clause after a loft-first romance');
         goTo(loft, SCENES, 'rt_mei_night');
         assert(/hundred years since the first time/.test(sceneView(loft, SCENES).text), 'ER1 (R1a): the loft-again opener after a loft-first romance');
         const none = LG(55042, { bl_region: 'ah' }, [80, 10], 0); goTo(none, SCENES, 'mei_bond');
-        assert(/for the first time, and with nothing clever/.test(sceneView(none, SCENES).text), 'ER1 (R1b i): the embers with no first time yet');
+        assert(/a first kiss, with nothing clever ready/.test(sceneView(none, SCENES).text), 'ER1 (R1b i): the embers with no first time yet');
     }
     // gap 1: Yuki's Fallout night with Mei Lin liked by the bar alone (the quiet loft), and with her flag and Ya at 72 (the roof)
     {
@@ -1533,7 +1695,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         ['bl_end', {}, /Yuki is on your shoulder, claws in\./, /Yuki is at your side, claws out\./, /Yuki is at your shoulder, claws out\./],
         ['hall_listen', {}, /Yuki puts her paw on the back of your hand\. Through the bond/, /Yuki rests her chin on the back of your hand\. Through the bond/, /Yuki puts her hand on the back of yours\. Through the bond/],
         ['bl_start', {}, /A biologist, a cat, a herb-woman/, /A biologist, a very large cat, a herb-woman/, /A biologist, a cat in a black dress, a herb-woman/],
-        ['ah_hunt', {}, /"They'll go for the cat\."\n\nYuki, on your shoulder, flattens/, /"They won't go for the cat\. Not that cat\."\n\nYuki, at your side, flattens/, /"They'll go for the small one\."\n\nYuki, at your elbow, flattens/],
+        ['ah_hunt', {}, /"It's the cat they want\."\n\nYuki, on your shoulder, lays her ears back/, /"They won't go for the cat\. Not that cat\."\n\nYuki, at your side, lays her ears back/, /"They'll go for the small one\."\n\nYuki, at your elbow, lays her ears back/], // v0.11.172 (P5A): Fable's rewrite
     ];
     let n = 0;
     for (const [id, flags, ...want] of CASES) {
@@ -1590,7 +1752,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         ['rt_quiet_night', {}, null, /Toward dawn Yuki puts her nose against your chin\./, /Toward dawn Yuki's nose bumps your chin\./, /Toward dawn Yuki's elbow finds your ribs\. \*Stop thinking,\* says the bond\. \*I am trying to sleep\.\*/],
         ['epilogue', {}, null, /a fresh doctorate, a cat, an empty closet/, /a fresh doctorate, a cat the size of a tiger, an empty closet/, /a fresh doctorate, a cat who is currently a woman, an empty closet/],
         ['ya_fight_start', {}, null, /Yuki climbs down off your shoulder and sits at a safe distance/, /Yuki walks off a little way and lies down at a safe distance/, /Yuki steps back and sits on a root at a safe distance/],
-        ['ah_hawks_won', {}, null, /riding your shoulder through the whole thing, claws in, spitting — leaps off and lands on it, and sits there/, /at your flank through the whole thing, claws out, snarling — puts one paw on it, and sits there/, /at your back through the whole thing, claws out, spitting — puts her foot on it, and stands there/],
+        ['ah_hawks_won', {}, null, /who rode out the whole fight on your shoulder, claws sunk in, spitting — jumps down onto it, and sits there/, /at your flank through the whole thing, claws out, snarling — puts one paw on it, and sits there/, /at your back through the whole thing, claws out, spitting — puts her foot on it, and stands there/],
         ['rt_taken', {}, 21 * 1440 + 600, /"You may bring the cat\. The Sect Master will want to see the cat\."[\s\S]*Yuki, on your shoulder, gives him/, /"You may bring the beast\. The Sect Master will want to see the beast\."[\s\S]*Yuki, at your side, gives him/, /"You may bring the root-kin\. The Sect Master will want to see the root-kin\."[\s\S]*Yuki, at your elbow, gives him/],
         ['fo_depart', {}, 10 * 1440 + 360, /Yuki rides your shoulder facing north, tail curled round your neck\./, /Yuki paces at your knee facing north, tail laid against your leg\./, /Yuki walks half a step ahead of you facing north, tail curled round your sleeve\./],
         ['night_event', { night_ev: 'lights' }, null, /Yuki is awake on your chest, ears flat, not hissing\./, /Yuki is awake against your side, ears flat, not growling\./, /Yuki is awake beside you, ears flat, not speaking\./],
@@ -1660,7 +1822,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         ['tribute_dawn_talk', {}, null, /Yuki climbs into the gap between you as if she'd been invited\./, /Yuki lies down across both your feet as if she'd been invited\./, /Yuki sits down on your other side and takes the other shoulder, as if she'd been invited\./],
         ['mei_lin', {}, null, /Yuki, from your shoulder, offers Mei Lin one slow blink\./, /Yuki, from your side, offers Mei Lin one slow blink\./, /Yuki, at your elbow, offers Mei Lin one slow blink\./],
         ['gao_talked', {}, null, /with a cat on his shoulder and the bored tone/, /with a cat the size of a tiger at his side and the bored tone/, /with a cat-eared woman in a black dress at his elbow and the bored tone/],
-        ['friends_watch', {}, null, /the three of you and the cat, and keep the watch/, /the three of you and the cat, and keep the watch/, /on the ridge, all four of you, and keep the watch/],
+        ['friends_watch', {}, null, /the three of you and the cat, and keep the watch/, /the three of you and one very large cat, and keep the watch/, /on the ridge instead, all four of you, and keep the watch/], // v0.11.172 (P5A, YF): the great root-kin's own wording
         ['rt_grove', {}, null, /Yuki walks into the middle of the ring, lies down, and purrs/, /Yuki walks into the middle of the ring, lies down, and purrs/, /Yuki walks into the middle of the ring, sits down in her black dress, and purrs/],
         ['roots_fall', {}, null, /Yuki climbs down after you, perfectly, and sits on your chest, and looks at you\./, /perfectly, all four hundred pounds of her, and puts one paw on your chest, and looks at you\./, /perfectly, in a dress, and stands over you, and looks at you\./],
         ['fo_spy_lost', {}, null, /Yuki sits on your chest\. \*He folded his mat,\* the bond observes/, /Yuki rests one paw on your chest\. \*He folded his mat,\* the bond observes/, /Yuki sits down beside you\. "He folded his mat," she observes\. "While you were bleeding\."/],
@@ -2019,8 +2181,8 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         ['rt_camp', {}, [0, 80], /with Yuki in the warmest lap available, which tonight is Ya's, to everyone's surprise/, /a white wall, her head in the warmest lap available, which tonight is Ya's/, /The four of you sit round it, Yuki leaning on the warmest shoulder available, which tonight is Ya's, to everyone's surprise/],
         ['rt_fire_talk', {}, [80, 80], /merely sad\.\n\nMei Lin's is/, /merely sad\.\n\nMei Lin's is/, /according to Ya and Mei Lin, not bad at all, merely sad\. Yuki, in her turn, says she has never done anything wrong in her life, and looks at each of you until the subject closes\.\n\nMei Lin's is/], // FT
         ['rt_fire_talk', {}, [0, 0], /people you'll never know about\.\n\nWhen the fire/, /people you'll never know about\.\n\nWhen the fire/, /people you'll never know about\. Yuki says only that she slept through the blast, which is true, and that she has not forgiven the chamber, which is also true\.\n\nWhen the fire/],
-        ['heart_view', {}, [0, 0], /The three of you lie down close, for warmth, for courage\. Yuki takes the exact centre\./, /The three of you lie down close, for warmth, for courage\. Yuki lies down round all of you, and regards that as the exact centre\./, /The four of you lie down close, for warmth, for courage\. Yuki takes the exact centre\./], // HV
-        ['bl_fireside', { bl_region: 'ah' }, [0, 0], /The three of you sit in a loose ring, the way people sit/, /The three of you sit in a loose ring, the way people sit/, /The four of you sit in a loose ring, the way people sit/], // BF
+        ['heart_view', {}, [0, 0], /The three of you lie down close together, for warmth and for courage\. Yuki takes the exact centre\./, /The three of you lie down close together, for warmth and for courage\. Yuki lies down round all of you, and counts that as the exact centre\./, /The four of you lie down close together, for warmth and for courage\. Yuki takes the exact centre\./], // HV
+        ['bl_fireside', { bl_region: 'ah' }, [0, 0], /The three of you sit in a loose ring, as people do/, /The three of you sit in a loose ring, as people do/, /The four of you sit in a loose ring, as people do/], // BF
         ['rt_mother', {}, [0, 0], /She looks at you\. She looks at Ya for a very long time\.[\s\S]*"Wash\. All three of you\./, /She looks at you\. She looks at Ya for a very long time\.[\s\S]*"Wash\. All three of you\./, /She looks at you\. She looks at Yuki, ears and all, and lets that wait\. She looks at Ya for a very long time\.[\s\S]*"Wash\. All four of you\./], // MO
         ['lf_exit', { yk_path: 'sister' }, undefined, /then turns into a cat on your shoulder at the treeline\. \*If the first woman/, /in her great shape, her shoulder at your hip, and takes most of the path\. At the treeline she stops and looks the world over\. \*If the first woman/, /on two bare feet, and at the treeline does not turn into anything\. "If the first woman we meet is pretty," she says, "I am telling her about the lab coat\. All of it\."$/], // LX
         ['lf_exit', { yk_path: 'lover' }, undefined, /Then she's a cat on your shoulder again, tail curled round your neck/, /with your hand on her great white shoulder[\s\S]*all four hundred pounds, purring like she owns you\. Which, you reflect, is fair\.$/, /Then she goes on holding it, out into the open, tail curled round your wrist, as if she owns you\. Which, you reflect, is fair\.$/],
@@ -2061,13 +2223,13 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
             ['rt_mother', {}, [0, 0], `"Your father," she says at last, "was exactly the same." She steps aside from the door. "Wash. All three of you. You smell like the forest died on you."`],
             ['lf_exit', { yk_path: 'sister' }, undefined, `Yuki walks the first mile beside you in her human shape, then turns into a cat on your shoulder at the treeline. *If the first woman we meet is pretty,* says the bond, *I am telling her about the lab coat. All of it.*`],
             ['lf_exit', { yk_path: 'lover' }, undefined, `Yuki holds your hand to the treeline. Then she's a cat on your shoulder again, tail curled round your neck, purring like she owns you. Which, you reflect, is fair.`],
-            ['heart_view', {}, [0, 0], `The three of you lie down close, for warmth, for courage. Yuki takes the exact centre.`],
+            ['heart_view', {}, [0, 0], `The three of you lie down close together, for warmth and for courage. Yuki takes the exact centre.`],
         ];
         for (const [id, flags, rel, line] of PIN) { const g = LPG(63400 + n++, 'cat', flags, rel); goTo(g, SCENES, id); assert(sceneView(g, SCENES).text.includes(line), `CB1 (T): ${id}: the cat's line word for word`); }
     }
     {   // T (Fable's review): the cat's other changed lines pinned; the sister's path and no path read the same; the label on screen and picked at 1; the great root-kin's yk_night_all
         const PIN2 = [
-            ['bl_fireside', { bl_region: 'ah' }, [0, 0], `The three of you sit in a loose ring, the way people sit when they've been through things together and don't yet have a word for what that makes them.`],
+            ['bl_fireside', { bl_region: 'ah' }, [0, 0], `The three of you sit in a loose ring, as people do who have come through things together and have no name yet for what it has made of them.`],
             ['rt_fire_talk', {}, [80, 80], `Yours involves a grant committee and is, according to both women, not bad at all, merely sad.\n\nMei Lin's is that she laughed at Gao Feng.`],
             ['rt_fire_talk', {}, [0, 0], `Mei Lin tells of her father. You tell of the lab, and the blast, and the people you'll never know about.\n\nWhen the fire is down to embers`],
         ];
@@ -2088,10 +2250,10 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     // v0.11.129 (owner pick CS1; Fable's MAINs): the review's and Fable's notes (BF2, NM, FW, TM, LB, RA, HG, HC, ML, ND, YC)
     const CS = [
         // [scene, flags, rel, the cat's, the great root-kin's, the human's]
-        ['bl_fireside', { bl_region: 'dw' }, [80, 80], /Later, settling down, the three of you end up closer than strictly necessary/, /Later, settling down, the three of you end up closer than strictly necessary/, /Later, settling down, the four of you end up closer than strictly necessary/], // BF2
+        ['bl_fireside', { bl_region: 'dw' }, [80, 80], /Later, when you all settle, the three of you lie nearer together than the cold requires/, /Later, when you all settle, the three of you lie nearer together than the cold requires/, /Later, when you all settle, the four of you lie nearer together than the cold requires/], // BF2
         ['rt_fire_talk', {}, [80, 80], /according to both women, not bad at all, merely sad\.\n/, /according to both women, not bad at all, merely sad\.\n/, /according to Ya and Mei Lin, not bad at all, merely sad\. Yuki, in her turn/], // FW
-        ['heart_view', {}, [0, 0], /\n\*Tomorrow,\* says Yuki, and for once she doesn't sound sarcastic at all\.$/, /\n\*Tomorrow,\* says Yuki, and for once she doesn't sound sarcastic at all\.$/, /\n"Tomorrow," says Yuki, and for once she doesn't sound sarcastic at all\.$/], // TM
-        ['heart_view', { ya_romance: true }, [0, 80], /Mei Lin lies down on Yuki's other side, close, and says goodnight/, /Mei Lin lies down against Yuki's great white flank, close, and says goodnight/, /Mei Lin lies down on Yuki's other side, close, and says goodnight/], // HG
+        ['heart_view', {}, [0, 0], /\n\*Tomorrow,\* says Yuki, and there is no sarcasm in it anywhere\.$/, /\n\*Tomorrow,\* says Yuki, and there is no sarcasm in it anywhere\.$/, /\n"Tomorrow," says Yuki, and there is no sarcasm in it anywhere\.$/], // TM
+        ['heart_view', { ya_romance: true }, [0, 80], /Mei Lin lies down on Yuki's other side, close by, and wishes you both goodnight/, /Mei Lin lies down against Yuki's great white flank, close by, and wishes you both goodnight/, /Mei Lin lies down on Yuki's other side, close by, and wishes you both goodnight/], // HG
         ['lf_exit', { yk_path: undefined }, undefined, /Yuki's opinion, through the bond: \*both\.\*$/, /Yuki's opinion, through the bond: \*both\.\*$/, /Yuki's opinion, delivered aloud: "Both\."$/], // LB (no path: nothing follows)
         ['lf_exit', { yk_path: 'sister' }, undefined, /Yuki's opinion, through the bond: \*both\.\*\n\n/, /Yuki's opinion, through the bond: \*both\.\*\n\n/, /Yuki's opinion, delivered aloud: "Both\."\n\nYuki walks the first mile beside you on two bare feet/],
         ['rt_arrive', {}, [0, 0], /\n\nTheir eyes go to Ya and stay there\. Bare arms/, /\n\nTheir eyes go to Yuki first: four hundred pounds of white cat[\s\S]*Then they go to Ya and stay there\. Bare arms/, /\n\nTheir eyes go to Yuki first — the white hair, the ears, the tail — and move on, gravely, as from a matter that belongs to the outlander and is therefore not to be looked at twice\. Then they go to Ya and stay there\. Bare arms/], // RA; v0.11.130 (YB1, RA): the great root-kin's own
@@ -2121,12 +2283,12 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     // human's texts unchanged (the tiger's text less its line is the cat's, word for word); roots_lost's no-Ya clause by form
     const YB = [
         // [scene, flags, the great root-kin's line, [her clause, the cat's clause] where the text also swaps one]
-        ["ah_hawks_lost", {}, "\n\nYuki sits upwind with a hawk's tail feathers in her teeth and a scorched stripe down one flank. *Mine is also holy,* says the bond. *Nobody is reviewing mine.*"],
-        ["ape_lost", {}, "\n\nYuki lies along your other side with one foreleg held off the ground. The ape threw her before it hit you, and she came back on three legs, in time to see it go. She is purring, low, the purr that isn't for pleasure."],
+        ["ah_hawks_lost", {}, "\n\nYuki sits upwind with a hawk's tail feathers in her teeth and a scorched stripe down one flank. *Mine is also holy,* says the bond. *Nobody is reviewing mine.*", null, null, "\n\nYuki stands upwind with a hawk's tail feathers in one fist and a scorched sleeve. \"Mine is also holy,\" she says. \"Nobody is reviewing mine.\""], // v0.11.172 (P5A RV1, L5): and the woman's own line (Fable's)
+        ["ape_lost", {}, "\n\nYuki lies along your other side with one foreleg held off the ground. The ape threw her before it hit you, and she came back on three legs, in time to see it go. She is purring, low, the purr that isn't for pleasure.", null, null, "\n\nYuki sits against your other side with one arm held close. The ape threw her before it hit you, and she was back on her feet in time to see it go. She says nothing. Her tail lies across your knees and does not move."], // v0.11.172 (P5A RV1, L5): and the woman's own line (Fable's)
         ["arson_lost", {}, " Yuki has one of them flat in the lane under both forepaws, and it is the wrong one: the torch was in the other man's hand. She keeps him all the same, and when the street has finished with the fire it finds it still has somebody to be grave at.", null, [" Yuki has one of them pinned in the lane with her knee between his shoulders, and it is the wrong one: the other man had the torch. She keeps him all the same, so that when the street has finished with the fire there is still somebody left for it to be grave at.", '']], // v0.11.169 (P3A, YF): and the woman's line // v0.11.131 (XB2, AP): she keeps him
-        ["bl_night_lost", {}, " Yuki, who had hold of it until it had hold of her ear, lies across your feet with the ear at half-mast. *Three voices,* says the bond. *I am also telling you off. I am just doing it quietly.*"],
+        ["bl_night_lost", {}, " Yuki, who had hold of it until it had hold of her ear, lies across your feet with the ear at half-mast. *Three voices,* says the bond. *I am also telling you off. I am just doing it quietly.*", null, null, " Yuki, who had hold of it until it had hold of her sleeve, sits on your feet. \"Three voices,\" she says. \"I am also telling you off. I am doing it quietly.\""], // v0.11.172 (P5A RV1, L5): and the woman's own line (Fable's)
         ["collectors_lost", {}, "\n\nThen he flicks two fingers, and the net comes off Yuki: a spirit-beast net, thrown from his sleeve in the first breath of the fight, before he so much as drew. She has been under it since your knees went. She walks over on legs that aren't quite steady and stands across you. Nobody asks her to move."],
-        ["dw_serpent_lost", { fly: true }, "\n\nYuki surfaces a moment later with a length of serpent in her mouth that is no longer attached to anything, climbs out, and shakes four hundred pounds of swamp over all three of you. *It let go,* says the bond. *Eventually. You're welcome.*"],
+        ["dw_serpent_lost", { fly: true }, "\n\nYuki surfaces a moment later with a length of serpent in her mouth that is no longer attached to anything, climbs out, and shakes four hundred pounds of swamp over all three of you. *It let go,* says the bond. *Eventually. You're welcome.*", null, null, "\n\nYuki comes up last, some way off, with her hair plastered flat and a length of serpent in one fist that is attached to nothing any more. She wades out and wrings her tail over all three of you. \"It let go,\" she says. \"Eventually. You're welcome.\""], // v0.11.172 (P5A, FB): and the woman's own line (Fable's)
         ["far_lost", {}, " Yuki comes in behind you on three good legs and lies down across the doorway. Mei Lin steps over her without breaking off, comes back with the salve, and starts on the cat. The lecture now covers you both.", null, [" Yuki comes in behind you holding one arm with the other, and sits on the doorstep without a word. Mei Lin does not break off. She fetches the salve, turns the arm to the light, and starts on it. The lecture now covers you both.", '']], // v0.11.169 (P3A, YF): and the woman's line
         // fo_spy_fled: v0.11.170 (NX2, CA1 FB) its own check below (the cat's and the woman's lines now too)
         ["fo_wolf_lost", {}, " Yuki comes out of the barley the other way a moment later, with grey fur in her teeth and no goat: she went after the one that came at her, the lame one, while the other went round. Wolves do that."],
@@ -2134,19 +2296,20 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         ["night_fled", {}, " Yuki walks behind with the blanket in her mouth, which keeps her from saying what she thinks of running from something she outweighs. The bond says it anyway."],
         ["ring_lost", {}, " Yuki is already out: she backed the whole length of the gallery ahead of you, because the rings were grown for gardeners and there is nowhere in them to turn four hundred pounds of cat round. She sits down and starts on the splinters in her forepaw."],
         ['roots_lost', {}, " The collar is in Yuki's teeth. She climbs the shaft backwards with you swinging under her chin like a kitten, and when she sets you down at the top there are husk-lines raked down both her flanks, which neither of you mentions."],
-        ["rr_bridge_fail", {}, " Yuki goes with her, low and silent, which is how you learn the two of them have been waiting for the bridge to fail."],
-        ["rr_elk_lost", {}, " The elk put Yuki through a thornbrake first, which is how it got to you. She comes out of it backwards, bristling, and sits down beside Mei Lin to wait her turn."],
+        ["rr_bridge_fail", {}, " Yuki goes with her, low and silent, which is how you learn the two of them have been waiting for the bridge to fail.", null, null, " Yuki is half a step behind her, tail lashing. \"You tried,\" she tells you over her shoulder, with no regret in it at all."], // v0.11.172 (P5A, FB): and the woman's own line (Fable's)
+        ["rr_elk_lost", {}, " The elk put Yuki through a thornbrake first, which is how it got to you. She comes out of it backwards, bristling, and sits down beside Mei Lin to wait her turn.", null, null, " The elk threw Yuki into a thornbrake first, which is how it reached you. She walks out with her hair full of thorns and her face full of nothing, and holds a scratched arm out to Mei Lin without being asked."], // v0.11.172 (P5A, FB): and the woman's own line (Fable's)
         ["rt_brawl_lost", {}, "\n\nFrom the wine-shop bench, most of which she is, Yuki yawns to the back teeth. *Fists only,* says the bond. *Your rule. I kept it for you.*"],
         ["rt_duel_lost", {}, "\n\nOne hand was for you. The other, you gather, was for Yuki, who lies ten paces up the road, a long white shape getting its legs under it one at a time."],
         ["rt_parley_fail", {}, " The two on Yuki's side stop a spear's length further off than the others. She watches them do it without getting up."],
-        ["wyrm_lost", { fly: true }, " Yuki lets go of the wyrm's neck when she is ready and comes down the forty metres at a walk, on nothing. She stops a hand's width above the water. Cats, it turns out, don't have to swim. This one looks at the three of you who did."], // v0.11.131 (XB2, FY): for a flier
+        ["wyrm_lost", { fly: true }, " Yuki lets go of the wyrm's neck when she is ready and comes down the forty metres at a walk, on nothing. She stops a hand's width above the water. Cats, it turns out, don't have to swim. This one looks at the three of you who did.", null, null, " Yuki lets go of the wyrm when it suits her and comes down the forty metres of air like a woman on a staircase. She stops a hand above the water and looks the three of you over. \"I didn't jump,\" she says. \"I'd like that noted.\""], // v0.11.172 (P5A, FB): and the woman's own line (Fable's) // v0.11.131 (XB2, FY): for a flier
         ['roots_lost', { ya_party: false }, " The collar is in Yuki's teeth. She climbs the shaft backwards with you swinging under her chin like a kitten, and when she sets you down at the top there are husk-lines raked down both her flanks, which neither of you mentions.", ['Mei Lin calling the handholds down from the lip of the shaft in a voice that is very nearly steady', 'Mei Lin and Yuki between them, which should not be physically possible'], ['Yuki in a black dress that has not picked up so much as one husk, ', '']], // v0.11.131 (XB2, RH): the human's own clause
         ['ring_lost', { ya_party: false }, " Yuki is already out: she backed the whole length of the gallery ahead of you, because the rings were grown for gardeners and there is nowhere in them to turn four hundred pounds of cat round. She sits down and starts on the splinters in her forepaw."],
     ];
-    for (const [id, { fly, ...flags }, line, swap, hswap] of YB) {
+    for (const [id, { fly, ...flags }, line, swap, hswap, hline] of YB) {
         // v0.11.131 (XB2, FY): a flight row compares her with the cat at Foundation (who flies too: realm 1), as she always flies
         const [cat, tiger, human] = ['cat', 'tiger', 'human'].map((form) => { const g = FM(65000 + n++, form, flags); if (fly && form === 'cat') { g.yuki.realm = 1; g.james.realm = 1; } goTo(g, SCENES, id); return sceneView(g, SCENES).text; });
         assert(tiger.includes(line) && !cat.includes(line) && !human.includes(line), `YB1 (LL): ${id} ${JSON.stringify(flags)}: the great root-kin's line, hers alone`);
+        if (hline) { assert(human.includes(hline) && human.replace(hline, '') === cat && !cat.includes(hline) && !tiger.includes(hline) && tiger.replace(line, '') === cat, `YB1 (LL) / P5A (FB): ${id} ${JSON.stringify(flags)}: the woman's line, hers alone, the cat's text the base`); continue; }
         assert((swap ? tiger.replace(swap[0], swap[1]) : tiger).replace(line, '') === cat && (hswap ? human.replace(hswap[0], hswap[1]) : human) === cat, `YB1 (LL): ${id} ${JSON.stringify(flags)}: the cat's and the human's texts unchanged`);
     }
     {   // v0.11.170 (owner picks NX2, CA1 FB; Fable's): fo_spy_fled has the great root-kin's line and now the cat's and the woman's, each hers alone
@@ -2506,7 +2669,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         assert(distinct(nights.map((n) => n[1])), 'ST3: the watch paragraph differs on all four nights');
         assert(nights[1][0] !== nights[2][0], 'ST3: the Drowned Wood night\'s opener differs on its second night');
         assert(camps[1].split('\n\n')[0] !== camps[2].split('\n\n')[0] && g.lines.d['bl_camp:dw']?.length === 2, 'ST3: the Drowned Wood camp differs on its second day (bl_camp keyed by region)');
-        assert(nights[0][1].startsWith('Watches to set. Ya says she doesn') && camps[1].startsWith('Camp on a raft of fallen trunks'), 'ST3: the Root Road\'s watches and the Drowned Wood\'s first camp keep the old texts');
+        assert(nights[0][1].startsWith('Watches to set. Ya claims she never sleeps') && camps[1].startsWith('Camp is a raft of fallen trunks'), 'ST3: the Root Road\'s watches and the Drowned Wood\'s first camp keep the old texts');
     }
     // ST4: a breakthrough text for each realm from 2 to 14, by night and by day; the village's closer, but not where the sky didn't come
     const BTR = await import('../js/story/prologue.js');
@@ -2579,10 +2742,10 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     {
         const g = RG(58470, 'cat'); g.flags.bl_region = 'rr';
         const eatGrub = (d) => { g.minutes = (d - 1) * D + 10 * 60; g.scene = 'rr_forage'; const i = SCENES.rr_forage.choices.findIndex((c) => c.text === 'Eat the grub.'); return SCENES.rr_forage.choices[i].do(g).join(' '); };
-        assert(eatGrub(11) === 'It pops. It tastes like nutty cream and regret. +10 satiety. Ya cheers.', 'ST6: the grub\'s first day reads as before');
+        assert(eatGrub(11) === 'It pops. Nutty cream, and under the cream, regret. +10 satiety. Ya cheers.', 'ST6: the grub\'s first day reads as before (v0.11.172, P5A: Fable\'s rewrite)');
         assert(/^It pops again\..* \+10 satiety\. Ya is already/.test(eatGrub(12)), 'ST6: the grub\'s second day, the gain in its place');
         const beetle = (d) => { g.minutes = (d - 1) * D + 10 * 60; g.scene = 'ah_forage'; return SCENES.ah_forage.choices.find((c) => /fire-beetle/.test(c.text)).do(g).join(' '); };
-        assert(beetle(14) === 'It is spicy. Genuinely, chemically spicy. +6 satiety. Ya looks at you like you just proposed.', 'RV1 (TG): the beetle\'s first day reads as before (through its choice)');
+        assert(beetle(14) === 'Spicy. Not figuratively: chemically spicy. +6 satiety. Ya looks at you as if that was a proposal.', 'RV1 (TG): the beetle\'s first day reads as before (through its choice)');
         assert(/^Still spicy\..* \+6 satiety\. Ya holds up two fingers/.test(beetle(15)), 'RV1 (TG): the beetle\'s second day, the gain in its place');
         const darts = SCENES.ah_hunt.choices.find((c) => /^Darts/.test(c.text));
         g.minutes = 13 * D + 10 * 60; const p1 = darts.do(g, { ratio: 0.5 })[0];

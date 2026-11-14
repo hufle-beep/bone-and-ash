@@ -90,212 +90,212 @@ Mei Lin, on the step, has put the knife down. She is staring at Ya with an expre
 
     /* ============================================================ PART 2 — INTO THE BLACKROOT ============================== */
     bone_elk: {
-        posture: (g, d) => `The bone-elk lowers a rack of antlers like a thicket of white knives and paws the root until splinters fly. Ya whoops. "Big one! Big one! Don't kill it in the face, I want the skull—"
+        posture: (g, d) => `The bone-elk drops its head, and the whole rack swings round on you: white tines by the dozen, each of them an edge. One forehoof strips bark off the root. Ya whoops. "Big one! Big one! Not in the face, I want the skull—"
 
-${pick(d, 'It is the size of a cart and it is coming straight at you.', 'It is the size of a cart. You have dealt with carts.', 'Your Convergence looks at its antlers the way a carpenter looks at a nice plank.')}`,
+${pick(d, 'It weighs what a cart weighs, and all of that is on its way to you.', 'It weighs what a cart weighs. You have stopped carts.', 'Your Convergence studies the rack as a carpenter studies a good plank that somebody else is waving about.')}`,
         win: {
-            2: () => `The elk stops three paces short of you with one antler caught in a white bone hoop you grew out of the root, and then it doesn't need to stop any more. Ya is on it before it finishes falling, knife out, opening the throat with a neatness that would get her a surgical residency where you come from.
+            2: () => `Three paces short of you the elk runs one antler into a hoop of white bone that was not growing out of the root a heartbeat ago. The hoop holds. The neck does not, and what is left of the elk arrives in a clatter. Ya is astride it with her knife out before it has settled, and makes one cut at the throat, small and exact, a butcher's cut and a kind one.
 
-She looks up at you, blood to the elbows. "That," she says, "was *rude*. You didn't let it try."
+She looks up, red to the elbows. "That," she says, "was *rude*. It never got its turn."
 
-"It tried."
+"It had a turn."
 
-"It tried for one second." She beams. "You can come hunting with me any time. You can come hunting with me *always*."
+"One breath of a turn." The grin gets away from her. "You can come hunting with me any time, scholar. *Any* time. Bring the hoop."
 
-You pick up a shed antler-tine. It's warm in your hand, and your Convergence turns it over like a jeweller with a stone: the grain, the density, the way it *wants* to be shaped. You put it in the hammerspace.`,
-            3: () => `The elk charges. You raise one hand, and its antlers — every white tine of them — simply *listen* to you instead of to it. They curl inward, politely, into a closed crown. The elk stops dead, very confused, wearing its own weapon as a hat.
+A shed antler-tine lies in the moss. You pick it up, still warm, and your Convergence goes over it grain by grain, weighing the density, listening to how much shape it is *asking* for. There is a remarkable thing in it somewhere. The hammerspace takes it.`,
+            3: () => `The elk charges. You lift one hand, and its antlers, every white tine of them, stop taking orders from the elk and start taking them from you. They curl inward, politely, and close into a crown. The elk pulls up, baffled, wearing its own weapons as a hat.
 
-It looks at you. You look at it. It sits down, like a dog.
+It regards you. You regard it. It sits, as a dog sits.
 
-Ya makes a noise you've never heard a person make. Then she's on it, knife out, quick and merciful, because meat is meat and the Blackroot doesn't do mercy any other way.
+Ya makes a noise no person has made near you before. Then she is on it, knife out, quick and kind about it, because meat is meat and that is all the mercy the Blackroot stocks.
 
-"You *talked to its head*," she says, blood to the elbows, eyes enormous. "You talked to its head and its head *agreed with you*. Marry me. No — teach me. No — both."
+"You *talked to its head*," she says, red to the elbows, eyes huge. "And its head took *your side*. You can come hunting with me any time. Every time. Marry me. No: teach me. No: both."
 
-You pick up a shed antler-tine. It's warm, and it practically purrs in your hand: the grain, the density, the way it *wants* to be shaped. You put it in the hammerspace. It seems happy there.`,
+A shed antler-tine lies in the moss. It lies warm in your fingers, and your Convergence all but purrs over it: grain, density, the amount of shape it is *asking* for. You put it away in the hammerspace, where it seems content.`,
         },
-        one: () => 'You ask the elk\'s antlers, nicely, to stop being on its side. They agree.',
+        one: () => 'You ask the elk\'s antlers, civilly, whether they would care to change sides. They would.',
     },
     root_wyrm: {
-        posture: (g, d) => `The root-wyrm pours out of the split in the great root, bark-scaled, eyeless, long as a village street, and the whole road shivers under it. Ya goes very still. "That one," she says, "ate my mother's spear."
+        posture: (g, d) => `Out it comes, out of the split in the great root: scaled in bark, eyeless, the length of a village street and still arriving. The Root Road shudders under the weight of it. Ya plants her feet. "That's all of it," she says. "I never saw all of it."
 
-${meiOn(g) ? 'Mei Lin draws her herb-knife, which is roughly like drawing a hairpin at an avalanche. ' : ''}${pick(d, 'This one is going to be work.', 'It is very big. You have been getting very good at big.', 'Your threads politely ask whether you would like them to fake some effort, for morale.')}`,
+${meiOn(g) ? 'Mei Lin has her knife out, which is roughly a hairpin drawn on an avalanche. ' : ''}${pick(d, 'This one will be work.', 'It is very large. You have lately got good at large.', 'Your threads ask, tactfully, whether you would like some effort faked, for morale.')}`,
         win: {
-            2: () => `It is still big, and it still takes a while, but it never touches anyone. Every lunge finds a white wall where you were; every coil closes on bone that wasn't there a moment earlier. When it finally goes still, the four of you are sitting on the lip of the split with your backs against the root, and only one of you is out of breath, and it's Mei Lin, from shouting.
+            2: () => `It is still enormous, and it still takes a while, but it never lays a scale on anyone. Each lunge meets a white wall where you were standing; each coil shuts on bone that grew there a breath before. When it stops at last, the four of you are sat in a row on the split's edge with the root at your backs, and exactly one of you is winded. That is Mei Lin, and it is from the shouting.
 
-Ya is grinning through a mask of sap. "I've wanted to kill that," she says dreamily, "since I was *nine*."
+Ya's face is all sap and teeth. "Since I was *nine*," she tells the sky. "Since I was nine I've wanted that thing dead."
 
-"Why didn't you?"
+"What stopped you?"
 
-"I was nine." She leans her head back against the root. "Then I was alone. You don't fight things like that alone. You fight them with—" She stops. Looks at the three of you as if seeing you for the first time. Then she gets up abruptly to cut scales off the corpse, and doesn't finish the sentence.
+"Being nine." She lets her head knock back on the root. "Then being alone. Nobody fights one of those alone. Those you fight with—" The word doesn't come. She looks along the row of you, slowly, like someone adding a column a second time because the sum came out wrong. Then she is up, too fast, and off to cut scales from the carcass. Nobody finishes the sentence for her.
 
-Mei Lin watches her go, softens, notices, stops it.`,
-            3: () => `The wyrm lunges. You make a small gesture, and a hundred white spikes come up out of the great root under it in a perfect line, like the teeth of a comb, and it stops lunging, and that's more or less the fight.
+Mei Lin's eyes follow her. Her face goes soft; she notices, and corrects it.`,
+            3: () => `The wyrm lunges. You move two fingers, and a hundred white spikes come up through the great root beneath it in one straight row, evenly spaced, like the teeth of a comb. The lunge ends there. So, give or take some thrashing, does the fight.
 
-Ya stands in the middle of the road with her spear half raised and her mouth open. "*No,*" she says. "No, no, no — I wanted to *help*, I've wanted to kill that since I was *nine*—"
+Ya stands mid-road with her spear half up and her mouth open. "*No,*" she says. "No, no — I was going to *help*. Since I was *nine* I've wanted to kill that—"
 
-"Why didn't you?"
+"What stopped you?"
 
-"I was nine! And then I was alone, and you don't fight things like that alone, you fight them with—" She stops. Looks at the three of you, and at the very dead wyrm, and laughs once, helplessly. "With *him*, apparently. Who does it with his *pinkie*."
+"I was nine! Then I was alone, and nobody fights one of those alone, those you fight with—" She runs out. Her eyes go over the three of you, and the wyrm on its comb, and one laugh gets out of her before she can catch it. "With *him*, it seems. Who uses two *fingers*."
 
-She goes to cut scales off the corpse and keeps glancing back at you, the way people glance at the sea.
+She goes off to cut scales from the carcass, and keeps checking over her shoulder that you are still where she left you, as people do with weather.
 
-Mei Lin watches her go. Something in her face softens, and then she notices it softening and stops it.`,
+Mei Lin's eyes follow her. Her face goes soft; she notices, and corrects it.`,
         },
-        one: () => 'One line of white spikes, root to tail. The wyrm meets all of them at once.',
+        one: () => 'One row of white spikes, nose to tail. The wyrm finds every one of them together.',
     },
     mire_serpent: {
-        posture: (g, d) => `The black water humps and the mire serpent rises out of it with a mouth like a split log and a smell like a wet grave. It sways. It considers you. It decides you are a snack.
+        posture: (g, d) => `The black water bulges, and the mire serpent stands up out of it: a mouth like a trunk split for the fire, and the smell of a grave somebody left open in the rain. It sways. It looks you over. It files you under snacks.
 
-${pick(d, 'It is very fast in the water. You are very much in the water.', 'You are knee-deep in a swamp and still feel overdressed for the occasion.', `${yu(g)} looks at the serpent and then at you, and you get the clear impression she's asking whether she can have it.`)}`,
+${pick(d, 'In the water it is very fast, and the water is where you are standing.', 'Knee-deep in a swamp, you still feel overdressed for this.', `${yu(g)} looks at the serpent, then at you. The question is plain enough: may she have it.`)}`,
         win: {
-            2: () => `You put a needle in its eye on the first lunge and a blade through its jaw on the second, and it thrashes the water to foam and then sinks, and the swamp goes back to pretending nothing happened. Ya rides it the last few seconds anyway, whooping, purely for the principle, and comes up out of the water soaked and glorious and enormously pleased with herself.
+            2: () => `A needle in its eye on the first lunge, a blade up through the jaw on the second. It flogs the swamp white, and then it goes down, and the swamp resumes its impression of a place where nothing happens. Ya rides the last few seconds of it regardless, whooping, on principle, and surfaces drenched and splendid and unbearably pleased.
 
-Mei Lin, dripping, says, "You're insane," and then, quieter, so that only you hear it: "That was beautiful."
+Mei Lin, streaming, tells her, "You're insane." Then, under her breath, where only you could catch it: "That was beautiful."
 
-You decide you didn't hear it. She decides you didn't either. You roast the serpent on a drowned branch. It tastes of eel and regret.`,
-            3: () => `The serpent rises. You look at it. It rises a little less. You keep looking at it, and somewhere in its small, cold, ancient brain a very old instinct speaks up, and the instinct says: *that is not food. That is the thing that eats food.*
+You rule that you caught nothing. Mei Lin rules the same. The serpent, roasted, tastes of eel and regret.`,
+            3: () => `The serpent rises. You look at it. It rises somewhat less. You go on looking, and far back in its small, cold, antique brain an instinct older than the swamp clears its throat and says: *that is not food. That is what food runs from.*
 
-It lowers its head into the water until only its eyes show, and then not even those, and then a large dark shape goes away from you across the swamp extremely fast.
+The head sinks until only the eyes are above the surface, then not the eyes, and then a long dark shape is leaving across the swamp at speed.
 
-Ya is so offended she can't speak. She wades after it with her spear, swearing in at least two languages, and twenty minutes later she comes back dragging the serpent by the tail, soaked and glorious and enormously pleased with herself. "It *ran*," she says. "From *you*. I didn't know they *could*."
+Ya is too insulted to speak. She goes in after it with her spear, cursing in two languages at least, and what follows is foam, and whooping, and a huntress riding a thing that would rather be elsewhere. She wades back hauling it by the tail, drenched and splendid and unbearably pleased. "It *ran*," she says. "From *you*. I didn't know they *could*."
 
-Mei Lin says, "You're insane," and then, quieter, to you: "That was beautiful."
+Mei Lin tells her, "You're insane." Then, under her breath, for you: "That was beautiful."
 
-You decide you didn't hear it. You roast the serpent on a drowned branch. It tastes of eel and wounded pride.`,
+You rule that you caught nothing. So does she. The serpent, roasted, tastes of eel and injured pride.`,
         },
-        one: () => 'You look at it. It remembers an appointment elsewhere. Ya catches it anyway.',
+        one: () => 'You look at it. It recalls an appointment elsewhere. Ya keeps the appointment for it.',
     },
     drowned: {
-        posture: (g, d) => `They come up out of the water without a splash. Three of them: a man, a woman, a child. They used to be people. Their eyes are white as boiled eggs and the water runs out of their mouths when they open them, as if they are trying to say something and have forgotten how.
+        posture: (g, d) => `They rise all round you, and the surface never breaks. Three: a man, a woman, a child. They were people, before the flood, before the bad Qi decided to keep them. Their eyes are boiled white, and when the mouths open only water comes out, as if there had been a sentence once and the swamp has had the use of it since. Somewhere under them is Mei Lin.
 
-${pick(d, 'You feel the cold coming off them like a wall.', 'They are slow. That is the only mercy here, and you mean to use it.', 'You could end this without touching them. You would like, very much, to be gentle about it.')}`,
+${pick(d, 'Cold stands off them like a wall.', 'They are slow. It is the one mercy on offer here, and you intend to spend it.', 'You could finish this from where you stand, with nothing touched. You would like, very much, to do it gently.')}`,
         win: {
-            2: () => `It's quick, and you make it quiet. Bone needles, one each, through the places where the poison sits thickest; the drowned stop, and stand for a moment as if listening, and then sink, slowly, as if relieved.
+            2: () => `It is quick, and you keep it quiet. One needle of bone apiece, set where the poison lies thickest. The drowned stop. They stand as if a voice had called them from another room, and then they sink, slowly, with every look of relief.
 
-Mei Lin still goes in. One of them caught her ankle before it stopped, and the hollow is deep, and Ya goes under after her without a second's thought and hauls her onto the nearest trunk by the collar, pounding her back until she coughs up half the swamp. There's a long gash down Ya's forearm where the drowned woman's nails went in. She hasn't noticed.
+Ya has not waited for any of that. She went under after Mei Lin without a thought in her head, and she comes up with her now: by the collar, onto the nearest trunk, a fist between the shoulder blades until half the hollow is back where it belongs. The drowned woman's nails found Ya's forearm on the way and laid it open, elbow to wrist. Ya has not looked.
 
-Mei Lin lies on the trunk, gasping, staring up at Ya. "You came in after me."
+Mei Lin lies there heaving, staring up. Ya stares down. Then, hoarse: "You came in after me."
 
-"Obviously," Ya says, offended. "You're *mine*. I mean — you're ours. You're the herb girl. Who'd stitch me?" She looks at her arm, finally. "Oh. That's bad."`,
-            3: () => `You don't fight them. You lift your hand and your Convergence finds what's left of them — bone, mostly, and the foul knot of Qi that keeps the bone walking — and you unpick the knot, very gently, the way you'd untangle a child's hair.
+"Obviously," says Ya, stung. "You're *mine*. I mean, ours. The herb girl. Who'd stitch me?" Now she looks at the arm. "Oh. That's bad."`,
+            3: () => `There is no fight in it. You raise one hand, and your Convergence finds what remains of each: bone, mostly, and the foul knot of Qi that keeps the bone on its feet. You unpick the knots, slowly, as you would work a tangle out of a child's hair.
 
-The drowned stop. The child looks at you, and for a moment the white goes out of its eyes, and it is only a child, and then it sinks, slowly, as if relieved. The other two follow.
+The drowned stop. The child looks at you, and the white goes out of its eyes, and for one breath it is a child and nothing else. Then it sinks, slowly, with every look of relief, and the man and the woman go down after it.
 
-It's the quietest thing you've ever done. It is also, apparently, the scariest, because Mei Lin backs away from you so fast she goes straight into the hollow, and Ya goes under after her without a second's thought and hauls her onto the nearest trunk by the collar, pounding her back until she coughs up half the swamp. There's a long gash down Ya's arm where a drowned branch caught her. She hasn't noticed.
+It is the quietest thing you have done on this world, and nobody saw it. Ya went under after Mei Lin before your hand was up, without a thought in her head, and they surface together into the stillness: Mei Lin by the collar, onto the nearest trunk, a fist between her shoulder blades until half the hollow is back where it belongs. Nails that were holding on a breath ago have laid Ya's forearm open, elbow to wrist. She has not looked.
 
-"You came in after me," Mei Lin says.
+"You came in after me," Mei Lin says, hoarse.
 
-"Obviously," Ya says, offended. "You're *mine*. Ours. The herb girl. Who'd stitch me?" She looks at her arm. "Oh. That's bad." Then she looks at you, and for once doesn't say anything at all.`,
+"Obviously," says Ya, stung. "You're *mine*. Ours. The herb girl. Who'd stitch me?" Now she looks at the arm. "Oh. That's bad." Then she looks at the flat black water where three of them stood, and at you, and for once has nothing to add.`,
         },
-        one: () => 'You untie the knot of foul Qi holding them up. They lie down in the water, like people who were very tired.',
+        one: () => 'You untie the knot of foul Qi that holds them up. They lie down in the water like people who have at last been told they may.',
     },
     cinder_hawks: {
-        posture: (g, d) => `Three cinder hawks drop out of the haze, wings trailing sparks, screaming like kettles. They go for the smallest target first, because hawks are not stupid. The smallest target is ${yukiForm(g) === 'cat' ? 'on your shoulder' : 'not, today, very small'}.
+        posture: (g, d) => `Three cinder hawks fall out of the haze with sparks pouring off their wings, screaming like kettles. Hawks are not stupid: they pick the smallest first. The smallest, in this party, is ${yukiForm(g) === 'cat' ? 'on your shoulder, and has views' : 'not, today, anything a hawk should pick'}.
 
-${pick(d, 'They are fast, and they are on fire. That\'s two problems.', 'They are on fire. You have a body made of composting. You\'re not worried.', 'You start counting sparks. You get to eleven before you lose interest.')}`,
+${pick(d, 'They are fast and they are alight. Two problems.', 'They are alight. Bone, as it happens, burns badly. You are not worried.', 'You begin counting the sparks, and reach eleven before it bores you.')}`,
         win: {
-            2: (g) => `Three darts, three hawks, three small showers of sparks on the ash. The last one tries to break off and you take it out of the air anyway, because cinder hawks hold grudges and you'd rather not be dive-bombed all the way to the tree.
+            2: (g) => `Three darts, three hawks, three small bursts of sparks on the ash. The third had thought better of it and turned for the haze; you take it regardless, since cinder hawks keep grudges and you would rather not be stooped on all the way to the tree.
 
-${yukiForm(g) === 'cat' ? 'Yuki leaps off your shoulder and lands on it, and sits there, and stares at the sky as if daring another one to try.' : `${yuShort(g)} pins the last of them with one paw and stares at the sky as if daring another one to try.`}
+${yukiForm(g) === 'cat' ? 'Yuki drops from your shoulder onto the last one down, sits, and watches the sky for volunteers.' : `${yuShort(g)} pins the last one down flat and watches the sky for volunteers.`}
 
-"Little queen," Ya says to her, with enormous respect. Yuki accepts the title. You are, apparently, the staff.`,
-            3: (g) => `The hawks dive. You hold up one finger, and a thin white canopy of bone lattice blooms over your heads like an umbrella; the hawks hit it, bounce, and drop to the ash in a heap of sparks and indignation, dazed, wings askew.
+"Little queen," says Ya, deeply respectful. Yuki lets it stand. That, you gather, makes you the household.`,
+            3: (g) => `The hawks stoop. You raise one finger, and a thin white lattice of bone opens over the four of you like an umbrella. They hit it, bounce, and land on the ash in one heap of sparks and outrage, stunned, wings at every angle.
 
-${yuShort(g)} walks over and sits on all three of them at once.
+${yuShort(g)} strolls over and takes possession of the heap.
 
-They stop struggling quite quickly. They give the impression, as hawks go, of having been very badly humiliated in front of their peers.
+The struggling stops quite soon. For hawks, they give a strong impression of having been shamed before their own kind, and they are still giving it when Ya comes round with her knife and makes two of them into supper and the third into a warning.
 
-"Little queen," Ya says to Yuki, with enormous respect, and then to you, with even more: "And — what do I call *you*? Big king? Umbrella man?" She considers. "I'll think of something filthy."`,
+"Little queen," she says to Yuki, deeply respectful, and then to you, more respectful still: "And *you*? What do I call you? Big king? Umbrella man?" She thinks. "I'll find something filthy."`,
         },
-        one: () => 'An umbrella of bone. Three hawks hit it and lie down to reconsider their lives.',
+        one: () => 'One umbrella of bone. Three hawks meet it and lie down to think their lives over.',
     },
     rot_ape: {
-        posture: (g, d) => `The rot-ape drops off the ridge onto all fours and the ground jumps. Its fur is moss. Its eyes are not. It beats the ash with both fists and screams, and Ya screams back at it — not in fear. In recognition. "That's *it*," she says. "That's the one. It killed my mother."
+        posture: (g, d) => `The rot-ape comes on all fours, and the pass jumps under it. Moss for fur; nothing so green or so living in what looks out. It hammers the ash with both fists and screams, and Ya screams straight back. There is no fear in hers. "That's *it*," she says. "That's the one my mother didn't come back from."
 
-${pick(d, 'You set your feet. This is going to hurt.', 'You take a breath. It is big. It is also, you notice, very slow to turn left.', 'You look at it and feel nothing but a deep, tired desire to make this quick, for her sake.')}`,
+${pick(d, 'You set your feet. This will hurt.', 'You breathe in. It is big. It is also, you notice, slow on the turn.', 'You look it over and feel one thing only: a tired wish to make this quick, for her sake.')}`,
         win: {
-            2: () => `It never gets its hands on anyone. Every swing finds bone where flesh was; every charge ends in a white wall. When it falls, it falls across the pass like a landslide, and the moss on its back goes on growing even after its heart stops.
+            2: () => `It never closes a hand on anyone. Each swing lands on bone where a body was; each charge ends at a white wall. When it goes over, it goes over across the pass, a hillside's worth, and the moss it wore goes on growing with nothing beating underneath.
 
-Ya walks over to it, slowly. Puts her hand on its face. Then she goes through the bones in the notch, one by one, until she finds what she's looking for: a spear-head, rusted, wrapped in leather gone black with age. She stands there holding it for a long time.
+Ya walks to it, in no hurry now, and puts her palm against its face. Then she goes through the bones heaped in the notch, piece by piece, to the one thing she wants: a spear-head, rusted, in a wrapping of leather gone black with years. She holds it in both hands and stands there, and the pass waits for her.
 
-Mei Lin goes and stands next to her. Doesn't say anything. Ya leans into her, just slightly, the way a tree leans into wind.
+Mei Lin comes to her side without a word. Ya's weight shifts toward her, a finger's width, no more.
 
-You give them the time. Yuki sits beside you and watches the dead tree.
+You give them room. Yuki stays by you, watching the dead tree.
 
-*It knows we're here,* she says.`,
-            3: () => `It charges. You step to one side. It goes past, turns, charges again; you step to the other side; it goes past again, into a white bone post you grew while it was turning, and sits down very hard, cross-eyed.
+*It knows we're here,* she says, on the bond, to you only.`,
+            3: () => `It charges, and you are one step to the left of where it charged. It goes by, hauls round, comes again; you are one step to the right. The third time it goes by into a white post of bone that grew while its back was turned, and sits down very hard, and stays sat.
 
-You walk up to it. It looks at you. You put one finger on its forehead and, for the first time in its long, poisoned life, it's afraid. You end it cleanly, because Ya deserves clean.
+You walk up to it. It looks at you. You lay one finger on its forehead, and after a long, poisoned life as the thing in the pass, it learns what the elk knew, and the wolves, and the one who came in crimson. You make the end clean. Ya is owed clean.
 
-It falls across the pass like a landslide, and the moss on its back goes on growing even after its heart stops.
+It goes over across the pass, a hillside's worth, and the moss it wore goes on growing with nothing beating underneath.
 
-Ya walks over to it, slowly. Puts her hand on its face. Then she goes through the bones in the notch until she finds what she's looking for: a spear-head, rusted, wrapped in leather gone black with age. She stands there holding it for a long time.
+Ya walks to it, in no hurry now, and puts her palm against its face. Then she goes through the bones heaped in the notch to the one thing she wants: a spear-head, rusted, in a wrapping of leather gone black with years. She holds it in both hands and stands there, and the pass waits for her.
 
-"Twenty years," she says. "You took a *minute*." It isn't a complaint. Mei Lin goes and stands next to her, and Ya leans into her the way a tree leans into wind.
+"Fifteen years," she says. "And you needed a *minute*." It is not a complaint. Mei Lin comes to her side, and Ya's weight shifts toward her, a finger's width, no more.
 
-Yuki sits beside you and watches the dead tree. *It knows we're here,* she says.`,
+Yuki stays by you, watching the dead tree. *It knows we're here,* she says, on the bond, to you only.`,
         },
-        one: () => 'One finger on its forehead. The rot-ape remembers fear, and then remembers nothing.',
+        one: () => 'One finger on its forehead. The rot-ape learns fear, and after that learns nothing.',
     },
     night_wolves: {
-        posture: (g, d) => `Two ash-wolves circle the firelight, the patient way, the way of animals that have done this to a hundred camps. Ya sits up with her spear across her knees and grins at them. "Breakfast came to us."
+        posture: (g, d) => `Two ash-wolves pace the edge of the light, unhurried, with the patience of animals that have emptied a good many camps. Ya sits up, lays the spear over her knees and shows them her teeth. "Breakfast walked here by itself."
 
-${pick(d, 'You get up. It is late and you are tired, and they know it.', 'You get up, mostly because they won\'t stop pacing.', 'You don\'t get up.')}`,
+${pick(d, 'You get up. It is late, you are tired, and they know both.', 'You get up, chiefly because the pacing is keeping you awake.', 'You do not get up.')}`,
         win: {
-            2: () => `It's over quickly, and not messily at all, which Ya seems to find disappointing. "You didn't even stand up properly," she says, cleaning her spear for form's sake.
+            2: () => `It is brief and it is tidy, and the tidiness lets Ya down. "You never even stood up properly," she says, wiping a clean spear for the look of it.
 
-Mei Lin checks you for cuts, finds none, frowns at the lack of them as if it's suspicious, and goes back to sleep.`,
-            3: () => `You don't get up. Two thin white spikes come out of the earth at the edge of the firelight, and the wolves, who were about to be very frightening, are suddenly very preoccupied, and then very still.
+Mei Lin searches you for cuts, finds none, frowns as if their absence were the suspicious part, and takes herself back to bed.`,
+            3: () => `You do not get up. Two thin white spikes rise out of the ground where the firelight ends, and the wolves, who had a frightening entrance planned, are abruptly busy with something else, and then are not busy at all.
 
-Ya, mid-lunge with her spear, stops, overbalances, and sits down in the ashes. "*Rude,*" she says. "I was *going*."
+Ya, halfway into a lunge, has nothing left to lunge at. She overbalances and sits down in the cold ashes. "*Rude,*" she says. "I was *going*."
 
-Mei Lin opens one eye, looks at the wolves, looks at you still lying under your blanket, says "Of course," and closes it again.`,
+Mei Lin unseals one eye, considers the wolves, considers you, flat under your blanket, says "Of course," and shuts it.`,
         },
-        one: () => 'Two spikes from under the blanket. You don\'t open your eyes.',
+        one: () => 'Two spikes, sent from under the blanket. Your eyes stay shut.',
     },
     night_drowned: {
-        posture: (g, d) => `Two of the drowned stand at the edge of the camp, dripping, waiting to be noticed. They don't come closer. Somehow that's worse.
+        posture: (g, d) => `Two of the drowned stand in the black water where the camp ends, streaming, waiting to be seen. They come no nearer. Nearer would be simpler.
 
-${pick(d, 'Mei Lin\'s hand finds your sleeve in the dark.', 'You sigh and get up. They deserve better than to be ignored.', 'You can feel the knot of foul Qi in them from here. You could undo it in your sleep. You might.')}`,
+${pick(d, 'In the dark Mei Lin\'s hand closes on your sleeve.', 'You sigh and get up. They are owed better than being ignored.', 'You can feel the foul knot of Qi in each of them from here. You could undo it asleep. You may yet.')}`,
         win: {
-            2: () => `Two needles, two quiet sinkings, and the water closes over them as if relieved. Ya cleans her spear, which she didn't use, and says it was good practice. Mei Lin cleans your cuts, which you don't have, and says nothing about practice at all. She doesn't let go of your sleeve for a long time.`,
-            3: () => `You reach out without getting up and untie whatever is holding them, gently, the way you'd let go of a held breath. They lie down in the shallows like people who were very tired.
+            2: () => `Two needles, and two of the drowned going quietly under, unhurried, as if thanking you. Ya never needed her spear; she lays it down and, for once, finds nothing funny to say. Mei Lin sits with her arms round her knees and one hand wound in your sleeve, Ya against her other side, and that is how the three of you wait out the dark.`,
+            3: () => `You reach out from where you lie and undo what holds them, as gently as letting a breath go. They settle into the black water as the very tired settle into bed.
 
-Ya, who had her spear up, lowers it slowly. "You do that like it's nothing," she says.
+Ya had her spear up. It comes down slowly. "You do that as if it was nothing," she says, and no joke follows.
 
-"It isn't nothing. It's just easy."
+"It isn't nothing. It's only easy."
 
-Mei Lin doesn't say anything. She moves her bedroll a hand's width closer to yours, and then, after a while, another.`,
+Mei Lin says nothing whatever. She sits up with her arms round her knees, and Ya with her. By morning her bedroll is a hand's width nearer yours, then another.`,
         },
-        one: () => 'You let them rest. They lie down in the water and do.',
+        one: () => 'You let them rest. They lie down in the water, and do.',
     },
     night_serpent: {
-        posture: (g, d) => `The serpent comes up the bank toward the warmth of the fire, belly scraping, tongue tasting the air. It tastes you. It tastes Yuki. It keeps coming, which is, in its defence, the only thing it knows how to do.
+        posture: (g, d) => `The serpent heaves itself in over the trunks toward the fire's warmth, belly rasping, tongue sampling the air. It samples you. It samples Yuki. It keeps coming all the same, which, to be fair to it, is the one thing it knows how to do.
 
-${pick(d, 'You grab the nearest burning branch, for all the good it\'ll do.', 'You put down your tea.', 'You don\'t put down your tea.')}`,
+${pick(d, 'You take the nearest burning branch, for whatever that is worth.', 'You put your tea down.', 'You do not put your tea down.')}`,
         win: {
-            2: () => `A needle behind the jaw, a blade under the skull, and the serpent slides back down the bank the way it came, only much less alive. Ya says it was good practice. Mei Lin says nothing about practice at all, and puts another stick on the fire.`,
-            3: (g) => `You don't put down your tea. ${yuShort(g)} gets up instead, looks at the serpent, and the serpent — which has never in its life seen ${yukiForm(g) === 'tiger' ? 'a white cat the size of a cart' : 'whatever Yuki is tonight'} — makes a decision, and the decision is *the river*.
+            2: () => `A needle behind the jaw, a blade under the skull, and the serpent goes back off the trunks by the route it came, considerably less alive. Ya says the night owed her a longer one than that. Mei Lin lays another stick on the fire and watches the water.`,
+            3: (g) => `You do not put your tea down. ${yuShort(g)} gets up in your place and looks at the serpent. The serpent, which has not in all its life been looked at like that by ${yukiForm(g) === 'tiger' ? 'a white cat that size' : 'anything, of any size'}, comes to a decision, and the decision is *the swamp*.
 
-It goes back down the bank very fast, in reverse.
+It leaves the trunks quickly, backwards.
 
-"Your cat," Ya says, reverently, "is the most frightening thing I've ever met. Except you. Except — no, the cat."
+"That one," says Ya, with reverence, tipping her chin at Yuki, "is the worst thing I ever met. Except you. Except — no. Her."
 
-You finish your tea.`,
+You finish the tea.`,
         },
-        one: () => 'You keep drinking your tea. The serpent leaves without being asked twice.',
+        one: () => 'You go on drinking your tea. The serpent does not need telling twice.',
     },
     night_hawks: {
-        posture: (g, d) => `Cinder hawks, two, diving at the fire as if it owes them money, sparks raining off their wings.
+        posture: (g, d) => `Two cinder hawks, coming down on your fire as if it owed them money, wings sheeting sparks.
 
-${pick(d, 'They\'re after the food. And Yuki.', 'They\'re after the food. You\'re after sleep. One of you will be disappointed.', 'You roll over.')}`,
+${pick(d, 'They want the food, and anything else small enough to carry.', 'They want the food. You want sleep. One side is going to be let down.', 'You roll over.')}`,
         win: {
-            2: () => `Two darts. Two small showers of sparks. Ya says it was good practice. Mei Lin says nothing about practice at all; she's already asleep again, which you take as a compliment.`,
-            3: () => `You roll over and a lid of white bone closes over the fire like a cooking pot. Two hawks hit it, bonk, bonk, and slide off into the ash, where they lie on their backs with their feet in the air, thinking about what they've done.
+            2: () => `Two darts, two small bursts of sparks, one bird for the morning's pot. Ya complains that she had only just found her spear. Mei Lin is asleep again before the complaint ends, and you choose to be flattered.`,
+            3: () => `You roll over, and a lid of white bone shuts over the fire like the lid on a pot. Two hawks strike it, bonk, bonk, and slide off into the ash. One lies on its back with its feet in the air, reviewing its choices; the other has no choices left, and is breakfast.
 
-Ya laughs so hard she has to put her face in her bedroll. Mei Lin tells her to be quiet, very sternly, and then laughs too.`,
+Ya has to push her face into her bedroll to stop laughing. Mei Lin tells her, very severely, to be quiet, and then gives way herself.`,
         },
-        one: () => 'A lid of bone over the fire. Bonk. Bonk.',
+        one: () => 'A bone lid, set over the fire. Bonk. Bonk.',
     },
 
     /* ============================================================ PART 3 — THE HEART ===================================== */

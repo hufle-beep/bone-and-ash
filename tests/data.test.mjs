@@ -460,7 +460,7 @@ assert(gives(yhunt).slice().sort().join(' ') === 'fowl_raw hare_raw venison', `v
     const fight = SCENES.bl_night_event.choices.find((c) => c.text === 'Fight.');
     const enc = (kind, stakes, hard) => { const g = structuredClone(base); g.flags.bl_ev = kind; g.flags.bl_stakes_night = stakes; g.flags.stakes_hard = hard; return fight.combat(g); };
     // X2: the cut comes after the scaling and the ally floor, so it is exact: max(1, hp − 3), max(1, hp − 4) with bone-meal
-    const LINE = { wolves: 'off the stakes already bleeding', drowned: 'walks onto the stakes', serpent: 'comes over the stakes', hawks: 'dives too low over the stakes' };
+    const LINE = { wolves: 'tried the stakes coming in', drowned: 'walked straight through the stakes', serpent: 'crossed the stakes', hawks: 'cuts it too fine over the stakes' }; // v0.11.172 (P5A): Fable's rewrite
     for (const kind of ['wolves', 'drowned', 'serpent', 'hawks']) {
         const off = enc(kind, false, false), on = enc(kind, true, false), hard = enc(kind, true, true);
         const h0 = off.enemies[0].hp;

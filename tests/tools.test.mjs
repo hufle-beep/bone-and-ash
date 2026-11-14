@@ -576,7 +576,11 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md', 'roadmap-act2.md']; // v0.1
 // files named; the handover's open items start with the same; the four done lines moved word for word, not left behind
 {
     const r1 = readFileSync(path.join(ROOT, 'project/roadmap.md'), 'utf8'), d2 = readFileSync(path.join(ROOT, 'project/roadmap-done-2.md'), 'utf8'), ho = readFileSync(path.join(ROOT, 'project/handover.md'), 'utf8');
-    const s0 = r1.slice(r1.indexOf('## 0. '), r1.indexOf('## 1. '));
+    const s0r = r1.slice(r1.indexOf('## 0. '), r1.indexOf('## 1. '));
+    // v0.11.172 (P5A, the roadmap under 60 KB): the done plan moved word for word to roadmap-done-3.md; these checks read it there
+    const d3m = readFileSync(path.join(ROOT, 'project/roadmap-done-3.md'), 'utf8'); const mv = d3m.slice(d3m.indexOf('### From section 0, as of v0.11.171'), d3m.indexOf('## Moved in v0.11.171'));
+    assert(mv.includes('- *(new in v0.11.144') && !s0r.includes('- *(new in v0.11.144') && s0r.includes('Section 0\'s Android app plan (done in v0.11.145–v0.11.150) moved word for word to `roadmap-done-3.md`'), 'P5A: section 0\'s done Android plan moved word for word to roadmap-done-3.md, a pointer left');
+    const s0 = mv;
     const first = s0.split('\n').find((l) => l.startsWith('- '));
     assert(/\*\*TABLED: everything else in this roadmap waits\*\*/.test(first || '') && /NEXT: the Android app, Selene's way/.test(first || ''), 'TB1: section 0 opens with the Tabled note and the Android app');
     const order = ['1. **WR + CI', '2. **UP', '3. **EX + NS', '4. **FN', '5. **BL'].map((t) => s0.indexOf(t));
