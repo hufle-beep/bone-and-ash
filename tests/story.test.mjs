@@ -1580,9 +1580,9 @@ for (const form of ['cat', 'human']) {
           const r = runTask(g, SCENES, card.id); bands.add(card.check?.band); const all = Object.values(LF_DRILL).flat();
           assert((r.lines.some((x) => all.includes(x) || (i === 2 && /−3 HP\.$/.test(x))) || (i === 2 && /partly/.test(r.lines[0] || ''))), `TG13 (C5): lf_train:${i} at T${tier} (${card.check?.band}) shows a drill line (${r.lines.slice(0, 3)})`); }
       assert(bands.size >= 2, `TG13: more than one band reached (${[...bands]})`); }
-    // TG14 (C4): the lint reads the Long Forest's later texts, the drills and the season lines (the saved snapshot)
+    // TG14 (C4): the lint reads the Long Forest's later texts, the drills and the season lines (the saved snapshot; v0.11.177, P9A: 24 drill lines with the spar's three)
     { const snap = JSON.parse(readFileSync(new URL('../tools/text-baseline.json', import.meta.url), 'utf8'));
-      assert(snap.pools?.lf_drill?.lines === 21 && snap.pools?.lf_season?.lines === 14 && snap.areas.longforest.variantWords > 4000, `TG14 (C4): the lint's pools and the later-visit samples (${snap.pools?.lf_drill?.lines}, ${snap.pools?.lf_season?.lines}, ${snap.areas?.longforest?.variantWords})`); }
+      assert(snap.pools?.lf_drill?.lines === 24 && snap.pools?.lf_season?.lines === 14 && snap.areas.longforest.variantWords > 4000, `TG14 (C4): the lint's pools and the later-visit samples (${snap.pools?.lf_drill?.lines}, ${snap.pools?.lf_season?.lines}, ${snap.areas?.longforest?.variantWords})`); }
     // T8: the great form's scene before the human one
     { const g = L(seed++, 'human', 7); g.flags.yuki_tiger_seen = false; g.flags.yuki_human_seen = false;
       const hum = SCENES.lf_hub.choices.find((c) => c.to === 'yuki_human_awaken'), tig = SCENES.lf_hub.choices.find((c) => c.to === 'yuki_tiger_awaken');
