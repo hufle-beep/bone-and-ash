@@ -5,6 +5,7 @@
  */
 import { registerStomp } from './power.js';
 import { yukiForm } from '../core/game.js';
+import { byDay } from '../core/lines.js';
 
 /** Yuki as she currently is, for a phrase in the middle of a sentence. */
 const yk = (g) => ({ tiger: 'Yuki — currently the size of a Bengal tiger and twice as bored', human: 'Yuki, white hair stirring, ears flat, arms folded', cat: 'Yuki, eleven pounds of white cat' }[yukiForm(g)]);
@@ -111,63 +112,63 @@ He goes, holding his arm. The whole village watches him go, then turns and looks
     },
 
     crows: {
-        posture: (g, d) => `The three rot-crows spread their moulting wings and scream, a sound like a gate being torn off its hinges, hopping closer along the trunk with their milky eyes fixed on your food, and then on your eyes.
+        posture: (g, d) => `The three rot-crows open what is left of their wings and scream, a noise like a rusted gate losing an argument, and sidle down the fallen trunk toward you. Their milk-white eyes settle on your food first. Then they move, with interest, to your eyes.
 
-${aside(d, 'You keep your hands near your face.', 'You keep your hands in your pockets.', `You keep eating. ${yk(g)} licks her lips.`)}`,
+${aside(d, 'You get a hand up in front of your glasses.', 'You leave your hands where they are. The glasses will do.', `You don't sit up. ${stompForm(g, 'On your chest, eleven pounds of white cat begins to purr.', 'Beside you a great white head lifts off its paws, and the purr starts somewhere under the ground.', 'Beside you Yuki sits up and smooths her hair. "Good," she says. "I was bored."')}`)}`,
         win: {
-            2: (g) => `Feathers everywhere. Two crows go down in the first three seconds; the third, being the smartest crow in the Blackroot, decides it has an appointment somewhere very far away and keeps it.
+            2: (g) => `Feathers, mostly. Two crows are down before the fire finishes its crackle. The third, the cleverest rot-crow in the Blackroot, recalls urgent business in another province and leaves to see to it.
 
-${yk(g)} washes with tremendous dignity. You sit for a while and notice, with clinical interest, that your heart barely bothered to speed up.`,
-            3: (g) => `You don't get up. You flick three needles off your thumb like seeds and the first two crows fall off the branch without having understood any of it. The third lands in front of you, lowers its head, and very carefully pushes a shiny beetle toward your boot. A peace offering.
+${stompForm(g, 'Yuki washes one paw, slowly, as after a meal that fell short.', 'Yuki lowers her chin onto her paws again; the rest of her never got up.', 'Yuki picks a feather out of her hair and holds it at arm\'s length until you take it.')} You check your pulse, out of habit. It had not troubled to rise.`,
+            3: (g) => `You stay lying down. Three needles leave your thumb like flicked seeds, and the first two crows quit the trunk without learning why. The third needle stops a finger short of the last crow's beak and waits. The crow thinks it over, hops down, and nudges a shiny beetle across the dirt to your hand: reparations.
 
-You accept the beetle. The crow leaves at a walk. ${yk(g)} watches it go with deep disappointment.`,
+You accept the beetle, which is alive and walks off. So does the crow. ${stompForm(g, 'Yuki watches a whole bird leave on foot, and holds you responsible.', 'Yuki watches a whole bird leave on foot, breathes out like a forge, and holds you responsible.', '"You let it walk," says Yuki. "It was not even quick."')}`,
         },
-        one: (g) => `One needle, three crows, one branch; it sounds like a riddle and resolves like one, with feathers drifting down into the fire.`,
+        one: (g) => `One needle, one trunk, two crows, and a third that has just learned to count. Feathers come down into the fire; the smell is their revenge.`,
     },
 
     rats: {
-        posture: (g, d) => `The mire-rats come up the bank shoulder to shoulder, slick and black, chattering through yellow teeth. The bigger one rears up on its hind legs to look taller, which, to be fair, works.
+        posture: (g, d) => `The mire-rats come up the bank side by side, black and streaming, chattering through long yellow teeth. The bigger one rears onto its hind legs so as to seem taller. It has to be admitted that this works.
 
-${aside(d, 'You get your feet under you.', 'You stay sitting down.', `You remain lying down. ${yk(g)} gets up instead, which is worse for them.`)}`,
+${aside(d, 'You get your feet under you.', 'You stay sitting, and feed the fire a stick.', `You stay lying down. ${stompForm(g, 'Yuki, eleven pounds of white cat and tonight\'s intended dish, gets up instead.', 'Yuki gets up instead, a process with several stages.', 'Yuki stands up instead, and folds her arms.')} Of the two of you, she is the worse news.`)}`,
         win: {
-            2: (g) => `It's short. One rat goes back into the stream a lot less alive than it came out. The other one stops at the water's edge, looks back at you with an expression of real betrayal, and swims away fast.
+            2: (g) => `It is brief. One rat stops on the bank and stays stopped. The other makes the waterline, turns, and regards you with honest betrayal, as if terms had been agreed and you had broken them. Then it swims off at speed.
 
-You dress what's left. It's technically meat. Do not tell Yuki. ${yukiForm(g) === 'human' ? 'Yuki, in human form, watches this and pointedly says nothing out loud, which is somehow worse.' : ''}`,
-            3: (g) => `You point at the bigger rat. Just point. A spike of bone comes up out of the mud under it like a reprimand, and it is suddenly, permanently uninterested in you. The second rat lies down flat in the reeds, pretending to be a log. It is not a convincing log. You let it be a log.
+You skin and dress the one that stayed. Technically it is meat. Nobody tell Yuki.${yukiForm(g) === 'human' ? ' Yuki stands at your elbow through the whole procedure and says nothing aloud. It carries.' : ''}`,
+            3: (g) => `You point at the bigger rat. Only that. A spike of bone comes up through the mud beneath it like a correction in a margin, and its interest in you ends, along with its other interests. The second rat lies flat among the reeds and becomes a log. As logs go, it breathes too much. You let it be a log.
 
-You dress the first one. It's technically meat. ${yk(g)} regards the log with intense interest for the rest of the night.`,
+You dress the first. Technically it is meat. ${stompForm(g, 'Yuki sits by the reeds until dawn, watching the log, in case it tries anything a log should not.', 'Yuki lies down next to the log for the night, one paw across it, companionably. The log does not sleep.', 'Yuki crouches by the reeds and informs the log, at intervals until dawn, that she can see it.')}`,
         },
-        one: (g) => `A ridge of white bone lifts out of the bank between you and the rats like a raised eyebrow, and they reverse into the stream so fast they leave wakes.`,
+        one: (g) => `A ridge of white bone lifts out of the bank under the bigger rat, much as an eyebrow lifts, and keeps it. The other one reverses into the stream so fast it leaves a wake.`,
     },
 
     lizard: {
-        posture: (g, d) => `The thornback lifts its ridge of hollow spines with a sound like a sword drawn slowly from a scabbard, gold eyes unblinking, tail lashing a slow figure-eight in the firelight. Its whole body says *nest*, and *mine*, and *leave or die*.
+        posture: (g, d) => `The thornback raises its ridge of hollow spines one after another, with the noise a sword makes leaving its scabbard slowly, so that you can think it over. Its gold eyes do not blink. Its tail cuts a slow figure of eight through the firelight. Every line of it says *nest*, and *mine*, and *leave or die*.
 
-${aside(d, 'You weigh "leave".', 'You weigh "leave" and find it surprisingly light.', 'You weigh "leave" and find you don\'t feel like moving.')}`,
+${aside(d, `You weigh "leave". It has its points.`, `You weigh "leave". It comes out lighter than you expected.`, `You weigh "leave". But the ground is warm, and you had only just got comfortable.`)}`,
         win: {
-            2: (g) => `The thornback is strong, and armoured, and has clearly won every fight of its life by being both. It has not met a man who grows his weapons faster than it can grow annoyed. Three exchanges in, it lies still across its nest, spines flat at last.
+            2: (g) => `The thornback is strong and armoured, and all its life those two facts have been the entire argument. Nobody warned it about men who grow weapons faster than it can lose its temper. Three exchanges, and it lies across its own nest, spines folded down at last, the gold gone out of its eye.
 
-Under it: eggs, leathery and warm, each the size of your fist. ${yk(g)} looks at them, then at you, then at them, with an intensity normally reserved for religion.`,
-            3: (g) => `The thornback lunges. You put one finger on its snout, mid-lunge, and it stops as if it's run into a mountain — which, in Qi terms, it has. It looks at the finger. Slowly, every spine on its back folds flat, and it backs off its own nest one claw at a time, never taking its gold eyes off you.
+Under it, the eggs: leathery, warm, each the size of your fist. ${stompForm(g, 'Yuki looks at the eggs, at you, and at the eggs again, with a fixity most creatures keep for religion.', 'Yuki lowers her great head until her nose is a whisker from the nearest egg, and holds it there, devoutly.', 'Yuki kneels by them, hands folded, as at a shrine. "Three," she says. "I have counted."')}`,
+            3: (g) => `The thornback lunges. You set one finger on its snout in mid-lunge, and it stops as if a mountain had been set there; in terms of Qi, one has. It looks at the finger. One by one its spines fold flat, and it starts to edge backwards off its own nest, gold eyes never leaving you.
 
-It leaves you the eggs. Leathery, warm, the size of your fist. ${yk(g)} accepts them on the household's behalf.`,
+You are still hungry, and it is still made of meat. One needle, behind the eye, before the last spine has finished folding. The eggs are still warm. ${stompForm(g, 'Yuki receives them on behalf of the household, one paw on the nearest.', 'Yuki receives them on behalf of the household, and lies down around all three.', '"On behalf of the household," says Yuki, taking the first one out of your hands, "accepted."')}`,
         },
-        one: (g) => `A single white spike rises out of the dark ground beneath the thornback's chin and simply holds its jaw shut; the lizard thinks about this for a long moment, then backs away off its nest.`,
+        one: (g) => `A single white spike comes up out of the dark ground under the thornback's chin and holds its jaw shut. The lizard studies the problem down the length of its own snout, finds no answer there, and stops where it stands.`,
     },
 
     mire: {
-        posture: (g, d) => `The mire-rats come out of the black water in a rush, three of them, the bloated one at the back hissing orders like a sergeant.
+        posture: (g, d) => `The black water breaks and the mire-rats come out of it in a rush: three, with the bloated one at the rear, hissing orders like a sergeant who has only read about the front.
 
-${aside(d, 'Your boots are already full of mire. You resign yourself to the rest of you.', 'You consider whether this counts as exercise.', 'You do not take your hands out of your pockets.')}`,
+${aside(d, 'Your boots are full of mire already. You resign yourself to the rest.', 'You wonder whether this will count as exercise.', 'Your pockets keep your hands. The mud has the boots; it is not getting those as well.')}`,
         win: {
-            2: (g) => `Three rats fewer in the world, give or take. The bloated one is last, and it has time to look at the other two and then at you, and visibly reconsider its whole philosophy.
+            2: (g) => `The world is three rats lighter, or near enough. The bloated one goes last. It has time to look at the other two, then at you, and to revise its whole philosophy of command, visibly, before the revision stops mattering.
 
-The silence of the mire settles back, unimpressed. In one of them, the omnitool finds a small, sour beast core.`,
-            3: (g) => `They hit a bone wall you grew while they were still underwater. The first two bounce. The bloated one doesn't even get that far: it surfaces, sees the wall, sees the two rats lying at the bottom of it, sees ${ykShort(g)}, and very slowly sinks back out of sight, like a submarine abandoning a war.
+The quiet of the mire comes back over all of it, unimpressed. In one of the three the omnitool finds a beast core, small and sour.`,
+            3: (g) => `They meet a wall of bone that you grew while they were still under water. The first two bounce. The bloated one never gets that far: it surfaces, sees the wall, sees two rats lying at the foot of it, sees ${ykShort(g)}, and sinks again by slow inches, a submarine withdrawing from a war it has just read the terms of.
 
-You fish one of the casualties out. A small, sour beast core. The silence of the mire settles back, unimpressed, which you feel is fair.`,
+You fish out one of the casualties. In it is a beast core, small and sour. The quiet of the mire comes back over the rest, unimpressed, and you can't fault it.`,
         },
-        one: (g) => `You tap the mud with your boot heel; bone needles come up through it like reeds, and the mire goes quiet in a single breath.`,
+        one: (g) => `You tap the mud once with a boot heel. Needles of bone come up through the black water like reeds, and the mire goes quiet between one breath and the next.`,
     },
 
     wolves: {
@@ -175,12 +176,16 @@ You fish one of the casualties out. A small, sour beast core. The silence of the
 
 ${aside(d, 'You put a tree at your back.', 'You clasp your hands behind you and wait.', `You rest a hand on ${ykShort(g)}. It is not there to hold her back. It is there to stop her showing off.`)}`,
         win: {
-            2: (g) => `They are clever and quick, and they hunt as one animal that happens to own two sets of teeth. Working out that you are not prey takes them the better part of a minute. Nothing after that takes them any time at all.
+            2: (g) => byDay(g, [`They are clever and quick, and they hunt as one animal that happens to own two sets of teeth. Working out that you are not prey takes them the better part of a minute. Nothing after that takes them any time at all. One of them carried a core, small and murky.
 
-Ashfall gets them in loads. The hunters accept every load in silence and give it the bow owed to an enemy who fell well. Afterwards, no less solemnly, they bow to you.`,
-            3: (g) => `The first wolf jumps. You pick it from the air by the scruff, as a kitten is lifted, and set it on the ground, where it remains. The second brakes hard in the leaf litter, studies its partner, studies you, and goes down on its belly, ears laid back, whining. Before long it has company, seated at its shoulder: ${yk(g)}.
+Ashfall gets the rest in loads. The hunters accept every load in silence and give it the bow owed to an enemy who fell well. Afterwards, no less solemnly, they bow to you.`, `A second pair, with the first pair's narrow grey manners. They open as the others did, one wide to each hand, and you let them finish the manoeuvre, since it is the only one they own. It puts you between them, which is the flaw in it. Two needles. One wolf carried a core, murky and small.
 
-Only one of them comes home with you. The other trails behind to the last of the oaks, keeping a polite distance, and goes no further. In Ashfall the hunters say nothing over the meat. They bow: to the wolf first, and then, with full ceremony, to you.`,
+You do not carry them far. The hunters are waiting at the oak hollow, unsent for, and the loads leave your shoulders eldest man first. No one speaks. The eldest looks over the wolves, then over you, and lowers his chin a finger's breadth. You gather that this is rank.`], 'far_won'),
+            3: (g) => byDay(g, [`The first wolf jumps. You pick it from the air by the scruff, as a kitten is lifted, and set it on the ground with its neck already seen to, where it remains. The second brakes hard in the leaf litter, studies its partner, studies you, and goes down on its belly, ears laid back, whining. Before long it has company, seated at its shoulder: ${yk(g)}.
+
+Only one of them comes home with you, a small murky core the lighter. The other trails behind to the last of the oaks, keeping a polite distance, and goes no further. In Ashfall the hunters say nothing over the meat. They bow: to the wolf first, and then, with full ceremony, to you.`, `The first wolf comes in low this time, for the knee. You bring a heel down as it passes under, without breaking stride, and it does not get up to complain. The second has watched closely. It sits, of its own accord, and lifts a paw. ${stompForm(g, 'Yuki, from your shoulder, declines it on your behalf.', 'Yuki sets her own paw next to it, for scale. The wolf withdraws the offer.', 'Yuki takes the paw, gives it one shake, and returns it. "Dismissed," she says.')}
+
+One wolf goes home across your shoulders, less a small murky core; the other is into the oaks before you have it lifted. At the oak hollow the hunters are waiting, unsent for, and the wolf passes from you to the oldest of them and so on down. Nobody speaks. The eldest studies the meat, then you, and dips his chin about as far as a finger is wide. You have, it appears, been promoted.`], 'far_won'),
         },
         one: (g) => `You close one hand on empty air, as on a scruff. The hunt changes owners there and then, and the wolves are the last to hear of it.`,
     },
@@ -190,14 +195,18 @@ Only one of them comes home with you. The other trails behind to the last of the
 
 ${aside(d, 'You count the spines. It has brought all of them.', 'You count the spines and choose the one that comes off first.', `You get a look from ${yk(g)}. It asks whether she may.`)}`,
         win: {
-            2: (g) => `It is huge, plated and enraged, and it had been counting on those three things to carry more weight than they do. At the end it lies on its side among the ferns with its spines laid flat and its breath coming slow, and one gold eye tracks you with what, in a politer animal, would be respect.
+            2: (g) => byDay(g, [`It is huge, plated and enraged, and it had been counting on those three things to carry more weight than they do. At the end it lies on its side among the ferns with its spines laid flat and its breath coming slow, and one gold eye tracks you with what, in a politer animal, would be respect. You do not leave it there to think. One needle, and the eye stops tracking.
 
-Afterwards you bring it to Ashfall in loads, and the eggs out of its nest with the last of them. The hunters meet each load without speaking and bow over it as over an enemy fallen with honour; then, just as gravely, to you.`,
-            3: (g) => `The bull charges. ${stompForm(g, 'You move one pace to the side, lay a palm on its flank as it goes by, and lean.', 'Yuki takes the charge chest to chest, a thing you had never planned on watching, and it is the bull that rebounds.', 'Yuki walks into its path, takes the foremost spine in one hand, and turns, as one shows a guest through a door.')} Three full rolls through the bracken bring it to rest belly up, legs in the air, every spine clamped shut, not moving at all. It is playing dead. It is not good at it.
+The core comes out small and murky. You bring the rest to Ashfall in loads, and two eggs out of its nest with the last of them. The hunters meet each load without speaking and bow over it as over an enemy fallen with honour; then, just as gravely, to you.`, `Another bull, as big as the last and no better informed. It lowers the palisade and comes on, and you allow it the first three charges, because it has plainly rehearsed them. The fourth meets a wedge of bone set where plate joins plate. It folds at the knees, lets out its steam, and is finished before it has settled into the ferns. The core comes out murky and small.
 
-You leave it to its performance and take the eggs. In Ashfall the hunters see you come up the lane with a nest of thornback eggs in your arms and no mark on you, and they set down their work and bow: to the eggs first, and then, with great gravity, to you.`,
+It goes as far as the oak hollow in loads, with two eggs from the nest riding on the last. The hunters are there already, unsent for, and they lift the weight off you by seniority. Not a word. The eldest looks along the bull, then at you, and tips his head a finger's width. You take it for promotion, and nobody corrects you.`], 'far_won'),
+            3: (g) => byDay(g, [`The bull charges. ${stompForm(g, 'You move one pace to the side, lay a palm on its flank as it goes by, and lean.', 'Yuki takes the charge chest to chest, a thing you had never planned on watching, and it is the bull that rebounds.', 'Yuki walks into its path, takes the foremost spine in one hand, and turns, as one shows a guest through a door.')} Three full rolls through the bracken bring it to rest belly up, legs in the air, every spine clamped shut, not moving at all. It is playing dead. It is not good at it.
+
+You spare it the rest of the performance: one needle, and the part is its own. You take the core, small and murky, and the eggs. In Ashfall the hunters see you come up the lane with thornback eggs in your arms and no mark on you, and they set down their work and bow: to the eggs first, and then, with great gravity, to you.`, `The bull charges; it is the one letter of its alphabet. ${stompForm(g, 'You hold out one finger and let it arrive.', 'Yuki lays one paw on its skull as it arrives, and keeps the paw there.', 'Yuki raises one hand, palm out, and it arrives at the hand.')} Its back half tries to keep going and is overruled. Then every spine drops flat together, and it stands blinking at the bracken, a hedge that has lost its faith.
+
+One needle, before it can arrive at a second idea. You take the core, murky and small, and two eggs from the nest. Today the hunters do not wait in the lane: they are at the oak hollow, unsent for, and they take the eggs out of your arms oldest first, one man to an egg, in both hands. The eldest, left with none, considers you and bends his neck by a finger's width. This, you gather, is advancement.`], 'far_won'),
         },
-        one: (g) => `The charge shakes the ground for four strides, and then there is no charge. The bracken comes down slowly over a bull with every spine folded away like a fan.`,
+        one: (g) => `The charge shakes the ground for four strides, and then there is no charge. One white spike has come up through the bracken and settled it. The fronds close slowly over a dead bull with every spine folded away like a fan.`,
     },
 
     arson: {
