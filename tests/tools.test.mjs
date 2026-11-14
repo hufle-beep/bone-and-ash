@@ -23,13 +23,14 @@ import { noise, band, flagged, K, MIN, LIMIT, NOTE_AT, driftKind } from '../tool
 import { strip, scanFunctions, scanFlags, flagFindings, scanCss, scanMarkers, scanStorage, scanFiles, applyKeep, loadKeep, KINDS, strictFailures, STRICT_KINDS } from '../tools/leftovers.mjs'; // v0.11.22; strict v0.11.23
 import { seen as touched, track, noteView, seenOut } from './lib/seen.mjs'; // v0.11.22
 import { stepLine, flagLines, leftoverFound, modelDigest } from '../tools/lib/report.mjs'; // v0.11.28
+import { applyFault, report as mutateReport } from '../tools/mutate.mjs'; // v0.11.178 (owner pick U1, PF)
 import { sparePlan, SPARE_FROM, SPARE_UNTIL, SPARE_QI_HOURS, SPARE_FED_MIN } from './lib/spare.mjs'; // v0.11.142 (owner pick CV1)
 import { artFiles, fingerprint, readArt, checkArt, writeArt, ART_RE } from '../tools/arthash.mjs'; // v0.11.39
 import { TACTICS, FIXED, rank, rankLabel, stream, isOneMove, playFight, sampleFight, sampleOrder, tacticStats, thirds, guNeeded, summarize, summarizeAll, tableLines } from '../tools/lib/fightlab.mjs'; // v0.11.80
 import { SCENES } from '../js/story/prologue.js'; // v0.11.80: the story's hooks, for the fight lab's real fight
 import { newGame, ensureBars, combatHooks, startCombat, combatStep } from '../js/core/game.js'; // v0.11.80
 import { shingles, reusedPassages, favouritePhrases, tics, broken, spacing, snapshotDiff, shareNote, poolCounts } from '../tools/lib/textlint.mjs'; // v0.11.132 (E1); v0.11.134 (LP2, LR): poolCounts
-import { docFindings, newestHistory, newestResearch, HANDOVER_MAX, HISTORY_MAX, RESEARCH_MAX, DOC_TOOL_MAX } from '../tools/lib/docs.mjs'; // v0.11.73; v0.11.78 the research parts
+import { docFindings, newestHistory, newestResearch, HANDOVER_MAX, HISTORY_MAX, RESEARCH_MAX, DOC_TOOL_MAX, MIRROR_MAX, PER_PUSH } from '../tools/lib/docs.mjs'; // v0.11.73; v0.11.78 the research parts
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 let pass = 0, fail = 0;
@@ -506,14 +507,14 @@ print(json.dumps({"n": len(R['masks']), "bad": bad, "bitmaps": sum('bitmap' in m
 }
 // v0.11.73 (group h, H1): the docs' own rules in tools/lib/docs.mjs (the handover's size, the newest history part, the roadmap's version)
 {
-    const ok = { version: '1.2.3', handoverBytes: 34999, histories: { 'history.md': 50000, 'history-2.md': 50000, 'history-10.md': 44000, 'history-9.md': 46000 }, roadmap: '# Roadmap\n\nLast updated: 2026-11-08 (v1.2.3, docs): x\n' };
+    const ok = { version: '1.2.3', handoverBytes: 34999, histories: { 'history.md': 50000, 'history-2.md': 50000, 'history-10.md': HISTORY_MAX - 1000, 'history-9.md': 46000 }, roadmap: '# Roadmap\n\nLast updated: 2026-11-08 (v1.2.3, docs): x\n' };
     assert(newestHistory(Object.keys(ok.histories)) === 'history-10.md' && newestHistory(['history.md']) === 'history.md' && newestHistory([]) === null, 'docs: the newest history part is the highest number (10 after 9, history.md is part 1)');
     const r = docFindings(ok);
     assert(r.fail.length === 0 && r.notes.length === 0, `docs: a handover under ${HANDOVER_MAX} bytes, the newest part under ${HISTORY_MAX} (older parts over it don't count), the roadmap on the version: nothing (${r.fail.concat(r.notes).join('; ')})`);
     const big = docFindings({ ...ok, handoverBytes: HANDOVER_MAX });
     assert(big.fail.length === 1 && /handover\.md is 35000 bytes/.test(big.fail[0]), `docs: a handover of ${HANDOVER_MAX} bytes fails (${big.fail.join('; ')})`);
     const hist = docFindings({ ...ok, histories: { ...ok.histories, 'history-10.md': HISTORY_MAX + 1 } });
-    assert(hist.fail.length === 0 && hist.notes.length === 1 && /history-10\.md is 45001 bytes/.test(hist.notes[0]), `docs: the newest part past ${HISTORY_MAX} bytes is a note, not a failure (${hist.notes.join('; ')})`);
+    assert(hist.fail.length === 0 && hist.notes.length === 1 && hist.notes[0].includes(`history-10.md is ${HISTORY_MAX + 1} bytes`), `docs: the newest part past ${HISTORY_MAX} bytes is a note, not a failure (${hist.notes.join('; ')})`);
     const old = docFindings({ ...ok, roadmap: 'Last updated: 2026-11-08 (v1.2.2, docs)' });
     const none = docFindings({ ...ok, roadmap: '# Roadmap\n' });
     assert(/says 1\.2\.2, sw\.js says 1\.2\.3/.test(old.fail[0] ?? '') && /says nothing/.test(none.fail[0] ?? ''), `docs: the roadmap on an older version, or with no "Last updated" line, fails (${old.fail[0]}; ${none.fail[0]})`);
@@ -521,8 +522,11 @@ print(json.dumps({"n": len(R['masks']), "bad": bad, "bitmaps": sum('bitmap' in m
     assert(newestResearch(['research.md', 'research-2.md', 'research-10.md', 'roadmap.md']) === 'research-10.md' && newestResearch(['research.md']) === 'research.md' && newestResearch([]) === null, 'docs: the newest research part is the highest number (research.md is part 1)');
     const rs = docFindings({ ...ok, researches: { 'research.md': RESEARCH_MAX + 5000, 'research-2.md': RESEARCH_MAX + 1 } });
     assert(rs.fail.length === 0 && rs.notes.length === 1 && /research-2\.md is 45001 bytes/.test(rs.notes[0]), `docs: only the newest research part past ${RESEARCH_MAX} bytes is a note (${rs.notes.join('; ')})`);
-    const tool = docFindings({ ...ok, docs: { 'roadmap.md': DOC_TOOL_MAX, 'changelog.md': DOC_TOOL_MAX + 1 } });
-    assert(tool.fail.length === 0 && tool.notes.length === 1 && /changelog\.md is 60001 bytes.*trimming pass/.test(tool.notes[0]), `docs: a doc past ${DOC_TOOL_MAX} bytes is a note naming the trim-then-split rule (${tool.notes.join('; ')})`);
+    const tool = docFindings({ ...ok, docs: { 'reference.md': DOC_TOOL_MAX, 'lore.md': DOC_TOOL_MAX + 1 } });
+    assert(tool.fail.length === 0 && tool.notes.length === 1 && /lore\.md is 60001 bytes.*trimming pass/.test(tool.notes[0]), `docs: a doc past ${DOC_TOOL_MAX} bytes is a note naming the trim-then-split rule (${tool.notes.join('; ')})`);
+    // v0.11.178 (owner pick U1, MD): the docs every push changes past MIRROR_MAX bytes are a note (never a failure); other docs are not held to it
+    const mir = docFindings({ ...ok, docs: { 'roadmap.md': MIRROR_MAX, 'changelog.md': MIRROR_MAX + 1, 'restore-points.md': MIRROR_MAX + 2, 'reference.md': MIRROR_MAX + 5000 } });
+    assert(HISTORY_MAX === 20000 && MIRROR_MAX === 20000 && PER_PUSH.join() === 'roadmap.md,changelog.md,restore-points.md' && mir.fail.length === 0 && mir.notes.length === 2 && mir.notes.every((n) => /past 20000: every push uploads it/.test(n)) && /changelog\.md is 20001/.test(mir.notes[0]), `MD: changelog and restore-points past ${MIRROR_MAX} bytes are notes, roadmap at the cap and reference.md are not (${mir.notes.join('; ')})`);
     let code = 0, out = '';
     try { out = execFileSync(process.execPath, ['tools/consistency.mjs'], { cwd: ROOT, encoding: 'utf8' }); } catch (e) { code = e.status ?? 1; out = String(e.stdout || e); }
     assert(code === 0 && /handover \d+ bytes/.test(out), `docs: tools/consistency.mjs passes on the real repo, with the handover's size (exit ${code}: ${out.trim().split('\n').pop()})`);
@@ -530,16 +534,16 @@ print(json.dumps({"n": len(R['masks']), "bad": bad, "bitmaps": sum('bitmap' in m
 // v0.11.88 (owner pick A: T1 + D2 + S1 + X): the roadmap's open work in two parts, sections 0–2 in roadmap.md (with the
 // "Last updated" line) and 3–6 with Decided in roadmap-2.md, each pointing at the other; the done lines in roadmap-done.md
 // (closed) and roadmap-done-2.md; the tests that read the roadmap read every open part
-const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md', 'roadmap-act2.md']; // v0.11.171 (owner pick RA1): Act 2's own part
+const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md', 'roadmap-act2.md', 'roadmap-e.md', 'roadmap-retune.md']; // v0.11.171 (owner pick RA1): Act 2's own part; v0.11.178 (U1, MD): group e's and section 2's older open items
 {
-    const [r1, r2, ra] = ROADMAP_PARTS.map((f) => readFileSync(path.join(ROOT, 'project', f), 'utf8'));
+    const [r1, r2, ra, re, rr] = ROADMAP_PARTS.map((f) => readFileSync(path.join(ROOT, 'project', f), 'utf8'));
     const secs = (t) => [...t.matchAll(/^## (\d)\. /gm)].map((m) => Number(m[1]));
     assert(secs(r1).join() === '0,1,2' && secs(r2).join() === '3,4,5,6', `roadmap: sections 0–2 in roadmap.md, 3–6 in roadmap-2.md (${secs(r1).join()} / ${secs(r2).join()})`);
     assert(/^Last updated: /m.test(r1) && !/^Last updated: /m.test(r2) && /^## Decided$/m.test(r2) && !/^## Decided$/m.test(r1), 'roadmap: the "Last updated" line in roadmap.md, Decided in roadmap-2.md');
     assert(r1.includes('`roadmap-2.md`') && r2.includes('`roadmap.md`'), 'roadmap: each part names the other');
     const d1 = readFileSync(path.join(ROOT, 'project/roadmap-done.md'), 'utf8'), d2 = readFileSync(path.join(ROOT, 'project/roadmap-done-2.md'), 'utf8');
     assert(d1.includes('`roadmap-done-2.md`') && /^## Moved in v0\.11\.88 \(word for word\)$/m.test(d2) && d2.indexOf('## Moved in v0.11.88') < d2.indexOf('### The old "Last updated" line'), 'roadmap: roadmap-done.md points at roadmap-done-2.md, which starts with v0.11.88');
-    for (const t of ['**What the sitting loop\'s fix left', '**The game on a PC, a wide layout', '**Act 2** (open).']) assert((r1 + r2 + ra).includes(t), `roadmap: the open line "${t.replace(/\*/g, '')}" is still in an open part`);
+    for (const t of ['**What the sitting loop\'s fix left', '**The game on a PC, a wide layout', '**Act 2** (open).']) assert((r1 + r2 + ra + re + rr).includes(t), `roadmap: the open line "${t.replace(/\*/g, '')}" is still in an open part`);
     // v0.11.151 (owner pick WD1, RF): group d closed: its section and section 0's "Next: group d" moved word for word to
     // roadmap-done-3.md (not left behind); its open parts re-filed: section 2 (the rot ape, DA2's three, the lab's table),
     // roadmap-2.md section 4 (stances, clean or barbed, #66) and section 5 (the knitting bone and the crushing mass, Act 2),
@@ -554,6 +558,19 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md', 'roadmap-act2.md']; // v0.1
         assert(/\*\*When a weapon moves to Convergence\*\* \(moved here from group d in v0\.11\.151/.test(ref), 'WD1 (RF): the weapon-to-Convergence note in reference.md');
     }
     for (const t of ['**Round 1 done (owner picks I1 + L1 + E1', "**The owner's calls for the next pushes", '**Mechanics and story, unarmed fights']) assert(d2.includes(t) && !(r1 + r2).includes(t), `roadmap: the done line "${t.replace(/\*/g, '')}" moved to roadmap-done-2.md`);
+}
+// v0.11.178 (owner pick U1, MD): group e's older open items and section 2's older ones moved word for word (one block each, as they
+// stood in roadmap.md) to roadmap-e.md and roadmap-retune.md, a pointer left in each place; roadmap.md under MIRROR_MAX
+{
+    const rd = (f) => readFileSync(path.join(ROOT, 'project', f), 'utf8');
+    const r1 = rd('roadmap.md'), body = (t) => t.slice(t.indexOf('\n- ') + 1).trimEnd();
+    const { createHash } = await import('node:crypto');
+    const h = (t) => createHash('sha256').update(t).digest('hex');
+    const be = body(rd('roadmap-e.md')), br = body(rd('roadmap-retune.md'));
+    assert(h(be) === '6e712ad1524d6d47beaa91d775a0c7a5d8c5cda69214b97812060dfbbeaeab12' && h(br) === '48076f4fa63681f75ceb035b2cc348b0652ab31e761b8383aa636aaeb5efbe9b', `MD: roadmap-e.md and roadmap-retune.md hold the moved blocks exactly (sha256 ${h(be).slice(0, 12)}…, ${h(br).slice(0, 12)}…)`);
+    assert(!r1.includes(be.split('\n')[0]) && !r1.includes(br.split('\n')[0]) && r1.includes("**Group e's older open items**") && r1.includes('`roadmap-e.md`') && r1.includes("**Section 2's older open items**") && r1.includes('`roadmap-retune.md`'), 'MD: not left behind in roadmap.md, a pointer in each place');
+    const e = r1.indexOf('### e. '), f = r1.indexOf('### f. Romance'), s2 = r1.indexOf('## 2. The balance retune');
+    assert(r1.slice(e, f).includes('`roadmap-e.md`') && r1.slice(s2).includes('`roadmap-retune.md`') && Buffer.byteLength(r1) <= MIRROR_MAX, `MD: the pointers in group e and section 2; roadmap.md ${Buffer.byteLength(r1)} bytes, under ${MIRROR_MAX}`);
 }
 // v0.11.171 (owner pick RA1): Act 2 in its own part, roadmap-act2.md, named between group f and section 2 in roadmap.md, with the
 // owner's words of 2026-11-14 01:02, the Act 2 lines moved from roadmap-2.md section 5 (not left behind) and its facts in lore.md;
@@ -681,7 +698,11 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md', 'roadmap-act2.md']; // v0.1
 {
     const rules = readFileSync(path.join(ROOT, 'CLAUDE.md'), 'utf8');
     const nums = [...rules.matchAll(/^(\d+)\. /gm)].map((m) => Number(m[1]));
-    assert(nums.length === 10 && nums.every((n, i) => n === i + 1), `CLAUDE.md: ten hard rules, numbered 1 to 10 (${nums.join(', ')})`);
+    assert(nums.length === 11 && nums.every((n, i) => n === i + 1), `CLAUDE.md: eleven hard rules, numbered 1 to 11 (${nums.join(', ')})`); // v0.11.178 (U1): rule 11, usage
+    // v0.11.178 (owner pick U1): cold reviews on Opus (rule 9), lean Fable packets (rule 10), a new chat per push (rule 4), small per-push docs (rule 8), usage (rule 11)
+    const rule = (n) => (rules.match(new RegExp(`^${n}\\. .*$`, 'm')) || [''])[0];
+    assert(/model `opus`/.test(rule(9)) && /review-checklist\.md/.test(rule(9)) && /tools\/mutate\.mjs/.test(rule(9)) && /canon-card\.md/.test(rule(10)) && /about 10 KB/.test(rule(10)) && /A new chat after every push/.test(rule(4)) && /under 20 KB/.test(rule(8)) && /^11\. \*\*Usage\*\*/m.test(rules) && /excerpts only/.test(rule(11)), 'U1: rules 4, 8, 9, 10 and 11 say what U1 picked');
+    for (const f of ['project/review-checklist.md', 'project/canon-card.md']) assert(existsSync(path.join(ROOT, f)) && Buffer.byteLength(readFileSync(path.join(ROOT, f))) < 12000, `U1: ${f} there and short`);
     const r8 = (rules.match(/^8\. .*$/m) || [''])[0];
     assert(/Claude uploads the changed `project\/` docs/.test(r8) && !/asks\*\* whether/.test(r8) && /project\/research\/` stays repo only/.test(r8), 'CLAUDE.md: rule 8 says Claude uploads the changed docs itself, research/ repo only, no question');
     assert(readFileSync(path.join(ROOT, 'project/working-agreement.md'), 'utf8').includes('**Since v0.11.79 (owner 2026-11-08 20:52'), 'working-agreement: the mirror rule of v0.11.79 is there');
@@ -849,40 +870,61 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md', 'roadmap-act2.md']; // v0.1
     assert(rp && (rp[3] || '').split(', ').filter(Boolean).every((x) => !TASK_HUBS[x.split(' ')[0]]), `E1 (RP): no hub among the repeated screens (${rp?.[3] || 'none'})`);
     assert(/NOTE {2}Act 1 endings \(log only\): careful accord 0% → [\d.]+% \(n 500 → 60\)/.test(mo) && /NOTE {2}repeated screens \(log only\): careful 60% → [\d.]+% of screens/.test(mo), 'E1 (EB): a saved copy far from the run is noted, log only');
 }
-const RP2_SHA = 'e5088b2cf6accc566581cf0d59f7ff00532bef028e8bef831b2f37295c4aefc2'; // v0.11.158 (RV1, RT): the 91 rows moved to restore-points-2.md, as moved (part 2 never changes)
+const RP2_SHA = 'e5088b2cf6accc566581cf0d59f7ff00532bef028e8bef831b2f37295c4aefc2';
+const RP3_SHA = '209ef1a2e40b0e12630dddd70618a67cdd098e03107d50a18bd31ad16889b517'; // v0.11.178 (U1, MD): the 102 rows moved to restore-points-3.md, as moved (part 3 never changes) // v0.11.158 (RV1, RT): the 91 rows moved to restore-points-2.md, as moved (part 2 never changes)
 // v0.11.158 (owner pick NX2, RP): restore-points.md split at 0.11.69 (as the changelog in v0.11.105): every row in exactly one part,
 // the old ones in restore-points-2.md, newest first in each, the first part under the project tool's limit with a pointer line
 {
-    const p1 = readFileSync(path.join(ROOT, 'project/restore-points.md'), 'utf8'), p2 = readFileSync(path.join(ROOT, 'project/restore-points-2.md'), 'utf8');
+    const p1 = readFileSync(path.join(ROOT, 'project/restore-points.md'), 'utf8'), p2 = readFileSync(path.join(ROOT, 'project/restore-points-2.md'), 'utf8'), p3 = readFileSync(path.join(ROOT, 'project/restore-points-3.md'), 'utf8');
     const rows = (t) => t.split('\n').filter((l) => /^\| \d+\.\d+\.\d+ \|/.test(l)).map((l) => l.split('|')[1].trim().split('.').map(Number));
     const cmp = (a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2];
-    const r1 = rows(p1), r2 = rows(p2), all = [...r1, ...r2].map((v) => v.join('.'));
-    assert(r2.length === 91 && r2.every((v) => cmp(v, [0, 11, 69]) <= 0) && r1.every((v) => cmp(v, [0, 11, 70]) >= 0), `RP: 0.11.69 and before in part 2 (${r2.length}), the rest in part 1 (${r1.length})`);
-    assert(new Set(all).size === all.length && [r1, r2].every((r) => r.every((v, i) => i === 0 || cmp(r[i - 1], v) > 0)), 'RP: no row twice, each part newest first');
+    const r1 = rows(p1), r2 = rows(p2), r3 = rows(p3), all = [...r1, ...r3, ...r2].map((v) => v.join('.'));
+    // v0.11.178 (owner pick U1, MD): 0.11.70–0.11.171 moved word for word to restore-points-3.md; part 1 keeps 0.11.172 on
+    assert(r2.length === 91 && r2.every((v) => cmp(v, [0, 11, 69]) <= 0) && r3.length === 102 && r3.every((v) => cmp(v, [0, 11, 70]) >= 0 && cmp(v, [0, 11, 171]) <= 0) && r1.every((v) => cmp(v, [0, 11, 172]) >= 0), `RP: 0.11.69 and before in part 2 (${r2.length}), 0.11.70–0.11.171 in part 3 (${r3.length}), the rest in part 1 (${r1.length})`);
+    assert(new Set(all).size === all.length && [r1, r2, r3].every((r) => r.every((v, i) => i === 0 || cmp(r[i - 1], v) > 0)), 'RP: no row twice, each part newest first');
     const { createHash } = await import('node:crypto');
-    const part2Rows = p2.split('\n').filter((l) => /^\| \d+\.\d+\.\d+ \|/.test(l)).join('\n');
-    assert(r1.length + r2.length >= 179 && createHash('sha256').update(part2Rows).digest('hex') === RP2_SHA, `RT (RV1): every row kept (${r1.length} + ${r2.length}), part 2's rows exactly as moved (sha256 ${createHash('sha256').update(part2Rows).digest('hex').slice(0, 12)}…)`);
-    assert(Buffer.byteLength(p1) <= DOC_TOOL_MAX && p1.includes('Older versions (0.11.69 and before): `restore-points-2.md`') && /\| 0\.8\.1 \| `0c82c10` \|/.test(p2), `RP: part 1 under ${DOC_TOOL_MAX} bytes (${Buffer.byteLength(p1)}) with its pointer; part 2 ends at 0.8.1`);
+    const rowsOf = (t) => t.split('\n').filter((l) => /^\| \d+\.\d+\.\d+ \|/.test(l)).join('\n');
+    const sha2 = createHash('sha256').update(rowsOf(p2)).digest('hex'), sha3 = createHash('sha256').update(rowsOf(p3)).digest('hex');
+    assert(r1.length + r2.length + r3.length >= 199 && sha2 === RP2_SHA && sha3 === RP3_SHA, `RT (RV1), MD: every row kept (${r1.length} + ${r3.length} + ${r2.length}), parts 2 and 3 exactly as moved (sha256 ${sha2.slice(0, 12)}…, ${sha3.slice(0, 12)}…)`);
+    assert(Buffer.byteLength(p1) <= MIRROR_MAX && p1.includes('Older versions (0.11.70–0.11.171): `restore-points-3.md`') && p1.includes('Older versions (0.11.69 and before): `restore-points-2.md`') && /\| 0\.8\.1 \| `0c82c10` \|/.test(p2) && p3.includes('Newer versions, the fallback branches'), `RP, MD: part 1 under ${MIRROR_MAX} bytes (${Buffer.byteLength(p1)}) with its pointers; part 2 ends at 0.8.1; part 3 points back`);
 }
 
-const CL3_SHA = '2eecaa7c2318459eee87ac90e7ca4d6b62c70d0939adf8a19dbb68feaf7aed48'; // v0.11.176 (CL1): the 70 rows moved to changelog-3.md, as moved (part 3 never changes)
+const CL3_SHA = '2eecaa7c2318459eee87ac90e7ca4d6b62c70d0939adf8a19dbb68feaf7aed48';
+const CL4_SHA = 'bac3bac02069f5cc5ba315d41219d66a55cf75e0fc1aae93dd85c8de5985d1c4'; // v0.11.178 (U1, MD): the 32 rows moved to changelog-4.md, as moved (part 4 never changes) // v0.11.176 (CL1): the 70 rows moved to changelog-3.md, as moved (part 3 never changes)
 // v0.11.176 (owner pick CL1): changelog.md split again at 0.11.139: 0.11.70–0.11.139 in changelog-3.md, 0.11.69 and before in changelog-2.md
 // (v0.11.105, CS1); every row in exactly one part, newest first in each, part 1 under the project tool's limit with its pointer line
 {
     const read = (f) => readFileSync(path.join(ROOT, 'project', f), 'utf8');
-    const [p1, p2, p3] = ['changelog.md', 'changelog-2.md', 'changelog-3.md'].map(read);
+    const [p1, p2, p3, p4] = ['changelog.md', 'changelog-2.md', 'changelog-3.md', 'changelog-4.md'].map(read);
     const rowLines = (t) => t.split('\n').filter((l) => /^\| \d+\.\d+\.\d+ \|/.test(l));
     const rows = (t) => rowLines(t).map((l) => l.split('|')[1].trim().split('.').map(Number));
     const cmp = (a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2];
-    const r1 = rows(p1), r2 = rows(p2), r3 = rows(p3), all = [...r1, ...r3, ...r2].map((v) => v.join('.'));
-    assert(r3.length === 70 && r3.every((v) => cmp(v, [0, 11, 70]) >= 0 && cmp(v, [0, 11, 139]) <= 0) && r1.every((v) => cmp(v, [0, 11, 140]) >= 0) && r2.every((v) => cmp(v, [0, 11, 69]) <= 0),
-        `CL1: 0.11.70–0.11.139 in part 3 (${r3.length}), 0.11.140 on in part 1 (${r1.length}), 0.11.69 and before in part 2 (${r2.length})`);
-    assert(new Set(all).size === all.length && [r1, r2, r3].every((r) => r.every((v, i) => i === 0 || cmp(r[i - 1], v) > 0)), 'CL1: no row twice, each part newest first');
+    const r1 = rows(p1), r2 = rows(p2), r3 = rows(p3), r4 = rows(p4), all = [...r1, ...r4, ...r3, ...r2].map((v) => v.join('.'));
+    // v0.11.178 (owner pick U1, MD): 0.11.140–0.11.171 moved word for word to changelog-4.md; part 1 keeps 0.11.172 on
+    assert(r3.length === 70 && r3.every((v) => cmp(v, [0, 11, 70]) >= 0 && cmp(v, [0, 11, 139]) <= 0) && r4.length === 32 && r4.every((v) => cmp(v, [0, 11, 140]) >= 0 && cmp(v, [0, 11, 171]) <= 0) && r1.every((v) => cmp(v, [0, 11, 172]) >= 0) && r2.every((v) => cmp(v, [0, 11, 69]) <= 0),
+        `CL1, MD: 0.11.70–0.11.139 in part 3 (${r3.length}), 0.11.140–0.11.171 in part 4 (${r4.length}), 0.11.172 on in part 1 (${r1.length}), 0.11.69 and before in part 2 (${r2.length})`);
+    assert(new Set(all).size === all.length && [r1, r2, r3, r4].every((r) => r.every((v, i) => i === 0 || cmp(r[i - 1], v) > 0)), 'CL1: no row twice, each part newest first');
     const { createHash } = await import('node:crypto');
-    const sha = createHash('sha256').update(rowLines(p3).join('\n')).digest('hex');
-    assert(r1.length >= 37 && sha === CL3_SHA, `CL1: part 3's rows exactly as moved (sha256 ${sha.slice(0, 12)}…), part 1 keeps 0.11.140 on (${r1.length})`);
-    assert(Buffer.byteLength(p1) <= DOC_TOOL_MAX && Buffer.byteLength(p3) <= DOC_TOOL_MAX && p1.includes('0.11.70–0.11.139 in `changelog-3.md`') && p1.includes('0.11.69 and before in `changelog-2.md`') && p3.includes('Newer versions: `changelog.md`'),
-        `CL1: parts 1 and 3 under ${DOC_TOOL_MAX} bytes (${Buffer.byteLength(p1)}, ${Buffer.byteLength(p3)}) with their pointers`);
+    const sha = createHash('sha256').update(rowLines(p3).join('\n')).digest('hex'), sha4 = createHash('sha256').update(rowLines(p4).join('\n')).digest('hex');
+    assert(r1.length >= 6 && sha === CL3_SHA && sha4 === CL4_SHA, `CL1, MD: parts 3 and 4's rows exactly as moved (sha256 ${sha.slice(0, 12)}…, ${sha4.slice(0, 12)}…), part 1 keeps 0.11.172 on (${r1.length})`);
+    assert(Buffer.byteLength(p1) <= MIRROR_MAX && Buffer.byteLength(p3) <= DOC_TOOL_MAX && Buffer.byteLength(p4) <= DOC_TOOL_MAX && p1.includes('0.11.140–0.11.171 in `changelog-4.md`') && p1.includes('0.11.70–0.11.139 in `changelog-3.md`') && p1.includes('0.11.69 and before in `changelog-2.md`') && p3.includes('Newer versions: `changelog.md`') && p4.includes('Newer versions: `changelog.md`'),
+        `CL1, MD: part 1 under ${MIRROR_MAX} bytes (${Buffer.byteLength(p1)}), parts 3 and 4 under ${DOC_TOOL_MAX}, with their pointers`);
+}
+
+// v0.11.178 (owner pick U1, PF): tools/mutate.mjs plants faults one at a time in scratch copies and runs a test command on each,
+// so a cold review on Opus needs no model to plant them; here on a tiny tree with a one-line test, nothing in the repo touched
+{
+    assert(applyFault('a b a', { find: 'b', replace: 'c' }).text === 'a c a' && applyFault('a b a', { find: 'a', replace: 'c' }).why === 'find occurs more than once' && applyFault('x', { find: 'y', replace: 'z' }).why === 'find not in the file' && applyFault('x', { find: 'x', replace: 'x' }).why === 'replace is the same text' && applyFault('x', {}).why === 'needs find and replace', 'PF: a fault applies only to one exact, unique match');
+    const rep = mutateReport([{ id: 'F1', file: 'a.js', note: 'n|1', status: 'caught', detail: 'x' }, { id: 'F2', file: 'a.js', note: '', status: 'missed', detail: '' }, { id: 'F3', file: 'b.js', note: '', status: 'not applied', detail: 'no such file' }]);
+    assert(rep.caught === 1 && rep.missed === 1 && rep.notApplied === 1 && rep.text.includes('| F1 | a.js | n\\|1 | caught |') && rep.text.endsWith('1 caught, 1 missed, 1 not applied (of 3).'), 'PF: the report counts and escapes');
+    const tree = path.join(TMP, 'mutate-tree'); mkdirSync(path.join(tree, 'js'), { recursive: true });
+    writeFileSync(path.join(tree, 'js/a.js'), 'export const A = 1;\nexport const B = 2;\n');
+    writeFileSync(path.join(tree, 'check.mjs'), "import { A, B } from './js/a.js'; process.exit(A === 1 ? 0 : 1);\n");
+    writeFileSync(path.join(TMP, 'faults.json'), JSON.stringify([{ id: 'F1', file: 'js/a.js', find: 'A = 1', replace: 'A = 2', note: 'A' }, { id: 'F2', file: 'js/a.js', find: 'B = 2', replace: 'B = 3', note: 'B' }, { id: 'F3', file: 'js/a.js', find: 'C', replace: 'D' }, { id: 'F4', file: 'js/none.js', find: 'A', replace: 'B' }]));
+    let code = 0, out = '';
+    try { out = execFileSync(process.execPath, ['tools/mutate.mjs', path.join(TMP, 'faults.json'), '--root', tree, '--cmd', `"${process.execPath}" check.mjs`, '--jobs', '2', '--out', path.join(TMP, 'mutate.md')], { cwd: ROOT, encoding: 'utf8' }); } catch (e) { code = e.status ?? 1; out = String(e.stdout || e); }
+    const md = existsSync(path.join(TMP, 'mutate.md')) ? readFileSync(path.join(TMP, 'mutate.md'), 'utf8') : '';
+    assert(code === 1 && /\| F1 \|[^\n]*\| caught \|/.test(md) && /\| F2 \|[^\n]*\| missed \|/.test(md) && /\| F3 \|[^\n]*find not in the file/.test(md) && /\| F4 \|[^\n]*no such file/.test(md) && md.indexOf('| F1 |') < md.indexOf('| F4 |') && readFileSync(path.join(tree, 'js/a.js'), 'utf8').includes('A = 1;'), `PF: caught, missed and not applied, in order, exit 1, the source tree untouched (exit ${code}: ${out.trim().split('\n').pop()})`);
 }
 
 rmSync(TMP, { recursive: true, force: true });
