@@ -145,7 +145,7 @@ She gives the patch of dark her full and serious attention. "It looks cold."
 
 She tells you what the tribute costs, in numbers: so many baskets of grass, so many sacks of millet, so many children tested for roots. Which families hid their children last year, and which of those were caught. Her voice is perfectly level through all of it. Her hands are not.
 
-After that she says nothing until the jar is nearly empty. Then she lets her shoulder rest against yours, and neither of you mentions it.`),
+After that she says nothing until the jar is nearly empty. Your forearm has been playing something slow and sad, very low, all evening. "Leave it," she says, when you reach to stop it. "It sounds like you do when you think nobody is watching." Then she lets her shoulder rest against yours, and neither of you mentions it.`),
         choices: [{ text: 'Stay until the cold drives you in.', do: (g) => { bumpRel(g, 'Mei Lin', 2, 3); return [vday(g) === 1 ? `You stay until your fingers stop working and she has run out of ways to hide that she is shivering. "Tell me about the trees again," she says on the way down, and you do, as far as the loft ladder. She does not say it sounds insane. She says goodnight as if the word cost her something.` : `Neither of you mentions it on the way down, either. At the foot of the ladder she takes the empty jar out of your hand, keeps hold of your wrist a little longer than the jar requires, and goes to her mother's room without looking back. You climb to the loft with one shoulder still warm.`]; }, to: 'village_night' }],
     },
 

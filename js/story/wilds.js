@@ -40,12 +40,25 @@ const DR_FEET_F = dayReply("wild_train:2:f", [
     "Scratched.",
     "She was already where you dodged to.",
 ]);
+/* Part 9 (run C, item 10): the drills' failures get a line by day, like DR_FEET_F (Fable's). */
+const DR_DARTS_F = dayReply("wild_train:0:f", [
+    "Your threads total up the throws and report, with tact, that the marks were never in danger. The undergrowth took losses.",
+    "The marks have not moved overnight. The darts land as though they had. Yuki follows one into the ferns with her eyes and says nothing, at length.",
+]);
+const DR_BLADE_F = dayReply("wild_train:1:f", [
+    "The blade arrives late, leaves early, and once comes out as a spoon. Yuki, who has views, shares only the short ones.",
+    "Grow, cut, dissolve. Today it dissolves on the cut, and you finish the form holding a fistful of white dust and your dignity, in that order.",
+]);
+const DR_NEEDLE_F = dayReply("wild_train:3:f", [
+    "A hundred needles, and the bark holds a hundred opinions on where the point was. Forty in the knuckle-width, if you are generous. Your threads are not.",
+    "Sixty in the mark, by the threads' count, which is the only count on offer. The other forty have founded a colony in the next trunk.",
+]);
 
 /* v0.11.168 (owner pick P2A, SW): the silent work cards' successes get a line by day (Fable's); the gains stay as they were. */
 const DR_RING = dayReply("wild_forage:0", ["The ring is sound to the stem. You cut from the outer edge and leave the middle to its work.", "The ring has closed the gaps you cut yesterday. You cut from the edge again, and wonder who is farming whom."]);
 const DR_CRESS = dayReply("wild_forage:1", ["It tastes of pepper and cold water. The omnitool has no objections, and you get that in writing.", "Same shallows, colder water, quicker hands. You are out before your feet have finished complaining."]);
 const DR_BERRIES = dayReply("wild_forage:3", ["The thorns collect a small fee in blood. The berries are worth it, barely.", "Today you pick with a bone needle for a hook. The thorns go unpaid."]);
-const DR_HARE = dayReply("wild_hunt:0", ["The dart is there before the bolt is. The glass plates stay dull, which is how you want them.", "A shorter stalk today, and a cleaner throw. Yuki's tail stops ticking a full second before the dart lands."]);
+const DR_HARE = dayReply("wild_hunt:0", ["Two hares in the reeds, and your darts are there before either bolt is. Both sets of glass plates stay dull, which is how you want them. Yuki, who was born starving and reports no improvement since, inspects the pair.", "A shorter stalk today, and two cleaner throws. Yuki's tail stops ticking a full second before the second dart lands."]);
 const DR_FOWL = dayReply("wild_hunt:1", ["The dart meets it at the top of its rise. It comes down far more gracefully than it went up.", "You lead it by a body length, and the bird flies into the dart unassisted. Ballistics, of a kind."]);
 const DR_CRAB = dayReply("wild_hunt:2", ["The needle goes in at the joint and the shell lifts off like a lid. It was simpler than the crab made it look.", "You know where the joint is now. One needle, a quarter turn, and the crab is a recipe."]);
 const DR_DARTS = dayReply("wild_train:0", ["Most of them land inside the marks. The ones that don't are at least in the right tree.", "Five paces back from yesterday's line, and the darts still find the marks. The trunks look tired of you."]);
@@ -116,7 +129,7 @@ They look at your food. They look at you. They have the air of creditors come ab
 ${byForm(g, "They've smelled the cat. They seem to think she's dinner.", "They've smelled the cat. They seem to think she's dinner, which means they haven't seen her yet.", "They've smelled a cat and found a woman. They seem to think she's dinner either way.")} Yuki finds this the best joke anyone has told her all week.`, `A splash, a pause, a second splash. You know the sound now. The reeds bend, and two mire-rats haul themselves onto the bank, black and streaming, big as dogs, and stand there working their noses at the dark.
 
 ${byForm(g, "They have smelled the cat again. Hope, in a rat, is a terrible thing.", "They have smelled the cat again. They follow the smell up, and further up, and stop.", "They have smelled a cat again, and found a woman with white ears and a tail looking back at them. It gives them a moment's thought, and no more.")} Yuki yawns, slowly, so that they can see all of it.`], `night_event:rats`),
-            lizard: `You wake to three observations, in order. One: the ground under you is warm. Two: claws are scraping on rock, slowly, with weight behind them. Three: at the edge of the firelight there is an eye, gold and slit and as wide as your palm, and it has been making observations for longer than you have.
+            lizard: `You wake to three observations, in order. One: the ground under you is warm. Two: claws are scraping on rock, slowly, with weight behind them. Three: just past your boots, catching what little light the night has, there is an eye, gold and slit and as wide as your palm, and it has been making observations for longer than you have.
 
 It belongs to a thornback lizard as long as a canoe, with a ridge of hollow spines down its back. The warm ground is its nest. You have pitched camp on its eggs.`,
             gift: byDay(g, [`Two things wake you: a weight on your chest, and fresh blood, near enough to smell.
@@ -156,7 +169,7 @@ ${byForm(g, "Yuki is sitting on your sternum with her tail wrapped round her fee
         },
         text: (g) => `${{
             crows: 'The trunk is carpeted in feathers. The last crow leaves on foot, and gets some way before it remembers it can fly.',
-            rats: 'The stream takes the rats back. One stays on the bank, having no further plans.',
+            rats: 'The stream takes one rat back. The other stays on the bank, having no further plans.',
             lizard: 'The thornback is down across its nest with every spine laid flat. Beneath it are the eggs: warm, leathery, each as big as your fist.',
         }[g.flags.night_ev] || 'It\'s over.'}
 
@@ -250,7 +263,7 @@ They've followed you.`,
     /* ---------- hunting ---------- */
     wild_hunt: {
         id: 'wild_hunt', title: 'The Hunt', art: 'hunt', place: `${P} — the reeds`,
-        text: `Yuki is in the grass ahead of you, belly to the ground, the end of her tail counting off the seconds. *Pick one,* says the bond. *Soon. I am starving. I was born starving, and nothing since has helped.*`,
+        text: '',
         choices: [
             { text: 'Glassback hare. A dart from cover.', show: daily('hare'), qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 3 }, time: 50, do: (g) => { markDaily(g, 'hare'); addItem(g, 'hare_raw', 2); return [`+2 Glassback hare. ${DR_HARE(g)}`]; }, failDo: (g) => { markDaily(g, 'hare'); return ['A burst of rainbows. No hare.']; }, to: 'wild_hunt' },
             { text: 'Mire fowl. They fly badly but they fly — a dart on the rise.', show: daily('fowl'), qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 4, bonus: (g) => (yukiFightSkill(g).level >= 2 ? 1 : 0) }, time: 60, do: (g) => { markDaily(g, 'fowl'); addItem(g, 'fowl_raw', 1); return [`+1 Mire fowl. ${DR_FOWL(g)}`]; }, failDo: (g) => { markDaily(g, 'fowl'); return ['It labours away over the reeds, honking remarks about you.']; }, to: 'wild_hunt' },
@@ -263,12 +276,12 @@ They've followed you.`,
     /* ---------- training ---------- */
     wild_train: {
         id: 'wild_train', title: 'Practice', art: 'clearing', place: `${P} — the clearing`,
-        text: `A clearing, a few trunks with marks cut in them, and Yuki, who has views. Your threads total up the evidence and report, with tact, that you are not yet good at any of this.`,
+        text: '',
         choices: [
-            { text: 'Darts at marks on the trunks, from further and further away.', show: daily('t_darts'), qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 3 }, time: 60, do: didSay('t_darts', DR_DARTS), failDo: did('t_darts'), to: 'wild_train' },
-            { text: 'Blade forms: grow it, move, dissolve it, again.', show: daily('t_blade'), qi: 3, check: { skill: 'GU', dc: 3 }, time: 60, do: didSay('t_blade', DR_BLADE), failDo: did('t_blade'), to: 'wild_train' },
+            { text: 'Darts at marks on the trunks, from further and further away.', show: daily('t_darts'), qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 3 }, time: 60, do: didSay('t_darts', DR_DARTS), failDo: didSay('t_darts', DR_DARTS_F), to: 'wild_train' },
+            { text: 'Blade forms: grow it, move, dissolve it, again.', show: daily('t_blade'), qi: 3, check: { skill: 'GU', dc: 3 }, time: 60, do: didSay('t_blade', DR_BLADE), failDo: didSay('t_blade', DR_BLADE_F), to: 'wild_train' },
             { text: 'Footwork: let Yuki pounce at you from cover and try not to be there.', show: daily('t_feet'), check: { skill: 'GU', dc: 4 }, time: 60, do: (g) => { markDaily(g, 't_feet'); return [DR_FEET(g), ...awardYukiFightXp(g, 'standard')]; }, failDo: (g) => { markDaily(g, 't_feet'); g.james.hp -= 1; return [`${DR_FEET_F(g)} −1 HP.`, ...awardYukiFightXp(g, 'standard')]; }, to: 'wild_train' },
-            { text: 'Needle drills: one point, one knuckle-width, a hundred times.', show: daily('t_needle'), qi: 4, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 4 }, time: 60, do: didSay('t_needle', DR_NEEDLE), failDo: did('t_needle'), to: 'wild_train' },
+            { text: 'Needle drills: one point, one knuckle-width, a hundred times.', show: daily('t_needle'), qi: 4, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 4 }, time: 60, do: didSay('t_needle', DR_NEEDLE), failDo: didSay('t_needle', DR_NEEDLE_F), to: 'wild_train' },
             { text: 'Enough. Back to the stream.', to: 'wilds' },
         ],
     },
@@ -277,7 +290,7 @@ They've followed you.`,
     wild_explore: {
         id: 'wild_explore', title: 'Deeper', art: 'clearing', place: P,
         enter: (g) => { markDaily(g, 'explore'); return []; },
-        text: `Your threads have been drawing a map while you were busy. Three places on it carry the same label, in your own handwriting: *what is that*.`,
+        text: `Your threads have been drawing a map while you were busy. Every blank left on it carries the same label, in your own handwriting: *what is that*.`,
         choices: [
             { text: 'The Bone Field — the white you saw from the rise.', show: (g) => !g.flags.v_bone, time: 90, do: set('v_bone'), to: 'bone_field' },
             { text: 'The Mire — where the fowl come from and the smell goes to.', show: (g) => !g.flags.v_mire, time: 90, do: set('v_mire'), to: 'mire' },
