@@ -2083,7 +2083,7 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     // landParts: no relationship lines across a rewind; the summary reads every line (Yuki's haul)
     const lp = landParts(['Coil 3. The hammerspace is empty.'], { Village: { f: 30, a: 0 } }, { Village: { f: 14, a: 0 } }, { coilChanged: true });
     assert(!lp.gains.some((l) => /Village/.test(l)), `R1: biting the tail lists no relationship losses (${lp.gains})`);
-    const ly = landParts(['Yuki comes back with 2 hares and the air of someone owed an apology. +2 Glassback hare (dressed).'], {}, {});
+    const ly = landParts(['Yuki comes back with 2 hares and no remarks, having decided the hares are remark enough. +2 Glassback hare (dressed).'], {}, {});
     assert(ly.sumLines.some((l) => /^Yuki comes/.test(l)) && ly.reply.length && ly.gains.some((l) => /^\+2 Glassback/.test(l)), `R1: Yuki's haul: the summary still reads her line (${JSON.stringify(ly)})`);
     const rl = relLines({ 'Mei Lin': { f: 1, a: 0 }, Village: { f: 3, a: 0 } }, { 'Mei Lin': { f: 5, a: 2 }, Ya: { f: -3, a: 0 }, Village: { f: 3, a: 0 } });
     assert(JSON.stringify(rl) === JSON.stringify(['Mei Lin: friendship +4, affection +2', 'Ya: friendship −3']), `C1: relationship lines (${rl})`);
@@ -3052,9 +3052,9 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
         const h = ensureBars(newGame(7105)); const o = c.do(h); assert(h.inventory.hare_raw === 1 && o[0] === 'She comes back with a hare and a look. +1 Glassback hare.', `Y1 (lf): the card adds what it says (${o[0]})`); }
     // C1: one total per skill, the rank reached, a cap once, other lines kept in order after the totals
     {
-        const s = sitSummary(['Condensed: Saturation 10%.', 'Convergence Use +5 XP', 'GU +5 XP', 'Yuki (bond) Qi Use +5', 'Yuki comes back with a hare and a look of mild contempt. +1 Glassback hare.',
+        const s = sitSummary(['Condensed: Saturation 10%.', 'Convergence Use +5 XP', 'GU +5 XP', 'Yuki (bond) Qi Use +5', 'Yuki comes back with a hare and drops it on your boots. +1 Glassback hare.',
             'Condensed: Saturation 20%.', 'Convergence Use +5.5 XP → T1 L3', 'GU at T10 L10 (cap)', 'Yuki (bond) Qi Use +5 → T2 L1', 'Some warning.']);
-        assert(JSON.stringify(s) === JSON.stringify(['Convergence Use +10.5 XP → T1 L3', 'GU +5 XP', 'GU at T10 L10 (cap)', 'Yuki (bond) Qi Use +10 → T2 L1', 'Yuki comes back with a hare and a look of mild contempt. +1 Glassback hare.', 'Some warning.']), `C1: the totals (${JSON.stringify(s)})`);
+        assert(JSON.stringify(s) === JSON.stringify(['Convergence Use +10.5 XP → T1 L3', 'GU +5 XP', 'GU at T10 L10 (cap)', 'Yuki (bond) Qi Use +10 → T2 L1', 'Yuki comes back with a hare and drops it on your boots. +1 Glassback hare.', 'Some warning.']), `C1: the totals (${JSON.stringify(s)})`);
         const x = ensureBars(newGame(7106, { closed: true })); x.scene = 'stream'; x.minutes = 1440 + 8 * 60; Object.assign(x.flags, { long: true, forest_day: 2 }); x.james.satiety = 90; x.james.qi = jamesQiMax(x);
         const y = JSON.parse(JSON.stringify(x)), raw = sitLoop(y, SCENES), rm = runMed(x, SCENES, 'med:sitall');
         const sum = (re) => raw.lines.reduce((n, l) => n + Number(re.exec(l)?.[1] || 0), 0);

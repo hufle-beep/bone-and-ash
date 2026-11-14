@@ -324,7 +324,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     const P9K = ['wild_train:0:f', 'wild_train:1:f', 'wild_train:3:f']; // v0.11.177 (P9A, P2): the Wilds drills' failures, their own test (P9A's block)
     const keys = Object.keys(DAY_REPLIES).filter((k) => !ST6K.includes(k) && !SWK.includes(k) && !SRK.includes(k) && !SR4K.includes(k) && !P5K.includes(k) && !P9K.includes(k));
     const first = (k) => COIL_SETS[k]?.[0] ?? DAY_REPLIES[k]; // v0.11.166 (RW1): a Coil's set for the lists by Coil
-    assert(keys.length === 38 && keys.reduce((s, k) => s + first(k).length - 1, 0) === 63, `NC1: 38 reply lists with 52 new texts; v0.11.152 (RP1): 11 more (${keys.length}, ${keys.reduce((s, k) => s + first(k).length - 1, 0)})`);
+    assert(keys.length === 38 && keys.reduce((s, k) => s + first(k).length - 1, 0) === 67, `NC1 (v0.11.177, P9A FF: the Fallout's four failure lists' third texts): 38 reply lists with 52 new texts; v0.11.152 (RP1): 11 more (${keys.length}, ${keys.reduce((s, k) => s + first(k).length - 1, 0)})`);
     assert(JSON.stringify([...keys].sort()) === JSON.stringify(NC.map(([k]) => k).sort()), 'NC1: a list for every reply the bots saw on two days, and no other');
     const state = (g) => { const { lines, log, ...rest } = g; return JSON.stringify(rest); }; // RV2 (TG): the whole game but the day record and the log
     let n = 0;
@@ -1378,6 +1378,20 @@ for (const form of ['cat', 'human']) {
             assert(hits.length >= 1 && hits.every((x) => /made a needle/.test(x) === !ign), `P9A (P1, NE): Wen's needle line only where Mei Lin saw it (ignored ${ign})`);
         }
     }
+    // run D: FF the Fallout's failure lists a third text; P5 the places by branch and region; P8 the Heartless's win grave, the spar's own failure pool
+    {
+        for (const k of ['fo_palisade:0:f', 'fo_council:0:f', 'fo_drill:1:f', 'fo_clinic:0:f']) {
+            const l = DAY_REPLIES[k]; assert(Array.isArray(l) && l.length === 3 && new Set(l).size === 3 && l.every((x) => !bad(x)), `P9A (FF): ${k} has three failure texts (${l?.length})`);
+        }
+        const pl = (id, flags) => { const g = ensureBars(fresh(9800)); Object.assign(g.flags, flags); g.scene = id; const p = SCENES[id].place; return typeof p === 'function' ? p(g) : p; };
+        assert(pl('ya_found', { ya_waited: true }) !== pl('ya_found', {}), 'P9A (P5): ya_found is placed by the branch');
+        assert(new Set(['rr', 'dw', 'ah'].map((r) => pl('mei_bond', { bl_region: r }))).size === 3, 'P9A (P5): mei_bond is placed by the region');
+        const { LF_DRILL } = await import('../js/story/longforest.js');
+        assert(Array.isArray(LF_DRILL.t3Fail) && LF_DRILL.t3Fail.length === 3, 'P9A (P8): the spar has its own failure pool');
+        { const g = ensureBars(fresh(9810)); g.coil.n = 2; g.scene = 'lf_spar'; const out = SCENES.lf_train.choices[2].failDo(g); assert(out.some((x) => LF_DRILL.t3Fail.includes(x)), 'P9A (P8): the spar\'s failure draws its pool'); }
+        { const g = ensureBars(fresh(9820)); g.coil.n = 2; g.flags.lf_last = 'lf_heartless'; g.flags.lf_trials_won = 1; g.scene = 'lf_trial_won'; const t = SCENES.lf_trial_won.text(g);
+          assert(/Heartless/.test(t) && !bad(t), 'P9A (P8): the Heartless has its own grave win text'); }
+    }
     // P2 (run C): the emptied menus are menus and empty; the Wilds drills' failures speak by day
     {
         const menuOf = (id) => Object.values(TASK_HUBS).some((h) => (h.menus || {})[id] || (h.doorMenus || {})[id]);
@@ -1450,7 +1464,7 @@ for (const form of ['cat', 'human']) {
         assert(seen.size === 3, `P8A (SW): ${k}'s three lines before any comes back (${seen.size})`);
         if (kf) { const f = new Set(); for (let j = 0; j < 3; j++) f.add(c.failDo(g).find((x) => LF_DRILL[kf].includes(x))); assert(f.size === 3, `P8A (SW): ${kf}'s three lines (${f.size})`); }
     }
-    assert(Object.values(LF_DRILL).flat().every((x) => !bad(x) && x.length > 30) && new Set(Object.values(LF_DRILL).flat()).size === 21, 'P8A (SW): 21 drill lines, all different');
+    assert(Object.values(LF_DRILL).flat().every((x) => !bad(x) && x.length > 30) && new Set(Object.values(LF_DRILL).flat()).size === 24, 'P8A (SW): 24 drill lines, all different (v0.11.177, P9A: the spar\'s three failure lines)');
     // SS: a season line per rung
     { const g = L(seed++, 'cat', 0); g.james.realm = 0; g.yuki.realm = 0; const got = [];
       for (let r = 1; r <= 14; r++) { const out = lfSeason(g); got.push(out[0]); assert(/^Realm: /.test(out[1]) && g.james.realm === r, `P8A (SS): the season to rung ${r} keeps its mechanical line`); }
@@ -1505,7 +1519,7 @@ for (const form of ['cat', 'human']) {
     // TG1: each scene's first text on the first visit and its later text after (markers of each)
     for (const [id, k, f, l] of [['lf_falls', 'falls', /An hour upstream a waterfall/, /The cliff has not moved/], ['lf_ride', 'ride', /In her great form Yuki is the size of a Bengal tiger/, /still does not do saddles/],
         ['lf_notes', 'notes', /\*Key finding/, /\*Further entries/], ['lf_bored', 'bored', /a bone mouse on a thread/, /So you compete with yourself/], ['lf_bathe', 'bathe', /a flat rock for your coat/, /The same cold black river/],
-        ['lf_bone_depths', 'bone', /Beyond the giant skulls/, /raked smooth since you were last here/], ['lf_black_mire', 'mire', /The mire beyond the mire/, /The ink has closed over/],
+        ['lf_bone_depths', 'bone', /Beyond the giant skulls/, /raked smooth, by wind or by something tidy/], ['lf_black_mire', 'mire', /The mire beyond the mire/, /The ink has closed over/],
         ['lf_thunder_ridge', 'ridge', /A spine of black rock above the treeline/, /The ridge again/], ['lf_storm', 'storm', /like the idiot in a/, /You take the top rock again/],
         ['lf_old_roots', 'roots', /Deeper in than the Hollow/, /The white roots lie as you left them/], ['lf_trial_lost', 'trial_lost', /You lose\. It happens\./, /You lose again\./]]) {
         const g = L(seed++, 'cat', 3, { lf_last: 'lf_bone_hounds' }); goTo(g, SCENES, id); const a = sceneView(g, SCENES).text; nextDay(g); goTo(g, SCENES, id); const b = sceneView(g, SCENES).text;
@@ -1556,7 +1570,7 @@ for (const form of ['cat', 'human']) {
     { const strip = (f) => (typeof f === 'function' ? f.toString().replace(/`(?:[^`\\]|\\.)*`|'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"/g, 'S') : String(f ?? ''));
       const out = {}; for (const id of Object.keys(LONGFOREST)) { const s = SCENES[id]; out[id] = [strip(s.enter), (s.choices || []).map((c) => [c.qi || 0, c.check ? `${c.check.band || ''}/${c.check.xpTo || ''}/${c.check.bonus ? strip(c.check.bonus) : ''}` : '', (c.gives || []).join(','), strip(c.do), strip(c.failDo), strip(c.show)].join('|'))]; }
       const h = createHash('sha1').update(JSON.stringify(out)).digest('hex');
-      assert(h === '3069b671168a0f938203a737b010cef55d646f3c', `TG10: the Long Forest's code with its strings taken out, as in v0.11.175 (${h}; update only with a push that means to change it)`); }
+      assert(h === '8324a18ec679bf78dc059d2dd4afd6e5712067cd', `TG10: the Long Forest's code with its strings taken out, as in v0.11.177 (P9A: the dead menus, the spar's pool, the Heartless's win) (${h}; update only with a push that means to change it)`); }
     // TG11: the first visits on day 0 count no weeks, months or days
     for (const id of Object.keys(LONGFOREST)) for (const [form] of FORMS) { const g = L(seed++, form, 7); g.scene = id; let t = ''; try { t = txt(id, g); } catch { t = ''; } const SPENT = /\b(?:several|many|for|after) (?:weeks|months|days)\b|\bweeks of\b|\ba while ago\b/; assert(!SPENT.test(t), `TG11: ${id} as ${form} on day 0 counts no time spent here (${(t.match(/.{0,30}(?:weeks|months|days|a while ago).{0,20}/) || [''])[0]})`); } // a week's walk, this week (the prologue's), a lie's month: not time spent here
     // TG13 (C5): a drill card on the task screen shows a drill line in every band it reaches
