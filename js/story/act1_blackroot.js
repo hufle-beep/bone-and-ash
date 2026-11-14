@@ -232,10 +232,10 @@ const nightFight = (kind) => (g) => {
     return r;
 };
 const STAKE_LINES = {
-    wolves: 'One has tried the stakes coming in, and bleeds for it.',
-    drowned: 'One walked straight through the stakes and did not slow. It leaks now, at least.',
-    serpent: 'It crossed the stakes to get this far, and the stakes kept a share.',
-    hawks: 'One cuts it too fine over the stakes and climbs away short of some feathers.',
+    wolves: 'One of them has tried the stakes already, and bleeds for it.',
+    drowned: 'One of them has a stake clean through it, and stands there leaking, and has not looked down.',
+    serpent: 'It has crossed the stakes to get this far, and the stakes kept a share.',
+    hawks: 'One cuts it too fine over the stakes, and comes on short of some feathers.',
 };
 
 /* ---------------- night events per region ---------------- */
@@ -386,15 +386,9 @@ Mei Lin goes the colour of a ripe needleberry and walks on ahead without a word.
     },
     rr_forage: {
         id: 'rr_forage', title: 'Root-Foraging', art: 'root_road', place: PLACE.rr,
-        text: `Three experts, three opinions. Mei Lin takes the herbs in the shadow of the roots. You take the fungus: bracket shelves the colour of old ivory, one to every crack in the bark. Ya takes whatever lives under a loose flap of root-bark, and comes back chewing.
-
-"Grubs," she says, and holds out a fat white one. "Good fat. Better than your mushrooms."
-
-"To you, everything is better than my mushrooms."
-
-"Not *everything*." She winks. It is a very aggressive wink.`,
+        text: '',
         choices: [
-            onceADay('rr_bracket', { text: 'The ivory brackets. Spore print, omnitool, the full liturgy.', check: { skill: 'GU', dc: 4, bonus: () => 2 }, time: 50, do: (g) => { addItem(g, 'jade_bracket', 3); return ['+3 Jade bracket fungus (the root variety, almost sweet).']; }, failDo: (g) => { addItem(g, 'jade_bracket', 1); return ['One sound shelf, and two that go to crumbs in your hand. +1 Jade bracket.']; }, to: 'rr_hub' }),
+            onceADay('rr_bracket', { text: 'The ivory brackets. Spore print, omnitool, the full liturgy.', check: { skill: 'GU', dc: 4, bonus: () => 2 }, time: 50, do: (g) => { addItem(g, 'jade_bracket', 3); return ['+3 Jade bracket fungus (the root variety, almost sweet).']; }, failDo: (g) => { addItem(g, 'jade_bracket', 1); return ['One sound shelf, and two that go to crumbs in your hand. +1 Jade bracket.', `Ya, chewing something she found under a flap of root-bark, rules that grubs are better than your mushrooms. To Ya, you point out, everything is. "Not *everything*," she says, and winks. It is a very aggressive wink.`]; }, to: 'rr_hub' }),
             onceADay('rr_sorrel', { text: 'Help Mei Lin with the root-sorrel.', check: { skill: 'GU', dc: 3 }, time: 50, do: (g) => { addItem(g, 'river_cress', 4); (relToday(g, 'rr_sorrel') && bumpRel(g, 'Mei Lin', 2, 1)); return [`+4 root-sorrel (counts as river cress). ${DR_SORREL(g)}`]; }, failDo: (g) => { addItem(g, 'river_cress', 2); return ['You cut it too high on the stem. Mei Lin sighs exactly like her mother. +2 root-sorrel.']; }, to: 'rr_hub' }),
             { text: 'Eat the grub.', show: daily('rr_grub'), do: (g) => { markDaily(g, 'rr_grub'); eat(g, 10); bumpRel(g, 'Ya', 3, 2); return [`${DR_GRUB(g)} +10 satiety. ${DR_GRUB_AFTER(g)}`]; }, to: 'rr_hub' },
         ],
@@ -570,18 +564,10 @@ You find a raft of fallen trunks jammed between two trees, high enough and dry e
     },
     dw_forage: {
         id: 'dw_forage', title: 'Wet Harvest', art: 'drowned_wood', place: PLACE.dw,
-        text: `The drowned trees are crowded with things growing: gill-fungi in pale tiers, water-chestnut in the shallows, and frogs, which Ya takes as a gift from whichever god she doesn't believe in.
-
-Mei Lin wades out to the chestnuts with her skirts knotted at the hip and her jaw set against the cold. Ya watches her legs with frank and appreciative interest, and makes no pretence of doing anything else.
-
-"Stop that," says Mei Lin, without turning round.
-
-"Stop what?"
-
-"*That.*"`,
+        text: '',
         choices: [
             onceADay('dw_gill', { text: 'The pale gill-fungi on the drowned trunks.', check: { skill: 'GU', dc: 5, bonus: () => 2 }, time: 50, do: (g) => { addItem(g, 'ghost_gill', 2); return ['+2 Ghost-gill. The omnitool is beside itself. So are you, within professional limits.']; }, failDo: (g) => { g.james.hp -= 2; return ['Leeches. This round goes to the fungi. −2 HP.']; }, to: 'dw_hub' }),
-            onceADay('dw_chestnut', { text: 'Wade out and help with the chestnuts.', check: { skill: 'GU', dc: 3 }, time: 50, do: (g) => { addItem(g, 'river_cress', 4); (relToday(g, 'dw_chestnut') && bumpRel(g, 'Mei Lin', 2, 2)); return ['+4 water-chestnuts (as river cress). Mei Lin\'s lips have gone blue, and she is laughing at something Yuki did.']; }, failDo: (g) => { addItem(g, 'river_cress', 1); return ['Your foot finds a root that is not there. +1 chestnut, and one biologist wet to the collar.']; }, to: 'dw_hub' }),
+            onceADay('dw_chestnut', { text: 'Wade out and help with the chestnuts.', check: { skill: 'GU', dc: 3 }, time: 50, do: (g) => { addItem(g, 'river_cress', 4); (relToday(g, 'dw_chestnut') && bumpRel(g, 'Mei Lin', 2, 2)); return ['+4 water-chestnuts (as river cress). Mei Lin\'s lips have gone blue, and she is laughing at something Yuki did.', `She has waded out with her skirts knotted at the hip. From the bank Ya studies her legs with frank and appreciative interest. "Stop that," says Mei Lin, without turning round. "Stop what?" "*That.*"`]; }, failDo: (g) => { addItem(g, 'river_cress', 1); return ['Your foot finds a root that is not there. +1 chestnut, and one biologist wet to the collar.']; }, to: 'dw_hub' }),
             onceADay('dw_frog', { text: 'Go frogging with Ya.', check: { skill: 'GU', xpTo: 'Convergence Use', dc: 4 }, time: 50, do: (g) => { eat(g, 18); (relToday(g, 'dw_frog') && bumpRel(g, 'Ya', 3, 3)); return ['Needles through frogs, frogs on a stick, frogs eaten off the stick. +18 satiety. For one good throw Ya kisses you on the ear, as though that were a thing people did.']; }, failDo: (g) => { (relToday(g, 'dw_frog') && bumpRel(g, 'Ya', 1, 0)); return ['The frogs are quicker than you. Ya is quicker than the frogs. She shares, in the end.']; }, to: 'dw_hub' }),
         ],
     },
@@ -802,15 +788,9 @@ She doesn't mean a word. All of you can hear that she doesn't, and it helps nobo
     },
     ah_forage: {
         id: 'ah_forage', title: 'Ash and Embers', art: 'ashen_hills', place: PLACE.ah,
-        text: `The ash feeds whoever knows where to dig. Mei Lin's share is the cinderberry bushes, down in the gullies where the stone ran to glass. Yours is the truffles: black and wrinkled, fruiting under the surface where the old fire left the soil rich. Ya's is the fire-beetles. She eats them live, with a crunch, and holds Mei Lin's eye all the way through each one.
-
-"Disgusting," says Mei Lin.
-
-"You're still looking."
-
-"I'm looking so I don't miss it when you *die*."`,
+        text: '',
         choices: [
-            onceADay('ah_truffle', { text: 'Dig for the ash-truffles.', check: { skill: 'GU', dc: 5, bonus: () => 2 }, time: 60, do: (g) => { addItem(g, 'jade_bracket', 2); eat(g, 10); return [`+2 ash-truffles (as jade bracket), and one eaten on the spot: +10 satiety. ${DR_TRUFFLE(g)}`]; }, failDo: () => ['Ash, more ash, and one beetle. The beetle goes to Ya.'], to: 'ah_hub' }),
+            onceADay('ah_truffle', { text: 'Dig for the ash-truffles.', check: { skill: 'GU', dc: 5, bonus: () => 2 }, time: 60, do: (g) => { addItem(g, 'jade_bracket', 2); eat(g, 10); return [`+2 ash-truffles (as jade bracket), and one eaten on the spot: +10 satiety. ${DR_TRUFFLE(g)}`]; }, failDo: () => [`Ash, more ash, and one beetle. The beetle goes to Ya. She eats it live, with a crunch, holding Mei Lin's eye throughout. "Disgusting," says Mei Lin. "You're still looking." "I'm looking so I don't miss it when you *die*."`], to: 'ah_hub' }),
             onceADay('ah_cinder', { text: 'Cinderberries with Mei Lin.', check: { skill: 'GU', dc: 3 }, time: 40, do: (g) => { addItem(g, 'crimson_berry', 6); (relToday(g, 'ah_cinder') && bumpRel(g, 'Mei Lin', 2, 2)); return [`+6 cinderberries (as needleberries). ${DR_CINDER(g)}`]; }, failDo: (g) => { addItem(g, 'crimson_berry', 2); return ['Thorns. +2 cinderberries.']; }, to: 'ah_hub' }),
             { text: 'Eat a fire-beetle. For science.', show: daily('ah_beetle'), do: (g) => { markDaily(g, 'ah_beetle'); eat(g, 6); bumpRel(g, 'Ya', 3, 3); return [`${DR_BEETLE(g)} +6 satiety. ${DR_BEETLE_AFTER(g)}`]; }, to: 'ah_hub' },
         ],
@@ -894,7 +874,7 @@ An hour has gone by since. The cinder hawks are circling lower.
         ],
     },
     ya_found: {
-        id: 'ya_found', title: 'Teeth', art: 'ya_close', place: `${P} — a burnt gully`,
+        id: 'ya_found', title: 'Teeth', art: 'ya_close', place: (g) => (g.flags.ya_waited ? PLACE.ah : `${P} — a burnt gully`),
         text: (g) => `${g.flags.ya_waited
         ? 'She comes back when she is ready, as far as the next rise: chin up, a hare over one shoulder, in plain sight of the camp and not in it. She sits there to gut it, with her back half turned to you.'
         : 'She is in a burnt gully when you find her, perched on a lump of glassed rock, gutting a hill-hare with more force than a hare requires.'}
@@ -912,7 +892,7 @@ The knife stops. At last she looks at you, eyes narrowed.
 "Hm," she says. A silence follows, and then her fist comes out with something in it: a wolf's tooth, long and yellow, on a cord. "I bit that off a wolf when I was eleven. It's the best thing I own." She shoves it against your chest. "Don't laugh at me again."`,
         choices: [
             { text: 'Take the tooth. Put it on. "I won\'t."', do: (g) => { addItem(g, 'ya_tooth', 1); bumpRel(g, 'Ya', 6, 6); return [`The cord is greasy and the tooth is warm from her fist. You put it on. She watches you do it with the stillness of something deciding whether to bolt, and then goes back to the hare as if nothing has happened, except that she's sitting a hand's width closer than she was.`, '+1 Ya\'s wolf tooth.']; }, to: 'ah_hub' },
-            { text: '"Bring it back to camp and give one to Mei Lin, too. She\'s been looking for you."', do: (g) => { addItem(g, 'ya_tooth', 1); bumpRel(g, 'Ya', 4, 3); bumpRel(g, 'Mei Lin', 2, 2); trioStep(g, 2); return ['+1 Ya\'s wolf tooth. Ya sets off to find a second wolf.']; }, to: 'ah_hub' },
+            { text: '"Bring it back to camp and give one to Mei Lin, too. She\'s been looking for you."', do: (g) => { addItem(g, 'ya_tooth', 1); bumpRel(g, 'Ya', 4, 3); bumpRel(g, 'Mei Lin', 2, 2); trioStep(g, 2); return [`You take the tooth, cord and all, and hang it round your neck before she can change her mind. She hears the rest out with her head on one side. "One each," she decides, wipes the knife on her thigh and stands. "Hers will be smaller."`, '+1 Ya\'s wolf tooth. Ya sets off to find a second wolf.']; }, to: 'ah_hub' },
         ],
     },
     trio_kiss: {
@@ -989,7 +969,7 @@ You come round to Mei Lin's hands on your face. Ya sits next to you with a ruste
     /* =================================== shared: train, talk =================================== */
     bl_train: {
         id: 'bl_train', title: 'Practice', art: 'ya_fight', place: (g) => PLACE[region(g)],
-        text: (g) => `${region(g) === 'dw' ? 'One dry trunk, with length enough to move on.' : region(g) === 'ah' ? 'A level floor of ash between two ridges.' : 'The root\'s broad back.'} Ya studies your training like a critic: a woman who never took a lesson in her life, and never lost a fight she wanted. Mei Lin studies Ya studying you, and would deny it.`,
+        text: '',
         choices: [
             { text: 'Spar with Ya.', show: daily('bt_ya'), check: { skill: 'GU', dc: 5 }, time: 60, do: (g) => { markDaily(g, 'bt_ya'); bumpRel(g, 'Ya', 2, 2); return [DR_SPAR_YA(g)]; }, failDo: (g) => { markDaily(g, 'bt_ya'); g.james.hp -= 2; bumpRel(g, 'Ya', 1, 1); return [`${DR_SPAR_YA_F(g)} −2 HP.`]; }, to: 'bl_train' },
             { text: 'Darts at a mark, from farther and farther.', show: daily('bt_dart'), qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 5 }, time: 60, do: (g) => { markDaily(g, 'bt_dart'); return [DR_BL_DART(g)]; }, failDo: (g) => { markDaily(g, 'bt_dart'); return []; }, to: 'bl_train' },
@@ -1208,7 +1188,7 @@ Much later Ya is dozing with her face in your neck and one bare leg slung across
         ],
     },
     mei_bond: {
-        id: 'mei_bond', title: 'Embers', art: 'night_watch', place: PLACE.ah,
+        id: 'mei_bond', title: 'Embers', art: 'night_watch', place: (g) => PLACE[region(g)],
         enter: (g) => { g.flags.mei_bond = true; bumpRel(g, 'Mei Lin', 5, 8); return []; },
         text: (g) => `${g.flags.mb_day ? 'You let Ya and Yuki draw ahead. Mei Lin stops with you where the way bends out of their sight, and for a time neither of you says a word.' : 'Once Ya is asleep, curled by the fire like a dog with the spear in her arms, Mei Lin sits up with you over the embers.'}
 

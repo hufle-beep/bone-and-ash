@@ -12,18 +12,22 @@ import { textDay } from '../core/lines.js'; // RV1 (FX)
 const DR_PALISADE_F = dayReply("fo_palisade:0:f", [
     "Every other stake crumbles at a mallet's first tap. The hunters cut pine for the gaps, wordlessly, and the silence says the rest.",
     "Too many of the stakes ring dull when you tap them. The hunters pull those and set timber in the gaps, and Old Hu thanks you for the rest, formally, with a bow. You would have preferred to be shouted at.",
+    "Somewhere along the row the song goes flat, and the stakes with it: chalk to the core. The hunters have pine cut and waiting before the last one crumbles. They brought it with them this morning, and nobody mentions why.",
 ]);
 const DR_COUNCIL_F = dayReply("fo_council:0:f", [
     "The words come out lame. The council takes the meaning regardless, and bows a finger's width short.",
     "It comes out in the wrong order, the end before the reasons. They wait for you to finish, with perfect courtesy, and bow as the form requires. No further than that.",
+    "You lose your place in the middle and go back for it, aloud. The council waits out the search without a cough. The bow, when it comes, is correct in every joint, and addressed slightly to your left.",
 ]);
 const DR_FO_SPAR_F = dayReply("fo_drill:1:f", [
     "Yuki wins. Decisively.",
     "They wanted to see fast. They saw it. You mostly heard it.",
+    "Over before the hunters have finished forming their circle. Old Hu asks, with respect, whether it could be shown again, slower. Yuki regards that as a question for you.",
 ]);
 const DR_FO_CLINIC_F = dayReply("fo_clinic:0:f", [
     "Mostly. You'll check the split scalp again tonight.",
     "Nearly all of it. One of the torn hands worries you; you'll look in on it after dark.",
+    "All but the last of the line. A crushed foot is more than one sitting mends; he goes home on a neighbour's back, with a splint, and a boy to recite your instructions.",
 ]);
 
 /* v0.11.170 (owner pick NX2, SR; Fable's texts, rule 10): the hub's cards (Days 8–10) answered every success, and three failures,
