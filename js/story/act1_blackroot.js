@@ -225,8 +225,8 @@ const nightFight = (kind) => (g) => {
     /* v0.11.25 (owner picks b1, X2, T1): the camp stakes (bl_camp, one night) cut the first attacker by 3 HP (4 with bone-meal),
        after the scaling and the ally floor, so the cut is real on every kind; at least 1 HP left. */
     const stake = g.flags.bl_stakes_night ? (g.flags.stakes_hard ? 4 : 3) : 0;
-    const intro = stake ? `${t.intro} ${STAKE_LINES[kind]}` : t.intro;
-    const r = encounter(g, { id: `night_${kind}`, tier: 'small', intro, enemies: t.enemies, win: 'bl_night_won', lose: 'bl_night_lost', flee: kind === 'drowned' ? null : 'bl_morning' });
+    // v0.11.177 (owner pick P9A, P5): the stake line as the fight's tail, so it shows after a stomp posture too (at degree 2 / 3 the posture replaced the intro it was in)
+    const r = encounter(g, { id: `night_${kind}`, tier: 'small', intro: t.intro, ...(stake ? { tail: STAKE_LINES[kind] } : {}), enemies: t.enemies, win: 'bl_night_won', lose: 'bl_night_lost', flee: kind === 'drowned' ? null : 'bl_morning' });
     if (stake) r.enemies[0] = { ...r.enemies[0], hp: Math.max(1, r.enemies[0].hp - stake) };
     r.night = true; // v0.11.92 (O1): a night fight costs sleep (a flight too: the mark is set when it starts, and the flight goes straight to bl_morning)
     return r;

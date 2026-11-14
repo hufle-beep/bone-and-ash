@@ -22,7 +22,7 @@ import { famTier, FAM } from './tasks.js';
 const isYukiJob = (id) => id.startsWith('yuki:'); // v0.11.159 (owner pick NX2, CL): her jobs are not cards; the Coil screen gives her her own line
 
 /** What James knows and keeps (plus Yuki's own flags and the Long Forest run, so that run stays scaled; v0.11.31: and the speed gates, tasks.js maxSpeed). */
-export const KEEP_FLAGS = ['lore1', 'lore_realms', 'lore_tree', 'saw_lights', 'yuki_tiger_seen', 'yuki_human_seen', 'yk_path', 'yk_wait', 'long', 'longforest', 'lf_instant', 'spd_pro', 'spd_a1'];
+export const KEEP_FLAGS = ['lore1', 'lore_realms', 'lore_tree', 'saw_lights', 'yuki_tiger_seen', 'yuki_human_seen', 'yk_path', 'yk_wait', 'long', 'longforest', 'lf_instant', 'spd_pro', 'spd_a1', 'lf_known'];
 /** Discoveries that also lock a one-time action: reset with the world, but the Coil remembers them (Insights in step 4). */
 export const REMEMBER = { roots: 'the roots under the hollow', bone_sung: 'the song in the bone field', gills: 'where the ghost-gills grow', fungus: 'the jade bracket fungus by the stream', ship_found: 'where the seed-ship lies', log_heard: 'what Wren Aldous\'s log said' };
 const KNOW_TEXT = { lore1: 'what the tribute is', lore_realms: 'the realms, from Old Wen', lore_tree: 'the story of the dead tree', saw_lights: 'where the night lights go' };

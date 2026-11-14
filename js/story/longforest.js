@@ -32,8 +32,20 @@ const yukiReturnHub = (g) => { g.flags.yuki_return = 'lf_hub'; return []; };
 const seenOf = (g, k) => g.flags[`lf_seen_${k}`] || 0;
 // v0.11.175 (RV1, C1/C2; Fable's review): once a day per key (`lf_seen_<key>_d` holds the day last counted): the storm's way back down the ridge and a zone
 // entered twice in a day count once, so "again" always spans a night
-const visit = (g, k) => { const d = dayKey(g); if (g.flags[`lf_seen_${k}_d`] !== d) { g.flags[`lf_seen_${k}_d`] = d; g.flags[`lf_seen_${k}`] = seenOf(g, k) + 1; } return []; };
-const later = (g, k) => seenOf(g, k) >= 2;
+// v0.11.177 (owner pick P9A, P8; Fable's review T14): the knowledge flag `lf_known` (kept across Coils, coil.js KEEP_FLAGS) holds, per key, the Coil of
+// its first visit, so from a later Coil a first visit reads the later text too (the man remembers the place); a save from before reads as before
+const coilNo = (g) => g.coil?.n || 1;
+const visit = (g, k) => {
+    const d = dayKey(g);
+    if (g.flags[`lf_seen_${k}_d`] !== d) { g.flags[`lf_seen_${k}_d`] = d; g.flags[`lf_seen_${k}`] = seenOf(g, k) + 1; }
+    const known = g.flags.lf_known || {};
+    if (!known[k]) g.flags.lf_known = { ...known, [k]: coilNo(g) };
+    return [];
+};
+const knownBefore = (g, k) => { const c = (g.flags.lf_known || {})[k]; return !!c && c < coilNo(g); };
+// people (the Tans, Fang Wei) remember nothing of an earlier Coil, so their meetings count this Coil's only
+const FORGETS = new Set(['lf_bandits', 'lf_rogue']);
+const later = (g, k) => seenOf(g, k) >= 2 || (seenOf(g, k) >= 1 && !FORGETS.has(k) && knownBefore(g, k));
 /** v0.11.175 (P8A, SW): the drills' result lines (they were silent), by the line picker (all three before any comes back). */
 export const LF_DRILL = {
     t1: ["Nine leaves pinned to nine trunks before they reach the ground. The tenth lands unharmed. You call it the control.", "You stop aiming at the leaf and aim at where the wind is taking it. The wind turns out to be predictable.", "A whole branch lets go at once, out of spite. You run out of leaves before you run out of darts."],
