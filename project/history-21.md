@@ -2,6 +2,19 @@
 
 Started 2026-11-14 (v0.11.172), when `history-20.md` had passed about 45 KB. Newer than `history-20.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.173 (word for word)
+
+### Decided in chat
+
+- **v0.11.170: Fable's rewrite, part 4, the Fallout (NX2, CA1, RV1, with LN, CMN, FX) (options at about 23:10, the owner's CW note 23:15, owner 23:16 "NX2."; the comparison, owner 23:54 "CA1 go"; Fable's review, owner 00:19 "RV1 go"):** the full entry (every number) word for word in `history-20.md` (the handover past 35 KB). **Measured:** the Fallout's older prose 143 strings, about 4,880 words (70%); labels 63; 11 hub replies the same every day; 2 great root-kin texts as "the cat", 3 cat-only; the three fights' stomp texts 1,175 words. **CMN** (500 games each, four models, friendship p50 at the day's end, cap 150): the mother, prologue Day 6 2–7, Act 1 Day 10 9–13, Day 21 11–15 (p90 to 27); the village 150 from Act 1's Day 10 in every model; so a kitchen by the mother's trust needs a low gate or more gains (balance), a gate on the village's does nothing in Act 1. **NX1 🟠 CM first / NX2 🟢 part 4 now (recommended) / NX3 🟡 without ST. Picked: NX2.** **LN** the owner's 23:15 note in `lore.md`; **CW** at most six throwaway lines, generic music only. **The draft:** code identical, labels unchanged, 15% of the Fallout's words changed (stomp 21%); the Fallout's favourites 21 → 5, tics 3 → 1. **CA1 🟢 DR + FB (four filled branches) + LB (five labels) (recommended) / CA2 🟡 / CA3 🟠 / CA4 🔴. Picked: CA1.** **Fable's review:** no high; **M1** a success closes its card for the Coil, so replies by the count of days never passed their first text (16 of 24 new lines, and part 3's five Day 6 lines); M2–M4, L1–L12, TG1–TG8. **RV1 🟢 SD (by the story's day) + P3D (part 3's by the village day) + CT + ML + PF + LT + LB2 + TG1–TG8 + NN (recommended) / RV2 🟡 without P3D / RV3 🟠 back to the first texts. Picked: RV1.**
+
+### Version notes
+
+## v0.11.170 — Fable's rewrite, part 4: the Fallout (NX2, CA1, RV1)
+
+- **Files:** `js/story/act1_fallout.js` (text; eleven reply lists `DR_FO_SING` … `DR_FO_BOY_F`, the eight successes by the story's day, `onStoryDay`; three `byForm` switches; the council's Day 10 branch; five labels and LB2), `js/story/ashfall.js` (the five success lists by the village day, `onVillageDay`; four Day 6 texts), `js/story/stomp_act1.js` (the watcher, the wolves, Ya's posture), `js/core/news.js`, `tests/story.test.mjs` (the NX2 block: SR, YF, FB, CW, ST, LB, the render pass; RV1's TG1–TG8; the old pins read the rewrite), `tests/README.md`, `tools/text-baseline.json`, `tools/timings.json`, `project/lore.md` (LN), `project/research/rewrite-part4-brief.md`, `-notes.md`, `-review.md` (new, repo only), `sw.js`, docs (v0.11.167's entries to `history-20.md`). No id, flag, key, check, gain or save field changed.
+- **Checks:** a game change (rule 2): the full check after the build (exit 0) and after RV1 (exit 0; the first RV1 run stopped on a page error, an unescaped apostrophe in the new news line, fixed): 146 compared, 0 drifted, 0 moved more than 5; the models unchanged (Careful 3.17 / 3.32, Completionist 3.31 / 3.51, Cultivator 2.82 / 3.04, Sociable 3.17 / 3.55); one FLAKE (browser part 2, a wait for a button, passed on the retry; alone 3 of 3); the log-only NOTE `rt_serpent_forced` as before.
+
 ## Moved from the handover in v0.11.172 (word for word)
 
 ### Open items (v0.11.171; every "open, options later" item placed on the roadmap)

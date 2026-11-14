@@ -300,80 +300,82 @@ Ya has to push her face into her bedroll to stop laughing. Mei Lin tells her, ve
 
     /* ============================================================ PART 3 — THE HEART ===================================== */
     husks: {
-        posture: (g, d) => `Things come out of the grey wood: hollow-grubs the size of dogs, pale as old candle wax, mouths full of splinters. They've been eating this tree for four hundred years. They seem to think you're dessert.
+        posture: (g, d) => `They come out of the grey wood in no hurry: hollow-grubs big as dogs, tallow-pale, splinters for teeth. They have been at this tree since it died, and nobody has yet interrupted them. ${yu(g)} counts them, and stops early.
 
-${pick(d, 'Somewhere under the revulsion, you\'re angry. These are eating your people\'s house.', 'They\'re eating your people\'s house. You\'re going to have words.', 'They\'re eating your people\'s house, and you are, it turns out, the landlord.')}`,
+${pick(d, 'Under the disgust is anger, and it is the steadier. This was your people\'s house.', 'They are eating your people\'s house. You mean to raise it with them.', 'They are eating your people\'s house, and you seem to be the nearest it has to a landlord.')}`,
         win: {
-            2: (g) => `It's brief and thorough. When it's over, the fourth ring is quiet and full of pale bits of grub. Behind the shelf they were eating, grown into the wall, there's a hollow with a cup in it — a plain wooden cup, a thousand years old, with a name burned into the base in a script you learned before you could walk.
+            2: (g) => `It is short, and thorough. When it is over the fourth ring is quiet, with grub on most of it, and Yuki has plainly decided none of that is hers to clean up. Behind the shelf they were eating, a hollow is grown into the wall, and a cup stands in the hollow: plain wood, a thousand years old if it is a day, a name burned into its base in the script you could read before you could walk.
 
 *Tamsin.*
 
-You stand there holding it for longer than you'd like anyone to see. Ya sees. She doesn't say anything. She just bumps your shoulder with hers, hard, on the way past, which may be the kindest thing she has ever done.`,
-            3: (g) => `You put your palm flat on the wall, and the tree — dead, but not deaf — remembers what it was for, just for a moment. The grey wood clenches like a fist around every grub in it. When it opens again, the fourth ring is quiet and very, very clean.
+You stand with it in both hands, longer than you would like witnessed. Ya witnesses, and says nothing. She only drives her shoulder into yours going by, hard enough to shift you a step, which from Ya is tenderness.`,
+            3: (g) => `You lay one palm flat on the wall. The tree is dead, not deaf, and for one heartbeat it recalls what it was grown for: the grey wood closes like a fist on every grub in the ring. When it opens again the fourth ring is quiet, and far cleaner than you would have left it. Yuki inspects the floor and can find nothing to object to, which annoys her.
 
-Behind the shelf they were eating, grown into the wall, there's a hollow with a cup in it — a plain wooden cup, a thousand years old, with a name burned into the base in a script you learned before you could walk.
+Behind the shelf they were eating, a hollow is grown into the wall, and a cup stands in the hollow: plain wood, a thousand years old if it is a day, a name burned into its base in the script you could read before you could walk.
 
 *Tamsin.*
 
-You stand there holding it for longer than you'd like anyone to see. Ya sees. She doesn't say anything about the wall, either, which for Ya is restraint on a heroic scale. She just bumps your shoulder with hers, hard, on the way past, which may be the kindest thing she has ever done.`,
+You stand with it in both hands, longer than you would like witnessed. Ya witnesses. About the wall she says nothing either, and for Ya that is restraint on the heroic scale. She only drives her shoulder into yours going by, hard enough to shift you a step, which from Ya is tenderness.`,
         },
-        one: () => 'A palm on the wall. The dead tree remembers, for one heartbeat, how to make a fist.',
+        one: () => 'One palm on the wall. For a heartbeat the dead tree remembers how to make a fist.',
     },
     root_husks: {
-        posture: (g, d) => `Down here, where the light never came, the rot has had four hundred years to grow ambitious. It has arms now. Several. It drags itself out of the roots toward you with a sound like wet paper tearing, and something in the middle of it that was once a grub and is now mostly mouth.
+        posture: (g, d) => `No light ever got down here, and the rot has spent its four centuries unsupervised. It has grown arms: several more than the work calls for. It hauls itself off the wall toward you with a noise of wet paper tearing, and at its centre is a thing that began as a grub and has since specialised in mouth.
 
-${pick(d, 'Ya swears softly and lowers her spear. Mei Lin\'s lips are moving; she\'s praying.', 'You roll your shoulders. This is the last thing standing between you and the ship.', 'It\'s the last thing between you and the ship. It is not going to be standing there long.')}`,
+${pick(d, 'Ya swears under her breath and brings her spear down level. Mei Lin\'s lips are moving. It is a prayer.', 'You loosen your shoulders. Whatever is down there under the roots, the road to it runs through this.', 'The road down runs through it. It is not going to be in the road for long.')}`,
         win: {
-            2: () => `It comes apart under bone and needle and Ya's spear, and when it's done the root-chamber goes quiet. Ya stands on the biggest husk, spear still in it, chest heaving, grinning like she's been given a present. "*That* I liked," she says. "Do they have more? Ask them if they have more."
+            2: () => `It comes apart under bone and needle and Ya's spear, and you could have left out two of the three. The root-chamber goes still. Ya is up on top of the biggest husk, spear still in it, blowing hard, grinning like a child with a present. "*That* I liked," she says. "Do they have more? Ask them if they have more."
 
-You didn't need her. She knows you didn't need her. She stabs it again anyway, for the principle.
+She was not needed, and she knows it. She stabs the husk once more regardless, as a matter of principle.
 
-Beyond the chamber, the tunnel turns, and the walls change. They stop being root. They start being *hull*.`,
-            3: () => `You walk into the middle of it. It closes round you, all its arms at once, and then all its arms are white, and then all of it is white — a statue of bone where the rot was, every tendril caught mid-reach, as if a sculptor had been very angry and very precise.
+Beyond the chamber the tunnel turns, and your hand on the wall finds a different thing under it. Not root any longer. *Hull*.`,
+            3: () => `You walk into the middle of it. It shuts on you with every arm it has, and then the arms are white, and then all of it is: a figure of bone standing where the rot stood, each tendril stopped in mid-reach, the work of a sculptor both furious and exact.
 
-Ya walks all the way around it. Slowly. She taps it with her spear. It rings.
+Ya goes the whole way round it, slowly. She raps it with her spear. It rings.
 
-"Okay," she says. "I don't *like* that. That's — no. I'm going to have dreams about that." A pause. "Good ones, probably. Don't look at me."
+"No," she says. "I don't *like* that. That is going to be in my dreams." She thinks about it. "Good ones, probably. Don't look at me."
 
-Beyond the chamber, the tunnel turns, and the walls change. They stop being root. They start being *hull*.`,
+Beyond the chamber the tunnel turns, and your hand on the wall finds a different thing under it. Not root any longer. *Hull*.`,
         },
-        one: () => 'It closes round you. You make it bone, all the way through, and leave it there as a warning to the rest of the rot.',
+        one: () => 'It shuts on you. You turn it to bone clean through and leave it standing, for the rest of the rot to think about.',
     },
-    guardian: {
-        posture: (g, d) => `The guardian unfolds: grown wood and old white bone, three times your height, its face an empty frame where a gardener once carved a smile. Somewhere inside it a voice is still, faintly, singing — one broken note of a song you were rocked to sleep with.
+    guardian: { // v0.11.173 (OL1, GW): win[2] takes g (story.js passes it), for the half-song's branch (guardian_won has it; Fable's line)
+        posture: (g, d) => `The guardian comes up to its whole height, better than three times yours: grown wood over old white bone, moss stirring on its arms, a smooth white head with nothing on it to plead with. Inside it a voice is still singing, faintly: one cracked line of a song you were rocked to sleep to, and Yuki with you.
 
-It doesn't know you. It knows only *intruder*, and it has been knowing only that for four hundred years.
+If any part of it knows you, it is not the part lifting its arms. That part knows *intruder*, and it has known little else since the tree died.
 
-${pick(d, 'You feel sick. You raise your hands anyway.', 'It\'s strong. It\'s also very old, and very tired, and you\'re neither.', 'You could break it with a thought. You find you don\'t want to. You want it to *look* at you.')}`,
+${pick(d, 'You feel sick. You put your hands up all the same.', 'It is strong. It is also old, and worn out, and you are neither.', 'A thought would break it. You find you do not want that. You want it to *look* at you.')}`,
         win: {
-            2: () => `You don't break it so much as take it apart, carefully, the way you'd dismantle something precious that had gone wrong — joint by joint, binding by binding, never more than it needs. It comes down the way a tree comes down: slowly, then all at once, and the floor of the chamber shakes when it hits.
+            2: (g) => `You do not break it. You take it down, as you would take apart a precious thing that had gone wrong: joint by joint, binding by binding, no more force than each one asks. It falls like timber all the same: a lean, a pause, and then the whole chamber floor jumping under you.
 
-For a moment it lies there with the green still glowing in its chest. The broken note goes on, softer, softer.
+It lies there, and the green in its chest stays lit. ${g.flags.guardian_weak ? 'Then, because you sang to it and part of it was listening, the note smooths out: three heartbeats of the whole lullaby, every line in place.' : 'The note goes on a little while yet, quieter each time round.'}
 
 Then it stops.
 
-You're not even breathing hard. You did the thing you came to do and you feel like you've put down a dog that was only guarding the house.
+You are not even out of breath. The thing you came to do is done, and it sits in you like having put down a dog whose one offence was guarding the house.
 
-"It was good," Ya says, quietly, standing over it. "It was a good fighter. It didn't want to stop."
+"It was good," Ya says, low, from beside its head. Her praise goes no further than that. "It was a good fighter. It didn't want to stop."
 
 "Yes," you say. "And now it doesn't have to."
 
-You take two pieces of its broken frame. They're warm. You promise them something, under your breath, and don't say what.`,
-            3: () => `It raises its arms to strike, and you don't raise yours. You just stand there and let your Convergence *sing* — not the broken note; the whole song, the one from home, the one it was built to keep.
+Two pieces of its frame have come away whole, at the joints. You take them. They are warm. You promise them a thing under your breath, and keep it to yourself.`,
+            3: () => `It lifts both arms to strike, and you leave yours where they are. You let your Convergence *sing* instead: not the one cracked line but the song entire, the one from home, the one it was grown to keep.
 
-The guardian stops with its fists over your head.
+The fists stop above your head.
 
-It looks at you, for the first time, with whatever it looks with. It knows you. Not your face: your *kind*. The singers. The gardeners. The ones who left it here to wait.
+Whatever it sees with, it turns on you now, and it knows you. Not your face: your *kind*. The singers. The gardeners. The ones who set it here and told it to wait.
 
-Very slowly, the guardian kneels. It puts its great wooden hands on the floor in front of you, palms up, the way a servant hands back a key. The green in its chest flares once, brightly, like a held breath let go — and then it goes out, and the frame comes gently apart in your hands, its work done.
+Slowly, the guardian kneels. It sets both huge hands on the floor before you, palms up, as a steward gives back a key. The blank head turns once toward the dark at its back, where the floor falls away, and then to you again. Its own note finds the rest of the lullaby and follows yours to the end. Then the note stops, the green in its chest, its own last sap, sinks to a low and steady glow, and the great frame eases apart, joint from joint, as gently as it knelt. Its work is done.
 
-Nobody says anything for a long time. Ya is crying and furious about it. Mei Lin has her hand over her mouth.
+Nobody speaks. Ya is crying, and furious about it. Mei Lin has both hands pressed to her mouth. Yuki has not moved since the first bar.
 
-"It waited," you say. "Four hundred years. It just wanted someone to come home."
+"It didn't want to stop," Ya gets out at last.
 
-You take two pieces of its frame. They're still warm.`,
+"It waited four hundred years for somebody to come home," you say. "Now it doesn't have to."
+
+You keep two pieces of the frame. They are still warm.`,
         },
-        one: () => 'You sing it the whole song. It kneels, hands you the key it has been holding for four hundred years, and rests.',
+        one: () => 'You sing it the whole song. It kneels, gives back the key it has held four hundred years, and rests.',
     },
 
     /* ============================================================ PART 4 — RETURN ======================================= */
