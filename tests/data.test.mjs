@@ -461,13 +461,16 @@ assert(gives(yhunt).slice().sort().join(' ') === 'fowl_raw hare_raw venison', `v
     const enc = (kind, stakes, hard) => { const g = structuredClone(base); g.flags.bl_ev = kind; g.flags.bl_stakes_night = stakes; g.flags.stakes_hard = hard; return fight.combat(g); };
     // X2: the cut comes after the scaling and the ally floor, so it is exact: max(1, hp − 3), max(1, hp − 4) with bone-meal
     const LINE = { wolves: 'tried the stakes coming in', drowned: 'walked straight through the stakes', serpent: 'crossed the stakes', hawks: 'cuts it too fine over the stakes' }; // v0.11.172 (P5A): Fable's rewrite
+    const TAILS = new Set();
     for (const kind of ['wolves', 'drowned', 'serpent', 'hawks']) {
         const off = enc(kind, false, false), on = enc(kind, true, false), hard = enc(kind, true, true);
         const h0 = off.enemies[0].hp;
         assert(on.enemies[0].hp === Math.max(1, h0 - 3) && hard.enemies[0].hp === Math.max(1, h0 - 4), `v0.11.25: ${kind}: the stakes cut the first attacker exactly (${h0} → ${on.enemies[0].hp}, ${hard.enemies[0].hp} with bone-meal)`);
         if (kind === 'serpent') assert(hard.enemies[0].hp < on.enemies[0].hp, 'v0.11.25: serpent: bone-meal cuts more than plain stakes');
         assert(JSON.stringify(on.enemies.slice(1)) === JSON.stringify(off.enemies.slice(1)), `v0.11.25: ${kind}: the others are untouched`);
-        assert(on.intro.includes(LINE[kind]) && !off.intro.includes('stakes'), `v0.11.25: ${kind}: its own stakes line, only with the stakes up`);
+        // v0.11.177 (P9A, P5): the stake line rides as the fight's tail (shown after the opening at every degree); Fable's lines
+        assert(/stake/i.test(on.tail || '') && !on.intro.includes(on.tail) && !off.tail && !off.intro.includes('stakes') && !TAILS.has(on.tail), `v0.11.25: ${kind}: its own stakes line, only with the stakes up`);
+        TAILS.add(on.tail);
     }
     const g = structuredClone(base); g.scene = 'bl_morning'; SCENES.bl_morning.enter(g);
     assert(g.flags.bl_stakes_night === false, 'v0.11.25: the stakes last one night (cleared in the morning)');
