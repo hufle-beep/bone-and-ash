@@ -2,6 +2,12 @@
 
 Started in v0.11.150, when `roadmap-done-2.md` had passed about 45 KB. Newer than `roadmap-done-2.md` and `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.179 (word for word; owner picks LB1, X1, D1, F1, H1, RV2: the label pass done)
+
+### From section 1, group e, as of v0.11.178
+
+  - **The label pass:** *(v0.11.178)* measured at 14:16 (16 open items, the list in the handover's "Decided in chat", v0.11.178); its options again under U1 (the read and the review on Opus, Fable for wordings only).  *(v0.11.175)* `lf_hub`'s "Wash in the river. You have been in a forest for a long time." (a tic, and untrue on day 0; review T13) and part 8's label notes in `rewrite-part8-notes.md`; about 37 suggestions (35 from part 1's notes, one done; two from part 2's: `night_won` / `night_fled` "Sleep, what's left of the night.", the Wilds' Train "…a sparring partner with views."). *(v0.11.172)* And `ah_hunt`'s "Take the hawks before they take Yuki." by her form (Ya has just said they won't go for the great root-kin; a label switch is code).
+
 ## Moved in v0.11.177 (word for word; owner picks P9A, CA1, RV1: part 9 done)
 
 ### From section 1, group e, as of v0.11.176

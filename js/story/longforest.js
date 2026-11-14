@@ -262,7 +262,7 @@ Through the bond, one weary image: a very long nap.
         id: 'lf_hub', title: P, art: 'lf_hub', place: P,
         text: hubText,
         choices: [
-            { text: 'Follow the smoke toward people. (Advances the story: you will meet Mei Lin.)', to: 'lf_exit' },
+            { text: 'Follow the smoke toward people. (Advances the story.)', to: 'lf_exit' },
             { text: 'Yuki is staring at you. The bond feels… wider.', show: (g) => g.yuki.realm >= 2 && !g.flags.yuki_tiger_seen, do: yukiReturnHub, to: 'yuki_tiger_awaken' },
             { text: 'Yuki has gone very still. Something in the bond is changing shape.', show: (g) => g.yuki.realm >= 7 && !!g.flags.yuki_tiger_seen && !g.flags.yuki_human_seen, do: yukiReturnHub, to: 'yuki_human_awaken' }, // v0.11.175 (RV1, T8): the great form's scene first (as prologue.js's breakthrough orders them)
             { text: (g) => `Yuki: change form (now: ${{ cat: 'cat', tiger: 'great root-kin', human: 'human' }[yukiForm(g)]}).`, show: (g) => yukiForms(g).length > 1, do: yukiReturnHub, to: 'yuki_form' },
@@ -271,12 +271,12 @@ Through the bond, one weary image: a very long nap.
             { text: 'Train.', show: (g) => !late(g), time: 10, to: 'lf_train' },
             { text: 'Go deep. (Trials: farmable zones, escalating fights.)', show: (g) => hour(g) < 17, time: 30, to: 'lf_trials' },
             { text: 'Walk the game trails and see who else is out here.', show: (g) => hour(g) < 17 && daily('lf_wander')(g), time: 60, to: 'lf_wanderers' },
-            { text: 'Withdraw into seclusion. (A season passes.)', show: (g) => daily('lf_secl')(g), to: 'lf_seclusion' },
+            { text: 'Sit out a season in seclusion. No realm to climb, only time.', show: (g) => daily('lf_secl')(g), to: 'lf_seclusion' },
             { text: 'Stand under the cold falls until something gives.', show: (g) => !late(g) && daily('lf_falls')(g), time: 20, to: 'lf_falls' },
             { text: 'Ride Yuki through the canopy.', show: (g) => yukiForms(g).includes('tiger') && !late(g) && daily('lf_ride')(g), time: 60, to: 'lf_ride' },
             { text: 'Climb the high spur and look at the dead tree.', show: (g) => !late(g) && !g.flags.lf_tree_seen, time: 90, to: 'lf_tree_view' },
             { text: 'Yuki is bored. Yuki would like that addressed.', show: (g) => lfDays(g) >= 1 && daily('lf_bored')(g) && !late(g), time: 30, to: 'lf_bored' },
-            { text: 'Wash in the river. You have been in a forest for a long time.', show: (g) => !late(g) && daily('lf_bathe')(g), time: 30, to: 'lf_bathe' },
+            { text: 'Wash in the river. The forest has been accumulating on you.', show: (g) => !late(g) && daily('lf_bathe')(g), time: 30, to: 'lf_bathe' },
             { text: 'Something white moves between the trees, and doesn\'t run.', show: (g) => lfDays(g) >= 3 && !g.flags.lf_stag && hour(g) < 17, time: 60, to: 'lf_white_stag' },
             { text: 'Take stock. Write it down.', show: (g) => lfDays(g) >= 2 && daily('lf_notes')(g), to: 'lf_notes' },
             { text: 'Cultivate: one sit, 10 Qi toward Saturation.', show: (g) => !late(g), req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`, ...r.xp] : []; }, to: 'lf_hub' },
@@ -585,6 +585,7 @@ Things live in them. Things made out of what the tree left behind.`),
         text: (g) => {
             const f = FIGHTS[g.flags.lf_last];
             const name = f ? f.enemies[0].name.replace(/ \(.*\)/, '') : 'it';
+            const theName = (n) => (n === 'it' ? 'It' : `The ${n.toLowerCase().startsWith('the ') ? n.slice(4) : n}`); // v0.11.179 (LB1, O2): no fight on record (a save on this screen) reads "It", not "The it"
             // v0.11.177 (P9A, P8; review T22): the one grave fight keeps a grave ending, on any win
             if (name === 'The Heartless') return `It is done. Among the white roots nothing moves, and you find you have no remark ready, which is rare enough to note.
 
@@ -593,12 +594,12 @@ Tomorrow the Heartless will be on its feet here again. It is made of what the de
 ${byForm(g, 'Yuki does not wash. She sits against your ankle, looking toward the dead tree, and the bond carries nothing at all.', 'Yuki does not wash. She stands with her shoulder against your hip, looking toward the dead tree, and the bond carries nothing at all.', 'Yuki leaves her sleeves as they are. She stands close at your side, looking toward the dead tree, and offers no opinion.')}`;
             if ((g.flags.lf_trials_won || 0) >= 2) return `Done. You count your limbs, a habit this forest taught you early. The count comes out right again.
 
-The ${name.toLowerCase().startsWith('the ') ? name.slice(4) : name} will be back tomorrow, or something filling the same post; the Long Forest leaves no vacancy open.
+${theName(name)} will be back tomorrow, or something filling the same post; the Long Forest leaves no vacancy open.
 
 ${byForm(g, 'Yuki cleans one ear. Her verdict, through the bond: *faster than last time. Still slower than me.*', 'Yuki yawns, a display of ivory nobody asked for. Her verdict, through the bond: *faster than last time. Still slower than me.*', 'Yuki smooths one long side lock flat between two fingers. "Faster than last time," she says. "Still slower than me."')}`; // v0.11.175 (P8A, RP): the second win on
             return `It's over. You stand in what is left of it breathing hard, and breathing at all is a thing you have learned not to take for granted.
 
-The ${name.toLowerCase().startsWith('the ') ? name.slice(4) : name} won't be the last thing out here to take you for food. But each time, a little less of you agrees with it.
+${theName(name)} won't be the last thing out here to take you for food. But each time, a little less of you agrees with it.
 
 ${byForm(g, 'Yuki washes a paw, inspects it, and washes it again. Her finding is that the fight was adequate.', 'Yuki washes one enormous paw, inspects it, and washes it again. Her finding is that the fight was adequate.', 'Yuki straightens one sleeve, inspects it, and straightens it again. "Adequate," she says, of the fight.')}`;
         },
@@ -639,8 +640,10 @@ He sees you. He takes in the white coat, ${byForm(g, 'the cat', 'the white beast
 
 "Oh, good," he says. "Only a mortal."`),
         choices: [
-            { text: 'Let them make their speech. Then answer it.', combat: (g) => fight(g.flags.lf_human)(g), to: 'lf_human_won' },
-            { text: 'Talk your way past them. You\'re very good at being underestimated.', check: { skill: 'GU', dc: 5 }, to: 'lf_human_talked', fail: 'lf_human_talked' },
+            { text: (g) => (g.flags.lf_human === 'lf_rogue' ? 'Let him make his speech. Then answer it.' : 'Let them make their speech. Then answer it.'), // v0.11.179 (LB1, K3): Fang Wei alone, the Tans two
+              combat: (g) => fight(g.flags.lf_human)(g), to: 'lf_human_won' },
+            { text: (g) => (g.flags.lf_human === 'lf_rogue' ? 'Talk your way past him. You\'re very good at being underestimated.' : 'Talk your way past them. You\'re very good at being underestimated.'),
+              check: { skill: 'GU', dc: 5 }, to: 'lf_human_talked', fail: 'lf_human_talked' },
             { text: 'Walk the other way. Not every fool needs a lesson today.', time: 30, to: 'lf_hub' },
         ],
     },
@@ -754,7 +757,7 @@ She can still do the cat thing, and shows you. One breath, and a small white cat
 
 "People say stupid things in front of cats," she adds. "It is very informative. So I will choose who hears me answer back, and when. Promise you won't make an occasion of it."`,
         choices: [
-            { text: 'Promise.', do: (g) => { g.yuki.form = 'cat'; return ['Yuki: small again, on your shoulder, washing an ear. The matter is closed.']; }, to: back },
+            { text: 'Promise. No occasion.', do: (g) => { g.yuki.form = 'cat'; return ['Yuki: small again, on your shoulder, washing an ear. The matter is closed.']; }, to: back },
             { text: 'Ask her to stay like this for a while.', do: (g) => { g.yuki.form = 'human'; return ['Yuki: human form. For once she is next to you and not on you. It is new.']; }, to: back },
         ],
     },
@@ -766,7 +769,7 @@ Through the bond, which is quicker than talk in any of her shapes: *which?*`,
         choices: [
             { text: 'Small. On your shoulder.', show: (g) => yukiForm(g) !== 'cat', do: (g) => { g.yuki.form = 'cat'; return ['Yuki: cat form.']; }, to: back },
             { text: 'The great form. Let her loom.', show: (g) => yukiForms(g).includes('tiger') && yukiForm(g) !== 'tiger', do: (g) => { g.yuki.form = 'tiger'; return ['Yuki: great root-kin form (hits much harder in a fight).']; }, to: back },
-            { text: 'Human. Someone to talk to.', show: (g) => yukiForms(g).includes('human') && yukiForm(g) !== 'human', do: (g) => { g.yuki.form = 'human'; return ['Yuki: human form.']; }, to: back },
+            { text: 'Human. Someone who answers aloud.', show: (g) => yukiForms(g).includes('human') && yukiForm(g) !== 'human', do: (g) => { g.yuki.form = 'human'; return ['Yuki: human form.']; }, to: back },
             { text: 'Leave her as she is.', to: back },
         ],
     },

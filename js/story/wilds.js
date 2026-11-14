@@ -173,7 +173,7 @@ ${byForm(g, "Yuki is sitting on your sternum with her tail wrapped round her fee
         }[g.flags.night_ev] || 'It\'s over.'}
 
 Yuki puts herself back in order as if the fight had been someone else's. You sit with your pulse hammering and note, clinically, that your hands now wait until *afterwards* to shake. What sleep is left will not be enough.`,
-        choices: [{ text: 'Sleep.', to: 'morning' }],
+        choices: [{ text: "Sleep. What's left of the night.", to: 'morning' }],
     },
     night_lost: {
         id: 'night_lost', title: 'Bitten', art: 'forest_night', place: `${P} — the dry rise`,
@@ -184,7 +184,7 @@ Yuki puts herself back in order as if the fight had been someone else's. You sit
     night_fled: {
         id: 'night_fled', title: 'Somewhere Else', art: 'forest_night', place: `${P} — further downstream`,
         text: (g) => `You snatch up what comes to hand and shift camp two hundred metres downstream in the dark, cursing under your breath at every step.${byForm(g, '', " Yuki walks behind with the blanket in her mouth, which keeps her from saying what she thinks of running from something she outweighs. The bond says it anyway.", '')}`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line; RB2 (BR): Fable's redraft after the review
-        choices: [{ text: 'Sleep.', to: 'morning' }],
+        choices: [{ text: "Sleep. What's left of the night.", to: 'morning' }],
     },
 
     morning: {
@@ -227,7 +227,7 @@ ${g.james.hp < jamesHpMax(g) * 0.5 ? (d2 ? `You are hurt, and the rest of you wo
             { text: 'Forage.', show: (g) => hour(g) < 19, time: 15, to: 'wild_forage' },
             { text: 'Hunt.', show: (g) => hour(g) < 19, time: 15, to: 'wild_hunt' },
             { text: 'Explore deeper into the forest (takes the afternoon).', show: (g) => hour(g) < 16 && (replayExplore(g) || daily('explore')(g)) && !(g.flags.v_bone && g.flags.v_mire && g.flags.v_hollow), time: 30, to: 'wild_explore' },
-            { text: 'Train: darts, blade, footwork, and a very unwilling sparring partner.', show: (g) => hour(g) < 19, time: 10, to: 'wild_train' },
+            { text: 'Train: darts, blade, footwork, and a sparring partner with views.', show: (g) => hour(g) < 19, time: 10, to: 'wild_train' },
             { text: 'Cultivate: one sit, 10 Qi toward Saturation.', show: (g) => hour(g) < 20, req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`, ...r.xp] : []; }, to: 'wilds' },
             { text: 'Rest in the shade for an hour.', show: (g) => hour(g) < 20, do: (g) => advance(g, 60, { resting: true }).concat(['An hour of rest. Your wind returns, with a little HP and Qi.']), to: 'wilds' },
             { text: 'Eat something.', show: (g) => foodCount(g) > 0 && g.james.satiety < 85, time: 15, do: (g) => eatBest(g), to: 'wilds' },

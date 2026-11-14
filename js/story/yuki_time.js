@@ -24,7 +24,7 @@ export const YT_LOW = 30;
 export const YT_LABEL = {
     "CAT": "Sit with Yuki.",
     "GREAT": "Lean on Yuki a while.",
-    "HUMAN": "Sit down beside Yuki."
+    "HUMAN": "Keep Yuki company."
 };
 /** The texts by slot `<hub>:<day there>`: [cat, great root-kin, human]. */
 export const YT_BODY = {

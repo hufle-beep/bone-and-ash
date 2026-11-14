@@ -148,7 +148,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     }
     { const g = at('rr_hub', 13, 15602); const s0 = grp(g, 'Scout').filter((c) => c.status === 'open'); assert(s0.length === 2, `OS: two scout cards (${s0.map((c) => c.id)})`);
       runTask(g, SCENES, 'rr_scout:1'); const s1 = grp(g, 'Scout');
-      assert(!s1.some((c) => c.id === 'rr_scout:1') && s1.find((c) => c.id === 'rr_scout:0')?.status === 'open', `OS: after "You followed me for two days?" the other scout card is open the same day, the one taken gone for the Coil (${s1.map((c) => `${c.id} ${c.status}`)})`); }
+      assert(!s1.some((c) => c.id === 'rr_scout:1') && s1.find((c) => c.id === 'rr_scout:0')?.status === 'open', `OS: after "You followed me for three nights?" the other scout card is open the same day, the one taken gone for the Coil (${s1.map((c) => `${c.id} ${c.status}`)})`); }
     { for (const [k, name] of ['Palisade', 'Militia', 'Clinic'].entries()) {
           const g = at('fo_ashfall', 8, 15610 + k);
           const cs = grp(g, name).filter((c) => c.status === 'open'); assert(cs.length >= 2, `OA: ${name} offers two cards (${cs.map((c) => c.id)})`);

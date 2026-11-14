@@ -26,7 +26,7 @@ const luHanHere = (g) => g.flags.ending !== 'fought';
  * the check's XP and the cards' familiarity only (no second preparation, no Village or Ya change). */
 export const DRILL_AGAIN = {
     label: 'Drill the hunters again. Practice only.',
-    hard: ['Cleaner than the first time. Nothing changes but the blisters, and they bow to thank you for those.', 'The bone shields lock, part and lock again without a rattle. Eight hunters thank you, eldest first, for corrections you never gave.', 'Spears behind, shields in front, nobody alone, three times running. The oldest hunter allows himself one nod, then looks ashamed of the extravagance.', 'Clean from first call to last. You call the turn and the whole line swings like a door on a good hinge. Nothing gained but sweat, formally acknowledged.'],
+    hard: ['Cleaner than before. Nothing changes but the blisters, and they bow to thank you for those.', 'The bone shields lock, part and lock again without a rattle. Eight hunters thank you, eldest first, for corrections you never gave.', 'Spears behind, shields in front, nobody alone, three times running. The oldest hunter allows himself one nod, then looks ashamed of the extravagance.', 'Clean from first call to last. You call the turn and the whole line swings like a door on a good hinge. Nothing gained but sweat, formally acknowledged.'],
     hardFail: ["Ragged this time. They had it earlier and they'll have it tomorrow; right now they are tired, and too dignified to say so.", 'The line turns left; two hunters turn right, with conviction. Nobody laughs. They have known it before, and will again once their arms stop shaking.', "Someone's shield comes up late, someone's spear early, and the line closes like a gate with a stone in it. Tired men. No harm done.", 'A stumble on the turn, a dropped shield, an apology so formal it outlasts the drill. Call it a rest day with spears.'],
     ya: ["Ya runs them round the threshing floor until they stop looking like villagers. 'Better,' she says. 'Still handsome but afraid.'", "Ya has them stalk a goat across the threshing floor in silence. The goat is not fooled. 'Closer than a villager should get,' Ya allows.", "Ya walks the line and sniffs each hunter in turn. 'Less fear,' she reports. 'More onion.' They receive it as a commendation.", "She makes them hunt her instead. Eight hunters spend an hour not finding one woman on a roof. 'You looked up once,' Ya calls. 'Progress.'"],
 };
@@ -142,7 +142,7 @@ Her laugh is a bark, and birds leave the canopy over it. Then she is right up ag
 ${both(g) ? '"And *she*," Ya adds, with a jerk of her chin back toward Mei Lin, "looks at me like a fire she wants to stand close to and is too proud to. I\'m working on it."' : ''}`,
         choices: [
             { text: '"You\'re not dirt. You\'re a menace. It\'s different."', do: (g) => { bumpRel(g, 'Ya', 4, 3); return ['A hard shove. From Ya, you are learning, that is tenderness.']; }, to: 'rt_road' },
-            { text: 'Kiss her, there on the path, since she\'s standing right there.', show: (g) => rel(g, 'Ya').a >= KISS_YA || !!g.flags.ya_romance, do: (g) => { bumpRel(g, 'Ya', 3, 8); return ['She kisses back as if there were a prize for it. Knowing her, there is.']; }, to: 'rt_road' }, // v0.11.123 (EB1, KN): a kiss no longer sets her romance flag (the bar of 72 decides)
+            { text: 'Kiss Ya before she gets there first.', show: (g) => rel(g, 'Ya').a >= KISS_YA || !!g.flags.ya_romance, do: (g) => { bumpRel(g, 'Ya', 3, 8); return ['She kisses back as if there were a prize for it. Knowing her, there is.']; }, to: 'rt_road' }, // v0.11.123 (EB1, KN): a kiss no longer sets her romance flag (the bar of 72 decides)
             { text: '"Leave Mei Lin alone."', show: both, do: (g) => { bumpRel(g, 'Ya', -2, 0); return ['"No," says Ya, sunny as anything. "She doesn\'t want that either. Nobody has told her yet."']; }, to: 'rt_road' },
         ],
     },
@@ -159,7 +159,7 @@ ${both(g) ? `Some way on she says, very low: "I keep looking at Ya." Her eyes st
             { text: '"Some things grow wherever they\'re planted. Even when the soil says no."', do: (g) => { bumpRel(g, 'Mei Lin', 3, 4); trioStep(g, 2); return []; }, to: 'rt_road' },
             { text: 'Take her hand and say nothing. She doesn\'t need a lecture.', do: (g) => { bumpRel(g, 'Mei Lin', 4, 5); return []; }, to: 'rt_road' },
             { text: '"Your father didn\'t die for a theft. He died for a lie. We can fix the lie."', do: (g) => { bumpRel(g, 'Mei Lin', 6, 2); g.flags.mei_vow = true; return ['She says nothing for a hundred paces. Then one nod, the kind that goes at the foot of a contract.']; }, to: 'rt_road' },
-            { text: 'Kiss her, there on the path, before she finds something else to hold.', show: (g) => rel(g, 'Mei Lin').a >= KISS_MEI || !!g.flags.romance, do: (g) => { const lover = !!g.flags.romance; bumpRel(g, 'Mei Lin', 3, 8); return [lover ? 'She kisses back with the knife held carefully out to one side, like a woman who was brought up properly. "Later," she says, and this time she says when.' : 'She kisses back with the knife held carefully out to one side, like a woman who was brought up properly. "We will discuss that," she says, and does not say when.']; }, to: 'rt_road' }, // v0.11.123 (EQ1, SC; Fable's D2; EB1, KN: sets no flag); last, so saved choice positions keep their lines
+            { text: 'Kiss her before she finds something else to hold.', show: (g) => rel(g, 'Mei Lin').a >= KISS_MEI || !!g.flags.romance, do: (g) => { const lover = !!g.flags.romance; bumpRel(g, 'Mei Lin', 3, 8); return [lover ? 'She kisses back with the knife held carefully out to one side, like a woman who was brought up properly. "Later," she says, and this time she says when.' : 'She kisses back with the knife held carefully out to one side, like a woman who was brought up properly. "We will discuss that," she says, and does not say when.']; }, to: 'rt_road' }, // v0.11.123 (EQ1, SC; Fable's D2; EB1, KN: sets no flag); last, so saved choice positions keep their lines
         ],
     },
     rt_ambush: {
@@ -460,7 +460,7 @@ From the fence Ya chews a grass stem and supplies commentary. "That one holds hi
 
 "I'm *helping*."`,
         choices: [
-            { text: 'Drill them hard: shields of bone, spears behind, nobody alone.', check: { skill: 'GU', dc: 5, band: 'challenging' }, time: 150, do: (g) => { if (g.flags.a1_militia) return [drillAgain(g, 'hard')]; g.flags.a1_militia = true; bumpRel(g, 'Village', 4, 0); return ['By the end they move as one body. Whether one body is enough against an Elder, nobody asks aloud.']; }, failDo: (g) => { if (g.flags.a1_militia) return [drillAgain(g, 'hardFail')]; bumpRel(g, 'Village', 1, 0); return ['It never quite locks. Tomorrow they will stand all the same. That is the worst of it.']; }, to: 'rt_ashfall' },
+            { text: 'Drill them hard: line tight, spears set, a shoulder on either side of everyone.', check: { skill: 'GU', dc: 5, band: 'challenging' }, time: 150, do: (g) => { if (g.flags.a1_militia) return [drillAgain(g, 'hard')]; g.flags.a1_militia = true; bumpRel(g, 'Village', 4, 0); return ['By the end they move as one body. Whether one body is enough against an Elder, nobody asks aloud.']; }, failDo: (g) => { if (g.flags.a1_militia) return [drillAgain(g, 'hardFail')]; bumpRel(g, 'Village', 1, 0); return ['It never quite locks. Tomorrow they will stand all the same. That is the worst of it.']; }, to: 'rt_ashfall' },
             { text: 'Let Ya teach them how she hunts. What could go wrong.', time: 150, do: (g) => { if (g.flags.a1_militia) return [drillAgain(g, 'ya')]; g.flags.a1_militia = true; bumpRel(g, 'Ya', 4, 2); bumpRel(g, 'Village', -2, 0); return ['One dislocated finger, two black eyes, and eight hunters who have begun to move like a thing that is hungry. The elders of Ashfall are gravely offended. It works.']; }, to: 'rt_ashfall' },
         ],
     },
@@ -488,7 +488,7 @@ The children have edged nearer. One small girl holds her palm out flat above a l
 
 ${byForm(g, "Yuki walks into the middle of the ring, lies down, and purrs so loudly that the leaves tremble.", "Yuki walks into the middle of the ring, lies down, and purrs so loudly that the leaves tremble.", "Yuki walks into the middle of the ring, sits down with her tail curled in her lap, and purrs so loudly that the leaves tremble.")}`,
         choices: [
-            { text: 'Sit among them and cultivate. Let the song in.', check: { skill: 'Convergence Use', dc: 4 }, noFam: true /* v0.11.141 (RW1, NF): cultivation or rest by its own rule */, time: 60, do: (g) => { g.flags.grove_attuned = true; const gain = sitGain(g, 2); g.james.saturation = Math.min(100, Math.round((g.james.saturation + gain) * 10) / 10); return [`The grove takes your Qi once round its ring and hands it back rinsed. Saturation +${Math.round(gain * 10) / 10}% (${g.james.saturation}%), no Qi spent.`]; }, failDo: () => ['You try. Tomorrow is too loud in you; nothing else gets in.'], to: 'rt_ashfall' },
+            { text: 'Cultivate in the grove, and let the song do the rest.', check: { skill: 'Convergence Use', dc: 4 }, noFam: true /* v0.11.141 (RW1, NF): cultivation or rest by its own rule */, time: 60, do: (g) => { g.flags.grove_attuned = true; const gain = sitGain(g, 2); g.james.saturation = Math.min(100, Math.round((g.james.saturation + gain) * 10) / 10); return [`The grove takes your Qi once round its ring and hands it back rinsed. Saturation +${Math.round(gain * 10) / 10}% (${g.james.saturation}%), no Qi spent.`]; }, failDo: () => ['You try. Tomorrow is too loud in you; nothing else gets in.'], to: 'rt_ashfall' },
             { text: 'Kneel by the girl and show her how to feel the song.', do: (g) => { bumpRel(g, 'Village', 5, 0); return ['Her grandmother looks on, rigid as a gatepost. Then, joint by joint, she kneels too.']; }, time: 30, to: 'rt_ashfall' },
         ],
     },
@@ -501,7 +501,7 @@ As best you can reconstruct it: Bao told her to cover her arms before decent wom
 
 "James!" Ya calls, eyes still on Bao. "Good. Watch this."`,
         choices: [
-            { text: 'Step between them. Talk everyone down, formally, the way Ashfall likes it.', check: { skill: 'GU', dc: 5 }, time: 30, do: (g) => { bumpRel(g, 'Village', 3, 0); bumpRel(g, 'Ya', -3, 0); return ['You bow to Bao, regret the conduct of "my guest, who comes from very far away", and steer Ya round the corner before her sentence can end. She sulks for an hour. As sulks go, it is a masterwork.']; }, fail: 'rt_brawl_start', to: 'rt_ashfall' },
+            { text: 'Step between them. Talk everyone down, formally, as Ashfall likes it.', check: { skill: 'GU', dc: 5 }, time: 30, do: (g) => { bumpRel(g, 'Village', 3, 0); bumpRel(g, 'Ya', -3, 0); return ['You bow to Bao, regret the conduct of "my guest, who comes from very far away", and steer Ya round the corner before her sentence can end. She sulks for an hour. As sulks go, it is a masterwork.']; }, fail: 'rt_brawl_start', to: 'rt_ashfall' },
             { text: 'Stand beside her. If they want a fight, it\'s two against two.', do: (g) => { bumpRel(g, 'Ya', 5, 4); return []; }, to: 'rt_brawl_start' },
         ],
     },
@@ -659,7 +659,7 @@ Behind you Mei Lin's hand closes on her knife. Ya's lips peel back from her teet
         choices: [
             { text: 'Fight him. Here, in front of the grove.', combat: elderFight, to: 'rt_duel_won' },
             { text: 'Parley. Formally. Give him the face he needs and none of what he wants.', time: 30, to: 'rt_parley' },
-            { text: 'Show him the truth: take him to the grove and let him feel clean Qi for the first time in three hundred years.', req: (g) => (g.james.qi >= 12 ? true : 'needs 12 Qi'), time: 30, to: 'rt_truth' },
+            { text: 'Show him the truth: take him to the grove and let him breathe clean Qi, which he has not done in three hundred years.', req: (g) => (g.james.qi >= 12 ? true : 'needs 12 Qi'), time: 30, to: 'rt_truth' },
             { text: 'Go with him. Spare Ashfall.', show: (g) => !!g.flags.offered_self, to: 'rt_taken' },
         ],
     },

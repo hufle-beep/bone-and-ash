@@ -1,0 +1,114 @@
+[
+ {
+  "id": "K3a",
+  "file": "js/story/longforest.js",
+  "find": "(g.flags.lf_human === 'lf_rogue' ? 'Let him make",
+  "replace": "(g.flags.lf_human !== 'lf_rogue' ? 'Let him make",
+  "note": "K3 inverted on the speech label"
+ },
+ {
+  "id": "K3b",
+  "file": "js/story/longforest.js",
+  "find": "(g.flags.lf_human === 'lf_rogue' ? 'Talk your way past him.",
+  "replace": "(g.flags.lf_human === 'lf_bandits' ? 'Talk your way past him.",
+  "note": "K3 talk label switched on the wrong flag value"
+ },
+ {
+  "id": "K4a",
+  "file": "js/story/act1_blackroot.js",
+  "find": "byForm(g, 'Take the hawks before they take Yuki.', 'Take the hawks.', 'Take the hawks.')",
+  "replace": "byForm(g, 'Take the hawks.', 'Take the hawks before they take Yuki.', 'Take the hawks.')",
+  "note": "K4 cat and great branches swapped"
+ },
+ {
+  "id": "K4b",
+  "file": "js/story/act1_blackroot.js",
+  "find": "byForm(g, 'Take the hawks before they take Yuki.', 'Take the hawks.', 'Take the hawks.')",
+  "replace": "byForm(g, 'Take the hawks before they take Yuki.', 'Take the hawks.', 'Take the hawks before they take Yuki.')",
+  "note": "K4 human branch keeps the old threat"
+ },
+ {
+  "id": "O2a",
+  "file": "js/story/longforest.js",
+  "find": "${theName(name)} will be back tomorrow",
+  "replace": "The ${name.toLowerCase().startsWith('the ') ? name.slice(4) : name} will be back tomorrow",
+  "note": "O2 reverted on the second-win branch only (The it will be back)"
+ },
+ {
+  "id": "O2b",
+  "file": "js/story/longforest.js",
+  "find": "(n === 'it' ? 'It' :",
+  "replace": "(n === 'It' ? 'It' :",
+  "note": "O2 fallback never matches (The it)"
+ },
+ {
+  "id": "W1a",
+  "file": "js/story/yuki_path.js",
+  "find": "'Call the cat off the floor, all of her, and follow Mei Lin up the ladder.', 'Ask Yuki up off the bench, and follow Mei Lin to the loft.'",
+  "replace": "'Ask Yuki up off the bench, and follow Mei Lin to the loft.', 'Call the cat off the floor, all of her, and follow Mei Lin up the ladder.'",
+  "note": "W1 great and human branches swapped"
+ },
+ {
+  "id": "H1a",
+  "file": "js/story/act1_blackroot.js",
+  "find": "Three nights it took me, working out what you were.",
+  "replace": "Two days I followed you, to work out what you were.",
+  "note": "rr_scout menu text reverted"
+ },
+ {
+  "id": "H1b",
+  "file": "js/story/act1_blackroot.js",
+  "find": "'\"You followed me for three nights?\"'",
+  "replace": "'\"You followed me for two nights?\"'",
+  "note": "rr_scout label count changed"
+ },
+ {
+  "id": "TIC1",
+  "file": "js/story/yuki_path.js",
+  "find": "She looks at you and waits.",
+  "replace": "She looks at you for a long moment.",
+  "note": "a listed tic put back in a replaced tic (again text)"
+ },
+ {
+  "id": "TIC2",
+  "file": "js/story/yuki_path.js",
+  "find": "Her ears stay forward, her gaze on you.",
+  "replace": "Gold eyes level.",
+  "note": "the tic back without its comma (fire text)"
+ },
+ {
+  "id": "TIC3",
+  "file": "js/story/yuki_path.js",
+  "find": "I like my odds.\" Very dry.",
+  "replace": "I like my odds.\" Gold eyes, steady, very dry.",
+  "note": "rt_yk_talk tic swapped for a near-copy"
+ },
+ {
+  "id": "T2a",
+  "file": "js/story/act1_return.js",
+  "find": "'Cleaner than this morning\\'s. Nothing",
+  "replace": "'Cleaner than yesterday\\'s. Nothing",
+  "note": "T2 calendar word changed (no first drill yesterday)"
+ },
+ {
+  "id": "LF1",
+  "file": "js/story/longforest.js",
+  "find": "'Sit out a season in seclusion. No realm to climb, only time.'",
+  "replace": "'Sit out a season in seclusion. (A season passes.)'",
+  "note": "seclusion label half-reverted"
+ },
+ {
+  "id": "YT1",
+  "file": "js/story/yuki_time.js",
+  "find": "\"Keep Yuki company.\"",
+  "replace": "\"Sit down beside Yuki.\"",
+  "note": "Yuki time human label reverted (tic)"
+ },
+ {
+  "id": "RD1",
+  "file": "js/story/act1_return.js",
+  "find": "'Spears behind, shields in front, nobody alone, three times running.",
+  "replace": "'Spears behind, shields in front, nobody alone, for a long moment.",
+  "note": "a tic planted in a drill reply next to T2"
+ }
+]

@@ -143,13 +143,13 @@ Yuki opens one eye. *Go on, then,* says the bond. *You bite. I will keep the rec
     const a1Enter = SCENES.a1_end.enter; // v0.11.72 (T1): Act 1 cleared, every outcome
     SCENES.a1_end.enter = (g) => { const lines = a1Enter ? (a1Enter(g) || []) : []; if (actOf(g) === 1) lines.push(...noteClear(g, 1)); return lines; };
     SCENES.rt_taken.choices.push({
-        text: 'Bite the tail. (The Coil: wake at the start of Act 1 or of the whole game, keep what you learned.)',
+        text: 'Bite the tail. (Wake at the start of Act 1 or of the whole game; you keep what you learned.)',
         show: coilActive,
         do: (g) => { endCoil(g, 'shen', 'rt_taken'); return []; },
         to: 'coil_end',
     });
     SCENES.collectors_lost.choices.push({
-        text: 'Bite the tail. (The Coil: wake at the first dawn, keep what you learned.)',
+        text: 'Bite the tail. (Wake at the first dawn; you keep what you learned.)',
         show: coilActive,
         do: (g) => { endCoil(g, 'tribute', 'collectors_lost'); return []; },
         to: 'coil_end',

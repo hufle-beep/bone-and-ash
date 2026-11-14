@@ -451,12 +451,13 @@ Ya is furious. Not with you; with the elk, which she curses in a language you su
 
 "Me?"
 
-"Ten days back, before the village: your camp, by the stream. The wolves weren't the only ones circling it. I smelled you every night." She grins without looking up. "You smell like lightning and soap. Nobody here smells like soap. Two days I followed you, to work out what you were."
+"Ten days back, before the village: your camp, by the stream. The wolves weren't the only ones circling it. I smelled you every night." She grins without looking up. "You smell like lightning and soap. Nobody here smells like soap. Three nights it took me, working out what you were."
 
 ${g.flags.saw_lights ? 'Further on, where the roots braid together, she has one more thing to show you: a trail in the moss, greener than the moss on either side of it, running inward. "The lights walk here," she says. "Every night. Toward the old tree. I followed them once, when I was small. I didn\'t go in."' : 'Further on, where the roots braid together, the moss runs greener along a line that points at the heart of the forest. "Something walks here at night," Ya says. "Not an animal. I don\'t follow it."'}`,
         choices: [
             { text: 'Learn it properly. Nose in the moss and everything.', check: { skill: 'GU', dc: 4 }, time: 90, do: (g) => { g.flags.bl_tracker = true; bumpRel(g, 'Ya', 3, 2); return ['"Eyes lie. Ears lie. Nose doesn\'t," says Ya, and holds your face down in the moss until you agree. You can smell wolf now. You will never again be able to stop smelling wolf. Ya is extremely proud of you.']; /* RV1 (M2): the menu's text is never drawn, so the lesson's first words go here */ }, failDo: (g) => { bumpRel(g, 'Ya', 1, 0); return ['You smell moss. Chiefly moss. Ya pats you on the head.']; }, to: 'rr_hub' },
-            { text: '"You followed me for two days?"', do: (g) => { bumpRel(g, 'Ya', 2, 4); return ['"Ten days back. Your first camp, by the stream. The wolves weren\'t the only ones going round it." She shrugs. "You fed the cat first, so: not Sect. You were interesting. Most things aren\'t."']; /* RV1 (M2): the calendar fix and the CW line where they are read */ }, time: 30, to: 'rr_hub' },
+            { text: '"You followed me for three nights?"', // v0.11.179 (LB1, H1): the count as in the Fallout ("Three nights I sat outside your little fire")
+              do: (g) => { bumpRel(g, 'Ya', 2, 4); return ['"Ten days back. Your first camp, by the stream. The wolves weren\'t the only ones going round it." She shrugs. "You fed the cat first, so: not Sect. You were interesting. Most things aren\'t."']; /* RV1 (M2): the calendar fix and the CW line where they are read */ }, time: 30, to: 'rr_hub' },
         ],
     },
     rr_roots: {
@@ -474,7 +475,7 @@ Mei Lin is watching you and not the root. "Your face," she says. "You look like 
 
 ${g.flags.roots ? 'You think of the root you followed out of the Hollow, and of what lay at the end of it, which was not entirely dead. You are walking toward it now.' : ''}`,
         choices: [
-            { text: 'Let the song in. Cultivate with it.', check: { skill: 'Convergence Use', dc: 4 }, noFam: true /* v0.11.141 (RW1, NF): cultivation or rest by its own rule */, time: 60, do: (g) => { g.james.saturation = Math.min(100, Math.round((g.james.saturation + 12) * 10) / 10); return [`The root takes your Qi round its own long circuit and returns it, slow as a held breath. Saturation +12% (${g.james.saturation}%), no Qi spent.`]; }, failDo: () => ['The song runs off you like rain off bark. Not yet, apparently.'], to: 'rr_hub' },
+            { text: 'Cultivate on the root. The song knows its way in.', check: { skill: 'Convergence Use', dc: 4 }, noFam: true /* v0.11.141 (RW1, NF): cultivation or rest by its own rule */, time: 60, do: (g) => { g.james.saturation = Math.min(100, Math.round((g.james.saturation + 12) * 10) / 10); return [`The root takes your Qi round its own long circuit and returns it, slow as a held breath. Saturation +12% (${g.james.saturation}%), no Qi spent.`]; }, failDo: () => ['The song runs off you like rain off bark. Not yet, apparently.'], to: 'rr_hub' },
             { text: '"It\'s one of ours," you tell them. "Was."', do: (g) => { bumpRel(g, 'Mei Lin', 3, 2); bumpRel(g, 'Ya', 2, 0); g.flags.told_hearth = true; return ['You tell them what a Hearth Tree is. Nobody laughs, not even Ya.']; }, time: 30, to: 'rr_hub' },
         ],
     },
@@ -811,7 +812,8 @@ Yuki, ${byForm(g, 'on your shoulder', 'at your side', 'at your elbow')}, does no
 
 The hill-hares are still in the gullies: still small, still ash-coloured, and still entirely free of fire.`], 'ah_hunt')),
         choices: [
-            onceADay('ah_hawks', { text: 'Take the hawks before they take Yuki.', combat: hawksFight, to: 'ah_hawks_won' }),
+            onceADay('ah_hawks', { text: (g) => byForm(g, 'Take the hawks before they take Yuki.', 'Take the hawks.', 'Take the hawks before they take Yuki.'), // v0.11.179 (LB1, K4; RV2 R5): the great root-kin is no prey (Ya: "looking somewhere else"); the cat and the woman are ("They want the small one")
+                combat: hawksFight, to: 'ah_hawks_won' }),
             onceADay('ah_hares', { text: 'Darts at the hill-hares instead.', qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 5 }, time: 50, do: (g, r) => { addItem(g, 'hare_raw', 2); return [dartsReply(g, !(r && r.ratio < 1)), '+2 hill-hares.']; }, failDo: () => ['Ash-coloured hares against ash-coloured hills. Every dart finds ash.'], to: 'ah_hub' }),
             { text: 'Not now.', to: 'ah_hub' }, // v0.11.161 RV1 (LV, Fable's M1): a way back, so a second visit is never a forced fight
         ],
@@ -869,7 +871,7 @@ An hour has gone by since. The cinder hawks are circling lower.
 
 "Let her sulk," says Mei Lin. Her eyes are on the haze as well.`,
         choices: [
-            { text: 'Track her. Nose first, like she taught you.', check: { skill: 'GU', dc: 5, bonus: (g) => (g.flags.bl_tracker ? 2 : 0) }, time: 60, to: 'ya_found', fail: 'ya_found' },
+            { text: 'Track her. Nose first, since that\'s how she\'d do it.', check: { skill: 'GU', dc: 5, bonus: (g) => (g.flags.bl_tracker ? 2 : 0) }, time: 60, to: 'ya_found', fail: 'ya_found' },
             { text: 'Wait. She\'ll come back when she\'s ready.', time: 120, do: (g) => { bumpRel(g, 'Ya', -3, 0); g.flags.ya_waited = true; return []; }, to: 'ya_found' },
         ],
     },
@@ -892,7 +894,7 @@ The knife stops. At last she looks at you, eyes narrowed.
 "Hm," she says. A silence follows, and then her fist comes out with something in it: a wolf's tooth, long and yellow, on a cord. "I bit that off a wolf when I was eleven. It's the best thing I own." She shoves it against your chest. "Don't laugh at me again."`,
         choices: [
             { text: 'Take the tooth. Put it on. "I won\'t."', do: (g) => { addItem(g, 'ya_tooth', 1); bumpRel(g, 'Ya', 6, 6); return [`The cord is greasy and the tooth is warm from her fist. You put it on. She watches you do it with the stillness of something deciding whether to bolt, and then goes back to the hare as if nothing has happened, except that she's sitting a hand's width closer than she was.`, '+1 Ya\'s wolf tooth.']; }, to: 'ah_hub' },
-            { text: '"Bring it back to camp and give one to Mei Lin, too. She\'s been looking for you."', do: (g) => { addItem(g, 'ya_tooth', 1); bumpRel(g, 'Ya', 4, 3); bumpRel(g, 'Mei Lin', 2, 2); trioStep(g, 2); return [`You take the tooth, cord and all, and hang it round your neck before she can change her mind. She hears the rest out with her head on one side. "One each," she decides, wipes the knife on her thigh and stands. "Hers will be smaller."`, '+1 Ya\'s wolf tooth. Ya sets off to find a second wolf.']; }, to: 'ah_hub' },
+            { text: '"I\'m keeping this. Come back to camp, and bring Mei Lin a tooth too. She\'s been looking for you."', do: (g) => { addItem(g, 'ya_tooth', 1); bumpRel(g, 'Ya', 4, 3); bumpRel(g, 'Mei Lin', 2, 2); trioStep(g, 2); return [`You take the tooth, cord and all, and hang it round your neck before she can change her mind. She hears the rest out with her head on one side. "One each," she decides, wipes the knife on her thigh and stands. "Hers will be smaller."`, '+1 Ya\'s wolf tooth. Ya sets off to find a second wolf.']; }, to: 'ah_hub' },
         ],
     },
     trio_kiss: {
@@ -1160,7 +1162,7 @@ ${both(g) ? 'Ya has put herself between you and Mei Lin with an arm hooked round
             { text: 'Sit beside Mei Lin.', show: (g) => region(g) !== 'ah', do: (g) => { bumpRel(g, 'Mei Lin', 2, 3); return []; }, to: 'bl_night' },
             { text: 'Sit beside Ya.', show: (g) => region(g) !== 'ah', do: (g) => { bumpRel(g, 'Ya', 2, 3); return []; }, to: 'bl_night' },
             { text: 'Sit between them, and see what happens.', show: (g) => region(g) !== 'ah' && both(g), do: (g) => { bumpRel(g, 'Mei Lin', 1, 2); bumpRel(g, 'Ya', 1, 2); return [DR_BETWEEN(g)]; }, to: 'bl_night' },
-            { text: 'When Ya takes your hand and tugs you toward the dark, go.', show: (g) => region(g) === 'ah' && (onlyYa(g) || both(g)) && !g.flags.ya_romance, to: 'ya_romance' }, // v0.11.122 (LG1, BC): also when both like him
+            { text: 'Ya\'s hand finds yours and pulls toward the dark. Let it.', show: (g) => region(g) === 'ah' && (onlyYa(g) || both(g)) && !g.flags.ya_romance, to: 'ya_romance' }, // v0.11.122 (LG1, BC): also when both like him
             { text: 'Stay up with Mei Lin after the others sleep.', show: (g) => region(g) === 'ah' && onlyMei(g) && !g.flags.mei_bond, to: 'mei_bond' },
             { text: 'Take the first watch together, all of you.', show: (g) => region(g) === 'ah' && !both(g) && !g.flags.bl_friends, to: 'friends_watch' },
             { text: 'Sleep.', to: 'bl_night' },

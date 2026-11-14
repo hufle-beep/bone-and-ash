@@ -17,6 +17,7 @@ import { STOMP } from '../js/story/power.js'; import { ASHFALL } from '../js/sto
 import { coilStamp, dayIndex, textDay, DAY_REPLIES, COIL_SETS, actCoil, noteDay, linesOf, pickLine } from '../js/core/lines.js'; // v0.11.166 (RW1): COIL_SETS, actCoil; // v0.11.135 (NT1, EV1); v0.11.136 (NC1): DAY_REPLIES
 import { splitReply, splitLine, landReply, noteSaid } from '../js/core/replies.js'; // v0.11.136 (NC1); RV2 (TG): landReply, noteSaid
 import { runTask, taskOutcome, cardCheck, taskCards, yukiSays as yukiSaysS } from '../js/core/tasks.js'; // v0.11.169 (CA1, YH): yukiSays // v0.11.136 (RV2, TG); v0.11.139 (MW1): taskCards
+import { DRILL_AGAIN } from '../js/story/act1_return.js'; // v0.11.179 (LB1, RV2 TG): the drill replies' tics
 import { HEART } from '../js/story/act1_heart.js'; import { createHash } from 'node:crypto'; // v0.11.173 (P6A): the Heart's scenes, for its block
 import { writeFileSync, readFileSync, readdirSync } from 'node:fs'; // v0.11.137 (HV1, T): the story files read for bumpRel
 import { smartAction } from './lib/smartfight.mjs'; // v0.11.96 (BT1)
@@ -845,9 +846,9 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         }
         // CL and LB: five days, not three or four; Ya's tracks ten days back; the three labels
         { const g = B(seed++, 'cat'); g.scene = 'bl_start'; const t = txt('bl_start', g); assert(/Five days in/.test(t) && !/Three days in|four-day/.test(SRC), 'P5A (CL): the expedition is five days (bl_start, the label)'); }
-        { const g = B(seed++, 'cat'); g.scene = 'rr_scout'; const t = txt('rr_scout', g); assert(/Ten days back, before the village/.test(t) && !/Three days ago/.test(t) && /two days/i.test(t), 'P5A (CL): Ya smelled his stream camp ten days back, and followed him two days'); }
+        { const g = B(seed++, 'cat'); g.scene = 'rr_scout'; const t = txt('rr_scout', g); assert(/Ten days back, before the village/.test(t) && !/Three days ago/.test(t) && /three nights/i.test(t), 'P5A (CL; v0.11.179 H1): Ya smelled his stream camp ten days back, and followed him three nights'); }
         // RV1 (M2, TG2): the menu's text is never drawn on a task screen, so the fix and the CW line are in the card's reply, which is
-        { const g = B(seed++, 'cat', 'rr', 1); g.scene = 'rr_hub'; const r = runTask(g, SCENES, 'rr_scout:1'); const j = r.lines.join(' '); assert(g.scene === 'rr_hub' && /Ten days back\. Your first camp, by the stream/.test(j) && /You fed the cat first, so: not Sect/.test(j), `P5A (RV1, M2): "You followed me for two days?" says ten days back and the cat fed first, on the hub (${j.slice(0, 80)})`); }
+        { const g = B(seed++, 'cat', 'rr', 1); g.scene = 'rr_hub'; const r = runTask(g, SCENES, 'rr_scout:1'); const j = r.lines.join(' '); assert(g.scene === 'rr_hub' && /Ten days back\. Your first camp, by the stream/.test(j) && /You fed the cat first, so: not Sect/.test(j), `P5A (RV1, M2): "You followed me for three nights?" says ten days back and the cat fed first, on the hub (${j.slice(0, 80)})`); }
         { const g = B(seed++, 'cat', 'rr', 1); g.scene = 'rr_hub'; g.james.gu = { tier: 4, level: 10, xp: 0 }; const r = runTask(g, SCENES, 'rr_scout:0'); assert(/Eyes lie\. Ears lie\. Nose doesn't/.test(r.lines.join(' ')), 'P5A (RV1, M2): the lesson\'s first words in its success line'); }
         const labs = (id) => SCENES[id].choices.map((c) => c.text);
         assert(labs('ya_mocks').includes('Defuse it. "We have a five-day walk and no doctor. Pick a fight with the forest."') && labs('bl_train').includes('Darts at a mark, from farther and farther.') && labs('bl_night').includes('Mei Lin and Ya together; you and a watch-thread after.'), 'P5A (LB): the three labels');
@@ -1255,7 +1256,7 @@ for (const form of ['cat', 'human']) {
             if (!/\s/.test(c)) out += c; i++; } return out; }; return code(false); };
       const hash = (t) => createHash('sha256').update(t).digest('hex').slice(0, 16);
       const LABELS = Object.values(RETURN).flatMap((sc) => (sc.choices || []).map((c) => (typeof c.text === 'string' ? c.text : '(fn)')));
-      const PIN = { 'act1_return.js': 'b8f64404a59727db', labels: '09639549cbc1df4e' };
+      const PIN = { 'act1_return.js': 'b8f64404a59727db', labels: '898cbbde857ef2e6' }; // v0.11.179 (LB1): the labels re-pinned (the label pass)
       const got = { 'act1_return.js': hash(skel(RSRC)), labels: hash(JSON.stringify(LABELS)) };
       for (const [k, v] of Object.entries(PIN)) assert(got[k] === v, `P7A (RV1, TG1): ${k}'s code and ids as pinned in v0.11.174 (${got[k]}; update the pin only with a push that means to change them)`); }
     // TG2: the mechanical parts of the Return's result lines, exactly
@@ -1534,7 +1535,8 @@ for (const form of ['cat', 'human']) {
     { const lab = (c) => (typeof c.text === 'function' ? '(fn)' : c.text); const out = {};
       for (const id of Object.keys(LONGFOREST)) { const s = SCENES[id]; out[id] = [s.title, typeof s.place === 'string' ? s.place : '(fn)', typeof s.art === 'string' ? s.art : '(fn)', (s.choices || []).map((c) => [lab(c), typeof c.to === 'string' ? c.to : '(fn)', c.time || 0, c.check ? `${c.check.skill}/${c.check.dc}` : ''].join('|'))]; }
       const h = createHash('sha1').update(JSON.stringify(out)).digest('hex');
-      assert(h === '47cdc01d6b4ab6a7e13145655586d82285767d62', `P8A: the Long Forest's ids, titles, places, art, labels, targets, times and checks as in v0.11.174 (${h}; update only with a push that means to change them)`); }
+      assert(h === '1d5b82bff9212d725b70edbd44b9d72c4feecbae', // v0.11.179 (LB1): re-pinned for the label pass's Long Forest labels
+         `P8A: the Long Forest's ids, titles, places, art, labels, targets, times and checks as in v0.11.174 (${h}; update only with a push that means to change them)`); }
 }
 // v0.11.175 (owner pick RV1; Fable's cold review of part 8, TG1–TG14): a visit counted once a day (C1/C2: the storm's way down the
 // ridge, a zone twice a day), the encounters' second fight openings (T6/C3), the great form's scene before the human one (T8), the
@@ -1761,7 +1763,7 @@ for (const form of ['cat', 'human']) {
     // M3: "Promise." (the cat), then the question, then "Not yet": the cat again
     {
         const g = base(65020, 'human', 'rr_hub', { f: 50, a: 40 }, { yk_back: 'rr_hub' }); goTo(g, SCENES, 'yuki_human_after');
-        choose(g, SCENES, sceneView(g, SCENES).choices.find((c) => c.label === 'Promise.').index);
+        choose(g, SCENES, sceneView(g, SCENES).choices.find((c) => c.label === 'Promise. No occasion.').index);
         assert(g.scene === 'yk_choice' && g.yuki.form === 'human' && g.flags.yk_form_before === 'cat', `RT1 (M3): "Promise." (the cat) leads into the question, asked in her human shape (${g.scene}, ${g.flags.yk_form_before})`);
         choose(g, SCENES, 2);
         assert(g.yuki.form === 'cat' && g.flags.yk_wait && !g.flags.yk_form_before, `RT1 (M3): after "Not yet" the cat again (${g.yuki.form})`);
@@ -1937,7 +1939,7 @@ for (const form of ['cat', 'human']) {
         const e = LG(52100 + yr, { yk_path: 'lover', trio: 3, yk_mei: 2 }, [80, 95], yr);
         e.minutes = 19 * 1440 + 1200; goTo(e, SCENES, 'rt_evening');
         const ev = labels(e);
-        for (const re of [/^Go out to the grove with Yuki/, /^Climb to the loft with Mei Lin\. The cat/, /^Follow Ya to the grove\. Yuki/, /^All of you/]) assert(ev.some((l) => re.test(l)) === human, `LG1 (YG): "${re.source}" ${human ? 'shows' : 'is hidden'} at Yuki's realm ${yr}`);
+        for (const re of [/^Go out to the grove with Yuki/, /^(Call the cat off the|Ask Yuki up off the bench)/, /^Go after Ya to the grove, and leave/, /^All of you/]) assert(ev.some((l) => re.test(l)) === human, `LG1 (YG): "${re.source}" ${human ? 'shows' : 'is hidden'} at Yuki's realm ${yr}`);
         assert(ev.some((l) => /^Climb to the herb loft with Mei Lin\.$/.test(l)) && ev.some((l) => /^Follow Ya out to the grove\.$/.test(l)) && ev.some((l) => /^Let Ya say/.test(l)), `LG1: the last night offers Mei Lin, Ya and the shared night when both like him (realm ${yr})`);
         assert(/I share a sunbeam/.test(sceneView(e, SCENES).text) === human, `LG1 (YG): the lover's last-night line only when she is human (realm ${yr})`);
         // the sister's interrogation: offered either way, in the bond below Nascent Soul
@@ -1979,7 +1981,7 @@ for (const form of ['cat', 'human']) {
         assert(labels(f).includes('"Stay."') === ok, `LG1 (S): "Stay." ${ok ? 'shows' : 'is hidden'} at Ya ${a}`);
         assert(/Do you want me to stay\?/.test(sceneView(f, SCENES).text) === ok, `LG1 (S): Ya's loft text matches the choice at Ya ${a}`);
         const p = LG(52800 + a, {}, [10, a], 0); p.minutes = 19 * 1440 + 600; goTo(p, SCENES, 'rt_ya_talk');
-        assert(labels(p).some((l) => /^Kiss her, there on the path/.test(l)) === ok, `LG1 (S): the path kiss ${ok ? 'shows' : 'is hidden'} at Ya ${a}`);
+        assert(labels(p).some((l) => /^Kiss Ya before she gets there/.test(l)) === ok, `LG1 (S): the path kiss ${ok ? 'shows' : 'is hidden'} at Ya ${a}`);
     }
     // BC: the hot spring, both like him: the shared night or Ya alone
     {
@@ -1998,7 +2000,7 @@ for (const form of ['cat', 'human']) {
     // BC: the Ashen Hollow camp, both like him, no Ya romance yet
     {
         const g = LG(53000, { bl_region: 'ah' }, [80, 95], 0); g.minutes = 14 * 1440 + 1260; goTo(g, SCENES, 'bl_fireside');
-        assert(pick(g, /^When Ya takes your hand/), 'LG1 (BC): the Ashen Hollow camp offers Ya\'s night when both like him');
+        assert(pick(g, /^Ya's hand finds yours/), 'LG1 (BC): the Ashen Hollow camp offers Ya\'s night when both like him');
         assert(g.scene === 'ya_romance' && /so much thread/.test(sceneView(g, SCENES).text), `LG1 (BC, B3; RL1 L3): Mei Lin watching from the fire (${g.scene})`);
         const d = LG(53001, { bl_region: 'ah', yr_day: true }, [80, 95], 0); goTo(d, SCENES, 'ya_romance');
         assert(!/so much thread/.test(sceneView(d, SCENES).text), 'LG1 (BC, B3): not on the daytime route');
@@ -2073,7 +2075,7 @@ for (const form of ['cat', 'human']) {
         assert(y.rel.Ya.a === a0 + 8 && y.rel.Ya.f === f0 + 4, `RL1 (T): just Ya at the spring +4 / +8 (${y.rel.Ya.f - f0} / ${y.rel.Ya.a - a0})`);
         assert((y.flags.trio || 0) >= 2, `RL1 (L2): just Ya keeps the trio step (${y.flags.trio})`);
         y.flags.bl_region = 'ah'; y.minutes = 14 * 1440 + 1260; goTo(y, SCENES, 'bl_fireside');
-        assert(!labels(y).some((l) => /^When Ya takes your hand/.test(l)), 'RL1 (T): the camp\'s Ya night is gone after "just Ya"');
+        assert(!labels(y).some((l) => /^Ya's hand finds yours/.test(l)), 'RL1 (T): the camp\'s Ya night is gone after "just Ya"');
         const r = LG(53601, { romance: true, ya_romance: true }, [80, 95], 0); r.minutes = 10 * 1440 + 1320; goTo(r, SCENES, 'fo_last_night');
         const ra = r.rel.Ya.a, rf = r.rel.Ya.f; pick(r, /^Tonight, Ya\./);
         assert(r.rel.Ya.a === ra + 10 && r.rel.Ya.f === rf + 6, `RL1 (T): Ya on the roof +6 / +10 (${r.rel.Ya.f - rf} / ${r.rel.Ya.a - ra})`);
@@ -2109,13 +2111,13 @@ for (const form of ['cat', 'human']) {
     // KN and D2: the road kisses set no flag; Mei Lin's from 30
     {
         const y = LG(54010, {}, [10, 50], 0); y.minutes = 19 * 1440 + 600; goTo(y, SCENES, 'rt_ya_talk');
-        assert(pick(y, /^Kiss her, there on the path, since/) && !y.flags.ya_romance && !likesYa(y), `EB1 (KN): Ya's path kiss leaves her romance flag unset (${y.flags.ya_romance})`);
+        assert(pick(y, /^Kiss Ya before she gets there/) && !y.flags.ya_romance && !likesYa(y), `EB1 (KN): Ya's path kiss leaves her romance flag unset (${y.flags.ya_romance})`);
         for (const [a, ok] of [[29, false], [30, true]]) {
             const m = LG(54020 + a, {}, [a, 10], 0); m.minutes = 19 * 1440 + 600; goTo(m, SCENES, 'rt_mei_talk');
-            assert(labels(m).some((l) => /^Kiss her, there on the path, before/.test(l)) === ok, `EQ1 (D2): Mei Lin's road kiss ${ok ? 'offered' : 'hidden'} at ${a}`);
+            assert(labels(m).some((l) => /^Kiss her before she finds something/.test(l)) === ok, `EQ1 (D2): Mei Lin's road kiss ${ok ? 'offered' : 'hidden'} at ${a}`);
         }
         const m = LG(54040, {}, [50, 10], 0); m.minutes = 19 * 1440 + 600; goTo(m, SCENES, 'rt_mei_talk');
-        const a0 = m.rel['Mei Lin'].a, f0 = m.rel['Mei Lin'].f; pick(m, /^Kiss her, there on the path, before/);
+        const a0 = m.rel['Mei Lin'].a, f0 = m.rel['Mei Lin'].f; pick(m, /^Kiss her before she finds something/);
         assert(m.scene === 'rt_road' && !m.flags.romance && !likesMei(m) && m.rel['Mei Lin'].a === a0 + 8 && m.rel['Mei Lin'].f === f0 + 3, `EB1 (KN; D2): Mei Lin's road kiss +3 / +8, no flag (${m.scene}, ${m.flags.romance})`);
     }
     // D1: Mei Lin's raft night, at the Drowned Wood's fire, once a Coil
@@ -2159,7 +2161,7 @@ for (const form of ['cat', 'human']) {
         if (!want) continue;
         pick(g, /^Let the other two get ahead/);
         assert(g.scene === 'rt_yk_talk' && /Forty gardeners/.test(sceneView(g, SCENES).text), `EQ1 (D4): the walk (${g.scene})`);
-        const yk0 = g.rel.Yuki.a; pick(g, /^Stop walking\. Kiss her/);
+        const yk0 = g.rel.Yuki.a; pick(g, /^Stop at the bend\. Kiss Yuki/);
         assert(g.scene === 'rt_road' && g.rel.Yuki.a === yk0 + 6 && !labels(g).some((l) => /^Let the other two get ahead/.test(l)), `EQ1 (D4): the kiss +6, back on the road, once a day (${g.scene})`);
         const n = LG(54310 + yr, { yk_path: path }, [10, 10], yr); n.minutes = 19 * 1440 + 600; goTo(n, SCENES, 'rt_yk_talk');
         const n0 = n.rel.Yuki.a; pick(n, /^"The best spot/);
@@ -2168,7 +2170,7 @@ for (const form of ['cat', 'human']) {
     // TP: the old choices keep their positions; the new ones last
     const fs = SCENES.bl_fireside.choices, mt = SCENES.rt_mei_talk.choices, rr = SCENES.rt_road.choices;
     assert(fs[fs.length - 2].text === 'Sleep.' && fs[fs.length - 1].to === 'mei_raft' && fs.length === 8, 'EQ1 (TP): bl_fireside keeps choices 0–6, the raft night last');
-    assert(mt.length === 4 && /^"Your father/.test(mt[2].text) && /^Kiss her, there on the path, before/.test(mt[3].text), 'EQ1 (TP): rt_mei_talk keeps choices 0–2, the kiss last');
+    assert(mt.length === 4 && /^"Your father/.test(mt[2].text) && /^Kiss her before she finds something/.test(mt[3].text), 'EQ1 (TP): rt_mei_talk keeps choices 0–2, the kiss last');
     assert(rr.length === 4 && rr[0].to === 'rt_ya_talk' && rr[1].to === 'rt_mei_talk' && rr[2].to === 'rt_ambush' && rr[3].to === 'rt_yk_talk', 'EQ1 (TP): rt_road keeps choices 0–2, Yuki\'s walk last');
 }
 // v0.11.123 (owner pick ER1, Fable's review of EQ1): a started throuple keeps both liked (GF), the raft-first lines and the other text
@@ -2201,11 +2203,11 @@ for (const form of ['cat', 'human']) {
     // gap 2 and R5: Mei Lin's road kiss through her romance flag below 30, with the lover's line
     {
         const g = LG(55030, { romance: true }, [10, 10], 0); g.minutes = 19 * 1440 + 600; goTo(g, SCENES, 'rt_mei_talk');
-        const c = sceneView(g, SCENES).choices.find((x) => !x.disabled && /^Kiss her, there on the path, before/.test(x.label));
+        const c = sceneView(g, SCENES).choices.find((x) => !x.disabled && /^Kiss her before she finds something/.test(x.label));
         const r = c && choose(g, SCENES, c.index);
         assert(!!c && r.lines.some((l) => /this time she says when/.test(l)), 'ER1 (T2, R5): the road kiss offered through her flag at 10, with the lover\'s line');
         const n = LG(55031, {}, [50, 10], 0); n.minutes = 19 * 1440 + 600; goTo(n, SCENES, 'rt_mei_talk');
-        const nc = sceneView(n, SCENES).choices.find((x) => !x.disabled && /^Kiss her, there on the path, before/.test(x.label)); const nr = choose(n, SCENES, nc.index);
+        const nc = sceneView(n, SCENES).choices.find((x) => !x.disabled && /^Kiss her before she finds something/.test(x.label)); const nr = choose(n, SCENES, nc.index);
         assert(nr.lines.some((l) => /does not say when/.test(l)), 'ER1 (R5): the first-kiss line when she is not yet his lover');
     }
     // gap 5 and R1: where the first time was
@@ -2530,7 +2532,7 @@ for (const form of ['cat', 'human']) {
     }
     // the choices' results (scene, the choice's text, flags, cat, great root-kin, human)
     const RES = [
-        ['fo_drill', /^Spar with Yuki in front of them/, {}, /Then Old Hu bows to the cat\./, /Then Old Hu bows to the great beast, from a distance/, // v0.11.170 (NX2, SR): the great root-kin's own
+        ['fo_drill', /^Go a round with Yuki while they watch/, {}, /Then Old Hu bows to the cat\./, /Then Old Hu bows to the great beast, from a distance/, // v0.11.170 (NX2, SR): the great root-kin's own
         /Then Old Hu bows to Yuki, and to nobody else\./],
         ['heart_spring', /^Sit by the water/, {}, /warm stretch of wall, with Yuki in your lap, and listen/, /warm stretch of wall, with Yuki's head in your lap, and listen/, /warm stretch of wall, with Yuki's shoulder against yours, and listen/],
         ['heart_camp', /^Sit up with Yuki and the hearth-log/, {}, /Yuki purrs against your chest from her first word to her last\./, /Yuki's head is on your chest, and she purrs from her first word to her last\./, /Yuki leans on your shoulder and purrs, very quietly, from her first word to her last\./],
@@ -2652,7 +2654,7 @@ for (const form of ['cat', 'human']) {
         assert(!!c && re.test(c.label) && SCENES.night_event.choices[c.index] && /fallen trunk/.test(SCENES.night_event.choices[c.index].text(g)), `NS1 (TR): the trunk choice as ${form} (${c?.label})`);
     }
     // T: the positions of the touched choices (saves keep picks by position)
-    for (const [id, idx, re] of [['fo_drill', 1, /^Spar with Yuki/], ['heart_spring', 2, /^Sit by the water/], ['heart_camp', 3, /^Sit up with Yuki/], ['wen_lesson', 0, /^Listen\. Ask/], ['rt_ford', 0, /^Cross carefully/]]) {
+    for (const [id, idx, re] of [['fo_drill', 1, /^Go a round with Yuki/], ['heart_spring', 2, /^Sit by the water/], ['heart_camp', 3, /^Sit up with Yuki/], ['wen_lesson', 0, /^Listen\. Ask/], ['rt_ford', 0, /^Cross carefully/]]) {
         assert(re.test(SCENES[id].choices[idx].text), `NR1 (T): ${id}'s touched choice stays at ${idx}`);
     }
     // T: the sweep, every touched scene with each path, the forms that are not the cat: no small-cat placement, and no voice aloud from
@@ -2708,7 +2710,7 @@ for (const form of ['cat', 'human']) {
     }
     // the labels: by her form, at their old places (saves keep picks by position)
     const lbl = (sc, to) => { const i = SCENES[sc].choices.findIndex((c) => c.to === to); return [i, SCENES[sc].choices[i]]; };
-    for (const [sc, to, idx, cat, human] of [['bl_camp', 'yk_camp', 4, 'Walk out past the firelight. The cat follows.', 'Walk out past the firelight. Yuki follows.'], ['rt_road', 'rt_yk_talk', 3, 'Let the other two get ahead, and walk a stretch with the cat.', 'Let the other two get ahead, and wait for Yuki to drop back.']]) {
+    for (const [sc, to, idx, cat, human] of [['bl_camp', 'yk_camp', 4, 'Walk out past the firelight. The cat follows.', 'Walk out past the firelight. Yuki follows.'], ['rt_road', 'rt_yk_talk', 3, 'Let the other two get ahead, and walk a stretch with the cat.', 'Let the other two get ahead, and keep Yuki at your elbow.']]) {
         const [i, c] = lbl(sc, to);
         assert(i === idx && typeof c?.text === 'function', `LP1 (CP): ${sc}'s choice to ${to} stays at ${idx} (${i})`);
         if (!c) continue;
@@ -2720,7 +2722,7 @@ for (const form of ['cat', 'human']) {
     }
     // the walk's results, also through choose(): by her form, the bond still bumped
     const WALK = [
-        [/^Stop walking\. Kiss her/, /Then there's a cat on your shoulder, washing a paw/, /Then there is a great white cat filling the path beside you/, /Then she walks on, hands clasped behind her back, innocent of everything\./], // LQ2 (TS): the great root-kin's own
+        [/^Stop at the bend\. Kiss Yuki/, /Then there's a cat on your shoulder, washing a paw/, /Then there is a great white cat filling the path beside you/, /Then she walks on, hands clasped behind her back, innocent of everything\./], // LQ2 (TS): the great root-kin's own
         [/^"The best spot is still yours/, /On the twelfth there's a cat on your shoulder again/, /On the twelfth your hand is on a great white shoulder instead/, /On the twelfth the path straightens, and she lets go, and purrs through the bond/],
     ];
     for (const [label, cat, tiger, human] of WALK) for (const form of ['cat', 'tiger', 'human']) {
@@ -2758,7 +2760,7 @@ for (const form of ['cat', 'human']) {
         }
     }
     {   // the rt_road label on screen, by her form
-        for (const [form, label] of [['cat', 'Let the other two get ahead, and walk a stretch with the cat.'], ['tiger', 'Let the other two get ahead, and walk a stretch with the cat.'], ['human', 'Let the other two get ahead, and wait for Yuki to drop back.']]) {
+        for (const [form, label] of [['cat', 'Let the other two get ahead, and walk a stretch with the cat.'], ['tiger', 'Let the other two get ahead, and walk a stretch with the cat.'], ['human', 'Let the other two get ahead, and keep Yuki at your elbow.']]) {
             const g = LPG(61650 + n++, form); goTo(g, SCENES, 'rt_road');
             const labels = sceneView(g, SCENES).choices.filter((c) => !c.disabled).map((c) => c.label);
             assert(labels.includes(label) && labels.filter((l) => /^Let the other two get ahead/.test(l)).length === 1, `LQ2 (TG): rt_road shows the walk as ${form}`);
@@ -2785,7 +2787,7 @@ for (const form of ['cat', 'human']) {
     {   // HL: the loft label by her form, at its place (saves keep picks by position)
         const i = SCENES.rt_evening.choices.findIndex((c) => c.to === 'yk_night_mei'), c = SCENES.rt_evening.choices[i];
         assert(typeof c?.text === 'function', `LQ2 (HL): rt_evening's loft choice is a label function (at ${i})`);
-        if (c) for (const form of ['cat', 'tiger', 'human']) assert(c.text(LPG(61900 + n++, form)) === (form === 'human' ? 'Climb to the loft with Mei Lin. Yuki is already up there.' : 'Climb to the loft with Mei Lin. The cat is already up there.'), `LQ2 (HL): the loft label as ${form}`);
+        if (c) for (const form of ['cat', 'tiger', 'human']) assert(c.text(LPG(61900 + n++, form)) === ({ cat: 'Call the cat off the stove, and follow Mei Lin up to the loft.', tiger: 'Call the cat off the floor, and follow Mei Lin up the ladder.', human: 'Ask Yuki up off the bench, and follow Mei Lin to the loft.' }[form]), `LQ2 (HL): the loft label as ${form}`);
     }
     // v0.11.128 (owner pick OF2; Fable's MAINs): the camp's lap, Mei Lin's confession, the last nights' openings and dawns, the roof label, Ya's fence
     const OF = [
@@ -3447,6 +3449,87 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         assert(p1 === `The darts go out flat through the ash haze and most of them hit ash. One hare stops being fast. Ya fetches it without being asked and holds it up by the ears, considering it. "Thin," she says. "Like you." Above you the hawks wheel off, unimpressed, trailing sparks.` && DAY_REPLIES['ah_hunt:1:full'][0] === `The darts go out flat through the ash haze and the hares stop being fast. Ya fetches them without being asked and comes back holding them up by the ears. "Small," she says. "But you hit what you aimed at. Rare, for you." Above you the hawks wheel off, disappointed, trailing sparks.`, 'RV1 (TG): the darts\' old first-day texts, word for word');
         assert(p1 === DAY_REPLIES['ah_hunt:1:part'][0] && f2 === DAY_REPLIES['ah_hunt:1:full'][1], 'ST6: the darts: day 1 some hares (old), day 2 all hares (its second-day text)');
     }
+}
+
+// v0.11.179 (owner pick LB1): the label pass. Each changed label reads its new words where the scene draws it; K3 and K4 switch.
+{
+    const LB = (seed, form) => { const g = ensureBars(fresh(seed)); const realm = form === 'human' ? 7 : form === 'tiger' ? 2 : 0; g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; return ensureBars(g); };
+    const lab = (id, re) => (SCENES[id].choices || []).find((c) => re.test(typeof c.text === 'function' ? c.text(LB(1, 'cat')) : c.text));
+    const say = (c, g) => (typeof c.text === 'function' ? c.text(g) : c.text);
+    const NEW = [ // [scene, the old label's start, the new label]
+        ['lf_hub', /^Wash in the river/, 'Wash in the river. The forest has been accumulating on you.'],
+        ['lf_hub', /^Follow the smoke/, 'Follow the smoke toward people. (Advances the story.)'], // RV2 R9: lf_exit's label, the next screen, says "(Day 4 begins.)"
+        ['night_won', /^Sleep/, "Sleep. What's left of the night."],
+        ['night_fled', /^Sleep/, "Sleep. What's left of the night."],
+        ['mei_lin', /^"Tell me about the tribute/, '"Tell me about the tribute. And the tribulations. And why the air here tastes like a funeral."'],
+        ['wilds', /^Train:/, 'Train: darts, blade, footwork, and a sparring partner with views.'],
+        ['rt_elder', /^Show him the truth/, 'Show him the truth: take him to the grove and let him breathe clean Qi, which he has not done in three hundred years.'],
+        ['gao_dead', /^Go with her/, 'Go with her. Behind you, Gao Feng is still swearing, slowly and in great detail, what his Sect will do to you.'],
+        ['evening', /^Flirt/, 'Flirt. Shamelessly. You\'re forty, not dead.'],
+        ['rt_taken', /^Bite the tail/, 'Bite the tail. (Wake at the start of Act 1 or of the whole game; you keep what you learned.)'],
+        ['collectors_lost', /^Bite the tail/, 'Bite the tail. (Wake at the first dawn; you keep what you learned.)'],
+        ['rt_ya_village', /^Step between them/, 'Step between them. Talk everyone down, formally, as Ashfall likes it.'],
+        ['yuki_form', /^Human\./, 'Human. Someone who answers aloud.'],
+        ['yuki_human_after', /^Promise/, 'Promise. No occasion.'],
+    ];
+    for (const [id, re, want] of NEW) { const c = lab(id, re); assert(c && say(c, LB(2, 'cat')) === want, `LB1: ${id} reads "${want}"`); }
+    for (const id of ['boar_won', 'boar_lost']) { const g = LB(3, 'cat'); assert(say(SCENES[id].choices[0], g) === 'Evening, and Mei Lin\'s table.', `LB1 (S3): ${id}'s evening label names the table`); }
+    assert(readFileSync(new URL('../js/story/act1_return.js', import.meta.url), 'utf8').includes("hard: ['Cleaner than before."), 'LB1 (T2; RV2 R3): the drill reply has no time of day in it');
+    // K3: Fang Wei alone is "him", the Tans are "them"
+    for (const [who, pro] of [['lf_rogue', 'him'], ['lf_bandits', 'them']]) {
+        const g = LB(4, 'cat'); g.flags.lf_human = who; const [a, b] = SCENES.lf_wanderers.choices.map((c) => say(c, g));
+        assert(a === `Let ${pro} make ${pro === 'him' ? 'his' : 'their'} speech. Then answer it.` && b === `Talk your way past ${pro}. You're very good at being underestimated.`, `LB1 (K3): ${who} reads "${pro}" (${a} / ${b})`);
+    }
+    // K4 (RV2 R5): the hawks are no threat to the great root-kin (Ya: "looking somewhere else"); the cat and the woman are ("They want the small one")
+    for (const [form, want] of [['cat', 'Take the hawks before they take Yuki.'], ['tiger', 'Take the hawks.'], ['human', 'Take the hawks before they take Yuki.']]) {
+        const c = SCENES.ah_hunt.choices.find((x) => x.combat); assert(say(c, LB(5, form)) === want, `LB1 (K4): ${form} reads "${want}"`);
+    }
+    // none of the old words are left anywhere in the story files
+    const all = readdirSync(new URL('../js/story/', import.meta.url)).filter((f) => f.endsWith('.js')).map((f) => readFileSync(new URL(`../js/story/${f}`, import.meta.url), 'utf8')).join('\n');
+    for (const old of ['You have been in a forest for a long time', 'you will meet Mei Lin.)', 'everyone here tastes like a funeral', 'very unwilling sparring partner', 'for the first time in three hundred years', 'Cleaner than the first time', 'Flirt back. Shamelessly', 'the way Ashfall likes it', 'Someone to talk to', '(The Coil: wake at', 'still swearing — slowly']) assert(!all.includes(old), `LB1: "${old}" is gone`);
+}
+
+// v0.11.179 (LB1, X1, D1, F1): the full read's finds (Fable's wordings, F1's cuts), O2's "It", O3's tic, O4's three nights.
+{
+    const LB = (seed, form) => { const g = ensureBars(fresh(seed)); const realm = form === 'human' ? 7 : form === 'tiger' ? 2 : 0; g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; return ensureBars(g); };
+    const say = (c, g) => (typeof c.text === 'function' ? c.text(g) : c.text);
+    const has = (id, want, form = 'cat') => (SCENES[id].choices || []).some((c) => { try { return say(c, LB(6, form)) === want; } catch { return false; } });
+    const NEW = [
+        ['rt_evening', 'Call the cat off the stove, and follow Mei Lin up to the loft.', 'cat'], ['rt_evening', 'Call the cat off the floor, and follow Mei Lin up the ladder.', 'tiger'], ['rt_evening', 'Ask Yuki up off the bench, and follow Mei Lin to the loft.', 'human'],
+        ['rt_evening', 'Go after Ya to the grove, and leave the door open.'], ['rr_scout', '"You followed me for three nights?"'], ['ya_offended', 'Track her. Nose first, since that\'s how she\'d do it.'],
+        ['rt_road', 'Let the other two get ahead, and keep Yuki at your elbow.', 'human'], ['fo_drill', 'Run the line: bone in front, spears through the gaps, no one out on their own.'],
+        ['fo_drill', 'Go a round with Yuki while they watch, and let them count what they missed.'], ['rt_hunters', 'Drill them hard: line tight, spears set, a shoulder on either side of everyone.'],
+        ['rr_roots', 'Cultivate on the root. The song knows its way in.'], ['rt_grove', 'Cultivate in the grove, and let the song do the rest.'],
+        ['rt_ya_talk', 'Kiss Ya before she gets there first.'], ['rt_mei_talk', 'Kiss her before she finds something else to hold.'], ['rt_yk_talk', 'Stop at the bend. Kiss Yuki while the others can\'t see round it.'],
+        ['bl_fireside', 'Ya\'s hand finds yours and pulls toward the dark. Let it.'], ['lf_train', 'Needle drills: one point, one knuckle-width, a thousand times.'] /* RV2 R2: the old label, as its results count a thousand at a knuckle's width */, ['lf_hub', 'Sit out a season in seclusion. No realm to climb, only time.'],
+        ['fo_wolf_lost', 'Bandage the arm. Sleep.'], ['ya_found', '"I\'m keeping this. Come back to camp, and bring Mei Lin a tooth too. She\'s been looking for you."'], ['scan_ok', '"Help" can wait. The clearing ahead can\'t.'],
+    ];
+    for (const [id, want, form] of NEW) assert(has(id, want, form), `LB1 (FR): ${id} offers "${want}"${form ? ` as ${form}` : ''}`);
+    assert(YT_LABEL.HUMAN === 'Keep Yuki company.' && YT_LABEL.CAT === 'Sit with Yuki.' && YT_LABEL.GREAT === 'Lean on Yuki a while.', 'LB1 (FR, W6): Yuki time\'s human label, the other two unchanged');
+    const scout = SCENES.rr_scout; const sg = LB(7, 'cat');
+    assert(/Three nights it took me, working out what you were\./.test(say({ text: scout.text }, sg)) && !/Two days I followed/.test(say({ text: scout.text }, sg)), 'LB1 (O4): Ya followed three nights, as in the Fallout');
+    const sc = scout.choices.find((c) => /three nights\?/.test(say(c, sg))); // RV2 TG: a missing label fails here, it doesn't throw
+    assert(!!sc && /^"Ten days back\. Your first camp, by the stream/.test(sc.do(LB(8, 'cat'))[0]), 'LB1 (H1): the card\'s answer keeps the calendar fact (the menu\'s text is never drawn in task mode)');
+    const all = readdirSync(new URL('../js/story/', import.meta.url)).filter((f) => f.endsWith('.js')).map((f) => readFileSync(new URL(`../js/story/${f}`, import.meta.url), 'utf8')).join('\n');
+    for (const old of ['Gold eyes, level', 'You followed me for two days', 'Two days I followed', 'like she taught you', 'wait for Yuki to drop back', 'Sit down beside Yuki', 'nobody alone.\', check: { skill: \'GU\', dc: 4', 'what fast looks like', 'Let the song in. Cultivate', 'Sit among them and cultivate', 'Kiss her, there on the path', 'Kiss her before the path straightens', 'tugs you toward the dark, go', '(A season passes.)', 'Bandage it.', 'give one to Mei Lin, too', 'Later. First: the clearing', 'The cat is already up there', 'Yuki follows you.\'']) assert(!all.includes(old), `LB1 (FR): "${old}" is gone`);
+    // O2: a save on the win screen with no fight on record reads "It", never "The it"
+    const g = LB(9, 'cat'); g.flags.lf_last = 'no_such_fight'; const t = SCENES.lf_trial_won.text(g);
+    assert(!/The it\b/.test(t) && /\bIt (won't|will)/.test(t), `LB1 (O2): no fight on record reads "It" (${t.slice(0, 80)})`);
+    { const g2 = LB(10, 'cat'); g2.flags.lf_last = 'no_such_fight'; g2.flags.lf_trials_won = 2; const t2 = SCENES.lf_trial_won.text(g2); // RV2 TG (O2a): the later wins' branch
+      assert(!/The it\b/.test(t2) && /\bIt will be back tomorrow/.test(t2), `LB1 (O2): a later win with no fight on record reads "It will be back" (${t2.slice(0, 120)})`); }
+    // RV2 TG (TIC1–TIC3, RD1): the card's tic list over every text this push touched, and the four beats that replaced "Gold eyes, level"
+    const card = readFileSync(new URL('../project/canon-card.md', import.meta.url), 'utf8');
+    const TICS = [...(card.split('\n').find((l) => l.includes('Tics to avoid')) || '').matchAll(/"([^"]+)"/g)].map((m) => m[1].toLowerCase()).filter((x) => x !== 'a black dress');
+    assert(TICS.length >= 15 && TICS.includes('gold eyes level'), `LB1 (TG): the card's tic list read (${TICS.length})`);
+    const KNOWN = [/ for a long time without saying anything\./, / for a very long time\./, / It is the first time you have seen her need one\./, /, a good deal lower down\./]; // older than this push (the fire night's "a long time" twice, the first asking's "the first time" and "a good deal"): on the roadmap, open, options later
+    const tic = (t) => { let u = String(t); for (const re of KNOWN) u = u.replace(re, '.'); return TICS.find((x) => u.toLowerCase().replace(/[,.]/g, '').includes(x)); };
+    const yk = LB(11, 'human'); yk.flags.lf_active = true;
+    const touched = [YK_HERE.first, YK_QUESTION.again, SCENES.yk_choice.text(yk), ...['cat', 'tiger', 'human'].map((f) => SCENES.rt_yk_talk.text(LB(12, f))), ...Object.values(DRILL_AGAIN).flat(),
+        ...NEW.map(([, w]) => w), ...Object.values(YT_LABEL)];
+    for (const t of touched) assert(!tic(t), `LB1 (TG): no tic ("${tic(t)}") in a touched text (${String(t).slice(0, 60)})`);
+    assert(!/gold eyes/i.test(all.match(/[^\n]*/g).filter((l) => /lecture is going well|answer with ears|I like my odds/.test(l)).join(' ')), 'LB1 (TG): no "gold eyes" beat left in the four texts');
+    for (const [where, beat] of [[YK_QUESTION.again, 'She looks at you and waits.'], [YK_HERE.first, "She doesn't blink."], [SCENES.yk_choice.text(yk), 'Her gaze stays on you.']]) assert(where.includes(beat), `LB1 (O3): "${beat}" in its text`);
+    assert(['cat', 'tiger', 'human'].every((f) => /I like my odds\." Very dry\./.test(SCENES.rt_yk_talk.text(LB(13, f)))), 'LB1 (O3, F1): rt_yk_talk\'s "Very dry."');
 }
 
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));

@@ -311,8 +311,8 @@ Old Wen's good eye comes round to you. "The council has heard my reasons. The st
 
 ${(g.flags.militia || 0) >= 2 ? 'They have kept everything you taught them before the tribute, and they practise it with the terrible seriousness of men who expect to need it.' : 'They have never fought anything that could think. They are about to.'}${yaHere(g) ? '\n\nYa watches from the woodpile, eating a raw turnip and heckling. Old Hu, with enormous dignity, declines to know that she exists.' : ''}`,
         choices: [
-            { text: 'Drill the line: spears behind bone shields, nobody alone.', check: { skill: 'GU', dc: 4, band: 'challenging' }, time: 150, do: (g) => { g.flags.militia = (g.flags.militia || 0) + 1; bumpRel(g, 'Village', 3, 0); return [DR_FO_DRILL(g)]; }, failDo: (g) => { bumpRel(g, 'Village', 1, 0); return [DR_FO_DRILL_F(g)]; }, to: 'fo_ashfall' },
-            { text: 'Spar with Yuki in front of them, so they see what fast looks like.', check: { skill: 'GU', dc: 5 }, time: 90, do: (g) => [DR_FO_SPAR(g), ...awardYukiFightXp(g, 'standard')] /* v0.11.126 (NQ1): by her form, Fable's; v0.11.170 (SR): by day */, failDo: (g) => { g.james.hp -= 2; return [`${DR_FO_SPAR_F(g)} −2 HP.`, ...awardYukiFightXp(g, 'standard')]; }, to: 'fo_ashfall' },
+            { text: 'Run the line: bone in front, spears through the gaps, no one out on their own.', check: { skill: 'GU', dc: 4, band: 'challenging' }, time: 150, do: (g) => { g.flags.militia = (g.flags.militia || 0) + 1; bumpRel(g, 'Village', 3, 0); return [DR_FO_DRILL(g)]; }, failDo: (g) => { bumpRel(g, 'Village', 1, 0); return [DR_FO_DRILL_F(g)]; }, to: 'fo_ashfall' },
+            { text: 'Go a round with Yuki while they watch, and let them count what they missed.', check: { skill: 'GU', dc: 5 }, time: 90, do: (g) => [DR_FO_SPAR(g), ...awardYukiFightXp(g, 'standard')] /* v0.11.126 (NQ1): by her form, Fable's; v0.11.170 (SR): by day */, failDo: (g) => { g.james.hp -= 2; return [`${DR_FO_SPAR_F(g)} −2 HP.`, ...awardYukiFightXp(g, 'standard')]; }, to: 'fo_ashfall' },
             { text: 'Not today.', to: 'fo_ashfall' },
         ],
     },
@@ -482,7 +482,7 @@ Perhaps it will be read. Ash-wolves are no fools. Nor, you are learning, are Ash
         text: (g) => `They go round you. A goat goes with them, and you keep a bite clean through the forearm, the kind that leaves a scar. The hunters reach the field in time to watch two grey backs sink into the barley, carrying the goat between them.${byForm(g, '', " Yuki comes out of the barley the other way a moment later, with grey fur in her teeth and no goat: she went after the one that came at her, the lame one, while the other went round. Wolves do that.", '')}
 
 Its owner bows to you regardless and thanks you for the attempt. Nothing else this week has been as hard to take.`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line; RB2 (WC): Fable's redraft after the review
-        choices: [{ text: 'Bandage it. Sleep.', to: 'fo_morning' }],
+        choices: [{ text: 'Bandage the arm. Sleep.', to: 'fo_morning' }],
     },
 
     fo_morning: {

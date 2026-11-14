@@ -163,7 +163,7 @@ Then the Qi. The tool draws it as a slow fog of particles, and every particle ca
 "Lovely," you murmur. "A planet with a grudge."
 
 Your Ouroboros Axiom, the pillar every one of your people carries, the loop that runs the body like a closed garden, has already gone to work. Whatever enters through your meridians is filtered, turned over, composted. You can breathe this. Most things here, you suspect, can't. Not without help.`,
-        choices: [{ text: 'Find out what "help" looks like around here. Later. First: the clearing ahead.', to: 'clearing' }],
+        choices: [{ text: '"Help" can wait. The clearing ahead can\'t.', to: 'clearing' }],
     },
     scan_bad: {
         id: 'scan_bad', title: 'Readings (partial)', art: 'omnitool', place: 'Unknown forest',
@@ -494,7 +494,7 @@ Mei Lin goes through his sleeves while he lies there, and comes out with a pouch
 
 She holds the stare well past the point of manners. Then, under her breath, a word that could be *idiot* and could, just possibly, be *thank you*.`,
         enter: (g) => { g.flags.gao_broken = true; addItem(g, 'beast_core', 1); return ['+1 Murky beast core (it was in Gao Feng\'s pouch, under the pills). The jade token stays with Mei Lin.']; },
-        choices: [{ text: 'Go with her. Behind you, Gao Feng is still swearing — slowly, and in great detail — what his Sect will do to you.', to: 'mei_lin' }],
+        choices: [{ text: 'Go with her. Behind you, Gao Feng is still swearing, slowly and in great detail, what his Sect will do to you.', to: 'mei_lin' }],
     },
     gao_spared: {
         id: 'gao_spared', title: 'Mercy, Probably a Mistake', art: 'gao_down', place: 'Blackroot Wilds — the herb slope',
@@ -528,7 +528,7 @@ You take it. The stem hums against your palm, hungry and faintly spiteful: Qi pa
 
 ${byForm(g, "Yuki, from your shoulder,", "Yuki, from your side,", "Yuki, at your elbow,")} offers Mei Lin one slow blink. Mei Lin — to her eternal credit — blinks back.`,
         choices: [
-            { text: '"Tell me about the tribute. And the tribulations. And why everyone here tastes like a funeral."', do: (g) => { g.flags.lore1 = true; bumpRel(g, 'Mei Lin', 3, 0); return []; }, time: 30, to: 'lore' },
+            { text: '"Tell me about the tribute. And the tribulations. And why the air here tastes like a funeral."', do: (g) => { g.flags.lore1 = true; bumpRel(g, 'Mei Lin', 3, 0); return []; }, time: 30, to: 'lore' },
             { text: '"Is there somewhere with a roof and food? I\'ll trade work."', time: 60, to: 'village' },
         ],
     },
@@ -629,13 +629,13 @@ You are still looking for it when it finds you. It has the dimensions of a small
         id: 'boar_won', title: 'Meat for Forty Houses', art: 'boar', place: 'Ashfall Hamlet',
         enter: (g) => { addItem(g, 'beast_core', 1); eat(g, 40); bumpRel(g, 'Village', 12, 0); g.flags.boar = true; return ['+1 Murky beast core. You eat with the village: +40 satiety.']; },
         text: `They come out with carts. By sunset half of Ashfall is grilling ironhide, the children are carrying the tusks to the shrine in solemn procession, a grandmother who has watched you carve for every child in reach before touching a rib yourself is telling her neighbour, as a finding, that the stranger was raised by someone, and a white-bearded hunter kneels in the dust and formally presents you with his own boar spear, which you take to be the local knighthood. You accept. You have nowhere to keep a spear. Then you remember that you own an infinite closet.`,
-        choices: [{ text: (g) => (g.flags.long && dayHour(g) < 16 ? 'Back to the village.' : 'Evening.'), time: 30, to: (g) => (g.flags.long ? (dayHour(g) >= 16 ? nextEvening(g) : hubOf(g)) : 'evening') }],
+        choices: [{ text: (g) => (g.flags.long && dayHour(g) < 16 ? 'Back to the village.' : 'Evening, and Mei Lin\'s table.'), time: 30, to: (g) => (g.flags.long ? (dayHour(g) >= 16 ? nextEvening(g) : hubOf(g)) : 'evening') }],
     },
     boar_lost: {
         id: 'boar_lost', title: 'Ironhide Wins', art: 'boar', place: 'Blackroot Wilds — the oak hollow',
         enter: (g) => { g.james.hp = Math.max(1, Math.floor(g.james.hp * 0.7)); return []; },
         text: (g) => byForm(g, 'The fight ends with you in a tree and the boar underneath it, losing interest. Eventually the two of you settle on a draw. You limp home to Ashfall carrying bark in places where bark has no business.', 'You end up up a tree. Yuki ends up on the far side of the hollow with a mouthful of ironhide bristle and nothing else. *It has armour,* says the bond. *I have standards.* The boar ends up bored. You both agree to call it a draw, and you limp back to Ashfall with bark in places bark should not go.', 'You finish the fight in one tree and Yuki in the next, her tail tucked up out of reach. The boar gets bored first. "A draw," she rules, and you limp back to Ashfall with bark where bark has no business.'), // v0.11.127 (LP1, FL; LQ2, TN: Fable's ALT A): the great root-kin's own
-        choices: [{ text: (g) => (g.flags.long && dayHour(g) < 16 ? 'Back to the village.' : 'Evening.'), time: 30, to: (g) => (g.flags.long ? (dayHour(g) >= 16 ? nextEvening(g) : hubOf(g)) : 'evening') }],
+        choices: [{ text: (g) => (g.flags.long && dayHour(g) < 16 ? 'Back to the village.' : 'Evening, and Mei Lin\'s table.'), time: 30, to: (g) => (g.flags.long ? (dayHour(g) >= 16 ? nextEvening(g) : hubOf(g)) : 'evening') }],
     },
     evening: {
         id: 'evening', title: 'Dinner', art: 'dinner', place: 'Ashfall Hamlet — Mei Lin\'s house',
@@ -655,7 +655,7 @@ The lamp makes Mei Lin's eyes bright. The white jacket is off, its red sash fold
 "Explain what that is. Slowly. I've had wine."`,
         choices: [
             { text: 'Tell her. Fungi, the forest that talks underground, the home you lost. Let it be honest.', do: (g) => { bumpRel(g, 'Mei Lin', 6, 6); g.flags.honest = true; return []; }, to: 'evening2' },
-            { text: 'Flirt back. Shamelessly. You\'re forty, not dead.', do: (g) => { bumpRel(g, 'Mei Lin', 3, 10); g.flags.flirted = true; return []; }, to: 'evening2' },
+            { text: 'Flirt. Shamelessly. You\'re forty, not dead.', do: (g) => { bumpRel(g, 'Mei Lin', 3, 10); g.flags.flirted = true; return []; }, to: 'evening2' },
             { text: 'Thank her for dinner and sleep by the stove with Yuki.', to: 'tribute_dawn_sleep' },
         ],
     },
