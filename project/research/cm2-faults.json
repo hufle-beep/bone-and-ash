@@ -1,0 +1,19 @@
+[
+ {"id":"F1","file":"js/story/music.js","find":"if (m && m.d === d) {","replace":"if (m && m.d === d && L.cur.mu === id) {","note":"one-a-day rule: a second evening screen picks again"},
+ {"id":"F2","file":"js/story/music.js","find":"if (!at || hour(g) < MUSIC_FROM) return null;","replace":"if (!at || hour(g) <= MUSIC_FROM) return null;","note":"off by one: no line from 15:00 to 15:59"},
+ {"id":"F3","file":"js/story/music.js","find":"mid: [30, 80]","replace":"mid: [30, 81]","note":"steps overlap at 80 (mid and high both open)"},
+ {"id":"F4","file":"js/story/music.js","find":"spec: a1 && (x.from || 0) > 0 && (x.from || 0) === ac ? 1 : 0","replace":"spec: 0","note":"this Coil's new lines no longer come first"},
+ {"id":"F5","file":"js/story/music.js","find":"export const DEFER = { heart_camp: readOpen };","replace":"export const DEFER = {};","note":"the camp shows a line and the reading follows: two a day"},
+ {"id":"F6","file":"js/story/music.js","find":"export const DAY_USED = new Set(['heart_read']);","replace":"export const DAY_USED = new Set([]);","note":"the reading no longer uses up the day"},
+ {"id":"F7","file":"js/story/music.js","find":"if (OWN_MUSIC.test(v?.text || '')","replace":"if (OWN_MUSIC.test(g.scene || '')","note":"the game's own music lines no longer count"},
+ {"id":"F8","file":"js/story/music.js","find":"% 4 === 0;","replace":"% 5 === 0;","note":"archive one day in five, not four"},
+ {"id":"F9","file":"js/story/music.js","find":"const t = m.i >= 0 && L.cur.mu === id ?","replace":"const t = m.i >= 0 ?","note":"the line shows again on a later visit and on other screens that day"},
+ {"id":"F10","file":"js/main.js","find":"Read it all again</button>'}${muHtml}</div>","replace":"Read it all again</button>'}</div>","note":"no line under a folded screen"},
+ {"id":"F11","file":"js/main.js","find":"setEdition(store.get(EDITION_KEY));","replace":"","note":"the phone's edition is not restored on load"},
+ {"id":"F12","file":"js/story/reading.js","find":"(g.flags.log_heard ? 'named' : g.flags.ship_found ? 'found' : 'notfound')","replace":"(g.flags.ship_found ? 'found' : g.flags.log_heard ? 'named' : 'notfound')","note":"'the ship' after the log (Selene rule)"},
+ {"id":"F13","file":"js/story/reading.js","find":"hour(g) >= READ_FROM","replace":"hour(g) > READ_FROM","note":"off by one: no reading from 16:00 to 16:59"},
+ {"id":"F14","file":"js/core/edition.js","find":"export function fillRefs(text, refs, ed = edition)","replace":"export function fillRefs(text, refs, ed = 'general')","note":"the named edition never reaches the screen"},
+ {"id":"F15","file":"js/story/music_texts.js","find":"You turn it up one notch anyway.","replace":"For a moment you turn it up one notch anyway.","note":"a listed tic in a music line"},
+ {"id":"F16","file":"js/story/music_texts.js","find":"Yuki asks for the one with the pipes.","replace":"Yuki, on your shoulder, asks for the one with the pipes.","note":"a form fault (the great form and the woman on his shoulder)"},
+ {"id":"F17","file":"js/story/music_texts.js","find":"general: \"dark, slow electronic pop sung in a low voice\"","replace":"general: \"dark, slow electronic pop like Kraftwerk sung in a low voice\"","note":"a proper name in the general edition (not from the table)"}
+]

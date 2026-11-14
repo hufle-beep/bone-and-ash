@@ -105,8 +105,16 @@ const { LF_DRILL } = await import(js('story/longforest.js')); const { SEASON_LIN
 // v0.11.181 (RV1, TG4): the kitchen's and the pot's texts (kitchen_texts.js) as the pool `kitchen`: they show only with a flag or in a result
 const KT = await import(js('story/kitchen_texts.js'));
 const kitchenLines = [...Object.values(KT.KT_UP), ...Object.values(KT.KT_DAY).flat(), ...Object.values(KT.KT_RETURN), ...KT.POT_LINE.ashfall, ...KT.POT_LINE.fo, KT.POT_COOK.ashfall.result, KT.POT_COOK.fo.result];
-const POOLS = { memory: [...MEMORY_LINES], yuki: yukiLines, aptitude: [ADAPT_REPLY], replies: dayReplies, house: houseLines, kitchen: kitchenLines, lf_drill: Object.values(LF_DRILL).flat(), lf_season: [...SEASON_LINES] };
+// v0.11.182 (CB1, EK): the music and archive lines (music_texts.js) in each edition, as the pools `music` (general) and `music_named`
+const { MUSIC_LINES: MLX } = await import(js('story/music.js')); const { fillRefs: FRX } = await import(js('core/edition.js')); const { MUSIC_REFS: MRX0 } = await import(js('story/music_texts.js'));
+const allMusicTexts = (ed) => Object.values(MLX).flatMap((p) => Object.values(p).flat()).map((x) => FRX(x.text, MRX0, ed));
+// RS1: the reading to Ya in the named edition (the scene lint reads the general one), each ship sentence and the lover's
+const RDX = await import(js('story/reading.js')); const EDX = await import(js('core/edition.js')); const { MUSIC_REFS: MRX } = await import(js('story/music_texts.js'));
+const readNamed = Object.values(RDX.READ.ship).map((sh) => EDX.fillRefs(RDX.READ.text.replace('{SHIP}', sh).replace('{LOVER}', RDX.READ.lover), MRX, 'named'));
+const POOLS = { memory: [...MEMORY_LINES], yuki: yukiLines, aptitude: [ADAPT_REPLY], replies: dayReplies, house: houseLines, kitchen: kitchenLines, music: allMusicTexts('general'), music_named: allMusicTexts('named'), reading_named: readNamed, lf_drill: Object.values(LF_DRILL).flat(), lf_season: [...SEASON_LINES] };
 const pools = poolCounts(POOLS, rows.filter((r) => r.kind === 'text').flatMap((r) => r.renders));
+// RV1 (TG6): the reading's named edition against every scene but its own (its general text is heart_read itself)
+pools.reading_named = poolCounts({ reading_named: readNamed }, rows.filter((r) => r.kind === 'text' && r.id !== 'heart_read').flatMap((r) => r.renders)).reading_named;
 const snap = { totals: now.totals, areas: now.areas, pools };
 
 console.log(`text lint (log only): ${T.scenes} scenes, ${T.labels} choice labels; ${T.words} words of base text, ${T.variantWords} in variants, ${T.labelWords} in labels`);

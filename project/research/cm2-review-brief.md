@@ -1,0 +1,24 @@
+# Cold review: CM push 2 (v0.11.182), Bone and Ash
+
+You review a push you have not seen built. Repo: `/home/claude/bone-and-ash` (the working copy holds the uncommitted push; never edit it: render in a scratch copy, plant faults only through `tools/mutate.mjs`). Read first: `project/review-checklist.md` (how to read, what to look for), `project/canon-card.md`. Then `/tmp/cm2/rv/diff.txt` (the code and test diff; the texts are in the new files `js/story/music_texts.js`, `js/story/reading_texts.js`). Context packets: `/tmp/cm2/rv/packet-heart.txt` (the Heart's camp and the new reading scene, full), `/tmp/cm2/rv/tags-A.txt` and `tags-B.txt` (the evening screens the music lines show under: when they show, the last part of their text). The lore for these texts: `project/lore.md`, sections "James: cooking, music and his archive" and "Selene" only. Rule 11: read excerpts (grep, line ranges), never whole story files.
+
+## What the push does (the owner's picks CB1, DF1, D1, RS1, R1)
+
+- **Editions** (`js/core/edition.js`): a per-phone setting (Settings → References: General by default, or By name; key `boneash.edition`, not in the save). Texts name real bands, songs, books and games only through slots `{ref:id}`, filled from the table `MUSIC_REFS` (named phrase / general phrase with no proper names).
+- **Music and archive lines** (`js/story/music.js`, texts by Fable in `music_texts.js`): at most one line a text day (from 05:00), under the text of the day's first evening screen (19 screens in `MUSIC_SCREENS`), from 15:00; main.js draws it under the prose, folded or not; same line on every redraw of a visit, none on a later visit that day. Not on the prologue's supper or the sunset walk (the roof and the third supper follow them with music lines of their own). The game's five older music lines (`OWN_MUSIC`) use up their day. One day in four (seed, Coil, day) the archive pool comes first. Five stretches (wilds, ashfall, fallout, journey, return), each with its pools; places per screen; reactions (`who`, `step`: low < 30, mid 30–79, high 80+, by friendship; presence by place, Mei Lin and Ya on the journey only once in the party). Act 1 lines open on the act's Coil `from` (0/1/2; `lines.js` actCoil), a line opening on this Coil first. State in the save's existing `lines` record (`mu`), reset each Coil. No gain, time, check, flag or id change.
+- **"Read to Ya"** (`js/story/reading.js`, texts by Fable in `reading_texts.js`): a choice appended last on `heart_camp` (from 16:00, Ya in the party, once a Coil via world flag `hc_read`), 30 minutes, no gain; scene `heart_read`, its ship sentence by `ship_found` / `log_heard` ("the ship" before the log, "Selene" after), a closing sentence when `ya_romance`; then `heart_night`. It is the day's music line: the camp shows no pool line while the choice is open, and none follows that day. New canon (owner's pick R1): Ya can't read letters.
+- Claude's cuts on Fable's drafts: facts (Paysage d'Hiver's spelling, Obkatiekat a cat-eared rock-and-scream VTuber, Circles' subject not claimed, *Odyssey* hololive English's), Yuki's bond speech removed where a human Yuki would speak aloud, four reused five-word runs reworded, Ya's "tall man" → "scholar".
+- Reserved for push 3 (not to appear): the 14 songs and the artists Eivør, Clamavi de Profundis, Wardruna, Ironmouse, Nyanners, Lord Athelstan, Holoadvent, Holomyth.
+- Checks run: the full `bash tools/check.sh`, exit 0 (models unchanged; 4 random-bot fight rates moved 5–8 points, log only).
+
+## Look especially at
+
+- Facts about the real artists, songs, books and games in the named phrases and the lines (accuracy; no lyrics or quotations); the general phrases (no proper names; each reads in its sentence).
+- Every line against every screen it can show under (its stretch and place): who is there, what is there (fire, meal, stove, lamp), Yuki in all three forms, time words, the Coil gate, what the prologue's James knows on Day 1.
+- The reading scene against the Heart's camp and night, the ship states, Ya's canon (`lore.md` "Places and people"), the lover sentence.
+- The code: the one-a-day rule (any path that shows two lines in a day, or a line twice), the defer on `heart_camp`, redraws, Coil resets, old saves without `lines.mu`, a hand-edited `mu`; the Settings toggle; edge cases in `lineOpen`, `archiveDay`, `fillRefs`.
+- Test gaps: plant faults with `tools/mutate.mjs` (`node tools/mutate.mjs faults.json --jobs 2 --out /tmp/cm2/rv/mutate.md`; the default command is the story test, quick). Around 12–16 faults across code and texts.
+
+## Report
+
+Write `/tmp/cm2/rv/review.md`: findings as H (high), M (medium), L (low), each with file and line, what is wrong, and a fix; then TG (test gaps); then the planted faults and which were caught. At most about 10 KB. Reply with just a one-line summary (counts).

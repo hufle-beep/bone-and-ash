@@ -90,6 +90,9 @@ button { font: inherit; color: inherit; }
 .prose.reply p:first-child::first-letter { font: inherit; float: none; margin: 0; }
 .prose p.memory:first-child::first-letter { font: inherit; float: none; margin: 0; }
 .prose p.memory + p::first-letter { font-family: var(--display); font-weight: 800; font-size: 2.1em; float: left; line-height: 0.9; margin: 0.08em 0.12em 0 0; }
+/* v0.11.182 (owner pick CB1: ML): the day's music or archive line, under the scene text */
+.prose p.music { color: var(--ink-2); border-left: 2px dotted var(--ink-dim); padding-left: 0.6em; }
+.prose p.music::before { content: '\266A\00a0'; color: var(--ink-dim); }
 .readall { display: block; margin: 0 0 0.95em; padding: 0.35em 0; background: none; border: 0; font: inherit; font-size: 0.92rem; color: var(--red); cursor: pointer; text-decoration: underline; text-underline-offset: 0.2em; }
 
 /* ---- what just happened: rolls and gains ---- */

@@ -1,0 +1,28 @@
+# Run A: the prologue, the Fallout and the Return (37 lines)
+
+Packet: `/tmp/cm2/tags-A.txt` (each screen the lines can show under: when it shows in play (days, hours, Coils), the last part of its text, its choices). Output file: `/tmp/cm2/draft-A.md`.
+
+## Stretches, places, keys
+
+**wilds** (the prologue, days 1–4: James alone in the Blackroot Wilds with Yuki, newly arrived, no village yet; screens `camp` from 15:00 and `night`, on a dry rise above a stream; a fire is not certain). Places: `any` only. Keys `wilds.01`–`wilds.08`: 7 music, 1 archive; one of the music lines is a Yuki reaction (`who` yuki, `step` -). All `from` 0.
+Slots: `sabbath` Black Sabbath · `iron_man` Black Sabbath's *Iron Man* · `paranoid` Black Sabbath's *Paranoid* · `deep_purple` Deep Purple · `child_in_time` Deep Purple's *Child in Time* · `black_night` Deep Purple's *Black Night* · `the_cure` The Cure · archive: `star_trek` *Star Trek*. Genre words (synthwave, darkwave, classic rock) need no slot.
+
+**ashfall** (the prologue, days 3–7, Ashfall hamlet, Mei Lin's house; James is a stranger lodging with Mei Lin and her mother; the Sect's tribute is coming). Places: `house` (`evening`, `evening2`, `supper`: a meal or after it, Mei Lin and her mother at the table, a lamp), `loft` (`village_night`: the herb loft where he sleeps, Yuki only), `walk` (`mei_walk`: a sunset walk along the barley with Mei Lin), or `any`. Keys `ashfall.01`–`ashfall.12`: 10 music, 2 archive. Reactions among the music lines: `mei` low, `mei` mid, `mei` high, `mother` low, `mother` mid (each with place `house`, or `walk` for Mei Lin if you like). All `from` 0.
+Slots: `iron_maiden` Iron Maiden · `run_to_the_hills` Iron Maiden's *Run to the Hills* · `number_of_the_beast` Iron Maiden's *The Number of the Beast* · `depeche_mode` Depeche Mode · `lacuna_coil` Lacuna Coil · `birthday_massacre` The Birthday Massacre · `disturbed` Disturbed · `ten_thousand_fists` Disturbed's *Ten Thousand Fists* · archive: `the_hobbit` *The Hobbit* · `dune` *Dune*. Genres: J-pop, synthpop.
+
+**fallout** (Act 1, days 8–11: back in Ashfall after the Sect's men; the village builds a palisade and argues about the children; James is one of the house now). Places: `house` (`fo_supper`: supper, Mei Lin and her mother, sometimes a neighbour), `loft` (`fo_night`, `fo_last_night`: the herb loft, Yuki only), or `any`. Keys `fallout.01`–`fallout.10`: 8 music, 2 archive. Reactions: `mei` mid, `mei` high, `mother` low, `mother` mid, `neighbour` high (all `house`). `from`: four lines 0, three 1, three 2 (spread the reactions and archive lines across them).
+Slots: `hololive_en` Hololive English · `calliope` Mori Calliope · `nerissa` Nerissa Ravencroft · `gura` Gawr Gura · `bao` Bao the Whale · `amalee` AmaLee · `nitzer_ebb` Nitzer Ebb · `vnv_nation` VNV Nation · `ashbury_heights` Ashbury Heights · archive: `the_expanse` *The Expanse* · `babylon_5` *Babylon 5*. Genres: K-pop, post-punk, futurepop, VTuber music.
+
+**return** (Act 1, days 20–21: home from the Heart of the Blackroot; the eve of the end; Ya now sleeps in the grove nearby). Places: `house` (`rt_evening`: the last supper before, the mother, Mei Lin and Ya), `stove` (`rt_quiet_night`: James by the stove, Yuki on him, everyone else asleep), or `any`. Keys `return.01`–`return.07`: 6 music, 1 archive. Reactions: `mother` mid, `ya` high (both `house`). `from`: three 0, two 1, two 2.
+Slots: `perfect_strangers` Deep Purple's *Perfect Strangers* · archive: `foundation` *Foundation*; you may also reuse any slot above.
+# Run B: the journey (28 lines)
+
+Packet: `/tmp/cm2/tags-B.txt` (each screen the lines can show under: when it shows in play (days, hours, Coils), the last part of its text, its choices). Output file: `/tmp/cm2/draft-B.md`.
+
+**journey** (Act 1, days 11–20: James's party crosses the Blackroot to the Heart, the great dead tree, and comes back; Mei Lin and Ya travel with him once they have joined; Yuki always). Places: `camp` (`bl_camp`, `bl_fireside`, `bl_night`: camps in the Blackroot; `rt_fire_talk`: the far bank on the way home, the three of them by a fire), `tree` (`heart_camp`, `heart_night`: a hollow inside the Old Tree, its singing heard faintly behind a door), `walk` (`yk_camp`: James walks out past the firelight with Yuki in human form, just the two of them; no one else hears), or `any` (fits all of them; don't assume a fire).
+
+Keys `journey.01`–`journey.28`: 23 music, 5 archive. Reactions among the music lines: `ya` low, `ya` mid, `ya` high, `mei` high, `yuki` (step -); Mei Lin and Ya never at `walk`. `from`: ten lines 0, nine 1, nine 2 (spread reactions and archive lines across them; lines opening later should feel like new ground, not variations).
+
+Slots (music): `saor` Saor · `passage_dhiver` Passage D'Hiver · `alcest` Alcest · `wittr` Wolves in the Throne Room · `gojira` Gojira · `lenfant_sauvage` Gojira's *L'Enfant Sauvage* · `miracle_of_sound` Miracle of Sound · `circles` Rachie's cover of *Circles* · `obkatiekat` Obkatiekat · `neuro` Neuro-sama · `evil_neuro` Evil Neuro · `mumei_artist` Nanashi Mumei (the artist only; her song "Mumei" is reserved) · `odyssey` Hololive's *Odyssey*. Genres: atmospheric black metal, death metal, folk, nerdcore.
+
+Slots (archive): `lotr` *The Lord of the Rings* · `silmarillion` *The Silmarillion* · `witcher` *The Witcher* · `wheel_of_time` *The Wheel of Time* · `lovecraft` Lovecraft · `worm` *Worm* · `scp` the SCP Foundation files · `three_body` *The Three-Body Problem* · `wh40k` *Warhammer 40,000* · `mass_effect` *Mass Effect* · `dragon_age` *Dragon Age* · `baldurs_gate` *Baldur's Gate* · `gibson` William Gibson · `pkd` Philip K. Dick · `star_wars` *Star Wars* · `rwby` *RWBY* · `harry_potter` *Harry Potter*. Use only some; five archive lines.

@@ -142,6 +142,12 @@ def main_menu(pg, url):
     pg.click('button[data-showchecks]'); until(pg, "localStorage.getItem('boneash.showchecks') === '1'", 3000)
     if pg.evaluate("localStorage.getItem('boneash.showchecks')") != '1': fails.append('Settings: Show checks did not switch on')
     pg.click('button[data-showchecks]'); until(pg, "localStorage.getItem('boneash.showchecks') === '0'", 3000)
+    # v0.11.182 (RV1, TG4): Settings → References: General by default, By name kept on the phone and restored on a reload
+    if not pg.query_selector('button.primary[data-edition="general"]'): fails.append('ES: References is not General by default')
+    pg.click('button[data-edition="named"]'); until(pg, "localStorage.getItem('boneash.edition') === 'named'", 3000)
+    pg.reload(); until(pg, '.main-menu', 10000, 'attached'); pg.click('button[data-menu="settings"]'); until(pg, 'button[data-edition]', 5000, 'visible')
+    if not pg.query_selector('button.primary[data-edition="named"]'): fails.append('ES: By name was not restored after a reload')
+    pg.click('button[data-edition="general"]'); until(pg, "localStorage.getItem('boneash.edition') === 'general'", 3000)
     pg.click('button[data-menu="main"]'); until(pg, '.main-menu', 5000, 'attached')
     pg.click('button[data-menu="saves"]'); until(pg, 'button[data-exportall]', 5000, 'visible'); check_text(pg, 'Saves (menu)')
     pg.click('button[data-menu="main"]'); until(pg, '.main-menu', 5000, 'attached')
@@ -508,6 +514,26 @@ def picked(pg, url):
         if n != 1: fails.append(f'picked, {where}: {n} recoloured buttons, expected 1 (the work card "Test the water" stays as it was)')
     if not any(f.startswith('picked') for f in fails): notes.append('picked choices recoloured, work left alone')
 
+def music_line(pg, url):
+    """v0.11.182 (RV1, TG4): the day's music line under a folded evening screen (the Wilds' night on Coil 2, read on Coil 1), in the named edition."""
+    st = json.loads((ROOT / 'saves/v0.11.7-coil2-day1.json').read_text())
+    st = json.loads(st['data']) if 'data' in st and isinstance(st.get('data'), str) else st
+    st['scene'] = 'night'; st['combat'] = None; st['minutes'] = 1440 + 21 * 60 + 30
+    st['coil']['n'] = 2; st['seen'] = {'night': 1}; st['lines'] = None
+    js = ("import { SCENES } from './js/story/prologue.js'; import { sceneView } from './js/core/story.js';"
+          "import { noteRead } from './js/story/again.js'; import { migrate, ensureBars } from './js/core/game.js';"
+          "const st = JSON.parse(process.argv[1]); const c = ensureBars(migrate(JSON.parse(JSON.stringify(st)))); const read = {};"
+          "noteRead({ read, coil: { n: 1 } }, sceneView(c, SCENES).text, 1); console.log(JSON.stringify(read));")
+    st['read'] = json.loads(subprocess.run(['node', '--input-type=module', '-e', js, json.dumps(st)], cwd=ROOT, capture_output=True, text=True, check=True).stdout)
+    fresh(pg, url, "a => { localStorage.clear(); localStorage.setItem('boneash.auto', a); localStorage.setItem('boneash.edition', 'named'); }", json.dumps(st))
+    if not pg.query_selector('.prose.again'): fails.append('ML (TG4): the night read on Coil 1 did not fold'); return
+    mu = pg.query_selector('.prose.again p.music')
+    if not mu or len(mu.inner_text().strip()) < 20: fails.append('ML (TG4): no music line under the folded night'); return
+    t0 = mu.inner_text(); pg.reload(); until(pg, '.main-menu', 10000, 'attached'); enter(pg)
+    mu2 = pg.query_selector('.prose p.music')
+    if not mu2 or mu2.inner_text() != t0: fails.append('ML (TG4): the line changed or went on a reload of the same visit')
+    else: notes.append('the music line under a folded screen, the same after a reload')
+
 def again(pg, url):
     """v0.11.35 (P1-a): a scene read in an earlier Coil folds under a memory line; Read it all again opens it; Skip to the next choice
     walks the stretch at once (night_won → morning → the wilds) and lands on the task screen."""
@@ -849,6 +875,7 @@ def main(part=0):
                 picked(pg, url)
                 # 10. a scene read before: the fold, the memory line, the skip (v0.11.35)
                 again(pg, url)
+                music_line(pg, url)
                 # 13. quiet repeats and the same-visit fold (v0.11.134, LP2)
                 lp2(pg, url)
                 # 14. whose relationships are shown (v0.11.137, HV1)

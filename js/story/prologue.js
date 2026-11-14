@@ -26,6 +26,7 @@ import { MERIDIANS, EXTRA_FROM } from './meridians.js';
 import { installYukiTime } from './yuki_time.js'; // v0.11.137 (TR1)
 import { installHouseTime } from './house_time.js'; // v0.11.139 (MW1)
 import { installKitchen } from './kitchen_install.js'; // v0.11.181 (SP1, PS)
+import { installReading } from './reading.js'; // v0.11.182 (RS1)
 import { installYukiPath } from './yuki_path.js';
 import { installCoil } from './coil_scenes.js';
 import { installOnce } from './oneoff.js';
@@ -1102,6 +1103,8 @@ installYukiTime(SCENES);
 installHouseTime(SCENES);
 // v0.11.181 (owner picks SP1, KG1; CM push 1): the cook-with-the-women cards, after the house cards on the prologue's and the Fallout's Ashfall
 installKitchen(SCENES);
+// v0.11.182 (owner picks RS1, D1; CM push 2): "Read to Ya" at the camp inside the Old Tree, appended last on heart_camp
+installReading(SCENES);
 // v0.11.174 (owner pick SL1, SC): the Selene story at the last camp, appended after everything else on rt_camp, so no position changes
 installSelene(SCENES);
 

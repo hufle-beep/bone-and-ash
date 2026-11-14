@@ -1,11 +1,11 @@
 {
  "saved": "2026-11-14",
  "totals": {
-  "scenes": 330,
-  "words": 37067,
+  "scenes": 331,
+  "words": 37387,
   "variantWords": 42868,
-  "labels": 839,
-  "labelWords": 5730,
+  "labels": 841,
+  "labelWords": 5740,
   "sharedChunks": 137,
   "sharedScenes": 112,
   "reused": 45,
@@ -17,11 +17,11 @@
  },
  "areas": {
   "prologue+shared": {
-   "scenes": 78,
-   "words": 10443,
+   "scenes": 79,
+   "words": 10763,
    "variantWords": 14264,
-   "labels": 165,
-   "labelWords": 1205,
+   "labels": 166,
+   "labelWords": 1209,
    "sharedScenes": 30,
    "reused": 0,
    "favScenes": 14,
@@ -90,8 +90,8 @@
    "scenes": 38,
    "words": 4397,
    "variantWords": 4457,
-   "labels": 80,
-   "labelWords": 510,
+   "labels": 81,
+   "labelWords": 516,
    "sharedScenes": 12,
    "reused": 9,
    "favScenes": 10,
@@ -178,6 +178,33 @@
   "kitchen": {
    "lines": 22,
    "words": 862,
+   "dupes": 0,
+   "sceneShared": 0,
+   "tics": 0,
+   "broken": 0,
+   "spacing": 0
+  },
+  "music": {
+   "lines": 65,
+   "words": 2265,
+   "dupes": 0,
+   "sceneShared": 2,
+   "tics": 0,
+   "broken": 0,
+   "spacing": 0
+  },
+  "music_named": {
+   "lines": 65,
+   "words": 1903,
+   "dupes": 0,
+   "sceneShared": 1,
+   "tics": 0,
+   "broken": 0,
+   "spacing": 0
+  },
+  "reading_named": {
+   "lines": 3,
+   "words": 986,
    "dupes": 0,
    "sceneShared": 0,
    "tics": 0,

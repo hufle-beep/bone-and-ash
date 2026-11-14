@@ -16,7 +16,7 @@
 - **Bonesinger** braided with his Qi into one **Convergence**: bone from nowhere, instantly; darts, needles, a wraithbone blade.
 - **Locals can't sense his cultivation**: to them he looks mortal. They place him by what they see, never by a realm they feel.
 - **Flight** from Foundation, natural, by realm; locals fly only from Golden Core, so nobody in the prologue or Act 1 flies but him and Yuki. Never in the prologue's fights.
-- Loves cooking and feeding people (Central and Eastern European, Italian, East Asian); music always on the omnitool, quiet, often no earphones; never while hunting. Throwaway remarks by others (never a speech) show the warm man under the deadpan. Music stays generic until CM settles it.
+- Loves cooking and feeding people (Central and Eastern European, Italian, East Asian); music always on the omnitool, quiet, often no earphones; never while hunting. Throwaway remarks by others (never a speech) show the warm man under the deadpan. Real names (bands, songs, books, games) only through slots `{ref:id}`: two editions, named and general (v0.11.182).
 
 ## Yuki
 - His **root-kin**, bonded from birth, born the same day. Same realm as James. She and James alone remember every Coil.
@@ -30,6 +30,7 @@
 - The Qi is poisoned ("something died here"). Sects climb on herbs, pills, beast cores and each other; Heaven's lightning at each breakthrough is real for locals and kills some.
 - **A realm gap is absolute among locals**: no one beats a higher realm. James and Yuki are the only exceptions; nobody knows it.
 - **The Old Tree**: a Hearth Tree grown about a thousand years ago around a crashed seed-ship by forty gardeners of the Ninth Grove under Wren Aldous. About four hundred years ago a calm man in red learnt its song, came back with three hundred disciples, took its heart and founded the **Crimson Lotus Sect**. Locals were told it died of age. A living seed-sliver remains in the heart-chamber.
+- **Seedlings** (his people's ships, v0.11.182; the owner 21:16 in `lore.md` "Selene"): mindless automatons grown for one task, like Ents to look at; done, they return to the ship's roots and the next learns from the last. Some wake to minds: never wiped, they become family, may refuse.
 - **Selene**: the ship's name, first heard in Wren's log. From then on "Selene", "she", "her", **never "the ship"**; before it, "the ship" is right. One of his Earth's first colonisation attempts, lost; a spacetime anomaly threw her into this universe. Ships are sentient, not sapient: homes, family and transport.
 - **The Coil**: the prologue loops to the tribute on Day 7, Act 1 to Shen Qiu on Day 21. James never dies. Everyone but Yuki forgets; relationships start the next Coil with a 25% head start.
 
@@ -38,5 +39,5 @@
 - **Crimson Lotus**: Gao Feng (outer disciple, about 20, haughty; can be killed or spared); Lu Han (inner disciple, about 30, still face, long sword); Outer Elder **Shen Qiu** (Core Formation, about three hundred years lived; Ashfall, Day 21).
 - **Realms as locals see them**: Mortal Vessel nearly everyone; Foundation the disciples ("Disciple", "young master"); Core Formation the outer elders ("Elder", "Senior"); Golden Core sect masters, the first who fly.
 - **The wilds** (prologue Days 1–3): black bark, grey moss, a bruise-coloured sky; the bone field, the mire, the hollow.
-- **The Blackroot** (Act 1): the root road, the drowned wood, the ashen hills, the Heart. **Ya**: 27, feral huntress, tall and rangy, barefoot, a necklace of teeth, a bone-tipped spear, a red scar under one eye; the second romance (a throuple can form).
+- **The Blackroot** (Act 1): the root road, the drowned wood, the ashen hills, the Heart. **Ya**: 27, feral huntress, tall and rangy, barefoot, a necklace of teeth, a bone-tipped spear, a red scar under one eye; the second romance (a throuple can form). She can't read letters (v0.11.182, R1); James is "scholar" to her.
 - **The Long Forest** (from Coil 2, so James already knows Mei Lin there): Fang Wei (a "lapsed" outer disciple) and the Tan brothers.

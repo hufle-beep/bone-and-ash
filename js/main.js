@@ -19,6 +19,8 @@ import { APK_URL, UPDATE_KEY, CHECK_DELAY, updPrefs, inApp, makeUpdater } from '
 import { exportRoute, canSaveToFile, wantsServiceWorker, savedName, resultPlace, FILE_TEXT } from './core/app.js'; // v0.11.148 (EX1; RX1: savedName, resultPlace)
 import { SEEN_KEY, NOTES, newsSince, versionLabel, statusPlace, takeoverNotice, recheckDue, READY_TEXT } from './core/news.js'; // v0.11.150 (BL1)
 import { realmShockHpBonus } from './core/formulas.js';
+import { EDITIONS, EDITION_KEY, getEdition, setEdition } from './core/edition.js'; // v0.11.182 (CB1, DF1: ES)
+import { musicLine } from './story/music.js'; // v0.11.182 (CB1: ML, MR, AR)
 import * as ART from './art/art.js';
 const sceneArt = (key) => { ART.setArtState?.({ yukiForm: yukiForm(g) }); return ART.sceneArt(key); };
 
@@ -78,6 +80,7 @@ let fatalArmed = { id: null, at: 0 }; // v0.11.64 (B1): the card tapped once tha
 // v0.11.10: checks are hidden on every card and in every result line (owner 2026-11-06: immersion); the James tab still shows the skills
 const SHOW_CHECKS_KEY = 'boneash.showchecks'; // per phone: '1' = show them (Settings → Show checks)
 let showChecks = store.get(SHOW_CHECKS_KEY) === '1';
+setEdition(store.get(EDITION_KEY)); // v0.11.182 (DF1): the general edition unless this phone chose the named one
 const TEXT_SIZE_KEY = 'boneash.textsize'; // per phone: 90–130 (%)
 const TEXT_SIZES = [90, 100, 110, 120, 130];
 let textSize = (() => { const v = Number(store.get(TEXT_SIZE_KEY)); return TEXT_SIZES.includes(v) ? v : 100; })();
@@ -262,9 +265,11 @@ function proseHtml(v) {
     if (a.newVisit) readAllScene = null; // v0.11.152 (RV1, L2; Fable's review): "Read it all again" shuts with each new visit
     shownScreen = { id: v.id, text: v.text, g };
     if (!noFold(v.id) && !v.end) noteRead(g, v.text); // v0.11.133 (FP2): what the screen shows is read; RF1 (M2): only screens that can fold (their record is what a later Coil's fold reads)
-    if (!a.fold) return `<div class="prose">${paras(v.text)}</div>`;
+    const mu = v.end ? null : musicLine(g, v, { newVisit: a.newVisit }); // v0.11.182 (CB1: ML): the day's music or archive line, under the text, folded or not; RV1 (L1): kept back from a meta screen
+    const muHtml = mu ? `<p class="music">${md(mu.text)}</p>` : '';
+    if (!a.fold) return `<div class="prose">${paras(v.text)}${muHtml}</div>`;
     const all = readAllScene === `${g.scene}#${g.coil?.n || 1}`; // per scene and Coil (Fable review)
-    return `<div class="prose again">${a.memory ? `<p class="memory">${md(a.memory)}</p>` : ''}${paras(a.first)}${all ? paras(a.rest) : '<button class="readall" data-readall="1" aria-expanded="false"><span aria-hidden="true">▸ </span>Read it all again</button>'}</div>`;
+    return `<div class="prose again">${a.memory ? `<p class="memory">${md(a.memory)}</p>` : ''}${paras(a.first)}${all ? paras(a.rest) : '<button class="readall" data-readall="1" aria-expanded="false"><span aria-hidden="true">▸ </span>Read it all again</button>'}${muHtml}</div>`;
 }
 function renderCardScreen() {
     const v = sceneView(g, SCENES);
@@ -740,6 +745,9 @@ function renderSettings() {
 <h2>Checks</h2>
 <p class="note">Cards and results don't show skill values, DCs or odds; the James tab shows the skills. Turn this on to see the numbers (for testing).</p>
 <div class="btns"><button class="btn${showChecks ? ' primary' : ''}" data-showchecks="1">Show checks: ${showChecks ? 'on' : 'off'}</button></div>
+<h2>References</h2>
+<p class="note">James's music and his archive: real bands, songs, books and games by name, or described without names.</p>
+<div class="btns">${EDITIONS.map((e) => `<button class="btn${getEdition() === e ? ' primary' : ''}" data-edition="${e}">${e === 'named' ? 'By name' : 'General'}</button>`).join('')}</div>
 <h2>Saving</h2>
 <div class="btns"><button class="btn${expState().off ? '' : ' primary'}" data-expremind="1">Remind me to download: ${expState().off ? 'off' : 'on'}</button></div>
 ${updatePanel()}
@@ -961,6 +969,7 @@ view.addEventListener('click', (ev) => {
         }
         if (b.dataset.newsclose) { news = []; render(); return; } // v0.11.150 (WN): the box closes for this visit (the version is already kept)
         if (b.dataset.textsize) { textSize = Number(b.dataset.textsize); store.set(TEXT_SIZE_KEY, String(textSize)); applyTextSize(); render(); return; }
+        if (b.dataset.edition) { store.set(EDITION_KEY, setEdition(b.dataset.edition)); render(); return; } // v0.11.182 (ES)
         if (b.dataset.showchecks) { showChecks = !showChecks; store.set(SHOW_CHECKS_KEY, showChecks ? '1' : '0'); render(); return; }
         if (b.dataset.bak) {
             let next;

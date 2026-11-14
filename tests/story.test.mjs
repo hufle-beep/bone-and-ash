@@ -1000,7 +1000,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
             if (stop) { if (c === '{') depth++; if (c === '}') { if (depth === 0) { i++; return out; } depth--; } }
             if (!/\s/.test(c)) out += c; i++; } return out; }; return code(false); };
         const LABELS = Object.values(HEART).flatMap((sc) => (sc.choices || []).map((c) => (typeof c.text === 'string' ? c.text : '(fn)')));
-        const PIN = { 'act1_heart.js': '2d572e3036fe378a', 'stomp_act1.js': '1a2e6d1e8cb25a0b', 'yuki_time.js': '57766f1f892f764a', labels: '0958b6a7e10b662a' };
+        const PIN = { 'act1_heart.js': '2d572e3036fe378a', 'stomp_act1.js': '1a2e6d1e8cb25a0b', 'yuki_time.js': '57766f1f892f764a', labels: '1c6aa5a54be6053d' }; // v0.11.182 (RS1, RV1 L6): the labels re-pinned ("Read to Ya from your archive." appended on heart_camp)
         const hash = (t) => createHash('sha256').update(t).digest('hex').slice(0, 16);
         const got = { labels: hash(JSON.stringify(LABELS)) };
         for (const f of ['act1_heart.js', 'stomp_act1.js', 'yuki_time.js']) got[f] = hash(skel(readFileSync(new URL(`../js/story/${f}`, import.meta.url), 'utf8')));
@@ -3651,6 +3651,171 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     assert(!/gold eyes/i.test(all.match(/[^\n]*/g).filter((l) => /lecture is going well|answer with ears|I like my odds/.test(l)).join(' ')), 'LB1 (TG): no "gold eyes" beat left in the four texts');
     for (const [where, beat] of [[YK_QUESTION.again, 'She looks at you and waits.'], [YK_HERE.first, "She doesn't blink."], [SCENES.yk_choice.text(yk), 'Her gaze stays on you.']]) assert(where.includes(beat), `LB1 (O3): "${beat}" in its text`);
     assert(['cat', 'tiger', 'human'].every((f) => /I like my odds\." Very dry\./.test(SCENES.rt_yk_talk.text(LB(13, f)))), 'LB1 (O3, F1): rt_yk_talk\'s "Very dry."');
+}
+
+// v0.11.182 (owner picks CB1, DF1; group e's CM, push 2): the editions (core/edition.js), James's music and archive lines
+// (music.js, music_texts.js): ET the slots and the table, ES the setting, EK both editions, ML one a text day, MR reactions,
+// AR the archive's day, PC the stretches and the Act 1 Coil gate
+{
+    const E = await import('../js/core/edition.js');
+    const M = await import('../js/story/music.js');
+    const D = 1440;
+    // ES / ET: the default is general (DF1); a slot fills by edition; an unknown id throws
+    assert(E.getEdition() === 'general' && E.EDITION_KEY === 'boneash.edition', 'CM2 (DF1): the general edition by default; the per-phone key');
+    assert(E.setEdition('named') === 'named' && E.fillRefs('a {ref:x} b', { x: { named: 'N', general: 'g' } }) === 'a N b', 'CM2 (ET): the named edition fills the name');
+    assert(E.setEdition('anything') === 'general' && E.fillRefs('a {ref:x} b', { x: { named: 'N', general: 'g' } }) === 'a g b', 'CM2 (ES): anything but named is general');
+    { let threw = false; try { E.fillRefs('{ref:nope}', {}); } catch { threw = true; } assert(threw, 'CM2 (ET): an unknown slot throws'); }
+    E.setEdition('general');
+    // the lines: counts, fields, places, steps, gates
+    const PLACES = { wilds: ['any'], ashfall: ['any', 'house', 'loft', 'lamp'], fallout: ['any', 'house', 'loft'], journey: ['any', 'camp', 'tree'], return: ['any', 'house', 'stove'] }; // RV1 (M3): no walk
+    const COUNT = { wilds: 8, ashfall: 7, fallout: 15, journey: 28, return: 7 }; // RV1 (M3c-1): the prologue's five house reactions at the Fallout's supper
+    const ARCH = { wilds: 1, ashfall: 2, fallout: 2, journey: 5, return: 1 };
+    const every = Object.entries(M.MUSIC_LINES).flatMap(([s, p]) => Object.entries(p).flatMap(([k, l]) => l.map((x) => ({ ...x, s, k }))));
+    assert(Object.keys(M.MUSIC_LINES).sort().join() === Object.keys(COUNT).sort().join(), 'CM2 (PC): five stretches');
+    for (const [s, n] of Object.entries(COUNT)) {
+        const l = every.filter((x) => x.s === s);
+        assert(l.length === n && l.filter((x) => x.k === 'archive').length === ARCH[s], `CM2 (CB1): ${s} has ${n} lines, ${ARCH[s]} of them the archive (${l.length})`);
+        { const plain = l.filter((x) => x.who === '-'); assert(l.every((x) => PLACES[s].includes(x.place)) && plain.filter((x) => x.place === 'any').length * 2 >= plain.length, `CM2: ${s}'s places are its own, at least half of its lines with no person any`); }
+        if (['wilds', 'ashfall'].includes(s)) assert(l.every((x) => x.from === 0), `CM2 (PC): the prologue's ${s} has no Coil gate`);
+    }
+    for (const [s, want] of [['fallout', [5, 5, 5]], ['journey', [10, 9, 9]], ['return', [3, 2, 2]]]) assert([0, 1, 2].map((f) => every.filter((x) => x.s === s && x.from === f).length).join() === want.join(), `CM2 (PC): ${s} opens ${want.join(' / ')} on the act's Coils 1 / 2 / 3`);
+    const WHO = { yuki: ['-'], mei: ['low', 'mid', 'high'], ya: ['low', 'mid', 'high'], mother: ['low', 'mid'], neighbour: ['high'] };
+    const reacts = every.filter((x) => x.who !== '-');
+    assert(reacts.length === 18 && reacts.every((x) => (WHO[x.who] || []).includes(x.step) && x.k === 'music'), `CM2 (MR): 18 reactions, each a person in a step it can reach (${reacts.length})`);
+    assert(every.filter((x) => x.who === '-').every((x) => x.step === '-'), 'CM2 (MR): a line with no person has no step');
+    assert(reacts.every((x) => x.who === 'yuki' || x.place !== 'any' || x.s === 'journey'), 'CM2 (MR): a village reaction names its place');
+    // RV1 (TG7): who is there at the end of the screen (M1): the prologue's Dinner leaves Mei Lin; the Return's supper empties the house, so its reactions are told in the past
+    assert(M.present({ flags: {} }, 'ashfall', 'house', 'mei') && !M.present({ flags: {} }, 'ashfall', 'house', 'mother') && every.filter((x) => x.s === 'ashfall' && x.who !== '-' && x.who !== 'yuki').length === 0, 'RV1 (M1, M3c-1): no reaction from the mother at the prologue\'s Dinner (she has gone to bed); its five house reactions are the Fallout\'s');
+    assert(every.filter((x) => x.s === 'return' && ['mother', 'ya'].includes(x.who)).every((x) => /[Aa]t supper/.test(x.text) && !/\b(says|asks|wants|looks)\b/.test(x.text)), 'RV1 (M1): the Return\'s reactions are told in the past, at supper');
+    // M2: the singing lines only while the guardian sings
+    { const sl = every.filter((x) => x.singing); const G = (f) => ({ flags: f, rel: {}, coil: { act: 1, n: 1 }, stats: { coils0: 1 } });
+      assert(sl.length === 2 && sl.every((x) => x.place === 'tree' && /singing/.test(x.text)) && every.filter((x) => /singing behind/.test(x.text)).every((x) => x.singing), 'RV1 (M2): the two lines with the singing behind the door are marked');
+      assert(sl.map((x) => ({ ...x, from: 0 })).every((x) => !M.lineOpen(G({}), x, 'journey', 'tree') && M.lineOpen(G({ log_heard: true }), x, 'journey', 'tree') && M.lineOpen(G({ log_heard: true, guardian: 'lost' }), x, 'journey', 'tree') && !M.lineOpen(G({ log_heard: true, guardian: 'calmed' }), x, 'journey', 'tree')), 'RV1 (M2): heard from the log, on after the crawl, gone once the guardian is calmed'); }
+    // ET / EK: every slot has a table entry, every entry is used; both editions fill; the general edition shows no name
+    const RD = await import('../js/story/reading.js'); // RS1: the reading's slots share the table
+    const readAll = [RD.READ.text, ...Object.values(RD.READ.ship), RD.READ.lover];
+    const slots = new Set([...every.map((x) => x.text), ...readAll].flatMap((t) => [...t.matchAll(E.SLOT)].map((m) => m[1])));
+    assert([...slots].every((id) => M.MUSIC_REFS[id]) && Object.keys(M.MUSIC_REFS).every((id) => slots.has(id)), `CM2 (ET): every slot in the table and every entry used (${slots.size} / ${Object.keys(M.MUSIC_REFS).length})`);
+    const allMusicTexts = (ed) => every.map((x) => E.fillRefs(x.text, M.MUSIC_REFS, ed));
+    const named = allMusicTexts('named'), general = allMusicTexts('general');
+    assert(named.length === 65 && general.length === 65 && named.concat(general).every((t) => !/\{|\}/.test(t)), 'CM2 (EK): 65 lines in each edition, every slot filled');
+    const NAMES = Object.values(M.MUSIC_REFS).flatMap((r) => r.named.replace(/[*]/g, '').split(/'s |, | of /)).map((n) => n.trim()).filter((n) => n.length > 3 && /^[A-Z]/.test(n));
+    for (const t of general) { const hit = NAMES.find((n) => t.includes(n)); assert(!hit, `CM2 (EK): the general edition names no one ("${hit}" in ${t.slice(0, 60)})`); }
+    assert(Object.values(M.MUSIC_REFS).every((r) => r.general && !/[A-Z]/.test(r.general.replace(/^\*/, '')[0]) && r.general !== r.named), 'CM2 (ET): each general phrase is its own, starting lower case');
+    const RESERVED = /Trøllabundin|Dúrin|Hammerdeep|Dwarven Forge|Music Box of Fate|\bBreathe\b|Eater's Call|Boof Pack|Genesis|Non-Fiction|\bReflect\b|Lyfjaberg|Eivør|Clamavi|Wardruna|Ironmouse|Nyanners|Athelstan|Holoadvent|Holomyth/i;
+    assert(named.every((t) => !RESERVED.test(t)) && !RESERVED.test(JSON.stringify(M.MUSIC_REFS)), 'CM2 (SG): the songs and artists kept for push 3 are not used');
+    assert(every.every((x) => !/(^|[.!?]\s+|"\s*)\{ref:/.test(x.text) && !/\{ref:[a-z0-9_]+\}'s/.test(x.text)), 'CM2 (ET): no slot opens a sentence or takes an \'s');
+    // ML: the screens; the five lines of the game's own count as the day's
+    assert(Object.keys(M.MUSIC_SCREENS).length === 18 && Object.keys(M.MUSIC_SCREENS).every((id) => SCENES[id]) && !M.MUSIC_SCREENS.supper && !M.MUSIC_SCREENS.mei_walk && !M.MUSIC_SCREENS.yk_camp, 'CM2 (ML, W1; RV1 M3): 18 evening screens, all real; not the supper or the sunset walk (the roof and the third supper follow them), nor Yuki\'s walk (a romance night)');
+    const src = readdirSync(new URL('../js/story/', import.meta.url)).filter((f) => f.endsWith('.js') && !/^music/.test(f)).map((f) => readFileSync(new URL(`../js/story/${f}`, import.meta.url), 'utf8')).join('\n');
+    assert((src.match(new RegExp(M.OWN_MUSIC.source, 'gi')) || []).length === 5, 'CM2 (ML): the five music lines already in the game are the ones OWN_MUSIC finds');
+    const at = (seed, scene, hour, extra = {}) => { const g = ensureBars(fresh(seed)); g.scene = scene; g.minutes = 2 * D + hour * 60; Object.assign(g.flags, extra.flags || {}); if (extra.act) { g.coil = { ...(g.coil || {}), act: extra.act }; } for (const [w, f] of Object.entries(extra.rel || {})) g.rel[w] = { f, a: 0 }; linesOf(g).at = scene; return g; };
+    const view = (g, text = 'A screen.') => ({ id: g.scene, text });
+    { const g = at(77001, 'camp', 14); g.minutes += 59; assert(M.musicLine(g, view(g)) === null, 'CM2 (ML): none before 15:00 (14:59)'); g.minutes += 1; assert(M.musicLine(g, view(g)) !== null, 'RV1 (TG2): one from 15:00'); }
+    { const g = at(77005, 'camp', 20); const a = M.musicLine(g, view(g)); linesOf(g).cur = {}; // RV1 (L1): back from a form change or a breakthrough: the same visit
+      const b = M.musicLine(g, view(g), { newVisit: false }); assert(a && b && a.key === b.key, 'RV1 (L1): the line stays when the same visit comes back from a meta screen');
+      linesOf(g).cur = {}; assert(M.musicLine(g, view(g), { newVisit: true }) === null, 'RV1 (L1): a new visit the same day shows none'); }
+    { const g = at(77002, 'camp', 20); const a = M.musicLine(g, view(g)); const b = M.musicLine(g, view(g));
+      assert(a && b && a.text === b.text && a.key === b.key, 'CM2 (ML): a line at 20:00, the same on a redraw of the visit');
+      linesOf(g).at = 'night'; linesOf(g).cur = {}; g.scene = 'night'; assert(M.musicLine(g, view(g)) === null, 'CM2 (ML): one a text day: the next evening screen shows none');
+      g.scene = 'camp'; linesOf(g).cur = {}; assert(M.musicLine(g, view(g)) === null, 'CM2 (ML): a later visit the same day shows none');
+      g.minutes += D; g.scene = 'night'; linesOf(g).cur = {}; const c = M.musicLine(g, view(g)); assert(c && c.key !== a.key, 'CM2 (ML): the next day a line again, another one'); }
+    { const g = at(77003, 'camp', 20); assert(M.musicLine(g, { id: 'mei_curious', text: 'Your arm is playing low.' }) === null, 'CM2 (ML): a screen with its own music line shows no pool line');
+      assert(M.musicLine(g, view(g)) === null, 'CM2 (ML): and uses up the day'); }
+    { const g = at(77004, 'wild_forage', 20); assert(M.musicLine(g, view(g)) === null, 'CM2 (ML): never on another screen (a forage, a hunt)'); }
+    // MR: a reaction only where its person is, in its step
+    const reactAt = (who, step) => reacts.find((x) => x.who === who && x.step === step);
+    for (const [who, step, lo, hi] of [['mei', 'mid', 30, 79], ['mei', 'high', 80, 150], ['mother', 'low', -10, 29], ['mother', 'mid', 30, 79]]) { // RV1 (TG2): the boundaries 29 / 30, 79 / 80
+        const x = reactAt(who, step); if (!x) { assert(false, `CM2 (MR): ${who} ${step} exists`); continue; }
+        const place = x.place === 'any' ? (x.s === 'journey' ? 'camp' : 'house') : x.place;
+        const R = { mei: 'Mei Lin', mother: 'Mother' }[who];
+        const ok = (f) => M.lineOpen(at(77010, 'x', 20, { act: x.s === 'fallout' || x.s === 'return' || x.s === 'journey' ? 1 : 0, rel: { [R]: f }, flags: { mei_party: true } }), { ...x, from: 0 }, x.s, place);
+        assert(ok(lo) && ok(hi) && (step === 'low' || !ok(lo - 1)) && (hi >= 150 || !ok(hi + 1)), `CM2 (MR): ${who} ${step} opens from ${lo} to ${hi} only`);
+    }
+    { const x = reactAt('ya', 'high'); if (x && x.s === 'journey') { const g = at(77011, 'bl_camp', 20, { act: 1, rel: { Ya: 120 } });
+        assert(!M.lineOpen(g, { ...x, from: 0 }, 'journey', 'camp'), 'CM2 (MR): Ya reacts on the journey only once in the party');
+        g.flags.ya_party = true; assert(M.lineOpen(g, { ...x, from: 0 }, 'journey', 'camp') && !M.lineOpen(g, { ...x, from: 0 }, 'journey', 'walk'), 'CM2 (MR): in the party she does, never on Yuki\'s walk'); } }
+    // PC: a line opening on the act's second Coil is shut on its first and comes first on its second
+    { const x = every.find((y) => y.s === 'journey' && y.from === 1 && y.who === '-' && y.place === 'any');
+      const g = at(77020, 'bl_camp', 20, { act: 1 }); g.stats.coils0 = 1; g.coil.n = 1;
+      assert(x && actCoil(g) === 0 && !M.lineOpen(g, x, 'journey', 'camp'), 'CM2 (PC): the second Coil\'s lines are shut on the first');
+      g.coil.n = 2; assert(actCoil(g) === 1 && M.lineOpen(g, x, 'journey', 'camp'), 'CM2 (PC): and open on the second');
+      // RV1 (F4): each night shows a line opening on this Coil while one is open in that night's pool (music, or the archive one day in four)
+      const openNew = { music: M.MUSIC_LINES.journey.music.filter((y) => y.from === 1 && M.lineOpen(g, y, 'journey', 'camp')).length, archive: M.MUSIC_LINES.journey.archive.filter((y) => y.from === 1 && M.lineOpen(g, y, 'journey', 'camp')).length };
+      const used = { music: 0, archive: 0 }; let fresh2 = 0, want = 0;
+      for (let d = 0; d < 9; d++) { g.minutes = (12 + d) * D + 20 * 60; linesOf(g).cur = {}; const r = M.musicLine(g, view(g)); if (!r) continue;
+          const [, k, i] = r.key.split('.'); if (used[k] < openNew[k]) want++; used[k]++; if (M.MUSIC_LINES.journey[k][Number(i)].from === 1) fresh2++; }
+      assert(openNew.music >= 4 && fresh2 === want && want >= 5, `CM2 (PC): on the second Coil its new lines come first (${fresh2} of ${want} nights that had one open; RV1, F4)`); }
+    // AR: the archive's day, one in four
+    { let n = 0; const g = at(77030, 'camp', 20); for (let d = 0; d < 4000; d++) if (M.archiveDay(g, d)) n++; assert(n > 920 && n < 1080, `CM2 (AR; RV1 TG3): the archive's day one in four (${n} of 4000)`); }
+    // RV1 (TG5): the card's tics, Yuki's forms and proper names in the general edition, on every music line and the reading
+    { const card = readFileSync(new URL('../project/canon-card.md', import.meta.url), 'utf8');
+      const TICS = [...(card.split('\n').find((l) => l.includes('Tics to avoid')) || '').matchAll(/"([^"]+)"/g)].map((m) => m[1].toLowerCase()).filter((x) => x !== 'a black dress');
+      const RD0 = await import('../js/story/reading.js');
+      const texts = [...every.map((x) => x.text), RD0.READ.text, ...Object.values(RD0.READ.ship), RD0.READ.lover, ...Object.values(M.MUSIC_REFS).flatMap((r) => [r.named, r.general])];
+      for (const t of texts) { const low = t.toLowerCase().replace(/[,.;:!?"]/g, ''); const hit = TICS.find((x) => low.includes(x)); assert(TICS.length >= 15 && !hit, `RV1 (TG5): no tic ("${hit}") in ${t.slice(0, 50)}`); }
+      for (const x of every.filter((y) => /Yuki/.test(y.text))) assert(!/shoulder|paw|purr|whisker|\btail\b|says the bond|\*[^*]+\*/.test(x.text.replace(/\{ref:[a-z0-9_]+\}/g, '')), `RV1 (TG5): Yuki's line fits every form (${x.key})`);
+      const capsOk = new Set(Object.values(SCENES).flatMap((sc) => { try { return [...String(typeof sc.text === 'function' ? sc.text(ensureBars(fresh(1))) : sc.text || '').matchAll(/\b[A-Z][a-z'-]+/g)].map((m) => m[0]); } catch { return []; } }));
+      for (const w of ['Yuki', 'Mei', 'Lin', 'Ya', 'Old', 'Wen', 'Sect', 'Blackroot', 'Selene', 'Ashfall', 'Seedlings', 'Parallel', 'Cognition', 'J-pop', 'K-pop', 'Synthwave', 'Synthpop', 'Futurepop', 'Darkwave', 'Nerdcore', 'Folk', 'Death', 'My', 'We', 'You', 'It', 'One', 'Forty']) capsOk.add(w);
+      for (const t of [...every.map((x) => E.fillRefs(x.text, M.MUSIC_REFS, 'general')), ...Object.values(M.MUSIC_REFS).map((r) => r.general)]) {
+          const mid = [...t.matchAll(/(?<![.!?"*:]\s|^|\*)\b([A-Z][A-Za-z'-]+)/g)].map((m) => m[1]).filter((w) => !capsOk.has(w));
+          assert(!mid.length, `RV1 (TG5): the general edition names no one ("${mid.join(', ')}" in ${t.slice(0, 50)})`); } }
+    // a random walk drawing every screen as main.js does: one line a day at most, only on the evening screens from 15:00
+    {
+        const { isTaskHub: hubQ, taskCards: tc, taskOpen: to, runTask: rt, taskState: ts, isTaskChoice: itc } = await import('../js/core/tasks.js');
+        let days = 0, withLine = 0, twice = 0, bad = 0; let s = 7; const shownKeys = new Set(); // RV1 (TG1): every line shows in a real game
+        const rnd = (n) => { s = (s * 1103515245 + 12345) >>> 0; return (s >>> 8) % n; };
+        for (let n = 0; n < 160; n++) {
+            const g = ensureBars(fresh(78000 + n)); const per = {};
+            for (let st = 0; st < 3000; st++) {
+                const v = sceneView(g, SCENES); if (v.end) break;
+                againView(g, v);
+                const r = M.musicLine(g, v); const k = `${coilStamp(g)}|${textDay(g)}`;
+                const e = per[k] || (per[k] = new Set());
+                if (M.OWN_MUSIC.test(v.text || '')) e.add('own');
+                if (r) { e.add(r.key); shownKeys.add(r.key); if (!M.MUSIC_SCREENS[g.scene] || clockHour(g) < 15 && clockHour(g) >= 5) bad++; }
+                if (hubQ(g)) { const cards = tc(g, SCENES).filter((c) => c.status === 'open'); const stops = v.choices.filter((c) => !c.disabled && (c.index >= 1000 || !itc(SCENES, g.scene, c.index)));
+                    if (cards.length && (rnd(10) < 8 || !stops.length)) { const id = cards[rnd(cards.length)].id; if (to(g, SCENES, id)) rt(g, SCENES, id); ts(g).queue.length = 0; continue; }
+                    if (!stops.length) break; const c = stops[rnd(stops.length)]; const out = choose(g, SCENES, c.index); if (out.combat) { startCombat(g, out.combat(g)); for (let t = 0; t < 400 && g.combat; t++) { const o = combatStep(g, smartAction(g, t)); if (o?.done) { goTo(g, SCENES, o.next); break; } } } continue; }
+                const open = v.choices.filter((c) => !c.disabled); if (!open.length) break;
+                const bite = open.filter((c) => /Bite the tail/.test(c.label)); const c = bite.length ? bite[0] : open[rnd(open.length)];
+                const out = choose(g, SCENES, c.index); if (out.combat) { startCombat(g, out.combat(g)); for (let t = 0; t < 400 && g.combat; t++) { const o = combatStep(g, smartAction(g, t)); if (o?.done) { goTo(g, SCENES, o.next); break; } } }
+            }
+            for (const e of Object.values(per)) { days++; if (e.size) withLine++; if (e.size > 1) twice++; }
+        }
+        assert(twice === 0 && bad === 0 && withLine > days * 0.4, `CM2 (ML): 160 random games, ${days} text days, ${withLine} with a music line, ${twice} with two (the game's own lines counted), ${bad} off the evening screens`);
+        { const allKeys = Object.entries(M.MUSIC_LINES).flatMap(([st, p]) => Object.entries(p).flatMap(([k, l]) => l.map((x, i) => [`${st}.${k}.${i}`, x.key])));
+          const miss = allKeys.filter(([k]) => !shownKeys.has(k)).map(([, key]) => key);
+          assert(miss.length === 0, `RV1 (TG1): every music and archive line shows in 160 random games (never: ${miss.join(', ') || 'none'})`); }
+    }
+
+    // RS1 (D1, R1): "Read to Ya" at the Heart's camp: the gate, the scene, the ship's sentence, the lover's, the editions, the day's line
+    {
+        const R = RD; const L1 = R.READ.label;
+        const { SOCIAL, EAT: EATLIKE } = await import('./lib/social.mjs');
+        assert(L1.length < 45 && /\.$/.test(L1) && !SOCIAL.test(L1) && !EATLIKE.test(L1) && R.READ.sleep.length < 45 && /\.$/.test(R.READ.sleep), 'RS1: the labels end with a full stop, under 45 characters, not read as a talk or a meal by the bots');
+        const idx = SCENES.heart_camp.choices.findIndex((c) => c.to === 'heart_read');
+        assert(idx === SCENES.heart_camp.choices.length - 1 && SCENES.heart_camp.choices[idx].time === 30 && !SCENES.heart_camp.choices[idx].check, 'RS1: the choice appended last on heart_camp (no position changes), 30 minutes, no check');
+        const camp = (seed, h, flags = {}) => { const g = ensureBars(fresh(seed)); g.coil = { ...(g.coil || {}), act: 1 }; g.scene = 'heart_camp'; g.minutes = 16 * D + h * 60; Object.assign(g.flags, { ya_party: true }, flags); return g; };
+        const shows = (g) => sceneView(g, SCENES).choices.some((c) => c.index === idx);
+        assert(!shows((() => { const g = camp(79001, 15); g.minutes += 59; return g; })()) && shows(camp(79006, 16)) && shows(camp(79002, 20)) && !shows(camp(79003, 20, { ya_party: false })) && !shows(camp(79004, 20, { hc_read: true })), 'RS1: from 16:00 (RV1 TG2: not 15:59), only with Ya in the party, once a Coil');
+        { const g = camp(79005, 20); const ya0 = JSON.stringify(g.rel.Ya || null), m0 = g.minutes; choose(g, SCENES, idx);
+          assert(g.scene === 'heart_read' && g.flags.hc_read && g.minutes - m0 === 30 && JSON.stringify(g.rel.Ya || null) === ya0, 'RS1: the scene, 30 minutes, her flag, no gain');
+          const v = sceneView(g, SCENES); assert(v.choices.length === 1 && v.choices[0].label === R.READ.sleep, 'RS1: one way out');
+          choose(g, SCENES, v.choices[0].index); assert(g.scene === 'heart_night', 'RS1: then the night');
+          assert(!KEEP_FLAGS.includes('hc_read'), 'RS1: hc_read resets with the Coil'); }
+        const txt = (flags, ed = 'general') => { E.setEdition(ed); const t = R.readText(camp(79010, 20, flags)); E.setEdition('general'); return t; };
+        const nf = txt({}), fd = txt({ ship_found: true }), nm = txt({ ship_found: true, log_heard: true });
+        assert(!/Selene|this floor/.test(nf) && /under this floor/.test(fd) && !/Selene/.test(fd) && /Selene grew them/.test(nm) && !/the ship/i.test(nm), 'RS1 (RS-N): "the ship" before the log, Selene after, neither before the ship is found');
+        assert(!nf.includes(R.READ.lover.trim()) && txt({ ya_romance: true }).endsWith(R.READ.lover.trim()), 'RS1: the lover\'s sentence only when she is his lover, last');
+        for (const t of [nf, fd, nm, txt({ ya_romance: true })]) { const n = t.split(/\s+/).length; assert(n >= 200 && n <= 360 && !/\{|\}/.test(t) && !/Ents|Treebeard|Lord of the Rings|Entwives/.test(t), `RS1 (EK): the general edition fills every slot and names nothing (${n} words)`); }
+        assert(/the Ents/.test(txt({}, 'named')) && /Treebeard/.test(txt({}, 'named')), 'RS1 (ET): the named edition names them');
+        // RS-M: the camp shows no music line while the reading is open; the reading uses up the day
+        { const g = camp(79020, 20); linesOf(g).at = 'heart_camp'; assert(M.musicLine(g, { id: 'heart_camp', text: 'x' }) === null && !(linesOf(g).mu && linesOf(g).mu.d === textDay(g)), 'RS1 (RS-M): the camp waits while the reading is open');
+          g.flags.hc_read = true; g.scene = 'heart_read'; linesOf(g).at = 'heart_read'; linesOf(g).cur = {}; assert(M.musicLine(g, { id: 'heart_read', text: 'x' }) === null, 'RS1 (RS-M): no line under the reading');
+          g.scene = 'heart_night'; linesOf(g).at = 'heart_night'; linesOf(g).cur = {}; assert(M.musicLine(g, { id: 'heart_night', text: 'x' }) === null, 'RS1 (RS-M): and none after it that day'); }
+        { const g = camp(79021, 20, { hc_read: true }); linesOf(g).at = 'heart_camp'; assert(M.musicLine(g, { id: 'heart_camp', text: 'x' }) !== null, 'RS1 (RS-M): once read, the camp has its line on later days'); }
+    }
 }
 
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));
