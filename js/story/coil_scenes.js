@@ -23,7 +23,7 @@ Then the Ouroboros Axiom turns, with the flat snap of a hand catching a cup. Thi
     shen: `The crimson robes take the road, and you walk in the middle of them, a guest in every word they use. Behind you the grove sings, faint and stubborn, and Ashfall stands at the tribute post, so still and so correct it might have been carved there.
 
 You could go with him. It is an ending somebody took the trouble to write, and not the worst on offer. Or you can bite down, and it never took place.`,
-    clear: `The grove is singing behind you, and Shen Qiu is somewhere down the mountain, thinking about things. This is an ending. You read it to the last line and set it down.
+    clear: `The grove is singing behind you, and Shen Qiu is somewhere up the mountain, thinking about things. This is an ending. You read it to the last line and set it down.
 
 Then you pick it up again. The Ouroboros Axiom turns, slow this time, not a hand catching a cup but a season closing. You did this once, start to finish, and your hands know it now. A thread wakes to hold it.`,
     choice: `You could simply carry on. People do. Whole civilisations are built on it.
@@ -128,7 +128,7 @@ Yuki is standing on your sternum, on all four feet. The look says: *we have been
         id: 'a1_again', title: 'Go Round Again', art: 'meditation', place: 'The Ouroboros Axiom',
         text: (g) => `The ending holds still, as endings will, and waits to learn whether you can leave it alone.
 
-Nothing obliges you to. The Axiom lies coiled under your breastbone, tail in its mouth, well within reach. Bite down, and this ending is one you remember and not one that happened: ${g.flags.a1_outcome === 'taken' ? 'the road up the mountain, the crimson robes, all of it' : 'the grove, the Sect, the whole hard-won shape of it'}. What you learned stays. What you won does not.
+Nothing obliges you to. The Axiom lies coiled under your breastbone, tail in its mouth, well within reach. Bite down, and this ending is one you remember and not one that happened: ${g.flags.a1_outcome === 'taken' ? "the Sect's road up into the mountains, the crimson robes, all of it" : 'the grove, the Sect, the whole hard-won shape of it'}. What you learned stays. What you won does not.
 
 Yuki opens one eye. *Go on, then,* says the bond. *You bite. I will keep the record for us both.*`,
         choices: [

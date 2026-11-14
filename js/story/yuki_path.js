@@ -24,7 +24,7 @@ export const ykHuman = (g) => yukiForms(g).includes('human');
 const SIS_TALK_BOND = [
     `Yuki corners you by the water. For a cat this means sitting down in the middle of the path and looking at you until you stop pretending there's a way round. She only does it for things she considers important. Today, that's your love life.
 
-*Mei Lin,* says the bond, *brought chopsticks into the Blackroot. For you. She doesn't say it's for you. She's been eating with them very slowly next to you for three days.* Her tail hits the ground, once. *And Ya bit off a wolf's tooth and gave it to you. Do you know what that means where she's from?*
+*Mei Lin,* says the bond, *brought chopsticks into the Blackroot. For you. She doesn't say it's for you. She's been eating with them very slowly next to you since the road began.* Her tail hits the ground, once. *And Ya bit off a wolf's tooth and gave it to you. Do you know what that means where she's from?*
 
 "I'm choosing not to ask."
 
@@ -46,7 +46,7 @@ const SIS_TALK_BOND = [
 ];
 const SIS_TALK_BOND_GREAT = `Yuki corners you by the water. In her great shape this takes no effort at all: she lies down across the path, and the path is over. She only does it for things she considers important. Today, that's your love life.
 
-*Mei Lin,* says the bond, *brought chopsticks into the Blackroot. For you. She doesn't say it's for you. She's been eating with them very slowly next to you for three days.* A paw the size of a plate comes down on your boot and stays there. *And Ya bit off a wolf's tooth and gave it to you. Do you know what that means where she's from?*
+*Mei Lin,* says the bond, *brought chopsticks into the Blackroot. For you. She doesn't say it's for you. She's been eating with them very slowly next to you since the road began.* A paw the size of a plate comes down on your boot and stays there. *And Ya bit off a wolf's tooth and gave it to you. Do you know what that means where she's from?*
 
 "I'm choosing not to ask."
 
@@ -234,7 +234,7 @@ In the morning Mei Lin and Yuki walk ahead of you on the path, side by side and 
             const lines = [
                 `${byForm(g, 'Yuki corners you by the water, in her human form, which she only uses for things she considers important.', 'Yuki corners you by the water, in her human form, which she only uses for things she considers important.', 'Yuki corners you by the water, which she does by standing exactly where you meant to go. She only does it for things she considers important.')} Today, that's your love life.
 
-"Mei Lin," she says, "carried chopsticks into the Blackroot. On your account. She will not say so. She has been eating with them beside you, very slowly, for three days, waiting to be noticed." She folds her arms. "And Ya, who bit a tooth out of a wolf, *gave you the tooth*. Have you any idea what that means among her people?"
+"Mei Lin," she says, "carried chopsticks into the Blackroot. On your account. She will not say so. She has been eating with them beside you, very slowly, since the road began, waiting to be noticed." She folds her arms. "And Ya, who bit a tooth out of a wolf, *gave you the tooth*. Have you any idea what that means among her people?"
 
 "I have chosen not to ask."
 
@@ -453,11 +453,11 @@ export function installYukiPath(SCENES) {
         : yukiForm(g) === 'human' && ykLover(g)
         ? ML_EARS + '*She\'s pretty,* says the bond instead, for you alone, appraising, unbothered, while its owner stands at your elbow and looks at the hills. *I approve. Of her. Not of your face right now.*'
         : ykSister(g)
-        ? '*She\'s pretty,* says the bond, appallingly loud inside your skull. *Bossy. You like bossy. Don\'t deny it, I\'ve met your thesis supervisor. Talk to her. TALK to her.*'
-        : ykLover(g) ? '*She\'s pretty,* says the bond, appraising, unbothered. *I approve. Of her. Not of your face right now.*' : ''));
+        ? `*Pretty,* the bond announces, at a volume your skull was never built to hold. *And she gives orders. You have a weakness for orders; I sat through your whole thesis, supervisor included. Say something to her. Out LOUD.*`
+        : ykLover(g) ? `*Pretty,* the bond remarks, in the tone of a buyer who has already checked the teeth. *I approve. Of her. Your expression I am sending back to the maker.*` : ''));
     beat(SCENES, 'romance', (g) => (ykSister(g)
-        ? byForm(g, 'Through the bond, from somewhere very far away and getting farther: *I am moving to the roof. I am living on the roof now. Do not look for me.*',
-            "Through the bond, from somewhere very far away and getting farther: *I am moving to the roof.* A long creak of thatch. A pause for thought. *I am moving to the goat shed. I live in the goat shed now. Do not look for me.*",
+        ? byForm(g, `The bond, already distant and still receding: *I am going up on the roof. The roof is my address from tonight. Forward nothing.*`,
+            `The bond, already distant and still receding: *I am going up on the roof.* Thatch groans, at length. A silence follows, in which engineering is reconsidered. *The goat shed. My address is the goat shed. Forward nothing.*`,
             'Through the bond, from somewhere very far away and getting farther: *I am moving to the roof. I am living on the roof now. Do not look for me.*') // v0.11.130 (YB1, SR; Fable's MAIN): the great root-kin and the thatch
         : ykLover(g) ? 'Through the bond, sleepy and amused from the stove downstairs: *Told you. I share. Tell her about me later.* A pause. *Much later.*' : ''));
     // v0.11.125 (owner picks FM1, XS1: RB; Fable's MAINs): the ridge, standing: her place by her current form (was "on your chest" in every form)
