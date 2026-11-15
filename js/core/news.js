@@ -40,6 +40,7 @@ export const NOTES = [
     ['0.11.184', 'Scenes you have lived on an earlier Coil now remember more exactly: the second morning in the Wilds no longer tells James he knows nothing, and most talks with Mei Lin or Ya you have heard before open with a line of their own about what is coming.'],
     ['0.11.185', 'A breakthrough in Ashfall during Act 1 is now seen by the village, which reacts to it, and one inside the Old Tree sends James out to where the sky can reach him first.'],
     ['0.11.187', 'Android app: when the update check fails, Settings → App updates now says so instead of "Up to date", tells you the time GitHub\'s limit lifts, and offers to download the new build in the phone\'s browser, which the limit doesn\'t touch.'],
+    ['0.11.188', 'Mei Lin and Ya now react when James reaches Foundation in front of them; the morning after the dwarven hymn, the work-chant has its beat; and when nobody saw the sky come for James, the Sect\'s letter and Old Wen\'s news no longer say it did.'],
 ];
 
 const parts = (v) => (/^\d+(\.\d+)*$/.test(String(v ?? '')) ? String(v).split('.').map(Number) : null);

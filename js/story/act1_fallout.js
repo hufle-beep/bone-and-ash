@@ -6,8 +6,9 @@
 import { addItem, eat, condense, advance, sleepUntil, jamesHpMax, hasItem, awardYukiFightXp, yukiForm, nightRest, nightTo } from '../core/game.js';
 import { daily, markDaily, hour, day, eatBest, pantry, foodCount, byForm, byDay, dayReply } from './common.js';
 import { encounter, rel, likesMei, likesYa, trioStep, bumpRel, KISS_YA } from './act1_common.js';
-import { textDay } from '../core/lines.js'; // RV1 (FX)
+import { textDay, coilStamp } from '../core/lines.js'; // RV1 (FX); v0.11.188 (N1, L7): coilStamp
 import { potLine } from './kitchen.js'; // v0.11.181 (SP1, PS)
+import { SONG_AT } from './songs.js'; // v0.11.188 (N1, L7): the song of fo_elder_named, by key (no song named here)
 
 /* v0.11.136 (owner pick NC1, NT1's push 2): replies by day (js/core/lines.js dayReply): the first text is the old reply, the rest Fable's, one for each later day of a Coil. */
 const DR_PALISADE_F = dayReply("fo_palisade:0:f", [
@@ -67,6 +68,10 @@ Mei Lin is on her feet before the word has finished, brushing thatch from her sk
 
 The ladder creaks, and then nothing. Ya looks at you with eyes that catch the starlight like an animal's, takes your wrist, and pulls you in through the window after her.`;
 const yaHere = (g) => !!g.flags.ya_met;
+/** v0.11.188 (owner picks N1, D1; Fable's; L7): the dwarven hymn played at fo_elder_named this Coil and this story day (the song's
+ *  record in the save's per-Coil `lines`, music.js; read only), so the first morning's work-chant has it in it. */
+export const hymnToday = (g) => !!(g.lines && g.lines.c === coilStamp(g) && g.lines.sg && g.lines.sg.song === SONG_AT.fo_elder_named && g.lines.sg.d === textDay(g));
+export const HYMN_MORNING = 'Morning. Axes, hammers, and the work-chant, which since breakfast keeps the beat of the dwarves\' song. The hunters hum the low part, gravely and wrong, and lift their stakes to it.';
 /** Day 8, 9 or 10. */
 const dd = (g) => Math.max(8, Math.min(10, day(g)));
 const toEvening = (g) => (dd(g) >= 10 ? 'fo_farewell' : 'fo_supper');
@@ -153,9 +158,22 @@ There is no threat anywhere in him. That is the frightening part.
 "I surrendered it to the Outer Hall," he says. "I was bound to. Outer Elder Shen Qiu lifted it from my hands himself. On the twenty-first he comes here, to ask where such a thing comes from." He lets a breath go by. "He will not ask as I am asking."
 
 He rises, bows lower than any stranger is owed, and goes back up the road by himself.`,
+    /** v0.11.188 (owner picks N1, D1; Fable's, Claude's cut C4): the lost tribute when nobody saw a tribulation (no `sky_witness`; LL):
+     *  the Sect's reason is Lu Han's report, hinting at (not saying) the "cannot sense him" that Old Wen tells at fo_elder_named. */
+    lostUnseen: `Old Wen reads it on his feet in the elder's house, the council in a ring around him, holding the scroll at arm's length as he would hold a debt.
+
+*The Crimson Lotus sets down the report of inner disciple Lu Han. At the tribute of Ashfall a stranger raised his hand against the Sect's collector and was beaten. The Sect sets down what that village calls him: Bone-Maker. It sets down that the bone he works was never carved and came out of no beast. It sets down that what the disciple's hand found in him, when it struck, does not agree with what the disciple's eyes had seen, and that the disciple cannot account for it. The year granted is withdrawn. Outer Elder Shen Qiu comes to Ashfall on the twenty-first day, to collect the Bone-Maker with his own hands.*
+
+Old Wen rolls the scroll shut and keeps hold of it. Nobody in the ring looks at you. They look at the boards at your feet, with care.
+
+"The Sect does not send an Elder to carry what a disciple could drag," says Old Hu, the head hunter, to the boards.
+
+"I lost that fight," you say. "I was told losing would be quieter."
+
+Nobody tells you otherwise. Under your shirt, Lu Han's boot print has begun to itch.`,
     lost: `Old Wen reads it on his feet in the elder's house, the council sitting in a ring about him.
 
-*It has come to the Outer Hall that on the day of the tribute the sky above Ashfall gathered tribulation over a stranger, and went away without striking. Heaven does not go away. The Outer Hall desires to know why. On the twenty-first day Outer Elder Shen Qiu will come to Ashfall, collect the Bone-Maker with his own hands, and study him as one studies a portent.*
+*It has come to the Outer Hall that in the days of the tribute the sky above Ashfall gathered tribulation over a stranger, and went away without striking. Heaven does not go away. The Outer Hall desires to know why. On the twenty-first day Outer Elder Shen Qiu will come to Ashfall, collect the Bone-Maker with his own hands, and study him as one studies a portent.*
 
 "Thirteen days, where we had a year," says Old Hu, the head hunter, without inflection. "Because Heaven took fright at him."
 
@@ -179,7 +197,7 @@ ${g.flags.sky_witness ? 'And under all of it, the thing nobody says out loud: th
     },
     fo_letter: {
         id: 'fo_letter', title: 'The Letter', art: 'council', place: `${P} — the elder's house`,
-        text: (g) => LETTER[ending(g) === 'lost' ? 'lost' : 'fought'],
+        text: (g) => LETTER[ending(g) === 'lost' ? (g.flags.sky_witness ? 'lost' : 'lostUnseen') : 'fought'], // v0.11.188 (N1, LL)
         choices: [
             { text: '"Then we use the thirteen days."', do: (g) => { bumpRel(g, 'Village', 4, 0); bumpRel(g, 'Old Wen', 3, 0); return []; }, to: 'fo_elder_named' },
             { text: '"I could leave. If I\'m gone, there\'s nobody for him to weigh."', to: 'fo_leave_offer' },
@@ -219,7 +237,7 @@ You ask about him, carefully. Voices drop. People describe Shen Qiu as they woul
 
 ${g.flags.elder_intel ? 'He has never lost a duel. He has never needed to hurry one.' : ''}
 
-One thing more, which Old Wen tells you over tea, so low that you have to lean in for it: the envoys, the watchers, Lu Han, each has carried home the same impossible report. *They cannot sense him.* A man who refuses tribulation and sings bone out of the air, and to a cultivator's senses he is an empty chair. "To them that is not a mystery," Old Wen says. "It is an insult. The Elder is not coming to speak with a mortal. He is coming to learn what is hiding inside one."
+One thing more, which Old Wen tells you over tea, so low that you have to lean in for it: the envoys, the watchers, Lu Han, each has carried home the same impossible report. *They cannot sense him.* ${g.flags.sky_witness ? 'A man who refuses tribulation and sings' : ending(g) === 'bluff' ? 'A senior of a mountain no one can name, who sings' : 'A man of no sect and no master, who sings'} bone out of the air, and to a cultivator's senses he is an empty chair. "To them that is not a mystery," Old Wen says. "It is an insult. The Elder is not coming to speak with a mortal. He is coming to learn what is hiding inside one."
 
 Meanwhile, whenever the wind goes round to the north, your Convergence lifts its head like a dog that has heard its name. North, beyond the Hollow, beyond the roots. The dead tree. It has been singing at you since the tribute, and it is not getting quieter.
 
@@ -234,7 +252,8 @@ Thirteen days. You can spend them building walls. Or you can go and find out wha
             const h = hour(g);
             const d2 = Math.max(0, Math.min(2, textDay(g) - 8)); // v0.11.154 (owner pick RV1, Fable's review, L3 FX): by the story's day (from 05:00), Day 8, 9, 10; was byDay(g, [0, 1, 2], 'fo_ashfall')
             // NT1 (Fable's draft): a second set of the times of day and of Ya's lines; v0.11.154 (owner pick PS1, RP1 push 2; Fable's, "ok for texts" 23:05): a third (ST2)
-            const when = d2 === 2
+            const when = h < 11 && hymnToday(g) ? HYMN_MORNING // RV1 (M3): before the days: an Act 1 that starts on Day 9 has the hymn on its first morning too
+                : d2 === 2
                 ? (h < 11 ? `Morning. The hammers have found a rhythm overnight, and the children have made a skipping game of it, which nobody has had the heart to forbid.` : h < 15 ? `Midday. Somebody has set a bowl of barley at the shrine, and somebody else has set a second, larger one beside it.` : h < 19 ? `Late afternoon. The wind has gone round to the north, and you are the only one in the street who turns his head.` : `Dusk. The lamps are lit early and trimmed low; Ashfall has begun counting its oil.`)
                 : d2
                 ? (h < 11 ? `Morning. The hammers started before the light did, and nobody has asked them to stop.` : h < 15 ? `Midday. The chalk line across the barley has been walked so often that it is a path.` : h < 19 ? `Late afternoon. The well is busy and silent, which in Ashfall is how you know people are frightened.` : `Dusk. Shutters closed, lamps lit, every door barred out of habit.`)

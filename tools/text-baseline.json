@@ -2,8 +2,8 @@
  "saved": "2026-11-15",
  "totals": {
   "scenes": 331,
-  "words": 37387,
-  "variantWords": 42868,
+  "words": 37411,
+  "variantWords": 42904,
   "labels": 841,
   "labelWords": 5740,
   "sharedChunks": 137,
@@ -60,7 +60,7 @@
   },
   "fallout": {
    "scenes": 41,
-   "words": 4897,
+   "words": 4901,
    "variantWords": 3964,
    "labels": 93,
    "labelWords": 680,
@@ -102,8 +102,8 @@
   },
   "return": {
    "scenes": 47,
-   "words": 5976,
-   "variantWords": 6793,
+   "words": 5996,
+   "variantWords": 6829,
    "labels": 104,
    "labelWords": 824,
    "sharedScenes": 24,

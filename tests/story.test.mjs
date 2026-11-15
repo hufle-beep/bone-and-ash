@@ -1256,7 +1256,7 @@ for (const form of ['cat', 'human']) {
             if (!/\s/.test(c)) out += c; i++; } return out; }; return code(false); };
       const hash = (t) => createHash('sha256').update(t).digest('hex').slice(0, 16);
       const LABELS = Object.values(RETURN).flatMap((sc) => (sc.choices || []).map((c) => (typeof c.text === 'string' ? c.text : '(fn)')));
-      const PIN = { 'act1_return.js': '05a797e519f6680a', labels: '58e59f4e08e64332' }; // v0.11.179 (LB1): the labels re-pinned (the label pass); v0.11.181 (KG1): again, the mother's card label on rt_ashfall became a function (by the kitchen's stage); v0.11.185 (BR1, RV1 M2): the code re-pinned (the street reads a1_sky_seen too)
+      const PIN = { 'act1_return.js': '09eb4287405f097a', labels: '58e59f4e08e64332' }; // v0.11.179 (LB1): the labels re-pinned (the label pass); v0.11.181 (KG1): again, the mother's card label on rt_ashfall became a function (by the kitchen's stage); v0.11.188 (N1, RV1 M4): again, rt_wen's and rt_elder's sky lines by sky_witness / a1_sky_seen; v0.11.185 (BR1, RV1 M2): the code re-pinned (the street reads a1_sky_seen too)
       const got = { 'act1_return.js': hash(skel(RSRC)), labels: hash(JSON.stringify(LABELS)) };
       for (const [k, v] of Object.entries(PIN)) assert(got[k] === v, `P7A (RV1, TG1): ${k}'s code and ids as pinned in v0.11.174 (${got[k]}; update the pin only with a push that means to change them)`); }
     // TG2: the mechanical parts of the Return's result lines, exactly
@@ -4004,7 +4004,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         const t = bt('heart_hub', r, hh), out = bt('rr_hub', r, hh);
         const rest = t.slice(P.BT_TREE_FRAME.length + 2);
         assert(t.startsWith(`${P.BT_TREE_FRAME}\n\n`) && (r === 1 ? rest === out.replace('fizzles out in the moss', 'fizzles out in the dead bark') : rest === out), `BR1 (HF): realm ${r} in the Old Tree ${hh}:00: the frame first, then the outdoor text${r === 1 ? ' (the bolt in dead bark)' : ''}`);
-        for (const back of ['stream', 'camp', 'rr_hub', 'ah_hub', 'dw_hub', 'rt_camp', 'lf_hub']) { const o = bt(back, r, hh); assert(!o.startsWith(P.BT_TREE_FRAME) && !o.includes(P.BT_A1_WITNESS) && !(r > 1 && VC.test(o.split('\n\n').at(-1))) && (r > 1 || /in the moss/.test(o)), `BR1: realm ${r} at ${back} ${hh}:00 unchanged`); }
+        for (const back of ['stream', 'camp', 'rr_hub', 'ah_hub', 'dw_hub', 'rt_camp', 'lf_hub']) { const o = bt(back, r, hh); assert(!o.startsWith(P.BT_TREE_FRAME) && !o.includes(P.BT_A1_WITNESS) && !(r > 1 && VC.test(o.split('\n\n').at(-1))) && (r > 1 || (back === 'ah_hub' ? /in the ash with/ : /in the moss/).test(o)), `BR1: realm ${r} at ${back} ${hh}:00 unchanged (v0.11.188, N1 RV1 L4: the Ashen Hills' bolt in the ash)`); }
     }
     assert(/Not in the history of the mountain/.test(bt('village', 1, 10)) && !bt('village', 1, 10).includes(P.BT_A1_WITNESS), 'BR1: the prologue village keeps its own witness block');
     // the real path: the Meditate card's breakthrough at each place; `sky_witness` only from the prologue's village
@@ -4020,7 +4020,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         const none = street({}), a1 = street({ a1_sky_seen: true }), pro = street({ sky_witness: 1 });
         assert(sum.test(none) && !weather.test(none) && weather.test(a1) && !sum.test(a1) && weather.test(pro), 'BR1 (RV1, M2): the Return\'s street saw the sky with a1_sky_seen, as with sky_witness');
         const ret = readFileSync(new URL('../js/story/act1_return.js', import.meta.url), 'utf8'), coil = readFileSync(new URL('../js/core/coil.js', import.meta.url), 'utf8');
-        assert((ret.match(/a1_sky_seen/g) || []).length === 1 && !/a1_sky_seen/.test(coil), 'BR1 (RV1, M2): a1_sky_seen read once (the street, no check), not kept across the Coil');
+        assert((ret.match(/a1_sky_seen/g) || []).length === 3 && !ret.split('\n').some((l) => /a1_sky_seen/.test(l) && /check|bonus|dc:/.test(l)) && !/a1_sky_seen/.test(coil), 'BR1 (RV1, M2): a1_sky_seen read by text only (the street; v0.11.188 N1 RV1 M4: rt_wen, rt_elder), in no check, not kept across the Coil');
     }
     // RV1 (TG1): Claude's cuts pinned (C1, C2, C3, and L1's "go up"); (TG2) the old text unchanged where nothing changed: renders hashed against v0.11.184
     assert(/They got as far as one, and it missed\./.test(P.BT_A1_WITNESS) && /A hunter bows to you, gravely, as one signs for a delivery nobody ordered\./.test(P.BT_A1_WITNESS) && !/like a man|\bnone\b/.test(P.BT_A1_WITNESS), 'BR1 (RV1, TG1): C1 and C2 as cut');
@@ -4035,6 +4035,106 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     const w = P.BT_A1_WITNESS.split(/\s+/).length, f = P.BT_TREE_FRAME.split(/\s+/).length;
     assert(w >= 90 && w <= 160 && !/Mei Lin|\bYa\b|mother|Gao|Pock|morning|night|tonight|today|evening|dawn|dusk|noon|\bsun\b|palisade|tribute/i.test(P.BT_A1_WITNESS), `BR1 (AW1, RV1 M1): ${w} words, no one whose state varies (Pock-Face is Gao's lackey), no time words, no tribute ending or palisade`);
     assert(f <= 40 && !/You sit|\bsit\b|lightning|cloud|storm/i.test(P.BT_TREE_FRAME), `BR1 (HF): ${f} words; ends before "You sit" and promises no sky (realms 10, 11)`);
+}
+
+// v0.11.188 (owner picks N1, D1, E1; group e): lines that assumed witnesses nobody had. TR: Foundation with Mei Lin and Ya there
+// (party flags; not a village) has their block, not "Nobody saw it except the trees"; L7: the first morning's work-chant has the
+// hymn in it when the hymn played this Coil and this story day; LL: the lost letter without a tribulation seen; EN: the thirteen
+// days' "refuses tribulation" only with one seen.
+{
+    const P = await import('../js/story/prologue.js');
+    const F = await import('../js/story/act1_fallout.js');
+    const M = await import('../js/story/music.js');
+    const D = 1440, TREES = /Nobody saw it except the trees/;
+    const bt = (back, realm, hh, party = true) => { const g = ensureBars(newGame(88000 + realm)); g.flags.bt_return = back; g.james.realm = realm; g.rel['Mei Lin'] = 20; g.minutes = 12 * D + hh * 60; if (party) { g.flags.mei_party = true; g.flags.ya_party = true; } return SCENES.breakthrough.text(g); };
+    for (const back of ['rr_hub', 'ah_hub', 'dw_hub', 'rt_camp', 'camp']) for (const [hh, k] of [[10, 'day'], [23, 'night'], [5, 'night'], [20, 'night']]) {
+        const t = bt(back, 1, hh);
+        const ash = back === 'ah_hub', kk = back === 'rt_camp' && hh === 20 ? 'night' : k, blk = ash ? P.BT_PARTY[kk].replace('scorched moss', 'scorched ash') : P.BT_PARTY[kk];
+        assert(t.includes(`\n\n${blk}\n\n*Foundation.*`) && !TREES.test(t) && (ash ? /fizzles out in the ash/ : /fizzles out in the moss/).test(t) && !/moss/.test(ash ? t : '') && !t.startsWith(P.BT_TREE_FRAME), `N1 (TR; RV1 L4): Foundation at ${back} ${hh}:00 with the party: their ${kk} block, the bolt in the ${ash ? 'ash' : 'moss'}`);
+        assert(TREES.test(bt(back, 1, hh, false)), `N1 (TR): Foundation at ${back} ${hh}:00 alone keeps the trees line`);
+        for (const r of [2, 5, 10, 13]) assert(bt(back, r, hh) === bt(back, r, hh, false), `N1 (TR): realm ${r} at ${back} ${hh}:00 unchanged by the party`);
+    }
+    for (const hh of [10, 23]) {
+        const t = bt('heart_hub', 1, hh);
+        assert(t.startsWith(`${P.BT_TREE_FRAME}\n\n`) && t.includes(`\n\n${P.BT_PARTY.tree}\n\n*Foundation.*`) && /fizzles out in the dead bark/.test(t) && !TREES.test(t), `N1 (TR): Foundation in the Old Tree ${hh}:00 with the party: the frame, their block, the bolt in dead bark`);
+    }
+    for (const back of ['fo_ashfall', 'rt_ashfall']) assert(bt(back, 1, 10).includes(P.BT_A1_WITNESS) && !Object.values(P.BT_PARTY).some((x) => bt(back, 1, 10).includes(x)), `N1 (TR): at ${back} Ashfall's own witness block comes first`);
+    for (const back of ['village', 'ashfall']) assert(/Not in the history of the mountain/.test(bt(back, 1, 10)) && !Object.values(P.BT_PARTY).some((x) => bt(back, 1, 10).includes(x)), `N1 (TR): the prologue's ${back} keeps its own block`);
+    for (const [k, x] of Object.entries(P.BT_PARTY)) {
+        const w = x.split(/\s+/).length;
+        assert(w >= 50 && w <= 100 && /Mei Lin/.test(x) && /\bYa\b/.test(x) && /you say\.$/.test(x) && !/Ashfall|bow|butt of her spear|Mei Lin looks at the/i.test(x), `N1 (TR, C2 C3): the ${k} block: ${w} words, both women, James's line last, not villagers, the cuts kept`);
+        assert(k === 'tree' ? /dead bark/.test(x) && !/night|morning|evening|dawn|dusk|\bsun\b/i.test(x) : /scorched moss/.test(x), `N1 (TR): the ${k} block's ground${k === 'tree' ? ', no time words' : ''}`);
+    }
+    assert(/^A few steps off,/.test(P.BT_PARTY.night) && !/fire/.test(P.BT_PARTY.night), 'N1 (TR, C1): no fire assumed at night');
+    // L7: the real path; the hymn's record is read only on the same Coil and story day
+    const fo = (hymn, hh = 8, seed = 88100) => {
+        const g = ensureBars(fresh(seed)); startActCoil(g, 1); Object.assign(g.flags, { ending: 'fought', ya_met: true });
+        g.flags.songs = ''; g.minutes = 7 * D + 7 * 60; goTo(g, SCENES, 'fo_elder_named');
+        if (hymn) { const r = M.musicLine(g, sceneView(g, SCENES)); assert(r && r.key === 'song.hammerdeep', 'N1 (L7): the hymn plays at fo_elder_named'); }
+        g.minutes = 7 * D + hh * 60; goTo(g, SCENES, 'fo_ashfall'); return g;
+    };
+    const OLD7 = /^Morning\. Axes, hammers, and a work-chant kept going so that nobody has to think\./;
+    { const g = fo(true); const t = sceneView(g, SCENES).text; assert(t.startsWith(`${F.HYMN_MORNING} `) && !OLD7.test(t) && F.hymnToday(g), 'N1 (L7): Day 8 morning after the hymn: the work-chant keeps its beat'); }
+    { const g = fo(false); assert(OLD7.test(sceneView(g, SCENES).text) && !F.hymnToday(g), 'N1 (L7): no hymn heard this Coil: the old line'); }
+    { const g = fo(true, 12); assert(!/dwarves' song/.test(sceneView(g, SCENES).text), 'N1 (L7): the midday line unchanged'); }
+    { const g = fo(true); g.minutes = 8 * D + 8 * 60; assert(!F.hymnToday(g) && !/dwarves' song/.test(sceneView(g, SCENES).text), 'N1 (L7): the next day, not'); }
+    { const g = fo(true); g.coil = { ...g.coil, n: (g.coil.n || 1) + 1 }; g.minutes = 7 * D + 8 * 60; assert(!F.hymnToday(g) && OLD7.test(sceneView(g, SCENES).text), 'N1 (L7): a later Coil (the record is per Coil): the old line'); }
+    { const g = fo(true); delete g.lines; assert(!F.hymnToday(g), 'N1 (L7): no record, no hymn'); }
+    assert(/^Morning\. /.test(F.HYMN_MORNING) && F.HYMN_MORNING.split(/\s+/).length <= 40 && !/Hammerdeep|Clamavi|\{ref/.test(F.HYMN_MORNING), 'N1 (L7): one short morning line, no song or singer named');
+    // LL and EN: by sky_witness
+    const scr = (id, ending, sw) => { const g = ensureBars(fresh(88200)); startActCoil(g, 1); Object.assign(g.flags, { ending, ya_met: true }); if (sw) g.flags.sky_witness = sw; g.minutes = 7 * D + 7 * 60; goTo(g, SCENES, id); return sceneView(g, SCENES).text; };
+    const unseen = scr('fo_letter', 'lost'), seen = scr('fo_letter', 'lost', 1);
+    assert(unseen.includes('report of inner disciple Lu Han') && !/tribulation|the sky|Heaven|sense him|feel him|cannot feel|could not sense|cannot sense|root in him|empty chair/i.test(unseen) && /to collect the Bone-Maker with his own hands/.test(unseen) && /the boards at your feet/.test(unseen) && !/floor in front of/.test(unseen), 'N1 (LL, C4): the lost letter with no tribulation seen: Lu Han\'s report, no sky, the reveal kept for later');
+    assert(/gathered tribulation over a stranger/.test(seen) && !seen.includes('Lu Han'), 'N1 (LL): with a tribulation seen, the old letter');
+    assert(/lifted its hand against the Sect/.test(scr('fo_letter', 'fought')) && /lifted its hand against the Sect/.test(scr('fo_letter', 'fought', 1)), 'N1 (LL): the fought letter unchanged either way');
+    for (const e of ['fought', 'lost', 'bluff', 'paid']) {
+        const a = scr('fo_elder_named', e), b = scr('fo_elder_named', e, 1);
+        assert((e === 'bluff' ? /A senior of a mountain no one can name, who sings bone out of the air, and to a cultivator's senses he is an empty chair\./ : /A man of no sect and no master, who sings bone out of the air/).test(a) && !/tribulation/.test(a) && /A man who refuses tribulation and sings bone out of the air/.test(b), `N1 (EN, E1; RV1 M2, L6, TG3): the thirteen days (${e}): "refuses tribulation" only with one seen; the bluff's own clause`);
+    }
+    // v0.11.188 (owner picks RV1, DB1; the Opus review's M1–M4, L1–L8, TG1–TG10)
+    const BR = await import('../js/story/act1_blackroot.js');
+    const R = await import('../js/story/act1_return.js');
+    const btw = (back, hh, flags) => { const g = ensureBars(newGame(88300)); Object.assign(g.flags, { bt_return: back, mei_party: true, ya_party: true }, flags); g.james.realm = 1; g.rel['Mei Lin'] = 20; g.minutes = 14 * D + hh * 60; return SCENES.breakthrough.text(g); };
+    // TG1 (M1): Ya away at the Ashen Hills: Mei Lin's own block; both away for water: the trees line; Ya away elsewhere: no matter
+    for (const [hh, k] of [[10, 'day'], [23, 'night']]) {
+        const t = btw('ah_hub', hh, { bl_day: 4 });
+        assert(t.includes(`\n\n${P.BT_MEI[k]}\n\n*Foundation.*`) && !Object.values(P.BT_PARTY).some((x) => t.includes(x.slice(0, 40))) && /fizzles out in the ash/.test(t), `N1 (RV1 M1, TG1): Ya away at the Ashen Hills ${hh}:00: Mei Lin's ${k} block, the ash`);
+        assert(btw('ah_hub', hh, { bl_day: 4, ya_off_done: true }).includes(P.BT_PARTY[k].replace('scorched moss', 'scorched ash')), `N1 (RV1 M1): Ya back (ya_off_done) ${hh}:00: the party's block`);
+        const g = ensureBars(newGame(88301)); Object.assign(g.flags, { bt_return: 'ah_hub', mei_party: true, ya_party: true, bl_day: 2, trio: 2 }); g.rel['Mei Lin'] = { f: 90, a: 90 }; g.rel['Ya'] = { f: 90, a: 90 }; g.james.realm = 1; g.minutes = 14 * D + hh * 60;
+        assert(BR.bothAway(g), 'N1 (TG1): the water state set up'); { const w = SCENES.breakthrough.text(g); assert(TREES.test(w) && !w.includes(P.BT_MEI[k]), `N1 (RV1 M1, TG1): both away for water ${hh}:00: the trees line`); }
+        assert(btw('dw_hub', hh, { bl_day: 6 }).includes(P.BT_PARTY[k]), `N1 (RV1 M1): Ya's door is the Ashen Hills' only: at dw_hub ${hh}:00 the party's block`);
+    }
+    { const g = ensureBars(newGame(88302)); g.flags.bl_day = 4; assert(BR.yaAway(g) && !BR.yaAway(Object.assign(g, { flags: { ...g.flags, ya_off_done: true } })), 'N1 (RV1 M1): yaAway is the door\'s state'); }
+    assert(BR.BLACKROOT.ah_hub.choices.some((c) => c.to === 'ya_offended' && /yaAway\(g\) && !late\(g\)/.test(String(c.show))) && BR.BLACKROOT.ah_hub.choices.some((c) => c.to === 'trio_kiss' && /bothAway\(g\) && !late\(g\)/.test(String(c.show))), 'N1 (RV1 M1): the doors read the same states');
+    for (const [k, x] of Object.entries(P.BT_MEI)) {
+        const w = x.split(/\s+/).length;
+        assert(w >= 40 && w <= 90 && /Mei Lin/.test(x) && /\bYa\b/.test(x) && /laugh/.test(x) && (k === 'day' || /\bash\b/.test(x)) && !/moss|Ya (prods|crouches|hauls)/.test(x) && /you say\./.test(x.split('\n\n').at(-1)), `N1 (RV1 M1, TG4): Mei Lin's ${k} block: ${w} words, she laughs, Ya only named, the ash, James last`);
+    }
+    // TG5: time words by block; L7: the Return's camp is night from 19:00
+    const NIGHTW = /\b(night\w*|dark\w*|star\w*|moon\w*|lamp\w*)/i, DAYW = /\b(sun\w*|noon\w*|morning|daylight|dawn|afternoon)/i; // TG5 (F8: "starlight")
+    for (const B of [P.BT_PARTY, P.BT_MEI]) { assert(!DAYW.test(B.night) && !NIGHTW.test(B.day), 'N1 (TG5): no day word at night, no night word by day'); }
+    assert(!NIGHTW.test(P.BT_PARTY.tree) && !DAYW.test(P.BT_PARTY.tree), 'N1 (TG5): no time word in the Old Tree');
+    assert(btw('rt_camp', 19, {}).includes(P.BT_PARTY.night) && btw('rt_camp', 18, {}).includes(P.BT_PARTY.day) && btw('rr_hub', 19, {}).includes(P.BT_PARTY.day), 'N1 (RV1 L7): the Return\'s camp is night from 19:00, the roads at 20:00');
+    // TG4: the tone words pinned; the cuts kept (L3, L5)
+    assert(/scholar/.test(P.BT_PARTY.night) && /scholar/.test(P.BT_PARTY.day) && /laughs/.test(P.BT_PARTY.day) && /grins/.test(P.BT_PARTY.night) && /the strike that never came/.test(P.BT_PARTY.day) && !/flash that never arrived|as evidence/.test(P.BT_PARTY.day + P.BT_PARTY.tree), 'N1 (TG4; RV1 L3, L5): Ya\'s "scholar", Mei Lin\'s laugh, the cuts');
+    assert(/gravely and wrong/.test(F.HYMN_MORNING), 'N1 (TG4): the hunters hum it gravely');
+    // TG2 (M3): an Act 1 that starts on Day 9 has the hymn on its first morning
+    { const g = ensureBars(fresh(88310)); startActCoil(g, 1); Object.assign(g.flags, { ending: 'fought', ya_met: true, songs: '' }); g.minutes = 8 * D + 7 * 60; goTo(g, SCENES, 'fo_elder_named'); M.musicLine(g, sceneView(g, SCENES)); g.minutes = 8 * D + 9 * 60; goTo(g, SCENES, 'fo_ashfall');
+      assert(sceneView(g, SCENES).text.startsWith(`${F.HYMN_MORNING} `), 'N1 (RV1 M3, TG2): Day 9\'s first morning after the hymn'); }
+    // TG8: another song's record the same day is not the hymn
+    { const g = fo(false); linesOf(g).sg = { d: textDay(g), song: 'genesis', at: 'fo_depart' }; assert(!F.hymnToday(g), 'N1 (TG8): another song the same day is not the hymn'); linesOf(g).sg.song = 'hammerdeep'; assert(F.hymnToday(g), 'N1 (TG8): the hymn\'s key'); }
+    // TG6, TG7, L1, L2: the lost letter
+    assert(/on the twenty-first day, to collect the Bone-Maker/.test(unseen) && /The Sect does not send an Elder to carry what a disciple could drag/.test(unseen) && /and that the disciple cannot account for it/.test(unseen) && !/nowhere in the room fit/.test(unseen), 'N1 (TG6, TG7, TG4; RV1 L1, L2): Day 21, Old Hu\'s line, "the disciple", the clause cut');
+    assert(/in the days of the tribute the sky above Ashfall/.test(seen) && !/on the day of the tribute/.test(seen), 'N1 (RV1 L8): the old letter: in the days of the tribute');
+    // TG10 (M4): the Return's two sky lines by sky_witness or a1_sky_seen
+    const ret = (id, flags) => { const g = ensureBars(fresh(88320)); startActCoil(g, 1); Object.assign(g.flags, { ya_met: true, ya_party: true, mei_party: true }, flags); g.minutes = 19 * D + 18 * 60; goTo(g, SCENES, id); return sceneView(g, SCENES).text; };
+    for (const e of ['fought', 'lost', 'bluff', 'paid']) {
+        const wn = ret('rt_wen', { ending: e }), ws = ret('rt_wen', { ending: e, sky_witness: 1 }), wa = ret('rt_wen', { ending: e, a1_sky_seen: true });
+        const tail = e === 'fought' ? ', and of the disciples you sent home bleeding.' : '.';
+        assert(wn.includes(`He will have heard of the stranger no envoy of theirs could sense${tail}`) && !/tribulation/.test(wn) && ws.includes(`the tribulation that refused to fall${tail}`) && wa.includes('the tribulation that refused to fall'), `N1 (RV1 M4, TG10): rt_wen (${e}) by what was seen`);
+        const en = ret('rt_elder', { ending: e }), es = ret('rt_elder', { ending: e, a1_sky_seen: true });
+        assert(/And you are the one\. Every report that crossed my table said there was nothing in you to report\. I have lived three hundred years/.test(en) && !/the sky came for you/.test(en) && /And the sky came for you, and went away ashamed\./.test(es), `N1 (RV1 M4, TG10): rt_elder (${e}) by what was seen`);
+    }
 }
 
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));

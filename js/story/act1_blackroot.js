@@ -183,6 +183,10 @@ const late = (g) => hour(g) >= 19;
 /** v0.11.123 (EQ1, SC; Fable's D1 lead-in): Ya's word when Mei Lin takes James to the far end of the raft and Ya likes him too. */
 const MEI_RAFT_YA = `Ya watches the two of you get up. Her nose wrinkles, and then she grins to the back teeth. "Go. Tonight I guard." She drags her bedroll round so her back is to the far end of the raft, with the air of a wolf doing someone a favour, and lays the spear across her knees. "I'm not listening," she tells the black water, loudly. "I have very bad ears. Everybody says." She is not put out. Her foot taps the trunk, twice. She is possibly a little put out.`;
 const both = (g) => likesMei(g) && likesYa(g);
+/** v0.11.188 (N1, RV1 M1): who is away from the Ashen Hills camp, as its door cards say (without the 19:00 cut, which hides
+ *  the door, not the absence): Ya walked off offended; or both went for water. Read by the breakthrough's witness block. */
+export const yaAway = (g) => bday(g) >= 4 && !g.flags.ya_off_done;
+export const bothAway = (g) => both(g) && trio(g) >= 2 && !g.flags.trio_kiss_seen;
 /** bl_night's second paragraph (NT1: the Drowned Wood's second night has its own, by day). */
 const BL_WATCHES = 'Watches to set. Ya claims she never sleeps, which is false; Mei Lin claims she won\'t sleep out here in any case, which is true. Your Parallel Cognition puts up a watch-thread, as it always does.';
 /** v0.11.154 (owner pick PS1, RP1 push 2; Fable's, "ok for texts" 23:05): the Drowned Wood's first night and the Ashen Hills' night have their own watch paragraph (BL_WATCHES was on
@@ -778,8 +782,8 @@ She doesn't mean a word. All of you can hear that she doesn't, and it helps nobo
             ? 'Black ridges, a grey sky, the dead tree over both. High up, cinder hawks circle, each trailing a thin thread of smoke.'
             : 'One ridge left before the tree. A rot-ape holds the pass at the top, Ya says. She says it calmly, and nothing she has said all week has worried you more.'),
         choices: [
-            { text: 'Ya\'s gone. So is her spear.', show: (g) => bday(g) >= 4 && !g.flags.ya_off_done && !late(g), time: 10, to: 'ya_offended' },
-            { text: 'Find Mei Lin and Ya. They went for water an hour ago.', show: (g) => both(g) && trio(g) >= 2 && !g.flags.trio_kiss_seen && !late(g), time: 30, to: 'trio_kiss' },
+            { text: 'Ya\'s gone. So is her spear.', show: (g) => yaAway(g) && !late(g), time: 10, to: 'ya_offended' },
+            { text: 'Find Mei Lin and Ya. They went for water an hour ago.', show: (g) => bothAway(g) && !late(g), time: 30, to: 'trio_kiss' },
             { text: 'Forage in the ash.', show: (g) => optionLeft(g, 'ah_forage') && !late(g), time: 15, to: 'ah_forage' },
             { text: 'Hunt.', show: (g) => optionLeft(g, 'ah_hunt') && !late(g), time: 15, to: 'ah_hunt' },
             { text: 'Climb to the cairn on the high ridge.', show: (g) => !g.flags.ah_cairn && !late(g), time: 40, to: 'ah_scout' },

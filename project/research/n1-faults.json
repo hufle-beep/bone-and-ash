@@ -1,0 +1,135 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/prologue.js",
+  "find": "const witness = a1seen ? BT_A1_WITNESS : seen",
+  "replace": "const witness = a1seen ? BT_A1_WITNESS : party ? BT_PARTY.day : seen",
+  "note": "TR: the party block wins over the prologue village's witness block"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/prologue.js",
+  "find": "const t = n ? BT_PARTY.night : BT_PARTY.day;",
+  "replace": "const t = n ? BT_PARTY.day : BT_PARTY.night;",
+  "note": "TR: night and day blocks swapped (adapted to RV1)"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/prologue.js",
+  "find": "if (BT_IN_TREE.includes(g.flags.bt_return)) return BT_PARTY.tree;",
+  "replace": "if (false) return BT_PARTY.tree;",
+  "note": "TR: the Old Tree gets the camp block (moss, a few steps off) under the climb-out frame (adapted to RV1)"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/prologue.js",
+  "find": "\"It left,\" she says. \"They don't leave.\"",
+  "replace": "\"It left,\" she says, and kneels in the moss and touches her forehead to it.",
+  "note": "TR tone: Mei Lin reveres him like a villager (only 'bow' is banned)"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/prologue.js",
+  "find": "Mei Lin takes in the sky, then the scorch",
+  "replace": "Mei Lin takes in the stars, then the scorch",
+  "note": "TR: a time word in the tree block (stars), which shows by day"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/prologue.js",
+  "find": "grins at you with all her teeth. \"The sky ran from you, scholar. I have chased things for less.\"",
+  "replace": "lowers her spear, gravely. \"Heaven has judged you clean, honoured one.\"",
+  "note": "TR tone: Ya grave and formal, no joke, no 'scholar'"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/prologue.js",
+  "find": "Mei Lin has not moved. She has watched",
+  "replace": "Mei Lin has not moved. In the noon glare she has watched",
+  "note": "TR: a day word in the night block"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/prologue.js",
+  "find": "a hand still raised to shield her eyes from the strike",
+  "replace": "a hand still raised against the starlight, shielding her eyes from the strike",
+  "note": "TR: a night word in the day block (adapted to RV1)"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/prologue.js",
+  "find": "Then she laughs, once, sounding surprised at herself.",
+  "replace": "Then she kneels and touches her forehead to the ground.",
+  "note": "TR tone: Mei Lin's laugh (looser) lost for a villager's obeisance"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/act1_fallout.js",
+  "find": "g.lines.sg.d === textDay(g)",
+  "replace": "g.lines.sg.d <= textDay(g)",
+  "note": "L7: the hymn line on every later day of the Coil"
+ },
+ {
+  "id": "F11",
+  "file": "js/story/act1_fallout.js",
+  "find": "g.lines.c === coilStamp(g) && ",
+  "replace": "",
+  "note": "L7: a record from an earlier Coil counts"
+ },
+ {
+  "id": "F12",
+  "file": "js/story/act1_fallout.js",
+  "find": "g.lines.sg.song === SONG_AT.fo_elder_named",
+  "replace": "!!g.lines.sg.song",
+  "note": "L7: any song played that day counts as the hymn"
+ },
+ {
+  "id": "F13",
+  "file": "js/story/act1_fallout.js",
+  "find": "const when = h < 11 && hymnToday(g) ? HYMN_MORNING",
+  "replace": "const when = h < 15 && hymnToday(g) ? HYMN_MORNING",
+  "note": "L7: the hymn line replaces the midday line too (adapted to RV1)"
+ },
+ {
+  "id": "F14",
+  "file": "js/story/act1_fallout.js",
+  "find": "The hunters hum the low part, gravely and wrong, and lift their stakes to it.",
+  "replace": "The hunters hum the low part, grinning, and trade jokes about the dwarves over their stakes.",
+  "note": "L7 tone: grave locals joking"
+ },
+ {
+  "id": "F15",
+  "file": "js/story/act1_fallout.js",
+  "find": "(g.flags.sky_witness ? 'lost' : 'lostUnseen')",
+  "replace": "(g.flags.sky_witness ? 'lostUnseen' : 'lost')",
+  "note": "LL: letters swapped"
+ },
+ {
+  "id": "F16",
+  "file": "js/story/act1_fallout.js",
+  "find": "does not agree with what the disciple's eyes had seen, and that the disciple cannot account for it.",
+  "replace": "found no root in him at all: the disciple could not sense him.",
+  "note": "LL: the letter spends the later 'cannot sense him' reveal (worded so the test's /cannot sense/ misses) (adapted to RV1)"
+ },
+ {
+  "id": "F17",
+  "file": "js/story/act1_fallout.js",
+  "find": "\"The Sect does not send an Elder to carry what a disciple could drag,\" says Old Hu, the head hunter, to the boards.",
+  "replace": "\"Well,\" says Old Hu, the head hunter, grinning at the boards, \"that's a twist.\"",
+  "note": "LL tone: the grave head hunter jokes"
+ },
+ {
+  "id": "F18",
+  "file": "js/story/act1_fallout.js",
+  "find": "${g.flags.sky_witness ? 'A man who refuses tribulation and sings' : ending(g) === 'bluff'",
+  "replace": "${!g.flags.sky_witness ? 'A man who refuses tribulation and sings' : ending(g) === 'bluff'",
+  "note": "EN: clauses swapped (adapted to RV1)"
+ },
+ {
+  "id": "F19",
+  "file": "js/story/act1_fallout.js",
+  "find": "Outer Elder Shen Qiu comes to Ashfall on the twenty-first day, to collect",
+  "replace": "Outer Elder Shen Qiu comes to Ashfall on the twentieth day, to collect",
+  "note": "LL: the Elder's day off by one (Day 21 is canon)"
+ }
+]

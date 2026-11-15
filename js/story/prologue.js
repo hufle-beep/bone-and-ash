@@ -18,7 +18,7 @@ import { WILDS, nightNext } from './wilds.js';
 import { ASHFALL, hubOf, nextEvening } from './ashfall.js';
 import { ACT1_ITEMS, KISS_MEI } from './act1_common.js';
 import { FALLOUT, BREAK_HUBS as B1 } from './act1_fallout.js';
-import { BLACKROOT, BREAK_HUBS as B2 } from './act1_blackroot.js';
+import { BLACKROOT, BREAK_HUBS as B2, yaAway, bothAway } from './act1_blackroot.js'; // v0.11.188 (N1, RV1 M1): yaAway, bothAway
 import { HEART, BREAK_HUBS as B3 } from './act1_heart.js';
 import { RETURN, BREAK_HUBS as B4, installSelene } from './act1_return.js';
 import { LONGFOREST, BREAK_HUBS as B0 } from './longforest.js';
@@ -923,10 +923,52 @@ Old Wen walks out to the place where the bolt gave up. He studies it, then you, 
 Nobody improves on it. A hunter bows to you, gravely, as one signs for a delivery nobody ordered. You nod back. It is cheaper than explaining.`;
 export const BT_TREE_FRAME = 'Not in here. The Old Tree has had enough done to it under this roof. You go up the widest crack to where it opens on the sky, and find a level place on the lip.';
 const BT_TREE_GROUND = 'dead bark';
+/** v0.11.188 (owner picks N1, D1; Fable's, Claude's cuts C1–C4): Foundation away from a village while Mei Lin and Ya travel with
+ *  him (TR): they saw it, so not "Nobody saw it except the trees". At a camp or on the road by night or day; in the Old Tree they
+ *  come up the crack after it (the frame line). Texts only: no flag, gain or check. */
+export const BT_PARTY = {
+    night: `A few steps off, Mei Lin has not moved. She has watched tribulations burn people down to their sandals, and she is still counting on her fingers for strokes that are not coming. "It left," she says. "They don't leave."
+
+Ya prods the scorched moss with her spear, sniffs it, and grins at you with all her teeth. "The sky ran from you, scholar. I have chased things for less."
+
+"It had somewhere to be," you say.`,
+    day: `Mei Lin is standing where she stood when the clouds came, a hand still raised to shield her eyes from the strike that never came. "I have seen that burn people," she says. "I have never seen it change its mind." Then she laughs, once, sounding surprised at herself.
+
+Ya crouches over the scorched moss, pokes it, and looks you up and down, slowly. "Heaven sniffed you and walked off. What do you smell of, scholar?"
+
+"Mostly cat," you say.`,
+    tree: `Two heads come up through the crack below you, one after the other. Mei Lin takes in the sky, then the scorch in the dead bark, then you, unburnt and sitting. "I came up to collect what was left," she says. "I brought a cloth." She holds it up.
+
+Ya hauls herself onto the lip, puts a bare foot on the scorch and finds it cold. "Do it again," she says. "I was climbing. I missed the good part."
+
+"That was the good part," you say.`,
+};
 const BT_VILLAGE_CLOSER = 'Ashfall watches it go in total silence. Then, one by one, people bow — not to the sky. To you. You would very much prefer they didn\'t.';
+/** v0.11.188 (owner picks N1, RV1, DB1; Fable's, part 2): Foundation at the Ashen Hills while Ya has walked off (M1): Mei Lin
+ *  alone saw it. Texts only. */
+export const BT_MEI = {
+    night: `Mei Lin has not moved. In the dark her face is turned up to where the storm was, then down to the scorched thumbprint the one bolt left in the ash by your knee. "I have watched Heaven burn three people," she says. "It never once changed its mind." A short laugh gets out of her. "Ya will call me a liar."
+
+"Tell her it was a scheduling error," you say.`,
+    day: `Mei Lin has not lowered the arm she threw over her eyes. She looks under it at the empty sky, then at you, who are not on fire. "People die of that," she says. "I have carried what was left of them home." Then she laughs, helplessly. "Ya walked off and missed Heaven losing its nerve. She will never believe me."
+
+"I barely do," you say. "And I was closer."`,
+};
+/** The party's block (TR; RV1): the Old Tree's; Mei Lin's own while Ya is away (M1); at a camp by night or day, the Return's camp
+ *  counting as night from 19:00 (L7: it is entered at dusk, round the fire); the ground ash in the Ashen Hills (L4). */
+function btParty(g, away, night) {
+    if (BT_IN_TREE.includes(g.flags.bt_return)) return BT_PARTY.tree;
+    const n = night || (g.flags.bt_return === 'rt_camp' && clockParts(g.minutes).hh >= 19);
+    if (away === 'ya') return n ? BT_MEI.night : BT_MEI.day;
+    const t = n ? BT_PARTY.night : BT_PARTY.day;
+    return g.flags.bt_return === 'ah_hub' ? t.replace('scorched moss', 'scorched ash') : t;
+}
 function btText(g) {
     const seen = VILLAGE_SCENES.includes(g.flags.bt_return);
     const a1seen = BT_ASHFALL_A1.includes(g.flags.bt_return); // v0.11.185 (BR1, AW1 + AW2): Act 1's Ashfall saw it too
+    const party = !!(g.flags.mei_party && g.flags.ya_party); // v0.11.188 (N1, TR): Mei Lin and Ya travel with him (the Blackroot, the Heart, the Return)
+    const ah = g.flags.bt_return === 'ah_hub'; // RV1 (M1, L4): the Ashen Hills: who is away, and the ground is ash
+    const away = party && ah ? (bothAway(g) ? 'both' : yaAway(g) ? 'ya' : null) : null;
     const knows = !!(g.flags.lore1 || g.flags.lore_realms || g.rel['Mei Lin']);
     const h = clockParts(g.minutes).hh;
     const night = h >= 20 || h < 6;
@@ -943,6 +985,7 @@ Old Wen stands in his doorway, his pipe gone cold in his hand. When at last he l
 "A tribulation that withdraws its own verdict," he says to no one, quietly and formally, as one reads out a death in the family. "A cloud over one roof and a few strokes: so Foundation is paid for. Never this. Not in the history of the mountain."
 
 And someone, you suspect, is already running up the road to the Crimson Lotus.`
+            : party && away !== 'both' ? btParty(g, away, night) // v0.11.188 (N1, TR; RV1 M1: Ya away, Mei Lin's own; both away, the trees)
             : night
                 ? 'Nobody saw it except the trees and whatever lives in them. Out here, at night, a miracle without witnesses is the best kind.'
                 : 'Nobody saw it except the trees. Out here, you suspect, a miracle without witnesses is the best kind.';
@@ -960,7 +1003,7 @@ It looks.
 
 It looks for a long time.
 
-And then — you would swear to this in any court — the storm more or less *shrugs*. It has found nothing impure to burn. Nothing to punish. One bolt comes down, strolls to the ground beside you and fizzles out in the ${seen || a1seen ? 'dust' : BT_IN_TREE.includes(g.flags.bt_return) ? BT_TREE_GROUND : 'moss'} with the sound of a disappointed sigh, and the clouds come apart and drift off in embarrassed directions.
+And then — you would swear to this in any court — the storm more or less *shrugs*. It has found nothing impure to burn. Nothing to punish. One bolt comes down, strolls to the ground beside you and fizzles out in the ${seen || a1seen ? 'dust' : BT_IN_TREE.includes(g.flags.bt_return) ? BT_TREE_GROUND : ah ? 'ash' : 'moss'} with the sound of a disappointed sigh, and the clouds come apart and drift off in embarrassed directions.
 
 "Huh," you say.
 
