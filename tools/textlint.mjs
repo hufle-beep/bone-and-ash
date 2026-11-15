@@ -118,7 +118,8 @@ const allSongTexts = (ed) => Object.values(SGX.SONG_TEXTS).flatMap((s) => (s.yuk
 const RMX = await import(js('story/remember_texts.js'));
 const rememberLines = [RMX.MORNING_AGAIN, RMX.SCENE_MEMORY_LINES.morning, ...Object.values(RMX.SCENE_MEMORY_LINES.talk_mei), ...Object.values(RMX.SCENE_MEMORY_LINES.talk_ya)];
 const BTX = await import(js('story/prologue.js')); // v0.11.185 (BR1, RV1 TG3): the sample states set no bt_return, so the two texts are read as a pool
-const btPlaceLines = [BTX.BT_A1_WITNESS, BTX.BT_TREE_FRAME];
+const { SUPPER_POT } = await import(js('story/act1_fallout.js')); // v0.11.189 (P1, PL, L5b): the women's lines at realm 2+ and the supper's clauses show only with flags the samples don't set
+const btPlaceLines = [BTX.BT_A1_WITNESS, BTX.BT_TREE_FRAME, ...Object.values(BTX.BT_LATE).flatMap((o) => Object.values(o)), SUPPER_POT[2], SUPPER_POT[3]];
 const POOLS = { memory: [...MEMORY_LINES], yuki: yukiLines, aptitude: [ADAPT_REPLY], replies: dayReplies, house: houseLines, kitchen: kitchenLines, music: allMusicTexts('general'), music_named: allMusicTexts('named'), reading_named: readNamed, songs: allSongTexts('general'), songs_named: allSongTexts('named'), lf_drill: Object.values(LF_DRILL).flat(), lf_season: [...SEASON_LINES], remember: rememberLines, bt_place: btPlaceLines };
 const pools = poolCounts(POOLS, rows.filter((r) => r.kind === 'text').flatMap((r) => r.renders));
 // RV1 (TG6): the reading's named edition against every scene but its own (its general text is heart_read itself)

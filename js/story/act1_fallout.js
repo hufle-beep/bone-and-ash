@@ -72,6 +72,14 @@ const yaHere = (g) => !!g.flags.ya_met;
  *  record in the save's per-Coil `lines`, music.js; read only), so the first morning's work-chant has it in it. */
 export const hymnToday = (g) => !!(g.lines && g.lines.c === coilStamp(g) && g.lines.sg && g.lines.sg.song === SONG_AT.fo_elder_named && g.lines.sg.d === textDay(g));
 export const HYMN_MORNING = 'Morning. Axes, hammers, and the work-chant, which since breakfast keeps the beat of the dwarves\' song. The hunters hum the low part, gravely and wrong, and lift their stakes to it.';
+/** v0.11.189 (owner pick P1, L5b; Fable's K2, K3): the supper's pot clause by the mother's kitchen this Coil (`kitchen_seen`, kitchen.js:
+ *  the highest stage she has shown him; a world flag). Below stage 2 she still pretends nobody salted her pot. Texts only. */
+export const SUPPER_POT = {
+    1: 'informing the ladle that whoever salted her pot while she was at the shrine was not seen, and has improved it.',
+    2: 'informing the ladle that half her fire is given over to error now, and that the error may have a second helping.',
+    3: 'informing the ladle that the pot is no longer her doing, that she supervised every grain of it, and that it will do.',
+};
+const supperPot = (g) => SUPPER_POT[Math.max(1, Math.min(3, Number(g.flags.kitchen_seen) || 0))];
 /** Day 8, 9 or 10. */
 const dd = (g) => Math.max(8, Math.min(10, day(g)));
 const toEvening = (g) => (dd(g) >= 10 ? 'fo_farewell' : 'fo_supper');
@@ -447,7 +455,7 @@ And beside your portrait, in the margin: *does not bow*.${byForm(g, "\n\nYuki is
 Mei Lin has one hand for her bowl. The other is tracing the palisade line across the table in spilled tea, and she is losing an argument with it. ${byForm(g, "Yuki eats a sliver of salt pork that nobody at this table offered her.", "Yuki, along the far wall, has been served a whole smoked hare in the washing basin, unasked. The mother pays her tolls promptly.", "Yuki, seated at the head by the mother's ruling, eats her sliver of salt pork with chopsticks, faultlessly, and is offered a second before you are.")}`
             : `${yaHere(g) ? `Ya comes to supper. Nobody invited her. She simply arrives at the door, walks in, sits at the table on the *wrong side* — the host's side — and eats with her fingers, fast, hunched, watching the door the whole time like a wolf at a kill.
 
-Mei Lin's mother serves her anyway, because a guest is a guest even if she is an animal, and sits through the whole meal with the face of a woman enduring a tribulation. Your bowl she fills past the line, informing the ladle that whoever salted her pot while she was at the shrine was not seen, and has improved it.
+Mei Lin's mother serves her anyway, because a guest is a guest even if she is an animal, and sits through the whole meal with the face of a woman enduring a tribulation. Your bowl she fills past the line, ${supperPot(g)}
 
 Halfway through, Ya burps, looks at Mei Lin, then at you, and says, conversationally: "So which of you two is sleeping in the loft? Or is it both. It should be both."
 

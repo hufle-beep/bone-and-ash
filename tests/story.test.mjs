@@ -3150,7 +3150,8 @@ for (let run = 0; run < 20; run++) { // the hunters too slow for the wolves: fo_
     const { SOCIAL, EAT: EATLIKE } = await import('./lib/social.mjs'); // RV1 (TG7): the bots' own regexes
     const all = [...Object.values(K.KT_LABEL), ...Object.values(K.KT_UP), ...Object.values(K.KT_DAY).flat(), ...Object.values(K.KT_RETURN), ...K.POT_LINE.ashfall, ...K.POT_LINE.fo, ...Object.values(K.POT_COOK).flatMap((o) => Object.values(o))];
     assert(all.length === 31 && all.every((t) => typeof t === 'string' && t.length > 10 && !/\[|\]|TODO/.test(t)) && new Set(all).size === 31, `CM (KG1, PS): 31 texts, all filled and distinct (${all.length})`);
-    assert(JSON.stringify(K.KG) === '[8,15,25]' && K.POT_GATE === 90, 'CM (KG1): the gates 8 / 15 / 25; PS: the village\'s 90');
+    assert(JSON.stringify(K.KG) === '[8,15,30]' && K.POT_GATE === 90, 'CM (KG1; P1 L5a): the gates 8 / 15 / 30; PS: the village\'s 90');
+    { const H = await import('../js/story/house_time.js'); assert(K.KG[2] === H.HT_MID, 'P1 (L5a): the take-over comes with her warm closers (HT_MID), not below them'); }
     const labels = [...Object.values(K.KT_LABEL), K.POT_COOK.ashfall.label, K.POT_COOK.fo.label];
     assert(labels.every((t) => !EATLIKE.test(t) && !SOCIAL.test(t) && /\.$/.test(t) && t.length < 45), 'CM: the card labels are not read as eating or a talk by the bots, end with a full stop, under 45 characters');
     assert([...K.POT_LINE.ashfall, ...K.POT_LINE.fo, K.POT_COOK.ashfall.result, K.POT_COOK.fo.result].every((t) => !/[.!?:]$/.test(t)), 'CM (PS): the pot lines and results end bare (the code adds ": +25 satiety.")');
@@ -3160,7 +3161,7 @@ for (let run = 0; run < 20; run++) { // the hunters too slow for the wolves: fo_
     assert(!/dödölle[\s\S]*dödölle/.test(all.join(' ')) && all.filter((t) => /dödölle|shakshuka/i.test(t)).length === 2, 'CM: two dishes named in all (KU3, KD3b)');
     // the stage by her friendship
     const at = (f) => { const g = ensureBars(fresh(66001)); g.rel.Mother = { f, a: 0 }; return g; };
-    assert([0, 7, 8, 14, 15, 24, 25, 150].map((f) => K.kitchenStage(at(f))).join() === '0,0,1,1,2,2,3,3', 'CM (KG1): the stage by her friendship');
+    assert([0, 7, 8, 14, 15, 29, 30, 150].map((f) => K.kitchenStage(at(f))).join() === '0,0,1,1,2,2,3,3', 'CM (KG1; P1 L5a): the stage by her friendship');
     // her card on the Fallout: the label by stage before the gain, the text after it; body, kitchen, closer
     const MK = (seed, hub, day, f, flags = {}) => { const g = ensureBars(fresh(seed)); g.coil.act = hub === 'ashfall' ? 0 : 1; g.minutes = (day - 1) * D + 600; Object.assign(g.flags, flags); g.rel.Mother = { f, a: 0 }; goTo(g, SCENES, hub); return g; };
     const mIdx = (g) => SCENES[g.scene].choices.findIndex((c) => c.to === 'mother_time');
@@ -3191,7 +3192,7 @@ for (let run = 0; run < 20; run++) { // the hunters too slow for the wolves: fo_
         choose(g, SCENES, mIdx(g));
         assert(sceneView(g, SCENES).text.split('\n\n')[1] === K.KT_UP[3] && g.flags.kitchen_seen === 3, 'CM (KG1): a Coil that starts high shows the highest stage\'s paragraph, not the ones below');
     }
-    for (const [f, s] of [[6, 1], [13, 2], [24, 3]]) { // the return's day: its own line by stage
+    for (const [f, s] of [[6, 1], [13, 2], [27, 3]]) { // the return's day: its own line by stage (P1, L5a: 27 + 3 = 30)
         const g = MK(66005 + s, 'rt_ashfall', 20, f);
         choose(g, SCENES, mIdx(g));
         assert(sceneView(g, SCENES).text.split('\n\n')[1] === K.KT_RETURN[s], `CM (KG1): the return's day, stage ${s}: its line`);
@@ -4052,7 +4053,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         const ash = back === 'ah_hub', kk = back === 'rt_camp' && hh === 20 ? 'night' : k, blk = ash ? P.BT_PARTY[kk].replace('scorched moss', 'scorched ash') : P.BT_PARTY[kk];
         assert(t.includes(`\n\n${blk}\n\n*Foundation.*`) && !TREES.test(t) && (ash ? /fizzles out in the ash/ : /fizzles out in the moss/).test(t) && !/moss/.test(ash ? t : '') && !t.startsWith(P.BT_TREE_FRAME), `N1 (TR; RV1 L4): Foundation at ${back} ${hh}:00 with the party: their ${kk} block, the bolt in the ${ash ? 'ash' : 'moss'}`);
         assert(TREES.test(bt(back, 1, hh, false)), `N1 (TR): Foundation at ${back} ${hh}:00 alone keeps the trees line`);
-        for (const r of [2, 5, 10, 13]) assert(bt(back, r, hh) === bt(back, r, hh, false), `N1 (TR): realm ${r} at ${back} ${hh}:00 unchanged by the party`);
+        for (const r of [2, 5, 10, 13]) assert(bt(back, r, hh) === `${bt(back, r, hh, false)}\n\n${P.BT_LATE[back === 'heart_hub' ? 'T' : 'P'][P.btStep(r)]}`, `N1 (TR); v0.11.189 (P1, PL): realm ${r} at ${back} ${hh}:00: the party's line after Yuki's`);
     }
     for (const hh of [10, 23]) {
         const t = bt('heart_hub', 1, hh);
@@ -4135,6 +4136,94 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         const en = ret('rt_elder', { ending: e }), es = ret('rt_elder', { ending: e, a1_sky_seen: true });
         assert(/And you are the one\. Every report that crossed my table said there was nothing in you to report\. I have lived three hundred years/.test(en) && !/the sky came for you/.test(en) && /And the sky came for you, and went away ashamed\./.test(es), `N1 (RV1 M4, TG10): rt_elder (${e}) by what was seen`);
     }
+}
+// v0.11.189 (owner picks P1, D1; group e): Mei Lin and Ya at realm 2+ (PL: a line of theirs after the realm's Yuki line, by step
+// and place, away from a village); L5a the kitchen's take-over at 30 with her warm closers; L5b the supper's pot clause by the kitchen.
+{
+    const P = await import('../js/story/prologue.js');
+    const F = await import('../js/story/act1_fallout.js');
+    const K = await import('../js/story/kitchen.js');
+    const { runMed } = await import('../js/core/meditate.js');
+    const D = 1440;
+    const STEPS = 'ABCDGEF';
+    // the texts: 3 places × 7 steps, filled, distinct, 20–55 words, no time or ground words, no Yuki, nothing that claims an earlier one seen
+    const NIGHTW = /\b(night\w*|dark\w*|stars?|starlight|starlit|moon\w*|lamp\w*|evening|dusk|fire\w*|ember\w*|torch\w*)\b/i, DAYW = /\b(sun\w*|noon\w*|morning|daylight|dawn|afternoon)\b/i;
+    const all = Object.entries(P.BT_LATE).flatMap(([pl, o]) => Object.entries(o).map(([s, x]) => [pl + s, x]));
+    assert(all.length === 21 && Object.values(P.BT_LATE).every((o) => Object.keys(o).join('') === STEPS) && new Set(all.map((a) => a[1])).size === 21, `P1 (PL, D1): 21 texts, steps ${STEPS} in each place (${all.length})`);
+    for (const [k, x] of all) {
+        const w = x.split(/\s+/).length;
+        assert(w >= 20 && w <= 55 && !/@|TODO|\[|\]/.test(x) && !NIGHTW.test(x) && !DAYW.test(x) && !/\bYuki\b|\bagain\b|last time|every time|as before/i.test(x), `P1 (PL): ${k}: ${w} words, no time word, no Yuki, nothing seen before`);
+        assert(k[0] === 'T' ? !/\b(moss|ash|ashes|dust|soil|mud)\b/i.test(x) : !/\b(moss|ash|ashes|dust|soil|mud|bark)\b/i.test(x), `P1 (PL; RV1 TG4): ${k}: no ground word${k[0] === 'T' ? ' but the dead bark' : ''}`);
+        assert(/Mei Lin/.test(x) && (k[0] === 'M' || /\bYa\b/.test(x)), `P1 (PL): ${k} has Mei Lin${k[0] === 'M' ? '' : ' and Ya'}`);
+        // RV1 (TG3): in Mei Lin's own texts Ya is named only inside speech, or as "the way Ya went"
+        if (k[0] === 'M') assert(x.replace(/"[^"]*"/g, '').replace(/the way Ya went/g, '').search(/\bYa\b/) < 0, `P1 (PL; RV1 TG3): ${k}: Ya named, not there`);
+        // RV1 (TG2): the Old Tree's texts climb up to him; the others never do
+        assert(k[0] === 'T' ? /crack|climbs up|hauls herself|dead bark/.test(x) : !/\bcrack\b|dead bark|hollow trunk|the ledge/.test(x), `P1 (PL; RV1 TG2): ${k}: ${k[0] === 'T' ? 'they come up the tree' : 'no tree'}`);
+    }
+    // C1–C3 of the drafts' check and the cuts kept (pl-drafts.md: Claude's cuts)
+    assert(!/laughs until she has to|Mei Lin sits on the|Mei Lin looks at the|You go up like/.test(all.map((a) => a[1]).join(' ')), 'P1 (D1): the shared runs reworded, PC in the future');
+    // RV1 (TG1, TG5; M1): each step's content: A and B name their realm; E has no sky; G its one thunder or a name asked;
+    // C, D, G, F: the realm is asked for or told before anyone reacts to it (nobody can sense it); F's "Immortal" after that
+    const ASK = /Which (one|rung|is this)\?|What is (it|this one|this) (now|called)?\?|What are you\?|How high|Tell me\.|Say the name|Name\?|Name it|[Yy]ou (tell|give) (her|them|it)|You say it|You name it|You do\.|asks what this one is called/;
+    for (const [pl, o] of Object.entries(P.BT_LATE)) {
+        assert(/Core Formation/.test(o.A) && /True Core/.test(o.B), `P1 (RV1 TG1): ${pl}A says Core Formation, ${pl}B True Core`);
+        assert(/(didn't|isn't|not) com(e|ing)|stopped coming|Nothing (came|arrives)/.test(o.E) && !/lightning|thunder|bolt|struck/i.test(o.E), `P1 (RV1 TG1): ${pl}E: the sky did not come`);
+        for (const s of 'CDGF') { const x = o[s], m = x.search(ASK); assert(m >= 0, `P1 (RV1 TG5, M1): ${pl}${s}: the realm asked for or told`);
+            assert(!/sect master|Immortal|elder/i.test(x.slice(0, m)), `P1 (RV1 TG5, M1): ${pl}${s}: no level named before it is told`); }
+        assert(/Immortal/.test(o.F) && !/Golden Core|Origin Core/.test(o.C), `P1 (RV1 TG1): ${pl}F says Immortal; ${pl}C names neither of its two realms`);
+    }
+    assert(/neither of them can feel it/.test(P.BT_LATE.P.B), 'P1 (RV1 TG5): PB pinned: they cannot feel it');
+    assert(/"It has stopped coming," you say/.test(P.BT_LATE.P.E) && /"It isn't coming," you tell her/.test(P.BT_LATE.M.E) && /"It didn't come," you tell her/.test(P.BT_LATE.T.E), 'P1 (RV1 TG1, L8): E\'s lines pinned: the sky did not come, and James says so');
+    assert(/^"One thunder," Ya says/.test(P.BT_LATE.P.G) && /"One thunder\./.test(P.BT_LATE.T.G) && !/\b(two|three|four|many) thunder/i.test(Object.values(P.BT_LATE).map((o) => o.G).join(' ')), 'P1 (RV1 TG1): G\'s one thunder (realm 8 one bolt, realm 9 one mutter)');
+    // the step by realm
+    assert([2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map(P.btStep).join('') === 'ABCCDDGGEEFFF', 'P1 (PL, D1): the steps by realm');
+    // the scene: by place, step, day and night
+    const bt = (back, realm, hh, flags = {}, party = true) => { const g = ensureBars(newGame(89000 + realm)); Object.assign(g.flags, { bt_return: back }, party ? { mei_party: true, ya_party: true } : {}, flags); g.james.realm = realm; g.rel['Mei Lin'] = 20; g.minutes = 14 * D + hh * 60; return SCENES.breakthrough.text(g); };
+    for (let r = 2; r <= 14; r++) for (const hh of [10, 23]) {
+        const s = P.btStep(r);
+        for (const [back, flags, pl] of [['rr_hub', {}, 'P'], ['rt_camp', {}, 'P'], ['dw_hub', { bl_day: 6 }, 'P'], ['ah_hub', { bl_day: 4 }, 'M'], ['ah_hub', { bl_day: 4, ya_off_done: true }, 'P'], ['heart_hub', {}, 'T']]) {
+            const t = bt(back, r, hh, flags), alone = bt(back, r, hh, flags, false);
+            assert(t === `${alone}\n\n${P.BT_LATE[pl][s]}` && !Object.values(P.BT_LATE).some((o) => Object.values(o).some((x) => alone.includes(x))), `P1 (PL): realm ${r} at ${back}${flags.ya_off_done ? ' (Ya back)' : ''} ${hh}:00: ${pl}${s} after the Yuki line; alone, none`);
+        }
+        for (const back of ['village', 'ashfall', 'fo_ashfall', 'rt_ashfall']) assert(!Object.values(P.BT_LATE).some((o) => Object.values(o).some((x) => bt(back, r, hh).includes(x))), `P1 (PL): realm ${r} in ${back}: the village's closers, no line of theirs`);
+    }
+    { // both away for water at the Ashen Hills: Yuki's line alone
+        const g = ensureBars(newGame(89100)); Object.assign(g.flags, { bt_return: 'ah_hub', mei_party: true, ya_party: true, bl_day: 2, trio: 2 }); g.rel['Mei Lin'] = { f: 90, a: 90 }; g.rel['Ya'] = { f: 90, a: 90 }; g.james.realm = 4; g.minutes = 14 * D + 600;
+        const t = SCENES.breakthrough.text(g); assert(t.endsWith(P.BT_REALMS[4].day) && !Object.values(P.BT_LATE).some((o) => Object.values(o).some((x) => t.includes(x))), 'P1 (PL): both away: the realm\'s Yuki line ends it');
+    }
+    // RV1 (TG6): one party flag alone: no line of theirs
+    for (const fl of [{ mei_party: true }, { ya_party: true }]) assert(!Object.values(P.BT_LATE).some((o) => Object.values(o).some((x) => bt('rr_hub', 4, 10, fl, false).includes(x))), `P1 (RV1 TG6): ${Object.keys(fl)[0]} alone: no line of theirs`);
+    // RV1 (TG9): the real path, the Meditate card at rr_hub with the party
+    { const g = ensureBars(newGame(89150)); g.scene = 'rr_hub'; Object.assign(g.flags, { mei_party: true, ya_party: true, ya_met: true }); g.james.realm = 1; g.james.saturation = 96; g.rel['Mei Lin'] = 20; g.minutes = 12 * D + 10 * 60;
+      runMed(g, SCENES, 'med:bt'); const t = g.scene === 'breakthrough' ? sceneView(g, SCENES).text : '';
+      assert(g.james.realm === 2 && t.endsWith(`\n\n${P.BT_LATE.P.A}`), `P1 (RV1 TG9): the Meditate card's breakthrough to realm 2 at rr_hub ends on PA (${g.scene}, realm ${g.james.realm})`); }
+    // RV1 (TG10): the text lint reads the 21 and the supper's two clauses as a pool
+    { const src = readFileSync(new URL('../tools/textlint.mjs', import.meta.url), 'utf8'); assert(/btPlaceLines = \[[^\n]*BT_LATE[^\n]*SUPPER_POT\[2\], SUPPER_POT\[3\]\]/.test(src), 'P1 (RV1 TG10): the text lint\'s bt_place pool holds BT_LATE and SUPPER_POT 2, 3'); }
+    // L5a: the take-over at 30, with her warm closer; 25–29 the shared hearth with a LOW closer
+    const MK = (seed, f) => { const g = ensureBars(fresh(seed)); g.coil.act = 1; g.minutes = 8 * D + 600; g.rel.Mother = { f, a: 0 }; goTo(g, SCENES, 'fo_ashfall'); const i = SCENES[g.scene].choices.findIndex((c) => c.to === 'mother_time'); choose(g, SCENES, i); return g; };
+    for (const [f, s, lv] of [[22, 2, 'LOW'], [26, 2, 'LOW'], [27, 3, 'MID'], [40, 3, 'MID']]) {
+        const g = MK(89200 + f, f), p = sceneView(g, SCENES).text.split('\n\n');
+        assert(g.rel.Mother.f === f + HT_GAIN && p[1] === K.KT_UP[s] && HT_CLOSE[`mother ${lv}`].includes(p.at(-1)), `P1 (L5a): Mother ${f} + ${HT_GAIN}: stage ${s}'s paragraph, a ${lv} closer`);
+    }
+    // RV1 (M2, TG7): a save already handed the hearth (kitchen_seen 3) at friendship 25–29 keeps it: label, day line, return line
+    for (const f of [22, 26]) {
+        const g = ensureBars(fresh(89250 + f)); g.coil.act = 1; g.minutes = 8 * D + 600; g.rel.Mother = { f, a: 0 }; g.flags.kitchen_seen = 3; goTo(g, SCENES, 'fo_ashfall');
+        const i = SCENES[g.scene].choices.findIndex((c) => c.to === 'mother_time');
+        assert(SCENES[g.scene].choices[i].text(g) === K.KT_LABEL[3], `P1 (RV1 M2, TG7): Mother ${f}, the hearth handed over: stage 3's label`);
+        choose(g, SCENES, i); const p = sceneView(g, SCENES).text.split('\n\n');
+        assert(K.KT_DAY[3].includes(p[1]) && g.flags.kitchen_seen === 3, `P1 (RV1 M2, TG7): Mother ${f}: a stage 3 day line, kitchen_seen kept`);
+        const r = ensureBars(fresh(89260 + f)); r.coil.act = 1; r.minutes = 19 * D + 600; r.rel.Mother = { f, a: 0 }; r.flags.kitchen_seen = 3; goTo(r, SCENES, 'rt_ashfall');
+        const j = SCENES[r.scene].choices.findIndex((c) => c.to === 'mother_time'); choose(r, SCENES, j);
+        assert(sceneView(r, SCENES).text.split('\n\n')[1] === K.KT_RETURN[3], `P1 (RV1 M2, TG7): Mother ${f} on the return's day: stage 3's line`);
+    }
+    // L5b: the supper's clause by the kitchen she has shown him this Coil
+    const sup = (seed, ks) => { const g = ensureBars(fresh(seed)); startActCoil(g, 1); Object.assign(g.flags, { ending: 'fought', ya_met: true }, ks == null ? {} : { kitchen_seen: ks }); g.minutes = 8 * D + 19 * 60; goTo(g, SCENES, 'fo_supper'); return sceneView(g, SCENES).text; };
+    for (const [ks, n] of [[null, 1], [1, 1], [2, 2], [3, 3]]) {
+        const t = sup(89300 + (ks || 0), ks);
+        assert(t.includes(`Your bowl she fills past the line, ${F.SUPPER_POT[n]}`) && Object.values(F.SUPPER_POT).filter((x) => t.includes(x)).length === 1, `P1 (L5b): kitchen_seen ${ks}: the clause of stage ${n}`);
+    }
+    assert(Object.values(F.SUPPER_POT).every((x) => /^informing the ladle that /.test(x) && /\.$/.test(x) && !/[{}@]/.test(x)) && new Set(Object.values(F.SUPPER_POT)).size === 3, 'P1 (L5b): three clauses, each joins the sentence and ends it');
+    assert(/half her fire is given over to error now,/.test(F.SUPPER_POT[2]) && /no longer her doing/.test(F.SUPPER_POT[3]) && /supervised every grain/.test(F.SUPPER_POT[3]) && /was not seen/.test(F.SUPPER_POT[1]), 'P1 (L5b; RV1 L7, TG8): the clauses pinned');
 }
 
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));

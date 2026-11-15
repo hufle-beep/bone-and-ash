@@ -954,6 +954,40 @@ export const BT_MEI = {
 
 "I barely do," you say. "And I was closer."`,
 };
+/** v0.11.189 (owner pick P1, PL; Fable's): realms 2+ with Mei Lin and Ya there (not a village): a line of theirs after the realm's
+ *  Yuki line, by step (A realm 2, B 3, C 4–5, D 6–7, G 8–9, E 10–11 no sky, F 12–14; D1: G a second run, so D shows at two realms) and place (P the party at a camp or on the road,
+ *  M Mei Lin alone at the Ashen Hills while Ya is away, T the Old Tree). Both away: Yuki's line alone, as before. Texts only. */
+export const BT_LATE = {
+    P: {
+        A: `"Which rung?" Mei Lin asks. "Core Formation," you say. She sits down on her pack, hard. "The Sect's elders are Core Formation. They spent centuries on it. They get carried places." Ya eyes the clearing sky. "Can he beat an elder?" "Ask an elder," you say.`,
+        B: `"True Core," you report, since neither of them can feel it. Mei Lin sits down where she is and laughs at the sky. "Elders die waiting for that one. Old, and waiting." Ya lowers her spear, disappointed in the lightning. "It patted you down and left. I wanted to watch it try."`,
+        C: `"What is it now?" Mei Lin asks you. You tell her. She laughs until the sky has finished leaving. "Sect masters have words like that. It costs them lifetimes, and there are banners." Ya grins. "And they float up like old smoke. You'll go up like a thrown rock, scholar." "Thank you," you say.`,
+        D: `"Say the name," Mei Lin says. You say it. She nods slowly. "That one is in the stories the old women tell. The man in it has a beard to his knees and a mountain." Ya looks you over. "You have glasses and a coat. Who would you lose to?" "Paperwork," you say.`,
+        G: `"One thunder," Ya says. Mei Lin asks what this one is called. You tell her. She repeats it, as she would a price. "If the Sect heard that, it would bar its gates and claim to be a farm." "Does it help in a fight?" Ya asks. "It hasn't come up," you say.`,
+        E: `You are still looking up when Mei Lin clears her throat. "Was that all of it? You sat. Nothing came." "It has stopped coming," you say. She starts to laugh and it turns into a stare. Ya spits to one side. "Then it is afraid of you. Good. I never liked it."`,
+        F: `Mei Lin has kept her arms folded through whatever the sky did. "What is this one?" You tell her. "Immortal," she says, trying it on you. "I should bow. I can't. I watched you apologise to a mushroom." Ya plants her spear. "Fight me anyway, scholar. I want to say I lost to one."`,
+    },
+    M: {
+        A: `Mei Lin prods your shoulder with one finger, checking it for heat. "Well? What are you?" "Core Formation," you say. She takes the finger back. "We kneel to those. I have knelt to one, holding a basket. And Ya chose this to sulk through." "I can describe it," you say. "It is mostly sitting."`,
+        B: `"True Core," you tell her. Mei Lin counts it off on her fingers, mortal, disciple, elder, and runs out of people she has met. "I have no one to compare you to," she says, and laughs, and then looks at you as if that were not funny. "Ya would. She would say herself."`,
+        C: `"Which one?" Mei Lin asks, and you tell her. She circles you, as she would a herb she can't name. "That is among the sect masters. I would not be let within a field of one. And Ya took her spear and her temper and missed it. I am going to enjoy telling her."`,
+        D: `"What is this one called?" Mei Lin asks. You tell her. She laughs through her nose. "Nobody has that. That is carved over temple doors, with a beard." Then, quieter: "People would walk a month to see you sit there. Ya walked the other way." "She has a good sense of direction," you say.`,
+        G: `"What is it called?" Mei Lin says. You tell her. She starts to say it back and laughs instead. "No. I am not saying that aloud. My mother would hear it from Ashfall and come to ask what I had done." She looks the way Ya went. "She will say you made it up."`,
+        E: `You wait. Mei Lin waits with you, her arm half raised. Nothing arrives. "Is it late?" she says. "It isn't coming," you tell her. She lowers the arm and laughs at herself, then frowns upward. "It is supposed to come. It comes for everyone." "I think we've stopped speaking," you say.`,
+        F: `Mei Lin lets out a breath she has kept through all of it. "Tell me." You do. "Immortal," she says. "There should be a mountain under you, and a thousand people on their faces." She looks round the camp. "There's me." She is smiling. "And Ya will come back wanting to fight one."`,
+    },
+    T: {
+        A: `Mei Lin's head comes up the crack, braced for a corpse. She finds you sitting under a clear sky. "The storm was over this tree," she says. "I ran." Ya climbs past her and sniffs. "No burnt meat. Which rung, scholar?" "Core Formation." Mei Lin uses a word her mother never taught her.`,
+        B: `They come up the crack arguing about who should look first. Ya wins, looks, and is annoyed. "Not a mark. Heaven went through you like a thief through an empty house." Mei Lin drops onto the dead bark. "True Core," you offer. She points at you. "Don't. Let me climb down before I understand that."`,
+        C: `Ya climbs up first, spear in her teeth, and takes it out. "How high, scholar?" You tell her. "Sect masters do that on a peak, with a crowd. You did it in a dead tree." Mei Lin starts laughing, then looks at the sky for some while without any. "It had a vacancy," you say.`,
+        D: `Mei Lin climbs up, finds you whole, and stares. "Name?" You give it. "That is a realm from the old stories," she says, not quite steadily. "In those the man stops answering when he is called." Ya's head appears at her elbow. "He'll answer," Ya says. "He owes me a hunt."`,
+        G: `Mei Lin comes up the crack and looks you over for holes. "One thunder. We nearly didn't climb." Ya hauls herself onto the dead bark. "Name it, scholar." You name it. Ya tries the words, frowns, and gives them back. "Too long to shout in a fight. I'll keep 'scholar'." "It's shorter," you agree.`,
+        E: `They come up the crack because nothing has happened for too long. Mei Lin studies the unmarked dead bark, then the sky. "No storm?" "It didn't come," you tell her. Ya laughs once, loudly, down into the hollow trunk. "You scared off Heaven, scholar. What is left for me to hunt?" "Smaller things," you say.`,
+        F: `Ya comes up the crack with her spear ready, sees nothing to stab, and takes it personally. Mei Lin sits across from you. "Which is this?" You say it. "Immortal," she repeats. "In a hollow tree, in that coat." She isn't laughing. "Should we kneel?" "Please don't," you say. "I'd have to get up."`,
+    },
+};
+/** PL: the step by realm (2 A, 3 B, 4–5 C, 6–7 D, 8–9 G, 10–11 E, 12–14 F). */
+export const btStep = (realm) => (realm <= 2 ? 'A' : realm === 3 ? 'B' : realm <= 5 ? 'C' : realm <= 7 ? 'D' : realm <= 9 ? 'G' : realm <= 11 ? 'E' : 'F');
 /** The party's block (TR; RV1): the Old Tree's; Mei Lin's own while Ya is away (M1); at a camp by night or day, the Return's camp
  *  counting as night from 19:00 (L7: it is entered at dusk, round the fire); the ground ash in the Ashen Hills (L4). */
 function btParty(g, away, night) {
@@ -1013,17 +1047,20 @@ ${witness}
 
 *Foundation.* Mortal Vessel no longer: the rung where this world's sect disciples stand, and you came by it without a pill. You feel heavier, and steadier, and precisely as sarcastic as before.`;
     }
+    // v0.11.189 (P1, PL): Mei Lin and Ya after the realm's Yuki line, away from a village (the village's own closers stay as they were)
+    const late = party && away !== 'both' && !seen && !a1seen
+        ? `\n\n${BT_LATE[BT_IN_TREE.includes(g.flags.bt_return) ? 'T' : away === 'ya' ? 'M' : 'P'][btStep(g.james.realm)]}` : '';
     const own = BT_REALMS[g.james.realm]; // ST4
     if (own) return `${own.body}
 
-${(seen || a1seen) && !BT_OWN_CLOSER.includes(g.james.realm) ? BT_VILLAGE_CLOSER : night ? own.night : own.day}`;
+${(seen || a1seen) && !BT_OWN_CLOSER.includes(g.james.realm) ? BT_VILLAGE_CLOSER : night ? own.night : own.day}${late}`;
     return `Once more the loop closes, a rung further up. ${realmName(g.james.realm)}.
 
 The sky has another go, since apparently the sky is obliged to: clouds, the hum, lightning casting about for something to burn. Nothing turns up. It gives up sooner than last time, like something that can be taught.
 
 ${seen || a1seen
     ? BT_VILLAGE_CLOSER
-    : night ? 'Yuki does not so much as open an eye. Off in the dark, something large thinks better of coming any closer.' : 'Yuki does not so much as open an eye.'}`;
+    : night ? 'Yuki does not so much as open an eye. Off in the dark, something large thinks better of coming any closer.' : 'Yuki does not so much as open an eye.'}${late}`;
 }
 SCENES.breakthrough = {
     id: 'breakthrough', title: (g) => realmName(g.james.realm), art: 'tribulation', place: (g) => g.location,

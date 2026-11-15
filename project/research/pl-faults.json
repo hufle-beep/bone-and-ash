@@ -1,0 +1,128 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/prologue.js",
+  "find": "party && away !== 'both' && !seen && !a1seen",
+  "replace": "party && away !== 'both' && !seen",
+  "note": "Act 1's Ashfall (fo_ashfall, rt_ashfall) gets the women's camp line under the village's closer"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/prologue.js",
+  "find": ": away === 'ya' ? 'M' : 'P'][btStep",
+  "replace": ": 'P'][btStep",
+  "note": "Ashen Hills with Ya away: the party text (Ya speaking) instead of Mei Lin's own"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/prologue.js",
+  "find": "realm <= 9 ? 'G'",
+  "replace": "realm <= 8 ? 'G'",
+  "note": "realm 9 (Immortal Ascension) gets step E: 'nothing came' while the sky muttered"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/prologue.js",
+  "find": "\"It has stopped coming,\" you say.",
+  "replace": "\"It came and went,\" you say.",
+  "note": "step E (realms 10-11, no sky) says the sky came"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/prologue.js",
+  "find": "Mei Lin's head comes up the crack, braced for a corpse.",
+  "replace": "Mei Lin, a few steps off, was braced for a corpse.",
+  "note": "TA no longer climbs up after him; reads as a camp under the tree frame"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/prologue.js",
+  "find": "\"True Core,\" you report, since neither of them can feel it.",
+  "replace": "\"True Core,\" Mei Lin says; she can feel it on you.",
+  "note": "canon: a local senses James's cultivation"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/prologue.js",
+  "find": "\"Ya would. She would say herself.\"",
+  "replace": "Ya snorts. \"I would. Myself.\"",
+  "note": "MB: Ya present while she has walked off (verb outside the test's list)"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/prologue.js",
+  "find": "\"One thunder,\" Ya says.",
+  "replace": "\"Three thunders,\" Ya says.",
+  "note": "PG against realms 8-9's bodies (one bolt / one mutter)"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/prologue.js",
+  "find": "Ya looks you over. \"You have glasses",
+  "replace": "Ya, firelit, looks you over. \"You have glasses",
+  "note": "PD gets a time word the NIGHTW regex misses; wrong by day"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/prologue.js",
+  "find": "Ya lowers her spear, disappointed in the lightning.",
+  "replace": "Ya lowers her spear into the ashes, disappointed in the lightning.",
+  "note": "PB gets a ground word (ashes) the \\bash\\b regex misses; wrong at rr_hub / dw_hub / rt_camp"
+ },
+ {
+  "id": "F11",
+  "file": "js/story/prologue.js",
+  "find": ": night ? own.night : own.day}${late}",
+  "replace": ": night ? own.night : own.day}",
+  "note": "realms 3-14 lose the women's line"
+ },
+ {
+  "id": "F12",
+  "file": "js/story/prologue.js",
+  "find": "BT_LATE[BT_IN_TREE.includes(g.flags.bt_return) ? 'T'",
+  "replace": "BT_LATE[BT_IN_TREE.includes(g.flags.bt_return) && !night ? 'T'",
+  "note": "Old Tree at night gets the camp text under the tree frame"
+ },
+ {
+  "id": "F13",
+  "file": "js/story/kitchen.js",
+  "find": "export const KG = [8, 15, 30];",
+  "replace": "export const KG = [8, 15, 25];",
+  "note": "L5a reverted: take-over at 25 with a cold closer"
+ },
+ {
+  "id": "F14",
+  "file": "js/story/act1_fallout.js",
+  "find": "Math.max(1, Math.min(3, Number(g.flags.kitchen_seen) || 0))",
+  "replace": "Math.max(1, Math.min(2, Number(g.flags.kitchen_seen) || 0))",
+  "note": "K3 never shows: stage 3 gets the shared-hearth clause"
+ },
+ {
+  "id": "F15",
+  "file": "js/story/act1_fallout.js",
+  "find": "that she supervised every grain of it, and that it will do.",
+  "replace": "that she cooked every grain of it herself, and that it will do.",
+  "note": "K3 contradicts the take-over it is gated on (pinned words still pass)"
+ },
+ {
+  "id": "F16",
+  "file": "tools/textlint.mjs",
+  "find": "...Object.values(BTX.BT_LATE).flatMap((o) => Object.values(o)), ",
+  "replace": "",
+  "note": "the 21 texts leave the bt_place pool: tics and reused runs unchecked"
+ },
+ {
+  "id": "F17",
+  "file": "js/story/prologue.js",
+  "find": "Mei Lin sits across from you.",
+  "replace": "Mei Lin sits across the fire from you.",
+  "note": "TF: a camp fire on the lip of the Old Tree (adapted to RV1's TF)"
+ },
+ {
+  "id": "F18",
+  "file": "js/story/prologue.js",
+  "find": "const late = party && away",
+  "replace": "const late = (party || !!g.flags.mei_party) && away",
+  "note": "Mei Lin alone (no ya_party) gets a text in which Ya speaks; no test sets one flag without the other"
+ }
+]

@@ -41,6 +41,7 @@ export const NOTES = [
     ['0.11.185', 'A breakthrough in Ashfall during Act 1 is now seen by the village, which reacts to it, and one inside the Old Tree sends James out to where the sky can reach him first.'],
     ['0.11.187', 'Android app: when the update check fails, Settings → App updates now says so instead of "Up to date", tells you the time GitHub\'s limit lifts, and offers to download the new build in the phone\'s browser, which the limit doesn\'t touch.'],
     ['0.11.188', 'Mei Lin and Ya now react when James reaches Foundation in front of them; the morning after the dwarven hymn, the work-chant has its beat; and when nobody saw the sky come for James, the Sect\'s letter and Old Wen\'s news no longer say it did.'],
+    ['0.11.189', 'Mei Lin and Ya now have something to say after James\'s later breakthroughs too, from Core Formation up, when they are with him on the road, at a camp or in the Old Tree. Mei Lin\'s mother hands over her hearth at friendship 30, not 25, so it comes with her warmer goodbyes; and once she has shared her kitchen, her supper line no longer pretends she doesn\'t know who salted her pot.'],
 ];
 
 const parts = (v) => (/^\d+(\.\d+)*$/.test(String(v ?? '')) ? String(v).split('.').map(Number) : null);

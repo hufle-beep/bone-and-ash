@@ -7,3 +7,9 @@
 - SW, `rt_parley` with `a1_sky_seen` and no `sky_witness`: Random 21 / 58, Careful 16 / 185, Completionist 20 / 56, Sociable 15 / 183; the check (GU, DC 9, no dice) passed in every parley (482 / 482), so +1 changes 0 outcomes.
 - FW, Wilds scenes with James able to fly in the prologue: Random 18 visits in 3 of 975 prologue Coils (0.3%); the others 0.
 - L8 (from the v0.11.183 review, 160 random games): Dúrin and mumei the same day 149, Trøllabundin and Music Box of Fate 82.
+
+## v0.11.189 (P1): the realms 2+ breakthroughs with Mei Lin and Ya there (a scratch copy of tests/models.test.mjs logging each breakthrough; 200 games each, the Sitter 100; deleted after)
+
+- PB, realm 2+ breakthroughs with `mei_party` and `ya_party` (by `bt_return`, the Ashen Hills split by Ya away / both away): Random 147 realm 2+, 141 with the party: rt_ashfall 29, fo_ashfall 8, rr_hub 22, heart_hub 45, ah_hub 10 + Ya away 4 + both away 2, rt_camp 15, dw_hub 6 (realms 2–3). Cultivator 695 realm 2+, 647 with the party (heart_hub 440, ah_hub 129 + Ya away 3, rr_hub 34, dw_hub 34, rt_ashfall 6, rt_camp 1; realms 2–6). Sitter 917 realm 2+, 476 with the party (heart_hub 132, rr_hub 103, dw_hub 70, ah_hub Ya away 90, fo_ashfall 24, rt_ashfall 40, rt_camp 17; realms 5–10). Careful, Completionist, Sociable: 0 realm 2+.
+- Away from a village (Ashfall's left out) and not both away: Random 102 of 147, Cultivator 641 of 695 (92%), Sitter 412 of 917 (45%).
+- Realms 6–9 with the party away from a village, the Sitter (100 games): r6 81, r7 100, r8 102, r9 67 (350, about 3.5 a game): why D1 split 6–9 into 6–7 and 8–9.

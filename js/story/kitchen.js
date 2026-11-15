@@ -2,7 +2,7 @@
  * v0.11.181 (owner picks SP1, KG1; group e's CM, push 1; texts by Fable, rule 10, in kitchen_texts.js): the mother's kitchen
  * and the communal pot (the owner 2026-11-08 13:17 and 2026-11-13 22:17, word for word in `lore.md` and `roadmap-e.md`).
  *  - K (KG1): Mei Lin's mother's card (`mother_time`, house_time.js) gains a kitchen paragraph by her friendship, after its
- *    gain: stage 1 from 8 (he helps), 2 from 15 (they share it), 3 from 25 (he takes it over). The first time a stage is reached
+ *    gain: stage 1 from 8 (he helps), 2 from 15 (they share it), 3 from 30 (he takes it over; 25 until v0.11.189, L5a: below the closers' 30 it met a cold closer). The first time a stage is reached
  *    this Coil, its paragraph (KT_UP); later days a short line by stage (KT_DAY); the return's day its own line (KT_RETURN). The
  *    card's label by her friendship before the gain (KT_LABEL; stage 0 keeps HT_LABEL.mother). No gain changed: texts only.
  *    `kitchen_seen` and `mother_kitchen` are world flags: they reset with the Coil, as her friendship does (she forgets; he
@@ -20,7 +20,7 @@ import { pickLine, textDay } from '../core/lines.js';
 import { KT_LABEL, KT_UP, KT_DAY, KT_RETURN, POT_LINE, POT_COOK } from './kitchen_texts.js';
 
 export { KT_LABEL, KT_UP, KT_DAY, KT_RETURN, POT_LINE, POT_COOK };
-export const KG = [8, 15, 25]; // KG1: helps / shares / takes over
+export const KG = [8, 15, 30]; // KG1: helps / shares / takes over; v0.11.189 (owner pick P1, L5a): the take-over from 30 (was 25), with her warm closers (house_time.js HT_MID)
 export const POT_GATE = 90; // PS: the village's friendship
 export const POT_FROM = 9, POT_UNTIL = 15; // the cook scene's hours (the card shows 09:00–14:59)
 export const POT_CARD_MIN = 30, POT_COOK_MIN = 60;
@@ -31,16 +31,18 @@ const relF = (g, who) => g.rel?.[who]?.f || 0;
 /** KG1: the kitchen's stage by Mei Lin's mother's friendship (0 none, 1 helps, 2 shares, 3 takes over). */
 export const kitchenStage = (g) => KG.filter((t) => relF(g, 'Mother') >= t).length;
 /** The card's label by her friendship now (before the visit's gain). */
-export const kitchenLabel = (g, base) => KT_LABEL[kitchenStage(g)] || base;
+/** v0.11.189 (RV1, M2): the stage she has reached this Coil: her friendship's, or a higher one she has already shown him (a save
+ *  from before the take-over moved from 25 to 30 keeps its hearth; she does not take it back). */
+export const kitchenShown = (g) => Math.max(kitchenStage(g), Math.min(3, Number(g.flags.kitchen_seen) || 0));
+export const kitchenLabel = (g, base) => KT_LABEL[kitchenShown(g)] || base;
 
 /** Drawn once when her scene opens (after its gain): which kitchen text it shows, kept in `mother_kitchen` (as closeOnce). */
 export function kitchenOnce(g, slot) {
-    const s = kitchenStage(g);
+    const up = kitchenStage(g), seen = Number(g.flags.kitchen_seen) || 0, s = kitchenShown(g); // RV1 (M2): never below what she has shown
     if (!s) { delete g.flags.mother_kitchen; return; }
-    const seen = Number(g.flags.kitchen_seen) || 0;
-    if (s > seen) g.flags.kitchen_seen = s;
+    if (up > seen) g.flags.kitchen_seen = up;
     if (String(slot).startsWith('rt_ashfall')) g.flags.mother_kitchen = `rt|${s}`;
-    else if (s > seen) g.flags.mother_kitchen = `up|${s}`;
+    else if (up > seen) g.flags.mother_kitchen = `up|${up}`;
     else g.flags.mother_kitchen = `day|${s}|${pickLine(g, `kitchen:${s}`, KT_DAY[s])}`;
 }
 /** The kitchen paragraph her scene shows ('' at stage 0). */
