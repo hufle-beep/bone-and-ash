@@ -359,7 +359,7 @@ ${byForm(g, 'Their eyes go to Ya and stay there.', "Their eyes go to Yuki first:
 
 "She is with us," Mei Lin tells the whole street, loud and clear. No woman of Ashfall says such a thing. The street makes a note.
 
-${g.flags.sky_witness ? 'And you they regard as they did once the sky had come for you and left again: as weather.' : 'And you, the stranger who walked into the forest and walked back out, they regard like a sum that has stopped adding up.'}`, // v0.11.130 (YB1, RA; Fable's MAIN): the street sees the great root-kin
+${g.flags.sky_witness || g.flags.a1_sky_seen ? 'And you they regard as they did once the sky had come for you and left again: as weather.' : 'And you, the stranger who walked into the forest and walked back out, they regard like a sum that has stopped adding up.'}`, // v0.11.130 (YB1, RA; Fable's MAIN): the street sees the great root-kin
         choices: [
             { text: 'Go to Old Wen first. Formally.', time: 30, to: 'rt_wen' },
             { text: 'Mei Lin\'s mother is in the doorway. Face her.', time: 30, to: 'rt_mother' },

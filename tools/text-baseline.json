@@ -255,6 +255,15 @@
    "tics": 0,
    "broken": 0,
    "spacing": 0
+  },
+  "bt_place": {
+   "lines": 2,
+   "words": 191,
+   "dupes": 0,
+   "sceneShared": 0,
+   "tics": 0,
+   "broken": 0,
+   "spacing": 0
   }
  }
 }

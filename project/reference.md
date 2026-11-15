@@ -34,7 +34,7 @@ The **long route** (v0.4.0, flag `long`, set on the first forest night) runs 7 d
 - Lu Han: inner disciple.
 - The Crimson Lotus Sect.
 
-**Flags that matter for Act 1** (v0.4.0 adds `sky_witness`, `foundation_day` (set, not read yet: v0.11.23), `saw_lights`, `roots`, `bone_sung`, `lore_tree`, `token_silenced`, `gao_turned`, `loft_burned`, `militia`, `plough`, `clinics`):
+**Flags that matter for Act 1** (v0.11.185 adds `a1_sky_seen`: a breakthrough at Act 1's Ashfall, `fo_ashfall` or `rt_ashfall`; a world flag, reset with the Coil; read only by the Return's street line in `rt_arrive`, not by its GU check, which reads `sky_witness`) (v0.4.0 adds `sky_witness`, `foundation_day` (set, not read yet: v0.11.23), `saw_lights`, `roots`, `bone_sung`, `lore_tree`, `token_silenced`, `gao_turned`, `loft_burned`, `militia`, `plough`, `clinics`):
 - `ending` (fought / bluff / paid / lost);
 - `gao_broken` (the scene `gao_dead` sets it; the flag `gao_dead` was never set and is no longer read since v0.11.40), `gao_spared`, `gao_humiliated`;
 - `romance`, `healed`, `boar`, `ignored`;

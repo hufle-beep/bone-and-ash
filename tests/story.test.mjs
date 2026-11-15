@@ -1256,7 +1256,7 @@ for (const form of ['cat', 'human']) {
             if (!/\s/.test(c)) out += c; i++; } return out; }; return code(false); };
       const hash = (t) => createHash('sha256').update(t).digest('hex').slice(0, 16);
       const LABELS = Object.values(RETURN).flatMap((sc) => (sc.choices || []).map((c) => (typeof c.text === 'string' ? c.text : '(fn)')));
-      const PIN = { 'act1_return.js': 'b8f64404a59727db', labels: '58e59f4e08e64332' }; // v0.11.179 (LB1): the labels re-pinned (the label pass); v0.11.181 (KG1): again, the mother's card label on rt_ashfall became a function (by the kitchen's stage)
+      const PIN = { 'act1_return.js': '05a797e519f6680a', labels: '58e59f4e08e64332' }; // v0.11.179 (LB1): the labels re-pinned (the label pass); v0.11.181 (KG1): again, the mother's card label on rt_ashfall became a function (by the kitchen's stage); v0.11.185 (BR1, RV1 M2): the code re-pinned (the street reads a1_sky_seen too)
       const got = { 'act1_return.js': hash(skel(RSRC)), labels: hash(JSON.stringify(LABELS)) };
       for (const [k, v] of Object.entries(PIN)) assert(got[k] === v, `P7A (RV1, TG1): ${k}'s code and ids as pinned in v0.11.174 (${got[k]}; update the pin only with a push that means to change them)`); }
     // TG2: the mechanical parts of the Return's result lines, exactly
@@ -3498,7 +3498,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
             const p = n.split('\n\n'); bodies.push(p.slice(0, -1).join('\n\n')); nights.push(p.at(-1)); days.push(d.split('\n\n').at(-1));
             if (r >= 3) { const { BT_REALMS: B } = BTR; assert(nights.at(-1) === B[r].night && days.at(-1) === B[r].day, `RV1 (TG): realm ${r}: the night closer by night, the day closer by day`); }
             g.flags.bt_return = 'ashfall'; const seen = SCENES.breakthrough.text(g);
-            assert(/Ashfall watches it go/.test(seen) === ![10, 11].includes(r), `ST4: realm ${r}: the village's closer ${[10, 11].includes(r) ? 'left out (no sky came)' : 'kept'}`);
+            assert(/Ashfall watches it go/.test(seen) === ![10, 11, 12, 14].includes(r), `ST4: realm ${r}: the village's closer ${[10, 11, 12, 14].includes(r) ? 'left out (no sky came, or its own text ends in silence or holding clouds; v0.11.185 RV1 L2)' : 'kept'}`);
         }
         assert(distinct(bodies) && distinct(nights) && distinct(days), 'ST4: thirteen realms, thirteen texts, each closer its own');
         assert(bodies[0].startsWith('Once more the loop closes, a rung further up. Core Formation.') && bodies[12].startsWith('Heavenly Immortal.'), 'ST4: Core Formation keeps the old text; the top realm has its own');
@@ -3980,6 +3980,61 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     assert(MEMORY_LINES.length === 48, `S1: the general pool unchanged (${MEMORY_LINES.length})`);
     assert(RM.sceneMemory(at(84500, 'wilds', 3), 'wilds') === null && RM.sceneMemory(at(84501, 'morning', 3, { forest_day: 4 }), 'morning') === null, 'S1: other scenes and days have none');
     const words = RT.MORNING_AGAIN.split(/\s+/).length; assert(words >= 45 && words <= 70 && !/Ashfall|cage|village|tribute|seventh|Day \d|\bonce\b|twice|times|every version/i.test(RT.MORNING_AGAIN) && !/^So the data/m.test(RT.MORNING_AGAIN), `S1 (KP, C1): the paragraph claims nothing a Coil may not have shown (${words} words)`);
+}
+
+// v0.11.185 (owner picks BR1, D1; group e's breakthroughs under a roof): Act 1's Ashfall saw it (AW1 Foundation's own witness
+// block, AW2 the village's closer for realms 2+, but not where no sky came); inside the Old Tree a frame line first and the
+// Foundation bolt in dead bark (HF); everywhere else unchanged; `sky_witness` still the prologue village's only.
+{
+    const P = await import('../js/story/prologue.js');
+    const { runMed } = await import('../js/core/meditate.js');
+    const D = 1440, VC = /^Ashfall watches it go in total silence\./, OWN = [10, 11, 12, 14]; // RV1 (L2): 12 and 14 keep their own closers
+    const DAY = { fo_ashfall: 9, rt_ashfall: 20, heart_hub: 16, ashfall: 3, village: 3 }; // RV1 (TG4): the places' own days, Mei Lin known as in Act 1
+    const bt = (back, realm, hh, seed = 85000) => { const g = ensureBars(newGame(seed + realm)); g.flags.bt_return = back; g.james.realm = realm; g.rel['Mei Lin'] = 20; g.minutes = (DAY[back] || 12) * D + hh * 60; return SCENES.breakthrough.text(g); };
+    for (const back of P.BT_ASHFALL_A1) for (const hh of [10, 23]) {
+        const t = bt(back, 1, hh);
+        assert(t.includes(`\n\n${P.BT_A1_WITNESS}\n\n*Foundation.*`) && /fizzles out in the dust/.test(t) && !/Nobody saw it|Not in the history of the mountain|Crimson Lotus/.test(t) && !t.startsWith(P.BT_TREE_FRAME), `BR1 (AW1): Foundation at ${back} ${hh}:00 has Ashfall's own witness block, in the dust`);
+        for (let r = 2; r <= 14; r++) {
+            const last = bt(back, r, hh).split('\n\n').at(-1), out = bt('rr_hub', r, hh).split('\n\n').at(-1);
+            assert(OWN.includes(r) ? last === out : VC.test(last), `BR1 (AW2): realm ${r} at ${back} ${hh}:00: ${OWN.includes(r) ? 'its own closer (no sky came, or its text ends in silence or holding clouds)' : 'the village\'s closer'}`);
+            assert(!/Off in the dark|Out in the dark|Nothing in the dark/.test(last) || OWN.includes(r), `BR1 (AW2): realm ${r} at ${back} ${hh}:00: no dark beyond the camp`);
+        }
+    }
+    for (let r = 1; r <= 14; r++) for (const hh of [10, 23]) {
+        const t = bt('heart_hub', r, hh), out = bt('rr_hub', r, hh);
+        const rest = t.slice(P.BT_TREE_FRAME.length + 2);
+        assert(t.startsWith(`${P.BT_TREE_FRAME}\n\n`) && (r === 1 ? rest === out.replace('fizzles out in the moss', 'fizzles out in the dead bark') : rest === out), `BR1 (HF): realm ${r} in the Old Tree ${hh}:00: the frame first, then the outdoor text${r === 1 ? ' (the bolt in dead bark)' : ''}`);
+        for (const back of ['stream', 'camp', 'rr_hub', 'ah_hub', 'dw_hub', 'rt_camp', 'lf_hub']) { const o = bt(back, r, hh); assert(!o.startsWith(P.BT_TREE_FRAME) && !o.includes(P.BT_A1_WITNESS) && !(r > 1 && VC.test(o.split('\n\n').at(-1))) && (r > 1 || /in the moss/.test(o)), `BR1: realm ${r} at ${back} ${hh}:00 unchanged`); }
+    }
+    assert(/Not in the history of the mountain/.test(bt('village', 1, 10)) && !bt('village', 1, 10).includes(P.BT_A1_WITNESS), 'BR1: the prologue village keeps its own witness block');
+    // the real path: the Meditate card's breakthrough at each place; `sky_witness` only from the prologue's village
+    for (const [hub, wit, frame, sw] of [['fo_ashfall', true, false, undefined], ['rt_ashfall', true, false, undefined], ['heart_hub', false, true, undefined], ['ashfall', false, false, 1]]) {
+        const g = ensureBars(newGame(85100)); g.scene = hub; g.james.saturation = 96; g.rel['Mei Lin'] = 20; g.minutes = DAY[hub] * D + 10 * 60;
+        runMed(g, SCENES, 'med:bt'); const t = g.scene === 'breakthrough' ? sceneView(g, SCENES).text : '';
+        assert(g.james.realm === 1 && t.includes(P.BT_A1_WITNESS) === wit && t.startsWith(P.BT_TREE_FRAME) === frame && g.flags.sky_witness === sw && !!g.flags.a1_sky_seen === wit, `BR1: the Meditate card's breakthrough at ${hub} (witness ${wit}, frame ${frame}, sky_witness ${sw}, a1_sky_seen ${wit})`);
+    }
+    // RV1 (M2): the Return's street reads a1_sky_seen as it reads sky_witness; the GU check reads sky_witness only; the flag resets with the Coil
+    {
+        const street = (flags) => { const g = ensureBars(newGame(85150)); Object.assign(g.flags, { ending: 'fought', ya_met: true, ya_party: true }, flags); g.minutes = 20 * D + 9 * 60; goTo(g, SCENES, 'rt_arrive'); return sceneView(g, SCENES).text; };
+        const weather = /as they did once the sky had come for you and left again: as weather/, sum = /like a sum that has stopped adding up/;
+        const none = street({}), a1 = street({ a1_sky_seen: true }), pro = street({ sky_witness: 1 });
+        assert(sum.test(none) && !weather.test(none) && weather.test(a1) && !sum.test(a1) && weather.test(pro), 'BR1 (RV1, M2): the Return\'s street saw the sky with a1_sky_seen, as with sky_witness');
+        const ret = readFileSync(new URL('../js/story/act1_return.js', import.meta.url), 'utf8'), coil = readFileSync(new URL('../js/core/coil.js', import.meta.url), 'utf8');
+        assert((ret.match(/a1_sky_seen/g) || []).length === 1 && !/a1_sky_seen/.test(coil), 'BR1 (RV1, M2): a1_sky_seen read once (the street, no check), not kept across the Coil');
+    }
+    // RV1 (TG1): Claude's cuts pinned (C1, C2, C3, and L1's "go up"); (TG2) the old text unchanged where nothing changed: renders hashed against v0.11.184
+    assert(/They got as far as one, and it missed\./.test(P.BT_A1_WITNESS) && /A hunter bows to you, gravely, as one signs for a delivery nobody ordered\./.test(P.BT_A1_WITNESS) && !/like a man|\bnone\b/.test(P.BT_A1_WITNESS), 'BR1 (RV1, TG1): C1 and C2 as cut');
+    assert(/^Not in here\. .* You go up the widest crack to where it opens on the sky, and find a level place on the lip\.$/.test(P.BT_TREE_FRAME) && !/crown|bough|climb/i.test(P.BT_TREE_FRAME), 'BR1 (RV1, TG1, L1): C3 and "go up" as cut (James flies from Foundation)');
+    {
+        const PIN_BT = [['stream', 1, 10, '81ef0e1c8a433e91'], ['camp', 1, 23, '1c2b702fa53d56e2'], ['village', 1, 10, 'dcf6caab493838f2'], ['village', 1, 22, 'ff5136872a9add43'], ['rr_hub', 2, 23, 'da992b67610dfde9'], ['ah_hub', 2, 10, '02f8ae1f5859205d'], ['ashfall', 3, 10, '48c49ed71ec38639'], ['dw_hub', 13, 23, '8739ed4b9081d57b']];
+        for (const [back, realm, hh, h] of PIN_BT) {
+            const g = ensureBars(newGame(85200 + realm)); g.flags.bt_return = back; g.james.realm = realm; g.minutes = 9 * D + hh * 60; g.rel['Mei Lin'] = 20;
+            assert(createHash('sha256').update(SCENES.breakthrough.text(g)).digest('hex').slice(0, 16) === h, `BR1 (RV1, TG2): realm ${realm} at ${back} ${hh}:00 renders as in v0.11.184`);
+        }
+    }
+    const w = P.BT_A1_WITNESS.split(/\s+/).length, f = P.BT_TREE_FRAME.split(/\s+/).length;
+    assert(w >= 90 && w <= 160 && !/Mei Lin|\bYa\b|mother|Gao|Pock|morning|night|tonight|today|evening|dawn|dusk|noon|\bsun\b|palisade|tribute/i.test(P.BT_A1_WITNESS), `BR1 (AW1, RV1 M1): ${w} words, no one whose state varies (Pock-Face is Gao's lackey), no time words, no tribute ending or palisade`);
+    assert(f <= 40 && !/You sit|\bsit\b|lightning|cloud|storm/i.test(P.BT_TREE_FRAME), `BR1 (HF): ${f} words; ends before "You sit" and promises no sky (realms 10, 11)`);
 }
 
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));

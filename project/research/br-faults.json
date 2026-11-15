@@ -1,0 +1,156 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/prologue.js",
+  "find": "fizzles out in the ${seen || a1seen ? 'dust'",
+  "replace": "fizzles out in the ${seen ? 'dust'",
+  "note": "code: Act 1 Ashfall bolt lands in moss"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/prologue.js",
+  "find": "${(seen || a1seen) && !BT_OWN_CLOSER.includes(g.james.realm) ? BT_VILLAGE_CLOSER",
+  "replace": "${(seen || a1seen) ? BT_VILLAGE_CLOSER",
+  "note": "code: realms 10/11 at Ashfall get the village closer though no sky came"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/prologue.js",
+  "find": "${seen || a1seen\n    ? BT_VILLAGE_CLOSER",
+  "replace": "${seen\n    ? BT_VILLAGE_CLOSER",
+  "note": "code: realm 2 (generic text) at Act 1 Ashfall keeps the camp closer"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/prologue.js",
+  "find": "text: (g) => (BT_IN_TREE.includes(g.flags.bt_return) ?",
+  "replace": "text: (g) => (BT_IN_TREE.includes(g.flags.bt_return) && g.james.realm === 1 ?",
+  "note": "code: frame only for Foundation in the Tree"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/prologue.js",
+  "find": "if (VILLAGE_SCENES.includes(g.flags.bt_return)) g.flags.sky_witness",
+  "replace": "if (VILLAGE_SCENES.includes(g.flags.bt_return) || BT_ASHFALL_A1.includes(g.flags.bt_return)) g.flags.sky_witness",
+  "note": "mechanic: sky_witness from Act 1 Ashfall (GU check +1)"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/prologue.js",
+  "find": "export const BT_ASHFALL_A1 = ['fo_ashfall', 'rt_ashfall'];",
+  "replace": "export const BT_ASHFALL_A1 = ['fo_ashfall'];",
+  "note": "code: rt_ashfall loses the village"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/prologue.js",
+  "find": "const witness = a1seen ? BT_A1_WITNESS : seen",
+  "replace": "const witness = seen ? BT_A1_WITNESS : a1seen",
+  "note": "code: prologue village gets the Act 1 block, Act 1 gets the prologue's"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/prologue.js",
+  "find": "They got as far as one, and it missed.",
+  "replace": "They got as far as none.",
+  "note": "text: Claude's cut C1 reverted"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/prologue.js",
+  "find": "You go up the widest crack to where it opens on the sky, and find a level place on the lip.",
+  "replace": "You climb the widest crack out onto the dead crown, under open sky, and find a level place among the boughs.",
+  "note": "text: Claude's cut C3 reverted (a crown the Tree may not have)"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/prologue.js",
+  "find": "A hunter bows to you, gravely, as one signs for a delivery nobody ordered.",
+  "replace": "A hunter bows, gravely, like a man signing for a delivery he did not order.",
+  "note": "text: Claude's cut C2 reverted"
+ },
+ {
+  "id": "F11",
+  "file": "js/story/prologue.js",
+  "find": "'Nobody saw it except the trees and whatever lives in them. Out here, at night, a miracle without witnesses is the best kind.'",
+  "replace": "'Nobody saw it except the trees. Out here, at night, a miracle without witnesses is the best kind.'",
+  "note": "refactor: an unchanged outdoor line altered"
+ },
+ {
+  "id": "F12",
+  "file": "js/story/prologue.js",
+  "find": "Not in the history of the mountain.\"",
+  "replace": "Not in the history of the mountains.\"",
+  "note": "refactor: the prologue village's witness altered"
+ },
+ {
+  "id": "F13",
+  "file": "js/story/prologue.js",
+  "find": "the man from the house opposite stands with his head bowed",
+  "replace": "Mei Lin's mother stands with her head bowed",
+  "note": "text: a person whose state varies (and C2-era ban list) in AW1"
+ },
+ {
+  "id": "F14",
+  "file": "js/story/prologue.js",
+  "find": "export const BT_IN_TREE = ['heart_hub'];",
+  "replace": "export const BT_IN_TREE = ['heart_hub', 'rr_hub'];",
+  "note": "code: the frame leaks to the root road"
+ },
+ {
+  "id": "F15",
+  "file": "js/story/prologue.js",
+  "find": "\"The Elder will ask what Ashfall saw.",
+  "replace": "\"The Elder will ask what Ashfall saw this morning.",
+  "note": "text: a time word in AW1"
+ },
+ {
+  "id": "F16",
+  "file": "js/story/prologue.js",
+  "find": "and the man from the house opposite stands with his head bowed",
+  "replace": "and Pock-Face stands with his head bowed",
+  "note": "RV1 M1 reverted: Pock-Face back in AW1"
+ },
+ {
+  "id": "F17",
+  "file": "js/story/prologue.js",
+  "find": "if (BT_ASHFALL_A1.includes(g.flags.bt_return)) g.flags.a1_sky_seen = true;",
+  "replace": "",
+  "note": "RV1 M2: a1_sky_seen never set"
+ },
+ {
+  "id": "F18",
+  "file": "js/story/act1_return.js",
+  "find": "${g.flags.sky_witness || g.flags.a1_sky_seen ? 'And you",
+  "replace": "${g.flags.sky_witness ? 'And you",
+  "note": "RV1 M2: the street ignores a1_sky_seen"
+ },
+ {
+  "id": "F19",
+  "file": "js/story/act1_return.js",
+  "find": "(g.flags.sky_witness ? 1 : 0)",
+  "replace": "(g.flags.sky_witness || g.flags.a1_sky_seen ? 1 : 0)",
+  "note": "RV1 M2: a1_sky_seen leaks into the Return's GU check"
+ },
+ {
+  "id": "F20",
+  "file": "js/core/coil.js",
+  "find": "'lf_known', 'songs'];",
+  "replace": "'lf_known', 'songs', 'a1_sky_seen'];",
+  "note": "RV1 M2: a1_sky_seen kept across the Coil"
+ },
+ {
+  "id": "F21",
+  "file": "js/story/prologue.js",
+  "find": "You go up the widest crack",
+  "replace": "You climb the widest crack",
+  "note": "RV1 L1 reverted: climb"
+ },
+ {
+  "id": "F22",
+  "file": "js/story/prologue.js",
+  "find": "const BT_OWN_CLOSER = [...BT_NO_SKY, 12, 14];",
+  "replace": "const BT_OWN_CLOSER = [...BT_NO_SKY, 12];",
+  "note": "RV1 L2: realm 14 gets the village closer again"
+ }
+]

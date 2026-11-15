@@ -117,7 +117,9 @@ const allSongTexts = (ed) => Object.values(SGX.SONG_TEXTS).flatMap((s) => (s.yuk
 // v0.11.184 (S1): the scenes' own memory lines (remember_texts.js) as the pool `remember`; RV1 (TG1): with the Day 2 morning's paragraph
 const RMX = await import(js('story/remember_texts.js'));
 const rememberLines = [RMX.MORNING_AGAIN, RMX.SCENE_MEMORY_LINES.morning, ...Object.values(RMX.SCENE_MEMORY_LINES.talk_mei), ...Object.values(RMX.SCENE_MEMORY_LINES.talk_ya)];
-const POOLS = { memory: [...MEMORY_LINES], yuki: yukiLines, aptitude: [ADAPT_REPLY], replies: dayReplies, house: houseLines, kitchen: kitchenLines, music: allMusicTexts('general'), music_named: allMusicTexts('named'), reading_named: readNamed, songs: allSongTexts('general'), songs_named: allSongTexts('named'), lf_drill: Object.values(LF_DRILL).flat(), lf_season: [...SEASON_LINES], remember: rememberLines };
+const BTX = await import(js('story/prologue.js')); // v0.11.185 (BR1, RV1 TG3): the sample states set no bt_return, so the two texts are read as a pool
+const btPlaceLines = [BTX.BT_A1_WITNESS, BTX.BT_TREE_FRAME];
+const POOLS = { memory: [...MEMORY_LINES], yuki: yukiLines, aptitude: [ADAPT_REPLY], replies: dayReplies, house: houseLines, kitchen: kitchenLines, music: allMusicTexts('general'), music_named: allMusicTexts('named'), reading_named: readNamed, songs: allSongTexts('general'), songs_named: allSongTexts('named'), lf_drill: Object.values(LF_DRILL).flat(), lf_season: [...SEASON_LINES], remember: rememberLines, bt_place: btPlaceLines };
 const pools = poolCounts(POOLS, rows.filter((r) => r.kind === 'text').flatMap((r) => r.renders));
 // RV1 (TG6): the reading's named edition against every scene but its own (its general text is heart_read itself)
 pools.reading_named = poolCounts({ reading_named: readNamed }, rows.filter((r) => r.kind === 'text' && r.id !== 'heart_read').flatMap((r) => r.renders)).reading_named;

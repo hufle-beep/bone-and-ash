@@ -152,7 +152,8 @@
   - Old Wen: the elder, 90, one blind milky eye.
   - Mei Lin: 26, a herb-gatherer with a sharp tongue, looser than the norm. Her hairpin is ivory, with a red tassel.
   - Her mother: 60, stern.
-  - The hunters, and Pock-Face.
+  - The hunters.
+  - Not a villager: **Pock-Face**, Gao Feng's lackey, who leads the arson on Mei Lin's herb loft on night 5 (`ashfall.js`; met only when Gao is neither broken nor spared; v0.11.185, RV1 M1: the canon card had listed him as a local).
 - **The Crimson Lotus Sect:**
   - Gao Feng: an outer disciple, about twenty, haughty. He can be killed or spared.
   - Lu Han: an inner disciple, about thirty, with a still face and a long sword.

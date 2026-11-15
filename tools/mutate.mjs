@@ -18,6 +18,9 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SKIP = new Set(['.git', 'art', 'node_modules']); // not read by the tests; art is 17 MB
+/** v0.11.185 (RV1, TG5): what a scratch copy keeps: SKIP only at the tree's top (a basename match dropped `js/art/` too, so
+ *  `tests/data.test.mjs` and `check.sh quick` failed in every copy and a harmless fault came out "caught"). Pure. */
+export const keepInCopy = (src, f) => !SKIP.has(path.relative(path.resolve(src), path.resolve(f)));
 
 /** One fault applied to a file's text: { ok: true, text } or { ok: false, why }. Pure. */
 export function applyFault(text, fault) {
@@ -58,7 +61,7 @@ async function main(argv) {
     if (base.code !== 0) { console.error(`The test command fails before any fault is planted (exit ${base.code}): ${failLine(base.out)}`); return 2; }
     const copies = [...Array(Math.min(jobs, faults.length || 1))].map(() => {
         const dir = mkdtempSync(path.join(tmpdir(), 'boneash-mutate-'));
-        cpSync(src, dir, { recursive: true, filter: (f) => !SKIP.has(path.basename(f)) || path.resolve(f) === src });
+        cpSync(src, dir, { recursive: true, filter: (f) => keepInCopy(src, f) });
         return dir;
     });
     const results = [];

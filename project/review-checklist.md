@@ -45,12 +45,15 @@
 - Sentences broken across paragraphs; the lowercase start after a comma (part 8 T18).
 - Beats and jokes lost from the old text (part 8 T16; part 9 T13).
 
+- **Who a named local is in the game, not only on the card (v0.11.185 M1):** grep the name in the story before a brief allows it (Pock-Face was on the canon card as a villager; in play he is Gao's lackey, met only on some paths).
+
 ## Tests (TG)
 - **The usual path, not only a fresh state (v0.11.181 TG1):** a gate tested from zero misses the stage already seen before the return.
 - **New text pools join textlint's POOLS (v0.11.181 TG4)**, or tics and reused runs in them go unchecked.
 - Each new text reachable in a real game, not only with a faked day record (part 4 TG1; part 5 TG1).
 - The render pass covers the branches by day, hour, flag and form (part 4 TG3; part 5 TG3, TG9).
 - **Pin the owner's fixed words (v0.11.183 TG5):** a fact or reaction the owner set (a disease's facts, "Mei Lin horrified", no music while hunting) gets a word or two in a test, or a planted fault that changes it passes. A walk asserts every placed item shows, not a share of them (TG2), and passes `newVisit` as main.js does (TG3).
-- **The browser test and planted faults (v0.11.182):** `tools/mutate.mjs` copies leave out `art/`, so a browser check's faults can't be measured there; say so rather than counting them.
+- **The browser test and planted faults (v0.11.182):** `tools/mutate.mjs` copies leave out `art/`, so a browser check's faults can't be measured there; say so rather than counting them. *(v0.11.185, RV1 TG5: the copies used to drop `js/art/` too, which broke `tests/data.test.mjs` and `check.sh quick` in every copy; now only the top-level `art/`, `.git` and `node_modules` are left out, so those commands can be measured; the browser test still can't.)*
+- **Pin Claude's cuts and the unchanged text around a refactor (v0.11.185 TG1, TG2):** a cut on Fable's draft gets a word in a test, and a text moved or wrapped gets a hash of a few fixed renders against the version before, or reverting it passes.
 - **A faked day record for one key only (v0.11.184 TG2):** a record that answers every key lets a line or text that reads another scene's days pass; fake the scene's own key and walk one real case with `goTo`.
 - Leftovers in the tests (unused imports, dead constants; part 9 C7).

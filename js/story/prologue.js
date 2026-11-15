@@ -906,36 +906,47 @@ The clouds come once more, and they bring no lightning. They gather, and hum, lo
         day: `Yuki looks up at the gap and blinks at it, slowly, as she does at people she has decided to permit.` },
 };
 const BT_NO_SKY = [10, 11];
-SCENES.breakthrough = {
-    id: 'breakthrough', title: (g) => realmName(g.james.realm), art: 'tribulation', place: (g) => g.location,
-    enter: (g) => {
-        const r = breakthrough(g);
-        if (VILLAGE_SCENES.includes(g.flags.bt_return)) g.flags.sky_witness = (g.flags.sky_witness || 0) + 1;
-        if (r.ok && r.realm === 1) g.flags.foundation_day = clockParts(g.minutes).day;
-        return r.ok ? r.lines : [];
-    },
-    text: (g) => {
-        const seen = VILLAGE_SCENES.includes(g.flags.bt_return);
-        const knows = !!(g.flags.lore1 || g.flags.lore_realms || g.rel['Mei Lin']);
-        const h = clockParts(g.minutes).hh;
-        const night = h >= 20 || h < 6;
-        const sky = night ? 'The stars go out one at a time, pinched like candles.' : 'Behind them the red sun goes out, a coin dropped into ink.';
-        if (g.james.realm === 1) {
-            const recognise = knows
-                ? `This one you have a name for. Mei Lin described it once, in the tone she keeps for weather: *the sky decides you're impure and tries to burn you clean. Most people it just burns.* A tribulation. Heaven is handing down a verdict, and the name written on it is yours.`
-                : `For this you have no word at all. You consult what you know of weather, of atmospheric charge, of the physics of a planet you have been on for under a week, and all of it returns a blank. Its outline you can read anyway. Lightning that drifts does not behave like that. This lightning is *aiming*. Somebody is being judged here, and it is you.`;
-            const witness = seen
-                ? `Ashfall saw it. The whole village is out in the street with its faces turned up, and no one is speaking. Somebody's grandmother kneels in the dust with her forehead to the ground, praying in a fast, shaking whisper. The hunters grip their spears as though a spear had a say in this. What frightens them most is that they can't *feel* you. Everyone in Ashfall with any sense for Qi is reaching for you now — it brushes you like a dozen nervous fingertips — and finding what they have always found. Nothing. A mortal, sitting in the dust, while Heaven argues with him and loses.
+/** v0.11.185 (RV1, L2): realms whose own closer stays in a village too: no sky came (10, 11), or their text already ends in silence (12) or with the clouds holding (14). */
+const BT_OWN_CLOSER = [...BT_NO_SKY, 12, 14];
+/** v0.11.185 (owner picks BR1, D1; Fable's, Claude's cuts C1–C3): a breakthrough in the right place. Act 1's Ashfall (AW1, AW2):
+ *  Foundation gets a witness block of its own, realms 2+ the village's closer (as the prologue's village; `sky_witness` is
+ *  still set by the prologue's village only, so the Return's GU check is unchanged; RV1, M2: `a1_sky_seen` (a world flag, reset each Coil) gives the Return's street its line). Inside the Old Tree (HF): a frame line
+ *  first (he climbs out to the sky), and the Foundation bolt lands in dead bark. Texts only: no flag, gain or check. */
+export const BT_ASHFALL_A1 = ['fo_ashfall', 'rt_ashfall'];
+export const BT_IN_TREE = ['heart_hub'];
+export const BT_A1_WITNESS = `Ashfall, unfortunately, was looking. Every door on the street is open and has somebody standing in it, and the man from the house opposite stands with his head bowed and his hands folded, though nobody has died. The old women were counting the strokes, as is proper. They got as far as one, and it missed.
+
+Old Wen walks out to the place where the bolt gave up. He studies it, then you, with the good eye and then the milky one, in case either is lying.
+
+"Heaven came for this man and found no charge to bring," he tells the street, in the voice kept for boundary disputes. "The Elder will ask what Ashfall saw. We will say that, and nothing more. Let no one improve on it."
+
+Nobody improves on it. A hunter bows to you, gravely, as one signs for a delivery nobody ordered. You nod back. It is cheaper than explaining.`;
+export const BT_TREE_FRAME = 'Not in here. The Old Tree has had enough done to it under this roof. You go up the widest crack to where it opens on the sky, and find a level place on the lip.';
+const BT_TREE_GROUND = 'dead bark';
+const BT_VILLAGE_CLOSER = 'Ashfall watches it go in total silence. Then, one by one, people bow — not to the sky. To you. You would very much prefer they didn\'t.';
+function btText(g) {
+    const seen = VILLAGE_SCENES.includes(g.flags.bt_return);
+    const a1seen = BT_ASHFALL_A1.includes(g.flags.bt_return); // v0.11.185 (BR1, AW1 + AW2): Act 1's Ashfall saw it too
+    const knows = !!(g.flags.lore1 || g.flags.lore_realms || g.rel['Mei Lin']);
+    const h = clockParts(g.minutes).hh;
+    const night = h >= 20 || h < 6;
+    const sky = night ? 'The stars go out one at a time, pinched like candles.' : 'Behind them the red sun goes out, a coin dropped into ink.';
+    if (g.james.realm === 1) {
+        const recognise = knows
+            ? `This one you have a name for. Mei Lin described it once, in the tone she keeps for weather: *the sky decides you're impure and tries to burn you clean. Most people it just burns.* A tribulation. Heaven is handing down a verdict, and the name written on it is yours.`
+            : `For this you have no word at all. You consult what you know of weather, of atmospheric charge, of the physics of a planet you have been on for under a week, and all of it returns a blank. Its outline you can read anyway. Lightning that drifts does not behave like that. This lightning is *aiming*. Somebody is being judged here, and it is you.`;
+        const witness = a1seen ? BT_A1_WITNESS : seen
+            ? `Ashfall saw it. The whole village is out in the street with its faces turned up, and no one is speaking. Somebody's grandmother kneels in the dust with her forehead to the ground, praying in a fast, shaking whisper. The hunters grip their spears as though a spear had a say in this. What frightens them most is that they can't *feel* you. Everyone in Ashfall with any sense for Qi is reaching for you now — it brushes you like a dozen nervous fingertips — and finding what they have always found. Nothing. A mortal, sitting in the dust, while Heaven argues with him and loses.
 
 Old Wen stands in his doorway, his pipe gone cold in his hand. When at last he looks at you, it is as a man revising, with great care, everything he believed he knew about Heaven.
 
 "A tribulation that withdraws its own verdict," he says to no one, quietly and formally, as one reads out a death in the family. "A cloud over one roof and a few strokes: so Foundation is paid for. Never this. Not in the history of the mountain."
 
 And someone, you suspect, is already running up the road to the Crimson Lotus.`
-                : night
-                    ? 'Nobody saw it except the trees and whatever lives in them. Out here, at night, a miracle without witnesses is the best kind.'
-                    : 'Nobody saw it except the trees. Out here, you suspect, a miracle without witnesses is the best kind.';
-            return `You sit, and you let the loop close.
+            : night
+                ? 'Nobody saw it except the trees and whatever lives in them. Out here, at night, a miracle without witnesses is the best kind.'
+                : 'Nobody saw it except the trees. Out here, you suspect, a miracle without witnesses is the best kind.';
+        return `You sit, and you let the loop close.
 
 Saturation has been pressing on the inside of you like a held breath, and now you release it: not out but *down*, into the foundations. The Ouroboros Axiom turns once, slowly, a great wheel finding its rest. Everything you have taken in of this world's poisoned Qi, composted and made clean, settles into you as bedrock.
 
@@ -949,7 +960,7 @@ It looks.
 
 It looks for a long time.
 
-And then — you would swear to this in any court — the storm more or less *shrugs*. It has found nothing impure to burn. Nothing to punish. One bolt comes down, strolls to the ground beside you and fizzles out in the ${seen ? 'dust' : 'moss'} with the sound of a disappointed sigh, and the clouds come apart and drift off in embarrassed directions.
+And then — you would swear to this in any court — the storm more or less *shrugs*. It has found nothing impure to burn. Nothing to punish. One bolt comes down, strolls to the ground beside you and fizzles out in the ${seen || a1seen ? 'dust' : BT_IN_TREE.includes(g.flags.bt_return) ? BT_TREE_GROUND : 'moss'} with the sound of a disappointed sigh, and the clouds come apart and drift off in embarrassed directions.
 
 "Huh," you say.
 
@@ -958,19 +969,29 @@ Yuki rose with you; you felt her meridians widen in the same breath as yours. Sh
 ${witness}
 
 *Foundation.* Mortal Vessel no longer: the rung where this world's sect disciples stand, and you came by it without a pill. You feel heavier, and steadier, and precisely as sarcastic as before.`;
-        }
-        const own = BT_REALMS[g.james.realm]; // ST4
-        if (own) return `${own.body}
+    }
+    const own = BT_REALMS[g.james.realm]; // ST4
+    if (own) return `${own.body}
 
-${seen && !BT_NO_SKY.includes(g.james.realm) ? 'Ashfall watches it go in total silence. Then, one by one, people bow — not to the sky. To you. You would very much prefer they didn\'t.' : night ? own.night : own.day}`;
-        return `Once more the loop closes, a rung further up. ${realmName(g.james.realm)}.
+${(seen || a1seen) && !BT_OWN_CLOSER.includes(g.james.realm) ? BT_VILLAGE_CLOSER : night ? own.night : own.day}`;
+    return `Once more the loop closes, a rung further up. ${realmName(g.james.realm)}.
 
 The sky has another go, since apparently the sky is obliged to: clouds, the hum, lightning casting about for something to burn. Nothing turns up. It gives up sooner than last time, like something that can be taught.
 
-${seen
-        ? 'Ashfall watches it go in total silence. Then, one by one, people bow — not to the sky. To you. You would very much prefer they didn\'t.'
-        : night ? 'Yuki does not so much as open an eye. Off in the dark, something large thinks better of coming any closer.' : 'Yuki does not so much as open an eye.'}`;
+${seen || a1seen
+    ? BT_VILLAGE_CLOSER
+    : night ? 'Yuki does not so much as open an eye. Off in the dark, something large thinks better of coming any closer.' : 'Yuki does not so much as open an eye.'}`;
+}
+SCENES.breakthrough = {
+    id: 'breakthrough', title: (g) => realmName(g.james.realm), art: 'tribulation', place: (g) => g.location,
+    enter: (g) => {
+        const r = breakthrough(g);
+        if (VILLAGE_SCENES.includes(g.flags.bt_return)) g.flags.sky_witness = (g.flags.sky_witness || 0) + 1;
+        if (BT_ASHFALL_A1.includes(g.flags.bt_return)) g.flags.a1_sky_seen = true; // v0.11.185 (RV1, M2): Act 1's Ashfall saw it; read by the Return's street only (no check)
+        if (r.ok && r.realm === 1) g.flags.foundation_day = clockParts(g.minutes).day;
+        return r.ok ? r.lines : [];
     },
+    text: (g) => (BT_IN_TREE.includes(g.flags.bt_return) ? `${BT_TREE_FRAME}\n\n${btText(g)}` : btText(g)), // v0.11.185 (BR1, HF)
     choices: [{ text: 'Get up.', to: (g) => {
         const back = g.flags.bt_return || 'stream';
         g.flags.yuki_return = back;
