@@ -27,7 +27,7 @@ import { installYukiTime } from './yuki_time.js'; // v0.11.137 (TR1)
 import { installHouseTime } from './house_time.js'; // v0.11.139 (MW1)
 import { installKitchen } from './kitchen_install.js'; // v0.11.181 (SP1, PS)
 import { installReading } from './reading.js'; // v0.11.182 (RS1)
-import { installYukiPath } from './yuki_path.js';
+import { installYukiPath, ykAskNow } from './yuki_path.js'; // v0.11.191 (Y1, AK): ykAskNow
 import { installCoil } from './coil_scenes.js';
 import { installOnce } from './oneoff.js';
 import { markWalks } from './walks.js'; // v0.11.109 (owner pick MW1)
@@ -1087,6 +1087,7 @@ SCENES.breakthrough = {
         g.flags.yuki_return = back;
         if (g.james.realm >= 2 && !g.flags.yuki_tiger_seen && SCENES.yuki_tiger_awaken) { g.flags.yuki_tiger_seen = true; return 'yuki_tiger_awaken'; }
         if (g.james.realm >= 7 && !g.flags.yuki_human_seen && SCENES.yuki_human_awaken) { g.flags.yuki_human_seen = true; return 'yuki_human_awaken'; }
+        if (ykAskNow(g)) { g.flags.yk_back = back; return 'yk_choice'; } // v0.11.191 (owner pick Y1, AK): a later Coil's human shape: she asks again
         return back;
     } }],
 };

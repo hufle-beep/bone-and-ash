@@ -14,12 +14,19 @@ import { bumpRel, sleepUntil, yukiForms, yukiForm } from '../core/game.js';
 import { daily, markDaily, byForm } from './common.js';
 import { likesMei, likesYa, trio, rel, KISS_YA, logTrio, ykShape, LIKES_BAR } from './act1_common.js'; // v0.11.137 (TR1, YR): LIKES_BAR
 
-export const ykPath = (g) => g.flags.yk_path || null;
+/** v0.11.191 (RV1, M3): until she asks this Coil and while she has no human shape in it, the lines read her last answer (she remembers;
+ *  `yk_last`, coil.js); once she can ask, only this Coil's answer counts (her question, ykAskNow). */
+export const ykPath = (g) => g.flags.yk_path || (!ykHuman(g) && ['sister', 'lover'].includes(g.flags.yk_last) ? g.flags.yk_last : null);
 export const ykLover = (g) => ykPath(g) === 'lover';
 export const ykSister = (g) => ykPath(g) === 'sister';
 /** v0.11.122 (owner pick LG1, YG; the owner's bug report 2026-11-08 23:22): her path is kept across Coils, her realm is not, so a scene
  *  that has her human needs her human form this Coil (Nascent Soul, `yukiForms`) as well as the path. */
 export const ykHuman = (g) => yukiForms(g).includes('human');
+/** v0.11.191 (owner pick Y1; the owner's report 2026-11-15 21:00: she asks every Coil, remembers, is patient, doesn't push): her answer
+ *  belongs to the Coil (coil.js keeps it as `yk_last`: 'sister' | 'lover' | 'wait'). AK: on a later Coil, the first breakthrough that gives
+ *  her the human shape again goes to her question (prologue.js's "Get up."; the Long Forest's fire through the same scene). */
+export const ykLast = (g) => g.flags.yk_last || null;
+export const ykAskNow = (g) => ykHuman(g) && !!g.flags.yuki_human_seen && !!ykLast(g) && !ykPath(g) && !g.flags.yk_wait;
 /** v0.11.122 (LG1, YV; texts by Fable, A1–A5): her lines when the path is chosen but she is a cat or the great root-kin this Coil. */
 const SIS_TALK_BOND = [
     `Yuki corners you by the water. For a cat this means sitting down in the middle of the path and looking at you until you stop pretending there's a way round. She only does it for things she considers important. Today, that's your love life.
@@ -75,6 +82,33 @@ export const YK_HERE = {
     loverLabel: "Keep hold of her hand. Later, then.",
     loverResult: "Yuki: your lover. She stays as she is and says nothing to anyone, because nobody needs to know yet and she likes being underestimated.",
 };
+/** v0.11.191 (Y1, TX; texts by Fable): the later question by last answer (Q), the one by the Long Forest's fire (F), and the answers on a
+ *  later Coil, the same as last time or changed (A; by the fire and elsewhere, so place-neutral); after a last "Not yet" its own two (RV1, M2). */
+export const YK_LATER = {
+    q: { sister: 
+        "Yuki leads you off until nobody is near enough to hear, and changes there. No ceremony: one step she is a cat, the next she is standing, a head shorter than you, shaking her sleeves straight like someone back in a coat she left on a hook.\n\n\"There,\" she says. \"Hands again. You know what comes with the hands.\"\n\n\"The question.\"\n\n\"The question.\" Her ears are pricked. \"You called me your sister, last time round, and I was a very good one. I have references, though none of them remember. That answer was yours to give then and it's yours to give now, and the two needn't match. I'll put it to you every time the world hands me a mouth. It costs me nothing, and I like to keep current.\" Her tail curls once, unhurried. \"So. Family, James? Or more?\"", lover: 
+        "She waits until no one is close enough to overhear, then stands up out of the cat's shape as easily as out of a chair. She tugs her collar level and counts her fingers. All present.\n\n\"Before you start,\" Yuki says aloud, \"I remember. Every bit. So do you, and you've been careful not to look at me about it, which I noticed and found sweet.\"\n\n\"I wasn't sure it carried over.\"\n\n\"The memory does. The answer doesn't. I won't hold you to a thing you said in a world that has since been put back in its box.\" One ear tilts, dry. \"You get a clean go whenever I get a face. Say it over, say otherwise; you couldn't lose me with a map. And you'll get the clean go after this one too. What am I to you, this turn? Family, or more?\"", wait: 
+        "Yuki picks a spot out of everyone's hearing and takes her human shape there, quick and tidy, a thing practised. She rolls her shoulders and checks that she has thumbs.\n\n\"We stopped at 'not yet',\" she says. \"Then it all began again, and it has taken me until now to grow a voice back. I'm not complaining. I'm explaining the delay.\"\n\n\"I never did answer you.\"\n\n\"No. You weren't ready, and then there was no more of it left to be ready in. That isn't a debt, and I haven't been keeping interest on it.\" She clasps her hands behind her back; her tail sways, slow. \"I ask whenever I've two feet to stand on while I do it. This is that and nothing heavier. Whatever you tell me, I stay, and the asking comes round again regardless. So, James. Am I family to you? Or am I more?\"" },
+    fire: 
+        "The fire has reached the stage where it wants watching and not feeding. Across it the white shape gets up, stretches, and is a woman by the end of the stretch: kneeling, sleeves neat, hair already everywhere.\n\n\"You've been expecting this,\" Yuki says.\n\n\"For a while.\"\n\n\"Then I can skip the preamble. You've heard it, and I was better at it then.\" She holds her palms to the heat, pleased with them. \"I know what you told me before. I've kept it, and I shan't quote it at you. People change between one turn of this and the next. You more than most; I've watched.\" An ear flicks. \"So I ask fresh each time I can speak, and I'll go on doing it for as long as the turns do. No answer you give could cost you me.\" She looks at you over the flames. \"Which is it, James? Family, or more?\"",
+    sister: { same: 
+        "\"Sister,\" Yuki says, tasting it. \"Again. Good. I've got the hang of that one.\"\n\nShe comes over and leans her whole weight on your arm, as the cat has always done and with far more leverage.\n\n\"The arrangement stands. No amendments, except that you chew too loudly and I've had no means of saying so until I had lips.\"\n\n\"You've said so through the bond for forty years.\"\n\n\"Aloud is different. Aloud counts.\" Her tail thumps your shin once, settled. \"The same, then. It suits us. And when I ask you next, don't read anything into it. I only like hearing you say it.\"", changed: 
+        "Yuki's ears go back, come forward, and stay forward. She nods.\n\n\"Family,\" she says. \"Right. Then let it be known that I was an excellent lover, and that I retire undefeated.\"\n\n\"You were. It isn't that—\"\n\n\"I know what it isn't. I live in your head, James. I felt you choose, and you chose kindly.\" She leans her shoulder into your ribs, hard enough to register. \"I was your kin before either of us could walk. It was never the consolation prize. It's what all the rest stands on.\" She straightens your lapel, proprietary. \"And I get to be rude about your taste in women again, with a clear conscience. I've missed that.\"" },
+    lover: { same: 
+        "Her fingers find the gaps between yours without looking, having been there before.\n\n\"There you are,\" Yuki says, low.\n\nShe leans in. The kiss is brief and exact, a signature on something already agreed, and afterwards she stays close enough that you feel her breathe out.\n\n\"I did wonder if you'd say it twice,\" she says. \"I'd have been fine. I want that understood. I am simply more fine at present.\"\n\n\"Understood.\"\n\n\"Good.\" She turns, fits herself under your arm and rests her head against your shoulder, your hand kept firmly in hers. \"The rest keeps. It kept through the world ending. It can keep a little longer.\"", changed: 
+        "Yuki looks at your hand, then at you, and her tail stops moving altogether.\n\n\"That's not what you said before,\" she says.\n\n\"No.\"\n\n\"I'm not objecting. I'm making sure you know.\" She takes the hand with care, turning it over as if it might be a different one. Then she comes closer, lays her free palm flat on your chest, and kisses you lightly: the corner of your mouth, then the middle of it.\n\n\"Hm,\" says Yuki. Her ears have tipped towards you and won't be talked out of it. \"I was a good sister. I intend to be insufferable at this.\" She settles into your side, fingers laced through yours. \"No rush on what's left. I've only just arrived.\"" },
+    // v0.11.191 (RV1, M2 + L4; Fable's): after last Coil's "Not yet", the answers claim no first time; her reply to a later "Not yet"
+    afterWait: { sister: "Yuki lets out a breath she has plainly been rationing.\n\n\"So that's what was waiting behind 'not yet',\" she says. \"Worth the queue.\"\n\n\"You're not disappointed.\"\n\n\"I put a question with two right answers, James. You picked one of them.\" She comes closer and butts her forehead against your shoulder, hard, twice. \"I'll want it in writing eventually. Your handwriting is a disgrace, so I'm prepared to be flexible about when.\" Her tail curls round your wrist and holds on. \"Sister. I'm keeping that. You'll find I'm very difficult to return.\"", lover: "Your hand is barely out before hers is in it, prompt, as though the offer might be withdrawn on a technicality.\n\n\"So 'not yet' did have an end,\" Yuki says. \"I'd begun to think of it as furniture.\"\n\n\"It took me one whole turn of the world.\"\n\n\"I've seen you take longer over a menu. I'm encouraged.\" Her ears have gone forward, and her voice hasn't quite kept its edge. The kiss she gives you is short and entirely sure of its address. Then she tips her weight against your side, her grip on your fingers tightening. \"Everything else can wait its turn. I've had the practice.\"" },
+    notYet: "Yuki tilts her head, ears following a beat behind. \"Not yet it is,\" she says, no heavier than if you'd declined tea. \"I'll put it to you again. It's a decent question. It bears repeating, and so, apparently, do we.\" Her tail flicks once, untroubled.",
+};
+/** The answer's text on a later Coil: the same as last time, changed (from the other answer), or null (the first text: no last answer, or "Not yet"). */
+export const ykLaterAnswer = (g, path) => { const l = ykLast(g); return l === path ? YK_LATER[path].same : l === 'sister' || l === 'lover' ? YK_LATER[path].changed : l === 'wait' ? YK_LATER.afterWait[path] : null; }; // RV1 (M2): after a "Not yet", its own
+/** v0.11.191 (Y1, D1 RL; Claude's words): after a later Coil's answer she goes back to the shape she had (ykFormBack), so the result says so
+ *  (a later Coil only, as picked, and only when she is not human after it: the reopened question leaves her human and keeps the first lines). */
+export const YK_LATER_RESULT = {
+    sister: 'Yuki: your sister. Back in her own shape, she takes the better half of wherever you sit next.',
+    lover: 'Yuki: your lover. Back in her own shape, she says nothing to anyone, because nobody needs to know yet and she likes being underestimated.',
+};
 export const ykAtFire = (g) => !!g.flags.lf_active;
 /** The question's text at the Long Forest's last fire (as before, word for word). */
 const YK_FIRE_TEXT = `The last night before you walk out of the Long Forest, Yuki sits across the fire from you in her human shape, knees drawn up, white hair pooled on the moss, and watches you for a long time without saying anything. That's normal. The bit where she does it with a face is new.
@@ -91,7 +125,7 @@ She takes a breath.
 export const ykLoverOpen = (g) => rel(g, 'Yuki').a >= LIKES_BAR;
 /** v0.11.137 (RT1, M2 + L1): her question is open while she IS human now, has no path, and said "Not yet" (or an old save saw her human
  *  with no answer); at 72 her daily scene asks it again (`yk_choice_again`), below it James can still say "Family." from that scene. */
-export const ykAskOpen = (g) => yukiForm(g) === 'human' && ykHuman(g) && !ykPath(g) && !!(g.flags.yk_wait || g.flags.yuki_human_seen);
+export const ykAskOpen = (g) => yukiForm(g) === 'human' && ykHuman(g) && !ykPath(g) && !!(g.flags.yk_wait || (g.flags.yuki_human_seen && !ykLast(g))); // v0.11.191 (RV1, H1b): on a later Coil only after this Coil's "Not yet"
 export const ykAskAgain = (g) => ykAskOpen(g) && ykLoverOpen(g);
 export const ykFamilyNow = (g) => ykAskOpen(g) && !ykLoverOpen(g);
 /** v0.11.137 (RT1, M3): the shape she had before the question, back after "Not yet" and the answers away from the fire. */
@@ -107,13 +141,13 @@ const YK_FO_LEAD = {
 };
 const SCENES_YK = {
     yk_choice: {
-        id: 'yk_choice', title: (g) => (ykAtFire(g) ? 'The Last Fire' : 'The Question'), art: 'yuki_human', place: (g) => (ykAtFire(g) ? 'The Long Forest' : g.location), // v0.11.137 (QA2): away from the fire, its own text
+        id: 'yk_choice', title: (g) => (ykAtFire(g) ? (ykLast(g) ? 'The Fire' : 'The Last Fire') : 'The Question'), // v0.11.191 (RV1, L3): a later fire is not the last art: 'yuki_human', place: (g) => (ykAtFire(g) ? 'The Long Forest' : g.location), // v0.11.137 (QA2): away from the fire, its own text
         enter: (g) => { g.flags.yk_form_before = yukiForm(g); g.yuki.form = 'human'; return []; }, // v0.11.137 (RT1, M3): her shape before, for after
-        text: (g) => (ykAtFire(g) ? YK_FIRE_TEXT : YK_HERE.first),
+        text: (g) => (ykAtFire(g) ? (ykLast(g) ? YK_LATER.fire : YK_FIRE_TEXT) : (YK_LATER.q[ykLast(g)] || YK_HERE.first)), // v0.11.191 (Y1, TX): asked before
         choices: [
             { text: '"Family. You\'re my sister, Yuki. You always have been."', do: (g) => { g.flags.yk_path = 'sister'; delete g.flags.yk_wait; return []; }, to: (g) => (ykAtFire(g) ? 'yk_sister' : 'yk_sister_here') }, // v0.11.137 (QA2): away from the fire, its own scene
             { text: (g) => (ykAtFire(g) ? '"More." Reach across the fire for her hand.' : YK_HERE.more), show: ykLoverOpen, do: (g) => { g.flags.yk_path = 'lover'; delete g.flags.yk_wait; return []; }, to: (g) => (ykAtFire(g) ? 'yk_lover' : 'yk_lover_here') }, // v0.11.137 (TR1, YR): at affection 72; (QA2) away from the fire, its own label and scene
-            { text: YK_QUESTION.notYet, show: (g) => !ykLoverOpen(g), do: (g) => { g.flags.yk_wait = true; ykFormBack(g); return [YK_QUESTION.notYetResult]; }, to: back }, // v0.11.137 (TR1, YR): last, so the two answers keep their places
+            { text: YK_QUESTION.notYet, show: (g) => !ykLoverOpen(g), do: (g) => { g.flags.yk_wait = true; ykFormBack(g); return [ykLast(g) ? YK_LATER.notYet : YK_QUESTION.notYetResult]; }, to: back }, // v0.11.137 (TR1, YR): last, so the two answers keep their places
         ],
     },
     yk_choice_again: { // v0.11.137 (TR1, YR; Fable's text): her question reopened by her daily scene (yuki_time.js), anywhere, at the bar
@@ -127,13 +161,13 @@ const SCENES_YK = {
     },
     yk_sister_here: { // v0.11.137 (QA2; Fable's text): "Family" away from the Long Forest's fire; her shape stays
         id: 'yk_sister_here', title: 'Family', art: 'yuki_human', place: (g) => g.location,
-        text: YK_HERE.sister,
-        choices: [{ text: YK_HERE.sisterLabel, do: (g) => { bumpRel(g, 'Yuki', 0, 0); ykFormBack(g); return [YK_HERE.sisterResult]; }, to: back }],
+        text: (g) => ykLaterAnswer(g, 'sister') || YK_HERE.sister, // v0.11.191 (Y1, TX)
+        choices: [{ text: YK_HERE.sisterLabel, do: (g) => { bumpRel(g, 'Yuki', 0, 0); ykFormBack(g); return [ykLast(g) && yukiForm(g) !== 'human' ? YK_LATER_RESULT.sister : YK_HERE.sisterResult]; }, to: back }], // v0.11.191 (Y1, D1 RL): a later Coil's own line
     },
     yk_lover_here: { // v0.11.137 (QA2; Fable's text): "More." away from the Long Forest's fire; her shape stays
         id: 'yk_lover_here', title: 'More', art: 'yuki_human', place: (g) => g.location,
-        text: YK_HERE.lover,
-        choices: [{ text: YK_HERE.loverLabel, do: (g) => { bumpRel(g, 'Yuki', 0, 0); g.flags.yk_kissed = true; ykFormBack(g); return [YK_HERE.loverResult]; }, to: back }],
+        text: (g) => ykLaterAnswer(g, 'lover') || YK_HERE.lover, // v0.11.191 (Y1, TX)
+        choices: [{ text: YK_HERE.loverLabel, do: (g) => { bumpRel(g, 'Yuki', 0, 0); g.flags.yk_kissed = true; ykFormBack(g); return [ykLast(g) && yukiForm(g) !== 'human' ? YK_LATER_RESULT.lover : YK_HERE.loverResult]; }, to: back }], // v0.11.191 (Y1, D1 RL)
     },
     yk_sister: {
         id: 'yk_sister', title: 'Family', art: 'yuki_human', place: 'The Long Forest',
@@ -148,7 +182,8 @@ const SCENES_YK = {
 "That's not a rule, that's a threat."
 
 "A sister," says Yuki, with vast contentment, "is entitled to both."`,
-        choices: [{ text: 'Sleep. Tomorrow, the smoke.', do: (g) => { bumpRel(g, 'Yuki', 0, 0); delete g.flags.yk_form_before; g.yuki.form = 'cat'; return ['Yuki: your sister. Back in her small form, on your chest, purring like a smug engine.']; }, to: back }],
+        choices: [{ text: (g) => (ykLast(g) ? 'Sleep.' : 'Sleep. Tomorrow, the smoke.'), // v0.11.191 (RV1, L3): a later fire's stay goes on
+            do: (g) => { bumpRel(g, 'Yuki', 0, 0); delete g.flags.yk_form_before; g.yuki.form = 'cat'; return ['Yuki: your sister. Back in her small form, on your chest, purring like a smug engine.']; }, to: back }],
     },
     yk_lover: {
         id: 'yk_lover', title: 'More', art: 'yuki_human', place: 'The Long Forest',
@@ -169,7 +204,8 @@ The fire burns low. Nobody gets up to feed it.
 *
 
 By first light she is asleep on your chest, the most familiar weight you own, except that tonight it has a face tucked into your neck, an arm flung across you, and a very small snore. The bond, mostly asleep: *I said I would get the best spot.*`,
-        choices: [{ text: 'Let her sleep. Tomorrow, the smoke.', do: (g) => { bumpRel(g, 'Yuki', 0, 0); delete g.flags.yk_form_before; g.flags.yk_kissed = true; g.yuki.form = 'cat'; return ['Yuki: your lover. She stays human until the treeline, holding your hand, and then flows back into a cat on your shoulder. "Nobody needs to know yet," she says, before she does. "I like being underestimated."']; }, to: back }], // v0.11.127 (LP1, LF): back in her small shape, as the text says (the sister's pick does the same)
+        choices: [{ text: (g) => (ykLast(g) ? 'Let her sleep.' : 'Let her sleep. Tomorrow, the smoke.'), // v0.11.191 (RV1, L3)
+            do: (g) => { bumpRel(g, 'Yuki', 0, 0); delete g.flags.yk_form_before; g.flags.yk_kissed = true; g.yuki.form = 'cat'; return ['Yuki: your lover. She stays human until the treeline, holding your hand, and then flows back into a cat on your shoulder. "Nobody needs to know yet," she says, before she does. "I like being underestimated."']; }, to: back }], // v0.11.127 (LP1, LF): back in her small shape, as the text says (the sister's pick does the same)
     },
 
     /* ---------- Act 1 camps ---------- */
@@ -429,6 +465,8 @@ function beat(SCENES, id, fn) {
 
 export function installYukiPath(SCENES) {
     Object.assign(SCENES, SCENES_YK);
+    // v0.11.191 (Y1, TX): by the fire too, a later Coil's answer reads the same or changed text (the fire's first texts stay for the first answer)
+    for (const [id, path] of [['yk_sister', 'sister'], ['yk_lover', 'lover']]) { const first = SCENES[id].text; SCENES[id].text = (g) => ykLaterAnswer(g, path) || first; }
 
     // the first time she is human in a normal run: the question comes after she shows you her shapes
     for (const c of SCENES.yuki_human_after?.choices || []) {

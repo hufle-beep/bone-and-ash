@@ -1,0 +1,12 @@
+# Y1 notes (suggestions only)
+
+- **Her shape before the change.** The three Q texts and F don't know whether she was the small cat or the great one. Q-sister and Q-lover say "a cat" / "the cat's shape" (true of both); Q-wait and F name no shape ("the white shape" in F). None uses a shoulder or a size.
+- **Who is nearby.** Each Q uses one clause ("until nobody is near enough to hear", "no one is close enough to overhear", "out of everyone's hearing") and never names Mei Lin or Ya, so the texts also hold when James is alone.
+- **"Not yet" is never promised.** Q-wait does not offer to wait again in words, since that label is hidden at high affection; it only says she stays and asks again. Likewise no Q promises that "More." is on the list, beyond the closing "Family, or more?" that the first scene also uses.
+- **The Coil is not named in dialogue.** She says "last time round", "this turn", "it all began again", "when all this winds back", "the world ending". If the game's characters do say "Coil" aloud, any of these can be swapped.
+- **A-sister-same** says "The terms stand as they were": a nod to the terms of the first sister scene without repeating any of them. If a player could reach this text without having seen that scene (family chosen on a later Coil only via this same text), it still reads, since "terms" needs no antecedent beyond being siblings. Cut the sentence if unwanted: "No amendments, except…" then becomes "One note: you chew too loudly…".
+- **A-sister-changed**: James's line breaks off ("It isn't that—"); she takes it without hurt and the dry line is the retirement. "before either of us could walk" stays clear of the first scene's "eyes open".
+- **A-lover-changed** starts after the label's own "Hold out your hand to her", so the hand is already out. It doesn't say whether they have kissed before; "I've only just arrived" refers to her shape this Coil and to the new answer, not to a first kiss.
+- **Both More texts** end with her hand in his and her leaning on him, nothing below the neck, nothing about sleep or the hour, so both labels fit.
+- **Time and ground words**: none of night, morning, dawn, sun, day (nor today / tonight / tomorrow / yesterday), none of moss, ash, dust, bark, in any of the eight or the alt. "laugh" is not used. "forty years" appears once (A-sister-same, James).
+- **Word counts** (approx.): Q-sister 140, Q-lover 140, Q-wait 150, F 150, A-sister-same 100, A-sister-changed 110, A-lover-same 110, A-lover-changed 115, Q-wait alt 125.

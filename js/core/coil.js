@@ -11,7 +11,7 @@
  * Rewind: back to the snapshot (Day 1 dawn for a new game; an old save as it was loaded). v0.11.26 (owner 11:07): from Act 1
  * also to the start of the whole game (Day 1, the arrival, a fresh start); "same days again" is gone. One Coil count per save
  * (owner 11:12): crossing into Act 1 continues the Coil, every rewind adds 1, and the bonus follows it (pick N1).
- *   Kept: familiarity, adaptation, Yuki's lane on/off, Yuki's relationship and path,
+ *   Kept: familiarity, adaptation, Yuki's lane on/off, Yuki's relationship, her last answer (`yk_last`, v0.11.191),
  *         the knowledge flags (KEEP_FLAGS), the journal and stats.
  *   Reset: James and Yuki (to the snapshot), hammerspace, every other flag, bars (full), Fed, the queue.
  *   Relationships other than Yuki: max(snapshot value, 25% of the last Coil's peak), friendship and affection apart.
@@ -21,8 +21,11 @@ import { coilStart, coilSnap, ensureBars, SAVE_VERSION, newGame, yukiAbove } fro
 import { famTier, FAM } from './tasks.js';
 const isYukiJob = (id) => id.startsWith('yuki:'); // v0.11.159 (owner pick NX2, CL): her jobs are not cards; the Coil screen gives her her own line
 
+/** v0.11.191 (owner pick Y1, RP): her answer to "family or more" (`yk_path`, `yk_wait`) belongs to the Coil; the rewind keeps it as `yk_last`
+ *  ('sister' | 'lover' | 'wait'), so she asks again, remembering (yuki_path.js ykAskNow). An old save moves at its next rewind. */
+export const ykLastOf = (f) => f.yk_path || (f.yk_wait ? 'wait' : f.yk_last);
 /** What James knows and keeps (plus Yuki's own flags and the Long Forest run, so that run stays scaled; v0.11.31: and the speed gates, tasks.js maxSpeed; v0.11.183 (SG2, ON-S): the songs heard, songs.js). */
-export const KEEP_FLAGS = ['lore1', 'lore_realms', 'lore_tree', 'saw_lights', 'yuki_tiger_seen', 'yuki_human_seen', 'yk_path', 'yk_wait', 'long', 'longforest', 'lf_instant', 'spd_pro', 'spd_a1', 'lf_known', 'songs'];
+export const KEEP_FLAGS = ['lore1', 'lore_realms', 'lore_tree', 'saw_lights', 'yuki_tiger_seen', 'yuki_human_seen', 'yk_last', 'long', 'longforest', 'lf_instant', 'spd_pro', 'spd_a1', 'lf_known', 'songs'];
 /** Discoveries that also lock a one-time action: reset with the world, but the Coil remembers them (Insights in step 4). */
 export const REMEMBER = { roots: 'the roots under the hollow', bone_sung: 'the song in the bone field', gills: 'where the ghost-gills grow', fungus: 'the jade bracket fungus by the stream', ship_found: 'where the seed-ship lies', log_heard: 'what Wren Aldous\'s log said' };
 const KNOW_TEXT = { lore1: 'what the tribute is', lore_realms: 'the realms, from Old Wen', lore_tree: 'the story of the dead tree', saw_lights: 'where the night lights go' };
@@ -125,6 +128,7 @@ export function rewind(g, { to = 'act' } = {}) {
     const base = clone(whole ? fresh : c.snap);
     const kept = {};
     for (const f of KEEP_FLAGS) if (g.flags[f] !== undefined) kept[f] = g.flags[f];
+    const last = ykLastOf(g.flags); // v0.11.191 (Y1, RP): this Coil's answer, or the one before it
     if (g.flags.ending) kept.spd_pro = true; // v0.11.31 (P3-b): the tribute was reached (any outcome), so ×2 stays open
     base.v = SAVE_VERSION;
     // v0.11.0 (owner 2026-11-06, pick 1a): realm, Saturation, skills and meridians start over with the act; the Coil bonus makes them come back faster
@@ -134,6 +138,10 @@ export function rewind(g, { to = 'act' } = {}) {
     if (yukiAbove(base)) base.yuki.fight = { tier: base.james.gu.tier, level: base.james.gu.level, xp: 0 };
     const unwound = false;
     base.flags = { ...base.flags, ...kept };
+    // v0.11.191 (Y1, RP; RV1 M1): the snapshot's answer goes too (an old keep's, or one asked by the prologue's Long Forest fire), so she asks
+    // on every Coil; an Act 1 that starts with her human asks through her daily door (yuki_time.js, ykAskNow)
+    delete base.flags.yk_path; delete base.flags.yk_wait;
+    if (last) base.flags.yk_last = last;
     const rel = clone(base.rel || {});
     for (const [who, p] of Object.entries(c.peak)) {
         if (who === 'Yuki') continue;

@@ -1,0 +1,212 @@
+[
+ {
+  "id": "P1",
+  "file": "js/core/coil.js",
+  "find": "    if (last) base.flags.yk_last = last;\n",
+  "replace": "",
+  "note": "RP: this Coil's answer not recorded as yk_last at the rewind"
+ },
+ {
+  "id": "P2",
+  "file": "js/core/coil.js",
+  "find": "export const ykLastOf = (f) => f.yk_path || (f.yk_wait ? 'wait' : f.yk_last);",
+  "replace": "export const ykLastOf = (f) => f.yk_last || f.yk_path || (f.yk_wait ? 'wait' : undefined);",
+  "note": "RP: the older answer wins over this Coil's"
+ },
+ {
+  "id": "P5",
+  "file": "js/story/yuki_path.js",
+  "find": "!!ykLast(g) && !ykPath(g) && !g.flags.yk_wait;",
+  "replace": "!!ykLast(g) && !ykPath(g);",
+  "note": "AK: she asks again at the next breakthrough after Not yet (pushes)"
+ },
+ {
+  "id": "P6",
+  "file": "js/story/yuki_path.js",
+  "find": "export const ykAskNow = (g) => ykHuman(g) && ",
+  "replace": "export const ykAskNow = (g) => ",
+  "note": "AK: asks below Nascent Soul, as a cat"
+ },
+ {
+  "id": "P7",
+  "file": "js/story/yuki_path.js",
+  "find": "(YK_LATER.q[ykLast(g)] || YK_HERE.first)",
+  "replace": "(YK_HERE.first)",
+  "note": "TX: the later question away from the fire never shows"
+ },
+ {
+  "id": "P8",
+  "file": "js/story/yuki_path.js",
+  "find": "l === 'sister' || l === 'lover' ? YK_LATER[path].changed : l === 'wait'",
+  "replace": "l ? YK_LATER[path].changed : l === 'wait'",
+  "note": "TX: last Not yet reads the changed text"
+ },
+ {
+  "id": "P9",
+  "file": "js/story/yuki_path.js",
+  "find": "return [ykLast(g) && yukiForm(g) !== 'human' ? YK_LATER_RESULT.lover : YK_HERE.loverResult];",
+  "replace": "return [yukiForm(g) !== 'human' ? YK_LATER_RESULT.lover : YK_HERE.loverResult];",
+  "note": "RL: the first-ever Coil's lover result also says Back in her own shape"
+ },
+ {
+  "id": "P10",
+  "file": "js/story/yuki_path.js",
+  "find": "[['yk_sister', 'sister'], ['yk_lover', 'lover']]",
+  "replace": "[['yk_sister', 'sister']]",
+  "note": "TX: the fire's lover answer keeps the first text on a later Coil"
+ },
+ {
+  "id": "P11",
+  "file": "js/story/prologue.js",
+  "find": "        if (ykAskNow(g)) { g.flags.yk_back = back; return 'yk_choice'; }",
+  "replace": "        if (ykAskNow(g) && !g.flags.lf_active) { g.flags.yk_back = back; return 'yk_choice'; }",
+  "note": "AK: no later question by the Long Forest's fire"
+ },
+ {
+  "id": "T1",
+  "file": "js/story/yuki_path.js",
+  "find": "It can keep a little longer.",
+  "replace": "It can keep until tonight.",
+  "note": "TX: a time word (tonight) in a place- and time-neutral answer"
+ },
+ {
+  "id": "T2",
+  "file": "js/story/yuki_path.js",
+  "find": "She settles into your side, fingers laced through yours.",
+  "replace": "She settles into your side by the stove, fingers laced through yours.",
+  "note": "TX: a place (stove) in a place-neutral answer shown by the fire"
+ },
+ {
+  "id": "T3",
+  "file": "js/story/yuki_path.js",
+  "find": "\\\"The memory does. The answer doesn't.",
+  "replace": "\\\"The memory does. For a long moment, the answer doesn't.",
+  "note": "TX: a canon-card tic (for a long moment) in Q-lover"
+ },
+ {
+  "id": "T4",
+  "file": "js/story/yuki_path.js",
+  "find": "No ceremony: one step she is a cat, the next she is standing",
+  "replace": "No ceremony: one step she hops down off your shoulder, the next she is standing",
+  "note": "Forms: a shoulder for the great root-kin"
+ },
+ {
+  "id": "T5",
+  "file": "js/story/yuki_path.js",
+  "find": "Yuki leads you off until nobody is near enough to hear, and changes there.",
+  "replace": "Yuki leads you off until Mei Lin and Ya are out of earshot, and changes there.",
+  "note": "Who is there: names the women where James may be alone"
+ },
+ {
+  "id": "T6",
+  "file": "js/story/yuki_path.js",
+  "find": "She leans in. The kiss is brief and exact",
+  "replace": "She leans in. The kiss is long and unhurried, and her collar comes undone",
+  "note": "Content limit: past a kiss in an answer text"
+ },
+ {
+  "id": "T7",
+  "file": "js/story/yuki_path.js",
+  "find": "Back in her own shape, she takes the better half of wherever you sit next.",
+  "replace": "Back in her own shape, she takes the better half of wherever you sit next. \\\"Mine,\\\" she says.",
+  "note": "RL: speech in a result line (the reply splitter)"
+ },
+ {
+  "id": "M1a",
+  "file": "js/core/coil.js",
+  "find": "    delete base.flags.yk_path; delete base.flags.yk_wait;\n",
+  "replace": "",
+  "note": "RV1 M1: the snapshot's answer comes back"
+ },
+ {
+  "id": "H1a",
+  "file": "js/story/yuki_time.js",
+  "find": "            if (ykAskNow(g)) { g.flags.yk_back = g.flags.yk_time_hub || g.flags.yk_back; g.scene = 'yk_choice';",
+  "replace": "            if (false) { g.flags.yk_back = g.flags.yk_time_hub || g.flags.yk_back; g.scene = 'yk_choice';",
+  "note": "RV1 H1a: her door doesn't ask"
+ },
+ {
+  "id": "H1b",
+  "file": "js/story/yuki_path.js",
+  "find": "!!(g.flags.yk_wait || (g.flags.yuki_human_seen && !ykLast(g)))",
+  "replace": "!!(g.flags.yk_wait || g.flags.yuki_human_seen)",
+  "note": "RV1 H1b: the false 'You said not yet'"
+ },
+ {
+  "id": "H1c",
+  "file": "js/story/yuki_path.js",
+  "find": "\\\"For a while.\\\"",
+  "replace": "\\\"Since the breakthrough.\\\"",
+  "note": "RV1 H1c: F's line after a season"
+ },
+ {
+  "id": "M3a",
+  "file": "js/story/yuki_path.js",
+  "find": "g.flags.yk_path || (!ykHuman(g) && ['sister', 'lover'].includes(g.flags.yk_last) ? g.flags.yk_last : null)",
+  "replace": "g.flags.yk_path || null",
+  "note": "RV1 M3: no remembered answer"
+ },
+ {
+  "id": "M3b",
+  "file": "js/story/yuki_path.js",
+  "find": "g.flags.yk_path || (!ykHuman(g) && ['sister', 'lover']",
+  "replace": "g.flags.yk_path || (['sister', 'lover']",
+  "note": "RV1 M3: remembered even when she is to ask"
+ },
+ {
+  "id": "L3a",
+  "file": "js/story/yuki_path.js",
+  "find": "(ykLast(g) ? 'Sleep.' : 'Sleep. Tomorrow, the smoke.')",
+  "replace": "'Sleep. Tomorrow, the smoke.'",
+  "note": "RV1 L3: the later fire's label"
+ },
+ {
+  "id": "L3b",
+  "file": "js/story/yuki_path.js",
+  "find": "(ykLast(g) ? 'The Fire' : 'The Last Fire')",
+  "replace": "'The Last Fire'",
+  "note": "RV1 L3: the later fire's title"
+ },
+ {
+  "id": "M2a",
+  "file": "js/story/yuki_path.js",
+  "find": ": l === 'wait' ? YK_LATER.afterWait[path] : null;",
+  "replace": ": null;",
+  "note": "RV1 M2: first-time texts after a wait"
+ },
+ {
+  "id": "L4a",
+  "file": "js/story/yuki_path.js",
+  "find": "return [ykLast(g) ? YK_LATER.notYet : YK_QUESTION.notYetResult]",
+  "replace": "return [YK_QUESTION.notYetResult]",
+  "note": "RV1 L4: the first reply again"
+ },
+ {
+  "id": "W1",
+  "file": "js/story/yuki_path.js",
+  "find": "The kiss she gives you is short and entirely sure of its address.",
+  "replace": "The kiss she gives you is long, and then her dress is somewhere else.",
+  "note": "the kiss limit in W-lover"
+ },
+ {
+  "id": "W2",
+  "file": "js/story/yuki_path.js",
+  "find": "I'll put it to you again. It's a decent question.",
+  "replace": "I'll put it to you again next time round. It's a decent question.",
+  "note": "D1 C3 undone"
+ },
+ {
+  "id": "W3",
+  "file": "js/story/yuki_path.js",
+  "find": "She comes closer and butts her forehead",
+  "replace": "She comes closer across the fire and butts her forehead",
+  "note": "a place in W-sister"
+ },
+ {
+  "id": "W4",
+  "file": "js/story/yuki_path.js",
+  "find": "Yuki lets out a breath she has plainly been rationing.",
+  "replace": "Yuki lets out a breath she has plainly been rationing. For the first time you hear her voice.",
+  "note": "a first-time claim after a wait"
+ }
+]

@@ -14,8 +14,10 @@ import { bumpRel } from '../core/game.js';
 import { daily, markDaily, byForm } from './common.js';
 import { byDay, byDayLast, pickLine } from '../core/lines.js';
 import { LIKES_BAR } from './act1_common.js';
-import { ykPath, ykAskAgain, ykFamilyNow, YK_QUESTION } from './yuki_path.js';
+import { ykPath, ykAskAgain, ykFamilyNow, YK_QUESTION, ykAskNow } from './yuki_path.js'; // v0.11.191 (RV1, H1a): ykAskNow
 import { TASK_HUBS } from './task_hubs.js';
+import { noteSeen } from '../core/story.js'; // v0.11.191 (RV1, H1a)
+let ALL = null; // v0.11.191 (RV1, H1a): the scenes, for her question's entry (installYukiTime)
 
 export const YT_MINUTES = 10; // v0.11.137 (owner pick DR2): like Mei Lin's and Ya's talks (20 drifted the Coil 5 tribute +21.3)
 /** YG-A: friendship and affection a scene, by turns (the Coil's count of her scenes picks the step). */
@@ -406,6 +408,9 @@ export const SCENES_YT = {
         id: 'yk_time', title: 'Yuki', art: 'yuki_close', place: (g) => g.location,
         dayKey: dayKeyOf,
         enter: (g) => {
+            // v0.11.191 (RV1, H1a): a later Coil's human shape that came without a breakthrough (the Long Forest's seasons, an Act 1 begun with
+            // her human): keeping her company, she asks her question instead (the door keeps its id, so task mode's door card stays as it is)
+            if (ykAskNow(g)) { g.flags.yk_back = g.flags.yk_time_hub || g.flags.yk_back; g.scene = 'yk_choice'; noteSeen(g, 'yk_choice'); return ALL.yk_choice.enter(g) || []; }
             markDaily(g, 'yk_time');
             const n = g.flags.yk_times || 0;
             g.flags.yk_times = n + 1;
@@ -433,6 +438,7 @@ export const SCENES_YT = {
 
 /** The card on every resting place: appended last (no choice position changes), a door card (`doors`), once a waking day. */
 export function installYukiTime(SCENES) {
+    ALL = SCENES;
     Object.assign(SCENES, SCENES_YT);
     for (const hub of Object.keys(YT_HUBS)) {
         const s = SCENES[hub];
