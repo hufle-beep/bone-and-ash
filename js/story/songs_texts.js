@@ -1,0 +1,74 @@
+/**
+ * Bone and Ash — the songs' texts (v0.11.183; owner pick SG2; written by Fable in two runs from the context packets, rule 10;
+ * Claude's cuts C1–C8 listed in the handover). Logic in songs.js.
+ *  - SONG_TEXTS: song key → { text, yuki? { bond, aloud } }: the passage drawn under its scene (songs.js SONG_AT), `{YUKI}` her
+ *    one line by her form. Paragraphs are separated by a blank line.
+ *  - SONG_REFS: slot id → { named, general } (core/edition.js); the general phrase names no one.
+ */
+export const SONG_TEXTS = {
+    reflect: { // night
+        text: "You have the archive open before you have decided to, which is apparently how evenings will go here. Out of all of it you pick {ref:reflect}, and keep it low: bright, quick, electronic, most of it in Japanese, and about as suited to this forest as a party hat on a headstone. The black trees take it without comment.\n\nIt is a song for two, sung by one: a singer and her other self, the one behind the face, who wants no part of her, and without whom, she owns up near the end, she would never have got this far. You have heard it some hundreds of times. Until tonight you had not thought of it as being about anyone you knew.\n\nYuki's ears come round from the dark to the omnitool, and stay there. {YUKI}\n\nYou play it again. Out in the dark, nothing objects.",
+        yuki: { bond: "*Play it a second time,* says Yuki, *and I'll assume you are trying to tell me something.*", aloud: "\"Play it a second time,\" says Yuki, \"and I'll assume you are trying to tell me something.\"" },
+    },
+    hammerdeep: { // fo_elder_named
+        text: "Whichever it is to be, the morning needs something under it. You thumb the omnitool and put on {ref:hammerdeep}, sung by {ref:clamavi}. It rolls out over the tea, low and many-voiced, like stone being moved: a fortress-home praised for the mighty hands that made it, the craftsman's honest work first and the ale after, and the ones who died keeping their lands.\n\nOld Wen hears it to the end with his cup held level, while you give him the words as they come. In the doorway, two women with water yokes have given up pretending to be on their way somewhere. \"Your ancestors,\" he says. It isn't a question.\n\nYou explain that they are not yours.\n\nHe weighs this with his whole face. \"Then they were somebody's, and they made a home worth dying for, and sang that the work comes before the cup,\" he says. \"The hunters will hear it before one stake is lifted.\"",
+    },
+    genesis: { // fo_depart
+        text: "A silence that complete wants something done to it. You turn the omnitool up, which you never do, and put on {ref:genesis}: several voices at once, brash, giving notice that they have begun and intend to be trouble, with a twist on the way that they are plainly pleased about. In your archive it belongs to five who broke out of a prison. You make it four, Yuki included, and nobody has called Ashfall a prison in your hearing.\n\n\"Louder,\" Ya calls, from wherever she has got to. \"Let everything in there know we're coming. Saves me the walk.\"\n\nMei Lin doesn't turn round. \"My mother can hear that.\"\n\n\"Yes.\"\n\n\"Good,\" she says, not quite steadily. \"Don't turn it down.\"\n\nYou don't.",
+    },
+    boof_pack: { // bl_camp
+        text: "A first camp under trees this size calls for something with dignity, so you put on {ref:boof_pack}. An easy, loafing beat; a saxophone with nowhere to be; and {ref:aethelstan}, explaining at some length that he can't come out this evening, because he is staying in with the boys.\n\nYa asks what he is saying. You tell her. She laughs so hard she has to put her spear down, makes you play it over, and joins the horn, loudly, on a note of her own. \"He's right,\" she says. \"Good fire, your own people, and some fool wants you to go *out*? I'd hunt with him.\"\n\nMei Lin is very still. \"Somebody made that deliberately,\" she says. \"And your people kept it. And out of everything you might have carried here, you carried that.\" The saxophone comes round again and she puts both hands over her ears. \"It sounds like a goose being consoled.\"\n\nYuki has the look of someone watching a cart roll slowly into a pond. {YUKI}",
+        yuki: { bond: "*All the music of home in there,* says Yuki, *and this is what the Blackroot will know us by.*", aloud: "\"All the music of home in there,\" says Yuki, \"and this is what the Blackroot will know us by.\"" },
+    },
+    waters_call: { // dw_enter
+        text: "You choose by title, which you would admit is not a method. Low, so that it stays on the raft, you play {ref:waters_call}. She closed her nightly shows with it: the last thing of the night, about five minutes long, and then everybody went home. Elsewhere it was a goodnight. Here, over water that keeps a copy of everything, it sounds like being told, kindly, that it is late.\n\n\"If they come up to listen,\" Ya says, hardly moving her mouth, \"you do the explaining, scholar.\" She doesn't tell you to stop.\n\nMei Lin asks what it is for. You tell her: for the end of things, for sending people home. She looks down at the black surface, and at whoever is under it. \"Then let it finish,\" she says.\n\nIt finishes. The dripping takes up its post again. Throughout, Yuki has watched the reflections; she reports no change, in the voice of someone who had been ready for one.",
+    },
+    lyfjaberg: { // ah_enter
+        text: "Since nothing anybody says is going to help, you stop saying things and put on {ref:lyfjaberg}, by {ref:wardruna}. Old instruments, and drums pitched so deep that the ash seems to settle to them. Its title is an old word for healing-mountain: in the poem, the sick who climb it are cured. The people who made the song add that a hard mountain is climbed with the mind as much as the body, which is the kind of remark people make from the top.\n\nMei Lin, with a herb-gatherer's suspicion of rivals, asks whether it works. \"The poem is confident,\" you say. \"Poems are,\" she says. But her feet have found the drum.\n\n\"If I get cured of anything up there,\" says Ya, \"I want it back.\" She means to go up ahead of the beat, to show it who is leading.\n\n{YUKI}",
+        yuki: { bond: "*The patient is half the horizon,* says Yuki, *so I hope they packed a large hill.*", aloud: "\"The patient is half the horizon,\" says Yuki, \"so I hope they packed a large hill.\"" },
+    },
+    trollabundin: { // ape_lured
+        text: "The hunt was over when the bait came down. Now it is a fight, and for a fight you have music. You wake the omnitool to {ref:trollabundin}: one frame drum, and a woman's voice that chants, and breathes, and rises. Its title means bewitched; bound by trolls. Your pulse finds the drum and stays on it, and everything that is not the ape goes quiet and very far off.\n\n\"*Now* he plays it,\" says Ya, and laughs like a knife coming out.",
+    },
+    music_box: { // heart_view
+        text: "Nobody sleeps. You can hear everyone not doing it. You raise your forearm and open the omnitool's pane, a square of light with a drawn singer in it, and pick {ref:music_box}. An orchestra comes up among the roots. Then the voice arrives on top of it and climbs, and goes on climbing, to where a voice ought to need a rope, and is at home there. In the gap in the trunk the other song carries on underneath, and doesn't interrupt.\n\n\"That is a drawing of {ref:ironmouse},\" you say. \"She trained for the opera. And her body makes almost none of what fights off sickness. Most days she can't leave her bed, or see anyone. Her lungs took an infection; now she breathes bottled air, day and night. Every week she needs the part of the blood she can't make, and strangers give it. So she sang from the bed, behind the drawing, and few people have a bigger crowd. She asks the crowd to give it. Singing costs her. She says none of it is for show.\"\n\nMei Lin has gone quiet, as she does at a sickbed. \"Almost nothing in her to fight with,\" she says. \"A cough could finish her, and she spends her breath on *that*.\" She wipes her face with the heel of her hand, the way she would a patient's. \"I have given up on people who had more left. I'm going to stop. Play the end again.\"\n\nYa is up on one elbow, glaring at the pane as at a rival. \"Bed. Bottled air. Can't go out her own door. And she does *that*, lying down.\" She thumps her breastbone. \"That's the strong. Not the arm. Any ox has the arm. If I whine in that tree, scholar, hit me.\"\n\nYou play the end again. Yuki, who has heard it more often than anyone here, listens as though she hadn't.",
+    },
+    durin: { // heart_hall
+        text: "You have a song for this. You have carried it most of your life without a room that deserved it. You give the omnitool {ref:durin} and, against habit, turn it up.\n\nSlow voices, deep, from a long way down: a king who woke when the world was young and gave the hills their names, and his halls in their glory; then the turn, the world gone grey, the halls dark. The hollow takes each line and hands it back off every gallery a breath late, so that the dead wood sings bass.\n\nMei Lin bows her head, as at a burial done properly at last. \"Who were they?\" she asks, when it ends.\n\n\"Dwarves. Short, stubborn. Somebody made them up.\"\n\n\"Then somebody made them up very well,\" she says, annoyed with both of you.\n\n\"Beards to the belt, I'd bet, and they hit things,\" Ya says. \"Finally. Somebody in here I'd drink with.\"\n\n{YUKI}",
+        yuki: { bond: "*You've been saving that one,* says Yuki.", aloud: "\"You've been saving that one,\" says Yuki." },
+    },
+    mumei_song: { // ship_wreck
+        text: "The minute needs something in it. Your hand goes to your forearm without consulting you and puts on {ref:mumei_song}, low, against the hull.\n\nIt is sung in a language nobody down here has. It is about being nameless and forgotten, and living on regardless, nameless still, for someone somewhere. Before you lies a bow, and on it the stub of one letter. Somebody waited for this ship. Then, at some point, somebody stopped.\n\n\"What is she saying?\" Mei Lin asks.\n\n\"That she hasn't got a name, and is staying anyway.\"\n\nMei Lin glances from the buried bow to you, and has the tact to say nothing, which costs her.\n\nYa, who has said nothing, goes on saying it.\n\nYuki watches the bow and not you, which is how she gives you the minute.",
+    },
+    non_fiction: { // rt_camp
+        text: "When the drums on your arm run out, you put on {ref:non_fiction}. You pick it because this is the last fire, and because by this hour tomorrow Ashfall will be telling the journey wrong, and you would like it on record how it sounded from the people who were in it. Five voices, about a myth of their own: one they wrote together, side by side, and are plainly pleased with.\n\nYou tell them that much. Ya counts the fire's company on her fingers and comes up short whichever end she starts from. \"Five,\" she says. \"We're one down.\"\n\n\"The seed,\" says Mei Lin. \"Five.\"\n\n\"A seed can't sing.\"\n\n\"*You* can't sing.\"\n\n\"I sing like a boar,\" Ya says, with pride.\n\n\"That is what I said.\"\n\n{YUKI}",
+        yuki: { bond: "*I wrote most of it,* says Yuki.", aloud: "\"I wrote most of it,\" says Yuki." },
+    },
+    breathe: { // rt_arrive
+        text: "The street is long, and nobody on it means to speak first. You put on {ref:breathe}, out of {ref:in_the_heights}, as {ref:ironmouse_again} sang it once for her crowd, low, at walking pace. A young woman comes home from her first year at a far school with her whole neighbourhood's hopes on her back, and is afraid she has dropped them. You were not carrying this street's hopes when you left. It turns out somebody put them in the pack anyway.\n\n\"She sings scared like it's a fight,\" Ya says, pleased, far too loud.\n\nMei Lin has none of the words and hears it regardless. Her eyes find one doorway, and her chin comes up. In the doorway her mother, arms folded, hears a girl's voice come out of the outlander's sleeve and gives it the look she keeps for unwashed herbs.\n\nThe grandmother with the dusty forehead bows to your forearm as well, to be thorough. Yuki accepts the silence of Ashfall as her due.",
+    },
+    dwarven_forge: { // rt_elder
+        text: "You don't answer at once. A question of that size deserves accompaniment. You tap the omnitool for {ref:dwarven_forge}, and you leave it loud enough for the road.\n\nDeep voices climb out of the omnitool like men out of a mine, singing of the hammer and the fire in the time a hammer keeps: people who made what they needed and asked nobody's leave. The sweet rot in the air does not thin. It does get company.\n\n\"He answers the Elder with a *work-chant*,\" one of the crimson twelve whispers, appalled. Nobody corrects him. It is close enough. When the Elder draws breath to speak, you turn it down for his answer.",
+    },
+};
+export const SONG_REFS = {
+    aethelstan: { named: "Lord Aethelstan", general: "the man behind it" },
+    boof_pack: { named: "*Boof Pack*", general: "the daftest track in the archive" },
+    breathe: { named: "*Breathe*", general: "a homecoming song" },
+    clamavi: { named: "Clamavi de Profundis", general: "a choir that sings fantasy as deep as voices go" },
+    durin: { named: "Clamavi de Profundis's *The Song of Dúrin*", general: "an old dwarven lament" },
+    dwarven_forge: { named: "Clamavi de Profundis's *Dwarven Forge*", general: "a forge song from home" },
+    genesis: { named: "hololive English -Advent-'s *Genesis*", general: "a group song from the idol end of your archive" },
+    hammerdeep: { named: "*The Song of Hammerdeep*", general: "a dwarven hymn" },
+    in_the_heights: { named: "*In the Heights*", general: "a musical about one city neighbourhood" },
+    ironmouse: { named: "Ironmouse", general: "the singer" },
+    ironmouse_again: { named: "Ironmouse", general: "the singer from the roots" },
+    lyfjaberg: { named: "*Lyfjaberg*", general: "a song about a mountain" },
+    mumei_song: { named: "Nanashi Mumei's *mumei*", general: "a quiet song from the far end of your archive" },
+    music_box: { named: "*Music Box of Fate*", general: "a song two composers wrote to show what one voice can do" },
+    non_fiction: { named: "hololive English -Myth-'s *Non-Fiction*", general: "a song five singers made for their second year together" },
+    reflect: { named: "Gawr Gura's *Reflect*", general: "the first original song of an idol who performs as a shark" },
+    trollabundin: { named: "Eivør's *Trøllabundin*", general: "a song from the Faroe Islands" },
+    wardruna: { named: "Wardruna", general: "a northern band that plays its ancestors' instruments" },
+    waters_call: { named: "Lord Aethelstan's *The Water's Call*, with Nyanners singing", general: "a song named for the call of water, with a woman singing" },
+};

@@ -111,7 +111,10 @@ const allMusicTexts = (ed) => Object.values(MLX).flatMap((p) => Object.values(p)
 // RS1: the reading to Ya in the named edition (the scene lint reads the general one), each ship sentence and the lover's
 const RDX = await import(js('story/reading.js')); const EDX = await import(js('core/edition.js')); const { MUSIC_REFS: MRX } = await import(js('story/music_texts.js'));
 const readNamed = Object.values(RDX.READ.ship).map((sh) => EDX.fillRefs(RDX.READ.text.replace('{SHIP}', sh).replace('{LOVER}', RDX.READ.lover), MRX, 'named'));
-const POOLS = { memory: [...MEMORY_LINES], yuki: yukiLines, aptitude: [ADAPT_REPLY], replies: dayReplies, house: houseLines, kitchen: kitchenLines, music: allMusicTexts('general'), music_named: allMusicTexts('named'), reading_named: readNamed, lf_drill: Object.values(LF_DRILL).flat(), lf_season: [...SEASON_LINES] };
+// v0.11.183 (SG2): the songs (songs_texts.js) in each edition, Yuki's line in both voices, as the pools `songs` (general) and `songs_named`
+const SGX = await import(js('story/songs.js'));
+const allSongTexts = (ed) => Object.values(SGX.SONG_TEXTS).flatMap((s) => (s.yuki ? [s.yuki.bond, s.yuki.aloud] : ['']).map((y) => EDX.fillRefs(s.text.replace('{YUKI}', y), SGX.ALL_REFS, ed)));
+const POOLS = { memory: [...MEMORY_LINES], yuki: yukiLines, aptitude: [ADAPT_REPLY], replies: dayReplies, house: houseLines, kitchen: kitchenLines, music: allMusicTexts('general'), music_named: allMusicTexts('named'), reading_named: readNamed, songs: allSongTexts('general'), songs_named: allSongTexts('named'), lf_drill: Object.values(LF_DRILL).flat(), lf_season: [...SEASON_LINES] };
 const pools = poolCounts(POOLS, rows.filter((r) => r.kind === 'text').flatMap((r) => r.renders));
 // RV1 (TG6): the reading's named edition against every scene but its own (its general text is heart_read itself)
 pools.reading_named = poolCounts({ reading_named: readNamed }, rows.filter((r) => r.kind === 'text' && r.id !== 'heart_read').flatMap((r) => r.renders)).reading_named;

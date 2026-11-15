@@ -33,6 +33,7 @@
 - Loot against the text (cores, items named).
 - **Result lines and the reply splitter (v0.11.181 M1, L1):** a result with speech outside `GAIN_LINES` puts its stat in the reply; a two-sentence result leaves a fragment in the reply. Run every new result through `splitLine`.
 - **Lines drawn under a screen (v0.11.182 M1, M3):** who is still there at the end of the text (a reaction from someone the text sent to bed); a screen that never comes first in its day never draws; slot phrases read in both editions once filled (L3).
+- **A passage drawn under a scene (v0.11.183 M2, M4, TG6, TG7):** it must not contradict a part of the scene that always shows (Ya "says nothing whatever" above a passage that gives her a speech), must not narrate past what the next screen opens with (a send-off the next screen starts again), and a local must not react to the content of a song in a language nobody translated. A song's line before it on the same evening counts as well as one after it (M1).
 - **Gates that cross another pool's gate on one screen (v0.11.181 L5):** a stage text by friendship next to a closer pool with its own level.
 
 ## Text quality
@@ -47,5 +48,6 @@
 - **New text pools join textlint's POOLS (v0.11.181 TG4)**, or tics and reused runs in them go unchecked.
 - Each new text reachable in a real game, not only with a faked day record (part 4 TG1; part 5 TG1).
 - The render pass covers the branches by day, hour, flag and form (part 4 TG3; part 5 TG3, TG9).
+- **Pin the owner's fixed words (v0.11.183 TG5):** a fact or reaction the owner set (a disease's facts, "Mei Lin horrified", no music while hunting) gets a word or two in a test, or a planted fault that changes it passes. A walk asserts every placed item shows, not a share of them (TG2), and passes `newVisit` as main.js does (TG3).
 - **The browser test and planted faults (v0.11.182):** `tools/mutate.mjs` copies leave out `art/`, so a browser check's faults can't be measured there; say so rather than counting them.
 - Leftovers in the tests (unused imports, dead constants; part 9 C7).

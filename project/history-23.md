@@ -2,6 +2,19 @@
 
 Started 2026-11-14 (v0.11.182), when `history-22.md` would have passed 20 KB with this move (owner pick U1, MD: history parts start at 20 KB, so a push uploads less). Newer than `history-22.md` … `history.md`. Each push moves what is older than the last three versions here from the handover, newest first.
 
+## Moved from the handover in v0.11.183 (word for word)
+
+### Decided in chat
+
+- **v0.11.180: the context packets (CP1, SZ1; tools and docs only) (the options at about 17:10; the owner 17:15 "CP1 go"; the stop at about 17:24, the owner 17:26 "SZ1 go"):** **Measured (the record in `project/research/label-pass-*.md`):** after the label pass's read, 16 more finds needed picks F, H and RV, each for want of a field the lean packet (220 characters) left out. **The fields and what each would have caught:** C1 the result and the screen after (R1, R2, R7, R9), C2 when it shows, with a bot run's days and hours (F1 "again", R3 "this morning's"), C3 task mode (H, R11), C4 the forms (R5, R6), C5 the whole text (F3, R1, R4, R8), C6 the screen and the labels leading in (F2), C7 Claude's check of drafts (F4, R10): 16 of 16. **CP1 🟢 C1–C7 for drafts and reviews, reads lean + tags (recommended) / CP2 🟡 without C5 and C6, 12 / 16 / CP3 🟠 tags only, 8 / 16 / CP4 🔴 C7 only, 2 / 16. Picked: CP1.** **The stop (rule 1: the sizes came out over the estimates):** measured on the label pass, Fable's packet 64 KB (estimated 40–60; the lean one 8.9 KB), the review's 99 KB for its 37 lines in 34 scenes (estimated about 40 more than its 12 KB diff), a whole-game read 218 KB (estimated about 160; the lean one 106 KB); P1 the texts and results seen in play (12.8 KB of Fable's, 19 KB of the review's; none of the 16 needed them, but a label must fit every variant), P2 the rest (mostly the scene text itself). **SZ1 🟢 all as built (recommended) / SZ2 🟡 P1 for the review only (Fable 52 KB) / SZ3 🟠 no P1 (Fable 52 KB, the review 81 KB) / SZ4 🔴 no push. Picked: SZ1.**
+
+### Version notes
+
+## v0.11.180 — The context packets (CP1, SZ1; tools and docs only)
+
+- **Files:** `tools/packet.mjs` (new: `node tools/packet.mjs <scene[:index]>…` full packets, C1–C6; `--tags [--area x]` for whole-game reads; `--check drafts.txt`, C7; `--games N`, the bot run, default 200, about 18 s), `tests/tools.test.mjs` (the CP block: each field on the label pass's faults; the LB1 roadmap check moved on, CP1's added), `tests/README.md`, `CLAUDE.md` (rule 10: context packets), `project/working-agreement.md` (Fable for story texts; Usage's FP), `project/review-checklist.md` (How to read: the packet; task mode first), `project/reference.md` (the files table), `roadmap.md` (the CP line to `roadmap-done-3.md`, CM next), `history-22.md` (v0.11.177's entries), `sw.js`. No game file changed; no What's new line.
+- **Checks:** tools, tests and docs (rule 2): the tools test and `bash tools/check.sh quick`. Interaction: `tools/packet.mjs` only reads the game (its bot plays on copies; `dryClone` for the forced results); it is not part of `tools/check.sh`; the leftovers scan reads it as a tool.
+
 ## Moved from the handover in v0.11.182 (word for word)
 
 ### Decided in chat

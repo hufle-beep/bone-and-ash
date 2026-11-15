@@ -3659,6 +3659,8 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
 {
     const E = await import('../js/core/edition.js');
     const M = await import('../js/story/music.js');
+    const SG = await import('../js/story/songs.js'); // v0.11.183 (SG2): the CM2 checks below play with every song heard (CM3 tests the songs)
+    const ALL_SONGS = Object.keys(SG.SONG_TEXTS).join(',');
     const D = 1440;
     // ES / ET: the default is general (DF1); a slot fills by edition; an unknown id throws
     assert(E.getEdition() === 'general' && E.EDITION_KEY === 'boneash.edition', 'CM2 (DF1): the general edition by default; the per-phone key');
@@ -3709,7 +3711,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     assert(Object.keys(M.MUSIC_SCREENS).length === 18 && Object.keys(M.MUSIC_SCREENS).every((id) => SCENES[id]) && !M.MUSIC_SCREENS.supper && !M.MUSIC_SCREENS.mei_walk && !M.MUSIC_SCREENS.yk_camp, 'CM2 (ML, W1; RV1 M3): 18 evening screens, all real; not the supper or the sunset walk (the roof and the third supper follow them), nor Yuki\'s walk (a romance night)');
     const src = readdirSync(new URL('../js/story/', import.meta.url)).filter((f) => f.endsWith('.js') && !/^music/.test(f)).map((f) => readFileSync(new URL(`../js/story/${f}`, import.meta.url), 'utf8')).join('\n');
     assert((src.match(new RegExp(M.OWN_MUSIC.source, 'gi')) || []).length === 5, 'CM2 (ML): the five music lines already in the game are the ones OWN_MUSIC finds');
-    const at = (seed, scene, hour, extra = {}) => { const g = ensureBars(fresh(seed)); g.scene = scene; g.minutes = 2 * D + hour * 60; Object.assign(g.flags, extra.flags || {}); if (extra.act) { g.coil = { ...(g.coil || {}), act: extra.act }; } for (const [w, f] of Object.entries(extra.rel || {})) g.rel[w] = { f, a: 0 }; linesOf(g).at = scene; return g; };
+    const at = (seed, scene, hour, extra = {}) => { const g = ensureBars(fresh(seed)); g.scene = scene; g.minutes = 2 * D + hour * 60; g.flags.songs = ALL_SONGS; Object.assign(g.flags, extra.flags || {}); if (extra.act) { g.coil = { ...(g.coil || {}), act: extra.act }; } for (const [w, f] of Object.entries(extra.rel || {})) g.rel[w] = { f, a: 0 }; linesOf(g).at = scene; return g; };
     const view = (g, text = 'A screen.') => ({ id: g.scene, text });
     { const g = at(77001, 'camp', 14); g.minutes += 59; assert(M.musicLine(g, view(g)) === null, 'CM2 (ML): none before 15:00 (14:59)'); g.minutes += 1; assert(M.musicLine(g, view(g)) !== null, 'RV1 (TG2): one from 15:00'); }
     { const g = at(77005, 'camp', 20); const a = M.musicLine(g, view(g)); linesOf(g).cur = {}; // RV1 (L1): back from a form change or a breakthrough: the same visit
@@ -3765,13 +3767,18 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         const { isTaskHub: hubQ, taskCards: tc, taskOpen: to, runTask: rt, taskState: ts, isTaskChoice: itc } = await import('../js/core/tasks.js');
         let days = 0, withLine = 0, twice = 0, bad = 0; let s = 7; const shownKeys = new Set(); // RV1 (TG1): every line shows in a real game
         const rnd = (n) => { s = (s * 1103515245 + 12345) >>> 0; return (s >>> 8) % n; };
+        const songsSeen = {}, beforeSong = {}; let afterSong = 0, dupSong = 0; // v0.11.183 (SG2; RV1 TG1)
         for (let n = 0; n < 160; n++) {
+            const gameSongs = [];
             const g = ensureBars(fresh(78000 + n)); const per = {};
             for (let st = 0; st < 3000; st++) {
                 const v = sceneView(g, SCENES); if (v.end) break;
-                againView(g, v);
-                const r = M.musicLine(g, v); const k = `${coilStamp(g)}|${textDay(g)}`;
+                const av = againView(g, v); // RV1 (TG3): newVisit passed as main.js does
+                const r0 = M.musicLine(g, v, { newVisit: av?.newVisit }); const k = `${coilStamp(g)}|${textDay(g)}`;
                 const e = per[k] || (per[k] = new Set());
+                // v0.11.183 (SG2): a song is counted apart (any screen, any hour), once a game (ON-S); no line after an evening one that day (DU-A)
+                if (r0 && r0.key.startsWith('song.')) { const evening = M.MUSIC_SCREENS[g.scene] && clockHour(g) >= 15; if (!e.has(r0.key)) { songsSeen[r0.key] = (songsSeen[r0.key] || 0) + 1; gameSongs.push(r0.key); if (evening && [...e].some((x) => x !== 'song' && !x.startsWith('song.'))) beforeSong[r0.key] = (beforeSong[r0.key] || 0) + 1; } e.add(r0.key); if (evening) e.add('song'); } // DU-A: an evening song takes the day; RV1 (TG1): and no line before it that evening
+                const r = r0 && !r0.key.startsWith('song.') ? r0 : null; if (r && e.has('song')) afterSong++;
                 if (M.OWN_MUSIC.test(v.text || '')) e.add('own');
                 if (r) { e.add(r.key); shownKeys.add(r.key); if (!M.MUSIC_SCREENS[g.scene] || clockHour(g) < 15 && clockHour(g) >= 5) bad++; }
                 if (hubQ(g)) { const cards = tc(g, SCENES).filter((c) => c.status === 'open'); const stops = v.choices.filter((c) => !c.disabled && (c.index >= 1000 || !itc(SCENES, g.scene, c.index)));
@@ -3781,14 +3788,95 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
                 const bite = open.filter((c) => /Bite the tail/.test(c.label)); const c = bite.length ? bite[0] : open[rnd(open.length)];
                 const out = choose(g, SCENES, c.index); if (out.combat) { startCombat(g, out.combat(g)); for (let t = 0; t < 400 && g.combat; t++) { const o = combatStep(g, smartAction(g, t)); if (o?.done) { goTo(g, SCENES, o.next); break; } } }
             }
-            for (const e of Object.values(per)) { days++; if (e.size) withLine++; if (e.size > 1) twice++; }
+            for (const e0 of Object.values(per)) { const e = [...e0].filter((x) => x !== 'song' && !x.startsWith('song.')); days++; if (e.length) withLine++; if (e.length > 1) twice++; }
+            if (new Set(gameSongs).size !== gameSongs.length) dupSong++;
         }
+        assert(dupSong === 0 && afterSong === 0, `CM3 (ON-S, DU): 160 random games: no song twice in a game (${dupSong}), no music line after an evening song the same day (${afterSong})`);
+        assert(Object.keys(songsSeen).length === 13, `CM3 (PL; RV1 TG2): all 13 songs show in 160 random games (${Object.keys(songsSeen).length}: ${Object.keys(songsSeen).map((k) => k.slice(5)).join(', ')})`);
+        assert(Object.keys(beforeSong).length === 0, `CM3 (RV1 M1, TG1): no music line earlier the same evening as an evening song (${JSON.stringify(beforeSong)})`);
         assert(twice === 0 && bad === 0 && withLine > days * 0.4, `CM2 (ML): 160 random games, ${days} text days, ${withLine} with a music line, ${twice} with two (the game's own lines counted), ${bad} off the evening screens`);
         { const allKeys = Object.entries(M.MUSIC_LINES).flatMap(([st, p]) => Object.entries(p).flatMap(([k, l]) => l.map((x, i) => [`${st}.${k}.${i}`, x.key])));
           const miss = allKeys.filter(([k]) => !shownKeys.has(k)).map(([, key]) => key);
           assert(miss.length === 0, `RV1 (TG1): every music and archive line shows in 160 random games (never: ${miss.join(', ') || 'none'})`); }
     }
 
+    // CM3 (v0.11.183, owner picks SG2, D1): the songs: PL each once in its scene, ON-S once a save (kept across the Coil), DU the day's music, ED both editions
+    {
+        const T = SG.SONG_TEXTS, A = SG.SONG_AT;
+        const keys = Object.keys(T);
+        assert(JSON.stringify(A) === JSON.stringify({ night: 'reflect', fo_elder_named: 'hammerdeep', fo_depart: 'genesis', bl_camp: 'boof_pack', dw_enter: 'waters_call', ah_enter: 'lyfjaberg', ape_lured: 'trollabundin', heart_view: 'music_box', heart_hall: 'durin', ship_wreck: 'mumei_song', rt_camp: 'non_fiction', rt_arrive: 'breathe', rt_elder: 'dwarven_forge' }), 'CM3 (PL, RV1 F11): the placement map the owner picked (SG2)');
+        assert(keys.length === 13 && Object.keys(A).length === 13 && Object.keys(A).every((id) => SCENES[id]) && new Set(Object.values(A)).size === 13 && Object.values(A).every((k) => T[k]), 'CM3 (PL): 13 songs, each in one real scene, every song placed (FC: the notes hold 13)');
+        const songSlots = new Set(keys.flatMap((k) => [...T[k].text.matchAll(E.SLOT)].map((m) => m[1])));
+        assert([...songSlots].every((id) => SG.ALL_REFS[id]) && Object.keys(SG.SONG_REFS).every((id) => songSlots.has(id)), `CM3 (ET): every song slot in a table and every song entry used (${songSlots.size})`);
+        assert(Object.values(SG.SONG_REFS).every((r) => r.general && r.general !== r.named && !/[A-Z]/.test(r.general.replace(/^\*/, '')[0])), 'CM3 (ET): each general phrase is its own, starting lower case');
+        assert(keys.every((k) => !/(^|[.!?]\s+|"\s*)\{ref:/.test(T[k].text) && !/\{ref:[a-z0-9_]+\}'s/.test(T[k].text)), 'CM3 (ET): no slot opens a sentence or takes an \'s');
+        const forms = [{ realm: 0, form: 'cat' }, { realm: 2, form: 'tiger' }, { realm: 7, form: 'human' }];
+        const outs = (ed) => keys.flatMap((k) => forms.map((y) => SG.songText({ flags: {}, yuki: y }, k, ed)));
+        const named = outs('named'), general = outs('general');
+        assert(named.concat(general).every((t) => !/[{}]/.test(t)), 'CM3 (EK): both editions fill every slot and Yuki\'s line');
+        const NAMES = Object.values(SG.ALL_REFS).flatMap((r) => r.named.replace(/[*"]/g, '').split(/'s |, | of |, with | singing/)).map((n) => n.trim()).filter((n) => n.length > 3 && /^[A-Z]/.test(n));
+        for (const t of general) { const hit = NAMES.find((n) => t.includes(n)) || (t.match(/Ironmouse|Aethelstan|Nyanners|Eivør|Wardruna|Clamavi|hololive|Mumei|Gura|Miranda|Heights|Hammerdeep|Dúrin|Lyfjaberg|Trøllabundin/) || [])[0]; assert(!hit, `CM3 (EK): the general edition names no one ("${hit}" in ${t.slice(0, 60)})`); }
+        assert(named.every((t) => !/Eater's Call|\bAthelstan/.test(t)), 'CM3 (FC): The Water\'s Call and Aethelstan, as the search found them');
+        assert(T.music_box.text.includes('{ref:ironmouse}') && /bed/.test(T.music_box.text) && /bottled air/.test(T.music_box.text) && /Mei Lin/.test(T.music_box.text) && /\bYa\b/.test(T.music_box.text), 'CM3 (PL): Music Box of Fate shown to Ya and Mei Lin, with her circumstances');
+        assert(/Ya/.test(T.boof_pack.text) && /Mei Lin/.test(T.boof_pack.text) && T.boof_pack.yuki, 'CM3 (PL): Boof Pack: Ya, Mei Lin and Yuki react');
+        assert(/hunt was over/.test(T.trollabundin.text), 'CM3 (lore): no music while hunting: Trøllabundin starts once it is a fight');
+        assert(!/bed-woman/.test(T.breathe.text), 'CM3 (D1, C7): Ya does not remember the roots song (only James and Yuki remember other Coils)');
+        for (const k of keys) {
+            const x = T[k];
+            assert((x.text.match(/\{YUKI\}/g) || []).length === (x.yuki ? 1 : 0), `CM3 (Yuki): ${k}: one {YUKI} exactly when it has her line`);
+            if (x.yuki) assert(/^\*[^*]+\*/.test(x.yuki.bond) && /says Yuki/.test(x.yuki.bond) && /^"/.test(x.yuki.aloud) && !/\*/.test(x.yuki.aloud) && /says Yuki/.test(x.yuki.aloud), `CM3 (Yuki): ${k}: through the bond in italics, aloud in quotes`);
+            assert(!/paw|purr|whisker|\btail\b|shoulder/.test(x.text), `CM3 (Yuki): ${k} fits all three of her forms`);
+        }
+        { const y = T.reflect.yuki; assert(SG.songText({ flags: {}, yuki: { realm: 7, form: 'human' } }, 'reflect').includes(y.aloud) && SG.songText({ flags: {}, yuki: { realm: 2, form: 'tiger' } }, 'reflect').includes(y.bond), 'CM3 (Yuki): aloud as a human, through the bond as a cat'); }
+        { const card = readFileSync(new URL('../project/canon-card.md', import.meta.url), 'utf8');
+          const TICS = [...(card.split('\n').find((l) => l.includes('Tics to avoid')) || '').matchAll(/"([^"]+)"/g)].map((m) => m[1].toLowerCase()).filter((x) => x !== 'a black dress');
+          for (const t of named) { const low = t.toLowerCase().replace(/[,.;:!?"]/g, ''); const hit = TICS.find((x) => low.includes(x)); assert(!hit, `CM3: no tic ("${hit}") in ${t.slice(0, 50)}`); } }
+        // ON-S, DU: once a save, the same on a redraw of its visit, the day's music, kept across every Coil
+        const sat = (seed, scene, day, hour, flags = {}) => { const g = ensureBars(fresh(seed)); g.scene = scene; g.minutes = day * D + hour * 60; Object.assign(g.flags, flags); linesOf(g).at = scene; return g; };
+        { const g = sat(77101, 'night', 1, 22);
+          assert(SG.heardSongs(g).size === 0 && SG.songDue(g, 'night') === 'reflect', 'CM3 (ON-S): a new game (or an older save) has heard none');
+          const a = M.musicLine(g, view(g));
+          assert(a && a.key === 'song.reflect' && /Reflect|shark/.test(a.text) && SG.heardSongs(g).has('reflect'), 'CM3 (PL): the song under its scene, marked heard');
+          const b = M.musicLine(g, view(g)); linesOf(g).cur = {}; const c = M.musicLine(g, view(g), { newVisit: false }); // RV1 (TG3): a meta screen's way back clears the visit mark
+          assert(b && c && b.key === a.key && c.key === a.key, 'CM3: the same on every redraw of that visit (and back from a meta screen)');
+          linesOf(g).cur = {}; assert(M.musicLine(g, view(g)) === null, 'CM3 (ON-S, DU): a new visit the same day: no song again, no other line');
+          g.scene = 'camp'; linesOf(g).at = 'camp'; linesOf(g).cur = {}; assert(M.musicLine(g, view(g)) === null, 'CM3 (DU): no music line after the song that day');
+          g.minutes += D; g.scene = 'night'; linesOf(g).at = 'night'; linesOf(g).cur = {}; const d2 = M.musicLine(g, view(g));
+          assert(!d2 || !d2.key.startsWith('song.'), 'CM3 (ON-S): the next day the song does not come back (a music line may)');
+          assert(KEEP_FLAGS.includes('songs'), 'CM3 (ON-S): the heard songs are kept across the Coil');
+          g.flags.songs = 'reflect,boof_pack'; rewind(g); assert(SG.heardSongs(g).has('reflect') && SG.heardSongs(g).has('boof_pack'), 'CM3 (ON-S): and survive a rewind'); }
+        { const g = sat(77102, 'fo_elder_named', 8, 6, { songs: 'reflect' }); g.coil = { ...(g.coil || {}), act: 1 };
+          const r = M.musicLine(g, view(g)); assert(r && r.key === 'song.hammerdeep', 'CM3 (PL): a song shows at any hour (Thirteen Days, 06:00)');
+          assert(String(g.flags.songs).split(',').sort().join() === 'hammerdeep,reflect', 'CM3 (ON-S): the flag a comma list of keys');
+          assert(!(linesOf(g).mu && linesOf(g).mu.d === textDay(g)), 'CM3 (DU-A): a morning song leaves the day its evening line');
+          g.scene = 'fo_supper'; linesOf(g).at = 'fo_supper'; linesOf(g).cur = {}; g.minutes += 13 * 60; Object.assign(g.flags, { songs: ALL_SONGS });
+          const ev = M.musicLine(g, view(g)); assert(ev && !ev.key.startsWith('song.'), 'CM3 (DU-A): and the evening has its line'); }
+        { const g = sat(77103, 'night', 1, 22, { songs: 'reflect,nonsense' }); assert(SG.heardSongs(g).size === 1, 'CM3: an unknown key in the flag is ignored'); }
+        { const g = sat(77104, 'heart_view', 15, 19, { mei_party: true, ya_party: true }); g.coil = { ...(g.coil || {}), act: 1 };
+          E.setEdition('named'); const r = M.musicLine(g, view(g)); E.setEdition('general');
+          assert(r && /Ironmouse/.test(r.text) && /Music Box of Fate/.test(r.text), 'CM3 (ED): the named edition names her and the song');
+          const gen = SG.songText(g, 'music_box', 'general'); assert(!/Ironmouse|Music Box/.test(gen) && /a drawing of the singer/.test(gen), 'CM3 (ED): the general one does not'); }
+        // RV1 (TG4): the DU-A boundary: an evening song at 14:59 leaves the day its line, at 15:00 it is the day's music
+        for (const [hr, taken] of [[14 + 59 / 60, false], [15, true]]) { const g = sat(77105 + Math.round(hr), 'bl_camp', 11, hr, { mei_party: true, ya_party: true, songs: 'reflect' }); g.coil = { ...(g.coil || {}), act: 1 };
+          const r = M.musicLine(g, view(g)); const mu = linesOf(g).mu;
+          assert(r && r.key === 'song.boof_pack' && !!(mu && mu.d === textDay(g)) === taken, `CM3 (DU-A, TG4): a song at ${taken ? '15:00 takes' : '14:59 leaves'} the day's line`); }
+        // RV1 (M1): the Wilds' camp has no line while Reflect is to come; after it, it has
+        { const g = sat(77107, 'camp', 1, 19); assert(M.DEFER.camp(g) === true && M.musicLine(g, view(g)) === null, 'CM3 (RV1 M1): the Wilds camp waits for Reflect');
+          g.flags.songs = 'reflect'; assert(M.DEFER.camp(g) === false, 'CM3 (RV1 M1): and not once it has played'); }
+        // RV1 (TG5): the facts and the owner's fixed reactions, pinned by a word or two
+        { const mb = T.music_box.text;
+          assert(/opera/.test(mb) && /Every week/.test(mb) && /part of the blood she can't make/.test(mb) && /give it\./.test(mb) && !/give blood/.test(mb) && /bottled air/.test(mb) && !/Can't breathe/.test(mb), 'CM3 (FC, TG5): Music Box: opera, weekly plasma, the plasma appeal, oxygen (RV1 M6, L1)');
+          assert(/I'm going to stop/.test(mb) && /That's the strong/.test(mb), 'CM3 (TG5): Mei Lin moved and inspired, Ya the true inner strength');
+          assert(/laughs so hard/.test(T.boof_pack.text) && /hands over her ears/.test(T.boof_pack.text) && /cart roll/.test(T.boof_pack.text), 'CM3 (TG5): Boof Pack: Ya delighted, Mei Lin horrified, Yuki amused');
+          assert(/^The hunt was over/.test(T.trollabundin.text) && !/stalk|creep|lure/.test(T.trollabundin.text), 'CM3 (lore, TG5): Trøllabundin starts after the hunt, never during it'); }
+        // RV1 (TG6): who is present against each scene's always-shown text
+        assert(!/\bYa (says|asks|calls)|says Ya/.test(T.mumei_song.text) && /Ya, who has said nothing/.test(T.mumei_song.text), 'CM3 (RV1 M4, TG6): mumei keeps Ya silent, as ship_wreck has her');
+        assert(!/four of you|holds its bow/.test(T.genesis.text) && /You don't\.$/.test(T.genesis.text), "CM3 (RV1 M2, TG6): Genesis stops before bl_start's send-off");
+        assert(keys.filter((k) => /made (them )?up|a story too/.test(T[k].text)).join() === 'durin', 'CM3 (RV1 M5): the dwarves-are-made-up beat once (Dúrin)');
+        assert(/give him the words/.test(T.hammerdeep.text) && !/Play it at the well/.test(T.hammerdeep.text), 'CM3 (RV1 M3, L7): James translates for Old Wen');
+        assert(SG.songText({ flags: {}, yuki: { realm: 0, form: 'cat' } }, 'breathe', 'general').includes('the singer from the roots') && !/on a stream/.test(T.breathe.text) && !/her streams/.test(T.waters_call.text), "CM3 (RV1 L2): the general edition reads right (Breathe, The Water's Call)");
+
+    }
     // RS1 (D1, R1): "Read to Ya" at the Heart's camp: the gate, the scene, the ship's sentence, the lover's, the editions, the day's line
     {
         const R = RD; const L1 = R.READ.label;

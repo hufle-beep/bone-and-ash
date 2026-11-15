@@ -1,5 +1,5 @@
 {
- "saved": "2026-11-14",
+ "saved": "2026-11-15",
  "totals": {
   "scenes": 331,
   "words": 37387,
@@ -205,6 +205,24 @@
   "reading_named": {
    "lines": 3,
    "words": 986,
+   "dupes": 0,
+   "sceneShared": 0,
+   "tics": 0,
+   "broken": 0,
+   "spacing": 0
+  },
+  "songs": {
+   "lines": 18,
+   "words": 2999,
+   "dupes": 0,
+   "sceneShared": 0,
+   "tics": 0,
+   "broken": 0,
+   "spacing": 0
+  },
+  "songs_named": {
+   "lines": 18,
+   "words": 2896,
    "dupes": 0,
    "sceneShared": 0,
    "tics": 0,

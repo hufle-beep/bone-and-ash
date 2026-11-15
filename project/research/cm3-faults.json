@@ -1,0 +1,20 @@
+[
+ {"id":"F1","file":"js/story/music.js","find":"            if (MUSIC_SCREENS[id] && hour(g) >= MUSIC_FROM) L.mu = { d, i: -1 };\n","replace":"","note":"DU-A dropped: a line after an evening song"},
+ {"id":"F2","file":"js/story/music.js","find":"if (MUSIC_SCREENS[id] && hour(g) >= MUSIC_FROM) L.mu = { d, i: -1 };","replace":"L.mu = { d, i: -1 };","note":"DU-A always: a morning song takes the evening's line"},
+ {"id":"F3","file":"js/story/music.js","find":"sv.at === id && (L.cur.sg === id || newVisit === false)","replace":"sv.at === id","note":"ON-S: the song again on every new visit that day"},
+ {"id":"F4","file":"js/story/music.js","find":"sv.at === id && (L.cur.sg === id || newVisit === false)","replace":"sv.at === id && L.cur.sg === id","note":"back from a meta screen (Yuki's form) loses the passage"},
+ {"id":"F5","file":"js/story/music.js","find":"markHeard(g, sg); L.sg","replace":"L.sg","note":"ON-S: never marked heard"},
+ {"id":"F6","file":"js/core/coil.js","find":"'lf_known', 'songs'];","replace":"'lf_known'];","note":"ON-S: songs reset with the Coil"},
+ {"id":"F7","file":"js/story/songs.js","find":".split(',').filter((k) => SONG_TEXTS[k]));","replace":".split(',').filter(Boolean));","note":"hand-edited key counted"},
+ {"id":"F8","file":"js/story/songs.js","find":"yukiForm(g) === 'human' ?","replace":"yukiForm(g) !== 'cat' ?","note":"the great cat speaks aloud"},
+ {"id":"F9","file":"js/story/music.js","find":"        if (songDue(g, id)) {","replace":"        if (songDue(g, id) && hour(g) >= MUSIC_FROM) {","note":"morning and day songs never play"},
+ {"id":"F10","file":"js/story/music.js","find":"        if (songDue(g, id)) {","replace":"        if (songDue(g, id) && !OWN_MUSIC.test(v?.text || '')) {","note":"a song on a screen with its own music (rt_camp) never plays"},
+ {"id":"F11","file":"js/story/songs.js","find":"rt_elder: 'dwarven_forge'","replace":"rt_parley: 'dwarven_forge'","note":"a song moved to a branch screen"},
+ {"id":"F12","file":"js/story/music.js","find":"if (MUSIC_SCREENS[id] && hour(g) >= MUSIC_FROM) L.mu","replace":"if (MUSIC_SCREENS[id] && hour(g) > MUSIC_FROM) L.mu","note":"DU-A boundary at 15:00"},
+ {"id":"F13","file":"js/story/songs_texts.js","find":"Every week she needs","replace":"Every month she needs","note":"fact: plasma weekly"},
+ {"id":"F14","file":"js/story/songs_texts.js","find":"she puts both hands over her ears. \\\"It sounds like a goose being consoled.\\\"","replace":"she starts, despite herself, to tap her foot.","note":"owner's fixed reaction: Mei Lin horrified"},
+ {"id":"F15","file":"js/story/songs_texts.js","find":"What is left is a fight, and for a fight you have music.","replace":"You had it playing all through the stalk.","note":"music while hunting"},
+ {"id":"F16","file":"js/story/songs_texts.js","find":"general: \"a song named for the call of water, with a woman singing\"","replace":"general: \"a song named for the call of water, with Nyanners singing\"","note":"general edition names her"},
+ {"id":"F17","file":"js/story/songs_texts.js","find":"named: \"Lord Aethelstan's *The Water's Call*","replace":"named: \"Lord Athelstan's *The Water's Call*","note":"FC misspelling back"},
+ {"id":"F18","file":"js/story/songs_texts.js","find":"Yuki watches the bow and not you,","replace":"Yuki watches the bow for a long moment and not you,","note":"a canon-card tic"}
+]

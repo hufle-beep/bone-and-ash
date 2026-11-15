@@ -15,6 +15,7 @@
  *  - PC: each stretch has its own pools (the references paced by stretch, the table in music_texts.js); in Act 1 a line opens on
  *    the act's Coil `from` (lines.js `actCoil`: 0 the first, 1 the second, 2 the third and on), and a line opening on this
  *    Coil comes first (`spec`).
+ *  - v0.11.183 (SG2, DU-A): the songs (songs.js) come first on their scenes; `sg` { d, song, at } in the `lines` record.
  *  - The lines and their counts live in the save's `lines` record (lines.js; reset with every Coil): `mu` { d: day, i: index or
  *    -1, k: pool, s: stretch, at: the screen it was drawn on }. No new save field, flag or id; no gain, time or check.
  */
@@ -24,6 +25,7 @@ import { hour } from './common.js';
 import { fillRefs } from '../core/edition.js';
 import { MUSIC_LINES, MUSIC_REFS } from './music_texts.js';
 import { readOpen } from './reading.js'; // RS1 (RS-M)
+import { SONG_AT, songDue, markHeard, songText } from './songs.js'; // v0.11.183 (SG2): the songs
 
 export { MUSIC_LINES, MUSIC_REFS };
 export const MUSIC_FROM = 15; // the hour from which a line shows
@@ -39,7 +41,8 @@ export const MUSIC_SCREENS = {
 export const OWN_MUSIC = /music from your (forearm|sleeve)|forearm has been playing|arm is playing low|omnitool plays low/i;
 /** RS1 (RS-M): the reading to Ya is the day's line; the Heart's camp shows none while it can still be chosen. */
 export const DAY_USED = new Set(['heart_read']);
-export const DEFER = { heart_camp: readOpen };
+// v0.11.183 (RV1, M1): the Wilds' camp waits while Reflect is still to come at `night`, so the song is that evening's music
+export const DEFER = { heart_camp: readOpen, camp: (g) => !!songDue(g, 'night') };
 /** Who is there, by stretch and place (Yuki everywhere). */
 const PEOPLE = {
     'ashfall:house': ['mei'], 'ashfall:lamp': ['mei'], // RV1 (M1): who is there at the end of the screen (the mother has gone to bed)
@@ -82,6 +85,19 @@ export function musicLine(g, v, { newVisit = true } = {}) {
     const L = linesOf(g);
     const d = textDay(g);
     const m = isRec(L.mu) ? L.mu : null;
+    // v0.11.183 (SG2): a song's scene, once a save (ON-S), the same on every redraw of its visit (its own record `sg`, as `mu`).
+    // DU-A: a song on an evening screen from 15:00 is that day's music (no line after it); one in the morning, by day or on a
+    // screen with no line leaves the evening its line.
+    const sg = SONG_AT[id];
+    if (sg) {
+        const sv = isRec(L.sg) ? L.sg : null;
+        if (sv && sv.d === d && sv.song === sg && sv.at === id && (L.cur.sg === id || newVisit === false)) { L.cur.sg = id; return { text: songText(g, sg), key: `song.${sg}` }; }
+        if (songDue(g, id)) {
+            markHeard(g, sg); L.sg = { d, song: sg, at: id }; L.cur.sg = id;
+            if (MUSIC_SCREENS[id] && hour(g) >= MUSIC_FROM) L.mu = { d, i: -1 };
+            return { text: songText(g, sg), key: `song.${sg}` };
+        }
+    }
     if (m && m.d === d) {
         // the visit that drew it, or (RV1, L1) the same visit back from a form change, a breakthrough or a door card (again.js: newVisit false)
         const same = m.i >= 0 && m.at === id && (L.cur.mu === id || newVisit === false);
