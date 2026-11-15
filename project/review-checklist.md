@@ -45,6 +45,7 @@
 - Sentences broken across paragraphs; the lowercase start after a comma (part 8 T18).
 - Beats and jokes lost from the old text (part 8 T16; part 9 T13).
 
+- **An insert before a sentence that opens on a pronoun (v0.11.190 M1):** a paragraph spliced in front of "Then she …" changes who "she" is (the women's paragraph ended on Mei Lin, the scene's next sentence meant Yuki). Check the first word of every anchor, and the screen after the insert for "the two of you" and a joke the insert has just made (M2).
 - **Who a named local is in the game, not only on the card (v0.11.185 M1):** grep the name in the story before a brief allows it (Pock-Face was on the canon card as a villager; in play he is Gao's lackey, met only on some paths).
 
 ## Tests (TG)

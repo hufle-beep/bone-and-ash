@@ -1256,7 +1256,7 @@ for (const form of ['cat', 'human']) {
             if (!/\s/.test(c)) out += c; i++; } return out; }; return code(false); };
       const hash = (t) => createHash('sha256').update(t).digest('hex').slice(0, 16);
       const LABELS = Object.values(RETURN).flatMap((sc) => (sc.choices || []).map((c) => (typeof c.text === 'string' ? c.text : '(fn)')));
-      const PIN = { 'act1_return.js': '09eb4287405f097a', labels: '58e59f4e08e64332' }; // v0.11.179 (LB1): the labels re-pinned (the label pass); v0.11.181 (KG1): again, the mother's card label on rt_ashfall became a function (by the kitchen's stage); v0.11.188 (N1, RV1 M4): again, rt_wen's and rt_elder's sky lines by sky_witness / a1_sky_seen; v0.11.185 (BR1, RV1 M2): the code re-pinned (the street reads a1_sky_seen too)
+      const PIN = { 'act1_return.js': '849a659a5f74bded', labels: '58e59f4e08e64332' }; // v0.11.190 (N1, SW): the code re-pinned (the parley's +1 reads a1_sky_seen too); v0.11.179 (LB1): the labels re-pinned (the label pass); v0.11.181 (KG1): again, the mother's card label on rt_ashfall became a function (by the kitchen's stage); v0.11.188 (N1, RV1 M4): again, rt_wen's and rt_elder's sky lines by sky_witness / a1_sky_seen; v0.11.185 (BR1, RV1 M2): the code re-pinned (the street reads a1_sky_seen too)
       const got = { 'act1_return.js': hash(skel(RSRC)), labels: hash(JSON.stringify(LABELS)) };
       for (const [k, v] of Object.entries(PIN)) assert(got[k] === v, `P7A (RV1, TG1): ${k}'s code and ids as pinned in v0.11.174 (${got[k]}; update the pin only with a push that means to change them)`); }
     // TG2: the mechanical parts of the Return's result lines, exactly
@@ -4021,7 +4021,8 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         const none = street({}), a1 = street({ a1_sky_seen: true }), pro = street({ sky_witness: 1 });
         assert(sum.test(none) && !weather.test(none) && weather.test(a1) && !sum.test(a1) && weather.test(pro), 'BR1 (RV1, M2): the Return\'s street saw the sky with a1_sky_seen, as with sky_witness');
         const ret = readFileSync(new URL('../js/story/act1_return.js', import.meta.url), 'utf8'), coil = readFileSync(new URL('../js/core/coil.js', import.meta.url), 'utf8');
-        assert((ret.match(/a1_sky_seen/g) || []).length === 3 && !ret.split('\n').some((l) => /a1_sky_seen/.test(l) && /check|bonus|dc:/.test(l)) && !/a1_sky_seen/.test(coil), 'BR1 (RV1, M2): a1_sky_seen read by text only (the street; v0.11.188 N1 RV1 M4: rt_wen, rt_elder), in no check, not kept across the Coil');
+        // v0.11.190 (N1, SW): the parley's GU check reads it too (+1, as sky_witness); still in no other check, not kept across the Coil
+        assert((ret.match(/a1_sky_seen/g) || []).length === 4 && ret.split('\n').filter((l) => /a1_sky_seen/.test(l) && /check|bonus|dc:/.test(l)).length === 1 && /check: \{ skill: 'GU', dc: 9, band: 'major', bonus: .*\(g\.flags\.sky_witness \|\| g\.flags\.a1_sky_seen \? 1 : 0\)/.test(ret) && !/a1_sky_seen/.test(coil), 'BR1 (RV1, M2; N1 SW): a1_sky_seen read by text only (the street; v0.11.188 N1 RV1 M4: rt_wen, rt_elder), in no check, not kept across the Coil');
     }
     // RV1 (TG1): Claude's cuts pinned (C1, C2, C3, and L1's "go up"); (TG2) the old text unchanged where nothing changed: renders hashed against v0.11.184
     assert(/They got as far as one, and it missed\./.test(P.BT_A1_WITNESS) && /A hunter bows to you, gravely, as one signs for a delivery nobody ordered\./.test(P.BT_A1_WITNESS) && !/like a man|\bnone\b/.test(P.BT_A1_WITNESS), 'BR1 (RV1, TG1): C1 and C2 as cut');
@@ -4224,6 +4225,112 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     }
     assert(Object.values(F.SUPPER_POT).every((x) => /^informing the ladle that /.test(x) && /\.$/.test(x) && !/[{}@]/.test(x)) && new Set(Object.values(F.SUPPER_POT)).size === 3, 'P1 (L5b): three clauses, each joins the sentence and ends it');
     assert(/half her fire is given over to error now,/.test(F.SUPPER_POT[2]) && /no longer her doing/.test(F.SUPPER_POT[3]) && /supervised every grain/.test(F.SUPPER_POT[3]) && /was not seen/.test(F.SUPPER_POT[1]), 'P1 (L5b; RV1 L7, TG8): the clauses pinned');
+}
+
+// v0.11.190 (owner pick N1, D1): L9 the women at Yuki's new forms (AWAKE_WOMEN, after a breakthrough they saw: btWho); L8b the
+// day's second song opens on a sentence of its own (SONG_SECOND, kept on a redraw by the `sg` record's `p`, SK1); SW the parley's
+// GU check +1 with a1_sky_seen as with sky_witness
+{
+    const P = await import('../js/story/prologue.js');
+    const M = await import('../js/story/music.js');
+    const SG = await import('../js/story/songs.js');
+    const { RETURN } = await import('../js/story/act1_return.js');
+    const { runMed } = await import('../js/core/meditate.js');
+    const D = 1440;
+    const words = (x) => x.split(/\s+/).filter(Boolean).length;
+    // the texts: 2 forms × 2 places, 30–60 words, no time or ground words, Yuki unnamed; Claude's cuts C1, C2 pinned
+    const AW = Object.entries(P.AWAKE_WOMEN).flatMap(([f, o]) => Object.entries(o).map(([w, x]) => [f + w, x]));
+    assert(AW.length === 4 && Object.values(P.AWAKE_WOMEN).every((o) => Object.keys(o).join('') === 'PM') && new Set(AW.map((a) => a[1])).size === 4, 'N1 (L9): four texts, P and M for each form');
+    for (const [k, x] of AW) assert(words(x) >= 30 && words(x) <= 60 && !/\b(night|dawn|dusk|sun|morning|evening|moss|ash|dust|bark|Yuki)\b/i.test(x) && !/[{}@`]|TODO/.test(x), `N1 (L9): ${k} 30–60 words (${words(x)}), no time, ground or Yuki`);
+    assert(/"Mine would have\. I have questions\."$/.test(P.AWAKE_WOMEN.tiger.M) && !/fish|set bones/.test(P.AWAKE_WOMEN.tiger.M), 'N1 (D1 C2; RV1 L2): TM ends on her questions, no fish heads, no bone-setting');
+    assert(/Mei Lin is checking: fingers, the turn of an ear, the tail\. "It's all real," she says, faintly\.$/.test(P.AWAKE_WOMEN.human.P) && !/talk|throat|counting/.test(P.AWAKE_WOMEN.human.P), 'N1 (RV1 M2, L1, L3): HP ends on "faintly", Yuki\'s own joke left to her; no throat under the collar');
+    assert(/^Mei Lin starts to speak and, for once, has nothing\./.test(P.AWAKE_WOMEN.human.M) && /from wrist to ears to tail, hunting for the seam\. She finds none\.$/.test(P.AWAKE_WOMEN.human.M) && !/\bYa\b|mouth|collarbone|Badly/.test(P.AWAKE_WOMEN.human.M), 'N1 (RV1 M3, L1, L4): HM ends on Mei Lin, no Ya joke, no "mouth" before the anchor\'s');
+    assert(!/\bYa\b/.test(P.AWAKE_WOMEN.tiger.M) && !/\bYa\b/.test(P.AWAKE_WOMEN.human.M), 'N1 (L9; RV1 TG4): Ya, away, is not in the M texts at all');
+    // RV1 (TG4): Fable's words pinned, a few a text
+    assert(/different cat/.test(P.AWAKE_WOMEN.tiger.P) && /Ya walks a slow half-circle, counting claws/.test(P.AWAKE_WOMEN.tiger.P) && /^Mei Lin's hands have gone to her herb bag/.test(P.AWAKE_WOMEN.tiger.P) && /being a healer, one step forward/.test(P.AWAKE_WOMEN.tiger.M) && /^Ya's spear comes halfway up/.test(P.AWAKE_WOMEN.human.P) && /"It sat on my foot\."/.test(P.AWAKE_WOMEN.human.P), 'N1 (RV1 TG4): Fable\'s words pinned (who does what)');
+    // the scenes: from the breakthrough the women saw, the paragraph goes in before the anchor; otherwise the text as before
+    const form = (id, back, flags = {}, party = true, ret) => {
+        const g = ensureBars(newGame(89300)); Object.assign(g.flags, { bt_return: back, yuki_return: ret || back }, party ? { mei_party: true, ya_party: true } : {}, flags);
+        g.minutes = 12 * D + 10 * 60; g.james.realm = id === 'yuki_human_awaken' ? 7 : 2; g.yuki.realm = g.james.realm; goTo(g, SCENES, id); return sceneView(g, SCENES).text;
+    };
+    for (const [f, id] of [['tiger', 'yuki_tiger_awaken'], ['human', 'yuki_human_awaken']]) {
+        const alone = form(id, 'rr_hub', {}, false);
+        assert(createHash('sha256').update(alone).digest('hex').slice(0, 16) === { tiger: '0af86b8c3b16508c', human: 'd351d6c495162fd7' }[f] && /^Then she/.test(P.AWAKE_AT[f]), `N1 (RV1 TG3): ${id} without the women renders as in v0.11.189`);
+        assert(alone.includes(`\n\n${P.AWAKE_AT[f]}`) && !AW.some((a) => alone.includes(a[1])), `N1 (L9): ${id} without the party as before`);
+        for (const [back, flags, w] of [['rr_hub', {}, 'P'], ['dw_hub', { bl_day: 6 }, 'P'], ['heart_hub', {}, 'P'], ['rt_camp', {}, 'P'], ['ah_hub', { bl_day: 4 }, 'M'], ['ah_hub', { bl_day: 4, ya_off_done: true }, 'P']]) {
+            const x = form(id, back, flags);
+            assert(x === alone.replace(`\n\n${P.AWAKE_AT[f]}`, () => `\n\n${P.AWAKE_WOMEN[f][w]}\n\n${P.AWAKE_AT[f].replace(/^Then she/, 'Then Yuki')}`), `N1 (L9; RV1 M1): ${id} after ${back}${flags.ya_off_done ? ' (Ya back)' : ''}: ${w} before "${P.AWAKE_AT[f]}", the sentence naming Yuki`);
+        }
+        for (const [back, flags, party, ret, why] of [['fo_ashfall', {}, true, null, "Act 1's Ashfall"], ['rt_ashfall', {}, true, null, 'the Return\'s Ashfall'], ['village', {}, true, null, "the prologue's village"],
+            ['ah_hub', { bl_day: 2, trio: 2 }, true, null, 'both away'], ['rr_hub', { ya_party: false }, true, null, 'Mei Lin alone in the party'], ['rr_hub', {}, true, 'lf_hub', "the Long Forest's hub"]]) {
+            const x = form(id, back, flags, party, ret);
+            assert(!AW.some((a) => x.includes(a[1])), `N1 (L9): ${id}: none for ${why}`);
+        }
+    }
+    { // both away needs her friendships: as P1's block
+        const g = ensureBars(newGame(89310)); Object.assign(g.flags, { bt_return: 'ah_hub', yuki_return: 'ah_hub', mei_party: true, ya_party: true, bl_day: 2, trio: 2 }); g.rel['Mei Lin'] = { f: 90, a: 90 }; g.rel['Ya'] = { f: 90, a: 90 };
+        g.james.realm = 2; g.yuki.realm = 2; assert(P.btWho(g) === null && !AW.some((a) => SCENES.yuki_tiger_awaken.text(g).includes(a[1])), 'N1 (L9): both away for water: none'); }
+    // btWho is the breakthrough's own test: the realm's line and the form scene agree
+    for (const [back, flags, w] of [['rr_hub', {}, 'P'], ['heart_hub', {}, 'T'], ['ah_hub', { bl_day: 4 }, 'M'], ['fo_ashfall', {}, null], ['village', {}, null]]) {
+        const g = ensureBars(newGame(89320)); Object.assign(g.flags, { bt_return: back, mei_party: true, ya_party: true }, flags); g.james.realm = 2; g.minutes = 12 * D + 10 * 60;
+        const t = SCENES.breakthrough.text(g);
+        assert(P.btWho(g) === w && (w ? t.endsWith(`\n\n${P.BT_LATE[w].A}`) : !Object.values(P.BT_LATE).some((o) => t.includes(o.A))), `N1 (L9): btWho ${back} → ${w}, as the breakthrough's line`);
+    }
+    // the real path: the Meditate card's breakthrough at rr_hub, Get up, the great form with both women
+    { const g = ensureBars(newGame(89330)); g.scene = 'rr_hub'; Object.assign(g.flags, { mei_party: true, ya_party: true, ya_met: true }); g.james.realm = 1; g.james.saturation = 96; g.rel['Mei Lin'] = 20; g.minutes = 11 * D + 10 * 60;
+      runMed(g, SCENES, 'med:bt');
+      if (g.scene === 'breakthrough') choose(g, SCENES, 0);
+      const t = g.scene === 'yuki_tiger_awaken' ? sceneView(g, SCENES).text : '';
+      assert(t.includes(`\n\n${P.AWAKE_WOMEN.tiger.P}\n\nThen Yuki is eleven pounds again, in the space of one breath.`) && t.indexOf(P.AWAKE_WOMEN.tiger.P) > t.indexOf('*Finally. I have been small for long enough.*'), `N1 (L9; RV1 M1): the real path from rr_hub's breakthrough to the great form with both women (${g.scene})`); }
+    // RV1 (TG2): the real path to the human form, through Nascent Soul's warning, both women (rr_hub) and Mei Lin alone (ah_hub)
+    for (const [hub, extra, w] of [['rr_hub', {}, 'P'], ['ah_hub', { bl_day: 4 }, 'M']]) {
+      const g = ensureBars(newGame(89331)); g.scene = hub; Object.assign(g.flags, { mei_party: true, ya_party: true, ya_met: true, yuki_tiger_seen: true }, extra); g.coil = { ...(g.coil || {}), act: 1 };
+      g.james.realm = 6; g.yuki.realm = 6; g.james.saturation = 96; g.rel['Mei Lin'] = 20; g.minutes = 11 * D + 10 * 60;
+      runMed(g, SCENES, 'med:bt'); if (g.scene === 'ns_warn') choose(g, SCENES, 1); if (g.scene === 'breakthrough') choose(g, SCENES, 0);
+      const t = g.scene === 'yuki_human_awaken' ? sceneView(g, SCENES).text : '';
+      assert(g.james.realm === 7 && t.includes(`\n\n${P.AWAKE_WOMEN.human[w]}\n\nThen Yuki looks at you and opens her mouth`) && t.indexOf(P.AWAKE_WOMEN.human[w]) < t.indexOf('"You," says Yuki'), `N1 (RV1 TG2): the real path at ${hub} to the human form: ${w} before her first words (${g.scene}, realm ${g.james.realm})`); }
+    // L8b: the second songs
+    const SONG_KEYS = new Set(Object.values(SG.SONG_AT));
+    assert(Object.keys(SG.SONG_SECOND).sort().join() === 'boof_pack,durin,mumei_song,music_box,waters_call' && Object.keys(SG.SONG_SECOND).every((k) => SONG_KEYS.has(k)), 'N1 (L8b): five songs that come second, all real');
+    // RV1 (TG5): each sentence pinned whole (they are short)
+    assert(JSON.stringify(SG.SONG_SECOND) === JSON.stringify({ mumei_song: 'The archive has been opened once already, and it turns out that does not close it.', music_box: 'Whatever you played earlier has worn off everyone by now, which you take as permission.', boof_pack: 'The omnitool has already played once today, and nobody has asked it to stop.', waters_call: 'The omnitool, asked for music twice in a day, offers no opinion and the whole list.', durin: 'Nobody here would say the day was short of songs, but the others were for other things.' }), 'N1 (L8b; RV1 L5, L6, L7, TG5): the five sentences as picked');
+    for (const [k, x] of Object.entries(SG.SONG_SECOND)) assert(!/\b(morning|evening|night|dawn|dusk|sun|tonight|yesterday)\b/i.test(x) && words(x) >= 8 && words(x) <= 25 && /\.$/.test(x) && !/[{}]/.test(x) && !/Dúrin|mumei|Trøllabundin|Genesis|Boof|Music Box|Water's Call|Eivør|Aethelstan|Ironmouse|Nyanners/i.test(x), `N1 (L8b): ${k} one sentence, 8–25 words, names no song or singer`);
+    assert(new Set(Object.values(SG.SONG_SECOND)).size === 5, 'N1 (L8b): five different sentences');
+    const sat = (seed, scene, day, hour, flags = {}) => { const g = ensureBars(fresh(seed)); g.scene = scene; g.minutes = day * D + hour * 60; Object.assign(g.flags, { mei_party: true, ya_party: true }, flags); g.coil = { ...(g.coil || {}), act: 1 }; linesOf(g).at = scene; return g; };
+    const view = (g) => ({ id: g.scene, text: 'A screen.' });
+    { const g = sat(89400, 'heart_hall', 15, 14, { songs: 'reflect' });
+      const a = M.musicLine(g, view(g)); assert(a && a.key === 'song.durin' && a.text === SG.songText(g, 'durin'), 'N1 (L8b): the day\'s first song as before (no opening sentence)');
+      g.scene = 'ship_wreck'; linesOf(g).at = 'ship_wreck'; linesOf(g).cur = {}; g.minutes += 2 * 60;
+      const b = M.musicLine(g, view(g)); assert(b && b.key === 'song.mumei_song' && b.text === `${SG.SONG_SECOND.mumei_song} ${SG.songText(g, 'mumei_song')}`, 'N1 (L8b): the second song the same day opens on its sentence');
+      assert(linesOf(g).sg.p === 'durin', 'N1 (SK1): the day\'s earlier song kept in the record');
+      const c = M.musicLine(g, view(g)); linesOf(g).cur = {}; const e = M.musicLine(g, view(g), { newVisit: false });
+      assert(c && e && c.text === b.text && e.text === b.text, 'N1 (SK1): the same on a redraw and back from a meta screen');
+      delete linesOf(g).sg.p; linesOf(g).cur = {}; const old = M.musicLine(g, view(g), { newVisit: false });
+      assert(old && old.text === SG.songText(g, 'mumei_song'), 'N1 (SK1): an older save\'s record (no p): the passage alone');
+      linesOf(g).sg.p = 'nonsense'; linesOf(g).cur = {}; const junk = M.musicLine(g, view(g), { newVisit: false });
+      assert(junk && junk.text === SG.songText(g, 'mumei_song'), 'N1 (RV1 L9): a junk p on redraw: the passage alone'); }
+    { const g = sat(89403, 'ship_wreck', 15, 16, { songs: 'reflect,durin' }); linesOf(g).sg = { d: textDay(g), song: 'nonsense', at: 'heart_hall' };
+      const r = M.musicLine(g, view(g)); assert(r && r.text === SG.songText(g, 'mumei_song') && !linesOf(g).sg.p, 'N1 (RV1 L9): a junk earlier song the same day: no opening sentence'); }
+    // RV1 (TG6): each measured pair, on its own scenes, and a third song the same day (p = the second)
+    for (const [a, b, day, ha, hb, act] of [['ape_lured', 'heart_view', 15, 13, 21, 1], ['heart_view', 'heart_hall', 15, 21, 22, 1], ['fo_depart', 'bl_camp', 10, 7, 19, 1], ['bl_camp', 'dw_enter', 11, 19, 21, 1]]) {
+      const g = sat(89410 + day + ha, a, day, ha, { songs: 'reflect' }); g.coil = { ...(g.coil || {}), act };
+      const x = M.musicLine(g, view(g)); g.scene = b; linesOf(g).at = b; linesOf(g).cur = {}; g.minutes += (hb - ha) * 60;
+      const y = M.musicLine(g, view(g)), kb = SG.SONG_AT[b];
+      assert(x && x.key === `song.${SG.SONG_AT[a]}` && y && y.key === `song.${kb}` && y.text === `${SG.SONG_SECOND[kb]} ${SG.songText(g, kb)}` && linesOf(g).sg.p === SG.SONG_AT[a], `N1 (RV1 TG6): ${a} then ${b} the same day: ${kb} opens on its sentence`); }
+    { const g = sat(89420, 'ape_lured', 15, 13, { songs: 'reflect' }); M.musicLine(g, view(g));
+      for (const [s, h] of [['heart_view', 21], ['heart_hall', 22]]) { g.scene = s; linesOf(g).at = s; linesOf(g).cur = {}; g.minutes = 15 * D + h * 60; M.musicLine(g, view(g)); }
+      assert(linesOf(g).sg.song === 'durin' && linesOf(g).sg.p === 'music_box', 'N1 (RV1 TG6): a third song the same day keeps the second as p'); }
+    { const g = sat(89401, 'ship_wreck', 15, 16, { songs: 'reflect,durin' }); linesOf(g).sg = { d: textDay(g) - 1, song: 'durin', at: 'heart_hall' };
+      const r = M.musicLine(g, view(g)); assert(r && r.text === SG.songText(g, 'mumei_song') && !linesOf(g).sg.p, 'N1 (L8b): a song the day before: no opening sentence'); }
+    { const g = sat(89402, 'night', 1, 22, {}); g.coil = { ...(g.coil || {}), act: 0 }; linesOf(g).sg = { d: textDay(g), song: 'nonsense', at: 'x' };
+      const r = M.musicLine(g, view(g)); assert(r && r.key === 'song.reflect' && r.text === SG.songText(g, 'reflect'), 'N1 (L8b): a song with no opening sentence of its own stays as it is'); }
+    // RV1 (TG1): both new pools read by the text lint (its sample states set no bt_return, no song record)
+    { const TL = readFileSync(new URL('../tools/textlint.mjs', import.meta.url), 'utf8');
+      assert(/awake: Object\.values\(BTX\.AWAKE_WOMEN\)/.test(TL) && /song_second: Object\.values\(SGX\.SONG_SECOND\)/.test(TL), 'N1 (RV1 TG1): textlint\'s POOLS hold the awake and song_second pools'); }
+    // SW: the parley's GU check
+    const ck = RETURN.rt_parley.choices.map((c) => c.check).find((c) => c && c.skill === 'GU' && c.dc === 9);
+    const bonus = (flags) => { const g = ensureBars(newGame(89500)); Object.assign(g.flags, flags); return ck.bonus(g); };
+    assert(ck && bonus({}) === 0 && bonus({ a1_sky_seen: true }) === 1 && bonus({ sky_witness: 1 }) === 1 && bonus({ sky_witness: 1, a1_sky_seen: true }) === 1, 'N1 (SW): the parley +1 with a1_sky_seen, as with sky_witness, not twice');
 }
 
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));

@@ -673,7 +673,7 @@ ${g.flags.ending === 'bluff' ? 'He has not forgotten the bluff at the tribute po
         choices: [
             {
                 text: 'Make your offer: the grove stays, Ashfall stays, and the Sect may send one disciple a season to learn what clean cultivation is.',
-                check: { skill: 'GU', dc: 9, band: 'major', bonus: (g) => (g.flags.grove ? 1 : 0) + (g.flags.grove === 'strong' ? 1 : 0) + (g.flags.a1_palisade ? 1 : 0) + (g.flags.a1_militia ? 1 : 0) + (g.flags.council_unity ? 1 : 0) + (g.flags.sky_witness ? 1 : 0) + (hasItem(g, 'hearth_log') ? 1 : 0) + (g.flags.ending === 'paid' || g.flags.ending === 'bluff' ? 1 : 0) - (g.flags.ending === 'fought' ? 1 : 0) },
+                check: { skill: 'GU', dc: 9, band: 'major', bonus: (g) => (g.flags.grove ? 1 : 0) + (g.flags.grove === 'strong' ? 1 : 0) + (g.flags.a1_palisade ? 1 : 0) + (g.flags.a1_militia ? 1 : 0) + (g.flags.council_unity ? 1 : 0) + (g.flags.sky_witness || g.flags.a1_sky_seen ? 1 : 0) /* v0.11.190 (N1, SW): Act 1's Ashfall saw it too, as the texts read */ + (hasItem(g, 'hearth_log') ? 1 : 0) + (g.flags.ending === 'paid' || g.flags.ending === 'bluff' ? 1 : 0) - (g.flags.ending === 'fought' ? 1 : 0) },
                 to: 'rt_accord', fail: 'rt_parley_fail',
             },
         ],

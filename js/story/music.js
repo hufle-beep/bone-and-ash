@@ -25,7 +25,7 @@ import { hour } from './common.js';
 import { fillRefs } from '../core/edition.js';
 import { MUSIC_LINES, MUSIC_REFS } from './music_texts.js';
 import { readOpen } from './reading.js'; // RS1 (RS-M)
-import { SONG_AT, songDue, markHeard, songText } from './songs.js'; // v0.11.183 (SG2): the songs
+import { SONG_AT, SONG_TEXTS, songDue, markHeard, songShown } from './songs.js'; // v0.11.183 (SG2): the songs; v0.11.190 (N1, L8b): songShown
 
 export { MUSIC_LINES, MUSIC_REFS };
 export const MUSIC_FROM = 15; // the hour from which a line shows
@@ -91,11 +91,13 @@ export function musicLine(g, v, { newVisit = true } = {}) {
     const sg = SONG_AT[id];
     if (sg) {
         const sv = isRec(L.sg) ? L.sg : null;
-        if (sv && sv.d === d && sv.song === sg && sv.at === id && (L.cur.sg === id || newVisit === false)) { L.cur.sg = id; return { text: songText(g, sg), key: `song.${sg}` }; }
+        if (sv && sv.d === d && sv.song === sg && sv.at === id && (L.cur.sg === id || newVisit === false)) { L.cur.sg = id; return { text: songShown(g, sg, sv.p), key: `song.${sg}` }; }
         if (songDue(g, id)) {
-            markHeard(g, sg); L.sg = { d, song: sg, at: id }; L.cur.sg = id;
+            // N1 (L8b, SK1): `p`, the day's earlier song, kept so a redraw of this visit keeps the opening sentence (older saves: none)
+            const p = sv && sv.d === d && typeof sv.song === 'string' && sv.song !== sg && SONG_TEXTS[sv.song] ? sv.song : null; // RV1 (L9): a real song only
+            markHeard(g, sg); L.sg = p ? { d, song: sg, at: id, p } : { d, song: sg, at: id }; L.cur.sg = id;
             if (MUSIC_SCREENS[id] && hour(g) >= MUSIC_FROM) L.mu = { d, i: -1 };
-            return { text: songText(g, sg), key: `song.${sg}` };
+            return { text: songShown(g, sg, p), key: `song.${sg}` };
         }
     }
     if (m && m.d === d) {

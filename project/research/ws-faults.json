@@ -1,0 +1,163 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/prologue.js",
+  "find": "VILLAGE_SCENES.includes(r) || BT_ASHFALL_A1.includes(r)) return null;",
+  "replace": "VILLAGE_SCENES.includes(r)) return null;",
+  "note": "btWho: Act 1's Ashfall no longer excluded"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/prologue.js",
+  "find": "(g.flags.yuki_return && g.flags.yuki_return === g.flags.bt_return ? btWho(g) : null)",
+  "replace": "btWho(g)",
+  "note": "awakeWho: drops the yuki_return === bt_return gate (Long Forest hub)"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/prologue.js",
+  "find": "AWAKE_WOMEN[form][w === 'M' ? 'M' : 'P']",
+  "replace": "AWAKE_WOMEN[form][w === 'T' ? 'M' : 'P']",
+  "note": "M/P swapped for Ya away and the Old Tree"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/prologue.js",
+  "find": "if (away === 'both') return null;\n    return BT_IN_TREE",
+  "replace": "return BT_IN_TREE",
+  "note": "btWho: both away gives P"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/prologue.js",
+  "find": "hunting for the seam. She finds none.`",
+  "replace": "hunting for the seam. She finds none. \"Badly,\" Ya says.`",
+  "note": "HM: Ya speaks while she is away"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/prologue.js",
+  "find": "human: 'Then she looks at you and opens her mouth' };",
+  "replace": "human: '\"You are already being insufferable about this,\" she says' };",
+  "note": "HP/HM placed after Yuki's first words (brief: before she first speaks)"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/prologue.js",
+  "find": "tiger: 'Then she is eleven pounds again', human",
+  "replace": "tiger: '*Finally. I have been small', human",
+  "note": "tiger paragraph before Yuki's bond line"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/prologue.js",
+  "find": "I moved her off my blanket. With one hand.",
+  "replace": "I moved her off my blanket this morning. With one hand.",
+  "note": "TP: a time word ('this morning') in a text shown at any hour"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/prologue.js",
+  "find": "Mei Lin is checking: fingers, the turn of an ear",
+  "replace": "Ya is checking: fingers, the turn of an ear",
+  "note": "HP: the healer's beat given to Ya (and 'And I have talked' now hers)"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/songs.js",
+  "find": "(after && after !== key && SONG_TEXTS[after] && SONG_SECOND[key] ?",
+  "replace": "(after !== key && SONG_SECOND[key] ?",
+  "note": "opening sentence on the day's first song too"
+ },
+ {
+  "id": "F11",
+  "file": "js/story/music.js",
+  "find": "L.sg = p ? { d, song: sg, at: id, p } : { d, song: sg, at: id };",
+  "replace": "L.sg = { d, song: sg, at: id };",
+  "note": "SK1: p not kept; a redraw drops the sentence"
+ },
+ {
+  "id": "F12",
+  "file": "js/story/music.js",
+  "find": "const p = sv && sv.d === d && typeof sv.song",
+  "replace": "const p = sv && typeof sv.song",
+  "note": "a song the day before counts as today's"
+ },
+ {
+  "id": "F13",
+  "file": "js/story/music.js",
+  "find": "return { text: songShown(g, sg, sv.p), key",
+  "replace": "return { text: songShown(g, sg, null), key",
+  "note": "redraw without the sentence"
+ },
+ {
+  "id": "F14",
+  "file": "js/story/songs.js",
+  "find": "'Nobody here would say the day was short",
+  "replace": "'Nobody here would say the morning was short",
+  "note": "durin: a time word against when it shows (evening/any hour)"
+ },
+ {
+  "id": "F15",
+  "file": "js/story/songs.js",
+  "find": "'The omnitool has already played once today",
+  "replace": "'Old Wen has already heard it once today",
+  "note": "boof_pack: someone not at the camp"
+ },
+ {
+  "id": "F16",
+  "file": "js/story/act1_return.js",
+  "find": "(g.flags.sky_witness || g.flags.a1_sky_seen ? 1 : 0)",
+  "replace": "(g.flags.sky_witness ? 1 : 0) + (g.flags.a1_sky_seen ? 1 : 0)",
+  "note": "SW: +2 with both flags"
+ },
+ {
+  "id": "F17",
+  "file": "js/story/songs.js",
+  "find": "asked for music twice in a day",
+  "replace": "asked for music three times in a day",
+  "note": "waters_call: a wrong count (the day's songs)"
+ },
+ {
+  "id": "F18",
+  "file": "js/story/prologue.js",
+  "find": "`\\n\\n${AWAKE_WOMEN[form][w === 'M' ? 'M' : 'P']}\\n\\n${AWAKE_AT[form].replace",
+  "replace": "`\\n\\n${AWAKE_WOMEN[form][w === 'M' ? 'M' : 'P']} ${AWAKE_AT[form].replace",
+  "note": "paragraph run into the anchor sentence (no blank line)"
+ },
+ {
+  "id": "F19",
+  "file": "js/story/prologue.js",
+  "find": ".replace(/^Then she/, 'Then Yuki')}`) : base;",
+  "replace": "}`) : base;",
+  "note": "RV1 M1 undone: \"Then she\" after the paragraph"
+ },
+ {
+  "id": "F20",
+  "file": "js/story/songs.js",
+  "find": "after !== key && SONG_TEXTS[after] && SONG_SECOND",
+  "replace": "after !== key && SONG_SECOND",
+  "note": "RV1 L9: a junk p on redraw adds the sentence"
+ },
+ {
+  "id": "F21",
+  "file": "js/story/music.js",
+  "find": "sv.song !== sg && SONG_TEXTS[sv.song] ? sv.song : null;",
+  "replace": "sv.song !== sg ? sv.song : null;",
+  "note": "RV1 L9: a junk earlier song counts"
+ },
+ {
+  "id": "F22",
+  "file": "js/story/prologue.js",
+  "find": "\"Mine would have. I have questions.\"",
+  "replace": "\"I set bones, and I have questions.\"",
+  "note": "RV1 L2 undone"
+ },
+ {
+  "id": "F23",
+  "file": "tools/textlint.mjs",
+  "find": ", awake: Object.values(BTX.AWAKE_WOMEN).flatMap((o) => Object.values(o))",
+  "replace": "",
+  "note": "RV1 TG1: the awake pool left out of the lint"
+ }
+]

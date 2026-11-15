@@ -43,5 +43,17 @@ export function songText(g, key, ed) {
     if (s.yuki) t = t.replace('{YUKI}', yukiForm(g) === 'human' ? s.yuki.aloud : s.yuki.bond);
     return ed ? fillRefs(t, ALL_REFS, ed) : fillRefs(t, ALL_REFS);
 }
+/** v0.11.190 (owner pick N1, L8b; Fable's): the opening sentence of a song that is not the day's first (music.js puts it in front
+ *  of the passage when another song played earlier that text day). The songs that come second in play: mumei after Dúrin, Music
+ *  Box of Fate after Trøllabundin, Boof Pack after Genesis, The Water's Call after Boof Pack, Dúrin after Music Box of Fate. */
+export const SONG_SECOND = {
+    mumei_song: 'The archive has been opened once already, and it turns out that does not close it.',
+    music_box: 'Whatever you played earlier has worn off everyone by now, which you take as permission.', // RV1 (L6): not the Tree's song
+    boof_pack: 'The omnitool has already played once today, and nobody has asked it to stop.', // RV1 (L7): Claude's; nobody watched the first
+    waters_call: 'The omnitool, asked for music twice in a day, offers no opinion and the whole list.',
+    durin: 'Nobody here would say the day was short of songs, but the others were for other things.', // RV1 (L5): Fable's alternative
+};
+/** The passage as drawn: with the opening sentence when `after` (the day's earlier song) is set and this song has one. */
+export const songShown = (g, key, after) => (after && after !== key && SONG_TEXTS[after] && SONG_SECOND[key] ? `${SONG_SECOND[key]} ${songText(g, key)}` : songText(g, key));
 /** The song due on this screen, or null: its key when the scene has one and this save has not heard it. */
 export const songDue = (g, id) => { const k = SONG_AT[id]; return k && !heardSongs(g).has(k) ? k : null; };

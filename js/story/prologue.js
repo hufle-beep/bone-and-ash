@@ -997,6 +997,16 @@ function btParty(g, away, night) {
     const t = n ? BT_PARTY.night : BT_PARTY.day;
     return g.flags.bt_return === 'ah_hub' ? t.replace('scorched moss', 'scorched ash') : t;
 }
+/** v0.11.190 (owner pick N1, L9; P1's test moved here): who of the women saw this breakthrough away from a village: 'T' the Old
+ *  Tree, 'M' Mei Lin alone while Ya is away (the Ashen Hills), 'P' both at a camp or on the road; null in a village (the prologue's
+ *  or Act 1's Ashfall), without the party, or with both away. */
+export function btWho(g) {
+    const r = g.flags.bt_return;
+    if (!(g.flags.mei_party && g.flags.ya_party) || VILLAGE_SCENES.includes(r) || BT_ASHFALL_A1.includes(r)) return null;
+    const away = r === 'ah_hub' ? (bothAway(g) ? 'both' : yaAway(g) ? 'ya' : null) : null;
+    if (away === 'both') return null;
+    return BT_IN_TREE.includes(r) ? 'T' : away === 'ya' ? 'M' : 'P';
+}
 function btText(g) {
     const seen = VILLAGE_SCENES.includes(g.flags.bt_return);
     const a1seen = BT_ASHFALL_A1.includes(g.flags.bt_return); // v0.11.185 (BR1, AW1 + AW2): Act 1's Ashfall saw it too
@@ -1048,8 +1058,8 @@ ${witness}
 *Foundation.* Mortal Vessel no longer: the rung where this world's sect disciples stand, and you came by it without a pill. You feel heavier, and steadier, and precisely as sarcastic as before.`;
     }
     // v0.11.189 (P1, PL): Mei Lin and Ya after the realm's Yuki line, away from a village (the village's own closers stay as they were)
-    const late = party && away !== 'both' && !seen && !a1seen
-        ? `\n\n${BT_LATE[BT_IN_TREE.includes(g.flags.bt_return) ? 'T' : away === 'ya' ? 'M' : 'P'][btStep(g.james.realm)]}` : '';
+    const who = btWho(g); // v0.11.190 (N1, L9): the same test for Yuki's new-form scenes after it
+    const late = who ? `\n\n${BT_LATE[who][btStep(g.james.realm)]}` : '';
     const own = BT_REALMS[g.james.realm]; // ST4
     if (own) return `${own.body}
 
@@ -1089,6 +1099,34 @@ for (const id of ['stream', 'wilds', 'camp', 'night', 'village', 'ashfall', 'sup
         do: (g) => { g.flags.yuki_return = g.scene; return []; },
         to: (g) => (SCENES.yuki_form ? 'yuki_form' : g.scene),
     });
+}
+
+/** v0.11.190 (owner pick N1, L9; Fable's, Claude's cuts C1, C2; RV1: M2, M3, L1–L4 Claude's cuts): Yuki's new forms after a breakthrough Mei Lin and Ya saw (`btWho`):
+ *  their paragraph goes in while she is still great (before she shrinks back) and before she first speaks. P both (the Old Tree's
+ *  too: they came up the crack after the breakthrough), M Mei Lin alone while Ya is away. Not from the Long Forest's hub. */
+export const AWAKE_WOMEN = {
+    tiger: {
+        P: `Mei Lin's hands have gone to her herb bag, where nothing helps. "I moved her off my blanket. With one hand." Ya walks a slow half-circle, counting claws, and stops well short of the tail. "Throat's too high. I'd want a pit, and friends." "You'd want a different cat," Mei Lin says.`,
+        M: `Mei Lin takes one step back and then, being a healer, one step forward. She looks at the shoulders, the depth of the chest, the paws. "The joints took all that without a sound," she says. "Mine would have. I have questions."`,
+    },
+    human: {
+        P: `Ya's spear comes halfway up and stays there, undecided. "That was a cat," she says. "It sat on my foot." Mei Lin is checking: fingers, the turn of an ear, the tail. "It's all real," she says, faintly.`,
+        M: `Mei Lin starts to speak and, for once, has nothing. She gets as far as "Your cat," and stops, a healer's eyes going from wrist to ears to tail, hunting for the seam. She finds none.`,
+    },
+};
+/** Where each paragraph goes: before these words in the scene's text; RV1 (M1): with the paragraph in, the sentence names her
+ *  ("Then Yuki …": the paragraph ends on Mei Lin, so "she" would be hers). */
+export const AWAKE_AT = { tiger: 'Then she is eleven pounds again', human: 'Then she looks at you and opens her mouth' };
+/** The women's paragraph for this form scene, or null (reached from the breakthrough they saw). */
+export const awakeWho = (g) => (g.flags.yuki_return && g.flags.yuki_return === g.flags.bt_return ? btWho(g) : null);
+for (const [form, id] of [['tiger', 'yuki_tiger_awaken'], ['human', 'yuki_human_awaken']]) {
+    const base = SCENES[id].text;
+    if (typeof base !== 'string' || !base.includes(`\n\n${AWAKE_AT[form]}`)) throw new Error(`N1: ${id}'s text has lost its anchor`);
+    SCENES[id].text = (g) => {
+        const w = awakeWho(g);
+        // RV1 (L10): a function as the replacement, so a `$` in a text stays as written
+        return w ? base.replace(`\n\n${AWAKE_AT[form]}`, () => `\n\n${AWAKE_WOMEN[form][w === 'M' ? 'M' : 'P']}\n\n${AWAKE_AT[form].replace(/^Then she/, 'Then Yuki')}`) : base;
+    };
 }
 
 installCoil(SCENES);
