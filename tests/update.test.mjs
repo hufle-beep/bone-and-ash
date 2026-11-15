@@ -16,6 +16,7 @@ let pass = 0, fail = 0;
 const assert = (c, l) => { if (c) { pass++; console.log('  PASS ', l); } else { fail++; console.error('  FAIL ', l); } };
 
 const wf = read('.github/workflows/android.yml');
+const readme = read('README.md'); // v0.11.186 (owner pick R1): the repo page's Android app section
 const main = read('js/main.js');
 const java = read('android/app/src/main/java/io/github/hufle/boneandash/MainActivity.java');
 const src = read('js/core/update.js');
@@ -30,6 +31,7 @@ async function suite(U) {
     t(U.APK_URL === `https://github.com/${U.REPO}/releases/download/${U.RELEASE_TAG}/${U.APK_NAME}` && U.REPO === 'hufle-beep/bone-and-ash', 'A: the link from the repo, the tag and the file name');
     t(new RegExp(`gh release upload ${U.RELEASE_TAG} `).test(wf) && new RegExp(`-f name=${U.APK_NAME.replace('.', '\\.')}`).test(wf), 'A: the workflow uploads to the same release and renames to the same file');
     t(U.RELEASE_API === `https://api.github.com/repos/${U.REPO}/releases/tags/${U.RELEASE_TAG}`, 'A: the API address is the release by its tag');
+    t(/^## Android app$/m.test(readme) && readme.includes(`**${U.APK_URL}**`) && readme.includes('"GitHub limits update checks"') && U.UPDATE_TEXT.limited.startsWith('GitHub limits update checks'), 'A: the README\'s Android app section gives the same link and names the limit message (v0.11.186, R1)');
     // B. the title the workflow writes
     const title = /TITLE="([^"]+)"/.exec(wf)?.[1] || '';
     t(U.buildOf(title.replace('${GITHUB_RUN_NUMBER}', '7')) === 7 && U.buildOf(title.replace('${GITHUB_RUN_NUMBER}', '123')) === 123, `B: the build read from the workflow's title (${title})`);

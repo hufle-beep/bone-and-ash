@@ -15,7 +15,19 @@ A text RPG for your phone. James Green (forty, with a doctorate three days old) 
 
 - **On the phone:** open **https://hufle-beep.github.io/bone-and-ash/** in Chrome and choose *Add to Home screen*. After the first load it works offline. New versions arrive on their own; reopen the game once or twice.
 - **On the PC:** run `python -m http.server 8080` in this folder and open `http://localhost:8080`.
+- **On Android, as an app:** see *Android app* below.
 - **Saves:** the game saves itself after every choice, in the browser. **☰ Menu → Saves** has 3 slots, automatic backups and export / import. A save can also be shared to this repository's `saves/` folder.
+
+## Android app
+
+An Android version is built automatically every time the game changes. It is not on Google Play; share this link with friends:
+
+**https://github.com/hufle-beep/bone-and-ash/releases/download/android-latest/BoneAndAsh.apk**
+
+- **Installing:** open the link on an Android phone (Android 8 or newer), download the file and tap it. The first time, Android asks you to allow installs from your browser or file manager; allow it.
+- **Updating:** **Settings → App updates** checks for a newer build (at every start, or with *Check now*) and can install it for you; Android still asks you to confirm. An update installs over the app and keeps your saves.
+- **If the check says "GitHub limits update checks":** GitHub allows 60 checks an hour per internet address, shared by everyone on that address. Switch networks (Wi-Fi ↔ mobile data) and check again, or open the link above in the phone's browser: plain downloads don't count against the limit.
+- **Saves:** the app's saves are its own, apart from the browser version's. To move a game between them, export it from one (**☰ Menu → Saves**) and import it in the other.
 
 ## Working on it
 
