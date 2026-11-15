@@ -8,8 +8,9 @@
 import { addItem, hasItem, eat, advance, clockParts, d6, awardYukiFightXp, jamesHpMax, condense, dayHour, nightTo, nightRest, canFly } from '../core/game.js';
 import { hasForm } from '../core/forms.js';
 import { choiceOpen, gives } from '../core/story.js'; // v0.11.161 (PO2): `optionLeft`; RV (GV, Fable's H1): the wrapper carries the card's items
-import { daily, markDaily, eatBest, pantry, foodCount, hour, byForm, byDay, dayIndex, dayReply } from './common.js';
+import { daily, markDaily, eatBest, pantry, foodCount, hour, byForm, byDay, dayReply } from './common.js';
 import { noteDay, DAY_REPLIES, coilReply } from '../core/lines.js'; // v0.11.166 (RW1): coilReply, the flirts by Coil
+import { talkBeat } from './remember.js'; // v0.11.184 (S1)
 import { encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil } from './act1_common.js';
 
 /* v0.11.136 (owner pick NC1, NT1's push 2): replies by day (js/core/lines.js dayReply): the first text is the old reply, the rest Fable's, one for each later day of a Coil. */
@@ -984,7 +985,7 @@ You come round to Mei Lin's hands on your face. Ya sits next to you with a ruste
         id: 'talk_mei', title: 'Mei Lin', art: 'mei_lin', place: (g) => PLACE[region(g)],
         enter: (g) => { markDaily(g, 'tmei'); return []; },
         text: (g) => {
-            const n = Math.max(g.flags.mei_talks || 0, dayIndex(g, 'talk_mei')); // v0.11.135 (NT1): the beat follows the day too; RN2 (M2): beats 0, 1, the old settled text at 2, the two new beats at 3 and 4, the settled text again from 5, so a talk left by the romance choice doesn't show the same beat the next day
+            const n = talkBeat(g, 'mei_talks', 'talk_mei'); // v0.11.184 (S1): the beat through remember.js, so its memory line follows the same beat; // v0.11.135 (NT1): the beat follows the day too; RN2 (M2): beats 0, 1, the old settled text at 2, the two new beats at 3 and 4, the settled text again from 5, so a talk left by the romance choice doesn't show the same beat the next day
             if (n === 0) return `Mei Lin keeps pace with you, basket on her hip, eyes going everywhere: herbs, tracks, Ya's back.
 
 "My mother thinks I'll come home married or not at all," she says. "In Ashfall a woman comes back from the forest in one of two shapes. Married, or dead, or *ruined*." A thin smile. "Three, then."
@@ -1037,7 +1038,7 @@ ${likesMei(g) ? 'Somewhere along the way there is a fallen trunk to climb, and s
         id: 'talk_ya', title: 'Ya', art: 'ya_close', place: (g) => PLACE[region(g)],
         enter: (g) => { markDaily(g, 'tya'); return []; },
         text: (g) => {
-            const n = Math.max(g.flags.ya_talks || 0, dayIndex(g, 'talk_ya')); // v0.11.135 (NT1, RN2 M2): as talk_mei
+            const n = talkBeat(g, 'ya_talks', 'talk_ya'); // v0.11.184 (S1): as talk_mei; // v0.11.135 (NT1, RN2 M2): as talk_mei
             if (n === 0) return `Ya falls in next to you, spear swinging, and spends a while looking you over from boots to hair, with nothing held back.
 
 "You're old," she says.

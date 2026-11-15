@@ -6,6 +6,7 @@ import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, clockPar
 import { condensationSatGain } from '../core/formulas.js';
 import { sitGain, yukiFightSkill, canFly } from '../core/game.js'; // v0.11.118 (YK1 review, SB); v0.11.131 (XB2, FY): canFly
 import { set, day, hour, daily, markDaily, forestScale, grow, eatBest, pantry, foodCount, byForm, byDay, dayReply } from './common.js';
+import { MORNING_AGAIN } from './remember_texts.js'; // v0.11.184 (S1, KP): the Day 2 morning from the second Coil on
 
 /* v0.11.136 (owner pick NC1, NT1's push 2): replies by day (js/core/lines.js dayReply): the first text is the old reply, the rest Fable's, one for each later day of a Coil. */
 const DR_MAP = dayReply("night_event:0", [
@@ -200,7 +201,7 @@ Yuki puts herself back in order as if the fight had been someone else's. You sit
         text: (g) => `${g.flags.forest_day === 2
             ? `The second morning. A red sun hauls itself up over the black trees, and you lie still and take stock: one Yuki, one omnitool, one lab coat that was white yesterday, one body that aches in places you could now label on a diagram. Alive, on the evidence.
 
-You could go looking for the way out. Or you could face the data: you know nothing about this world, and this forest is the mildest teacher it is likely to offer. So learn it. Eat. Get stronger. *Then* walk out.`
+${replayExplore(g) ? MORNING_AGAIN : 'You could go looking for the way out. Or you could face the data: you know nothing about this world, and this forest is the mildest teacher it is likely to offer. So learn it. Eat. Get stronger. *Then* walk out.'}`
             : `Day three in the Blackroot. You wake ahead of the light now. That is either adaptation or damage, and you decline to run the test that would tell you which.
 
 This patch of forest is yours by now: the stream's tempers, the reeds where the hares lie up, the reek of the mire when the wind turns west. It has other tenants. For two nights something has circled the camp at a distance, and it has left tracks. Large. More than one set. In no hurry.

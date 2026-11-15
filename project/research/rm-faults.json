@@ -1,0 +1,114 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/again.js",
+  "find": "memory: sceneMemory(g, id) ?? memoryLine(g)",
+  "replace": "memory: memoryLine(g) ?? sceneMemory(g, id)",
+  "note": "pool always wins: own lines never shown"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/again.js",
+  "find": "memory: sceneMemory(g, id) ?? memoryLine(g)",
+  "replace": "memory: ((m) => sceneMemory(g, id) ?? m)(memoryLine(g))",
+  "note": "a pool line is drawn (picker advanced) even when the scene has its own: the pool not untouched"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/again.js",
+  "find": "memory: null, same: true, newVisit }; // SV",
+  "replace": "memory: sceneMemory(g, id), same: true, newVisit }; // SV",
+  "note": "own line on a same-visit (SV) fold, which must have none"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/again.js",
+  "find": "memory: sceneMemory(g, id) ?? memoryLine(g)",
+  "replace": "memory: sceneMemory(g, id)",
+  "note": "the pool lost for every other scene"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/remember.js",
+  "find": "Math.max(g?.flags?.[flag] || 0, dayIndex(g, id))",
+  "replace": "(g?.flags?.[flag] || 0)",
+  "note": "the beat ignores the day index (text and line both)"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/remember.js",
+  "find": "L.talk_ya[talkBeat(g, 'ya_talks', 'talk_ya')]",
+  "replace": "L.talk_ya[talkBeat(g, 'ya_talks', 'talk_mei')]",
+  "note": "Ya's line follows Mei Lin's day record: line and text on different beats"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/remember.js",
+  "find": "L.talk_mei[talkBeat(g, 'mei_talks', 'talk_mei')] ?? null",
+  "replace": "L.talk_mei[talkBeat(g, 'mei_talks', 'talk_mei')] ?? L.talk_mei[1]",
+  "note": "the settled text gets beat 1's line"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/remember.js",
+  "find": "g.flags?.forest_day === 2 ? L.morning",
+  "replace": "g.flags?.forest_day !== 3 ? L.morning",
+  "note": "morning line on days other than 2"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/remember_texts.js",
+  "find": "        3: 'A definition is about to be required of you. The spear, you note, has nothing to add.',\n        4: 'Being counted is not a thing you expected to enjoy. The count is coming, and you like it.',",
+  "replace": "        3: 'Being counted is not a thing you expected to enjoy. The count is coming, and you like it.',\n        4: 'A definition is about to be required of you. The spear, you note, has nothing to add.',",
+  "note": "Ya's beat 3 and 4 lines swapped: each line above the wrong talk"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/remember_texts.js",
+  "find": "You have lived these trees before, and they have not noticed.",
+  "replace": "You know where the stream leads now: Ashfall, a cage, and this red sun again.",
+  "note": "KP claims Ashfall and the cage (C1's false-in-14-83% fact) without the words the regex knows"
+ },
+ {
+  "id": "F11",
+  "file": "js/story/remember_texts.js",
+  "find": "having sat its early lessons makes you",
+  "replace": "having sat its early lessons twice makes you",
+  "note": "KP names a Coil count"
+ },
+ {
+  "id": "F12",
+  "file": "js/story/remember_texts.js",
+  "find": "You are holding out for a fourth.",
+  "replace": "For a long moment you are holding out for a fourth.",
+  "note": "canon-card tic in a memory line"
+ },
+ {
+  "id": "F13",
+  "file": "js/story/remember_texts.js",
+  "find": "So learn it properly.",
+  "replace": "So learn it properly, for a long moment.",
+  "note": "canon-card tic in the KP paragraph"
+ },
+ {
+  "id": "F14",
+  "file": "js/story/remember_texts.js",
+  "find": "The answer is ready before the question.",
+  "replace": "The answer has been ready since this morning.",
+  "note": "time word that is wrong at most hours (talks run 6-19)"
+ },
+ {
+  "id": "F15",
+  "file": "js/story/wilds.js",
+  "find": "${replayExplore(g) ? MORNING_AGAIN :",
+  "replace": "${replayExplore(g) && g.flags.saw_lights ? MORNING_AGAIN :",
+  "note": "KP only after the lights night"
+ },
+ {
+  "id": "F16",
+  "file": "js/story/act1_blackroot.js",
+  "find": "const n = talkBeat(g, 'ya_talks', 'talk_ya');",
+  "replace": "const n = talkBeat(g, 'ya_talks', 'talk_mei');",
+  "note": "Ya's TEXT follows Mei Lin's day record (line by Ya's): line above the wrong beat"
+ }
+]

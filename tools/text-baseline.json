@@ -246,6 +246,15 @@
    "tics": 0,
    "broken": 0,
    "spacing": 0
+  },
+  "remember": {
+   "lines": 10,
+   "words": 201,
+   "dupes": 0,
+   "sceneShared": 0,
+   "tics": 0,
+   "broken": 0,
+   "spacing": 0
   }
  }
 }

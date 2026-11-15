@@ -18,6 +18,7 @@
 import { sceneView, choose, seenBefore, isMenuScene, isTimeless } from '../core/story.js';
 import { fnv1a } from '../core/game.js';
 import { TASK_HUBS } from './task_hubs.js';
+import { sceneMemory } from './remember.js'; // v0.11.184 (S1): a scene's own memory line
 import { noteVisit, visitLine, linesOf, textDay } from '../core/lines.js'; // v0.11.134 (LP2: PK, ML); v0.11.152 (RP1, SD): linesOf, textDay
 
 /** Scenes whose text follows an outcome or a level that may differ from the read before (Fable review): never folded. */
@@ -118,7 +119,7 @@ export function againView(g, v, prev = null) {
     const whole = { fold: false, first: v?.text || '', rest: '', memory: null, same: false, newVisit };
     if (noFold(id) || v?.end || ps.length < 2) return whole;
     const variant = g.lastWin && g.lastWin.next === id && g.lastWin.degree >= 2; // a lopsided win's own text (story.js): not the one read before
-    if (seenBefore(g, id) && !variant && readBefore(g, v.text)) return { fold: true, first: ps[0], rest: ps.slice(1).join('\n\n'), memory: memoryLine(g), same: false, newVisit };
+    if (seenBefore(g, id) && !variant && readBefore(g, v.text)) return { fold: true, first: ps[0], rest: ps.slice(1).join('\n\n'), memory: sceneMemory(g, id) ?? memoryLine(g), same: false, newVisit }; // v0.11.184 (S1): the scene's own line first, the pool untouched when it has one
     if (prev && prev.id === id && prev.text === v.text) return { fold: true, first: ps[0], rest: ps.slice(1).join('\n\n'), memory: null, same: true, newVisit }; // SV
     if (sd) return { fold: true, first: ps[0], rest: ps.slice(1).join('\n\n'), memory: null, same: true, newVisit }; // SD
     return whole;

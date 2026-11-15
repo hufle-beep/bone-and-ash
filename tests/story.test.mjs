@@ -3906,6 +3906,82 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     }
 }
 
+// v0.11.184 (owner picks N1, S1, D1; group e's #95 and the Day 2 morning): memory lines of their own (js/story/remember.js,
+// remember_texts.js, Fable's with Claude's cuts). KP the Day 2 morning's second paragraph from the second Coil; ML the scene's own
+// line above a fold (the morning's, the talks' beats 0, 1, 3, 4), the general pool for everything else; the same line on a redraw.
+{
+    const RM = await import('../js/story/remember.js'); const RT = await import('../js/story/remember_texts.js');
+    const PINS_RM = [['talk_mei', 0, /a fourth/, /Three, then/], ['talk_mei', 1, /\bstem\b/, /\bstem\b/], ['talk_mei', 3, /question/, /twenty-six/], ['talk_mei', 4, /\bbird\b/, /a bird fell/],
+        ['talk_ya', 0, /inspection/, /boots to hair/], ['talk_ya', 1, /to her it is/, /wolf den/], ['talk_ya', 3, /definition/, /\*improper\*/i], ['talk_ya', 4, /count/, /I count/]];
+    // RV1 (TG2): the day record faked for one key only, so a line or text reading another talk's record fails
+    const onDayR = (g, k, key) => { const today = textDay(g); const days = [...Array(k).keys()].map((i) => -1 - i).concat([today]); g.lines = { c: coilStamp(g), p: {}, last: {}, cur: {}, at: null, said: [], d: { [key]: days } }; return g; };
+    const at = (seed, id, coil, flags = {}) => { const g = ensureBars(fresh(seed)); g.coil.n = coil; Object.assign(g.flags, flags); g.scene = id; return g; };
+    // a scene shown on Coil `coil`, its text read on Coil `readOn` (or never): the view and the fold
+    const folded = (g, readOn) => { const v = sceneView(g, SCENES); if (readOn) { g.seen = { ...(g.seen || {}), [g.scene]: 1 }; noteRead(g, v.text, readOn); } return { v, a: againView(g, v, null) }; };
+    const NOTHING = /you know nothing about this world/;
+    // KP: the morning's paragraph by Coil; Day 3 untouched
+    { const m1 = sceneView(at(84001, 'morning', 1, { forest_day: 2 }), SCENES).text, m2 = sceneView(at(84002, 'morning', 2, { forest_day: 2 }), SCENES).text;
+      assert(NOTHING.test(m1) && !m1.includes(RT.MORNING_AGAIN), 'S1 (KP): the first Coil keeps "you know nothing"');
+      assert(!NOTHING.test(m2) && m2.endsWith(RT.MORNING_AGAIN) && m2.split(/\n\s*\n/).length === 2 && m2.split(/\n\s*\n/)[0] === m1.split(/\n\s*\n/)[0], 'S1 (KP): from the second Coil the new paragraph replaces it, the first unchanged');
+      const d3a = sceneView(at(84003, 'morning', 1, { forest_day: 3 }), SCENES).text, d3b = sceneView(at(84003, 'morning', 4, { forest_day: 3 }), SCENES).text;
+      assert(d3a === d3b && !d3a.includes(RT.MORNING_AGAIN), 'S1 (KP): Day 3 reads the same on every Coil'); }
+    // ML: the morning folds under its own line once its new text was read; Day 3 under the pool's
+    { const { a } = folded(at(84010, 'morning', 3, { forest_day: 2 }), 2);
+      assert(a.fold && a.memory === RT.SCENE_MEMORY_LINES.morning, 'S1 (ML): the Day 2 morning folds under its own line');
+      const a1 = (() => { const g = at(84011, 'morning', 2, { forest_day: 2 }); g.seen = { ...(g.seen || {}), morning: 1 }; noteRead(g, sceneView(at(84013, 'morning', 1, { forest_day: 2 }), SCENES).text, 1); return againView(g, sceneView(g, SCENES), null); })(); // Coil 1's text read on Coil 1
+      assert(!a1.fold && a1.memory === null, 'S1 (KP): on the second Coil the new paragraph shows the morning in full once (it was never read)');
+      const { a: a3 } = folded(at(84012, 'morning', 3, { forest_day: 3 }), 1);
+      assert(a3.fold && MEMORY_LINES.includes(a3.memory), 'S1 (ML): Day 3 keeps the general pool'); }
+    // ML: the talks, by beat (the counter and the day's index both), the settled text under the pool's
+    let nT = 0;
+    for (const [id, flag] of [['talk_mei', 'mei_talks'], ['talk_ya', 'ya_talks']]) {
+        for (const k of [0, 1, 2, 3, 4, 5, 7]) {
+            for (const how of ['count', 'day']) {
+                const g = at(84100 + nT, id, 3, { [flag]: how === 'count' ? k : 0, ya_party: true }); if (how === 'day') onDayR(g, k, id);
+                assert(RM.talkBeat(g, flag, id) === k, `S1: ${id} beat ${k} by ${how}`);
+                const { a } = folded(g, 2), own = RT.SCENE_MEMORY_LINES[id][k];
+                assert(a.fold, `S1: ${id} beat ${k} (${how}) read on an earlier Coil folds`);
+                if (own) assert(a.memory === own && linesOf(g).cur.mem === undefined && !Object.keys(linesOf(g).p || {}).some((x) => /mem/.test(x)), `S1 (ML, RV1 TG5): ${id} beat ${k} (${how}) folds under its own line, the pool not drawn`);
+                else assert(MEMORY_LINES.includes(a.memory), `S1 (ML): ${id} beat ${k} (${how}), the settled text, keeps the pool (${a.memory})`);
+                const again = againView(g, sceneView(g, SCENES), null); assert(again.memory === a.memory, `S1 (ML): ${id} beat ${k}: the same line on a redraw`);
+                nT++;
+            }
+        }
+        // the text itself follows the same beat as the line (talkBeat drives both)
+        const t = (k) => sceneView(at(84300 + k, id, 1, { [flag]: k }), SCENES).text;
+        assert(new Set([0, 1, 2, 3, 4].map(t)).size === 5 && t(2) === t(5), `S1: ${id}'s five texts by beat, the settled text at 2 and 5`);
+        // not read before: no fold, no line
+        const { a } = folded(at(84400, id, 2, { [flag]: 1 }), 0);
+        assert(!a.fold && a.memory === null, `S1: ${id} heard for the first time shows in full`);
+    }
+    assert(nT === 28, `S1: ${nT} beat × way checks`);
+    // RV1 (TG2): the other talk's record moves neither the text nor the line
+    for (const [id, other, flag] of [['talk_mei', 'talk_ya', 'mei_talks'], ['talk_ya', 'talk_mei', 'ya_talks']]) {
+        const g = onDayR(at(84600, id, 3, { ya_party: true }), 3, other);
+        assert(RM.talkBeat(g, flag, id) === 0 && sceneView(g, SCENES).text === sceneView(at(84601, id, 1, { ya_party: true }), SCENES).text, `S1 (RV1 TG2): ${id} ignores ${other}'s days`);
+        const { a } = folded(g, 2); assert(a.memory === RT.SCENE_MEMORY_LINES[id][0], `S1 (RV1 TG2): ${id}'s line ignores ${other}'s days`);
+    }
+    // RV1 (TG2): a real walk: Mei Lin on two days, Ya first on the third (goTo notes the days as play does)
+    { const g = at(84610, 'rr_hub', 3, { ya_party: true }); const ref = (id, k) => sceneView(at(84611 + k, id, 1, { ya_party: true, [id === 'talk_mei' ? 'mei_talks' : 'ya_talks']: k }), SCENES).text;
+      goTo(g, SCENES, 'talk_mei'); const t1 = sceneView(g, SCENES).text; g.minutes += 24 * 60;
+      goTo(g, SCENES, 'talk_mei'); const t2 = sceneView(g, SCENES).text, m2 = RM.sceneMemory(g, 'talk_mei'); g.minutes += 24 * 60;
+      goTo(g, SCENES, 'talk_ya'); const ty = sceneView(g, SCENES).text, my = RM.sceneMemory(g, 'talk_ya');
+      assert(t1 === ref('talk_mei', 0) && t2 === ref('talk_mei', 1) && m2 === RT.SCENE_MEMORY_LINES.talk_mei[1], 'S1 (RV1 TG2): Mei Lin\'s first two days walk beats 0 and 1, the line with them');
+      assert(ty === ref('talk_ya', 0) && my === RT.SCENE_MEMORY_LINES.talk_ya[0], 'S1 (RV1 TG2): Ya first on the third day starts at her beat 0, the line with it'); }
+    // RV1 (TG3): each line pinned to its own beat's text (a word in the line, a word in the beat)
+    for (const [id, k, inLine, inBeat] of PINS_RM) {
+        const t = sceneView(at(84700 + k, id, 1, { ya_party: true, [id === 'talk_mei' ? 'mei_talks' : 'ya_talks']: k }), SCENES).text;
+        assert(inLine.test(RT.SCENE_MEMORY_LINES[id][k]) && inBeat.test(t), `S1 (RV1 TG3): ${id} beat ${k}'s line points at its own beat (${inLine} ↔ ${inBeat})`);
+    }
+    assert(PINS_RM.length === 8, 'S1 (RV1 TG3): every line pinned');
+    // the pool untouched; every new line its own; none in the pool; no other scene has one
+    const own = [RT.SCENE_MEMORY_LINES.morning, ...Object.values(RT.SCENE_MEMORY_LINES.talk_mei), ...Object.values(RT.SCENE_MEMORY_LINES.talk_ya)];
+    assert(own.length === 9 && new Set(own).size === 9 && own.every((l) => !MEMORY_LINES.includes(l) && l.split(/\s+/).length <= 25), 'S1 (ML): nine lines, distinct, none from the pool, each under 25 words');
+    assert(MEMORY_LINES.length === 48, `S1: the general pool unchanged (${MEMORY_LINES.length})`);
+    assert(RM.sceneMemory(at(84500, 'wilds', 3), 'wilds') === null && RM.sceneMemory(at(84501, 'morning', 3, { forest_day: 4 }), 'morning') === null, 'S1: other scenes and days have none');
+    const words = RT.MORNING_AGAIN.split(/\s+/).length; assert(words >= 45 && words <= 70 && !/Ashfall|cage|village|tribute|seventh|Day \d|\bonce\b|twice|times|every version/i.test(RT.MORNING_AGAIN) && !/^So the data/m.test(RT.MORNING_AGAIN), `S1 (KP, C1): the paragraph claims nothing a Coil may not have shown (${words} words)`);
+}
+
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));
 console.log('fights', sorted(fights));
 console.log('endings', sorted(endings), 'longest run', maxSteps, 'scenes', Object.keys(SCENES).length);
