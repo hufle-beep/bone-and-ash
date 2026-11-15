@@ -47,6 +47,28 @@ export const inApp = (w) => !!(w && w.AndroidBridge && typeof w.AndroidBridge.ve
 /** Whether a message from the app should be tried again: a 404 on the download, fewer than RETRY_MAX tries so far. */
 export const retryDownload = (state, msg, tries) => state === 'error' && /\b404\b/.test(String(msg)) && tries < RETRY_MAX;
 
+/** v0.11.187 (owner pick U1, RT): when GitHub's limit lifts, from its headers (get(name) → the header or null; now in ms):
+ * X-RateLimit-Reset (seconds since 1970) on a 403 or 429, else Retry-After (seconds) on a 429. Null when neither is there or
+ * the time is past or more than a day away (then the line says "in an hour" as before). */
+export function resetAt(get, now) {
+    const num = (v) => (v == null || String(v).trim() === '' ? NaN : Number(v));
+    const reset = num(get('x-ratelimit-reset')), after = num(get('retry-after'));
+    const at = Number.isFinite(reset) ? reset * 1000 : Number.isFinite(after) ? now + after * 1000 : NaN;
+    return Number.isFinite(at) && at > now && at - now <= 864e5 ? at : null;
+}
+/** The phone's own clock, "15:42". */
+export const clock = (ms) => { const d = new Date(ms); return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; };
+/** v0.11.187 (U1, UB): the panel's second button: a newer build found → download it; the last check failed → "Couldn't
+ * check"; a check that worked → "Up to date"; none yet → "Not checked yet". */
+export function goLabel(st) {
+    if (st.found?.newer) return `Download and install build ${st.found.build}`;
+    if (st.failed) return 'Couldn\'t check';
+    return st.found ? 'Up to date' : 'Not checked yet';
+}
+/** v0.11.187 (U1, DL): the browser link after a failed check that a plain download can get past (the limit, or no answer);
+ * not when GitHub has no build at all. */
+export const offerBrowser = (st) => st.failed === 'limited' || st.failed === 'offline';
+
 /** The panel's lines (the app's own messages come from MainActivity.java and are shown as they are). */
 export const UPDATE_TEXT = {
     checking: 'Checking GitHub…',
@@ -58,7 +80,9 @@ export const UPDATE_TEXT = {
     downloading: 'Downloading…',
     progress: (pct) => `Downloading… ${pct}%`,
     retry: (n) => `The build is still uploading; trying again in ${RETRY_MS / 1000} s (${n}/${RETRY_MAX})…`,
-    limited: 'GitHub limits update checks; try again in an hour.', // v0.11.147 (RV1, RL): a 403 or 429
+    limited: 'GitHub limits update checks; try again in an hour.', // v0.11.147 (RV1, RL): a 403 or 429 (no time from GitHub)
+    limitedAt: (at, now) => `GitHub limits update checks; try again at ${clock(at)} (in ${Math.max(1, Math.ceil((at - now) / 6e4))} min).`, // v0.11.187 (U1, RT)
+    browser: 'Download in the phone\'s browser', // v0.11.187 (U1, DL): GitHub's plain downloads don't count against the limit
     unknown: (u) => `This app can't tell its own build; GitHub's newest is build ${u.build}.`, // RV1 (UB)
     missing: 'The app\'s file is missing on GitHub right now; the next build puts it back.', // RV1 (LM): a 404 after the last retry
 };
@@ -66,10 +90,11 @@ export const UPDATE_TEXT = {
 /** v0.11.147 (owner pick RV1, after the cold review; TC): the check, the download and the app's messages, with what main.js
  * does passed in, so the busy, retry and redraw rules run in tests/update.test.mjs on a fake app and fake timers.
  * h: bridge() → AndroidBridge or null; fetch(url, opts) → Promise of { ok, status, json() }; setTimeout / clearTimeout;
- * save() the game; screen() → 'settings' | 'main' | 'main-armed' (the menu with New game's second tap armed) | null (in the game);
+ * now() the time in ms (Date.now when not given); save() the game; screen() → 'settings' | 'main' | 'main-armed' (the menu with New game's second tap armed) | null (in the game);
  * redraw() the page; status(msg) the panel's line; autoInstall() the switch. */
 export function makeUpdater(h) {
-    const st = { found: null, msg: '', busy: false, tries: 0, timer: null };
+    const st = { found: null, failed: null, msg: '', busy: false, tries: 0, timer: null }; // failed (U1): 'limited' | 'none' | 'offline' after a failed check
+    const now = () => (h.now ? h.now() : Date.now());
     const say = (m) => { st.msg = m; h.status(m); };
     const onSettings = () => { if (h.screen() === 'settings') h.redraw(); };
     const mine = () => { try { return Number(h.bridge()?.versionCode()) || 0; } catch { return 0; } };
@@ -90,12 +115,17 @@ export function makeUpdater(h) {
         const m = mine();
         if (manual) say(UPDATE_TEXT.checking);
         return h.fetch(RELEASE_API, { cache: 'no-store' })
-            .then((r) => (r.ok ? r.json() : Promise.reject({ http: r.status })))
+            .then((r) => (r.ok ? r.json() : Promise.reject({ http: r.status, at: resetAt((n) => { try { return r.headers?.get?.(n) ?? null; } catch { return null; } }, now()) })))
             .then((j) => ({ j }), (e) => ({ e }))
             .then(({ j, e }) => { // a mistake in here is not "offline" (RL): it rejects the returned promise
-                if (e) { if (manual) say(e.http === 403 || e.http === 429 ? UPDATE_TEXT.limited : e.http === 404 ? UPDATE_TEXT.none : UPDATE_TEXT.offline); return; }
+                if (e) { // U1: the failure is kept (the label, the browser link); its line only on Check now, as before
+                    st.failed = e.http === 403 || e.http === 429 ? 'limited' : e.http === 404 ? 'none' : 'offline';
+                    if (manual) { say(st.failed === 'limited' ? (e.at ? UPDATE_TEXT.limitedAt(e.at, now()) : UPDATE_TEXT.limited) : st.failed === 'none' ? UPDATE_TEXT.none : UPDATE_TEXT.offline); onSettings(); }
+                    return;
+                }
                 const u = updateState(j && j.name, m);
-                if (!u) { say(UPDATE_TEXT.none); onSettings(); return; }
+                if (!u) { st.failed = 'none'; say(UPDATE_TEXT.none); onSettings(); return; }
+                st.failed = null;
                 st.found = m ? u : { ...u, newer: false, unknown: true }; // UB: build 0 is unknown, not old
                 say(st.found.unknown ? UPDATE_TEXT.unknown(u) : st.found.newer ? UPDATE_TEXT.newer(u) : UPDATE_TEXT.latest(u));
                 const sc = h.screen();

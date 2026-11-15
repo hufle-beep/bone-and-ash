@@ -199,6 +199,21 @@ def news_box(pg, url):
     al = pa.inner_text('.mver')
     if al != f'Version {ver} · build 6 · Incremental Mode': fails.append(f'BL1 (LB): the app\'s menu says {al!r}')
     else: notes.append(f'BL1: the label ({al}), What\'s new ({len(shown)} on the menu{", ✕" if shown else ", none before the bump"}), Settings\' list ({n})')
+    # v0.11.187 (owner pick U1): GitHub limits the check (a fake 403 with its reset time 23 min on): UB the label, RT the time, DL the link
+    reset = int(time.time()) + 23 * 60
+    pa.route('https://api.github.com/**', lambda r: r.fulfill(status=403, body='{"message":"API rate limit exceeded"}', headers={'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Access-Control-Expose-Headers': 'X-RateLimit-Reset', 'X-RateLimit-Reset': str(reset)}))
+    pa.click('button[data-menu="settings"]'); until(pa, 'button[data-updcheck]', 5000, 'attached')
+    l0 = pa.inner_text('button[data-updgo]')
+    pa.click('button[data-updcheck]'); until(pa, "/try again at/.test(document.getElementById('updSt')?.textContent || '')", 5000)
+    st, l1 = pa.inner_text('#updSt'), pa.inner_text('button[data-updgo]')
+    href = pa.get_attribute('a.updbrowser', 'href') if pa.query_selector('a.updbrowser') else None
+    want = time.strftime('%H:%M', time.localtime(reset))
+    if l0 != 'Not checked yet': fails.append(f'U1 (UB): before a check the button says {l0!r}')
+    if l1 != "Couldn't check": fails.append(f'U1 (UB): after a limited check the button says {l1!r}')
+    if not re.fullmatch(rf'GitHub limits update checks; try again at {want} \(in 2[23] min\)\.', st): fails.append(f'U1 (RT): the line says {st!r}, not {want}')
+    if href != 'https://github.com/hufle-beep/bone-and-ash/releases/download/android-latest/BoneAndAsh.apk': fails.append(f'U1 (DL): the browser link is {href!r}')
+    check_text(pa, 'Settings → App updates (limited)')
+    if not [f for f in fails if f.startswith('U1')]: notes.append(f'U1: Settings → App updates: {l0!r} → {l1!r}, "{st}", the browser link')
     pa.close()
 
 FONT_FACES = {'Literata|400 600|normal', 'Literata|400|italic', 'Shippori Mincho|600|normal', 'Shippori Mincho|800|normal'}

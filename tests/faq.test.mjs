@@ -28,9 +28,9 @@ assert(FAQ.every(([q, a]) => !/undefined|NaN|\[object/.test(typeof a === 'functi
 assert(FAQ.every(([, a]) => !/\bd6\b|🎲|a 6 always/.test(typeof a === 'function' ? a(fresh) : a)), 'no answer talks of dice');
 
 // v0.11.150 (owner pick BL1, FQ-e; Fable's text): the Android app entry, there from the start, its link from update.js, and every
-// button it names drawn by main.js (so a renamed button can't leave the FAQ stale)
+// button it names drawn by main.js or update.js (so a renamed button can't leave the FAQ stale)
 { const { APK_URL } = await import('../js/core/update.js');
-  const app = text('The Android app'), main = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+  const app = text('The Android app'), main = ['../js/main.js', '../js/core/update.js'].map((f) => readFileSync(new URL(f, import.meta.url), 'utf8')).join('\n'); // v0.11.187 (U1): the second button's label lives in update.js (goLabel)
   assert(FAQ.find(([q]) => q === 'The Android app')[2] === 'start' && app.includes(`<a href="${APK_URL}">${APK_URL}</a>`), 'FQ-e: the Android app entry is there from the start, with the APK link from update.js');
   const named = [...app.matchAll(/<b>([^<]+)<\/b>/g)].map((m) => m[1]).filter((x) => !['Saves', 'Settings'].includes(x));
   const missing = named.filter((x) => !main.includes(x.replace(/'/g, "\\'")) && !main.includes(x));
@@ -77,7 +77,7 @@ assert(inAct1({ flags: { ending: 'won' }, scene: 'fo_start', minutes: 7 * 1440 +
   assert(/HOLD_MS = 500\b/.test(main) && plain(text('How do I play?')).includes('Hold a card for half a second'), 'hold for half a second (HOLD_MS)');
   assert((main.match(/\$\{slot\(\d\)\}/g) || []).length === 3 && plain(text('Saving and settings')).includes('three slots'), 'three save slots'); }
 // every bold label is a word the game uses (a button, a card, a tab), so the FAQ can't name a control that doesn't exist
-{ const src = ['js/main.js', 'js/core/game.js', 'js/core/tasks.js', 'js/core/forms.js', 'js/core/meditate.js', 'js/core/coil.js', 'js/story/coil_scenes.js', 'js/story/prologue.js', 'js/story/longforest.js', 'js/story/again.js', 'js/core/replies.js', 'js/story/meridians.js', 'index.html'].map((f) => readFileSync(new URL(`../${f}`, import.meta.url), 'utf8')).join('\n').toLowerCase();
+{ const src = ['js/main.js', 'js/core/update.js', 'js/core/game.js', 'js/core/tasks.js', 'js/core/forms.js', 'js/core/meditate.js', 'js/core/coil.js', 'js/story/coil_scenes.js', 'js/story/prologue.js', 'js/story/longforest.js', 'js/story/again.js', 'js/core/replies.js', 'js/story/meridians.js', 'index.html'].map((f) => readFileSync(new URL(`../${f}`, import.meta.url), 'utf8')).join('\n').toLowerCase();
   const OWN = new Set(['kept:', 'back to the act\'s start:', /* v0.11.116 (WA2): the Fights entry's two headings */ 'the rhythm:', 'the song:', 'work', 'story', 'convergence', 'cycle', 'fed', 'hp', 'familiarity', 'check', 'spar', 'brawl', 'great root-kin', 'friendship', 'affection', 'bonesinger', 'saturation', 'coil', 'james green', 'act 1', 'hold a card', 'walks:', 'crossings:']); // v0.11.109 (FL1): the Flight entry's two headings
   const missing = [];
   for (const [q, a] of FAQ) for (const m of (typeof a === 'function' ? a(fresh) : a).matchAll(/<b>(.+?)<\/b>/g)) { const t = m[1].toLowerCase().replace(/\s+/g, ' '); if (!OWN.has(t) && !src.includes(t)) missing.push(`${q}: ${m[1]}`); }

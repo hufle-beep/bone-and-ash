@@ -15,7 +15,7 @@ import { coilActive, endCoil, targetsText, tabWhy } from './core/coil.js';
 import { medCards, runMed, isSitChoice, medActivity, useLine, LATE_TAG, canMeditate } from './core/meditate.js';
 import { FAQ_KEY, FAQ_TAB, faqState, faqText, faqCheck, faqList, faqHasNew, faqSeen, faqMatch } from './core/faq.js'; // v0.11.83 (P1 + T1 + R1)
 import { meridianRow } from './story/meridians.js';
-import { APK_URL, UPDATE_KEY, CHECK_DELAY, updPrefs, inApp, makeUpdater } from './core/update.js'; // v0.11.147 (UP1; RV1: makeUpdater)
+import { APK_URL, UPDATE_KEY, CHECK_DELAY, UPDATE_TEXT, updPrefs, inApp, makeUpdater, goLabel, offerBrowser } from './core/update.js'; // v0.11.147 (UP1; RV1: makeUpdater; v0.11.187 U1: goLabel, offerBrowser)
 import { exportRoute, canSaveToFile, wantsServiceWorker, savedName, resultPlace, FILE_TEXT } from './core/app.js'; // v0.11.148 (EX1; RX1: savedName, resultPlace)
 import { SEEN_KEY, NOTES, newsSince, versionLabel, statusPlace, takeoverNotice, recheckDue, READY_TEXT } from './core/news.js'; // v0.11.150 (BL1)
 import { realmShockHpBonus } from './core/formulas.js';
@@ -1136,8 +1136,9 @@ function updatePanel() {
 <p class="note">Installed: ${mine ? `build ${mine}` : 'unknown build'}${u ? ` · latest on GitHub: build ${u.build}` : ''}. An update installs over this app and keeps your saves.</p>
 <div class="btns"><button class="btn${upd.auto ? ' primary' : ''}" data-updauto="1">Check at start: ${upd.auto ? 'on' : 'off'}</button><button class="btn${upd.autoInstall ? ' primary' : ''}" data-updinst="1">Install automatically: ${upd.autoInstall ? 'on' : 'off'}</button></div>
 <p class="note">Install automatically downloads a new build as soon as it is found (from the menu or Settings) and opens Android's installer, which still asks you to confirm.</p>
-<div class="btns"><button class="btn" data-updcheck="1">Check now</button><button class="btn${go ? ' primary' : ''}" data-updgo="1"${go ? '' : ' disabled'}>${u?.newer ? `Download and install build ${u.build}` : 'Up to date'}</button></div>
-<p class="note" id="updSt" role="status">${esc(updater.st.msg)}</p>`;
+<div class="btns"><button class="btn" data-updcheck="1">Check now</button><button class="btn${go ? ' primary' : ''}" data-updgo="1"${go ? '' : ' disabled'}>${esc(goLabel(updater.st))}</button></div>
+<p class="note" id="updSt" role="status">${esc(updater.st.msg)}</p>${offerBrowser(updater.st) ? `
+<p class="note"><a class="updbrowser" href="${APK_URL}" rel="noopener">${esc(UPDATE_TEXT.browser)}</a>: GitHub's plain downloads don't count against its limit. Android asks once to let the browser install apps; the new build installs over this app and keeps your saves.</p>` : ''}`; // v0.11.187 (U1: UB the label, DL the link; MainActivity opens outside links in the phone's browser)
 }
 const checkAppUpdate = (manual) => updater.check(manual).catch((err) => console.error('update check', err)); // RL: a mistake is logged, not "offline"
 /** Called by the app (MainActivity.java's post). */

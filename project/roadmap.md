@@ -1,6 +1,6 @@
 # Roadmap: Bone and Ash
 
-Last updated: 2026-11-15 (v0.11.186: the Android link on the repo page, owner pick R1).
+Last updated: 2026-11-15 (v0.11.187: the update check, owner pick U1).
 
 *(v0.11.88, owner pick A: this file holds sections 0–2 of the open work; sections 3–6 and Decided are in `roadmap-2.md`; done, stale and moot lines in `roadmap-done.md` and, since v0.11.88, `roadmap-done-2.md`. The two paragraphs on how this file is laid out (v0.11.53, v0.11.65) moved word for word to `roadmap-done-2.md`.)*
 
@@ -10,7 +10,7 @@ Last updated: 2026-11-15 (v0.11.186: the Android link on the repo page, owner pi
 
 *(v0.11.88: section 0 is empty: the FAQ (v0.11.83), the difficulty (v0.11.85), #53 (v0.11.86) and the sitting loop (v0.11.87) are done; their notes moved word for word to `roadmap-done-2.md`. Next: the owner's pick.)*
 
-- *(v0.11.186, owner 15:01 "go with your picks")* **Next, each its own push and chat:** **U1, the update check** (UB the "Up to date" label after a failed check, RT GitHub's reset time in the message, DL a browser-download button when the check fails; the owner's phone hit GitHub's 60-an-hour limit on a shared Wi-Fi address, 14:54); then **N1** (group e: TR the trees line with Mei Lin and Ya near, L7 Hammerdeep's well and the work-chant, LL the lost letter's tribulation; one Fable run). The layout in the handover's "Decided in chat" (v0.11.186), the numbers in `project/research/ne-measure.md`. **Open, options later:** an update check that skips GitHub's API. **Done in v0.11.186 (R1):** the README's *Android app* section; the About box is the owner's to set.
+- *(v0.11.187, owner 15:12 "Go")* **Next: N1** (group e, its own push and chat: TR the trees line with Mei Lin and Ya near, L7 Hammerdeep's well and the work-chant, LL the lost letter's tribulation; one Fable run; picked 15:01). The layout in the handover's "Decided in chat" (v0.11.186), the numbers in `project/research/ne-measure.md`. **Open, options later:** an update check that skips GitHub's API. **Done:** v0.11.186 R1 (the README's *Android app* section; the About box is the owner's to set); v0.11.187 U1 (the update check: UB, RT, DL).
 - *(v0.11.172)* Section 0's Android app plan (done in v0.11.145–v0.11.150) moved word for word to `roadmap-done-3.md` (the roadmap kept under 60 KB).
 - *(v0.11.150)* The done lines of v0.11.141–v0.11.143 (FX1, CV1, NF1) moved word for word to the new `roadmap-done-3.md` (the roadmap at its 60 KB note; `roadmap-done-2.md` past 45 KB). *(v0.11.111, owner pick TR1)* Section 0's done lines (the after-bed fights' timing, done in v0.11.94; the browser flake, done in v0.11.103) moved word for word to `roadmap-done-2.md`.
 - *(v0.11.151, owner pick WD1)* **Group d (combat): closed.** The line "Next: group d" and group d's section moved word for word to `roadmap-done-3.md`; what was left went to its homes: the rot ape and DA2's three to section 2, stances (#58), clean or barbed (#145) and #66 to `roadmap-2.md` section 4, the knitting bone and the crushing mass to section 5 (Act 2), the note on a weapon moving to Convergence to `reference.md`. **Next: the owner's pick** (group e, f, the retune, …; options first).

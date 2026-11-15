@@ -39,6 +39,7 @@ export const NOTES = [
     ['0.11.183', 'Thirteen songs now play once each, at a moment of their own across the prologue and Act 1: a song for the first nights in the Wilds, one for leaving Ashfall, one the party will not forget at the first Blackroot camp, one shown to Ya and Mei Lin in the roots of the dead tree, one for coming home, and more. Each plays the first time you reach its scene, once in the whole game, and the References setting decides whether they are named or described.'],
     ['0.11.184', 'Scenes you have lived on an earlier Coil now remember more exactly: the second morning in the Wilds no longer tells James he knows nothing, and most talks with Mei Lin or Ya you have heard before open with a line of their own about what is coming.'],
     ['0.11.185', 'A breakthrough in Ashfall during Act 1 is now seen by the village, which reacts to it, and one inside the Old Tree sends James out to where the sky can reach him first.'],
+    ['0.11.187', 'Android app: when the update check fails, Settings → App updates now says so instead of "Up to date", tells you the time GitHub\'s limit lifts, and offers to download the new build in the phone\'s browser, which the limit doesn\'t touch.'],
 ];
 
 const parts = (v) => (/^\d+(\.\d+)*$/.test(String(v ?? '')) ? String(v).split('.').map(Number) : null);

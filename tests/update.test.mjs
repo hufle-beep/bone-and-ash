@@ -51,13 +51,14 @@ async function suite(U) {
     // F. v0.11.147 (RV1, TC): makeUpdater on a fake app, fake GitHub and fake timers
     if (typeof U.makeUpdater !== 'function') { bad.push('F: makeUpdater exported'); return bad; }
     const rig = (o = {}) => {
-        const env = { screen: 'main', auto: false, mine: 2, title: 'Bone and Ash for Android (build 5)', http: 200, net: false, app: true, throwOnRedraw: false, ...o };
+        const env = { screen: 'main', auto: false, mine: 2, title: 'Bone and Ash for Android (build 5)', http: 200, net: false, app: true, throwOnRedraw: false, headers: {}, now: 1.7e12, ...o };
         const log = { dl: 0, saves: 0, redraws: 0, fetch: 0, order: [], status: undefined, url: null };
         const timers = new Map(); let tid = 0;
         const bridge = { versionCode: () => env.mine, ...(o.noSelf ? {} : { downloadUpdate: (u) => { log.dl++; log.url = u; log.order.push('dl'); } }) };
         const up = U.makeUpdater({
             bridge: () => (env.app ? bridge : null),
-            fetch: (url) => { log.fetch++; log.fetchUrl = url; return env.net ? Promise.reject(new TypeError('Failed to fetch')) : Promise.resolve({ ok: env.http === 200, status: env.http, json: async () => ({ name: env.title }) }); },
+            fetch: (url) => { log.fetch++; log.fetchUrl = url; return env.net ? Promise.reject(new TypeError('Failed to fetch')) : Promise.resolve({ ok: env.http === 200, status: env.http, json: async () => ({ name: env.title }), headers: { get: (n) => { if (env.headers === 'throws') throw new Error('no headers'); return env.headers[n.toLowerCase()] ?? null; } } }); },
+            now: () => env.now,
             setTimeout: (f, ms) => { const id = ++tid; timers.set(id, { f, ms }); return id; },
             clearTimeout: (id) => { timers.delete(id); },
             save: () => { log.saves++; log.order.push('save'); },
@@ -98,6 +99,24 @@ async function suite(U) {
     { const r = rig({ title: 'Bone and Ash for Android' }); await r.up.check(true); t(r.log.status === T.none && !r.up.st.found, 'F: a title with no build: none found'); }
     { const r = rig({ screen: 'settings', throwOnRedraw: true }); let threw = false; try { await r.up.check(true); } catch { threw = true; } t(threw && r.log.status !== T.offline, 'F: a mistake in the page is not reported as offline (RL)'); }
     { const r = rig({ noSelf: true }); t(r.up.start() === false && r.log.status === T.noSelf && r.log.saves === 0, 'F: an app without downloadUpdate says so'); }
+    // v0.11.187 (owner pick U1): UB the label, RT the reset time, DL the browser link
+    { const r = rig({ mine: 5 }); const l0 = U.goLabel(r.up.st); await r.up.check(true); const l1 = U.goLabel(r.up.st);
+      r.env.http = 403; await r.up.check(true); const l2 = U.goLabel(r.up.st); r.env.http = 200; await r.up.check(true);
+      t(l0 === 'Not checked yet' && l1 === 'Up to date' && l2 === 'Couldn\'t check' && U.goLabel(r.up.st) === 'Up to date' && r.up.st.failed === null, `F: the label: not checked yet, up to date, couldn't check after a failure, up to date again after a check that works (UB: ${l0} / ${l1} / ${l2})`); }
+    { const r = rig(); await r.up.check(true); r.env.http = 429; await r.up.check(true); t(U.goLabel(r.up.st) === 'Download and install build 5' && r.up.st.failed === 'limited', 'F: a newer build already found keeps its button after a failed check (UB)'); }
+    { const r = rig({ title: 'Bone and Ash for Android' }); await r.up.check(true); t(U.goLabel(r.up.st) === 'Couldn\'t check' && !U.offerBrowser(r.up.st), 'F: a title with no build: couldn\'t check, no browser link (UB, DL)'); }
+    { const now = 1.7e12, r = rig({ http: 403, now, headers: { 'x-ratelimit-reset': String((now + 22.5 * 6e4) / 1000) } }); await r.up.check(true);
+      t(r.log.status === T.limitedAt(now + 22.5 * 6e4, now) && r.log.status === `GitHub limits update checks; try again at ${U.clock(now + 22.5 * 6e4)} (in 23 min).`, `F: a 403 with X-RateLimit-Reset: the time and the minutes, rounded up (RT: "${r.log.status}")`); }
+    { const now = 1.7e12, r = rig({ http: 429, now, headers: { 'retry-after': '90' } }); await r.up.check(true); t(r.log.status === `GitHub limits update checks; try again at ${U.clock(now + 9e4)} (in 2 min).`, 'F: a 429 with Retry-After (RT)'); }
+    { const now = 1.7e12, r = rig({ http: 429, now, headers: { 'x-ratelimit-reset': String(now / 1000 + 600), 'retry-after': '60' } }); await r.up.check(true); t(r.log.status === T.limitedAt(now + 6e5, now), 'F: X-RateLimit-Reset first when both are sent (RT)'); }
+    for (const [h, l] of [[{}, 'no header'], [{ 'x-ratelimit-reset': String(1.7e12 / 1000 - 60) }, 'a past time'], [{ 'x-ratelimit-reset': String(1.7e12 / 1000 + 90000) }, 'more than a day away'], [{ 'x-ratelimit-reset': 'soon' }, 'junk'], [{ 'retry-after': '' }, 'an empty Retry-After'], ['throws', 'headers that throw']]) {
+        const r = rig({ http: 403, headers: h }); await r.up.check(true); t(r.log.status === T.limited, `F: ${l}: "in an hour" as before (RT)`);
+    }
+    for (const [o, want, l] of [[{ http: 403 }, true, '403'], [{ http: 429 }, true, '429'], [{ net: true }, true, 'no network'], [{ http: 404 }, false, '404'], [{}, false, 'a check that works']]) {
+        const r = rig({ screen: 'settings', ...o }); const before = U.offerBrowser(r.up.st); await r.up.check(true);
+        t(!before && U.offerBrowser(r.up.st) === want && r.log.redraws === 1, `F: the browser link ${want ? 'after' : 'not after'} ${l}; Settings redrawn once (DL)`);
+    }
+    { const r = rig({ http: 403, screen: 'settings' }); await r.up.check(false); t(r.up.st.failed === 'limited' && U.offerBrowser(r.up.st) && r.log.status === undefined && r.log.redraws === 0, 'F: a failed check at start is kept (the label and the link next time Settings is drawn), quiet as before (UB, DL)'); }
     return bad;
 }
 
@@ -105,7 +124,7 @@ async function suite(U) {
 {
     const U = await import(pathToFileURL(path.join(ROOT, 'js/core/update.js')).href);
     const bad = await suite(U);
-    assert(!bad.length, `A–C and F (the updater, 21 cases) on js/core/update.js (${bad.join('; ') || 'all hold'})`);
+    assert(!bad.length, `A–C and F (the updater, 39 cases) on js/core/update.js (${bad.join('; ') || 'all hold'})`);
     for (const l of bad) console.error('        ', l);
     // B: the order in the workflow: the file swapped in before the title names the build
     const iRename = wf.indexOf(`-f name=${U.APK_NAME}`), iTitle = wf.indexOf('gh release edit android-latest --title "$TITLE"');
@@ -119,6 +138,8 @@ assert(/const updater = makeUpdater\(\{/.test(main) && /save: \(\) => \{ if \(g 
 assert(/screen: \(\) => \(menu === 'settings' \? 'settings' : menu === 'main' \? \(Date\.now\(\) - newArmed < 4000 \? 'main-armed' : 'main'\) : null\)/.test(main), 'D: the screens, with New game\'s armed second tap (NA)');
 assert(/window\.onAppUpdate = \(state, msg\) => updater\.onMessage\(state, msg\);/.test(main) && /updater\.check\(manual\)\.catch\(\(err\) => console\.error/.test(main), 'D: the app\'s messages to update.js; a mistake in the check logged, not shown as offline');
 assert(/\$\{updatePanel\(\)\}/.test(main) && /appUpd\(\)\?\.newer \? `<button class="btn big" data-menu="settings">App update available/.test(main) && /mine \? `build \$\{mine\}` : 'unknown build'/.test(main), 'D: Settings shows the panel (an unknown build said so); the menu a button when a newer build is found');
+assert(/goLabel, offerBrowser \} from '\.\/core\/update\.js'/.test(main) && main.includes('${esc(goLabel(updater.st))}</button>') && !main.includes(": 'Up to date'}") && /\$\{offerBrowser\(updater\.st\) \? `\n<p class="note"><a class="updbrowser" href="\$\{APK_URL\}" rel="noopener">\$\{esc\(UPDATE_TEXT\.browser\)\}<\/a>/.test(main), 'D: the second button\'s label from goLabel; the browser link to APK_URL only when offerBrowser (v0.11.187, U1)');
+assert(/if \("appassets\.androidplatform\.net"\.equals\(u\.getHost\(\)\)\) return false;\s*\/\/[^\n]*\n\s*try \{ startActivity\(new Intent\(Intent\.ACTION_VIEW, u\)\); \}/.test(java), 'D: MainActivity opens every outside link (the browser link) in the phone\'s browser (U1, DL)');
 for (const k of ['updauto', 'updinst', 'updcheck', 'updgo']) assert(main.includes(`data-${k}="1"`) && main.includes(`b.dataset.${k}`), `D: data-${k} written and handled`);
 assert(/store\.set\(UPDATE_KEY, JSON\.stringify\(upd\)\)/.test(main) && /const upd = updPrefs\(store\.get\(UPDATE_KEY\)\)/.test(main), 'D: the switches read and written under UPDATE_KEY');
 { // TK: every literal key in the game's code; update.js's own is in no other file
@@ -164,10 +185,24 @@ assert(/'js\/core\/update\.js'/.test(read('sw.js')), 'E: sw.js lists js/core/upd
         ['the menu redrawn for latest', "(sc === 'main' && st.found.newer)", "sc === 'main' || sc === 'main-armed'"],
         ['auto-install in the game', 'h.autoInstall() && sc) start()', 'h.autoInstall()) start()'],
         ['build 0 as old', 'st.found = m ? u : { ...u, newer: false, unknown: true };', 'st.found = u;'],
-        ['no rate-limit line', 'e.http === 403 || e.http === 429 ? UPDATE_TEXT.limited : ', ''],
+        ['no rate-limit line', "say(st.failed === 'limited' ? (e.at ? UPDATE_TEXT.limitedAt(e.at, now()) : UPDATE_TEXT.limited) : st.failed === 'none'", "say(st.failed === 'none'"],
         ['no missing-file line', "say(gone ? UPDATE_TEXT.missing : String(msg || ''));", "say(String(msg || ''));"],
         ['no save first', '        h.save();\n', ''],
         ['mistakes as offline', '.then((j) => ({ j }), (e) => ({ e }))', '.then((j) => ({ j }))'],
+        // v0.11.187 (U1)
+        ['no reset time', '(e.at ? UPDATE_TEXT.limitedAt(e.at, now()) : UPDATE_TEXT.limited)', 'UPDATE_TEXT.limited'],
+        ['the reset read as ms', 'reset * 1000', 'reset'],
+        ['Retry-After ignored', ': Number.isFinite(after) ? now + after * 1000 : NaN', ': NaN'],
+        ['a past time kept', 'at > now && ', ''],
+        ['more than a day kept', ' && at - now <= 864e5', ''],
+        ['the minutes rounded down', 'Math.max(1, Math.ceil(', 'Math.max(1, Math.floor('],
+        ['up to date after a failure', "if (st.failed) return 'Couldn\\'t check';", ''],
+        ['up to date before any check', "st.found ? 'Up to date' : 'Not checked yet'", "'Up to date'"],
+        ['the failure kept after a check that works', '                st.failed = null;\n', ''],
+        ['the browser link after a 404', "st.failed === 'limited' || st.failed === 'offline'", '!!st.failed'],
+        ['no browser link offline', "st.failed === 'limited' || st.failed === 'offline'", "st.failed === 'limited'"],
+        ['no redraw on a failed Check now', 'UPDATE_TEXT.offline); onSettings(); }', 'UPDATE_TEXT.offline); }'],
+        ['the failure at start not kept', "st.failed = e.http === 403 || e.http === 429 ? 'limited'", "if (manual) st.failed = e.http === 403 || e.http === 429 ? 'limited'"],
     ];
     let caught = 0;
     for (const [name, from, to] of mutants) {
