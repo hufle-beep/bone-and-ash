@@ -1,5 +1,5 @@
 {
- "saved": "2026-11-15",
+ "saved": "2026-11-16",
  "totals": {
   "scenes": 331,
   "words": 37411,
@@ -266,10 +266,10 @@
    "spacing": 0
   },
   "awake": {
-   "lines": 4,
-   "words": 168,
+   "lines": 9,
+   "words": 458,
    "dupes": 0,
-   "sceneShared": 0,
+   "sceneShared": 2,
    "tics": 0,
    "broken": 0,
    "spacing": 0

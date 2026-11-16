@@ -2,6 +2,21 @@
 
 Started 2026-11-15 (v0.11.190), when `history-24.md` would have passed 20 KB with this move (owner pick U1, MD: history parts start at 20 KB, so a push uploads less). Older parts: `history-24.md` … `history.md`.
 
+## Moved from the handover in v0.11.193 (word for word)
+
+### Decided in chat
+
+- **v0.11.190: the women at Yuki's new forms, the day's second song, the parley (N1, D1, RV1) (the options at about 18:50; the owner 19:09 "N1 go"; the drafts, 19:14 "D1 go"; the Opus review, 19:54 "RV1 go"; the fork, 19:15):** **Measured first** (scratch models copy, 200 games × 5 bots and the Sitter 100; every number in `ne-measure.md`): the great form in Act 1 with the women Random 94, Cultivator 154; the human form the Sitter 102; two songs a day in 74–200 of 200 games by bot; SW 0 outcomes change (482 / 482 passed); FW bigger than thought (Cultivator 163 / 200, Sitter 100 / 100 fly in the prologue; open, options later). **N1 🟢 L9a + L9b + L8b + SW (recommended) / N2 🟡 L9 + SW / N3 🟠 L8b + SW / N4 🔴 SW. Picked: N1.** **The drafts** (Fable, one run, about 76k tokens; `ws-drafts.md`; `--check` tic 0, run 1). **D1 🟢 C1 HP "have talked" + C2 TM's fish heads cut + SK1 (`p` in the song record, kept on a redraw) (recommended) / D2 🟡 C1 + C2 + SK2 (no save change, the sentence lost on a redraw) / D3 🟠 as drafted + SK1 / D4 🔴 a rerun. Picked: D1.** **The Opus review** (`ws-review.md`): H0 M3 L10 TG6, 12 of 18 planted caught: M1 "Then she" after the paragraph reads as Mei Lin; M2 HP's last line takes Yuki's joke on the next screen, which says "the two of you"; M3 HM repeats the breakthrough's Ya joke; L1–L7 texts (collar, bone-setting, repeated families, "mouth", the Dúrin, Music Box and Boof Pack sentences), L8 the Old Tree's lip (kept), L9–L10 code. **RV1 🟢 M1 code, M2's cut, M3, L1–L7 Claude's cuts (Dúrin Fable's alternative), L9, L10, TG1–TG6 (recommended) / RV2 🟡 a small Fable run for TM, HP, HM, Boof Pack / RV3 🟠 M + TG / RV4 🔴 TG. Picked: RV1.** M2b (`yuki_human_after`'s "the two of you") open, options later. Planted after RV1: 23 of 23 (`ws-mutate.md`). **The fork (the owner 19:15, word for word):** "the fork can be moved to the end of the roadmap, the option to switch between generic and concrete cultural mentions covers what I wanted for now." Moved: `roadmap-2.md` section 4 (f) to section 5.
+
+### Version notes
+
+## v0.11.190 — The women at Yuki's new forms, the day's second song, the parley (N1, D1, RV1)
+
+- **Files:** `js/story/prologue.js` (`btWho` out of `btText`; `AWAKE_WOMEN`, `AWAKE_AT`, `awakeWho`; the form scenes wrapped at load), `js/story/songs.js` (`SONG_SECOND`, `songShown`), `js/story/music.js` (`p` in the `sg` record; real songs only), `js/story/act1_return.js` (the parley's +1), `js/core/news.js`, `sw.js` (VERSION), `tools/textlint.mjs` (pools `awake`, `song_second`) and `tools/text-baseline.json`, `tests/story.test.mjs` (the N1 block; the BR1 pins for SW), `tests/README.md`, `project/research/ws-*`, `ne-measure.md`, `review-checklist.md` (the anchor's pronoun), the docs (`roadmap-2.md`: the fork to section 5; `roadmap-done-3.md`: section 0's three old lines; `history-25.md` new).
+- **What:** see the version line. `longforest.js` unchanged.
+- **Checks:** a game change (rule 2): the full check after the build (exit 0) and after RV1 (exit 0): 146 compared, 0 drifted, the same 4 log-only moves as v0.11.187–189 (mire_serpent inc random −5.9, guardian inc random +6.6, palisade_wolf story random +5.5, guardian story random −8.1; bot noise); the models unchanged (Careful 3.17 / 3.32). The text-lint snapshot saved (two new pools). Planted faults: 23 of 23 after RV1.
+- **Fable:** one run (about 76k tokens): its brief, the canon card, the form scenes' packets, the lines before them, the five passages.
+
 ## Moved from the handover in v0.11.192 (word for word)
 
 ### Decided in chat

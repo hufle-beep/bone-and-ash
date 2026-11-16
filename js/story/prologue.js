@@ -27,7 +27,7 @@ import { installYukiTime } from './yuki_time.js'; // v0.11.137 (TR1)
 import { installHouseTime } from './house_time.js'; // v0.11.139 (MW1)
 import { installKitchen } from './kitchen_install.js'; // v0.11.181 (SP1, PS)
 import { installReading } from './reading.js'; // v0.11.182 (RS1)
-import { installYukiPath, ykAskNow } from './yuki_path.js'; // v0.11.191 (Y1, AK): ykAskNow
+import { installYukiPath, ykAskNow, YK_HERE } from './yuki_path.js'; // v0.11.191 (Y1, AK): ykAskNow; v0.11.193 (N1, HQ): YK_HERE
 import { installCoil } from './coil_scenes.js';
 import { installOnce } from './oneoff.js';
 import { markWalks } from './walks.js'; // v0.11.109 (owner pick MW1)
@@ -1120,21 +1120,59 @@ export const AWAKE_WOMEN = {
 export const AWAKE_AT = { tiger: 'Then she is eleven pounds again', human: 'Then she looks at you and opens her mouth' };
 /** The women's paragraph for this form scene, or null (reached from the breakthrough they saw). */
 export const awakeWho = (g) => (g.flags.yuki_return && g.flags.yuki_return === g.flags.bt_return ? btWho(g) : null);
+/** v0.11.193 (owner pick N1, GV; Fable's, G1's bow: it follows BT_VILLAGE_CLOSER's "people bow … To you"; RV1 H1: "spirit-beast", the locals' word
+ *  (the mother's at supper, ashfall.js), not James's people's "root-kin"; RV1 L3: not after a realm with its own closer, BT_OWN_CLOSER): the great form after a breakthrough the prologue's
+ *  Ashfall saw (the village's witness block): the street answers while she is still great. */
+export const AWAKE_VILLAGE = `Nobody in the street runs. Running would be noticed. Mothers draw children behind them by the collar; the hunters study their own feet. Old Wen comes one step down from his doorway and bows again, to her this time, lower than he bowed to you. "Ashfall did not know it was housing a spirit-beast of rank," he says. "The fish she was given were small. This will be corrected." Yuki's ears turn at "fish".`;
+/** The village saw the breakthrough this form scene follows (the prologue's village scenes only; Act 1's Ashfall is BT_ASHFALL_A1).
+ *  RV1 (L2): 'supper' is in VILLAGE_SCENES but never a breakthrough's place (no Meditate card there), so only 'village' and 'ashfall' reach it. */
+export const awakeVillage = (g) => !!g.flags.yuki_return && g.flags.yuki_return === g.flags.bt_return && VILLAGE_SCENES.includes(g.flags.bt_return) && !BT_OWN_CLOSER.includes(g.james.realm);
 for (const [form, id] of [['tiger', 'yuki_tiger_awaken'], ['human', 'yuki_human_awaken']]) {
     const base = SCENES[id].text;
     if (typeof base !== 'string' || !base.includes(`\n\n${AWAKE_AT[form]}`)) throw new Error(`N1: ${id}'s text has lost its anchor`);
     SCENES[id].text = (g) => {
         const w = awakeWho(g);
+        const para = w ? AWAKE_WOMEN[form][w === 'M' ? 'M' : 'P'] : form === 'tiger' && awakeVillage(g) ? AWAKE_VILLAGE : null; // v0.11.193 (GV)
         // RV1 (L10): a function as the replacement, so a `$` in a text stays as written
-        return w ? base.replace(`\n\n${AWAKE_AT[form]}`, () => `\n\n${AWAKE_WOMEN[form][w === 'M' ? 'M' : 'P']}\n\n${AWAKE_AT[form].replace(/^Then she/, 'Then Yuki')}`) : base;
+        return para ? base.replace(`\n\n${AWAKE_AT[form]}`, () => `\n\n${para}\n\n${AWAKE_AT[form].replace(/^Then she/, 'Then Yuki')}`) : base;
     };
 }
 /** v0.11.192 (owner pick K1, M2b; Claude's word; v0.11.190's review M2b): after the women's paragraph, her shapes leave everyone less room, not "the two of you". */
 export const AFTER_WOMEN = ['which leaves the two of you rather less room', 'which leaves everyone rather less room'];
+/** v0.11.193 (owner pick N1, HA; Fable's, Claude's C1 in M): her last paragraph when the women heard her speak: not "I will choose
+ *  who hears me", they have; the closing request stays word for word, so "Promise. No occasion." still answers it. */
+export const AFTER_ANSWER = `"People say stupid things in front of cats," she adds. "It is very informative. So I will choose who hears me answer back, and when. Promise you won't make an occasion of it."`;
+export const AFTER_ANSWER_WOMEN = {
+    P: `"People are careless in front of a cat," she adds. "It is very informative. So to everyone else I stay one, and I choose who hears me answer back." Her gaze goes over Mei Lin and Ya, unhurried. "You two have heard. It can't be undone, so you are chosen. Don't be flattered." Ya shuts her mouth; Mei Lin nods, carefully. "And you," Yuki says to you. "Promise you won't make an occasion of it."`,
+    M: `"People are careless in front of a cat," she adds. "It is very informative. So to everyone else I stay one, and I choose who hears me answer back." Her eyes move to Mei Lin. "You have heard already. It was not planned. Keep it." "Who would believe me?" Mei Lin says. Yuki turns back to you. "Promise you won't make an occasion of it."`,
+};
 {
     const base = SCENES.yuki_human_after.text;
     if (typeof base !== 'string' || base.split(AFTER_WOMEN[0]).length !== 2) throw new Error('K1: yuki_human_after has lost "the two of you"');
-    SCENES.yuki_human_after.text = (g) => (awakeWho(g) ? base.replace(AFTER_WOMEN[0], () => AFTER_WOMEN[1]) : base);
+    SCENES.yuki_human_after.text = (g) => {
+        const w = awakeWho(g);
+        return w ? base.replace(AFTER_WOMEN[0], () => AFTER_WOMEN[1]).replace(AFTER_ANSWER, () => AFTER_ANSWER_WOMEN[w === 'M' ? 'M' : 'P']) : base;
+    };
+    if (base.split(AFTER_ANSWER).length !== 2) throw new Error('N1: yuki_human_after has lost its last paragraph');
+}
+/** v0.11.193 (owner pick N1, HQ; Fable's): her first question, when the women saw her turn human: they leave first.
+ *  Only on the first question's text (YK_HERE.first comes only after yuki_human_after; a later Coil's question is its own).
+ *  RV1 (M2; Claude's words): the first sentences are not a look (HA ends on her gaze, YK_HERE.first opens on one); (M1) after them
+ *  the question's first sentence names her ("Yuki is in the tall shape"): "She" would be the woman who just left. */
+export const ASK_AT = ['She is in the tall shape', 'Yuki is in the tall shape'];
+export const ASK_WOMEN = {
+    P: `Yuki waits, in Mei Lin and Ya's direction, with great patience. Mei Lin reads it first. "We're wanted elsewhere," she says, and takes Ya by the elbow. "I'm not," says Ya. "You are now." They go, Ya looking back twice.`,
+    M: `Yuki says nothing to Mei Lin, pointedly. Mei Lin lifts both hands. "I know that silence. My mother has it." She is already walking. "I'll go and count my herbs. Slowly. Shout if he falls over."`,
+};
+{
+    const base = SCENES.yk_choice.text;
+    if (typeof base !== 'function') throw new Error('N1: yk_choice has lost its text function');
+    if (!YK_HERE.first.startsWith(ASK_AT[0]) || YK_HERE.first.split(ASK_AT[0]).length !== 2) throw new Error('N1 (RV1 M1): YK_HERE.first has lost "She is in the tall shape"');
+    SCENES.yk_choice.text = (g) => {
+        const t = base(g);
+        const w = t === YK_HERE.first ? awakeWho(g) : null;
+        return w ? `${ASK_WOMEN[w === 'M' ? 'M' : 'P']}\n\n${t.replace(ASK_AT[0], () => ASK_AT[1])}` : t;
+    };
 }
 
 installCoil(SCENES);

@@ -1,0 +1,20 @@
+[
+ {"id":"F1","file":"js/story/prologue.js","find":"export const awakeVillage = (g) => !!g.flags.yuki_return && g.flags.yuki_return === g.flags.bt_return && VILLAGE_SCENES.includes(g.flags.bt_return);","replace":"export const awakeVillage = (g) => VILLAGE_SCENES.includes(g.flags.bt_return);","note":"GV: stale bt_return (no yuki_return check)"},
+ {"id":"F2","file":"js/story/prologue.js","find":"g.flags.yuki_return === g.flags.bt_return && VILLAGE_SCENES.includes(g.flags.bt_return);","replace":"g.flags.yuki_return === g.flags.bt_return && [...VILLAGE_SCENES, ...BT_ASHFALL_A1].includes(g.flags.bt_return);","note":"GV in Act 1's Ashfall too"},
+ {"id":"F3","file":"js/story/prologue.js","find":": form === 'tiger' && awakeVillage(g) ? AWAKE_VILLAGE : null;","replace":": awakeVillage(g) ? AWAKE_VILLAGE : null;","note":"GV on the human form too"},
+ {"id":"F4","file":"js/story/prologue.js","find":"AFTER_ANSWER_WOMEN[w === 'M' ? 'M' : 'P']","replace":"AFTER_ANSWER_WOMEN[w === 'P' ? 'P' : 'M']","note":"HA: the Old Tree (T) reads M"},
+ {"id":"F5","file":"js/story/prologue.js","find":"const w = t === YK_HERE.first ? awakeWho(g) : null;","replace":"const w = awakeWho(g);","note":"HQ on a later Coil's question too"},
+ {"id":"F6","file":"js/story/prologue.js","find":"return w ? `${ASK_WOMEN[w === 'M' ? 'M' : 'P']}\\n\\n${t}` : t;","replace":"return w ? `${t}\\n\\n${ASK_WOMEN[w === 'M' ? 'M' : 'P']}` : t;","note":"HQ after the question, not before"},
+ {"id":"F7","file":"js/story/prologue.js","find":"They go, Ya looking back twice.","replace":"They go, Ya looking back once.","note":"HQ-P text changed"},
+ {"id":"F8","file":"js/story/prologue.js","find":"\"You have heard already. It was not planned. Keep it.\"","replace":"\"You have heard already. That makes you the first, and it was not planned. Keep it.\"","note":"C1 reverted"},
+ {"id":"F9","file":"js/story/prologue.js","find":"housing a root-kin of rank","replace":"housing a spirit beast of rank","note":"C2 reverted"},
+ {"id":"F10","file":"js/story/prologue.js","find":"`Nobody in the street runs. Running","replace":"`Nobody in the moonlit street runs. Running","note":"GV: a time word outside the test's list"},
+ {"id":"F11","file":"js/story/prologue.js","find":"Ya shuts her mouth; Mei Lin nods, carefully.","replace":"Ya shuts her mouth; Mei Lin laughs, loudly.","note":"HA-P: an unpinned beat changed"},
+ {"id":"F12","file":"js/story/prologue.js","find":"`Yuki looks at Mei Lin, and goes on looking.","replace":"`Yuki looks at Mei Lin from your shoulder, and goes on looking.","note":"HQ-M: a shape word (her shape varies)"},
+ {"id":"F13","file":"js/story/prologue.js","find":"lower than he bowed to you.","replace":"lower than he has ever bowed to a disciple.","note":"G1 bow reverted to Fable's"},
+ {"id":"F14","file":"js/story/prologue.js","find":"base.replace(AFTER_WOMEN[0], () => AFTER_WOMEN[1]).replace(AFTER_ANSWER, () =>","replace":"base.replace(AFTER_ANSWER, () =>","note":"HA: \"everyone\" lost with the women"},
+ {"id":"F15","file":"js/story/prologue.js","find":"Yuki turns back to you. \"Promise you won't","replace":"Yuki turns back to you. \"Swear you won't","note":"HA-M: the request no longer matches \"Promise. No occasion.\""},
+ {"id":"F16","file":"js/story/prologue.js","find":"`Yuki looks at Mei Lin and Ya, then at nothing in particular, and waits. Mei Lin reads it first.","replace":"`Yuki looks at Mei Lin and Ya, then at nothing in particular, and waits. It is dark, and Mei Lin reads it first.","note":"HQ-P: a time word outside the test's list"},
+ {"id":"F17","file":"tools/textlint.mjs","find":", ...Object.values(BTX.ASK_WOMEN)]","replace":"]","note":"ASK_WOMEN dropped from the textlint pool"},
+ {"id":"F18","file":"js/story/prologue.js","find":"\"I'll go and count my herbs. Slowly. Shout if he falls over.\"`","replace":"\"I'll go and count my herbs. Slowly. Shout if he falls over.\" Ya goes with her.`","note":"HQ-M: Ya (away) named"}
+]

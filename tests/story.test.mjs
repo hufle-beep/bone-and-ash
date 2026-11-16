@@ -4326,7 +4326,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       const r = M.musicLine(g, view(g)); assert(r && r.key === 'song.reflect' && r.text === SG.songText(g, 'reflect'), 'N1 (L8b): a song with no opening sentence of its own stays as it is'); }
     // RV1 (TG1): both new pools read by the text lint (its sample states set no bt_return, no song record)
     { const TL = readFileSync(new URL('../tools/textlint.mjs', import.meta.url), 'utf8');
-      assert(/awake: Object\.values\(BTX\.AWAKE_WOMEN\)/.test(TL) && /song_second: Object\.values\(SGX\.SONG_SECOND\)/.test(TL), 'N1 (RV1 TG1): textlint\'s POOLS hold the awake and song_second pools'); }
+      assert(/awake: \[\.\.\.Object\.values\(BTX\.AWAKE_WOMEN\)\.flatMap\(\(o\) => Object\.values\(o\)\), BTX\.AWAKE_VILLAGE, \.\.\.Object\.values\(BTX\.AFTER_ANSWER_WOMEN\), \.\.\.Object\.values\(BTX\.ASK_WOMEN\)\]/.test(TL) && /song_second: Object\.values\(SGX\.SONG_SECOND\)/.test(TL), 'N1 (RV1 TG1): textlint\'s POOLS hold the awake and song_second pools'); }
     // SW: the parley's GU check
     const ck = RETURN.rt_parley.choices.map((c) => c.check).find((c) => c && c.skill === 'GU' && c.dc === 9);
     const bonus = (flags) => { const g = ensureBars(newGame(89500)); Object.assign(g.flags, flags); return ck.bonus(g); };
@@ -4520,7 +4520,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         const at = (party, ret = 'rr_hub') => { const g = ensureBars(fresh(92100)); Object.assign(g.flags, { bt_return: 'rr_hub', yuki_return: ret }, party ? { mei_party: true, ya_party: true } : {}); g.minutes = 12 * D + 600; g.james.realm = 7; g.yuki.realm = 7; goTo(g, SCENES, 'yuki_human_after'); return sceneView(g, SCENES).text; };
         const alone = at(false), both = at(true);
         assert(alone.includes(P.AFTER_WOMEN[0]) && !alone.includes(P.AFTER_WOMEN[1]), 'K1 (M2b): without the women, "the two of you" as before');
-        assert(both === alone.replace(P.AFTER_WOMEN[0], P.AFTER_WOMEN[1]), 'K1 (M2b): with the women, "everyone", nothing else changed');
+        assert(both === alone.replace(P.AFTER_WOMEN[0], P.AFTER_WOMEN[1]).replace(P.AFTER_ANSWER, P.AFTER_ANSWER_WOMEN.P), 'K1 (M2b); v0.11.193 (N1, HA): with the women, "everyone" and her last paragraph for them, nothing else changed');
         assert(/Then the great form, which leaves everyone rather less room than before, yawning/.test(both) && /which leaves the two of you rather less room than before/.test(alone), 'K1 (RV1 TG1): the word as shown to the owner, pinned');
         assert(at(true, 'lf_hub') === alone, 'K1 (M2b): reached from elsewhere than the breakthrough they saw, as before');
     }
@@ -4599,6 +4599,83 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         assert(/for \(const \[k, pairs\] of Object\.entries\(YK_LATER_HUMAN\)\) for \(const p of pairs\) swap\(/.test(src) && /^swap\(YK_LATER\.q\.wait, YK_WAIT_SINCE_DAWN\);$/m.test(src), 'K1 (RV1 TG8): the load-time check of every pair is there');
         assert(/t = put\(t, p\)/.test(body) && !/swap\(/.test(body) && /yukiForms\(\{ yuki: g\.coil\?\.snap\?\.yuki/.test(src), 'K1 (RV1 L6, L7): ykLaterQ uses the non-throwing put; the load check keeps swap');
     }
+}
+
+// v0.11.193 (owner pick N1, D1; Fable's, Claude's C1 + C2): HA yuki_human_after's last paragraph when the women heard her; HQ the
+// first question opens on them leaving; GV the prologue's Ashfall answers her great form. RV1: H1 "spirit-beast", M1 "Yuki is in the tall
+// shape" after HQ, M2 HQ's first sentences not a look (Claude's), L2 'supper' unreachable, L3 not after a realm with its own closer, TG1–TG6
+{
+    const P = await import('../js/story/prologue.js');
+    const D = 1440;
+    const { runMed } = await import('../js/core/meditate.js');
+    const pick = (g, re) => { const c = sceneView(g, SCENES).choices.find((x) => re.test(x.label)); assert(!!c, `N1 (193): a choice ${re} on ${g.scene}`); return c ? choose(g, SCENES, c.index) : null; };
+    const PROMISE = '"Promise you won\'t make an occasion of it."';
+    // the words as picked (D1): Fable's, with C1 (M) and C2 (GV)
+    assert(Object.keys(P.AFTER_ANSWER_WOMEN).join('') === 'PM' && Object.keys(P.ASK_WOMEN).join('') === 'PM', 'N1 (HA, HQ): P and M each');
+    assert(P.AFTER_ANSWER_WOMEN.P.endsWith(PROMISE) && P.AFTER_ANSWER_WOMEN.M.endsWith(PROMISE) && P.AFTER_ANSWER.endsWith(PROMISE.slice(1)), 'N1 (HA): the closing request word for word, so "Promise. No occasion." answers it');
+    assert(!/choose who hears me answer back, and when/.test(P.AFTER_ANSWER_WOMEN.P + P.AFTER_ANSWER_WOMEN.M) && /to everyone else I stay one, and I choose who hears me answer back\./.test(P.AFTER_ANSWER_WOMEN.P) && /You two have heard\. It can't be undone, so you are chosen\. Don't be flattered\./.test(P.AFTER_ANSWER_WOMEN.P), 'N1 (HA-P): the women have heard; Fable\'s words pinned');
+    assert(/"You have heard already\. It was not planned\. Keep it\." "Who would believe me\?" Mei Lin says\./.test(P.AFTER_ANSWER_WOMEN.M) && !/the first/.test(P.AFTER_ANSWER_WOMEN.M) && !/\bYa\b/.test(P.AFTER_ANSWER_WOMEN.M), 'N1 (HA-M; D1 C1): no "the first" (James heard her first); Ya, away, not named');
+    assert(/^Yuki waits, in Mei Lin and Ya's direction, with great patience\. Mei Lin reads it first\./.test(P.ASK_WOMEN.P) && /^Yuki says nothing to Mei Lin, pointedly\. Mei Lin lifts both hands\. "I know that silence\. My mother has it\."/.test(P.ASK_WOMEN.M) && !/\blooks?\b|\bgaze\b|\beyes\b/.test(P.ASK_WOMEN.P + P.ASK_WOMEN.M), 'N1 (RV1 M2): HQ opens on a wait and a silence, not a look');
+    assert(/takes Ya by the elbow/.test(P.ASK_WOMEN.P) && /Ya looking back twice\.$/.test(P.ASK_WOMEN.P) && /My mother has it\./.test(P.ASK_WOMEN.M) && /Shout if he falls over\."$/.test(P.ASK_WOMEN.M) && !/\bYa\b/.test(P.ASK_WOMEN.M), 'N1 (HQ): Fable\'s words pinned; Ya not in M');
+    const TIME = /\b(night|nights|dawn|dusk|sun|sunlit|sunset|sunrise|morning|evening|noon|midday|dark|darkness|moon|moonlit|stars?|today|tonight|lamp|lamplight|torch|torchlight)\b/i;
+    assert(!TIME.test(P.ASK_WOMEN.P + P.ASK_WOMEN.M) && !/\b(moss|ash|dust|bark|cat|tall|small|human|shoulder|lap|paws?|tail|ears|fur|whiskers)\b/i.test(P.ASK_WOMEN.P + P.ASK_WOMEN.M), 'N1 (HQ; RV1 TG2): no time, ground or shape words (camps, the Old Tree, the road; her shape varies)');
+    assert(/Ya shuts her mouth; Mei Lin nods, carefully\./.test(P.AFTER_ANSWER_WOMEN.P) && /Her gaze goes over Mei Lin and Ya, unhurried\./.test(P.AFTER_ANSWER_WOMEN.P) && /Her eyes move to Mei Lin\./.test(P.AFTER_ANSWER_WOMEN.M) && /Yuki turns back to you\./.test(P.AFTER_ANSWER_WOMEN.M) && /"And you," Yuki says to you\./.test(P.AFTER_ANSWER_WOMEN.P), 'N1 (HA; RV1 TG3): the middle beats pinned');
+    assert(P.ASK_AT.join('|') === 'She is in the tall shape|Yuki is in the tall shape' && YK_HERE.first.startsWith(P.ASK_AT[0]), 'N1 (RV1 M1): YK_HERE.first opens on the anchor');
+    assert(/a spirit-beast of rank/.test(P.AWAKE_VILLAGE) && !/root-kin/.test(P.AWAKE_VILLAGE) && !TIME.test(P.AWAKE_VILLAGE) && /^Nobody in the street runs\./.test(P.AWAKE_VILLAGE) && /Yuki's ears turn at "fish"\.$/.test(P.AWAKE_VILLAGE) && /and bows again, to her this time, lower than he bowed to you\./.test(P.AWAKE_VILLAGE) && !/disciple/.test(P.AWAKE_VILLAGE) && !/\b(Mei Lin|night|dawn|sun|morning|dust)\b/.test(P.AWAKE_VILLAGE), 'N1 (GV; RV1 H1, TG6: the locals\' "spirit-beast", never "root-kin"; G1 the bow as a callback to the closer): the locals\' word, no Mei Lin, no time words, no dust');
+    // HA: rendered after the breakthrough the women saw
+    const after = (back, flags = {}, party = true, ret) => { const g = ensureBars(fresh(93000)); Object.assign(g.flags, { bt_return: back, yuki_return: ret || back }, party ? { mei_party: true, ya_party: true } : {}, flags); g.minutes = 12 * D + 600; g.james.realm = 7; g.yuki.realm = 7; goTo(g, SCENES, 'yuki_human_after'); return sceneView(g, SCENES).text; };
+    const alone = after('rr_hub', {}, false);
+    assert(alone.endsWith(P.AFTER_ANSWER) && alone.includes(P.AFTER_WOMEN[0]), 'N1 (HA): without the women, as before');
+    for (const [back, flags, w] of [['rr_hub', {}, 'P'], ['heart_hub', {}, 'P'], ['ah_hub', { bl_day: 4 }, 'M'], ['ah_hub', { bl_day: 4, ya_off_done: true }, 'P']]) {
+        const x = after(back, flags);
+        assert(x === alone.replace(P.AFTER_WOMEN[0], P.AFTER_WOMEN[1]).replace(P.AFTER_ANSWER, P.AFTER_ANSWER_WOMEN[w]), `N1 (HA): ${back}${flags.ya_off_done ? ' (Ya back)' : ''}: ${w}'s last paragraph, "everyone"`);
+    }
+    for (const [back, ret, why] of [['rr_hub', 'lf_hub', "the Long Forest's hub"], ['fo_ashfall', null, "Act 1's Ashfall"], ['village', null, "the prologue's village"]]) assert(after(back, {}, true, ret) === alone, `N1 (HA): ${why}: as before`);
+    // HQ: the first question through yuki_human_after's two choices; the women leave first
+    for (const [re, back, flags, w] of [[/^Promise/, 'rr_hub', {}, 'P'], [/^Ask her to stay/, 'rr_hub', {}, 'P'], [/^Promise/, 'ah_hub', { bl_day: 4 }, 'M'], [/^Ask her to stay/, 'ah_hub', { bl_day: 4 }, 'M'], [/^Promise/, 'heart_hub', {}, 'P'], [/^Promise/, 'rr_hub', null, null]]) {
+        const g = ensureBars(fresh(93100)); g.minutes = 12 * D + 600;
+        Object.assign(g.flags, { yuki_tiger_seen: true, yuki_human_seen: true, bt_return: back, yuki_return: back }, flags ? { mei_party: true, ya_party: true, ...flags } : {});
+        g.james.realm = 7; g.yuki.realm = 7; g.yuki.form = 'human'; g.rel = { ...g.rel, Yuki: { f: 50, a: 80 } };
+        goTo(g, SCENES, 'yuki_human_after'); pick(g, re);
+        const t = g.scene === 'yk_choice' ? sceneView(g, SCENES).text : '';
+        assert(w ? t === `${P.ASK_WOMEN[w]}\n\n${YK_HERE.first.replace(P.ASK_AT[0], P.ASK_AT[1])}` && t.includes('\n\nYuki is in the tall shape') && !t.includes('\n\nShe is in the tall shape') : t === YK_HERE.first, `N1 (HQ): ${re} at ${back}: ${w ? `${w} leave, then her question naming her` : 'alone, her question as before'} (${g.scene})`);
+        if (w) { pick(g, /^"Family\./); assert(g.scene === 'yk_sister_here', `N1 (HQ): the answer as before (${g.scene})`); }
+    }
+    { // a later Coil's question (asked before) at the breakthrough the women saw: its own text, not this opening (open, options later)
+        const g = ensureBars(fresh(93200)); g.minutes = 12 * D + 600;
+        Object.assign(g.flags, { yuki_tiger_seen: true, yuki_human_seen: true, bt_return: 'rr_hub', yuki_return: 'rr_hub', mei_party: true, ya_party: true, yk_last: 'sister' });
+        g.james.realm = 7; g.yuki.realm = 7; g.yuki.form = 'human'; goTo(g, SCENES, 'yk_choice');
+        const t = sceneView(g, SCENES).text; assert(!Object.values(P.ASK_WOMEN).some((a) => t.includes(a)) && t !== YK_HERE.first, 'N1 (HQ): a later Coil\'s question unchanged');
+    }
+    // GV: the great form after the prologue village's breakthrough
+    const tiger = (back, party = false, ret) => { const g = ensureBars(fresh(93300)); Object.assign(g.flags, { bt_return: back, yuki_return: ret || back }, party ? { mei_party: true, ya_party: true } : {}); g.minutes = 3 * D + 600; g.james.realm = 2; g.yuki.realm = 2; goTo(g, SCENES, 'yuki_tiger_awaken'); return sceneView(g, SCENES).text; };
+    const tAlone = tiger('rr_hub');
+    for (const back of ['village', 'ashfall']) { // RV1 (L2): 'supper' is never a breakthrough's place
+        const x = tiger(back);
+        assert(x === tAlone.replace(`\n\n${P.AWAKE_AT.tiger}`, () => `\n\n${P.AWAKE_VILLAGE}\n\nThen Yuki is eleven pounds again`) && x.indexOf(P.AWAKE_VILLAGE) > x.indexOf('*Finally. I have been small for long enough.*'), `N1 (GV): ${back}: the street's paragraph while she is still great, then "Then Yuki"`);
+    }
+    for (const [back, ret, why] of [['fo_ashfall', null, "Act 1's Ashfall"], ['rt_ashfall', null, "the Return's Ashfall"], ['village', 'lf_hub', "the Long Forest's hub"], ['camp', null, 'the camp']]) assert(!tiger(back, false, ret).includes(P.AWAKE_VILLAGE), `N1 (GV): none at ${why}`);
+    for (const [realm, want] of [[3, true], [9, true], [10, false], [11, false], [12, false], [14, false]]) { // RV1 (L3): an old save's first great form at a realm with its own closer
+        const g = ensureBars(fresh(93305)); Object.assign(g.flags, { bt_return: 'village', yuki_return: 'village' }); g.james.realm = realm; g.yuki.realm = realm; goTo(g, SCENES, 'yuki_tiger_awaken');
+        assert(sceneView(g, SCENES).text.includes(P.AWAKE_VILLAGE) === want, `N1 (RV1 L3): realm ${realm}: GV ${want ? 'shown' : 'not shown (no "people bow" before it)'}`);
+    }
+    { const g = ensureBars(fresh(93310)); Object.assign(g.flags, { bt_return: 'village', yuki_return: 'village', yuki_tiger_seen: true }); g.james.realm = 7; g.yuki.realm = 7; goTo(g, SCENES, 'yuki_human_awaken');
+      assert(!sceneView(g, SCENES).text.includes(P.AWAKE_VILLAGE), 'N1 (GV): the great form only'); }
+    // RV1 (TG4): the real path to HA and HQ: the realm-7 breakthrough at rr_hub with both women, "Hello, Yuki.", "Promise. No occasion."
+    { const g = ensureBars(newGame(93330)); g.scene = 'rr_hub'; Object.assign(g.flags, { mei_party: true, ya_party: true, ya_met: true, yuki_tiger_seen: true }); g.coil = { ...(g.coil || {}), act: 1 };
+      g.james.realm = 6; g.yuki.realm = 6; g.james.saturation = 96; g.rel['Mei Lin'] = 20; g.rel = { ...g.rel, Yuki: { f: 50, a: 80 } }; g.minutes = 11 * D + 10 * 60;
+      runMed(g, SCENES, 'med:bt'); if (g.scene === 'ns_warn') choose(g, SCENES, 1); if (g.scene === 'breakthrough') choose(g, SCENES, 0);
+      const s1 = g.scene; if (g.scene === 'yuki_human_awaken') pick(g, /^"Hello, Yuki\."/);
+      const ha = g.scene === 'yuki_human_after' ? sceneView(g, SCENES).text : '';
+      if (g.scene === 'yuki_human_after') pick(g, /^Promise/);
+      const hq = g.scene === 'yk_choice' ? sceneView(g, SCENES).text : '';
+      assert(s1 === 'yuki_human_awaken' && ha.endsWith(P.AFTER_ANSWER_WOMEN.P) && ha.includes(P.AFTER_WOMEN[1]) && hq === `${P.ASK_WOMEN.P}\n\n${YK_HERE.first.replace(P.ASK_AT[0], P.ASK_AT[1])}`, `N1 (RV1 TG4): the real path at rr_hub: HA-P, then HQ-P naming her (${s1} → ${g.scene})`); }
+    // the real path: the prologue village's Meditate breakthrough, Get up, the great form with the street
+    { const g = ensureBars(newGame(93320)); g.scene = 'village'; g.james.realm = 1; g.james.saturation = 96; g.minutes = 3 * D + 10 * 60;
+      runMed(g, SCENES, 'med:bt'); const bt = g.scene === 'breakthrough' ? sceneView(g, SCENES).text : '';
+      if (g.scene === 'breakthrough') choose(g, SCENES, 0);
+      const t = g.scene === 'yuki_tiger_awaken' ? sceneView(g, SCENES).text : '';
+      assert(/Ashfall watches it go in total silence\./.test(bt) && g.james.realm === 2 && t.includes(`\n\n${P.AWAKE_VILLAGE}\n\nThen Yuki is eleven pounds again, in the space of one breath.`), `N1 (GV): the real path from the village's breakthrough (${g.scene})`); }
 }
 
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));

@@ -2,6 +2,12 @@
 
 Started in v0.11.150, when `roadmap-done-2.md` had passed about 45 KB. Newer than `roadmap-done-2.md` and `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.193 (word for word; the roadmap kept under 20 KB)
+
+### From section 0, as of v0.11.192
+
+- *(v0.11.192, owner RV1 and A1)* **Next: not picked yet** (options at the start of the next chat). **Open, options later:** FW, the prologue with a flying James (measured in v0.11.190, `project/research/ne-measure.md`: Random 48, the Cultivator 163 of 200 games, the Sitter 100 of 100; 61 scenes, 2 flight branches; a read of the texts first); Yuki's great form in the prologue's Ashfall (Cultivator 48, Sitter 28, Random 3; who sees her, not checked); the Old Tree's lip under Ya's half-circle (v0.11.190's L8, a note); an update check that skips GitHub's API. **From v0.11.192 (open, options later):** with Mei Lin and Ya there, `yuki_human_after`'s "choose who hears me answer back" and the first question after it (the K1 review's L5, older); text lint's new hits from the later-Coil states ("for forty years", "palm flat on", "round your wrist" 5 scenes each, "she comes closer" 4; "lets out a breath she" shared with a breakthrough line). **Done:** v0.11.191 Y1 (Yuki asks every Coil: RP `yk_last`; AK the breakthrough or her daily door; TX 11 texts by Fable; D1, RV1, D1). v0.11.192 K1 (L5 the first answer's line by her shape; M2b "everyone"; QH the later openings already human; QW no "until now" when the Coil began with her human shape; LF a later fire's lover line; TL the text checks' later-Coil states; F1 FQ the later fire's opening; RV1 M1, M2, L1–L4, L6, L7, TG1–TG8; A1 the fault copies keep `art/`). Older done lines: `roadmap-done-3.md` (v0.11.192).
+
 ## Moved in v0.11.192 (word for word; the roadmap kept under 20 KB)
 
 ### From section 0, as of v0.11.191

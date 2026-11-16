@@ -46,7 +46,9 @@
 - Beats and jokes lost from the old text (part 8 T16; part 9 T13).
 
 - **An insert before a sentence that opens on a pronoun (v0.11.190 M1):** a paragraph spliced in front of "Then she …" changes who "she" is (the women's paragraph ended on Mei Lin, the scene's next sentence meant Yuki). Check the first word of every anchor, and the screen after the insert for "the two of you" and a joke the insert has just made (M2).
+- **An insert before a scene's own first sentence (v0.11.193 M1):** check that sentence's pronoun as well as the anchor's: `ASK_WOMEN` went in front of `YK_HERE.first`, whose "She is in the tall shape" then read as the woman who had just left.
 - **Who a named local is in the game, not only on the card (v0.11.185 M1):** grep the name in the story before a brief allows it (Pock-Face was on the canon card as a villager; in play he is Gao's lackey, met only on some paths).
+- **A cut's reason gets a grep too (v0.11.193 H1):** Claude's cut C2 swapped Fable's "spirit beast" for "root-kin" as "a term the game never uses"; the grep missed the hyphenated "spirit-beast" the mother says at supper, and "root-kin" is James's people's word, not a local's. Grep every spelling (hyphen, space, plural) and who says it before a cut's reason goes to the owner.
 
 ## Tests (TG)
 - **The usual path, not only a fresh state (v0.11.181 TG1):** a gate tested from zero misses the stage already seen before the return.
