@@ -4786,6 +4786,105 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         assert(t.endsWith(BT_CLOSER) && /\nIt goes on looking\.\n/.test(t), `${T} (BT, S3): the Foundation breakthrough's screen`); }
 }
 
+// v0.11.197 (owner pick C1; the owner 2026-11-16 12:28): a walk with Mei Lin and Ya along is flown only when they are carried
+// (game.js `partyCarry`): James carries Mei Lin; Ya rides Yuki's great form (realm 2+) or is carried by her human form; each woman
+// friendship and affection both at 30+. Otherwise the whole party walks the full time, with a FOOT_LINES line; `hot_spring` [2]
+// leaves them behind (`alone`) and flies as his own; `lore` [0] stays on foot (F1's LW block above).
+{
+    const { partyCarry, CARRY_F, CARRY_A, flightMinutes } = await import('../js/core/game.js');
+    const { CARRY_LINES, FOOT_LINES, FLOWN_LINES } = await import('../js/core/story.js');
+    const { WALKS } = await import('../js/story/walks.js');
+    const T = 'C1 (197)';
+    const fill = (l, min, walk) => l.replace('{min}', min).replace('{walk}', walk);
+    const pools = [...CARRY_LINES.great, ...CARRY_LINES.human, ...FOOT_LINES.yuki, ...FOOT_LINES.mei, ...FOOT_LINES.ya];
+    assert(CARRY_F === 30 && CARRY_A === 30, `${T}: the bars are 30 / 30`);
+    assert(pools.every((l) => typeof l === 'string' && l.split('{min}').length === 2 && l.split('{walk}').length === 2), `${T}: each line with both numbers, once each`);
+    assert([CARRY_LINES.great, CARRY_LINES.human, FOOT_LINES.yuki, FOOT_LINES.mei, FOOT_LINES.ya].map((p) => p.length).join() === '4,3,3,2,2', `${T} (D1): Fable's 14 lines, 4 / 3 / 3 / 2 / 2`);
+    // D1: Fable's words, a fact or two pinned in each line (N1: the first great line without "tiger-sized")
+    const PINS = [[CARRY_LINES.great, ['Ya rides Yuki and whoops at every turn.', 'issuing corrections', 'steers by the ears', 'You split the difference']],
+        [CARRY_LINES.human, ['makes it look like an errand', 'somewhere interesting', 'a woman with a tail']],
+        [FOOT_LINES.yuki, ['carries what a cat carries', 'I could carry her spear', 'a cat of the right size']],
+        [FOOT_LINES.mei, ['with her whole spine', 'a mother who would hear of it']], [FOOT_LINES.ya, ["I'm not luggage, scholar.", 'declines to be cargo']]];
+    assert(PINS.every(([p, w]) => w.every((x, k) => p[k].includes(x))) && !pools.some((l) => /tiger-sized|\bagain\b|\bfirst\b|this time/.test(l)), `${T} (D1): the words as picked, no time words`);
+    const party = (realm, { mei = [50, 50], ya = [50, 50], form = 'cat', yr = realm } = {}) => {
+        const g = ensureBars(fresh(19700 + realm)); g.james.realm = realm; g.yuki.realm = yr; g.yuki.form = form;
+        g.flags.mei_party = true; g.flags.ya_party = true; g.rel['Mei Lin'] = { f: mei[0], a: mei[1] }; g.rel.Ya = { f: ya[0], a: ya[1] };
+        g.minutes = 14 * 1440 + 8 * 60; g.james.satiety = 90; return g;
+    };
+    // the rule
+    { const g = ensureBars(fresh(19700)); g.james.realm = 3; g.yuki.realm = 3; assert(partyCarry(g) === null, `${T}: nobody along: no rule`); }
+    assert(partyCarry(party(1)).why === 'yuki' && partyCarry(party(1, { mei: [0, 0] })).why === 'yuki', `${T}: below Core Formation Yuki can't carry Ya (checked first)`);
+    assert(partyCarry(party(2, { mei: [29, 50] })).why === 'mei' && partyCarry(party(2, { mei: [50, 29] })).why === 'mei' && partyCarry(party(2, { ya: [50, 29] })).why === 'ya' && partyCarry(party(2, { ya: [29, 99] })).why === 'ya', `${T}: each woman needs both meters at 30`);
+    { const c = partyCarry(party(2, { mei: [30, 30], ya: [30, 30] })); assert(c.carried && c.ya === 'great', `${T}: 30 / 30 is enough; Ya on the great form`); }
+    { const c = partyCarry(party(7, { form: 'human' })); assert(c.carried && c.ya === 'human', `${T}: Yuki in her human form carries Ya`); }
+    { const c = partyCarry(party(7, { form: 'cat' })); assert(c.carried && c.ya === 'great', `${T}: human form open, Yuki a cat now: she takes the great form for the trip`); }
+    // the walks: rt_road [2] (120 min to rt_ambush) and heart_core_after [0] (60 min), no `enter` on either destination
+    // (RV1: log_comfort is a quiet walk now, tested below)
+    const walk = (id) => { const w = WALKS.find(([wid]) => wid === id); return [w[1], SCENES[id].choices[w[1]]]; };
+    for (const id of ['rt_road', 'heart_core_after']) {
+        const [i, c] = walk(id);
+        { const g = party(1); g.scene = id; g.stats.flown = 4; const m0 = g.minutes; const r = choose(g, SCENES, i); const fl = flightMinutes(g, c.time);
+          assert(g.minutes - m0 === c.time && r.lines.includes(fill(FOOT_LINES.yuki[4 % FOOT_LINES.yuki.length], fl, c.time)) && g.stats.flown === 5 && !FLOWN_LINES.some((l) => r.lines.includes(fill(l, fl, c.time))), `${T}: ${id} at Foundation with the party: on foot, ${c.time} min (${g.minutes - m0}), the Yuki line in turn`); }
+        { const g = party(2); g.scene = id; g.stats.flown = 2; const m0 = g.minutes; const r = choose(g, SCENES, i); const fl = flightMinutes(g, c.time);
+          assert(fl < c.time && g.minutes - m0 === fl && r.lines.includes(fill(CARRY_LINES.great[2 % CARRY_LINES.great.length], fl, c.time)), `${T}: ${id} at Core Formation, both ready: carried, ${fl} min (${g.minutes - m0}), a great-form line`); }
+        { const g = party(7, { form: 'human' }); g.scene = id; const m0 = g.minutes; const r = choose(g, SCENES, i); const fl = flightMinutes(g, c.time);
+          assert(g.minutes - m0 === fl && r.lines.includes(fill(CARRY_LINES.human[0], fl, c.time)), `${T}: ${id} with Yuki human: carried, a human-form line`); }
+        for (const [who, opt] of [['mei', { mei: [10, 50] }], ['ya', { ya: [50, 10] }]]) {
+            const g = party(3, opt); g.scene = id; const m0 = g.minutes; const r = choose(g, SCENES, i); const fl = flightMinutes(g, c.time);
+            assert(g.minutes - m0 === c.time && r.lines.includes(fill(FOOT_LINES[who][0], fl, c.time)), `${T}: ${id}, ${who} not ready: on foot, the ${who} line`);
+        }
+        { const g = party(0); g.scene = id; const m0 = g.minutes; const r = choose(g, SCENES, i); assert(g.minutes - m0 === c.time && !pools.some((l) => r.lines.includes(fill(l, c.time, c.time))) && !g.stats.flown, `${T}: ${id} mortal: walked, no line`); }
+        { const g = party(1); g.scene = id; const m0 = g.minutes; choose(g, SCENES, i, { task: true }); assert(g.minutes - m0 === c.time && !g.stats.flown, `${T}: ${id} as a card: never a walk line`); }
+    }
+    // hot_spring [2] "Leave them to it": alone, flown as his own with the party flags set
+    { const [i, c] = walk('hot_spring'); assert(c.walkAlone === true && WALKS.filter((w) => w[3] === 'alone').length === 2, `${T}: hot_spring [2] an 'alone' mark (RV1 M1: rt_brawl_won the other)`);
+      const g = party(1); g.scene = 'hot_spring'; g.stats.flown = 0; const m0 = g.minutes; const r = choose(g, SCENES, i); const fl = flightMinutes(g, c.time);
+      assert(g.minutes - m0 === fl && r.lines.includes(fill(FLOWN_LINES[0], fl, c.time)), `${T}: hot_spring [2] flown alone at Foundation (${g.minutes - m0} of ${c.time})`); }
+    // RV1 (the Opus review)
+    const { QUIET_LINE } = await import('../js/core/story.js');
+    const { realmName } = await import('../js/core/game.js');
+    // TG2: the form-bound words, and {min} first in a carried line, {walk} first on foot
+    const at = (p, k) => p[k];
+    assert(at(CARRY_LINES.great, 0).startsWith('You carry Mei Lin.') && at(CARRY_LINES.great, 2).startsWith('*She steers by the ears,* Yuki reports') && at(CARRY_LINES.great, 3).includes('from your arms')
+        && at(CARRY_LINES.human, 0).includes('a head shorter than you') && at(CARRY_LINES.human, 0).includes('You take Mei Lin.') && at(CARRY_LINES.human, 1).includes('Yuki tells Ya, aloud,')
+        && at(FOOT_LINES.yuki, 1).includes('the four of you together') && at(FOOT_LINES.yuki, 1).includes('Yuki offers from your shoulder'), `${T} (RV1 TG2): the form-bound words`);
+    assert(Object.values(CARRY_LINES).flat().every((l) => l.indexOf('{min}') < l.indexOf('{walk}')) && Object.values(FOOT_LINES).flat().every((l) => l.indexOf('{walk}') < l.indexOf('{min}')), `${T} (RV1 TG2): {min} first when carried, {walk} first on foot`);
+    // L4, L5: the reviewer's words
+    assert(CARRY_LINES.great[2].includes("Ya, who can't hear it, denies nothing.") && FOOT_LINES.ya[1].endsWith("Yuki's silence has a point to it.") && !pools.some((l) => /says nothing, pointedly/.test(l)), `${T} (RV1 L4, L5): the reviewer's words`);
+    // TG3: the form read through yukiForm: a human form below realm 7 is not open, so Ya rides the great form
+    { const c = partyCarry(party(2, { form: 'human' })); assert(c.carried && c.ya === 'great', `${T} (RV1 TG3): form 'human' at realm 2 reads as great`); }
+    // TG1: the second time spot (no own time: the default move after go): ht_leave [0] → rt_start, carried and on foot
+    { const [i] = walk('ht_leave'); assert(SCENES.ht_leave.choices[i].time == null, `${T} (RV1 TG1): ht_leave [0] has no own time`);
+      const a = party(1); a.scene = 'ht_leave'; a.stats.flown = 0; const ra = choose(a, SCENES, i);
+      assert(ra.lines.some((l) => FOOT_LINES.yuki.some((y) => l === fill(y, 10, 20))) && a.stats.flown === 1 && a.scene === 'rt_start', `${T} (RV1 TG1): ht_leave at Foundation: on foot, the yuki line with 20 / 10`);
+      const b = party(2); b.scene = 'ht_leave'; b.stats.flown = 0; const rb = choose(b, SCENES, i);
+      assert(rb.lines.includes(fill(CARRY_LINES.great[0], 7, 20)) && b.stats.flown === 1, `${T} (RV1 TG1): ht_leave at Core Formation: carried, 7 of 20`); }
+    // M2: the quiet walks take only the calm line of each pool, whatever the turn
+    { const q = WALKS.filter((w) => w[3] === 'quiet').map((w) => w[0]).sort().join(); assert(q === 'ape_won,dw_drowned_won,log_comfort' && JSON.stringify(QUIET_LINE) === '{"great":1,"human":0,"yuki":0,"mei":0,"ya":1}', `${T} (RV1 M2): three quiet walks (${q}), the calm lines`);
+      const [i, c] = walk('log_comfort');
+      for (const [opt, realm, key, pool] of [[{}, 1, 'yuki', FOOT_LINES], [{}, 2, 'great', CARRY_LINES], [{ form: 'human' }, 7, 'human', CARRY_LINES], [{ mei: [10, 50] }, 2, 'mei', FOOT_LINES], [{ ya: [50, 10] }, 2, 'ya', FOOT_LINES]]) for (const turn of [0, 1, 5]) {
+          const g = party(realm, opt); g.scene = 'log_comfort'; g.stats.flown = turn; const r = choose(g, SCENES, i); const fl = flightMinutes(g, c.time);
+          assert(r.lines.includes(fill(pool[key][QUIET_LINE[key]], fl, c.time)) && g.stats.flown === turn + 1, `${T} (RV1 M2): log_comfort ${key} at turn ${turn}: the calm line`);
+      } }
+    // M1 + TG6: rt_brawl_won [0] in Ashfall after the Return, the flags set by a real path (rt_start's own enter): flown alone
+    { const [i, c] = walk('rt_brawl_won'); assert(c.walkAlone === true && WALKS.filter((w) => w[3] === 'alone').map((w) => w[0]).sort().join() === 'hot_spring,rt_brawl_won', `${T} (RV1 M1): two alone marks`);
+      const g = ensureBars(fresh(19799)); g.james.realm = 1; g.yuki.realm = 1; g.minutes = 18 * 1440 + 5 * 60; g.james.satiety = 90; goTo(g, SCENES, 'rt_start');
+      assert(g.flags.mei_party && g.flags.ya_party, `${T} (RV1 TG6): rt_start's enter sets the party flags`);
+      g.scene = 'rt_brawl_won'; g.stats.flown = 0; const m0 = g.minutes; const r = choose(g, SCENES, i); const fl = flightMinutes(g, c.time);
+      assert(g.minutes - m0 >= fl && r.lines.includes(fill(FLOWN_LINES[0], fl, c.time)) && !r.lines.some((l) => /Mei Lin/.test(l)), `${T} (RV1 M1, TG6): rt_brawl_won flown alone, no Mei Lin (${g.minutes - m0})`); }
+    // TG4: the FAQ and What's new against the bars
+    { const { FAQ } = await import('../js/core/faq.js'); const { NOTES } = await import('../js/core/news.js');
+      const fq = FAQ.find(([q]) => q === 'Flight'); const t = typeof fq[1] === 'function' ? fq[1](party(1)) : fq[1];
+      const note = NOTES.find(([v]) => v === '0.11.197')[1];
+      assert(t.includes(`friendship ${CARRY_F} and affection ${CARRY_A} or more`) && t.includes(`great form (from ${realmName(2)};`) && /ferries them over whatever the numbers say/.test(t), `${T} (RV1 L1, L2, TG4): the FAQ's With company`);
+      assert(CARRY_F === CARRY_A && note.includes(`friendship and affection of ${CARRY_F} or more`), `${T} (RV1 TG4): What's new's bar`);
+      // the two bars are equal today, so the rendered text can't tell them apart: the source names each (RV-f, an equivalent fault)
+      assert(readFileSync(new URL('../js/core/faq.js', import.meta.url), 'utf8').includes('needs friendship ${CARRY_F} and affection ${CARRY_A} or more'), `${T} (RV1 TG4): the FAQ names each bar`); }
+    // without the party the old rule: flown, FLOWN_LINES
+    { const [i, c] = walk('rt_road'); const g = party(1); delete g.flags.mei_party; delete g.flags.ya_party; g.scene = 'rt_road'; g.stats.flown = 0; const m0 = g.minutes; const r = choose(g, SCENES, i); const fl = flightMinutes(g, c.time);
+      assert(g.minutes - m0 === fl && r.lines.includes(fill(FLOWN_LINES[0], fl, c.time)), `${T}: rt_road [2] without the party: flown as before`); }
+}
+
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));
 console.log('fights', sorted(fights));
 console.log('endings', sorted(endings), 'longest run', maxSteps, 'scenes', Object.keys(SCENES).length);

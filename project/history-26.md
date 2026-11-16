@@ -2,6 +2,21 @@
 
 Started 2026-11-16 (v0.11.194), when `history-25.md` would have passed 20 KB with this move (owner pick U1, MD: history parts start at 20 KB, so a push uploads less). Older parts: `history-25.md` … `history.md`.
 
+## Moved from the handover in v0.11.197 (word for word)
+
+### Decided in chat
+
+- **v0.11.194: the read for a flying James in the prologue (R2, G1) (the options at about 10:11; the owner 10:12 "R2 go"; the stop-and-ask at about 10:15, 10:16 "G1"):** **The options (rule 1):** FR the read for FW (Random 48, the Cultivator 163 of 200, the Sitter 100 of 100 games fly in the prologue; 61 scenes; about 78 walking words in `prologue.js`, `wilds.js`, `ashfall.js`), TL the later-Coil lint hits (about 8 swaps), LQ a later Coil's question with the women there (0 of 800; the later texts already lead him out of hearing), AG the great form in Act 1's Ashfall without the party (Random 3 of 200), UC the update check off the API. **R2 🟢 FR by an Opus helper (recommended) / R1 🟡 FR, Claude's keyword read / T1 🟡 TL / U1 🟠 UC / N1 🔴 LQ + AG by Fable / N2 🔴 the same, Claude's. Picked: R2.** **PK (found while building: the packets 238.5 KB, not the 40–60 KB estimated; about 150k tokens, not 60–90k): G1 🟢 the full packets, two Opus helpers side by side (recommended) / G2 🟡 without repeats, 189 KB / G3 🟠 back to R1. Picked: G1.** **The re-measure:** the same as v0.11.190 (61 scenes; `breakthrough`, `ashfall`, `evening`, `tribute` 405 Coils each). **The read:** about 119k and 117k tokens, 85 s and 94 s; part 1 B 2 O 4 R 4, part 2 B 2 O 9 R 7; distinct, after Claude's code check: B 4 O 12 R 11, 36 fine (`lore` [0] moved O → B: a marked walk; `heal` [2]'s time is right, work keeps its time).
+
+### Version notes
+
+### v0.11.194 — The read for a flying James in the prologue (R2, G1)
+
+- **Files:** `project/research/fw-brief.md` (the brief and the table of the 61 scenes), `fw-read.md` (the two reports word for word, the totals, Claude's check), `sw.js` (VERSION), the docs (`history-26.md` started: v0.11.191's entries; `roadmap-done-3.md`: section 0's v0.11.193 line).
+- **What:** see the version line. The game as v0.11.193.
+- **Checks:** docs only (rule 2): `bash tools/check.sh quick` and the docs' test; the re-measure (a scratch copy of the models test, deleted after) and the packets changed nothing.
+- **Fable:** not used. **Opus:** two cold readers (about 119k and 117k tokens).
+
 ## Moved from the handover in v0.11.196 (word for word)
 
 ### Open items (as of v0.11.195; now on the roadmap, owner pick M1)

@@ -300,6 +300,15 @@
    "tics": 0,
    "broken": 0,
    "spacing": 0
+  },
+  "carry": {
+   "lines": 14,
+   "words": 372,
+   "dupes": 0,
+   "sceneShared": 1,
+   "tics": 0,
+   "broken": 0,
+   "spacing": 0
   }
  }
 }

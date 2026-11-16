@@ -22,6 +22,8 @@
 - **Labels against texts:** a choice label that no longer fits the text above it or the result after it (part 4 L11; part 5 L9).
 - **Repeated beats:** the same joke on one screen or on consecutive ones; a line that repeats one a screen earlier (part 5 L6, L10; part 6 L3, L6; part 9 T17, T18).
 - **Variants by state:** second-day and later-visit texts that assume the same beast, place or person as the first (part 9 T1, T15); the stomp texts' wins and `one` against each other (part 9 T9).
+- **Pools blind to their scene:** a line pool drawn after many scenes (the flown and carried walk lines) shown after a hard beat (a rescue, a grave find, a grief night) where its jokes don't fit; mark those uses (v0.11.197 M2: `quiet`).
+- **Flags that outlive their story:** a rule keyed on flags that are never cleared (`mei_party`, `ya_party`) firing where the people aren't (Ashfall after the Return; v0.11.197 M1).
 
 ## Reachability (what the player never sees)
 - Texts behind a day record, an hour or a flag a real game never reaches (part 4 M1, M2; part 5 M1, M2).

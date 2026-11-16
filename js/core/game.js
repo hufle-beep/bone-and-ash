@@ -467,6 +467,23 @@ export const airFights = (g) => canFly(g) && inAct1(g);
 /** Would this action be done from the air now (for the card and the smart rule): Foundation+, armed, a foe that doesn't fly standing. */
 export const airStrike = (g, actionId) => !!(g.combat && airFights(g) && !g.combat.style && AIR_STRIKE_ACTIONS.has(actionId) && g.combat.enemies.some((e) => e.hp > 0 && !e.flies));
 export const flightMinutes = (g, m) => (canFly(g) ? Math.min(m, Math.max(FLY_MIN, Math.round(m / (1 + g.james.realm)))) : m);
+/** v0.11.197 (owner pick C1; the owner 2026-11-16 12:28): a marked walk with Mei Lin or Ya along (`mei_party`, `ya_party`) is flown
+ *  only when they can come too: James carries Mei Lin, and Ya rides Yuki's great form (open from Core Formation; Yuki takes it for
+ *  the trip) or, while Yuki is in her human form, is carried by her. Each woman needs friendship and affection both at CARRY_F /
+ *  CARRY_A or more. Otherwise the whole party walks at walking time. Measured before the pick (a scratch copy of the models test,
+ *  200 games each, the Sitter 100): Act 1 company walks carried Careful, Completionist, Sociable 0% (they never reach realm 2),
+ *  Random 30%, Cultivator 82%, Sitter 79%; minutes added a game +296 / +361 / +301 / +243 / +58 / +120; Coils and clears unchanged.
+ *  null when nobody is along; else { carried, why: 'yuki' | 'mei' | 'ya' (on foot), ya: 'great' | 'human' (carried) }. */
+export const CARRY_F = 30, CARRY_A = 30;
+export function partyCarry(g) {
+    const mei = !!g.flags?.mei_party, ya = !!g.flags?.ya_party;
+    if (!mei && !ya) return null;
+    if (ya && !yukiForms(g).includes('tiger')) return { carried: false, why: 'yuki' };
+    const ready = (who) => { const r = g.rel?.[who] || { f: 0, a: 0 }; return r.f >= CARRY_F && r.a >= CARRY_A; };
+    if (mei && !ready('Mei Lin')) return { carried: false, why: 'mei' };
+    if (ya && !ready('Ya')) return { carried: false, why: 'ya' };
+    return { carried: true, ya: ya ? (yukiForm(g) === 'human' ? 'human' : 'great') : null };
+}
 
 export function advance(g, minutes, { resting = false } = {}) {
     const m = Math.max(0, Math.round(minutes));

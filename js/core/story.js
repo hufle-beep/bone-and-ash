@@ -4,7 +4,7 @@
  *             to | to(g), fail?, do?(g, r) → lines, failDo?(g, r) → lines, combat?: encounter, xp?: false }.
  * A check pays standard XP (25% on a fail) unless xp: false. Pure — no DOM.
  */
-import { rollCheck, awardXp, spendQi, advance, ensureBars, actingCheck, actingName, instantWin, itemFull, takeCapNotes, itemNames, setLootMult, noDiceDc, checkText, addItem, canFly, flightMinutes, plainFight, useSpeed, USE_CAP } from './game.js';
+import { rollCheck, awardXp, spendQi, advance, ensureBars, actingCheck, actingName, instantWin, itemFull, takeCapNotes, itemNames, setLootMult, noDiceDc, checkText, addItem, canFly, flightMinutes, partyCarry, plainFight, useSpeed, USE_CAP } from './game.js';
 import { STOMP, degreeForChoice } from '../story/power.js';
 import { keepReplies } from './replies.js'; // v0.11.69 (P1)
 import { noteDay } from './lines.js'; // v0.11.135 (NT1, EV1)
@@ -204,6 +204,49 @@ function flownLine(g, min, walk) {
     const n = g.stats.flown || 0; g.stats.flown = n + 1;
     return FLOWN_LINES[n % FLOWN_LINES.length].replace('{min}', min).replace('{walk}', walk);
 }
+/** v0.11.197 (owner pick C1; Fable's, rule 10): a walk with Mei Lin and Ya along (game.js `partyCarry`). CARRY_LINES when they are
+ *  carried (by Ya's ride: Yuki's great form or her human form), FOOT_LINES when the party walks (why: Yuki has no great form yet,
+ *  or Mei Lin or Ya isn't ready to be carried). {min} flying, {walk} walking; the same turn as FLOWN_LINES (`g.stats.flown`). */
+export const CARRY_LINES = {
+    great: [ // D1: the first with Fable's own alternative (N1: she may be in her great form already)
+        "You carry Mei Lin. Ya rides Yuki and whoops at every turn. {min} min in the air against {walk} on foot.",
+        "Mei Lin rides in your arms with her eyes shut, issuing corrections. Ya rides Yuki with hers wide open. {min} min; the walk wanted {walk}.",
+        "*She steers by the ears,* Yuki reports, large and white and put upon. Ya, who can't hear it, denies nothing. {min} min flown; on foot, {walk}.", // RV1 L4
+        "\"Faster,\" says Ya, from Yuki's back. \"Slower,\" says Mei Lin, from your arms. You split the difference: {min} min instead of {walk}.",
+    ],
+    human: [
+        "Yuki, a head shorter than you, carries Ya, who is not short, and makes it look like an errand. You take Mei Lin. {min} min instead of {walk}.",
+        "\"Stop kicking,\" Yuki tells Ya, aloud, \"or I put you down somewhere interesting.\" Ya stops, mostly. Mei Lin laughs into your collar. {min} min, with {walk} of walking left undone.",
+        "Ya has decided that being carried by a woman with a tail is the finest thing going, and says so for the whole {min} min. On foot: {walk}, and quieter.",
+    ],
+};
+export const FOOT_LINES = {
+    yuki: [
+        "Yuki weighs what a cat weighs and carries what a cat carries, which isn't Ya. So everyone walks: {walk} min. Alone you'd have flown it in {min}.",
+        "{walk} min on foot, the four of you together. *I could carry her spear,* Yuki offers from your shoulder. The flight you didn't take was {min}.",
+        "Ya walks, so the party walks, and you with it. {walk} min by foot; {min} by air, if anyone had a cat of the right size.",
+    ],
+    mei: [
+        "You offer to carry Mei Lin. She thanks you, with her whole spine, and walks. {walk} min on foot, against {min} had you gone up by yourself.",
+        "\"I have two feet,\" says Mei Lin, \"and a mother who would hear of it.\" So you all walk: {walk} min. The air would have asked {min} of you alone.",
+    ],
+    ya: [
+        "\"I'm not luggage, scholar.\" Ya walks, so everyone does, at her pace, which is brisk and offended. {walk} min; flying alone, {min}.",
+        "Ya looks Yuki over, hunter to hunter, and declines to be cargo. {walk} min of walking follows. The flight by yourself would have been {min}. Yuki's silence has a point to it.", // RV1 L5
+    ],
+};
+/** RV1 (M2): a walk marked 'quiet' (walks.js: after a rescue, a grave find, a grief night) takes only the calm line of each pool. */
+export const QUIET_LINE = { great: 1, human: 0, yuki: 0, mei: 0, ya: 1 };
+/** The line for a walk with company: carried (the time flown) or on foot (the time walked, the flight it would have been alone).
+ *  RV1 (L6): the party flags are always set together (act1_fallout.js, act1_blackroot.js, act1_return.js), so a carried party
+ *  always has Ya along and `carry.ya` is set; 'great' is only a fallback. */
+function partyLine(g, carry, min, walk, quiet) {
+    const key = carry.carried ? (carry.ya || 'great') : carry.why;
+    const all = carry.carried ? CARRY_LINES[key] : FOOT_LINES[key];
+    const pool = quiet ? [all[QUIET_LINE[key]]] : all;
+    const n = g.stats.flown || 0; g.stats.flown = n + 1;
+    return pool[n % pool.length].replace('{min}', min).replace('{walk}', walk);
+}
 
 /* ---------- every choice takes time (task mode, v0.9.5) ---------- */
 /** Scenes whose choices among themselves take no extra time: task hubs and their menus (their cards carry their own time), meta screens. */
@@ -280,6 +323,16 @@ export function choose(g, scenes, index, { task = false, speed = 0 } = {}) { // 
     // v0.11.109 (owner picks FS1 + MW1; Fable's two reviews): only a marked walk (js/story/walks.js, `c.walk`) is flown, and only
     // as a story choice: never a card, never with a check, Qi, fight, work or haul in it (camps, sleep and story beats keep their time)
     const walkOnly = !!c.walk && !task && !c.check && !c.qi && !c.do && !c.combat && gives(c).length === 0;
+    // v0.11.197 (owner pick C1): with Mei Lin or Ya along the walk is flown only when they are carried; else all of them walk
+    // (a walk marked `alone` leaves them behind). Read before the walk: the destination's own `enter` may set the party flags.
+    const carry = walkOnly && !c.walkAlone && canFly(g) ? partyCarry(g) : null;
+    const walkTime = (t0) => { // the minutes, and the line: flown alone, carried, or on foot with them
+        const fl = flightMinutes(g, t0);
+        if (!(fl < t0)) return t0;
+        if (carry && !carry.carried) { lines.push(partyLine(g, carry, fl, t0, c.walkQuiet)); return t0; }
+        lines.push(carry ? partyLine(g, carry, fl, t0, c.walkQuiet) : flownLine(g, fl, t0));
+        return fl;
+    };
     if (c.check) {
         roll = rollCheck(g, c.check.skill, asText(c.check.dc, g), c.check.bonus ? c.check.bonus(g) : 0);
         ok = roll.success;
@@ -294,8 +347,7 @@ export function choose(g, scenes, index, { task = false, speed = 0 } = {}) { // 
     if (onChoose && ok) onChoose(g, s.id, index, c); // v0.11.33: once-per-Coil work counts only when it succeeds (owner 14:05)
     if (c.time) {
         const t0 = sped(c.time);
-        const t = walkOnly && typeof c.to === 'string' && movesPlace(g, scenes, s.id, c.to) && !(TIMELESS_PAIR.has(s.id) && TIMELESS_PAIR.has(c.to)) ? flightMinutes(g, t0) : t0; // v0.11.109 (FL1 + FS1, WP): a pure walk elsewhere is flown
-        if (t < t0) lines.push(flownLine(g, t, t0));
+        const t = walkOnly && typeof c.to === 'string' && movesPlace(g, scenes, s.id, c.to) && !(TIMELESS_PAIR.has(s.id) && TIMELESS_PAIR.has(c.to)) ? walkTime(t0) : t0; // v0.11.109 (FL1 + FS1, WP): a pure walk elsewhere is flown; v0.11.197 (C1): with company, if carried
         lines.push(...advance(g, t, { work: true }));
     }
     takeCapNotes();
@@ -329,8 +381,7 @@ export function choose(g, scenes, index, { task = false, speed = 0 } = {}) { // 
     const extra = defaultMinutes(scenes, s.id, c, g.scene, g.location !== loc0);
     if (extra) {
         const t0 = sped(extra);
-        const t = walkOnly && g.location !== loc0 ? flightMinutes(g, t0) : t0; // v0.11.109 (FL1 + FS1, WP)
-        if (t < t0) lines.push(flownLine(g, t, t0));
+        const t = walkOnly && g.location !== loc0 ? walkTime(t0) : t0; // v0.11.109 (FL1 + FS1, WP); v0.11.197 (C1)
         lines.push(...advance(g, t, { work: true }));
     }
     lines.push(...checkDeath(g, scenes));

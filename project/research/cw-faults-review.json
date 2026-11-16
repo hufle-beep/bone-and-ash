@@ -1,0 +1,16 @@
+[
+ {"id":"R1","file":"js/core/story.js","find":"const t = walkOnly && g.location !== loc0 ? walkTime(t0) : t0;","replace":"const t = walkOnly && g.location !== loc0 ? flightMinutes(g, t0) : t0;","note":"second time spot (default move minutes after go) ignores the party: flown, no line (ht_leave, bl_morning)"},
+ {"id":"R2","file":"js/core/story.js","find":"? walkTime(t0) : t0; // v0.11.109 (FL1 + FS1, WP); v0.11.197 (C1)","replace":"? (carry ? t0 : walkTime(t0)) : t0; // v0.11.109 (FL1 + FS1, WP); v0.11.197 (C1)","note":"second time spot: a carried party walks the full time, no line"},
+ {"id":"R3","file":"js/core/game.js","find":"ya: ya ? (yukiForm(g) === 'human' ? 'human' : 'great') : null","replace":"ya: ya ? (g.yuki.form === 'human' ? 'human' : 'great') : null","note":"raw form instead of yukiForm: a human form below realm 7 picks the human pool"},
+ {"id":"R4","file":"js/core/story.js","find":"\"You carry Mei Lin. Ya rides Yuki and whoops","replace":"\"You carry Ya. Ya rides Yuki and whoops","note":"line words: who James carries (great 1)"},
+ {"id":"R5","file":"js/core/story.js","find":"Yuki, a head shorter than you, carries Ya","replace":"Yuki, a head taller than you, carries Ya","note":"line words: canon height (human 1)"},
+ {"id":"R6","file":"js/core/story.js","find":"Yuki offers from your shoulder.","replace":"Yuki offers at your knee.","note":"line words: the cat's place (yuki 2)"},
+ {"id":"R7","file":"js/core/story.js","find":"the four of you together","replace":"the three of you together","note":"line words: the count (yuki 2)"},
+ {"id":"R8","file":"js/core/story.js","find":"{walk} min on foot, against {min} had you gone up","replace":"{min} min on foot, against {walk} had you gone up","note":"line numbers swapped inside one foot line (mei 1)"},
+ {"id":"R9","file":"js/core/story.js","find":"Yuki tells Ya, aloud,","replace":"Yuki tells Ya through the bond,","note":"line words: bond speech to a local (human 2)"},
+ {"id":"R10","file":"js/core/story.js","find":"Yuki reports, large and white","replace":"Yuki says aloud, large and white","note":"line words: the great form speaking aloud (great 3)"},
+ {"id":"R11","file":"js/core/story.js","find":"if (carry && !carry.carried) { lines.push(partyLine(g, carry, fl, t0)); return t0; }","replace":"if (carry && !carry.carried) { lines.push(partyLine(g, carry, t0, fl)); return t0; }","note":"control: foot line numbers swapped in code"},
+ {"id":"R12","file":"js/core/faq.js","find":"Each woman also needs friendship and affection both at","replace":"Each woman also needs friendship or affection at","note":"FAQ against the rule"},
+ {"id":"R13","file":"js/core/faq.js","find":"(from ${realmName(2)}; Yuki takes it for the trip)","replace":"(from ${realmName(1)}; Yuki takes it for the trip)","note":"FAQ realm of the great form"},
+ {"id":"R14","file":"js/core/news.js","find":"Both women need friendship and affection of 30 or more.","replace":"Both women need friendship and affection of 50 or more.","note":"What's new number against CARRY_F / CARRY_A"}
+]
