@@ -580,7 +580,7 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md', 'roadmap-act2.md', 'roadmap
     // v0.11.200 (D1): and the tails of v0.11.2xx (S5's on the text tools' line)
     const tails = (t) => (t.match(/ \*\(v0\.11\.(19\d|2\d\d)/g) || []).length, cut = (t) => t.replace(/ \*\(v0\.11\.(19\d|2\d\d)[^\n]*/g, '');
     const beRaw = body(rd('roadmap-e.md'));
-    assert(tails(beRaw) === 4, `MD (H1): roadmap-e.md has the 3 marked tails of v0.11.196 and v0.11.200's (${tails(beRaw)})`);
+    assert(tails(beRaw) === 9, `MD (H1): roadmap-e.md has the 3 marked tails of v0.11.196, v0.11.200's and v0.11.202's 5 (${tails(beRaw)})`);
     const be = cut(beRaw), br = body(rd('roadmap-retune.md'));
     assert(h(be) === '6e712ad1524d6d47beaa91d775a0c7a5d8c5cda69214b97812060dfbbeaeab12' && h(br) === '48076f4fa63681f75ceb035b2cc348b0652ab31e761b8383aa636aaeb5efbe9b', `MD: roadmap-e.md and roadmap-retune.md hold the moved blocks exactly (sha256 ${h(be).slice(0, 12)}…, ${h(br).slice(0, 12)}…)`);
     assert(!r1.includes(be.split('\n')[0]) && !r1.includes(br.split('\n')[0]) && r1.includes("**Group e's older open items**") && r1.includes('`roadmap-e.md`') && r1.includes("**Section 2's older open items**") && r1.includes('`roadmap-retune.md`'), 'MD: not left behind in roadmap.md, a pointer in each place');
@@ -891,7 +891,7 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md', 'roadmap-act2.md', 'roadmap
         assert(/CT the canon card's tics in the result lines: \d+/.test(game.out), 'D1 (S5): the card\'s tics in the result lines are printed (CT)');
         const { splitLine } = await import('../js/core/replies.js');
         assert(splitLine('Supper: +25 satiety.').reply === '', 'D1 (S5): a gain line gives no result text (the pool reads the reply part only)');
-        const from = 'for a moment it\'s almost like working in a lab again';
+        const from = 'it\'s almost like working in a lab again'; // v0.11.202 (D1, a12): "for a moment" cut from the line
         assert(src.includes(from), 'D1 (S5): the planted result line is there to change');
         writeFileSync(pro, src.replace(from, `${from} \\$${'{'}lab}`)); // a literal \${lab} in the template source
         const rb = run(dir);

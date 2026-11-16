@@ -103,7 +103,7 @@ export const YT_BODY = {
     "rr_hub:1": [
         "The great root is smooth as a bench and warm as one in the sun, and Yuki has found the warmest yard of it. You sit there. She gets on you. Under you both, the root hums against your Convergence like a tuning fork. *It purrs,* says the bond, critically. *Flat. I could teach it.* She demonstrates, on your knee.",
         "The root is wide enough for a cart, which means it is wide enough for Yuki, lengthways, with room for you at the shoulder. Under you both it hums against your Convergence like a tuning fork. *It purrs,* says the bond, critically. *Flat.* She demonstrates the correct pitch. You feel it in your back teeth.",
-        "Yuki walks the root's edge with her arms out, heel to toe, her tail doing the real work, then sits down beside you and lets her feet hang. Under you both the wood hums against your Convergence. She lays her palm flat on it. \"It's purring,\" she says. \"Flat, and in its sleep. I know a man like that.\""
+        "Yuki walks the root's edge with her arms out, heel to toe, her tail doing the real work, then drops onto the root next to you and lets her feet hang. Under you both the wood hums against your Convergence. She spreads one hand on the bark. \"It's purring,\" she says. \"Flat, and in its sleep. I know a man like that.\""
     ],
     "rr_hub:2": [
         "Yuki is asleep in the hood, or says she is. The roots are warmer today, and the bond is warm with them, a slow shared drowse. You put a hand back and find an ear. *Something lives in the split,* it reminds you. \"I know.\" *Then stop thinking about it so loudly. Some of us are resting for it.*",
@@ -304,17 +304,17 @@ export const YT_CLOSE = {
     ],
     "HUMAN MID": [
         "She bumps her head against your shoulder, once, exactly as she did when she weighed nothing, and looks straight ahead afterwards.",
-        "\"You'll do,\" she says. It has been her highest mark for forty years, and it sounds different aloud. She seems to notice that too.",
+        "\"You'll do,\" she says. It is the highest mark she has ever given anyone, and it sounds different aloud. She seems to notice that too.",
         "She stays a while after there is any reason to. Her tail has settled against your back, and neither of you remarks on it.",
         // v0.11.152 (owner pick RP1, RM10, YT14; Fable's): eleven more, so a Coil never repeats one
         "She leans her shoulder into yours and addresses the middle distance. \"Don't read anything into it. I'm resting.\"",
-        "Her hand lands on your head, briefly and flat, the way yours has landed on hers for forty years. She appears to find the view from that side instructive.",
+        "Her hand lands on your head, briefly and flat, as yours has landed on hers since you were both small. She appears to find the view from that side instructive.",
         "\"You were less tiresome today,\" she says. \"I checked twice.\"",
         "She picks something off your sleeve, inspects it, and doesn't say what it was. Her hand stays on the sleeve.",
         "One white ear rests against your temple. She seems to think you won't notice if she doesn't.",
         "\"Stay there,\" she says. \"You're the right temperature, and I've lost the fur.\"",
         "She hums, low in her chest, where the purr used to be kept, and stops when she hears herself.",
-        "\"I had words for you for forty years,\" she says. \"It's strange to need a mouth for them. You're still not getting the long ones.\"",
+        "\"I've had words for you since before either of us could talk,\" she says. \"It's strange to need a mouth for them. You're still not getting the long ones.\"",
         "She puts her feet across your knees without asking, as she always has. There are simply fewer of them now, and more of each.",
         "Her fingers find the spot behind your ear and scratch it, twice. \"There,\" she says. \"Now you know what it's like.\"",
         "She gets up, and then sits down again closer, as though the first place had been a clerical error."
@@ -350,13 +350,13 @@ export const YT_CLOSE = {
         "She fixes your glasses, which were straight, and then your hair, which wasn't. \"Somebody's mother ought to,\" she says. \"You got me instead.\"",
         "\"Born the same day,\" she says, \"and I've been the elder since lunchtime of it.\" She pats your knee, twice, as one dismisses a pupil.",
         "She puts her head down on your shoulder and is asleep in four breaths, as she has been in hoods, pockets and lecture halls. You are not to move. You know the rules.",
-        "\"If you cry at anything,\" she says, \"I didn't see it. If I do, you didn't. That's the whole treaty. It's held for forty years.\"",
+        "\"If you cry at anything,\" she says, \"I didn't see it. If I do, you didn't. That's the whole treaty. It has outlasted better-drafted ones.\"",
         "She hooks her tail through your arm, as other people's sisters take an elbow, and walks you three steps in the direction she has chosen. \"There,\" she says. \"Go on by yourself. I'll be watching.\""
     ],
     "HUMAN HIGH UNDECIDED": [
         "\"I asked you a question once,\" she says, not looking at you. \"No hurry. I've only forty years invested.\"",
         "She looks at you a breath longer than the moment needs, then away. \"Still waiting,\" she says. \"I'm good at it. I once watched a mousehole through an entire conference.\"",
-        "Her tail curls once round your wrist and lets go. \"That wasn't a hint,\" she says. \"When I hint, you'll know. I'll use small words.\"",
+        "Her tail loops your wrist once and lets go. \"That wasn't a hint,\" she says. \"When I hint, you'll know. I'll use small words.\"",
         // v0.11.152 (owner pick RP1, RM10, YT14; Fable's): eleven more, so a Coil never repeats one
         "\"Don't answer yet,\" she says, though you hadn't opened your mouth. \"You've got your thesis face on. I'm not being a footnote.\"",
         "She starts to lean on you, stops halfway, makes a decision, and leans. \"This doesn't count toward anything,\" she says.",

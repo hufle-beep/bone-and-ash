@@ -83,6 +83,17 @@ const DR_BL_NEEDLE = dayReply("bl_train:2", [
     "Eyes shut today, by feel, each needle set down next to the last. You look afterwards: a row straighter than you could have drawn.",
     "Slow, exact and at last boring, which is what a drill is for. Mei Lin says you looked almost peaceful, and sounds suspicious.",
 ]);
+/* D1 (the merged text push, b1; Fable's): the Practice darts and needles had no line when they failed */
+const DR_BL_DART_F = dayReply("bl_train:1:f", [
+    "Past thirty paces the darts start holding opinions of their own. The mark stands through all of them, and Ya counts the misses aloud until she runs out of fingers.",
+    "The wind is from the left, and so, as it happens, is your aim. Mei Lin remarks that whatever is standing behind the mark has done nothing to deserve this.",
+    "Forty paces proves longer than it looked from twenty. You spend more of the hour finding darts than throwing them, and the mark looks on, unmarked.",
+]);
+const DR_BL_NEEDLE_F = dayReply("bl_train:2:f", [
+    "Slow, you can do. Exact is the trouble: each needle comes out a shade thicker than its neighbour, and by the tenth you have grown a toothpick.",
+    "The third needle forks at the tip. So does the fourth. Nine threads of cognition look into it, and not one will own the fault.",
+    "Mei Lin turns one over in her fingers and says, kindly, that she has darned with worse. You take it back and dissolve the whole batch.",
+]);
 const DR_LIGHTS = dayReply("bl_night_event:1", [
     "You follow until the roots knit shut across the way. The lights pass through a gap no person could use, and the song goes through with them.",
     "You go after them as far as the roots let you. They slip through a gap you couldn't get an arm into, one by one, without hurrying, and the song thins out behind them like a door being closed gently.",
@@ -110,7 +121,7 @@ const DR_MEI_FLIRT = coilReply("talk_mei:1", [[
     "She hands you the basket. You hold the basket. With both hands free she resets her hairpin, slowly, tassel and all, and asks you to go on. You gather the view is being improved on purpose.",
 ]]);
 const DR_SNARE = dayReply("rr_hunt:1", [
-    "Ya mourns the elk until dark, aloud, in instalments.",
+    "Your Convergence sings the snares out of nothing along the hare-runs, loops of white bone no thicker than a grass stem, and by the time Ya has finished looking down on the method they have closed on root-hares. Ya mourns the elk until dark, aloud, in instalments.", // D1 (a9; Fable's): the snare is sung
     "Ya carries the catch by the ears and tells it, personally, that it is not an elk.", // RV2 (L3, Fable's review): one hare on a thin haul
 ]);
 const DR_BETWEEN = dayReply("bl_fireside:2", [
@@ -199,7 +210,7 @@ const onlyYa = (g) => likesYa(g) && !likesMei(g);
 /* v0.11.122 (owner pick LG1, BC; texts by Fable, B0–B3): when both like him, the hot spring and the Ashen Hollow camp offer Ya alone too. */
 const SPRING_BOTH_WAIT = 'Nobody says anything for a long time. Mei Lin has come to the very edge of the bank, arms folded, glaring at the stars as if they started it. She hasn\'t left. She hasn\'t come in. She is, you realise, waiting to see what you do.';
 const SPRING_BOTH_SPLASH = '"Turn around, both of you," says Mei Lin, in a voice you have never heard her use: small, furious, and something else. There is a splash, and then she is in the water too, on Ya\'s other side, arms folded over her chest.';
-const SPRING_JUST_YA = ['"I am going to see to the fire," Mei Lin tells the steam, with great dignity. "It will take me a long time. I will be loud coming back." She goes, her back very straight. Three steps into the trees you hear her laugh, once, and stop herself.', 'Ya puts her hand flat on your chest, under the water. "Just me, then," she says. "For now." Her mouth finds yours. The steam does the rest.'];
+const SPRING_JUST_YA = ['"I am going to see to the fire," Mei Lin tells the steam, with great dignity. "It is a slow fire and will need me for hours. I will be loud coming back." She goes, her back very straight. Three steps into the trees you hear her laugh, once, and stop herself.', 'Ya puts her hand flat on your chest, under the water. "Just me, then," she says. "For now." Her mouth finds yours. The steam does the rest.'];
 const CAMP_BOTH_MEI = 'Mei Lin watches you go with her chin on her knees and calls after you, quite clearly, "Bring him back in one piece, I only brought so much thread," and then puts a hand over her mouth as if the words had got out on their own.'; // RL1 (L3): Fable's ALT A, after the fireside
 const onlyMei = (g) => likesMei(g) && !likesYa(g);
 /** Move the clock forward to hour h today (time passes: hunger, regen). */
@@ -979,8 +990,8 @@ You come round to Mei Lin's hands on your face. Ya sits next to you with a ruste
         text: '',
         choices: [
             { text: 'Spar with Ya.', show: daily('bt_ya'), check: { skill: 'GU', dc: 5 }, time: 60, do: (g) => { markDaily(g, 'bt_ya'); bumpRel(g, 'Ya', 2, 2); return [DR_SPAR_YA(g)]; }, failDo: (g) => { markDaily(g, 'bt_ya'); g.james.hp -= 2; bumpRel(g, 'Ya', 1, 1); return [`${DR_SPAR_YA_F(g)} −2 HP.`]; }, to: 'bl_train' },
-            { text: 'Darts at a mark, from farther and farther.', show: daily('bt_dart'), qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 5 }, time: 60, do: (g) => { markDaily(g, 'bt_dart'); return [DR_BL_DART(g)]; }, failDo: (g) => { markDaily(g, 'bt_dart'); return []; }, to: 'bl_train' },
-            { text: 'Needle drills, slow and exact.', show: daily('bt_needle'), qi: 4, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 6 }, time: 60, do: (g) => { markDaily(g, 'bt_needle'); return [DR_BL_NEEDLE(g)]; }, failDo: (g) => { markDaily(g, 'bt_needle'); return []; }, to: 'bl_train' },
+            { text: 'Darts at a mark, from farther and farther.', show: daily('bt_dart'), qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 5 }, time: 60, do: (g) => { markDaily(g, 'bt_dart'); return [DR_BL_DART(g)]; }, failDo: (g) => { markDaily(g, 'bt_dart'); return [DR_BL_DART_F(g)]; }, to: 'bl_train' },
+            { text: 'Needle drills, slow and exact.', show: daily('bt_needle'), qi: 4, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 6 }, time: 60, do: (g) => { markDaily(g, 'bt_needle'); return [DR_BL_NEEDLE(g)]; }, failDo: (g) => { markDaily(g, 'bt_needle'); return [DR_BL_NEEDLE_F(g)]; }, to: 'bl_train' },
             { text: 'Footwork with Yuki.', show: daily('bt_yuki'), check: { skill: 'GU', dc: 5 }, time: 60, do: (g) => { markDaily(g, 'bt_yuki'); return awardYukiFightXp(g, 'standard'); }, failDo: (g) => { markDaily(g, 'bt_yuki'); return awardYukiFightXp(g, 'standard'); }, to: 'bl_train' },
             { text: 'Enough.', to: hubFor },
         ],

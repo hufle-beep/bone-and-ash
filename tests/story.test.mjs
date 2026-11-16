@@ -324,7 +324,9 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     const SR4K = ['fo_palisade:0', 'fo_palisade:1', 'fo_palisade:1:f', 'fo_council:0', 'fo_council:1', 'fo_drill:0', 'fo_drill:0:f', 'fo_drill:1', 'fo_clinic:0', 'fo_clinic:1', 'fo_clinic:1:f']; // v0.11.170 (NX2, SR): their own test (NX2's block)
     const P5K = ['bl_camp:0', 'bl_train:1', 'bl_train:2']; // v0.11.172 (P5A, CW + SW): their own test (P5A's block)
     const P9K = ['wild_train:0:f', 'wild_train:1:f', 'wild_train:3:f']; // v0.11.177 (P9A, P2): the Wilds drills' failures, their own test (P9A's block)
-    const keys = Object.keys(DAY_REPLIES).filter((k) => !ST6K.includes(k) && !SWK.includes(k) && !SRK.includes(k) && !SR4K.includes(k) && !P5K.includes(k) && !P9K.includes(k));
+    const D1K = ['bl_train:1:f', 'bl_train:2:f']; // D1 (the merged text push, b1): the Blackroot drills' failures, their own test (D1's block)
+    const D1_FIRST = { 'rr_hunt:1': 'Your Convergence sings the snares out of nothing along the hare-runs, loops of white bone no thicker than a grass stem, and by the time Ya has finished looking down on the method they have closed on root-hares.' }; // D1 (a9): the sung snare, in front of the first day's old reply
+    const keys = Object.keys(DAY_REPLIES).filter((k) => !ST6K.includes(k) && !SWK.includes(k) && !SRK.includes(k) && !SR4K.includes(k) && !P5K.includes(k) && !P9K.includes(k) && !D1K.includes(k));
     const first = (k) => COIL_SETS[k]?.[0] ?? DAY_REPLIES[k]; // v0.11.166 (RW1): a Coil's set for the lists by Coil
     assert(keys.length === 38 && keys.reduce((s, k) => s + first(k).length - 1, 0) === 67, `NC1 (v0.11.177, P9A FF: the Fallout's four failure lists' third texts): 38 reply lists with 52 new texts; v0.11.152 (RP1): 11 more (${keys.length}, ${keys.reduce((s, k) => s + first(k).length - 1, 0)})`);
     assert(JSON.stringify([...keys].sort()) === JSON.stringify(NC.map(([k]) => k).sort()), 'NC1: a list for every reply the bots saw on two days, and no other');
@@ -346,9 +348,10 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
         };
         const list = first(key).map((t) => { const g = ensureBars(fresh(5200)); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; return typeof t === 'function' ? t(g) : t; });
         const days = list.map((_, k) => run(k));
-        if (form === 'cat') assert(days[0].reply === old && days[0].gains === JSON.stringify(OLD_GAINS[key]), `NC1: ${key}: the first day's reply and its gains are the old ones (${days[0].reply} | ${days[0].gains})`);
+        const want = D1_FIRST[key] ? `${D1_FIRST[key]} ${old}` : old; // D1 (a9)
+        if (form === 'cat') assert(days[0].reply === want && days[0].gains === JSON.stringify(OLD_GAINS[key]), `NC1: ${key}: the first day's reply and its gains are the old ones (${days[0].reply} | ${days[0].gains})`);
         else if (OLD_FORMS[form][key]) assert(days[0].reply === OLD_FORMS[form][key], `NC1 (RV2, TG): ${key} (${form}): the first day's reply is the old one`);
-        else assert(days[0].reply === old, `NC1 (RV2, TG): ${key} (${form}): one first-day reply in every form, the old one`);
+        else assert(days[0].reply === want, `NC1 (RV2, TG): ${key} (${form}): one first-day reply in every form, the old one`);
         assert(days.every((d, k) => d.reply === list[k]), `NC1: ${key} (${form}): day k shows text k`);
         assert(new Set(days.map((d) => d.reply)).size === list.length, `NC1: ${key} (${form}): a different reply each day`);
         assert(days.every((d) => d.gains === days[0].gains && JSON.stringify(d.delta) === JSON.stringify(days[0].delta)), `NC1: ${key} (${form}): the same gains and effects every day`);
@@ -843,7 +846,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
             const c = SCENES.bl_train.choices[i]; const L = DAY_REPLIES[key];
             assert(c.text === label && L?.length === 5 && new Set(L).size === 5 && L.every((t) => !bad(t) && words(t) >= 8 && words(t) <= 35), `P5A (SW): ${key}: five different lines (${label})`);
             for (const day of [0, 1, 4]) { const g = B(seed++, 'cat'); g.scene = 'bl_train'; onDay(g, day); const out = c.do(g); assert(out.length === 1 && out[0] === L[day], `P5A (SW): ${key} day ${day + 1} says its line`); }
-            { const g = B(seed++, 'cat'); g.scene = 'bl_train'; assert(c.failDo(g).length === 0, `P5A (SW): ${key}'s failure stays silent`); }
+            { const g = B(seed++, 'cat'); g.scene = 'bl_train'; const out = c.failDo(g); assert(out.length === 1 && out[0] === DAY_REPLIES[`${key}:f`]?.[0], `P5A (SW) → D1 (b1): ${key}'s failure says its first line (it was silent)`); }
         }
         // CL and LB: five days, not three or four; Ya's tracks ten days back; the three labels
         { const g = B(seed++, 'cat'); g.scene = 'bl_start'; const t = txt('bl_start', g); assert(/Five days in/.test(t) && !/Three days in|four-day/.test(SRC), 'P5A (CL): the expedition is five days (bl_start, the label)'); }
@@ -2701,7 +2704,7 @@ for (const form of ['cat', 'human']) {
         assert(want[i].test(t) && want.filter((re) => re.test(t)).length === same, `LP1: ${id} as ${form} (${t.slice(0, 70)}…)`);
     });
     for (const [id, cat, tiger] of [['gao_fled', /backs off down the slope, lackey in tow\. "The Crimson Lotus/, /He keeps his eyes on Yuki the whole way down[\s\S]*yawns at him/], ['boar_lost', /^(The fight ends with you in a tree and the boar underneath it|You finish the fight in one tree and Yuki in the next)/, // v0.11.174 (RV1, run 5): the woman has her own line now
-         /Yuki ends up on the far side of the hollow with a mouthful of ironhide bristle[\s\S]*\*I have standards\.\*/]]) {
+         /Yuki ends up across the hollow with a mouthful of ironhide bristle[\s\S]*\*I have standards\.\*/]]) {
         for (const form of ['cat', 'tiger', 'human']) for (const path of [null, 'sister', 'lover']) {
             const g = FM(61200 + n++, form, path ? { yk_path: path } : {}); g.scene = id;
             const t = sceneView(g, SCENES).text;
@@ -2981,7 +2984,7 @@ for (const form of ['cat', 'human']) {
         ["far_lost", {}, " Yuki comes in behind you on three good legs and lies down across the doorway. Mei Lin steps over her without breaking off, comes back with the salve, and starts on the cat. The lecture now covers you both.", null, [" Yuki comes in behind you holding one arm with the other, and sits on the doorstep without a word. Mei Lin does not break off. She fetches the salve, turns the arm to the light, and starts on it. The lecture now covers you both.", '']], // v0.11.169 (P3A, YF): and the woman's line
         // fo_spy_fled: v0.11.170 (NX2, CA1 FB) its own check below (the cat's and the woman's lines now too)
         ["fo_wolf_lost", {}, " Yuki comes out of the barley the other way a moment later, with grey fur in her teeth and no goat: she went after the one that came at her, the lame one, while the other went round. Wolves do that."],
-        ["mire_lost", { fly: true }, " Yuki rises beside you, black to the shoulder, having learnt that the mire holds a tiger's weight a great deal better than it holds a cat's, and lets go of it a great deal more slowly. *We do not speak of this,* says the bond."], // v0.11.131 (XB2, FY): for a flier
+        ["mire_lost", { fly: true }, " Yuki rises beside you, black to the shoulder, having learnt that the mire holds a tiger's weight far better than it holds a cat's, and lets go of it far more slowly. *We do not speak of this,* says the bond."], // v0.11.131 (XB2, FY): for a flier
         ["night_fled", {}, " Yuki walks behind with the blanket in her mouth, which keeps her from saying what she thinks of running from something she outweighs. The bond says it anyway."],
         ["ring_lost", {}, " Yuki is already out: she backed the whole length of the gallery ahead of you, because the rings were grown for gardeners and there is nowhere in them to turn that much cat round. She sits down and starts on the splinters in her forepaw.", null, null, " Yuki is out already, standing clear with her tail held up off the floor, taking splinters out of her sleeve one by one. \"They have the shelves,\" she says. \"I don't see why they need us as well.\""], // v0.11.173 (P6A, FB): and the woman's own line (Fable's)
         ['roots_lost', {}, " The collar is in Yuki's teeth. She climbs the shaft backwards with you swinging under her chin like a kitten, and when she sets you down at the top there are husk-lines raked down both her flanks, which neither of you mentions."],
@@ -3644,7 +3647,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     const card = readFileSync(new URL('../project/canon-card.md', import.meta.url), 'utf8');
     const TICS = [...(card.split('\n').find((l) => l.includes('Tics to avoid')) || '').matchAll(/"([^"]+)"/g)].map((m) => m[1].toLowerCase()).filter((x) => x !== 'a black dress');
     assert(TICS.length >= 15 && TICS.includes('gold eyes level'), `LB1 (TG): the card's tic list read (${TICS.length})`);
-    const KNOWN = [/ for a long time without saying anything\./, / for a very long time\./, / It is the first time you have seen her need one\./, /, a good deal lower down\./]; // older than this push (the fire night's "a long time" twice, the first asking's "the first time" and "a good deal"): on the roadmap, open, options later
+    const KNOWN = []; // D1 (a11): the four older tics (the fire night's "a long time" twice, the first asking's "the first time" and "a good deal") are gone // older than this push (the fire night's "a long time" twice, the first asking's "the first time" and "a good deal"): on the roadmap, open, options later
     const tic = (t) => { let u = String(t); for (const re of KNOWN) u = u.replace(re, '.'); return TICS.find((x) => u.toLowerCase().replace(/[,.]/g, '').includes(x)); };
     const yk = LB(11, 'human'); yk.flags.lf_active = true;
     const touched = [YK_HERE.first, YK_QUESTION.again, SCENES.yk_choice.text(yk), ...['cat', 'tiger', 'human'].map((f) => SCENES.rt_yk_talk.text(LB(12, f))), ...Object.values(DRILL_AGAIN).flat(),
@@ -4202,7 +4205,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       runMed(g, SCENES, 'med:bt'); const t = g.scene === 'breakthrough' ? sceneView(g, SCENES).text : '';
       assert(g.james.realm === 2 && t.endsWith(`\n\n${P.BT_LATE.P.A}`), `P1 (RV1 TG9): the Meditate card's breakthrough to realm 2 at rr_hub ends on PA (${g.scene}, realm ${g.james.realm})`); }
     // RV1 (TG10): the text lint reads the 21 and the supper's two clauses as a pool
-    { const src = readFileSync(new URL('../tools/textlint.mjs', import.meta.url), 'utf8'); assert(/btPlaceLines = \[[^\n]*BT_LATE[^\n]*SUPPER_POT\[2\], SUPPER_POT\[3\]\]/.test(src), 'P1 (RV1 TG10): the text lint\'s bt_place pool holds BT_LATE and SUPPER_POT 2, 3'); }
+    { const src = readFileSync(new URL('../tools/textlint.mjs', import.meta.url), 'utf8'); assert(/btPlaceLines = \[[^\n]*BT_LATE[^\n]*SUPPER_POT\[2\], SUPPER_POT\[3\], \.\.\.Object\.values\(BTX\.BT_ASK_WOMEN\)\]/.test(src), 'P1 (RV1 TG10): the text lint\'s bt_place pool holds BT_LATE and SUPPER_POT 2, 3; D1 (c1): and BT_ASK_WOMEN'); }
     // L5a: the take-over at 30, with her warm closer; 25–29 the shared hearth with a LOW closer
     const MK = (seed, f) => { const g = ensureBars(fresh(seed)); g.coil.act = 1; g.minutes = 8 * D + 600; g.rel.Mother = { f, a: 0 }; goTo(g, SCENES, 'fo_ashfall'); const i = SCENES[g.scene].choices.findIndex((c) => c.to === 'mother_time'); choose(g, SCENES, i); return g; };
     for (const [f, s, lv] of [[22, 2, 'LOW'], [26, 2, 'LOW'], [27, 3, 'MID'], [40, 3, 'MID']]) {
@@ -4242,8 +4245,11 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     const D = 1440;
     const words = (x) => x.split(/\s+/).filter(Boolean).length;
     // the texts: 2 forms × 2 places, 30–60 words, no time or ground words, Yuki unnamed; Claude's cuts C1, C2 pinned
-    const AW = Object.entries(P.AWAKE_WOMEN).flatMap(([f, o]) => Object.entries(o).map(([w, x]) => [f + w, x]));
-    assert(AW.length === 4 && Object.values(P.AWAKE_WOMEN).every((o) => Object.keys(o).join('') === 'PM') && new Set(AW.map((a) => a[1])).size === 4, 'N1 (L9): four texts, P and M for each form');
+    const AWT = Object.entries(P.AWAKE_WOMEN).flatMap(([f, o]) => Object.entries(o).map(([w, x]) => [f + w, x])); // D1 (c3): and the Old Tree's T (tiger only)
+    const AW = AWT.filter(([k]) => k !== 'tigerT');
+    assert(AW.length === 4 && Object.values(P.AWAKE_WOMEN).every((o) => Object.keys(o).filter((k) => k !== 'T').join('') === 'PM') && new Set(AW.map((a) => a[1])).size === 4, 'N1 (L9): four texts, P and M for each form');
+    { const T = P.AWAKE_WOMEN.tiger.T; // D1 (c3; Fable's): on the lip, no half-circle; Mei Lin's first line and Ya's throat line kept
+      assert(AWT.length === 5 && !P.AWAKE_WOMEN.human.T && words(T) >= 50 && words(T) <= 90 && !/half-circle|walks|Yuki|\b(night|dawn|dusk|morning|evening)\b/i.test(T) && T.startsWith('Mei Lin\'s hands have gone to her herb bag, where nothing helps. "I moved her off my blanket. With one hand."') && /"Throat's too high\. I'd want the ground, a pit, and friends\." "You'd want a wider ledge," says Mei Lin, who is not looking down\.$/.test(T), `D1 (c3): the Old Tree's T, 50–90 words (${words(T)}), no half-circle, no time word, Yuki unnamed; the kept lines`); }
     for (const [k, x] of AW) assert(words(x) >= 30 && words(x) <= 60 && !/\b(night|dawn|dusk|sun|morning|evening|moss|ash|dust|bark|Yuki)\b/i.test(x) && !/[{}@`]|TODO/.test(x), `N1 (L9): ${k} 30–60 words (${words(x)}), no time, ground or Yuki`);
     assert(/"Mine would have\. I have questions\."$/.test(P.AWAKE_WOMEN.tiger.M) && !/fish|set bones/.test(P.AWAKE_WOMEN.tiger.M), 'N1 (D1 C2; RV1 L2): TM ends on her questions, no fish heads, no bone-setting');
     assert(/Mei Lin is checking: fingers, the turn of an ear, the tail\. "It's all real," she says, faintly\.$/.test(P.AWAKE_WOMEN.human.P) && !/talk|throat|counting/.test(P.AWAKE_WOMEN.human.P), 'N1 (RV1 M2, L1, L3): HP ends on "faintly", Yuki\'s own joke left to her; no throat under the collar');
@@ -4260,7 +4266,8 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         const alone = form(id, 'rr_hub', {}, false);
         assert(createHash('sha256').update(alone).digest('hex').slice(0, 16) === { tiger: '0af86b8c3b16508c', human: 'd351d6c495162fd7' }[f] && /^Then she/.test(P.AWAKE_AT[f]), `N1 (RV1 TG3): ${id} without the women renders as in v0.11.189`);
         assert(alone.includes(`\n\n${P.AWAKE_AT[f]}`) && !AW.some((a) => alone.includes(a[1])), `N1 (L9): ${id} without the party as before`);
-        for (const [back, flags, w] of [['rr_hub', {}, 'P'], ['dw_hub', { bl_day: 6 }, 'P'], ['heart_hub', {}, 'P'], ['rt_camp', {}, 'P'], ['ah_hub', { bl_day: 4 }, 'M'], ['ah_hub', { bl_day: 4, ya_off_done: true }, 'P']]) {
+        for (const [back, flags, w0] of [['rr_hub', {}, 'P'], ['dw_hub', { bl_day: 6 }, 'P'], ['heart_hub', {}, 'T'], ['rt_camp', {}, 'P'], ['ah_hub', { bl_day: 4 }, 'M'], ['ah_hub', { bl_day: 4, ya_off_done: true }, 'P']]) {
+            const w = w0 === 'T' && !P.AWAKE_WOMEN[f].T ? 'P' : w0; // D1 (c3): the Old Tree's own text for the great form, P for the human
             const x = form(id, back, flags);
             assert(x === alone.replace(`\n\n${P.AWAKE_AT[f]}`, () => `\n\n${P.AWAKE_WOMEN[f][w]}\n\n${P.AWAKE_AT[f].replace(/^Then she/, 'Then Yuki')}`), `N1 (L9; RV1 M1): ${id} after ${back}${flags.ya_off_done ? ' (Ya back)' : ''}: ${w} before "${P.AWAKE_AT[f]}", the sentence naming Yuki`);
         }
@@ -4329,7 +4336,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       const r = M.musicLine(g, view(g)); assert(r && r.key === 'song.reflect' && r.text === SG.songText(g, 'reflect'), 'N1 (L8b): a song with no opening sentence of its own stays as it is'); }
     // RV1 (TG1): both new pools read by the text lint (its sample states set no bt_return, no song record)
     { const TL = readFileSync(new URL('../tools/textlint.mjs', import.meta.url), 'utf8');
-      assert(/awake: \[\.\.\.Object\.values\(BTX\.AWAKE_WOMEN\)\.flatMap\(\(o\) => Object\.values\(o\)\), BTX\.AWAKE_VILLAGE, \.\.\.Object\.values\(BTX\.AFTER_ANSWER_WOMEN\), \.\.\.Object\.values\(BTX\.ASK_WOMEN\)\]/.test(TL) && /song_second: Object\.values\(SGX\.SONG_SECOND\)/.test(TL), 'N1 (RV1 TG1): textlint\'s POOLS hold the awake and song_second pools'); }
+      assert(/awake: \[\.\.\.Object\.values\(BTX\.AWAKE_WOMEN\)\.flatMap\(\(o\) => Object\.values\(o\)\), BTX\.AWAKE_VILLAGE, BTX\.AWAKE_A1_ASHFALL \/\* D1 \(c2\) \*\/, \.\.\.Object\.values\(BTX\.AFTER_ANSWER_WOMEN\), \.\.\.Object\.values\(BTX\.ASK_WOMEN\)\]/.test(TL) && /song_second: Object\.values\(SGX\.SONG_SECOND\)/.test(TL), 'N1 (RV1 TG1): textlint\'s POOLS hold the awake and song_second pools'); }
     // SW: the parley's GU check
     const ck = RETURN.rt_parley.choices.map((c) => c.check).find((c) => c && c.skill === 'GU' && c.dc === 9);
     const bonus = (flags) => { const g = ensureBars(newGame(89500)); Object.assign(g.flags, flags); return ck.bonus(g); };
@@ -4488,7 +4495,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     for (const x of [...ALLY(Y.YK_LATER), ...ALLY(Y.YK_LATER_RESULT)]) assert(!CARD_TICS.test(x) && !/\bfirst time\b|\bnever (heard|seen|had)\b/i.test(x), `Y1 (RV1 TG): no canon-card tic and no first-time claim: ${x.slice(0, 40)}`);
     assert(later(91410, 'wait', { realm: 6 }).scene === 'rr_hub' && !Y.ykAskNow(later(91411, 'wait', { realm: 6 })), 'Y1 (AK): after a "Not yet", below Nascent Soul, no question either');
     for (const x of Object.values(Y.YK_LATER_RESULT)) assert(!/"/.test(x) && splitLine(x).reply === x, `Y1 (RV1 TG8): a result line with no speech, read whole: ${x.slice(0, 30)}`);
-    assert(/The arrangement stands\./.test(Y.YK_LATER.sister.same) && /She leans in\. The kiss/.test(Y.YK_LATER.lover.same) && /Then she comes closer,/.test(Y.YK_LATER.lover.changed) && / She leans her shoulder into your ribs/.test(Y.YK_LATER.sister.changed) && !/steps in/.test(Y.YK_LATER.sister.changed), 'Y1 (RV1 L1, L2): Claude\'s cuts');
+    assert(/The arrangement stands\./.test(Y.YK_LATER.sister.same) && /She leans in\. The kiss/.test(Y.YK_LATER.lover.same) && /Then she shifts closer, rests her free hand over your heart/.test(Y.YK_LATER.lover.changed) && / She leans her shoulder into your ribs/.test(Y.YK_LATER.sister.changed) && !/steps in/.test(Y.YK_LATER.sister.changed), 'Y1 (RV1 L1, L2): Claude\'s cuts');
     // the first texts unchanged where no last answer: the question away and by the fire
     const g0 = ensureBars(fresh(91500)); Object.assign(g0.flags, { yuki_human_seen: true }); g0.james.realm = 7; g0.yuki.realm = 7; g0.rel = { ...g0.rel, Yuki: { f: 50, a: 80 } };
     goTo(g0, SCENES, 'yk_choice'); assert(sceneView(g0, SCENES).text === Y.YK_HERE.first, 'Y1: the first question away from the fire as before');
@@ -4552,7 +4559,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     assert(!/pleased with them/.test(Y.ykLaterQ({ flags: { yk_form_before: 'human' } }, 'fire')) && /pleased with them/.test(Y.YK_LATER.fire), 'K1 (RV1 L3): the fire\'s palms, already human, without "pleased with them"');
     assert(Y.ykLaterQ({ flags: { yk_form_before: 'human' } }, 'sister').startsWith('Yuki leads you off until nobody is near enough to hear, and stops there, shaking her sleeves straight.\n\n"Right," she says. "You know what comes with the hands."'), 'K1 (RV1 M1): the sister opening as shown');
     assert(Y.ykLaterQ({ flags: { yk_form_before: 'human' }, coil: { snap: { yuki: { realm: 0 } } } }, 'sister').startsWith('Yuki leads you off until nobody is near enough to hear, and stops there, shaking her sleeves straight.'), 'K1 (QH): the sister opening as shown to the owner');
-    assert(/^She waits until no one is close enough to overhear\. She tugs her collar level\.\n\n/.test(Y.ykLaterQ({ flags: { yk_form_before: 'human' } }, 'lover')), 'K1 (QH; RV1 L1): the lover opening as picked');
+    assert(/^Yuki waits until no one is close enough to overhear\. She tugs her collar level\.\n\n/.test(Y.ykLaterQ({ flags: { yk_form_before: 'human' } }, 'lover')), 'K1 (QH; RV1 L1): the lover opening as picked; v0.11.202 (RV1 M2): opens on her name');
     assert(/^Yuki picks a spot out of everyone's hearing and rolls her shoulders there\.\n\n/.test(Y.ykLaterQ({ flags: { yk_form_before: 'human' } }, 'wait')), 'K1 (QH; RV1 L2): the "Not yet" opening as picked');
     assert(/Across it Yuki gets up, stretches, and kneels again: sleeves neat, hair already everywhere\./.test(Y.ykLaterQ({ flags: { yk_form_before: 'human' } }, 'fire')), 'K1 (F1, FQ): the fire opening as asked');
     // QW: the "Not yet" one when this Coil began with her human shape: no voice grown back; otherwise as written
@@ -4693,7 +4700,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     const TICS = /something like|for a moment|in a way that|the way a|a long moment|a long time|the first time|a thousand years|four hundred pounds|a great deal|a good deal|the far side|sits down beside|since the lab|light comes down|gold eyes level/i;
     const all = [...Object.values(FW), BT_CLOSER, ...Object.values(FLY_LABELS)];
     assert(all.every((t) => typeof t === 'string' && t.length > 0 && !TICS.test(t)), `${T}: every line set, no canon-card tic`);
-    assert(Object.keys(FW).length === 17 && Object.keys(FLY_LABELS).join() === 'stream#5,dawn#0,bone_field#2', `${T}: 17 lines and 3 flown walk labels`);
+    assert(Object.keys(FW).length === 17 && Object.keys(FLY_LABELS).join() === 'stream#5,dawn#0,bone_field#2,mire_lost#0', `${T}: 17 lines and 3 flown walk labels; D1 (a1): and mire_lost's`);
     assert(/^You land out of sight/.test(FW.healAgain) && /You went nowhere near that high\.$/.test(FW.healAgain) && /two hours, nearly all of it cutting and carrying\.$/.test(FW.healLabel), `${T} (HL): Fable's words`);
     assert(BT_CLOSER.endsWith('precisely as sarcastic as before. The ground, it seems, has let go of you.') && !/withdraw|verdict|claim/.test(BT_CLOSER) && FW.jackalsRun.endsWith('Flying wants a clearer head.'), `${T} (D1; RV1 M4): BT and NA as the alts, BT not in Wen's words`);
     // RV1 (TG1): the facts inside each line, so a word changed in the middle fails too
@@ -4968,6 +4975,83 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     // D1's fixes: ST (no "steers" on the screen), RA (the original sentence), RU (no reused openers)
     assert(!/steers with/.test(SX.great + SX.human) && SX.ambush.endsWith('She lets it pass without a word, and that tells you how bad it is.') && SX.start.startsWith('You fly up out of') && SX.ambush.startsWith('You land on the birch ridge.'), `${T} (D1): ST, RA, RU`);
     assert(flightMinutes(party(2), 120) < 120, `${T}: sanity, realm 2 flies`);
+}
+
+// D1 (the merged text push, owner pick M1 then D1; Fable's, Claude's cuts): A the small text swaps (a1–a12), B part 9's leftovers (b1, b3–b6),
+// C Yuki's forms (c1–c3), X the prologue's night; e1, e2, b2, b7 found done before (the docs)
+{
+    const P = await import('../js/story/prologue.js');
+    const Y = await import('../js/story/yuki_path.js');
+    const { FLY_LABELS } = await import('../js/story/walks.js');
+    const T = 'D1 (merged text push)';
+    const SRC = readdirSync(new URL('../js/story/', import.meta.url)).filter((f) => f.endsWith('.js')).map((f) => readFileSync(new URL(`../js/story/${f}`, import.meta.url), 'utf8')).join('\n');
+    const count = (re) => (SRC.match(re) || []).length;
+    const G = (seed, realm = 0, form = 'cat') => { const g = ensureBars(newGame(seed)); g.james.realm = realm; g.yuki.realm = realm; g.yuki.form = form; return g; };
+    const view = (g, id) => { goTo(g, SCENES, id); return sceneView(g, SCENES).text; };
+    const onDay = (g, k) => { const today = textDay(g); const days = [...Array(k).keys()].map((i) => -1 - i).concat([today]); g.lines = { c: coilStamp(g), p: {}, last: {}, cur: {}, at: null, said: [], d: new Proxy({}, { get: (_, key) => (typeof key === 'string' ? days : undefined) }) }; return g; }; // as NC1's
+    // a1: the flown label; the walking one kept
+    assert(FLY_LABELS['mire_lost#0'] === 'Drip your way back to the stream.' && SCENES.mire_lost.choices[0].text(G(97001, 0)) === 'Limp back to the stream.' && SCENES.mire_lost.choices[0].text(G(97002, 1)) === 'Drip your way back to the stream.', `${T}: a1 mire_lost's label by flight`);
+    // a2, a3, X: the prologue names the wilds, not Act 1's Blackroot, in these three
+    { const g = G(97003); g.flags.ignored = true; const e = view(g, 'elder');
+      const g2 = G(97004); g2.flags.forest_day = 2; const n = view(g2, 'night');
+      assert(/walked down out of the wilds alive/.test(e) && !/Blackroot/.test(e) && /any branch in the forest/.test(SRC) && !/any branch in the Blackroot/.test(SRC) && count(/Another night in the wilds\./g) === 2 && !/Another night in the Blackroot/.test(SRC) && /Another night in the wilds\./.test(n), `${T}: a2, a3, X no Blackroot in the prologue's elder, wen_lesson and night`); }
+    // a4, a5, a11, a12: the tics gone from their lines; the story test's old KNOWN list is empty now
+    assert(!/the far side of the hollow|a great deal better than it holds|a great deal more slowly|for a long time without saying anything|for a very long time\.|It is the first time you have seen her need one|a good deal lower down|and for a moment it's almost like working|It will take me a long time/.test(SRC), `${T}: a4, a5, a11, a12 the tics gone`);
+    // a6: no loads with a bottomless hammerspace
+    assert(!/carry it home in loads/.test(SRC) && /It rides home in the hammerspace as far as the oak hollow, and on your shoulders after that[\s\S]{0,60}This time the hunters meet you at the oak hollow/.test(SRC), `${T}: a6 far_won rides home in the hammerspace to the oak hollow, where the hunters take it (RV1 M1)`);
+    // a7: Shen Qiu's crown matches his picture
+    assert(count(/red jade crown|crown of red jade/g) === 0 && count(/(small|little) black crown/g) === 4 && /bound up under a small black crown/.test(SCENES.rt_elder.text(G(97007, 2))), `${T}: a7 four black crowns, no red jade (RV1 H1, TG1: rt_elder's arrival too)`);
+    // a8: Fang Wei alone robs you alone; the Tans as before
+    { const r = G(97005); r.flags.lf_last = 'lf_rogue'; const b = G(97006); b.flags.lf_last = 'lf_bandits';
+      const tr = SCENES.lf_human_lost.text(r), tb = SCENES.lf_human_lost.text(b);
+      assert(/Fang Wei goes through your pockets by himself/.test(tr) && !/laughter/.test(tr) && /to the sound of laughter about the mortal in white/.test(tb) && !/Fang Wei/.test(tb), `${T}: a8 Fang Wei alone, the Tans as before`); }
+    // a9: the snare is sung, on the first day
+    assert(DAY_REPLIES['rr_hunt:1'][0].startsWith('Your Convergence sings the snares out of nothing') && DAY_REPLIES['rr_hunt:1'].length === 2, `${T}: a9 the sung snare, the first day`);
+    // a10: the later-Coil phrases thinned
+    assert(count(/for forty years/g) === 4 && count(/palm flat on/g) === 5 && count(/round your wrist/g) === 6 && count(/lets out a breath she/g) === 1 && count(/[Ss]he comes closer/g) === 0 && !/steps in, rests/.test(SRC), `${T}: a10 forty years 4, palm flat 5, round your wrist 6 (8 before), the shared breath 1, she comes closer 0 (${count(/for forty years/g)}, ${count(/palm flat on/g)}, ${count(/round your wrist/g)})`);
+    assert(/I've slept on you every night since\./.test(YK_HERE.first) && /You have never before seen her need one\./.test(YK_HERE.first) && /from much nearer the floor\./.test(YK_HERE.first), `${T}: a10, a11 YK_HERE.first's swaps`);
+    // b1: the Blackroot drills' failures, three lines each, different, 8–35 words, by day
+    for (const [i, key] of [[1, 'bl_train:1'], [2, 'bl_train:2']]) {
+        const L = DAY_REPLIES[`${key}:f`]; const c = SCENES.bl_train.choices[i];
+        assert(L?.length === 3 && new Set(L).size === 3 && L.every((x) => x.split(/\s+/).length >= 8 && x.split(/\s+/).length <= 35 && !/yesterday|\d/.test(x)), `${T}: b1 ${key}'s failures, three lines`);
+        for (const day of [0, 1, 2]) { const g = G(97010 + day + 3 * i); g.scene = 'bl_train'; onDay(g, day); const out = c.failDo(g); assert(out.length === 1 && out[0] === L[day], `${T}: b1 ${key} failure day ${day + 1} says its line`); }
+    }
+    // b3, b5: no fire assumed, no yesterday claimed
+    assert(/dries under a grey film\. The camp, such as it is, takes it badly\./.test(SRC) && !/The fire spits and sulks/.test(SRC) && DAY_REPLIES['wild_train:0'][1].startsWith('Five paces further back than is sensible') && !DAY_REPLIES['wild_train:0'].some((x) => /yesterday/.test(x)), `${T}: b3 the rain night, b5 the darts`);
+    // RV1 (L1, TG4): the second rain text names the fire only when there is one
+    { const rain = (fire) => { const g = G(97060 + fire); g.flags.night_ev = 'rain'; if (fire) g.flags.fire = true; onDay(g, 1); g.scene = 'night_event'; return SCENES.night_event.text(g); };
+      const a = rain(0), b = rain(1); assert(/first the grey film creeps/.test(a) && !/fire sulks/.test(a) && /first the fire sulks, then the grey film creeps/.test(b), `${T} (RV1 L1, TG4): the rain's second night, fire or none`); }
+    assert(/the dark settles beside you like an acquaintance/.test(SRC) && !/dark sits down beside you/.test(SRC) && /for the length of one tissue test/.test(SRC), `${T} (RV1 L5, L6): the night's tic, the tissue test`);
+    // the owner's report (19:10): yk_choice had lost its art and place to a comment in v0.11.191; every scene has art now
+    { const none = Object.entries(SCENES).filter(([, s]) => s.art === undefined || s.art === null || s.art === '').map(([id]) => id);
+      const g = G(97070, 7); g.flags.lf_active = true; const h = G(97071, 7);
+      assert(none.length === 0 && SCENES.yk_choice.art === 'yuki_human' && SCENES.yk_choice.place(g) === 'The Long Forest' && SCENES.yk_choice.place(h) === h.location, `${T} (RV1, the art bug): every scene has art (${none.join(', ') || 'none missing'}); yk_choice draws Yuki's picture and its place`); }
+    // b4: the litter has porters
+    { const g = G(97020); g.flags.gao_broken = true; const t = view(g, 'tribute'); assert(/carried in a litter at the rear, his sword arm bound to his chest and his face grey; at its poles are two porters/.test(t), `${T}: b4 the tribute's litter`); }
+    // c1: a later Coil's question straight after a breakthrough the women saw: their line closes the breakthrough screen
+    const asker = (seed, back, flags = {}) => { const g = G(seed, 8); Object.assign(g.flags, { bt_return: back, mei_party: true, ya_party: true, yuki_tiger_seen: true, yuki_human_seen: true, yk_last: 'sister' }, flags); return g; };
+    for (const [back, flags, w] of [['rr_hub', {}, 'P'], ['heart_hub', {}, 'T'], ['ah_hub', { bl_day: 4 }, 'M']]) {
+        const g = asker(97030, back, flags); const t = view(g, 'breakthrough');
+        assert(P.btAsksNext(g) && t.endsWith(`\n\n${P.BT_ASK_WOMEN[w]}`), `${T}: c1 ${back}: the breakthrough ends on ${w}`);
+        choose(g, SCENES, 0); assert(g.scene === 'yk_choice', `${T}: c1 ${back}: Get up goes to her question (${g.scene})`);
+    }
+    for (const [why, g] of [['answered this Coil', asker(97040, 'rr_hub', { yk_path: 'sister' })], ['no party', asker(97041, 'rr_hub', { mei_party: false, ya_party: false })], ['the village', asker(97042, 'village')], ['a new form first', asker(97043, 'rr_hub', { yuki_human_seen: false })]]) {
+        const t = view(g, 'breakthrough'); assert(!Object.values(P.BT_ASK_WOMEN).some((x) => t.includes(x)), `${T}: c1 none for ${why}`);
+    }
+    assert(Object.values(P.BT_ASK_WOMEN).every((x) => !/\b(night|dawn|morning|evening|yesterday|tomorrow)\b/i.test(x)) && /no backward glance/.test(P.BT_ASK_WOMEN.P) && /keeps her mouth shut and a firm hold of the tree\.$/.test(P.BT_ASK_WOMEN.T), `${T}: c1 no time words; Claude's cuts`);
+    // RV1: L2 none at step F (realms 12–14); TG2 M's speaker is Mei Lin, Ya not in it; L7 "goes off" for every form; L8, M2 the next screen names Yuki
+    { const g = asker(97035, 'rr_hub'); g.james.realm = 12; g.yuki.realm = 12; const t = view(g, 'breakthrough'); assert(P.btAsksNext(g) && !Object.values(P.BT_ASK_WOMEN).some((x) => t.includes(x)), `${T} (RV1 L2): c1 none at realm 12 (step F)`); }
+    assert(/"Go on," Mei Lin says\./.test(P.BT_ASK_WOMEN.M) && !/\bYa\b/.test(P.BT_ASK_WOMEN.M) && /\bYa\b/.test(P.BT_ASK_WOMEN.P) && /^Yuki goes off along the lip/.test(P.BT_ASK_WOMEN.T), `${T} (RV1 TG2, L7): M is Mei Lin's alone; T "goes off"`);
+    assert(/^Yuki waits until no one is close enough to overhear/.test(Y.YK_LATER.q.lover) && Object.values(Y.YK_LATER.q).every((x) => /^(Yuki|The fire)/.test(x)) && /Yuki exhales, like someone spending a ration\./.test(Y.YK_LATER.afterWait.sister), `${T} (RV1 M2, L8): every later question opens on Yuki, not "She"; the ration`);
+    // c2: Act 1's Ashfall street at the great form; the prologue's village keeps its own; none elsewhere
+    for (const back of ['fo_ashfall', 'rt_ashfall']) {
+        const g = G(97050, 2); Object.assign(g.flags, { bt_return: back, yuki_return: back }); const t = view(g, 'yuki_tiger_awaken');
+        assert(t.includes(`\n\n${P.AWAKE_A1_ASHFALL}\n\nThen Yuki is eleven pounds again`) && !t.includes(P.AWAKE_VILLAGE), `${T}: c2 ${back}: the street's paragraph, then "Then Yuki"`);
+    }
+    { const g = G(97052, 2); Object.assign(g.flags, { bt_return: 'village', yuki_return: 'village' }); const t = view(g, 'yuki_tiger_awaken'); assert(t.includes(P.AWAKE_VILLAGE) && !t.includes(P.AWAKE_A1_ASHFALL), `${T}: c2 the prologue's village keeps AWAKE_VILLAGE`); }
+    { const g = G(97053, 2); Object.assign(g.flags, { bt_return: 'fo_ashfall', yuki_return: 'rr_hub' }); const t = view(g, 'yuki_tiger_awaken'); assert(!t.includes(P.AWAKE_A1_ASHFALL), `${T}: c2 none when the form scene doesn't follow that breakthrough`); }
+    { const g = G(97054, 7); Object.assign(g.flags, { bt_return: 'fo_ashfall', yuki_return: 'fo_ashfall', yuki_tiger_seen: true }); const t = view(g, 'yuki_human_awaken'); assert(!t.includes(P.AWAKE_A1_ASHFALL) && !t.includes(P.AWAKE_VILLAGE), `${T} (RV1 TG3): c2 never in the human form's scene`); }
+    assert(!/Old Hu|once already|watched the sky/.test(P.AWAKE_A1_ASHFALL) && /^The street, already silent, stays so in good order; nobody screams\./.test(P.AWAKE_A1_ASHFALL), `${T}: c2 Claude's cuts (no Old Hu, who is only in the Fallout; RV1 L3: no restating the closer before)`);
 }
 
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));

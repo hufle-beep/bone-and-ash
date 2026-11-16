@@ -110,7 +110,8 @@ export const ITEMS = {
 };
 Object.assign(itemNames, ITEMS);
 
-/** What locals sense of Yuki's meridians (v0.9.6: they may still be closed). */
+/** What locals make of Yuki's meridians (v0.9.6: they may still be closed). D1 (b6): they can't sense her, as they can't sense James
+ *  (lore.md, the realm sheet); Old Wen and Lu Han go by what they see around her (the kettle's steam, a sense she watches cross the road). */
 /** v0.11.125 (owner pick FM1; Fable's MAINs): where the locals see her, by her current form. */
 const yukiSpot = (g) => byForm(g, 'the beast on your shoulder', 'the beast at your side', 'the beast beside you');
 const yukiMerElder = (g) => { const n = g.yuki.primaries ?? 12; const b = yukiSpot(g); return n >= 12 ? `And ${b}: I have watched it since you came through my door. The steam of my kettle leans toward it, against the draught, and has not once leaned back. I am ninety, and I have seen a room's air do that only around the heirs of great sects.` : n > 0 ? `And ${b}: I have watched it since you came through my door. The steam of my kettle leans toward it, ${n <= 3 ? 'faintly' : n <= 7 ? 'plainly' : 'steeply'} and against the draught, ${byForm(g, 'small as it is', 'and no hand ever trained it', 'young as it looks')}, and there is no pill-smell on it. I am ninety, and I have seen steam do that only around the heirs of great sects.` : `And ${b} has watched my kettle since you came through my door, and its eyes go where the steam will go before the steam does. That cannot be done. It is being done in front of me.`; };
@@ -253,7 +254,7 @@ Fungus. At last, a thing you hold an actual doctorate in.`,
         choices: [
             { text: 'The bracket fungus. Spore print, tissue test, the whole ritual.', check: { skill: 'GU', dc: 3, bonus: () => 2 }, time: 20, do: (g) => { addItem(g, 'jade_bracket', 3); g.flags.fungus = true; return [`Spore print on a bone sheet, a sliver under the omnitool, a cautious nibble: edible, mild, and quietly murderous to most of the bacteria you can name. Yuki watches the whole ritual from the log and sends you a thought that translates roughly as *you could just eat it.* You could not just eat it. You have standards.`, '+3 Jade bracket fungus (edible, mildly antibiotic).']; }, failDo: (g) => { addItem(g, 'jade_bracket', 1); return ['One piece comes away whole, and the rest of the shelf goes to crumbs. +1 Jade bracket fungus.']; }, to: 'stream' },
             { text: 'The berries. Omnitool analysis, then a tiny taste.', check: { skill: 'GU', dc: 3 }, time: 15, do: (g) => { addItem(g, 'crimson_berry', 6); eat(g, 8, { yuki: false }); return ['They pass. +6 Crimson needleberries, and a handful go straight down: +8 satiety.']; }, failDo: (g) => { g.james.hp -= 3; return ['The analysis said "probably". Your intestines overrule it. −3 HP.']; }, to: 'stream' },
-            { text: 'Both. You\'re hungry and the day isn\'t getting longer.', check: { skill: 'GU', dc: 4, bonus: () => 1 }, time: 35, do: (g, r) => { addItem(g, 'jade_bracket', 3); addItem(g, 'crimson_berry', 6); eat(g, 8, { yuki: false }); g.flags.fungus = true; return [r && r.ratio < 1 ? `You do it the fast way, which turns out not to be the right way: half the shelf crumbles and the berries are mostly thorns. Yuki sniffs a berry, stares at it, and bats it into the stream, which you choose to take as peer review.` : `You do it the fast way and the right way at once, a thread on the fungus and a thread on the berries, and for a moment it's almost like working in a lab again, except for the cat and a sky the colour of a bruise. Yuki sniffs a berry, stares at it, and bats it into the stream, which you choose to take as peer review.`, '+3 Jade bracket fungus, +6 Crimson needleberries, +8 satiety.']; }, failDo: (g) => { addItem(g, 'jade_bracket', 1); g.james.hp -= 2; return ['+1 Jade bracket fungus, and one berry too many: −2 HP.']; }, to: 'stream' },
+            { text: 'Both. You\'re hungry and the day isn\'t getting longer.', check: { skill: 'GU', dc: 4, bonus: () => 1 }, time: 35, do: (g, r) => { addItem(g, 'jade_bracket', 3); addItem(g, 'crimson_berry', 6); eat(g, 8, { yuki: false }); g.flags.fungus = true; return [r && r.ratio < 1 ? `You do it the fast way, which turns out not to be the right way: half the shelf crumbles and the berries are mostly thorns. Yuki sniffs a berry, stares at it, and bats it into the stream, which you choose to take as peer review.` : `You do it the fast way and the right way at once, a thread on the fungus and a thread on the berries, and for the length of one tissue test it's almost like working in a lab again, except for the cat and a sky the colour of a bruise. Yuki sniffs a berry, stares at it, and bats it into the stream, which you choose to take as peer review.`, '+3 Jade bracket fungus, +6 Crimson needleberries, +8 satiety.']; }, failDo: (g) => { addItem(g, 'jade_bracket', 1); g.james.hp -= 2; return ['+1 Jade bracket fungus, and one berry too many: −2 HP.']; }, to: 'stream' },
         ],
     },
     hunt: {
@@ -309,11 +310,11 @@ ${g.flags.fire ? byNight(g, ['The fire crackles and spits, pleased with itself.'
 
 ${g.flags.fire ? 'The fire makes a small, defiant room in the dark.' : 'Without fire, the dark comes right up to your knees.'} ${byForm(g, 'Yuki climbs into your lap', 'Yuki lies down around you', 'Yuki sits down against your side')}, a habit she saves for the times she thinks one of you needs it.
 
-${(g.flags.forest_day || 1) > 1 ? 'Another night in the Blackroot. Your watch-thread is already spinning up before you ask.' : 'Your Parallel Cognition offers, unprompted, to spin up a thread for watch-keeping. Nine threads, and one of them never sleeps unless you tell it to.'}`, (g) => `The dark comes down the way it did before: all at once, and personally. The black trees take the stars one at a time. Somewhere off to the left something large walks a slow circle round the rise and does not come closer, which you decide to take as manners.
+${(g.flags.forest_day || 1) > 1 ? 'Another night in the wilds. Your watch-thread is already spinning up before you ask.' : 'Your Parallel Cognition offers, unprompted, to spin up a thread for watch-keeping. Nine threads, and one of them never sleeps unless you tell it to.'}`, (g) => `The dark comes down the way it did before: all at once, and personally. The black trees take the stars one at a time. Somewhere off to the left something large walks a slow circle round the rise and does not come closer, which you decide to take as manners.
 
-${g.flags.fire ? `The fire holds its small room open against the dark.` : `With no fire, the dark sits down beside you like an acquaintance.`} ${byForm(g, 'Yuki is in your lap before you have finished sitting down', 'Yuki has laid herself round you before you have finished sitting down', 'Yuki has settled against your side before you have finished sitting down')}, and neither of you mentions it.
+${g.flags.fire ? `The fire holds its small room open against the dark.` : `With no fire, the dark settles beside you like an acquaintance.`} ${byForm(g, 'Yuki is in your lap before you have finished sitting down', 'Yuki has laid herself round you before you have finished sitting down', 'Yuki has settled against your side before you have finished sitting down')}, and neither of you mentions it.
 
-${(g.flags.forest_day || 1) > 1 ? `Another night in the Blackroot. The watch-thread is up and turning before you have thought to ask.` : `Your Parallel Cognition puts a thread forward for the watch again, unasked. Nine threads, and one of them is content never to sleep.`}`, // v0.11.154 (owner pick PS1, RP1 push 2; Fable's, "ok for texts" 23:05): the third night (ST1)
+${(g.flags.forest_day || 1) > 1 ? `Another night in the wilds. The watch-thread is up and turning before you have thought to ask.` : `Your Parallel Cognition puts a thread forward for the watch again, unasked. Nine threads, and one of them is content never to sleep.`}`, // v0.11.154 (owner pick PS1, RP1 push 2; Fable's, "ok for texts" 23:05): the third night (ST1)
             (g) => `Night arrives without the courtesy of a dusk. The black trees have the stars put away before you can count them. Tonight nothing screams, and nothing walks a circle round the rise. The forest is quiet in the way of a room where people have just stopped talking about you.
 
 ${g.flags.fire ? `The fire keeps its small room, and tonight the dark stands at the door of it and does not pretend to be anywhere else.` : `With no fire, the dark has nothing to stay outside of, and doesn't.`} ${byForm(g, `Yuki gets into your lap and stays sitting up, ears turning, facing out.`, `Yuki lies down round you with her head up and her ears turning, facing out.`, `Yuki sits down against your side with her back half to you, ears turning, facing out.`)}
@@ -591,7 +592,7 @@ ${g.flags.long ? 'The tribute falls due in three days, at dawn. The whole villag
         id: 'elder', title: 'Old Wen', art: 'elder', place: 'Ashfall Hamlet — the elder\'s house',
         text: (g) => `Old Wen is ninety in a village where sixty is Heaven being kind. He is blind in one eye, and he pours tea with the steady hand of a man who has outlived three sect masters and intends to outlive a fourth.
 
-"You eat no pills," he says, before you have finished sitting down. "You carry no smell of grass. And when I reach for you with the little sense ninety years have left me, I find nothing. No root. No sea of Qi. That chair might as well be empty." He frowns at the chair. "${g.flags.sky_witness ? FW.elderSky /* v0.11.195 (F1, D1: EW-2): he watched the sky */ : g.flags.ignored ? 'Yet you walked down out of the Blackroot alive, with no spear in your hand, and a whole street took care not to look at you. One of these things is untrue, and I am too old to doubt what a whole street will not look at.' : 'Yet Mei Lin says you made a needle out of air. One of these things is untrue, and I am too old to believe it is her.'} ${yukiMerElder(g)}" He sips. "I would know what you are before the Crimson Lotus does. Their way of learning it is to cut you open."
+"You eat no pills," he says, before you have finished sitting down. "You carry no smell of grass. And when I reach for you with the little sense ninety years have left me, I find nothing. No root. No sea of Qi. That chair might as well be empty." He frowns at the chair. "${g.flags.sky_witness ? FW.elderSky /* v0.11.195 (F1, D1: EW-2): he watched the sky */ : g.flags.ignored ? 'Yet you walked down out of the wilds alive, with no spear in your hand, and a whole street took care not to look at you. One of these things is untrue, and I am too old to doubt what a whole street will not look at.' : 'Yet Mei Lin says you made a needle out of air. One of these things is untrue, and I am too old to believe it is her.'} ${yukiMerElder(g)}" He sips. "I would know what you are before the Crimson Lotus does. Their way of learning it is to cut you open."
 
 "There does seem to be a consensus."
 
@@ -637,7 +638,7 @@ You are still looking for it when it finds you. It has the dimensions of a small
     boar_lost: {
         id: 'boar_lost', title: 'Ironhide Wins', art: 'boar', place: 'Blackroot Wilds — the oak hollow',
         enter: (g) => { g.james.hp = Math.max(1, Math.floor(g.james.hp * 0.7)); return []; },
-        text: (g) => byForm(g, 'The fight ends with you in a tree and the boar underneath it, losing interest. Eventually the two of you settle on a draw. You limp home to Ashfall carrying bark in places where bark has no business.', 'You end up up a tree. Yuki ends up on the far side of the hollow with a mouthful of ironhide bristle and nothing else. *It has armour,* says the bond. *I have standards.* The boar ends up bored. You both agree to call it a draw, and you limp back to Ashfall with bark in places bark should not go.', 'You finish the fight in one tree and Yuki in the next, her tail tucked up out of reach. The boar gets bored first. "A draw," she rules, and you limp back to Ashfall with bark where bark has no business.'), // v0.11.127 (LP1, FL; LQ2, TN: Fable's ALT A): the great root-kin's own
+        text: (g) => byForm(g, 'The fight ends with you in a tree and the boar underneath it, losing interest. Eventually the two of you settle on a draw. You limp home to Ashfall carrying bark in places where bark has no business.', 'You end up up a tree. Yuki ends up across the hollow with a mouthful of ironhide bristle and nothing else. *It has armour,* says the bond. *I have standards.* The boar ends up bored. You both agree to call it a draw, and you limp back to Ashfall with bark in places bark should not go.', 'You finish the fight in one tree and Yuki in the next, her tail tucked up out of reach. The boar gets bored first. "A draw," she rules, and you limp back to Ashfall with bark where bark has no business.'), // v0.11.127 (LP1, FL; LQ2, TN: Fable's ALT A): the great root-kin's own
         choices: [{ text: (g) => (g.flags.long && dayHour(g) < 16 ? 'Back to the village.' : 'Evening, and Mei Lin\'s table.'), time: 30, to: (g) => (g.flags.long ? (dayHour(g) >= 16 ? nextEvening(g) : hubOf(g)) : 'evening') }],
     },
     evening: {
@@ -710,7 +711,7 @@ Much later the lamp is out, the hay has got everywhere, and Mei Lin is asleep ag
     /* ================= DAY 3 ================= */
     tribute: {
         id: 'tribute', title: 'The Collectors', art: 'collectors', place: 'Ashfall Hamlet — the tribute post',
-        text: (g) => `They come with the sun: four men in crimson, walking up the road as if they owned it, which they do. At their head is a tall man in a deeper red, a long sword on his back and a face as still as a frozen pond. *Inner Disciple Lu Han*, the whisper runs down the line, and after it, lower, *Foundation*, said as other villages say *flood*. ${g.flags.gao_broken ? 'Gao Feng is with them, carried in a litter at the rear, his sword arm bound to his chest and his face grey. He sees you and says nothing. His eyes cover the rest.' : `Beside him, ${g.flags.gao_beaten ? 'bandaged, his face a mask of cold and formal hatred' : 'his face carefully blank and his eyes not'}, is Gao Feng.`}
+        text: (g) => `They come with the sun: four men in crimson, walking up the road as if they owned it, which they do. At their head is a tall man in a deeper red, a long sword on his back and a face as still as a frozen pond. *Inner Disciple Lu Han*, the whisper runs down the line, and after it, lower, *Foundation*, said as other villages say *flood*. ${g.flags.gao_broken ? 'Gao Feng is with them, carried in a litter at the rear, his sword arm bound to his chest and his face grey; at its poles are two porters pressed from some village lower down the road, who are not in crimson and are counted by nobody. He sees you and says nothing. His eyes cover the rest.' : `Beside him, ${g.flags.gao_beaten ? 'bandaged, his face a mask of cold and formal hatred' : 'his face carefully blank and his eyes not'}, is Gao Feng.`}
 
 Ashfall stands in line at the tribute post with its baskets of grass and grain. ${g.flags.healed === true ? 'The mother of the boy you healed has placed herself very close behind you. So has half the street.' : ''}
 
@@ -998,6 +999,17 @@ function btParty(g, away, night) {
     const t = n ? BT_PARTY.night : BT_PARTY.day;
     return g.flags.bt_return === 'ah_hub' ? t.replace('scorched moss', 'scorched ash') : t;
 }
+/** D1 (the merged text push, c1; Fable's, Claude's cuts): a later Coil, Yuki asks her question straight after a breakthrough the women
+ *  saw (the Get up route below: no new form first, then ykAskNow); the next screen (YK_LATER.q) leads him out of hearing, so the
+ *  women's line closes this one. P both, M Mei Lin alone, T on the Old Tree's lip. No flag: read from the breakthrough's own state. */
+export const BT_ASK_WOMEN = {
+    P: `Yuki walks off, tail up like a flag and no backward glance, which is a summons. "Go on, you're wanted," Mei Lin says, and Ya, still scowling at the sky on your behalf, tells you to shout if the cat wins.`,
+    M: `Yuki walks off, tail up like a flag and no backward glance, which is a summons. "Go on," Mei Lin says. "I'll still be cross with the sky when you come back."`,
+    T: `Yuki goes off along the lip and round the curve of the trunk, tail straight up, expecting to be followed. Ya flattens herself to the bark to let you by and says not to fall, she has only just got used to you; Mei Lin keeps her mouth shut and a firm hold of the tree.`,
+};
+/** The Get up route goes to her question (not to a new form's scene first). */
+export const btAsksNext = (g) => !(g.james.realm >= 2 && !g.flags.yuki_tiger_seen) && ykAskNow(g); // RV1 (F2): ykAskNow already needs yuki_human_seen, so the human form's scene never comes first here
+function btAskWomen(g) { const w = btWho(g); return w && btAsksNext(g) && btStep(g.james.realm) !== 'F' /* RV1 (L2): not after step F's smile (realms 12–14) */ ? `\n\n${BT_ASK_WOMEN[w]}` : ''; }
 /** v0.11.190 (owner pick N1, L9; P1's test moved here): who of the women saw this breakthrough away from a village: 'T' the Old
  *  Tree, 'M' Mei Lin alone while Ya is away (the Ashen Hills), 'P' both at a camp or on the road; null in a village (the prologue's
  *  or Act 1's Ashfall), without the party, or with both away. */
@@ -1082,7 +1094,7 @@ SCENES.breakthrough = {
         if (r.ok && r.realm === 1) g.flags.foundation_day = clockParts(g.minutes).day;
         return r.ok ? r.lines : [];
     },
-    text: (g) => (BT_IN_TREE.includes(g.flags.bt_return) ? `${BT_TREE_FRAME}\n\n${btText(g)}` : btText(g)), // v0.11.185 (BR1, HF)
+    text: (g) => `${BT_IN_TREE.includes(g.flags.bt_return) ? `${BT_TREE_FRAME}\n\n${btText(g)}` : btText(g)}${btAskWomen(g)}`, // v0.11.185 (BR1, HF); D1 (c1)
     choices: [{ text: 'Get up.', to: (g) => {
         const back = g.flags.bt_return || 'stream';
         g.flags.yuki_return = back;
@@ -1109,6 +1121,7 @@ for (const id of ['stream', 'wilds', 'camp', 'night', 'village', 'ashfall', 'sup
 export const AWAKE_WOMEN = {
     tiger: {
         P: `Mei Lin's hands have gone to her herb bag, where nothing helps. "I moved her off my blanket. With one hand." Ya walks a slow half-circle, counting claws, and stops well short of the tail. "Throat's too high. I'd want a pit, and friends." "You'd want a different cat," Mei Lin says.`,
+        T: `Mei Lin's hands have gone to her herb bag, where nothing helps. "I moved her off my blanket. With one hand." There is a tiger's worth of lip and the tiger has it; Ya, left a spear's width, puts her back to the trunk and counts claws from where she stands, which gets her as far as the near forepaw. "Throat's too high. I'd want the ground, a pit, and friends." "You'd want a wider ledge," says Mei Lin, who is not looking down.`, // D1 (c3; Fable's): no half-circle on the lip
         M: `Mei Lin takes one step back and then, being a healer, one step forward. She looks at the shoulders, the depth of the chest, the paws. "The joints took all that without a sound," she says. "Mine would have. I have questions."`,
     },
     human: {
@@ -1128,12 +1141,16 @@ export const AWAKE_VILLAGE = `Nobody in the street runs. Running would be notice
 /** The village saw the breakthrough this form scene follows (the prologue's village scenes only; Act 1's Ashfall is BT_ASHFALL_A1).
  *  RV1 (L2): 'supper' is in VILLAGE_SCENES but never a breakthrough's place (no Meditate card there), so only 'village' and 'ashfall' reach it. */
 export const awakeVillage = (g) => !!g.flags.yuki_return && g.flags.yuki_return === g.flags.bt_return && VILLAGE_SCENES.includes(g.flags.bt_return) && !BT_OWN_CLOSER.includes(g.james.realm);
+/** D1 (the merged text push, c2; Fable's, Claude's cuts): the great form after a breakthrough in Act 1's Ashfall (the Fallout or the
+ *  Return; the street, whoever of the party is about): the street that has just watched the sky give up answers while she is still great. */
+export const AWAKE_A1_ASHFALL = `The street, already silent, stays so in good order; nobody screams. A woman at the well finishes filling her bucket before she looks properly, and a grey hunter at the gate grounds his spear and salutes the cat, having judged that the safest of the errors open to him. "It is his," somebody says, with the weight of a ruling, and the street accepts the ruling. A small boy asks, very clearly, whether she has eaten the little one, and is removed.`;
+export const awakeA1Ashfall = (g) => !!g.flags.yuki_return && g.flags.yuki_return === g.flags.bt_return && BT_ASHFALL_A1.includes(g.flags.bt_return) && !BT_OWN_CLOSER.includes(g.james.realm);
 for (const [form, id] of [['tiger', 'yuki_tiger_awaken'], ['human', 'yuki_human_awaken']]) {
     const base = SCENES[id].text;
     if (typeof base !== 'string' || !base.includes(`\n\n${AWAKE_AT[form]}`)) throw new Error(`N1: ${id}'s text has lost its anchor`);
     SCENES[id].text = (g) => {
         const w = awakeWho(g);
-        const para = w ? AWAKE_WOMEN[form][w === 'M' ? 'M' : 'P'] : form === 'tiger' && awakeVillage(g) ? AWAKE_VILLAGE : null; // v0.11.193 (GV)
+        const para = w ? AWAKE_WOMEN[form][w === 'M' ? 'M' : w === 'T' && AWAKE_WOMEN[form].T ? 'T' : 'P'] : form === 'tiger' && awakeVillage(g) ? AWAKE_VILLAGE : form === 'tiger' && awakeA1Ashfall(g) ? AWAKE_A1_ASHFALL : null; // v0.11.193 (GV); D1 (c2, c3)
         // RV1 (L10): a function as the replacement, so a `$` in a text stays as written
         return para ? base.replace(`\n\n${AWAKE_AT[form]}`, () => `\n\n${para}\n\n${AWAKE_AT[form].replace(/^Then she/, 'Then Yuki')}`) : base;
     };

@@ -663,7 +663,7 @@ ${byForm(g, 'Toward dawn Yuki puts her nose against your chin. *Stop thinking,* 
         enter: (g) => { toHour(g, 8); return dayTwentyOneBreakfast(g); }, // v0.11.152 (owner pick E1, BK): Day 21's breakfast, as every other morning
         text: (g) => `He comes up the road at the hour of the dragon, on foot, twelve disciples in crimson at his back ${luHanHere(g) ? 'and Lu Han at his right hand, with a face like a pond iced over' : 'and, conspicuously, no Lu Han'}.${g.flags.gao_broken ? ' Last of all, in an open litter, his sword arm still strapped to his chest, comes Gao Feng. He is here to watch. His lips never stop moving, the same few words round and round, and you are fairly sure they are your name.' : ''}
 
-Outer Elder Shen Qiu is old as mountains are old. His white hair is bound up under a crown of red jade. His robe is the red of blood gone dry, with one lotus embroidered on it; his hands are folded into its sleeves, and from the left one shows the end of a closed fan of red lacquer. He walks slowly, and the air keeps step with him: heavy, sweet, rotten, this world's poisoned Qi gathered round him so thick that the roadside grass turns grey where he has passed.
+Outer Elder Shen Qiu is old as mountains are old. His white hair is bound up under a small black crown. His robe is the red of blood gone dry, with one lotus embroidered on it; his hands are folded into its sleeves, and from the left one shows the end of a closed fan of red lacquer. He walks slowly, and the air keeps step with him: heavy, sweet, rotten, this world's poisoned Qi gathered round him so thick that the roadside grass turns grey where he has passed.
 
 At the tribute post he stops. He considers Ashfall: ${g.flags.a1_palisade ? 'the white palisade, ' : ''}${g.flags.a1_militia ? 'the hunters in their line with their spears grounded, ' : ''}the people who have not knelt. Then his face turns, slowly, toward the grove, and at last something moves in it.
 
@@ -764,7 +764,7 @@ ${luHanHere(g) ? 'He leaves Lu Han behind. "Your first student," he says. Lu Han
     rt_duel_won: {
         id: 'rt_duel_won', title: 'The Elder Bleeds', art: 'elder_duel', place: `${P} — the tribute post`,
         enter: (g) => { g.flags.a1_outcome = 'victory'; bumpRel(g, 'Village', 20, 0); return []; }, // v0.11.174 (RV1, L10): no kill: he lets Shen Qiu live
-        text: (g) => `It ends with Shen Qiu on one knee in the road, a white wraithbone blade at his throat, his red jade crown in the dust and blood in his beard.
+        text: (g) => `It ends with Shen Qiu on one knee in the road, a white wraithbone blade at his throat, his small black crown in the dust and blood in his beard.
 
 Ashfall is not breathing. Neither is the road. Three hundred years old, and an Outer Elder of the Crimson Lotus kneels to a mycologist in a lab coat.
 

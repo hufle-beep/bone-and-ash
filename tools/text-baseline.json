@@ -2,14 +2,14 @@
  "saved": "2026-11-16",
  "totals": {
   "scenes": 331,
-  "words": 37409,
-  "variantWords": 45650,
+  "words": 37405,
+  "variantWords": 45659,
   "labels": 841,
   "labelWords": 5740,
-  "sharedChunks": 638,
+  "sharedChunks": 637,
   "sharedScenes": 113,
   "reused": 47,
-  "favourites": 13,
+  "favourites": 8,
   "tics": 7,
   "broken": 0,
   "spacing": 8,
@@ -18,13 +18,13 @@
  "areas": {
   "prologue+shared": {
    "scenes": 79,
-   "words": 10761,
-   "variantWords": 16827,
+   "words": 10758,
+   "variantWords": 16824,
    "labels": 166,
    "labelWords": 1209,
    "sharedScenes": 31,
    "reused": 4,
-   "favScenes": 15,
+   "favScenes": 10,
    "tics": 5,
    "broken": 0,
    "spacing": 0,
@@ -33,7 +33,7 @@
   "wilds": {
    "scenes": 17,
    "words": 784,
-   "variantWords": 542,
+   "variantWords": 538,
    "labels": 63,
    "labelWords": 462,
    "sharedScenes": 4,
@@ -47,7 +47,7 @@
   "ashfall": {
    "scenes": 18,
    "words": 1078,
-   "variantWords": 1204,
+   "variantWords": 1222,
    "labels": 64,
    "labelWords": 472,
    "sharedScenes": 3,
@@ -66,7 +66,7 @@
    "labelWords": 680,
    "sharedScenes": 14,
    "reused": 9,
-   "favScenes": 5,
+   "favScenes": 4,
    "tics": 0,
    "broken": 0,
    "spacing": 2,
@@ -80,7 +80,7 @@
    "labelWords": 1054,
    "sharedScenes": 14,
    "reused": 36,
-   "favScenes": 12,
+   "favScenes": 9,
    "tics": 0,
    "broken": 0,
    "spacing": 4,
@@ -94,7 +94,7 @@
    "labelWords": 516,
    "sharedScenes": 12,
    "reused": 9,
-   "favScenes": 11,
+   "favScenes": 10,
    "tics": 0,
    "broken": 0,
    "spacing": 0,
@@ -102,13 +102,13 @@
   },
   "return": {
    "scenes": 47,
-   "words": 5996,
-   "variantWords": 6829,
+   "words": 5995,
+   "variantWords": 6827,
    "labels": 104,
    "labelWords": 824,
    "sharedScenes": 24,
    "reused": 0,
-   "favScenes": 2,
+   "favScenes": 1,
    "tics": 1,
    "broken": 0,
    "spacing": 1,
@@ -122,7 +122,7 @@
    "labelWords": 523,
    "sharedScenes": 11,
    "reused": 9,
-   "favScenes": 3,
+   "favScenes": 2,
    "tics": 0,
    "broken": 0,
    "spacing": 1,
@@ -158,8 +158,8 @@
    "spacing": 0
   },
   "replies": {
-   "lines": 260,
-   "words": 7093,
+   "lines": 266,
+   "words": 7296,
    "dupes": 0,
    "sceneShared": 8,
    "tics": 0,
@@ -257,17 +257,17 @@
    "spacing": 0
   },
   "bt_place": {
-   "lines": 25,
-   "words": 1350,
+   "lines": 28,
+   "words": 1479,
    "dupes": 0,
-   "sceneShared": 1,
+   "sceneShared": 0,
    "tics": 0,
    "broken": 0,
    "spacing": 0
   },
   "awake": {
-   "lines": 9,
-   "words": 458,
+   "lines": 11,
+   "words": 624,
    "dupes": 0,
    "sceneShared": 2,
    "tics": 0,
@@ -285,7 +285,7 @@
   },
   "yk_later": {
    "lines": 14,
-   "words": 1352,
+   "words": 1351,
    "dupes": 0,
    "sceneShared": 10,
    "tics": 0,
@@ -320,14 +320,14 @@
    "spacing": 0
   },
   "results": {
-   "lines": 301,
-   "words": 6649,
+   "lines": 303,
+   "words": 6752,
    "dupes": 0,
    "sceneShared": 13,
    "tics": 0,
    "broken": 0,
    "spacing": 0,
-   "cardTics": 2
+   "cardTics": 0
   }
  }
 }

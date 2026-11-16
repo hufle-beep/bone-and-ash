@@ -1,6 +1,6 @@
 # Roadmap: Bone and Ash
 
-Last updated: 2026-11-16 (v0.11.201: the time scale placed on the roadmap; O1).
+Last updated: 2026-11-16 (v0.11.202: the merged text push; M1, D1).
 
 *(v0.11.88, owner pick A: this file holds sections 0–2 of the open work; sections 3–6 and Decided are in `roadmap-2.md`; done, stale and moot lines in `roadmap-done.md` and, since v0.11.88, `roadmap-done-2.md`. The two paragraphs on how this file is laid out (v0.11.53, v0.11.65) moved word for word to `roadmap-done-2.md`.)*
 
@@ -10,7 +10,7 @@ Last updated: 2026-11-16 (v0.11.201: the time scale placed on the roadmap; O1).
 
 *(v0.11.88: section 0 is empty: the FAQ (v0.11.83), the difficulty (v0.11.85), #53 (v0.11.86) and the sitting loop (v0.11.87) are done; their notes moved word for word to `roadmap-done-2.md`. Next: the owner's pick.)*
 
-- *(v0.11.201, owner pick O1)* **The time scale placed** (the owner's 17:54 and 18:04, word for word, the measurements and TS1–TS8 in **`roadmap-time.md`**). **Next, for the owner's friend on Friday 2026-11-20: the PC layout (`roadmap-2.md` section 4) → the merged text push (A+E, B and C in one, `roadmap-e.md`) → the time scale (`roadmap-time.md`) → group f (with TS5) → the retune of the prologue and Act 1 (section 2, with TS7) → Act 2 if there is time;** each still gets its options first. Section 0's line as of v0.11.200 moved word for word to `roadmap-done-3.md`.
+- *(v0.11.202, owner picks M1, D1)* **The merged text push done** (A, B and C of `roadmap-e.md`'s plan in one; e1, e2, b2, b7 found done before). **The PC layout deferred** until the owner is at a computer (the owner 18:32; `roadmap-2.md` section 4, with the measurements): after every push, ask. **Next, for the owner's friend on Friday 2026-11-20: the time scale (`roadmap-time.md`) → group f (with TS5) → the retune of the prologue and Act 1 (section 2, with TS7) → Act 2 if there is time;** the PC layout in between whenever the owner can see it; each still gets its options first. Section 0's line as of v0.11.201 moved word for word to `history-28.md`.
 - *(v0.11.190, the size rule)* Section 0's three older notes (v0.11.150, v0.11.151, v0.11.172) moved word for word to `roadmap-done-3.md`. Pointers kept: Section 0's Android app plan (done in v0.11.145–v0.11.150) moved word for word to `roadmap-done-3.md`; **Group d (combat): closed.** (its open parts in section 2, `roadmap-2.md` sections 4 and 5, `roadmap-act2.md` and `reference.md`).
 
 ## 1. The story and mechanics pass (in progress; push 1 done in v0.11.64, group a in v0.11.66, group b's hub format in v0.11.67, where replies show in v0.11.68, the missing replies in v0.11.69: group b done; group c in v0.11.71; group g in v0.11.72; group h in v0.11.73; group i's round 1 in v0.11.74, round 2's wave 1 in v0.11.75, wave 2 in v0.11.76: group i done; group d started: the fight lab in v0.11.80, the Tan fight in v0.11.81, the brawls in v0.11.82)

@@ -86,6 +86,7 @@ export const FLY_LABELS = {
     'stream#5': 'Keep going downstream until dark.',
     'dawn#0': 'Go straight toward it.',
     'bone_field#2': 'Head back before the light goes.',
+    'mire_lost#0': 'Drip your way back to the stream.', // D1 (the merged text push, a1; Fable's): the text above it leaves by air
 };
 
 /** Mark the walks on the scenes (once, at load); a walk with a label in FLY_LABELS shows it from Foundation. */

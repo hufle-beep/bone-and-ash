@@ -474,7 +474,7 @@ ${pick(d, 'He is the most dangerous man you have ever faced, and he has not yet 
         win: {
             2: () => `Three hundred years have made him good, and it falls short. Each red wave breaks on white bone; each strike finds the place you just left. You take his footing, then his reach, then his breath, until the cupboard is bare.
 
-Shen Qiu finishes on one knee, your white wraithbone blade under his chin, the red jade crown in the dust, his beard bloody from a lip he bit through sooner than cry out.
+Shen Qiu finishes on one knee, your white wraithbone blade under his chin, the little black crown knocked off into the dust, his beard bloody from a lip he bit through sooner than cry out.
 
 Ashfall has stopped breathing. An Outer Elder of the Crimson Lotus, three hundred years old, kneels to a mycologist in a lab coat.
 
@@ -495,7 +495,7 @@ His composure does not crack. It breaks, and the whole road hears it go.
 
 "*What are you,*" he whispers.
 
-"Late for lunch," you say, and lay two fingers on his breastbone. He sits down in the road, hard, and bites his tongue doing it: blood in his beard. The red jade crown rolls away. He tries to rise, meets a white wraithbone blade under his chin, and gets as far as one knee.
+"Late for lunch," you say, and lay two fingers on his breastbone. He sits down in the road, hard, and bites his tongue doing it: blood in his beard. The small black crown rolls away. He tries to rise, meets a white wraithbone blade under his chin, and gets as far as one knee.
 
 Ashfall has stopped breathing. Three hundred years of cultivation kneel to a mycologist in a lab coat.
 
