@@ -2,6 +2,12 @@
 
 Started in v0.11.150, when `roadmap-done-2.md` had passed about 45 KB. Newer than `roadmap-done-2.md` and `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.192 (word for word; the roadmap kept under 20 KB)
+
+### From section 0, as of v0.11.191
+
+- *(v0.11.191, owner 22:43 "D1 go")* **Done:** v0.11.190 N1 (L9 the women at Yuki's new forms, 4 texts; L8b the day's second song, 5 sentences, `p` kept on a redraw; SW the parley's +1 by `a1_sky_seen`; D1, RV1); the fork moved to the end of the roadmap (`roadmap-2.md` section 5; the owner 19:15).
+
 ## Moved in v0.11.191 (word for word; the roadmap kept under 20 KB)
 
 ### From section 0, as of v0.11.190

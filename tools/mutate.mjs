@@ -11,16 +11,22 @@
 // faults.json: [{ "id": "F1", "file": "js/story/x.js", "find": "exact old text", "replace": "new text", "note": "what it breaks" }]
 // `find` must occur exactly once in the file. Exit code: 0 when every fault was caught, 1 when one was missed or not applied.
 import { readFileSync, writeFileSync, cpSync, mkdtempSync, rmSync } from 'node:fs';
-import { spawn } from 'node:child_process';
+import { spawn, execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const SKIP = new Set(['.git', 'art', 'node_modules']); // not read by the tests; art is 17 MB
+const SKIP = new Set(['.git', 'node_modules']); // v0.11.192 (owner pick A1): art/ is copied (17 MB, 0.03 s): the consistency check and the art hash test read it
 /** v0.11.185 (RV1, TG5): what a scratch copy keeps: SKIP only at the tree's top (a basename match dropped `js/art/` too, so
  *  `tests/data.test.mjs` and `check.sh quick` failed in every copy and a harmless fault came out "caught"). Pure. */
 export const keepInCopy = (src, f) => !SKIP.has(path.relative(path.resolve(src), path.resolve(f)));
+/** v0.11.192 (owner pick RV1, M2; the K1 review): a copy has no `.git`, so `git ls-files` (tools/check.mjs, the leftovers and consistency
+ *  tests) died in it and every fault measured with `check.sh quick` came out "caught". Each copy gets a git index of its own files
+ *  (no commit, nothing pushed); a machine without git keeps the copy as it was. Returns whether it worked. */
+export function gitCopy(dir) {
+    try { execFileSync('git', ['init', '-q'], { cwd: dir, stdio: 'ignore' }); execFileSync('git', ['add', '-A'], { cwd: dir, stdio: 'ignore' }); return true; } catch { return false; }
+}
 
 /** One fault applied to a file's text: { ok: true, text } or { ok: false, why }. Pure. */
 export function applyFault(text, fault) {
@@ -62,6 +68,7 @@ async function main(argv) {
     const copies = [...Array(Math.min(jobs, faults.length || 1))].map(() => {
         const dir = mkdtempSync(path.join(tmpdir(), 'boneash-mutate-'));
         cpSync(src, dir, { recursive: true, filter: (f) => keepInCopy(src, f) });
+        gitCopy(dir); // RV1 (M2)
         return dir;
     });
     const results = [];

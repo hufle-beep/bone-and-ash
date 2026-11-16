@@ -1,0 +1,22 @@
+# Cold review brief — v0.11.192 (owner picks K1, F1)
+
+You review a push you have not seen built. Repo: /home/claude/bone-and-ash (do **not** edit it; copy to a scratch dir such as /tmp/k1r/s/ for any render or test). Read `project/review-checklist.md` first and follow it. Read cheaply: excerpts by grep and line ranges, never whole story files.
+
+## What the push does (from `git diff` in the repo; uncommitted working copy)
+v0.11.191 made Yuki ask "family or more" on every Coil (`yk_last` keeps her last answer: 'sister' | 'lover' | 'wait'; `ykAskNow`; the later texts `YK_LATER`, Fable's). This push fixes its leftovers, all in Claude's words, as shown to the owner:
+- **L5:** `yk_sister_here` / `yk_lover_here` (away from the fire): after the answer, `ykFormBack` returns her to the shape she had before the question (`yk_form_before`). The result line was "Yuki: your sister. She stays as she is, …" even when she went back to a cat (the first Coil, after `yuki_human_after`'s "Promise. No occasion."). Now `YK_LATER_RESULT` ("Back in her own shape, …") whenever she is not human after it, on any Coil (the condition `ykLast(g) &&` dropped). Measured: 93 of 100 Sitter games show it.
+- **M2b:** `yuki_human_after`'s "Then the great form, which leaves the two of you rather less room" reads "everyone" when `awakeWho(g)` (Mei Lin and Ya saw the breakthrough; v0.11.190's paragraph shows in `yuki_human_awaken`). `AFTER_WOMEN`, wrapped in prologue.js after the AWAKE loop. Measured: 98 of 100 Sitter games.
+- **QH + FQ:** the later question texts (`YK_LATER.q.sister/lover/wait` and `YK_LATER.fire`) open with her changing from a cat into her human shape. When she is already in human form as the question starts (`yk_form_before === 'human'`, set by `yk_choice`'s enter), `ykLaterQ` swaps the opening (`YK_LATER_HUMAN` [from, to] pairs, each checked at load). The routes: her daily door (`yuki_time.js`, `ykAskNow`) and the breakthrough's "Get up." (`prologue.js`) with her human.
+- **QW:** `YK_LATER.q.wait` says "it has taken me until now to grow a voice back"; cut to `"Then it all began again."` when the Coil's snapshot has her human shape (`ykHumanAtStart`: `g.coil.snap.yuki.realm >= 7`; an Act 1 begun with her human).
+- **LF:** the fire's `yk_sister` / `yk_lover` result lines ("on your chest", "until the treeline") on a later fire (`ykLast`), where the stay goes on: `YK_FIRE_LATER_RESULT`.
+- **TL:** `tools/textlint.mjs` and `tools/lint.mjs` read 9 more sample states (`yk_last` × 3 forms; the human ones with `yk_form_before` 'human' and the snapshot at realm 7); the text-lint snapshot saved; `tests/tools.test.mjs` pins 18 lint states.
+- Tests: `tests/story.test.mjs` the K1 block (search "owner pick K1"); QA2's result assert (search "K1, L5"). `js/core/news.js` a What's new line; `sw.js` VERSION.
+
+## Measured (scratch copy of the models test, 100 games per bot)
+Sitter: the first answer after `yuki_human_after` 100 times (96 with her a cat before, 4 human); L5's wrong line 93 times; M2b with the women 98, without 2. Other bots never reach her human form. Later Coils (LF, QH, QW, FQ): 0 of 800 games (the bots stop at Act 1's end). The full check after the build: exit 0, 146 compared, 0 drifted.
+
+## Files for you
+- `/tmp/k1r/packet.md`: packets of the changed scenes (first-time state; render the later states yourself with `yk_last`, `yk_form_before`, `coil.snap.yuki.realm` set). `/tmp/k1r/canon-card.md`.
+
+## Report
+Write `/tmp/k1r/review.md` (under 10 KB): H / M / L findings with file:line and a concrete fix each, then TG (test gaps). Look especially at: whether `yk_form_before` is a reliable "already human" signal on every route into `yk_choice` (stale values, the reopened `yk_choice_again`, the first-time question), whether the QW snapshot test is right for every Coil kind (prologue, Act 1, a whole-game Coil, an old save), whether any swapped text now contradicts its own later lines (e.g. "Hands again", "I get a face", "two feet to stand on"), whether L5's new line is right on every route (the reopened question leaves her human), and save safety (rule 7). Plant faults with `tools/mutate.mjs` (write `/tmp/k1r/faults.json`, run `node tools/mutate.mjs /tmp/k1r/faults.json --jobs 2 --out /tmp/k1r/mutate.md` from the repo; it works on copies): about 12–18 faults against the new code and texts; list caught / missed in the report. Reply with one line when done.

@@ -1,0 +1,16 @@
+[
+ {
+  "id": "T1",
+  "file": "tools/textlint.mjs",
+  "find": "if (form === 'human') { g.flags.yk_form_before = 'human'; g.coil.snap",
+  "replace": "if (form === 'humanX') { g.flags.yk_form_before = 'human'; g.coil.snap",
+  "note": "textlint: the QH/QW states dropped"
+ },
+ {
+  "id": "T2",
+  "file": "tools/lint.mjs",
+  "find": "if (form === 'human') { g.flags.yk_form_before = 'human'; g.coil.snap",
+  "replace": "if (form === 'humanX') { g.flags.yk_form_before = 'human'; g.coil.snap",
+  "note": "lint: the QH/QW states dropped (count stays 18)"
+ }
+]

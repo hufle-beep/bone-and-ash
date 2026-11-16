@@ -60,6 +60,20 @@ for (const who of ['lf_bandits', 'lf_rogue']) for (const [form, realm] of [['cat
     for (const k of ['falls', 'ride', 'notes', 'bored', 'bathe', 'bone', 'mire', 'ridge', 'storm', 'roots', 'trial_lost', 'lf_bandits', 'lf_rogue']) g.flags[`lf_seen_${k}`] = 2;
     SAMPLES.push(ensureBars(g));
 }
+// v0.11.192 (owner pick K1, TL): a later Coil before her question (`yk_last` without `yk_path`), in all three forms (10 states, RV1 TG7); the human ones
+// already human as it starts (`yk_form_before`) and with her human shape in the Coil's snapshot, so QH, QW and FQ are read too
+for (const last of ['sister', 'lover', 'wait']) for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) {
+    const g = ensureBars(newGame(1234, { closed: true }));
+    g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; g.flags.yk_last = last;
+    if (form === 'human') g.flags.yk_form_before = 'human';
+    if (form !== 'tiger') g.coil.snap = { ...g.coil.snap, yuki: { ...g.coil.snap.yuki, realm: 7 } }; // RV1 (TG7): the cat reads QW alone, the human QH + QW
+    SAMPLES.push(ensureBars(g));
+}
+{   // RV1 (TG7): and QH alone (the "Not yet" text, already human, the Coil begun without her human shape)
+    const g = ensureBars(newGame(1234, { closed: true }));
+    g.yuki.realm = 7; g.james.realm = 7; g.yuki.form = 'human'; g.flags.yk_last = 'wait'; g.flags.yk_form_before = 'human';
+    SAMPLES.push(ensureBars(g));
+}
 const renders = (x) => {
     if (typeof x === 'string') return [x];
     if (typeof x !== 'function') return [];
@@ -118,7 +132,7 @@ const allSongTexts = (ed) => Object.values(SGX.SONG_TEXTS).flatMap((s) => (s.yuk
 const RMX = await import(js('story/remember_texts.js'));
 const rememberLines = [RMX.MORNING_AGAIN, RMX.SCENE_MEMORY_LINES.morning, ...Object.values(RMX.SCENE_MEMORY_LINES.talk_mei), ...Object.values(RMX.SCENE_MEMORY_LINES.talk_ya)];
 const YKX = await import(js('story/yuki_path.js')); const flat = (o) => (typeof o === 'string' ? [o] : Object.values(o).flatMap(flat));
-const ykLaterTexts = [...flat(YKX.YK_LATER), ...flat(YKX.YK_LATER_RESULT)]; // v0.11.191 (RV1, TG3)
+const ykLaterTexts = [...flat(YKX.YK_LATER), ...flat(YKX.YK_LATER_RESULT), ...flat(YKX.YK_FIRE_LATER_RESULT)]; // v0.11.191 (RV1, TG3); v0.11.192 (K1, LF): the later fire's results
 const BTX = await import(js('story/prologue.js')); // v0.11.185 (BR1, RV1 TG3): the sample states set no bt_return, so the two texts are read as a pool
 const { SUPPER_POT } = await import(js('story/act1_fallout.js')); // v0.11.189 (P1, PL, L5b): the women's lines at realm 2+ and the supper's clauses show only with flags the samples don't set
 const btPlaceLines = [BTX.BT_A1_WITNESS, BTX.BT_TREE_FRAME, ...Object.values(BTX.BT_LATE).flatMap((o) => Object.values(o)), SUPPER_POT[2], SUPPER_POT[3]];

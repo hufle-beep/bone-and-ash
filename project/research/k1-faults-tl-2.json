@@ -1,0 +1,5 @@
+[
+ {"id": "T1", "file": "tools/textlint.mjs", "find": "if (form === 'human') g.flags.yk_form_before = 'human';", "replace": "if (form === 'humanX') g.flags.yk_form_before = 'human';", "note": "textlint: the QH states dropped (adapted to RV1 TG7)"},
+ {"id": "T2", "file": "tools/lint.mjs", "find": "if (form === 'human') g.flags.yk_form_before = 'human';", "replace": "if (form === 'humanX') g.flags.yk_form_before = 'human';", "note": "lint: the QH states dropped, count stays 19 (adapted to RV1 TG7)"},
+ {"id": "T3", "file": "tools/lint.mjs", "find": "if (form !== 'tiger') g.coil.snap", "replace": "if (form === 'none') g.coil.snap", "note": "lint: the snapshot with her human shape dropped (TG7)"}
+]

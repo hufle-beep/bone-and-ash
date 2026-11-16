@@ -21,6 +21,20 @@ for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) for (const
     g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; if (path) g.flags.yk_path = path;
     SAMPLES.push(ensureBars(g));
 }
+// v0.11.192 (owner pick K1, TL): a later Coil before her question (`yk_last` without `yk_path`), in all three forms (10 states, RV1 TG7); the human ones already
+// human as it starts and with her human shape in the Coil's snapshot (tools/textlint.mjs has the same)
+for (const last of ['sister', 'lover', 'wait']) for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) {
+    const g = ensureBars(newGame(1234, { closed: true }));
+    g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; g.flags.yk_last = last;
+    if (form === 'human') g.flags.yk_form_before = 'human';
+    if (form !== 'tiger') g.coil.snap = { ...g.coil.snap, yuki: { ...g.coil.snap.yuki, realm: 7 } }; // RV1 (TG7): the cat reads QW alone, the human QH + QW
+    SAMPLES.push(ensureBars(g));
+}
+{   // RV1 (TG7): and QH alone (the "Not yet" text, already human, the Coil begun without her human shape)
+    const g = ensureBars(newGame(1234, { closed: true }));
+    g.yuki.realm = 7; g.james.realm = 7; g.yuki.form = 'human'; g.flags.yk_last = 'wait'; g.flags.yk_form_before = 'human';
+    SAMPLES.push(ensureBars(g));
+}
 let rendered = 0, unrendered = 0;
 /** every rendering of a text: the string itself, or the function on each sample state */
 const renders = (x) => {

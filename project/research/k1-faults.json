@@ -1,0 +1,121 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/yuki_path.js",
+  "find": "if (g.flags.yk_form_before === 'human') for",
+  "replace": "if (yukiForm(g) === 'human') for",
+  "note": "QH signal read after enter (always human): the swap shows for a cat too"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/yuki_path.js",
+  "find": "(g.coil?.snap?.yuki?.realm ?? 0) >= 7",
+  "replace": "(g.coil?.snap?.yuki?.realm ?? 0) >= 6",
+  "note": "QW threshold off by one"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/yuki_path.js",
+  "find": "(g.coil?.snap?.yuki?.realm ?? 0) >= 7",
+  "replace": "(g.yuki?.realm ?? 0) >= 7",
+  "note": "QW reads her realm now, not the snapshot: cut on every later Coil"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/yuki_path.js",
+  "find": "return [yukiForm(g) !== 'human' ? YK_LATER_RESULT.sister",
+  "replace": "return [ykLast(g) && yukiForm(g) !== 'human' ? YK_LATER_RESULT.sister",
+  "note": "L5 reverted for Family"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/yuki_path.js",
+  "find": "return [yukiForm(g) !== 'human' ? YK_LATER_RESULT.lover",
+  "replace": "return [true ? YK_LATER_RESULT.lover",
+  "note": "L5 lover: \"Back in her own shape\" even when she stays human"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/prologue.js",
+  "find": "'which leaves everyone rather less room'",
+  "replace": "'which leaves all of you rather less room'",
+  "note": "M2b: the owner-shown word changed"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/prologue.js",
+  "find": "(awakeWho(g) ? base.replace",
+  "replace": "(g.flags.mei_party ? base.replace",
+  "note": "M2b gate: party flag instead of the breakthrough they saw"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/yuki_path.js",
+  "find": "'\"There,\" she says. \"You know'",
+  "replace": "'\"There,\" she says. \"Fingers again. You know'",
+  "note": "QH sister: a new change-of-shape beat put back by another word"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/yuki_path.js",
+  "find": "return [ykLast(g) ? YK_FIRE_LATER_RESULT.lover",
+  "replace": "return [ykLast(g) === 'sister' ? YK_FIRE_LATER_RESULT.lover",
+  "note": "LF lover: only after a last \"sister\" (lover/wait get the treeline line)"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/yuki_path.js",
+  "find": "if (k === 'wait' && ykHumanAtStart(g))",
+  "replace": "if (k === 'wait' && ykHumanAtStart(g) && g.flags.yk_form_before !== 'human')",
+  "note": "QW skipped when she is human before"
+ },
+ {
+  "id": "F11",
+  "file": "js/story/yuki_path.js",
+  "find": "g.flags.yk_form_before = yukiForm(g); g.yuki.form = 'human';",
+  "replace": "g.yuki.form = 'human'; g.flags.yk_form_before = yukiForm(g);",
+  "note": "enter order: yk_form_before always human"
+ },
+ {
+  "id": "F12",
+  "file": "js/story/yuki_path.js",
+  "find": "(ykLast(g) ? ykLaterQ(g, 'fire') : YK_FIRE_TEXT)",
+  "replace": "(ykLast(g) ? YK_LATER.fire : YK_FIRE_TEXT)",
+  "note": "FQ reverted: the fire changes her shape when already human"
+ },
+ {
+  "id": "F13",
+  "file": "js/story/yuki_time.js",
+  "find": "return ALL.yk_choice.enter(g) || [];",
+  "replace": "g.yuki.form = 'human'; return [];",
+  "note": "daily door: no yk_form_before (no QH, no form back)"
+ },
+ {
+  "id": "F14",
+  "file": "js/story/yuki_path.js",
+  "find": "' \"Then it all began again.\"'",
+  "replace": "' \"Then it all began again, and here I am at last.\"'",
+  "note": "QW cut text changed (re-adds a lateness claim)"
+ },
+ {
+  "id": "F15",
+  "file": "js/story/yuki_path.js",
+  "find": "'and stops there, and rolls her shoulders.'",
+  "replace": "'and stops there, and rolls her shoulders and checks that she has thumbs.'",
+  "note": "QH wait: the new-thumbs beat back"
+ },
+ {
+  "id": "F16",
+  "file": "js/story/yuki_path.js",
+  "find": "'Across it Yuki gets up, stretches, and kneels again:'",
+  "replace": "'Across it the white shape gets up, stretches, and kneels again:'",
+  "note": "FQ: \"the white shape\" (a cat) for a woman already human"
+ },
+ {
+  "id": "F17",
+  "file": "js/story/yuki_path.js",
+  "find": "for (const [k, pairs] of Object.entries(YK_LATER_HUMAN)) for (const p of pairs) swap(k === 'fire' ? YK_LATER.fire : YK_LATER.q[k], p);",
+  "replace": "",
+  "note": "load-time check of the QH pairs removed"
+ }
+]

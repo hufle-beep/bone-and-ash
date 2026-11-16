@@ -1,0 +1,1 @@
+[{"id":"Q1","file":"js/core/news.js","find":"// junk compares as null: nothing","replace":"// junk compares as null:  nothing","note":"harmless: a comment space (quick must pass in a copy)"}]

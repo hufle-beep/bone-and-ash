@@ -1,0 +1,37 @@
+[
+ {
+  "id": "F2",
+  "file": "js/story/yuki_path.js",
+  "find": "yukiForms({ yuki: g.coil?.snap?.yuki ?? { realm: 0 } }).includes('human')",
+  "replace": "yukiForms({ yuki: { realm: (g.coil?.snap?.yuki?.realm ?? 0) + 1 } }).includes('human')",
+  "note": "QW threshold off by one (adapted to RV1 L6)"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/yuki_path.js",
+  "find": "yukiForms({ yuki: g.coil?.snap?.yuki ?? { realm: 0 } }).includes('human')",
+  "replace": "yukiForms({ yuki: g.yuki ?? { realm: 0 } }).includes('human')",
+  "note": "QW reads her realm now, not the snapshot (adapted to RV1 L6)"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/yuki_path.js",
+  "find": "'\"Right,\" she says. \"You know'",
+  "replace": "'\"Right,\" she says. \"Fingers again. You know'",
+  "note": "QH sister: a new change-of-shape beat put back (adapted to RV1 M1)"
+ },
+ {
+  "id": "F15",
+  "file": "js/story/yuki_path.js",
+  "find": "'and rolls her shoulders there.'",
+  "replace": "'and rolls her shoulders there and checks that she has thumbs.'",
+  "note": "QH wait: the new-thumbs beat back (adapted to RV1 L2)"
+ },
+ {
+  "id": "F17",
+  "file": "js/story/yuki_path.js",
+  "find": "for (const [k, pairs] of Object.entries(YK_LATER_HUMAN)) for (const p of pairs) swap(k === 'fire' ? YK_LATER.fire : YK_LATER.q[k], p);",
+  "replace": "",
+  "note": "load-time check of the QH pairs removed"
+ }
+]

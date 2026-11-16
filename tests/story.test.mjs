@@ -6,7 +6,7 @@ import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTION
 import { sceneView, choose, goTo, wasPicked, threatOf } from '../js/core/story.js'; // v0.11.136 (RV2, TG): threatOf
 import { actionOpen } from '../js/core/forms.js';
 import { btTarget } from '../js/story/meridians.js';
-import { loveLine, YK_QUESTION, ykAskAgain, YK_HERE } from '../js/story/yuki_path.js'; // v0.11.122 (RL1, T); v0.11.137 (TR1, YR; QA2)
+import { loveLine, YK_QUESTION, ykAskAgain, YK_HERE, YK_LATER_RESULT } from '../js/story/yuki_path.js'; // v0.11.122 (RL1, T); v0.11.137 (TR1, YR; QA2); v0.11.192 (K1, L5): YK_LATER_RESULT
 import { YT_HUBS, YT_BODY, YT_CLOSE, YT_LABEL, YT_GAIN, ytPool } from '../js/story/yuki_time.js'; // v0.11.137 (TR1)
 import { TASK_HUBS } from '../js/story/task_hubs.js'; // v0.11.137 (TR1, YB)
 import { HT_HUBS, HT_BODY, HT_CLOSE, HT_LABEL, HT_GAIN, HT_MID, htPool, htSlot } from '../js/story/house_time.js'; // v0.11.139 (MW1)
@@ -1916,7 +1916,7 @@ for (const form of ['cat', 'human']) {
         const w = sceneView(g, SCENES);
         assert(!/fire|treeline|smoke|dawn/i.test(w.text + w.choices.map((c) => c.label).join(' ')), `QA2: ${here} names no fire, treeline, smoke or dawn`);
         const r = choose(g, SCENES, 0);
-        assert(g.yuki.form === 'cat' && g.scene === 'rr_hub' && r.lines.includes(to === 'lover' ? YK_HERE.loverResult : YK_HERE.sisterResult) && (to !== 'lover' || g.flags.yk_kissed), `QA2 (RT1, M3): ${here}: back to the shape she had (the cat), her line, back (${g.yuki.form}, ${g.scene})`);
+        assert(g.yuki.form === 'cat' && g.scene === 'rr_hub' && r.lines.includes(to === 'lover' ? YK_LATER_RESULT.lover : YK_LATER_RESULT.sister) && (to !== 'lover' || g.flags.yk_kissed), `QA2 (RT1, M3); v0.11.192 (K1, L5): ${here}: back to the shape she had (the cat), "Back in her own shape", back (${g.yuki.form}, ${g.scene})`);
     }
 }
 // v0.11.122 (owner pick LG1): Yuki's human scenes need her human form this Coil (YG), her bond lines below it (YV, Fable's
@@ -4490,6 +4490,115 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     const g0 = ensureBars(fresh(91500)); Object.assign(g0.flags, { yuki_human_seen: true }); g0.james.realm = 7; g0.yuki.realm = 7; g0.rel = { ...g0.rel, Yuki: { f: 50, a: 80 } };
     goTo(g0, SCENES, 'yk_choice'); assert(sceneView(g0, SCENES).text === Y.YK_HERE.first, 'Y1: the first question away from the fire as before');
     g0.flags.lf_active = true; assert(/^The last night before you walk out of the Long Forest/.test(sceneView(g0, SCENES).text), 'Y1: the first question by the fire as before');
+}
+
+// v0.11.192 (owner pick K1, F1; Claude's words): L5 the first Coil's result line when she goes back to a cat; M2b "everyone" after the
+// women's paragraph; LF a later fire's result lines; QH the later questions (and FQ the later fire's) when she is already human; QW the
+// "Not yet" one when the Coil began with her human shape (the snapshot)
+{
+    const Y = await import('../js/story/yuki_path.js');
+    const P = await import('../js/story/prologue.js');
+    const D = 1440;
+    const pick = (g, re) => { const c = sceneView(g, SCENES).choices.find((x) => re.test(x.label)); assert(!!c, `K1: a choice ${re} on ${g.scene}`); return c ? choose(g, SCENES, c.index) : null; };
+    const lines = (r, g) => r?.lines || g.log.at(-1)?.lines || [];
+    // L5: the first time, through yuki_human_after's two choices: back to a cat → "Back in her own shape"; kept human → "She stays as she is"
+    for (const [re, form, want] of [[/^Promise/, 'cat', 'later'], [/^Ask her to stay/, 'human', 'here']]) {
+        for (const [ans, are, scene] of [['sister', /^"Family\./, 'yk_sister_here'], ['lover', /^"More\."/, 'yk_lover_here']]) {
+            const g = ensureBars(fresh(92000)); g.minutes = 12 * D + 600;
+            Object.assign(g.flags, { yuki_tiger_seen: true, yuki_human_seen: true, bt_return: 'rr_hub', yuki_return: 'rr_hub' });
+            g.james.realm = 7; g.yuki.realm = 7; g.yuki.form = 'human'; g.rel = { ...g.rel, Yuki: { f: 50, a: 80 } };
+            goTo(g, SCENES, 'yuki_human_after'); pick(g, re);
+            assert(g.scene === 'yk_choice' && g.flags.yk_form_before === form, `K1 (L5): ${re} leads to her question with her ${form} before it (${g.scene}, ${g.flags.yk_form_before})`);
+            pick(g, are); assert(g.scene === scene, `K1 (L5): ${ans} away from the fire (${g.scene})`);
+            const r = choose(g, SCENES, 0), rl = want === 'later' ? Y.YK_LATER_RESULT[ans] : Y.YK_HERE[`${ans}Result`];
+            assert(g.yuki.form === form && lines(r, g).includes(rl), `K1 (L5): the first Coil, ${ans}, her ${form} after it: "${rl.slice(0, 40)}…" (${g.yuki.form})`);
+        }
+    }
+    assert(/She stays as she is/.test(Y.YK_HERE.sisterResult) && /She stays as she is/.test(Y.YK_HERE.loverResult), 'K1 (L5): the first lines kept for her staying human');
+    // M2b: yuki_human_after names everyone after the women's paragraph, "the two of you" without it
+    {
+        const at = (party, ret = 'rr_hub') => { const g = ensureBars(fresh(92100)); Object.assign(g.flags, { bt_return: 'rr_hub', yuki_return: ret }, party ? { mei_party: true, ya_party: true } : {}); g.minutes = 12 * D + 600; g.james.realm = 7; g.yuki.realm = 7; goTo(g, SCENES, 'yuki_human_after'); return sceneView(g, SCENES).text; };
+        const alone = at(false), both = at(true);
+        assert(alone.includes(P.AFTER_WOMEN[0]) && !alone.includes(P.AFTER_WOMEN[1]), 'K1 (M2b): without the women, "the two of you" as before');
+        assert(both === alone.replace(P.AFTER_WOMEN[0], P.AFTER_WOMEN[1]), 'K1 (M2b): with the women, "everyone", nothing else changed');
+        assert(/Then the great form, which leaves everyone rather less room than before, yawning/.test(both) && /which leaves the two of you rather less room than before/.test(alone), 'K1 (RV1 TG1): the word as shown to the owner, pinned');
+        assert(at(true, 'lf_hub') === alone, 'K1 (M2b): reached from elsewhere than the breakthrough they saw, as before');
+    }
+    // the later question's helper state: a later Coil (last answer), at the breakthrough or her daily door
+    const later = (last, { form = 'cat', lfA = false, snap = 0, a = 80 } = {}) => {
+        const g = ensureBars(fresh(92200)); g.minutes = 12 * D + 600;
+        Object.assign(g.flags, { yuki_tiger_seen: true, yuki_human_seen: true, bt_return: lfA ? 'lf_hub' : 'rr_hub', yk_last: last }, lfA ? { lf_active: true } : {});
+        g.james.realm = 7; g.yuki.realm = 7; g.yuki.form = form; g.rel = { ...g.rel, Yuki: { f: 50, a } }; g.coil.snap.yuki.realm = snap;
+        goTo(g, SCENES, 'breakthrough'); choose(g, SCENES, 0); return g;
+    };
+    // QH + FQ: already human as it starts: no change of shape (all four texts); a cat or the great root-kin: the texts as written
+    for (const [k, lfA] of [['sister', false], ['lover', false], ['wait', false], ['fire', true]]) {
+        const last = k === 'fire' ? 'sister' : k, base = k === 'fire' ? Y.YK_LATER.fire : Y.YK_LATER.q[k];
+        for (const form of ['cat', 'tiger']) {
+            const g = later(last, { form, lfA });
+            assert(g.scene === 'yk_choice' && sceneView(g, SCENES).text === base, `K1 (QH): ${k}, her ${form} before it: the text as written (${g.scene})`);
+        }
+        const h = later(last, { form: 'human', lfA }); const t = sceneView(h, SCENES).text;
+        let want = base; for (const [from, to] of Y.YK_LATER_HUMAN[k]) want = want.replace(from, to);
+        assert(h.scene === 'yk_choice' && t === want && t !== base, `K1 (QH${k === 'fire' ? ', FQ' : ''}): ${k}, already human: her own opening (${h.scene})`);
+        assert(!/\bchanges there|one step she is a cat|out of the cat's shape|takes her human shape|is a woman by the end|Hands again|has thumbs\b/.test(t), `K1 (QH): ${k}, already human: no change of shape in it`);
+    }
+    // RV1 (TG2): each opening pinned as built (M1, L1, L2, L3), and no new-hands beat in a first paragraph
+    assert(JSON.stringify(Object.fromEntries(Object.entries(Y.YK_LATER_HUMAN).map(([k, ps]) => [k, ps.map((x) => x[1])]))) === JSON.stringify({ sister: ['and stops there, shaking her sleeves straight.', '"Right," she says. "You know'], lover: ['. She tugs her collar level.'], wait: ['and rolls her shoulders there.'], fire: ['Across it Yuki gets up, stretches, and kneels again:', 'She holds her palms to the heat.'] }), 'K1 (RV1 TG2): the QH and FQ words as the owner picked them');
+    for (const k of ['sister', 'lover', 'wait']) assert(!/\b(again|thumbs|fingers|coat|hook|There,)/.test(Y.ykLaterQ({ flags: { yk_form_before: 'human' } }, k).split('\n\n')[0]) && !/"There,|Hands again/.test(Y.ykLaterQ({ flags: { yk_form_before: 'human' } }, k).split('\n\n')[1]), `K1 (RV1 TG2): ${k}, already human: no new-hands beat in its opening`);
+    assert(!/pleased with them/.test(Y.ykLaterQ({ flags: { yk_form_before: 'human' } }, 'fire')) && /pleased with them/.test(Y.YK_LATER.fire), 'K1 (RV1 L3): the fire\'s palms, already human, without "pleased with them"');
+    assert(Y.ykLaterQ({ flags: { yk_form_before: 'human' } }, 'sister').startsWith('Yuki leads you off until nobody is near enough to hear, and stops there, shaking her sleeves straight.\n\n"Right," she says. "You know what comes with the hands."'), 'K1 (RV1 M1): the sister opening as shown');
+    assert(Y.ykLaterQ({ flags: { yk_form_before: 'human' }, coil: { snap: { yuki: { realm: 0 } } } }, 'sister').startsWith('Yuki leads you off until nobody is near enough to hear, and stops there, shaking her sleeves straight.'), 'K1 (QH): the sister opening as shown to the owner');
+    assert(/^She waits until no one is close enough to overhear\. She tugs her collar level\.\n\n/.test(Y.ykLaterQ({ flags: { yk_form_before: 'human' } }, 'lover')), 'K1 (QH; RV1 L1): the lover opening as picked');
+    assert(/^Yuki picks a spot out of everyone's hearing and rolls her shoulders there\.\n\n/.test(Y.ykLaterQ({ flags: { yk_form_before: 'human' } }, 'wait')), 'K1 (QH; RV1 L2): the "Not yet" opening as picked');
+    assert(/Across it Yuki gets up, stretches, and kneels again: sleeves neat, hair already everywhere\./.test(Y.ykLaterQ({ flags: { yk_form_before: 'human' } }, 'fire')), 'K1 (F1, FQ): the fire opening as asked');
+    // QW: the "Not yet" one when this Coil began with her human shape: no voice grown back; otherwise as written
+    for (const [snap, form, cut] of [[7, 'cat', true], [7, 'human', true], [0, 'cat', false], [6, 'cat', false]]) {
+        const g = later('wait', { form, snap }); const t = sceneView(g, SCENES).text;
+        assert(t.includes('"We stopped at \'not yet\'," she says. "Then it all began again."\n\n') === cut && t.includes('until now to grow a voice back') === !cut, `K1 (QW): the snapshot at realm ${snap}, her ${form}: ${cut ? 'cut' : 'as written'}`);
+    }
+    assert(!Y.ykLaterQ({ flags: {}, coil: { snap: { yuki: { realm: 7 } } } }, 'sister').includes(Y.YK_WAIT_SINCE_DAWN[1]) && Y.ykLaterQ({ flags: {} }, null) === null, 'K1 (QW): only the "Not yet" text; no last answer, no later text');
+    // LF: a later fire's results on a stay that goes on; the first fire's as before; RV1 (L4): the sister keeps her first line; (TG3) every last answer
+    for (const last of ['sister', 'lover', 'wait']) for (const [ans, are, fire] of [['sister', /^"Family\./, 'yk_sister'], ['lover', /^"More\."/, 'yk_lover']]) {
+        const g = later(last, { lfA: true }); pick(g, are); assert(g.scene === fire, `K1 (LF): ${ans} by a later fire, last ${last} (${g.scene})`);
+        const r = choose(g, SCENES, 0), want = ans === 'lover' ? Y.YK_FIRE_LATER_RESULT.lover : 'Yuki: your sister. Back in her small form, on your chest, purring like a smug engine.';
+        assert(lines(r, g).includes(want) && g.yuki.form === 'cat', `K1 (LF; RV1 L4, TG3): a later fire's ${ans} result line, last ${last} (${lines(r, g)[0]?.slice(0, 40)})`);
+    }
+    for (const [ans, are] of [['sister', /^"Family\./], ['lover', /^"More\."/]]) {
+        const f = ensureBars(fresh(92300)); Object.assign(f.flags, { yuki_human_seen: true, lf_active: true, yk_back: 'lf_hub' }); f.james.realm = 7; f.yuki.realm = 7; f.rel = { ...f.rel, Yuki: { f: 50, a: 80 } };
+        goTo(f, SCENES, 'yk_choice'); pick(f, are); const r0 = choose(f, SCENES, 0);
+        assert(lines(r0, f).some((l) => (ans === 'sister' ? /on your chest, purring like a smug engine\.$/ : /She stays human until the treeline/).test(l)), `K1 (LF): the first fire's ${ans} result as before`);
+    }
+    assert(Object.keys(Y.YK_FIRE_LATER_RESULT).join() === 'lover' && Y.YK_FIRE_LATER_RESULT.lover === 'Yuki: your lover. She stays human a while, holding your hand, and then flows back into a cat on your shoulder. "Nobody needs to know yet," she says, before she does. "I like being underestimated."', 'K1 (LF; RV1 L4): the lover\'s later line as shown, the sister\'s first kept');
+    assert(!/\b(treeline|tomorrow|smoke|dawn|night)\b/i.test(Y.YK_FIRE_LATER_RESULT.lover), 'K1 (LF): no leaving in a later fire\'s lover line');
+    // RV1 (TG5): QW on a real rewind: an Act 1 begun with her human cuts it through her daily door; the whole game again does not
+    {
+        const C = await import('../js/core/coil.js');
+        const g = ensureBars(fresh(92400)); Object.assign(g.flags, { yuki_tiger_seen: true, yuki_human_seen: true });
+        g.james.realm = 7; g.yuki.realm = 7; g.yuki.form = 'cat'; g.rel = { ...g.rel, Yuki: { f: 50, a: 40 } };
+        startActCoil(g, 1); g.scene = 'rr_hub'; g.flags.yk_wait = true; C.endCoil(g, 'choice', 'rr_hub'); C.rewind(g);
+        assert(g.flags.yk_last === 'wait' && g.yuki.realm === 7 && Y.ykHumanAtStart(g) && Y.ykAskNow(g), `K1 (RV1 TG5): an Act 1 rewind with her human at its dawn (${g.flags.yk_last}, ${g.yuki.realm})`);
+        goTo(g, SCENES, 'yk_time');
+        const t = sceneView(g, SCENES).text;
+        assert(g.scene === 'yk_choice' && t.includes('"Then it all began again."\n\n') && !t.includes('grow a voice back'), `K1 (RV1 TG5): her daily door asks, "Not yet" without "until now" (${g.scene})`);
+        C.endCoil(g, 'choice', 'rr_hub'); C.rewind(g, { to: 'game' });
+        assert(!Y.ykHumanAtStart(g), 'K1 (RV1 TG5): the whole game again starts without her human shape');
+    }
+    // RV1 (TG6): QH through her daily door with her already human
+    for (const last of ['sister', 'lover', 'wait']) {
+        const g = ensureBars(fresh(92500)); g.minutes = 12 * D + 600;
+        Object.assign(g.flags, { yuki_tiger_seen: true, yuki_human_seen: true, yk_last: last }); g.james.realm = 7; g.yuki.realm = 7; g.yuki.form = 'human'; g.rel = { ...g.rel, Yuki: { f: 50, a: 80 } };
+        goTo(g, SCENES, 'yk_time');
+        assert(g.scene === 'yk_choice' && g.flags.yk_form_before === 'human' && sceneView(g, SCENES).text === Y.ykLaterQ(g, last) && sceneView(g, SCENES).text !== Y.YK_LATER.q[last], `K1 (RV1 TG6): her daily door, already human, last ${last}: her own opening (${g.scene})`);
+    }
+    // RV1 (L6, L7): the shape rule is the game's own; a pair never throws at play time
+    assert(Y.ykHumanAtStart({ coil: { snap: { yuki: { realm: 7 } } } }) && !Y.ykHumanAtStart({ coil: { snap: { yuki: { realm: 6 } } } }) && !Y.ykHumanAtStart({}), 'K1 (RV1 L6): ykHumanAtStart by yukiForms');
+    {
+        const src = readFileSync(new URL('../js/story/yuki_path.js', import.meta.url), 'utf8');
+        const body = src.slice(src.indexOf('export const ykLaterQ'), src.indexOf('export const ykLaterQ') + 600);
+        assert(/for \(const \[k, pairs\] of Object\.entries\(YK_LATER_HUMAN\)\) for \(const p of pairs\) swap\(/.test(src) && /^swap\(YK_LATER\.q\.wait, YK_WAIT_SINCE_DAWN\);$/m.test(src), 'K1 (RV1 TG8): the load-time check of every pair is there');
+        assert(/t = put\(t, p\)/.test(body) && !/swap\(/.test(body) && /yukiForms\(\{ yuki: g\.coil\?\.snap\?\.yuki/.test(src), 'K1 (RV1 L6, L7): ykLaterQ uses the non-throwing put; the load check keeps swap');
+    }
 }
 
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));

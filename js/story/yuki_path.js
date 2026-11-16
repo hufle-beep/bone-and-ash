@@ -101,13 +101,44 @@ export const YK_LATER = {
     afterWait: { sister: "Yuki lets out a breath she has plainly been rationing.\n\n\"So that's what was waiting behind 'not yet',\" she says. \"Worth the queue.\"\n\n\"You're not disappointed.\"\n\n\"I put a question with two right answers, James. You picked one of them.\" She comes closer and butts her forehead against your shoulder, hard, twice. \"I'll want it in writing eventually. Your handwriting is a disgrace, so I'm prepared to be flexible about when.\" Her tail curls round your wrist and holds on. \"Sister. I'm keeping that. You'll find I'm very difficult to return.\"", lover: "Your hand is barely out before hers is in it, prompt, as though the offer might be withdrawn on a technicality.\n\n\"So 'not yet' did have an end,\" Yuki says. \"I'd begun to think of it as furniture.\"\n\n\"It took me one whole turn of the world.\"\n\n\"I've seen you take longer over a menu. I'm encouraged.\" Her ears have gone forward, and her voice hasn't quite kept its edge. The kiss she gives you is short and entirely sure of its address. Then she tips her weight against your side, her grip on your fingers tightening. \"Everything else can wait its turn. I've had the practice.\"" },
     notYet: "Yuki tilts her head, ears following a beat behind. \"Not yet it is,\" she says, no heavier than if you'd declined tea. \"I'll put it to you again. It's a decent question. It bears repeating, and so, apparently, do we.\" Her tail flicks once, untroubled.",
 };
+/** v0.11.192 (owner pick K1, QH; F1, FQ; Claude's cuts): the later question when she is already in her human form as it starts
+ *  (`yk_form_before`, set by yk_choice's enter): no change of shape. [from, to] pairs, each found once (checked at load). */
+export const YK_LATER_HUMAN = {
+    sister: [['and changes there. No ceremony: one step she is a cat, the next she is standing, a head shorter than you, shaking her sleeves straight like someone back in a coat she left on a hook.', 'and stops there, shaking her sleeves straight.'], ['"There," she says. "Hands again. You know', '"Right," she says. "You know']], // RV1 (M1): no coat put back on, no "There,"
+    lover: [[', then stands up out of the cat\'s shape as easily as out of a chair. She tugs her collar level and counts her fingers. All present.', '. She tugs her collar level.']], // RV1 (L1): no finger count
+    wait: [['and takes her human shape there, quick and tidy, a thing practised. She rolls her shoulders and checks that she has thumbs.', 'and rolls her shoulders there.']], // RV1 (L2): no "stops" before "We stopped"
+    fire: [['Across it the white shape gets up, stretches, and is a woman by the end of the stretch: kneeling,', 'Across it Yuki gets up, stretches, and kneels again:'], ['She holds her palms to the heat, pleased with them.', 'She holds her palms to the heat.']], // RV1 (L3): no new hands
+};
+/** v0.11.192 (K1, QW; Claude's cut): the "Not yet" one when this Coil began with her human shape (the snapshot's realm): no voice grown back. */
+export const YK_WAIT_SINCE_DAWN = [' "Then it all began again, and it has taken me until now to grow a voice back. I\'m not complaining. I\'m explaining the delay."', ' "Then it all began again."'];
+const swap = (t, [from, to]) => { if (t.split(from).length !== 2) throw new Error(`K1: "${from.slice(0, 40)}…" is not in its text once`); return t.replace(from, () => to); };
+/** RV1 (L7): at play time a pair never throws (the load check below already proved each one is there once). */
+const put = (t, [from, to]) => t.replace(from, () => to);
+for (const [k, pairs] of Object.entries(YK_LATER_HUMAN)) for (const p of pairs) swap(k === 'fire' ? YK_LATER.fire : YK_LATER.q[k], p);
+swap(YK_LATER.q.wait, YK_WAIT_SINCE_DAWN);
+/** Her human shape was hers at this Coil's start (an Act 1 begun with her human; the snapshot, coil.js). */
+export const ykHumanAtStart = (g) => yukiForms({ yuki: g.coil?.snap?.yuki ?? { realm: 0 } }).includes('human'); // RV1 (L6): the game's own shape rule
+/** The later question's text (k: 'sister' | 'lover' | 'wait' | 'fire'), with QH and QW where they apply. */
+export const ykLaterQ = (g, k) => {
+    let t = k === 'fire' ? YK_LATER.fire : YK_LATER.q[k];
+    if (!t) return null;
+    if (g.flags.yk_form_before === 'human') for (const p of YK_LATER_HUMAN[k]) t = put(t, p);
+    if (k === 'wait' && ykHumanAtStart(g)) t = put(t, YK_WAIT_SINCE_DAWN);
+    return t;
+};
 /** The answer's text on a later Coil: the same as last time, changed (from the other answer), or null (the first text: no last answer, or "Not yet"). */
 export const ykLaterAnswer = (g, path) => { const l = ykLast(g); return l === path ? YK_LATER[path].same : l === 'sister' || l === 'lover' ? YK_LATER[path].changed : l === 'wait' ? YK_LATER.afterWait[path] : null; }; // RV1 (M2): after a "Not yet", its own
 /** v0.11.191 (Y1, D1 RL; Claude's words): after a later Coil's answer she goes back to the shape she had (ykFormBack), so the result says so
- *  (a later Coil only, as picked, and only when she is not human after it: the reopened question leaves her human and keeps the first lines). */
+ *  (a later Coil only, as picked, and only when she is not human after it: the reopened question leaves her human and keeps the first lines).
+ *  v0.11.192 (owner pick K1, L5): on the first Coil too ("She stays as she is" while she goes back to a cat was wrong). */
 export const YK_LATER_RESULT = {
     sister: 'Yuki: your sister. Back in her own shape, she takes the better half of wherever you sit next.',
     lover: 'Yuki: your lover. Back in her own shape, she says nothing to anyone, because nobody needs to know yet and she likes being underestimated.',
+};
+/** v0.11.192 (owner pick K1, LF; Claude's words): a later fire's lover answer, on a stay that goes on (no treeline); RV1 (L4): the sister's
+ *  first line stays ("on your chest" fits the "Sleep." above it and says nothing of leaving). */
+export const YK_FIRE_LATER_RESULT = {
+    lover: 'Yuki: your lover. She stays human a while, holding your hand, and then flows back into a cat on your shoulder. "Nobody needs to know yet," she says, before she does. "I like being underestimated."',
 };
 export const ykAtFire = (g) => !!g.flags.lf_active;
 /** The question's text at the Long Forest's last fire (as before, word for word). */
@@ -143,7 +174,7 @@ const SCENES_YK = {
     yk_choice: {
         id: 'yk_choice', title: (g) => (ykAtFire(g) ? (ykLast(g) ? 'The Fire' : 'The Last Fire') : 'The Question'), // v0.11.191 (RV1, L3): a later fire is not the last art: 'yuki_human', place: (g) => (ykAtFire(g) ? 'The Long Forest' : g.location), // v0.11.137 (QA2): away from the fire, its own text
         enter: (g) => { g.flags.yk_form_before = yukiForm(g); g.yuki.form = 'human'; return []; }, // v0.11.137 (RT1, M3): her shape before, for after
-        text: (g) => (ykAtFire(g) ? (ykLast(g) ? YK_LATER.fire : YK_FIRE_TEXT) : (YK_LATER.q[ykLast(g)] || YK_HERE.first)), // v0.11.191 (Y1, TX): asked before
+        text: (g) => (ykAtFire(g) ? (ykLast(g) ? ykLaterQ(g, 'fire') : YK_FIRE_TEXT) : (ykLaterQ(g, ykLast(g)) || YK_HERE.first)), // v0.11.191 (Y1, TX): asked before; v0.11.192 (K1, QH + QW; F1, FQ)
         choices: [
             { text: '"Family. You\'re my sister, Yuki. You always have been."', do: (g) => { g.flags.yk_path = 'sister'; delete g.flags.yk_wait; return []; }, to: (g) => (ykAtFire(g) ? 'yk_sister' : 'yk_sister_here') }, // v0.11.137 (QA2): away from the fire, its own scene
             { text: (g) => (ykAtFire(g) ? '"More." Reach across the fire for her hand.' : YK_HERE.more), show: ykLoverOpen, do: (g) => { g.flags.yk_path = 'lover'; delete g.flags.yk_wait; return []; }, to: (g) => (ykAtFire(g) ? 'yk_lover' : 'yk_lover_here') }, // v0.11.137 (TR1, YR): at affection 72; (QA2) away from the fire, its own label and scene
@@ -162,12 +193,12 @@ const SCENES_YK = {
     yk_sister_here: { // v0.11.137 (QA2; Fable's text): "Family" away from the Long Forest's fire; her shape stays
         id: 'yk_sister_here', title: 'Family', art: 'yuki_human', place: (g) => g.location,
         text: (g) => ykLaterAnswer(g, 'sister') || YK_HERE.sister, // v0.11.191 (Y1, TX)
-        choices: [{ text: YK_HERE.sisterLabel, do: (g) => { bumpRel(g, 'Yuki', 0, 0); ykFormBack(g); return [ykLast(g) && yukiForm(g) !== 'human' ? YK_LATER_RESULT.sister : YK_HERE.sisterResult]; }, to: back }], // v0.11.191 (Y1, D1 RL): a later Coil's own line
+        choices: [{ text: YK_HERE.sisterLabel, do: (g) => { bumpRel(g, 'Yuki', 0, 0); ykFormBack(g); return [yukiForm(g) !== 'human' ? YK_LATER_RESULT.sister : YK_HERE.sisterResult]; }, to: back }], // v0.11.191 (Y1, D1 RL): a later Coil's own line
     },
     yk_lover_here: { // v0.11.137 (QA2; Fable's text): "More." away from the Long Forest's fire; her shape stays
         id: 'yk_lover_here', title: 'More', art: 'yuki_human', place: (g) => g.location,
         text: (g) => ykLaterAnswer(g, 'lover') || YK_HERE.lover, // v0.11.191 (Y1, TX)
-        choices: [{ text: YK_HERE.loverLabel, do: (g) => { bumpRel(g, 'Yuki', 0, 0); g.flags.yk_kissed = true; ykFormBack(g); return [ykLast(g) && yukiForm(g) !== 'human' ? YK_LATER_RESULT.lover : YK_HERE.loverResult]; }, to: back }], // v0.11.191 (Y1, D1 RL)
+        choices: [{ text: YK_HERE.loverLabel, do: (g) => { bumpRel(g, 'Yuki', 0, 0); g.flags.yk_kissed = true; ykFormBack(g); return [yukiForm(g) !== 'human' ? YK_LATER_RESULT.lover : YK_HERE.loverResult]; }, to: back }], // v0.11.191 (Y1, D1 RL)
     },
     yk_sister: {
         id: 'yk_sister', title: 'Family', art: 'yuki_human', place: 'The Long Forest',
@@ -205,7 +236,7 @@ The fire burns low. Nobody gets up to feed it.
 
 By first light she is asleep on your chest, the most familiar weight you own, except that tonight it has a face tucked into your neck, an arm flung across you, and a very small snore. The bond, mostly asleep: *I said I would get the best spot.*`,
         choices: [{ text: (g) => (ykLast(g) ? 'Let her sleep.' : 'Let her sleep. Tomorrow, the smoke.'), // v0.11.191 (RV1, L3)
-            do: (g) => { bumpRel(g, 'Yuki', 0, 0); delete g.flags.yk_form_before; g.flags.yk_kissed = true; g.yuki.form = 'cat'; return ['Yuki: your lover. She stays human until the treeline, holding your hand, and then flows back into a cat on your shoulder. "Nobody needs to know yet," she says, before she does. "I like being underestimated."']; }, to: back }], // v0.11.127 (LP1, LF): back in her small shape, as the text says (the sister's pick does the same)
+            do: (g) => { bumpRel(g, 'Yuki', 0, 0); delete g.flags.yk_form_before; g.flags.yk_kissed = true; g.yuki.form = 'cat'; return [ykLast(g) ? YK_FIRE_LATER_RESULT.lover : 'Yuki: your lover. She stays human until the treeline, holding your hand, and then flows back into a cat on your shoulder. "Nobody needs to know yet," she says, before she does. "I like being underestimated."']; }, to: back }], // v0.11.192 (K1, LF) // v0.11.127 (LP1, LF): back in her small shape, as the text says (the sister's pick does the same)
     },
 
     /* ---------- Act 1 camps ---------- */

@@ -1129,6 +1129,13 @@ for (const [form, id] of [['tiger', 'yuki_tiger_awaken'], ['human', 'yuki_human_
         return w ? base.replace(`\n\n${AWAKE_AT[form]}`, () => `\n\n${AWAKE_WOMEN[form][w === 'M' ? 'M' : 'P']}\n\n${AWAKE_AT[form].replace(/^Then she/, 'Then Yuki')}`) : base;
     };
 }
+/** v0.11.192 (owner pick K1, M2b; Claude's word; v0.11.190's review M2b): after the women's paragraph, her shapes leave everyone less room, not "the two of you". */
+export const AFTER_WOMEN = ['which leaves the two of you rather less room', 'which leaves everyone rather less room'];
+{
+    const base = SCENES.yuki_human_after.text;
+    if (typeof base !== 'string' || base.split(AFTER_WOMEN[0]).length !== 2) throw new Error('K1: yuki_human_after has lost "the two of you"');
+    SCENES.yuki_human_after.text = (g) => (awakeWho(g) ? base.replace(AFTER_WOMEN[0], () => AFTER_WOMEN[1]) : base);
+}
 
 installCoil(SCENES);
 installOnce(SCENES); // v0.11.33: the task screens' one-off work, "Call it a day"

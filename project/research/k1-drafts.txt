@@ -1,0 +1,7 @@
+yk_sister:0 | Yuki: your sister. Back in her small form, on your shoulder, purring like a smug engine.
+yk_lover:0 | Yuki: your lover. She stays human a while, holding your hand, and then flows back into a cat on your shoulder. "Nobody needs to know yet," she says, before she does. "I like being underestimated."
+yk_choice | Yuki leads you off until nobody is near enough to hear, and stops there, shaking her sleeves straight like someone back in a coat she left on a hook. "There," she says. "You know what comes with the hands."
+yk_choice | She waits until no one is close enough to overhear. She tugs her collar level and counts her fingers. All present.
+yk_choice | Yuki picks a spot out of everyone's hearing and stops there, and rolls her shoulders. "We stopped at 'not yet'," she says. "Then it all began again."
+yk_choice | The fire has reached the stage where it wants watching and not feeding. Across it Yuki gets up, stretches, and kneels again: sleeves neat, hair already everywhere.
+yuki_human_after | Then the great form, which leaves everyone rather less room than before, yawning, so that you may count her teeth.

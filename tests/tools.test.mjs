@@ -23,7 +23,7 @@ import { noise, band, flagged, K, MIN, LIMIT, NOTE_AT, driftKind } from '../tool
 import { strip, scanFunctions, scanFlags, flagFindings, scanCss, scanMarkers, scanStorage, scanFiles, applyKeep, loadKeep, KINDS, strictFailures, STRICT_KINDS } from '../tools/leftovers.mjs'; // v0.11.22; strict v0.11.23
 import { seen as touched, track, noteView, seenOut } from './lib/seen.mjs'; // v0.11.22
 import { stepLine, flagLines, leftoverFound, modelDigest } from '../tools/lib/report.mjs'; // v0.11.28
-import { applyFault, report as mutateReport, keepInCopy } from '../tools/mutate.mjs'; // v0.11.178 (owner pick U1, PF); v0.11.185 (RV1, TG5): keepInCopy
+import { applyFault, report as mutateReport, keepInCopy, gitCopy } from '../tools/mutate.mjs'; // v0.11.178 (owner pick U1, PF); v0.11.185 (RV1, TG5): keepInCopy
 import { sparePlan, SPARE_FROM, SPARE_UNTIL, SPARE_QI_HOURS, SPARE_FED_MIN } from './lib/spare.mjs'; // v0.11.142 (owner pick CV1)
 import { artFiles, fingerprint, readArt, checkArt, writeArt, ART_RE } from '../tools/arthash.mjs'; // v0.11.39
 import { TACTICS, FIXED, rank, rankLabel, stream, isOneMove, playFight, sampleFight, sampleOrder, tacticStats, thirds, guNeeded, summarize, summarizeAll, tableLines } from '../tools/lib/fightlab.mjs'; // v0.11.80
@@ -791,7 +791,12 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md', 'roadmap-act2.md', 'roadmap
 // name that only the great root-kin's line carries fails the lint; the real game passes.
 {
     const real = (() => { try { return { code: 0, out: execFileSync(process.execPath, ['tools/lint.mjs'], { cwd: ROOT, encoding: 'utf8' }) }; } catch (e) { return { code: e.status ?? 1, out: String(e.stdout || e) }; } })();
-    assert(real.code === 0 && /texts and labels that are functions read on 9 sample states/.test(real.out), `LN: the lint reads function texts and passes on the game (${real.out.split('\n').slice(-2).join(' ')})`);
+    assert(real.code === 0 && /texts and labels that are functions read on 19 sample states/.test(real.out), `LN; v0.11.192 (K1, TL: 9 + 10 later-Coil states): the lint reads function texts and passes on the game (${real.out.split('\n').slice(-2).join(' ')})`);
+    // v0.11.192 (RV1, TG4): the later-Coil states are really there: already human, the snapshot with her human shape, QH alone
+    for (const f of ['tools/lint.mjs', 'tools/textlint.mjs']) {
+        const src = readFileSync(path.join(ROOT, f), 'utf8');
+        assert(/for \(const last of \['sister', 'lover', 'wait'\]\)/.test(src) && /if \(form === 'human'\) g\.flags\.yk_form_before = 'human';/.test(src) && /if \(form !== 'tiger'\) g\.coil\.snap = \{ \.\.\.g\.coil\.snap, yuki: \{ \.\.\.g\.coil\.snap\.yuki, realm: 7 \} \};/.test(src) && /g\.flags\.yk_last = 'wait'; g\.flags\.yk_form_before = 'human';/.test(src), `LN (RV1 TG4): ${f} has the later-Coil states`);
+    }
     const dir = path.join(TMP, 'lint'); mkdirSync(path.join(dir, 'tools'), { recursive: true });
     cpSync(path.join(ROOT, 'js'), path.join(dir, 'js'), { recursive: true });
     writeFileSync(path.join(dir, 'tools', 'lint.mjs'), readFileSync(path.join(ROOT, 'tools', 'lint.mjs')));
@@ -935,7 +940,14 @@ const CL4_SHA = 'bac3bac02069f5cc5ba315d41219d66a55cf75e0fc1aae93dd85c8de5985d1c
     const md = existsSync(path.join(TMP, 'mutate.md')) ? readFileSync(path.join(TMP, 'mutate.md'), 'utf8') : '';
     assert(code === 1 && /\| F1 \|[^\n]*\| caught \|/.test(md) && /\| F2 \|[^\n]*\| missed \|/.test(md) && /\| F3 \|[^\n]*find not in the file/.test(md) && /\| F4 \|[^\n]*no such file/.test(md) && md.indexOf('| F1 |') < md.indexOf('| F4 |') && readFileSync(path.join(tree, 'js/a.js'), 'utf8').includes('A = 1;'), `PF: caught, missed and not applied, in order, exit 1, the source tree untouched (exit ${code}: ${out.trim().split('\n').pop()})`);
     // v0.11.185 (RV1, TG5): the copy leaves out only the top-level art/, .git and node_modules, never js/art/
-    assert(!keepInCopy('/r', '/r/art') && !keepInCopy('/r', '/r/.git') && !keepInCopy('/r', '/r/node_modules') && keepInCopy('/r', '/r') && keepInCopy('/r', '/r/js/art') && keepInCopy('/r', '/r/js/art/art.js') && keepInCopy('/r', '/r/tests/art.txt'), 'PF (RV1, TG5): only the top-level art/, .git and node_modules are left out of a copy (js/art/ kept)');
+    assert(keepInCopy('/r', '/r/art') && !keepInCopy('/r', '/r/.git') && !keepInCopy('/r', '/r/node_modules') && keepInCopy('/r', '/r') && keepInCopy('/r', '/r/js/art') && keepInCopy('/r', '/r/js/art/art.js') && keepInCopy('/r', '/r/tests/art.txt'), 'PF (RV1, TG5); v0.11.192 (A1): only the top-level .git and node_modules are left out of a copy (art/ and js/art/ kept)');
+    // v0.11.192 (RV1, M2): each copy is a git tree of its own files, so `git ls-files` (check.mjs, check.sh quick) works in it
+    {
+        const d = path.join(TMP, 'mutate-git'); mkdirSync(path.join(d, 'js'), { recursive: true }); writeFileSync(path.join(d, 'js/a.js'), 'x\n');
+        const ok = gitCopy(d), files = ok ? execFileSync('git', ['ls-files'], { cwd: d, encoding: 'utf8' }) : '';
+        assert(ok && files.split('\n').includes('js/a.js'), `PF (RV1 M2): a copy's own files are in its git index (${JSON.stringify(files)})`);
+        assert(/gitCopy\(dir\); \/\/ RV1 \(M2\)/.test(readFileSync(path.join(ROOT, 'tools/mutate.mjs'), 'utf8')), 'PF (RV1 M2): every copy is made a git tree');
+    }
 }
 
 // v0.11.180 (owner picks CP1, SZ1): tools/packet.mjs, the context packets: each field (C1–C7) on the lines v0.11.179's label pass
