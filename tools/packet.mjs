@@ -12,7 +12,10 @@
 //   C5 the whole text as drawn (on the first day and a later one; and as seen in play)
 //   C6 the screen: every label beside it, and the labels that lead in (the hub's entry or the story choice)
 //   C7 Claude's check before a handover (`--check`): each draft through the canon card's tic list, word pairs the game already
-//      uses five times or more, five-word runs shared with a scene, and time words (again, first, last, morning…) against C2
+//      uses five times or more, five-word runs shared with a scene, and time words (again, first, last, morning…) against C2;
+//      v0.11.200 (owner pick D1): and a result's split (`splitLine`: a stat in the reply, a short reply beside a gain), five-word
+//      runs shared by two drafts of different scenes, "still" as stillness ("goes still", "a still place") no time word, and a
+//      reference's phrase or a `{slot}` breaking a run (two texts that name one song share its phrase on purpose)
 // Whole-game reads (`--tags`) get the lean form (each scene's last 220 characters, by form where they differ) and one tag line
 // per label (C2, C3, C4, the next screen), then full packets for the lines they flag.
 //
@@ -35,6 +38,8 @@ const { isTaskHub, isTaskChoice, taskCards, taskOpen, runTask, taskState, dryClo
 const { hour } = await import(js('story/common.js'));
 const { coilStamp, textDay } = await import(js('core/lines.js'));
 const { smartAction } = await import(path.join(ROOT, 'tests/lib/smartfight.mjs'));
+const { splitLine } = await import(js('core/replies.js')); // v0.11.200 (D1, S1)
+const { ALL_REFS } = await import(js('story/songs.js')); // v0.11.200 (D1, S4)
 
 export const FORMS = [['cat', 0, 'cat'], ['tiger', 2, 'great'], ['human', 7, 'human']];
 const FORM_NAMES = FORMS.map((f) => f[2]);
@@ -302,7 +307,35 @@ export function pairs(t) {
     for (let i = 0; i < w.length; i++) for (let j = i + 1; j < Math.min(w.length, i + 4); j++) out.add(`${w[i]} … ${w[j]}`);
     return out;
 }
-const runs5 = (t) => { const w = words(t); const out = new Set(); for (let i = 0; i + 5 <= w.length; i++) out.add(w.slice(i, i + 5).join(' ')); return out; };
+/** v0.11.200 (owner pick D1, S4; S2): the stretches a run may span: a `{slot}` and every reference's phrase (named or general, as
+ *  `fillRefs` puts them in) break a text, so two texts that name one song or share a `{min}` tail are not a reused run. */
+const REF_PHRASES = [...new Set(Object.values(ALL_REFS).flatMap((r) => [r.named, r.general]).filter((x) => typeof x === 'string' && x.trim()).map((x) => x.toLowerCase()))].sort((a, b) => b.length - a.length);
+export function stretches(t) {
+    let s = String(t).toLowerCase().replace(/\{[^}]*\}/g, '\u0000');
+    for (const r of REF_PHRASES) if (s.includes(r)) s = s.split(r).join('\u0000');
+    return s.split('\u0000');
+}
+const runs5 = (t) => { const out = new Set(); for (const part of stretches(t)) { const w = words(part); for (let i = 0; i + 5 <= w.length; i++) out.add(w.slice(i, i + 5).join(' ')); } return out; };
+/** v0.11.200 (D1, S3): "still" as stillness is no time word: after goes / holds / stands / keep / perfectly / very / quite / as / a /
+ *  is not…, or before water / place / air (22 of the game's 73 "still" at v0.11.199). The first time word that counts, or null. */
+const STILL_AS_STILLNESS = /\b(go|goes|going|went|gone|hold|holds|holding|held|stand|stands|standing|stood|keep|keeps|kept|lie|lies|lay|sit|sits|sat|stay|stays|stayed|freeze|freezes|froze|perfectly|very|quite|utterly|as|a|not)\s+$/i;
+export function timeWord(t) {
+    const s = String(t);
+    const re = new RegExp(TIME_WORDS.source, 'gi');
+    for (const m of s.matchAll(re)) {
+        if (m[0].toLowerCase() === 'still' && (STILL_AS_STILLNESS.test(s.slice(0, m.index)) || /^\s+(water|place|air|pool|pools)\b/i.test(s.slice(m.index + 5)))) continue;
+        return m[0];
+    }
+    return null;
+}
+/** v0.11.200 (D1, S1; v0.11.181's M1 and L1): a draft result as the screen splits it: a stat left in the reply (speech outside
+ *  GAIN_LINES carries its sentence there), or a reply of under four words beside a gain (a two-sentence result's fragment). */
+export function splitNote(t) {
+    const sp = splitLine(String(t).replace(/\{[^}]*\}/g, '20'));
+    if (/(^|[\s(])[+−-]\d/.test(sp.reply) && /\b(HP|Qi|XP|satiety|Fed|Saturation)\b|[+−-]\d+ [A-Z]/.test(sp.reply)) return `a stat stays in the reply: "${sp.reply.slice(0, 90)}"`;
+    if (sp.reply && sp.gain && sp.reply.split(/\s+/).length < 4) return `the reply is a fragment beside the gain ("${sp.reply}" | "${sp.gain.slice(0, 60)}"); check it is meant`;
+    return null;
+}
 /** The canon card's tic list (as tests/story.test.mjs reads it). */
 export function cardTics(card = readFileSync(path.join(ROOT, 'project/canon-card.md'), 'utf8')) {
     return [...(card.split('\n').find((l) => l.includes('Tics to avoid')) || '').matchAll(/"([^"]+)"/g)].map((m) => m[1].toLowerCase()).filter((x) => x !== 'a black dress');
@@ -318,7 +351,8 @@ export function corpus() {
 }
 /**
  * C7 on drafts [{ key: 'scene[:index]', text }]: tics, word pairs used `pairMin`+ times elsewhere, five-word runs shared with a
- * scene, and time words with the line's C2 data. Returns [{ key, kind, what }].
+ * scene, and time words with the line's C2 data; v0.11.200 (D1): the split (`split`) and runs shared by two drafts (`self`).
+ * Returns [{ key, kind, what }].
  */
 export function checkDrafts(drafts, { seen = {}, tics = cardTics(), texts = corpus(), pairMin = 5 } = {}) {
     const pairCount = new Map();
@@ -334,8 +368,20 @@ export function checkDrafts(drafts, { seen = {}, tics = cardTics(), texts = corp
         for (const p of pairs(d.text)) { const n = pairCount.get(p) || 0; if (n >= pairMin) out.push({ key: d.key, kind: 'pair', what: `"${p}" is in ${n} texts or labels already` }); }
         const sid = d.key.split(':')[0];
         for (const r of runs5(d.text)) { const at = runAt.get(r); if (at && at !== sid) out.push({ key: d.key, kind: 'run', what: `"${r}" also in ${at}` }); }
-        const tw = String(d.text).match(TIME_WORDS);
-        if (tw) out.push({ key: d.key, kind: 'time', what: `"${tw[0]}": ${fmtSeen(seen[d.key] || seen[sid])}; check it holds on every day and hour` });
+        const tw = timeWord(d.text);
+        if (tw) out.push({ key: d.key, kind: 'time', what: `"${tw}": ${fmtSeen(seen[d.key] || seen[sid])}; check it holds on every day and hour` });
+        const sn = splitNote(d.text);
+        if (sn) out.push({ key: d.key, kind: 'split', what: sn });
+    }
+    // v0.11.200 (D1, S2): the drafts against each other (a run in two drafts of different scenes; one note, on the later draft)
+    const draftRun = new Map();
+    for (const d of drafts) {
+        const sid = d.key.split(':')[0];
+        for (const r of runs5(d.text)) {
+            const at = draftRun.get(r);
+            if (!at) draftRun.set(r, { sid, key: d.key });
+            else if (at.sid !== sid) out.push({ key: d.key, kind: 'self', what: `"${r}" also in the draft ${at.key}` });
+        }
     }
     return out;
 }
@@ -355,7 +401,7 @@ if (isMain) {
         const drafts = lines.map((l) => { const k = l.indexOf('|'); return { key: l.slice(0, k).trim(), text: l.slice(k + 1).trim() }; });
         const seen = games ? seenAt(games) : {};
         const r = checkDrafts(drafts, { seen });
-        text = `${r.map((x) => `${x.kind.toUpperCase()} · ${x.key} · ${x.what}`).join('\n')}\n\nC7: ${drafts.length} drafts, ${r.length} notes (tic ${r.filter((x) => x.kind === 'tic').length}, pair ${r.filter((x) => x.kind === 'pair').length}, run ${r.filter((x) => x.kind === 'run').length}, time ${r.filter((x) => x.kind === 'time').length})\n`;
+        text = `${r.map((x) => `${x.kind.toUpperCase()} · ${x.key} · ${x.what}`).join('\n')}\n\nC7: ${drafts.length} drafts, ${r.length} notes (${['tic', 'pair', 'run', 'self', 'time', 'split'].map((k) => `${k} ${r.filter((x) => x.kind === k).length}`).join(', ')})\n`;
     } else if (argv.includes('--tags')) {
         let ids = Object.keys(SCENES);
         const area = opt('area', null);

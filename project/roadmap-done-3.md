@@ -2,6 +2,12 @@
 
 Started in v0.11.150, when `roadmap-done-2.md` had passed about 45 KB. Newer than `roadmap-done-2.md` and `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.200 (word for word; owner pick D1: section 0's line as of v0.11.199, its done parts; the size rule)
+
+### From section 0, as of v0.11.199
+
+- *(v0.11.198, owner S1, D1, T1)* **C1's leftovers SX and L3: done in v0.11.198** (the road home after a carried flight; five more on-foot lines; what is left on `roadmap-e.md`'s flight line). *(v0.11.197, owner C1, D1, RV1)* **Walks with company: done in v0.11.197** (the owner's suggestion of 2026-11-16 12:28). *(v0.11.199, owner P1)* **Next: the bundles D → A+E → B → C, then group f** (the plan at the top of `roadmap-e.md`; each still gets its options first). **Section 0's open items moved to their homes in v0.11.196 (M1):** flight on `roadmap-e.md`'s "Story, flight" line; tics and wording on its "Small text fixes" line; Yuki's forms (LQ, AG, the Old Tree's lip) on its "Reactions to Yuki's forms" line; the update check, target SDK 35/36 and Welcome back in `roadmap-2.md` section 4 (g)–(i). **Done:** v0.11.195 F1 + D1 + RV1 (FW's fixes: `js/story/flight_texts.js`, `lore` [0] on foot). v0.11.196 M1 (the open items sorted). Older done lines: `roadmap-done-3.md` (v0.11.196).
+
 ## Moved in v0.11.196 (word for word; owner pick M1: section 0's open items sorted into their homes)
 
 ### From section 0, as of v0.11.195

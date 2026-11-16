@@ -505,6 +505,16 @@ print(json.dumps({"n": len(R['masks']), "bad": bad, "bitmaps": sum('bitmap' in m
     }
     rmSync(out, { recursive: true, force: true });
 }
+// v0.11.200 (owner pick D1, S6): the handover's "Other docs" names the newest history part (it said history-26.md for two versions after
+// history-27.md was started), and its "now `project/history-N.md`" line in the size paragraph too
+{
+    const ho = readFileSync(path.join(ROOT, 'project/handover.md'), 'utf8');
+    const newest = newestHistory(readdirSync(path.join(ROOT, 'project')));
+    const n = (newest.match(/\d+/) || ['1'])[0];
+    const other = (ho.match(/\*\*Other docs:\*\*[^\n]*/) || [''])[0];
+    assert(other.includes(`**\`project/${newest}\`** … **\`project/history.md\`**`) && other.includes(`part ${n} is the newest`), `S6: the handover's "Other docs" names ${newest} as the newest history part`);
+    assert(ho.includes(`(now \`project/${newest}\``), `S6: the handover's size paragraph names ${newest} as the part the old notes move to`);
+}
 // v0.11.73 (group h, H1): the docs' own rules in tools/lib/docs.mjs (the handover's size, the newest history part, the roadmap's version)
 {
     const ok = { version: '1.2.3', handoverBytes: 34999, histories: { 'history.md': 50000, 'history-2.md': 50000, 'history-10.md': HISTORY_MAX - 1000, 'history-9.md': 46000 }, roadmap: '# Roadmap\n\nLast updated: 2026-11-08 (v1.2.3, docs): x\n' };
@@ -567,9 +577,10 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md', 'roadmap-act2.md', 'roadmap
     const { createHash } = await import('node:crypto');
     const h = (t) => createHash('sha256').update(t).digest('hex');
     // v0.11.196 (owner picks M1, H1): later additions to a moved line are tails marked " *(v0.11.19x"; cut before hashing, so the moved block stays pinned
-    const tails = (t) => (t.match(/ \*\(v0\.11\.19\d/g) || []).length, cut = (t) => t.replace(/ \*\(v0\.11\.19\d[^\n]*/g, '');
+    // v0.11.200 (D1): and the tails of v0.11.2xx (S5's on the text tools' line)
+    const tails = (t) => (t.match(/ \*\(v0\.11\.(19\d|2\d\d)/g) || []).length, cut = (t) => t.replace(/ \*\(v0\.11\.(19\d|2\d\d)[^\n]*/g, '');
     const beRaw = body(rd('roadmap-e.md'));
-    assert(tails(beRaw) === 3, `MD (H1): roadmap-e.md has the 3 marked tails of v0.11.196 (${tails(beRaw)})`);
+    assert(tails(beRaw) === 4, `MD (H1): roadmap-e.md has the 3 marked tails of v0.11.196 and v0.11.200's (${tails(beRaw)})`);
     const be = cut(beRaw), br = body(rd('roadmap-retune.md'));
     assert(h(be) === '6e712ad1524d6d47beaa91d775a0c7a5d8c5cda69214b97812060dfbbeaeab12' && h(br) === '48076f4fa63681f75ceb035b2cc348b0652ab31e761b8383aa636aaeb5efbe9b', `MD: roadmap-e.md and roadmap-retune.md hold the moved blocks exactly (sha256 ${h(be).slice(0, 12)}…, ${h(br).slice(0, 12)}…)`);
     assert(!r1.includes(be.split('\n')[0]) && !r1.includes(br.split('\n')[0]) && r1.includes("**Group e's older open items**") && r1.includes('`roadmap-e.md`') && r1.includes("**Section 2's older open items**") && r1.includes('`roadmap-retune.md`'), 'MD: not left behind in roadmap.md, a pointer in each place');
@@ -587,7 +598,7 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md', 'roadmap-act2.md', 'roadmap
     assert(ra.includes('"one item after the romance and before the act 1 retune.') && ra.includes('and he has a doctorate in biology...)"') && ra.includes('`roadmap.md`') && ra.includes('`roadmap-2.md`'), 'RA1: the owner\'s words word for word, and the parts named');
     for (const t of ['- **Act 2** (open).', '**Plot point for Act 2: James\'s world is the outlier.**', '**For Act 2, the knitting bone (T6) and the crushing mass (T9)**', '**For Act 2, from the cultivation games:**', 'Universal-service gifts (organic armour']) assert(ra.includes(t) && !r2.includes(t), `RA1: "${t.replace(/\*/g, '').slice(0, 40)}" moved to roadmap-act2.md`);
     assert(/^## Act 2 \(the owner, 2026-11-14 01:02/m.test(lore) && /never be truly alive again, nor regenerate enough to fly/.test(lore) && /biology, engineering, agriculture, horticulture and gardening are mostly the same thing/.test(lore), 'RA1: Act 2\'s facts in lore.md');
-    assert(/Now: e, f, Act 2 \(`roadmap-act2\.md`\), then section 2/.test(r1), 'RA1: the order names Act 2 between f and the retune');
+    assert(/Now: the PC layout, the merged text push \(the rest of e\), f, section 2 \(the retune of the prologue and Act 1\), then Act 2 \(`roadmap-act2\.md`\) if there is time/.test(r1), 'RA1, v0.11.200 (owner pick F2): the order names Act 2 after the retune, the PC layout first');
     // v0.11.173 (P6A): parts 5 and 6 done, their lines moved word for word to roadmap-done-3.md; the stasis note in roadmap-act2.md
     { const d3 = rd('roadmap-done-3.md'); assert(r1.slice(r1.indexOf('### e. '), f).includes('**Parts 5, 6, 7 and 8: done**') && d3.includes('its stomp texts. **Done in v0.11.175**') && d3.includes('**Part 5, the Blackroot:** **done in v0.11.172**') && d3.includes('**Part 7, the Return:** **done in v0.11.174**') && d3.includes('**Part 6, the Heart:**') && d3.includes('**Done in v0.11.173**'), 'P6A: parts 5 and 6 done, their lines in roadmap-done-3.md (v0.11.174, P7A: and part 7)'); }
     assert(ra.includes('It\'s called the "Sneaky Bastard"') && ra.includes('we will square it when we get there...') && rd('roadmap-done-3.md').includes('`mei_carried_seed`'), 'P6A (rule 6): the owner\'s 03:50 and 03:57 note in roadmap-act2.md; SD in part 7');
@@ -856,6 +867,19 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md', 'roadmap-act2.md', 'roadmap
     assert(/LR line pools: memory 48 lines \/ \d+ words \(twice 0, shared with a scene \d+, tics \d+, broken 0, spacing 0\); yuki \d+ lines \/ \d+ words .*; aptitude 1 lines \/ 5 words/.test(game.out), `LR: the lint reads the memory lines, Yuki's haul lines and the aptitude reply (${(game.out.match(/LR line pools.*/) || [''])[0]})`);
     { const m = game.out.match(/; yuki (\d+) lines/); assert(m && Number(m[1]) >= 57, `P3A (RV1, TG7): the lint reads Ashfall's haul lines in every form (${m?.[1]})`); }
     writeFileSync(pro, src); // the planted line back
+    { // v0.11.200 (owner pick D1, S5): the result lines as a pool (the reply part, no gains), the card's tics in them, and a planted fault in one noted
+        const m = game.out.match(/; results (\d+) lines \/ (\d+) words \(twice 0, shared with a scene \d+, tics \d+, broken 0, spacing 0\)/);
+        assert(m && Number(m[1]) >= 250 && Number(m[2]) >= 5000, `D1 (S5): the lint reads the result lines (${m ? `${m[1]} lines, ${m[2]} words` : 'no results pool'})`);
+        assert(/CT the canon card's tics in the result lines: \d+/.test(game.out), 'D1 (S5): the card\'s tics in the result lines are printed (CT)');
+        const { splitLine } = await import('../js/core/replies.js');
+        assert(splitLine('Supper: +25 satiety.').reply === '', 'D1 (S5): a gain line gives no result text (the pool reads the reply part only)');
+        const from = 'for a moment it\'s almost like working in a lab again';
+        assert(src.includes(from), 'D1 (S5): the planted result line is there to change');
+        writeFileSync(pro, src.replace(from, `${from} \\$${'{'}lab}`)); // a literal \${lab} in the template source
+        const rb = run(dir);
+        assert(rb.code === 0 && /NOTE {2}text \(log only\): pool results broken 0 → 1/.test(rb.out) && !/NOTE {2}text \(log only\): all broken/.test(rb.out), `D1 (S5): a template leftover in forage's result is noted in the results pool, log only, the scenes untouched (exit ${rb.code})`);
+        writeFileSync(pro, src);
+    }
     { // v0.11.163 (owner pick TL2): the used-today sample reads a hunt's return line (shown only after a hunt option is used today)
         const bl = path.join(dir, 'js', 'story', 'act1_blackroot.js'); const bsrc = readFileSync(bl, 'utf8');
         assert(bsrc.includes('The pool has gone flat again.'), 'TL2: the planted return line is there to change');
@@ -995,6 +1019,24 @@ const CL4_SHA = 'bac3bac02069f5cc5ba315d41219d66a55cf75e0fc1aae93dd85c8de5985d1c
     const notes = P.checkDrafts([{ key: 'rt_yk_talk', text: 'Gold eyes, level.' }, { key: 'yuki_path', text: 'Her ears stay forward.' }, { key: 'fo_drill:0', text: 'Drill the line: shields of bone, spears behind, nobody alone.' }, { key: 'rt_ashfall', text: 'Cleaner than this morning\'s.' }, { key: 'x', text: 'A plain new line.' }], { seen });
     const has = (kind, key) => notes.some((n) => n.kind === kind && n.key === key);
     assert(has('tic', 'rt_yk_talk') && has('pair', 'yuki_path') && has('run', 'fo_drill:0') && has('time', 'rt_ashfall') && !notes.some((n) => n.key === 'x'), `CP (C7): the tic, "ears … forward", the drill's reused run, "this morning" found; a plain line passes (${notes.map((n) => `${n.kind}:${n.key}`).join(', ')})`);
+    // v0.11.200 (owner pick D1): S1 the split, S2 the drafts against each other, S3 "still" as stillness, S4 a reference's phrase and a slot
+    {
+        const n2 = P.checkDrafts([
+            { key: 'sa', text: '"Mine," says Ya: +2 HP.' }, { key: 'sb', text: 'Thorns. +2 cinderberries.' }, { key: 'sc', text: 'Supper: +25 satiety.' },
+            { key: 'ta', text: 'Her face goes still.' }, { key: 'tb', text: 'Find a still place and sit.' }, { key: 'tc', text: 'It is still dark.' }, { key: 'td', text: 'You keep perfectly still until tomorrow.' },
+            { key: 'ra', text: 'You read her a very long book about carrying a ring to a volcano, slowly.' },
+            { key: 'da', text: 'Yuki sits by the cold river stones and counts.' }, { key: 'db', text: 'Later Yuki sits by the cold river stones and counts them.' }, { key: 'da:1', text: 'yuki sits by the cold river stones and counts' },
+            { key: 'ma', text: 'Flown, {min} min aloft against {walk} on foot.' }, { key: 'mb', text: 'Carried: {min} min aloft against {walk} on foot.' },
+        ], { seen });
+        const at = (kind, key) => n2.some((n) => n.kind === kind && n.key === key);
+        assert(at('split', 'sa') && /stat stays in the reply/.test(n2.find((n) => n.key === 'sa' && n.kind === 'split').what) && at('split', 'sb') && !at('split', 'sc'), 'D1 (S1): a stat in the reply and a fragment beside a gain noted; a plain gain line passes');
+        assert(!at('time', 'ta') && !at('time', 'tb') && at('time', 'tc') && n2.some((n) => n.key === 'td' && n.kind === 'time' && /"tomorrow"/.test(n.what)), 'D1 (S3): "goes still" and "a still place" are no time words; "still dark" is; after "perfectly still" the next time word counts');
+        assert(P.timeWord('Still nothing.') === 'Still' && P.timeWord('Hold still.') === null && P.timeWord('the still water') === null, 'D1 (S3): timeWord by itself');
+        assert(!at('run', 'ra'), 'D1 (S4): a reference\'s general phrase in a scene (lotr in the reading) is no reused run');
+        assert(at('self', 'db') && !at('self', 'da') && !at('self', 'da:1'), 'D1 (S2): a run shared by drafts of two scenes noted once, on the later; two drafts of one scene not');
+        assert(!at('self', 'mb') && !at('run', 'ma'), 'D1 (S2, S4): a {slot} breaks a run, so two walk lines sharing "{min} min aloft against {walk} on foot" are not noted');
+        assert(P.stretches('Plays {ref:sabbath} loud, then a dwarven hymn.').length === 3, 'D1 (S4): stretches splits at a slot and at a reference\'s phrase');
+    }
     // the command line writes a packet file
     let cli = '';
     try { cli = execFileSync(process.execPath, ['tools/packet.mjs', 'rr_scout:1', '--games', '3', '--out', path.join(TMP, 'pk.md')], { cwd: ROOT, encoding: 'utf8' }); } catch (e) { cli = String(e.stdout || e); }

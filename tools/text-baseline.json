@@ -318,6 +318,16 @@
    "tics": 0,
    "broken": 0,
    "spacing": 0
+  },
+  "results": {
+   "lines": 301,
+   "words": 6649,
+   "dupes": 0,
+   "sceneShared": 13,
+   "tics": 0,
+   "broken": 0,
+   "spacing": 0,
+   "cardTics": 2
   }
  }
 }

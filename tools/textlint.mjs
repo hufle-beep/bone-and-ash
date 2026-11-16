@@ -14,7 +14,10 @@
 // v0.11.136 (NC1): and the replies by day (lines.js DAY_REPLIES) as the pool `replies`.
 // v0.11.139 (MW1): and Old Wen's and the mother's daily scenes (house_texts.js) as the pool `house`.
 // v0.11.163 (TL2): one more sample, every once-a-day key used today (the return lines after a hunt).
-// Not read yet: the other result lines of choices and cards, the task cards' texts (open, options later).
+// v0.11.200 (owner pick D1, S5): and the result lines of every choice, as the screen shows them (the reply under the scene, `splitLine`;
+// the gains and engine lines left out), forced as a success and, with a check, as a failure on six sample states (each form on its first
+// and a later day, as tools/packet.mjs's), as the pool `results`; and the canon card's tic list over them (a log line, CT).
+// Not read yet: the task cards' texts (open, options later).
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -142,7 +145,30 @@ const { SUPPER_POT } = await import(js('story/act1_fallout.js')); // v0.11.189 (
 const btPlaceLines = [BTX.BT_A1_WITNESS, BTX.BT_TREE_FRAME, ...Object.values(BTX.BT_LATE).flatMap((o) => Object.values(o)), SUPPER_POT[2], SUPPER_POT[3]];
 const POOLS = { memory: [...MEMORY_LINES], yuki: yukiLines, aptitude: [ADAPT_REPLY], replies: dayReplies, house: houseLines, kitchen: kitchenLines, music: allMusicTexts('general'), music_named: allMusicTexts('named'), reading_named: readNamed, songs: allSongTexts('general'), songs_named: allSongTexts('named'), lf_drill: Object.values(LF_DRILL).flat(), lf_season: [...SEASON_LINES], remember: rememberLines, bt_place: btPlaceLines, awake: [...Object.values(BTX.AWAKE_WOMEN).flatMap((o) => Object.values(o)), BTX.AWAKE_VILLAGE, ...Object.values(BTX.AFTER_ANSWER_WOMEN), ...Object.values(BTX.ASK_WOMEN)], // v0.11.193 (N1: GV, HA, HQ)
     song_second: Object.values(SGX.SONG_SECOND), yk_later: ykLaterTexts, sky_fw: [FWX.FW.elderSky, FWX.FW.elderRung, FWX.FW.luHanSky, FWX.FW.luHanTail, FWX.FW.morningOut, FWX.BT_CLOSER], carry: carryLines, sx: Object.values(SX) }; // v0.11.195 (F1, D1; RV1 TG3): the lines after a tribulation the village saw (the samples set no sky_witness), the second morning flown and the Foundation closer (realm 1 only) // v0.11.191 (Y1, RV1 TG3): Yuki's later question, answers and result lines (the samples set no yk_last) // v0.11.190 (N1, RV1 TG1): the women at Yuki's forms and the second songs' sentences
+// v0.11.200 (owner pick D1, S5): the result lines (the reply part of each line every choice gives), on six samples: each form on its first
+// day and its third (SAMPLES' k 0 and 2 with no path: the indices below), as a success and, with a check, as a failure
+const { choose } = await import(js('core/story.js')); const { dryClone } = await import(js('core/tasks.js')); const { splitLine } = await import(js('core/replies.js'));
+const RESULT_SAMPLES = [0, 3, 6, 18, 21, 24].map((i) => SAMPLES[i]);
+const resultLines = []; const resultAt = new Map();
+for (const s of Object.values(SCENES)) (s.choices || []).forEach((c0, i) => {
+    for (const smp of RESULT_SAMPLES) for (const b of (c0.check ? [999, -999] : [0])) {
+        const c = { ...c0, show: undefined, req: undefined }; if (c0.check) c.check = { ...c0.check, bonus: () => b };
+        const choices = s.choices.slice(); choices[i] = c;
+        try {
+            const g = dryClone(smp); g.scene = s.id;
+            const r = choose(g, { ...SCENES, [s.id]: { ...s, choices } }, i, { task: true });
+            const t = (r.lines || []).map((l) => splitLine(String(l)).reply).filter(Boolean).join(' ').trim();
+            if (t && !resultAt.has(t)) { resultAt.set(t, s.id); resultLines.push(t); }
+        } catch { /* needs more state than a sample has */ }
+    }
+});
+POOLS.results = resultLines;
 const pools = poolCounts(POOLS, rows.filter((r) => r.kind === 'text').flatMap((r) => r.renders));
+// CT (D1, S5): the canon card's tics in the result lines (the card's list, as tools/packet.mjs reads it)
+const cardPath = path.join(ROOT, 'project/canon-card.md');
+const CARD_TICS = existsSync(cardPath) ? [...(readFileSync(cardPath, 'utf8').split('\n').find((l) => l.includes('Tics to avoid')) || '').matchAll(/"([^"]+)"/g)].map((m) => m[1].toLowerCase()).filter((x) => x !== 'a black dress') : [];
+const cardTicHits = resultLines.flatMap((t) => { const low = t.toLowerCase().replace(/[,.;:!?"]/g, ''); return CARD_TICS.filter((x) => low.includes(x)).map((x) => `${resultAt.get(t)} "${x}"`); });
+pools.results.cardTics = cardTicHits.length;
 // RV1 (TG6): the reading's named edition against every scene but its own (its general text is heart_read itself)
 pools.reading_named = poolCounts({ reading_named: readNamed }, rows.filter((r) => r.kind === 'text' && r.id !== 'heart_read').flatMap((r) => r.renders)).reading_named;
 const snap = { totals: now.totals, areas: now.areas, pools };
@@ -153,6 +179,7 @@ console.log(`  FV favourite phrases (in 4+ scenes; names and canon terms left ou
 console.log(`  TC tics (2–3 words 3+ times in one text): ${T.tics}: ${now.lists.tics.slice(0, 5).map((x) => `${x.id} "${x.phrase}" ×${x.n}`).join(', ')}`);
 console.log(`  BD broken text: ${T.broken}${T.broken ? `: ${now.lists.broken.slice(0, 5).map((x) => `${x.id} (${x.kind}) ${x.what}`).join(', ')}` : ''}; spacing the screen drops: ${T.spacing}`);
 console.log(`  LR line pools: ${Object.entries(pools).map(([p, v]) => `${p} ${v.lines} lines / ${v.words} words (twice ${v.dupes}, shared with a scene ${v.sceneShared}, tics ${v.tics}, broken ${v.broken}, spacing ${v.spacing})`).join('; ')}`);
+console.log(`  CT the canon card's tics in the result lines: ${cardTicHits.length}${cardTicHits.length ? `: ${cardTicHits.join(', ')}` : ''}`);
 console.log(`  RD texts rendered on none of the sample states: ${T.unrendered}${T.unrendered ? `: ${now.lists.unrendered.map((x) => `${x.id} (${x.kind})`).join(', ')}` : ''}`);
 
 if (LIST) {
