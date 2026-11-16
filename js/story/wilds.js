@@ -7,6 +7,7 @@ import { condensationSatGain } from '../core/formulas.js';
 import { sitGain, yukiFightSkill, canFly } from '../core/game.js'; // v0.11.118 (YK1 review, SB); v0.11.131 (XB2, FY): canFly
 import { FW } from './flight_texts.js'; // v0.11.195 (owner picks F1, D1)
 import { set, day, hour, daily, markDaily, forestScale, grow, eatBest, pantry, foodCount, byForm, byDay, dayReply } from './common.js';
+import { storyNight, weekMorning, longCal } from '../core/calendar.js'; // v0.11.203 (owner pick T1, TS1): the long calendar's weeks
 import { MORNING_AGAIN } from './remember_texts.js'; // v0.11.184 (S1, KP): the Day 2 morning from the second Coil on
 
 /* v0.11.136 (owner pick NC1, NT1's push 2): replies by day (js/core/lines.js dayReply): the first text is the old reply, the rest Fable's, one for each later day of a Coil. */
@@ -75,7 +76,9 @@ export const replayExplore = (g) => ((g.coil && g.coil.n) || 1) >= 2;
 const loot = (lines) => () => lines;
 
 /* ---------- where the night goes ---------- */
-export const nightNext = (g) => (g.flags.leave_forest || (g.flags.forest_day || 1) >= 3 ? 'night_attack' : 'night_event');
+/** v0.11.203 (owner pick T1, TS1): in the long calendar a forest day is a week: its first six nights are quiet (straight to the morning),
+ *  and the story's night (an encounter, or the jackals on the third) comes on the seventh. Leaving the forest still brings the jackals that night. */
+export const nightNext = (g) => (g.flags.leave_forest || ((g.flags.forest_day || 1) >= 3 && storyNight(g)) ? 'night_attack' : storyNight(g) ? 'night_event' : 'morning');
 
 /* ---------- night encounters (grow with the forest days) ---------- */
 const nightFight = (kind) => (g) => {
@@ -194,7 +197,8 @@ Yuki puts herself back in order as if the fight had been someone else's. You sit
         enter: (g) => {
             const lines = [];
             if (hour(g) < 6 || hour(g) >= 20) lines.push(nightRest(g)); // v0.11.92 (O1): half back after a night fight
-            g.flags.forest_day = (g.flags.forest_day || 1) + 1;
+            if (longCal(g)) g.flags.long = true; // v0.11.203 (T1, TS1): a night in the forest makes the long road, as the first night's event does in the old calendar
+            if (weekMorning(g)) g.flags.forest_day = (g.flags.forest_day || 1) + 1; // v0.11.203 (T1, TS1): once a week in the long calendar
             const out = eatBest(g);
             lines.push(out.length ? 'Breakfast. ' + out[0] : 'No breakfast. Your stomach enters it in the record.');
             return lines;

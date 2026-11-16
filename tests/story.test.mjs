@@ -1004,7 +1004,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
             if (stop) { if (c === '{') depth++; if (c === '}') { if (depth === 0) { i++; return out; } depth--; } }
             if (!/\s/.test(c)) out += c; i++; } return out; }; return code(false); };
         const LABELS = Object.values(HEART).flatMap((sc) => (sc.choices || []).map((c) => (typeof c.text === 'string' ? c.text : '(fn)')));
-        const PIN = { 'act1_heart.js': '2d572e3036fe378a', 'stomp_act1.js': '1a2e6d1e8cb25a0b', 'yuki_time.js': '746d1873838bd5ca', labels: '1c6aa5a54be6053d' }; // v0.11.182 (RS1, RV1 L6): the labels re-pinned ("Read to Ya from your archive." appended on heart_camp)
+        const PIN = { 'act1_heart.js': 'd1708057e33d7f53', /* v0.11.203 (T1, TS1): re-pinned for the long calendar (late and the leave by the story's day) */ 'stomp_act1.js': '1a2e6d1e8cb25a0b', 'yuki_time.js': '746d1873838bd5ca', labels: '1c6aa5a54be6053d' }; // v0.11.182 (RS1, RV1 L6): the labels re-pinned ("Read to Ya from your archive." appended on heart_camp)
         const hash = (t) => createHash('sha256').update(t).digest('hex').slice(0, 16);
         const got = { labels: hash(JSON.stringify(LABELS)) };
         for (const f of ['act1_heart.js', 'stomp_act1.js', 'yuki_time.js']) got[f] = hash(skel(readFileSync(new URL(`../js/story/${f}`, import.meta.url), 'utf8')));
@@ -1539,7 +1539,7 @@ for (const form of ['cat', 'human']) {
     { const lab = (c) => (typeof c.text === 'function' ? '(fn)' : c.text); const out = {};
       for (const id of Object.keys(LONGFOREST)) { const s = SCENES[id]; out[id] = [s.title, typeof s.place === 'string' ? s.place : '(fn)', typeof s.art === 'string' ? s.art : '(fn)', (s.choices || []).map((c) => [lab(c), typeof c.to === 'string' ? c.to : '(fn)', c.time || 0, c.check ? `${c.check.skill}/${c.check.dc}` : ''].join('|'))]; }
       const h = createHash('sha1').update(JSON.stringify(out)).digest('hex');
-      assert(h === '1d5b82bff9212d725b70edbd44b9d72c4feecbae', // v0.11.179 (LB1): re-pinned for the label pass's Long Forest labels
+      assert(h === '43a749b3c08ec57ad5bd516a36862fb7b300e3ab', // v0.11.179 (LB1): re-pinned for the label pass's Long Forest labels; v0.11.203 (T1, TS1): the way back's label names its day by the calendar ((fn))
          `P8A: the Long Forest's ids, titles, places, art, labels, targets, times and checks as in v0.11.174 (${h}; update only with a push that means to change them)`); }
 }
 // v0.11.175 (owner pick RV1; Fable's cold review of part 8, TG1–TG14): a visit counted once a day (C1/C2: the storm's way down the
@@ -5052,6 +5052,78 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     { const g = G(97053, 2); Object.assign(g.flags, { bt_return: 'fo_ashfall', yuki_return: 'rr_hub' }); const t = view(g, 'yuki_tiger_awaken'); assert(!t.includes(P.AWAKE_A1_ASHFALL), `${T}: c2 none when the form scene doesn't follow that breakthrough`); }
     { const g = G(97054, 7); Object.assign(g.flags, { bt_return: 'fo_ashfall', yuki_return: 'fo_ashfall', yuki_tiger_seen: true }); const t = view(g, 'yuki_human_awaken'); assert(!t.includes(P.AWAKE_A1_ASHFALL) && !t.includes(P.AWAKE_VILLAGE), `${T} (RV1 TG3): c2 never in the human form's scene`); }
     assert(!/Old Hu|once already|watched the sky/.test(P.AWAKE_A1_ASHFALL) && /^The street, already silent, stays so in good order; nobody screams\./.test(P.AWAKE_A1_ASHFALL), `${T}: c2 Claude's cuts (no Old Hu, who is only in the Fallout; RV1 L3: no restating the closer before)`);
+}
+
+// v0.11.203 (owner pick T1, TS1 + TS8): the long calendar behind the test switch (js/core/calendar.js). Old saves and plain new games keep
+// the old calendar (every helper the identity); a long-calendar game keeps `cal` through saves and both rewinds; the stays are weeks.
+{
+    const C = await import('../js/core/calendar.js');
+    const W = await import('../js/story/wilds.js');
+    const A = await import('../js/story/ashfall.js');
+    const { FAQ } = await import('../js/core/faq.js');
+    const { inAct1 } = await import('../js/core/game.js');
+    const T = 'TS1 (the long calendar)';
+    const old = ensureBars(newGame(98001, { closed: true })), lg = ensureBars(newGame(98002, { closed: true, cal: C.LONG_CAL }));
+    assert(!('cal' in old) && lg.cal === 7 && !C.longCal(old) && C.longCal(lg), `${T}: plain New game has no cal; the switch's game has cal 7`);
+    let id = true; for (let d = 1; d <= 30; d++) id = id && C.calStart(old, d) === d && C.calEnd(old, d) === d && C.storyDayOf(old, d) === d; assert(id, `${T}: the old calendar is the identity (Days 1–30)`);
+    const starts = [[1, 1], [2, 8], [4, 22], [7, 43], [8, 44], [10, 58], [11, 65], [15, 69], [16, 70], [19, 91], [20, 92], [21, 93], [22, 94]];
+    assert(starts.every(([d, c]) => C.calStart(lg, d) === c), `${T}: story days to calendar days (${starts.map(([d]) => `${d}→${C.calStart(lg, d)}`).join(' ')})`);
+    const back = [[7, 1], [21, 3], [22, 4], [42, 6], [43, 7], [44, 8], [64, 10], [65, 11], [90, 18], [91, 19], [93, 21], [94, 22]];
+    assert(back.every(([c, d]) => C.storyDayOf(lg, c) === d), `${T}: calendar days back to story days (${back.map(([c]) => `${c}→${C.storyDayOf(lg, c)}`).join(' ')})`);
+    assert(C.calMinutes(old, 8, 6) === 7 * 1440 + 360 && C.calMinutes(lg, 8, 6) === 43 * 1440 + 360, `${T}: Act 1's first dawn: Day 8 / Day 44`);
+    // the save and the rewinds keep it
+    { const g2 = deserialize(serialize(lg)); assert(g2.cal === 7, `${T}: a save keeps cal`); const o2 = deserialize(serialize(old)); assert(!('cal' in o2), `${T}: an old-calendar save gets no cal`); }
+    { const g = ensureBars(newGame(98003, { closed: true, cal: 7 })); g.minutes += 3 * 1440; rewind(g); assert(g.cal === 7 && g.minutes === newGame(1).minutes, `${T}: the act's rewind keeps cal (and the first dawn)`); }
+    { const g = ensureBars(newGame(98004, { closed: true, cal: 7 })); g.coil.act = 1; g.flags.ending = 'paid'; rewind(g, { to: 'game' }); assert(g.cal === 7, `${T}: the whole game's rewind keeps cal`); }
+    // inAct1 at the long calendar's Day 44
+    { const g = ensureBars(newGame(98005, { closed: true, cal: 7 })); g.flags.ending = 'paid'; g.scene = 'fo_start'; g.minutes = C.calMinutes(g, 8, 6) - 1; const before = inAct1(g); g.minutes += 1; assert(!before && inAct1(g), `${T}: Act 1 from Day 44 06:00`); }
+    // the wilds: six quiet nights, then the story's night; forest_day once a week; the old calendar's night 1 is an event
+    const nightsOf = (g) => { const out = []; for (let k = 0; k < 21; k++) { goTo(g, SCENES, 'night'); const nx = W.nightNext(g); out.push(nx); goTo(g, SCENES, 'morning'); } return out; };
+    { const g = ensureBars(newGame(98006, { closed: true, cal: 7 })); g.minutes = 21 * 60; const n = nightsOf(g); const story = n.map((x, i) => [x, i]).filter(([x]) => x !== 'morning').map(([x, i]) => `${i + 1}:${x}`);
+      assert(story.join(' ') === '7:night_event 14:night_event 21:night_attack', `${T}: the forest's story nights on nights 7, 14 and 21 (${story.join(' ')})`);
+      assert(g.flags.forest_day === 4 && g.flags.long === true, `${T}: forest_day once a week, and a quiet night makes the long road (${g.flags.forest_day})`); }
+    { const g = ensureBars(newGame(98007, { closed: true })); g.minutes = 21 * 60; goTo(g, SCENES, 'night'); assert(W.nightNext(g) === 'night_event', `${T}: the old calendar's first night is the event`); goTo(g, SCENES, 'morning'); assert(g.flags.forest_day === 2 && !('cal_night' in g.flags), `${T}: the old calendar's morning turns the day, no cal_night`); }
+    // the village: the arson on vday 2's seventh night; the eve of the tribute on vday 3's seventh night
+    { const g = ensureBars(newGame(98008, { closed: true, cal: 7 })); g.flags.long = true; goTo(g, SCENES, 'village'); assert(g.flags.vday === 1 && g.flags.cal_night === 0, `${T}: the village's first week starts at night 0`);
+      const ev = []; for (let k = 0; k < 21; k++) { if (k >= 7 && k < 14) ev.push(SCENES.village_night.enter ? (A.nextEvening(g) === 'supper' && sceneView((goTo(g, SCENES, 'village_night'), g), SCENES).choices.some((c) => /Sleep\./.test(c.label)) ? 'q' : 'A') : '?'); else ev.push(A.nextEvening(g) === 'supper' ? 's' : 'E'); g.minutes = Math.floor(g.minutes / 1440) * 1440 + 21 * 60; goTo(g, SCENES, 'village_morning'); }
+      assert(ev.join('') === 'sssssssqqqqqqAssssssE', `${T}: the village's three weeks: suppers, the arson on night 14, the eve on night 21 (${ev.join('')})`); }
+    // the Fallout and the Heart by the story's day
+    { const g = ensureBars(newGame(98009, { closed: true, cal: 7 })); g.flags.ending = 'paid';
+      for (const [cal, d] of [[44, 8], [50, 8], [51, 9], [58, 10], [64, 10]]) { g.minutes = (cal - 1) * 1440 + 17 * 60; goTo(g, SCENES, 'fo_ashfall'); const ev = sceneView(g, SCENES).choices.find((c) => /^Evening/.test(c.label))?.label || ''; assert(/The last one in Ashfall/.test(ev) === (cal === 64), `${T}: Day ${cal} (story ${d}): the farewell only on its last week's last day (${ev})`); } }
+    { const g = ensureBars(newGame(98010, { closed: true, cal: 7 })); g.minutes = (90 - 1) * 1440 + 8 * 60; goTo(g, SCENES, 'heart_hub'); const a = sceneView(g, SCENES).choices.some((c) => /^Explore the ring/.test(c.label)); g.minutes = (91 - 1) * 1440 + 8 * 60; goTo(g, SCENES, 'heart_hub'); const b = sceneView(g, SCENES).choices.some((c) => /^Explore the ring/.test(c.label)); assert(a && !b, `${T}: the Heart's last day is Day 90; from Day 91 (story 19) only the way on`); }
+    // RV1 (the planted faults F4, F10, F12, F15, F16): the jumps between parts and the slots by the story's day
+    { const g = ensureBars(newGame(98011, { closed: true, cal: 7 })); g.flags.long = true; g.flags.cal_night = 6; goTo(g, SCENES, 'village'); assert(g.flags.cal_night === 0 && C.storyNight(g) === false, `${T}: the forest's last night count does not leak into the village (F4)`); }
+    for (const [cal, want] of [[0, 11], [7, 65]]) { const g = ensureBars(newGame(98012, { closed: true, cal })); g.flags.ending = 'paid'; g.minutes = (C.calEnd(g, 10) - 1) * 1440 + 20 * 60; goTo(g, SCENES, 'fo_depart'); const i = sceneView(g, SCENES).choices.findIndex((c) => /^Into the Blackroot/.test(c.label)); choose(g, SCENES, i);
+      assert(g.scene === 'bl_start' && clockParts(g.minutes).day === want && clockParts(g.minutes).hh === 6, `${T}: the Blackroot starts on Day ${want} at 06:00 (${cal ? 'long' : 'old'} calendar; F10; Day ${clockParts(g.minutes).day})`); }
+    for (const [cal, want] of [[0, 8], [7, 44]]) { const g = ensureBars(newGame(98013, { closed: true, cal })); g.flags.ending = 'paid'; g.minutes = 6 * 1440 + 18 * 60; goTo(g, SCENES, 'epilogue'); const i = sceneView(g, SCENES).choices.findIndex((c) => /^Act 1: The Hearth Tree/.test(c.label)); choose(g, SCENES, i);
+      assert(clockParts(g.minutes).day === want && clockParts(g.minutes).hh === 6, `${T}: Act 1 starts on Day ${want} (${cal ? 'long' : 'old'} calendar; F12; Day ${clockParts(g.minutes).day})`); }
+    for (const [cal, want] of [[0, 4], [7, 22]]) { const g = ensureBars(newGame(98014, { closed: true, cal })); g.flags.lf_active = true; goTo(g, SCENES, 'lf_exit'); const v = sceneView(g, SCENES); const i = v.choices.findIndex((c) => /^Walk toward the smoke/.test(c.label)); const lab = v.choices[i]?.label || ''; choose(g, SCENES, i);
+      assert(clockParts(g.minutes).day === want && lab.includes(`(Day ${want} begins.)`) && g.flags.forest_day === 3, `${T}: the Long Forest's way back: Day ${want} (${cal ? 'long' : 'old'} calendar; F15; Day ${clockParts(g.minutes).day}, "${lab}")`); }
+    { const g = ensureBars(newGame(98015, { closed: true, cal: 7 })); g.flags.ending = 'paid'; const got = [44, 50, 51, 57, 58, 64].map((cal) => { g.minutes = (cal - 1) * 1440 + 12 * 60; return HT_HUBS.fo_ashfall[0](g); });
+      assert(got.join() === 'fo_ashfall:1,fo_ashfall:1,fo_ashfall:2,fo_ashfall:2,fo_ashfall:3,fo_ashfall:3', `${T}: the Fallout's house-time slots by the story's day (F16; ${got.join()})`); }
+    // RV1 (TG2, TG7): 20 random games on each calendar, played as the games above: within a Coil the clock never goes back, and the
+    // Blackroot, the Heart and the road home start on their story days (11, 16, 19 or 20: the Heart's leave waits for the next dawn after 09:00)
+    { const starts = { 0: {}, 7: {} }; let back = 0, stuck = 0, ended = 0;
+      for (const cal of [0, 7]) for (let run = 0; run < 20; run++) {
+        rs = seedOf(run, 31 + cal); const g = ensureBars(newGame(run + 98100, { closed: true, cal })); let key = '', last = g.minutes, k = 0; const met = new Set();
+        for (; k < 40000; k++) {
+            const ck = `${g.coil.act || 0}:${g.coil.n}`; if (ck !== key) { key = ck; last = g.minutes; met.clear(); }
+            if (g.minutes < last) back++; last = g.minutes;
+            for (const [id, want] of [['bl_start', 'bl'], ['ht_start', 'ht'], ['rt_start', 'rt']]) if (g.scene === id && !met.has(id)) { met.add(id); const d = C.storyDay(g); starts[cal][`${want}${d}`] = (starts[cal][`${want}${d}`] || 0) + 1; }
+            const v = sceneView(g, SCENES); if (v.end || g.scene === 'a1_end') { ended++; break; }
+            const open = v.choices.filter((c) => !c.disabled && !/Stay lost|whole game/.test(c.label)); if (!open.length) break;
+            const r = choose(g, SCENES, open[rnd(open.length)].index);
+            if (r?.combat) { startCombat(g, r.combat(g)); for (let t = 0; t < 400 && g.combat; t++) { const out = combatStep(g, smartAction(g, t)); if (out?.done) { goTo(g, SCENES, out.next); break; } } }
+        }
+        if (k >= 40000) stuck++;
+      }
+      const keys = (o) => Object.keys(o).sort().join(' ');
+      const ok = (o) => Object.keys(o).every((x) => ['bl11', 'ht16', 'rt19', 'rt20'].includes(x)) && o.bl11 > 0 && o.ht16 > 0 && (o.rt19 || 0) + (o.rt20 || 0) > 0;
+      assert(!back && !stuck && ended === 40, `${T} (RV1, TG7): 40 random games end, the clock never goes back within a Coil (back ${back}, stuck ${stuck}, ended ${ended})`);
+      assert(ok(starts[0]) && ok(starts[7]), `${T} (RV1, TG2): the Blackroot, the Heart and the road home start on story days 11, 16, 19–20 in both calendars (old: ${keys(starts[0])}; long: ${keys(starts[7])})`); }
+    // the FAQ and the menu
+    { const goal = FAQ.find(([q]) => q === 'What is the goal?')[1], a1 = FAQ.find(([q]) => q === 'Act 1')[1]; assert(/tribute on Day 7\./.test(goal(old)) && /tribute on Day 43\./.test(goal(lg)) && /Day 8 .*Day 21\./.test(a1(old)) && /Day 44 .*Day 93\./.test(a1(lg)), `${T}: the FAQ's days by the save's calendar`); }
+    { const M = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8'); assert(/data-new="long">New game: the long calendar \(test\)/.test(M) && /freshGame\(b\.dataset\.new === 'long' \? LONG_CAL : 0\)/.test(M), `${T}: the main menu's test switch`); }
 }
 
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));

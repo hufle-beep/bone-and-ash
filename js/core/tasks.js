@@ -20,6 +20,7 @@ import { btTarget, MER_LINES, lineWindow, lineIndex, lineName } from '../story/m
 import { TASK_HUBS } from '../story/task_hubs.js';
 import { onceOpen, noteOnce, stageOpen, ONCE_MENUS } from '../story/oneoff.js';
 import { daily, foodCount } from '../story/common.js';
+import { storyDay, calStart } from './calendar.js'; // v0.11.203 (owner pick T1, TS1): the long calendar
 import { endCoil } from './coil.js';
 import { canMeditate } from './meditate.js';
 import { keepReplies } from './replies.js'; // v0.11.69 (P1)
@@ -632,7 +633,7 @@ export function nextStep(g, scenes) {
     if (yl && !yl.on) return 'Yuki can hunt on her own while you work: switch her job on at the top of the list.';
     if (n >= 2 && day === 1) return `A new Coil: the world and the hammerspace started over, but your familiarity and what James knows didn't. Cards you know run faster${coilMult(g) > 1 ? `, and you learn ×${fmtMult(coilMult(g))} as fast` : ''}.`; // v0.11.86: no "×1 as fast"
     if (g.james.qi >= CONDENSE_SIT_COST && g.james.qi >= 0.9 * jamesQiMax(g) && g.james.saturation < breakAt() && !sitUseless(g) && taskOpen(g, scenes, sitTaskId(g, scenes))) return 'Qi is nearly full: Cultivate turns it into Saturation.';
-    if (g.flags.long && day >= 2 && day <= 6) return `Day ${day} of 7: the Sect's tribute comes on Day 7.`;
+    if (g.flags.long && storyDay(g) >= 2 && storyDay(g) <= 6) return `Day ${day} of ${calStart(g, 7)}: the Sect's tribute comes on Day ${calStart(g, 7)}.`; // v0.11.203 (T1, TS1): 43 in the long calendar
     return '';
 }
 

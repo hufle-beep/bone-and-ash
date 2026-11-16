@@ -23,6 +23,7 @@
 - **Repeated beats:** the same joke on one screen or on consecutive ones; a line that repeats one a screen earlier (part 5 L6, L10; part 6 L3, L6; part 9 T17, T18).
 - **Variants by state:** second-day and later-visit texts that assume the same beast, place or person as the first (part 9 T1, T15); the stomp texts' wins and `one` against each other (part 9 T9).
 - **Pools blind to their scene:** a line pool drawn after many scenes (the flown and carried walk lines) shown after a hard beat (a rescue, a grave find, a grief night) where its jokes don't fit; mark those uses (v0.11.197 M2: `quiet`).
+- **The clock's day against the text day (v0.11.203 L4):** a beat keyed on `clockParts(g.minutes).day` opens after midnight on the night before its day (`dayHour` reads 00:00–03:59 as the evening before); the text day (`textDay`, from 05:00) is the story's.
 - **Flags that outlive their story:** a rule keyed on flags that are never cleared (`mei_party`, `ya_party`) firing where the people aren't (Ashfall after the Return; v0.11.197 M1).
 
 ## Reachability (what the player never sees)
@@ -62,3 +63,5 @@
 - **Pin Claude's cuts and the unchanged text around a refactor (v0.11.185 TG1, TG2):** a cut on Fable's draft gets a word in a test, and a text moved or wrapped gets a hash of a few fixed renders against the version before, or reverting it passes.
 - **A faked day record for one key only (v0.11.184 TG2):** a record that answers every key lets a line or text that reads another scene's days pass; fake the scene's own key and walk one real case with `goTo`.
 - Leftovers in the tests (unused imports, dead constants; part 9 C7).
+- **A jump between parts walked, not computed (v0.11.203 TG2–TG4, TG7):** a time jump (`g.minutes = …`) at a part's start or a Long Forest's way back gets a test that takes the real choice and reads the clock after it, in both calendars; a helper the test calls directly hides a scene that never calls it (the planted F10, F12, F15 passed). A helper with no effect (L1, `weekEnds`) is found by following the scenes after it.
+- **A new check step's arguments (v0.11.203 TG6):** test the step's command from `tools/check.mjs`'s source, not only its name (`--list` gives names only).

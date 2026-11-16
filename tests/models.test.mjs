@@ -45,6 +45,7 @@
 // Coil 8. A rewind forgets the cards done (the days start over).
 import { SCENES } from '../js/story/prologue.js';
 import { endCoil } from '../js/core/coil.js';
+import { LONG_CAL } from '../js/core/calendar.js'; // v0.11.203 (T1, TS8)
 import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, jamesHpMax, clockParts, coilMult } from '../js/core/game.js';
 import { INC_ONLY_ACTIONS, actionOpen } from '../js/core/forms.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
@@ -66,6 +67,10 @@ const ONLY = opt('model', 'all');
 const PLAY = ONLY === 'all' ? MODELS : ONLY.split(',');
 for (const m of PLAY) if (!MODELS.includes(m)) { console.error(`unknown model ${m} (${MODELS.join(', ')})`); process.exit(2); }
 const JSON_OUT = opt('json', null);
+// v0.11.203 (owner pick T1, TS8): --cal 7 plays the long calendar (js/core/calendar.js; the main menu's test switch); log only, never
+// compared with the models baseline. Every model's day of the tribute and of Act 1's end is in its "days" line (both calendars).
+const CAL = Number(opt('cal', 0)) || 0;
+if (CAL && CAL !== LONG_CAL) { console.error(`--cal takes ${LONG_CAL} (the long calendar) or 0 (${CAL})`); process.exit(2); }
 const TEXTS = argv.includes('--texts'); // v0.11.132 (E1, RP)
 const SAVE_BASE = argv.includes('--save-baseline'); // v0.11.132 (E1, EB)
 const MODELS_BASE = new URL('../tools/models-baseline.json', import.meta.url);
@@ -181,7 +186,7 @@ function storyPick(model, g, choices, mem) {
 function play(run, model, st, yuki) {
     rs = seedOf(run, 7 + MODELS.indexOf(model === 'sociable' ? 'careful' : model) + (yuki === 'off' ? 50 : 0)); // RV1 (PS): the Sociable on Careful's dice, so the two compare game for game
     const smart = model !== 'random' || run % 2 === 0;
-    const g = ensureBars(newGame(run + 1 + 900000, { closed: true }));
+    const g = ensureBars(newGame(run + 1 + 900000, { closed: true, cal: CAL }));
     let off = 0; // v0.11.86: the Farmer's bites by choice, through the scenes the James tab's button leads to
     if (model === 'farmer') {
         for (let k = 0; k < FARM_BITES; k++) {
@@ -218,7 +223,8 @@ function play(run, model, st, yuki) {
         // v0.11.130 (owner pick YB1, LN): the last night taken, once a Coil (g.flags.final_night: Act 1's last evening)
         if (g.flags.final_night && nightKey !== coilKey) { nightKey = coilKey; const k = NIGHT_KIND[g.flags.final_night] || 'other'; st.nights[k] = (st.nights[k] || 0) + 1; }
         const tOut = { bluff_win: 'won', collectors_won: 'won', tribute_paid: 'paid', collectors_lost: 'lost' }[g.scene];
-        if (tOut && !seenTrib.has(cn())) { seenTrib.add(cn()); const b = st.tribute[cn()] || (st.tribute[cn()] = { won: 0, paid: 0, lost: 0 }); b[tOut]++; }
+        if (tOut && !seenTrib.has(cn())) { seenTrib.add(cn()); if (tOut && act === 0) { st.tribDay = (st.tribDay || 0) + clockParts(g.minutes).day; st.tribN = (st.tribN || 0) + 1; } // v0.11.203 (TS8): the tribute's day
+             const b = st.tribute[cn()] || (st.tribute[cn()] = { won: 0, paid: 0, lost: 0 }); b[tOut]++; }
         const v = sceneView(g, SCENES);
         // v0.11.134 (LP2, SV): the screen before this step's view, when the last action kept the bot on it (every step after the first follows an action)
         const prevShown = TEXTS && lastShown && lastShown.id === g.scene ? lastShown : null;
@@ -232,7 +238,8 @@ function play(run, model, st, yuki) {
         }
         if (TEXTS && v.text && !noFold(g.scene) && !v.end) noteRead(g, v.text); // v0.11.133 (FP2, RF1): the bot reads what the screen shows, as main.js records it
         if (v.end || g.scene === 'a1_end') {
-            st.endRealm[g.james.realm] = (st.endRealm[g.james.realm] || 0) + 1; // v0.11.142 (CV1): the realm at Act 1's end (the realm starts over each Coil)
+            st.endRealm[g.james.realm] = (st.endRealm[g.james.realm] || 0) + 1;
+            st.endDay = (st.endDay || 0) + clockParts(g.minutes).day; st.endN = (st.endN || 0) + 1; // v0.11.203 (TS8): Act 1's end, its day // v0.11.142 (CV1): the realm at Act 1's end (the realm starts over each Coil)
             const o = g.flags.a1_outcome || 'none';
             st.endings[o] = (st.endings[o] || 0) + 1;
             if (o !== 'taken' && o !== 'none') { st.act1Clear[cn()] = (st.act1Clear[cn()] || 0) + 1; if (cn() === 1) st.oneCoil++; }
@@ -248,7 +255,15 @@ function play(run, model, st, yuki) {
             if (yl) { if (model === 'random') { if (rnd(3) === 0) setYuki(g, !yl.on); } else if (yl.on !== (yuki === 'on')) setYuki(g, yuki === 'on'); }
             const cards = taskCards(g, SCENES);
             const stops = v.choices.filter((c) => !c.disabled && (c.index >= 1000 || !isTaskChoice(SCENES, g.scene, c.index)));
-            const plan = hubPlan(model, g, cards, mem, !stops.length);
+            let plan = hubPlan(model, g, cards, mem, !stops.length);
+            // v0.11.203 (T1, TS8): the long calendar's weeks run out of work before they run out of days (the planner comes in TS2 + TS3);
+            // a model with nothing fresh whose story stops pass no time (Yuki's form screen) would go round them forever, so after
+            // 12 steps on one minute it rests an hour (or takes the first open card). Long calendar only: the old numbers stay as they were.
+            if (CAL && !plan) {
+                const sk = `${g.scene}@${g.minutes}`;
+                mem.still = mem.stillAt === sk ? (mem.still || 0) + 1 : 0; mem.stillAt = sk;
+                if (mem.still >= 12) { const open = cards.filter((c) => c.status === 'open'); const r = open.find((c) => /^Rest an hour/.test(c.label)) || open.find((c) => !EAT.test(c.label)); if (r) { plan = [r.id]; st.idle = (st.idle || 0) + 1; } }
+            }
             if (plan && plan.length) {
                 const q = taskState(g).queue; q.push(...plan); // v0.11.64: the plan in the save's old queue field, as before
                 while (q.length && isTaskHub(g)) {
@@ -385,6 +400,8 @@ for (const [m, st] of Object.entries(all)) {
         const en = sum(st.endRealm);
         console.log(`  cultivation: ${h(tot)} h a game on task screens (${CULT_KINDS.map((k) => `${CULT_NAMES[k]} ${h(st.cult[k] || 0)}`).join(', ')}) · realm at Act 1's end ${en ? `${avg(st.endRealm)} (n ${en})` : '—'} · spare-time cards ${h(60 * (st.spare || 0))} a game`);
     }
+    if (st.idle) console.log(`  long calendar: ${(st.idle / Math.max(1, st.games)).toFixed(1)} idle hours a game (nothing fresh left on a task screen before evening)`); // v0.11.203 (T1, TS8)
+    console.log(`  days: tribute Day ${st.tribN ? (st.tribDay / st.tribN).toFixed(1) : '—'} (n ${st.tribN || 0}) · Act 1's end Day ${st.endN ? (st.endDay / st.endN).toFixed(1) : '—'} (n ${st.endN || 0})${CAL ? ' · the long calendar' : ''}`); // v0.11.203 (T1, TS8)
     console.log(`  last nights: ${nt ? NIGHT_ORDER.filter((k) => k !== 'other' || st.nights.other).map((k) => `${k} ${st.nights[k] || 0}`).join(' / ') + ` (of ${nt} last evenings)` : '—'}`);
 }
 if (JSON_OUT) writeFileSync(JSON_OUT, JSON.stringify(all));
@@ -399,7 +416,7 @@ function shareTable(all) {
     }
     return out;
 }
-if (!SHARD) {
+if (!SHARD && !CAL) { // v0.11.203 (TS8): the long calendar is never compared with the saved copy
     const now = shareTable(all);
     if (SAVE_BASE) { writeFileSync(MODELS_BASE, `${JSON.stringify({ saved: new Date().toISOString().slice(0, 10), args: argv.filter((a) => a !== '--save-baseline').join(' '), models: now }, null, 1)}\n`); console.log(`\n  models baseline saved: tools/models-baseline.json`); }
     else if (existsSync(MODELS_BASE)) {

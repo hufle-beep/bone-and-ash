@@ -17,6 +17,7 @@
 import { bumpRel, eat } from '../core/game.js';
 import { daily, markDaily, hour } from './common.js';
 import { pickLine, textDay } from '../core/lines.js';
+import { storyDayOf } from '../core/calendar.js'; // v0.11.203 (owner pick T1, TS1): the Fallout's story day in the long calendar
 import { KT_LABEL, KT_UP, KT_DAY, KT_RETURN, POT_LINE, POT_COOK } from './kitchen_texts.js';
 
 export { KT_LABEL, KT_UP, KT_DAY, KT_RETURN, POT_LINE, POT_COOK };
@@ -57,7 +58,7 @@ export function kitchenText(g) {
 /** PS: the pot's result line from the village's 90, by the place's day; null below it (the caller keeps its old line). */
 export function potLine(g, where) {
     if (relF(g, 'Village') < POT_GATE) return null;
-    const i = where === 'ashfall' ? ((g.flags.vday || 1) >= 3 ? 1 : 0) : Math.max(1, Math.min(3, textDay(g) - 7)) - 1;
+    const i = where === 'ashfall' ? ((g.flags.vday || 1) >= 3 ? 1 : 0) : Math.max(1, Math.min(3, storyDayOf(g, textDay(g)) - 7)) - 1;
     return `${POT_LINE[where][i]}: +${POT_SAT} satiety.`;
 }
 

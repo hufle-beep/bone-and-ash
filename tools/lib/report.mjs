@@ -35,8 +35,9 @@ export function modelDigest(out, expect = 0) {
         const p1 = b.match(/\n {2}prologue: C1 dead ([\d.]+%)/);
         const cl = b.match(/cleared: prologue [\d.]+% \(mean Coil ([\d.]+|—)\) · Act 1 [\d.]+% \(mean Coil ([\d.]+|—)\) · the whole game on Coil 1 ([\d.]+%)/);
         if (!head || !p1 || !cl) return null;
-        const rl = b.match(/realm at Act 1's end ([\d.]+) \(n \d+\)/); // v0.11.142 (owner pick CV1): the realm at Act 1's end, when the report has it
-        rows.push(`  ${`${head[1]} ${head[2]}`.padEnd(26)}prologue C1 dead ${p1[1]} · mean Coil ${cl[1]} / ${cl[2]} · whole game C1 ${cl[3]}${rl ? ` · realm ${rl[1]}` : ''}${gave ? ` · ${gave[1]} gave up` : ''}`);
+        const rl = b.match(/realm at Act 1's end ([\d.]+) \(n \d+\)/);
+        const dy = b.match(/days: tribute Day ([\d.]+|—) \(n \d+\) · Act 1's end Day ([\d.]+|—) \(n \d+\) · the long calendar/); // v0.11.203 (T1, TS8): the long calendar's days // v0.11.142 (owner pick CV1): the realm at Act 1's end, when the report has it
+        rows.push(`  ${`${head[1]} ${head[2]}`.padEnd(26)}prologue C1 dead ${p1[1]} · mean Coil ${cl[1]} / ${cl[2]} · whole game C1 ${cl[3]}${rl ? ` · realm ${rl[1]}` : ''}${dy ? ` · tribute Day ${dy[1]}, Act 1 ends Day ${dy[2]}` : ''}${gave ? ` · ${gave[1]} gave up` : ''}`);
     }
     return rows;
 }

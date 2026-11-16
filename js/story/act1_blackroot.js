@@ -9,7 +9,8 @@ import { addItem, hasItem, eat, advance, clockParts, d6, awardYukiFightXp, james
 import { hasForm } from '../core/forms.js';
 import { choiceOpen, gives } from '../core/story.js'; // v0.11.161 (PO2): `optionLeft`; RV (GV, Fable's H1): the wrapper carries the card's items
 import { daily, markDaily, eatBest, pantry, foodCount, hour, byForm, byDay, dayReply } from './common.js';
-import { noteDay, DAY_REPLIES, coilReply } from '../core/lines.js'; // v0.11.166 (RW1): coilReply, the flirts by Coil
+import { noteDay, DAY_REPLIES, coilReply } from '../core/lines.js';
+import { storyDay, calMinutes } from '../core/calendar.js'; // v0.11.203 (owner pick T1, TS1): the long calendar (Day 11 is 65, Day 16 is 70) // v0.11.166 (RW1): coilReply, the flirts by Coil
 import { talkBeat } from './remember.js'; // v0.11.184 (S1)
 import { encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil } from './act1_common.js';
 
@@ -292,8 +293,7 @@ export const BLACKROOT = {
     bl_start: {
         id: 'bl_start', title: 'Into the Blackroot', art: 'root_road', place: PLACE.rr,
         enter: (g) => {
-            const p = clockParts(g.minutes);
-            if (p.day < 11) g.minutes = 10 * 1440 + 6 * 60;
+            if (storyDay(g) < 11) g.minutes = calMinutes(g, 11, 6);
             g.flags.bl_region = 'rr';
             g.flags.bl_day = 1;
             g.flags.mei_party = true;
@@ -1394,7 +1394,7 @@ ${byForm(g, '*Tomorrow,*', '*Tomorrow,*', '"Tomorrow,"')} says Yuki, and there i
         enter: (g) => {
             const lines = [];
             if (hour(g) < 6 || hour(g) >= 19) { sleepUntil(g, 6); lines.push('Slept until 06:00. HP and Qi full.'); }
-            if (clockParts(g.minutes).day < 16) g.minutes = 15 * 1440 + 6 * 60;
+            if (storyDay(g) < 16) g.minutes = calMinutes(g, 16, 6);
             return lines;
         },
         text: (g) => `Morning comes into the roots grey and quiet.
@@ -1406,6 +1406,6 @@ Ya has her spear. Mei Lin has her knife, her basket, and her chin up. ${byForm(g
 You have a fresh doctorate, a lab coat that is mostly holes, and a gift this world has never seen. And somewhere ahead of you, long dead, is a piece of home.
 
 "Well," you say. "Let's see who's in."`,
-        choices: [{ text: 'Into the Heart.', do: (g) => { if (clockParts(g.minutes).day < 16) g.minutes = 15 * 1440 + 6 * 60; return []; }, to: 'ht_start' }],
+        choices: [{ text: 'Into the Heart.', do: (g) => { if (storyDay(g) < 16) g.minutes = calMinutes(g, 16, 6); return []; }, to: 'ht_start' }],
     },
 };

@@ -124,7 +124,7 @@ export function targetsText(g) {
 export function rewind(g, { to = 'act' } = {}) {
     const c = coil(g);
     const whole = to === 'game' && (c.act || 0) === 1;
-    const fresh = whole ? coilSnap(newGame(g.seed, { closed: true })) : null; // the arrival as a new game has it
+    const fresh = whole ? coilSnap(newGame(g.seed, { closed: true, cal: g.cal })) : null; // v0.11.203 (T1, TS1): the long calendar kept // the arrival as a new game has it
     const base = clone(whole ? fresh : c.snap);
     const kept = {};
     for (const f of KEEP_FLAGS) if (g.flags[f] !== undefined) kept[f] = g.flags[f];

@@ -12,6 +12,7 @@ import {
     checkFromTierLevel, skillXpCost, maxHp, qiPoolMax, qiRegenPercent, cycleTimeMinutes,
     realmBonus, realmStepLabel, CONDENSE_SIT_COST, FAIL_XP_FRACTION, realmDr, realmShockHpBonus, dampenMultiplier,
 } from './formulas.js';
+import { calMinutes, LONG_CAL } from './calendar.js'; // v0.11.203 (owner pick T1, TS1): the long calendar (test switch)
 
 export const K = 0.5;
 export const CONVERGENCE_MULTIPLIER = 1.25;
@@ -28,7 +29,8 @@ const node = (tier = 1, level = 1) => ({ tier, level, xp: 0 });
  * A fresh game: James (40, fresh doctorate), Yuki, an empty hammerspace.
  * closed (v0.9.6, task mode): every primary and collateral starts closed (0/12, 0/66); classic games start open.
  */
-export function newGame(seed = Date.now(), { closed = false } = {}) {
+/** v0.11.203 (owner pick T1, TS1): `cal: LONG_CAL` starts the long calendar (calendar.js; the test switch on the main menu). */
+export function newGame(seed = Date.now(), { closed = false, cal = 0 } = {}) {
     const g = {
         v: SAVE_VERSION,
         seed: seed >>> 0,
@@ -74,6 +76,7 @@ export function newGame(seed = Date.now(), { closed = false } = {}) {
         combat: null,
         tasks: { queue: [], fam: {}, adapt: {}, yuki: { on: false, progress: 0 } },
     };
+    if (cal === LONG_CAL) g.cal = LONG_CAL;
     g.coil = makeCoil(g);
     g.seen = { [g.scene]: 1 }; // v0.11.35 (P1-a): the start scene, first read on Coil 1
     g.read = {}; // v0.11.133 (FP2): the paragraphs read (again.js noteRead); the screen records what it shows
@@ -117,7 +120,7 @@ export function startActCoil(g, act = 1) {
         if (old.start?.fam) g.coil.start = { ...g.coil.start, fam: JSON.parse(JSON.stringify(old.start.fam)) }; }
 }
 /** Is a state in Act 1? (Act 1 starts on Day 8 06:00, after the tribute's outcome and the epilogue.) */
-export const inAct1 = (g) => !!g.flags?.ending && g.scene !== 'epilogue' && g.minutes >= 7 * 1440 + 6 * 60;
+export const inAct1 = (g) => !!g.flags?.ending && g.scene !== 'epilogue' && g.minutes >= calMinutes(g, 8, 6); // v0.11.203 (T1, TS1): Day 44 in the long calendar
 
 /* ---------------- numbers ---------------- */
 

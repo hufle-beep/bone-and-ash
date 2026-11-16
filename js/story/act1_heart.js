@@ -5,7 +5,8 @@
  */
 import { addItem, hasItem, condense, advance, jamesHpMax, d6 } from '../core/game.js';
 import { eatBest, pantry, foodCount, set, byForm, byDay, dayReply } from './common.js';
-import { byDayLast } from '../core/lines.js'; // v0.11.154 (owner pick RV1, Fable's review, L2 CL)
+import { byDayLast } from '../core/lines.js';
+import { storyDay, calStart } from '../core/calendar.js'; // v0.11.203 (owner pick T1, TS1): the long calendar (Day 19 is 91) // v0.11.154 (owner pick RV1, Fable's review, L2 CL)
 import { day, hour, encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil, logTrio, ykShape } from './act1_common.js';
 import { ykPath } from './yuki_path.js';
 
@@ -82,7 +83,7 @@ const PIN = 'Inside the Old Tree';
 /** Waking hours, when there is time to explore. */
 const active = (g) => hour(g) >= 6 && hour(g) < 18;
 /** From Day 19 the tree is done with them: only the way forward is left (v0.11.87: Cultivate and Rest too). */
-const late = (g) => day(g) >= 19;
+const late = (g) => storyDay(g) >= 19; // v0.11.203 (T1, TS1): the story's day
 const guardianOpen = (g) => !!g.flags.log_heard && !g.flags.guardian;
 const ya = (g) => !!g.flags.ya_party;
 const both = (g) => likesMei(g) && likesYa(g);
@@ -791,10 +792,10 @@ ${g.flags.reaction === 'rage' ? 'And after that, you think, somebody in red is g
         id: 'ht_leave', title: 'Leaving the Old Tree', art: 'heart_gate', place: P,
         enter: (g) => {
             const out = [];
-            if (day(g) < 19) {
-                g.minutes = 17 * 1440 + 21 * 60;
+            if (storyDay(g) < 19) {
+                g.minutes = (calStart(g, 19) - 2) * 1440 + 21 * 60;
                 sleepUntil(g, 6);
-                out.push('You stay until dawn on Day 19: resting, mapping the galleries, saying goodbye. HP and Qi full.');
+                out.push(`You stay until dawn on Day ${calStart(g, 19)}: resting, mapping the galleries, saying goodbye. HP and Qi full.`);
             } else if (hour(g) >= 9) {
                 sleepUntil(g, 6);
                 out.push('You wait for the next dawn and leave with it. HP and Qi full.');

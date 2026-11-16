@@ -9,7 +9,8 @@ import { addItem, hasItem, eat, condense, sleepUntil, advance, d6, awardXp, awar
 import { condensationSatGain } from '../core/formulas.js';
 import { daily, markDaily, hour, eatBest, pantry, foodCount, byForm, dayKey } from './common.js'; // v0.11.126 (NQ1): byForm
 import { registerStomp } from './power.js';
-import { pickLine } from '../core/lines.js'; // v0.11.175 (P8A, SW): the drills' lines
+import { pickLine } from '../core/lines.js';
+import { calMinutes, calStart } from '../core/calendar.js'; // v0.11.203 (owner pick T1, TS1): the long calendar (Day 4 is 22) // v0.11.175 (P8A, SW): the drills' lines
 
 /** v0.11.71 (owner pick Y1): the Long Forest's "Let Yuki hunt": { item, n, line }; the first kind with room for the whole haul (R1); item null: none, she eats it. */
 export function lfYukiCatch(g) {
@@ -329,15 +330,15 @@ What nobody out there knows, and what you were told to your face the last time t
 
 ${byForm(g, 'Yuki\'s opinion, through the bond: *both.*', 'Yuki\'s opinion, through the bond: *both.*', 'Yuki\'s opinion, delivered aloud: "Both."')}`,
         choices: [{
-            text: 'Walk toward the smoke. (Day 4 begins.)',
+            text: (g) => `Walk toward the smoke. (Day ${calStart(g, 4)} begins.)`,
             do: (g) => {
                 g.flags.lf_active = false;
                 g.flags.long = true;
                 g.flags.forest_day = 3;
-                g.minutes = 3 * 1440 + 6 * 60;
+                g.minutes = calMinutes(g, 4, 6);
                 g.james.hp = jamesHpMax(g); g.james.qi = jamesQiMax(g); g.yuki.hp = yukiHpMax(g); g.yuki.qi = yukiQiMax(g);
                 ensureBars(g);
-                return ['You walk out of the Long Forest. The calendar starts again: Day 4.'];
+                return [`You walk out of the Long Forest. The calendar starts again: Day ${calStart(g, 4)}.`];
             },
             to: 'dawn',
         }],

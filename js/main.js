@@ -1,4 +1,5 @@
 /** Bone and Ash — UI. Renders the story, combat, sheet, hammerspace, journal and saves. */
+import { LONG_CAL } from './core/calendar.js'; // v0.11.203 (owner pick T1, TS1)
 import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel, fragileKnife, knifeSwings } from './core/forms.js';
 import { coilMult, coilMultNext, wakeDay, fmtMult, clockParts, REL_HIDDEN } from './core/game.js'; // v0.11.137 (HV1): REL_HIDDEN
 import {
@@ -308,7 +309,7 @@ function renderCardScreen() {
     const sk = v.end || hub ? { steps: 0 } : skipPlan(g, SCENES); // v0.11.35 (P1-a): a stretch read before, 2 steps or more
     const skipHtml = sk.steps >= 2 ? `<button class="card story skip" data-skip="1">Skip to the next choice.<span class="tag">${sk.steps} scenes you know</span><span class="len">${esc(durLabel(sk.minutes))} · at once</span></button>` : '';
     const storyHtml = v.end
-        ? `<h2>Story</h2><div class="cards">${story.map(storyCardHtml).join('')}<button class="card story" data-new="1">Start a new game</button><button class="card story" data-tab-go="sheet">See how James ended up</button></div>` // v0.11.26: an end's own choices first (Go round again…)
+        ? `<h2>Story</h2><div class="cards">${story.map(storyCardHtml).join('')}<button class="card story" data-new="${g.cal === LONG_CAL ? 'long' : '1'}">Start a new game</button><button class="card story" data-tab-go="sheet">See how James ended up</button></div>` // v0.11.26: an end's own choices first (Go round again…)
         : story.length ? `<h2>Story</h2><div class="cards">${skipHtml}${story.map(storyCardHtml).join('')}</div>` : '';
     const medOpen = med.filter((m) => m.open || m.late || m.show); // v0.11.46 (Q1): a sit short of Qi shows, locked, with the reason // v0.11.37 (D-a): a card that would end past the day's end (00:00 since v0.11.91) shows, locked, with that tag // v0.11.17 (pick 1a): only what can run now (collaterals until they open, locked sits and meridians, Break through until ready)
     const medHtml = medOpen.length ? groupHtml('Meditate', medOpen.map(medCardHtml), true) : ''; // v0.11.67 (D2): starts open, folds
@@ -363,7 +364,9 @@ ${statusHtml()}
 </section>`;
 }
 
-const freshGame = () => ensureBars(newGame(Math.floor(Math.random() * 2 ** 31), { closed: true })); // meridians closed at the start (v0.9.6)
+/** v0.11.203 (owner pick T1, TS1): the long calendar's test switch on the main menu (calendar.js). */
+const LONG_CAL_NOTE = 'Each day of a stay is a week: the tribute on Day 43, the Elder on Day 93. Being built: the texts and the weekly work are not done yet.';
+const freshGame = (cal = 0) => ensureBars(newGame(Math.floor(Math.random() * 2 ** 31), { closed: true, cal })); // meridians closed at the start (v0.9.6); v0.11.203 (T1, TS1): cal, the long calendar
 const bakMeta = () => { try { return JSON.parse(store.get(BAK_META)) || { play: 0, at: {}, when: {} }; } catch { return { play: 0, at: {}, when: {} }; } };
 function writeKey(k, s) { if (!store.set(k, s) && !storageWarned) { storageWarned = true; showError('Could not save: the storage for this site is full or blocked. Download your save: ☰ Menu → Saves.'); } }
 
@@ -768,7 +771,7 @@ function renderMenu() {
 <div class="mseal" aria-hidden="true">骨</div>
 <h1 class="mtitle">Bone and Ash</h1>
 <p class="note mver">Version <span id="menuVer">…</span> · Incremental Mode</p>
-${newsBox()}<div class="mbtns">${cont}${hadSave && !recovery ? '<button class="btn big" data-new="1">New game</button>' : ''}<button class="btn big" data-menu="saves">Saves</button><button class="btn big" data-menu="settings">Settings</button>${appUpd()?.newer ? `<button class="btn big" data-menu="settings">App update available (build ${appUpd().build})<small>You have build ${appUpd().mine}. Settings → App updates; saves are kept.</small></button>` : ''}</div>
+${newsBox()}<div class="mbtns">${cont}${hadSave && !recovery ? '<button class="btn big" data-new="1">New game</button>' : ''}${!recovery ? `<button class="btn big" data-new="long">New game: the long calendar (test)<small>${LONG_CAL_NOTE}</small></button>` : ''}<button class="btn big" data-menu="saves">Saves</button><button class="btn big" data-menu="settings">Settings</button>${appUpd()?.newer ? `<button class="btn big" data-menu="settings">App update available (build ${appUpd().build})<small>You have build ${appUpd().mine}. Settings → App updates; saves are kept.</small></button>` : ''}</div>
 <p class="note" id="saveNote"></p></section>`;
     runningVersion().then((v) => { const el = document.getElementById('menuVer'); if (el) el.textContent = versionLabel(v, inApp(window) ? updater.mine() : 0); }); // v0.11.150 (LB)
 }
@@ -1055,9 +1058,10 @@ view.addEventListener('click', (ev) => {
             if (out.done) { const lines = out.lines.slice(); lines.push(...goTo(g, SCENES, out.next)); land(fightTitle, lines, out.done === 'lose', rel0, { quiet: false }); combatLog = null; } // v0.11.68
             autosave(); render();
         } else if (b.dataset.new) {
-            if ((menu || tab !== 'story') && !confirmNew()) return;
+            if ((menu || tab !== 'story') && hadSave && !confirmNew(b.dataset.new)) return; // RV1 (L3): no autosave yet, nothing to warn about
             backupBefore('a new game');
-            g = freshGame();
+            g = freshGame(b.dataset.new === 'long' ? LONG_CAL : 0); // v0.11.203 (T1, TS1): the test switch; RV1 (L2): the end screen's new game keeps the save's calendar
+            hadSave = true; // RV1 (L3): the new game's autosave exists from now on
             lastResult = null; lastReply = []; combatLog = null; autosave(); setTab('story');
         } else if (b.dataset.tabGo) {
             setTab(b.dataset.tabGo);
@@ -1096,10 +1100,11 @@ document.getElementById('tabs').addEventListener('click', (ev) => { const b = ev
 let newArmed = 0;
 let biteArmed = 0;
 let yieldArmed = 0; // v0.11.114 (PB1, YC)
-function confirmNew() {
-    if (Date.now() - newArmed < 4000) return true;
-    newArmed = Date.now();
-    note('Tap New game again to start over. Your autosave will be replaced (slots are kept).');
+let newKind = ''; // v0.11.203 (T1, TS1): the second tap must be on the same button (New game, or the long calendar's)
+function confirmNew(kind = '1') {
+    if (Date.now() - newArmed < 4000 && newKind === kind) return true;
+    newArmed = Date.now(); newKind = kind;
+    note(kind === 'long' ? 'Tap New game: the long calendar again to start over on it. Your autosave will be replaced (slots are kept).' : 'Tap New game again to start over. Your autosave will be replaced (slots are kept).');
     return false;
 }
 function note(t) { const n = document.getElementById('saveNote'); if (n) n.textContent = t; }

@@ -22,8 +22,16 @@ Started in v0.11.201 (owner pick O1, 2026-11-16 18:19), because `roadmap.md` was
 
 **Claude's estimate (not measured):** 4–6 pushes for the time scale: TS1 + TS8 one, TS2 + TS3 one or two, TS4 one, TS6 one or two; TS5 inside group f's first push, TS7 inside the retune.
 
+## The shape picked (v0.11.203, owner pick T1, 2026-11-16 19:56)
+
+**T1:** the stays ×7 (each story day of the wilds, the village, Ashfall's Fallout and the Heart is a week; journeys and deadline days keep one day: about 93 days, the tribute on Day 43, the Elder on Day 93), a week planner (the week's work set, then run; it stops on events), the daily routine running itself each day (three meals, camp, the day's sit), the realm pace scaled (S6), all behind a test switch until the last push flips it (S7). **Measured before the pick** (a scratch copy of the models test, 80 games each of Careful, Sociable, Completionist and Cultivator, the Coil that clears each act): taps a run today Careful 94 + 189 = 283 (story 158, daily layer 51, weekly layer 71, talks 5), Sociable 325, Completionist 399, the Cultivator 591; Act 1 Careful: stays 73 taps, journeys 113; estimates: every day tapped through as today about 1,030 a run, the planner about 230–290, week turns about 283. **Not picked:** T2 (every day ×7, 147 days), T3 (week turns), T4 (T1 pushed live step by step).
+
+- **TS1 + TS8: done in v0.11.203** (the calendar behind the test switch; `js/core/calendar.js`; the bots with `--cal 7`, log only; the numbers in the handover's v0.11.203 entry). **The long calendar as built:** the counter stays (the wilds, the village) move their day once a week and keep the story's night for the week's seventh (the forest's night events and the jackals, the arson, the tribute's eve); the calendar stays (the Fallout, the Heart) read the story's day; leaving the forest early still shortens the prologue, as in the old calendar (the bots' tribute on Day 27–29, the Cultivator's on 43).
+- **Next (each its own options first):** TS2 + TS3, the routine and the week planner (with the bots' plan by the week in place of v0.11.203's idle hour); S6, the realm pace's scale until the retune (measured first: in the long calendar every model clears both acts on Coil 1, realm 3 at Act 1's end for Careful, 12 for the Cultivator); TS4; TS6 (the texts that count the old days, a week's repeated suppers and texts); then the flip (the long calendar for every new game, old saves moved to the matching day).
+
 ## Open, options later (with TS1's options)
 
-- Every day ×7, or only the stays ×7 (journeys keep their length).
-- Day-by-day play with shorter days (the owner's 18:04), or week turns with the daily work folded in (the owner's 17:54).
-- How the daily routine runs itself (the meals, the camp; Parallel Cognition's threads are in `design.md`, not built).
+- ~~Every day ×7, or only the stays ×7 (journeys keep their length).~~ **Decided in v0.11.203 (T1): only the stays.**
+- ~~Day-by-day play with shorter days (the owner's 18:04), or week turns with the daily work folded in (the owner's 17:54).~~ **Decided in v0.11.203 (T1): day by day, with a week planner.**
+- How the daily routine runs itself (the meals, the camp; Parallel Cognition's threads are in `design.md`, not built): **T1: by itself each day; the details with TS2 + TS3's options.**
+- **New in v0.11.203 (open, options later):** a week's repeated relationship gains (the village's suppers and walks every night; TS5); the long calendar's texts (TS6).

@@ -5,6 +5,7 @@
 import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, d6, awardYukiFightXp, jamesHpMax, nightRest, nightTo, canFly } from '../core/game.js';
 import { FW } from './flight_texts.js'; // v0.11.195 (owner picks F1, D1)
 import { set, day, hour, daily, markDaily, forestScale, villageScale, grow, eatBest, pantry, foodCount, byForm, byDay, dayReply } from './common.js';
+import { storyNight, weekMorning } from '../core/calendar.js'; // v0.11.203 (owner pick T1, TS1): the long calendar's weeks
 import { potLine } from './kitchen.js'; // v0.11.181 (SP1, PS)
 
 /* v0.11.136 (owner pick NC1, NT1's push 2): replies by day (js/core/lines.js dayReply): the first text is the old reply, the rest Fable's, one for each later day of a Coil. */
@@ -72,7 +73,10 @@ const vday = (g) => g.flags.vday || 1;
 const meiRel = (g) => g.rel['Mei Lin'] || { f: 0, a: 0 };
 /** Where "back to the village" leads, and where the evening goes. */
 export const hubOf = (g) => (g.flags.long && vday(g) >= 2 ? 'ashfall' : 'village');
-export const nextEvening = (g) => (g.flags.long && vday(g) < 3 ? 'supper' : 'evening');
+/** v0.11.203 (owner pick T1, TS1): in the long calendar a village day is a week, so the eve of the tribute waits for the third week's last night. */
+export const nextEvening = (g) => (g.flags.long && (vday(g) < 3 || !storyNight(g)) ? 'supper' : 'evening');
+/** The night of the arson (the village's second day; in the long calendar the second week's seventh night). */
+const arsonNight = (g) => vday(g) === 2 && !g.flags.night5_done && storyNight(g);
 const late = (g) => hour(g) >= 19;
 /** v0.11.157 (owner picks NX1, RV1 FT; Fable's lines): a failed clinic or spearhead card can be tried again the same day, so its reply
  * promises no later time (was "You'll check on him tonight." / "Tomorrow, maybe."). */
@@ -153,13 +157,13 @@ After that she says nothing until the jar is nearly empty. Your forearm has been
 
     /* ---------- the night: quiet, or Gao Feng's doing (night 5) ---------- */
     village_night: {
-        id: 'village_night', title: 'Night in Ashfall', art: (g) => (vday(g) === 2 && !g.flags.night5_done ? ((g.flags.gao_broken) ? 'token' : g.flags.gao_spared ? 'gao_window' : 'arson') : 'village_night'), place: `${P} — the herb loft`,
+        id: 'village_night', title: 'Night in Ashfall', art: (g) => (arsonNight(g) ? ((g.flags.gao_broken) ? 'token' : g.flags.gao_spared ? 'gao_window' : 'arson') : 'village_night'), place: `${P} — the herb loft`,
         // v0.11.94 (owner 2026-11-09 11:35, pick T-b1): night 2's beats (the arson, Gao's token, Gao at the window) come after
         // the bed at 01:00, like the camp nights (never back; the fight taken at once is over by 02:00, one after a failed
         // "Wake the street" starts at 01:50, like the camps' forced fights); a quiet night is untouched
-        enter: (g) => (vday(g) === 2 && !g.flags.night5_done ? nightTo(g, 60) : []), // v0.11.151 (WD1, LN): the slept line
+        enter: (g) => (arsonNight(g) ? nightTo(g, 60) : []), // v0.11.151 (WD1, LN): the slept line
         text: (g) => {
-            if (vday(g) !== 2 || g.flags.night5_done) return byForm(g, 'The herb loft smells of mint and drying ginseng, and under it the house breathes. Yuki settles on the middle of your chest, which is also the middle of your sleep. You let her have both.', 'The herb loft smells of mint and drying ginseng, and under it the house breathes. Yuki takes the loft, and leaves you a strip along the wall and one flank for a pillow. The posts creak, consider the matter, and hold.', 'The herb loft smells of mint and drying ginseng, and under it the house breathes. Yuki gives up the stove once the house is dark, stretches out behind you, and takes most of the blanket without discussion. You let her keep it.');
+            if (!arsonNight(g)) return byForm(g, 'The herb loft smells of mint and drying ginseng, and under it the house breathes. Yuki settles on the middle of your chest, which is also the middle of your sleep. You let her have both.', 'The herb loft smells of mint and drying ginseng, and under it the house breathes. Yuki takes the loft, and leaves you a strip along the wall and one flank for a pillow. The posts creak, consider the matter, and hold.', 'The herb loft smells of mint and drying ginseng, and under it the house breathes. Yuki gives up the stove once the house is dark, stretches out behind you, and takes most of the blanket without discussion. You let her keep it.');
             if (g.flags.gao_broken) return `It is still dark when Mei Lin's hand on your shoulder wakes you. Her other hand is closed on a twist of cloth, and in the cloth is Gao Feng's jade token: she had it out of his sleeve while he was lying in the herbs with his arm pointing the wrong way.
 
 The jade is warm. It *beats*, slow and faint, as if it kept a pulse of its own.
@@ -177,16 +181,16 @@ Down in the lane, torchlight. Three men are creeping toward the side of the hous
 Gao Feng's lackey has come to settle Gao Feng's grudge. With a torch. By night. A traditionalist.`;
         },
         choices: [
-            { text: 'Sleep.', show: (g) => vday(g) !== 2 || !!g.flags.night5_done, to: 'village_morning' },
+            { text: 'Sleep.', show: (g) => !arsonNight(g), to: 'village_morning' },
             // Gao broken (or dead, old saves): the token
-            { text: 'Crush the token in a fist of bone. Silence it.', show: (g) => vday(g) === 2 && !g.flags.night5_done && !!(g.flags.gao_broken), qi: 4, check: { skill: 'Convergence Use', dc: 4 }, do: (g) => { g.flags.night5_done = true; g.flags.token_silenced = true; return ['The jade cracks with the sound of a bell rung under water. The pulse stops. Lu Han will have nothing to follow here.']; }, failDo: (g) => { g.flags.night5_done = true; addItem(g, 'sect_token', 1); return ['The bone skids off it, and it goes on pulsing. You put it in the hammerspace and hope that folded space can keep a secret.']; }, to: 'village_morning' },
-            { text: 'Carry it far into the forest and bury it in the mire.', show: (g) => vday(g) === 2 && !g.flags.night5_done && !!(g.flags.gao_broken), time: 120, check: { skill: 'GU', dc: 3 }, do: (g) => { g.flags.night5_done = true; g.flags.token_silenced = true; return ['Lu Han is welcome to search a swamp for his cousin.']; }, failDo: (g) => { g.flags.night5_done = true; g.james.hp -= 3; return ['You get it buried, and something in the mire bites you for your trouble: −3 HP.']; }, to: 'village_morning' },
+            { text: 'Crush the token in a fist of bone. Silence it.', show: (g) => arsonNight(g) && !!(g.flags.gao_broken), qi: 4, check: { skill: 'Convergence Use', dc: 4 }, do: (g) => { g.flags.night5_done = true; g.flags.token_silenced = true; return ['The jade cracks with the sound of a bell rung under water. The pulse stops. Lu Han will have nothing to follow here.']; }, failDo: (g) => { g.flags.night5_done = true; addItem(g, 'sect_token', 1); return ['The bone skids off it, and it goes on pulsing. You put it in the hammerspace and hope that folded space can keep a secret.']; }, to: 'village_morning' },
+            { text: 'Carry it far into the forest and bury it in the mire.', show: (g) => arsonNight(g) && !!(g.flags.gao_broken), time: 120, check: { skill: 'GU', dc: 3 }, do: (g) => { g.flags.night5_done = true; g.flags.token_silenced = true; return ['Lu Han is welcome to search a swamp for his cousin.']; }, failDo: (g) => { g.flags.night5_done = true; g.james.hp -= 3; return ['You get it buried, and something in the mire bites you for your trouble: −3 HP.']; }, to: 'village_morning' },
             // Gao spared: the visit
-            { text: '"Because I\'m not from here. Where I\'m from, we don\'t kill people for being stupid. Go home, Gao."', show: (g) => vday(g) === 2 && !g.flags.night5_done && !!g.flags.gao_spared, check: { skill: 'GU', dc: 3 }, do: (g) => { g.flags.night5_done = true; g.flags.gao_turned = true; return ['He looks up at you until the silence is awkward. Then he tells you all of it: Lu Han is bringing four men, not two. He wants you alive. He takes you for the heir of a hidden sect. "Let him go on thinking so," Gao says, and is gone.']; }, failDo: (g) => { g.flags.night5_done = true; g.flags.gao_warned = true; return ['He does not believe you. He warns you anyway: Lu Han wants you alive. Then the lane is empty.']; }, to: 'village_morning' },
-            { text: 'A bone needle into the post an inch from his ear. "Ask me again and I\'ll explain it slower."', show: (g) => vday(g) === 2 && !g.flags.night5_done && !!g.flags.gao_spared, qi: 3, do: (g) => { g.flags.night5_done = true; g.flags.gao_warned = true; return ['The colour leaves his face. Lu Han wants you alive, he says, all in one breath, and then he is running.']; }, to: 'village_morning' },
+            { text: '"Because I\'m not from here. Where I\'m from, we don\'t kill people for being stupid. Go home, Gao."', show: (g) => arsonNight(g) && !!g.flags.gao_spared, check: { skill: 'GU', dc: 3 }, do: (g) => { g.flags.night5_done = true; g.flags.gao_turned = true; return ['He looks up at you until the silence is awkward. Then he tells you all of it: Lu Han is bringing four men, not two. He wants you alive. He takes you for the heir of a hidden sect. "Let him go on thinking so," Gao says, and is gone.']; }, failDo: (g) => { g.flags.night5_done = true; g.flags.gao_warned = true; return ['He does not believe you. He warns you anyway: Lu Han wants you alive. Then the lane is empty.']; }, to: 'village_morning' },
+            { text: 'A bone needle into the post an inch from his ear. "Ask me again and I\'ll explain it slower."', show: (g) => arsonNight(g) && !!g.flags.gao_spared, qi: 3, do: (g) => { g.flags.night5_done = true; g.flags.gao_warned = true; return ['The colour leaves his face. Lu Han wants you alive, he says, all in one breath, and then he is running.']; }, to: 'village_morning' },
             // Gao alive and humiliated: arson
-            { text: 'Drop out of the loft into the middle of them.', show: (g) => vday(g) === 2 && !g.flags.night5_done && !(g.flags.gao_broken) && !g.flags.gao_spared, combat: arson, to: 'arson_won' },
-            { text: 'Wake the street. Let forty houses deal with three men.', show: (g) => vday(g) === 2 && !g.flags.night5_done && !(g.flags.gao_broken) && !g.flags.gao_spared, check: { skill: 'GU', dc: 4, bonus: (g) => ((g.rel.Village?.f || 0) >= 20 ? 2 : 0) }, do: (g) => { g.flags.night5_done = true; bumpRel(g, 'Village', 6, 0); return ['Up and down the lane the shutters crash back. Pock-Face and his two friends turn round into a hedge of pitchforks, and go home lighter by several teeth.']; }, fail: 'arson_start', to: 'village_morning' },
+            { text: 'Drop out of the loft into the middle of them.', show: (g) => arsonNight(g) && !(g.flags.gao_broken) && !g.flags.gao_spared, combat: arson, to: 'arson_won' },
+            { text: 'Wake the street. Let forty houses deal with three men.', show: (g) => arsonNight(g) && !(g.flags.gao_broken) && !g.flags.gao_spared, check: { skill: 'GU', dc: 4, bonus: (g) => ((g.rel.Village?.f || 0) >= 20 ? 2 : 0) }, do: (g) => { g.flags.night5_done = true; bumpRel(g, 'Village', 6, 0); return ['Up and down the lane the shutters crash back. Pock-Face and his two friends turn round into a hedge of pitchforks, and go home lighter by several teeth.']; }, fail: 'arson_start', to: 'village_morning' },
         ],
     },
     arson_start: {
@@ -219,7 +223,7 @@ Mei Lin stands in the lane, soot across her face, and looks at what is left. She
         enter: (g) => {
             const lines = [];
             if (hour(g) < 6 || hour(g) >= 19) lines.push(nightRest(g)); // v0.11.92 (X1): half back after the arson fight
-            g.flags.vday = vday(g) + 1;
+            if (weekMorning(g)) g.flags.vday = vday(g) + 1; // v0.11.203 (T1, TS1): once a week in the long calendar
             eat(g, 20);
             lines.push('Breakfast at Mei Lin\'s: rice gruel and pickles, +20 satiety.');
             return lines;

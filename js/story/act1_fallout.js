@@ -6,7 +6,8 @@
 import { addItem, eat, condense, advance, sleepUntil, jamesHpMax, hasItem, awardYukiFightXp, yukiForm, nightRest, nightTo } from '../core/game.js';
 import { daily, markDaily, hour, day, eatBest, pantry, foodCount, byForm, byDay, dayReply } from './common.js';
 import { encounter, rel, likesMei, likesYa, trioStep, bumpRel, KISS_YA } from './act1_common.js';
-import { textDay, coilStamp } from '../core/lines.js'; // RV1 (FX); v0.11.188 (N1, L7): coilStamp
+import { textDay, coilStamp } from '../core/lines.js';
+import { longCal, storyDay, storyDayOf, calStart, calEnd, lastOfWeek } from '../core/calendar.js'; // v0.11.203 (owner pick T1, TS1): the long calendar // RV1 (FX); v0.11.188 (N1, L7): coilStamp
 import { potLine } from './kitchen.js'; // v0.11.181 (SP1, PS)
 import { SONG_AT } from './songs.js'; // v0.11.188 (N1, L7): the song of fo_elder_named, by key (no song named here)
 
@@ -38,7 +39,7 @@ const DR_FO_CLINIC_F = dayReply("fo_clinic:0:f", [
 /** v0.11.170 (owner pick RV1, SD; Fable's review M1): a success closes its card for the rest of the Coil (oneoff.js ONCE_MENUS), so a
  * count of days (dayReply) only ever reached the first text. The eight success lists go by the story's day instead (Day 8, 9, 10 →
  * the first, second, third text); the list is registered as before (the lint and the tests read DAY_REPLIES). No save field. */
-const onStoryDay = (key, list) => { dayReply(key, list); return (g) => { const t = list[Math.max(8, Math.min(10, day(g))) - 8]; return typeof t === 'function' ? t(g) : t; }; };
+const onStoryDay = (key, list) => { dayReply(key, list); return (g) => { const t = list[Math.max(8, Math.min(10, storyDay(g))) - 8]; return typeof t === 'function' ? t(g) : t; }; };
 const DR_FO_SING = onStoryDay("fo_palisade:0", ["The stakes come up white and even, humming one note between them. The hunters lay a palm on the nearest, as on a doorpost.", "The old bone lies sorted by length, ready. The stakes come up dead on the chalk; Old Hu sights down the row and finds nothing to straighten.", "The whole stretch comes up on one breath of song, and every stake rings true. A grandmother ties red thread round the last one, and nobody objects."]);
 const DR_FO_PITS = onStoryDay("fo_palisade:1", ["Ugly pits, at the jackals' own angle. They will work, and nobody here asked for handsome.", "You show the angle once. The hunters dig the rest of the stretch to it, and correct one another by bowing at the offending stake.", "The jackals' angle turns out to be teachable. The pits go in faster than you can inspect them; one stake is a finger off true, and three men apologise for it."]);
 const DR_FO_PITS_F = dayReply("fo_palisade:1:f", ["Under a foot of soil the ground is solid stone. You find this out with a mattock, and with both wrists.", "Today's stretch crosses an old field drain. The pits fill with water as fast as they are dug, and the hunters take it as a judgement.", "The angles come out wrong: stakes leaning in, toward the houses. They will have to come up again, and the jackals are not here to ask."]);
@@ -81,8 +82,14 @@ export const SUPPER_POT = {
 };
 const supperPot = (g) => SUPPER_POT[Math.max(1, Math.min(3, Number(g.flags.kitchen_seen) || 0))];
 /** Day 8, 9 or 10. */
-const dd = (g) => Math.max(8, Math.min(10, day(g)));
-const toEvening = (g) => (dd(g) >= 10 ? 'fo_farewell' : 'fo_supper');
+/** v0.11.203 (owner pick T1, TS1): the story's day (8–10); in the long calendar each is a week (Days 44–50, 51–57, 58–64). `ddShow` is the
+ *  calendar's day for the titles and the count to the Elder; the farewell waits for the last week's last day. */
+const dd = (g) => Math.max(8, Math.min(10, storyDay(g)));
+const ddShow = (g) => (longCal(g) ? day(g) : dd(g));
+const farewellNow = (g) => dd(g) >= 10 && lastOfWeek(g);
+/** The text day as a story day (8–10), for the lists by the story's day. */
+export const textStoryDay = (g) => storyDayOf(g, textDay(g));
+const toEvening = (g) => (farewellNow(g) ? 'fo_farewell' : 'fo_supper');
 
 /* ---------------- encounters ---------------- */
 const spyFight = (g) => encounter(g, {
@@ -255,10 +262,10 @@ Thirteen days. You can spend them building walls. Or you can go and find out wha
 
     /* ---------------- the day hub ---------------- */
     fo_ashfall: {
-        id: 'fo_ashfall', title: (g) => `Ashfall — Day ${dd(g)}`, art: 'village', place: P,
+        id: 'fo_ashfall', title: (g) => `Ashfall — Day ${ddShow(g)}`, art: 'village', place: P,
         text: (g) => {
             const h = hour(g);
-            const d2 = Math.max(0, Math.min(2, textDay(g) - 8)); // v0.11.154 (owner pick RV1, Fable's review, L3 FX): by the story's day (from 05:00), Day 8, 9, 10; was byDay(g, [0, 1, 2], 'fo_ashfall')
+            const d2 = Math.max(0, Math.min(2, textStoryDay(g) - 8)); // v0.11.154 (owner pick RV1, Fable's review, L3 FX): by the story's day (from 05:00), Day 8, 9, 10; was byDay(g, [0, 1, 2], 'fo_ashfall')
             // NT1 (Fable's draft): a second set of the times of day and of Ya's lines; v0.11.154 (owner pick PS1, RP1 push 2; Fable's, "ok for texts" 23:05): a third (ST2)
             const when = h < 11 && hymnToday(g) ? HYMN_MORNING // RV1 (M3): before the days: an Act 1 that starts on Day 9 has the hymn on its first morning too
                 : d2 === 2
@@ -266,7 +273,7 @@ Thirteen days. You can spend them building walls. Or you can go and find out wha
                 : d2
                 ? (h < 11 ? `Morning. The hammers started before the light did, and nobody has asked them to stop.` : h < 15 ? `Midday. The chalk line across the barley has been walked so often that it is a path.` : h < 19 ? `Late afternoon. The well is busy and silent, which in Ashfall is how you know people are frightened.` : `Dusk. Shutters closed, lamps lit, every door barred out of habit.`)
                 : (h < 11 ? 'Morning. Axes, hammers, and a work-chant kept going so that nobody has to think.' : h < 15 ? 'Midday. A white chalk line runs through the barley where the palisade is to stand.' : h < 19 ? 'Late afternoon. Forty chimneys smoking, and not one laugh at the well all day.' : 'Dusk. Lamps behind every shutter.');
-            const days = 21 - dd(g);
+            const days = calStart(g, 21) - ddShow(g);
             return `${when} ${days} days until the Elder.
 
 ${yaHere(g) ? (g.flags.ya_party ? (d2 === 2 ? `Ya is on the shrine roof, honing her spear's bone tip on a ridge tile and looking north. Someone has moved the offering bowl out from under her.` : d2 ? `Ya is on the shrine roof again, awake this time, eating something with its legs still on and watching the street like a play.` : 'Ya is asleep on the shrine roof with one leg dangling, apparently on purpose, to offend the god.') : (d2 === 2 ? `Ya is somewhere in the village. The row of fish drying along the south wall is one fish short, and the gap is being discussed in low, formal voices.` : d2 ? `Ya is somewhere in the village. A dog is barking at one end of it and a grandmother is shouting at the other, so she is moving fast.` : 'Somewhere in the village, Ya is offending someone. You can tell by the silence.')) : ''}
@@ -286,7 +293,7 @@ ${pantry(g)} ${g.james.satiety < 30 ? 'You are hungry.' : ''} ${g.james.hp < jam
             { text: 'Eat at the communal pot.', show: (g) => daily('a1_pot')(g) && g.james.satiety < 80 && !late(g), time: 30, do: (g) => { markDaily(g, 'a1_pot'); eat(g, 25); return [potLine(g, 'fo') ?? 'Bean and barley stew, ladled out wordlessly and handed over with a short bow: +25 satiety.']; }, to: 'fo_ashfall' }, // v0.11.181 (SP1, PS): from the village's 90, potLine
             { text: 'Cultivate behind the shrine: one sit, 10 Qi.', show: (g) => !late(g), req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`, ...r.xp] : []; }, to: 'fo_ashfall' },
             { text: 'Rest an hour.', show: (g) => !late(g), do: (g) => advance(g, 60, { resting: true }).concat(['An hour of rest.']), to: 'fo_ashfall' },
-            { text: (g) => (dd(g) >= 10 ? 'Evening. The last one in Ashfall for a while.' : 'Evening. Go home to Mei Lin\'s.'), show: (g) => hour(g) >= 16, time: 20, to: toEvening },
+            { text: (g) => (farewellNow(g) ? 'Evening. The last one in Ashfall for a while.' : 'Evening. Go home to Mei Lin\'s.'), show: (g) => hour(g) >= 16, time: 20, to: toEvening },
         ],
     },
 
@@ -514,7 +521,7 @@ Its owner bows to you regardless and thanks you for the attempt. Nothing else th
     },
 
     fo_morning: {
-        id: 'fo_morning', title: (g) => `Day ${dd(g)}`, art: 'ashfall_dawn', place: P,
+        id: 'fo_morning', title: (g) => `Day ${ddShow(g)}`, art: 'ashfall_dawn', place: P,
         enter: (g) => {
             const lines = [];
             if (hour(g) < 6 || hour(g) >= 19) lines.push(nightRest(g)); // v0.11.92 (X1): half back after the barley wolves
@@ -529,7 +536,7 @@ Its owner bows to you regardless and thanks you for the attempt. Nothing else th
 You are on the step with a bowl of gruel when Ashfall goes silent at your back. It is not the careful silence you have grown used to. It is sharp and complete, like a plate dropped in a temple.
 
 Someone is walking out of the Blackroot: down the north path, through the barley, hauling something heavy behind her on a rope.`
-            : `Day ${dd(g)}. ${21 - dd(g)} days to the Elder. The wind has come round to the north again, and your Convergence hums along under it without having asked your leave.`),
+            : `Day ${ddShow(g)}. ${calStart(g, 21) - ddShow(g)} days to the Elder. The wind has come round to the north again, and your Convergence hums along under it without having asked your leave.`),
         choices: [
             { text: 'Look.', show: (g) => dd(g) === 9 && !yaHere(g), to: 'ya_arrives' },
             { text: 'Old Wen has called for you. Today is the day you decide.', show: (g) => dd(g) >= 10 && !g.flags.fo_plan, to: 'fo_plan' },
@@ -810,6 +817,6 @@ On your left walks Mei Lin, her father's knife at her hip, the basket on her bac
 Where the barley stops and the black trees start, your Convergence leaves off humming and begins, beyond any mistaking, to *sing*.
 
 ${likesMei(g) && likesYa(g) ? '"Three of us," Ya says, to nobody, very pleased. Mei Lin doesn\'t answer. But she doesn\'t correct her, either.' : '"Into the warm," says Ya, and steps under the trees.'}`,
-        choices: [{ text: 'Into the Blackroot.', do: (g) => { g.minutes = 9 * 1440 + 23 * 60; sleepUntil(g, 6); g.flags.mei_party = true; g.flags.ya_party = true; bumpRel(g, 'Mother', 2, 0); return []; }, to: 'bl_start' }], // v0.11.139 (owner pick MW1, MB): Mother +2
+        choices: [{ text: 'Into the Blackroot.', do: (g) => { g.minutes = (calEnd(g, 10) - 1) * 1440 + 23 * 60; sleepUntil(g, 6); /* v0.11.203 (T1, TS1): Day 10's (64's) last hour */ g.flags.mei_party = true; g.flags.ya_party = true; bumpRel(g, 'Mother', 2, 0); return []; }, to: 'bl_start' }], // v0.11.139 (owner pick MW1, MB): Mother +2
     },
 };

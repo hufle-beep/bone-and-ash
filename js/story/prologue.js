@@ -23,6 +23,7 @@ import { HEART, BREAK_HUBS as B3 } from './act1_heart.js';
 import { RETURN, BREAK_HUBS as B4, installSelene } from './act1_return.js';
 import { LONGFOREST, BREAK_HUBS as B0 } from './longforest.js';
 import { MERIDIANS, EXTRA_FROM } from './meridians.js';
+import { weekBegins, calStart } from '../core/calendar.js'; // v0.11.203 (owner pick T1, TS1): the long calendar
 import { installYukiTime } from './yuki_time.js'; // v0.11.137 (TR1)
 import { installHouseTime } from './house_time.js'; // v0.11.139 (MW1)
 import { installKitchen } from './kitchen_install.js'; // v0.11.181 (SP1, PS)
@@ -573,7 +574,7 @@ Yuki does not look at you. She keeps it up all the way down.`,
     },
     village: {
         id: 'village', title: 'Ashfall', art: 'village', place: 'Ashfall Hamlet',
-        enter: (g) => { if (g.flags.ignored) g.flags.mei_bruised = true; if (g.flags.long && !g.flags.vday) g.flags.vday = 1; return []; },
+        enter: (g) => { if (g.flags.ignored) g.flags.mei_bruised = true; if (g.flags.long && !g.flags.vday) { g.flags.vday = 1; weekBegins(g); } return []; }, // v0.11.203 (T1, TS1): the village's first week starts with no nights slept
         text: (g) => `Ashfall Hamlet: forty grey stone houses gathered round a well, a shrine to some god whose face has been chiselled away, and one tall wooden post dressed in red lotus banners. That is the tribute post. The villagers walk wide of it, as people walk wide of a dog that is only asleep.
 
 ${g.flags.ignored
@@ -813,7 +814,7 @@ You are forty. Your assets: a fresh doctorate, ${byForm(g, 'a cat', 'a cat the s
 "Sure," you say. "I don't see how that could go wrong."
 
 — **End of the Prologue.** —`,
-        choices: [{ text: 'Act 1: The Hearth Tree.', do: (g) => { const d = Math.floor(g.minutes / 1440) + 1; g.minutes = Math.max(d, 7) * 1440 + 6 * 60; g.james.hp = Math.max(g.james.hp, 1); return []; }, to: 'fo_start' }],
+        choices: [{ text: 'Act 1: The Hearth Tree.', do: (g) => { const d = Math.floor(g.minutes / 1440) + 1; g.minutes = Math.max(d, calStart(g, 8) - 1) * 1440 + 6 * 60; /* v0.11.203 (T1, TS1): Day 8, or 44 in the long calendar */ g.james.hp = Math.max(g.james.hp, 1); return []; }, to: 'fo_start' }],
     },
 };
 

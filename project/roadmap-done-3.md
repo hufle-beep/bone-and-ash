@@ -2,6 +2,12 @@
 
 Started in v0.11.150, when `roadmap-done-2.md` had passed about 45 KB. Newer than `roadmap-done-2.md` and `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.203 (word for word; owner pick T1: section 0's line as of v0.11.202; the size rule)
+
+### From section 0, as of v0.11.202
+
+- *(v0.11.202, owner picks M1, D1)* **The merged text push done** (A, B and C of `roadmap-e.md`'s plan in one; e1, e2, b2, b7 found done before). **The PC layout deferred** until the owner is at a computer (the owner 18:32; `roadmap-2.md` section 4, with the measurements): after every push, ask. **Next, for the owner's friend on Friday 2026-11-20: the time scale (`roadmap-time.md`) → group f (with TS5) → the retune of the prologue and Act 1 (section 2, with TS7) → Act 2 if there is time;** the PC layout in between whenever the owner can see it; each still gets its options first. Section 0's line as of v0.11.201 moved word for word to `history-28.md`.
+
 ## Moved in v0.11.201 (word for word; owner pick O1: section 0's line as of v0.11.200, and group e's closed items; the size rule)
 
 ### From section 0, as of v0.11.200

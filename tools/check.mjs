@@ -57,6 +57,9 @@ const jobs = [
     // v0.11.142 (owner pick CV1): the Cultivator too (the completionist that cultivates in its spare time), --games like the others
     // v0.11.160 (owner pick NX2, CN): the Sociable too (Careful that takes the talk doors with Ya and Mei Lin), --games like the others
     { name: `bot models (${QUICK ? 50 : 500} games each, the Sitter ${QUICK ? 20 : 150}, the Farmer ${QUICK ? 20 : 100}, the Cultivator ${QUICK ? 50 : 500}, the Sociable ${QUICK ? 50 : 500}, log only)`, key: 'models', show: 'models', blocks: QUICK ? 7 : 9, cmd: node('tests/models.test.mjs', '--model', 'careful,completionist,rusher,sitter,farmer,cultivator,sociable', '--games', QUICK ? '50' : '500', '--sitter-games', QUICK ? '20' : '150', '--farmer-games', QUICK ? '20' : '100', '--off', QUICK ? '0' : '300', '--off-models', 'careful,completionist', '--texts'), heavy: true }, // v0.11.132 (E1): --texts, the repeated screens (RP)
+    // v0.11.203 (owner pick T1, TS8): the long calendar (the main menu's test switch), log only: the four models that plan the days,
+    // never compared with a saved copy; a stuck or unfinished game still fails (every game must end)
+    { name: `bot models, the long calendar (test switch; ${QUICK ? 10 : 40} games each of Careful, Sociable, Completionist, Cultivator; log only)`, key: 'models-long', show: 'models', blocks: 4, cmd: node('tests/models.test.mjs', '--cal', '7', '--model', 'careful,sociable,completionist,cultivator', '--games', QUICK ? '10' : '40', '--off', '0'), heavy: true },
     { name: 'syntax', key: 'syntax', fn: syntax },
     { name: 'consistency (offline files, versions)', key: 'consistency', cmd: node('tools/consistency.mjs') },
     { name: 'engine numbers', key: 'rules', cmd: node('tests/rules.test.mjs') },

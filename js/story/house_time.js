@@ -12,6 +12,7 @@
 import { bumpRel } from '../core/game.js';
 import { daily, markDaily, hour } from './common.js';
 import { pickLine, textDay } from '../core/lines.js';
+import { storyDayOf } from '../core/calendar.js'; // v0.11.203 (owner pick T1, TS1): the Fallout's story day in the long calendar
 import { TASK_HUBS } from './task_hubs.js';
 import { HT_LABEL, HT_BODY, HT_CLOSE } from './house_texts.js';
 import { kitchenOnce, kitchenText, kitchenLabel } from './kitchen.js'; // v0.11.181 (SP1, KG1): the mother's kitchen by her friendship
@@ -27,7 +28,7 @@ export const HT_MID = 30; // MT: the closers' level
  *  a card taken at 23:50 keeps its day's text past midnight). */
 export const HT_HUBS = {
     ashfall: [(g) => ((g.flags.vday || 1) >= 3 ? 'ashfall:2' : 'ashfall:1')],
-    fo_ashfall: [(g) => `fo_ashfall:${Math.max(1, Math.min(3, textDay(g) - 7))}`],
+    fo_ashfall: [(g) => `fo_ashfall:${Math.max(1, Math.min(3, storyDayOf(g, textDay(g)) - 7))}`],
     rt_ashfall: [() => 'rt_ashfall:1'],
 };
 

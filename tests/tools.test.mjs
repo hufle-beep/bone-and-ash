@@ -134,7 +134,8 @@ for (const mode of ['full', 'quick']) {
     assert(jobs.every((j) => typeof j.name === 'string' && Array.isArray(j.after) && typeof j.heavy === 'boolean'), `${mode}: every job has name, after, heavy`);
     for (const j of jobs) for (const a of j.after) assert(keys.includes(a), `${mode}: ${j.key} waits for ${a}, a job of this mode`);
     for (const k of ['tasks', 'story', 'syntax', 'data']) assert(keys.includes(k), `${mode}: has ${k}`);
-    assert(jobs.filter((j) => j.heavy).map((j) => j.key).sort().join() === 'models,story,tasks', `${mode}: the heavy jobs are tasks, story and the bot models (v0.11.27)`);
+    assert(jobs.filter((j) => j.heavy).map((j) => j.key).sort().join() === 'models,models-long,story,tasks', `${mode}: the heavy jobs are tasks, story and the bot models, both calendars (v0.11.27; v0.11.203 T1, TS8: models-long)`);
+    { const ml = jobs.find((j) => j.key === 'models-long'); assert(ml && /the long calendar \(test switch; \d+ games each of Careful, Sociable, Completionist, Cultivator; log only\)/.test(ml.name), `${mode}: the long calendar's models step (v0.11.203, TS8)`); }
     assert(validateJobs(jobs.map((j) => ({ ...j, cmd: ['x', []] }))).length === 0, `${mode}: validateJobs finds no problem`);
     if (mode === 'full') {
         const s = jobs.find((j) => j.key === 'sanity');
@@ -287,6 +288,15 @@ for (const mode of ['full', 'quick']) {
     let bad = 0;
     try { execFileSync(process.execPath, ['tests/models.test.mjs', '--games', '1', '--off-models', 'nobody'], { cwd: ROOT, stdio: 'ignore' }); } catch (e) { bad = e.status; }
     assert(bad === 2, `models --off-models with an unknown model exits 2 (${bad})`);
+    // v0.11.203 (owner pick T1, TS8): --cal 7, a tiny real run on the long calendar: every game ends, its days line read by the digest
+    { let lr = ''; try { lr = execFileSync(process.execPath, ['tests/models.test.mjs', '--cal', '7', '--model', 'careful', '--games', '2', '--off', '0', '--workers', '1'], { cwd: ROOT, encoding: 'utf8' }); } catch (e) { lr = `FAILED ${e.status} ${String(e.stdout || e)}`; }
+      const ld = modelDigest(lr, 1);
+      assert(/0 failed/.test(lr) && /days: tribute Day [\d.]+ \(n \d+\) · Act 1's end Day 9[34]\.0 \(n 2\) · the long calendar/.test(lr) && /· tribute Day [\d.]+, Act 1 ends Day 9[34]\.0$/.test(ld?.[0] ?? ''), `models --cal 7: two long-calendar games end on Day 93 or 94, the digest names the days (${ld?.[0] ?? lr.slice(-300)})`);
+      let bc = 0; try { execFileSync(process.execPath, ['tests/models.test.mjs', '--games', '1', '--cal', '5'], { cwd: ROOT, stdio: 'ignore' }); } catch (e) { bc = e.status; }
+      assert(bc === 2, `models --cal with another number exits 2 (${bc})`); }
+    { // RV1 (TG6): the long calendar's step plays the long calendar (its arguments read from the source, as the Sitter's below)
+      const cs = readFileSync(path.join(ROOT, 'tools/check.mjs'), 'utf8'), line = cs.split('\n').find((l) => l.includes("key: 'models-long'")) || '';
+      assert(line.includes("node('tests/models.test.mjs', '--cal', '7', '--model', 'careful,sociable,completionist,cultivator', '--games', QUICK ? '10' : '40', '--off', '0')") && line.includes('blocks: 4'), 'models-long: --cal 7, the four models, 40 games (10 in quick), four blocks (RV1, TG6)'); }
     // v0.11.85 (owner pick M1): the Sitter in the models step (its own game count), and a tiny real Sitter run
     const mj = list().jobs?.find((j) => j.key === 'models'), mq = list('quick').jobs?.find((j) => j.key === 'models');
     const src = readFileSync(path.join(ROOT, 'tools/check.mjs'), 'utf8'); // --list gives names only: the job's arguments read from the source
@@ -603,6 +613,20 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md', 'roadmap-act2.md', 'roadmap
     assert(d3.includes('- *(v0.11.200, owner D1, F2 and 17:46)* **Bundle D: done in v0.11.200.**') && d3.includes('  - **Closed since:** a success card saying its line twice in a day') && !r1.includes('**Closed since:**') && !r1.includes('**Bundle D: done in v0.11.200.**'), 'O1: section 0\'s old line and group e\'s closed items moved word for word to roadmap-done-3.md');
     assert(h28.includes('- **The time scale (the owner 2026-11-16 17:54, mid-build of v0.11.200, word for word;') && h28.includes('## v0.11.198 — ') && h28.includes('## v0.11.197 — ') && !ho.includes('## v0.11.198 — '), 'O1: the old open items and v0.11.197–198 moved word for word to history-28.md');
     assert(Buffer.byteLength(r1) <= MIRROR_MAX && Buffer.byteLength(rt) <= MIRROR_MAX, `O1: roadmap.md ${Buffer.byteLength(r1)} and roadmap-time.md ${Buffer.byteLength(rt)} bytes, under ${MIRROR_MAX}`);
+}
+// v0.11.203 (owner picks T1, RV1): the time scale's shape and TS1 + TS8 in roadmap-time.md; the fallback branch listed; the handover's
+// moves word for word to history-29.md (the v0.11.200 entry, the open decisions, the usage note); section 0's v0.11.202 line in
+// roadmap-done-3.md; the docs gap (group e's lines) marked; the review's new kinds in the checklist
+{
+    const rd = (f) => readFileSync(path.join(ROOT, 'project', f), 'utf8');
+    const rt = rd('roadmap-time.md'), r1 = rd('roadmap.md'), ho = rd('handover.md'), h29 = rd('history-29.md'), d3 = rd('roadmap-done-3.md'), rp = rd('restore-points.md'), ck = rd('review-checklist.md');
+    assert(rt.includes('## The shape picked (v0.11.203, owner pick T1, 2026-11-16 19:56)') && rt.includes('- **TS1 + TS8: done in v0.11.203**') && rt.includes('**Decided in v0.11.203 (T1): only the stays.**'), 'T1: roadmap-time.md has the shape picked, TS1 + TS8 done and the decided questions');
+    assert(rp.includes('| `fallback/2026-11-16-before-time-scale` | 0.11.202 (`20837ea`)'), 'T1 (rule 5, H1): the fallback branch before the time scale listed');
+    assert(h29.includes('- **v0.11.200: bundle D (D1), the kept realm recorded (KA), the plan for Friday (F2)') && !ho.includes('- **v0.11.200: bundle D (D1), the kept realm recorded (KA)') && h29.includes('- **Serpent (D, owner 09:44, v0.9.9): folded into step 5**') && !ho.includes('- **Serpent (D, owner 09:44, v0.9.9)') && h29.includes('**Usage (the owner 2026-11-14 15:27, word for word):** "one important note, the fable usage is being Burnt through quickly'), 'T1: the handover\'s older entries moved word for word to history-29.md, not left behind');
+    assert(ho.includes('**`project/history-29.md`** … **`project/history.md`**') && ho.includes('- **v0.11.203: the time scale\'s TS1 + TS8 (T1), the review\'s fixes (RV1)') && ho.includes('## v0.11.203 — '), 'T1 (rules 5, 6): the handover names history-29.md, the picks and the version note');
+    assert(d3.includes('### From section 0, as of v0.11.202\n\n- *(v0.11.202, owner picks M1, D1)* **The merged text push done**') && !r1.includes('- *(v0.11.202, owner picks M1, D1)* **The merged text push done**') && r1.includes('- *(v0.11.190, the size rule)*'), 'T1: section 0\'s v0.11.202 line moved word for word, the v0.11.190 pointer kept');
+    assert(r1.includes('~~the Blackroot\'s Practice darts and needles failing in silence~~ **done in v0.11.202** (b1)') && r1.includes('~~the four older Yuki tics (v0.11.179\'s RV2 list)~~ **done in v0.11.202** (a10, a11)') && r1.includes('**found done in v0.11.202** (e2)'), 'T1: the docs gap: group e\'s lines mark v0.11.202\'s items');
+    assert(ck.includes('**The clock\'s day against the text day (v0.11.203 L4):**') && ck.includes('**A jump between parts walked, not computed (v0.11.203 TG2–TG4, TG7):**'), 'T1 (RV1): the review\'s new kinds in the checklist');
 }
 // v0.11.171 (owner pick RA1): Act 2 in its own part, roadmap-act2.md, named between group f and section 2 in roadmap.md, with the
 // owner's words of 2026-11-14 01:02, the Act 2 lines moved from roadmap-2.md section 5 (not left behind) and its facts in lore.md;
