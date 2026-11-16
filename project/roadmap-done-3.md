@@ -2,6 +2,12 @@
 
 Started in v0.11.150, when `roadmap-done-2.md` had passed about 45 KB. Newer than `roadmap-done-2.md` and `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.196 (word for word; owner pick M1: section 0's open items sorted into their homes)
+
+### From section 0, as of v0.11.195
+
+- *(v0.11.195, owner F1, D1, RV1)* **Next: not picked yet** (options at the start of the next chat). **F1, FW's fixes: done in v0.11.195** (`project/research/fw-fix-*`): `lore` [0] walks beside Mei Lin (40 min); 17 flown lines by Fable (`js/story/flight_texts.js`), Wen and Lu Han after the sky (`sky_witness`), the Foundation closer, five swaps for everyone; RV1 M1–M4, L1, L5, L6, TG1–TG4. **Open, options later:** from F1 (v0.11.195): Act 1's marked walks with Mei Lin and Ya along still flown (`wyrm_won`, `dw_drowned_won`, `rt_start`, `ht_leave`; the review's L7), `mire_lost`'s "Limp back" label under its flown text, `elder`'s `ignored` "walked down out of the Blackroot" and one `wen_lesson` version's "Blackroot", `boar_lost`'s great form "the far side"; the read's R items (canon-consistent) and Fable's KEEPs; the Old Tree's lip under Ya's half-circle (v0.11.190's L8, a note); an update check that skips GitHub's API (v0.11.194's options, U1); text lint's hits from the later-Coil states (v0.11.194's options, T1); a later Coil's question at a breakthrough Mei Lin and Ya saw (`ykLaterQ`; LQ); the great form in Act 1's Ashfall without the party (AG); `far_won`'s loads, `breakthrough`'s Ya (unchecked). **Done:** v0.11.194 R2 + G1 (FW's read). v0.11.195 F1 + D1 + RV1 (FW's fixes). Older done lines: `roadmap-done-3.md` (v0.11.195).
+
 ## Moved in v0.11.195 (word for word; the roadmap kept under 20 KB)
 
 ### From section 0, as of v0.11.194

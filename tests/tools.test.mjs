@@ -566,7 +566,11 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md', 'roadmap-act2.md', 'roadmap
     const r1 = rd('roadmap.md'), body = (t) => t.slice(t.indexOf('\n- ') + 1).trimEnd();
     const { createHash } = await import('node:crypto');
     const h = (t) => createHash('sha256').update(t).digest('hex');
-    const be = body(rd('roadmap-e.md')), br = body(rd('roadmap-retune.md'));
+    // v0.11.196 (owner picks M1, H1): later additions to a moved line are tails marked " *(v0.11.19x"; cut before hashing, so the moved block stays pinned
+    const tails = (t) => (t.match(/ \*\(v0\.11\.19\d/g) || []).length, cut = (t) => t.replace(/ \*\(v0\.11\.19\d[^\n]*/g, '');
+    const beRaw = body(rd('roadmap-e.md'));
+    assert(tails(beRaw) === 3, `MD (H1): roadmap-e.md has the 3 marked tails of v0.11.196 (${tails(beRaw)})`);
+    const be = cut(beRaw), br = body(rd('roadmap-retune.md'));
     assert(h(be) === '6e712ad1524d6d47beaa91d775a0c7a5d8c5cda69214b97812060dfbbeaeab12' && h(br) === '48076f4fa63681f75ceb035b2cc348b0652ab31e761b8383aa636aaeb5efbe9b', `MD: roadmap-e.md and roadmap-retune.md hold the moved blocks exactly (sha256 ${h(be).slice(0, 12)}…, ${h(br).slice(0, 12)}…)`);
     assert(!r1.includes(be.split('\n')[0]) && !r1.includes(br.split('\n')[0]) && r1.includes("**Group e's older open items**") && r1.includes('`roadmap-e.md`') && r1.includes("**Section 2's older open items**") && r1.includes('`roadmap-retune.md`'), 'MD: not left behind in roadmap.md, a pointer in each place');
     const e = r1.indexOf('### e. '), f = r1.indexOf('### f. Romance'), s2 = r1.indexOf('## 2. The balance retune');
