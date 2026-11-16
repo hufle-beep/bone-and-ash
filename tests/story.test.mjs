@@ -18,6 +18,7 @@ import { coilStamp, dayIndex, textDay, DAY_REPLIES, COIL_SETS, actCoil, noteDay,
 import { splitReply, splitLine, landReply, noteSaid } from '../js/core/replies.js'; // v0.11.136 (NC1); RV2 (TG): landReply, noteSaid
 import { runTask, taskOutcome, cardCheck, taskCards, yukiSays as yukiSaysS } from '../js/core/tasks.js'; // v0.11.169 (CA1, YH): yukiSays // v0.11.136 (RV2, TG); v0.11.139 (MW1): taskCards
 import { DRILL_AGAIN } from '../js/story/act1_return.js'; // v0.11.179 (LB1, RV2 TG): the drill replies' tics
+import { BT_CLOSER as BT_CLOSER_195 } from '../js/story/flight_texts.js'; // v0.11.195 (F1, D1)
 import { HEART } from '../js/story/act1_heart.js'; import { createHash } from 'node:crypto'; // v0.11.173 (P6A): the Heart's scenes, for its block
 import { writeFileSync, readFileSync, readdirSync } from 'node:fs'; // v0.11.137 (HV1, T): the story files read for bumpRel
 import { smartAction } from './lib/smartfight.mjs'; // v0.11.96 (BT1)
@@ -2648,10 +2649,10 @@ for (const form of ['cat', 'human']) {
         if (form === 'human') assert(!/Your cat|on your knee|in your lap\b(?! and)/.test(host.text) || id === 'heart_spring', `NR1 (T): ${id}'s own text as the human`);
     }
     // NS1 (TR): the rats night's trunk, by form (a label that is a function; its place on the scene kept)
-    for (const [form, re] of [['cat', /^Up the fallen trunk with Yuki and wait them out\.$/], ['tiger', /^Up the fallen trunk behind Yuki and wait them out\.$/], ['human', /^Up the fallen trunk with Yuki and wait them out\.$/]]) {
+    for (const [form, re] of [['cat', /^Up the fallen trunk with Yuki and wait them out\.$/], ['tiger', /^Step up off the ground behind Yuki and wait them out\.$/], ['human', /^Step up off the ground with Yuki and wait them out\.$/]]) { // v0.11.195 (F1, D1: NE-8): the great and human forms fly
         const g = FM(60700 + n++, form, { night_ev: 'rats' }); goTo(g, SCENES, 'night_event'); g.flags.night_ev = 'rats';
-        const c = sceneView(g, SCENES).choices.find((x) => /^Up the fallen trunk/.test(x.label));
-        assert(!!c && re.test(c.label) && SCENES.night_event.choices[c.index] && /fallen trunk/.test(SCENES.night_event.choices[c.index].text(g)), `NS1 (TR): the trunk choice as ${form} (${c?.label})`);
+        const c = sceneView(g, SCENES).choices.find((x) => /^(Up the fallen trunk|Step up off the ground)/.test(x.label));
+        assert(!!c && re.test(c.label) && SCENES.night_event.choices[c.index] && /fallen trunk|off the ground/.test(SCENES.night_event.choices[c.index].text(g)), `NS1 (TR): the trunk choice as ${form} (${c?.label})`);
     }
     // T: the positions of the touched choices (saves keep picks by position)
     for (const [id, idx, re] of [['fo_drill', 1, /^Go a round with Yuki/], ['heart_spring', 2, /^Sit by the water/], ['heart_camp', 3, /^Sit up with Yuki/], ['wen_lesson', 0, /^Listen\. Ask/], ['rt_ford', 0, /^Cross carefully/]]) {
@@ -4031,7 +4032,9 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         const PIN_BT = [['stream', 1, 10, '81ef0e1c8a433e91'], ['camp', 1, 23, '1c2b702fa53d56e2'], ['village', 1, 10, 'dcf6caab493838f2'], ['village', 1, 22, 'ff5136872a9add43'], ['rr_hub', 2, 23, 'da992b67610dfde9'], ['ah_hub', 2, 10, '02f8ae1f5859205d'], ['ashfall', 3, 10, '48c49ed71ec38639'], ['dw_hub', 13, 23, '8739ed4b9081d57b']];
         for (const [back, realm, hh, h] of PIN_BT) {
             const g = ensureBars(newGame(85200 + realm)); g.flags.bt_return = back; g.james.realm = realm; g.minutes = 9 * D + hh * 60; g.rel['Mei Lin'] = 20;
-            assert(createHash('sha256').update(SCENES.breakthrough.text(g)).digest('hex').slice(0, 16) === h, `BR1 (RV1, TG2): realm ${realm} at ${back} ${hh}:00 renders as in v0.11.184`);
+            // v0.11.195 (F1, D1: BT, S3): the two swaps undone first, so the pin still shows nothing else moved
+            const was = SCENES.breakthrough.text(g).replace(BT_CLOSER_195, '*Foundation.* Mortal Vessel no longer: the rung where this world\'s sect disciples stand, and you came by it without a pill. You feel heavier, and steadier, and precisely as sarcastic as before.').replace('\nIt goes on looking.\n', '\nIt looks for a long time.\n');
+            assert(createHash('sha256').update(was).digest('hex').slice(0, 16) === h, `BR1 (RV1, TG2): realm ${realm} at ${back} ${hh}:00 renders as in v0.11.184 (v0.11.195's BT and S3 aside)`);
         }
     }
     const w = P.BT_A1_WITNESS.split(/\s+/).length, f = P.BT_TREE_FRAME.split(/\s+/).length;
@@ -4676,6 +4679,111 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       if (g.scene === 'breakthrough') choose(g, SCENES, 0);
       const t = g.scene === 'yuki_tiger_awaken' ? sceneView(g, SCENES).text : '';
       assert(/Ashfall watches it go in total silence\./.test(bt) && g.james.realm === 2 && t.includes(`\n\n${P.AWAKE_VILLAGE}\n\nThen Yuki is eleven pounds again, in the space of one breath.`), `N1 (GV): the real path from the village's breakthrough (${g.scene})`); }
+}
+
+// v0.11.195 (owner picks F1, D1; Fable's, BT and NA the alts; the FW read of v0.11.194): the prologue's lines for a James who can fly
+// (canFly, Foundation+), shown in place of the mortal line only while he flies; LW `lore` [0] walks beside Mei Lin at every realm;
+// EW / LH after a tribulation the village saw (sky_witness); BT the Foundation closer and S1–S4, X for everyone. RV1: M1 no WD-3 (never drawn),
+// M2 one "ninety" fewer, M3 Lu Han's tail "Villages exaggerate.", M4 BT's "let go of you", L1 the slope seen from the ridge, L5 "All along the
+// post"; TG1 a fact word or two pinned inside every line, TG2 EW / LH with Yuki's other primaries, healed, gao_broken, TG4 a real fetch
+{
+    const { FW, BT_CLOSER } = await import('../js/story/flight_texts.js');
+    const { WALKS, FLY_LABELS } = await import('../js/story/walks.js');
+    const T = 'F1 (195)';
+    const TICS = /something like|for a moment|in a way that|the way a|a long moment|a long time|the first time|a thousand years|four hundred pounds|a great deal|a good deal|the far side|sits down beside|since the lab|light comes down|gold eyes level/i;
+    const all = [...Object.values(FW), BT_CLOSER, ...Object.values(FLY_LABELS)];
+    assert(all.every((t) => typeof t === 'string' && t.length > 0 && !TICS.test(t)), `${T}: every line set, no canon-card tic`);
+    assert(Object.keys(FW).length === 17 && Object.keys(FLY_LABELS).join() === 'stream#5,dawn#0,bone_field#2', `${T}: 17 lines and 3 flown walk labels`);
+    assert(/^You land out of sight/.test(FW.healAgain) && /You went nowhere near that high\.$/.test(FW.healAgain) && /two hours, nearly all of it cutting and carrying\.$/.test(FW.healLabel), `${T} (HL): Fable's words`);
+    assert(BT_CLOSER.endsWith('precisely as sarcastic as before. The ground, it seems, has let go of you.') && !/withdraw|verdict|claim/.test(BT_CLOSER) && FW.jackalsRun.endsWith('Flying wants a clearer head.'), `${T} (D1; RV1 M4): BT and NA as the alts, BT not in Wen's words`);
+    // RV1 (TG1): the facts inside each line, so a word changed in the middle fails too
+    const PIN = {
+        healLabel: [/^Fly back to the stream for the fungus\./, /two hours/], healAgain: [/two shelves of pale green fungus/, /as if you had brought her the moon/, /out of sight/],
+        elderSky: [/watched Heaven come for the man in that chair, and Heaven left with nothing\./, /My sense and my eye cannot both be honest, and I do not know which of them to bury\.$/], elderRung: [/until Heaven declined to stop you/],
+        morningOut: [/^\*Then\* fly out\.$/], luHanSky: [/^"A tribulation was reported over this village," he says, to the road in general\./, /a man whom it did not burn/, /All along the post, heads go lower\. Nobody points\. Nobody needs to\.$/], luHanTail: [/^Villages exaggerate\.$/],
+        scout: [/switchback/, /a bench under a roof, a shrine with a red lotus cut into the stone/, /because dust can't be read from above/, /The marks in it are fresh\. Somebody has been standing here, watching the village\.$/],
+        jackalsRun: [/^A hedge of bone spikes between you and them, then run for the water\./], dawnNothing: [/You eat nothing, a meal you are getting very good at/, /about to go up/, /when the scream comes\.$/], dawnLeft: [/You eat what's left/, /about to go up/, /when the scream comes\.$/],
+        streamOutLabel: [/^Enough of the forest\. Fly the stream out, low — today\.$/], streamOut: [/it is your only map/, /The trees draw apart, the stones grow, the stream raises its voice\.$/],
+        trunk: [/^Step up off the ground with Yuki/], trunkGreat: [/^Step up off the ground behind Yuki/], ridgeOpen: [/^You come down on the ridge with the lie of the land already in your head:$/],
+        ridgeSlope: [/^Below, on the herb slope, a basket lies spilled\. A boulder has blood on it\. Whoever was there has gone\.$/],
+    };
+    assert(Object.keys(PIN).sort().join() === Object.keys(FW).sort().join() && Object.entries(PIN).every(([k, res]) => res.every((re) => re.test(FW[k]))), `${T} (RV1 TG1): every line's facts pinned (${Object.entries(PIN).filter(([k, res]) => !res.every((re) => re.test(FW[k] || ''))).map(([k]) => k).join(', ')})`);
+    assert(!('explore' in FW), `${T} (RV1 M1): no WD-3 (task mode draws wilds [3] as the Explore card)`);
+    assert(/^Yet I stood in my own street/.test(FW.elderSky) && /^Foundation, a rung no one in Ashfall had stood on, until Heaven declined to stop you\.$/.test(FW.elderRung) && /Nobody needs to\.$/.test(FW.luHanSky), `${T} (EW, LH): Fable's words`);
+    // the screens by realm: realm 0 the old line, realm 1 the new one
+    const at = (realm, id, flags = {}) => { const g = ensureBars(fresh(95000 + realm)); g.james.realm = realm; g.yuki.realm = realm; Object.assign(g.flags, flags); goTo(g, SCENES, id); Object.assign(g.flags, flags); return { g, v: sceneView(g, SCENES) }; };
+    const lbl = (v, re) => v.choices.find((c) => re.test(c.label))?.label || '';
+    for (const [id, mortal, flown] of [
+        ['heal_again', /^You come back mud to the knees/, FW.healAgain],
+        ['scout', /^Out of Ashfall the road goes up/, FW.scout],
+        ['ridge_alone', /^The ridge shows you the lie of the land:/, FW.ridgeOpen],
+        ['stream_out', /^You go where the water goes\. The trees draw apart/, FW.streamOut],
+    ]) {
+        const m = at(0, id).v.text; const f = at(1, id).v.text;
+        assert(mortal.test(m) && !m.includes(flown) && f.startsWith(flown) && !mortal.test(f), `${T}: ${id} by flight`);
+    }
+    { const m = at(0, 'ridge_alone').v.text; const f = at(1, 'ridge_alone').v.text;
+        assert(/The way down crosses the herb slope\./.test(m) && f.includes(FW.ridgeSlope) && !/The way down crosses/.test(f) && /all the way down\.$/.test(f), `${T} (RA-3): the slope crossed coming in`); }
+    { const m = at(0, 'heal').v; const f = at(1, 'heal').v;
+        assert(lbl(m, /stream for the fungus/) === "Go back to the stream for the fungus. It's two hours there and back." && lbl(f, /stream for the fungus/) === FW.healLabel, `${T} (HL-L): the label by flight`);
+        assert(SCENES.heal.choices[2].time === 120 && !SCENES.heal.choices[2].walk, `${T} (HL-L): still 120 min of work, not a walk`); }
+    for (const food of [0, 1]) {
+        const flags = {}; const mk = (r) => { const x = at(r, 'dawn', flags); x.g.inventory = food ? { hare_raw: 1 } : {}; return sceneView(x.g, SCENES); };
+        const m = mk(0); const f = mk(1);
+        assert(/working out which direction counts as \*away\*/.test(m.text) && f.text.startsWith(food ? FW.dawnLeft : FW.dawnNothing), `${T} (DW-1): dawn ¶1 by flight, ${food ? 'with food' : 'without'}`);
+        assert(/plenty of swearing folded in/.test(f.text) && !/a good deal/.test(m.text + f.text), `${T} (X): dawn ¶2's swap`);
+        assert(lbl(m, /toward it\.$/) === 'Run straight toward it.' && lbl(f, /toward it\.$/) === 'Go straight toward it.', `${T} (DW-0): the walk's label by flight`);
+    }
+    { const m = at(0, 'wilds', { forest_day: 2 }).v; const f = at(1, 'wilds', { forest_day: 2 }).v;
+        assert(lbl(m, /^Explore deeper/) === 'Explore deeper into the forest (takes the afternoon).' && lbl(f, /^Explore deeper/) === lbl(m, /^Explore deeper/), `${T} (RV1 M1): Explore's label as before at every realm`);
+        assert(lbl(m, /^Enough of the forest/) === 'Enough of the forest. Follow the stream out — today.' && lbl(f, /^Enough of the forest/) === FW.streamOutLabel, `${T} (WD-10): the stream out by flight`); }
+    { const m = at(0, 'bone_field').v; const f = at(1, 'bone_field').v;
+        assert(lbl(m, /before the light goes\.$/) === 'Walk back before the light goes.' && lbl(f, /before the light goes\.$/) === 'Head back before the light goes.', `${T} (BF)`); }
+    { const m = at(0, 'stream').v; const f = at(1, 'stream').v;
+        assert(lbl(m, /downstream until dark\.$/) === 'Keep walking downstream until dark.' && lbl(f, /downstream until dark\.$/) === 'Keep going downstream until dark.', `${T} (ST)`); }
+    { const c = SCENES.night_attack.choices.find((x) => /hedge of bone spikes/.test(String(x.text)));
+        assert(!!c && c.text(at(0, 'night_attack').g) === 'A hedge of bone spikes between you and them, then run for the water.' && c.text(at(1, 'night_attack').g) === FW.jackalsRun && c.to === 'jackals_fled', `${T} (NA): the label by flight, still into the water`); }
+    // MW and S4: the second morning's closing words; the third morning names the forest, not the Blackroot
+    for (const replay of [false, true]) {
+        const mk = (r) => { const x = at(r, 'morning', { forest_day: 2 }); if (replay) { x.g.coil.n = 2; Object.assign(x.g.flags, { v_bone: true }); } return sceneView(x.g, SCENES).text; };
+        const m = mk(0); const f = mk(1);
+        assert(m.endsWith('*Then* walk out.') && f.endsWith(FW.morningOut) && m.slice(0, -16) === f.slice(0, -15), `${T} (MW): the closing three words by flight${replay ? ' (a later Coil)' : ''}`);
+    }
+    { const t = at(0, 'morning', { forest_day: 3 }).v.text; assert(/^Day three in the forest\./.test(t) && !/Blackroot/.test(t), `${T} (S4): the third morning`); }
+    // EW and LH: after a tribulation the village saw; without it, as before (flying or not)
+    for (const [realm, sky] of [[0, 0], [1, 0], [1, 1], [3, 2]]) {
+        const e = at(realm, 'elder', sky ? { sky_witness: sky } : {}).v.text; const t = at(realm, 'tribute', sky ? { sky_witness: sky } : {}).v.text;
+        if (sky) assert(e.includes(FW.elderSky) && e.includes(`An inner disciple leads them: ${FW.elderRung}`) && !/Mei Lin says you made a needle|a rung no one in Ashfall has stood on/.test(e) && /That chair might as well be empty\." He frowns at the chair\. "Yet I stood/.test(e), `${T} (EW): Wen watched it (realm ${realm})`);
+        else assert(!e.includes(FW.elderSky) && /a rung no one in Ashfall has stood on\./.test(e), `${T} (EW): no sky, as before (realm ${realm})`);
+        if (sky) assert(t.includes(`There it stays.\n\n${FW.luHanSky}\n\n"Interesting." His Qi-sense reaches for you`) && t.includes(`No cultivation at all. A mortal. ${FW.luHanTail}" The same sense`), `${T} (LH; RV1 M3): between ¶3 and ¶4, ¶4 on "Interesting." alone, the tail (realm ${realm})`);
+        else assert(!t.includes(FW.luHanSky) && !t.includes(FW.luHanTail) && /There it stays\.\n\n"Interesting," he says\. His Qi-sense/.test(t) && /A mortal\." The same sense/.test(t), `${T} (LH): no sky, as before (realm ${realm})`);
+    }
+    // RV1 (TG2): with Yuki's other primaries (the beast's sentence can say "I am ninety"), and with healed and gao_broken
+    for (const prim of [0, 5, 12]) for (const extra of [{}, { healed: true }, { gao_broken: true }, { long: true, gao_beaten: true }]) {
+        const mk = (id) => { const x = at(1, id, { sky_witness: 1, ...extra }); x.g.yuki.primaries = prim; return sceneView(x.g, SCENES).text; };
+        const e = mk('elder'); const t = mk('tribute');
+        assert(e.includes(FW.elderSky) && (e.match(/ninety/g) || []).length <= 3 && !/at ninety I/.test(e) && (e.split('\n\n')[1].match(/ninety/g) || []).length <= 2, `${T} (RV1 M2, TG2): Wen's paragraph, primaries ${prim} ${Object.keys(extra).join('+') || 'plain'}`);
+        assert(t.includes(FW.luHanSky) && t.includes(FW.luHanTail) && (t.match(/\bline\b/g) || []).length <= 2 && (t.match(/," he says/g) || []).length <= 1, `${T} (RV1 M3, L5, TG2): Lu Han's screen, primaries ${prim} ${Object.keys(extra).join('+') || 'plain'}`);
+    }
+    // RV1 (TG4): a real fetch at Foundation: heal [2] → heal_again, 120 min, the flown line
+    { const { g } = at(1, 'heal'); g.inventory = {}; const v = sceneView(g, SCENES); const c = v.choices.find((x) => x.label === FW.healLabel); const m0 = g.minutes;
+        if (c) choose(g, SCENES, c.index);
+        assert(!!c && g.scene === 'heal_again' && g.minutes - m0 === 120 && sceneView(g, SCENES).text === FW.healAgain && (g.inventory.jade_bracket || 0) === 2, `${T} (RV1 TG4): heal → heal_again flown, 120 min (${g.minutes - m0})`); }
+    { const e = at(1, 'elder', { sky_witness: 1, ignored: true }).v.text; assert(e.includes(FW.elderSky) && !/walked down out of the Blackroot/.test(e), `${T} (EW): the sky before "ignored"`); }
+    // LW: lore [0] is no longer a walk: 40 min beside Mei Lin at every realm, no flown line
+    assert(!WALKS.some(([id]) => id === 'lore') && !SCENES.lore.choices[0].walk && SCENES.lore.choices[0].time === 40, `${T} (LW): lore [0] unmarked, 40 min`);
+    for (const realm of [0, 1, 3]) {
+        const { g } = at(realm, 'lore'); const m0 = g.minutes; const out = choose(g, SCENES, 0) || [];
+        const lines = Array.isArray(out) ? out.join(' ') : String(out?.lines || '');
+        assert(g.scene === 'village' && g.minutes - m0 === 40 && !/instead of|min by air|not 40|Flown:/.test(lines), `${T} (LW): realm ${realm}: 40 min on foot (${g.minutes - m0})`);
+    }
+    // S1, S2, S3, BT: for everyone
+    assert(/in exact detail, to the last hailstone\./.test(at(0, 'wen_lesson').v.text), `${T} (S1): Wen's first lesson`);
+    { const src = readFileSync(new URL('../js/story/ashfall.js', import.meta.url), 'utf8'); const pro = readFileSync(new URL('../js/story/prologue.js', import.meta.url), 'utf8');
+        assert(/is considerably stronger than one confused mycologist/.test(src) && !/a good deal stronger|a great deal of exact/.test(src), `${T} (S1, S2): the swaps in ashfall.js`);
+        assert(/\nIt goes on looking\.\n/.test(pro) && !/It looks for a long time\./.test(pro) && /\$\{BT_CLOSER /.test(pro) && !/You feel heavier, and steadier, and precisely as sarcastic as before\.`/.test(pro), `${T} (S3, BT): the tribulation's look, the closer`); }
+    { const g = ensureBars(fresh(95100)); g.james.realm = 1; g.yuki.realm = 1; g.flags.bt_return = 'wilds'; goTo(g, SCENES, 'breakthrough'); const t = sceneView(g, SCENES).text;
+        assert(t.endsWith(BT_CLOSER) && /\nIt goes on looking\.\n/.test(t), `${T} (BT, S3): the Foundation breakthrough's screen`); }
 }
 
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));

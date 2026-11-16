@@ -5,6 +5,7 @@
 import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, clockParts, d6, awardYukiFightXp, awardXp, jamesHpMax, jamesQiMax, nightTo, nightRest } from '../core/game.js';
 import { condensationSatGain } from '../core/formulas.js';
 import { sitGain, yukiFightSkill, canFly } from '../core/game.js'; // v0.11.118 (YK1 review, SB); v0.11.131 (XB2, FY): canFly
+import { FW } from './flight_texts.js'; // v0.11.195 (owner picks F1, D1)
 import { set, day, hour, daily, markDaily, forestScale, grow, eatBest, pantry, foodCount, byForm, byDay, dayReply } from './common.js';
 import { MORNING_AGAIN } from './remember_texts.js'; // v0.11.184 (S1, KP): the Day 2 morning from the second Coil on
 
@@ -147,7 +148,7 @@ ${byForm(g, "Yuki is sitting on your sternum with her tail wrapped round her fee
             { text: 'Fight them off.', show: ev('crows'), combat: nightFight('crows'), to: 'night_won' },
             { text: 'Throw them the scraps and keep your eyes.', show: ev('crows'), do: (g) => { const id = ['crimson_berry', 'river_cress', 'jade_bracket', 'crab_meat', 'hare_raw', 'fowl_raw'].find((k) => g.inventory[k] > 0); if (id) addItem(g, id, -1); return [id ? 'The crows take their cut of your food and go.' : 'You have nothing to throw. The crows wait, judge you poor, and leave.']; }, to: 'morning' },
             { text: 'Fight. Rats are just bad mice.', show: ev('rats'), combat: nightFight('rats'), to: 'night_won' },
-            { text: (g) => byForm(g, 'Up the fallen trunk with Yuki and wait them out.', 'Up the fallen trunk behind Yuki and wait them out.', 'Up the fallen trunk with Yuki and wait them out.') /* v0.11.126 (NS1, TR): Fable's */, show: ev('rats'), check: { skill: 'GU', dc: 3 }, failDo: (g) => { g.james.hp -= 3; return ['The quicker one reaches your ankle first: −3 HP.']; }, to: 'morning' },
+            { text: (g) => (canFly(g) ? byForm(g, FW.trunk, FW.trunkGreat, FW.trunk) /* v0.11.195 (F1, D1: NE-8; the great and human forms come with realm 2+, so they always fly) */ : 'Up the fallen trunk with Yuki and wait them out.') /* v0.11.126 (NS1, TR): Fable's */, show: ev('rats'), check: { skill: 'GU', dc: 3 }, failDo: (g) => { g.james.hp -= 3; return ['The quicker one reaches your ankle first: −3 HP.']; }, to: 'morning' },
             { text: 'Fight it. You\'re hungry, and it\'s made of meat.', show: ev('lizard'), combat: nightFight('lizard'), to: 'night_won' },
             { text: 'Back away slowly and give it its nest.', show: ev('lizard'), check: { skill: 'GU', dc: 4 }, time: 20, fail: 'night_lizard_forced', to: 'morning' },
             { text: 'Pluck it, dress it, and tell her she\'s the best hunter in two worlds.', show: ev('gift'), do: (g) => { addItem(g, 'fowl_raw', 1); bumpRel(g, 'Yuki', 3, 0); return [`+1 Mire fowl (dressed). ${DR_GIFT(g)}`, ...awardYukiFightXp(g, 'standard')]; }, to: 'morning' },
@@ -201,8 +202,8 @@ Yuki puts herself back in order as if the fight had been someone else's. You sit
         text: (g) => `${g.flags.forest_day === 2
             ? `The second morning. A red sun hauls itself up over the black trees, and you lie still and take stock: one Yuki, one omnitool, one lab coat that was white yesterday, one body that aches in places you could now label on a diagram. Alive, on the evidence.
 
-${replayExplore(g) ? MORNING_AGAIN : 'You could go looking for the way out. Or you could face the data: you know nothing about this world, and this forest is the mildest teacher it is likely to offer. So learn it. Eat. Get stronger. *Then* walk out.'}`
-            : `Day three in the Blackroot. You wake ahead of the light now. That is either adaptation or damage, and you decline to run the test that would tell you which.
+${(replayExplore(g) ? MORNING_AGAIN : 'You could go looking for the way out. Or you could face the data: you know nothing about this world, and this forest is the mildest teacher it is likely to offer. So learn it. Eat. Get stronger. *Then* walk out.').replace(/\*Then\* walk out\.$/, canFly(g) ? FW.morningOut : '$&') /* v0.11.195 (F1, D1: MW) */}`
+            : `Day three in the forest. You wake ahead of the light now. That is either adaptation or damage, and you decline to run the test that would tell you which.
 
 This patch of forest is yours by now: the stream's tempers, the reeds where the hares lie up, the reek of the mire when the wind turns west. It has other tenants. For two nights something has circled the camp at a distance, and it has left tracks. Large. More than one set. In no hurry.
 
@@ -227,19 +228,19 @@ ${g.james.hp < jamesHpMax(g) * 0.5 ? (d2 ? `You are hurt, and the rest of you wo
         choices: [
             { text: 'Forage.', show: (g) => hour(g) < 19, time: 15, to: 'wild_forage' },
             { text: 'Hunt.', show: (g) => hour(g) < 19, time: 15, to: 'wild_hunt' },
-            { text: 'Explore deeper into the forest (takes the afternoon).', show: (g) => hour(g) < 16 && (replayExplore(g) || daily('explore')(g)) && !(g.flags.v_bone && g.flags.v_mire && g.flags.v_hollow), time: 30, to: 'wild_explore' },
+            { text: 'Explore deeper into the forest (takes the afternoon).', /* v0.11.195 (RV1 M1): no flown label: task mode draws this door as the Explore card */ show: (g) => hour(g) < 16 && (replayExplore(g) || daily('explore')(g)) && !(g.flags.v_bone && g.flags.v_mire && g.flags.v_hollow), time: 30, to: 'wild_explore' },
             { text: 'Train: darts, blade, footwork, and a sparring partner with views.', show: (g) => hour(g) < 19, time: 10, to: 'wild_train' },
             { text: 'Cultivate: one sit, 10 Qi toward Saturation.', show: (g) => hour(g) < 20, req: (g) => (g.james.qi >= 10 ? true : 'needs 10 Qi'), do: (g) => { const r = condense(g); return r.ok ? [`Condensed: Saturation ${r.saturation}%.`, ...r.xp] : []; }, to: 'wilds' },
             { text: 'Rest in the shade for an hour.', show: (g) => hour(g) < 20, do: (g) => advance(g, 60, { resting: true }).concat(['An hour of rest. Your wind returns, with a little HP and Qi.']), to: 'wilds' },
             { text: 'Eat something.', show: (g) => foodCount(g) > 0 && g.james.satiety < 85, time: 15, do: (g) => eatBest(g), to: 'wilds' },
             { text: 'Chew a ghost-gill (+8 HP).', show: (g) => hasItem(g, 'ghost_gill') && g.james.hp < jamesHpMax(g), do: (g) => { addItem(g, 'ghost_gill', -1); g.james.hp = Math.min(jamesHpMax(g), g.james.hp + 8); return ['It tastes of wet stone and old dark. Your cuts knit shut as you chew.']; }, to: 'wilds' },
             { text: 'Make camp for the night.', show: (g) => hour(g) >= 15, time: 20, to: 'camp' },
-            { text: 'Enough of the forest. Follow the stream out — today.', show: (g) => !g.flags.leave_forest && (g.flags.forest_day || 1) < 3 && hour(g) < 15, time: 240, do: set('leave_forest'), to: 'stream_out' },
+            { text: (g) => (canFly(g) ? FW.streamOutLabel : 'Enough of the forest. Follow the stream out — today.'), /* v0.11.195 (F1, D1: WD-10) */ show: (g) => !g.flags.leave_forest && (g.flags.forest_day || 1) < 3 && hour(g) < 15, time: 240, do: set('leave_forest'), to: 'stream_out' },
         ],
     },
     stream_out: {
         id: 'stream_out', title: 'Downstream', art: 'stream', place: `${P} — far downstream`,
-        text: `You go where the water goes. The trees draw apart, the stones grow, the stream raises its voice. Late in the afternoon the ridge shows ahead, and past it a grey thread that could be smoke, if you are owed any luck.
+        text: (g) => `${canFly(g) ? FW.streamOut /* v0.11.195 (F1, D1: WD-10) */ : 'You go where the water goes. The trees draw apart, the stones grow, the stream raises its voice.'} Late in the afternoon the ridge shows ahead, and past it a grey thread that could be smoke, if you are owed any luck.
 
 It will keep until morning. You are too tired to walk in on strangers after dark, and strangers seldom care for it either. You find a second dry rise and a second fallen trunk. Far back along the stream, something howls. Something else answers. Then a third voice joins.
 

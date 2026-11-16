@@ -5,7 +5,11 @@
  * choice's index and the start of its label; `markWalks` throws if a label no longer matches (a reordered or reworded choice),
  * so a mark can't silently move to another choice. The numbers before the pick (200 games each, a scratch copy): Act 1 travel at
  * Foundation+ Careful 1,448 → 1,079 min a game (−25%), Completionist 1,958 → 1,550 (−21%); Act 1 Coils 3.64 / 3.50.
+ * v0.11.195 (owner pick F1, a; the FW read's B): `lore` [0] "Walk on to her village." is no longer marked: Mei Lin walks down
+ * beside him and can't fly, so it keeps its 40 min at every realm (flown it was 20 min at Foundation, 13 at realm 2).
  */
+import { canFly } from '../core/game.js';
+
 export const WALKS = [
     ['clearing', 2, "Follow the sound of water."],
     ['first_bone', 0, "Follow the water."],
@@ -17,7 +21,6 @@ export const WALKS = [
     ['hunt_got', 0, "Back to the stream."],
     ['dawn', 0, "Run straight toward it."],
     ['dawn', 2, "Not your world, not your fig"],
-    ['lore', 0, "Walk on to her village."],
     ['ridge_alone', 0, "Go down to the village."],
     ['bone_field', 2, "Walk back before the light g"],
     ['mire', 2, "Wade back out while you stil"],
@@ -71,11 +74,20 @@ export const WALKS = [
     ['yk_camp', 0, "Back to the fire before it g"],
 ];
 
-/** Mark the walks on the scenes (once, at load). */
+/** v0.11.195 (owner pick F1, k): the label shown from Foundation, where a walk's own label says walk or run (Fable's, rule 10). */
+export const FLY_LABELS = {
+    'stream#5': 'Keep going downstream until dark.',
+    'dawn#0': 'Go straight toward it.',
+    'bone_field#2': 'Head back before the light goes.',
+};
+
+/** Mark the walks on the scenes (once, at load); a walk with a label in FLY_LABELS shows it from Foundation. */
 export function markWalks(scenes) {
     for (const [id, i, start] of WALKS) {
         const c = scenes[id]?.choices?.[i];
         if (!c || typeof c.text !== 'string' || !c.text.startsWith(start)) throw new Error(`walks.js: ${id}#${i} is not "${start}…" any more`);
         c.walk = true;
+        const fly = FLY_LABELS[`${id}#${i}`];
+        if (fly) { const t = c.text; c.text = (g) => (canFly(g) ? fly : t); }
     }
 }

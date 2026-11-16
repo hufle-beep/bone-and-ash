@@ -4,7 +4,7 @@
  * corpses of their rivals, and where Heaven answers every breakthrough with lightning. James needs none of it.
  * That is going to be a problem — for them.
  */
-import { addItem, hasItem, eat, bumpRel, sleepUntil, advance, clockParts, breakthrough, realmName, nightTo, nightRest } from '../core/game.js';
+import { addItem, hasItem, eat, bumpRel, sleepUntil, advance, clockParts, breakthrough, realmName, nightTo, nightRest, canFly } from '../core/game.js';
 import { NO_DICE_TUNE } from './nodice_tune.js';
 import { setNoDiceTune, yukiFightSkill } from '../core/game.js'; // v0.11.118 (YK1 review, SB)
 setNoDiceTune(NO_DICE_TUNE);
@@ -31,6 +31,7 @@ import { installYukiPath, ykAskNow, YK_HERE } from './yuki_path.js'; // v0.11.19
 import { installCoil } from './coil_scenes.js';
 import { installOnce } from './oneoff.js';
 import { markWalks } from './walks.js'; // v0.11.109 (owner pick MW1)
+import { FW, BT_CLOSER } from './flight_texts.js'; // v0.11.195 (owner picks F1, D1): the lines for a James who can fly
 /** v0.11.131 (XB2, FL; RC2, L5): the great root-kin's line in night_attack_forced, both texts (Fable's MAIN). */
 const NA_TIGER = " Yuki, who was never going to run, gets up. *Good,* says the bond. *I outweigh them. All of them, together.*";
 
@@ -374,9 +375,9 @@ Cold, wet, alive, furious: you are all four. Yuki — ${byForm(g, "perched on yo
     /* ================= DAY 2 ================= */
     dawn: {
         id: 'dawn', title: (g) => (g.flags.long ? 'Day Four' : 'Day Two'), art: 'forest_dawn', place: 'Blackroot Wilds',
-        text: (g) => `Morning comes up red. You eat ${foodCount(g) ? 'what\'s left' : 'nothing, a meal you are getting very good at'}, and you are working out which direction counts as *away* when the scream comes.
+        text: (g) => `${canFly(g) ? (foodCount(g) ? FW.dawnLeft : FW.dawnNothing) /* v0.11.195 (F1, D1: DW-1) */ : `Morning comes up red. You eat ${foodCount(g) ? 'what\'s left' : 'nothing, a meal you are getting very good at'}, and you are working out which direction counts as *away* when the scream comes.`}
 
-Human. A woman's. More fury in it than fear, and a good deal of swearing folded in. A few hundred metres east, down the slope.
+Human. A woman's. More fury in it than fear, and plenty of swearing folded in. A few hundred metres east, down the slope.
 
 Yuki is already looking at you. You are already moving. You have a type of stupid, it seems, and this is the one.`,
         enter: (g) => cookMealMorning(g),
@@ -560,11 +561,11 @@ Then you consider, with some care, what a world like this does with an outlier.
     ridge_alone: {
         id: 'ridge_alone', title: 'The Ridge', art: 'ridge', place: 'Blackroot Wilds — the ridge',
         enter: set('ignored'),
-        text: `The ridge shows you the lie of the land: black forest out to the horizon, mountains like a jaw of broken teeth, and at the forest's heart something enormous and dead. A tree, or what is left of one, taller than anything has a right to stand. Even at this distance your Convergence *answers* it with a faint, sad hum.
+        text: (g) => `${canFly(g) ? FW.ridgeOpen /* v0.11.195 (F1, D1: RA-1) */ : 'The ridge shows you the lie of the land:'} black forest out to the horizon, mountains like a jaw of broken teeth, and at the forest's heart something enormous and dead. A tree, or what is left of one, taller than anything has a right to stand. Even at this distance your Convergence *answers* it with a faint, sad hum.
 
 Under the ridge sits a village: grey stone, grey thatch, smoke going straight up. People.
 
-The way down crosses the herb slope. A basket lies spilled. A boulder has blood on it. Whoever was here has gone.
+${canFly(g) ? FW.ridgeSlope /* v0.11.195 (F1, D1: RA-3) */ : 'The way down crosses the herb slope. A basket lies spilled. A boulder has blood on it. Whoever was here has gone.'}
 
 Yuki does not look at you. She keeps it up all the way down.`,
         choices: [{ text: 'Go down to the village.', time: 60, to: 'village' }],
@@ -590,11 +591,11 @@ ${g.flags.long ? 'The tribute falls due in three days, at dawn. The whole villag
         id: 'elder', title: 'Old Wen', art: 'elder', place: 'Ashfall Hamlet — the elder\'s house',
         text: (g) => `Old Wen is ninety in a village where sixty is Heaven being kind. He is blind in one eye, and he pours tea with the steady hand of a man who has outlived three sect masters and intends to outlive a fourth.
 
-"You eat no pills," he says, before you have finished sitting down. "You carry no smell of grass. And when I reach for you with the little sense ninety years have left me, I find nothing. No root. No sea of Qi. That chair might as well be empty." He frowns at the chair. "${g.flags.ignored ? 'Yet you walked down out of the Blackroot alive, with no spear in your hand, and a whole street took care not to look at you. One of these things is untrue, and I am too old to doubt what a whole street will not look at.' : 'Yet Mei Lin says you made a needle out of air. One of these things is untrue, and I am too old to believe it is her.'} ${yukiMerElder(g)}" He sips. "I would know what you are before the Crimson Lotus does. Their way of learning it is to cut you open."
+"You eat no pills," he says, before you have finished sitting down. "You carry no smell of grass. And when I reach for you with the little sense ninety years have left me, I find nothing. No root. No sea of Qi. That chair might as well be empty." He frowns at the chair. "${g.flags.sky_witness ? FW.elderSky /* v0.11.195 (F1, D1: EW-2): he watched the sky */ : g.flags.ignored ? 'Yet you walked down out of the Blackroot alive, with no spear in your hand, and a whole street took care not to look at you. One of these things is untrue, and I am too old to doubt what a whole street will not look at.' : 'Yet Mei Lin says you made a needle out of air. One of these things is untrue, and I am too old to believe it is her.'} ${yukiMerElder(g)}" He sips. "I would know what you are before the Crimson Lotus does. Their way of learning it is to cut you open."
 
 "There does seem to be a consensus."
 
-"Then hear an old man's advice." He sets the cup down. "${g.flags.long ? 'In three days' : 'Tomorrow'}, the collectors come. An inner disciple leads them: Foundation, a rung no one in Ashfall has stood on. If you are here, they will see you. If they see you, they will want you. You may run ${g.flags.long ? 'before then' : 'tonight'}. No one would blame you." A pause. "Or you may stand in front of us. No one has done that in forty years."
+"Then hear an old man's advice." He sets the cup down. "${g.flags.long ? 'In three days' : 'Tomorrow'}, the collectors come. An inner disciple leads them: ${g.flags.sky_witness ? FW.elderRung /* v0.11.195 (F1, D1: EW-4) */ : 'Foundation, a rung no one in Ashfall has stood on.'} If you are here, they will see you. If they see you, they will want you. You may run ${g.flags.long ? 'before then' : 'tonight'}. No one would blame you." A pause. "Or you may stand in front of us. No one has done that in forty years."
 
 ${g.flags.gao_beaten || g.flags.gao_humiliated ? '"You have also," he adds, with no change of voice, "shamed an outer disciple of the Sect on our slope already. Running may no longer be yours to choose."' : ''}`,
         choices: [{ text: 'Thank him. Think about it.', do: (g) => { bumpRel(g, 'Old Wen', 3, 0); return []; }, to: hubOf }], // v0.11.139 (owner pick MW1, MB): Wen +3
@@ -608,12 +609,12 @@ You are not a doctor. You are a man who has spent fifteen years on the question 
         choices: [
             { text: 'Clean it with a bone lancet, dress it with the jade bracket.', show: (g) => (g.inventory.jade_bracket || 0) > 0, check: { skill: 'GU', dc: 3, bonus: () => 2 }, time: 60, do: (g) => { addItem(g, 'jade_bracket', -1); g.flags.healed = true; bumpRel(g, 'Village', 15, 0); return ['The fever breaks before dark. Ashfall will remember it.']; }, failDo: (g) => { addItem(g, 'jade_bracket', -1); g.flags.healed = 'partly'; bumpRel(g, 'Village', 6, 0); return ['It helps, slowly. He will probably live.']; }, to: hubOf },
             { text: 'Drain and clean it, and ask what herbs they have that don\'t taste of death.', check: { skill: 'GU', dc: 4 }, time: 60, do: (g) => { g.flags.healed = 'partly'; bumpRel(g, 'Village', 8, 0); return ['Better. Not well. But better.']; }, failDo: () => [`You drain it and clean it and dress it with the least murderous herb they have, and by the time you leave the boy is no cooler and the wound is no quieter. The mother thanks you, formally, with a bow that goes to the floor, which is worse than if she'd shouted. You walk out into the street with the taste of it in your mouth: the thing you know how to do, and didn't do well enough.`], to: hubOf },
-            { text: 'Go back to the stream for the fungus. It\'s two hours there and back.', show: (g) => !(g.inventory.jade_bracket > 0), time: 120, do: (g) => { addItem(g, 'jade_bracket', 2); return ['+2 Jade bracket fungus.']; }, to: 'heal_again' },
+            { text: (g) => (canFly(g) ? FW.healLabel : 'Go back to the stream for the fungus. It\'s two hours there and back.'), /* v0.11.195 (F1, D1: HL-L) */ show: (g) => !(g.inventory.jade_bracket > 0), time: 120, do: (g) => { addItem(g, 'jade_bracket', 2); return ['+2 Jade bracket fungus.']; }, to: 'heal_again' },
         ],
     },
     heal_again: {
         id: 'heal_again', title: 'The Coughing House', art: 'healer', place: 'Ashfall Hamlet — the coughing house',
-        text: `You come back mud to the knees, carrying two shelves of pale green fungus, and the mother looks at them as if you had brought her the moon.`,
+        text: (g) => (canFly(g) ? FW.healAgain : `You come back mud to the knees, carrying two shelves of pale green fungus, and the mother looks at them as if you had brought her the moon.`), // v0.11.195 (F1, D1: HL-A)
         choices: [{ text: 'Get to work.', check: { skill: 'GU', dc: 3, bonus: () => 2 }, time: 60, do: (g) => { addItem(g, 'jade_bracket', -1); g.flags.healed = true; bumpRel(g, 'Village', 15, 0); return ['The fever breaks before dark. Ashfall will remember it.']; }, failDo: (g) => { addItem(g, 'jade_bracket', -1); g.flags.healed = 'partly'; bumpRel(g, 'Village', 6, 0); return ['It helps, slowly.']; }, to: hubOf }],
     },
     village_hunt: {
@@ -715,7 +716,7 @@ Ashfall stands in line at the tribute post with its baskets of grass and grain. 
 
 Lu Han's gaze goes over the baskets, over the people, and stops at you. Then at Yuki. There it stays.
 
-"Interesting," he says. His Qi-sense reaches for you — it goes over you like a draught under a door — and finds nothing. "No root. No pill-smell. No cultivation at all. A mortal." The same sense moves on to Yuki and reads no realm there either. His gaze sharpens all the same. "${yukiMerLu(g)} A mortal holding a treasure he cannot possibly understand." He tilts his head. "Kneel, stranger, and come with us. The Sect Master will wish to dissect you personally. It is an honour. Few are offered it."
+${g.flags.sky_witness ? `${FW.luHanSky}\n\n"Interesting."` : '"Interesting," he says.' /* v0.11.195 (F1, D1: LH; RV1 M3): the village watched the sky; a runner went up */} His Qi-sense reaches for you — it goes over you like a draught under a door — and finds nothing. "No root. No pill-smell. No cultivation at all. A mortal.${g.flags.sky_witness ? ` ${FW.luHanTail}` : ''}" The same sense moves on to Yuki and reads no realm there either. His gaze sharpens all the same. "${yukiMerLu(g)} A mortal holding a treasure he cannot possibly understand." He tilts his head. "Kneel, stranger, and come with us. The Sect Master will wish to dissect you personally. It is an honour. Few are offered it."
 
 "I've been offered worse," you say. "Not recently."`,
         choices: [
@@ -1045,7 +1046,7 @@ ${recognise}
 
 It looks.
 
-It looks for a long time.
+It goes on looking.
 
 And then — you would swear to this in any court — the storm more or less *shrugs*. It has found nothing impure to burn. Nothing to punish. One bolt comes down, strolls to the ground beside you and fizzles out in the ${seen || a1seen ? 'dust' : BT_IN_TREE.includes(g.flags.bt_return) ? BT_TREE_GROUND : ah ? 'ash' : 'moss'} with the sound of a disappointed sigh, and the clouds come apart and drift off in embarrassed directions.
 
@@ -1055,7 +1056,7 @@ Yuki rose with you; you felt her meridians widen in the same breath as yours. Sh
 
 ${witness}
 
-*Foundation.* Mortal Vessel no longer: the rung where this world's sect disciples stand, and you came by it without a pill. You feel heavier, and steadier, and precisely as sarcastic as before.`;
+${BT_CLOSER /* v0.11.195 (F1, D1: BT, the alt) */}`;
     }
     // v0.11.189 (P1, PL): Mei Lin and Ya after the realm's Yuki line, away from a village (the village's own closers stay as they were)
     const who = btWho(g); // v0.11.190 (N1, L9): the same test for Yuki's new-form scenes after it
@@ -1275,7 +1276,7 @@ SCENES.lf_hub.choices.push({
         c.text = text; // v0.11.41: Incremental Mode's wording only (Story Mode's is gone)
         if (out) { const d = c.do; c.do = (g, r) => (d(g, r) || []).map((l) => (l === out[0] ? out[1] : l)); }
     };
-    reword('night_attack', /^Bone wall between you/, 'A hedge of bone spikes between you and them, then run for the water.');
+    reword('night_attack', /^Bone wall between you/, (g) => (canFly(g) ? FW.jackalsRun : 'A hedge of bone spikes between you and them, then run for the water.')); // v0.11.195 (F1, D1: NA, the alt): no flight in the prologue's fights
     SCENES.night_attack_forced.text = (g) => `The hedge comes up knee-high and mostly gaps. The jackals step through it with professional courtesy. Running is off the table.${byForm(g, '', NA_TIGER, '')}`; /* v0.11.131 (XB2, FL; Fable's MAIN): the great root-kin */
     reword('rt_ford', /bridge of bone/, 'Sing stepping-stones of bone from stone to stone.', ['A white bridge rises stone to stone, ribbed like a backbone. Mei Lin walks over it with temple manners, eyes down, feet careful.', 'White stepping-stones rise between the black ones, ribbed like vertebrae. Mei Lin walks over them with temple manners, eyes down, feet careful.']);
     reword('rt_ambush', /wall of bone/, 'A slab of bone between you and them, then down to the river.');

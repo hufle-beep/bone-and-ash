@@ -2,7 +2,8 @@
  * Days 5–6 in Ashfall Hamlet (the long route): suppers at Mei Lin's, a free day loop around the village,
  * a night visit shaped by what James did to Gao Feng, and bonuses that pay off when the Sect comes on Day 7.
  */
-import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, d6, awardYukiFightXp, jamesHpMax, nightRest, nightTo } from '../core/game.js';
+import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, d6, awardYukiFightXp, jamesHpMax, nightRest, nightTo, canFly } from '../core/game.js';
+import { FW } from './flight_texts.js'; // v0.11.195 (owner picks F1, D1)
 import { set, day, hour, daily, markDaily, forestScale, villageScale, grow, eatBest, pantry, foodCount, byForm, byDay, dayReply } from './common.js';
 import { potLine } from './kitchen.js'; // v0.11.181 (SP1, PS)
 
@@ -226,7 +227,7 @@ Mei Lin stands in the lane, soot across her face, and looks at what is left. She
         text: (g) => (vday(g) === 2
             ? `Ashfall in the morning: smoke from forty chimneys, a rooster who is plainly being paid for this, and children watching you from behind every wall.
 
-Two days until the collectors. The village is being ordinary as loudly as it can. You have those two days to make sure that when the Crimson Lotus walks up that road, what waits at the top of it is a good deal stronger than one confused mycologist and Yuki. The mycologist is where the work is.`
+Two days until the collectors. The village is being ordinary as loudly as it can. You have those two days to make sure that when the Crimson Lotus walks up that road, what waits at the top of it is considerably stronger than one confused mycologist and Yuki. The mycologist is where the work is.`
             : `The last day. Tomorrow at sunrise, the collectors.
 
 All of Ashfall is up early, and all of it has found some errand that leads past Mei Lin's house, to see whether you are still there. You are. ${g.flags.loft_burned ? 'What is left of the loft is still smoking a little.' : byForm(g, 'Yuki is sunning herself on the doorstep like a small white guard dog.', 'Yuki is sunning herself across the doorstep like a large white guard dog.', 'Yuki is sunning herself on the doorstep, eyes shut, like a white guard dog in a high black collar.')}`),
@@ -327,7 +328,7 @@ ${g.flags.militia ? 'They are faster than they were, and they stand differently.
         id: 'wen_lesson', title: 'Old Wen', art: 'elder', place: `${P} — the elder's house`,
         enter: (g) => { markDaily(g, 'wen'); return []; },
         text: (g) => (!g.flags.lore_realms
-            ? `Old Wen pours tea and talks of cultivation as an old farmer talks of weather: without hope, without fear, and in a great deal of exact detail.
+            ? `Old Wen pours tea and talks of cultivation as an old farmer talks of weather: without hope, without fear, and in exact detail, to the last hailstone.
 
 Mortal Vessel. Foundation. Core Formation. The realms go up like a ladder into cloud, and each rung costs more than the last. The Sect buys its rungs with villages like this one: grass, grain, children. "A ladder," he says, "is only a ladder while somebody holds the bottom."`
             : byDay(g, [(g) => `The forest is today's lesson. He begins with the Old Tree that stands in the midst of it — "there before the Sect, there before my grandfather's grandfather" — and with what the hunters' tales hold: that it once sang, and the singing made the forest kind.
@@ -371,7 +372,7 @@ Mortal Vessel. Foundation. Core Formation. The realms go up like a ladder into c
     scout: {
         id: 'scout', title: 'The Tribute Road', art: 'ridge', place: 'The road to the Crimson Lotus',
         enter: set('scouted_try'),
-        text: `Out of Ashfall the road goes up toward the mountains, one long switchback after another. A waystation sits at the halfway turn: a bench under a roof, a shrine with a red lotus cut into the stone, and dust that your threads flag. The marks in it are fresh. Somebody has been standing here, watching the village.`,
+        text: (g) => (canFly(g) ? FW.scout : `Out of Ashfall the road goes up toward the mountains, one long switchback after another. A waystation sits at the halfway turn: a bench under a roof, a shrine with a red lotus cut into the stone, and dust that your threads flag. The marks in it are fresh. Somebody has been standing here, watching the village.`), // v0.11.195 (F1, D1: SC)
         choices: [
             { text: 'Read the ground. Who\'s been here, how many, how long?', check: { skill: 'GU', dc: 4 }, time: 150, do: (g) => { g.flags.scouted = true; return ['Two watchers, three days running, in outer-sect boots. By tomorrow they will know exactly what you are, or believe they do. Good. That can be used.']; }, failDo: () => ['The marks run into one another. Somebody watched. The ground says no more.'], to: 'ashfall' },
         ],

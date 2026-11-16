@@ -1,0 +1,226 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/walks.js",
+  "find": "    ['ridge_alone', 0, \"Go down to the village.\"],",
+  "replace": "    ['lore', 0, \"Walk on to her village.\"],\n    ['ridge_alone', 0, \"Go down to the village.\"],",
+  "note": "LW: lore [0] flown again"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/prologue.js",
+  "find": "(canFly(g) ? FW.healLabel :",
+  "replace": "(false ? FW.healLabel :",
+  "note": "HL-L never shown"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/prologue.js",
+  "find": "(canFly(g) ? FW.healAgain :",
+  "replace": "(true ? FW.healAgain :",
+  "note": "HL-A for a mortal too"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/prologue.js",
+  "find": "${g.flags.sky_witness ? FW.elderSky",
+  "replace": "${!g.flags.sky_witness ? FW.elderSky",
+  "note": "EW-2 inverted"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/prologue.js",
+  "find": "${g.flags.sky_witness ? FW.elderRung",
+  "replace": "${g.flags.ignored ? FW.elderRung",
+  "note": "EW-4 on the wrong flag"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/ashfall.js",
+  "find": "(canFly(g) ? FW.scout :",
+  "replace": "(true ? FW.scout :",
+  "note": "SC for a mortal"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/prologue.js",
+  "find": "(canFly(g) ? FW.jackalsRun :",
+  "replace": "(!canFly(g) ? FW.jackalsRun :",
+  "note": "NA inverted"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/prologue.js",
+  "find": "(foodCount(g) ? FW.dawnLeft : FW.dawnNothing)",
+  "replace": "(foodCount(g) ? FW.dawnNothing : FW.dawnLeft)",
+  "note": "DW-1 by food swapped"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/walks.js",
+  "find": "    'dawn#0': 'Go straight toward it.',",
+  "replace": "    'dawn#0': null,",
+  "note": "DW-0 label lost"
+ },
+ {
+  "id": "F12",
+  "file": "js/story/wilds.js",
+  "find": "${canFly(g) ? FW.streamOut /*",
+  "replace": "${false ? FW.streamOut /*",
+  "note": "WD-10 stream_out never"
+ },
+ {
+  "id": "F13",
+  "file": "js/story/wilds.js",
+  "find": "byForm(g, FW.trunk, FW.trunkGreat, FW.trunk)",
+  "replace": "byForm(g, FW.trunkGreat, FW.trunk, FW.trunk)",
+  "note": "NE-8 forms swapped"
+ },
+ {
+  "id": "F14",
+  "file": "js/story/prologue.js",
+  "find": "${canFly(g) ? FW.ridgeSlope",
+  "replace": "${false ? FW.ridgeSlope",
+  "note": "RA-3 never"
+ },
+ {
+  "id": "F15",
+  "file": "js/story/wilds.js",
+  "find": ".replace(/\\*Then\\* walk out\\.$/,",
+  "replace": ".replace(/\\*Then\\* walk out$/,",
+  "note": "MW never applies"
+ },
+ {
+  "id": "F17",
+  "file": "js/story/prologue.js",
+  "find": "\nIt goes on looking.\n",
+  "replace": "\nIt looks for a long time.\n",
+  "note": "S3 reverted (tic)"
+ },
+ {
+  "id": "F18",
+  "file": "js/story/prologue.js",
+  "find": "plenty of swearing folded in",
+  "replace": "a good deal of swearing folded in",
+  "note": "X reverted (tic)"
+ },
+ {
+  "id": "F19",
+  "file": "js/story/wilds.js",
+  "find": ": `Day three in the forest. You wake",
+  "replace": ": `Day three in the Blackroot. You wake",
+  "note": "S4 reverted"
+ },
+ {
+  "id": "F20",
+  "file": "js/story/ashfall.js",
+  "find": "is considerably stronger than",
+  "replace": "is a good deal stronger than",
+  "note": "S2 reverted (tic)"
+ },
+ {
+  "id": "F21",
+  "file": "js/story/prologue.js",
+  "find": "An inner disciple leads them: ${g.flags.sky_witness ? FW.elderRung",
+  "replace": "An inner disciple leads them: ${g.flags.sky_witness && g.james.realm > 1 ? FW.elderRung",
+  "note": "EW-4 missing at Foundation"
+ },
+ {
+  "id": "F22b",
+  "file": "js/story/flight_texts.js",
+  "find": "stand, and you came by it without a pill.",
+  "replace": "stand, and you came by it without a pill or a great deal of fuss.",
+  "note": "a tic in BT (F22 with the find fixed)"
+ },
+ {
+  "id": "G9",
+  "file": "js/story/flight_texts.js",
+  "find": "watched Heaven come for the man in that chair, and Heaven left with nothing",
+  "replace": "watched Heaven come for the man in that chair, and burn him to the bone",
+  "note": "EW-2's fact (Heaven left) inverted"
+ },
+ {
+  "id": "G10",
+  "file": "js/story/flight_texts.js",
+  "find": "a shrine with a red lotus cut into the stone. You come down",
+  "replace": "a shrine with a white lotus cut into the stone. You come down",
+  "note": "SC: a fact of the old line changed"
+ },
+ {
+  "id": "G11",
+  "file": "js/story/flight_texts.js",
+  "find": "Below, on the herb slope, a basket lies spilled. A boulder has blood on it. Whoever",
+  "replace": "Below, on the herb slope, a basket lies spilled. Whoever",
+  "note": "RA-3: a sight of the old line lost"
+ },
+ {
+  "id": "G12",
+  "file": "js/story/flight_texts.js",
+  "find": "All along the post, heads go lower. Nobody points.",
+  "replace": "All along the post, Old Wen points.",
+  "note": "LH: a local gives him away"
+ },
+ {
+  "id": "F6b",
+  "file": "js/story/prologue.js",
+  "find": "`${FW.luHanSky}\\n\\n\"Interesting.\"`",
+  "replace": "`${FW.luHanSky}\\n\"Interesting.\"`",
+  "note": "LH glued to \u00b64"
+ },
+ {
+  "id": "F16b",
+  "file": "js/story/flight_texts.js",
+  "find": " The ground, it seems, has let go of you.';",
+  "replace": "';",
+  "note": "BT reverted"
+ },
+ {
+  "id": "R1",
+  "file": "js/story/flight_texts.js",
+  "find": "and I do not know which of them to bury.",
+  "replace": "and at ninety I do not know which of them to bury.",
+  "note": "M2 undone"
+ },
+ {
+  "id": "R2",
+  "file": "js/story/prologue.js",
+  "find": "A mortal.${g.flags.sky_witness ? ` ${FW.luHanTail}` : ''}",
+  "replace": "A mortal.",
+  "note": "M3's tail lost"
+ },
+ {
+  "id": "R3",
+  "file": "js/story/flight_texts.js",
+  "find": "The ground, it seems, has let go of you.",
+  "replace": "The ground, for its part, has withdrawn its claim.",
+  "note": "M4 undone"
+ },
+ {
+  "id": "R4",
+  "file": "js/story/flight_texts.js",
+  "find": "'Below, on the herb slope, a basket lies spilled. A boulder has blood on it. Whoever was there has gone.'",
+  "replace": "'You crossed the herb slope coming in. A basket lay spilled. A boulder had blood on it. Whoever was there had gone.'",
+  "note": "L1 undone"
+ },
+ {
+  "id": "R5",
+  "file": "js/story/flight_texts.js",
+  "find": "All along the post, heads go lower.",
+  "replace": "Down the line, heads go lower.",
+  "note": "L5 undone"
+ },
+ {
+  "id": "R6",
+  "file": "js/story/prologue.js",
+  "find": "`${FW.luHanSky}\\n\\n\"Interesting.\"` : '\"Interesting,\" he says.'",
+  "replace": "`${FW.luHanSky}\\n\\n\"Interesting,\" he says.` : '\"Interesting,\" he says.'",
+  "note": "M3: two 'he says' openers"
+ },
+ {
+  "id": "R7",
+  "file": "js/story/wilds.js",
+  "find": "{ text: 'Explore deeper into the forest (takes the afternoon).', /* v0.11.195 (RV1 M1)",
+  "replace": "{ text: (g) => (canFly(g) ? 'Explore deeper, by air (takes the afternoon).' : 'Explore deeper into the forest (takes the afternoon).'), /* v0.11.195 (RV1 M1)",
+  "note": "M1 undone: a label never drawn"
+ }
+]

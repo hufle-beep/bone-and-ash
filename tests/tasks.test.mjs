@@ -521,7 +521,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
         assert(kept > 0, `FS1: work that ends elsewhere keeps its time (${kept})`);
         // MW1: only a marked walk is flown; a choice that only moves but isn't a walk keeps its time; a card (task: true) never flies
         const { WALKS, markWalks } = await import('../js/story/walks.js');
-        assert(WALKS.length === 62 && WALKS.every(([id, i]) => SCENES[id]?.choices?.[i]?.walk === true), `MW1: 62 marked walks, each on its choice (${WALKS.length})`);
+        assert(WALKS.length === 61 && WALKS.every(([id, i]) => SCENES[id]?.choices?.[i]?.walk === true), `MW1: 61 marked walks (v0.11.195, F1: lore [0] unmarked), each on its choice (${WALKS.length})`);
         { let threw = false; try { markWalks({ [WALKS[0][0]]: { choices: [] } }); } catch { threw = true; } assert(threw, 'MW1: a mark that no longer matches its choice throws at load'); }
         const camp = SCENES.rt_serpent_lost.choices[0];
         assert(!camp.walk && /^Make camp/.test(camp.text) && camp.time === 90, 'MW1: "Make camp. Dry out." is not a walk');

@@ -1,0 +1,7 @@
+[
+ {"id":"F22b","file":"js/story/flight_texts.js","find":"stand, and you came by it without a pill.","replace":"stand, and you came by it without a pill or a great deal of fuss.","note":"a tic in BT (F22 with the find fixed)"},
+ {"id":"G9","file":"js/story/flight_texts.js","find":"watched Heaven come for the man in that chair, and Heaven left with nothing","replace":"watched Heaven come for the man in that chair, and burn him to the bone","note":"EW-2's fact (Heaven left) inverted"},
+ {"id":"G10","file":"js/story/flight_texts.js","find":"a shrine with a red lotus cut into the stone. You come down","replace":"a shrine with a white lotus cut into the stone. You come down","note":"SC: a fact of the old line changed"},
+ {"id":"G11","file":"js/story/flight_texts.js","find":"A basket lay spilled. A boulder had blood on it. Whoever","replace":"A basket lay spilled. Whoever","note":"RA-3: a sight of the old line lost"},
+ {"id":"G12","file":"js/story/flight_texts.js","find":"Down the line, heads go lower. Nobody points.","replace":"Down the line, Old Wen points.","note":"LH: a local gives him away"}
+]

@@ -2,6 +2,12 @@
 
 Started in v0.11.150, when `roadmap-done-2.md` had passed about 45 KB. Newer than `roadmap-done-2.md` and `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.195 (word for word; the roadmap kept under 20 KB)
+
+### From section 0, as of v0.11.194
+
+- *(v0.11.194, owner R2, G1)* **Next: not picked yet** (options at the start of the next chat). **FW's read: done in v0.11.194** (`project/research/fw-read.md`): B 4 (`heal` [2] "two hours there and back", `heal_again` ¶1 "mud to the knees", `morning`'s second morning "walk out", `lore` [0] a walk flown with Mei Lin beside him), O 12, R 11 (canon-consistent), 36 scenes fine; `stream` and `gao_lost` to read with them. **Open, options later:** FW's fixes (from the read); the Old Tree's lip under Ya's half-circle (v0.11.190's L8, a note); an update check that skips GitHub's API (v0.11.194's options, U1); text lint's hits from the later-Coil states ("for forty years" 5 scenes, "palm flat on" 5, "round your wrist" 5, "she comes closer" 4, "lets out a breath she" 2; v0.11.194's options, T1); a later Coil's question at a breakthrough Mei Lin and Ya saw (`ykLaterQ`; 0 of 800 bot games; v0.11.194's options, LQ); the great form in Act 1's Ashfall without the party (Random 3 of 200; v0.11.194's options, AG); the read's side notes, not flight (three canon-card tics, `morning`'s "Blackroot", `far_won`'s loads, `breakthrough`'s Ya; `fw-read.md`). **Done:** v0.11.193 N1 (HA `yuki_human_after`'s last paragraph with the women, HQ the women leave before her first question, GV the prologue's Ashfall at her great form; Fable's, D1 C1 + C2, G1 the bow; RV1 H1 "spirit-beast", M1 "Yuki is in the tall shape", M2 HQ's openings, L2, L3, TG1–TG6, two checklist lines). v0.11.194 R2 + G1 (FW's read). Older done lines: `roadmap-done-3.md` (v0.11.194).
+
 ## Moved in v0.11.194 (word for word; the roadmap kept under 20 KB)
 
 ### From section 0, as of v0.11.193
