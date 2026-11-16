@@ -2,6 +2,12 @@
 
 Started in v0.11.150, when `roadmap-done-2.md` had passed about 45 KB. Newer than `roadmap-done-2.md` and `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.194 (word for word; the roadmap kept under 20 KB)
+
+### From section 0, as of v0.11.193
+
+- *(v0.11.193, owner RV1)* **Next: not picked yet** (options at the start of the next chat). **Open, options later:** FW, the prologue with a flying James (measured in v0.11.190, `project/research/ne-measure.md`: Random 48, the Cultivator 163 of 200 games, the Sitter 100 of 100; 61 scenes, 2 flight branches; a read of the texts first); the Old Tree's lip under Ya's half-circle (v0.11.190's L8, a note); an update check that skips GitHub's API (a build file on a branch, read through raw; v0.11.193's options, U1); text lint's hits from the later-Coil states ("for forty years" 11 lines in 5 scenes, "palm flat on" 7, "round your wrist" 6, "she comes closer" 4, "lets out a breath she" 2; v0.11.193's options, T1). **From v0.11.193 (open, options later):** a later Coil's question at a breakthrough Mei Lin and Ya saw (`ykLaterQ`; 0 of 800 bot games); the great form in Act 1's Ashfall without the party (Random 3 of 200); GV's fish on the arrival day (the review's L1, kept). **Done:** v0.11.192 K1 (L5, M2b, QH, QW, LF, TL; F1; RV1; A1). v0.11.193 N1 (HA `yuki_human_after`'s last paragraph with the women, HQ the women leave before her first question, GV the prologue's Ashfall at her great form; Fable's, D1 C1 + C2, G1 the bow; RV1 H1 "spirit-beast", M1 "Yuki is in the tall shape", M2 HQ's openings, L2, L3, TG1–TG6, two checklist lines). Older done lines: `roadmap-done-3.md` (v0.11.193).
+
 ## Moved in v0.11.193 (word for word; the roadmap kept under 20 KB)
 
 ### From section 0, as of v0.11.192
