@@ -1257,7 +1257,7 @@ for (const form of ['cat', 'human']) {
             if (!/\s/.test(c)) out += c; i++; } return out; }; return code(false); };
       const hash = (t) => createHash('sha256').update(t).digest('hex').slice(0, 16);
       const LABELS = Object.values(RETURN).flatMap((sc) => (sc.choices || []).map((c) => (typeof c.text === 'string' ? c.text : '(fn)')));
-      const PIN = { 'act1_return.js': '849a659a5f74bded', labels: '58e59f4e08e64332' }; // v0.11.190 (N1, SW): the code re-pinned (the parley's +1 reads a1_sky_seen too); v0.11.179 (LB1): the labels re-pinned (the label pass); v0.11.181 (KG1): again, the mother's card label on rt_ashfall became a function (by the kitchen's stage); v0.11.188 (N1, RV1 M4): again, rt_wen's and rt_elder's sky lines by sky_witness / a1_sky_seen; v0.11.185 (BR1, RV1 M2): the code re-pinned (the street reads a1_sky_seen too)
+      const PIN = { 'act1_return.js': 'c7ebb0a55ca9d7c1', labels: '58e59f4e08e64332' }; // v0.11.198 (S1, D1, SX; RV1 L1, M3): the code re-pinned (rt_start, rt_road and rt_ambush read party_flew; the SX block; sxRide; partyCarry imported; the labels unchanged); v0.11.190 (N1, SW): the code re-pinned (the parley's +1 reads a1_sky_seen too); v0.11.179 (LB1): the labels re-pinned (the label pass); v0.11.181 (KG1): again, the mother's card label on rt_ashfall became a function (by the kitchen's stage); v0.11.188 (N1, RV1 M4): again, rt_wen's and rt_elder's sky lines by sky_witness / a1_sky_seen; v0.11.185 (BR1, RV1 M2): the code re-pinned (the street reads a1_sky_seen too)
       const got = { 'act1_return.js': hash(skel(RSRC)), labels: hash(JSON.stringify(LABELS)) };
       for (const [k, v] of Object.entries(PIN)) assert(got[k] === v, `P7A (RV1, TG1): ${k}'s code and ids as pinned in v0.11.174 (${got[k]}; update the pin only with a push that means to change them)`); }
     // TG2: the mechanical parts of the Return's result lines, exactly
@@ -4799,7 +4799,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     const pools = [...CARRY_LINES.great, ...CARRY_LINES.human, ...FOOT_LINES.yuki, ...FOOT_LINES.mei, ...FOOT_LINES.ya];
     assert(CARRY_F === 30 && CARRY_A === 30, `${T}: the bars are 30 / 30`);
     assert(pools.every((l) => typeof l === 'string' && l.split('{min}').length === 2 && l.split('{walk}').length === 2), `${T}: each line with both numbers, once each`);
-    assert([CARRY_LINES.great, CARRY_LINES.human, FOOT_LINES.yuki, FOOT_LINES.mei, FOOT_LINES.ya].map((p) => p.length).join() === '4,3,3,2,2', `${T} (D1): Fable's 14 lines, 4 / 3 / 3 / 2 / 2`);
+    assert([CARRY_LINES.great, CARRY_LINES.human, FOOT_LINES.yuki, FOOT_LINES.mei, FOOT_LINES.ya].map((p) => p.length).join() === '4,3,8,2,2', `${T} (D1; v0.11.198 L3): Fable's 19 lines, 4 / 3 / 8 / 2 / 2`);
     // D1: Fable's words, a fact or two pinned in each line (N1: the first great line without "tiger-sized")
     const PINS = [[CARRY_LINES.great, ['Ya rides Yuki and whoops at every turn.', 'issuing corrections', 'steers by the ears', 'You split the difference']],
         [CARRY_LINES.human, ['makes it look like an errand', 'somewhere interesting', 'a woman with a tail']],
@@ -4844,11 +4844,14 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     const { QUIET_LINE } = await import('../js/core/story.js');
     const { realmName } = await import('../js/core/game.js');
     // TG2: the form-bound words, and {min} first in a carried line, {walk} first on foot
+    const B2 = "Ya asks how long you'd have taken flying it alone. {min} min, you tell her. She thinks about that for all {walk} min of the walk and arrives angry at the ground.";
     const at = (p, k) => p[k];
     assert(at(CARRY_LINES.great, 0).startsWith('You carry Mei Lin.') && at(CARRY_LINES.great, 2).startsWith('*She steers by the ears,* Yuki reports') && at(CARRY_LINES.great, 3).includes('from your arms')
         && at(CARRY_LINES.human, 0).includes('a head shorter than you') && at(CARRY_LINES.human, 0).includes('You take Mei Lin.') && at(CARRY_LINES.human, 1).includes('Yuki tells Ya, aloud,')
         && at(FOOT_LINES.yuki, 1).includes('the four of you together') && at(FOOT_LINES.yuki, 1).includes('Yuki offers from your shoulder'), `${T} (RV1 TG2): the form-bound words`);
-    assert(Object.values(CARRY_LINES).flat().every((l) => l.indexOf('{min}') < l.indexOf('{walk}')) && Object.values(FOOT_LINES).flat().every((l) => l.indexOf('{walk}') < l.indexOf('{min}')), `${T} (RV1 TG2): {min} first when carried, {walk} first on foot`);
+    assert(Object.values(CARRY_LINES).flat().every((l) => l.indexOf('{min}') < l.indexOf('{walk}')) && Object.values(FOOT_LINES).flat().every((l) => l.indexOf('{walk}') < l.indexOf('{min}') || l === B2), `${T} (RV1 TG2): {min} first when carried, {walk} first on foot (v0.11.198 T1: B2 the one exception)`);
+    // v0.11.198 (owner pick T1): Fable's B2 asks the flight first and names the walk as the walk; the only on-foot line with {min} first
+    assert(FOOT_LINES.yuki.filter((l) => l.indexOf('{min}') < l.indexOf('{walk}')).join() === B2 && /^Ya asks how long you'd have taken flying it alone\. \{min\} min, you tell her\. .*all \{walk\} min of the walk/.test(B2), `${T} (T1): B2 word for word, the only exception`);
     // L4, L5: the reviewer's words
     assert(CARRY_LINES.great[2].includes("Ya, who can't hear it, denies nothing.") && FOOT_LINES.ya[1].endsWith("Yuki's silence has a point to it.") && !pools.some((l) => /says nothing, pointedly/.test(l)), `${T} (RV1 L4, L5): the reviewer's words`);
     // TG3: the form read through yukiForm: a human form below realm 7 is not open, so Ya rides the great form
@@ -4858,9 +4861,9 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       const a = party(1); a.scene = 'ht_leave'; a.stats.flown = 0; const ra = choose(a, SCENES, i);
       assert(ra.lines.some((l) => FOOT_LINES.yuki.some((y) => l === fill(y, 10, 20))) && a.stats.flown === 1 && a.scene === 'rt_start', `${T} (RV1 TG1): ht_leave at Foundation: on foot, the yuki line with 20 / 10`);
       const b = party(2); b.scene = 'ht_leave'; b.stats.flown = 0; const rb = choose(b, SCENES, i);
-      assert(rb.lines.includes(fill(CARRY_LINES.great[0], 7, 20)) && b.stats.flown === 1, `${T} (RV1 TG1): ht_leave at Core Formation: carried, 7 of 20`); }
+      assert(rb.lines.includes(fill(CARRY_LINES.great[QUIET_LINE.great], 7, 20)) && b.stats.flown === 1, `${T} (RV1 TG1): ht_leave at Core Formation: carried, 7 of 20 (v0.11.198 RV1 M2: quiet, the calm line)`); }
     // M2: the quiet walks take only the calm line of each pool, whatever the turn
-    { const q = WALKS.filter((w) => w[3] === 'quiet').map((w) => w[0]).sort().join(); assert(q === 'ape_won,dw_drowned_won,log_comfort' && JSON.stringify(QUIET_LINE) === '{"great":1,"human":0,"yuki":0,"mei":0,"ya":1}', `${T} (RV1 M2): three quiet walks (${q}), the calm lines`);
+    { const q = WALKS.filter((w) => w[3] === 'quiet').map((w) => w[0]).sort().join(); assert(q === 'ape_won,dw_drowned_won,ht_leave,log_comfort' && JSON.stringify(QUIET_LINE) === '{"great":1,"human":0,"yuki":0,"mei":0,"ya":1}', `${T} (RV1 M2): three quiet walks (${q}), the calm lines`);
       const [i, c] = walk('log_comfort');
       for (const [opt, realm, key, pool] of [[{}, 1, 'yuki', FOOT_LINES], [{}, 2, 'great', CARRY_LINES], [{ form: 'human' }, 7, 'human', CARRY_LINES], [{ mei: [10, 50] }, 2, 'mei', FOOT_LINES], [{ ya: [50, 10] }, 2, 'ya', FOOT_LINES]]) for (const turn of [0, 1, 5]) {
           const g = party(realm, opt); g.scene = 'log_comfort'; g.stats.flown = turn; const r = choose(g, SCENES, i); const fl = flightMinutes(g, c.time);
@@ -4883,6 +4886,88 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     // without the party the old rule: flown, FLOWN_LINES
     { const [i, c] = walk('rt_road'); const g = party(1); delete g.flags.mei_party; delete g.flags.ya_party; g.scene = 'rt_road'; g.stats.flown = 0; const m0 = g.minutes; const r = choose(g, SCENES, i); const fl = flightMinutes(g, c.time);
       assert(g.minutes - m0 === fl && r.lines.includes(fill(FLOWN_LINES[0], fl, c.time)), `${T}: rt_road [2] without the party: flown as before`); }
+}
+
+// v0.11.198 (owner picks S1, D1; Fable's words, rule 10): SX, the road home after a carried flight: `party_flew` set by the last
+// walk with the women along (story.js `choose`), read by rt_start ¶1, rt_road ¶1–¶3 and rt_ambush ¶1 + Ya's "paced" sentence
+// (act1_return.js `SX`); L3, five more lines in the yuki pool (8).
+{
+    const { flightMinutes } = await import('../js/core/game.js');
+    const { FOOT_LINES, QUIET_LINE } = await import('../js/core/story.js');
+    const { SX } = await import('../js/story/act1_return.js');
+    const { WALKS } = await import('../js/story/walks.js');
+    const T = 'SX (198)';
+    const party = (realm, { mei = [50, 50], ya = [50, 50], form = 'cat' } = {}) => {
+        const g = ensureBars(fresh(19800 + realm)); g.james.realm = realm; g.yuki.realm = realm; g.yuki.form = form;
+        g.flags.mei_party = true; g.flags.ya_party = true; g.rel['Mei Lin'] = { f: mei[0], a: mei[1] }; g.rel.Ya = { f: ya[0], a: ya[1] };
+        g.minutes = 18 * 1440 + 5 * 60; g.james.satiety = 90; return g;
+    };
+    const text = (g, id) => { g.scene = id; return sceneView(g, SCENES).text; };
+    const walkIdx = (id) => WALKS.find(([w]) => w === id)[1];
+    // L3: the pool, Fable's words pinned, the calm line unchanged
+    const Y = FOOT_LINES.yuki;
+    assert(Y.length === 8 && ['Nobody asks the cat to grow', 'arrives angry at the ground', 'Then we\'re worth the difference', 'I\'d have slept through every one', 'what the air would have charged you alone'].every((w, k) => Y[3 + k].includes(w)) && QUIET_LINE.yuki === 0 && Y[0].startsWith('Yuki weighs what a cat weighs'), `${T} (L3): the yuki pool 8, the five new lines in order, the calm line still [0]`);
+    assert(new Set(Y).size === 8 && !Y.some((l) => /\bagain\b|\bfirst\b|\blast\b|this time|\bstill\b|instead of/.test(l)), `${T} (L3): no repeats, no time words`);
+    // the flag: set by every walk with company (carried true, on foot false), not by a mortal walk, an alone walk or a card
+    { const g = party(1); g.scene = 'rt_road'; choose(g, SCENES, walkIdx('rt_road')); assert(g.flags.party_flew === false && g.scene === 'rt_ambush', `${T}: on foot at Foundation: false`); }
+    { const g = party(2); g.scene = 'rt_road'; choose(g, SCENES, walkIdx('rt_road')); assert(g.flags.party_flew === true, `${T}: carried at Core Formation: true`); }
+    { const g = party(2, { ya: [50, 10] }); g.flags.party_flew = true; g.scene = 'rt_road'; choose(g, SCENES, walkIdx('rt_road')); assert(g.flags.party_flew === false, `${T}: a walk on foot clears it`); }
+    { const g = party(0); g.scene = 'rt_road'; choose(g, SCENES, walkIdx('rt_road')); assert(g.flags.party_flew === undefined, `${T}: a mortal walk leaves it unset`); }
+    { const g = party(2); g.scene = 'hot_spring'; choose(g, SCENES, walkIdx('hot_spring')); assert(g.flags.party_flew === undefined, `${T}: an alone walk leaves it unset`); }
+    { const g = party(2); g.scene = 'rt_road'; choose(g, SCENES, walkIdx('rt_road'), { task: true }); assert(g.flags.party_flew === undefined, `${T}: a card leaves it unset`); }
+    assert(!(await import('../js/core/coil.js')).KEEP_FLAGS.includes('party_flew'), `${T}: not kept across Coils`);
+    // the screens, by a real path: ht_leave → rt_start → rt_road → rt_ambush, carried and on foot
+    const WALKED = { start: 'You climb out between the roots of the dead tree into a grey morning', road: "Ya's way is no path. It is an opinion", ambush: 'Ya stops dead and you walk into her back.', paced: "They've paced us since the tree." };
+    for (const [realm, opt, carried, ride] of [[2, {}, true, 'great'], [7, { form: 'human' }, true, 'human'], [1, {}, false], [2, { mei: [10, 50] }, false], [0, {}, false]]) {
+        const g = party(realm, opt); g.scene = 'ht_leave'; choose(g, SCENES, walkIdx('ht_leave'));
+        const s = text(g, 'rt_start'); choose(g, SCENES, walkIdx('rt_start')); const r = text(g, 'rt_road'); choose(g, SCENES, walkIdx('rt_road')); const a = text(g, 'rt_ambush');
+        const tag = `${T}: realm ${realm} ${JSON.stringify(opt)}`;
+        if (carried) {
+            assert(s.startsWith(SX.start) && !s.includes(WALKED.start) && s.includes('Ya is ten paces ahead already'), `${tag}: rt_start carried ¶1, ¶2+ unchanged`);
+            assert(r === `${SX.road}\n\n${SX[ride]}` && /\*She calls me 'pony',\*|"She calls me 'pony',"/.test(r), `${tag}: rt_road carried, the ${ride} Yuki line`);
+            assert(a.startsWith(SX.ambush) && a.includes(`"Three. ${WALKED.paced}" She tests the air`) && !a.includes(WALKED.ambush), `${tag}: rt_ambush carried (RV1 M3: Ya's sentence as before)`);
+            const lbl = sceneView((() => { g.scene = 'rt_road'; return g; })(), SCENES).choices.map((c) => c.label);
+            assert(lbl.includes('Walk with Ya at the front.') && lbl.includes('Push on toward the birch ridge.'), `${tag}: rt_road's labels stay`);
+        } else {
+            assert(s.startsWith(WALKED.start) && r.startsWith(WALKED.road) && a.startsWith(WALKED.ambush) && a.includes(WALKED.paced) && ![SX.start, SX.road, SX.ambush].some((x) => (s + r + a).includes(x)), `${tag}: walked, the old texts`);
+        }
+    }
+    // an old save on the road (no flag): the walked texts (RV1 TG3: Ya's sentence too)
+    { const g = party(3); delete g.flags.party_flew; const a = text(g, 'rt_ambush'); assert(text(g, 'rt_start').startsWith(WALKED.start) && text(g, 'rt_road').startsWith(WALKED.road) && a.startsWith(WALKED.ambush) && a.includes(WALKED.paced), `${T}: an old save reads walked`); }
+    // RV1 (the Opus review)
+    // TG1: the words as picked, a fact or two each (M1, L2, L3, L4 the reviewer's words)
+    assert(SX.start.includes('blinking like a clutch of things newly hatched') && SX.start.includes('Ya has jumped clear of Yuki before the landing is finished.')
+        && SX.road.startsWith("Ya's way is no path, and from the air it is less than one: a gap in the canopy") && SX.road.includes('She points out each landing, and you fly it in hops.') && SX.road.includes('as a landlord inspects a house in arrears')
+        && SX.road.includes("\n\nParts of her way, by Ya's lights, have to be walked.") && SX.road.includes('like a woman stepping out of a sedan chair') && SX.road.includes('Ya stops for her without being asked')
+        && SX.great.startsWith('Yuki crouches at each landing to let Ya off') && SX.great.includes("*She calls me 'pony',* she tells you. *I am keeping a tally.*")
+        && SX.human.startsWith('Yuki sets Ya down at each landing') && SX.human.includes('a head shorter than her cargo') && SX.human.includes('"She calls me \'pony\'," she says. "I am keeping a tally."')
+        && SX.ambush.includes('Ya slides to the ground and stops dead, and you, a pace too close behind, walk into her back.')
+        && !/steers|Because|and more shorter|landing a pace/.test(Object.values(SX).join(' ')) && !('paced' in SX), `${T} (RV1 TG1, M1, L2, L3, L4): the words as picked`);
+    // RV1 (after the planted faults: R2, a word inside ¶2, passed the facts): every word of the five texts pinned (update only with a push that means to change them)
+    assert(createHash('sha256').update(JSON.stringify(SX)).digest('hex').slice(0, 16) === '07d2a7774b0c1676', `${T} (RV1 TG1): SX word for word`);
+    // TG2: the five lines' form words (the cat through the bond, on James's shoulder)
+    assert(Y[3].includes('*Nobody asks the cat to grow,* Yuki says. *I notice that.*') && Y[4].includes("arrives angry at the ground") && Y[5].includes('"Then we\'re worth the difference," she says.')
+        && Y[6].includes("*{min} by air,* Yuki says from your shoulder, *and I'd have slept through every one.*") && Y[7].includes('the cat who can is too small to carry either'), `${T} (RV1 TG2): the form words`);
+    // TG3 (L1): flown in, then a woman under the bar, Yuki human: the human line by her form
+    { const g = party(7, { form: 'human', ya: [29, 50] }); g.flags.party_flew = true; assert(text(g, 'rt_road').endsWith(SX.human), `${T} (RV1 L1, TG3): flew, Ya at 29, Yuki human: the human line`); }
+    { const g = party(2, { ya: [29, 50] }); g.flags.party_flew = true; assert(text(g, 'rt_road').endsWith(SX.great), `${T} (RV1 L1, TG3): flew, Ya at 29, Yuki a cat: the great line`); }
+    // TG3 (M3): walked from the tree, a talk lifts Ya to 30, the ridge flown: carried ¶1, Ya's sentence as before
+    { const g = party(2, { ya: [28, 50] }); g.scene = 'ht_leave'; choose(g, SCENES, walkIdx('ht_leave')); choose(g, SCENES, walkIdx('rt_start'));
+      assert(g.flags.party_flew === false && text(g, 'rt_road').startsWith(WALKED.road), `${T} (RV1 M3): walked from the tree`);
+      g.rel.Ya.f = 32; g.scene = 'rt_road'; choose(g, SCENES, walkIdx('rt_road')); const a = text(g, 'rt_ambush');
+      assert(g.flags.party_flew === true && a.startsWith(SX.ambush) && a.includes(WALKED.paced), `${T} (RV1 M3, TG3): the ridge flown, "paced us since the tree" kept`); }
+    // M2 + TG5: ht_leave [0] is quiet (the calm line of each pool) and, like every quiet walk, sets the flag
+    { const w = WALKS.find(([id]) => id === 'ht_leave'); assert(w[3] === 'quiet', `${T} (RV1 M2): ht_leave [0] quiet`);
+      for (const [realm, opt, key, pool, flag] of [[1, {}, 'yuki', FOOT_LINES, false], [2, {}, 'great', null, true], [7, { form: 'human' }, 'human', null, true]]) for (const turn of [0, 1, 2, 3, 5]) {
+          const { CARRY_LINES } = await import('../js/core/story.js'); const P = pool || CARRY_LINES;
+          const g = party(realm, opt); g.scene = 'ht_leave'; g.stats.flown = turn; const c = SCENES.ht_leave.choices[walkIdx('ht_leave')]; const r = choose(g, SCENES, walkIdx('ht_leave'));
+          const line = P[key][QUIET_LINE[key]].split('{')[0];
+          assert(r.lines.some((l) => l.startsWith(line) && (line.length > 0)) && g.flags.party_flew === flag, `${T} (RV1 M2, TG5): ht_leave ${key} at turn ${turn}: the calm line, flag ${flag}`);
+      } }
+    { const g = party(1); g.scene = 'log_comfort'; g.flags.party_flew = true; choose(g, SCENES, walkIdx('log_comfort')); assert(g.flags.party_flew === false, `${T} (RV1 TG5): log_comfort (quiet) on foot clears the flag`); }
+    // D1's fixes: ST (no "steers" on the screen), RA (the original sentence), RU (no reused openers)
+    assert(!/steers with/.test(SX.great + SX.human) && SX.ambush.endsWith('She lets it pass without a word, and that tells you how bad it is.') && SX.start.startsWith('You fly up out of') && SX.ambush.startsWith('You land on the birch ridge.'), `${T} (D1): ST, RA, RU`);
+    assert(flightMinutes(party(2), 120) < 120, `${T}: sanity, realm 2 flies`);
 }
 
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));

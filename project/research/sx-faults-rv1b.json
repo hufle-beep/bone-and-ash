@@ -1,0 +1,4 @@
+[
+ {"id":"R2","file":"js/story/act1_return.js","find":"Mei Lin, set down, straightens her sleeves each time","replace":"Mei Lin, set down, straightens her skirts each time","note":"new words: SX.road ¶2 changed (rerun after the pin)"},
+ {"id":"R4b","file":"js/story/act1_return.js","find":"how bad it is.', // D1","replace":"how bad it was.', // D1","note":"new words: SX.ambush's tail changed (R4 retargeted: the paced sentence is gone)"}
+]

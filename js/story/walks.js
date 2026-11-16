@@ -13,6 +13,7 @@
  * RV1 (the Opus review): M1 `rt_brawl_won` [0] 'alone' too (Ashfall after the Return: the party flags stay set, Mei Lin isn't
  * there); M2 'quiet' on the three walks that follow a hard scene (`dw_drowned_won` the rescue, `ape_won` the spear-head,
  * `log_comfort` the grief night): their line comes from the calm ones only (story.js `QUIET_LINE`).
+ * v0.11.198 (owner pick RV1, M2): `ht_leave` [0] 'quiet' too (the walk out of the Heart; `rt_start` opens on "Mei Lin is pale and silent").
  */
 import { canFly } from '../core/game.js';
 
@@ -58,7 +59,7 @@ export const WALKS = [
     ['guardian_approach', 2, "Back away. Not yet."],
     ['guardian_bypass', 0, "Go to the heart. Quietly."],
     ['heart_core_after', 0, "Back up to the hall."],
-    ['ht_leave', 0, "Home. To Ashfall."],
+    ['ht_leave', 0, "Home. To Ashfall.", 'quiet'], // v0.11.198 (RV1 M2): out of the Heart after its hard beats; "Mei Lin is pale and silent" follows
     ['rt_start', 0, "Ya's way. One day. Ashfall i"],
     ['rt_road', 2, "Push on toward the birch rid"],
     ['rt_wolves_won', 0, "Down to the river."],

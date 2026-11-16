@@ -837,6 +837,7 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md', 'roadmap-act2.md', 'roadmap
     const run = (cwd, args = []) => { try { return { code: 0, out: execFileSync(process.execPath, ['tools/textlint.mjs', ...args], { cwd, encoding: 'utf8' }) }; } catch (e) { return { code: e.status ?? 1, out: String(e.stdout || e) }; } };
     const game = run(ROOT);
     assert(game.code === 0 && /^text lint \(log only\): \d+ reused passages, \d+ favourite phrases, \d+ tics, 0 broken, \d+ unrendered; 0 changed against the snapshot$/m.test(game.out), `E1: the text lint runs on the game, 0 broken, the snapshot current (${game.out.trim().split('\n').pop()})`);
+    assert(/; sx 5 lines \/ \d+ words \(twice 0, shared with a scene \d+, tics 0, broken 0/.test(game.out), 'E1 (v0.11.198, S1 RV1 TG4): the carried road texts (act1_return.js SX) are a lint pool, 5 lines, no tics');
     const dir = path.join(TMP, 'textlint'); mkdirSync(path.join(dir, 'tools', 'lib'), { recursive: true });
     cpSync(path.join(ROOT, 'js'), path.join(dir, 'js'), { recursive: true });
     for (const f of ['tools/textlint.mjs', 'tools/lib/textlint.mjs', 'tools/text-baseline.json']) writeFileSync(path.join(dir, f), readFileSync(path.join(ROOT, f)));
@@ -908,24 +909,26 @@ const RP3_SHA = '209ef1a2e40b0e12630dddd70618a67cdd098e03107d50a18bd31ad16889b51
 }
 
 const CL3_SHA = '2eecaa7c2318459eee87ac90e7ca4d6b62c70d0939adf8a19dbb68feaf7aed48';
+const CL5_SHA = 'f3084c6f309cdedf10b48bcb11e02489e34015a416329a657b0f6c66a3bee786'; // v0.11.198 (MD): the 10 rows moved to changelog-5.md, as moved (part 5 never changes)
 const CL4_SHA = 'bac3bac02069f5cc5ba315d41219d66a55cf75e0fc1aae93dd85c8de5985d1c4'; // v0.11.178 (U1, MD): the 32 rows moved to changelog-4.md, as moved (part 4 never changes) // v0.11.176 (CL1): the 70 rows moved to changelog-3.md, as moved (part 3 never changes)
 // v0.11.176 (owner pick CL1): changelog.md split again at 0.11.139: 0.11.70–0.11.139 in changelog-3.md, 0.11.69 and before in changelog-2.md
 // (v0.11.105, CS1); every row in exactly one part, newest first in each, part 1 under the project tool's limit with its pointer line
 {
     const read = (f) => readFileSync(path.join(ROOT, 'project', f), 'utf8');
-    const [p1, p2, p3, p4] = ['changelog.md', 'changelog-2.md', 'changelog-3.md', 'changelog-4.md'].map(read);
+    const [p1, p2, p3, p4, p5] = ['changelog.md', 'changelog-2.md', 'changelog-3.md', 'changelog-4.md', 'changelog-5.md'].map(read);
     const rowLines = (t) => t.split('\n').filter((l) => /^\| \d+\.\d+\.\d+ \|/.test(l));
     const rows = (t) => rowLines(t).map((l) => l.split('|')[1].trim().split('.').map(Number));
     const cmp = (a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2];
-    const r1 = rows(p1), r2 = rows(p2), r3 = rows(p3), r4 = rows(p4), all = [...r1, ...r4, ...r3, ...r2].map((v) => v.join('.'));
+    const r1 = rows(p1), r2 = rows(p2), r3 = rows(p3), r4 = rows(p4), r5 = rows(p5), all = [...r1, ...r5, ...r4, ...r3, ...r2].map((v) => v.join('.'));
     // v0.11.178 (owner pick U1, MD): 0.11.140–0.11.171 moved word for word to changelog-4.md; part 1 keeps 0.11.172 on
-    assert(r3.length === 70 && r3.every((v) => cmp(v, [0, 11, 70]) >= 0 && cmp(v, [0, 11, 139]) <= 0) && r4.length === 32 && r4.every((v) => cmp(v, [0, 11, 140]) >= 0 && cmp(v, [0, 11, 171]) <= 0) && r1.every((v) => cmp(v, [0, 11, 172]) >= 0) && r2.every((v) => cmp(v, [0, 11, 69]) <= 0),
-        `CL1, MD: 0.11.70–0.11.139 in part 3 (${r3.length}), 0.11.140–0.11.171 in part 4 (${r4.length}), 0.11.172 on in part 1 (${r1.length}), 0.11.69 and before in part 2 (${r2.length})`);
-    assert(new Set(all).size === all.length && [r1, r2, r3, r4].every((r) => r.every((v, i) => i === 0 || cmp(r[i - 1], v) > 0)), 'CL1: no row twice, each part newest first');
+    assert(r3.length === 70 && r3.every((v) => cmp(v, [0, 11, 70]) >= 0 && cmp(v, [0, 11, 139]) <= 0) && r4.length === 32 && r4.every((v) => cmp(v, [0, 11, 140]) >= 0 && cmp(v, [0, 11, 171]) <= 0) && r5.length === 10 && r5.every((v) => cmp(v, [0, 11, 172]) >= 0 && cmp(v, [0, 11, 181]) <= 0) && r1.every((v) => cmp(v, [0, 11, 182]) >= 0) && r2.every((v) => cmp(v, [0, 11, 69]) <= 0),
+        `CL1, MD: 0.11.70–0.11.139 in part 3 (${r3.length}), 0.11.140–0.11.171 in part 4 (${r4.length}), 0.11.172–0.11.181 in part 5 (${r5.length}; v0.11.198), 0.11.182 on in part 1 (${r1.length}), 0.11.69 and before in part 2 (${r2.length})`);
+    assert(new Set(all).size === all.length && [r1, r2, r3, r4, r5].every((r) => r.every((v, i) => i === 0 || cmp(r[i - 1], v) > 0)), 'CL1: no row twice, each part newest first');
     const { createHash } = await import('node:crypto');
     const sha = createHash('sha256').update(rowLines(p3).join('\n')).digest('hex'), sha4 = createHash('sha256').update(rowLines(p4).join('\n')).digest('hex');
-    assert(r1.length >= 6 && sha === CL3_SHA && sha4 === CL4_SHA, `CL1, MD: parts 3 and 4's rows exactly as moved (sha256 ${sha.slice(0, 12)}…, ${sha4.slice(0, 12)}…), part 1 keeps 0.11.172 on (${r1.length})`);
-    assert(Buffer.byteLength(p1) <= MIRROR_MAX && Buffer.byteLength(p3) <= DOC_TOOL_MAX && Buffer.byteLength(p4) <= DOC_TOOL_MAX && p1.includes('0.11.140–0.11.171 in `changelog-4.md`') && p1.includes('0.11.70–0.11.139 in `changelog-3.md`') && p1.includes('0.11.69 and before in `changelog-2.md`') && p3.includes('Newer versions: `changelog.md`') && p4.includes('Newer versions: `changelog.md`'),
+    const sha5 = createHash('sha256').update(rowLines(p5).join('\n')).digest('hex');
+    assert(r1.length >= 6 && sha === CL3_SHA && sha4 === CL4_SHA && sha5 === CL5_SHA, `CL1, MD: parts 3 and 4's rows exactly as moved (sha256 ${sha.slice(0, 12)}…, ${sha4.slice(0, 12)}…), part 1 keeps 0.11.172 on (${r1.length})`);
+    assert(Buffer.byteLength(p1) <= MIRROR_MAX && Buffer.byteLength(p3) <= DOC_TOOL_MAX && Buffer.byteLength(p4) <= DOC_TOOL_MAX && p1.includes('0.11.172–0.11.181 in `changelog-5.md`') && Buffer.byteLength(p5) <= DOC_TOOL_MAX && p1.includes('0.11.140–0.11.171 in `changelog-4.md`') && p1.includes('0.11.70–0.11.139 in `changelog-3.md`') && p1.includes('0.11.69 and before in `changelog-2.md`') && p3.includes('Newer versions: `changelog.md`') && p4.includes('Newer versions: `changelog.md`'),
         `CL1, MD: part 1 under ${MIRROR_MAX} bytes (${Buffer.byteLength(p1)}), parts 3 and 4 under ${DOC_TOOL_MAX}, with their pointers`);
 }
 

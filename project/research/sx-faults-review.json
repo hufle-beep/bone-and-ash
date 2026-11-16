@@ -1,0 +1,79 @@
+[
+ {
+  "id": "R1",
+  "file": "js/story/act1_return.js",
+  "find": "She steers by pointing, and you fly it in hops",
+  "replace": "She steers by the ears, and you fly it in hops",
+  "note": "new words: SX.road ¶1 changed (the ST echo made worse)"
+ },
+ {
+  "id": "R2",
+  "file": "js/story/act1_return.js",
+  "find": "Mei Lin, set down, straightens her sleeves each time",
+  "replace": "Mei Lin, set down, straightens her skirts each time",
+  "note": "new words: SX.road ¶2 changed"
+ },
+ {
+  "id": "R3",
+  "file": "js/story/act1_return.js",
+  "find": "a head and more shorter than her cargo",
+  "replace": "a head taller than her cargo",
+  "note": "new words: SX.human contradicts canon height"
+ },
+ {
+  "id": "R4",
+  "file": "js/story/act1_return.js",
+  "find": "paced: \"They've run under us since the tree.\",",
+  "replace": "paced: \"They've run under us since dawn.\",",
+  "note": "new words: Ya's paced sentence changed"
+ },
+ {
+  "id": "R5",
+  "file": "js/core/story.js",
+  "find": "*Nobody asks the cat to grow,* Yuki says.",
+  "replace": "\\\"Nobody asks the cat to grow,\\\" Yuki says.",
+  "note": "new words: the cat speaks aloud (bond italics lost)"
+ },
+ {
+  "id": "R6",
+  "file": "js/core/story.js",
+  "find": "*{min} by air,* Yuki says from your shoulder,",
+  "replace": "*{min} by air,* Yuki says from the path,",
+  "note": "new words: the cat off the shoulder"
+ },
+ {
+  "id": "R7",
+  "file": "js/story/act1_return.js",
+  "find": "Ya has jumped clear of Yuki before the landing",
+  "replace": "Ya has jumped clear of your arms before the landing",
+  "note": "new words: who carries whom"
+ },
+ {
+  "id": "R8",
+  "file": "js/story/act1_return.js",
+  "find": "${partyCarry(g)?.ya === 'human' ? SX.human : SX.great}",
+  "replace": "${partyCarry(g)?.ya !== 'great' ? SX.human : SX.great}",
+  "note": "flag path: the fallback when flew but no longer carried flips to the human line"
+ },
+ {
+  "id": "R9",
+  "file": "js/story/act1_return.js",
+  "find": "${flew(g) ? SX.paced : \"They've paced us since the tree.\"}",
+  "replace": "${partyCarry(g)?.carried ? SX.paced : \"They've paced us since the tree.\"}",
+  "note": "flag path: Ya's sentence by the current carry, not the flag (an old save reads carried)"
+ },
+ {
+  "id": "R10",
+  "file": "js/core/story.js",
+  "find": "    if (carry) g.flags.party_flew = !!carry.carried;",
+  "replace": "    if (carry || (task && c.walk && partyCarry(g))) g.flags.party_flew = !!(carry || partyCarry(g)).carried;",
+  "note": "flag path: a card sets the flag"
+ },
+ {
+  "id": "R11",
+  "file": "js/core/story.js",
+  "find": "    if (carry) g.flags.party_flew = !!carry.carried;",
+  "replace": "    if (carry && !c.walkQuiet) g.flags.party_flew = !!carry.carried;",
+  "note": "flag path: quiet walks leave a stale value"
+ }
+]

@@ -3,13 +3,31 @@
  * the night the romance resolves (a throuple, one lover, or none), and Outer Elder Shen Qiu at the gate on Day 21.
  * Entry 'rt_start' (Day 19 ~06:00). Ends at 'a1_end'.
  */
-import { addItem, hasItem, eat, condense, advance, clockParts, jamesQiMax, dayHour, yukiForm } from '../core/game.js';
+import { addItem, hasItem, eat, condense, advance, clockParts, jamesQiMax, dayHour, yukiForm, partyCarry } from '../core/game.js';
 import { condensationSatGain } from '../core/formulas.js';
 import { coilMult, sitGain } from '../core/game.js';
 import { set, daily, markDaily, eatBest, byForm } from './common.js';
 import { loveLine } from './yuki_path.js';
 import { pickLine } from '../core/lines.js';
 import { encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil, hour, KISS_YA, KISS_MEI } from './act1_common.js';
+
+/** v0.11.198 (owner picks S1, D1; SX; Fable's words, rule 10): the road home after a carried flight. `party_flew` is set by the
+ *  last walk with the women along (story.js `choose`: true carried, false on foot); unset (old saves, a mortal James) reads as
+ *  walked. Ya's ride for rt_road's Yuki line from the rule itself (game.js `partyCarry`: 'human' or 'great'). */
+const flew = (g) => !!g.flags.party_flew;
+/** RV1 (L1): the ride for rt_road's Yuki line: the rule's own ('human' / 'great'), or, if a woman has dropped under the bar on
+ *  the road since the flight, Yuki's form now. RV1 (M3): Ya's "They've paced us since the tree." stays under both (the flag is
+ *  the last walk's travel only; a flight reads it as well). */
+const sxRide = (g) => partyCarry(g)?.ya ?? (yukiForm(g) === 'human' ? 'human' : 'great');
+export const SX = {
+    start: 'You fly up out of the dead tree and set down among its roots in a grey morning, blinking like a clutch of things newly hatched. Mei Lin finds her feet with care; Ya has jumped clear of Yuki before the landing is finished.',
+    road: `Ya's way is no path, and from the air it is less than one: a gap in the canopy, a dead pine, a rock she insists has a name. She points out each landing, and you fly it in hops. From up there she inspects the Blackroot as a landlord inspects a house in arrears, and wherever she finds fault, down you all go.
+
+Parts of her way, by Ya's lights, have to be walked. She has walked them since she was six and will not hear of the air doing it for her. Mei Lin, set down, straightens her sleeves each time like a woman stepping out of a sedan chair. On the walked stretches Ya stops for her without being asked, and laughs when Mei Lin pretends not to have seen it.`,
+    great: "Yuki crouches at each landing to let Ya off, rises at the next to take her back, and supervises. *She calls me 'pony',* she tells you. *I am keeping a tally.*", // D1 (ST)
+    human: 'Yuki sets Ya down at each landing and gathers her up at the next, a head shorter than her cargo, and supervises. "She calls me \'pony\'," she says. "I am keeping a tally."', // D1 (ST)
+    ambush: 'You land on the birch ridge. Ya slides to the ground and stops dead, and you, a pace too close behind, walk into her back. She lets it pass without a word, and that tells you how bad it is.', // D1 (RU, RA); RV1 L4 (the reviewer's words)
+};
 
 const P = 'Ashfall Hamlet';
 const BR = 'Blackroot Wilds';
@@ -98,7 +116,7 @@ export const RETURN = {
     rt_start: {
         id: 'rt_start', title: 'Out of the Heart', art: 'return_road', place: `${BR} — under the dead tree`,
         enter: (g) => { toHour(g, 6); g.flags.mei_party = true; g.flags.ya_party = true; return []; },
-        text: (g) => `You climb out between the roots of the dead tree into a grey morning, squinting like something newly hatched.
+        text: (g) => `${flew(g) ? SX.start : 'You climb out between the roots of the dead tree into a grey morning, squinting like something newly hatched.'}
 
 ${seeded(g) ? g.flags.mei_carried_seed ? 'Mei Lin walks with one hand flat over her heart, where the seed-sliver rides wrapped in her sleeve. It hums there. Your Convergence hears it through her, a small green insistence under her heartbeat. *Plant me. Put me where I can sing.*' : 'Folded away in your hammerspace, in no place at all, the seed-sliver hums. It sits under your attention like a second pulse, small and green and stubborn. *Plant me. Put me where I can sing.*' : 'You bring no seed out with you, only what you saw down there. It sits behind your breastbone like a stone you swallowed.'}
 
@@ -116,7 +134,9 @@ Mei Lin is pale and silent, which in her is as loud as shouting. Ya is ten paces
     },
     rt_road: {
         id: 'rt_road', title: 'Ya\'s Way', art: 'return_road', place: `${BR} — the deer paths`,
-        text: (g) => `Ya's way is no path. It is an opinion about where a path might go, kept alive by deer, spite, and Ya herself, who has walked it since she was six. She goes through the Blackroot like a landlord through a house in arrears.
+        text: (g) => flew(g) ? `${SX.road}
+
+${sxRide(g) === 'human' ? SX.human : SX.great}` : `Ya's way is no path. It is an opinion about where a path might go, kept alive by deer, spite, and Ya herself, who has walked it since she was six. She goes through the Blackroot like a landlord through a house in arrears.
 
 Mei Lin follows with grim, formal dignity: all her life she has been told that a forest is where herbs come from, not a place a woman runs through. ${rel(g, 'Ya').f >= 20 ? 'Twice Ya stops and waits for her. Twice Mei Lin fails to notice, with care. Ya notices the care, both times, and laughs.' : 'Ya does not wait for her. Mei Lin would sooner eat the moss than ask.'}
 
@@ -164,7 +184,7 @@ ${both(g) ? `Some way on she says, very low: "I keep looking at Ya." Her eyes st
     },
     rt_ambush: {
         id: 'rt_ambush', title: 'The Birch Ridge', art: 'wolves', place: `${BR} — the birch ridge`,
-        text: `Ya stops dead and you walk into her back. She lets it pass without a word, and that tells you how bad it is.
+        text: (g) => `${flew(g) ? SX.ambush : 'Ya stops dead and you walk into her back. She lets it pass without a word, and that tells you how bad it is.'}
 
 "Ash-wolves," she breathes. "Three. They've paced us since the tree." She tests the air and her face turns ugly. "They smell you, and whatever you brought out of that tree. Everything in this forest that eats Qi will want it."
 

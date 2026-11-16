@@ -302,10 +302,19 @@
    "spacing": 0
   },
   "carry": {
-   "lines": 14,
-   "words": 372,
+   "lines": 19,
+   "words": 514,
    "dupes": 0,
    "sceneShared": 1,
+   "tics": 0,
+   "broken": 0,
+   "spacing": 0
+  },
+  "sx": {
+   "lines": 5,
+   "words": 282,
+   "dupes": 0,
+   "sceneShared": 2,
    "tics": 0,
    "broken": 0,
    "spacing": 0

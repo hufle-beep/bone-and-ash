@@ -19,7 +19,8 @@ Older versions (0.11.69 and before): `restore-points-2.md` (moved word for word 
 
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.197 | (this push) | C1 (walks with company flown only when carried; D1, RV1): `js/core/game.js`, `story.js`, `faq.js`, `news.js`, `js/story/walks.js`, `sw.js`, `tools/textlint.mjs`, the tests, the docs. A game change; no save field. |
+| 0.11.198 | (this push) | SX + L3 (the road home after a carried flight, more on-foot lines; S1, D1, T1, RV1): `js/core/story.js`, `news.js`, `js/story/act1_return.js`, `walks.js`, `sw.js`, `tools/textlint.mjs`, `tools/text-baseline.json`, the tests, the docs. A game change; one new flag (`party_flew`), no save field. |
+| 0.11.197 | `c631005` | C1 (walks with company flown only when carried; D1, RV1): `js/core/game.js`, `story.js`, `faq.js`, `news.js`, `js/story/walks.js`, `sw.js`, `tools/textlint.mjs`, the tests, the docs. A game change; no save field. |
 | 0.11.196 | `99f9745` | M1 (the open items sorted, docs only): `project/roadmap.md`, `roadmap-e.md`, `roadmap-2.md`, `roadmap-done-3.md`, `reference.md`, `handover.md`, `history-26.md`, `tests/tools.test.mjs` (MD, H1), `tests/README.md`, `sw.js` (VERSION). The game as v0.11.195. |
 | 0.11.195 | `70f2087` | F1 + D1 + RV1 (the prologue's lines for a flying James): `js/story/flight_texts.js` (new), `walks.js` (`lore` [0] unmarked, `FLY_LABELS`), `prologue.js`, `ashfall.js`, `wilds.js`, `js/core/news.js`, `sw.js` (VERSION, FILES), `tools/textlint.mjs` and `text-baseline.json`, the tests, `project/research/fw-fix-*`. One time change (`lore` [0] 40 min at every realm); no save change. |
 | 0.11.194 | `aca04ec` | R2 + G1 (the read for FW, docs only): `project/research/fw-brief.md`, `fw-read.md`; `sw.js` (VERSION); the docs (`history-26.md` started: v0.11.191's entries; `roadmap-done-3.md`: section 0's v0.11.193 line). The game as v0.11.193. |

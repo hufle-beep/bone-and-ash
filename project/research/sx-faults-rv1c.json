@@ -1,0 +1,3 @@
+[
+ {"id":"V4","file":"tools/textlint.mjs","find":"carry: carryLines, sx: Object.values(SX) };","replace":"carry: carryLines };","note":"TG4 undone: SX out of the lint pools (the tools test's E1 snapshot)"}
+]

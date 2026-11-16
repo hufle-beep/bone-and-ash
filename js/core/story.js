@@ -225,6 +225,12 @@ export const FOOT_LINES = {
         "Yuki weighs what a cat weighs and carries what a cat carries, which isn't Ya. So everyone walks: {walk} min. Alone you'd have flown it in {min}.",
         "{walk} min on foot, the four of you together. *I could carry her spear,* Yuki offers from your shoulder. The flight you didn't take was {min}.",
         "Ya walks, so the party walks, and you with it. {walk} min by foot; {min} by air, if anyone had a cat of the right size.",
+        // v0.11.198 (owner picks S1, D1; Fable's, rule 10; L3: the pool carried 97% of the walks on foot, 3–4 times a line a game)
+        "{walk} min, at Ya's pace, which she calls slow. By air and alone it would have been {min}. *Nobody asks the cat to grow,* Yuki says. *I notice that.*",
+        "Ya asks how long you'd have taken flying it alone. {min} min, you tell her. She thinks about that for all {walk} min of the walk and arrives angry at the ground.",
+        "Mei Lin counts the walk at {walk} min and asks what flying alone would have cost you. {min}. \"Then we're worth the difference,\" she says. Nobody argues.",
+        "You walk it with them: {walk} min. *{min} by air,* Yuki says from your shoulder, *and I'd have slept through every one.*",
+        "Two of your company can't fly, and the cat who can is too small to carry either. {walk} min on foot, then; {min} is what the air would have charged you alone.",
     ],
     mei: [
         "You offer to carry Mei Lin. She thanks you, with her whole spine, and walks. {walk} min on foot, against {min} had you gone up by yourself.",
@@ -326,6 +332,8 @@ export function choose(g, scenes, index, { task = false, speed = 0 } = {}) { // 
     // v0.11.197 (owner pick C1): with Mei Lin or Ya along the walk is flown only when they are carried; else all of them walk
     // (a walk marked `alone` leaves them behind). Read before the walk: the destination's own `enter` may set the party flags.
     const carry = walkOnly && !c.walkAlone && canFly(g) ? partyCarry(g) : null;
+    // v0.11.198 (owner picks S1, D1; SX): the walk's way of travel, read by the screens after it (act1_return.js `flew`)
+    if (carry) g.flags.party_flew = !!carry.carried;
     const walkTime = (t0) => { // the minutes, and the line: flown alone, carried, or on foot with them
         const fl = flightMinutes(g, t0);
         if (!(fl < t0)) return t0;

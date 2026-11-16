@@ -1,0 +1,191 @@
+[
+ {
+  "id": "F1",
+  "file": "js/core/story.js",
+  "find": "    if (carry) g.flags.party_flew = !!carry.carried;",
+  "replace": "    if (carry) g.flags.party_flew = true;",
+  "note": "on foot also marks flown"
+ },
+ {
+  "id": "F2",
+  "file": "js/core/story.js",
+  "find": "    if (carry) g.flags.party_flew = !!carry.carried;",
+  "replace": "    if (carry && carry.carried) g.flags.party_flew = true;",
+  "note": "never cleared by a walk on foot"
+ },
+ {
+  "id": "F3",
+  "file": "js/core/story.js",
+  "find": "    if (carry) g.flags.party_flew = !!carry.carried;",
+  "replace": "    if (walkOnly) g.flags.party_flew = !!(carry && carry.carried);",
+  "note": "alone and mortal walks touch the flag"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/act1_return.js",
+  "find": "const flew = (g) => !!g.flags.party_flew;",
+  "replace": "const flew = (g) => g.flags.party_flew !== false;",
+  "note": "old saves read as carried"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/act1_return.js",
+  "find": "${sxRide(g) === 'human' ? SX.human : SX.great}",
+  "replace": "${sxRide(g) === 'great' ? SX.human : SX.great}",
+  "note": "the forms' Yuki lines swapped"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/act1_return.js",
+  "find": "\"Three. They've paced us since the tree.\" She tests",
+  "replace": "\"Three. They've run under us since the tree.\" She tests",
+  "note": "M3 undone: the carried sentence in every case"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/act1_return.js",
+  "find": "text: (g) => `${flew(g) ? SX.start :",
+  "replace": "text: (g) => `${!flew(g) ? SX.start :",
+  "note": "rt_start inverted"
+ },
+ {
+  "id": "F8",
+  "file": "js/core/story.js",
+  "find": "*Nobody asks the cat to grow,* Yuki says.",
+  "replace": "*Nobody asks the cat to grow,* Yuki says again.",
+  "note": "a time word in a pool line"
+ },
+ {
+  "id": "F9",
+  "file": "js/core/story.js",
+  "find": "what the air would have charged you alone.\",\n",
+  "replace": "what the air would have charged you alone.\",\n        \"Ya walks. {walk} min.\",\n",
+  "note": "a ninth line without {min}"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/act1_return.js",
+  "find": "*She calls me 'pony',* she tells you.",
+  "replace": "*She steers with her heels,* she tells you.",
+  "note": "ST undone"
+ },
+ {
+  "id": "F11",
+  "file": "js/story/act1_return.js",
+  "find": "You land on the birch ridge.",
+  "replace": "You come down on the birch ridge.",
+  "note": "RU undone"
+ },
+ {
+  "id": "F12",
+  "file": "js/core/story.js",
+  "find": "Mei Lin counts the walk at {walk} min and asks",
+  "replace": "Mei Lin counts the walk at {min} min and asks",
+  "note": "numbers swapped in a pool line"
+ },
+ {
+  "id": "R1",
+  "file": "js/story/act1_return.js",
+  "find": "She points out each landing, and you fly it in hops.",
+  "replace": "She steers by the ears, and you fly it in hops.",
+  "note": "new words: SX.road \u00b61 changed (the ST echo made worse)"
+ },
+ {
+  "id": "R2",
+  "file": "js/story/act1_return.js",
+  "find": "Mei Lin, set down, straightens her sleeves each time",
+  "replace": "Mei Lin, set down, straightens her skirts each time",
+  "note": "new words: SX.road \u00b62 changed"
+ },
+ {
+  "id": "R3",
+  "file": "js/story/act1_return.js",
+  "find": "a head shorter than her cargo",
+  "replace": "a head and more shorter than her cargo",
+  "note": "new words: SX.human contradicts canon height"
+ },
+ {
+  "id": "R4",
+  "file": "js/story/act1_return.js",
+  "find": "walk into her back. She lets it pass without a word",
+  "replace": "walk into her back. She lets it pass in silence",
+  "note": "new words: Ya's paced sentence changed"
+ },
+ {
+  "id": "R5",
+  "file": "js/core/story.js",
+  "find": "*Nobody asks the cat to grow,* Yuki says.",
+  "replace": "\\\"Nobody asks the cat to grow,\\\" Yuki says.",
+  "note": "new words: the cat speaks aloud (bond italics lost)"
+ },
+ {
+  "id": "R6",
+  "file": "js/core/story.js",
+  "find": "*{min} by air,* Yuki says from your shoulder,",
+  "replace": "*{min} by air,* Yuki says from the path,",
+  "note": "new words: the cat off the shoulder"
+ },
+ {
+  "id": "R7",
+  "file": "js/story/act1_return.js",
+  "find": "Ya has jumped clear of Yuki before the landing",
+  "replace": "Ya has jumped clear of your arms before the landing",
+  "note": "new words: who carries whom"
+ },
+ {
+  "id": "R8",
+  "file": "js/story/act1_return.js",
+  "find": "const sxRide = (g) => partyCarry(g)?.ya ?? (yukiForm(g) === 'human' ? 'human' : 'great');",
+  "replace": "const sxRide = (g) => partyCarry(g)?.ya ?? 'great';",
+  "note": "L1 undone: the fallback ignores Yuki's form"
+ },
+ {
+  "id": "R9",
+  "file": "js/story/act1_return.js",
+  "find": "const flew = (g) => !!g.flags.party_flew;",
+  "replace": "const flew = (g) => !!g.flags.party_flew || !!partyCarry(g)?.carried;",
+  "note": "the screens by the current carry, not the flag"
+ },
+ {
+  "id": "R10",
+  "file": "js/core/story.js",
+  "find": "    if (carry) g.flags.party_flew = !!carry.carried;",
+  "replace": "    if (carry || (task && c.walk && partyCarry(g))) g.flags.party_flew = !!(carry || partyCarry(g)).carried;",
+  "note": "flag path: a card sets the flag"
+ },
+ {
+  "id": "R11",
+  "file": "js/core/story.js",
+  "find": "    if (carry) g.flags.party_flew = !!carry.carried;",
+  "replace": "    if (carry && !c.walkQuiet) g.flags.party_flew = !!carry.carried;",
+  "note": "flag path: quiet walks leave a stale value"
+ },
+ {
+  "id": "V1",
+  "file": "js/story/walks.js",
+  "find": "['ht_leave', 0, \"Home. To Ashfall.\", 'quiet'],",
+  "replace": "['ht_leave', 0, \"Home. To Ashfall.\"],",
+  "note": "M2 undone"
+ },
+ {
+  "id": "V2",
+  "file": "js/story/act1_return.js",
+  "find": "Parts of her way, by Ya's lights",
+  "replace": "Because parts of her way, by Ya's lights",
+  "note": "L3 undone"
+ },
+ {
+  "id": "V3",
+  "file": "js/story/act1_return.js",
+  "find": "you, a pace too close behind, walk into her back",
+  "replace": "you, landing a pace too close, walk into her back",
+  "note": "L4 undone"
+ },
+ {
+  "id": "V4",
+  "file": "tools/textlint.mjs",
+  "find": "carry: carryLines, sx: Object.values(SX) };",
+  "replace": "carry: carryLines };",
+  "note": "TG4 undone: SX out of the lint pools"
+ }
+]
