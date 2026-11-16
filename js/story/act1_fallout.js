@@ -86,7 +86,7 @@ const supperPot = (g) => SUPPER_POT[Math.max(1, Math.min(3, Number(g.flags.kitch
  *  calendar's day for the titles and the count to the Elder; the farewell waits for the last week's last day. */
 const dd = (g) => Math.max(8, Math.min(10, storyDay(g)));
 const ddShow = (g) => (longCal(g) ? day(g) : dd(g));
-const farewellNow = (g) => dd(g) >= 10 && lastOfWeek(g);
+export const farewellNow = (g) => dd(g) >= 10 && lastOfWeek(g); // v0.11.204 (RV1, L4): exported for the week planner's stop
 /** The text day as a story day (8–10), for the lists by the story's day. */
 export const textStoryDay = (g) => storyDayOf(g, textDay(g));
 const toEvening = (g) => (farewellNow(g) ? 'fo_farewell' : 'fo_supper');

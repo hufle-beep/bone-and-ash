@@ -2,6 +2,12 @@
 
 Started in v0.11.150, when `roadmap-done-2.md` had passed about 45 KB. Newer than `roadmap-done-2.md` and `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.204 (word for word; owner pick W1: section 0's line as of v0.11.203; the size rule)
+
+### From section 0, as of v0.11.203
+
+- *(v0.11.203, owner pick T1)* **The time scale's TS1 + TS8 done** (the long calendar behind a test switch; `roadmap-time.md`). **Next:** TS2 + TS3, S6, TS4, TS6, the flip; then f, the retune, Act 2; the PC layout when the owner can see it. The v0.11.202 line in `roadmap-done-3.md`.
+
 ## Moved in v0.11.203 (word for word; owner pick T1: section 0's line as of v0.11.202; the size rule)
 
 ### From section 0, as of v0.11.202

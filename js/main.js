@@ -1,5 +1,6 @@
 /** Bone and Ash — UI. Renders the story, combat, sheet, hammerspace, journal and saves. */
 import { LONG_CAL } from './core/calendar.js'; // v0.11.203 (owner pick T1, TS1)
+import { foldNight, runWeek, planCards, planHere, planEnsure, planSet, planEmpty, planEndDay, planClear, weekResume, STOP_TEXT } from './core/week.js'; // v0.11.204 (owner pick W1: R3, P1)
 import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel, fragileKnife, knifeSwings } from './core/forms.js';
 import { coilMult, coilMultNext, wakeDay, fmtMult, clockParts, REL_HIDDEN } from './core/game.js'; // v0.11.137 (HV1): REL_HIDDEN
 import {
@@ -7,7 +8,7 @@ import {
     startCombat, combatStep, combatFlee, combatYield, waitLeft, songPays, sungKey, THREAT_TEXT, SONG_TEXT, SONG_COST, SONG_MAX, SAY_TEXT, SPAR_TEXT, postureNow, unarmedMastery, fightAdapt, weaponMastery, COMBAT_ACTIONS, noDiceDc, airStrike, AIR_TEXT, FOE_TRAITS, foeTraits, TELL_TEXT, bigBlowNow, lungeNow, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage, qiShield,
 } from './core/game.js';
 import { sceneView, choose, goTo, gives, choiceQi, threatOf } from './core/story.js'; // v0.11.109 (FQ1): choiceQi
-import { deadMenuHub, showPicked, isTaskHub, isQueueScreen, isTaskChoice, taskCards, taskLabel, taskMinutes, taskOutcome, dryOutcome, outcomeOf, runTask, FAM, famLine, yukiLane, setYuki, nextStep, YUKI_LANE_TEXT, YUKI_HOURS } from './core/tasks.js';
+import { weekHub, cardSpeed, NEW_LENGTH, WEEK_MULT, deadMenuHub, showPicked, isTaskHub, isQueueScreen, isTaskChoice, taskCards, taskLabel, taskMinutes, taskOutcome, dryOutcome, outcomeOf, runTask, FAM, famLine, yukiLane, setYuki, nextStep, YUKI_LANE_TEXT, YUKI_HOURS } from './core/tasks.js';
 import { SCENES, ITEMS } from './story/prologue.js';
 import { TASK_HUBS } from './story/task_hubs.js';
 import { landParts, landReply, noteSaid } from './core/replies.js'; // v0.11.68 (A1 + B2 + C1); v0.11.134 (LP2, QR; RQ1): landReply, noteSaid
@@ -208,6 +209,33 @@ function doTask(id) {
     if (r.stopped) window.scrollTo({ top: 0, behavior: smoothScroll() });
 }
 
+/* v0.11.204 (owner pick W1): the long calendar's week. R3: after a story choice, the quiet night's screens seen before are walked at
+ * once (one Results entry); P1: a plan stopped by the evening's choice goes on by itself the next morning. */
+function weekAfter() {
+    if (!g || g.cal !== LONG_CAL || g.combat) return;
+    const f = foldNight(g, SCENES);
+    if (f.steps) addResult('A quiet night', f.lines.length ? f.lines : [`${f.steps} screen${f.steps > 1 ? 's' : ''} seen on an earlier night, walked at once.`], false, { quiet: true });
+    if (weekResume(g)) runPlan(); // RV1 (L1): also a plan whose week just ended, so "The week is over." shows
+}
+function runPlan() {
+    const r = runWeek(g, SCENES);
+    for (const d of r.days) addResult(`Day ${d.day}: the week's plan`, d.lines, false, { quiet: true });
+    lastReply = [];
+    lastResult = { lines: [r.stop === 'week' ? 'The week is over.' : `The week stops here: ${STOP_TEXT[r.stop] || r.stop}.${r.stop === 'evening' ? ' The plan goes on after it.' : ''}`], fail: r.stop === 'hurt' || r.stop === 'hungry' };
+    announce(lastResult.lines[0]);
+}
+const planRow = (key, label, n, note) => `<div class="prow"><span class="pl">${md(label)}${note ? `<span class="note">${esc(note)}</span>` : ''}</span><button class="btn step" data-plan="${esc(key)}" data-d="-1" aria-label="One fewer: ${esc(plain(label))}"${n > 0 ? '' : ' disabled'}>−</button><b class="pn">${n}</b><button class="btn step" data-plan="${esc(key)}" data-d="1" aria-label="One more: ${esc(plain(label))}">+</button></div>`;
+/** P1: the week's plan on a stay hub (long calendar). */
+function weekHtml() {
+    const p = planHere(g);
+    const items = p?.items || {}, med = p?.med || { sit: 0, mer: 0, qi: 0 };
+    const rows = planCards(g, SCENES).map((c) => planRow(c.id, c.label, items[c.id] || 0, `${durLabel(Math.round((c.minutes * NEW_LENGTH) / cardSpeed(c.fam || 0)) * WEEK_MULT)} a card`));
+    rows.push(planRow('med:sit', 'Sits a day', med.sit || 0, ''), planRow('med:mer', 'Meridian sessions a day', med.mer || 0, ''), planRow('med:qi', 'Gather Qi a day', med.qi || 0, 'hours'));
+    const stop = p?.stop ? `<p class="note">${esc(p.stop === 'week' ? 'The week is over.' : `Stopped: ${STOP_TEXT[p.stop] || p.stop}.`)}</p>` : '';
+    const btn = `<div class="pbtns"><button class="btn primary" data-week="run">${planEmpty(p) ? 'Rest out the week' : 'Run the week'} · to Day ${planEndDay(g, p)}</button>${planEmpty(p) ? '' : '<button class="btn" data-week="clear">Clear</button>'}</div>`;
+    return groupHtml('Plan the week', [`<p class="note">Cards by the week, Meditate by the day. Meals and the day's sit run themselves; it stops for anything that needs you.</p>`, ...rows, stop, btn], true);
+}
+
 /* ---------------- task mode: every screen as cards (v0.9.5) ---------------- */
 
 /** Game minutes a story choice will take (a dry run on a copy; no dice, so it is exact). 0 = it happens at once (a fight starts, a screen opens). */
@@ -227,7 +255,7 @@ function playChoice(idx) {
         const rel0 = relSnap();
         const r = choose(g, SCENES, idx);
         land(label, r.lines, r.roll ? !r.roll.success : false, rel0); // v0.11.68
-        if (r.combat) { startCombat(g, r.combat(g)); combatLog = null; }
+        if (r.combat) { startCombat(g, r.combat(g)); combatLog = null; } else weekAfter();
         autosave(); render(); window.scrollTo({ top: 0, behavior: smoothScroll() });
     } catch (err) { lastResult = { lines: [String(err.message || err)], fail: true }; lastReply = []; render(); showError(err); }
 }
@@ -283,7 +311,7 @@ function renderCardScreen() {
     let hubHtml = '';
     let hubTop = '';
     if (qs) {
-        const cards = taskCards(g, SCENES).filter((c) => !medIds.has(c.id) && (c.status === 'open' || c.status === 'late')); // v0.11.37 (D-a): 'late' = would end past the day's end (00:00 since v0.11.91), shown locked // v0.11.17 (owner pick 1a): "done for today" cards are hidden
+        const cards = taskCards(g, SCENES).filter((c) => !medIds.has(c.id) && (c.status === 'open' || c.status === 'late' || c.status === 'busy' || c.status === 'evening')); // v0.11.204 (W1, S1): busy, evening // v0.11.37 (D-a): 'late' = would end past the day's end (00:00 since v0.11.91), shown locked // v0.11.17 (owner pick 1a): "done for today" cards are hidden
         const groups = [];
         for (const c of cards) { let gr = groups.find((x) => x.name === c.group); if (!gr) groups.push(gr = { name: c.group, cards: [], note: '' }); gr.cards.push(c); if (c.groupNote) gr.note = c.groupNote; }
         const cardHtml = (c) => {
@@ -291,7 +319,7 @@ function renderCardScreen() {
             const mins = out ? out.minutes : c.minutes;
             const fam = c.kind === 'work' || c.kind === 'door' ? ` · ${famLine(c)}` : ''; // v0.11.155 (FD1, NX)
             const ctag = hideTag(c.tag);
-            const tag = c.status === 'late' ? LATE_TAG : c.status !== 'open' ? 'done for today — back tomorrow' : c.kind === 'door' ? `opens the scene${ctag ? ` · ${ctag}` : ''}` : (ctag || (showChecks ? 'no check' : ''));
+            const tag = c.status === 'late' ? LATE_TAG : c.status === 'busy' ? `busy: ${c.busy}` : c.status === 'evening' ? 'the week\'s work stops at evening: tomorrow' : c.status !== 'open' ? 'done for today — back tomorrow' : c.kind === 'door' ? `opens the scene${ctag ? ` · ${ctag}` : ''}` : (ctag || (showChecks ? 'no check' : ''));
             const dies = out?.death ? ` <b class="dies">${out.death === 'hunger' ? 'Starves here' : 'Collapses here'}</b>` : '';
             const when = c.kind === 'door' || !mins || !out ? '' : ` ${endAt(out.end)}`;
             return `<button class="card${c.kind === 'door' ? ' door' : ''}${out?.death ? ' fatal' : ''}${c.check && showChecks ? ` b-${c.check.band}` : ''}" data-run="${esc(c.id)}" ${c.status !== 'open' ? 'disabled' : ''}>${md(c.label)}${dies}${tag ? `<span class="tag">${esc(tag)}</span>` : ''}${c.status === 'open' ? `<span class="len">${mins ? durLabel(mins) : 'at once'}${when}${fam}</span>` : ''}</button>`;
@@ -304,7 +332,7 @@ function renderCardScreen() {
         const ns = store.get(NONEXT_KEY) === '1' ? '' : nextStep(g, SCENES); // v0.11.72 (N1): Selene's next-step line, ✕ hides it for good
         hubTop = `${ns ? `<div class="nstep"><b>Next step</b> <span>${esc(ns)}</span><button class="nstep-x" data-nonext="1" aria-label="Hide the next-step line">✕</button></div>` : ''}${yHtml}`;
         const work = workGroups(g.scene);
-        hubHtml = groups.map((gr) => groupHtml(gr.name, gr.cards.map(cardHtml), !work.has(gr.name), gr.note)).join(''); // v0.11.67 (D2)
+        hubHtml = (hub && weekHub(g) ? weekHtml() : '') + groups.map((gr) => groupHtml(gr.name, gr.cards.map(cardHtml), !work.has(gr.name), gr.note)).join(''); // v0.11.67 (D2); v0.11.204 (W1, P1): the week's plan first
     }
     const sk = v.end || hub ? { steps: 0 } : skipPlan(g, SCENES); // v0.11.35 (P1-a): a stretch read before, 2 steps or more
     const skipHtml = sk.steps >= 2 ? `<button class="card story skip" data-skip="1">Skip to the next choice.<span class="tag">${sk.steps} scenes you know</span><span class="len">${esc(durLabel(sk.minutes))} · at once</span></button>` : '';
@@ -958,13 +986,20 @@ view.addEventListener('click', (ev) => {
     const b = ev.target.closest('button');
     if (!b) return;
     if (recovery && !menu) { onRecovery(b); return; }
-    if (b.dataset.act || b.dataset.flee || b.dataset.yield || b.dataset.run || b.dataset.med) { // v0.11.64: cards act at once, so they get the double-tap guard too
+    if (b.dataset.act || b.dataset.flee || b.dataset.yield || b.dataset.run || b.dataset.med || b.dataset.week) { // v0.11.64: cards act at once, so they get the double-tap guard too
         const now = Date.now();
         if (now - lastPress < 400) return; // double-tap guard: a fast second tap must not take the next scene's choice
         lastPress = now;
     }
     try {
         if (b.dataset.run) { doTask(b.dataset.run); return; } // v0.11.64: at once (was: run now, ahead of the queue)
+        if (b.dataset.plan) { // v0.11.204 (W1, P1): a count on the week's plan
+            const p = planEnsure(g); if (!p) { render(); return; }
+            const k = b.dataset.plan, cur = /^med:/.test(k) ? p.med[k.slice(4)] || 0 : p.items[k] || 0;
+            planSet(g, k, cur + Number(b.dataset.d || 0)); autosave(); render(); return;
+        }
+        if (b.dataset.week === 'run') { const p = planEnsure(g); if (p) runPlan(); autosave(); render(); window.scrollTo({ top: 0, behavior: smoothScroll() }); return; }
+        if (b.dataset.week === 'clear') { planClear(g); autosave(); render(); return; } // RV1 (TG11): week.js planClear
         if (b.dataset.menu) {
             const m = b.dataset.menu;
             if (m === 'continue' || m === 'recovery') { hadSave = true; menu = null; setTab('story'); return; }

@@ -49,7 +49,8 @@ import { LONG_CAL } from '../js/core/calendar.js'; // v0.11.203 (T1, TS8)
 import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, jamesHpMax, clockParts, coilMult } from '../js/core/game.js';
 import { INC_ONLY_ACTIONS, actionOpen } from '../js/core/forms.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
-import { isTaskHub, isTaskChoice, taskCards, taskOpen, runTask, taskState, setYuki, yukiLane } from '../js/core/tasks.js';
+import { isTaskHub, isTaskChoice, taskCards, taskOpen, runTask, taskState, setYuki, yukiLane, weekHub, CARRY_TASK } from '../js/core/tasks.js';
+import { foldNight, runWeek, planHere, planEnsure, planSet, weekResume } from '../js/core/week.js'; // v0.11.204 (owner pick W1, B1): the bots plan by the week
 import { medCards, runMed, canMeditate } from '../js/core/meditate.js';
 import { writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { noFold, OUTCOME_SCENES, againView, noteRead } from '../js/story/again.js'; // v0.11.132 (E1, RP); v0.11.133 (FP2): noteRead
@@ -182,6 +183,31 @@ function storyPick(model, g, choices, mem) {
     return pick(choices).index;
 }
 
+/** v0.11.204 (owner pick W1, B1): the long calendar's bots plan by the week on a stay (js/core/week.js). What a model counts a day
+ *  (its own rules, outside the plan: eating, resting, the breakthrough, doors, talks and chores) stays a card of its own; the week's
+ *  cards go on the plan, once each (Careful and the Sociable food first, then training), and the Meditate cards by the day:
+ *  Careful and the Sociable a meridian session (the day's sit runs itself), the Completionist a sit and a session, the Cultivator
+ *  6 sits, 3 sessions and 4 hours of gathering. Taps: a count set is one, a "Run the week" one; the plan's own steps, the
+ *  routine and the quiet nights none. Random plays as before. */
+const MED_PLAN = { careful: { sit: 0, mer: 1, qi: 0 }, sociable: { sit: 0, mer: 1, qi: 0 }, completionist: { sit: 1, mer: 1, qi: 0 }, cultivator: { sit: 6, mer: 3, qi: 4 } };
+const WEEK_SIDE = (c) => !c.week && c.id !== CARRY_TASK && !['sit', 'mer', 'qi'].includes(c.kind) && !/^(Call it a day|Cultivate|Condense)/.test(c.label);
+function weekRun(model, g, cards, st) {
+    let p = planHere(g);
+    if (!p && weekResume(g)) { const r = runWeek(g, SCENES); st.weekStops[r.stop] = (st.weekStops[r.stop] || 0) + 1; } // RV1 (L1): the week's end reported
+    if (!p) {
+        p = planEnsure(g); if (!p) return false;
+        const wk = cards.filter((c) => c.week);
+        const order = careLike(model) ? [...wk.filter((c) => FOOD_GROUP.test(c.group || '')), ...wk.filter((c) => TRAIN_GROUP.test(c.group || '')), ...wk.filter((c) => !FOOD_GROUP.test(c.group || '') && !TRAIN_GROUP.test(c.group || ''))] : wk;
+        for (const c of order) { planSet(g, c.id, 1); st.taps.set++; }
+        for (const [k, n] of Object.entries(MED_PLAN[model] || {})) if (n) { planSet(g, `med:${k}`, n); st.taps.set++; }
+    }
+    if (!p.running) st.taps.run++;
+    const m0 = g.minutes, s0 = g.scene;
+    const r = runWeek(g, SCENES);
+    st.weekStops[r.stop] = (st.weekStops[r.stop] || 0) + 1;
+    return g.minutes !== m0 || g.scene !== s0;
+}
+
 /** One game. Returns 'end' (an Act 1 ending), 'gaveUp' (past Coil 8) or 'stuck'. */
 function play(run, model, st, yuki) {
     rs = seedOf(run, 7 + MODELS.indexOf(model === 'sociable' ? 'careful' : model) + (yuki === 'off' ? 50 : 0)); // RV1 (PS): the Sociable on Careful's dice, so the two compare game for game
@@ -255,7 +281,16 @@ function play(run, model, st, yuki) {
             if (yl) { if (model === 'random') { if (rnd(3) === 0) setYuki(g, !yl.on); } else if (yl.on !== (yuki === 'on')) setYuki(g, yuki === 'on'); }
             const cards = taskCards(g, SCENES);
             const stops = v.choices.filter((c) => !c.disabled && (c.index >= 1000 || !isTaskChoice(SCENES, g.scene, c.index)));
-            let plan = hubPlan(model, g, cards, mem, !stops.length);
+            let plan = null;
+            if (CAL && model !== 'random' && weekHub(g)) { // v0.11.204 (W1, B1): the model's own cards first, then the week's plan
+                plan = hubPlan(model === 'cultivator' ? 'completionist' : model, g, cards.filter(WEEK_SIDE), mem, false);
+                if (!plan || !plan.length) {
+                    plan = null;
+                    if (weekRun(model, g, cards, st)) continue;
+                    if (planHere(g)?.stop === 'evening' && stops.length) plan = []; // the evening's choice is a story stop: no cards first
+                }
+            }
+            if (!plan) plan = hubPlan(model, g, cards, mem, !stops.length);
             // v0.11.203 (T1, TS8): the long calendar's weeks run out of work before they run out of days (the planner comes in TS2 + TS3);
             // a model with nothing fresh whose story stops pass no time (Yuki's form screen) would go round them forever, so after
             // 12 steps on one minute it rests an hour (or takes the first open card). Long calendar only: the old numbers stay as they were.
@@ -273,7 +308,7 @@ function play(run, model, st, yuki) {
                     const c = cards.find((x) => x.id === id);
                     if (c && !EAT.test(c.label)) st.work++;
                     const m0 = g.minutes;
-                    runTask(g, SCENES, id); st.cards++;
+                    runTask(g, SCENES, id); st.cards++; st.taps.card++;
                     if (model === 'sociable' && c?.kind === 'door' && SOCIAL.test(c.label)) st.talks = (st.talks || 0) + 1; // v0.11.160 (NX2, CN; RV1 TC)
                     const ck = c && (c.kind === 'chore' && /^(Cultivate|Condense)/.test(c.label) ? 'sit' : c.kind); // a hub's own Cultivate chore is a sit
                     if (CULT_KINDS.includes(ck)) st.cult[ck] = (st.cult[ck] || 0) + (g.minutes - m0); // v0.11.142 (CV1): cultivation on task screens
@@ -286,12 +321,13 @@ function play(run, model, st, yuki) {
                 if (!open.length) { assert(false, `${model}: dead end at task screen ${g.scene} (run ${run})`); return 'stuck'; }
                 const done = doneSet(mem, g);
                 const c = careLike(model) ? forcedPick(open, done, mem.walked, dayKey(g)) : oldForcedPick(open, done); // v0.11.163 (W1, RS; tests/lib/forced.mjs)
-                done.add(c.id); st.forced++; st.cards++;
+                done.add(c.id); st.forced++; st.cards++; st.taps.card++;
                 runTask(g, SCENES, c.id);
                 continue;
             }
             const i = storyPick(model, g, stops, mem); mem.tried.add(`${g.scene}:${i}`);
-            runCombat(g, choose(g, SCENES, i), st, smart);
+            runCombat(g, choose(g, SCENES, i), st, smart); st.taps.story++;
+            if (CAL && !g.combat) st.taps.fold += foldNight(g, SCENES).steps; // v0.11.204 (W1, R3): as main.js does after a story choice
             continue;
         }
         let open = v.choices.filter((c) => !c.disabled);
@@ -305,7 +341,8 @@ function play(run, model, st, yuki) {
         if (g.scene === 'coil_end' && g.coil.why === 'shen') open = open.filter((c) => /start of Act 1/.test(c.label));
         if (!open.length) { assert(false, `${model}: no choice left at ${g.scene} (run ${run})`); return 'stuck'; }
         const i = storyPick(model, g, open, mem); mem.tried.add(`${g.scene}:${i}`);
-        runCombat(g, choose(g, SCENES, i), st, smart);
+        runCombat(g, choose(g, SCENES, i), st, smart); st.taps.story++;
+        if (CAL && !g.combat) st.taps.fold += foldNight(g, SCENES).steps; // v0.11.204 (W1, R3)
         if (careLike(model) && g.james.satiety < 30 && foodLeft(g)) { // RV1 (HN): the Sociable too; v0.11.163 (owner pick HN1): where, and how low
             st.hungry++; st.hungryAt[g.scene] = (st.hungryAt[g.scene] || 0) + 1;
             const b = g.james.satiety < 10 ? 'f0' : g.james.satiety < 20 ? 'f10' : 'f20'; st.hungryFed[b] = (st.hungryFed[b] || 0) + 1;
@@ -322,7 +359,7 @@ const NIGHT_ORDER = ['quiet', 'Mei Lin', 'Ya', 'trio', 'Yuki', 'other'];
 const ENDING_ORDER = ['accord', 'revelation', 'victory', 'taken', 'none']; // v0.11.132 (E1, EB): g.flags.a1_outcome (act1_return.js)
 const CULT_KINDS = ['sit', 'mer', 'qi', 'bt']; // v0.11.142 (CV1)
 const CULT_NAMES = { sit: 'sits', mer: 'meridians', qi: 'gather Qi', bt: 'breakthroughs' };
-const blank = () => ({ hungryAt: {}, hungryFed: {}, cult: {}, endRealm: {}, spare: 0, nights: {}, games: 0, finished: 0, gaveUp: 0, stuck: 0, cards: 0, work: 0, forced: 0, oneCoil: 0, hungry: 0, cuAhead: 0, deaths: {}, tribute: {}, prologueClear: {}, act1Clear: {}, endings: {}, fights: {} });
+const blank = () => ({ taps: { story: 0, card: 0, set: 0, run: 0, fold: 0 }, weekStops: {}, hungryAt: {}, hungryFed: {}, cult: {}, endRealm: {}, spare: 0, nights: {}, games: 0, finished: 0, gaveUp: 0, stuck: 0, cards: 0, work: 0, forced: 0, oneCoil: 0, hungry: 0, cuAhead: 0, deaths: {}, tribute: {}, prologueClear: {}, act1Clear: {}, endings: {}, fights: {} });
 const all = {};
 const playInto = (st, run, m, yuki) => { st.games++; const r = play(run, m, st, yuki); if (r === 'end') st.finished++; else if (r === 'stuck') st.stuck++; };
 for (const m of PLAY) {
@@ -398,8 +435,9 @@ for (const [m, st] of Object.entries(all)) {
         const h = (m) => Math.round((10 * m) / 60 / Math.max(1, st.games)) / 10;
         const tot = CULT_KINDS.reduce((a, k) => a + (st.cult[k] || 0), 0);
         const en = sum(st.endRealm);
-        console.log(`  cultivation: ${h(tot)} h a game on task screens (${CULT_KINDS.map((k) => `${CULT_NAMES[k]} ${h(st.cult[k] || 0)}`).join(', ')}) · realm at Act 1's end ${en ? `${avg(st.endRealm)} (n ${en})` : '—'} · spare-time cards ${h(60 * (st.spare || 0))} a game`);
+        console.log(`  cultivation${CAL ? ' (the bot\'s own cards; the week plan\'s and the routine\'s not counted)' : ''}: ${h(tot)} h a game on task screens (${CULT_KINDS.map((k) => `${CULT_NAMES[k]} ${h(st.cult[k] || 0)}`).join(', ')}) · realm at Act 1's end ${en ? `${avg(st.endRealm)} (n ${en})` : '—'} · spare-time cards ${h(60 * (st.spare || 0))} a game`);
     }
+    if (CAL) { const t = st.taps, n = Math.max(1, st.games), a = (x) => (x / n).toFixed(0); console.log(`  taps a game: ${a(t.story + t.card + t.set + t.run)} (story ${a(t.story)}, cards ${a(t.card)}, the week's plan ${a(t.set + t.run)}: counts ${a(t.set)}, runs ${a(t.run)}) · quiet-night screens walked ${a(t.fold)} · the plan's stops: ${Object.entries(st.weekStops).sort((x, y) => y[1] - x[1]).map(([k, v]) => `${k} ${a(v)}`).join(', ') || '—'}`); } // v0.11.204 (W1, B1)
     if (st.idle) console.log(`  long calendar: ${(st.idle / Math.max(1, st.games)).toFixed(1)} idle hours a game (nothing fresh left on a task screen before evening)`); // v0.11.203 (T1, TS8)
     console.log(`  days: tribute Day ${st.tribN ? (st.tribDay / st.tribN).toFixed(1) : '—'} (n ${st.tribN || 0}) · Act 1's end Day ${st.endN ? (st.endDay / st.endN).toFixed(1) : '—'} (n ${st.endN || 0})${CAL ? ' · the long calendar' : ''}`); // v0.11.203 (T1, TS8)
     console.log(`  last nights: ${nt ? NIGHT_ORDER.filter((k) => k !== 'other' || st.nights.other).map((k) => `${k} ${st.nights[k] || 0}`).join(' / ') + ` (of ${nt} last evenings)` : '—'}`);
@@ -432,6 +470,13 @@ if (!SHARD && !CAL) { // v0.11.203 (TS8): the long calendar is never compared wi
     }
 }
 for (const h of hungryLines) console.log(`  ${h}`); // v0.11.163 (HN1): log only, no NOTE
+// RV1 (TG12, the Opus review): the long calendar's bots by the week: each model's weeks end, it breaks through on a stay, and the
+// stays' weeks are worked (Careful, the Sociable and the Completionist stay the forest's three weeks: the tribute on Day 40 or later)
+if (CAL && !SHARD) for (const [m, st] of Object.entries(all)) {
+    if (m === 'random' || /:/.test(m) || st.games < 10) continue;
+    assert((st.weekStops.week || 0) > 0 && (st.weekStops.breakthrough || 0) > 0, `${m} (--cal 7): the plan's weeks end and it stops for a breakthrough (${JSON.stringify(st.weekStops)})`);
+    if (['careful', 'sociable', 'completionist'].includes(m)) assert(st.tribN && st.tribDay / st.tribN >= 40, `${m} (--cal 7): the forest's weeks worked, the tribute on Day 40 or later (Day ${st.tribN ? (st.tribDay / st.tribN).toFixed(1) : '—'})`);
+}
 for (const n of notes) console.log(`  NOTE  ${n}`);
 for (const f of fails) console.error(`  FAIL  ${f}`);
 console.log(`\n${pass} passed, ${fail} failed${notes.length ? `, ${notes.length} notes` : ''}`);

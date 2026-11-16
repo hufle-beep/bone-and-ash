@@ -14,13 +14,13 @@
  */
 import { hasForm } from './forms.js';
 import { choose, goTo, choiceOpen, choiceTag, gives, setTimeless, defaultMinutes, movesPlace, wasPicked, isMenuScene, isTimeless, setFamiliar, doorMinutes } from './story.js';
-import { d8, itemCap, yukiForm, advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, canBreakThrough, btMinutes, realmName, condense, sitMinutes, useSpeed, USE_N, USE_CAP, nightLock, endsLate, sitUseless, jamesQiMax, SATIETY_PER_HOUR, breakAt, coilMult, fmtMult, YUKI_HELD_TEXT } from './game.js';
+import { NIGHT_TO, d8, itemCap, yukiForm, advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, canBreakThrough, btMinutes, realmName, condense, sitMinutes, useSpeed, USE_N, USE_CAP, nightLock, endsLate, sitUseless, jamesQiMax, SATIETY_PER_HOUR, breakAt, coilMult, fmtMult, YUKI_HELD_TEXT } from './game.js';
 import { CONDENSE_SIT_COST } from './formulas.js';
 import { btTarget, MER_LINES, lineWindow, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
-import { onceOpen, noteOnce, stageOpen, ONCE_MENUS } from '../story/oneoff.js';
-import { daily, foodCount } from '../story/common.js';
-import { storyDay, calStart } from './calendar.js'; // v0.11.203 (owner pick T1, TS1): the long calendar
+import { onceOpen, noteOnce, stageOpen, ONCE_MENUS, EVENING_HOUR } from '../story/oneoff.js';
+import { daily, foodCount, eatBest } from '../story/common.js';
+import { storyDay, calStart, longCal, LONG_CAL, STAY_DAYS } from './calendar.js'; // v0.11.203 (owner pick T1, TS1): the long calendar; v0.11.204 (W1): the week
 import { endCoil } from './coil.js';
 import { canMeditate } from './meditate.js';
 import { keepReplies } from './replies.js'; // v0.11.69 (P1)
@@ -245,6 +245,7 @@ export function taskCards(g, scenes, only = null) {
         else if (isChore(hubId, c)) push(`${hubId}:${i}`, c.check && !cfg.plainChecks ? 'work' : 'chore', cfg.own, c, c.time || 0, 'open');
     });
     cards.push(...medTaskCards(g, scenes));
+    weekCards(g, scenes, hubId, cards); // v0.11.204 (owner pick W1, S1): the long calendar's week
     return nightCards(g, scenes, cards, only);
 }
 /**
@@ -283,7 +284,7 @@ function medTaskCards(g, scenes) {
 }
 
 export const taskOpen = (g, scenes, id) => (id === MER_TASK ? !!TASK_HUBS[g.scene] && merChoice(g, scenes) >= 0 && !nightLock(g) : taskCards(g, scenes, id).some((c) => c.id === id && c.status === 'open')); // v0.11.13: an old queue's mer:next still runs
-export const taskLabel = (g, scenes, id) => { if (id === MER_TASK) return 'Next meridian session'; if (lineOfTask(id)) return lineName(g, lineOfTask(id)).replace(/\.$/, ''); if (id === BT_TASK) return 'Break through'; if (id === SIT_TASK) return 'Cultivate: one sit'; if (id === QI_TASK) return 'Meditate: gather Qi'; const p = parse(id); const c = scenes[p.scene]?.choices?.[p.index]; return c ? asText(c.text, g) : id; };
+export const taskLabel = (g, scenes, id) => { if (id === CARRY_TASK) return `Go on: ${carryHere(g, g.scene)?.label || 'the week\'s work'}`; if (id === MER_TASK) return 'Next meridian session'; if (lineOfTask(id)) return lineName(g, lineOfTask(id)).replace(/\.$/, ''); if (id === BT_TASK) return 'Break through'; if (id === SIT_TASK) return 'Cultivate: one sit'; if (id === QI_TASK) return 'Meditate: gather Qi'; const p = parse(id); const c = scenes[p.scene]?.choices?.[p.index]; return c ? asText(c.text, g) : id; };
 
 /** HP 0 during a task (v0.9.4): the Coil ends; the Coil screen decides what happens next. */
 function collapse(g, scenes, hubId) {
@@ -324,7 +325,12 @@ function resolveWork(g, scenes, hubId, card, id) {
         lines.push(`${k.skill} ${k.value} / DC ${k.dc} — ${BAND_TEXT[band]}`);
         if (c.xp !== false) lines.push(...awardXp(g, c.check.xpTo || c.check.skill, c.check.band || 'standard', { fail: band === 'fail', factor: band === 'partial' ? ratio : 1 }));
     }
-    const mins = Math.round((((card.entry?.time || 0) + (c.time || 0)) * NEW_LENGTH) / cardSpeed(t.fam[id] || 0));
+    const once = Math.round((((card.entry?.time || 0) + (c.time || 0)) * NEW_LENGTH) / cardSpeed(t.fam[id] || 0));
+    // v0.11.204 (owner pick W1, S1): on a stay of the long calendar a week's card is ×7 its time: today's share up to the evening,
+    // the rest carried to the next mornings (the "Go on" card, `g.tasks.carry`); its result, XP and familiarity once, as before
+    const total = weekCard(g, hubId, card) ? once * WEEK_MULT : once;
+    const mins = total > once ? Math.min(total, workRoom(g, hubId)) : once;
+    if (total > mins) t.carry = { id, hub: hubId, left: total - mins, total, label: String(asText(c.text, g)).replace(/\.$/, ''), coil: coilKey(g) };
     lines.push(...advance(g, mins, { work: true }));
     g.james.satiety = Math.max(0, g.james.satiety - (FED_EXTRA_PER_HOUR * mins) / 60);
     takeCapNotes();
@@ -353,6 +359,7 @@ function resolveWork(g, scenes, hubId, card, id) {
         if (band === 'partial' && lost > 0) g.james.hp = hp0; // a partial never hurts
     }
     for (const i of new Set(takeCapNotes())) lines.push(`Hammerspace: ${itemNames[i]?.name || i} is full — the rest stays behind.`);
+    if (total > once) lines.push(t.carry?.id === id ? `A week's work: ${hrs(total)} in all, ${hrs(t.carry.left)} still to go (Go on, from tomorrow morning).` : `A week's work: ${hrs(total)}, done.`);
     if ((band === 'partial' || band === 'fail') && c.check) {
         const a = t.adapt[id] || 0;
         if (a < ADAPT_MAX) { t.adapt[id] = Math.min(ADAPT_MAX, a + ADAPT_STEP); lines.push(`${ADAPT_REPLY} (Intuitive Aptitude: +${ADAPT_STEP} on this next time.)`); }
@@ -435,12 +442,31 @@ export function runTask(g, scenes, id) {
     const hubId = g.scene;
     if (g.tasks?.door) delete g.tasks.door; // v0.11.141 (FX1, DI): back on a task screen
     if (!runsHere(g, scenes, id)) throw new Error(`Not a task hub: ${hubId}`); // v0.11.14: Meditate cards also on the resting places
-    const card = cardOf(scenes, hubId, id);
+    const card = id === CARRY_TASK ? { kind: 'carry' } : cardOf(scenes, hubId, id);
     if (!card) throw new Error(`No card ${id} on ${hubId}`);
     const m0 = g.minutes;
     const lines = [];
     let fail = false;
-    if (card.kind === 'bt') {
+    if (st(g).carry && TASK_HUBS[hubId] && !carryHere(g, hubId) && card.kind !== 'carry') delete st(g).carry; // v0.11.204 (W1, S1): a week's work left behind
+    if (!routineBusy) { // v0.11.204 (owner pick W1, R1 + R2): the day's meals and sit, long calendar only
+        const pre = dayRoutine(g, scenes, hubId, card.kind, id);
+        lines.push(...pre);
+        // RV1 (H1, L2; the Opus review): the routine took the time the card needed (a "Go on" past the evening hour too): not run, said so
+        if (pre.length && g.scene === hubId && (card.kind === 'carry' ? workRoom(g, hubId) <= 0 : !taskOpen(g, scenes, id))) { lines.push(SKIP_LINE); return { lines, fail: false, stopped: false, skipped: true }; }
+        if (pre.length && g.scene !== hubId) return { lines, fail: false, stopped: true, skipped: true };
+    }
+    const mY = g.minutes; // RV1 (M1): Yuki's lane counts from here; the day's sit ticked her for its own minutes
+    if (card.kind === 'carry') {
+        const cy = carryHere(g, hubId);
+        if (!cy) throw new Error('No week\'s work to go on with');
+        const now = Math.min(cy.left, workRoom(g, hubId));
+        if (now <= 0) throw new Error('The day\'s work is over');
+        lines.push(...advance(g, now, { work: true }));
+        g.james.satiety = Math.max(0, g.james.satiety - (FED_EXTRA_PER_HOUR * now) / 60);
+        cy.left -= now;
+        lines.push(cy.left > 0 ? `${cy.label}: ${hrs(now)} more, ${hrs(cy.left)} still to go.` : `${cy.label}: done, ${hrs(cy.total)} in all.`);
+        if (cy.left <= 0) delete st(g).carry;
+    } else if (card.kind === 'bt') {
         if (!btOpen(g)) throw new Error('No breakthrough possible');
         g.flags.bt_return = hubId;
         if (!TASK_HUBS[hubId]) g.flags.med_back = hubId; // v0.11.14: back to a resting place without its enter again
@@ -477,7 +503,7 @@ export function runTask(g, scenes, id) {
         if (card.kind === 'chore' || card.kind === 'door') learn(g, scenes, hubId, card, id, 1);
         if (card.kind === 'door' && g.scene !== hubId) st(g).door = { id, speed }; // v0.11.141 (FX1, DI): the scenes behind it run at its speed (story.js)
     }
-    lines.push(...yukiTick(g, hubId, g.minutes - m0));
+    lines.push(...yukiTick(g, hubId, g.minutes - mY));
     let stopped = g.scene !== hubId;
     if (!stopped && g.james.hp <= 0) { lines.push(...collapse(g, scenes, hubId)); stopped = true; }
     return { lines, fail, stopped };
@@ -616,6 +642,85 @@ export function sitSummary(lines) {
     return [...out, ...rest];
 }
 export const SIT_STOP_TEXT = { sat: 'the breakthrough point', qi: 'then Qi runs out', night: 'then the day ends', fed: 'then you need food', shut: 'then it stops', left: 'the story moves on', max: 'a long session' };
+
+/* ---------- v0.11.204 (owner pick W1; roadmap-time.md TS2 + TS3): the week, long calendar only ---------- */
+/**
+ * On a stay of the long calendar (`weekHub`: the wilds, the village, Ashfall's Fallout and the Heart, on a story day that is a stay):
+ *  - S1: a week's card (a work card of the hub's own menus: Forage, Hunt, Practice, Clinic, Workshop, Militia, Palisade, Council) takes
+ *    ×7 its time. Today's share runs up to the hub's evening hour (`EVENING_HOUR`); the rest is carried (`g.tasks.carry`) and goes on
+ *    with the "Go on" card the next mornings; while it is open the other week's cards are busy. Its result, XP, loot and familiarity
+ *    come once, at the start, as before. Leaving the stay drops what is left. Journeys, the old calendar and every other card: unchanged.
+ *  - R1: the meals run themselves: at the first card in each of three parts of the day (before 11:00, 11:00–14:59, from 15:00), the
+ *    best food in the hammerspace when Fed is under ROUTINE_FED (the eat cards stay).
+ *  - R2: the day's sit runs itself at the first card of the day, when Qi ≥ 10 and a sit is open (the Meditate cards stay).
+ * The week planner and the quiet nights are in week.js. New save fields (all in `g.tasks`, dropped by every rewind): `carry`, `routine`,
+ * and week.js's `plan` and `nf`. Saves without them play as before.
+ */
+export const WEEK_MULT = LONG_CAL;
+export const WEEK_HUBS = new Set(['wilds', 'ashfall', 'fo_ashfall', 'heart_hub']);
+export const ROUTINE_FED = 85;
+export const CARRY_TASK = 'week:carry';
+/** RV1 (L2): a card the day's meal and sit left no time for. */
+export const SKIP_LINE = 'The day\'s meal and sit came first: no time left for this today.';
+const hrs = (m) => { m = Math.round(m); return m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} min` : ''}` : `${m} min`; };
+const coilKey = (g) => `${g.coil?.n || 1}|${g.coil?.act || 0}`;
+/** Is this hub a stay of the long calendar right now? */
+export const weekHub = (g, hubId = g.scene) => longCal(g) && WEEK_HUBS.has(hubId) && STAY_DAYS.has(storyDay(g));
+/** Is this card a week's card here (S1)? */
+export const weekCard = (g, hubId, card) => !!card && card.kind === 'work' && !!card.menu && !!TASK_HUBS[hubId]?.menus?.[card.menu] && weekHub(g, hubId);
+/** The waking day (the night to 04:00 belongs to the day before). */
+export const workDay = (g) => Math.floor(((g.minutes || 0) - NIGHT_TO * 60) / 1440);
+/** Minutes left today for a week's work: to the hub's evening hour. */
+export const workRoom = (g, hubId = g.scene) => Math.max(0, workDay(g) * 1440 + (EVENING_HOUR[hubId] ?? 16) * 60 - g.minutes);
+/** The week's work carried on this hub, or null. */
+export function carryHere(g, hubId = g.scene) {
+    const cy = g.tasks?.carry;
+    return cy && typeof cy === 'object' && cy.hub === hubId && cy.left > 0 && cy.coil === coilKey(g) && weekHub(g, hubId) ? cy : null;
+}
+/** taskCards' part: the week's cards busy or over for the day, and the "Go on" card. */
+function weekCards(g, scenes, hubId, cards) {
+    if (!weekHub(g, hubId)) return;
+    const cy = carryHere(g, hubId), room = workRoom(g, hubId);
+    for (const c of cards) {
+        if (c.kind !== 'work' || !weekCard(g, hubId, cardOf(scenes, hubId, c.id))) continue;
+        c.week = true; // RV1 (L6): a card done for today stays on the plan's list
+        if (c.status !== 'open') continue;
+        if (cy) { c.status = 'busy'; c.busy = cy.label; } else if (room < 30) c.status = 'evening';
+    }
+    if (cy) cards.unshift({ id: CARRY_TASK, kind: 'carry', group: 'This week', label: `Go on: ${cy.label}`, tag: `${hrs(cy.left)} still to go`, minutes: Math.min(cy.left, room), status: room > 0 ? 'open' : 'evening', tier: 0, fam: 0, next: null });
+}
+let routineBusy = false;
+const MEAL = { b: 'Breakfast', l: 'Midday', s: 'Supper' };
+/** The part of the day (R1): before 11:00, 11:00–14:59, from 15:00 (the night to 04:00 is the evening's). */
+export const mealSlot = (g) => { const hh = clockParts(g.minutes).hh, h = hh < NIGHT_TO ? hh + 24 : hh; return h < 11 ? 'b' : h < 15 ? 'l' : 's'; };
+/** R1: this part of the day's meal, once, when Fed is under ROUTINE_FED and there is food (lines). RV1 (M2): also on the week plan's days off. */
+export function dayMeal(g, hubId = g.scene) {
+    if (!weekHub(g, hubId) || g.combat) return [];
+    const t = st(g), d = workDay(g);
+    if (!t.routine || typeof t.routine !== 'object' || t.routine.d !== d) t.routine = { d, meals: '', sit: false };
+    const slot = mealSlot(g);
+    if (String(t.routine.meals).includes(slot) || g.james.satiety >= ROUTINE_FED || foodCount(g) <= 0) return [];
+    t.routine.meals = `${t.routine.meals || ''}${slot}`;
+    const e = eatBest(g, { fire: hubId === 'wilds' ? !!g.flags.fire : true });
+    return e.length ? [`${MEAL[slot]}: ${String(e[0]).replace(/^You eat: /, '')}`] : [];
+}
+/** R1 + R2: the day's meals and sit before a card (lines), on a stay of the long calendar. */
+export function dayRoutine(g, scenes, hubId = g.scene, kind = '', id = '') {
+    if (!weekHub(g, hubId) || g.combat) return [];
+    const t = st(g), d = workDay(g), out = [];
+    out.push(...dayMeal(g, hubId));
+    if (!t.routine.sit) {
+        t.routine.sit = true;
+        const sid = sitTaskId(g, scenes);
+        if (!['sit', 'mer', 'qi', 'bt'].includes(kind) && id !== sid) { // a Meditate card first: it is the day's sitting
+            if (g.james.qi >= CONDENSE_SIT_COST && taskOpen(g, scenes, sid)) {
+                routineBusy = true;
+                try { const r = runTask(g, scenes, sid); out.push('The day\'s sit:', ...r.lines); } finally { routineBusy = false; }
+            }
+        }
+    }
+    return out;
+}
 
 /* ---------- v0.11.72 (owner pick N1, the copy-over push 5): the next-step line ---------- */
 /**

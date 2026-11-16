@@ -609,7 +609,8 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md', 'roadmap-act2.md', 'roadmap
     assert(/\*\*The target realm: open, options later\*\*/.test(rt) && /^## Open, options later/m.test(rt) && rt.includes('`fallback/<date>-before-time-scale`'), 'O1: the open questions and the fallback branch named');
     const e = r1.indexOf('### e. '), t = r1.indexOf('### t. The time scale'), f = r1.indexOf('### f. Romance');
     assert(e > 0 && t > e && f > t && r1.slice(t, f).includes('`roadmap-time.md`') && r1.slice(r1.indexOf('## 0. '), r1.indexOf('## 1. ')).includes('`roadmap-time.md`'), 'O1: roadmap.md names roadmap-time.md in section 0 and between groups e and f');
-    assert(ho.includes(w1804) && ho.includes('**`roadmap-time.md`**'), 'O1 (rule 6): the 18:04 words in the handover, and the new part among its docs');
+    const h29 = rd('history-29.md'); // v0.11.204 (W1, the 35 KB rule): v0.11.201's entry moved word for word to history-29.md
+    assert((ho + h29).includes(w1804) && ho.includes('**`roadmap-time.md`**') && (ho.includes(w1804) || ho.includes('word for word in `history-29.md`')), 'O1 (rule 6): the 18:04 words in the handover or moved word for word to history-29.md, and the new part among its docs');
     assert(d3.includes('- *(v0.11.200, owner D1, F2 and 17:46)* **Bundle D: done in v0.11.200.**') && d3.includes('  - **Closed since:** a success card saying its line twice in a day') && !r1.includes('**Closed since:**') && !r1.includes('**Bundle D: done in v0.11.200.**'), 'O1: section 0\'s old line and group e\'s closed items moved word for word to roadmap-done-3.md');
     assert(h28.includes('- **The time scale (the owner 2026-11-16 17:54, mid-build of v0.11.200, word for word;') && h28.includes('## v0.11.198 — ') && h28.includes('## v0.11.197 — ') && !ho.includes('## v0.11.198 — '), 'O1: the old open items and v0.11.197–198 moved word for word to history-28.md');
     assert(Buffer.byteLength(r1) <= MIRROR_MAX && Buffer.byteLength(rt) <= MIRROR_MAX, `O1: roadmap.md ${Buffer.byteLength(r1)} and roadmap-time.md ${Buffer.byteLength(rt)} bytes, under ${MIRROR_MAX}`);
@@ -668,7 +669,8 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md', 'roadmap-act2.md', 'roadmap
     const lore = rd('lore.md'), ra = rd('roadmap-act2.md'), ho = rd('handover.md');
     assert(lore.includes('## Selene (the owner, 2026-11-14; v0.11.174, picks SL1 and CN1)') && lore.includes('Instead of a meteor shower, she is knocked off course by a spacetime anomaly.') && lore.includes('Never "The ship" "The ship Selene" etc.'), 'P7A (rule 6): the owner\'s Selene words in lore.md');
     assert(ra.includes('The new, young ship should be called Luna in honour of Selene."') && ra.includes('There was a compartmentalized hammerspace on the ship too'), 'P7A (rule 6): the owner\'s Luna note in roadmap-act2.md');
-    assert(ho.includes('it\'s really different to spending a few more tokens vs to wait for a job to finish for an hours if it can be done in 10 minutes with parallelization...'), 'P7A (rule 6): the owner\'s note on parallel work in the handover');
+    const h29p = rd('history-29.md'); // v0.11.204 (W1, the 35 KB rule): moved word for word to history-29.md, a pointer left
+    assert((ho + h29p).includes('it\'s really different to spending a few more tokens vs to wait for a job to finish for an hours if it can be done in 10 minutes with parallelization...') && (ho.includes('parallelization...') || ho.includes('**parallel work (the owner 06:48) and the owner 08:14: word for word in `history-29.md`')), 'P7A (rule 6): the owner\'s note on parallel work in the handover, or moved word for word with a pointer');
 }
 // v0.11.144 (owner pick TB1): everything tabled; the Android app is section 0's first item, its five pushes in order, Selene's
 // files named; the handover's open items start with the same; the four done lines moved word for word, not left behind

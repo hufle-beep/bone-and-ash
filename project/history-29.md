@@ -2,6 +2,29 @@
 
 Started 2026-11-16 (v0.11.203), when `history-28.md` would have passed 20 KB with this move (owner pick U1, MD: history parts start at 20 KB, so a push uploads less). Older parts: `history-28.md` … `history.md`.
 
+## Moved from the handover in v0.11.204 (word for word)
+
+### From "Decided in chat" (v0.11.201's entry)
+
+- **v0.11.201: the time scale placed on the roadmap (O1) (the owner 17:54, in the handover since v0.11.200; 18:04 "so meridian opening, meditation, Qi condensation, eating and such things, also cooking, making camp should stay daily tasks, with the building and training tasks stretched out, along with the hunting. It would also change the structure of building trust with the villagers, but it would fit that the sect itself is not in a hurry because they are longer lived. It would naturally change the structure of gaining friendship and affection too, but would also bring the game closer to the proposed dating sim like structure. but the days themselves would of course be shorter... after this push is done, investigate the suggestions and order them on the roadmap. optimally this should go into the part that's finished before Friday afternoon."; the options at about 18:15; 18:19 "O1 go"):** **Measured first (read only; a scratch copy of the models test, 80 games each of Careful, Sociable, Completionist, Cultivator, the Coil that cleared each act):** TS1 the calendar (Days 1–7 and 8–21; ×7 = 147 days; about 12 of 21 days are stays, the Blackroot and the road home journeys; 13 fixed day numbers, 37 day tests, 7 day counters, 64 once-a-day keys, 71 hour tests; the rewind points; old saves to their week); TS2 the daily layer (meals 1.6–2.6 a day, Fed about −70 to −76 a day, a meal 15–30; Act 1 Careful 15 h, Cultivator 43 h; 3 meals × 147 days ≈ 441 taps unless the routine runs itself); TS3 the weekly layer (Act 1 Careful 85 h, about 6.5 h a day; Cultivator 87 h; the prologue Careful 18 h); TS4 food preservation (new cards, kept foods, spoiling); TS5 trust and affection (talks once a waking day; ×7 the talks unless scaled; a weekly free evening); TS6 the texts (88 counted-day phrases, 32 "Day N", "week" 21, "tomorrow" 59, "tonight" 52, meals 77; about 150–250 to check, 80–150 rewritten, two Fable runs); TS7 the realm pace (Saturation 10 / 15 / 22.5 / 33.8 / 50.6 h, 68 h of meridians for Foundation, speed by use ×10, the Coil bonus +25%; the realm at Act 1's end 1.0 for Careful, Sociable, Completionist, 4.4 for the Cultivator); TS8 the bots and tests (146 baseline numbers move). Claude's estimate: 4–6 pushes. **O1 🟢 the PC layout → the merged text push → the time scale → group f with TS5 → the retune with TS7 → Act 2 if there is time; 10–14 pushes before Friday, nothing redone (recommended) / O2 🟡 O1 without TS4 and TS5 before Friday (1–2 of group f's pushes redone later) / O3 🟠 F2 as it was, the time scale after Friday (3–5 pushes redone). Picked: O1.**
+
+### From "Open items" (the group e line's v0.11.196 part, the fork and the order after them, the 35 KB check)
+
+**Open, options later: all on the roadmap since v0.11.196 (M1):** flight on `roadmap-e.md`'s "Story, flight" line; tics and wording on its "Small text fixes" line; Yuki's forms (LQ, AG, the Old Tree's lip) on its "Reactions to Yuki's forms" line; the Android follow-ups (the update check off the API, target SDK 35/36, Welcome back) in `roadmap-2.md` section 4 (g)–(i); the items as they stood, word for word, in `history-26.md`. **The fork (the owner 2026-11-15 19:15, word for word):** "the fork can be moved to the end of the roadmap, the option to switch between generic and concrete cultural mentions covers what I wanted for now." (moved to `roadmap-2.md` section 5 in v0.11.190). After them, by the order: group e's open items on the roadmap, then group f, romance; CM's own open, options later items are on the roadmap's CM line (the fork's texts at the roadmap's end since v0.11.190); part 9's on the part 9 line.
+
+### From "Open items" (the group e line's "Still in force from v0.11.174" part, the 35 KB check)
+
+**parallel work (the owner 06:48, word for word):** "I mean, I know I said we should keep a reasonable amount of parallelization in order to not eat through my tokens and limit too quickly, but if a job can be sped up this much... then weigh the use of parallelization on the future tests, please... it's really different to spending a few more tokens vs to wait for a job to finish for an hours if it can be done in 10 minutes with parallelization..." (so: split long jobs into parallel runs whenever they don't depend on each other); **the owner 08:14 (v0.11.175, word for word): "I'm going to sleep so you can run this consecutively instead of parallel, 2 at a time, one of each core"** (read as: at most 2 Fable jobs at once, the workspace has 2 cores; v0.11.175 ran its drafts in two waves of two and its two reviews side by side).
+
+### From "Version notes"
+
+#### v0.11.201 — The time scale placed on the roadmap (O1)
+
+- **Files:** `project/roadmap-time.md` (new: the owner's words, TS1–TS8, the order, the open questions), `roadmap.md` (the "Last updated" line; section 0's line; the order; section 1's new "t" pointer; group e's closed items moved), `roadmap-done-3.md` (section 0's line as of v0.11.200 and group e's closed items, word for word), `history-28.md` (new: v0.11.198's and v0.11.197's entries and the two changed open items, word for word), `handover.md`, `changelog.md`, `restore-points.md`, `tests/tools.test.mjs` (O1's block; the order line; `roadmap-time.md` among the open parts), `tests/README.md`, `sw.js` (VERSION).
+- **What:** see the version line. The game as v0.11.199.
+- **Checks:** docs and tests only (rule 2): `tests/tools.test.mjs` and `bash tools/check.sh quick`.
+- **Fable:** not used. **Opus:** not used.
+
 ## Moved from the handover in v0.11.203 (word for word)
 
 ### From "Open items" (two lines, as of v0.11.202)
