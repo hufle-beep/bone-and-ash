@@ -2,6 +2,21 @@
 
 Started 2026-11-16 (v0.11.198), when `history-26.md` would have passed 20 KB with this move (owner pick U1, MD: history parts start at 20 KB, so a push uploads less). Older parts: `history-26.md` … `history.md`.
 
+## Moved from the handover in v0.11.199 (word for word)
+
+### From "Decided in chat"
+
+- **v0.11.196: the open items sorted into their roadmap places (M1) (the owner 12:15 "please check to move all dangling issues into their appropriate roadmap spots and give me the open roadmap items after that is done"; the options at about 12:16; 12:17 "M1 go"):** **Found (read only, the five roadmap files against the handover and the recent reviews):** a section 0 holding 12 open items that have homes elsewhere; b 5 on no roadmap (other parts' fight intros never shown, `wilds.js` "a great deal", target SDK 35/36, Welcome back, F1's review notes L2 and L4); c 4 stale (group e's three v0.11.185 items done in v0.11.188 / v0.11.190; the flight line without F1); d `reference.md`'s "62 marked walks". **M1 🟢 a + b + c + d, one docs push (recommended) / M2 🟡 b + d / M3 🟠 no push, the list only. Picked: M1.** **MP (found while building: `tests/tools.test.mjs` MD pins `roadmap-e.md`'s moved block by sha256; the three tails broke it, 385 / 1; cut, the old pin matches exactly): H1 🟢 the test cuts the marked tails and counts them (recommended) / H2 🟡 a new `roadmap-e2.md` / H3 🟠 re-pin. Picked: H1 (12:24).**
+
+### From "Version notes"
+
+## v0.11.196 — The open items sorted into their roadmap places (M1)
+
+- **Files:** `project/roadmap.md` (section 0's line; group e's three v0.11.185 items marked done; the flight pointer), `roadmap-e.md` (the flight line, the small text fixes line, the Yuki's forms line), `roadmap-2.md` (section 4 (g)–(i)), `roadmap-done-3.md` (section 0's v0.11.195 line), `reference.md` (61 marked walks), `handover.md` (the open items as pointers; the moved text and v0.11.193's entries word for word in `history-26.md`), `tests/tools.test.mjs` (MD: the tails cut before the pin, H1), `tests/README.md`, `sw.js` (VERSION), the docs.
+- **What:** see the version line. The game as v0.11.195.
+- **Checks:** docs and a test (rule 2): `bash tools/check.sh quick` and `tests/tools.test.mjs` (387 / 0); MD's pin of `roadmap-e.md` cut the new tails first (H1, the owner's pick after the first quick check stopped on it: 385 / 1).
+- **Fable:** not used. **Opus:** not used.
+
 ## Moved from the handover in v0.11.198 (word for word)
 
 ### From "Decided in chat"
