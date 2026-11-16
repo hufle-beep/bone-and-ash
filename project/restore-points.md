@@ -9,7 +9,7 @@
 | `fallback/2026-11-13-before-rewrite` | 0.11.166 (`fb0ffac`), the game before Fable's rewrite pass (made with 0.11.167, owner picks P1A, CA1: part 1 of 8). |
 | `fallback/2026-11-09-before-difficulty` | 0.11.84 (`5eb5683`), the game before the XP rate ×0.6 and the targets 4 / 6 (made with 0.11.85, owner pick D: "at least twice as hard"). |
 
-The next one is made before the retune (section 2), in that push.
+The next one is made before the time scale's TS1 (v0.11.201, owner pick O1: `fallback/<date>-before-time-scale`) and before the retune (section 2), each in that push.
 
 ## Known-good versions (newest first)
 
@@ -19,7 +19,8 @@ Older versions (0.11.69 and before): `restore-points-2.md` (moved word for word 
 
 | Version | Commit | What it is |
 |---|---|---|
-| 0.11.200 | (this push) | D1 + KA + F2 (bundle D, tools and docs): `tools/packet.mjs`, `tools/textlint.mjs`, `tools/text-baseline.json`, `tests/tools.test.mjs`, `tests/README.md`, `project/roadmap.md`, `roadmap-e.md`, `roadmap-act2.md`, `roadmap-2.md`, `roadmap-done-3.md`, `handover.md`, `history-27.md`, `sw.js` (VERSION). The game as v0.11.199. |
+| 0.11.201 | (this push) | O1 (the time scale placed, docs and tests): `project/roadmap-time.md` (new), `roadmap.md`, `roadmap-done-3.md`, `history-28.md` (new), `handover.md`, `changelog.md`, `restore-points.md`, `tests/tools.test.mjs`, `tests/README.md`, `sw.js` (VERSION). The game as v0.11.199. |
+| 0.11.200 | `ea055d4` | D1 + KA + F2 (bundle D, tools and docs): `tools/packet.mjs`, `tools/textlint.mjs`, `tools/text-baseline.json`, `tests/tools.test.mjs`, `tests/README.md`, `project/roadmap.md`, `roadmap-e.md`, `roadmap-act2.md`, `roadmap-2.md`, `roadmap-done-3.md`, `handover.md`, `history-27.md`, `sw.js` (VERSION). The game as v0.11.199. |
 | 0.11.199 | `9e29291` | P1 (the bundles, docs only): `project/roadmap-e.md`, `roadmap.md`, `roadmap-2.md`, `handover.md`, `history-27.md`, `sw.js` (VERSION). The game as v0.11.198. |
 | 0.11.198 | `fa28d7a` | SX + L3 (the road home after a carried flight, more on-foot lines; S1, D1, T1, RV1): `js/core/story.js`, `news.js`, `js/story/act1_return.js`, `walks.js`, `sw.js`, `tools/textlint.mjs`, `tools/text-baseline.json`, the tests, the docs. A game change; one new flag (`party_flew`), no save field. |
 | 0.11.197 | `c631005` | C1 (walks with company flown only when carried; D1, RV1): `js/core/game.js`, `story.js`, `faq.js`, `news.js`, `js/story/walks.js`, `sw.js`, `tools/textlint.mjs`, the tests, the docs. A game change; no save field. |

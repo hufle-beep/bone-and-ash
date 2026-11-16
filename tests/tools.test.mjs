@@ -544,7 +544,7 @@ print(json.dumps({"n": len(R['masks']), "bad": bad, "bitmaps": sum('bitmap' in m
 // v0.11.88 (owner pick A: T1 + D2 + S1 + X): the roadmap's open work in two parts, sections 0–2 in roadmap.md (with the
 // "Last updated" line) and 3–6 with Decided in roadmap-2.md, each pointing at the other; the done lines in roadmap-done.md
 // (closed) and roadmap-done-2.md; the tests that read the roadmap read every open part
-const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md', 'roadmap-act2.md', 'roadmap-e.md', 'roadmap-retune.md']; // v0.11.171 (owner pick RA1): Act 2's own part; v0.11.178 (U1, MD): group e's and section 2's older open items
+const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md', 'roadmap-act2.md', 'roadmap-e.md', 'roadmap-retune.md', 'roadmap-time.md']; // v0.11.201 (owner pick O1): the time scale's own part // v0.11.171 (owner pick RA1): Act 2's own part; v0.11.178 (U1, MD): group e's and section 2's older open items
 {
     const [r1, r2, ra, re, rr] = ROADMAP_PARTS.map((f) => readFileSync(path.join(ROOT, 'project', f), 'utf8'));
     const secs = (t) => [...t.matchAll(/^## (\d)\. /gm)].map((m) => Number(m[1]));
@@ -587,6 +587,23 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md', 'roadmap-act2.md', 'roadmap
     const e = r1.indexOf('### e. '), f = r1.indexOf('### f. Romance'), s2 = r1.indexOf('## 2. The balance retune');
     assert(r1.slice(e, f).includes('`roadmap-e.md`') && r1.slice(s2).includes('`roadmap-retune.md`') && Buffer.byteLength(r1) <= MIRROR_MAX, `MD: the pointers in group e and section 2; roadmap.md ${Buffer.byteLength(r1)} bytes, under ${MIRROR_MAX}`);
 }
+// v0.11.201 (owner pick O1): the time scale in its own part, roadmap-time.md: the owner's 17:54 and 18:04 words word for word, TS1–TS8,
+// named in roadmap.md between group e and group f (section 1's "t") and in section 0; the 18:04 words in the handover (rule 6);
+// the old section 0 line and group e's closed items moved word for word to roadmap-done-3.md; roadmap.md under MIRROR_MAX
+{
+    const rd = (f) => readFileSync(path.join(ROOT, 'project', f), 'utf8');
+    const rt = rd('roadmap-time.md'), r1 = rd('roadmap.md'), ho = rd('handover.md'), d3 = rd('roadmap-done-3.md'), h28 = rd('history-28.md');
+    const w1754 = 'everything is happening too quickly, what is a day now should take a week.', w1804 = 'so meridian opening, meditation, Qi condensation, eating and such things, also cooking, making camp should stay daily tasks';
+    assert(rt.includes(w1754) && rt.includes('how much Qi per sitting is condensed."') && rt.includes(w1804) && rt.includes('optimally this should go into the part that\'s finished before Friday afternoon."'), 'O1: roadmap-time.md has both of the owner\'s messages word for word');
+    for (const t of ['TS1', 'TS2', 'TS3', 'TS4', 'TS5', 'TS6', 'TS7', 'TS8']) assert(rt.includes(`- **${t}, `), `O1: roadmap-time.md has ${t}`);
+    assert(/\*\*The target realm: open, options later\*\*/.test(rt) && /^## Open, options later/m.test(rt) && rt.includes('`fallback/<date>-before-time-scale`'), 'O1: the open questions and the fallback branch named');
+    const e = r1.indexOf('### e. '), t = r1.indexOf('### t. The time scale'), f = r1.indexOf('### f. Romance');
+    assert(e > 0 && t > e && f > t && r1.slice(t, f).includes('`roadmap-time.md`') && r1.slice(r1.indexOf('## 0. '), r1.indexOf('## 1. ')).includes('`roadmap-time.md`'), 'O1: roadmap.md names roadmap-time.md in section 0 and between groups e and f');
+    assert(ho.includes(w1804) && ho.includes('**`roadmap-time.md`**'), 'O1 (rule 6): the 18:04 words in the handover, and the new part among its docs');
+    assert(d3.includes('- *(v0.11.200, owner D1, F2 and 17:46)* **Bundle D: done in v0.11.200.**') && d3.includes('  - **Closed since:** a success card saying its line twice in a day') && !r1.includes('**Closed since:**') && !r1.includes('**Bundle D: done in v0.11.200.**'), 'O1: section 0\'s old line and group e\'s closed items moved word for word to roadmap-done-3.md');
+    assert(h28.includes('- **The time scale (the owner 2026-11-16 17:54, mid-build of v0.11.200, word for word;') && h28.includes('## v0.11.198 — ') && h28.includes('## v0.11.197 — ') && !ho.includes('## v0.11.198 — '), 'O1: the old open items and v0.11.197–198 moved word for word to history-28.md');
+    assert(Buffer.byteLength(r1) <= MIRROR_MAX && Buffer.byteLength(rt) <= MIRROR_MAX, `O1: roadmap.md ${Buffer.byteLength(r1)} and roadmap-time.md ${Buffer.byteLength(rt)} bytes, under ${MIRROR_MAX}`);
+}
 // v0.11.171 (owner pick RA1): Act 2 in its own part, roadmap-act2.md, named between group f and section 2 in roadmap.md, with the
 // owner's words of 2026-11-14 01:02, the Act 2 lines moved from roadmap-2.md section 5 (not left behind) and its facts in lore.md;
 // the handover's open items placed on the roadmap (group e's parts 5–9, section 2, roadmap-2.md sections 4 and 6), the handover pointing there
@@ -599,6 +616,7 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md', 'roadmap-act2.md', 'roadmap
     for (const t of ['- **Act 2** (open).', '**Plot point for Act 2: James\'s world is the outlier.**', '**For Act 2, the knitting bone (T6) and the crushing mass (T9)**', '**For Act 2, from the cultivation games:**', 'Universal-service gifts (organic armour']) assert(ra.includes(t) && !r2.includes(t), `RA1: "${t.replace(/\*/g, '').slice(0, 40)}" moved to roadmap-act2.md`);
     assert(/^## Act 2 \(the owner, 2026-11-14 01:02/m.test(lore) && /never be truly alive again, nor regenerate enough to fly/.test(lore) && /biology, engineering, agriculture, horticulture and gardening are mostly the same thing/.test(lore), 'RA1: Act 2\'s facts in lore.md');
     assert(/Now: the PC layout, the merged text push \(the rest of e\), f, section 2 \(the retune of the prologue and Act 1\), then Act 2 \(`roadmap-act2\.md`\) if there is time/.test(r1), 'RA1, v0.11.200 (owner pick F2): the order names Act 2 after the retune, the PC layout first');
+    assert(/\*\*Now: the PC layout, the merged text push \(the rest of e\), the time scale \(t, `roadmap-time\.md`\), f, section 2 \(the retune of the prologue and Act 1\), then Act 2 \(`roadmap-act2\.md`\) if there is time/.test(r1), 'v0.11.201 (owner pick O1): the order names the time scale between the merged text push and f, in bold (F2\'s order struck)');
     // v0.11.173 (P6A): parts 5 and 6 done, their lines moved word for word to roadmap-done-3.md; the stasis note in roadmap-act2.md
     { const d3 = rd('roadmap-done-3.md'); assert(r1.slice(r1.indexOf('### e. '), f).includes('**Parts 5, 6, 7 and 8: done**') && d3.includes('its stomp texts. **Done in v0.11.175**') && d3.includes('**Part 5, the Blackroot:** **done in v0.11.172**') && d3.includes('**Part 7, the Return:** **done in v0.11.174**') && d3.includes('**Part 6, the Heart:**') && d3.includes('**Done in v0.11.173**'), 'P6A: parts 5 and 6 done, their lines in roadmap-done-3.md (v0.11.174, P7A: and part 7)'); }
     assert(ra.includes('It\'s called the "Sneaky Bastard"') && ra.includes('we will square it when we get there...') && rd('roadmap-done-3.md').includes('`mei_carried_seed`'), 'P6A (rule 6): the owner\'s 03:50 and 03:57 note in roadmap-act2.md; SD in part 7');

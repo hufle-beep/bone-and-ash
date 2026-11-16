@@ -2,6 +2,16 @@
 
 Started in v0.11.150, when `roadmap-done-2.md` had passed about 45 KB. Newer than `roadmap-done-2.md` and `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.201 (word for word; owner pick O1: section 0's line as of v0.11.200, and group e's closed items; the size rule)
+
+### From section 0, as of v0.11.200
+
+- *(v0.11.200, owner D1, F2 and 17:46)* **Bundle D: done in v0.11.200.** **Next, for the owner's friend on Friday 2026-11-20 (a polished prologue and Act 1; Act 2 left for now): the PC layout (`roadmap-2.md` section 4) → the merged text push (A+E, B and C in one, `roadmap-e.md`) → group f → the retune of the prologue and Act 1 (section 2) → Act 2 if there is time;** each still gets its options first. **Section 0's open items moved to their homes in v0.11.196 (M1):** flight on `roadmap-e.md`'s "Story, flight" line; tics and wording on its "Small text fixes" line; Yuki's forms (LQ, AG, the Old Tree's lip) on its "Reactions to Yuki's forms" line; the update check, target SDK 35/36 and Welcome back in `roadmap-2.md` section 4 (g)–(i). Older done lines: `roadmap-done-3.md` (v0.11.200: section 0's line as of v0.11.199).
+
+### From group e (section 1), its closed items
+
+  - **Closed since:** a success card saying its line twice in a day (v0.11.169's L3: a success closes its card, v0.11.170); "Thirteen days" on Day 9 and the burned loft's mint (the Fallout's rewrite, v0.11.170); the prologue camp's fire and stakes on three nights (part 1, v0.11.167).
+
 ## Moved in v0.11.200 (word for word; owner pick D1: section 0's line as of v0.11.199, its done parts; the size rule)
 
 ### From section 0, as of v0.11.199
