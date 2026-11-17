@@ -12,6 +12,7 @@ Serves the folder, opens the game at 390x844 in headless Chromium and taps the r
   7. v0.11.11: holding a card opens its tooltip (no check text) and the tap that ends the hold runs nothing; the status bars carry
      progress values; a story card plays at once; each tab keeps its scroll.
   8. v0.11.64 (C1): on a resting place, Cultivate until the limit runs its sits at once (the clock and Saturation move).
+  (part 2, v0.11.208, PC3: the PC layout from 1100 px; see wide_layout)
 Game screens (story, fights, journal) also fail on any check text: DC, a die, "+ d6" (checks are hidden since v0.11.10).
 Fails on any page error, or when the screen shows undefined, NaN, [object Object] or an old mode name.
 The taps are seeded, so a run repeats. Exit code 1 on any failure.
@@ -865,6 +866,48 @@ def update_test(b):
     finally:
         srv.shutdown(); shutil.rmtree(tmp, ignore_errors=True)
 
+def wide_layout(b, url):
+    """v0.11.208 (owner pick PC3): the PC layout from 1100 px (saves/v0.11.7-long-forest-coil2.json, the Long Forest camp, 24 cards):
+    three columns (story, cards, Results), the switch hidden; at 1366x768 at least 10 cards whole on the first screen and Results
+    in view (11 when built), at 1920x1080 all 24; the cards scroll on their own under the pinned status bar and the last card is
+    what a tap at its middle reaches; at 130% text the cards still start under the status bar; no sideways scroll; the James
+    tab's page sits where it did in the old 44 rem column, centred; at 1099 px the screen is today's single column."""
+    save = (ROOT / 'saves/v0.11.7-long-forest-coil2.json').read_text()
+    for w, h, size, need in ((1366, 768, 100, 10), (1920, 1080, 100, 24), (1366, 768, 130, 0), (1099, 768, 100, -1)):
+        ctx = b.new_context(viewport={'width': w, 'height': h}, service_workers='block')
+        pg = ctx.new_page(); pg.on('pageerror', lambda e: fails.append(f"page error: {e}"))
+        fresh(pg, url, "([s, z]) => { localStorage.clear(); localStorage.setItem('boneash.auto', s); localStorage.setItem('boneash.textsize', z); }", [save, str(size)])
+        where = f'PC3 ({w}x{h}, {size}%)'
+        m = pg.evaluate("""() => {
+            const q = (s) => document.querySelector(s), r = (s) => q(s)?.getBoundingClientRect();
+            const sec = q('#view > section'), st = r('.status'), tb = r('#tabs'), bl = r('.below'), res = r('.pane.results'), tk = r('.pane.tasks'), pl = r('.plate');
+            const whole = [...document.querySelectorAll('#view .card')].filter((c) => { const k = c.getBoundingClientRect();
+                return k.height > 0 && k.top >= st.bottom - 1 && k.bottom <= tb.top + 1 && k.top >= bl.top - 1 && k.bottom <= bl.bottom + 1; }).length;
+            return { grid: getComputedStyle(sec).display === 'grid', whole, cards: document.querySelectorAll('#view .card').length,
+                cols: pl && tk && res ? [pl.left, tk.left, res.left].map(Math.round) : null, resIn: !!res && res.height > 0 && res.top < tb.top - 40 && res.right <= innerWidth + 1,
+                sw: getComputedStyle(q('.panel-switch')).display, below: bl ? [Math.round(bl.top), Math.round(st.bottom)] : null,
+                hs: document.documentElement.scrollWidth > innerWidth }; }""")
+        if m['hs']: fails.append(f'{where}: the page scrolls sideways')
+        if need < 0:
+            if m['grid']: fails.append(f'{where}: under 1100 px the screen is not the single column')
+            ctx.close(); continue
+        if not m['grid'] or m['sw'] != 'none' or not m['cols'] or not (m['cols'][0] < m['cols'][1] < m['cols'][2]):
+            fails.append(f'{where}: not three columns (grid {m["grid"]}, switch {m["sw"]}, lefts {m["cols"]})'); ctx.close(); continue
+        if m['below'][0] < m['below'][1] - 1: fails.append(f'{where}: the cards start under the status bar ({m["below"]})')
+        if m['whole'] < need: fails.append(f'{where}: {m["whole"]} of {m["cards"]} cards whole on the first screen, not {need}')
+        if not m['resIn']: fails.append(f'{where}: Results not in view')
+        last = pg.evaluate("""() => { const b = document.querySelector('.below'); b.scrollTop = b.scrollHeight;
+            const c = [...b.querySelectorAll('.card')].filter((e) => e.getBoundingClientRect().height).pop(); const k = c.getBoundingClientRect();
+            const at = document.elementFromPoint(k.left + k.width / 2, k.top + k.height / 2); return [scrollY, !!at && (at === c || c.contains(at))]; }""")
+        if last[0] != 0 or not last[1]: fails.append(f'{where}: the cards do not scroll on their own, or the last card lies under something (page scrollY, hit) = {last}')
+        if size == 100 and w == 1366:
+            pg.click('[data-tab="sheet"]'); on_tab(pg, 'sheet')
+            off = pg.evaluate("() => { const p = document.querySelector('#view > section.page').getBoundingClientRect(); const rem = parseFloat(getComputedStyle(document.documentElement).fontSize); return Math.round(p.left - (innerWidth - 44 * rem) / 2); }")
+            if abs(off) > 1: fails.append(f'{where}: the James tab is {off} px off the old centred column')
+        if size == 100 and w == 1366 and not any(f.startswith('PC3') for f in fails):
+            notes.append(f'PC3: three columns from 1100 px, {m["whole"]} of {m["cards"]} cards on the first screen at 1366x768, Results in view, the other tabs centred')
+        ctx.close()
+
 def main(part=0):
     """v0.11.20: part 1 (Incremental Mode, the reload, no mode switch, two tabs) and part 2 (Saves, the menu, tooltips and scroll,
     the resting places) can run side by side, each with its own browser and server; no part = everything, in order."""
@@ -967,6 +1010,7 @@ def main(part=0):
                 # 15. the long calendar's Plan the week at a phone's width (v0.11.205, P1)
                 plan_rows(b, url)
                 plan_forecast(b, url)  # v0.11.206 (FC1)
+                wide_layout(b, url)  # v0.11.208 (PC3)
                 # 12. the FAQ (v0.11.83)
                 faq(pg, url)
             if three:

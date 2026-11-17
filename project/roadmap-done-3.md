@@ -1,6 +1,6 @@
 # Roadmap: done, stale and moot, part 3 (Bone and Ash)
 
-Started in v0.11.150, when `roadmap-done-2.md` had passed about 45 KB. Newer than `roadmap-done-2.md` and `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
+Started in v0.11.150, when `roadmap-done-2.md` had passed about 45 KB. Newer than `roadmap-done-2.md` and `roadmap-done.md`; older than `roadmap-done-4.md` (started in v0.11.208). Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
 ## Moved in v0.11.207 (word for word; owner pick SC2: section 0's time-scale line as of v0.11.204)
 

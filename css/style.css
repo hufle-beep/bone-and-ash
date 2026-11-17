@@ -299,3 +299,28 @@ button.card, button.choice { -webkit-touch-callout: none; -webkit-user-select: n
 .faq details p { margin: 0 0 0.8rem; font-size: 0.95rem; color: var(--ink-2); line-height: 1.55; }
 .faq details p b { color: var(--ink); font-weight: 600; }
 .faq .fnew { display: inline-block; margin-left: 0.3rem; padding: 0 0.4em; border-radius: 1em; background: var(--red); color: var(--paper); font-family: var(--body); font-size: 0.72rem; font-weight: 400; vertical-align: 0.1em; }
+
+/* ---- v0.11.208 (owner pick PC3): the PC layout, from 1100 px; the phone and anything narrower unchanged.
+   The story and fight screens (#view > section:not(.page)) become three columns: the story (picture, title, text) left,
+   the cards in the middle, Results right (the .split of two panes, as from 700 px); the cards and Results scroll on their
+   own under the pinned status bar (the status spans all columns). P: the picture is capped at 40% of the screen height
+   (at most 25 rem, its usual size); W: the story column is 40% of the screen width (22–40 rem). The other tabs (James,
+   Hammerspace, Journal, FAQ, the menu) keep today's 44 rem column, centred. ---- */
+@media (min-width: 1100px) {
+  #app, #tabs { max-width: 112rem; }
+  #view { padding-bottom: 3.6rem; }
+  #view > section.page { margin-left: max(0px, calc((100% - 44rem) / 2)); }
+  #view > section:not(.page) {
+    display: grid; grid-template-columns: clamp(22rem, 40vw, 40rem) minmax(0, 1fr);
+    grid-template-rows: auto repeat(14, auto) 1fr; column-gap: 1.2rem; align-items: start;
+  }
+  #view > section:not(.page) > * { grid-column: 1; }
+  #view > section:not(.page) > .status { grid-column: 1 / -1; grid-row: 1; }
+  #view > section:not(.page) > .below {
+    grid-column: 2; grid-row: 2 / -1; position: sticky; top: 4.6rem; max-height: calc(100vh - 8rem); overflow: auto;
+    overscroll-behavior: contain; margin-top: 0.4rem; border-top: 0; padding-top: 0;
+  }
+  #view > section:not(.page) .plate { max-height: min(25rem, 40vh); }
+  .below .split { grid-template-columns: minmax(0, 1.6fr) minmax(15rem, 1fr); }
+  .below .pane.results { top: 0; max-height: calc(100vh - 8.4rem); }
+}

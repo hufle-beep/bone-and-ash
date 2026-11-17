@@ -55,6 +55,7 @@ export const NOTES = [
     ['0.11.205', 'The long calendar (test): on Plan the week every row now takes the whole width, so its − and + can always be tapped (on a wider phone the next row\'s words lay over them).'],
     ['0.11.206', 'The long calendar (test): Plan the week now forecasts the week. Each planned card says when it will be done (or not this week), each Meditate row on how many days it runs in full, and two lines under them give the cards\' hours against the hours left to the evenings and where the plan will stop, why, and your Fed and HP then. It is worked out by playing the plan on a copy of your save, so it changes with every − and +; at an evening\'s choice it takes the one you took there last time.'],
     ['0.11.207', 'The long calendar (test): James now grows at about the old pace. A sit gives a quarter of the Saturation it did (at least 0.1%), a meridian takes four times its hours, the root in the Blackroot and a Long Forest seclusion a quarter too, and every XP award is ×0.7, so the tribute and Shen Qiu can go against you again on the first Coil. Plain New game and your saves are unchanged.'],
+    ['0.11.208', 'On a PC (a screen 1100 px wide or more) the story screen now uses the width: the story on the left, the cards in the middle, Results on the right, so the cards show without scrolling. The other tabs keep their column, centred. On the phone nothing changes.'],
 ];
 
 const parts = (v) => (/^\d+(\.\d+)*$/.test(String(v ?? '')) ? String(v).split('.').map(Number) : null);
