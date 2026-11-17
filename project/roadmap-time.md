@@ -2,7 +2,7 @@
 
 Started in v0.11.201 (owner pick O1, 2026-11-16 18:19), because `roadmap.md` was at its 20 KB limit. Open work; done lines move word for word to `roadmap-done-3.md`. The order of the whole roadmap is in `roadmap.md` (section 1's **Order** line); the retune's own lines in `roadmap.md` section 2 and `roadmap-retune.md`; romance in `roadmap.md` group f.
 
-**Where it goes (O1):** the PC layout (`roadmap-2.md` section 4) → the merged text push (`roadmap-e.md`) → **the time scale (this file: TS1 + TS8, TS2 + TS3, TS4, TS6)** → group f, with TS5 → section 2, the retune of the prologue and Act 1, with TS7 → Act 2 if there is time. Before Friday 2026-11-20 if the pushes allow (Claude's estimate: 10–14 pushes before Friday against F2's 6–8, at the 8–10 pushes a day of 2026-11-15 and 2026-11-16). **A fallback branch before TS1** (rule 5, H1: `fallback/<date>-before-time-scale`). Each push still gets its own options and pick (rule 1).
+**Where it goes (O1):** the PC layout (`roadmap-2.md` section 4) → the merged text push (`roadmap-e.md`) → **the time scale (this file: TS1 + TS8, TS2 + TS3, TS4, TS6)** → the rest of group e (v0.11.216, the owner's order) → group f, with TS5 → section 2, the retune of the prologue and Act 1, with TS7 → Act 2 if there is time. Before Friday 2026-11-20 if the pushes allow (Claude's estimate: 10–14 pushes before Friday against F2's 6–8, at the 8–10 pushes a day of 2026-11-15 and 2026-11-16). **A fallback branch before TS1** (rule 5, H1: `fallback/<date>-before-time-scale`). Each push still gets its own options and pick (rule 1).
 
 ## The owner's words (word for word)
 
