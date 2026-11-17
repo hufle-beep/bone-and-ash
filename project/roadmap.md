@@ -1,6 +1,6 @@
 # Roadmap: Bone and Ash
 
-Last updated: 2026-11-16 (v0.11.204: the week on the long calendar, TS2 + TS3; W1).
+Last updated: 2026-11-17 (v0.11.205: Plan the week's rows fixed on wider phones; P1).
 
 *(v0.11.88, owner pick A: this file holds sections 0–2 of the open work; sections 3–6 and Decided are in `roadmap-2.md`; done, stale and moot lines in `roadmap-done.md` and, since v0.11.88, `roadmap-done-2.md`. The two paragraphs on how this file is laid out (v0.11.53, v0.11.65) moved word for word to `roadmap-done-2.md`.)*
 

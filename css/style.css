@@ -208,6 +208,10 @@ button { font: inherit; color: inherit; }
 .yuki-lane .note { color: var(--ink-dim); font-size: 0.78rem; }
 /* v0.11.204 (owner pick W1, P1): the week's plan (long calendar) */
 .prow { display: grid; grid-template-columns: 1fr auto 2ch auto; gap: 0.4rem; align-items: center; font-size: 0.9rem; padding: 0.15rem 0; }
+/* v0.11.205 (owner pick P1, L1 + L2): the plan's note, rows and buttons take the panel's full width (in the cards' grid of two
+   columns a row was half wide: its − and + stuck out under the next row's label, which took the tap); a long word wraps */
+.cards > .prow, .cards > .note, .cards > .pbtns { grid-column: 1 / -1; }
+.prow .pl { min-width: 0; overflow-wrap: anywhere; }
 .prow .pl .note { display: block; color: var(--ink-dim); font-size: 0.76rem; }
 .prow .pn { text-align: center; }
 .prow .btn.step { padding: 0.2rem 0.65rem; min-width: 2.4rem; }

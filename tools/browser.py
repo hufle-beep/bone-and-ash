@@ -669,6 +669,36 @@ def hv1(pg, url):
         else: notes.append('HV1: the James tab shows the Village last with friendship only and no Old Hu; the game\'s own save keeps his numbers')
     check_text(pg, 'the James tab (HV1)', strict=False)
 
+def plan_rows(b, url):
+    """v0.11.205 (owner pick P1, TG): the long calendar's Plan the week (saves/v0.11.204-long-wilds-day2.json, the wilds on Day 2):
+    at 412 px (the owner's phone, two card columns) and at 360 px with 130% text, every row's − and + sits inside its row and is
+    what a tap at its middle reaches (in v0.11.204 the next row's label lay over 8 of the 22 at 412 px), and one + adds a card."""
+    save = (ROOT / 'saves/v0.11.204-long-wilds-day2.json').read_text()
+    for w, size in ((412, 100), (360, 130)):
+        ctx = b.new_context(viewport={'width': w, 'height': 800}, service_workers='block')
+        pg = ctx.new_page(); pg.on('pageerror', lambda e: fails.append(f"page error: {e}"))
+        fresh(pg, url, "([s, z]) => { localStorage.clear(); localStorage.setItem('boneash.auto', s); localStorage.setItem('boneash.textsize', z); }", [save, str(size)])
+        rows = pg.query_selector_all('.prow')
+        if len(rows) < 8: fails.append(f'P1 ({w} px, {size}%): Plan the week shows {len(rows)} rows, not the wilds\' 8 or more'); ctx.close(); continue
+        bad = []
+        for r in rows:
+            for bt in r.query_selector_all('button'):
+                bt.evaluate("e => e.scrollIntoView({ block: 'center' })")
+                ok = bt.evaluate("""e => { const q = e.getBoundingClientRect(), c = e.closest('.prow').getBoundingClientRect();
+                    const at = document.elementFromPoint(q.left + q.width / 2, q.top + q.height / 2);
+                    return q.left >= c.left - 0.5 && q.right <= c.right + 0.5 && !!at && (at === e || e.contains(at)); }""")
+                if not ok: bad.append(bt.get_attribute('aria-label'))
+        if bad: fails.append(f'P1 ({w} px, {size}%): {len(bad)} plan buttons stick out of their row or lie under another ({bad[:3]})')
+        else:
+            plus = rows[0].query_selector('button[data-d="1"]'); n0 = rows[0].query_selector('.pn').inner_text() if rows[0].query_selector('.pn') else '?'
+            plus.evaluate("e => e.scrollIntoView({ block: 'center' })"); plus.click()
+            until(pg, f"(document.querySelector('.prow .pn')?.textContent || '') !== {json.dumps(n0)}", 3000)
+            n1 = pg.query_selector('.prow .pn').inner_text() if pg.query_selector('.prow .pn') else '?'
+            if n1 == n0: fails.append(f'P1 ({w} px, {size}%): + on the first row did not add a card ({n0} → {n1})')
+            else: notes.append(f'P1: Plan the week at {w} px, {size}% text: every − and + inside its row and tappable; + added a card ({n0} → {n1})')
+        check_text(pg, f'Plan the week ({w} px)', strict=False)
+        ctx.close()
+
 def poll(pg, js, ms=20000):
     """v0.11.39: evaluate js (may return a promise) until it is truthy; the last value (falsy when the time ran out)."""
     end = time.time() + ms / 1000; v = None
@@ -895,6 +925,8 @@ def main(part=0):
                 lp2(pg, url)
                 # 14. whose relationships are shown (v0.11.137, HV1)
                 hv1(pg, url)
+                # 15. the long calendar's Plan the week at a phone's width (v0.11.205, P1)
+                plan_rows(b, url)
                 # 12. the FAQ (v0.11.83)
                 faq(pg, url)
             if three:
