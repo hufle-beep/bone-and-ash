@@ -620,17 +620,30 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md', 'roadmap-act2.md', 'roadmap
 // roadmap-done-3.md; the docs gap (group e's lines) marked; the review's new kinds in the checklist
 {
     const rd = (f) => readFileSync(path.join(ROOT, 'project', f), 'utf8');
-    const rt = rd('roadmap-time.md'), r1 = rd('roadmap.md'), ho = rd('handover.md'), h29 = rd('history-29.md'), d3 = rd('roadmap-done-3.md'), rp = rd('restore-points.md'), ck = rd('review-checklist.md');
+    const rt = rd('roadmap-time.md'), r1 = rd('roadmap.md'), ho = rd('handover.md'), h29 = rd('history-29.md'), d3 = rd('roadmap-done-3.md'), rp = rd('restore-points.md'), ck = rd('review-checklist.md') + rd('review-checklist-code.md'); // v0.11.212 (CK1): the checklist in two parts
     assert(rt.includes('## The shape picked (v0.11.203, owner pick T1, 2026-11-16 19:56)') && rt.includes('- **TS1 + TS8: done in v0.11.203**') && rt.includes('**Decided in v0.11.203 (T1): only the stays.**'), 'T1: roadmap-time.md has the shape picked, TS1 + TS8 done and the decided questions');
     assert(rp.includes('| `fallback/2026-11-16-before-time-scale` | 0.11.202 (`20837ea`)'), 'T1 (rule 5, H1): the fallback branch before the time scale listed');
     assert(h29.includes('- **v0.11.200: bundle D (D1), the kept realm recorded (KA), the plan for Friday (F2)') && !ho.includes('- **v0.11.200: bundle D (D1), the kept realm recorded (KA)') && h29.includes('- **Serpent (D, owner 09:44, v0.9.9): folded into step 5**') && !ho.includes('- **Serpent (D, owner 09:44, v0.9.9)') && h29.includes('**Usage (the owner 2026-11-14 15:27, word for word):** "one important note, the fable usage is being Burnt through quickly'), 'T1: the handover\'s older entries moved word for word to history-29.md, not left behind');
     { const h30 = rd('history-30.md'); // v0.11.206 (FC1): v0.11.203's pick and note moved word for word to history-30.md (rule 5)
       const h31 = rd('history-31.md'); // v0.11.209 (TF1): v0.11.206's pick and note moved word for word to history-31.md (rule 5)
-      assert(ho.includes('**`project/history-31.md`** … **`project/history.md`**') && h30.includes('- **v0.11.203: the time scale\'s TS1 + TS8 (T1), the review\'s fixes (RV1)') && !ho.includes('- **v0.11.203: the time scale\'s TS1 + TS8 (T1)') && h30.includes('## v0.11.203 — ') && !ho.includes('## v0.11.203 — ') && h31.includes('- **v0.11.206: the plan\'s forecast (FC1)') && h31.includes('## v0.11.206 — ') && !ho.includes('## v0.11.206 — ') && ho.includes('- **v0.11.209: TS4, food that spoils and keeps (TF1)') && ho.includes('## v0.11.209 — '), 'T1 (rules 5, 6): v0.11.203\'s pick and note in history-30.md, v0.11.206\'s in history-31.md, the handover names it and keeps v0.11.209\'s'); }
+      const h32 = rd('history-32.md'); // v0.11.212 (CK1): v0.11.209's pick and note moved word for word to history-32.md (rule 5)
+      assert(ho.includes('**`project/history-32.md`** … **`project/history.md`**') && h30.includes('- **v0.11.203: the time scale\'s TS1 + TS8 (T1), the review\'s fixes (RV1)') && !ho.includes('- **v0.11.203: the time scale\'s TS1 + TS8 (T1)') && h30.includes('## v0.11.203 — ') && !ho.includes('## v0.11.203 — ') && h31.includes('- **v0.11.206: the plan\'s forecast (FC1)') && h31.includes('## v0.11.206 — ') && !ho.includes('## v0.11.206 — ') && h32.includes('- **v0.11.209: TS4, food that spoils and keeps (TF1)') && h32.includes('## v0.11.209 — ') && !ho.includes('## v0.11.209 — ') && ho.includes('## v0.11.212 — '), 'T1 (rules 5, 6): v0.11.203\'s pick and note in history-30.md, v0.11.206\'s in history-31.md, v0.11.209\'s in history-32.md, the handover names it and keeps v0.11.212\'s'); }
     assert(d3.includes('### From section 0, as of v0.11.202\n\n- *(v0.11.202, owner picks M1, D1)* **The merged text push done**') && !r1.includes('- *(v0.11.202, owner picks M1, D1)* **The merged text push done**') && r1.includes('- *(v0.11.190, the size rule)*'), 'T1: section 0\'s v0.11.202 line moved word for word, the v0.11.190 pointer kept');
     assert(r1.includes('~~the Blackroot\'s Practice darts and needles failing in silence~~ **done in v0.11.202** (b1)') && r1.includes('~~the four older Yuki tics (v0.11.179\'s RV2 list)~~ **done in v0.11.202** (a10, a11)') && r1.includes('**found done in v0.11.202** (e2)'), 'T1: the docs gap: group e\'s lines mark v0.11.202\'s items');
     assert(ck.includes('**The clock\'s day against the text day (v0.11.203 L4):**') && ck.includes('**A jump between parts walked, not computed (v0.11.203 TG2–TG4, TG7):**'), 'T1 (RV1): the review\'s new kinds in the checklist');
 }
+// v0.11.212 (owner pick CK1): the review checklist split by kind under the 12,000-byte cap: the text lists in review-checklist.md
+// (its head names the second part), the test gaps and the code lessons in review-checklist-code.md (it sends the reader to the first
+// part's "How to read"); v0.11.210's and v0.11.211's four lessons in it; nothing lost in the move
+{
+    const rd = (f) => readFileSync(path.join(ROOT, 'project', f), 'utf8');
+    const a = rd('review-checklist.md'), b = rd('review-checklist-code.md');
+    assert(a.includes('## How to read (cheaply)') && a.includes('also `review-checklist-code.md`') && !a.includes('## Tests (TG)'), 'CK1: the first part keeps how to read and names the second');
+    assert(b.includes("`review-checklist.md`'s \"How to read\" first") && b.includes('## Tests (TG)') && b.includes('## Code and UI (v0.11.210, v0.11.211)'), 'CK1: the second part has the test gaps and the code lessons');
+    for (const k of ['(v0.11.210 M1)', '(v0.11.210 M2)', '(v0.11.211 H1)', '(v0.11.211 TG2)']) assert(b.includes(k), `CK1: the lesson ${k} in the second part`);
+    for (const k of ['(v0.11.206 H1, TG1)', '(v0.11.207 M1, L2, TG1–TG3)', '(v0.11.181 TG1)', '(v0.11.203 TG6)']) assert(b.includes(k) && !a.includes(k), `CK1: the test gap ${k} moved, not lost`);
+}
+
 // v0.11.171 (owner pick RA1): Act 2 in its own part, roadmap-act2.md, named between group f and section 2 in roadmap.md, with the
 // owner's words of 2026-11-14 01:02, the Act 2 lines moved from roadmap-2.md section 5 (not left behind) and its facts in lore.md;
 // the handover's open items placed on the roadmap (group e's parts 5–9, section 2, roadmap-2.md sections 4 and 6), the handover pointing there
@@ -772,7 +785,7 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md', 'roadmap-act2.md', 'roadmap
     // v0.11.178 (owner pick U1): cold reviews on Opus (rule 9), lean Fable packets (rule 10), a new chat per push (rule 4), small per-push docs (rule 8), usage (rule 11)
     const rule = (n) => (rules.match(new RegExp(`^${n}\\. .*$`, 'm')) || [''])[0];
     assert(/model `opus`/.test(rule(9)) && /review-checklist\.md/.test(rule(9)) && /tools\/mutate\.mjs/.test(rule(9)) && /canon-card\.md/.test(rule(10)) && /about 10 KB/.test(rule(10)) && /A new chat after every push/.test(rule(4)) && /under 20 KB/.test(rule(8)) && /^11\. \*\*Usage\*\*/m.test(rules) && /excerpts only/.test(rule(11)), 'U1: rules 4, 8, 9, 10 and 11 say what U1 picked');
-    for (const f of ['project/review-checklist.md', 'project/canon-card.md']) assert(existsSync(path.join(ROOT, f)) && Buffer.byteLength(readFileSync(path.join(ROOT, f))) < 12000, `U1: ${f} there and short`);
+    for (const f of ['project/review-checklist.md', 'project/review-checklist-code.md', 'project/canon-card.md']) assert(existsSync(path.join(ROOT, f)) && Buffer.byteLength(readFileSync(path.join(ROOT, f))) < 12000, `U1: ${f} there and short`);
     const r8 = (rules.match(/^8\. .*$/m) || [''])[0];
     assert(/Claude uploads the changed `project\/` docs/.test(r8) && !/asks\*\* whether/.test(r8) && /project\/research\/` stays repo only/.test(r8), 'CLAUDE.md: rule 8 says Claude uploads the changed docs itself, research/ repo only, no question');
     assert(readFileSync(path.join(ROOT, 'project/working-agreement.md'), 'utf8').includes('**Since v0.11.79 (owner 2026-11-08 20:52'), 'working-agreement: the mirror rule of v0.11.79 is there');
