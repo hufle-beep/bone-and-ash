@@ -1,6 +1,6 @@
 /** Bone and Ash — UI. Renders the story, combat, sheet, hammerspace, journal and saves. */
 import { LONG_CAL } from './core/calendar.js'; // v0.11.203 (owner pick T1, TS1)
-import { runWeek, planCards, planHere, planEnsure, planSet, planEmpty, planEndDay, planClear, STOP_TEXT, planNotes, storyTap, afterStory, planCount, doorCards, planRanks, planPrio } from './core/week.js'; // v0.11.204 (owner pick W1: R3, P1); v0.11.206 (FC1, RV1): the forecast's texts, the shared tap steps
+import { runWeek, planCards, planHere, planEnsure, planSet, planEmpty, planEndDay, planClear, STOP_TEXT, planNotes, storyTap, afterStory, planCount, doorCards, planRanks, planPrio, doorNote, noteCardTap } from './core/week.js'; // v0.11.204 (owner pick W1: R3, P1); v0.11.206 (FC1, RV1): the forecast's texts, the shared tap steps
 import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel, fragileKnife, knifeSwings } from './core/forms.js';
 import { coilMult, coilMultNext, wakeDay, fmtMult, clockParts, REL_HIDDEN } from './core/game.js'; // v0.11.137 (HV1): REL_HIDDEN
 import {
@@ -203,6 +203,7 @@ function doTask(id) {
     if (!fatalOk(id, out)) return;
     const label = taskLabel(g, SCENES, id);
     const rel0 = relSnap();
+    noteCardTap(g, SCENES, id); // v0.11.213 (RV1, L3): a one-off door tapped by hand: its plan row back to 0
     const r = runTask(g, SCENES, id);
     land(label, r.lines, r.fail, rel0, { always: !r.stopped }); // v0.11.68: a door or collapse shows its reply in the scene it opens
     autosave(); render();
@@ -240,7 +241,9 @@ function weekHtml() {
     rows.push(planRow('med:sit', 'Sits a day', med.sit || 0, fc.med.sit || '', rk), planRow('med:mer', 'Meridian sessions a day', med.mer || 0, fc.med.mer || '', rk), planRow('med:qi', 'Gather Qi a day', med.qi || 0, ['hours', fc.med.qi].filter(Boolean).join(' · '), rk));
     rows.push(planRow('med:pres', 'Smoke the catch, once a day', med.pres || 0, [[when('med:pres'), '15 m a piece'].filter(Boolean).join(', '), fc.med.pres].filter(Boolean).join(' · '), rk)); // v0.11.209 (owner pick TF1, K)
     // v0.11.210 (owner pick N1, DC-a): the hub's daily doors, once a day each (Yuki's starts at 1 on a new plan)
-    for (const d of doorCards(g, SCENES)) rows.push(planRow(`door:${d.scene}`, d.label, planCount(g, `door:${d.scene}`), [['once a day', when(`door:${d.scene}`)].filter(Boolean).join(', '), fc.med[`door:${d.scene}`]].filter(Boolean).join(' · '), rk));
+    // v0.11.213 (VQ1 + FQ1): every door of the hub; a repeating one every 3rd day (S3), a one-off once
+    for (const d of doorCards(g, SCENES)) rows.push(planRow(`door:${d.scene}`, d.label, planCount(g, `door:${d.scene}`), [[doorNote(d), when(`door:${d.scene}`)].filter(Boolean).join(', '), fc.med[`door:${d.scene}`]].filter(Boolean).join(' · '), rk));
+    rows.push(planRow('med:rest', 'Rest, hours a day', med.rest || 0, [when('med:rest'), fc.med.rest].filter(Boolean).join(' · '), rk)); // v0.11.213 (VQ1, RS)
     const total = fc.total ? `<p class="note fc">${esc(fc.total)}</p>` : '', outlook = fc.outlook ? `<p class="note fc">${esc(fc.outlook)}</p>` : '';
     const stop = p?.stop ? `<p class="note">${esc(p.stop === 'week' ? 'The week is over.' : `Stopped: ${STOP_TEXT[p.stop] || p.stop}.`)}</p>` : '';
     const btn = `<div class="pbtns"><button class="btn primary" data-week="run">${planEmpty(p) ? 'Rest out the week' : 'Run the week'} · to Day ${planEndDay(g, p)}</button>${planEmpty(p) ? '' : '<button class="btn" data-week="clear">Clear</button>'}</div>`;

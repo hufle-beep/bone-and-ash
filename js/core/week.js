@@ -16,10 +16,10 @@
  */
 import { longCal, storyDay, storyDayOf, calEnd, weekNights, LONG_CAL, STAY_DAYS } from './calendar.js';
 import { sceneView, choose } from './story.js';
-import { advance, jamesHpMax, canBreakThrough, clockParts, clockLabel, fnv1a, takeSpoilNotes } from './game.js';
+import { advance, jamesHpMax, canBreakThrough, clockParts, clockLabel, fnv1a, takeSpoilNotes, wakeDay } from './game.js';
 import { taskCards, taskOpen, runTask, taskState, taskOutcome, isTaskChoice, sitTaskId, QI_TASK, CARRY_TASK, carryHere, weekHub, workDay, workRoom, dayMeal, cardSpeed, NEW_LENGTH, WEEK_MULT } from './tasks.js';
 import { farewellNow } from '../story/act1_fallout.js'; // RV1 (L4)
-import { foodCount, preservable } from '../story/common.js';
+import { foodCount, preservable, unspaced, spacedNext, SPACE_DAYS } from '../story/common.js'; // v0.11.213 (FQ1, S3): the spacing
 import { EVENING_HOUR } from '../story/oneoff.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
 
@@ -38,6 +38,16 @@ export const STOP_TEXT = {
  *  RV1 (M2): taken in this order, the two-hour talks last, so the visits (closed from 19:00, HT_UNTIL) get the hours after a work day. */
 export const DAILY_DOORS = ['yk_time', 'wen_time', 'mother_time', 'fo_mei', 'fo_ya_time'];
 export const DOOR_START = { yk_time: 1 };
+/** v0.11.213 (owner pick VQ1 + FQ1, 2026-11-17 15:31 / 15:35; his 15:19 report: "not all the around the village options are in the
+ *  queuable list"): every door card of a stay hub has a plan row: the daily doors above, then WL Old Wen's lesson, FH the far hunt and
+ *  ST the one-off doors (the village's, the Fallout's, the Heart's), the two talks last (RV1, M2). `REPEAT` the ones that come back
+ *  (every SPACE_DAYS-th day on a stay, common.js S3), the rest once (a row taken is set back to 0). Each with the daily key its card
+ *  is spaced by (`spacedNext`); `heart_spring` by the calendar day. */
+export const PLAN_DOORS = [...DAILY_DOORS.slice(0, 3), 'wen_lesson', 'far_hunt', 'herb_slopes', 'heal', 'village_hunt', 'scout', 'pot_cook', 'fo_mother', 'fo_spy', 'fo_pot_cook', 'hall_listen', 'ring_chambers', 'heart_spring', ...DAILY_DOORS.slice(3)]; // the owner 16:42: the communal pot's cooking too (once a Coil)
+export const DOOR_KEY = { yk_time: 'yk_time', wen_time: 'wen_time', mother_time: 'mother_time', wen_lesson: 'wen', far_hunt: 'far', herb_slopes: 'slopes', heart_spring: 'spring', fo_mei: 'a1_mei', fo_ya_time: 'a1_ya' };
+export const doorRepeats = (s) => s in DOOR_KEY;
+/** v0.11.213 (VQ1, RS): "Rest an hour" on each stay hub, by the day (a count, as the sits). */
+export const REST_LABEL = /^Rest\b/;
 /** RV1 (L2, the owner 12:39): the day's line before a talk's choice the plan took as last time. */
 export const AGAIN_LINE = 'As before: ';
 /** The stops after which the plan keeps running (it goes on by itself once the story is back on the hub). */
@@ -47,6 +57,8 @@ const calDay = (g) => Math.floor((g.minutes || 0) / 1440) + 1;
 const hourNow = (g) => clockParts(g.minutes).hh;
 const coilKey = (g) => `${g.coil?.n || 1}|${g.coil?.act || 0}`;
 const plainChoice = (c) => !!c && !c.check && !c.combat && !c.fail && !c.qi;
+/** v0.11.213 (VQ1, W1): a door's one way on that the plan walks: a plain one, or one with a check (rolled as a tap would), never a fight. */
+const walkChoice = (c) => plainChoice(c) || (!!c && !!c.check && !c.combat);
 const isRec = (o) => !!o && typeof o === 'object' && !Array.isArray(o);
 
 /** R3: walk the quiet night's screens shown before. Returns { steps, lines }. */
@@ -98,24 +110,24 @@ export function planEnsure(g) {
     if (p) return p;
     if (!weekHub(g)) return null;
     const t = taskState(g);
-    t.plan = { hub: g.scene, coil: coilKey(g), lastDay: weekLastDay(g), items: {}, med: { sit: 0, mer: 0, qi: 0, pres: 0 }, doors: { ...DOOR_START }, done: { d: -1, sit: 0, mer: 0, qi: 0, pres: 0, doors: {} }, running: false, stop: '', bt: -1 };
+    t.plan = { hub: g.scene, coil: coilKey(g), lastDay: weekLastDay(g), items: {}, med: { sit: 0, mer: 0, qi: 0, pres: 0, rest: 0 }, doors: { ...DOOR_START }, done: { d: -1, sit: 0, mer: 0, qi: 0, pres: 0, rest: 0, doors: {} }, running: false, stop: '', bt: -1 };
     return t.plan;
 }
-export const MED_MAX = { sit: 12, mer: 6, qi: 8, pres: 1 }; // v0.11.209 (owner pick TF1, K): "Smoke the catch." by the day (0 or 1)
+export const MED_MAX = { sit: 12, mer: 6, qi: 8, pres: 1, rest: 12 }; // v0.11.213 (VQ1, RS): hours of rest a day, as the sits // v0.11.209 (owner pick TF1, K): "Smoke the catch." by the day (0 or 1)
 /** Change a count (`key`: a card id, 'med:sit' / 'med:mer' / 'med:qi' / 'med:pres', or 'door:<scene>' of DAILY_DOORS), from 0 up to
  *  9 cards, MED_MAX a day, or 0 / 1 a day for a door. */
 export function planSet(g, key, n) {
     const p = planEnsure(g);
     if (!p) return null;
-    const m = /^med:(sit|mer|qi|pres)$/.exec(key), dm = /^door:(\w+)$/.exec(key);
+    const m = /^med:(sit|mer|qi|pres|rest)$/.exec(key), dm = /^door:(\w+)$/.exec(key);
     if (m) p.med[m[1]] = Math.max(0, Math.min(MED_MAX[m[1]], Math.round(n) || 0));
-    else if (dm) { if (!DAILY_DOORS.includes(dm[1])) return p; if (!isRec(p.doors)) p.doors = {}; p.doors[dm[1]] = Math.max(0, Math.min(1, Math.round(n) || 0)); }
+    else if (dm) { if (!PLAN_DOORS.includes(dm[1])) return p; if (!isRec(p.doors)) p.doors = {}; p.doors[dm[1]] = Math.max(0, Math.min(1, Math.round(n) || 0)); }
     else { const v = Math.max(0, Math.min(9, Math.round(n) || 0)); if (v) p.items[key] = v; else delete p.items[key]; }
     p.stop = '';
     return p;
 }
 /** Clear: every count to 0, the plan stopped (RV1, TG11: here, so the tests can run it). */
-export function planClear(g) { const p = planHere(g); if (!p) return null; p.items = {}; p.med = { sit: 0, mer: 0, qi: 0, pres: 0 }; p.doors = {}; p.stop = ''; p.running = false; return p; }
+export function planClear(g) { const p = planHere(g); if (!p) return null; p.items = {}; p.med = { sit: 0, mer: 0, qi: 0, pres: 0, rest: 0 }; p.doors = {}; p.stop = ''; p.running = false; return p; }
 /** v0.11.210 (DC-a): a plan row's count now (a card, a Meditate row, a door; with no plan the new plan's start). */
 export function planCount(g, key) {
     const p = planHere(g);
@@ -130,8 +142,8 @@ export function planCount(g, key) {
  * a new Coil keeps the order. A row with no place yet (none set on this hub, or new since: a card or a person met later) takes the
  * old order's place after every set one: the cards carried and in the order set, Smoke the catch, the doors (DAILY_DOORS), the sits,
  * the meridian sessions, Gather Qi. With no places set the plan runs exactly as before. */
-const PRIO_AT = { pres: 200, door: 300, sit: 400, mer: 500, qi: 600 };
-const keyGroup = (k) => (k.startsWith('door:') ? 'door' : k === 'med:pres' ? 'pres' : /^med:/.test(k) ? k.slice(4) : 'card');
+const PRIO_AT = { pres: 200, door: 300, sit: 400, mer: 500, qi: 600, rest: 700 }; // v0.11.213 (VQ1, RS): Rest an hour last
+const keyGroup = (k) => (k.startsWith('door:') ? 'door' : k === 'med:pres' ? 'pres' : /^med:/.test(k) ? k.slice(4) : 'card'); // med:rest → 'rest' (v0.11.213)
 /** This hub's places ({ key: place }), or {} (with `make`, created). */
 export function prioHere(g, hub = g.scene, make = false) {
     const t = make ? taskState(g) : g.tasks;
@@ -144,7 +156,7 @@ export function prioHere(g, hub = g.scene, make = false) {
  *  Smoke the catch, the doors, the sits, the meridian sessions, Gather Qi. */
 function oldPlace(p, k, cards, cyId) {
     const grp = keyGroup(k);
-    if (grp === 'door') return PRIO_AT.door + Math.max(0, DAILY_DOORS.indexOf(k.slice(5)));
+    if (grp === 'door') return PRIO_AT.door + Math.max(0, PLAN_DOORS.indexOf(k.slice(5)));
     if (grp !== 'card') return PRIO_AT[grp];
     const set = Object.keys(p?.items || {}).filter((id) => p.items[id] > 0), i = set.indexOf(k);
     if (i >= 0) return 100 + i / 100;
@@ -156,10 +168,10 @@ function oldPlace(p, k, cards, cyId) {
  *  rows' ids) and `doors` (the door rows' scenes) only for the screen; the run passes none (it takes the rows with a count). */
 export function planOrder(g, p = planHere(g), { cards = [], doors = [], extra = [] } = {}) {
     const hub = p?.hub || g.scene, pr = prioHere(g, hub), cyId = carryHere(g, hub)?.id || null;
-    const shown = [...cards, 'med:sit', 'med:mer', 'med:qi', 'med:pres', ...doors.map((s) => `door:${s}`)];
+    const shown = [...cards, 'med:sit', 'med:mer', 'med:qi', 'med:pres', 'med:rest', ...doors.map((s) => `door:${s}`)];
     const all = new Set(shown);
     for (const id of Object.keys(p?.items || {})) if (p.items[id] > 0) all.add(id);
-    for (const [s, n] of Object.entries(isRec(p?.doors) ? p.doors : {})) if (n > 0 && DAILY_DOORS.includes(s)) all.add(`door:${s}`);
+    for (const [s, n] of Object.entries(isRec(p?.doors) ? p.doors : {})) if (n > 0 && PLAN_DOORS.includes(s)) all.add(`door:${s}`);
     if (cyId) all.add(cyId);
     for (const k of extra) all.add(k);
     const old = (k) => oldPlace(p, k, cards, cyId);
@@ -209,24 +221,43 @@ function hubStops(g, scenes) {
     const v = sceneView(g, scenes);
     return v.choices.filter((c) => !c.disabled && (c.index >= 1000 || !isTaskChoice(scenes, g.scene, c.index)) && !META.test(String(c.label)));
 }
-/** v0.11.210 (DC-a): the hub's daily door rows: [{ id, scene, label, status }], `status` 'open' when its card is on the hub now. A row
- *  shows when its card is open, when the plan counts it, when the plan took it today, and always for Yuki's (she is always there):
- *  a person not met yet, or not here yet (Ya), has no row. */
+/** v0.11.210 (DC-a): the hub's door rows: [{ id, scene, label, status, repeat, next }], `status` 'open' when its card is on the hub
+ *  now. A row shows when its card is open, when the plan counts it, when the plan took it today, and always for Yuki's (she is always
+ *  there): a person not met yet, or not here yet (Ya), has no row. v0.11.213 (VQ1): every door of PLAN_DOORS; a repeating door
+ *  closed only by its spacing (S3) keeps its row, `next` the calendar day it opens again; one row a scene (the spring's two ways in). */
 export function doorCards(g, scenes) {
     if (!weekHub(g) || !scenes[g.scene]) return [];
     const p = planHere(g), open = new Map(taskCards(g, scenes).filter((c) => c.kind === 'door').map((c) => [c.id, c]));
-    const out = [];
+    const by = new Map();
     scenes[g.scene].choices.forEach((c, i) => {
-        if (typeof c.to !== 'string' || !DAILY_DOORS.includes(c.to)) return;
-        const id = `${g.scene}:${i}`, card = open.get(id);
-        const keep = !!card || c.to === 'yk_time' || (p?.doors?.[c.to] || 0) > 0 || (p?.done?.d === workDay(g) && (p.done.doors?.[c.to] || 0) > 0);
+        if (typeof c.to !== 'string' || !PLAN_DOORS.includes(c.to)) return;
+        const id = `${g.scene}:${i}`, card = open.get(id), rep = doorRepeats(c.to);
+        let spaced = false;
+        if (!card && rep && c.to !== 'yk_time') { try { spaced = !!unspaced(() => !c.show || c.show(g)); } catch { spaced = false; } }
+        const keep = !!card || spaced || c.to === 'yk_time' || (p?.doors?.[c.to] || 0) > 0 || (p?.done?.d === workDay(g) && (p.done.doors?.[c.to] || 0) > 0);
         if (!keep) return;
+        const rank = card ? 2 : spaced ? 1 : 0; // one row a scene (RV1, L1): the open way in, else the one closed only by its spacing
+        if (by.has(c.to) && by.get(c.to).rank >= rank) return;
         let label = card?.label;
         if (!label) { try { label = typeof c.text === 'function' ? c.text(g) : c.text; } catch { label = ''; } }
-        out.push({ id, scene: c.to, label: String(label || ''), status: card?.status === 'open' ? 'open' : 'closed' });
+        const k = DOOR_KEY[c.to], cal = k === 'spring' ? calDay(g) : null;
+        const nx = rep && !card ? (cal != null ? spacedNext(g, k, cal) : spacedNext(g, k, wakeDay(g)) - wakeDay(g) + calDay(g)) : null;
+        by.set(c.to, { id, scene: c.to, label: String(label || ''), status: card?.status === 'open' ? 'open' : 'closed', repeat: rep, next: nx != null && nx > calDay(g) ? nx : null, rank });
     });
-    return out.sort((a, b) => DAILY_DOORS.indexOf(a.scene) - DAILY_DOORS.indexOf(b.scene)); // RV1 (M2): the talks last
+    return [...by.values()].map(({ rank, ...d }) => d).sort((a, b) => PLAN_DOORS.indexOf(a.scene) - PLAN_DOORS.indexOf(b.scene)); // RV1 (M2): the talks last
 }
+/** v0.11.213 (RV1, L3): a door card tapped by hand (main.js doTask, before runTask): a one-off's plan row back to 0, as the plan does. */
+export function noteCardTap(g, scenes, id) {
+    const p = planHere(g);
+    if (!p || !isRec(p.doors) || typeof id !== 'string' || !scenes[g.scene]) return;
+    const m = /^([\w]+):(\d+)$/.exec(id);
+    const c = m && m[1] === g.scene ? scenes[g.scene].choices[Number(m[2])] : null;
+    if (c && typeof c.to === 'string' && PLAN_DOORS.includes(c.to) && !doorRepeats(c.to) && p.doors[c.to] > 0) p.doors[c.to] = 0;
+}
+/** v0.11.213 (VQ1 + FQ1): a door row's note: a repeating door's spacing (and the day it opens again, closed now), a one-off's "once". */
+export const doorNote = (d) => (d.repeat ? `every ${SPACE_DAYS === 3 ? '3rd' : `${SPACE_DAYS}th`} day${d.next ? `, opens Day ${d.next}` : ''}` : 'once');
+/** v0.11.213 (VQ1, RS): the hub's "Rest an hour" card when it is open now, or null. */
+export const restCard = (g, scenes) => taskCards(g, scenes).find((c) => c.kind === 'chore' && REST_LABEL.test(String(c.label)) && c.status === 'open')?.id || null;
 const firstMer = (g, scenes) => taskCards(g, scenes).find((c) => c.kind === 'mer' && c.status === 'open')?.id || null;
 /** v0.11.209 (TF1, K): the hub's "Smoke the catch." card when it is open now, or null. */
 export const presCard = (g, scenes) => taskCards(g, scenes).find((c) => c.pres && c.status === 'open')?.id || null;
@@ -268,7 +299,7 @@ export function runWeek(g, scenes, { max = 600, onStep = null } = {}) {
         if (g.james.satiety < 30 && foodCount(g) === 0) return end('hungry');
         if (canBreakThrough(g) && p.bt !== g.james.realm) { p.bt = g.james.realm; return end('breakthrough'); }
         const d = workDay(g);
-        if (p.done.d !== d) p.done = { d, sit: 0, mer: 0, qi: 0, pres: 0, doors: {} };
+        if (p.done.d !== d) p.done = { d, sit: 0, mer: 0, qi: 0, pres: 0, rest: 0, doors: {} };
         if (!isRec(p.done.doors)) p.done.doors = {}; // a plan from before v0.11.210
         // RV1 (M3): the forecast's death check, as a tap's ("Starves here"): stop before a card that would end the Coil
         const deadly = (id) => { try { return taskOutcome(g, scenes, id)?.death || null; } catch { return null; } };
@@ -309,12 +340,13 @@ export function runWeek(g, scenes, { max = 600, onStep = null } = {}) {
                 p.done.doors[s] = (p.done.doors[s] || 0) + 1;
                 const r = run(dw.id);
                 if (r.skipped) { p.done.doors[s] -= 1; return 'next'; } // the day's routine went first; the door is still owed today
+                if (!doorRepeats(s)) p.doors[s] = 0; // v0.11.213 (VQ1, ST): a one-off door, taken: its row back to 0
                 if (g.scene === hub) return 'next'; // nothing opened (a guard): counted as done today
                 for (let k2 = 0; k2 < 6 && g.scene !== hub && !g.combat; k2++) {
                     const v = sceneView(g, scenes);
                     if (v.end) return 'story';
                     const open = v.choices.filter((c) => !c.disabled && !META.test(String(c.label)));
-                    const plain = open.length === 1 && open[0].index < 1000 && plainChoice(scenes[g.scene].choices[open[0].index]);
+                    const plain = open.length === 1 && open[0].index < 1000 && walkChoice(scenes[g.scene].choices[open[0].index]); // v0.11.213 (VQ1, W1): a check too
                     const again = plain ? null : doorPick(g, scenes); // RV1 (L2, the owner 12:39): a talk answered as last time, the same options
                     if (!plain && again == null) return 'door'; // the first time, or a new option: the player's; the screen shows its own text
                     say([String(v.text || '')].filter(Boolean)); // RV1 (L3): a screen's text said only when the plan walks past it
@@ -328,6 +360,7 @@ export function runWeek(g, scenes, { max = 600, onStep = null } = {}) {
             if (grp === 'sit') { const sid = sitTaskId(g, scenes); if (p.done.sit < p.med.sit && taskOpen(g, scenes, sid) && !deadly(sid)) { p.done.sit++; run(sid); return done1(); } return null; }
             if (grp === 'mer') { const mer = p.done.mer < p.med.mer ? firstMer(g, scenes) : null; if (mer && !deadly(mer)) { p.done.mer++; run(mer); return done1(); } return null; }
             if (grp === 'qi') { if (p.done.qi < p.med.qi && taskOpen(g, scenes, QI_TASK) && !deadly(QI_TASK)) { p.done.qi++; run(QI_TASK); return done1(); } return null; }
+            if (grp === 'rest') { const rid = (p.done.rest || 0) < (p.med.rest || 0) ? restCard(g, scenes) : null; if (rid && !deadly(rid)) { p.done.rest = (p.done.rest || 0) + 1; run(rid); return done1(); } return null; } // v0.11.213 (VQ1, RS)
             return null;
         };
         // v0.11.211 (owner pick PR2 + PK1): the rows in the hub's order, the first one due and open now
@@ -406,7 +439,7 @@ function doorMemo(g) {
 const doorOpen = (g, scenes) => sceneView(g, scenes).choices.filter((c) => !c.disabled && c.index < 1000 && !META.test(String(c.label)));
 export const doorSig = (g, scenes) => hash(doorOpen(g, scenes).map((c) => `${c.index}:${c.label}`).join('|'));
 export function noteDoor(g, scenes, sceneId, index) {
-    if (!longCal(g) || !DAILY_DOORS.includes(sceneId) || sceneId !== g.scene || !(index >= 0) || index >= 1000) return;
+    if (!longCal(g) || !PLAN_DOORS.includes(sceneId) || sceneId !== g.scene || !(index >= 0) || index >= 1000) return;
     doorMemo(g)[sceneId] = { i: index, sig: doorSig(g, scenes) };
 }
 /** The choice taken last on this door's screen this Coil, when the screen's options are the same as then and it is open; else null. */
@@ -414,6 +447,7 @@ export function doorPick(g, scenes) {
     const t = g.tasks?.dc;
     if (!isRec(t) || t.coil !== coilKey(g) || !isRec(t.picks) || !isRec(t.picks[g.scene])) return null;
     const { i, sig } = t.picks[g.scene];
+    if (scenes[g.scene]?.choices?.[i]?.combat) return null; // v0.11.213 (RV1, M2): a fight is never replayed (W1); the player's again
     return sig === doorSig(g, scenes) && doorOpen(g, scenes).some((c) => c.index === i) ? i : null;
 }
 /** RV1 (TG1, TG8): a story choice as a tap takes it: the evening's choice (and a talk's, v0.11.210) noted first, then taken. Returns choose's result. */
@@ -459,6 +493,7 @@ export function planForecast(g, scenes, { max = 60, json = null } = {}) {
         if (!p) return null;
         p.running = false; p.stop = '';
         const hub = p.hub, day0 = workDay(c), want = Object.keys(p.items).filter((id) => p.items[id] > 0);
+        const doors0 = isRec(p.doors) ? { ...p.doors } : {}; // v0.11.213 (RV1, M1): as set before the run (a one-off taken goes back to 0)
         const rows = Object.fromEntries(want.map((id) => [id, null]));
         const days = Math.max(1, p.lastDay - day0 + 1), med = { ...p.med }, done = {}, mornings = {};
         if (isRec(p.done) && p.done.d === day0) done[day0] = { ...p.done };
@@ -490,7 +525,7 @@ export function planForecast(g, scenes, { max = 60, json = null } = {}) {
         }
         const full = Object.fromEntries(Object.keys(med).map((k) => [k, med[k] > 0 ? Object.entries(done).filter(([d, x]) => Number(d) <= p.lastDay && (x[k] || 0) >= med[k]).length : 0]));
         const doors = {}; // v0.11.210 (DC-a): each door row's days in full, apart from the Meditate rows
-        for (const [s, n] of Object.entries(isRec(p.doors) ? p.doors : {})) if (n > 0) doors[s] = Object.entries(done).filter(([d, x]) => Number(d) <= p.lastDay && (x.doors?.[s] || 0) >= n).length;
+        for (const [s, n] of Object.entries(doors0)) if (n > 0) doors[s] = Object.entries(done).filter(([d, x]) => Number(d) <= p.lastDay && (x.doors?.[s] || 0) >= n).length;
         return { rows, med: full, doors, days, stop, minutes: c.minutes, fed: Math.round(c.james.satiety), hp: Math.round(c.james.hp), hpMax: jamesHpMax(c), mornings };
     } catch { return null; }
 }
@@ -526,7 +561,8 @@ export function planNotes(g, scenes) {
     if (fc) {
         for (const id of Object.keys(items)) if (items[id] > 0) rows[id] = fc.rows[id] != null ? ` · done ${whenText(fc.rows[id])}` : ' · not this week';
         for (const k of Object.keys(med)) if (med[k] > 0) mt[k] = `${fc.med[k] || 0} of ${fc.days} day${fc.days > 1 ? 's' : ''}`;
-        for (const [s, n] of Object.entries(fc.doors || {})) mt[`door:${s}`] = `${n} of ${fc.days} day${fc.days > 1 ? 's' : ''}`; // v0.11.210 (DC-a)
+        // v0.11.210 (DC-a); v0.11.213 (FQ1, S3): the visits this week (a repeating door opens every SPACE_DAYS-th day), a one-off's if or not
+        for (const [s, n] of Object.entries(fc.doors || {})) mt[`door:${s}`] = doorRepeats(s) ? `${n} visit${n === 1 ? '' : 's'} this week` : n ? 'this week' : 'not this week';
     }
     const h = planEmpty(p) ? null : planHours(g, scenes, p, fc);
     const total = h ? `Cards ${durText(h.work)}; ${durText(h.left)} left to the evenings this week.` : '';

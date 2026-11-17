@@ -1,6 +1,6 @@
 /** Shared story helpers: flags, days, food, and how enemies grow with the days James spends training. */
 import { clockParts, addItem, eat, wakeDay, dayHour, combatHooks, yukiForm, foodHooks, spoilFresh, freshDue, advance, itemCap } from '../core/game.js';
-import { longCal } from '../core/calendar.js';
+import { longCal, storyDay, storyDayOf, STAY_DAYS } from '../core/calendar.js';
 export { byDay, dayIndex, dayReply } from '../core/lines.js'; // v0.11.135 (owner picks NT1, EV1): a scene's text for the day; v0.11.136 (NC1): a reply's
 /** v0.11.125 (owner pick FM1): a story line by Yuki's current form, as the pictures draw her (the cat's line is the old one; texts by Fable). */
 export const byForm = (g, cat, tiger, human) => { const f = yukiForm(g); return f === 'tiger' ? tiger : f === 'human' ? human : cat; };
@@ -14,7 +14,36 @@ export const hour = (g) => dayHour(g); // v0.11.37: 00:00–03:59 read 24–27 i
 /** v0.11.18: in Incremental Mode a "day" for these is a waking day (back after sleep or a push), not the calendar. */
 export const dayKey = (g) => wakeDay(g);
 export const DAILY_KEYS = new Set();
-export const daily = (key) => { DAILY_KEYS.add(key); return Object.assign((g) => !g.flags[`${key}@${dayKey(g)}`], { dailyKey: key }); };
+/* v0.11.213 (owner pick FQ1, S3, 2026-11-17 15:35: "FQ1 but also apply to the Heart cards of Mei and Ya"): on the long calendar's
+ * stays the repeating door cards (and the Heart's two fireside talks) open every SPACE_DAYS-th day, not every day: a card taken
+ * today opens again SPACE_DAYS days later (a day missed costs no visit). Past days count only when they were the same stay's (a
+ * journey day's visit, or the last stay's, doesn't hold a stay's first days: RV1, L4). The old calendar, and the long calendar's journey days, keep once a day. The base
+ * game gives 3 visits a stay (one a story day); the long calendar gave 21 (7×), now 7 (2.3×). Keys: the daily keys below, and the
+ * calendar-day flags `spring`, `hc_mei`, `hc_ya` (act1_heart.js). */
+export const SPACE_DAYS = 3;
+export const SPACED = new Set(['yk_time', 'wen_time', 'mother_time', 'a1_mei', 'a1_ya', 'slopes', 'wen', 'far', 'spring', 'hc_mei', 'hc_ya']);
+let spaceOff = 0;
+/** `fn` run as if the cards were not spaced (the plan's rows: is a card closed only by its spacing?). */
+export const unspaced = (fn) => { spaceOff++; try { return fn(); } finally { spaceOff--; } };
+const spacedNow = (g, key) => !spaceOff && SPACED.has(key) && longCal(g) && STAY_DAYS.has(storyDay(g));
+/** v0.11.213 (RV1, L4): which stay a story day belongs to (the wilds, the village, the Fallout, the Heart; 0 a journey or deadline day). */
+export const stayOf = (d) => (d >= 1 && d <= 3 ? 1 : d >= 4 && d <= 6 ? 2 : d >= 8 && d <= 10 ? 3 : d >= 16 && d <= 18 ? 4 : 0);
+/** A past day `pd` counts for the spacing only when it was a day of the same stay as `d` (RV1, L4: a new stay starts afresh). */
+const sameStay = (g, d, pd) => { const s = stayOf(storyDayOf(g, d)); return s > 0 && stayOf(storyDayOf(g, pd)) === s; };
+/** Is flag `key@d` (and, spaced, `key@d-1`, `key@d-2` of a stay) unset? `d`: today's number in the flag (a waking day or a calendar day). */
+export function spacedFree(g, key, d) {
+    if (g.flags[`${key}@${d}`]) return false;
+    if (!spacedNow(g, key)) return true;
+    for (let k = 1; k < SPACE_DAYS; k++) if (sameStay(g, d, d - k) && g.flags[`${key}@${d - k}`]) return false;
+    return true;
+}
+/** The day (in `d`'s count) a spaced card opens again, or `d` when it is open (or not spaced now). */
+export function spacedNext(g, key, d) {
+    if (!spacedNow(g, key)) return g.flags[`${key}@${d}`] ? d + 1 : d;
+    for (let k = 0; k < SPACE_DAYS; k++) if ((k === 0 || sameStay(g, d, d - k)) && g.flags[`${key}@${d - k}`]) return d - k + SPACE_DAYS;
+    return d;
+}
+export const daily = (key) => { DAILY_KEYS.add(key); return Object.assign((g) => spacedFree(g, key, dayKey(g)), { dailyKey: key }); };
 export const markDaily = (g, key) => { DAILY_KEYS.add(key); g.flags[`${key}@${dayKey(g)}`] = true; };
 
 /** Days of training beyond the original pace: 0 on the old route, up to 2 in the forest and 2 in Ashfall. */

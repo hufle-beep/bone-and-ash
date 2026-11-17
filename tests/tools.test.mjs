@@ -639,7 +639,7 @@ const ROADMAP_PARTS = ['roadmap.md', 'roadmap-2.md', 'roadmap-act2.md', 'roadmap
     const rd = (f) => readFileSync(path.join(ROOT, 'project', f), 'utf8');
     const a = rd('review-checklist.md'), b = rd('review-checklist-code.md');
     assert(a.includes('## How to read (cheaply)') && a.includes('also `review-checklist-code.md`') && !a.includes('## Tests (TG)'), 'CK1: the first part keeps how to read and names the second');
-    assert(b.includes("`review-checklist.md`'s \"How to read\" first") && b.includes('## Tests (TG)') && b.includes('## Code and UI (v0.11.210, v0.11.211)'), 'CK1: the second part has the test gaps and the code lessons');
+    assert(b.includes("`review-checklist.md`'s \"How to read\" first") && b.includes('## Tests (TG)') && b.includes('## Code and UI (v0.11.210, v0.11.211'), 'CK1: the second part has the test gaps and the code lessons');
     for (const k of ['(v0.11.210 M1)', '(v0.11.210 M2)', '(v0.11.211 H1)', '(v0.11.211 TG2)']) assert(b.includes(k), `CK1: the lesson ${k} in the second part`);
     for (const k of ['(v0.11.206 H1, TG1)', '(v0.11.207 M1, L2, TG1–TG3)', '(v0.11.181 TG1)', '(v0.11.203 TG6)']) assert(b.includes(k) && !a.includes(k), `CK1: the test gap ${k} moved, not lost`);
 }

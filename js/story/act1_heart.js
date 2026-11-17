@@ -4,7 +4,7 @@
  * Entry 'ht_start' (Day 16). Exit 'rt_start' (Day 19, dawn).
  */
 import { addItem, hasItem, condense, advance, jamesHpMax, d6 } from '../core/game.js';
-import { eatBest, pantry, foodCount, set, byForm, byDay, dayReply } from './common.js';
+import { eatBest, pantry, foodCount, set, byForm, byDay, dayReply, spacedFree } from './common.js'; // v0.11.213 (FQ1, S3): spacedFree
 import { byDayLast } from '../core/lines.js';
 import { storyDay, calStart } from '../core/calendar.js'; // v0.11.203 (owner pick T1, TS1): the long calendar (Day 19 is 91) // v0.11.154 (owner pick RV1, Fable's review, L2 CL)
 import { day, hour, encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil, logTrio, ykShape } from './act1_common.js';
@@ -208,7 +208,7 @@ ${pantry(g)} ${g.james.hp < jamesHpMax(g) * 0.5 ? 'You are hurt.' : ''}${late(g)
             { text: 'Listen to the hall with your Convergence.', show: (g) => active(g) && !late(g) && !g.flags.hall_song, time: 60, to: 'hall_listen' },
             { text: 'Explore the ring-chambers off the galleries.', show: (g) => active(g) && !late(g) && !g.flags.rings_done, time: 30, to: 'ring_chambers' },
             { text: 'Follow the sound of water.', show: (g) => active(g) && !late(g) && !g.flags.spring_found, time: 30, to: 'heart_spring' },
-            { text: 'Wash at the spring.', show: (g) => active(g) && !late(g) && !!g.flags.spring_found && !g.flags[`spring@${day(g)}`], time: 30, to: 'heart_spring' },
+            { text: 'Wash at the spring.', show: (g) => active(g) && !late(g) && !!g.flags.spring_found && spacedFree(g, 'spring', day(g)), time: 30, to: 'heart_spring' },
             { text: 'Climb to the great wound high in the wall.', show: (g) => active(g) && !late(g) && !!g.flags.sect_marks && !g.flags.cut_read, time: 60, to: 'sect_cut' },
             { text: 'Go down into the root-galleries.', show: (g) => active(g) && !g.flags.roots_done, time: 30, to: 'heart_roots' },
             { text: 'Go down to the ship.', show: (g) => active(g) && !!g.flags.roots_done && !g.flags.ship_found, time: 60, to: 'ship_wreck' },
@@ -565,8 +565,8 @@ In the end it is Mei Lin who speaks. "Thank you for bringing us here. I think I 
 ${byDay(g, HC_POOLS[hcPool(g)], `heart_camp:${hcPool(g)}`)}`; // v0.11.152 (owner pick RP1, RM6; Fable's): a new paragraph each night (up to four); RV1 (M2): each version counted on its own
         },
         choices: [
-            { text: 'Talk with Mei Lin by the fire.', show: (g) => !g.flags[`hc_mei@${day(g)}`], do: (g) => { g.flags[`hc_mei@${day(g)}`] = true; bumpRel(g, 'Mei Lin', 3, likesMei(g) ? 3 : 1); return [DR_HC_MEI(g)]; }, to: 'heart_night' },
-            { text: 'Climb up to Ya\'s ledge.', show: (g) => ya(g) && !g.flags[`hc_ya@${day(g)}`], do: (g) => { g.flags[`hc_ya@${day(g)}`] = true; bumpRel(g, 'Ya', 3, likesYa(g) ? 4 : 1); return [DR_HC_YA(g)]; }, to: 'heart_night' },
+            { text: 'Talk with Mei Lin by the fire.', show: (g) => spacedFree(g, 'hc_mei', day(g)), do: (g) => { g.flags[`hc_mei@${day(g)}`] = true; bumpRel(g, 'Mei Lin', 3, likesMei(g) ? 3 : 1); return [DR_HC_MEI(g)]; }, to: 'heart_night' },
+            { text: 'Climb up to Ya\'s ledge.', show: (g) => ya(g) && spacedFree(g, 'hc_ya', day(g)), do: (g) => { g.flags[`hc_ya@${day(g)}`] = true; bumpRel(g, 'Ya', 3, likesYa(g) ? 4 : 1); return [DR_HC_YA(g)]; }, to: 'heart_night' },
             { text: 'Sit up with Yuki and the hearth-log.', show: (g) => hasItem(g, 'hearth_log'), do: (g) => { bumpRel(g, 'Yuki', 2, 0); return [DR_HC_LOG(g)]; /* v0.11.126 (NQ1): by her form, Fable's; v0.11.136 (NC1): by the day */ }, to: 'heart_night' },
             { text: 'Story Mode only (removed in v0.11.41).', show: () => false, to: 'heart_night' }, // v0.11.41 (D2-a): Story Mode's sit; the place kept (choice indices)
             { text: 'Sleep.', to: 'heart_night' },

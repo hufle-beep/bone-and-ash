@@ -1004,7 +1004,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
             if (stop) { if (c === '{') depth++; if (c === '}') { if (depth === 0) { i++; return out; } depth--; } }
             if (!/\s/.test(c)) out += c; i++; } return out; }; return code(false); };
         const LABELS = Object.values(HEART).flatMap((sc) => (sc.choices || []).map((c) => (typeof c.text === 'string' ? c.text : '(fn)')));
-        const PIN = { 'act1_heart.js': 'd1708057e33d7f53', /* v0.11.203 (T1, TS1): re-pinned for the long calendar (late and the leave by the story's day) */ 'stomp_act1.js': '1a2e6d1e8cb25a0b', 'yuki_time.js': '746d1873838bd5ca', labels: 'f5407fff487a26e2' }; // v0.11.209 (TF1, K): the labels re-pinned ("Smoke the catch." appended on heart_hub); v0.11.182 (RS1, RV1 L6): the labels re-pinned ("Read to Ya from your archive." appended on heart_camp)
+        const PIN = { 'act1_heart.js': '2f16ebb99efd4fad', /* v0.11.213 (FQ1, S3): re-pinned: the spring's and the fireside talks' days spaced (spacedFree); v0.11.203 (T1, TS1): re-pinned for the long calendar (late and the leave by the story's day) */ 'stomp_act1.js': '1a2e6d1e8cb25a0b', 'yuki_time.js': '746d1873838bd5ca', labels: 'f5407fff487a26e2' }; // v0.11.209 (TF1, K): the labels re-pinned ("Smoke the catch." appended on heart_hub); v0.11.182 (RS1, RV1 L6): the labels re-pinned ("Read to Ya from your archive." appended on heart_camp)
         const hash = (t) => createHash('sha256').update(t).digest('hex').slice(0, 16);
         const got = { labels: hash(JSON.stringify(LABELS)) };
         for (const f of ['act1_heart.js', 'stomp_act1.js', 'yuki_time.js']) got[f] = hash(skel(readFileSync(new URL(`../js/story/${f}`, import.meta.url), 'utf8')));
@@ -1623,7 +1623,7 @@ for (const form of ['cat', 'human']) {
     { const strip = (f) => (typeof f === 'function' ? f.toString().replace(/`(?:[^`\\]|\\.)*`|'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"/g, 'S') : String(f ?? ''));
       const out = {}; for (const id of Object.keys(LONGFOREST)) { const s = SCENES[id]; out[id] = [strip(s.enter), (s.choices || []).map((c) => [c.qi || 0, c.check ? `${c.check.band || ''}/${c.check.xpTo || ''}/${c.check.bonus ? strip(c.check.bonus) : ''}` : '', (c.gives || []).join(','), strip(c.do), strip(c.failDo), strip(c.show)].join('|'))]; }
       const h = createHash('sha1').update(JSON.stringify(out)).digest('hex');
-      assert(h === 'f3211c3f05ecfdc4e251f6663dacb3582e42d18c', `TG10: the Long Forest's code with its strings taken out, as in v0.11.207 (v0.11.177's P9A: the dead menus, the spar's pool, the Heartless's win; v0.11.207's RV1 L2: the seclusion's Saturation ÷satDiv) (${h}; update only with a push that means to change it)`); }
+      assert(h === '5ffabaa6ff1cfbdb9aa71d8ce83f31bc0906845e', `TG10: the Long Forest's code with its strings taken out, as in v0.11.213 (re-pinned: daily()'s body, the S3 spacing in common.js; no Long Forest key is spaced) (v0.11.177's P9A: the dead menus, the spar's pool, the Heartless's win; v0.11.207's RV1 L2: the seclusion's Saturation ÷satDiv) (${h}; update only with a push that means to change it)`); }
     // TG11: the first visits on day 0 count no weeks, months or days
     for (const id of Object.keys(LONGFOREST)) for (const [form] of FORMS) { const g = L(seed++, form, 7); g.scene = id; let t = ''; try { t = txt(id, g); } catch { t = ''; } const SPENT = /\b(?:several|many|for|after) (?:weeks|months|days)\b|\bweeks of\b|\ba while ago\b/; assert(!SPENT.test(t), `TG11: ${id} as ${form} on day 0 counts no time spent here (${(t.match(/.{0,30}(?:weeks|months|days|a while ago).{0,20}/) || [''])[0]})`); } // a week's walk, this week (the prologue's), a lie's month: not time spent here
     // TG13 (C5): a drill card on the task screen shows a drill line in every band it reaches
@@ -5685,9 +5685,9 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       assert(Wk.planCount(g, 'door:yk_time') === 1 && Wk.doorCards(g, SCENES).map((d) => `${d.scene}:${d.status}`).join() === 'yk_time:open', `${T}: the wilds: Yuki's row, at 1 before any plan (${JSON.stringify(Wk.doorCards(g, SCENES))})`);
       const pc = Wk.planCards(g, SCENES); Wk.planSet(g, pc[0].id, 7); Wk.planSet(g, 'med:sit', 2);
       assert(Wk.planEmpty({ items: {}, med: {}, doors: { yk_time: 1 } }) && g.tasks.plan.doors.yk_time === 1, `${T}: a new plan has Yuki at 1; planEmpty leaves the doors out ("Rest out the week")`);
-      assert(Wk.planNotes(g, SCENES).med['door:yk_time'] === '6 of 6 days', `${T}: the forecast: her row 6 of 6 days (${Wk.planNotes(g, SCENES).med['door:yk_time']})`);
+      assert(Wk.planNotes(g, SCENES).med['door:yk_time'] === '2 visits this week', `${T}: the forecast: her row 2 visits this week (v0.11.213, S3: every 3rd day; was 6 of 6 days) (${Wk.planNotes(g, SCENES).med['door:yk_time']})`);
       const { lines, stops } = week(g);
-      assert(g.rel.Yuki.f === 17 && g.rel.Yuki.a === 16 && Math.floor(g.minutes / D) - d0 >= 5, `${T}: a planned wilds week (Day 2 to 8): her six scenes, 2 / 1 → ${g.rel.Yuki.f} / ${g.rel.Yuki.a} (17 / 16, as tapping her card every day; stops ${stops.join()})`);
+      assert(g.rel.Yuki.f === 7 && g.rel.Yuki.a === 6 && Math.floor(g.minutes / D) - d0 >= 5, `${T}: a planned wilds week (Day 2 to 8): her two scenes (v0.11.213, S3: every 3rd day; six before, 17 / 16), 2 / 1 → ${g.rel.Yuki.f} / ${g.rel.Yuki.a} (7 / 6, as tapping her card whenever it shows; stops ${stops.join()})`);
       assert(lines.some((x) => /^Yuki has decided you are dirty/.test(x)), `${T}: the day's lines say her scene's text`); }
     { const g = save(); Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', 0); Wk.planSet(g, 'med:sit', 2); week(g);
       assert(g.rel.Yuki.f === 2 && g.rel.Yuki.a === 1, `${T}: her row at 0: no scene in the week (${g.rel.Yuki.f} / ${g.rel.Yuki.a})`); }
@@ -5699,7 +5699,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       assert(ok && g.rel.Yuki.f === 2, `${T}: a plan from before (no doors) runs as before, no scene taken`); }
     // the Fallout: Mei Lin's and Ya's talks stop the plan on their choice; it goes on after it, and no door is taken twice a day
     { const g = ensureBars(newGame(99501, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'fo_ashfall'); g.minutes = 16 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true;
-      assert(Wk.doorCards(g, SCENES).map((d) => d.scene).join() === 'yk_time,wen_time,mother_time,fo_mei,fo_ya_time', `${T}: the Fallout's five daily doors (${Wk.doorCards(g, SCENES).map((d) => d.scene).join()})`);
+      assert(Wk.doorCards(g, SCENES).map((d) => d.scene).join() === 'yk_time,wen_time,mother_time,fo_mother,fo_spy,fo_mei,fo_ya_time', `${T}: the Fallout's five daily doors and (v0.11.213, VQ1) its two one-offs (${Wk.doorCards(g, SCENES).map((d) => d.scene).join()})`);
       Wk.planEnsure(g); for (const s of ['fo_mei', 'fo_ya_time', 'wen_time', 'mother_time']) Wk.planSet(g, `door:${s}`, 1);
       const r1 = Wk.runWeek(g, SCENES), s1 = g.scene, run1 = g.tasks.plan.running;
       const v = sceneView(g, SCENES); Wk.storyTap(g, SCENES, v.choices.find((c) => !c.disabled && c.index < 1000).index); const a1 = Wk.afterStory(g, SCENES);
@@ -5714,7 +5714,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     // twice; TG2–TG6 and the planted faults the first run missed (F3, F5, F6, F8, F12, F14, F15, F17)
     const fo = (seed = 99501, h = 7, m = 0) => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'fo_ashfall'); g.minutes = 16 * D + h * 60 + m; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true; return g; };
     const pickOn = (g) => sceneView(g, SCENES).choices.find((c) => !c.disabled && c.index < 1000 && !/^(Yuki: change form|Story Mode only)/.test(c.label)).index;
-    { const g = fo(); assert(Wk.doorCards(g, SCENES).map((d) => d.scene).join() === 'yk_time,wen_time,mother_time,fo_mei,fo_ya_time', `${T} (RV1, M2): the doors in DAILY_DOORS order, the talks last (${Wk.doorCards(g, SCENES).map((d) => d.scene).join()})`); }
+    { const g = fo(); assert(Wk.doorCards(g, SCENES).map((d) => d.scene).join() === 'yk_time,wen_time,mother_time,fo_mother,fo_spy,fo_mei,fo_ya_time', `${T} (RV1, M2): the doors in PLAN_DOORS order, the talks last (${Wk.doorCards(g, SCENES).map((d) => d.scene).join()})`); }
     { const g = fo(); Wk.planEnsure(g); for (const s of ['wen_time', 'mother_time', 'fo_mei', 'fo_ya_time']) Wk.planSet(g, `door:${s}`, 1); for (const c of Wk.planCards(g, SCENES)) Wk.planSet(g, c.id, 9);
       const r1 = Wk.runWeek(g, SCENES); Wk.storyTap(g, SCENES, pickOn(g)); Wk.afterStory(g, SCENES); const r2 = Wk.runWeek(g, SCENES);
       assert(r1.stop === 'door' && g.rel.Yuki.f === 3 && g.rel['Old Wen']?.f === 3 && g.rel.Mother?.f >= 3 && g.rel['Mei Lin']?.f >= 1 && r2.stop === 'evening', `${T} (RV1, M2, TG5): a Fallout work day (every card at 9): Yuki, Old Wen and the mother before 19:00, then Mei Lin's talk (${JSON.stringify(g.rel)}; ${r1.stop}, ${r2.stop})`); }
@@ -5762,7 +5762,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       assert(ok && g.rel.Yuki?.f === 3, `${T} (RV1, F8): a day's done record from before (no doors) gets one; Yuki's scene taken`); }
     // F12: no rows for people not met yet (the prologue's Ashfall on Day 4, Ya before she arrives)
     { const a = ensureBars(newGame(99510, { closed: true, cal: C.LONG_CAL })); goTo(a, SCENES, 'ashfall'); a.minutes = 4 * D + 9 * 60; const b = fo(); delete b.flags.ya_met;
-      assert(Wk.doorCards(a, SCENES).map((d) => d.scene).join() === 'yk_time' && !Wk.doorCards(b, SCENES).some((d) => d.scene === 'fo_ya_time'), `${T} (RV1, F12): no row for Old Wen and the mother before James meets them, none for Ya before she comes`); }
+      assert(Wk.doorCards(a, SCENES).map((d) => d.scene).join().startsWith('yk_time') && !Wk.doorCards(a, SCENES).some((d) => /^(wen|mother)_time$/.test(d.scene)) && !Wk.doorCards(b, SCENES).some((d) => d.scene === 'fo_ya_time'), `${T} (RV1, F12): no row for Old Wen and the mother before James meets them, none for Ya before she comes`); }
     // F5 + F15 + F17: a door that stays open is still taken once a day; the walked way's own lines are said; a door that opens nothing is done
     { const ch = SCENES.wilds.choices.find((c) => c.to === 'yk_time'), show0 = ch.show, go = SCENES.yk_time.choices.find((c) => /^Go on/.test(String(c.text))), do0 = go.do, en0 = SCENES.yk_time.enter;
       try {
@@ -5811,10 +5811,10 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     // none set: the old order; every row set to the place it shows: the same run, step for step
     { const a = plan(save()), b = plan(save());
       const rk = Wk.planRanks(b, SCENES);
-      assert(rk.n === 13 && rk.rank['wild_train:1'] === 1 && rk.rank['wild_forage:0'] === 2 && rk.rank['med:pres'] === 9 && rk.rank['door:yk_time'] === 10 && rk.rank['med:sit'] === 11 && rk.rank['med:qi'] === 13, `${T}: the old order shown: the cards set, the cards not set, Smoke, Yuki, sit, meridian, Qi (${JSON.stringify(rk)})`);
+      assert(rk.n === 14 && rk.rank['med:rest'] === 14 && rk.rank['wild_train:1'] === 1 && rk.rank['wild_forage:0'] === 2 && rk.rank['med:pres'] === 9 && rk.rank['door:yk_time'] === 10 && rk.rank['med:sit'] === 11 && rk.rank['med:qi'] === 13, `${T}: the old order shown: the cards set, the cards not set, Smoke, Yuki, sit, meridian, Qi (${JSON.stringify(rk)})`);
       for (const [k, n] of Object.entries(rk.rank)) Wk.planPrio(b, SCENES, k, n);
       const wa = week(a), wb = week(b);
-      assert(Object.keys(b.tasks.prio.wilds).length === 13, `${T}: every row placed (${JSON.stringify(b.tasks.prio)})`);
+      assert(Object.keys(b.tasks.prio.wilds).length === 14, `${T}: every row placed (${JSON.stringify(b.tasks.prio)})`);
       assert(JSON.stringify(wa) === JSON.stringify(wb) && noPrio(a) === noPrio(b), `${T}: the places as shown run exactly as none set (${wa.ids.length} / ${wb.ids.length} steps)`);
       assert(!('prio' in a.tasks), `${T} (RV1, TG2): a run with no places writes none into the save`);
       assert(!a.tasks.plan?.items?.['wild_train:1'] && !a.tasks.plan?.items?.['wild_forage:0'], `${T}: the old order: all 4 cards taken this week`); }
@@ -5834,7 +5834,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         Wk.planEnsure(g); for (const s of ['wen_time', 'mother_time', 'fo_mei', 'fo_ya_time']) Wk.planSet(g, `door:${s}`, 1); for (const c of Wk.planCards(g, SCENES)) Wk.planSet(g, c.id, 9); Wk.planSet(g, 'med:sit', 2); out.fallout = pin(g); }
       { const g = ensureBars(newGame(99502, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'ashfall'); g.minutes = 9 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60);
         Wk.planEnsure(g); const cs = Wk.planCards(g, SCENES); for (const c of cs.slice(0, 3)) Wk.planSet(g, c.id, 2); Wk.planSet(g, 'med:sit', 4); Wk.planSet(g, 'med:qi', 3); out.ashfall = pin(g); out.cards = cs.slice(0, 3).map((c) => c.id).join(); }
-      assert(JSON.stringify(out) === '{"wilds":"fe3d1924","fallout":"a85e856c","ashfall":"1db224f4","cards":"workshop:0,workshop:2,drill:0"}', `${T} (RV1, TG2): none set: the wilds, the Fallout and Ashfall runs as v0.11.210's code ran them (${JSON.stringify(out)})`); }
+      assert(JSON.stringify(out) === '{"wilds":"f183f4d0","fallout":"95b8841e","ashfall":"70e7a986","cards":"workshop:0,workshop:2,drill:0"}', `${T} (RV1, TG2): none set: the wilds, the Fallout and Ashfall runs as v0.11.213's code runs them (re-pinned for S3 and the rest row; with the spacing off and the rest row taken out they run as v0.11.210's: the VQ1 block) (${JSON.stringify(out)})`); }
     // RV1 (TG3): one row a step: Smoke the catch is seen by the step's watch each day it smokes (a row that ran and let the next one
     // run in the same step hid it, and skipped the step's checks: hurt, hungry)
     { const g = ensureBars(newGame(99502, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'ashfall'); g.minutes = 9 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 30); Gm.addItem(g, 'hare_raw', 2);
@@ -5867,7 +5867,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     { const a = plan(save()), b = plan(save()), sid = Tk.sitTaskId(b, SCENES);
       Wk.planPrio(b, SCENES, 'med:sit', 1); Wk.planPrio(b, SCENES, 'med:mer', 2); Wk.planPrio(b, SCENES, 'med:qi', 3);
       const r = Wk.planRanks(b, SCENES).rank;
-      assert(r['med:sit'] === 1 && r['med:mer'] === 2 && r['med:qi'] === 3 && r['wild_train:1'] === 4 && Object.values(r).sort((x, y) => x - y).join() === Array.from({ length: 13 }, (_, i) => i + 1).join(), `${T}: a move renumbers every row 1… (${JSON.stringify(r)})`);
+      assert(r['med:sit'] === 1 && r['med:mer'] === 2 && r['med:qi'] === 3 && r['wild_train:1'] === 4 && Object.values(r).sort((x, y) => x - y).join() === Array.from({ length: 14 }, (_, i) => i + 1).join(), `${T}: a move renumbers every row 1… (${JSON.stringify(r)})`);
       const fa = Wk.planNotes(a, SCENES), fb = Wk.planNotes(b, SCENES);
       const wa = week(a), wb = week(b);
       const left = (g) => Object.values(g.tasks.plan?.hub === 'wilds' ? g.tasks.plan.items : {}).reduce((x, y) => x + y, 0);
@@ -5907,6 +5907,162 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     { const src = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
       assert(/<select class="prio" data-prio=/.test(src) && /closest\('select\[data-prio\]'\)/.test(src) && src.includes('try { planPrio(g, SCENES, key, Number(sel.value)); autosave(); render(); } catch (err) { showError(err); return; }') && /again\.focus\(\{ preventScroll: true \}\)/.test(src), `${T} (RV1, M1, L3, TG6): main.js draws the drop-downs; a change moves the row, saves, keeps the focus, shows an error`);
       assert(src.includes("'before the day\\'s work'") && src.includes('kept here for good'), `${T}: the notes follow the order; the panel says the boxes are kept`); }
+}
+
+// v0.11.213 (owner picks VQ1 + FQ1, 2026-11-17 15:31 / 15:35; his 15:19 report "not all the around the village options are in the
+// queuable list"; 15:31 "the frequency of repetition of the door cards should be examined"; 15:35 "FQ1 but also apply to the Heart
+// cards of Mei and Ya"): VQ1 every door of a stay hub on Plan the week (week.js PLAN_DOORS: WL, FH, ST), W1 (a door's one way on with
+// a check is walked, the check rolled as a tap would), RS (Rest an hour, a day's count); S3 (common.js SPACE_DAYS, SPACED,
+// spacedFree, spacedNext): on the long calendar's stays a repeating door (and the Heart's fireside talks) opens every 3rd day.
+{
+    const Gm = await import('../js/core/game.js');
+    const C = await import('../js/core/calendar.js');
+    const Wk = await import('../js/core/week.js');
+    const Cm = await import('../js/story/common.js');
+    const Tk = await import('../js/core/tasks.js');
+    const T = 'VQ1 + FQ1 (every door on the plan, every 3rd day)';
+    const D = 1440;
+    const mk = (hub, sd, h = 7, cal = C.LONG_CAL, seed = 99601) => { const g = ensureBars(newGame(seed, { closed: true, ...(cal ? { cal } : {}) })); goTo(g, SCENES, hub); g.minutes = (C.calStart(g, sd) - 1) * D + h * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true; g.flags.elder = true; return g; };
+    const rows = (g) => Wk.doorCards(g, SCENES).map((d) => d.scene).join();
+    assert(Cm.SPACE_DAYS === 3 && ['yk_time', 'wen_time', 'mother_time', 'a1_mei', 'a1_ya', 'slopes', 'wen', 'far', 'spring', 'hc_mei', 'hc_ya'].every((k) => Cm.SPACED.has(k)) && Cm.SPACED.size === 11, `${T}: S3's keys, every 3rd day`);
+    assert(JSON.stringify(Wk.PLAN_DOORS) === JSON.stringify(['yk_time', 'wen_time', 'mother_time', 'wen_lesson', 'far_hunt', 'herb_slopes', 'heal', 'village_hunt', 'scout', 'pot_cook', 'fo_mother', 'fo_spy', 'fo_pot_cook', 'hall_listen', 'ring_chambers', 'heart_spring', 'fo_mei', 'fo_ya_time']) && Wk.PLAN_DOORS.filter(Wk.doorRepeats).length === 9, `${T}: the doors on the plan, 9 repeating, 9 once (the owner 16:42: the communal pot's cooking too), the talks last`);
+    for (const s of Wk.PLAN_DOORS) assert(!!SCENES[s], `${T}: ${s} is a scene`);
+    for (const hub of Tk.WEEK_HUBS) for (const c of SCENES[hub].choices) if (typeof c.to === 'string' && (TASK_HUBS[hub].doors || []).includes(c.to) && c.to !== 'sect_cut') assert(Wk.PLAN_DOORS.includes(c.to), `${T}: ${hub}'s door ${c.to} has a plan row (not in VQ1: the Heart's climb to the wound, a story step)`);
+    // the rows per stay: the village 7 new (6 doors and the rest row), the Fallout 3, the Heart 4, the wilds 1
+    { const g = mk('ashfall', 6); g.flags.vday = 3; const r = rows(g);
+      assert(['wen_lesson', 'far_hunt', 'herb_slopes', 'heal', 'village_hunt', 'scout'].every((s) => r.split(',').includes(s)) && Wk.planRanks(g, SCENES).rank['med:rest'] > 0, `${T}: Ashfall's six doors and the rest row (${r})`); }
+    { const g = mk('fo_ashfall', 9); assert(rows(g) === 'yk_time,wen_time,mother_time,fo_mother,fo_spy,fo_mei,fo_ya_time', `${T}: the Fallout's one-offs between the visits and the talks (${rows(g)})`); }
+    { const g = mk('heart_hub', 17); assert(rows(g) === 'yk_time,hall_listen,ring_chambers,heart_spring', `${T}: the Heart's three doors (${rows(g)})`);
+      g.flags.spring_found = true; assert(Wk.doorCards(g, SCENES).filter((d) => d.scene === 'heart_spring').length === 1, `${T}: one row for the spring's two ways in`); }
+    { const g = mk('wilds', 2); assert(Wk.planRanks(g, SCENES).rank['med:rest'] === Wk.planRanks(g, SCENES).n, `${T}: the wilds: the rest row, last in the old order`); }
+    // S3: a stay's repeating door, taken today, opens again 3 days later; the row stays, with the day it opens
+    { const g = mk('fo_ashfall', 9); const d = Gm.wakeDay(g), cal = Math.floor(g.minutes / D) + 1;
+      const open = (s) => { const v = sceneView(g, SCENES); const i = SCENES.fo_ashfall.choices.findIndex((c) => c.to === s); return v.choices.some((c) => c.index === i && !c.disabled); };
+      g.flags[`a1_mei@${d}`] = true;
+      let r0 = null; const o = []; for (let k = 0; k <= 3; k++) { g.minutes += k ? D : 0; o.push(open('fo_mei')); if (k === 1) r0 = Wk.doorCards(g, SCENES).find((x) => x.scene === 'fo_mei'); }
+      assert(o.join() === 'false,false,false,true' && r0?.status === 'closed' && r0.next === cal + 3 && Wk.doorNote(r0) === `every 3rd day, opens Day ${cal + 3}`, `${T}: Mei Lin's talk taken: closed 2 days, open the 3rd; its row kept, "opens Day ${cal + 3}" (${o.join()}; ${JSON.stringify(r0)})`); }
+    { const g = mk('fo_ashfall', 9, 7, null); const d = Gm.wakeDay(g); g.flags[`a1_mei@${d}`] = true; g.minutes += D;
+      assert(Cm.spacedFree(g, 'a1_mei', Gm.wakeDay(g)) && Cm.spacedNext(g, 'a1_mei', Gm.wakeDay(g)) === Gm.wakeDay(g), `${T}: the old calendar: once a day, as before`); }
+    // RV1 (TG1, L4): a stay's visit (the village's last day, calendar 42) and the tribute (43, a deadline day: once a day) and Act 1's first day (44, a new stay: afresh)
+    { const g = mk('ashfall', 6); g.minutes = 41 * D + 9 * 60; const d = Gm.wakeDay(g); g.flags[`yk_time@${d}`] = true;
+      g.minutes += D; const t43 = Cm.spacedFree(g, 'yk_time', Gm.wakeDay(g)); g.minutes += D; const t44 = Cm.spacedFree(g, 'yk_time', Gm.wakeDay(g));
+      assert(d === 42 && C.storyDay(g) === 8 && t43 && t44 && Cm.stayOf(6) === 2 && Cm.stayOf(7) === 0 && Cm.stayOf(8) === 3, `${T} (RV1, TG1 + L4): a village visit on Day 42 holds neither the tribute (43: ${t43}) nor the Fallout's first day (44: ${t44})`); }
+    { const g = mk('fo_ashfall', 9); const d = Gm.wakeDay(g); g.flags[`yk_time@${d - 1}`] = true;
+      assert(!Cm.spacedFree(g, 'yk_time', d) && Cm.spacedNext(g, 'yk_time', d) === d + 2, `${T}: within one stay a visit holds the next two days`); }
+    { const g = mk('heart_hub', 16); const d = Gm.wakeDay(g); g.flags[`yk_time@${d - 1}`] = true;
+      assert(Cm.spacedFree(g, 'yk_time', d), `${T}: a journey day's visit doesn't hold a stay's first day`); }
+    { const g = mk('fo_ashfall', 9); const d = Gm.wakeDay(g); g.flags[`a1_mei@${d - 1}`] = true;
+      assert(!Cm.spacedFree(g, 'a1_mei', d) && Cm.unspaced(() => Cm.spacedFree(g, 'a1_mei', d)) && !Cm.unspaced(() => (g.flags[`a1_mei@${d}`] = true, Cm.spacedFree(g, 'a1_mei', d))), `${T}: unspaced: closed only by its spacing reads open; taken today stays closed`); }
+    // the Heart's fireside talks at its camp (the owner 15:35) and the spring: every 3rd calendar day
+    { const g = mk('heart_hub', 17, 21); const day = Math.floor(g.minutes / D) + 1; const hn = SCENES.heart_camp.choices;
+      const mei = hn.find((c) => /Talk with Mei Lin by the fire/.test(String(c.text))), ya = hn.find((c) => /Ya's ledge/.test(String(c.text)));
+      g.flags.ya_party = true; g.flags[`hc_mei@${day}`] = true; g.flags[`hc_ya@${day}`] = true; const o = [];
+      for (let k = 1; k <= 3; k++) { g.minutes += D; o.push(`${mei.show(g)}/${ya.show(g)}`); }
+      const c = mk('heart_hub', 17, 21, null); const cd = Math.floor(c.minutes / D) + 1; c.flags[`hc_mei@${cd}`] = true; c.minutes += D;
+      assert(o.join() === 'false/false,false/false,true/true' && mei.show(c), `${T}: the fireside talks every 3rd night; the old calendar every night (${o.join()})`);
+      const sp = SCENES.heart_hub.choices.find((x) => /Wash at the spring/.test(String(x.text))); const g2 = mk('heart_hub', 17); g2.flags.spring_found = true; g2.flags[`spring@${Math.floor(g2.minutes / D) + 1}`] = true; g2.minutes += D;
+      assert(!sp.show(g2) && Wk.doorCards(g2, SCENES).find((x) => x.scene === 'heart_spring')?.next === Math.floor(g2.minutes / D) + 3, `${T}: the spring's wash every 3rd day, its row with the day it opens`); }
+    // a planned Fallout week: Yuki, Old Wen, the mother and Mei Lin each every 3rd day (Days 51, 54, 57 here), the talk answered as before
+    { const g = mk('fo_ashfall', 9); g.flags.palisade = 1; g.flags.wolf = 'driven'; Wk.planEnsure(g); for (const s of ['wen_time', 'mother_time', 'fo_mei']) Wk.planSet(g, `door:${s}`, 1);
+      let r = Wk.runWeek(g, SCENES);
+      for (let k = 0; k < 200 && ['evening', 'door'].includes(r.stop); k++) { const v = sceneView(g, SCENES); const o = v.choices.filter((c) => !c.disabled && c.index < 1000 && !/^(Yuki: change form|Story Mode only)/.test(c.label)); if (!o.length || g.combat) break; Wk.storyTap(g, SCENES, o[0].index); if (g.combat) break; if (Wk.afterStory(g, SCENES).resume) r = Wk.runWeek(g, SCENES); }
+      const days = (k) => Object.keys(g.flags).filter((f) => f.startsWith(`${k}@`)).map((f) => Number(f.split('@')[1]));
+      const gaps = (a) => a.slice(1).map((x, i) => x - a[i]);
+      assert(r.stop === 'week' && ['yk_time', 'wen_time', 'mother_time', 'a1_mei'].every((k) => days(k).length === 3 && gaps(days(k)).every((x) => x === 3)) && g.rel.Yuki.f === 8 && g.rel['Mei Lin'].a === 12, `${T}: a planned Fallout week: 3 visits each, 3 days apart (${['yk_time', 'a1_mei'].map((k) => days(k).join('/')).join(' ; ')}; Yuki ${g.rel.Yuki.f}, Mei Lin's affection ${g.rel['Mei Lin'].a}; was 7 visits)`); }
+    // W1: Old Wen's lesson, one way on with a check, walked; GU +12 and Old Wen +4; no stop for it
+    { const g = mk('ashfall', 5); Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', 0); Wk.planSet(g, 'door:wen_lesson', 1); const xp = () => JSON.stringify(g.james);
+      const j0 = xp(); const r = Wk.runWeek(g, SCENES);
+      assert(g.rel['Old Wen']?.f === 4 && j0 !== xp() && g.scene === 'ashfall' && r.days.some((d) => d.lines.some((x) => /GU \+12 XP/.test(x))), `${T} (W1): the lesson walked, its check rolled: Old Wen ${g.rel['Old Wen']?.f}, GU +12 XP (${r.stop})`); }
+    // ST: a one-off door with a choice stops the plan ('door'), its row back to 0; a one-off with one checked way (the scout) walked
+    { const g = mk('ashfall', 5); Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', 0); Wk.planSet(g, 'door:heal', 1); const r = Wk.runWeek(g, SCENES);
+      assert(r.stop === 'door' && g.scene === 'heal' && g.tasks.plan.doors.heal === 0, `${T} (ST): the coughing house stops it on its choice; its row back to 0 (${r.stop}, ${g.scene})`); }
+    { const g = mk('ashfall', 6); g.flags.vday = 3; Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', 0); Wk.planSet(g, 'door:scout', 1); Wk.planSet(g, 'med:sit', 1); const r = Wk.runWeek(g, SCENES);
+      assert(g.flags.scouted_try && r.stop !== 'door' && g.tasks.plan.doors.scout === 0, `${T} (ST + W1): the tribute road scouted on its one checked way (${r.stop})`); }
+    { const g = mk('ashfall', 5); Wk.planEnsure(g); Wk.planSet(g, 'door:heal', 5); Wk.planSet(g, 'med:rest', 40);
+      assert(g.tasks.plan.doors.heal === 1 && g.tasks.plan.med.rest === 12 && Wk.planCount(g, 'med:rest') === 12, `${T}: a door counts 0 or 1, rest up to 12 a day`); }
+    // FH: the far hunt stops the first time; the next visit (same kind, same options) answered as before
+    { const g = mk('ashfall', 5); Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', 0); Wk.planSet(g, 'door:far_hunt', 1); const r1 = Wk.runWeek(g, SCENES); const s1 = g.scene, kind = g.flags.far_kind;
+      const back = sceneView(g, SCENES).choices.find((c) => !c.disabled && /^(Back off|Let them go)/.test(c.label)); Wk.storyTap(g, SCENES, back.index);
+      assert(r1.stop === 'door' && s1 === 'far_hunt' && g.tasks.dc.picks.far_hunt?.i === back.index && g.tasks.plan.doors.far_hunt === 1, `${T} (FH): the far hunt stops on Fight / Back off the first time (${r1.stop}, ${kind}); the pick noted; the row stays`); }
+    // RS: Rest an hour, twice a day
+    { const g = mk('fo_ashfall', 9); Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', 0); Wk.planSet(g, 'med:rest', 2); const ids = []; const rid = Wk.restCard(g, SCENES);
+      Wk.runWeek(g, SCENES, { onStep: (cg, l) => { if (l && !l.r.skipped) ids.push(l.id); } });
+      assert(rid === 'fo_ashfall:12' && ids.slice(0, 2).join() === `${rid},${rid}` && Wk.planNotes(g, SCENES) && true, `${T} (RS): Rest an hour taken twice a day (${ids.slice(0, 3).join()})`); }
+    { const g = mk('wilds', 2); Wk.planEnsure(g); delete g.tasks.plan.med.rest; g.tasks.plan.done = { d: -1, sit: 0, mer: 0, qi: 0, pres: 0, doors: {} }; Wk.planSet(g, 'med:sit', 1); let ok = true;
+      try { Wk.runWeek(g, SCENES); Wk.planNotes(g, SCENES); } catch { ok = false; } assert(ok, `${T}: a plan from before (no rest row) runs`); }
+    // the old calendar: no plan; the Fallout's doors open every day
+    { const g = mk('fo_ashfall', 9, 7, null); assert(Wk.doorCards(g, SCENES).length === 0 && Wk.planEnsure(g) === null, `${T}: the old calendar: no plan rows`); }
+    // TG: with the spacing off and the rest row taken out, PR2's three pinned runs are v0.11.210's, step for step
+    { const strip = (g) => { const c = JSON.parse(JSON.stringify(g)); const q = c.tasks?.plan; if (q) { delete q.med.rest; if (q.done) delete q.done.rest; } return c; };
+      const pin = (g) => { const ids = [], lines = []; const onStep = (cg, l) => { if (l) ids.push(`${cg.minutes}:${l.id}${l.r.skipped ? '~' : ''}`); };
+        const go = () => { const r = Wk.runWeek(g, SCENES, { onStep }); for (const d of r.days) lines.push(...d.lines); return r; };
+        let r = go(); const stops = [r.stop];
+        for (let k = 0; k < 60 && ['evening', 'door'].includes(r.stop); k++) {
+            const v = sceneView(g, SCENES); const open = v.choices.filter((c) => !c.disabled && c.index < 1000 && !/^(Yuki: change form|Story Mode only)/.test(c.label)); if (!open.length || g.combat) break;
+            Wk.storyTap(g, SCENES, open[0].index); if (g.combat) break; if (Wk.afterStory(g, SCENES).resume) { r = go(); stops.push(r.stop); } }
+        return Gm.fnv1a(JSON.stringify({ ids, lines, stops, g: strip(g) })); };
+      const out = Cm.unspaced(() => {
+        const o = {};
+        { const g = deserialize(readFileSync(new URL('../saves/v0.11.204-long-wilds-day2.json', import.meta.url), 'utf8'), { force: true }); g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 30); Gm.addItem(g, 'hare_raw', 2);
+          for (const [k, n] of [['wild_train:1', 2], ['wild_forage:0', 2], ['med:sit', 3], ['med:mer', 2], ['med:qi', 2], ['med:pres', 1]]) Wk.planSet(g, k, n); o.wilds = pin(g); }
+        { const g = ensureBars(newGame(99501, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'fo_ashfall'); g.minutes = 16 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true;
+          Wk.planEnsure(g); for (const s of ['wen_time', 'mother_time', 'fo_mei', 'fo_ya_time']) Wk.planSet(g, `door:${s}`, 1); for (const c of Wk.planCards(g, SCENES)) Wk.planSet(g, c.id, 9); Wk.planSet(g, 'med:sit', 2); o.fallout = pin(g); }
+        { const g = ensureBars(newGame(99502, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'ashfall'); g.minutes = 9 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60);
+          Wk.planEnsure(g); const cs = Wk.planCards(g, SCENES); for (const c of cs.slice(0, 3)) Wk.planSet(g, c.id, 2); Wk.planSet(g, 'med:sit', 4); Wk.planSet(g, 'med:qi', 3); o.ashfall = pin(g); }
+        return o; });
+      assert(JSON.stringify(out) === '{"wilds":"fe3d1924","fallout":"a85e856c","ashfall":"1db224f4"}', `${T} (TG): spacing off, rest row out: v0.11.210's three runs exactly (${JSON.stringify(out)})`); }
+    // RV1 (TG2, L1): the spring found, its row at 1 and the wash open: one row, the wash's, and the run washes
+    { const g = mk('heart_hub', 17); g.flags.spring_found = true; Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', 0); Wk.planSet(g, 'door:heart_spring', 1);
+      const rs = Wk.doorCards(g, SCENES).filter((x) => x.scene === 'heart_spring'); const r = Wk.runWeek(g, SCENES);
+      assert(rs.length === 1 && rs[0].id === 'heart_hub:4' && rs[0].status === 'open' && Object.keys(g.flags).some((k) => /^spring@/.test(k)), `${T} (RV1, TG2): the wash's row (${JSON.stringify(rs)}), taken (${r.stop})`);
+      const c = mk('heart_hub', 17); c.flags.spring_found = true; c.flags[`spring@${Math.floor(c.minutes / D) + 1}`] = true; c.minutes += D; Wk.planEnsure(c); Wk.planSet(c, 'door:heart_spring', 1);
+      const r2 = Wk.doorCards(c, SCENES).filter((x) => x.scene === 'heart_spring');
+      assert(r2.length === 1 && r2[0].id === 'heart_hub:4' && r2[0].label === 'Wash at the spring.' && r2[0].status === 'closed', `${T} (RV1, L1): closed by its spacing, at 1: still the wash's row (${JSON.stringify(r2)})`); }
+    // RV1 (TG3): exactly the rest row's hours a day, every day of the week
+    { const g = mk('fo_ashfall', 9); g.flags.palisade = 1; g.flags.wolf = 'driven'; Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', 0); Wk.planSet(g, 'med:rest', 2); const per = {}; const rid = Wk.restCard(g, SCENES);
+      const onStep = (cg, l) => { if (l && !l.r.skipped && l.id === rid) { const d = Tk.workDay(cg); per[d] = (per[d] || 0) + 1; } };
+      let r = Wk.runWeek(g, SCENES, { onStep });
+      for (let k = 0; k < 100 && ['evening', 'door'].includes(r.stop); k++) { const v = sceneView(g, SCENES); const o = v.choices.filter((c) => !c.disabled && c.index < 1000 && !/^(Yuki: change form|Story Mode only)/.test(c.label)); if (!o.length || g.combat) break; Wk.storyTap(g, SCENES, o[0].index); if (g.combat) break; if (Wk.afterStory(g, SCENES).resume) r = Wk.runWeek(g, SCENES, { onStep }); }
+      const v = Object.values(per); assert(v.length >= 5 && v.every((n) => n === 2), `${T} (RV1, TG3): Rest an hour exactly twice each day (${JSON.stringify(per)})`); }
+    // RV1 (F5, F15 the second run): a journey day taken today opens tomorrow (spacedNext); a door closed by its hours (the slopes from 15:00, untaken) says no day
+    { const g = mk('fo_ashfall', 12); const d = Gm.wakeDay(g); g.flags[`yk_time@${d}`] = true;
+      const h = mk('ashfall', 5, 16); Wk.planEnsure(h); Wk.planSet(h, 'door:herb_slopes', 1); const hs = Wk.doorCards(h, SCENES).find((x) => x.scene === 'herb_slopes');
+      assert(Cm.spacedNext(g, 'yk_time', d) === d + 1 && hs?.status === 'closed' && hs.next === null && Wk.doorNote(hs) === 'every 3rd day', `${T} (F5, F15): a journey day's next is tomorrow (${Cm.spacedNext(g, 'yk_time', d) - d}); the slopes closed at 16:00, untaken: no day (${JSON.stringify(hs)})`); }
+    // RV1 (TG4): the notes: a one-off "once"; an open repeating row no day; a closed one its day
+    assert(Wk.doorNote({ repeat: false }) === 'once' && Wk.doorNote({ repeat: true, next: null }) === 'every 3rd day' && Wk.doorNote({ repeat: true, next: 51 }) === 'every 3rd day, opens Day 51', `${T} (RV1, TG4): doorNote`);
+    { const g = mk('fo_ashfall', 9); const ds = Wk.doorCards(g, SCENES);
+      assert(ds.filter((d) => d.status === 'open').every((d) => d.next === null) && Wk.doorNote(ds.find((d) => d.scene === 'fo_mother')) === 'once' && !/opens/.test(Wk.doorNote(ds.find((d) => d.scene === 'fo_mei'))), `${T} (RV1, TG4): open rows say no day; the mother's first visit "once"`); }
+    // RV1 (TG5, M1): the forecast says "this week" for a one-off it takes, "not this week" for one it doesn't reach
+    { const g = mk('fo_ashfall', 9); Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', 0); Wk.planSet(g, 'door:fo_mother', 1); const n = Wk.planNotes(g, SCENES).med;
+      const h = mk('ashfall', 5); Wk.planEnsure(h); Wk.planSet(h, 'door:yk_time', 0); Wk.planSet(h, 'door:heal', 1); for (const c of Wk.planCards(h, SCENES)) Wk.planSet(h, c.id, 9); Wk.planPrio(h, SCENES, 'door:heal', Wk.planRanks(h, SCENES).n); const nh = Wk.planNotes(h, SCENES).med;
+      assert(n['door:fo_mother'] === 'this week' && ['this week', 'not this week'].includes(nh['door:heal']), `${T} (RV1, TG5 + M1): the mother's visit "this week" (${n['door:fo_mother']}); the coughing house ${nh['door:heal']}`); }
+    { const g = mk('ashfall', 6, 18); Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', 0); Wk.planSet(g, 'door:heal', 1); g.flags.healed_try = true; const fc = Wk.planForecast(g, SCENES);
+      assert(fc && fc.doors.heal === 0 && Wk.planNotes(g, SCENES).med['door:heal'] === 'not this week', `${T} (RV1, TG5): a one-off that never opens: "not this week"`); }
+    // RV1 (TG6): each repeating door spaced by its own key: Old Wen's lesson, the far hunt, the herb slopes taken today open on day d+3
+    { const g = mk('ashfall', 5, 8); const cal = Math.floor(g.minutes / D) + 1, wd = Gm.wakeDay(g);
+      for (const k of ['wen', 'far', 'slopes']) g.flags[`${k}@${wd}`] = true; g.minutes += D;
+      const ds = Wk.doorCards(g, SCENES), nx = (s) => ds.find((d) => d.scene === s)?.next;
+      assert(['wen_lesson', 'far_hunt', 'herb_slopes'].every((s) => nx(s) === cal + 3) && Wk.DOOR_KEY.wen_lesson === 'wen' && Wk.DOOR_KEY.far_hunt === 'far' && Wk.DOOR_KEY.herb_slopes === 'slopes', `${T} (RV1, TG6): the lesson, the far hunt, the slopes: Day ${cal + 3} (${['wen_lesson', 'far_hunt', 'herb_slopes'].map(nx).join()})`); }
+    // RV1 (TG7, M2): a remembered "Fight." is never replayed: the plan stops on the far hunt again (the player's), the pick kept
+    { let g = null, kind = null; for (let seed = 99600; seed < 99640 && !g; seed++) { const t = mk('ashfall', 5, 8, C.LONG_CAL, seed); goTo(t, SCENES, 'far_hunt'); if (t.flags.far_kind !== 'deer') { g = t; kind = t.flags.far_kind; } }
+      const fi = sceneView(g, SCENES).choices.find((c) => c.label === 'Fight.').index; Wk.noteDoor(g, SCENES, 'far_hunt', fi);
+      assert(Wk.doorPick(g, SCENES) === null && g.tasks.dc.picks.far_hunt.i === fi, `${T} (RV1, TG7 + M2): Fight. remembered against the ${kind}: not replayed (${Wk.doorPick(g, SCENES)})`);
+      const b = sceneView(g, SCENES).choices.find((c) => /^Back off/.test(c.label)).index; Wk.noteDoor(g, SCENES, 'far_hunt', b);
+      assert(Wk.doorPick(g, SCENES) === b, `${T} (RV1, M2): Back off is replayed`); }
+    // RV1 (L3): a one-off door tapped by hand sets its row back to 0; a repeating one keeps its row
+    { const g = mk('fo_ashfall', 9); Wk.planEnsure(g); Wk.planSet(g, 'door:fo_mother', 1); Wk.planSet(g, 'door:fo_mei', 1);
+      Wk.noteCardTap(g, SCENES, 'fo_ashfall:6'); Wk.noteCardTap(g, SCENES, 'fo_ashfall:5'); Wk.noteCardTap(g, SCENES, 'not:a:card'); Wk.noteCardTap(g, SCENES, 'mer:pri');
+      assert(g.tasks.plan.doors.fo_mother === 0 && g.tasks.plan.doors.fo_mei === 1, `${T} (RV1, L3): the mother's first visit tapped: its row 0; Mei Lin's talk kept at 1`);
+      const src = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8'); assert(/noteCardTap\(g, SCENES, id\);[^\n]*\n\s*const r = runTask\(g, SCENES, id\);/.test(src), `${T} (RV1, L3): doTask notes the tap before runTask`); }
+    // the owner 16:42: the communal pot's cooking on the plan, once (its Village 90, 09:00 to 14:59)
+    { const g = mk('ashfall', 5, 10); Gm.bumpRel(g, 'Village', 95, 0); const f = mk('fo_ashfall', 9, 10); Gm.bumpRel(f, 'Village', 95, 0);
+      const a = Wk.doorCards(g, SCENES).find((d) => d.scene === 'pot_cook'), b = Wk.doorCards(f, SCENES).find((d) => d.scene === 'fo_pot_cook');
+      assert(a?.status === 'open' && !a.repeat && b?.status === 'open' && !b.repeat && Wk.doorNote(a) === 'once', `${T} (the owner 16:42): the pot's cooking rows, once (${JSON.stringify([a, b])})`);
+      Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', 0); Wk.planSet(g, 'door:pot_cook', 1); const r = Wk.runWeek(g, SCENES);
+      assert((r.stop === 'door' && g.scene === 'pot_cook') || g.flags.pot_cook, `${T}: the plan opens the pot (${r.stop}, ${g.scene})`); }
+    // the screen: the door rows' note from doorNote, the rest row
+    { const src = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+      assert(src.includes('[doorNote(d), when(`door:${d.scene}`)]') && src.includes("planRow('med:rest', 'Rest, hours a day'"), `${T}: the panel's door notes and the rest row`); }
 }
 
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));

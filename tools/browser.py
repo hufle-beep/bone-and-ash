@@ -983,6 +983,38 @@ def n1_ui(b, url):
     finally:
         ctx.close()
 
+def vq1_ui(b, url):
+    """v0.11.213 (owner picks VQ1 + FQ1): Plan the week on the day-2 wilds save at 412 px: the rest row ("Rest, hours a day", last,
+    its + sets 1 and the save keeps it in g.tasks.plan.med.rest); Yuki's row says "every 3rd day"; RV1 (TG8): her card tapped by hand,
+    then "Go on.": her row says "every 3rd day, opens Day 5"."""
+    save = (ROOT / 'saves/v0.11.204-long-wilds-day2.json').read_text()
+    ctx = b.new_context(viewport={'width': 412, 'height': 800}, service_workers='block')
+    pg = ctx.new_page(); pg.on('pageerror', lambda e: fails.append(f"page error: {e}"))
+    try:
+        fresh(pg, url, "s => { localStorage.clear(); localStorage.setItem('boneash.auto', s); }", save)
+        info = pg.evaluate("""() => { const rows = [...document.querySelectorAll('.prow')]; const t = (r) => r.querySelector('.pl')?.textContent || '';
+            const rest = rows.findIndex((r) => r.querySelector('[data-plan="med:rest"]')); const yk = rows.find((r) => r.querySelector('[data-plan="door:yk_time"]'));
+            return [rows.length, rest, rest >= 0 ? t(rows[rest]) : '', yk ? t(yk) : '']; }""")
+        if info[1] < 0 or 'Rest, hours a day' not in info[2]: fails.append(f'VQ1: no rest row on the plan ({info})')
+        elif 'every 3rd day' not in info[3]: fails.append(f'VQ1: Yuki\'s row does not say "every 3rd day" ({info[3]})')
+        else:
+            n0 = pg.evaluate("localStorage.getItem('boneash.auto')"); pg.click('button[data-plan="med:rest"][data-d="1"]')
+            until(pg, "b => localStorage.getItem('boneash.auto') !== b", 3000, arg=n0); pg.wait_for_timeout(100)
+            got = pg.evaluate("() => { const o = JSON.parse(localStorage.getItem('boneash.auto')); return JSON.parse(o.data || JSON.stringify(o)).tasks?.plan?.med?.rest; }")
+            if got != 1: fails.append(f'VQ1: the rest row\'s + kept {got} in the save (1 expected)')
+            # RV1 (TG8): Yuki's card tapped by hand, then "Go on.": back on the hub her row says the day it opens again (S3)
+            card = pg.query_selector('button[data-run="wilds:14"]')
+            if not card: fails.append('VQ1 (TG8): no "Sit with Yuki." card on the wilds')
+            else:
+                tap(pg, card); until(pg, "() => [...document.querySelectorAll('button')].some((e) => e.textContent.trim().startsWith('Go on.'))", 5000)
+                go = pg.locator('button', has_text='Go on.').first; tap(pg, go.element_handle())
+                until(pg, 'button[data-plan="door:yk_time"]', 5000, 'attached'); pg.wait_for_timeout(100)
+                note = pg.evaluate("() => document.querySelector('button[data-plan=\"door:yk_time\"]').closest('.prow').querySelector('.note')?.textContent || ''")
+                if 'every 3rd day, opens Day 5' not in note: fails.append(f'VQ1 (TG8): Yuki\'s row after her scene: {note!r} ("every 3rd day, opens Day 5" expected)')
+    finally:
+        ctx.close()
+
+
 def pr2_ui(b, url):
     """v0.11.211 (owner picks PR2 + PK1): Plan the week's places. On the day-2 save at 412 px and 1366x768: every row has a drop-down of
     1 to the rows' count by its label, inside its row and reachable; "Sits a day" shows 11 of 13; set to 1 it shows 1 and the save
@@ -1004,7 +1036,7 @@ def pr2_ui(b, url):
             vals = sorted(x[2] for x in info)
             if bad or vals != list(range(1, n + 1)): fails.append(f'{where}: drop-downs not 1..{n}, or outside their row / covered ({bad[:3]}, {vals})'); continue
             sit = next(x for x in info if x[0] == 'med:sit')
-            if n != 13 or sit[2] != 11: fails.append(f'{where}: the wilds shows {n} rows, "Sits a day" at {sit[2]} (13 rows, 11 expected)')
+            if n != 14 or sit[2] != 11: fails.append(f'{where}: the wilds shows {n} rows, "Sits a day" at {sit[2]} (14 rows with v0.11.213\'s rest row, 11 expected)')
             # RV1 (L2): a card planned first, so the notes have the day's work to go by
             n0 = pg.evaluate("localStorage.getItem('boneash.auto')"); pg.click('.prow button[data-d="1"]')
             until(pg, "b => localStorage.getItem('boneash.auto') !== b", 3000, arg=n0); pg.wait_for_timeout(100)
@@ -1136,6 +1168,7 @@ def main(part=0):
                 wide_layout(b, url)  # v0.11.208 (PC3)
                 n1_ui(b, url)  # v0.11.210 (N1: SC, DC-a, MS, TT)
                 pr2_ui(b, url)  # v0.11.211 (PR2 + PK1)
+                vq1_ui(b, url)  # v0.11.213 (VQ1 + FQ1)
                 # 12. the FAQ (v0.11.83)
                 faq(pg, url)
             if three:
