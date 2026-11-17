@@ -5,7 +5,10 @@
  * shared camp / fireside / night scenes, a seeded night event, and the Mei Lin – Ya – James romance arc.
  * Entry 'bl_start' (Day 11). Exit 'ht_start' (Day 16, 06:00). Region in g.flags.bl_region, expedition day in g.flags.bl_day (1–5).
  */
-import { addItem, hasItem, eat, advance, clockParts, d6, awardYukiFightXp, jamesHpMax, condense, dayHour, nightTo, nightRest, canFly } from '../core/game.js';
+import { addItem, hasItem, eat, advance, clockParts, d6, awardYukiFightXp, jamesHpMax, condense, dayHour, nightTo, nightRest, canFly, satDiv } from '../core/game.js'; // v0.11.207 (RV1, M1): satDiv
+/** v0.11.207 (owner pick RV1, M1): the root's Saturation, +12%; ÷4 on the long calendar (+3%), as a sit (game.js satDiv). */
+export const ROOT_SAT = 12;
+export const rootGain = (g) => Math.round((ROOT_SAT / satDiv(g)) * 10) / 10;
 import { hasForm } from '../core/forms.js';
 import { choiceOpen, gives } from '../core/story.js'; // v0.11.161 (PO2): `optionLeft`; RV (GV, Fable's H1): the wrapper carries the card's items
 import { daily, markDaily, eatBest, pantry, foodCount, hour, byForm, byDay, dayReply } from './common.js';
@@ -491,7 +494,7 @@ Mei Lin is watching you and not the root. "Your face," she says. "You look like 
 
 ${g.flags.roots ? 'You think of the root you followed out of the Hollow, and of what lay at the end of it, which was not entirely dead. You are walking toward it now.' : ''}`,
         choices: [
-            { text: 'Cultivate on the root. The song knows its way in.', check: { skill: 'Convergence Use', dc: 4 }, noFam: true /* v0.11.141 (RW1, NF): cultivation or rest by its own rule */, time: 60, do: (g) => { g.james.saturation = Math.min(100, Math.round((g.james.saturation + 12) * 10) / 10); return [`The root takes your Qi round its own long circuit and returns it, slow as a held breath. Saturation +12% (${g.james.saturation}%), no Qi spent.`]; }, failDo: () => ['The song runs off you like rain off bark. Not yet, apparently.'], to: 'rr_hub' },
+            { text: 'Cultivate on the root. The song knows its way in.', check: { skill: 'Convergence Use', dc: 4 }, noFam: true /* v0.11.141 (RW1, NF): cultivation or rest by its own rule */, time: 60, do: (g) => { const gain = rootGain(g); g.james.saturation = Math.min(100, Math.round((g.james.saturation + gain) * 10) / 10); return [`The root takes your Qi round its own long circuit and returns it, slow as a held breath. Saturation +${gain}% (${g.james.saturation}%), no Qi spent.`]; }, failDo: () => ['The song runs off you like rain off bark. Not yet, apparently.'], to: 'rr_hub' },
             { text: '"It\'s one of ours," you tell them. "Was."', do: (g) => { bumpRel(g, 'Mei Lin', 3, 2); bumpRel(g, 'Ya', 2, 0); g.flags.told_hearth = true; return ['You tell them what a Hearth Tree is. Nobody laughs, not even Ya.']; }, time: 30, to: 'rr_hub' },
         ],
     },

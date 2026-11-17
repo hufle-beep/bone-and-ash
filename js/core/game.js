@@ -247,6 +247,27 @@ export const coilMultNext = (g, chosen) => 1 + COIL_GROWTH * Math.max(0, (g?.coi
  */
 export const XP_RATE = 0.6;
 /**
+ * v0.11.207 (owner pick SC2, roadmap-time.md S6): the long calendar's pace until the retune (TS7). On a long-calendar game only
+ * (`g.cal === LONG_CAL`): a sit's Saturation ÷LONG_SAT_DIV (`sitGain`), a meridian channel's hours ×LONG_MER_MULT (story/meridians.js
+ * `need`), every XP award ×LONG_XP after the Coil bonus and XP_RATE (`awardXp`, Yuki's fights). The old calendar and every old save:
+ * ×1, unchanged. Measured (the models, 100 games each, Careful / Sociable / Completionist / Cultivator): the prologue on mean Coil
+ * 3.04 / 3.04 / 1.03 / 1.00 (the old calendar 3.10 / 3.10 / 3.33 / 3.08), Act 1 3.29 / 3.34 / 1.03 / 1.00 (old 3.27 / 3.77 / 3.48 / 3.17),
+ * the realm at Act 1's end 1 / 1 / 2 / 4 (old 1 / 1 / 1 / 4.45; before SC2 3 / 3 / 4 / 7.95).
+ */
+export const LONG_SAT_DIV = 4;
+export const LONG_MER_MULT = 4;
+export const LONG_XP = 0.7;
+const longPace = (g) => g?.cal === LONG_CAL;
+/** SC2: the Saturation a sit gives is divided by this (1 on the old calendar). */
+export const satDiv = (g) => (longPace(g) ? LONG_SAT_DIV : 1);
+/** SC2: a meridian channel's hours are multiplied by this (1 on the old calendar). */
+export const merMult = (g) => (longPace(g) ? LONG_MER_MULT : 1);
+/** SC2: every XP award is multiplied by this (1 on the old calendar). */
+export const xpPace = (g) => (longPace(g) ? LONG_XP : 1);
+/** v0.11.207 (owner pick RV1, L1): an award's pool, rounded down; on the long calendar with a hair added first, so 150 × 0.6 × 0.7
+ *  (62.999…) pays 63, not 62. The old calendar's product is rounded down as before, bit for bit. */
+export const xpFloor = (g, x) => Math.floor(longPace(g) ? x + 1e-9 : x);
+/**
  * Speed by use (v0.11.15, B1-b, owner 19:12, Selene's familiarity): each activity speeds up with its own use, kept across
  * Coils: speed = 1 + 9 × (uses ÷ N), up to ×10. Cards N 18 (tasks.js, the familiarity count), the sit N 30, meridian
  * work N 30 (a sitting), the breakthrough N 6. Uses of the sit, meridian work and the breakthrough live in
@@ -290,7 +311,7 @@ export function awardXp(g, skillName, band = 'standard', { fail = false, factor 
     let pool = (XP_BANDS[band] ?? 30) * (poolTier ?? n.tier); // poolTier: v0.11.89, the unarmed brawl (awardFightXp)
     if (fail) pool = Math.floor(pool * FAIL_XP_FRACTION);
     if (factor !== 1) pool = Math.floor(pool * factor); // a partial result on a task card (v0.9.2)
-    pool = Math.floor(pool * coilMult(g) * XP_RATE); // the Coil bonus (v0.11.0), the XP rate (v0.11.85)
+    pool = xpFloor(g, pool * coilMult(g) * XP_RATE * xpPace(g)); // the Coil bonus (v0.11.0), the XP rate (v0.11.85), the long calendar's pace (v0.11.207, SC2)
     if (!pool) return [];
     const out = [];
     const heads = name === 'GU' ? 1 : 2;
@@ -360,7 +381,7 @@ function yukiShareToJames(g, lost) {
 }
 export function awardYukiFightXp(g, band = 'standard') {
     const y = g.yuki.fight, gu = g.james.gu;
-    const pool = Math.floor((XP_BANDS[band] ?? 30) * Math.min(y.tier, gu.tier) * coilMult(g) * XP_RATE); // v0.11.85: the XP rate; LX1 review (AP): an old save above him sized on his tier (under him hers is never higher)
+    const pool = xpFloor(g, (XP_BANDS[band] ?? 30) * Math.min(y.tier, gu.tier) * coilMult(g) * XP_RATE * xpPace(g)); // v0.11.85: the XP rate; v0.11.207 (SC2): the long calendar's pace; LX1 review (AP): an old save above him sized on his tier (under him hers is never higher)
     const r0 = rankOf(gu); // YB1 (HL): his rank before his share
     if (yukiHeld(g)) { // at T10 L10 too (CP); LX1: his share
         const t = gu.tier, l = gu.level, share = yukiShareToJames(g, pool);
@@ -660,7 +681,12 @@ export const SIT_MINUTES_INC = 60;
 /** v0.11.15: a sit's length: an hour ÷ its speed by use (at least a minute). */
 export const sitMinutes = (g) => Math.max(1, Math.round(SIT_MINUTES_INC / actSpeed(g, 'sit')));
 /** Saturation % from `sits` sits (one hour each in Incremental Mode; the hollow and the grove count as two). */
-export const sitGain = (g, sits = 1) => Math.round(((100 * sits) / SAT_HOURS(g.james.realm)) * 10) / 10; // v0.11.15: no Coil bonus
+/** v0.11.207 (owner pick FL1, found in SC2's build): on the long calendar a sit below the top realm gives at least 0.1% (÷4 rounds to 0 from realm 10). */
+export const LONG_SIT_MIN = 0.1;
+export const sitGain = (g, sits = 1) => { // v0.11.15: no Coil bonus; v0.11.207 (SC2): ÷4 on the long calendar, FL1: at least 0.1% a sit there below the top
+    const v = Math.round(((100 * sits) / SAT_HOURS(g.james.realm) / satDiv(g)) * 10) / 10;
+    return satDiv(g) > 1 && (g.james.realm || 0) < MAX_REALM ? Math.max(Math.round(LONG_SIT_MIN * sits * 10) / 10, v) : v;
+};
 /** v0.11.37 (owner 13:06, pick B2): a sit that changes nothing (the top realm, or a gain that rounds to 0%: from realm 14 since v0.11.66's ×1.5, so only the top realm) is not offered (Incremental Mode). */
 export const sitUseless = (g) => (g.james.realm >= MAX_REALM || sitGain(g) <= 0);
 /** The breakthrough's length: 2 h × (realm + 1) (Foundation 2 h … Heavenly Immortal 28 h). */

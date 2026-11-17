@@ -1623,7 +1623,7 @@ for (const form of ['cat', 'human']) {
     { const strip = (f) => (typeof f === 'function' ? f.toString().replace(/`(?:[^`\\]|\\.)*`|'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"/g, 'S') : String(f ?? ''));
       const out = {}; for (const id of Object.keys(LONGFOREST)) { const s = SCENES[id]; out[id] = [strip(s.enter), (s.choices || []).map((c) => [c.qi || 0, c.check ? `${c.check.band || ''}/${c.check.xpTo || ''}/${c.check.bonus ? strip(c.check.bonus) : ''}` : '', (c.gives || []).join(','), strip(c.do), strip(c.failDo), strip(c.show)].join('|'))]; }
       const h = createHash('sha1').update(JSON.stringify(out)).digest('hex');
-      assert(h === '8324a18ec679bf78dc059d2dd4afd6e5712067cd', `TG10: the Long Forest's code with its strings taken out, as in v0.11.177 (P9A: the dead menus, the spar's pool, the Heartless's win) (${h}; update only with a push that means to change it)`); }
+      assert(h === 'f3211c3f05ecfdc4e251f6663dacb3582e42d18c', `TG10: the Long Forest's code with its strings taken out, as in v0.11.207 (v0.11.177's P9A: the dead menus, the spar's pool, the Heartless's win; v0.11.207's RV1 L2: the seclusion's Saturation ÷satDiv) (${h}; update only with a push that means to change it)`); }
     // TG11: the first visits on day 0 count no weeks, months or days
     for (const id of Object.keys(LONGFOREST)) for (const [form] of FORMS) { const g = L(seed++, form, 7); g.scene = id; let t = ''; try { t = txt(id, g); } catch { t = ''; } const SPENT = /\b(?:several|many|for|after) (?:weeks|months|days)\b|\bweeks of\b|\ba while ago\b/; assert(!SPENT.test(t), `TG11: ${id} as ${form} on day 0 counts no time spent here (${(t.match(/.{0,30}(?:weeks|months|days|a while ago).{0,20}/) || [''])[0]})`); } // a week's walk, this week (the prologue's), a lie's month: not time spent here
     // TG13 (C5): a drill card on the task screen shows a drill line in every band it reaches
@@ -5337,7 +5337,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         'with food, Practice 1–3': (g) => { food(g); for (const id of ['wild_train:1', 'wild_train:2', 'wild_train:3']) Wk.planSet(g, id, 1); },
         'with food, all 8 cards': (g) => { food(g); for (const id of cards) Wk.planSet(g, id, 1); },
         'with food, a card twice': (g) => { food(g); Wk.planSet(g, 'wild_forage:3', 2); },
-        'with food, Meditate only (2, 2, 2)': (g) => { food(g); Wk.planSet(g, 'med:sit', 2); Wk.planSet(g, 'med:mer', 2); Wk.planSet(g, 'med:qi', 2); },
+        'with food, Meditate only (2, 2, 3)': (g) => { food(g); Wk.planSet(g, 'med:sit', 2); Wk.planSet(g, 'med:mer', 2); Wk.planSet(g, 'med:qi', 3); }, // v0.11.207 (SC2): was (2, 2, 2): it stopped for Foundation's breakthrough on its last day then (Gather Qi 5 of 6); with SC2's pace no breakthrough this week (6 of 6), so the short row is 3 a day
         'with food, the night\'s other choice last time (E4)': (g) => { food(g); Wk.planSet(g, cards[0], 1); g.tasks.evc = { night: 3 }; },
         'with food, an empty plan': (g) => { food(g); },
         // TG2: a plan made late (the day's sit still due; H1: the card skipped today, done on Day 4), work carried from before the plan, a card never open
@@ -5347,7 +5347,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         'TG2: a card never open': (g) => { food(g); Wk.planSet(g, 'wild_forage:3', 1); Wk.planEnsure(g).items['wild_forage:99'] = 1; },
     };
     for (const [name, set] of Object.entries(plans)) { const g = copy(); set(g); seen[name] = { g, ...cmp(name, g) }; }
-    { const a = seen['the save as it is, 2 cards'].f, b = seen['with food, 4 mixed cards, a sit and a session a day'].f, c = seen['with food, all 8 cards'].f, m = seen['with food, Meditate only (2, 2, 2)'].f, s2 = seen['the save as it is, a card and 2 sits a day'].f;
+    { const a = seen['the save as it is, 2 cards'].f, b = seen['with food, 4 mixed cards, a sit and a session a day'].f, c = seen['with food, all 8 cards'].f, m = seen['with food, Meditate only (2, 2, 3)'].f, s2 = seen['the save as it is, a card and 2 sits a day'].f;
       assert(a.stop === 'hungry' && clockParts(a.minutes).day === 3 && Object.values(a.rows).includes(null), `${T} (E3): the save as it is stops hungry on Day 3, a card not this week (${a.stop}, ${clockLabel(a.minutes)})`);
       assert(b.stop === 'story' && clockParts(b.minutes).day === 8 && Object.values(b.rows).every((x) => x != null) && b.med.sit === b.days && b.days === 6, `${T} (E2b, E3, M1): with food 4 mixed cards finish, the 7th night's event stops it, a sit every day (${b.stop} ${clockLabel(b.minutes)}, ${JSON.stringify(b.med)} of ${b.days})`);
       const fin = Object.values(c.rows).filter((x) => x != null).length; assert(fin >= 1 && fin < 8, `${T} (E2b): all 8 cards: some not this week (${fin} of 8 finish)`);
@@ -5424,6 +5424,115 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     // the screen: main.js takes the shared steps and draws planNotes; the scene's text before the panels (L5)
     { const M = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
       assert(/storyTap\(g, SCENES, idx\)/.test(M) && !/\bchoose\(g, SCENES, idx\)/.test(M) && /afterStory\(g, SCENES\)/.test(M) && /planNotes\(g, SCENES\)/.test(M) && M.indexOf('const proseOut = proseHtml(v)') < M.indexOf("hub && weekHub(g) ? weekHtml()"), `${T}: main.js takes the shared steps, draws planNotes, the scene's text first`); }
+}
+
+// v0.11.207 (owner pick SC2; roadmap-time.md S6): the long calendar's pace until the retune (js/core/game.js LONG_SAT_DIV, LONG_MER_MULT,
+// LONG_XP; satDiv, merMult, xpPace; sitGain, awardXp, awardYukiFightXp; js/story/meridians.js need). The old calendar: ×1. RV1 (the Opus review): the root (M1), the seclusion (L2), the XP's
+// rounding (L1), the What's new line (M2t), TG1–TG6.
+{
+    const Gm = await import('../js/core/game.js');
+    const M = await import('../js/story/meridians.js');
+    const C = await import('../js/core/calendar.js');
+    const T = 'SC2 (the long calendar\'s pace)';
+    const fresh = (cal, seed = 99301) => ensureBars(newGame(seed, { closed: true, ...(cal ? { cal } : {}) }));
+    const old = fresh(0), lg = fresh(C.LONG_CAL);
+    assert(Gm.LONG_SAT_DIV === 4 && Gm.LONG_MER_MULT === 4 && Gm.LONG_XP === 0.7, `${T}: the knobs ÷4 / ×4 / ×0.7`);
+    assert(Gm.satDiv(old) === 1 && Gm.merMult(old) === 1 && Gm.xpPace(old) === 1 && Gm.satDiv(lg) === 4 && Gm.merMult(lg) === 4 && Gm.xpPace(lg) === 0.7, `${T}: ×1 on the old calendar, the knobs on the long one`);
+    assert(Gm.satDiv(null) === 1 && Gm.merMult({}) === 1 && Gm.xpPace({ cal: 3 }) === 1, `${T}: anything but cal 7 is the old pace`);
+    // a sit's Saturation: the old formula unchanged, a quarter of it on the long calendar, at every realm
+    { let okOld = true, okLong = true;
+      for (let r = 0; r <= Gm.MAX_REALM; r++) { old.james.realm = lg.james.realm = r;
+        okOld = okOld && Gm.sitGain(old) === Math.round((100 / Gm.SAT_HOURS(r)) * 10) / 10 && Gm.sitGain(old, 2) === Math.round((200 / Gm.SAT_HOURS(r)) * 10) / 10;
+        const q = Math.round((100 / Gm.SAT_HOURS(r) / 4) * 10) / 10, q2 = Math.round((200 / Gm.SAT_HOURS(r) / 4) * 10) / 10;
+        okLong = okLong && (r < Gm.MAX_REALM ? Gm.sitGain(lg) === Math.max(0.1, q) && Gm.sitGain(lg, 2) === Math.max(0.2, q2) && !Gm.sitUseless(lg) : Gm.sitGain(lg) === 0 && Gm.sitUseless(lg)); }
+      old.james.realm = lg.james.realm = 0;
+      { const g = fresh(C.LONG_CAL, 99308); const at = (r) => { g.james.realm = r; return Gm.sitGain(g); };
+        assert(Gm.LONG_SIT_MIN === 0.1 && [9, 10, 11, 12, 13].every((r) => at(r) === 0.1) && at(14) === 0 && at(6) === 0.2 && at(7) === 0.1, `${T} (FL1): realms 10–13 a sit 0.1% on the long calendar (÷4 rounds to 0), 0 at the top (${[6, 7, 9, 10, 13, 14].map((r) => `${r}: ${at(r)}`).join(', ')})`); }
+      assert(okOld && okLong && Gm.sitGain(old) === 10 && Gm.sitGain(lg) === 2.5, `${T}: a sit +10% / +2.5% at Mortal Vessel, the old formula at every realm, a quarter on the long calendar, at least 0.1% a sit below the top (FL1)`); }
+    // condense on both: Saturation and the sit's XP (a third of a standard award, then ×0.6, ×0.7 on the long calendar)
+    { const a = fresh(0, 99302), b = fresh(C.LONG_CAL, 99302); a.james.qi = b.james.qi = 50;
+      const ra = Gm.condense(a), rb = Gm.condense(b);
+      const xpOf = (r, re) => Number((r.xp.find((l) => re.test(l)) || '').match(/\+(\d+)/)?.[1] ?? -1);
+      const sitPool = Math.floor(30 * Gm.SIT_XP_FACTOR);
+      assert(ra.ok && rb.ok && a.james.saturation === 10 && b.james.saturation === 2.5, `${T}: one sit +10% old, +2.5% long (${a.james.saturation}, ${b.james.saturation})`);
+      assert(xpOf(ra, /^Convergence Use/) === Math.floor(Math.floor(sitPool * 0.6) / 2) && xpOf(rb, /^Convergence Use/) === Math.floor(Math.floor(sitPool * 0.6 * 0.7) / 2), `${T}: a sit's XP ×0.7 on the long calendar (${xpOf(ra, /^Convergence Use/)} → ${xpOf(rb, /^Convergence Use/)})`); }
+    // every award: James's (each band, tier, Coil) and Yuki's fights
+    { let ok = true; const bad = [];
+      for (const band of ['standard', 'challenging', 'major']) for (const tier of [1, 3]) for (const n of [1, 3]) {
+        const a = fresh(0, 99303), b = fresh(C.LONG_CAL, 99303);
+        for (const g of [a, b]) { g.james.gu.tier = tier; g.coil.n = n; g.coil.free = 0; }
+        const ga = Number(Gm.awardXp(a, 'GU', band)[0].match(/\+(\d+)/)[1]), gb = Number(Gm.awardXp(b, 'GU', band)[0].match(/\+(\d+)/)[1]);
+        const base = Gm.XP_BANDS[band] * tier * Gm.coilMult(a);
+        const want = [Math.floor(base * Gm.XP_RATE), Math.floor(base * Gm.XP_RATE * 0.7)];
+        if (ga !== want[0] || gb !== want[1]) { ok = false; bad.push(`${band} T${tier} C${n}: ${ga}/${gb} want ${want}`); } }
+      assert(ok, `${T}: every award ×0.7 on the long calendar after the Coil bonus and the XP rate, unchanged on the old (${bad.slice(0, 3).join('; ') || 'all'})`); }
+    { const a = fresh(0, 99304), b = fresh(C.LONG_CAL, 99304);
+      for (const g of [a, b]) { g.james.gu.tier = 2; g.yuki.fight.tier = 2; g.yuki.fight.level = 1; g.yuki.fight.xp = 0; g.james.gu.level = 9; }
+      const xa = a.yuki.fight.xp, xb = b.yuki.fight.xp; Gm.awardYukiFightXp(a, 'challenging'); Gm.awardYukiFightXp(b, 'challenging');
+      const da = a.yuki.fight.xp - xa + 0, db = b.yuki.fight.xp - xb + 0;
+      const want = Math.floor(60 * 2 * Gm.XP_RATE), wantL = Math.floor(60 * 2 * Gm.XP_RATE * 0.7);
+      assert((da === want || a.yuki.fight.level > 1) && (db === wantL || b.yuki.fight.level > 1) && (a.yuki.fight.level > b.yuki.fight.level || da > db), `${T}: Yuki's fight XP ×0.7 on the long calendar (${da} / ${db}; want ${want} / ${wantL})`); }
+    // a meridian channel's hours: ×4 on the long calendar for every line, the tables themselves unchanged
+    { const lines = [['pri', (g) => {}], ['col', (g) => { g.james.primaries = 12; }], ['e8', (g) => { g.james.realm = 4; }], ['ec', (g) => { g.james.realm = 4; g.james.extra8 = 8; }], ['jn', (g) => { g.james.realm = 7; }]];
+      const bad = [];
+      for (const [k, set] of lines) { const a = fresh(0, 99305), b = fresh(C.LONG_CAL, 99305); set(a); set(b);
+        const hoursOf = (g) => { goTo(g, SCENES, 'meridians'); g.james.qi = 50; g.james.satiety = 100; const i = SCENES.meridians.choices.findIndex((c) => c.merLine === k); const l = sceneView(g, SCENES).choices.find((c) => c.index === i)?.label || ''; return Number(/ of ([\d.]+) h done/.exec(l)?.[1] ?? NaN); };
+        const na = hoursOf(a), nb = hoursOf(b); if (!(na > 0) || Math.abs(nb - 4 * na) > 0.05) bad.push(`${k} ${na}/${nb}`); }
+      assert(!bad.length && M.priHours(0) === 2 && M.colHours(0) === 3, `${T}: every line's hours ×4 on the long calendar (${bad.join(', ') || 'pri 2 → 8, col 3 → 12, …'})`); }
+    // the meridian screen: a session on the long calendar does 2 h of the channel's 8 h, and the card says so
+    { const g = fresh(C.LONG_CAL, 99306); goTo(g, SCENES, 'meridians'); g.james.qi = 50; g.james.satiety = 100;
+      const i = SCENES.meridians.choices.findIndex((c) => c.merLine === 'pri');
+      const label0 = sceneView(g, SCENES).choices.find((c) => c.index === i)?.label || '';
+      choose(g, SCENES, i);
+      const label1 = sceneView(g, SCENES).choices.find((c) => c.index === i)?.label || '';
+      assert(/0 h of 8 h done; 120 min/.test(label0) && /2 h of 8 h done/.test(label1) && (g.james.primaries || 0) === 0, `${T}: a primary takes 8 h on the long calendar, in 2 h sittings ("${label0.slice(-40)}" → "${label1.slice(-40)}")`); }
+    // the old calendar's meridian screen as before
+    { const g = fresh(0, 99307); goTo(g, SCENES, 'meridians'); g.james.qi = 50; g.james.satiety = 100;
+      const i = SCENES.meridians.choices.findIndex((c) => c.merLine === 'pri'); choose(g, SCENES, i);
+      assert((g.james.primaries || 0) === 1, `${T}: on the old calendar a 2 h sitting still opens the first primary (${g.james.primaries})`); }
+    // RV1 (TG1, TG2, M1, L2): the double sits and the flat gains: the hollow, the grove's kin, the Blackroot root, a Long Forest seclusion
+    { const BR = await import('../js/story/act1_blackroot.js');
+      const sat = (cal, seed, setup, scene, re) => { const g = fresh(cal, seed); g.james.skills['Convergence Use'].tier = 5; g.james.qi = 50; setup(g); const s0 = g.james.saturation; goTo(g, SCENES, scene);
+        if (re) { const i = SCENES[scene].choices.findIndex((c) => re.test(String(c.text))); if (i < 0) return NaN; choose(g, SCENES, i); } return Math.round((g.james.saturation - s0) * 10) / 10; };
+      const h = [0, C.LONG_CAL].map((c) => sat(c, 99310, () => {}, 'hollow', /^Sit among the roots/));
+      assert(h[0] === 20 && h[1] === 5, `${T} (TG1): the hollow's double sit +20% old, +5% long at Mortal Vessel (${h.join(' / ')})`);
+      const r = [0, C.LONG_CAL].map((c) => sat(c, 99311, (g) => { g.james.realm = 1; }, 'rr_roots', /^Cultivate on the root/));
+      assert(BR.ROOT_SAT === 12 && r[0] === 12 && r[1] === 3 && BR.rootGain(old) === 12 && BR.rootGain(lg) === 3, `${T} (M1, TG2): the Blackroot root +12% old, +3% long (${r.join(' / ')})`);
+      { const say = [0, C.LONG_CAL].map((c) => { const g = fresh(c, 99315); g.james.skills['Convergence Use'].tier = 5; g.james.realm = 1; goTo(g, SCENES, 'rr_roots'); const i = SCENES.rr_roots.choices.findIndex((x) => /^Cultivate on the root/.test(String(x.text))); return (choose(g, SCENES, i)?.lines || []).find((l) => /^The root takes your Qi/.test(l)) || ''; });
+        assert(/Saturation \+12% \(/.test(say[0]) && /Saturation \+3% \(/.test(say[1]), `${T} (M1): the root's line says its own gain (${say.map((l) => l.slice(-35)).join(' / ')})`); }
+      const lf = [0, C.LONG_CAL].map((c) => sat(c, 99312, (g) => { g.james.realm = 3; }, 'lf_seclusion', null));
+      assert(lf[0] > 0 && Math.abs(lf[1] - lf[0] / 4) <= 0.1, `${T} (L2, TG2): a Long Forest seclusion's Saturation ÷4 on the long calendar (${lf.join(' / ')})`); }
+    // RV1 (L1, TG3): every award against whole-number arithmetic on the long calendar (tiers 1–10, Coils 1–4, every band); the old as before
+    { const bad = []; let n = 0;
+      for (const band of ['standard', 'challenging', 'major']) for (let tier = 1; tier <= 10; tier++) for (let c = 1; c <= 4; c++) {
+        const a = fresh(0, 99313), b = fresh(C.LONG_CAL, 99313);
+        for (const g of [a, b]) { g.james.gu.tier = tier; g.coil.n = c; g.coil.free = 0; }
+        const ga = Number(Gm.awardXp(a, 'GU', band)[0].match(/\+(\d+)/)[1]), gb = Number(Gm.awardXp(b, 'GU', band)[0].match(/\+(\d+)/)[1]);
+        const wantOld = Math.floor(Gm.XP_BANDS[band] * tier * Gm.coilMult(a) * Gm.XP_RATE); // the old calendar's own float order, bit for bit
+        const wantLong = Math.floor((Gm.XP_BANDS[band] * tier * (c + 3) * 42) / 400); // × (1 + 0.25 (c − 1)) × 0.6 × 0.7, exactly
+        n++; if (ga !== wantOld || gb !== wantLong) bad.push(`${band} T${tier} C${c}: ${ga}/${gb} want ${wantOld}/${wantLong}`); }
+      assert(!bad.length && n === 120 && Gm.XP_RATE === 0.6 && Gm.COIL_GROWTH === 0.25, `${T} (L1, TG3): 120 awards: the long calendar's exact to the point, the old calendar's as before (${bad.slice(0, 3).join('; ') || 'T5 C1 standard 63'})`); }
+    // RV1 (TG6): Yuki's fight XP, exact, nobody levelling
+    { const a = fresh(0, 99314), b = fresh(C.LONG_CAL, 99314);
+      for (const g of [a, b]) { g.james.gu.tier = 3; g.james.gu.level = 1; g.yuki.fight.tier = 2; g.yuki.fight.level = 1; g.yuki.fight.xp = 0; }
+      Gm.awardYukiFightXp(a, 'standard'); Gm.awardYukiFightXp(b, 'standard');
+      assert(a.yuki.fight.level === 1 && b.yuki.fight.level === 1 && a.yuki.fight.xp === 36 && b.yuki.fight.xp === 25, `${T} (TG6): Yuki's standard fight at T2: 36 XP old, 25 long (${a.yuki.fight.xp} / ${b.yuki.fight.xp})`); }
+    { const a = fresh(0, 99316), b = fresh(C.LONG_CAL, 99316); // 30 × 3 × 0.6 × 0.7 = 37.8: rounded down to 37
+      for (const g of [a, b]) { g.james.gu.tier = 4; g.james.gu.level = 1; g.yuki.fight.tier = 3; g.yuki.fight.level = 1; g.yuki.fight.xp = 0; }
+      Gm.awardYukiFightXp(a, 'standard'); Gm.awardYukiFightXp(b, 'standard');
+      assert(a.yuki.fight.level === 1 && b.yuki.fight.level === 1 && a.yuki.fight.xp === 54 && b.yuki.fight.xp === 37, `${T} (TG6): Yuki's standard fight at T3: 54 XP old, 37 long, rounded down (${a.yuki.fight.xp} / ${b.yuki.fight.xp})`); }
+    // RV1 (L1): the hair never touches the old calendar: no reachable pool (1–1,200, Coils 1–9) lies within it of a whole number
+    { let hit = 0; for (let p = 1; p <= 1200; p++) for (let n = 1; n <= 9; n++) { const x = p * (1 + Gm.COIL_GROWTH * (n - 1)) * Gm.XP_RATE; if (Math.floor(x) !== Math.floor(x + 1e-9)) hit++; }
+      assert(hit === 0 && Gm.xpFloor(old, 62.99999999999999) === 62 && Gm.xpFloor(lg, 62.99999999999999) === 63, `${T} (L1): xpFloor adds its hair on the long calendar only (old pools within it: ${hit})`); }
+    // RV1 (TG4): a long-calendar save from before SC2, halfway through a channel: the work kept, the channel's 8 h, still shut after one sitting
+    { const g = deserialize(readFileSync(new URL('../saves/v0.11.204-long-wilds-day2.json', import.meta.url), 'utf8'), { force: true });
+      g.james.merWork = 1.5; const h2 = deserialize(serialize(g), { force: true }); goTo(h2, SCENES, 'meridians'); h2.james.qi = 50; h2.james.satiety = 100;
+      const i = SCENES.meridians.choices.findIndex((c) => c.merLine === 'pri'), lab = () => sceneView(h2, SCENES).choices.find((c) => c.index === i)?.label || '';
+      const l0 = lab(); choose(h2, SCENES, i); const l1 = lab();
+      assert(h2.cal === 7 && /1\.5 h of 8 h done/.test(l0) && /3\.5 h of 8 h done/.test(l1) && (h2.james.primaries || 0) === 0, `${T} (TG4): a save 1.5 h into its first primary: 1.5 of 8 h, then 3.5 of 8 h, still shut ("${l0.slice(-45)}" → "${l1.slice(-45)}")`); }
+    // RV1 (M2t, TG5): the What's new line says the knobs' own numbers
+    { const { NOTES } = await import('../js/core/news.js'); const nt = (NOTES.find(([v]) => v === '0.11.207') || [])[1] || '';
+      assert(Gm.LONG_SAT_DIV === 4 && /a quarter of the Saturation/.test(nt) && Gm.LONG_SIT_MIN === 0.1 && /at least 0\.1%/.test(nt) && Gm.LONG_MER_MULT === 4 && /four times its hours/.test(nt) && /×0\.7/.test(nt) && Gm.LONG_XP === 0.7, `${T} (M2t, TG5): the What's new line names ÷4 (at least 0.1%), ×4 and ×0.7`); }
 }
 
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));
