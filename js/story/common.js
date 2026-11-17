@@ -1,5 +1,6 @@
 /** Shared story helpers: flags, days, food, and how enemies grow with the days James spends training. */
-import { clockParts, addItem, eat, wakeDay, dayHour, combatHooks, yukiForm } from '../core/game.js';
+import { clockParts, addItem, eat, wakeDay, dayHour, combatHooks, yukiForm, foodHooks, spoilFresh, freshDue, advance, itemCap } from '../core/game.js';
+import { longCal } from '../core/calendar.js';
 export { byDay, dayIndex, dayReply } from '../core/lines.js'; // v0.11.135 (owner picks NT1, EV1): a scene's text for the day; v0.11.136 (NC1): a reply's
 /** v0.11.125 (owner pick FM1): a story line by Yuki's current form, as the pictures draw her (the cat's line is the old one; texts by Fable). */
 export const byForm = (g, cat, tiger, human) => { const f = yukiForm(g); return f === 'tiger' ? tiger : f === 'human' ? human : cat; };
@@ -43,12 +44,15 @@ export const FOOD = {
     river_cress: [8, 8],
     crimson_berry: [3, 3],
     venison: [40, 20],
+    smoked_meat: [30, 30], // v0.11.209 (owner pick TF1, TS4): the kept foods, long calendar only (they never spoil)
+    dried_bracket: [15, 15],
 };
 /** v0.11.113 (DA1, CS): what a thief (the rot-crows) takes: the first food in FOOD's order the hammerspace holds. */
 combatHooks.steal = (g) => Object.keys(FOOD).find((k) => (g.inventory[k] || 0) > 0) || null;
 export const foodCount = (g) => Object.keys(FOOD).reduce((n, k) => n + (g.inventory[k] || 0), 0);
 /** Eat the most filling thing in the hammerspace (cooked if there's a fire). */
 export function eatBest(g, { fire = !!g.flags.fire } = {}) {
+    spoilFresh(g); // v0.11.209 (TF1, S): what has turned goes before the meal (long calendar only); RV1 (H1): its line with the action's, never in the meal's
     let best = null;
     for (const [id, [cooked, raw]] of Object.entries(FOOD)) {
         if (!(g.inventory[id] > 0)) continue;
@@ -60,10 +64,52 @@ export function eatBest(g, { fire = !!g.flags.fire } = {}) {
     eat(g, best.v);
     return [`You eat: ${FOOD_NAMES[best.id] || best.id}${fire && FOOD[best.id][0] !== FOOD[best.id][1] ? ', cooked' : ''}. +${best.v} satiety.`];
 }
-const FOOD_NAMES = {
+export const FOOD_NAMES = {
     hare_raw: 'glassback hare', fowl_raw: 'mire fowl', crab_meat: 'stone-shell crab', honeycomb: 'wild honeycomb',
     lizard_egg: 'thornback egg', jade_bracket: 'jade bracket fungus', river_cress: 'river cress', crimson_berry: 'needleberries', venison: 'ash-deer venison',
+    smoked_meat: 'smoked meat', dried_bracket: 'dried bracket',
 };
+/* ---------- v0.11.209 (owner pick TF1, roadmap-time.md TS4): food that spoils and food that keeps, long calendar only ---------- */
+/** D1 (Fable's texts): the spoil line ({food}: "2 glassback hare and 1 river cress"), the card, its lines at camp and in the village. */
+export const SPOIL_LINE = 'Spoiled: {food}. The hammerspace folds space. It does not, it turns out, fold time.';
+export const PRESERVE_LABEL = 'Smoke the catch.';
+export const PRESERVE_CAMP = 'You build the fire low and the smoke thick, and hang the catch over it. Yuki supervises from wherever the smoke isn\'t.';
+export const PRESERVE_VILLAGE = 'You are given a place at Ashfall\'s smoking racks. The woman who keeps them watches your hands throughout, finds nothing to correct, and nods as if signing a treaty.';
+const andList = (xs) => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}`);
+/** RV1 (L1): the spoil line's names, one and more. */
+export const SPOIL_NAMES = { hare_raw: ['glassback hare', 'glassback hares'], fowl_raw: ['mire fowl', 'mire fowl'], crab_meat: ['stone-shell crab', 'stone-shell crabs'], river_cress: ['river cress', 'river cress'], crimson_berry: ['needleberry', 'needleberries'], jade_bracket: ['jade bracket', 'jade brackets'], lizard_egg: ['thornback egg', 'thornback eggs'] };
+foodHooks.spoilLine = (gone) => SPOIL_LINE.replace('{food}', andList(gone.map(([id, n]) => `${n} ${(SPOIL_NAMES[id] || [FOOD_NAMES[id] || id, FOOD_NAMES[id] || id])[n === 1 ? 0 : 1]}`)));
+/** What each raw food is smoked or dried into (K). */
+export const PRESERVE = { hare_raw: 'smoked_meat', fowl_raw: 'smoked_meat', crab_meat: 'smoked_meat', jade_bracket: 'dried_bracket' };
+/** Minutes of work a piece. */
+export const PRESERVE_MIN = 15;
+/** The pieces the card would smoke or dry now: [[raw id, pieces], …] (a kept food's room up to its cap counted). */
+export function preservePlan(g) {
+    const room = {}, out = [];
+    for (const [id, to] of Object.entries(PRESERVE)) {
+        if (room[to] == null) room[to] = Math.max(0, itemCap(to) - (g.inventory[to] || 0));
+        const n = Math.min(Math.max(0, (g.inventory[id] || 0) - freshDue(g, id)), room[to]);
+        if (n > 0) { out.push([id, n]); room[to] -= n; }
+    }
+    return out;
+}
+export const preservable = (g) => preservePlan(g).reduce((a, [, n]) => a + n, 0);
+/** K: the hub card "Smoke the catch." (the four stays; the camp only with its fire): 15 minutes a piece, every piece it can take. */
+export function preserveChoice(hubId, { camp = false } = {}) {
+    return {
+        text: PRESERVE_LABEL, preserve: true,
+        show: (g) => longCal(g) && (!camp || hubId !== 'wilds' || !!g.flags.fire) && preservable(g) > 0,
+        minutes: (g) => preservable(g) * PRESERVE_MIN,
+        do: (g) => {
+            spoilFresh(g); const plan = preservePlan(g), got = {}; // what has turned first: the card counted without it
+            for (const [id, n] of plan) { addItem(g, id, -n); addItem(g, PRESERVE[id], n); got[PRESERVE[id]] = (got[PRESERVE[id]] || 0) + n; }
+            const n = plan.reduce((a, [, k]) => a + k, 0);
+            const gotLine = Object.entries(got).map(([id, k]) => `+${k} ${NEW_ITEMS[id]?.name || id}`).join(', ');
+            return [camp ? PRESERVE_CAMP : PRESERVE_VILLAGE, `${gotLine}.`, ...advance(g, n * PRESERVE_MIN)];
+        },
+        to: hubId,
+    };
+}
 export function pantry(g) {
     const bits = Object.keys(FOOD).filter((k) => g.inventory[k] > 0).map((k) => `${g.inventory[k]} ${FOOD_NAMES[k]}`);
     return bits.length ? `In the hammerspace: ${bits.join(', ')}.` : 'The hammerspace holds no food. Infinite space, zero snacks.';
@@ -81,4 +127,6 @@ export const NEW_ITEMS = {
     crow_feather: { name: 'Rot-crow feathers', note: 'Smell exactly how they look.' },
     lizard_spine: { name: 'Thornback spines', note: 'Hollow and sharp. Good needles, if you didn\'t grow your own.' },
     sect_token: { name: 'Gao Feng\'s jade token', note: 'Faintly warm. Faintly watching.' },
+    smoked_meat: { name: 'Smoked meat', note: 'Hare, fowl or crab. The smoke has settled the question.' }, // v0.11.209 (TF1, D1: Fable's)
+    dried_bracket: { name: 'Dried bracket', note: 'Chews like a bootlace and will outlast one.' },
 };

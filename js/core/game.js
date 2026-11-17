@@ -518,6 +518,7 @@ export function advance(g, minutes, { resting = false } = {}) {
     if (m >= 1440) { w.n += Math.floor(m / 1440); w.slept = clockParts(g.minutes + m).day; } // a span of a day or more has its nights in it
     w.lastX = X4(g.minutes + m); // a morning passed awake: no new day
     g.minutes += m;
+    spoilFresh(g); // v0.11.209 (TF1, S): long calendar only; RV1 (M1): its line waits for the action's end (takeSpoilNotes)
     const fed0 = Math.max(0, g.james.satiety);
     g.james.satiety -= (SATIETY_PER_HOUR * m) / 60;
     if (g.james.satiety <= 0) {
@@ -599,6 +600,7 @@ export function nightTo(g, at = 60) {
     const fedShare = fed0 <= 0 ? 0 : drop > 0 ? Math.min(1, fed0 / drop) : 1; // v0.11.143 (RN1, FP): only the hours he was still fed for
     if (span > 0 && fedShare > 0) { regenFor(g, Math.round(span * fedShare), true); ensureBars(g); } // v0.11.143 (NF1)
     g.james.satiety = Math.max(0, fed0 - drop);
+    spoilFresh(g); // v0.11.209 (TF1, S): what turned overnight (RV1: its line with the action's)
     return sleptLine(t, b0, { hp: g.james.hp, qi: g.james.qi }, fire);
 }
 /** v0.11.151 (owner pick WD1, LN; Fable's L4 of v0.11.143): the night scene says what the hours asleep gave back, James's
@@ -627,6 +629,7 @@ export function sleepUntil(g, hour = 6, { bed = true } = {}) {
     g.minutes = target;
     { const w = g.wake, d = clockParts(target).day; if (d > w.slept) { w.n += 1; w.slept = d; } w.lastX = X4(target); }
     g.james.satiety = Math.max(0, g.james.satiety - (SATIETY_PER_HOUR * span) / 60 / 2);
+    spoilFresh(g); // RV1 (H1): what turned overnight goes with the night (its line with the action's), not at the first meal
     g.james.hp = jamesHpMax(g);
     g.james.qi = jamesQiMax(g);
     g.yuki.hp = yukiHpMax(g);
@@ -856,8 +859,64 @@ export function addItem(g, id, n = 1) {
     }
     g.inventory[id] = have + n;
     if (g.inventory[id] <= 0) delete g.inventory[id];
+    if (FRESH_DAYS[id] && longPace(g)) freshSync(g, id); // TF1 (S): a new piece dated today; a piece gone leaves oldest first
 }
 export const hasItem = (g, id, n = 1) => (g.inventory[id] || 0) >= n;
+/**
+ * v0.11.209 (owner pick TF1, roadmap-time.md TS4): raw food spoils, on the long calendar only. `g.fresh` (a long-calendar save only):
+ * item id → [[calendar day gained (from 0), pieces], …], oldest first; a piece spoils at the midnight FRESH_DAYS[id] days after the
+ * day it was gained (`spoilFresh`, from `advance`). Pieces the record doesn't hold (a save from before, a direct write) count as
+ * gained on the day they are first seen; pieces gone (eaten, smoked, stolen, a new Coil's empty hammerspace) leave oldest first.
+ * Honeycomb, the village's venison and the kept foods never spoil. The old calendar keeps no record and nothing spoils.
+ */
+export const FRESH_DAYS = { hare_raw: 3, fowl_raw: 3, crimson_berry: 3, crab_meat: 2, river_cress: 2, jade_bracket: 4, lizard_egg: 8 };
+/** story/common.js sets `spoilLine(gone)` (gone: [[id, pieces], …]) → the spoil line (Fable's, D1). */
+export const foodHooks = { spoilLine: null };
+const calDay0 = (g) => Math.floor((g.minutes || 0) / 1440);
+function freshSync(g, id) {
+    const F = g.fresh && typeof g.fresh === 'object' && !Array.isArray(g.fresh) ? g.fresh : (g.fresh = {});
+    const L = Array.isArray(F[id]) ? F[id].filter((b) => Array.isArray(b) && b[1] > 0) : [];
+    const have = Math.max(0, g.inventory[id] || 0);
+    let sum = L.reduce((a, b) => a + b[1], 0);
+    while (sum > have && L.length) { const x = Math.min(L[0][1], sum - have); L[0][1] -= x; sum -= x; if (L[0][1] <= 0) L.shift(); }
+    if (sum < have) L.push([calDay0(g), have - sum]);
+    if (L.length) F[id] = L; else delete F[id];
+}
+/** TF1 (S): pieces of `id` held whose day has come but that haven't left yet (pure; `spoilFresh` takes them at the next step). */
+export function freshDue(g, id) {
+    if (!longPace(g) || !FRESH_DAYS[id]) return 0;
+    const L = Array.isArray(g.fresh?.[id]) ? g.fresh[id] : [], day = calDay0(g);
+    let held = 0, due = 0;
+    for (const b of L) { if (!Array.isArray(b) || !(b[1] > 0)) continue; held += b[1]; if (Math.min(b[0], day) + FRESH_DAYS[id] <= day) due += b[1]; }
+    return Math.max(0, due - Math.max(0, held - Math.max(0, g.inventory?.[id] || 0))); // pieces gone since leave oldest first
+}
+/** RV1 (H1, M1; the Opus review): the spoil lines wait here, per game, until the action that passed the time ends (`takeSpoilNotes`:
+ *  story.js `choose`, tasks.js `runTask`, week.js `runWeek`), so no caller that keeps only some of `advance`'s lines (a sit, a meridian,
+ *  a fight, a meal's first line) loses or misplaces them. A dry run's copy is another object: its lines never reach the screen. */
+const spoilQ = new WeakMap();
+export function takeSpoilNotes(g) { const q = (g && spoilQ.get(g)) || []; if (g) spoilQ.delete(g); return q; }
+/** TF1 (S): the pieces whose day has come leave the hammerspace; their line waits for `takeSpoilNotes` (returned too, for the tests).
+ *  RV1 (M2): every due piece goes wherever it sits in the record, and a piece dated after today (the clock moved back: the Long
+ *  Forest's Go back, `lf_exit`) is dated today. Long calendar only. */
+export function spoilFresh(g) {
+    if (!longPace(g) || !g.inventory) return [];
+    const day = calDay0(g), gone = [];
+    for (const id of Object.keys(FRESH_DAYS)) {
+        if (!((g.inventory[id] || 0) > 0) && !g.fresh?.[id]) continue;
+        freshSync(g, id);
+        const L = g.fresh[id];
+        if (!L) continue;
+        for (const b of L) if (b[0] > day) b[0] = day;
+        let n = 0;
+        const keep = L.filter((b) => { if (b[0] + FRESH_DAYS[id] <= day) { n += b[1]; return false; } return true; });
+        if (keep.length) g.fresh[id] = keep; else delete g.fresh[id];
+        if (n > 0) { g.inventory[id] -= n; if (g.inventory[id] <= 0) delete g.inventory[id]; gone.push([id, n]); }
+    }
+    if (!gone.length) return [];
+    const line = foodHooks.spoilLine ? foodHooks.spoilLine(gone) : `Spoiled: ${gone.map(([id, n]) => `${n} ${id}`).join(', ')}.`;
+    const q = spoilQ.get(g) || []; q.push(line); spoilQ.set(g, q);
+    return [line];
+}
 export function eat(g, satiety, { yuki = true } = {}) {
     g.james.satiety = Math.min(100, g.james.satiety + satiety);
     g.stats.meals += 1;

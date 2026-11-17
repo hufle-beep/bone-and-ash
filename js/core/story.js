@@ -4,7 +4,7 @@
  *             to | to(g), fail?, do?(g, r) → lines, failDo?(g, r) → lines, combat?: encounter, xp?: false }.
  * A check pays standard XP (25% on a fail) unless xp: false. Pure — no DOM.
  */
-import { rollCheck, awardXp, spendQi, advance, ensureBars, actingCheck, actingName, instantWin, itemFull, takeCapNotes, itemNames, setLootMult, noDiceDc, checkText, addItem, canFly, flightMinutes, partyCarry, plainFight, useSpeed, USE_CAP } from './game.js';
+import { rollCheck, awardXp, spendQi, advance, ensureBars, actingCheck, actingName, instantWin, itemFull, takeCapNotes, takeSpoilNotes, itemNames, setLootMult, noDiceDc, checkText, addItem, canFly, flightMinutes, partyCarry, plainFight, useSpeed, USE_CAP } from './game.js';
 import { STOMP, degreeForChoice } from '../story/power.js';
 import { keepReplies } from './replies.js'; // v0.11.69 (P1)
 import { noteDay } from './lines.js'; // v0.11.135 (NT1, EV1)
@@ -381,6 +381,7 @@ export function choose(g, scenes, index, { task = false, speed = 0 } = {}) { // 
     for (const id of new Set(takeCapNotes())) lines.push(`Hammerspace: ${itemNames[id]?.name || id} is full — the rest stays behind.`);
     if (!ok && c.failDo) lines.push(...(c.failDo(g, roll) || []));
     if (c.combat && ok) {
+        lines.push(...takeSpoilNotes(g)); // v0.11.209 (RV1, H1 + M1): the food that turned while this choice took its time
         return { lines, roll, combat: c.combat };
     }
     const dest = ok ? c.to : (c.fail ?? c.to);
@@ -392,6 +393,7 @@ export function choose(g, scenes, index, { task = false, speed = 0 } = {}) { // 
         const t = walkOnly && g.location !== loc0 ? walkTime(t0) : t0; // v0.11.109 (FL1 + FS1, WP); v0.11.197 (C1)
         lines.push(...advance(g, t, { work: true }));
     }
+    lines.push(...takeSpoilNotes(g)); // v0.11.209 (RV1, H1 + M1): the food that turned while this choice took its time
     lines.push(...checkDeath(g, scenes));
     g.log.push({ at: g.minutes, scene: g.scene, lines: lines.slice(0, 12) });
     if (g.log.length > 200) g.log.shift();

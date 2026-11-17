@@ -189,8 +189,9 @@ function storyPick(model, g, choices, mem) {
  *  Careful and the Sociable a meridian session (the day's sit runs itself), the Completionist a sit and a session, the Cultivator
  *  6 sits, 3 sessions and 4 hours of gathering. Taps: a count set is one, a "Run the week" one; the plan's own steps, the
  *  routine and the quiet nights none. Random plays as before. */
-const MED_PLAN = { careful: { sit: 0, mer: 1, qi: 0 }, sociable: { sit: 0, mer: 1, qi: 0 }, completionist: { sit: 1, mer: 1, qi: 0 }, cultivator: { sit: 6, mer: 3, qi: 4 } };
-const WEEK_SIDE = (c) => !c.week && c.id !== CARRY_TASK && !['sit', 'mer', 'qi'].includes(c.kind) && !/^(Call it a day|Cultivate|Condense)/.test(c.label);
+// v0.11.209 (owner pick TF1, B): every model smokes the day's catch by the plan (`pres`), never as a card of its own (WEEK_SIDE)
+const MED_PLAN = { careful: { sit: 0, mer: 1, qi: 0, pres: 1 }, sociable: { sit: 0, mer: 1, qi: 0, pres: 1 }, completionist: { sit: 1, mer: 1, qi: 0, pres: 1 }, cultivator: { sit: 6, mer: 3, qi: 4, pres: 1 } };
+const WEEK_SIDE = (c) => !c.week && !c.pres && c.id !== CARRY_TASK && !['sit', 'mer', 'qi'].includes(c.kind) && !/^(Call it a day|Cultivate|Condense)/.test(c.label);
 function weekRun(model, g, cards, st) {
     let p = planHere(g);
     if (!p && weekResume(g)) { const r = runWeek(g, SCENES); st.weekStops[r.stop] = (st.weekStops[r.stop] || 0) + 1; } // RV1 (L1): the week's end reported
@@ -351,7 +352,7 @@ function play(run, model, st, yuki) {
     assert(false, `${model}: run ${run} finishes in ${maxSteps} steps (at ${g.scene})`);
     return 'stuck';
 }
-const foodLeft = (g) => Object.entries(g.inventory || {}).some(([k, n]) => n > 0 && /raw|meat|berry|cress|honey|crab|fowl|hare|venison|egg/.test(k));
+const foodLeft = (g) => Object.entries(g.inventory || {}).some(([k, n]) => n > 0 && /raw|meat|berry|cress|honey|crab|fowl|hare|venison|egg|dried_bracket/.test(k));
 
 /** v0.11.130 (YB1, LN): the last-night split, by g.flags.final_night (yuki_path.js): her four nights count as Yuki's. */
 const NIGHT_KIND = { none: 'quiet', mei: 'Mei Lin', ya: 'Ya', trio: 'trio', yuki: 'Yuki', yuki_mei: 'Yuki', yuki_ya: 'Yuki', all: 'Yuki' };

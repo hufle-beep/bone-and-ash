@@ -16,10 +16,10 @@
  */
 import { longCal, storyDay, storyDayOf, calEnd, weekNights, LONG_CAL, STAY_DAYS } from './calendar.js';
 import { sceneView, choose } from './story.js';
-import { advance, jamesHpMax, canBreakThrough, clockParts, clockLabel, fnv1a } from './game.js';
+import { advance, jamesHpMax, canBreakThrough, clockParts, clockLabel, fnv1a, takeSpoilNotes } from './game.js';
 import { taskCards, taskOpen, runTask, taskState, taskOutcome, isTaskChoice, sitTaskId, QI_TASK, CARRY_TASK, carryHere, weekHub, workDay, workRoom, dayMeal, cardSpeed, NEW_LENGTH, WEEK_MULT } from './tasks.js';
 import { farewellNow } from '../story/act1_fallout.js'; // RV1 (L4)
-import { foodCount } from '../story/common.js';
+import { foodCount, preservable } from '../story/common.js';
 import { EVENING_HOUR } from '../story/oneoff.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
 
@@ -88,22 +88,22 @@ export function planEnsure(g) {
     if (p) return p;
     if (!weekHub(g)) return null;
     const t = taskState(g);
-    t.plan = { hub: g.scene, coil: coilKey(g), lastDay: weekLastDay(g), items: {}, med: { sit: 0, mer: 0, qi: 0 }, done: { d: -1, sit: 0, mer: 0, qi: 0 }, running: false, stop: '', bt: -1 };
+    t.plan = { hub: g.scene, coil: coilKey(g), lastDay: weekLastDay(g), items: {}, med: { sit: 0, mer: 0, qi: 0, pres: 0 }, done: { d: -1, sit: 0, mer: 0, qi: 0, pres: 0 }, running: false, stop: '', bt: -1 };
     return t.plan;
 }
-export const MED_MAX = { sit: 12, mer: 6, qi: 8 };
-/** Change a count (`key`: a card id, or 'med:sit' / 'med:mer' / 'med:qi'), from 0 up to 9 cards or MED_MAX a day. */
+export const MED_MAX = { sit: 12, mer: 6, qi: 8, pres: 1 }; // v0.11.209 (owner pick TF1, K): "Smoke the catch." by the day (0 or 1)
+/** Change a count (`key`: a card id, or 'med:sit' / 'med:mer' / 'med:qi' / 'med:pres'), from 0 up to 9 cards or MED_MAX a day. */
 export function planSet(g, key, n) {
     const p = planEnsure(g);
     if (!p) return null;
-    const m = /^med:(sit|mer|qi)$/.exec(key);
+    const m = /^med:(sit|mer|qi|pres)$/.exec(key);
     if (m) p.med[m[1]] = Math.max(0, Math.min(MED_MAX[m[1]], Math.round(n) || 0));
     else { const v = Math.max(0, Math.min(9, Math.round(n) || 0)); if (v) p.items[key] = v; else delete p.items[key]; }
     p.stop = '';
     return p;
 }
 /** Clear: every count to 0, the plan stopped (RV1, TG11: here, so the tests can run it). */
-export function planClear(g) { const p = planHere(g); if (!p) return null; p.items = {}; p.med = { sit: 0, mer: 0, qi: 0 }; p.stop = ''; p.running = false; return p; }
+export function planClear(g) { const p = planHere(g); if (!p) return null; p.items = {}; p.med = { sit: 0, mer: 0, qi: 0, pres: 0 }; p.stop = ''; p.running = false; return p; }
 /** After a story choice: should the plan go on by itself here? A running plan on its hub, or (RV1, L1) a running plan whose week has
  *  just ended (runWeek then reports the week's end). */
 export function weekResume(g) {
@@ -121,6 +121,8 @@ function hubStops(g, scenes) {
     return v.choices.filter((c) => !c.disabled && (c.index >= 1000 || !isTaskChoice(scenes, g.scene, c.index)) && !META.test(String(c.label)));
 }
 const firstMer = (g, scenes) => taskCards(g, scenes).find((c) => c.kind === 'mer' && c.status === 'open')?.id || null;
+/** v0.11.209 (TF1, K): the hub's "Smoke the catch." card when it is open now, or null. */
+export const presCard = (g, scenes) => taskCards(g, scenes).find((c) => c.pres && c.status === 'open')?.id || null;
 
 /**
  * Run the plan from here until a stop. Returns { stop, days: [{ day, lines }], steps }. `max`: a guard on the steps.
@@ -159,7 +161,7 @@ export function runWeek(g, scenes, { max = 600, onStep = null } = {}) {
         if (g.james.satiety < 30 && foodCount(g) === 0) return end('hungry');
         if (canBreakThrough(g) && p.bt !== g.james.realm) { p.bt = g.james.realm; return end('breakthrough'); }
         const d = workDay(g);
-        if (p.done.d !== d) p.done = { d, sit: 0, mer: 0, qi: 0 };
+        if (p.done.d !== d) p.done = { d, sit: 0, mer: 0, qi: 0, pres: 0 };
         // RV1 (M3): the forecast's death check, as a tap's ("Starves here"): stop before a card that would end the Coil
         const deadly = (id) => { try { return taskOutcome(g, scenes, id)?.death || null; } catch { return null; } };
         const run = (id) => { const r = runTask(g, scenes, id); say(r.lines); last = { id, r }; return r; }; // FC1 (RV1, H1): seen by the next watch
@@ -174,6 +176,10 @@ export function runWeek(g, scenes, { max = 600, onStep = null } = {}) {
             if (r.stopped || g.scene !== hub) return end('story');
             continue;
         }
+        // v0.11.209 (owner pick TF1, K): the day's catch smoked, after the day's work (a plan from before has no `pres`: 0)
+        const pid = (p.done.pres || 0) < (p.med.pres || 0) ? presCard(g, scenes) : null;
+        if (pid && !deadly(pid)) { p.done.pres = (p.done.pres || 0) + 1; run(pid); if (g.scene !== hub) return end('story'); continue; }
+        if ((p.done.pres || 0) < (p.med.pres || 0) && preservable(g) === 0) p.done.pres = p.med.pres; // RV1 (L7): nothing to smoke: the day's row is done
         // the day's meditation, in the hours the work leaves
         const sid = sitTaskId(g, scenes);
         if (p.done.sit < p.med.sit && taskOpen(g, scenes, sid) && !deadly(sid)) { p.done.sit++; run(sid); if (g.scene !== hub) return end('story'); continue; }
@@ -191,10 +197,11 @@ export function runWeek(g, scenes, { max = 600, onStep = null } = {}) {
                 const step = Math.min(mins, Math.max(1, (Math.min(next, ev) - hh) * 60 - clockParts(g.minutes).mm));
                 advance(g, step, { resting: true });
                 if (!cur?.lines?.includes('The rest of the day off.')) say(['The rest of the day off.']);
+                say(takeSpoilNotes(g)); // RV1 (M1): the food that turned in the day off
                 continue;
             }
         }
-        say(dayMeal(g, hub)); // the evening's meal before the evening
+        say(dayMeal(g, hub)); say(takeSpoilNotes(g)); // the evening's meal before the evening (RV1, M1: and what turned)
         const stops = hubStops(g, scenes);
         if (stops.length !== 1) return end(stops.length ? 'evening' : 'stuck');
         // RV1 (L4, L5): the one way on is taken only when it is the usual evening: not a fight, not the Fallout's farewell, not a new label

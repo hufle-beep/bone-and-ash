@@ -8,7 +8,7 @@ import { addItem, hasItem, eat, bumpRel, sleepUntil, advance, clockParts, breakt
 import { NO_DICE_TUNE } from './nodice_tune.js';
 import { setNoDiceTune, yukiFightSkill } from '../core/game.js'; // v0.11.118 (YK1 review, SB)
 setNoDiceTune(NO_DICE_TUNE);
-import { forestScale, villageScale, grow, NEW_ITEMS, byForm, byDay } from './common.js';
+import { forestScale, villageScale, grow, NEW_ITEMS, byForm, byDay, preserveChoice } from './common.js';
 import './power.js';
 import './stomp_prologue.js';
 import './stomp_act1.js';
@@ -1311,5 +1311,7 @@ installKitchen(SCENES);
 installReading(SCENES);
 // v0.11.174 (owner pick SL1, SC): the Selene story at the last camp, appended after everything else on rt_camp, so no position changes
 installSelene(SCENES);
+// v0.11.209 (owner pick TF1, roadmap-time.md TS4): "Smoke the catch." on the four stays, long calendar only, appended last, so no position changes
+for (const [hub, camp] of [['wilds', true], ['ashfall', false], ['fo_ashfall', false], ['heart_hub', true]]) SCENES[hub].choices.push(preserveChoice(hub, { camp }));
 
 export const START_SCENE = 'arrival';

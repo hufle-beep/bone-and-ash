@@ -719,6 +719,10 @@ def plan_forecast(b, url):
         tot = re.search(r'Cards ([^;]+); ([^.]+) left to the evenings this week\.', txt)
         if not (m and row and tot): fails.append(f'FC1: the plan shows no forecast after a + (outlook {bool(m)}, row {bool(row)}, total {bool(tot)})'); return
         want = (m.group(1), m.group(3), m.group(4))
+        # v0.11.209 (owner pick TF1, K): the plan's own row for "Smoke the catch.", once a day, with its + (the save has no raw food: the card itself not on the hub)
+        pres = pg.query_selector('button[data-plan="med:pres"][data-d="1"]')
+        if not pres or 'Smoke the catch, once a day' not in txt or 'Smoke the catch.' in pg.eval_on_selector_all('button.card', "els => els.map(e => e.textContent).join('|')"):
+            fails.append('TF1: Plan the week has no "Smoke the catch, once a day" row with a +, or the hub shows the card with no raw food')
         run = pg.query_selector('button[data-week="run"]'); run.evaluate("e => e.scrollIntoView({ block: 'center' })"); run.click()
         for _ in range(12):  # the evening's choices, the forecast's pick each time (the lowest way on), until the plan stops elsewhere
             until(pg, "() => !!document.querySelector('button.card.story[data-story]:not([disabled])') || !!document.querySelector('button[data-week=\"run\"]')", 5000)

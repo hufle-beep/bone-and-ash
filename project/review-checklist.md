@@ -41,6 +41,8 @@
 - **A review cut is a draft too (v0.11.184 M1):** run Claude's own cuts through the brief's bans (a count, a claim a Coil may not have shown) and `--check` again.
 - **Gates that cross another pool's gate on one screen (v0.11.181 L5):** a stage text by friendship next to a closer pool with its own level.
 
+- **v0.11.209:** grep callers of `[0]`/`.length` before prefixing a result (H1); every `advance(` whose return is dropped (M1); every backward clock write (M2); exact minutes, not `>=` (TG4).
+
 ## Text quality
 - **A voice habit spreading (v0.11.181 M4):** count one image family (here legal words) across the new texts, and from one character to others.
 - **James's expertise against fact and against the game (v0.11.181 M2, M3):** real-world mycology and cooking; what he has already done ("until today").

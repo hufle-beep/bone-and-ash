@@ -1004,7 +1004,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
             if (stop) { if (c === '{') depth++; if (c === '}') { if (depth === 0) { i++; return out; } depth--; } }
             if (!/\s/.test(c)) out += c; i++; } return out; }; return code(false); };
         const LABELS = Object.values(HEART).flatMap((sc) => (sc.choices || []).map((c) => (typeof c.text === 'string' ? c.text : '(fn)')));
-        const PIN = { 'act1_heart.js': 'd1708057e33d7f53', /* v0.11.203 (T1, TS1): re-pinned for the long calendar (late and the leave by the story's day) */ 'stomp_act1.js': '1a2e6d1e8cb25a0b', 'yuki_time.js': '746d1873838bd5ca', labels: '1c6aa5a54be6053d' }; // v0.11.182 (RS1, RV1 L6): the labels re-pinned ("Read to Ya from your archive." appended on heart_camp)
+        const PIN = { 'act1_heart.js': 'd1708057e33d7f53', /* v0.11.203 (T1, TS1): re-pinned for the long calendar (late and the leave by the story's day) */ 'stomp_act1.js': '1a2e6d1e8cb25a0b', 'yuki_time.js': '746d1873838bd5ca', labels: 'f5407fff487a26e2' }; // v0.11.209 (TF1, K): the labels re-pinned ("Smoke the catch." appended on heart_hub); v0.11.182 (RS1, RV1 L6): the labels re-pinned ("Read to Ya from your archive." appended on heart_camp)
         const hash = (t) => createHash('sha256').update(t).digest('hex').slice(0, 16);
         const got = { labels: hash(JSON.stringify(LABELS)) };
         for (const f of ['act1_heart.js', 'stomp_act1.js', 'yuki_time.js']) got[f] = hash(skel(readFileSync(new URL(`../js/story/${f}`, import.meta.url), 'utf8')));
@@ -1673,7 +1673,7 @@ for (const form of ['cat', 'human']) {
     const D = 1440;
     // YB: every resting place has the card, last (no choice position changes), a door card, once a waking day
     for (const hub of Object.keys(YT_HUBS)) {
-        const cs = SCENES[hub].choices.filter((c) => !/^(wen|mother)_time$/.test(c.to) && c.to !== 'rt_selene' && !/^(fo_)?pot_cook$/.test(c.to)), last = cs[cs.length - 1]; // v0.11.139 (MW1): Wen's and the mother's cards follow hers; v0.11.174 (SL1, SC): and the Selene story on rt_camp; v0.11.181 (SP1, PS): and the cook cards
+        const cs = SCENES[hub].choices.filter((c) => !/^(wen|mother)_time$/.test(c.to) && c.to !== 'rt_selene' && !/^(fo_)?pot_cook$/.test(c.to) && !c.preserve), last = cs[cs.length - 1]; // v0.11.209 (TF1, K): and "Smoke the catch."; v0.11.139 (MW1): Wen's and the mother's cards follow hers; v0.11.174 (SL1, SC): and the Selene story on rt_camp; v0.11.181 (SP1, PS): and the cook cards
         assert(last.to === 'yk_time' && last.time === 10 && cs.filter((c) => c.to === 'yk_time').length === 1, `TR1 (YB; DR2): ${hub}'s last choice is Yuki's card, 10 min`);
         assert((TASK_HUBS[hub].doors || []).includes('yk_time'), `TR1 (YB): ${hub} shows it as a door card`);
     }
@@ -1811,7 +1811,7 @@ for (const form of ['cat', 'human']) {
     const HT_SLOTS = ['ashfall:1', 'ashfall:2', 'fo_ashfall:1', 'fo_ashfall:2', 'fo_ashfall:3', 'rt_ashfall:1'];
     // MS: on Ashfall's three resting places, after Yuki's card, door cards of 10 minutes, once a waking day
     for (const hub of Object.keys(HT_HUBS)) {
-        const cs = SCENES[hub].choices.filter((c) => !/^(fo_)?pot_cook$/.test(c.to)), tail = cs.slice(-3).map((c) => c.to); // v0.11.181 (SP1, PS): the cook cards come after (kitchen_install.js)
+        const cs = SCENES[hub].choices.filter((c) => !/^(fo_)?pot_cook$/.test(c.to) && !c.preserve), tail = cs.slice(-3).map((c) => c.to); // v0.11.209 (TF1, K): "Smoke the catch." last; v0.11.181 (SP1, PS): the cook cards come after (kitchen_install.js)
         assert(JSON.stringify(tail) === '["yk_time","wen_time","mother_time"]', `MW1 (MS): ${hub} ends with Yuki's, Wen's and the mother's cards (${tail})`);
         for (const k of ['wen', 'mother']) {
             const c = cs.find((x) => x.to === `${k}_time`);
@@ -3252,7 +3252,7 @@ for (let run = 0; run < 20; run++) { // the hunters too slow for the wolves: fo_
         const mk = (v, h) => { const g = ensureBars(fresh(66020)); g.coil.act = act; g.minutes = (day - 1) * D + h * 60; Object.assign(g.flags, { long: true, vday: 2 }); g.rel.Village = { f: v, a: 0 }; g.rel.Mother = { f: 10, a: 0 }; g.james.satiety = 40; goTo(g, SCENES, hub); return g; };
         const ci = (g) => SCENES[hub].choices.findIndex((c) => c.to === scene);
         const open = (g) => SCENES[hub].choices[ci(g)].show(g);
-        assert((TASK_HUBS[hub].doors || []).includes(scene) && ci(mk(150, 10)) === SCENES[hub].choices.length - 1, `CM (PS): ${hub}: the cook card is the last choice, a door card`);
+        assert((TASK_HUBS[hub].doors || []).includes(scene) && ci(mk(150, 10)) === SCENES[hub].choices.filter((c) => !c.preserve).length - 1, `CM (PS): ${hub}: the cook card is the last choice (before v0.11.209's "Smoke the catch."), a door card`);
         assert(!open(mk(89, 10)) && open(mk(90, 10)) && !open(mk(150, 8)) && open(mk(150, 9)) && open(mk(150, 14)) && !open(mk(150, 15)), `CM (PS): ${hub}: from the village's 90, 09:00–14:59`);
         const g = mk(150, 10), m0 = g.minutes;
         choose(g, SCENES, ci(g));
@@ -5204,7 +5204,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         try { const g = fresh(99102); Tk.setYuki(g, true); g.tasks.yuki.progress = 0; const m0 = g.minutes; runTask(g, SCENES, 'wild_train:1');
           assert(g.tasks.yuki.progress === g.minutes - m0, `${R} (TG2, M1): Yuki's progress is the minutes passed (${g.tasks.yuki.progress} / ${g.minutes - m0})`); } finally { job.minutes = len0; } }
       // TG3 (M2, the stops): an empty plan rests out a week with food and never starves; the hungry, hurt and breakthrough stops
-      { const g = fresh(99103); g.inventory.hare_raw = 12; Wk.planEnsure(g); let low = 100, ate = 0;
+      { const g = fresh(99103); g.inventory.smoked_meat = 12; Wk.planEnsure(g); /* v0.11.209 (TF1, S): kept food (raw hare spoils in 3 days) */ let low = 100, ate = 0;
         for (let k = 0; k < 20; k++) { const r = Wk.runWeek(g, SCENES); ate += r.days.reduce((a, d) => a + d.lines.filter((x) => /^(Breakfast|Midday|Supper): /.test(x)).length, 0); low = Math.min(low, g.james.satiety);
           if (r.stop === 'week' || r.stop === 'stuck' || g.scene === 'wilds') { if (r.stop === 'week' || r.stop === 'stuck') break; }
           for (let j = 0; j < 8 && g.scene !== 'wilds'; j++) { const v = sceneView(g, SCENES); const op = v.choices.filter((c) => !c.disabled && !/change form/.test(c.label)); if (!op.length) break; choose(g, SCENES, op[op.length - 1].index); Wk.foldNight(g, SCENES); low = Math.min(low, g.james.satiety); } }
@@ -5279,7 +5279,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     const { clockLabel } = await import('../js/core/game.js');
     const base = deserialize(readFileSync(new URL('../saves/v0.11.204-long-wilds-day2.json', import.meta.url), 'utf8'), { force: true });
     const copy = (g = base) => JSON.parse(JSON.stringify(g));
-    const food = (g) => { g.james.satiety = 100; g.inventory.hare_raw = 30; };
+    const food = (g) => { g.james.satiety = 100; g.inventory.smoked_meat = 30; }; // v0.11.209 (TF1, S): kept food (30 raw hare would spoil in 3 days; the 'save as it is' cases keep their raw food)
     const isFight = (g, S) => Wk.fightHere(g, S);
     /** The real run on the save itself, as main.js takes it. */
     const realRun = (g, S = SCENES) => {
@@ -5533,6 +5533,133 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     // RV1 (M2t, TG5): the What's new line says the knobs' own numbers
     { const { NOTES } = await import('../js/core/news.js'); const nt = (NOTES.find(([v]) => v === '0.11.207') || [])[1] || '';
       assert(Gm.LONG_SAT_DIV === 4 && /a quarter of the Saturation/.test(nt) && Gm.LONG_SIT_MIN === 0.1 && /at least 0\.1%/.test(nt) && Gm.LONG_MER_MULT === 4 && /four times its hours/.test(nt) && /×0\.7/.test(nt) && Gm.LONG_XP === 0.7, `${T} (M2t, TG5): the What's new line names ÷4 (at least 0.1%), ×4 and ×0.7`); }
+}
+
+// v0.11.209 (owner picks TF1, X1, RV1; roadmap-time.md TS4): food that spoils and food that keeps, long calendar only. S raw food
+// spoils (game.js FRESH_DAYS, g.fresh, spoilFresh, freshDue; RV1: its line waits for the action's end, takeSpoilNotes, H1 + M1; every
+// due piece goes wherever it sits and a future date is today, M2; the names one and more, L1); K "Smoke the catch." on the four stays
+// (common.js preserveChoice, 15 min a piece) and its plan row (week.js med.pres; nothing to smoke: the day done, L7); Y Yuki's food
+// home from one haul in three, the first of each Coil (tasks.js YUKI_LONG_KEEP; L3); the texts Fable's (D1). The old calendar: no
+// record, nothing spoils, no card, every haul as before. RV1's TG1–TG9 marked.
+{
+    const Gm = await import('../js/core/game.js');
+    const Cm = await import('../js/story/common.js');
+    const C = await import('../js/core/calendar.js');
+    const Tk = await import('../js/core/tasks.js');
+    const Wk = await import('../js/core/week.js');
+    const T = 'TF1 (food that spoils and keeps)';
+    const D = 1440;
+    const mk = (cal, seed = 99401, scene = 'wilds') => { const g = ensureBars(newGame(seed, { closed: true, ...(cal ? { cal } : {}) })); goTo(g, SCENES, scene); g.minutes = 1 * D + 10 * 60; g.flags.fire = true; g.james.satiety = 100; Gm.takeSpoilNotes(g); return g; };
+    const line = (parts) => Cm.SPOIL_LINE.replace('{food}', parts);
+    const due = (g, id, n, day = 0) => { g.inventory[id] = (g.inventory[id] || 0) + n; (g.fresh || (g.fresh = {}))[id] = [...(g.fresh[id] || []), [day, n]]; }; // pieces gained on calendar day `day` (from 0)
+    assert(JSON.stringify(Gm.FRESH_DAYS) === JSON.stringify({ hare_raw: 3, fowl_raw: 3, crimson_berry: 3, crab_meat: 2, river_cress: 2, jade_bracket: 4, lizard_egg: 8 }) && !('honeycomb' in Gm.FRESH_DAYS) && !('venison' in Gm.FRESH_DAYS) && !('smoked_meat' in Gm.FRESH_DAYS), `${T} (S): the days as picked; honeycomb, venison and the kept foods never spoil`);
+    assert(Cm.PRESERVE_MIN === 15 && Tk.YUKI_LONG_KEEP === 3 && JSON.stringify(Cm.FOOD.smoked_meat) === '[30,30]' && JSON.stringify(Cm.FOOD.dried_bracket) === '[15,15]' && JSON.stringify(Cm.PRESERVE) === JSON.stringify({ hare_raw: 'smoked_meat', fowl_raw: 'smoked_meat', crab_meat: 'smoked_meat', jade_bracket: 'dried_bracket' }), `${T} (K, Y; TG9): 15 min a piece, one haul in 3, smoked meat +30 and dried bracket +15, cooked or raw`);
+    // the old calendar: no record, nothing spoils in ten days, no card, no line waiting
+    { const g = mk(0); Gm.addItem(g, 'hare_raw', 5); const notes = []; for (let k = 0; k < 10; k++) notes.push(...Gm.advance(g, D));
+      const cards = taskCards(g, SCENES);
+      assert(!('fresh' in g) && g.inventory.hare_raw === 5 && !notes.some((x) => /Spoiled/.test(x)) && !Gm.takeSpoilNotes(g).length && !cards.some((c) => c.pres) && !SCENES.wilds.choices.at(-1).show(g), `${T}: the old calendar: no record, 5 hare after ten days, no card`); }
+    // S: each kind spoils at the midnight its days after the day it came; the line waits for the action's end (H1, M1), its names (L1)
+    for (const [id, days] of Object.entries(Gm.FRESH_DAYS)) {
+        const g = mk(C.LONG_CAL); Gm.addItem(g, id, 2); const d0 = Math.floor(g.minutes / D);
+        Gm.advance(g, (d0 + days) * D - 1 - g.minutes); const kept = g.inventory[id], q0 = Gm.takeSpoilNotes(g).length;
+        const notes = Gm.advance(g, 2); const q = Gm.takeSpoilNotes(g);
+        assert(kept === 2 && q0 === 0 && !g.inventory[id] && !notes.some((x) => /Spoiled/.test(x)) && q.length === 1 && q[0] === line(`2 ${Cm.SPOIL_NAMES[id][1]}`) && !Gm.takeSpoilNotes(g).length, `${T} (S, M1): ${id} keeps ${days} days to the minute before midnight, then goes; its line waits, once (${kept}, ${g.inventory[id]}, ${q[0]})`);
+    }
+    { const g = mk(C.LONG_CAL); Gm.addItem(g, 'hare_raw', 2); Gm.addItem(g, 'river_cress', 1); Gm.addItem(g, 'crab_meat', 1); Gm.addItem(g, 'crimson_berry', 1); Gm.advance(g, 3 * D); const n = Gm.takeSpoilNotes(g).join(' | ');
+      assert(n === line('2 glassback hares, 1 needleberry, 1 stone-shell crab and 1 river cress'), `${T} (S, D1, L1): one line, one and more, the list joined ("${n}")`); }
+    { const g = mk(C.LONG_CAL); Gm.addItem(g, 'hare_raw', 2); Gm.addItem(g, 'river_cress', 1); Gm.advance(g, D); Gm.addItem(g, 'hare_raw', 3); // 2 from Day 2, 3 from Day 3
+      Gm.addItem(g, 'hare_raw', -2); // eaten: the oldest go first
+      const L = JSON.parse(JSON.stringify(g.fresh.hare_raw)); Gm.advance(g, 3 * D);
+      assert(L.length === 1 && L[0][1] === 3 && !g.inventory.hare_raw && !g.inventory.river_cress, `${T} (S): pieces gone leave oldest first; the rest spoil on their own day (${JSON.stringify(L)})`); }
+    { const g = mk(C.LONG_CAL); for (const id of ['honeycomb', 'venison', 'smoked_meat', 'dried_bracket']) Gm.addItem(g, id, 4); Gm.advance(g, 30 * D);
+      assert(['honeycomb', 'venison', 'smoked_meat', 'dried_bracket'].every((id) => g.inventory[id] === 4) && !Object.keys(g.fresh || {}).length, `${T} (S): honeycomb, venison and the kept foods after 30 days: all there`); }
+    // a save from before (long calendar, raw food, no record): dated the day it is first seen, nothing lost at once
+    { const g = mk(C.LONG_CAL); g.inventory.hare_raw = 6; delete g.fresh; const h = deserialize(serialize(g), { force: true });
+      Gm.advance(h, 60); const kept = h.inventory.hare_raw, q = Gm.takeSpoilNotes(h); Gm.advance(h, 3 * D);
+      assert(!q.length && kept === 6 && !h.inventory.hare_raw, `${T} (S): an old save's raw food is dated the day it loads (6 kept, gone 3 days later)`);
+      const k = mk(C.LONG_CAL); Gm.addItem(k, 'fowl_raw', 2); const r = deserialize(serialize(k), { force: true }); assert(JSON.stringify(r.fresh) === JSON.stringify(k.fresh), `${T} (S): the record survives a save`); }
+    // M2 (TG3): the clock moved back (the Long Forest's Go back, lf_exit): a piece dated after today is dated today; a due piece behind a newer one goes
+    { const g = mk(C.LONG_CAL); due(g, 'hare_raw', 2, 12); g.minutes = 0 * D + 10 * 60; Gm.advance(g, 30); const kept = g.inventory.hare_raw; Gm.advance(g, 3 * D);
+      assert(kept === 2 && JSON.stringify(g.fresh.hare_raw ?? null) === 'null' && !g.inventory.hare_raw, `${T} (M2): Day 13's hare after the clock goes back to Day 1: kept that day, gone 3 days later`);
+      const h = mk(C.LONG_CAL); due(h, 'hare_raw', 1, 5); due(h, 'hare_raw', 3, 0); h.minutes = 4 * D + 10 * 60; Gm.advance(h, 1);
+      assert(h.inventory.hare_raw === 1 && Gm.takeSpoilNotes(h)[0] === line('3 glassback hares'), `${T} (M2): a due bucket behind a newer one goes (${h.inventory.hare_raw})`); }
+    // TG7: freshDue after pieces have gone; the card's count at the moment a piece falls due
+    { const g = mk(C.LONG_CAL); due(g, 'hare_raw', 2, 0); due(g, 'hare_raw', 3, 2); g.inventory.hare_raw -= 2; g.minutes = 3 * D + 10 * 60; // a direct write: the record not synced yet
+      assert(Gm.freshDue(g, 'hare_raw') === 0 && g.inventory.hare_raw === 3, `${T} (TG7): freshDue leaves out the pieces gone (the oldest)`);
+      const h = mk(C.LONG_CAL); h.fresh = { hare_raw: [[0, 2], [3, 1]] }; h.inventory.hare_raw = 3; h.minutes = 3 * D + 10 * 60;
+      assert(Gm.freshDue(h, 'hare_raw') === 2 && Cm.preservable(h) === 1 && SCENES.wilds.choices.at(-1).minutes(h) === 15, `${T} (TG7): at the moment 2 fall due, the card counts 1 (15 min)`); }
+    // H1 (TG1): a meal keeps its line when food turns first; the spoil line waits; the camp's supper and the forest morning
+    { const g = mk(C.LONG_CAL); due(g, 'hare_raw', 1); Gm.addItem(g, 'smoked_meat', 2); g.minutes = 4 * D + 8 * 60; g.james.satiety = 50; delete g.tasks.routine;
+      const m = Tk.dayMeal(g, 'wilds');
+      assert(m.length === 1 && /^Breakfast: smoked meat\. \+30 satiety\.$/.test(m[0]) && g.inventory.smoked_meat === 1 && !g.inventory.hare_raw && Gm.takeSpoilNotes(g)[0] === line('1 glassback hare'), `${T} (H1, TG1): the day's meal keeps its line, the spoil line waits (${m.join(' | ')})`);
+      const e = Cm.eatBest(g); assert(e.length === 1 && /^You eat: smoked meat/.test(e[0]), `${T} (H1): eatBest returns the meal only`); }
+    { const g = mk(C.LONG_CAL, 99406, 'rt_camp'); g.inventory = {}; g.fresh = {}; due(g, 'hare_raw', 1); g.minutes = 4 * D + 17 * 60; g.james.satiety = 50; delete g.flags[Object.keys(g.flags).find((k) => /rt_supper/.test(k)) || 'none'];
+      const r = goTo(g, SCENES, 'rt_camp') || []; const q = Gm.takeSpoilNotes(g);
+      assert(Math.round(g.james.satiety) >= 69 && !g.inventory.hare_raw && (q[0] === line('1 glassback hare')), `${T} (H1, TG1): the last camp's supper with only a turned hare: Ya's +20 (Fed ${Math.round(g.james.satiety)}; ${JSON.stringify(r).slice(0, 80)})`); }
+    { const g = mk(C.LONG_CAL); g.inventory = {}; g.fresh = {}; due(g, 'hare_raw', 1); g.minutes = 4 * D + 5 * 60 + 30; const all = JSON.stringify(goTo(g, SCENES, 'morning'));
+      assert(/No breakfast/.test(all) && !/Breakfast\. Spoiled/.test(all) && !g.inventory.hare_raw, `${T} (H1, TG1): the forest morning with only a turned hare: "No breakfast." (${all.slice(0, 120)})`); }
+    // M1 (TG2): every path that passes time says its line once: a sit card, a meridian card, a story choice, the plan's day off, a night (sleepUntil)
+    { const at = () => { const g = mk(C.LONG_CAL); g.inventory = {}; g.fresh = {}; due(g, 'hare_raw', 2); g.minutes = 4 * D + 10 * 60; g.tasks.routine = { d: Tk.workDay(g), meals: 'bls', sit: true }; g.james.qi = Gm.jamesQiMax(g); return g; };
+      const want = line('2 glassback hares'), once = (ls) => ls.filter((x) => x === want).length === 1;
+      { const g = at(); const sid = Tk.sitTaskId(g, SCENES); const r = runTask(g, SCENES, sid); assert(once(r.lines) && !g.inventory.hare_raw, `${T} (M1, TG2): a sit says it (${r.lines.slice(-2).join(' | ')})`); }
+      { const g = at(); const r = runTask(g, SCENES, 'wild_forage:0'); assert(once(r.lines), `${T} (M1, TG2): a work card says it (${r.lines.slice(-2).join(' | ')})`); }
+      { const g = at(); const mer = taskCards(g, SCENES).find((c) => c.kind === 'mer' && c.status === 'open'); const r = mer ? runTask(g, SCENES, mer.id) : { lines: [want] }; assert(once(r.lines), `${T} (M1, TG2): a meridian session says it`); }
+      { const g = at(); Gm.addItem(g, 'smoked_meat', 1); g.james.satiety = 50; const i = SCENES.wilds.choices.findIndex((c) => /^Eat something/.test(c.text)); const r = choose(g, SCENES, i);
+        assert(once(r.lines) && r.lines.some((x) => /^You eat: smoked meat/.test(x)), `${T} (M1, TG2): a story choice says it with the meal (${r.lines.join(' | ')})`); }
+      { const g = at(); Wk.planEnsure(g); const r = Wk.runWeek(g, SCENES); assert(r.days.flatMap((d) => d.lines).filter((x) => x === want).length === 1, `${T} (M1, TG2): the plan's day off says it (${r.stop})`); }
+      { const g = at(); g.minutes = 3 * D + 22 * 60; Gm.sleepUntil(g, 6); assert(!g.inventory.hare_raw && Gm.takeSpoilNotes(g)[0] === want, `${T} (M1, H1): a night takes what turned, its line waiting for the action`); } }
+    // K: the card: the four stays, last (no position changes), long calendar only, with raw food; the wilds' camp with its fire, the Heart without (TG5)
+    for (const [hub, camp] of [['wilds', true], ['ashfall', false], ['fo_ashfall', false], ['heart_hub', true]]) {
+        const c = SCENES[hub].choices.at(-1);
+        assert(c.preserve && c.text === 'Smoke the catch.' && c.to === hub && SCENES[hub].choices.filter((x) => x.preserve).length === 1, `${T} (K): ${hub}'s last choice is "Smoke the catch."`);
+        const g = mk(C.LONG_CAL, 99402, hub); g.flags.fire = hub === 'wilds'; if (hub === 'heart_hub' || hub === 'fo_ashfall') g.minutes = 16 * D + 10 * 60; assert(!c.show(g), `${T} (K): ${hub}: no raw food, no card`);
+        Gm.addItem(g, 'hare_raw', 3); Gm.addItem(g, 'jade_bracket', 1); assert(c.show(g) && c.minutes(g) === 60, `${T} (K, TG5): ${hub}: 4 pieces, 60 min${hub === 'heart_hub' ? ', no fire flag needed' : ''}`);
+        if (hub === 'heart_hub' || hub === 'fo_ashfall') { g.tasks.routine = { d: Tk.workDay(g), meals: 'bls', sit: true }; const card = taskCards(g, SCENES).find((x) => x.pres); const r = card ? runTask(g, SCENES, card.id) : { lines: [] };
+            assert(r.lines.includes(camp ? Cm.PRESERVE_CAMP : Cm.PRESERVE_VILLAGE) && !r.lines.includes(camp ? Cm.PRESERVE_VILLAGE : Cm.PRESERVE_CAMP), `${T} (K, TG5): ${hub} gets the ${camp ? 'camp' : 'village'}'s line`); }
+    }
+    { const g = mk(C.LONG_CAL); Gm.addItem(g, 'hare_raw', 1); g.flags.fire = false; assert(!SCENES.wilds.choices.at(-1).show(g), `${T} (K): the wilds' card needs its fire`); }
+    // TG4: its time exactly 15 a piece (the day's routine done, Yuki off); to the cap; the camp's line and the gains
+    { const g = mk(C.LONG_CAL); Gm.addItem(g, 'hare_raw', 2); Gm.addItem(g, 'fowl_raw', 1); Gm.addItem(g, 'crab_meat', 1); Gm.addItem(g, 'jade_bracket', 2); Gm.addItem(g, 'river_cress', 2); g.inventory.smoked_meat = 97;
+      g.tasks.routine = { d: Tk.workDay(g), meals: 'bls', sit: true }; Tk.setYuki(g, false);
+      const card = taskCards(g, SCENES).find((c) => c.pres); assert(card && card.kind === 'chore' && card.minutes === 4 * 15, `${T} (K): the card a chore, its minutes from the pieces it can take (97 smoked: room for 2, + 2 bracket: ${card?.minutes})`);
+      const m0 = g.minutes; const r = runTask(g, SCENES, card.id);
+      assert(g.inventory.smoked_meat === 99 && g.inventory.dried_bracket === 2 && !g.inventory.jade_bracket && g.inventory.river_cress === 2 && g.minutes - m0 === 60 && r.lines.includes(Cm.PRESERVE_CAMP) && r.lines.includes('+2 Smoked meat, +2 Dried bracket.'), `${T} (K, TG4): exactly 60 min, to the cap, cress untouched, the camp's line and the gains (${g.minutes - m0} min; ${r.lines.join(' | ')})`);
+      assert((g.inventory.hare_raw || 0) + (g.inventory.fowl_raw || 0) + (g.inventory.crab_meat || 0) === 2, `${T} (K): the pieces past the cap stay raw`); }
+    { const g = mk(C.LONG_CAL, 99403, 'ashfall'); g.minutes = 4 * D + 10 * 60; Gm.addItem(g, 'fowl_raw', 2); const card = taskCards(g, SCENES).find((c) => c.pres); const r = runTask(g, SCENES, card.id);
+      assert(r.lines.includes(Cm.PRESERVE_VILLAGE) && g.inventory.smoked_meat === 2 && Cm.NEW_ITEMS.smoked_meat.name === 'Smoked meat' && Cm.NEW_ITEMS.dried_bracket.name === 'Dried bracket', `${T} (K, D1): the village's line; the items' names`); }
+    // K: the plan's row, once a day after the day's work (TG8: the forecast's days; L7: nothing to smoke is a day done); a plan from before runs as before
+    { const g = mk(C.LONG_CAL); g.minutes = 1 * D + 7 * 60; Gm.addItem(g, 'hare_raw', 2); Gm.addItem(g, 'smoked_meat', 30); const p = Wk.planEnsure(g); Wk.planSet(g, 'med:pres', 5);
+      assert(p.med.pres === 1 && Wk.MED_MAX.pres === 1, `${T} (K): the row clamps to once a day`);
+      const fc = Wk.planForecast(g, SCENES), notes = Wk.planNotes(g, SCENES);
+      assert(fc && fc.med.pres === fc.days && new RegExp(`^${fc.days} of ${fc.days} days?$`).test(notes.med.pres || ''), `${T} (TG8, L7): the forecast: the row in full every day, a day with nothing to smoke counted (${fc?.med?.pres} of ${fc?.days}; "${notes.med.pres}")`);
+      const r = Wk.runWeek(g, SCENES); const smoked = r.days.flatMap((d) => d.lines).filter((x) => x === Cm.PRESERVE_CAMP).length;
+      assert(smoked >= 1 && (g.inventory.smoked_meat || 0) >= 1 && !g.inventory.hare_raw, `${T} (K): the plan smokes the catch (${smoked} times, ${r.stop})`);
+      const h = mk(C.LONG_CAL); h.minutes = 1 * D + 7 * 60; Gm.addItem(h, 'hare_raw', 2); const q = Wk.planEnsure(h); delete q.med.pres; delete q.done.pres; Wk.planSet(h, 'med:sit', 1); let err = null, rr = null; try { rr = Wk.runWeek(h, SCENES); } catch (e) { err = e; }
+      const hl = rr ? rr.days.flatMap((d) => d.lines) : [];
+      assert(!err && !hl.includes(Cm.PRESERVE_CAMP) && hl.some((x) => /^Condensed/.test(x)), `${T} (TG8): a plan from before without the row runs its sits and smokes nothing (${err?.message || rr?.stop})`); }
+    // TG8 (the review's F19): with Yuki's hauls coming in all day, the plan smokes at most once a day
+    { const job = TASK_HUBS.wilds.yuki, len0 = job.minutes; job.minutes = 2;
+        try { const g = mk(C.LONG_CAL, 99407); g.minutes = 1 * D + 7 * 60; Gm.addItem(g, 'hare_raw', 2); Gm.addItem(g, 'smoked_meat', 30); Tk.setYuki(g, true); Wk.planEnsure(g); Wk.planSet(g, 'med:pres', 1);
+            const r = Wk.runWeek(g, SCENES); const per = r.days.map((d) => d.lines.filter((x) => x === Cm.PRESERVE_CAMP).length);
+            assert(per.some((n) => n === 1) && per.every((n) => n <= 1), `${T} (TG8): once a day at most (${per.join(', ')})`); } finally { job.minutes = len0; } }
+    // Y (TG6, L3): Yuki's food home from the first haul of the Coil, then every third; the d8 stream and her familiarity as on the old
+    // calendar (a journey's hub, the Blackroot's roots: no week cards there, so both calendars take the same minutes)
+    { const job = TASK_HUBS.rr_hub.yuki, len0 = job.minutes; job.minutes = 2;
+        try {
+            const H = Gm.YUKI_HELD_TEXT, heads = ['held', 'heldPast', 'reach', 'reachPast'].map((k) => String(H[k]).split('{')[0]).filter(Boolean);
+            const isXp = (x) => /^Yuki Fight \+\d+/.test(x) || heads.some((h) => x.startsWith(h));
+            const run = (cal) => { const g = mk(cal, 99405, 'rr_hub'); g.minutes = 11 * D + 8 * 60; Tk.setYuki(g, true); g.tasks.yuki.progress = 0; let got = 0, xp = 0, firstOk = null;
+                const card = taskCards(g, SCENES).find((c) => c.kind === 'work' && c.status === 'open' && !/fight/.test(c.tag || ''));
+                for (let k = 0; k < 10; k++) { g.james.qi = Gm.jamesQiMax(g); g.james.satiety = 100; g.james.hp = jamesHpMax(g); const c0 = g.tasks.yuki.cnt || 0; const r = runTask(g, SCENES, card.id);
+                    const n = r.lines.filter((x) => / \+\d+ (Glassback hare|Mire fowl|Stone-shell crab|Ash-deer venison)/.test(x)).length; got += n; xp += r.lines.filter(isXp).length; if (firstOk == null && (g.tasks.yuki.cnt || 0) > c0) firstOk = c0 === 0 ? n >= 1 : null; }
+                return { got, xp, cnt: g.tasks.yuki.cnt || 0, fam: g.tasks.fam[job.id] || 0, rng: JSON.stringify(g.rng), firstOk, card: card?.id }; };
+            const a = run(0), b = run(C.LONG_CAL);
+            assert(b.cnt > 3 && b.got === Math.floor((b.cnt + 2) / 3) && b.firstOk === true && !a.cnt && a.got > b.got, `${T} (Y, L3, TG6): the first haul home, then one in 3 (${b.got} of ${b.cnt}; the old calendar ${a.got}; ${b.card})`);
+            assert(a.fam === b.fam && a.rng === b.rng && a.xp === b.xp && a.xp > 3, `${T} (TG6): her familiarity (${a.fam} / ${b.fam}), her XP awards (${a.xp} / ${b.xp}) and the dice stream as on the old calendar`);
+        } finally { job.minutes = len0; }
+    }
+    // L2: her lane says it on the long calendar (main.js)
+    { const src = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8'); assert(/g\.cal === LONG_CAL \? ' · food home from one haul in 3 \(the long calendar\)' : ''/.test(src), `${T} (L2): Yuki's lane says one haul in 3 on the long calendar`); }
 }
 
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));

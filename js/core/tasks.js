@@ -14,7 +14,7 @@
  */
 import { hasForm } from './forms.js';
 import { choose, goTo, choiceOpen, choiceTag, gives, setTimeless, defaultMinutes, movesPlace, wasPicked, isMenuScene, isTimeless, setFamiliar, doorMinutes } from './story.js';
-import { NIGHT_TO, d8, itemCap, yukiForm, advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, itemNames, addItem, canBreakThrough, btMinutes, realmName, condense, sitMinutes, useSpeed, USE_N, USE_CAP, nightLock, endsLate, sitUseless, jamesQiMax, SATIETY_PER_HOUR, breakAt, coilMult, fmtMult, YUKI_HELD_TEXT } from './game.js';
+import { NIGHT_TO, d8, itemCap, yukiForm, advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, takeSpoilNotes, itemNames, addItem, canBreakThrough, btMinutes, realmName, condense, sitMinutes, useSpeed, USE_N, USE_CAP, nightLock, endsLate, sitUseless, jamesQiMax, SATIETY_PER_HOUR, breakAt, coilMult, fmtMult, YUKI_HELD_TEXT } from './game.js';
 import { CONDENSE_SIT_COST } from './formulas.js';
 import { btTarget, MER_LINES, lineWindow, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
@@ -242,7 +242,7 @@ export function taskCards(g, scenes, only = null) {
         if (!choiceOpen(g, c)) return;
         if (sitUseless(g) && isSitChore(c, hubId)) return; // v0.11.37 (B2): a sit that changes nothing is not offered
         if (isDoor(cfg, c)) push(`${hubId}:${i}`, 'door', cfg.own, c, c.time || 0, 'open');
-        else if (isChore(hubId, c)) push(`${hubId}:${i}`, c.check && !cfg.plainChecks ? 'work' : 'chore', cfg.own, c, c.time || 0, 'open');
+        else if (isChore(hubId, c)) { push(`${hubId}:${i}`, c.check && !cfg.plainChecks ? 'work' : 'chore', cfg.own, c, c.minutes ? c.minutes(g) : c.time || 0, 'open'); if (c.preserve) cards[cards.length - 1].pres = true; } // v0.11.209 (TF1, K): the card's own minutes
     });
     cards.push(...medTaskCards(g, scenes));
     weekCards(g, scenes, hubId, cards); // v0.11.204 (owner pick W1, S1): the long calendar's week
@@ -391,6 +391,8 @@ export function yukiCatch(g, job, n = 1) {
  * sets it; `job.dc` is kept in the data, unused.
  */
 export const YUKI_D8 = [0, 0, 0.5, 0.5, 1, 1, 2, 2];
+/** v0.11.209 (owner pick TF1, Y): on the long calendar one haul in this many brings her food home (her XP and familiarity: every haul). */
+export const YUKI_LONG_KEEP = 3;
 export const YUKI_LANE_TEXT = { roll: 'd8 per haul: 1–2 nothing · 3–4 half · 5–6 full · 7–8 double' }; // Fable's (the MAIN)
 export function yukiHaul(g, job) {
     const k = YUKI_D8[d8(g) - 1];
@@ -412,6 +414,10 @@ function yukiTick(g, hubId, minutes) {
         if (y.progress < len) break;
         y.progress -= len;
         const n = yukiHaul(g, job);
+        // v0.11.209 (owner pick TF1, Y): on the long calendar her food comes home from one haul in YUKI_LONG_KEEP (RV1, L3: the first of
+        // each Coil, then the 4th, 7th, …); the others she comes back with nothing (her job's own line for an empty haul), her XP and
+        // familiarity as for a haul. The d8 is rolled as before.
+        if (n > 0 && longCal(g)) { y.cnt = (Number(y.cnt) || 0) + 1; if ((y.cnt - 1) % YUKI_LONG_KEEP) { lines.push(yukiSays(g, job.none), ...awardYukiFightXp(g, 'challenging')); takeCapNotes(); st(g).fam[job.id] = r1(f + 1); continue; } }
         const pick = n > 0 ? yukiCatch(g, job, n) : null;
         if (pick) { addItem(g, pick.item, n); lines.push(`${pick.got(n, g)} +${n} ${itemNames[pick.item]?.name || pick.item}.`, ...awardYukiFightXp(g, 'challenging')); }
         else if (n > 0) lines.push(yukiSays(g, job.full || job.none), ...awardYukiFightXp(g, 'challenging')); // v0.11.71 (Y1): everything she brings here is full: she eats it; XP and familiarity as a haul
@@ -452,8 +458,8 @@ export function runTask(g, scenes, id) {
         const pre = dayRoutine(g, scenes, hubId, card.kind, id);
         lines.push(...pre);
         // RV1 (H1, L2; the Opus review): the routine took the time the card needed (a "Go on" past the evening hour too): not run, said so
-        if (pre.length && g.scene === hubId && (card.kind === 'carry' ? workRoom(g, hubId) <= 0 : !taskOpen(g, scenes, id))) { lines.push(SKIP_LINE); return { lines, fail: false, stopped: false, skipped: true }; }
-        if (pre.length && g.scene !== hubId) return { lines, fail: false, stopped: true, skipped: true };
+        if (pre.length && g.scene === hubId && (card.kind === 'carry' ? workRoom(g, hubId) <= 0 : !taskOpen(g, scenes, id))) { lines.push(SKIP_LINE, ...takeSpoilNotes(g)); return { lines, fail: false, stopped: false, skipped: true }; }
+        if (pre.length && g.scene !== hubId) { lines.push(...takeSpoilNotes(g)); return { lines, fail: false, stopped: true, skipped: true }; }
     }
     const mY = g.minutes; // RV1 (M1): Yuki's lane counts from here; the day's sit ticked her for its own minutes
     if (card.kind === 'carry') {
@@ -504,6 +510,7 @@ export function runTask(g, scenes, id) {
         if (card.kind === 'door' && g.scene !== hubId) st(g).door = { id, speed }; // v0.11.141 (FX1, DI): the scenes behind it run at its speed (story.js)
     }
     lines.push(...yukiTick(g, hubId, g.minutes - mY));
+    lines.push(...takeSpoilNotes(g)); // v0.11.209 (RV1, H1 + M1): the food that turned while the card took its time (a sit, a meridian, the routine)
     let stopped = g.scene !== hubId;
     if (!stopped && g.james.hp <= 0) { lines.push(...collapse(g, scenes, hubId)); stopped = true; }
     return { lines, fail, stopped };
