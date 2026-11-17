@@ -128,6 +128,7 @@ button { font: inherit; color: inherit; }
 .foe { display: grid; grid-template-columns: 1fr 6rem; gap: 0.75rem; align-items: center; font-size: 0.95rem; }
 .foe .trait { opacity: 0.7; font-size: 0.8em; white-space: nowrap; } /* v0.11.113 (DA1, TD): a foe's traits */
 .foe .stroke i { background: var(--red); }
+.foe.ally .stroke i { background: var(--ink-2); } /* v0.11.210 (owner pick N1, HB): Yuki's HP in a fight (was var(--bone), undefined: no bar) */
 .foe.down { opacity: 0.4; text-decoration: line-through; }
 .round { padding: 0.8rem 1.15rem 0; font-size: 0.92rem; color: var(--ink); white-space: pre-line; }
 .round .r { color: var(--ink-dim); font-family: var(--display); }
@@ -323,4 +324,5 @@ button.card, button.choice { -webkit-touch-callout: none; -webkit-user-select: n
   #view > section:not(.page) .plate { max-height: min(25rem, 40vh); }
   .below .split { grid-template-columns: minmax(0, 1.6fr) minmax(15rem, 1fr); }
   .below .pane.results { top: 0; max-height: calc(100vh - 8.4rem); }
+  #tip { right: auto; width: min(28rem, calc(100% - 1rem)); } /* v0.11.210 (owner pick N1, TT): not the whole width on a PC (was 1,350 px at 1366) */
 }

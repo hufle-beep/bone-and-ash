@@ -57,6 +57,7 @@ export const NOTES = [
     ['0.11.207', 'The long calendar (test): James now grows at about the old pace. A sit gives a quarter of the Saturation it did (at least 0.1%), a meridian takes four times its hours, the root in the Blackroot and a Long Forest seclusion a quarter too, and every XP award is ×0.7, so the tribute and Shen Qiu can go against you again on the first Coil. Plain New game and your saves are unchanged.'],
     ['0.11.208', 'On a PC (a screen 1100 px wide or more) the story screen now uses the width: the story on the left, the cards in the middle, Results on the right, so the cards show without scrolling. The other tabs keep their column, centred. On the phone nothing changes.'],
     ['0.11.209', 'The long calendar (test): raw food now spoils, and a new card, "Smoke the catch.", keeps hare, fowl, crab and jade bracket for good (15 minutes a piece; Plan the week has a row for it). Yuki brings food home from one haul in three. Plain New game and your saves are unchanged.'],
+    ['0.11.210', 'On a PC the cards stay where you scrolled after a tap. Yuki\'s HP bar shows in fights again. The long calendar (test): Plan the week has rows for "Sit with Yuki." (on by default) and the day\'s visits; a talk stops it the first time, then it answers as you did until the options change.'],
 ];
 
 const parts = (v) => (/^\d+(\.\d+)*$/.test(String(v ?? '')) ? String(v).split('.').map(Number) : null);

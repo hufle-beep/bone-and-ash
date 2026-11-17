@@ -5337,7 +5337,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         'with food, Practice 1–3': (g) => { food(g); for (const id of ['wild_train:1', 'wild_train:2', 'wild_train:3']) Wk.planSet(g, id, 1); },
         'with food, all 8 cards': (g) => { food(g); for (const id of cards) Wk.planSet(g, id, 1); },
         'with food, a card twice': (g) => { food(g); Wk.planSet(g, 'wild_forage:3', 2); },
-        'with food, Meditate only (2, 2, 3)': (g) => { food(g); Wk.planSet(g, 'med:sit', 2); Wk.planSet(g, 'med:mer', 2); Wk.planSet(g, 'med:qi', 3); }, // v0.11.207 (SC2): was (2, 2, 2): it stopped for Foundation's breakthrough on its last day then (Gather Qi 5 of 6); with SC2's pace no breakthrough this week (6 of 6), so the short row is 3 a day
+        'with food, Meditate only (2, 2, 3)': (g) => { food(g); Wk.planSet(g, 'med:sit', 2); Wk.planSet(g, 'med:mer', 2); Wk.planSet(g, 'med:qi', 3); Wk.planSet(g, 'door:yk_time', 0); }, // v0.11.210 (N1, DC-a): Yuki's row at 0, so the day's hours are as M1 measured them (with her 20 minutes Gather Qi fits 6 of 6); v0.11.207 (SC2): was (2, 2, 2): it stopped for Foundation's breakthrough on its last day then (Gather Qi 5 of 6); with SC2's pace no breakthrough this week (6 of 6), so the short row is 3 a day
         'with food, the night\'s other choice last time (E4)': (g) => { food(g); Wk.planSet(g, cards[0], 1); g.tasks.evc = { night: 3 }; },
         'with food, an empty plan': (g) => { food(g); },
         // TG2: a plan made late (the day's sit still due; H1: the card skipped today, done on Day 4), work carried from before the plan, a card never open
@@ -5660,6 +5660,131 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     }
     // L2: her lane says it on the long calendar (main.js)
     { const src = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8'); assert(/g\.cal === LONG_CAL \? ' · food home from one haul in 3 \(the long calendar\)' : ''/.test(src), `${T} (L2): Yuki's lane says one haul in 3 on the long calendar`); }
+}
+
+// v0.11.210 (owner pick N1; his 10:16 report, roadmap-time.md): DC-a, the daily door cards on Plan the week (week.js DAILY_DOORS,
+// DOOR_START, doorCards, planCount; runWeek takes each once a day after the day's work, walks its one plain way on and stops on a
+// real choice ('door', the plan goes on after it); planClear zeroes them; planEmpty leaves them out; the bots' plans have none).
+// HB (Yuki's HP bar) and the CSS variables: every var(--x) the game uses is defined. SC, MS and TT: tools/browser.py n1_ui.
+{
+    const Gm = await import('../js/core/game.js');
+    const C = await import('../js/core/calendar.js');
+    const Wk = await import('../js/core/week.js');
+    const T = 'N1 (the daily doors on the plan)';
+    const Tk = await import('../js/core/tasks.js');
+    const D = 1440;
+    assert(JSON.stringify(Wk.DAILY_DOORS) === JSON.stringify(['yk_time', 'wen_time', 'mother_time', 'fo_mei', 'fo_ya_time']) && JSON.stringify(Wk.DOOR_START) === '{"yk_time":1}' && Wk.STOP_TEXT.door === 'a talk has a choice', `${T}: the doors, Yuki's at 1 on a new plan, the stop's text`);
+    const save = () => { const g = deserialize(readFileSync(new URL('../saves/v0.11.204-long-wilds-day2.json', import.meta.url), 'utf8'), { force: true }); Gm.addItem(g, 'smoked_meat', 60); return g; };
+    // a week run as the screen runs it: the plan, the evening's first way on, the plan again after it
+    const week = (g) => { const stops = [], lines = []; const go = () => { const r = Wk.runWeek(g, SCENES); stops.push(r.stop); for (const d of r.days) lines.push(...d.lines); return r; }; let r = go();
+        for (let k = 0; k < 120 && ['evening', 'door'].includes(r.stop); k++) {
+            const v = sceneView(g, SCENES); const open = v.choices.filter((c) => !c.disabled && c.index < 1000 && !/^(Yuki: change form|Story Mode only)/.test(c.label)); if (!open.length || g.combat) break;
+            Wk.storyTap(g, SCENES, open[0].index); if (g.combat) break; if (Wk.afterStory(g, SCENES).resume) r = go(); }
+        return { stops, lines }; };
+    { const g = save(); const d0 = Math.floor(g.minutes / D);
+      assert(Wk.planCount(g, 'door:yk_time') === 1 && Wk.doorCards(g, SCENES).map((d) => `${d.scene}:${d.status}`).join() === 'yk_time:open', `${T}: the wilds: Yuki's row, at 1 before any plan (${JSON.stringify(Wk.doorCards(g, SCENES))})`);
+      const pc = Wk.planCards(g, SCENES); Wk.planSet(g, pc[0].id, 7); Wk.planSet(g, 'med:sit', 2);
+      assert(Wk.planEmpty({ items: {}, med: {}, doors: { yk_time: 1 } }) && g.tasks.plan.doors.yk_time === 1, `${T}: a new plan has Yuki at 1; planEmpty leaves the doors out ("Rest out the week")`);
+      assert(Wk.planNotes(g, SCENES).med['door:yk_time'] === '6 of 6 days', `${T}: the forecast: her row 6 of 6 days (${Wk.planNotes(g, SCENES).med['door:yk_time']})`);
+      const { lines, stops } = week(g);
+      assert(g.rel.Yuki.f === 17 && g.rel.Yuki.a === 16 && Math.floor(g.minutes / D) - d0 >= 5, `${T}: a planned wilds week (Day 2 to 8): her six scenes, 2 / 1 → ${g.rel.Yuki.f} / ${g.rel.Yuki.a} (17 / 16, as tapping her card every day; stops ${stops.join()})`);
+      assert(lines.some((x) => /^Yuki has decided you are dirty/.test(x)), `${T}: the day's lines say her scene's text`); }
+    { const g = save(); Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', 0); Wk.planSet(g, 'med:sit', 2); week(g);
+      assert(g.rel.Yuki.f === 2 && g.rel.Yuki.a === 1, `${T}: her row at 0: no scene in the week (${g.rel.Yuki.f} / ${g.rel.Yuki.a})`); }
+    { const g = save(); Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', 5); const a = g.tasks.plan.doors.yk_time; Wk.planSet(g, 'door:not_a_door', 1);
+      Wk.planClear(g);
+      assert(a === 1 && !('not_a_door' in (g.tasks.plan.doors || {})) && Object.keys(g.tasks.plan.doors).length === 0 && Wk.planCount(g, 'door:yk_time') === 0, `${T}: a door counts 0 or 1; an unknown one is ignored; Clear zeroes them`); }
+    { const g = save(); Wk.planEnsure(g); delete g.tasks.plan.doors; g.tasks.plan.done = { d: -1, sit: 0, mer: 0, qi: 0, pres: 0 }; Wk.planSet(g, 'med:sit', 1); let ok = true;
+      try { Wk.runWeek(g, SCENES); } catch { ok = false; }
+      assert(ok && g.rel.Yuki.f === 2, `${T}: a plan from before (no doors) runs as before, no scene taken`); }
+    // the Fallout: Mei Lin's and Ya's talks stop the plan on their choice; it goes on after it, and no door is taken twice a day
+    { const g = ensureBars(newGame(99501, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'fo_ashfall'); g.minutes = 16 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true;
+      assert(Wk.doorCards(g, SCENES).map((d) => d.scene).join() === 'yk_time,wen_time,mother_time,fo_mei,fo_ya_time', `${T}: the Fallout's five daily doors (${Wk.doorCards(g, SCENES).map((d) => d.scene).join()})`);
+      Wk.planEnsure(g); for (const s of ['fo_mei', 'fo_ya_time', 'wen_time', 'mother_time']) Wk.planSet(g, `door:${s}`, 1);
+      const r1 = Wk.runWeek(g, SCENES), s1 = g.scene, run1 = g.tasks.plan.running;
+      const v = sceneView(g, SCENES); Wk.storyTap(g, SCENES, v.choices.find((c) => !c.disabled && c.index < 1000).index); const a1 = Wk.afterStory(g, SCENES);
+      const r2 = Wk.runWeek(g, SCENES), s2 = g.scene;
+      const v2 = sceneView(g, SCENES); Wk.storyTap(g, SCENES, v2.choices.find((c) => !c.disabled && c.index < 1000).index); Wk.afterStory(g, SCENES);
+      const r3 = Wk.runWeek(g, SCENES);
+      assert(r1.stop === 'door' && s1 === 'fo_mei' && run1 && a1.resume && r2.stop === 'door' && s2 === 'fo_ya_time' && r3.stop === 'evening', `${T}: Mei Lin's talk stops it (${r1.stop}, ${s1}, running ${run1}), it goes on after (${a1.resume}), then Ya's (${r2.stop}, ${s2}), then the evening (${r3.stop})`);
+      assert(g.rel.Yuki.f === 3 && g.rel['Old Wen'].f === 3 && g.rel.Mother.f >= 3, `${T}: Yuki's, Old Wen's and the mother's scenes walked the same day (${JSON.stringify(g.rel)})`);
+      assert(Wk.FORECAST_TEXT.door === 'a talk has a choice', `${T}: the forecast's text for the stop`); }
+    // RV1 (the Opus review; the owner's pick 12:25): M2 the talks last; L1 the result line; L2 as the owner set it (the forecast takes
+    // the talk's choice taken before this Coil, the first time it stops; a new Coil forgets); L3 the stopping talk's text not said
+    // twice; TG2–TG6 and the planted faults the first run missed (F3, F5, F6, F8, F12, F14, F15, F17)
+    const fo = (seed = 99501, h = 7, m = 0) => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'fo_ashfall'); g.minutes = 16 * D + h * 60 + m; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true; return g; };
+    const pickOn = (g) => sceneView(g, SCENES).choices.find((c) => !c.disabled && c.index < 1000 && !/^(Yuki: change form|Story Mode only)/.test(c.label)).index;
+    { const g = fo(); assert(Wk.doorCards(g, SCENES).map((d) => d.scene).join() === 'yk_time,wen_time,mother_time,fo_mei,fo_ya_time', `${T} (RV1, M2): the doors in DAILY_DOORS order, the talks last (${Wk.doorCards(g, SCENES).map((d) => d.scene).join()})`); }
+    { const g = fo(); Wk.planEnsure(g); for (const s of ['wen_time', 'mother_time', 'fo_mei', 'fo_ya_time']) Wk.planSet(g, `door:${s}`, 1); for (const c of Wk.planCards(g, SCENES)) Wk.planSet(g, c.id, 9);
+      const r1 = Wk.runWeek(g, SCENES); Wk.storyTap(g, SCENES, pickOn(g)); Wk.afterStory(g, SCENES); const r2 = Wk.runWeek(g, SCENES);
+      assert(r1.stop === 'door' && g.rel.Yuki.f === 3 && g.rel['Old Wen']?.f === 3 && g.rel.Mother?.f >= 3 && g.rel['Mei Lin']?.f >= 1 && r2.stop === 'evening', `${T} (RV1, M2, TG5): a Fallout work day (every card at 9): Yuki, Old Wen and the mother before 19:00, then Mei Lin's talk (${JSON.stringify(g.rel)}; ${r1.stop}, ${r2.stop})`); }
+    { const g = fo(); Wk.planEnsure(g); Wk.planSet(g, 'door:fo_mei', 1); const r = Wk.runWeek(g, SCENES); const shown = String(sceneView(g, SCENES).text);
+      assert(r.stop === 'door' && g.scene === 'fo_mei' && !r.days.flatMap((d) => d.lines).includes(shown), `${T} (RV1, L3): the talk that stops the plan: its text on the screen only, not also in the day's lines`); }
+    { const src = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8'); assert(src.includes("r.stop === 'evening' || r.stop === 'door' ? ' The plan goes on after it.' : ''"), `${T} (RV1, L1): a talk's stop says the plan goes on after it`); }
+    // L2 as the owner set it (12:25, 12:39): the first time this Coil a talk stops the plan (and the forecast); answered once, the plan
+    // answers it the same way while its options are the same; an option new or changed, or another Coil, stops it again
+    { const g = fo(); Wk.planEnsure(g); Wk.planSet(g, 'door:fo_mei', 1);
+      const f0 = Wk.planForecast(g, SCENES);
+      const r = Wk.runWeek(g, SCENES); const at = g.minutes; const idx = pickOn(g); const label = sceneView(g, SCENES).choices.find((c) => c.index === idx).label; const sig = Wk.doorSig(g, SCENES); Wk.storyTap(g, SCENES, idx);
+      const memo = JSON.stringify(g.tasks.dc);
+      assert(f0.stop === 'door' && f0.minutes === at && r.stop === 'door', `${T} (RV1, L2, F14): the first time the plan and the forecast stop at the talk (${f0.stop} ${f0.minutes} / ${r.stop} ${at})`);
+      assert(memo === JSON.stringify({ coil: `${g.coil.n}|${g.coil.act}`, picks: { fo_mei: { i: idx, sig } } }), `${T} (RV1, L2): the talk's choice and its options noted for this Coil (${memo})`);
+      const next = () => { const h = fo(99501, 7 + 24); Wk.planEnsure(h); Wk.planSet(h, 'door:fo_mei', 1); h.tasks.dc = JSON.parse(memo); return h; }; // the next morning, the talk answered before
+      { const h = next(), mei0 = h.rel['Mei Lin']?.f || 0, f1 = Wk.planForecast(h, SCENES); const r1 = Wk.runWeek(h, SCENES); const ls = r1.days.flatMap((d) => d.lines);
+        assert(r1.stop !== 'door' && ls.includes(`${Wk.AGAIN_LINE}${label}`) && (h.rel['Mei Lin']?.f || 0) > mei0 && f1.stop !== 'door' && f1.minutes > at, `${T} (RV1, L2): the same options the next day: the plan answers as before ("${Wk.AGAIN_LINE}${label.slice(0, 30)}…"; ${r1.stop}; Mei Lin ${mei0} → ${h.rel['Mei Lin']?.f}), the forecast runs past it (${f1.stop})`); }
+      { const h = next(); h.tasks.dc.picks.fo_mei.sig = 'changed'; const r2 = Wk.runWeek(h, SCENES);
+        assert(r2.stop === 'door' && h.scene === 'fo_mei', `${T} (RV1, L2): an option new or changed: it stops again (${r2.stop})`); }
+      { const h = next(); h.tasks.dc.coil = '9|1'; const r3 = Wk.runWeek(h, SCENES), f2 = Wk.planForecast(next(), SCENES);
+        assert(r3.stop === 'door' && Wk.doorPick(h, SCENES) === null, `${T} (RV1, L2): a choice noted in another Coil is forgotten: it stops again (${r3.stop})`); }
+      { const m = next(); m.tasks.dc.coil = '9|1'; goTo(m, SCENES, 'fo_mei'); Wk.noteDoor(m, SCENES, 'fo_mei', 1); assert(JSON.stringify(Object.keys(m.tasks.dc.picks)) === '["fo_mei"]' && m.tasks.dc.coil === `${m.coil.n}|${m.coil.act}` && m.tasks.dc.picks.fo_mei.i === 1, `${T} (RV1, L2): a note in a new Coil starts its record over`); }
+      { const m = next(); goTo(m, SCENES, 'fo_supper'); Wk.noteDoor(m, SCENES, 'fo_supper', 0); assert(m.scene === 'fo_supper' && !('fo_supper' in m.tasks.dc.picks), `${T} (RV1, L2, R8): only the daily doors' screens are noted (the supper's choice is not)`); }
+      const { rewind: rw } = await import('../js/core/coil.js'); const q = JSON.parse(JSON.stringify(g)); try { rw(q, SCENES); } catch { /* the act's start */ }
+      assert(!q.tasks?.dc || q.tasks.dc.coil !== `${g.coil.n}|${g.coil.act}` || !Object.keys(q.tasks.dc.picks || {}).length, `${T} (RV1, L2): a rewind drops the talks' choices`); }
+    // TG3: the forecast equals the real run on the Fallout with every door on and both talks answered before (the same options)
+    { const g0 = fo(); const memo = { coil: `${g0.coil.n}|${g0.coil.act}`, picks: {} };
+      for (const sc of ['fo_mei', 'fo_ya_time']) { const t = fo(); goTo(t, SCENES, sc); memo.picks[sc] = { i: pickOn(t), sig: Wk.doorSig(t, SCENES) }; }
+      const g = fo(); Wk.planEnsure(g); for (const s of ['wen_time', 'mother_time', 'fo_mei', 'fo_ya_time']) Wk.planSet(g, `door:${s}`, 1); g.tasks.dc = memo;
+      const f = Wk.planForecast(g, SCENES); let r = Wk.runWeek(g, SCENES);
+      for (let n = 0; n < 60 && r.stop === 'evening'; n++) {
+          let on = false; for (let j = 0; j < 12 && !on; j++) { const i = Wk.eveningPick(g, SCENES); if (i == null || g.combat) break; const t = Wk.storyTap(g, SCENES, i); if (t.combat) break; on = Wk.afterStory(g, SCENES).resume; }
+          if (!on) break; r = Wk.runWeek(g, SCENES);
+      }
+      const real = { minutes: g.minutes, fed: Math.round(g.james.satiety), hp: Math.round(g.james.hp) };
+      assert(f.minutes === real.minutes && f.fed === real.fed && f.hp === real.hp && f.stop !== 'door' && Object.values(f.doors).length === 5 && Object.values(f.doors).every((x) => x >= 1), `${T} (RV1, TG3): the Fallout's forecast with every door is the real run (${f.stop} ${f.minutes} Fed ${f.fed} / ${r.stop} ${real.minutes} Fed ${real.fed}; doors ${JSON.stringify(f.doors)})`); }
+    // F3 (TG2): a door the day's routine went before is still owed (Old Wen at 18:50 with the supper due: the meal, then 19:00, closed)
+    { const g = fo(99501, 18, 50); g.james.satiety = 40; Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', 0); Wk.planSet(g, 'door:wen_time', 1); const r = Wk.runWeek(g, SCENES);
+      assert(g.tasks.plan.done.doors.wen_time === 0 && !g.rel['Old Wen'] && r.days.flatMap((d) => d.lines).includes(Tk.SKIP_LINE), `${T} (RV1, F3): the routine first, then Old Wen's visit closed: owed, not counted done (${JSON.stringify(g.tasks.plan.done.doors)})`); }
+    // F6: a closed door is not taken (Old Wen at 19:30)
+    { const g = fo(99501, 19, 30); Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', 0); Wk.planSet(g, 'door:wen_time', 1); Wk.runWeek(g, SCENES);
+      assert(!g.rel['Old Wen'], `${T} (RV1, F6): Old Wen's visit closed at 19:30: not taken (${JSON.stringify(g.rel)})`); }
+    // F8: a plan from before with the doors set but the day's done record without them
+    { const g = fo(); Wk.planEnsure(g); const d = Tk.workDay(g); g.tasks.plan.done = { d, sit: 0, mer: 0, qi: 0, pres: 0 }; let ok = true; try { Wk.runWeek(g, SCENES); } catch { ok = false; }
+      assert(ok && g.rel.Yuki?.f === 3, `${T} (RV1, F8): a day's done record from before (no doors) gets one; Yuki's scene taken`); }
+    // F12: no rows for people not met yet (the prologue's Ashfall on Day 4, Ya before she arrives)
+    { const a = ensureBars(newGame(99510, { closed: true, cal: C.LONG_CAL })); goTo(a, SCENES, 'ashfall'); a.minutes = 4 * D + 9 * 60; const b = fo(); delete b.flags.ya_met;
+      assert(Wk.doorCards(a, SCENES).map((d) => d.scene).join() === 'yk_time' && !Wk.doorCards(b, SCENES).some((d) => d.scene === 'fo_ya_time'), `${T} (RV1, F12): no row for Old Wen and the mother before James meets them, none for Ya before she comes`); }
+    // F5 + F15 + F17: a door that stays open is still taken once a day; the walked way's own lines are said; a door that opens nothing is done
+    { const ch = SCENES.wilds.choices.find((c) => c.to === 'yk_time'), show0 = ch.show, go = SCENES.yk_time.choices.find((c) => /^Go on/.test(String(c.text))), do0 = go.do, en0 = SCENES.yk_time.enter;
+      try {
+          ch.show = () => true; go.do = (g) => [...(do0 ? do0(g) || [] : []), 'TEST: the way on said.'];
+          const g = save(); Wk.planEnsure(g); Wk.planSet(g, 'med:sit', 1); const r = Wk.runWeek(g, SCENES);
+          const per = r.days.map((d) => d.lines.filter((x) => x === 'TEST: the way on said.').length);
+          assert(per.length && per.every((n) => n === 1), `${T} (RV1, F5, F15): a door that stays open: once a day, its way on's lines said (${per.join(', ')})`);
+          SCENES.yk_time.enter = (g) => { g.scene = 'wilds'; return []; };
+          const h = save(); Wk.planEnsure(h); const r2 = Wk.runWeek(h, SCENES);
+          assert(h.tasks.plan.done.doors.yk_time === 1 && r2.steps < 100, `${T} (RV1, F17): a door that opened nothing counts as done (${JSON.stringify(h.tasks.plan.done.doors)}, ${r2.steps} steps)`);
+      } finally { ch.show = show0; go.do = do0; SCENES.yk_time.enter = en0; } }
+    // the old calendar: no plan, no door rows
+    { const g = ensureBars(newGame(99503, { closed: true })); goTo(g, SCENES, 'wilds'); assert(Wk.doorCards(g, SCENES).length === 0 && Wk.planEnsure(g) === null, `${T}: the old calendar: no plan, no door rows`); }
+    // the bots: no doors on their plans (models.test.mjs)
+    { const src = readFileSync(new URL('./models.test.mjs', import.meta.url), 'utf8'); assert(/p\.doors = \{\}; \/\/ v0\.11\.210/.test(src), `${T}: the bots' plans have no daily doors`); }
+    // HB: Yuki's HP bar has a colour; every CSS variable used is defined
+    { const css = readFileSync(new URL('../css/style.css', import.meta.url), 'utf8'), main = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+      const strip = (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n`'"]*$/gm, '');
+      const defd = new Set([...css.matchAll(/(--[\w-]+)\s*:/g)].map((m) => m[1]));
+      const used = [...new Set([...strip(css).matchAll(/var\((--[\w-]+)/g), ...strip(main).matchAll(/var\((--[\w-]+)/g)].map((m) => m[1]))];
+      const undef = used.filter((v) => !defd.has(v));
+      assert(!undef.length && /\.foe\.ally \.stroke i \{ background: var\(--ink-2\); \}/.test(css) && /<div class="foe ally">/.test(main), `${T} (HB): Yuki's bar drawn in ink-2; no CSS variable used undefined (${undef.join(', ') || 'none'})`); }
 }
 
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));

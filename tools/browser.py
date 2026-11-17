@@ -912,6 +912,77 @@ def wide_layout(b, url):
             notes.append(f'PC3: three columns from 1100 px, {m["whole"]} of {m["cards"]} cards on the first screen at 1366x768, Results in view, the other tabs centred')
         ctx.close()
 
+def n1_ui(b, url):
+    """v0.11.210 (owner pick N1): SC, a tap in the PC's cards column keeps its scroll (the day-2 save at 1366x768: a + on the plan's
+    rows kept the column where it was, 682 px, not 0; a work card too; at 412 px the page's scroll as before); DC-a, Plan the week
+    shows Yuki's row at 1; MS, Continue from a scrolled main menu opens the game at its own place (the top on a first entry), not
+    the menu's (35 px at 1366x768, 130%, in v0.11.209); TT, a tooltip at most 28 rem wide on a PC (was the whole width)."""
+    save = (ROOT / 'saves/v0.11.204-long-wilds-day2.json').read_text()
+    for w, h in ((1366, 768), (412, 800)):
+        ctx = b.new_context(viewport={'width': w, 'height': h}, service_workers='block')
+        pg = ctx.new_page(); pg.on('pageerror', lambda e: fails.append(f"page error: {e}"))
+        try:
+            fresh(pg, url, "s => { localStorage.clear(); localStorage.setItem('boneash.auto', s); }", save)
+            where = f'N1 ({w}x{h})'
+            yk = pg.query_selector('button[data-plan="door:yk_time"][data-d="1"]')
+            row = yk.evaluate("e => [e.closest('.prow').querySelector('.pl')?.textContent || '', e.closest('.prow').querySelector('.pn')?.textContent || '']") if yk else ['', '']
+            if not yk or not row[0].startswith('Sit with Yuki.') or row[1] != '1':
+                fails.append(f'{where} (DC-a): Plan the week has no "Sit with Yuki." row at 1 ({row[:80]!r})')
+            pos = "() => { const b = document.querySelector('#view .below'); return [Math.round(scrollY), b ? Math.round(b.scrollTop) : 0]; }"
+            ok = True
+            for sel in ('button[data-plan="med:sit"][data-d="1"]', 'button[data-plan="med:mer"][data-d="1"]'):
+                e = pg.query_selector(sel); e.evaluate("e => e.scrollIntoView({ block: 'center' })"); pg.wait_for_timeout(100)
+                before = pg.evaluate(pos); n0 = pg.evaluate("localStorage.getItem('boneash.auto')"); e.click()
+                until(pg, "b => localStorage.getItem('boneash.auto') !== b", 3000, arg=n0); pg.wait_for_timeout(100)
+                after = pg.evaluate(pos)
+                k = 1 if w >= 1100 else 0
+                if before[k] < 100 or abs(after[k] - before[k]) > 2: ok = False; fails.append(f'{where} (SC): a + on {sel} moved the {"cards column" if k else "page"} {before[k]} → {after[k]} px')
+            if w >= 1100:
+                if ok: notes.append(f'N1 (SC): a + on the plan keeps the cards column at {after[1]} px at {w}x{h}; Yuki\'s row at 1 (DC-a)')
+                # TT: hold a card for its tooltip
+                c = pg.evaluate_handle("() => [...document.querySelectorAll('#view button.card:not([disabled])[data-run]')].find((e) => e.checkVisibility())").as_element()
+                c.evaluate("e => e.scrollIntoView({ block: 'center' })"); pg.wait_for_timeout(200)
+                bb = c.bounding_box(); pg.mouse.move(bb['x'] + bb['width'] / 2, bb['y'] + bb['height'] / 2); pg.mouse.down(); pg.wait_for_timeout(750); pg.mouse.up(); until(pg, '#tip', 3000, 'visible')
+                tw = pg.evaluate("() => { const t = document.querySelector('#tip'); return t && !t.hidden ? [Math.round(t.getBoundingClientRect().width), parseFloat(getComputedStyle(document.documentElement).fontSize)] : null; }")
+                if not tw or tw[0] > 28 * tw[1] + 1: fails.append(f'{where} (TT): the tooltip is {tw} wide (px, rem), not at most 28 rem')
+        finally:
+            ctx.close()
+    # RV1 (M1, TG1): a new screen starts at the top (the wilds at 16:30, the column scrolled, then "Make camp for the night.": Camp
+    # opened at 372 px, its bottom, before RV1); RV1 (L6): the column comes back after the menu and Continue
+    ctx = b.new_context(viewport={'width': 1366, 'height': 420}, service_workers='block')
+    pg = ctx.new_page(); pg.on('pageerror', lambda e: fails.append(f"page error: {e}"))
+    try:
+        fresh(pg, url, "s => { localStorage.clear(); localStorage.setItem('boneash.auto', s); }", (ROOT / 'saves/v0.11.210-long-wilds-evening.json').read_text())
+        col = "() => { const b = document.querySelector('#view .below'); return b ? [Math.round(b.scrollTop), b.scrollHeight - b.clientHeight] : [-1, -1]; }"
+        y0 = pg.evaluate("() => { const b = document.querySelector('#view .below'); b.scrollTop = b.scrollHeight; return Math.round(b.scrollTop); }")
+        pg.click('[data-tab="menu"]'); until(pg, 'button[data-menu="continue"]', 5000, 'visible'); pg.click('button[data-menu="continue"]'); in_game(pg)
+        back = pg.evaluate(col)
+        if y0 < 100 or abs(back[0] - y0) > 2: fails.append(f'N1 (RV1, L6): the cards column at {y0} px came back from the menu at {back[0]} px')
+        camp = pg.evaluate_handle("() => [...document.querySelectorAll('#view button.card[data-story]')].find(e => /^Make camp/.test(e.textContent) && !e.disabled)").as_element()
+        if not camp: fails.append('N1 (RV1, M1): no "Make camp for the night." on the wilds at 16:30')
+        else:
+            pg.evaluate("() => { const b = document.querySelector('#view .below'); b.scrollTop = b.scrollHeight; }")  # the column scrolled again (L6 apart)
+            before = pg.evaluate("localStorage.getItem('boneash.auto')"); camp.evaluate("e => e.click()")
+            until(pg, "b => localStorage.getItem('boneash.auto') !== b", 5000, arg=before); pg.wait_for_timeout(100)
+            c = pg.evaluate(col)
+            if c[1] < 50 or c[0] != 0: fails.append(f'N1 (RV1, M1): Camp, a new screen, opened its cards column at {c[0]} px of {c[1]}, not 0')
+            else: notes.append(f'N1 (RV1, M1, L6): a new screen starts at the top (Camp 0 of {c[1]} px); the column back from the menu at {back[0]} px')
+    finally:
+        ctx.close()
+    # MS: the main menu scrolled, then Continue: the game at the top (a first entry this visit)
+    ctx = b.new_context(viewport={'width': 1366, 'height': 420}, service_workers='block')
+    pg = ctx.new_page(); pg.on('pageerror', lambda e: fails.append(f"page error: {e}"))
+    try:
+        pg.goto(url); pg.evaluate("([s, z]) => { localStorage.clear(); localStorage.setItem('boneash.auto', s); localStorage.setItem('boneash.textsize', z); }", [save, '130']); pg.reload()
+        until(pg, 'button[data-menu="continue"]', 5000, 'visible')
+        y = pg.evaluate("() => { scrollTo(0, document.documentElement.scrollHeight); return Math.round(scrollY); }")
+        pg.click('button[data-menu="continue"]'); in_game(pg)
+        y2 = pg.evaluate("Math.round(scrollY)")
+        if y < 20 or y2 != 0: fails.append(f'N1 (MS): Continue from the main menu scrolled {y} px opened the game at {y2} px, not 0')
+        else: notes.append(f'N1 (MS): Continue from a main menu scrolled {y} px opens the game at the top')
+    finally:
+        ctx.close()
+
 def main(part=0):
     """v0.11.20: part 1 (Incremental Mode, the reload, no mode switch, two tabs) and part 2 (Saves, the menu, tooltips and scroll,
     the resting places) can run side by side, each with its own browser and server; no part = everything, in order."""
@@ -1015,6 +1086,7 @@ def main(part=0):
                 plan_rows(b, url)
                 plan_forecast(b, url)  # v0.11.206 (FC1)
                 wide_layout(b, url)  # v0.11.208 (PC3)
+                n1_ui(b, url)  # v0.11.210 (N1: SC, DC-a, MS, TT)
                 # 12. the FAQ (v0.11.83)
                 faq(pg, url)
             if three:

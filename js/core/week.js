@@ -31,7 +31,17 @@ const META = /^(Yuki: change form|Story Mode only)/;
 export const STOP_TEXT = {
     evening: 'the evening has a choice', story: 'the story needs you', hurt: 'HP is under 60%', hungry: 'Fed is under 30 and there is no food',
     breakthrough: 'a breakthrough is ready', week: 'the week is over', stuck: 'nothing left it can do here', left: 'the story moved on',
+    door: 'a talk has a choice', // v0.11.210 (owner pick N1, DC-a): a daily door's scene with a real choice; the plan goes on after it
 };
+/** v0.11.210 (owner pick N1, DC-a): the daily door cards the plan can take once a day after the day's work (Yuki's sit, Old Wen's and
+ *  Mei Lin's mother's visits, Mei Lin's and Ya's talks on the Fallout). Yuki's row starts at 1 on a new plan, the others at 0.
+ *  RV1 (M2): taken in this order, the two-hour talks last, so the visits (closed from 19:00, HT_UNTIL) get the hours after a work day. */
+export const DAILY_DOORS = ['yk_time', 'wen_time', 'mother_time', 'fo_mei', 'fo_ya_time'];
+export const DOOR_START = { yk_time: 1 };
+/** RV1 (L2, the owner 12:39): the day's line before a talk's choice the plan took as last time. */
+export const AGAIN_LINE = 'As before: ';
+/** The stops after which the plan keeps running (it goes on by itself once the story is back on the hub). */
+const GOES_ON = new Set(['evening', 'door']);
 const hash = (t) => fnv1a(String(t || '').replace(/\d+/g, '#')); // the day's numbers ("Day 45. 48 days to the Elder.") don't make a night new
 const calDay = (g) => Math.floor((g.minutes || 0) / 1440) + 1;
 const hourNow = (g) => clockParts(g.minutes).hh;
@@ -88,22 +98,31 @@ export function planEnsure(g) {
     if (p) return p;
     if (!weekHub(g)) return null;
     const t = taskState(g);
-    t.plan = { hub: g.scene, coil: coilKey(g), lastDay: weekLastDay(g), items: {}, med: { sit: 0, mer: 0, qi: 0, pres: 0 }, done: { d: -1, sit: 0, mer: 0, qi: 0, pres: 0 }, running: false, stop: '', bt: -1 };
+    t.plan = { hub: g.scene, coil: coilKey(g), lastDay: weekLastDay(g), items: {}, med: { sit: 0, mer: 0, qi: 0, pres: 0 }, doors: { ...DOOR_START }, done: { d: -1, sit: 0, mer: 0, qi: 0, pres: 0, doors: {} }, running: false, stop: '', bt: -1 };
     return t.plan;
 }
 export const MED_MAX = { sit: 12, mer: 6, qi: 8, pres: 1 }; // v0.11.209 (owner pick TF1, K): "Smoke the catch." by the day (0 or 1)
-/** Change a count (`key`: a card id, or 'med:sit' / 'med:mer' / 'med:qi' / 'med:pres'), from 0 up to 9 cards or MED_MAX a day. */
+/** Change a count (`key`: a card id, 'med:sit' / 'med:mer' / 'med:qi' / 'med:pres', or 'door:<scene>' of DAILY_DOORS), from 0 up to
+ *  9 cards, MED_MAX a day, or 0 / 1 a day for a door. */
 export function planSet(g, key, n) {
     const p = planEnsure(g);
     if (!p) return null;
-    const m = /^med:(sit|mer|qi|pres)$/.exec(key);
+    const m = /^med:(sit|mer|qi|pres)$/.exec(key), dm = /^door:(\w+)$/.exec(key);
     if (m) p.med[m[1]] = Math.max(0, Math.min(MED_MAX[m[1]], Math.round(n) || 0));
+    else if (dm) { if (!DAILY_DOORS.includes(dm[1])) return p; if (!isRec(p.doors)) p.doors = {}; p.doors[dm[1]] = Math.max(0, Math.min(1, Math.round(n) || 0)); }
     else { const v = Math.max(0, Math.min(9, Math.round(n) || 0)); if (v) p.items[key] = v; else delete p.items[key]; }
     p.stop = '';
     return p;
 }
 /** Clear: every count to 0, the plan stopped (RV1, TG11: here, so the tests can run it). */
-export function planClear(g) { const p = planHere(g); if (!p) return null; p.items = {}; p.med = { sit: 0, mer: 0, qi: 0, pres: 0 }; p.stop = ''; p.running = false; return p; }
+export function planClear(g) { const p = planHere(g); if (!p) return null; p.items = {}; p.med = { sit: 0, mer: 0, qi: 0, pres: 0 }; p.doors = {}; p.stop = ''; p.running = false; return p; }
+/** v0.11.210 (DC-a): a plan row's count now (a card, a Meditate row, a door; with no plan the new plan's start). */
+export function planCount(g, key) {
+    const p = planHere(g);
+    if (/^med:/.test(key)) return p?.med?.[key.slice(4)] || 0;
+    if (/^door:/.test(key)) { const s = key.slice(5); return p ? (isRec(p.doors) ? p.doors[s] || 0 : 0) : DOOR_START[s] || 0; }
+    return p?.items?.[key] || 0;
+}
 /** After a story choice: should the plan go on by itself here? A running plan on its hub, or (RV1, L1) a running plan whose week has
  *  just ended (runWeek then reports the week's end). */
 export function weekResume(g) {
@@ -119,6 +138,24 @@ export const planEndDay = (g, p) => (p ? p.lastDay : weekLastDay(g)) + 1;
 function hubStops(g, scenes) {
     const v = sceneView(g, scenes);
     return v.choices.filter((c) => !c.disabled && (c.index >= 1000 || !isTaskChoice(scenes, g.scene, c.index)) && !META.test(String(c.label)));
+}
+/** v0.11.210 (DC-a): the hub's daily door rows: [{ id, scene, label, status }], `status` 'open' when its card is on the hub now. A row
+ *  shows when its card is open, when the plan counts it, when the plan took it today, and always for Yuki's (she is always there):
+ *  a person not met yet, or not here yet (Ya), has no row. */
+export function doorCards(g, scenes) {
+    if (!weekHub(g) || !scenes[g.scene]) return [];
+    const p = planHere(g), open = new Map(taskCards(g, scenes).filter((c) => c.kind === 'door').map((c) => [c.id, c]));
+    const out = [];
+    scenes[g.scene].choices.forEach((c, i) => {
+        if (typeof c.to !== 'string' || !DAILY_DOORS.includes(c.to)) return;
+        const id = `${g.scene}:${i}`, card = open.get(id);
+        const keep = !!card || c.to === 'yk_time' || (p?.doors?.[c.to] || 0) > 0 || (p?.done?.d === workDay(g) && (p.done.doors?.[c.to] || 0) > 0);
+        if (!keep) return;
+        let label = card?.label;
+        if (!label) { try { label = typeof c.text === 'function' ? c.text(g) : c.text; } catch { label = ''; } }
+        out.push({ id, scene: c.to, label: String(label || ''), status: card?.status === 'open' ? 'open' : 'closed' });
+    });
+    return out.sort((a, b) => DAILY_DOORS.indexOf(a.scene) - DAILY_DOORS.indexOf(b.scene)); // RV1 (M2): the talks last
 }
 const firstMer = (g, scenes) => taskCards(g, scenes).find((c) => c.kind === 'mer' && c.status === 'open')?.id || null;
 /** v0.11.209 (TF1, K): the hub's "Smoke the catch." card when it is open now, or null. */
@@ -140,7 +177,7 @@ export function runWeek(g, scenes, { max = 600, onStep = null } = {}) {
     // routine left no time for is owed again by then) and at the stop, with the last card run and its result
     let last = null;
     const watch = () => { if (onStep) onStep(g, last); last = null; };
-    const end = (stop) => { watch(); if (p) { p.stop = stop; if (stop !== 'evening') p.running = false; } return { stop, days, steps }; };
+    const end = (stop) => { watch(); if (p) { p.stop = stop; if (!GOES_ON.has(stop)) p.running = false; } return { stop, days, steps }; };
     let steps = 0;
     for (; steps < max; steps++) {
         watch();
@@ -161,7 +198,8 @@ export function runWeek(g, scenes, { max = 600, onStep = null } = {}) {
         if (g.james.satiety < 30 && foodCount(g) === 0) return end('hungry');
         if (canBreakThrough(g) && p.bt !== g.james.realm) { p.bt = g.james.realm; return end('breakthrough'); }
         const d = workDay(g);
-        if (p.done.d !== d) p.done = { d, sit: 0, mer: 0, qi: 0, pres: 0 };
+        if (p.done.d !== d) p.done = { d, sit: 0, mer: 0, qi: 0, pres: 0, doors: {} };
+        if (!isRec(p.done.doors)) p.done.doors = {}; // a plan from before v0.11.210
         // RV1 (M3): the forecast's death check, as a tap's ("Starves here"): stop before a card that would end the Coil
         const deadly = (id) => { try { return taskOutcome(g, scenes, id)?.death || null; } catch { return null; } };
         const run = (id) => { const r = runTask(g, scenes, id); say(r.lines); last = { id, r }; return r; }; // FC1 (RV1, H1): seen by the next watch
@@ -180,6 +218,29 @@ export function runWeek(g, scenes, { max = 600, onStep = null } = {}) {
         const pid = (p.done.pres || 0) < (p.med.pres || 0) ? presCard(g, scenes) : null;
         if (pid && !deadly(pid)) { p.done.pres = (p.done.pres || 0) + 1; run(pid); if (g.scene !== hub) return end('story'); continue; }
         if ((p.done.pres || 0) < (p.med.pres || 0) && preservable(g) === 0) p.done.pres = p.med.pres; // RV1 (L7): nothing to smoke: the day's row is done
+        // v0.11.210 (owner pick N1, DC-a): the day's daily doors, once each, after the day's work: the scene's text said, its one plain
+        // way on walked ("Go on."), a real choice (her question, Mei Lin's or Ya's talk) a stop the plan goes on after
+        const dw = isRec(p.doors) ? doorCards(g, scenes).find((c) => (p.doors[c.scene] || 0) > (p.done.doors[c.scene] || 0) && c.status === 'open' && !deadly(c.id)) : null;
+        if (dw) {
+            p.done.doors[dw.scene] = (p.done.doors[dw.scene] || 0) + 1;
+            const r = run(dw.id);
+            if (r.skipped) { p.done.doors[dw.scene] -= 1; continue; } // the day's routine went first; the door is still owed today
+            if (g.scene === hub) continue; // nothing opened (a guard): counted as done today
+            for (let k = 0; k < 6 && g.scene !== hub && !g.combat; k++) {
+                const v = sceneView(g, scenes);
+                if (v.end) return end('story');
+                const open = v.choices.filter((c) => !c.disabled && !META.test(String(c.label)));
+                const plain = open.length === 1 && open[0].index < 1000 && plainChoice(scenes[g.scene].choices[open[0].index]);
+                const again = plain ? null : doorPick(g, scenes); // RV1 (L2, the owner 12:39): a talk answered as last time, the same options
+                if (!plain && again == null) return end('door'); // the first time, or a new option: the player's; the screen shows its own text
+                say([String(v.text || '')].filter(Boolean)); // RV1 (L3): a screen's text said only when the plan walks past it
+                if (!plain) say([`${AGAIN_LINE}${open.find((c) => c.index === again).label}`]);
+                const r2 = choose(g, scenes, plain ? open[0].index : again); say(r2.lines || []);
+                if (r2.combat) return end('story');
+            }
+            if (g.scene !== hub || g.combat) return end('story');
+            continue;
+        }
         // the day's meditation, in the hours the work leaves
         const sid = sitTaskId(g, scenes);
         if (p.done.sit < p.med.sit && taskOpen(g, scenes, sid) && !deadly(sid)) { p.done.sit++; run(sid); if (g.scene !== hub) return end('story'); continue; }
@@ -242,9 +303,35 @@ export function noteEvening(g, sceneId, index) {
     if (!isRec(t.evc)) t.evc = {};
     t.evc[sceneId] = index;
 }
-/** RV1 (TG1, TG8): a story choice as a tap takes it: the evening's choice noted first, then taken. Returns choose's result. */
+/** v0.11.210 (owner pick RV1, L2 as the owner set it, 12:25: "It should take the choice I took before, that's ok, but the first time
+ *  should stop, so I can choose. Also, choice resets per coil."; 12:39: "yes, repeat talks should be also answered, unless a new option
+ *  comes up. If a new option comes up, it should stop again"): the choice taken last in each daily door's scene (a talk), with the
+ *  screen's options as they were then (`sig`: their labels, numbers aside), this Coil only (`g.tasks.dc`: { coil, picks: scene →
+ *  { i, sig } }; a new Coil starts it empty). The plan (and so the forecast's dry run) answers a talk with it when the options are the
+ *  same; the first time, or with an option new or changed, it stops for the player. */
+function doorMemo(g) {
+    const t = taskState(g);
+    if (!isRec(t.dc) || t.dc.coil !== coilKey(g) || !isRec(t.dc.picks)) t.dc = { coil: coilKey(g), picks: {} };
+    return t.dc.picks;
+}
+/** The open options of the screen (labels, numbers aside), as one hash. */
+const doorOpen = (g, scenes) => sceneView(g, scenes).choices.filter((c) => !c.disabled && c.index < 1000 && !META.test(String(c.label)));
+export const doorSig = (g, scenes) => hash(doorOpen(g, scenes).map((c) => `${c.index}:${c.label}`).join('|'));
+export function noteDoor(g, scenes, sceneId, index) {
+    if (!longCal(g) || !DAILY_DOORS.includes(sceneId) || sceneId !== g.scene || !(index >= 0) || index >= 1000) return;
+    doorMemo(g)[sceneId] = { i: index, sig: doorSig(g, scenes) };
+}
+/** The choice taken last on this door's screen this Coil, when the screen's options are the same as then and it is open; else null. */
+export function doorPick(g, scenes) {
+    const t = g.tasks?.dc;
+    if (!isRec(t) || t.coil !== coilKey(g) || !isRec(t.picks) || !isRec(t.picks[g.scene])) return null;
+    const { i, sig } = t.picks[g.scene];
+    return sig === doorSig(g, scenes) && doorOpen(g, scenes).some((c) => c.index === i) ? i : null;
+}
+/** RV1 (TG1, TG8): a story choice as a tap takes it: the evening's choice (and a talk's, v0.11.210) noted first, then taken. Returns choose's result. */
 export function storyTap(g, scenes, index) {
     noteEvening(g, g.scene, index);
+    noteDoor(g, scenes, g.scene, index);
     return choose(g, scenes, index);
 }
 /** RV1 (TG1): after a story choice (no fight): the quiet night's fold, then whether the plan goes on by itself. */
@@ -300,7 +387,7 @@ export function planForecast(g, scenes, { max = 60, json = null } = {}) {
         for (let k = 0; k < max; k++) {
             stop = runWeek(c, scenes, { onStep }).stop;
             if (stop === 'story' && fightHere(c, scenes)) stop = 'fight';
-            if (stop !== 'evening') break;
+            if (stop !== 'evening') break; // v0.11.210 (RV1, L2): a talk the plan can't answer ('door') is the player's: the forecast stops there
             let on = false;
             for (let j = 0; j < 12 && !on; j++) { // the evening's screens, a tap each, until the plan goes on by itself
                 if (workDay(c) > p.lastDay) { stop = 'week'; break; } // RV1 (M1): past the plan's last day the week is over
@@ -314,7 +401,9 @@ export function planForecast(g, scenes, { max = 60, json = null } = {}) {
             if (!on) break;
         }
         const full = Object.fromEntries(Object.keys(med).map((k) => [k, med[k] > 0 ? Object.entries(done).filter(([d, x]) => Number(d) <= p.lastDay && (x[k] || 0) >= med[k]).length : 0]));
-        return { rows, med: full, days, stop, minutes: c.minutes, fed: Math.round(c.james.satiety), hp: Math.round(c.james.hp), hpMax: jamesHpMax(c), mornings };
+        const doors = {}; // v0.11.210 (DC-a): each door row's days in full, apart from the Meditate rows
+        for (const [s, n] of Object.entries(isRec(p.doors) ? p.doors : {})) if (n > 0) doors[s] = Object.entries(done).filter(([d, x]) => Number(d) <= p.lastDay && (x.doors?.[s] || 0) >= n).length;
+        return { rows, med: full, doors, days, stop, minutes: c.minutes, fed: Math.round(c.james.satiety), hp: Math.round(c.james.hp), hpMax: jamesHpMax(c), mornings };
     } catch { return null; }
 }
 /** E1: minutes of work in the plan (each card's ×7 time; the carried work's rest) and minutes left to the evenings this week. */
@@ -349,6 +438,7 @@ export function planNotes(g, scenes) {
     if (fc) {
         for (const id of Object.keys(items)) if (items[id] > 0) rows[id] = fc.rows[id] != null ? ` · done ${whenText(fc.rows[id])}` : ' · not this week';
         for (const k of Object.keys(med)) if (med[k] > 0) mt[k] = `${fc.med[k] || 0} of ${fc.days} day${fc.days > 1 ? 's' : ''}`;
+        for (const [s, n] of Object.entries(fc.doors || {})) mt[`door:${s}`] = `${n} of ${fc.days} day${fc.days > 1 ? 's' : ''}`; // v0.11.210 (DC-a)
     }
     const h = planEmpty(p) ? null : planHours(g, scenes, p, fc);
     const total = h ? `Cards ${durText(h.work)}; ${durText(h.left)} left to the evenings this week.` : '';

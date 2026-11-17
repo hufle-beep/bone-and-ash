@@ -201,6 +201,7 @@ function weekRun(model, g, cards, st) {
         const order = careLike(model) ? [...wk.filter((c) => FOOD_GROUP.test(c.group || '')), ...wk.filter((c) => TRAIN_GROUP.test(c.group || '')), ...wk.filter((c) => !FOOD_GROUP.test(c.group || '') && !TRAIN_GROUP.test(c.group || ''))] : wk;
         for (const c of order) { planSet(g, c.id, 1); st.taps.set++; }
         for (const [k, n] of Object.entries(MED_PLAN[model] || {})) if (n) { planSet(g, `med:${k}`, n); st.taps.set++; }
+        p.doors = {}; // v0.11.210 (owner pick N1, DC-a): the bots' plans as before (no daily doors; Yuki's row starts at 1 on a player's plan)
     }
     if (!p.running) st.taps.run++;
     const m0 = g.minutes, s0 = g.scene;

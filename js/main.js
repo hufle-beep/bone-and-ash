@@ -1,6 +1,6 @@
 /** Bone and Ash — UI. Renders the story, combat, sheet, hammerspace, journal and saves. */
 import { LONG_CAL } from './core/calendar.js'; // v0.11.203 (owner pick T1, TS1)
-import { runWeek, planCards, planHere, planEnsure, planSet, planEmpty, planEndDay, planClear, STOP_TEXT, planNotes, storyTap, afterStory } from './core/week.js'; // v0.11.204 (owner pick W1: R3, P1); v0.11.206 (FC1, RV1): the forecast's texts, the shared tap steps
+import { runWeek, planCards, planHere, planEnsure, planSet, planEmpty, planEndDay, planClear, STOP_TEXT, planNotes, storyTap, afterStory, planCount, doorCards } from './core/week.js'; // v0.11.204 (owner pick W1: R3, P1); v0.11.206 (FC1, RV1): the forecast's texts, the shared tap steps
 import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel, fragileKnife, knifeSwings } from './core/forms.js';
 import { coilMult, coilMultNext, wakeDay, fmtMult, clockParts, REL_HIDDEN } from './core/game.js'; // v0.11.137 (HV1): REL_HIDDEN
 import {
@@ -218,10 +218,11 @@ function weekAfter() {
     if (resume) runPlan(); // RV1 (L1): also a plan whose week just ended, so "The week is over." shows
 }
 function runPlan() {
+    drawnKey = ''; // v0.11.210 (RV1, M1): a run is a new page of the week: the cards column starts at the top
     const r = runWeek(g, SCENES);
     for (const d of r.days) addResult(`Day ${d.day}: the week's plan`, d.lines, false, { quiet: true });
     lastReply = [];
-    lastResult = { lines: [r.stop === 'week' ? 'The week is over.' : `The week stops here: ${STOP_TEXT[r.stop] || r.stop}.${r.stop === 'evening' ? ' The plan goes on after it.' : ''}`], fail: r.stop === 'hurt' || r.stop === 'hungry' };
+    lastResult = { lines: [r.stop === 'week' ? 'The week is over.' : `The week stops here: ${STOP_TEXT[r.stop] || r.stop}.${r.stop === 'evening' || r.stop === 'door' ? ' The plan goes on after it.' : ''}`], fail: r.stop === 'hurt' || r.stop === 'hungry' };
     announce(lastResult.lines[0]);
 }
 const planRow = (key, label, n, note) => `<div class="prow"><span class="pl">${md(label)}${note ? `<span class="note">${esc(note)}</span>` : ''}</span><button class="btn step" data-plan="${esc(key)}" data-d="-1" aria-label="One fewer: ${esc(plain(label))}"${n > 0 ? '' : ' disabled'}>−</button><b class="pn">${n}</b><button class="btn step" data-plan="${esc(key)}" data-d="1" aria-label="One more: ${esc(plain(label))}">+</button></div>`;
@@ -233,6 +234,8 @@ function weekHtml() {
     const rows = planCards(g, SCENES).map((c) => planRow(c.id, c.label, items[c.id] || 0, `${durLabel(Math.round((c.minutes * NEW_LENGTH) / cardSpeed(c.fam || 0)) * WEEK_MULT)} a card${fc.rows[c.id] || ''}`));
     rows.push(planRow('med:sit', 'Sits a day', med.sit || 0, fc.med.sit || ''), planRow('med:mer', 'Meridian sessions a day', med.mer || 0, fc.med.mer || ''), planRow('med:qi', 'Gather Qi a day', med.qi || 0, ['hours', fc.med.qi].filter(Boolean).join(' · ')));
     rows.push(planRow('med:pres', 'Smoke the catch, once a day', med.pres || 0, ['after the day\'s work, 15 m a piece', fc.med.pres].filter(Boolean).join(' · '))); // v0.11.209 (owner pick TF1, K)
+    // v0.11.210 (owner pick N1, DC-a): the hub's daily doors, once a day each after the day's work (Yuki's starts at 1 on a new plan)
+    for (const d of doorCards(g, SCENES)) rows.push(planRow(`door:${d.scene}`, d.label, planCount(g, `door:${d.scene}`), ['once a day, after the day\'s work', fc.med[`door:${d.scene}`]].filter(Boolean).join(' · ')));
     const total = fc.total ? `<p class="note fc">${esc(fc.total)}</p>` : '', outlook = fc.outlook ? `<p class="note fc">${esc(fc.outlook)}</p>` : '';
     const stop = p?.stop ? `<p class="note">${esc(p.stop === 'week' ? 'The week is over.' : `Stopped: ${STOP_TEXT[p.stop] || p.stop}.`)}</p>` : '';
     const btn = `<div class="pbtns"><button class="btn primary" data-week="run">${planEmpty(p) ? 'Rest out the week' : 'Run the week'} · to Day ${planEndDay(g, p)}</button>${planEmpty(p) ? '' : '<button class="btn" data-week="clear">Clear</button>'}</div>`;
@@ -382,7 +385,7 @@ function renderCombatCards() {
     const flee = c.flee ? `<button class="card" data-flee="1">Run${showChecks ? `<span class="tag">GU ${n1(checkValue(g, 'GU'))} / DC ${noDiceDc(Math.max(...c.enemies.filter((e) => e.hp > 0).map((e) => e.atk)))}</span>` : ''}</button>` : '';
     const yieldCard = c.style ? `<button class="card" data-yield="1">${esc(SPAR_TEXT.yieldLabel)}<span class="tag">${esc(SPAR_TEXT.yieldTag)}</span></button>` : ''; // v0.11.114 (PA2, YD)
     const foes = c.enemies.map((e) => `<div class="foe${e.hp <= 0 ? ' down' : ''}"><span>${esc(e.name)}${e.staggered ? (c.style === 'unarmed' ? ' (down)' : ' (reeling)') : ''}${e.hp > 0 ? foeTraits(e).map((k) => ` <small class="trait">· ${esc(FOE_TRAITS[k].tag)}</small>`).join('') : ''}</span><div class="stroke"><i style="width:${pct(Math.max(0, e.hp), e.hpMax)}"></i></div></div>`).join('');
-    const yuki = `<div class="foe"><span>Yuki${c.yukiOut ? ' (watching)' : ''}</span><div class="stroke" style="background:rgba(242,239,230,0.08)"><i style="width:${pct(g.yuki.hp, yukiHpMax(g))};background:var(--bone)"></i></div></div>`
+    const yuki = `<div class="foe ally"><span>Yuki${c.yukiOut ? ' (watching)' : ''}</span><div class="stroke"><i style="width:${pct(g.yuki.hp, yukiHpMax(g))}"></i></div></div>` // v0.11.210 (owner pick N1, HB): her bar drawn (was var(--bone), defined nowhere)
         + ((c.song || 0) > 0 && c.style !== 'spar' ? `<div class="foe song"><span>${esc(SONG_TEXT.label.replace('{n}', c.song).replace('{max}', SONG_MAX))}</span></div>` : ''); // v0.11.116 (WA2, SG)
     view.innerHTML = `<section>
 ${statusHtml()}
@@ -964,25 +967,46 @@ function faqFocus() {
 
 /* ---------------- wiring ---------------- */
 
+/** v0.11.210 (owner pick N1, SC): on a PC the cards column (.below) scrolls on its own and every redraw rebuilt it at the top (a + on
+ *  the plan's rows 682 → 0 px at 1366x768). Its scroll is kept across a redraw of the same screen (the scene, a fight or not); a new
+ *  screen starts at the top. Results keep starting at the top (the newest entry). On the phone .below does not scroll: nothing changes.
+ *  RV1 (M1): the screen drawn last is remembered (`drawnKey`, set after each draw): the tap has changed the game before the redraw, so
+ *  the key is compared with what was on screen, not with the game before the draw (a new scene opened at the old column's scroll). */
+let drawnKey = '';
+const screenKey = () => (tab === 'story' && g && !menu ? `${g.scene}|${g.combat ? 1 : 0}` : '');
+function colScroll() {
+    const el = document.querySelector('#view .below'), was = drawnKey, y = el ? el.scrollTop : 0;
+    return () => {
+        const key = screenKey();
+        drawnKey = key;
+        if (!y || !key || key !== was) return;
+        const n = document.querySelector('#view .below'); if (n) n.scrollTop = y;
+    };
+}
 function render() {
     document.querySelectorAll('#tabs button').forEach((b) => b.setAttribute('aria-current', b.dataset.tab === tab ? 'page' : 'false'));
     document.body.classList.toggle('menu-on', !!menu);
     if (menu) return renderMenu();
     if (recovery) return renderRecovery();
     faqUpdate(); // v0.11.83: unlock what the game has reached; the tab's dot
+    const keep = colScroll(); // v0.11.210 (owner pick N1, SC)
     ({ story: renderStory, sheet: renderSheet, bag: renderBag, journal: renderJournal, faq: renderFaq })[tab]();
+    keep();
     if (tab === 'story' && g && g.scene !== announcedScene) { announcedScene = g.scene; announce(g.combat ? `A fight: ${sceneTitle(g.scene)}` : val(SCENES[g.scene]?.title) || ''); }
 }
 /** v0.11.11: each tab keeps its scroll; the Story tab starts at the top again on a new scene. */
 const scrollPos = {};
 function setTab(t) {
     tipEl.hidden = true;
-    if (t === 'menu') { if (!menu) scrollPos[tab] = { y: window.scrollY, scene: g?.scene }; openMenu('main'); return; }
-    if (!menu) scrollPos[tab] = { y: window.scrollY, scene: g?.scene };
+    const col = () => document.querySelector('#view .below')?.scrollTop || 0; // v0.11.210 (RV1, L6): the PC's cards column too
+    if (t === 'menu') { if (!menu) scrollPos[tab] = { y: window.scrollY, scene: g?.scene, col: col() }; openMenu('main'); return; }
+    if (!menu) scrollPos[tab] = { y: window.scrollY, scene: g?.scene, col: col() };
     faqFrom = t === 'faq' && tab !== 'faq' && !menu ? tab : null; // v0.11.83: the FAQ opens the entry for the tab you came from
     menu = null; tab = t; render();
     const p = scrollPos[t];
-    window.scrollTo({ top: p && (t !== 'story' || p.scene === g?.scene) ? p.y : 0 });
+    const same = p && (t !== 'story' || p.scene === g?.scene);
+    window.scrollTo({ top: same ? p.y : 0 });
+    if (same && p.col) { const n = document.querySelector('#view .below'); if (n) n.scrollTop = p.col; } // RV1 (L6)
     if (t === 'faq') faqFocus(); // after the scroll is restored
 }
 
@@ -999,14 +1023,14 @@ view.addEventListener('click', (ev) => {
         if (b.dataset.run) { doTask(b.dataset.run); return; } // v0.11.64: at once (was: run now, ahead of the queue)
         if (b.dataset.plan) { // v0.11.204 (W1, P1): a count on the week's plan
             const p = planEnsure(g); if (!p) { render(); return; }
-            const k = b.dataset.plan, cur = /^med:/.test(k) ? p.med[k.slice(4)] || 0 : p.items[k] || 0;
+            const k = b.dataset.plan, cur = planCount(g, k); // v0.11.210 (N1, DC-a): a card, a Meditate row or a door
             planSet(g, k, cur + Number(b.dataset.d || 0)); autosave(); render(); return;
         }
-        if (b.dataset.week === 'run') { const p = planEnsure(g); if (p) runPlan(); autosave(); render(); window.scrollTo({ top: 0, behavior: smoothScroll() }); return; }
+        if (b.dataset.week === 'run') { const p = planEnsure(g); if (p) runPlan(); autosave(); render(); window.scrollTo({ top: 0, behavior: smoothScroll() }); const bl = document.querySelector('#view .below'); if (bl) bl.scrollTop = 0; return; } // v0.11.210 (SC): a run is a new page of the week
         if (b.dataset.week === 'clear') { planClear(g); autosave(); render(); return; } // RV1 (TG11): week.js planClear
         if (b.dataset.menu) {
             const m = b.dataset.menu;
-            if (m === 'continue' || m === 'recovery') { hadSave = true; menu = null; setTab('story'); return; }
+            if (m === 'continue' || m === 'recovery') { hadSave = true; setTab('story'); return; } // v0.11.210 (owner pick N1, MS): setTab closes the menu itself, so the menu's own scroll is not kept as the game's (35 px at 1366x768, 130%)
             openMenu(m); return;
         }
         if (b.dataset.newsclose) { news = []; render(); return; } // v0.11.150 (WN): the box closes for this visit (the version is already kept)
