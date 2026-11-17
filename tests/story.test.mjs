@@ -5787,6 +5787,128 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       assert(!undef.length && /\.foe\.ally \.stroke i \{ background: var\(--ink-2\); \}/.test(css) && /<div class="foe ally">/.test(main), `${T} (HB): Yuki's bar drawn in ink-2; no CSS variable used undefined (${undef.join(', ') || 'none'})`); }
 }
 
+// v0.11.211 (owner picks PR2 + PK1, 2026-11-17 13:38 and 13:43): the plan's priorities. Every row of Plan the week (a card, a
+// Meditate row, Smoke the catch, a door or talk) has a place, 1 first (week.js planOrder, planRanks, planPrio); runWeek takes the
+// first row due and open in that order; a card carried takes its card's place; the places are kept per hub for good
+// (g.tasks.prio[hub], kept by a rewind); a row with no place goes after the set ones, in the old order; none set = the old run.
+{
+    const Gm = await import('../js/core/game.js');
+    const C = await import('../js/core/calendar.js');
+    const Wk = await import('../js/core/week.js');
+    const Tk = await import('../js/core/tasks.js');
+    const Co = await import('../js/core/coil.js');
+    const T = 'PR2 (the plan\'s priorities)';
+    const D = 1440;
+    const save = () => { const g = deserialize(readFileSync(new URL('../saves/v0.11.204-long-wilds-day2.json', import.meta.url), 'utf8'), { force: true }); g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 30); return g; };
+    const plan = (g, rows = [['wild_train:1', 2], ['wild_forage:0', 2], ['med:sit', 3], ['med:mer', 2], ['med:qi', 2]]) => { for (const [k, n] of rows) Wk.planSet(g, k, n); return g; };
+    const week = (g) => { const ids = []; const onStep = (cg, l) => { if (l && !l.r.skipped) ids.push([Tk.workDay(cg), l.id]); };
+        let r = Wk.runWeek(g, SCENES, { onStep }); const stops = [r.stop];
+        for (let k = 0; k < 60 && ['evening', 'door'].includes(r.stop); k++) {
+            const v = sceneView(g, SCENES); const open = v.choices.filter((c) => !c.disabled && c.index < 1000 && !/^(Yuki: change form|Story Mode only)/.test(c.label)); if (!open.length || g.combat) break;
+            Wk.storyTap(g, SCENES, open[0].index); if (g.combat) break; if (Wk.afterStory(g, SCENES).resume) { r = Wk.runWeek(g, SCENES, { onStep }); stops.push(r.stop); } }
+        return { ids, stops }; };
+    const noPrio = (g) => { const c = JSON.parse(JSON.stringify(g)); delete c.tasks.prio; return JSON.stringify(c); }; // b has its places by design; a none (below)
+    // none set: the old order; every row set to the place it shows: the same run, step for step
+    { const a = plan(save()), b = plan(save());
+      const rk = Wk.planRanks(b, SCENES);
+      assert(rk.n === 13 && rk.rank['wild_train:1'] === 1 && rk.rank['wild_forage:0'] === 2 && rk.rank['med:pres'] === 9 && rk.rank['door:yk_time'] === 10 && rk.rank['med:sit'] === 11 && rk.rank['med:qi'] === 13, `${T}: the old order shown: the cards set, the cards not set, Smoke, Yuki, sit, meridian, Qi (${JSON.stringify(rk)})`);
+      for (const [k, n] of Object.entries(rk.rank)) Wk.planPrio(b, SCENES, k, n);
+      const wa = week(a), wb = week(b);
+      assert(Object.keys(b.tasks.prio.wilds).length === 13, `${T}: every row placed (${JSON.stringify(b.tasks.prio)})`);
+      assert(JSON.stringify(wa) === JSON.stringify(wb) && noPrio(a) === noPrio(b), `${T}: the places as shown run exactly as none set (${wa.ids.length} / ${wb.ids.length} steps)`);
+      assert(!('prio' in a.tasks), `${T} (RV1, TG2): a run with no places writes none into the save`);
+      assert(!a.tasks.plan?.items?.['wild_train:1'] && !a.tasks.plan?.items?.['wild_forage:0'], `${T}: the old order: all 4 cards taken this week`); }
+    // RV1 (TG2): none set runs exactly as v0.11.210 did: three runs pinned on its code (the steps with their clock, the day's lines,
+    // the stops and the whole save after them). A deliberate change to these runs (a text, a number) updates the pins with it.
+    { const pin = (g) => { const ids = [], lines = []; const onStep = (cg, l) => { if (l) ids.push(`${cg.minutes}:${l.id}${l.r.skipped ? '~' : ''}`); };
+        const go = () => { const r = Wk.runWeek(g, SCENES, { onStep }); for (const d of r.days) lines.push(...d.lines); return r; };
+        let r = go(); const stops = [r.stop];
+        for (let k = 0; k < 60 && ['evening', 'door'].includes(r.stop); k++) {
+            const v = sceneView(g, SCENES); const open = v.choices.filter((c) => !c.disabled && c.index < 1000 && !/^(Yuki: change form|Story Mode only)/.test(c.label)); if (!open.length || g.combat) break;
+            Wk.storyTap(g, SCENES, open[0].index); if (g.combat) break; if (Wk.afterStory(g, SCENES).resume) { r = go(); stops.push(r.stop); } }
+        return Gm.fnv1a(JSON.stringify({ ids, lines, stops, g })); };
+      const out = {};
+      { const g = deserialize(readFileSync(new URL('../saves/v0.11.204-long-wilds-day2.json', import.meta.url), 'utf8'), { force: true }); g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 30); Gm.addItem(g, 'hare_raw', 2);
+        for (const [k, n] of [['wild_train:1', 2], ['wild_forage:0', 2], ['med:sit', 3], ['med:mer', 2], ['med:qi', 2], ['med:pres', 1]]) Wk.planSet(g, k, n); out.wilds = pin(g); }
+      { const g = ensureBars(newGame(99501, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'fo_ashfall'); g.minutes = 16 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true;
+        Wk.planEnsure(g); for (const s of ['wen_time', 'mother_time', 'fo_mei', 'fo_ya_time']) Wk.planSet(g, `door:${s}`, 1); for (const c of Wk.planCards(g, SCENES)) Wk.planSet(g, c.id, 9); Wk.planSet(g, 'med:sit', 2); out.fallout = pin(g); }
+      { const g = ensureBars(newGame(99502, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'ashfall'); g.minutes = 9 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60);
+        Wk.planEnsure(g); const cs = Wk.planCards(g, SCENES); for (const c of cs.slice(0, 3)) Wk.planSet(g, c.id, 2); Wk.planSet(g, 'med:sit', 4); Wk.planSet(g, 'med:qi', 3); out.ashfall = pin(g); out.cards = cs.slice(0, 3).map((c) => c.id).join(); }
+      assert(JSON.stringify(out) === '{"wilds":"fe3d1924","fallout":"a85e856c","ashfall":"1db224f4","cards":"workshop:0,workshop:2,drill:0"}', `${T} (RV1, TG2): none set: the wilds, the Fallout and Ashfall runs as v0.11.210's code ran them (${JSON.stringify(out)})`); }
+    // RV1 (TG3): one row a step: Smoke the catch is seen by the step's watch each day it smokes (a row that ran and let the next one
+    // run in the same step hid it, and skipped the step's checks: hurt, hungry)
+    { const g = ensureBars(newGame(99502, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'ashfall'); g.minutes = 9 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 30); Gm.addItem(g, 'hare_raw', 2);
+      Wk.planEnsure(g); Wk.planSet(g, 'med:pres', 1); Wk.planSet(g, 'med:sit', 2); const sid = Tk.sitTaskId(g, SCENES);
+      const pid = Wk.presCard(g, SCENES), seen = []; Wk.runWeek(g, SCENES, { onStep: (cg, l) => { if (l && !l.r.skipped) seen.push(l.id); } });
+      assert(pid && seen.filter((id) => id === pid).length === 1 && seen.indexOf(pid) < seen.lastIndexOf(sid), `${T} (RV1, TG3): Smoke the catch is one step of its own, before the sits (${pid}: ${seen.join(', ')})`); }
+    // RV1 (TG4): the guards the loop keeps from v0.11.210 (a door that would kill: skipped; a carry that took no time: stuck)
+    { const src = readFileSync(new URL('../js/core/week.js', import.meta.url), 'utf8');
+      assert(src.includes('if (!dw || deadly(dw.id)) return null;') && src.includes("if (r.skipped && g.minutes === m0) return 'stuck'; return 'next';") && src.includes("const dz = deadly(CARRY_TASK); if (dz) return dz === 'hunger' ? 'hungry' : 'hurt';"), `${T} (RV1, TG4): the door's death check and the carry's stuck and death guards`); }
+    // RV1 (H1, TG1): a once-a-Coil card's row is gone after its first run, its week's work still carried: with no place of its own it
+    // goes first, as before (the review: the Fallout's Council, a place set on another row: it started at 12:23, 4 h 37 m a day less)
+    { const O = await import('../js/story/oneoff.js');
+      const g = ensureBars(newGame(99501, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'ashfall'); g.minutes = 9 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60);
+      Wk.planEnsure(g); for (const d of Wk.doorCards(g, SCENES)) Wk.planSet(g, `door:${d.scene}`, 0);
+      Wk.planSet(g, 'workshop:0', 1); Wk.planSet(g, 'med:sit', 4); Wk.planSet(g, 'med:qi', 3);
+      Wk.runWeek(g, SCENES, { max: 1 });
+      O.noteOnce(g, 'workshop', 0, SCENES.workshop.choices[0]); // its once-a-Coil mark: the row goes
+      const gone = g.tasks.carry?.id === 'workshop:0' && !Wk.planCards(g, SCENES).some((c) => c.id === 'workshop:0');
+      Wk.planPrio(g, SCENES, 'med:pres', 1);
+      g.minutes = (Tk.workDay(g) + 1) * D + 7 * 60; g.james.satiety = 100;
+      const ids = []; Wk.runWeek(g, SCENES, { onStep: (cg, l) => { if (l && !l.r.skipped) ids.push(l.id); } });
+      assert(gone && !('workshop:0' in g.tasks.prio.ashfall) && ids[0] === Tk.CARRY_TASK, `${T} (RV1, H1): the workshop's work carried, its row gone, a place set on another row: the work first next morning (${gone}; ${ids.slice(0, 3).join(', ')})`); }
+    // RV1 (L1): a row hidden while another moves keeps its place among the rest (Ya's talk at 1, hidden, back at 1)
+    { const g = ensureBars(newGame(99501, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'fo_ashfall'); g.minutes = 16 * D + 7 * 60; g.flags.ya_met = true;
+      Wk.planEnsure(g); Wk.planPrio(g, SCENES, 'door:fo_ya_time', 1); const r0 = Wk.planRanks(g, SCENES).rank['door:fo_ya_time'];
+      g.flags.ya_met = false; const hid = !('door:fo_ya_time' in Wk.planRanks(g, SCENES).rank);
+      const c0 = Wk.planCards(g, SCENES)[0].id; Wk.planPrio(g, SCENES, c0, 1); g.flags.ya_met = true; const r1 = Wk.planRanks(g, SCENES).rank;
+      assert(r0 === 1 && hid && r1['door:fo_ya_time'] === 1 && r1[c0] === 2, `${T} (RV1, L1): Ya's row hidden while a card moved to 1: back at 1, the card at 2 (${r0}, ${hid}, ${r1['door:fo_ya_time']}, ${r1[c0]})`); }
+    // Meditate first: the same sits, fewer cards (measured 13:38: 4 of 4 → 1 of 4)
+    { const a = plan(save()), b = plan(save()), sid = Tk.sitTaskId(b, SCENES);
+      Wk.planPrio(b, SCENES, 'med:sit', 1); Wk.planPrio(b, SCENES, 'med:mer', 2); Wk.planPrio(b, SCENES, 'med:qi', 3);
+      const r = Wk.planRanks(b, SCENES).rank;
+      assert(r['med:sit'] === 1 && r['med:mer'] === 2 && r['med:qi'] === 3 && r['wild_train:1'] === 4 && Object.values(r).sort((x, y) => x - y).join() === Array.from({ length: 13 }, (_, i) => i + 1).join(), `${T}: a move renumbers every row 1… (${JSON.stringify(r)})`);
+      const fa = Wk.planNotes(a, SCENES), fb = Wk.planNotes(b, SCENES);
+      const wa = week(a), wb = week(b);
+      const left = (g) => Object.values(g.tasks.plan?.hub === 'wilds' ? g.tasks.plan.items : {}).reduce((x, y) => x + y, 0);
+      const firstOfDay = (w) => { const out = {}; for (const [d, id] of w.ids) if (!(d in out) && id !== Tk.CARRY_TASK) out[d] = id; return out; };
+      assert(left(b) >= 2 && left(a) === 0, `${T}: Meditate first: cards left at the week's end ${left(b)} (none set: ${left(a)})`);
+      assert(/not this week/.test(fb.rows['wild_train:1'] || '') && /done/.test(fa.rows['wild_train:1'] || ''), `${T}: the forecast follows the order (${fa.rows['wild_train:1']} → ${fb.rows['wild_train:1']})`);
+      const fd = Object.values(firstOfDay(wb));
+      assert(fd.length >= 4 && fd.every((id) => id === sid), `${T}: Meditate first: each day starts with a sit (${fd.join(', ')})`); }
+    // a card carried keeps its card's place: the sit at 1 goes before the "Go on" next morning; the cards' order among themselves
+    { const g = plan(save(), [['wild_train:1', 1], ['med:sit', 1]]); Wk.planPrio(g, SCENES, 'med:sit', 1); const sid = Tk.sitTaskId(g, SCENES);
+      const w = week(g); const d1 = w.ids.filter(([d]) => d === w.ids[0][0] + 1).map(([, id]) => id);
+      assert(d1[0] === sid && d1.includes(Tk.CARRY_TASK), `${T}: the next morning: the sit (place 1), then the work carried (${d1.join(', ')})`); }
+    { const g = plan(save(), [['wild_train:1', 3], ['wild_hunt:2', 3]]); Wk.planPrio(g, SCENES, 'wild_hunt:2', 1);
+      const w = week(g); const ids = w.ids.map(([, id]) => id).filter((id) => /^wild_(hunt|train)/.test(id));
+      assert(/^wild_hunt:2,wild_hunt:2,wild_hunt:2(,wild_train:1)+$/.test(ids.join()), `${T}: a card placed first: its 3 cards first, then the other (${ids.join()})`); }
+    // kept for good, per hub: a new week's plan, a save file, a rewind; a row new since goes after the set ones; bad input
+    { const g = plan(save()); Wk.planPrio(g, SCENES, 'door:yk_time', 1);
+      const j = deserialize(serialize(g), { force: true });
+      assert(Wk.planRanks(j, SCENES).rank['door:yk_time'] === 1, `${T}: the places in the save file`);
+      delete g.tasks.plan; assert(Wk.planRanks(g, SCENES).rank['door:yk_time'] === 1 && Wk.planEnsure(g) && Wk.planRanks(g, SCENES).rank['door:yk_time'] === 1, `${T}: a new plan (the next week) keeps them`);
+      delete g.tasks.prio.wilds['wild_hunt:2']; const r = Wk.planRanks(g, SCENES);
+      assert(r.rank['wild_hunt:2'] === r.n, `${T}: a row with no place (new since) goes after the set ones (${r.rank['wild_hunt:2']} of ${r.n})`);
+      Wk.planPrio(g, SCENES, 'wild_hunt:2', 99); assert(Wk.planRanks(g, SCENES).rank['wild_hunt:2'] === r.n, `${T}: a place past the end is the last`);
+      Wk.planPrio(g, SCENES, 'wild_hunt:2', 0); assert(Wk.planRanks(g, SCENES).rank['wild_hunt:2'] === 1, `${T}: a place under 1 is the first`);
+      assert(Wk.planPrio(g, SCENES, 'not_a_row', 2) === null && !('not_a_row' in g.tasks.prio.wilds), `${T}: an unknown row is ignored`);
+      const before = JSON.stringify(g.tasks.prio); Co.rewind(g);
+      assert(JSON.stringify(g.tasks.prio) === before, `${T} (PK1): a rewind (a new Coil) keeps the places`);
+      const o = ensureBars(newGame(99601, { closed: true })); goTo(o, SCENES, 'wilds'); assert(Wk.planPrio(o, SCENES, 'med:sit', 1) === null && !o.tasks?.prio, `${T}: the old calendar: no places`); }
+    // the Fallout: a talk placed first comes before the day's work (here 07:00, the work at 9 a card)
+    { const g = ensureBars(newGame(99501, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'fo_ashfall'); g.minutes = 16 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true;
+      Wk.planEnsure(g); for (const c of Wk.planCards(g, SCENES)) Wk.planSet(g, c.id, 9); Wk.planSet(g, 'door:wen_time', 1);
+      Wk.planPrio(g, SCENES, 'door:wen_time', 1); const wenId = Wk.doorCards(g, SCENES).find((d) => d.scene === 'wen_time').id, cardIds = new Set(Wk.planCards(g, SCENES).map((c) => c.id));
+      const ids = []; Wk.runWeek(g, SCENES, { onStep: (cg, l) => { if (l && !l.r.skipped) ids.push(l.id); } });
+      const wen = ids.indexOf(wenId), work = ids.findIndex((id) => cardIds.has(id));
+      assert(wen >= 0 && (work < 0 || wen < work) && g.rel['Old Wen']?.f >= 3, `${T}: Old Wen's tea at place 1: before the day's work (${ids.slice(0, 4).join(', ')})`); }
+    // the screen: a drop-down of 1 to the rows' count by each label; a change moves the row; the doors' and Smoke's notes follow
+    { const src = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+      assert(/<select class="prio" data-prio=/.test(src) && /closest\('select\[data-prio\]'\)/.test(src) && src.includes('try { planPrio(g, SCENES, key, Number(sel.value)); autosave(); render(); } catch (err) { showError(err); return; }') && /again\.focus\(\{ preventScroll: true \}\)/.test(src), `${T} (RV1, M1, L3, TG6): main.js draws the drop-downs; a change moves the row, saves, keeps the focus, shows an error`);
+      assert(src.includes("'before the day\\'s work'") && src.includes('kept here for good'), `${T}: the notes follow the order; the panel says the boxes are kept`); }
+}
+
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));
 console.log('fights', sorted(fights));
 console.log('endings', sorted(endings), 'longest run', maxSteps, 'scenes', Object.keys(SCENES).length);

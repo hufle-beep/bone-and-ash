@@ -1,6 +1,6 @@
 /** Bone and Ash — UI. Renders the story, combat, sheet, hammerspace, journal and saves. */
 import { LONG_CAL } from './core/calendar.js'; // v0.11.203 (owner pick T1, TS1)
-import { runWeek, planCards, planHere, planEnsure, planSet, planEmpty, planEndDay, planClear, STOP_TEXT, planNotes, storyTap, afterStory, planCount, doorCards } from './core/week.js'; // v0.11.204 (owner pick W1: R3, P1); v0.11.206 (FC1, RV1): the forecast's texts, the shared tap steps
+import { runWeek, planCards, planHere, planEnsure, planSet, planEmpty, planEndDay, planClear, STOP_TEXT, planNotes, storyTap, afterStory, planCount, doorCards, planRanks, planPrio } from './core/week.js'; // v0.11.204 (owner pick W1: R3, P1); v0.11.206 (FC1, RV1): the forecast's texts, the shared tap steps
 import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel, fragileKnife, knifeSwings } from './core/forms.js';
 import { coilMult, coilMultNext, wakeDay, fmtMult, clockParts, REL_HIDDEN } from './core/game.js'; // v0.11.137 (HV1): REL_HIDDEN
 import {
@@ -225,21 +225,26 @@ function runPlan() {
     lastResult = { lines: [r.stop === 'week' ? 'The week is over.' : `The week stops here: ${STOP_TEXT[r.stop] || r.stop}.${r.stop === 'evening' || r.stop === 'door' ? ' The plan goes on after it.' : ''}`], fail: r.stop === 'hurt' || r.stop === 'hungry' };
     announce(lastResult.lines[0]);
 }
-const planRow = (key, label, n, note) => `<div class="prow"><span class="pl">${md(label)}${note ? `<span class="note">${esc(note)}</span>` : ''}</span><button class="btn step" data-plan="${esc(key)}" data-d="-1" aria-label="One fewer: ${esc(plain(label))}"${n > 0 ? '' : ' disabled'}>−</button><b class="pn">${n}</b><button class="btn step" data-plan="${esc(key)}" data-d="1" aria-label="One more: ${esc(plain(label))}">+</button></div>`;
+/** v0.11.211 (owner pick PR2 + PK1): a row's place, a drop-down of 1 to the rows' count by its label. */
+const prioBox = (key, label, rk) => (rk?.rank?.[key] ? `<select class="prio" data-prio="${esc(key)}" aria-label="Place in the order: ${esc(plain(label))}">${Array.from({ length: rk.n }, (_, i) => `<option value="${i + 1}"${i + 1 === rk.rank[key] ? ' selected' : ''}>${i + 1}</option>`).join('')}</select>` : '');
+const planRow = (key, label, n, note, rk = null) => `<div class="prow"><span class="pl">${md(label)}${prioBox(key, label, rk)}${note ? `<span class="note">${esc(note)}</span>` : ''}</span><button class="btn step" data-plan="${esc(key)}" data-d="-1" aria-label="One fewer: ${esc(plain(label))}"${n > 0 ? '' : ' disabled'}>−</button><b class="pn">${n}</b><button class="btn step" data-plan="${esc(key)}" data-d="1" aria-label="One more: ${esc(plain(label))}">+</button></div>`;
 /** P1: the week's plan on a stay hub (long calendar). */
 function weekHtml() {
     const p = planHere(g);
     const items = p?.items || {}, med = p?.med || { sit: 0, mer: 0, qi: 0, pres: 0 };
     const fc = planNotes(g, SCENES); // v0.11.206 (FC1, RV1 TG7): E1, E2b, E3, E4, M1, from week.js (the dry run kept until the save changes)
-    const rows = planCards(g, SCENES).map((c) => planRow(c.id, c.label, items[c.id] || 0, `${durLabel(Math.round((c.minutes * NEW_LENGTH) / cardSpeed(c.fam || 0)) * WEEK_MULT)} a card${fc.rows[c.id] || ''}`));
-    rows.push(planRow('med:sit', 'Sits a day', med.sit || 0, fc.med.sit || ''), planRow('med:mer', 'Meridian sessions a day', med.mer || 0, fc.med.mer || ''), planRow('med:qi', 'Gather Qi a day', med.qi || 0, ['hours', fc.med.qi].filter(Boolean).join(' · ')));
-    rows.push(planRow('med:pres', 'Smoke the catch, once a day', med.pres || 0, ['after the day\'s work, 15 m a piece', fc.med.pres].filter(Boolean).join(' · '))); // v0.11.209 (owner pick TF1, K)
-    // v0.11.210 (owner pick N1, DC-a): the hub's daily doors, once a day each after the day's work (Yuki's starts at 1 on a new plan)
-    for (const d of doorCards(g, SCENES)) rows.push(planRow(`door:${d.scene}`, d.label, planCount(g, `door:${d.scene}`), ['once a day, after the day\'s work', fc.med[`door:${d.scene}`]].filter(Boolean).join(' · ')));
+    const rk = planRanks(g, SCENES), cardIds = planCards(g, SCENES).map((c) => c.id); // v0.11.211 (PR2 + PK1): the rows' places
+    const cr = cardIds.filter((id) => (items[id] || 0) > 0 || g.tasks?.carry?.id === id).map((id) => rk.rank[id]).filter(Boolean), lo = Math.min(...cr), hi = Math.max(...cr); // RV1 (L2): the planned cards (and the work carried) only
+    const when = (key) => (!cr.length || rk.rank[key] > hi ? 'after the day\'s work' : rk.rank[key] < lo ? 'before the day\'s work' : ''); // the rows' notes follow the order
+    const rows = planCards(g, SCENES).map((c) => planRow(c.id, c.label, items[c.id] || 0, `${durLabel(Math.round((c.minutes * NEW_LENGTH) / cardSpeed(c.fam || 0)) * WEEK_MULT)} a card${fc.rows[c.id] || ''}`, rk));
+    rows.push(planRow('med:sit', 'Sits a day', med.sit || 0, fc.med.sit || '', rk), planRow('med:mer', 'Meridian sessions a day', med.mer || 0, fc.med.mer || '', rk), planRow('med:qi', 'Gather Qi a day', med.qi || 0, ['hours', fc.med.qi].filter(Boolean).join(' · '), rk));
+    rows.push(planRow('med:pres', 'Smoke the catch, once a day', med.pres || 0, [[when('med:pres'), '15 m a piece'].filter(Boolean).join(', '), fc.med.pres].filter(Boolean).join(' · '), rk)); // v0.11.209 (owner pick TF1, K)
+    // v0.11.210 (owner pick N1, DC-a): the hub's daily doors, once a day each (Yuki's starts at 1 on a new plan)
+    for (const d of doorCards(g, SCENES)) rows.push(planRow(`door:${d.scene}`, d.label, planCount(g, `door:${d.scene}`), [['once a day', when(`door:${d.scene}`)].filter(Boolean).join(', '), fc.med[`door:${d.scene}`]].filter(Boolean).join(' · '), rk));
     const total = fc.total ? `<p class="note fc">${esc(fc.total)}</p>` : '', outlook = fc.outlook ? `<p class="note fc">${esc(fc.outlook)}</p>` : '';
     const stop = p?.stop ? `<p class="note">${esc(p.stop === 'week' ? 'The week is over.' : `Stopped: ${STOP_TEXT[p.stop] || p.stop}.`)}</p>` : '';
     const btn = `<div class="pbtns"><button class="btn primary" data-week="run">${planEmpty(p) ? 'Rest out the week' : 'Run the week'} · to Day ${planEndDay(g, p)}</button>${planEmpty(p) ? '' : '<button class="btn" data-week="clear">Clear</button>'}</div>`;
-    return groupHtml('Plan the week', [`<p class="note">Cards by the week, Meditate by the day. Meals and the day's sit run themselves; it stops for anything that needs you.</p>`, ...rows, total, outlook, stop, btn], true);
+    return groupHtml('Plan the week', [`<p class="note">Cards by the week, Meditate by the day. Meals and the day's sit run themselves; it stops for anything that needs you. The box by each row is its place in the order, 1 first, kept here for good.</p>`, ...rows, total, outlook, stop, btn], true);
 }
 
 /* ---------------- task mode: every screen as cards (v0.9.5) ---------------- */
@@ -1143,6 +1148,14 @@ view.addEventListener('click', (ev) => {
         lastResult = { lines: [String(err.message || err)], fail: true }; lastReply = []; render();
         if (!(err instanceof SaveError)) showError(err);
     }
+});
+view.addEventListener('change', (ev) => { // v0.11.211 (owner pick PR2 + PK1): a row's place on Plan the week
+    const sel = ev.target.closest('select[data-prio]');
+    if (!sel || !g) return;
+    const key = sel.dataset.prio;
+    try { planPrio(g, SCENES, key, Number(sel.value)); autosave(); render(); } catch (err) { showError(err); return; } // RV1 (L3): as the click handler
+    const again = [...document.querySelectorAll('select[data-prio]')].find((e) => e.dataset.prio === key); // RV1 (M1): the keyboard stays on its row
+    if (again) again.focus({ preventScroll: true });
 });
 view.addEventListener('change', async (ev) => {
     const inp = ev.target.closest('input[data-import]');

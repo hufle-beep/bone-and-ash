@@ -123,6 +123,76 @@ export function planCount(g, key) {
     if (/^door:/.test(key)) { const s = key.slice(5); return p ? (isRec(p.doors) ? p.doors[s] || 0 : 0) : DOOR_START[s] || 0; }
     return p?.items?.[key] || 0;
 }
+/* ---------- v0.11.211 (owner pick PR2 + PK1, 2026-11-17 13:38 and 13:43): the plan's priorities ----------
+ * Every row of Plan the week (a card, a Meditate row, Smoke the catch, a door or talk) has a place, 1 first, set with a drop-down by
+ * its label. The plan takes the first row in that order that is due and open now, step by step (a card carried takes its card's
+ * place). The places are kept per hub for good (`g.tasks.prio[hub]`: row key → place; a rewind keeps them, coil.js), so a new week or
+ * a new Coil keeps the order. A row with no place yet (none set on this hub, or new since: a card or a person met later) takes the
+ * old order's place after every set one: the cards carried and in the order set, Smoke the catch, the doors (DAILY_DOORS), the sits,
+ * the meridian sessions, Gather Qi. With no places set the plan runs exactly as before. */
+const PRIO_AT = { pres: 200, door: 300, sit: 400, mer: 500, qi: 600 };
+const keyGroup = (k) => (k.startsWith('door:') ? 'door' : k === 'med:pres' ? 'pres' : /^med:/.test(k) ? k.slice(4) : 'card');
+/** This hub's places ({ key: place }), or {} (with `make`, created). */
+export function prioHere(g, hub = g.scene, make = false) {
+    const t = make ? taskState(g) : g.tasks;
+    if (!t) return {};
+    if (!isRec(t.prio)) { if (!make) return {}; t.prio = {}; }
+    if (!isRec(t.prio[hub])) { if (!make) return {}; t.prio[hub] = {}; }
+    return t.prio[hub];
+}
+/** A row's place in the old order (a row with no place set): the work carried, the cards set (in the order set), the cards not set,
+ *  Smoke the catch, the doors, the sits, the meridian sessions, Gather Qi. */
+function oldPlace(p, k, cards, cyId) {
+    const grp = keyGroup(k);
+    if (grp === 'door') return PRIO_AT.door + Math.max(0, DAILY_DOORS.indexOf(k.slice(5)));
+    if (grp !== 'card') return PRIO_AT[grp];
+    const set = Object.keys(p?.items || {}).filter((id) => p.items[id] > 0), i = set.indexOf(k);
+    if (i >= 0) return 100 + i / 100;
+    if (k === cyId) return 99;
+    const j = cards.indexOf(k);
+    return 150 + (j >= 0 ? j / 100 : 0.99);
+}
+/** The rows in the plan's order: { keys: every row the plan can take or shows, shown: the rows on the screen }. `cards` (the card
+ *  rows' ids) and `doors` (the door rows' scenes) only for the screen; the run passes none (it takes the rows with a count). */
+export function planOrder(g, p = planHere(g), { cards = [], doors = [], extra = [] } = {}) {
+    const hub = p?.hub || g.scene, pr = prioHere(g, hub), cyId = carryHere(g, hub)?.id || null;
+    const shown = [...cards, 'med:sit', 'med:mer', 'med:qi', 'med:pres', ...doors.map((s) => `door:${s}`)];
+    const all = new Set(shown);
+    for (const id of Object.keys(p?.items || {})) if (p.items[id] > 0) all.add(id);
+    for (const [s, n] of Object.entries(isRec(p?.doors) ? p.doors : {})) if (n > 0 && DAILY_DOORS.includes(s)) all.add(`door:${s}`);
+    if (cyId) all.add(cyId);
+    for (const k of extra) all.add(k);
+    const old = (k) => oldPlace(p, k, cards, cyId);
+    // RV1 (H1): the work carried with no place set goes first, as before v0.11.211 (a once-a-Coil card's row is gone after its first run)
+    const at = (k) => (Number.isFinite(pr[k]) ? pr[k] : k === cyId ? 0 : old(k));
+    const keys = [...all].sort((a, b) => at(a) - at(b) || old(a) - old(b));
+    const on = new Set(shown);
+    return { keys, shown: keys.filter((k) => on.has(k)) };
+}
+/** The screen's rows with their places ({ key: 1… }) and how many there are. */
+export function planRanks(g, scenes) {
+    const p = planHere(g);
+    const { shown } = planOrder(g, p, { cards: planCards(g, scenes).map((c) => c.id), doors: doorCards(g, scenes).map((d) => d.scene) });
+    return { rank: Object.fromEntries(shown.map((k, i) => [k, i + 1])), n: shown.length };
+}
+/** Move a row to place `n` (1 first) among the screen's rows; the rows on the screen and the rows hidden now that have a place are then
+ *  numbered 1… on this hub in that order (RV1, L1: a hidden row keeps its place among the others), kept for good. */
+export function planPrio(g, scenes, key, n) {
+    if (!weekHub(g)) return null;
+    const p = planHere(g), pr0 = prioHere(g);
+    const cards = planCards(g, scenes).map((c) => c.id), doors = doorCards(g, scenes).map((d) => d.scene);
+    const { keys, shown } = planOrder(g, p, { cards, doors, extra: Object.keys(pr0) });
+    if (!shown.includes(key)) return null;
+    const on = new Set(shown);
+    const list = keys.filter((k) => k !== key && (on.has(k) || Number.isFinite(pr0[k])));
+    const rest = list.filter((k) => on.has(k));
+    const i = Math.max(0, Math.min(rest.length, (Math.round(n) || 1) - 1));
+    list.splice(i < rest.length ? list.indexOf(rest[i]) : list.indexOf(rest[rest.length - 1]) + 1, 0, key);
+    const pr = prioHere(g, g.scene, true);
+    list.forEach((k, j) => { pr[k] = j + 1; });
+    if (p) p.stop = '';
+    return pr;
+}
 /** After a story choice: should the plan go on by itself here? A running plan on its hub, or (RV1, L1) a running plan whose week has
  *  just ended (runWeek then reports the week's end). */
 export function weekResume(g) {
@@ -203,50 +273,68 @@ export function runWeek(g, scenes, { max = 600, onStep = null } = {}) {
         // RV1 (M3): the forecast's death check, as a tap's ("Starves here"): stop before a card that would end the Coil
         const deadly = (id) => { try { return taskOutcome(g, scenes, id)?.death || null; } catch { return null; } };
         const run = (id) => { const r = runTask(g, scenes, id); say(r.lines); last = { id, r }; return r; }; // FC1 (RV1, H1): seen by the next watch
-        // the week's work: what is carried first, then the planned cards in order
-        if (carryHere(g, hub) && taskOpen(g, scenes, CARRY_TASK)) { const dz = deadly(CARRY_TASK); if (dz) return end(dz === 'hunger' ? 'hungry' : 'hurt'); const r = run(CARRY_TASK); if (g.scene !== hub) return end('story'); if (r.skipped && g.minutes === m0) return end('stuck'); continue; }
-        const next = Object.keys(p.items).find((id) => p.items[id] > 0 && taskOpen(g, scenes, id));
-        if (next) {
-            const dz = deadly(next); if (dz) return end(dz === 'hunger' ? 'hungry' : 'hurt');
-            p.items[next] -= 1; if (p.items[next] <= 0) delete p.items[next];
-            const r = run(next);
-            if (r.skipped) p.items[next] = (p.items[next] || 0) + 1; // the day's routine went first; the card is still owed
-            if (r.stopped || g.scene !== hub) return end('story');
-            continue;
-        }
-        // v0.11.209 (owner pick TF1, K): the day's catch smoked, after the day's work (a plan from before has no `pres`: 0)
-        const pid = (p.done.pres || 0) < (p.med.pres || 0) ? presCard(g, scenes) : null;
-        if (pid && !deadly(pid)) { p.done.pres = (p.done.pres || 0) + 1; run(pid); if (g.scene !== hub) return end('story'); continue; }
-        if ((p.done.pres || 0) < (p.med.pres || 0) && preservable(g) === 0) p.done.pres = p.med.pres; // RV1 (L7): nothing to smoke: the day's row is done
-        // v0.11.210 (owner pick N1, DC-a): the day's daily doors, once each, after the day's work: the scene's text said, its one plain
-        // way on walked ("Go on."), a real choice (her question, Mei Lin's or Ya's talk) a stop the plan goes on after
-        const dw = isRec(p.doors) ? doorCards(g, scenes).find((c) => (p.doors[c.scene] || 0) > (p.done.doors[c.scene] || 0) && c.status === 'open' && !deadly(c.id)) : null;
-        if (dw) {
-            p.done.doors[dw.scene] = (p.done.doors[dw.scene] || 0) + 1;
-            const r = run(dw.id);
-            if (r.skipped) { p.done.doors[dw.scene] -= 1; continue; } // the day's routine went first; the door is still owed today
-            if (g.scene === hub) continue; // nothing opened (a guard): counted as done today
-            for (let k = 0; k < 6 && g.scene !== hub && !g.combat; k++) {
-                const v = sceneView(g, scenes);
-                if (v.end) return end('story');
-                const open = v.choices.filter((c) => !c.disabled && !META.test(String(c.label)));
-                const plain = open.length === 1 && open[0].index < 1000 && plainChoice(scenes[g.scene].choices[open[0].index]);
-                const again = plain ? null : doorPick(g, scenes); // RV1 (L2, the owner 12:39): a talk answered as last time, the same options
-                if (!plain && again == null) return end('door'); // the first time, or a new option: the player's; the screen shows its own text
-                say([String(v.text || '')].filter(Boolean)); // RV1 (L3): a screen's text said only when the plan walks past it
-                if (!plain) say([`${AGAIN_LINE}${open.find((c) => c.index === again).label}`]);
-                const r2 = choose(g, scenes, plain ? open[0].index : again); say(r2.lines || []);
-                if (r2.combat) return end('story');
+        const done1 = () => (g.scene !== hub ? 'story' : 'next');
+        let dc = null; const doorsNow = () => (dc ||= doorCards(g, scenes));
+        /** One row's step now: 'next' (it ran: the next step), a stop, or null (not due or not open now: the next row). */
+        const rowStep = (k) => {
+            const grp = keyGroup(k);
+            if (grp === 'card') {
+                // the week's work carried, in its card's place (RV: before v0.11.211 always first)
+                const cy = carryHere(g, hub);
+                if (cy && cy.id === k) {
+                    if (!taskOpen(g, scenes, CARRY_TASK)) return null;
+                    const dz = deadly(CARRY_TASK); if (dz) return dz === 'hunger' ? 'hungry' : 'hurt';
+                    const r = run(CARRY_TASK); if (g.scene !== hub) return 'story'; if (r.skipped && g.minutes === m0) return 'stuck'; return 'next';
+                }
+                if (!(p.items[k] > 0) || !taskOpen(g, scenes, k)) return null;
+                const dz = deadly(k); if (dz) return dz === 'hunger' ? 'hungry' : 'hurt';
+                p.items[k] -= 1; if (p.items[k] <= 0) delete p.items[k];
+                const r = run(k);
+                if (r.skipped) p.items[k] = (p.items[k] || 0) + 1; // the day's routine went first; the card is still owed
+                if (r.stopped || g.scene !== hub) return 'story';
+                return 'next';
             }
-            if (g.scene !== hub || g.combat) return end('story');
-            continue;
-        }
-        // the day's meditation, in the hours the work leaves
-        const sid = sitTaskId(g, scenes);
-        if (p.done.sit < p.med.sit && taskOpen(g, scenes, sid) && !deadly(sid)) { p.done.sit++; run(sid); if (g.scene !== hub) return end('story'); continue; }
-        const mer = p.done.mer < p.med.mer ? firstMer(g, scenes) : null;
-        if (mer && !deadly(mer)) { p.done.mer++; run(mer); if (g.scene !== hub) return end('story'); continue; }
-        if (p.done.qi < p.med.qi && taskOpen(g, scenes, QI_TASK) && !deadly(QI_TASK)) { p.done.qi++; run(QI_TASK); if (g.scene !== hub) return end('story'); continue; }
+            if (grp === 'pres') { // v0.11.209 (owner pick TF1, K): the day's catch smoked (a plan from before has no `pres`: 0)
+                const pid = (p.done.pres || 0) < (p.med.pres || 0) ? presCard(g, scenes) : null;
+                if (pid && !deadly(pid)) { p.done.pres = (p.done.pres || 0) + 1; run(pid); return done1(); }
+                if ((p.done.pres || 0) < (p.med.pres || 0) && preservable(g) === 0) p.done.pres = p.med.pres; // RV1 (L7): nothing to smoke: the day's row is done
+                return null;
+            }
+            if (grp === 'door') { // v0.11.210 (owner pick N1, DC-a): a daily door, once a day: the scene's text said, its one plain way
+                // on walked ("Go on."), a real choice (her question, Mei Lin's or Ya's talk) a stop the plan goes on after
+                const s = k.slice(5);
+                if (!isRec(p.doors) || !((p.doors[s] || 0) > (p.done.doors[s] || 0))) return null;
+                const dw = doorsNow().find((c) => c.scene === s && c.status === 'open');
+                if (!dw || deadly(dw.id)) return null;
+                p.done.doors[s] = (p.done.doors[s] || 0) + 1;
+                const r = run(dw.id);
+                if (r.skipped) { p.done.doors[s] -= 1; return 'next'; } // the day's routine went first; the door is still owed today
+                if (g.scene === hub) return 'next'; // nothing opened (a guard): counted as done today
+                for (let k2 = 0; k2 < 6 && g.scene !== hub && !g.combat; k2++) {
+                    const v = sceneView(g, scenes);
+                    if (v.end) return 'story';
+                    const open = v.choices.filter((c) => !c.disabled && !META.test(String(c.label)));
+                    const plain = open.length === 1 && open[0].index < 1000 && plainChoice(scenes[g.scene].choices[open[0].index]);
+                    const again = plain ? null : doorPick(g, scenes); // RV1 (L2, the owner 12:39): a talk answered as last time, the same options
+                    if (!plain && again == null) return 'door'; // the first time, or a new option: the player's; the screen shows its own text
+                    say([String(v.text || '')].filter(Boolean)); // RV1 (L3): a screen's text said only when the plan walks past it
+                    if (!plain) say([`${AGAIN_LINE}${open.find((c) => c.index === again).label}`]);
+                    const r2 = choose(g, scenes, plain ? open[0].index : again); say(r2.lines || []);
+                    if (r2.combat) return 'story';
+                }
+                return g.scene !== hub || g.combat ? 'story' : 'next';
+            }
+            // the day's meditation
+            if (grp === 'sit') { const sid = sitTaskId(g, scenes); if (p.done.sit < p.med.sit && taskOpen(g, scenes, sid) && !deadly(sid)) { p.done.sit++; run(sid); return done1(); } return null; }
+            if (grp === 'mer') { const mer = p.done.mer < p.med.mer ? firstMer(g, scenes) : null; if (mer && !deadly(mer)) { p.done.mer++; run(mer); return done1(); } return null; }
+            if (grp === 'qi') { if (p.done.qi < p.med.qi && taskOpen(g, scenes, QI_TASK) && !deadly(QI_TASK)) { p.done.qi++; run(QI_TASK); return done1(); } return null; }
+            return null;
+        };
+        // v0.11.211 (owner pick PR2 + PK1): the rows in the hub's order, the first one due and open now
+        let did = null;
+        for (const k of planOrder(g, p).keys) { did = rowStep(k); if (did) break; }
+        if (did === 'next') continue;
+        if (did) return end(did);
         // the day's end: the rest of the day off, then the evening's one way on
         const ev = EVENING_HOUR[hub] ?? 16;
         // RV1 (M2): the day off has its meals too: the rest of the day in steps to the next part of the day (11:00, 15:00), a meal at each

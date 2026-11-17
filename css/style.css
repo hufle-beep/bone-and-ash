@@ -214,6 +214,7 @@ button { font: inherit; color: inherit; }
 .cards > .prow, .cards > .note, .cards > .pbtns { grid-column: 1 / -1; }
 .prow .pl { min-width: 0; overflow-wrap: anywhere; }
 .prow .pl .note { display: block; color: var(--ink-dim); font-size: 0.76rem; }
+.prow .pl .prio { margin-left: 0.45rem; font: inherit; font-size: 0.85rem; padding: 0.05rem 0.2rem; min-height: 1.9rem; color: var(--ink); background: var(--paper, transparent); border: 1px solid var(--ink-dim); border-radius: 4px; vertical-align: middle; } /* v0.11.211 (PR2 + PK1): a row's place */
 .prow .pn { text-align: center; }
 .prow .btn.step { padding: 0.2rem 0.65rem; min-width: 2.4rem; }
 .pbtns { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.4rem; }

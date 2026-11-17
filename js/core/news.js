@@ -58,6 +58,7 @@ export const NOTES = [
     ['0.11.208', 'On a PC (a screen 1100 px wide or more) the story screen now uses the width: the story on the left, the cards in the middle, Results on the right, so the cards show without scrolling. The other tabs keep their column, centred. On the phone nothing changes.'],
     ['0.11.209', 'The long calendar (test): raw food now spoils, and a new card, "Smoke the catch.", keeps hare, fowl, crab and jade bracket for good (15 minutes a piece; Plan the week has a row for it). Yuki brings food home from one haul in three. Plain New game and your saves are unchanged.'],
     ['0.11.210', 'On a PC the cards stay where you scrolled after a tap. Yuki\'s HP bar shows in fights again. The long calendar (test): Plan the week has rows for "Sit with Yuki." (on by default) and the day\'s visits; a talk stops it the first time, then it answers as you did until the options change.'],
+    ['0.11.211', 'The long calendar (test): every row of Plan the week has a box with its place in the order, 1 first: the cards, Meditate, Smoke the catch, the visits and the talks. The plan takes them in that order; each stay keeps its order for good, and a row new since goes last.'],
 ];
 
 const parts = (v) => (/^\d+(\.\d+)*$/.test(String(v ?? '')) ? String(v).split('.').map(Number) : null);

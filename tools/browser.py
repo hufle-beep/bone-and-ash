@@ -983,6 +983,54 @@ def n1_ui(b, url):
     finally:
         ctx.close()
 
+def pr2_ui(b, url):
+    """v0.11.211 (owner picks PR2 + PK1): Plan the week's places. On the day-2 save at 412 px and 1366x768: every row has a drop-down of
+    1 to the rows' count by its label, inside its row and reachable; "Sits a day" shows 11 of 13; set to 1 it shows 1 and the save
+    keeps it (g.tasks.prio.wilds); with a card planned, Yuki's row set to 1 says "before the day's work" and Smoke's "after the day's work"
+    (RV1, L2); RV1 (M1, TG5): two ArrowUp keys move a row two places, the focus kept."""
+    save = (ROOT / 'saves/v0.11.204-long-wilds-day2.json').read_text()
+    for w, h in ((412, 800), (1366, 768)):
+        ctx = b.new_context(viewport={'width': w, 'height': h}, service_workers='block')
+        pg = ctx.new_page(); pg.on('pageerror', lambda e: fails.append(f"page error: {e}"))
+        try:
+            fresh(pg, url, "s => { localStorage.clear(); localStorage.setItem('boneash.auto', s); }", save)
+            where = f'PR2 ({w}x{h})'
+            info = pg.evaluate("""() => { const rows = [...document.querySelectorAll('.prow')];
+                return rows.map((r) => { const s = r.querySelector('select.prio'); if (!s) return null; s.scrollIntoView({ block: 'center' });
+                  const q = s.getBoundingClientRect(), c = r.getBoundingClientRect(), at = document.elementFromPoint(q.left + q.width / 2, q.top + q.height / 2);
+                  return [s.dataset.prio, s.options.length, Number(s.value), q.left >= c.left - 0.5 && q.right <= c.right + 0.5 && (at === s || s.contains(at))]; }); }""")
+            if not info or any(x is None for x in info): fails.append(f'{where}: a plan row has no place drop-down ({info})'); continue
+            n = len(info); bad = [x[0] for x in info if not x[3] or x[1] != n]
+            vals = sorted(x[2] for x in info)
+            if bad or vals != list(range(1, n + 1)): fails.append(f'{where}: drop-downs not 1..{n}, or outside their row / covered ({bad[:3]}, {vals})'); continue
+            sit = next(x for x in info if x[0] == 'med:sit')
+            if n != 13 or sit[2] != 11: fails.append(f'{where}: the wilds shows {n} rows, "Sits a day" at {sit[2]} (13 rows, 11 expected)')
+            # RV1 (L2): a card planned first, so the notes have the day's work to go by
+            n0 = pg.evaluate("localStorage.getItem('boneash.auto')"); pg.click('.prow button[data-d="1"]')
+            until(pg, "b => localStorage.getItem('boneash.auto') !== b", 3000, arg=n0); pg.wait_for_timeout(100)
+            for key, at in (('med:sit', '1'), ('door:yk_time', '1'), ('med:pres', '4')):  # Smoke at 4: after the planned card (3), before the cards at 0
+                n0 = pg.evaluate("localStorage.getItem('boneash.auto')")
+                pg.select_option(f'select[data-prio="{key}"]', at)
+                until(pg, "b => localStorage.getItem('boneash.auto') !== b", 3000, arg=n0); pg.wait_for_timeout(100)
+            got = pg.evaluate("""() => [Number(document.querySelector('select[data-prio="door:yk_time"]').value), Number(document.querySelector('select[data-prio="med:sit"]').value),
+                document.querySelector('select[data-prio="door:yk_time"]').closest('.prow').querySelector('.note')?.textContent || '',
+                document.querySelector('select[data-prio="med:pres"]').closest('.prow').querySelector('.note')?.textContent || '',
+                JSON.parse(JSON.parse(localStorage.getItem('boneash.auto')).data).tasks?.prio?.wilds || null]""")
+            if got[0] != 1 or got[1] != 2 or 'before the day\'s work' not in got[2] or 'after the day\'s work' not in got[3] or not got[4] or got[4].get('door:yk_time') != 1:
+                fails.append(f'{where}: after Sits a day and then Yuki to 1: Yuki {got[0]}, sits {got[1]} (1, 2), notes {got[2]!r} / Smoke {got[3]!r}, saved {got[4]}')
+            else: notes.append(f'PR2: Plan the week\'s places at {w}x{h}: {n} drop-downs, 1..{n}, inside their rows; a move saved; Yuki at 1: "{got[2]}"; Smoke: "{got[3]}"')
+            # RV1 (M1, TG5): the keyboard: an arrow key moves the row a place and the focus stays on its drop-down, so the next one moves it again
+            sel = 'select[data-prio="med:qi"]'
+            v0 = int(pg.eval_on_selector(sel, 'e => e.value')); pg.focus(sel); seen = []
+            for _ in range(2):
+                n0 = pg.evaluate("localStorage.getItem('boneash.auto')"); pg.keyboard.press('ArrowUp')
+                until(pg, "b => localStorage.getItem('boneash.auto') !== b", 3000, arg=n0); pg.wait_for_timeout(100)
+                seen.append(pg.evaluate("() => { const a = document.activeElement; return [a?.dataset?.prio || a?.tagName || '', Number(a?.value || 0)]; }"))
+            if seen != [['med:qi', v0 - 1], ['med:qi', v0 - 2]]: fails.append(f'{where} (RV1, M1): two ArrowUp on Gather Qi at {v0}: {seen} (the focus kept, {v0 - 1} then {v0 - 2})')
+            else: notes.append(f'PR2 (RV1, M1): two ArrowUp on Gather Qi: {v0} → {v0 - 2}, the focus kept at {w}x{h}')
+        finally:
+            ctx.close()
+
 def main(part=0):
     """v0.11.20: part 1 (Incremental Mode, the reload, no mode switch, two tabs) and part 2 (Saves, the menu, tooltips and scroll,
     the resting places) can run side by side, each with its own browser and server; no part = everything, in order."""
@@ -1087,6 +1135,7 @@ def main(part=0):
                 plan_forecast(b, url)  # v0.11.206 (FC1)
                 wide_layout(b, url)  # v0.11.208 (PC3)
                 n1_ui(b, url)  # v0.11.210 (N1: SC, DC-a, MS, TT)
+                pr2_ui(b, url)  # v0.11.211 (PR2 + PK1)
                 # 12. the FAQ (v0.11.83)
                 faq(pg, url)
             if three:

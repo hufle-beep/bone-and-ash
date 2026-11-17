@@ -2,6 +2,24 @@
 
 Started 2026-11-17 (v0.11.209), when `history-30.md` would have passed 20 KB with this move (owner pick U1, MD: history parts start at 20 KB, so a push uploads less). Older parts: `history-30.md` … `history.md`.
 
+## Moved from the handover in v0.11.211 (word for word)
+
+*(the last three versions: v0.11.208's decision and version notes)*
+
+*(the 35 KB check: two done open-item lines)*
+
+- **The plan's forecast (v0.11.206) and S6 (v0.11.207): done; their open-item lines moved word for word to `history-31.md` in v0.11.210 (the 35 KB check); S6's open, options later items are on `roadmap-time.md`.**
+- **The PC layout: done in v0.11.208 (PC3 picked 08:52); the owner 09:32 on his PC: "yes. the layout looks good".** The item as it stood, word for word, in `history-30.md`. **Found while building PC3: Yuki's HP bar (HB) and the tooltip's width (TT) done in v0.11.210 (N1).**
+
+- **v0.11.208: the PC layout (PC3) (the owner 08:40 "yes, I'm at my PC now" (rule 6: noted here); the options with screenshots at about 08:50; 08:52 "PC3 go"):** **Measured first** (read only; scratch prototypes outside the repo, CSS injected, headless Chromium; the four v0.11.7 test saves (31 cards; the Long Forest camp 24) and a fight; cards whole on the first screen at 1280×720 / 1366×768 / 1920×1080, of 31): today 0 / 0 / 2; **A** one wide column, the picture as a band: 0 / 0 / 8 (the band cuts heads off, James's face in the Long Forest; Results beside the cards, under the story); **B** two columns, the story left, the cards right with the Cards / Results switch: 18 / 18 / 28 (with P), Results a tap away; **C** three columns, story, cards, Results: 17 / 18 / 31 (with P + W), Results always in view, cards 2 a row at 1366; **P** the picture capped at 40% of the screen height (B and C): at 1366 400 → 307 px, story lines on the first screen 7 → 10 (Day Eight 7 → 10 of 17), at 1280 5 → 9, at 1920 none; **W** the story column 40% of the screen width (C): Long Forest cards at 1100 / 1280 / 1366 4 → 6, 6 → 10, 10 → 11, at 1920 none; in every option: the other tabs centred in the old 44 rem column (the prototype had the James tab stuck left, 828 px empty at 1366), fights the same layout (8 of 8 action cards at 1366 in B and C; today and A 0), under 1100 px and the phone unchanged (390×844 pixel for pixel), no page errors, no sideways scroll. **PC3 🟢 C + P + W (recommended) / PC2 🟡 B + P / PC1 🔴 A. Picked: PC3.** **As built:** the same numbers as the prototype (1100 / 1280 / 1366 / 1920 / 2560: the Long Forest 6 / 10 / 11 / 24 / 24 of 24, Results in view at all); P as a `max-height` on the 16:10 plate (never taller than its own width allows); the James and Journal tabs at 1366 pixel for pixel as before above the tab bar; 390, 800 and 1099 px pixel for pixel as before.
+
+## v0.11.208 — The PC layout (PC3)
+
+- **Files:** `css/style.css` (the PC layout block from 1100 px), `tools/browser.py` (`wide_layout`, part 2), `js/core/news.js` (What's new), `sw.js` (VERSION), `tests/README.md`, the docs (`roadmap-2.md` section 4's PC line moved to `roadmap-done-4.md`, new; v0.11.205's notes and the PC layout's open item moved to `history-30.md`).
+- **What:** see the version line. CSS only: no balance, save or text change; the phone and anything under 1100 px unchanged.
+- **Checks:** a game change (rule 2, CSS is a game file): the full `bash tools/check.sh` (exit 0, 705 s; 146 compared, 0 drifted, 3 moved more than 5 (log only, the same three as v0.11.202–v0.11.207: the guardian and the palisade wolf, random bots); `models-long` as v0.11.207. One earlier run stopped on the tools test's pins (roadmap.md's section 0 must name `roadmap-time.md`, and the changelog's parts as they are: a move of four rows not needed, undone), before the docs were final; no game step failed). The new browser guard `wide_layout` (three columns, 11 of 24 cards at 1366, 24 at 1920, Results in view, the cards scroll on their own, 130% text, the James tab centred, 1099 px a single column) fails on v0.11.207's CSS and without the centring line, passes on the build.
+- **Fable:** not used. **Opus:** no cold review (rule 9: no game logic, balance or story text).
+
 ## Moved from the handover in v0.11.210 (word for word)
 
 *(the 35 KB check: two open-item lines)*
