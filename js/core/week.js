@@ -16,8 +16,8 @@
  */
 import { longCal, storyDay, storyDayOf, calEnd, weekNights, LONG_CAL, STAY_DAYS } from './calendar.js';
 import { sceneView, choose } from './story.js';
-import { advance, jamesHpMax, canBreakThrough, clockParts, fnv1a } from './game.js';
-import { taskCards, taskOpen, runTask, taskState, taskOutcome, isTaskChoice, sitTaskId, QI_TASK, CARRY_TASK, carryHere, weekHub, workDay, workRoom, dayMeal } from './tasks.js';
+import { advance, jamesHpMax, canBreakThrough, clockParts, clockLabel, fnv1a } from './game.js';
+import { taskCards, taskOpen, runTask, taskState, taskOutcome, isTaskChoice, sitTaskId, QI_TASK, CARRY_TASK, carryHere, weekHub, workDay, workRoom, dayMeal, cardSpeed, NEW_LENGTH, WEEK_MULT } from './tasks.js';
 import { farewellNow } from '../story/act1_fallout.js'; // RV1 (L4)
 import { foodCount } from '../story/common.js';
 import { EVENING_HOUR } from '../story/oneoff.js';
@@ -126,7 +126,7 @@ const firstMer = (g, scenes) => taskCards(g, scenes).find((c) => c.kind === 'mer
  * Run the plan from here until a stop. Returns { stop, days: [{ day, lines }], steps }. `max`: a guard on the steps.
  * Every card is run with runTask and every story choice with choose, exactly as a tap would take them.
  */
-export function runWeek(g, scenes, { max = 600 } = {}) {
+export function runWeek(g, scenes, { max = 600, onStep = null } = {}) {
     const days = [];
     let cur = null;
     const say = (ls) => { if (!ls || !ls.length) return; const d = calDay(g); if (!cur || cur.day !== d) { cur = { day: d, lines: [] }; days.push(cur); } cur.lines.push(...ls); };
@@ -134,9 +134,14 @@ export function runWeek(g, scenes, { max = 600 } = {}) {
     if (!p) { const t = taskState(g); if (isRec(t.plan) && t.plan.hub === g.scene && t.plan.coil === coilKey(g)) { t.plan.running = false; t.plan.stop = 'week'; return { stop: 'week', days, steps: 0 }; } return { stop: 'left', days, steps: 0 }; }
     const hub = p.hub;
     p.running = true; p.stop = '';
-    const end = (stop) => { if (p) { p.stop = stop; if (stop !== 'evening') p.running = false; } return { stop, days, steps }; };
+    // FC1 (RV1, H1): the forecast's watch, called at each step's start (after the last step's bookkeeping: a card the day's
+    // routine left no time for is owed again by then) and at the stop, with the last card run and its result
+    let last = null;
+    const watch = () => { if (onStep) onStep(g, last); last = null; };
+    const end = (stop) => { watch(); if (p) { p.stop = stop; if (stop !== 'evening') p.running = false; } return { stop, days, steps }; };
     let steps = 0;
     for (; steps < max; steps++) {
+        watch();
         const m0 = g.minutes, s0 = g.scene;
         if (g.combat) return end('story');
         if (g.scene !== hub) {
@@ -149,7 +154,7 @@ export function runWeek(g, scenes, { max = 600 } = {}) {
             return end(NIGHT_SCENES.has(g.scene) ? 'evening' : 'story');
         }
         p = planHere(g);
-        if (!p) { const t = taskState(g); if (isRec(t.plan) && t.plan.hub === hub) { t.plan.running = false; t.plan.stop = 'week'; } return { stop: 'week', days, steps }; }
+        if (!p) { const t = taskState(g); if (isRec(t.plan) && t.plan.hub === hub) { t.plan.running = false; t.plan.stop = 'week'; } watch(); return { stop: 'week', days, steps }; }
         if (g.james.hp < 0.6 * jamesHpMax(g)) return end('hurt');
         if (g.james.satiety < 30 && foodCount(g) === 0) return end('hungry');
         if (canBreakThrough(g) && p.bt !== g.james.realm) { p.bt = g.james.realm; return end('breakthrough'); }
@@ -157,7 +162,7 @@ export function runWeek(g, scenes, { max = 600 } = {}) {
         if (p.done.d !== d) p.done = { d, sit: 0, mer: 0, qi: 0 };
         // RV1 (M3): the forecast's death check, as a tap's ("Starves here"): stop before a card that would end the Coil
         const deadly = (id) => { try { return taskOutcome(g, scenes, id)?.death || null; } catch { return null; } };
-        const run = (id) => { const r = runTask(g, scenes, id); say(r.lines); return r; };
+        const run = (id) => { const r = runTask(g, scenes, id); say(r.lines); last = { id, r }; return r; }; // FC1 (RV1, H1): seen by the next watch
         // the week's work: what is carried first, then the planned cards in order
         if (carryHere(g, hub) && taskOpen(g, scenes, CARRY_TASK)) { const dz = deadly(CARRY_TASK); if (dz) return end(dz === 'hunger' ? 'hungry' : 'hurt'); const r = run(CARRY_TASK); if (g.scene !== hub) return end('story'); if (r.skipped && g.minutes === m0) return end('stuck'); continue; }
         const next = Object.keys(p.items).find((id) => p.items[id] > 0 && taskOpen(g, scenes, id));
@@ -203,4 +208,144 @@ export function runWeek(g, scenes, { max = 600 } = {}) {
         if (g.minutes === m0 && g.scene === s0) return end('stuck');
     }
     return end('stuck');
+}
+
+/* ---------- v0.11.206 (owner pick FC1, with the Opus review's fixes RV1): the plan's forecast ---------- */
+/**
+ * E1: the plan's cards (and the week's work carried) against the hours left to the evenings this week: today's to the evening,
+ * then each later day's from its morning (the dry run's own mornings, RV1 M2; MORNING_HOUR only where the dry run has none).
+ * E2b + E3: a dry run of the plan on a copy of the save (`runWeek` itself, so it is exact: no dice, every number from the save):
+ * each planned card's finish (calendar minutes) or null (not this week), and where the plan stops and why, with Fed and HP then.
+ * M1 (the owner's pick mid-build): each Meditate row's days in full this week.
+ * E4: at an evening's choice the dry run takes the one taken there last time (`g.tasks.evc`, scene → index, noted by `storyTap`,
+ * the story taps of the long calendar's stays; dropped by every rewind like the rest of `g.tasks`), else the first way on.
+ * The dry run and the screen take the same steps: `storyTap` (a story choice), `afterStory` (the quiet night's fold, then the plan
+ * goes on by itself or not) are what main.js runs on a tap (RV1, TG1). Nothing here changes the save it is given.
+ */
+export const FORECAST_TEXT = { ...STOP_TEXT, fight: 'a fight' };
+/** E1: the hour a stay's working day is counted from where the dry run has no morning (it stopped first). */
+export const MORNING_HOUR = 7;
+/** A stay hub's own evening (two or more ways on): the hubs with an evening hour. */
+const WEEK_EVENING = new Set(Object.keys(EVENING_HOUR));
+/** E4: note the choice taken on an evening or night screen (long calendar, a stay's days only (RV1, L4); a hub only in its evening). */
+export function noteEvening(g, sceneId, index) {
+    if (!longCal(g) || !STAY_DAYS.has(storyDay(g)) || !(index >= 0) || index >= 1000) return;
+    if (!NIGHT_SCENES.has(sceneId) && !(WEEK_EVENING.has(sceneId) && sceneId === g.scene && weekHub(g) && workRoom(g, sceneId) <= 0)) return;
+    const t = taskState(g);
+    if (!isRec(t.evc)) t.evc = {};
+    t.evc[sceneId] = index;
+}
+/** RV1 (TG1, TG8): a story choice as a tap takes it: the evening's choice noted first, then taken. Returns choose's result. */
+export function storyTap(g, scenes, index) {
+    noteEvening(g, g.scene, index);
+    return choose(g, scenes, index);
+}
+/** RV1 (TG1): after a story choice (no fight): the quiet night's fold, then whether the plan goes on by itself. */
+export function afterStory(g, scenes) {
+    const fold = foldNight(g, scenes);
+    return { fold, resume: weekResume(g) };
+}
+/** The ways on of the screen (no card, no meta, no "one move"). */
+const waysOn = (g, scenes) => (TASK_HUBS[g.scene] ? hubStops(g, scenes) : sceneView(g, scenes).choices.filter((c) => !c.disabled && !META.test(String(c.label)))).filter((c) => c.index < 1000);
+/** E4: the choice the dry run takes here: the one taken last time, else the first way on; null if none. */
+export function eveningPick(g, scenes) {
+    const open = waysOn(g, scenes);
+    const last = g.tasks?.evc?.[g.scene];
+    return (open.find((c) => c.index === last) || open[0])?.index ?? null;
+}
+/** E3 (RV1, L3): a fight stops the plan when every way on of the screen starts one (a fight among other ways is the story's). */
+export const fightHere = (g, scenes) => {
+    if (g.combat) return true;
+    if (!scenes[g.scene]) return false;
+    const w = waysOn(g, scenes);
+    return w.length > 0 && w.every((c) => !!scenes[g.scene].choices[c.index]?.combat);
+};
+/** A week's card's whole time, as its row shows it (×7; its familiarity in). */
+export const cardWeekMinutes = (c) => Math.round(((c.minutes || 0) * NEW_LENGTH) / cardSpeed(c.fam || 0)) * WEEK_MULT;
+/** Minutes of the waking day `d` (from its midnight). */
+const ofDay = (g, d) => g.minutes - d * 1440;
+/**
+ * E2b + E3 + E4 + M1: the dry run. Returns { rows: { cardId: minutes | null }, med: { sit, mer, qi } days in full, days, stop,
+ * minutes, fed, hp, hpMax, mornings: { workDay: minutes of that day } }, or null (not a stay hub, or the dry run failed: RV1, L2).
+ * `max`: a guard on the evenings walked; `json`: the save as JSON, when the caller has it already.
+ */
+export function planForecast(g, scenes, { max = 60, json = null } = {}) {
+    if (!weekHub(g)) return null;
+    try {
+        const c = JSON.parse(json || JSON.stringify(g));
+        const p = planEnsure(c);
+        if (!p) return null;
+        p.running = false; p.stop = '';
+        const hub = p.hub, day0 = workDay(c), want = Object.keys(p.items).filter((id) => p.items[id] > 0);
+        const rows = Object.fromEntries(want.map((id) => [id, null]));
+        const days = Math.max(1, p.lastDay - day0 + 1), med = { ...p.med }, done = {}, mornings = {};
+        if (isRec(p.done) && p.done.d === day0) done[day0] = { ...p.done };
+        // the watch (RV1, H1: after each step's bookkeeping): a card is done when its count is gone and no carry of it is left
+        const onStep = (cg) => {
+            const q = cg.tasks.plan;
+            for (const id of want) if (rows[id] == null && !(q?.items?.[id] > 0) && cg.tasks.carry?.id !== id) rows[id] = cg.minutes;
+            if (isRec(q?.done) && q.done.d >= day0) done[q.done.d] = { ...q.done };
+            const d = workDay(cg); // M2: the morning is the first moment on the hub of a later day
+            if (cg.scene === hub && d > day0 && mornings[d] == null) mornings[d] = ofDay(cg, d);
+        };
+        const evening = () => NIGHT_SCENES.has(c.scene) || c.scene === hub;
+        let stop = 'stuck';
+        for (let k = 0; k < max; k++) {
+            stop = runWeek(c, scenes, { onStep }).stop;
+            if (stop === 'story' && fightHere(c, scenes)) stop = 'fight';
+            if (stop !== 'evening') break;
+            let on = false;
+            for (let j = 0; j < 12 && !on; j++) { // the evening's screens, a tap each, until the plan goes on by itself
+                if (workDay(c) > p.lastDay) { stop = 'week'; break; } // RV1 (M1): past the plan's last day the week is over
+                const idx = eveningPick(c, scenes);
+                if (idx == null) { stop = 'stuck'; break; }
+                const r = storyTap(c, scenes, idx);
+                if (r.combat) { stop = 'fight'; break; }
+                if (afterStory(c, scenes).resume) on = true;
+                else if (!evening()) { stop = fightHere(c, scenes) ? 'fight' : 'story'; break; }
+            }
+            if (!on) break;
+        }
+        const full = Object.fromEntries(Object.keys(med).map((k) => [k, med[k] > 0 ? Object.entries(done).filter(([d, x]) => Number(d) <= p.lastDay && (x[k] || 0) >= med[k]).length : 0]));
+        return { rows, med: full, days, stop, minutes: c.minutes, fed: Math.round(c.james.satiety), hp: Math.round(c.james.hp), hpMax: jamesHpMax(c), mornings };
+    } catch { return null; }
+}
+/** E1: minutes of work in the plan (each card's ×7 time; the carried work's rest) and minutes left to the evenings this week. */
+export function planHours(g, scenes, p = planHere(g), fc = null) {
+    if (!weekHub(g)) return null;
+    const hub = g.scene, ev = (EVENING_HOUR[hub] ?? 16) * 60;
+    let work = carryHere(g, hub)?.left || 0;
+    const cards = planCards(g, scenes);
+    for (const [id, n] of Object.entries(p?.items || {})) { const c = cards.find((x) => x.id === id); if (c && n > 0) work += n * cardWeekMinutes(c); }
+    const last = p ? p.lastDay : weekLastDay(g), today = workDay(g);
+    let left = workRoom(g, hub), morn = MORNING_HOUR * 60;
+    for (let d = today + 1; d <= last; d++) { if (fc?.mornings?.[d] != null) morn = fc.mornings[d]; left += Math.max(0, ev - morn); }
+    return { work, left };
+}
+/** The forecast, kept until the save changes (each − / + tap, each card): a plain redraw costs one JSON copy. */
+let memo = { key: '', out: null };
+export function forecastNow(g, scenes) {
+    let key;
+    try { key = JSON.stringify(g); } catch { return null; }
+    if (key !== memo.key) memo = { key, out: planForecast(g, scenes, { json: key }) };
+    return memo.out;
+}
+const durText = (m) => (m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} m` : ''}` : `${m} m`);
+const whenText = (m) => clockLabel(m).replace(',', '');
+/**
+ * RV1 (TG7): the plan panel's forecast texts, from the forecast: { rows: { cardId: ' · done Day 3 14:56' | ' · not this week' },
+ * med: { sit: '6 of 6 days', … }, total: the E1 line ('' for an empty plan: RV1, L1), outlook: the E3 line ('' with no forecast) }.
+ */
+export function planNotes(g, scenes) {
+    const p = planHere(g), fc = forecastNow(g, scenes), items = p?.items || {}, med = p?.med || {};
+    const rows = {}, mt = {};
+    if (fc) {
+        for (const id of Object.keys(items)) if (items[id] > 0) rows[id] = fc.rows[id] != null ? ` · done ${whenText(fc.rows[id])}` : ' · not this week';
+        for (const k of Object.keys(med)) if (med[k] > 0) mt[k] = `${fc.med[k] || 0} of ${fc.days} day${fc.days > 1 ? 's' : ''}`;
+    }
+    const h = planEmpty(p) ? null : planHours(g, scenes, p, fc);
+    const total = h ? `Cards ${durText(h.work)}; ${durText(h.left)} left to the evenings this week.` : '';
+    const then = fc ? ` Fed ${fc.fed}, HP ${fc.hp}/${fc.hpMax} then.` : '';
+    const outlook = !fc ? '' : fc.stop === 'week' ? `Forecast: it runs to the week's end (${whenText(fc.minutes)}).${then}` : `Forecast: it stops ${whenText(fc.minutes)}: ${FORECAST_TEXT[fc.stop] || fc.stop}.${then}`;
+    return { rows, med: mt, total, outlook };
 }

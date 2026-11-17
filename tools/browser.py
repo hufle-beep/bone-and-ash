@@ -699,6 +699,45 @@ def plan_rows(b, url):
         check_text(pg, f'Plan the week ({w} px)', strict=False)
         ctx.close()
 
+def plan_forecast(b, url):
+    """v0.11.206 (owner pick FC1, the test that the forecast equals the run): on saves/v0.11.204-long-wilds-day2.json (the wilds on
+    Day 2 06:40, Fed 42, no food) one + on Forage's first row shows its finish and the outlook; Run the week, then the night's
+    first way on (the forecast's own pick, E4), runs to where the forecast said: the same stop, the same minute, the same Fed and HP."""
+    save = (ROOT / 'saves/v0.11.204-long-wilds-day2.json').read_text()
+    ctx = b.new_context(viewport={'width': 412, 'height': 800}, service_workers='block')
+    pg = ctx.new_page(); pg.on('pageerror', lambda e: fails.append(f"page error: {e}"))
+    try:
+        fresh(pg, url, "s => { localStorage.clear(); localStorage.setItem('boneash.auto', s); }", save)
+        plus = pg.query_selector('button[data-plan="wild_forage:0"][data-d="1"]')
+        if not plus: fails.append('FC1: no + on the Forage row of Plan the week'); return
+        plus.evaluate("e => e.scrollIntoView({ block: 'center' })"); plus.click()
+        until(pg, "() => /Forecast: /.test(document.body.innerText) && /done Day|not this week/.test(document.body.innerText)", 5000)
+        txt = pg.evaluate("document.body.innerText")
+        m = re.search(r'Forecast: it (?:stops|runs to the week\'s end) \(?(Day \d+ \d\d:\d\d)\)?:? ?([^.]*)\.(?: Fed (\d+), HP (\d+)/(\d+) then\.)?', txt)
+        row = re.search(r'a card · (done Day \d+ \d\d:\d\d|not this week)', txt)
+        tot = re.search(r'Cards ([^;]+); ([^.]+) left to the evenings this week\.', txt)
+        if not (m and row and tot): fails.append(f'FC1: the plan shows no forecast after a + (outlook {bool(m)}, row {bool(row)}, total {bool(tot)})'); return
+        want = (m.group(1), m.group(3), m.group(4))
+        run = pg.query_selector('button[data-week="run"]'); run.evaluate("e => e.scrollIntoView({ block: 'center' })"); run.click()
+        for _ in range(12):  # the evening's choices, the forecast's pick each time (the lowest way on), until the plan stops elsewhere
+            until(pg, "() => !!document.querySelector('button.card.story[data-story]:not([disabled])') || !!document.querySelector('button[data-week=\"run\"]')", 5000)
+            st = json.loads(pg.evaluate("localStorage.getItem('boneash.auto')")); st = json.loads(st['data']) if isinstance(st.get('data'), str) else st
+            if st.get('scene') == 'wilds': break
+            ids = sorted(int(x) for x in pg.eval_on_selector_all('button.card.story[data-story]:not([disabled])', "els => els.filter(e => !/^(Yuki: change form|Story Mode only)/.test(e.textContent)).map(e => e.dataset.story)") if int(x) < 1000)
+            if not ids: break
+            before = pg.evaluate("localStorage.getItem('boneash.auto')")
+            tap(pg, pg.query_selector(f'button.card.story[data-story="{ids[0]}"]'))
+            until(pg, "b => localStorage.getItem('boneash.auto') !== b", 8000, arg=before)
+        st = json.loads(pg.evaluate("localStorage.getItem('boneash.auto')")); st = json.loads(st['data']) if isinstance(st.get('data'), str) else st
+        mins = st.get('minutes', 0); d, hh, mm = mins // 1440 + 1, (mins % 1440) // 60, mins % 60
+        got = (f'Day {d} {hh:02d}:{mm:02d}', str(round(st['james']['satiety'])), str(round(st['james']['hp'])))
+        stop = ((st.get('tasks') or {}).get('plan') or {}).get('stop')
+        if got != want or stop != 'hungry': fails.append(f'FC1: the forecast said {want} ({m.group(2)}), the run reached {got}, stop {stop}')
+        else: notes.append(f'FC1: the forecast ({row.group(1)}; cards {tot.group(1)}, {tot.group(2)} to the evenings; stops {want[0]}, {m.group(2)}, Fed {want[1]}, HP {want[2]}) is where Run the week stopped')
+        check_text(pg, 'the plan\'s forecast (FC1)', strict=False)
+    finally:
+        ctx.close()
+
 def poll(pg, js, ms=20000):
     """v0.11.39: evaluate js (may return a promise) until it is truthy; the last value (falsy when the time ran out)."""
     end = time.time() + ms / 1000; v = None
@@ -927,6 +966,7 @@ def main(part=0):
                 hv1(pg, url)
                 # 15. the long calendar's Plan the week at a phone's width (v0.11.205, P1)
                 plan_rows(b, url)
+                plan_forecast(b, url)  # v0.11.206 (FC1)
                 # 12. the FAQ (v0.11.83)
                 faq(pg, url)
             if three:

@@ -5263,6 +5263,169 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       assert(/else weekAfter\(\);/.test(M) && /function weekAfter\(\)/.test(M) && /hub && weekHub\(g\) \? weekHtml\(\)/.test(M) && /data-week="run"/.test(M) && /b\.dataset\.plan/.test(M), `${T}: main.js folds after a story choice, resumes the plan and draws its panel`); }
 }
 
+// v0.11.206 (owner pick FC1, with the Opus review's fixes RV1): the plan's forecast (js/core/week.js planForecast, planHours,
+// planNotes, forecastNow, noteEvening, storyTap, afterStory, eveningPick, fightHere; js/main.js weekHtml, playChoice, weekAfter).
+// The forecast is a dry run of the plan on a copy. Here the real run plays the save itself with the steps main.js takes on the
+// taps (Run the week = runWeek; a story tap = storyTap; then afterStory: the fold, and the plan goes on by itself or not), the
+// player taking at each evening the forecast's own pick (E4), and it watches the run its own way (RV1, TG1): a card is done when
+// its result says the week's work is done ("A week's work: …, done." or the carried work's "done, … in all."), a skipped card
+// (the day's meal and sit came first) never counts, and a Meditate day counts its own runs. Every number the panel shows must be
+// the one the real run reaches.
+{
+    const Tk = await import('../js/core/tasks.js');
+    const Wk = await import('../js/core/week.js');
+    const C = await import('../js/core/calendar.js');
+    const T = 'FC1 (the forecast)';
+    const { clockLabel } = await import('../js/core/game.js');
+    const base = deserialize(readFileSync(new URL('../saves/v0.11.204-long-wilds-day2.json', import.meta.url), 'utf8'), { force: true });
+    const copy = (g = base) => JSON.parse(JSON.stringify(g));
+    const food = (g) => { g.james.satiety = 100; g.inventory.hare_raw = 30; };
+    const isFight = (g, S) => Wk.fightHere(g, S);
+    /** The real run on the save itself, as main.js takes it. */
+    const realRun = (g, S = SCENES) => {
+        const p0 = Wk.planEnsure(g), hub = p0.hub, day0 = Tk.workDay(g), last = p0.lastDay, want = { ...p0.items };
+        const units = {}, rows = Object.fromEntries(Object.keys(want).filter((id) => want[id] > 0).map((id) => [id, null]));
+        const runs = {}, mornings = {}; let owner = g.tasks.carry ? 'before the plan' : null;
+        const sid = () => Tk.sitTaskId(g, S);
+        if (p0.done?.d === day0) runs[day0] = { sit: p0.done.sit, mer: p0.done.mer, qi: p0.done.qi };
+        const onStep = (cg, l) => {
+            const d = Tk.workDay(cg);
+            if (cg.scene === hub && d > day0 && mornings[d] == null) mornings[d] = cg.minutes - d * 1440;
+            if (!l || l.r.skipped) return;
+            const L = l.r.lines || [];
+            let doneOf = null;
+            if (l.id === Tk.CARRY_TASK) { if (L.some((x) => /: done, .* in all\.$/.test(x))) { doneOf = owner; owner = null; } }
+            else if (L.some((x) => /^A week's work: .*, done\.$/.test(x))) doneOf = l.id;
+            else if (L.some((x) => /^A week's work: .*still to go/.test(x))) owner = l.id;
+            if (doneOf && doneOf in rows) { units[doneOf] = (units[doneOf] || 0) + 1; if (units[doneOf] === want[doneOf]) rows[doneOf] = cg.minutes; }
+            const kind = l.id === sid() ? 'sit' : l.id === Tk.QI_TASK ? 'qi' : /^mer|meridian/i.test(l.id) || l.id === Tk.MER_TASK ? 'mer' : null;
+            if (kind && d >= day0) { const x = runs[d] || (runs[d] = { sit: 0, mer: 0, qi: 0 }); x[kind]++; }
+        };
+        let stop = 'stuck';
+        for (let k = 0; k < 60; k++) {
+            stop = Wk.runWeek(g, S, { onStep }).stop;
+            if (stop === 'story' && isFight(g, S)) stop = 'fight';
+            if (stop !== 'evening') break;
+            let on = false;
+            for (let j = 0; j < 12 && !on; j++) {
+                if (Tk.workDay(g) > last) { stop = 'week'; break; }
+                const r = Wk.storyTap(g, S, Wk.eveningPick(g, S));
+                if (r.combat) { stop = 'fight'; break; }
+                if (Wk.afterStory(g, S).resume) on = true;
+                else if (!Wk.NIGHT_SCENES.has(g.scene) && g.scene !== hub) { stop = isFight(g, S) ? 'fight' : 'story'; break; }
+            }
+            if (!on) break;
+        }
+        const med = Object.fromEntries(Object.keys(p0.med).map((k) => [k, p0.med[k] > 0 ? Object.entries(runs).filter(([d, x]) => Number(d) <= last && x[k] >= p0.med[k]).length : 0]));
+        return { rows, med, stop, minutes: g.minutes, fed: Math.round(g.james.satiety), hp: Math.round(g.james.hp), mornings };
+    };
+    const cmp = (name, g, S = SCENES) => {
+        const j0 = JSON.stringify(g), f = Wk.planForecast(g, S);
+        assert(JSON.stringify(g) === j0, `${T}: the forecast changes nothing in the save (${name})`);
+        const r = realRun(copy(g), S);
+        const same = !!f && f.stop === r.stop && f.minutes === r.minutes && f.fed === r.fed && f.hp === r.hp && JSON.stringify(f.rows) === JSON.stringify(r.rows) && JSON.stringify(f.med) === JSON.stringify(r.med);
+        assert(same, `${T} (TG1): the forecast equals the real run: ${name} (forecast ${JSON.stringify(f && { ...f, hpMax: undefined, mornings: undefined })} / real ${JSON.stringify({ ...r, mornings: undefined })})`);
+        return { f, r };
+    };
+    const cards = Wk.planCards(base, SCENES).map((c) => c.id);
+    const seen = {};
+    const plans = {
+        'the save as it is, 2 cards': (g) => { Wk.planSet(g, cards[0], 1); Wk.planSet(g, cards[1], 1); },
+        'the save as it is, a card and 2 sits a day': (g) => { Wk.planSet(g, 'wild_forage:3', 1); Wk.planSet(g, 'med:sit', 2); },
+        'with food, 4 mixed cards, a sit and a session a day': (g) => { food(g); for (const id of ['wild_forage:3', 'wild_hunt:2', 'wild_train:1', 'wild_forage:1']) Wk.planSet(g, id, 1); Wk.planSet(g, 'med:sit', 1); Wk.planSet(g, 'med:mer', 1); },
+        'with food, Forage 0–3': (g) => { food(g); for (const id of ['wild_forage:0', 'wild_forage:1', 'wild_forage:2', 'wild_forage:3']) Wk.planSet(g, id, 1); },
+        'with food, Practice 1–3': (g) => { food(g); for (const id of ['wild_train:1', 'wild_train:2', 'wild_train:3']) Wk.planSet(g, id, 1); },
+        'with food, all 8 cards': (g) => { food(g); for (const id of cards) Wk.planSet(g, id, 1); },
+        'with food, a card twice': (g) => { food(g); Wk.planSet(g, 'wild_forage:3', 2); },
+        'with food, Meditate only (2, 2, 2)': (g) => { food(g); Wk.planSet(g, 'med:sit', 2); Wk.planSet(g, 'med:mer', 2); Wk.planSet(g, 'med:qi', 2); },
+        'with food, the night\'s other choice last time (E4)': (g) => { food(g); Wk.planSet(g, cards[0], 1); g.tasks.evc = { night: 3 }; },
+        'with food, an empty plan': (g) => { food(g); },
+        // TG2: a plan made late (the day's sit still due; H1: the card skipped today, done on Day 4), work carried from before the plan, a card never open
+        'TG2: made at 14:00 with the day\'s sit due': (g) => { food(g); g.james.satiety = 60; g.james.qi = 50; delete g.tasks.routine; g.minutes = 1440 + 14 * 60; Wk.planSet(g, 'wild_forage:0', 1); },
+        'TG2: made at 13:45 with the day\'s sit due': (g) => { food(g); g.james.satiety = 60; g.james.qi = 50; delete g.tasks.routine; g.minutes = 1440 + 13 * 60 + 45; Wk.planSet(g, 'wild_forage:0', 1); },
+        'TG2: work carried from before the plan': (g) => { food(g); runTask(g, SCENES, 'wild_forage:0'); Wk.planSet(g, 'wild_forage:0', 1); Wk.planSet(g, 'wild_forage:3', 1); },
+        'TG2: a card never open': (g) => { food(g); Wk.planSet(g, 'wild_forage:3', 1); Wk.planEnsure(g).items['wild_forage:99'] = 1; },
+    };
+    for (const [name, set] of Object.entries(plans)) { const g = copy(); set(g); seen[name] = { g, ...cmp(name, g) }; }
+    { const a = seen['the save as it is, 2 cards'].f, b = seen['with food, 4 mixed cards, a sit and a session a day'].f, c = seen['with food, all 8 cards'].f, m = seen['with food, Meditate only (2, 2, 2)'].f, s2 = seen['the save as it is, a card and 2 sits a day'].f;
+      assert(a.stop === 'hungry' && clockParts(a.minutes).day === 3 && Object.values(a.rows).includes(null), `${T} (E3): the save as it is stops hungry on Day 3, a card not this week (${a.stop}, ${clockLabel(a.minutes)})`);
+      assert(b.stop === 'story' && clockParts(b.minutes).day === 8 && Object.values(b.rows).every((x) => x != null) && b.med.sit === b.days && b.days === 6, `${T} (E2b, E3, M1): with food 4 mixed cards finish, the 7th night's event stops it, a sit every day (${b.stop} ${clockLabel(b.minutes)}, ${JSON.stringify(b.med)} of ${b.days})`);
+      const fin = Object.values(c.rows).filter((x) => x != null).length; assert(fin >= 1 && fin < 8, `${T} (E2b): all 8 cards: some not this week (${fin} of 8 finish)`);
+      assert(m.med.sit === m.days && m.med.mer === m.days && m.med.qi < m.days, `${T} (M1): Meditate only: every sit and session a day, Gather Qi short a day (${JSON.stringify(m.med)} of ${m.days}, ${m.stop})`);
+      assert(s2.med.sit === 1 && s2.days === 6, `${T} (M1): the save as it is: the sits a day 1 of 6 days (it stops hungry; ${JSON.stringify(s2.med)})`);
+      const late = seen['TG2: made at 14:00 with the day\'s sit due'].f.rows['wild_forage:0']; assert(late != null && clockParts(late).day === 4, `${T} (TG2, H1): a card the day's sit left no time for today is not done today (${clockLabel(late)})`);
+      const never = seen['TG2: a card never open'].f.rows['wild_forage:99']; assert(never === null, `${T} (TG2): a card never open is not this week`);
+      const tw = seen['with food, a card twice'].f.rows['wild_forage:3']; const o1 = copy(); food(o1); Wk.planSet(o1, 'wild_forage:3', 1); const once = Wk.planForecast(o1, SCENES).rows['wild_forage:3']; assert(tw != null && once != null && tw > once, `${T} (E2b): a card twice finishes after its second run`); }
+    // TG3 (M2): the hours line counts each later day from the dry run's own morning, and agrees with the rows on the wilds plans
+    for (const name of ['with food, Forage 0–3', 'with food, Practice 1–3', 'with food, 4 mixed cards, a sit and a session a day', 'with food, all 8 cards', 'the save as it is, 2 cards']) {
+        const { g, f, r } = seen[name]; const h = Wk.planHours(g, SCENES, Wk.planHere(g), f); const p = Wk.planHere(g), d0 = Tk.workDay(g);
+        let want = Tk.workRoom(g, 'wilds'), mo = Wk.MORNING_HOUR * 60; for (let d = d0 + 1; d <= p.lastDay; d++) { if (r.mornings[d] != null) mo = r.mornings[d]; want += Math.max(0, 15 * 60 - mo); }
+        const all = Object.values(f.rows).every((x) => x != null);
+        assert(JSON.stringify(f.mornings) === JSON.stringify(r.mornings) && Object.keys(f.mornings).every((d) => Number(d) > d0), `${T} (E1, TG3): ${name}: the dry run's mornings are the real run's, later days only (${JSON.stringify(f.mornings)})`);
+        assert(h.left === want && (f.stop === 'hungry' || (h.work <= h.left) === all), `${T} (E1, TG3): ${name}: ${h.left} min to the evenings (the real run's mornings: ${want}); cards ${h.work} min, all done ${all}`); }
+    { const g = copy(); g.james.hp = 1; Wk.planSet(g, 'wild_forage:0', 1); const f = Wk.planForecast(g, SCENES), h = Wk.planHours(g, SCENES, Wk.planHere(g), f);
+      assert(f.stop === 'hurt' && Wk.MORNING_HOUR === 7 && h.left === (15 * 60 - (6 * 60 + 40)) + 5 * (15 - 7) * 60, `${T} (E1): with no morning in the dry run the day counts from 07:00 (${f.stop}, ${h.left}; 500 + 5 × 480)`); }
+    // TG4: the carried work is in the plan's total, exactly
+    { const g = copy(); Wk.planSet(g, 'wild_forage:3', 1); runTask(g, SCENES, 'wild_forage:0'); const per = Object.fromEntries(Wk.planCards(g, SCENES).map((c) => [c.id, Wk.cardWeekMinutes(c)])); const h = Wk.planHours(g, SCENES);
+      assert(g.tasks.carry && h.work === g.tasks.carry.left + per['wild_forage:3'], `${T} (E1, TG4): the carried work's rest and the planned card (${h.work} = ${g.tasks.carry?.left} + ${per['wild_forage:3']})`); }
+    // TG5: a hub's evening with two ways on (never a card), a fight as the hub's only way on, a fight from the evening's tap, a fight among other ways
+    { const night = SCENES.night, wilds = SCENES.wilds, fightC = SCENES.night_attack.choices.find((x) => x.combat).combat;
+      const wayOn = wilds.choices.findIndex((c, i) => !Tk.isTaskChoice(SCENES, 'wilds', i) && /camp|Night/i.test(String(typeof c.text === 'function' ? '' : c.text)));
+      const S2 = { ...SCENES, wilds: { ...wilds, choices: [...wilds.choices, { ...wilds.choices[wayOn], text: 'Walk the shore before the fire.' }] } };
+      const g = copy(); food(g); Wk.planSet(g, 'wild_forage:3', 1); g.minutes = 1440 + 15 * 60 + 30; g.tasks.routine = { d: Tk.workDay(g), meals: 'bls', sit: true };
+      const pick = Wk.eveningPick(g, S2); assert(wayOn >= 0 && pick != null && !Tk.isTaskChoice(S2, 'wilds', pick), `${T} (TG5, E4): the hub's evening pick is a way on, never a card (${pick})`);
+      const { f } = cmp('TG5: the hub\'s evening with two ways on', g, S2); assert(f && f.stop !== 'stuck', `${T} (TG5): two ways on: the plan goes on (${f?.stop})`);
+      const S3 = { ...SCENES, wilds: { ...wilds, choices: wilds.choices.map((c, i) => (i === wayOn ? { ...c, combat: fightC } : c)) } };
+      const h = copy(); food(h); Wk.planSet(h, 'wild_forage:3', 1); h.minutes = 1440 + 15 * 60 + 30; h.tasks.routine = { d: Tk.workDay(h), meals: 'bls', sit: true };
+      const f3 = cmp('TG5: a fight as the hub\'s only way on', h, S3).f; assert(f3?.stop === 'fight', `${T} (TG5, L3): a fight as the only way on is a fight (${f3?.stop})`);
+      const S4 = { ...SCENES, night: { ...night, choices: night.choices.map((c, i) => (i === 1 ? { ...c, combat: fightC } : c)) } };
+      const k = copy(); food(k); Wk.planSet(k, 'wild_forage:3', 1);
+      const f4 = cmp('TG5: a fight from the evening\'s tap', k, S4).f; assert(f4?.stop === 'fight' && clockParts(f4.minutes).day === 2, `${T} (TG5): a fight from the night's tap stops it that night (${f4?.stop} ${f4 && clockLabel(f4.minutes)})`);
+      const e = copy(seen['with food, 4 mixed cards, a sit and a session a day'].g); const fe = Wk.planForecast(e, SCENES);
+      assert(fe.stop === 'story' && /the story needs you/.test(Wk.planNotes(e, SCENES).outlook), `${T} (L3): the 7th night's event (a fight is one way) is the story's, not "a fight" (${fe.stop})`); }
+    // TG6: the Fallout (its supper's choice each night; the week's end into Ya's arrival: M1), the Heart, the village
+    { const fo = ensureBars(newGame(99300, { closed: true, cal: 7 })); fo.flags.ending = 'paid'; fo.flags.palisade = true; fo.flags.wolf = 'driven'; fo.minutes = 44 * 1440 + 7 * 60; goTo(fo, SCENES, 'fo_ashfall'); food(fo);
+      const pid = Wk.planCards(fo, SCENES).find((c) => /^fo_palisade/.test(c.id))?.id; Wk.planSet(fo, pid, 1);
+      const { f } = cmp('TG6: the Fallout, a Palisade card', fo); assert(f?.stop === 'week' && f.rows[pid] != null && /runs to the week's end/.test(Wk.planNotes(fo, SCENES).outlook), `${T} (TG6, M1): the Fallout's week ends at its last morning, not in Ya's arrival (${f?.stop} ${f && clockLabel(f.minutes)})`);
+      const he = ensureBars(newGame(99301, { closed: true, cal: 7 })); he.flags.ending = 'paid'; he.minutes = (C.calStart(he, 16) - 1) * 1440 + 8 * 60; goTo(he, SCENES, 'heart_hub'); food(he);
+      const hc = Wk.planCards(he, SCENES).map((c) => c.id); if (hc[0]) Wk.planSet(he, hc[0], 1); Wk.planSet(he, 'med:sit', 1);
+      const fh = cmp('TG6: the Heart, a card and a sit a day', he).f; assert(Tk.weekHub(he) && fh && fh.stop !== 'stuck', `${T} (TG6): the Heart's forecast (${fh?.stop} ${fh && clockLabel(fh.minutes)})`);
+      const vi = ensureBars(newGame(99302, { closed: true, cal: 7 })); vi.minutes = (C.calStart(vi, 5) - 1) * 1440 + 8 * 60; goTo(vi, SCENES, 'ashfall'); food(vi);
+      const vc = Wk.planCards(vi, SCENES).map((c) => c.id); if (vc[0]) Wk.planSet(vi, vc[0], 1);
+      const fv = Tk.weekHub(vi) ? cmp('TG6: the village, a card', vi).f : null; assert(Tk.weekHub(vi) && fv && fv.stop !== 'stuck', `${T} (TG6): the village's forecast (${fv?.stop})`); }
+    // E4: the evening's choice taken last time; else the first way on; noted by a tap before it is taken (TG8), a stay's days only (L4)
+    { const g = copy(); food(g); goTo(g, SCENES, 'night'); g.minutes = 1440 + 21 * 60;
+      const first = Wk.eveningPick(g, SCENES); g.tasks.evc = { night: 3 }; const again = Wk.eveningPick(g, SCENES); g.tasks.evc = { night: 99 }; const gone = Wk.eveningPick(g, SCENES);
+      assert(first === 1 && again === 3 && gone === 1, `${T} (E4): the night's first way on, the one taken last time, the first again when that one is gone (${first}, ${again}, ${gone})`);
+      const n = copy(); goTo(n, SCENES, 'night'); n.minutes = 1440 + 21 * 60; delete n.tasks.evc; Wk.storyTap(n, SCENES, 3);
+      assert(n.tasks.evc?.night === 3 && Object.keys(n.tasks.evc).length === 1 && n.scene !== 'night', `${T} (E4, TG8): a tap notes the night's choice before it is taken (${JSON.stringify(n.tasks.evc)}, now ${n.scene})`);
+      const h = copy(); Wk.noteEvening(h, 'wilds', 2); assert(!h.tasks.evc?.wilds, `${T} (E4): a hub's choice in the day is not an evening's`);
+      h.minutes = 1440 + 16 * 60; Wk.noteEvening(h, 'wilds', 2); assert(h.tasks.evc?.wilds === 2, `${T} (E4): a hub's choice in its evening is`);
+      const o = ensureBars(newGame(99201, { closed: true })); goTo(o, SCENES, 'night'); Wk.noteEvening(o, 'night', 3); assert(!o.tasks?.evc, `${T} (E4): the old calendar notes nothing`);
+      const t7 = ensureBars(newGame(99203, { closed: true, cal: 7 })); t7.minutes = (C.calStart(t7, 7) - 1) * 1440 + 22 * 60; goTo(t7, SCENES, 'night'); Wk.noteEvening(t7, 'night', 3); assert(!t7.tasks?.evc?.night, `${T} (E4, L4): a night off the stays notes nothing (story day ${C.storyDay(t7)})`);
+      const d = deserialize(serialize(n)); assert(d.tasks.evc?.night === 3, `${T} (E4): the note goes through a save`);
+      const f1 = seen['with food, the night\'s other choice last time (E4)'].f, g1 = copy(); food(g1); Wk.planSet(g1, cards[0], 1); const f0 = Wk.planForecast(g1, SCENES);
+      assert(JSON.stringify(f1) !== JSON.stringify(f0), `${T} (E4): the night's other choice changes the forecast (${f0.stop} ${clockLabel(f0.minutes)} HP ${f0.hp} / ${f1.stop} ${clockLabel(f1.minutes)} HP ${f1.hp})`); }
+    // TG7: the panel's texts; the forecast kept until the save changes, and redone when it does (each − / + tap)
+    { const g = copy(); Wk.planSet(g, 'wild_forage:0', 1); Wk.planSet(g, 'wild_forage:1', 1); Wk.planSet(g, 'med:sit', 2);
+      const N = Wk.planNotes(g, SCENES), f = Wk.forecastNow(g, SCENES);
+      assert(f === Wk.forecastNow(g, SCENES), `${T} (TG7): the forecast is kept while the save is the same`);
+      assert(N.rows['wild_forage:0'] === ` · done ${clockLabel(f.rows['wild_forage:0']).replace(',', '')}` && N.rows['wild_forage:1'] === ' · not this week' && N.med.sit === '1 of 6 days' && !('mer' in N.med), `${T} (TG7): the rows: done, not this week, the sits' days (${JSON.stringify(N)})`);
+      assert(/^Cards \d+ h( \d+ m)?; \d+ h( \d+ m)? left to the evenings this week\.$/.test(N.total) && N.outlook === `Forecast: it stops ${clockLabel(f.minutes).replace(',', '')}: Fed is under 30 and there is no food. Fed ${f.fed}, HP ${f.hp}/${f.hpMax} then.`, `${T} (TG7): the total and the outlook (${N.total} | ${N.outlook})`);
+      Wk.planSet(g, 'wild_forage:1', 0); const N2 = Wk.planNotes(g, SCENES); assert(Wk.forecastNow(g, SCENES) !== f && !('wild_forage:1' in N2.rows), `${T} (TG7, F9): a − tap redoes the forecast`);
+      const e = copy(); food(e); const NE = Wk.planNotes(e, SCENES); assert(NE.total === '' && /^Forecast: it stops /.test(NE.outlook), `${T} (L1): an empty plan: no hours line, the outlook kept (${NE.outlook})`);
+    }
+    // L2: a dry run that fails shows no forecast (not "nothing left it can do")
+    { const g = copy(); Wk.planSet(g, 'wild_forage:0', 1); const S5 = { ...SCENES, night: { ...SCENES.night, get choices() { throw new Error('planted'); } } };
+      assert(Wk.planForecast(g, S5) === null, `${T} (L2): a dry run that throws gives no forecast`); }
+    // nothing off a stay hub, nothing on the old calendar
+    { const o = ensureBars(newGame(99202, { closed: true })); goTo(o, SCENES, 'wilds'); assert(Wk.planForecast(o, SCENES) === null && Wk.planHours(o, SCENES) === null, `${T}: no forecast on the old calendar`);
+      const g = copy(); goTo(g, SCENES, 'night'); assert(Wk.planForecast(g, SCENES) === null, `${T}: no forecast off the stay hub`); }
+    // the screen: main.js takes the shared steps and draws planNotes; the scene's text before the panels (L5)
+    { const M = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+      assert(/storyTap\(g, SCENES, idx\)/.test(M) && !/\bchoose\(g, SCENES, idx\)/.test(M) && /afterStory\(g, SCENES\)/.test(M) && /planNotes\(g, SCENES\)/.test(M) && M.indexOf('const proseOut = proseHtml(v)') < M.indexOf("hub && weekHub(g) ? weekHtml()"), `${T}: main.js takes the shared steps, draws planNotes, the scene's text first`); }
+}
+
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));
 console.log('fights', sorted(fights));
 console.log('endings', sorted(endings), 'longest run', maxSteps, 'scenes', Object.keys(SCENES).length);

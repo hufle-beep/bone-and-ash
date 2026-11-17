@@ -1,6 +1,6 @@
 /** Bone and Ash — UI. Renders the story, combat, sheet, hammerspace, journal and saves. */
 import { LONG_CAL } from './core/calendar.js'; // v0.11.203 (owner pick T1, TS1)
-import { foldNight, runWeek, planCards, planHere, planEnsure, planSet, planEmpty, planEndDay, planClear, weekResume, STOP_TEXT } from './core/week.js'; // v0.11.204 (owner pick W1: R3, P1)
+import { runWeek, planCards, planHere, planEnsure, planSet, planEmpty, planEndDay, planClear, STOP_TEXT, planNotes, storyTap, afterStory } from './core/week.js'; // v0.11.204 (owner pick W1: R3, P1); v0.11.206 (FC1, RV1): the forecast's texts, the shared tap steps
 import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel, fragileKnife, knifeSwings } from './core/forms.js';
 import { coilMult, coilMultNext, wakeDay, fmtMult, clockParts, REL_HIDDEN } from './core/game.js'; // v0.11.137 (HV1): REL_HIDDEN
 import {
@@ -213,9 +213,9 @@ function doTask(id) {
  * once (one Results entry); P1: a plan stopped by the evening's choice goes on by itself the next morning. */
 function weekAfter() {
     if (!g || g.cal !== LONG_CAL || g.combat) return;
-    const f = foldNight(g, SCENES);
+    const { fold: f, resume } = afterStory(g, SCENES); // v0.11.206 (FC1, RV1 TG1): the steps the forecast's dry run takes
     if (f.steps) addResult('A quiet night', f.lines.length ? f.lines : [`${f.steps} screen${f.steps > 1 ? 's' : ''} seen on an earlier night, walked at once.`], false, { quiet: true });
-    if (weekResume(g)) runPlan(); // RV1 (L1): also a plan whose week just ended, so "The week is over." shows
+    if (resume) runPlan(); // RV1 (L1): also a plan whose week just ended, so "The week is over." shows
 }
 function runPlan() {
     const r = runWeek(g, SCENES);
@@ -229,11 +229,13 @@ const planRow = (key, label, n, note) => `<div class="prow"><span class="pl">${m
 function weekHtml() {
     const p = planHere(g);
     const items = p?.items || {}, med = p?.med || { sit: 0, mer: 0, qi: 0 };
-    const rows = planCards(g, SCENES).map((c) => planRow(c.id, c.label, items[c.id] || 0, `${durLabel(Math.round((c.minutes * NEW_LENGTH) / cardSpeed(c.fam || 0)) * WEEK_MULT)} a card`));
-    rows.push(planRow('med:sit', 'Sits a day', med.sit || 0, ''), planRow('med:mer', 'Meridian sessions a day', med.mer || 0, ''), planRow('med:qi', 'Gather Qi a day', med.qi || 0, 'hours'));
+    const fc = planNotes(g, SCENES); // v0.11.206 (FC1, RV1 TG7): E1, E2b, E3, E4, M1, from week.js (the dry run kept until the save changes)
+    const rows = planCards(g, SCENES).map((c) => planRow(c.id, c.label, items[c.id] || 0, `${durLabel(Math.round((c.minutes * NEW_LENGTH) / cardSpeed(c.fam || 0)) * WEEK_MULT)} a card${fc.rows[c.id] || ''}`));
+    rows.push(planRow('med:sit', 'Sits a day', med.sit || 0, fc.med.sit || ''), planRow('med:mer', 'Meridian sessions a day', med.mer || 0, fc.med.mer || ''), planRow('med:qi', 'Gather Qi a day', med.qi || 0, ['hours', fc.med.qi].filter(Boolean).join(' · ')));
+    const total = fc.total ? `<p class="note fc">${esc(fc.total)}</p>` : '', outlook = fc.outlook ? `<p class="note fc">${esc(fc.outlook)}</p>` : '';
     const stop = p?.stop ? `<p class="note">${esc(p.stop === 'week' ? 'The week is over.' : `Stopped: ${STOP_TEXT[p.stop] || p.stop}.`)}</p>` : '';
     const btn = `<div class="pbtns"><button class="btn primary" data-week="run">${planEmpty(p) ? 'Rest out the week' : 'Run the week'} · to Day ${planEndDay(g, p)}</button>${planEmpty(p) ? '' : '<button class="btn" data-week="clear">Clear</button>'}</div>`;
-    return groupHtml('Plan the week', [`<p class="note">Cards by the week, Meditate by the day. Meals and the day's sit run themselves; it stops for anything that needs you.</p>`, ...rows, stop, btn], true);
+    return groupHtml('Plan the week', [`<p class="note">Cards by the week, Meditate by the day. Meals and the day's sit run themselves; it stops for anything that needs you.</p>`, ...rows, total, outlook, stop, btn], true);
 }
 
 /* ---------------- task mode: every screen as cards (v0.9.5) ---------------- */
@@ -253,7 +255,7 @@ function playChoice(idx) {
         if (!fatalOk(`${g.scene}#${idx}`, storyOutcome(idx))) return; // v0.11.64 (B1)
         if (ch && /^Stay lost/.test(label)) backupBefore('the Long Forest');
         const rel0 = relSnap();
-        const r = choose(g, SCENES, idx);
+        const r = storyTap(g, SCENES, idx); // v0.11.206 (FC1, E4; RV1 TG8): the evening's choice noted, then taken (week.js)
         land(label, r.lines, r.roll ? !r.roll.success : false, rel0); // v0.11.68
         if (r.combat) { startCombat(g, r.combat(g)); combatLog = null; } else weekAfter();
         autosave(); render(); window.scrollTo({ top: 0, behavior: smoothScroll() });
@@ -308,6 +310,7 @@ function renderCardScreen() {
     const medIds = new Set(med.filter((m) => m.task).map((m) => m.task));
     const sitHere = (c) => c.index < 1000 && isSitChoice(SCENES[g.scene].choices[c.index], g.scene); // condensation lives on the Meditate card
     const story = (hub ? v.choices.filter((c) => c.index >= 1000 || !isTaskChoice(SCENES, g.scene, c.index)) : v.choices).filter((c) => !sitHere(c));
+    const proseOut = proseHtml(v), replyOut = replyHtml(); // v0.11.206 (FC1, RV1 L5): these note what is read and said; drawn first, so the plan's forecast runs once a screen
     let hubHtml = '';
     let hubTop = '';
     if (qs) {
@@ -345,8 +348,8 @@ function renderCardScreen() {
 ${statusHtml()}
 <div class="plate">${sceneArt(v.art)}</div>
 <header class="head"><div class="place">${esc(v.place || g.location)}</div><h1 class="title">${esc(v.title)}</h1></header>
-${proseHtml(v)}
-${replyHtml()}
+${proseOut}
+${replyOut}
 <div class="below">
 ${resultHtml()}
 ${hubTop}
