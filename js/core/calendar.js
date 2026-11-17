@@ -37,8 +37,11 @@ export function storyDayOf(g, cal) {
     while (calEnd(g, d) < cal) d++;
     return d;
 }
-/** The story day now. */
-export const storyDay = (g) => storyDayOf(g, calDayOf(g.minutes));
+/** The story day now. v0.11.215 (RV1, MS): inside `atStoryDay` the story day a carried work started (its result's texts and flags). */
+let pinnedDay = null;
+export const storyDay = (g) => (pinnedDay != null && longCal(g) ? pinnedDay : storyDayOf(g, calDayOf(g.minutes)));
+/** v0.11.215 (owner pick RV1, MS): run `fn` as on story day `d` (a week's card's result, read on the day its work started). */
+export function atStoryDay(d, fn) { const o = pinnedDay; pinnedDay = d; try { return fn(); } finally { pinnedDay = o; } }
 /** The minute of story day `d`'s first day at `h`:`m` (the old calendar: `(d - 1) * 1440 + h * 60 + m`). */
 export const calMinutes = (g, d, h = 0, m = 0) => (calStart(g, d) - 1) * 1440 + h * 60 + m;
 /** Is today the last day of its story day's week (the old calendar: always)? */

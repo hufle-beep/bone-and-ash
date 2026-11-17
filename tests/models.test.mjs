@@ -49,7 +49,7 @@ import { LONG_CAL } from '../js/core/calendar.js'; // v0.11.203 (T1, TS8)
 import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, jamesHpMax, clockParts, coilMult } from '../js/core/game.js';
 import { INC_ONLY_ACTIONS, actionOpen } from '../js/core/forms.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
-import { isTaskHub, isTaskChoice, taskCards, taskOpen, runTask, taskState, setYuki, yukiLane, weekHub, CARRY_TASK } from '../js/core/tasks.js';
+import { isTaskHub, isTaskChoice, taskCards, taskOpen, runTask, taskState, setYuki, yukiLane, weekHub, isCarryTask } from '../js/core/tasks.js';
 import { foldNight, runWeek, planHere, planEnsure, planSet, weekResume, noteReadTap } from '../js/core/week.js'; // v0.11.204 (owner pick W1, B1): the bots plan by the week
 import { medCards, runMed, canMeditate } from '../js/core/meditate.js';
 import { writeFileSync, readFileSync, existsSync } from 'node:fs';
@@ -191,7 +191,7 @@ function storyPick(model, g, choices, mem) {
  *  routine and the quiet nights none. Random plays as before. */
 // v0.11.209 (owner pick TF1, B): every model smokes the day's catch by the plan (`pres`), never as a card of its own (WEEK_SIDE)
 const MED_PLAN = { careful: { sit: 0, mer: 1, qi: 0, pres: 1 }, sociable: { sit: 0, mer: 1, qi: 0, pres: 1 }, completionist: { sit: 1, mer: 1, qi: 0, pres: 1 }, cultivator: { sit: 6, mer: 3, qi: 4, pres: 1 } };
-const WEEK_SIDE = (c) => !c.week && !c.pres && c.id !== CARRY_TASK && !['sit', 'mer', 'qi'].includes(c.kind) && !/^(Call it a day|Cultivate|Condense)/.test(c.label);
+const WEEK_SIDE = (c) => !c.week && !c.pres && !isCarryTask(c.id) && !['sit', 'mer', 'qi'].includes(c.kind) && !/^(Call it a day|Cultivate|Condense)/.test(c.label);
 function weekRun(model, g, cards, st) {
     let p = planHere(g);
     if (!p && weekResume(g)) { const r = runWeek(g, SCENES); st.weekStops[r.stop] = (st.weekStops[r.stop] || 0) + 1; } // RV1 (L1): the week's end reported

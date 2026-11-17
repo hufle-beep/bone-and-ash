@@ -17,7 +17,7 @@
 import { longCal, storyDay, storyDayOf, calEnd, weekNights, LONG_CAL, STAY_DAYS } from './calendar.js';
 import { sceneView, choose } from './story.js';
 import { advance, jamesHpMax, canBreakThrough, clockParts, clockLabel, fnv1a, takeSpoilNotes, wakeDay } from './game.js';
-import { taskCards, taskOpen, runTask, taskState, taskOutcome, isTaskChoice, sitTaskId, QI_TASK, CARRY_TASK, carryHere, weekHub, workDay, workRoom, dayMeal, cardSpeed, NEW_LENGTH, WEEK_MULT } from './tasks.js';
+import { taskCards, taskOpen, runTask, taskState, taskOutcome, isTaskChoice, sitTaskId, QI_TASK, carryHere, carriesHere, carriesRead, carryTaskId, isCarryTask, weekHub, workDay, workRoom, dayMeal, cardSpeed, NEW_LENGTH, WEEK_MULT } from './tasks.js';
 import { farewellNow } from '../story/act1_fallout.js'; // RV1 (L4)
 import { foodCount, preservable, unspaced, spacedNext, SPACE_DAYS } from '../story/common.js'; // v0.11.213 (FQ1, S3): the spacing
 import { EVENING_HOUR } from '../story/oneoff.js';
@@ -88,7 +88,7 @@ export function noteReadTap(g, scenes, id, r = null) {
     const k = p.readKey;
     delete p.read; delete p.readKey;
     if (p.stop === 'read') p.stop = ''; // RV1 (L4): no stale "Stopped: …" line for a card now read
-    if (typeof k !== 'string' || id === CARRY_TASK) return; // the week's work carried keeps its own count
+    if (typeof k !== 'string' || isCarryTask(id)) return; // the week's work carried keeps its own count
     const d = workDay(g), grp = keyGroup(k);
     if (!isRec(p.done) || p.done.d !== d) p.done = { d, sit: 0, mer: 0, qi: 0, pres: 0, rest: 0, doors: {} };
     if (!isRec(p.done.doors)) p.done.doors = {};
@@ -200,29 +200,29 @@ export function prioHere(g, hub = g.scene, make = false) {
 }
 /** A row's place in the old order (a row with no place set): the work carried, the cards set (in the order set), the cards not set,
  *  Smoke the catch, the doors, the sits, the meridian sessions, Gather Qi. */
-function oldPlace(p, k, cards, cyId) {
+function oldPlace(p, k, cards, cys) {
     const grp = keyGroup(k);
     if (grp === 'door') return PRIO_AT.door + Math.max(0, PLAN_DOORS.indexOf(k.slice(5)));
     if (grp !== 'card') return PRIO_AT[grp];
     const set = Object.keys(p?.items || {}).filter((id) => p.items[id] > 0), i = set.indexOf(k);
     if (i >= 0) return 100 + i / 100;
-    if (k === cyId) return 99;
+    if (cys.has(k)) return 99;
     const j = cards.indexOf(k);
     return 150 + (j >= 0 ? j / 100 : 0.99);
 }
 /** The rows in the plan's order: { keys: every row the plan can take or shows, shown: the rows on the screen }. `cards` (the card
  *  rows' ids) and `doors` (the door rows' scenes) only for the screen; the run passes none (it takes the rows with a count). */
 export function planOrder(g, p = planHere(g), { cards = [], doors = [], extra = [] } = {}) {
-    const hub = p?.hub || g.scene, pr = prioHere(g, hub), cyId = carryHere(g, hub)?.id || null;
+    const hub = p?.hub || g.scene, pr = prioHere(g, hub), cys = new Set(carriesHere(g, hub).map((cy) => cy.id)); // v0.11.215 (CF1, UB): each card's work carried
     const shown = [...cards, 'med:sit', 'med:mer', 'med:qi', 'med:pres', 'med:rest', ...doors.map((s) => `door:${s}`)];
     const all = new Set(shown);
     for (const id of Object.keys(p?.items || {})) if (p.items[id] > 0) all.add(id);
     for (const [s, n] of Object.entries(isRec(p?.doors) ? p.doors : {})) if (n > 0 && PLAN_DOORS.includes(s)) all.add(`door:${s}`);
-    if (cyId) all.add(cyId);
+    for (const k of cys) all.add(k);
     for (const k of extra) all.add(k);
-    const old = (k) => oldPlace(p, k, cards, cyId);
+    const old = (k) => oldPlace(p, k, cards, cys);
     // RV1 (H1): the work carried with no place set goes first, as before v0.11.211 (a once-a-Coil card's row is gone after its first run)
-    const at = (k) => (Number.isFinite(pr[k]) ? pr[k] : k === cyId ? 0 : old(k));
+    const at = (k) => (Number.isFinite(pr[k]) ? pr[k] : cys.has(k) ? 0 : old(k));
     const keys = [...all].sort((a, b) => at(a) - at(b) || old(a) - old(b));
     const on = new Set(shown);
     return { keys, shown: keys.filter((k) => on.has(k)) };
@@ -358,11 +358,12 @@ export function runWeek(g, scenes, { max = 600, onStep = null, probe = true } = 
             const grp = keyGroup(k);
             if (grp === 'card') {
                 // the week's work carried, in its card's place (RV: before v0.11.211 always first)
-                const cy = carryHere(g, hub);
+                const cy = carryHere(g, hub, k); // v0.11.215 (CF1, UB): this card's own work carried
                 if (cy && cy.id === k) {
-                    if (!taskOpen(g, scenes, CARRY_TASK)) return null;
-                    const dz = deadly(CARRY_TASK); if (dz) return dz === 'hunger' ? 'hungry' : 'hurt';
-                    const r = run(CARRY_TASK); if (g.scene !== hub) return 'story'; if (r.skipped && g.minutes === m0) return 'stuck'; return 'next';
+                    const cid = carryTaskId(k);
+                    if (!taskOpen(g, scenes, cid)) return null;
+                    const dz = deadly(cid); if (dz) return dz === 'hunger' ? 'hungry' : 'hurt';
+                    const r = run(cid); if (g.scene !== hub) return 'story'; if (r.skipped && g.minutes === m0) return 'stuck'; return 'next';
                 }
                 if (!(p.items[k] > 0) || !taskOpen(g, scenes, k)) return null;
                 const dz = deadly(k); if (dz) return dz === 'hunger' ? 'hungry' : 'hurt';
@@ -549,7 +550,7 @@ export function planForecast(g, scenes, { max = 60, json = null } = {}) {
         // the watch (RV1, H1: after each step's bookkeeping): a card is done when its count is gone and no carry of it is left
         const onStep = (cg) => {
             const q = cg.tasks.plan;
-            for (const id of want) if (rows[id] == null && !(q?.items?.[id] > 0) && cg.tasks.carry?.id !== id) rows[id] = cg.minutes;
+            for (const id of want) if (rows[id] == null && !(q?.items?.[id] > 0) && !carriesRead(cg)[id]) rows[id] = cg.minutes; // v0.11.215 (CF1, RE): done when its work is
             if (isRec(q?.done) && q.done.d >= day0) done[q.done.d] = { ...q.done };
             const d = workDay(cg); // M2: the morning is the first moment on the hub of a later day
             if (cg.scene === hub && d > day0 && mornings[d] == null) mornings[d] = ofDay(cg, d);
@@ -582,7 +583,7 @@ export function planForecast(g, scenes, { max = 60, json = null } = {}) {
 export function planHours(g, scenes, p = planHere(g), fc = null) {
     if (!weekHub(g)) return null;
     const hub = g.scene, ev = (EVENING_HOUR[hub] ?? 16) * 60;
-    let work = carryHere(g, hub)?.left || 0;
+    let work = carriesHere(g, hub).reduce((a, cy) => a + cy.left, 0); // v0.11.215 (CF1, UB): every card's work carried
     const cards = planCards(g, scenes);
     for (const [id, n] of Object.entries(p?.items || {})) { const c = cards.find((x) => x.id === id); if (c && n > 0) work += n * cardWeekMinutes(c); }
     const last = p ? p.lastDay : weekLastDay(g), today = workDay(g);

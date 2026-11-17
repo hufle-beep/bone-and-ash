@@ -23,6 +23,7 @@ import { HEART } from '../js/story/act1_heart.js'; import { createHash } from 'n
 import { writeFileSync, readFileSync, readdirSync } from 'node:fs'; // v0.11.137 (HV1, T): the story files read for bumpRel
 import { smartAction } from './lib/smartfight.mjs'; // v0.11.96 (BT1)
 import { DAY21_BREAKFAST } from '../js/story/act1_return.js'; // v0.11.152 (E1, BK)
+import { carriesRead as CR0 } from '../js/core/tasks.js'; const CY = (g) => Object.values(CR0(g))[0] || null; // v0.11.215 (CF1, UB): the first carried work (the tests from before: one at a time)
 import { READ_STOP } from '../js/core/week.js'; READ_STOP.on = false; // v0.11.214 (owner pick RD1): the plan's blocks before RD1 pin it without the read stop; the RD1 block turns it on
 const clockHour = (g) => Math.floor(((g.minutes % 1440) + 1440) % 1440 / 60); // v0.11.152 (E1, BK)
 import { GAMES, FULL, SHARD, WORKERS, STATS_OUT, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
@@ -5138,24 +5139,34 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     // S1: ×7 the time, today's share to the evening hour, the rest carried; the result once, as on the old calendar
     { const o = at(0), l = at(7); const mo = o.minutes, ml = l.minutes;
       const ro = runTask(o, SCENES, 'wild_forage:1'), rl = runTask(l, SCENES, 'wild_forage:1');
-      const once = o.minutes - mo, cy = l.tasks.carry;
-      assert(!o.tasks.carry && !o.tasks.routine && !ro.lines.some((x) => /^(Breakfast|Midday|Supper):|day's sit|A week's work/.test(x)), `${T}: the old calendar: no carry, no routine (${ro.lines.slice(0, 3).join(' | ')})`);
+      const once = o.minutes - mo, cy = l.tasks.carries?.['wild_forage:1']; // v0.11.215 (CF1, UB): one record per card
+      assert(!CY(o) && !o.tasks.routine && !ro.lines.some((x) => /^(Breakfast|Midday|Supper):|day's sit|A week's work/.test(x)), `${T}: the old calendar: no carry, no routine (${ro.lines.slice(0, 3).join(' | ')})`);
       assert(cy && cy.id === 'wild_forage:1' && cy.total === once * Tk.WEEK_MULT && cy.left > 0 && cy.left < cy.total && rl.lines.some((x) => /^A week's work: /.test(x)), `${T}: a week's card is ×7 its time, the rest carried (${once} min → ${cy?.total}, ${cy?.left} left)`);
       assert(clockParts(l.minutes).hh === 15 && clockParts(l.minutes).mm === 0, `${T}: today's share ends at the wilds' evening hour (15:00; ${clockParts(l.minutes).hh}:${clockParts(l.minutes).mm})`);
-      assert((l.inventory.river_cress || 0) === (o.inventory.river_cress || 0) && l.tasks.fam['wild_forage:1'] === o.tasks.fam['wild_forage:1'], `${T}: the result and the familiarity once, as on the old calendar (cress ${o.inventory.river_cress}/${l.inventory.river_cress})`);
-      const cards = taskCards(l, SCENES); const busy = cards.filter((c) => c.week && c.status === 'busy').length, carry = cards.find((c) => c.id === Tk.CARRY_TASK);
-      assert(busy >= 5 && carry && carry.status === 'evening', `${T}: while it is carried the other week's cards are busy, and "Go on" waits for the morning (${busy} busy, ${carry?.status})`);
-      // the next morning: Go on
-      l.minutes = 2 * 1440 + 7 * 60; const left0 = l.tasks.carry.left; const r2 = runTask(l, SCENES, Tk.CARRY_TASK);
-      assert(r2.lines.some((x) => /still to go|done, /.test(x)) && (!l.tasks.carry || l.tasks.carry.left < left0), `${T}: "Go on" works the next day's share (${left0} → ${l.tasks.carry?.left ?? 0})`);
-      if (l.tasks.carry) { l.minutes = 3 * 1440 + 7 * 60; runTask(l, SCENES, Tk.CARRY_TASK); }
-      assert(!l.tasks.carry && taskCards(l, SCENES).some((c) => c.week && c.status === 'open'), `${T}: once done, the week's cards open again`);
+      // v0.11.215 (FP1, FS): a food card pays at its start, as on the old calendar; its work goes on already paid
+      assert((l.inventory.river_cress || 0) === (o.inventory.river_cress || 0) && l.tasks.fam['wild_forage:1'] === o.tasks.fam['wild_forage:1'] && cy.paid === true && Tk.foodCard(SCENES.wild_forage.choices[1]), `${T} (FP1, FS): a food card's result and familiarity at its start, as on the old calendar (cress ${o.inventory.river_cress}/${l.inventory.river_cress})`);
+      const gid = Tk.carryTaskId('wild_forage:1');
+      { const cards = taskCards(l, SCENES), carry = cards.find((c) => c.id === gid);
+        assert(carry && carry.status === 'evening' && !/then its result/.test(carry.tag) && cards.filter((c) => c.week && c.status === 'busy').length === 0, `${T} (CF1, UB): no other card waits behind it; its Go on waits for the morning (${carry?.status}, ${carry?.tag})`); }
+      l.minutes = 2 * 1440 + 7 * 60; const left0 = l.tasks.carries['wild_forage:1'].left; const r2 = runTask(l, SCENES, gid);
+      assert(r2.lines.some((x) => /still to go|done, /.test(x)) && (!l.tasks.carries['wild_forage:1'] || l.tasks.carries['wild_forage:1'].left < left0), `${T}: "Go on" works the next day's share (${left0} → ${l.tasks.carries['wild_forage:1']?.left ?? 0})`);
+      let r3 = null; if (l.tasks.carries['wild_forage:1']) { l.minutes = 3 * 1440 + 7 * 60; r3 = runTask(l, SCENES, gid); }
+      assert(!l.tasks.carries['wild_forage:1'] && (l.inventory.river_cress || 0) === (o.inventory.river_cress || 0) && !(r3 || r2).lines.some((x) => /\+\d+ River cress/.test(x)), `${T} (FP1): its end pays nothing more (cress ${l.inventory.river_cress})`); }
+    // v0.11.215 (owner pick CF1, RE + UB + BL): a card that gives no food (Practice) pays when its work is done; only its own card waits
+    { const o = at(0, 99011), l = at(7, 99011); l.tasks.routine = { d: Tk.workDay(l), meals: 'bls', sit: true }; const x0 = JSON.stringify(l.james.skills); // the day's sit done: its XP apart
+      runTask(o, SCENES, 'wild_train:1'); const rl = runTask(l, SCENES, 'wild_train:1'); const cy = l.tasks.carries?.['wild_train:1'];
+      assert(cy && cy.paid === false && !l.tasks.fam['wild_train:1'] && JSON.stringify(l.james.skills) === x0 && !rl.lines.some((x) => / \/ DC /.test(x)) && rl.lines.some((x) => /its result when it is done/.test(x)) && !Tk.foodCard(SCENES.wild_train.choices[1]), `${T} (CF1, RE): nothing at the start: no check, no XP, no familiarity (${rl.lines.slice(-2).join(' | ')})`);
+      l.minutes = 1440 + 9 * 60; delete l.tasks.routine; // a second card the same day? the first took the day: tomorrow
+      const gid = Tk.carryTaskId('wild_train:1'), cards = taskCards(l, SCENES), busy = cards.filter((c) => c.week && c.status === 'busy').map((c) => c.id), carry = cards.find((c) => c.id === gid);
+      assert(busy.join() === 'wild_train:1' && /its work goes on, .* to go/.test(cards.find((c) => c.id === 'wild_train:1').busy) && /then its result/.test(carry?.tag || '') && cards.some((c) => c.week && c.id !== 'wild_train:1' && c.status === 'open'), `${T} (CF1, UB + BL): only its own card waits, saying how long; the other week's cards open (${busy.join()}; ${carry?.tag})`);
+      let last = null; for (let d = 2; d < 8 && l.tasks.carries?.['wild_train:1']; d++) { l.minutes = d * 1440 + 7 * 60; delete l.tasks.routine; last = runTask(l, SCENES, gid); }
+      assert(!l.tasks.carries['wild_train:1'] && last.lines.some((x) => / \/ DC /.test(x)) && last.lines.some((x) => /: done, .* in all\./.test(x)) && l.tasks.fam['wild_train:1'] === o.tasks.fam['wild_train:1'], `${T} (CF1, RE): at its end the check, XP and familiarity, once (fam ${l.tasks.fam['wild_train:1']} / ${o.tasks.fam['wild_train:1']}; ${last?.lines.slice(-3).join(' | ')})`);
       const p = deserialize(serialize(l)); assert(p.tasks.routine && p.cal === 7, `${T}: the routine's record goes through a save`); }
     // the carry is dropped off its stay and by the rewind; never shown on another hub
-    { const l = at(7, 99002); runTask(l, SCENES, 'wild_hunt:2'); assert(!!l.tasks.carry, `${T}: a hunt is a week's card too`);
-      const s2 = deserialize(serialize(l)); assert(s2.tasks.carry?.id === 'wild_hunt:2', `${T}: the carry goes through a save`);
-      goTo(l, SCENES, 'ashfall'); assert(!Tk.carryHere(l) && !taskCards(l, SCENES).some((c) => c.id === Tk.CARRY_TASK), `${T}: not on another hub`);
-      const g3 = at(7, 99003); runTask(g3, SCENES, 'wild_forage:1'); rewind(g3); assert(!g3.tasks.carry && !g3.tasks.plan && !g3.tasks.routine, `${T}: a rewind drops the week`); }
+    { const l = at(7, 99002); runTask(l, SCENES, 'wild_hunt:2'); assert(!!l.tasks.carries?.['wild_hunt:2'], `${T}: a hunt is a week's card too`);
+      const s2 = deserialize(serialize(l)); assert(s2.tasks.carries?.['wild_hunt:2']?.id === 'wild_hunt:2', `${T}: the carry goes through a save`);
+      goTo(l, SCENES, 'ashfall'); assert(!Tk.carryHere(l) && !taskCards(l, SCENES).some((c) => Tk.isCarryTask(c.id)), `${T}: not on another hub`);
+      const g3 = at(7, 99003); runTask(g3, SCENES, 'wild_forage:1'); rewind(g3); assert(!g3.tasks.carries && !CY(g3) && !g3.tasks.plan && !g3.tasks.routine, `${T}: a rewind drops the week`); }
     // the Blackroot is a journey: its cards keep their time
     { const g = ensureBars(newGame(99004, { closed: true, cal: 7 })); g.flags.ending = 'paid'; g.minutes = (C.calStart(g, 12) - 1) * 1440 + 7 * 60; goTo(g, SCENES, 'rr_hub');
       assert(!Tk.weekHub(g) && !taskCards(g, SCENES).some((c) => c.week), `${T}: the Blackroot's cards are not week's cards (Day ${clockParts(g.minutes).day})`); }
@@ -5165,9 +5176,9 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     // R1 + R2: a meal in each part of the day when Fed is under 85, the day's sit once
     { const g = at(7, 99006); const r = runTask(g, SCENES, 'wild_train:1');
       assert(r.lines.some((x) => /^Breakfast: /.test(x)) && r.lines.some((x) => /day's sit/.test(x)), `${T}: the first card of the day brings breakfast and the day's sit`);
-      g.tasks.carry = null; g.minutes = 1440 + 9 * 60; g.james.satiety = 40; const r2 = runTask(g, SCENES, 'wild_train:2');
+      g.tasks.carries = {}; g.minutes = 1440 + 9 * 60; g.james.satiety = 40; const r2 = runTask(g, SCENES, 'wild_train:2');
       assert(!r2.lines.some((x) => /^Breakfast: |day's sit/.test(x)), `${T}: once a part of the day, the sit once a day`);
-      g.tasks.carry = null; g.minutes = 1440 + 12 * 60; g.james.satiety = 90; const r3 = runTask(g, SCENES, 'wild_train:3');
+      g.tasks.carries = {}; g.minutes = 1440 + 12 * 60; g.james.satiety = 90; const r3 = runTask(g, SCENES, 'wild_train:3');
       assert(!r3.lines.some((x) => /^Midday: /.test(x)), `${T}: no meal at Fed 90`);
       const s = at(7, 99007); const before = s.james.saturation; const rs1 = runTask(s, SCENES, Tk.sitTaskId(s, SCENES)); assert(!rs1.lines.some((x) => /day's sit/.test(x)) && s.tasks.routine.sit === true, `${T}: a sit card first: no extra sit (Saturation ${before} → ${s.james.saturation})`); }
     // R3: a quiet night folds once its screens were shown; an event's text does not; the old calendar never folds
@@ -5197,9 +5208,9 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     { const R = 'W1 RV1';
       const fresh = (seed, h = 7, m = 0, day = 1) => { const g = at(7, seed); g.minutes = day * 1440 + h * 60 + m; return g; };
       // TG1 (H1): "Go on" as the day's first card mid-afternoon: the meal and the sit run, the card is not run and says so; no throw
-      { const g = fresh(99101); runTask(g, SCENES, 'wild_forage:1'); g.minutes = 2 * 1440 + 14 * 60 + 30; g.james.qi = 20; g.james.satiety = 50; const left = g.tasks.carry.left;
+      { const g = fresh(99101); runTask(g, SCENES, 'wild_forage:1'); g.minutes = 2 * 1440 + 14 * 60 + 30; g.james.qi = 20; g.james.satiety = 50; const left = CY(g).left;
         let out = null, err = null; try { taskOutcome(g, SCENES, Tk.CARRY_TASK); } catch (e) { err = e; } try { out = runTask(g, SCENES, Tk.CARRY_TASK); } catch (e) { err = e; }
-        assert(!err && out?.skipped && out.lines.includes(Tk.SKIP_LINE) && g.tasks.carry.left === left, `${R} (TG1, H1): "Go on" after the day's sit pushed past evening: skipped, said, the carry kept (${err?.message || out?.lines?.slice(-1)})`); }
+        assert(!err && out?.skipped && out.lines.includes(Tk.SKIP_LINE) && CY(g).left === left, `${R} (TG1, H1): "Go on" after the day's sit pushed past evening: skipped, said, the carry kept (${err?.message || out?.lines?.slice(-1)})`); }
       // TG2 (M1): Yuki's lane counts the minutes once with the day's sit (her job made too long to haul, for the count)
       { const job = TASK_HUBS.wilds.yuki, len0 = job.minutes; job.minutes = 1e6;
         try { const g = fresh(99102); Tk.setYuki(g, true); g.tasks.yuki.progress = 0; const m0 = g.minutes; runTask(g, SCENES, 'wild_train:1');
@@ -5220,11 +5231,11 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       // TG5: a card the routine leaves no time for: not run, nothing gained, the plan keeps its count
       { const g = fresh(99109, 14, 25); g.james.qi = 20; const inv = { ...g.inventory }; const r = runTask(g, SCENES, 'wild_forage:1');
         const gained = Object.keys(g.inventory).some((k) => k !== 'hare_raw' && (g.inventory[k] || 0) > (inv[k] || 0));
-        assert(r.skipped && r.lines.includes(Tk.SKIP_LINE) && !gained && !g.tasks.carry && !g.tasks.fam['wild_forage:1'], `${R} (TG5, L2): the card is not run and says so`);
+        assert(r.skipped && r.lines.includes(Tk.SKIP_LINE) && !gained && !CY(g) && !g.tasks.fam['wild_forage:1'], `${R} (TG5, L2): the card is not run and says so`);
         const p = fresh(99110, 14, 25); p.james.qi = 20; Wk.planSet(p, 'wild_forage:1', 1); Wk.runWeek(p, SCENES); assert(p.tasks.plan.items['wild_forage:1'] === 1, `${R} (TG5): the plan keeps the card it could not run (${JSON.stringify(p.tasks.plan.items)})`); }
       // TG6: a stale carry goes when a card runs on another hub; a carry from another Coil is not here
-      { const g = fresh(99111); runTask(g, SCENES, 'wild_forage:1'); const c = { ...g.tasks.carry }; g.tasks.carry.coil = '9|0'; assert(!Tk.carryHere(g), `${R} (TG6): another Coil's carry is not here`); g.tasks.carry = c;
-        goTo(g, SCENES, 'ashfall'); g.minutes = (C.calStart(g, 4) - 1) * 1440 + 8 * 60; g.james.qi = 0; g.james.satiety = 80; const id = 'qi:next'; runTask(g, SCENES, id); assert(!g.tasks.carry, `${R} (TG6): a card on another hub drops the wilds' carry (${JSON.stringify(g.tasks.carry)})`); }
+      { const g = fresh(99111); runTask(g, SCENES, 'wild_forage:1'); const c = { ...CY(g) }; g.tasks.carries[c.id].coil = '9|0'; assert(!Tk.carryHere(g), `${R} (TG6): another Coil's carry is not here`); g.tasks.carries[c.id] = c;
+        goTo(g, SCENES, 'ashfall'); g.minutes = (C.calStart(g, 4) - 1) * 1440 + 8 * 60; g.james.qi = 0; g.james.satiety = 80; const id = 'qi:next'; runTask(g, SCENES, id); assert(!CY(g), `${R} (TG6): a card on another hub drops the wilds' carry (${JSON.stringify(CY(g))})`); }
       // TG7: the parts of the day; no sit before a meridian session or an hour of gathering
       { const g = fresh(99112); const at2 = (h, m) => { g.minutes = 1440 + h * 60 + m; return Tk.mealSlot(g); }; assert(at2(10, 59) === 'b' && at2(11, 0) === 'l' && at2(14, 59) === 'l' && at2(15, 0) === 's' && at2(2, 0) === 's', `${R} (TG7): the parts of the day at 10:59, 11:00, 14:59, 15:00 and 02:00`);
         const q = fresh(99113); q.james.qi = 5; const r = runTask(q, SCENES, 'qi:next'); assert(!r.lines.some((x) => /day's sit/.test(x)) && q.tasks.routine.sit === true, `${R} (TG7): gathering Qi first is the day's sitting`);
@@ -5250,7 +5261,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         g.tasks.plan.running = true; g.tasks.plan.lastDay = Tk.workDay(g) - 1; assert(Wk.weekResume(g) && Wk.runWeek(g, SCENES).stop === 'week' && !g.tasks.plan.running, `${R} (L1): a running plan whose week ended reports it`); }
       // L6: a week's card done for today stays on the plan's list (the Fallout's Council, once a day)
       { const g = ensureBars(newGame(99125, { closed: true, cal: 7 })); g.flags.ending = 'paid'; g.minutes = 44 * 1440 + 7 * 60; goTo(g, SCENES, 'fo_ashfall'); g.tasks.routine = { d: Tk.workDay(g), meals: 'bls', sit: true };
-        const cid = taskCards(g, SCENES).find((c) => c.week && c.status === 'open' && /^fo_council:/.test(c.id))?.id; if (cid) { runTask(g, SCENES, cid); delete g.tasks.carry; }
+        const cid = taskCards(g, SCENES).find((c) => c.week && c.status === 'open' && /^fo_council:/.test(c.id))?.id; if (cid) { runTask(g, SCENES, cid); delete g.tasks.carries; }
         const row = Wk.planCards(g, SCENES).find((c) => c.id === cid); assert(cid && row && row.status === 'tomorrow', `${R} (L6): the Council done for today is still on the plan's list (${cid}, ${row?.status})`); }
       // L4, L5: the Fallout's farewell evening and a fight are never taken alone
       { const g = ensureBars(newGame(99123, { closed: true, cal: 7 })); g.flags.ending = 'paid'; g.flags.palisade = true; g.minutes = (C.calEnd(g, 10) - 1) * 1440 + 17 * 60; goTo(g, SCENES, 'fo_ashfall'); Wk.planEnsure(g); g.tasks.routine = { d: Tk.workDay(g), meals: 'bls', sit: true };
@@ -5286,7 +5297,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     const realRun = (g, S = SCENES) => {
         const p0 = Wk.planEnsure(g), hub = p0.hub, day0 = Tk.workDay(g), last = p0.lastDay, want = { ...p0.items };
         const units = {}, rows = Object.fromEntries(Object.keys(want).filter((id) => want[id] > 0).map((id) => [id, null]));
-        const runs = {}, mornings = {}; let owner = g.tasks.carry ? 'before the plan' : null;
+        const runs = {}, mornings = {}, started = new Set(); let owner = CY(g) ? 'before the plan' : null;
         const sid = () => Tk.sitTaskId(g, S);
         if (p0.done?.d === day0) runs[day0] = { sit: p0.done.sit, mer: p0.done.mer, qi: p0.done.qi };
         const onStep = (cg, l) => {
@@ -5295,9 +5306,10 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
             if (!l || l.r.skipped) return;
             const L = l.r.lines || [];
             let doneOf = null;
-            if (l.id === Tk.CARRY_TASK) { if (L.some((x) => /: done, .* in all\.$/.test(x))) { doneOf = owner; owner = null; } }
+            // v0.11.215 (CF1, UB): each card's own Go on; a work started before the plan is not the plan's
+            if (Tk.isCarryTask(l.id)) { if (L.some((x) => /: done, .* in all\.$/.test(x))) { const k = l.id.startsWith(`${Tk.CARRY_TASK}:`) ? l.id.slice(Tk.CARRY_TASK.length + 1) : owner; doneOf = started.delete(k) ? k : null; } }
             else if (L.some((x) => /^A week's work: .*, done\.$/.test(x))) doneOf = l.id;
-            else if (L.some((x) => /^A week's work: .*still to go/.test(x))) owner = l.id;
+            else if (L.some((x) => /^A week's work: .*still to go/.test(x))) { owner = l.id; started.add(l.id); }
             if (doneOf && doneOf in rows) { units[doneOf] = (units[doneOf] || 0) + 1; if (units[doneOf] === want[doneOf]) rows[doneOf] = cg.minutes; }
             const kind = l.id === sid() ? 'sit' : l.id === Tk.QI_TASK ? 'qi' : /^mer|meridian/i.test(l.id) || l.id === Tk.MER_TASK ? 'mer' : null;
             if (kind && d >= day0) { const x = runs[d] || (runs[d] = { sit: 0, mer: 0, qi: 0 }); x[kind]++; }
@@ -5368,7 +5380,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       assert(f.stop === 'hurt' && Wk.MORNING_HOUR === 7 && h.left === (15 * 60 - (6 * 60 + 40)) + 5 * (15 - 7) * 60, `${T} (E1): with no morning in the dry run the day counts from 07:00 (${f.stop}, ${h.left}; 500 + 5 × 480)`); }
     // TG4: the carried work is in the plan's total, exactly
     { const g = copy(); Wk.planSet(g, 'wild_forage:3', 1); runTask(g, SCENES, 'wild_forage:0'); const per = Object.fromEntries(Wk.planCards(g, SCENES).map((c) => [c.id, Wk.cardWeekMinutes(c)])); const h = Wk.planHours(g, SCENES);
-      assert(g.tasks.carry && h.work === g.tasks.carry.left + per['wild_forage:3'], `${T} (E1, TG4): the carried work's rest and the planned card (${h.work} = ${g.tasks.carry?.left} + ${per['wild_forage:3']})`); }
+      assert(CY(g) && h.work === CY(g).left + per['wild_forage:3'], `${T} (E1, TG4): the carried work's rest and the planned card (${h.work} = ${CY(g)?.left} + ${per['wild_forage:3']})`); }
     // TG5: a hub's evening with two ways on (never a card), a fight as the hub's only way on, a fight from the evening's tap, a fight among other ways
     { const night = SCENES.night, wilds = SCENES.wilds, fightC = SCENES.night_attack.choices.find((x) => x.combat).combat;
       const wayOn = wilds.choices.findIndex((c, i) => !Tk.isTaskChoice(SCENES, 'wilds', i) && /camp|Night/i.test(String(typeof c.text === 'function' ? '' : c.text)));
@@ -5417,7 +5429,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       const e = copy(); food(e); const NE = Wk.planNotes(e, SCENES); assert(NE.total === '' && /^Forecast: it stops /.test(NE.outlook), `${T} (L1): an empty plan: no hours line, the outlook kept (${NE.outlook})`);
     }
     // L2: a dry run that fails shows no forecast (not "nothing left it can do")
-    { const g = copy(); Wk.planSet(g, 'wild_forage:0', 1); const S5 = { ...SCENES, night: { ...SCENES.night, get choices() { throw new Error('planted'); } } };
+    { const g = copy(); food(g); Wk.planSet(g, 'wild_forage:0', 1); const S5 = { ...SCENES, night: { ...SCENES.night, get choices() { throw new Error('planted'); } } };
       assert(Wk.planForecast(g, S5) === null, `${T} (L2): a dry run that throws gives no forecast`); }
     // nothing off a stay hub, nothing on the old calendar
     { const o = ensureBars(newGame(99202, { closed: true })); goTo(o, SCENES, 'wilds'); assert(Wk.planForecast(o, SCENES) === null && Wk.planHours(o, SCENES) === null, `${T}: no forecast on the old calendar`);
@@ -5808,7 +5820,6 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
             const v = sceneView(g, SCENES); const open = v.choices.filter((c) => !c.disabled && c.index < 1000 && !/^(Yuki: change form|Story Mode only)/.test(c.label)); if (!open.length || g.combat) break;
             Wk.storyTap(g, SCENES, open[0].index); if (g.combat) break; if (Wk.afterStory(g, SCENES).resume) { r = Wk.runWeek(g, SCENES, { onStep }); stops.push(r.stop); } }
         return { ids, stops }; };
-    const noPrio = (g) => { const c = JSON.parse(JSON.stringify(g)); delete c.tasks.prio; return JSON.stringify(c); }; // b has its places by design; a none (below)
     // none set: the old order; every row set to the place it shows: the same run, step for step
     { const a = plan(save()), b = plan(save());
       const rk = Wk.planRanks(b, SCENES);
@@ -5816,26 +5827,36 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       for (const [k, n] of Object.entries(rk.rank)) Wk.planPrio(b, SCENES, k, n);
       const wa = week(a), wb = week(b);
       assert(Object.keys(b.tasks.prio.wilds).length === 14, `${T}: every row placed (${JSON.stringify(b.tasks.prio)})`);
-      assert(JSON.stringify(wa) === JSON.stringify(wb) && noPrio(a) === noPrio(b), `${T}: the places as shown run exactly as none set (${wa.ids.length} / ${wb.ids.length} steps)`);
+      // v0.11.215 (CF1, UB): with none set every card's work carried goes first (RV1, H1); with the places set it keeps its card's place,
+      // so the runs part once a second card starts while another's work goes on: the first day (no work carried yet) is the same
+      const day1 = (w) => JSON.stringify(w.ids.filter(([d]) => d === w.ids[0][0]));
+      assert(day1(wa) === day1(wb) && wa.ids.length > 20, `${T}: the places as shown run the first day exactly as none set (${wa.ids.length} / ${wb.ids.length} steps)`);
       assert(!('prio' in a.tasks), `${T} (RV1, TG2): a run with no places writes none into the save`);
       assert(!a.tasks.plan?.items?.['wild_train:1'] && !a.tasks.plan?.items?.['wild_forage:0'], `${T}: the old order: all 4 cards taken this week`); }
     // RV1 (TG2): none set runs exactly as v0.11.210 did: three runs pinned on its code (the steps with their clock, the day's lines,
     // the stops and the whole save after them). A deliberate change to these runs (a text, a number) updates the pins with it.
-    { const pin = (g) => { const ids = [], lines = []; const onStep = (cg, l) => { if (l) ids.push(`${cg.minutes}:${l.id}${l.r.skipped ? '~' : ''}`); };
+    { const v214 = (g) => { if (Tk.CF1.on) return g; const c = JSON.parse(JSON.stringify(g)); const cs = c.tasks?.carries; if (cs) { delete c.tasks.carries; const v = Object.values(cs)[0]; if (v) { const { paid, stay, sd, ...rest } = v; c.tasks.carry = rest; } } return c; }; // RV1 (TG4): v0.11.214's save shape
+        const idOf = (id) => (Tk.CF1.on ? id : String(id).replace(/^week:carry:.*/, 'week:carry'));
+        const canon = (v) => (Array.isArray(v) ? `[${v.map(canon).join(',')}]` : v && typeof v === 'object' ? `{${Object.keys(v).sort().map((k) => `${JSON.stringify(k)}:${canon(v[k])}`).join(',')}}` : JSON.stringify(v)); // switched off: keys sorted (a record's place among a save's keys is no rule)
+        const ser = (o) => (Tk.CF1.on ? JSON.stringify(o) : canon(o));
+      const pin = (g) => { const ids = [], lines = []; const onStep = (cg, l) => { if (l) ids.push(`${cg.minutes}:${idOf(l.id)}${l.r.skipped ? '~' : ''}`); };
         const go = () => { const r = Wk.runWeek(g, SCENES, { onStep }); for (const d of r.days) lines.push(...d.lines); return r; };
         let r = go(); const stops = [r.stop];
         for (let k = 0; k < 60 && ['evening', 'door'].includes(r.stop); k++) {
             const v = sceneView(g, SCENES); const open = v.choices.filter((c) => !c.disabled && c.index < 1000 && !/^(Yuki: change form|Story Mode only)/.test(c.label)); if (!open.length || g.combat) break;
             Wk.storyTap(g, SCENES, open[0].index); if (g.combat) break; if (Wk.afterStory(g, SCENES).resume) { r = go(); stops.push(r.stop); } }
-        return Gm.fnv1a(JSON.stringify({ ids, lines, stops, g })); };
-      const out = {};
+        return Gm.fnv1a(ser({ ids, lines, stops, g: v214(g) })); };
+      const build = () => { const out = {};
       { const g = deserialize(readFileSync(new URL('../saves/v0.11.204-long-wilds-day2.json', import.meta.url), 'utf8'), { force: true }); g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 30); Gm.addItem(g, 'hare_raw', 2);
         for (const [k, n] of [['wild_train:1', 2], ['wild_forage:0', 2], ['med:sit', 3], ['med:mer', 2], ['med:qi', 2], ['med:pres', 1]]) Wk.planSet(g, k, n); out.wilds = pin(g); }
       { const g = ensureBars(newGame(99501, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'fo_ashfall'); g.minutes = 16 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true;
         Wk.planEnsure(g); for (const s of ['wen_time', 'mother_time', 'fo_mei', 'fo_ya_time']) Wk.planSet(g, `door:${s}`, 1); for (const c of Wk.planCards(g, SCENES)) Wk.planSet(g, c.id, 9); Wk.planSet(g, 'med:sit', 2); out.fallout = pin(g); }
       { const g = ensureBars(newGame(99502, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'ashfall'); g.minutes = 9 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60);
         Wk.planEnsure(g); const cs = Wk.planCards(g, SCENES); for (const c of cs.slice(0, 3)) Wk.planSet(g, c.id, 2); Wk.planSet(g, 'med:sit', 4); Wk.planSet(g, 'med:qi', 3); out.ashfall = pin(g); out.cards = cs.slice(0, 3).map((c) => c.id).join(); }
-      assert(JSON.stringify(out) === '{"wilds":"f183f4d0","fallout":"95b8841e","ashfall":"70e7a986","cards":"workshop:0,workshop:2,drill:0"}', `${T} (RV1, TG2): none set: the wilds, the Fallout and Ashfall runs as v0.11.213's code runs them (re-pinned for S3 and the rest row; with the spacing off and the rest row taken out they run as v0.11.210's: the VQ1 block) (${JSON.stringify(out)})`); }
+        return out; };
+      const out = build(); Tk.CF1.on = false; let old; try { old = build(); } finally { Tk.CF1.on = true; }
+      assert(JSON.stringify(old) === '{"wilds":"52a6f20a","fallout":"f17ca92c","ashfall":"97eb74f4","cards":"workshop:0,workshop:2,drill:0"}', `${T} (v0.11.215, RV1 TG4): with CF1 switched off the three runs are v0.11.214's exactly (its code, keys sorted: wilds 52a6f20a, the Fallout f17ca92c, Ashfall 97eb74f4), so the new pins below change only by CF1 (${JSON.stringify(old)})`);
+      assert(JSON.stringify(out) === '{"wilds":"7c6e58ca","fallout":"dd24acc5","ashfall":"c8d8939d","cards":"workshop:0,workshop:2,drill:0"}', `${T} (RV1, TG2): none set: the wilds, the Fallout and Ashfall runs as v0.11.215's code runs them (re-pinned for CF1 and its RV1: no card waits behind another's work, a card that gives no food pays at its end, a start needs its old length left today and, with no food, its whole work left in the stay; before, for S3 and the rest row; with the spacing off and the rest row taken out they run as v0.11.210's: the VQ1 block) (${JSON.stringify(out)})`); }
     // RV1 (TG3): one row a step: Smoke the catch is seen by the step's watch each day it smokes (a row that ran and let the next one
     // run in the same step hid it, and skipped the step's checks: hurt, hungry)
     { const g = ensureBars(newGame(99502, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'ashfall'); g.minutes = 9 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 30); Gm.addItem(g, 'hare_raw', 2);
@@ -5844,7 +5865,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       assert(pid && seen.filter((id) => id === pid).length === 1 && seen.indexOf(pid) < seen.lastIndexOf(sid), `${T} (RV1, TG3): Smoke the catch is one step of its own, before the sits (${pid}: ${seen.join(', ')})`); }
     // RV1 (TG4): the guards the loop keeps from v0.11.210 (a door that would kill: skipped; a carry that took no time: stuck)
     { const src = readFileSync(new URL('../js/core/week.js', import.meta.url), 'utf8');
-      assert(src.includes('if (!dw || deadly(dw.id)) return null;') && src.includes("if (r.skipped && g.minutes === m0) return 'stuck'; return 'next';") && src.includes("const dz = deadly(CARRY_TASK); if (dz) return dz === 'hunger' ? 'hungry' : 'hurt';"), `${T} (RV1, TG4): the door's death check and the carry's stuck and death guards`); }
+      assert(src.includes('if (!dw || deadly(dw.id)) return null;') && src.includes("if (r.skipped && g.minutes === m0) return 'stuck'; return 'next';") && src.includes("const dz = deadly(cid); if (dz) return dz === 'hunger' ? 'hungry' : 'hurt';"), `${T} (RV1, TG4): the door's death check and the carry's stuck and death guards`); }
     // RV1 (H1, TG1): a once-a-Coil card's row is gone after its first run, its week's work still carried: with no place of its own it
     // goes first, as before (the review: the Fallout's Council, a place set on another row: it started at 12:23, 4 h 37 m a day less)
     { const O = await import('../js/story/oneoff.js');
@@ -5853,11 +5874,11 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       Wk.planSet(g, 'workshop:0', 1); Wk.planSet(g, 'med:sit', 4); Wk.planSet(g, 'med:qi', 3);
       Wk.runWeek(g, SCENES, { max: 1 });
       O.noteOnce(g, 'workshop', 0, SCENES.workshop.choices[0]); // its once-a-Coil mark: the row goes
-      const gone = g.tasks.carry?.id === 'workshop:0' && !Wk.planCards(g, SCENES).some((c) => c.id === 'workshop:0');
+      const gone = CY(g)?.id === 'workshop:0' && !Wk.planCards(g, SCENES).some((c) => c.id === 'workshop:0');
       Wk.planPrio(g, SCENES, 'med:pres', 1);
       g.minutes = (Tk.workDay(g) + 1) * D + 7 * 60; g.james.satiety = 100;
       const ids = []; Wk.runWeek(g, SCENES, { onStep: (cg, l) => { if (l && !l.r.skipped) ids.push(l.id); } });
-      assert(gone && !('workshop:0' in g.tasks.prio.ashfall) && ids[0] === Tk.CARRY_TASK, `${T} (RV1, H1): the workshop's work carried, its row gone, a place set on another row: the work first next morning (${gone}; ${ids.slice(0, 3).join(', ')})`); }
+      assert(gone && !('workshop:0' in g.tasks.prio.ashfall) && Tk.isCarryTask(ids[0]), `${T} (RV1, H1): the workshop's work carried, its row gone, a place set on another row: the work first next morning (${gone}; ${ids.slice(0, 3).join(', ')})`); }
     // RV1 (L1): a row hidden while another moves keeps its place among the rest (Ya's talk at 1, hidden, back at 1)
     { const g = ensureBars(newGame(99501, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'fo_ashfall'); g.minutes = 16 * D + 7 * 60; g.flags.ya_met = true;
       Wk.planEnsure(g); Wk.planPrio(g, SCENES, 'door:fo_ya_time', 1); const r0 = Wk.planRanks(g, SCENES).rank['door:fo_ya_time'];
@@ -5872,7 +5893,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       const fa = Wk.planNotes(a, SCENES), fb = Wk.planNotes(b, SCENES);
       const wa = week(a), wb = week(b);
       const left = (g) => Object.values(g.tasks.plan?.hub === 'wilds' ? g.tasks.plan.items : {}).reduce((x, y) => x + y, 0);
-      const firstOfDay = (w) => { const out = {}; for (const [d, id] of w.ids) if (!(d in out) && id !== Tk.CARRY_TASK) out[d] = id; return out; };
+      const firstOfDay = (w) => { const out = {}; for (const [d, id] of w.ids) if (!(d in out) && !Tk.isCarryTask(id)) out[d] = id; return out; };
       assert(left(b) >= 2 && left(a) === 0, `${T}: Meditate first: cards left at the week's end ${left(b)} (none set: ${left(a)})`);
       assert(/not this week/.test(fb.rows['wild_train:1'] || '') && /done/.test(fa.rows['wild_train:1'] || ''), `${T}: the forecast follows the order (${fa.rows['wild_train:1']} → ${fb.rows['wild_train:1']})`);
       const fd = Object.values(firstOfDay(wb));
@@ -5880,10 +5901,12 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     // a card carried keeps its card's place: the sit at 1 goes before the "Go on" next morning; the cards' order among themselves
     { const g = plan(save(), [['wild_train:1', 1], ['med:sit', 1]]); Wk.planPrio(g, SCENES, 'med:sit', 1); const sid = Tk.sitTaskId(g, SCENES);
       const w = week(g); const d1 = w.ids.filter(([d]) => d === w.ids[0][0] + 1).map(([, id]) => id);
-      assert(d1[0] === sid && d1.includes(Tk.CARRY_TASK), `${T}: the next morning: the sit (place 1), then the work carried (${d1.join(', ')})`); }
+      assert(d1[0] === sid && d1.some(Tk.isCarryTask), `${T}: the next morning: the sit (place 1), then the work carried (${d1.join(', ')})`); }
     { const g = plan(save(), [['wild_train:1', 3], ['wild_hunt:2', 3]]); Wk.planPrio(g, SCENES, 'wild_hunt:2', 1);
       const w = week(g); const ids = w.ids.map(([, id]) => id).filter((id) => /^wild_(hunt|train)/.test(id));
-      assert(/^wild_hunt:2,wild_hunt:2,wild_hunt:2(,wild_train:1)+$/.test(ids.join()), `${T}: a card placed first: its 3 cards first, then the other (${ids.join()})`); }
+      // v0.11.215 (CF1, UB): the card placed first starts first and its work goes on first each morning; the other fills the days it leaves (before: only after all 3)
+      const go = w.ids.map(([, id]) => id).filter(Tk.isCarryTask);
+      assert(ids[0] === 'wild_hunt:2' && ids.filter((x) => x === 'wild_hunt:2').length === 3 && ids.includes('wild_train:1') && go.length > 0, `${T} (CF1): a card placed first: started first, all 3 of it, the other in the time left (${ids.join()})`); }
     // kept for good, per hub: a new week's plan, a save file, a rewind; a row new since goes after the set ones; bad input
     { const g = plan(save()); Wk.planPrio(g, SCENES, 'door:yk_time', 1);
       const j = deserialize(serialize(g), { force: true });
@@ -5994,15 +6017,19 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     // the old calendar: no plan; the Fallout's doors open every day
     { const g = mk('fo_ashfall', 9, 7, null); assert(Wk.doorCards(g, SCENES).length === 0 && Wk.planEnsure(g) === null, `${T}: the old calendar: no plan rows`); }
     // TG: with the spacing off and the rest row taken out, PR2's three pinned runs are v0.11.210's, step for step
-    { const strip = (g) => { const c = JSON.parse(JSON.stringify(g)); const q = c.tasks?.plan; if (q) { delete q.med.rest; if (q.done) delete q.done.rest; } return c; };
-      const pin = (g) => { const ids = [], lines = []; const onStep = (cg, l) => { if (l) ids.push(`${cg.minutes}:${l.id}${l.r.skipped ? '~' : ''}`); };
+    { const v214 = (g) => { if (Tk.CF1.on) return g; const c = JSON.parse(JSON.stringify(g)); const cs = c.tasks?.carries; if (cs) { delete c.tasks.carries; const v = Object.values(cs)[0]; if (v) { const { paid, stay, sd, ...rest } = v; c.tasks.carry = rest; } } return c; }; // RV1 (TG4): v0.11.214's save shape
+        const idOf = (id) => (Tk.CF1.on ? id : String(id).replace(/^week:carry:.*/, 'week:carry'));
+        const canon = (v) => (Array.isArray(v) ? `[${v.map(canon).join(',')}]` : v && typeof v === 'object' ? `{${Object.keys(v).sort().map((k) => `${JSON.stringify(k)}:${canon(v[k])}`).join(',')}}` : JSON.stringify(v)); // switched off: keys sorted (a record's place among a save's keys is no rule)
+        const ser = (o) => (Tk.CF1.on ? JSON.stringify(o) : canon(o));
+      const strip = (g) => { const c = v214(JSON.parse(JSON.stringify(g))); const q = c.tasks?.plan; if (q) { delete q.med.rest; if (q.done) delete q.done.rest; } return c; };
+      const pin = (g) => { const ids = [], lines = []; const onStep = (cg, l) => { if (l) ids.push(`${cg.minutes}:${idOf(l.id)}${l.r.skipped ? '~' : ''}`); };
         const go = () => { const r = Wk.runWeek(g, SCENES, { onStep }); for (const d of r.days) lines.push(...d.lines); return r; };
         let r = go(); const stops = [r.stop];
         for (let k = 0; k < 60 && ['evening', 'door'].includes(r.stop); k++) {
             const v = sceneView(g, SCENES); const open = v.choices.filter((c) => !c.disabled && c.index < 1000 && !/^(Yuki: change form|Story Mode only)/.test(c.label)); if (!open.length || g.combat) break;
             Wk.storyTap(g, SCENES, open[0].index); if (g.combat) break; if (Wk.afterStory(g, SCENES).resume) { r = go(); stops.push(r.stop); } }
-        return Gm.fnv1a(JSON.stringify({ ids, lines, stops, g: strip(g) })); };
-      const out = Cm.unspaced(() => {
+        return Gm.fnv1a(ser({ ids, lines, stops, g: strip(g) })); };
+      const build = () => Cm.unspaced(() => {
         const o = {};
         { const g = deserialize(readFileSync(new URL('../saves/v0.11.204-long-wilds-day2.json', import.meta.url), 'utf8'), { force: true }); g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 30); Gm.addItem(g, 'hare_raw', 2);
           for (const [k, n] of [['wild_train:1', 2], ['wild_forage:0', 2], ['med:sit', 3], ['med:mer', 2], ['med:qi', 2], ['med:pres', 1]]) Wk.planSet(g, k, n); o.wilds = pin(g); }
@@ -6011,7 +6038,9 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         { const g = ensureBars(newGame(99502, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'ashfall'); g.minutes = 9 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60);
           Wk.planEnsure(g); const cs = Wk.planCards(g, SCENES); for (const c of cs.slice(0, 3)) Wk.planSet(g, c.id, 2); Wk.planSet(g, 'med:sit', 4); Wk.planSet(g, 'med:qi', 3); o.ashfall = pin(g); }
         return o; });
-      assert(JSON.stringify(out) === '{"wilds":"fe3d1924","fallout":"a85e856c","ashfall":"1db224f4"}', `${T} (TG): spacing off, rest row out: v0.11.210's three runs exactly (${JSON.stringify(out)})`); }
+      const out = build(); Tk.CF1.on = false; let old; try { old = build(); } finally { Tk.CF1.on = true; }
+      assert(JSON.stringify(old) === '{"wilds":"647d2274","fallout":"6aade2dc","ashfall":"55bb2cae"}', `${T} (v0.11.215, RV1 TG4): with CF1 switched off, v0.11.214's runs exactly (its code, keys sorted) (${JSON.stringify(old)})`);
+      assert(JSON.stringify(out) === '{"wilds":"ad1fa63b","fallout":"be0db1d7","ashfall":"eb5b2dc3"}', `${T} (TG): spacing off, rest row out: v0.11.210's three runs exactly as v0.11.215 runs them (re-pinned for CF1: no card waits behind another's work, a card that gives no food pays at its end) (${JSON.stringify(out)})`); }
     // RV1 (TG2, L1): the spring found, its row at 1 and the wash open: one row, the wash's, and the run washes
     { const g = mk('heart_hub', 17); g.flags.spring_found = true; Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', 0); Wk.planSet(g, 'door:heart_spring', 1);
       const rs = Wk.doorCards(g, SCENES).filter((x) => x.scene === 'heart_spring'); const r = Wk.runWeek(g, SCENES);
@@ -6130,9 +6159,10 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
           const c = JSON.parse(JSON.stringify(g)); const rr = Tk.runTask(c, SCENES, card.id); const pre = rr.lines.slice(0, rr.pre);
           const u = Wk.readProbe(g, SCENES); if (u) A.noteLines(g, u.lines);
           assert(rr.pre >= 2 && A.unreadLines(g, pre).length > 0 && Wk.readProbe(g, SCENES) === null && Wk.runWeek(g, SCENES).stop !== 'read', `${T} (RV1, TG2): the card's own lines read, its breakfast and day's sit not: no stop (${rr.pre} routine lines: ${pre.map((l) => l.slice(0, 30)).join(' | ')})`); }
-        { const g = mk('fo_ashfall', 9, 15); g.minutes += 15; g.james.satiety = 60; g.james.qi = Math.max(g.james.qi, 30); Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', 0); const card = Wk.planCards(g, SCENES).find((c) => c.status === 'open'); Wk.planSet(g, card.id, 1);
+        // v0.11.215 (RV1, SR): open at 11:00 (its old length left), the routine then takes the time
+        { const g = mk('fo_ashfall', 9, 11); g.james.satiety = 60; g.james.qi = Math.max(g.james.qi, 30); Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', 0); const card = Wk.planCards(g, SCENES).find((c) => c.status === 'open'); Wk.planSet(g, card.id, 1);
           const c = JSON.parse(JSON.stringify(g)); const rr = Tk.runTask(c, SCENES, card.id);
-          assert(rr.skipped && Wk.readProbe(g, SCENES) === null, `${T} (RV1, TG2): a card the routine left no time for (${card.id} at 15:15: skipped ${!!rr.skipped}) is not checked`); }
+          assert(rr.skipped && Wk.readProbe(g, SCENES) === null, `${T} (RV1, TG2): a card the routine left no time for (${card.id} at 11:00: skipped ${!!rr.skipped}) is not checked`); }
         // RV1 (TG1): a player as main.js plays: every read stop tapped (the tap's lines recorded, as land), the screens that can fold recorded,
         // the talks and evenings tapped (their lines recorded). No stop comes back for a line the tap showed; at the end every line of the
         // plan's reports (the routine's meals and the day's sit, "As before: ", the number lines and the plan's own lines aside) is read.
@@ -6172,6 +6202,130 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         { const src = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
           assert(/function land\([^)]*\) \{\n\s*noteLines\(g, lines\);/.test(src) && /const r = runTask\(g, SCENES, id\);\n\s*noteReadTap\(g, SCENES, id, r\);/.test(src) && src.includes("r.stop === 'read' ? ' Tap it yourself, then run the week again.'") && src.includes('`Stopped: ${stopText(p.stop)}.`'), `${T}: main.js records what it shows, counts the tap, names the card`); }
     } finally { READ_STOP.on = false; }
+}
+
+// v0.11.215 (owner picks CF1: UB + RE + BL, 2026-11-17 20:31; FP1: FS, 20:58; his report 20:24 "a serious bug. actions take more than a day.
+// I cannot take them at all.", 20:28 "it was all over from the beginning of ashfall", with saves/v0.11.214-long-fallout-day64.json): every
+// week's card keeps its own work carried (no card waits behind another's), a card that gives no food pays when its work is done, a card
+// that gives food (the wilds' Forage and Hunt) pays at its start (FS), a busy card says how long is left; an old save's one carry, paid.
+{
+    const Gm = await import('../js/core/game.js');
+    const C = await import('../js/core/calendar.js');
+    const Wk = await import('../js/core/week.js');
+    const Tk = await import('../js/core/tasks.js');
+    const T = 'CF1 (every card its own work)';
+    const D = 1440;
+    const own = () => deserialize(readFileSync(new URL('../saves/v0.11.214-long-fallout-day64.json', import.meta.url), 'utf8'), { force: true });
+    // the owner's save: one old carry (Sing a full stretch of the line), 7 cards planned, all 7 "busy" behind it at v0.11.214
+    { const g = own(); const old = g.tasks.carry;
+      assert(old?.id === 'fo_palisade:0' && old.left === 1191 && !g.tasks.carries && Tk.carriesRead(g)['fo_palisade:0']?.paid === true && Tk.carryHere(g, 'fo_ashfall')?.id === 'fo_palisade:0', `${T}: the owner's save: its one carry read as paid (${JSON.stringify(old)})`);
+      { // Day 65 is the road (no stay): the same save on its own last morning, Day 64 07:00, before the farewell
+        const h = own(); h.minutes = 63 * D + 7 * 60; goTo(h, SCENES, 'fo_ashfall'); h.james.satiety = 100; delete h.tasks.routine;
+        const cards = taskCards(h, SCENES).filter((c) => c.week), busy = cards.filter((c) => c.status === 'busy').map((c) => c.id), go = taskCards(h, SCENES).find((c) => c.id === Tk.carryTaskId('fo_palisade:0'));
+        // RV1 (SG, TG2): on the stay's last morning no card that gives no food can end before the stay: "too long", and his plan starts none
+        assert(Tk.weekHub(h) && busy.join() === '' && cards.filter((c) => c.status === 'long').length === 7 && go?.status === 'open' && !/then its result/.test(go.tag), `${T} (RV1, SG): Day 64 07:00: none waits behind Sing; the 7 planned cards too long for the day left (busy: ${busy.join() || 'none'}; ${cards.map((c) => c.status).join()}; ${go?.tag})`);
+        { const k = JSON.parse(JSON.stringify(h)); const ids = []; Wk.runWeek(k, SCENES, { onStep: (cg, l) => { if (l && !l.r.skipped) ids.push(l.id); } });
+          assert(!ids.some((id) => /^fo_(clinic|drill|council|palisade):/.test(id)), `${T} (RV1, SG, TG2): his plan starts no card it could not end (${ids.slice(0, 8).join(', ')})`); }
+        // a week earlier in the same stay (Day 58 07:00, Sing's work still open): the cards open, and his plan starts one
+        { const k = JSON.parse(JSON.stringify(h)); k.minutes = 57 * D + 7 * 60; const ids = []; const open = taskCards(k, SCENES).filter((c) => c.week && c.status === 'open').length;
+          Wk.runWeek(k, SCENES, { onStep: (cg, l) => { if (l && !l.r.skipped) ids.push(l.id); } });
+          assert(open === 7 && ids.some((id) => /^fo_(clinic|drill|council|palisade):/.test(id) && !Tk.isCarryTask(id)), `${T} (UB): Day 58: the 7 cards open beside Sing's work, and his plan starts one (${open}; ${ids.slice(0, 8).join(', ')})`); }
+        const r = Tk.runTask(h, SCENES, Tk.CARRY_TASK);
+        assert(r.lines.some((x) => /Sing a full stretch of the line: /.test(x)) && Tk.carriesRead(h)['fo_palisade:0'] && !('carry' in h.tasks) && !r.lines.some((x) => / \/ DC /.test(x)), `${T}: the old carry goes on (the bare Go on id), moved into the record, nothing paid twice (${r.lines.slice(-1)})`);
+      }
+    }
+    // UB: two cards' work carried at once, each with its own Go on; the plan takes both; the forecast's rows follow each card's end
+    { const g = ensureBars(newGame(99701, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'fo_ashfall'); g.minutes = (C.calStart(g, 8) - 1) * D + 7 * 60; g.flags.palisade = 1; g.flags.wolf = 'driven'; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60);
+      const [a, b] = Wk.planCards(g, SCENES).filter((c) => c.status === 'open').map((c) => c.id);
+      Tk.runTask(g, SCENES, a); g.minutes += D; g.minutes = Math.floor(g.minutes / D) * D + 7 * 60; delete g.tasks.routine; Tk.runTask(g, SCENES, b);
+      const here = Tk.carriesHere(g).map((cy) => cy.id).sort().join(), gos = taskCards(g, SCENES).filter((c) => Tk.isCarryTask(c.id)).map((c) => c.id).sort().join();
+      assert(here === [a, b].sort().join() && gos === [a, b].map(Tk.carryTaskId).sort().join() && Tk.carriesHere(g).every((cy) => cy.paid === false), `${T} (UB): two works carried, two Go on cards (${gos})`);
+      const h = Wk.planHours(g, SCENES); assert(h.work === Tk.carriesHere(g).reduce((x, cy) => x + cy.left, 0), `${T} (UB): the plan's hours count every work carried (${h.work})`);
+      Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', 0); const ran = new Set(); const done = []; g.minutes += D; g.minutes = Math.floor(g.minutes / D) * D + 7 * 60; delete g.tasks.routine;
+      const onStep = (cg, l) => { if (l && !l.r.skipped) { ran.add(l.id); if (l.r.lines.some((x) => / \/ DC /.test(x))) done.push(l.id); } };
+      let r = Wk.runWeek(g, SCENES, { onStep });
+      for (let k = 0; k < 80 && ['evening', 'door'].includes(r.stop) && !(done.length >= 2); k++) { const v = sceneView(g, SCENES); const o = v.choices.filter((c) => !c.disabled && c.index < 1000 && !/^(Yuki: change form|Story Mode only)/.test(c.label)); if (!o.length || g.combat) break; Wk.storyTap(g, SCENES, o[0].index); if (g.combat) break; if (Wk.afterStory(g, SCENES).resume) r = Wk.runWeek(g, SCENES, { onStep }); }
+      assert([a, b].every((k) => ran.has(Tk.carryTaskId(k))) && done.length >= 1 && done.every(Tk.isCarryTask), `${T} (UB, RE): the plan goes on with both; each pays at its own end (${[...ran].join(', ')}; paid by ${done.join()}; ${r.stop})`); }
+    // FS: every week card that gives food is a wilds Forage or Hunt card; Practice and the village's and Fallout's give none
+    { const food = [], none = []; for (const hub of Tk.WEEK_HUBS) for (const m of Object.keys(TASK_HUBS[hub].menus || {})) SCENES[m].choices.forEach((c, i) => { if (c.check || c.time != null) (Tk.foodCard(c) ? food : none).push(`${m}:${i}`); });
+      assert(food.length >= 7 && food.every((id) => /^wild_(forage|hunt):/.test(id)) && none.some((id) => /^wild_train:/.test(id)) && none.some((id) => /^fo_/.test(id)), `${T} (FS): the food cards are the wilds' Forage and Hunt (${food.join()})`); }
+    // main.js: the planned cards' notes count every work carried
+    { const src = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+      assert(src.includes('const carried = new Set(carriesHere(g, g.scene).map((cy) => cy.id))') && !/tasks\?\.carry\b/.test(src), `${T}: main.js reads every work carried`); }
+    // the old calendar: no carry ever
+    { const g = ensureBars(newGame(99702, { closed: true })); goTo(g, SCENES, 'wilds'); g.minutes = D + 7 * 60; Tk.runTask(g, SCENES, 'wild_train:1'); assert(!g.tasks.carries && !g.tasks.carry, `${T}: the old calendar: nothing carried`); }
+}
+
+// v0.11.215 (owner pick RV1 after the Opus review: KS, SG, DL, MS, SR, TG1–TG10): a carried work lives through its stay (the camp and the
+// village between keep it), an unpaid one dropped at the stay's end says so, a card that gives no food starts only if its whole work fits
+// in the stay, a start needs its old length left today, the result reads the story day its work started.
+{
+    const Gm = await import('../js/core/game.js');
+    const C = await import('../js/core/calendar.js');
+    const Wk = await import('../js/core/week.js');
+    const Tk = await import('../js/core/tasks.js');
+    const A = await import('../js/story/again.js');
+    const T = 'CF1 RV1';
+    const D = 1440;
+    const at = (hub, sd, h = 7, seed = 99801) => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, hub); g.minutes = (C.calStart(g, sd) - 1) * D + h * 60; g.james.satiety = 100; g.james.qi = 30; Gm.addItem(g, 'smoked_meat', 40); g.flags.palisade = 1; g.flags.wolf = 'driven'; g.flags.ya_met = true; return g; };
+    // TG1 (H1, KS): unpaid work through the wilds' camp and back; the prologue village between Ashfall's days
+    { const g = at('wilds', 2); g.flags.fire = true; Tk.runTask(g, SCENES, 'wild_train:1'); const left = g.tasks.carries['wild_train:1']?.left;
+      goTo(g, SCENES, 'camp'); const ci = taskCards(g, SCENES).find((c) => c.status === 'open' && !Tk.isCarryTask(c.id))?.id; if (ci) Tk.runTask(g, SCENES, ci);
+      assert(left > 0 && ci && g.tasks.carries['wild_train:1']?.left === left && g.tasks.carries['wild_train:1'].paid === false, `${T} (TG1, KS): a card at camp keeps the wilds' unpaid work (${ci}; ${left} → ${g.tasks.carries['wild_train:1']?.left})`);
+      goTo(g, SCENES, 'wilds'); g.minutes = Math.floor(g.minutes / D + 1) * D + 7 * 60; delete g.tasks.routine; assert(taskCards(g, SCENES).some((c) => c.id === Tk.carryTaskId('wild_train:1') && c.status === 'open'), `${T} (TG1): back on the wilds its Go on opens`); }
+    { const g = at('ashfall', 5); const card = taskCards(g, SCENES).find((c) => c.week && c.status === 'open' && !Tk.foodCard(SCENES[c.id.split(':')[0]].choices[Number(c.id.split(':')[1])])); Tk.runTask(g, SCENES, card.id);
+      goTo(g, SCENES, 'village'); const vi = taskCards(g, SCENES).find((c) => c.status === 'open' && !Tk.isCarryTask(c.id))?.id; if (vi) Tk.runTask(g, SCENES, vi);
+      assert(vi && Tk.carriesRead(g)[card.id]?.paid === false, `${T} (TG1, KS): a card in the village keeps Ashfall's unpaid work (${card.id}, ${vi})`); }
+    // TG1 (H2, DL): the stay over, the next task hub drops the unpaid work and says so; a paid one goes quietly
+    { const g = at('fo_ashfall', 10); const card = taskCards(g, SCENES).find((c) => c.week && c.status === 'open'); Tk.runTask(g, SCENES, card.id);
+      g.tasks.carries.extra = { id: 'extra', hub: 'fo_ashfall', left: 60, total: 600, label: 'Paid work', coil: g.tasks.carries[card.id].coil, paid: true, stay: 3 };
+      g.flags.ending = 'paid'; g.minutes = (C.calStart(g, 12) - 1) * D + 8 * 60; goTo(g, SCENES, 'rr_hub'); const ri = taskCards(g, SCENES).find((c) => c.status === 'open')?.id; const r = Tk.runTask(g, SCENES, ri);
+      const line = r.lines.find((x) => /left unfinished when the stay ended; nothing comes of it\./.test(x));
+      assert(!g.tasks.carries[card.id] && !g.tasks.carries.extra && line && line.startsWith(g.tasks.carries[card.id]?.label || '') && r.pre >= 1 && r.lines.filter((x) => /left unfinished/.test(x)).length === 1, `${T} (TG1, DL): at the Root Road the Fallout's works dropped, the unpaid one said once (${line}; pre ${r.pre})`); }
+    // SG: a card that gives no food is "too long" when its whole work can't fit in the stay; the plan and the forecast skip it
+    { const g = at('fo_ashfall', 10, 7); g.minutes += 6 * D; delete g.tasks.routine; // the stay's last morning
+      const long = taskCards(g, SCENES).filter((c) => c.week && c.status === 'long').map((c) => c.id), room = Tk.stayRoom(g);
+      Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', 0); for (const id of long) Wk.planSet(g, id, 1); const ids = []; Wk.runWeek(g, SCENES, { onStep: (cg, l) => { if (l && !l.r.skipped) ids.push(l.id); } });
+      assert(long.length >= 6 && room <= 540 && !ids.some((id) => long.includes(id)) && Object.values(Wk.planNotes(g, SCENES).rows).every((x) => / not this week/.test(x)), `${T} (SG): the stay's last morning: ${long.length} cards too long (${room} min left), none started, all "not this week"`);
+      const e = at('fo_ashfall', 8, 7); assert(taskCards(e, SCENES).filter((c) => c.week && c.status === 'long').length === 0 && Tk.stayRoom(e) > 7000, `${T} (SG): the stay's first morning: none too long (${Tk.stayRoom(e)} min)`);
+      const src = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8'); assert(src.includes("c.status === 'long' ? 'too long for what is left of this stay'") && src.includes("|| c.status === 'long'));"), `${T} (SG): the card shown, locked, with its reason`); }
+    // SR (TG10, M2): a week's card opens only with its old-calendar length left today; the late-start food path is closed
+    { const g = deserialize(readFileSync(new URL('../saves/v0.11.204-long-wilds-day2.json', import.meta.url), 'utf8'), { force: true }); g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 20);
+      g.minutes = Math.floor(g.minutes / D) * D + 14 * 60 + 30; g.tasks.routine = { d: Tk.workDay(g), meals: 'bls', sit: true };
+      const food = taskCards(g, SCENES).filter((c) => c.week && Tk.foodCard(SCENES[c.id.split(':')[0]].choices[Number(c.id.split(':')[1])]));
+      assert(food.length >= 5 && food.every((c) => c.status !== 'open'), `${T} (SR, TG10): at 14:30 (30 min left) no food card starts (${food.map((c) => `${c.id} ${c.status}`).join(', ')})`);
+      const h = deserialize(readFileSync(new URL('../saves/v0.11.204-long-wilds-day2.json', import.meta.url), 'utf8'), { force: true }); h.minutes = Math.floor(h.minutes / D) * D + 7 * 60; h.tasks.routine = { d: Tk.workDay(h), meals: 'bls', sit: true };
+      assert(taskCards(h, SCENES).filter((c) => c.week && c.status === 'open').length >= 5, `${T} (SR): at 07:00 they open`); }
+    // TG3 (M1, MS): the Fallout council card started on story day 8, ended on day 9: day 8's reply and flag
+    { const g = at('fo_ashfall', 8, 7); g.minutes = (C.calEnd(g, 8) - 1) * D + 7 * 60; const id = 'fo_council:0'; Tk.runTask(g, SCENES, id); const sd0 = C.storyDay(g); // started on day 8's last day
+      for (let d = 1; d < 12 && g.tasks.carries?.[id]; d++) { g.minutes = Math.floor(g.minutes / D + 1) * D + 7 * 60; delete g.tasks.routine; if (Tk.taskOpen(g, SCENES, Tk.carryTaskId(id))) Tk.runTask(g, SCENES, Tk.carryTaskId(id)); }
+      assert(sd0 === 8 && C.storyDay(g) === 9 && !g.tasks.carries?.[id] && g.flags.council8 && !g.flags.council9, `${T} (TG3, MS): started on day 8, ended on day ${C.storyDay(g)}: day 8's flag (${Object.keys(g.flags).filter((f) => /^council/.test(f)).join()})`); }
+    // TG5: two works carried, both paid at their own ends
+    { const g = at('fo_ashfall', 8, 7); const [a, b] = taskCards(g, SCENES).filter((c) => c.week && c.status === 'open').map((c) => c.id);
+      Tk.runTask(g, SCENES, a); g.minutes = Math.floor(g.minutes / D + 1) * D + 7 * 60; delete g.tasks.routine; Tk.runTask(g, SCENES, b);
+      const paid = new Set(); for (let d = 0; d < 14 && Tk.carriesHere(g).length; d++) { g.minutes = Math.floor(g.minutes / D + 1) * D + 7 * 60; delete g.tasks.routine; for (const cy of Tk.carriesHere(g)) { if (!Tk.taskOpen(g, SCENES, Tk.carryTaskId(cy.id))) continue; const r = Tk.runTask(g, SCENES, Tk.carryTaskId(cy.id)); if (r.lines.some((x) => / \/ DC /.test(x))) paid.add(cy.id); } }
+      assert(paid.size === 2 && paid.has(a) && paid.has(b), `${T} (TG5): both works paid at their ends (${[...paid].join()})`); }
+    // the plan goes on with each card's own work at its card's place: the newer work placed first goes on first (F17)
+    { const g = at('fo_ashfall', 8, 7); const [a, b] = taskCards(g, SCENES).filter((c) => c.week && c.status === 'open').map((c) => c.id);
+      Tk.runTask(g, SCENES, a); g.minutes = Math.floor(g.minutes / D + 1) * D + 7 * 60; delete g.tasks.routine; Tk.runTask(g, SCENES, b); g.minutes = Math.floor(g.minutes / D + 1) * D + 7 * 60; delete g.tasks.routine;
+      Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', 0); Wk.planPrio(g, SCENES, b, 1); const ids = []; Wk.runWeek(g, SCENES, { onStep: (cg, l) => { if (l && !l.r.skipped) ids.push(l.id); } });
+      assert(ids.find(Tk.isCarryTask) === Tk.carryTaskId(b), `${T} (F17): ${b} placed first: its Go on first, though ${a}'s work is older (${ids.slice(0, 4).join(', ')})`); }
+    // TG6 (F15): an old save's work, followed to its end, pays nothing (the owner's Sing)
+    { const h = deserialize(readFileSync(new URL('../saves/v0.11.214-long-fallout-day64.json', import.meta.url), 'utf8'), { force: true }); h.minutes = 57 * D + 7 * 60; goTo(h, SCENES, 'fo_ashfall'); h.james.satiety = 100;
+      const fam = h.tasks.fam['fo_palisade:0'], checks = h.stats.checks; let last = null;
+      for (let d = 0; d < 5 && Tk.carriesRead(h)['fo_palisade:0']; d++) { delete h.tasks.routine; if (Tk.taskOpen(h, SCENES, Tk.carryTaskId('fo_palisade:0'))) last = Tk.runTask(h, SCENES, Tk.carryTaskId('fo_palisade:0')); h.minutes = Math.floor(h.minutes / D + 1) * D + 7 * 60; }
+      assert(!Tk.carriesRead(h)['fo_palisade:0'] && last?.lines.some((x) => /Sing a full stretch of the line: done/.test(x)) && h.stats.checks === checks && h.tasks.fam['fo_palisade:0'] === fam, `${T} (TG6): the owner's Sing ends and pays nothing twice (checks ${checks} → ${h.stats.checks})`); }
+    // TG7 (F12): an unpaid start still charges the work's Fed
+    { const g = at('wilds', 2); g.tasks.routine = { d: Tk.workDay(g), meals: 'bls', sit: true }; const f0 = g.james.satiety, m0 = g.minutes; Tk.runTask(g, SCENES, 'wild_train:1');
+      const hrs = (g.minutes - m0) / 60; assert(Math.abs((f0 - g.james.satiety) - 4 * hrs) < 0.6, `${T} (TG7): an unpaid start costs Fed 4 an hour (${(f0 - g.james.satiety).toFixed(1)} over ${hrs.toFixed(1)} h)`); }
+    // TG8 (F1): a once-a-Coil card closes at its end, not its start
+    { const g = at('fo_ashfall', 8, 7); const id = 'fo_council:1'; Tk.runTask(g, SCENES, id); const before = !!g.flags['oo:fo_council#1']; // no check: it always succeeds
+      for (let d = 0; d < 8 && g.tasks.carries?.[id]; d++) { g.minutes = Math.floor(g.minutes / D + 1) * D + 7 * 60; delete g.tasks.routine; if (Tk.taskOpen(g, SCENES, Tk.carryTaskId(id))) Tk.runTask(g, SCENES, Tk.carryTaskId(id)); }
+      assert(!before && g.flags['oo:fo_council#1'] && !taskCards(g, SCENES).some((c) => c.id === id), `${T} (TG8): the once-a-Coil card open while its work goes on, closed at its end`); }
+    // TG9 (F18): a Go on tapped at a read stop clears the stop and leaves its card's count
+    { const g = at('fo_ashfall', 8, 7); Wk.planEnsure(g); const card = Wk.planCards(g, SCENES)[0].id; Wk.planSet(g, card, 2); const p = g.tasks.plan; p.read = Tk.carryTaskId(card); p.readKey = card; p.stop = 'read';
+      Wk.noteReadTap(g, SCENES, Tk.carryTaskId(card), { lines: [] });
+      assert(!p.read && p.items[card] === 2 && p.stop === '', `${T} (TG9): the Go on's tap: stop cleared, ${card} still 2`); }
 }
 
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));

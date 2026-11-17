@@ -8,7 +8,7 @@ import {
     startCombat, combatStep, combatFlee, combatYield, waitLeft, songPays, sungKey, THREAT_TEXT, SONG_TEXT, SONG_COST, SONG_MAX, SAY_TEXT, SPAR_TEXT, postureNow, unarmedMastery, fightAdapt, weaponMastery, COMBAT_ACTIONS, noDiceDc, airStrike, AIR_TEXT, FOE_TRAITS, foeTraits, TELL_TEXT, bigBlowNow, lungeNow, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage, qiShield,
 } from './core/game.js';
 import { sceneView, choose, goTo, gives, choiceQi, threatOf } from './core/story.js'; // v0.11.109 (FQ1): choiceQi
-import { weekHub, cardSpeed, NEW_LENGTH, WEEK_MULT, deadMenuHub, showPicked, isTaskHub, isQueueScreen, isTaskChoice, taskCards, taskLabel, taskMinutes, taskOutcome, dryOutcome, outcomeOf, runTask, FAM, famLine, yukiLane, setYuki, nextStep, YUKI_LANE_TEXT, YUKI_HOURS } from './core/tasks.js';
+import { carriesHere, weekHub, cardSpeed, NEW_LENGTH, WEEK_MULT, deadMenuHub, showPicked, isTaskHub, isQueueScreen, isTaskChoice, taskCards, taskLabel, taskMinutes, taskOutcome, dryOutcome, outcomeOf, runTask, FAM, famLine, yukiLane, setYuki, nextStep, YUKI_LANE_TEXT, YUKI_HOURS } from './core/tasks.js';
 import { SCENES, ITEMS } from './story/prologue.js';
 import { TASK_HUBS } from './story/task_hubs.js';
 import { landParts, landReply, noteSaid } from './core/replies.js'; // v0.11.68 (A1 + B2 + C1); v0.11.134 (LP2, QR; RQ1): landReply, noteSaid
@@ -243,7 +243,7 @@ function weekHtml() {
     const items = p?.items || {}, med = p?.med || { sit: 0, mer: 0, qi: 0, pres: 0 };
     const fc = planNotes(g, SCENES); // v0.11.206 (FC1, RV1 TG7): E1, E2b, E3, E4, M1, from week.js (the dry run kept until the save changes)
     const rk = planRanks(g, SCENES), cardIds = planCards(g, SCENES).map((c) => c.id); // v0.11.211 (PR2 + PK1): the rows' places
-    const cr = cardIds.filter((id) => (items[id] || 0) > 0 || g.tasks?.carry?.id === id).map((id) => rk.rank[id]).filter(Boolean), lo = Math.min(...cr), hi = Math.max(...cr); // RV1 (L2): the planned cards (and the work carried) only
+    const carried = new Set(carriesHere(g, g.scene).map((cy) => cy.id)), cr = cardIds.filter((id) => (items[id] || 0) > 0 || carried.has(id)).map((id) => rk.rank[id]).filter(Boolean), lo = Math.min(...cr), hi = Math.max(...cr); // RV1 (L2): the planned cards (and the work carried) only
     const when = (key) => (!cr.length || rk.rank[key] > hi ? 'after the day\'s work' : rk.rank[key] < lo ? 'before the day\'s work' : ''); // the rows' notes follow the order
     const rows = planCards(g, SCENES).map((c) => planRow(c.id, c.label, items[c.id] || 0, `${durLabel(Math.round((c.minutes * NEW_LENGTH) / cardSpeed(c.fam || 0)) * WEEK_MULT)} a card${fc.rows[c.id] || ''}`, rk));
     rows.push(planRow('med:sit', 'Sits a day', med.sit || 0, fc.med.sit || '', rk), planRow('med:mer', 'Meridian sessions a day', med.mer || 0, fc.med.mer || '', rk), planRow('med:qi', 'Gather Qi a day', med.qi || 0, ['hours', fc.med.qi].filter(Boolean).join(' · '), rk));
@@ -334,7 +334,7 @@ function renderCardScreen() {
     let hubHtml = '';
     let hubTop = '';
     if (qs) {
-        const cards = taskCards(g, SCENES).filter((c) => !medIds.has(c.id) && (c.status === 'open' || c.status === 'late' || c.status === 'busy' || c.status === 'evening')); // v0.11.204 (W1, S1): busy, evening // v0.11.37 (D-a): 'late' = would end past the day's end (00:00 since v0.11.91), shown locked // v0.11.17 (owner pick 1a): "done for today" cards are hidden
+        const cards = taskCards(g, SCENES).filter((c) => !medIds.has(c.id) && (c.status === 'open' || c.status === 'late' || c.status === 'busy' || c.status === 'evening' || c.status === 'long')); // v0.11.215 (RV1, SG): 'long' // v0.11.204 (W1, S1): busy, evening // v0.11.37 (D-a): 'late' = would end past the day's end (00:00 since v0.11.91), shown locked // v0.11.17 (owner pick 1a): "done for today" cards are hidden
         const groups = [];
         for (const c of cards) { let gr = groups.find((x) => x.name === c.group); if (!gr) groups.push(gr = { name: c.group, cards: [], note: '' }); gr.cards.push(c); if (c.groupNote) gr.note = c.groupNote; }
         const cardHtml = (c) => {
@@ -342,7 +342,7 @@ function renderCardScreen() {
             const mins = out ? out.minutes : c.minutes;
             const fam = c.kind === 'work' || c.kind === 'door' ? ` · ${famLine(c)}` : ''; // v0.11.155 (FD1, NX)
             const ctag = hideTag(c.tag);
-            const tag = c.status === 'late' ? LATE_TAG : c.status === 'busy' ? `busy: ${c.busy}` : c.status === 'evening' ? 'the week\'s work stops at evening: tomorrow' : c.status !== 'open' ? 'done for today — back tomorrow' : c.kind === 'door' ? `opens the scene${ctag ? ` · ${ctag}` : ''}` : (ctag || (showChecks ? 'no check' : ''));
+            const tag = c.status === 'late' ? LATE_TAG : c.status === 'busy' ? `busy: ${c.busy}` : c.status === 'evening' ? 'the week\'s work stops at evening: tomorrow' : c.status === 'long' ? 'too long for what is left of this stay' : c.status !== 'open' ? 'done for today — back tomorrow' : c.kind === 'door' ? `opens the scene${ctag ? ` · ${ctag}` : ''}` : (ctag || (showChecks ? 'no check' : ''));
             const dies = out?.death ? ` <b class="dies">${out.death === 'hunger' ? 'Starves here' : 'Collapses here'}</b>` : '';
             const when = c.kind === 'door' || !mins || !out ? '' : ` ${endAt(out.end)}`;
             return `<button class="card${c.kind === 'door' ? ' door' : ''}${out?.death ? ' fatal' : ''}${c.check && showChecks ? ` b-${c.check.band}` : ''}" data-run="${esc(c.id)}" ${c.status !== 'open' ? 'disabled' : ''}>${md(c.label)}${dies}${tag ? `<span class="tag">${esc(tag)}</span>` : ''}${c.status === 'open' ? `<span class="len">${mins ? durLabel(mins) : 'at once'}${when}${fam}</span>` : ''}</button>`;

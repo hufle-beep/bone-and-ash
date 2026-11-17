@@ -19,8 +19,8 @@ import { CONDENSE_SIT_COST } from './formulas.js';
 import { btTarget, MER_LINES, lineWindow, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
 import { onceOpen, noteOnce, stageOpen, ONCE_MENUS, EVENING_HOUR } from '../story/oneoff.js';
-import { daily, foodCount, eatBest } from '../story/common.js';
-import { storyDay, calStart, longCal, LONG_CAL, STAY_DAYS } from './calendar.js'; // v0.11.203 (owner pick T1, TS1): the long calendar; v0.11.204 (W1): the week
+import { daily, foodCount, eatBest, FOOD, stayOf } from '../story/common.js';
+import { storyDay, calStart, calEnd, atStoryDay, longCal, LONG_CAL, STAY_DAYS } from './calendar.js'; // v0.11.203 (owner pick T1, TS1): the long calendar; v0.11.204 (W1): the week
 import { endCoil } from './coil.js';
 import { canMeditate } from './meditate.js';
 import { keepReplies } from './replies.js'; // v0.11.69 (P1)
@@ -284,7 +284,7 @@ function medTaskCards(g, scenes) {
 }
 
 export const taskOpen = (g, scenes, id) => (id === MER_TASK ? !!TASK_HUBS[g.scene] && merChoice(g, scenes) >= 0 && !nightLock(g) : taskCards(g, scenes, id).some((c) => c.id === id && c.status === 'open')); // v0.11.13: an old queue's mer:next still runs
-export const taskLabel = (g, scenes, id) => { if (id === CARRY_TASK) return `Go on: ${carryHere(g, g.scene)?.label || 'the week\'s work'}`; if (id === MER_TASK) return 'Next meridian session'; if (lineOfTask(id)) return lineName(g, lineOfTask(id)).replace(/\.$/, ''); if (id === BT_TASK) return 'Break through'; if (id === SIT_TASK) return 'Cultivate: one sit'; if (id === QI_TASK) return 'Meditate: gather Qi'; const p = parse(id); const c = scenes[p.scene]?.choices?.[p.index]; return c ? asText(c.text, g) : id; };
+export const taskLabel = (g, scenes, id) => { if (isCarryTask(id)) return `Go on: ${carryHere(g, g.scene, id)?.label || 'the week\'s work'}`; if (id === MER_TASK) return 'Next meridian session'; if (lineOfTask(id)) return lineName(g, lineOfTask(id)).replace(/\.$/, ''); if (id === BT_TASK) return 'Break through'; if (id === SIT_TASK) return 'Cultivate: one sit'; if (id === QI_TASK) return 'Meditate: gather Qi'; const p = parse(id); const c = scenes[p.scene]?.choices?.[p.index]; return c ? asText(c.text, g) : id; };
 
 /** HP 0 during a task (v0.9.4): the Coil ends; the Coil screen decides what happens next. */
 function collapse(g, scenes, hubId) {
@@ -317,6 +317,40 @@ function resolveWork(g, scenes, hubId, card, id) {
     if (card.entry?.do) lines.push(...(card.entry.do(g) || []));
     if (card.menu) lines.push(...goTo(g, scenes, card.menu));
     if (c.qi && !spendQi(g, c.qi)) throw new Error('Not enough Qi');
+    const once = Math.round((((card.entry?.time || 0) + (c.time || 0)) * NEW_LENGTH) / cardSpeed(t.fam[id] || 0));
+    // v0.11.204 (owner pick W1, S1): on a stay of the long calendar a week's card is ×7 its time: today's share up to the evening,
+    // the rest carried to the next mornings (the "Go on" card); v0.11.215 (owner pick CF1, RE): a card whose work goes on past today
+    // brings its check, result, XP, loot and familiarity when the work is done (`workResult` from the "Go on" card), not at its start;
+    // FP1 (owner pick, 20:58, FS): a card that gives food (the wilds' Forage and Hunt) still pays at its start (food late starved the
+    // Cultivator: prologue Coil 1 deaths 2.5% → 15%); its work goes on with its own "Go on", already paid
+    const total = weekCard(g, hubId, card) ? once * WEEK_MULT : once;
+    const mins = total > once ? Math.min(total, workRoom(g, hubId)) : once;
+    const food = foodCard(c);
+    if (total > mins && !food) {
+        carriesWrite(g)[id] = { id, hub: hubId, left: total - mins, total, label: String(asText(c.text, g)).replace(/\.$/, ''), coil: coilKey(g), paid: false, stay: stayOf(storyDay(g)), sd: storyDay(g) }; // RV1 (KS, MS): its stay and story day
+        lines.push(...advance(g, mins, { work: true }));
+        g.james.satiety = Math.max(0, g.james.satiety - (FED_EXTRA_PER_HOUR * mins) / 60);
+        takeCapNotes();
+        lines.push(`A week's work: ${hrs(total)} in all, ${hrs(total - mins)} still to go (Go on, from tomorrow morning; its result when it is done).`);
+        if (card.menu && g.scene === card.menu) lines.push(...goTo(g, scenes, hubId));
+        g.log.push({ at: g.minutes, scene: g.scene, lines: lines.slice(0, 12) });
+        if (g.log.length > 200) g.log.shift();
+        return lines;
+    }
+    if (total > mins) carriesWrite(g)[id] = { id, hub: hubId, left: total - mins, total, label: String(asText(c.text, g)).replace(/\.$/, ''), coil: coilKey(g), paid: true, ...(CF1.on ? { stay: stayOf(storyDay(g)) } : {}) }; // FP1 (FS); RV1 (KS)
+    return workResult(g, scenes, hubId, card, id, { lines, mins, total, once, left: total > mins ? total - mins : 0 });
+}
+/** v0.11.215 (FP1, FS): a card whose result is food (an item of FOOD), paid at its start. */
+export const foodCard = (c) => !CF1.on || (!!c && gives(c).some((i) => i in FOOD));
+/** v0.11.215 (RV1, TG4): the tests switch CF1 off to run v0.11.214's rules (one carry, every card paid at its start, no stay rules). */
+export const CF1 = { on: true };
+/** v0.11.215 (owner pick CF1, RE): a work card's check, time (`mins`; 0 when the "Go on" card already took it), result, XP, loot,
+ *  familiarity and way on. `lines` the lines so far (the card's own start, or none at the end of a week's work); `done` (the end of a
+ *  week's work): the "A week's work" line is the "Go on" card's own. */
+function workResult(g, scenes, hubId, card, id, { lines = [], mins = 0, total = 0, once = 0, done = false, left = 0, sd = null } = {}) {
+    const asOn = (fn) => (sd != null ? atStoryDay(sd, fn) : fn()); // RV1 (MS): the result's texts and flags on the day its work started
+    const { c } = card;
+    const t = st(g);
     let band = 'full', ratio = 1;
     if (c.check) {
         const k = cardCheck(g, id, c);
@@ -325,14 +359,10 @@ function resolveWork(g, scenes, hubId, card, id) {
         lines.push(`${k.skill} ${k.value} / DC ${k.dc} — ${BAND_TEXT[band]}`);
         if (c.xp !== false) lines.push(...awardXp(g, c.check.xpTo || c.check.skill, c.check.band || 'standard', { fail: band === 'fail', factor: band === 'partial' ? ratio : 1 }));
     }
-    const once = Math.round((((card.entry?.time || 0) + (c.time || 0)) * NEW_LENGTH) / cardSpeed(t.fam[id] || 0));
-    // v0.11.204 (owner pick W1, S1): on a stay of the long calendar a week's card is ×7 its time: today's share up to the evening,
-    // the rest carried to the next mornings (the "Go on" card, `g.tasks.carry`); its result, XP and familiarity once, as before
-    const total = weekCard(g, hubId, card) ? once * WEEK_MULT : once;
-    const mins = total > once ? Math.min(total, workRoom(g, hubId)) : once;
-    if (total > mins) t.carry = { id, hub: hubId, left: total - mins, total, label: String(asText(c.text, g)).replace(/\.$/, ''), coil: coilKey(g) };
-    lines.push(...advance(g, mins, { work: true }));
-    g.james.satiety = Math.max(0, g.james.satiety - (FED_EXTRA_PER_HOUR * mins) / 60);
+    if (mins > 0) {
+        lines.push(...advance(g, mins, { work: true }));
+        g.james.satiety = Math.max(0, g.james.satiety - (FED_EXTRA_PER_HOUR * mins) / 60);
+    }
     takeCapNotes();
     const items = gives(c).length > 0;
     const success = band === 'double' || band === 'full' || (band === 'partial' && items);
@@ -342,7 +372,7 @@ function resolveWork(g, scenes, hubId, card, id) {
         const before = { ...g.inventory };
         if (band === 'double') setLootMult(2);
         let out = [];
-        try { out = c.do(g, roll) || []; } finally { setLootMult(1); }
+        try { out = asOn(() => c.do(g, roll)) || []; } finally { setLootMult(1); }
         lines.push(...(band === 'partial' ? keepReplies(out) : out)); // a partial lists only what it keeps; v0.11.69 (P1): its reply sentences stay
         const gained = Object.keys(g.inventory).map((i) => [i, (g.inventory[i] || 0) - (before[i] || 0)]).filter(([, d]) => d > 0);
         if (band === 'partial') {
@@ -351,7 +381,7 @@ function resolveWork(g, scenes, hubId, card, id) {
         } else if (band === 'double' && gained.length) lines.push(`Double haul — in total: ${gained.map(([i, d]) => `+${d} ${itemNames[i]?.name || i}`).join(', ')}.`);
     } else if (!success && c.failDo) {
         const hp0 = g.james.hp;
-        const out = c.failDo(g, roll) || [];
+        const out = asOn(() => c.failDo(g, roll)) || [];
         // a partial never hurts, so its text drops the sentences about HP
         lines.push(...(band === 'partial' ? out.map((l) => l.replace(/[^.!?]*−\d+(?:\.\d+)? HP[^.!?]*[.!?]?/g, '').trim()).filter(Boolean) : out));
         const lost = hp0 - g.james.hp;
@@ -359,7 +389,7 @@ function resolveWork(g, scenes, hubId, card, id) {
         if (band === 'partial' && lost > 0) g.james.hp = hp0; // a partial never hurts
     }
     for (const i of new Set(takeCapNotes())) lines.push(`Hammerspace: ${itemNames[i]?.name || i} is full — the rest stays behind.`);
-    if (total > once) lines.push(t.carry?.id === id ? `A week's work: ${hrs(total)} in all, ${hrs(t.carry.left)} still to go (Go on, from tomorrow morning).` : `A week's work: ${hrs(total)}, done.`);
+    if (total > once && !done) lines.push(left > 0 ? `A week's work: ${hrs(total)} in all, ${hrs(left)} still to go (Go on, from tomorrow morning).` : `A week's work: ${hrs(total)}, done.`); // v0.11.215: a carried card's end line is its Go on card's
     if ((band === 'partial' || band === 'fail') && c.check) {
         const a = t.adapt[id] || 0;
         if (a < ADAPT_MAX) { t.adapt[id] = Math.min(ADAPT_MAX, a + ADAPT_STEP); lines.push(`${ADAPT_REPLY} (Intuitive Aptitude: +${ADAPT_STEP} on this next time.)`); }
@@ -448,30 +478,46 @@ export function runTask(g, scenes, id) {
     const hubId = g.scene;
     if (g.tasks?.door) delete g.tasks.door; // v0.11.141 (FX1, DI): back on a task screen
     if (!runsHere(g, scenes, id)) throw new Error(`Not a task hub: ${hubId}`); // v0.11.14: Meditate cards also on the resting places
-    const card = id === CARRY_TASK ? { kind: 'carry' } : cardOf(scenes, hubId, id);
+    const card = isCarryTask(id) ? { kind: 'carry' } : cardOf(scenes, hubId, id);
     if (!card) throw new Error(`No card ${id} on ${hubId}`);
     const m0 = g.minutes;
     const lines = [];
     let fail = false, pre0 = 0; // v0.11.214 (RD1, RU): how many of the lines are the day's routine (the plan's read check leaves them out)
-    if (st(g).carry && TASK_HUBS[hubId] && !carryHere(g, hubId) && card.kind !== 'carry') delete st(g).carry; // v0.11.204 (W1, S1): a week's work left behind
+    // v0.11.204 (W1, S1): a week's work left behind; v0.11.215 (RV1, KS): only once its stay or Coil is over (the camp and the village
+    // between keep it); DL: an unpaid one says so (these lines go before the card, counted with the routine's in `pre`)
+    const dropped = [];
+    if (TASK_HUBS[hubId] && card.kind !== 'carry' && Object.values(carriesRead(g)).some((cy) => !carryAlive(g, cy, hubId))) {
+        const cs = carriesWrite(g);
+        for (const k of Object.keys(cs)) if (!carryAlive(g, cs[k], hubId)) { if (CF1.on && !cs[k].paid) dropped.push(`${cs[k].label}: left unfinished when the stay ended; nothing comes of it.`); delete cs[k]; }
+    }
+    lines.push(...dropped);
     if (!routineBusy) { // v0.11.204 (owner pick W1, R1 + R2): the day's meals and sit, long calendar only
         const pre = dayRoutine(g, scenes, hubId, card.kind, id);
-        lines.push(...pre); pre0 = pre.length;
+        lines.push(...pre); pre0 = dropped.length + pre.length;
         // RV1 (H1, L2; the Opus review): the routine took the time the card needed (a "Go on" past the evening hour too): not run, said so
         if (pre.length && g.scene === hubId && (card.kind === 'carry' ? workRoom(g, hubId) <= 0 : !taskOpen(g, scenes, id))) { lines.push(SKIP_LINE, ...takeSpoilNotes(g)); return { lines, fail: false, stopped: false, skipped: true }; }
         if (pre.length && g.scene !== hubId) { lines.push(...takeSpoilNotes(g)); return { lines, fail: false, stopped: true, skipped: true }; }
     }
     const mY = g.minutes; // RV1 (M1): Yuki's lane counts from here; the day's sit ticked her for its own minutes
     if (card.kind === 'carry') {
-        const cy = carryHere(g, hubId);
-        if (!cy) throw new Error('No week\'s work to go on with');
+        const found = carryHere(g, hubId, id);
+        if (!found) throw new Error('No week\'s work to go on with');
+        const cy = carriesWrite(g)[found.id];
         const now = Math.min(cy.left, workRoom(g, hubId));
         if (now <= 0) throw new Error('The day\'s work is over');
         lines.push(...advance(g, now, { work: true }));
         g.james.satiety = Math.max(0, g.james.satiety - (FED_EXTRA_PER_HOUR * now) / 60);
         cy.left -= now;
         lines.push(cy.left > 0 ? `${cy.label}: ${hrs(now)} more, ${hrs(cy.left)} still to go.` : `${cy.label}: done, ${hrs(cy.total)} in all.`);
-        if (cy.left <= 0) delete st(g).carry;
+        if (cy.left <= 0) {
+            delete carriesWrite(g)[cy.id];
+            const wc = !cy.paid ? cardOf(scenes, hubId, cy.id) : null; // v0.11.215 (CF1, RE): its result now
+            if (wc?.c) {
+                const before = g.stats.wins, checks = g.stats.checks;
+                lines.push(...workResult(g, scenes, hubId, wc, cy.id, { done: true, sd: CF1.on ? cy.sd ?? null : null }));
+                fail = g.stats.checks > checks && g.stats.wins === before;
+            }
+        }
     } else if (card.kind === 'bt') {
         if (!btOpen(g)) throw new Error('No breakthrough possible');
         g.flags.bt_return = hubId;
@@ -679,22 +725,70 @@ export const weekCard = (g, hubId, card) => !!card && card.kind === 'work' && !!
 export const workDay = (g) => Math.floor(((g.minutes || 0) - NIGHT_TO * 60) / 1440);
 /** Minutes left today for a week's work: to the hub's evening hour. */
 export const workRoom = (g, hubId = g.scene) => Math.max(0, workDay(g) * 1440 + (EVENING_HOUR[hubId] ?? 16) * 60 - g.minutes);
-/** The week's work carried on this hub, or null. */
-export function carryHere(g, hubId = g.scene) {
-    const cy = g.tasks?.carry;
-    return cy && typeof cy === 'object' && cy.hub === hubId && cy.left > 0 && cy.coil === coilKey(g) && weekHub(g, hubId) ? cy : null;
+/* ---------- v0.11.215 (owner pick CF1: UB + RE + BL, 2026-11-17 20:31; his report 20:24 "a serious bug. actions take more than a day.
+ * I cannot take them at all.", 20:28 "it was all over from the beginning of ashfall", with his Day 64 save) ----------
+ * UB: every week's card keeps its own work left (`g.tasks.carries`: card id → { id, hub, left, total, label, coil, paid }), each with
+ * its own "Go on" card (`week:carry:<card id>`); no card waits behind another's work (before: one `g.tasks.carry` made every other
+ * week's card "busy" until it was done: the owner's Fallout, 20 days behind "Sing a full stretch of the line"). RE: a card whose work
+ * goes on past today brings its result when the work is done (`paid: false`), so starting every card at once brings nothing early.
+ * BL: a card with its own work going on says how long is left. An old save's single `carry` (paid at its start) is read as one of
+ * them (`paid: true`), and moved into `carries` by the first card that changes them. Dropped by every rewind, as before. */
+/** A carried card's "Go on" id; the bare CARRY_TASK (an old save's queue) is the first one here. */
+export const carryTaskId = (cardId) => `${CARRY_TASK}:${cardId}`;
+export const isCarryTask = (id) => typeof id === 'string' && (id === CARRY_TASK || id.startsWith(`${CARRY_TASK}:`));
+const isObj = (o) => !!o && typeof o === 'object' && !Array.isArray(o);
+/** The carried work (card id → record), read only: an old save's `carry` included as paid. */
+export function carriesRead(g) {
+    const t = g?.tasks, out = isObj(t?.carries) ? { ...t.carries } : {};
+    if (isObj(t?.carry) && t.carry.id && !out[t.carry.id]) out[t.carry.id] = { ...t.carry, paid: true };
+    return out;
 }
-/** taskCards' part: the week's cards busy or over for the day, and the "Go on" card. */
+/** The carried work to change: an old save's `carry` moved in first. */
+function carriesWrite(g) {
+    const t = st(g);
+    if (!isObj(t.carries)) t.carries = {};
+    if (isObj(t.carry)) { if (t.carry.id && !t.carries[t.carry.id]) t.carries[t.carry.id] = { ...t.carry, paid: true }; delete t.carry; }
+    return t.carries;
+}
+const carryOk = (g, cy, hubId) => isObj(cy) && cy.hub === hubId && cy.left > 0 && cy.coil === coilKey(g) && weekHub(g, hubId) && (!CF1.on || cy.stay == null || cy.stay === stayOf(storyDay(g)));
+/** v0.11.215 (owner pick RV1, KS): a carried work lives through its stay (the camp, the village between) and its Coil; an old save's (no stay) as before. */
+const carryAlive = (g, cy, hubId) => (CF1.on && isObj(cy) && cy.stay != null ? cy.left > 0 && cy.coil === coilKey(g) && cy.stay === stayOf(storyDay(g)) : carryOk(g, cy, hubId));
+/** v0.11.215 (RV1, SG): the stays' last story days; the work minutes left in this stay (today's to the evening, then each later day's from 07:00). */
+const STAY_LAST = { 1: 3, 2: 6, 3: 10, 4: 18 };
+export function stayRoom(g, hubId = g.scene) {
+    const s = stayOf(storyDay(g));
+    if (!s || !longCal(g)) return 0;
+    const lastWake = calEnd(g, STAY_LAST[s]) - 1, day = ((EVENING_HOUR[hubId] ?? 16) - 7) * 60;
+    return workRoom(g, hubId) + Math.max(0, lastWake - workDay(g)) * day;
+}
+/** A work card's time once (its old-calendar length, familiarity in). */
+const onceOf = (g, card, id) => Math.round((((card?.entry?.time || 0) + (card?.c?.time || 0)) * NEW_LENGTH) / cardSpeed(st(g).fam[id] || 0));
+/** The week's work carried on this hub (oldest first). */
+export const carriesHere = (g, hubId = g.scene) => Object.values(carriesRead(g)).filter((cy) => carryOk(g, cy, hubId));
+/** The carried work of `id` here (a card id or a "Go on" id; the bare CARRY_TASK the first), or null. */
+export function carryHere(g, hubId = g.scene, id = null) {
+    const all = carriesHere(g, hubId);
+    if (id == null || id === CARRY_TASK) return all[0] || null;
+    const k = String(id).startsWith(`${CARRY_TASK}:`) ? String(id).slice(CARRY_TASK.length + 1) : id;
+    return all.find((cy) => cy.id === k) || null;
+}
+/** taskCards' part: a week's card with its own work going on (busy), the cards over for the day, and a "Go on" card for each work. */
 function weekCards(g, scenes, hubId, cards) {
     if (!weekHub(g, hubId)) return;
-    const cy = carryHere(g, hubId), room = workRoom(g, hubId);
+    const here = carriesHere(g, hubId), room = workRoom(g, hubId), mine = new Map(here.map((cy) => [cy.id, cy]));
+    let left = null; // RV1 (SG): the stay's work minutes left, once
     for (const c of cards) {
-        if (c.kind !== 'work' || !weekCard(g, hubId, cardOf(scenes, hubId, c.id))) continue;
+        const card = cardOf(scenes, hubId, c.id);
+        if (c.kind !== 'work' || !weekCard(g, hubId, card)) continue;
         c.week = true; // RV1 (L6): a card done for today stays on the plan's list
         if (c.status !== 'open') continue;
-        if (cy) { c.status = 'busy'; c.busy = cy.label; } else if (room < 30) c.status = 'evening';
+        if (!CF1.on) { if (here.length) { c.status = 'busy'; c.busy = here[0].label; } else if (room < 30) c.status = 'evening'; continue; } // v0.11.214's rule (TG4)
+        const cy = mine.get(c.id), once = onceOf(g, card, c.id);
+        if (cy) { c.status = 'busy'; c.busy = `its work goes on, ${hrs(cy.left)} to go`; } // BL
+        else if (room < Math.max(30, once)) c.status = 'evening'; // RV1 (SR): a start needs its old-calendar length left today
+        else if (!foodCard(card.c) && once * WEEK_MULT > (left ??= stayRoom(g, hubId))) c.status = 'long'; // RV1 (SG): it could not end, and pay, before the stay does
     }
-    if (cy) cards.unshift({ id: CARRY_TASK, kind: 'carry', group: 'This week', label: `Go on: ${cy.label}`, tag: `${hrs(cy.left)} still to go`, minutes: Math.min(cy.left, room), status: room > 0 ? 'open' : 'evening', tier: 0, fam: 0, next: null });
+    cards.unshift(...here.map((cy) => ({ id: carryTaskId(cy.id), kind: 'carry', card: cy.id, group: 'This week', label: `Go on: ${cy.label}`, tag: `${hrs(cy.left)} still to go${cy.paid ? '' : ', then its result'}`, minutes: Math.min(cy.left, room), status: room > 0 ? 'open' : 'evening', tier: 0, fam: 0, next: null })));
 }
 let routineBusy = false;
 const MEAL = { b: 'Breakfast', l: 'Midday', s: 'Supper' };
