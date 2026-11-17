@@ -22,6 +22,7 @@ import { farewellNow } from '../story/act1_fallout.js'; // RV1 (L4)
 import { foodCount, preservable, unspaced, spacedNext, SPACE_DAYS } from '../story/common.js'; // v0.11.213 (FQ1, S3): the spacing
 import { EVENING_HOUR } from '../story/oneoff.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
+import { unreadLines } from '../story/again.js'; // v0.11.214 (owner pick RD1): the lines never shown in this game
 
 /** The night and morning screens of the stays that fold (the suppers and the camp's night keep their choices, so they never do). */
 export const FOLD_SCENES = new Set(['village_night', 'village_morning', 'fo_night', 'fo_morning', 'morning', 'heart_night', 'heart_morning']);
@@ -31,6 +32,7 @@ const META = /^(Yuki: change form|Story Mode only)/;
 export const STOP_TEXT = {
     evening: 'the evening has a choice', story: 'the story needs you', hurt: 'HP is under 60%', hungry: 'Fed is under 30 and there is no food',
     breakthrough: 'a breakthrough is ready', week: 'the week is over', stuck: 'nothing left it can do here', left: 'the story moved on',
+    read: 'a card with text you have not read yet', // v0.11.214 (owner pick RD1, RB): tap it yourself, then run the week again
     door: 'a talk has a choice', // v0.11.210 (owner pick N1, DC-a): a daily door's scene with a real choice; the plan goes on after it
 };
 /** v0.11.210 (owner pick N1, DC-a): the daily door cards the plan can take once a day after the day's work (Yuki's sit, Old Wen's and
@@ -50,6 +52,50 @@ export const doorRepeats = (s) => s in DOOR_KEY;
 export const REST_LABEL = /^Rest\b/;
 /** RV1 (L2, the owner 12:39): the day's line before a talk's choice the plan took as last time. */
 export const AGAIN_LINE = 'As before: ';
+/* ---------- v0.11.214 (owner pick RD1: RU + RB, 2026-11-17 16:54; the owner 16:42: "if a card or it's result haven't been read yet
+ * in the game, it should stop to be read. Effectively making the first runs manual  that's by design.") ----------
+ * Before each card or door the plan takes, the step is run on a copy (`readProbe`: one step of runWeek itself, so its lines are the
+ * real step's): a line of the card's text or result, or of a door's screens walked, never shown on screen in this game (again.js
+ * RU, its numbers aside) stops the plan before it (`read`; `p.read` the card to tap). The player taps it, reads it, and runs the
+ * week again; the forecast stops there too. Not checked: the day's routine before a card (the meals, the day's sit: `pre`), a card
+ * the routine left no time for, the plan's own "As before: " line (a label shown when it was picked). `READ_STOP.on`: the tests
+ * from before v0.11.214 pin the plan without it. */
+export const READ_STOP = { on: true };
+/** A copy for the probe: the save without its journal and its read record (neither changes a step), the Coil's snapshot shared. */
+function probeClone(g) {
+    const { log, read, coil, ...rest } = g;
+    const c = JSON.parse(JSON.stringify(rest));
+    c.log = [];
+    if (coil) { const { snap, ...cr } = coil; c.coil = JSON.parse(JSON.stringify(cr)); if (snap !== undefined) c.coil.snap = snap; }
+    return c;
+}
+/** RD1 (RB): the plan's next step on a copy: { id: the card it runs, lines: those never shown } when it has such lines, else null. */
+export function readProbe(g, scenes) {
+    const c = probeClone(g);
+    let first = null;
+    const r = runWeek(c, scenes, { max: 1, probe: false, onStep: (cg, l) => { if (l && !first) first = l; } });
+    if (!first || first.r?.skipped) return null;
+    const all = r.days.flatMap((d) => d.lines).slice(first.r?.pre || 0).filter((l) => !String(l).startsWith(AGAIN_LINE));
+    const lines = unreadLines(g, all);
+    return lines.length ? { id: first.id, key: first.key, lines } : null;
+}
+/** RD1 (RB): the card the plan stopped for, tapped by hand (main.js doTask, after runTask): it counts as the plan's step, so the
+ *  plan doesn't take it again (a card one fewer, the day's Meditate, Smoke or Rest row one more done, a door done today, a one-off's
+ *  row back to 0). Any other tap leaves the plan as it is. */
+export function noteReadTap(g, scenes, id, r = null) {
+    const p = planHere(g);
+    if (!p || !p.read || p.read !== id || r?.skipped) return; // RV1 (L1): the day's routine went first (not run): the stop stays for the next tap
+    const k = p.readKey;
+    delete p.read; delete p.readKey;
+    if (p.stop === 'read') p.stop = ''; // RV1 (L4): no stale "Stopped: …" line for a card now read
+    if (typeof k !== 'string' || id === CARRY_TASK) return; // the week's work carried keeps its own count
+    const d = workDay(g), grp = keyGroup(k);
+    if (!isRec(p.done) || p.done.d !== d) p.done = { d, sit: 0, mer: 0, qi: 0, pres: 0, rest: 0, doors: {} };
+    if (!isRec(p.done.doors)) p.done.doors = {};
+    if (grp === 'card') { if (p.items?.[k] > 0) { p.items[k] -= 1; if (p.items[k] <= 0) delete p.items[k]; } return; }
+    if (grp === 'door') { const s = k.slice(5); p.done.doors[s] = (p.done.doors[s] || 0) + 1; if (!doorRepeats(s) && isRec(p.doors)) p.doors[s] = 0; return; }
+    p.done[grp] = (p.done[grp] || 0) + 1; // sit, mer, qi, pres, rest
+}
 /** The stops after which the plan keeps running (it goes on by itself once the story is back on the hub). */
 const GOES_ON = new Set(['evening', 'door']);
 const hash = (t) => fnv1a(String(t || '').replace(/\d+/g, '#')); // the day's numbers ("Day 45. 48 days to the Elder.") don't make a night new
@@ -266,14 +312,14 @@ export const presCard = (g, scenes) => taskCards(g, scenes).find((c) => c.pres &
  * Run the plan from here until a stop. Returns { stop, days: [{ day, lines }], steps }. `max`: a guard on the steps.
  * Every card is run with runTask and every story choice with choose, exactly as a tap would take them.
  */
-export function runWeek(g, scenes, { max = 600, onStep = null } = {}) {
+export function runWeek(g, scenes, { max = 600, onStep = null, probe = true } = {}) {
     const days = [];
     let cur = null;
     const say = (ls) => { if (!ls || !ls.length) return; const d = calDay(g); if (!cur || cur.day !== d) { cur = { day: d, lines: [] }; days.push(cur); } cur.lines.push(...ls); };
     let p = planHere(g);
     if (!p) { const t = taskState(g); if (isRec(t.plan) && t.plan.hub === g.scene && t.plan.coil === coilKey(g)) { t.plan.running = false; t.plan.stop = 'week'; return { stop: 'week', days, steps: 0 }; } return { stop: 'left', days, steps: 0 }; }
     const hub = p.hub;
-    p.running = true; p.stop = '';
+    p.running = true; p.stop = ''; delete p.read; delete p.readKey;
     // FC1 (RV1, H1): the forecast's watch, called at each step's start (after the last step's bookkeeping: a card the day's
     // routine left no time for is owed again by then) and at the stop, with the last card run and its result
     let last = null;
@@ -303,7 +349,8 @@ export function runWeek(g, scenes, { max = 600, onStep = null } = {}) {
         if (!isRec(p.done.doors)) p.done.doors = {}; // a plan from before v0.11.210
         // RV1 (M3): the forecast's death check, as a tap's ("Starves here"): stop before a card that would end the Coil
         const deadly = (id) => { try { return taskOutcome(g, scenes, id)?.death || null; } catch { return null; } };
-        const run = (id) => { const r = runTask(g, scenes, id); say(r.lines); last = { id, r }; return r; }; // FC1 (RV1, H1): seen by the next watch
+        let rowKey = null; // RD1 (RB): the row being taken (the probe's `key`)
+        const run = (id) => { const r = runTask(g, scenes, id); say(r.lines); last = { id, r, key: rowKey }; return r; }; // FC1 (RV1, H1): seen by the next watch
         const done1 = () => (g.scene !== hub ? 'story' : 'next');
         let dc = null; const doorsNow = () => (dc ||= doorCards(g, scenes));
         /** One row's step now: 'next' (it ran: the next step), a stop, or null (not due or not open now: the next row). */
@@ -363,9 +410,11 @@ export function runWeek(g, scenes, { max = 600, onStep = null } = {}) {
             if (grp === 'rest') { const rid = (p.done.rest || 0) < (p.med.rest || 0) ? restCard(g, scenes) : null; if (rid && !deadly(rid)) { p.done.rest = (p.done.rest || 0) + 1; run(rid); return done1(); } return null; } // v0.11.213 (VQ1, RS)
             return null;
         };
+        // v0.11.214 (owner pick RD1, RB): the next card or door with a line not read yet: stop before it
+        if (probe && READ_STOP.on) { const u = readProbe(g, scenes); if (u) { p.read = u.id; p.readKey = u.key; return end('read'); } }
         // v0.11.211 (owner pick PR2 + PK1): the rows in the hub's order, the first one due and open now
         let did = null;
-        for (const k of planOrder(g, p).keys) { did = rowStep(k); if (did) break; }
+        for (const k of planOrder(g, p).keys) { rowKey = k; did = rowStep(k); if (did) break; }
         if (did === 'next') continue;
         if (did) return end(did);
         // the day's end: the rest of the day off, then the evening's one way on

@@ -452,11 +452,11 @@ export function runTask(g, scenes, id) {
     if (!card) throw new Error(`No card ${id} on ${hubId}`);
     const m0 = g.minutes;
     const lines = [];
-    let fail = false;
+    let fail = false, pre0 = 0; // v0.11.214 (RD1, RU): how many of the lines are the day's routine (the plan's read check leaves them out)
     if (st(g).carry && TASK_HUBS[hubId] && !carryHere(g, hubId) && card.kind !== 'carry') delete st(g).carry; // v0.11.204 (W1, S1): a week's work left behind
     if (!routineBusy) { // v0.11.204 (owner pick W1, R1 + R2): the day's meals and sit, long calendar only
         const pre = dayRoutine(g, scenes, hubId, card.kind, id);
-        lines.push(...pre);
+        lines.push(...pre); pre0 = pre.length;
         // RV1 (H1, L2; the Opus review): the routine took the time the card needed (a "Go on" past the evening hour too): not run, said so
         if (pre.length && g.scene === hubId && (card.kind === 'carry' ? workRoom(g, hubId) <= 0 : !taskOpen(g, scenes, id))) { lines.push(SKIP_LINE, ...takeSpoilNotes(g)); return { lines, fail: false, stopped: false, skipped: true }; }
         if (pre.length && g.scene !== hubId) { lines.push(...takeSpoilNotes(g)); return { lines, fail: false, stopped: true, skipped: true }; }
@@ -513,7 +513,7 @@ export function runTask(g, scenes, id) {
     lines.push(...takeSpoilNotes(g)); // v0.11.209 (RV1, H1 + M1): the food that turned while the card took its time (a sit, a meridian, the routine)
     let stopped = g.scene !== hubId;
     if (!stopped && g.james.hp <= 0) { lines.push(...collapse(g, scenes, hubId)); stopped = true; }
-    return { lines, fail, stopped };
+    return { lines, fail, stopped, pre: pre0 };
 }
 
 const fullClone = (g) => JSON.parse(JSON.stringify(g));

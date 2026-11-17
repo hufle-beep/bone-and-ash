@@ -50,10 +50,10 @@ import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTION
 import { INC_ONLY_ACTIONS, actionOpen } from '../js/core/forms.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
 import { isTaskHub, isTaskChoice, taskCards, taskOpen, runTask, taskState, setYuki, yukiLane, weekHub, CARRY_TASK } from '../js/core/tasks.js';
-import { foldNight, runWeek, planHere, planEnsure, planSet, weekResume } from '../js/core/week.js'; // v0.11.204 (owner pick W1, B1): the bots plan by the week
+import { foldNight, runWeek, planHere, planEnsure, planSet, weekResume, noteReadTap } from '../js/core/week.js'; // v0.11.204 (owner pick W1, B1): the bots plan by the week
 import { medCards, runMed, canMeditate } from '../js/core/meditate.js';
 import { writeFileSync, readFileSync, existsSync } from 'node:fs';
-import { noFold, OUTCOME_SCENES, againView, noteRead } from '../js/story/again.js'; // v0.11.132 (E1, RP); v0.11.133 (FP2): noteRead
+import { noFold, OUTCOME_SCENES, againView, noteRead, noteLines } from '../js/story/again.js'; // v0.11.132 (E1, RP); v0.11.133 (FP2): noteRead
 import { shareNote } from '../tools/lib/textlint.mjs'; // v0.11.132 (E1, EB)
 import { smartAction } from './lib/smartfight.mjs'; // v0.11.96 (BT1)
 import { SOCIAL, EAT } from './lib/social.mjs'; // v0.11.160 (NX2, CN): the Sociable's talk doors; v0.11.181 (RV1, TG7): EAT moved there
@@ -207,6 +207,8 @@ function weekRun(model, g, cards, st) {
     const m0 = g.minutes, s0 = g.scene;
     const r = runWeek(g, SCENES);
     st.weekStops[r.stop] = (st.weekStops[r.stop] || 0) + 1;
+    // v0.11.214 (owner pick RD1, RB): a card with text not read yet: the model taps it (a card tap), reads it, and runs the week again
+    if (r.stop === 'read') { const id = planHere(g)?.read; if (id && taskOpen(g, SCENES, id)) { const rr = runTask(g, SCENES, id); noteReadTap(g, SCENES, id, rr); noteLines(g, rr.lines); st.cards++; st.taps.card++; return true; } }
     return g.minutes !== m0 || g.scene !== s0;
 }
 
@@ -264,7 +266,7 @@ function play(run, model, st, yuki) {
             tx.screens++;
             if (mem.texts.has(k)) { if (!av.fold) { tx.repeats++; tx.scenes[g.scene] = (tx.scenes[g.scene] || 0) + 1; } } else mem.texts.add(k);
         }
-        if (TEXTS && v.text && !noFold(g.scene) && !v.end) noteRead(g, v.text); // v0.11.133 (FP2, RF1): the bot reads what the screen shows, as main.js records it
+        if ((TEXTS || CAL) && v.text && !noFold(g.scene) && !v.end) noteRead(g, v.text); // v0.11.214 (RD1): on the long calendar too (the plan's read stop); v0.11.133 (FP2, RF1): the bot reads what the screen shows, as main.js records it
         if (v.end || g.scene === 'a1_end') {
             st.endRealm[g.james.realm] = (st.endRealm[g.james.realm] || 0) + 1;
             st.endDay = (st.endDay || 0) + clockParts(g.minutes).day; st.endN = (st.endN || 0) + 1; // v0.11.203 (TS8): Act 1's end, its day // v0.11.142 (CV1): the realm at Act 1's end (the realm starts over each Coil)
@@ -310,7 +312,7 @@ function play(run, model, st, yuki) {
                     const c = cards.find((x) => x.id === id);
                     if (c && !EAT.test(c.label)) st.work++;
                     const m0 = g.minutes;
-                    runTask(g, SCENES, id); st.cards++; st.taps.card++;
+                    const rr = runTask(g, SCENES, id); st.cards++; st.taps.card++; if (CAL) noteLines(g, rr.lines); // v0.11.214 (RD1): what a tap shows is read
                     if (model === 'sociable' && c?.kind === 'door' && SOCIAL.test(c.label)) st.talks = (st.talks || 0) + 1; // v0.11.160 (NX2, CN; RV1 TC)
                     const ck = c && (c.kind === 'chore' && /^(Cultivate|Condense)/.test(c.label) ? 'sit' : c.kind); // a hub's own Cultivate chore is a sit
                     if (CULT_KINDS.includes(ck)) st.cult[ck] = (st.cult[ck] || 0) + (g.minutes - m0); // v0.11.142 (CV1): cultivation on task screens
@@ -324,11 +326,11 @@ function play(run, model, st, yuki) {
                 const done = doneSet(mem, g);
                 const c = careLike(model) ? forcedPick(open, done, mem.walked, dayKey(g)) : oldForcedPick(open, done); // v0.11.163 (W1, RS; tests/lib/forced.mjs)
                 done.add(c.id); st.forced++; st.cards++; st.taps.card++;
-                runTask(g, SCENES, c.id);
+                const rr = runTask(g, SCENES, c.id); if (CAL) noteLines(g, rr.lines); // v0.11.214 (RD1)
                 continue;
             }
             const i = storyPick(model, g, stops, mem); mem.tried.add(`${g.scene}:${i}`);
-            runCombat(g, choose(g, SCENES, i), st, smart); st.taps.story++;
+            { const cr = choose(g, SCENES, i); if (CAL) noteLines(g, cr.lines); runCombat(g, cr, st, smart); } st.taps.story++; // v0.11.214 (RD1): the long calendar reads the result
             if (CAL && !g.combat) st.taps.fold += foldNight(g, SCENES).steps; // v0.11.204 (W1, R3): as main.js does after a story choice
             continue;
         }
@@ -343,7 +345,7 @@ function play(run, model, st, yuki) {
         if (g.scene === 'coil_end' && g.coil.why === 'shen') open = open.filter((c) => /start of Act 1/.test(c.label));
         if (!open.length) { assert(false, `${model}: no choice left at ${g.scene} (run ${run})`); return 'stuck'; }
         const i = storyPick(model, g, open, mem); mem.tried.add(`${g.scene}:${i}`);
-        runCombat(g, choose(g, SCENES, i), st, smart); st.taps.story++;
+        { const cr = choose(g, SCENES, i); if (CAL) noteLines(g, cr.lines); runCombat(g, cr, st, smart); } st.taps.story++; // v0.11.214 (RD1): the long calendar reads the result
         if (CAL && !g.combat) st.taps.fold += foldNight(g, SCENES).steps; // v0.11.204 (W1, R3)
         if (careLike(model) && g.james.satiety < 30 && foodLeft(g)) { // RV1 (HN): the Sociable too; v0.11.163 (owner pick HN1): where, and how low
             st.hungry++; st.hungryAt[g.scene] = (st.hungryAt[g.scene] || 0) + 1;

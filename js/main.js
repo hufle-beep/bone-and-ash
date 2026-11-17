@@ -1,6 +1,6 @@
 /** Bone and Ash — UI. Renders the story, combat, sheet, hammerspace, journal and saves. */
 import { LONG_CAL } from './core/calendar.js'; // v0.11.203 (owner pick T1, TS1)
-import { runWeek, planCards, planHere, planEnsure, planSet, planEmpty, planEndDay, planClear, STOP_TEXT, planNotes, storyTap, afterStory, planCount, doorCards, planRanks, planPrio, doorNote, noteCardTap } from './core/week.js'; // v0.11.204 (owner pick W1: R3, P1); v0.11.206 (FC1, RV1): the forecast's texts, the shared tap steps
+import { runWeek, planCards, planHere, planEnsure, planSet, planEmpty, planEndDay, planClear, STOP_TEXT, planNotes, storyTap, afterStory, planCount, doorCards, planRanks, planPrio, doorNote, noteCardTap, noteReadTap } from './core/week.js'; // v0.11.204 (owner pick W1: R3, P1); v0.11.206 (FC1, RV1): the forecast's texts, the shared tap steps
 import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel, fragileKnife, knifeSwings } from './core/forms.js';
 import { coilMult, coilMultNext, wakeDay, fmtMult, clockParts, REL_HIDDEN } from './core/game.js'; // v0.11.137 (HV1): REL_HIDDEN
 import {
@@ -12,7 +12,7 @@ import { weekHub, cardSpeed, NEW_LENGTH, WEEK_MULT, deadMenuHub, showPicked, isT
 import { SCENES, ITEMS } from './story/prologue.js';
 import { TASK_HUBS } from './story/task_hubs.js';
 import { landParts, landReply, noteSaid } from './core/replies.js'; // v0.11.68 (A1 + B2 + C1); v0.11.134 (LP2, QR; RQ1): landReply, noteSaid
-import { againView, skipPlan, skipRun, noteRead, noFold } from './story/again.js'; // v0.11.35 (P1-a); v0.11.133 (FP2): noteRead, noFold
+import { againView, skipPlan, skipRun, noteRead, noFold, noteLines } from './story/again.js'; // v0.11.35 (P1-a); v0.11.133 (FP2): noteRead, noFold
 import { coilActive, endCoil, targetsText, tabWhy } from './core/coil.js';
 import { medCards, runMed, isSitChoice, medActivity, useLine, LATE_TAG, canMeditate } from './core/meditate.js';
 import { FAQ_KEY, FAQ_TAB, faqState, faqText, faqCheck, faqList, faqHasNew, faqSeen, faqMatch } from './core/faq.js'; // v0.11.83 (P1 + T1 + R1)
@@ -165,6 +165,7 @@ const relSnap = () => ({ rel: JSON.parse(JSON.stringify(g?.rel || {})), coil: `$
 /** v0.11.68: one action's lines: the reply under the scene text, the gains and relationship changes as a Results entry
  * (`always`: an entry even with no gains, as a task card always had). */
 function land(title, lines, fail, snap0, { always = false, quiet = true } = {}) {
+    noteLines(g, lines); // v0.11.214 (owner pick RD1, RU): what a tap shows is read (the plan stops before a line not read yet)
     const p = landParts(lines, snap0.rel, g.rel, { coilChanged: snap0.coil !== `${g.coil?.n}|${g.coil?.act}` });
     sameVisit = shownScreen && shownScreen.g === g && shownScreen.id === g.scene ? shownScreen : null; // v0.11.134 (LP2, SV): the action kept you on the screen
     lastResult = null;
@@ -205,6 +206,7 @@ function doTask(id) {
     const rel0 = relSnap();
     noteCardTap(g, SCENES, id); // v0.11.213 (RV1, L3): a one-off door tapped by hand: its plan row back to 0
     const r = runTask(g, SCENES, id);
+    noteReadTap(g, SCENES, id, r); // v0.11.214 (RD1, RB): the card the plan stopped for, tapped: it counts as the plan's step
     land(label, r.lines, r.fail, rel0, { always: !r.stopped }); // v0.11.68: a door or collapse shows its reply in the scene it opens
     autosave(); render();
     if (r.stopped) window.scrollTo({ top: 0, behavior: smoothScroll() });
@@ -223,8 +225,14 @@ function runPlan() {
     const r = runWeek(g, SCENES);
     for (const d of r.days) addResult(`Day ${d.day}: the week's plan`, d.lines, false, { quiet: true });
     lastReply = [];
-    lastResult = { lines: [r.stop === 'week' ? 'The week is over.' : `The week stops here: ${STOP_TEXT[r.stop] || r.stop}.${r.stop === 'evening' || r.stop === 'door' ? ' The plan goes on after it.' : ''}`], fail: r.stop === 'hurt' || r.stop === 'hungry' };
+    lastResult = { lines: [r.stop === 'week' ? 'The week is over.' : `The week stops here: ${stopText(r.stop)}.${r.stop === 'evening' || r.stop === 'door' ? ' The plan goes on after it.' : r.stop === 'read' ? ' Tap it yourself, then run the week again.' : ''}`], fail: r.stop === 'hurt' || r.stop === 'hungry' };
     announce(lastResult.lines[0]);
+}
+/** v0.11.214 (owner pick RD1, RB): a stop's words; a card with text not read yet named by its label. */
+function stopText(stop) {
+    const id = planHere(g)?.read;
+    const lab = stop === 'read' && id ? safeOutcome(() => plain(taskLabel(g, SCENES, id))) : '';
+    return `${STOP_TEXT[stop] || stop}${lab ? ` (${lab})` : ''}`;
 }
 /** v0.11.211 (owner pick PR2 + PK1): a row's place, a drop-down of 1 to the rows' count by its label. */
 const prioBox = (key, label, rk) => (rk?.rank?.[key] ? `<select class="prio" data-prio="${esc(key)}" aria-label="Place in the order: ${esc(plain(label))}">${Array.from({ length: rk.n }, (_, i) => `<option value="${i + 1}"${i + 1 === rk.rank[key] ? ' selected' : ''}>${i + 1}</option>`).join('')}</select>` : '');
@@ -245,7 +253,7 @@ function weekHtml() {
     for (const d of doorCards(g, SCENES)) rows.push(planRow(`door:${d.scene}`, d.label, planCount(g, `door:${d.scene}`), [[doorNote(d), when(`door:${d.scene}`)].filter(Boolean).join(', '), fc.med[`door:${d.scene}`]].filter(Boolean).join(' · '), rk));
     rows.push(planRow('med:rest', 'Rest, hours a day', med.rest || 0, [when('med:rest'), fc.med.rest].filter(Boolean).join(' · '), rk)); // v0.11.213 (VQ1, RS)
     const total = fc.total ? `<p class="note fc">${esc(fc.total)}</p>` : '', outlook = fc.outlook ? `<p class="note fc">${esc(fc.outlook)}</p>` : '';
-    const stop = p?.stop ? `<p class="note">${esc(p.stop === 'week' ? 'The week is over.' : `Stopped: ${STOP_TEXT[p.stop] || p.stop}.`)}</p>` : '';
+    const stop = p?.stop ? `<p class="note">${esc(p.stop === 'week' ? 'The week is over.' : `Stopped: ${stopText(p.stop)}.`)}</p>` : '';
     const btn = `<div class="pbtns"><button class="btn primary" data-week="run">${planEmpty(p) ? 'Rest out the week' : 'Run the week'} · to Day ${planEndDay(g, p)}</button>${planEmpty(p) ? '' : '<button class="btn" data-week="clear">Clear</button>'}</div>`;
     return groupHtml('Plan the week', [`<p class="note">Cards by the week, Meditate by the day. Meals and the day's sit run themselves; it stops for anything that needs you. The box by each row is its place in the order, 1 first, kept here for good.</p>`, ...rows, total, outlook, stop, btn], true);
 }

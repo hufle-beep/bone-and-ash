@@ -17,6 +17,7 @@
  */
 import { sceneView, choose, seenBefore, isMenuScene, isTimeless } from '../core/story.js';
 import { fnv1a } from '../core/game.js';
+import { longCal } from '../core/calendar.js'; // v0.11.214 (RD1, RV1 L3): the read stop's record on the long calendar only
 import { TASK_HUBS } from './task_hubs.js';
 import { sceneMemory } from './remember.js'; // v0.11.184 (S1): a scene's own memory line
 import { noteVisit, visitLine, linesOf, textDay } from '../core/lines.js'; // v0.11.134 (LP2: PK, ML); v0.11.152 (RP1, SD): linesOf, textDay
@@ -95,7 +96,44 @@ export const isRecord = (r) => !!r && typeof r === 'object' && !Array.isArray(r)
 export function noteRead(g, text, n = g?.coil?.n || 1) {
     if (!g || !text) return;
     if (!isRecord(g.read)) g.read = {};
-    for (const p of storyParas(text)) { const k = paraKey(p); if (g.read[k] == null || g.read[k] > n) g.read[k] = n; }
+    for (const p of storyParas(text)) {
+        const k = paraKey(p); if (g.read[k] == null || g.read[k] > n) g.read[k] = n;
+        if (/\d/.test(p) && longCal(g)) { const k2 = lineKey(p); if (g.read[k2] == null || g.read[k2] > n) g.read[k2] = n; } // RD1 (RU): with its numbers aside too; RV1 (L3): the long calendar only (the old calendar's record as before)
+    }
+}
+/* ---------- v0.11.214 (owner pick RD1: RU, 2026-11-17 16:54) ----------
+ * The plan (js/core/week.js) stops before a card or door whose text or result holds a line not shown on screen in this game (any
+ * Coil), its numbers aside. The record is `g.read` itself: a paragraph's key as before, and its key with the numbers aside
+ * (`lineKey`: each number read as "#", a time with its unit as one: "45 min", "8 h", "8 h 44 min") for a paragraph with numbers; the result
+ * lines a tap shows (main.js doTask, playChoice) are noted by `noteLines`. An old save has none of the result lines: the plan stops
+ * once for each, then never again for the same line. */
+const NUM = /\d+(?:[.,]\d+)?\s*(?:h|min|m)\b(?:\s+\d+\s*(?:min|m)\b)?|\d+(?:[.,]\d+)*/g;
+/** RD1 (RU): a paragraph's key with its numbers aside. */
+export const lineKey = (p) => paraKey(String(p).replace(NUM, '#'));
+/** RD1 (RU): the story paragraphs of result lines (strings only; each line may hold paragraphs of its own). */
+const lineParas = (lines) => (Array.isArray(lines) ? lines : [lines]).filter((l) => typeof l === 'string').flatMap(storyParas);
+/** RD1 (RU): note result lines as shown on Coil `n` (numbers aside); RV1 (L3): the long calendar only (the old calendar has no plan). */
+export function noteLines(g, lines, n = g?.coil?.n || 1) {
+    if (!g || !lines || !longCal(g)) return;
+    if (!isRecord(g.read)) g.read = {};
+    for (const p of lineParas(lines)) { const k = lineKey(p); if (g.read[k] == null || g.read[k] > n) g.read[k] = n; }
+}
+/** RD1 (owner pick RN1, NL, 2026-11-17 18:24): the lines that only report numbers, with their numbers aside: a check ("GU # / DC # —
+ *  done"), XP and level lines (Yuki's held level too), Qi / Saturation / HP lines, a bare gain ("+# Smoked meat."), a week's work's
+ *  progress ("…: # more, # still to go.", "…: done, # in all.", "A week's work: …"). The plan never stops for these. */
+export const NUMBER_LINES = [
+    /^[\w ()'.-]+ \+#( XP)?( → T# L#)?(, [\w ()'’ ]+)?\.?$/, /^Yuki Fight held at /, / # \/ DC # — /, /^Qi Max \+#/, /^Qi regen now /,
+    /^Meditated an hour: Qi # → #\.$/, /^Condensed: Saturation #%\.$/, /^(Double haul — in total: |A thin haul — you keep: )?(\+# [^.,]+(, )?)+\.$/,
+    /^HP \+#/, /^[−-]# HP\.$/, /: (done, # in all|# more, # still to go)\.$/, /^A week's work: /,
+    /^[\w ()'.-]+ at T# L# \(cap\)$/, // RV1 (L2): a skill at its cap
+];
+/** RD1 (RN1, NL): a paragraph that only reports numbers. */
+export const numberLine = (p) => { const t = String(p).replace(NUM, '#'); return NUMBER_LINES.some((r) => r.test(t)); };
+/** RD1 (RU): the paragraphs of `lines` never shown in this game (any Coil): neither as they are nor with their numbers aside; RN1 (NL):
+ *  the lines that only report numbers left out. */
+export function unreadLines(g, lines) {
+    const r = isRecord(g?.read) ? g.read : {};
+    return lineParas(lines).filter((p) => !numberLine(p) && r[paraKey(p)] == null && r[lineKey(p)] == null); // RN1 (NL): the number lines never count
 }
 /** v0.11.133 (FP2): every story paragraph of `text` was read on an earlier Coil. */
 export function readBefore(g, text) {

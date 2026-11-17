@@ -585,11 +585,15 @@ def again(pg, url):
             pg.reload(); pg.wait_for_load_state('load'); time.sleep(0.5)
             r = json.loads(pg.evaluate("localStorage.getItem('boneash.auto')")); return json.loads(r['data']) if isinstance(r.get('data'), str) else r
         r2 = saved()
-        hub_ok = len(r2.get('read') or {}) == len(st['read'])  # RF1 (M2): the wilds is a task screen: nothing recorded
+        # RF1 (M2): the wilds is a task screen: none of its paragraphs recorded (v0.11.214, RD1: the skip's result lines are, as every tap's)
+        hub_ok = pg.evaluate("""async (r) => { const { SCENES } = await import('./js/story/prologue.js'); const { sceneView } = await import('./js/core/story.js');
+            const { paraKey } = await import('./js/story/again.js'); const { migrate, ensureBars } = await import('./js/core/game.js');
+            const g = ensureBars(migrate(JSON.parse(JSON.stringify(r)))); const ps = String(sceneView(g, SCENES).text).split(/\\n\\s*\\n/).map((p) => p.trim()).filter(Boolean);
+            return ps.length > 0 && ps.every((p) => r.read?.[paraKey(p)] == null); }""", r2) and len(r2.get('read') or {}) >= len(st['read'])
         st2 = dict(st); st2['coil'] = dict(st['coil'], n=1); st2['read'] = {}; st2['seen'] = {'night_won': 1}
         fresh(pg, url, "a => { localStorage.clear(); localStorage.setItem('boneash.auto', a); }", json.dumps(st2))
         r3 = saved()
-        if not hub_ok: fails.append(f'RF1 (M2): the wilds (a task screen) added paragraphs to the record ({len(st["read"])} → {len(r2.get("read") or {})})')
+        if not hub_ok: fails.append(f'RF1 (M2): the wilds (a task screen) added its paragraphs to the record ({len(st["read"])} → {len(r2.get("read") or {})})')
         elif len(r3.get('read') or {}) < 2: fails.append(f'FP2: the screen recorded no paragraph of night_won ({len(r3.get("read") or {})})')
         else: notes.append('a scene read before folds, reads in full, the skip walks to the wilds, and the screen records the scenes that can fold (not the task screens)')
     check_text(pg, 'after the skip', strict=True)
@@ -700,11 +704,62 @@ def plan_rows(b, url):
         check_text(pg, f'Plan the week ({w} px)', strict=False)
         ctx.close()
 
+def week_read(save, card):
+    """v0.11.214 (owner pick RD1): the save with every line its week would show (one `card` on the plan, the evenings' first way on,
+    as the forecast takes them) noted as read, from the game's own code, so the plan runs as before RD1."""
+    js = ("import { SCENES } from './js/story/prologue.js'; import { sceneView } from './js/core/story.js';"
+          "import { noteLines } from './js/story/again.js'; import { deserialize, serialize } from './js/core/game.js';"
+          "import * as Wk from './js/core/week.js';"
+          "const g = deserialize(process.argv[1], { force: true }); const c = JSON.parse(JSON.stringify(g)); Wk.planEnsure(c); Wk.planSet(c, process.argv[2], 1);"
+          "for (let k = 0; k < 60; k++) { const r = Wk.runWeek(c, SCENES); if (r.stop !== 'read') { if (r.stop !== 'evening') break; const i = Wk.eveningPick(c, SCENES); if (i == null) break; Wk.storyTap(c, SCENES, i); Wk.afterStory(c, SCENES); continue; } const u = Wk.readProbe(c, SCENES); noteLines(g, u.lines); noteLines(c, u.lines); }"
+          "process.stdout.write(serialize(g));")
+    return subprocess.run(['node', '--input-type=module', '-e', js, save, card], cwd=ROOT, capture_output=True, text=True, check=True).stdout
+
+def rd1_ui(b, url):
+    """v0.11.214 (owner pick RD1: RU + RB; RN1: NT + NL): on saves/v0.11.204-long-wilds-day2.json (no result lines read) one + on Forage's
+    first row: the forecast stops for a text not read yet; Run the week stops before the card and names it; the card tapped by hand counts
+    as the plan's step (its row back to 0) and its lines are read; Run the week again goes past it."""
+    save = (ROOT / 'saves/v0.11.204-long-wilds-day2.json').read_text()
+    ctx = b.new_context(viewport={'width': 412, 'height': 800}, service_workers='block')
+    pg = ctx.new_page(); pg.on('pageerror', lambda e: fails.append(f"page error: {e}"))
+    state = "() => { const o = JSON.parse(localStorage.getItem('boneash.auto')); return JSON.parse(o.data || JSON.stringify(o)); }"
+    try:
+        fresh(pg, url, "s => { localStorage.clear(); localStorage.setItem('boneash.auto', s); }", save)
+        plus = pg.query_selector('button[data-plan="wild_forage:0"][data-d="1"]')
+        if not plus: fails.append('RD1: no + on the Forage row of Plan the week'); return
+        plus.evaluate("e => e.scrollIntoView({ block: 'center' })"); plus.click()
+        until(pg, "() => /Forecast: /.test(document.body.innerText)", 5000)
+        txt = pg.evaluate("document.body.innerText")
+        if 'a card with text you have not read yet' not in txt: fails.append('RD1: the forecast does not stop for the card not read yet'); return
+        n0 = pg.evaluate("localStorage.getItem('boneash.auto')")
+        run = pg.query_selector('button[data-week="run"]'); run.evaluate("e => e.scrollIntoView({ block: 'center' })"); run.click()
+        until(pg, "b => localStorage.getItem('boneash.auto') !== b", 8000, arg=n0)
+        st = pg.evaluate(state); p = (st.get('tasks') or {}).get('plan') or {}
+        txt = pg.evaluate("document.body.innerText")
+        m = re.search(r'The week stops here: a card with text you have not read yet \(([^)]+)\)\. Tap it yourself, then run the week again\.', txt)
+        if p.get('stop') != 'read' or p.get('read') != 'wild_forage:0' or not m or st.get('minutes') != 1840:
+            fails.append(f"RD1: Run the week did not stop before the Forage card (stop {p.get('stop')}, card {p.get('read')}, minutes {st.get('minutes')}, line {bool(m)})"); return
+        k0 = len(st.get('read') or {}); card = pg.query_selector('button.card[data-run="wild_forage:0"]')
+        if not card: fails.append('RD1: the card it stopped for is not on the hub'); return
+        n0 = pg.evaluate("localStorage.getItem('boneash.auto')"); time.sleep(GUARD); card.evaluate("e => e.click()"); until(pg, "b => localStorage.getItem('boneash.auto') !== b", 8000, arg=n0)  # the card may sit in a closed group: clicked as the page would
+        st = pg.evaluate(state); p = (st.get('tasks') or {}).get('plan') or {}
+        if (p.get('items') or {}).get('wild_forage:0') or p.get('read') or len(st.get('read') or {}) <= k0:
+            fails.append(f"RD1 (NT): the tap did not count as the plan's step or was not read (row {(p.get('items') or {}).get('wild_forage:0')}, stop card {p.get('read')}, read {k0} → {len(st.get('read') or {})})"); return
+        n0 = pg.evaluate("localStorage.getItem('boneash.auto')")
+        run = pg.query_selector('button[data-week="run"]'); run.evaluate("e => e.scrollIntoView({ block: 'center' })"); run.click()
+        until(pg, "b => localStorage.getItem('boneash.auto') !== b", 8000, arg=n0)
+        st = pg.evaluate(state); p = (st.get('tasks') or {}).get('plan') or {}
+        if p.get('read') == 'wild_forage:0': fails.append('RD1: after the tap the plan stopped for the same card again')
+        else: notes.append(f"RD1: the plan stopped before the Forage card ({m.group(1)[:40]}), the tap counted and was read ({k0} → more), the next run went past it (stop {p.get('stop')})")
+        check_text(pg, 'the read stop (RD1)', strict=False)
+    finally:
+        ctx.close()
+
 def plan_forecast(b, url):
     """v0.11.206 (owner pick FC1, the test that the forecast equals the run): on saves/v0.11.204-long-wilds-day2.json (the wilds on
     Day 2 06:40, Fed 42, no food) one + on Forage's first row shows its finish and the outlook; Run the week, then the night's
     first way on (the forecast's own pick, E4), runs to where the forecast said: the same stop, the same minute, the same Fed and HP."""
-    save = (ROOT / 'saves/v0.11.204-long-wilds-day2.json').read_text()
+    save = week_read((ROOT / 'saves/v0.11.204-long-wilds-day2.json').read_text(), 'wild_forage:0')  # v0.11.214 (RD1): the week's lines read, so the run is FC1's
     ctx = b.new_context(viewport={'width': 412, 'height': 800}, service_workers='block')
     pg = ctx.new_page(); pg.on('pageerror', lambda e: fails.append(f"page error: {e}"))
     try:
@@ -1169,6 +1224,7 @@ def main(part=0):
                 n1_ui(b, url)  # v0.11.210 (N1: SC, DC-a, MS, TT)
                 pr2_ui(b, url)  # v0.11.211 (PR2 + PK1)
                 vq1_ui(b, url)  # v0.11.213 (VQ1 + FQ1)
+                rd1_ui(b, url)  # v0.11.214 (RD1 + RN1)
                 # 12. the FAQ (v0.11.83)
                 faq(pg, url)
             if three:
