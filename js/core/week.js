@@ -23,6 +23,7 @@ import { foodCount, preservable, unspaced, spacedNext, SPACE_DAYS } from '../sto
 import { EVENING_HOUR } from '../story/oneoff.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
 import { unreadLines } from '../story/again.js'; // v0.11.214 (owner pick RD1): the lines never shown in this game
+import { COOK_PLAN } from '../story/kitchen.js'; // v0.11.218 (owner pick RV1, HA): the cook's hold on the pot only while its row is set
 
 /** The night and morning screens of the stays that fold (the suppers and the camp's night keep their choices, so they never do). */
 export const FOLD_SCENES = new Set(['village_night', 'village_morning', 'fo_night', 'fo_morning', 'morning', 'heart_night', 'heart_morning']);
@@ -45,9 +46,10 @@ export const DOOR_START = { yk_time: 1 };
  *  ST the one-off doors (the village's, the Fallout's, the Heart's), the two talks last (RV1, M2). `REPEAT` the ones that come back
  *  (every SPACE_DAYS-th day on a stay, common.js S3), the rest once (a row taken is set back to 0). Each with the daily key its card
  *  is spaced by (`spacedNext`); `heart_spring` by the calendar day. */
-export const PLAN_DOORS = [...DAILY_DOORS.slice(0, 3), 'wen_lesson', 'far_hunt', 'herb_slopes', 'heal', 'village_hunt', 'scout', 'pot_cook', 'fo_mother', 'fo_spy', 'fo_pot_cook', 'hall_listen', 'ring_chambers', 'heart_spring', ...DAILY_DOORS.slice(3)]; // the owner 16:42: the communal pot's cooking too (once a Coil)
-export const DOOR_KEY = { yk_time: 'yk_time', wen_time: 'wen_time', mother_time: 'mother_time', wen_lesson: 'wen', far_hunt: 'far', herb_slopes: 'slopes', heart_spring: 'spring', fo_mei: 'a1_mei', fo_ya_time: 'a1_ya' };
+export const PLAN_DOORS = [...DAILY_DOORS.slice(0, 3), 'wen_lesson', 'far_hunt', 'herb_slopes', 'heal', 'village_hunt', 'scout', 'pot_cook', 'fo_mother', 'fo_spy', 'fo_pot_cook', 'hall_listen', 'ring_chambers', 'heart_spring', ...DAILY_DOORS.slice(3)]; // the owner 16:42: the communal pot's cooking too (once a Coil; every 3rd day since v0.11.218, CK1)
+export const DOOR_KEY = { yk_time: 'yk_time', wen_time: 'wen_time', mother_time: 'mother_time', wen_lesson: 'wen', far_hunt: 'far', herb_slopes: 'slopes', heart_spring: 'spring', fo_mei: 'a1_mei', fo_ya_time: 'a1_ya', pot_cook: 'cook', fo_pot_cook: 'a1_cook' }; // v0.11.218 (owner pick CK1, RF3): the cook with the women repeats
 export const doorRepeats = (s) => s in DOOR_KEY;
+COOK_PLAN.row = (g, s) => { const p = planHere(g); return !!p && isRec(p.doors) && (Number(p.doors[s]) || 0) > 0; }; // v0.11.218 (RV1, HA)
 /** v0.11.213 (VQ1, RS): "Rest an hour" on each stay hub, by the day (a count, as the sits). */
 export const REST_LABEL = /^Rest\b/;
 /** RV1 (L2, the owner 12:39): the day's line before a talk's choice the plan took as last time. */

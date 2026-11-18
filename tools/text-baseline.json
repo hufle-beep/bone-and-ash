@@ -1,5 +1,5 @@
 {
- "saved": "2026-11-17",
+ "saved": "2026-11-18",
  "totals": {
   "scenes": 331,
   "words": 37405,
@@ -176,11 +176,11 @@
    "spacing": 0
   },
   "kitchen": {
-   "lines": 22,
-   "words": 862,
+   "lines": 46,
+   "words": 1888,
    "dupes": 0,
    "sceneShared": 0,
-   "tics": 0,
+   "tics": 1,
    "broken": 0,
    "spacing": 0
   },

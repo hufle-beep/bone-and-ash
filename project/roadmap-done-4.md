@@ -15,3 +15,7 @@ Started in v0.11.208, when `roadmap-done-3.md` would have passed about 45 KB wit
 ## Moved from `roadmap-time.md` in v0.11.217 (word for word; the size rule: under 20,000 bytes)
 
 - **New in v0.11.211:** ~~the review's two lessons for `project/review-checklist.md` (a fixed chain made an ordered loop: check each item with no row on the screen, the carried work, a hidden card, for where it sorts once a place is set; test "exactly as before" against the old code or a pinned hash, never stripping the new field first), waiting with v0.11.210's two on the file's 12,000-byte cap~~ **done in v0.11.212** (CK1: the checklist split by kind; the four lessons in `review-checklist-code.md`).
+
+## Moved from `roadmap-time.md` in v0.11.218 (word for word; the size rule: under 20,000 bytes)
+
+- **New in v0.11.214:** **RD1 done** (RN1, RV1: the plan stops before a card or door whose text or result was not shown on screen in this game; number lines never). **Picked 19:26 and 20:14, each its own push, in this order:** PT1 (the day's meal at the communal pot when it is open; the owner 17:42), then KC1 (the plan's amounts kept per stay for good, as its places; the owner 20:02), then WF2 (the wilds' work cards every 3rd day; the owner 17:28: at Mastered a planned week runs 42 against the base game's 8); the options and numbers in the handover.

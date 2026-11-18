@@ -1,0 +1,93 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/kitchen.js",
+  "find": "const cookFree = (g, c) => (longCal(g) ? spacedFree(g, c.key, dayKey(g)) : !g.flags[c.flag]);",
+  "replace": "const cookFree = (g, c) => !g.flags[c.flag];",
+  "note": "the long calendar keeps the cook once a Coil"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/kitchen.js",
+  "find": "if (shown(g, c) < 0) { if (POT_MOTHER[hub])",
+  "replace": "if (true) { if (POT_MOTHER[hub])",
+  "note": "the gains on every cook (GA, not G1)"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/kitchen.js",
+  "find": "g.flags[`${c.flag}_next`] = pickLine(g, `cook_${c.t}`, POT_AGAIN[c.t]);",
+  "replace": "g.flags[`${c.flag}_next`] = 0;",
+  "note": "the same repeat every time"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/kitchen.js",
+  "find": "export const cookLabel = (g, hub) => cookTexts(hub, cookVariant(g, hub)).label;",
+  "replace": "export const cookLabel = (g, hub) => cookTexts(hub, -1).label;",
+  "note": "the card's label always the first cook's"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/kitchen.js",
+  "find": "if (longCal(g)) { g.flags[`${c.flag}_v`] = cookVariant(g, hub); markDaily(g, c.key); }",
+  "replace": "{ g.flags[`${c.flag}_v`] = cookVariant(g, hub); markDaily(g, c.key); }",
+  "note": "the old calendar sets the new flags"
+ },
+ {
+  "id": "F6",
+  "file": "js/core/week.js",
+  "find": "fo_ya_time: 'a1_ya', pot_cook: 'cook', fo_pot_cook: 'a1_cook' };",
+  "replace": "fo_ya_time: 'a1_ya' };",
+  "note": "the plan's cook rows once, not repeating"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/common.js",
+  "find": "'hc_ya', 'cook', 'a1_cook']);",
+  "replace": "'hc_ya']);",
+  "note": "the cook not spaced: daily on the long calendar"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/kitchen.js",
+  "find": "return !!c && cookFree(g, c) && (!longCal(g)",
+  "replace": "return !!c && !g.flags[c.flag] && (!longCal(g)",
+  "note": "CG keyed on the Coil flag: the routine never waits for a repeat cook, even with the plan's row at 1"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/kitchen.js",
+  "find": "text: (g) => cookTexts(hub, shown(g, c)).text,",
+  "replace": "text: (g) => cookTexts(hub, cookVariant(g, hub)).text,",
+  "note": "the scene's text read after enter: the first cook shows a repeat"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/kitchen.js",
+  "find": "v < POT_AGAIN[c.t].length ? v : 0; };",
+  "replace": "v < POT_AGAIN[c.t].length ? v : -1; };",
+  "note": "an old save that cooked gets the first-time scene again"
+ },
+ {
+  "id": "F11",
+  "file": "js/story/kitchen.js",
+  "find": "(!longCal(g) || !g.flags[c.flag] || COOK_PLAN.row(g, c.scene))",
+  "replace": "true",
+  "note": "RV1 (HA) off: the hold on every repeat day the card is open"
+ },
+ {
+  "id": "F12",
+  "file": "js/story/kitchen.js",
+  "find": "    if (v < 0 || L.last[pool] != null) return;",
+  "replace": "    return;",
+  "note": "RV1 (M1) off: an old save's repeat 0 can come twice running"
+ },
+ {
+  "id": "F13",
+  "file": "js/core/week.js",
+  "find": "return !!p && isRec(p.doors) && (Number(p.doors[s]) || 0) > 0; };",
+  "replace": "return false; };",
+  "note": "RV1 (HA): the plan's cook row never read: no hold for a planned repeat"
+ }
+]

@@ -5949,8 +5949,8 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     const D = 1440;
     const mk = (hub, sd, h = 7, cal = C.LONG_CAL, seed = 99601) => { const g = ensureBars(newGame(seed, { closed: true, ...(cal ? { cal } : {}) })); goTo(g, SCENES, hub); g.minutes = (C.calStart(g, sd) - 1) * D + h * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true; g.flags.elder = true; return g; };
     const rows = (g) => Wk.doorCards(g, SCENES).map((d) => d.scene).join();
-    assert(Cm.SPACE_DAYS === 3 && ['yk_time', 'wen_time', 'mother_time', 'a1_mei', 'a1_ya', 'slopes', 'wen', 'far', 'spring', 'hc_mei', 'hc_ya'].every((k) => Cm.SPACED.has(k)) && Cm.SPACED.size === 11, `${T}: S3's keys, every 3rd day`);
-    assert(JSON.stringify(Wk.PLAN_DOORS) === JSON.stringify(['yk_time', 'wen_time', 'mother_time', 'wen_lesson', 'far_hunt', 'herb_slopes', 'heal', 'village_hunt', 'scout', 'pot_cook', 'fo_mother', 'fo_spy', 'fo_pot_cook', 'hall_listen', 'ring_chambers', 'heart_spring', 'fo_mei', 'fo_ya_time']) && Wk.PLAN_DOORS.filter(Wk.doorRepeats).length === 9, `${T}: the doors on the plan, 9 repeating, 9 once (the owner 16:42: the communal pot's cooking too), the talks last`);
+    assert(Cm.SPACE_DAYS === 3 && ['yk_time', 'wen_time', 'mother_time', 'a1_mei', 'a1_ya', 'slopes', 'wen', 'far', 'spring', 'hc_mei', 'hc_ya', 'cook', 'a1_cook'].every((k) => Cm.SPACED.has(k)) && Cm.SPACED.size === 13, `${T}: S3's keys, every 3rd day (CK1: the cook's two)`);
+    assert(JSON.stringify(Wk.PLAN_DOORS) === JSON.stringify(['yk_time', 'wen_time', 'mother_time', 'wen_lesson', 'far_hunt', 'herb_slopes', 'heal', 'village_hunt', 'scout', 'pot_cook', 'fo_mother', 'fo_spy', 'fo_pot_cook', 'hall_listen', 'ring_chambers', 'heart_spring', 'fo_mei', 'fo_ya_time']) && Wk.PLAN_DOORS.filter(Wk.doorRepeats).length === 11, `${T}: the doors on the plan, 11 repeating (CK1: the pot's cooking), 7 once (the owner 16:42: the communal pot's cooking too), the talks last`);
     for (const s of Wk.PLAN_DOORS) assert(!!SCENES[s], `${T}: ${s} is a scene`);
     for (const hub of Tk.WEEK_HUBS) for (const c of SCENES[hub].choices) if (typeof c.to === 'string' && (TASK_HUBS[hub].doors || []).includes(c.to) && c.to !== 'sect_cut') assert(Wk.PLAN_DOORS.includes(c.to), `${T}: ${hub}'s door ${c.to} has a plan row (not in VQ1: the Heart's climb to the wound, a story step)`);
     // the rows per stay: the village 7 new (6 doors and the rest row), the Fallout 3, the Heart 4, the wilds 1
@@ -6086,10 +6086,10 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       Wk.noteCardTap(g, SCENES, 'fo_ashfall:6'); Wk.noteCardTap(g, SCENES, 'fo_ashfall:5'); Wk.noteCardTap(g, SCENES, 'not:a:card'); Wk.noteCardTap(g, SCENES, 'mer:pri');
       assert(g.tasks.plan.doors.fo_mother === 0 && g.tasks.plan.doors.fo_mei === 1, `${T} (RV1, L3): the mother's first visit tapped: its row 0; Mei Lin's talk kept at 1`);
       const src = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8'); assert(/noteCardTap\(g, SCENES, id\);[^\n]*\n\s*const r = runTask\(g, SCENES, id\);/.test(src), `${T} (RV1, L3): doTask notes the tap before runTask`); }
-    // the owner 16:42: the communal pot's cooking on the plan, once (its Village 90, 09:00 to 14:59)
+    // the owner 16:42: the communal pot's cooking on the plan (its Village 90, 09:00 to 14:59); v0.11.218 (CK1, RF3): a repeating row
     { const g = mk('ashfall', 5, 10); Gm.bumpRel(g, 'Village', 95, 0); const f = mk('fo_ashfall', 9, 10); Gm.bumpRel(f, 'Village', 95, 0);
       const a = Wk.doorCards(g, SCENES).find((d) => d.scene === 'pot_cook'), b = Wk.doorCards(f, SCENES).find((d) => d.scene === 'fo_pot_cook');
-      assert(a?.status === 'open' && !a.repeat && b?.status === 'open' && !b.repeat && Wk.doorNote(a) === 'once', `${T} (the owner 16:42): the pot's cooking rows, once (${JSON.stringify([a, b])})`);
+      assert(a?.status === 'open' && a.repeat && b?.status === 'open' && b.repeat && Wk.doorNote(a) !== 'once', `${T} (the owner 16:42; CK1): the pot's cooking rows, repeating (${JSON.stringify([a, b])})`);
       Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', 0); Wk.planSet(g, 'door:pot_cook', 1); const r = Wk.runWeek(g, SCENES);
       assert((r.stop === 'door' && g.scene === 'pot_cook') || g.flags.pot_cook, `${T}: the plan opens the pot (${r.stop}, ${g.scene})`); }
     // the screen: the door rows' note from doorNote, the rest row
@@ -6368,7 +6368,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     // CG by the hour: before 15:00 the pot is left for the cook, from 15:00 it is the routine's
     { const g = wk2(); g.minutes = 50 * D + 14 * 60 + 59; const before = Tk.potCardOpen(g, SCENES); g.minutes = 50 * D + 15 * 60; const after = Tk.potCardOpen(g, SCENES);
       assert(K.potCookDue(g, 'fo_ashfall') === false && before === null && after === Tk.potCardId(SCENES, 'fo_ashfall'), `${T} (CG): 14:59 left for the cook, 15:00 the routine's (${before}, ${after})`);
-      g.minutes = 50 * D + 9 * 60; g.flags.fo_pot_cook = true; assert(Tk.potCardOpen(g, SCENES) === Tk.potCardId(SCENES, 'fo_ashfall'), `${T} (CG): cooked this Coil: the pot from the morning`); }
+      g.minutes = 50 * D + 9 * 60; g.flags.fo_pot_cook = true; (await import('../js/story/common.js')).markDaily(g, 'a1_cook'); assert(Tk.potCardOpen(g, SCENES) === Tk.potCardId(SCENES, 'fo_ashfall'), `${T} (CG; CK1): cooked today: the pot from the morning`); }
     // the pot's meal takes its card's time, its line and the day's pot
     { const g = wk2(50); const id = Tk.potCardId(SCENES, 'fo_ashfall'), mins = taskCards(g, SCENES).find((c) => c.id === id)?.minutes, m0 = g.minutes, f0 = g.james.satiety;
       const ls = Tk.dayMeal(g, 'fo_ashfall', SCENES);
@@ -6433,6 +6433,94 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     assert(Tk.potCardId(SCENES, 'wilds') === null && Tk.potCardId(SCENES, 'heart_hub') === null && /^ashfall:\d+$/.test(Tk.potCardId(SCENES, 'ashfall')), `${T}: only the village's and the Fallout's hubs have the pot`);
     { const o = ensureBars(newGame(99601, { closed: true })); goTo(o, SCENES, 'ashfall'); o.minutes = 4 * D + 8 * 60; o.james.satiety = 50; const f0 = o.james.satiety, m0 = o.minutes;
       assert(Tk.dayMeal(o, 'ashfall', SCENES).length === 0 && o.james.satiety === f0 && o.minutes === m0, `${T}: the old calendar: no routine meal`); }
+}
+
+// v0.11.218 (owner pick CK1 = RF3 + G1 + TX3, 2026-11-18 01:01): cooking with the village women every 3rd day on the long
+// calendar; the gains on the first cook a Coil only; from the second, one of three repeat scenes per act (Fable's), never twice running.
+{
+    const C = await import('../js/core/calendar.js');
+    const K = await import('../js/story/kitchen.js');
+    const Wk = await import('../js/core/week.js');
+    const Gm = await import('../js/core/game.js');
+    const { SOCIAL, EAT: EATLIKE } = await import('./lib/social.mjs');
+    const T = 'CK1 (the cook with the women, every 3rd day)';
+    const D = 1440;
+    // TX3: the texts
+    const all = Object.values(K.POT_AGAIN).flat(), vals = all.flatMap((o) => ['label', 'text', 'go', 'result'].map((f) => o[f]));
+    assert(K.POT_AGAIN.ashfall.length === 3 && K.POT_AGAIN.fo.length === 3 && vals.every((t) => typeof t === 'string' && t.length > 8 && !/PLACEHOLDER|TODO|\[|\]/.test(t)) && new Set(vals).size === 24, `${T} (TX3): 3 repeats an act, every text filled and distinct`);
+    const labels = all.map((o) => o.label);
+    assert(labels.every((t) => !EATLIKE.test(t) && !SOCIAL.test(t) && /\.$/.test(t) && t.length < 45) && !labels.includes(K.POT_COOK.ashfall.label) && !labels.includes(K.POT_COOK.fo.label), `${T} (TX3): the labels end with a full stop, under 45 characters, not read as eating or a talk, not the first cook's`);
+    assert(all.every((o) => !/[.!?:]$/.test(o.result) && /\.$|\?$|!$/.test(o.go)) && all.every((o) => o.text.split(/\n\n/).length === 2), `${T} (TX3): the results end bare (the code adds ": +25 satiety."), the buttons end, two paragraphs`);
+    assert(vals.every((t) => !/\b(morning|noon|midday|afternoon|evening|dawn|dusk|tonight|today|tomorrow|yesterday|breakfast|lunch|dinner|supper|night\w*|sunrise|sunset)\b/i.test(t)), `${T} (TX3; RV1, TG3): no time words, meal names or night (the card shows 09:00–14:59, on any day of the stay)`);
+    assert(vals.every((t) => !/\b(every (other|second|third|few|\w+) days?|(second|third|fourth|fifth|sixth|seventh|last) (time|visit|cook)|(two|three|four|five|six|seven|several) (days|visits|times|cooks))\b/i.test(t) && (t.match(/\bagain\b/gi) || []).length <= 1), `${T} (RV1, TG3): no count of days or visits, "again" once at most (any repeat can be the 2nd cook or the 7th)`);
+    // RV1 (TG1, TG2, TG4, TG7): the canon card's tics; Claude's cuts and label change kept; a result read whole as the gain; canon
+    { const CARD_TICS = /something like|for a moment|in a way that|the way a\b|a long moment|a long time|the first time|a thousand years|four hundred pounds|a great deal|a good deal|the far side|sits down beside|a black dress|since the lab|light comes down|gold eyes level/i;
+      assert(vals.every((t) => !CARD_TICS.test(t)), `${T} (RV1, TG1): no canon-card tic in the six`);
+      assert(readFileSync(new URL('../tools/textlint.mjs', import.meta.url), 'utf8').includes('...Object.values(KT.POT_AGAIN).flat().flatMap((o) => [o.label, o.text, o.go, o.result])'), `${T} (RV1, TG1): the text lint's kitchen pool reads the six`);
+      const [p1, p2] = K.POT_AGAIN.ashfall;
+      assert(!/says nothing/.test(p1.text) && /She tastes it, and moves the mortar/.test(p1.text) && !/lets it be known/.test(p2.text) && /She informs you that in her house eggs are finished\./.test(p2.text) && p2.label === 'See to the greens at the village pot.', `${T} (RV1, TG2): Claude's two cuts and P2's label kept`);
+      const { splitLine } = await import('../js/core/replies.js');
+      assert(all.every((o) => { const l = `${o.result}: +25 satiety.`; const r = splitLine(l); return !/"/.test(o.result) && !/[.!?] /.test(o.result) && r.reply === '' && r.gain === l; }), `${T} (RV1, TG4): each result one sentence, no speech, read whole as the gain`);
+      assert(K.POT_AGAIN.fo.filter((o) => /Mei Lin's mother/.test(o.text + o.result)).length <= 2 && vals.every((t) => !/\b(senses?|sensed|cultivation|qi|realm|meridian\w*|dantian)\b/i.test(t)), `${T} (RV1, TG7): Mei Lin's mother in at most two of the Fallout's three; no local senses his cultivation`); }
+    assert(!K.POT_AGAIN.ashfall.some((o) => /Mei Lin's mother/.test(o.text + o.result)), `${T} (TX3): Mei Lin's mother not at the prologue's pot (RV1, L4 of v0.11.181)`);
+    assert(!KEEP_FLAGS.some((f) => /pot_cook|(^|_)cook$/.test(f)), `${T}: the cook's flags reset with the Coil`);
+    const mk = (hub, sd, act, long = true, seed = 99181) => { const g = ensureBars(newGame(seed, { closed: true, ...(long ? { cal: C.LONG_CAL } : {}) })); g.coil.act = act; goTo(g, SCENES, hub);
+        g.minutes = (long ? C.calStart(g, sd) - 1 : sd - 1) * D + 10 * 60; delete g.wake; g.rel.Village = { f: 100, a: 0 }; g.rel.Mother = { f: 10, a: 0 }; g.james.satiety = 40; g.flags.ya_met = true; return g; };
+    const ci = (hub) => SCENES[hub].choices.findIndex((c) => c.to === K.POT_HUBS[hub].scene);
+    const cook = (g, hub) => { g.james.satiety = 40; const label = sceneView(g, SCENES).choices.find((c) => c.index === ci(hub))?.label; choose(g, SCENES, ci(hub)); const v = sceneView(g, SCENES);
+        const r = choose(g, SCENES, 0); return { label, text: v.text, go: v.choices[0]?.label, lines: r.lines || [], fed: g.james.satiety, back: g.scene === hub }; };
+    for (const [hub, act, sd, t] of [['ashfall', 0, 4, 'ashfall'], ['fo_ashfall', 1, 8, 'fo']]) {
+        const flag = K.POT_HUBS[hub].flag, P = K.POT_AGAIN[t], F = K.POT_COOK[t];
+        // the old calendar: once a Coil, the first scene, no new flag
+        { const o = mk(hub, sd + 1, act, false); const r = cook(o, hub);
+          assert(r.label === F.label && r.text === F.text && r.back && o.rel.Village.f === 103 && !(`${flag}_v` in o.flags) && !(`${flag}_next` in o.flags) && !Object.keys(o.flags).some((k) => /^(a1_)?cook@/.test(k)), `${T}: ${hub}, the old calendar: the first scene and its gains, no new flag`);
+          o.minutes += D; assert(!K.potCookOpen(o, hub) && !K.potCookDue(o, hub), `${T}: ${hub}, the old calendar: once a Coil`); }
+        // RV1 (H1, HA, TG6): a week after the first cook, its plan's cook row 0: the routine's pot meals as v0.11.217 (Ashfall 7, the Fallout 6;
+        // 2 each before RV1); row 1: two repeat cooks, the pot held on their days only
+        for (const row of [0, 1]) {
+            const w = mk(hub, sd, act, true, 7); w.james.satiety = 50; Gm.addItem(w, 'smoked_meat', 99); Object.assign(w.flags, { elder: true, palisade: 1, wolf: 'driven' }); w.rel.Village = { f: 100, a: 0 };
+            choose(w, SCENES, ci(hub)); choose(w, SCENES, 0);
+            const endDay = C.calStart(w, sd + 3) - 1; w.minutes = Math.floor(w.minutes / D + 1) * D + 7 * 60; delete w.wake;
+            Wk.planEnsure(w); for (const s0 of Wk.PLAN_DOORS) Wk.planSet(w, `door:${s0}`, 0); Wk.planSet(w, `door:${K.POT_HUBS[hub].scene}`, row); Wk.planSet(w, 'med:sit', 4); Wk.planSet(w, 'med:rest', 4);
+            let pot = 0, ham = 0;
+            for (let i = 0; i < 40 && Math.floor(w.minutes / D) < endDay; i++) {
+                const r = Wk.runWeek(w, SCENES); for (const d of r.days) for (const l of d.lines) if (/^(Breakfast|Midday|Supper)/.test(l)) { if (/smoked meat/.test(l)) ham++; else pot++; }
+                if (w.scene === K.POT_HUBS[hub].scene) { choose(w, SCENES, 0); continue; }
+                w.minutes = Math.floor(w.minutes / D + 1) * D + 7 * 60; delete w.wake; w.james.satiety = 50; if (w.scene !== hub) goTo(w, SCENES, hub); if (!Wk.planHere(w)) break; }
+            const cooks = Object.keys(w.flags).filter((k) => new RegExp(`^${K.POT_HUBS[hub].key}@`).test(k)).length;
+            if (row === 0) assert(pot >= (act ? 6 : 7) && cooks === 1, `${T} (RV1, H1): ${hub}: cook row 0 after the first cook: ${pot} pot meals, ${ham} from the hammerspace, no repeat`);
+            else assert(cooks === 3 && pot >= (act ? 4 : 5), `${T} (RV1, HA): ${hub}: cook row 1: two repeat cooks, ${pot} pot meals, ${ham} from the hammerspace`);
+        }
+        // the long calendar: the stay's cooks, 3 days apart
+        const g = mk(hub, sd, act); const d0 = g.minutes, len = C.calStart(g, sd + 3) - C.calStart(g, sd);
+        assert(K.potCookOpen(g, hub) && K.potCookDue(g, hub), `${T}: ${hub}: open on the stay's first day`);
+        const r1 = cook(g, hub), mum = act === 1 ? 12 : 10;
+        assert(r1.label === F.label && r1.text === F.text && r1.go === F.go && r1.lines.includes(`${F.result}: +25 satiety.`) && g.rel.Village.f === 103 && g.rel.Mother.f === mum && g.flags[`${flag}_v`] === -1 && [0, 1, 2].includes(g.flags[`${flag}_next`]), `${T} (G1): ${hub}: the first cook: its scene, Village +3${act ? ', Mother +2' : ''}, the next repeat drawn (${g.flags[`${flag}_next`]})`);
+        g.minutes = d0 + D; assert(!K.potCookOpen(g, hub) && !K.potCookDue(g, hub), `${T} (RF3): ${hub}: closed the day after (the routine has the pot)`);
+        { const row = Wk.doorCards(g, SCENES).find((d) => d.scene === K.POT_HUBS[hub].scene); assert(row?.repeat && row.status !== 'open' && row.next === Math.floor(g.minutes / D) + 3, `${T} (RF3): ${hub}: the plan's row repeats, opens in 2 days (${JSON.stringify(row)})`); }
+        g.minutes = d0 + 2 * D; assert(!K.potCookOpen(g, hub), `${T} (RF3): ${hub}: closed 2 days after`);
+        const seq = [];
+        for (let k = 1; 3 * k < len && k <= 6; k++) {
+            g.minutes = d0 + 3 * k * D; delete g.wake; const v0 = g.flags[`${flag}_next`], vil = g.rel.Village.f, mo = g.rel.Mother.f;
+            assert(K.potCookOpen(g, hub) && !K.potCookDue(g, hub) && K.cookLabel(g, hub) === P[v0].label, `${T} (RF3; RV1, HA): ${hub}: open again ${3 * k} days on, no plan row: CG does not hold the pot; the label the drawn repeat's (${v0})`);
+            if (k === 1) { const h = JSON.parse(JSON.stringify(g)); Wk.planEnsure(h); Wk.planSet(h, `door:${K.POT_HUBS[hub].scene}`, 1); const due1 = K.potCookDue(h, hub); Wk.planSet(h, `door:${K.POT_HUBS[hub].scene}`, 0);
+              assert(due1 && !K.potCookDue(h, hub), `${T} (RV1, HA): ${hub}: a repeat holds the pot only while the plan's cook row is 1`); }
+            const r = cook(g, hub); seq.push(v0);
+            assert(r.label === P[v0].label && r.text === P[v0].text && r.go === P[v0].go && r.lines.includes(`${P[v0].result}: +25 satiety.`) && r.fed > 58 && r.fed <= 65 && r.back && g.rel.Village.f === vil && g.rel.Mother.f === mo && g.flags[`${flag}_v`] === v0, `${T} (G1, TX3): ${hub}: repeat ${k}: its scene, the meal, no gain (${v0})`);
+            assert(!K.potCookOpen(g, hub) && !SCENES[hub].choices.find((c) => c.text === 'Eat at the communal pot.').show(g), `${T}: ${hub}: then neither the card nor the pot that day`);
+        }
+        assert(seq.length >= 3 && JSON.stringify([...seq.slice(0, 3)].sort()) === '[0,1,2]' && seq.every((v, i) => i === 0 || v !== seq[i - 1]), `${T} (TX3): ${hub}: each repeat once before any comes back, never twice running (${seq.join()})`);
+        // an old long-calendar save that cooked this Coil before v0.11.218 (the flag, no repeat drawn): the first repeat, no gain
+        { const h = mk(hub, sd, act); h.flags[flag] = true; const vil = h.rel.Village.f; const r = cook(h, hub);
+          assert(r.label === P[0].label && r.text === P[0].text && h.rel.Village.f === vil, `${T}: ${hub}: an old save that cooked: the first repeat, no gain`); }
+        // RV1 (M1, TG5): and the draw after it is never repeat 0 again (40 seeds; 10–11 of 40 before the fix)
+        { const twice = []; for (let sd0 = 0; sd0 < 40; sd0++) { const h = mk(hub, sd, act, true, 99300 + sd0); h.flags[flag] = true; cook(h, hub); if (h.flags[`${flag}_next`] === 0) twice.push(sd0); }
+          assert(twice.length === 0, `${T} (RV1, M1): ${hub}: an old save's repeat 0 never comes twice running (${twice.length} of 40)`); }
+        // RV1 (L5, TG8): a repeat number out of range shows the first-time scene and gives its gains, alike
+        { const h = mk(hub, sd, act); h.flags[flag] = true; h.flags[`${flag}_next`] = 0; choose(h, SCENES, ci(hub)); h.flags[`${flag}_v`] = 9; const vil = h.rel.Village.f;
+          const tx = sceneView(h, SCENES).text; choose(h, SCENES, 0);
+          assert(tx === F.text && h.rel.Village.f === vil + 3, `${T} (RV1, L5): ${hub}: a bad repeat number: the first scene and its gain together`); }
+    }
 }
 
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));

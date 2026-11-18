@@ -121,7 +121,7 @@ const houseLines = [...Object.values(HT_BODY).flatMap((b) => Object.values(b)), 
 const { LF_DRILL } = await import(js('story/longforest.js')); const { SEASON_LINES } = await import(js('story/prologue.js')); // v0.11.175 (RV1, C4)
 // v0.11.181 (RV1, TG4): the kitchen's and the pot's texts (kitchen_texts.js) as the pool `kitchen`: they show only with a flag or in a result
 const KT = await import(js('story/kitchen_texts.js'));
-const kitchenLines = [...Object.values(KT.KT_UP), ...Object.values(KT.KT_DAY).flat(), ...Object.values(KT.KT_RETURN), ...KT.POT_LINE.ashfall, ...KT.POT_LINE.fo, KT.POT_COOK.ashfall.result, KT.POT_COOK.fo.result];
+const kitchenLines = [...Object.values(KT.KT_UP), ...Object.values(KT.KT_DAY).flat(), ...Object.values(KT.KT_RETURN), ...KT.POT_LINE.ashfall, ...KT.POT_LINE.fo, KT.POT_COOK.ashfall.result, KT.POT_COOK.fo.result, ...Object.values(KT.POT_AGAIN).flat().flatMap((o) => [o.label, o.text, o.go, o.result])]; // v0.11.218 (RV1, TG1): the cook's repeat scenes, every field
 // v0.11.182 (CB1, EK): the music and archive lines (music_texts.js) in each edition, as the pools `music` (general) and `music_named`
 const { MUSIC_LINES: MLX } = await import(js('story/music.js')); const { fillRefs: FRX } = await import(js('core/edition.js')); const { MUSIC_REFS: MRX0 } = await import(js('story/music_texts.js'));
 const allMusicTexts = (ed) => Object.values(MLX).flatMap((p) => Object.values(p).flat()).map((x) => FRX(x.text, MRX0, ed));

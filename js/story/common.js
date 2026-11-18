@@ -21,7 +21,7 @@ export const DAILY_KEYS = new Set();
  * game gives 3 visits a stay (one a story day); the long calendar gave 21 (7×), now 7 (2.3×). Keys: the daily keys below, and the
  * calendar-day flags `spring`, `hc_mei`, `hc_ya` (act1_heart.js). */
 export const SPACE_DAYS = 3;
-export const SPACED = new Set(['yk_time', 'wen_time', 'mother_time', 'a1_mei', 'a1_ya', 'slopes', 'wen', 'far', 'spring', 'hc_mei', 'hc_ya']);
+export const SPACED = new Set(['yk_time', 'wen_time', 'mother_time', 'a1_mei', 'a1_ya', 'slopes', 'wen', 'far', 'spring', 'hc_mei', 'hc_ya', 'cook', 'a1_cook']); // v0.11.218 (owner pick CK1, RF3): the cook with the women (kitchen.js), long calendar only
 let spaceOff = 0;
 /** `fn` run as if the cards were not spaced (the plan's rows: is a card closed only by its spacing?). */
 export const unspaced = (fn) => { spaceOff++; try { return fn(); } finally { spaceOff--; } };

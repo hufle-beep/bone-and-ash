@@ -1,0 +1,86 @@
+[
+ {
+  "id": "R1",
+  "file": "js/story/kitchen_texts.js",
+  "find": "She nods as one receiving a border post.",
+  "replace": "For a moment she nods as one receiving a border post.",
+  "note": "a canon-card tic in a repeat scene (textlint's POOLS miss POT_AGAIN; the samples never render a repeat)"
+ },
+ {
+  "id": "R2",
+  "file": "js/story/kitchen_texts.js",
+  "find": "She informs you that in her house eggs are finished.",
+  "replace": "She lets it be known that in her house eggs are finished.",
+  "note": "Claude's cut on Fable's P2 reverted (cuts not pinned)"
+ },
+ {
+  "id": "R3",
+  "file": "js/story/kitchen_texts.js",
+  "find": "The barley is on.",
+  "replace": "The barley is on for supper.",
+  "note": "a meal-time word the CK1 time regex lacks (supper / breakfast / lunch / night)"
+ },
+ {
+  "id": "R4",
+  "file": "js/story/kitchen_texts.js",
+  "find": "as Mei Lin's mother has verified\",",
+  "replace": "and Mei Lin's mother says \\\"Nine\\\" over every bowl\",",
+  "note": "speech in a repeat result: the reply splitter / GAIN_LINES never see a repeat result"
+ },
+ {
+  "id": "R5",
+  "file": "js/story/kitchen.js",
+  "find": "if (longCal(g)) { countShown(g, c, shown(g, c)); g.flags[`${c.flag}_next`]",
+  "replace": "{ countShown(g, c, shown(g, c)); g.flags[`${c.flag}_next`]",
+  "note": "the old calendar draws a repeat (a new flag and a g.lines change)"
+ },
+ {
+  "id": "R6",
+  "file": "js/story/kitchen.js",
+  "find": "export const cookLabel = (g, hub) => cookTexts(hub, cookVariant(g, hub)).label;",
+  "replace": "export const cookLabel = (g, hub) => cookTexts(hub, shown(g, POT_HUBS[hub])).label;",
+  "note": "the hub label from the last cook shown, not the next (label and scene disagree)"
+ },
+ {
+  "id": "R7",
+  "file": "js/story/kitchen.js",
+  "find": "const cookFree = (g, c) => (longCal(g) ? spacedFree(g, c.key, dayKey(g)) : !g.flags[c.flag]);",
+  "replace": "const cookFree = (g, c) => (longCal(g) ? spacedFree(g, c.key, dayKey(g)) && !g.flags[`${c.key}@${dayKey(g) - 1}`] : !g.flags[c.flag]);",
+  "note": "a skipped repeat day still closes the next (the spacing off by one on the day after a cook)"
+ },
+ {
+  "id": "R8",
+  "file": "js/story/kitchen_texts.js",
+  "find": "A builder arrives ahead of the others, with a reason.",
+  "replace": "A builder arrives ahead of the others at breakfast, with a reason.",
+  "note": "a meal-time word in a Fallout repeat (the CK1 time regex lacks breakfast / supper / lunch / night)"
+ },
+ {
+  "id": "R9",
+  "file": "js/story/kitchen_texts.js",
+  "find": "The women have left a gap at the pot the width",
+  "replace": "As on every third day, the women have left a gap at the pot the width",
+  "note": "a count of days or visits in a repeat (the brief bans it; no test)"
+ },
+ {
+  "id": "R10",
+  "file": "js/story/kitchen_texts.js",
+  "find": "Hard flatbread fried in egg and pork fat, eaten off",
+  "replace": "Hard flatbread fried in egg and pork fat. It is eaten off",
+  "note": "a two-sentence repeat result (the reply splitter leaves a fragment; the test checks only the end)"
+ },
+ {
+  "id": "R11",
+  "file": "js/story/kitchen_texts.js",
+  "find": "The eldest inspects a yolk, finds it soft",
+  "replace": "The eldest, who has felt your Qi since the day you came, inspects a yolk, finds it soft",
+  "note": "canon: a local senses James's cultivation (no canon pin on the repeats)"
+ },
+ {
+  "id": "R13",
+  "file": "js/story/kitchen.js",
+  "find": "fo_ashfall: { scene: 'fo_pot_cook', flag: 'fo_pot_cook', daily: 'a1_pot', key: 'a1_cook', t: 'fo' }",
+  "replace": "fo_ashfall: { scene: 'fo_pot_cook', flag: 'fo_pot_cook', daily: 'a1_pot', key: 'cook', t: 'fo' }",
+  "note": "the Fallout card spaced by the prologue key while the plan row reads a1_cook (row and card disagree)"
+ }
+]

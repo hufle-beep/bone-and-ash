@@ -4,7 +4,7 @@
  * choices), so no choice position changes.
  */
 import { TASK_HUBS } from './task_hubs.js';
-import { SCENES_KITCHEN, POT_HUBS, POT_COOK, POT_CARD_MIN, potCookOpen } from './kitchen.js';
+import { SCENES_KITCHEN, POT_HUBS, POT_CARD_MIN, potCookOpen, cookLabel } from './kitchen.js';
 
 /** The cook cards on the prologue's and the Fallout's Ashfall, appended last (no choice position changes); door cards. */
 export function installKitchen(SCENES) {
@@ -12,7 +12,7 @@ export function installKitchen(SCENES) {
     for (const [hub, c] of Object.entries(POT_HUBS)) {
         const s = SCENES[hub];
         if (!s) continue;
-        s.choices.push({ text: POT_COOK[c.t].label, show: (g) => potCookOpen(g, hub), time: POT_CARD_MIN, to: c.scene });
+        s.choices.push({ text: (g) => cookLabel(g, hub), show: (g) => potCookOpen(g, hub), time: POT_CARD_MIN, to: c.scene });
         const cfg = TASK_HUBS[hub];
         if (cfg && !(cfg.doors || []).includes(c.scene)) cfg.doors = [...(cfg.doors || []), c.scene];
     }
