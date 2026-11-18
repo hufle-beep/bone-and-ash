@@ -6,8 +6,8 @@
 import { addItem, eat, condense, advance, sleepUntil, jamesHpMax, hasItem, awardYukiFightXp, yukiForm, nightRest, nightTo } from '../core/game.js';
 import { daily, markDaily, hour, day, eatBest, pantry, foodCount, byForm, byDay, dayReply } from './common.js';
 import { encounter, rel, likesMei, likesYa, trioStep, bumpRel, KISS_YA } from './act1_common.js';
-import { textDay, coilStamp } from '../core/lines.js';
-import { longCal, storyDay, storyDayOf, calStart, calEnd, lastOfWeek } from '../core/calendar.js'; // v0.11.203 (owner pick T1, TS1): the long calendar // RV1 (FX); v0.11.188 (N1, L7): coilStamp
+import { textDay, coilStamp, seqText } from '../core/lines.js'; // v0.11.224 (TX2, V3a): seqText
+import { longCal, storyDay, storyDayOf, calStart, calEnd, lastOfWeek, blSpan, elderLeft, departLeft, daysWord, DaysWord, dayWord, countsFill, numWord, dayTitle, titleCase } from '../core/calendar.js'; // v0.11.224 (TX2, TS6): the counts // v0.11.203 (owner pick T1, TS1): the long calendar // RV1 (FX); v0.11.188 (N1, L7): coilStamp
 import { potLine } from './kitchen.js'; // v0.11.181 (SP1, PS)
 import { SONG_AT } from './songs.js'; // v0.11.188 (N1, L7): the song of fo_elder_named, by key (no song named here)
 
@@ -84,6 +84,7 @@ const supperPot = (g) => SUPPER_POT[Math.max(1, Math.min(3, Number(g.flags.kitch
 /** Day 8, 9 or 10. */
 /** v0.11.203 (owner pick T1, TS1): the story's day (8–10); in the long calendar each is a week (Days 44–50, 51–57, 58–64). `ddShow` is the
  *  calendar's day for the titles and the count to the Elder; the farewell waits for the last week's last day. */
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1); // RV1 (MC)
 const dd = (g) => Math.max(8, Math.min(10, storyDay(g)));
 const ddShow = (g) => (longCal(g) ? day(g) : dd(g));
 export const farewellNow = (g) => dd(g) >= 10 && lastOfWeek(g); // v0.11.204 (RV1, L4): exported for the week planner's stop
@@ -150,11 +151,11 @@ At the hour of the dragon a rider in crimson comes down the switchbacks carrying
 const LETTER = {
     fought: `Old Wen reads it aloud in the elder's house with the council seated before him, slowly, like a man proofing the inscription for his own gravestone.
 
-*The Crimson Lotus sets down that in the ninth month the village of Ashfall lifted its hand against the Sect. It sets down likewise the name of the stranger at its head. By the law of the mountain the Outer Hall sends Outer Elder Shen Qiu to Ashfall on the twenty-first day. He will weigh the village, and the stranger, and give sentence.*
+*The Crimson Lotus sets down that in the ninth month the village of Ashfall lifted its hand against the Sect. It sets down likewise the name of the stranger at its head. By the law of the mountain the Outer Hall sends Outer Elder Shen Qiu to Ashfall on {elderDay}. He will weigh the village, and the stranger, and give sentence.*
 
 The scroll goes back into its tube. No one says a word. One of the hunters at the back has tears running down a face that does not otherwise move; men here are taught to.
 
-"Thirteen days," says Old Wen. "A village must be given time to put its affairs in order before the weighing. So the law has it." His one good eye picks you out. "We are to understand this as mercy."
+"{Days}," says Old Wen. "A village must be given time to put its affairs in order before the weighing. So the law has it." His one good eye picks you out. "We are to understand this as mercy."
 
 "They're very organised," you say. "Credit where it's due."`,
     bluff: `The youth in pale silk opens the scroll to arm's length and delivers it in a high, clear voice, meaning every syllable:
@@ -165,19 +166,19 @@ He bows. Both attendants bow. The canopy, having no choice, bows with them.
 
 "And if this one is otherwise engaged?" you ask.
 
-The pain on his face is perfectly sincere. "Then Outer Elder Shen Qiu will call here in person, on the twenty-first day. The Elder greatly looks forward to the tea." A swallow. "The Elder's tea is… very strong, Senior."`,
+The pain on his face is perfectly sincere. "Then Outer Elder Shen Qiu will call here in person, on {elderDay}. The Elder greatly looks forward to the tea." A swallow. "The Elder's tea is… very strong, Senior."`,
     paid: `"It is not bone," Lu Han says, low. "Not any bone I know. With it in my hand my Qi goes *quiet*. Clean, like a window someone has wiped." He turns his palms up and looks into them. "They fed me grass from the age of six. Pills from twelve. I had never been clean, not for one breath of my life, until I held your hairpin."
 
 There is no threat anywhere in him. That is the frightening part.
 
-"I surrendered it to the Outer Hall," he says. "I was bound to. Outer Elder Shen Qiu lifted it from my hands himself. On the twenty-first he comes here, to ask where such a thing comes from." He lets a breath go by. "He will not ask as I am asking."
+"I surrendered it to the Outer Hall," he says. "I was bound to. Outer Elder Shen Qiu lifted it from my hands himself. {OnElder} he comes here, to ask where such a thing comes from." He lets a breath go by. "He will not ask as I am asking."
 
 He rises, bows lower than any stranger is owed, and goes back up the road by himself.`,
     /** v0.11.188 (owner picks N1, D1; Fable's, Claude's cut C4): the lost tribute when nobody saw a tribulation (no `sky_witness`; LL):
      *  the Sect's reason is Lu Han's report, hinting at (not saying) the "cannot sense him" that Old Wen tells at fo_elder_named. */
     lostUnseen: `Old Wen reads it on his feet in the elder's house, the council in a ring around him, holding the scroll at arm's length as he would hold a debt.
 
-*The Crimson Lotus sets down the report of inner disciple Lu Han. At the tribute of Ashfall a stranger raised his hand against the Sect's collector and was beaten. The Sect sets down what that village calls him: Bone-Maker. It sets down that the bone he works was never carved and came out of no beast. It sets down that what the disciple's hand found in him, when it struck, does not agree with what the disciple's eyes had seen, and that the disciple cannot account for it. The year granted is withdrawn. Outer Elder Shen Qiu comes to Ashfall on the twenty-first day, to collect the Bone-Maker with his own hands.*
+*The Crimson Lotus sets down the report of inner disciple Lu Han. At the tribute of Ashfall a stranger raised his hand against the Sect's collector and was beaten. The Sect sets down what that village calls him: Bone-Maker. It sets down that the bone he works was never carved and came out of no beast. It sets down that what the disciple's hand found in him, when it struck, does not agree with what the disciple's eyes had seen, and that the disciple cannot account for it. The year granted is withdrawn. Outer Elder Shen Qiu comes to Ashfall on {elderDay}, to collect the Bone-Maker with his own hands.*
 
 Old Wen rolls the scroll shut and keeps hold of it. Nobody in the ring looks at you. They look at the boards at your feet, with care.
 
@@ -188,9 +189,9 @@ Old Wen rolls the scroll shut and keeps hold of it. Nobody in the ring looks at 
 Nobody tells you otherwise. Under your shirt, Lu Han's boot print has begun to itch.`,
     lost: `Old Wen reads it on his feet in the elder's house, the council sitting in a ring about him.
 
-*It has come to the Outer Hall that in the days of the tribute the sky above Ashfall gathered tribulation over a stranger, and went away without striking. Heaven does not go away. The Outer Hall desires to know why. On the twenty-first day Outer Elder Shen Qiu will come to Ashfall, collect the Bone-Maker with his own hands, and study him as one studies a portent.*
+*It has come to the Outer Hall that in the days of the tribute the sky above Ashfall gathered tribulation over a stranger, and went away without striking. Heaven does not go away. The Outer Hall desires to know why. On {elderDay} Outer Elder Shen Qiu will come to Ashfall, collect the Bone-Maker with his own hands, and study him as one studies a portent.*
 
-"Thirteen days, where we had a year," says Old Hu, the head hunter, without inflection. "Because Heaven took fright at him."
+"{Days}, where we had a year," says Old Hu, the head hunter, without inflection. "Because Heaven took fright at him."
 
 "I wouldn't say fright," you say. "I'd say Heaven lost its place. That's a different problem."
 
@@ -201,7 +202,8 @@ export const BREAK_HUBS = ['fo_ashfall'];
 
 export const FALLOUT = {
     fo_start: {
-        id: 'fo_start', title: 'Day Eight', art: (g) => (ending(g) === 'bluff' ? 'envoy' : 'ashfall_dawn'), place: P,
+        id: 'fo_start', title: (g) => (longCal(g) ? dayTitle(g) : 'Day Eight'), // RV1 (MC)
+        art: (g) => (ending(g) === 'bluff' ? 'envoy' : 'ashfall_dawn'), place: P,
         enter: (g) => { if (g.james.hp < 1) g.james.hp = 1; return []; },
         text: (g) => `${OPENING[ending(g)]}
 
@@ -212,9 +214,10 @@ ${g.flags.sky_witness ? 'And under all of it, the thing nobody says out loud: th
     },
     fo_letter: {
         id: 'fo_letter', title: 'The Letter', art: 'council', place: `${P} — the elder's house`,
-        text: (g) => LETTER[ending(g) === 'lost' ? (g.flags.sky_witness ? 'lost' : 'lostUnseen') : 'fought'], // v0.11.188 (N1, LL)
+        text: (g) => countsFill(g, LETTER[ending(g) === 'lost' ? (g.flags.sky_witness ? 'lost' : 'lostUnseen') : 'fought']), // v0.11.224 (TX2, DC12, DC13): the counts from the calendar // v0.11.188 (N1, LL)
         choices: [
-            { text: '"Then we use the thirteen days."', do: (g) => { bumpRel(g, 'Village', 4, 0); bumpRel(g, 'Old Wen', 3, 0); return []; }, to: 'fo_elder_named' },
+            { text: (g) => `"Then we use the ${daysWord(elderLeft(g))}."`, // v0.11.224 (TX2, DC12)
+              do: (g) => { bumpRel(g, 'Village', 4, 0); bumpRel(g, 'Old Wen', 3, 0); return []; }, to: 'fo_elder_named' },
             { text: '"I could leave. If I\'m gone, there\'s nobody for him to weigh."', to: 'fo_leave_offer' },
         ],
     },
@@ -229,7 +232,7 @@ ${g.flags.romance ? 'Mei Lin, at the back of the room, says nothing. She has no 
     },
     fo_envoy: {
         id: 'fo_envoy', title: 'An Invitation', art: 'envoy', place: `${P} — the tribute post`,
-        text: (g) => LETTER.bluff,
+        text: (g) => countsFill(g, LETTER.bluff),
         choices: [
             { text: 'Stall, like a senior: "This one is in seclusion. Return when the plum trees flower."', check: { skill: 'GU', dc: 5 }, do: (g) => { g.flags.envoy = 'stalled'; bumpRel(g, 'Village', 3, 0); return ['His bow goes so deep that one attendant has to steady the canopy, and the other has to steady him.']; }, failDo: (g) => { g.flags.envoy = 'doubted'; return ['He bows, but on the way up his eyes stop at your coat and take inventory. The Elder will be told that the senior dresses like nothing in the registers.']; }, to: 'fo_elder_named' },
             { text: 'Refuse plainly: "I don\'t drink tea with people who tax children."', do: (g) => { g.flags.envoy = 'refused'; bumpRel(g, 'Village', 5, 0); return ['He goes the colour of his own scroll, and bows regardless. Manners here would survive a flood.']; }, to: 'fo_elder_named' },
@@ -238,15 +241,16 @@ ${g.flags.romance ? 'Mei Lin, at the back of the room, says nothing. She has no 
     },
     fo_lu_han: {
         id: 'fo_lu_han', title: 'Lu Han, Alone', art: 'envoy', place: `${P} — Mei Lin's doorstep`,
-        text: (g) => LETTER.paid,
+        text: (g) => countsFill(g, LETTER.paid),
         choices: [
             { text: 'Call after him: "Lu Han. If you want to be clean again, you know where I am."', do: (g) => { g.flags.lu_han_seed = true; return ['He stops, with his back to you, for the length of three breaths. Then he walks on, no faster and no slower.']; }, to: 'fo_elder_named' },
             { text: 'Let him go. A man like that has to come back on his own.', to: 'fo_elder_named' },
         ],
     },
     fo_elder_named: {
-        id: 'fo_elder_named', title: 'Thirteen Days', art: 'ashfall_dawn', place: P,
-        text: (g) => `So that is how it stands. In thirteen days Outer Elder Shen Qiu of the Crimson Lotus comes down that road, and everything you have done here goes on the scales.
+        id: 'fo_elder_named', title: (g) => (longCal(g) ? titleCase(daysWord(elderLeft(g))) : 'Thirteen Days'), // RV1 (MC)
+        art: 'ashfall_dawn', place: P,
+        text: (g) => `So that is how it stands. In ${daysWord(elderLeft(g))} Outer Elder Shen Qiu of the Crimson Lotus comes down that road, and everything you have done here goes on the scales.
 
 You ask about him, carefully. Voices drop. People describe Shen Qiu as they would the weather in a mountain pass: a condition, not a person. He is old. He is courteous. He is the reason the village over the next ridge is no longer there.
 
@@ -256,7 +260,7 @@ One thing more, which Old Wen tells you over tea, so low that you have to lean i
 
 Meanwhile, whenever the wind goes round to the north, your Convergence lifts its head like a dog that has heard its name. North, beyond the Hollow, beyond the roots. The dead tree. It has been singing at you since the tribute, and it is not getting quieter.
 
-Thirteen days. You can spend them building walls. Or you can go and find out what is calling.`,
+${DaysWord(elderLeft(g))}. You can spend them building walls. Or you can go and find out what is calling.`,
         choices: [{ text: 'Start with the walls. Today, at least.', to: 'fo_ashfall' }],
     },
 
@@ -328,7 +332,7 @@ Today's business is the Old Tree. Each hunter at the table had the same tale fro
 ${byForm(g, "\"Your cat,\" Old Wen says,", "\"Your great beast,\" Old Wen says,", "\"Your companion,\" Old Wen says,")} "faces north in her sleep. As you do."`
             : `Third council, and the last before the north path. The tea has gone beyond weak into memory: hot water, served with the full ceremony of tea. The map still lies on the table from this morning. Nobody has presumed to roll it up.
 
-The business is short. Who answers for the palisade line. Who drills the line. Who keeps the well while the Bone-Maker is in the Blackroot with the herb-gatherer and the wild woman, and eleven days stand on the tally. Each matter is stood for, bowed over and settled. Nobody says *if he comes back*. It sits at the table all the same, an eighth elder.
+The business is short. Who answers for the palisade line. Who drills the line. Who keeps the well while the Bone-Maker is in the Blackroot with the herb-gatherer and the wild woman, and ${daysWord(elderLeft(g))} stand on the tally. Each matter is stood for, bowed over and settled. Nobody says *if he comes back*. It sits at the table all the same, an eighth elder.
 
 Then Old Hu rises, bows to Old Wen, and puts the question his hunters have put to him: why a man walks toward a dead tree while an Elder is walking toward his door.
 
@@ -373,7 +377,7 @@ ${hasItem(g, 'jade_bracket') ? 'You have jade bracket. It will have to stretch.'
         text: (g) => {
             if (dd(g) === 8) return `She is up in the herb loft${g.flags.loft_burned ? ' — what is left of it, the charred beams scrubbed and oiled as if scrubbing could unburn them —' : ''}, sorting roots as if each one had personally offended her, which is how Mei Lin avoids thinking.
 
-"Thirteen days," she says to the roots. "And all of Ashfall so calm. My mother has been calm since before it was light. The headman is calm. Old Hu is calm enough that somebody ought to check him for a pulse." A bundle slaps down on the board. "I shall scream, James. Out in the street. Just so that I have heard one person do it."
+"${DaysWord(elderLeft(g))}," she says to the roots. "And all of Ashfall so calm. My mother has been calm since before it was light. The headman is calm. Old Hu is calm enough that somebody ought to check him for a pulse." A bundle slaps down on the board. "I shall scream, James. Out in the street. Just so that I have heard one person do it."
 
 "Your reputation," you say, "would never recover."
 
@@ -381,7 +385,7 @@ ${hasItem(g, 'jade_bracket') ? 'You have jade bracket. It will have to stretch.'
             if (dd(g) === 9) return `The herb slopes, late in the morning. She cuts Ninefold grass in short, angry strokes and talks without stopping, which for Mei Lin is what thinking sounds like.
 
 ${yaHere(g) ? '"That woman," she says, "asked me this morning whether you were *mine*. In the street. In front of Grandmother Lao." Slash. "And when I told her that is not a question decent people ask, she asked whether I was *decent*, then, because she had heard otherwise." Slash. "And then she *laughed*. Do you know what it is to hear someone laugh in this village? It sounded like glass breaking."\n\nThe knife stops. "I liked it," she says, very low, as one owns up to a crime. "That\'s the worst part."' : 'She does not mention the Elder once, which is how you know he is all she is thinking about.'}`;
-            return `The last day. She is packing the basket for the second time, having unpacked it to audit her mother's additions.
+            return `${departLeft(g) > 1 ? 'The last days in Ashfall. She is packing the basket again, having unpacked it once more to audit her mother\'s additions.' : 'The last day. She is packing the basket for the second time, having unpacked it to audit her mother\'s additions.'}
 
 "I'm still coming," she says, before your mouth is open. "Don't. If you have thought of a reason since this morning, keep it. I know every herb between here and the Hollow, and you know none of them, and *she* knows nothing that grows unless it bleeds. Someone on this expedition has to know which mushrooms not to eat."
 
@@ -456,17 +460,34 @@ And beside your portrait, in the margin: *does not bow*.${byForm(g, "\n\nYuki is
     fo_supper: {
         id: 'fo_supper', title: 'Supper', art: 'dinner', place: `${P} — Mei Lin's house`,
         enter: (g) => { if (hour(g) < 19) advance(g, (19 - hour(g)) * 60); if (daily('a1_supper')(g)) { markDaily(g, 'a1_supper'); eat(g, 30); return ['Millet, pickled greens, a sliver of salt pork: +30 satiety.']; } return []; },
+        // v0.11.224 (owner pick TX2, TS6: V3a): each story day's supper a sequence of three on the long calendar (lines.js seqText), the first the old
         text: (g) => (dd(g) === 8
-            ? `Nobody talks at supper. Mei Lin's mother gives the ancestors their grace at double length, with one line tacked on at the end concerning the stranger. You decide it was a blessing.
+            ? seqText(g, 'fo_supper:8', [(g) => `Nobody talks at supper. Mei Lin's mother gives the ancestors their grace at double length, with one line tacked on at the end concerning the stranger. You decide it was a blessing.
 
-Mei Lin has one hand for her bowl. The other is tracing the palisade line across the table in spilled tea, and she is losing an argument with it. ${byForm(g, "Yuki eats a sliver of salt pork that nobody at this table offered her.", "Yuki, along the far wall, has been served a whole smoked hare in the washing basin, unasked. The mother pays her tolls promptly.", "Yuki, seated at the head by the mother's ruling, eats her sliver of salt pork with chopsticks, faultlessly, and is offered a second before you are.")}`
-            : `${yaHere(g) ? `Ya comes to supper. Nobody invited her. She simply arrives at the door, walks in, sits at the table on the *wrong side* — the host's side — and eats with her fingers, fast, hunched, watching the door the whole time like a wolf at a kill.
+Mei Lin has one hand for her bowl. The other is tracing the palisade line across the table in spilled tea, and she is losing an argument with it. ${byForm(g, "Yuki eats a sliver of salt pork that nobody at this table offered her.", "Yuki, along the far wall, has been served a whole smoked hare in the washing basin, unasked. The mother pays her tolls promptly.", "Yuki, seated at the head by the mother's ruling, eats her sliver of salt pork with chopsticks, faultlessly, and is offered a second before you are.")}`, (g) => `Supper is late; the light held, and nobody would leave the timber while it did. Mei Lin's mother gives the grace at its ordinary length tonight. The line about the stranger is still in it, moved nearer the front.
+
+Mei Lin eats left-handed, because the right has a splinter in it that she will let nobody look at. She has stopped drawing the wall on the table and begun counting it, posts against days, and likes neither number. ${byForm(g, "Yuki, on the stove, has sawdust in her whiskers and is taking no questions about it.", "Yuki, along the wall, smells of pine resin; she dragged four trunks down from the ridge today and let the hunters believe they were helping.", "Yuki, at the head of the table, reaches across and turns the right hand over unasked, has the splinter out before Mei Lin can object, and goes back to her pork.")}`, (g) => `The talk at supper is of post holes: how deep, how many, whose turn to dig. The mother conducts it as she would a burial. When it is settled she puts down her bowl and asks you whether a wall will be enough.
+
+You are still choosing an answer when Mei Lin says, "It'll be enough to make them knock," and laughs, and then looks at the shutters. Her mother does not rebuke her. That is how you learn what the count is doing to this house. ${byForm(g, "Yuki leaves the stove, crosses the table between the bowls and sits down facing the mother, which is as near to an answer as anyone gets tonight.", "Yuki raises her head from the floor, and the lamp flame leans; the mother looks at her for some time, and then goes on eating.", `"It will not be the wall they meet first," says Yuki, from the head of the table, and helps herself to the pickles. The mother considers this, and bows.`)}`])
+            : seqText(g, 'fo_supper:9', [(g) => `${yaHere(g) ? `Ya comes to supper. Nobody invited her. She simply arrives at the door, walks in, sits at the table on the *wrong side* — the host's side — and eats with her fingers, fast, hunched, watching the door the whole time like a wolf at a kill.
 
 Mei Lin's mother serves her anyway, because a guest is a guest even if she is an animal, and sits through the whole meal with the face of a woman enduring a tribulation. Your bowl she fills past the line, ${supperPot(g)}
 
 Halfway through, Ya burps, looks at Mei Lin, then at you, and says, conversationally: "So which of you two is sleeping in the loft? Or is it both. It should be both."
 
-The mother drops her chopsticks.` : 'Supper. Quiet. The mother watches the north window the whole time.'}`),
+The mother drops her chopsticks.` : 'Supper. Quiet. The mother watches the north window the whole time.'}`, (g) => `${yaHere(g) ? `Ya comes to supper with a hare. It is not dressed, or skinned, or entirely cold, and she lays it on the table between the millet and the pickles as a guest of better breeding would set down a jar of wine. Then she takes the host's side of the table and looks about for a bowl.
+
+Mei Lin's mother regards the hare. A gift is a gift, even one that is bleeding on her table, and she thanks the giver in full form, to which Ya says "What?" with her mouth already full. Your bowl she heaps past the line, ${supperPot(g)}
+
+Ya eats what she is given and then what Mei Lin was given. Midway she stops, points a greasy finger at the mother, and says to you, with respect: "This one is small, but she hits, yes? I can tell. Ask her if she wants to fight after."
+
+The mother, who heard it perfectly well, waits for you to deal with it.` : 'Supper. The mother has turned her stool to face the north window.'}`, (g) => `${yaHere(g) ? `Ya is at the table before the grace, which no guest of this house has managed, chiefly because she came in by the window. She sits on the host's side with her spear across her knees and her eyes on the door she did not use.
+
+Mei Lin's mother gives the ancestors their grace regardless, entire, in a voice that takes no notice of the chewing. A guest is fed; that much is law, and she keeps it with her jaw set. Your bowl she heaps past the line, ${supperPot(g)}
+
+When the last name has been said, Ya swallows, wipes her mouth on her wrist, and asks Mei Lin, loudly and with real interest: "Do they answer? Hers. When she feeds them." She tips her head at you. "Feed the scholar and he answers. He never stops."
+
+Mei Lin studies her tea. The mother's hands have stopped over the ladle.` : 'Supper. Nobody says much. The mother bars the door before the grace.'}`])),
         choices: [
             { text: (g) => (yaHere(g) && dd(g) === 9 ? '"Ya. Manners." (You\'re aware of the irony.)' : 'Help clear the table.'), do: (g) => { if (yaHere(g) && dd(g) === 9) { bumpRel(g, 'Ya', -2, 2); bumpRel(g, 'Mother', 3, 0); return ['Ya bristles, concludes you are joking, concludes you are not, concludes she likes you regardless, and eats your pickles to make the point.']; } bumpRel(g, 'Mother', 2, 0); return []; }, to: 'fo_night' },
             { text: (g) => (yaHere(g) && dd(g) === 9 ? 'Laugh. Out loud. Somebody at this table has to.' : 'Go up to the loft early.'), do: (g) => { if (yaHere(g) && dd(g) === 9) { bumpRel(g, 'Ya', 3, 3); bumpRel(g, 'Mei Lin', 2, 0); g.flags.laughed_with_ya = true; return ['Ya laughs with you. Mei Lin tries not to, and loses, and her mother regards the three of you as she would a fire in the thatch.']; } return []; }, to: 'fo_night' },
@@ -478,7 +499,7 @@ The mother drops her chopsticks.` : 'Supper. Quiet. The mother watches the north
         text: (g) => `${dd(g) === 8 && !g.flags.palisade ? 'There is no palisade yet. You lie awake listening to the barley.' : dd(g) === 9 ? 'The mint in the rafters has been joined by a new row of something bitter, hung up that afternoon. The loft is being provisioned for a siege, like the rest of the house.' : 'The loft smells of mint and drying ginseng: the first bundles hung since the tribute, in a row along the new-scrubbed beam.'}
 
 ${meiLovers(g)
-        ? (dd(g) === 9 ? 'Mei Lin comes up the ladder earlier tonight, before the snoring below is properly established, which for Mei Lin is recklessness. She sits down on the edge of your blanket and unpins her hair. "Twelve," she says, and that is all the arithmetic either of you does.' : 'Mei Lin climbs the ladder after her mother\'s snoring has settled into its rhythm. She doesn\'t say anything. She doesn\'t have to. Thirteen days is a long time, and also no time at all, and she means to use every night of it.')
+        ? (dd(g) === 9 ? 'Mei Lin comes up the ladder earlier tonight, before the snoring below is properly established, which for Mei Lin is recklessness. She sits down on the edge of your blanket and unpins her hair. "' + cap(numWord(elderLeft(g))) + '," she says, and that is all the arithmetic either of you does.' : 'Mei Lin climbs the ladder after her mother\'s snoring has settled into its rhythm. She doesn\'t say anything. She doesn\'t have to. ' + DaysWord(elderLeft(g)) + ' is a long time, and also no time at all, and she means to use every night of it.')
         : (dd(g) === 9 ? 'Below, Mei Lin\'s lamp burns late again. You hear the knock of her herb-knife on the board, steady, and then not, and then a snort of laughter that she turns into a cough, for the benefit of the wall.' : 'Mei Lin\'s lamp is still burning below, late. Once, you hear her laugh — alone, at something — and then stop herself, as if someone might hear.')}${yaHere(g) ? '\n\nAnd on the shrine roof across the lane, a silhouette is sitting cross-legged against the stars, watching your window, not even pretending not to.' : ''}`,
         choices: [
             { text: (g) => (meiLovers(g) ? 'Let the night be just this.' : 'Sleep.'), do: (g) => { if (meiLovers(g)) bumpRel(g, 'Mei Lin', 2, 4); return []; }, to: (g) => (dd(g) === 8 && !g.flags.palisade && !g.flags.wolf ? 'fo_wolf' : 'fo_morning') },
@@ -531,12 +552,12 @@ Its owner bows to you regardless and thanks you for the attempt. Nothing else th
             return lines;
         },
         text: (g) => (dd(g) === 9 && !yaHere(g)
-            ? `Day nine. Twelve days to the Elder.
+            ? `${dayWord(g)}. ${DaysWord(elderLeft(g))} to the Elder.
 
 You are on the step with a bowl of gruel when Ashfall goes silent at your back. It is not the careful silence you have grown used to. It is sharp and complete, like a plate dropped in a temple.
 
 Someone is walking out of the Blackroot: down the north path, through the barley, hauling something heavy behind her on a rope.`
-            : `Day ${ddShow(g)}. ${calStart(g, 21) - ddShow(g)} days to the Elder. The wind has come round to the north again, and your Convergence hums along under it without having asked your leave.`),
+            : `${longCal(g) ? `${dayWord(g)}. ${DaysWord(elderLeft(g))}` : `Day ${ddShow(g)}. ${calStart(g, 21) - ddShow(g)} days`} to the Elder. The wind has come round to the north again, and your Convergence hums along under it without having asked your leave.`),
         choices: [
             { text: 'Look.', show: (g) => dd(g) === 9 && !yaHere(g), to: 'ya_arrives' },
             { text: 'Old Wen has called for you. Today is the day you decide.', show: (g) => dd(g) >= 10 && !g.flags.fo_plan, to: 'fo_plan' },
@@ -565,7 +586,7 @@ Then she sees you. And Yuki. Her nostrils flare, and all the play leaves her fac
         enter: (g) => { g.flags.ya_met = true; bumpRel(g, 'Ya', 2, 2); return []; },
         text: (g) => `She comes straight up to you, far closer than anyone here would stand, and *smells* you: the neck, the hair, the collar of the coat. Yuki, ${byForm(g, 'on your shoulder', 'at your hip', 'at your elbow')}, sets her ears back and lets it happen. She has let nobody do it before.
 
-"*You,*" says the woman. "Three nights I sat outside your little fire. Three. You smell like nothing. Nothing smells like nothing. It all stinks of rot here: the grass, the beasts, the Sect, *them*" — her thumb goes at the village — "whatever eats this air. Not you." A grin, every tooth in it. "I wondered what you'd taste of. Then the dogs came at you, and you killed them, and I thought: mine. I'll fetch him when I get hungry."
+"*You,*" says the woman. "${longCal(g) ? 'Night after night I sat outside your little fire. All of them.' : 'Three nights I sat outside your little fire. Three.'} You smell like nothing. Nothing smells like nothing. It all stinks of rot here: the grass, the beasts, the Sect, *them*" — her thumb goes at the village — "whatever eats this air. Not you." A grin, every tooth in it. "I wondered what you'd taste of. Then the dogs came at you, and you killed them, and I thought: mine. I'll fetch him when I get hungry."
 
 "I'd like the 'mine' part explained."
 
@@ -574,14 +595,15 @@ Then she sees you. And Yuki. Her nostrils flare, and all the play leaves her fac
 She means Mei Lin, behind you, who has come out on the step with a knife in one fist and a bunch of herbs in the other, and outrage all over her face. ${meiLovers(g) ? 'Ya\'s nose wrinkles. She looks from Mei Lin to you and back. "Oh. *Oh.* You two." She sounds pleased, the way a fox sounds pleased to find two hens.' : 'Ya\'s grin widens. "Oh, I like her. She looks like she bites."'}`,
         choices: [
             { text: '"James. That\'s Mei Lin. The one behind you is Old Hu, and he\'s about to challenge you."', to: 'ya_challenge' },
-            { text: '"You followed me for three days and didn\'t say hello?"', do: (g) => { bumpRel(g, 'Ya', 3, 2); return ['"Saying hello is how you get speared," she says, patiently, as one explains fire to the very young.']; }, to: 'ya_challenge' },
+            { text: (g) => (longCal(g) ? '"You followed me for weeks and didn\'t say hello?"' : '"You followed me for three days and didn\'t say hello?"'), // v0.11.224 (TX2, DN1)
+              do: (g) => { bumpRel(g, 'Ya', 3, 2); return ['"Saying hello is how you get speared," she says, patiently, as one explains fire to the very young.']; }, to: 'ya_challenge' },
         ],
     },
     ya_challenge: {
         id: 'ya_challenge', title: 'A Matter of Face', art: 'ya_fight', place: `${P} — the lane`,
-        text: `Old Hu is, in fact, about to challenge her. The headband is off already, folded, and given into his nephew's keeping, and in Ashfall wars have been declared with less. Formal fury has turned his face grey. She insulted him in the lane before every soul in Ashfall; this world allows a man two answers to that, and his years have put both out of reach.
+        text: (g) => `Old Hu is, in fact, about to challenge her. The headband is off already, folded, and given into his nephew's keeping, and in Ashfall wars have been declared with less. Formal fury has turned his face grey. She insulted him in the lane before every soul in Ashfall; this world allows a man two answers to that, and his years have put both out of reach.
 
-Ya notices, and *brightens*. "A fight? Good. Four days I've been walking."
+Ya notices, and *brightens*. "A fight? Good. ${longCal(g) ? 'Days and days I\'ve been walking.' : 'Four days I\'ve been walking.'}"
 
 "Old Hu," you say, "is seventy."
 
@@ -634,7 +656,7 @@ The chewing stops. So does the grin.
 
 "I sleep in its roots in winter," she says. "It's warm. Nothing else in the forest is warm." She is quiet for a breath. "Sometimes it hums. Only while I sleep. I wake up, and it stops." Her eyes go narrow. "The nights I was near *you*, it hummed louder."
 
-Then the grin comes back, wider than before. "Anyway. Salt. Iron. And you. You gave the white one the best of the meat before you ate, three nights running. I watched." The spoon swings round to Mei Lin. "And maybe you."
+Then the grin comes back, wider than before. "Anyway. Salt. Iron. And you. You gave the white one the best of the meat before you ate, ${longCal(g) ? 'every single night' : 'three nights running'}. I watched." The spoon swings round to Mei Lin. "And maybe you."
 
 Mei Lin answers with the noise of a kettle.`,
         choices: [
@@ -644,7 +666,7 @@ Mei Lin answers with the noise of a kettle.`,
     },
     ya_share: {
         id: 'ya_share', title: 'An Indecent Proposal', art: 'ya_close', place: `${P} — Mei Lin's step`,
-        text: (g) => `Ya has been studying the two of you as a predator studies anything: with patience, and with nothing overlooked. ${meiLovers(g) ? 'She saw Mei Lin\'s hand find your sleeve on the step. She saw the hay still in Mei Lin\'s hair from two nights ago.' : 'She saw how the two of you keep not looking at each other.'}
+        text: (g) => `Ya has been studying the two of you as a predator studies anything: with patience, and with nothing overlooked. ${meiLovers(g) ? 'She saw Mei Lin\'s hand find your sleeve on the step. ' + (longCal(g) ? 'She saw the hay that keeps turning up in Mei Lin\'s hair.' : 'She saw the hay still in Mei Lin\'s hair from two nights ago.') : 'She saw how the two of you keep not looking at each other.'}
 
 "So," she says, and licks gruel from her thumb. "You two are a pair. Good. I don't mind. In the forest, when the kill is good, everybody eats." Her eyes go over Mei Lin, frank and friendly and approving. "You're pretty when you're angry. You're angry a lot. Lucky."
 
@@ -676,7 +698,7 @@ Ya's grin has gone uncertain. She is reading Mei Lin's face, and you can watch t
 "It's *slow*." The boy is released. He bows. She bares her teeth at him, and he is gone. "Come here. You're not slow. Throw me."`
             : `She is up on the shrine roof, drawing a stone down the edge of her spear, her legs dangling in front of the god's chiselled-off face.
 
-"Tomorrow we start for the tree," she says, and does not look down. "You, and the angry one." The stone makes two more strokes. "She doesn't like me."
+${departLeft(g) > 1 ? '"A few more sleeps, then we start for the tree,"' : '"Tomorrow we start for the tree,"'} she says, and does not look down. "You, and the angry one." The stone makes two more strokes. "She doesn't like me."
 
 "She doesn't know what to do with you. Nobody here does."
 
@@ -708,11 +730,11 @@ Your Convergence is humming so loudly that it seems remiss of everyone else not 
         id: 'fo_price', title: 'The Price', art: 'ya_close', place: `${P} — the shrine roof`,
         text: (g) => `You find Ya ${g.flags.ya_brawl === 'won' ? 'practising the disarm that took her spear, on a sack of millet, slowly, and losing to it on purpose' : 'asleep on the shrine roof in full sun like a lizard'}. You lay it out for her. She hears you through with her head tilted.
 
-"I'll take you," she says. "Five days in, maybe six. Past the Hollow there are things that eat hunters like rice. A wet wood, where the dead walk. Hills where the birds are on fire. I know all of it." The grin. "My price."
+"I'll take you," she says. "${blSpan(g) > 1 ? 'Half a moon in, maybe more.' : 'Five days in, maybe six.'} Past the Hollow there are things that eat hunters like rice. A wet wood, where the dead walk. Hills where the birds are on fire. I know all of it." The grin. "My price."
 
 "Salt? Iron?"
 
-"Salt and iron," she agrees. "And a fight every three days. A real one. No bowing." One finger goes up. "And in the forest I sleep next to you. Not across the fire, like a guest." A second finger. "And *she* comes." Both fingers swing to Mei Lin's house, over the lane. "You'll be miserable without her, and I don't travel with miserable people. They taste of fear."`,
+"Salt and iron," she agrees. "And a fight every ${blSpan(g) > 1 ? 'few' : 'three'} days. A real one. No bowing." One finger goes up. "And in the forest I sleep next to you. Not across the fire, like a guest." A second finger. "And *she* comes." Both fingers swing to Mei Lin's house, over the lane. "You'll be miserable without her, and I don't travel with miserable people. They taste of fear."`,
         choices: [
             { text: '"Done. All of it."', do: (g) => { g.flags.ya_price = 'all'; bumpRel(g, 'Ya', 5, 4); return likesMei(g) && likesYa(g) ? trioStep(g, 1) : []; }, to: 'fo_mei_insists' },
             { text: '"Salt, iron and the fights. The sleeping arrangements, we negotiate."', check: { skill: 'GU', dc: 5 }, do: (g) => { g.flags.ya_price = 'haggled'; bumpRel(g, 'Ya', 4, 2); return ['"Negotiate," she says, trying the word out, delighted, as if you had offered her a new sort of fight.']; }, failDo: (g) => { g.flags.ya_price = 'all'; bumpRel(g, 'Ya', 2, 3); return ['"No," she says. The negotiation has now been held.']; }, to: 'fo_mei_insists' },
@@ -808,7 +830,7 @@ She is gone when you wake: back up on the shrine roof, working at her spear, as 
     fo_depart: {
         id: 'fo_depart', title: 'North', art: 'ashfall_dawn', place: `${P} — the north path`,
         enter: (g) => { g.flags.mei_party = true; g.flags.ya_party = true; delete g.flags.fo_pick; return []; }, // RL1 (L4): the bridge's flag cleared
-        text: (g) => `Day eleven. Ten days to the Elder.
+        text: (g) => `${dayWord(g)}. ${DaysWord(elderLeft(g))} to the Elder.
 
 All of Ashfall stands along the north path and makes no sound: each family, each child, the hunters in their two ruled lines. No one calls out. No one lifts a hand. They bow as you go by, row upon row, like barley when the wind crosses it.
 

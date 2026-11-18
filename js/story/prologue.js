@@ -23,7 +23,7 @@ import { HEART, BREAK_HUBS as B3 } from './act1_heart.js';
 import { RETURN, BREAK_HUBS as B4, installSelene } from './act1_return.js';
 import { LONGFOREST, BREAK_HUBS as B0 } from './longforest.js';
 import { MERIDIANS, EXTRA_FROM } from './meridians.js';
-import { weekBegins, calStart } from '../core/calendar.js'; // v0.11.203 (owner pick T1, TS1): the long calendar
+import { weekBegins, calStart, longCal, tributeLeft, daysWord, dayTitle } from '../core/calendar.js'; // v0.11.224 (TX2, TS6): the counts // v0.11.203 (owner pick T1, TS1): the long calendar
 import { installYukiTime } from './yuki_time.js'; // v0.11.137 (TR1)
 import { installHouseTime } from './house_time.js'; // v0.11.139 (MW1)
 import { installKitchen } from './kitchen_install.js'; // v0.11.181 (SP1, PS)
@@ -50,7 +50,7 @@ const jackals = (g) => {
     ];
     return {
         id: 'jackals', night: true, // v0.11.92 (O1): a night fight costs sleep
-        intro: s >= 2 ? 'Three shapes come loose from the dark, the same three that have walked rings round your camp for two nights: ash-grey hides, a surplus of teeth, eyes like coals nobody remembered to put out.' : 'Two shapes come loose from the dark: ash-grey hides, a surplus of teeth, eyes like coals nobody remembered to put out.',
+        intro: s >= 2 ? 'Three shapes come loose from the dark, the same three that have walked rings round your camp for ' + (longCal(g) ? 'weeks' : 'two nights') + ': ash-grey hides, a surplus of teeth, eyes like coals nobody remembered to put out.' : 'Two shapes come loose from the dark: ash-grey hides, a surplus of teeth, eyes like coals nobody remembered to put out.',
         band: 'standard',
         enemies: enemies.map((e) => grow(e, s, JACKAL_GROWTH)),
         win: 'jackals_won', lose: 'jackals_lost', flee: 'jackals_fled',
@@ -320,7 +320,38 @@ ${(g.flags.forest_day || 1) > 1 ? `Another night in the wilds. The watch-thread 
 
 ${g.flags.fire ? `The fire keeps its small room, and tonight the dark stands at the door of it and does not pretend to be anywhere else.` : `With no fire, the dark has nothing to stay outside of, and doesn't.`} ${byForm(g, `Yuki gets into your lap and stays sitting up, ears turning, facing out.`, `Yuki lies down round you with her head up and her ears turning, facing out.`, `Yuki sits down against your side with her back half to you, ears turning, facing out.`)}
 
-One of your nine threads has taken the watch before you have decided anything, and settles to it like a dog on a doorstep.`], 'night'),
+One of your nine threads has taken the watch before you have decided anything, and settles to it like a dog on a doorstep.`,
+            // v0.11.224 (owner pick TX2, TS6: V3a): two more for each, so the long calendar's forest weeks have nine nights before one comes back
+            (g) => `The dark here has a weight your own world's never had. It comes down through the black trees and rests on the rise like a hand on a lid. Out among the trunks something clicks, twice, and is answered from the opposite direction by something that is plainly not the same kind of animal.
+
+${g.flags.fire ? 'The fire burns low and a little sullen, as most things do here, and you sit close to it anyway.' : 'Without a fire the dark has no edge to it. There is only more of it, starting at your skin.'} ${byForm(g, 'Yuki folds herself into your lap and watches the trees over your knee', 'Yuki curls her whole length round you and watches the trees across your knees', 'Yuki leans in against your side and watches the trees past your arm')}, and her tail does not keep still.
+
+A thread of your Parallel Cognition is on the watch already, sorting the clicks. It has found no pattern in them. What reaches you from it is not worry, only the lack of a conclusion.`,
+            (g) => `Dusk is not a thing this forest does, and you have stopped waiting for it. By the time the dark drops you have hung your coat on the branch that has become the coat's branch and sat down in the patch of ground that has worn itself to your shape. Off to the left the large thing makes its slow round of the rise. You have begun to think of it as the neighbour.
+
+${g.flags.fire ? 'The fire catches at the first try now, which you put down to practice and the fire puts down to nothing at all.' : 'There is no fire, and out of habit you have arranged yourself around the place where one would be.'} ${byForm(g, 'Yuki walks one turn on your lap and drops', 'Yuki treads one turn round you and drops', 'Yuki drops down against your side and takes your arm for a pillow')}, as she does every night here, and neither of you calls it a routine.
+
+The watch-thread is up already. It has started to notice when the neighbour runs late, which is how you know the camp has become yours.`,
+            (g) => `A still night. The dark comes down and nothing comes with it: no scream, no footfall, no clicking in the trees. Even the grey moss seems to be minding its own business. You listen for some time before you admit that you are listening for trouble, and are faintly put out not to get any.
+
+${g.flags.fire ? 'The fire ticks to itself. It is the loudest thing for a mile and seems embarrassed about it.' : 'With no fire, there is nothing to hear but two sets of breathing, and you know both of them.'} ${byForm(g, `Yuki lies along your lap with her chin on your wrist. *Don't,* she says through the bond. *You'll jinx it.*`, `Yuki lies round you with her chin on your knee. *Don't,* she says through the bond. *You'll jinx it.*`, `Yuki sits against your side with her chin on her knees. "Don't," she says. "You'll jinx it."`)}
+
+The watch-thread takes its post and finds nothing. It goes on finding nothing, thoroughly, in every direction.`,
+            (g) => `Night falls here as if the day had been a clerical error, now corrected. The trees are blacker than the sky behind them, which should be impossible and is not. Far off something calls in a voice with too many parts to it, and the forest goes still to listen, and so do you.
+
+${g.flags.fire ? 'The fire throws your shadow up the nearest trunk, where it looks more confident than you are.' : 'With no fire you cannot see your own hands, and you take it on trust that they are where you left them.'} ${byForm(g, 'Yuki is a small warm weight in your lap, purring at a pitch meant for you alone', 'Yuki is a great warm wall at your back, purring low enough to feel in your ribs', 'Yuki is a warm shoulder against your arm, humming under her breath, off-key, on purpose')}, until the calling stops.
+
+The watch-thread comes up unasked and takes its post. That leaves eight to wonder what the voice belonged to, and all eight would rather not.`,
+            (g) => `You know this dark by now. It comes down all of a piece, and you find your back is against the same root before it lands. The rise has a dip in it that fits your shoulders. The omnitool plays a quiet piece from home, turned low enough that the forest has to lean closer to hear it.
+
+${g.flags.fire ? 'You feed the fire without looking, and it takes the stick like an animal that knows the hand.' : 'No fire tonight. You know where everything is regardless, which is a small thing, and you are proud of it.'} ${byForm(g, 'Yuki arrives in your lap at the hour she always does', 'Yuki arranges herself round you at the hour she always does', 'Yuki arrives against your side at the hour she always does')}, and you move your arm out of her road without being asked.
+
+The watch-thread comes up by itself, a thing done so often that it no longer counts as a decision. The other eight are already thinking about breakfast.`,
+            (g) => `The night comes in quietly and stays that way. The black trees stand about like guests who have run out of things to say. There is no wind. Once, far off, a branch lets go of its load and it falls a long way through leaves, and that is the whole of the evening's news.
+
+${g.flags.fire ? 'The fire has burnt down to a red that asks for nothing. You give it a stick regardless.' : 'With no fire, the dark and the quiet turn out to be one thing, and it is nearly restful.'} ${byForm(g, 'Yuki is half asleep in your lap, one ear still up', 'Yuki is half asleep round you, one ear still up', 'Yuki is half asleep against your side, one cat ear still up')}, which is as far off duty as she goes.
+
+The watch-thread has the quiet to itself, and one of nine is plenty for it. Your shoulders have come down from around your ears. You don't remember telling them to.`], 'night'),
         choices: [
             { text: 'Leave a thread on watch and sleep.', do: set('watch'), to: nightNext },
             { text: 'Story Mode only (removed in v0.11.41).', show: () => false, to: nightNext }, // v0.11.41 (D2-a): Story Mode's sit; the place kept (choice indices)
@@ -376,7 +407,8 @@ Cold, wet, alive, furious: you are all four. Yuki — ${byForm(g, "perched on yo
 
     /* ================= DAY 2 ================= */
     dawn: {
-        id: 'dawn', title: (g) => (g.flags.long ? 'Day Four' : 'Day Two'), art: 'forest_dawn', place: 'Blackroot Wilds',
+        id: 'dawn', title: (g) => (longCal(g) ? dayTitle(g) : g.flags.long ? 'Day Four' : 'Day Two'), // RV1 (MC)
+        art: 'forest_dawn', place: 'Blackroot Wilds',
         text: (g) => `${canFly(g) ? (foodCount(g) ? FW.dawnLeft : FW.dawnNothing) /* v0.11.195 (F1, D1: DW-1) */ : `Morning comes up red. You eat ${foodCount(g) ? 'what\'s left' : 'nothing, a meal you are getting very good at'}, and you are working out which direction counts as *away* when the scream comes.`}
 
 Human. A woman's. More fury in it than fear, and plenty of swearing folded in. A few hundred metres east, down the slope.
@@ -395,7 +427,7 @@ Yuki is already looking at you. You are already moving. You have a type of stupi
 
 With her back against a boulder and a herb-knife in her fist stands a woman of about twenty-five: white jacket, red sash, long dark skirt, a red ribbon in black hair. Her basket has gone over, and what spills out of it glows a faint green. Two men face her. The young one wears crimson robes with a lotus stitched on each sleeve, done so that it seems to bleed. The other is a pock-faced slab of a man holding a hatchet.
 
-"The tribute falls due ${g.flags.long ? 'in three days' : 'tomorrow'}," Crimson Robes is telling her, grave and unhurried, a magistrate partway through a sentence. "And before the whole slope, Mei Lin, you laughed at an outer disciple of the Crimson Lotus. Face is owed. The Ninefold grass is forfeit. Tonight you will serve tea in my quarters, as penance. Refuse, and the Elder hears that your mother has kept a spirit root hidden in that house."
+"The tribute falls due ${tributeLeft(g) > 1 ? `in ${daysWord(tributeLeft(g))}` : 'tomorrow'}," Crimson Robes is telling her, grave and unhurried, a magistrate partway through a sentence. "And before the whole slope, Mei Lin, you laughed at an outer disciple of the Crimson Lotus. Face is owed. The Ninefold grass is forfeit. Tonight you will serve tea in my quarters, as penance. Refuse, and the Elder hears that your mother has kept a spirit root hidden in that house."
 
 "My mother is *sixty*, you overdressed rooster—"
 
@@ -581,7 +613,7 @@ ${g.flags.ignored
         ? 'A woman in a patched white jacket and a red sash limps past you with a split lip and an empty basket, and the street falls silent around her. Someone mutters "Gao Feng". Nobody looks at you, the stranger who came down off the ridge at exactly the wrong hour.'
         : 'Mei Lin walks you in like a stray she has decided to keep. "He\'s with me," she tells the street, and the street answers with the silence of people who have spent twenty years watching Mei Lin say the wrong thing to the wrong person. An old woman at the well makes a warding sign. A man turns his head and spits, precisely.'}
 
-${g.flags.long ? 'The tribute falls due in three days, at dawn. The whole village is counting them, and not aloud.' : 'The tribute falls due tomorrow at dawn. The whole village is holding its breath over it.'}`,
+${tributeLeft(g) > 1 ? `The tribute falls due in ${daysWord(tributeLeft(g))}, at dawn. The whole village is counting them, and not aloud.` : 'The tribute falls due tomorrow at dawn. The whole village is holding its breath over it.'}`,
         choices: [
             { text: 'Ask for the village elder.', show: once('elder'), time: 30, do: set('elder'), to: 'elder' },
             { text: 'There\'s a sick child — you can hear the coughing. Offer to help.', show: once('healed_try'), time: 60, to: 'heal' },
@@ -597,7 +629,7 @@ ${g.flags.long ? 'The tribute falls due in three days, at dawn. The whole villag
 
 "There does seem to be a consensus."
 
-"Then hear an old man's advice." He sets the cup down. "${g.flags.long ? 'In three days' : 'Tomorrow'}, the collectors come. An inner disciple leads them: ${g.flags.sky_witness ? FW.elderRung /* v0.11.195 (F1, D1: EW-4) */ : 'Foundation, a rung no one in Ashfall has stood on.'} If you are here, they will see you. If they see you, they will want you. You may run ${g.flags.long ? 'before then' : 'tonight'}. No one would blame you." A pause. "Or you may stand in front of us. No one has done that in forty years."
+"Then hear an old man's advice." He sets the cup down. "${tributeLeft(g) > 1 ? `In ${daysWord(tributeLeft(g))}` : 'Tomorrow'}, the collectors come. An inner disciple leads them: ${g.flags.sky_witness ? FW.elderRung /* v0.11.195 (F1, D1: EW-4) */ : 'Foundation, a rung no one in Ashfall has stood on.'} If you are here, they will see you. If they see you, they will want you. You may run ${g.flags.long ? 'before then' : 'tonight'}. No one would blame you." A pause. "Or you may stand in front of us. No one has done that in forty years."
 
 ${g.flags.gao_beaten || g.flags.gao_humiliated ? '"You have also," he adds, with no change of voice, "shamed an outer disciple of the Sect on our slope already. Running may no longer be yours to choose."' : ''}`,
         choices: [{ text: 'Thank him. Think about it.', do: (g) => { bumpRel(g, 'Old Wen', 3, 0); return []; }, to: hubOf }], // v0.11.139 (owner pick MW1, MB): Wen +3
@@ -647,7 +679,7 @@ You are still looking for it when it finds you. It has the dimensions of a small
         enter: (g) => { const p = clockParts(g.minutes); if (dayHour(g) < 19) g.minutes = (p.day - 1) * 1440 + 19 * 60; /* v0.11.37: after midnight (24+) it is already evening: no jump back to 19:00 */ if (!g.flags.ate_dinner) { eat(g, 30); g.flags.ate_dinner = true; return ['Millet, greens and a little smoked fish: +30 satiety.']; } return []; },
         text: (g) => `${g.flags.ignored
         ? 'You find her house by asking. On her doorstep you apologise, properly, with the sarcasm left out. She lets you in, which you had not earned, and sets a bowl in front of you, which you had earned even less.'
-        : g.flags.long ? 'Third supper at Mei Lin\'s. Her mother serves you first now, which in Ashfall carries about the weight of a signed adoption certificate. The low music from your forearm she has ruled on as well: "It keeps time like a loom. A house can bear that."' : 'Mei Lin\'s house is two rooms and a herb loft, and her mother is a small, fierce woman who gives you one look and starts adding millet to the pot.'}
+        : g.flags.long ? (longCal(g) ? 'Three weeks of suppers at Mei Lin\'s.' : 'Third supper at Mei Lin\'s.') + ' Her mother serves you first now, which in Ashfall carries about the weight of a signed adoption certificate. The low music from your forearm she has ruled on as well: "It keeps time like a loom. A house can bear that."' : 'Mei Lin\'s house is two rooms and a herb loft, and her mother is a small, fierce woman who gives you one look and starts adding millet to the pot.'}
 
 Afterwards her mother informs Mei Lin, in a low, severe voice pitched for you to overhear, that a respectable daughter does not drink plum wine with strange men under her mother's roof. Then she goes to bed. Mei Lin pours herself a second cup the moment the door shuts, and that leaves Mei Lin, a clay lamp, a jar of what may once have been plum wine, and you. Yuki has claimed the warmest place by the stove and is pretending to be asleep, convincing nobody.
 

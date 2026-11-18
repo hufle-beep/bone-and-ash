@@ -4,6 +4,7 @@
  * James never kills humans: he knocks them out and very nearly cripples them. Locals cannot sense his cultivation.
  */
 import { registerStomp } from './power.js';
+import { longCal } from '../core/calendar.js'; // v0.11.224 (RV1, MF1)
 import { yukiForm } from '../core/game.js';
 
 const pick = (d, a, b, c) => (d >= 3 ? c : d === 2 ? b : a);
@@ -64,7 +65,7 @@ Old Hu turns the skulls outward again. Later, alone, he turns one of them back.`
         one: () => 'You throw once. The fight is reclassified as a burial detail.',
     },
     ya_brawl: {
-        posture: (g, d) => `Ya rolls her neck until it cracks, spits in the dust, and shows you every tooth she owns. "Three nights at your fire and I never smelled a thing on you. No rot. No fear. *Nothing*." She beckons with two fingers. "Come on, Nothing. If you win, you buy my salt. If I win, I take the coat. Then whatever's under it."
+        posture: (g, d) => `Ya rolls her neck until it cracks, spits in the dust, and shows you every tooth she owns. ${longCal(g) ? '"Weeks I watched you, scholar, upwind and down, and I never smelled a thing on you. No rot. No fear. *Nothing*."' : '"Three nights at your fire and I never smelled a thing on you. No rot. No fear. *Nothing*."'} She beckons with two fingers. "Come on, Nothing. If you win, you buy my salt. If I win, I take the coat. Then whatever's under it."
 
 ${pick(d, 'She is very fast, and she knows it.', 'She is fast, and about to have an educational morning.', 'You find you are sorry in advance, chiefly on behalf of the goats.')}`,
         win: {

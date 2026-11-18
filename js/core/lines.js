@@ -106,6 +106,17 @@ export function byDay(g, list, key = g?.scene) {
     return typeof t === 'function' ? t(g) : t;
 }
 
+/** v0.11.224 (owner pick TX2, TS6: V3a; the owner 2026-11-18 07:56: "schedulable items should have a sequence of three texts max"): a
+ *  text that shows on many days of one story day (a stay's week on the long calendar) as a sequence: `list[0]` (the old text, the story's
+ *  beat) on the first day `key` shows this Coil, then the next, and round again (again.js's VF folds a text already shown on an earlier
+ *  day). The days are noted under `s:<key>` in the Coil's day record, so a scene with several story-day texts keeps one sequence each
+ *  (`supper:4`, `supper:5`…). The old calendar shows each such text on one day: always `list[0]`. */
+export function seqText(g, key, list) {
+    const k = `s:${key}`;
+    noteDay(g, k);
+    return byDay(g, list, k);
+}
+
 /** v0.11.154 (owner pick RV1, Fable's review, L2 CL): like byDay, but past the last text it stays on the last one instead of starting again (the Heart's
  *  lists: a stay past their last day shows the last day's text, not the first day's). */
 export function byDayLast(g, list, key = g?.scene) {

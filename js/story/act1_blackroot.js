@@ -13,7 +13,7 @@ import { hasForm } from '../core/forms.js';
 import { choiceOpen, gives } from '../core/story.js'; // v0.11.161 (PO2): `optionLeft`; RV (GV, Fable's H1): the wrapper carries the card's items
 import { daily, markDaily, eatBest, pantry, foodCount, hour, byForm, byDay, dayReply } from './common.js';
 import { noteDay, DAY_REPLIES, coilReply } from '../core/lines.js';
-import { storyDay, calMinutes, blSpan } from '../core/calendar.js'; // v0.11.222 (owner pick J2, TS9): blSpan, the camps' days a story day; // v0.11.203 (owner pick T1, TS1): the long calendar (Day 11 is 65, Day 16 is 70) // v0.11.166 (RW1): coilReply, the flirts by Coil
+import { storyDay, calMinutes, blSpan, longCal } from '../core/calendar.js'; // v0.11.224 (TX2, TS6): longCal // v0.11.222 (owner pick J2, TS9): blSpan, the camps' days a story day; // v0.11.203 (owner pick T1, TS1): the long calendar (Day 11 is 65, Day 16 is 70) // v0.11.166 (RW1): coilReply, the flirts by Coil
 import { talkBeat } from './remember.js'; // v0.11.184 (S1)
 import { encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil } from './act1_common.js';
 
@@ -198,6 +198,10 @@ const bday = (g) => g.flags.bl_day || 1;
  * its last night. Its beats (the split, the hollow, the pass) and its night event come on its last day and night, as before; the
  * nights before it are quiet (Sleep goes straight to the morning). With blSpan 1 (the old calendar, an old save) every day is the last. */
 const blN = (g) => g.flags.bl_n || 0;
+/** v0.11.224 (owner pick TX2, TS6: DN12; RV1 MP2): the quiet mornings' lines (the second and third of a story day's camp), by `bl_day`. */
+const BL_QUIET = { 1: ['Another morning on the root. It is warm under the bedroll and cold everywhere else. Ya has been out and back already, and smells of whatever she found.', 'The root has not moved in the night, which out here counts as news. Dew has beaded on your glasses. Yuki regards the cold fire and then you, in that order, until you light it.'], 2: ['Morning, and the same stretch of root. Ya has her nose to the wind before anyone else is upright. "Still there," she says of the wyrm, fondly.', 'Grey light on the root again. Ya is restringing her necklace, and holds one of the teeth up beside your mouth for comparison. She looks sorry for you.'], 3: ['Mist again, and grey water under it. Mei Lin wrings out a sleeve that was dry when she lay down, with the face of a woman drafting a complaint to Heaven.', 'Morning, by the colour of the mist. Something surfaces beside the raft, considers the breakfast, and goes back under. Yuki keeps her eyes on the spot until the rings are gone.'], 4: ['Morning in the hills. Ash has got into the bedrolls, the water and the millet. The dead tree stands where it stood at dusk, holding the same half of the sky.', 'The hills are the grey they were. Your footprints from dusk have filled in overnight, and Ya walks the camp\'s edge reading the ground anyway, annoyed at how little it will say.'], 5: ['Morning under the tree. The sun gets round it late. Ya\'s whetstone has started already, and Mei Lin has given up asking how sharp one spear needs to be.', 'The tree has not come any closer overnight; you checked. Nobody talks much over the millet. Yuki faces it through the whole meal, and so far the tree has not blinked.'] };
+/** DN12: the quiet mornings' choice: the day stays at the camp. */
+const QUIET_LABEL = 'Another day here.';
 export const blLastDay = (g) => blN(g) >= blSpan(g) - 1;
 const sleepTo = (g) => (blLastDay(g) ? 'bl_night' : 'bl_morning');
 const stakesDay = daily('bl_stakes'); // v0.11.222 (RV2, SQ): the ring's day key, as before
@@ -217,7 +221,7 @@ const BL_WATCHES = 'Watches to set. Ya claims she never sleeps, which is false; 
 const BL_WATCH_DW1 = `Watches to set, and nowhere dry to set them from. Ya wants the end of the raft nearest the water, so that whatever comes meets her first; Mei Lin wants the middle, and has counted the trunks. Your watch-thread, at least, does not mind the damp.`;
 const BL_WATCH_AH = `The last watches of the road. Ya says nobody can sleep under a thing like that, and yawns; Mei Lin means to sit up and keep an eye on it, in case it moves. Your watch-thread comes forward already facing north.`;
 const BL_DW_OPEN = ['All night, from somewhere very high up, water drips.', `Still dripping. By now you know which drop comes next.`];
-const BL_DW_CAMP = ['Camp is a raft of fallen trunks with black water under it. The fire hisses; everything else drips. Now and then, a long way out, something comes up through the surface and sinks back.', `Another raft of fallen trunks, better chosen; you are learning. The fire hisses. Mei Lin has hung the wet things up to drip with everything else. Whatever keeps surfacing out there has come no nearer. You checked.`];
+const BL_DW_CAMP = ['Camp is a raft of fallen trunks with black water under it. The fire hisses; everything else drips. Now and then, a long way out, something comes up through the surface and sinks back.', `Another raft of fallen trunks, better chosen; you are learning. The fire hisses. Mei Lin has hung the wet things up to drip with everything else. Whatever keeps surfacing out there has come no nearer. You checked.`, 'The raft holds. By now you know which trunks shift and which stay put, and so does Mei Lin, who walks them with her skirt in one fist. The fire hisses. Out on the water the thing comes up, looks, and sinks, as regular as a watchman.']; // v0.11.224 (TX2, DN13): a third, for the long calendar's wood
 const onlyYa = (g) => likesYa(g) && !likesMei(g);
 /* v0.11.122 (owner pick LG1, BC; texts by Fable, B0–B3): when both like him, the hot spring and the Ashen Hollow camp offer Ya alone too. */
 const SPRING_BOTH_WAIT = 'Nobody says anything for a long time. Mei Lin has come to the very edge of the bank, arms folded, glaring at the stars as if they started it. She hasn\'t left. She hasn\'t come in. She is, you realise, waiting to see what you do.';
@@ -316,7 +320,7 @@ export const BLACKROOT = {
 
 Then the trees shut behind you and there are four of you. A biologist, ${byForm(g, 'a cat', 'a very large cat', 'a cat on two legs')}, a herb-woman with a basket and a knife, and Ya: barefoot, spear across her shoulders, walking backwards ahead of you so that she can watch your faces.
 
-"Five days in," Ya says. "Six, if I end up carrying one of you. Something will try to eat us on the way. I'll say which, when I smell it." She grins at Mei Lin. "You bowed to the old man like your spine was on fire. Does it hurt, being that polite? Is there a cure?"
+${blSpan(g) > 1 ? '"Half a moon in," Ya says. "Longer, if I end up carrying one of you.' : '"Five days in," Ya says. "Six, if I end up carrying one of you.'} Something will try to eat us on the way. I'll say which, when I smell it." She grins at Mei Lin. "You bowed to the old man like your spine was on fire. Does it hurt, being that polite? Is there a cure?"
 
 "There is," says Mei Lin. "It's called being raised by people."
 
@@ -329,7 +333,7 @@ Before noon you come to the first of the roots: grey-white, smooth as bone, broa
         id: 'rr_hub', title: 'The Root Road', art: 'root_road', place: PLACE.rr,
         text: (g) => hubText(g, bday(g) === 1
             ? 'The root runs ahead of you, broad enough for a cart, rising and dipping across the forest floor like the backbone of a sleeper. Lesser roots come in from either hand and join it. Every one of them is going the same way.'
-            : 'Day two on the Root Road. The roots run thicker here, and warmer underfoot. Ya says the road ends today, at the split, and that the split has a tenant. She mentions it as other people mention rain.'),
+            : blSpan(g) > 1 ? 'The second stretch of the Root Road. The roots run thicker here, and warmer underfoot. Ya says the road ends at the split, not far on now, and that the split has a tenant. She mentions it as other people mention rain.' : 'Day two on the Root Road. The roots run thicker here, and warmer underfoot. Ya says the road ends today, at the split, and that the split has a tenant. She mentions it as other people mention rain.'),
         choices: [
             // v0.11.47 (owner 20:01): the Manners beat sits behind eating on the Root Road (was "Stop for the midday meal.", the same place in the list):
             // until it has played this card replaces "Eat something." here; Ya's millet cakes, so no food needed; then the ordinary card is back;
@@ -366,7 +370,8 @@ And now the pair of them turn to you.`,
         choices: [
             { text: 'Side with Mei Lin. "She thanks Heaven. You eat bugs. Nobody\'s perfect."', do: (g) => { bumpRel(g, 'Mei Lin', 4, 2); bumpRel(g, 'Ya', -4, 0); g.flags.ya_grudge = true; return ['Mei Lin\'s mouth twitches. Ya stalks off to eat by herself, as loudly as a millet cake allows.']; }, to: 'rr_hub' },
             { text: 'Side with Ya. "It was a pretty good impression."', do: (g) => { bumpRel(g, 'Ya', 4, 3); bumpRel(g, 'Mei Lin', -3, 0); return ['Ya crows. Mei Lin looks at you like a woman making an entry in a ledger, to be opened later.']; }, to: 'rr_hub' },
-            { text: 'Defuse it. "We have a five-day walk and no doctor. Pick a fight with the forest."', check: { skill: 'GU', dc: 4 }, do: (g) => { bumpRel(g, 'Mei Lin', 2, 0); bumpRel(g, 'Ya', 2, 0); return ['Now they are both glaring at you instead. You count it as progress.']; }, failDo: (g) => { bumpRel(g, 'Ya', -2, 0); return ['Ya concludes that you are cowards, the pair of you. She explains why, point by point.']; }, to: 'rr_hub' },
+            { text: (g) => (blSpan(g) > 1 ? 'Defuse it. "We have a two-week walk and no doctor. Pick a fight with the forest."' : 'Defuse it. "We have a five-day walk and no doctor. Pick a fight with the forest."'), // v0.11.224 (TX2, DN11)
+              check: { skill: 'GU', dc: 4 }, do: (g) => { bumpRel(g, 'Mei Lin', 2, 0); bumpRel(g, 'Ya', 2, 0); return ['Now they are both glaring at you instead. You count it as progress.']; }, failDo: (g) => { bumpRel(g, 'Ya', -2, 0); return ['Ya concludes that you are cowards, the pair of you. She explains why, point by point.']; }, to: 'rr_hub' },
         ],
     },
     ya_fight_start: {
@@ -479,13 +484,14 @@ Ya is furious. Not with you; with the elk, which she curses in a language you su
 
 "Me?"
 
-"Ten days back, before the village: your camp, by the stream. The wolves weren't the only ones circling it. I smelled you every night." She grins without looking up. "You smell like lightning and soap. Nobody here smells like soap. Three nights it took me, working out what you were."
+${longCal(g) ? '"Way back, before the village: your camp, by the stream.' : '"Ten days back, before the village: your camp, by the stream.'} The wolves weren't the only ones circling it. I smelled you every night." She grins without looking up. "You smell like lightning and soap. Nobody here smells like soap. ${longCal(g) ? 'Weeks it took me, working out what you were.' : 'Three nights it took me, working out what you were.'}"
 
 ${g.flags.saw_lights ? 'Further on, where the roots braid together, she has one more thing to show you: a trail in the moss, greener than the moss on either side of it, running inward. "The lights walk here," she says. "Every night. Toward the old tree. I followed them once, when I was small. I didn\'t go in."' : 'Further on, where the roots braid together, the moss runs greener along a line that points at the heart of the forest. "Something walks here at night," Ya says. "Not an animal. I don\'t follow it."'}`,
         choices: [
             { text: 'Learn it properly. Nose in the moss and everything.', check: { skill: 'GU', dc: 4 }, time: 90, do: (g) => { g.flags.bl_tracker = true; bumpRel(g, 'Ya', 3, 2); return ['"Eyes lie. Ears lie. Nose doesn\'t," says Ya, and holds your face down in the moss until you agree. You can smell wolf now. You will never again be able to stop smelling wolf. Ya is extremely proud of you.']; /* RV1 (M2): the menu's text is never drawn, so the lesson's first words go here */ }, failDo: (g) => { bumpRel(g, 'Ya', 1, 0); return ['You smell moss. Chiefly moss. Ya pats you on the head.']; }, to: 'rr_hub' },
-            { text: '"You followed me for three nights?"', // v0.11.179 (LB1, H1): the count as in the Fallout ("Three nights I sat outside your little fire")
-              do: (g) => { bumpRel(g, 'Ya', 2, 4); return ['"Ten days back. Your first camp, by the stream. The wolves weren\'t the only ones going round it." She shrugs. "You fed the cat first, so: not Sect. You were interesting. Most things aren\'t."']; /* RV1 (M2): the calendar fix and the CW line where they are read */ }, time: 30, to: 'rr_hub' },
+            { text: (g) => (longCal(g) ? '"You followed me for weeks?"' : '"You followed me for three nights?"'), // v0.11.224 (TX2, DN5)
+              // v0.11.179 (LB1, H1): the count as in the Fallout ("Three nights I sat outside your little fire")
+              do: (g) => { bumpRel(g, 'Ya', 2, 4); return [(longCal(g) ? '"From the start. Your first camp, by the stream.' : '"Ten days back. Your first camp, by the stream.') + ' The wolves weren\'t the only ones going round it." She shrugs. "You fed the cat first, so: not Sect. You were interesting. Most things aren\'t."']; /* RV1 (M2): the calendar fix and the CW line where they are read */ }, time: 30, to: 'rr_hub' },
         ],
     },
     rr_roots: {
@@ -509,9 +515,9 @@ ${g.flags.roots ? 'You think of the root you followed out of the Hollow, and of 
     },
     rr_end: {
         id: 'rr_end', title: 'The Split', art: 'root_wyrm', place: `${P} — the end of the Root Road`,
-        text: `The Root Road ends where the great root splits round a chasm, and both halves dive into darkness and water. The air that comes up smells of rot and wet stone. Far below, somewhere in all that, is the Drowned Wood.
+        text: (g) => `The Root Road ends where the great root splits round a chasm, and both halves dive into darkness and water. The air that comes up smells of rot and wet stone. Far below, somewhere in all that, is the Drowned Wood.
 
-Ya stops. Ya, who has stopped for nothing in two days.
+Ya stops. ${blSpan(g) > 1 ? 'Ya, who has stopped for nothing since Ashfall.' : 'Ya, who has stopped for nothing in two days.'}
 
 "It lives in the split," she says. "I watched it eat a bone-elk whole. Antlers first."
 
@@ -786,7 +792,7 @@ You say nothing. All week you have done nothing smarter.`
     ah_enter: {
         id: 'ah_enter', title: 'The Ashen Hills', art: 'ashen_hills', place: PLACE.ah,
         enter: (g) => { g.flags.bl_region = 'ah'; return []; },
-        text: `Up out of the water, into the hills, and there the forest ends.
+        text: (g) => `Up out of the water, into the hills, and there the forest ends.
 
 It doesn't thin out. It ends, on a line you could mark with string, and past the line the hills are black: burnt ridges, ash to the depth of a hand, stumps standing in rows like bad teeth. Whatever burned here burned hot enough to run the stone; it lies in the gullies still, in glassy tongues. Nothing has grown since. The wind tastes of old smoke, and the sky above the ridges has the colour of a bruise on its third day.
 
@@ -794,7 +800,7 @@ Over all of it, and far nearer than it was, the dead tree takes up half the hori
 
 Ya refuses to look at it. Mei Lin can't look anywhere else.
 
-"Two days," says Ya. "Then we're under it." She spits into the ash. "And then I go home, and the three of you can die in there on your own."
+${blSpan(g) > 1 ? '"Two camps," says Ya. "Then we\'re under it."' : '"Two days," says Ya. "Then we\'re under it."'} She spits into the ash. "And then I go home, and the three of you can die in there on your own."
 
 She doesn't mean a word. All of you can hear that she doesn't, and it helps nobody.`,
         choices: [{ text: 'Climb.', time: 120, to: 'ah_hub' }],
@@ -1051,6 +1057,11 @@ She takes that in with her knife gone still. "And nobody asks whose daughter she
 "I'm writing it down."
 
 "You would." She walks on a few steps. "When we go home I'm supposed to put it all away again. The noise. Walking where I like." Her chin comes up. "I've decided I'm not going to. I haven't decided how."`;
+            if (n >= 5 && (n - 5) % 3) return [(g) => `Mei Lin keeps her eyes on the ground as she walks, one hand in the basket, sorting by touch. She holds up a root and asks what it is called among your people. You tell her. She repeats the word, badly, and rules that hers is better. Ahead, Ya stops to smell a tree, moves on, and does not explain. "She does that," Mei Lin says. "I've stopped asking. The answers were worse."
+
+${likesMei(g) ? 'She tucks a sprig of some bitter-smelling leaf into your coat pocket, for luck, she says, and leaves her hand on the pocket a little longer than the luck needs. Neither of you remarks on it.' : 'You say the tree probably had it coming. She snorts, covers it with a cough, and looks about to see whether the forest means to tell her mother.'}`, (g) => `You and Mei Lin have dropped to the back, where the talk is. She is counting what the basket holds against what the walking has cost her, and the walking is ahead. She asks whether everybody where you come from wears a white coat into a forest. You say only the ones who did not plan to be in one. She allows that. She says the coat is how she finds you among the trees, and that she would thank you not to let it go grey.
+
+${likesMei(g) ? 'Where the path narrows she walks close enough that her sleeve keeps brushing yours. The path widens again. Nobody seems to have told her sleeve.' : 'Up ahead Ya shouts some cheerful remark at a bird. Mei Lin shuts her eyes briefly, like a woman counting, and then laughs in spite of herself, quietly, into the basket.'}`][(n - 5) % 3 - 1](g); // v0.11.224 (owner pick TX2, TS6: V3a): the settled walk a sequence of three past the five beats
             return `For a while you walk and neither of you talks. That has become easy. She points out a herb that grows only where a beast has died; you point out a fungus that grows only where one is about to. She calls you morbid. You bring up pots and kettles. She adds that you hum when you cook, and that it gives you away; you say the humming is for the fire.
 
 ${likesMei(g) ? 'Somewhere along the way there is a fallen trunk to climb, and she takes your hand for it, and once over she keeps it. The matter goes unmentioned by both parties.' : 'She laughs, a real one, and then glances behind her in case somebody from Ashfall was near enough to hear.'}`;
@@ -1110,6 +1121,15 @@ Ya thinks about this with her whole face. "So. Everything I do."
 "Constantly."
 
 Ya walks on for a bit, scowling at the idea. "No wonder they throw things," she says.`;
+            if (n >= 5 && (n - 5) % 3) return [(g) => `Ya has decided that you walk too loudly, and has decided to fix it.
+
+${likesYa(g) ? 'She walks behind you with a hand flat between your shoulders, steering, and calls out each mistake as you make it. The hand stays after the mistakes run out. When you mention this she says a hunter never leaves a job half done, and moves it lower.' : 'She shows you how to put a foot down, twice, with the patience of a woman teaching a rock. Then she pronounces you hopeless, cheerfully, and trips you to prove it.'}
+
+${likesMei(g) && likesYa(g) ? '"The herb girl walks quieter than you," she adds. "I have been watching how she walks." A grin with every tooth in it. "Closely. She knows."' : ''}`, (g) => `Ya wants a fight today, and you are the nearest thing that talks.
+
+${likesYa(g) ? 'She argues that a spear beats a scholar, then that a scholar is no use in the cold, then that you would be warmer than you look. By the third she has an arm slung over your shoulders and has plainly forgotten which side she was on.' : 'She says scholars are soft. You agree. She says that was too easy and you ought to argue. You decline. She walks along scowling, delighted, working out what to accuse you of next.'}
+
+${likesMei(g) && likesYa(g) ? '"She gave me a salve," she says, lower. "For my feet. Did not look at me when she did it." She shows her teeth. "Looked at my feet a good while, though."' : ''}`][(n - 5) % 3 - 1](g); // v0.11.224 (TX2, V3a)
             return `Ya is in a good mood, and Ya's good moods are loud.
 
 ${likesYa(g) ? 'She walks near enough to knock her hip against yours every few steps, deliberately, and grins each time as if the joke were new. You catch her hand to make her stop. She turns it over, threads her fingers through yours and walks on, like someone whose plan has worked.' : 'She tells you a long tale about a bear, which may be true, and finishes it with a punch on your arm, which certainly is.'}
@@ -1177,7 +1197,27 @@ Mei Lin picks it out with her chopsticks, gravely, and sets it on the trunk betw
 
 "It can be both," Ya says, and Mei Lin's mouth goes tight at the corners with the effort of not laughing, and Ya watches her not do it with the patience of something sitting by a burrow.
 
-${likesMei(g) && likesYa(g) ? `Later, lying down, the ${byForm(g, 'three', 'three', 'four')} of you leave less room between the bedrolls than last night, and nobody remarks on the arithmetic.` : `Later the fire sinks, and the dripping goes on, and you all lie awake listening to each other not sleeping.`}`], 'bl_fireside:dw');
+${likesMei(g) && likesYa(g) ? `Later, lying down, the ${byForm(g, 'three', 'three', 'four')} of you leave less room between the bedrolls than last night, and nobody remarks on the arithmetic.` : `Later the fire sinks, and the dripping goes on, and you all lie awake listening to each other not sleeping.`}`, (g) => `Mei Lin has found something to do about the damp, which is to hang every wet thing in camp along Ya's spear, propped across two branches. Ya watches her own weapon become a clothes pole and, for once, has no remark ready.
+
+"It was the only straight thing here," says Mei Lin.
+
+"It kills things."
+
+"Tonight it dries things. It may kill them in the morning."
+
+Ya turns to you for a ruling. You are discovered to be very busy with the fire. She thinks it over, pulls off her wet jacket and hangs it up with the rest, and Mei Lin moves it one hand to the left, where it will drip on nobody.
+
+${likesMei(g) && likesYa(g) ? `Later the ${byForm(g, 'three', 'three', 'four')} of you bed down in a single row on the one dry trunk, with no gap in it, and nobody proposes a second trunk.` : `Later the fire sinks to red under the hung washing, the wood drips on, and whoever sleeps does it in turns.`}`, (g) => `Ya has decided that Mei Lin should learn to spit. A hunter who cannot spit, she explains, cannot tell the wind, insult a rival, or get a beetle out of her mouth. She demonstrates into the black water: one long, clean arc.
+
+"No," says Mei Lin.
+
+"Scholar spits."
+
+"I don't," you say.
+
+"He doesn't," says Mei Lin, with the pride of a woman defending the last civilised man in the swamp. Then, once Ya has turned to the fire, she leans a little way out over the edge of the raft and tries it, once, quietly. It goes nowhere. You see nothing. Ya, with her back still turned, says, "Further from the teeth."
+
+${likesMei(g) && likesYa(g) ? `Later, when the fire is low, the ${byForm(g, 'three', 'three', 'four')} of you settle in a heap that nobody arranged, and Mei Lin, wedged at its centre, complains only about Ya's feet.` : `Later the fire burns low, something far out breaks the water and goes under again, and all of you count drips until you lose count.`}`], 'bl_fireside:dw');
             return `A blue fire, and the dead tree over it. Not tonight, but soon now, you walk inside.
 
 ${both(g) ? 'Ya has put herself between you and Mei Lin with an arm hooked round each neck, and nobody shifts her. Mei Lin\'s head rests on Ya\'s shoulder. You doubt she knows she laid it there.' : onlyYa(g) ? 'Ya sits jammed against your side with a hand on your knee and no shame whatever. Across the fire Mei Lin makes a point of not seeing. She may not mind. She may mind very much.' : onlyMei(g) ? 'Mei Lin has sat near enough for her shoulder to rest on yours. From across the fire Ya beams at you both like a matchmaker collecting on a bet.' : `${byForm(g, 'The three', 'The three', 'The four')} of you sit in a loose ring, as people do who have come through things together and have no name yet for what it has made of them.`}
@@ -1365,20 +1405,25 @@ ${likesMei(g) ? `Mei Lin does not pretend to be asleep tonight. She gets up, bri
             lines.push(out.length ? `Breakfast. ${out[0]}` : 'No breakfast. Ya holds out a grub on the flat of her knife. You decline. For now.');
             return lines;
         },
-        text: (g) => ({
+        text: (g) => (blN(g) > 0 && BL_QUIET[bday(g)]?.[Math.min(blN(g), 2) - 1]) // RV1 (MP2): the second and third mornings each their own
+             || ({ // v0.11.224 (TX2, DN12): the quiet mornings within a story day their own line
             2: 'Morning on the Root Road. Ya is up already, crouched on the root with her nose to the wind. "Wyrm country today," she says. "Eat. If it swallows you, be heavy. Takes it longer."',
             3: 'A grey morning on grey water, with mist so thick that the other end of your own raft has gone. Mei Lin is braiding her hair with her jaw set: frightened, and declining to be.',
             4: 'At first light you leave the Drowned Wood, wading up out of the last of the water toward the hills. Behind you the mist settles over the trunks like a lid going on.',
-            5: 'The last morning before the tree. It has the whole sky now; even the sunrise has to go round it. Nobody has much to say. Ya sits whetting her spear until the sound is part of the morning.',
+            5: (blSpan(g) > 1 ? 'Morning, and nothing left ahead but the tree.' : 'The last morning before the tree.') + ' It has the whole sky now; even the sunrise has to go round it. Nobody has much to say. Ya sits whetting her spear until the sound is part of the morning.',
         }[bday(g)] || 'Another morning, grey and cold. The dead tree waits. It has had centuries of practice.'),
         choices: [
-            { text: 'Get moving.', show: (g) => bday(g) === 2, to: 'rr_hub' },
-            { text: 'Get moving.', show: (g) => bday(g) === 3, to: 'dw_hub' },
+            { text: 'Get moving.', show: (g) => bday(g) === 2 && blN(g) === 0, to: 'rr_hub' },
+            { text: 'Get moving.', show: (g) => bday(g) === 3 && blN(g) === 0, to: 'dw_hub' },
             { text: 'Climb out of the water into the hills.', show: (g) => bday(g) === 4 && region(g) === 'dw', to: 'ah_enter' },
-            { text: 'Get moving.', show: (g) => bday(g) >= 5, to: 'ah_hub' },
+            { text: 'Get moving.', show: (g) => bday(g) >= 5 && blN(g) === 0, to: 'ah_hub' },
             // v0.11.222 (J2, MH): the quiet mornings within a story day (appended, so the marked choices keep their places)
-            { text: 'Get moving.', show: (g) => bday(g) === 1, to: 'rr_hub' },
-            { text: 'Get moving.', show: (g) => bday(g) === 4 && region(g) === 'ah', to: 'ah_hub' },
+            { text: (g) => (blSpan(g) > 1 ? QUIET_LABEL : 'Get moving.'), show: (g) => bday(g) === 1, to: 'rr_hub' },
+            { text: (g) => (blSpan(g) > 1 ? QUIET_LABEL : 'Get moving.'), show: (g) => bday(g) === 4 && region(g) === 'ah', to: 'ah_hub' },
+            // v0.11.224 (owner pick TX2, TS6: DN12): the other quiet mornings stay at their camp (appended, so the marked choices keep their places)
+            { text: QUIET_LABEL, show: (g) => bday(g) === 2 && blN(g) > 0, to: 'rr_hub' },
+            { text: QUIET_LABEL, show: (g) => bday(g) === 3 && blN(g) > 0, to: 'dw_hub' },
+            { text: QUIET_LABEL, show: (g) => bday(g) >= 5 && blN(g) > 0, to: 'ah_hub' },
         ],
     },
 

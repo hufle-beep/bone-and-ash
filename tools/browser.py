@@ -706,12 +706,14 @@ def plan_rows(b, url):
 
 def week_read(save, card):
     """v0.11.214 (owner pick RD1): the save with every line its week would show (one `card` on the plan, the evenings' first way on,
-    as the forecast takes them) noted as read, from the game's own code, so the plan runs as before RD1."""
+    as the forecast takes them) noted as read, from the game's own code, so the plan runs as before RD1. v0.11.224 (TX2, TS6): and past a
+    morning the plan stops on ('left': a night or morning whose text is new to the save, as the long calendar's new texts are), its first
+    way on, as the browser run takes it."""
     js = ("import { SCENES } from './js/story/prologue.js'; import { sceneView } from './js/core/story.js';"
           "import { noteLines } from './js/story/again.js'; import { deserialize, serialize } from './js/core/game.js';"
           "import * as Wk from './js/core/week.js';"
           "const g = deserialize(process.argv[1], { force: true }); const c = JSON.parse(JSON.stringify(g)); Wk.planEnsure(c); Wk.planSet(c, process.argv[2], 1);"
-          "for (let k = 0; k < 60; k++) { const r = Wk.runWeek(c, SCENES); if (r.stop !== 'read') { if (r.stop !== 'evening') break; const i = Wk.eveningPick(c, SCENES); if (i == null) break; Wk.storyTap(c, SCENES, i); Wk.afterStory(c, SCENES); continue; } const u = Wk.readProbe(c, SCENES); noteLines(g, u.lines); noteLines(c, u.lines); }"
+          "for (let k = 0; k < 60; k++) { const r = Wk.runWeek(c, SCENES); if (r.stop !== 'read') { if (r.stop !== 'evening' && r.stop !== 'left') break; const i = Wk.eveningPick(c, SCENES); if (i == null) break; Wk.storyTap(c, SCENES, i); Wk.afterStory(c, SCENES); continue; } const u = Wk.readProbe(c, SCENES); noteLines(g, u.lines); noteLines(c, u.lines); }"
           "process.stdout.write(serialize(g));")
     return subprocess.run(['node', '--input-type=module', '-e', js, save, card], cwd=ROOT, capture_output=True, text=True, check=True).stdout
 

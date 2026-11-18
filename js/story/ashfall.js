@@ -4,8 +4,8 @@
  */
 import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, d6, awardYukiFightXp, jamesHpMax, nightRest, nightTo, canFly } from '../core/game.js';
 import { FW } from './flight_texts.js'; // v0.11.195 (owner picks F1, D1)
-import { set, day, hour, daily, markDaily, forestScale, villageScale, grow, eatBest, pantry, foodCount, byForm, byDay, dayReply } from './common.js';
-import { storyNight, weekMorning } from '../core/calendar.js'; // v0.11.203 (owner pick T1, TS1): the long calendar's weeks
+import { set, day, hour, daily, markDaily, forestScale, villageScale, grow, eatBest, pantry, foodCount, byForm, byDay, dayReply, seqText } from './common.js';
+import { storyNight, weekMorning, longCal, tributeLeft, daysWord, DaysWord } from '../core/calendar.js'; // v0.11.224 (TX2, TS6): the counts // v0.11.203 (owner pick T1, TS1): the long calendar's weeks
 import { potLine } from './kitchen.js'; // v0.11.181 (SP1, PS)
 
 /* v0.11.136 (owner pick NC1, NT1's push 2): replies by day (js/core/lines.js dayReply): the first text is the old reply, the rest Fable's, one for each later day of a Coil. */
@@ -108,25 +108,60 @@ export const ASHFALL = {
             if (daily('supper')(g)) { markDaily(g, 'supper'); eat(g, 30); return ['Millet, greens and a little smoked fish: +30 satiety.']; }
             return [];
         },
+        // v0.11.224 (owner pick TX2, TS6: V3a): each story day's supper a sequence of three on the long calendar (lines.js seqText), the first the old
         text: (g) => (vday(g) === 1
-            ? `${g.flags.ignored
+            ? seqText(g, 'supper:4', [(g) => `${g.flags.ignored
                 ? 'You ask your way to her house. On the doorstep you apologise, in full, without one joke. She studies you until the silence has made its point, then steps aside, which you did not deserve, and sets a bowl before you, which you deserved even less.'
                 : 'Mei Lin\'s house has two rooms, a herb loft, and a mother: a tiny, fierce woman who looks you over once and puts more millet in the pot without a word.'}
 
-${byForm(g, `"Three days," the mother says, to the pot, ladling. "Three days, and they come up that road. Every year of my life." She gives you the largest piece of fish and looks at Yuki, then at you. "You will sleep in the loft. It is not proper. It is necessary." Her eyes rest on Yuki a while longer, and she inclines her head to her, by very little. "The spirit-beast will sleep where it chooses. One does not command such creatures."
+${byForm(g, `"${DaysWord(tributeLeft(g))}," the mother says, to the pot, ladling. "${DaysWord(tributeLeft(g))}, and they come up that road. Every year of my life." She gives you the largest piece of fish and looks at Yuki, then at you. "You will sleep in the loft. It is not proper. It is necessary." Her eyes rest on Yuki a while longer, and she inclines her head to her, by very little. "The spirit-beast will sleep where it chooses. One does not command such creatures."
 
-Yuki, on the warm stove, closes her eyes in complete agreement.`, `"Three days," the mother says, to the pot, ladling. "Three days, and they come up that road. Every year of my life." She gives you the largest piece of fish and looks at Yuki, who is lying along the whole of the far wall, then at you. "You will sleep in the loft. It is not proper. It is necessary." Her eyes rest on Yuki a while longer, and she inclines her head to her, lower than she has to anyone tonight. "The spirit-beast will sleep where it chooses. One does not command such creatures. One moves the bench."
+Yuki, on the warm stove, closes her eyes in complete agreement.`, `"${DaysWord(tributeLeft(g))}," the mother says, to the pot, ladling. "${DaysWord(tributeLeft(g))}, and they come up that road. Every year of my life." She gives you the largest piece of fish and looks at Yuki, who is lying along the whole of the far wall, then at you. "You will sleep in the loft. It is not proper. It is necessary." Her eyes rest on Yuki a while longer, and she inclines her head to her, lower than she has to anyone tonight. "The spirit-beast will sleep where it chooses. One does not command such creatures. One moves the bench."
 
-Yuki, with the stove at her back and most of the floor under her, closes her eyes in complete agreement.`, `"Three days," the mother says, to the pot, ladling. "Three days, and they come up that road. Every year of my life." She gives you the largest piece of fish. The next largest goes to Yuki, who has been seated at the head of the table, where the ears and the tail can be kept in view. "You will sleep in the loft," she tells you. "It is not proper. It is necessary." Then she inclines her head to Yuki, deeper than she has for anyone at this table. "The honoured one will sleep where she chooses. One does not assign a mat to such a guest."
+Yuki, with the stove at her back and most of the floor under her, closes her eyes in complete agreement.`, `"${DaysWord(tributeLeft(g))}," the mother says, to the pot, ladling. "${DaysWord(tributeLeft(g))}, and they come up that road. Every year of my life." She gives you the largest piece of fish. The next largest goes to Yuki, who has been seated at the head of the table, where the ears and the tail can be kept in view. "You will sleep in the loft," she tells you. "It is not proper. It is necessary." Then she inclines her head to Yuki, deeper than she has for anyone at this table. "The honoured one will sleep where she chooses. One does not assign a mat to such a guest."
 
-"The stove," says Yuki, who has had her eye on it since she sat down. The mother nods, as one authority to another.`)}`
-            : `Second supper at Mei Lin's. Her mother no longer watches you as she would a fox in the henhouse. She watches you as she would a fox she might find a use for.
+"The stove," says Yuki, who has had her eye on it since she sat down. The mother nods, as one authority to another.`)}`, (g) => `${g.flags.ignored
+    ? 'The door opens before you knock, which you take for progress until you see it was the mother who opened it. Mei Lin has not mentioned the apology since she heard it. She has put your bowl where it stood the night before, and you are learning to read that.'
+    : 'The house has made room for you by moving one basket. There is a bowl at your place before you sit, and the mother no longer looks you over; she has seen what there is.'}
+
+${byForm(g, `You asked to help with the pot. Mei Lin's mother weighed it as a magistrate would a petition, and granted you the greens. She stands at your elbow while you cut them. "Thinner," she says. Of the garlic you found in her own store and fried first, she says, "This is not how it is done," and takes a second helping. Mei Lin watches that happen and says nothing, with great enjoyment. The fish her mother divides herself. The belly piece goes onto a saucer, and the saucer onto the stove, set down with both hands. "For the spirit-beast," she says, to the room, in case anyone had thought it an accident.
+
+Yuki eats it facing the wall, as an offering should be eaten. *She's the only one here who understands rank.*`, `You asked to help with the pot. Mei Lin's mother weighed it as a magistrate would a petition, and granted you the greens. She stands at your elbow while you cut them. "Thinner," she says. Of the garlic you found in her own store and fried first, she says, "This is not how it is done," and takes a second helping. Mei Lin watches that happen and says nothing, with great enjoyment. The fish her mother divides herself. The belly piece and the two next to it go into the big serving dish, and the dish onto the floor by the wall, set down with both hands. "For the spirit-beast," she says, to the room, in case anyone had thought it an accident.
+
+Yuki, who occupies the wall and the place where the bench used to stand, eats without lifting her chin off her paws. *She's the only one here who understands rank.*`, `You asked to help with the pot. Mei Lin's mother weighed it as a magistrate would a petition, and granted you the greens. She stands at your elbow while you cut them. "Thinner," she says. Of the garlic you found in her own store and fried first, she says, "This is not how it is done," and takes a second helping. Mei Lin watches that happen and says nothing, with great enjoyment. The fish her mother divides herself. The belly piece goes to the head of the table, set down with both hands. "For the honoured one."
+
+"The greens are his," Yuki tells her, eating them. "He is permitted near food. It is his one use." The mother receives this as she would a ruling, and hands you back the knife.`)}`, (g) => `${g.flags.ignored
+    ? 'You are let in without a word, and tonight the silence is only how this house eats. Mei Lin hands you the bowls to carry to the table. It is the one job a guest is never given, and you understand that you have been moved to a different list.'
+    : 'By now you know which board by the door complains and which stool is yours. It is the low one. The mother watches you take it unprompted and adds millet to the pot, as she has each night, still with no comment.'}
+
+${byForm(g, `What this house owes the post stands by the door in two sacks, weighed and tied. Mei Lin's mother has weighed them again since morning; the steelyard is still out. "The Sect's measure is larger than ours," she says, serving the fish. "Each year it is a little larger. One does not remark on it." "One remarks on it constantly," says Mei Lin. "One just does it indoors." She glances at the shutter all the same. "Indoors," her mother says, "is where it will stay." Yuki has chosen the nearer sack to sleep on. The mother looks at this, sets the Sect's displeasure against a spirit-beast's, and leaves her there.
+
+*It's lumpy,* Yuki reports. *Tell them I said so.*`, `What this house owes the post stands by the door in two sacks, weighed and tied. Mei Lin's mother has weighed them again since morning; the steelyard is still out. "The Sect's measure is larger than ours," she says, serving the fish. "Each year it is a little larger. One does not remark on it." "One remarks on it constantly," says Mei Lin. "One just does it indoors." She glances at the shutter all the same. "Indoors," her mother says, "is where it will stay." Yuki lies across the doorway with both sacks behind her, so that anyone wanting them must first take the matter up with her. The mother looks at this arrangement and finds nothing in it to correct.
+
+*Tell her I charge less than the Sect,* Yuki sends, and yawns, which is a lot of teeth to show a household at supper.`, `What this house owes the post stands by the door in two sacks, weighed and tied. Mei Lin's mother has weighed them again since morning; the steelyard is still out. "The Sect's measure is larger than ours," she says, serving the fish. "Each year it is a little larger. One does not remark on it." "One remarks on it constantly," says Mei Lin. "One just does it indoors." She glances at the shutter all the same. "Indoors," her mother says, "is where it will stay." Yuki, at the head of the table, has been listening with her ears forward.
+
+"How much larger," she asks. The mother tells her, to the handful. Yuki nods and says no more, and you, who know that nod, eat your fish and feel briefly sorry for the measure.`)}`])
+            : seqText(g, 'supper:5', [(g) => `${longCal(g) ? 'Another supper at Mei Lin\'s.' : 'Second supper at Mei Lin\'s.'} Her mother no longer watches you as she would a fox in the henhouse. She watches you as she would a fox she might find a use for.
 
 Tonight she talks. Of Mei Lin's father, who had a spirit root, and who went up the road with the collectors when Mei Lin was six. Of the letter that came down four years later, two words long: *Tribulation. Honoured.* Of the box they buried, which had nothing in it.
 
 Mei Lin clears the bowls through all of it, as loudly as bowls can be cleared. When her mother has finished she says, with her back to the room, "He'd have liked you. He was an idiot too."
 
-"*Mei Lin.*" Her mother says it once, and it closes like a door. "You do not speak so of your father." Mei Lin does not apologise. She does not stop smiling either, and she does not look at her mother again until the meal is over.`),
+"*Mei Lin.*" Her mother says it once, and it closes like a door. "You do not speak so of your father." Mei Lin does not apologise. She does not stop smiling either, and she does not look at her mother again until the meal is over.`, (g) => `Supper at Mei Lin's has acquired rules, and you have learned most of them by breaking them. You sit where you are put. You thank the mother for the food once, since twice would suggest surprise.
+
+She has not spoken of her husband since the night of the empty box. She asks about you now, one question a meal, placed with care. Tonight: what a man does who studies mushrooms. You tell her. It is not a short answer, and you hear yourself getting interested.
+
+She hears you out in silence. "So," she says at the end. "You know which ones kill." You admit that this is a fair summary of your education. She nods and serves you more greens, satisfied that you have a trade.
+
+"He knows which ones glow, too," says Mei Lin. "He told me. He was so pleased about it." Then she catches her mother's eye and takes a sudden interest in her millet.`, (g) => `The mother has let you cook. Nobody in the house treats this as a small matter, least of all her: she stood in the doorway for the whole of it with her arms folded and corrected nothing, which Mei Lin says has never happened to anyone.
+
+It is the same millet, greens and fish as every night. You toasted the grain dry before the water went in and flaked the fish through at the end, and that is all you did. The mother eats one mouthful, puts her chopsticks down, and looks at the bowl as she might at a neighbour's child come home wearing silk. Then she finishes it, at her usual pace, in silence.
+
+"My husband could not boil water," she says at last. She has not named him since the night she told you of the letter, and she says no more now. She passes her bowl back to be filled again.
+
+"Twenty-six years," Mei Lin says to you, filling it, "and she has never once asked me for seconds."
+
+"You have never once toasted the millet," says her mother. Mei Lin opens her mouth, finds nothing in it, and gives you a look that says this is your doing. It is.`])),
         choices: [
             { text: 'Climb out onto the roof with Mei Lin and watch the stars come out.', do: (g) => { bumpRel(g, 'Mei Lin', 3, 4); return []; }, time: 60, to: 'supper_roof' },
             { text: 'Help her mother with the dishes, and listen.', do: (g) => { bumpRel(g, 'Village', 3, 0); bumpRel(g, 'Mei Lin', 2, 0); bumpRel(g, 'Mother', 2, 0); return [DR_DISHES(g)]; }, time: 60, to: 'village_night' }, // v0.11.139 (owner pick MW1, MB): Mother +2
@@ -147,7 +182,7 @@ She gives the patch of dark her full and serious attention. "It looks cold."
 "It was warm. We grew our houses out of trees. They sang back when you sang to them." You stop. "Sorry. That sounds insane."
 
 "It sounds," she says, "like the only thing anyone has told me in years that I wanted to be true."`
-            : `Second night on the roof. This time she brings the plum wine, and does not ask whether you want any.
+            : `${longCal(g) ? 'Up on the roof again.' : 'Second night on the roof.'} This time she brings the plum wine, and does not ask whether you want any.
 
 She tells you what the tribute costs, in numbers: so many baskets of grass, so many sacks of millet, so many children tested for roots. Which families hid their children last year, and which of those were caught. Her voice is perfectly level through all of it. Her hands are not.
 
@@ -228,11 +263,16 @@ Mei Lin stands in the lane, soot across her face, and looks at what is left. She
             lines.push('Breakfast at Mei Lin\'s: rice gruel and pickles, +20 satiety.');
             return lines;
         },
-        text: (g) => (vday(g) === 2
+        // v0.11.224 (owner pick TX2, TS6: DC7–DC9): the long calendar's first week has its own mornings (story day 6's showed before); the counts from the calendar
+        text: (g) => (vday(g) === 1
+            ? `Morning in the herb loft: mint, hay, and from below the sound of Mei Lin's mother sweeping a floor she swept last night.
+
+There are ${daysWord(tributeLeft(g))} left before the tribute. Ashfall is spending them on deciding what you are, and is in no hurry about it: you cross the lane, and forty houses watch you as they would watch weather coming over the ridge. Yuki has been ruled on already. ${byForm(g, 'A saucer by the door holds fish scraps, and nobody admits to putting it there.', 'A whole smoked fish sits by the door on somebody\'s good plate, and nobody admits to putting it there.', 'A bowl of fish sits by the door with chopsticks laid across it, and nobody admits to putting it there.')}`
+            : vday(g) === 2
             ? `Ashfall in the morning: smoke from forty chimneys, a rooster who is plainly being paid for this, and children watching you from behind every wall.
 
-Two days until the collectors. The village is being ordinary as loudly as it can. You have those two days to make sure that when the Crimson Lotus walks up that road, what waits at the top of it is considerably stronger than one confused mycologist and Yuki. The mycologist is where the work is.`
-            : `The last day. Tomorrow at sunrise, the collectors.
+${DaysWord(tributeLeft(g))} until the collectors. The village is being ordinary as loudly as it can. You have those ${daysWord(tributeLeft(g))} to make sure that when the Crimson Lotus walks up that road, what waits at the top of it is considerably stronger than one confused mycologist and Yuki. The mycologist is where the work is.`
+            : `${tributeLeft(g) <= 1 ? 'The last day. Tomorrow at sunrise, the collectors.' : 'The last week. When it runs out, at sunrise, the collectors.'}
 
 All of Ashfall is up early, and all of it has found some errand that leads past Mei Lin's house, to see whether you are still there. You are. ${g.flags.loft_burned ? 'What is left of the loft is still smoking a little.' : byForm(g, 'Yuki is sunning herself on the doorstep like a small white guard dog.', 'Yuki is sunning herself across the doorstep like a large white guard dog.', 'Yuki is sunning herself on the doorstep, eyes shut, like a white guard dog in a high black collar.')}`),
         choices: [{ text: 'Out into the village.', to: 'ashfall' }],
@@ -246,7 +286,7 @@ All of Ashfall is up early, and all of it has found some errand that leads past 
             const when = byDay(g, [0, 1], 'ashfall') // NT1 (Fable's draft): a second set of the times of day
                 ? (h < 11 ? `Morning. Smoke going straight up, and the sound of somebody splitting wood as if it had wronged him.` : h < 15 ? `Midday. The well rope is too hot to hold and the dogs have gone under the houses.` : h < 18 ? `Late afternoon. The shadows of the houses have reached the far side of the street, and the cooking smells begin.` : `Dusk. Shutters closing one after another down the street, like a sentence being finished.`)
                 : (h < 11 ? 'Morning. Ashfall is up, and already at work.' : h < 15 ? 'Midday, and hot. The chickens have stopped trying.' : h < 18 ? 'Late afternoon: long shadows, and woodsmoke from the cooking fires.' : 'Dusk. Lamps are being lit behind the shutters.');
-            return `${when} ${vday(g) === 3 ? 'The red banners on the tribute post hang dead still. Tomorrow.' : 'The tribute is two days off.'}
+            return `${when} ${vday(g) === 3 ? (tributeLeft(g) <= 1 ? 'The red banners on the tribute post hang dead still. Tomorrow.' : 'The red banners on the tribute post hang dead still. Within the week.') : `The tribute is ${daysWord(tributeLeft(g))} off.`}
 
 ${[pantry(g), g.james.satiety < 30 ? 'You are hungry.' : '', g.james.hp < jamesHpMax(g) * 0.5 ? 'You are hurt.' : ''].filter(Boolean).join(' ')}`; // v0.11.169 (RV1, L8): no double space when a clause is empty
         },
@@ -254,14 +294,16 @@ ${[pantry(g), g.james.satiety < 30 ? 'You are hungry.' : '', g.james.hp < jamesH
             { text: 'Visit Old Wen.', show: (g) => !g.flags.elder && !late(g), time: 30, do: set('elder'), to: 'elder' },
             { text: 'Go to the coughing house. A child is sick.', show: (g) => !g.flags.healed_try && !late(g), time: 30, to: 'heal' },
             { text: 'Hunt the ironhide boar past the oak hollow.', show: (g) => !g.flags.village_hunt && hour(g) < 15, time: 90, to: 'village_hunt' },
-            { text: 'Gather herbs with Mei Lin on the slopes.', show: (g) => daily('slopes')(g) && hour(g) < 15, time: 30, to: 'herb_slopes' },
+            { text: 'Gather herbs with Mei Lin on the slopes.', show: (g) => daily('slopes')(g) && hour(g) < 15 && (!longCal(g) || vday(g) >= 2), // RV1 (H3a): not in the long calendar's first week
+              time: 30, to: 'herb_slopes' },
             { text: 'Run a clinic: the sick and the hurt line up at the well.', show: (g) => !!g.flags.healed_try && !late(g), time: 20, to: 'clinic' },
             { text: 'Bone workshop: make things the village needs.', show: (g) => !late(g), time: 10, to: 'workshop' },
             { text: 'Drill the village hunters. They\'ll be standing next to you at the post.', show: (g) => !late(g), time: 10, to: 'drill' }, // v0.11.169 (CA1, LB): this and the spearheads said "tomorrow" on Day 5 too
             { text: 'Sit with Old Wen and listen.', show: (g) => !!g.flags.elder && daily('wen')(g) && !late(g), time: 20, to: 'wen_lesson' },
             { text: 'Hunt beyond the oak hollow.', show: (g) => daily('far')(g) && hour(g) < 16, time: 60, to: 'far_hunt' },
             { text: 'Scout the tribute road.', show: (g) => vday(g) === 3 && !g.flags.scouted_try && hour(g) < 17, time: 30, to: 'scout' },
-            { text: 'Walk with Mei Lin at sunset.', show: (g) => daily('walk')(g) && hour(g) >= 15 && hour(g) < 20, time: 30, to: 'mei_walk' },
+            { text: 'Walk with Mei Lin at sunset.', show: (g) => daily('walk')(g) && hour(g) >= 15 && hour(g) < 20 && (!longCal(g) || vday(g) >= 2), // RV1 (H3a)
+              time: 30, to: 'mei_walk' },
             { text: 'Eat at the communal pot.', show: (g) => daily('pot')(g) && g.james.satiety < 80 && !late(g), time: 30, do: (g) => { markDaily(g, 'pot'); eat(g, 25); return [potLine(g, 'ashfall') ?? 'Barley and bean stew, ladled by a woman who addresses you as "honoured guest" in the tone of someone who has not yet ruled on whether you are one: +25 satiety.']; }, to: 'ashfall' }, // v0.11.181 (SP1, PS): from the village's 90, potLine
             { text: 'Eat something from the hammerspace.', show: (g) => foodCount(g) > 0 && g.james.satiety < 85, time: 15, do: (g) => eatBest(g, { fire: true }), to: 'ashfall' },
             { text: 'Chew a ghost-gill (+8 HP).', show: (g) => hasItem(g, 'ghost_gill') && g.james.hp < jamesHpMax(g), do: (g) => { addItem(g, 'ghost_gill', -1); g.james.hp = Math.min(jamesHpMax(g), g.james.hp + 8); return ['+8 HP. The flavour is still cellar.']; }, to: 'ashfall' },
@@ -280,7 +322,7 @@ ${[pantry(g), g.james.satiety < 30 ? 'You are hungry.' : '', g.james.hp < jamesH
 "You don't need any of this," she says, without looking at you. "Why are you here?"
 
 ${g.flags.mei_bruised ? 'Her split lip has scabbed over. She catches you looking at it, and stares back until you look somewhere else.' : ''}`
-            : `It is the last day on the slopes before the tribute. She cuts double what she needs and offers no reason. You ask for none. It needs no saying: should tomorrow go wrong, she will have no next season to cut in. Halfway along the terrace, with her back to you and the knife still working, she asks again what a man who needs none of this is doing up here.
+            : `${tributeLeft(g) <= 1 ? 'It is the last day on the slopes before the tribute. She cuts double what she needs and offers no reason. You ask for none. It needs no saying: should tomorrow go wrong, she will have no next season to cut in.' : 'It is the last week on the slopes before the tribute. She cuts double what she needs and offers no reason. You ask for none. It needs no saying: should the tribute go wrong, she will have no next season to cut in.'} Halfway along the terrace, with her back to you and the knife still working, she asks again what a man who needs none of this is doing up here.
 
 Her father comes up again, briefly. He would walk her up here and get the name of every plant wrong, on purpose, so that she had to put him right.`),
         choices: [
@@ -378,20 +420,30 @@ Mortal Vessel. Foundation. Core Formation. The realms go up like a ladder into c
         enter: set('scouted_try'),
         text: (g) => (canFly(g) ? FW.scout : `Out of Ashfall the road goes up toward the mountains, one long switchback after another. A waystation sits at the halfway turn: a bench under a roof, a shrine with a red lotus cut into the stone, and dust that your threads flag. The marks in it are fresh. Somebody has been standing here, watching the village.`), // v0.11.195 (F1, D1: SC)
         choices: [
-            { text: 'Read the ground. Who\'s been here, how many, how long?', check: { skill: 'GU', dc: 4 }, time: 150, do: (g) => { g.flags.scouted = true; return ['Two watchers, three days running, in outer-sect boots. By tomorrow they will know exactly what you are, or believe they do. Good. That can be used.']; }, failDo: () => ['The marks run into one another. Somebody watched. The ground says no more.'], to: 'ashfall' },
+            { text: 'Read the ground. Who\'s been here, how many, how long?', check: { skill: 'GU', dc: 4 }, time: 150, do: (g) => { g.flags.scouted = true; return [tributeLeft(g) <= 1 ? 'Two watchers, three days running, in outer-sect boots. By tomorrow they will know exactly what you are, or believe they do. Good. That can be used.' : 'Two watchers, three days running, in outer-sect boots. Before the tribute comes due they will know exactly what you are, or believe they do. Good. That can be used.']; /* RV1 (MF2) */ }, failDo: () => ['The marks run into one another. Somebody watched. The ground says no more.'], to: 'ashfall' },
         ],
     },
 
     mei_walk: {
         id: 'mei_walk', title: 'Sunset', art: 'roof', place: `${P} — the edge of the barley`,
         enter: (g) => { markDaily(g, 'walk'); return []; },
+        // v0.11.224 (owner pick TX2, TS6: V3a): a sequence of three on the long calendar's week; the last sunset on the eve only
         text: (g) => (vday(g) === 2
-            ? `You walk the edge of the field while the sun goes down red. She walks near enough that your sleeves brush, and gives no sign of having noticed. ${byForm(g, 'Yuki walks between you at intervals, a chaperone with a grudge.', 'Yuki walks between you wherever the path is wide enough and in some places where it is not, a chaperone with a grudge and the means to enforce it.', 'Yuki walks three paces behind with her hands clasped at her back, a chaperone with a grudge and an excellent view.')}
+            ? seqText(g, 'mei_walk:5', [(g) => `You walk the edge of the field while the sun goes down red. She walks near enough that your sleeves brush, and gives no sign of having noticed. ${byForm(g, 'Yuki walks between you at intervals, a chaperone with a grudge.', 'Yuki walks between you wherever the path is wide enough and in some places where it is not, a chaperone with a grudge and the means to enforce it.', 'Yuki walks three paces behind with her hands clasped at her back, a chaperone with a grudge and an excellent view.')}
 
 ${byForm(g, `"When it goes bad at the post," she says, "and it will, take the cat and go. Don't be a hero for a village that isn't yours."`, `"When it goes bad at the post," she says, "and it will, take that great white beast of yours and go. Don't be a hero for a village that isn't yours."`, `"When it goes bad at the post," she says, "and it will, take her and go." She nods back at Yuki without turning round. "Don't be a hero for a village that isn't yours."`)}
 
-"Bit late for that."`
-            : `The last sunset before the tribute. This time she does not talk at all. Halfway along the field edge she takes hold of your hand, and she does not let go of it until the lamps come on.`),
-        choices: [{ text: 'Walk her home.', do: (g) => { bumpRel(g, 'Mei Lin', 3, meiRel(g).a >= 8 ? 5 : 4); return [vday(g) === 2 ? `You walk her to her mother's door in the last of the red light. On the step she turns, looks at you as though there were something else she meant to say, and says "Idiot," very quietly, in its place. ${byForm(g, 'Yuki pushes past you both and goes in first, as though the house were hers. By now it may be.', 'Yuki goes in first, shoulders turned to clear the doorposts, as though the house were hers. By now it may be; nobody inside is going to raise the matter.', 'Yuki says "Excuse me" to the space between you, walks through it, and goes in first, as though the house were hers. By now it may be.')}` : `She does not let go at the door, either. She stands there with your hand in hers and the lamplight on her face and says, "Tomorrow, whatever happens, I'm glad you came out of that forest." Then she goes in, quickly, before you can answer, and you stand in the lane for a while, learning how to breathe again.`]; }, time: 60, to: 'ashfall' }],
+"Bit late for that."`, (g) => `The sun goes down behind the barley and takes its time about it. She sets the pace this evening, a slow one, and she has not raised the post again; it comes along regardless, at her other shoulder. ${byForm(g, 'On your shoulder Yuki faces backwards, so that somebody is watching the road.', 'Yuki paces the furrow below the path, her back level with your hip, and the barley leans away from her.', 'Yuki follows at a distance she has measured: near enough to hear, far enough to deny it.')}
+
+${byForm(g, `"Mother asked what we find to talk about out here," she says. "I said herbs. So if she asks you, it was herbs, and the cat will say the same."`, `"Mother asked what we find to talk about out here," she says. "I said herbs. So if she asks you, it was herbs, and that great white beast of yours will say the same."`, `"Mother asked what we find to talk about out here," she says. "I said herbs. So if she asks you, it was herbs, and she will say the same." She jerks her chin over her shoulder at Yuki.`)}
+
+"Which herbs? She'll ask."`, (g) => `From the field edge you can see the road, which the men swept this afternoon for the collectors. In the red light it is the cleanest thing in Ashfall. She looks at it for most of the walk and at you for the rest. ${byForm(g, 'Yuki has gone ahead along the furrow, a white tail above the barley, hunting mice and scandal.', 'Yuki has gone ahead, and the barley closes behind her more slowly than it opened.', 'Yuki has gone ahead with her hands in her sleeves, and stops whenever you stop, without looking back.')}
+
+${byForm(g, `"Every year they sweep it," she says. "So the Sect needn't get dust on its boots while it robs us." She laughs, once, and then checks the field for who might have heard. Only the cat.`, `"Every year they sweep it," she says. "So the Sect needn't get dust on its boots while it robs us." She laughs, once, and then checks the field for who might have heard. Only that great white beast of yours, whom nobody is going to question.`, `"Every year they sweep it," she says. "So the Sect needn't get dust on its boots while it robs us." She laughs, once, and then checks the field for who might have heard. Only Yuki, who lifts one hand to show she heard nothing.`)}
+
+"I'd have left the dust. Added some."`])
+            : tributeLeft(g) <= 1 ? `The last sunset before the tribute. This time she does not talk at all. Halfway along the field edge she takes hold of your hand, and she does not let go of it until the lamps come on.`
+            : seqText(g, 'mei_walk:6', [(g) => `The barley is nearly ready and nobody will say who is to cut it. She talks about the harvest all the way across the field, quickly, all of it in the future tense, and somewhere along the path her fingers have closed on your sleeve.`, (g) => `From the field edge you can watch the shutters close early, house by house. She has her arm through yours and names each family under her breath as its light goes, as one checks a tally that has come up short before.`, (g) => `The well rope is coiled and hung up dry before the sun is down, which nobody in Ashfall does. Mei Lin points it out, laughs at it, looks round to see who heard, and by the next house she has your sleeve in both hands and is steering by it.`])),
+        choices: [{ text: 'Walk her home.', do: (g) => { bumpRel(g, 'Mei Lin', 3, meiRel(g).a >= 8 ? 5 : 4); return [vday(g) === 2 ? `You walk her to her mother's door in the last of the red light. On the step she turns, looks at you as though there were something else she meant to say, and says "Idiot," very quietly, in its place. ${byForm(g, 'Yuki pushes past you both and goes in first, as though the house were hers. By now it may be.', 'Yuki goes in first, shoulders turned to clear the doorposts, as though the house were hers. By now it may be; nobody inside is going to raise the matter.', 'Yuki says "Excuse me" to the space between you, walks through it, and goes in first, as though the house were hers. By now it may be.')}` : tributeLeft(g) <= 1 ? `She does not let go at the door, either. She stands there with your hand in hers and the lamplight on her face and says, "Tomorrow, whatever happens, I'm glad you came out of that forest." Then she goes in, quickly, before you can answer, and you stand in the lane for a while, learning how to breathe again.` : 'At the door she takes your hand and does not go in. She stands there with it in both of hers and the lamplight on her face and says, "Whatever happens when they come, I\'m glad you came out of that forest." Then she goes in, quickly, before you can answer, and you stand in the lane for a while, working out what to do with the hand.']; }, time: 60, to: 'ashfall' }],
     },
 };

@@ -6,7 +6,7 @@
 import { addItem, hasItem, condense, advance, jamesHpMax, d6 } from '../core/game.js';
 import { eatBest, pantry, foodCount, set, byForm, byDay, dayReply, spacedFree } from './common.js'; // v0.11.213 (FQ1, S3): spacedFree
 import { byDayLast } from '../core/lines.js';
-import { storyDay, calStart } from '../core/calendar.js'; // v0.11.203 (owner pick T1, TS1): the long calendar (Day 19 is 91) // v0.11.154 (owner pick RV1, Fable's review, L2 CL)
+import { storyDay, calStart, longCal, dayWord } from '../core/calendar.js'; // v0.11.224 (TX2, TS6): longCal, dayWord // v0.11.203 (owner pick T1, TS1): the long calendar (Day 19 is 91) // v0.11.154 (owner pick RV1, Fable's review, L2 CL)
 import { day, hour, encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil, logTrio, ykShape } from './act1_common.js';
 import { ykPath } from './yuki_path.js';
 
@@ -54,7 +54,7 @@ const HC_MEI_WATCH = [
     'Mei Lin takes the first watch.',
     'Mei Lin takes the first watch again. She sits very straight, with her herb-knife laid across her knees like a magistrate\'s seal.',
     'Mei Lin has the first watch. She has told you, formally, that it is her turn, and has declined to hear the arithmetic.',
-    'The first watch is Mei Lin\'s, by a custom now three nights old, which in Ashfall would make it law.',
+    (g) => (longCal(g) ? 'The first watch is Mei Lin\'s, by a custom as old as the camp, which in Ashfall would make it law.' : 'The first watch is Mei Lin\'s, by a custom now three nights old, which in Ashfall would make it law.'), // v0.11.224 (TX2, DN15)
 ];
 const HC_POOLS = { heap: HC_HEAP, ya: HC_YA_WATCH, mei: HC_MEI_WATCH };
 /** RV1 (M2): which version of heart_camp's second paragraph tonight. */
@@ -141,7 +141,7 @@ function wake(g) {
 export const HEART = {
     ht_start: {
         id: 'ht_start', title: 'The Heart', art: 'heart_gate', place: P,
-        text: (g) => `Day sixteen. By daylight, the roots you slept in turn out to be the least of it.
+        text: (g) => `${dayWord(g)}. By daylight, the roots you slept in turn out to be the least of it.
 
 You saw it from the ridge. You felt it through the soles of your feet for days, and last night you lay down in its lap. None of that was preparation. Tip your head back, and the trunk goes on past the angle your neck will agree to: grey, smooth, a cliff of dead wood broad enough to keep its own weather, with the black wound high in its flank and the stubs of broken limbs above that. No leaves. None in living memory, nor in anybody's grandmother's.
 

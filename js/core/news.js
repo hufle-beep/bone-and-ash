@@ -67,6 +67,7 @@ export const NOTES = [
     ['0.11.219', 'The long calendar (test): Plan the week now keeps its counts. A new week on a stay starts with the counts you set there last (the cards, the Meditate rows, Smoke, Rest, the visits and talks), in every later Coil too; change a count or Clear and that is kept instead. A one-off visit goes back to 0 once taken.'],
     ['0.11.221', 'The long calendar (test): in the wilds, a Forage, Hunt or Practice card that is Skilled or Mastered now comes back every 3rd day instead of every day, and its row in Plan the week says so. New and Practised cards still come back every day.'],
     ['0.11.222', 'The long calendar (test): the journey to the Heart Tree takes longer. Each day of the Blackroot is now three days at its camp, so the road takes 15 days instead of 5, and the Elder comes on Day 103. You can forage, hunt, scout and train there every day; the wyrm, the Drowned and the rot-ape still wait for the last of those days, and the nights before it are quiet. A game already in the Blackroot or past it keeps the 5-day road.'],
+    ['0.11.224', 'The long calendar (test): the texts now count its days. The village, Ashfall and Ya say the real number of days to the tribute or the Elder, and Day numbers are the real ones. Suppers, sunset walks, forest nights and the Blackroot talks have new texts on later days of a week, and a text already read earlier in a loop folds to its first paragraph.'],
 ];
 
 const parts = (v) => (/^\d+(\.\d+)*$/.test(String(v ?? '')) ? String(v).split('.').map(Number) : null);

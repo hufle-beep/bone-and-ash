@@ -114,6 +114,11 @@ export const BROKEN = {
     drafting: (t) => t.split('\n').some((l) => !/["“”]/.test(l) && /\b(?:let ?me (?:redo|rewrite|start (?:fresh|over|again))|this approach isn'?t? working)\b/i.test(l)),
     code: (t) => /\bundefined\b|\bNaN\b|\[object |\$\{|\bTODO\b|\bFIXME\b|\bALT [AB]\b/.test(t),
     asterisks: (t) => t.split(/\n\s*\n/).some((p) => p.trim() !== '*' && (p.match(/(?<!\*)\*(?!\*)/g) || []).length % 2 === 1),
+    // v0.11.224 (owner pick RV1, TG8; the TS6 review's H1 and H2): a literal "\n" from a code slip, a count slot the code left unfilled, and a
+    // sentence run into the next with no space ("Lin's.Her")
+    escapes: (t) => /\\[nt]/.test(t),
+    slot: (t) => /\{(?:days|Days|Day|elderDay|OnElder|since|Since)\}/.test(t),
+    nospace: (t) => /[a-z][.!?]["”’*]?[A-Z][a-z]/.test(t),
 };
 /** BD: the broken kinds a text shows (names of BROKEN). */
 export const broken = (t) => Object.keys(BROKEN).filter((k) => BROKEN[k](String(t)));

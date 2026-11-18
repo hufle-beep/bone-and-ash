@@ -58,14 +58,14 @@ const DR_NEEDLE_F = dayReply("wild_train:3:f", [
 ]);
 
 /* v0.11.168 (owner pick P2A, SW): the silent work cards' successes get a line by day (Fable's); the gains stay as they were. */
-const DR_RING = dayReply("wild_forage:0", ["The ring is sound to the stem. You cut from the outer edge and leave the middle to its work.", "The ring has closed the gaps you cut yesterday. You cut from the edge again, and wonder who is farming whom."]);
+const DR_RING = dayReply("wild_forage:0", ["The ring is sound to the stem. You cut from the outer edge and leave the middle to its work.", "The ring has closed the gaps you left in it. You cut from the edge again, and wonder who is farming whom."]);
 const DR_CRESS = dayReply("wild_forage:1", ["It tastes of pepper and cold water. The omnitool has no objections, and you get that in writing.", "Same shallows, colder water, quicker hands. You are out before your feet have finished complaining."]);
 const DR_BERRIES = dayReply("wild_forage:3", ["The thorns collect a small fee in blood. The berries are worth it, barely.", "Today you pick with a bone needle for a hook. The thorns go unpaid."]);
 const DR_HARE = dayReply("wild_hunt:0", ["Bone arrives before the bolt does. The glass plates stay dull, which is how you want them. Yuki, born starving, inspects the result.", "A shorter stalk today, and cleaner throwing. Yuki's tail stops ticking a full second before the reeds go quiet."]);
 const DR_FOWL = dayReply("wild_hunt:1", ["The dart meets it at the top of its rise. It comes down far more gracefully than it went up.", "You lead it by a body length, and the bird flies into the dart unassisted. Ballistics, of a kind."]);
 const DR_CRAB = dayReply("wild_hunt:2", ["The needle goes in at the joint and the shell lifts off like a lid. It was simpler than the crab made it look.", "You know where the joint is now. One needle, a quarter turn, and the crab is a recipe."]);
 const DR_DARTS = dayReply("wild_train:0", ["Most of them land inside the marks. The ones that don't are at least in the right tree.", "Five paces further back than is sensible, and the darts still find the marks. The trunks look tired of you."]);
-const DR_BLADE = dayReply("wild_train:1", ["Grow, cut, dissolve. By the end the blade arrives when you ask and leaves when you are done.", "The blade comes out a finger longer than yesterday and goes without a crumb. Your wrist has stopped arguing."]);
+const DR_BLADE = dayReply("wild_train:1", ["Grow, cut, dissolve. By the end the blade arrives when you ask and leaves when you are done.", "The blade comes out a finger longer than last time and goes without a crumb. Your wrist has stopped arguing."]);
 const DR_FEET = dayReply("wild_train:2", ["She lands where you were. You are somewhere else, upright, and nearly as surprised as she is.", "You are gone before she leaves the ground. She changes the angle mid-air, and you are gone from there too."]);
 const DR_NEEDLE = dayReply("wild_train:3", ["A hundred needles into one knuckle-width of bark. Call it ninety-one. Your threads are keeping the real count.", "A hundred, and the hole in the bark is no wider than the first needle made it. Ninety-seven, say the threads."]);
 
@@ -204,14 +204,14 @@ Yuki puts herself back in order as if the fight had been someone else's. You sit
             return lines;
         },
         text: (g) => `${g.flags.forest_day === 2
-            ? `The second morning. A red sun hauls itself up over the black trees, and you lie still and take stock: one Yuki, one omnitool, one lab coat that was white yesterday, one body that aches in places you could now label on a diagram. Alive, on the evidence.
+            ? `${longCal(g) ? 'Another morning in the forest. A red sun hauls itself up over the black trees, and you lie still and take stock: one Yuki, one omnitool, one lab coat that was white when it got here, one body that aches in places you could now label on a diagram.' : 'The second morning. A red sun hauls itself up over the black trees, and you lie still and take stock: one Yuki, one omnitool, one lab coat that was white yesterday, one body that aches in places you could now label on a diagram.'} Alive, on the evidence.
 
 ${(replayExplore(g) ? MORNING_AGAIN : 'You could go looking for the way out. Or you could face the data: you know nothing about this world, and this forest is the mildest teacher it is likely to offer. So learn it. Eat. Get stronger. *Then* walk out.').replace(/\*Then\* walk out\.$/, canFly(g) ? FW.morningOut : '$&') /* v0.11.195 (F1, D1: MW) */}`
-            : `Day three in the forest. You wake ahead of the light now. That is either adaptation or damage, and you decline to run the test that would tell you which.
+            : `${longCal(g) ? 'The third week in the forest.' : 'Day three in the forest.'} You wake ahead of the light now. That is either adaptation or damage, and you decline to run the test that would tell you which.
 
-This patch of forest is yours by now: the stream's tempers, the reeds where the hares lie up, the reek of the mire when the wind turns west. It has other tenants. For two nights something has circled the camp at a distance, and it has left tracks. Large. More than one set. In no hurry.
+This patch of forest is yours by now: the stream's tempers, the reeds where the hares lie up, the reek of the mire when the wind turns west. It has other tenants. ${longCal(g) ? 'For nights now something has circled the camp at a distance, and it has left tracks.' : 'For two nights something has circled the camp at a distance, and it has left tracks.'} Large. More than one set. In no hurry.
 
-${g.flags.saw_lights ? 'And then the lights. Your mind keeps going back to the lights.' : 'Tonight, you suspect, the hurry arrives.'}`}`,
+${g.flags.saw_lights ? 'And then the lights. Your mind keeps going back to the lights.' : longCal(g) ? 'One of these nights, you suspect, the hurry arrives.' : 'Tonight, you suspect, the hurry arrives.'}`}`,
         choices: [{ text: 'Get up.', to: 'wilds' }],
     },
 

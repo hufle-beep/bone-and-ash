@@ -3,6 +3,7 @@
  * the night the romance resolves (a throuple, one lover, or none), and Outer Elder Shen Qiu at the gate on Day 21.
  * Entry 'rt_start' (Day 19 ~06:00). Ends at 'a1_end'.
  */
+import { daysWord, sinceDepart, longCal, dayTitle } from '../core/calendar.js'; // v0.11.224 (owner pick TX2, TS6: DN14): the days since the start for the tree
 import { addItem, hasItem, eat, condense, advance, clockParts, jamesQiMax, dayHour, yukiForm, partyCarry } from '../core/game.js';
 import { condensationSatGain } from '../core/formulas.js';
 import { coilMult, sitGain } from '../core/game.js';
@@ -357,7 +358,8 @@ Quiet, for a while. Then: "${likesYa(g) ? 'With you in the house, I could stand 
         ],
     },
     rt_dawn: {
-        id: 'rt_dawn', title: 'Day Twenty', art: 'return_road', place: `${BR} — the last ridge`,
+        id: 'rt_dawn', title: (g) => (longCal(g) ? dayTitle(g) : 'Day Twenty'), // RV1 (MC)
+        art: 'return_road', place: `${BR} — the last ridge`,
         enter: (g) => { sleepUntil(g, 6); return ['Slept until 06:00. HP and Qi full.']; },
         text: `The last stretch you walk without talking. The forest thins. The ridge climbs. Then, below, in the grey morning: forty roofs of grey stone, chimney smoke, the tribute post with its banners hanging slack.
 
@@ -405,7 +407,7 @@ He puts his cup down with great care.
     // v0.11.129 (CB1, MO; Fable's MAIN): the mother sees the human and counts four
     rt_mother: {
         id: 'rt_mother', title: 'The Mother', art: 'dinner', place: `${P} — Mei Lin's house`,
-        text: (g) => `Mei Lin's mother looks her daughter over: filthy, and scratched from nine days in the deep forest. She looks at you.${byForm(g, '', '', ' She looks at Yuki, ears and all, and lets that wait.')} At Ya she looks longest of all.
+        text: (g) => `Mei Lin's mother looks her daughter over: filthy, and scratched from ${daysWord(sinceDepart(g))} in the deep forest. She looks at you.${byForm(g, '', '', ' She looks at Yuki, ears and all, and lets that wait.')} At Ya she looks longest of all.
 
 "You took my daughter into the Blackroot," she tells you, without raising her voice.
 
@@ -557,7 +559,7 @@ Mei Lin arrives and takes inventory: you in the trough, Ya on the roof, half the
     rt_evening: {
         id: 'rt_evening', title: 'The Last Supper Before', art: 'dinner', place: `${P} — Mei Lin's house`,
         enter: (g) => { toHour(g, 19); if (daily('rt_evening')(g)) { markDaily(g, 'rt_evening'); eat(g, 30); return ['Millet, greens, and every good thing the house had put by for a better occasion: +30 satiety.']; } return []; },
-        text: (g) => `Mei Lin's mother serves four bowls ${byForm(g, 'and a saucer for the cat', 'and, after a long look at Yuki, the stew pot', 'and a fifth for Yuki, with the saucer beside it out of habit')}. She serves Ya last, and Ya, who has been watching the old woman all evening like a wolf watches a fire, says "thank you" in a small voice that nobody at the table has heard her use before. "Nine days in the Blackroot," the old woman informs the pot, "and my daughter comes home fatter than she left."
+        text: (g) => `Mei Lin's mother serves four bowls ${byForm(g, 'and a saucer for the cat', 'and, after a long look at Yuki, the stew pot', 'and a fifth for Yuki, with the saucer beside it out of habit')}. She serves Ya last, and Ya, who has been watching the old woman all evening like a wolf watches a fire, says "thank you" in a small voice that nobody at the table has heard her use before. ${longCal(g) ? `"My daughter spent ${daysWord(sinceDepart(g))} in the Blackroot," the old woman informs the pot, "and has come home fatter than she left."` : '"Nine days in the Blackroot," the old woman informs the pot, "and my daughter comes home fatter than she left."'}
 
 Nobody mentions tomorrow. Everybody thinks about it.
 

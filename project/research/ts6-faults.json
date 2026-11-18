@@ -1,0 +1,156 @@
+[
+ {
+  "id": "F1",
+  "file": "js/core/calendar.js",
+  "find": "    return (3 - v) * s + (s - weekNights(g));",
+  "replace": "    return (3 - v) * s + (s - weekNights(g) - 1);",
+  "note": "the days to the tribute one short (the eve says two days)"
+ },
+ {
+  "id": "F2",
+  "file": "js/core/calendar.js",
+  "find": "export const elderLeft = (g) => calStart(g, 21) - today(g);",
+  "replace": "export const elderLeft = (g) => calStart(g, 20) - today(g);",
+  "note": "the Elder's count a day short on the old calendar (12 for 13)"
+ },
+ {
+  "id": "F3",
+  "file": "js/core/calendar.js",
+  "find": "    const left = storyDay(g) <= 7 ? tributeLeft(g) : elderLeft(g);",
+  "replace": "    const left = storyDay(g) < 7 ? tributeLeft(g) : elderLeft(g);",
+  "note": "the tribute's own story day counts to the Elder"
+ },
+ {
+  "id": "F4",
+  "file": "js/core/lines.js",
+  "find": "    noteDay(g, k);\n    return byDay(g, list, k);",
+  "replace": "    return byDay(g, list, k);",
+  "note": "a sequence never moves on (always its first text)"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/again.js",
+  "find": "        L.vfFold = Number.isInteger(first) && first < day ? k : null;",
+  "replace": "        L.vfFold = Number.isInteger(first) && first <= day ? k : null;",
+  "note": "VF folds a text shown again on the same day too"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/again.js",
+  "find": "    if (!g || !id || noFold(id) || v?.end) return false;\n    const L = linesOf(g);\n    if (!isRecord(L.vd))",
+  "replace": "    if (!g || !id || v?.end) return false;\n    const L = linesOf(g);\n    if (!isRecord(L.vd))",
+  "note": "VF folds task screens and menus"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/ashfall.js",
+  "find": "${vday(g) === 3 ? (tributeLeft(g) <= 1 ? 'The red banners on the tribute post hang dead still. Tomorrow.'",
+  "replace": "${vday(g) === 3 ? (tributeLeft(g) < 1 ? 'The red banners on the tribute post hang dead still. Tomorrow.'",
+  "note": "the hub never says Tomorrow on the eve"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/house_time.js",
+  "find": "(tributeLeft(g) > 1 ? 'ashfall:2-early' : 'ashfall:2')",
+  "replace": "(tributeLeft(g) > 0 ? 'ashfall:2-early' : 'ashfall:2')",
+  "note": "the villagers' eve texts never show"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/ashfall.js",
+  "find": "            : tributeLeft(g) <= 1 ? `The last sunset",
+  "replace": "            : tributeLeft(g) > 1 ? `The last sunset",
+  "note": "the last sunset on the early evenings, the early ones on the eve"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/act1_blackroot.js",
+  "find": "{ text: QUIET_LABEL, show: (g) => bday(g) === 2 && blN(g) > 0, to: 'rr_hub' }",
+  "replace": "{ text: QUIET_LABEL, show: (g) => bday(g) === 2, to: 'rr_hub' }",
+  "note": "the Root Road's first morning shows two ways on"
+ },
+ {
+  "id": "F11",
+  "file": "js/story/act1_blackroot.js",
+  "find": "            if (n >= 5 && (n - 5) % 3) return [(g) => `Mei Lin keeps",
+  "replace": "            if (n >= 4 && (n - 4) % 3) return [(g) => `Mei Lin keeps",
+  "note": "the settled walk's sequence starts a beat early (over the old calendar's last talk)"
+ },
+ {
+  "id": "F12",
+  "file": "js/story/prologue.js",
+  "find": "\"The tribute falls due ${tributeLeft(g) > 1 ? `in ${daysWord(tributeLeft(g))}` : 'tomorrow'},\"",
+  "replace": "\"The tribute falls due ${tributeLeft(g) >= 1 ? `in ${daysWord(tributeLeft(g))}` : 'tomorrow'},\"",
+  "note": "the herb girl's eve says 'in one day'"
+ },
+ {
+  "id": "F13",
+  "file": "js/core/tasks.js",
+  "find": "the Sect's tribute comes on Day ${day + tributeLeft(g)}.",
+  "replace": "the Sect's tribute comes on Day ${day + tributeLeft(g) - 1}.",
+  "note": "the hint's tribute day a day early"
+ },
+ {
+  "id": "F14",
+  "file": "js/story/act1_fallout.js",
+  "find": "${departLeft(g) > 1 ? '\"A few more sleeps",
+  "replace": "${departLeft(g) > 2 ? '\"A few more sleeps",
+  "note": "Ya says Tomorrow two days early"
+ },
+ {
+  "id": "F15",
+  "file": "js/story/wilds.js",
+  "find": ": longCal(g) ? 'One of these nights, you suspect, the hurry arrives.'",
+  "replace": ": !longCal(g) ? 'One of these nights, you suspect, the hurry arrives.'",
+  "note": "X2 on the wrong calendar"
+ },
+ {
+  "id": "F16",
+  "file": "js/story/again.js",
+  "find": "    if (laterDayAgain(g, id, v, fresh)) return { fold: true, first: ps[0], rest: ps.slice(1).join('\\n\\n'),",
+  "replace": "    if (laterDayAgain(g, id, v, fresh)) return { fold: true, first: ps[0], rest: ps.slice(1).join(' '),",
+  "note": "RV1 H1: the later-day fold's hidden part run together"
+ },
+ {
+  "id": "F17",
+  "file": "js/story/ashfall.js",
+  "find": "show: (g) => daily('walk')(g) && hour(g) >= 15 && hour(g) < 20 && (!longCal(g) || vday(g) >= 2),",
+  "replace": "show: (g) => daily('walk')(g) && hour(g) >= 15 && hour(g) < 20,",
+  "note": "RV1 H3a: the walk in the long calendar's first week again"
+ },
+ {
+  "id": "F18",
+  "file": "js/story/again.js",
+  "find": ".join('\\n\\n').replace(NUM_WORDS, '#'))}`, day = textDay(g);",
+  "replace": ".join('\\n\\n'))}`, day = textDay(g);",
+  "note": "RV1 VK: number words make a text new again"
+ },
+ {
+  "id": "F19",
+  "file": "js/story/act1_fallout.js",
+  "find": "id: 'fo_elder_named', title: (g) => (longCal(g) ? titleCase(daysWord(elderLeft(g))) : 'Thirteen Days'),",
+  "replace": "id: 'fo_elder_named', title: (g) => (longCal(g) ? 'Thirteen Days' : titleCase(daysWord(elderLeft(g)))),",
+  "note": "RV1 MC: the title by the wrong calendar"
+ },
+ {
+  "id": "F20",
+  "file": "js/core/calendar.js",
+  "find": "longCal(g) ? `On ${elderDayWord(g)}` : `On the ${ordWord(calStart(g, 21))}`",
+  "replace": "`On the ${ordWord(calStart(g, 21))}`",
+  "note": "RV1 L2: Lu Han's 'On the hundred and third'"
+ },
+ {
+  "id": "F21",
+  "file": "js/story/act1_blackroot.js",
+  "find": "BL_QUIET[bday(g)]?.[Math.min(blN(g), 2) - 1]",
+  "replace": "BL_QUIET[bday(g)]?.[0]",
+  "note": "RV1 MP2: the third morning repeats the second's line"
+ },
+ {
+  "id": "F22",
+  "file": "js/core/week.js",
+  "find": ".replace(/\\d+/g, '#').replace(NUM_WORDS, '#'));",
+  "replace": ".replace(/\\d+/g, '#'));",
+  "note": "RV1 VK: the night fold sees the spelled-out day as a new night"
+ }
+]

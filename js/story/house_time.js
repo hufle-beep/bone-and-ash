@@ -12,7 +12,7 @@
 import { bumpRel } from '../core/game.js';
 import { daily, markDaily, hour } from './common.js';
 import { pickLine, textDay } from '../core/lines.js';
-import { storyDayOf } from '../core/calendar.js'; // v0.11.203 (owner pick T1, TS1): the Fallout's story day in the long calendar
+import { storyDayOf, tributeLeft, countsFill } from '../core/calendar.js'; // v0.11.203 (owner pick T1, TS1): the Fallout's story day in the long calendar
 import { TASK_HUBS } from './task_hubs.js';
 import { HT_LABEL, HT_BODY, HT_CLOSE } from './house_texts.js';
 import { kitchenOnce, kitchenText, kitchenLabel } from './kitchen.js'; // v0.11.181 (SP1, KG1): the mother's kitchen by her friendship
@@ -27,7 +27,7 @@ export const HT_MID = 30; // MT: the closers' level
  *  day is its own slot, so no text comes back on another day of the Coil. The Fallout's day is the text day, from 05:00 (MR1, M1:
  *  a card taken at 23:50 keeps its day's text past midnight). */
 export const HT_HUBS = {
-    ashfall: [(g) => ((g.flags.vday || 1) >= 3 ? 'ashfall:2' : 'ashfall:1')],
+    ashfall: [(g) => ((g.flags.vday || 1) >= 3 ? (tributeLeft(g) > 1 ? 'ashfall:2-early' : 'ashfall:2') : 'ashfall:1')], // v0.11.224 (owner pick TX2, TS6: DC11): the long calendar's last week before its eve
     fo_ashfall: [(g) => `fo_ashfall:${Math.max(1, Math.min(3, storyDayOf(g, textDay(g)) - 7))}`],
     rt_ashfall: [() => 'rt_ashfall:1'],
 };
@@ -52,7 +52,7 @@ function closeOnce(g, k) {
 }
 function textOf(g, k) {
     const slot = htSlot(g, k);
-    const body = (g.flags.loft_burned && HT_BODY[k][`${slot}-burned`]) || HT_BODY[k][slot]; // MR1 (M4): after the arson night
+    const body = countsFill(g, (g.flags.loft_burned && HT_BODY[k][`${slot}-burned`]) || HT_BODY[k][slot]); // MR1 (M4): after the arson night; v0.11.224 (TX2, DC12): its count from the calendar
     const [pool, i] = String(g.flags[`${k}_time_close`] || '').split('|');
     const line = HT_CLOSE[pool]?.[Number(i)];
     const kit = k === 'mother' ? kitchenText(g) : ''; // v0.11.181 (KG1): between her day's text and the closer

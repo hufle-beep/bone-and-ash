@@ -77,6 +77,16 @@ for (const last of ['sister', 'lover', 'wait']) for (const [form, realm] of [['c
     g.yuki.realm = 7; g.james.realm = 7; g.yuki.form = 'human'; g.flags.yk_last = 'wait'; g.flags.yk_form_before = 'human';
     SAMPLES.push(ensureBars(g));
 }
+// v0.11.224 (owner pick RV1, TG8; the TS6 review): and the long calendar, in the cat form, on a day of each story day's week (the village's
+// three weeks, the forest's, the Fallout's, the Blackroot's camps on their first and a quiet morning, the Heart, the road home), so the
+// texts that read the long calendar (`longCal`, `blSpan`, the counts) are rendered and linted too
+for (const [day, flags] of [[23, { long: true, vday: 1, cal_night: 1 }], [30, { long: true, vday: 2, cal_night: 1 }], [37, { long: true, vday: 3, cal_night: 1 }], [42, { long: true, vday: 3, cal_night: 6 }],
+    [2, { forest_day: 1 }], [9, { forest_day: 2 }], [16, { forest_day: 3 }], [44, { ya_met: true }], [51, { ya_met: true }], [60, { ya_met: true }],
+    [66, { bl_day: 1, bl_n: 1, bl_region: 'rr' }], [69, { bl_day: 2, bl_n: 0, bl_region: 'rr' }], [72, { bl_day: 3, bl_n: 2, bl_region: 'dw' }], [76, { bl_day: 4, bl_n: 1, bl_region: 'ah' }], [79, { bl_day: 5, bl_n: 2, bl_region: 'ah' }],
+    [81, {}], [102, {}]]) {
+    const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); Object.assign(g.flags, flags); g.minutes = (day - 1) * 1440 + 12 * 60;
+    SAMPLES.push(ensureBars(g));
+}
 const renders = (x) => {
     if (typeof x === 'string') return [x];
     if (typeof x !== 'function') return [];
@@ -117,7 +127,10 @@ const dayReplies = [];
 for (const list of Object.values(DAY_REPLIES)) for (const t of list) for (const r of renders(t)) if (!dayReplies.includes(r)) dayReplies.push(r);
 // v0.11.139 (owner pick MW1): Old Wen's and the mother's daily scenes, every body and closer (the samples read one slot only)
 const { HT_BODY, HT_CLOSE } = await import(js('story/house_texts.js'));
-const houseLines = [...Object.values(HT_BODY).flatMap((b) => Object.values(b)), ...Object.values(HT_CLOSE).flat()];
+// v0.11.224 (TX2, DC12): a body's count slot filled as the screen fills it, on both calendars' first Fallout day (the old 13, the long 59)
+const { countsFill } = await import(js('core/calendar.js'));
+const HFILL = [ensureBars(newGame(1234, { closed: true })), ensureBars(newGame(1234, { closed: true, cal: 7 }))]; HFILL[0].minutes = 7 * 1440 + 600; HFILL[1].minutes = 43 * 1440 + 600;
+const houseLines = [...new Set([...Object.values(HT_BODY).flatMap((b) => Object.values(b)).flatMap((t) => HFILL.map((g) => countsFill(g, t))), ...Object.values(HT_CLOSE).flat()])];
 const { LF_DRILL } = await import(js('story/longforest.js')); const { SEASON_LINES } = await import(js('story/prologue.js')); // v0.11.175 (RV1, C4)
 // v0.11.181 (RV1, TG4): the kitchen's and the pot's texts (kitchen_texts.js) as the pool `kitchen`: they show only with a flag or in a result
 const KT = await import(js('story/kitchen_texts.js'));

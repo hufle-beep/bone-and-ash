@@ -17,7 +17,7 @@
  */
 import { sceneView, choose, seenBefore, isMenuScene, isTimeless } from '../core/story.js';
 import { fnv1a } from '../core/game.js';
-import { longCal } from '../core/calendar.js'; // v0.11.214 (RD1, RV1 L3): the read stop's record on the long calendar only
+import { longCal, NUM_WORDS } from '../core/calendar.js'; // v0.11.214 (RD1, RV1 L3): the read stop's record on the long calendar only
 import { TASK_HUBS } from './task_hubs.js';
 import { sceneMemory } from './remember.js'; // v0.11.184 (S1): a scene's own memory line
 import { noteVisit, visitLine, linesOf, textDay } from '../core/lines.js'; // v0.11.134 (LP2: PK, ML); v0.11.152 (RP1, SD): linesOf, textDay
@@ -160,7 +160,31 @@ export function againView(g, v, prev = null) {
     if (seenBefore(g, id) && !variant && readBefore(g, v.text)) return { fold: true, first: ps[0], rest: ps.slice(1).join('\n\n'), memory: sceneMemory(g, id) ?? memoryLine(g), same: false, newVisit }; // v0.11.184 (S1): the scene's own line first, the pool untouched when it has one
     if (prev && prev.id === id && prev.text === v.text) return { fold: true, first: ps[0], rest: ps.slice(1).join('\n\n'), memory: null, same: true, newVisit }; // SV
     if (sd) return { fold: true, first: ps[0], rest: ps.slice(1).join('\n\n'), memory: null, same: true, newVisit }; // SD
+    if (laterDayAgain(g, id, v, fresh)) return { fold: true, first: ps[0], rest: ps.slice(1).join('\n\n'), memory: null, same: true, newVisit }; // v0.11.224 (TX2, VF)
     return whole;
+}
+
+/**
+ * v0.11.224 (owner pick TX2, TS6: VF; the owner 2026-11-17 15:44 "aim for less repetition"): a scene shown on a later day of the same
+ * Coil with a text it already showed in full on an earlier day folds to its first paragraph under "Read it all again", as SD does on
+ * the same day (no memory line: the memory lines are for earlier Coils). On the long calendar a stay's daily scene came back in full
+ * on every day of its week (the bots' repeated screens 25.1 / 28.5 / 26.5 / 27.0% of the story screens, Careful / Sociable /
+ * Completionist / Cultivator; the old calendar 0%). Decided once per visit (`fresh`) and kept on every redraw (`vfFold`); the record is the
+ * Coil's `lines.vd` (scene|text hash → the text day it was first shown; reset with each Coil; an older version ignores it; at most
+ * VD_MAX entries, the oldest kept). The task screens, menus, meta screens and outcome scenes never fold (noFold, as above).
+ */
+export const VD_MAX = 600;
+export function laterDayAgain(g, id, v, fresh) {
+    if (!g || !id || noFold(id) || v?.end) return false;
+    const L = linesOf(g);
+    if (!isRecord(L.vd)) L.vd = {};
+    const k = `${id}|${lineKey(storyParas(String(v?.text || '')).join('\n\n').replace(NUM_WORDS, '#'))}`, day = textDay(g); // RV1 (VK): numbers aside, the food stock left out
+    if (fresh) {
+        const first = L.vd[k];
+        L.vfFold = Number.isInteger(first) && first < day ? k : null;
+        if (first == null && Object.keys(L.vd).length < VD_MAX) L.vd[k] = day;
+    }
+    return L.vfFold === k; // only while the text on screen is still the one folded (as SD's RV1 M1)
 }
 
 /**

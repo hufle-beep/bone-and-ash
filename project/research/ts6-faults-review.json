@@ -1,0 +1,72 @@
+[
+ {
+  "id": "R1",
+  "file": "js/story/again.js",
+  "find": "if (prev && prev.id === id && prev.text === v.text) return { fold: true, first: ps[0], rest: ps.slice(1).join('\\n\\n')",
+  "replace": "if (prev && prev.id === id && prev.text === v.text) return { fold: true, first: ps[0], rest: ps.slice(1).join('\\\\n\\\\n')",
+  "note": "SV's folded rest joined with a literal backslash-n (the same slip as SD and VF in this build): 'Read it all again' runs the paragraphs together"
+ },
+ {
+  "id": "R2",
+  "file": "js/story/house_time.js",
+  "find": "(tributeLeft(g) > 1 ? 'ashfall:2-early'",
+  "replace": "(tributeLeft(g) > 2 ? 'ashfall:2-early'",
+  "note": "the house cards' eve texts ('tomorrow the Sect walks past it') two days before the tribute"
+ },
+ {
+  "id": "R3",
+  "file": "js/story/act1_blackroot.js",
+  "find": "{ text: QUIET_LABEL, show: (g) => bday(g) === 3 && blN(g) > 0, to: 'dw_hub' }",
+  "replace": "{ text: QUIET_LABEL, show: (g) => bday(g) === 3 && blN(g) > 0, to: 'rr_hub' }",
+  "note": "a quiet morning in the Drowned Wood leads back to the Root Road's hub"
+ },
+ {
+  "id": "R4",
+  "file": "js/story/act1_blackroot.js",
+  "find": "if (n >= 5 && (n - 5) % 3) return [(g) => `Mei Lin keeps",
+  "replace": "if (n >= 5 && (n - 5) % 3 === 1) return [(g) => `Mei Lin keeps",
+  "note": "the settled walk's second new text never shows (the old settled text twice in three)"
+ },
+ {
+  "id": "R5",
+  "file": "js/story/prologue.js",
+  "find": "'Third supper at Mei Lin\\'s.'",
+  "replace": "'Third supper at Mei Lin\\'s house.'",
+  "note": "the old calendar's eve supper opener changed by a word (no old-calendar pin on `evening`)"
+ },
+ {
+  "id": "R6",
+  "file": "js/story/ashfall.js",
+  "find": "` : tributeLeft(g) <= 1 ? `She does not let go at the door",
+  "replace": "` : tributeLeft(g) <= 7 ? `She does not let go at the door",
+  "note": "the walk's 'Tomorrow, whatever happens' result on the last week's earlier evenings again (X6 undone)"
+ },
+ {
+  "id": "R7",
+  "file": "js/story/again.js",
+  "find": "    return L.vfFold === k;",
+  "replace": "    return !!L.vfFold;",
+  "note": "VF keeps folding after the text on screen changes within the visit"
+ },
+ {
+  "id": "R8",
+  "file": "js/core/lines.js",
+  "find": "    const k = `s:${key}`;",
+  "replace": "    const k = `s:${String(key).split(':')[0]}`;",
+  "note": "every sequence of a scene shares one day record: story day 5's suppers start mid-sequence (the father's story skipped on the week's first night)"
+ },
+ {
+  "id": "R9",
+  "file": "js/story/act1_blackroot.js",
+  "find": "(blN(g) > 0 && BL_QUIET[bday(g)]?.[",
+  "replace": "(blN(g) > 1 && BL_QUIET[bday(g)]?.[",
+  "note": "a camp's second morning shows its first morning's text again (v0.11.224 RV1: the find moved with MP2)"
+ },
+ {
+  "id": "R10",
+  "file": "js/story/act1_blackroot.js",
+  "find": "${blSpan(g) > 1 ? '\"Half a moon in,\" Ya says.",
+  "replace": "${longCal(g) ? '\"Half a moon in,\" Ya says.",
+  "note": "Ya's 'Half a moon in' on a long-calendar save that keeps the 5-day road (calBl 1)"
+ }
+]

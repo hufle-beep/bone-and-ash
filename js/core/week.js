@@ -14,7 +14,7 @@
  *    The plan is `g.tasks.plan`: { hub, coil, lastDay, items: { cardId: count }, med: { sit, mer, qi } a day, done: { d, sit, mer, qi },
  *    running, stop, bt }.
  */
-import { longCal, storyDay, storyDayOf, calEnd, weekNights, LONG_CAL, STAY_DAYS } from './calendar.js';
+import { longCal, storyDay, storyDayOf, calEnd, weekNights, LONG_CAL, STAY_DAYS, NUM_WORDS } from './calendar.js'; // v0.11.224 (RV1, VK): NUM_WORDS
 import { sceneView, choose } from './story.js';
 import { advance, jamesHpMax, canBreakThrough, clockParts, clockLabel, fnv1a, takeSpoilNotes, wakeDay } from './game.js';
 import { taskCards, taskOpen, runTask, taskState, taskOutcome, isTaskChoice, sitTaskId, QI_TASK, carryHere, carriesHere, carriesRead, carryTaskId, isCarryTask, weekHub, workDay, workRoom, dayMeal, cardSpeed, NEW_LENGTH, WEEK_MULT } from './tasks.js';
@@ -100,7 +100,7 @@ export function noteReadTap(g, scenes, id, r = null) {
 }
 /** The stops after which the plan keeps running (it goes on by itself once the story is back on the hub). */
 const GOES_ON = new Set(['evening', 'door']);
-const hash = (t) => fnv1a(String(t || '').replace(/\d+/g, '#')); // the day's numbers ("Day 45. 48 days to the Elder.") don't make a night new
+const hash = (t) => fnv1a(String(t || '').replace(/\d+/g, '#').replace(NUM_WORDS, '#')); // the day's numbers ("Day 45. 48 days to the Elder.") don't make a night new; v0.11.224 (RV1, VK): nor in words ("Day fifty-one. Fifty-two days")
 const calDay = (g) => Math.floor((g.minutes || 0) / 1440) + 1;
 const hourNow = (g) => clockParts(g.minutes).hh;
 const coilKey = (g) => `${g.coil?.n || 1}|${g.coil?.act || 0}`;

@@ -69,3 +69,64 @@ export function weekMorning(g) {
 }
 /** A counter stay begins (the village): its first story day starts with no nights slept. */
 export const weekBegins = (g) => { if (longCal(g)) g.flags.cal_night = 0; };
+
+/* ---------- v0.11.224 (owner pick TX2, TS6: DC) the texts' counts, from the calendar ----------
+ * The lines that count days to the tribute or the Elder, or name the day, take the count from here, so they read right on both
+ * calendars (the old one gives the old numbers: "Thirteen days", "Day nine") and on any later calendar. Spelled out, as the story writes them. */
+const ONES = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+const TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+const ORD = { one: 'first', two: 'second', three: 'third', five: 'fifth', eight: 'eighth', nine: 'ninth', twelve: 'twelfth' };
+/** `n` in words (0–999): 59 → "fifty-nine", 103 → "a hundred and three". */
+export function numWord(n) {
+    n = Math.max(0, Math.round(Number(n) || 0));
+    if (n < 20) return ONES[n];
+    if (n < 100) return TENS[Math.floor(n / 10)] + (n % 10 ? `-${ONES[n % 10]}` : '');
+    const h = Math.floor(n / 100), r = n % 100;
+    return `${h === 1 ? 'a hundred' : `${ONES[h]} hundred`}${r ? ` and ${numWord(r)}` : ''}`;
+}
+/** The ordinal in words: 21 → "twenty-first", 103 → "hundred and third" (no article). */
+export function ordWord(n) {
+    const w = numWord(n).replace(/^a hundred/, 'hundred');
+    return w.replace(/([a-z]+)$/, (last) => ORD[last] || (last.endsWith('y') ? `${last.slice(0, -1)}ieth` : `${last}th`));
+}
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+/** "one day" / "fifty-nine days". */
+export const daysWord = (n) => `${numWord(n)} ${n === 1 ? 'day' : 'days'}`;
+export const DaysWord = (n) => cap(daysWord(n));
+const today = (g) => calDayOf(g?.minutes);
+/** The days left to the tribute (1 = tomorrow). The village is counted by its weeks (`vday`, the nights slept this story day);
+ *  the short road (no `long` flag: straight to the village on the tribute's eve) has 1; before the village's first week begins, all of it. */
+export function tributeLeft(g) {
+    if (!g?.flags?.long) return 1;
+    const s = longCal(g) ? LONG_CAL : 1;
+    if (!g.flags.vday) return 3 * s;
+    const v = Math.max(1, Math.min(3, g.flags.vday));
+    return (3 - v) * s + (s - weekNights(g));
+}
+/** The days left to the Elder (Day 21 on the old calendar; 1 = tomorrow). */
+export const elderLeft = (g) => calStart(g, 21) - today(g);
+/** The days left to the start for the tree (story day 11's first day; 1 = tomorrow). */
+export const departLeft = (g) => calStart(g, 11) - today(g);
+/** The days since the start for the tree (the old calendar on the eve of the Elder: 9). */
+export const sinceDepart = (g) => today(g) - calStart(g, 11);
+/** "Day nine" / "Day fifty-one": today. */
+export const dayWord = (g) => `Day ${numWord(today(g)).replace(/^a hundred/, 'one hundred')}`;
+/** "the twenty-first day" / "the hundred and third day": the Elder's day. */
+export const elderDayWord = (g) => `the ${ordWord(calStart(g, 21))} day`;
+/** v0.11.224 (TX2, DC): a text's count slots filled: `{days}` / `{Days}` the days left to the story's next deadline (up to the tribute's
+ *  story day the tribute, after it the Elder), `{Day}` today ("Day nine"), `{elderDay}` the Elder's day ("the twenty-first day"),
+ *  `{OnElder}` Lu Han's "On the twenty-first" (the long calendar: "On the hundred and third day"; RV1 L2), `{since}` / `{Since}` the days since the start for the tree. A text without slots comes back as it is. */
+export function countsFill(g, s) {
+    if (typeof s !== 'string' || !s.includes('{')) return s;
+    const left = storyDay(g) <= 7 ? tributeLeft(g) : elderLeft(g);
+    return s.replace(/\{days\}/g, daysWord(left)).replace(/\{Days\}/g, DaysWord(left)).replace(/\{Day\}/g, dayWord(g))
+        .replace(/\{elderDay\}/g, elderDayWord(g)).replace(/\{OnElder\}/g, longCal(g) ? `On ${elderDayWord(g)}` : `On the ${ordWord(calStart(g, 21))}`)
+        .replace(/\{since\}/g, daysWord(sinceDepart(g))).replace(/\{Since\}/g, DaysWord(sinceDepart(g)));
+}
+/** RV1 (MC): "Twenty-Two" for a title. */
+export const titleCase = (s) => String(s).replace(/(^|[\s-])([a-z])/g, (_, a, b) => a + b.toUpperCase()).replace(/ And /g, ' and ');
+/** RV1 (MC): today as a screen title: "Day Fifty-One". */
+export const dayTitle = (g) => titleCase(dayWord(g));
+/** RV1 (VK): the numbers in words the counts above write, set aside (as "#") where a text's own numbers must not make it new: the
+ *  later-day fold's key (again.js) and the planned week's night fold (week.js). */
+export const NUM_WORDS = /\b(?:(?:(?:a|one) hundred(?: and)? )?(?:twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)(?:-(?:one|two|three|four|five|six|seven|eight|nine))?|(?:(?:a|one) hundred(?: and)? )?(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen)|(?:a|one) hundred)\b/gi;
