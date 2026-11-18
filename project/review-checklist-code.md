@@ -22,6 +22,9 @@
 - **A once-off made regular (v0.11.218 H1, M1):** every rule keyed on "still due" (a hold, a wait, a stop) for a card that used to close for the Coil: a regular card skipped once stays open every day after (the spacing), so measure the week with its row at 0 and at 1; and a sequence entered from an old save (the first shown without a draw) must count as drawn, or it can come twice running.
 - **A rule moved onto a view of kept settings (v0.11.219 H1, M1, L2):** a rule that read "the plan made this week" and now reads a view built from kept settings fires in weeks with no plan and in hand play: measure it with no plan made, not only with one. A kept amount next to a count that runs down: test a change mid-week, after the countdown. A kept row the screen doesn't show still counts wherever the screen's totals and buttons read it.
 
+- **A gate added to some of a group's beats (v0.11.222 M1):** when a pick moves several beats onto a day (the split, the hollow and the pass), grep every member's `show` and the "Call it a day" rule (`oneOffLeft`) for each; one left ungated also holds the task screen's skip.
+- **A destination made a function (v0.11.222 TG2, TG3):** every choice that used to name the old target gets a test, the side scenes too; appended choices get their old indices' targets pinned, not only the count.
+
 ## Code and UI (v0.11.210, v0.11.211, v0.11.213)
 - **A redraw that keeps a scroll (v0.11.210 M1):** compare with the screen drawn last, not the scene id alone; a new screen (a fight's start or end, a plan going on by itself) starts at the top.
 - **Steps sharing a closing hour (v0.11.210 M2):** measure their order on a full work day; the long steps last, or the short visits close before they run.

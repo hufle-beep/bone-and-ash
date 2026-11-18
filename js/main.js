@@ -418,7 +418,7 @@ ${statusHtml()}
 }
 
 /** v0.11.203 (owner pick T1, TS1): the long calendar's test switch on the main menu (calendar.js). */
-const LONG_CAL_NOTE = 'Each day of a stay is a week: the tribute on Day 43, the Elder on Day 93. Being built: the texts and the weekly work are not done yet.';
+const LONG_CAL_NOTE = 'Each day of a stay is a week, and each day of the Blackroot three: the tribute on Day 43, the Elder on Day 103. Being built: the texts and the weekly work are not done yet.';
 const freshGame = (cal = 0) => ensureBars(newGame(Math.floor(Math.random() * 2 ** 31), { closed: true, cal })); // meridians closed at the start (v0.9.6); v0.11.203 (T1, TS1): cal, the long calendar
 const bakMeta = () => { try { return JSON.parse(store.get(BAK_META)) || { play: 0, at: {}, when: {} }; } catch { return { play: 0, at: {}, when: {} }; } };
 function writeKey(k, s) { if (!store.set(k, s) && !storageWarned) { storageWarned = true; showError('Could not save: the storage for this site is full or blocked. Download your save: ☰ Menu → Saves.'); } }

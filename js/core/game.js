@@ -12,7 +12,7 @@ import {
     checkFromTierLevel, skillXpCost, maxHp, qiPoolMax, qiRegenPercent, cycleTimeMinutes,
     realmBonus, realmStepLabel, CONDENSE_SIT_COST, FAIL_XP_FRACTION, realmDr, realmShockHpBonus, dampenMultiplier,
 } from './formulas.js';
-import { calMinutes, LONG_CAL } from './calendar.js'; // v0.11.203 (owner pick T1, TS1): the long calendar (test switch)
+import { calMinutes, LONG_CAL, BL_SPAN, storyDay } from './calendar.js'; // v0.11.222 (J2, SV): BL_SPAN, storyDay (blFill) // v0.11.203 (owner pick T1, TS1): the long calendar (test switch)
 
 export const K = 0.5;
 export const CONVERGENCE_MULTIPLIER = 1.25;
@@ -76,7 +76,7 @@ export function newGame(seed = Date.now(), { closed = false, cal = 0 } = {}) {
         combat: null,
         tasks: { queue: [], fam: {}, adapt: {}, yuki: { on: false, progress: 0 } },
     };
-    if (cal === LONG_CAL) g.cal = LONG_CAL;
+    if (cal === LONG_CAL) { g.cal = LONG_CAL; g.calBl = BL_SPAN; } // v0.11.222 (owner pick J2, TS9: SV): the Blackroot's camps, BL_SPAN days a story day
     g.coil = makeCoil(g);
     g.seen = { [g.scene]: 1 }; // v0.11.35 (P1-a): the start scene, first read on Coil 1
     g.read = {}; // v0.11.133 (FP2): the paragraphs read (again.js noteRead); the screen records what it shows
@@ -1545,7 +1545,18 @@ export function migrate(g) {
     if (g.v === undefined) g.v = 1;
     if (g.v > SAVE_VERSION) throw new SaveError('tooNew', `This save is from a newer version of the game (state ${g.v}; this version reads up to ${SAVE_VERSION}).`);
     while (g.v < SAVE_VERSION) { const step = MIGRATIONS[g.v]; if (!step) throw new SaveError('notSave', `No migration from state ${g.v}.`); step(g); g.v += 1; }
-    return readFill(fliesFill(queueDrop(gaoFill(seenFill(oneCount(g))))));
+    return blFill(readFill(fliesFill(queueDrop(gaoFill(seenFill(oneCount(g)))))));
+}
+/**
+ * v0.11.222 (owner pick J2, TS9: SV): a long-calendar save from before this version has no `calBl`. One still before the Blackroot
+ * (the prologue, or story day 10 or earlier; those days don't depend on it) gets the Blackroot's camps (BL_SPAN days a story day: the Elder on Day 103);
+ * one already in or past the Blackroot keeps the 5-day road (`calBl: 1`, written so a later load doesn't decide again). Old-calendar
+ * saves are not touched. Fills a missing field only.
+ */
+export function blFill(g) {
+    if (!g || g.cal !== LONG_CAL || g.calBl !== undefined) return g;
+    g.calBl = (g.coil?.act || 0) === 0 || storyDay(g) <= 10 ? BL_SPAN : 1; // the prologue (the Long Forest too) always before it
+    return g;
 }
 /** v0.11.112 (owner pick AF1, M; Fable's FF1 review, low 1): a fight saved before flight in fights has no `flies` on its hawks and crows; they get it by name. Fills only. */
 export function fliesFill(g) {

@@ -158,6 +158,7 @@ export function rewind(g, { to = 'act' } = {}) {
     if (g.read) base.read = clone(g.read); // v0.11.133 (FP2): and the paragraphs read
     base.log = g.log.slice(-150);
     base.rng = g.rng;
+    if (g.calBl !== undefined) base.calBl = g.calBl; else delete base.calBl; // v0.11.222 (J2, SV): a rewind keeps the save's Blackroot (the snapshot may be older than its fill)
     base.combat = null; base.lastWin = null;
     const n = c.n + 1;
     const peak = {};

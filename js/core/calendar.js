@@ -2,7 +2,8 @@
  * v0.11.203 (owner pick T1, TS1; roadmap-time.md): the long calendar, behind a test switch ("New game: the long calendar (test)").
  * A save with `g.cal === LONG_CAL` plays every story day of a stay as a week: the wilds (Days 1–3), the village (4–6), Ashfall's
  * Fallout (8–10) and the Heart (16–18). Journeys and deadline days keep one day: the tribute (7), the Blackroot (11–15), the road
- * home (19–20) and the Elder (21). So the prologue's tribute comes on Day 43 and the Elder on Day 93. Saves without `cal` (every
+ * home (19–20) and the Elder (21). So the prologue's tribute comes on Day 43 and the Elder on Day 93 (Day 103 since v0.11.222, TS9: the
+ * Blackroot's five days at its camps, three days each, `blSpan`). Saves without `cal` (every
  * save before this version, and every new game started with plain New game) keep the old calendar: every helper here is then the
  * identity, so the game plays exactly as before.
  *
@@ -18,7 +19,13 @@ export const LONG_CAL = 7;
 /** The story days that are stays (a week each in the long calendar). */
 export const STAY_DAYS = new Set([1, 2, 3, 4, 5, 6, 8, 9, 10, 16, 17, 18]);
 export const longCal = (g) => g?.cal === LONG_CAL;
-const span = (g, d) => (longCal(g) && STAY_DAYS.has(d) ? LONG_CAL : 1);
+/** v0.11.222 (owner pick J2, TS9: MH + K3 + SV): the Blackroot's story days (11–15) at its camps, BL_SPAN days each on a long-calendar game
+ *  that carries `g.calBl` (written by newGame and, for a long-calendar save from before the Blackroot, by game.js `blFill`); a save
+ *  without it, or with 1 (one already in or past the Blackroot when it was loaded), keeps the 5-day road. */
+export const BL_DAYS = new Set([11, 12, 13, 14, 15]);
+export const BL_SPAN = 3;
+export const blSpan = (g) => (longCal(g) && Number.isInteger(g?.calBl) && g.calBl > 1 ? g.calBl : 1);
+const span = (g, d) => (longCal(g) && STAY_DAYS.has(d) ? LONG_CAL : BL_DAYS.has(d) ? blSpan(g) : 1);
 const calDayOf = (minutes) => Math.floor((minutes || 0) / 1440) + 1;
 
 /** The first calendar day of story day `d` (the old calendar: `d`). */

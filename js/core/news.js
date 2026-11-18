@@ -66,6 +66,7 @@ export const NOTES = [
     ['0.11.218', 'The long calendar (test): cooking with the village women now comes back every 3rd day of a stay in Ashfall and in the Fallout, and the plan\'s row for it repeats. The first cook of a Coil keeps its scene and its friendship; after that each cook is one of three new scenes per act, with the meal only.'],
     ['0.11.219', 'The long calendar (test): Plan the week now keeps its counts. A new week on a stay starts with the counts you set there last (the cards, the Meditate rows, Smoke, Rest, the visits and talks), in every later Coil too; change a count or Clear and that is kept instead. A one-off visit goes back to 0 once taken.'],
     ['0.11.221', 'The long calendar (test): in the wilds, a Forage, Hunt or Practice card that is Skilled or Mastered now comes back every 3rd day instead of every day, and its row in Plan the week says so. New and Practised cards still come back every day.'],
+    ['0.11.222', 'The long calendar (test): the journey to the Heart Tree takes longer. Each day of the Blackroot is now three days at its camp, so the road takes 15 days instead of 5, and the Elder comes on Day 103. You can forage, hunt, scout and train there every day; the wyrm, the Drowned and the rot-ape still wait for the last of those days, and the nights before it are quiet. A game already in the Blackroot or past it keeps the 5-day road.'],
 ];
 
 const parts = (v) => (/^\d+(\.\d+)*$/.test(String(v ?? '')) ? String(v).split('.').map(Number) : null);

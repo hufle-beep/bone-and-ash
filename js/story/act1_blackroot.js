@@ -13,7 +13,7 @@ import { hasForm } from '../core/forms.js';
 import { choiceOpen, gives } from '../core/story.js'; // v0.11.161 (PO2): `optionLeft`; RV (GV, Fable's H1): the wrapper carries the card's items
 import { daily, markDaily, eatBest, pantry, foodCount, hour, byForm, byDay, dayReply } from './common.js';
 import { noteDay, DAY_REPLIES, coilReply } from '../core/lines.js';
-import { storyDay, calMinutes } from '../core/calendar.js'; // v0.11.203 (owner pick T1, TS1): the long calendar (Day 11 is 65, Day 16 is 70) // v0.11.166 (RW1): coilReply, the flirts by Coil
+import { storyDay, calMinutes, blSpan } from '../core/calendar.js'; // v0.11.222 (owner pick J2, TS9): blSpan, the camps' days a story day; // v0.11.203 (owner pick T1, TS1): the long calendar (Day 11 is 65, Day 16 is 70) // v0.11.166 (RW1): coilReply, the flirts by Coil
 import { talkBeat } from './remember.js'; // v0.11.184 (S1)
 import { encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil } from './act1_common.js';
 
@@ -193,6 +193,14 @@ const P = 'Blackroot Wilds';
 const PLACE = { rr: `${P} — the Root Road`, dw: `${P} — the Drowned Wood`, ah: `${P} — the Ashen Hills` };
 const region = (g) => g.flags.bl_region || 'rr';
 const bday = (g) => g.flags.bl_day || 1;
+/* v0.11.222 (owner pick J2, TS9: MH + K3 + SV): on a long-calendar game with `calBl` each story day of the Blackroot lasts blSpan(g)
+ * days at its camp. `bl_n` counts the nights slept this story day (0 … blSpan − 1); the story day (bl_day) turns on the morning after
+ * its last night. Its beats (the split, the hollow, the pass) and its night event come on its last day and night, as before; the
+ * nights before it are quiet (Sleep goes straight to the morning). With blSpan 1 (the old calendar, an old save) every day is the last. */
+const blN = (g) => g.flags.bl_n || 0;
+export const blLastDay = (g) => blN(g) >= blSpan(g) - 1;
+const sleepTo = (g) => (blLastDay(g) ? 'bl_night' : 'bl_morning');
+const stakesDay = daily('bl_stakes'); // v0.11.222 (RV2, SQ): the ring's day key, as before
 const hubFor = (g) => ({ rr: 'rr_hub', dw: 'dw_hub', ah: 'ah_hub' }[region(g)]);
 const late = (g) => hour(g) >= 19;
 /** v0.11.123 (EQ1, SC; Fable's D1 lead-in): Ya's word when Mei Lin takes James to the far end of the raft and Ya likes him too. */
@@ -299,6 +307,7 @@ export const BLACKROOT = {
             if (storyDay(g) < 11) g.minutes = calMinutes(g, 11, 6);
             g.flags.bl_region = 'rr';
             g.flags.bl_day = 1;
+            g.flags.bl_n = 0; // v0.11.222 (J2, MH)
             g.flags.mei_party = true;
             g.flags.ya_party = true;
             return [];
@@ -332,8 +341,8 @@ Before noon you come to the first of the roots: grey-white, smooth as bone, broa
             { text: 'Scout ahead with Ya.', show: (g) => !late(g), time: 20, to: 'rr_scout' },
             { text: 'Put your hand flat on the root and listen.', show: (g) => !g.flags.rr_listened && !late(g), time: 30, to: 'rr_roots' },
             ...hubChoices('rr_hub'),
-            { text: 'Make camp on the root.', show: (g) => bday(g) === 1 && hour(g) >= 16, time: 20, to: 'bl_camp' },
-            { text: 'Push on to the end of the road. To the split.', show: (g) => bday(g) >= 2, time: 60, to: 'rr_end' },
+            { text: 'Make camp on the root.', show: (g) => (bday(g) === 1 || !blLastDay(g)) && hour(g) >= 16, time: 20, to: 'bl_camp' },
+            { text: 'Push on to the end of the road. To the split.', show: (g) => bday(g) >= 2 && blLastDay(g), time: 60, to: 'rr_end' },
         ],
     },
     ya_mocks: {
@@ -577,9 +586,9 @@ You find a raft of fallen trunks jammed between two trees, high enough and dry e
             { text: 'Hunt.', show: (g) => optionLeft(g, 'dw_hunt') && !late(g), time: 15, to: 'dw_hunt' },
             { text: 'Look at the carvings on the drowned shrine.', show: (g) => !g.flags.dw_carving && !late(g), time: 30, to: 'dw_scout' },
             ...hubChoices('dw_hub'),
-            { text: 'Cross the mourning hollow.', show: (g) => !g.flags.drowned_done, time: 40, to: 'dw_hollow' },
+            { text: 'Cross the mourning hollow.', show: (g) => !g.flags.drowned_done && blLastDay(g), time: 40, to: 'dw_hollow' }, // v0.11.222 (RV2, HD): on the wood's last day, as the split and the pass
             { text: 'The hot spring Ya found.', show: (g) => !!g.flags.drowned_done && !g.flags.spring_done, time: 30, to: 'hot_spring' },
-            { text: 'Make camp at the wood\'s edge.', show: (g) => !!g.flags.drowned_done && hour(g) >= 16, time: 20, to: 'bl_camp' },
+            { text: 'Make camp at the wood\'s edge.', show: (g) => (!!g.flags.drowned_done || !blLastDay(g)) && hour(g) >= 16, time: 20, to: 'bl_camp' },
         ],
     },
     dw_forage: {
@@ -802,8 +811,8 @@ She doesn't mean a word. All of you can hear that she doesn't, and it helps nobo
             { text: 'Hunt.', show: (g) => optionLeft(g, 'ah_hunt') && !late(g), time: 15, to: 'ah_hunt' },
             { text: 'Climb to the cairn on the high ridge.', show: (g) => !g.flags.ah_cairn && !late(g), time: 40, to: 'ah_scout' },
             ...hubChoices('ah_hub'),
-            { text: 'Make camp in the lee of a ridge.', show: (g) => bday(g) <= 4 && hour(g) >= 16, time: 20, to: 'bl_camp' },
-            { text: 'Climb to the pass. The rot-ape.', show: (g) => bday(g) >= 5, time: 60, to: 'ah_ridge_end' },
+            { text: 'Make camp in the lee of a ridge.', show: (g) => (bday(g) <= 4 || !blLastDay(g)) && hour(g) >= 16, time: 20, to: 'bl_camp' },
+            { text: 'Climb to the pass. The rot-ape.', show: (g) => bday(g) >= 5 && blLastDay(g), time: 60, to: 'ah_ridge_end' },
         ],
     },
     ah_forage: {
@@ -1129,9 +1138,9 @@ ${likesMei(g) && likesYa(g) ? '"She looked at me today," she says, low. "The her
 ${pantry(g)}`,
         choices: [
             { text: 'Cook and eat.', show: (g) => foodCount(g) > 0 && daily('bl_cook')(g), time: 30, do: (g) => { markDaily(g, 'bl_cook'); const out = eatBest(g, { fire: true }); return /, cooked\./.test(out[0] || '') ? [...out, DR_COOK(g)] : out; } /* RV1 (L4): the party's word only after a cooked meal */, to: 'bl_camp' },
-            { text: 'Sing a ring of bone stakes around the camp.', show: daily('bl_stakes'), qi: 3, check: { skill: 'Convergence Use', dc: 4 }, time: 15, do: (g) => { markDaily(g, 'bl_stakes'); g.flags.bl_stakes_night = true; return [DR_STAKES(g)]; }, failDo: (g) => { markDaily(g, 'bl_stakes'); g.flags.bl_stakes_night = false; return ['The stakes come up soft. Ya knocks one flat with her foot.']; }, to: 'bl_camp' },
+            { text: 'Sing a ring of bone stakes around the camp.', show: Object.assign((g) => stakesDay(g) && blLastDay(g), { dailyKey: 'bl_stakes' }), /* v0.11.222 (RV2, SQ): only on the story's night (none comes on a quiet one) */ qi: 3, check: { skill: 'Convergence Use', dc: 4 }, time: 15, do: (g) => { markDaily(g, 'bl_stakes'); g.flags.bl_stakes_night = true; return [DR_STAKES(g)]; }, failDo: (g) => { markDaily(g, 'bl_stakes'); g.flags.bl_stakes_night = false; return ['The stakes come up soft. Ya knocks one flat with her foot.']; }, to: 'bl_camp' },
             { text: 'Sit by the fire with the others.', show: daily('bl_fire'), time: 20, to: 'bl_fireside' },
-            { text: 'Sleep.', to: 'bl_night' },
+            { text: 'Sleep.', to: sleepTo },
         ],
     },
     // v0.11.129 (CB1, BF; CS1, BF2; Fable's MAINs): the loose ring and the dw night's settling count four with the human
@@ -1178,13 +1187,13 @@ ${both(g) ? 'Ya has put herself between you and Mei Lin with an arm hooked round
 "Obviously," says Ya. "Who else would I go anywhere with?"`;
         },
         choices: [
-            { text: 'Sit beside Mei Lin.', show: (g) => region(g) !== 'ah', do: (g) => { bumpRel(g, 'Mei Lin', 2, 3); return []; }, to: 'bl_night' },
-            { text: 'Sit beside Ya.', show: (g) => region(g) !== 'ah', do: (g) => { bumpRel(g, 'Ya', 2, 3); return []; }, to: 'bl_night' },
-            { text: 'Sit between them, and see what happens.', show: (g) => region(g) !== 'ah' && both(g), do: (g) => { bumpRel(g, 'Mei Lin', 1, 2); bumpRel(g, 'Ya', 1, 2); return [DR_BETWEEN(g)]; }, to: 'bl_night' },
+            { text: 'Sit beside Mei Lin.', show: (g) => region(g) !== 'ah', do: (g) => { bumpRel(g, 'Mei Lin', 2, 3); return []; }, to: sleepTo },
+            { text: 'Sit beside Ya.', show: (g) => region(g) !== 'ah', do: (g) => { bumpRel(g, 'Ya', 2, 3); return []; }, to: sleepTo },
+            { text: 'Sit between them, and see what happens.', show: (g) => region(g) !== 'ah' && both(g), do: (g) => { bumpRel(g, 'Mei Lin', 1, 2); bumpRel(g, 'Ya', 1, 2); return [DR_BETWEEN(g)]; }, to: sleepTo },
             { text: 'Ya\'s hand finds yours and pulls toward the dark. Let it.', show: (g) => region(g) === 'ah' && (onlyYa(g) || both(g)) && !g.flags.ya_romance, to: 'ya_romance' }, // v0.11.122 (LG1, BC): also when both like him
             { text: 'Stay up with Mei Lin after the others sleep.', show: (g) => region(g) === 'ah' && onlyMei(g) && !g.flags.mei_bond, to: 'mei_bond' },
             { text: 'Take the first watch together, all of you.', show: (g) => region(g) === 'ah' && !both(g) && !g.flags.bl_friends, to: 'friends_watch' },
-            { text: 'Sleep.', to: 'bl_night' },
+            { text: 'Sleep.', to: sleepTo },
             { text: 'When the fire burns low, follow Mei Lin to the far end of the raft.', show: (g) => region(g) === 'dw' && likesMei(g) && !g.flags.mei_raft, to: 'mei_raft' }, // v0.11.123 (EQ1, SC; Fable's D1): Mei Lin's Blackroot night, once a Coil; last, so saved choice positions keep their lines
         ],
     },
@@ -1204,7 +1213,7 @@ Her jacket follows, in time, after negotiations involving several buckles and on
 
 Much later Ya is dozing with her face in your neck and one bare leg slung across you, snoring a little, like a wolf-pup. From somewhere close by, Yuki passes one aggrieved thought down the bond: *I am going to need to be compensated for this.*`,
         choices: [
-            { text: 'Sleep, eventually.', show: (g) => !g.flags.yr_day, to: 'bl_night' },
+            { text: 'Sleep, eventually.', show: (g) => !g.flags.yr_day, to: sleepTo },
             { text: 'Find your clothes. Catch up with the others.', show: (g) => !!g.flags.yr_day, do: (g) => { g.flags.yr_day = false; return ['Mei Lin gives your hair a single look, learns everything from it, and walks on in silence.']; }, to: hubFor },
         ],
     },
@@ -1225,7 +1234,7 @@ Much later Ya is dozing with her face in your neck and one bare leg slung across
 
 "I mean it. I'll knock you down. I've watched Ya do it. It looks easy."`,
         choices: [
-            { text: 'Sleep with her head on your chest.', show: (g) => !g.flags.mb_day, to: 'bl_night' },
+            { text: 'Sleep with her head on your chest.', show: (g) => !g.flags.mb_day, to: sleepTo },
             { text: 'Catch up with the others, eventually.', show: (g) => !!g.flags.mb_day, do: (g) => { g.flags.mb_day = false; return []; }, to: hubFor },
         ],
     },
@@ -1255,7 +1264,7 @@ Much later she lies along you with her hair loose over your arm, listening to th
 "You do."
 
 "Stop agreeing with me. It's unsettling." She is asleep before you are. From the fire, through the bond: *The raft moves when you do. All of it. I want that on the record.*`,
-        choices: [{ text: 'Sleep. Let the swamp do the dripping.', to: 'bl_night' }],
+        choices: [{ text: 'Sleep. Let the swamp do the dripping.', to: sleepTo }],
     },
     friends_watch: {
         id: 'friends_watch', title: 'Watch', art: 'night_watch', place: PLACE.ah,
@@ -1265,7 +1274,7 @@ Much later she lies along you with her hair loose over your arm, listening to th
 Ya teaches Mei Lin a filthy song in a language no one else alive speaks. Mei Lin teaches Ya the correct bow to an elder, and then the correct bow to an enemy, which is the same bow with the eyes kept up. Ya has never heard anything funnier, and spends an hour practising it on a rock. Yuki remarks, to nobody, that you kept the last of the meat warm for whoever came off watch, as you always do; you say it was in the way.
 
 You tell them about the stars, and which of them yours might lie near. Ya says hers is the one that looks like a wolf. Mei Lin says Ashfall has no star of its own, and then, after a while, quietly: "Maybe it should."`,
-        choices: [{ text: 'Sleep, at last.', to: 'bl_night' }],
+        choices: [{ text: 'Sleep, at last.', to: sleepTo }],
     },
     bl_night: {
         dayKey: (g) => `bl_night:${region(g)}`, // v0.11.135 (NT1): by region
@@ -1350,7 +1359,7 @@ ${likesMei(g) ? `Mei Lin does not pretend to be asleep tonight. She gets up, bri
         enter: (g) => {
             const lines = [];
             if (hour(g) < 6 || hour(g) >= 19) lines.push(nightRest(g)); // v0.11.92 (O1): half back after a night fight
-            g.flags.bl_day = bday(g) + 1;
+            if (blN(g) + 1 >= blSpan(g)) { g.flags.bl_n = 0; g.flags.bl_day = bday(g) + 1; } else g.flags.bl_n = blN(g) + 1; // v0.11.222 (J2, MH): the story day turns after its last night
             g.flags.bl_stakes_night = false; // v0.11.25: the stakes last one night
             const out = eatBest(g, { fire: true });
             lines.push(out.length ? `Breakfast. ${out[0]}` : 'No breakfast. Ya holds out a grub on the flat of her knife. You decline. For now.');
@@ -1365,8 +1374,11 @@ ${likesMei(g) ? `Mei Lin does not pretend to be asleep tonight. She gets up, bri
         choices: [
             { text: 'Get moving.', show: (g) => bday(g) === 2, to: 'rr_hub' },
             { text: 'Get moving.', show: (g) => bday(g) === 3, to: 'dw_hub' },
-            { text: 'Climb out of the water into the hills.', show: (g) => bday(g) === 4, to: 'ah_enter' },
+            { text: 'Climb out of the water into the hills.', show: (g) => bday(g) === 4 && region(g) === 'dw', to: 'ah_enter' },
             { text: 'Get moving.', show: (g) => bday(g) >= 5, to: 'ah_hub' },
+            // v0.11.222 (J2, MH): the quiet mornings within a story day (appended, so the marked choices keep their places)
+            { text: 'Get moving.', show: (g) => bday(g) === 1, to: 'rr_hub' },
+            { text: 'Get moving.', show: (g) => bday(g) === 4 && region(g) === 'ah', to: 'ah_hub' },
         ],
     },
 

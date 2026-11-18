@@ -1,0 +1,114 @@
+[
+ {
+  "id": "F1",
+  "file": "js/core/calendar.js",
+  "find": "export const BL_SPAN = 3;",
+  "replace": "export const BL_SPAN = 2;",
+  "note": "two days a story day, not K3"
+ },
+ {
+  "id": "F2",
+  "file": "js/core/calendar.js",
+  "find": ": BL_DAYS.has(d) ? blSpan(g) : 1);",
+  "replace": ": 1);",
+  "note": "the calendar keeps the 5-day road while the camps count three nights"
+ },
+ {
+  "id": "F3",
+  "file": "js/core/game.js",
+  "find": "|| storyDay(g) <= 10 ? BL_SPAN : 1;",
+  "replace": "|| storyDay(g) <= 11 ? BL_SPAN : 1;",
+  "note": "an old save on the Blackroot's first day gets the camps mid-road"
+ },
+ {
+  "id": "F4",
+  "file": "js/core/coil.js",
+  "find": "    if (g.calBl !== undefined) base.calBl = g.calBl; else delete base.calBl;",
+  "replace": "",
+  "note": "a rewind takes the snapshot's calBl (an old save's fill lost)"
+ },
+ {
+  "id": "F5",
+  "file": "js/core/game.js",
+  "find": "{ g.cal = LONG_CAL; g.calBl = BL_SPAN; }",
+  "replace": "{ g.cal = LONG_CAL; }",
+  "note": "new games keep the 5-day road (blFill only on load)"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/act1_blackroot.js",
+  "find": "export const blLastDay = (g) => blN(g) >= blSpan(g) - 1;",
+  "replace": "export const blLastDay = (g) => blN(g) >= blSpan(g);",
+  "note": "the last day never comes: no split, no pass, no story night"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/act1_blackroot.js",
+  "find": "const sleepTo = (g) => (blLastDay(g) ? 'bl_night' : 'bl_morning');",
+  "replace": "const sleepTo = (g) => 'bl_night';",
+  "note": "every night a story night (15 night events)"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/act1_blackroot.js",
+  "find": "show: (g) => bday(g) >= 2 && blLastDay(g), time: 60, to: 'rr_end' }",
+  "replace": "show: (g) => bday(g) >= 2, time: 60, to: 'rr_end' }",
+  "note": "the split on day 12's first day"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/act1_blackroot.js",
+  "find": "show: (g) => (!!g.flags.drowned_done || !blLastDay(g)) && hour(g) >= 16,",
+  "replace": "show: (g) => !!g.flags.drowned_done && hour(g) >= 16,",
+  "note": "no quiet camps in the wood before the hollow"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/act1_blackroot.js",
+  "find": "if (blN(g) + 1 >= blSpan(g)) { g.flags.bl_n = 0;",
+  "replace": "if (blN(g) + 1 > blSpan(g)) { g.flags.bl_n = 0;",
+  "note": "four mornings a story day"
+ },
+ {
+  "id": "F11",
+  "file": "js/story/act1_blackroot.js",
+  "find": "{ text: 'Get moving.', show: (g) => bday(g) === 4 && region(g) === 'ah', to: 'ah_hub' },",
+  "replace": "{ text: 'Get moving.', show: (g) => bday(g) === 4, to: 'ah_hub' },",
+  "note": "two ways on out of the wood (the hills' hub skipping ah_enter)"
+ },
+ {
+  "id": "F12",
+  "file": "js/core/game.js",
+  "find": "if (!g || g.cal !== LONG_CAL || g.calBl !== undefined) return g;",
+  "replace": "if (!g || g.calBl !== undefined) return g;",
+  "note": "old-calendar saves get calBl"
+ },
+ {
+  "id": "F13",
+  "file": "js/story/act1_blackroot.js",
+  "find": "show: (g) => bday(g) >= 5 && blLastDay(g), time: 60, to: 'ah_ridge_end' }",
+  "replace": "show: (g) => bday(g) >= 5, time: 60, to: 'ah_ridge_end' }",
+  "note": "the pass on day 15's first day"
+ },
+ {
+  "id": "F14",
+  "file": "js/story/act1_blackroot.js",
+  "find": "show: (g) => !g.flags.drowned_done && blLastDay(g), time: 40, to: 'dw_hollow' }",
+  "replace": "show: (g) => !g.flags.drowned_done, time: 40, to: 'dw_hollow' }",
+  "note": "RV2 HD undone: the hollow on any wood day (the review's M1)"
+ },
+ {
+  "id": "F15",
+  "file": "js/story/act1_blackroot.js",
+  "find": "show: Object.assign((g) => stakesDay(g) && blLastDay(g), { dailyKey: 'bl_stakes' }),",
+  "replace": "show: Object.assign((g) => stakesDay(g), { dailyKey: 'bl_stakes' }),",
+  "note": "RV2 SQ undone: the ring on quiet nights (the review's L3)"
+ },
+ {
+  "id": "F16",
+  "file": "js/story/act1_blackroot.js",
+  "find": "show: Object.assign((g) => stakesDay(g) && blLastDay(g), { dailyKey: 'bl_stakes' }),",
+  "replace": "show: (g) => stakesDay(g) && blLastDay(g),",
+  "note": "RV2 SQ: the ring's day key lost"
+ }
+]
