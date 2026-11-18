@@ -2,6 +2,21 @@
 
 Started 2026-11-18 (v0.11.222), when `history-34.md` would have passed 20 KB with this move (owner pick U1, MD: history parts start at 20 KB, so a push uploads less). Older parts: `history-34.md` … `history.md`.
 
+## Moved from the handover in v0.11.223 (word for word)
+
+*(the decision)*
+
+- **v0.11.220: OR1 and the realm kept moved up (the owner 11:29 "order the open/unordered items to corresponding parts on the roadmap, then give me the current open roadmap items"; the options at about 11:31: MT 14 items as t's queue, MF 2 to group f, MR 9 to the retune, M4 2 to section 4, MD 5 closed; **OR1 🟢 MT + MF + MR + M4 + MD (recommended) / OR2 🟡 MT + MD / OR3 🟠 MT**; 11:34 "OR1 go", with KA moved after t):** built as picked. For the size rule, group f's done item (Yuki's love-life talk, done in v0.11.122) and the v0.11.216 order line moved word for word to `roadmap-done-4.md`. The v0.11.209 line's "the screen jumping to the top" stays in t's queue to check first (v0.11.210 kept the scroll on the same screen).
+
+*(the version notes)*
+
+## v0.11.220 — The open items sorted into their parts (OR1); the realm kept moved up (docs only)
+
+- **Files:** `project/roadmap-time.md` (t's queue; the owner's 11:34 words; the moved items out), `roadmap.md` (the order line with KA second; group f's TS5 items; section 0's next line), `roadmap-retune.md` (a block from `roadmap-time.md`), `roadmap-2.md` (section 4: two UI items), `roadmap-act2.md` (KA's line marked moved up), `roadmap-done-4.md` (the decided and done items, group f's done item, the v0.11.216 order line), `handover.md`, `changelog.md`, `restore-points.md`, `history-34.md` (v0.11.217's notes and decision moved), `changelog-5.md` (0.11.195–0.11.197, the size rule), `sw.js` (VERSION), `tests/tools.test.mjs` (the OR1 block; the retune hash up to the new block; T1 and the order test move on).
+- **What:** see the version line. No game change (no What's new line).
+- **Checks:** docs only (rule 2): the tools test and `bash tools/check.sh quick`; only the docs tests read these files.
+- **Fable:** not used. **Opus:** no cold review (rule 9).
+
 ## Moved from the handover in v0.11.222 (word for word)
 
 *(the open items as they stood)*

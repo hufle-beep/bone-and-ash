@@ -43,3 +43,8 @@ Open items of section 2, moved word for word in v0.11.178, owner pick U1 (MD: th
 - *(moved in v0.11.220 from `roadmap-time.md`'s v0.11.205 line, word for word; owner pick OR1)* **Open, options later (from v0.11.203, the review):** L4, the Fallout's farewell opens after midnight on the night before its day (both calendars: `lastOfWeek` and `dd` read the clock's day, not the text day; fixing it changes the old calendar, numbers first).
 - *(moved in v0.11.220 from `roadmap-time.md`'s v0.11.213 line, word for word; owner pick OR1)* the long-calendar Sociable bots' Mei Lin last nights 2 → 0 (10 games; for TS7, the retune).
 - *(new in v0.11.222, TS9's HN; open, options later)* **The rot-ape on a longer road:** with the Blackroot's camps three days a story day (MH + K3) the ape's deaths fell to 0 for all four bots (15 of 55 / 9 of 49 / 5 of 45 / 0 of 40 on the 5-day road; scratch builds, 40 games each, long calendar), the Cultivator's realm at Act 1's end Golden Core → Origin Core: the journey's only real danger gone; its strength (and the wyrm's) for the retune.
+
+## Moved here from `roadmap-time.md` in v0.11.223 (word for word; owner pick RO1)
+
+- *(from the v0.11.221 line)* **From the review, for the owner (no fault):** every wilds card's familiarity rises together (transfer, the drill share), so a Practised week (familiarity 7) is a Skilled one within a day (19 runs): "Practised unchanged" holds near familiarity 2; a card can cross into Skilled by another card's run and read as closed that day (L2);
+- *(from v0.11.214's review, word for word from `history-33.md`; for the retune's tools)* The long-calendar bot step 58 → 136 s (the probes and the cards they tap).
