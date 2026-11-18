@@ -1,0 +1,114 @@
+[
+ {
+  "id": "F1",
+  "file": "js/core/week.js",
+  "find": "const newPlan = (g) => ({ hub: g.scene, coil: coilKey(g), lastDay: weekLastDay(g), ...planStart(g, g.scene),",
+  "replace": "const newPlan = (g) => ({ hub: g.scene, coil: coilKey(g), lastDay: weekLastDay(g), items: {}, med: MED_ZERO(), doors: { ...DOOR_START },",
+  "note": "nothing kept: every week starts empty (the old start)"
+ },
+ {
+  "id": "F2",
+  "file": "js/core/week.js",
+  "find": "const kp = keepHere(g, p.hub, p); // KC1 (KA)",
+  "replace": "const kp = {}; // KC1 (KA)",
+  "note": "a count set is not kept"
+ },
+ {
+  "id": "F3",
+  "file": "js/core/week.js",
+  "find": "    if (grp === 'card') { if (p.items?.[k] > 0) { p.items[k] -= 1; if (p.items[k] <= 0) delete p.items[k]; } return; }",
+  "replace": "    if (grp === 'card') { if (p.items?.[k] > 0) { p.items[k] -= 1; const kk = keepHere(g, p.hub); if (kk) kk[k] = p.items[k] || 0; if (p.items[k] <= 0) delete p.items[k]; } return; }",
+  "note": "a read tap's countdown changes what is kept (what is left, not as set)"
+ },
+ {
+  "id": "F4",
+  "file": "js/core/week.js",
+  "find": "    t.keep[p.hub] = Object.fromEntries(Object.keys(DOOR_START).map((s) => [`door:${s}`, 0])); // KC1 (KA): Clear is kept (Yuki's row too)",
+  "replace": "    delete t.keep[p.hub];",
+  "note": "Clear not kept: Yuki's row back at 1 next week"
+ },
+ {
+  "id": "F5",
+  "file": "js/core/week.js",
+  "find": "function keepTaken(g, hub, s) { const k = keepHere(g, hub); if (k && (Number(k[`door:${s}`]) || 0) > 0) k[`door:${s}`] = 0; }",
+  "replace": "function keepTaken(g, hub, s) { }",
+  "note": "a one-off door taken stays 1 in what is kept"
+ },
+ {
+  "id": "F6",
+  "file": "js/core/coil.js",
+  "find": ", ...(g.tasks.keep && typeof g.tasks.keep === 'object' ? { keep: clone(g.tasks.keep) } : {}) };",
+  "replace": " };",
+  "note": "a rewind drops the kept counts (KS, not KG)"
+ },
+ {
+  "id": "F7",
+  "file": "js/core/week.js",
+  "find": "    const p = planView(g); // KC1: with no plan yet this week, the kept amounts",
+  "replace": "    const p = planHere(g); // KC1: with no plan yet this week, the kept amounts",
+  "note": "the screen's counts 0 before the week's plan"
+ },
+ {
+  "id": "F8",
+  "file": "js/core/week.js",
+  "find": "        else if (!/^(med|door):/.test(key)) { const v = clampN(n, 9); if (v) items[key] = v; }",
+  "replace": "        else if (!/^(med|door):/.test(key)) { const v = Math.round(Number(n)) || 0; if (v) items[key] = v; }",
+  "note": "kept card counts not clamped"
+ },
+ {
+  "id": "F9",
+  "file": "js/core/week.js",
+  "find": "export function noteCardDone(g, tap, r) { if (tap && !r?.skipped) keepTaken(g, tap.hub, tap.s); }",
+  "replace": "export function noteCardDone(g, tap, r) { if (tap) keepTaken(g, tap.hub, tap.s); }",
+  "note": "a one-off tapped but skipped by the routine: kept 0 for good (RV1, LS)"
+ },
+ {
+  "id": "F10",
+  "file": "js/core/week.js",
+  "find": "    const p = planEnsure(g); if (!p) return null; // KC1: a week not started yet shows the kept counts, so Clear makes its plan",
+  "replace": "    const p = planHere(g); if (!p) return null; // KC1: a week not started yet shows the kept counts, so Clear makes its plan",
+  "note": "Clear with no plan yet does nothing (the kept counts stay)"
+ },
+ {
+  "id": "F11",
+  "file": "js/core/week.js",
+  "find": "    for (const [id, n] of Object.entries(p.items || {})) if (n > 0) o[id] = n; // an old save's plan: its counts as they stand",
+  "replace": "",
+  "note": "an old save's cards lost on its first change"
+ },
+ {
+  "id": "F12",
+  "file": "js/main.js",
+  "find": "const p = planHere(g), pv = planView(g) || p;",
+  "replace": "const p = planHere(g), pv = p;",
+  "note": "the panel shows 0 before the week's plan"
+ },
+ {
+  "id": "F13",
+  "file": "js/core/week.js",
+  "find": "const k0 = Number(kp[key]) || 0, kv = Math.max(0, Math.min(9, k0 + v - was));",
+  "replace": "const k0 = Number(kp[key]) || 0, kv = Math.max(0, Math.min(9, v));",
+  "note": "a count changed mid-week keeps what is left (the review's M1, RV1 MK)"
+ },
+ {
+  "id": "F14",
+  "file": "js/core/week.js",
+  "find": "        if (!was && v) delete kp[key];\n",
+  "replace": "",
+  "note": "a card set again keeps its old place in the kept order (L1, RV1 LO)"
+ },
+ {
+  "id": "F15",
+  "file": "js/core/week.js",
+  "find": "    const h = planEmptyShown(g, scenes, p) ? null : planHours(g, scenes, p, fc);",
+  "replace": "    const h = planEmpty(p) ? null : planHours(g, scenes, p, fc);",
+  "note": "\"Cards 0 m\" for a hidden kept card (L2, RV1 LE)"
+ },
+ {
+  "id": "F16",
+  "file": "js/core/week.js",
+  "find": "    return planEmpty({ items: Object.fromEntries(Object.entries(p.items || {}).filter(([id]) => on.has(id))), med: p.med });",
+  "replace": "    return planEmpty(p);",
+  "note": "a hidden kept card makes \"Run the week\" and Clear (L2, RV1 LE)"
+ }
+]

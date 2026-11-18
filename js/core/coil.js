@@ -150,7 +150,7 @@ export function rewind(g, { to = 'act' } = {}) {
     }
     if (g.rel.Yuki) rel.Yuki = clone(g.rel.Yuki);
     base.rel = rel;
-    base.tasks = { queue: [], fam: clone(g.tasks.fam || {}), use: clone(g.tasks.use || {}), adapt: clone(g.tasks.adapt || {}), yuki: { on: !!g.tasks.yuki?.on, progress: 0 }, ...(g.tasks.prio && typeof g.tasks.prio === 'object' ? { prio: clone(g.tasks.prio) } : {}) }; // v0.11.211 (owner pick PK1): the plan's places kept for good
+    base.tasks = { queue: [], fam: clone(g.tasks.fam || {}), use: clone(g.tasks.use || {}), adapt: clone(g.tasks.adapt || {}), yuki: { on: !!g.tasks.yuki?.on, progress: 0 }, ...(g.tasks.prio && typeof g.tasks.prio === 'object' ? { prio: clone(g.tasks.prio) } : {}), ...(g.tasks.keep && typeof g.tasks.keep === 'object' ? { keep: clone(g.tasks.keep) } : {}) }; // v0.11.219 (owner pick KC1, KG): the plan's counts kept for good too // v0.11.211 (owner pick PK1): the plan's places kept for good
     base.stats = clone(g.stats);
     if (whole) { base.stats.pass = c.n + 1; delete base.stats.passUnknown; } // v0.11.72 (T1): the whole game again starts a new pass
     if (g.picked) base.picked = clone(g.picked); // v0.11.32 (P2-a): picked choices are remembered across every rewind

@@ -1,0 +1,58 @@
+[
+ {
+  "id": "R1",
+  "file": "js/core/week.js",
+  "find": "if (!doorRepeats(s)) { p.doors[s] = 0; keepTaken(g, hub, s); }",
+  "replace": "if (!doorRepeats(s)) { p.doors[s] = 0; }",
+  "note": "the run's own one-off door taken: kept stays 1 (only the hand and read-tap paths tested)"
+ },
+ {
+  "id": "R2",
+  "file": "js/core/week.js",
+  "find": "COOK_PLAN.row = (g, s) => { const p = planHere(g);",
+  "replace": "COOK_PLAN.row = (g, s) => { const p = planView(g);",
+  "note": "(updated for RV1, HB) the kept cook row holds the pot with no plan this week (the review's H1)"
+ },
+ {
+  "id": "R3",
+  "file": "js/core/week.js",
+  "find": "    const p = planView(g), fc = forecastNow(g, scenes), items = p?.items || {}, med = p?.med || {};",
+  "replace": "    const p = planHere(g), fc = forecastNow(g, scenes), items = p?.items || {}, med = p?.med || {};",
+  "note": "the panel's notes blank before the week's plan (kept counts shown without their forecast or hours)"
+ },
+ {
+  "id": "R4",
+  "file": "js/core/week.js",
+  "find": "    const p = planView(g), open = new Map(",
+  "replace": "    const p = planHere(g), open = new Map(",
+  "note": "a kept door row (closed now) hidden before the week's plan"
+ },
+ {
+  "id": "R5",
+  "file": "js/core/week.js",
+  "find": "const p = planView(g); // KC1\n    const { shown }",
+  "replace": "const p = planHere(g); // KC1\n    const { shown }",
+  "note": "the order's places shown from an empty plan before the week's plan"
+ },
+ {
+  "id": "R6",
+  "file": "js/core/week.js",
+  "find": "planOrder(g, p || planView(g), {",
+  "replace": "planOrder(g, p, {",
+  "note": "a place set before the week's plan reads the old empty order"
+ },
+ {
+  "id": "R7",
+  "file": "js/main.js",
+  "find": "const empty = planEmptyShown(g, SCENES, pv);",
+  "replace": "const empty = planEmptyShown(g, SCENES, p);",
+  "note": "(updated for RV1, LE) the button says Rest out the week over kept cards before the week's plan"
+ },
+ {
+  "id": "R8",
+  "file": "js/core/week.js",
+  "find": "    const p = planView(g), fc = forecastNow(g, scenes), items = p?.items || {}, med = p?.med || {};",
+  "replace": "    const p = planEnsure(g), fc = forecastNow(g, scenes), items = p?.items || {}, med = p?.med || {};",
+  "note": "drawing the panel saves the week's plan (looking writes the save)"
+ }
+]

@@ -5203,7 +5203,8 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       }
       assert(stops.at(-1) === 'week' && !back && Object.keys(g.tasks.plan.items).length === 0, `${T}: the plan ends with its week, every card run, the clock forward (${stops.join(' ')})`);
       assert(stops.filter((x) => x === 'evening').length >= 5, `${T}: it stops for the camp's night (watch or sleep) and goes on (${stops.filter((x) => x === 'evening').length})`);
-      const p2 = Wk.planEnsure(g); assert(p2 && Wk.planEmpty(p2) && p2.lastDay > g.tasks.plan.lastDay - 7 && Wk.runWeek(g, SCENES).days.some((d) => d.lines.includes('The rest of the day off.')), `${T}: an empty plan rests out the next week`); }
+      const p2 = Wk.planEnsure(g); assert(p2 && pc.slice(0, 3).every((c) => p2.items[c.id] === 1) && p2.med.mer === 1 && p2.med.sit === Wk.MED_MAX.sit, `${T} (v0.11.219, KC1): the next week starts with the counts as set (${JSON.stringify(p2.items)})`);
+      Wk.planClear(g); assert(Wk.planEmpty(p2) && p2.lastDay > g.tasks.plan.lastDay - 7 && Wk.runWeek(g, SCENES).days.some((d) => d.lines.includes('The rest of the day off.')), `${T}: an empty plan rests out the next week`); }
     // RV1 (the Opus review's H1, M1, M2, L1–L7 and TG1–TG11)
     { const R = 'W1 RV1';
       const fresh = (seed, h = 7, m = 0, day = 1) => { const g = at(7, seed); g.minutes = day * 1440 + h * 60 + m; return g; };
@@ -5839,13 +5840,14 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         const idOf = (id) => (Tk.CF1.on ? id : String(id).replace(/^week:carry:.*/, 'week:carry'));
         const canon = (v) => (Array.isArray(v) ? `[${v.map(canon).join(',')}]` : v && typeof v === 'object' ? `{${Object.keys(v).sort().map((k) => `${JSON.stringify(k)}:${canon(v[k])}`).join(',')}}` : JSON.stringify(v)); // switched off: keys sorted (a record's place among a save's keys is no rule)
         const ser = (o) => (Tk.CF1.on ? JSON.stringify(o) : canon(o));
+      const noKeep = (g) => { if (!g.tasks?.keep) return g; const c = JSON.parse(JSON.stringify(g)); delete c.tasks.keep; return c; }; // v0.11.219 (KC1): the kept counts are the save's only change in these runs
       const pin = (g) => { const ids = [], lines = []; const onStep = (cg, l) => { if (l) ids.push(`${cg.minutes}:${idOf(l.id)}${l.r.skipped ? '~' : ''}`); };
         const go = () => { const r = Wk.runWeek(g, SCENES, { onStep }); for (const d of r.days) lines.push(...d.lines); return r; };
         let r = go(); const stops = [r.stop];
         for (let k = 0; k < 60 && ['evening', 'door'].includes(r.stop); k++) {
             const v = sceneView(g, SCENES); const open = v.choices.filter((c) => !c.disabled && c.index < 1000 && !/^(Yuki: change form|Story Mode only)/.test(c.label)); if (!open.length || g.combat) break;
             Wk.storyTap(g, SCENES, open[0].index); if (g.combat) break; if (Wk.afterStory(g, SCENES).resume) { r = go(); stops.push(r.stop); } }
-        return Gm.fnv1a(ser({ ids, lines, stops, g: v214(g) })); };
+        return Gm.fnv1a(ser({ ids, lines, stops, g: v214(noKeep(g)) })); };
       const build = () => { const out = {};
       { const g = deserialize(readFileSync(new URL('../saves/v0.11.204-long-wilds-day2.json', import.meta.url), 'utf8'), { force: true }); g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 30); Gm.addItem(g, 'hare_raw', 2);
         for (const [k, n] of [['wild_train:1', 2], ['wild_forage:0', 2], ['med:sit', 3], ['med:mer', 2], ['med:qi', 2], ['med:pres', 1]]) Wk.planSet(g, k, n); out.wilds = pin(g); }
@@ -6022,7 +6024,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         const idOf = (id) => (Tk.CF1.on ? id : String(id).replace(/^week:carry:.*/, 'week:carry'));
         const canon = (v) => (Array.isArray(v) ? `[${v.map(canon).join(',')}]` : v && typeof v === 'object' ? `{${Object.keys(v).sort().map((k) => `${JSON.stringify(k)}:${canon(v[k])}`).join(',')}}` : JSON.stringify(v)); // switched off: keys sorted (a record's place among a save's keys is no rule)
         const ser = (o) => (Tk.CF1.on ? JSON.stringify(o) : canon(o));
-      const strip = (g) => { const c = v214(JSON.parse(JSON.stringify(g))); const q = c.tasks?.plan; if (q) { delete q.med.rest; if (q.done) delete q.done.rest; } return c; };
+      const strip = (g) => { const c = v214(JSON.parse(JSON.stringify(g))); if (c.tasks) delete c.tasks.keep; /* v0.11.219 (KC1) */ const q = c.tasks?.plan; if (q) { delete q.med.rest; if (q.done) delete q.done.rest; } return c; };
       const pin = (g) => { const ids = [], lines = []; const onStep = (cg, l) => { if (l) ids.push(`${cg.minutes}:${idOf(l.id)}${l.r.skipped ? '~' : ''}`); };
         const go = () => { const r = Wk.runWeek(g, SCENES, { onStep }); for (const d of r.days) lines.push(...d.lines); return r; };
         let r = go(); const stops = [r.stop];
@@ -6520,6 +6522,122 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         { const h = mk(hub, sd, act); h.flags[flag] = true; h.flags[`${flag}_next`] = 0; choose(h, SCENES, ci(hub)); h.flags[`${flag}_v`] = 9; const vil = h.rel.Village.f;
           const tx = sceneView(h, SCENES).text; choose(h, SCENES, 0);
           assert(tx === F.text && h.rel.Village.f === vil + 3, `${T} (RV1, L5): ${hub}: a bad repeat number: the first scene and its gain together`); }
+    }
+}
+// v0.11.219 (owner pick KC1 = KA + KG, 2026-11-17 20:14; the owner 20:02 "other than the order of the scheduled cards, the amount
+// should be saved too, to be adjusted later"): each plan row's amount as set is kept per hub for good (g.tasks.keep[hub], kept by a
+// rewind); a new week's plan starts from it; a run's countdown doesn't change it; a count changed, Clear, or a one-off door taken does.
+{
+    const Gm = await import('../js/core/game.js');
+    const C = await import('../js/core/calendar.js');
+    const Wk = await import('../js/core/week.js');
+    const Tk = await import('../js/core/tasks.js');
+    const Co = await import('../js/core/coil.js');
+    const T = 'KC1 (the plan\'s amounts kept)';
+    const D = 1440;
+    const save = () => { const g = deserialize(readFileSync(new URL('../saves/v0.11.204-long-wilds-day2.json', import.meta.url), 'utf8'), { force: true }); g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 30); return g; };
+    const nextWeek = (g) => { if (g.tasks.plan) g.tasks.plan.lastDay = Tk.workDay(g) - 1; return Wk.planEnsure(g); }; // the week over: the next one's plan
+    // nothing kept (a new game, an old save): the old start, and nothing written by looking
+    { const g = save(); delete g.tasks.plan; delete g.tasks.keep;
+      const v = Wk.planView(g); assert(v && Wk.planEmpty(v) && v.doors.yk_time === 1 && !g.tasks.plan && !('keep' in g.tasks), `${T}: nothing kept: the view is the old start (empty, Yuki's row 1), and no plan or keep saved by looking`);
+      assert(Wk.planCount(g, 'door:yk_time') === 1 && Wk.planCount(g, 'wild_train:1') === 0, `${T}: the counts shown with no plan`); }
+    // KA + KG: the amounts as set start the next week, not what is left; the place's keep only
+    { let g = save(); delete g.tasks.plan; delete g.tasks.keep;
+      Wk.planSet(g, 'wild_train:1', 3); Wk.planSet(g, 'wild_forage:0', 2); Wk.planSet(g, 'med:sit', 4); Wk.planSet(g, 'med:mer', 2); Wk.planSet(g, 'med:pres', 1); Wk.planSet(g, 'med:rest', 1); Wk.planSet(g, 'door:yk_time', 0);
+      const kept = JSON.stringify(g.tasks.keep);
+      assert(g.tasks.keep.wilds['wild_train:1'] === 3 && g.tasks.keep.wilds['med:sit'] === 4 && g.tasks.keep.wilds['door:yk_time'] === 0 && Object.keys(g.tasks.keep).join() === 'wilds', `${T} (KA): each count as set, on its hub (${kept})`);
+      const r = Wk.runWeek(g, SCENES); const left = { ...(Wk.planHere(g)?.items || g.tasks.plan.items) };
+      assert(JSON.stringify(g.tasks.keep) === kept && (left['wild_train:1'] || 0) + (left['wild_forage:0'] || 0) < 5, `${T} (KA): the run counts down the week (${JSON.stringify(left)}, ${r.stop}), the kept amounts unchanged`);
+      const r0 = g; { const h = save(); delete h.tasks.plan; h.tasks.keep = JSON.parse(kept); g = h; } // the run ended at the camp: the next week on the hub
+      const p = nextWeek(g);
+      assert(r0 !== g && p.items['wild_train:1'] === 3 && p.items['wild_forage:0'] === 2 && Object.keys(p.items).join() === 'wild_train:1,wild_forage:0' && p.med.sit === 4 && p.med.mer === 2 && p.med.qi === 0 && p.med.pres === 1 && p.med.rest === 1 && p.doors.yk_time === 0 && !p.running && !p.stop, `${T} (KG): the next week starts with the amounts as set, in the order set (${JSON.stringify(p.items)} ${JSON.stringify(p.med)} ${JSON.stringify(p.doors)})`);
+      Wk.planSet(g, 'wild_train:1', 1); Wk.planSet(g, 'wild_forage:0', 0); const p2 = nextWeek(g);
+      assert(p2.items['wild_train:1'] === 1 && !('wild_forage:0' in p2.items) && !('wild_forage:0' in g.tasks.keep.wilds), `${T} (KA): a count changed is what is kept (${JSON.stringify(p2.items)})`);
+      // KG: a rewind keeps them (as the places), for every later Coil
+      const k0 = JSON.stringify(g.tasks.keep); Co.rewind(g); assert(JSON.stringify(g.tasks.keep) === k0 && !g.tasks.plan, `${T} (KG): a rewind keeps the amounts and drops the week (${JSON.stringify(g.tasks.keep)})`);
+      const h = save(); h.tasks.keep = JSON.parse(k0); delete h.tasks.plan; h.coil = { ...(h.coil || {}), n: (h.coil?.n || 1) + 1 };
+      assert(Wk.planCount(h, 'wild_train:1') === 1 && Wk.planCount(h, 'med:sit') === 4 && Wk.planCount(h, 'door:yk_time') === 0 && !h.tasks.plan, `${T} (KG): a later Coil's stay shows the kept counts before its plan is made`);
+      assert(Wk.planEnsure(h).items['wild_train:1'] === 1, `${T} (KG): and its plan starts with them`); }
+    // Clear is kept (Yuki's row too); a card not open keeps its amount, the run leaves it
+    { const g = save(); delete g.tasks.plan; delete g.tasks.keep; Wk.planSet(g, 'wild_train:1', 2); Wk.planSet(g, 'med:qi', 3);
+      Wk.planClear(g); const p = nextWeek(g); assert(Wk.planEmpty(p) && p.doors.yk_time === 0 && p.med.qi === 0, `${T} (KA): Clear is kept: the next week empty, Yuki's row 0 (${JSON.stringify(g.tasks.keep)})`);
+      const h = save(); delete h.tasks.plan; h.tasks.keep = { wilds: { 'workshop:0': 2, 'wild_train:1': 1 } }; const q = Wk.planEnsure(h);
+      assert(q.items['workshop:0'] === 2, `${T}: a card not open here keeps its amount in the plan`);
+      let err = null; try { Wk.runWeek(h, SCENES); } catch (e) { err = e; }
+      assert(!err && h.tasks.plan?.items['workshop:0'] === 2 && h.tasks.keep.wilds['workshop:0'] === 2, `${T}: the run leaves a card not open, its amount kept for when it is back (${err?.message || ''})`);
+      // Clear with no plan this week (the kept counts shown): it makes the plan and clears it
+      const c = save(); delete c.tasks.plan; c.tasks.keep = { wilds: { 'wild_train:1': 2 } }; Wk.planClear(c);
+      assert(c.tasks.plan && Wk.planEmpty(c.tasks.plan) && Wk.planCount(c, 'wild_train:1') === 0, `${T}: Clear with no plan yet clears the kept counts shown`);
+      // a bad kept value is clamped, an unknown door dropped
+      const b = save(); delete b.tasks.plan; b.tasks.keep = { wilds: { 'wild_train:1': 50, 'med:sit': 99, 'med:pres': 'x', 'door:nowhere': 1, 'door:yk_time': 7 } }; const bp = Wk.planEnsure(b);
+      assert(bp.items['wild_train:1'] === 9 && bp.med.sit === Wk.MED_MAX.sit && bp.med.pres === 0 && !('nowhere' in bp.doors) && bp.doors.yk_time === 1, `${T}: kept values clamped (${JSON.stringify(bp)})`); }
+    // an old save's plan: the first count changed keeps the plan as it stands, then the change
+    { const g = save(); delete g.tasks.keep; delete g.tasks.plan; const p = Wk.planEnsure(g); p.items = { 'wild_train:1': 2 }; p.med.mer = 1;
+      Wk.planSet(g, 'med:sit', 2); assert(g.tasks.keep.wilds['wild_train:1'] === 2 && g.tasks.keep.wilds['med:mer'] === 1 && g.tasks.keep.wilds['med:sit'] === 2 && g.tasks.keep.wilds['door:yk_time'] === 1, `${T}: an old plan's counts kept on the first change (${JSON.stringify(g.tasks.keep)})`); }
+    // a one-off door taken (by hand, or with no plan this week) goes back to 0 in what is kept; a repeating one stays
+    { const mk = (hub, sd, h = 7, seed = 99701) => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, hub); g.minutes = (C.calStart(g, sd) - 1) * D + h * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true; g.flags.elder = true; return g; };
+      const g = mk('fo_ashfall', 9); Wk.planSet(g, 'door:fo_mother', 1); Wk.planSet(g, 'door:fo_mei', 1);
+      Wk.noteCardDone(g, Wk.noteCardTap(g, SCENES, 'fo_ashfall:6'), { lines: [] }); Wk.noteCardDone(g, Wk.noteCardTap(g, SCENES, 'fo_ashfall:5'), { lines: [] });
+      assert(g.tasks.keep.fo_ashfall['door:fo_mother'] === 0 && g.tasks.keep.fo_ashfall['door:fo_mei'] === 1, `${T} (KA): the mother's visit taken: kept 0; Mei Lin's talk kept at 1 (${JSON.stringify(g.tasks.keep)})`);
+      const h = mk('fo_ashfall', 9, 7, 99702); h.tasks.keep = { fo_ashfall: { 'door:fo_mother': 1 } }; delete h.tasks.plan; const ht = Wk.noteCardTap(h, SCENES, 'fo_ashfall:6');
+      assert(h.tasks.keep.fo_ashfall['door:fo_mother'] === 1 && ht?.s === 'fo_mother', `${T} (RV1, LS): nothing kept before the tap has run`);
+      Wk.noteCardDone(h, ht, { skipped: true, lines: [] }); assert(h.tasks.keep.fo_ashfall['door:fo_mother'] === 1, `${T} (RV1, LS): a tap the day's routine skipped (not taken): kept 1`);
+      Wk.noteCardDone(h, ht, { lines: [] }); assert(h.tasks.keep.fo_ashfall['door:fo_mother'] === 0 && !h.tasks.plan, `${T} (KA): taken by hand with no plan this week: kept 0`);
+      const src = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8'); assert(/const tap = noteCardTap\(g, SCENES, id\);[^\n]*\n\s*const r = runTask\(g, SCENES, id\);\n\s*noteReadTap\(g, SCENES, id, r\);[^\n]*\n\s*noteCardDone\(g, tap, r\);/.test(src), `${T} (RV1, LS): doTask keeps a one-off taken after runTask`);
+      // the read-tap path (noteReadTap) too
+      const r = mk('fo_ashfall', 9, 7, 99703); Wk.planSet(r, 'door:fo_mother', 1); r.tasks.plan.read = 'fo_ashfall:6'; r.tasks.plan.readKey = 'door:fo_mother'; Wk.noteReadTap(r, SCENES, 'fo_ashfall:6');
+      assert(r.tasks.keep.fo_ashfall['door:fo_mother'] === 0 && r.tasks.plan.doors.fo_mother === 0, `${T} (KA): a one-off read and taken: kept 0`); }
+    // the old calendar: no plan, nothing kept
+    { const o = ensureBars(newGame(99710, { closed: true })); goTo(o, SCENES, 'wilds'); assert(Wk.planSet(o, 'wild_train:1', 2) === null && !Wk.planView(o) && !('keep' in (o.tasks || {})), `${T}: the old calendar keeps nothing`); }
+    // the panel reads the kept counts with no plan this week (main.js weekHtml: planView)
+    { const src = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8'); assert(/pv = planView\(g\) \|\| p;/.test(src) && /const empty = planEmptyShown\(g, SCENES, pv\);/.test(src) && /\$\{empty \? 'Rest out the week' : 'Run the week'\}/.test(src) && /\$\{empty \? '' : '<button class="btn" data-week="clear">Clear<\/button>'\}/.test(src) && !/planEmpty\(p\)/.test(src), `${T} (RV1, TG4): the panel shows the kept counts; the button and Clear both by the rows on the screen`); }
+    // v0.11.219 (owner pick RV1 after the Opus review: HB, MK, LO, LE, LS, TG1–TG7)
+    { const R = 'KC1 RV1';
+      const mk = (hub, sd, h = 7, seed = 99721) => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, hub); g.minutes = (C.calStart(g, sd) - 1) * D + h * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true; g.flags.elder = true; return g; };
+      const { COOK_PLAN } = await import('../js/story/kitchen.js');
+      // TG1: the run's own one-off door taken: kept 0
+      { const g = mk('fo_ashfall', 9); Wk.planSet(g, 'door:fo_mother', 1); assert(g.tasks.keep.fo_ashfall['door:fo_mother'] === 1, `${R} (TG1): set`); const r = Wk.runWeek(g, SCENES);
+        assert(g.tasks.plan.done.doors.fo_mother === 1 && g.tasks.plan.doors.fo_mother === 0 && g.tasks.keep.fo_ashfall['door:fo_mother'] === 0, `${R} (TG1): the plan took the mother's visit: its row and its kept row 0 (${r.stop}, ${JSON.stringify(g.tasks.keep)})`); }
+      // TG2 (HB): a kept cook row holds the pot only with a plan made this week (v0.11.218's HA); the old start never
+      { const g = mk('fo_ashfall', 9, 10); g.tasks.keep = { fo_ashfall: { 'door:fo_pot_cook': 1 } }; delete g.tasks.plan;
+        assert(Wk.planCount(g, 'door:fo_pot_cook') === 1 && !COOK_PLAN.row(g, 'fo_pot_cook'), `${R} (TG2, HB): the row shows 1 with no plan this week, and the pot is not held`);
+        Wk.planEnsure(g); assert(COOK_PLAN.row(g, 'fo_pot_cook'), `${R} (TG2, HB): with the week's plan made, the kept row holds it`);
+        Wk.planSet(g, 'door:fo_pot_cook', 0); assert(!COOK_PLAN.row(g, 'fo_pot_cook') && g.tasks.keep.fo_ashfall['door:fo_pot_cook'] === 0, `${R} (TG2): set to 0: not held, kept 0`);
+        const o = mk('fo_ashfall', 9, 10, 99722); delete o.tasks.plan; delete o.tasks.keep; assert(!COOK_PLAN.row(o, 'fo_pot_cook') && !COOK_PLAN.row(o, 'pot_cook'), `${R} (TG2): nothing kept, no plan: not held`); }
+      // TG3: the panel before the week's plan reads the kept plan (notes, ranks, places, door rows), and looking saves nothing
+      { const g = save(); delete g.tasks.plan; delete g.tasks.prio; g.tasks.keep = { wilds: { 'wild_train:1': 1, 'wild_forage:0': 2, 'med:sit': 2, 'door:yk_time': 0 } };
+        const before = JSON.stringify(g); const n = Wk.planNotes(g, SCENES); Wk.forecastNow(g, SCENES); const rk = Wk.planRanks(g, SCENES); Wk.doorCards(g, SCENES);
+        assert(JSON.stringify(g) === before, `${R} (TG3): planNotes, the forecast, planRanks and doorCards with no plan save nothing`);
+        assert(n.rows['wild_train:1'] && n.rows['wild_forage:0'] && n.med.sit && /^Cards /.test(n.total) && n.outlook, `${R} (TG3): the notes read the kept counts (${JSON.stringify(n)})`);
+        const scr = Wk.planCards(g, SCENES).map((c) => c.id); assert(scr.indexOf('wild_forage:0') < scr.indexOf('wild_train:1') && rk.rank['wild_train:1'] < rk.rank['wild_forage:0'], `${R} (TG3): the places shown in the kept order (Train set first), not the screen's`);
+        Wk.planPrio(g, SCENES, 'med:qi', 1); const pr = g.tasks.prio.wilds; assert(pr['med:qi'] === 1 && pr['wild_train:1'] < pr['wild_forage:0'] && !g.tasks.plan, `${R} (TG3): a place set before the week's plan keeps the kept order (${JSON.stringify(pr)})`);
+        const d = mk('fo_ashfall', 9, 20); const a = Wk.doorCards(d, SCENES).map((x) => x.scene); d.tasks.keep = { fo_ashfall: { 'door:fo_mother': 1 } }; const b = Wk.doorCards(d, SCENES);
+        assert(!a.includes('fo_mother') && b.some((x) => x.scene === 'fo_mother' && x.status === 'closed') && !d.tasks.plan, `${R} (TG3): a kept door closed now keeps its row before the week's plan`); }
+      // LE (TG4): a kept card hidden here: empty as shown (no Run, no total, no Clear), kept as it was
+      { const g = save(); delete g.tasks.plan; g.tasks.keep = { wilds: { 'workshop:0': 2 } };
+        assert(!Wk.planEmpty(Wk.planView(g)) && Wk.planEmptyShown(g, SCENES) && Wk.planNotes(g, SCENES).total === '' && g.tasks.keep.wilds['workshop:0'] === 2, `${R} (LE): a hidden kept card: "Rest out the week", no total, no Clear`);
+        g.tasks.keep.wilds['wild_train:1'] = 1; assert(!Wk.planEmptyShown(g, SCENES) && /^Cards /.test(Wk.planNotes(g, SCENES).total), `${R} (LE): a card on the screen: "Run the week"`);
+        g.tasks.keep.wilds = { 'med:mer': 1 }; assert(!Wk.planEmptyShown(g, SCENES), `${R} (LE): a Meditate row counts`); }
+      // TG5: a read tap's card countdown leaves what is kept
+      { const g = save(); delete g.tasks.plan; delete g.tasks.keep; Wk.planSet(g, 'wild_train:1', 2); const p = g.tasks.plan; p.read = 'wild_train:1'; p.readKey = 'wild_train:1';
+        Wk.noteReadTap(g, SCENES, 'wild_train:1', { lines: [] }); assert(p.items['wild_train:1'] === 1 && g.tasks.keep.wilds['wild_train:1'] === 2, `${R} (TG5): the read tap counts the week down (${p.items['wild_train:1']}), kept 2`); }
+      // TG6 (MK): a count changed mid-week moves the kept amount by its own step; (LO) a card set again goes to the end of the kept order
+      { const g = save(); delete g.tasks.plan; delete g.tasks.keep; Wk.planSet(g, 'wild_forage:0', 3); const p = g.tasks.plan; p.items['wild_forage:0'] = 1; // two run
+        Wk.planSet(g, 'wild_forage:0', 2); assert(g.tasks.keep.wilds['wild_forage:0'] === 4 && p.items['wild_forage:0'] === 2, `${R} (TG6, MK): kept 3, 2 run, + → kept 4 (${g.tasks.keep.wilds['wild_forage:0']})`);
+        Wk.planSet(g, 'wild_forage:0', 1); Wk.planSet(g, 'wild_forage:0', 0); assert(g.tasks.keep.wilds['wild_forage:0'] === 2 && !('wild_forage:0' in p.items), `${R} (TG6, MK): − to 0 to skip this week: kept 2 (${g.tasks.keep.wilds['wild_forage:0']})`);
+        Wk.planSet(g, 'wild_forage:0', 12); assert(g.tasks.keep.wilds['wild_forage:0'] === 9, `${R} (TG6): kept at most 9`);
+        const h = save(); delete h.tasks.plan; delete h.tasks.keep; delete h.tasks.prio; Wk.planSet(h, 'wild_forage:0', 1); Wk.planSet(h, 'wild_train:1', 1); delete h.tasks.plan.items['wild_forage:0']; // ran out
+        Wk.planSet(h, 'wild_forage:0', 1); const now = Object.keys(h.tasks.plan.items).join(); const nx = nextWeek(h);
+        assert(now === 'wild_train:1,wild_forage:0' && Object.keys(nx.items).join() === now && nx.items['wild_forage:0'] === 2, `${R} (TG6, LO): this week's order is next week's (${now} / ${Object.keys(nx.items).join()}; Forage kept 1 + 1)`); }
+      // TG7: the Fallout's and Ashfall's runs leave what is kept as set (the pins leave `keep` out)
+      { const walk = (g) => { let r = Wk.runWeek(g, SCENES); for (let k = 0; k < 60 && ['evening', 'door'].includes(r.stop); k++) { const v = sceneView(g, SCENES); const open = v.choices.filter((c) => !c.disabled && c.index < 1000 && !/^(Yuki: change form|Story Mode only)/.test(c.label)); if (!open.length || g.combat) break; Wk.storyTap(g, SCENES, open[0].index); if (g.combat) break; if (Wk.afterStory(g, SCENES).resume) r = Wk.runWeek(g, SCENES); } return r; };
+        const f = ensureBars(newGame(99501, { closed: true, cal: C.LONG_CAL })); goTo(f, SCENES, 'fo_ashfall'); f.minutes = 16 * D + 7 * 60; f.james.satiety = 100; Gm.addItem(f, 'smoked_meat', 60); f.flags.ya_met = true;
+        Wk.planEnsure(f); for (const s of ['wen_time', 'mother_time', 'fo_mei', 'fo_ya_time']) Wk.planSet(f, `door:${s}`, 1); for (const c of Wk.planCards(f, SCENES)) Wk.planSet(f, c.id, 9); Wk.planSet(f, 'med:sit', 2);
+        const kf = JSON.stringify(f.tasks.keep); walk(f);
+        const a = ensureBars(newGame(99502, { closed: true, cal: C.LONG_CAL })); goTo(a, SCENES, 'ashfall'); a.minutes = 9 * D + 7 * 60; a.james.satiety = 100; Gm.addItem(a, 'smoked_meat', 60);
+        Wk.planEnsure(a); for (const c of Wk.planCards(a, SCENES).slice(0, 3)) Wk.planSet(a, c.id, 2); Wk.planSet(a, 'med:sit', 4); Wk.planSet(a, 'med:qi', 3);
+        const ka = JSON.stringify(a.tasks.keep); walk(a);
+        assert(JSON.stringify(f.tasks.keep) === kf && JSON.stringify(a.tasks.keep) === ka, `${R} (TG7): the Fallout's and Ashfall's weeks leave the kept counts (${JSON.stringify(f.tasks.keep).slice(0, 120)} / ${JSON.stringify(a.tasks.keep).slice(0, 120)})`); }
     }
 }
 

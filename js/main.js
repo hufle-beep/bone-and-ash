@@ -1,6 +1,6 @@
 /** Bone and Ash — UI. Renders the story, combat, sheet, hammerspace, journal and saves. */
 import { LONG_CAL } from './core/calendar.js'; // v0.11.203 (owner pick T1, TS1)
-import { runWeek, planCards, planHere, planEnsure, planSet, planEmpty, planEndDay, planClear, STOP_TEXT, planNotes, storyTap, afterStory, planCount, doorCards, planRanks, planPrio, doorNote, noteCardTap, noteReadTap } from './core/week.js'; // v0.11.204 (owner pick W1: R3, P1); v0.11.206 (FC1, RV1): the forecast's texts, the shared tap steps
+import { runWeek, planCards, planHere, planEnsure, planSet, planEndDay, planClear, STOP_TEXT, planNotes, storyTap, afterStory, planCount, planView, doorCards, planRanks, planPrio, doorNote, noteCardTap, noteCardDone, noteReadTap, planEmptyShown } from './core/week.js'; // v0.11.204 (owner pick W1: R3, P1); v0.11.206 (FC1, RV1): the forecast's texts, the shared tap steps
 import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel, fragileKnife, knifeSwings } from './core/forms.js';
 import { coilMult, coilMultNext, wakeDay, fmtMult, clockParts, REL_HIDDEN } from './core/game.js'; // v0.11.137 (HV1): REL_HIDDEN
 import {
@@ -204,9 +204,10 @@ function doTask(id) {
     if (!fatalOk(id, out)) return;
     const label = taskLabel(g, SCENES, id);
     const rel0 = relSnap();
-    noteCardTap(g, SCENES, id); // v0.11.213 (RV1, L3): a one-off door tapped by hand: its plan row back to 0
+    const tap = noteCardTap(g, SCENES, id); // v0.11.213 (RV1, L3): a one-off door tapped by hand: its plan row back to 0
     const r = runTask(g, SCENES, id);
     noteReadTap(g, SCENES, id, r); // v0.11.214 (RD1, RB): the card the plan stopped for, tapped: it counts as the plan's step
+    noteCardDone(g, tap, r); // v0.11.219 (KC1, RV1 LS): taken, its kept row back to 0
     land(label, r.lines, r.fail, rel0, { always: !r.stopped }); // v0.11.68: a door or collapse shows its reply in the scene it opens
     autosave(); render();
     if (r.stopped) window.scrollTo({ top: 0, behavior: smoothScroll() });
@@ -239,8 +240,8 @@ const prioBox = (key, label, rk) => (rk?.rank?.[key] ? `<select class="prio" dat
 const planRow = (key, label, n, note, rk = null) => `<div class="prow"><span class="pl">${md(label)}${prioBox(key, label, rk)}${note ? `<span class="note">${esc(note)}</span>` : ''}</span><button class="btn step" data-plan="${esc(key)}" data-d="-1" aria-label="One fewer: ${esc(plain(label))}"${n > 0 ? '' : ' disabled'}>−</button><b class="pn">${n}</b><button class="btn step" data-plan="${esc(key)}" data-d="1" aria-label="One more: ${esc(plain(label))}">+</button></div>`;
 /** P1: the week's plan on a stay hub (long calendar). */
 function weekHtml() {
-    const p = planHere(g);
-    const items = p?.items || {}, med = p?.med || { sit: 0, mer: 0, qi: 0, pres: 0 };
+    const p = planHere(g), pv = planView(g) || p; // v0.11.219 (KC1): with no plan yet this week, the kept counts
+    const items = pv?.items || {}, med = pv?.med || { sit: 0, mer: 0, qi: 0, pres: 0 };
     const fc = planNotes(g, SCENES); // v0.11.206 (FC1, RV1 TG7): E1, E2b, E3, E4, M1, from week.js (the dry run kept until the save changes)
     const rk = planRanks(g, SCENES), cardIds = planCards(g, SCENES).map((c) => c.id); // v0.11.211 (PR2 + PK1): the rows' places
     const carried = new Set(carriesHere(g, g.scene).map((cy) => cy.id)), cr = cardIds.filter((id) => (items[id] || 0) > 0 || carried.has(id)).map((id) => rk.rank[id]).filter(Boolean), lo = Math.min(...cr), hi = Math.max(...cr); // RV1 (L2): the planned cards (and the work carried) only
@@ -254,7 +255,8 @@ function weekHtml() {
     rows.push(planRow('med:rest', 'Rest, hours a day', med.rest || 0, [when('med:rest'), fc.med.rest].filter(Boolean).join(' · '), rk)); // v0.11.213 (VQ1, RS)
     const total = fc.total ? `<p class="note fc">${esc(fc.total)}</p>` : '', outlook = fc.outlook ? `<p class="note fc">${esc(fc.outlook)}</p>` : '';
     const stop = p?.stop ? `<p class="note">${esc(p.stop === 'week' ? 'The week is over.' : `Stopped: ${stopText(p.stop)}.`)}</p>` : '';
-    const btn = `<div class="pbtns"><button class="btn primary" data-week="run">${planEmpty(p) ? 'Rest out the week' : 'Run the week'} · to Day ${planEndDay(g, p)}</button>${planEmpty(p) ? '' : '<button class="btn" data-week="clear">Clear</button>'}</div>`;
+    const empty = planEmptyShown(g, SCENES, pv); // v0.11.219 (RV1, LE): the rows on the screen only
+    const btn = `<div class="pbtns"><button class="btn primary" data-week="run">${empty ? 'Rest out the week' : 'Run the week'} · to Day ${planEndDay(g, p)}</button>${empty ? '' : '<button class="btn" data-week="clear">Clear</button>'}</div>`;
     return groupHtml('Plan the week', [`<p class="note">Cards by the week, Meditate by the day. Meals and the day's sit run themselves; it stops for anything that needs you. The box by each row is its place in the order, 1 first, kept here for good.</p>`, ...rows, total, outlook, stop, btn], true);
 }
 

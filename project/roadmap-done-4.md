@@ -19,3 +19,9 @@ Started in v0.11.208, when `roadmap-done-3.md` would have passed about 45 KB wit
 ## Moved from `roadmap-time.md` in v0.11.218 (word for word; the size rule: under 20,000 bytes)
 
 - **New in v0.11.214:** **RD1 done** (RN1, RV1: the plan stops before a card or door whose text or result was not shown on screen in this game; number lines never). **Picked 19:26 and 20:14, each its own push, in this order:** PT1 (the day's meal at the communal pot when it is open; the owner 17:42), then KC1 (the plan's amounts kept per stay for good, as its places; the owner 20:02), then WF2 (the wilds' work cards every 3rd day; the owner 17:28: at Mastered a planned week runs 42 against the base game's 8); the options and numbers in the handover.
+
+### From `roadmap-time.md`, as of v0.11.218 (moved in v0.11.219, the size rule)
+
+- **New in v0.11.217:** **PT1 done** (PM + CG, RV1: the village's and the Fallout's routine meal at the communal pot when it is open; the pot waits until 15:00 for a cook still due). **Picked 2026-11-18 01:01** (done in v0.11.218): CK1 (the cook with the women every 3rd day, gains once a Coil, 6 repeat scenes by Fable); then KC1, then WF2; the numbers in the handover.
+
+- **New in v0.11.218:** **CK1 done** (RF3 + G1 + TX3: the cook with the women every 3rd day of a stay, its plan row repeating; the gains on the first cook a Coil; six repeat scenes by Fable, never twice running). **Next:** KC1, then WF2.

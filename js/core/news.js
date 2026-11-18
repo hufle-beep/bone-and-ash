@@ -64,6 +64,7 @@ export const NOTES = [
     ['0.11.215', 'The long calendar (test): a week\'s card no longer makes the others wait: each keeps its own work and "Go on" card. Cards that give no food (Practice, the village\'s and the Fallout\'s work) pay when done, and start only if they can finish within the stay; Forage and Hunt still feed you at once. A card needs its old length of the day left to start.'],
     ['0.11.217', 'The long calendar (test): in Ashfall and in the Fallout the day\'s meals now eat at the communal pot when it is open (once a day), and from the hammerspace otherwise; the pot meal takes its card\'s time. On a day you could still cook with the village women, the pot waits for them until 15:00. Tapping the pot yourself counts as that meal.'],
     ['0.11.218', 'The long calendar (test): cooking with the village women now comes back every 3rd day of a stay in Ashfall and in the Fallout, and the plan\'s row for it repeats. The first cook of a Coil keeps its scene and its friendship; after that each cook is one of three new scenes per act, with the meal only.'],
+    ['0.11.219', 'The long calendar (test): Plan the week now keeps its counts. A new week on a stay starts with the counts you set there last (the cards, the Meditate rows, Smoke, Rest, the visits and talks), in every later Coil too; change a count or Clear and that is kept instead. A one-off visit goes back to 0 once taken.'],
 ];
 
 const parts = (v) => (/^\d+(\.\d+)*$/.test(String(v ?? '')) ? String(v).split('.').map(Number) : null);

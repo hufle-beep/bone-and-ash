@@ -197,6 +197,7 @@ function weekRun(model, g, cards, st) {
     if (!p && weekResume(g)) { const r = runWeek(g, SCENES); st.weekStops[r.stop] = (st.weekStops[r.stop] || 0) + 1; } // RV1 (L1): the week's end reported
     if (!p) {
         p = planEnsure(g); if (!p) return false;
+        p.items = {}; p.med = { sit: 0, mer: 0, qi: 0, pres: 0, rest: 0 }; // v0.11.219 (KC1): the bots plan each week afresh, as before (the kept counts not used)
         const wk = cards.filter((c) => c.week);
         const order = careLike(model) ? [...wk.filter((c) => FOOD_GROUP.test(c.group || '')), ...wk.filter((c) => TRAIN_GROUP.test(c.group || '')), ...wk.filter((c) => !FOOD_GROUP.test(c.group || '') && !TRAIN_GROUP.test(c.group || ''))] : wk;
         for (const c of order) { planSet(g, c.id, 1); st.taps.set++; }
