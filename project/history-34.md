@@ -2,6 +2,21 @@
 
 Started 2026-11-18 (v0.11.218), when `history-33.md` would have passed 20 KB with this move (owner pick U1, MD: history parts start at 20 KB, so a push uploads less). Older parts: `history-33.md` … `history.md`.
 
+## Moved from the handover in v0.11.220 (word for word)
+
+*(the decision of v0.11.217)*
+
+- **v0.11.217: PT1 = PM + CG (PC1), CK1 recorded, the review's RV1 (the owner 2026-11-17 17:42 the pot, 19:26 PT1; mid-build at about 00:50 (stop-and-ask: a pot breakfast hid the cook card all day; his Day 64 save set back to Day 51, Village 111, the cook row first, Fed 60: v0.11.216 11 hammerspace meals, the cook on Day 54; PM alone 7 pot + 5, the cook never; PM + CG 6 pot + 7, the cook on Day 54; the long bots (40 games × 4): hammerspace meals on the two Ashfall stays 45,331 → 6,925 (PM) / 7,841 (CG), the bots' own cooks 110 → 104 / 106, Careful's Act 1 3.15 → 3.23 / 3.25 (its Coil 4 deaths 0 → 3 / 4 of 21), the Completionist's 1.45 → 1.32; PC1 🟢 PM + CG (recommended) / PC2 🟡 PM + CR (the wait only while the cook row is set) / PC3 🔴 PM); 00:57 "cooking with the village women should be a regular occasion. what would cover that?", the options at about 00:59 (CK1, above); 01:01 "Pc1 and CK1 ok"; the review's options at about 02:10; 02:14 "Rv1"):** **The Opus review** (179k tokens; 7 of its 12 planted faults caught): M1 a pot breakfast past 11:00 on the plan's day off lost the midday meal (10:50, Fed 40: Fed at 15:00 53 against v0.11.216's 88); L1 the pot tapped at 18:56: the day's sit ran past 19:00, the tap skipped and the supper lost (Fed 60 against 95); L2 the pot's 30 minutes closing the card tapped ("Eat something." at 10:00, Fed 70; "Rest an hour" at 18:35: skipped, with a wrong "no time left"); L3 a Village reaching 90 mid-day: the cook a day later (no fix); L4 the pot's text never stops the plan (by design: the routine's lines are not probed); TG1–TG7. **RV1 🟢 MD + LM + LE + LT + TG1–TG7 + the checklist line (recommended) / RV2 🟡 MD + LM + TG / RV3 🟠 MD + TG. Picked: RV1.** With RV1: Fed at 15:00 88 / 89; the 18:56 supper with the next tap (Fed 95); "Eat something." runs (Fed 100, 6 min); the rest runs with a hammerspace supper (Fed 92); the bots and the measured week unchanged.
+
+*(the last three versions: v0.11.217's version notes)*
+
+## v0.11.217 — The routine eats at the communal pot (PT1 = PM + CG, RV1); CK1 recorded
+
+- **Files:** `js/core/tasks.js` (`PT1`, `potCardId`, `potCardOpen`, `mealCard`, `openAfterPot`; `dayMeal`'s pot, `mark`, `id`, `at`; `dayRoutine` and an eat card tapped; `runTask`'s `slot0`), `js/story/kitchen.js` (`potCookDue`), `js/core/week.js` (the day off's and the evening's meal with `scenes`; the day off reads the part of the day again after a meal that took time), `js/core/news.js`, `sw.js`, `tests/story.test.mjs` (the PT1 block; the PR2 and VQ1 + FQ1 pins: PT1 off = v0.11.216's runs, the Fallout and Ashfall re-pinned, the wilds unchanged), `tests/README.md`, `project/review-checklist-code.md`, `project/research/pt-faults.json`, `pt-faults-review.json`, `pt-mutate.md`, `tests/tools.test.mjs` (CL1's part 5 rows), `tools/timings.json`, the docs (v0.11.214's notes moved to `history-33.md`; changelog 0.11.191–0.11.194 to `changelog-5.md`; `roadmap-time.md`'s v0.11.211 line to `roadmap-done-4.md`).
+- **What:** see the version line. No id, flag or storage key changed; no new save field.
+- **Checks:** a game change (rule 2): the full `bash tools/check.sh` after the build (exit 0, 672 s) and after RV1 (exit 0, 637 s); 146 compared, 0 drifted, the same 3 moved more than 5 (log only); models-long Careful 3.15 → 3.25, Completionist 1.45 → 1.32, Sociable and Cultivator within 0.02 (log only). `mutate.mjs`: 26 of 26 (`pt-faults.json` 9; `pt-faults-review.json` 17: the review's 12, five updated for RV1, R13–R17 new; F4 equivalent since RV1, its line went; `pt-mutate.md`).
+- **Fable:** not used (no story text; What's new is a UI line). **Opus:** the cold review (rule 9; 179k tokens).
+
 ## Moved from the handover in v0.11.219 (word for word)
 
 *(the CK1 done line and the KC1 open item, done in v0.11.219, as they stood)*
