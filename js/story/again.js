@@ -123,7 +123,7 @@ export function noteLines(g, lines, n = g?.coil?.n || 1) {
  *  progress ("…: # more, # still to go.", "…: done, # in all.", "A week's work: …"). The plan never stops for these. */
 export const NUMBER_LINES = [
     /^[\w ()'.-]+ \+#( XP)?( → T# L#)?(, [\w ()'’ ]+)?\.?$/, /^Yuki Fight held at /, / # \/ DC # — /, /^Qi Max \+#/, /^Qi regen now /,
-    /^Meditated an hour: Qi # → #\.$/, /^Condensed: Saturation #%\.$/, /^(Double haul — in total: |A thin haul — you keep: )?(\+# [^.,]+(, )?)+\.$/,
+    /^Meditated an hour: Qi # → #\.$/, /^Condensed: Saturation #%\.$/, /^(Double haul — in total: |A thin haul — you keep: |Three days' haul — in total: )?(\+# [^.,]+(, )?)+\.$/, // v0.11.221 (owner pick RV2, HF): the three days' haul
     /^HP \+#/, /^[−-]# HP\.$/, /: (done, # in all|# more, # still to go)\.$/, /^A week's work: /,
     /^[\w ()'.-]+ at T# L# \(cap\)$/, // RV1 (L2): a skill at its cap
 ];

@@ -6,7 +6,7 @@ import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, clockPar
 import { condensationSatGain } from '../core/formulas.js';
 import { sitGain, yukiFightSkill, canFly } from '../core/game.js'; // v0.11.118 (YK1 review, SB); v0.11.131 (XB2, FY): canFly
 import { FW } from './flight_texts.js'; // v0.11.195 (owner picks F1, D1)
-import { set, day, hour, daily, markDaily, forestScale, grow, eatBest, pantry, foodCount, byForm, byDay, dayReply } from './common.js';
+import { set, day, hour, daily, markDaily, spaceByFam, forestScale, grow, eatBest, pantry, foodCount, byForm, byDay, dayReply } from './common.js';
 import { storyNight, weekMorning, longCal } from '../core/calendar.js'; // v0.11.203 (owner pick T1, TS1): the long calendar's weeks
 import { MORNING_AGAIN } from './remember_texts.js'; // v0.11.184 (S1, KP): the Day 2 morning from the second Coil on
 
@@ -357,3 +357,6 @@ ${g.flags.saw_lights ? 'The lights you watched in the night came through here. T
         ],
     },
 };
+// v0.11.221 (owner pick WB = SK, common.js): the wilds' work cards spaced on the long calendar once their own card is Skilled
+// RV2 (LY): not "Let Yuki hunt", which is not James's card in task mode (task_hubs.js notJames) and gains familiarity only by transfer
+for (const menu of ['wild_forage', 'wild_hunt', 'wild_train']) WILDS[menu].choices.forEach((c, i) => { if (c.show?.dailyKey && c.show.dailyKey !== 'yukihunt') spaceByFam(c.show.dailyKey, `${menu}:${i}`); });

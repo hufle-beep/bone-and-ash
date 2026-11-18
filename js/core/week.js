@@ -19,7 +19,7 @@ import { sceneView, choose } from './story.js';
 import { advance, jamesHpMax, canBreakThrough, clockParts, clockLabel, fnv1a, takeSpoilNotes, wakeDay } from './game.js';
 import { taskCards, taskOpen, runTask, taskState, taskOutcome, isTaskChoice, sitTaskId, QI_TASK, carryHere, carriesHere, carriesRead, carryTaskId, isCarryTask, weekHub, workDay, workRoom, dayMeal, cardSpeed, NEW_LENGTH, WEEK_MULT } from './tasks.js';
 import { farewellNow } from '../story/act1_fallout.js'; // RV1 (L4)
-import { foodCount, preservable, unspaced, spacedNext, SPACE_DAYS } from '../story/common.js'; // v0.11.213 (FQ1, S3): the spacing
+import { foodCount, preservable, unspaced, spacedNext, SPACE_DAYS, cardSpaced, cardKey } from '../story/common.js'; // v0.11.213 (FQ1, S3): the spacing
 import { EVENING_HOUR } from '../story/oneoff.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
 import { unreadLines } from '../story/again.js'; // v0.11.214 (owner pick RD1): the lines never shown in this game
@@ -369,6 +369,18 @@ export function noteCardTap(g, scenes, id) {
 export function noteCardDone(g, tap, r) { if (tap && !r?.skipped) keepTaken(g, tap.hub, tap.s); }
 /** v0.11.213 (VQ1 + FQ1): a door row's note: a repeating door's spacing (and the day it opens again, closed now), a one-off's "once". */
 export const doorNote = (d) => (d.repeat ? `every ${SPACE_DAYS === 3 ? '3rd' : `${SPACE_DAYS}th`} day${d.next ? `, opens Day ${d.next}` : ''}` : 'once');
+/** v0.11.221 (owner pick WB, CN): a wilds card spaced now (Skilled or up, common.js SK): its plan row's note, as a repeating door's; else ''. */
+export const cardNote = (g, id) => {
+    if (!cardSpaced(g, id)) return '';
+    const wd = wakeDay(g), nx = spacedNext(g, cardKey(id), wd); // RV2 (NO): ", opens Day N" when it is closed, as a door's row
+    return doorNote({ repeat: true, next: nx > wd ? nx - wd + calDay(g) : null });
+};
+/** RV2 (NC): how many runs a spaced card's open days allow from today to the week's last day `last` (a work day); null if not spaced. */
+export function cardRunsLeft(g, id, last) {
+    if (!cardSpaced(g, id)) return null;
+    const wd = wakeDay(g), wait = spacedNext(g, cardKey(id), wd) - wd, days = last - workDay(g);
+    return wait > days ? 0 : 1 + Math.floor((days - wait) / SPACE_DAYS);
+}
 /** v0.11.213 (VQ1, RS): the hub's "Rest an hour" card when it is open now, or null. */
 export const restCard = (g, scenes) => taskCards(g, scenes).find((c) => c.kind === 'chore' && REST_LABEL.test(String(c.label)) && c.status === 'open')?.id || null;
 const firstMer = (g, scenes) => taskCards(g, scenes).find((c) => c.kind === 'mer' && c.status === 'open')?.id || null;
@@ -611,7 +623,7 @@ export function planForecast(g, scenes, { max = 60, json = null } = {}) {
         const p = planEnsure(c);
         if (!p) return null;
         p.running = false; p.stop = '';
-        const hub = p.hub, day0 = workDay(c), want = Object.keys(p.items).filter((id) => p.items[id] > 0);
+        const hub = p.hub, day0 = workDay(c), want = Object.keys(p.items).filter((id) => p.items[id] > 0), items0 = { ...p.items };
         const doors0 = isRec(p.doors) ? { ...p.doors } : {}; // v0.11.213 (RV1, M1): as set before the run (a one-off taken goes back to 0)
         const rows = Object.fromEntries(want.map((id) => [id, null]));
         const days = Math.max(1, p.lastDay - day0 + 1), med = { ...p.med }, done = {}, mornings = {};
@@ -645,7 +657,8 @@ export function planForecast(g, scenes, { max = 60, json = null } = {}) {
         const full = Object.fromEntries(Object.keys(med).map((k) => [k, med[k] > 0 ? Object.entries(done).filter(([d, x]) => Number(d) <= p.lastDay && (x[k] || 0) >= med[k]).length : 0]));
         const doors = {}; // v0.11.210 (DC-a): each door row's days in full, apart from the Meditate rows
         for (const [s, n] of Object.entries(doors0)) if (n > 0) doors[s] = Object.entries(done).filter(([d, x]) => Number(d) <= p.lastDay && (x.doors?.[s] || 0) >= n).length;
-        return { rows, med: full, doors, days, stop, minutes: c.minutes, fed: Math.round(c.james.satiety), hp: Math.round(c.james.hp), hpMax: jamesHpMax(c), mornings };
+        const left = c.tasks?.plan?.items || {}, runs = Object.fromEntries(want.map((id) => [id, Math.max(0, (items0[id] || 0) - (left[id] || 0))])); // RV2 (NV): each card's runs this week
+        return { rows, runs, med: full, doors, days, stop, minutes: c.minutes, fed: Math.round(c.james.satiety), hp: Math.round(c.james.hp), hpMax: jamesHpMax(c), mornings };
     } catch { return null; }
 }
 /** E1: minutes of work in the plan (each card's ×7 time; the carried work's rest) and minutes left to the evenings this week. */
@@ -654,8 +667,8 @@ export function planHours(g, scenes, p = planHere(g), fc = null) {
     const hub = g.scene, ev = (EVENING_HOUR[hub] ?? 16) * 60;
     let work = carriesHere(g, hub).reduce((a, cy) => a + cy.left, 0); // v0.11.215 (CF1, UB): every card's work carried
     const cards = planCards(g, scenes);
-    for (const [id, n] of Object.entries(p?.items || {})) { const c = cards.find((x) => x.id === id); if (c && n > 0) work += n * cardWeekMinutes(c); }
     const last = p ? p.lastDay : weekLastDay(g), today = workDay(g);
+    for (const [id, n] of Object.entries(p?.items || {})) { const c = cards.find((x) => x.id === id); const cap = cardRunsLeft(g, id, last); if (c && n > 0) work += (cap == null ? n : Math.min(n, cap)) * cardWeekMinutes(c); } // RV2 (NC): a spaced card, the runs its open days allow
     let left = workRoom(g, hub), morn = MORNING_HOUR * 60;
     for (let d = today + 1; d <= last; d++) { if (fc?.mornings?.[d] != null) morn = fc.mornings[d]; left += Math.max(0, ev - morn); }
     return { work, left };
@@ -678,7 +691,7 @@ export function planNotes(g, scenes) {
     const p = planView(g), fc = forecastNow(g, scenes), items = p?.items || {}, med = p?.med || {}; // KC1: the kept counts before the week's plan
     const rows = {}, mt = {};
     if (fc) {
-        for (const id of Object.keys(items)) if (items[id] > 0) rows[id] = fc.rows[id] != null ? ` · done ${whenText(fc.rows[id])}` : ' · not this week';
+        for (const id of Object.keys(items)) if (items[id] > 0) rows[id] = cardSpaced(g, id) && fc.runs ? ` · ${fc.runs[id] || 0} run${fc.runs[id] === 1 ? '' : 's'} this week` : fc.rows[id] != null ? ` · done ${whenText(fc.rows[id])}` : ' · not this week'; // RV2 (NV): a spaced card's runs, as a door's visits
         for (const k of Object.keys(med)) if (med[k] > 0) mt[k] = `${fc.med[k] || 0} of ${fc.days} day${fc.days > 1 ? 's' : ''}`;
         // v0.11.210 (DC-a); v0.11.213 (FQ1, S3): the visits this week (a repeating door opens every SPACE_DAYS-th day), a one-off's if or not
         for (const [s, n] of Object.entries(fc.doors || {})) mt[`door:${s}`] = doorRepeats(s) ? `${n} visit${n === 1 ? '' : 's'} this week` : n ? 'this week' : 'not this week';

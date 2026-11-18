@@ -25,7 +25,25 @@ export const SPACED = new Set(['yk_time', 'wen_time', 'mother_time', 'a1_mei', '
 let spaceOff = 0;
 /** `fn` run as if the cards were not spaced (the plan's rows: is a card closed only by its spacing?). */
 export const unspaced = (fn) => { spaceOff++; try { return fn(); } finally { spaceOff--; } };
-const spacedNow = (g, key) => !spaceOff && SPACED.has(key) && longCal(g) && STAY_DAYS.has(storyDay(g));
+/* v0.11.221 (owner pick WB = SK + CN, 2026-11-18 12:09; WF2, the owner 2026-11-17 17:28: "The frequency of the training/prartice/hunt
+ * etc cards should also be examined, I'm higher coils those could also be farmed."): on the long calendar's stays the wilds' work cards
+ * (Forage, Hunt, Practice; wilds.js registers them) open every SPACE_DAYS-th day too, each once its own card is Skilled (familiarity
+ * SKILLED_FAM, tasks.js FAM[2]); a New or Practised card stays once a day (a slow player's food). A planned wilds week, 8 cards each at
+ * 9: Skilled 31 → 19 runs, Mastered 42 → 21; New 7 and Practised 14 unchanged. */
+export const SKILLED_FAM = 8;
+const FAM_KEY = new Map(), KEY_OF = new Map();
+/** Space the daily key `key` by its card `cardId`'s familiarity (SK). */
+export function spaceByFam(key, cardId) { FAM_KEY.set(key, cardId); KEY_OF.set(cardId, key); SPACED.add(key); }
+const famReady = (g, key) => !FAM_KEY.has(key) || (Number(g.tasks?.fam?.[FAM_KEY.get(key)]) || 0) >= SKILLED_FAM;
+const spacedNow = (g, key) => !spaceOff && SPACED.has(key) && longCal(g) && STAY_DAYS.has(storyDay(g)) && famReady(g, key);
+/** CN: is the work card `cardId` spaced now (its plan row says "every 3rd day")? */
+export const cardSpaced = (g, cardId) => KEY_OF.has(cardId) && spacedNow(g, KEY_OF.get(cardId));
+/** RV2 (NO, NC): the daily key the card `cardId` is spaced by, or null. */
+export const cardKey = (cardId) => KEY_OF.get(cardId) || null;
+/** v0.11.221 (owner pick RV2, HF; the Opus review's H1: a planned Skilled week starved on Day 5): a spaced Forage or Hunt card brings
+ *  SPACE_DAYS × its items (one run covers its days); XP and familiarity as before. The multiplier for the card `cardId` now (1 or 3). */
+const HAUL_MENUS = /^wild_(forage|hunt):/;
+export const haulMult = (g, cardId) => (HAUL_MENUS.test(String(cardId)) && cardSpaced(g, cardId) ? SPACE_DAYS : 1);
 /** v0.11.213 (RV1, L4): which stay a story day belongs to (the wilds, the village, the Fallout, the Heart; 0 a journey or deadline day). */
 export const stayOf = (d) => (d >= 1 && d <= 3 ? 1 : d >= 4 && d <= 6 ? 2 : d >= 8 && d <= 10 ? 3 : d >= 16 && d <= 18 ? 4 : 0);
 /** A past day `pd` counts for the spacing only when it was a day of the same stay as `d` (RV1, L4: a new stay starts afresh). */

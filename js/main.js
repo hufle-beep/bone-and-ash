@@ -1,6 +1,6 @@
 /** Bone and Ash — UI. Renders the story, combat, sheet, hammerspace, journal and saves. */
 import { LONG_CAL } from './core/calendar.js'; // v0.11.203 (owner pick T1, TS1)
-import { runWeek, planCards, planHere, planEnsure, planSet, planEndDay, planClear, STOP_TEXT, planNotes, storyTap, afterStory, planCount, planView, doorCards, planRanks, planPrio, doorNote, noteCardTap, noteCardDone, noteReadTap, planEmptyShown } from './core/week.js'; // v0.11.204 (owner pick W1: R3, P1); v0.11.206 (FC1, RV1): the forecast's texts, the shared tap steps
+import { runWeek, planCards, planHere, planEnsure, planSet, planEndDay, planClear, STOP_TEXT, planNotes, storyTap, afterStory, planCount, planView, doorCards, planRanks, planPrio, doorNote, cardNote, noteCardTap, noteCardDone, noteReadTap, planEmptyShown } from './core/week.js'; // v0.11.204 (owner pick W1: R3, P1); v0.11.206 (FC1, RV1): the forecast's texts, the shared tap steps
 import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel, fragileKnife, knifeSwings } from './core/forms.js';
 import { coilMult, coilMultNext, wakeDay, fmtMult, clockParts, REL_HIDDEN } from './core/game.js'; // v0.11.137 (HV1): REL_HIDDEN
 import {
@@ -246,7 +246,7 @@ function weekHtml() {
     const rk = planRanks(g, SCENES), cardIds = planCards(g, SCENES).map((c) => c.id); // v0.11.211 (PR2 + PK1): the rows' places
     const carried = new Set(carriesHere(g, g.scene).map((cy) => cy.id)), cr = cardIds.filter((id) => (items[id] || 0) > 0 || carried.has(id)).map((id) => rk.rank[id]).filter(Boolean), lo = Math.min(...cr), hi = Math.max(...cr); // RV1 (L2): the planned cards (and the work carried) only
     const when = (key) => (!cr.length || rk.rank[key] > hi ? 'after the day\'s work' : rk.rank[key] < lo ? 'before the day\'s work' : ''); // the rows' notes follow the order
-    const rows = planCards(g, SCENES).map((c) => planRow(c.id, c.label, items[c.id] || 0, `${durLabel(Math.round((c.minutes * NEW_LENGTH) / cardSpeed(c.fam || 0)) * WEEK_MULT)} a card${fc.rows[c.id] || ''}`, rk));
+    const rows = planCards(g, SCENES).map((c) => planRow(c.id, c.label, items[c.id] || 0, `${durLabel(Math.round((c.minutes * NEW_LENGTH) / cardSpeed(c.fam || 0)) * WEEK_MULT)} a card${cardNote(g, c.id) ? ` · ${cardNote(g, c.id)}` : ''}${fc.rows[c.id] || ''}`, rk)); // v0.11.221 (owner pick WB, CN): a spaced wilds card's "every 3rd day"
     rows.push(planRow('med:sit', 'Sits a day', med.sit || 0, fc.med.sit || '', rk), planRow('med:mer', 'Meridian sessions a day', med.mer || 0, fc.med.mer || '', rk), planRow('med:qi', 'Gather Qi a day', med.qi || 0, ['hours', fc.med.qi].filter(Boolean).join(' · '), rk));
     rows.push(planRow('med:pres', 'Smoke the catch, once a day', med.pres || 0, [[when('med:pres'), '15 m a piece'].filter(Boolean).join(', '), fc.med.pres].filter(Boolean).join(' · '), rk)); // v0.11.209 (owner pick TF1, K)
     // v0.11.210 (owner pick N1, DC-a): the hub's daily doors, once a day each (Yuki's starts at 1 on a new plan)

@@ -5951,7 +5951,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     const D = 1440;
     const mk = (hub, sd, h = 7, cal = C.LONG_CAL, seed = 99601) => { const g = ensureBars(newGame(seed, { closed: true, ...(cal ? { cal } : {}) })); goTo(g, SCENES, hub); g.minutes = (C.calStart(g, sd) - 1) * D + h * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true; g.flags.elder = true; return g; };
     const rows = (g) => Wk.doorCards(g, SCENES).map((d) => d.scene).join();
-    assert(Cm.SPACE_DAYS === 3 && ['yk_time', 'wen_time', 'mother_time', 'a1_mei', 'a1_ya', 'slopes', 'wen', 'far', 'spring', 'hc_mei', 'hc_ya', 'cook', 'a1_cook'].every((k) => Cm.SPACED.has(k)) && Cm.SPACED.size === 13, `${T}: S3's keys, every 3rd day (CK1: the cook's two)`);
+    assert(Cm.SPACE_DAYS === 3 && ['yk_time', 'wen_time', 'mother_time', 'a1_mei', 'a1_ya', 'slopes', 'wen', 'far', 'spring', 'hc_mei', 'hc_ya', 'cook', 'a1_cook'].every((k) => Cm.SPACED.has(k)) && Cm.SPACED.size === 24, `${T}: S3's keys, every 3rd day (CK1: the cook's two; WF2 (WB): the wilds' 11 work cards, by their familiarity; RV2 (LY): not Yuki's hunt)`);
     assert(JSON.stringify(Wk.PLAN_DOORS) === JSON.stringify(['yk_time', 'wen_time', 'mother_time', 'wen_lesson', 'far_hunt', 'herb_slopes', 'heal', 'village_hunt', 'scout', 'pot_cook', 'fo_mother', 'fo_spy', 'fo_pot_cook', 'hall_listen', 'ring_chambers', 'heart_spring', 'fo_mei', 'fo_ya_time']) && Wk.PLAN_DOORS.filter(Wk.doorRepeats).length === 11, `${T}: the doors on the plan, 11 repeating (CK1: the pot's cooking), 7 once (the owner 16:42: the communal pot's cooking too), the talks last`);
     for (const s of Wk.PLAN_DOORS) assert(!!SCENES[s], `${T}: ${s} is a scene`);
     for (const hub of Tk.WEEK_HUBS) for (const c of SCENES[hub].choices) if (typeof c.to === 'string' && (TASK_HUBS[hub].doors || []).includes(c.to) && c.to !== 'sect_cut') assert(Wk.PLAN_DOORS.includes(c.to), `${T}: ${hub}'s door ${c.to} has a plan row (not in VQ1: the Heart's climb to the wound, a story step)`);
@@ -6639,6 +6639,87 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         const ka = JSON.stringify(a.tasks.keep); walk(a);
         assert(JSON.stringify(f.tasks.keep) === kf && JSON.stringify(a.tasks.keep) === ka, `${R} (TG7): the Fallout's and Ashfall's weeks leave the kept counts (${JSON.stringify(f.tasks.keep).slice(0, 120)} / ${JSON.stringify(a.tasks.keep).slice(0, 120)})`); }
     }
+}
+
+// v0.11.221 (owner pick WB = SK + CN, 2026-11-18 12:09; WF2, the owner 2026-11-17 17:28 on the work cards farmed in higher Coils): on
+// the long calendar's stays the wilds' work cards (Forage, Hunt, Practice) open every 3rd day once their own card is Skilled
+// (common.js spaceByFam, SKILLED_FAM; registered by wilds.js); New and Practised cards stay once a day; a spaced card's plan row says
+// "every 3rd day" (week.js cardNote, CN). The measured week: 8 cards each at 9, Practised 14 runs, Mastered 42 → 21. RV2 (the Opus
+// review, picked 12:39): HF a spaced Forage or Hunt card brings 3× its items (haulMult, HAUL_TEXT); NO ", opens Day N"; NV a spaced
+// card's row "N runs this week"; NC the "Cards" total by the runs its open days allow (cardRunsLeft); LY not "Let Yuki hunt"; TG1–TG5.
+{
+    const Gm = await import('../js/core/game.js');
+    const C = await import('../js/core/calendar.js');
+    const Wk = await import('../js/core/week.js');
+    const Cm = await import('../js/story/common.js');
+    const Tk = await import('../js/core/tasks.js');
+    const Ag = await import('../js/story/again.js');
+    const { DAY_REPLIES: DR } = await import('../js/core/lines.js');
+    const T = 'WB (the wilds\' work cards every 3rd day from Skilled)';
+    const D = 1440, MENUS = ['wild_forage', 'wild_hunt', 'wild_train'];
+    const setFam = (g, f) => { g.tasks = g.tasks || {}; g.tasks.fam = {}; for (const m of MENUS) SCENES[m].choices.forEach((c, i) => { if (c.show?.dailyKey) g.tasks.fam[`${m}:${i}`] = f; }); return g; };
+    const mk = (cal, f, seed = 99701) => { const g = ensureBars(newGame(seed, { closed: true, ...(cal ? { cal } : {}) })); goTo(g, SCENES, 'wilds'); g.minutes = D + 7 * 60; g.james.satiety = 80; g.inventory.hare_raw = 30; g.james.qi = 60; return setFam(g, f); };
+    // the keys: every wilds work card's daily key but Yuki's hunt (RV2, LY), by its own card; Skilled is tasks.js's third tier
+    const keys = MENUS.flatMap((m) => SCENES[m].choices.filter((c) => c.show?.dailyKey && Cm.SPACED.has(c.show.dailyKey)).map((c) => c.show.dailyKey));
+    assert(keys.join() === 'ring,cress,honey,berries,hare,fowl,crab,t_darts,t_blade,t_feet,t_needle' && !Cm.SPACED.has('yukihunt') && Cm.cardKey('wild_hunt:3') === null && Cm.cardKey('wild_forage:1') === 'cress' && Cm.SKILLED_FAM === Tk.FAM[2].at && Tk.famTier(Cm.SKILLED_FAM) === 2 && Tk.famTier(Cm.SKILLED_FAM - 1) === 1, `${T}: the 11 keys spaced by their cards, from Skilled; not Yuki's hunt (${keys.join()})`);
+    // SK: each card by its own familiarity: Skilled taken today closes for two days, opens the third; Practised opens tomorrow
+    const open = (g, m, i) => !!SCENES[m].choices[i].show(g);
+    for (const [m, i] of [['wild_forage', 0], ['wild_forage', 3], ['wild_hunt', 2], ['wild_train', 2]]) { // the cards open at the start (hare, fowl and the darts wait for a form: tasks.js hasForm)
+      const key = SCENES[m].choices[i].show.dailyKey, sk = mk(7, 8), pr = mk(7, 7);
+      Cm.markDaily(sk, key); Cm.markDaily(pr, key);
+      const seq = []; for (let k = 1; k <= 3; k++) { sk.minutes += D; pr.minutes += D; seq.push(`${open(sk, m, i) ? 'o' : '-'}${open(pr, m, i) ? 'o' : '-'}`); }
+      assert(seq.join() === '-o,-o,oo', `${T} (SK): ${m}:${i} (${key}): Skilled closed 2 days then open, Practised (7) open each day (${seq.join()})`);
+      assert(Cm.unspaced(() => { sk.minutes -= 2 * D; const o = open(sk, m, i); sk.minutes += 2 * D; return o; }), `${T}: unspaced: ${key} closed only by its spacing reads open`);
+    }
+    // one card Skilled spaces only itself; Yuki's hunt stays daily (LY); the old calendar keeps once a day
+    { const g = mk(7, 0); g.tasks.fam['wild_forage:1'] = 18; g.tasks.fam['wild_hunt:3'] = 18; Cm.markDaily(g, 'cress'); Cm.markDaily(g, 'ring'); Cm.markDaily(g, 'yukihunt'); g.minutes += D;
+      assert(!open(g, 'wild_forage', 1) && open(g, 'wild_forage', 0) && open(g, 'wild_hunt', 3), `${T}: a Mastered card spaced, a New one beside it daily, Yuki's hunt daily (LY)`);
+      const o = mk(0, 18); Cm.markDaily(o, 'cress'); o.minutes += D; assert(open(o, 'wild_forage', 1) && !Cm.cardSpaced(o, 'wild_forage:1'), `${T}: the old calendar: once a day, as before`); }
+    // TG4: a day that is not a stay's (a journey day's number) keeps once a day
+    { const g = mk(7, 18); g.minutes = (C.calStart(g, 7) - 1) * D + 7 * 60; assert(!C.STAY_DAYS.has(C.storyDay(g)) && !Cm.cardSpaced(g, 'wild_forage:1'), `${T} (TG4): not spaced off a stay's days (story day ${C.storyDay(g)})`);
+      Cm.markDaily(g, 'cress'); g.minutes += D; assert(C.STAY_DAYS.has(C.storyDay(g)) || open(g, 'wild_forage', 1), `${T} (TG4): a journey day's take doesn't hold the next day`); }
+    // the task screen: a spaced card closed is "tomorrow" (hidden, on the plan's list)
+    { const g = mk(7, 8); Cm.markDaily(g, 'ring'); g.minutes += D; const c = taskCards(g, SCENES).find((x) => x.id === 'wild_forage:0');
+      assert(c && c.status === 'tomorrow' && c.week && Wk.planCards(g, SCENES).some((x) => x.id === 'wild_forage:0'), `${T}: closed by its spacing: off the screen, on the plan (${c?.status})`); }
+    // CN + NO: the row's note, Skilled and up on the long calendar only; ", opens Day N" while closed
+    { const s = mk(7, 8), p = mk(7, 7), o = mk(0, 18);
+      assert(Wk.cardNote(s, 'wild_train:1') === 'every 3rd day' && Wk.cardNote(p, 'wild_train:1') === '' && Wk.cardNote(o, 'wild_train:1') === '' && Wk.cardNote(s, 'wild_explore:0') === '', `${T} (CN): "every 3rd day" on a Skilled card's row only`);
+      const day = Math.floor(s.minutes / D) + 1; Cm.markDaily(s, 't_blade'); const n0 = Wk.cardNote(s, 'wild_train:1'); s.minutes += D; const n1 = Wk.cardNote(s, 'wild_train:1'); s.minutes += 2 * D; const n3 = Wk.cardNote(s, 'wild_train:1');
+      assert(n0 === `every 3rd day, opens Day ${day + 3}` && n1 === n0 && n3 === 'every 3rd day', `${T} (NO): taken: opens Day ${day + 3}; open again: the bare note (${n0} | ${n1} | ${n3})`);
+      const M = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8'); assert(/a card\$\{cardNote\(g, c\.id\) \? ` · \$\{cardNote\(g, c\.id\)\}` : ''\}\$\{fc\.rows\[c\.id\]/.test(M), `${T} (CN): the plan row draws it`); }
+    // HF: a spaced Forage or Hunt card brings 3× its items, with a number line; not Practised, not Practice, not the old calendar
+    { const gain = (g, id, fn = (f) => f()) => { const b = { ...g.inventory }; const r = fn(() => runTask(g, SCENES, id)); return { r, d: Object.keys(g.inventory).reduce((a, i) => a + Math.max(0, (g.inventory[i] || 0) - (b[i] || 0)), 0) }; };
+      for (const id of ['wild_forage:1', 'wild_forage:0', 'wild_forage:3']) {
+        const a = gain(mk(7, 8, 99710), id), b = gain(mk(7, 8, 99710), id, Cm.unspaced);
+        const thin = a.r.lines.some((x) => /^A thin haul/.test(x)); // a partial keeps its share of the ×3, rounded down
+        assert(Tk.HAUL_TEXT === 'Three days\' haul — in total:' && (thin ? Math.abs(a.d - 3 * b.d) <= 2 : a.d === 3 * b.d) && b.d > 0 && a.r.lines.some((x) => x.startsWith(Tk.HAUL_TEXT) || /^(Double haul — in total|A thin haul — you keep): /.test(x)) && !b.r.lines.some((x) => x.startsWith(Tk.HAUL_TEXT)), `${T} (HF): ${id} spaced brings 3× (${a.d} / ${b.d}; ${a.r.lines.filter((x) => /haul/.test(x)).join(' | ')})`);
+        assert(a.r.lines.filter((x) => /haul — /.test(x)).every((x) => Ag.numberLine(x)), `${T} (HF): the haul line is a number line (the read stop leaves it out)`); }
+      const pr = mk(7, 7, 99710), sk = mk(7, 8, 99710); assert(Cm.haulMult(pr, 'wild_forage:1') === 1 && Cm.haulMult(sk, 'wild_forage:1') === 3 && Cm.haulMult(sk, 'wild_hunt:2') === 3 && Cm.haulMult(sk, 'wild_train:1') === 1 && Cm.haulMult(mk(0, 18), 'wild_forage:1') === 1, `${T} (HF): ×3 only for a spaced Forage or Hunt card`); }
+    // the measured week (the options' numbers): 8 cards each at 9, the evenings walked; Practised 14 runs as before, Mastered 21
+    const walk = (g) => { let st = ''; for (let k = 0; k < 60; k++) { st = Wk.runWeek(g, SCENES).stop; if (st !== 'evening') break; let on = false; for (let j = 0; j < 12 && !on; j++) { const idx = Wk.eveningPick(g, SCENES); if (idx == null) break; const r = Wk.storyTap(g, SCENES, idx); if (r.combat) break; if (Wk.afterStory(g, SCENES).resume) on = true; } if (!on) break; } return st; };
+    const week = (g) => { for (const c of Wk.planCards(g, SCENES)) Wk.planSet(g, c.id, 9); const b = { ...g.tasks.plan.items }, n = Object.keys(b).length; const stop = walk(g);
+      const a = g.tasks.plan?.items || {}; return { n, stop, fed: Math.round(g.james.satiety), runs: Object.keys(b).reduce((x, id) => x + b[id] - (a[id] || 0), 0) }; };
+    { const pr = week(mk(7, 2, 99001)), ms = week(mk(7, 18, 99001)); assert(pr.n === 8 && pr.runs === 14 && ms.runs === 21, `${T}: a planned week, 8 cards at 9: Practised ${pr.runs} (14 before), Mastered ${ms.runs} (42 before)`); }
+    // TG1 (H1): the owner's wilds save, Skilled, Yuki's lane off: the week runs to its end (before HF: 8 runs, hungry on Day 5, Fed 2)
+    { const sv = () => { const g = deserialize(readFileSync(new URL('../saves/v0.11.204-long-wilds-day2.json', import.meta.url), 'utf8'), { force: true }); delete g.tasks.plan; delete g.tasks.keep; for (const c of Wk.planCards(g, SCENES)) g.tasks.fam[c.id] = 8; return g; };
+      const w = week(sv()); assert(w.stop !== 'hungry' && w.runs === 16 && w.fed >= 60, `${T} (TG1): the save's Skilled week, the lane off: ${w.runs} runs, stop ${w.stop}, Fed ${w.fed}`);
+      // TG3 (NV, NC): its rows say the runs this week; the "Cards" total counts what the open days allow
+      const g = sv(); for (const c of Wk.planCards(g, SCENES)) Wk.planSet(g, c.id, 9); const nt = Wk.planNotes(g, SCENES), fc = Wk.forecastNow(g, SCENES), h = Wk.planHours(g, SCENES);
+      const capped = Wk.planCards(g, SCENES).reduce((a, c) => a + Math.min(9, Wk.cardRunsLeft(g, c.id, g.tasks.plan.lastDay)) * Wk.cardWeekMinutes(c), 0);
+      assert(Object.entries(nt.rows).every(([id, t]) => t === ` · ${fc.runs[id]} run${fc.runs[id] === 1 ? '' : 's'} this week`) && Object.values(fc.runs).reduce((a, n) => a + n, 0) === 16, `${T} (TG3, NV): "N runs this week" (${JSON.stringify(nt.rows).slice(0, 160)})`);
+      assert(h.work === capped && Wk.planCards(g, SCENES).every((c) => Wk.cardRunsLeft(g, c.id, g.tasks.plan.lastDay) <= 3) && h.work < 9 * 8 * 60 * 10, `${T} (TG3, NC): the "Cards" total by the open days (${h.work} min)`); }
+    // NC: the runs a spaced card's open days allow, by hand (mutate F18: every 2nd day passed the week above)
+    { const g = mk(7, 8), wd = Tk.workDay(g), r = (last) => Wk.cardRunsLeft(g, 'wild_forage:1', last), a = [r(wd + 6), r(wd + 2), r(wd)];
+      Cm.markDaily(g, 'cress'); const b = [r(wd + 6), r(wd + 3), r(wd + 2)];
+      assert(a.join() === '3,1,1' && b.join() === '2,1,0' && Wk.cardRunsLeft(mk(7, 7), 'wild_forage:1', wd + 6) === null, `${T} (NC): open: 3 in 7 days, 1 in 3, 1 today; taken today: 2, 1, 0; not spaced: null (${a} / ${b})`); }
+    // TG2 (M1, TL: to TS6): the spaced cards' second replies that say "yesterday" are the two known ones (a new one fails here)
+    { const ids = Object.keys(DR).filter((k) => /^wild_(forage|hunt|train):\d+$/.test(k) && Cm.cardKey(k) && DR[k].some((t) => /\byesterday\b/i.test(t))).sort();
+      assert(ids.join() === 'wild_forage:0,wild_train:1', `${T} (TG2): "yesterday" only in the two lines kept for TS6 (${ids.join()})`); }
+    // TG5: a card turning Skilled through its own run closes behind it; a rewind keeps familiarity and the cards spaced from a stay's first day
+    { const g = mk(7, 7.9, 99720); const r = runTask(g, SCENES, 'wild_forage:1'); const f = g.tasks.fam['wild_forage:1'];
+      g.minutes += D; delete g.tasks.carries; assert(f >= Cm.SKILLED_FAM && !open(g, 'wild_forage', 1) && Cm.cardSpaced(g, 'wild_forage:1'), `${T} (TG5): Practised 7.9 → ${f} by its run: closed the next day (${r.lines.slice(-1)})`);
+      rewind(g); assert(g.tasks.fam['wild_forage:1'] === f && !g.flags[`cress@${Cm.dayKey(g)}`], `${T} (TG5): a rewind keeps familiarity, not the day's flag`);
+      goTo(g, SCENES, 'wilds'); g.minutes = Math.max(g.minutes, D + 7 * 60); assert(Cm.cardSpaced(g, 'wild_forage:1') && open(g, 'wild_forage', 1), `${T} (TG5): the next Coil's wilds: spaced, open on its first day`); }
 }
 
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));

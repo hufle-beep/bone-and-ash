@@ -2,6 +2,22 @@
 
 Started 2026-11-18 (v0.11.218), when `history-33.md` would have passed 20 KB with this move (owner pick U1, MD: history parts start at 20 KB, so a push uploads less). Older parts: `history-33.md` … `history.md`.
 
+## Moved from the handover in v0.11.221 (word for word)
+
+*(the open items as they stood)*
+
+- **KC1: done in v0.11.219** (KA + KG; the item as it stood, with the options and numbers, word for word in `history-34.md`; the CK1 done line too).
+- **NEXT PUSH: WF2, the wilds' work cards every 3rd day (picked 19:26 as "WS3"; the order the owner's 20:14; the owner 17:28: "The frequency of the training/prartice/hunt etc cards should also be examined, I'm higher coils those could also be farmed."; the options at about 17:55).** **Measured:** only the wilds' work cards repeat (Forage, Hunt, Practice: 12 cards and "Let Yuki hunt", `daily(…)`, once a calendar day each on the long calendar); the village's and the Fallout's menus (Clinic, Workshop, Militia, Palisade, Council) are once a Coil (`oneoff.js` `ONCE_MENUS`), the Heart has none; familiarity is kept across Coils (`coil.js`). A planned wilds week (8 cards open, each at 9) against the base game's same story day: New 7 runs (5), Practised 14 (8), Skilled 31 (8), Mastered 42 (8): 5.25× the XP and loot at Mastered. **Sub-items** (worked out from 8 cards): **WS7** once a week (the base game): at most 8; **WS3** every 3rd day (as the doors, S3): at most about 19 a week (Mastered, Skilled → about 19, 2.3×; Practised, New unchanged); **WS2** every 2nd day: at most 28 (3.5×). **WF1 🟢 WS7 / WF2 🟡 WS3 (recommended) / WF3 🟠 WS2 / WF4 🔴 leave it. Picked: WS3 (WF2).** Its own push, next.
+
+*(the last three versions: v0.11.218's version notes)*
+
+## v0.11.218 — Cooking with the village women every 3rd day (CK1 = RF3 + G1 + TX3)
+
+- **Files:** `js/story/kitchen.js` (`cookFree`, `potCookOpen` and `potCookDue` by it, `cookVariant`, `cookTexts`, `cookLabel`; the cook scene's enter, text, choice and gains), `js/story/kitchen_texts.js` (`POT_AGAIN`, Fable's), `js/story/kitchen_install.js` (the card's label by `cookLabel`), `js/story/common.js` (`SPACED` + `cook`, `a1_cook`), `js/core/week.js` (`DOOR_KEY` + the two cook doors: their rows repeat; RV1: `COOK_PLAN.row`), RV1 in `kitchen.js` (`COOK_PLAN`, `potCookDue`'s HA, `countShown`, `shown`'s range), `tools/textlint.mjs` (the kitchen pool reads the six; `tools/text-baseline.json` saved), `project/review-checklist-code.md` (a once-off made regular), `js/core/news.js`, `sw.js`, `tests/story.test.mjs` (the CK1 block; VQ1's keys, rows and cooking rows; PT1's "cooked today"), `tests/README.md`, `project/research/ck-brief.md`, `ck-drafts.md`, `ck-notes.md`, `ck-review-brief.md`, `ck-review.md`, `ck-faults.json`, `ck-faults-review.json`, `ck-mutate.md`, the docs (`history-34.md` new: v0.11.215's notes and the CK1 item moved; `roadmap-e.md`: the owner's two notes).
+- **What:** see the version line. New world flags on the long calendar only (`pot_cook_v`, `pot_cook_next`, `fo_pot_cook_v`, `fo_pot_cook_next`, `cook@N`, `a1_cook@N`; they reset with the Coil); no id, flag or storage key changed, no save field. A long-calendar save that cooked this Coil before v0.11.218 gets the first repeat next, with no gain.
+- **Checks:** a game change (rule 2): the full `bash tools/check.sh` after the build (exit 0, 660 s; an earlier run cut off by the cloud environment's restart at 08:26) and after RV1 (exit 0, 552 s); both 146 compared, 0 drifted, the same 3 moved more than 5 (log only). `mutate.mjs`: 25 of 25 after RV1 (`ck-faults.json` 13, `ck-faults-review.json` 12; the review's R12 dropped as equivalent since L5; `ck-mutate.md`). The text lint's snapshot saved (the kitchen pool 22 → 46 lines; its one pool tic, F2's "the board" ×3, noted on `roadmap-e.md`).
+- **Fable:** the six repeat scenes (one run; `packet.mjs --check`: no tic, no reused run after two of Claude's cuts, "says nothing" and "lets it be known"). **Opus:** the cold review (rule 9; 185k tokens; H1, M1, M2, L1–L5, TG1–TG8 in `ck-review.md`); a second run, started when the restart seemed to have stopped the first, was stopped once the first had finished.
+
 ## Moved from the handover in v0.11.220 (word for word)
 
 *(the decision of v0.11.217)*

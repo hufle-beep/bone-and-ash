@@ -19,7 +19,7 @@ import { CONDENSE_SIT_COST } from './formulas.js';
 import { btTarget, MER_LINES, lineWindow, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
 import { onceOpen, noteOnce, stageOpen, ONCE_MENUS, EVENING_HOUR } from '../story/oneoff.js';
-import { daily, foodCount, eatBest, FOOD, stayOf } from '../story/common.js';
+import { daily, foodCount, eatBest, FOOD, stayOf, haulMult } from '../story/common.js'; // v0.11.221 (RV2, HF): haulMult
 import { potCookDue } from '../story/kitchen.js'; // v0.11.217 (owner pick PC1, CG)
 import { storyDay, calStart, calEnd, atStoryDay, longCal, LONG_CAL, STAY_DAYS } from './calendar.js'; // v0.11.203 (owner pick T1, TS1): the long calendar; v0.11.204 (W1): the week
 import { endCoil } from './coil.js';
@@ -308,6 +308,8 @@ function learn(g, scenes, hubId, card, id, gain) {
 }
 
 const BAND_TEXT = { double: 'a double haul', full: 'done', partial: 'partly', fail: 'failed' };
+/** v0.11.221 (owner pick RV2, HF): the line under a spaced Forage or Hunt card's result: its items, ×3 (again.js reads it as a number line). */
+export const HAUL_TEXT = 'Three days\' haul — in total:';
 
 /** A work card, resolved without dice. Returns its lines; leaves the story wherever the choice leads. */
 function resolveWork(g, scenes, hubId, card, id) {
@@ -369,9 +371,11 @@ function workResult(g, scenes, hubId, card, id, { lines = [], mins = 0, total = 
     const success = band === 'double' || band === 'full' || (band === 'partial' && items);
     const roll = { success, crit: band === 'double', ratio };
     if (card.menu && success) noteOnce(g, card.menu, Number(String(id).split(':').pop()), c); // v0.11.33: once per Coil; a failed try can be made again (owner 14:05)
+    const hm = haulMult(g, id); // v0.11.221 (owner pick RV2, HF): a spaced Forage or Hunt card brings its 3 days' items
+    const haul = (gained) => { if (hm > 1 && gained.length) lines.push(`${HAUL_TEXT} ${gained.map(([i, d]) => `+${d} ${itemNames[i]?.name || i}`).join(', ')}.`); };
     if (success && c.do) {
         const before = { ...g.inventory };
-        if (band === 'double') setLootMult(2);
+        if (band === 'double' || hm > 1) setLootMult((band === 'double' ? 2 : 1) * hm);
         let out = [];
         try { out = asOn(() => c.do(g, roll)) || []; } finally { setLootMult(1); }
         lines.push(...(band === 'partial' ? keepReplies(out) : out)); // a partial lists only what it keeps; v0.11.69 (P1): its reply sentences stay
@@ -380,14 +384,18 @@ function workResult(g, scenes, hubId, card, id, { lines = [], mins = 0, total = 
             const kept = gained.map(([i, d]) => { const keep = Math.max(1, Math.floor(d * ratio)); if (keep < d) addItem(g, i, keep - d); return [i, keep]; }).filter(([, d]) => d > 0);
             lines.push(kept.length ? `A thin haul — you keep: ${kept.map(([i, d]) => `+${d} ${itemNames[i]?.name || i}`).join(', ')}.` : 'A thin haul — nothing worth keeping.');
         } else if (band === 'double' && gained.length) lines.push(`Double haul — in total: ${gained.map(([i, d]) => `+${d} ${itemNames[i]?.name || i}`).join(', ')}.`);
+        else haul(gained);
     } else if (!success && c.failDo) {
-        const hp0 = g.james.hp;
-        const out = asOn(() => c.failDo(g, roll)) || [];
+        const hp0 = g.james.hp, before = { ...g.inventory };
+        if (hm > 1) setLootMult(hm);
+        let out = [];
+        try { out = asOn(() => c.failDo(g, roll)) || []; } finally { setLootMult(1); }
         // a partial never hurts, so its text drops the sentences about HP
         lines.push(...(band === 'partial' ? out.map((l) => l.replace(/[^.!?]*−\d+(?:\.\d+)? HP[^.!?]*[.!?]?/g, '').trim()).filter(Boolean) : out));
         const lost = hp0 - g.james.hp;
         if (band === 'fail' && lost > 0) { g.james.hp -= lost; lines.push(`It goes in deeper than it should: another −${r1(lost)} HP.`); }
         if (band === 'partial' && lost > 0) g.james.hp = hp0; // a partial never hurts
+        haul(Object.keys(g.inventory).map((i) => [i, (g.inventory[i] || 0) - (before[i] || 0)]).filter(([, d]) => d > 0)); // HF: a fail's items too
     }
     for (const i of new Set(takeCapNotes())) lines.push(`Hammerspace: ${itemNames[i]?.name || i} is full — the rest stays behind.`);
     if (total > once && !done) lines.push(left > 0 ? `A week's work: ${hrs(total)} in all, ${hrs(left)} still to go (Go on, from tomorrow morning).` : `A week's work: ${hrs(total)}, done.`); // v0.11.215: a carried card's end line is its Go on card's

@@ -1,0 +1,128 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/common.js",
+  "find": "(Number(g.tasks?.fam?.[FAM_KEY.get(key)]) || 0) >= SKILLED_FAM;",
+  "replace": "(Number(g.tasks?.fam?.[FAM_KEY.get(key)]) || 0) >= 0;",
+  "note": "every wilds card spaced from New (SA, not the pick)"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/common.js",
+  "find": "export const SKILLED_FAM = 8;",
+  "replace": "export const SKILLED_FAM = 18;",
+  "note": "spaced from Mastered, not Skilled"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/common.js",
+  "find": "export function spaceByFam(key, cardId) { FAM_KEY.set(key, cardId); KEY_OF.set(cardId, key); SPACED.add(key); }",
+  "replace": "export function spaceByFam(key, cardId) { FAM_KEY.set(key, cardId); KEY_OF.set(cardId, key); }",
+  "note": "registered but never spaced"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/wilds.js",
+  "find": "for (const menu of ['wild_forage', 'wild_hunt', 'wild_train']) WILDS",
+  "replace": "for (const menu of ['wild_forage', 'wild_hunt']) WILDS",
+  "note": "Practice left daily"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/wilds.js",
+  "find": "spaceByFam(c.show.dailyKey, `${menu}:${i}`)",
+  "replace": "spaceByFam(c.show.dailyKey, `${menu}:${i + 1}`)",
+  "note": "each key gated by the next card's familiarity"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/common.js",
+  "find": "const famReady = (g, key) => !FAM_KEY.has(key) ||",
+  "replace": "const famReady = (g, key) => FAM_KEY.has(key) ||",
+  "note": "the doors and the cook lose their spacing"
+ },
+ {
+  "id": "F7",
+  "file": "js/core/week.js",
+  "find": "    if (!cardSpaced(g, id)) return '';\n    const wd = wakeDay(g), nx",
+  "replace": "    if (!/^wild_/.test(id)) return '';\n    const wd = wakeDay(g), nx",
+  "note": "the note on every wilds row, Practised or on the old calendar (re-pointed for RV2)"
+ },
+ {
+  "id": "F8",
+  "file": "js/main.js",
+  "find": "a card${cardNote(g, c.id) ? ` · ${cardNote(g, c.id)}` : ''}${fc.rows[c.id] || ''}`",
+  "replace": "a card${fc.rows[c.id] || ''}`",
+  "note": "the row's note not drawn"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/common.js",
+  "find": "export const cardSpaced = (g, cardId) => KEY_OF.has(cardId) && spacedNow(g, KEY_OF.get(cardId));",
+  "replace": "export const cardSpaced = (g, cardId) => KEY_OF.has(cardId) && famReady(g, KEY_OF.get(cardId));",
+  "note": "the note shown on the old calendar too"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/common.js",
+  "find": "export const haulMult = (g, cardId) => (HAUL_MENUS.test(String(cardId)) && cardSpaced(g, cardId) ? SPACE_DAYS : 1);",
+  "replace": "export const haulMult = (g, cardId) => (HAUL_MENUS.test(String(cardId)) && cardSpaced(g, cardId) ? 1 : 1);",
+  "note": "RV2 HF off: the Skilled week starves again"
+ },
+ {
+  "id": "F11",
+  "file": "js/story/common.js",
+  "find": "const HAUL_MENUS = /^wild_(forage|hunt):/;",
+  "replace": "const HAUL_MENUS = /^wild_(forage|hunt|train):/;",
+  "note": "HF on Practice too"
+ },
+ {
+  "id": "F12",
+  "file": "js/core/tasks.js",
+  "find": "        if (band === 'double' || hm > 1) setLootMult((band === 'double' ? 2 : 1) * hm);",
+  "replace": "        if (band === 'double') setLootMult(2);",
+  "note": "HF's multiplier never set on a success"
+ },
+ {
+  "id": "F13",
+  "file": "js/story/again.js",
+  "find": "|Three days' haul — in total: )?",
+  "replace": ")?",
+  "note": "the haul line stops the plan as unread"
+ },
+ {
+  "id": "F14",
+  "file": "js/core/week.js",
+  "find": "return doorNote({ repeat: true, next: nx > wd ? nx - wd + calDay(g) : null });",
+  "replace": "return doorNote({ repeat: true, next: null });",
+  "note": "NO: no opens Day N"
+ },
+ {
+  "id": "F15",
+  "file": "js/core/week.js",
+  "find": "rows[id] = cardSpaced(g, id) && fc.runs ?",
+  "replace": "rows[id] = false && fc.runs ?",
+  "note": "NV off: not this week again"
+ },
+ {
+  "id": "F16",
+  "file": "js/core/week.js",
+  "find": "work += (cap == null ? n : Math.min(n, cap)) * cardWeekMinutes(c); }",
+  "replace": "work += n * cardWeekMinutes(c); }",
+  "note": "NC off: the Cards total counts every run set"
+ },
+ {
+  "id": "F17",
+  "file": "js/story/wilds.js",
+  "find": "if (c.show?.dailyKey && c.show.dailyKey !== 'yukihunt') spaceByFam",
+  "replace": "if (c.show?.dailyKey) spaceByFam",
+  "note": "LY off: Yuki's hunt spaced"
+ },
+ {
+  "id": "F18",
+  "file": "js/core/week.js",
+  "find": "    return wait > days ? 0 : 1 + Math.floor((days - wait) / SPACE_DAYS);",
+  "replace": "    return wait > days ? 0 : 1 + Math.floor((days - wait) / 2);",
+  "note": "NC counts every 2nd day"
+ }
+]

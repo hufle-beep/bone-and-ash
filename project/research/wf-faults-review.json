@@ -1,0 +1,58 @@
+[
+ {
+  "id": "RF1",
+  "file": "js/story/common.js",
+  "find": "|| 0) >= SKILLED_FAM;",
+  "replace": "|| 0) > SKILLED_FAM;",
+  "note": "a card at exactly 8 (Skilled) still daily"
+ },
+ {
+  "id": "RF2",
+  "file": "js/story/common.js",
+  "find": "g.tasks?.fam?.[FAM_KEY.get(key)]",
+  "replace": "g.tasks?.fam?.[key]",
+  "note": "familiarity read under the daily key, never the card: never spaced"
+ },
+ {
+  "id": "RF3",
+  "file": "js/story/common.js",
+  "find": "(Number(g.tasks?.fam?.[FAM_KEY.get(key)]) || 0)",
+  "replace": "Math.max(0, ...Object.entries(g.tasks?.fam || {}).filter(([k]) => k.split(':')[0] === String(FAM_KEY.get(key)).split(':')[0]).map(([, v]) => Number(v) || 0))",
+  "note": "one Skilled card spaces its whole menu"
+ },
+ {
+  "id": "RF4",
+  "file": "js/story/wilds.js",
+  "find": "if (c.show?.dailyKey && c.show.dailyKey !== 'yukihunt') spaceByFam",
+  "replace": "if (c.show?.dailyKey && c.show.dailyKey !== 'yukihunt' && !/dart/i.test(String(c.text))) spaceByFam",
+  "note": "the dart cards (hare, fowl, darts: form-gated) left daily (re-pointed for RV2, LY)"
+ },
+ {
+  "id": "RF5",
+  "file": "js/story/common.js",
+  "find": "KEY_OF.set(cardId, key);",
+  "replace": "KEY_OF.set(key, cardId);",
+  "note": "cardSpaced never true: the CN note never drawn"
+ },
+ {
+  "id": "RF6",
+  "file": "js/story/common.js",
+  "find": "for (let k = 1; k < SPACE_DAYS; k++) if (sameStay",
+  "replace": "for (let k = 1; k < (FAM_KEY.has(key) ? 2 : SPACE_DAYS); k++) if (sameStay",
+  "note": "wilds cards every 2nd day while the note says 3rd"
+ },
+ {
+  "id": "RF7",
+  "file": "js/story/common.js",
+  "find": "|| 0) >= SKILLED_FAM;",
+  "replace": "|| 0) >= SKILLED_FAM && (Number(g.tasks?.fam?.[FAM_KEY.get(key)]) || 0) < 18;",
+  "note": "Mastered cards daily again"
+ },
+ {
+  "id": "RF8",
+  "file": "js/story/common.js",
+  "find": "&& STAY_DAYS.has(storyDay(g)) && famReady(g, key);",
+  "replace": "&& (FAM_KEY.has(key) || STAY_DAYS.has(storyDay(g))) && famReady(g, key);",
+  "note": "wilds cards spaced on journey days too (probe: is the stay rule pinned for them?)"
+ }
+]
