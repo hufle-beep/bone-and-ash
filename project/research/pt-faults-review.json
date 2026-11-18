@@ -1,0 +1,121 @@
+[
+ {
+  "id": "R1",
+  "file": "js/core/tasks.js",
+  "find": "        routineBusy = true;\n        let r;",
+  "replace": "        let r;",
+  "note": "the routine's pot run without routineBusy (its own routine, the sit, runs inside it)"
+ },
+ {
+  "id": "R2",
+  "file": "js/core/tasks.js",
+  "find": "    if (!(PT1.on && mealCard(scenes, hubId, id))) out.push(...dayMeal(g, hubId, scenes, false, id));",
+  "replace": "    if (!(PT1.on && mealCard(scenes, hubId, id))) out.push(...dayMeal(g, hubId));",
+  "note": "a card tap's routine never eats at the pot (only the plan's day off and evening)"
+ },
+ {
+  "id": "R3",
+  "file": "js/story/kitchen.js",
+  "find": "return !!c && !g.flags[c.flag] && relF(g, 'Village') >= POT_GATE && hour(g) < POT_UNTIL",
+  "replace": "return !!c && !g.flags[c.flag] && relF(g, 'Village') > POT_GATE && hour(g) < POT_UNTIL",
+  "note": "CG off at exactly the village's 90"
+ },
+ {
+  "id": "R4",
+  "file": "js/story/kitchen.js",
+  "find": "return !!c && !g.flags[c.flag] && relF(g, 'Village') >= POT_GATE",
+  "replace": "return !!c && relF(g, 'Village') >= POT_GATE",
+  "note": "CG ignores the cook done this Coil"
+ },
+ {
+  "id": "R5",
+  "file": "js/core/tasks.js",
+  "find": "    return !!c && (c.text === POT_TEXT || EAT_TEXT.has(c.text));",
+  "replace": "    return !!c && !!c.do;",
+  "note": "every card with a result (Rest, Cultivate) counts as the meal"
+ },
+ {
+  "id": "R6",
+  "file": "js/core/tasks.js",
+  "find": "    if (PT1.on && slot0 && !fail) dayMeal(g, hubId, null, true, '', slot0);",
+  "replace": "    if (slot0 && !fail) dayMeal(g, hubId, null, true, '', slot0);",
+  "note": "PT1 off still marks a hand-tapped eat card (v0.11.216 not exactly back)"
+ },
+ {
+  "id": "R7",
+  "file": "js/core/tasks.js",
+  "find": "const ls = r.lines.filter((l) => l !== '')",
+  "replace": "const ls = r.lines.filter((l) => /satiety/.test(l))",
+  "note": "the pot's Yuki / spoil lines of its half hour dropped"
+ },
+ {
+  "id": "R8",
+  "file": "js/core/tasks.js",
+  "find": "    let pot = potCardOpen(g, scenes, hubId);",
+  "replace": "    if (foodCount(g) <= 0) return [];\n    let pot = potCardOpen(g, scenes, hubId);",
+  "note": "an empty hammerspace: no pot meal either"
+ },
+ {
+  "id": "R9",
+  "file": "js/core/tasks.js",
+  "find": "if (i >= 0) ls[i] = `${MEAL[slot]}: ${ls[i]}`;",
+  "replace": "if (i >= 0) ls[i] = `${MEAL[mealSlot(g)]}: ${ls[i]}`;",
+  "note": "the meal named by the clock after the pot (a 10:40 breakfast reads Midday)"
+ },
+ {
+  "id": "R10",
+  "file": "js/story/kitchen.js",
+  "find": "relF(g, 'Village') >= POT_GATE && hour(g) < POT_UNTIL && daily(c.daily)(g);\n};",
+  "replace": "relF(g, 'Village') >= POT_GATE && hour(g) >= POT_FROM && hour(g) < POT_UNTIL && daily(c.daily)(g);\n};",
+  "note": "CG only from 09:00: a 07:00 breakfast takes the pot and the day's cook"
+ },
+ {
+  "id": "R11",
+  "file": "js/core/week.js",
+  "find": "                const m1 = g.minutes;\n                say(dayMeal(g, hub, scenes)); // PT1 (PM): the pot's meal takes its card's time\n                if (g.minutes !== m1) continue; // RV1 (M1): the clock moved: the next step reads the part of the day it is in now\n                const mins = workRoom(g, hub);",
+  "replace": "                const mins = workRoom(g, hub);\n                say(dayMeal(g, hub, scenes)); // PT1 (PM): the pot's meal takes its card's time",
+  "note": "the day off's minutes read before the meal"
+ },
+ {
+  "id": "R12",
+  "file": "js/core/tasks.js",
+  "find": "    if (!PT1.on || g.scene !== hubId || potCookDue(g, hubId)) return null;",
+  "replace": "    if (!PT1.on || g.scene !== hubId || potCookDue(g, hubId) || g.james.satiety >= 70) return null;",
+  "note": "the routine eats at the pot only below 70 (a stricter threshold than the card's 80)"
+ },
+ {
+  "id": "R13",
+  "file": "js/core/week.js",
+  "find": "                if (g.minutes !== m1) continue; // RV1 (M1): the clock moved: the next step reads the part of the day it is in now\n",
+  "replace": "                if (g.minutes - m1 > 999) continue;\n",
+  "note": "M1 back: the day off steps on after a pot breakfast past 11:00 (the midday meal lost)"
+ },
+ {
+  "id": "R14",
+  "file": "js/core/tasks.js",
+  "find": "    if (pot && id && !openAfterPot(g, scenes, hubId, pot, id)) pot = null;",
+  "replace": "    if (pot && id && false && !openAfterPot(g, scenes, hubId, pot, id)) pot = null;",
+  "note": "L2 back: the pot's time closes the card tapped"
+ },
+ {
+  "id": "R15",
+  "file": "js/core/tasks.js",
+  "find": "const EAT_TEXT = new Set(['Eat something from the hammerspace.', 'Eat something.']);",
+  "replace": "const EAT_TEXT = new Set(['Eat something from the hammerspace.']);",
+  "note": "the Fallout's eat card not the meal"
+ },
+ {
+  "id": "R16",
+  "file": "js/core/tasks.js",
+  "find": "    const slot0 = weekHub(g, hubId) && mealCard(scenes, hubId, id) ? mealSlot(g) : null;",
+  "replace": "    const slot0 = weekHub(g, hubId) && mealCard(scenes, hubId, id) ? 'x' : null;",
+  "note": "the eat card tapped marks no real part of the day: a second meal after it"
+ },
+ {
+  "id": "R17",
+  "file": "js/core/tasks.js",
+  "find": "    if (!(PT1.on && mealCard(scenes, hubId, id))) out.push(...dayMeal(g, hubId, scenes, false, id));",
+  "replace": "    if (PT1.on && mealCard(scenes, hubId, id)) dayMeal(g, hubId, null, true); else out.push(...dayMeal(g, hubId, scenes, false, id));",
+  "note": "L1 back: the meal marked before the tap runs (a skipped tap loses the supper)"
+ }
+]

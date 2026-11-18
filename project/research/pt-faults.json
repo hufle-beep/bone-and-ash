@@ -1,0 +1,65 @@
+[
+ {
+  "id": "F1",
+  "file": "js/core/tasks.js",
+  "find": "if (!PT1.on || g.scene !== hubId || potCookDue(g, hubId)) return null;",
+  "replace": "if (!PT1.on || g.scene !== hubId) return null;",
+  "note": "CG gone: the routine eats at the pot while the cook can still show"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/kitchen.js",
+  "find": "relF(g, 'Village') >= POT_GATE && hour(g) < POT_UNTIL && daily(c.daily)(g);\n};",
+  "replace": "relF(g, 'Village') >= POT_GATE && hour(g) < POT_FROM && daily(c.daily)(g);\n};",
+  "note": "CG's window ends at 09:00, not 15:00"
+ },
+ {
+  "id": "F3",
+  "file": "js/core/tasks.js",
+  "find": "    if (!(PT1.on && mealCard(scenes, hubId, id))) out.push(...dayMeal(g, hubId, scenes, false, id));",
+  "replace": "    out.push(...dayMeal(g, hubId, scenes, false, id));",
+  "note": "the pot tapped by hand: the routine eats first"
+ },
+ {
+  "id": "F5",
+  "file": "js/core/week.js",
+  "find": "say(dayMeal(g, hub, scenes)); // PT1 (PM)",
+  "replace": "say(dayMeal(g, hub)); // PT1 (PM)",
+  "note": "the day off never eats at the pot"
+ },
+ {
+  "id": "F6",
+  "file": "js/core/week.js",
+  "find": "say(dayMeal(g, hub, scenes)); say(takeSpoilNotes(g));",
+  "replace": "say(dayMeal(g, hub)); say(takeSpoilNotes(g));",
+  "note": "the evening's meal never at the pot"
+ },
+ {
+  "id": "F7",
+  "file": "js/core/tasks.js",
+  "find": "if (i >= 0) ls[i] = `${MEAL[slot]}: ${ls[i]}`;",
+  "replace": "if (i >= 0) ls[i] = `${ls[i]}`;",
+  "note": "the pot's line without its part of the day"
+ },
+ {
+  "id": "F8",
+  "file": "js/core/week.js",
+  "find": "                if (g.minutes !== m1) continue; // RV1 (M1): the clock moved: the next step reads the part of the day it is in now\n                const mins = workRoom(g, hub);\n",
+  "replace": "                const mins = workRoom(g, hub);\n",
+  "note": "the day off steps on after a pot meal (past the evening or the next part of the day)"
+ },
+ {
+  "id": "F9",
+  "file": "js/core/tasks.js",
+  "find": "    if (mark) { t.routine.meals = `${t.routine.meals || ''}${slot}`; return []; }",
+  "replace": "    if (mark) return [];",
+  "note": "the pot tapped by hand doesn't count as the meal: the next card eats too"
+ },
+ {
+  "id": "F10",
+  "file": "js/core/tasks.js",
+  "find": "const POT_HUB = new Set(['ashfall', 'fo_ashfall']);",
+  "replace": "const POT_HUB = new Set(['ashfall']);",
+  "note": "the Fallout's pot never the routine's"
+ }
+]

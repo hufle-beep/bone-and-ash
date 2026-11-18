@@ -422,9 +422,11 @@ export function runWeek(g, scenes, { max = 600, onStep = null, probe = true } = 
         const ev = EVENING_HOUR[hub] ?? 16;
         // RV1 (M2): the day off has its meals too: the rest of the day in steps to the next part of the day (11:00, 15:00), a meal at each
         if (hourNow(g) >= 4 && hourNow(g) < ev) {
-            const mins = workRoom(g, hub);
-            if (mins > 0) {
-                say(dayMeal(g, hub));
+            if (workRoom(g, hub) > 0) {
+                const m1 = g.minutes;
+                say(dayMeal(g, hub, scenes)); // PT1 (PM): the pot's meal takes its card's time
+                if (g.minutes !== m1) continue; // RV1 (M1): the clock moved: the next step reads the part of the day it is in now
+                const mins = workRoom(g, hub);
                 const hh = hourNow(g), next = hh < 11 ? 11 : hh < 15 ? 15 : ev;
                 const step = Math.min(mins, Math.max(1, (Math.min(next, ev) - hh) * 60 - clockParts(g.minutes).mm));
                 advance(g, step, { resting: true });
@@ -433,7 +435,7 @@ export function runWeek(g, scenes, { max = 600, onStep = null, probe = true } = 
                 continue;
             }
         }
-        say(dayMeal(g, hub)); say(takeSpoilNotes(g)); // the evening's meal before the evening (RV1, M1: and what turned)
+        say(dayMeal(g, hub, scenes)); say(takeSpoilNotes(g)); // the evening's meal before the evening (RV1, M1: and what turned)
         const stops = hubStops(g, scenes);
         if (stops.length !== 1) return end(stops.length ? 'evening' : 'stuck');
         // RV1 (L4, L5): the one way on is taken only when it is the usual evening: not a fight, not the Fallout's farewell, not a new label

@@ -20,6 +20,7 @@ import { btTarget, MER_LINES, lineWindow, lineIndex, lineName } from '../story/m
 import { TASK_HUBS } from '../story/task_hubs.js';
 import { onceOpen, noteOnce, stageOpen, ONCE_MENUS, EVENING_HOUR } from '../story/oneoff.js';
 import { daily, foodCount, eatBest, FOOD, stayOf } from '../story/common.js';
+import { potCookDue } from '../story/kitchen.js'; // v0.11.217 (owner pick PC1, CG)
 import { storyDay, calStart, calEnd, atStoryDay, longCal, LONG_CAL, STAY_DAYS } from './calendar.js'; // v0.11.203 (owner pick T1, TS1): the long calendar; v0.11.204 (W1): the week
 import { endCoil } from './coil.js';
 import { canMeditate } from './meditate.js';
@@ -498,6 +499,7 @@ export function runTask(g, scenes, id) {
         if (pre.length && g.scene === hubId && (card.kind === 'carry' ? workRoom(g, hubId) <= 0 : !taskOpen(g, scenes, id))) { lines.push(SKIP_LINE, ...takeSpoilNotes(g)); return { lines, fail: false, stopped: false, skipped: true }; }
         if (pre.length && g.scene !== hubId) { lines.push(...takeSpoilNotes(g)); return { lines, fail: false, stopped: true, skipped: true }; }
     }
+    const slot0 = weekHub(g, hubId) && mealCard(scenes, hubId, id) ? mealSlot(g) : null; // RV1 (L1, L2)
     const mY = g.minutes; // RV1 (M1): Yuki's lane counts from here; the day's sit ticked her for its own minutes
     if (card.kind === 'carry') {
         const found = carryHere(g, hubId, id);
@@ -555,6 +557,7 @@ export function runTask(g, scenes, id) {
         if (card.kind === 'chore' || card.kind === 'door') learn(g, scenes, hubId, card, id, 1);
         if (card.kind === 'door' && g.scene !== hubId) st(g).door = { id, speed }; // v0.11.141 (FX1, DI): the scenes behind it run at its speed (story.js)
     }
+    if (PT1.on && slot0 && !fail) dayMeal(g, hubId, null, true, '', slot0); // RV1 (L1, L2): the eat card tapped is this part of the day's meal, now it ran
     lines.push(...yukiTick(g, hubId, g.minutes - mY));
     lines.push(...takeSpoilNotes(g)); // v0.11.209 (RV1, H1 + M1): the food that turned while the card took its time (a sit, a meridian, the routine)
     let stopped = g.scene !== hubId;
@@ -794,13 +797,68 @@ let routineBusy = false;
 const MEAL = { b: 'Breakfast', l: 'Midday', s: 'Supper' };
 /** The part of the day (R1): before 11:00, 11:00–14:59, from 15:00 (the night to 04:00 is the evening's). */
 export const mealSlot = (g) => { const hh = clockParts(g.minutes).hh, h = hh < NIGHT_TO ? hh + 24 : hh; return h < 11 ? 'b' : h < 15 ? 'l' : 's'; };
-/** R1: this part of the day's meal, once, when Fed is under ROUTINE_FED and there is food (lines). RV1 (M2): also on the week plan's days off. */
-export function dayMeal(g, hubId = g.scene) {
+/* ---------- v0.11.217 (owner picks PT1 = PM, 2026-11-17 19:26, and PC1 = PM + CG, 2026-11-18 01:01; the owner 17:42: "eating at
+ * the pot is not among the schedualble options") ----------
+ * PM: on the village's and the Fallout's stays the day's meal is the communal pot's when its card is open (once a day, Fed under 80,
+ * before 19:00), run as its card (its time, its line, the day's pot used); else the hammerspace, as before. No plan row.
+ * CG: not while the cook-with-the-women card can still show today (kitchen.js potCookDue): the pot is left for it (before, a
+ * planned Fallout week never cooked). The pot's card tapped by hand is that part of the day's meal (no routine meal before it).
+ * RV1 (owner pick, 02:14; the Opus review): the tap counts as the meal only once it has run (L1); the village's and the Fallout's
+ * eat card tapped is the meal too (L2); the pot only when the card tapped stays open after it, else the hammerspace (L2); the plan's
+ * day off reads the part of the day again after a meal that took time (week.js, M1).
+ * `PT1.on`: the tests switch it off to run v0.11.216's meals. */
+export const PT1 = { on: true };
+const POT_TEXT = 'Eat at the communal pot.';
+const POT_HUB = new Set(['ashfall', 'fo_ashfall']);
+/** PT1: the pot's card id on this hub (open or not), or null. */
+export function potCardId(scenes, hubId) {
+    if (!scenes || !POT_HUB.has(hubId)) return null;
+    const i = (scenes[hubId]?.choices || []).findIndex((c) => c.text === POT_TEXT);
+    return i >= 0 ? `${hubId}:${i}` : null;
+}
+/** PT1 (PM + CG): the pot's card here when the routine eats there now (its task id), else null. */
+export function potCardOpen(g, scenes, hubId = g.scene) {
+    if (!PT1.on || g.scene !== hubId || potCookDue(g, hubId)) return null;
+    const id = potCardId(scenes, hubId);
+    return id && taskOpen(g, scenes, id) ? id : null;
+}
+/** R1: this part of the day's meal, once, when Fed is under ROUTINE_FED and there is food (lines). RV1 (M2): also on the week plan's
+ *  days off. PT1 (PM): at the communal pot when it is open (`scenes` given). */
+/** RV1 (L1, L2): the pot's card or the hammerspace's eat card on this hub (a tap of one is this part of the day's meal). */
+const EAT_TEXT = new Set(['Eat something from the hammerspace.', 'Eat something.']); // the village's and the Fallout's
+export function mealCard(scenes, hubId, id) {
+    if (!id || !scenes || !POT_HUB.has(hubId)) return false;
+    const [h, i] = String(id).split(':'), c = h === hubId ? scenes[hubId]?.choices?.[Number(i)] : null;
+    return !!c && (c.text === POT_TEXT || EAT_TEXT.has(c.text));
+}
+/** RV1 (L2): would the tapped card still be open after the pot's meal? (on a copy) */
+function openAfterPot(g, scenes, hubId, pot, id) {
+    if (!id || isCarryTask(id)) return true;
+    const { log, ...rest } = g, c = JSON.parse(JSON.stringify(rest)); c.log = [];
+    routineBusy = true;
+    try { runTask(c, scenes, pot); } finally { routineBusy = false; }
+    return taskOpen(c, scenes, id);
+}
+export function dayMeal(g, hubId = g.scene, scenes = null, mark = false, id = '', at = null) {
     if (!weekHub(g, hubId) || g.combat) return [];
     const t = st(g), d = workDay(g);
     if (!t.routine || typeof t.routine !== 'object' || t.routine.d !== d) t.routine = { d, meals: '', sit: false };
-    const slot = mealSlot(g);
-    if (String(t.routine.meals).includes(slot) || g.james.satiety >= ROUTINE_FED || foodCount(g) <= 0) return [];
+    const slot = at || mealSlot(g);
+    if (String(t.routine.meals).includes(slot)) return [];
+    if (mark) { t.routine.meals = `${t.routine.meals || ''}${slot}`; return []; } // PT1: this part of the day's meal taken by a card
+    if (g.james.satiety >= ROUTINE_FED) return [];
+    let pot = potCardOpen(g, scenes, hubId);
+    if (pot && id && !openAfterPot(g, scenes, hubId, pot, id)) pot = null; // RV1 (L2): the pot's time would close the card tapped: the hammerspace
+    if (pot) {
+        t.routine.meals = `${t.routine.meals || ''}${slot}`;
+        routineBusy = true;
+        let r;
+        try { r = runTask(g, scenes, pot); } finally { routineBusy = false; }
+        const ls = r.lines.filter((l) => l !== ''), i = ls.findIndex((l) => /: \+\d+ satiety\.$/.test(l));
+        if (i >= 0) ls[i] = `${MEAL[slot]}: ${ls[i]}`; else ls.unshift(`${MEAL[slot]}: the communal pot.`);
+        return ls;
+    }
+    if (foodCount(g) <= 0) return [];
     t.routine.meals = `${t.routine.meals || ''}${slot}`;
     const e = eatBest(g, { fire: hubId === 'wilds' ? !!g.flags.fire : true });
     return e.length ? [`${MEAL[slot]}: ${String(e[0]).replace(/^You eat: /, '')}`] : [];
@@ -809,7 +867,8 @@ export function dayMeal(g, hubId = g.scene) {
 export function dayRoutine(g, scenes, hubId = g.scene, kind = '', id = '') {
     if (!weekHub(g, hubId) || g.combat) return [];
     const t = st(g), d = workDay(g), out = [];
-    out.push(...dayMeal(g, hubId));
+    if (!t.routine || typeof t.routine !== 'object' || t.routine.d !== d) t.routine = { d, meals: '', sit: false };
+    if (!(PT1.on && mealCard(scenes, hubId, id))) out.push(...dayMeal(g, hubId, scenes, false, id)); // RV1 (L1, L2): an eat card tapped is the meal, marked when it runs
     if (!t.routine.sit) {
         t.routine.sit = true;
         const sid = sitTaskId(g, scenes);

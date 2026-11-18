@@ -5854,9 +5854,10 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       { const g = ensureBars(newGame(99502, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'ashfall'); g.minutes = 9 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60);
         Wk.planEnsure(g); const cs = Wk.planCards(g, SCENES); for (const c of cs.slice(0, 3)) Wk.planSet(g, c.id, 2); Wk.planSet(g, 'med:sit', 4); Wk.planSet(g, 'med:qi', 3); out.ashfall = pin(g); out.cards = cs.slice(0, 3).map((c) => c.id).join(); }
         return out; };
-      const out = build(); Tk.CF1.on = false; let old; try { old = build(); } finally { Tk.CF1.on = true; }
+      const out = build(); Tk.PT1.on = false; let old, v216; try { v216 = build(); Tk.CF1.on = false; old = build(); } finally { Tk.CF1.on = true; Tk.PT1.on = true; } // v0.11.217 (PT1): v0.11.216's runs with PT1 off; v0.11.214's with CF1 off too
       assert(JSON.stringify(old) === '{"wilds":"52a6f20a","fallout":"f17ca92c","ashfall":"97eb74f4","cards":"workshop:0,workshop:2,drill:0"}', `${T} (v0.11.215, RV1 TG4): with CF1 switched off the three runs are v0.11.214's exactly (its code, keys sorted: wilds 52a6f20a, the Fallout f17ca92c, Ashfall 97eb74f4), so the new pins below change only by CF1 (${JSON.stringify(old)})`);
-      assert(JSON.stringify(out) === '{"wilds":"7c6e58ca","fallout":"dd24acc5","ashfall":"c8d8939d","cards":"workshop:0,workshop:2,drill:0"}', `${T} (RV1, TG2): none set: the wilds, the Fallout and Ashfall runs as v0.11.215's code runs them (re-pinned for CF1 and its RV1: no card waits behind another's work, a card that gives no food pays at its end, a start needs its old length left today and, with no food, its whole work left in the stay; before, for S3 and the rest row; with the spacing off and the rest row taken out they run as v0.11.210's: the VQ1 block) (${JSON.stringify(out)})`); }
+      assert(JSON.stringify(v216) === '{"wilds":"7c6e58ca","fallout":"dd24acc5","ashfall":"c8d8939d","cards":"workshop:0,workshop:2,drill:0"}', `${T} (v0.11.217, PT1): with PT1 switched off the three runs are v0.11.216's exactly (${JSON.stringify(v216)})`);
+      assert(JSON.stringify(out) === '{"wilds":"7c6e58ca","fallout":"00b6e2e7","ashfall":"1e4a6b32","cards":"workshop:0,workshop:2,drill:0"}', `${T} (RV1, TG2): none set: the wilds, the Fallout and Ashfall runs as v0.11.217's code runs them (v0.11.217, PT1: the Fallout and Ashfall re-pinned for the pot's meals, the wilds unchanged; re-pinned for CF1 and its RV1: no card waits behind another's work, a card that gives no food pays at its end, a start needs its old length left today and, with no food, its whole work left in the stay; before, for S3 and the rest row; with the spacing off and the rest row taken out they run as v0.11.210's: the VQ1 block) (${JSON.stringify(out)})`); }
     // RV1 (TG3): one row a step: Smoke the catch is seen by the step's watch each day it smokes (a row that ran and let the next one
     // run in the same step hid it, and skipped the step's checks: hurt, hungry)
     { const g = ensureBars(newGame(99502, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'ashfall'); g.minutes = 9 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 30); Gm.addItem(g, 'hare_raw', 2);
@@ -6038,9 +6039,10 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         { const g = ensureBars(newGame(99502, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'ashfall'); g.minutes = 9 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60);
           Wk.planEnsure(g); const cs = Wk.planCards(g, SCENES); for (const c of cs.slice(0, 3)) Wk.planSet(g, c.id, 2); Wk.planSet(g, 'med:sit', 4); Wk.planSet(g, 'med:qi', 3); o.ashfall = pin(g); }
         return o; });
-      const out = build(); Tk.CF1.on = false; let old; try { old = build(); } finally { Tk.CF1.on = true; }
+      const out = build(); Tk.PT1.on = false; let old, v216; try { v216 = build(); Tk.CF1.on = false; old = build(); } finally { Tk.CF1.on = true; Tk.PT1.on = true; } // v0.11.217 (PT1): v0.11.216's runs with PT1 off; v0.11.214's with CF1 off too
       assert(JSON.stringify(old) === '{"wilds":"647d2274","fallout":"6aade2dc","ashfall":"55bb2cae"}', `${T} (v0.11.215, RV1 TG4): with CF1 switched off, v0.11.214's runs exactly (its code, keys sorted) (${JSON.stringify(old)})`);
-      assert(JSON.stringify(out) === '{"wilds":"ad1fa63b","fallout":"be0db1d7","ashfall":"eb5b2dc3"}', `${T} (TG): spacing off, rest row out: v0.11.210's three runs exactly as v0.11.215 runs them (re-pinned for CF1: no card waits behind another's work, a card that gives no food pays at its end) (${JSON.stringify(out)})`); }
+      assert(JSON.stringify(v216) === '{"wilds":"ad1fa63b","fallout":"be0db1d7","ashfall":"eb5b2dc3"}', `${T} (v0.11.217, PT1): with PT1 switched off, v0.11.216's runs exactly (${JSON.stringify(v216)})`);
+      assert(JSON.stringify(out) === '{"wilds":"ad1fa63b","fallout":"71b7fbc9","ashfall":"d853a742"}', `${T} (TG): spacing off, rest row out: v0.11.210's three runs exactly as v0.11.217 runs them (v0.11.217, PT1: the Fallout and Ashfall re-pinned for the pot's meals, the wilds unchanged; re-pinned for CF1: no card waits behind another's work, a card that gives no food pays at its end) (${JSON.stringify(out)})`); }
     // RV1 (TG2, L1): the spring found, its row at 1 and the wash open: one row, the wash's, and the run washes
     { const g = mk('heart_hub', 17); g.flags.spring_found = true; Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', 0); Wk.planSet(g, 'door:heart_spring', 1);
       const rs = Wk.doorCards(g, SCENES).filter((x) => x.scene === 'heart_spring'); const r = Wk.runWeek(g, SCENES);
@@ -6326,6 +6328,111 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     { const g = at('fo_ashfall', 8, 7); Wk.planEnsure(g); const card = Wk.planCards(g, SCENES)[0].id; Wk.planSet(g, card, 2); const p = g.tasks.plan; p.read = Tk.carryTaskId(card); p.readKey = card; p.stop = 'read';
       Wk.noteReadTap(g, SCENES, Tk.carryTaskId(card), { lines: [] });
       assert(!p.read && p.items[card] === 2 && p.stop === '', `${T} (TG9): the Go on's tap: stop cleared, ${card} still 2`); }
+}
+
+// v0.11.217 (owner picks PT1 = PM, 2026-11-17 19:26, and PC1 = PM + CG, 2026-11-18 01:01; the owner 17:42 "eating at the pot is not
+// among the schedualble options"): on the village's and the Fallout's stays the day's meal is the communal pot's when its card is open
+// (as its card: time, line, the pot used), else the hammerspace; not while the cook-with-the-women card can still show today (CG);
+// the pot's card tapped by hand is that part of the day's meal.
+{
+    const Gm = await import('../js/core/game.js');
+    const Wk = await import('../js/core/week.js');
+    const Tk = await import('../js/core/tasks.js');
+    const K = await import('../js/story/kitchen.js');
+    const T = 'PT1 (the routine eats at the pot)';
+    const D = 1440, MEAL = /^(Breakfast|Midday|Supper): /, POT = /\+25 satiety\.$/;
+    // the owner's Day 64 save set back to Day 51 07:00 (the Fallout's second week), the cook not done yet, Fed 60
+    const wk2 = (vil = null) => { const g = deserialize(readFileSync(new URL('../saves/v0.11.214-long-fallout-day64.json', import.meta.url), 'utf8'), { force: true });
+        g.minutes = 50 * D + 7 * 60; delete g.wake; delete g.flags.fo_pot_cook; delete g.tasks.plan; delete g.tasks.carries; delete g.tasks.carry; delete g.tasks.routine;
+        g.james.satiety = 60; g.james.qi = 20; Gm.addItem(g, 'smoked_meat', 40); if (vil != null) g.rel.Village.f = vil; return g; };
+    const week = (g) => { const lines = []; const go = () => { const r = Wk.runWeek(g, SCENES); for (const d of r.days) lines.push(...d.lines.map((l) => `D${d.day} ${l}`)); return r; }; let r = go();
+        for (let k = 0; k < 160 && ['evening', 'door'].includes(r.stop); k++) {
+            const v = sceneView(g, SCENES); const open = v.choices.filter((c) => !c.disabled && c.index < 1000 && !/^(Yuki: change form|Story Mode only)/.test(c.label)); if (!open.length || g.combat) break;
+            const ev = open.find((c) => /^Evening\.|loft|Sleep|bed/i.test(c.label)) || open[open.length - 1]; Wk.storyTap(g, SCENES, ev.index); if (g.combat) break; if (Wk.afterStory(g, SCENES).resume) r = go(); }
+        return lines; };
+    const plan = (g, cookFirst = true) => { Wk.planEnsure(g); for (const c of Wk.planCards(g, SCENES)) Wk.planSet(g, c.id, 1); Wk.planSet(g, 'med:sit', 1); Wk.planSet(g, 'door:fo_pot_cook', 1);
+        const pr = Wk.prioHere(g, 'fo_ashfall', true); for (const k of Object.keys(pr)) delete pr[k]; if (cookFirst) pr['door:fo_pot_cook'] = 1; };
+    const meals = (ls) => ls.filter((x) => MEAL.test(x.replace(/^D\d+ /, '')));
+    const pots = (ls) => meals(ls).filter((x) => POT.test(x)).map((x) => x.split(' ').slice(0, 2).join(' ').replace(/:$/, ''));
+    const cookDay = (ls) => (ls.find((x) => POT.test(x) && !MEAL.test(x.replace(/^D\d+ /, ''))) || '').split(' ')[0];
+    // the measured week (shown to the owner before PC1): v0.11.216 eats 11 hammerspace meals and cooks on Day 54
+    { const g = wk2(); plan(g); Tk.PT1.on = false; let ls; try { ls = week(g); } finally { Tk.PT1.on = true; }
+      assert(pots(ls).length === 0 && meals(ls).length === 11 && cookDay(ls) === 'D54' && g.flags.fo_pot_cook, `${T}: PT1 off: v0.11.216's week, 11 hammerspace meals, the cook on Day 54 (${meals(ls).length}, ${cookDay(ls)})`); }
+    // PC1 (PM + CG): 6 pot meals (suppers until the cook, then from breakfast), 7 from the hammerspace, the cook kept on Day 54
+    { const g = wk2(); plan(g); const ls = week(g);
+      assert(pots(ls).join() === 'D51 Supper,D52 Supper,D53 Supper,D55 Supper,D56 Breakfast,D57 Supper' && meals(ls).length === 13 && cookDay(ls) === 'D54' && g.flags.fo_pot_cook, `${T} (PC1): 6 pot meals, 13 in all, the cook on Day 54 (${pots(ls).join()}; ${meals(ls).length}; ${cookDay(ls)})`);
+      assert(meals(ls).filter((x) => POT.test(x)).every((x) => /^D\d+ (Breakfast|Midday|Supper): .+: \+25 satiety\.$/.test(x)), `${T}: a pot meal reads "<part of the day>: <the pot's line>: +25 satiety."`); }
+    // CG lifted below the village's 90 (no cook card): the pot from breakfast, one a day
+    { const g = wk2(50); plan(g); const ls = week(g);
+      assert(pots(ls).length === 7 && pots(ls)[0] === 'D51 Breakfast' && !g.flags.fo_pot_cook, `${T} (CG): Village 50: the pot every day from breakfast, no cook (${pots(ls).join()})`); }
+    // CG by the hour: before 15:00 the pot is left for the cook, from 15:00 it is the routine's
+    { const g = wk2(); g.minutes = 50 * D + 14 * 60 + 59; const before = Tk.potCardOpen(g, SCENES); g.minutes = 50 * D + 15 * 60; const after = Tk.potCardOpen(g, SCENES);
+      assert(K.potCookDue(g, 'fo_ashfall') === false && before === null && after === Tk.potCardId(SCENES, 'fo_ashfall'), `${T} (CG): 14:59 left for the cook, 15:00 the routine's (${before}, ${after})`);
+      g.minutes = 50 * D + 9 * 60; g.flags.fo_pot_cook = true; assert(Tk.potCardOpen(g, SCENES) === Tk.potCardId(SCENES, 'fo_ashfall'), `${T} (CG): cooked this Coil: the pot from the morning`); }
+    // the pot's meal takes its card's time, its line and the day's pot
+    { const g = wk2(50); const id = Tk.potCardId(SCENES, 'fo_ashfall'), mins = taskCards(g, SCENES).find((c) => c.id === id)?.minutes, m0 = g.minutes, f0 = g.james.satiety;
+      const ls = Tk.dayMeal(g, 'fo_ashfall', SCENES);
+      assert(ls.length >= 1 && /^Breakfast: .+: \+25 satiety\.$/.test(ls[0]) && g.minutes - m0 === mins && Math.abs(g.james.satiety - f0 - 25) < 2 && !Tk.taskOpen(g, SCENES, id), `${T} (PM): the card's ${mins} min, +25 (less the half hour's hunger), the pot shut for the day (${g.minutes - m0}, ${(g.james.satiety - f0).toFixed(1)}, ${ls[0]})`);
+      assert(Tk.dayMeal(g, 'fo_ashfall', SCENES).length === 0, `${T}: one meal a part of the day`); }
+    // the pot's card tapped by hand: that part of the day's meal (no routine meal before it, no "no time left" line); the next card eats nothing more
+    { const g = wk2(50); g.james.satiety = 50; const id = Tk.potCardId(SCENES, 'fo_ashfall'); const r = runTask(g, SCENES, id);
+      assert(!r.skipped && !r.lines.includes(Tk.SKIP_LINE) && r.lines.filter((x) => POT.test(x)).length === 1 && !r.lines.some((x) => MEAL.test(x)), `${T}: the pot tapped by hand is the breakfast (${r.lines.join(' | ').slice(0, 200)})`);
+      const sm = g.inventory.smoked_meat, card = taskCards(g, SCENES).find((c) => c.week && c.status === 'open'); const r2 = runTask(g, SCENES, card.id);
+      assert(g.inventory.smoked_meat === sm && !r2.lines.some((x) => MEAL.test(x)), `${T}: the breakfast taken: the next card eats nothing (Fed ${Math.round(g.james.satiety)})`); }
+    // the plan's day off and its evening eat at the pot too (an empty plan: the rest of the day off)
+    { const g = wk2(50); g.james.satiety = 70; Wk.planEnsure(g); const r = Wk.runWeek(g, SCENES, { max: 3 }); const ls = r.days.flatMap((d) => d.lines);
+      assert(ls.some((x) => /^Breakfast: .+: \+25 satiety\.$/.test(x)) && ls.includes('The rest of the day off.'), `${T}: the day off's breakfast at the pot (${ls.slice(0, 3).join(' | ').slice(0, 160)})`); }
+    { const g = wk2(50); g.james.satiety = 70; g.minutes = 50 * D + 16 * 60 + 10; Wk.planEnsure(g); const r = Wk.runWeek(g, SCENES); const ls = r.days.flatMap((d) => d.lines);
+      assert(/^Supper: .+: \+25 satiety\.$/.test(ls[0] || ''), `${T}: the evening's meal at the pot (${(ls[0] || '').slice(0, 120)})`); }
+    // a pot meal that runs past the evening hour ends the day off there: the clock never goes back, the evening comes once
+    { const g = wk2(50); g.james.satiety = 70; g.minutes = 50 * D + 15 * 60 + 40; delete g.tasks.fam; Wk.planEnsure(g); const ms = [];
+      const r = Wk.runWeek(g, SCENES, { onStep: (cg) => ms.push(cg.minutes) }); const ls = r.days.flatMap((d) => d.lines);
+      assert(ms.every((m, k) => k === 0 || m >= ms[k - 1]) && ms.length < 40 && /^Supper: /.test(ls[0] || '') && ls.filter((x) => x === 'The rest of the day off.').length === 0, `${T}: a pot meal from 15:40 runs past 16:00: no day off after it, no clock back (${ms.length} steps, ${ls.slice(0, 2).join(' | ').slice(0, 140)})`); }
+    // RV1 (the Opus review's fixes and test gaps)
+    const sitDone = (g) => { g.tasks.routine = { d: Tk.workDay(g), meals: '', sit: true }; return g; };
+    const at = (min, vil = 50, fed = 60) => { const g = wk2(vil); g.minutes = 50 * D + min; delete g.wake; g.james.satiety = fed; return sitDone(g); };
+    // TG1 (R8): an empty hammerspace: the pot still feeds
+    { const g = at(8 * 60); g.inventory = {}; const ls = Tk.dayMeal(g, 'fo_ashfall', SCENES); assert(/^Breakfast: .+: \+25 satiety\.$/.test(ls[0] || ''), `${T} (RV1, TG1): no food in the hammerspace: breakfast at the pot (${ls[0]})`); }
+    // TG2 (R3): Village exactly 90, the cook not done, 10:00: the pot is left for the cook; at 89 it is the routine's
+    { const g = at(10 * 60, 90); const h = at(10 * 60, 89);
+      assert(K.potCookDue(g, 'fo_ashfall') && Tk.potCardOpen(g, SCENES) === null && Tk.potCardOpen(h, SCENES) === Tk.potCardId(SCENES, 'fo_ashfall'), `${T} (RV1, TG2): Village 90 waits for the cook, 89 eats`); }
+    // TG3 (R9): the meal is named by the part of the day it starts in (10:40 to 11:10 is the breakfast)
+    { const g = at(10 * 60 + 40); const ls = Tk.dayMeal(g, 'fo_ashfall', SCENES); assert(/^Breakfast: /.test(ls[0] || '') && Gm.clockParts(g.minutes).hh === 11 && g.tasks.routine.meals === 'b', `${T} (RV1, TG3): 10:40 → 11:10 reads Breakfast (${ls[0]?.slice(0, 30)}, ${g.tasks.routine.meals})`); }
+    // TG4 (R7): the pot's meal keeps every line of its card (only the satiety line gets the part of the day)
+    { const g = at(8 * 60), h = JSON.parse(JSON.stringify(g)); const ls = Tk.dayMeal(g, 'fo_ashfall', SCENES); const r = runTask(h, SCENES, Tk.potCardId(SCENES, 'fo_ashfall'));
+      const strip = (x) => x.replace(MEAL, ''); assert(ls.length === r.lines.length && ls.map(strip).join('|') === r.lines.join('|'), `${T} (RV1, TG4): the routine's pot lines are the card's (${ls.length} / ${r.lines.length})`); }
+    // TG5 (R6): PT1 off, the pot tapped by hand: v0.11.216's way (the routine's hammerspace breakfast first, then the pot shut: skipped)
+    { const g = at(8 * 60, 50, 50); Tk.PT1.on = false; let r; try { r = runTask(g, SCENES, Tk.potCardId(SCENES, 'fo_ashfall')); } finally { Tk.PT1.on = true; }
+      assert(r.skipped && r.lines.some((x) => /^Breakfast: /.test(x) && !POT.test(x)) && g.tasks.routine.meals === 'b', `${T} (RV1, TG5): PT1 off: the hand tap as v0.11.216 (${r.lines.slice(0, 2).join(' | ').slice(0, 120)})`); }
+    // TG6 (M1): the day off: a pot breakfast past 11:00, then the midday meal (Fed at 15:00 as v0.11.216's 88)
+    { const g = at(10 * 60 + 50, 50, 40); Wk.planEnsure(g); let fed15 = null; const r = Wk.runWeek(g, SCENES, { onStep: (cg) => { if (fed15 == null && Gm.clockParts(cg.minutes).hh >= 15) fed15 = cg.james.satiety; } });
+      const ls = r.days.flatMap((d) => d.lines).filter((x) => MEAL.test(x));
+      assert(/^Breakfast: .+\+25 satiety\.$/.test(ls[0] || '') && /^Midday: /.test(ls[1] || '') && fed15 >= 85, `${T} (RV1, M1): 10:50 Fed 40: the pot's breakfast, then midday (Fed at 15:00 ${Math.round(fed15)}; ${ls.map((x) => x.split(':')[0]).join(', ')})`); }
+    // TG6 (L1): the pot tapped at 18:56: the day's sit runs it past 19:00, the tap skipped and no meal marked; the next tap has the supper
+    { const g = at(18 * 60 + 56); g.tasks.routine.sit = false; const r = runTask(g, SCENES, Tk.potCardId(SCENES, 'fo_ashfall'));
+      const c = taskCards(g, SCENES).find((x) => x.status === 'open' && !/^Eat /.test(x.label)); const r2 = runTask(g, SCENES, c.id);
+      assert(r.skipped && r2.lines.some((x) => /^Supper: /.test(x)), `${T} (RV1, L1): skipped, then the supper with ${c.label.slice(0, 30)}`); }
+    // L2: "Eat something." tapped at 10:00 (Fed 70) is the breakfast: it runs, no routine meal before it
+    { const g = at(10 * 60, 50, 70); const id = taskCards(g, SCENES).find((x) => x.label === 'Eat something.')?.id; const r = runTask(g, SCENES, id);
+      assert(Tk.mealCard(SCENES, 'fo_ashfall', id) && !r.skipped && r.lines.some((x) => /^You eat: /.test(x)) && !r.lines.some((x) => MEAL.test(x)) && g.tasks.routine.meals === 'b', `${T} (RV1, L2): the eat card tapped is the breakfast (${r.lines.slice(0, 2).join(' | ').slice(0, 100)})`); }
+    // L2: "Rest an hour" tapped at 18:35 (Fed 60): the pot's 30 minutes would shut it at 19:00, so the supper is the hammerspace's and the rest runs
+    { const g = at(18 * 60 + 35); const id = taskCards(g, SCENES).find((x) => /^Rest an hour/.test(x.label))?.id; const r = runTask(g, SCENES, id);
+      assert(!r.skipped && r.lines.some((x) => /^Supper: /.test(x) && !POT.test(x)) && Tk.taskOpen(g, SCENES, Tk.potCardId(SCENES, 'fo_ashfall')) === false, `${T} (RV1, L2): the rest runs, the supper from the hammerspace (${r.lines.filter((x) => MEAL.test(x)).join('|').slice(0, 80)})`); }
+    // F4: the pot's meal marks its part of the day (Fed 40 → 65 is still under 85: no second meal)
+    { const g = at(8 * 60, 50, 40); const a = Tk.dayMeal(g, 'fo_ashfall', SCENES), b = Tk.dayMeal(g, 'fo_ashfall', SCENES);
+      assert(POT.test(a.find((x) => MEAL.test(x)) || '') && b.length === 0 && g.james.satiety < 85 && g.tasks.routine.meals === 'b', `${T} (F4): one meal a part of the day, Fed under 85 after it (${Math.round(g.james.satiety)}, ${b.join('|').slice(0, 60)})`); }
+    // R6: PT1 off, no food, the pot tapped by hand: v0.11.216 marks no part of the day
+    { const g = at(8 * 60, 50, 50); g.inventory = {}; Tk.PT1.on = false; let r; try { r = runTask(g, SCENES, Tk.potCardId(SCENES, 'fo_ashfall')); } finally { Tk.PT1.on = true; }
+      assert(!r.skipped && r.lines.some((x) => POT.test(x)) && g.tasks.routine.meals === '', `${T} (R6): PT1 off: the hand-tapped pot marks nothing (${JSON.stringify(g.tasks.routine)})`); }
+    assert(!Tk.mealCard(SCENES, 'wilds', 'wilds:0') && !Tk.mealCard(SCENES, 'fo_ashfall', null), `${T} (RV1): meal cards only on the village's and the Fallout's hubs`);
+    // TG7: with the read stop on and nothing read, the day off's pot meals never stop the plan (the routine's lines are not probed)
+    { const g = at(7 * 60); g.read = {}; Wk.planEnsure(g); Wk.READ_STOP.on = true; let r; try { r = Wk.runWeek(g, SCENES, { max: 6 }); } finally { Wk.READ_STOP.on = false; }
+      assert(r.stop !== 'read' && r.days.flatMap((d) => d.lines).some((x) => /^Breakfast: .+\+25 satiety\.$/.test(x)), `${T} (RV1, TG7): the read stop never stops for the routine's pot (${r.stop})`); }
+    // PT1 off: the pot is never the routine's; the wilds and the old calendar have no pot
+    { const g = wk2(50); Tk.PT1.on = false; try { assert(Tk.potCardOpen(g, SCENES) === null && !Tk.dayMeal(g, 'fo_ashfall', SCENES).some((x) => POT.test(x)), `${T}: PT1 off: the hammerspace, as before`); } finally { Tk.PT1.on = true; } }
+    assert(Tk.potCardId(SCENES, 'wilds') === null && Tk.potCardId(SCENES, 'heart_hub') === null && /^ashfall:\d+$/.test(Tk.potCardId(SCENES, 'ashfall')), `${T}: only the village's and the Fallout's hubs have the pot`);
+    { const o = ensureBars(newGame(99601, { closed: true })); goTo(o, SCENES, 'ashfall'); o.minutes = 4 * D + 8 * 60; o.james.satiety = 50; const f0 = o.james.satiety, m0 = o.minutes;
+      assert(Tk.dayMeal(o, 'ashfall', SCENES).length === 0 && o.james.satiety === f0 && o.minutes === m0, `${T}: the old calendar: no routine meal`); }
 }
 
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));

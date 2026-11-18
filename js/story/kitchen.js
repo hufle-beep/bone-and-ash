@@ -69,6 +69,14 @@ export const potCookOpen = (g, hub) => {
     return !g.flags[c.flag] && relF(g, 'Village') >= POT_GATE && hour(g) >= POT_FROM && hour(g) < POT_UNTIL && daily(c.daily)(g);
 };
 
+/** v0.11.217 (owner pick PC1, CG; 2026-11-18 01:01): the cook card can still show today (not cooked, the village's 90, before 15:00,
+ *  the pot not yet used today): the day's routine leaves the pot for it (tasks.js dayMeal). By the day, so a regular cook (CK1,
+ *  the next push) needs only its own rule here. */
+export const potCookDue = (g, hub) => {
+    const c = POT_HUBS[hub];
+    return !!c && !g.flags[c.flag] && relF(g, 'Village') >= POT_GATE && hour(g) < POT_UNTIL && daily(c.daily)(g);
+};
+
 function cookScene(hub) {
     const c = POT_HUBS[hub], T = POT_COOK[c.t];
     return {
