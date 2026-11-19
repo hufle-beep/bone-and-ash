@@ -1,0 +1,44 @@
+[
+ {
+  "id": "C1",
+  "file": "js/story/act1_fallout.js",
+  "find": "text: (g) => (dd(g) === 8 && foSeq(g, 'fo_mei:8') ? FO_MEI_L1[8][foSeq(g, 'fo_mei:8') - 1]",
+  "replace": "text: (g) => (foSeq(g, 'fo_mei:8') ? FO_MEI_L1[8][foSeq(g, 'fo_mei:8') - 1]",
+  "note": "day 8's quilt/pot labels leak onto days 9 and 10 after a real week of day 8 (fo_mei:8 count 7 \u2192 index 1)"
+ },
+ {
+  "id": "C2",
+  "file": "js/story/act1_blackroot.js",
+  "find": "dayKey: (g) => `bl_fireside:${region(g)}`,",
+  "replace": "dayKey: (g) => `bl_fire:${region(g)}`,",
+  "note": "the fireside's day key no longer noted under the key byDay reads: Root Road and Ashen Hills (and the Drowned Wood) stuck on the first text in a real game"
+ },
+ {
+  "id": "C3",
+  "file": "js/story/act1_fallout.js",
+  "find": "So tell me what sort of woman that makes me.\"",
+  "replace": "So tell me what sort of woman that makes me.",
+  "note": "an unclosed quote in fo_mei day 9's third text (a text the text lint never renders)"
+ },
+ {
+  "id": "C4",
+  "file": "js/story/act1_blackroot.js",
+  "find": "two fingers on your wrist as she'd take a pulse.",
+  "replace": "two fingers on your wrist as she'd \"take a pulse.",
+  "note": "an unpaired quote in the Ashen Hills' third text, Mei Lin's branch"
+ },
+ {
+  "id": "C5",
+  "file": "js/story/ashfall.js",
+  "find": "const roofKey = (g) => `supper_roof:${vday(g) === 1 ? 1 : 2}`;",
+  "replace": "const roofKey = (g) => `supper_roof:${longCal(g) && vday(g) !== 1 ? 2 : 1}`;",
+  "note": "the old calendar's second roof night shares the first week's count: 'Second night on the roof' replaced by the plum-wine text, its stay line by the first week's"
+ },
+ {
+  "id": "C6",
+  "file": "js/story/act1_fallout.js",
+  "find": "goat year back,\" she says to the ground.",
+  "replace": "goat year back, she says to the ground.",
+  "note": "an unpaired quote in fo_mei day 9's third text, mid-paragraph"
+ }
+]

@@ -38,7 +38,7 @@ export const MUSIC_SCREENS = {
     rt_evening: ['return', 'house'], rt_quiet_night: ['return', 'stove'],
 };
 /** The music lines already in the game's own texts (the five of v0.11.181): a screen showing one uses up the day. */
-export const OWN_MUSIC = /music from your (forearm|sleeve)|forearm has been playing|arm is playing low|omnitool plays low/i;
+export const OWN_MUSIC = /music from your (forearm|sleeve)|forearm has been playing|arm is playing low|omnitool plays low|forearm is playing/i; // v0.11.232 (RV1, MR): the roof's first-week third text
 /** RS1 (RS-M): the reading to Ya is the day's line; the Heart's camp shows none while it can still be chosen. */
 export const DAY_USED = new Set(['heart_read']);
 // v0.11.183 (RV1, M1): the Wilds' camp waits while Reflect is still to come at `night`, so the song is that evening's music

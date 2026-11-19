@@ -1,0 +1,100 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/act1_fallout.js",
+  "find": "text: (g) => seqText(g, `fo_mei:${dd(g)}`, [",
+  "replace": "text: (g) => seqText(g, 'fo_mei', [",
+  "note": "fo_mei's three story days share one count"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/act1_fallout.js",
+  "find": "? FO_MEI_L0[dd(g)][foSeq(g, `fo_mei:${dd(g)}`) - 1]",
+  "replace": "? FO_MEI_L0[dd(g)][foSeq(g, `fo_mei:${dd(g)}`) % 2]",
+  "note": "label [0] one text off"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/act1_fallout.js",
+  "find": "dd(g) === 8 && foSeq(g, 'fo_mei:8') ? FO_MEI_L1[8][foSeq(g, 'fo_mei:8') - 1]",
+  "replace": "dd(g) === 8 && foSeq(g, 'fo_mei:9') ? FO_MEI_L1[8][foSeq(g, 'fo_mei:9') - 1]",
+  "note": "day 8's label [1] read by day 9's count"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/act1_fallout.js",
+  "find": "foSeq(g, 'fo_ya_time:10') ? FO_YA_L0[10][foSeq(g, 'fo_ya_time:10') - 1]",
+  "replace": "foSeq(g, 'fo_ya_time:9') ? FO_YA_L0[10][foSeq(g, 'fo_ya_time:9') - 1]",
+  "note": "Ya's day-10 label by day 9's count"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/ashfall.js",
+  "find": "const ri = dayIndex(g, `s:${roofKey(g)}`) % 3;",
+  "replace": "const ri = dayIndex(g, `s:${roofKey(g)}`);",
+  "note": "the roof's line past the third night"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/ashfall.js",
+  "find": "const roofKey = (g) => `supper_roof:${vday(g) === 1 ? 1 : 2}`;",
+  "replace": "const roofKey = (g) => `supper_roof:${vday(g)}`;",
+  "note": "village days 5 and 6 counted apart"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/act1_blackroot.js",
+  "find": "ahPart(both(g) ? t.both : onlyYa(g) ? t.ya : onlyMei(g) ? t.mei : t.none, g)",
+  "replace": "ahPart(both(g) ? t.both : onlyYa(g) ? t.mei : onlyMei(g) ? t.ya : t.none, g)",
+  "note": "the Ashen Hills' Ya and Mei Lin lines swapped"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/act1_blackroot.js",
+  "find": "...FS_RR], 'bl_fireside:rr');",
+  "replace": "...FS_RR], 'bl_fireside:ah');",
+  "note": "Root Road's fire read by the Ashen Hills' count"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/ashfall.js",
+  "find": "satisfied that you have a trade. \"The dyer's boy",
+  "replace": "satisfied that you have a trade. \"The tanner's boy",
+  "note": "CW line changed"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/act1_fallout.js",
+  "find": "...FO_YA_NEW[dd(g) === 9 ? 9 : 10]]),",
+  "replace": "...FO_YA_NEW[dd(g)]]),",
+  "note": "Ya's scene on day 8 (a walker) has no list"
+ },
+ {
+  "id": "F11",
+  "file": "js/story/act1_blackroot.js",
+  "find": "const FS_AH = [ahFire(FS_AH_T[2]), ahFire(FS_AH_T[3])];",
+  "replace": "const FS_AH = [ahFire(FS_AH_T[3]), ahFire(FS_AH_T[2])];",
+  "note": "the Ashen Hills' new texts out of order"
+ },
+ {
+  "id": "F12",
+  "file": "js/core/week.js",
+  "find": "return typeof f === 'function' ? `#${String(f(g)).replace(/\\d/g, (n) => 'abcdefghij'[n])}` : c.label;",
+  "replace": "return typeof f === 'function' ? `#${f(g)}` : c.label;",
+  "note": "PS-a: the story day dropped from the signature (hash drops digits)"
+ },
+ {
+  "id": "F13",
+  "file": "js/story/music.js",
+  "find": "|omnitool plays low|forearm is playing/i;",
+  "replace": "|omnitool plays low/i;",
+  "note": "MR reverted: a second music line under the roof's third text"
+ },
+ {
+  "id": "F14",
+  "file": "js/story/ashfall.js",
+  "find": "She tows you wide of the one door with a pot still on",
+  "replace": "She tows you wide of the one door with a pan still on",
+  "note": "the walk's cooking line changed"
+ }
+]

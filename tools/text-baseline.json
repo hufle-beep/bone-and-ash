@@ -3,7 +3,7 @@
  "totals": {
   "scenes": 331,
   "words": 37443,
-  "variantWords": 75851,
+  "variantWords": 77042,
   "labels": 850,
   "labelWords": 5765,
   "sharedChunks": 727,
@@ -47,7 +47,7 @@
   "ashfall": {
    "scenes": 18,
    "words": 1112,
-   "variantWords": 3769,
+   "variantWords": 4005,
    "labels": 65,
    "labelWords": 475,
    "sharedScenes": 5,
@@ -61,7 +61,7 @@
   "fallout": {
    "scenes": 41,
    "words": 4905,
-   "variantWords": 19209,
+   "variantWords": 19630,
    "labels": 94,
    "labelWords": 683,
    "sharedScenes": 20,
@@ -75,7 +75,7 @@
   "blackroot": {
    "scenes": 60,
    "words": 6644,
-   "variantWords": 8293,
+   "variantWords": 8827,
    "labels": 185,
    "labelWords": 1067,
    "sharedScenes": 17,

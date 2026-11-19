@@ -1,0 +1,8 @@
+[
+ { "id": "T1", "file": "js/story/act1_fallout.js", "find": "\"They leave food,\" she says. \"Like for a spirit.", "replace": "\"Since yesterday they leave food,\" she says. \"Like for a spirit.", "note": "a time word (yesterday) in Ya's day-10 text, which can show on the first day she is in reach of it" },
+ { "id": "T2", "file": "js/story/act1_fallout.js", "find": "\"And now there is an Elder on the road,", "replace": "\"And now there are sect robes on the road,", "note": "Claude's cut on fo_mei 9:3 reverted (who could know: the road is still empty)" },
+ { "id": "T3", "file": "js/story/ashfall.js", "find": "\"Old Wen says a scholar who has lost his way,", "replace": "\"Lu Han says a scholar who has lost his way,", "note": "canon: the roof names Lu Han, met only at the tribute" },
+ { "id": "T4", "file": "js/story/ashfall.js", "find": "\"I said this house does not discuss its kitchen.", "replace": "\"I said he cooks better than any woman in Ashfall.", "note": "the owner's fixed word: the mother never praises outright" },
+ { "id": "T5", "file": "js/story/act1_blackroot.js", "find": "Nobody has looked straight at it all evening,", "replace": "Nobody has looked straight at it all morning,", "note": "a time word against the evening fire" },
+ { "id": "T6", "file": "js/story/act1_blackroot.js", "find": "*Four,* Yuki observes, from your shoulder. *I counted. I had five.*", "replace": "*Four,* Yuki observes, from your shoulder. \"I counted. I had five.\"", "note": "the cat speaks aloud (bond italics lost) after the pinned words" }
+]

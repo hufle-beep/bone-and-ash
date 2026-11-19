@@ -645,7 +645,10 @@ function doorMemo(g) {
 }
 /** The open options of the screen (labels, numbers aside), as one hash. */
 const doorOpen = (g, scenes) => sceneView(g, scenes).choices.filter((c) => !c.disabled && c.index < 1000 && !META.test(String(c.label)));
-export const doorSig = (g, scenes) => hash(doorOpen(g, scenes).map((c) => `${c.index}:${c.label}`).join('|'));
+// v0.11.232 (owner picks P5-B, RV1: PS-a): a choice whose label changes with its scene's text of the day (a sequence of three) carries a fixed
+// `sig` (a function of g: its scene, story day and place), so the plan's "As before:" still knows it; any other choice by its label, as before.
+const sigOf = (g, scenes, c) => { const f = scenes[g.scene]?.choices?.[c.index]?.sig; return typeof f === 'function' ? `#${String(f(g)).replace(/\d/g, (n) => 'abcdefghij'[n])}` : c.label; }; // digits as letters: `hash` drops numbers
+export const doorSig = (g, scenes) => hash(doorOpen(g, scenes).map((c) => `${c.index}:${sigOf(g, scenes, c)}`).join('|'));
 export function noteDoor(g, scenes, sceneId, index) {
     if (!longCal(g) || !PLAN_DOORS.includes(sceneId) || sceneId !== g.scene || !(index >= 0) || index >= 1000) return;
     doorMemo(g)[sceneId] = { i: index, sig: doorSig(g, scenes) };

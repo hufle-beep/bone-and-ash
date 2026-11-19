@@ -6,7 +6,7 @@
 import { addItem, eat, condense, advance, sleepUntil, jamesHpMax, hasItem, awardYukiFightXp, yukiForm, nightRest, nightTo } from '../core/game.js';
 import { daily, markDaily, hour, day, eatBest, pantry, foodCount, byForm, byDay, dayReply } from './common.js';
 import { encounter, rel, likesMei, likesYa, trioStep, bumpRel, KISS_YA } from './act1_common.js';
-import { textDay, coilStamp, seqText } from '../core/lines.js'; // v0.11.224 (TX2, V3a): seqText
+import { textDay, coilStamp, seqText, dayIndex } from '../core/lines.js'; // v0.11.232 (P5-B, V3b): dayIndex // v0.11.224 (TX2, V3a): seqText
 import { longCal, storyDay, storyDayOf, calStart, calEnd, lastOfWeek, blSpan, elderLeft, departLeft, daysWord, DaysWord, dayWord, countsFill, numWord, dayTitle, titleCase } from '../core/calendar.js'; // v0.11.224 (TX2, TS6): the counts // v0.11.203 (owner pick T1, TS1): the long calendar // RV1 (FX); v0.11.188 (N1, L7): coilStamp
 import { potLine } from './kitchen.js'; // v0.11.181 (SP1, PS)
 import { SONG_AT } from './songs.js'; // v0.11.188 (N1, L7): the song of fo_elder_named, by key (no song named here)
@@ -86,6 +86,72 @@ const supperPot = (g) => SUPPER_POT[Math.max(1, Math.min(3, Number(g.flags.kitch
  *  calendar's day for the titles and the count to the Elder; the farewell waits for the last week's last day. */
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1); // RV1 (MC)
 const dd = (g) => Math.max(8, Math.min(10, storyDay(g)));
+
+// v0.11.232 (owner picks P5-B, D1; V3b): the Fallout's two daily scenes a sequence of three a story day on the long calendar (lines.js seqText; the first the old
+// text), with each new text's own labels where the old ones answer only the old text (by the same index: `foSeq`). Texts by Fable (run F), Claude's cuts.
+const foSeq = (g, key) => dayIndex(g, `s:${key}`) % 3;
+const FO_MEI_NEW = {
+    8: [`She is on her mother's doorstep, scouring the cooking pot with sand as though it owed her money.
+
+"Grandmother Lao has aired the funeral cloth," she says, not looking up. "Aired it. Folded it again. Told me the weather was good for it." Sand grinds. "The headman is having the lane swept, so that the Elder will have a clean street to condemn us in. I asked my mother what we are going to *do*, and she said we are going to have supper." She holds the pot up, finds it guilty and starts over. "Say something sensible, James. Or say something stupid. I honestly don't mind which, so long as somebody says it too loudly."`, `She is in the yard behind her mother's house, beating a quilt that has done nothing to anyone.
+
+"Old Hu stopped me in the lane," she says, between blows. "He asked me to walk more quietly. The village, he tells me, is *composing itself*." Whack. "Like a letter. Like a corpse." Whack. Dust rolls out over the fence, and a neighbour shuts her door on it, calmly, without a word.
+
+"You're frightening the bedding."
+
+"Good. One thing in Ashfall ought to be frightened." She lowers the cane and gets her breath back, the red tassel of her hairpin stuck to her neck. "Your people, James. When something terrible is on the road to them. Tell me they have the decency to panic."`],
+    9: [`She is on the herb slopes, tying cut stems into bundles and knotting each bunch as if it might escape.
+
+"I was singing," she says. "At the well, with the bucket halfway up. I didn't know until Grandmother Lao looked at me as if I had spat in it." A knot, pulled hard. "Nobody sings here unless somebody has died, and then only the correct song."
+
+"Was it the correct song?"
+
+"It was about a goose." She gives you the cord's end to hold, unasked. "The Elder is coming, the whole village is sharpening its face, and I woke up *glad*, James. I have been hunting for the reason ever since." Her eyes go to you and away. "I think I had better not find it."`, `The herb slopes, the wind coming off the ridge, and she is digging bitterroot with a short iron spike and a grudge.
+
+"Do you know what happened in Ashfall last year?" she says. "A goat got onto the granary roof. That is the whole year. People still speak of the goat." A root comes up, and she knocks the earth off it against her boot. "And now there is an Elder on the road, and my mother counts the rice twice a night."
+
+"And?"
+
+The spike goes in again and stays there. "And I would not have the goat year back," she says to the ground. "Not for anything. People may die of this, and I'm *awake*. So tell me what sort of woman that makes me."`],
+    10: [`She has the whole basket turned out on the step and is rolling medicines into oilcloth, one twist to each, the twists laid in rows.
+
+"Fever. Flux. Bleeding. Bleeding, worse." She taps each row. "This one is for bites, and I have made three of it, because we are travelling with a woman who looked at my basket and said that only prey carries things." A twist is tied off with her teeth. "I asked what she does when she is ill. She said she doesn't get ill, she gets *angry*."
+
+"That does sound like Ya."
+
+"So I am packing for an idiot, and I haven't settled which of us it is." She sits back on her heels. "Go on. Tell me it's too much."`, `She is on the step with the basket between her knees, sewing a new strap on with waxed thread and a sack needle.
+
+"My mother has not forbidden it," she says. "I was ready for forbidding. I had a speech." The needle goes through. "Instead I came in last night and my herb knife was on the bed, ground sharp, with a cloth round it. She hasn't said one word. She just goes on making supper *at* me."
+
+"That sounds like a blessing."
+
+"It is. That is what's so unbearable." She bites the thread through and glares at the strap, blinking harder than sewing requires. "If you say a single kind thing now, James, I shall cry on this, and the wax isn't dry."`],
+};
+const FO_MEI_L0 = { 8: ['"Stupid, then, and loud. Stand close. They\'ll blame the foreigner."', '"Magnificently. I\'ll teach you. It\'s mostly shouting and making lists."'], 9: ['Tell her glad is not a crime, even in Ashfall.', 'Tell her it makes her a woman who was wasted on the goat year.'], 10: ['"It\'s exactly enough. Hand me the heavy half."', '"Your stitching is crooked."'] };
+const FO_MEI_L1 = { 8: ['Pick up the second pot and a fistful of sand. Keep quiet. The pot can take it.', 'Take the other end of the quilt and hold it taut. Offer no opinions. She wants a target.'] }; // days 9 and 10 keep "Help her work. Let her talk."
+const FO_YA_NEW = {
+    9: [`She lies spread out across the threshing floor, while an old man with a flail waits at the edge with terrible patience.
+
+"He wants his floor," she says to the sky. "I said he could take it off me. He's stood there ever since. He hasn't even *tried*."
+
+"He's past sixty."
+
+"Then he's had sixty years to learn how." She rolls to her feet, grinning, and shakes the dust out of her hair. "You try, scholar. Put me off it, and the old one gets his floor. Come on."`, `She is on the threshing floor with five of the village children, teaching them to wrestle, while their mothers stand along the edge like a row of grave tablets.
+
+"The small ones are good," she tells you, with a boy hanging off her forearm by his teeth. "They bite. Nobody's told them yet that they can't." A mother walks out, unhooks the boy and carries him off under one arm. The other four are collected in silence.
+
+"They took my pack." She turns and brightens. "You're bigger than a child. A bit. Come and throw me, scholar."`],
+    10: [`She is on the granary roof, eating dumplings out of a bowl that somebody left for her below the ladder.
+
+"They leave food," she says. "Like for a spirit. I think it's so I stay up here." She sucks the sauce off her thumb and looks out at the dark line of the Blackroot. "I've hunted alone since I was this high. I never walked anywhere *with* people. Who goes in front? Do you talk? When do you stop? Tell me how it's done, scholar. I don't want to do it wrong."`, `She is high in the dead pine above the barley, scowling down at the hunters drilling below.
+
+"That one drops his elbow," she says. "That one shuts his eyes when he throws." A pine cone goes down, hard, and a hunter yelps. "Elbow!"
+
+"You could teach them."
+
+"I don't like them. They don't like me." She pulls a knee up under her chin. "We go to the tree, and these are what's left to guard the old ones and the goats. Why am I counting them, scholar? I never count anything."`],
+};
+const FO_YA_L0 = { 10: ['"You go in front. We\'ll both be glad you\'re there."', '"Because they\'re yours now. It\'s a nuisance. I\'d know."'] }; // day 9 keeps "Throw her." (the chaff result)
 const ddShow = (g) => (longCal(g) ? day(g) : dd(g));
 export const farewellNow = (g) => dd(g) >= 10 && lastOfWeek(g); // v0.11.204 (RV1, L4): exported for the week planner's stop
 /** The text day as a story day (8–10), for the lists by the story's day. */
@@ -374,7 +440,7 @@ ${hasItem(g, 'jade_bracket') ? 'You have jade bracket. It will have to stretch.'
     fo_mei: {
         id: 'fo_mei', title: 'Mei Lin', art: (g) => (dd(g) === 9 ? 'herb_slope' : 'mei_lin'), place: (g) => (dd(g) === 9 ? `${P} — the herb slopes` : `${P} — Mei Lin's house`),
         enter: (g) => { markDaily(g, 'a1_mei'); return []; },
-        text: (g) => {
+        text: (g) => seqText(g, `fo_mei:${dd(g)}`, [(g) => { // v0.11.232 (P5-B, V3b): the old text first
             if (dd(g) === 8) return `She is up in the herb loft${g.flags.loft_burned ? ' — what is left of it, the charred beams scrubbed and oiled as if scrubbing could unburn them —' : ''}, sorting roots as if each one had personally offended her, which is how Mei Lin avoids thinking.
 
 "${DaysWord(elderLeft(g))}," she says to the roots. "And all of Ashfall so calm. My mother has been calm since before it was light. The headman is calm. Old Hu is calm enough that somebody ought to check him for a pulse." A bundle slaps down on the board. "I shall scream, James. Out in the street. Just so that I have heard one person do it."
@@ -392,10 +458,10 @@ ${yaHere(g) ? '"That woman," she says, "asked me this morning whether you were *
 "I'm a mycologist."
 
 "Then you'll be a great help in naming the ones that killed us. And you are cooking. I have seen you look at my mother's pot like a man watching a child cross a river."`;
-        },
+        }, ...FO_MEI_NEW[dd(g)]]),
         choices: [
-            { text: (g) => (dd(g) === 8 ? '"Scream, then. I\'ll stand next to you so they look at me instead."' : dd(g) === 9 ? 'Tell her she\'s allowed to like it.' : '"No reason. I was going to carry the basket."'), time: 120, do: (g) => { bumpRel(g, 'Mei Lin', 4, 4); return likesMei(g) && likesYa(g) ? trioStep(g, 1) : []; }, to: 'fo_ashfall' },
-            { text: (g) => (dd(g) === 8 ? 'Help her sort roots. Say nothing. Let her be angry at the roots.' : 'Help her work. Let her talk.'), time: 120, do: (g) => { bumpRel(g, 'Mei Lin', 5, 1); addItem(g, 'jade_bracket', 1); return ['+1 Jade bracket (pressed into your palm in passing, with no remark and no eye contact).']; }, to: 'fo_ashfall' },
+            { sig: (g) => `fo_mei:${dd(g)}:0`, /* v0.11.232 (RV1, PS-a): week.js doorSig */ text: (g) => (foSeq(g, `fo_mei:${dd(g)}`) ? FO_MEI_L0[dd(g)][foSeq(g, `fo_mei:${dd(g)}`) - 1] : dd(g) === 8 ? '"Scream, then. I\'ll stand next to you so they look at me instead."' : dd(g) === 9 ? 'Tell her she\'s allowed to like it.' : '"No reason. I was going to carry the basket."'), time: 120, do: (g) => { bumpRel(g, 'Mei Lin', 4, 4); return likesMei(g) && likesYa(g) ? trioStep(g, 1) : []; }, to: 'fo_ashfall' },
+            { sig: (g) => `fo_mei:${dd(g)}:1`, text: (g) => (dd(g) === 8 && foSeq(g, 'fo_mei:8') ? FO_MEI_L1[8][foSeq(g, 'fo_mei:8') - 1] : dd(g) === 8 ? 'Help her sort roots. Say nothing. Let her be angry at the roots.' : 'Help her work. Let her talk.'), time: 120, do: (g) => { bumpRel(g, 'Mei Lin', 5, 1); addItem(g, 'jade_bracket', 1); return ['+1 Jade bracket (pressed into your palm in passing, with no remark and no eye contact).']; }, to: 'fo_ashfall' },
         ],
     },
 
@@ -690,7 +756,7 @@ Ya's grin has gone uncertain. She is reading Mei Lin's face, and you can watch t
     fo_ya_time: {
         id: 'fo_ya_time', title: 'Ya', art: (g) => (dd(g) === 10 ? 'ya_close' : 'ya_fight'), place: `${P} — wherever Ya is`,
         enter: (g) => { markDaily(g, 'a1_ya'); return []; },
-        text: (g) => (dd(g) === 9
+        text: (g) => seqText(g, `fo_ya_time:${dd(g) === 9 ? 9 : 10}`, [(g) => (dd(g) === 9 // v0.11.232 (P5-B, V3b): the old text first (any day but 9 has day 10's)
             ? `She is on the threshing floor, having challenged three of the younger hunters to wrestle her, all three together. She is winning. She is also in a rage, since they will keep breaking off to bow.
 
 "They *bow*," she tells you, scandalised, with one of them held down by the neck. "Halfway through. Why do they *bow*?"
@@ -704,9 +770,9 @@ ${departLeft(g) > 1 ? '"A few more sleeps, then we start for the tree,"' : '"Tom
 
 "She doesn't know what to do with you. Nobody here does."
 
-"I know." She tests the point against her thumb. One bead of blood. "I don't like it when people don't like me. It makes me want to bite them. I'm trying not to bite her." The stone stops. "For you."`),
+"I know." She tests the point against her thumb. One bead of blood. "I don't like it when people don't like me. It makes me want to bite them. I'm trying not to bite her." The stone stops. "For you."`), ...FO_YA_NEW[dd(g) === 9 ? 9 : 10]]),
         choices: [
-            { text: (g) => (dd(g) === 9 ? 'Throw her.' : '"Thank you. I mean that."'), do: (g) => { bumpRel(g, 'Ya', 4, dd(g) === 9 ? 5 : 3); return likesMei(g) && likesYa(g) ? trioStep(g, 1) : []; }, time: 120, to: 'fo_ashfall' },
+            { sig: (g) => `fo_ya_time:${dd(g) === 9 ? 9 : 10}:0`, /* v0.11.232 (RV1, PS-a) */ text: (g) => (dd(g) === 9 ? 'Throw her.' : foSeq(g, 'fo_ya_time:10') ? FO_YA_L0[10][foSeq(g, 'fo_ya_time:10') - 1] : '"Thank you. I mean that."'), do: (g) => { bumpRel(g, 'Ya', 4, dd(g) === 9 ? 5 : 3); return likesMei(g) && likesYa(g) ? trioStep(g, 1) : []; }, time: 120, to: 'fo_ashfall' },
             { text: (g) => (dd(g) === 9 ? 'Let her throw you. Several times. It seems important to her.' : 'Climb up and sit with her for a while.'), do: (g) => { bumpRel(g, 'Ya', 3, 4); g.james.hp = Math.max(1, g.james.hp - (dd(g) === 9 ? 2 : 0)); return dd(g) === 9 ? ['Eleven times she puts you in the chaff, and is happier each time. −2 HP.', ...awardYukiFightXp(g, 'standard')] : ['You sit. She leans her shoulder into yours, hard, as one wolf leans on another.']; }, time: 120, to: 'fo_ashfall' },
         ],
     },

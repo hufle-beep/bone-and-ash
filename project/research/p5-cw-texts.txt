@@ -1,0 +1,48 @@
+# CW candidates: the prologue's supper and sunset walks (Ashfall, village days 4–6). Cat form shown; texts with a form split say so.
+# Each list plays in order on the long calendar, one text a day, then round again. A text read before folds to its FIRST sentence.
+# Texts NOT listed here already carry cooking praise (supper:4 text 2: the garlic, the mother's second helping; supper:5 text 3: the
+# mother lets him cook, the toasted millet, "My husband could not boil water", "never once asked me for seconds").
+
+## supper:4 (village day 4), text 1 (the old one, read by every player once)
+Mei Lin's house has two rooms, a herb loft, and a mother: a tiny, fierce woman who looks you over once and puts more millet in the pot without a word.
+¶ "Three days," the mother says, to the pot, ladling. "Three days, and they come up that road. Every year of my life." She gives you the largest piece of fish and looks at Yuki, then at you. "You will sleep in the loft. It is not proper. It is necessary." Her eyes rest on Yuki a while longer, and she inclines her head to her, by very little. "The spirit-beast will sleep where it chooses. One does not command such creatures."   [this paragraph is by form]
+¶ Yuki, on the warm stove, closes her eyes in complete agreement.   [by form]
+
+## supper:4, text 3
+By now you know which board by the door complains and which stool is yours. It is the low one. The mother watches you take it unprompted and adds millet to the pot, as she has each night, still with no comment.   [another first paragraph if he insulted Mei Lin on day 1]
+¶ What this house owes the post stands by the door in two sacks, weighed and tied. Mei Lin's mother has weighed them again since morning; the steelyard is still out. "The Sect's measure is larger than ours," she says, serving the fish. "Each year it is a little larger. One does not remark on it." "One remarks on it constantly," says Mei Lin. "One just does it indoors." She glances at the shutter all the same. "Indoors," her mother says, "is where it will stay." …   [the rest of this paragraph is by form]
+
+## supper:5 (village days 5–6), text 1
+Another supper at Mei Lin's. Her mother no longer watches you as she would a fox in the henhouse. She watches you as she would a fox she might find a use for.
+¶ Tonight she talks. Of Mei Lin's father, who had a spirit root, and who went up the road with the collectors when Mei Lin was six. Of the letter that came down four years later, two words long: *Tribulation. Honoured.* Of the box they buried, which had nothing in it.
+¶ Mei Lin clears the bowls through all of it, as loudly as bowls can be cleared. When her mother has finished she says, with her back to the room, "He'd have liked you. He was an idiot too."
+¶ "*Mei Lin.*" Her mother says it once, and it closes like a door. "You do not speak so of your father." Mei Lin does not apologise. She does not stop smiling either, and she does not look at her mother again until the meal is over.
+
+## supper:5, text 2
+Supper at Mei Lin's has acquired rules, and you have learned most of them by breaking them. You sit where you are put. You thank the mother for the food once, since twice would suggest surprise.
+¶ She has not spoken of her husband since the night of the empty box. She asks about you now, one question a meal, placed with care. Tonight: what a man does who studies mushrooms. You tell her. It is not a short answer, and you hear yourself getting interested.
+¶ She hears you out in silence. "So," she says at the end. "You know which ones kill." You admit that this is a fair summary of your education. She nods and serves you more greens, satisfied that you have a trade.
+¶ "He knows which ones glow, too," says Mei Lin. "He told me. He was so pleased about it." Then she catches her mother's eye and takes a sudden interest in her millet.
+
+## mei_walk:5 (village day 5), text 1
+You walk the edge of the field while the sun goes down red. She walks near enough that your sleeves brush, and gives no sign of having noticed. Yuki walks between you at intervals, a chaperone with a grudge.   [last sentence by form]
+¶ "When it goes bad at the post," she says, "and it will, take the cat and go. Don't be a hero for a village that isn't yours."   [by form]
+¶ "Bit late for that."
+
+## mei_walk:5, text 2
+The sun goes down behind the barley and takes its time about it. She sets the pace this evening, a slow one, and she has not raised the post again; it comes along regardless, at her other shoulder. On your shoulder Yuki faces backwards, so that somebody is watching the road.   [last sentence by form]
+¶ "Mother asked what we find to talk about out here," she says. "I said herbs. So if she asks you, it was herbs, and the cat will say the same."   [by form]
+¶ "Which herbs? She'll ask."
+
+## mei_walk:5, text 3
+From the field edge you can see the road, which the men swept this afternoon for the collectors. In the red light it is the cleanest thing in Ashfall. She looks at it for most of the walk and at you for the rest. Yuki has gone ahead along the furrow, a white tail above the barley, hunting mice and scandal.   [last sentence by form]
+¶ "Every year they sweep it," she says. "So the Sect needn't get dust on its boots while it robs us." She laughs, once, and then checks the field for who might have heard. Only the cat.   [by form]
+¶ "I'd have left the dust. Added some."
+
+## mei_walk:6 (village day 6, not the last sunset), texts 1–3 (one paragraph each)
+1: The barley is nearly ready and nobody will say who is to cut it. She talks about the harvest all the way across the field, quickly, all of it in the future tense, and somewhere along the path her fingers have closed on your sleeve.
+2: From the field edge you can watch the shutters close early, house by house. She has her arm through yours and names each family under her breath as its light goes, as one checks a tally that has come up short before.
+3: The well rope is coiled and hung up dry before the sun is down, which nobody in Ashfall does. Mei Lin points it out, laughs at it, looks round to see who heard, and by the next house she has your sleeve in both hands and is steering by it.
+
+# The choice after mei_walk: "Walk her home." (its result: at her mother's door she says "Idiot," very quietly, in place of something else).
+# The choices after supper: climb onto the roof with Mei Lin / help her mother with the dishes, and listen / go up to the loft early.

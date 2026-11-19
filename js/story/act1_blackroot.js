@@ -453,6 +453,81 @@ const SPRING_BOTH_SPLASH = '"Turn around, both of you," says Mei Lin, in a voice
 const SPRING_JUST_YA = ['"I am going to see to the fire," Mei Lin tells the steam, with great dignity. "It is a slow fire and will need me for hours. I will be loud coming back." She goes, her back very straight. Three steps into the trees you hear her laugh, once, and stop herself.', 'Ya puts her hand flat on your chest, under the water. "Just me, then," she says. "For now." Her mouth finds yours. The steam does the rest.'];
 const CAMP_BOTH_MEI = 'Mei Lin watches you go with her chin on her knees and calls after you, quite clearly, "Bring him back in one piece, I only brought so much thread," and then puts a hand over her mouth as if the words had got out on their own.'; // RL1 (L3): Fable's ALT A, after the fireside
 const onlyMei = (g) => likesMei(g) && !likesYa(g);
+
+// v0.11.232 (owner picks P5-B, D1; V3b): the Root Road's and the Ashen Hills' firesides three texts each (by the region's day key; the first
+// the old text). The Ashen Hills' new texts keep the old one's three parts: an opening, the line for whom James is close to, a closing. Fable's (run R), Claude's cuts.
+const FS_RR = [(g) => byForm(g, `Supper is over, and Ya has opened proceedings against the leaves in it.
+
+"Wolves do not put leaves in meat," she says.
+
+"It was wood sorrel and mountain pepper," says Mei Lin, who picked both and sorted them twice. "They are not leaves. They are a preparation."
+
+"They are leaves. I found one in my teeth." Ya produces it as evidence, holds it up to the firelight, and then eats it.
+
+"You went back to the preparation until it ran out."
+
+"I was looking for the meat."
+
+*Four times,* Yuki observes, from your shoulder. *I counted. I had five.*
+
+"He stirs it as if it could hear him," Ya tells the fire, as a further charge. Mei Lin, for once, lets her have the last word.`, `Supper is over, and Ya has opened proceedings against the leaves in it.
+
+"Wolves do not put leaves in meat," she says.
+
+"It was wood sorrel and mountain pepper," says Mei Lin, who picked both and sorted them twice. "They are not leaves. They are a preparation."
+
+"They are leaves. I found one in my teeth." Ya produces it as evidence, holds it up to the firelight, and then eats it.
+
+"You went back to the preparation until it ran out."
+
+"I was looking for the meat."
+
+*Four times,* Yuki sends, from the dark behind you, most of which is her. *I counted. I had the rest of the animal.*
+
+"He stirs it as if it could hear him," Ya tells the fire, as a further charge. Mei Lin, for once, lets her have the last word.`, `Supper is over, and Ya has opened proceedings against the leaves in it.
+
+"Wolves do not put leaves in meat," she says.
+
+"It was wood sorrel and mountain pepper," says Mei Lin, who picked both and sorted them twice. "They are not leaves. They are a preparation."
+
+"They are leaves. I found one in my teeth." Ya produces it as evidence, holds it up to the firelight, and then eats it.
+
+"You went back to the preparation until it ran out."
+
+"I was looking for the meat."
+
+"Four times," says Yuki, stretched out along the log with her eyes shut. "I counted. I had five."
+
+"He stirs it as if it could hear him," Ya tells the fire, as a further charge. Mei Lin, for once, lets her have the last word.`), `Ya has demanded a lesson in chopsticks, on the grounds that anything Mei Lin can do, a wolf can do faster.
+
+"Not a fist," says Mei Lin. "You are not strangling them."
+
+"I strangle nothing. I hold." Ya runs one stick through the middle of a fried mushroom and lifts it, triumphant.
+
+"That is a spear."
+
+"It is food and it is in the air. Where is the fault?"
+
+Mei Lin reaches over and sets Ya's fingers, one by one, with the patience she keeps for sick children and for you. Ya permits this, rigid, as she would the drawing of a splinter. The mushroom drops into the fire. Both look round at you, since you cooked it and are therefore to blame.
+
+You pass over another. There are always more; you have learned to cook for an argument.`]; // RV1 (T M1, L2): text 2 after the meal (Fable's run RV)
+const FS_AH_T = { // RV1 (T M2, M3, L1, L2): ah:2's close and `none` (by form), ah:3's `both`, `mei`, `none` (Fable's run RV)
+    2: { open: `The ash burns blue up here, and it lends your stew a colour that nobody mentions. The dead tree has the whole north of the sky, so everyone has chosen to sit facing the pot.`, both: `Ya eats with her bare feet in your lap and her back against Mei Lin, who is combing ash out of Ya's hair with her fingers and scolding her for having any.`, ya: `Ya eats with her bare feet in your lap, daring the hills to object. Across the fire Mei Lin sorts her herb pouch by touch and smiles at the pouch.`, mei: `Mei Lin has tucked herself under your arm with her bowl, as though she had been issued there. Across the fire Ya whets the spear and grins at the pair of you between strokes.`, none: (g) => byForm(g, `Everyone has found a thing to tend: Mei Lin her herbs, Ya the edge of the spear, Yuki one white paw, you the pot, which has never been so clean.`, `Everyone has found a thing to tend: Mei Lin her herbs, Ya the edge of the spear, Yuki one paw as broad as the pot lid, you the pot, which has never been so clean.`, `Everyone has found a thing to tend: Mei Lin her herbs, Ya the edge of the spear, Yuki the end of her own tail, you the pot, which has never been so clean.`), close: `"Blue," says Ya, at last. "I have eaten blue."
+
+"It does no harm," says Mei Lin. "I tested it twice."
+
+"Who spoke of harm? Scholar. Can you do red?"` },
+    3: { open: `Blue embers, and a wind off the dead tree that smells of old rain. Nobody has looked straight at it all evening, which takes some doing with a thing that size.`, both: `Mei Lin has given up sitting straight and leans propped between you and Ya like a scroll between bookends, eyes half shut, listening. Ya has taken to speaking quietly on her account, and looks astonished at herself.`, ya: `Ya leans on you with her full weight, which is how she tells you she is not afraid. Across the fire Mei Lin grinds a bitter root in her little mortar, as if the hills wanted medicine.`, mei: `Mei Lin's hand has been inside your sleeve since the stew, two fingers on your wrist as she'd take a pulse. Across the fire Ya restrings her necklace of teeth, holding each one up to the embers to recall whose it was.`, none: `Ya is binding a spare spearhead to its shaft with gut, and Mei Lin corrects the knot without looking up. You ladle out what is left in fair shares and are thanked by nobody, which among friends is thanks.`, close: `"Scholar. What does a tree that size eat?"
+
+"Light, while it lived."
+
+"And now?"
+
+Mei Lin answers for you. "Now it doesn't. Eat your supper, Ya."` },
+};
+const ahPart = (v, g) => (typeof v === 'function' ? v(g) : v);
+const ahFire = (t) => (g) => `${t.open}\n\n${ahPart(both(g) ? t.both : onlyYa(g) ? t.ya : onlyMei(g) ? t.mei : t.none, g)}\n\n${t.close}`;
+const FS_AH = [ahFire(FS_AH_T[2]), ahFire(FS_AH_T[3])];
 /** Move the clock forward to hour h today (time passes: hunger, regen). */
 function toHour(g, h) {
     const p = clockParts(g.minutes);
@@ -1397,13 +1472,13 @@ ${pantry(g)}`,
         enter: (g) => { markDaily(g, 'bl_fire'); return []; },
         text: (g) => {
             const r = region(g);
-            if (r === 'rr') return `Ya rips at a strip of meat with her teeth. Mei Lin eats with chopsticks, which she packed for the Blackroot deliberately, and with enormous dignity. Yuki eats everything. Ya mentions, chewing, that you gave the best piece away, which among wolves is how you tell who feeds the litter.
+            if (r === 'rr') return byDay(g, [`Ya rips at a strip of meat with her teeth. Mei Lin eats with chopsticks, which she packed for the Blackroot deliberately, and with enormous dignity. Yuki eats everything. Ya mentions, chewing, that you gave the best piece away, which among wolves is how you tell who feeds the litter.
 
 "A story, scholar," says Ya. "A true one. Your home, with the singing trees."
 
 You tell one. The Hearth Trees, and the cities grown out of them, and the children who learn to sing to the wood before anyone teaches them to read. Ya listens hugging her shins, with her eyes as round as a child's. Mei Lin listens with hers shut.
 
-Afterwards the fire has the talking to itself for a while. Then Ya says, "I'd like that. A tree that sang back." Mei Lin says, "So would I," and the two of them stare at each other over the flames, startled to have agreed on anything.`;
+Afterwards the fire has the talking to itself for a while. Then Ya says, "I'd like that. A tree that sang back." Mei Lin says, "So would I," and the two of them stare at each other over the flames, startled to have agreed on anything.`, ...FS_RR], 'bl_fireside:rr'); // v0.11.232 (P5-B, V3b)
             if (r === 'dw') return byDay(g, [(g) => `The drowned are the one subject nobody will touch. Ya therefore covers every other subject there is, at volume, until Mei Lin laughs in spite of herself: a real laugh, of the sort Ashfall schooled out of her. Her hand flies to her mouth as though she had sworn in a temple.
 
 "Do that again," says Ya.
@@ -1445,13 +1520,13 @@ ${likesMei(g) && likesYa(g) ? `Later the ${byForm(g, 'three', 'three', 'four')} 
 "He doesn't," says Mei Lin, with the pride of a woman defending the last civilised man in the swamp. Then, once Ya has turned to the fire, she leans a little way out over the edge of the raft and tries it, once, quietly. It goes nowhere. You see nothing. Ya, with her back still turned, says, "Further from the teeth."
 
 ${likesMei(g) && likesYa(g) ? `Later, when the fire is low, the ${byForm(g, 'three', 'three', 'four')} of you settle in a heap that nobody arranged, and Mei Lin, wedged at its centre, complains only about Ya's feet.` : `Later the fire burns low, something far out breaks the water and goes under again, and all of you count drips until you lose count.`}`], 'bl_fireside:dw');
-            return `A blue fire, and the dead tree over it. Not tonight, but soon now, you walk inside.
+            return byDay(g, [(g) => `A blue fire, and the dead tree over it. Not tonight, but soon now, you walk inside.
 
 ${both(g) ? 'Ya has put herself between you and Mei Lin with an arm hooked round each neck, and nobody shifts her. Mei Lin\'s head rests on Ya\'s shoulder. You doubt she knows she laid it there.' : onlyYa(g) ? 'Ya sits jammed against your side with a hand on your knee and no shame whatever. Across the fire Mei Lin makes a point of not seeing. She may not mind. She may mind very much.' : onlyMei(g) ? 'Mei Lin has sat near enough for her shoulder to rest on yours. From across the fire Ya beams at you both like a matchmaker collecting on a bet.' : `${byForm(g, 'The three', 'The three', 'The four')} of you sit in a loose ring, as people do who have come through things together and have no name yet for what it has made of them.`}
 
 "Whatever is in there," says Mei Lin, "we go in together."
 
-"Obviously," says Ya. "Who else would I go anywhere with?"`;
+"Obviously," says Ya. "Who else would I go anywhere with?"`, ...FS_AH], 'bl_fireside:ah'); // v0.11.232 (P5-B, V3b)
         },
         choices: [
             { text: 'Sit beside Mei Lin.', show: (g) => region(g) !== 'ah', do: (g) => { bumpRel(g, 'Mei Lin', 2, 3); return []; }, to: sleepTo },

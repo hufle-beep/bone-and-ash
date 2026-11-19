@@ -5,6 +5,7 @@
 import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, d6, awardYukiFightXp, jamesHpMax, nightRest, nightTo, canFly } from '../core/game.js';
 import { FW } from './flight_texts.js'; // v0.11.195 (owner picks F1, D1)
 import { set, day, hour, daily, markDaily, forestScale, villageScale, grow, eatBest, pantry, foodCount, byForm, byDay, dayReply, seqText } from './common.js';
+import { dayIndex } from '../core/lines.js'; // v0.11.232 (P5-B, V3b): the roof's lines by the text's index
 import { storyNight, weekMorning, longCal, tributeLeft, daysWord, DaysWord } from '../core/calendar.js'; // v0.11.224 (TX2, TS6): the counts // v0.11.203 (owner pick T1, TS1): the long calendar's weeks
 import { potLine } from './kitchen.js'; // v0.11.181 (SP1, PS)
 
@@ -98,6 +99,61 @@ const arson = (g) => {
     return { id: 'arson', night: true, intro: '' /* v0.11.231 (P4-2, FI): never shown, the stomp posture opens it */, band: 'challenging', enemies: [{ name: 'Lackey Pock-Face', hp: 7, dc: 3, atk: 4, dmg: 3 }, { name: 'Hired thug', hp: 5, dc: 3, atk: 4, dmg: 3 }, { name: 'Hired thug', hp: 5, dc: 3, atk: 4, dmg: 3 }].map((e) => grow(e, s)), win: 'arson_won', lose: 'arson_lost' };
 };
 
+
+// v0.11.232 (owner picks P5-B, D1; V3b): the roof a sequence of three for the first week and for the later nights on the long calendar (lines.js
+// seqText; the first the old text), each new text with its own line after "Stay until the cold drives you in." (by the same index). Fable's (run R), Claude's cuts.
+const roofKey = (g) => `supper_roof:${vday(g) === 1 ? 1 : 2}`;
+const ROOF_NEW = { 1: [`On the roof Mei Lin lists what Ashfall has decided you are.
+
+"A deserter. A struck-off physician. The widow by the well says a fox spirit, but she says that of anyone tall." She counts them off on her fingers, with the stars arriving behind her hand. "Old Wen says a scholar who has lost his way, which is his polite word for all three."
+
+"And you?"
+
+"I say a man who thanks the cooking pot." She addresses this to the dark fields. "Nobody dangerous does that."
+
+"I was thanking your mother. The pot was in the way."
+
+"She thought so too. She has been unbearable all evening. It looks exactly like her other face."`, `Your forearm is playing strings under its breath, and Mei Lin has stopped pretending she cannot hear it.
+
+"There are people in your arm," she says.
+
+"A recording. They played it once, very far from here, and the arm remembers."
+
+She considers the arm, then the roof ridge, then the darkening lane. "Are they well treated?"
+
+"They were paid. I believe one of them bought a boat."
+
+"Then they may continue." She lies back on the thatch with her hands folded, as she would for a temple recital, and hears it out without moving. "Brisk," she says at the end. "Is all of your music in such a hurry?"
+
+"No. Some of it is merely loud."
+
+"Save that for the collectors."`], 2: [`The plum wine comes up the ladder ahead of her these evenings, and two cups after it.
+
+She pours yours fuller than hers and denies it. "What do your people do," she asks, "before a thing they cannot stop?"
+
+"Cook. Far too much. Dumplings, mostly, and a soup that takes all day, so that nobody has a free hand to worry with."
+
+"And does it stop the thing?"
+
+"Never once. But everyone meets it fed."
+
+She turns her cup round in her fingers. "Here we sweep," she says. "Yours is better. Don't tell my mother I said a foreigner's was better."
+
+"She'd only add millet."
+
+Mei Lin laughs into her sleeve, where the lane will not hear it.`, `Tonight the jar stays corked until you can bow properly, which Mei Lin says may outlast the wine.
+
+"Lower. Eyes on his boots. You are not to look as though you were measuring him."
+
+"I'm not measuring him."
+
+"You measure everyone. You measured my mother." She pushes your head down with two fingers. "When the collectors arrive you are a mute cousin from the hill farms. You have never had a thought."
+
+"I can manage most of that."
+
+"The last part is where you fail." Her fingers stay in your hair somewhat past the end of the lesson. Then she pulls the cork with her teeth and drinks before you do, which is not the correct form, and she knows it.`] };
+const ROOF_STAY = { 1: [`The cold wins, as it does. On the ladder she adds a late entry: the dyer has you down as a tax spy, and has hidden his good vat. You promise to leave the vat alone. She says goodnight to the rungs, and you take the fox spirit up to the loft.`, `She sits up only when the thatch has gone cold under you both. "Tell them it was well played," she says, with a small bow to your arm, and is down the ladder before you can decide whether she was joking. You are in the herb loft and still have not settled it.`], 2: [`The jar goes down the ladder lighter, and she a little less steady, which she blames on the rungs. At the bottom she asks how long the soup takes, exactly, and repeats the answer under her breath as she goes. You reach the loft composing a shopping list for a village with no shops.`, `On the way down she has you bow once more, to the water butt, and passes you, narrowly. "Mute," she reminds you outside her mother's room, a finger laid to her own lips. You carry your silence up into the loft and practise it on the ginseng.`] };
+
 export const ASHFALL = {
     /* ---------- suppers (Days 4 and 5) ---------- */
     supper: {
@@ -153,7 +209,9 @@ She has not spoken of her husband since the night of the empty box. She asks abo
 
 She hears you out in silence. "So," she says at the end. "You know which ones kill." You admit that this is a fair summary of your education. She nods and serves you more greens, satisfied that you have a trade.
 
-"He knows which ones glow, too," says Mei Lin. "He told me. He was so pleased about it." Then she catches her mother's eye and takes a sudden interest in her millet.`, (g) => `The mother has let you cook. Nobody in the house treats this as a small matter, least of all her: she stood in the doorway for the whole of it with her arms folded and corrected nothing, which Mei Lin says has never happened to anyone.
+"He knows which ones glow, too," says Mei Lin. "He told me. He was so pleased about it." Then she catches her mother's eye and takes a sudden interest in her millet.
+
+Her mother lets the remark cool. "The dyer's wife has asked twice whether the foreigner cooks. I said a kitchen is not gossip." She sets an onion by your bowl. "This came with the question."`, (g) => `The mother has let you cook. Nobody in the house treats this as a small matter, least of all her: she stood in the doorway for the whole of it with her arms folded and corrected nothing, which Mei Lin says has never happened to anyone.
 
 It is the same millet, greens and fish as every night. You toasted the grain dry before the water went in and flaked the fish through at the end, and that is all you did. The mother eats one mouthful, puts her chopsticks down, and looks at the bowl as she might at a neighbour's child come home wearing silk. Then she finishes it, at her usual pace, in silence.
 
@@ -170,7 +228,7 @@ It is the same millet, greens and fish as every night. You toasted the grain dry
     },
     supper_roof: {
         id: 'supper_roof', title: 'The Roof', art: 'roof', place: `${P} — on Mei Lin's roof`,
-        text: (g) => (vday(g) === 1
+        text: (g) => seqText(g, roofKey(g), [(g) => (vday(g) === 1 // v0.11.232 (P5-B, V3b): the old text first
             ? `The thatch still holds the day's warmth. The stars come out singly, then in a crowd, and every constellation among them is wrong.
 
 "Which one's yours?" Mei Lin asks.
@@ -186,8 +244,8 @@ She gives the patch of dark her full and serious attention. "It looks cold."
 
 She tells you what the tribute costs, in numbers: so many baskets of grass, so many sacks of millet, so many children tested for roots. Which families hid their children last year, and which of those were caught. Her voice is perfectly level through all of it. Her hands are not.
 
-After that she says nothing until the jar is nearly empty. Your forearm has been playing something slow and sad, very low, all evening. "Leave it," she says, when you reach to stop it. "It sounds like you do when you think nobody is watching." Then she lets her shoulder rest against yours, and neither of you mentions it.`),
-        choices: [{ text: 'Stay until the cold drives you in.', do: (g) => { bumpRel(g, 'Mei Lin', 2, 3); return [vday(g) === 1 ? `You stay until your fingers stop working and she has run out of ways to hide that she is shivering. "Tell me about the trees again," she says on the way down, and you do, as far as the loft ladder. She does not say it sounds insane. She says goodnight as if the word cost her something.` : `Neither of you mentions it on the way down, either. At the foot of the ladder she takes the empty jar out of your hand, keeps hold of your wrist a little longer than the jar requires, and goes to her mother's room without looking back. You climb to the loft with one shoulder still warm.`]; }, to: 'village_night' }],
+After that she says nothing until the jar is nearly empty. Your forearm has been playing something slow and sad, very low, all evening. "Leave it," she says, when you reach to stop it. "It sounds like you do when you think nobody is watching." Then she lets her shoulder rest against yours, and neither of you mentions it.`), ...ROOF_NEW[vday(g) === 1 ? 1 : 2]]),
+        choices: [{ text: 'Stay until the cold drives you in.', do: (g) => { bumpRel(g, 'Mei Lin', 2, 3); const ri = dayIndex(g, `s:${roofKey(g)}`) % 3; return [ri ? ROOF_STAY[vday(g) === 1 ? 1 : 2][ri - 1] : vday(g) === 1 ? `You stay until your fingers stop working and she has run out of ways to hide that she is shivering. "Tell me about the trees again," she says on the way down, and you do, as far as the loft ladder. She does not say it sounds insane. She says goodnight as if the word cost her something.` : `Neither of you mentions it on the way down, either. At the foot of the ladder she takes the empty jar out of your hand, keeps hold of your wrist a little longer than the jar requires, and goes to her mother's room without looking back. You climb to the loft with one shoulder still warm.`]; }, to: 'village_night' }],
     },
 
     /* ---------- the night: quiet, or Gao Feng's doing (night 5) ---------- */
@@ -445,7 +503,7 @@ ${byForm(g, `"Every year they sweep it," she says. "So the Sect needn't get dust
 
 "I'd have left the dust. Added some."`])
             : tributeLeft(g) <= 1 ? `The last sunset before the tribute. This time she does not talk at all. Halfway along the field edge she takes hold of your hand, and she does not let go of it until the lamps come on.`
-            : seqText(g, 'mei_walk:6', [(g) => `The barley is nearly ready and nobody will say who is to cut it. She talks about the harvest all the way across the field, quickly, all of it in the future tense, and somewhere along the path her fingers have closed on your sleeve.`, (g) => `From the field edge you can watch the shutters close early, house by house. She has her arm through yours and names each family under her breath as its light goes, as one checks a tally that has come up short before.`, (g) => `The well rope is coiled and hung up dry before the sun is down, which nobody in Ashfall does. Mei Lin points it out, laughs at it, looks round to see who heard, and by the next house she has your sleeve in both hands and is steering by it.`])),
+            : seqText(g, 'mei_walk:6', [(g) => `The barley is nearly ready and nobody will say who is to cut it. She talks about the harvest all the way across the field, quickly, all of it in the future tense, and somewhere along the path her fingers have closed on your sleeve.`, (g) => `From the field edge you can watch the shutters close early, house by house. She has her arm through yours and names each family under her breath as its light goes, as one checks a tally that has come up short before.`, (g) => `The well rope is coiled and hung up dry before the sun is down, which nobody in Ashfall does. Mei Lin points it out, laughs at it, looks round to see who heard, and by the next house she has your sleeve in both hands and is steering by it. She tows you wide of the one door with a pot still on, since you would stop to advise it, she says, and they would have to be polite.`])),
         choices: [{ text: 'Walk her home.', do: (g) => { bumpRel(g, 'Mei Lin', 3, meiRel(g).a >= 8 ? 5 : 4); return [vday(g) === 2 ? `You walk her to her mother's door in the last of the red light. On the step she turns, looks at you as though there were something else she meant to say, and says "Idiot," very quietly, in its place. ${byForm(g, 'Yuki pushes past you both and goes in first, as though the house were hers. By now it may be.', 'Yuki goes in first, shoulders turned to clear the doorposts, as though the house were hers. By now it may be; nobody inside is going to raise the matter.', 'Yuki says "Excuse me" to the space between you, walks through it, and goes in first, as though the house were hers. By now it may be.')}` : tributeLeft(g) <= 1 ? `She does not let go at the door, either. She stands there with your hand in hers and the lamplight on her face and says, "Tomorrow, whatever happens, I'm glad you came out of that forest." Then she goes in, quickly, before you can answer, and you stand in the lane for a while, learning how to breathe again.` : 'At the door she takes your hand and does not go in. She stands there with it in both of hers and the lamplight on her face and says, "Whatever happens when they come, I\'m glad you came out of that forest." Then she goes in, quickly, before you can answer, and you stand in the lane for a while, working out what to do with the hand.']; }, time: 60, to: 'ashfall' }],
     },
 };
