@@ -1,0 +1,51 @@
+[
+ {
+  "id": "R1",
+  "file": "js/core/coil.js",
+  "find": "    if (g.readStops) base.readStops = clone(g.readStops); else delete base.readStops;",
+  "replace": "    if (g.readStops && !whole) base.readStops = clone(g.readStops); else delete base.readStops;",
+  "note": "CC: the whole game's rewind (to: 'game') forgets the stops; only the act's rewind is tested"
+ },
+ {
+  "id": "R2",
+  "file": "js/core/week.js",
+  "find": "        const c = JSON.parse(json || JSON.stringify(g));",
+  "replace": "        const c = JSON.parse(json || JSON.stringify(g)); delete c.readStops;",
+  "note": "SC: the forecast's dry run ignores the stops counted: it stops for a capped item the real run goes past"
+ },
+ {
+  "id": "R3",
+  "file": "js/core/news.js",
+  "find": "at most three times for each card in a whole game",
+  "replace": "at most five times for each card in a whole game",
+  "note": "NW: the What's new line's number unpinned"
+ },
+ {
+  "id": "R4",
+  "file": "js/core/week.js",
+  "find": "    if (grp === 'sit' || grp === 'mer' || grp === 'qi') return 'med';",
+  "replace": "    if (grp === 'sit' || grp === 'mer' || grp === 'qi' || grp === 'pres') return 'med';",
+  "note": "SC: Smoke the catch counted with the day's meditation (med:pres not in the items test)"
+ },
+ {
+  "id": "R5",
+  "file": "js/core/week.js",
+  "find": "if (u && readCapOk(g, u, p.readLine)) {",
+  "replace": "if (u && (readCapOk(g, u, p.readLine) || String(u.key).startsWith('door:'))) {",
+  "note": "SC: doors never capped (no door walked to its cap in the tests)"
+ },
+ {
+  "id": "R6",
+  "file": "js/core/coil.js",
+  "find": "    if (!g.coil.kept) delete g.coil.kept;",
+  "replace": "    if (!g.coil.kept) delete g.coil.kept;\n    if (whole) delete g.readStops;",
+  "note": "CC: the whole game's rewind forgets the stops, written off the pinned line (R1 caught only by the source pin)"
+ },
+ {
+  "id": "R7",
+  "file": "js/core/week.js",
+  "find": "    if (!u || !u.lines?.length) return false;",
+  "replace": "    if (!u || !u.lines?.length) return false;\n    if (String(u.key).startsWith('door:')) return true;",
+  "note": "SC: doors never capped, written in readCapOk (R5 caught only by the source pin)"
+ }
+]

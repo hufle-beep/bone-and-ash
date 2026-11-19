@@ -1,0 +1,100 @@
+[
+ {
+  "id": "F1",
+  "file": "js/core/week.js",
+  "find": "export const READ_CAP = { n: 3 };",
+  "replace": "export const READ_CAP = { n: 4 };",
+  "note": "SC: the cap off by one"
+ },
+ {
+  "id": "F2",
+  "file": "js/core/week.js",
+  "find": "    if (grp === 'sit' || grp === 'mer' || grp === 'qi') return 'med';",
+  "replace": "    if (grp === 'mer') return 'med';",
+  "note": "SC: the sit and gathering Qi count apart from the sessions"
+ },
+ {
+  "id": "F3",
+  "file": "js/core/week.js",
+  "find": "    return String(id || '').replace(/^week:carry:/, '');",
+  "replace": "    return String(id || '');",
+  "note": "SC: the carried week's work counts apart from its card"
+ },
+ {
+  "id": "F4",
+  "file": "js/core/week.js",
+  "find": "    if (pend != null && lineKey(u.lines[0]) === pend) return true;\n",
+  "replace": "",
+  "note": "SC: run again without the tap: the stop still pending refused at the cap"
+ },
+ {
+  "id": "F5",
+  "file": "js/core/week.js",
+  "find": "    if (k !== pend && had.length < READ_CAP.n) had.push(k);",
+  "replace": "    if (had.length < READ_CAP.n) had.push(k);",
+  "note": "SC: run again without the tap counts as a new stop"
+ },
+ {
+  "id": "F6",
+  "file": "js/core/week.js",
+  "find": "if (u && readCapOk(g, u, p.readLine)) { noteReadStop(g, u, p.readLine);",
+  "replace": "if (u) { noteReadStop(g, u, p.readLine);",
+  "note": "SC: no cap at all"
+ },
+ {
+  "id": "F7",
+  "file": "js/core/week.js",
+  "find": "if (u && readCapOk(g, u, p.readLine)) { noteReadStop(g, u, p.readLine); p.read",
+  "replace": "if (u && readCapOk(g, u, p.readLine)) { p.read",
+  "note": "SC: the stops never counted"
+ },
+ {
+  "id": "F8",
+  "file": "js/core/coil.js",
+  "find": "    if (g.readStops) base.readStops = clone(g.readStops); else delete base.readStops;",
+  "replace": "",
+  "note": "CC: a rewind forgets the stops (the snapshot's taken)"
+ },
+ {
+  "id": "F9",
+  "file": "js/core/game.js",
+  "find": "    delete s.readStops; // v0.11.228 (RE1, SC): so do the plan's read stops\n",
+  "replace": "",
+  "note": "CC: the snapshot holds the stops"
+ },
+ {
+  "id": "F10",
+  "file": "js/core/week.js",
+  "find": "    const it = readItem(u.id, u.key), k = lineKey(u.lines[0]);",
+  "replace": "    const it = readItem(u.id, u.key), k = paraKey(u.lines[0]);",
+  "note": "SC: a stop known by its exact line, numbers counted (paraKey not imported: a crash)"
+ },
+ {
+  "id": "F11",
+  "file": "js/core/faq.js",
+  "find": "at most three times for each card in a game",
+  "replace": "at most three times for each card in a Coil",
+  "note": "NW: the FAQ says a Coil"
+ },
+ {
+  "id": "F12",
+  "file": "js/core/week.js",
+  "find": "    if (!isRec(g.readStops)) g.readStops = {};",
+  "replace": "    if (!g.readStops) g.readStops = {};",
+  "note": "SC: a broken record (an array) kept: the stops lost on save"
+ },
+ {
+  "id": "F13",
+  "file": "js/core/week.js",
+  "find": "    delete p.read; delete p.readKey; delete p.readLine; // v0.11.228",
+  "replace": "    delete p.read; delete p.readKey; // v0.11.228",
+  "note": "RV1 L3a: the stop's line stays pending after its tap"
+ },
+ {
+  "id": "F14",
+  "file": "js/core/week.js",
+  "find": "p.readKey = u.key; p.readLine = lineKey(u.lines[0]); return end('read');",
+  "replace": "p.readKey = u.key; return end('read');",
+  "note": "RV1 L3a: the pending line never kept: a run again without the tap counts a new stop"
+ }
+]

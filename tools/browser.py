@@ -738,7 +738,7 @@ def week_read(save, card):
     way on, as the browser run takes it."""
     js = ("import { SCENES } from './js/story/prologue.js'; import { sceneView } from './js/core/story.js';"
           "import { noteLines } from './js/story/again.js'; import { deserialize, serialize } from './js/core/game.js';"
-          "import * as Wk from './js/core/week.js';"
+          "import * as Wk from './js/core/week.js'; Wk.READ_CAP.n = Infinity;"  # v0.11.228 (RV1, L1a): the copy notes every line, so no cap there
           "const g = deserialize(process.argv[1], { force: true }); const c = JSON.parse(JSON.stringify(g)); Wk.planEnsure(c); Wk.planSet(c, process.argv[2], 1);"
           "for (let k = 0; k < 60; k++) { const r = Wk.runWeek(c, SCENES); if (r.stop !== 'read') { if (r.stop !== 'evening' && r.stop !== 'left') break; const i = Wk.eveningPick(c, SCENES); if (i == null) break; Wk.storyTap(c, SCENES, i); Wk.afterStory(c, SCENES); continue; } const u = Wk.readProbe(c, SCENES); noteLines(g, u.lines); noteLines(c, u.lines); }"
           "process.stdout.write(serialize(g));")

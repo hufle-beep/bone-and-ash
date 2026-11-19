@@ -22,7 +22,7 @@ import { farewellNow } from '../story/act1_fallout.js'; // RV1 (L4)
 import { foodCount, preservable, unspaced, spacedNext, SPACE_DAYS, cardSpaced, cardKey } from '../story/common.js'; // v0.11.213 (FQ1, S3): the spacing
 import { EVENING_HOUR } from '../story/oneoff.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
-import { unreadLines } from '../story/again.js'; // v0.11.214 (owner pick RD1): the lines never shown in this game
+import { unreadLines, lineKey } from '../story/again.js'; // v0.11.214 (owner pick RD1): the lines never shown in this game; v0.11.228 (RE1, SC): lineKey
 import { relLines } from './replies.js'; // v0.11.225 (owner pick LO2, RS): the run's relationship changes
 import { COOK_PLAN } from '../story/kitchen.js'; // v0.11.218 (owner pick RV1, HA): the cook's hold on the pot only while its row is set
 
@@ -82,6 +82,41 @@ export function readProbe(g, scenes) {
     const lines = unreadLines(g, all);
     return lines.length ? { id: first.id, key: first.key, lines } : null;
 }
+/* ---------- v0.11.228 (owner pick RE1: SC; the owner 2026-11-18 07:56 "schedulable items should have a sequence of three texts max
+ * … because if there were no repeats, the scheduler would stop on every single card", 08:03 "the read cards … should carry over
+ * between coils") ----------
+ * The plan stops for one item's unread lines at most READ_CAP.n (3) times in a game. An item is a card (the week's work carried and the
+ * card itself one item), a door, or the day's meditation (the sit, the meridian sessions and gathering Qi as one: 60 texts, one per
+ * meridian and step). A stop is known by its first unread line (`lineKey`), kept on the plan (`p.readLine`) until its card is tapped
+ * (RV1, L3a), so running the week again without tapping is the same stop, never a new one. Past the cap the item's new lines show in the week's report, without a stop. The record is
+ * `g.readStops` { item: [lineKey, …] }, kept across every rewind (coil.js), as `g.read` is; an old save starts with none.
+ * Read stops a game (the models test, long calendar, 20 games each; Careful / Sociable / Completionist / Cultivator): 71 / 71 / 59 / 91
+ * → 43 / 42 / 35 / 34 (RV1, L2: the build's own run; the scratch copy's estimate before the pick 70 / 70 / 59 / 91 → 42 / 42 / 34 / 35). */
+export const READ_CAP = { n: 3 }; // `n`: the tests from before v0.11.228 pin the plan without the cap (Infinity)
+/** SC: the item a read stop counts against. */
+export function readItem(id, key) {
+    const grp = typeof key === 'string' ? keyGroup(key) : '';
+    if (grp === 'sit' || grp === 'mer' || grp === 'qi') return 'med';
+    return String(id || '').replace(/^week:carry:/, '');
+}
+/** SC: may the plan stop for this probe (`readProbe`'s result)? Its item under the cap, or the stop still pending (`pend`: the plan's
+ *  `readLine`, the first line of the stop not tapped yet; RV1, L3a: only that one, so an item never stops a 4th time). */
+export function readCapOk(g, u, pend = null) {
+    if (!u || !u.lines?.length) return false;
+    if (pend != null && lineKey(u.lines[0]) === pend) return true;
+    const r = isRec(g?.readStops) ? g.readStops : {};
+    const had = Array.isArray(r[readItem(u.id, u.key)]) ? r[readItem(u.id, u.key)] : [];
+    return had.length < READ_CAP.n;
+}
+/** SC: count the stop, unless it is the one still pending (`pend`, run again without the tap). RV1 (L3a): every new stop counts, the
+ *  same first line again too (a tap that showed another result leaves it unread). */
+export function noteReadStop(g, u, pend = null) {
+    if (!g || !u || !u.lines?.length) return;
+    if (!isRec(g.readStops)) g.readStops = {};
+    const it = readItem(u.id, u.key), k = lineKey(u.lines[0]);
+    const had = Array.isArray(g.readStops[it]) ? g.readStops[it] : (g.readStops[it] = []);
+    if (k !== pend && had.length < READ_CAP.n) had.push(k);
+}
 /** RD1 (RB): the card the plan stopped for, tapped by hand (main.js doTask, after runTask): it counts as the plan's step, so the
  *  plan doesn't take it again (a card one fewer, the day's Meditate, Smoke or Rest row one more done, a door done today, a one-off's
  *  row back to 0). Any other tap leaves the plan as it is. */
@@ -89,7 +124,7 @@ export function noteReadTap(g, scenes, id, r = null) {
     const p = planHere(g);
     if (!p || !p.read || p.read !== id || r?.skipped) return; // RV1 (L1): the day's routine went first (not run): the stop stays for the next tap
     const k = p.readKey;
-    delete p.read; delete p.readKey;
+    delete p.read; delete p.readKey; delete p.readLine; // v0.11.228 (RV1, L3a): the stop tapped: no longer pending
     if (p.stop === 'read') p.stop = ''; // RV1 (L4): no stale "Stopped: …" line for a card now read
     if (typeof k !== 'string' || isCarryTask(id)) return; // the week's work carried keeps its own count
     const d = workDay(g), grp = keyGroup(k);
@@ -533,7 +568,7 @@ export function runWeek(g, scenes, { max = 600, onStep = null, probe = true, rel
             return null;
         };
         // v0.11.214 (owner pick RD1, RB): the next card or door with a line not read yet: stop before it
-        if (probe && READ_STOP.on) { const u = readProbe(g, scenes); if (u) { p.read = u.id; p.readKey = u.key; return end('read'); } }
+        if (probe && READ_STOP.on) { const u = readProbe(g, scenes); if (u && readCapOk(g, u, p.readLine)) { noteReadStop(g, u, p.readLine); p.read = u.id; p.readKey = u.key; p.readLine = lineKey(u.lines[0]); return end('read'); } } // v0.11.228 (RE1, SC): READ_CAP.n stops an item
         // v0.11.211 (owner pick PR2 + PK1): the rows in the hub's order, the first one due and open now
         let did = null;
         for (const k of planOrder(g, p).keys) { rowKey = k; did = rowStep(k); if (did) break; }

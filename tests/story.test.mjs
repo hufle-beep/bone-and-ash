@@ -25,7 +25,7 @@ import { writeFileSync, readFileSync, readdirSync } from 'node:fs'; // v0.11.137
 import { smartAction } from './lib/smartfight.mjs'; // v0.11.96 (BT1)
 import { DAY21_BREAKFAST } from '../js/story/act1_return.js'; // v0.11.152 (E1, BK)
 import { carriesRead as CR0 } from '../js/core/tasks.js'; const CY = (g) => Object.values(CR0(g))[0] || null; // v0.11.215 (CF1, UB): the first carried work (the tests from before: one at a time)
-import { READ_STOP, RS1 } from '../js/core/week.js'; READ_STOP.on = false; RS1.on = false; // v0.11.214 (owner pick RD1): the plan's blocks before RD1 pin it without the read stop; the RD1 block turns it on. v0.11.225 (LO2, RS): the blocks before pin the plan's runs without its relationship lines; the LO2 block turns them on
+import { READ_STOP, RS1, READ_CAP } from '../js/core/week.js'; const READ_CAP0 = READ_CAP.n; READ_STOP.on = false; RS1.on = false; READ_CAP.n = Infinity; // v0.11.214 (owner pick RD1): the plan's blocks before RD1 pin it without the read stop; the RD1 block turns it on. v0.11.225 (LO2, RS): the blocks before pin the plan's runs without its relationship lines; the LO2 block turns them on. v0.11.228 (RE1, SC): the blocks before pin the read stop without its cap; the RE1 block sets it to 3
 const clockHour = (g) => Math.floor(((g.minutes % 1440) + 1440) % 1440 / 60); // v0.11.152 (E1, BK)
 import { GAMES, FULL, SHARD, WORKERS, STATS_OUT, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
 import { seen as touched, track as watchGame, noteView, mergeSeen, seenOut as touchedOut } from './lib/seen.mjs'; // v0.11.22: for tools/leftovers.mjs
@@ -6118,7 +6118,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     const T = 'RD1 (the plan stops for a text not read yet)';
     const D = 1440;
     const mk = (hub, sd, h = 7, cal = C.LONG_CAL, seed = 99601) => { const g = ensureBars(newGame(seed, { closed: true, ...(cal ? { cal } : {}) })); goTo(g, SCENES, hub); g.minutes = (C.calStart(g, sd) - 1) * D + h * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true; g.flags.elder = true; g.flags.palisade = 1; g.flags.wolf = 'driven'; return g; };
-    const strip = (g) => { const c = JSON.parse(JSON.stringify(g)); delete c.read; delete c.log; if (c.tasks?.plan) { delete c.tasks.plan.read; delete c.tasks.plan.readKey; delete c.tasks.plan.stop; delete c.tasks.plan.running; if (c.tasks.plan.done && !Object.values(c.tasks.plan.done).some((v) => v && typeof v !== 'object' && v !== c.tasks.plan.done.d)) delete c.tasks.plan.done; } return JSON.stringify(c); }; // a day's record started and still empty is no change
+    const strip = (g) => { const c = JSON.parse(JSON.stringify(g)); delete c.read; delete c.readStops; /* v0.11.228 (RE1, SC): the stops counted, beside the record */ delete c.log; if (c.tasks?.plan) { delete c.tasks.plan.read; delete c.tasks.plan.readKey; delete c.tasks.plan.readLine; delete c.tasks.plan.stop; delete c.tasks.plan.running; if (c.tasks.plan.done && !Object.values(c.tasks.plan.done).some((v) => v && typeof v !== 'object' && v !== c.tasks.plan.done.d)) delete c.tasks.plan.done; } return JSON.stringify(c); }; // a day's record started and still empty is no change
     // RU: the keys, numbers aside (a time with its unit as one); the record; the number-only lines (NL)
     assert(A.lineKey('Sing: 8 h 44 min more, 29 h 56 min still to go.') === A.lineKey('Sing: 45 min more, 2 h still to go.') && A.lineKey('Qi 19.9 → 25.') === A.lineKey('Qi 3 → 4.5.') && A.lineKey('A hare.') === A.paraKey('A hare.') && A.lineKey('3 hares.') !== A.lineKey('3 crabs.'), `${T} (RU): numbers aside, times with their units as one, words kept`);
     { const old = { coil: { n: 1 } }; A.noteLines(old, ['A line.']); A.noteRead(old, 'Day 4. A line with a number.', 1);
@@ -7160,6 +7160,104 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         READ_STOP.on = false;
     }
     RS1.on = false;
+}
+
+// v0.11.228 (owner pick RE1 = SC + CC + DR + NW, 2026-11-19 12:11; the owner 2026-11-18 07:56 and 08:03): SC the plan stops for one item's
+// unread lines at most READ_CAP.n (3) times in a game (a card and its carried week's work one item, a door, the day's meditation one item:
+// the sit, the meridian sessions and gathering Qi); a stop is known by its first unread line, so a run again without the tap is the same
+// stop; past the cap the lines show in the week's report; `g.readStops` kept across every rewind with `g.read` (CC, the 08:03 note).
+{
+    const Gm = await import('../js/core/game.js');
+    const C = await import('../js/core/calendar.js');
+    const Wk = await import('../js/core/week.js');
+    const Tk = await import('../js/core/tasks.js');
+    const A = await import('../js/story/again.js');
+    const T = 'RE1 (SC, the read stop\'s cap)';
+    const D = 1440;
+    const mk = (hub, sd, h = 7, seed = 99801) => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, hub); g.minutes = (C.calStart(g, sd) - 1) * D + h * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true; g.flags.elder = true; g.flags.palisade = 1; g.flags.wolf = 'driven'; return g; };
+    const capWas = READ_CAP.n;
+    READ_CAP.n = 3; READ_STOP.on = true;
+    try {
+        assert(Wk.READ_CAP === READ_CAP && capWas === Infinity && READ_CAP0 === 3, `${T}: the game's cap is 3 (${READ_CAP0}; RV1, TG1); the blocks before run without it (${capWas})`);
+        // the items
+        const it = [['week:carry:workshop:0', 'workshop:0', 'workshop:0'], ['workshop:0', 'workshop:0', 'workshop:0'], ['mer:pri', 'med:mer', 'med'], ['mer:e8', 'med:mer', 'med'], ['qi:next', 'med:qi', 'med'], ['cultivate:0', 'med:sit', 'med'], ['fo_ashfall:6', 'door:fo_mother', 'fo_ashfall:6'], ['clinic:1', 'med:rest', 'clinic:1'], ['wilds:15', 'med:pres', 'wilds:15'], ['x:1', undefined, 'x:1']]; // RV1 (TG5): Smoke the catch on its own
+        const bad = it.filter(([id, key, want]) => Wk.readItem(id, key) !== want);
+        assert(!bad.length, `${T}: the items (a card and its carried work one, the sit, sessions and gathering one; ${bad.map((b) => b.join(' → ')).join(' | ')})`);
+        // the count: three stops an item; the same stop again is no new one; another item counts apart; a missing or broken record is none
+        { const g = {}; const u = (id, key, l) => ({ id, key, lines: [l, 'More.'] });
+          const okAll = ['One.', 'Two.', 'Three.'].every((l) => { const x = u('mer:pri', 'med:mer', l); const ok = Wk.readCapOk(g, x); Wk.noteReadStop(g, x); return ok; });
+          const pend = A.lineKey('Three.'); // the last stop, not tapped yet: run again, the same stop, not counted
+          const same = Wk.readCapOk(g, u('mer:col', 'med:mer', 'Three.'), pend); Wk.noteReadStop(g, u('mer:col', 'med:mer', 'Three.'), pend);
+          const oldLine = Wk.readCapOk(g, u('mer:col', 'med:mer', 'Two.')); // RV1 (L3a): a counted line again, no longer pending: a 4th stop, refused
+          const fourth = Wk.readCapOk(g, u('qi:next', 'med:qi', 'Four.'), pend); Wk.noteReadStop(g, u('qi:next', 'med:qi', 'Four.'), pend);
+          const other = Wk.readCapOk(g, u('wild_forage:1', 'wild_forage:1', 'Four.'));
+          assert(okAll && same && !oldLine && !fourth && other && g.readStops.med.length === 3 && Wk.readCapOk({}, null) === false && Wk.readCapOk({ readStops: [] }, u('a', 'a', 'x')) === true && Wk.readCapOk({ readStops: { a: 'x' } }, u('a', 'a', 'x')) === true,
+              `${T}: three stops an item; the stop still pending again is the same stop; a counted line no longer pending, or a fourth, refused (RV1, L3a); another item apart (${JSON.stringify(g.readStops)})`);
+          const g1 = {}; Wk.noteReadStop(g1, u('w:1', 'w:1', 'A.')); Wk.noteReadStop(g1, u('w:1', 'w:1', 'A.'));
+          assert(g1.readStops['w:1'].length === 2, `${T} (RV1, L3a): the same first line stopped again after a tap counts again (${JSON.stringify(g1.readStops)})`);
+          const g3 = { readStops: [] }; Wk.noteReadStop(g3, u('mer:pri', 'med:mer', 'One.'));
+          assert(!Array.isArray(g3.readStops) && JSON.parse(JSON.stringify(g3)).readStops?.med?.length === 1, `${T}: a broken record (an array) replaced, the stop kept through a save (${JSON.stringify(g3)})`);
+          const g2 = { readStops: { med: ['k'] } }; const p7 = A.lineKey('7 hares.'); Wk.noteReadStop(g2, u('mer:pri', 'med:mer', '7 hares.')); Wk.noteReadStop(g2, u('mer:pri', 'med:mer', '9 hares.'), p7);
+          assert(g2.readStops.med.length === 2 && Wk.readCapOk({ readStops: { med: ['a', 'b', 'c'] } }, u('mer:pri', 'med:mer', '12 hares.'), p7), `${T}: a stop's first line by its key, numbers aside (${JSON.stringify(g2.readStops)})`); }
+        // a week's meditation on a stay: the day's sit, a session and gathering Qi every day; every stop tapped as a player would
+        const walkMed = (cap, door = false, g = null) => {
+            READ_CAP.n = cap;
+            if (!g) { g = mk('wilds', 2); g.james.qi = Math.max(g.james.qi, 40); }
+            Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', door ? 1 : 0); for (const c of Wk.planCards(g, SCENES)) Wk.planSet(g, c.id, 0); for (const k of ['sit', 'mer', 'qi']) Wk.planSet(g, `med:${k}`, door ? 0 : 1);
+            let med = 0, other = 0, same = 0, lineBad = 0; const said = [], items = {};
+            for (let k = 0; k < 200; k++) {
+                const r = Wk.runWeek(g, SCENES); for (const d of r.days) said.push(...d.lines);
+                if (r.stop === 'read') {
+                    const p = g.tasks.plan, id = p.read, key = p.readKey, n0 = JSON.stringify(g.readStops);
+                    if (k === 0) { const r2 = Wk.runWeek(g, SCENES); same = r2.stop === 'read' && g.tasks.plan.read === id && JSON.stringify(g.readStops) === n0 ? 1 : -1; } // run again without the tap: the same stop, not a new one
+                    if (Wk.readItem(id, key) === 'med') med++; else other++; items[Wk.readItem(id, key)] = (items[Wk.readItem(id, key)] || 0) + 1;
+                    const pl = g.tasks.plan.readLine; const rr = Tk.runTask(g, SCENES, id); Wk.noteReadTap(g, SCENES, id, rr); A.noteLines(g, rr.lines); if (!pl || g.tasks.plan.readLine !== undefined) lineBad++; continue; // RV1 (L3a): the stop's line kept until the tap, then gone
+                }
+                if (r.stop === 'evening' || r.stop === 'door' || r.stop === 'story' || g.scene !== 'wilds') { for (let j = 0; j < 30 && g.scene !== 'wilds' && !g.combat; j++) { const v = sceneView(g, SCENES); if (v.text) A.noteRead(g, v.text); const o = v.choices.filter((c) => !c.disabled && c.index < 1000 && !/^(Yuki: change form|Story Mode only)/.test(c.label)); if (!o.length || v.end) break; const r3 = Wk.storyTap ? Wk.storyTap(g, SCENES, o[0].index) : choose(g, SCENES, o[0].index); A.noteLines(g, r3?.lines || []); } if (g.scene === 'wilds' && !g.combat && r.stop !== 'week') continue; }
+                break;
+            }
+            return { med, other, same, g, said, items, lineBad };
+        };
+        const off = walkMed(Infinity), on = walkMed(3);
+        const unreadSaid = A.unreadLines(on.g, on.said).length;
+        assert(off.med > 3 && on.med === 3 && on.same === 1 && on.lineBad === 0 && off.lineBad === 0 && on.g.readStops.med.length === 3 && unreadSaid > 0, `${T}: a planned week's meditation stops ${off.med} times without the cap, 3 with it (the run again without the tap the same stop: ${on.same}); past the cap its new lines in the report (${unreadSaid} not tapped)`);
+        // RV1 (TG3): a door at its cap: Yuki's sits on the Wilds, every stop tapped
+        { const d0 = walkMed(Infinity, true), d1 = walkMed(1, true); const k0 = Object.entries(d0.items).find(([, n]) => n > 1);
+          assert(!!k0 && d1.items[k0[0]] === 1 && d1.g.readStops[k0[0]]?.length === 1, `${T} (RV1, TG3): a door (${k0?.[0]}) stops ${k0?.[1]} times without the cap, ${d1.items[k0?.[0]]} with a cap of 1`); }
+        // RV1 (TG4): the forecast and the real run agree with the day's meditation at its cap
+        { READ_CAP.n = 3; const g = mk('wilds', 2); g.james.qi = Math.max(g.james.qi, 40); g.readStops = { med: ['a', 'b', 'c'] }; Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', 0); for (const c of Wk.planCards(g, SCENES)) Wk.planSet(g, c.id, 0); for (const k of ['sit', 'mer', 'qi']) Wk.planSet(g, `med:${k}`, 1);
+          const fc = Wk.planForecast(g, SCENES); const seen = []; let r = null;
+          for (let k = 0; k < 40; k++) { r = Wk.runWeek(g, SCENES); seen.push(r.stop); if (r.stop !== 'evening' && r.stop !== 'left') break; const i = Wk.eveningPick(g, SCENES); if (i == null) break; Wk.storyTap(g, SCENES, i); if (r.stop === 'left' && g.scene !== 'wilds' && sceneView(g, SCENES).choices.length > 1) break; } // the evenings as the forecast takes them, to where the story needs a choice
+          assert(fc && fc.stop !== 'read' && fc.minutes === g.minutes && !seen.includes('read'), `${T} (RV1, TG4): the forecast (${fc?.stop} at ${fc?.minutes}) and the run (${seen.join()} at ${g.minutes}) agree past the cap, no read stop`); }
+        // CC (the 08:03 note): the record and the stops kept across a rewind (the act's and the whole game's), never taken from the snapshot
+        { const g = mk('wilds', 2); g.read = { abc: 1 }; g.readStops = { med: ['k1', 'k2', 'k3'], 'wild_forage:1': ['k4'] };
+          const snapHas = 'readStops' in Gm.coilSnap(g);
+          const g1 = JSON.parse(JSON.stringify(g)); endCoil(g1, 'collapse'); rewind(g1);
+          assert(!snapHas && g1.coil.n === 2 && JSON.stringify(g1.readStops) === JSON.stringify(g.readStops) && g1.read.abc === 1, `${T} (CC): an act's rewind keeps the read record and the stops (${JSON.stringify(g1.readStops)})`);
+          const gw = JSON.parse(JSON.stringify(g)); gw.coil.act = 1; endCoil(gw, 'collapse'); rewind(gw, { to: 'game' });
+          assert(JSON.stringify(gw.readStops) === JSON.stringify(g.readStops) && gw.read.abc === 1 && (gw.coil.act || 0) === 0, `${T} (CC; RV1, TG2): the whole game's rewind keeps them too (act ${gw.coil.act}; ${JSON.stringify(gw.readStops)})`);
+          const g2 = JSON.parse(JSON.stringify(g)); delete g2.readStops; endCoil(g2, 'collapse'); rewind(g2);
+          assert(!('readStops' in g2), `${T} (CC): a save without stops rewinds without them`); }
+        // RV1 (TG7): through a real rewind: the meditation capped in Coil 1 stops nothing in Coil 2, where its lines past the cap are still unread
+        { const c1 = walkMed(3); const g = c1.g; endCoil(g, 'collapse'); rewind(g);
+          goTo(g, SCENES, 'wilds'); g.minutes = (C.calStart(g, 2) - 1) * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.james.qi = Math.max(g.james.qi || 0, 40);
+          const free = JSON.parse(JSON.stringify(g)); const c2 = walkMed(3, false, g), f2 = walkMed(Infinity, false, free);
+          assert(g.coil.n === 2 && c1.med === 3 && c2.med === 0 && f2.med > 0 && g.readStops.med.length === 3, `${T} (RV1, TG7): Coil 2 after a rewind: ${c2.med} meditation stops (without the cap ${f2.med}); the stops kept (${g.readStops.med.length})`); }
+        // CC: a line a Coil 1 tap showed never stops the plan in Coil 2; the stops counted in Coil 1 count in Coil 2 (one game)
+        { const g = mk('fo_ashfall', 9); Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', 0); Wk.planSet(g, 'med:mer', 1);
+          const r = Wk.runWeek(g, SCENES); const id = g.tasks.plan.read, first = Wk.readProbe(g, SCENES)?.lines?.[0];
+          const rr = Tk.runTask(g, SCENES, id); Wk.noteReadTap(g, SCENES, id, rr); A.noteLines(g, rr.lines);
+          const h = mk('fo_ashfall', 9); h.coil.n = 2; h.read = JSON.parse(JSON.stringify(g.read)); h.readStops = JSON.parse(JSON.stringify(g.readStops)); Wk.planEnsure(h); Wk.planSet(h, 'door:yk_time', 0); Wk.planSet(h, 'med:mer', 1);
+          const u2 = Wk.readProbe(h, SCENES);
+          assert(r.stop === 'read' && !!first && (!u2 || !u2.lines.includes(first)) && h.readStops.med.length === 1, `${T} (CC): Coil 2 doesn't stop for Coil 1's tapped line (${first?.slice(0, 40)}; next: ${u2?.lines?.[0]?.slice(0, 40) || 'none'})`); }
+        { const Fq = await import('../js/core/faq.js'); const a = Fq.FAQ.find(([q]) => q === 'What carries over')?.[1]; const t = typeof a === 'function' ? a({}) : String(a);
+          assert(t.includes('the cards read (the week\'s plan stops for a card whose text you haven\'t read anywhere in this game, at most three times for each card in a game; the day\'s meditation, every meridian session with it, counts as one card)'), `${T} (NW): the FAQ says it`); }
+        { const Nw = await import('../js/core/news.js'); const n = Nw.NOTES.find(([v]) => v === '0.11.228')?.[1] || '';
+          assert(n.includes('at most three times for each card in a whole game') && n.includes('counts as one card'), `${T} (NW; RV1, TG6): What's new says three`); }
+        // old saves: no record, no fill needed (read as none); the key in the source
+        { const src = readFileSync(new URL('../js/core/week.js', import.meta.url), 'utf8');
+          assert(src.includes("if (u && readCapOk(g, u, p.readLine)) { noteReadStop(g, u, p.readLine); p.read = u.id; p.readKey = u.key; p.readLine = lineKey(u.lines[0]);") && readFileSync(new URL('../js/core/coil.js', import.meta.url), 'utf8').includes('if (g.readStops) base.readStops = clone(g.readStops); else delete base.readStops;'), `${T}: the stop counted where it is made; the rewind keeps the record`); }
+    } finally { READ_STOP.on = false; READ_CAP.n = Infinity; }
 }
 
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));

@@ -192,6 +192,7 @@ export function rewind(g, { to = 'act' } = {}) {
     if (g.picked) base.picked = clone(g.picked); // v0.11.32 (P2-a): picked choices are remembered across every rewind
     if (g.seen) base.seen = clone(g.seen); // v0.11.35 (P1-a): so are the scenes read
     if (g.read) base.read = clone(g.read); // v0.11.133 (FP2): and the paragraphs read
+    if (g.readStops) base.readStops = clone(g.readStops); else delete base.readStops; // v0.11.228 (RE1, SC): and the plan's read stops, for the whole game
     base.log = g.log.slice(-150);
     base.rng = g.rng;
     if (g.calBl !== undefined) base.calBl = g.calBl; else delete base.calBl; // v0.11.222 (J2, SV): a rewind keeps the save's Blackroot (the snapshot may be older than its fill)
