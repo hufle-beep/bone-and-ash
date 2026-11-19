@@ -1,0 +1,121 @@
+[
+ {
+  "id": "F1",
+  "file": "js/core/week.js",
+  "find": "    const watch = () => { relSay(); if (onStep) onStep(g, last); last = null; };",
+  "replace": "    const watch = () => { if (onStep) onStep(g, last); last = null; };",
+  "note": "RS: a run says no relationship change"
+ },
+ {
+  "id": "F2",
+  "file": "js/core/week.js",
+  "find": "    const r = runWeek(c, scenes, { max: 1, probe: false, rel: false, onStep:",
+  "replace": "    const r = runWeek(c, scenes, { max: 1, probe: false, onStep:",
+  "note": "RS: the probe reads the relationship lines as text: the plan stops for them"
+ },
+ {
+  "id": "F3",
+  "file": "js/core/week.js",
+  "find": "    const relSay = () => { if (!rel || !RS1.on) return; if (rel0.c === coilKey(g)) {",
+  "replace": "    const relSay = () => { if (!rel || !RS1.on) return; if (true) {",
+  "note": "RS: a Coil's reset said as a loss"
+ },
+ {
+  "id": "F4",
+  "file": "js/core/week.js",
+  "find": "export const planDoorsShown = (g, scenes, p = planView(g)) => !!p && isRec(p.doors) && doorCards(g, scenes).some((d) => (p.doors[d.scene] || 0) > 0);",
+  "replace": "export const planDoorsShown = (g, scenes, p = planView(g)) => !!p && isRec(p.doors);",
+  "note": "PE: a plan with every door at 0 reads as set"
+ },
+ {
+  "id": "F7",
+  "file": "js/core/week.js",
+  "find": "        if (nx > wd) out.push({ id: c.id, kind: 'work',",
+  "replace": "        if (nx >= wd) out.push({ id: c.id, kind: 'work',",
+  "note": "SN: a card closed for another reason (not its spacing) shows as spaced"
+ },
+ {
+  "id": "F8",
+  "file": "js/core/week.js",
+  "find": "note: doorNote({ repeat: true, next: nx - wd + calDay(g) }) });",
+  "replace": "note: doorNote({ repeat: true, next: nx }) });",
+  "note": "SN: the waking day said as the calendar day"
+ },
+ {
+  "id": "F9",
+  "file": "js/core/week.js",
+  "find": "for (const d of doorCards(g, scenes)) if (d.status === 'closed' && d.repeat && d.next) out.push(",
+  "replace": "for (const d of doorCards(g, scenes)) if (d.status === 'closed' && d.repeat && false) out.push(",
+  "note": "SN: the doors closed by their spacing not shown"
+ },
+ {
+  "id": "F10",
+  "file": "js/core/week.js",
+  "find": "export function noteCardDone(g, tap, r) { if (tap && !r?.skipped) keepTakenAll(g, tap.s); }",
+  "replace": "export function noteCardDone(g, tap, r) { if (tap && !r?.skipped) keepTaken(g, tap.hub, tap.s); }",
+  "note": "OL: only the hub tapped on (the village keeps nothing): Ashfall's row stays 1"
+ },
+ {
+  "id": "F11",
+  "file": "js/core/week.js",
+  "find": "export function noteCardDone(g, tap, r) { if (tap && !r?.skipped) keepTakenAll(g, tap.s); }",
+  "replace": "export function noteCardDone(g, tap, r) { if (tap) keepTakenAll(g, tap.s); }",
+  "note": "OL: a tap the routine skipped drops the kept row"
+ },
+ {
+  "id": "F12",
+  "file": "js/core/tasks.js",
+  "find": "dayRoutine(r0, scenes, r0.scene, 'door', id); pre = Math.max(0, r0.minutes - m0);",
+  "replace": "pre = 0;",
+  "note": "FD: the door's time without the routine"
+ },
+ {
+  "id": "F13",
+  "file": "js/core/tasks.js",
+  "find": "        if (!routineBusy) { try { const r0 = clone(g), m0 = r0.minutes; dayRoutine(r0, scenes, r0.scene, 'door', id);",
+  "replace": "        if (!routineBusy) { try { const r0 = g, m0 = r0.minutes; dayRoutine(r0, scenes, r0.scene, 'door', id);",
+  "note": "FD: the dry run eats the real save's meal and sit"
+ },
+ {
+  "id": "F14",
+  "file": "tests/models.test.mjs",
+  "find": "        for (const [k, n] of Object.entries(want)) if (cur(k) !== n) { planSet(g, k, n); st.taps.set++; }",
+  "replace": "        for (const [k, n] of Object.entries(want)) { planSet(g, k, n); st.taps.set++; }",
+  "note": "BK: the bots count every row again (as before)"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/act1_fallout.js",
+  "find": "(!longCal(g) || (g.flags.wolf_bit || 0) < 2)",
+  "replace": "(!longCal(g) || (g.flags.wolf_bit || 0) < 3)",
+  "note": "WM (WMa): three bites on the long calendar"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/act1_fallout.js",
+  "find": "if (longCal(g)) g.flags.wolf_bit = (g.flags.wolf_bit || 0) + 1;",
+  "replace": "g.flags.wolf_bit = (g.flags.wolf_bit || 0) + 1;",
+  "note": "WM (WMa): the old calendar counts the flag too"
+ },
+ {
+  "id": "F15",
+  "file": "js/core/tasks.js",
+  "find": "if (r?.skipped) minutes = Math.max(0, c.minutes - m0);",
+  "replace": "if (false) minutes = Math.max(0, c.minutes - m0);",
+  "note": "FD (RV1 M1): a door the routine closes shows the routine plus the walk"
+ },
+ {
+  "id": "F16",
+  "file": "js/core/week.js",
+  "find": "const wakeCal = (g) => Math.floor(((g.minutes || 0) - 240) / 1440) + 1;",
+  "replace": "const wakeCal = (g) => Math.floor((g.minutes || 0) / 1440) + 1;",
+  "note": "SN (RV1 L2): a day late between 00:00 and 04:00"
+ },
+ {
+  "id": "F17",
+  "file": "js/core/week.js",
+  "find": "    const at = (c, i) => (ord.has(c.id) ? ord.get(c.id) : 1e6 + i);",
+  "replace": "    const at = (c, i) => 1e6 + i;",
+  "note": "SN (RV1 L3): the spaced cards last (a group of them moves to the end)"
+ }
+]

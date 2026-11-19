@@ -187,7 +187,8 @@ function storyPick(model, g, choices, mem) {
  *  (its own rules, outside the plan: eating, resting, the breakthrough, doors, talks and chores) stays a card of its own; the week's
  *  cards go on the plan, once each (Careful and the Sociable food first, then training), and the Meditate cards by the day:
  *  Careful and the Sociable a meridian session (the day's sit runs itself), the Completionist a sit and a session, the Cultivator
- *  6 sits, 3 sessions and 4 hours of gathering. Taps: a count set is one, a "Run the week" one; the plan's own steps, the
+ *  6 sits, 3 sessions and 4 hours of gathering. Taps: a count set is one (v0.11.225, LO2 BK: only a row that differs from the amount
+ *  kept, as a player's week starts from it), a "Run the week" one; the plan's own steps, the
  *  routine and the quiet nights none. Random plays as before. */
 // v0.11.209 (owner pick TF1, B): every model smokes the day's catch by the plan (`pres`), never as a card of its own (WEEK_SIDE)
 const MED_PLAN = { careful: { sit: 0, mer: 1, qi: 0, pres: 1 }, sociable: { sit: 0, mer: 1, qi: 0, pres: 1 }, completionist: { sit: 1, mer: 1, qi: 0, pres: 1 }, cultivator: { sit: 6, mer: 3, qi: 4, pres: 1 } };
@@ -197,11 +198,17 @@ function weekRun(model, g, cards, st) {
     if (!p && weekResume(g)) { const r = runWeek(g, SCENES); st.weekStops[r.stop] = (st.weekStops[r.stop] || 0) + 1; } // RV1 (L1): the week's end reported
     if (!p) {
         p = planEnsure(g); if (!p) return false;
-        p.items = {}; p.med = { sit: 0, mer: 0, qi: 0, pres: 0, rest: 0 }; // v0.11.219 (KC1): the bots plan each week afresh, as before (the kept counts not used)
+        // v0.11.225 (owner pick LO2, BK): the week starts from the amounts kept (KC1), as a player's: a tap only for a row that differs
+        // (before, every week afresh: Careful 1,063 taps a game → 931, Sociable 1,145 → 1,014, Completionist 1,128 → 1,053, Cultivator 1,323 → 1,275)
+        const want = {};
         const wk = cards.filter((c) => c.week);
         const order = careLike(model) ? [...wk.filter((c) => FOOD_GROUP.test(c.group || '')), ...wk.filter((c) => TRAIN_GROUP.test(c.group || '')), ...wk.filter((c) => !FOOD_GROUP.test(c.group || '') && !TRAIN_GROUP.test(c.group || ''))] : wk;
-        for (const c of order) { planSet(g, c.id, 1); st.taps.set++; }
-        for (const [k, n] of Object.entries(MED_PLAN[model] || {})) if (n) { planSet(g, `med:${k}`, n); st.taps.set++; }
+        for (const c of order) want[c.id] = 1;
+        for (const [k, n] of Object.entries(MED_PLAN[model] || {})) if (n) want[`med:${k}`] = n;
+        const cur = (k) => (k.startsWith('med:') ? p.med?.[k.slice(4)] || 0 : p.items?.[k] || 0);
+        for (const k of Object.keys(p.items || {})) if (!(k in want) && p.items[k] > 0 && wk.some((c) => c.id === k)) { planSet(g, k, 0); st.taps.set++; }
+        for (const k of Object.keys(p.med || {})) if (!(`med:${k}` in want) && p.med[k] > 0) { planSet(g, `med:${k}`, 0); st.taps.set++; }
+        for (const [k, n] of Object.entries(want)) if (cur(k) !== n) { planSet(g, k, n); st.taps.set++; }
         p.doors = {}; // v0.11.210 (owner pick N1, DC-a): the bots' plans as before (no daily doors; Yuki's row starts at 1 on a player's plan)
     }
     if (!p.running) st.taps.run++;
@@ -479,6 +486,7 @@ for (const h of hungryLines) console.log(`  ${h}`); // v0.11.163 (HN1): log only
 // stays' weeks are worked (Careful, the Sociable and the Completionist stay the forest's three weeks: the tribute on Day 40 or later)
 if (CAL && !SHARD) for (const [m, st] of Object.entries(all)) {
     if (m === 'random' || /:/.test(m) || st.games < 10) continue;
+    assert(st.taps.set < st.taps.run, `${m} (--cal 7; v0.11.225, LO2 BK): the kept amounts: fewer count taps than runs (${st.taps.set} / ${st.taps.run}; every week afresh before: Careful 162 / 101 a game)`);
     assert((st.weekStops.week || 0) > 0 && (st.weekStops.breakthrough || 0) > 0, `${m} (--cal 7): the plan's weeks end and it stops for a breakthrough (${JSON.stringify(st.weekStops)})`);
     if (['careful', 'sociable', 'completionist'].includes(m)) assert(st.tribN && st.tribDay / st.tribN >= 40, `${m} (--cal 7): the forest's weeks worked, the tribute on Day 40 or later (Day ${st.tribN ? (st.tribDay / st.tribN).toFixed(1) : '—'})`);
 }

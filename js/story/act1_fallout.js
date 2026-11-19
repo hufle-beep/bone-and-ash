@@ -546,7 +546,9 @@ Its owner bows to you regardless and thanks you for the attempt. Nothing else th
         enter: (g) => {
             const lines = [];
             if (hour(g) < 6 || hour(g) >= 19) lines.push(nightRest(g)); // v0.11.92 (X1): half back after the barley wolves
-            if (g.flags.wolf === 'lost') g.james.hp = Math.ceil(g.james.hp * 0.85);
+            // v0.11.225 (owner pick LO2, WM; RV1 WMa): on the long calendar the two mornings right after the loss (as the old calendar's days 9 and 10;
+            // every Fallout morning before, about 20), counted in the world flag `wolf_bit` (0–2); the old calendar as before
+            if (g.flags.wolf === 'lost' && (!longCal(g) || (g.flags.wolf_bit || 0) < 2)) { g.james.hp = Math.ceil(g.james.hp * 0.85); if (longCal(g)) g.flags.wolf_bit = (g.flags.wolf_bit || 0) + 1; }
             eat(g, 20);
             lines.push('Breakfast at Mei Lin\'s: gruel and pickles, +20 satiety.');
             return lines;

@@ -1,6 +1,6 @@
 /** Bone and Ash — UI. Renders the story, combat, sheet, hammerspace, journal and saves. */
 import { LONG_CAL } from './core/calendar.js'; // v0.11.203 (owner pick T1, TS1)
-import { runWeek, planCards, planHere, planEnsure, planSet, planEndDay, planClear, STOP_TEXT, planNotes, storyTap, afterStory, planCount, planView, doorCards, planRanks, planPrio, doorNote, cardNote, noteCardTap, noteCardDone, noteReadTap, planEmptyShown } from './core/week.js'; // v0.11.204 (owner pick W1: R3, P1); v0.11.206 (FC1, RV1): the forecast's texts, the shared tap steps
+import { runWeek, planCards, planHere, planEnsure, planSet, planEndDay, planClear, STOP_TEXT, planNotes, storyTap, afterStory, planCount, planView, doorCards, planRanks, planPrio, doorNote, cardNote, noteCardTap, noteCardDone, noteReadTap, planEmptyShown, planDoorsShown, spacedClosed, withSpaced } from './core/week.js'; // v0.11.204 (owner pick W1: R3, P1); v0.11.206 (FC1, RV1): the forecast's texts, the shared tap steps
 import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel, fragileKnife, knifeSwings } from './core/forms.js';
 import { coilMult, coilMultNext, wakeDay, fmtMult, clockParts, REL_HIDDEN } from './core/game.js'; // v0.11.137 (HV1): REL_HIDDEN
 import {
@@ -255,7 +255,7 @@ function weekHtml() {
     rows.push(planRow('med:rest', 'Rest, hours a day', med.rest || 0, [when('med:rest'), fc.med.rest].filter(Boolean).join(' · '), rk)); // v0.11.213 (VQ1, RS)
     const total = fc.total ? `<p class="note fc">${esc(fc.total)}</p>` : '', outlook = fc.outlook ? `<p class="note fc">${esc(fc.outlook)}</p>` : '';
     const stop = p?.stop ? `<p class="note">${esc(p.stop === 'week' ? 'The week is over.' : `Stopped: ${stopText(p.stop)}.`)}</p>` : '';
-    const empty = planEmptyShown(g, SCENES, pv); // v0.11.219 (RV1, LE): the rows on the screen only
+    const empty = planEmptyShown(g, SCENES, pv) && !planDoorsShown(g, SCENES, pv); // v0.11.219 (RV1, LE): the rows on the screen only; v0.11.225 (LO2, PE): a door or talk row set runs too
     const btn = `<div class="pbtns"><button class="btn primary" data-week="run">${empty ? 'Rest out the week' : 'Run the week'} · to Day ${planEndDay(g, p)}</button>${empty ? '' : '<button class="btn" data-week="clear">Clear</button>'}</div>`;
     return groupHtml('Plan the week', [`<p class="note">Cards by the week, Meditate by the day. Meals and the day's sit run themselves; it stops for anything that needs you. The box by each row is its place in the order, 1 first, kept here for good.</p>`, ...rows, total, outlook, stop, btn], true);
 }
@@ -336,7 +336,8 @@ function renderCardScreen() {
     let hubHtml = '';
     let hubTop = '';
     if (qs) {
-        const cards = taskCards(g, SCENES).filter((c) => !medIds.has(c.id) && (c.status === 'open' || c.status === 'late' || c.status === 'busy' || c.status === 'evening' || c.status === 'long')); // v0.11.215 (RV1, SG): 'long' // v0.11.204 (W1, S1): busy, evening // v0.11.37 (D-a): 'late' = would end past the day's end (00:00 since v0.11.91), shown locked // v0.11.17 (owner pick 1a): "done for today" cards are hidden
+        let cards = taskCards(g, SCENES).filter((c) => !medIds.has(c.id) && (c.status === 'open' || c.status === 'late' || c.status === 'busy' || c.status === 'evening' || c.status === 'long')); // v0.11.215 (RV1, SG): 'long' // v0.11.204 (W1, S1): busy, evening // v0.11.37 (D-a): 'late' = would end past the day's end (00:00 since v0.11.91), shown locked // v0.11.17 (owner pick 1a): "done for today" cards are hidden
+        cards = withSpaced(g, SCENES, cards); // v0.11.225 (owner pick LO2, SN): a card closed only by its spacing shows, closed, with the day it opens again; RV1 (L3): in its own place
         const groups = [];
         for (const c of cards) { let gr = groups.find((x) => x.name === c.group); if (!gr) groups.push(gr = { name: c.group, cards: [], note: '' }); gr.cards.push(c); if (c.groupNote) gr.note = c.groupNote; }
         const cardHtml = (c) => {
@@ -344,7 +345,7 @@ function renderCardScreen() {
             const mins = out ? out.minutes : c.minutes;
             const fam = c.kind === 'work' || c.kind === 'door' ? ` · ${famLine(c)}` : ''; // v0.11.155 (FD1, NX)
             const ctag = hideTag(c.tag);
-            const tag = c.status === 'late' ? LATE_TAG : c.status === 'busy' ? `busy: ${c.busy}` : c.status === 'evening' ? 'the week\'s work stops at evening: tomorrow' : c.status === 'long' ? 'too long for what is left of this stay' : c.status !== 'open' ? 'done for today — back tomorrow' : c.kind === 'door' ? `opens the scene${ctag ? ` · ${ctag}` : ''}` : (ctag || (showChecks ? 'no check' : ''));
+            const tag = c.status === 'spaced' ? c.note : c.status === 'late' ? LATE_TAG : c.status === 'busy' ? `busy: ${c.busy}` : c.status === 'evening' ? 'the week\'s work stops at evening: tomorrow' : c.status === 'long' ? 'too long for what is left of this stay' : c.status !== 'open' ? 'done for today — back tomorrow' : c.kind === 'door' ? `opens the scene${ctag ? ` · ${ctag}` : ''}` : (ctag || (showChecks ? 'no check' : ''));
             const dies = out?.death ? ` <b class="dies">${out.death === 'hunger' ? 'Starves here' : 'Collapses here'}</b>` : '';
             const when = c.kind === 'door' || !mins || !out ? '' : ` ${endAt(out.end)}`;
             return `<button class="card${c.kind === 'door' ? ' door' : ''}${out?.death ? ' fatal' : ''}${c.check && showChecks ? ` b-${c.check.band}` : ''}" data-run="${esc(c.id)}" ${c.status !== 'open' ? 'disabled' : ''}>${md(c.label)}${dies}${tag ? `<span class="tag">${esc(tag)}</span>` : ''}${c.status === 'open' ? `<span class="len">${mins ? durLabel(mins) : 'at once'}${when}${fam}</span>` : ''}</button>`;
@@ -899,7 +900,7 @@ function tipFor(b) {
     { const id0 = b.dataset.run || b.dataset.med || ''; const k = medActivity(id0) || (/^(.+):(\d+)$/.test(id0) && isSitChoice(SCENES[id0.split(':')[0]]?.choices?.[Number(id0.split(':')[1])], id0.split(':')[0]) ? 'sit' : null); if (k) lines.push(useLine(g, k)); } // v0.11.15: speed by use
     if (card && (card.kind === 'work' || card.kind === 'door')) lines.push(`Familiarity: ${FAM[card.tier].name}${card.next != null ? `, ${card.fam} of ${card.next} to ${FAM[card.tier + 1].name}` : ' (the top)'}.${card.kind === 'work' ? ' Familiar work goes faster.' : ''}`); // v0.11.140 (RV1, DS): a door card too (its walk speeds up), no new words
     if (card && card.status === 'late') lines.push('It would end past midnight, when the day is over. Sleep.');
-    else if (card && card.status !== 'open') lines.push('Done for today. Back tomorrow.');
+    else if (card && card.status !== 'open') { const sp = card.status === 'tomorrow' && weekHub(g) ? spacedClosed(g, SCENES).find((x) => x.id === card.id) : null; lines.push(sp ? `Not now: ${sp.note}.` : 'Done for today. Back tomorrow.'); } // v0.11.225 (RV1, L1): a spaced card says its day, as its tag
     if (b.disabled && !card) { const tag = b.querySelector('.tag')?.textContent; lines.push(tag ? `Not now: ${tag}.` : 'Not now.'); }
     if (showChecks && card?.tag) lines.push(`Check: ${card.tag}`);
     if (!lines.length) lines.push('Nothing more to tell. Tap it to find out.');

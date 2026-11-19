@@ -1043,7 +1043,8 @@ def n1_ui(b, url):
 def vq1_ui(b, url):
     """v0.11.213 (owner picks VQ1 + FQ1): Plan the week on the day-2 wilds save at 412 px: the rest row ("Rest, hours a day", last,
     its + sets 1 and the save keeps it in g.tasks.plan.med.rest); Yuki's row says "every 3rd day"; RV1 (TG8): her card tapped by hand,
-    then "Go on.": her row says "every 3rd day, opens Day 5"."""
+    then "Go on.": her row says "every 3rd day, opens Day 5". v0.11.225 (LO2): her card stays on the hub, closed, with that note (SN);
+    the button reads "Run the week" with Clear (PE)."""
     save = (ROOT / 'saves/v0.11.204-long-wilds-day2.json').read_text()
     ctx = b.new_context(viewport={'width': 412, 'height': 800}, service_workers='block')
     pg = ctx.new_page(); pg.on('pageerror', lambda e: fails.append(f"page error: {e}"))
@@ -1068,6 +1069,10 @@ def vq1_ui(b, url):
                 until(pg, 'button[data-plan="door:yk_time"]', 5000, 'attached'); pg.wait_for_timeout(100)
                 note = pg.evaluate("() => document.querySelector('button[data-plan=\"door:yk_time\"]').closest('.prow').querySelector('.note')?.textContent || ''")
                 if 'every 3rd day, opens Day 5' not in note: fails.append(f'VQ1 (TG8): Yuki\'s row after her scene: {note!r} ("every 3rd day, opens Day 5" expected)')
+                # v0.11.225 (owner pick LO2, SN): her card stays on the hub, closed, with the same note; PE: her row alone runs ("Run the week", Clear)
+                sn = pg.evaluate("() => { const c = document.querySelector('button.card[data-run=\"wilds:14\"]'); const btn = document.querySelector('button[data-week=\"run\"]'); return [c ? c.disabled : null, c?.querySelector('.tag')?.textContent || '', btn?.textContent || '', !!document.querySelector('button[data-week=\"clear\"]')]; }")
+                if sn[0] is not True or sn[1] != 'every 3rd day, opens Day 5': fails.append(f'LO2 (SN): Yuki\'s card after her scene: {sn[:2]} (closed, "every 3rd day, opens Day 5" expected)')
+                if not sn[2].startswith('Run the week') or not sn[3]: fails.append(f'LO2 (PE): the plan\'s button with Yuki\'s row set: {sn[2:]} ("Run the week" and Clear expected)')
     finally:
         ctx.close()
 

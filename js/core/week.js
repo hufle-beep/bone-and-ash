@@ -17,12 +17,13 @@
 import { longCal, storyDay, storyDayOf, calEnd, weekNights, LONG_CAL, STAY_DAYS, NUM_WORDS } from './calendar.js'; // v0.11.224 (RV1, VK): NUM_WORDS
 import { sceneView, choose } from './story.js';
 import { advance, jamesHpMax, canBreakThrough, clockParts, clockLabel, fnv1a, takeSpoilNotes, wakeDay } from './game.js';
-import { taskCards, taskOpen, runTask, taskState, taskOutcome, isTaskChoice, sitTaskId, QI_TASK, carryHere, carriesHere, carriesRead, carryTaskId, isCarryTask, weekHub, workDay, workRoom, dayMeal, cardSpeed, NEW_LENGTH, WEEK_MULT } from './tasks.js';
+import { famOf, taskCards, taskOpen, runTask, taskState, taskOutcome, isTaskChoice, sitTaskId, QI_TASK, carryHere, carriesHere, carriesRead, carryTaskId, isCarryTask, weekHub, workDay, workRoom, dayMeal, cardSpeed, NEW_LENGTH, WEEK_MULT } from './tasks.js';
 import { farewellNow } from '../story/act1_fallout.js'; // RV1 (L4)
 import { foodCount, preservable, unspaced, spacedNext, SPACE_DAYS, cardSpaced, cardKey } from '../story/common.js'; // v0.11.213 (FQ1, S3): the spacing
 import { EVENING_HOUR } from '../story/oneoff.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
 import { unreadLines } from '../story/again.js'; // v0.11.214 (owner pick RD1): the lines never shown in this game
+import { relLines } from './replies.js'; // v0.11.225 (owner pick LO2, RS): the run's relationship changes
 import { COOK_PLAN } from '../story/kitchen.js'; // v0.11.218 (owner pick RV1, HA): the cook's hold on the pot only while its row is set
 
 /** The night and morning screens of the stays that fold (the suppers and the camp's night keep their choices, so they never do). */
@@ -75,7 +76,7 @@ function probeClone(g) {
 export function readProbe(g, scenes) {
     const c = probeClone(g);
     let first = null;
-    const r = runWeek(c, scenes, { max: 1, probe: false, onStep: (cg, l) => { if (l && !first) first = l; } });
+    const r = runWeek(c, scenes, { max: 1, probe: false, rel: false, onStep: (cg, l) => { if (l && !first) first = l; } });
     if (!first || first.r?.skipped) return null;
     const all = r.days.flatMap((d) => d.lines).slice(first.r?.pre || 0).filter((l) => !String(l).startsWith(AGAIN_LINE));
     const lines = unreadLines(g, all);
@@ -102,6 +103,9 @@ export function noteReadTap(g, scenes, id, r = null) {
 const GOES_ON = new Set(['evening', 'door']);
 const hash = (t) => fnv1a(String(t || '').replace(/\d+/g, '#').replace(NUM_WORDS, '#')); // the day's numbers ("Day 45. 48 days to the Elder.") don't make a night new; v0.11.224 (RV1, VK): nor in words ("Day fifty-one. Fifty-two days")
 const calDay = (g) => Math.floor((g.minutes || 0) / 1440) + 1;
+/** v0.11.225 (RV1, L2): the calendar day of the waking day (the day turns at 04:00, as wakeState's): a waking day's day as a calendar day
+ *  (00:00–04:00 still the day before: a spaced card's "opens Day N" was a day late there). */
+const wakeCal = (g) => Math.floor(((g.minutes || 0) - 240) / 1440) + 1;
 const hourNow = (g) => clockParts(g.minutes).hh;
 const coilKey = (g) => `${g.coil?.n || 1}|${g.coil?.act || 0}`;
 const plainChoice = (c) => !!c && !c.check && !c.combat && !c.fail && !c.qi;
@@ -320,6 +324,9 @@ export const planEmptyShown = (g, scenes, p = planView(g)) => {
     const on = new Set(planCards(g, scenes).map((c) => c.id));
     return planEmpty({ items: Object.fromEntries(Object.entries(p.items || {}).filter(([id]) => on.has(id))), med: p.med });
 };
+/** v0.11.225 (owner pick LO2, PE): a door or talk row on the screen is set (with nothing else set the plan still runs: "Run the week",
+ *  Clear; the total line still reads the cards only). */
+export const planDoorsShown = (g, scenes, p = planView(g)) => !!p && isRec(p.doors) && doorCards(g, scenes).some((d) => (p.doors[d.scene] || 0) > 0);
 /** The plan's last waking day as a calendar day (for the button). */
 export const planEndDay = (g, p) => (p ? p.lastDay : weekLastDay(g)) + 1;
 
@@ -348,13 +355,13 @@ export function doorCards(g, scenes) {
         let label = card?.label;
         if (!label) { try { label = typeof c.text === 'function' ? c.text(g) : c.text; } catch { label = ''; } }
         const k = DOOR_KEY[c.to], cal = k === 'spring' ? calDay(g) : null;
-        const nx = rep && !card ? (cal != null ? spacedNext(g, k, cal) : spacedNext(g, k, wakeDay(g)) - wakeDay(g) + calDay(g)) : null;
-        by.set(c.to, { id, scene: c.to, label: String(label || ''), status: card?.status === 'open' ? 'open' : 'closed', repeat: rep, next: nx != null && nx > calDay(g) ? nx : null, rank });
+        const nx = rep && !card ? (cal != null ? spacedNext(g, k, cal) : spacedNext(g, k, wakeDay(g)) - wakeDay(g) + wakeCal(g)) : null;
+        by.set(c.to, { id, scene: c.to, label: String(label || ''), status: card?.status === 'open' ? 'open' : 'closed', repeat: rep, next: nx != null && nx > (cal != null ? calDay(g) : wakeCal(g)) ? nx : null, rank });
     });
     return [...by.values()].map(({ rank, ...d }) => d).sort((a, b) => PLAN_DOORS.indexOf(a.scene) - PLAN_DOORS.indexOf(b.scene)); // RV1 (M2): the talks last
 }
 /** v0.11.213 (RV1, L3): a door card tapped by hand (main.js doTask, before runTask): a one-off's plan row back to 0, as the plan does.
- *  v0.11.219 (RV1, LS): returns { hub, s } for a one-off on a stay, for noteCardDone. */
+ *  v0.11.219 (RV1, LS): returns { hub, s } for a one-off, for noteCardDone; v0.11.225 (LO2, OL): on any hub (the prologue's village too). */
 export function noteCardTap(g, scenes, id) {
     const p = planHere(g);
     if (typeof id !== 'string' || !scenes[g.scene]) return;
@@ -362,18 +369,45 @@ export function noteCardTap(g, scenes, id) {
     const c = m && m[1] === g.scene ? scenes[g.scene].choices[Number(m[2])] : null;
     if (!c || typeof c.to !== 'string' || !PLAN_DOORS.includes(c.to) || doorRepeats(c.to)) return;
     if (p && isRec(p.doors) && p.doors[c.to] > 0) p.doors[c.to] = 0;
-    return weekHub(g) ? { hub: g.scene, s: c.to } : undefined; // RV1 (LS): for noteCardDone, after the tap ran
+    return { hub: g.scene, s: c.to }; // RV1 (LS): for noteCardDone, after the tap ran; v0.11.225 (LO2, OL): on any hub (the prologue's village too)
+}
+/** v0.11.225 (owner pick LO2, SN): the cards on this stay's hub closed only by their spacing (a Skilled wilds card, a repeating door),
+ *  shown on the hub, closed, with the day each opens again, as their plan rows say: [{ id, kind, group, label, tier, fam, next (the
+ *  familiarity fields main.js's card reads), status: 'spaced', note }]. */
+export function spacedClosed(g, scenes) {
+    if (!weekHub(g) || !scenes[g.scene]) return [];
+    const out = [], wd = wakeDay(g);
+    for (const c of taskCards(g, scenes)) {
+        if (c.kind !== 'work' || c.status !== 'tomorrow' || !cardSpaced(g, c.id)) continue;
+        const nx = spacedNext(g, cardKey(c.id), wd);
+        if (nx > wd) out.push({ id: c.id, kind: 'work', group: c.group, label: c.label, tier: c.tier, fam: c.fam, next: c.next, status: 'spaced', note: doorNote({ repeat: true, next: nx - wd + wakeCal(g) }) });
+    }
+    const own = TASK_HUBS[g.scene]?.own || '';
+    for (const d of doorCards(g, scenes)) if (d.status === 'closed' && d.repeat && d.next) out.push({ id: d.id, kind: 'door', group: own, label: d.label, ...famOf(g, d.id), status: 'spaced', note: doorNote(d) });
+    return out;
+}
+/** v0.11.225 (RV1, L3): the hub's cards with the spaced ones in their own places (a group whose every card is spaced keeps its place,
+ *  not last): the order of the hub's cards with the spacing off. */
+export function withSpaced(g, scenes, cards) {
+    const sp = weekHub(g) ? spacedClosed(g, scenes) : [];
+    if (!sp.length) return cards;
+    const ord = new Map(unspaced(() => taskCards(g, scenes)).map((c, i) => [c.id, i]));
+    const at = (c, i) => (ord.has(c.id) ? ord.get(c.id) : 1e6 + i);
+    return [...cards, ...sp].map((c, i) => [at(c, i), i, c]).sort((a, b) => a[0] - b[0] || a[1] - b[1]).map((x) => x[2]);
 }
 /** v0.11.219 (KC1, RV1 LS): after a one-off door tapped by hand (main.js doTask, after runTask): taken, its kept row back to 0, with or
  *  without a plan this week; not taken (the day's routine went first) it stays. `tap`: noteCardTap's answer. */
-export function noteCardDone(g, tap, r) { if (tap && !r?.skipped) keepTaken(g, tap.hub, tap.s); }
+export function noteCardDone(g, tap, r) { if (tap && !r?.skipped) keepTakenAll(g, tap.s); }
+/** v0.11.225 (owner pick LO2, OL; the v0.11.219 review's L4): a one-off door taken anywhere is taken: its kept row back to 0 on every
+ *  stay (the coughing house and the boar hunt taken in the prologue's village left a closed "1 · once" row in Ashfall). */
+function keepTakenAll(g, s) { const k = g.tasks?.keep; if (isRec(k)) for (const hub of Object.keys(k)) keepTaken(g, hub, s); }
 /** v0.11.213 (VQ1 + FQ1): a door row's note: a repeating door's spacing (and the day it opens again, closed now), a one-off's "once". */
 export const doorNote = (d) => (d.repeat ? `every ${SPACE_DAYS === 3 ? '3rd' : `${SPACE_DAYS}th`} day${d.next ? `, opens Day ${d.next}` : ''}` : 'once');
 /** v0.11.221 (owner pick WB, CN): a wilds card spaced now (Skilled or up, common.js SK): its plan row's note, as a repeating door's; else ''. */
 export const cardNote = (g, id) => {
     if (!cardSpaced(g, id)) return '';
     const wd = wakeDay(g), nx = spacedNext(g, cardKey(id), wd); // RV2 (NO): ", opens Day N" when it is closed, as a door's row
-    return doorNote({ repeat: true, next: nx > wd ? nx - wd + calDay(g) : null });
+    return doorNote({ repeat: true, next: nx > wd ? nx - wd + wakeCal(g) : null });
 };
 /** RV2 (NC): how many runs a spaced card's open days allow from today to the week's last day `last` (a work day); null if not spaced. */
 export function cardRunsLeft(g, id, last) {
@@ -387,11 +421,14 @@ const firstMer = (g, scenes) => taskCards(g, scenes).find((c) => c.kind === 'mer
 /** v0.11.209 (TF1, K): the hub's "Smoke the catch." card when it is open now, or null. */
 export const presCard = (g, scenes) => taskCards(g, scenes).find((c) => c.pres && c.status === 'open')?.id || null;
 
+/** v0.11.225 (owner pick LO2, RS): `RS1.on`: the tests from before pin the plan's runs without the relationship lines. */
+export const RS1 = { on: true };
 /**
  * Run the plan from here until a stop. Returns { stop, days: [{ day, lines }], steps }. `max`: a guard on the steps.
  * Every card is run with runTask and every story choice with choose, exactly as a tap would take them.
+ * v0.11.225 (LO2, RS): `rel` (default true): each step's relationship changes said with its day's lines (false: the read probe).
  */
-export function runWeek(g, scenes, { max = 600, onStep = null, probe = true } = {}) {
+export function runWeek(g, scenes, { max = 600, onStep = null, probe = true, rel = true } = {}) {
     const days = [];
     let cur = null;
     const say = (ls) => { if (!ls || !ls.length) return; const d = calDay(g); if (!cur || cur.day !== d) { cur = { day: d, lines: [] }; days.push(cur); } cur.lines.push(...ls); };
@@ -402,7 +439,12 @@ export function runWeek(g, scenes, { max = 600, onStep = null, probe = true } = 
     // FC1 (RV1, H1): the forecast's watch, called at each step's start (after the last step's bookkeeping: a card the day's
     // routine left no time for is owed again by then) and at the stop, with the last card run and its result
     let last = null;
-    const watch = () => { if (onStep) onStep(g, last); last = null; };
+    // v0.11.225 (owner pick LO2, RS): the friendship and affection each step changed, said with that day's lines (a run showed none);
+    // number lines, never a read stop (the probe runs without them, `rel: false`)
+    const relCopy = () => ({ c: coilKey(g), r: JSON.parse(JSON.stringify(isRec(g.rel) ? g.rel : {})) });
+    let rel0 = relCopy();
+    const relSay = () => { if (!rel || !RS1.on) return; if (rel0.c === coilKey(g)) { const ls = relLines(rel0.r, g.rel); if (ls.length) { if (cur) cur.lines.push(...ls); else say(ls); } } rel0 = relCopy(); };
+    const watch = () => { relSay(); if (onStep) onStep(g, last); last = null; };
     const end = (stop) => { watch(); if (p) { p.stop = stop; if (!GOES_ON.has(stop)) p.running = false; } return { stop, days, steps }; };
     let steps = 0;
     for (; steps < max; steps++) {

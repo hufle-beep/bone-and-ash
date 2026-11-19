@@ -1,0 +1,51 @@
+[
+ {
+  "id": "R1",
+  "file": "js/core/week.js",
+  "find": "if (cur) cur.lines.push(...ls); else say(ls); } } rel0 = relCopy(); };",
+  "replace": "if (cur) cur.lines.push(...ls); else say(ls); } } };",
+  "note": "RS: the copy never moves on: every step says the run's whole change so far again (Yuki +3, +6, +9 …)"
+ },
+ {
+  "id": "R2",
+  "file": "js/core/week.js",
+  "find": "if (cur) cur.lines.push(...ls); else say(ls); } } rel0 = relCopy(); };",
+  "replace": "if (days[0]) days[0].lines.push(...ls); else say(ls); } } rel0 = relCopy(); };",
+  "note": "RS: every change said under the run's first day, not the day it happened"
+ },
+ {
+  "id": "R3",
+  "file": "js/core/week.js",
+  "find": "relCopy = () => ({ c: coilKey(g), r: JSON.parse(JSON.stringify(isRec(g.rel) ? g.rel : {})) });",
+  "replace": "relCopy = () => ({ c: coilKey(g), r: { ...(isRec(g.rel) ? g.rel : {}) } });",
+  "note": "RS: a shallow copy (the inner records shared): a change made in place is never seen"
+ },
+ {
+  "id": "R4",
+  "file": "js/story/act1_fallout.js",
+  "find": "if (g.flags.wolf === 'lost' && firstOfWeek(g))",
+  "replace": "if (g.flags.wolf === 'lost' && longCal(g) && firstOfWeek(g))",
+  "note": "WM: the old calendar loses the bite (its two mornings)"
+ },
+ {
+  "id": "R5",
+  "file": "js/story/act1_fallout.js",
+  "find": "if (g.flags.wolf === 'lost' && firstOfWeek(g))",
+  "replace": "if (g.flags.wolf === 'lost' && (firstOfWeek(g) || lastOfWeek(g)))",
+  "note": "WM: 4 bites on the long calendar (each week's last morning too)"
+ },
+ {
+  "id": "R6",
+  "file": "js/core/week.js",
+  "find": "    const end = (stop) => { watch(); if (p) {",
+  "replace": "    const end = (stop) => { if (onStep) onStep(g, last); last = null; if (p) {",
+  "note": "RS: the step before a stop (a talk's door, the week's end) says nothing of its change"
+ },
+ {
+  "id": "R7",
+  "file": "js/core/week.js",
+  "find": "label: d.label, ...famOf(g, d.id), status: 'spaced'",
+  "replace": "label: d.label, tier: 2, fam: 8, next: 16, status: 'spaced'",
+  "note": "SN: a spaced door reads the wrong familiarity (Skilled for a New door)"
+ }
+]

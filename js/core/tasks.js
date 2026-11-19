@@ -54,6 +54,8 @@ export const yukiSpeedLine = (f) => (yukiSpeed(f) >= YUKI_CAP ? `×${YUKI_CAP}, 
 export const yukiJobLabel = (id) => Object.values(TASK_HUBS).find((h) => h.yuki?.id === id)?.yuki.label || 'Yuki\'s hunting';
 export const cardSpeed = (f) => useSpeed(f, USE_N.card);
 const nextAt = (f) => FAM.find((t) => t.at > f)?.at ?? null;
+/** v0.11.225 (owner pick LO2, SN): a card's familiarity fields ({ tier, fam, next }) by its id, as taskCards gives them. */
+export const famOf = (g, id) => { const f = Number(g.tasks?.fam?.[id]) || 0; return { tier: famTier(f), fam: f, next: nextAt(f) }; };
 /** v0.11.155 (FD1, NX): a work or door card's familiarity line names the next step ("Practised · 5/8 to Skilled"); "Mastered" at the top.
  * RV1 (NB): non-breaking spaces keep "5/8 to Skilled" whole, so a narrow card wraps only after a "·" (a 390 px phone: 4 of 4 mid-phrase breaks → 0). */
 export const famLine = (card) => (card.next != null ? `${FAM[card.tier].name}\u00a0· ${card.fam}/${card.next}\u00a0to\u00a0${FAM[card.tier + 1].name}` : FAM[card.tier].name);
@@ -612,9 +614,13 @@ export function taskOutcome(g, scenes, id) {
     const c = clone(g);
     const card = cardOf(scenes, c.scene, id);
     if (card?.kind === 'door') { // the walk's minutes; v0.11.66 (owner pick F1): the death from a full run on the copy (a door that throws there, a fight, reads as no death)
-        const minutes = taskMinutes(g, scenes, id);
+        // v0.11.225 (owner pick LO2, FD): the day's routine before it (the meal, the day's sit) is part of its time, as a work card's dry run
+        let pre = 0;
+        if (!routineBusy) { try { const r0 = clone(g), m0 = r0.minutes; dayRoutine(r0, scenes, r0.scene, 'door', id); pre = Math.max(0, r0.minutes - m0); } catch { pre = 0; } }
+        let minutes = pre + taskMinutes(g, scenes, id);
         let death = null, deathAt = null;
-        try { runTask(c, scenes, id); death = outcomeOf(c, c.minutes).death; if (death) deathAt = c.minutes; } catch { death = null; }
+        // v0.11.225 (RV1, M1): a door the routine closes (no time left after the day's sit) shows the routine's time alone, as the tap does
+        try { const m0 = c.minutes; const r = runTask(c, scenes, id); if (r?.skipped) minutes = Math.max(0, c.minutes - m0); death = outcomeOf(c, c.minutes).death; if (death) deathAt = c.minutes; } catch { death = null; }
         return { minutes, end: g.minutes + minutes, fed: g.james.satiety, hp: g.james.hp, death, ...(death ? { deathAt } : {}) }; // the card shows the walk's end; the warning the death's clock (the review, R1)
     }
     const m0 = c.minutes;

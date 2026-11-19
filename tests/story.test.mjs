@@ -25,7 +25,7 @@ import { writeFileSync, readFileSync, readdirSync } from 'node:fs'; // v0.11.137
 import { smartAction } from './lib/smartfight.mjs'; // v0.11.96 (BT1)
 import { DAY21_BREAKFAST } from '../js/story/act1_return.js'; // v0.11.152 (E1, BK)
 import { carriesRead as CR0 } from '../js/core/tasks.js'; const CY = (g) => Object.values(CR0(g))[0] || null; // v0.11.215 (CF1, UB): the first carried work (the tests from before: one at a time)
-import { READ_STOP } from '../js/core/week.js'; READ_STOP.on = false; // v0.11.214 (owner pick RD1): the plan's blocks before RD1 pin it without the read stop; the RD1 block turns it on
+import { READ_STOP, RS1 } from '../js/core/week.js'; READ_STOP.on = false; RS1.on = false; // v0.11.214 (owner pick RD1): the plan's blocks before RD1 pin it without the read stop; the RD1 block turns it on. v0.11.225 (LO2, RS): the blocks before pin the plan's runs without its relationship lines; the LO2 block turns them on
 const clockHour = (g) => Math.floor(((g.minutes % 1440) + 1440) % 1440 / 60); // v0.11.152 (E1, BK)
 import { GAMES, FULL, SHARD, WORKERS, STATS_OUT, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
 import { seen as touched, track as watchGame, noteView, mergeSeen, seenOut as touchedOut } from './lib/seen.mjs'; // v0.11.22: for tools/leftovers.mjs
@@ -6596,7 +6596,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     // the old calendar: no plan, nothing kept
     { const o = ensureBars(newGame(99710, { closed: true })); goTo(o, SCENES, 'wilds'); assert(Wk.planSet(o, 'wild_train:1', 2) === null && !Wk.planView(o) && !('keep' in (o.tasks || {})), `${T}: the old calendar keeps nothing`); }
     // the panel reads the kept counts with no plan this week (main.js weekHtml: planView)
-    { const src = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8'); assert(/pv = planView\(g\) \|\| p;/.test(src) && /const empty = planEmptyShown\(g, SCENES, pv\);/.test(src) && /\$\{empty \? 'Rest out the week' : 'Run the week'\}/.test(src) && /\$\{empty \? '' : '<button class="btn" data-week="clear">Clear<\/button>'\}/.test(src) && !/planEmpty\(p\)/.test(src), `${T} (RV1, TG4): the panel shows the kept counts; the button and Clear both by the rows on the screen`); }
+    { const src = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8'); assert(/pv = planView\(g\) \|\| p;/.test(src) && /const empty = planEmptyShown\(g, SCENES, pv\) && !planDoorsShown\(g, SCENES, pv\);/.test(src) /* v0.11.225 (LO2, PE): a door row set runs too */ && /\$\{empty \? 'Rest out the week' : 'Run the week'\}/.test(src) && /\$\{empty \? '' : '<button class="btn" data-week="clear">Clear<\/button>'\}/.test(src) && !/planEmpty\(p\)/.test(src), `${T} (RV1, TG4): the panel shows the kept counts; the button and Clear both by the rows on the screen`); }
     // v0.11.219 (owner pick RV1 after the Opus review: HB, MK, LO, LE, LS, TG1–TG7)
     { const R = 'KC1 RV1';
       const mk = (hub, sd, h = 7, seed = 99721) => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, hub); g.minutes = (C.calStart(g, sd) - 1) * D + h * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true; g.flags.elder = true; return g; };
@@ -6982,6 +6982,184 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       assert(fw === '0' && qw === '6', `${T} (DN12, TG7): the Root Road's story morning one way on (the marked walk), a quiet one its own (${fw} / ${qw})`);
       const five = at(true, 65, 6, { bl_day: 1 }); five.calBl = 1; const fs = at(true, 58, 12, {}); fs.calBl = 1;
       assert(/"Five days in," Ya says\. "Six, if I end up carrying one of you\./.test(tx(five, 'bl_start')) && /"Half a moon in," Ya says/.test(tx(at(true, 65, 6, { bl_day: 1 }), 'bl_start')) && /"Five days in, maybe six\./.test(tx(fs, 'fo_price')), `${T} (DN6, DN7, TG7): a save on the 5-day road (calBl 1) keeps Ya's five days`); }
+}
+
+// v0.11.225 (owner pick LO2 = RL + RS + PE + WM + SN + OL + FD + BK, 2026-11-18 22:10; the plan's leftovers, t's queue item 4): RS a plan
+// run's relationship changes said with its day's lines; PE a plan with only door rows set runs ("Run the week", Clear); WM the barley
+// wolves' bite only on the mornings that open a story day; SN a card closed only by its spacing shown on the hub with its day; OL a one-off
+// door taken anywhere drops its kept row on every stay; FD a door card's dry run takes the day's routine first. (BK: tests/models.test.mjs.)
+{
+    const Wk = await import('../js/core/week.js');
+    const Cal = await import('../js/core/calendar.js');
+    const Cm = await import('../js/story/common.js');
+    const { wakeDay } = await import('../js/core/game.js');
+    const T = 'LO2';
+    RS1.on = true;
+    const wilds = () => deserialize(readFileSync(new URL('../saves/v0.11.204-long-wilds-day2.json', import.meta.url), 'utf8'), { force: true });
+    const fall = () => deserialize(readFileSync(new URL('../saves/v0.11.214-long-fallout-day64.json', import.meta.url), 'utf8'), { force: true });
+    const wd = (g) => Math.floor((g.minutes || 0) / 1440) + 1;
+    // RS: Yuki's sit by the plan (her row at 1 by default) moves her friendship; the run's days say it, in relLines' words
+    {
+        const g = wilds(); g.james.satiety = 100; g.inventory.smoked_meat = 30;
+        const p = Wk.planEnsure(g); p.items = {}; p.med = { sit: 0, mer: 0, qi: 0, pres: 0, rest: 0 }; p.doors = { yk_time: 1 };
+        const f0 = g.rel?.Yuki?.f || 0;
+        const r = Wk.runWeek(g, SCENES);
+        const said = r.days.flatMap((d) => d.lines).filter((l) => /^Yuki: (friendship|affection) [+−]/.test(l));
+        const f1 = g.rel?.Yuki?.f || 0;
+        assert(f1 > f0 && said.length >= 1, `${T} (RS): a planned week's sits with Yuki say her friendship in the run's lines (${f0} → ${f1}, ${said.length} lines; stop ${r.stop})`);
+        // RV1 (TG1): the said changes add up to the run's own total, each on the day its step ran, and the step just before the run's end is said
+        const sum = (ls, who) => { const t = { f: 0, a: 0 }; for (const l of ls) { if (!l.startsWith(`${who}: `)) continue; for (const m of l.matchAll(/(friendship|affection) ([+−])(\d+)/g)) t[m[1][0]] += (m[2] === '+' ? 1 : -1) * Number(m[3]); } return t; };
+        { const h = wilds(); h.james.satiety = 100; h.inventory.smoked_meat = 30; const ph = Wk.planEnsure(h); ph.items = {}; ph.med = { sit: 0, mer: 0, qi: 0, pres: 0, rest: 0 }; ph.doors = { yk_time: 1 };
+          const r0 = JSON.parse(JSON.stringify(h.rel || {})); const moved = new Set(); let prev = JSON.stringify(h.rel || {});
+          const rh = Wk.runWeek(h, SCENES, { onStep: (gg) => { const now = JSON.stringify(gg.rel || {}); if (now !== prev) moved.add(Math.floor((gg.minutes || 0) / 1440) + 1); prev = now; } });
+          const ls = rh.days.flatMap((d) => d.lines), t = sum(ls, 'Yuki'), want = { f: (h.rel?.Yuki?.f || 0) - (r0.Yuki?.f || 0), a: (h.rel?.Yuki?.a || 0) - (r0.Yuki?.a || 0) };
+          const daysSaid = new Set(rh.days.filter((d) => d.lines.some((l) => /^Yuki: /.test(l))).map((d) => d.day));
+          assert(want.f > 0 && t.f === want.f && t.a === want.a, `${T} (RS, TG1): the said changes are the run's total (said ${JSON.stringify(t)}, moved ${JSON.stringify(want)})`);
+          assert([...daysSaid].every((d) => moved.has(d)) && daysSaid.size === moved.size, `${T} (RS, TG1): each said on the day its step ran (said ${[...daysSaid]}, moved ${[...moved]})`); }
+        { const h = wilds(); h.james.satiety = 100; const ph = Wk.planEnsure(h); ph.items = {}; ph.med = { sit: 0, mer: 0, qi: 0, pres: 0, rest: 0 }; ph.doors = { yk_time: 1 };
+          const f0 = h.rel?.Yuki?.f || 0; let rh = null, k = 1; for (; k <= 6; k++) { const c = JSON.parse(JSON.stringify(h)); rh = Wk.runWeek(c, SCENES, { max: k }); if ((c.rel?.Yuki?.f || 0) > f0) { const t = sum(rh.days.flatMap((d) => d.lines), 'Yuki'); assert(t.f === (c.rel.Yuki.f - f0), `${T} (RS, TG1): the change of the run's last step (the guard ends it after ${k}) is said (${t.f} / ${c.rel.Yuki.f - f0}; ${rh.stop})`); break; } }
+          assert(k <= 6, `${T} (RS, TG1): Yuki's sit comes within the first steps`); }
+        const g2 = wilds(); const p2 = Wk.planEnsure(g2); p2.items = {}; p2.med = { sit: 0, mer: 0, qi: 0, pres: 0, rest: 0 }; p2.doors = {};
+        const r2 = Wk.runWeek(g2, SCENES);
+        assert(!r2.days.flatMap((d) => d.lines).some((l) => /: (friendship|affection) [+−]/.test(l)), `${T} (RS): a run that moves no one says nothing of it`);
+        // a Coil changing under a run (its relationships reset) is no loss to say (as main.js land's coilChanged)
+        const g3 = wilds(); g3.rel = { ...(g3.rel || {}), Yuki: { f: 30, a: 20 } }; const p3 = Wk.planEnsure(g3); p3.items = {}; p3.med = { sit: 0, mer: 0, qi: 0, pres: 0, rest: 0 }; p3.doors = { yk_time: 1 };
+        let n3 = 0; const r3 = Wk.runWeek(g3, SCENES, { onStep: (gg) => { if (++n3 === 2) { gg.coil = { ...(gg.coil || {}), n: (gg.coil?.n || 1) + 1 }; gg.rel = {}; } } });
+        assert(!r3.days.flatMap((d) => d.lines).some((l) => /: (friendship|affection) −/.test(l)), `${T} (RS): a Coil's reset under a run is not said as a loss (${r3.days.flatMap((d) => d.lines).filter((l) => /friendship|affection/.test(l)).join(' | ')})`);
+    }
+    // PE: Yuki's row set and nothing else: the plan runs ("Run the week" and Clear); her row at 0 too: empty ("Rest out the week")
+    {
+        const g = wilds(); const p = Wk.planEnsure(g); p.items = {}; p.med = { sit: 0, mer: 0, qi: 0, pres: 0, rest: 0 }; p.doors = { yk_time: 1 };
+        assert(Wk.planEmptyShown(g, SCENES, p) && Wk.planDoorsShown(g, SCENES, p), `${T} (PE): Yuki's row alone counts as a plan`);
+        p.doors.yk_time = 0;
+        assert(!Wk.planDoorsShown(g, SCENES, p), `${T} (PE): no door row set: empty as before`);
+        const MS = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+        assert(/const empty = planEmptyShown\(g, SCENES, pv\) && !planDoorsShown\(g, SCENES, pv\);/.test(MS), `${T} (PE): the panel's button reads both`);
+    }
+    // WM (RV1 WMa): on the long calendar the bite on the two mornings right after the loss (the flag `wolf_bit`), every morning of story days
+    // 8–10 walked (TG2); the old calendar's days 9 and 10 both bite, as before, with no flag
+    {
+        const g0 = fall(); const fight = Cal.calStart(g0, 8), last = Cal.calEnd(g0, 10);
+        const g = fall(); g.flags.wolf = 'lost'; delete g.flags.wolf_bit; const mx = jamesHpMax(g); const bites = [];
+        for (let d = fight + 1; d <= last; d++) { g.james.hp = mx; g.minutes = (d - 1) * 1440 + 6 * 60; goTo(g, SCENES, 'fo_morning'); if (g.james.hp < mx) bites.push(d); }
+        assert(bites.join() === `${fight + 1},${fight + 2}` && g.flags.wolf_bit === 2, `${T} (WM): the long calendar: ${last - fight} mornings after the fight, bites on ${bites.join()} (${fight + 1} and ${fight + 2} expected; wolf_bit ${g.flags.wolf_bit})`);
+        const hp1 = (() => { const h = fall(); h.flags.wolf = 'lost'; const m = jamesHpMax(h); h.james.hp = m; h.minutes = fight * 1440 + 6 * 60; goTo(h, SCENES, 'fo_morning'); return Math.round((100 * h.james.hp) / m); })();
+        assert(hp1 === 85, `${T} (WM): the bite is 85% of HP (${hp1}%)`);
+        const wn = () => { const h = fall(); h.flags.wolf = 'won'; const m = jamesHpMax(h); h.james.hp = m; h.minutes = fight * 1440 + 6 * 60; goTo(h, SCENES, 'fo_morning'); return h.james.hp === m && !h.flags.wolf_bit; };
+        assert(wn(), `${T} (WM): the wolves won: no bite, no flag`);
+        const old = fall(); delete old.cal; old.flags.wolf = 'lost'; delete old.flags.wolf_bit; const om = jamesHpMax(old); const ob = [];
+        for (const d of [9, 10]) { old.james.hp = om; old.minutes = (d - 1) * 1440 + 6 * 60; goTo(old, SCENES, 'fo_morning'); if (old.james.hp < om) ob.push(d); }
+        assert(!Cal.longCal(old) && ob.join() === '9,10' && !old.flags.wolf_bit, `${T} (WM): the old calendar bites on days 9 and 10, as before, with no flag (${ob.join()})`);
+    }
+    // SN: a Skilled wilds card used today and Yuki's sit taken today show, closed, with the day they open again
+    {
+        const g = wilds(); const cal = wd(g);
+        assert(wakeDay(g) === cal, `${T} (SN): on this save the waking day is the calendar day (${wakeDay(g)} / ${cal})`);
+        const cid = 'wild_forage:0', key = Cm.cardKey(cid);
+        g.tasks.fam[cid] = Cm.SKILLED_FAM; g.flags[`${key}@${wakeDay(g)}`] = true; g.flags[`yk_time@${wakeDay(g)}`] = true;
+        const sc = Wk.spacedClosed(g, SCENES);
+        const fc = sc.find((c) => c.id === cid), yk = sc.find((c) => c.kind === 'door');
+        assert(fc && fc.status === 'spaced' && /^every 3rd day, opens Day \d+$/.test(fc.note) && fc.group === 'Forage', `${T} (SN): the Skilled card closed by its spacing shows with its day (${JSON.stringify(fc)})`);
+        assert(yk && /^Sit with Yuki|Yuki/.test(yk.label) && /opens Day \d+$/.test(yk.note) && yk.group === TASK_HUBS.wilds.own, `${T} (SN): Yuki's door closed by its spacing shows too (${JSON.stringify(yk)})`);
+        { const { famLine, FAM } = await import('../js/core/tasks.js'); let fl = ''; try { fl = famLine(fc) + ' | ' + famLine(yk); } catch (e) { fl = `throws: ${e.message}`; }
+          assert(/^Skilled/.test(fl) && !/throws|undefined/.test(fl), `${T} (SN): the hub's card reads its familiarity as an open one (main.js famLine: ${fl})`);
+          // RV1 (TG3): the door's own level (Yuki's door New here, then Practised)
+          const yf = Number(g.tasks.fam[yk.id]) || 0; const tierName = (f) => [...FAM].reverse().find((t) => f >= t.at).name;
+          assert(famLine(yk).startsWith(tierName(yf)), `${T} (SN, TG3): the door's card reads its own level (${famLine(yk)}; fam ${yf})`);
+          g.tasks.fam[yk.id] = 3; const yk2 = Wk.spacedClosed(g, SCENES).find((c) => c.kind === 'door');
+          assert(famLine(yk2).startsWith('Practised'), `${T} (SN, TG3): a Practised door reads Practised (${famLine(yk2)})`); g.tasks.fam[yk.id] = yf; }
+        const n1 = Number(/Day (\d+)$/.exec(fc.note)[1]);
+        assert(n1 === cal + Cm.SPACE_DAYS, `${T} (SN): it opens again ${Cm.SPACE_DAYS} days on (Day ${n1}, today Day ${cal})`);
+        assert(!taskCards(g, SCENES).some((c) => c.id === cid && c.status === 'open'), `${T} (SN): the card itself is still closed`);
+        const h = wilds(); assert(Wk.spacedClosed(h, SCENES).length === 0, `${T} (SN): nothing closed by its spacing: nothing extra on the hub`);
+        const old = ensureBars(newGame(3, { closed: true })); goTo(old, SCENES, 'wilds');
+        assert(Wk.spacedClosed(old, SCENES).length === 0, `${T} (SN): never on the old calendar`);
+        const MS = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+        assert(/cards = withSpaced\(g, SCENES, cards\);/.test(MS) && /c\.status === 'spaced' \? c\.note :/.test(MS), `${T} (SN): the hub draws them, closed, with the note`);
+        // RV1 (L1): the held card's tip says the same day as its tag, not "Back tomorrow"
+        assert(/const sp = card\.status === 'tomorrow' && weekHub\(g\) \? spacedClosed\(g, SCENES\)\.find\(\(x\) => x\.id === card\.id\) : null; lines\.push\(sp \? `Not now: \$\{sp\.note\}\.` : 'Done for today\. Back tomorrow\.'\);/.test(MS), `${T} (SN, L1): the tip reads the spaced note`);
+        // RV1 (L2): 00:10 of the next calendar day, not slept (the waking day still today): the same day, on the hub card and the plan row
+        const n = wilds(); n.tasks.fam[cid] = Cm.SKILLED_FAM; n.flags[`${key}@${wakeDay(n)}`] = true; n.flags[`yk_time@${wakeDay(n)}`] = true;
+        n.minutes = cal * 1440 + 10; const wn0 = wakeDay(n);
+        const ns = Wk.spacedClosed(n, SCENES); const nd = (c) => Number(/Day (\d+)$/.exec(c?.note || '')?.[1]);
+        const yrow = Wk.doorCards(n, SCENES).find((d) => d.scene === 'yk_time');
+        const nf = ns.find((c) => c.id === cid); // the night lock hides the work cards (only the eat cards): if shown, the same day
+        assert(wn0 === cal && (!nf || nd(nf) === cal + Cm.SPACE_DAYS) && nd(ns.find((c) => c.kind === 'door')) === cal + Cm.SPACE_DAYS && yrow?.next === cal + Cm.SPACE_DAYS, `${T} (SN, L2): at 00:10 the same opening day (${ns.map((c) => c.note).join(' | ')}; row ${yrow?.next}; waking day ${wn0})`);
+        // RV1 (L3): every Forage card spaced: the group keeps its place (first), as with nothing spaced
+        const shown = (c) => ['open', 'late', 'busy', 'evening', 'long'].includes(c.status);
+        const order = (cs) => [...new Set(cs.map((c) => c.group))];
+        const base = order(taskCards(wilds(), SCENES).filter(shown));
+        const q = wilds(); for (const c of taskCards(q, SCENES).filter((c) => /^wild_forage:/.test(c.id))) { q.tasks.fam[c.id] = Cm.SKILLED_FAM; q.flags[`${Cm.cardKey(c.id)}@${wakeDay(q)}`] = true; }
+        const qo = order(Wk.withSpaced(q, SCENES, taskCards(q, SCENES).filter(shown)));
+        assert(base[0] === 'Forage' && qo[0] === 'Forage' && qo.join() === base.join(), `${T} (SN, L3): the groups' order kept (${qo.join(' | ')}; nothing spaced: ${base.join(' | ')})`);
+    }
+    // OL: the coughing house taken in the prologue's village: Ashfall's kept row back to 0 (and the plan's on any stay)
+    {
+        const g = ensureBars(newGame(5, { closed: true, cal: Cal.LONG_CAL })); goTo(g, SCENES, 'village');
+        g.tasks = g.tasks || {}; g.tasks.keep = { ashfall: { 'door:heal': 1, 'door:scout': 1 }, fo_ashfall: { 'door:heal': 1 } };
+        const i = SCENES.village.choices.findIndex((c) => c.to === 'heal');
+        const tap = Wk.noteCardTap(g, SCENES, `village:${i}`);
+        assert(tap && tap.s === 'heal', `${T} (OL): a one-off door tapped on the prologue's village is noted (${JSON.stringify(tap)})`);
+        Wk.noteCardDone(g, tap, { skipped: false });
+        assert(g.tasks.keep.ashfall['door:heal'] === 0 && g.tasks.keep.fo_ashfall['door:heal'] === 0 && g.tasks.keep.ashfall['door:scout'] === 1, `${T} (OL): its kept rows 0 on every stay, the others kept (${JSON.stringify(g.tasks.keep)})`);
+        const g2 = ensureBars(newGame(5, { closed: true, cal: Cal.LONG_CAL })); goTo(g2, SCENES, 'village'); g2.tasks.keep = { ashfall: { 'door:heal': 1 } };
+        Wk.noteCardDone(g2, Wk.noteCardTap(g2, SCENES, `village:${i}`), { skipped: true });
+        assert(g2.tasks.keep.ashfall['door:heal'] === 1, `${T} (OL): not taken (the routine went first): kept`);
+        const yi = SCENES.village.choices.findIndex((c) => c.to === 'yk_time');
+        assert(Wk.noteCardTap(g2, SCENES, `village:${yi}`) === undefined, `${T} (OL): a repeating door is not a one-off`);
+    }
+    // FD: a door's dry run takes the day's routine first (its shown time is the real one); a work card's already did
+    {
+        const g = wilds();
+        for (const c of taskCards(g, SCENES).filter((x) => x.status === 'open' && (x.kind === 'door' || x.kind === 'work'))) {
+            const h = wilds(); const out = taskOutcome(h, SCENES, c.id); const m0 = h.minutes; runTask(h, SCENES, c.id);
+            assert(out.minutes === h.minutes - m0, `${T} (FD): ${c.label.slice(0, 30)}: the card's time ${out.minutes} min, the tap ${h.minutes - m0}`);
+        }
+        const h = wilds(); const yk = taskCards(h, SCENES).find((c) => c.kind === 'door' && /Yuki/.test(c.label));
+        runTask(h, SCENES, taskCards(h, SCENES).find((c) => c.kind === 'work' && c.status === 'open').id); // the routine taken today
+        if (h.scene === 'wilds' && taskCards(h, SCENES).some((c) => c.id === yk.id && c.status === 'open')) {
+            const out = taskOutcome(h, SCENES, yk.id); const m0 = h.minutes; runTask(h, SCENES, yk.id);
+            assert(out.minutes === h.minutes - m0 && out.minutes < 60, `${T} (FD): after the day's routine the door's own time only (${out.minutes} / ${h.minutes - m0})`);
+        } else assert(false, `${T} (FD): Yuki's door open after a card (scene ${h.scene})`);
+        // RV1 (M1, TG4): the day swept by 10 min, the day's sit not done: every open door's time is the tap's (15:00–15:50: the sit closes the Explore doors)
+        const g0 = wilds(); const d0 = Math.floor(g0.minutes / 1440) * 1440; let n = 0, bad = [];
+        for (let t = 6 * 60; t < 24 * 60; t += 10) {
+            const b = wilds(); b.minutes = d0 + t; b.james.satiety = 60;
+            for (const c of taskCards(b, SCENES).filter((x) => x.status === 'open' && x.kind === 'door')) {
+                const h = wilds(); h.minutes = d0 + t; h.james.satiety = 60; const out = taskOutcome(h, SCENES, c.id); const m0 = h.minutes; runTask(h, SCENES, c.id); n++;
+                if (out.minutes !== h.minutes - m0) bad.push(`${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')} ${c.label.slice(0, 20)} ${out.minutes}/${h.minutes - m0}`);
+            }
+        }
+        assert(n > 200 && bad.length === 0, `${T} (FD, TG4): ${n} door states over the day, ${bad.length} off (${bad.slice(0, 4).join('; ')})`);
+    }
+    // RS: never a read stop (number lines): the probe runs without them, with the read stop on a planned Yuki week runs to its end
+    {
+        READ_STOP.on = true;
+        const g = wilds(); g.james.satiety = 100; g.inventory.smoked_meat = 30; const A = await import('../js/story/again.js');
+        const p = Wk.planEnsure(g); p.items = {}; p.med = { sit: 0, mer: 0, qi: 0, pres: 0, rest: 0 }; p.doors = { yk_time: 1 };
+        // the week walked as a player: every read stop tapped, the door's and night's screens walked back to the hub (no fights)
+        const walk = (g, on) => {
+            READ_STOP.on = on; let stops = 0, r = null, relStop = 0, said = 0, dayOk = 0; const dayBad = [];
+            const back = () => { for (let j = 0; j < 40 && g.scene !== 'wilds' && !g.combat; j++) { const v = sceneView(g, SCENES); if (v.text) A.noteRead(g, v.text); const o = v.choices.filter((c) => !c.disabled && c.index < 1000 && !SCENES[g.scene].choices[c.index]?.combat && !/^(Yuki: change form|Story Mode only)/.test(c.label)); if (!o.length) break; const cr = choose(g, SCENES, o[0].index); A.noteLines(g, cr.lines || []); } };
+            for (let k = 0; k < 60; k++) {
+                const u = Wk.readProbe(g, SCENES); if (u && u.lines.some((l) => /: (friendship|affection) [+−]/.test(l))) relStop++;
+                let prev = JSON.stringify(g.rel || {}); const moved = new Set();
+                r = Wk.runWeek(g, SCENES, { onStep: (gg) => { const now = JSON.stringify(gg.rel || {}); if (now !== prev) moved.add(Math.floor((gg.minutes || 0) / 1440) + 1); prev = now; } }); const ls = r.days.flatMap((d) => d.lines); said += ls.filter((l) => /^Yuki: friendship/.test(l)).length; A.noteLines(g, ls.filter((l) => !/: (friendship|affection) [+−]/.test(l)));
+                for (const d of r.days) if (d.lines.some((l) => /: (friendship|affection) [+−]/.test(l))) { if (moved.has(d.day)) dayOk++; else dayBad.push(`${d.day} (moved ${[...moved]})`); }
+                if (r.stop === 'read') { stops++; const id = g.tasks.plan.read; const rr = runTask(g, SCENES, id); Wk.noteReadTap(g, SCENES, id, rr); A.noteLines(g, rr.lines); back(); continue; }
+                if (g.scene !== 'wilds' && !g.combat) { back(); if (g.scene === 'wilds') continue; }
+                if (r.stop === 'week' || g.combat || g.scene !== 'wilds') break;
+            }
+            return { stops, relStop, said, stop: r?.stop, scene: g.scene, dayOk, dayBad };
+        };
+        const c = JSON.parse(JSON.stringify(g)); const w0 = walk(c, false); g.read = JSON.parse(JSON.stringify(c.read || {})); // Yuki's texts read already: her sits go by the plan
+        // TG1: that week's runs (no read stops): every relationship line on the day its step ran, not the run's first day
+        assert(w0.dayOk >= 2 && w0.dayBad.length === 0, `${T} (RS, TG1): over a week's runs every relationship line on its step's day (${w0.dayOk} right; off: ${w0.dayBad.join(', ')})`);
+        const w = walk(g, true);
+        assert(w.relStop === 0 && w.said >= 1 && w.stop === 'week', `${T} (RS): a planned Yuki week to its end, her texts read: her friendship said ${w.said} times, never a read stop (${w.relStop} probes flagged one; ${w.stops} read stops; ended ${w.stop} on ${w.scene})`);
+        READ_STOP.on = false;
+    }
+    RS1.on = false;
 }
 
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));
