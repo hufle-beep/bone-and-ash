@@ -1,0 +1,65 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/again.js",
+  "find": "return ss.length >= 2 ? { ps: [ss[0], ss.slice(1).join(' ')], split: true } : { ps, split: false };",
+  "replace": "return ss.length >= 99 ? { ps: [ss[0], ss.slice(1).join(' ')], split: true } : { ps, split: false };",
+  "note": "FR off: one-paragraph texts never fold"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/again.js",
+  "find": "const rest = ps.slice(1).join(split ? ' ' : '\\n\\n');",
+  "replace": "const rest = ps.slice(1).join('\\n\\n');",
+  "note": "the rest of a split fold joined as paragraphs (equivalent: the review's L3; the join removed in RV1, so it no longer applies)"
+ },
+ {
+  "id": "F3",
+  "file": "js/main.js",
+  "find": "${all && a.split ? paras(v.text) : paras(a.first)}${all ? (a.split ? '' : paras(a.rest))",
+  "replace": "${paras(a.first)}${all ? paras(a.rest)",
+  "note": "Read it all again opens a split fold as two paragraphs"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/again.js",
+  "find": "const parts = String(p).split(/(?<=[.!?…][\"”’*]?)\\s+(?=[A-Z\"“*])/)",
+  "replace": "const parts = String(p).split(/(?<=[.!?…])\\s+(?=[A-Z])/)",
+  "note": "sentences no longer split before a quote or a star (RV1: ported to the new split)"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/again.js",
+  "find": "return ss.length >= 2 ? { ps: [ss[0], ss.slice(1).join(' ')], split: true } : { ps, split: false };",
+  "replace": "return ss.length >= 1 ? { ps: [ss[0], ss.slice(1).join(' ')], split: true } : { ps, split: false };",
+  "note": "a one-sentence text folds to itself with an empty rest"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/again.js",
+  "find": "if (laterDayAgain(g, id, v, fresh, split)) return { fold: true, first: ps[0], rest, memory: null, same: true, newVisit, split };",
+  "replace": "if (laterDayAgain(g, id, v, fresh, split)) return { fold: true, first: ps[0], rest, memory: null, same: true, newVisit, split: false };",
+  "note": "VF's fold loses the split flag (RV1: ported)"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/again.js",
+  "find": "const whole = { fold: false, first: v?.text || '', rest: '', memory: null, same: false, newVisit, split: false };",
+  "replace": "const whole = { fold: false, first: v?.text || '', rest: '', memory: null, same: false, newVisit, split: true };",
+  "note": "the whole view says split"
+ },
+ {
+  "id": "F8",
+  "file": "js/core/faq.js",
+  "find": "folds to its first paragraph, or a one-paragraph scene to its first sentence (",
+  "replace": "folds to its first paragraph (",
+  "note": "the FAQ line lost"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/again.js",
+  "find": "if (seenBefore(g, id) && !variant && readBefore(g, v.text)) return { fold: true, first: ps[0], rest, memory: sceneMemory(g, id) ?? memoryLine(g), same: false, newVisit, split };",
+  "replace": "if (seenBefore(g, id) && !variant && readBefore(g, v.text)) return { fold: true, first: ps[0], rest, memory: null, same: false, newVisit, split };",
+  "note": "an earlier Coil's fold loses its memory line"
+ }
+]

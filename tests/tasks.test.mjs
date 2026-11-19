@@ -3573,7 +3573,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     const lines = new Set(); for (const id of Object.keys(SCENES)) { f.seen[id] = 1; const t = { id, text: 'a\n\nb' }; const x = againView(f, t); if (x.fold) lines.add(x.memory); }
     assert(lines.size >= 18, `P1-a: the lines vary by scene (${lines.size} different on Coil 2)`);
     f.seen.wilds = 1; assert(!againView(f, { id: 'wilds', text: 'a\n\nb' }).fold && noFold('wilds') && noFold('coil_end') && noFold(Object.keys(TASK_HUBS)[0]), 'P1-a: no fold on the task screens, their menus or the Coil\'s screens');
-    assert(!againView(f, { id: 'night_won', text: 'one paragraph only' }).fold, 'P1-a: a one-paragraph scene does not fold');
+    assert(!againView(f, { id: 'night_won', text: 'one paragraph only' }).fold, 'P1-a: a one-sentence scene does not fold (v0.11.229, FR: a one-paragraph scene of two sentences or more folds to its first)');
     // the skip: night_won → morning → wilds (a task screen), two steps, the same as tapping
     const s0 = ensureBars(newGame(3507, { closed: true })); s0.flags.long = true; s0.flags.forest_day = 2; s0.minutes += 1440 + 22 * 60; goTo(s0, SCENES, 'night_won'); goTo(s0, SCENES, 'morning'); goTo(s0, SCENES, 'night_won');
     { const r0 = JSON.parse(JSON.stringify(s0)); for (let k = 0; k < 3 && r0.scene !== 'wilds'; k++) { noteRead(s0, sceneView(r0, SCENES).text); choose(r0, SCENES, sceneView(r0, SCENES).choices.filter((c) => !c.disabled)[0].index); } } // v0.11.133 (FP2): Coil 1 read the stretch
@@ -3726,7 +3726,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     assert(!againView(sv, { id: vb.id, text: `${vb.text}\n\nSomething changed.` }, prev).fold, 'LP2 (SV): a text that changed shows in full');
     assert(!againView(sv, vb, { id: 'mire', text: vb.text }).fold, 'LP2 (SV): another scene before it: in full');
     assert(!againView(sv, { id: 'wilds', text: 'a\n\nb' }, { id: 'wilds', text: 'a\n\nb' }).fold, 'LP2 (SV): never on the task screens and menus');
-    assert(!againView(sv, { id: 'bone_field', text: 'one paragraph' }, { id: 'bone_field', text: 'one paragraph' }).fold, 'LP2 (SV): never on one paragraph');
+    assert(!againView(sv, { id: 'bone_field', text: 'one paragraph' }, { id: 'bone_field', text: 'one paragraph' }).fold, 'LP2 (SV): never on one sentence (v0.11.229, FR: one paragraph of two sentences or more folds)');
     assert(!againView(sv, { id: 'bone_field', text: 'a\n\nb', end: true }, { id: 'bone_field', text: 'a\n\nb' }).fold, 'LP2 (SV): never on an end');
     // QR: quiet repeats
     const q = ensureBars(newGame(4208));

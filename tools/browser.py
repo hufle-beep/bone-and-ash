@@ -7,7 +7,7 @@ Serves the folder, opens the game at 390x844 in headless Chromium and taps the r
   4. two tabs: closing the older tab leaves the newer save alone (v0.11.8);
   5. Saves (v0.11.9, in the menu since v0.11.10): Copy status, Export all then Restore all into a new game, a backup restored;
   6. the main menu (v0.11.10): opens first on plain paper with no tab bar; Settings (text size, Show checks) and Saves; Continue;
-  (part 2 also: v0.11.35 a scene read before folds, Read it all again, Skip to the next choice; v0.11.83 the FAQ tab)
+  (part 2 also: v0.11.35 a scene read before folds, Read it all again, Skip to the next choice; v0.11.229 a one-paragraph one to its first sentence; v0.11.83 the FAQ tab)
   (part 3, v0.11.39: the art cache across an update, with the service worker running; see update_test)
   7. v0.11.11: holding a card opens its tooltip (no check text) and the tap that ends the hold runs nothing; the status bars carry
      progress values; a story card plays at once; each tab keeps its scroll.
@@ -624,6 +624,32 @@ def again(pg, url):
         elif len(r3.get('read') or {}) < 2: fails.append(f'FP2: the screen recorded no paragraph of night_won ({len(r3.get("read") or {})})')
         else: notes.append('a scene read before folds, reads in full, the skip walks to the wilds, and the screen records the scenes that can fold (not the task screens)')
     check_text(pg, 'after the skip', strict=True)
+
+def split_fold(pg, url):
+    """v0.11.229 (owner pick E2-2: FR; RV1, TG2): a one-paragraph scene read in an earlier Coil folds to its first sentence under a
+    memory line; Read it all again opens the paragraph whole, as one paragraph, the first sentence not twice (far_won)."""
+    st = json.loads((ROOT / 'saves/v0.11.7-coil2-day1.json').read_text())
+    st = json.loads(st['data']) if 'data' in st and isinstance(st.get('data'), str) else st
+    st['scene'] = 'far_won'; st['combat'] = None; st['flags'].update({'far_kind': 'wolves'}); st['minutes'] = 1440 + 10 * 60
+    st['coil']['n'] = 2; st['seen'] = {'far_won': 1}; st.pop('lines', None)
+    js = ("import { SCENES } from './js/story/prologue.js'; import { sceneView } from './js/core/story.js';"
+          "import { noteRead, sentencesOf } from './js/story/again.js'; import { migrate, ensureBars } from './js/core/game.js';"
+          "const st = JSON.parse(process.argv[1]); const c = ensureBars(migrate(JSON.parse(JSON.stringify(st)))); const read = {};"
+          "const t = sceneView(c, SCENES).text; noteRead({ read, coil: { n: 1 } }, t, 1);"
+          "console.log(JSON.stringify({ read, t, first: sentencesOf(t)[0] }));")
+    o = json.loads(subprocess.run(['node', '--input-type=module', '-e', js, json.dumps(st)], cwd=ROOT, capture_output=True, text=True, check=True).stdout)
+    st['read'] = o['read']
+    fresh(pg, url, "a => { localStorage.clear(); localStorage.setItem('boneash.auto', a); }", json.dumps(st))
+    ps = lambda: [e.inner_text().strip() for e in pg.query_selector_all('.prose.again > p:not(.memory):not(.music)')]
+    rd = pg.query_selector('.prose.again button.readall')
+    if '\n\n' in o['t'].strip() or not pg.query_selector('.prose.again .memory') or not rd:
+        fails.append('FR (TG2): far_won read on Coil 1 should fold on Coil 2, with a memory line and Read it all again'); return
+    p0 = ps()
+    tap(pg, rd); until(pg, '!document.querySelector("button.readall")', 3000)
+    p1 = ps()
+    if p0 != [o['first']]: fails.append(f'FR (TG2): folded, the first sentence alone should show ({p0!r})')
+    elif len(p1) != 1 or p1[0].count(o['first']) != 1 or len(p1[0]) <= len(o['first']): fails.append(f'FR (TG2): opened, the paragraph should show whole, once ({p1!r})')
+    else: notes.append('FR (TG2): a one-paragraph scene read before folds to its first sentence and opens whole')
 
 def lp2(pg, url):
     """v0.11.134 (owner pick LP2): QR, a reply already shown this Coil is not shown again (a card that fails twice: "You see what
@@ -1247,6 +1273,7 @@ def main(part=0):
                 picked(pg, url)
                 # 10. a scene read before: the fold, the memory line, the skip (v0.11.35)
                 again(pg, url)
+                split_fold(pg, url)  # v0.11.229 (E2-2, RV1: TG2)
                 music_line(pg, url)
                 # 13. quiet repeats and the same-visit fold (v0.11.134, LP2)
                 lp2(pg, url)

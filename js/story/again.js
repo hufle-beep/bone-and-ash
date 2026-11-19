@@ -142,10 +142,44 @@ export function readBefore(g, text) {
 }
 
 /**
- * How the current scene's text shows: { fold, first, rest, memory, same }. `fold` on a scene read in an earlier Coil with more
+ * v0.11.229 (owner pick E2-2: FR; the rule for repeated texts on roadmap-e.md, "the story's own texts repeat little (a scene read before
+ * folds)"): a text of one paragraph folds too, to its first sentence, when it has two sentences or more. Before it only texts of two
+ * paragraphs or more folded, so the one-paragraph texts were the only ones left repeating in full (the models test, long calendar, 10
+ * games each: 11.2 / 11.2 / 9.1 / 4.5 a game, Careful / Sociable / Completionist / Cultivator: `mei_walk`'s sunsets, the quiet night
+ * in Ashfall, the far hunt and its haul → 0 / 0 / 0.6 / 0.5: the far hunt's two one-sentence bull texts can't fold). A sentence ends
+ * at . ! ? or … (a closing quote or `*` may follow), then a space and a capital, a quote or a `*`, never inside a quote or an italic
+ * span (RV1, L1a; a one-sentence quote and its speaker after it still split: no game text has one). The read record (`g.read`) stays
+ * by paragraph; "Read it all again" opens the paragraph whole (main.js: `split`).
+ */
+export function sentencesOf(p) {
+    const parts = String(p).split(/(?<=[.!?…]["”’*]?)\s+(?=[A-Z"“*])/).map((s) => s.trim()).filter(Boolean);
+    // RV1 (L1a): never inside a quote or an italic span: a part whose quotes or stars are still open takes the next one with it
+    const out = []; let cur = '';
+    for (const x of parts) { cur = cur ? `${cur} ${x}` : x; if (closedSpans(cur)) { out.push(cur); cur = ''; } }
+    if (cur) out.push(cur);
+    return out;
+}
+/** RV1 (L1a): every straight quote and star paired, every curly quote closed. */
+function closedSpans(t) {
+    const n = (c) => t.split(c).length - 1;
+    return n('"') % 2 === 0 && n('*') % 2 === 0 && n('“') === n('”');
+}
+/** FR: the text's folding parts: its paragraphs, or a one-paragraph text's first sentence and the rest ({ ps, split }). */
+function foldParts(text) {
+    const ps = parasOf(text);
+    if (ps.length !== 1) return { ps, split: false };
+    const ss = sentencesOf(ps[0]);
+    return ss.length >= 2 ? { ps: [ss[0], ss.slice(1).join(' ')], split: true } : { ps, split: false };
+}
+
+/**
+ * How the current scene's text shows: { fold, first, rest, memory, same, split }. FR (v0.11.229): `split` when a one-paragraph text
+ * folded to its first sentence (`rest` then the sentences after it, not paragraphs, so main.js opens the paragraph whole; RV1, L3); on a
+ * later day (VF) a split fold needs the exact text shown before, numbers in (RV1, M1a: the Fallout morning's count to the Elder, which
+ * the paragraph folds by numbers aside would hide). `fold` on a scene read in an earlier Coil with more
  * than one paragraph (with a memory line), or (v0.11.134, SV; `same`) on one shown again with the same text right after an
  * action that kept you there (`prev`: the screen shown before that action, { id, text }; no memory line). `first` and `rest`
- * are text (paragraphs joined by a blank line), so main.js renders them as before. Every call notes the visit (lines.js).
+ * are text (paragraphs joined by a blank line; a split fold's `rest` its sentences, above), so main.js renders them as before. Every call notes the visit (lines.js).
  */
 export function againView(g, v, prev = null) {
     const id = v?.id || g.scene;
@@ -153,14 +187,15 @@ export function againView(g, v, prev = null) {
     const fresh = noteVisit(g, id);
     const newVisit = fresh && !(before && META_BACK(before)); // RV1 (L1): back from a meta screen is the same visit for "Read it all again" (L2)
     const sd = sameDayAgain(g, id, v, fresh); // v0.11.152 (owner pick RP1, SD); LB1 (owner 22:30): back from a meta screen or the breakthrough folds too (bots' repeated screens Sitter 1.1% → 0.1%, Cultivator 0.9% → 0.1%)
-    const ps = parasOf(v?.text || '');
-    const whole = { fold: false, first: v?.text || '', rest: '', memory: null, same: false, newVisit };
+    const { ps, split } = foldParts(v?.text || ''); // FR (v0.11.229): a one-paragraph text by its sentences
+    const whole = { fold: false, first: v?.text || '', rest: '', memory: null, same: false, newVisit, split: false };
     if (noFold(id) || v?.end || ps.length < 2) return whole;
+    const rest = ps.slice(1).join('\n\n'); // a split fold has one rest part (RV1, L3: no join of its own)
     const variant = g.lastWin && g.lastWin.next === id && g.lastWin.degree >= 2; // a lopsided win's own text (story.js): not the one read before
-    if (seenBefore(g, id) && !variant && readBefore(g, v.text)) return { fold: true, first: ps[0], rest: ps.slice(1).join('\n\n'), memory: sceneMemory(g, id) ?? memoryLine(g), same: false, newVisit }; // v0.11.184 (S1): the scene's own line first, the pool untouched when it has one
-    if (prev && prev.id === id && prev.text === v.text) return { fold: true, first: ps[0], rest: ps.slice(1).join('\n\n'), memory: null, same: true, newVisit }; // SV
-    if (sd) return { fold: true, first: ps[0], rest: ps.slice(1).join('\n\n'), memory: null, same: true, newVisit }; // SD
-    if (laterDayAgain(g, id, v, fresh)) return { fold: true, first: ps[0], rest: ps.slice(1).join('\n\n'), memory: null, same: true, newVisit }; // v0.11.224 (TX2, VF)
+    if (seenBefore(g, id) && !variant && readBefore(g, v.text)) return { fold: true, first: ps[0], rest, memory: sceneMemory(g, id) ?? memoryLine(g), same: false, newVisit, split }; // v0.11.184 (S1): the scene's own line first, the pool untouched when it has one
+    if (prev && prev.id === id && prev.text === v.text) return { fold: true, first: ps[0], rest, memory: null, same: true, newVisit, split }; // SV
+    if (sd) return { fold: true, first: ps[0], rest, memory: null, same: true, newVisit, split }; // SD
+    if (laterDayAgain(g, id, v, fresh, split)) return { fold: true, first: ps[0], rest, memory: null, same: true, newVisit, split }; // v0.11.224 (TX2, VF)
     return whole;
 }
 
@@ -174,11 +209,11 @@ export function againView(g, v, prev = null) {
  * VD_MAX entries, the oldest kept). The task screens, menus, meta screens and outcome scenes never fold (noFold, as above).
  */
 export const VD_MAX = 600;
-export function laterDayAgain(g, id, v, fresh) {
+export function laterDayAgain(g, id, v, fresh, exact = false) {
     if (!g || !id || noFold(id) || v?.end) return false;
     const L = linesOf(g);
     if (!isRecord(L.vd)) L.vd = {};
-    const k = `${id}|${lineKey(storyParas(String(v?.text || '')).join('\n\n').replace(NUM_WORDS, '#'))}`, day = textDay(g); // RV1 (VK): numbers aside, the food stock left out
+    const k = exact ? `${id}|=${paraKey(String(v?.text || ''))}` : `${id}|${lineKey(storyParas(String(v?.text || '')).join('\n\n').replace(NUM_WORDS, '#'))}`, day = textDay(g); // RV1 (VK): numbers aside, the food stock left out; v0.11.229 (E2-2, RV1: M1a): `exact` for a split fold, numbers in (the Fallout morning's count to the Elder)
     if (fresh) {
         const first = L.vd[k];
         L.vfFold = Number.isInteger(first) && first < day ? k : null;

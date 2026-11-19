@@ -1,0 +1,30 @@
+[
+ {
+  "id": "R2b",
+  "file": "js/story/again.js",
+  "find": "const rest = ps.slice(1).join('\\n\\n');",
+  "replace": "const rest = ps.slice(1).join(' ');",
+  "note": "R2 ported after L3: a paragraph fold's rest (3+ paragraphs) joined into one run"
+ },
+ {
+  "id": "R5b",
+  "file": "js/story/again.js",
+  "find": "const parts = String(p).split(/(?<=[.!?…][\"”’*]?)\\s+(?=[A-Z\"“*])/)",
+  "replace": "const parts = String(p).split(/(?<=[.!?…][\"”’*]?)\\s+(?=[A-Z\"*])/)",
+  "note": "R5 ported after L1a: a sentence opening with a curly quote no longer splits"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/again.js",
+  "find": "if (laterDayAgain(g, id, v, fresh, split)) return",
+  "replace": "if (laterDayAgain(g, id, v, fresh)) return",
+  "note": "M1a off: a later day's split fold by numbers aside (the Elder count hidden)"
+ },
+ {
+  "id": "F11",
+  "file": "js/story/again.js",
+  "find": "if (closedSpans(cur)) { out.push(cur); cur = ''; }",
+  "replace": "{ out.push(cur); cur = ''; }",
+  "note": "L1a off: sentences split inside quotes and stars"
+ }
+]

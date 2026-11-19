@@ -7260,6 +7260,78 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     } finally { READ_STOP.on = false; READ_CAP.n = Infinity; }
 }
 
+// v0.11.229 (owner pick E2-2 = FR + NR + HS, 2026-11-19 14:05): FR a one-paragraph text of two sentences or more folds to its first sentence
+// by the same rules as the longer ones (SV, SD, VF, read on an earlier Coil); "Read it all again" opens the paragraph whole (main.js `split`).
+// The models test (long calendar, 10 games each): full repeats 11.2 / 11.2 / 9.1 / 4.5 a game → 0 / 0 / 0.6 / 0.5 (the bull's one-sentence texts).
+{
+    const T = 'E2-2 (FR, one-paragraph folds)';
+    const C = await import('../js/core/calendar.js');
+    const A = await import('../js/story/again.js');
+    const D = 1440;
+    const at = (day, h = 9, flags = {}) => { const g = ensureBars(newGame(98900 + day, { closed: true, cal: C.LONG_CAL })); Object.assign(g.flags, flags); g.minutes = (day - 1) * D + h * 60; return g; };
+    const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
+    const paras = (t) => String(t).split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+    // the sentences
+    { const s = (t) => A.sentencesOf(t).length;
+      const cases = [['One. Two.', 2], ['A thornback, and a large one: a bull, twice the size.', 1], ['"Go," she says. "Now."', 2], ['*fire.* Then smoke.', 2], ['Wait… Yes! No? Fine.', 4], ['He said no. then left.', 1], ['3.5 hours. Done.', 2], ['', 0]];
+      const bad = cases.filter(([t, n]) => s(t) !== n);
+      assert(!bad.length, `${T}: sentences split at . ! ? … before a capital, a quote or a star (${bad.map(([t, n]) => `"${t}" ${s(t)} not ${n}`).join(' | ')})`); }
+    // VF on a later day, SD the same day, SV the same visit: a one-paragraph text folds to its first sentence; one sentence never; two paragraphs as before
+    { const g = at(30, 10, { long: true, vday: 2 }); const id = 'herb_girl', one = 'Alpha one. Beta two. Gamma three.';
+      const v0 = againView(g, { id, text: one }); g.minutes += D; linesOf(g).at = 'wilds'; const v1 = againView(g, { id, text: one });
+      const sv = againView(g, { id, text: one }, { id, text: one });
+      g.minutes += D; linesOf(g).at = 'wilds'; againView(g, { id, text: 'Just one sentence here.' }); g.minutes += D; linesOf(g).at = 'wilds'; const s1 = againView(g, { id, text: 'Just one sentence here.' });
+      g.minutes += D; linesOf(g).at = 'wilds'; againView(g, { id, text: 'P one. P two.\n\nQ.' }); g.minutes += D; linesOf(g).at = 'wilds'; const p2 = againView(g, { id, text: 'P one. P two.\n\nQ.' });
+      assert(!v0.fold && !v0.split && v1.fold && v1.split && v1.first === 'Alpha one.' && v1.rest === 'Beta two. Gamma three.' && v1.memory === null, `${T} (VF): a later day folds to the first sentence, the rest one run of sentences (${JSON.stringify([v1.first, v1.rest])})`);
+      assert(sv.fold && sv.split && sv.same && sv.first === 'Alpha one.', `${T} (SV): the same visit folds it too`);
+      assert(!s1.fold && !s1.split && s1.first === 'Just one sentence here.', `${T}: a one-sentence text never folds`);
+      assert(p2.fold && !p2.split && p2.first === 'P one. P two.' && p2.rest === 'Q.', `${T}: two paragraphs fold by paragraph as before`); }
+    // read on an earlier Coil: the memory line, the first sentence; a task screen and an end never
+    { const g = at(30, 10); const id = 'night_won', one = 'The crows are gone. Feathers everywhere.';
+      noteRead(g, one, 1); g.seen = { ...(g.seen || {}), [id]: 1 }; g.coil.n = 2;
+      const a = againView(g, { id, text: one });
+      const hub = againView(g, { id: 'wilds', text: one }, { id: 'wilds', text: one }), end = againView(g, { id, text: one, end: true }, { id, text: one });
+      assert(a.fold && a.split && a.first === 'The crows are gone.' && a.rest === 'Feathers everywhere.' && typeof a.memory === 'string' && a.memory.length > 0, `${T}: read on Coil 1, folded on Coil 2 with its memory line (${JSON.stringify(a)})`);
+      assert(!hub.fold && !end.fold, `${T}: a task screen and an end never fold`); }
+    // the scenes that repeated in full: one paragraph, two sentences or more, so a later day folds them; the bull's texts one sentence (left)
+    { const fold2 = (id, text) => { const g = at(31, 18, { long: true, vday: 2 }); againView(g, { id, text }); g.minutes += D; linesOf(g).at = 'ashfall'; return againView(g, { id, text }); };
+      const got = [];
+      { const g = at(31, 22); got.push(['village_night', tx(g, 'village_night')]); }
+      for (const vd of [2, 3]) for (let d = 0; d < 3; d++) { const g = at(31 + d, 18, { long: true, vday: vd }); got.push([`mei_walk ${vd}`, tx(g, 'mei_walk')]); }
+      for (const k of ['wolves', 'deer']) for (let d = 0; d < 2; d++) { const g = at(31 + d, 10, { far_kind: k }); got.push([`far_hunt ${k}`, tx(g, 'far_hunt')]); }
+      for (let d = 0; d < 2; d++) { const g = at(31 + d, 10, { far_kind: 'wolves' }); got.push(['far_won', tx(g, 'far_won')]); }
+      const one = got.filter(([, t]) => paras(t).length === 1);
+      const notFold = one.filter(([id, t]) => { const a = fold2(id.split(' ')[0], t); return !(a.fold && a.split && a.first === A.sentencesOf(t)[0]); });
+      const bull = [0, 1].map((d) => tx(at(31 + d, 10, { far_kind: 'bull' }), 'far_hunt'));
+      assert(one.length >= 8 && !notFold.length, `${T}: ${one.length} one-paragraph texts of the four scenes fold to their first sentence on a later day (not: ${notFold.map(([id, t]) => `${id}: ${t.slice(0, 40)}`).join(' | ')})`);
+      assert(bull.every((t) => paras(t).length === 1 && A.sentencesOf(t).length === 1) && !fold2('far_hunt', bull[0]).fold, `${T}: the bull's texts are one sentence and show in full (the 0.6 / 0.5 left; ${bull.map((t) => t.slice(0, 30)).join(' | ')})`); }
+    // RV1 (TG1): SD, the same day: split too (an opened same-day fold shows the paragraph whole)
+    { const g = at(30, 10, { long: true, vday: 2 }); const id = 'herb_girl', one = 'Sd one. Sd two.';
+      againView(g, { id, text: one }); linesOf(g).at = 'wilds'; g.minutes += 60; const sd = againView(g, { id, text: one });
+      assert(sd.fold && sd.split && sd.same && sd.first === 'Sd one.' && sd.rest === 'Sd two.', `${T} (RV1, TG1): the same day folds it split (${JSON.stringify(sd)})`); }
+    // RV1 (L1a, TG3): never inside a quote or an italic span; curly quotes closed; a one-sentence quote and its speaker still split
+    { const cases = [['"Go now. Run," she says.', 1], ['*Run. Now,* says the bond.', 1], ['“Hi. There.” Then.', 2], ['"Go!" Yuki says.', 2], ['"Go," she says. "Now."', 2], ['(Nobody laughs.) Then.', 1], ['Go. “Now.”', 2]];
+      const bad = cases.filter(([t, n]) => A.sentencesOf(t).length !== n);
+      assert(!bad.length, `${T} (RV1, L1a, TG3): quotes and stars stay whole (${bad.map(([t, n]) => `"${t}" ${JSON.stringify(A.sentencesOf(t))} not ${n}`).join(' | ')})`); }
+    // RV1 (M1a, TG4): the Fallout morning's count to the Elder: a later day with another count shows in full; the same text again folds
+    { const mo = (day) => { const g = at(day, 7); g.minutes = (day - 1) * D + 7 * 60; return tx(g, 'fo_morning'); };
+      const t48 = mo(48), t49 = mo(49);
+      const g = at(48, 7, { long: true }); againView(g, { id: 'fo_morning', text: t48 }); g.minutes += D; linesOf(g).at = 'fo_ashfall'; const v49 = againView(g, { id: 'fo_morning', text: t49 });
+      g.minutes += D; linesOf(g).at = 'fo_ashfall'; const again48 = againView(g, { id: 'fo_morning', text: t48 });
+      assert(paras(t48).length === 1 && /days to the Elder/.test(t48) && t48 !== t49 && !v49.fold && again48.fold && again48.split, `${T} (RV1, M1a, TG4): a new day's count shows in full, the same text folds (${t49.slice(0, 50)})`); }
+    // RV1 (TG5): the Blackroot camp (its story and the food stock) still folds by paragraph, never by sentence
+    { const b = at(66, 19, { bl_day: 1, bl_n: 1, bl_region: 'rr', ending: 'paid', mei_party: true, ya_party: true }); goTo(b, SCENES, 'bl_camp'); const t = sceneView(b, SCENES).text;
+      againView(b, { id: 'bl_camp', text: t }); b.minutes += D; linesOf(b).at = 'bl_morning'; const f = againView(b, { id: 'bl_camp', text: t });
+      assert(paras(t).length >= 2 && f.fold && !f.split && f.first === paras(t)[0], `${T} (RV1, TG5): bl_camp folds by paragraph (${paras(t).length} paragraphs)`); }
+    // main.js opens the paragraph whole; the FAQ and What's new say it
+    { const src = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+      assert(src.includes('${all && a.split ? paras(v.text) : paras(a.first)}${all ? (a.split ? \'\' : paras(a.rest))'), `${T}: main.js opens a split fold as one paragraph`);
+      const Fq = await import('../js/core/faq.js'); const h = Fq.FAQ.find(([q]) => q === 'How do I play?')?.[1]; const t = typeof h === 'function' ? h({}) : String(h);
+      assert(t.includes('or a one-paragraph scene to its first sentence'), `${T}: the FAQ says it`);
+      const Nw = await import('../js/core/news.js'); const n = Nw.NOTES.find(([v]) => v === '0.11.229')?.[1] || '';
+      assert(n.includes('folds to its first sentence') && n.includes('Read it all again opens it whole'), `${T}: What's new says it`); }
+}
+
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));
 console.log('fights', sorted(fights));
 console.log('endings', sorted(endings), 'longest run', maxSteps, 'scenes', Object.keys(SCENES).length);
