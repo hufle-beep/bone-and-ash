@@ -1,0 +1,58 @@
+[
+ {
+  "id": "F1r",
+  "file": "js/story/act1_blackroot.js",
+  "find": "const ahDay = (g) => region(g) === 'ah' && hour(g) >= 6 && !late(g);",
+  "replace": "const ahDay = (g) => hour(g) >= 6 && !late(g);",
+  "note": "AR (RV1 port): absences read anywhere"
+ },
+ {
+  "id": "F2r",
+  "file": "js/story/act1_blackroot.js",
+  "find": "const ahDay = (g) => region(g) === 'ah' && hour(g) >= 6 && !late(g);",
+  "replace": "const ahDay = (g) => region(g) === 'ah' && hour(g) >= 6;",
+  "note": "AV (RV1 port): the evening no longer back"
+ },
+ {
+  "id": "F11r",
+  "file": "js/story/act1_blackroot.js",
+  "find": "export const awayHawks = (g, degree) => (awayNow(g) && AW.stomp_hawks[degree] ?",
+  "replace": "export const awayHawks = (g, degree) => (awayNow(g) === 'both' && AW.stomp_hawks[degree] ?",
+  "note": "AT (RV1 port): the hawks' wins name Ya while she alone is away"
+ },
+ {
+  "id": "F13r",
+  "file": "js/story/act1_blackroot.js",
+  "find": "return away ? awayText(g, t, AW.patch_up) : t;",
+  "replace": "return t;",
+  "note": "AT (RV1 port): the bandage line names the absent women"
+ },
+ {
+  "id": "F15",
+  "file": "js/story/act1_blackroot.js",
+  "find": "const ahDay = (g) => region(g) === 'ah' && hour(g) >= 6 && !late(g);",
+  "replace": "const ahDay = (g) => region(g) === 'ah' && !late(g);",
+  "note": "RV1 (C L5): 04:00 counts as day"
+ },
+ {
+  "id": "F16",
+  "file": "js/story/act1_blackroot.js",
+  "find": "enter: (g) => patchUp(g, true),",
+  "replace": "enter: (g) => patchUp(g),",
+  "note": "RV1 (C L2) control: the hawks' loss without the away bandage line"
+ },
+ {
+  "id": "F17",
+  "file": "js/story/act1_blackroot.js",
+  "find": "text: (g) => (springToday(g) ? AW.ya_off_spring :",
+  "replace": "text: (g) => (false ? AW.ya_off_spring :",
+  "note": "RV1 (T H1): the old quarrel after the spring"
+ },
+ {
+  "id": "F18",
+  "file": "js/story/act1_blackroot.js",
+  "find": "${awayNow(g) === 'ya' ? AW.cairn_end.ya :",
+  "replace": "${false ? AW.cairn_end.ya :",
+  "note": "RV1 (C M2): the cairn with Ya while she is away"
+ }
+]

@@ -50,7 +50,7 @@ const jackals = (g) => {
     ];
     return {
         id: 'jackals', night: true, // v0.11.92 (O1): a night fight costs sleep
-        intro: s >= 2 ? 'Three shapes come loose from the dark, the same three that have walked rings round your camp for ' + (longCal(g) ? 'weeks' : 'two nights') + ': ash-grey hides, a surplus of teeth, eyes like coals nobody remembered to put out.' : 'Two shapes come loose from the dark: ash-grey hides, a surplus of teeth, eyes like coals nobody remembered to put out.',
+        intro: '' /* v0.11.231 (P4-2, FI): never shown, the stomp posture opens it */,
         band: 'standard',
         enemies: enemies.map((e) => grow(e, s, JACKAL_GROWTH)),
         win: 'jackals_won', lose: 'jackals_lost', flee: 'jackals_fled',
@@ -63,7 +63,7 @@ const BOAR_GROWTH = { hp: 0.15, dc: 0.45, atk: 0.6 };
 const LU_GROWTH = { hp: 0.05, dc: 0.35, atk: 0.5 };
 const gaoFight = (g) => ({
     id: 'gao',
-    intro: 'Gao Feng snaps his sleeve straight and Qi runs crackling down it, red as a fresh cut. Behind him the lackey grins and frees his hatchet.',
+    intro: '' /* v0.11.231 (P4-2, FI): never shown, the stomp posture opens it */,
     band: 'challenging',
     enemies: [
         { name: 'Gao Feng', hp: g.flags.gao_hand ? 6 : 9, dc: 4, atk: 5, dmg: 4, dr: 1 },
@@ -83,7 +83,7 @@ const collectorsFight = (g) => {
     if (militia) enemies[0].hp = Math.max(6, enemies[0].hp - 2 * militia);
     return {
         id: 'collectors',
-        intro: militia ? 'Inner Disciple Lu Han does not hurry. Then eight hunters with white bone spearheads step up behind you, and not one of them kneels. That, at last, hurries him.' : 'Inner Disciple Lu Han does not hurry. No mortal has ever given him a reason to.',
+        intro: '' /* v0.11.231 (P4-2, FI): never shown, the stomp posture opens it */,
         band: 'major',
         enemies,
         win: 'collectors_won', lose: 'collectors_lost',
@@ -658,7 +658,7 @@ You are not a doctor. You are a man who has spent fifteen years on the question 
 
 You are still looking for it when it finds you. It has the dimensions of a small car, and it regards your visit as a *personal* matter.`,
         choices: [
-            { text: 'Darts to the eyes, then the blade.', combat: (g) => ({ id: 'boar', intro: 'The boar paws at the black earth, and the earth shakes under it.', band: 'challenging', enemies: [grow({ name: 'Ironhide boar', hp: 10, dc: 4, atk: 4, dmg: 5, dr: 1 }, forestScale(g), BOAR_GROWTH)], win: 'boar_won', lose: 'boar_lost', flee: hubOf(g) }), to: 'boar_won' },
+            { text: 'Darts to the eyes, then the blade.', combat: (g) => ({ id: 'boar', intro: '' /* v0.11.231 (P4-2, FI): never shown, the stomp posture opens it */, band: 'challenging', enemies: [grow({ name: 'Ironhide boar', hp: 10, dc: 4, atk: 4, dmg: 5, dr: 1 }, forestScale(g), BOAR_GROWTH)], win: 'boar_won', lose: 'boar_lost', flee: hubOf(g) }), to: 'boar_won' },
             { text: 'A pit and a bed of bone spikes. Make it come to you.', qi: 6, check: { skill: 'Convergence Use', dc: 4, bonus: (g) => -Math.floor(forestScale(g) / 2) }, time: 60, to: 'boar_won', fail: 'boar_lost' },
         ],
     },
@@ -1059,7 +1059,7 @@ function btText(g) {
     const party = !!(g.flags.mei_party && g.flags.ya_party); // v0.11.188 (N1, TR): Mei Lin and Ya travel with him (the Blackroot, the Heart, the Return)
     const ah = g.flags.bt_return === 'ah_hub'; // RV1 (M1, L4): the Ashen Hills: who is away, and the ground is ash
     const away = party && ah ? (bothAway(g) ? 'both' : yaAway(g) ? 'ya' : null) : null;
-    const knows = !!(g.flags.lore1 || g.flags.lore_realms || g.rel['Mei Lin']);
+    const knows = !!g.flags.lore1; // v0.11.231 (P4-2, BYb-g): the quote is the `lore` scene's line, so only after that scene (Old Wen's lesson or meeting her said nothing of it)
     const h = clockParts(g.minutes).hh;
     const night = h >= 20 || h < 6;
     const sky = night ? 'The stars go out one at a time, pinched like candles.' : 'Behind them the red sun goes out, a coin dropped into ink.';

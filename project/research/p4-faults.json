@@ -1,0 +1,100 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/act1_blackroot.js",
+  "find": "const ahDay = (g) => region(g) === 'ah' && !late(g);",
+  "replace": "const ahDay = (g) => !late(g);",
+  "note": "AR: absences read anywhere (the Drowned Wood after the spring)"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/act1_blackroot.js",
+  "find": "const ahDay = (g) => region(g) === 'ah' && !late(g);",
+  "replace": "const ahDay = (g) => region(g) === 'ah';",
+  "note": "AV: the evening no longer counts as back"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/act1_blackroot.js",
+  "find": "show: (g) => yaAway(g) && !bothAway(g), time: 10, to: 'ya_offended' }",
+  "replace": "show: (g) => yaAway(g), time: 10, to: 'ya_offended' }",
+  "note": "AE: Ya's door before the spring"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/act1_blackroot.js",
+  "find": "show: (g) => daily('tya')(g) && !late(g) && !yaOut(g),",
+  "replace": "show: (g) => daily('tya')(g) && !late(g),",
+  "note": "AG: talk to an absent Ya"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/act1_blackroot.js",
+  "find": "const sparYa = Object.assign((g) => daily('bt_ya')(g) && !yaOut(g),",
+  "replace": "const sparYa = Object.assign((g) => daily('bt_ya')(g),",
+  "note": "AG: spar with an absent Ya"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/act1_blackroot.js",
+  "find": "show: (g) => !meiOut(g) /* v0.11.231 (P4-2, AG) */, ",
+  "replace": "",
+  "note": "AG: cinderberries with an absent Mei Lin"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/act1_blackroot.js",
+  "find": "(alt.both ?? alt.any ?? base)",
+  "replace": "(alt.ya ?? alt.any ?? base)",
+  "note": "AT: both away shows the Ya-away version (Mei Lin named)"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/act1_blackroot.js",
+  "find": "const a = alt[dayIndex(g, `r:${key}`) % list.length];",
+  "replace": "const a = alt[(dayIndex(g, `r:${key}`) + 1) % list.length];",
+  "note": "AT: away version of the wrong day"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/prologue.js",
+  "find": "const knows = !!g.flags.lore1;",
+  "replace": "const knows = !!(g.flags.lore1 || g.rel['Mei Lin']);",
+  "note": "BYb-g: the quote after only meeting her"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/wilds.js",
+  "find": "rats: { intro: '' /* v0.11.231 (P4-2, FI)",
+  "replace": "rats: { intro: 'Two mire-rats.' /* v0.11.231 (P4-2, FI)",
+  "note": "FI: a dead intro with words again"
+ },
+ {
+  "id": "F11",
+  "file": "js/story/act1_blackroot.js",
+  "find": "(awayNow(g) && AW.stomp_hawks[degree])",
+  "replace": "(awayNow(g) === 'both' && AW.stomp_hawks[degree])",
+  "note": "AT: the hawks' easy wins name Ya while she alone is away"
+ },
+ {
+  "id": "F12",
+  "file": "js/story/act1_blackroot.js",
+  "find": "t.includes(e.from)",
+  "replace": "t.startsWith(e.from)",
+  "note": "AT: the mornings' away versions never match"
+ },
+ {
+  "id": "F13",
+  "file": "js/story/act1_blackroot.js",
+  "find": "shoulders your pack.', AW.patch_up)]",
+  "replace": "shoulders your pack.', undefined)]",
+  "note": "AT: patchUp names the absent women"
+ },
+ {
+  "id": "F14",
+  "file": "js/story/act1_blackroot.js",
+  "find": "const meiOut = (g) => bothAway(g);",
+  "replace": "const meiOut = (g) => yaAway(g);",
+  "note": "AG: Mei Lin's cards hidden when only Ya is away"
+ }
+]

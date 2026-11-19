@@ -1,0 +1,72 @@
+[
+ {
+  "id": "TF1",
+  "file": "js/story/act1_blackroot.js",
+  "find": "over the two of you like an umbrella",
+  "replace": "over the four of you like an umbrella",
+  "note": "stomp_hawks 3: the absent women counted under the umbrella (the 'ya' state needs three, not two: finding M1)"
+ },
+ {
+  "id": "TF2",
+  "file": "js/story/act1_blackroot.js",
+  "find": "you had proposed to the beetle",
+  "replace": "you had just proposed to it",
+  "note": "Claude's cut 2 reverted (beetle_after 0)"
+ },
+ {
+  "id": "TF3",
+  "file": "js/story/act1_blackroot.js",
+  "find": "You hold the beetle out to Mei Lin on the flat of your palm.",
+  "replace": "You hold the beetle out to Mei Lin on the flat of your palm. She studies it, and then you, at some length.",
+  "note": "Claude's cut 1 reverted (truffle_f ya)"
+ },
+ {
+  "id": "TF4",
+  "file": "js/story/stomp_prologue.js",
+  "find": "and no hunter saw them laid",
+  "replace": "and you have been promoted for it",
+  "note": "ST2: a banned word of the brief ('promoted') in the wolves' third"
+ },
+ {
+  "id": "TF5",
+  "file": "js/story/act1_blackroot.js",
+  "find": "rolling in the ash until the sparks give up. Yuki sits upwind with her fur on end and looks through the holes one by one.\n\n*Your coat,* says the bond, *is getting very holy.*",
+  "replace": "rolling in the ash until the sparks give up. Yuki sits upwind with her fur on end and looks through the holes one by one.\n\n\"Your coat,\" she says, \"is getting very holy.\"",
+  "note": "form: the cat speaks aloud (hawks_lost both, cat)"
+ },
+ {
+  "id": "TF6",
+  "file": "js/story/act1_blackroot.js",
+  "find": "Three again. You shade your eyes. They keep eyeing the cat and then finding somewhere else to look. Sensible birds.\n\nYuki, at your side,",
+  "replace": "Three again. You shade your eyes. They keep eyeing the cat and then finding somewhere else to look. Sensible birds.\n\nYuki, on your shoulder,",
+  "note": "form: the great root-kin on James's shoulder (hunt day 2, tiger)"
+ },
+ {
+  "id": "TF7",
+  "file": "js/story/act1_blackroot.js",
+  "find": "from: 'Ya\\'s whetstone has started'",
+  "replace": "from: 'Ya\\'s whetstone started'",
+  "note": "control: awayMorning's phrase no longer matches, the base morning names Ya"
+ },
+ {
+  "id": "TF8",
+  "file": "js/story/act1_blackroot.js",
+  "find": "Morning under the tree. The sun gets round it late. The wind has started already, and the ash has given up trying to settle.",
+  "replace": "Morning under the tree. The sun gets round it late. The wind works at the ash until the sound is part of the morning.",
+  "note": "repeated beat: morning 5a both reuses the next morning's wind sentence word for word"
+ },
+ {
+  "id": "TF9",
+  "file": "js/story/act1_blackroot.js",
+  "find": "nothing you have seen all week has worried you more",
+  "replace": "nothing Ya has said all week has worried you more",
+  "note": "control: ridge_lead names Ya"
+ },
+ {
+  "id": "TF10",
+  "file": "js/story/act1_blackroot.js",
+  "find": "and Yuki has stopped looking up",
+  "replace": "and Mei Lin has stopped looking up",
+  "note": "hunt_again 'any' names Mei Lin (absent in 'both')"
+ }
+]

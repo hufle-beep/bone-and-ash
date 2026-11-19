@@ -3,7 +3,7 @@
  "totals": {
   "scenes": 331,
   "words": 37443,
-  "variantWords": 75335,
+  "variantWords": 75851,
   "labels": 850,
   "labelWords": 5765,
   "sharedChunks": 727,
@@ -75,7 +75,7 @@
   "blackroot": {
    "scenes": 60,
    "words": 6644,
-   "variantWords": 7777,
+   "variantWords": 8293,
    "labels": 185,
    "labelWords": 1067,
    "sharedScenes": 17,
@@ -158,10 +158,10 @@
    "spacing": 0
   },
   "replies": {
-   "lines": 266,
-   "words": 7298,
+   "lines": 333,
+   "words": 10851,
    "dupes": 0,
-   "sceneShared": 10,
+   "sceneShared": 34,
    "tics": 0,
    "broken": 0,
    "spacing": 0

@@ -84,9 +84,9 @@ export const nightNext = (g) => (g.flags.leave_forest || ((g.flags.forest_day ||
 const nightFight = (kind) => (g) => {
     const s = forestScale(g);
     const base = {
-        crows: { intro: 'Three rot-crows come down out of the dark on a reek of old meat, making for your food and, after it, your eyes.', enemies: [1, 2, 3].map((i) => ({ name: `Rot-crow ${i}`, hp: 3, dc: 3, atk: 4, dmg: 2, prefersSmall: true, flies: true, thief: true })) }, // v0.11.113 (DA1, CS): the first landed hit takes a food item
-        rats: { intro: 'Two mire-rats, big as hounds, heave out of the stream and come up the bank wet, teeth leading.', enemies: [{ name: 'Mire-rat', hp: 5, dc: 3, atk: 4, dmg: 3, prefersSmall: true }, { name: 'Mire-rat (scarred)', hp: 5, dc: 3, atk: 4, dmg: 3, prefersSmall: true }] },
-        lizard: { intro: 'The thornback\'s ridge of spines comes up in one wave, rattling like a quiver being emptied.', enemies: [{ name: 'Thornback lizard', hp: 9, dc: 4, atk: 5, dmg: 4, dr: 1 }] },
+        crows: { intro: '' /* v0.11.231 (P4-2, FI): never shown, the stomp posture opens it */, enemies: [1, 2, 3].map((i) => ({ name: `Rot-crow ${i}`, hp: 3, dc: 3, atk: 4, dmg: 2, prefersSmall: true, flies: true, thief: true })) }, // v0.11.113 (DA1, CS): the first landed hit takes a food item
+        rats: { intro: '' /* v0.11.231 (P4-2, FI): never shown, the stomp posture opens it */, enemies: [{ name: 'Mire-rat', hp: 5, dc: 3, atk: 4, dmg: 3, prefersSmall: true }, { name: 'Mire-rat (scarred)', hp: 5, dc: 3, atk: 4, dmg: 3, prefersSmall: true }] },
+        lizard: { intro: '' /* v0.11.231 (P4-2, FI): never shown, the stomp posture opens it */, enemies: [{ name: 'Thornback lizard', hp: 9, dc: 4, atk: 5, dmg: 4, dr: 1 }] },
     }[kind];
     return { id: kind, night: true, intro: base.intro, band: 'standard', enemies: base.enemies.map((e) => grow(e, s)), win: 'night_won', lose: 'night_lost', flee: kind === 'crows' ? null : 'night_fled' };
 };
@@ -325,7 +325,7 @@ On the drowned stumps, here and there, grow pale gilled fungi that glow faintly,
 Under the water something moves. Then several more somethings.`,
         choices: [
             { text: 'Harvest the ghost-gills. Carefully. Properly.', show: (g) => !g.flags.gills, check: { skill: 'GU', dc: 4, bonus: () => 2 }, time: 45, do: (g) => { g.flags.gills = true; addItem(g, 'ghost_gill', 3); return [`You cut them at the base with a bone blade, leave the stalks to fruit again, and wrap each cap in moss the way you'd wrap a specimen worth your whole grant. Behind you the black water heaves once and settles. Yuki, on a hummock, does not take her eyes off it until you're done.`, '+3 Ghost-gill (chew one: +8 HP).']; }, failDo: (g) => { g.flags.gills = true; addItem(g, 'ghost_gill', 1); g.james.hp -= 2; return ['A slip, a few leeches, one cap saved. +1 Ghost-gill, −2 HP.']; }, to: 'mire' },
-            { text: 'Wait for the somethings to come up. Then deal with them.', show: (g) => !g.flags.mire_fight, combat: (g) => ({ id: 'mire', intro: 'The black water splits, and the mire-rats are on you all at once.', band: 'standard', enemies: [{ name: 'Mire-rat', hp: 5, dc: 3, atk: 5, dmg: 3, prefersSmall: true }, { name: 'Mire-rat', hp: 5, dc: 3, atk: 5, dmg: 3, prefersSmall: true }, { name: 'Mire-rat (bloated)', hp: 7, dc: 3, atk: 5, dmg: 4 }].map((e) => grow(e, forestScale(g))), win: 'mire_won', lose: 'mire_lost', flee: 'wilds' }), to: 'mire_won' },
+            { text: 'Wait for the somethings to come up. Then deal with them.', show: (g) => !g.flags.mire_fight, combat: (g) => ({ id: 'mire', intro: '' /* v0.11.231 (P4-2, FI): never shown, the stomp posture opens it */, band: 'standard', enemies: [{ name: 'Mire-rat', hp: 5, dc: 3, atk: 5, dmg: 3, prefersSmall: true }, { name: 'Mire-rat', hp: 5, dc: 3, atk: 5, dmg: 3, prefersSmall: true }, { name: 'Mire-rat (bloated)', hp: 7, dc: 3, atk: 5, dmg: 4 }].map((e) => grow(e, forestScale(g))), win: 'mire_won', lose: 'mire_lost', flee: 'wilds' }), to: 'mire_won' },
             { text: 'Wade back out while you still have both boots.', time: 60, to: 'wilds' },
         ],
     },

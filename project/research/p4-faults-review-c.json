@@ -1,0 +1,58 @@
+[
+ {
+  "id": "C1",
+  "file": "js/story/act1_blackroot.js",
+  "find": "both: 'Farther again, and this throw with your eyes shut",
+  "replace": "both: 'Farther again, and Ya says this throw with your eyes shut",
+  "note": "AT: a both-away drill line (dart day 3) names Ya; the AT walk reads day index 0 only"
+ },
+ {
+  "id": "C2",
+  "file": "js/story/act1_blackroot.js",
+  "find": "Yuki looks at you again. Two, the look says",
+  "replace": "Ya looks at you again. Two, the look says",
+  "note": "AT: the beetle's second-day both-away line names Ya; the walk reads do(g)[1], which is undefined"
+ },
+ {
+  "id": "C3",
+  "file": "js/story/act1_blackroot.js",
+  "find": "You walk out for them and come back with one in each fist",
+  "replace": "Ya walks out for them and comes back with one in each fist",
+  "note": "AT: the darts' second-day away line (darts_full[1]) names Ya"
+ },
+ {
+  "id": "C4",
+  "file": "js/story/act1_blackroot.js",
+  "find": "const awayList = (list, alt) => list.map((t, i) => (alt?.[i] ? (g) => awayText(g, t, alt[i]) : t));",
+  "replace": "const awayList = (list, alt) => list.map((t, i) => (alt?.[i] ? (g) => awayText(g, t, alt[(i + 1) % alt.length]) : t));",
+  "note": "AT: by-day lists show the away version of another day (hunt, darts, hawks_won)"
+ },
+ {
+  "id": "C5",
+  "file": "js/story/act1_blackroot.js",
+  "find": "if (!['dart', 'dart_f', 'needle', 'needle_f', 'beetle_after'].includes(k))",
+  "replace": "if (!['dart', 'dart_f', 'needle', 'needle_f', 'beetle_after', 'hurt'].includes(k))",
+  "note": "AT: an away list dropped from the text lint (count asserted as >= 18, not exact)"
+ },
+ {
+  "id": "C6",
+  "file": "js/story/act1_return.js",
+  "find": "if (p) enc.intro += ' Behind you, Ashfall does not kneel.';",
+  "replace": "if (p) enc.intro += '';",
+  "note": "FI: the Elder's live tail (keepTail) lost"
+ },
+ {
+  "id": "C7",
+  "file": "js/story/act1_blackroot.js",
+  "find": "const yaOut = (g) => !!awayNow(g);",
+  "replace": "const yaOut = (g) => yaAway(g) && !bothAway(g);",
+  "note": "AG: Ya's spar and talk offered while she is at the spring with Mei Lin"
+ },
+ {
+  "id": "C8",
+  "file": "js/story/act1_blackroot.js",
+  "find": "{ ya: 'Mei Lin holds up two fingers, for the second one,",
+  "replace": "{ ya: 'Ya holds up two fingers, for the second one,",
+  "note": "AT: the beetle's second-day Ya-away line names Ya"
+ }
+]

@@ -1,0 +1,30 @@
+[
+ {
+  "id": "TF4r",
+  "file": "js/story/stomp_prologue.js",
+  "find": "The youngest is sent forward to close the wolves' eyes.",
+  "replace": "The youngest is promoted forward to close the wolves' eyes.",
+  "note": "ST2 (port of TF4): a banned word in the wolves' third"
+ },
+ {
+  "id": "TF8r",
+  "file": "js/story/act1_blackroot.js",
+  "find": "The camp is quiet enough to hear the ash sifting down onto it, flake by flake.",
+  "replace": "The wind works at the ash until the sound is part of the morning.",
+  "note": "port of TF8: 5a both reuses the next morning's wind sentence"
+ },
+ {
+  "id": "TF9r",
+  "file": "js/story/act1_blackroot.js",
+  "find": "One ridge left before the tree. The pass at the top is quiet, and nothing in these hills has yet been quiet for a good reason.",
+  "replace": "One ridge left before the tree. Ya says the pass is held.",
+  "note": "port of TF9: ridge_lead names Ya"
+ },
+ {
+  "id": "TF5",
+  "file": "js/story/act1_blackroot.js",
+  "find": "rolling in the ash until the sparks give up. Yuki sits upwind with her fur on end and looks through the holes one by one.\n\n*Your coat,* says the bond, *is getting very holy.*",
+  "replace": "rolling in the ash until the sparks give up. Yuki sits upwind with her fur on end and looks through the holes one by one.\n\n\"Your coat,\" she says, \"is getting very holy.\"",
+  "note": "form: the cat speaks aloud (rerun after TG-T3)"
+ }
+]

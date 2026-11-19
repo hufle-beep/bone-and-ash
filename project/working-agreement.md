@@ -24,6 +24,11 @@ Allowed without asking (they change nothing): reading code and saves, running te
 
 **After every build, before the docs** (owner 2026-11-06, v0.11.3; scoped 2026-11-07, v0.11.29, pick C-a): when a push changes the game (game files, saves, balance) or the code behind the bot numbers, Claude runs the full `bash tools/check.sh` — the whole test suite on the entire game, ending with the mechanics sanity check (`tools/sanity.mjs`: the cultivation and Coil formulas, Story Mode's numbers, no broken bars, and every per-Coil rate and fight win rate against `tools/baseline.json`; more than 20 points off with at least 50 samples is flagged (100 before v0.11.42); owner 2026-11-07, v0.11.37, pick T1: was 5, until the retune; a move of more than 5 points is still listed as a log-only note, and Claude reports those). A push of tools, tests or docs only runs the tests of what it changes plus `bash tools/check.sh quick`, with one line in the report on how the change interacts with the rest and a warning where something could break; the report always says which checks ran and why. If a check or test fails or flags anything, Claude stops and reports it right away with the numbers, even mid-build after a pick. After an intended balance change, the baseline is saved again (`node tools/sanity.mjs --update`) only after the owner has seen the numbers and said go. If something urgent breaks, Claude reports it with options and waits; it does not fix it unasked.
 
+**How a push runs: PW1** (owner 2026-11-19 19:23, "PW1 go"; recorded in v0.11.231):
+- **PL, the pipeline:** while push N's full check and its Opus review run, a helper measures push N+1 and writes its options (the full layout above) to the claude.ai project; the owner gets them with push N's report, so the next chat starts from a pick. The measuring changes nothing (rule 1's "allowed without asking").
+- **BN, bundles:** 2–3 items a push; at most 2 Fable runs at once.
+- **PR, the split cold review:** two Opus reviewers that haven't seen the build, one for the texts and one for the code (rule 9), each with its own brief and report; the planted faults (`tools/mutate.mjs`) go with the code review.
+
 Automated "commit and push your changes" reminders from the tooling do **not** override this rule.
 
 ## Documentation and backups

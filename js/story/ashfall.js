@@ -90,12 +90,12 @@ const farHunt = (g) => {
     const enemies = wolves
         ? [{ name: 'Ash-wolf', hp: 7, dc: 4, atk: 5, dmg: 4 }, { name: 'Ash-wolf (old scar)', hp: 7, dc: 4, atk: 5, dmg: 4 }]
         : [{ name: 'Thornback bull', hp: 11, dc: 4, atk: 5, dmg: 5, dr: 1 }];
-    return { id: wolves ? 'wolves' : 'thornback', intro: wolves ? 'Two ash-wolves leave the oaks in step, grey and narrow, like a pair of knives leaving the same sleeve.' : 'The thornback bull heaves up out of the bracken, every spine raised, hissing like a cart-sized kettle.', band: 'challenging', enemies: enemies.map((e) => grow(e, s)), win: 'far_won', lose: 'far_lost', flee: 'ashfall' };
+    return { id: wolves ? 'wolves' : 'thornback', intro: '' /* v0.11.231 (P4-2, FI): never shown, the stomp posture opens it */, band: 'challenging', enemies: enemies.map((e) => grow(e, s)), win: 'far_won', lose: 'far_lost', flee: 'ashfall' };
 };
 const arson = (g) => {
     const s = forestScale(g) + villageScale(g);
     // v0.11.92 (X1): a fight after bed (Mei Lin wakes James) costs sleep
-    return { id: 'arson', night: true, intro: 'Pock-Face raises his torch and grins. The two behind him fan out without being told, which says how often they have done this.', band: 'challenging', enemies: [{ name: 'Lackey Pock-Face', hp: 7, dc: 3, atk: 4, dmg: 3 }, { name: 'Hired thug', hp: 5, dc: 3, atk: 4, dmg: 3 }, { name: 'Hired thug', hp: 5, dc: 3, atk: 4, dmg: 3 }].map((e) => grow(e, s)), win: 'arson_won', lose: 'arson_lost' };
+    return { id: 'arson', night: true, intro: '' /* v0.11.231 (P4-2, FI): never shown, the stomp posture opens it */, band: 'challenging', enemies: [{ name: 'Lackey Pock-Face', hp: 7, dc: 3, atk: 4, dmg: 3 }, { name: 'Hired thug', hp: 5, dc: 3, atk: 4, dmg: 3 }, { name: 'Hired thug', hp: 5, dc: 3, atk: 4, dmg: 3 }].map((e) => grow(e, s)), win: 'arson_won', lose: 'arson_lost' };
 };
 
 export const ASHFALL = {

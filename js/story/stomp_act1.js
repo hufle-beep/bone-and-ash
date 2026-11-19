@@ -6,6 +6,7 @@
 import { registerStomp } from './power.js';
 import { longCal } from '../core/calendar.js'; // v0.11.224 (RV1, MF1)
 import { yukiForm } from '../core/game.js';
+import { awayHawks } from './act1_blackroot.js'; // v0.11.231 (P4-2, AT): the hawks' wins while a woman is away
 
 const pick = (d, a, b, c) => (d >= 3 ? c : d === 2 ? b : a);
 const meiOn = (g) => !!g.flags.mei_party;
@@ -195,12 +196,12 @@ It is the quietest thing you have done on this world, and nobody saw it. Ya went
 
 ${pick(d, 'They are fast and they are alight. Two problems.', 'They are alight. Bone, as it happens, burns badly. You are not worried.', 'You begin counting the sparks, and reach eleven before it bores you.')}`,
         win: {
-            2: (g) => `Three darts, three hawks, three small bursts of sparks on the ash. The third had thought better of it and turned for the haze; you take it regardless, since cinder hawks keep grudges and you would rather not be stooped on all the way to the tree.
+            2: (g) => (awayHawks(g, 2) ?? `Three darts, three hawks, three small bursts of sparks on the ash. The third had thought better of it and turned for the haze; you take it regardless, since cinder hawks keep grudges and you would rather not be stooped on all the way to the tree.
 
 ${yukiForm(g) === 'cat' ? 'Yuki drops from your shoulder onto the last one down, sits, and watches the sky for volunteers.' : `${yuShort(g)} pins the last one down flat and watches the sky for volunteers.`}
 
-"Little queen," says Ya, deeply respectful. Yuki lets it stand. That, you gather, makes you the household.`,
-            3: (g) => `The hawks stoop. You raise one finger, and a thin white lattice of bone opens over the four of you like an umbrella. They hit it, bounce, and land on the ash in one heap of sparks and outrage, stunned, wings at every angle.
+"Little queen," says Ya, deeply respectful. Yuki lets it stand. That, you gather, makes you the household.`),
+            3: (g) => awayHawks(g, 3) ?? `The hawks stoop. You raise one finger, and a thin white lattice of bone opens over the four of you like an umbrella. They hit it, bounce, and land on the ash in one heap of sparks and outrage, stunned, wings at every angle.
 
 ${yuShort(g)} strolls over and takes possession of the heap.
 

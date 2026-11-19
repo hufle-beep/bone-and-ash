@@ -115,17 +115,17 @@ const LOG_SEAT = {
 /* ---------- encounters ---------- */
 const husks = (g, win, lose) => encounter(g, {
     id: 'husks', tier: 'small', win, lose, flee: 'heart_hub',
-    intro: 'The grey wood lets them out one at a time: hollow-grubs as big as dogs, the colour of old tallow, each with a mouthful of splinters.',
+    intro: '' /* v0.11.231 (P4-2, FI): never shown, the stomp posture opens it */,
     enemies: [{ name: 'Hollow-grub', hp: 5, dc: 2, atk: 3, dmg: 4 }, { name: 'Hollow-grub (swollen)', hp: 5, dc: 2, atk: 3, dmg: 4 }],
 });
 const rootThings = (g) => encounter(g, {
     id: 'root_husks', tier: 'region', win: 'roots_won', lose: 'roots_lost', flee: 'heart_hub',
-    intro: 'No light ever got this far down, and the rot has had four centuries of dark to get ideas in. It has grown arms. More than it needs.',
+    intro: '' /* v0.11.231 (P4-2, FI): never shown, the stomp posture opens it */,
     enemies: [{ name: 'Root-husk', hp: 6, dc: 2, atk: 2, dmg: 4 }, { name: 'Hollow-grub', hp: 4, dc: 2, atk: 2, dmg: 4 }],
 });
 const guardianFight = (g) => encounter(g, {
     id: 'guardian', tier: 'boss', win: 'guardian_won', lose: 'guardian_lost',
-    intro: 'The guardian opens out to its whole height, three of you end to end, grown wood on old white bone; and inside it, faint, a voice has not stopped singing.',
+    intro: '' /* v0.11.231 (P4-2, FI): never shown, the stomp posture opens it */,
     enemies: [{ name: 'The Gardeners\' Guardian', hp: g.flags.guardian_weak ? 10 : 12, dc: 3, atk: 3, dmg: 5, dr: 1, moods: true }], // v0.11.113 (DA1, HD): its moods (game.js moodOf)
 });
 

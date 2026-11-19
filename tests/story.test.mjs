@@ -329,7 +329,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     const P9K = ['wild_train:0:f', 'wild_train:1:f', 'wild_train:3:f']; // v0.11.177 (P9A, P2): the Wilds drills' failures, their own test (P9A's block)
     const D1K = ['bl_train:1:f', 'bl_train:2:f']; // D1 (the merged text push, b1): the Blackroot drills' failures, their own test (D1's block)
     const D1_FIRST = { 'rr_hunt:1': 'Your Convergence sings the snares out of nothing along the hare-runs, loops of white bone no thicker than a grass stem, and by the time Ya has finished looking down on the method they have closed on root-hares.' }; // D1 (a9): the sung snare, in front of the first day's old reply
-    const keys = Object.keys(DAY_REPLIES).filter((k) => !ST6K.includes(k) && !SWK.includes(k) && !SRK.includes(k) && !SR4K.includes(k) && !P5K.includes(k) && !P9K.includes(k) && !D1K.includes(k));
+    const keys = Object.keys(DAY_REPLIES).filter((k) => !k.startsWith('away:') /* v0.11.231 (P4-2, AT): their own test */ && !ST6K.includes(k) && !SWK.includes(k) && !SRK.includes(k) && !SR4K.includes(k) && !P5K.includes(k) && !P9K.includes(k) && !D1K.includes(k));
     const first = (k) => COIL_SETS[k]?.[0] ?? DAY_REPLIES[k]; // v0.11.166 (RW1): a Coil's set for the lists by Coil
     assert(keys.length === 38 && keys.reduce((s, k) => s + first(k).length - 1, 0) === 67, `NC1 (v0.11.177, P9A FF: the Fallout's four failure lists' third texts): 38 reply lists with 52 new texts; v0.11.152 (RP1): 11 more (${keys.length}, ${keys.reduce((s, k) => s + first(k).length - 1, 0)})`);
     assert(JSON.stringify([...keys].sort()) === JSON.stringify(NC.map(([k]) => k).sort()), 'NC1: a list for every reply the bots saw on two days, and no other');
@@ -1007,7 +1007,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
             if (stop) { if (c === '{') depth++; if (c === '}') { if (depth === 0) { i++; return out; } depth--; } }
             if (!/\s/.test(c)) out += c; i++; } return out; }; return code(false); };
         const LABELS = Object.values(HEART).flatMap((sc) => (sc.choices || []).map((c) => (typeof c.text === 'string' ? c.text : '(fn)')));
-        const PIN = { 'act1_heart.js': '9948b2e5b18d7311', /* v0.11.224 (TX2, TS6): re-pinned: ht_start's day from the calendar (dayWord), the watch line's long-calendar version (DN15); */ /* v0.11.213 (FQ1, S3): re-pinned: the spring's and the fireside talks' days spaced (spacedFree); v0.11.203 (T1, TS1): re-pinned for the long calendar (late and the leave by the story's day) */ 'stomp_act1.js': '63e5f3db75400ee8' /* v0.11.224 (RV1, MF1): Ya's fight opener by the calendar */, 'yuki_time.js': '746d1873838bd5ca', labels: 'f5407fff487a26e2' }; // v0.11.209 (TF1, K): the labels re-pinned ("Smoke the catch." appended on heart_hub); v0.11.182 (RS1, RV1 L6): the labels re-pinned ("Read to Ya from your archive." appended on heart_camp)
+        const PIN = { 'act1_heart.js': '9948b2e5b18d7311', /* v0.11.224 (TX2, TS6): re-pinned: ht_start's day from the calendar (dayWord), the watch line's long-calendar version (DN15); */ /* v0.11.213 (FQ1, S3): re-pinned: the spring's and the fireside talks' days spaced (spacedFree); v0.11.203 (T1, TS1): re-pinned for the long calendar (late and the leave by the story's day) */ 'stomp_act1.js': '884a95f6c7728761' /* v0.11.231 (P4-2, AT; RV1: `??`): re-pinned: the hawks' easy wins read awayHawks (Ya or both away); v0.11.224 (RV1, MF1): Ya's fight opener by the calendar */, 'yuki_time.js': '746d1873838bd5ca', labels: 'f5407fff487a26e2' }; // v0.11.209 (TF1, K): the labels re-pinned ("Smoke the catch." appended on heart_hub); v0.11.182 (RS1, RV1 L6): the labels re-pinned ("Read to Ya from your archive." appended on heart_camp)
         const hash = (t) => createHash('sha256').update(t).digest('hex').slice(0, 16);
         const got = { labels: hash(JSON.stringify(LABELS)) };
         for (const f of ['act1_heart.js', 'stomp_act1.js', 'yuki_time.js']) got[f] = hash(skel(readFileSync(new URL(`../js/story/${f}`, import.meta.url), 'utf8')));
@@ -1097,7 +1097,9 @@ for (const form of ['cat', 'human']) {
     const strong = () => { const r = { cat: 0, tiger: 2, human: 7 }[form]; g.james.realm = r; g.yuki.realm = r; g.yuki.form = form; g.james.gu = { tier: 4, level: 5, xp: 0 }; g.james.skills['Convergence Use'] = { tier: 4, level: 5, xp: 0 }; ensureBars(g); g.james.hp = jamesHpMax(g); g.james.qi = jamesQiMax(g); g.rel['Mei Lin'] = { f: 60, a: 30 }; g.rel.Ya = { f: 60, a: 30 }; g.inventory.venison = 20; g.james.satiety = 50; };
     strong(); g.scene = 'fo_start'; startActCoil(g, 1);
     const KEYS = ['bl_camp:0', 'bl_train:1', 'bl_train:2', 'talk_ya:3'];
-    const idxOf = (key, text) => DAY_REPLIES[key].findIndex((t) => text.includes(typeof t === 'function' ? t(g) : t));
+    const BRX = await import('../js/story/act1_blackroot.js'); // v0.11.231 (P4-2, AT): the away lines
+    const AWK = { 'bl_train:1': 'dart', 'bl_train:2': 'needle' }; // v0.11.231 (P4-2, AT): Days 14–15 Ya is away in this walk (it never follows her): her days' away lines count as theirs
+    const idxOf = (key, text) => { const i = DAY_REPLIES[key].findIndex((t) => text.includes(typeof t === 'function' ? t(g) : t)); if (i >= 0 || !AWK[key]) return i; return BRX.AW[AWK[key]].findIndex((a) => a && Object.values(a).some((t) => text.includes(typeof t === 'function' ? t(g) : t))); };
     const pick = (label) => sceneView(g, SCENES).choices.find((c) => !c.disabled && (label instanceof RegExp ? label.test(c.label) : c.label === label)) || null;
     const fight = (r) => { startCombat(g, r.combat(g)); for (let t = 0; t < 120 && g.combat; t++) { const out = combatStep(g, smartAction(g, t)); if (out?.done) { goTo(g, SCENES, out.next); break; } } };
     for (let coil = 0; coil < 3; coil++) {
@@ -1122,7 +1124,7 @@ for (const form of ['cat', 'human']) {
         const seq = (k, n, off = 0) => JSON.stringify(log[k] || []) === JSON.stringify([...Array(n).keys()].map((i) => i + off));
         assert(seq('bl_train:1', DAY_REPLIES['bl_train:1'].length) && seq('bl_train:2', DAY_REPLIES['bl_train:2'].length), `P5A (RV1, TG1): the darts and the needles show all five lines, Days 11–15 (${form}, Coil ${coil + 1}: ${log['bl_train:1']} / ${log['bl_train:2']})`);
         assert(seq('bl_camp:0', DAY_REPLIES['bl_camp:0'].length), `P5A (RV1, TG1, M1): the cooking shows all four lines at the four camps (${form}, Coil ${coil + 1}: ${log['bl_camp:0']})`);
-        assert(seq('talk_ya:3', COIL_SETS['talk_ya:3'][coil].length, 5 * coil) && actCoil(g) === coil, `P5A (RV1, TG8): "Knock it off" shows set ${coil + 1} from its first text after ${coil} real rewind(s) (${form}: ${log['talk_ya:3']})`);
+        assert(seq('talk_ya:3', COIL_SETS['talk_ya:3'][coil].length - 2, 5 * coil) && actCoil(g) === coil, `P5A (RV1, TG8; v0.11.231 AG: no talk with Ya on Days 14–15, she is away): "Knock it off" shows set ${coil + 1} from its first text after ${coil} real rewind(s) (${form}: ${log['talk_ya:3']})`);
         if (coil < 2) { rewind(g); strong(); g.flags.long = true; }
     }
 }
@@ -4037,7 +4039,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     {
         const PIN_BT = [['stream', 1, 10, '81ef0e1c8a433e91'], ['camp', 1, 23, '1c2b702fa53d56e2'], ['village', 1, 10, 'dcf6caab493838f2'], ['village', 1, 22, 'ff5136872a9add43'], ['rr_hub', 2, 23, 'da992b67610dfde9'], ['ah_hub', 2, 10, '02f8ae1f5859205d'], ['ashfall', 3, 10, '48c49ed71ec38639'], ['dw_hub', 13, 23, '8739ed4b9081d57b']];
         for (const [back, realm, hh, h] of PIN_BT) {
-            const g = ensureBars(newGame(85200 + realm)); g.flags.bt_return = back; g.james.realm = realm; g.minutes = 9 * D + hh * 60; g.rel['Mei Lin'] = 20;
+            const g = ensureBars(newGame(85200 + realm)); g.flags.bt_return = back; g.james.realm = realm; g.minutes = 9 * D + hh * 60; g.rel['Mei Lin'] = 20; g.flags.lore1 = true; // v0.11.231 (P4-2, BYb-g): Mei Lin's quote needs the lore scene now (it had her name)
             // v0.11.195 (F1, D1: BT, S3): the two swaps undone first, so the pin still shows nothing else moved
             const was = SCENES.breakthrough.text(g).replace(BT_CLOSER_195, '*Foundation.* Mortal Vessel no longer: the rung where this world\'s sect disciples stand, and you came by it without a pill. You feel heavier, and steadier, and precisely as sarcastic as before.').replace('\nIt goes on looking.\n', '\nIt looks for a long time.\n');
             assert(createHash('sha256').update(was).digest('hex').slice(0, 16) === h, `BR1 (RV1, TG2): realm ${realm} at ${back} ${hh}:00 renders as in v0.11.184 (v0.11.195's BT and S3 aside)`);
@@ -4108,15 +4110,21 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     const btw = (back, hh, flags) => { const g = ensureBars(newGame(88300)); Object.assign(g.flags, { bt_return: back, mei_party: true, ya_party: true }, flags); g.james.realm = 1; g.rel['Mei Lin'] = 20; g.minutes = 14 * D + hh * 60; return SCENES.breakthrough.text(g); };
     // TG1 (M1): Ya away at the Ashen Hills: Mei Lin's own block; both away for water: the trees line; Ya away elsewhere: no matter
     for (const [hh, k] of [[10, 'day'], [23, 'night']]) {
-        const t = btw('ah_hub', hh, { bl_day: 4 });
+        const t = btw('ah_hub', hh, { bl_region: 'ah', bl_day: 4 });
+        if (hh >= 19) { // v0.11.231 (P4-2, AV): the evening counts as back: the party's block, the trees line gone
+            assert(t.includes(P.BT_PARTY[k].replace('scorched moss', 'scorched ash')), `N1 (P4-2 AV): Ya "away" at the Ashen Hills ${hh}:00 is back: the party's block`);
+            const g = ensureBars(newGame(88301)); Object.assign(g.flags, { bt_return: 'ah_hub', mei_party: true, ya_party: true, bl_day: 2, trio: 2, bl_region: 'ah' }); g.rel['Mei Lin'] = { f: 90, a: 90 }; g.rel['Ya'] = { f: 90, a: 90 }; g.james.realm = 1; g.minutes = 14 * D + hh * 60;
+            assert(!BR.bothAway(g) && !TREES.test(SCENES.breakthrough.text(g)), `N1 (P4-2 AV): both "away" at ${hh}:00 are back: no trees line`);
+            continue;
+        }
         assert(t.includes(`\n\n${P.BT_MEI[k]}\n\n*Foundation.*`) && !Object.values(P.BT_PARTY).some((x) => t.includes(x.slice(0, 40))) && /fizzles out in the ash/.test(t), `N1 (RV1 M1, TG1): Ya away at the Ashen Hills ${hh}:00: Mei Lin's ${k} block, the ash`);
-        assert(btw('ah_hub', hh, { bl_day: 4, ya_off_done: true }).includes(P.BT_PARTY[k].replace('scorched moss', 'scorched ash')), `N1 (RV1 M1): Ya back (ya_off_done) ${hh}:00: the party's block`);
-        const g = ensureBars(newGame(88301)); Object.assign(g.flags, { bt_return: 'ah_hub', mei_party: true, ya_party: true, bl_day: 2, trio: 2 }); g.rel['Mei Lin'] = { f: 90, a: 90 }; g.rel['Ya'] = { f: 90, a: 90 }; g.james.realm = 1; g.minutes = 14 * D + hh * 60;
+        assert(btw('ah_hub', hh, { bl_region: 'ah', bl_day: 4, ya_off_done: true }).includes(P.BT_PARTY[k].replace('scorched moss', 'scorched ash')), `N1 (RV1 M1): Ya back (ya_off_done) ${hh}:00: the party's block`);
+        const g = ensureBars(newGame(88301)); Object.assign(g.flags, { bt_return: 'ah_hub', mei_party: true, ya_party: true, bl_day: 2, trio: 2, bl_region: 'ah' }); g.rel['Mei Lin'] = { f: 90, a: 90 }; g.rel['Ya'] = { f: 90, a: 90 }; g.james.realm = 1; g.minutes = 14 * D + hh * 60;
         assert(BR.bothAway(g), 'N1 (TG1): the water state set up'); { const w = SCENES.breakthrough.text(g); assert(TREES.test(w) && !w.includes(P.BT_MEI[k]), `N1 (RV1 M1, TG1): both away for water ${hh}:00: the trees line`); }
         assert(btw('dw_hub', hh, { bl_day: 6 }).includes(P.BT_PARTY[k]), `N1 (RV1 M1): Ya's door is the Ashen Hills' only: at dw_hub ${hh}:00 the party's block`);
     }
-    { const g = ensureBars(newGame(88302)); g.flags.bl_day = 4; assert(BR.yaAway(g) && !BR.yaAway(Object.assign(g, { flags: { ...g.flags, ya_off_done: true } })), 'N1 (RV1 M1): yaAway is the door\'s state'); }
-    assert(BR.BLACKROOT.ah_hub.choices.some((c) => c.to === 'ya_offended' && /yaAway\(g\) && !late\(g\)/.test(String(c.show))) && BR.BLACKROOT.ah_hub.choices.some((c) => c.to === 'trio_kiss' && /bothAway\(g\) && !late\(g\)/.test(String(c.show))), 'N1 (RV1 M1): the doors read the same states');
+    { const g = ensureBars(newGame(88302)); g.flags.bl_day = 4; g.flags.bl_region = 'ah'; g.minutes = 14 * D + 10 * 60; assert(BR.yaAway(g) && !BR.yaAway(Object.assign(g, { flags: { ...g.flags, ya_off_done: true } })), 'N1 (RV1 M1): yaAway is the door\'s state'); }
+    assert(BR.BLACKROOT.ah_hub.choices.some((c) => c.to === 'ya_offended' && /yaAway\(g\) && !bothAway\(g\)/.test(String(c.show))) && BR.BLACKROOT.ah_hub.choices.some((c) => c.to === 'trio_kiss' && /bothAway\(g\)/.test(String(c.show))), 'N1 (RV1 M1; v0.11.231 P4-2 AE): the doors read the same states');
     for (const [k, x] of Object.entries(P.BT_MEI)) {
         const w = x.split(/\s+/).length;
         assert(w >= 40 && w <= 90 && /Mei Lin/.test(x) && /\bYa\b/.test(x) && /laugh/.test(x) && (k === 'day' || /\bash\b/.test(x)) && !/moss|Ya (prods|crouches|hauls)/.test(x) && /you say\./.test(x.split('\n\n').at(-1)), `N1 (RV1 M1, TG4): Mei Lin's ${k} block: ${w} words, she laughs, Ya only named, the ash, James last`);
@@ -4191,14 +4199,14 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     const bt = (back, realm, hh, flags = {}, party = true) => { const g = ensureBars(newGame(89000 + realm)); Object.assign(g.flags, { bt_return: back }, party ? { mei_party: true, ya_party: true } : {}, flags); g.james.realm = realm; g.rel['Mei Lin'] = 20; g.minutes = 14 * D + hh * 60; return SCENES.breakthrough.text(g); };
     for (let r = 2; r <= 14; r++) for (const hh of [10, 23]) {
         const s = P.btStep(r);
-        for (const [back, flags, pl] of [['rr_hub', {}, 'P'], ['rt_camp', {}, 'P'], ['dw_hub', { bl_day: 6 }, 'P'], ['ah_hub', { bl_day: 4 }, 'M'], ['ah_hub', { bl_day: 4, ya_off_done: true }, 'P'], ['heart_hub', {}, 'T']]) {
+        for (const [back, flags, pl] of [['rr_hub', {}, 'P'], ['rt_camp', {}, 'P'], ['dw_hub', { bl_day: 6 }, 'P'], ['ah_hub', { bl_day: 4, bl_region: 'ah' }, hh >= 19 ? 'P' : 'M' /* v0.11.231 (P4-2, AV): back in the evening */], ['ah_hub', { bl_day: 4, ya_off_done: true, bl_region: 'ah' }, 'P'], ['heart_hub', {}, 'T']]) {
             const t = bt(back, r, hh, flags), alone = bt(back, r, hh, flags, false);
             assert(t === `${alone}\n\n${P.BT_LATE[pl][s]}` && !Object.values(P.BT_LATE).some((o) => Object.values(o).some((x) => alone.includes(x))), `P1 (PL): realm ${r} at ${back}${flags.ya_off_done ? ' (Ya back)' : ''} ${hh}:00: ${pl}${s} after the Yuki line; alone, none`);
         }
         for (const back of ['village', 'ashfall', 'fo_ashfall', 'rt_ashfall']) assert(!Object.values(P.BT_LATE).some((o) => Object.values(o).some((x) => bt(back, r, hh).includes(x))), `P1 (PL): realm ${r} in ${back}: the village's closers, no line of theirs`);
     }
     { // both away for water at the Ashen Hills: Yuki's line alone
-        const g = ensureBars(newGame(89100)); Object.assign(g.flags, { bt_return: 'ah_hub', mei_party: true, ya_party: true, bl_day: 2, trio: 2 }); g.rel['Mei Lin'] = { f: 90, a: 90 }; g.rel['Ya'] = { f: 90, a: 90 }; g.james.realm = 4; g.minutes = 14 * D + 600;
+        const g = ensureBars(newGame(89100)); Object.assign(g.flags, { bt_return: 'ah_hub', mei_party: true, ya_party: true, bl_day: 2, trio: 2, bl_region: 'ah' }); g.rel['Mei Lin'] = { f: 90, a: 90 }; g.rel['Ya'] = { f: 90, a: 90 }; g.james.realm = 4; g.minutes = 14 * D + 600;
         const t = SCENES.breakthrough.text(g); assert(t.endsWith(P.BT_REALMS[4].day) && !Object.values(P.BT_LATE).some((o) => Object.values(o).some((x) => t.includes(x))), 'P1 (PL): both away: the realm\'s Yuki line ends it');
     }
     // RV1 (TG6): one party flag alone: no line of theirs
@@ -4269,22 +4277,22 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         const alone = form(id, 'rr_hub', {}, false);
         assert(createHash('sha256').update(alone).digest('hex').slice(0, 16) === { tiger: '0af86b8c3b16508c', human: 'd351d6c495162fd7' }[f] && /^Then she/.test(P.AWAKE_AT[f]), `N1 (RV1 TG3): ${id} without the women renders as in v0.11.189`);
         assert(alone.includes(`\n\n${P.AWAKE_AT[f]}`) && !AW.some((a) => alone.includes(a[1])), `N1 (L9): ${id} without the party as before`);
-        for (const [back, flags, w0] of [['rr_hub', {}, 'P'], ['dw_hub', { bl_day: 6 }, 'P'], ['heart_hub', {}, 'T'], ['rt_camp', {}, 'P'], ['ah_hub', { bl_day: 4 }, 'M'], ['ah_hub', { bl_day: 4, ya_off_done: true }, 'P']]) {
+        for (const [back, flags, w0] of [['rr_hub', {}, 'P'], ['dw_hub', { bl_day: 6 }, 'P'], ['heart_hub', {}, 'T'], ['rt_camp', {}, 'P'], ['ah_hub', { bl_day: 4, bl_region: 'ah' }, 'M'], ['ah_hub', { bl_day: 4, ya_off_done: true, bl_region: 'ah' }, 'P']]) {
             const w = w0 === 'T' && !P.AWAKE_WOMEN[f].T ? 'P' : w0; // D1 (c3): the Old Tree's own text for the great form, P for the human
             const x = form(id, back, flags);
             assert(x === alone.replace(`\n\n${P.AWAKE_AT[f]}`, () => `\n\n${P.AWAKE_WOMEN[f][w]}\n\n${P.AWAKE_AT[f].replace(/^Then she/, 'Then Yuki')}`), `N1 (L9; RV1 M1): ${id} after ${back}${flags.ya_off_done ? ' (Ya back)' : ''}: ${w} before "${P.AWAKE_AT[f]}", the sentence naming Yuki`);
         }
         for (const [back, flags, party, ret, why] of [['fo_ashfall', {}, true, null, "Act 1's Ashfall"], ['rt_ashfall', {}, true, null, 'the Return\'s Ashfall'], ['village', {}, true, null, "the prologue's village"],
-            ['ah_hub', { bl_day: 2, trio: 2 }, true, null, 'both away'], ['rr_hub', { ya_party: false }, true, null, 'Mei Lin alone in the party'], ['rr_hub', {}, true, 'lf_hub', "the Long Forest's hub"]]) {
+            ['ah_hub', { bl_day: 2, trio: 2, bl_region: 'ah' }, true, null, 'both away'], ['rr_hub', { ya_party: false }, true, null, 'Mei Lin alone in the party'], ['rr_hub', {}, true, 'lf_hub', "the Long Forest's hub"]]) {
             const x = form(id, back, flags, party, ret);
             assert(!AW.some((a) => x.includes(a[1])), `N1 (L9): ${id}: none for ${why}`);
         }
     }
     { // both away needs her friendships: as P1's block
-        const g = ensureBars(newGame(89310)); Object.assign(g.flags, { bt_return: 'ah_hub', yuki_return: 'ah_hub', mei_party: true, ya_party: true, bl_day: 2, trio: 2 }); g.rel['Mei Lin'] = { f: 90, a: 90 }; g.rel['Ya'] = { f: 90, a: 90 };
+        const g = ensureBars(newGame(89310)); Object.assign(g.flags, { bt_return: 'ah_hub', yuki_return: 'ah_hub', mei_party: true, ya_party: true, bl_day: 2, trio: 2, bl_region: 'ah' }); g.rel['Mei Lin'] = { f: 90, a: 90 }; g.rel['Ya'] = { f: 90, a: 90 };
         g.james.realm = 2; g.yuki.realm = 2; assert(P.btWho(g) === null && !AW.some((a) => SCENES.yuki_tiger_awaken.text(g).includes(a[1])), 'N1 (L9): both away for water: none'); }
     // btWho is the breakthrough's own test: the realm's line and the form scene agree
-    for (const [back, flags, w] of [['rr_hub', {}, 'P'], ['heart_hub', {}, 'T'], ['ah_hub', { bl_day: 4 }, 'M'], ['fo_ashfall', {}, null], ['village', {}, null]]) {
+    for (const [back, flags, w] of [['rr_hub', {}, 'P'], ['heart_hub', {}, 'T'], ['ah_hub', { bl_day: 4, bl_region: 'ah' }, 'M'], ['fo_ashfall', {}, null], ['village', {}, null]]) {
         const g = ensureBars(newGame(89320)); Object.assign(g.flags, { bt_return: back, mei_party: true, ya_party: true }, flags); g.james.realm = 2; g.minutes = 12 * D + 10 * 60;
         const t = SCENES.breakthrough.text(g);
         assert(P.btWho(g) === w && (w ? t.endsWith(`\n\n${P.BT_LATE[w].A}`) : !Object.values(P.BT_LATE).some((o) => t.includes(o.A))), `N1 (L9): btWho ${back} → ${w}, as the breakthrough's line`);
@@ -4296,7 +4304,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       const t = g.scene === 'yuki_tiger_awaken' ? sceneView(g, SCENES).text : '';
       assert(t.includes(`\n\n${P.AWAKE_WOMEN.tiger.P}\n\nThen Yuki is eleven pounds again, in the space of one breath.`) && t.indexOf(P.AWAKE_WOMEN.tiger.P) > t.indexOf('*Finally. I have been small for long enough.*'), `N1 (L9; RV1 M1): the real path from rr_hub's breakthrough to the great form with both women (${g.scene})`); }
     // RV1 (TG2): the real path to the human form, through Nascent Soul's warning, both women (rr_hub) and Mei Lin alone (ah_hub)
-    for (const [hub, extra, w] of [['rr_hub', {}, 'P'], ['ah_hub', { bl_day: 4 }, 'M']]) {
+    for (const [hub, extra, w] of [['rr_hub', {}, 'P'], ['ah_hub', { bl_day: 4, bl_region: 'ah' }, 'P' /* v0.11.231 (P4-2, AV): the breakthrough runs to 00:00, and the evening counts as back */]]) {
       const g = ensureBars(newGame(89331)); g.scene = hub; Object.assign(g.flags, { mei_party: true, ya_party: true, ya_met: true, yuki_tiger_seen: true }, extra); g.coil = { ...(g.coil || {}), act: 1 };
       g.james.realm = 6; g.yuki.realm = 6; g.james.saturation = 96; g.rel['Mei Lin'] = 20; g.minutes = 11 * D + 10 * 60;
       runMed(g, SCENES, 'med:bt'); if (g.scene === 'ns_warn') choose(g, SCENES, 1); if (g.scene === 'breakthrough') choose(g, SCENES, 0);
@@ -4639,13 +4647,13 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     const after = (back, flags = {}, party = true, ret) => { const g = ensureBars(fresh(93000)); Object.assign(g.flags, { bt_return: back, yuki_return: ret || back }, party ? { mei_party: true, ya_party: true } : {}, flags); g.minutes = 12 * D + 600; g.james.realm = 7; g.yuki.realm = 7; goTo(g, SCENES, 'yuki_human_after'); return sceneView(g, SCENES).text; };
     const alone = after('rr_hub', {}, false);
     assert(alone.endsWith(P.AFTER_ANSWER) && alone.includes(P.AFTER_WOMEN[0]), 'N1 (HA): without the women, as before');
-    for (const [back, flags, w] of [['rr_hub', {}, 'P'], ['heart_hub', {}, 'P'], ['ah_hub', { bl_day: 4 }, 'M'], ['ah_hub', { bl_day: 4, ya_off_done: true }, 'P']]) {
+    for (const [back, flags, w] of [['rr_hub', {}, 'P'], ['heart_hub', {}, 'P'], ['ah_hub', { bl_day: 4, bl_region: 'ah' }, 'M'], ['ah_hub', { bl_day: 4, ya_off_done: true, bl_region: 'ah' }, 'P']]) {
         const x = after(back, flags);
         assert(x === alone.replace(P.AFTER_WOMEN[0], P.AFTER_WOMEN[1]).replace(P.AFTER_ANSWER, P.AFTER_ANSWER_WOMEN[w]), `N1 (HA): ${back}${flags.ya_off_done ? ' (Ya back)' : ''}: ${w}'s last paragraph, "everyone"`);
     }
     for (const [back, ret, why] of [['rr_hub', 'lf_hub', "the Long Forest's hub"], ['fo_ashfall', null, "Act 1's Ashfall"], ['village', null, "the prologue's village"]]) assert(after(back, {}, true, ret) === alone, `N1 (HA): ${why}: as before`);
     // HQ: the first question through yuki_human_after's two choices; the women leave first
-    for (const [re, back, flags, w] of [[/^Promise/, 'rr_hub', {}, 'P'], [/^Ask her to stay/, 'rr_hub', {}, 'P'], [/^Promise/, 'ah_hub', { bl_day: 4 }, 'M'], [/^Ask her to stay/, 'ah_hub', { bl_day: 4 }, 'M'], [/^Promise/, 'heart_hub', {}, 'P'], [/^Promise/, 'rr_hub', null, null]]) {
+    for (const [re, back, flags, w] of [[/^Promise/, 'rr_hub', {}, 'P'], [/^Ask her to stay/, 'rr_hub', {}, 'P'], [/^Promise/, 'ah_hub', { bl_day: 4, bl_region: 'ah' }, 'M'], [/^Ask her to stay/, 'ah_hub', { bl_day: 4, bl_region: 'ah' }, 'M'], [/^Promise/, 'heart_hub', {}, 'P'], [/^Promise/, 'rr_hub', null, null]]) {
         const g = ensureBars(fresh(93100)); g.minutes = 12 * D + 600;
         Object.assign(g.flags, { yuki_tiger_seen: true, yuki_human_seen: true, bt_return: back, yuki_return: back }, flags ? { mei_party: true, ya_party: true, ...flags } : {});
         g.james.realm = 7; g.yuki.realm = 7; g.yuki.form = 'human'; g.rel = { ...g.rel, Yuki: { f: 50, a: 80 } };
@@ -5033,7 +5041,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     { const g = G(97020); g.flags.gao_broken = true; const t = view(g, 'tribute'); assert(/carried in a litter at the rear, his sword arm bound to his chest and his face grey; at its poles are two porters/.test(t), `${T}: b4 the tribute's litter`); }
     // c1: a later Coil's question straight after a breakthrough the women saw: their line closes the breakthrough screen
     const asker = (seed, back, flags = {}) => { const g = G(seed, 8); Object.assign(g.flags, { bt_return: back, mei_party: true, ya_party: true, yuki_tiger_seen: true, yuki_human_seen: true, yk_last: 'sister' }, flags); return g; };
-    for (const [back, flags, w] of [['rr_hub', {}, 'P'], ['heart_hub', {}, 'T'], ['ah_hub', { bl_day: 4 }, 'M']]) {
+    for (const [back, flags, w] of [['rr_hub', {}, 'P'], ['heart_hub', {}, 'T'], ['ah_hub', { bl_day: 4, bl_region: 'ah' }, 'M']]) {
         const g = asker(97030, back, flags); const t = view(g, 'breakthrough');
         assert(P.btAsksNext(g) && t.endsWith(`\n\n${P.BT_ASK_WOMEN[w]}`), `${T}: c1 ${back}: the breakthrough ends on ${w}`);
         choose(g, SCENES, 0); assert(g.scene === 'yk_choice', `${T}: c1 ${back}: Get up goes to her question (${g.scene})`);
@@ -6930,7 +6938,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
           out.push(`${s.id}|${v.title ?? ''}|${v.text}|${v.choices.filter((c) => !c.disabled).map((c) => c.label).join('/')}`);
       }
       const h = Gm.fnv1a(out.join('\n'));
-      assert(h === '8de296d0' && out.length === 38976, `${T} (H2, TG2): the old calendar's ${out.length} renders of the scenes the counts don't touch exactly as v0.11.223's code (${h}; v0.11.230 (P3-2, FT): 5117a3ec → 8de296d0, the new texts of far_hunt, far_won and village_night (the other 38598 renders 8c6f3060 on both codes); v0.11.227: 8ce676b4 / 39060 → 5117a3ec / 38976, the 84 kept-realm renders of yuki_check left out, the hash taken on v0.11.226's code; update only with a push that means to change the old calendar's texts)`);
+      assert(h === '503ab805' && out.length === 38976, `${T} (H2, TG2): the old calendar's ${out.length} renders of the scenes the counts don't touch exactly as v0.11.223's code (${h}; v0.11.231 (P4-2, AG + AT, RV1): 8de296d0 → 503ab805, 57 renders on Days 14–15 at 08:00 with Ya away at the Ashen Hills (her cards hidden, the away lines; 19:00 unchanged, AV); v0.11.230 (P3-2, FT): 5117a3ec → 8de296d0, the new texts of far_hunt, far_won and village_night (the other 38598 renders 8c6f3060 on both codes); v0.11.227: 8ce676b4 / 39060 → 5117a3ec / 38976, the 84 kept-realm renders of yuki_check left out, the hash taken on v0.11.226's code; update only with a push that means to change the old calendar's texts)`);
       const real = [
         [at(false, 6, 19, { long: true, vday: 3 }), 'evening', /^Third supper at Mei Lin's\. Her mother serves you first now/],
         [at(false, 20, 19, {}), 'rt_evening', /"Nine days in the Blackroot," the old woman informs the pot, "and my daughter comes home fatter than she left\."/],
@@ -7383,6 +7391,150 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     // SF-c: no "sits down beside" left in Yuki's daily scenes
     { const all = Object.values(YT_BODY).flat().map((t) => (typeof t === 'function' ? t(at(31)) : t));
       assert(!all.some((t) => /sits down beside/.test(t)) && all.some((t) => /leans over your shoulder, takes one/.test(t)) && all.some((t) => /folds down next to you in the dust/.test(t)), `${T} (SF-c): the two "sits down beside" replaced`); }
+}
+
+// v0.11.231 (owner pick P4-2, 2026-11-19 20:08; texts D?): who is at the Ashen Hills camp. AR the absences read at the Ashen Hills only; AV the
+// day only (the evening counts as back); AE Ya's door waits for the spring; AG the spar, the talks and the cinderberries hidden while she
+// is away; AT the day lines' away versions (Fable's); BYb-g Foundation's quote of Mei Lin only after the `lore` scene; FI the dead fight
+// intros emptied; ST2 the degree-2 far wins' third texts (Fable's).
+{
+    const T = 'P4-2';
+    const BR = await import('../js/story/act1_blackroot.js');
+    const { markDaily } = await import('../js/story/common.js');
+    const { STOMP } = await import('../js/story/power.js');
+    const D = 1440;
+    const LIKE = { f: 90, a: 90 };
+    // state: null (both there), 'ya' (Ya walked off), 'both' (both at the spring)
+    const camp = (state, { h = 10, day = 4, form = 'cat', seed = 99400, flags = {} } = {}) => {
+        const g = ensureBars(newGame(seed + (form === 'cat' ? 0 : form === 'tiger' ? 1 : 2)));
+        Object.assign(g.flags, { bl_region: 'ah', bl_day: day, mei_party: true, ya_party: true }, state === null ? { ya_off_done: true } : {}, state === 'both' ? { trio: 2 } : {}, flags);
+        if (state === 'both') { g.rel['Mei Lin'] = { ...LIKE }; g.rel.Ya = { ...LIKE }; }
+        g.yuki.form = form; g.yuki.realm = form === 'cat' ? 0 : form === 'tiger' ? 2 : 7; g.james.realm = g.yuki.realm;
+        g.minutes = 20 * D + h * 60; g.scene = 'ah_hub';
+        return g;
+    };
+    // AR + AV: the Ashen Hills, the day only
+    { const y = camp('ya'), b = camp('both');
+      assert(BR.awayNow(y) === 'ya' && BR.awayNow(b) === 'both' && BR.awayNow(camp(null)) === null, `${T} (AR): the three states`);
+      const dw = camp('both', { flags: { bl_region: 'dw' } }), ydw = camp('ya', { flags: { bl_region: 'dw' } });
+      assert(!BR.bothAway(dw) && !BR.yaAway(ydw), `${T} (AR): no one away in the Drowned Wood (after the spring, or its last morning)`);
+      const eve = [19, 23, 26].map((h) => [camp('ya', { h }), camp('both', { h })]).flat();
+      assert(eve.every((g) => BR.awayNow(g) === null) && BR.awayNow(camp('ya', { h: 6 })) === 'ya' && BR.awayNow(camp('ya', { h: 18 })) === 'ya', `${T} (AV): the evening and the night count as back (19:00, 23:00, 02:00); 06:00 and 18:00 away`); }
+    // AE: Ya's door waits for the spring; both doors in the day only, and again the next morning
+    { const door = (g, to) => BR.BLACKROOT.ah_hub.choices.find((c) => c.to === to).show(g);
+      const b = camp('both');
+      assert(!door(b, 'ya_offended') && door(b, 'trio_kiss'), `${T} (AE): both away: the spring's door only`);
+      b.flags.trio_kiss_seen = true;
+      assert(door(b, 'ya_offended') && !door(b, 'trio_kiss'), `${T} (AE): after the spring, Ya's door`);
+      assert(!door(camp('ya', { h: 19 }), 'ya_offended') && door(camp('ya', { h: 6 }), 'ya_offended') && !door(camp('both', { h: 20 }), 'trio_kiss'), `${T} (AV): the doors hide at 19:00 and come back in the morning`); }
+    // AG: the cards that need her are hidden while she is away; Train stays while another drill is left
+    { const hubC = (g, txt) => BR.BLACKROOT.ah_hub.choices.find((c) => c.text === txt);
+      const trainC = (g, txt) => BR.BLACKROOT.bl_train.choices.find((c) => c.text === txt).show(g);
+      const cinder = (g) => BR.BLACKROOT.ah_forage.choices.find((c) => c.text === 'Cinderberries with Mei Lin.').show(g);
+      const y = camp('ya'), b = camp('both'), n = camp(null);
+      assert(!hubC(y, 'Talk to Ya.').show(y) && hubC(y, 'Talk to Mei Lin.').show(y) && trainC(y, 'Needle drills, slow and exact.') && !trainC(y, 'Spar with Ya.') && cinder(y), `${T} (AG): Ya away: no spar or talk with Ya; Mei Lin's talk and berries stay`);
+      assert(!hubC(b, 'Talk to Ya.').show(b) && !hubC(b, 'Talk to Mei Lin.').show(b) && !trainC(b, 'Spar with Ya.') && !cinder(b), `${T} (AG): both away: no spar, no talks, no berries`);
+      assert(hubC(n, 'Talk to Ya.').show(n) && hubC(n, 'Talk to Mei Lin.').show(n) && trainC(n, 'Spar with Ya.') && cinder(n), `${T} (AG): both there: all four`);
+      assert(BR.BLACKROOT.bl_train.choices.find((c) => c.text === 'Spar with Ya.').show.dailyKey === 'bt_ya', `${T} (AG): the spar keeps its day key (shown as tomorrow)`);
+      const only = (g) => { for (const k of ['bt_yuki', 'bt_needle', 'bt_dart']) markDaily(g, k); return hubC(g, 'Train.').show(g); };
+      assert(!only(camp('ya')) && only(camp(null)), `${T} (AG): Train hides when only the spar with an absent Ya is left`); }
+    // AT (RV1 TG-C1, TG-C2, TG-C5, TG-T1, TG-T3): one game a state and form walked over five days, so every day's away line is read
+    // (the drills, the hunt, the darts, the hawks, the forage, the beetle); no absent woman named, the head count right, the forms kept
+    { const names = { ya: /\bYa\b|\bYa's\b/, both: /\bYa\b|Mei Lin/ };
+      const COUNT = { null: 'four', ya: 'three', both: 'two' };
+      const run = (state, form) => {
+          const g = camp(state, { form }); const out = [], by = {};
+          const put = (k, t) => { t = String(t); out.push(t); (by[k] ||= []).push(t); };
+          for (let d = 0; d < 5; d++) {
+              g.minutes = (20 + d) * D + 10 * 60;
+              for (const i of [1, 2]) { const c = BR.BLACKROOT.bl_train.choices[i]; put(`train${i}`, c.do(g)[0]); put(`train${i}f`, c.failDo(g)[0]); }
+              put('beetle', BR.BLACKROOT.ah_forage.choices[2].do(g)[0]); put('truffle', BR.BLACKROOT.ah_forage.choices[0].failDo(g)[0]);
+              g.scene = 'ah_hunt'; noteDay(g, 'ah_hunt'); put('hunt', BR.BLACKROOT.ah_hunt.text(g));
+              put('dartsF', BR.dartsReply(g, true)); put('dartsP', BR.dartsReply(g, false));
+              g.scene = 'ah_hawks_won'; noteDay(g, 'ah_hawks_won'); put('won', BR.BLACKROOT.ah_hawks_won.text(g));
+              g.scene = 'ah_hawks_lost'; put('lost', BR.BLACKROOT.ah_hawks_lost.text(g)); put('patch', BR.BLACKROOT.ah_hawks_lost.enter(g)[0]);
+              put('stomp2', STOMP.cinder_hawks.win[2](g)); put('stomp3', STOMP.cinder_hawks.win[3](g));
+          }
+          const h = camp(state, { form, day: 5 }); h.james.satiety = 10; h.james.hp = 1;
+          put('hub', BR.BLACKROOT.ah_hub.text(h)); put('rest', BR.BLACKROOT.ah_hub.choices.find((c) => c.text === 'Rest an hour.').do(h).at(-1));
+          markDaily(h, 'ah_hawks'); h.scene = 'ah_hunt'; put('again', BR.BLACKROOT.ah_hunt.text(h));
+          return { out, by };
+      };
+      for (const form of ['cat', 'tiger', 'human']) {
+          const base = run(null, form);
+          for (const state of ['ya', 'both']) {
+              const { out, by } = run(state, form);
+              const bad = out.filter((t) => names[state].test(t));
+              assert(out.length === base.out.length && !bad.length, `${T} (AT, RV1 TG-C1): ${state} away, ${form}: ${out.length} lines over five days, none names her (${bad.map((t) => t.slice(0, 60)).join(' | ')})`);
+              const changed = out.filter((t, i) => t !== base.out[i]).length;
+              assert(new Set(by.train1).size === 5 && new Set(by.train2).size === 5 && new Set(by.beetle).size === 2 && new Set(by.hunt).size === 2 && changed >= 40, `${T} (AT, RV1 TG-C1, C2): every day's line read (darts ${new Set(by.train1).size}, needles ${new Set(by.train2).size}, beetle ${new Set(by.beetle).size}, hunt ${new Set(by.hunt).size}; ${changed} changed)`);
+              const counts = out.join(' ').match(/\b(two|three|four) of you\b/g) || [];
+              assert(counts.length && counts.every((c) => c === `${COUNT[state]} of you`) && !/smaller of you/.test(out.join(' ')), `${T} (RV1 T M1, TG-T1): the head count ${state} away: ${[...new Set(counts)].join(', ')}`);
+              if (form !== 'human') { const loud = out.filter((t, i) => /"[^"]*" (says|calls) Yuki|Yuki[^.]*"[^"]+," she says/.test(t) || (state === 'both' && t !== base.out[i] && /"[^"]*,?" (she|Yuki) (says|calls|tells)/.test(t))); /* RV1 TG-T3 (TF5): with both away, any "…" she says is Yuki's */ assert(!loud.length, `${T} (RV1 TG-T3): ${form}: Yuki speaks only through the bond (${loud.map((t) => t.slice(0, 50)).join(' | ')})`); }
+              if (form === 'tiger') assert(!out.some((t, i) => t !== base.out[i] && /your shoulder/.test(t)), `${T} (RV1 TG-T3): the great root-kin on no shoulder`);
+              if (state === 'ya') assert(out.some((t) => /Mei Lin/.test(t)), `${T} (AT): Ya away, Mei Lin is still in some lines (${form})`);
+          }
+          assert((base.out.join(' ').match(/\b(two|three|four) of you\b/g) || []).every((c) => c === 'four of you'), `${T} (TG-T1): both there: the four of you`);
+      }
+      // Claude's two cuts and the review's fixes pinned (RV1 TG-T2)
+      const AWX = BR.AW;
+      assert(/proposed to the beetle/.test(AWX.beetle_after[0].any) && /"You're still looking," you tell her\./.test(AWX.truffle_f.ya) && !/She studies it/.test(AWX.truffle_f.ya), `${T} (RV1 TG-T2, T M3): the cuts as made`);
+      const m5 = AWX.morning.find((e) => /whetstone/.test(e.from)); const d5 = AWX.morning.find((e) => /whetting/.test(e.from));
+      assert(!/wind/i.test(m5.both) || !/wind/i.test(d5.any(camp('both'))), `${T} (RV1 T L5, TG-T6): Day 5's two mornings don't both open on the wind`);
+      // the clock (RV1 C L5, TG-C4): 04:00 and 05:00 still the night, 06:00 the day
+      assert([4, 5].every((h) => BR.awayNow(camp('ya', { h })) === null) && BR.awayNow(camp('ya', { h: 6 })) === 'ya', `${T} (RV1 C L5): 04:00–05:59 no one away, 06:00 away`);
+      // patchUp's away line after the hawks only (RV1 C L2)
+      { const g = camp('both'); assert(/Mei Lin bandages/.test(BR.patchUpLine(g, false)) && !/Mei Lin|Ya/.test(BR.patchUpLine(g, true)), `${T} (RV1 C L2): the away bandage line after the hawks only`); }
+    }
+    // AT: the mornings (long calendar, three camps a story day) and the empty breakfast
+    { const C = await import('../js/core/calendar.js');
+      const morn = (state, day, n, form = 'cat') => { const g = camp(state, { day, form }); const h = ensureBars(newGame(99450, { closed: true, cal: C.LONG_CAL })); h.calBl = 3; Object.assign(h.flags, g.flags, { bl_n: n }); Object.assign(h.rel, g.rel); h.minutes = 20 * D + 6 * 60; h.scene = 'bl_morning'; return BR.BLACKROOT.bl_morning.text(h); };
+      const all = (s) => [morn(s, 4, 2), morn(s, 5, 0), morn(s, 5, 1), morn(s, 5, 2)];
+      assert(all(null).filter((t) => /\bYa\b/.test(t)).length === 3 && !all('ya').some((t) => /\bYa\b/.test(t)) && !all('both').some((t) => /\bYa\b|Mei Lin/.test(t)) && /Mei Lin/.test(morn('ya', 5, 1)), `${T} (AT): the camp's mornings without the absent woman (${all('both').map((t) => t.slice(0, 40)).join(' | ')})`);
+      const nb = (s) => { const g = camp(s, { day: 4 }); g.flags.bl_n = 0; g.inventory = {}; g.james.satiety = 50; return BR.BLACKROOT.bl_morning.enter(g).find((l) => /breakfast/i.test(l)); };
+      assert(/\bYa\b/.test(nb(null)) && !/\bYa\b/.test(nb('ya')) && /^No breakfast\./.test(nb('ya')), `${T} (AT): no breakfast without Ya`); }
+    // AT: the text lint reads every away version
+    { const keys = Object.keys(DAY_REPLIES).filter((k) => k.startsWith('away:'));
+      const WANT = 'away:ah_forage:2:after away:bl_train:1 away:bl_train:1:f away:bl_train:2 away:bl_train:2:f away:cairn_end away:darts_full away:darts_part away:hawks_lost away:hawks_won away:hunt away:hunt_again away:hungry away:hurt away:morning away:no_breakfast away:patch_up away:rest away:ridge_lead away:stomp_hawks away:talk_mei away:truffle_f away:ya_found_spring away:ya_off_spring';
+      assert([...keys].sort().join(' ') === WANT.split(' ').sort().join(' ') && keys.every((k) => DAY_REPLIES[k].length > 0 && DAY_REPLIES[k].every((t) => typeof t === 'string' || typeof t === 'function')), `${T} (AT, RV1 TG-C3): the ${keys.length} away lists the lint reads, exactly (${[...keys].sort().join(' ')})`); }
+    // RV1 (TG-T4, TG-C5): the screens after the hub while Ya alone is away: Mei Lin's talk (every beat, liked or not) and the cairn
+    { const bad = [];
+      for (let n = 0; n <= 10; n++) for (const likes of [false, true]) {
+          const g = camp('ya', { seed: 99480 + n }); g.flags.mei_talks = n; g.flags.mei_talks_seen = n; if (likes) g.rel['Mei Lin'] = { f: 90, a: 90 };
+          g.scene = 'talk_mei'; const t = BR.BLACKROOT.talk_mei.text(g); if (/Ya's back\.|Ya stops to smell|Ya shouts|Ahead, Ya|Up ahead Ya/.test(t)) bad.push(`${n}${likes ? 'L' : ''}: ${t.slice(0, 60)}`);
+      }
+      assert(!bad.length, `${T} (RV1 T M2, C M1): Mei Lin's talk with Ya away puts Ya nowhere on the path (${bad.join(' | ')})`);
+      const c = camp('ya'); c.scene = 'ah_scout'; const ct = BR.BLACKROOT.ah_scout.text(c), cn = camp(null); cn.scene = 'ah_scout';
+      assert(!/Ya spits/.test(ct) && /Ya spits/.test(BR.BLACKROOT.ah_scout.text(cn)), `${T} (RV1 C M2): the cairn without Ya while she is away`); }
+    // RV1 (T H1, TG-T4): the spring, then Ya's walk-off the same day: the quarrel after the spring; a later day the old one
+    { const { choose } = await import('../js/core/story.js');
+      const g = camp('both'); g.scene = 'ah_hub';
+      const door = (to) => BR.BLACKROOT.ah_hub.choices.findIndex((c) => c.to === to && c.show(g));
+      choose(g, SCENES, BR.BLACKROOT.ah_hub.choices.findIndex((c) => c.to === 'trio_kiss')); assert(g.scene === 'trio_kiss', `${T} (RV1): to the spring`);
+      choose(g, SCENES, 0); assert(g.scene === 'ah_hub' && door('ya_offended') >= 0, `${T} (RV1 T H1): back at the hub, Ya's door (${g.scene})`);
+      choose(g, SCENES, door('ya_offended')); const t = BR.BLACKROOT.ya_offended.text(g);
+      assert(/^It started with the spring/.test(t) && !/^Nothing started it/.test(t), `${T} (RV1 T H1): the same day, the quarrel after the spring (${t.slice(0, 40)})`);
+      g.minutes += D; assert(/^Nothing started it/.test(BR.BLACKROOT.ya_offended.text(g)), `${T} (RV1 T H1): a later day, the old quarrel`);
+      const f = camp(null, { flags: { trio_kiss_seen: true } }); f.scene = 'ya_found'; const ft = BR.BLACKROOT.ya_found.text(f), f0 = camp(null); f0.scene = 'ya_found';
+      assert(/found out at a spring/.test(ft) && !/too fond of each other to say so/.test(ft) && /too fond of each other to say so/.test(BR.BLACKROOT.ya_found.text(f0)), `${T} (RV1 T H1): James's answer after the spring`); }
+    // BYb-g: Foundation names Mei Lin's description only after the lore scene
+    { const fnd = (flags, mei) => { const g = ensureBars(newGame(99460)); Object.assign(g.flags, { bt_return: 'camp' }, flags); if (mei) g.rel['Mei Lin'] = { f: 20, a: 0 }; g.james.realm = 1; g.minutes = 3 * D + 10 * 60; return SCENES.breakthrough.text(g); };
+      const Q = /Mei Lin described it once/;
+      assert(Q.test(fnd({ lore1: true })) && !Q.test(fnd({ lore_realms: true })) && !Q.test(fnd({}, true)) && !Q.test(fnd({})), `${T} (BYb-g): the quote after the lore scene only (not after Old Wen's lesson or only meeting her)`); }
+    // FI: the dead fight intros emptied, each fight opened by its stomp posture; the Elder's live tail kept
+    { const files = ['prologue', 'wilds', 'ashfall', 'act1_fallout', 'act1_blackroot', 'act1_heart'];
+      const src = files.map((f) => readFileSync(new URL(`../js/story/${f}.js`, import.meta.url), 'utf8'));
+      const pinned = src.reduce((n, t) => n + (t.match(/intro: '' \/\* v0\.11\.231 \(P4-2, FI\)/g) || []).length, 0);
+      const left = src.flatMap((t, i) => [...t.matchAll(/intro: (['`"])(?!\1)/g)].map(() => files[i]));
+      const ids = 'jackals gao collectors boar crows rats lizard mire wolves thornback arson sect_watcher palisade_wolf ya_brawl bone_elk root_wyrm mire_serpent drowned cinder_hawks rot_ape night_wolves night_drowned night_serpent night_hawks husks root_husks guardian'.split(' ');
+      assert(pinned === 26 && !left.length && ids.every((id) => typeof STOMP[id]?.posture === 'function'), `${T} (FI): 26 intro lines emptied, none left with words (${left.join(', ')}), all ${ids.length} fights open on a posture`); }
+    // ST2: the degree-2 far wins in threes, by far_won's day; round again on the fourth
+    { const C = await import('../js/core/calendar.js');
+      for (const [kind, id, starts] of [['wolves', 'wolves', ['They are clever and quick', 'A pair of ash-wolves', 'The left one takes a bone needle']], ['bull', 'thornback', ['It is huge, plated and enraged', 'A bull the size of a woodshed', 'It charges.']]]) {
+          const g = ensureBars(newGame(99470, { closed: true, cal: C.LONG_CAL })); g.flags.far_kind = kind; const out = [];
+          for (let d = 0; d < 4; d++) { g.minutes = (30 + d) * D + 10 * 60; g.scene = 'far_won'; noteDay(g, 'far_won'); out.push(STOMP[id].win[2](g)); }
+          assert(starts.every((w, i) => out[i].startsWith(w)) && out[3] === out[0] && out.every((t) => !/\bloads?\b|a piece at a time|well done/i.test(t)) && !/promot|swept|white stones|unsent for|by seniority|eldest man first|finger's (breadth|width)|bows? (a breath )?early/i.test(out[2]) /* RV1 (T M4, TG-T5): the third stands alone, the brief's bans */, `${T} (ST2): ${id} degree 2 three texts, then round again (${out.map((t) => t.slice(0, 25)).join(' | ')})`);
+      } }
 }
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

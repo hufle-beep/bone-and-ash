@@ -27,6 +27,8 @@
 - **The clock's day against the text day (v0.11.203 L4):** a beat keyed on `clockParts(g.minutes).day` opens after midnight on the night before its day (`dayHour` reads 00:00–03:59 as the evening before); the text day (`textDay`, from 05:00) is the story's.
 - **Flags that outlive their story:** a rule keyed on flags that are never cleared (`mei_party`, `ya_party`) firing where the people aren't (Ashfall after the Return; v0.11.197 M1).
 
+- **A presence rule (who is there; v0.11.231 T H1, M1, M2, C M1, M2, TG-C1, TG-C5):** walk every screen reachable from the cards that stay open while someone is away (the other woman's talk, a scout scene, the door scenes and what follows them, the same day and a later one), over several real days of one game per state (not a fresh game a day: that reads only day 1), in each form; count heads ("the two / three / four of you"), not only names; and the order the rule now forces (a scene that assumed the old order).
+
 ## Reachability (what the player never sees)
 - Texts behind a day record, an hour or a flag a real game never reaches (part 4 M1, M2; part 5 M1, M2).
 - Emptied menus and dead texts; a save resting in an emptied menu (part 9 C2, C3).

@@ -95,20 +95,20 @@ const toEvening = (g) => (farewellNow(g) ? 'fo_farewell' : 'fo_supper');
 /* ---------------- encounters ---------------- */
 const spyFight = (g) => encounter(g, {
     id: 'sect_watcher', tier: 'small',
-    intro: 'The watcher puts his rice cake down on its lotus leaf before he draws. The short sword comes out fast and clean, the work of ten thousand identical mornings. Then he bows, and only then does he attack.',
+    intro: '' /* v0.11.231 (P4-2, FI): never shown, the stomp posture opens it */,
     enemies: [{ name: 'Sect watcher', hp: 9, dc: 5, atk: 6, dmg: 3, dr: 1 }],
     win: 'fo_spy_won', lose: 'fo_spy_lost', flee: 'fo_ashfall',
 });
 const wolfFight = (g) => encounter(g, {
     id: 'palisade_wolf', tier: 'small',
-    intro: 'Two ash-wolves come out of the barley and over the chalk line, one high and one low, having settled between them beforehand who dies first.',
+    intro: '' /* v0.11.231 (P4-2, FI): never shown, the stomp posture opens it */,
     enemies: [{ name: 'Ash-wolf', hp: 8, dc: 5, atk: 6, dmg: 4 }, { name: 'Ash-wolf (lame)', hp: 6, dc: 4, atk: 5, dmg: 3 }],
     win: 'fo_wolf_won', lose: 'fo_wolf_lost', flee: 'fo_morning',
     night: true, // v0.11.92 (X1): a fight after bed costs sleep
 });
 const yaBrawl = (g) => encounter(g, {
     id: 'ya_brawl', tier: 'small',
-    intro: 'Ya spits in the dust, grins, and comes in low behind the spear, laughing already: a dog that has picked out another dog to be friends with and means to settle it by force.',
+    intro: '' /* v0.11.231 (P4-2, FI): never shown, the stomp posture opens it */,
     enemies: [{ name: 'Ya', hp: 15, dc: 6, atk: 7, dmg: 3 }],
     win: 'ya_won', lose: 'ya_lost',
     // v0.11.82 (owner picks B1 + Y1; texts Fable's): a weapon spar, Yuki only in her human form
