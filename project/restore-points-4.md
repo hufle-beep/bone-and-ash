@@ -1,6 +1,6 @@
 # Restore points, part 4
 
-The known-good versions 0.11.172 to 0.11.184, moved word for word in v0.11.207 (0.11.172–0.11.181), v0.11.222 (0.11.182), v0.11.223 (0.11.183) and v0.11.224 (0.11.184) (owner pick U1, MD: the docs every push changes stay under 20 KB, so the mirror uploads less), from `restore-points.md`. Newer versions, the fallback branches, how to roll back and the saves: `restore-points.md`; older versions: `restore-points-3.md`.
+The known-good versions 0.11.172 to 0.11.187, moved word for word in v0.11.207 (0.11.172–0.11.181), v0.11.222 (0.11.182), v0.11.223 (0.11.183), v0.11.224 (0.11.184) and v0.11.225 (0.11.185–0.11.187) (owner pick U1, MD: the docs every push changes stay under 20 KB, so the mirror uploads less), from `restore-points.md`. Newer versions, the fallback branches, how to roll back and the saves: `restore-points.md`; older versions: `restore-points-3.md`.
 
 ## Known-good versions (newest first)
 

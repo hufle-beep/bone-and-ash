@@ -1,6 +1,6 @@
 # Changelog, part 5: Bone and Ash
 
-Versions 0.11.172 to 0.11.200, newest first, moved word for word in v0.11.198 (0.11.172–0.11.181), v0.11.209 (0.11.182–0.11.190), v0.11.217 (0.11.191–0.11.194), v0.11.220 (0.11.195–0.11.197), v0.11.222 (0.11.198), v0.11.223 (0.11.199) and v0.11.224 (0.11.200) (owner pick U1, MD: the docs every push changes stay under 20 KB, so the mirror uploads less), from `changelog.md`. Newer versions: `changelog.md`; 0.11.140–0.11.171: `changelog-4.md`; 0.11.70–0.11.139: `changelog-3.md`; 0.11.69 and before: `changelog-2.md`.
+Versions 0.11.172 to 0.11.202, newest first, moved word for word in v0.11.198 (0.11.172–0.11.181), v0.11.209 (0.11.182–0.11.190), v0.11.217 (0.11.191–0.11.194), v0.11.220 (0.11.195–0.11.197), v0.11.222 (0.11.198), v0.11.223 (0.11.199), v0.11.224 (0.11.200) and v0.11.225 (0.11.201–0.11.202) (owner pick U1, MD: the docs every push changes stay under 20 KB, so the mirror uploads less), from `changelog.md`. Newer versions: `changelog.md`; 0.11.140–0.11.171: `changelog-4.md`; 0.11.70–0.11.139: `changelog-3.md`; 0.11.69 and before: `changelog-2.md`.
 
 | Version | Date | Commit | What changed |
 |---|---|---|---|
