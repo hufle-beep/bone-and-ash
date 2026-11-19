@@ -43,7 +43,7 @@ export const YT_BODY = {
     "camp:3": [
         "You are describing the gill spacing of a grey bracket fungus to the only member of your thesis committee who made the crossing. Yuki hears the defence out with her eyes shut. *Not a week a doctor,* says the bond, *and already lecturing in a wood.* \"It's fieldwork.\" *It's talking to a mushroom. I was told that would stop.*",
         "You hold a grey bracket fungus up to the light and tell Yuki about its gills. She puts one paw on your chest, very gently, and pushes until you are lying down. *Rest,* says the bond. *The mushroom will keep.* \"It's a new genus.\" *It was a new genus yesterday. Nobody else here is going to publish.*",
-        "You are sorting grey bracket fungi by gill spacing when Yuki sits down beside you, takes one, and holds it up. \"Describe it,\" she says. You do, for some minutes. \"There,\" she says, handing it back. \"Now you've lectured, and you'll rest. I sat through the whole doctorate. I know how you work.\""
+        "You are sorting grey bracket fungi by gill spacing when Yuki leans over your shoulder, takes one, and holds it up. \"Describe it,\" she says. You do, for some minutes. \"There,\" she says, handing it back. \"Now you've lectured, and you'll rest. I sat through the whole doctorate. I know how you work.\""
     ],
     "camp:4": [
         "Yuki kneads the lab coat where it covers your stomach, methodically, as if the camp were a bed she had finally got the lumps out of. You scratch under her jaw. The bond hums between you like a wire in the wind, the one thing here that tastes of home. *Don't get sentimental,* it says. *Left a bit.*",
@@ -133,7 +133,7 @@ export const YT_BODY = {
     "heart_hub:1": [
         "The hall is grown, not built, and Yuki walks its ledges as she walked the ones at home, leaving the only pawprints this dust has taken since the tree died. She comes back and sits on your foot. *It's a house,* says the bond. *I know where the warm spot would have been.* She looks at it a while. *I'm not going to sit there.*",
         "The hall is grown, not built, and for once Yuki is in a room large enough for her. She paces it, leaving prints the size of plates in the dust, then lies down against you. *It's a house,* says the bond. *I know where the warm spot would have been.* She looks at it. *I'm not going to lie there.*",
-        "Yuki walks the hall with one hand trailing along the grown wood, as she'd walk a corridor at home, and sits down beside you in the dust. \"It's a house,\" she says. \"The ledges are where ours were. I know where somebody's cat would have slept.\" She draws her knees up. \"I'm not going to sit there.\""
+        "Yuki walks the hall with one hand trailing along the grown wood, as she'd walk a corridor at home, and folds down next to you in the dust. \"It's a house,\" she says. \"The ledges are where ours were. I know where somebody's cat would have slept.\" She draws her knees up. \"I'm not going to sit there.\""
     ],
     "heart_hub:2": [
         "You have been over the hall's walls twice. The rot keeps to the roots; up here, four hundred years dead, nothing grows, not one fruiting body. Yuki hears this from inside your coat. *You're upset that nothing is eating the walls,* says the bond. \"It's unnatural.\" *You're a mycologist in a hall with no mushrooms. It's personal.* Her head comes out under your chin. *I'm sorry about your mushrooms.*",

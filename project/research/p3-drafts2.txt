@@ -1,0 +1,22 @@
+dart:1 | Twenty paces, then thirty, then forty. Somewhere past thirty the mark stops being there to hit. You grow a new one, thicker, and walk back out to twenty.
+dart:3 | Farther again, and this throw with your eyes shut, on the theory that it ought to matter. The dart lands where the one before it landed. You are impressed, slightly, and keep it to yourself.
+dart:4 | You pick the mark today, a knuckle of bone no wider than your thumb, to be awkward. Three darts land in it, touching. The fourth has nowhere left to go, so you stop.
+dart:5:cat | From so far back that the hit has to be fetched as news. Yuki goes out to look and is in no hurry about it. *Centre,* says the bond. *Don't ask me to do that twice.*
+dart:5:root-kin | From so far back that the hit has to be fetched as news. Yuki goes out to look and is in no hurry about it. *Centre,* says the bond, and a very large white cat lies down across the evidence.
+dart:5:woman | From so far back that the hit has to be fetched as news. Yuki goes out to look and is in no hurry about it. "Centre," she calls, without bothering to raise her voice, and stays out there.
+needle:2 | Finer than the last lot. You hold one up against the light and lose sight of it, then spend an embarrassing while finding it again by touch.
+needle:3 | Slow enough to hear each one arrive. A hundred breaths go by with nothing visibly happening, and at the end of them there are nine needles and not a flaw to pick at.
+needle:5 | Slow, exact and at last boring, which is what a drill is for. Halfway through you catch yourself humming along with the omnitool, and the needles come out no worse for it.
+dart_f:1 | Past thirty paces the darts stop agreeing with you. The mark stands through all of them, and you walk a wide circle afterwards, picking your misses out of the ash and counting.
+dart_f:2 | The wind is from the left, and so, as it happens, is your aim. The hillside behind the mark has done nothing to deserve this and takes all of it without complaint.
+needle_f:3 | You try one on the hem of the lab coat and it leaves a hole you could post a letter through. The batch goes back to nothing, and the coat keeps the hole.
+cook:1 | You set out more bowls than the evening calls for, from habit, and put them back. The stew is quite adequate. You scrape the pot yourself, which is the cook's right, and tonight it goes undisputed.
+cook:2 | You sit right by the pot tonight, to save walking. The herbs went in late and bruised instead of cut, and that turns out to have been the whole trick. You note it on the omnitool, one professional to another.
+cook:3:cat | One piece is left. You look at it. Yuki looks at you. *Mine,* says the bond. You cut it in half, and she takes the larger half as a first instalment.
+cook:3:root-kin | One piece is left. You look at it. Yuki looks at you. *Mine,* says the bond, and a paw the size of the bowl comes to rest next to it. You cut it in half, and she takes the larger half as a first instalment.
+cook:3:woman | One piece is left. You look at it. Yuki looks at you. "Mine," says Yuki, as one reporting the weather. You cut it in half, and she takes the larger half as a first instalment.
+cook:4 | You eat without a word until the pot is empty. Then you tell the fire that you would hire this cook. The fire raises no objection, and you wash the one bowl.
+# notes
+- dart:5 is written in three forms (Yuki does the walking out); if a single-form line is wanted, swap in: "From so far back that you have to walk out and read the result yourself. You come back slower than you went, and take two more paces back."
+- Solitude is noted only in cook:1 and cook:4; no line says where anyone is.
+- needle_f:3 changes the gag from darning to the lab coat's hem; the fault (too coarse) and the batch being unmade are kept.

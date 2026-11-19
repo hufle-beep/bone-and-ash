@@ -1,0 +1,44 @@
+[
+ {
+  "id": "R1",
+  "file": "js/story/stomp_prologue.js",
+  "find": "Ashfall gets the rest all at once, out of the hammerspace. The hunters accept it in silence",
+  "replace": "Ashfall gets the rest load by load. The hunters accept it in silence",
+  "note": "SF-a: loads back in a stomp text under another spelling (the test greps four phrases)"
+ },
+ {
+  "id": "R2",
+  "file": "js/story/ashfall.js",
+  "find": "Yuki treads a circle on your chest, finds her place exactly, and is asleep while you are still deciding to mind.",
+  "replace": "Yuki comes up the ladder last, puts her cold feet against your calves without apology, and is asleep while you are still deciding to mind.",
+  "note": "FT: the woman's quiet-night line in the cat's branch (forms only checked as different)"
+ },
+ {
+  "id": "R3",
+  "file": "js/story/ashfall.js",
+  "find": "], 'far_won'), // v0.11.230",
+  "replace": "].map((t, i, a) => a[[0, 2, 1][i]]), 'far_won'), // v0.11.230",
+  "note": "FT: far_won's 'By now' text on the second win, 'This time' on the third (order not pinned)"
+ },
+ {
+  "id": "R4",
+  "file": "js/story/act1_blackroot.js",
+  "find": "const bothOff = (g) => region(g) === 'ah' && bothAway(g);",
+  "replace": "const bothOff = (g) => region(g) !== 'rr' && bothAway(g);",
+  "note": "SF-b: both away read in the Drowned Wood too (the test compares the Root Road only)"
+ },
+ {
+  "id": "R5",
+  "file": "js/story/act1_blackroot.js",
+  "find": "const yaOff = (g) => region(g) === 'ah' && yaAway(g);",
+  "replace": "const yaOff = (g) => region(g) === 'ah' && yaAway(g) && (g.flags.bl_day || 1) >= 5;",
+  "note": "SF-b: Ya away only from day 5 (the door shows from day 4; the test renders day 5)"
+ },
+ {
+  "id": "R6",
+  "file": "js/story/act1_blackroot.js",
+  "find": "const bothOff = (g) => region(g) === 'ah' && bothAway(g);",
+  "replace": "const bothOff = (g) => region(g) === 'ah' && both(g) && trio(g) >= 2;",
+  "note": "SF-b: both still away after the spring scene (trio_kiss_seen never set in the test)"
+ }
+]

@@ -6930,7 +6930,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
           out.push(`${s.id}|${v.title ?? ''}|${v.text}|${v.choices.filter((c) => !c.disabled).map((c) => c.label).join('/')}`);
       }
       const h = Gm.fnv1a(out.join('\n'));
-      assert(h === '5117a3ec' && out.length === 38976, `${T} (H2, TG2): the old calendar's ${out.length} renders of the scenes the counts don't touch exactly as v0.11.223's code (${h}; v0.11.227: 8ce676b4 / 39060 → 5117a3ec / 38976, the 84 kept-realm renders of yuki_check left out, the hash taken on v0.11.226's code; update only with a push that means to change the old calendar's texts)`);
+      assert(h === '8de296d0' && out.length === 38976, `${T} (H2, TG2): the old calendar's ${out.length} renders of the scenes the counts don't touch exactly as v0.11.223's code (${h}; v0.11.230 (P3-2, FT): 5117a3ec → 8de296d0, the new texts of far_hunt, far_won and village_night (the other 38598 renders 8c6f3060 on both codes); v0.11.227: 8ce676b4 / 39060 → 5117a3ec / 38976, the 84 kept-realm renders of yuki_check left out, the hash taken on v0.11.226's code; update only with a push that means to change the old calendar's texts)`);
       const real = [
         [at(false, 6, 19, { long: true, vday: 3 }), 'evening', /^Third supper at Mei Lin's\. Her mother serves you first now/],
         [at(false, 20, 19, {}), 'rt_evening', /"Nine days in the Blackroot," the old woman informs the pot, "and my daughter comes home fatter than she left\."/],
@@ -7304,7 +7304,8 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       const notFold = one.filter(([id, t]) => { const a = fold2(id.split(' ')[0], t); return !(a.fold && a.split && a.first === A.sentencesOf(t)[0]); });
       const bull = [0, 1].map((d) => tx(at(31 + d, 10, { far_kind: 'bull' }), 'far_hunt'));
       assert(one.length >= 8 && !notFold.length, `${T}: ${one.length} one-paragraph texts of the four scenes fold to their first sentence on a later day (not: ${notFold.map(([id, t]) => `${id}: ${t.slice(0, 40)}`).join(' | ')})`);
-      assert(bull.every((t) => paras(t).length === 1 && A.sentencesOf(t).length === 1) && !fold2('far_hunt', bull[0]).fold, `${T}: the bull's texts are one sentence and show in full (the 0.6 / 0.5 left; ${bull.map((t) => t.slice(0, 30)).join(' | ')})`); }
+      // v0.11.230 (P3-2, FT): the bull's texts rewritten as two sentences, so they fold too (were the 0.6 / 0.5 left)
+      assert(bull.every((t) => paras(t).length === 1 && A.sentencesOf(t).length === 2) && fold2('far_hunt', bull[0]).fold, `${T}: the bull's texts are two sentences and fold (v0.11.230, FT; ${bull.map((t) => t.slice(0, 30)).join(' | ')})`); }
     // RV1 (TG1): SD, the same day: split too (an opened same-day fold shows the paragraph whole)
     { const g = at(30, 10, { long: true, vday: 2 }); const id = 'herb_girl', one = 'Sd one. Sd two.';
       againView(g, { id, text: one }); linesOf(g).at = 'wilds'; g.minutes += 60; const sd = againView(g, { id, text: one });
@@ -7337,5 +7338,51 @@ console.log('fights', sorted(fights));
 console.log('endings', sorted(endings), 'longest run', maxSteps, 'scenes', Object.keys(SCENES).length);
 if (STATS_OUT) writeFileSync(STATS_OUT, JSON.stringify({ games: GAMES, fights, endings, seen: touchedOut() })); // v0.11.3: for tools/sanity.mjs; v0.11.22: `seen` for tools/leftovers.mjs
 console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FULL ? '' : ' (quick: coverage logged, not checked)'}`);
+// v0.11.230 (owner picks P3-2 = FT + SF, D1, AS1, DB1, RV1; 2026-11-19 17:31–18:48): FT the four one-paragraph scenes' texts in threes (far_hunt a
+// kind, far_won, village_night's quiet night by its own day key), every text two sentences or more (the bull's two rewritten), so all fold;
+// SF-a no "loads" with a bottomless hammerspace; SF-c the two other "sits down beside". RV1 (the Opus review): H1 a later day's wolves or bull
+// is a new one (the old was usually killed: 13 / 13, 8 / 8, 14 / 18 shown after a win); WD SF-b and AS1's away lines taken back out (the
+// drills and the cooking as in v0.11.229: the camp's away rule is open on roadmap-e.md); TG1–TG4, TG7, TG8. The models test (long calendar,
+// 10 games each): full repeats 0 / 0 / 0.6 / 0.5 a game → 0.
+{
+    const T = 'P3-2 (FT + SF, RV1)';
+    const C = await import('../js/core/calendar.js');
+    const A = await import('../js/story/again.js');
+    const D = 1440;
+    const at = (day, h = 9, flags = {}) => { const g = ensureBars(newGame(99300 + day, { closed: true, cal: C.LONG_CAL })); Object.assign(g.flags, flags); g.minutes = (day - 1) * D + h * 60; return g; };
+    const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
+    const seq = (id, key, h, flags, form = 'cat', n = 4) => { const g = at(31, h, flags); g.yuki.realm = 9; g.yuki.form = form; const out = []; for (let d = 0; d < n; d++) { g.minutes = (30 + d) * D + h * 60; noteDay(g, key); out.push(tx(g, id)); } return out; };
+    const ok3 = (l) => new Set(l.slice(0, 3)).size === 3 && l[3] === l[0] && l.every((t) => A.sentencesOf(t).length >= 2);
+    const opens = (l, starts) => starts.every((w, i) => l[i].startsWith(w));
+    // FT and RV1 (TG3): three texts a kind in this order, round again, each of two sentences or more
+    const HUNT = { wolves: ['The hunters warned you about the ash-wolves', 'The ash-wolves again.', 'Ash-wolves again: a new grey pair'], bull: ['A thornback, and a large one', 'A thornback bull again, standing square', 'Another thornback bull rises out of the bracken'], deer: ['Ash-deer, grey and fast', 'The ash-deer are in the birches again', 'Ash-deer among the birches, at their usual'] };
+    for (const [k, st] of Object.entries(HUNT)) { const l = seq('far_hunt', `far_hunt:${k}`, 10, { far_kind: k }); assert(ok3(l) && opens(l, st), `${T} (FT, TG3): far_hunt ${k} three texts in order, each two sentences or more (${l.map((t) => t.slice(0, 30)).join(' | ')})`); }
+    // RV1 (H1, TG8): a later day's wolves or bull is another (the one before was usually killed); none claims the same animal
+    { const later = ['wolves', 'bull'].flatMap((k) => seq('far_hunt', `far_hunt:${k}`, 10, { far_kind: k }).slice(1, 3));
+      assert(!later.some((t) => /the same (grey )?pair|^The thornback bull|recognition|same doe/.test(t)) && /a new grey pair/.test(later[1]) && /^Another thornback bull/.test(later[3]), `${T} (RV1, H1, TG8): the later wolves and bulls are new ones (${later.map((t) => t.slice(0, 40)).join(' | ')})`); }
+    { const l = seq('far_won', 'far_won', 10, { far_kind: 'wolves' }); assert(ok3(l) && opens(l, ['The kill travels to Ashfall folded away', 'It rides home in the hammerspace', 'By now the hunters have a place swept for the kill a bowshot past the oak hollow']), `${T} (FT, SF-a, TG3; RV1 L6): far_won three texts in order (${l.map((t) => t.slice(0, 30)).join(' | ')})`); }
+    // FT and RV1 (TG2): the quiet night three texts in each form, in order, with the form's own place and voice
+    { const PIN = { cat: [/your chest/, /your chest/, /\*Stop thinking,\* Yuki sends from the hollow of your shoulder/], tiger: [/one flank for a pillow/, /settles along the loft by stages/, /\*Stop thinking,\* Yuki sends from most of the floor/], human: [/takes most of the blanket/, /comes up the ladder last/, /"Stop thinking," Yuki says from behind you/] };
+      const byF = Object.fromEntries(Object.keys(PIN).map((f) => [f, seq('village_night', 'village_night:quiet', 22, {}, f)]));
+      const bad = Object.entries(PIN).flatMap(([f, re]) => re.map((r, i) => (r.test(byF[f][i]) ? null : `${f} ${i + 1}`)).filter(Boolean));
+      assert(Object.values(byF).every(ok3) && !bad.length && !/"/.test(byF.cat.join(' ') + byF.tiger.join(' ')), `${T} (FT, RV1 TG2): the quiet night by form, in order, the bond in italics for the cat and the great form (${bad.join(', ')})`); }
+    // RV1 (TG1): an arson night between quiet nights is no step of the quiet sequence
+    { const g = at(31, 22); g.scene = 'village_night'; const quiet = SCENES.village_night.dayKey(g);
+      const arsonOn = (() => { const h = ensureBars(newGame(99350, { closed: true })); h.flags.vday = 2; h.minutes = 1440 + 22 * 60; h.scene = 'village_night'; return SCENES.village_night.dayKey(h) === null && !SCENES.village_night.choices.find((c) => c.text === 'Sleep.').show(h); })(); // the old calendar's story night 2: the arson
+      const w = at(31, 22); w.yuki.realm = 0; const seen = [];
+      for (let d = 0; d < 3; d++) { w.minutes = (30 + d) * D + 22 * 60; if (d === 1) { noteDay(w, null); continue; } noteDay(w, SCENES.village_night.dayKey(w)); seen.push(tx(w, 'village_night')); }
+      assert(quiet === 'village_night:quiet' && arsonOn && seen[0] !== seen[1] && /Below the herb loft somebody banks the stove/.test(seen[1]), `${T} (RV1, TG1): a quiet night counts on its own key, an arson night (dayKey null) skips no quiet text (${arsonOn ? 'arson found' : 'no arson night'}; ${seen.map((t) => t.slice(0, 30)).join(' | ')})`); }
+    // SF-a and RV1 (L1, TG4): no "loads" in any far win (far_won, the stomp texts' degrees 2 and 3, both kinds, three days)
+    { const out = [];
+      for (const kind of ['wolves', 'bull']) for (const id of [kind === 'wolves' ? 'wolves' : 'thornback']) for (let d = 0; d < 3; d++) { const g = at(31, 10, { far_kind: kind }); for (let e = 0; e <= d; e++) { g.minutes = (30 + e) * D + 10 * 60; noteDay(g, 'far_won'); } out.push(tx(g, 'far_won')); for (const deg of [2, 3]) out.push(STOMP[id].win[deg](g)); }
+      const hit = out.filter((t) => /\bloads?\b|load by load|a piece at a time/.test(t));
+      assert(out.length === 18 && out.every((t) => typeof t === 'string' && t.length > 40) && !hit.length, `${T} (SF-a, RV1 L1, TG4): no far win carries the kill in loads (${hit.map((t) => t.slice(0, 50)).join(' | ')})`); }
+    // RV1 (WD): the drills' and the cooking's lines as in v0.11.229 (the away versions out; the camp's away rule open on roadmap-e.md)
+    { const L = ['bl_train:1', 'bl_train:2', 'bl_train:1:f', 'bl_train:2:f'].flatMap((k) => DAY_REPLIES[k]);
+      assert(L.length === 16 && L.every((t) => typeof t === 'string') && L.filter((t) => /\bYa\b/.test(t)).length === 5, `${T} (RV1, WD): the drills' 16 lines are plain lines again, 5 naming Ya`); }
+    // SF-c: no "sits down beside" left in Yuki's daily scenes
+    { const all = Object.values(YT_BODY).flat().map((t) => (typeof t === 'function' ? t(at(31)) : t));
+      assert(!all.some((t) => /sits down beside/.test(t)) && all.some((t) => /leans over your shoulder, takes one/.test(t)) && all.some((t) => /folds down next to you in the dust/.test(t)), `${T} (SF-c): the two "sits down beside" replaced`); }
+}
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

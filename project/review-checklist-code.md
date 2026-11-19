@@ -33,3 +33,4 @@
 - **A fixed chain made an ordered loop (v0.11.211 H1):** for each item with no row on the screen (the work carried, a card hidden once done), where does it sort once the player sets a place?
 - **"Exactly as before" (v0.11.211 TG2):** test it against the old code or a hash pinned on it, never the new code against itself, and never strip the new field before comparing.
 - **A guard on what a plan may take for the player (v0.11.213 M2):** check every other path that takes a choice for them too (a remembered pick, the forecast's pick), and that a pick's option signature tells different encounters apart (the far hunt's wolves and bull share one).
+- **A presence rule on some lines of a screen (v0.11.230 M1, M2):** a line that drops someone who is away: grep every card, label and reply on the same menu and its hub for the name, and the screen after (the spar and talk doors, the fireside); and check the rule itself ends when the story says the person is back.

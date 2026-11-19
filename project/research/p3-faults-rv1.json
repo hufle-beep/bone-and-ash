@@ -1,0 +1,58 @@
+[
+ {
+  "id": "F3",
+  "file": "js/story/ashfall.js",
+  "find": "dayKey: (g) => (arsonNight(g) ? null : 'village_night:quiet'),",
+  "replace": "dayKey: (g) => 'village_night:quiet',",
+  "note": "an arson night counts as a quiet night"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/ashfall.js",
+  "find": "], 'village_night:quiet');",
+  "replace": "]);",
+  "note": "the quiet night keyed on the scene (arson nights shift it)"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/yuki_time.js",
+  "find": "when Yuki leans over your shoulder, takes one",
+  "replace": "when Yuki sits down beside you, takes one",
+  "note": "the tic back"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/ashfall.js",
+  "find": "The kill travels to Ashfall folded away",
+  "replace": "The kill comes back to Ashfall in loads, folded away",
+  "note": "loads back in far_won"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/ashfall.js",
+  "find": "It wears its spines like a hedge somebody has sharpened.",
+  "replace": "and wears its spines like a hedge somebody has sharpened.",
+  "note": "the bull's first text one sentence again (no fold)"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/ashfall.js",
+  "find": "Another thornback bull rises out of the bracken, a stranger,",
+  "replace": "The thornback bull rises out of the bracken again,",
+  "note": "RV1 H1: the later bull the same one again"
+ },
+ {
+  "id": "F11",
+  "file": "js/story/stomp_prologue.js",
+  "find": "You bring them out of the hammerspace there, and the hunters take them eldest man first.",
+  "replace": "The loads leave your shoulders there, eldest man first.",
+  "note": "RV1 L1: loads back in the wolves' 2nd stomp text"
+ },
+ {
+  "id": "F12",
+  "file": "js/story/ashfall.js",
+  "find": "a place swept for the kill a bowshot past the oak hollow",
+  "replace": "a place swept for the kill before you reach the first houses",
+  "note": "RV1 L6: the custom backwards again"
+ }
+]

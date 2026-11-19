@@ -1,0 +1,65 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/act1_blackroot.js",
+  "find": "const yaOff = (g) => region(g) === 'ah' && yaAway(g);",
+  "replace": "const yaOff = (g) => yaAway(g);",
+  "note": "Ya away read outside the Ashen Hills"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/act1_blackroot.js",
+  "find": "const t = bothOff(g) ? both : ya && yaOff(g) ? ya : text;",
+  "replace": "const t = ya && yaOff(g) ? ya : bothOff(g) ? both : text;",
+  "note": "Ya away wins over both away (names Mei Lin)"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/ashfall.js",
+  "find": "dayKey: (g) => (arsonNight(g) ? null : 'village_night:quiet'),",
+  "replace": "dayKey: (g) => 'village_night:quiet',",
+  "note": "an arson night counts as a quiet night"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/ashfall.js",
+  "find": "], 'village_night:quiet');",
+  "replace": "]);",
+  "note": "the quiet night keyed on the scene (arson nights shift it)"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/act1_blackroot.js",
+  "find": "const bothOff = (g) => region(g) === 'ah' && bothAway(g);",
+  "replace": "const bothOff = (g) => bothAway(g);",
+  "note": "both away read outside the Ashen Hills"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/yuki_time.js",
+  "find": "when Yuki leans over your shoulder, takes one",
+  "replace": "when Yuki sits down beside you, takes one",
+  "note": "the tic back"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/ashfall.js",
+  "find": "The kill travels to Ashfall folded away",
+  "replace": "The kill comes back to Ashfall in loads, folded away",
+  "note": "loads back in far_won"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/act1_blackroot.js",
+  "find": "Yuki goes out to look, taking her time. *Centre,* says the bond. A very large",
+  "replace": "Yuki goes out to look, taking her time. *Centre,* says the bond. *Don't ask me to do that twice.* A very large",
+  "note": "the great form's line made the cat's (forms not checked for overlap)"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/ashfall.js",
+  "find": "It wears its spines like a hedge somebody has sharpened.",
+  "replace": "and wears its spines like a hedge somebody has sharpened.",
+  "note": "the bull's first text one sentence again (no fold)"
+ }
+]

@@ -1,0 +1,23 @@
+[
+ {
+  "id": "R1",
+  "file": "js/story/stomp_prologue.js",
+  "find": "Ashfall gets the rest all at once, out of the hammerspace. The hunters accept it in silence",
+  "replace": "Ashfall gets the rest load by load. The hunters accept it in silence",
+  "note": "SF-a: loads back in a stomp text under another spelling (the test greps four phrases)"
+ },
+ {
+  "id": "R2",
+  "file": "js/story/ashfall.js",
+  "find": "Yuki treads a circle on your chest, finds her place exactly, and is asleep while you are still deciding to mind.",
+  "replace": "Yuki comes up the ladder last, puts her cold feet against your calves without apology, and is asleep while you are still deciding to mind.",
+  "note": "FT: the woman's quiet-night line in the cat's branch (forms only checked as different)"
+ },
+ {
+  "id": "R3",
+  "file": "js/story/ashfall.js",
+  "find": "], 'far_won'), // v0.11.230",
+  "replace": "].map((t, i, a) => a[[0, 2, 1][i]]), 'far_won'), // v0.11.230",
+  "note": "FT: far_won's 'By now' text on the second win, 'This time' on the third (order not pinned)"
+ }
+]
