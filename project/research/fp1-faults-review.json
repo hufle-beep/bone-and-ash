@@ -1,0 +1,8 @@
+[
+ { "id": "R1", "file": "js/main.js", "find": "        next = checkScene(deserialize(text));", "replace": "        next = deserialize(text);", "note": "MV: a save file loaded by Import skips the flip (8 checkScene(deserialize( left, the pin asks >= 8)" },
+ { "id": "R2", "file": "js/main.js", "find": "    g = checkScene(deserialize(p.auto)); lastResult = null;", "replace": "    g = deserialize(p.auto); lastResult = null;", "note": "MV: Restore all opens the file's autosave unmoved" },
+ { "id": "R3", "file": "js/core/game.js", "find": "    s.calBl = act === 0 || d <= 10 ? BL_SPAN : 1;", "replace": "    s.calBl = act === 0 || d < 10 ? BL_SPAN : 1;", "note": "MV: an Act 1 save on Day 10 (the Fallout's last) gets the 5-day road" },
+ { "id": "R4", "file": "js/core/game.js", "find": "const FLIP_DAY_FLAGS = ['guardian_lost_day', 'foundation_day'];", "replace": "const FLIP_DAY_FLAGS = ['guardian_lost_day'];", "note": "DK: foundation_day not moved (never read: a harmless fault, a pin gap)" },
+ { "id": "R5", "file": "js/core/news.js", "find": "Day 6 becomes Day 36, Day 12 Day 66", "replace": "Day 6 becomes Day 37, Day 12 Day 66", "note": "NW: the What's new line's example day wrong" },
+ { "id": "R6", "file": "js/core/game.js", "find": "    if (g.coil?.snap && g.coil.snap.cal !== LONG_CAL) flipOne(g.coil.snap, act);", "replace": "    if (g.coil?.snap && g.coil.snap.cal !== LONG_CAL) flipOne(g.coil.snap, 0);", "note": "MV: the rewind point's Blackroot from act 0 (no effect: rewind keeps g.calBl)" }
+]

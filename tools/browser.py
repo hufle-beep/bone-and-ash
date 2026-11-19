@@ -81,10 +81,12 @@ def tap(pg, el, timeout=3000):
     el.click(timeout=timeout)
     if guarded: _pressed[id(pg)] = time.monotonic()
 
+OLD_CAL = "localStorage.setItem('boneash.oldcal', '1')"
 def fresh(pg, url, js, arg=None):
     """v0.11.8: set storage from a non-game page on the same site, then open the game: the game's save-on-close can't write over it."""
     pg.goto(url.replace('index.html', 'art/bg/CREDITS.md'))
     pg.evaluate(js, arg) if arg is not None else pg.evaluate(js)
+    pg.evaluate(OLD_CAL)  # v0.11.226 (FP1, BT): the flows written for the old calendar keep it (main.js OLD_CAL_KEY); flip_ui plays without it
     pg.goto(url); until(pg, '.main-menu', 10000, 'attached')
     enter(pg)
 
@@ -129,7 +131,7 @@ def open_saves(pg):
 
 def main_menu(pg, url):
     """v0.11.10: the menu opens first, without the tab bar or the game's picture; Settings and Saves; Continue enters the game."""
-    pg.goto(url.replace('index.html', 'art/bg/CREDITS.md')); pg.evaluate("localStorage.clear()")
+    pg.goto(url.replace('index.html', 'art/bg/CREDITS.md')); pg.evaluate("localStorage.clear()"); pg.evaluate(OLD_CAL)
     pg.goto(url); until(pg, '.main-menu', 10000, 'attached')
     if not pg.query_selector('.main-menu'): fails.append('menu: the game did not open on the main menu'); return
     if pg.is_visible('#tabs') or pg.query_selector('.plate'): fails.append('menu: the tab bar or the game picture shows behind the menu')
@@ -168,14 +170,14 @@ def news_box(pg, url):
     ver = re.search(r"VERSION = 'bone-ash-([^']+)'", (ROOT / 'sw.js').read_text()).group(1)
     notes_src = (ROOT / 'js/core/news.js').read_text()
     shown = [v for v in re.findall(r"\['(\d+\.\d+\.\d+)', '", notes_src) if tuple(map(int, v.split('.'))) <= tuple(map(int, ver.split('.')))]
-    pg.goto(url.replace('index.html', 'art/bg/CREDITS.md')); pg.evaluate("localStorage.clear()")
+    pg.goto(url.replace('index.html', 'art/bg/CREDITS.md')); pg.evaluate("localStorage.clear()"); pg.evaluate(OLD_CAL)
     pg.goto(url); until(pg, '#menuVer:not(:empty)', 5000, 'attached'); until(pg, "document.getElementById('menuVer')?.textContent !== '…'", 5000)
     label = pg.inner_text('.mver')
     if label != f'Version {ver} · Incremental Mode': fails.append(f'BL1 (LB): the browser menu says {label!r}, not Version {ver} · Incremental Mode')
     until(pg, f"localStorage.getItem('boneash.seen') === '{ver}'", 3000)
     if pg.query_selector('.wnew-box') or pg.evaluate("localStorage.getItem('boneash.seen')") != ver: fails.append('BL1 (WN): a new player saw What\'s new, or the version was not kept')
     save = (ROOT / 'saves/v0.11.7-long-forest-coil2.json').read_text()
-    pg.goto(url.replace('index.html', 'art/bg/CREDITS.md')); pg.evaluate("s => { localStorage.clear(); localStorage.setItem('boneash.auto', s); localStorage.setItem('boneash.seen', '0.11.140'); }", save)
+    pg.goto(url.replace('index.html', 'art/bg/CREDITS.md')); pg.evaluate("s => { localStorage.clear(); localStorage.setItem('boneash.oldcal', '1'); localStorage.setItem('boneash.auto', s); localStorage.setItem('boneash.seen', '0.11.140'); }", save)
     pg.goto(url); until(pg, f"localStorage.getItem('boneash.seen') === '{ver}'", 5000)
     if shown: until(pg, '.wnew-box li', 3000, 'visible')
     got = pg.eval_on_selector_all('.wnew-box li b', 'els => els.map(e => e.textContent)')
@@ -348,6 +350,31 @@ def replies(pg, url):
     elif pg.query_selector('.below .result'): fails.append('A1: a reply box still shows above the cards')
     else: notes.append('a card\'s reply under the scene text, its gains in Results')
     check_text(pg, 'a reply', strict=True)
+
+def flip_ui(pg, url):
+    """v0.11.226 (owner pick FP1, the flip; no OLD_CAL key, as a player has it): the menu has no test button; Begin starts the long
+    calendar on Day 1; an old-calendar save (Day 4, Mei Lin) opens moved to Day 22, and its autosave after a card is on the long calendar."""
+    auto = "(() => { try { return JSON.parse(JSON.parse(localStorage.getItem('boneash.auto')).data); } catch { return null; } })()"
+    pg.goto(url.replace('index.html', 'art/bg/CREDITS.md')); pg.evaluate("localStorage.clear()")
+    pg.goto(url); until(pg, '.main-menu', 10000, 'attached')
+    bad = []
+    if pg.query_selector('button[data-new="long"]') or '(test)' in pg.inner_text('.main-menu'): bad.append('OB: the long calendar\'s test button still shows')
+    enter(pg)
+    if 'Day 1' not in pg.evaluate("document.body.innerText"): bad.append('NG: Begin did not start on Day 1')
+    c = pg.query_selector('button.card:not([disabled])[data-story], button.card:not([disabled])[data-run], button.card:not([disabled])[data-act]')
+    if c: tap(pg, c); until(pg, f"{auto} && {auto}.cal === 7", 3000)
+    st = pg.evaluate(auto)
+    if not st or st.get('cal') != 7: bad.append(f"NG: Begin's autosave is not on the long calendar (cal {st and st.get('cal')})")
+    save = (ROOT / 'saves/v0.8.5-day4-mei-lin.json').read_text()
+    pg.goto(url.replace('index.html', 'art/bg/CREDITS.md')); pg.evaluate("s => { localStorage.clear(); localStorage.setItem('boneash.auto', s); }", save)
+    pg.goto(url); until(pg, '.main-menu', 10000, 'attached'); enter(pg)
+    if 'Day 22' not in pg.evaluate("document.body.innerText"): bad.append('MV: the Day 4 save did not open on Day 22')
+    c = pg.query_selector('button.card:not([disabled])[data-story], button.card:not([disabled])[data-run], button.card:not([disabled])[data-act]')
+    if c: tap(pg, c); until(pg, f"{auto} && {auto}.cal === 7", 3000)
+    st = pg.evaluate(auto)
+    if not st or st.get('cal') != 7 or not (21 * 1440 <= st.get('minutes', 0) < 23 * 1440): bad.append(f"MV: the moved save's autosave is not on Day 22 of the long calendar (cal {st and st.get('cal')}, minutes {st and st.get('minutes')})")
+    if bad: fails.extend(bad)
+    else: notes.append('FP1: no test button; Begin on Day 1 of the long calendar; a Day 4 save opened on Day 22, saved on the long calendar')
 
 def nextstep(pg, url):
     """v0.11.72 (owner pick N1): the next-step line on a prologue task screen (Day 1, the stream, a v0.8.5 test save);
@@ -1030,7 +1057,7 @@ def n1_ui(b, url):
     ctx = b.new_context(viewport={'width': 1366, 'height': 420}, service_workers='block')
     pg = ctx.new_page(); pg.on('pageerror', lambda e: fails.append(f"page error: {e}"))
     try:
-        pg.goto(url); pg.evaluate("([s, z]) => { localStorage.clear(); localStorage.setItem('boneash.auto', s); localStorage.setItem('boneash.textsize', z); }", [save, '130']); pg.reload()
+        pg.goto(url); pg.evaluate("([s, z]) => { localStorage.clear(); localStorage.setItem('boneash.oldcal', '1'); localStorage.setItem('boneash.auto', s); localStorage.setItem('boneash.textsize', z); }", [save, '130']); pg.reload()
         until(pg, 'button[data-menu="continue"]', 5000, 'visible')
         y = pg.evaluate("() => { scrollTo(0, document.documentElement.scrollHeight); return Math.round(scrollY); }")
         pg.click('button[data-menu="continue"]'); in_game(pg)
@@ -1185,6 +1212,7 @@ def main(part=0):
               groups(pg, url)
               replies(pg, url)
               nextstep(pg, url)
+              flip_ui(pg, url)
               # 4. two tabs (v0.11.8): a tab that closes never writes its older game over a newer save from another tab
               fresh(pg, url, "localStorage.clear()")
               pg.evaluate("1")

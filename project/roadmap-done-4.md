@@ -77,3 +77,7 @@ Started in v0.11.208, when `roadmap-done-3.md` would have passed about 45 KB wit
    - *(from the v0.11.221 line, the review's, for the owner)* a spaced card closed leaves the hub screen with no sign it is back in two days, only its plan row says so (L3, nothing false shown).
    - *(from the v0.11.222 line)* **Open, options later:** Plan the week on the Blackroot's camps (the taps a pass with MH + K3: 254 / 311 / 381 / 530, the four bots, without it).
    - *(from v0.11.214's review, word for word from `history-33.md`)* friendship and affection changes are numbers ("Mei Lin: friendship +4, affection +2", `replies.js` `relLines`) and never stop the plan; their texts (closers, talks) do (L5). every meridian has its own line, so a Coil can stop up to 24 times on meridians.
+
+## Moved from `roadmap-time.md` in v0.11.226 (word for word: t's queue item 5, done in v0.11.226 (FP1 + RV1))
+
+5. **The flip** (the long calendar for every new game, old saves moved to the matching day).

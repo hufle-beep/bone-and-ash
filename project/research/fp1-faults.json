@@ -1,0 +1,128 @@
+[
+ {
+  "id": "F1",
+  "file": "js/core/game.js",
+  "find": "    s.minutes = (calStart(s, d) - 1) * 1440 + tod;",
+  "replace": "    s.minutes = calStart(s, d) * 1440 + tod;",
+  "note": "MV: a day late (the week's second day)"
+ },
+ {
+  "id": "F2",
+  "file": "js/core/game.js",
+  "find": "    s.minutes = (calStart(s, d) - 1) * 1440 + tod;",
+  "replace": "    s.minutes = (calStart(s, d) - 1) * 1440 + 360;",
+  "note": "MV: the hour not kept (06:00)"
+ },
+ {
+  "id": "F3",
+  "file": "js/core/game.js",
+  "find": "    f.cal_night = night ? LONG_CAL - 1 : 0;",
+  "replace": "    f.cal_night = 0;",
+  "note": "MV (RV1 H1): a night save starts the week with no nights slept"
+ },
+ {
+  "id": "F4",
+  "file": "js/core/game.js",
+  "find": "    s.calBl = act === 0 || d <= 10 ? BL_SPAN : 1;",
+  "replace": "    s.calBl = BL_SPAN;",
+  "note": "MV: a save in or past the Blackroot gets its camps"
+ },
+ {
+  "id": "F5",
+  "file": "js/core/game.js",
+  "find": "    for (const [k] of moved) delete f[k]; // all out first",
+  "replace": "    for (const [k] of moved) void k; // all out first",
+  "note": "DK: the old marks stay too"
+ },
+ {
+  "id": "F6",
+  "file": "js/core/game.js",
+  "find": "    for (const [, k, v] of moved) f[k] = v;",
+  "replace": "    for (const [o, k, v] of moved) { delete f[o]; f[k] = v; }",
+  "note": "DK: renamed one by one: key@4 \u2192 key@22 overwrites key@22 before it moves"
+ },
+ {
+  "id": "F7",
+  "file": "js/core/game.js",
+  "find": "    const to = (n) => (n < 1 ? n : night && n === d - 1 ? calEnd(s, n) : calStart(s, n));",
+  "replace": "    const to = (n) => (n < 1 ? n : calStart(s, n));",
+  "note": "DK (RV1 M1): a night save's evening marks to the week's first day"
+ },
+ {
+  "id": "F8",
+  "file": "js/core/game.js",
+  "find": "    for (const k of FLIP_DAY_FLAGS) if (Number.isInteger(f[k])) f[k] = to(f[k]);",
+  "replace": "",
+  "note": "DK: the guardian's day not moved"
+ },
+ {
+  "id": "F9",
+  "file": "js/core/game.js",
+  "find": "    if (g.coil?.snap && g.coil.snap.cal !== LONG_CAL) flipOne(g.coil.snap, act);",
+  "replace": "",
+  "note": "MV: the rewind point left on the old calendar"
+ },
+ {
+  "id": "F10",
+  "file": "js/core/game.js",
+  "find": "    if (!g || g.cal === LONG_CAL) return false;",
+  "replace": "    if (!g) return false;",
+  "note": "MV: says it moved a long save"
+ },
+ {
+  "id": "F11",
+  "file": "js/main.js",
+  "find": "function checkScene(s) { if (!oldCalTest()) flipFill(s);",
+  "replace": "function checkScene(s) { if (oldCalTest()) flipFill(s);",
+  "note": "MV: a player's old save not moved"
+ },
+ {
+  "id": "F12",
+  "file": "js/main.js",
+  "find": "const freshGame = (cal = oldCalTest() ? 0 : LONG_CAL) =>",
+  "replace": "const freshGame = (cal = 0) =>",
+  "note": "NG: a new game on the old calendar"
+ },
+ {
+  "id": "F13",
+  "file": "js/main.js",
+  "find": "            g = freshGame(); // v0.11.226",
+  "replace": "            g = freshGame(0); // v0.11.226",
+  "note": "NG: New game on the old calendar (Begin still long)"
+ },
+ {
+  "id": "F14",
+  "file": "js/core/game.js",
+  "find": "    const to = (n) => (n < 1 ? n : night && n === d - 1 ? calEnd(s, n) : calStart(s, n));",
+  "replace": "    const to = (n) => (night && n === d - 1 ? calEnd(s, n) : calStart(s, n));",
+  "note": "DK: a mark of day 0 moves to day 1"
+ },
+ {
+  "id": "F15",
+  "file": "js/core/game.js",
+  "find": "flipOne(t, act); return t.minutes; }",
+  "replace": "flipOne(t, act); return minutes; }",
+  "note": "L2: the Saves screen shows the old day"
+ },
+ {
+  "id": "F16",
+  "file": "js/main.js",
+  "find": "clockLabel(p.cal === LONG_CAL || oldCalTest() ? p.minutes : flipMinutes(p.minutes, p.act))",
+  "replace": "clockLabel(p.minutes)",
+  "note": "L2: descOf without the move"
+ },
+ {
+  "id": "F17",
+  "file": "js/core/game.js",
+  "find": "    const night = tod < 240 && d > 1;",
+  "replace": "    const night = tod < 180 && d > 1;",
+  "note": "H1: a save at 03:00\u201303:59 not a night"
+ },
+ {
+  "id": "F18",
+  "file": "js/core/news.js",
+  "find": "the Elder on Day 103)",
+  "replace": "the Elder on Day 93)",
+  "note": "NW: What's new's Elder day wrong"
+ }
+]

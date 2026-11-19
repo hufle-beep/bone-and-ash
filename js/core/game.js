@@ -12,7 +12,7 @@ import {
     checkFromTierLevel, skillXpCost, maxHp, qiPoolMax, qiRegenPercent, cycleTimeMinutes,
     realmBonus, realmStepLabel, CONDENSE_SIT_COST, FAIL_XP_FRACTION, realmDr, realmShockHpBonus, dampenMultiplier,
 } from './formulas.js';
-import { calMinutes, LONG_CAL, BL_SPAN, storyDay } from './calendar.js'; // v0.11.222 (J2, SV): BL_SPAN, storyDay (blFill) // v0.11.203 (owner pick T1, TS1): the long calendar (test switch)
+import { calMinutes, calStart, calEnd, LONG_CAL, BL_SPAN, storyDay } from './calendar.js'; // v0.11.222 (J2, SV): BL_SPAN, storyDay (blFill) // v0.11.203 (owner pick T1, TS1): the long calendar (test switch)
 
 export const K = 0.5;
 export const CONVERGENCE_MULTIPLIER = 1.25;
@@ -1553,6 +1553,50 @@ export function migrate(g) {
  * one already in or past the Blackroot keeps the 5-day road (`calBl: 1`, written so a later load doesn't decide again). Old-calendar
  * saves are not touched. Fills a missing field only.
  */
+/**
+ * v0.11.226 (owner pick FP1, the flip: MV + DK; roadmap-time.md t's queue item 5): an old-calendar save (no `cal`) moves to the long
+ * calendar. Its story day d moves to the first day of d's week (`calStart`), the hour kept; `cal: LONG_CAL`; `calBl` as `blFill` gives it
+ * (BL_SPAN before the Blackroot, 1 in or past it); `cal_night` 0 (the week of its story day begins). DK: the day marks move with it (every
+ * `key@d` flag, `guardian_lost_day`, `foundation_day`: d → calStart(d); a mark of day 0 or before stays), so a card done today stays done.
+ * RV1 (H1, M1): a save at 00:00–03:59 is on the night after waking day d − 1: `cal_night` 6 (the week's seventh night) and that waking
+ * day's marks to calEnd(d − 1).
+ * The Coil's rewind point moves the same way (Day 1 stays Day 1, Act 1's Day 8 dawn → Day 44). Called by main.js on every load (the
+ * autosave, slots, backups, an import), not by `migrate`: the tests' old-calendar games keep their round trip. Returns true when it moved.
+ */
+const FLIP_DAY_FLAGS = ['guardian_lost_day', 'foundation_day'];
+function flipOne(s, act) {
+    if (!s || typeof s !== 'object' || s.cal === LONG_CAL) return;
+    const m0 = Number.isFinite(s.minutes) ? s.minutes : 0, d = Math.floor(m0 / 1440) + 1, tod = m0 - (d - 1) * 1440;
+    s.cal = LONG_CAL;
+    s.calBl = act === 0 || d <= 10 ? BL_SPAN : 1;
+    s.minutes = (calStart(s, d) - 1) * 1440 + tod;
+    const f = s.flags && typeof s.flags === 'object' ? s.flags : (s.flags = {});
+    // RV1 (H1, M1; the Opus review): a save at 00:00–03:59 rests on the night after waking day d − 1 (the old calendar's every night is a
+    // story night): it starts on that week's seventh night (`cal_night` 6, as a new long game has it there, so the next morning turns the
+    // wilds' and the village's counter), and that waking day's marks go to its week's last day (`dayKey` is the waking day: calEnd(d − 1))
+    const night = tod < 240 && d > 1;
+    f.cal_night = night ? LONG_CAL - 1 : 0;
+    const to = (n) => (n < 1 ? n : night && n === d - 1 ? calEnd(s, n) : calStart(s, n));
+    const moved = [];
+    for (const k of Object.keys(f)) {
+        const x = /^(.*)@(-?\d+)$/.exec(k);
+        if (!x) continue;
+        const n = to(+x[2]);
+        if (n !== +x[2]) moved.push([k, `${x[1]}@${n}`, f[k]]);
+    }
+    for (const [k] of moved) delete f[k]; // all out first: a mark's new day can be another mark's old one (key@4 → key@22, key@22 → key@94)
+    for (const [, k, v] of moved) f[k] = v;
+    for (const k of FLIP_DAY_FLAGS) if (Number.isInteger(f[k])) f[k] = to(f[k]);
+}
+/** RV1 (L2): the minute an old-calendar save's `minutes` moves to (the Saves screen's lines, from `peekSave`; `act` the Coil's act). */
+export function flipMinutes(minutes, act = 0) { const t = { minutes, flags: {} }; flipOne(t, act); return t.minutes; }
+export function flipFill(g) {
+    if (!g || g.cal === LONG_CAL) return false;
+    const act = g.coil?.act || 0;
+    flipOne(g, act);
+    if (g.coil?.snap && g.coil.snap.cal !== LONG_CAL) flipOne(g.coil.snap, act);
+    return true;
+}
 export function blFill(g) {
     if (!g || g.cal !== LONG_CAL || g.calBl !== undefined) return g;
     g.calBl = (g.coil?.act || 0) === 0 || storyDay(g) <= 10 ? BL_SPAN : 1; // the prologue (the Long Forest too) always before it
@@ -1623,7 +1667,7 @@ export function unwrapSave(text, { force = false } = {}) {
 
 /** A short description of a save without loading it ("<scene id>|<minutes>"), or null. */
 export function peekSave(text) {
-    try { const s = JSON.parse(unwrapSave(text, { force: true })); return s && s.scene ? { scene: s.scene, minutes: s.minutes, coil: (s.coil ? oneCount(JSON.parse(JSON.stringify(s))).coil.n : 0), act: s.coil?.act || 0 } : null; /* v0.11.26: the one count, as it loads */ } catch { return null; } // v0.11.13: with the Coil, for the save lists
+    try { const s = JSON.parse(unwrapSave(text, { force: true })); return s && s.scene ? { scene: s.scene, minutes: s.minutes, coil: (s.coil ? oneCount(JSON.parse(JSON.stringify(s))).coil.n : 0), act: s.coil?.act || 0, cal: s.cal || 0 } : null; /* v0.11.26 … v0.11.226 (RV1, L2): cal, for the moved day; v0.11.26: the one count, as it loads */ } catch { return null; } // v0.11.13: with the Coil, for the save lists
 }
 
 export function deserialize(text, { force = false } = {}) {

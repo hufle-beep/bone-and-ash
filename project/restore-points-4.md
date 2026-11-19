@@ -1,11 +1,12 @@
 # Restore points, part 4
 
-The known-good versions 0.11.172 to 0.11.187, moved word for word in v0.11.207 (0.11.172–0.11.181), v0.11.222 (0.11.182), v0.11.223 (0.11.183), v0.11.224 (0.11.184) and v0.11.225 (0.11.185–0.11.187) (owner pick U1, MD: the docs every push changes stay under 20 KB, so the mirror uploads less), from `restore-points.md`. Newer versions, the fallback branches, how to roll back and the saves: `restore-points.md`; older versions: `restore-points-3.md`.
+The known-good versions 0.11.172 to 0.11.188, moved word for word in v0.11.207 (0.11.172–0.11.181), v0.11.222 (0.11.182), v0.11.223 (0.11.183), v0.11.224 (0.11.184) v0.11.225 (0.11.185–0.11.187) and v0.11.226 (0.11.188) (owner pick U1, MD: the docs every push changes stay under 20 KB, so the mirror uploads less), from `restore-points.md`. Newer versions, the fallback branches, how to roll back and the saves: `restore-points.md`; older versions: `restore-points-3.md`.
 
 ## Known-good versions (newest first)
 
 | Version | Commit | What it is |
 |---|---|---|
+| 0.11.188 | `236171e` | N1 + D1 + E1 + RV1 + DB1 (lines that assumed witnesses): `js/story/prologue.js` (`BT_PARTY`, `BT_MEI`, `btParty`, the Ashen Hills' ash), `js/story/act1_blackroot.js` (`yaAway`, `bothAway`), `js/story/act1_fallout.js` (`hymnToday`, `HYMN_MORNING`, `LETTER.lostUnseen`, the thirteen days' clause, the old letter's date), `js/story/act1_return.js` (`rt_wen`, `rt_elder`), `js/core/news.js`, `sw.js`, `tests/story.test.mjs` (the N1 block; the Return's pin), `tools/text-baseline.json`, `tests/README.md`, `project/research/n1-*`. Texts only. |
 | 0.11.187 | `526ee4d` | U1 (the update check): `js/core/update.js` (`resetAt`, `clock`, `goLabel`, `offerBrowser`, `st.failed`, the `limitedAt` and `browser` lines), `js/main.js` (the panel's label and browser link), `js/core/news.js`, `sw.js`, `tests/update.test.mjs` (F 39 cases, 37 mutants; D), `tests/faq.test.mjs` (reads `update.js` for the button's words), `tools/browser.py` (part 2: a limited check in the app). No save change; the full check exit 0. |
 | 0.11.186 | `2ac9430` | R1 (the Android link on the repo page): `README.md` (the *Android app* section), `sw.js` (VERSION), `project/research/ne-measure.md`, the docs (`history-24.md` new). Docs only. |
 | 0.11.185 | `d1f3cdf` | BR1 + D1 + RV1 (breakthroughs in the right place): `js/story/prologue.js` (`btText`, the Act 1 Ashfall witness block, the Old Tree's frame, `BT_OWN_CLOSER`, `a1_sky_seen`), `js/story/act1_return.js` (the street line), `js/core/news.js`, `sw.js`, the BR1 block in `tests/story.test.mjs`, `tools/mutate.mjs` (`keepInCopy`), textlint's `bt_place` pool. One new world flag (`a1_sky_seen`, reset each Coil; an older save has none). The full check exit 0. |

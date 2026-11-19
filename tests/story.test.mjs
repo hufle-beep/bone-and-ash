@@ -5126,7 +5126,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       assert(ok(starts[0]) && ok(starts[7]), `${T} (RV1, TG2): the Blackroot, the Heart and the road home start on story days 11, 16, 19–20 in both calendars (old: ${keys(starts[0])}; long: ${keys(starts[7])})`); }
     // the FAQ and the menu
     { const goal = FAQ.find(([q]) => q === 'What is the goal?')[1], a1 = FAQ.find(([q]) => q === 'Act 1')[1]; assert(/tribute on Day 7\./.test(goal(old)) && /tribute on Day 43\./.test(goal(lg)) && /Day 8 .*Day 21\./.test(a1(old)) && /Day 44 .*Day 103\./.test(a1(lg)), `${T}: the FAQ's days by the save's calendar`); }
-    { const M = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8'); assert(/data-new="long">New game: the long calendar \(test\)/.test(M) && /freshGame\(b\.dataset\.new === 'long' \? LONG_CAL : 0\)/.test(M), `${T}: the main menu's test switch`); }
+    { const M = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8'); assert(!/data-new="long"/.test(M) && /const freshGame = \(cal = oldCalTest\(\) \? 0 : LONG_CAL\) =>/.test(M) && /g = freshGame\(\); \/\/ v0\.11\.226/.test(M), `${T}: every new game on the long calendar (v0.11.226, FP1: the test switch gone)`); }
 }
 
 // v0.11.204 (owner pick W1; roadmap-time.md TS2 + TS3): the week on the long calendar (js/core/tasks.js S1, R1, R2; js/core/week.js R3, P1).
@@ -6819,7 +6819,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     { const g = ensureBars(newGame(99905, { closed: true })); g.flags.ending = 'paid'; g.minutes = 10 * D + 17 * 60; Object.assign(g.flags, { bl_day: 1, bl_region: 'rr', mei_party: true, ya_party: true, ya_mocked: true });
       goTo(g, SCENES, 'rr_hub'); assert(has(g, CAMP) && !has(g, PUSH) && C.calStart(g, 16) === 16, `${T}: the old calendar's Root Road as before`); }
     // the main menu's note names the new day
-    { const M = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8'); assert(/the Elder on Day 103\./.test(M) && !/Day 93/.test(M), `${T}: the main menu's note: the Elder on Day 103`); }
+    { const M = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8'), N = readFileSync(new URL('../js/core/news.js', import.meta.url), 'utf8'); assert(!/Day 93/.test(M) && /'0\.11\.226', '[^']*the Elder on Day 103\)/.test(N), `${T}: the Elder on Day 103 (the main menu's note until v0.11.226, FP1; What's new since)`); }
 }
 
 // v0.11.224 (owner pick TX2 = DC + DN + V3a + VF, 2026-11-18 16:46; TS6, the texts; the owner 2026-11-17 15:44 "aim for less repetition"): the

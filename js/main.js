@@ -2,7 +2,7 @@
 import { LONG_CAL } from './core/calendar.js'; // v0.11.203 (owner pick T1, TS1)
 import { runWeek, planCards, planHere, planEnsure, planSet, planEndDay, planClear, STOP_TEXT, planNotes, storyTap, afterStory, planCount, planView, doorCards, planRanks, planPrio, doorNote, cardNote, noteCardTap, noteCardDone, noteReadTap, planEmptyShown, planDoorsShown, spacedClosed, withSpaced } from './core/week.js'; // v0.11.204 (owner pick W1: R3, P1); v0.11.206 (FC1, RV1): the forecast's texts, the shared tap steps
 import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel, fragileKnife, knifeSwings } from './core/forms.js';
-import { coilMult, coilMultNext, wakeDay, fmtMult, clockParts, REL_HIDDEN } from './core/game.js'; // v0.11.137 (HV1): REL_HIDDEN
+import { flipFill, flipMinutes, coilMult, coilMultNext, wakeDay, fmtMult, clockParts, REL_HIDDEN } from './core/game.js'; // v0.11.137 (HV1): REL_HIDDEN
 import {
     newGame, ensureBars, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, skillCheck, checkValue, xpToNext, clockLabel, clockLabelG, realmName, yukiForm, yukiHeldNote,
     startCombat, combatStep, combatFlee, combatYield, waitLeft, songPays, sungKey, THREAT_TEXT, SONG_TEXT, SONG_COST, SONG_MAX, SAY_TEXT, SPAR_TEXT, postureNow, unarmedMastery, fightAdapt, weaponMastery, COMBAT_ACTIONS, noDiceDc, airStrike, AIR_TEXT, FOE_TRAITS, foeTraits, TELL_TEXT, bigBlowNow, lungeNow, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage, qiShield,
@@ -363,7 +363,7 @@ function renderCardScreen() {
     const sk = v.end || hub ? { steps: 0 } : skipPlan(g, SCENES); // v0.11.35 (P1-a): a stretch read before, 2 steps or more
     const skipHtml = sk.steps >= 2 ? `<button class="card story skip" data-skip="1">Skip to the next choice.<span class="tag">${sk.steps} scenes you know</span><span class="len">${esc(durLabel(sk.minutes))} · at once</span></button>` : '';
     const storyHtml = v.end
-        ? `<h2>Story</h2><div class="cards">${story.map(storyCardHtml).join('')}<button class="card story" data-new="${g.cal === LONG_CAL ? 'long' : '1'}">Start a new game</button><button class="card story" data-tab-go="sheet">See how James ended up</button></div>` // v0.11.26: an end's own choices first (Go round again…)
+        ? `<h2>Story</h2><div class="cards">${story.map(storyCardHtml).join('')}<button class="card story" data-new="1">Start a new game</button><button class="card story" data-tab-go="sheet">See how James ended up</button></div>` // v0.11.26: an end's own choices first (Go round again…)
         : story.length ? `<h2>Story</h2><div class="cards">${skipHtml}${story.map(storyCardHtml).join('')}</div>` : '';
     const medOpen = med.filter((m) => m.open || m.late || m.show); // v0.11.46 (Q1): a sit short of Qi shows, locked, with the reason // v0.11.37 (D-a): a card that would end past the day's end (00:00 since v0.11.91) shows, locked, with that tag // v0.11.17 (pick 1a): only what can run now (collaterals until they open, locked sits and meridians, Break through until ready)
     const medHtml = medOpen.length ? groupHtml('Meditate', medOpen.map(medCardHtml), true) : ''; // v0.11.67 (D2): starts open, folds
@@ -418,14 +418,17 @@ ${statusHtml()}
 </section>`;
 }
 
-/** v0.11.203 (owner pick T1, TS1): the long calendar's test switch on the main menu (calendar.js). */
-const LONG_CAL_NOTE = 'Each day of a stay is a week, and each day of the Blackroot three: the tribute on Day 43, the Elder on Day 103. Being built: the texts and the weekly work are not done yet.';
-const freshGame = (cal = 0) => ensureBars(newGame(Math.floor(Math.random() * 2 ** 31), { closed: true, cal })); // meridians closed at the start (v0.9.6); v0.11.203 (T1, TS1): cal, the long calendar
+/** v0.11.226 (owner pick FP1, the flip: NG + OB + BT): every new game is on the long calendar (calendar.js; the test switch of
+ *  v0.11.203 is gone). BT: the browser test (tools/browser.py `fresh`) sets the storage key OLD_CAL_KEY, which keeps its games and
+ *  saves on the old calendar (no player sets it). */
+const OLD_CAL_KEY = 'boneash.oldcal';
+const oldCalTest = () => store.get(OLD_CAL_KEY) === '1';
+const freshGame = (cal = oldCalTest() ? 0 : LONG_CAL) => ensureBars(newGame(Math.floor(Math.random() * 2 ** 31), { closed: true, cal })); // meridians closed at the start (v0.9.6); v0.11.203 (T1, TS1): cal, the long calendar
 const bakMeta = () => { try { return JSON.parse(store.get(BAK_META)) || { play: 0, at: {}, when: {} }; } catch { return { play: 0, at: {}, when: {} }; } };
 function writeKey(k, s) { if (!store.set(k, s) && !storageWarned) { storageWarned = true; showError('Could not save: the storage for this site is full or blocked. Download your save: ☰ Menu → Saves.'); } }
 
 /** Throws a SaveError if the state points at a scene this version doesn't have. */
-function checkScene(s) { if (!SCENES[s.scene]) throw new SaveError('notSave', `The save points at a scene this version doesn't have (${s.scene}).`); const hub = deadMenuHub(s, SCENES); if (hub) s.scene = hub; return s; } // v0.11.177 (RV1, C2): a save resting in an emptied menu opens on its hub
+function checkScene(s) { if (!oldCalTest()) flipFill(s); /* v0.11.226 (FP1, MV + DK): an old-calendar save moves to the long calendar */ if (!SCENES[s.scene]) throw new SaveError('notSave', `The save points at a scene this version doesn't have (${s.scene}).`); const hub = deadMenuHub(s, SCENES); if (hub) s.scene = hub; return s; } // v0.11.177 (RV1, C2): a save resting in an emptied menu opens on its hub
 
 function rolling(s) {
     const m = bakMeta();
@@ -493,7 +496,7 @@ function backupList() {
     const names = { '5m': 'Last 5 minutes', '30m': 'Last 30 minutes', '2h': 'Last 2 hours', before: `Before ${m.label || 'a risky move'}` };
     return Object.keys(names).map((k) => ({ k, name: names[k], raw: store.get(BAK_KEY(k)), when: m.when?.[k] })).filter((b) => b.raw);
 }
-const descOf = (raw) => { const p = peekSave(raw); return p ? `${sceneTitle(p.scene)} — ${clockLabel(p.minutes)}${p.coil ? ` · ${p.act === 1 ? 'Act 1, ' : ''}Coil ${p.coil}` : ''}` : 'Unreadable'; }; // v0.11.13: the Coil too (Incremental Mode, as on Continue)
+const descOf = (raw) => { const p = peekSave(raw); return p ? `${sceneTitle(p.scene)} — ${clockLabel(p.cal === LONG_CAL || oldCalTest() ? p.minutes : flipMinutes(p.minutes, p.act)) /* v0.11.226 (RV1, L2): the day it opens on */}${p.coil ? ` · ${p.act === 1 ? 'Act 1, ' : ''}Coil ${p.coil}` : ''}` : 'Unreadable'; }; // v0.11.13: the Coil too (Incremental Mode, as on Continue)
 
 /* ---------------- saves push (v0.11.9): share, export all, reminder, status ---------------- */
 
@@ -825,7 +828,7 @@ function renderMenu() {
 <div class="mseal" aria-hidden="true">骨</div>
 <h1 class="mtitle">Bone and Ash</h1>
 <p class="note mver">Version <span id="menuVer">…</span> · Incremental Mode</p>
-${newsBox()}<div class="mbtns">${cont}${hadSave && !recovery ? '<button class="btn big" data-new="1">New game</button>' : ''}${!recovery ? `<button class="btn big" data-new="long">New game: the long calendar (test)<small>${LONG_CAL_NOTE}</small></button>` : ''}<button class="btn big" data-menu="saves">Saves</button><button class="btn big" data-menu="settings">Settings</button>${appUpd()?.newer ? `<button class="btn big" data-menu="settings">App update available (build ${appUpd().build})<small>You have build ${appUpd().mine}. Settings → App updates; saves are kept.</small></button>` : ''}</div>
+${newsBox()}<div class="mbtns">${cont}${hadSave && !recovery ? '<button class="btn big" data-new="1">New game</button>' : ''}<button class="btn big" data-menu="saves">Saves</button><button class="btn big" data-menu="settings">Settings</button>${appUpd()?.newer ? `<button class="btn big" data-menu="settings">App update available (build ${appUpd().build})<small>You have build ${appUpd().mine}. Settings → App updates; saves are kept.</small></button>` : ''}</div>
 <p class="note" id="saveNote"></p></section>`;
     runningVersion().then((v) => { const el = document.getElementById('menuVer'); if (el) el.textContent = versionLabel(v, inApp(window) ? updater.mine() : 0); }); // v0.11.150 (LB)
 }
@@ -1142,7 +1145,7 @@ view.addEventListener('click', (ev) => {
         } else if (b.dataset.new) {
             if ((menu || tab !== 'story') && hadSave && !confirmNew(b.dataset.new)) return; // RV1 (L3): no autosave yet, nothing to warn about
             backupBefore('a new game');
-            g = freshGame(b.dataset.new === 'long' ? LONG_CAL : 0); // v0.11.203 (T1, TS1): the test switch; RV1 (L2): the end screen's new game keeps the save's calendar
+            g = freshGame(); // v0.11.226 (FP1, NG): every new game on the long calendar (v0.11.203's test switch gone)
             hadSave = true; // RV1 (L3): the new game's autosave exists from now on
             lastResult = null; lastReply = []; combatLog = null; autosave(); setTab('story');
         } else if (b.dataset.tabGo) {
@@ -1190,11 +1193,11 @@ document.getElementById('tabs').addEventListener('click', (ev) => { const b = ev
 let newArmed = 0;
 let biteArmed = 0;
 let yieldArmed = 0; // v0.11.114 (PB1, YC)
-let newKind = ''; // v0.11.203 (T1, TS1): the second tap must be on the same button (New game, or the long calendar's)
+let newKind = ''; // v0.11.203 (T1, TS1): the second tap must be on the same button (v0.11.226, FP1: one New game button left)
 function confirmNew(kind = '1') {
     if (Date.now() - newArmed < 4000 && newKind === kind) return true;
     newArmed = Date.now(); newKind = kind;
-    note(kind === 'long' ? 'Tap New game: the long calendar again to start over on it. Your autosave will be replaced (slots are kept).' : 'Tap New game again to start over. Your autosave will be replaced (slots are kept).');
+    note('Tap New game again to start over. Your autosave will be replaced (slots are kept).');
     return false;
 }
 function note(t) { const n = document.getElementById('saveNote'); if (n) n.textContent = t; }
