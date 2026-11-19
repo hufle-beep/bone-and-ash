@@ -12,12 +12,13 @@
  * also to the start of the whole game (Day 1, the arrival, a fresh start); "same days again" is gone. One Coil count per save
  * (owner 11:12): crossing into Act 1 continues the Coil, every rewind adds 1, and the bonus follows it (pick N1).
  *   Kept: familiarity, adaptation, Yuki's lane on/off, Yuki's relationship, her last answer (`yk_last`, v0.11.191),
- *         the knowledge flags (KEEP_FLAGS), the journal and stats.
+ *         the knowledge flags (KEEP_FLAGS), the journal and stats; v0.11.227 (KA1): the realm kept for won clears (liftKept).
  *   Reset: James and Yuki (to the snapshot), hammerspace, every other flag, bars (full), Fed, the queue.
  *   Relationships other than Yuki: max(snapshot value, 25% of the last Coil's peak), friendship and affection apart.
  * Pure — no DOM.
  */
-import { coilStart, coilSnap, ensureBars, SAVE_VERSION, newGame, yukiAbove } from './game.js';
+import { coilStart, coilSnap, ensureBars, SAVE_VERSION, newGame, yukiAbove, awardXp, realmName, MAX_REALM } from './game.js';
+import { COL_GROUPS, colGroupsOpen } from '../story/meridians.js'; // v0.11.227 (KA1, KL-x): the meridians a kept realm opens
 import { famTier, FAM } from './tasks.js';
 const isYukiJob = (id) => id.startsWith('yuki:'); // v0.11.159 (owner pick NX2, CL): her jobs are not cards; the Coil screen gives her her own line
 
@@ -93,6 +94,40 @@ export function coilReport(g) {
     return { n: c.n, why: c.why, gained, known, near: near.slice(0, 3), yuki };
 }
 
+/* ---------- v0.11.227 (owner pick KA1 + XW-a): the realm kept for a won game ---------- */
+/** Each won clear of Act 1 (a bite with why 'clear': victory, revelation or accord, `ACT1_WON`; KG-b) adds 1 to `stats.clears`, and
+ *  `stats.keptTop` keeps the highest realm James had at a won clear (both in `stats`, which every rewind keeps). Every later Coil
+ *  starts James at realm keptRealm or above (a floor, KB-a; never above keptTop, KC), and Yuki with him. */
+export const keptRealm = (g) => Math.max(0, Math.min(g?.stats?.clears || 0, g?.stats?.keptTop || 0, MAX_REALM));
+/** The next keptRealm if this Coil ends on a won clear (the Coil screen's line). */
+export const keptAfterClear = (g) => Math.max(0, Math.min((g?.stats?.clears || 0) + 1, Math.max(g?.stats?.keptTop || 0, g?.james?.realm || 0), MAX_REALM));
+/** Lift James (and Yuki) to the kept realm, in place: Saturation 0, the Mortal Vessel meridians open (Foundation's twelve primaries and
+ *  the 66 collaterals) with the Convergence XP opening each still-shut channel gives (KL-x: standard, one each), and from Nascent Soul
+ *  the Extraordinary 8 and their 28 collaterals too, whose window (Golden Core to Soul Embryo) a kept realm walks past (XW-a: challenging,
+ *  one each). Returns the realm lifted to, or 0 when James is already there (nothing changes). */
+export const KEPT_EXTRA_FROM = 7;
+export function liftKept(g) {
+    const k = keptRealm(g), j = g.james, y = g.yuki;
+    if (!k || (j.realm || 0) >= k) return 0;
+    const shut = (12 - (j.primaries ?? 12)) + (COL_GROUPS.length - colGroupsOpen(g));
+    const e8 = k >= KEPT_EXTRA_FROM ? 8 - (j.extra8 || 0) : 0, ec = k >= KEPT_EXTRA_FROM ? 28 - (j.extraCollaterals || 0) : 0;
+    Object.assign(j, { primaries: 12, collaterals: 66, colSealed: false, merWork: 0, colWork: 0, realm: k, saturation: 0 });
+    Object.assign(y, { primaries: 12, collaterals: 66, realm: Math.max(y.realm || 0, k) });
+    if (k >= KEPT_EXTRA_FROM) Object.assign(j, { extra8: 8, extraCollaterals: 28, e8Work: 0, ecWork: 0 });
+    for (let i = 0; i < shut; i++) awardXp(g, 'Convergence Use', 'standard');
+    for (let i = 0; i < e8 + ec; i++) awardXp(g, 'Convergence Use', 'challenging');
+    j.hp = null; j.qi = null; y.hp = null; y.qi = null; // ensureBars fills them to the new Max
+    return k;
+}
+/** The James tab's kept-realm line (plain words, KT; here since KA1's RV1, TG3, so the tests read it): what is kept, and what a won act's bite would keep. */
+export function keptTabText(g) {
+    const k = keptRealm(g), n = g.stats?.clears || 0;
+    const now = k ? `Kept from ${n} won clear${n === 1 ? '' : 's'} of Act 1: no Coil starts below ${realmName(k)} (James and Yuki, the Mortal Vessel meridians open).` : 'Each won clear of Act 1 (victory, revelation or accord) keeps one realm for every later Coil, up to the realm James had when he won.';
+    return now + (actWon(g) && keptAfterClear(g) > k ? ` A bite now keeps ${realmName(keptAfterClear(g))}.` : '');
+}
+/** The first dawn's line after a lift (plain words, KT). */
+export const keptLine = (g) => { const n = g.stats?.clears || 0; return `Kept from ${n} won clear${n === 1 ? '' : 's'} of Act 1: ${realmName(g.coil.kept)}, for you and Yuki, with the Mortal Vessel meridians open${g.coil.kept >= KEPT_EXTRA_FROM ? ', and the Extraordinary vessels and their collaterals' : ''}.`; };
+
 /* ---------- v0.11.72 (owner pick T1): a target per act and the personal best ---------- */
 /** Target Coils per act (0 the prologue, 1 Act 1), counted from Day 1 of the pass (the owner's Completionist targets).
  *  v0.11.85 (owner pick D + T1): 2 / 3 → 4 / 6, with the XP rate ×0.6 (the Completionist's means 3.94 / 5.89). */
@@ -152,6 +187,7 @@ export function rewind(g, { to = 'act' } = {}) {
     base.rel = rel;
     base.tasks = { queue: [], fam: clone(g.tasks.fam || {}), use: clone(g.tasks.use || {}), adapt: clone(g.tasks.adapt || {}), yuki: { on: !!g.tasks.yuki?.on, progress: 0 }, ...(g.tasks.prio && typeof g.tasks.prio === 'object' ? { prio: clone(g.tasks.prio) } : {}), ...(g.tasks.keep && typeof g.tasks.keep === 'object' ? { keep: clone(g.tasks.keep) } : {}) }; // v0.11.219 (owner pick KC1, KG): the plan's counts kept for good too // v0.11.211 (owner pick PK1): the plan's places kept for good
     base.stats = clone(g.stats);
+    if (c.why === 'clear') { base.stats.clears = (base.stats.clears || 0) + 1; base.stats.keptTop = Math.max(base.stats.keptTop || 0, g.james.realm || 0); } // v0.11.227 (KA1): a won clear
     if (whole) { base.stats.pass = c.n + 1; delete base.stats.passUnknown; } // v0.11.72 (T1): the whole game again starts a new pass
     if (g.picked) base.picked = clone(g.picked); // v0.11.32 (P2-a): picked choices are remembered across every rewind
     if (g.seen) base.seen = clone(g.seen); // v0.11.35 (P1-a): so are the scenes read
@@ -169,6 +205,8 @@ export function rewind(g, { to = 'act' } = {}) {
     delete base.coil.played; delete base.coil.replay; // v0.11.26: "same days again" is gone (older saves keep the fields; nothing reads them)
     for (const k of Object.keys(g)) delete g[k];
     Object.assign(g, base);
+    g.coil.kept = liftKept(g); // v0.11.227 (KA1 + XW-a): the kept realm, on every rewind (the act's and the whole game's)
+    if (!g.coil.kept) delete g.coil.kept;
     ensureBars(g);
     g.coil.start = coilStart(g);
     g.log.push({ at: g.minutes, scene: g.scene, lines: [`${(g.coil.act || 0) === 1 ? 'Act 1, ' : whole ? 'The whole game again. ' : ''}Coil ${n} begins.${unwound ? ' Foundation unwound: Mortal Vessel again, the collaterals open to you.' : ''}`] });

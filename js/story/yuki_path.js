@@ -117,7 +117,7 @@ const put = (t, [from, to]) => t.replace(from, () => to);
 for (const [k, pairs] of Object.entries(YK_LATER_HUMAN)) for (const p of pairs) swap(k === 'fire' ? YK_LATER.fire : YK_LATER.q[k], p);
 swap(YK_LATER.q.wait, YK_WAIT_SINCE_DAWN);
 /** Her human shape was hers at this Coil's start (an Act 1 begun with her human; the snapshot, coil.js). */
-export const ykHumanAtStart = (g) => yukiForms({ yuki: g.coil?.snap?.yuki ?? { realm: 0 } }).includes('human'); // RV1 (L6): the game's own shape rule
+export const ykHumanAtStart = (g) => yukiForms({ yuki: { ...(g.coil?.snap?.yuki ?? { realm: 0 }), realm: Math.max(g.coil?.snap?.yuki?.realm || 0, g.coil?.kept || 0) } }).includes('human'); // RV1 (L6): the game's own shape rule; v0.11.227 (KA1's RV1, L2): a realm kept on this Coil's rewind counts (the lift changes the game, not the snapshot)
 /** The later question's text (k: 'sister' | 'lover' | 'wait' | 'fire'), with QH and QW where they apply. */
 export const ykLaterQ = (g, k) => {
     let t = k === 'fire' ? YK_LATER.fire : YK_LATER.q[k];

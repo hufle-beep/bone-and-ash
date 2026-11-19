@@ -1,9 +1,9 @@
 {
- "saved": "2026-11-18",
+ "saved": "2026-11-19",
  "totals": {
   "scenes": 331,
   "words": 37445,
-  "variantWords": 74658,
+  "variantWords": 75022,
   "labels": 850,
   "labelWords": 5765,
   "sharedChunks": 728,
@@ -19,7 +19,7 @@
   "prologue+shared": {
    "scenes": 79,
    "words": 10758,
-   "variantWords": 20841,
+   "variantWords": 21205,
    "labels": 166,
    "labelWords": 1209,
    "sharedScenes": 32,

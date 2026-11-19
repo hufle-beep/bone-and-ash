@@ -4610,7 +4610,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         const src = readFileSync(new URL('../js/story/yuki_path.js', import.meta.url), 'utf8');
         const body = src.slice(src.indexOf('export const ykLaterQ'), src.indexOf('export const ykLaterQ') + 600);
         assert(/for \(const \[k, pairs\] of Object\.entries\(YK_LATER_HUMAN\)\) for \(const p of pairs\) swap\(/.test(src) && /^swap\(YK_LATER\.q\.wait, YK_WAIT_SINCE_DAWN\);$/m.test(src), 'K1 (RV1 TG8): the load-time check of every pair is there');
-        assert(/t = put\(t, p\)/.test(body) && !/swap\(/.test(body) && /yukiForms\(\{ yuki: g\.coil\?\.snap\?\.yuki/.test(src), 'K1 (RV1 L6, L7): ykLaterQ uses the non-throwing put; the load check keeps swap');
+        assert(/t = put\(t, p\)/.test(body) && !/swap\(/.test(body) && /yukiForms\(\{ yuki: \{ \.\.\.\(g\.coil\?\.snap\?\.yuki \?\? \{ realm: 0 \}\), realm: Math\.max\(g\.coil\?\.snap\?\.yuki\?\.realm \|\| 0, g\.coil\?\.kept \|\| 0\) \} \}\)/.test(src), 'K1 (RV1 L6, L7): ykLaterQ uses the non-throwing put; the load check keeps swap');
     }
 }
 
@@ -6924,13 +6924,13 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         [8, { ya_met: true }], [9, { ya_met: true }], [10, { ya_met: true }], [11, { bl_day: 1, bl_region: 'rr' }], [12, { bl_day: 2, bl_region: 'rr' }], [13, { bl_day: 3, bl_region: 'dw' }], [14, { bl_day: 4, bl_region: 'ah' }], [15, { bl_day: 5, bl_region: 'ah' }], [16, {}], [18, {}], [19, {}], [20, {}], [21, {}]];
       const out = [];
       for (const [day, flags] of STATES) for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) for (const h of [8, 19]) for (const s of Object.values(SCENES)) {
-          if (EXC.has(s.id)) continue;
+          if (EXC.has(s.id) || (s.id === 'yuki_check' && realm)) continue; // v0.11.227 (KA1's RV1, M1a): the arrival's Yuki screen above Mortal Vessel is only a kept realm's (its own test: tests/saves.test.mjs)
           const g = ensureBars(newGame(4242, { closed: true })); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; Object.assign(g.flags, flags); g.minutes = (day - 1) * 1440 + h * 60; g.scene = s.id;
           let v; try { v = sceneView(g, SCENES); } catch { out.push(`${s.id}|!`); continue; }
           out.push(`${s.id}|${v.title ?? ''}|${v.text}|${v.choices.filter((c) => !c.disabled).map((c) => c.label).join('/')}`);
       }
       const h = Gm.fnv1a(out.join('\n'));
-      assert(h === '8ce676b4' && out.length === 39060, `${T} (H2, TG2): the old calendar's ${out.length} renders of the scenes the counts don't touch exactly as v0.11.223's code (${h}; update only with a push that means to change the old calendar's texts)`);
+      assert(h === '5117a3ec' && out.length === 38976, `${T} (H2, TG2): the old calendar's ${out.length} renders of the scenes the counts don't touch exactly as v0.11.223's code (${h}; v0.11.227: 8ce676b4 / 39060 → 5117a3ec / 38976, the 84 kept-realm renders of yuki_check left out, the hash taken on v0.11.226's code; update only with a push that means to change the old calendar's texts)`);
       const real = [
         [at(false, 6, 19, { long: true, vday: 3 }), 'evening', /^Third supper at Mei Lin's\. Her mother serves you first now/],
         [at(false, 20, 19, {}), 'rt_evening', /"Nine days in the Blackroot," the old woman informs the pot, "and my daughter comes home fatter than she left\."/],

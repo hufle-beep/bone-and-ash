@@ -169,5 +169,133 @@ assert(kindOf(() => deserialize(JSON.stringify(noV))) === 'ok', 'a save without 
     for (const [w, v] of want) assert(new RegExp(`${w} ${v}\\b`).test(line), `FP1 (RV1, TG5): What's new says "${w} ${v}"`);
 }
 
+// 4. v0.11.227 (owner pick KA1 + XW-a, DW-a): the realm kept for a won game. Each won clear of Act 1 (victory, revelation, accord; the bite
+//    with why 'clear') adds 1 to stats.clears and keeps the realm James had then in stats.keptTop; every later Coil, of the act or of the
+//    whole game, starts at min(clears, keptTop) or above, Yuki too, the Mortal Vessel meridians open with their Convergence XP (KL-x),
+//    and from Nascent Soul the Extraordinary 8 and their 28 collaterals (XW-a). Old saves start at 0; one at the act's end bites in.
+{
+    const { rewind, endCoil, keptRealm, keptAfterClear, liftKept, KEPT_EXTRA_FROM } = await import('../js/core/coil.js');
+    const { jamesHpMax, jamesQiMax, yukiHpMax } = await import('../js/core/game.js');
+    const rank = (n) => 10 * (n.tier - 1) + n.level;
+    const won = (seed, outcome, realm, cal = 7) => { const g = ensureBars(newGame(seed, { closed: true, cal })); g.coil.act = 1; g.james.realm = realm; g.flags.a1_outcome = outcome; goTo(g, SCENES, 'a1_end'); return g; };
+    const biteFrom = (g, re) => { goTo(g, SCENES, 'a1_again'); const c = sceneView(g, SCENES).choices.find((x) => re.test(x.label)); return c ? choose(g, SCENES, c.index) : null; };
+    // KG-b: every won ending counts, from the act's end (a1_again) and from the James tab's path (endCoil 'clear' + the Coil screen)
+    for (const o of ['victory', 'revelation', 'accord']) {
+        const g = won(31, o, 2); const r = biteFrom(g, /whole game/);
+        assert(g.stats.clears === 1 && g.stats.keptTop === 2 && keptRealm(g) === 1 && g.james.realm === 1 && g.yuki.realm === 1, `KA1 (KG-b): a won ${o} keeps one realm (clears ${g.stats.clears}, top ${g.stats.keptTop}, realm ${g.james.realm} / Yuki ${g.yuki.realm})`);
+        assert(g.scene === 'coil_dawn' && g.coil.kept === 1 && r.lines.some((l) => /^Kept from 1 won clear of Act 1: Foundation, for you and Yuki/.test(l)), `KA1 (KT): ${o}: the first dawn's Results name the kept realm`);
+        const t = String(sceneView(g, SCENES).text);
+        assert(/it kept Foundation\. The meridians are open, primaries and collaterals at the least\./.test(t) && !/The meridians are ash again/.test(t), `KA1 (DW-a): ${o}: the prologue's dawn says the body kept the realm`);
+    }
+    { const g = won(32, 'victory', 4); endCoil(g, 'clear', 'a1_end'); goTo(g, SCENES, 'coil_end');
+      const t = String(sceneView(g, SCENES).text);
+      assert(/start over, but never below Foundation, kept from 1 won clear of Act 1/.test(t) && keptAfterClear(g) === 1, 'KA1 (KT): the Coil screen after a won clear names the floor the next Coil wakes at');
+      const c = sceneView(g, SCENES).choices.find((x) => /start of the whole game/.test(x.label)); choose(g, SCENES, c.index);
+      assert(g.stats.clears === 1 && g.james.realm === 1, 'KA1: the James tab\'s path (endCoil clear, the Coil screen) counts the clear'); }
+    // not a clear: 'taken', a bite by choice, a collapse
+    { const g = won(33, 'taken', 3); biteFrom(g, /whole game/); assert(!g.stats.clears && g.james.realm === 0 && !g.coil.kept, 'KA1: going round after taken keeps nothing'); }
+    { const g = ensureBars(newGame(34, { closed: true, cal: 7 })); g.james.realm = 2; endCoil(g, 'collapse'); rewind(g); assert(!g.stats.clears && g.james.realm === 0, 'KA1: a collapse keeps nothing'); }
+    { const g = ensureBars(newGame(35, { closed: true, cal: 7 })); g.coil.act = 1; g.james.realm = 2; endCoil(g, 'choice'); rewind(g); assert(!g.stats.clears && g.james.realm === 0, 'KA1: a bite by choice keeps nothing'); }
+    // KC: never above the realm at a won clear; KB-a: a floor, one realm a clear
+    { const g = won(36, 'accord', 0); biteFrom(g, /whole game/); assert(g.stats.clears === 1 && keptRealm(g) === 0 && g.james.realm === 0 && !g.coil.kept && /The meridians are ash again/.test(String(sceneView(g, SCENES).text)), 'KA1 (KC): a clear at Mortal Vessel keeps nothing (the old dawn)');
+      g.coil.act = 1; g.james.realm = 1; g.flags.a1_outcome = 'victory'; goTo(g, SCENES, 'a1_end'); biteFrom(g, /whole game/);
+      assert(g.stats.clears === 2 && g.stats.keptTop === 1 && keptRealm(g) === 1 && g.james.realm === 1, 'KA1 (KC): two clears, the best at Foundation, keep Foundation');
+      g.coil.act = 1; g.james.realm = 5; g.flags.a1_outcome = 'revelation'; goTo(g, SCENES, 'a1_end'); biteFrom(g, /whole game/);
+      assert(g.stats.clears === 3 && keptRealm(g) === 3 && g.james.realm === 3, 'KA1 (KB-a): three clears keep three realms, not the realm reached (5)'); }
+    // every later Coil: a prologue rewind in the next pass, and an Act 1 rewind below / above the floor
+    { const g = won(37, 'victory', 2); biteFrom(g, /whole game/); g.coil.n; endCoil(g, 'collapse'); rewind(g);
+      assert(g.james.realm === 1 && g.coil.kept === 1, 'KA1: a prologue rewind in the next pass keeps the floor');
+      g.coil.act = 1; g.coil.snap.james.realm = 0; g.flags.a1_outcome = 'accord'; g.james.realm = 3; goTo(g, SCENES, 'a1_end'); biteFrom(g, /start of Act 1/);
+      assert(g.coil.act === 1 && g.james.realm === 2 && g.coil.kept === 2, 'KA1: an Act 1 rewind from a snapshot below the floor wakes at it');
+      g.coil.snap.james.realm = 4; g.flags.a1_outcome = 'taken'; goTo(g, SCENES, 'a1_end'); const r = biteFrom(g, /start of Act 1/);
+      assert(g.james.realm === 4 && !g.coil.kept && !r.lines.some((l) => /^Kept from/.test(l)), 'KA1: an Act 1 snapshot above the floor is kept as it is (no lift, no line)'); }
+    // KL-x: the lift itself (James and Yuki, the meridians, Saturation, the bars, the XP)
+    { const g = ensureBars(newGame(38, { closed: true, cal: 7 })); g.stats.clears = 3; g.stats.keptTop = 3; g.james.primaries = 5; g.james.saturation = 40;
+      const gu0 = rank(g.james.gu); const k = liftKept(g); ensureBars(g);
+      assert(k === 3 && g.james.realm === 3 && g.yuki.realm === 3 && g.james.primaries === 12 && g.james.collaterals === 66 && g.yuki.primaries === 12 && g.yuki.collaterals === 66 && !g.james.colSealed && g.james.saturation === 0, 'KA1 (KL-x): realm 3, Yuki 3, every Mortal Vessel meridian open, Saturation 0');
+      assert(rank(g.james.gu) > gu0 && g.james.hp === jamesHpMax(g) && g.james.qi === jamesQiMax(g) && g.yuki.hp === yukiHpMax(g), 'KA1 (KL-x): the Convergence XP is given and the bars are full');
+      assert(liftKept(g) === 0, 'KA1: a second lift at the same realm changes nothing');
+      const a = ensureBars(newGame(39, { closed: true, cal: 7 })), b = ensureBars(newGame(39, { closed: true, cal: 7 }));
+      a.stats.clears = b.stats.clears = 1; a.stats.keptTop = b.stats.keptTop = 1; b.james.primaries = 12; b.james.collaterals = 66;
+      liftKept(a); liftKept(b); assert(rank(a.james.gu) > rank(b.james.gu), 'KA1 (KL-x): the XP is for the channels still shut (none shut, no XP)'); }
+    // XW-a: from Nascent Soul the Extraordinary 8 and their collaterals too; below it they stay for the player to open
+    { const g = ensureBars(newGame(40, { closed: true, cal: 7 })); g.stats.clears = 7; g.stats.keptTop = 9; liftKept(g);
+      const o = ensureBars(newGame(40, { closed: true, cal: 7 })); o.stats.clears = 7; o.stats.keptTop = 9; Object.assign(o.james, { extra8: 8, extraCollaterals: 28 }); liftKept(o);
+      const tot = (n) => rank(n) * 1e6 + (n.xp || 0);
+      assert(tot(g.james.gu) > tot(o.james.gu), `KA1 (XW-a): the Extraordinary lines' XP is given for those still shut (${JSON.stringify(g.james.gu)} vs already open ${JSON.stringify(o.james.gu)})`);
+      assert(KEPT_EXTRA_FROM === 7 && g.james.realm === 7 && g.james.extra8 === 8 && g.james.extraCollaterals === 28 && !g.james.junctions, 'KA1 (XW-a): at Nascent Soul the Extraordinary 8 and 28 collaterals open, the junctions not');
+      const h = ensureBars(newGame(41, { closed: true, cal: 7 })); h.stats.clears = 6; h.stats.keptTop = 6; liftKept(h);
+      assert(h.james.realm === 6 && !h.james.extra8 && !h.james.extraCollaterals, 'KA1 (XW-a): at Soul Embryo they stay shut (their window is open)'); }
+    // the old calendar the same
+    { const g = won(42, 'victory', 1, 0); biteFrom(g, /whole game/); assert(g.james.realm === 1 && g.stats.clears === 1, 'KA1: the old calendar keeps the realm too'); }
+    // KS: old saves start at 0, and one at the act's end with a won ending counts when it bites (the owner's a1_again, victory)
+    for (const f of files) {
+        const g = deserialize(unpack(readFileSync(new URL(f, dir), 'utf8')));
+        assert(keptRealm(g) === 0, `KA1 (KS): ${f} starts with no kept realm`);
+        if (g.coil?.act === 1 && /^(a1_end|a1_again)$/.test(g.scene) && ['victory', 'revelation', 'accord'].includes(g.flags.a1_outcome) && !g.stats?.clears) {
+            const R = g.james.realm; const r = biteFrom(g, /whole game/);
+            assert(r && g.stats.clears === 1 && g.stats.keptTop === R && g.james.realm === Math.min(1, R), `KA1 (KS): ${f} (${R}) bites into a kept realm`);
+            assert(kindOf(() => deserialize(serialize(g))) === 'ok', `KA1 (KS): ${f} saves and loads after the bite`);
+        }
+    }
+    const src = (f) => readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
+    // KA1's RV1 (the Opus review's TG1–TG8)
+    {
+        const { awardXp } = await import('../js/core/game.js');
+        const { coilReport, keptTabText, tabWhy } = await import('../js/core/coil.js');
+        const { ykHumanAtStart } = await import('../js/story/yuki_path.js');
+        const xpOf = (seed, prep, extra = 0) => { const g = ensureBars(newGame(seed, { closed: true, cal: 7 })); prep(g); const before = JSON.stringify(g.james.gu); liftKept(g); return { g, before }; };
+        // TG1 + TG2: the exact awards: a fresh lift to Foundation is 20 standard (12 primaries, 8 groups); to Nascent Soul 20 standard and 36 challenging
+        const same = (k, n1, n2) => { const a = ensureBars(newGame(50, { closed: true, cal: 7 })), b = ensureBars(newGame(50, { closed: true, cal: 7 }));
+            a.stats.clears = b.stats.clears = k; a.stats.keptTop = b.stats.keptTop = k; liftKept(a);
+            Object.assign(b.james, { realm: k, saturation: 0, primaries: 12, collaterals: 66 }); Object.assign(b.yuki, { realm: k, primaries: 12, collaterals: 66 }); if (k >= 7) Object.assign(b.james, { extra8: 8, extraCollaterals: 28 });
+            for (let i = 0; i < n1; i++) awardXp(b, 'Convergence Use', 'standard'); for (let i = 0; i < n2; i++) awardXp(b, 'Convergence Use', 'challenging');
+            return JSON.stringify([a.james.gu, a.james.skills['Convergence Use'], a.yuki.fight]) === JSON.stringify([b.james.gu, b.james.skills['Convergence Use'], b.yuki.fight]); };
+        assert(same(1, 20, 0) && !same(1, 21, 0) && !same(1, 66, 0), 'KA1 (RV1, TG2): a fresh lift to Foundation gives exactly 20 standard Convergence awards (12 primaries, 8 collateral groups)');
+        assert(same(7, 20, 36) && !same(7, 20, 35) && !same(7, 20, 0), 'KA1 (RV1, TG1): a fresh lift to Nascent Soul gives 20 standard and exactly 36 challenging (8 vessels, 28 collaterals)');
+        { const a = ensureBars(newGame(51, { closed: true, cal: 7 })), b = ensureBars(newGame(51, { closed: true, cal: 7 }));
+          for (const x of [a, b]) { x.stats.clears = 7; x.stats.keptTop = 7; } Object.assign(b.james, { extra8: 8, extraCollaterals: 20 }); liftKept(a); liftKept(b);
+          const c = ensureBars(newGame(51, { closed: true, cal: 7 })); Object.assign(c.james, { realm: 7, saturation: 0, primaries: 12, collaterals: 66, extra8: 8, extraCollaterals: 28 }); Object.assign(c.yuki, { realm: 7, primaries: 12, collaterals: 66 });
+          for (let i = 0; i < 20; i++) awardXp(c, 'Convergence Use', 'standard'); for (let i = 0; i < 8; i++) awardXp(c, 'Convergence Use', 'challenging');
+          assert(JSON.stringify(b.james.gu) === JSON.stringify(c.james.gu), 'KA1 (RV1, TG1): XW-a pays only for the Extraordinary lines still shut (8 vessels open, 20 of 28 collaterals: 8 awards)'); }
+        // TG3: the James tab's path as main.js runs it (tabWhy → endCoil → the Coil screen → the bite) and its line
+        { const M = src('js/main.js');
+          assert(/endCoil\(g, tabWhy\(g\), g\.scene\);[^\n]*\n\s*lastResult = null; lastReply = \[\]; goTo\(g, SCENES, 'coil_end'\)/.test(M) && /const keptTabLine = \(g\) => `<p class="note"><b>Kept realm:<\/b> \$\{esc\(keptTabText\(g\)\)\}<\/p>`;/.test(M), 'KA1 (RV1, TG3): the James tab bites through tabWhy, endCoil and the Coil screen, and draws keptTabText');
+          const g = won(52, 'revelation', 3);
+          assert(/^Each won clear of Act 1 \(victory, revelation or accord\) keeps one realm[^.]*\. A bite now keeps Foundation\.$/.test(keptTabText(g)), `KA1 (RV1, TG3): the tab before the first clear (${keptTabText(g)})`);
+          endCoil(g, tabWhy(g), g.scene); goTo(g, SCENES, 'coil_end'); const c = sceneView(g, SCENES).choices.find((x) => /whole game/.test(x.label)); choose(g, SCENES, c.index); choose(g, SCENES, 0);
+          assert(g.stats.clears === 1 && g.james.realm === 1 && keptTabText(g) === 'Kept from 1 won clear of Act 1: no Coil starts below Foundation (James and Yuki, the Mortal Vessel meridians open).', `KA1 (RV1, TG3): the tab's bite counts, and the tab then says what is kept (${keptTabText(g)})`);
+          const t = won(53, 'taken', 3); t.stats.clears = 2; t.stats.keptTop = 3;
+          assert(!/A bite now keeps/.test(keptTabText(t)) && tabWhy(t) === 'choice', 'KA1 (RV1, TG3): after taken the tab promises nothing');
+          const r = won(54, 'accord', 1); r.stats.clears = 1; r.stats.keptTop = 4;
+          assert(!/A bite now keeps/.test(keptTabText(won(55, 'victory', 0))) && /A bite now keeps Core Formation/.test(keptTabText(r)), 'KA1 (RV1, TG3): the tab promises a realm only when the bite would raise it'); }
+        // TG4: the cap keeps the highest realm at a won clear
+        { const g = won(56, 'victory', 4); biteFrom(g, /whole game/); g.coil.act = 1; g.james.realm = 2; g.flags.a1_outcome = 'accord'; goTo(g, SCENES, 'a1_end'); biteFrom(g, /whole game/);
+          assert(g.stats.keptTop === 4 && g.stats.clears === 2 && g.james.realm === 2, 'KA1 (RV1, TG4): a later clear at a lower realm keeps the highest (4)'); }
+        // TG5: a sealed Foundation snapshot lifted higher is unsealed with its collaterals open
+        { const g = ensureBars(newGame(57, { closed: true, cal: 7 })); Object.assign(g.james, { realm: 1, primaries: 12, collaterals: 34, colSealed: true }); g.stats.clears = 2; g.stats.keptTop = 2; liftKept(g);
+          assert(g.james.realm === 2 && g.james.collaterals === 66 && g.james.colSealed === false && g.yuki.collaterals === 66, 'KA1 (RV1, TG5): a sealed Foundation lifted to Core Formation opens its collaterals and is not sealed'); }
+        // TG6: the Coil screen doesn't count the kept realm as this Coil's gain
+        { const g = won(58, 'victory', 2); biteFrom(g, /whole game/); assert(g.coil.start.realm === 1 && !coilReport(g).gained.some((x) => /^realm/.test(x)), 'KA1 (RV1, TG6): the Coil starts at the kept realm (no "realm +1" for it)'); }
+        // TG7: the Results line on an Act 1 rewind lifted to the floor, and its plural
+        { const g = won(59, 'victory', 3); g.stats.clears = 2; g.stats.keptTop = 3; g.coil.snap.james.realm = 0; const r = biteFrom(g, /start of Act 1/);
+          assert(g.coil.act === 1 && g.james.realm === 3 && r.lines.some((l) => l === 'Kept from 3 won clears of Act 1: True Core, for you and Yuki, with the Mortal Vessel meridians open.'), `KA1 (RV1, TG7): an Act 1 rewind lifted to the floor names it, plural (${r.lines.join(' | ')})`); }
+        // TG8 (M1a): the arrival's Yuki screen after a kept bite, and the old one without
+        { const g = won(60, 'victory', 2); biteFrom(g, /whole game/); choose(g, SCENES, 0);
+          const c = sceneView(g, SCENES).choices.find((x) => /Check Yuki over first/.test(x.label)); choose(g, SCENES, c.index);
+          const t = String(sceneView(g, SCENES).text);
+          assert(g.scene === 'yuki_check' && /Foundation, the pair of you, and it made the trip intact\. At home that still gets you seated with the children\. Nobody here needs to hear it\./.test(t) && !/Mortal Vessel/.test(t), 'KA1 (RV1, M1a, TG8): the arrival\'s Yuki screen after a kept bite names the kept realm');
+          const h = ensureBars(newGame(61, { closed: true, cal: 7 })); const c2 = sceneView(h, SCENES).choices.find((x) => /Check Yuki over first/.test(x.label)); choose(h, SCENES, c2.index);
+          assert(/Mortal Vessel, the pair of you\. Young, as your people count it\. Larval, near enough\./.test(String(sceneView(h, SCENES).text)), 'KA1 (RV1, M1a): a new game keeps the old line'); }
+        // L2: Yuki's human shape from a realm kept on this Coil's rewind
+        { const g = won(62, 'victory', 7); g.stats.clears = 7; g.stats.keptTop = 7; g.coil.snap.james.realm = 3; g.coil.snap.yuki.realm = 3; biteFrom(g, /start of Act 1/);
+          assert(g.coil.kept === 7 && ykHumanAtStart(g), 'KA1 (RV1, L2): an Act 1 rewind lifted to Nascent Soul counts her human shape from the dawn');
+          const h = won(63, 'victory', 3); biteFrom(h, /start of Act 1/); assert(!ykHumanAtStart(h), 'KA1 (RV1, L2): below Nascent Soul she has no human shape at the dawn'); }
+    }
+    assert(/<b>Kept realm:<\/b>/.test(src('js/main.js')) && /\$\{keptTabLine\(g\)\}/.test(src('js/main.js')), 'KA1 (KT): the James tab shows the kept realm');
+    assert(/Kept realm:<\/b> the realm kept for a won game/.test(src('js/core/faq.js')) && /from the Coil's first morning once a won Act 1 has kept him a realm/.test(src('js/core/faq.js')), 'KA1 (KT): the FAQ says it (What carries over, Flight)');
+    assert(/\['0\.11\.227', 'A won game now keeps some of James\\'s realm/.test(src('js/core/news.js')), 'KA1 (KT): What\'s new says it');
+}
+
 console.log(`saves: ${files.length} files · ${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

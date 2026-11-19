@@ -147,7 +147,7 @@ Your glasses are still on your face, thin, rectangular and unbroken, which is mo
         text: (g) => `She holds still for all of it, which tells you how frightened she was. ${(g.yuki.primaries ?? 12) >= 12 && (g.yuki.collaterals ?? 66) >= 66
         ? 'Twelve primaries open and sixty-six collaterals, a match for yours. You were born on the same day, in the same grove, and her meridians have kept step with yours ever since, a reflection in still water.'
         : `Her meridians have gone grey. ${g.yuki.primaries ? `${g.yuki.primaries} of twelve primaries lit, ${g.yuki.collaterals} of sixty-six collaterals` : 'All twelve primaries and all sixty-six collaterals'}${g.yuki.primaries ? ', the rest' : ','} sealed under a crust of ash, exactly like yours. The crossing did it: this world's Qi walked in through every open door and burned the frames out behind it. You were born on the same day, in the same grove, and her meridians have kept step with yours ever since, a reflection in still water. Even in this. In this most of all. The Axiom is already gnawing at the ash. Clearing it will take sessions, plural.`}
-Mortal Vessel, the pair of you. Young, as your people count it. Larval, near enough.
+${(g.yuki.realm || 0) >= 1 ? `${realmName(g.yuki.realm)}, the pair of you, and it made the trip intact. At home that still gets you seated with the children. Nobody here needs to hear it.` : 'Mortal Vessel, the pair of you. Young, as your people count it. Larval, near enough.'}
 
 Down the bond comes a feeling that translates, roughly, as: *the air tastes wrong and you smell of burnt lab.*
 

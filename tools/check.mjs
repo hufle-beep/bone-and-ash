@@ -60,6 +60,7 @@ const jobs = [
     // v0.11.203 (owner pick T1, TS8): the long calendar (the main menu's test switch), log only: the four models that plan the days,
     // never compared with a saved copy; a stuck or unfinished game still fails (every game must end)
     { name: `bot models, the long calendar (test switch; ${QUICK ? 10 : 40} games each of Careful, Sociable, Completionist, Cultivator; log only)`, key: 'models-long', show: 'models', blocks: 4, cmd: node('tests/models.test.mjs', '--cal', '7', '--model', 'careful,sociable,completionist,cultivator', '--games', QUICK ? '10' : '40', '--off', '0'), heavy: true },
+    { name: `bot models, the realm kept (KA1, KM: a second pass after a won Act 1; ${QUICK ? 10 : 40} games each of Careful, Sociable, Completionist, Cultivator; long calendar; log only)`, key: 'models-kept', show: 'models', blocks: 4, cmd: node('tests/models.test.mjs', '--cal', '7', '--model', 'careful,sociable,completionist,cultivator', '--games', QUICK ? '10' : '40', '--off', '0', '--kept'), heavy: true }, // v0.11.227 (owner picks KA1 + KM-40)
     { name: 'syntax', key: 'syntax', fn: syntax },
     { name: 'consistency (offline files, versions)', key: 'consistency', cmd: node('tools/consistency.mjs') },
     { name: 'engine numbers', key: 'rules', cmd: node('tests/rules.test.mjs') },

@@ -1,0 +1,18 @@
+[
+ {"id":"F1","file":"js/core/coil.js","find":"if (c.why === 'clear') { base.stats.clears","replace":"if (c.why === 'clear' || c.why === 'choice') { base.stats.clears","note":"a bite by choice counts as a won clear"},
+ {"id":"F2","file":"js/core/coil.js","find":"Math.max(base.stats.keptTop || 0, g.james.realm || 0)","replace":"Math.max(base.stats.keptTop || 0, base.james.realm || 0)","note":"the cap reads the snapshot's realm, not the realm at the clear"},
+ {"id":"F3","file":"js/core/coil.js","find":"Math.min(g?.stats?.clears || 0, g?.stats?.keptTop || 0, MAX_REALM)","replace":"Math.min(g?.stats?.clears || 0, MAX_REALM)","note":"no cap (KC)"},
+ {"id":"F4","file":"js/core/coil.js","find":"realm: Math.max(y.realm || 0, k) });","replace":"realm: y.realm || 0 });","note":"Yuki not lifted"},
+ {"id":"F5","file":"js/core/coil.js","find":"primaries: 12, collaterals: 66, colSealed: false, merWork","replace":"primaries: 12, collaterals: j.collaterals, colSealed: false, merWork","note":"the collaterals stay shut"},
+ {"id":"F6","file":"js/core/coil.js","find":"    for (let i = 0; i < shut; i++) awardXp(g, 'Convergence Use', 'standard');\n","replace":"","note":"no Convergence XP for the Mortal Vessel channels (KL-m, not KL-x)"},
+ {"id":"F7","file":"js/core/coil.js","find":"export const KEPT_EXTRA_FROM = 7;","replace":"export const KEPT_EXTRA_FROM = 6;","note":"XW-a at Soul Embryo, inside the window"},
+ {"id":"F8","file":"js/core/coil.js","find":"g.coil.kept = liftKept(g); //","replace":"g.coil.kept = whole ? liftKept(g) : 0; //","note":"the floor only on a whole-game rewind"},
+ {"id":"F9","file":"js/core/coil.js","find":"if (!k || (j.realm || 0) >= k) return 0;","replace":"if (!k) return 0;","note":"a snapshot above the floor is pulled down to it"},
+ {"id":"F10","file":"js/story/coil_scenes.js","find":"${g.coil.kept ? `The hammerspace reports in: empty.","replace":"${g.coil.kept > 1 ? `The hammerspace reports in: empty.","note":"the kept dawn text only from Core Formation"},
+ {"id":"F11","file":"js/story/coil_scenes.js","find":"    if (g.coil.kept) out.push(keptLine(g));","replace":"","note":"no Results line at the first dawn"},
+ {"id":"F12","file":"js/core/coil.js","find":"Math.min((g?.stats?.clears || 0) + 1,","replace":"Math.min((g?.stats?.clears || 0),","note":"the Coil screen names the old floor after a won clear"},
+ {"id":"F13","file":"js/core/coil.js","find":"realm: k, saturation: 0 });","replace":"realm: k });","note":"Saturation kept from the snapshot"},
+ {"id":"F14","file":"js/core/coil.js","find":"    j.hp = null; j.qi = null; y.hp = null; y.qi = null; // ensureBars fills them to the new Max\n","replace":"","note":"the bars not refilled to the new Max"},
+ {"id":"F15","file":"js/core/coil.js","find":"    for (let i = 0; i < e8 + ec; i++) awardXp(g, 'Convergence Use', 'challenging');\n","replace":"","note":"XW-a without its XP"},
+ {"id":"F16","file":"js/core/coil.js","find":"export const ACT1_WON = ['victory', 'accord', 'revelation'];","replace":"export const ACT1_WON = ['victory', 'revelation'];","note":"the accord no longer counts (KG-a)"}
+]

@@ -1,0 +1,3 @@
+[
+ {"id":"R1b","file":"js/core/coil.js","find":"actWon(g) && keptAfterClear(g) > k ?","replace":"actWon(g) && keptAfterClear(g) >= k ?","note":"R1 after RV1's TG3 moved the James tab's words to coil.js keptTabText: the tab promises 'A bite now keeps X' when a clear keeps nothing new"}
+]

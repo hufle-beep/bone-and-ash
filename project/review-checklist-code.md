@@ -25,6 +25,7 @@
 - **A gate added to some of a group's beats (v0.11.222 M1):** when a pick moves several beats onto a day (the split, the hollow and the pass), grep every member's `show` and the "Call it a day" rule (`oneOffLeft`) for each; one left ungated also holds the task screen's skip.
 - **A destination made a function (v0.11.222 TG2, TG3):** every choice that used to name the old target gets a test, the side scenes too; appended choices get their old indices' targets pinned, not only the count.
 - **A move of the clock onto a new calendar (v0.11.226 H1, M1, TG1, TG2):** measure it at night (00:30, and 01:10 on a story night) as well as by day: after midnight the save is still on the evening's waking day for the day marks (`dayKey`) and the counter stays (`cal_night`, `forest_day`, `vday`); play the moved save on to the next deadline and read the dates, and probe "done today" by the key the card uses, not the calendar day.
+- **A state lifted at a rewind (v0.11.227 M1, L1, L2):** after the rewind changes the live game (a kept realm, its meridians), grep the texts that read that state at the wake point (fixed realm words on the arrival's screens, "every channel") and the rules that read the snapshot (`coil.snap`, `ykHumanAtStart`) in place of the live game.
 
 ## Code and UI (v0.11.210, v0.11.211, v0.11.213)
 - **A redraw that keeps a scroll (v0.11.210 M1):** compare with the screen drawn last, not the scene id alone; a new screen (a fight's start or end, a plan going on by itself) starts at the top.

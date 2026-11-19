@@ -13,7 +13,7 @@ import { SCENES, ITEMS } from './story/prologue.js';
 import { TASK_HUBS } from './story/task_hubs.js';
 import { landParts, landReply, noteSaid } from './core/replies.js'; // v0.11.68 (A1 + B2 + C1); v0.11.134 (LP2, QR; RQ1): landReply, noteSaid
 import { againView, skipPlan, skipRun, noteRead, noFold, noteLines } from './story/again.js'; // v0.11.35 (P1-a); v0.11.133 (FP2): noteRead, noFold
-import { coilActive, endCoil, targetsText, tabWhy } from './core/coil.js';
+import { coilActive, endCoil, targetsText, tabWhy, keptTabText } from './core/coil.js';
 import { medCards, runMed, isSitChoice, medActivity, useLine, LATE_TAG, canMeditate } from './core/meditate.js';
 import { FAQ_KEY, FAQ_TAB, faqState, faqText, faqCheck, faqList, faqHasNew, faqSeen, faqMatch } from './core/faq.js'; // v0.11.83 (P1 + T1 + R1)
 import { meridianRow } from './story/meridians.js';
@@ -47,6 +47,9 @@ let shownScreen = null;
 let sameVisit = null;
 let combatLog = null;
 const view = document.getElementById('view');
+
+/** v0.11.227 (owner pick KA1, KT): the realm kept for won clears of Act 1, on the James tab (its words: coil.js keptTabText; RV1 TG3). */
+const keptTabLine = (g) => `<p class="note"><b>Kept realm:</b> ${esc(keptTabText(g))}</p>`;
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const md = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*(.+?)\*/g, '<em>$1</em>');
@@ -746,7 +749,7 @@ ${skillRow('GU', j.gu, 'General Use: anything he has no skill for, and his defen
 ${skillRow('Convergence Use', cu, 'the song: what he can sing, how hard it hits, the Qi blast and shield')}
 <p class="note">${esc(BONESINGER_TIERS[Math.min(cu.tier, BONESINGER_TIERS.length - 1)] || '')}</p>
 ${Object.entries(FORM_LINES).map(([k, l]) => { const s = lineState(g, k); return `<div class="row"><span>${esc(l.label)}</span><span>${s.now ? esc(s.now.name) : '—'}${s.next ? ` <span class="note">(next: ${esc(s.next.name)} at ${rankLabel(s.next.at)})</span>` : ''}</span></div>`; }).join('')}
-${g.coil ? `<h2>The Coil</h2><p class="note">${g.coil.act === 1 ? 'Act 1, ' : ''}Coil ${g.coil.n}. ${coilActive(g) ? `Bite the tail to start ${g.coil.act === 1 ? 'Act 1' : 'the prologue'} over at ${g.coil.act === 1 ? 'its start' : 'the first dawn'}: James keeps his familiarity and what he knows; his realm, skills and meridians, the hammerspace and the world start over. This Coil he learns ×${fmtMult(coilMult(g))} as fast. ${tabWhy(g) === 'clear' ? `Act 1 is won, so this bite adds to the faster learning: the next learns ×${fmtMult(coilMultNext(g, false))}.` : tabWhy(g) === 'choice' ? `A Coil ended by choice still counts as a Coil, but adds nothing to the faster learning: the next learns ×${fmtMult(coilMultNext(g, true))} too. A collapse, a lost fight or a lost deadline adds to it (×${fmtMult(coilMultNext(g, false))}).` : `The deadline went against him, so this bite adds to the faster learning: the next learns ×${fmtMult(coilMultNext(g, false))}.`}` : 'The Coil turns during the prologue (until the tribute is settled) and during Act 1 (until Shen Qiu is settled, and again at its end).'}</p><p class="note"><b>Targets:</b> ${esc(targetsText(g))}</p>${coilActive(g) ? '<div class="btns"><button class="btn" data-bite="1">Bite the tail</button></div><p class="note" id="saveNote"></p>' : ''}` : ''}
+${g.coil ? `<h2>The Coil</h2><p class="note">${g.coil.act === 1 ? 'Act 1, ' : ''}Coil ${g.coil.n}. ${coilActive(g) ? `Bite the tail to start ${g.coil.act === 1 ? 'Act 1' : 'the prologue'} over at ${g.coil.act === 1 ? 'its start' : 'the first dawn'}: James keeps his familiarity and what he knows; his realm, skills and meridians, the hammerspace and the world start over (the realm no lower than the kept realm below). This Coil he learns ×${fmtMult(coilMult(g))} as fast. ${tabWhy(g) === 'clear' ? `Act 1 is won, so this bite adds to the faster learning: the next learns ×${fmtMult(coilMultNext(g, false))}.` : tabWhy(g) === 'choice' ? `A Coil ended by choice still counts as a Coil, but adds nothing to the faster learning: the next learns ×${fmtMult(coilMultNext(g, true))} too. A collapse, a lost fight or a lost deadline adds to it (×${fmtMult(coilMultNext(g, false))}).` : `The deadline went against him, so this bite adds to the faster learning: the next learns ×${fmtMult(coilMultNext(g, false))}.`}` : 'The Coil turns during the prologue (until the tribute is settled) and during Act 1 (until Shen Qiu is settled, and again at its end).'}</p><p class="note"><b>Targets:</b> ${esc(targetsText(g))}</p>${keptTabLine(g)}${coilActive(g) ? '<div class="btns"><button class="btn" data-bite="1">Bite the tail</button></div><p class="note" id="saveNote"></p>' : ''}` : ''}
 <h2>Pillars</h2>
 <div class="row"><span>Ouroboros Axiom</span><span>DR 1</span><span class="sub">The body as a closed garden: what comes in is filtered and returned clean.</span></div>
 <div class="row"><span>Parallel Cognition Engine</span><span>9 threads</span><span class="sub">One of them is always on watch, if he asks.</span></div>

@@ -44,7 +44,7 @@
 // lost tribute up to 3 times, bite the tail when Shen Qiu takes James up to 3 times (the start of Act 1), and stop after
 // Coil 8. A rewind forgets the cards done (the days start over).
 import { SCENES } from '../js/story/prologue.js';
-import { endCoil } from '../js/core/coil.js';
+import { endCoil, ACT1_WON } from '../js/core/coil.js'; // v0.11.227 (KA1, KM): ACT1_WON
 import { LONG_CAL } from '../js/core/calendar.js'; // v0.11.203 (T1, TS8)
 import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, jamesHpMax, clockParts, coilMult } from '../js/core/game.js';
 import { INC_ONLY_ACTIONS, actionOpen } from '../js/core/forms.js';
@@ -73,6 +73,11 @@ const JSON_OUT = opt('json', null);
 const CAL = Number(opt('cal', 0)) || 0;
 if (CAL && CAL !== LONG_CAL) { console.error(`--cal takes ${LONG_CAL} (the long calendar) or 0 (${CAL})`); process.exit(2); }
 const TEXTS = argv.includes('--texts'); // v0.11.132 (E1, RP)
+// v0.11.227 (owner pick KA1, KM): --kept plays each game on: after a won Act 1 the model goes round again from Day 1 (a1_again, the whole
+// game) and plays that second pass, with its Coil bonus and the realm kept, to its own Act 1 end. The `<model>:kept` lines count the second
+// pass alone (its Coils from 1; RV1 L3: only games that play one, a first pass not won or given up is named in the kept line); the first
+// pass's realm and Coil at the clear in their own line. Log only; the seeds are the plain games'.
+const KEPT = argv.includes('--kept');
 const SAVE_BASE = argv.includes('--save-baseline'); // v0.11.132 (E1, EB)
 const MODELS_BASE = new URL('../tools/models-baseline.json', import.meta.url);
 const OFF = Math.max(0, Number(opt('off', 300)) || 0);
@@ -221,7 +226,8 @@ function weekRun(model, g, cards, st) {
 }
 
 /** One game. Returns 'end' (an Act 1 ending), 'gaveUp' (past Coil 8) or 'stuck'. */
-function play(run, model, st, yuki) {
+function play(run, model, st, yuki, kept = false) {
+    const real = st; if (kept) st = blank(); // KA1 (KM): the first pass counts apart
     rs = seedOf(run, 7 + MODELS.indexOf(model === 'sociable' ? 'careful' : model) + (yuki === 'off' ? 50 : 0)); // RV1 (PS): the Sociable on Careful's dice, so the two compare game for game
     const smart = model !== 'random' || run % 2 === 0;
     const g = ensureBars(newGame(run + 1 + 900000, { closed: true, cal: CAL }));
@@ -237,13 +243,13 @@ function play(run, model, st, yuki) {
         model = 'completionist';
     }
     const cn = () => g.coil.n - off;
-    const mem = { done: {}, tried: new Set(), tribLost: 0, shenBites: 0, st }; // v0.11.142 (CV1): st for the spare-time count
+    let mem = { done: {}, tried: new Set(), tribLost: 0, shenBites: 0, st }; // v0.11.142 (CV1): st for the spare-time count
     let coilKey = '', deadKey = '', takenKey = '', nightKey = '', crossed = false, bitShen = false;
     let lastShown = null; // v0.11.134 (LP2, SV)
     const seenTrib = new Set();
-    const maxSteps = model === 'sitter' ? STEPS_SITTER : STEPS;
+    const maxSteps = (model === 'sitter' ? STEPS_SITTER : STEPS) * (kept ? 2 : 1);
     for (let steps = 0; steps < maxSteps; steps++) {
-        if (cn() > MAX_COIL) { st.gaveUp++; return 'gaveUp'; }
+        if (cn() > MAX_COIL) { if (kept && st !== real) { real.p1GaveUp = (real.p1GaveUp || 0) + 1; real.games--; return 'noClear'; } st.gaveUp++; return 'gaveUp'; } // KA1's RV1 (L3): a first pass that gives up has no second
         const act = g.coil.act || 0;
         const key = `${act}:${cn()}`;
         if (key !== coilKey) { // a new Coil: the days start over
@@ -275,6 +281,17 @@ function play(run, model, st, yuki) {
             if (mem.texts.has(k)) { if (!av.fold) { tx.repeats++; tx.scenes[g.scene] = (tx.scenes[g.scene] || 0) + 1; } } else mem.texts.add(k);
         }
         if ((TEXTS || CAL) && v.text && !noFold(g.scene) && !v.end) noteRead(g, v.text); // v0.11.214 (RD1): on the long calendar too (the plan's read stop); v0.11.133 (FP2, RF1): the bot reads what the screen shows, as main.js records it
+        if (kept && st !== real && (v.end || g.scene === 'a1_end')) { // KA1 (KM): the first pass ends: a won Act 1 goes round again from Day 1
+            if (!ACT1_WON.includes(g.flags.a1_outcome)) { real.noClear = (real.noClear || 0) + 1; real.games--; return 'noClear'; } // RV1 (L3): the second pass's lines count only games that play one
+            real.p1Realm = (real.p1Realm || 0) + g.james.realm; real.p1Coil = (real.p1Coil || 0) + cn(); real.p1N = (real.p1N || 0) + 1;
+            goTo(g, SCENES, 'a1_again');
+            const w = sceneView(g, SCENES).choices.find((c) => /start of the whole game/.test(c.label));
+            if (!w) { assert(false, `${model}: no whole-game bite at a1_again after a won Act 1 (run ${run})`); return 'stuck'; }
+            choose(g, SCENES, w.index); real.keptStart = (real.keptStart || 0) + g.james.realm;
+            st = real; mem = { done: {}, tried: mem.tried, tribLost: 0, shenBites: 0, st }; off = g.coil.n - 1;
+            coilKey = ''; deadKey = ''; takenKey = ''; nightKey = ''; crossed = false; bitShen = false; seenTrib.clear(); lastShown = null;
+            continue;
+        }
         if (v.end || g.scene === 'a1_end') {
             st.endRealm[g.james.realm] = (st.endRealm[g.james.realm] || 0) + 1;
             st.endDay = (st.endDay || 0) + clockParts(g.minutes).day; st.endN = (st.endN || 0) + 1; // v0.11.203 (TS8): Act 1's end, its day // v0.11.142 (CV1): the realm at Act 1's end (the realm starts over each Coil)
@@ -373,8 +390,9 @@ const CULT_KINDS = ['sit', 'mer', 'qi', 'bt']; // v0.11.142 (CV1)
 const CULT_NAMES = { sit: 'sits', mer: 'meridians', qi: 'gather Qi', bt: 'breakthroughs' };
 const blank = () => ({ taps: { story: 0, card: 0, set: 0, run: 0, fold: 0 }, weekStops: {}, hungryAt: {}, hungryFed: {}, cult: {}, endRealm: {}, spare: 0, nights: {}, games: 0, finished: 0, gaveUp: 0, stuck: 0, cards: 0, work: 0, forced: 0, oneCoil: 0, hungry: 0, cuAhead: 0, deaths: {}, tribute: {}, prologueClear: {}, act1Clear: {}, endings: {}, fights: {} });
 const all = {};
-const playInto = (st, run, m, yuki) => { st.games++; const r = play(run, m, st, yuki); if (r === 'end') st.finished++; else if (r === 'stuck') st.stuck++; };
+const playInto = (st, run, m, yuki, kept = false) => { st.games++; const r = play(run, m, st, yuki, kept); if (r === 'end') st.finished++; else if (r === 'stuck') st.stuck++; };
 for (const m of PLAY) {
+    if (KEPT) { all[`${m}:kept`] = blank(); if (!kids) for (const run of myRuns()) if (ownCount(m, run)) playInto(all[`${m}:kept`], run, m, 'on', true); continue; } // KA1 (KM)
     all[m] = blank();
     if (m !== 'random' && OFF && OFF_MODELS.includes(m)) all[`${m}:yukiOff`] = blank();
     if (kids) continue; // with workers the parent only merges
@@ -436,6 +454,7 @@ for (const [m, st] of Object.entries(all)) {
     const sum = (o) => Object.values(o).reduce((a, b) => a + b, 0);
     console.log(`  cleared: prologue ${pct(sum(st.prologueClear), st.games)} (mean Coil ${avg(st.prologueClear)}) · Act 1 ${pct(sum(st.act1Clear), st.games)} (mean Coil ${avg(st.act1Clear)}) · the whole game on Coil 1 ${pct(st.oneCoil, st.games)}`);
     if (st.talks) console.log(`  talk doors: ${(st.talks / Math.max(1, st.games)).toFixed(1)} a game (Ya and Mei Lin)`); // v0.11.160 (NX2, CN)
+    if (st.p1N || st.noClear || st.p1GaveUp) console.log(`  kept (KA1, KM): the first pass won ${st.p1N || 0} of ${(st.p1N || 0) + (st.noClear || 0) + (st.p1GaveUp || 0)}${st.noClear || st.p1GaveUp ? ` (${st.noClear || 0} not won, ${st.p1GaveUp || 0} gave up: no second pass, left out of this block)` : ''} (realm at its clear ${st.p1N ? (st.p1Realm / st.p1N).toFixed(2) : '—'}, mean Coil ${st.p1N ? (st.p1Coil / st.p1N).toFixed(2) : '—'}); this second pass starts at realm ${st.p1N ? (st.keptStart / st.p1N).toFixed(2) : '—'}, with its Coil bonus; Coils above counted from its first`);
     if (st.farmN) console.log(`  farmer: ${FARM_BITES} bites by choice at the first dawn first, then ×${(st.farmMult / st.farmN).toFixed(2)} (a bite by choice adds no bonus); Coils above counted from its first real one`);
     const fl = KEY_FIGHTS.filter((k) => st.fights[k]).map((k) => { const f = st.fights[k]; const n = f.win + f.lose + (f.flee || 0); return `${k} ${pct(f.win, n)} (${n})`; });
     console.log(`  key fights won: ${fl.join(' · ') || '—'}`);

@@ -3,9 +3,9 @@
  * "Bite the tail" after a lost tribute, "You remember this" on the arrival, breakthrough from 95% in the label.
  * Every new choice checks coilActive (Incremental Mode, the only mode since v0.11.34).
  */
-import { advance, startActCoil, combatHooks, PEOPLE_FIGHTS, coilMult, coilMultNext, fmtMult } from '../core/game.js';
+import { advance, startActCoil, combatHooks, PEOPLE_FIGHTS, coilMult, coilMultNext, fmtMult, realmName } from '../core/game.js';
 import { setDeathHook, goTo } from '../core/story.js';
-import { coilActive, endCoil, rewind, coilReport, actOf, actWon, willUnwind, noteClear, targetsText } from '../core/coil.js';
+import { coilActive, endCoil, rewind, coilReport, actOf, actWon, willUnwind, noteClear, targetsText, keptRealm, keptAfterClear, keptLine } from '../core/coil.js';
 import { yukiJobLabel, yukiSpeedLine } from '../core/tasks.js'; // v0.11.159 (owner pick NX2, CL)
 
 const WHY = {
@@ -44,7 +44,17 @@ let cardScenes = {};
 function bite(g, to) {
     const whole = to === 'game' && actOf(g) === 1;
     const n = rewind(g, { to });
-    return [`Coil ${n}.${whole ? ' Day 1 again: the forest, the stream, the whole of it.' : ''} The hammerspace is empty, and so are your hands. Your head is not${coilMult(g) > 1 ? `: you learn ×${fmtMult(coilMult(g))} as fast` : ''}.`]; // v0.11.86: no "×1 as fast"
+    const out = [`Coil ${n}.${whole ? ' Day 1 again: the forest, the stream, the whole of it.' : ''} The hammerspace is empty, and so are your hands. Your head is not${coilMult(g) > 1 ? `: you learn ×${fmtMult(coilMult(g))} as fast` : ''}.`]; // v0.11.86: no "×1 as fast"
+    if (g.coil.kept) out.push(keptLine(g)); // v0.11.227 (KA1, KT): the realm kept for won clears
+    return out;
+}
+
+/** v0.11.227 (owner pick KA1, KT): the Coil screen's kept realm, in plain words: the floor the next Coil wakes at (after a won clear, the new one). */
+function keptNext(g) {
+    const k = g.coil?.why === 'clear' ? keptAfterClear(g) : keptRealm(g);
+    if (!k) return '';
+    const n = (g.stats?.clears || 0) + (g.coil?.why === 'clear' ? 1 : 0);
+    return `, but never below ${realmName(k)}, kept from ${n} won clear${n === 1 ? '' : 's'} of Act 1 (for you and Yuki, with the Mortal Vessel meridians open)`;
 }
 
 export function installCoil(SCENES) {
@@ -69,7 +79,7 @@ ${r.near.length ? `
 
 Yuki remembers all of it, through the bond, as she always has. Expect to hear it quoted.
 
-**Next Coil:** your realm, skills and meridians start over. ${g.coil?.why === 'clear' ? `Act 1 is won, and a bite from a won act counts like a hard one: you will learn ×${fmtMult(coilMultNext(g, false))} as fast.` : g.coil?.why === 'choice' ? `A Coil you end by choice adds nothing to the faster learning: you will learn as fast as now${coilMultNext(g, true) > 1 ? ` (×${fmtMult(coilMultNext(g, true))})` : ''}.` : `What you remember makes them come back faster: you will learn ×${fmtMult(coilMultNext(g, false))} as fast.`}${willUnwind(g) ? `
+**Next Coil:** your realm, skills and meridians start over${keptNext(g)}. ${g.coil?.why === 'clear' ? `Act 1 is won, and a bite from a won act counts like a hard one: you will learn ×${fmtMult(coilMultNext(g, false))} as fast.` : g.coil?.why === 'choice' ? `A Coil you end by choice adds nothing to the faster learning: you will learn as fast as now${coilMultNext(g, true) > 1 ? ` (×${fmtMult(coilMultNext(g, true))})` : ''}.` : `What you remember makes them come back faster: you will learn ×${fmtMult(coilMultNext(g, false))} as fast.`}${willUnwind(g) ? `
 
 **The price:** your collaterals sealed at Foundation. This rewind unwinds the breakthrough with them: Mortal Vessel again, ${g.james.realm} realm${g.james.realm > 1 ? 's' : ''} gone, Saturation at zero. The threads will open again. Everything else you learned stays.` : ''}`;
         },
@@ -98,7 +108,7 @@ Down the street Mei Lin is already arguing with somebody about herbs, and winnin
 Yuki is sitting on the windowsill, tail wrapped over her feet. The look says: *again. Fine. My remarks on the last one will keep until breakfast.*`;
             return `Black bark. Grey moss. Overhead, the same bruise of a sky. You have seen this sky ${times}, and it has not spent the interval improving.
 
-The hammerspace reports in: empty. Your body files a report of its own, and a short one: it remembers nothing. The meridians are ash again. Your head is another matter, a library nobody thought to burn, with the way back shelved where you left it.${unwound}
+${g.coil.kept ? `The hammerspace reports in: empty. Your body files a report of its own, and for once it is not a blank page: it kept ${realmName(g.coil.kept)}. The meridians are open, primaries and collaterals at the least. The skills went the usual way, with everything you carried, which leaves your head, a library nobody thought to burn, with the way back shelved in order.` : 'The hammerspace reports in: empty. Your body files a report of its own, and a short one: it remembers nothing. The meridians are ash again. Your head is another matter, a library nobody thought to burn, with the way back shelved where you left it.'}${unwound}
 
 Yuki is standing on your sternum, on all four feet. The look says: *we have been here. I was paying attention. This time you will be, too.*
 
