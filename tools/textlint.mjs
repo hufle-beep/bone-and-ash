@@ -8,6 +8,7 @@
 //   node tools/textlint.mjs           counts, and what changed against the snapshot
 //   node tools/textlint.mjs --list    every hit
 //   node tools/textlint.mjs --save    save the counts as the new snapshot (with the push that changes the texts)
+//   node tools/textlint.mjs --corpus f.json  every render as JSON to f.json, nothing counted (v0.11.239, RC: tools/packet.mjs's run check)
 // v0.11.134 (owner pick LP2, LR): and the line pools: again.js's memory lines, Yuki's haul lines (task_hubs.js), the aptitude reply
 // (tasks.js): per pool lines, words, a line twice, lines sharing a 5-word chunk with a scene text, tics, broken, spacing.
 // v0.11.135 (NT1, EV1): every sample state also on a scene's 2nd–4th day this Coil, so the later-day texts are read.
@@ -26,7 +27,8 @@ import { lintCounts, snapshotDiff, poolCounts } from './lib/textlint.mjs';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SNAP = path.join(ROOT, 'tools/text-baseline.json');
 const argv = process.argv.slice(2);
-const LIST = argv.includes('--list'), SAVE = argv.includes('--save');
+const LIST = argv.includes('--list'), SAVE = argv.includes('--save'), CORPUS = argv.includes('--corpus');
+if (CORPUS && !/^[^-]/.test(argv[argv.indexOf('--corpus') + 1] || '')) { console.log('--corpus takes a file to write (node tools/textlint.mjs --corpus f.json)'); process.exit(2); } // v0.11.239 RV1 (C L3) // v0.11.239 (owner pick P12-A, RC): --corpus prints every render as JSON for tools/packet.mjs's run check
 const js = (f) => path.join(ROOT, 'js', f);
 
 const { SCENES } = await import(js('story/prologue.js'));
@@ -133,8 +135,9 @@ for (const [vday, day] of [[1, 23], [2, 30], [3, 37]]) for (const k of [0, 1, 2,
     Object.assign(g.flags, { long: true, vday, cal_night: 1 }); g.minutes = (day - 1) * 1440 + 19 * 60;
     SAMPLES.push(onDay(g, k));
 }
-for (const day of [51, 58]) for (const k of [0, 1, 2]) {
-    const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); Object.assign(g.flags, { ya_met: true }); g.minutes = (day - 1) * 1440 + 12 * 60;
+// v0.11.239 (owner pick P12-A, TG): and the Fallout supper's sequences of six (FS6): story day 8's six in the three forms, day 9's with Ya and without her
+for (const day of [44, 51, 58]) for (const k of [0, 1, 2, 3, 4, 5]) for (const [form, realm] of (day === 44 ? [['cat', 0], ['tiger', 2], ['human', 7]] : [['cat', 0]])) for (const ya of (day === 51 ? [true, false] : [true])) {
+    const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; if (ya) g.flags.ya_met = true; g.minutes = (day - 1) * 1440 + 12 * 60;
     SAMPLES.push(onDay(g, k));
 }
 const renders = (x) => {
@@ -226,6 +229,14 @@ for (const s of Object.values(SCENES)) (s.choices || []).forEach((c0, i) => {
     }
 });
 POOLS.results = resultLines;
+// v0.11.239 (owner pick P12-A, RC; p12's measure CR1–CR3): every text, label and pool line the lint reads, as JSON ({ id, t, label }), for the
+// draft check's runs (tools/packet.mjs lintCorpus): a result line by its scene, a pool line as `pool:<name>`; nothing counted or printed
+if (CORPUS) {
+    const out = rows.flatMap((r) => r.renders.map((t) => (r.kind === 'label' ? { id: r.id, t, label: true } : { id: r.id, t })));
+    for (const [p, v] of Object.entries(POOLS)) for (const t of v) if (typeof t === 'string') out.push({ id: p === 'results' ? resultAt.get(t) : `pool:${p}`, t });
+    writeFileSync(argv[argv.indexOf('--corpus') + 1], JSON.stringify(out)); // a file: a pipe may be cut off at exit
+    process.exit(0);
+}
 const pools = poolCounts(POOLS, rows.filter((r) => r.kind === 'text').flatMap((r) => r.renders));
 // CT (D1, S5): the canon card's tics in the result lines (the card's list, as tools/packet.mjs reads it)
 const cardPath = path.join(ROOT, 'project/canon-card.md');

@@ -1,0 +1,80 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/act1_fallout.js",
+  "find": ", ...FS8.map(fs8)",
+  "replace": ""
+ },
+ {
+  "id": "F2",
+  "file": "js/story/act1_fallout.js",
+  "find": ", ...FS9.map(fs9)",
+  "replace": ""
+ },
+ {
+  "id": "F3",
+  "file": "js/story/act1_fallout.js",
+  "find": "const fs9 = (x) => (g) => (yaHere(g) ? x.t : x.away);",
+  "replace": "const fs9 = (x) => (g) => x.t;"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/act1_fallout.js",
+  "find": "const fs8 = (x) => (g) => x.t.replace('{yuki}', byForm(g, ...x.y));",
+  "replace": "const fs8 = (x) => (g) => x.t;"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/act1_fallout.js",
+  "find": "const fs8 = (x) => (g) => x.t.replace('{yuki}', byForm(g, ...x.y));",
+  "replace": "const fs8 = (x) => (g) => x.t.replace('{yuki}', byForm(g, x.y[2], x.y[1], x.y[0]));"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/act1_fallout.js",
+  "find": "a jar of salve set down by her bowl unexplained.",
+  "replace": "a jar of salve set down by her bowl like a verdict."
+ },
+ {
+  "id": "F7",
+  "file": "js/story/act1_fallout.js",
+  "find": "Supper. The mother trims the lamp low and listens between mouthfuls.",
+  "replace": "Supper. The mother trims the lamp low and listens to the loft between mouthfuls."
+ },
+ {
+  "id": "F8",
+  "file": "tools/packet.mjs",
+  "find": "    if (base(a) !== base(b) || a === b) return false;",
+  "replace": "    return false;"
+ },
+ {
+  "id": "F9",
+  "file": "tools/packet.mjs",
+  "find": ".filter(([, n]) => n * 2 >= mine.size)",
+  "replace": ".filter(([, n]) => n * 2 >= mine.size && false)"
+ },
+ {
+  "id": "F10",
+  "file": "tools/packet.mjs",
+  "find": "('texts' in opts ? texts : [...texts, ...lintCorpus()])",
+  "replace": "texts"
+ },
+ {
+  "id": "F11",
+  "file": "tools/textlint.mjs",
+  "find": "    for (const [p, v] of Object.entries(POOLS)) for (const t of v) if (typeof t === 'string') out.push",
+  "replace": "    for (const [p, v] of Object.entries({})) for (const t of v) if (typeof t === 'string') out.push"
+ },
+ {
+  "id": "F12",
+  "file": "tools/textlint.mjs",
+  "find": "for (const day of [44, 51, 58]) for (const k of [0, 1, 2, 3, 4, 5])",
+  "replace": "for (const day of [44, 51, 58]) for (const k of [0, 1, 2])"
+ },
+ {
+  "id": "F13",
+  "file": "tools/packet.mjs",
+  "find": "            else if (at.some(([id, i]) => id === sid && !replaced.has(i))) out.push",
+  "replace": "            else if (false) out.push"
+ }
+]

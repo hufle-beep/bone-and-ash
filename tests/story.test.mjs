@@ -8223,5 +8223,60 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     // SN: What's new says it
     { const N = await import('../js/core/news.js'); const all = JSON.stringify(N); assert(/0\.11\.238/.test(all), `${T} (SN): What's new has 0.11.238`); }
 }
+// v0.11.239 (owner pick P12-A = FS6 + RC, the Fallout supper read as the social supper, D1; 2026-11-20 19:54, 20:06): FS6 the Fallout
+// supper's story days 8 and 9 a sequence of six each on the long calendar (Fable's runs S8 and S9, Claude's cuts D1: RN the seven runs, VD
+// "verdict", SC "scholar" is Ya's word, PG the coat's peg); RC (tools/packet.mjs's run check) in tests/tools.test.mjs; TG the text lint's samples.
+{
+    const T = 'P12-A (FS6)';
+    const C = await import('../js/core/calendar.js');
+    const { FS8, FS9 } = await import('../js/story/act1_fallout.js');
+    const D = 1440;
+    const week = (d0, flags, form = 'cat', n = 7, cal = C.LONG_CAL) => {
+        const g = ensureBars(newGame(39100 + d0, { closed: true, cal })); Object.assign(g.flags, flags); g.yuki.realm = 9; g.yuki.form = form; g.scene = 'fo_supper';
+        const out = []; for (let k = 0; k < n; k++) { g.minutes = (d0 - 1 + k) * D + 19 * 60; out.push(SCENES.fo_supper.text(g)); } return out;
+    };
+    const paras = (t) => t.split('\n\n');
+    // the long calendar: each story day's week six texts, the old three first, the seventh night the first again
+    for (const form of ['cat', 'tiger', 'human']) {
+        const l = week(44, {}, form);
+        assert(new Set(l.slice(0, 6)).size === 6 && l[6] === l[0] && /^Nobody talks at supper/.test(l[0]) && /^Hands are to be shown/.test(l[3]) && /^Old Wen has told/.test(l[4]) && /^The coat was white once/.test(l[5]) && l.every((t) => paras(t).length >= 2 && !t.includes('{yuki}')), `${T}: story day 8's week, ${form}: six texts, the old three first, then FS8 in order (${l.map((t) => t.slice(0, 20)).join(' | ')})`);
+    }
+    { const l = week(51, { ya_met: true }); assert(new Set(l.slice(0, 6)).size === 6 && l[6] === l[0] && l.slice(3, 6).join('|') === FS9.map((x) => x.t).join('|') && l.every((t) => paras(t).length >= 2), `${T}: story day 9's week with Ya: the old three, then FS9's texts`); }
+    { const l = week(51, {}); assert(new Set(l.slice(0, 6)).size === 6 && l.slice(3, 6).join('|') === FS9.map((x) => x.away).join('|') && l.every((t) => !/\bYa\b/.test(t)), `${T}: story day 9's week without Ya: her lines out (${l.slice(3).join(' | ')})`); }
+    // the old calendar keeps its one supper a story day: the old first text (RV1, the cold review's C L1, TG-C2: a game built without the long calendar)
+    { const g = ensureBars(newGame(39108, { closed: true })); g.yuki.realm = 9; g.scene = 'fo_supper'; g.minutes = 7 * D + 19 * 60;
+      assert(g.cal !== C.LONG_CAL && /^Nobody talks at supper/.test(SCENES.fo_supper.text(g)), `${T}: the old calendar's day 8 supper is the old text (cal ${g.cal})`); }
+    // each form draws its own passage (cat, great, woman), the shared text round it
+    for (const [i, form] of ['cat', 'tiger', 'human'].entries()) { const l = week(44, {}, form); assert(FS8.every((x, k) => l[3 + k] === x.t.replace('{yuki}', x.y[i])), `${T}: story day 8's texts 4–6 in the ${form} form carry its own Yuki passage`); }
+    // Yuki by form in FS8: the bond in italics for the cat and the great form, aloud for the woman; the fold's first paragraph names no form
+    assert(FS8.every((x) => x.t.includes('{yuki}') && !paras(x.t)[0].includes('{yuki}') && !/\b(paw|forepaw|tail|ears|stove)\b/.test(x.t.replace('{yuki}', '')) && /\*/.test(x.y[0]) && !/"/.test(x.y[0]) && /\*/.test(x.y[1]) && !/"/.test(x.y[1]) && /"/.test(x.y[2]) && !/\*/.test(x.y[2])), `${T}: FS8's Yuki passages by form (italics, italics, aloud), the shared text without a form word or her slot in its first paragraph`);
+    // each fold reminder its own; no loft (LF: it may have burned); the brief's openers kept out
+    { const firsts = [...FS8.map((x) => paras(x.t)[0]), ...FS9.map((x) => paras(x.t)[0])];
+      assert(new Set(firsts).size === 6 && !firsts.some((f) => /^(Nobody|Supper|The talk|Mei Lin's mother|Mei Lin eats|Tonight|You|Ya comes to supper|Ya is at the table)\b/.test(f)), `${T}: six fold reminders, none with the old texts' openers`);
+      const all = JSON.stringify([FS8, FS9]);
+      assert(!/loft/i.test(all) && FS9.every((x) => x.away.split(/(?<=\.)\s/).length >= 2 && !/supperPot|ladle/.test(x.t)), `${T}: no loft (LF), the lines without Ya two sentences or more, no pot clause`); }
+    // D1: Claude's cuts in, the cut phrases out
+    { const all = JSON.stringify([FS8, FS9]);
+      const IN = ['set down by her bowl unexplained', 'from the place of honour', 'it waits by the door', 'Mei Lin takes in the sleeves', 'planting herself in front of it', 'Mei Lin closes her eyes', 'as a child recites its lesson'];
+      const OUT = ['when Mei Lin was six', 'verdict', 'at the head of the table', 'hangs on a peg', 'Mei Lin looks at the', 'inclines her head', 'standing in front of it', 'shuts her eyes', 'in the voice of a'];
+      assert(IN.every((x) => all.includes(x)) && !OUT.some((x) => all.includes(x)), `${T} (D1): the cuts (RN, VD, PG) in, the drafts' phrases out (SC taken back by RV1, T L1)`); }
+    // RV1 (owner pick 2026-11-20 21:27; the cold reviews' T M1, M2, L1, L3, L4, L6 and the test gaps TG-T1–T4, TG-C1–C2)
+    { const all = JSON.stringify([FS8, FS9]);
+      const last6 = paras(FS9[2].t).at(-1);
+      assert(!/laugh/i.test(last6) && /shoulders shaking/.test(last6), `${T} RV1 (T M1, TG-T2): the second week's sixth supper ends before the laugh its label offers ("${last6}")`);
+      assert(/^Hands are to be shown before the grace tonight/.test(FS8[0].t) && /as they were when Mei Lin was small/.test(FS8[0].t) && !/since Mei Lin was small/.test(all), `${T} RV1 (T M2): the hands shown once, tonight, not a nightly custom`);
+      assert(FS8[1].t.includes('Old Wen has told the house that you are a scholar') && !/learned man/.test(all), `${T} RV1 (T L1): Old Wen's "scholar" kept (ashfall's "a scholar who has lost his way")`);
+      assert(FS9.filter((x) => /\bscholar\b/i.test(x.t)).length === 2 && !/Scholar\. Tell her/.test(FS9[0].t), `${T} RV1 (T L3): Ya's "scholar" in two of FS9's three`);
+      { const hum = week(44, {}, 'human'); const bows = hum.slice(0, 6).filter((t) => /\bbows?\b/.test(t)).length; assert(bows <= 2 && /The mother hears her out/.test(FS8[2].y[2]), `${T} RV1 (T L4): the mother bows to Yuki in ${bows} of the human form's six`); }
+      assert(!/radish|rice chest/.test(all) && /grain chest/.test(FS8[1].y[0]) && /pickled greens/.test(FS8[1].y[2]), `${T} RV1 (T L6): the table's food as the meal line has it`);
+      assert(FS8[2].t.includes('Then she sees whose jacket it is.') && FS9[1].t.includes("This one was a man's. He started it.") && /forty-odd teeth/.test(FS9[1].t), `${T} RV1 (TG-T4): the new canon words pinned (the husband's jacket, the man's tooth)`); }
+    // TG-T1, TG-C1: one game walked through story days 9 and 10 with Ya: day 10 goes on with day 9's sequence (7–13), FS9 with Ya on Days 60–62
+    { const g = ensureBars(newGame(39151, { closed: true, cal: C.LONG_CAL })); g.flags.ya_met = true; g.yuki.realm = 9; g.scene = 'fo_supper';
+      const out = []; for (let d = 51; d <= 64; d++) { g.minutes = (d - 1) * D + 19 * 60; out.push(SCENES.fo_supper.text(g)); }
+      const old = week(51, { ya_met: true }, 'cat', 3);
+      assert(out[7] === old[1] && out[8] === old[2] && out.slice(9, 12).join('|') === FS9.map((x) => x.t).join('|') && out[12] === old[0] && out[13] === old[1], `${T} RV1 (TG-T1, TG-C1): story day 10 goes on with day 9's sequence, FS9 with Ya on Days 60–62 (${out.map((t) => t.slice(0, 12)).join(' | ')})`); }
+    // SN: What's new says it
+    { const N = await import('../js/core/news.js'); const all = JSON.stringify(N); assert(/0\.11\.239/.test(all), `${T} (SN): What's new has 0.11.239`); }
+}
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

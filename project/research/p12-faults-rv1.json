@@ -1,0 +1,58 @@
+[
+ {
+  "id": "RV1-1",
+  "file": "js/story/act1_fallout.js",
+  "find": "Mei Lin has turned to the stove, shoulders shaking, which will not save her.",
+  "replace": "Mei Lin has begun to laugh, which will not help her.",
+  "note": "RT5 ported: the sixth supper ends on the laugh its label offers (T M1)"
+ },
+ {
+  "id": "RV1-2",
+  "file": "js/story/act1_fallout.js",
+  "find": "Hands are to be shown before the grace tonight, backs and then palms, as they were when Mei Lin was small.",
+  "replace": "Hands are shown before the grace in this house, backs and then palms, as they have been since Mei Lin was small.",
+  "note": "T M2 undone: the hands a nightly custom"
+ },
+ {
+  "id": "RV1-3",
+  "file": "js/story/act1_fallout.js",
+  "find": "you are a scholar,",
+  "replace": "you are a learned man,",
+  "note": "T L1 undone"
+ },
+ {
+  "id": "RV1-4",
+  "file": "js/story/act1_fallout.js",
+  "find": "The mother hears her out, and fills",
+  "replace": "The mother bows her head to her, and fills",
+  "note": "T L4 undone"
+ },
+ {
+  "id": "RV1-5",
+  "file": "tools/packet.mjs",
+  "find": "    ...[0, 1, 2, 3, 4, 5].flatMap((k) => FORMS.map(([f, r, name]) => ({ base: `the long calendar's story day 8,",
+  "replace": "    ...[].flatMap((k) => FORMS.map(([f, r, name]) => ({ base: `the long calendar's story day 8,",
+  "note": "C M2 undone: the packet draws no story day 8 state"
+ },
+ {
+  "id": "RV1-6",
+  "file": "tools/packet.mjs",
+  "find": "        if (replaced.size) { const n =",
+  "replace": "        if (false) { const n =",
+  "note": "C M1 undone: a copy silent again"
+ },
+ {
+  "id": "RV1-7",
+  "file": "tools/packet.mjs",
+  "find": "    const base = (k) => k.replace(/:(y:(cat|great|tiger|human)|away)$/, '');",
+  "replace": "    const base = (k) => k.replace(/:(y:(cat|great|human)|away)$/, '');",
+  "note": "C L4 undone"
+ },
+ {
+  "id": "RV1-8",
+  "file": "tools/textlint.mjs",
+  "find": "if (CORPUS && !/^[^-]/.test(",
+  "replace": "if (false && !/^[^-]/.test(",
+  "note": "C L3 undone"
+ }
+]

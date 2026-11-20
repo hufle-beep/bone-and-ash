@@ -1,0 +1,58 @@
+[
+ {
+  "id": "C1",
+  "file": "js/story/act1_fallout.js",
+  "find": "seqText(g, 'fo_supper:9', [",
+  "replace": "seqText(g, `fo_supper:${dd(g)}`, [",
+  "note": "story day 10 starts its own sequence (no longer continues day 9's)"
+ },
+ {
+  "id": "C2",
+  "file": "js/story/act1_fallout.js",
+  "find": "? seqText(g, 'fo_supper:8', [(g) =>",
+  "replace": "? seqText(g, 'fo_supper:8', [...(longCal(g) ? [] : FS8.map(fs8)), (g) =>",
+  "note": "the old calendar's day 8 supper shows FS8[0] instead of the old text"
+ },
+ {
+  "id": "C3",
+  "file": "js/story/act1_fallout.js",
+  "find": "const fs9 = (x) => (g) => (yaHere(g) ? x.t : x.away);",
+  "replace": "const fs9 = (x) => (g) => (yaHere(g) && dd(g) === 9 ? x.t : x.away);",
+  "note": "story day 10 draws the away lines with Ya met"
+ },
+ {
+  "id": "C4",
+  "file": "tools/packet.mjs",
+  "find": "const hit = at.find((x) => x.key !== d.key && !exclusiveDrafts(x.key, d.key));",
+  "replace": "const hit = [at[0]].find((x) => x.key !== d.key && !exclusiveDrafts(x.key, d.key));",
+  "note": "self pass reads only the first draft holding the run (a run first in an exclusive draft hides a later sharing one)"
+ },
+ {
+  "id": "C5",
+  "file": "tools/packet.mjs",
+  "find": "else if (at.some(([id, i]) => id === sid && !replaced.has(i)))",
+  "replace": "else if (at.some(([id, i]) => id === sid && !replaced.size))",
+  "note": "a draft that replaces one own-scene text is no longer checked against the scene's other texts"
+ },
+ {
+  "id": "C6",
+  "file": "tools/textlint.mjs",
+  "find": "for (const day of [44, 51, 58]) for (const k of [0, 1, 2, 3, 4, 5])",
+  "replace": "for (const day of [44, 51]) for (const k of [0, 1, 2, 3, 4, 5])",
+  "note": "the lint drops story day 10 (fo_mei:10, fo_ya_time:10 and their labels, sampled before this push)"
+ },
+ {
+  "id": "C7",
+  "file": "tools/packet.mjs",
+  "find": ".filter(([, n]) => n * 2 >= mine.size)",
+  "replace": ".filter(([, n]) => n * 3 >= mine.size)",
+  "note": "replaced threshold a third instead of half"
+ },
+ {
+  "id": "C8",
+  "file": "tools/textlint.mjs",
+  "find": "id: p === 'results' ? resultAt.get(t) : `pool:${p}`",
+  "replace": "id: `pool:${p}`",
+  "note": "result lines lose their scene in the corpus (an own-scene result run noted as another scene's)"
+ }
+]

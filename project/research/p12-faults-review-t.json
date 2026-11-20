@@ -1,0 +1,8 @@
+[
+ { "id": "RT1", "file": "js/story/act1_fallout.js", "find": "seqText(g, 'fo_supper:9', [", "replace": "seqText(g, `fo_supper:${dd(g)}`, [", "note": "story day 10 restarts its own sequence instead of continuing day 9's (old first again on Day 58)" },
+ { "id": "RT2", "file": "js/story/act1_fallout.js", "find": "const fs9 = (x) => (g) => (yaHere(g) ? x.t : x.away);", "replace": "const fs9 = (x) => (g) => (yaHere(g) && dd(g) === 9 ? x.t : x.away);", "note": "story day 10 with Ya at the table draws the lines without her" },
+ { "id": "RT3", "file": "js/story/act1_fallout.js", "find": "(yaHere(g) && dd(g) === 9 ? 'Laugh. Out loud.", "replace": "(yaHere(g) && dd(g) >= 9 ? 'Laugh. Out loud.", "note": "the day-9 Laugh label on story day 10 under the folded FS9 texts" },
+ { "id": "RT4", "file": "js/story/act1_fallout.js", "find": "*Passed,* Yuki informs you.", "replace": "\\\"Passed,\\\" Yuki informs you.", "note": "the cat speaks aloud at the table" },
+ { "id": "RT5", "file": "js/story/act1_fallout.js", "find": "Mei Lin has begun to laugh, which will not help her.", "replace": "Mei Lin laughs out loud, which will not help her.", "note": "makes the FS9[2] / Laugh-label clash explicit (already there in substance)" },
+ { "id": "RT6", "file": "js/story/act1_fallout.js", "find": "This one was a man's. He started it.", "replace": "This one was a man's. I started it.", "note": "Ya's canon line (owner-visible assumption) changed" }
+]

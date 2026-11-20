@@ -24,7 +24,9 @@
 //   node tools/packet.mjs --check drafts.txt             C7 on drafts: one per line, `scene_id[:index] | text`
 //   --games N   the bot run's games (default 200; 0 = none); --out file   write there instead of stdout
 // Changes nothing in the game. The bot run is wall time only (no model reads it).
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -82,7 +84,11 @@ const campNight = (bday, n = 0) => (g) => calMinutes(g, 10 + bday, 19) + n * DAY
 export const STATES = [
     ...[[1, 23], [2, 30], [3, 37]].flatMap(([v, d]) => [0, 1, 2, 3, 4, 5].flatMap((k) => FORMS.map(([f, r, name]) => ({ base: `the long calendar's village week ${v}, day ${k + 1} of its cycles`, form: name, week: v, // v0.11.238 (P11-A, PKf): `--week v` keeps week v's
         on: (id) => inArea(ASHFALL)(id) && !(v === 1 && id === 'mei_walk'), g: stateOf({ long: true, vday: v, cal_night: 1 }, (d - 1) * DAY + 19 * 60, { k, form: [f, r] }) })))),
-    ...[[9, 51], [10, 58]].flatMap(([sd, d]) => [0, 1, 2].map((k) => ({ base: `the long calendar's story day ${sd}, day ${k + 1} of its sequences`, on: inArea(FALLOUT), g: stateOf({ ya_met: true }, (d - 1) * DAY + 12 * 60, { k }) }))),
+    ...[[9, 51], [10, 58]].flatMap(([sd, d]) => [0, 1, 2, 3, 4, 5].map((k) => ({ base: `the long calendar's story day ${sd}, day ${k + 1} of its sequences`, on: inArea(FALLOUT), g: stateOf({ ya_met: true }, (d - 1) * DAY + 12 * 60, { k }) }))),
+    // v0.11.239 (owner pick RV1 after P12-A; the cold review's C M2): the Fallout supper's sequences of six (FS6): story day 8 on each of its days in the
+    // three forms (FS8 names Yuki by form), story days 9 and 10 on days 4–6 too, and story day 9 without Ya (FS9's `away` lines), so the packet draws them
+    ...[0, 1, 2, 3, 4, 5].flatMap((k) => FORMS.map(([f, r, name]) => ({ base: `the long calendar's story day 8, day ${k + 1} of its sequences`, form: name, on: inArea(FALLOUT), g: stateOf({}, 43 * DAY + 12 * 60, { k, form: [f, r] }) }))),
+    ...[0, 1, 2, 3, 4, 5].map((k) => ({ base: `the long calendar's story day 9, day ${k + 1} of its sequences, Ya not met`, on: inArea(FALLOUT), g: stateOf({}, 50 * DAY + 12 * 60, { k }) })),
     { base: 'the Ashen Hills by day, Ya away', on: inArea(BLACKROOT), g: stateOf(AH, 70 * DAY + 10 * 60, { k: 1 }) },
     { base: 'the Ashen Hills by day, both away', on: inArea(BLACKROOT), g: stateOf({ ...AH, trio: 2 }, 70 * DAY + 10 * 60, { k: 1, rel: BOTH }) },
     { base: 'the Ashen Hills by day, both there', on: inArea(BLACKROOT), g: stateOf({ ...AH, ya_off_done: true }, 70 * DAY + 10 * 60, { k: 1 }) },
@@ -407,38 +413,79 @@ export function corpus() {
     }
     return out;
 }
+/** v0.11.239 (owner pick P12-A, RC; p12's measure CR2, CR3): every render the text lint reads (its long-calendar and story states, the
+ *  stomp lists and the result lines, Yuki's path, the day replies and the other pools), from `node tools/textlint.mjs --corpus`; once a run. */
+let LINT_CORPUS = null;
+export function lintCorpus() {
+    if (!LINT_CORPUS) {
+        const dir = mkdtempSync(path.join(tmpdir(), 'lintcorpus-')), f = path.join(dir, 'corpus.json');
+        try { // v0.11.239 RV1 (C L2): the lint's own error on stderr, and the folder removed either way
+            execFileSync(process.execPath, [path.join(ROOT, 'tools/textlint.mjs'), '--corpus', f], { cwd: ROOT, stdio: ['ignore', 'ignore', 'inherit'] });
+            LINT_CORPUS = JSON.parse(readFileSync(f, 'utf8'));
+        } finally { rmSync(dir, { recursive: true, force: true }); }
+    }
+    return LINT_CORPUS;
+}
+/** v0.11.239 (RC, CR1): two draft keys that never share a screen: one text's Yuki passages by form (`…:y:cat`, `…:y:great`, `…:y:human`),
+ *  and a text with someone there against its line without them (`…:away`, the text and its Yuki passages); `…:y:tiger` as `great`. */
+export function exclusiveDrafts(a, b) {
+    const base = (k) => k.replace(/:(y:(cat|great|tiger|human)|away)$/, ''); // v0.11.239 RV1 (C L4): `tiger`, the game's own name, too
+    if (base(a) !== base(b) || a === b) return false;
+    const yk = (k) => /:y:(cat|great|tiger|human)$/.test(k), aw = (k) => /:away$/.test(k);
+    return (yk(a) && yk(b)) || aw(a) || aw(b);
+}
 /**
  * C7 on drafts [{ key: 'scene[:index]', text }]: tics, word pairs used `pairMin`+ times elsewhere, five-word runs shared with a
  * scene, and time words with the line's C2 data; v0.11.200 (D1): the split (`split`) and runs shared by two drafts (`self`).
+ * v0.11.239 (owner pick P12-A, RC; p12's measure CR1–CR3): the runs are counted against `runTexts` (by default `texts` and the text
+ * lint's renders, `lintCorpus`; given `texts` alone, those), every scene a run is in is kept, and a run shared with another text of the
+ * draft's own scene is noted (`scene`), except against the text the draft replaces (an own-scene text holding half the draft's runs or
+ * more; RV1, C M1: that one gets a single note, a rewrite or a copy); two drafts of one scene are checked against each other too, but for drafts that never share a screen (`exclusiveDrafts`).
  * Returns [{ key, kind, what }].
  */
-export function checkDrafts(drafts, { seen = {}, tics = cardTics(), texts = corpus(), pairMin = 5 } = {}) {
+export function checkDrafts(drafts, opts = {}) {
+    const { seen = {}, tics = cardTics(), texts = corpus(), pairMin = 5 } = opts;
+    const runTexts = opts.runTexts || ('texts' in opts ? texts : [...texts, ...lintCorpus()]);
     const pairCount = new Map();
-    const runAt = new Map();
-    for (const { id, t } of texts) {
-        for (const p of pairs(t)) pairCount.set(p, (pairCount.get(p) || 0) + 1);
-        for (const r of runs5(t)) if (!runAt.has(r)) runAt.set(r, id);
-    }
+    for (const { t } of texts) for (const p of pairs(t)) pairCount.set(p, (pairCount.get(p) || 0) + 1);
+    const runAt = new Map(); // a run → [[scene id, render index]]
+    runTexts.forEach(({ id, t }, i) => { for (const r of runs5(t)) { if (!runAt.has(r)) runAt.set(r, []); runAt.get(r).push([id, i]); } });
     const out = [];
     for (const d of drafts) {
         const low = String(d.text).toLowerCase().replace(/[,.;:!?"]/g, '');
         for (const x of tics) if (low.includes(x)) out.push({ key: d.key, kind: 'tic', what: `"${x}" (the canon card's list)` });
         for (const p of pairs(d.text)) { const n = pairCount.get(p) || 0; if (n >= pairMin) out.push({ key: d.key, kind: 'pair', what: `"${p}" is in ${n} texts or labels already` }); }
         const sid = d.key.split(':')[0];
-        for (const r of runs5(d.text)) { const at = runAt.get(r); if (at && at !== sid) out.push({ key: d.key, kind: 'run', what: `"${r}" also in ${at}` }); }
+        const mine = runs5(d.text);
+        const shared = new Map(); // an own-scene render → the draft's runs it holds
+        for (const r of mine) for (const [id, i] of runAt.get(r) || []) if (id === sid) shared.set(i, (shared.get(i) || 0) + 1);
+        const replaced = new Set([...shared].filter(([, n]) => n * 2 >= mine.size).map(([i]) => i));
+        // v0.11.239 RV1 (the cold review's C M1): never silent: a draft holding half the runs of an own-scene text or more gets one note (a
+        // rewrite of it, or a copy), and its runs are still checked against the scene's other texts
+        if (replaced.size) { const n = Math.max(...[...replaced].map((i) => shared.get(i))); out.push({ key: d.key, kind: 'scene', what: `${n} of ${mine.size} runs shared with one text of ${sid}: a rewrite of it, or a copy` }); }
+        for (const r of mine) {
+            const at = runAt.get(r) || [];
+            const others = [...new Set(at.filter(([id]) => id !== sid).map(([id]) => id))];
+            if (others.length) out.push({ key: d.key, kind: 'run', what: `"${r}" also in ${others.join(', ')}` });
+            else if (at.some(([id, i]) => id === sid && !replaced.has(i))) out.push({ key: d.key, kind: 'scene', what: `"${r}" also in another text of ${sid}` });
+        }
         const tw = timeWord(d.text);
         if (tw) out.push({ key: d.key, kind: 'time', what: `"${tw}": ${fmtSeen(seen[d.key] || seen[sid])}; check it holds on every day and hour` });
         const sn = splitNote(d.text);
         if (sn) out.push({ key: d.key, kind: 'split', what: sn });
     }
-    // v0.11.200 (D1, S2): the drafts against each other (a run in two drafts of different scenes; one note, on the later draft)
+    // v0.11.200 (D1, S2): the drafts against each other (a run in two drafts; one note, on the later draft; v0.11.239 RC: of one scene too)
     const draftRun = new Map();
     for (const d of drafts) {
         const sid = d.key.split(':')[0];
         for (const r of runs5(d.text)) {
             const at = draftRun.get(r);
-            if (!at) draftRun.set(r, { sid, key: d.key });
-            else if (at.sid !== sid) out.push({ key: d.key, kind: 'self', what: `"${r}" also in the draft ${at.key}` });
+            if (!at) draftRun.set(r, [{ sid, key: d.key }]);
+            else {
+                const hit = at.find((x) => x.key !== d.key && !exclusiveDrafts(x.key, d.key)); // v0.11.239 (RC, CR1): one scene's drafts too
+                if (hit) out.push({ key: d.key, kind: 'self', what: `"${r}" also in the draft ${hit.key}` });
+                at.push({ sid, key: d.key });
+            }
         }
     }
     return out;
@@ -461,7 +508,7 @@ if (isMain) {
         const drafts = lines.map((l) => { const k = l.indexOf('|'); return { key: l.slice(0, k).trim(), text: l.slice(k + 1).trim() }; });
         const seen = games ? seenAt(games) : {};
         const r = checkDrafts(drafts, { seen });
-        text = `${r.map((x) => `${x.kind.toUpperCase()} · ${x.key} · ${x.what}`).join('\n')}\n\nC7: ${drafts.length} drafts, ${r.length} notes (${['tic', 'pair', 'run', 'self', 'time', 'split'].map((k) => `${k} ${r.filter((x) => x.kind === k).length}`).join(', ')})\n`;
+        text = `${r.map((x) => `${x.kind.toUpperCase()} · ${x.key} · ${x.what}`).join('\n')}\n\nC7: ${drafts.length} drafts, ${r.length} notes (${['tic', 'pair', 'run', 'scene', 'self', 'time', 'split'].map((k) => `${k} ${r.filter((x) => x.kind === k).length}`).join(', ')})\n`;
     } else if (argv.includes('--tags')) {
         let ids = Object.keys(SCENES);
         const area = opt('area', null);
