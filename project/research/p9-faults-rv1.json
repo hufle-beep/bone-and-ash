@@ -1,0 +1,142 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/act1_blackroot.js",
+  "find": "            rr: byDay(g, BL_RR_CAMP, 'bl_camp:rr'), // v0.11.236 (P9-A, CB3)",
+  "replace": "            rr: BL_RR_CAMP[0],",
+  "note": "the Root Road camp back to one text"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/act1_blackroot.js",
+  "find": "            ah: byDay(g, BL_AH_CAMP, 'bl_camp:ah'),",
+  "replace": "            ah: byDay(g, BL_AH_CAMP, 'bl_camp:rr'),",
+  "note": "the Ashen Hills camp counts the Root Road's nights"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/act1_blackroot.js",
+  "find": "            rr: byDay(g, BL_RR_CAMP, 'bl_camp:rr'), // v0.11.236 (P9-A, CB3)",
+  "replace": "            rr: byDay(g, BL_AH_CAMP, 'bl_camp:rr'),",
+  "note": "the Root Road reads the Ashen Hills' texts"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/act1_blackroot.js",
+  "find": "            if (n >= 5) return `Mei Lin has not spoken for some while",
+  "replace": "            if (n > 5) return `Mei Lin has not spoken for some while",
+  "note": "Mei Lin's beat 5 the old quiet walk again"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/act1_blackroot.js",
+  "find": "${likesMei(g) ? 'The next cake she breaks evenly",
+  "replace": "${!likesMei(g) ? 'The next cake she breaks evenly",
+  "note": "Mei Lin's branches swapped"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/act1_blackroot.js",
+  "find": "${likesMei(g) && likesYa(g) ? '\"The herb girl got one too,\"",
+  "replace": "${likesYa(g) ? '\"The herb girl got one too,\"",
+  "note": "Ya's line about Mei Lin's stone when Mei Lin doesn't like him"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/act1_blackroot.js",
+  "find": "            if (n >= 5) return `Ya is quiet, which you had taken",
+  "replace": "            if (n >= 50) return `Ya is quiet, which you had taken",
+  "note": "Ya's new quiet walk never shows"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/ashfall.js",
+  "find": "Mei Lin wants to know whether your people have collectors.",
+  "replace": "Mei Lin wants to know whether your world has collectors.",
+  "note": "YW undone"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/act1_blackroot.js",
+  "find": "Ya walking the edge barefoot, listening.'];",
+  "replace": "Ya walking the edge barefoot, listening.'].slice(0, 2);",
+  "note": "the Ashen Hills camp two texts"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/act1_blackroot.js",
+  "find": "${likesYa(g) ? 'Later she wants the stone back",
+  "replace": "${likesMei(g) ? 'Later she wants the stone back",
+  "note": "Ya's warm branch by Mei Lin's warmth"
+ },
+ {
+  "id": "T1",
+  "file": "js/story/act1_blackroot.js",
+  "find": "The routine has settled:",
+  "replace": "By now the routine is settled:",
+  "note": "T1 ported: D1's BN cut undone"
+ },
+ {
+  "id": "T2",
+  "file": "js/story/act1_blackroot.js",
+  "find": "She sounds delighted.",
+  "replace": "Every tooth shows.",
+  "note": "T2 ported: D1's TT cut undone"
+ },
+ {
+  "id": "T3",
+  "file": "js/story/act1_blackroot.js",
+  "find": "She breaks a millet cake in two",
+  "replace": "She breaks a seed cake in two",
+  "note": "T3 ported: D1's MC cut undone"
+ },
+ {
+  "id": "T4",
+  "file": "js/story/act1_blackroot.js",
+  "find": "Mei Lin is kneeling there with the kindling",
+  "replace": "Mei Lin lays the kindling there",
+  "note": "T4 ported: the kindling laid after the fire is lit"
+ },
+ {
+  "id": "R5",
+  "file": "js/story/act1_blackroot.js",
+  "find": "by laughing with her mouth full.'",
+  "replace": "by laughing with her mouth full and checking over her shoulder for Ya.'",
+  "note": "R5 ported: Ya in Mei Lin's cold branch (Ya away)"
+ },
+ {
+  "id": "N1",
+  "file": "js/story/act1_blackroot.js",
+  "find": "The hill is black glass in places, and you have camped on the largest sheet of it, which rings underfoot.",
+  "replace": "The cinder hawks have come down to roost along the ridge above the camp, each under its own wisp of smoke.",
+  "note": "RV1 T M1 undone: the hawks on the hawk night"
+ },
+ {
+  "id": "N2",
+  "file": "js/story/act1_blackroot.js",
+  "find": "Nobody discusses where the fire goes any more.",
+  "replace": "The root runs thicker here, and warmer underfoot.",
+  "note": "RV1 T M2 undone: the next morning's news"
+ },
+ {
+  "id": "N3",
+  "file": "js/story/act1_blackroot.js",
+  "find": "and goes looking along the roadside for a better one, which will apparently also be yours.",
+  "replace": "and punches your arm for having carried it so carefully.",
+  "note": "RV1 T L4 undone: the punch again"
+ },
+ {
+  "id": "N4",
+  "file": "js/story/act1_blackroot.js",
+  "find": "The fire throws your shadows up it.",
+  "replace": "The fire leaves no scorch on it; you looked.",
+  "note": "RV1 T M4 undone: you looked"
+ },
+ {
+  "id": "N5",
+  "file": "js/story/act1_blackroot.js",
+  "find": "she tells the road ahead.",
+  "replace": "she says, lower.",
+  "note": "RV1 T L4 undone: the copied tag"
+ }
+]

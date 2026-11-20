@@ -151,7 +151,7 @@ There has not been a mouse in this house since Yuki moved in. Nobody mentions th
 Mei Lin's mother is still holding the string they hung by. "Next year's will be sweeter," she tells it. "The tree was young." She winds it up and puts it in her sleeve, because string is string.`],
 };
 const WALK_NEW = {
-    5: [(g) => `Mei Lin wants to know whether your world has collectors. She asks it at the barley's corner, where the path narrows to one walker's width and she steps down into the furrow sooner than go on ahead of you.
+    5: [(g) => `Mei Lin wants to know whether your people have collectors. She asks it at the barley's corner, where the path narrows to one walker's width and she steps down into the furrow sooner than go on ahead of you.
 
 "We have them," you say. "They send letters."
 
@@ -182,7 +182,7 @@ At the seventh you put your own hand down next to hers, not touching.
 She stares at it. "Now it's counted you. You'll owe millet." She does not smile. Not smiling takes her all of the eighth stone and most of the ninth, and you watch her do the work.
 
 "I've eaten its millet all week. The stone is within its rights."`],
-    6: [(g) => `"Tell me the dullest thing about your world," Mei Lin says, her arm hooked through yours and the barley gone grey at your elbow. You give her the committee: eleven people, one room, a morning spent deciding who shall take the notes. She listens as to a tale of immortals.
+    6: [(g) => `"Tell me the dullest thing about where you come from," Mei Lin says, her arm hooked through yours and the barley gone grey at your elbow. You give her the committee: eleven people, one room, a morning spent deciding who shall take the notes. She listens as to a tale of immortals.
 
 "And nobody dies of it?"
 

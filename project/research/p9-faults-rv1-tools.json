@@ -1,0 +1,23 @@
+[
+ {
+  "id": "P1",
+  "file": "tools/packet.mjs",
+  "find": "{ k: 2 }) },\n    ...[['neither close'",
+  "replace": "{ k: 1 }) },\n    ...[['neither close'",
+  "note": "the Ashen Hills' third camp state back to day index 1"
+ },
+ {
+  "id": "P2",
+  "file": "tools/packet.mjs",
+  "find": "mei_talks: 5, ya_talks: 5 }, 70 * DAY + 10 * 60, { rel }) })),",
+  "replace": "mei_talks: 4, ya_talks: 4 }, 70 * DAY + 10 * 60, { rel }) })),",
+  "note": "the talk states at beat 4"
+ },
+ {
+  "id": "P3",
+  "file": "tools/packet.mjs",
+  "find": "{ ...AH, mei_talks: 5, ya_talks: 5 }, 70 * DAY + 10 * 60, { k: 1 }) },",
+  "replace": "{ ...AH, ya_off_done: true, mei_talks: 5, ya_talks: 5 }, 70 * DAY + 10 * 60, { k: 1 }) },",
+  "note": "the Ya-away talk state with Ya back"
+ }
+]

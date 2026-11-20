@@ -3,10 +3,10 @@
  "totals": {
   "scenes": 331,
   "words": 37443,
-  "variantWords": 114387,
+  "variantWords": 115109,
   "labels": 850,
   "labelWords": 5765,
-  "sharedChunks": 753,
+  "sharedChunks": 757,
   "sharedScenes": 136,
   "reused": 49,
   "favourites": 34,
@@ -47,7 +47,7 @@
   "ashfall": {
    "scenes": 18,
    "words": 1112,
-   "variantWords": 9086,
+   "variantWords": 9088,
    "labels": 65,
    "labelWords": 475,
    "sharedScenes": 6,
@@ -75,7 +75,7 @@
   "blackroot": {
    "scenes": 60,
    "words": 6644,
-   "variantWords": 16749,
+   "variantWords": 17469,
    "labels": 185,
    "labelWords": 1067,
    "sharedScenes": 19,

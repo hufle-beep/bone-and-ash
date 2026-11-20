@@ -3,7 +3,7 @@
  * A scene read on an earlier Coil folds under a memory line (again.js). For the scenes here the line is the scene's own, chosen
  * by what the text shows now, in place of the general pool's: the Day 2 morning (`forest_day` 2) and Mei Lin's and Ya's talk
  * beats 0, 1, 3 and 4 (the beat as act1_blackroot.js picks it: the higher of the talk count and the day's index). The settled
- * text (beats 2 and 5+) and every other scene keep the pool (null here). No flags, no save fields: the fold itself (`g.read`)
+ * text (beat 2, and from 5 the cycle of six: v0.11.236 RV1 C L1) and every other scene keep the pool (null here). No flags, no save fields: the fold itself (`g.read`)
  * says the text was read before. The same line on every redraw (it follows the state, not a draw).
  */
 import { dayIndex } from '../core/lines.js';

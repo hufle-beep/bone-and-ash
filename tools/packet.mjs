@@ -87,6 +87,13 @@ export const STATES = [
     { base: 'the Ashen Hills in the evening, he cooked', on: inArea(BLACKROOT), g: stateOf({ ...AH, ya_off_done: true }, 70 * DAY + 20 * 60, { k: 1, cooked: true }) },
     { base: 'the Root Road in the evening, he did not cook', on: inArea(BLACKROOT), g: stateOf({ bl_region: 'rr', bl_day: 2, mei_party: true, ya_party: true }, 70 * DAY + 20 * 60, { k: 1 }) },
     { base: 'the Root Road in the evening, he cooked', on: inArea(BLACKROOT), g: stateOf({ bl_region: 'rr', bl_day: 2, mei_party: true, ya_party: true }, 70 * DAY + 20 * 60, { k: 1, cooked: true }) },
+    // v0.11.236 (owner pick RV1 after P9-A, PS; the cold review's C M1): the camps' third night (day index 2) and the journey talks' beat 5 (the
+    // cycle's own quiet walk) by warmth and with Ya away, so the packet draws the six texts P9-A added
+    { base: 'the Root Road in the evening, its third camp', on: inArea(BLACKROOT), g: stateOf({ bl_region: 'rr', bl_day: 2, mei_party: true, ya_party: true }, 70 * DAY + 20 * 60, { k: 2 }) },
+    { base: 'the Ashen Hills in the evening, its third camp', on: inArea(BLACKROOT), g: stateOf({ ...AH, ya_off_done: true }, 70 * DAY + 20 * 60, { k: 2 }) },
+    ...[['neither close', {}], ['Mei Lin close', { 'Mei Lin': 90 }], ['Ya close', { Ya: 90 }], ['both close', BOTH]].map(([w, rel]) => ({ base: `the journey talks at beat 5, ${w}`, on: inArea(BLACKROOT),
+        g: stateOf({ bl_region: 'rr', bl_day: 2, mei_party: true, ya_party: true, mei_talks: 5, ya_talks: 5 }, 70 * DAY + 10 * 60, { rel }) })),
+    { base: 'the journey talks at beat 5, Ya away, Mei Lin not close', on: inArea(BLACKROOT), g: stateOf({ ...AH, mei_talks: 5, ya_talks: 5 }, 70 * DAY + 10 * 60, { k: 1 }) },
 ];
 /** RV1: the states that draw one text, named shortly: a state in all three forms by its name alone, else with its forms. */
 export function stateNames(states) {

@@ -1,0 +1,16 @@
+talk_mei:q | Mei Lin has not spoken for some while, and neither have you, and the walking has gone on perfectly well without it. She breaks a seed cake in two with her thumbnail and passes you the smaller half without looking. You eat it. Further on she remarks that in Ashfall a silence of this length between two people means a death or a debt. You ask which this one is. She consults the basket. "Neither," she says. "I checked."
+talk_mei:q:likes | The next cake she breaks evenly, which you understand to be a promotion. She puts your half into your palm and her fingers stay folded round yours until the crumbs are safely delivered. Then she studies the path ahead, closely.
+talk_mei:q:not | You say the smaller half was noted. She says a guest is served first and least, that is only manners, and then ruins the gravity of it by laughing with her mouth full and checking over her shoulder for witnesses.
+talk_ya:q | Ya is quiet, which you had taken for a thing that only happens to other people. She walks at your side with the spear across her shoulders and both wrists hung over it, and says nothing, and looks at nothing in particular. Some way on she picks up a stone, turns it over, and puts it in your hand. You ask what it is for. "Carrying," says Ya. You carry it. This appears to be all that was wanted.
+talk_ya:q:likes | Later she wants the stone back, and takes it by closing her hand over yours with the stone still inside. She does not take it out. It is, she tells you, a very good stone.
+talk_ya:q:not | Later she takes it back, weighs it, and throws it at nothing, a long way. "Wrong stone," she says, and punches your arm for having carried it so carefully.
+talk_ya:q:both | "The herb girl got one too," she says, lower. "Smaller. Rounder. She put it in the basket with her roots and thinks I did not see." Every tooth shows. "She kept it."
+mei_walk:5:4 | Mei Lin wants to know whether your people have collectors.
+mei_walk:6:4 | "Tell me the dullest thing about where you come from," Mei Lin says, her arm hooked through yours and the barley gone grey at your elbow.
+# notes
+- talk_mei:q names no Ya in any paragraph, so there are no `:ya` keys.
+- Both new texts keep to "path" and name no trees, roots underfoot, water or haze, so they hold in all three regions; neither has a time word.
+- Closeness: Mei Lin's `likes` is her fingers round his hand over a piece of cake (at the level of the hand kept after the trunk); Ya's is her hand closed over his (below the threaded fingers).
+- "seed cake" is an invented travel food; if the game has a named ration, swap the two words (and "cake" in `likes`).
+- mei_walk:5:4: one-word change ("your world has" -> "your people have"; "among your people" is already Mei Lin's phrase in talk_mei). Alternative if "world" should go without "people": "whether they have collectors where you come from."
+- mei_walk:6:4: "your world" -> "where you come from" (her own phrase in talk_mei beat 3); the rest of the sentence is untouched.

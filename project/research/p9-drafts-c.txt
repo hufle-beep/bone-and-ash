@@ -1,0 +1,12 @@
+bl_camp:rr:2 | A lesser root joins the road here, and the crook between them gives the camp a wall on one side and the forest on the other three. Ya has rapped the bark with her spear butt and pronounced it sound. The fire leaves no scorch on it; you looked.
+bl_camp:rr:3 | The root runs thicker here, broad enough that the firelight stops short of its edges. By now nobody asks where to put the fire: Ya finds a dip in the bark with her bare heel, and Mei Lin lays the kindling there before Ya can say so.
+bl_camp:ah:2 | Ash has drifted knee-deep behind the ridge, so the camp is a pit you trod out yourselves, with the fire on bare rock in the middle. Every step you took to build it is still printed round the edge. Ya has read them all and thinks little of yours.
+bl_camp:ah:3 | The cinder hawks have come down to roost along the ridge above the camp, each under its own wisp of smoke. By now the routine is settled: packs strapped shut, the water covered, and Mei Lin shaking the ash out of her sleeves while Ya counts birds and loses her place.
+# notes
+- Word counts: rr:2 48, rr:3 46, ah:2 49, ah:3 49 (hyphenated words counted as one).
+- rr:2 and rr:3 each start from the root itself rather than "You camp", so the three Root Road texts open differently; ah:2 opens on the ash, ah:3 on the hawks.
+- rr:3 "lays the kindling" is written as habit ("by now nobody asks"), not as something happening after the screen is drawn; the fire is already lit. If it reads as a later event, swap to "and Mei Lin has the kindling there before Ya can say so".
+- ah:3 assumes cinder hawks roost at evening (the brief only says they circle by day). If that is not canon, the first sentence needs another image.
+- ah:2 "knee-deep" ash is a new size claim for the hills; shrink to "ankle-deep" if the day texts say otherwise.
+- "By now" opens the second sentence of both rr:3 and ah:3; they are in different regions, so never on consecutive screens, but one could become "These days" if the pair check flags it.
+- Yuki is in none of the four. No food, no watch, no day counts, no promise of quiet or danger.

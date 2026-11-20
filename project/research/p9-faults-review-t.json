@@ -1,0 +1,6 @@
+[
+ {"id":"T1","file":"js/story/act1_blackroot.js","find":"The routine has settled: packs strapped shut","replace":"By now the routine is settled: packs strapped shut","note":"D1 cut 1 reverted (By now a third time)"},
+ {"id":"T2","file":"js/story/act1_blackroot.js","find":"thinks I did not see.\" She sounds delighted. \"She kept it.\"","replace":"thinks I did not see.\" Every tooth shows. \"She kept it.\"","note":"D1 cut 2 reverted (every tooth, Ya's 7th)"},
+ {"id":"T3","file":"js/story/act1_blackroot.js","find":"She breaks a millet cake in two","replace":"She breaks a seed cake in two","note":"D1 cut 3 reverted (seed cake)"},
+ {"id":"T4","file":"js/story/act1_blackroot.js","find":"Mei Lin has the kindling there before Ya can say so","replace":"Mei Lin lays the kindling there before Ya can say so","note":"D1 cut 4 reverted (lays: an action redrawn after the meal)"}
+]

@@ -1,0 +1,12 @@
+bl_camp:rr:2 | A buttress of bark stands up from the road's edge here, taller than you, and the camp sits in the crook it makes, with a wall at its back. Ya rapped the wall twice with her spear butt before anyone unpacked. The fire throws your shadows up it.
+bl_camp:rr:3 | Nobody discusses where the fire goes any more. Ya walks the bark until her bare heel finds a dip, and Mei Lin is kneeling there with the kindling before Ya has pointed. The road's edges are somewhere out past the firelight, and the forest past them.
+bl_camp:ah:3 | The hill is black glass in places, and you have camped on the largest sheet of it, which rings underfoot. The routine has settled: packs strapped shut, the water covered, Mei Lin shaking the ash out of her sleeves, and Ya walking the edge barefoot, listening.
+talk_ya:q:not | Further on she holds out her hand for it, hefts it once and pitches it into the trees. "Wrong stone," she says, and goes looking along the roadside for a better one, which will apparently also be yours.
+talk_ya:q:both | "The herb girl got one too," she tells the road ahead. "Smaller. Rounder. She put it in the basket with her roots and thinks I did not see." She sounds delighted. "She kept it."
+# notes
+- Word counts: rr:2 48, rr:3 46, ah:3 46, q:not 39. q:both changes the dialogue tag only.
+- ah:3 keeps the routine clause from the current line word for word (the brief allows it), so a reuse check against the old ah:3 will flag that run; it is the line being replaced.
+- rr:2: the crook is now a buttress of the road's own bark, so no second root is named. Ya's test is an action in the middle, not a ruling, and the line ends on the fire.
+- rr:3: "any more" carries the habit without a time word tied to a day count; it reads whole on a later night.
+- ah:3: black glass underfoot is new to the Ashen Hills camps (ridge shelter, ash pit before it). No fire image in this one, so nothing glows or reflects near the "pale lights" event.
+- q:not: she now goes looking for a replacement stone instead of the punch; the ending keeps James as the carrier.

@@ -1,0 +1,86 @@
+[
+ {
+  "id": "R1",
+  "file": "js/story/act1_blackroot.js",
+  "find": "The routine has settled: packs",
+  "replace": "By now the routine is settled: packs",
+  "note": "D1 cut 1 undone (Fable's 'By now the routine is settled')"
+ },
+ {
+  "id": "R2",
+  "file": "js/story/act1_blackroot.js",
+  "find": "She sounds delighted.",
+  "replace": "Every tooth shows.",
+  "note": "D1 cut 2 undone (Ya's 'Every tooth shows.')"
+ },
+ {
+  "id": "R3",
+  "file": "js/story/act1_blackroot.js",
+  "find": "She breaks a millet cake in two",
+  "replace": "She breaks a seed cake in two",
+  "note": "D1 cut 3 undone ('seed cake')"
+ },
+ {
+  "id": "R4",
+  "file": "js/story/act1_blackroot.js",
+  "find": "Mei Lin has the kindling there",
+  "replace": "Mei Lin lays the kindling there",
+  "note": "D1 cut 4 undone ('lays the kindling')"
+ },
+ {
+  "id": "R5",
+  "file": "js/story/act1_blackroot.js",
+  "find": "checking over her shoulder for witnesses",
+  "replace": "checking over her shoulder for Ya",
+  "note": "Mei Lin's new walk, cold branch, names Ya (shows with Ya away)"
+ },
+ {
+  "id": "R6",
+  "file": "js/story/act1_blackroot.js",
+  "find": "dayKey: (g) => `bl_camp:${region(g)}`",
+  "replace": "dayKey: (g) => `bl_camp_${region(g)}`",
+  "note": "the camp's noted key no longer the one byDay reads (every night text 1)"
+ },
+ {
+  "id": "R7",
+  "file": "js/story/act1_blackroot.js",
+  "find": "if (n >= 5) return `Ya is quiet",
+  "replace": "if (n === 5) return `Ya is quiet",
+  "note": "Ya's beats 11, 17 back to the old quiet walk"
+ },
+ {
+  "id": "R8",
+  "file": "js/story/act1_blackroot.js",
+  "find": "in the shape of the dead tree.'",
+  "replace": "in the shape of the tree.'",
+  "note": "the moved old Ashen Hills text changed (no pin on the moved text)"
+ },
+ {
+  "id": "R9",
+  "file": "js/story/act1_blackroot.js",
+  "find": "${likesMei(g) && likesYa(g) ? '\"The herb girl got one too,\"",
+  "replace": "${true ? '\"The herb girl got one too,\"",
+  "note": "Ya's both-line ungated"
+ },
+ {
+  "id": "R10",
+  "file": "js/story/act1_blackroot.js",
+  "find": "if (n >= 5 && (n - 5) % 6) return [(g) => `${awayText(g,",
+  "replace": "if (n >= 5 && (n - 5) % 6 && false) return [(g) => `${awayText(g,",
+  "note": "Mei Lin's beats 6-10 shadowed by the new walk"
+ },
+ {
+  "id": "R11",
+  "file": "js/story/ashfall.js",
+  "find": "\"Tell me the dullest thing about where you come from,\"",
+  "replace": "\"Tell me the dullest thing about your world,\"",
+  "note": "YW, the second walk undone"
+ },
+ {
+  "id": "R12",
+  "file": "js/story/act1_blackroot.js",
+  "find": "Ya has rapped the bark with her spear butt",
+  "replace": "Yuki has rapped the bark with her tail",
+  "note": "RR text 2 names Yuki in the wrong form (no form check; the test's ban list does catch the name)"
+ }
+]

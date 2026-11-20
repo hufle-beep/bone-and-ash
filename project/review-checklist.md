@@ -32,6 +32,7 @@
 - **A cycle's branch formula (v0.11.233 T M1):** count the endings of every plain and warm branch across a whole cycle of texts, and the result pools drawn under them; a brief that prescribes a branch's beat makes every text end on it. And a line on a hub screen (which never folds) against every state that redraws it: the food on hand, the screen after the meal (v0.11.233 T M2, C M1).
 - **A result line drawn above the next scene (v0.11.234 T M1):** it must stop where that scene's text starts (no sleep before the screen that settles him) and must not repeat its opening noun; a brief's "it ends with…" goes into every line, so read the brief's prescribed endings and props (the sleeve, the mother) across the whole cycle.
 - **Two cycles that run in step (v0.11.235 T M1, M2, M3):** read the scenes of one evening together (the walk's text n, then the supper's n), not each cycle alone: a joke family or a brief's prescribed beat ("laughs, checks who heard", a closeness that "stays there") can land twice in one evening; and read every cut for a pronoun it orphaned.
+- **A day-indexed text against the story's day (v0.11.236 T M1, M2):** find which day index lands on the story night or the day a beat turns (`blLastDay`, the morning after), and read that text against the night's event pool and the next screen's news; a text that only reads well in isolation can give away an attack or spend the next hub's line.
 
 ## Reachability (what the player never sees)
 - Texts behind a day record, an hour or a flag a real game never reaches (part 4 M1, M2; part 5 M1, M2).

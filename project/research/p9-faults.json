@@ -1,0 +1,72 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/act1_blackroot.js",
+  "find": "            rr: byDay(g, BL_RR_CAMP, 'bl_camp:rr'), // v0.11.236 (P9-A, CB3)",
+  "replace": "            rr: BL_RR_CAMP[0],",
+  "note": "the Root Road camp back to one text"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/act1_blackroot.js",
+  "find": "            ah: byDay(g, BL_AH_CAMP, 'bl_camp:ah'),",
+  "replace": "            ah: byDay(g, BL_AH_CAMP, 'bl_camp:rr'),",
+  "note": "the Ashen Hills camp counts the Root Road's nights"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/act1_blackroot.js",
+  "find": "            rr: byDay(g, BL_RR_CAMP, 'bl_camp:rr'), // v0.11.236 (P9-A, CB3)",
+  "replace": "            rr: byDay(g, BL_AH_CAMP, 'bl_camp:rr'),",
+  "note": "the Root Road reads the Ashen Hills' texts"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/act1_blackroot.js",
+  "find": "            if (n >= 5) return `Mei Lin has not spoken for some while",
+  "replace": "            if (n > 5) return `Mei Lin has not spoken for some while",
+  "note": "Mei Lin's beat 5 the old quiet walk again"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/act1_blackroot.js",
+  "find": "${likesMei(g) ? 'The next cake she breaks evenly",
+  "replace": "${!likesMei(g) ? 'The next cake she breaks evenly",
+  "note": "Mei Lin's branches swapped"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/act1_blackroot.js",
+  "find": "${likesMei(g) && likesYa(g) ? '\"The herb girl got one too,\"",
+  "replace": "${likesYa(g) ? '\"The herb girl got one too,\"",
+  "note": "Ya's line about Mei Lin's stone when Mei Lin doesn't like him"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/act1_blackroot.js",
+  "find": "            if (n >= 5) return `Ya is quiet, which you had taken",
+  "replace": "            if (n >= 50) return `Ya is quiet, which you had taken",
+  "note": "Ya's new quiet walk never shows"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/ashfall.js",
+  "find": "Mei Lin wants to know whether your people have collectors.",
+  "replace": "Mei Lin wants to know whether your world has collectors.",
+  "note": "YW undone"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/act1_blackroot.js",
+  "find": "Ya counts birds and loses her place.'];",
+  "replace": "Ya counts birds and loses her place.'].slice(0, 2);",
+  "note": "the Ashen Hills camp two texts"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/act1_blackroot.js",
+  "find": "${likesYa(g) ? 'Later she wants the stone back",
+  "replace": "${likesMei(g) ? 'Later she wants the stone back",
+  "note": "Ya's warm branch by Mei Lin's warmth"
+ }
+]
