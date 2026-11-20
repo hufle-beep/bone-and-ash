@@ -1,0 +1,51 @@
+[
+ {
+  "id": "C1",
+  "file": "tools/packet.mjs",
+  "find": "(week && st.week && st.week !== week)",
+  "replace": "(week && st.week !== week)",
+  "note": "PKf: --week drops every state without a week (a Blackroot or Fallout scene packed with --week draws no states)"
+ },
+ {
+  "id": "C2",
+  "file": "tools/packet.mjs",
+  "find": "['--games', '--out', '--area', '--check', '--week']",
+  "replace": "['--games', '--out', '--area', '--check']",
+  "note": "PKf CLI: the --week value is taken for a scene id"
+ },
+ {
+  "id": "C3",
+  "file": "tools/packet.mjs",
+  "find": "const week = opt('week', null) ? Number(opt('week')) : null;",
+  "replace": "const week = Number(opt('week', 1));",
+  "note": "PKf CLI: every packet without --week cut to week 1"
+ },
+ {
+  "id": "C4",
+  "file": "tools/textlint.mjs",
+  "find": "g.minutes = 70 * 1440 + 20 * 60; SAMPLES.push(onDay(ensureBars(g), k));",
+  "replace": "g.minutes = 70 * 1440 + 20 * 60; SAMPLES.push(ensureBars(g));",
+  "note": "TG: the later-camp samples lose their day index (the lint reads text 1 only)"
+ },
+ {
+  "id": "C5",
+  "file": "js/story/act1_blackroot.js",
+  "find": "show: (g) => (!!g.flags.drowned_done || !blLastDay(g)) && hour(g) >= 16",
+  "replace": "show: (g) => hour(g) >= 16",
+  "note": "the wood: camp on its last day without the hollow (the wood-edge text on a night before the hollow; the hollow skippable)"
+ },
+ {
+  "id": "C6",
+  "file": "js/story/act1_blackroot.js",
+  "find": "show: (g) => (bday(g) === 1 || !blLastDay(g)) && hour(g) >= 16",
+  "replace": "show: (g) => (bday(g) <= 2 || !blLastDay(g)) && hour(g) >= 16",
+  "note": "the Root Road: a sixth camp on its story day (the list wraps to text 1 on the wyrm night)"
+ },
+ {
+  "id": "C7",
+  "file": "js/story/ashfall.js",
+  "find": "if (!arsonNight(g) && longCal(g) && QUIET_WEEK[vday(g)])",
+  "replace": "if (!arsonNight(g) && longCal(g) && vday(g) > 2 && QUIET_WEEK[vday(g)])",
+  "note": "week 2 falls to the week-1 six (by the quiet key, mid-cycle)"
+ }
+]

@@ -97,3 +97,7 @@ Started in v0.11.208, when `roadmap-done-3.md` would have passed about 45 KB wit
 ## Moved from `roadmap.md` in v0.11.236 (word for word; section 0's oldest notes, the size rule: under 20,000 bytes)
 
 *(v0.11.228: the rest of e, push 1 done (RE1 + RV1: the read stop's cap, the rule for repeated texts on `roadmap-e.md`).)* *(v0.11.227: KA done (KA1 + XW-a + DW-a + KM-40 + RV1).)*
+
+## Moved from `roadmap.md` in v0.11.238 (word for word; section 0's oldest notes, the size rule: under 20,000 bytes)
+
+*(v0.11.230: the rest of e, push 3 done (P3-2 + RV1: FT, SF-a, SF-c).)* *(v0.11.229: the rest of e, push 2 done (E2-2 + RV1: one-paragraph texts fold to their first sentence; the night's rules read for its time words).)*

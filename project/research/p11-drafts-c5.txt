@@ -1,0 +1,11 @@
+bl_camp:rr:4 | A lesser root joins the road, thick as a barrel, and the camp lies in the fork where the two barks meet. Rain has pooled in the seam, so the fire sits a pace uphill. Ya washes her feet in the pool, which Mei Lin had marked for the waterskins.
+bl_camp:rr:5 | The road dips here until its back is level with the forest floor, and ferns lean in over both edges. You camp in the dip, out of the wind. Leaf fall has drifted across the bark, and Mei Lin swept a circle clear with a branch before anyone struck a spark.
+bl_camp:ah:4 | A bough of the dead tree fell here once and lies along the slope like a wall, bare and hard as slate. You camp against it, since nothing else stops the wind. Mei Lin has hung the packs from a twig as thick as her waist.
+bl_camp:ah:5 | The wind drops at dusk, and the ash it carried all day comes down on the camp, fine as flour. Mei Lin has tied a cloth over her nose and mouth and offered one to Ya, who wears hers round her wrist. The blue flames take no notice.
+bl_camp:dw:4 | The trees thin out here and the water with them, ankle-deep over black silt and warm as a hand. You camp on a bar of cinders the wood has not managed to drown. Mist stands on the shallows, and Ya wades about in it, spear down, suspicious of comfort.
+# notes
+- Word counts: rr:4 50, rr:5 49, ah:4 46, ah:5 48, dw:4 48. Yuki is in none of them.
+- ah:4 invents a fallen bough of the dead tree lying on the slope. Nothing in the packets or the canon card says boughs have fallen; check against lore.md, and swap for a spur of ridge if it clashes.
+- dw:4 "a bar of cinders" is meant as the first sign of the hills under the water; no spring, no bathing (Ya wades with the spear, she does not wash). rr:4 has Ya washing her feet in a rain pool on the root; if that sits too close to the bathing scene, change it to her drinking from it.
+- rr:4 says rain has pooled (rain earlier, not falling now), so it holds on every redraw. ah:5 has ash falling at dusk; it reads the same after the fireside, but it is the one draft tied to a time of evening.
+- dw:4 replaces the raft text on the wood's story night, but bl_fireside (the spitting lesson, "the edge of the raft", "the black water") and bl_night ("Still dripping") for that night still say raft; those are other screens and not in this run.

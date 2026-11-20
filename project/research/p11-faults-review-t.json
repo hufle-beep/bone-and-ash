@@ -1,0 +1,44 @@
+[
+ {
+  "id": "RT1",
+  "file": "js/story/ashfall.js",
+  "find": "The loft has one board that announces you, and you have found it again.",
+  "replace": "The loft has one board that announces you, and the cat has found it again.",
+  "note": "a form word in the shared first sentence (the fold names a form; the same in every form, so the equality test passes)"
+ },
+ {
+  "id": "RT2",
+  "file": "js/story/ashfall.js",
+  "find": "*It's a bird,* Yuki sends, not lifting her head from your elbow.",
+  "replace": "*It's a bird,* Yuki sends, from most of the floor.",
+  "note": "the cat's passage given the great form's place"
+ },
+ {
+  "id": "RT3",
+  "file": "js/story/act1_blackroot.js",
+  "find": "The wind drops at dusk, and the ash",
+  "replace": "The wind drops at midnight, and the ash",
+  "note": "a time word the 19:00 camp can't hold (the camp test's ban list has no midnight/dusk/night words)"
+ },
+ {
+  "id": "RT4",
+  "file": "js/story/ashfall.js",
+  "find": "It came here white. Along the lane",
+  "replace": "It came here white, a week ago. Along the lane",
+  "note": "a day count in week 1's text (the brief's ban; no test reads the quiet texts for day counts)"
+ },
+ {
+  "id": "RT5",
+  "file": "js/story/ashfall.js",
+  "find": "Downstairs a broom stops, long enough for the matter to be noted, and resumes.",
+  "replace": "Downstairs Ya's broom stops, long enough for the matter to be noted, and resumes.",
+  "note": "Ya in Ashfall's first week (he has not met her; canon)"
+ },
+ {
+  "id": "RT6",
+  "file": "js/story/act1_blackroot.js",
+  "find": "Mist stands on the shallows, and Ya wades about in it, spear down, suspicious of comfort.",
+  "replace": "Mist stands on the shallows, and Ya wades about in it, spear down, suspicious of comfort. Her forearm is whole.",
+  "note": "the wood's fourth camp contradicts the hollow (dw_after stitches Ya's arm that evening)"
+ }
+]

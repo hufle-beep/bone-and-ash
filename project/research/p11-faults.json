@@ -1,0 +1,93 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/act1_blackroot.js",
+  "find": "const BL_RR_CAMP = ['You camp on the root\\'s broad back, with the fire set in a hollow of the bark and the forest standing round you, dark and very large. Through the bedroll, the root is warm.', 'A buttress of bark stands up from the road\\'s edge here, taller than you, and the camp sits in the crook it makes, with a wall at its back. Ya rapped the wall twice with her spear butt before anyone unpacked. The fire throws your shadows up it.', 'Nobody discusses where the fire goes any more. Ya walks the bark until her bare heel finds a dip, and Mei Lin is kneeling there with the kindling before Ya has pointed. The road\\'s edges are somewhere beyond the firelight, and the forest beyond them.', \"A lesser root joins the road, thick as a barrel, and the camp lies in the fork where the two barks meet. Rain has pooled in the seam, so the fire sits a pace uphill. Ya washes her feet in the pool, which Mei Lin had marked for the waterskins.\", \"The road dips here until its back is level with the forest floor, and ferns lean in over both edges. You camp in the dip, out of the wind. Leaf fall has drifted across the bark, and Mei Lin swept a circle clear with a branch before anyone struck a spark.\"];",
+  "replace": "const BL_RR_CAMP = ['You camp on the root\\'s broad back, with the fire set in a hollow of the bark and the forest standing round you, dark and very large. Through the bedroll, the root is warm.', 'A buttress of bark stands up from the road\\'s edge here, taller than you, and the camp sits in the crook it makes, with a wall at its back. Ya rapped the wall twice with her spear butt before anyone unpacked. The fire throws your shadows up it.', 'Nobody discusses where the fire goes any more. Ya walks the bark until her bare heel finds a dip, and Mei Lin is kneeling there with the kindling before Ya has pointed. The road\\'s edges are somewhere beyond the firelight, and the forest beyond them.', \"A lesser root joins the road, thick as a barrel, and the camp lies in the fork where the two barks meet. Rain has pooled in the seam, so the fire sits a pace uphill. Ya washes her feet in the pool, which Mei Lin had marked for the waterskins.\"];",
+  "note": "the Root Road's fifth camp dropped (the list back to four)"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/act1_blackroot.js",
+  "find": "const BL_AH_CAMP = ['You camp under a black ridge, where the wind can\\'t reach. Fire behaves oddly here: it burns low and blue, as though the ash recalled its old trade. A third of the stars are missing, in the shape of the dead tree.', 'Ash has drifted knee-deep behind the ridge, so the camp is a pit you trod out yourselves, with the fire on bare rock in the middle. Every step you took to build it is still printed round the edge. Ya has read them all and thinks little of yours.', 'The hill is black glass in places, and you have camped on the largest sheet of it, which rings underfoot. The routine has settled: packs strapped shut, the water covered, Mei Lin shaking the ash out of her sleeves, and Ya walking the edge barefoot, listening.', \"A bough of the dead tree fell here once and lies along the slope like a wall, bare and hard as slate. You camp against it, since nothing else stops the wind. The packs hang from a twig as thick as Mei Lin's waist.\", \"The wind drops at dusk, and the ash it carried all day comes down on the camp, fine as flour. Mei Lin has tied a cloth over her nose and mouth and offered one to Ya, who wears hers round her wrist. The blue flames take no notice.\"];",
+  "replace": "const BL_AH_CAMP = ['You camp under a black ridge, where the wind can\\'t reach. Fire behaves oddly here: it burns low and blue, as though the ash recalled its old trade. A third of the stars are missing, in the shape of the dead tree.', 'Ash has drifted knee-deep behind the ridge, so the camp is a pit you trod out yourselves, with the fire on bare rock in the middle. Every step you took to build it is still printed round the edge. Ya has read them all and thinks little of yours.', 'The hill is black glass in places, and you have camped on the largest sheet of it, which rings underfoot. The routine has settled: packs strapped shut, the water covered, Mei Lin shaking the ash out of her sleeves, and Ya walking the edge barefoot, listening.', \"The wind drops at dusk, and the ash it carried all day comes down on the camp, fine as flour. Mei Lin has tied a cloth over her nose and mouth and offered one to Ya, who wears hers round her wrist. The blue flames take no notice.\", \"A bough of the dead tree fell here once and lies along the slope like a wall, bare and hard as slate. You camp against it, since nothing else stops the wind. The packs hang from a twig as thick as Mei Lin's waist.\"];",
+  "note": "the Ashen Hills' fourth and fifth in the wrong order"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/act1_blackroot.js",
+  "find": "The raft you camp on has run aground on a bar of cinders",
+  "replace": "You camp on a bar of cinders",
+  "note": "RF reverted: the wood's fourth camp off the raft"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/ashfall.js",
+  "find": "return byDay(g, longCal(g) ? [...QUIET_OLD, ...QUIET_W1] : QUIET_OLD, 'village_night:quiet')",
+  "replace": "return byDay(g, [...QUIET_OLD, ...QUIET_W1], 'village_night:quiet')",
+  "note": "the old calendar gets the six"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/ashfall.js",
+  "find": "return byDay(g, longCal(g) ? [...QUIET_OLD, ...QUIET_W1] : QUIET_OLD, 'village_night:quiet')",
+  "replace": "return byDay(g, longCal(g) ? [...QUIET_W1, ...QUIET_OLD] : QUIET_OLD, 'village_night:quiet')",
+  "note": "week 1 starts with the new three"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/ashfall.js",
+  "find": "*I found it once, with one paw, and have gone round it ever since. Consider doing the same.*",
+  "replace": "*I am three times your weight and it has never said a word about me. Consider why.*",
+  "note": "GW reverted"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/ashfall.js",
+  "find": "\"\\\"It is a bird,\\\" Yuki says, from under her own arm.",
+  "replace": "\"*It is a bird,* Yuki sends, from under her own arm.",
+  "note": "the woman's passage in bond-speech"
+ },
+ {
+  "id": "F8",
+  "file": "tools/packet.mjs",
+  "find": "if (!st.on(id) || (week && st.week && st.week !== week)) continue;",
+  "replace": "if (!st.on(id)) continue;",
+  "note": "PKf's filter does nothing"
+ },
+ {
+  "id": "F9",
+  "file": "tools/packet.mjs",
+  "find": "[2, 'its third camp', { bl_day: 3, bl_n: 1 }], ",
+  "replace": "",
+  "note": "PKs: the Drowned Wood's third camp state dropped"
+ },
+ {
+  "id": "F10",
+  "file": "tools/textlint.mjs",
+  "find": "['dw', 3, [1, 2, 3], {}]",
+  "replace": "['dw', 3, [1], {}]",
+  "note": "TG: the lint reads the wood's second camp only"
+ },
+ {
+  "id": "F11",
+  "file": "js/story/ashfall.js",
+  "find": "Out past the last house something calls twice",
+  "replace": "Out past the last house something calls once",
+  "note": "week 1's fifth text changed (opener still close)"
+ },
+ {
+  "id": "F12",
+  "file": "js/story/act1_blackroot.js",
+  "find": "and Ya wades about in it, spear down",
+  "replace": "and Yuki wades about in it, spear down",
+  "note": "Yuki in a camp text (the brief leaves her out)"
+ },
+ {
+  "id": "F13",
+  "file": "js/core/news.js",
+  "find": "['0.11.238', ",
+  "replace": "['0.11.23x', ",
+  "note": "What's new without 0.11.238"
+ }
+]

@@ -1,0 +1,51 @@
+[
+ {
+  "id": "F8",
+  "file": "tools/packet.mjs",
+  "find": "if (!st.on(id) || (week && st.week && st.week !== week)) continue;",
+  "replace": "if (!st.on(id)) continue;",
+  "note": "PKf's filter does nothing"
+ },
+ {
+  "id": "F9",
+  "file": "tools/packet.mjs",
+  "find": "[2, 'its third camp', { bl_day: 3, bl_n: 1 }], ",
+  "replace": "",
+  "note": "PKs: the Drowned Wood's third camp state dropped"
+ },
+ {
+  "id": "F10",
+  "file": "tools/textlint.mjs",
+  "find": "['dw', 3, [1, 2, 3], {}]",
+  "replace": "['dw', 3, [1], {}]",
+  "note": "TG: the lint reads the wood's second camp only"
+ },
+ {
+  "id": "C1",
+  "file": "tools/packet.mjs",
+  "find": "(week && st.week && st.week !== week)",
+  "replace": "(week && st.week !== week)",
+  "note": "PKf: --week drops every state without a week (a Blackroot or Fallout scene packed with --week draws no states)"
+ },
+ {
+  "id": "C2",
+  "file": "tools/packet.mjs",
+  "find": "['--games', '--out', '--area', '--check', '--week']",
+  "replace": "['--games', '--out', '--area', '--check']",
+  "note": "PKf CLI: the --week value is taken for a scene id"
+ },
+ {
+  "id": "C3",
+  "file": "tools/packet.mjs",
+  "find": "const week = argv.includes('--week') ? Number(opt('week')) : null;",
+  "replace": "const week = Number(opt('week', 1));",
+  "note": "PKf CLI: every packet without --week cut to week 1 (ported after RV2)"
+ },
+ {
+  "id": "C4",
+  "file": "tools/textlint.mjs",
+  "find": "g.minutes = 70 * 1440 + 20 * 60; SAMPLES.push(onDay(ensureBars(g), k));",
+  "replace": "g.minutes = 70 * 1440 + 20 * 60; SAMPLES.push(ensureBars(g));",
+  "note": "TG: the later-camp samples lose their day index (the lint reads text 1 only)"
+ }
+]

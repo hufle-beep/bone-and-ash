@@ -118,6 +118,13 @@ for (const [region, warm] of [['rr', [[0, 0]]], ['ah', [[80, 80], [0, 80], [80, 
         SAMPLES.push(ensureBars(g));
     }
 }
+// v0.11.238 (owner pick P11-A, TG; p11's measure: the Drowned Wood's camps 2–3 were never read, its sample had day index 0 only): each region's
+// camp on its later nights as the game reaches them (the Root Road's and the Ashen Hills' fourth and fifth on their second story day, the
+// Drowned Wood's second to fourth, the fourth after the mourning hollow), so every camp text is read, CB5's five with them
+for (const [region, day, ks, more] of [['rr', 2, [3, 4], {}], ['dw', 3, [1, 2, 3], {}], ['ah', 5, [3, 4], { ya_off_done: true }]]) for (const k of ks) {
+    const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); Object.assign(g.flags, { bl_day: day, bl_region: region, mei_party: true, ya_party: true, ...more, ...(region === 'dw' && k === 3 ? { bl_n: 2, drowned_done: true } : {}) });
+    g.minutes = 70 * 1440 + 20 * 60; SAMPLES.push(onDay(ensureBars(g), k));
+}
 // v0.11.235 (owner pick P8-A, TG; v0.11.234's measure): the supper's and the sunset walk's cycles of six on each of their days, the village's
 // three weeks, in the three forms (two new texts name Yuki by form), and the Fallout's story days 9 and 10 (`fo_mei`, `fo_ya_time`, their
 // labels) on each day of their sequences of three, so the texts v0.11.232–235 added there are read too

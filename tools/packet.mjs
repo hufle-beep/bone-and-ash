@@ -37,6 +37,7 @@ const { TASK_HUBS } = await import(js('story/task_hubs.js'));
 const { isTaskHub, isTaskChoice, taskCards, taskOpen, runTask, taskState, dryClone } = await import(js('core/tasks.js'));
 const { hour, markDaily } = await import(js('story/common.js')); // v0.11.235 (P8-A, TG): markDaily
 const { coilStamp, textDay } = await import(js('core/lines.js'));
+const { calMinutes } = await import(js('core/calendar.js')); // v0.11.238 RV2 (C L2): the camps' states on their real nights
 const { smartAction } = await import(path.join(ROOT, 'tests/lib/smartfight.mjs'));
 const { splitLine } = await import(js('core/replies.js')); // v0.11.200 (D1, S1)
 const { ALL_REFS } = await import(js('story/songs.js')); // v0.11.200 (D1, S4)
@@ -64,7 +65,7 @@ export const SAMPLES = FORMS.flatMap(([f, r, name]) => [{ g: sample(f, r, 0), fo
  *  RV1 (the cold review's C M1, M2, L1): the away states by day (at 20:00 they were inert), every day of the cycles in every form (the packet drew
  *  4 of the 12 new texts), and each state only on the scenes of its area (`ASHFALL`, `FALLOUT`, `BLACKROOT`; the walk not in the first week). */
 function stateOf(flags, minutes, { k = 0, cooked = false, rel = null, form = ['cat', 0] } = {}) {
-    const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); g.yuki.form = form[0]; g.yuki.realm = form[1]; g.james.realm = form[1]; Object.assign(g.flags, flags); /* the long calendar, as textlint's */ g.minutes = minutes; if (rel) for (const [n, a] of Object.entries(rel)) g.rel[n] = { f: a ? 90 : 20, a };
+    const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); g.yuki.form = form[0]; g.yuki.realm = form[1]; g.james.realm = form[1]; Object.assign(g.flags, flags); /* the long calendar, as textlint's */ g.minutes = typeof minutes === 'function' ? minutes(g) : minutes; /* v0.11.238 RV2 (C L2): or a function of the game */ if (rel) for (const [n, a] of Object.entries(rel)) g.rel[n] = { f: a ? 90 : 20, a };
     if (k) { const today = textDay(g); const days = [...Array(k).keys()].map((i) => -1 - i).concat([today]); g.lines = { c: coilStamp(g), p: {}, last: {}, cur: {}, at: null, said: [], d: new Proxy({}, { get: (_, key) => (typeof key === 'string' ? days : undefined) }) }; }
     if (cooked) markDaily(g, 'bl_cook');
     return ensureBars(g);
@@ -76,8 +77,10 @@ const { BLACKROOT } = await import(js('story/act1_blackroot.js'));
 const inArea = (table) => (id) => Object.hasOwn(table, id);
 const AH = { bl_region: 'ah', bl_day: 4, bl_n: 2, mei_party: true, ya_party: true }; // bl_n 2: the camp's later morning, which has an away version (AW.morning)
 const BOTH = { 'Mei Lin': 90, Ya: 90 };
+/** v0.11.238 RV2 (the cold review's C L2): a camp night's clock as the game has it: story day 10 + `bl_day` (`blSpan` days each), its `bl_n`-th night, at 19:00 (`bl_camp`'s hour). */
+const campNight = (bday, n = 0) => (g) => calMinutes(g, 10 + bday, 19) + n * DAY;
 export const STATES = [
-    ...[[1, 23], [2, 30], [3, 37]].flatMap(([v, d]) => [0, 1, 2, 3, 4, 5].flatMap((k) => FORMS.map(([f, r, name]) => ({ base: `the long calendar's village week ${v}, day ${k + 1} of its cycles`, form: name,
+    ...[[1, 23], [2, 30], [3, 37]].flatMap(([v, d]) => [0, 1, 2, 3, 4, 5].flatMap((k) => FORMS.map(([f, r, name]) => ({ base: `the long calendar's village week ${v}, day ${k + 1} of its cycles`, form: name, week: v, // v0.11.238 (P11-A, PKf): `--week v` keeps week v's
         on: (id) => inArea(ASHFALL)(id) && !(v === 1 && id === 'mei_walk'), g: stateOf({ long: true, vday: v, cal_night: 1 }, (d - 1) * DAY + 19 * 60, { k, form: [f, r] }) })))),
     ...[[9, 51], [10, 58]].flatMap(([sd, d]) => [0, 1, 2].map((k) => ({ base: `the long calendar's story day ${sd}, day ${k + 1} of its sequences`, on: inArea(FALLOUT), g: stateOf({ ya_met: true }, (d - 1) * DAY + 12 * 60, { k }) }))),
     { base: 'the Ashen Hills by day, Ya away', on: inArea(BLACKROOT), g: stateOf(AH, 70 * DAY + 10 * 60, { k: 1 }) },
@@ -94,6 +97,14 @@ export const STATES = [
     ...[['neither close', {}], ['Mei Lin close', { 'Mei Lin': 90 }], ['Ya close', { Ya: 90 }], ['both close', BOTH]].map(([w, rel]) => ({ base: `the journey talks at beat 5, ${w}`, on: inArea(BLACKROOT),
         g: stateOf({ bl_region: 'rr', bl_day: 2, mei_party: true, ya_party: true, mei_talks: 5, ya_talks: 5 }, 70 * DAY + 10 * 60, { rel }) })),
     { base: 'the journey talks at beat 5, Ya away, Mei Lin not close', on: inArea(BLACKROOT), g: stateOf({ ...AH, mei_talks: 5, ya_talks: 5 }, 70 * DAY + 10 * 60, { k: 1 }) },
+    // v0.11.238 (owner pick P11-A, PKs; p11's measure): the Drowned Wood's camps by its day index as the game reaches them (its first is the Root
+    // Road's story night, its fourth the wood's own after the drowned hollow), and the Root Road's and the Ashen Hills' fourth and fifth (their second
+    // story day's quiet nights), so the packet draws every camp text: the Drowned Wood's later two had no state, and CB5's five come here
+    ...[[0, "its first camp (the Root Road's story night)", { bl_day: 2, bl_n: 2 }], [1, 'its second camp', { bl_day: 3 }], [2, 'its third camp', { bl_day: 3, bl_n: 1 }], [3, "its fourth camp (the wood's story night)", { bl_day: 3, bl_n: 2, drowned_done: true }]]
+        .map(([k, w, f]) => ({ base: `the Drowned Wood in the evening, ${w}`, on: inArea(BLACKROOT), g: stateOf({ bl_region: 'dw', mei_party: true, ya_party: true, ...f }, campNight(f.bl_day, f.bl_n), { k }) })),
+    ...[[3, 'fourth'], [4, 'fifth']].flatMap(([k, w]) => [
+        { base: `the Root Road in the evening, its ${w} camp`, on: inArea(BLACKROOT), g: stateOf({ bl_region: 'rr', bl_day: 2, bl_n: k - 3, mei_party: true, ya_party: true }, campNight(2, k - 3), { k }) },
+        { base: `the Ashen Hills in the evening, its ${w} camp`, on: inArea(BLACKROOT), g: stateOf({ ...AH, bl_day: 5, bl_n: k - 3, ya_off_done: true }, campNight(5, k - 3), { k }) }]),
 ];
 /** RV1: the states that draw one text, named shortly: a state in all three forms by its name alone, else with its forms. */
 export function stateNames(states) {
@@ -270,7 +281,7 @@ const fmtSeen = (e) => (e ? `seen in ${e.games} games: day ${span(...e.days)}, h
 
 /* ---------------- the packet ---------------- */
 /** Full packets (C1–C6) for the named scenes; `marks` = the `scene:index` lines being changed (their results in full). */
-export function packet(ids, { marks = new Set(), seen = {} } = {}) {
+export function packet(ids, { marks = new Set(), seen = {}, week = null } = {}) { // v0.11.238 (P11-A, PKf): `week` keeps only that village week's states
     const out = [];
     for (const id of ids) {
         const s = SCENES[id];
@@ -286,7 +297,7 @@ export function packet(ids, { marks = new Set(), seen = {} } = {}) {
         const variants = byForms(s.text).map((r) => ({ tag: formTag(r.forms, r.later), t: r.t }));
         for (const t of seen[id]?.texts || []) variants.push({ tag: 'as seen in play', t });
         { const byText = new Map(); // v0.11.235 (P8-A, TG): the states' texts, each once, named by every state that draws it
-          for (const st of STATES) { if (!st.on(id)) continue; st.g.scene = id; const t = asStr(s.text, st.g); if (t) byText.set(t, [...(byText.get(t) || []), st]); }
+          for (const st of STATES) { if (!st.on(id) || (week && st.week && st.week !== week)) continue; st.g.scene = id; const t = asStr(s.text, st.g); if (t) byText.set(t, [...(byText.get(t) || []), st]); }
           for (const [t, sts] of byText) variants.push({ tag: `state: ${stateNames(sts).join('; ')}`, t }); }
         const done = new Set();
         let first = null;
@@ -440,9 +451,11 @@ if (isMain) {
     const opt = (k, d) => { const i = argv.indexOf(`--${k}`); return i >= 0 ? argv[i + 1] : d; };
     const games = Number(opt('games', 200));
     const outFile = opt('out', null);
-    const vals = new Set(['--games', '--out', '--area', '--check'].flatMap((k) => { const i = argv.indexOf(k); return i >= 0 ? [argv[i + 1]] : []; }));
+    const vals = new Set(['--games', '--out', '--area', '--check', '--week'].flatMap((k) => { const i = argv.indexOf(k); return i >= 0 ? [argv[i + 1]] : []; }));
     const args = argv.filter((a) => !a.startsWith('--') && !vals.has(a));
     let text;
+    // v0.11.238 RV2 (the cold review's C L1): --week works on scene packets only; with --check or --tags, or with no value, it is refused, not ignored
+    if (argv.includes('--week') && (argv.includes('--check') || argv.includes('--tags') || ![1, 2, 3].includes(Number(opt('week'))))) { console.log('--week takes 1, 2 or 3, and only with scene packets (not --check or --tags)'); process.exit(2); }
     if (argv.includes('--check')) {
         const lines = readFileSync(opt('check'), 'utf8').split('\n').map((l) => l.trim()).filter((l) => l && !l.startsWith('#'));
         const drafts = lines.map((l) => { const k = l.indexOf('|'); return { key: l.slice(0, k).trim(), text: l.slice(k + 1).trim() }; });
@@ -460,11 +473,12 @@ if (isMain) {
         }
         text = `${tags(ids, games ? seenAt(games) : {})}\n`;
     } else {
-        if (!args.length) { console.log('usage: node tools/packet.mjs <scene[:index]> … | --tags [--area x] | --check drafts.txt  [--games N] [--out file]'); process.exit(2); }
+        if (!args.length) { console.log('usage: node tools/packet.mjs <scene[:index]> … [--week 1|2|3] | --tags [--area x] | --check drafts.txt  [--games N] [--out file]'); process.exit(2); }
         const marks = new Set(args.filter((a) => a.includes(':')));
         const ids = [...new Set(args.map((a) => a.split(':')[0]))];
         const seen = games ? seenAt(games, new Set(ids)) : {};
-        text = packet(ids, { marks, seen });
+        const week = argv.includes('--week') ? Number(opt('week')) : null; // v0.11.238 (P11-A, PKf): one village week's states (`village_night` about 24 KB whole with --games 0, a week's about 12.5)
+        text = packet(ids, { marks, seen, week });
     }
     if (outFile) { writeFileSync(outFile, text); console.log(`packet: ${outFile}, ${Math.round(text.length / 102.4) / 10} KB`); } else process.stdout.write(text);
 }
