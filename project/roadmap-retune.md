@@ -48,3 +48,7 @@ Open items of section 2, moved word for word in v0.11.178, owner pick U1 (MD: th
 
 - *(from the v0.11.221 line)* **From the review, for the owner (no fault):** every wilds card's familiarity rises together (transfer, the drill share), so a Practised week (familiarity 7) is a Skilled one within a day (19 runs): "Practised unchanged" holds near familiarity 2; a card can cross into Skilled by another card's run and read as closed that day (L2);
 - *(from v0.11.214's review, word for word from `history-33.md`; for the retune's tools)* The long-calendar bot step 58 → 136 s (the probes and the cards they tap).
+
+## Placed here in v0.11.240 (owner pick RA1, 2026-11-20 23:29: from the handover's open items, word for word)
+
+- *(new in v0.11.240; open, options later; beside section 2's "the text day (05:00) against the daily reset (04:00)" in `roadmap.md`)* **p13-measure §10's bug:** From p13's measure: on the old calendar a Fallout supper eaten after midnight reads the next story day's text (the Sociable 10 of 10 games, v0.11.238 too: the scene's day starts at midnight, the day records at 05:00; `p13-measure.md` §10). The old calendar is bots and tests only since the flip (v0.11.226).

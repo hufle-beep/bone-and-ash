@@ -101,3 +101,14 @@ Started in v0.11.208, when `roadmap-done-3.md` would have passed about 45 KB wit
 ## Moved from `roadmap.md` in v0.11.238 (word for word; section 0's oldest notes, the size rule: under 20,000 bytes)
 
 *(v0.11.230: the rest of e, push 3 done (P3-2 + RV1: FT, SF-a, SF-c).)* *(v0.11.229: the rest of e, push 2 done (E2-2 + RV1: one-paragraph texts fold to their first sentence; the night's rules read for its time words).)*
+
+## Moved from `roadmap.md` in v0.11.240 (word for word; section 0's oldest notes, the size rule: under 20,000 bytes)
+
+*(v0.11.232: the rest of e, push 5 done (P5-B + D1 + RV1: V3b, CW; PS-a, MR).)* *(v0.11.231: the rest of e, push 4 done (P4-2 + D1 + RV1: AR, AG, AE, AV, AT, BYb-g, FI, ST2 degree 2, SN; PW1 recorded).)*
+
+## Closed as accepted in v0.11.240 (word for word; owner pick RA1, 2026-11-20 23:29: the handover's save and lint notes)
+
+- an old save mid-week (v0.11.233 C L2, nothing breaks; v0.11.238: a save past the old lists' end reads the new index from there).
+- *(from v0.11.237's reviews)* a save from mid-Blackroot shows each camp text in full once more, then folds (C L2, once).
+- *(from v0.11.238's build and reviews)* a save that kept the 5-day Blackroot road (`calBl` 1) never sees the wood's fourth camp (C L4, old behaviour).
+- *(from v0.11.238's build and reviews)* the lint's shingle across the wood's fourth camp and its stock line (log only).
