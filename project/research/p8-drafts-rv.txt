@@ -1,0 +1,14 @@
+rv:s54 | You say that the hen is the potter's, the woodpile is hers, and that among your people the egg would go back before it cooled, with an offer to help mend whichever fence the hen came through. ¶ "The potter's fence is sound. His hen is wilful." ¶ "Then the offer is a courtesy." ¶ "He means the potter can't keep a hen," says Mei Lin. "Let me tell him."
+rv:w54a | , where the path narrows to one walker's width and she steps down into the furrow sooner than go on ahead of you.
+rv:w54b | She stops dead among the stalks and looks at you as if you had described a river that runs uphill. "And they call that collecting," she says. "Ours would be ashamed to stand beside them." Then, quieter, to the barley: "I'd like to see it. Once."
+rv:w56a | Between stones she walks nearer to you than the path asks of her, and the path here is wide.
+rv:w56b | She does not smile. Not smiling takes her all of the eighth stone and most of the ninth, and you watch her do the work. ¶ "I've eaten its millet all week. The stone is within its rights."
+rv:w65 | Somewhere in the saying of it the hand on your sleeve has become her arm through yours. "He's the only man in Ashfall who may stare at the collectors. I have always thought he overdoes it."
+rv:s44 | "You will dust the shrine shelf tomorrow," her mother tells her. "Before you eat." ¶ Mei Lin opens her mouth. ¶ "And you will ask pardon of each of them. By name." ¶ Mei Lin closes her mouth and eats her fish, studying you over the bowl's rim with no remorse whatsoever.
+rv:s56 | Mei Lin's mother is still holding the string they hung by. "Next year's will be sweeter," she tells it. "The tree was young." She winds it up and puts it in her sleeve, because string is string.
+# notes
+- rv:s54: the custom is now a neighbourly offer of help with the fence; "It took too long" still fits, and the mother's next line answers Mei Lin's "Let me tell him."
+- rv:w54a/w54b: the closeness is her walking in the furrow to keep abreast; she does not laugh, and the text ends on her line with the tribute's shadow.
+- rv:w56b ends on James's line (w54 no longer does); she holds a straight face, no laugh and no look up the lane.
+- rv:w65 keeps "I have always thought he overdoes it" and names the collectors; "her arm through yours" may echo an old third-week walk, worth a script check.
+- rv:s44: the penalty is tied to the dead she joked about; the last sentence keeps its old ending, with "her mouth" in place of the stray "it".

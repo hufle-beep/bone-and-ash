@@ -1,0 +1,51 @@
+[
+ {
+  "id": "F11",
+  "file": "tools/packet.mjs",
+  "find": "    if (cooked) markDaily(g, 'bl_cook');",
+  "replace": "    if (false) markDaily(g, 'bl_cook');",
+  "note": "the packet's cook mark never set"
+ },
+ {
+  "id": "F12",
+  "file": "tools/textlint.mjs",
+  "find": "for (const k of [0, 1, 2, 3, 4, 5]) for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) {",
+  "replace": "for (const k of [0, 1, 2]) for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) {",
+  "note": "the lint reads only the old three"
+ },
+ {
+  "id": "F13",
+  "file": "tools/packet.mjs",
+  "find": "for (const [t, sts] of byText) variants.push",
+  "replace": "for (const [t, sts] of [...byText].slice(0, 1)) variants.push",
+  "note": "the packet draws one state only"
+ },
+ {
+  "id": "RT1",
+  "file": "tools/textlint.mjs",
+  "find": "    SAMPLES.push(onDay(g, k));\n}\nfor (const day of [51, 58])",
+  "replace": "    SAMPLES.push(ensureBars(g));\n}\nfor (const day of [51, 58])",
+  "note": "the lint's village samples ignore the day index (only the first text of each cycle read)"
+ },
+ {
+  "id": "RT2",
+  "file": "tools/packet.mjs",
+  "find": "{ base: 'the Root Road in the evening, he cooked', on: inArea(BLACKROOT), g: stateOf({ bl_region: 'rr', bl_day: 2, mei_party: true, ya_party: true }, 70 * DAY + 20 * 60, { k: 1, cooked: true }) }",
+  "replace": "{ base: 'the Root Road in the evening, he cooked', on: inArea(BLACKROOT), g: stateOf({ bl_region: 'rr', bl_day: 2, mei_party: true, ya_party: true }, 70 * DAY + 20 * 60, { k: 1, cooked: false }) }",
+  "note": "the Root Road's cooked state not cooked (its name merged with the not-cooked text)"
+ },
+ {
+  "id": "RT3",
+  "file": "tools/packet.mjs",
+  "find": "stateOf({ ...AH, trio: 2 }",
+  "replace": "stateOf({ ...AH }",
+  "note": "the both-away state's flags dropped"
+ },
+ {
+  "id": "RT4",
+  "file": "tools/packet.mjs",
+  "find": "for (const [t, sts] of byText) variants.push({ tag: `state: ${stateNames(sts).join('; ')}`, t });",
+  "replace": "for (const [t, sts] of byText) for (const one of sts) variants.push({ tag: `state: ${stateNames([one]).join('; ')}`, t });",
+  "note": "no merge by text: one block per state (the packet bloats)"
+ }
+]

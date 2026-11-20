@@ -1,0 +1,9 @@
+[
+ {"id": "T1", "file": "js/story/ashfall.js", "find": "Mei Lin halts you, a hand on your sleeve, to look", "replace": "Mei Lin halts you, her hand in yours, to look", "note": "week 3 walk holds hands before the eve (closeness rule)"},
+ {"id": "T2", "file": "js/story/ashfall.js", "find": "Her shoulder is a finger's width from your arm and stays there.", "replace": "Her arm is through yours and stays there.", "note": "week 2 walk arm-in-arm early (closeness rule)"},
+ {"id": "T3", "file": "js/story/ashfall.js", "find": "Mei Lin draws breath.", "replace": "Mei Lin opens her mouth.", "note": "Claude's cut reverted (the run shared with supper:5's third text)"},
+ {"id": "T4", "file": "js/story/ashfall.js", "find": "\"It's the custom,\" she says.", "replace": "\"They come tomorrow,\" she says. \"It's the custom.\"", "note": "a 'tomorrow' in a cycled week-3 text (shows on any of six evenings)"},
+ {"id": "T5", "file": "js/story/ashfall.js", "find": "it opens one eye, and the sieve", "replace": "it climbs onto your shoulder, and the sieve", "note": "the great form on James's shoulder"},
+ {"id": "T6", "file": "js/story/ashfall.js", "find": "as is done each autumn, so that", "replace": "as is done each spring, so that", "note": "the season slips (owner canon: each autumn)"},
+ {"id": "T7", "file": "js/story/ashfall.js", "find": "Mei Lin wants to know whether your world has collectors. She asks it", "replace": "She asks it", "note": "the fold's first paragraph opens on a pronoun with no antecedent"}
+]

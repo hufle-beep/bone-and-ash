@@ -1,0 +1,21 @@
+# Bone and Ash, v0.11.235 run RV (owner pick RV1 after P8-A: the cold review T's text findings)
+
+You revise a few lines of story texts already in the game. Read ONLY: this brief, `/tmp/p8/rv-current.txt` (the six texts as they stand now: `key | text`, paragraphs separated by ` ¶ `), `/home/claude/bone-and-ash/project/research/p8-brief-s.md` and `p8-brief-w.md` (the scenes, tone and rules these texts were written to) and `/home/claude/bone-and-ash/project/canon-card.md`. Do not read other repo files.
+
+On the long calendar the supper and the sunset walk run in step through the village's second week: on the same evening the player reads walk text n and then supper text n. Keep each replacement close to the length of what it replaces; the rest of each text must read straight on around it.
+
+## Write (keys; each replaces only the words quoted)
+- `rv:s54` — `supper:5:4`, from "You say that the hen is the potter's" to the end of Mei Lin's line "Let me write it.\"" (the egg goes back "with a note"). Problem: the walk on the same evening jokes that James's world settles things by letter ("They send letters", "robbed by post"), and 4 of the new texts lean on writing/paperwork. Give the egg's return another custom of his people (not writing, not a fine, not a committee or form), keeping the mother's last line ("It was the right answer. It took too long.") true.
+- `rv:w54a` — `mei_walk:5:4`, the end of its first paragraph: ", where the path narrows and her sleeve rides against yours the whole way round, a fact she leaves entirely unremarked." Problem: it retells an old walk's "your sleeves brush, and gives no sign of having noticed". A different small sign of closeness for the second week (no arm-in-arm, no hands), or none.
+- `rv:w54b` — `mei_walk:5:4`, from "She laughs before she can stop it" to the end of the text. Problem: "laughs, then checks the lane for listeners" is in 3 of the second week's walks (two on back-to-back evenings), and 5 of the week's 6 walks end on James's short deadpan line. Give her reaction another shape, and end on her line or on narration.
+- `rv:w56a` — `mei_walk:5:6`, the sentence "She has drifted in until her elbow keeps finding yours, and has not drifted out." Problem: three walks end their closeness on one shape ("…and stays there", "has not drifted out", "Her hand stays where it is"). Another shape.
+- `rv:w56b` — `mei_walk:5:6`, from "The laugh gets out;" to the end of the text ("I'd want that in writing. From the stone."). Problem: the laugh-and-check-who-heard beat again, and the writing joke. Another reaction and another last line.
+- `rv:w65` — `mei_walk:6:5`, from "Her hand stays where it is." to "I have always thought he overdoes it.\"" Problem: the closeness shape above, and "who may stare at them": "them" (the collectors) is never named in the text.
+- `rv:s44` — `supper:4:4`, from "\"You will fetch the water tomorrow,\"" to the end of the text. Problems: the water forfeit ("Both pails") repeats the roof's lamp bet ("The loser carries the water in the morning. Both buckets."); and a cut left "Mei Lin draws breath. … Mei Lin shuts it", where "it" has nothing to point to. Another penalty for Mei Lin, the mother's second line still extending it, and Mei Lin's silent end.
+- `rv:s56` — `supper:5:6`, the last paragraph ("\"Next year's will be sweeter,\" she says, to the string in her hand. …"). Problem: after a paragraph about Mei Lin and Yuki, "she … the string in her hand" reads a beat late (whose string?). Keep the mother's two lines and "because string is string", make it plain it is the mother, and don't use "the mother says, to the" (an old text's phrase).
+
+## Don't reuse
+Writing, letters, notes, forms, fines, committees; "laughs into her sleeve", "checks who heard", "stays there", "has not drifted", "entire", "entirely", "both pails", "both buckets", "water", "hard enough to", "verdict", "has ruled". Avoid the canon card's tics and any phrase the given texts already use; don't reuse a five-word run between your lines. No song lyrics, no real names.
+
+## Output
+Write `/tmp/p8/drafts-rv.txt`: one replacement per line, `key | text` (paragraph breaks as ` ¶ `). Then, under a line `# notes`, at most a few short notes (under 1 KB).

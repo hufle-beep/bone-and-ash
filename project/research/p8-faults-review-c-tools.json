@@ -1,0 +1,30 @@
+[
+ {
+  "id": "RT1",
+  "file": "tools/textlint.mjs",
+  "find": "    SAMPLES.push(onDay(g, k));\n}\nfor (const day of [51, 58])",
+  "replace": "    SAMPLES.push(ensureBars(g));\n}\nfor (const day of [51, 58])",
+  "note": "the lint's village samples ignore the day index (only the first text of each cycle read)"
+ },
+ {
+  "id": "RT2",
+  "file": "tools/packet.mjs",
+  "find": "{ name: 'the Root Road, he cooked', g: stateOf({ bl_region: 'rr', bl_day: 2, mei_party: true, ya_party: true }, 70 * DAY + 20 * 60, { k: 1, cooked: true }) }",
+  "replace": "{ name: 'the Root Road, he cooked', g: stateOf({ bl_region: 'rr', bl_day: 2, mei_party: true, ya_party: true }, 70 * DAY + 20 * 60, { k: 1, cooked: false }) }",
+  "note": "the Root Road's cooked state not cooked (its name merged with the not-cooked text)"
+ },
+ {
+  "id": "RT3",
+  "file": "tools/packet.mjs",
+  "find": "stateOf({ ...AH, trio: 2 }",
+  "replace": "stateOf({ ...AH }",
+  "note": "the both-away state's flags dropped"
+ },
+ {
+  "id": "RT4",
+  "file": "tools/packet.mjs",
+  "find": "byText.set(t, [...(byText.get(t) || []), st.name]);",
+  "replace": "byText.set(t + '\\u200b'.repeat(byText.size), [st.name]);",
+  "note": "no merge by text: one block per state (the packet bloats)"
+ }
+]

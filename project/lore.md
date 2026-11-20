@@ -150,7 +150,7 @@
 - **The wilds** (prologue Days 1–3): a forest of black bark and grey moss under a bruise-coloured sky. The bone field, the mire, the hollow.
 - **Ashfall:** the village.
   - Old Wen: the elder, 90, one blind milky eye.
-  - Mei Lin: 26, a herb-gatherer with a sharp tongue, looser than the norm. Her hairpin is ivory, with a red tassel.
+  - Mei Lin: 26, a herb-gatherer with a sharp tongue, looser than the norm. Her hairpin is ivory, with a red tassel. She has no spirit root: the collectors tested her at seven and sent her home; her mother went on rubbing soot under her eyes each autumn for two more years, in case they had been wrong (the sunset walk, v0.11.235, owner pick P8-A D1). Her father had one (the supper).
   - Her mother: 60, stern.
   - The hunters.
   - Not a villager: **Pock-Face**, Gao Feng's lackey, who leads the arson on Mei Lin's herb loft on night 5 (`ashfall.js`; met only when Gao is neither broken nor spared; v0.11.185, RV1 M1: the canon card had listed him as a local).

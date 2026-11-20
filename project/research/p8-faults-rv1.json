@@ -1,0 +1,163 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/ashfall.js",
+  "find": "sorry for the measure.`)}`, ...SUPPER_NEW[4]])",
+  "replace": "sorry for the measure.`)}`])",
+  "note": "the first week's suppers back to three"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/ashfall.js",
+  "find": "this is your doing. It is.`, ...SUPPER_NEW[5]]))",
+  "replace": "this is your doing. It is.`, ...SUPPER_NEW[4]]))",
+  "note": "the later weeks read the first week's new texts"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/ashfall.js",
+  "find": "would have to be polite.`, ...WALK_NEW[6]]))",
+  "replace": "would have to be polite.`]))",
+  "note": "the third week's walks back to three"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/ashfall.js",
+  "find": "Added some.\"`, ...WALK_NEW[5]])",
+  "replace": "Added some.\"`, ...WALK_NEW[6]])",
+  "note": "the second week's walks read the third week's (arm in arm early)"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/ashfall.js",
+  "find": "\"Then the visitor sees the ears on the woman in the best seat, one ear turns her way, and the sieve changes hands at speed.\")",
+  "replace": "\"Yuki watches from under your stool, and the woman who came to see a foreigner leaves inspected by his cat.\")",
+  "note": "the human form reads the cat's sentence (ported to RV1: \"the visitor\")"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/ashfall.js",
+  "find": "Mei Lin's hand is already halfway across the table.",
+  "replace": "Mei Lin intercepts them and puts them on.",
+  "note": "the glasses tried before Act 1"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/ashfall.js",
+  "find": "Mine did it every year. When I was seven they tested me anyway",
+  "replace": "Mine did it until I was seven. Then they tested me",
+  "note": "the soot slip back"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/ashfall.js",
+  "find": "tributeLeft(g) <= 1 ? `The last sunset",
+  "replace": "tributeLeft(g) < 1 ? `The last sunset",
+  "note": "the last sunset lost to the cycle"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/ashfall.js",
+  "find": "Mei Lin wants to know whether your world has collectors.",
+  "replace": "On the fourth evening Mei Lin wants to know whether your world has collectors.",
+  "note": "a day count in a cycled text"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/ashfall.js",
+  "find": "const WALK_NEW = {\n    5: [",
+  "replace": "const WALK_NEW = {\n    5: [(g) => '', ",
+  "note": "an empty text in the walk's cycle (seven, one blank)"
+ },
+ {
+  "id": "T1",
+  "file": "js/story/ashfall.js",
+  "find": "Mei Lin halts you, a hand on your sleeve, to look",
+  "replace": "Mei Lin halts you, her hand in yours, to look",
+  "note": "week 3 walk holds hands before the eve (closeness rule)"
+ },
+ {
+  "id": "T2",
+  "file": "js/story/ashfall.js",
+  "find": "Her shoulder is a finger's width from your arm and stays there.",
+  "replace": "Her arm is through yours and stays there.",
+  "note": "week 2 walk arm-in-arm early (closeness rule)"
+ },
+ {
+  "id": "T3",
+  "file": "js/story/ashfall.js",
+  "find": "Mei Lin draws breath.",
+  "replace": "Mei Lin opens her mouth.",
+  "note": "Claude's cut reverted (the run shared with supper:5's third text)"
+ },
+ {
+  "id": "T4",
+  "file": "js/story/ashfall.js",
+  "find": "\"It's the custom,\" she says.",
+  "replace": "\"They come tomorrow,\" she says. \"It's the custom.\"",
+  "note": "a 'tomorrow' in a cycled week-3 text (shows on any of six evenings)"
+ },
+ {
+  "id": "T5",
+  "file": "js/story/ashfall.js",
+  "find": "It opens one eye, and the sieve",
+  "replace": "It climbs onto your shoulder, and the sieve",
+  "note": "the great form on James's shoulder (ported to RV1: the sentence split)"
+ },
+ {
+  "id": "T6",
+  "file": "js/story/ashfall.js",
+  "find": "as is done each autumn, so that",
+  "replace": "as is done each spring, so that",
+  "note": "the season slips (owner canon: each autumn)"
+ },
+ {
+  "id": "T7",
+  "file": "js/story/ashfall.js",
+  "find": "Mei Lin wants to know whether your world has collectors. She asks it",
+  "replace": "She asks it",
+  "note": "the fold's first paragraph opens on a pronoun with no antecedent"
+ },
+ {
+  "id": "RC1",
+  "file": "js/story/ashfall.js",
+  "find": "seqText(g, 'mei_walk:6'",
+  "replace": "seqText(g, 'mei_walk:5'",
+  "note": "week 3's walks share week 2's day record (in play the old beat text skipped: index 7 % 6 = 1)"
+ },
+ {
+  "id": "RC2",
+  "file": "js/story/ashfall.js",
+  "find": "this is your doing. It is.`, ...SUPPER_NEW[5]]))",
+  "replace": "this is your doing. It is.`, ...SUPPER_NEW[5]].slice(longCal(g) ? 0 : 3)))",
+  "note": "the old calendar reads a new text, not the old one"
+ },
+ {
+  "id": "RC3",
+  "file": "js/story/ashfall.js",
+  "find": "Mei Lin wants to know whether your world has collectors.",
+  "replace": "She wants to know whether your world has collectors.",
+  "note": "a new text's first sentence (the fold's) opens on a bare pronoun"
+ },
+ {
+  "id": "RC4",
+  "file": "js/story/ashfall.js",
+  "find": "Somebody has turned the scarecrow round to face the road.",
+  "replace": "Yesterday somebody turned the scarecrow round to face the road.",
+  "note": "a time word in a cycled text (the test bans only counted days)"
+ },
+ {
+  "id": "RC5",
+  "file": "js/story/ashfall.js",
+  "find": "\"Yuki pads behind and sets one broad paw on each stone in turn, which the field is unlikely to forget.\"",
+  "replace": "\"From your shoulder Yuki inspects each stone as it goes by, as a landlord might.\"",
+  "note": "the great form reads the cat's sentence (on your shoulder for a tiger)"
+ },
+ {
+  "id": "RC6",
+  "file": "js/story/ashfall.js",
+  "find": "text: (g) => (vday(g) === 1\n            ? seqText(g, 'supper:4'",
+  "replace": "text: (g) => (vday(g) <= 2\n            ? seqText(g, 'supper:4'",
+  "note": "week 2's suppers read week 1's list"
+ }
+]

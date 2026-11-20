@@ -1,0 +1,23 @@
+[
+ {
+  "id": "F11",
+  "file": "tools/packet.mjs",
+  "find": "    if (cooked) markDaily(g, 'bl_cook');",
+  "replace": "    if (false) markDaily(g, 'bl_cook');",
+  "note": "the packet's cook mark never set"
+ },
+ {
+  "id": "F12",
+  "file": "tools/textlint.mjs",
+  "find": "for (const k of [0, 1, 2, 3, 4, 5]) for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) {",
+  "replace": "for (const k of [0, 1, 2]) for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) {",
+  "note": "the lint reads only the old three"
+ },
+ {
+  "id": "F13",
+  "file": "tools/packet.mjs",
+  "find": "for (const [t, names] of byText) variants.push",
+  "replace": "for (const [t, names] of [...byText].slice(0, 1)) variants.push",
+  "note": "the packet draws one state only"
+ }
+]

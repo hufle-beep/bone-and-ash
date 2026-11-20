@@ -100,6 +100,112 @@ const arson = (g) => {
 };
 
 
+// v0.11.235 (owner pick P8-A, EVs + EVw, D1; 2026-11-20 08:16, 08:22): the supper's and the sunset walk's sequences a cycle of six (the owner's
+// six-text social exception, as the roof's later nights and the talks): three more texts each, after the old three (seqText). Fable's (runs S
+// and W), Claude's cuts (D1: six shared runs, the glasses (Mei Lin's first try stays Act 1's), the soot). Yuki in one sentence by form where named.
+// RV1 (the cold review's T M1–M3, L1–L6): Fable's run RV (the egg, the walks' closeness and endings, the shrine shelf, the string), Claude's cuts.
+const SUPPER_NEW = {
+    4: [(g) => `You stand your chopsticks upright in the millet while you reach for the greens, and the table stops. Mei Lin's mother takes them out and lays them flat across your bowl, without hurry. "Upright is for the dead," she says. "They are fed at the shrine shelf, on their days. Not here, and not by guests." You apologise. She accepts it with a nod the size of a grain.
+
+"He only wanted the greens and he's buried us all," Mei Lin says. "Efficient."
+
+"You will dust the shrine shelf tomorrow," her mother tells her. "Before you eat."
+
+Mei Lin draws breath.
+
+"And you will beg their pardon. Every one, by name."
+
+Mei Lin lets the breath go unused and eats her fish, studying you over the bowl's rim with no remorse whatsoever.`,
+        (g) => `The cooper's wife comes to the door in the middle of supper to return a sieve, and to look at you. Mei Lin's mother meets her on the threshold and does not move from it. The sieve was borrowed at midsummer. "You are prompt," the mother says. The cooper's wife leans left. The mother is somehow also to the left. ${byForm(g, "Yuki watches from under your stool, and the woman who came to see a foreigner leaves inspected by his cat.", "Then the visitor sees what is stretched out behind the table. It opens one eye, and the sieve changes hands at speed.", "Then the visitor sees the ears on the woman in the best seat, one ear turns her way, and the sieve changes hands at speed.")}
+
+"She'll tell the lane you have four arms," says Mei Lin, once the door is shut.
+
+"She will tell them what she saw. A man eating millet." Her mother sits. "With his elbows on my table." You remove them.`,
+        (g) => `Mei Lin's mother asks for your glasses, across the fish, with her palm held out flat. You hand them over. She holds them up to the lamp, then looks through them at the wall, at her daughter and lastly at you. "They make the room worse," she says.
+
+She holds them out again, folded.
+
+Mei Lin's hand is already halfway across the table. "A guest's eyes are not a toy," her mother says, without raising her voice, and the hand goes back to the bowl as if it had only ever been reaching for the salt.`],
+    5: [(g) => `The potter's hen has laid in this house's woodpile, and Mei Lin's mother brings the egg to the table and sets it before you. "You have no cousins in Ashfall," she says. "Whose is it?"
+
+The egg keeps its own counsel. You say that the hen is the potter's, the woodpile is hers, and that among your people the egg would go back before it cooled, with an offer to help mend whichever fence the hen came through.
+
+"His fence is sound. The hen is wilful."
+
+"Then the offer is a courtesy."
+
+"He means the potter can't keep a hen," says Mei Lin. "Let me tell him."
+
+"You will carry the egg back, and you will say good evening, and nothing else." Her mother turns to you again. "It was the right answer. It took too long."`,
+        (g) => `All this time you have been asking for the millet in the wrong tone, and tonight Mei Lin tells you what you have been saying instead. "Pass the sorrow," she says, in your accent, which she does well. "Is there any sorrow left in the pot." She has to set her bowl down.
+
+"You knew," says her mother, "and you let a guest of this house go on saying it." Mei Lin stops laughing, mostly.
+
+Then the mother faces you and says the word. You say it back. She says it again. On the fifth attempt she nods and passes you the millet, and Mei Lin tells her fish, very quietly, that she will miss the sorrow.`,
+        (g) => `After the fish Mei Lin's mother brings down the dried persimmons, which hang in the rafters to be eaten at the new year and not before. She cuts them down and puts two by each bowl. Mei Lin stares at the persimmons, then at her mother, and for once finds no remark to make.
+
+"The mice would have had them," the mother says.
+
+There has not been a mouse in this house since Yuki moved in. Nobody mentions that either. Yours is dense and dark and tastes of a better month than this one.
+
+Mei Lin's mother is still holding the string they hung by. "Next year's will be sweeter," she tells it. "The tree was young." She winds it up and puts it in her sleeve, because string is string.`],
+};
+const WALK_NEW = {
+    5: [(g) => `Mei Lin wants to know whether your world has collectors. She asks it at the barley's corner, where the path narrows to one walker's width and she steps down into the furrow sooner than go on ahead of you.
+
+"We have them," you say. "They send letters."
+
+"Letters." She weighs it. "And you pay?"
+
+"Eventually. There are further letters first, each a little sterner."
+
+"Nobody walks up your road? Nobody takes a child?"
+
+"Nobody takes anything. There is a fine."
+
+She stops dead among the stalks, the way one stops for a river seen running uphill. "And they call that collecting," she says. "Ours would be ashamed to stand beside them." Then, quieter, to the barley: "I'd like to see it. Once."`,
+        (g) => `Out by the barley, Mei Lin admits that she once cried for a week at not being worth stealing. It comes out sideways. In the lane behind you a mother is rubbing soot beneath her children's eyes, as is done each autumn, so that they look sickly when heads are counted.
+
+"It fools nobody," Mei Lin says. Her shoulder is a finger's width from your arm and stays there. "Mine did it every year. When I was seven they tested me anyway, found no root at all, and sent me home. I howled. I'd been told I was too precious to show them."
+
+"And the soot?"
+
+"She kept on with it two more years. In case they'd been wrong."
+
+"Thorough woman."
+
+"You've met her."`,
+        (g) => `There are nine boundary stones round the barley, and Mei Lin lays her palm on every one as she passes. "You touch them before the tribute," she says, "so the field remembers whose it is. It's nonsense. Old Wen does it with both hands." Between stones she walks nearer to you than the path asks of her, and the path here is wide. ${byForm(g, "From your shoulder Yuki inspects each stone as it goes by, as a landlord might.", "Yuki pads behind and sets one broad paw on each stone in turn, which the field is unlikely to forget.", "Yuki, a few paces back, trails her fingertips over each stone in turn and keeps a straight face throughout.")}
+
+At the seventh you put your own hand down next to hers, not touching.
+
+She stares at it. "Now it's counted you. You'll owe millet." She does not smile. Not smiling takes her all of the eighth stone and most of the ninth, and you watch her do the work.
+
+"I've eaten its millet all week. The stone is within its rights."`],
+    6: [(g) => `"Tell me the dullest thing about your world," Mei Lin says, her arm hooked through yours and the barley gone grey at your elbow. You give her the committee: eleven people, one room, a morning spent deciding who shall take the notes. She listens as to a tale of immortals.
+
+"And nobody dies of it?"
+
+"Not visibly."
+
+"More," she says, and tightens her arm, and you describe the form for claiming back the price of a journey until the first lamps show.`,
+        (g) => `Somebody has turned the scarecrow round to face the road. Mei Lin halts you, a hand on your sleeve, to look at it: the same straw, the same split hat, its back now to the barley it is kept to mind.
+
+"It's the custom," she says. "So that one of us is seen to be watching." Somewhere in the saying of it her hand has moved from your sleeve to your arm. "He's the only man in Ashfall who may stare at the collectors. I have always thought he overdoes it."
+
+"He has the face for it."`,
+        (g) => `Between the old pear tree and the dyke run forty paces of path that no window in Ashfall can see, and Mei Lin has known it since she was fourteen. She tells you so with her arm drawn close through yours, walking slower at each step.
+
+"I worked it out for stealing pears," she says. "I want that understood."
+
+"Understood."
+
+"It was never any use for anything else." She leans her weight on you, a little, for exactly as far as the dyke, and straightens before the nearest roof comes into view.
+
+"Good pears?"
+
+"Sour," she says. "They always were."`],
+};
 // v0.11.232 (owner picks P5-B, D1; V3b): the roof a sequence of three for the first week and for the later nights on the long calendar (lines.js
 // seqText; the first the old text), each new text with its own line after "Stay until the cold drives you in." (by the same index). Fable's (run R), Claude's cuts.
 const roofKey = (g) => `supper_roof:${vday(g) === 1 ? 1 : 2}`;
@@ -241,7 +347,7 @@ ${byForm(g, `What this house owes the post stands by the door in two sacks, weig
 
 *Tell her I charge less than the Sect,* Yuki sends, and yawns, which is a lot of teeth to show a household at supper.`, `What this house owes the post stands by the door in two sacks, weighed and tied. Mei Lin's mother has weighed them again since morning; the steelyard is still out. "The Sect's measure is larger than ours," she says, serving the fish. "Each year it is a little larger. One does not remark on it." "One remarks on it constantly," says Mei Lin. "One just does it indoors." She glances at the shutter all the same. "Indoors," her mother says, "is where it will stay." Yuki, at the head of the table, has been listening with her ears forward.
 
-"How much larger," she asks. The mother tells her, to the handful. Yuki nods and says no more, and you, who know that nod, eat your fish and feel briefly sorry for the measure.`)}`])
+"How much larger," she asks. The mother tells her, to the handful. Yuki nods and says no more, and you, who know that nod, eat your fish and feel briefly sorry for the measure.`)}`, ...SUPPER_NEW[4]])
             : seqText(g, 'supper:5', [(g) => `${longCal(g) ? 'Another supper at Mei Lin\'s.' : 'Second supper at Mei Lin\'s.'} Her mother no longer watches you as she would a fox in the henhouse. She watches you as she would a fox she might find a use for.
 
 Tonight she talks. Of Mei Lin's father, who had a spirit root, and who went up the road with the collectors when Mei Lin was six. Of the letter that came down four years later, two words long: *Tribulation. Honoured.* Of the box they buried, which had nothing in it.
@@ -264,7 +370,7 @@ It is the same millet, greens and fish as every night. You toasted the grain dry
 
 "Twenty-six years," Mei Lin says to you, filling it, "and she has never once asked me for seconds."
 
-"You have never once toasted the millet," says her mother. Mei Lin opens her mouth, finds nothing in it, and gives you a look that says this is your doing. It is.`])),
+"You have never once toasted the millet," says her mother. Mei Lin opens her mouth, finds nothing in it, and gives you a look that says this is your doing. It is.`, ...SUPPER_NEW[5]])),
         choices: [
             { text: 'Climb out onto the roof with Mei Lin and watch the stars come out.', do: (g) => { bumpRel(g, 'Mei Lin', 3, 4); return []; }, time: 60, to: 'supper_roof' },
             { text: 'Help her mother with the dishes, and listen.', do: (g) => { bumpRel(g, 'Village', 3, 0); bumpRel(g, 'Mei Lin', 2, 0); bumpRel(g, 'Mother', 2, 0); return [DR_DISHES(g)]; }, time: 60, to: 'village_night' }, // v0.11.139 (owner pick MW1, MB): Mother +2
@@ -546,9 +652,9 @@ ${byForm(g, `"Mother asked what we find to talk about out here," she says. "I sa
 
 ${byForm(g, `"Every year they sweep it," she says. "So the Sect needn't get dust on its boots while it robs us." She laughs, once, and then checks the field for who might have heard. Only the cat.`, `"Every year they sweep it," she says. "So the Sect needn't get dust on its boots while it robs us." She laughs, once, and then checks the field for who might have heard. Only that great white beast of yours, whom nobody is going to question.`, `"Every year they sweep it," she says. "So the Sect needn't get dust on its boots while it robs us." She laughs, once, and then checks the field for who might have heard. Only Yuki, who lifts one hand to show she heard nothing.`)}
 
-"I'd have left the dust. Added some."`])
+"I'd have left the dust. Added some."`, ...WALK_NEW[5]])
             : tributeLeft(g) <= 1 ? `The last sunset before the tribute. This time she does not talk at all. Halfway along the field edge she takes hold of your hand, and she does not let go of it until the lamps come on.`
-            : seqText(g, 'mei_walk:6', [(g) => `The barley is nearly ready and nobody will say who is to cut it. She talks about the harvest all the way across the field, quickly, all of it in the future tense, and somewhere along the path her fingers have closed on your sleeve.`, (g) => `From the field edge you can watch the shutters close early, house by house. She has her arm through yours and names each family under her breath as its light goes, as one checks a tally that has come up short before.`, (g) => `The well rope is coiled and hung up dry before the sun is down, which nobody in Ashfall does. Mei Lin points it out, laughs at it, looks round to see who heard, and by the next house she has your sleeve in both hands and is steering by it. She tows you wide of the one door with a pot still on, since you would stop to advise it, she says, and they would have to be polite.`])),
+            : seqText(g, 'mei_walk:6', [(g) => `The barley is nearly ready and nobody will say who is to cut it. She talks about the harvest all the way across the field, quickly, all of it in the future tense, and somewhere along the path her fingers have closed on your sleeve.`, (g) => `From the field edge you can watch the shutters close early, house by house. She has her arm through yours and names each family under her breath as its light goes, as one checks a tally that has come up short before.`, (g) => `The well rope is coiled and hung up dry before the sun is down, which nobody in Ashfall does. Mei Lin points it out, laughs at it, looks round to see who heard, and by the next house she has your sleeve in both hands and is steering by it. She tows you wide of the one door with a pot still on, since you would stop to advise it, she says, and they would have to be polite.`, ...WALK_NEW[6]])),
         choices: [{ text: 'Walk her home.', do: (g) => { bumpRel(g, 'Mei Lin', 3, meiRel(g).a >= 8 ? 5 : 4); return [vday(g) === 2 ? `You walk her to her mother's door in the last of the red light. On the step she turns, looks at you as though there were something else she meant to say, and says "Idiot," very quietly, in its place. ${byForm(g, 'Yuki pushes past you both and goes in first, as though the house were hers. By now it may be.', 'Yuki goes in first, shoulders turned to clear the doorposts, as though the house were hers. By now it may be; nobody inside is going to raise the matter.', 'Yuki says "Excuse me" to the space between you, walks through it, and goes in first, as though the house were hers. By now it may be.')}` : tributeLeft(g) <= 1 ? `She does not let go at the door, either. She stands there with your hand in hers and the lamplight on her face and says, "Tomorrow, whatever happens, I'm glad you came out of that forest." Then she goes in, quickly, before you can answer, and you stand in the lane for a while, learning how to breathe again.` : 'At the door she takes your hand and does not go in. She stands there with it in both of hers and the lamplight on her face and says, "Whatever happens when they come, I\'m glad you came out of that forest." Then she goes in, quickly, before you can answer, and you stand in the lane for a while, working out what to do with the hand.']; }, time: 60, to: 'ashfall' }],
     },
 };

@@ -1,0 +1,44 @@
+[
+ {
+  "id": "RC1",
+  "file": "js/story/ashfall.js",
+  "find": "seqText(g, 'mei_walk:6'",
+  "replace": "seqText(g, 'mei_walk:5'",
+  "note": "week 3's walks share week 2's day record (in play the old beat text skipped: index 7 % 6 = 1)"
+ },
+ {
+  "id": "RC2",
+  "file": "js/story/ashfall.js",
+  "find": "this is your doing. It is.`, ...SUPPER_NEW[5]]))",
+  "replace": "this is your doing. It is.`, ...SUPPER_NEW[5]].slice(longCal(g) ? 0 : 3)))",
+  "note": "the old calendar reads a new text, not the old one"
+ },
+ {
+  "id": "RC3",
+  "file": "js/story/ashfall.js",
+  "find": "Mei Lin wants to know whether your world has collectors.",
+  "replace": "She wants to know whether your world has collectors.",
+  "note": "a new text's first sentence (the fold's) opens on a bare pronoun"
+ },
+ {
+  "id": "RC4",
+  "file": "js/story/ashfall.js",
+  "find": "Somebody has turned the scarecrow round to face the road.",
+  "replace": "Yesterday somebody turned the scarecrow round to face the road.",
+  "note": "a time word in a cycled text (the test bans only counted days)"
+ },
+ {
+  "id": "RC5",
+  "file": "js/story/ashfall.js",
+  "find": "\"Yuki pads behind and sets one broad paw on each stone in turn, which the field is unlikely to forget.\"",
+  "replace": "\"From your shoulder Yuki inspects each stone as it goes by, as a landlord might.\"",
+  "note": "the great form reads the cat's sentence (on your shoulder for a tiger)"
+ },
+ {
+  "id": "RC6",
+  "file": "js/story/ashfall.js",
+  "find": "text: (g) => (vday(g) === 1\n            ? seqText(g, 'supper:4'",
+  "replace": "text: (g) => (vday(g) <= 2\n            ? seqText(g, 'supper:4'",
+  "note": "week 2's suppers read week 1's list"
+ }
+]

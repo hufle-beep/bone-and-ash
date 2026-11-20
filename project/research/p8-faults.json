@@ -1,0 +1,72 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/ashfall.js",
+  "find": "sorry for the measure.`)}`, ...SUPPER_NEW[4]])",
+  "replace": "sorry for the measure.`)}`])",
+  "note": "the first week's suppers back to three"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/ashfall.js",
+  "find": "this is your doing. It is.`, ...SUPPER_NEW[5]]))",
+  "replace": "this is your doing. It is.`, ...SUPPER_NEW[4]]))",
+  "note": "the later weeks read the first week's new texts"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/ashfall.js",
+  "find": "would have to be polite.`, ...WALK_NEW[6]]))",
+  "replace": "would have to be polite.`]))",
+  "note": "the third week's walks back to three"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/ashfall.js",
+  "find": "Added some.\"`, ...WALK_NEW[5]])",
+  "replace": "Added some.\"`, ...WALK_NEW[6]])",
+  "note": "the second week's walks read the third week's (arm in arm early)"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/ashfall.js",
+  "find": "\"Then she sees the ears on the woman in the best seat, one ear turns her way, and the sieve changes hands at speed.\")",
+  "replace": "\"Yuki watches from under your stool, and the woman who came to see a foreigner leaves inspected by his cat.\")",
+  "note": "the human form reads the cat's sentence"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/ashfall.js",
+  "find": "Mei Lin's hand is already halfway across the table.",
+  "replace": "Mei Lin intercepts them and puts them on.",
+  "note": "the glasses tried before Act 1"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/ashfall.js",
+  "find": "Mine did it every year. When I was seven they tested me anyway",
+  "replace": "Mine did it until I was seven. Then they tested me",
+  "note": "the soot slip back"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/ashfall.js",
+  "find": "tributeLeft(g) <= 1 ? `The last sunset",
+  "replace": "tributeLeft(g) < 1 ? `The last sunset",
+  "note": "the last sunset lost to the cycle"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/ashfall.js",
+  "find": "Mei Lin wants to know whether your world has collectors.",
+  "replace": "On the fourth evening Mei Lin wants to know whether your world has collectors.",
+  "note": "a day count in a cycled text"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/ashfall.js",
+  "find": "const WALK_NEW = {\n    5: [",
+  "replace": "const WALK_NEW = {\n    5: [(g) => '', ",
+  "note": "an empty text in the walk's cycle (seven, one blank)"
+ }
+]

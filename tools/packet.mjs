@@ -35,7 +35,7 @@ const { newGame, ensureBars, startCombat, combatStep, clockParts } = await impor
 const { sceneView, choose, goTo } = await import(js('core/story.js'));
 const { TASK_HUBS } = await import(js('story/task_hubs.js'));
 const { isTaskHub, isTaskChoice, taskCards, taskOpen, runTask, taskState, dryClone } = await import(js('core/tasks.js'));
-const { hour } = await import(js('story/common.js'));
+const { hour, markDaily } = await import(js('story/common.js')); // v0.11.235 (P8-A, TG): markDaily
 const { coilStamp, textDay } = await import(js('core/lines.js'));
 const { smartAction } = await import(path.join(ROOT, 'tests/lib/smartfight.mjs'));
 const { splitLine } = await import(js('core/replies.js')); // v0.11.200 (D1, S1)
@@ -57,6 +57,43 @@ function sample(form, realm, k = 0) {
 }
 /** The sample states: each form on its first day and on a later one (`later` names the later ones in the packet). */
 export const SAMPLES = FORMS.flatMap(([f, r, name]) => [{ g: sample(f, r, 0), form: name, later: false }, { g: sample(f, r, 2), form: name, later: true }]);
+/** v0.11.235 (owner pick P8-A, TG; v0.11.234's measure): the states a text reads beyond the forms and the day: the long calendar's three
+ *  village weeks (`vday`) on each day of a cycle of six, in the three forms; the Fallout's story days 9 and 10 on each day of their sequences;
+ *  the Ashen Hills by day by who is there (Ya away, both away, both there: `awayNow` reads 06:00–18:59) and at the evening fire by the cook
+ *  mark (`cookedToday`), the Root Road's fire cooked and not. A scene's text on each, where it differs from the forms' (C5: "[text · state: …]").
+ *  RV1 (the cold review's C M1, M2, L1): the away states by day (at 20:00 they were inert), every day of the cycles in every form (the packet drew
+ *  4 of the 12 new texts), and each state only on the scenes of its area (`ASHFALL`, `FALLOUT`, `BLACKROOT`; the walk not in the first week). */
+function stateOf(flags, minutes, { k = 0, cooked = false, rel = null, form = ['cat', 0] } = {}) {
+    const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); g.yuki.form = form[0]; g.yuki.realm = form[1]; g.james.realm = form[1]; Object.assign(g.flags, flags); /* the long calendar, as textlint's */ g.minutes = minutes; if (rel) for (const [n, a] of Object.entries(rel)) g.rel[n] = { f: a ? 90 : 20, a };
+    if (k) { const today = textDay(g); const days = [...Array(k).keys()].map((i) => -1 - i).concat([today]); g.lines = { c: coilStamp(g), p: {}, last: {}, cur: {}, at: null, said: [], d: new Proxy({}, { get: (_, key) => (typeof key === 'string' ? days : undefined) }) }; }
+    if (cooked) markDaily(g, 'bl_cook');
+    return ensureBars(g);
+}
+const DAY = 1440;
+const { ASHFALL } = await import(js('story/ashfall.js'));
+const { FALLOUT } = await import(js('story/act1_fallout.js'));
+const { BLACKROOT } = await import(js('story/act1_blackroot.js'));
+const inArea = (table) => (id) => Object.hasOwn(table, id);
+const AH = { bl_region: 'ah', bl_day: 4, bl_n: 2, mei_party: true, ya_party: true }; // bl_n 2: the camp's later morning, which has an away version (AW.morning)
+const BOTH = { 'Mei Lin': 90, Ya: 90 };
+export const STATES = [
+    ...[[1, 23], [2, 30], [3, 37]].flatMap(([v, d]) => [0, 1, 2, 3, 4, 5].flatMap((k) => FORMS.map(([f, r, name]) => ({ base: `the long calendar's village week ${v}, day ${k + 1} of its cycles`, form: name,
+        on: (id) => inArea(ASHFALL)(id) && !(v === 1 && id === 'mei_walk'), g: stateOf({ long: true, vday: v, cal_night: 1 }, (d - 1) * DAY + 19 * 60, { k, form: [f, r] }) })))),
+    ...[[9, 51], [10, 58]].flatMap(([sd, d]) => [0, 1, 2].map((k) => ({ base: `the long calendar's story day ${sd}, day ${k + 1} of its sequences`, on: inArea(FALLOUT), g: stateOf({ ya_met: true }, (d - 1) * DAY + 12 * 60, { k }) }))),
+    { base: 'the Ashen Hills by day, Ya away', on: inArea(BLACKROOT), g: stateOf(AH, 70 * DAY + 10 * 60, { k: 1 }) },
+    { base: 'the Ashen Hills by day, both away', on: inArea(BLACKROOT), g: stateOf({ ...AH, trio: 2 }, 70 * DAY + 10 * 60, { k: 1, rel: BOTH }) },
+    { base: 'the Ashen Hills by day, both there', on: inArea(BLACKROOT), g: stateOf({ ...AH, ya_off_done: true }, 70 * DAY + 10 * 60, { k: 1 }) },
+    { base: 'the Ashen Hills in the evening, he did not cook', on: inArea(BLACKROOT), g: stateOf({ ...AH, ya_off_done: true }, 70 * DAY + 20 * 60, { k: 1 }) },
+    { base: 'the Ashen Hills in the evening, he cooked', on: inArea(BLACKROOT), g: stateOf({ ...AH, ya_off_done: true }, 70 * DAY + 20 * 60, { k: 1, cooked: true }) },
+    { base: 'the Root Road in the evening, he did not cook', on: inArea(BLACKROOT), g: stateOf({ bl_region: 'rr', bl_day: 2, mei_party: true, ya_party: true }, 70 * DAY + 20 * 60, { k: 1 }) },
+    { base: 'the Root Road in the evening, he cooked', on: inArea(BLACKROOT), g: stateOf({ bl_region: 'rr', bl_day: 2, mei_party: true, ya_party: true }, 70 * DAY + 20 * 60, { k: 1, cooked: true }) },
+];
+/** RV1: the states that draw one text, named shortly: a state in all three forms by its name alone, else with its forms. */
+export function stateNames(states) {
+    const by = new Map();
+    for (const st of states) by.set(st.base, [...(by.get(st.base) || []), st.form].filter(Boolean));
+    return [...by].map(([b, f]) => (!f.length || FORM_NAMES.every((n) => f.includes(n)) ? b : `${b} (${f.join('/')})`));
+}
 
 const asStr = (x, g) => { try { const t = typeof x === 'function' ? x(g) : x; return typeof t === 'string' ? t : null; } catch { return null; } };
 
@@ -241,6 +278,9 @@ export function packet(ids, { marks = new Set(), seen = {} } = {}) {
         const paras = (t) => String(t).split(/\n\s*\n/).map((x) => x.replace(/\s+/g, ' ').trim()).filter(Boolean);
         const variants = byForms(s.text).map((r) => ({ tag: formTag(r.forms, r.later), t: r.t }));
         for (const t of seen[id]?.texts || []) variants.push({ tag: 'as seen in play', t });
+        { const byText = new Map(); // v0.11.235 (P8-A, TG): the states' texts, each once, named by every state that draws it
+          for (const st of STATES) { if (!st.on(id)) continue; st.g.scene = id; const t = asStr(s.text, st.g); if (t) byText.set(t, [...(byText.get(t) || []), st]); }
+          for (const [t, sts] of byText) variants.push({ tag: `state: ${stateNames(sts).join('; ')}`, t }); }
         const done = new Set();
         let first = null;
         for (const v of variants) {

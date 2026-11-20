@@ -118,6 +118,18 @@ for (const [region, warm] of [['rr', [[0, 0]]], ['ah', [[80, 80], [0, 80], [80, 
         SAMPLES.push(ensureBars(g));
     }
 }
+// v0.11.235 (owner pick P8-A, TG; v0.11.234's measure): the supper's and the sunset walk's cycles of six on each of their days, the village's
+// three weeks, in the three forms (two new texts name Yuki by form), and the Fallout's story days 9 and 10 (`fo_mei`, `fo_ya_time`, their
+// labels) on each day of their sequences of three, so the texts v0.11.232–235 added there are read too
+for (const [vday, day] of [[1, 23], [2, 30], [3, 37]]) for (const k of [0, 1, 2, 3, 4, 5]) for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) {
+    const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form;
+    Object.assign(g.flags, { long: true, vday, cal_night: 1 }); g.minutes = (day - 1) * 1440 + 19 * 60;
+    SAMPLES.push(onDay(g, k));
+}
+for (const day of [51, 58]) for (const k of [0, 1, 2]) {
+    const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); Object.assign(g.flags, { ya_met: true }); g.minutes = (day - 1) * 1440 + 12 * 60;
+    SAMPLES.push(onDay(g, k));
+}
 const renders = (x) => {
     if (typeof x === 'string') return [x];
     if (typeof x !== 'function') return [];

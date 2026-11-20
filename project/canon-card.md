@@ -35,7 +35,7 @@
 - **The Coil**: the prologue loops to the tribute on Day 7, Act 1 to Shen Qiu on Day 21. James never dies. Everyone but Yuki forgets; relationships start the next Coil with a 25% head start.
 
 ## People and places
-- **Ashfall**: Old Wen (elder, 90, one milky eye); Mei Lin (26, herb-gatherer, sharp tongue, ivory hairpin with a red tassel); her mother (60, stern); the hunters. **Pock-Face** is not a villager: Gao Feng's lackey, who torches Mei Lin's herb loft on night 5 (met only when Gao is neither broken nor spared; v0.11.185, RV1 M1).
+- **Ashfall**: Old Wen (elder, 90, one milky eye); Mei Lin (26, herb-gatherer, sharp tongue, ivory hairpin with a red tassel; no spirit root, tested at seven; her father had one); her mother (60, stern); the hunters. **Pock-Face** is not a villager: Gao Feng's lackey, who torches Mei Lin's herb loft on night 5 (met only when Gao is neither broken nor spared; v0.11.185, RV1 M1).
 - **Crimson Lotus**: Gao Feng (outer disciple, about 20, haughty; can be killed or spared); Lu Han (inner disciple, about 30, still face, long sword); Outer Elder **Shen Qiu** (Core Formation, about three hundred years lived; Ashfall, Day 21).
 - **Realms as locals see them**: Mortal Vessel nearly everyone; Foundation the disciples ("Disciple", "young master"); Core Formation the outer elders ("Elder", "Senior"); Golden Core sect masters, the first who fly.
 - **The wilds** (prologue Days 1–3): black bark, grey moss, a bruise-coloured sky; the bone field, the mire, the hollow.
