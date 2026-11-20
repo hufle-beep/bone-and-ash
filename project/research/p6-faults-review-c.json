@@ -1,0 +1,72 @@
+[
+ {
+  "id": "C1",
+  "file": "js/story/act1_blackroot.js",
+  "find": "${likesMei(g) ? 'Where the ground turns rough",
+  "replace": "${likesYa(g) ? 'Where the ground turns rough",
+  "note": "Mei Lin's sixth (beat 10) warm branch on Ya's affection"
+ },
+ {
+  "id": "C2",
+  "file": "js/story/act1_blackroot.js",
+  "find": "${likesMei(g) && likesYa(g) ? '\"The herb girl is easier,\"",
+  "replace": "${likesYa(g) ? '\"The herb girl is easier,\"",
+  "note": "Ya's beat 9 herb-girl line without Mei Lin's affection"
+ },
+ {
+  "id": "C3",
+  "file": "js/story/act1_blackroot.js",
+  "find": "${likesMei(g) && likesYa(g) ? '\"The herb girl carries mint on her,\"",
+  "replace": "${false ? '\"The herb girl carries mint on her,\"",
+  "note": "Ya's beat 10 herb-girl line never shows (ported in RV1)"
+ },
+ {
+  "id": "C4",
+  "file": "js/story/act1_blackroot.js",
+  "find": "${likesYa(g) ? 'She stops you with a hand on your chest",
+  "replace": "${likesMei(g) ? 'She stops you with a hand on your chest",
+  "note": "Ya's beat 10 warm branch on Mei Lin's affection (ported in RV1)"
+ },
+ {
+  "id": "C5",
+  "file": "js/story/act1_blackroot.js",
+  "find": "watching your face as she watches a trail",
+  "replace": "watching your face like a snare",
+  "note": "Claude's cut 'like a snare' reverted"
+ },
+ {
+  "id": "C6",
+  "file": "js/story/act1_blackroot.js",
+  "find": "She laughs so hard that she spoils the limp",
+  "replace": "She laughs hard enough to spoil the limp",
+  "note": "Claude's shared-run cut reverted (Mei Lin's beat 9 plain branch) (ported in RV1: the plain branch rewritten; now the RV1 cut)"
+ },
+ {
+  "id": "C7",
+  "file": "js/story/act1_blackroot.js",
+  "find": "s4: { ya: `Mei Lin informs you",
+  "replace": "s4: { both: `Mei Lin informs you",
+  "note": "the away version under the wrong away key (both; Mei Lin's talk is hidden then)"
+ },
+ {
+  "id": "C8",
+  "file": "js/story/remember_texts.js",
+  "find": "4: 'A bird fares badly in this, and she comes off well. You have the record open.',",
+  "replace": "4: 'A bird fares badly in this, and she comes off well. You have the record open.', 8: 'You have worn these glasses before.',",
+  "note": "a memory line of its own at beat 8 (the pool lost)"
+ },
+ {
+  "id": "C9",
+  "file": "js/story/prologue.js",
+  "find": "'*At home you fed everyone who stood still,* Yuki sends. *Here there is only me, and more of me than there was. Cook accordingly.*'",
+  "replace": "''",
+  "note": "the camp line dropped from the great form"
+ },
+ {
+  "id": "C10",
+  "file": "js/story/act1_blackroot.js",
+  "find": "if (n >= 5 && (n - 5) % 6) return [(g) => `Ya has decided",
+  "replace": "if (n >= 5 && n < 11 && (n - 5) % 6) return [(g) => `Ya has decided",
+  "note": "Ya's cycle stops after one round (old saves past beat 10 read only the quiet walk)"
+ }
+]

@@ -89,3 +89,7 @@ Started in v0.11.208, when `roadmap-done-3.md` would have passed about 45 KB wit
 ## Moved from `roadmap.md` in v0.11.232 (word for word; section 0's oldest notes, the size rule: under 20,000 bytes)
 
 *(v0.11.224: TS6 done (TX2 + XA + RV1).)* *(v0.11.223: the open items sorted (RO1).)* *(v0.11.222: TS9 done (J2 + RV2).)* *(v0.11.221: WF2 done (WB + RV2).)* *(v0.11.220: the open items sorted (OR1); KA moved up.)* *(v0.11.219: KC1 done.)* *(v0.11.216: the new order, section 1's order line.)*
+
+## Moved from `roadmap.md` in v0.11.233 (word for word; section 0's oldest notes, the size rule: under 20,000 bytes)
+
+*(v0.11.226: the flip done (FP1 + RV1); t's queue done.)* *(v0.11.225: the plan's leftovers done (LO2 + RV1).)*

@@ -1,0 +1,72 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/act1_blackroot.js",
+  "find": "if (n >= 5 && (n - 5) % 6) return [(g) => `${awayText(g, `Mei Lin keeps",
+  "replace": "if (n >= 5 && (n - 5) % 3) return [(g) => `${awayText(g, `Mei Lin keeps",
+  "note": "Mei Lin's gate back to a cycle of three (the new texts never show)"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/act1_blackroot.js",
+  "find": "if (n >= 5 && (n - 5) % 6) return [(g) => `Ya has decided",
+  "replace": "if (n >= 5 && (n - 5) % 3) return [(g) => `Ya has decided",
+  "note": "Ya's gate back to three"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/act1_blackroot.js",
+  "find": "][(n - 5) % 6 - 1](g); // v0.11.224 (TX2, V3a); v0.11.233",
+  "replace": "][(n - 5) % 6 % 5](g); // v0.11.224 (TX2, V3a); v0.11.233",
+  "note": "Ya's index one off"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/act1_blackroot.js",
+  "find": "AW.talk_mei.s4)}",
+  "replace": "AW.talk_mei.s1)}",
+  "note": "Mei Lin's fourth reads the wrong away version"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/act1_blackroot.js",
+  "find": "${likesMei(g) ? 'She turns your chin down",
+  "replace": "${likesYa(g) ? 'She turns your chin down",
+  "note": "Mei Lin's fourth branch on Ya's affection"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/act1_blackroot.js",
+  "find": "${likesMei(g) && likesYa(g) ? '\"The herb girl mends it",
+  "replace": "${likesYa(g) ? '\"The herb girl mends it",
+  "note": "the herb-girl line without Mei Lin's affection"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/ashfall.js",
+  "find": "Ashfall has nothing further to say tonight. The house below does: through the floor Mei Lin\\'s mother tells her daughter, gravely, that a guest who asks twice what is in the pot will be handed the ladle and watched. *Stop thinking,* Yuki sends from most of the floor.",
+  "replace": "Ashfall has nothing further to say tonight. *Stop thinking,* Yuki sends from most of the floor.",
+  "note": "the CW line missing from the great form"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/prologue.js",
+  "find": "pleased with itself.${foodCount(g) ? ` ${byForm(g, ",
+  "replace": "pleased with itself.${foodCount(g) ? ` ${byForm(g, '', ",
+  "note": "the cat's camp line dropped"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/prologue.js",
+  "find": "pleased with itself.${foodCount(g) ? ` ${byForm(",
+  "replace": "pleased with itself.${g.flags.fire ? ` ${byForm(",
+  "note": "RV1 CM-b: the camp line without the food gate"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/act1_blackroot.js",
+  "find": "'You say you could carry her. She laughs so hard",
+  "replace": "'You say you could carry her, and she looks all round her for whichever aunt has felt it. She laughs so hard",
+  "note": "RV1 RT: the look-round back in a plain branch"
+ }
+]

@@ -87,6 +87,19 @@ for (const [day, flags] of [[23, { long: true, vday: 1, cal_night: 1 }], [30, { 
     const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); Object.assign(g.flags, flags); g.minutes = (day - 1) * 1440 + 12 * 60;
     SAMPLES.push(ensureBars(g));
 }
+// v0.11.233 (owner pick RV1 after P6-A, LS; the cold review's C M2): the journey talks past their five beats (5–10: the quiet walk, the two old
+// settled texts and the three new), cold and warm, and Mei Lin's with Ya away; and the prologue camp's first night with the fire lit and food,
+// so the talks' cycle of six and Yuki's cooking line are read too
+for (const n of [5, 6, 7, 8, 9, 10]) for (const a of [0, 80]) for (const [region, day] of [['rr', 2], ['ah', 4]]) {
+    const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); Object.assign(g.flags, { bl_day: day, bl_region: region, mei_talks: n, ya_talks: n, mei_party: true, ya_party: true });
+    g.rel['Mei Lin'] = { f: 20, a }; g.rel.Ya = { f: 20, a }; g.minutes = 70 * 1440 + 10 * 60;
+    SAMPLES.push(ensureBars(g));
+}
+for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) {
+    const g = ensureBars(newGame(1234, { closed: true })); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form;
+    Object.assign(g.flags, { forest_day: 1, fire: true }); g.inventory.hare_raw = 1;
+    SAMPLES.push(ensureBars(g));
+}
 const renders = (x) => {
     if (typeof x === 'string') return [x];
     if (typeof x !== 'function') return [];

@@ -1,0 +1,57 @@
+# The talks' settled texts as they stand (Act 1, the Blackroot journey). Past the five beats, each talk plays a cycle:
+# the quiet walk, then settled text A, then settled text B, then round again. This push makes the cycle six:
+# quiet walk, A, B, then YOUR three new texts (3, 4, 5), then round again. Each text has a base paragraph and one or two
+# branch paragraphs. `likesMei` / `likesYa` = her affection is high (the warm branch); otherwise the plain branch.
+# [Ya away] = the version used while Ya has walked off into the haze after a quarrel (the Ashen Hills only; Mei Lin is there).
+
+## talk_mei, the quiet walk
+For a while you walk and neither of you talks. That has become easy. She points out a herb that grows only where a beast has died; you point out a fungus that grows only where one is about to. She calls you morbid. You bring up pots and kettles. She adds that you hum when you cook, and that it gives you away; you say the humming is for the fire.
+¶ [likesMei] Somewhere along the way there is a fallen trunk to climb, and she takes your hand for it, and once over she keeps it. The matter goes unmentioned by both parties.
+¶ [plain] She laughs, a real one, and then glances behind her in case somebody from Ashfall was near enough to hear.
+
+## talk_mei, settled A
+Mei Lin keeps her eyes on the ground as she walks, one hand in the basket, sorting by touch. She holds up a root and asks what it is called among your people. You tell her. She repeats the word, badly, and rules that hers is better. Ahead, Ya stops to smell a tree, moves on, and does not explain. "She does that," Mei Lin says. "I've stopped asking. The answers were worse."
+  [Ya away] … She repeats the word, badly, and decides that hers is better. Then she glances at the haze, at the stretch of it Ya walked into, and away again. "She'll be back by dark," Mei Lin says. "She gets hungry, and sulking on an empty stomach is beneath her."
+¶ [likesMei] She tucks a sprig of some bitter-smelling leaf into your coat pocket, for luck, she says, and leaves her hand on the pocket a little longer than the luck needs. Neither of you remarks on it.
+¶ [plain] You say the tree probably had it coming. She snorts, covers it with a cough, and looks about to see whether the forest means to tell her mother.
+  [plain, Ya away] You say you pity the haze. She snorts, turns it into a cough, and glances round in case these are the sort of hills that tell her mother.
+
+## talk_mei, settled B
+You and Mei Lin have dropped to the back, where the talk is. She is counting what the basket holds against what the walking has cost her, and the walking is ahead. She asks whether everybody where you come from wears a white coat into a forest. You say only the ones who did not plan to be in one. She allows that. She says the coat is how she finds you among the trees, and that she would thank you not to let it go grey.
+¶ [likesMei] Where the path narrows she walks close enough that her sleeve keeps brushing yours. The path widens again. Nobody seems to have told her sleeve.
+¶ [plain] Up ahead Ya shouts some cheerful remark at a bird. Mei Lin shuts her eyes briefly, like a woman counting, and then laughs in spite of herself, quietly, into the basket.
+  [plain, Ya away] Out in the haze something whoops, far off, and it may be a bird and it may be Ya. Mei Lin shuts her eyes briefly, decides not to know, and laughs anyway, quietly, into the basket.
+
+## talk_ya, the quiet walk
+Ya is in a good mood, and Ya's good moods are loud.
+¶ [likesYa] She walks near enough to knock her hip against yours every few steps, deliberately, and grins each time as if the joke were new. You catch her hand to make her stop. She turns it over, threads her fingers through yours and walks on, like someone whose plan has worked.
+¶ [plain] She tells you a long tale about a bear, which may be true, and finishes it with a punch on your arm, which certainly is.
+¶ [likesMei and likesYa] "She looked at me today," she says, low. "The herb girl. When I was washing. A real look." A slow, wolfish smile. "She's coming round."
+
+## talk_ya, settled A
+Ya has decided that you walk too loudly, and has decided to fix it.
+¶ [likesYa] She walks behind you with a hand flat between your shoulders, steering, and calls out each mistake as you make it. The hand stays after the mistakes run out. When you mention this she says a hunter never leaves a job half done, and moves it lower.
+¶ [plain] She shows you how to put a foot down, twice, with the patience of a woman teaching a rock. Then she pronounces you hopeless, cheerfully, and trips you to prove it.
+¶ [likesMei and likesYa] "The herb girl walks quieter than you," she adds. "I have been watching how she walks." A grin with every tooth in it. "Closely. She knows."
+
+## talk_ya, settled B
+Ya wants a fight today, and you are the nearest thing that talks.
+¶ [likesYa] She argues that a spear beats a scholar, then that a scholar is no use in the cold, then that you would be warmer than you look. By the third she has an arm slung over your shoulders and has plainly forgotten which side she was on.
+¶ [plain] She says scholars are soft. You agree. She says that was too easy and you ought to argue. You decline. She walks along scowling, delighted, working out what to accuse you of next.
+¶ [likesMei and likesYa] "She gave me a salve," she says, lower. "For my feet. Did not look at me when she did it." She shows her teeth. "Looked at my feet a good while, though."
+
+## The five beats before the cycle (one text each; DON'T retell them)
+- Mei Lin: 0 "married or dead or ruined" (her mother; Old Wen bowed to her); 1 "Ya says I talk like a temple" (she envies how Ya just lives); 2 the quiet walk; 3 "what does a woman do at twenty-six with no husband" (forms: "I'm very good at forms. I'm from Ashfall."); 4 "I shouted this morning, at the trees" (she won't put the noise away when they go home).
+- Ya: 0 "You're old" (forty; good teeth; "lie down with me, or her, or both"); 1 her mother the hunter, found in a wolf den, the ape at the pass, "Once they threw a priest. He bounced."; 2 the villages and "the talking first"; 3 "*improper*", "you say them back"; 4 she wakes in the night and counts her people ("That's called worrying." "It's stupid.").
+
+## The CW places (one line each)
+
+### village_night, the quiet nights (Ashfall, the prologue; the herb loft above Mei Lin's mother's house). A sequence of three, one a night, one paragraph each, by Yuki's form. Your line goes into text 3, after its first sentence, the same sentence in all three forms:
+3 [cat] The herb loft is dark and the lane outside is darker, and Ashfall has nothing further to say tonight. *Stop thinking,* Yuki sends from the hollow of your shoulder. *It's loud.* You stop, more or less.
+3 [great] The herb loft is dark and the lane outside is darker, and Ashfall has nothing further to say tonight. *Stop thinking,* Yuki sends from most of the floor. *It's loud.* Her tail comes down across your legs, and that is the end of the discussion.
+3 [woman] The herb loft is dark and the lane outside is darker, and Ashfall has nothing further to say tonight. "Stop thinking," Yuki says from behind you, mostly asleep. "It's loud." You stop, more or less.
+(Texts 1 and 2 for reference: "The herb loft smells of mint and drying ginseng, and under it the house breathes. …"; "Below the herb loft somebody banks the stove, and the last of the talk in the house goes out with it. …")
+
+### camp, the wilds (the prologue's first days: James and Yuki alone, no people for days; a dry rise above a stream, a fallen trunk, a fire he made with a bone bow-drill; food is a glassback hare or a jade bracket fungus at best). The camp's fire line, on the second night only, shown only when the fire is lit:
+The fire crackles like something with tenure, and holds views on damp wood.
+Your line follows it: Yuki's remark, in three forms (cat: bond-speech in italics; great root-kin, tiger-sized: bond-speech in italics; woman: aloud, in quotes).

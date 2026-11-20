@@ -1,0 +1,72 @@
+[
+ {
+  "id": "T1",
+  "file": "js/story/act1_blackroot.js",
+  "find": "She laughs so hard that she spoils the limp",
+  "replace": "She laughs hard enough to spoil the limp",
+  "note": "Claude's cut 'smothers it in her sleeve' reverted (cut not pinned) (ported in RV1: the plain branch rewritten; now the RV1 cut)"
+ },
+ {
+  "id": "T2",
+  "file": "js/story/act1_blackroot.js",
+  "find": "watching your face as she watches a trail",
+  "replace": "watching your face like a snare",
+  "note": "Claude's cut 'like a snare' reverted (a reused run back in)"
+ },
+ {
+  "id": "T3",
+  "file": "js/story/act1_blackroot.js",
+  "find": "the uses she has for a man your height, and they are mostly carrying",
+  "replace": "what she would do with a man your height, and it is mostly carrying",
+  "note": "Claude's cut on Ya's plain blush reverted"
+ },
+ {
+  "id": "T4",
+  "file": "js/story/act1_blackroot.js",
+  "find": "She leaves the finger there until you have both noticed it, and then tells the path",
+  "replace": "The finger stays where it is until you have both noticed it, and then she tells the path",
+  "note": "Claude's cut on Mei Lin's warm bow reverted"
+ },
+ {
+  "id": "T5",
+  "file": "js/story/act1_blackroot.js",
+  "find": "She looks at the haze, where somebody is no doubt bowing to nothing at all and doing it badly, and says the lesson goes better with a worse pupil in it.` } }",
+  "replace": "She glances at the haze. Ahead, the huntress bows to a rock at all three depths and then kicks it.` } }",
+  "note": "the Ya-away version puts Ya in the scene without her name (a head count, not a name) (ported in RV1)"
+ },
+ {
+  "id": "T6",
+  "file": "js/story/act1_blackroot.js",
+  "find": "She puts them on, looks at the path, and stops walking",
+  "replace": "She puts them on, looks at the ridge, and stops walking",
+  "note": "a place-bound word outside the test's list (the ridge: the Ashen Hills only)"
+ },
+ {
+  "id": "T7",
+  "file": "js/story/prologue.js",
+  "find": "*Here there is only me, and more of me than there was. Cook accordingly.*",
+  "replace": "\"Here there is only me, and more of me than there was. Cook accordingly.\"",
+  "note": "the great root-kin speaks aloud after the bond opener (bond not in italics)"
+ },
+ {
+  "id": "T8",
+  "file": "js/story/act1_blackroot.js",
+  "find": "${likesMei(g) && likesYa(g) ? '\"The herb girl carries mint on her",
+  "replace": "${likesYa(g) ? '\"The herb girl carries mint on her",
+  "note": "Ya's sixth herb-girl line without Mei Lin's affection (only beat 8 is tested) (ported in RV1)"
+ },
+ {
+  "id": "T9",
+  "file": "js/story/act1_blackroot.js",
+  "find": "${likesMei(g) ? 'Where the ground turns rough she takes your arm",
+  "replace": "${likesYa(g) ? 'Where the ground turns rough she takes your arm",
+  "note": "Mei Lin's limp branch on Ya's affection (only beats 8 and 9 tested)"
+ },
+ {
+  "id": "T10",
+  "file": "js/story/prologue.js",
+  "find": "*Forty years of your dumplings,* Yuki sends, *and now a forest with nothing in it. Cook whatever it is. I shall complain, and then I shall eat it all.*",
+  "replace": "*Forty years of your dumplings,* Yuki sends, *and now a forest with nothing in it. Cook the hare. I shall complain, and then I shall eat it all.*",
+  "note": "the cat's camp line names food the screen may say is not there"
+ }
+]

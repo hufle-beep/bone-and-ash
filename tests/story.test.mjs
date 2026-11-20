@@ -6987,8 +6987,8 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       assert(/Before the tribute comes due they will know/.test(sc(at(true, 37, 9, { long: true, vday: 3, cal_night: 1 }))) && /By tomorrow they will know/.test(sc(at(true, 42, 9, { long: true, vday: 3, cal_night: 6 }))) && /By tomorrow they will know/.test(sc(at(false, 6, 9, { long: true, vday: 3 }))), `${T} (MF2, TG6): the scout's "By tomorrow" on the eve only`); }
     // TG7: the long calendar's own branches: the settled talks' sequence, the quiet mornings, the 5-day road's words
     { const talk = (n, id) => { const g = at(true, 70, 10, { bl_day: 2, bl_region: 'rr', mei_talks: n, ya_talks: n, mei_party: true, ya_party: true }); return tx(g, id).slice(0, 40); };
-      const seqOk = (id) => new Set([5, 6, 7].map((n) => talk(n, id))).size === 3 && talk(8, id) === talk(5, id) && talk(2, id) === talk(5, id);
-      assert(seqOk('talk_mei') && seqOk('talk_ya'), `${T} (V3a, TG7): the settled talks a sequence of three past the five beats`);
+      const seqOk = (id) => new Set([5, 6, 7, 8, 9, 10].map((n) => talk(n, id))).size === 6 && talk(11, id) === talk(5, id) && talk(2, id) === talk(5, id); // v0.11.233 (P6-A, TK): a cycle of six
+      assert(seqOk('talk_mei') && seqOk('talk_ya'), `${T} (V3a, TG7; P6-A TK): the settled talks a cycle of six past the five beats`);
       const mq = (n) => { const g = at(true, 71, 6, { bl_day: 2, bl_n: n, bl_region: 'rr' }); g.scene = 'bl_morning'; return SCENES.bl_morning.text(g); };
       assert(mq(0) !== mq(1) && mq(1) !== mq(2) && /^Morning on the Root Road\./.test(mq(0)), `${T} (DN12, MP2, TG7): the story morning, then two quiet lines`);
       const first = at(true, 68, 6, { bl_day: 2, bl_n: 0, bl_region: 'rr' }); first.scene = 'bl_morning'; const fw = sceneView(first, SCENES).choices.filter((c) => !c.disabled).map((c) => c.index).join();
@@ -7671,6 +7671,91 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     // TG-C6 (MR): every new text where James's arm plays is one OWN_MUSIC knows (no second music line under it)
     { const own = all.filter((t) => /forearm|omnitool/.test(t) && /play|music|strings/.test(t)); // the scene texts (a line after a choice draws no music line)
       assert(own.length >= 1 && own.every((t) => M.OWN_MUSIC.test(t)), `${T} (MR, TG-C6): the roof's arm music is its own line (${own.length})`); }
+}
+// v0.11.233 (owner pick P6-A = TK + CWx, D1; 2026-11-20 00:59, 01:08): TK the talks past the five beats a cycle of six (the quiet walk, the two
+// old settled texts, three new), Mei Lin's fourth with its Ya-away version; CWx two cooking lines (village_night's third quiet text; the camp's
+// fire line by Yuki's form). Texts by Fable (run T), Claude's 7 cuts. RV1 (01:53, the two cold reviews): Fable's run RV (Mei Lin's three plain
+// branches without the look-round, T M1; Ya's beat-10 warm branch without the arm, T L1; the coat opener, T L5; the away bow's haze, T L3) and
+// Claude's 2 cuts (the text lint's favourites); CM-b the camp line on the first night while there is food (T M2, C M1); the tests' gaps.
+{
+    const T = 'P6-A (TK + CWx)';
+    const C = await import('../js/core/calendar.js');
+    const A = await import('../js/story/again.js');
+    const D = 1440;
+    const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
+    const talk = (id, n, { m = 0, y = 0, region = 'rr', day = 2, h = 10, flags = {} } = {}) => { const g = ensureBars(newGame(99600 + n, { closed: true, cal: C.LONG_CAL })); Object.assign(g.flags, { bl_day: day, bl_region: region, mei_talks: n, ya_talks: n, mei_party: true, ya_party: true }, flags); g.rel['Mei Lin'] = { f: 20, a: m }; g.rel.Ya = { f: 20, a: y }; g.minutes = 70 * D + h * 60; return tx(g, id); };
+    const MEI = ['Mei Lin has asked to try your glasses', 'Mei Lin informs you that you bow', 'Mei Lin is limping'];
+    const YA = ['Ya has taken against your coat, and has decided the coat ought to hear about it.', 'Ya has bet herself', 'Ya is hungry'];
+    // the cycle: beats 8, 9, 10 the new texts in order, 11 the quiet walk again, 14 the first new text again; the old three where they were
+    for (const [id, starts] of [['talk_mei', MEI], ['talk_ya', YA]]) {
+        const bad = [];
+        for (const [m, y] of [[0, 0], [80, 80], [80, 0], [0, 80]]) {
+            const out = [5, 6, 7, 8, 9, 10, 11, 14].map((n) => talk(id, n, { m, y }));
+            if (new Set(out.slice(0, 6)).size !== 6 || out[6] !== out[0] || out[7] !== out[3] || !starts.every((w, i) => out[3 + i].startsWith(w))) bad.push(`${m}/${y}`);
+            for (const t of out.slice(3, 6)) { const p = t.split('\n\n'); if (A.sentencesOf(p[0]).length < 1 || A.sentencesOf(t).length < 3) bad.push(`${m}/${y} short: ${t.slice(0, 30)}`); }
+        }
+        assert(!bad.length, `${T} (TK): ${id} a cycle of six, the three new texts at 8–10 in order, each with its branches (${bad.join(', ')})`);
+    }
+    // the branches at every new beat (RV1 TG-T5, TG-C2): Mei Lin's by her affection alone, Ya's by hers, Ya's herb-girl line only with both
+    { const MW = { 8: /straightens them with two fingertips/, 9: /turns your chin down with one finger/, 10: /takes your arm, on behalf of the foot/ };
+      const MP = { 8: /gives them back at arm's length, held by one earpiece/, 9: /names a sum, and keeps her palm held out/, 10: /gives you the basket instead, as the half of her worth carrying/ };
+      const YW = { 8: /warm on your ribs/, 9: /At your ears she wins/, 10: /bites your shoulder through the coat/ };
+      const YP = { 8: /white is for prey that has given up/, 9: /the uses she has for a man your height/, 10: /what you taste of/ };
+      const YB = { 8: /The herb girl mends it while you sleep/, 9: /The herb girl is easier/, 10: /The herb girl carries mint on her/ };
+      const bad = [];
+      for (const n of [8, 9, 10]) {
+          for (const [m, y] of [[0, 0], [80, 80], [80, 0], [0, 80]]) {
+              const mt = talk('talk_mei', n, { m, y }); const yt = talk('talk_ya', n, { m, y });
+              if (MW[n].test(mt) !== (m >= 72) || MP[n].test(mt) === (m >= 72)) bad.push(`mei ${n} ${m}/${y}`);
+              if (YW[n].test(yt) !== (y >= 72) || YP[n].test(yt) === (y >= 72) || YB[n].test(yt) !== (m >= 72 && y >= 72) || (!(m >= 72 && y >= 72) && /herb girl/.test(yt))) bad.push(`ya ${n} ${m}/${y}`);
+          }
+      }
+      assert(!bad.length, `${T} (TK, RV1 TG-C2): every new beat's branches on the right woman (${bad.join(', ')})`); }
+    // Ya away (the Ashen Hills by day, story day 4 on, before her return): Mei Lin's fourth names no Ya, nor anything of hers, and the haze has her in it;
+    // with Ya there, or outside the away state (day 3, the Root Road, the Drowned Wood, the evening), she bows to a rock (RV1 TG-T2, TG-C5)
+    { const away = talk('talk_mei', 9, { region: 'ah', day: 4 });
+      const here = [talk('talk_mei', 9, { region: 'ah', day: 4, flags: { ya_off_done: true } }), talk('talk_mei', 9, { region: 'ah', day: 3 }), talk('talk_mei', 9, { region: 'rr', day: 4 }), talk('talk_mei', 9, { region: 'dw', day: 4 })];
+      assert(!/\bYa\b|huntress|spear|wolf|wild girl|barefoot/i.test(away) && /She looks at the haze, where somebody is no doubt bowing to nothing at all and doing it badly, and says the lesson goes better with a worse pupil in it\.$/m.test(away.split('\n\n')[0]) && here.every((t) => /Ya, who has been listening, bows to a rock at all three depths and then kicks it\./.test(t)), `${T} (TK, RV1 L3): the fourth settled text's Ya-away version only while Ya is away (${away.split('\n\n')[0].slice(-90)})`); }
+    // place-neutral and no day words: the new texts stand on the Root Road, in the Drowned Wood and the Ashen Hills on any day and hour (RV1 TG-T3)
+    { const bad = [];
+      for (const id of ['talk_mei', 'talk_ya']) for (let n = 8; n < 11; n++) for (const [m, y] of [[0, 0], [80, 80]]) {
+          const t = talk(id, n, { m, y, flags: { ya_off_done: true } }).replace('bows to a rock', ''); // the rock: as the old B's "path" (T L4, kept)
+          if (/\b(trees?|roots?|forest|water|haze|ash(en)?|ridges?|marsh|raft|trunks?|stream|pool|mud|hills?|slope|cinders?|today|tonight|tomorrow|morning|evening|this morning|at dusk|dawn)\b/i.test(t)) bad.push(`${id}:${n}`);
+      }
+      assert(!bad.length, `${T} (TK): the new talks name no place and no day (${bad.join(', ')})`); }
+    // RV1 (T M1): Mei Lin's new plain branches don't end on the look-round for Ashfall (the quiet walk and A keep theirs); Ya's beat 10 doesn't take the arm (T L1)
+    { const plain = [8, 9, 10].map((n) => talk('talk_mei', n).split('\n\n').pop());
+      assert(plain.every((t) => !/behind|over her shoulder|looks? (all )?round|aunt|Ashfall|into the basket/.test(t)) && !/\barm\b/.test(talk('talk_ya', 10, { y: 80 }).split('\n\n')[1]), `${T} (RV1 RT): no look-round in the new plain branches, no arm in Ya's warm one at beat 10`); }
+    // Claude's cuts stay cut (RV1 TG-T1, TG-C3: the 7 of D1, the 2 of RV1)
+    { const all = [8, 9, 10].flatMap((n) => [[0, 0], [80, 80]].flatMap(([m, y]) => [talk('talk_mei', n, { m, y }), talk('talk_mei', n, { m, y, region: 'ah', day: 4 }), talk('talk_ya', n, { m, y })])).join('\n');
+      const gone = ['claps a hand over her mouth', 'like a snare', 'what she would do with', 'has made up her mind', 'The finger stays where it is', 'has ruled', 'reached a verdict', 'hard enough to spoil', 'smells of mint'].filter((w) => all.includes(w));
+      const kept = ['She leaves the finger there until you have both noticed it', 'watching your face as she watches a trail', 'Mei Lin informs you that you bow', 'Ya has taken against your coat', 'She laughs so hard that she spoils the limp', 'The herb girl carries mint on her'].filter((w) => !all.includes(w));
+      assert(!gone.length && !kept.length, `${T} (RV1 TG-T1): Claude's cuts in place (back: ${gone.join(', ')}; missing: ${kept.join(', ')})`); }
+    // the memory lines: beats 8–10 keep the pool (no own line), as the settled texts
+    { const RM = await import('../js/story/remember.js'); const g = ensureBars(newGame(99620, { closed: true, cal: C.LONG_CAL })); g.flags.mei_talks = 8; g.flags.ya_talks = 9;
+      assert(RM.sceneMemory(g, 'talk_mei') === null && RM.sceneMemory(g, 'talk_ya') === null, `${T} (TK): the new settled texts keep the general memory pool`); }
+    // CWx: village_night's third quiet text carries the overheard line in all three forms; the first two don't
+    { const bad = [];
+      for (const f of ['cat', 'tiger', 'human']) {
+          const g = ensureBars(newGame(99630, { closed: true, cal: C.LONG_CAL })); g.flags.vday = 1; g.yuki.realm = 9; g.yuki.form = f; const out = [];
+          for (let d = 0; d < 4; d++) { g.minutes = (30 + d) * D + 22 * 60; noteDay(g, 'village_night:quiet'); out.push(tx(g, 'village_night')); }
+          const re = /nothing further to say tonight\. The house below does: through the floor Mei Lin's mother tells her daughter, gravely, that a guest who asks twice what is in the pot will be handed the ladle and watched\. /;
+          if (!re.test(out[2]) || re.test(out[0]) || re.test(out[1]) || re.test(out[3])) bad.push(f);
+      }
+      assert(!bad.length, `${T} (CWx): village_night's third quiet text carries the cooking line, all three forms (${bad.join(', ')})`); }
+    // CWx, RV1 CM-b: the camp's first night with the fire lit and food on hand: Yuki's line by form, whole; not without food, not without the fire,
+    // not on the second or third night; gone from the screen after "Cook and eat" eats the last of it (TG-T4, TG-T6, TG-C4)
+    { const L = { cat: ' *Forty years of your dumplings,* Yuki sends, *and now a forest with nothing in it. Cook whatever it is. I shall complain, and then I shall eat it all.*', tiger: ' *At home you fed everyone who stood still,* Yuki sends. *Here there is only me, and more of me than there was. Cook accordingly.*', human: ' "You\'re looking at that fire and missing your kitchen," Yuki says. "So am I. Nobody out here to feed but me. I\'ll try to be a crowd."' };
+      const mk = (fd, fire, hares, f) => { const g = ensureBars(newGame(99640, { closed: true })); g.flags.forest_day = fd; g.flags.fire = fire; g.inventory.hare_raw = hares; g.yuki.realm = { cat: 0, tiger: 2, human: 7 }[f]; g.yuki.form = f; g.scene = 'camp'; return g; };
+      const bad = [];
+      for (const [f, line] of Object.entries(L)) {
+          const has = (t) => /Yuki (sends|says)/.test(t.split('\n\n').slice(1).join('\n\n'));
+          if (!tx(mk(1, true, 1, f), 'camp').includes(`The fire crackles and spits, pleased with itself.${line}`)) bad.push(`${f} shown`);
+          if (has(tx(mk(1, true, 0, f), 'camp')) || has(tx(mk(1, false, 1, f), 'camp')) || has(tx(mk(2, true, 1, f), 'camp')) || has(tx(mk(3, true, 1, f), 'camp'))) bad.push(`${f} elsewhere`);
+          const g = mk(1, true, 1, f); const cook = SCENES.camp.choices.find((c) => c.text === 'Cook and eat.'); cook.do(g);
+          if (has(tx(g, 'camp'))) bad.push(`${f} after the meal`);
+      }
+      assert(!bad.length, `${T} (CWx, RV1 CM-b): the camp's first night by the fire, with food, Yuki's cooking line by form only there (${bad.join(', ')})`); }
 }
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

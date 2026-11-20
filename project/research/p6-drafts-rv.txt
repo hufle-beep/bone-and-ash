@@ -1,0 +1,11 @@
+talk_mei:3:plain | She gives them back at arm's length, held by one earpiece, as one returns a beetle to its owner. Then she watches you put them on, sees your eyes change size, and laughs until the basket has to be steadied with her free hand.
+talk_mei:4:plain | You try the money depth on her, as near as you can judge it. She laughs outright, names a sum, and keeps her palm held out until you have searched every pocket of the coat.
+talk_mei:5:plain | You say you could carry her. She laughs hard enough to spoil the limp she isn't having, and gives you the basket instead, as the half of her worth carrying.
+talk_ya:5:like | She stops you with a hand flat on your chest, sniffs your neck from collar to ear, and bites the ear, gently for her. Not food, she decides; food does not stand still for it. She stays near enough to bite again, in case she is wrong.
+talk_ya:3 | Ya has taken against your coat, and has decided the coat ought to hear about it.
+talk_mei:4:away:last | She looks at the haze, where somebody is no doubt bowing to nothing at all and doing it badly, and says the lesson goes better with a worse pupil in it.
+# notes
+- The three Mei Lin plain branches end on an act or a remark of hers (steadying the basket; her hand out for the money; handing him the basket). None looks round, so none clashes with "she laughs without looking behind her first".
+- talk_mei:4:plain and 5:plain reword the openers ("You bow to her at the money depth." / "You offer to carry her.") to keep clear of the old five-word runs; restore the old openers if the matter should read identically.
+- talk_ya:5:like: a hand on his chest and a bite on the ear, no arm. Text 4's warm branch also ends at his ear (the blush); swap "the ear" for "your shoulder, through the coat" if two ears in the cycle is one too many.
+- talk_mei:4:away:last keeps "haze" on purpose (this version shows in the Ashen Hills only) and has someone in it, unnamed.

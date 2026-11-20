@@ -29,6 +29,8 @@
 
 - **A presence rule (who is there; v0.11.231 T H1, M1, M2, C M1, M2, TG-C1, TG-C5):** walk every screen reachable from the cards that stay open while someone is away (the other woman's talk, a scout scene, the door scenes and what follows them, the same day and a later one), over several real days of one game per state (not a fresh game a day: that reads only day 1), in each form; count heads ("the two / three / four of you"), not only names; and the order the rule now forces (a scene that assumed the old order).
 
+- **A cycle's branch formula (v0.11.233 T M1):** count the endings of every plain and warm branch across a whole cycle of texts, and the result pools drawn under them; a brief that prescribes a branch's beat makes every text end on it. And a line on a hub screen (which never folds) against every state that redraws it: the food on hand, the screen after the meal (v0.11.233 T M2, C M1).
+
 ## Reachability (what the player never sees)
 - Texts behind a day record, an hour or a flag a real game never reaches (part 4 M1, M2; part 5 M1, M2).
 - Emptied menus and dead texts; a save resting in an emptied menu (part 9 C2, C3).
