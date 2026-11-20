@@ -151,8 +151,53 @@ Mei Lin laughs into her sleeve, where the lane will not hear it.`, `Tonight the 
 
 "I can manage most of that."
 
-"The last part is where you fail." Her fingers stay in your hair somewhat past the end of the lesson. Then she pulls the cork with her teeth and drinks before you do, which is not the correct form, and she knows it.`] };
-const ROOF_STAY = { 1: [`The cold wins, as it does. On the ladder she adds a late entry: the dyer has you down as a tax spy, and has hidden his good vat. You promise to leave the vat alone. She says goodnight to the rungs, and you take the fox spirit up to the loft.`, `She sits up only when the thatch has gone cold under you both. "Tell them it was well played," she says, with a small bow to your arm, and is down the ladder before you can decide whether she was joking. You are in the herb loft and still have not settled it.`], 2: [`The jar goes down the ladder lighter, and she a little less steady, which she blames on the rungs. At the bottom she asks how long the soup takes, exactly, and repeats the answer under her breath as she goes. You reach the loft composing a shopping list for a village with no shops.`, `On the way down she has you bow once more, to the water butt, and passes you, narrowly. "Mute," she reminds you outside her mother's room, a finger laid to her own lips. You carry your silence up into the loft and practise it on the ginseng.`] };
+"The last part is where you fail." Her fingers stay in your hair somewhat past the end of the lesson. Then she pulls the cork with her teeth and drinks before you do, which is not the correct form, and she knows it.`, // v0.11.234 (P7-A, RN): three more for the later nights, a cycle of six (Fable's runs RM, RM2)
+`Mei Lin bets you that the lamp of the widow by the well will go out before the dyer's.
+
+"Stakes?"
+
+"The loser carries the water in the morning. Both buckets." She settles on her elbows to watch the lane. "The widow sleeps early. She likes to be up before anyone else's faults are."
+
+"And the dyer?"
+
+"Owes the miller. He sits up doing sums until they come out differently."
+
+You back the dyer's lamp to go first, on principle. Both burn on. A shutter creaks, a basin is emptied into the lane, and the widow's window goes dark.
+
+"You've watched this lane before."
+
+"Every night since I could climb." She says it kindly, which is worse. "It was never a bet. It was a lesson."`,
+`Mei Lin examines you on the contents of the herb loft, in the dark, by smell alone.
+
+She passes the sprigs across one at a time. You get the mugwort. You get the dried orange peel, which she says a child would. The third is bitter and faintly of cellars, and you name the mould growing on it instead, with its habits.
+
+"That is a fault in the stock," she says. "You are not supposed to praise it."
+
+"It's doing very well."
+
+"It will be out by morning." She takes the sprig back and sniffs it herself, frowning. "Which shelf?"
+
+"Third. By the window. It likes the damp."
+
+"So do you, it seems. You sleep there."`,
+`Mei Lin's mother has three rules about the lodger, and Mei Lin recites them to you from under the blanket she brought up the ladder.
+
+"One. He is not to be fed between meals; it encourages him." She passes you a roasted chestnut out of her sleeve.
+
+"Two. He is not to be asked about his country. The answers keep a household awake."
+
+"What do you want to know?"
+
+"Whether it has roofs a person may sit on."
+
+"Several."
+
+"Good." She shakes out the blanket until it covers your shoulder as well as hers, and looks hard at the lane while she does it. "Three concerns distance."
+
+"How much distance?"
+
+"She gave no figure. I have always thought that careless of her."`] };
+const ROOF_STAY = { 1: [`The cold wins, as it does. On the ladder she adds a late entry: the dyer has you down as a tax spy, and has hidden his good vat. You promise to leave the vat alone. She says goodnight to the rungs, and you take the fox spirit up to the loft.`, `She sits up only when the thatch has gone cold under you both. "Tell them it was well played," she says, with a small bow to your arm, and is down the ladder before you can decide whether she was joking. You are in the herb loft and still have not settled it.`], 2: [`The jar goes down the ladder lighter, and she a little less steady, which she blames on the rungs. At the bottom she asks how long the soup takes, exactly, and repeats the answer under her breath as she goes. You reach the loft composing a shopping list for a village with no shops.`, `On the way down she has you bow once more, to the water butt, and passes you, narrowly. "Mute," she reminds you outside her mother's room, a finger laid to her own lips. You carry your silence up into the loft and practise it on the ginseng.`, `The dyer's lamp outlasts you both, and his sums come out no better for the extra oil. On the ladder she tells you where the yoke hangs and which bucket leaks, as a kindness to the defeated. You go in like a man with water to carry.`, `She runs out of sprigs before you run out of wrong answers. You have failed four, every one a plain leaf, and she goes down the ladder naming them at you like a debt. You follow her in, owing condolences to the third shelf.`, `The chestnuts run out before the rules do. There is a fourth, about the ladder after dark, and you break it together, rung by rung. At the bottom she folds the blanket with great correctness, as evidence. You reach the door smelling of chestnut smoke, which is also evidence.`] }; // v0.11.234 (P7-A, RN): the later nights' results 4–6 (RV1 RT: Fable's run RT, T M1: they stop at the door)
 
 export const ASHFALL = {
     /* ---------- suppers (Days 4 and 5) ---------- */
@@ -245,7 +290,7 @@ She gives the patch of dark her full and serious attention. "It looks cold."
 She tells you what the tribute costs, in numbers: so many baskets of grass, so many sacks of millet, so many children tested for roots. Which families hid their children last year, and which of those were caught. Her voice is perfectly level through all of it. Her hands are not.
 
 After that she says nothing until the jar is nearly empty. Your forearm has been playing something slow and sad, very low, all evening. "Leave it," she says, when you reach to stop it. "It sounds like you do when you think nobody is watching." Then she lets her shoulder rest against yours, and neither of you mentions it.`), ...ROOF_NEW[vday(g) === 1 ? 1 : 2]]),
-        choices: [{ text: 'Stay until the cold drives you in.', do: (g) => { bumpRel(g, 'Mei Lin', 2, 3); const ri = dayIndex(g, `s:${roofKey(g)}`) % 3; return [ri ? ROOF_STAY[vday(g) === 1 ? 1 : 2][ri - 1] : vday(g) === 1 ? `You stay until your fingers stop working and she has run out of ways to hide that she is shivering. "Tell me about the trees again," she says on the way down, and you do, as far as the loft ladder. She does not say it sounds insane. She says goodnight as if the word cost her something.` : `Neither of you mentions it on the way down, either. At the foot of the ladder she takes the empty jar out of your hand, keeps hold of your wrist a little longer than the jar requires, and goes to her mother's room without looking back. You climb to the loft with one shoulder still warm.`]; }, to: 'village_night' }],
+        choices: [{ text: 'Stay until the cold drives you in.', do: (g) => { bumpRel(g, 'Mei Lin', 2, 3); const ri = dayIndex(g, `s:${roofKey(g)}`) % (ROOF_NEW[vday(g) === 1 ? 1 : 2].length + 1); /* v0.11.234 (P7-A, RN): the later nights a cycle of six; RV1 (CL; C L3): the cycle's length from its own list (the old text + ROOF_NEW's), so the line after keeps step with seqText */ return [ri ? ROOF_STAY[vday(g) === 1 ? 1 : 2][ri - 1] : vday(g) === 1 ? `You stay until your fingers stop working and she has run out of ways to hide that she is shivering. "Tell me about the trees again," she says on the way down, and you do, as far as the loft ladder. She does not say it sounds insane. She says goodnight as if the word cost her something.` : `Neither of you mentions it on the way down, either. At the foot of the ladder she takes the empty jar out of your hand, keeps hold of your wrist a little longer than the jar requires, and goes to her mother's room without looking back. You climb to the loft with one shoulder still warm.`]; }, to: 'village_night' }],
     },
 
     /* ---------- the night: quiet, or Gao Feng's doing (night 5) ---------- */

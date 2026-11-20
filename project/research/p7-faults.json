@@ -1,0 +1,12 @@
+[
+ { "id": "F1", "file": "js/story/ashfall.js", "find": "% (vday(g) === 1 ? 3 : 6); /* v0.11.234", "replace": "% 3; /* v0.11.234", "note": "the roof's line after back to a cycle of three (texts 4-6 get the old lines)" },
+ { "id": "F2", "file": "js/story/ashfall.js", "find": "% (vday(g) === 1 ? 3 : 6); /* v0.11.234", "replace": "% 6; /* v0.11.234", "note": "the first week's lines on a cycle of six (its 4th night a missing line)" },
+ { "id": "F3", "file": "js/story/act1_blackroot.js", "find": "export const cookedToday = (g) => !daily('bl_cook')(g);", "replace": "export const cookedToday = (g) => daily('bl_cook')(g);", "note": "the cooked test inverted" },
+ { "id": "F4", "file": "js/story/act1_blackroot.js", "find": "const ahFire = (t) => (g) => `${ahPart(t.open, g)}", "replace": "const ahFire = (t) => (g) => `${t.open}", "note": "AH 2's open printed as a function" },
+ { "id": "F5", "file": "js/story/act1_blackroot.js", "find": "since ${noCook(g, 'the stew', 'the pickles were counted')}", "replace": "since ${noCook(g, 'the stew', 'the stew')}", "note": "AH 3 mei keeps the stew on a no-cook day" },
+ { "id": "F6", "file": "js/story/act1_blackroot.js", "find": "const AH2_POT = (g) => noCook(g, 'you the pot, which has never been so clean.', 'you the fire, which was managing perfectly well alone.');", "replace": "const AH2_POT = (g) => noCook(g, 'you the fire, which was managing perfectly well alone.', 'you the pot, which has never been so clean.');", "note": "the pot's two versions swapped" },
+ { "id": "F7", "file": "js/core/tasks.js", "find": "if (c.show.dailyKey && !c.show.away?.(g) && (!c.form || hasForm(g, c.form))) status = 'tomorrow';", "replace": "if (c.show.dailyKey && (!c.form || hasForm(g, c.form))) status = 'tomorrow';", "note": "TL undone: away cards back tomorrow" },
+ { "id": "F8", "file": "js/core/tasks.js", "find": "if (doneToday) { if (c.show?.away?.(g)) return; status = 'tomorrow'; }", "replace": "if (doneToday) { status = 'tomorrow'; }", "note": "TL: the done-menu path still shows her card as tomorrow" },
+ { "id": "F9", "file": "js/story/act1_blackroot.js", "find": "{ dailyKey: key }, c.show.away ? { away: c.show.away } : {})", "replace": "{ dailyKey: key })", "note": "onceADay drops the away test (the cinderberries)" },
+ { "id": "F10", "file": "js/story/act1_blackroot.js", "find": "{ dailyKey: 'bt_ya', away: yaOut });", "replace": "{ dailyKey: 'bt_ya', away: meiOut });", "note": "the spar's away test on the wrong woman" }
+]

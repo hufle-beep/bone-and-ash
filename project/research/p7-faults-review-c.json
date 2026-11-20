@@ -1,0 +1,8 @@
+[
+ { "id": "C1", "file": "js/story/act1_blackroot.js", "find": "export const cookedToday = (g) => !daily('bl_cook')(g);", "replace": "export const cookedToday = (g) => !!g.flags[`bl_cook@${Math.floor(g.minutes / 1440) + 1}`];", "note": "cookedToday by the calendar day, not wakeDay: a fireside after midnight on a day he cooked reads the no-cook text" },
+ { "id": "C2", "file": "js/core/tasks.js", "find": "if (doneToday) { if (c.show?.away?.(g)) return;", "replace": "if (doneToday) { if (c.show?.away) return;", "note": "done-menu path: the cinderberries hidden whenever the Forage is done, even with Mei Lin there (no 'tomorrow')" },
+ { "id": "C3", "file": "js/story/ashfall.js", "find": "She says it into her sleeve, laughing.", "replace": "She says it into her sleeve, shaking.", "note": "Claude's cut on roof text 4 reverted (shaking)" },
+ { "id": "C4", "file": "js/story/act1_blackroot.js", "find": "and looks very pleased not to.", "replace": "and looks pleased.", "note": "a no-cook text (RR2_CLOSE) changed past its pinned first sentence" },
+ { "id": "C5", "file": "js/story/ashfall.js", "find": "wish the third shelf goodnight", "replace": "wish the shelf goodnight", "note": "roof line after 5 changed past its first words (texts and lines 4-6 not pinned)" },
+ { "id": "C6", "file": "js/story/act1_blackroot.js", "find": "do: (g) => { markDaily(g, 'bl_cook');", "replace": "do: (g) => { markDaily(g, 'bl_cooked');", "note": "the camp's real Cook and eat. marks another key: every fireside reads no-cook in play (the ML tests mark bl_cook by hand)" }
+]

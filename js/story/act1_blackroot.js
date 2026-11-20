@@ -11,7 +11,7 @@ export const ROOT_SAT = 12;
 export const rootGain = (g) => Math.round((ROOT_SAT / satDiv(g)) * 10) / 10;
 import { hasForm } from '../core/forms.js';
 import { choiceOpen, gives } from '../core/story.js'; // v0.11.161 (PO2): `optionLeft`; RV (GV, Fable's H1): the wrapper carries the card's items
-import { daily, markDaily, eatBest, pantry, foodCount, hour, byForm, byDay, dayReply } from './common.js';
+import { daily, markDaily, eatBest, pantry, foodCount, hour, byForm, byDay, dayReply, dayKey } from './common.js';
 import { noteDay, DAY_REPLIES, coilReply, dayIndex } from '../core/lines.js'; // v0.11.231 (P4-2, AT): dayIndex
 import { storyDay, calMinutes, blSpan, longCal } from '../core/calendar.js'; // v0.11.224 (TX2, TS6): longCal // v0.11.222 (owner pick J2, TS9): blSpan, the camps' days a story day; // v0.11.203 (owner pick T1, TS1): the long calendar (Day 11 is 65, Day 16 is 70) // v0.11.166 (RW1): coilReply, the flirts by Coil
 import { talkBeat } from './remember.js'; // v0.11.184 (S1)
@@ -377,7 +377,7 @@ export const HUNT_AGAIN = {
     dw: `The pool has gone flat again. Nothing long moves under it; the serpent's part of the day is over, however it's being counted. Ya gives the surface one last hard look and turns her back on it, which in her is a formal declaration. Overhead the marsh fowl have resettled, having learnt nothing from any of it.`,
     ah: `The haze over the ridge has nothing in it now. However the business with the hawks came out, they are not up there, and Ya has stopped looking up, which she does not do lightly. "An empty sky is a door left open," she says. "Small things come out." Down in the gullies, small things are doing exactly that.`,
 };
-export const onceADay = (key, c) => Object.defineProperty({ ...c, show: c.show ? Object.assign((g) => daily(key)(g) && c.show(g), { dailyKey: key }) : daily(key), // RV1 (L1): the day key kept, so a card shows as tomorrow
+export const onceADay = (key, c) => Object.defineProperty({ ...c, show: c.show ? Object.assign((g) => daily(key)(g) && c.show(g), { dailyKey: key }, c.show.away ? { away: c.show.away } : {}) : daily(key), // RV1 (L1): the day key kept, so a card shows as tomorrow; v0.11.234 (P7-A, TL): and its `away`
     do: (g, r) => { markDaily(g, key); return c.do ? (c.do(g, r) || []) : []; },
     ...(c.failDo ? { failDo: (g, r) => { markDaily(g, key); return c.failDo(g, r) || []; } } : {}) }, 'gives', { enumerable: true, get: () => gives(c) }); // RV (GV, Fable's H1): the items read from the card's own `do`, when asked (story.js's `gives`)
 /** v0.11.161 (PO2, FG + HO): the Hunt card and the Forage entry are open while their scene would offer an option today (each once a
@@ -456,6 +456,13 @@ const onlyMei = (g) => likesMei(g) && !likesYa(g);
 
 // v0.11.232 (owner picks P5-B, D1; V3b): the Root Road's and the Ashen Hills' firesides three texts each (by the region's day key; the first
 // the old text). The Ashen Hills' new texts keep the old one's three parts: an opening, the line for whom James is close to, a closing. Fable's (run R), Claude's cuts.
+/** v0.11.234 (P7-A, ML; T L6): did he cook today ("Cook and eat." at the camp)? The firesides' meal lines have a version for a day he did not (Fable's run RM).
+ *  RV1 (CK; T L4, C L1): a raw meal (nothing with a cooked form) marks the day `'raw'`, not `true`: the card still closes (any truthy mark), the fireside reads the no-cook lines.
+ *  The same flag key, a new value only; an old save's `true` reads as cooked, as before. */
+export const cookedToday = (g) => g.flags[`bl_cook@${dayKey(g)}`] === true;
+const noCook = (g, cooked, not) => (cookedToday(g) ? cooked : not);
+const AH2_POT = (g) => noCook(g, 'you the pot, which has never been so clean.', 'you the fire, which was managing perfectly well alone.'); // v0.11.234 (P7-A, ML, D1's extra)
+const RR2_CLOSE = (g) => noCook(g, `"He stirs it as if it could hear him," Ya tells the fire, as a further charge. Mei Lin, for once, lets her have the last word.`, `"She put them on my kill while I was skinning it," Ya tells the fire, as the heart of the matter. Mei Lin does not deny it, and looks very pleased not to.`);
 const FS_RR = [(g) => byForm(g, `Supper is over, and Ya has opened proceedings against the leaves in it.
 
 "Wolves do not put leaves in meat," she says.
@@ -470,7 +477,7 @@ const FS_RR = [(g) => byForm(g, `Supper is over, and Ya has opened proceedings a
 
 *Four times,* Yuki observes, from your shoulder. *I counted. I had five.*
 
-"He stirs it as if it could hear him," Ya tells the fire, as a further charge. Mei Lin, for once, lets her have the last word.`, `Supper is over, and Ya has opened proceedings against the leaves in it.
+${RR2_CLOSE(g)}`, `Supper is over, and Ya has opened proceedings against the leaves in it.
 
 "Wolves do not put leaves in meat," she says.
 
@@ -484,7 +491,7 @@ const FS_RR = [(g) => byForm(g, `Supper is over, and Ya has opened proceedings a
 
 *Four times,* Yuki sends, from the dark behind you, most of which is her. *I counted. I had the rest of the animal.*
 
-"He stirs it as if it could hear him," Ya tells the fire, as a further charge. Mei Lin, for once, lets her have the last word.`, `Supper is over, and Ya has opened proceedings against the leaves in it.
+${RR2_CLOSE(g)}`, `Supper is over, and Ya has opened proceedings against the leaves in it.
 
 "Wolves do not put leaves in meat," she says.
 
@@ -498,7 +505,7 @@ const FS_RR = [(g) => byForm(g, `Supper is over, and Ya has opened proceedings a
 
 "Four times," says Yuki, stretched out along the log with her eyes shut. "I counted. I had five."
 
-"He stirs it as if it could hear him," Ya tells the fire, as a further charge. Mei Lin, for once, lets her have the last word.`), `Ya has demanded a lesson in chopsticks, on the grounds that anything Mei Lin can do, a wolf can do faster.
+${RR2_CLOSE(g)}`), (g) => `Ya has demanded a lesson in chopsticks, on the grounds that anything Mei Lin can do, a wolf can do faster.
 
 "Not a fist," says Mei Lin. "You are not strangling them."
 
@@ -508,16 +515,18 @@ const FS_RR = [(g) => byForm(g, `Supper is over, and Ya has opened proceedings a
 
 "It is food and it is in the air. Where is the fault?"
 
-Mei Lin reaches over and sets Ya's fingers, one by one, with the patience she keeps for sick children and for you. Ya permits this, rigid, as she would the drawing of a splinter. The mushroom drops into the fire. Both look round at you, since you cooked it and are therefore to blame.
+Mei Lin reaches over and sets Ya's fingers, one by one, with the patience she keeps for sick children and for you. Ya permits this, rigid, as she would the drawing of a splinter. The mushroom drops into the fire. ${noCook(g, `Both look round at you, since you cooked it and are therefore to blame.
 
-You pass over another. There are always more; you have learned to cook for an argument.`]; // RV1 (T M1, L2): text 2 after the meal (Fable's run RV)
+You pass over another. There are always more; you have learned to cook for an argument.`, `Both turn to you, who only picked it and must therefore answer for it.
+
+You fetch another from Mei Lin's pan. You gathered twice what supper needed, having met these two before.`)}`]; // RV1 (T M1, L2): text 2 after the meal (Fable's run RV); v0.11.234 (P7-A, ML): its end on a day he did not cook
 const FS_AH_T = { // RV1 (T M2, M3, L1, L2): ah:2's close and `none` (by form), ah:3's `both`, `mei`, `none` (Fable's run RV)
-    2: { open: `The ash burns blue up here, and it lends your stew a colour that nobody mentions. The dead tree has the whole north of the sky, so everyone has chosen to sit facing the pot.`, both: `Ya eats with her bare feet in your lap and her back against Mei Lin, who is combing ash out of Ya's hair with her fingers and scolding her for having any.`, ya: `Ya eats with her bare feet in your lap, daring the hills to object. Across the fire Mei Lin sorts her herb pouch by touch and smiles at the pouch.`, mei: `Mei Lin has tucked herself under your arm with her bowl, as though she had been issued there. Across the fire Ya whets the spear and grins at the pair of you between strokes.`, none: (g) => byForm(g, `Everyone has found a thing to tend: Mei Lin her herbs, Ya the edge of the spear, Yuki one white paw, you the pot, which has never been so clean.`, `Everyone has found a thing to tend: Mei Lin her herbs, Ya the edge of the spear, Yuki one paw as broad as the pot lid, you the pot, which has never been so clean.`, `Everyone has found a thing to tend: Mei Lin her herbs, Ya the edge of the spear, Yuki the end of her own tail, you the pot, which has never been so clean.`), close: `"Blue," says Ya, at last. "I have eaten blue."
+    2: { open: (g) => noCook(g, `The ash burns blue up here, and it lends your stew a colour that nobody mentions. The dead tree has the whole north of the sky, so everyone has chosen to sit facing the pot.`, `Up here the ash burns blue, and it has turned Mei Lin's rice cakes and the meat on Ya's stick a colour that nobody mentions. The dead tree owns the north of the sky, so all of you sit with your backs to it and watch the fire you laid instead.`) /* v0.11.234 (P7-A, ML) */, both: `Ya eats with her bare feet in your lap and her back against Mei Lin, who is combing ash out of Ya's hair with her fingers and scolding her for having any.`, ya: `Ya eats with her bare feet in your lap, daring the hills to object. Across the fire Mei Lin sorts her herb pouch by touch and smiles at the pouch.`, mei: `Mei Lin has tucked herself under your arm with her bowl, as though she had been issued there. Across the fire Ya whets the spear and grins at the pair of you between strokes.`, none: (g) => byForm(g, `Everyone has found a thing to tend: Mei Lin her herbs, Ya the edge of the spear, Yuki one white paw, ${AH2_POT(g)}`, `Everyone has found a thing to tend: Mei Lin her herbs, Ya the edge of the spear, Yuki one paw as broad as the pot lid, ${AH2_POT(g)}`, `Everyone has found a thing to tend: Mei Lin her herbs, Ya the edge of the spear, Yuki the end of her own tail, ${AH2_POT(g)}`), close: `"Blue," says Ya, at last. "I have eaten blue."
 
 "It does no harm," says Mei Lin. "I tested it twice."
 
 "Who spoke of harm? Scholar. Can you do red?"` },
-    3: { open: `Blue embers, and a wind off the dead tree that smells of old rain. Nobody has looked straight at it all evening, which takes some doing with a thing that size.`, both: `Mei Lin has given up sitting straight and leans propped between you and Ya like a scroll between bookends, eyes half shut, listening. Ya has taken to speaking quietly on her account, and looks astonished at herself.`, ya: `Ya leans on you with her full weight, which is how she tells you she is not afraid. Across the fire Mei Lin grinds a bitter root in her little mortar, as if the hills wanted medicine.`, mei: `Mei Lin's hand has been inside your sleeve since the stew, two fingers on your wrist as she'd take a pulse. Across the fire Ya restrings her necklace of teeth, holding each one up to the embers to recall whose it was.`, none: `Ya is binding a spare spearhead to its shaft with gut, and Mei Lin corrects the knot without looking up. You ladle out what is left in fair shares and are thanked by nobody, which among friends is thanks.`, close: `"Scholar. What does a tree that size eat?"
+    3: { open: `Blue embers, and a wind off the dead tree that smells of old rain. Nobody has looked straight at it all evening, which takes some doing with a thing that size.`, both: `Mei Lin has given up sitting straight and leans propped between you and Ya like a scroll between bookends, eyes half shut, listening. Ya has taken to speaking quietly on her account, and looks astonished at herself.`, ya: `Ya leans on you with her full weight, which is how she tells you she is not afraid. Across the fire Mei Lin grinds a bitter root in her little mortar, as if the hills wanted medicine.`, mei: (g) => `Mei Lin's hand has been inside your sleeve since ${noCook(g, 'the stew', 'the second rice cake') /* RV1 (RT; T L3) */}, two fingers on your wrist as she'd take a pulse. Across the fire Ya restrings her necklace of teeth, holding each one up to the embers to recall whose it was.`, none: (g) => `Ya is binding a spare spearhead to its shaft with gut, and Mei Lin corrects the knot without looking up. ${noCook(g, 'You ladle out what is left in fair shares and are thanked by nobody, which among friends is thanks.', 'The last rice cake comes to you to be divided, and you cut it into shares so exact that nobody can object, so nobody speaks, and you take the silence as praise.')}` /* v0.11.234 (P7-A, ML; D1's extra) */, close: `"Scholar. What does a tree that size eat?"
 
 "Light, while it lived."
 
@@ -526,7 +535,7 @@ const FS_AH_T = { // RV1 (T M2, M3, L1, L2): ah:2's close and `none` (by form), 
 Mei Lin answers for you. "Now it doesn't. Eat your supper, Ya."` },
 };
 const ahPart = (v, g) => (typeof v === 'function' ? v(g) : v);
-const ahFire = (t) => (g) => `${t.open}\n\n${ahPart(both(g) ? t.both : onlyYa(g) ? t.ya : onlyMei(g) ? t.mei : t.none, g)}\n\n${t.close}`;
+const ahFire = (t) => (g) => `${ahPart(t.open, g)}\n\n${ahPart(both(g) ? t.both : onlyYa(g) ? t.ya : onlyMei(g) ? t.mei : t.none, g)}\n\n${t.close}`;
 const FS_AH = [ahFire(FS_AH_T[2]), ahFire(FS_AH_T[3])];
 /** Move the clock forward to hour h today (time passes: hunger, regen). */
 function toHour(g, h) {
@@ -581,7 +590,7 @@ const FIGHTS = ['wolves', 'drowned', 'serpent', 'hawks'];
 
 /* ---------------- shared hub choices ---------------- */
 /** v0.11.47 (owner 19:39, T1): any of bl_train's once-a-day drills left today (darts only once James can sing them). */
-const sparYa = Object.assign((g) => daily('bt_ya')(g) && !yaOut(g), { dailyKey: 'bt_ya' }); // v0.11.231 (P4-2, AG): not while Ya is away
+const sparYa = Object.assign((g) => daily('bt_ya')(g) && !yaOut(g), { dailyKey: 'bt_ya', away: yaOut }); // v0.11.231 (P4-2, AG): not while Ya is away; v0.11.234 (P7-A, TL): `away`, so task mode hides it then (no "back tomorrow")
 const trainLeft = (g) => sparYa(g) || daily('bt_yuki')(g) || daily('bt_needle')(g) || (daily('bt_dart')(g) && hasForm(g, 'dart'));
 function hubChoices(id) {
     return [
@@ -1128,7 +1137,7 @@ She doesn't mean a word. All of you can hear that she doesn't, and it helps nobo
         text: '',
         choices: [
             onceADay('ah_truffle', { text: 'Dig for the ash-truffles.', check: { skill: 'GU', dc: 5, bonus: () => 2 }, time: 60, do: (g) => { addItem(g, 'jade_bracket', 2); eat(g, 10); return [`+2 ash-truffles (as jade bracket), and one eaten on the spot: +10 satiety. ${DR_TRUFFLE(g)}`]; }, failDo: (g) => [awayText(g, `Ash, more ash, and one beetle. The beetle goes to Ya. She eats it live, with a crunch, holding Mei Lin's eye throughout. "Disgusting," says Mei Lin. "You're still looking." "I'm looking so I don't miss it when you *die*."`, AW.truffle_f)], to: 'ah_hub' }),
-            onceADay('ah_cinder', { text: 'Cinderberries with Mei Lin.', show: (g) => !meiOut(g) /* v0.11.231 (P4-2, AG) */, check: { skill: 'GU', dc: 3 }, time: 40, do: (g) => { addItem(g, 'crimson_berry', 6); (relToday(g, 'ah_cinder') && bumpRel(g, 'Mei Lin', 2, 2)); return [`+6 cinderberries (as needleberries). ${DR_CINDER(g)}`]; }, failDo: (g) => { addItem(g, 'crimson_berry', 2); return ['Thorns. +2 cinderberries.']; }, to: 'ah_hub' }),
+            onceADay('ah_cinder', { text: 'Cinderberries with Mei Lin.', show: Object.assign((g) => !meiOut(g), { away: meiOut }) /* v0.11.231 (P4-2, AG); v0.11.234 (P7-A, TL): `away` */, check: { skill: 'GU', dc: 3 }, time: 40, do: (g) => { addItem(g, 'crimson_berry', 6); (relToday(g, 'ah_cinder') && bumpRel(g, 'Mei Lin', 2, 2)); return [`+6 cinderberries (as needleberries). ${DR_CINDER(g)}`]; }, failDo: (g) => { addItem(g, 'crimson_berry', 2); return ['Thorns. +2 cinderberries.']; }, to: 'ah_hub' }),
             { text: 'Eat a fire-beetle. For science.', show: daily('ah_beetle'), do: (g) => { markDaily(g, 'ah_beetle'); eat(g, 6); bumpRel(g, 'Ya', 3, 3); return [`${DR_BEETLE(g)} +6 satiety. ${DR_BEETLE_AFTER(g)}`]; }, to: 'ah_hub' },
         ],
     },
@@ -1477,7 +1486,7 @@ ${likesMei(g) && likesYa(g) ? '"She looked at me today," she says, low. "The her
 
 ${pantry(g)}`,
         choices: [
-            { text: 'Cook and eat.', show: (g) => foodCount(g) > 0 && daily('bl_cook')(g), time: 30, do: (g) => { markDaily(g, 'bl_cook'); const out = eatBest(g, { fire: true }); return /, cooked\./.test(out[0] || '') ? [...out, DR_COOK(g)] : out; } /* RV1 (L4): the party's word only after a cooked meal */, to: 'bl_camp' },
+            { text: 'Cook and eat.', show: (g) => foodCount(g) > 0 && daily('bl_cook')(g), time: 30, do: (g) => { markDaily(g, 'bl_cook'); const out = eatBest(g, { fire: true }); if (/, cooked\./.test(out[0] || '')) return [...out, DR_COOK(g)]; g.flags[`bl_cook@${dayKey(g)}`] = 'raw'; return out; } /* v0.11.234 RV1 (CK): a raw meal marks the day 'raw' (cookedToday). RV1 (L4): the party's word only after a cooked meal */, to: 'bl_camp' },
             { text: 'Sing a ring of bone stakes around the camp.', show: Object.assign((g) => stakesDay(g) && blLastDay(g), { dailyKey: 'bl_stakes' }), /* v0.11.222 (RV2, SQ): only on the story's night (none comes on a quiet one) */ qi: 3, check: { skill: 'Convergence Use', dc: 4 }, time: 15, do: (g) => { markDaily(g, 'bl_stakes'); g.flags.bl_stakes_night = true; return [DR_STAKES(g)]; }, failDo: (g) => { markDaily(g, 'bl_stakes'); g.flags.bl_stakes_night = false; return ['The stakes come up soft. Ya knocks one flat with her foot.']; }, to: 'bl_camp' },
             { text: 'Sit by the fire with the others.', show: daily('bl_fire'), time: 20, to: 'bl_fireside' },
             { text: 'Sleep.', to: sleepTo },

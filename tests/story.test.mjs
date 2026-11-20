@@ -7580,21 +7580,22 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       assert(/^She is up in the herb loft/.test(t) && /^"Scream, then/.test(lab(g, 'fo_mei', 0)) && /^Help her sort roots/.test(lab(g, 'fo_mei', 1)), `${T} (V3b): the old calendar's day 8 keeps the old text and labels`); }
     // the roof: three texts a slot, each with its own line after "Stay until the cold drives you in."
     for (const [vd, starts, res] of [[1, ['The thatch still holds', 'On the roof Mei Lin lists', 'Your forearm is playing strings'], [/^You stay until your fingers stop working/, /^The cold wins, as it does/, /^She sits up only when the thatch/]], [2, ['Up on the roof again', 'The plum wine comes up the ladder', 'Tonight the jar stays corked'], [/^Neither of you mentions it/, /^The jar goes down the ladder lighter/, /^On the way down she has you bow/]]]) {
-        const g = base(99520 + vd, { vday: vd }); const out = [], R = [];
-        for (let d = 0; d < 4; d++) { g.minutes = (30 + d) * D + 21 * 60; out.push(tx(g, 'supper_roof')); R.push(SCENES.supper_roof.choices[0].do(g)[0]); }
+        const g = base(99520 + vd, { vday: vd }); const out = [], R = []; const N = vd === 1 ? 3 : 6; // v0.11.234 (P7-A, RN): the later nights round again after six
+        for (let d = 0; d <= N; d++) { g.minutes = (30 + d) * D + 21 * 60; out.push(tx(g, 'supper_roof')); R.push(SCENES.supper_roof.choices[0].do(g)[0]); }
         const bad = [...starts.map((w, i) => (out[i].startsWith(w) ? null : `text ${i + 1}`)), ...res.map((r, i) => (r.test(R[i]) ? null : `line ${i + 1}`))].filter(Boolean);
-        assert(ok3(out) && R[3] === R[0] && new Set(R.slice(0, 3)).size === 3 && !bad.length, `${T} (V3b): the roof's ${vd === 1 ? 'first week' : 'later nights'} three texts, each with its own line after (${bad.join(', ')})`);
+        assert(ok3([...out.slice(0, 3), out[N]]) && R[N] === R[0] && new Set(R.slice(0, N)).size === N && !bad.length, `${T} (V3b): the roof's ${vd === 1 ? 'first week' : 'later nights'} three texts, each with its own line after (${bad.join(', ')})`);
     }
     // the later nights are one sequence across village days 5 and 6 (as supper:5): two on day 5, the third on day 6
     { const g = base(99525, { vday: 2 }); const out = [];
       for (const [vd, d] of [[2, 0], [2, 1], [3, 2]]) { g.flags.vday = vd; g.minutes = (30 + d) * D + 21 * 60; out.push(tx(g, 'supper_roof')); }
       assert(/^Tonight the jar stays corked/.test(out[2]) && /^On the way down she has you bow/.test(SCENES.supper_roof.choices[0].do(g)[0]), `${T} (V3b): the roof's later nights one sequence across days 5 and 6, the line after with it`); }
     // the firesides: Root Road by form; the Ashen Hills by whom James is close to
+    const { markDaily: MD } = await import('../js/story/common.js'); // v0.11.234 (P7-A, ML)
     { const forms = { cat: /\*Four times,\* Yuki observes, from your shoulder/, tiger: /\*Four times,\* Yuki sends, from the dark behind you/, human: /"Four times," says Yuki, stretched out along the log/ };
       const bad = [];
       for (const [f, re] of Object.entries(forms)) {
           const g = base(99530, { bl_region: 'rr' }); g.yuki.realm = 9; g.yuki.form = f; const out = [];
-          for (let d = 0; d < 4; d++) { g.minutes = (40 + d) * D + 20 * 60; noteDay(g, 'bl_fireside:rr'); out.push(tx(g, 'bl_fireside')); }
+          for (let d = 0; d < 4; d++) { g.minutes = (40 + d) * D + 20 * 60; noteDay(g, 'bl_fireside:rr'); MD(g, 'bl_cook'); out.push(tx(g, 'bl_fireside')); } // v0.11.234 (P7-A, ML): a day he cooked
           if (!(ok3(out) && /^Ya rips at a strip of meat/.test(out[0]) && re.test(out[1]) && /^Ya has demanded a lesson in chopsticks/.test(out[2]) && /^Supper is over/.test(out[1]) && !/tries a mouthful|will not touch it/.test(out[1]))) bad.push(f);
       }
       assert(!bad.length, `${T} (V3b): the Root Road's fire three texts, the second by Yuki's form (${bad.join(', ')})`); }
@@ -7602,7 +7603,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       const bad = [];
       for (const [k, [m, y, r2, r3]] of Object.entries(who)) {
           const g = base(99540, { bl_region: 'ah' }); g.rel['Mei Lin'] = { f: 20, a: m }; g.rel.Ya = { f: 20, a: y }; const out = [];
-          for (let d = 0; d < 4; d++) { g.minutes = (60 + d) * D + 20 * 60; noteDay(g, 'bl_fireside:ah'); out.push(tx(g, 'bl_fireside')); }
+          for (let d = 0; d < 4; d++) { g.minutes = (60 + d) * D + 20 * 60; noteDay(g, 'bl_fireside:ah'); MD(g, 'bl_cook'); out.push(tx(g, 'bl_fireside')); } // v0.11.234 (P7-A, ML): a day he cooked
           if (!(ok3(out) && /^A blue fire, and the dead tree over it/.test(out[0]) && /^The ash burns blue up here/.test(out[1]) && r2.test(out[1]) && /"Blue," says Ya, at last\. "I have eaten blue\."/.test(out[1]) && /^Blue embers/.test(out[2]) && r3.test(out[2]) && /Eat your supper, Ya\."$/.test(out[2]))) bad.push(k);
       }
       assert(!bad.length, `${T} (V3b): the Ashen Hills' fire three texts, each with the line for whom James is close to (${bad.join(', ')})`); }
@@ -7634,9 +7635,10 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     for (const [id, sd] of [['fo_mei', 8], ['fo_mei', 9], ['fo_mei', 10], ['fo_ya_time', 9], ['fo_ya_time', 10]]) for (const f of ['cat', 'human']) {
         const g = form(base(99700 + sd, { ya_met: true }), f); for (let d = 0; d < 3; d++) { g.minutes = C.calMinutes(g, sd, 10) + d * D; all.push(tx(g, id), lab(g, id, 0), lab(g, id, 1)); } }
     for (const vd of [1, 2]) { const g = base(99710 + vd, { vday: vd }); for (let d = 0; d < 3; d++) { g.minutes = (30 + d) * D + 21 * 60; all.push(tx(g, 'supper_roof'), SCENES.supper_roof.choices[0].do(g)[0]); } }
+    const { markDaily: CK } = await import('../js/story/common.js'); // v0.11.234 (P7-A, ML)
     for (const [r, rels] of [['rr', [[0, 0]]], ['ah', [[80, 80], [0, 80], [80, 0], [0, 0]]]]) for (const [m, y] of rels) for (const f of ['cat', 'tiger', 'human']) {
         const g = form(base(99720, { bl_region: r }), f); g.rel['Mei Lin'] = { f: 20, a: m }; g.rel.Ya = { f: 20, a: y };
-        for (let d = 0; d < 3; d++) { g.minutes = (60 + d) * D + 20 * 60; noteDay(g, `bl_fireside:${r}`); all.push(tx(g, 'bl_fireside')); } }
+        for (let d = 0; d < 3; d++) { g.minutes = (60 + d) * D + 20 * 60; noteDay(g, `bl_fireside:${r}`); CK(g, 'bl_cook'); all.push(tx(g, 'bl_fireside')); } } // v0.11.234 (P7-A, ML): days he cooked, so the pin reads the texts it pinned
     { const g = base(99730, { vday: 2 }); g.minutes = 30 * D + 19 * 60; noteDay(g, 's:supper:5'); g.minutes += D; all.push(tx(g, 'supper'));
       const v = base(99731, { vday: 3, long: true }); for (let d = 0; d < 3; d++) { v.minutes = (34 + d) * D + 17 * 60; if (d < 2) noteDay(v, 's:mei_walk:6'); } all.push(tx(v, 'mei_walk')); }
     // TG-T1, TG-T4: the whole texts pinned (a change to any word fails; re-pin only with a push that means to change them)
@@ -7756,6 +7758,112 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
           if (has(tx(g, 'camp'))) bad.push(`${f} after the meal`);
       }
       assert(!bad.length, `${T} (CWx, RV1 CM-b): the camp's first night by the fire, with food, Yuki's cooking line by form only there (${bad.join(', ')})`); }
+}
+// v0.11.234 (owner pick P7-A = RN + ML + TL; 2026-11-20 04:46): RN the roof's later nights a cycle of six; ML the firesides' meal on a day he
+// did not cook; TL (v0.11.231 C L4) task mode hides a card hidden for her absence (the spar, the cinderberries), as the hub does, never "back tomorrow".
+{
+    const T = 'P7-A (RN + ML + TL)';
+    const { taskCards } = await import('../js/core/tasks.js');
+    const { markDaily } = await import('../js/story/common.js');
+    const D = 1440;
+    // TL: the Ashen Hills by who is there, with nothing used, the spar and the berries used, the truffle used (the Forage menu then done)
+    { const camp = (state, used) => { const g = ensureBars(newGame(99700)); Object.assign(g.flags, { bl_region: 'ah', bl_day: 4, mei_party: true, ya_party: true }, state === null ? { ya_off_done: true } : {}, state === 'both' ? { trio: 2 } : {});
+        if (state === 'both') { g.rel['Mei Lin'] = { f: 90, a: 90 }; g.rel.Ya = { f: 90, a: 90 }; }
+        g.minutes = 20 * D + 10 * 60; g.scene = 'ah_hub'; for (const k of used) markDaily(g, k); return g; };
+      const st = (g, re) => taskCards(g, SCENES).find((c) => re.test(c.label))?.status || 'hidden';
+      const bad = [];
+      for (const used of [[], ['bt_ya', 'ah_cinder'], ['ah_truffle']]) {
+        const want = { spar: used.includes('bt_ya') ? 'tomorrow' : 'open', cinder: used.includes('ah_cinder') ? 'tomorrow' : 'open' };
+        const y = camp('ya', used), b = camp('both', used), n = camp(null, used);
+        if (st(y, /^Spar with Ya/) !== 'hidden' || st(y, /^Cinderberries/) !== want.cinder) bad.push(`ya ${used}: ${st(y, /^Spar with Ya/)} ${st(y, /^Cinderberries/)}`);
+        if (st(b, /^Spar with Ya/) !== 'hidden' || st(b, /^Cinderberries/) !== 'hidden') bad.push(`both ${used}: ${st(b, /^Spar with Ya/)} ${st(b, /^Cinderberries/)}`);
+        if (st(n, /^Spar with Ya/) !== want.spar || st(n, /^Cinderberries/) !== want.cinder) bad.push(`there ${used}: ${st(n, /^Spar with Ya/)} ${st(n, /^Cinderberries/)}`);
+      }
+      assert(!bad.length, `${T} (TL): her cards hidden while she is away (never "back tomorrow"), tomorrow only once used with her there (${bad.join('; ')})`); }
+    const C = await import('../js/core/calendar.js');
+    const A = await import('../js/story/again.js');
+    const BR = await import('../js/story/act1_blackroot.js');
+    const base = (seed, flags = {}) => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); Object.assign(g.flags, flags); return g; };
+    const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
+    const stay = (g) => SCENES.supper_roof.choices[0].do(g)[0];
+    // RN: the later nights a cycle of six, each text with its own line after; the seventh night the old text again; the first week still three
+    { const START = ['Up on the roof again', 'The plum wine comes up the ladder', 'Tonight the jar stays corked', 'Mei Lin bets you that the lamp of the widow by the well', 'Mei Lin examines you on the contents', "Mei Lin's mother has three rules"];
+      const RES = [/^Neither of you mentions it/, /^The jar goes down the ladder lighter/, /^On the way down she has you bow/, /^The dyer's lamp outlasts you both/, /^She runs out of sprigs/, /^The chestnuts run out/];
+      const g = base(99710, { vday: 2 }); const out = [], R = [];
+      for (let d = 0; d < 8; d++) { g.flags.vday = d < 4 ? 2 : 3; g.minutes = (30 + d) * D + 21 * 60; out.push(tx(g, 'supper_roof')); R.push(stay(g)); }
+      const bad = [...START.map((w, i) => (out[i].startsWith(w) ? null : `text ${i + 1}: ${out[i].slice(0, 30)}`)), ...RES.map((r, i) => (r.test(R[i]) ? null : `line ${i + 1}: ${R[i].slice(0, 30)}`))].filter(Boolean);
+      assert(!bad.length && out[6] === out[0] && out[7] === out[1] && R[6] === R[0] && R[7] === R[1], `${T} (RN): the later nights six texts in order across days 5 and 6, each with its line after, then round again (${bad.join('; ')})`);
+      const fresh = out.slice(3, 6);
+      assert(fresh.every((t) => A.sentencesOf(t.split('\n\n')[0]).length >= 1 && A.sentencesOf(t).length >= 2) && !fresh.some((t) => /\b(second|third|fourth) (night|evening)|\btomorrow\b|\btoday\b|\btonight\b|\bdays?\b/i.test(t)) /* RV1 (TG; T TG-T2): and no "tonight" */ && !R.slice(3, 6).some((t) => /\btomorrow\b|\btoday\b/i.test(t)), `${T} (RN): the new texts fold to a sentence and name no day`);
+      const f = base(99711, { vday: 1 }); const R1 = [];
+      for (let d = 0; d < 4; d++) { f.minutes = (20 + d) * D + 21 * 60; tx(f, 'supper_roof'); R1.push(stay(f)); }
+      assert(/^You stay until your fingers stop working/.test(R1[0]) && /^The cold wins/.test(R1[1]) && /^She sits up only/.test(R1[2]) && R1[3] === R1[0], `${T} (RN): the first week still three, its lines after unchanged`);
+      const o = ensureBars(newGame(99712, { closed: true })); o.flags.vday = 2; o.minutes = 5 * D + 21 * 60;
+      assert(/^Second night on the roof/.test(tx(o, 'supper_roof')) && /^Neither of you mentions it/.test(stay(o)), `${T} (RN): the old calendar keeps the old later text`); }
+    // ML: the firesides' meal on a day he did not cook ("Cook and eat." not taken): Root Road texts 2 (by form) and 3, Ashen Hills 2 and 3 (by who is warm)
+    { const { markDaily: MD } = await import('../js/story/common.js');
+      const OLD = /lends your stew|facing the pot|the pot, which has never been so clean|since the stew|You ladle out|since you cooked it|cook for an argument|stirs it as if it could hear him/;
+      const fire = (region, n, cooked, { form = 'cat', m = 0, y = 0 } = {}) => {
+          const g = base(99720, { bl_region: region }); g.yuki.realm = form === 'cat' ? 0 : 9; g.yuki.form = form; g.rel['Mei Lin'] = { f: 20, a: m }; g.rel.Ya = { f: 20, a: y };
+          for (let d = 0; d < n; d++) { g.minutes = (40 + d) * D + 20 * 60; noteDay(g, `bl_fireside:${region}`); }
+          g.minutes = (40 + n) * D + 20 * 60; if (cooked) MD(g, 'bl_cook');
+          assert(BR.cookedToday(g) === cooked, `${T} (ML): cookedToday`);
+          return tx(g, 'bl_fireside'); };
+      const bad = [];
+      for (const form of ['cat', 'tiger', 'human']) {
+          const c = fire('rr', 1, true, { form }), n = fire('rr', 1, false, { form });
+          if (!/^Supper is over/.test(n) || OLD.test(n) || !/She put them on my kill while I was skinning it/.test(n) || !/stirs it as if it could hear him/.test(c) || c.split('\n\n').length !== n.split('\n\n').length) bad.push(`rr2 ${form}`);
+      }
+      { const c = fire('rr', 2, true), n = fire('rr', 2, false);
+        if (OLD.test(n) || !/Both turn to you, who only picked it/.test(n) || !/You gathered twice what supper needed/.test(n) || !/since you cooked it/.test(c)) bad.push('rr3'); }
+      for (const [k, m, y] of [['both', 80, 80], ['ya', 0, 80], ['mei', 80, 0], ['none', 0, 0]]) for (const form of ['cat', 'tiger', 'human']) {
+          const c2 = fire('ah', 1, true, { form, m, y }), n2 = fire('ah', 1, false, { form, m, y }), c3 = fire('ah', 2, true, { form, m, y }), n3 = fire('ah', 2, false, { form, m, y });
+          if (OLD.test(n2) || OLD.test(n3) || !/^Up here the ash burns blue/.test(n2) || !/"Blue," says Ya, at last/.test(n2) || !/^The ash burns blue up here, and it lends your stew/.test(c2) || !/Eat your supper, Ya\."$/.test(n3)) bad.push(`ah ${k} ${form}`);
+          if (k === 'none' && (!/you the fire, which was managing perfectly well alone\./.test(n2) || !/The last rice cake comes to you to be divided/.test(n3) || !/never been so clean/.test(c2) || !/thanked by nobody/.test(c3))) bad.push(`ah none ${form} extras`);
+          if (k === 'mei' && (!/inside your sleeve since the second rice cake, two fingers/.test(n3) || !/since the stew, two fingers/.test(c3))) bad.push(`ah mei ${form}`);
+      }
+      assert(!bad.length, `${T} (ML): on a day he did not cook, no fireside line speaks of his stew, pot or cooking; on a day he did, the old lines (${bad.join(', ')})`); }
+    // v0.11.234 RV1 (owner 07:33, TG; the cold reviews' TG-T1–T4, TG-C1, TG-C2, TG-C5): the new texts whole as built (Fable's runs RM, RM2, RT with
+    // Claude's cuts: project/research/p7-drafts-rv.txt), the lines after against the next screen, a raw meal, the fireside past midnight, the done menu
+    { const { readFileSync } = await import('node:fs');
+      const DR = Object.fromEntries(readFileSync(new URL('../project/research/p7-drafts-rv.txt', import.meta.url), 'utf8').trim().split('\n').map((l) => { const i = l.indexOf(' | '); return [l.slice(0, i), l.slice(i + 3).replaceAll(' ¶ ', '\n\n')]; }));
+      const { markDaily: MD } = await import('../js/story/common.js');
+      const g = base(99730, { vday: 2 }); const out = [], R = [];
+      for (let d = 0; d < 6; d++) { g.minutes = (30 + d) * D + 21 * 60; out.push(tx(g, 'supper_roof')); R.push(stay(g)); }
+      const pin = [4, 5, 6].flatMap((n) => [out[n - 1] === DR[`supper_roof:2:${n}`] ? null : `text ${n}`, R[n - 1] === DR[`supper_roof:2:${n}:r`] ? null : `line ${n}`]).filter(Boolean);
+      assert(!pin.length, `${T} RV1 (TG-T1, T2): the roof's texts and lines 4–6 whole, as the drafts file (${pin.join(', ')})`);
+      assert(R.slice(3).every((t) => !/\bsleep|\bherb loft\b|\bbed\b/i.test(t) && !/^[^.]*\b(thatch|roof)\b[^.]*\bcold\b/i.test(t)), `${T} RV1 (TG-T3; T M1): the new lines after stop at the door (no sleep, no "herb loft" before village_night's), none opens on the cold`);
+      // the no-cook lines whole in their texts (each form and part where they sit)
+      const fire = (region, n, cooked, { form = 'cat', m = 0, y = 0, h = 20 } = {}) => {
+          const f = base(99731, { bl_region: region }); f.yuki.realm = form === 'cat' ? 0 : 9; f.yuki.form = form; f.rel['Mei Lin'] = { f: 20, a: m }; f.rel.Ya = { f: 20, a: y };
+          for (let d = 0; d < n; d++) { f.minutes = (40 + d) * D + 20 * 60; noteDay(f, `bl_fireside:${region}`); }
+          f.minutes = (40 + n) * D + 20 * 60; if (cooked) MD(f, 'bl_cook'); f.minutes = (40 + n) * D + h * 60; return tx(f, 'bl_fireside'); };
+      const has = (t, k) => t.includes(DR[k]);
+      const miss = [];
+      for (const form of ['cat', 'tiger', 'human']) if (!has(fire('rr', 1, false, { form }), 'ml:rr2:close')) miss.push(`rr2 ${form}`);
+      if (!has(fire('rr', 2, false), 'ml:rr3:end')) miss.push('rr3');
+      if (!fire('ah', 1, false).startsWith(DR['ml:ah2:open'])) miss.push('ah2 open');
+      for (const form of ['cat', 'tiger', 'human']) if (!has(fire('ah', 1, false, { form }), 'ml:ah2:none')) miss.push(`ah2 none ${form}`);
+      if (!fire('ah', 2, false, { m: 80 }).includes(`since ${DR['ml:ah3:mei']}, two fingers`)) miss.push('ah3 mei');
+      if (!has(fire('ah', 2, false), 'ml:ah3:none')) miss.push('ah3 none');
+      assert(!miss.length, `${T} RV1 (TG-T1): the no-cook lines whole where they sit (${miss.join(', ')})`);
+      // TG-C2: cooked at 20:00, the fireside at 00:30 (the same waking day) still reads the cooked text
+      assert(/lends your stew/.test(fire('ah', 1, true, { h: 24.5 })) && /^Up here the ash burns blue/.test(fire('ah', 1, false, { h: 24.5 })), `${T} RV1 (TG-C2): past midnight the evening's cook mark still counts`);
+      // TG-T4 / TG-C5 (CK): "Cook and eat." on a raw meal marks the day 'raw': the card closes, the fireside reads the no-cook lines; a cooked meal marks it cooked
+      const cookAt = (inv) => { const c = base(99732, { bl_region: 'ah', bl_day: 4, mei_party: true, ya_party: true }); c.minutes = 70 * D + 19 * 60; Object.assign(c.inventory, inv); c.scene = 'bl_camp';
+          const ch = SCENES.bl_camp.choices.find((x) => x.text === 'Cook and eat.'); const shown = ch.show(c); const lines = ch.do(c); return { c, shown, after: ch.show(c), lines }; };
+      { const raw = cookAt({ honeycomb: 1 }), hot = cookAt({ hare_raw: 1 });
+        assert(raw.shown && !raw.after && !BR.cookedToday(raw.c) && !/, cooked\./.test(raw.lines[0] || '') && hot.shown && !hot.after && BR.cookedToday(hot.c) && /, cooked\./.test(hot.lines[0] || ''),
+            `${T} RV1 (CK): a raw meal closes the card and reads as no cook (${raw.lines[0]}); a cooked one as cooked (${hot.lines[0]})`); }
+      // TG-C1: the Forage menu done for the day (truffle and beetle used) with Mei Lin away (both away): her card hidden, not "back tomorrow"; with her there, tomorrow
+      { const camp = (both) => { const c = ensureBars(newGame(99733)); Object.assign(c.flags, { bl_region: 'ah', bl_day: 4, mei_party: true, ya_party: true }, both ? { trio: 2 } : { ya_off_done: true });
+          if (both) { c.rel['Mei Lin'] = { f: 90, a: 90 }; c.rel.Ya = { f: 90, a: 90 }; }
+          c.minutes = 20 * D + 10 * 60; c.scene = 'ah_hub'; for (const k of ['ah_truffle', 'ah_beetle'].concat(both ? [] : ['ah_cinder'])) MD(c, k); return c; };
+        const st = (c, re) => taskCards(c, SCENES).find((x) => re.test(x.label))?.status || 'hidden';
+        const away = camp(true), there = camp(false);
+        assert(st(away, /^Cinderberries/) === 'hidden' && st(away, /^Dig for the ash-truffles/) === 'tomorrow' && st(there, /^Cinderberries/) === 'tomorrow' && st(there, /^Dig for the ash-truffles/) === 'tomorrow',
+            `${T} RV1 (TG-C1): the done menu hides her card while she is away (${st(away, /^Cinderberries/)}, ${st(away, /^Dig for the ash-truffles/)}; there: ${st(there, /^Cinderberries/)})`); }
+    }
 }
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

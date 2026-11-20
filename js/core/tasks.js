@@ -234,8 +234,8 @@ export function taskCards(g, scenes, only = null) {
             if (cfg.notJames && cfg.notJames(c)) return;
             if (!onceOpen(g, menu, i)) return; // v0.11.33: done this Coil
             let status = 'open';
-            if (doneToday) status = 'tomorrow';
-            else if (c.show && !c.show(g)) { if (c.show.dailyKey && (!c.form || hasForm(g, c.form))) status = 'tomorrow'; else return; } // v0.10.4: a form he can't sing yet stays hidden
+            if (doneToday) { if (c.show?.away?.(g)) return; status = 'tomorrow'; } // v0.11.234 (P7-A, TL): her card stays hidden while she is away, here too
+            else if (c.show && !c.show(g)) { if (c.show.dailyKey && !c.show.away?.(g) && (!c.form || hasForm(g, c.form))) status = 'tomorrow'; else return; } // v0.10.4: a form he can't sing yet stays hidden; v0.11.234 (P7-A, TL; v0.11.231 C L4): so does a card hidden for her absence (`away`), as the hub hides it
             else if (!choiceOpen(g, c)) return;
             push(`${menu}:${i}`, door ? 'door' : 'work', m.label, c, (entry.time || 0) + (c.time || 0), status);
             if (m.note) cards[cards.length - 1].groupNote = m.note(g) || ''; // v0.11.156 (DM1, TX-A): a note after the group's heading

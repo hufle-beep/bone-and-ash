@@ -1,0 +1,12 @@
+# Bone and Ash, v0.11.234, run RT (owner pick RV1 after the cold reviews): fixes to run RM/RM2's roof texts and one meal line
+
+Read ONLY: this brief, `/home/claude/bone-and-ash/project/research/p7-drafts-cut.txt` (the drafts as built), `/home/claude/bone-and-ash/project/research/p7-review-t.md` (the texts review: M1, M2, L1, L2, L3 and its suggested lines, suggestions only), `/tmp/p7/roof-texts.txt` (the roof's older texts and lines after) and `project/canon-card.md`. Same tone and rules as `p7-brief-rm.md` (no day counts, no "tonight", first sentence stands alone, British spelling).
+
+Write the full replacement for each key (the whole text or line, not a diff):
+- `supper_roof:2:4:r`, `supper_roof:2:5:r`, `supper_roof:2:6:r` (M1): each line after "Stay until the cold drives you in." must **stop when he goes in or reaches the ladder**: no sleeping, no "sleep", no "bed" with sleep in it, and **not the words "herb loft"** (the next screen opens on the herb loft and then has him settle and sleep). **Don't open on the thatch or the roof going cold** (the button above already says "the cold"; the old lines use it). Keep each line's own joke (the dyer's sums and the water to carry; the four plain leaves recited like a debt and the third shelf; the fourth rule about the ladder after dark, broken together, and the blanket folded as evidence). 30–50 words.
+- `supper_roof:2:4` (M2, L1, L2): the same text with three changes: the fold sentence names **the widow by the well** (Mei Lin's mother is herself a widow); the stake no longer names her mother ("the water", or another stake); and the end loses the sleeve ("She says it into her sleeve, laughing." → something else that isn't a sleeve, the lane or laughing into anything).
+- `supper_roof:2:5` (M2, L1): the same text with the sleeve out of "She passes the sprigs across from her sleeve" and her mother out of "My mother will have it out by morning" (the herb loft is Mei Lin's stock).
+- `ml:ah3:mei` (L3): replaces only "the pickles were counted" in "…inside your sleeve since ___, two fingers on your wrist…" (Ashen Hills, a day he did not cook; AH 2's no-cook version set up Mei Lin's rice cakes and the meat on Ya's stick). A short phrase.
+Change nothing else in those texts. Don't reuse a five-word run from the other drafts or the old texts.
+
+Write `/tmp/p7/drafts-rt.txt`: `key | text`, paragraphs separated by ` ¶ `, then `# notes` (under 1 KB).

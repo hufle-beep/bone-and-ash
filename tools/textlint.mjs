@@ -100,6 +100,24 @@ for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) {
     Object.assign(g.flags, { forest_day: 1, fire: true }); g.inventory.hare_raw = 1;
     SAMPLES.push(ensureBars(g));
 }
+// v0.11.234 (owner pick RV1 after P7-A, LS; the cold review's C L2): the roof's later nights on each of their six days (the long calendar's
+// second week), and the firesides' meal texts 2–3 (the Root Road by form, the Ashen Hills by who is warm and, with neither, by form) on a day
+// he cooked and on one he did not, so both versions of the meal lines (`cookedToday`) and the roof's cycle of six are read
+// (markDaily: imported above)
+const ROOF_SAMPLES = [], ROOF_K = new Map(); // the day index by sample: `dryClone` drops the lines' proxy, so the results loop sets it again
+for (const k of [0, 1, 2, 3, 4, 5]) {
+    const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); Object.assign(g.flags, { long: true, vday: 2, cal_night: 1 }); g.minutes = 29 * 1440 + 21 * 60;
+    onDay(g, k); SAMPLES.push(g); ROOF_SAMPLES.push(g); ROOF_K.set(g, k);
+}
+for (const [region, warm] of [['rr', [[0, 0]]], ['ah', [[80, 80], [0, 80], [80, 0], [0, 0]]]]) for (const [m, y] of warm) for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) {
+    if (region === 'ah' && (m || y) && form !== 'cat') continue;
+    for (const k of [1, 2]) for (const cooked of [true, false]) {
+        const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form;
+        Object.assign(g.flags, { bl_day: region === 'ah' ? 4 : 2, bl_region: region, mei_party: true, ya_party: true }); g.rel['Mei Lin'] = { f: 20, a: m }; g.rel.Ya = { f: 20, a: y };
+        g.minutes = 70 * 1440 + 20 * 60; onDay(g, k); if (cooked) markDaily(g, 'bl_cook');
+        SAMPLES.push(ensureBars(g));
+    }
+}
 const renders = (x) => {
     if (typeof x === 'string') return [x];
     if (typeof x !== 'function') return [];
@@ -177,11 +195,11 @@ const { choose } = await import(js('core/story.js')); const { dryClone } = await
 const RESULT_SAMPLES = [0, 3, 6, 18, 21, 24].map((i) => SAMPLES[i]);
 const resultLines = []; const resultAt = new Map();
 for (const s of Object.values(SCENES)) (s.choices || []).forEach((c0, i) => {
-    for (const smp of RESULT_SAMPLES) for (const b of (c0.check ? [999, -999] : [0])) {
+    for (const smp of (s.id === 'supper_roof' ? [...RESULT_SAMPLES, ...ROOF_SAMPLES] : RESULT_SAMPLES)) for /* v0.11.234 RV1 (LS): the roof's six lines after */ (const b of (c0.check ? [999, -999] : [0])) {
         const c = { ...c0, show: undefined, req: undefined }; if (c0.check) c.check = { ...c0.check, bonus: () => b };
         const choices = s.choices.slice(); choices[i] = c;
         try {
-            const g = dryClone(smp); g.scene = s.id;
+            const g = dryClone(smp); g.scene = s.id; if (ROOF_K.has(smp)) onDay(g, ROOF_K.get(smp)); // v0.11.234 RV1 (LS)
             const r = choose(g, { ...SCENES, [s.id]: { ...s, choices } }, i, { task: true });
             const t = (r.lines || []).map((l) => splitLine(String(l)).reply).filter(Boolean).join(' ').trim();
             if (t && !resultAt.has(t)) { resultAt.set(t, s.id); resultLines.push(t); }

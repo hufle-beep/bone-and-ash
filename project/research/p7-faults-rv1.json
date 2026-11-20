@@ -1,0 +1,191 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/ashfall.js",
+  "find": "% (ROOF_NEW[vday(g) === 1 ? 1 : 2].length + 1); /* v0.11.234",
+  "replace": "% 3; /* v0.11.234",
+  "note": "the roof's line after back to a cycle of three (texts 4-6 get the old lines)"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/ashfall.js",
+  "find": "% (ROOF_NEW[vday(g) === 1 ? 1 : 2].length + 1); /* v0.11.234",
+  "replace": "% 6; /* v0.11.234",
+  "note": "the first week's lines on a cycle of six (its 4th night a missing line)"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/act1_blackroot.js",
+  "find": "export const cookedToday = (g) => g.flags[`bl_cook@${dayKey(g)}`] === true;",
+  "replace": "export const cookedToday = (g) => !g.flags[`bl_cook@${dayKey(g)}`];",
+  "note": "the cooked test inverted"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/act1_blackroot.js",
+  "find": "const ahFire = (t) => (g) => `${ahPart(t.open, g)}",
+  "replace": "const ahFire = (t) => (g) => `${t.open}",
+  "note": "AH 2's open printed as a function"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/act1_blackroot.js",
+  "find": "noCook(g, 'the stew', 'the second rice cake')",
+  "replace": "noCook(g, 'the stew', 'the stew')",
+  "note": "AH 3 mei keeps the stew on a no-cook day"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/act1_blackroot.js",
+  "find": "const AH2_POT = (g) => noCook(g, 'you the pot, which has never been so clean.', 'you the fire, which was managing perfectly well alone.');",
+  "replace": "const AH2_POT = (g) => noCook(g, 'you the fire, which was managing perfectly well alone.', 'you the pot, which has never been so clean.');",
+  "note": "the pot's two versions swapped"
+ },
+ {
+  "id": "F7",
+  "file": "js/core/tasks.js",
+  "find": "if (c.show.dailyKey && !c.show.away?.(g) && (!c.form || hasForm(g, c.form))) status = 'tomorrow';",
+  "replace": "if (c.show.dailyKey && (!c.form || hasForm(g, c.form))) status = 'tomorrow';",
+  "note": "TL undone: away cards back tomorrow"
+ },
+ {
+  "id": "F8",
+  "file": "js/core/tasks.js",
+  "find": "if (doneToday) { if (c.show?.away?.(g)) return; status = 'tomorrow'; }",
+  "replace": "if (doneToday) { status = 'tomorrow'; }",
+  "note": "TL: the done-menu path still shows her card as tomorrow"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/act1_blackroot.js",
+  "find": "{ dailyKey: key }, c.show.away ? { away: c.show.away } : {})",
+  "replace": "{ dailyKey: key })",
+  "note": "onceADay drops the away test (the cinderberries)"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/act1_blackroot.js",
+  "find": "{ dailyKey: 'bt_ya', away: yaOut });",
+  "replace": "{ dailyKey: 'bt_ya', away: meiOut });",
+  "note": "the spar's away test on the wrong woman"
+ },
+ {
+  "id": "F11",
+  "file": "js/story/act1_blackroot.js",
+  "find": "g.flags[`bl_cook@${dayKey(g)}`] = 'raw'; return out;",
+  "replace": "return out;",
+  "note": "CK undone: a raw meal reads as cooked"
+ },
+ {
+  "id": "F12",
+  "file": "js/story/act1_blackroot.js",
+  "find": "export const cookedToday = (g) => g.flags[`bl_cook@${dayKey(g)}`] === true;",
+  "replace": "export const cookedToday = (g) => !!g.flags[`bl_cook@${dayKey(g)}`];",
+  "note": "CK: 'raw' counted as cooked"
+ },
+ {
+  "id": "F13",
+  "file": "js/story/ashfall.js",
+  "find": "You go in like a man with water to carry.",
+  "replace": "You go up to the herb loft and sleep like a man with water to carry.",
+  "note": "RT undone: line 4 sleeps before village_night"
+ },
+ {
+  "id": "F14",
+  "file": "js/story/ashfall.js",
+  "find": "Mei Lin bets you that the lamp of the widow by the well",
+  "replace": "Mei Lin bets you that the widow's lamp",
+  "note": "RT L2 undone"
+ },
+ {
+  "id": "RT1",
+  "file": "js/story/ashfall.js",
+  "find": "She says it kindly, which is worse.",
+  "replace": "She says it into her sleeve, laughing.",
+  "note": "(ported) Claude's cut on roof 2:4 reverted (laughing back to shaking)"
+ },
+ {
+  "id": "RT2",
+  "file": "js/story/ashfall.js",
+  "find": "You go in like a man with water to carry.",
+  "replace": "You climb to the herb loft and sleep like a man with water to carry.",
+  "note": "(ported) Claude's cut on roof 2:4's line after reverted"
+ },
+ {
+  "id": "RT3",
+  "file": "js/story/ashfall.js",
+  "find": "You get the mugwort.",
+  "replace": "You get the wormwood.",
+  "note": "a word changed in roof text 5 (texts 4-6 have no whole-text pin)"
+ },
+ {
+  "id": "RT4",
+  "file": "js/story/act1_blackroot.js",
+  "find": "You fetch another from Mei Lin's pan.",
+  "replace": "You pass over another.",
+  "note": "RR 3's no-cook end has James serving again"
+ },
+ {
+  "id": "RT5",
+  "file": "js/story/ashfall.js",
+  "find": "\"The widow sleeps early. She likes",
+  "replace": "\"My mother sleeps early. She likes",
+  "note": "the neighbour swapped for the mother in roof text 4"
+ },
+ {
+  "id": "RT6",
+  "file": "js/story/act1_blackroot.js",
+  "find": "watch the fire you laid instead.",
+  "replace": "watch the pot instead.",
+  "note": "AH 2's no-cook open brings the pot back"
+ },
+ {
+  "id": "RT7",
+  "file": "js/story/ashfall.js",
+  "find": "\"She gave no figure. I have",
+  "replace": "\"She gave no figure tonight. I have",
+  "note": "a 'tonight' put back into a new roof text (the cuts took two out)"
+ },
+ {
+  "id": "RC1",
+  "file": "js/story/act1_blackroot.js",
+  "find": "export const cookedToday = (g) => g.flags[`bl_cook@${dayKey(g)}`] === true;",
+  "replace": "export const cookedToday = (g) => g.flags[`bl_cook@${Math.floor(g.minutes / 1440)}`] === true;",
+  "note": "(ported) cookedToday by the calendar day, not wakeDay: a fireside after midnight on a day he cooked reads the no-cook text"
+ },
+ {
+  "id": "RC2",
+  "file": "js/core/tasks.js",
+  "find": "if (doneToday) { if (c.show?.away?.(g)) return;",
+  "replace": "if (doneToday) { if (c.show?.away) return;",
+  "note": "done-menu path: the cinderberries hidden whenever the Forage is done, even with Mei Lin there (no 'tomorrow')"
+ },
+ {
+  "id": "RC3",
+  "file": "js/story/ashfall.js",
+  "find": "She says it kindly, which is worse.",
+  "replace": "She says it kindly.",
+  "note": "(ported) Claude's cut on roof text 4 reverted (shaking)"
+ },
+ {
+  "id": "RC4",
+  "file": "js/story/act1_blackroot.js",
+  "find": "and looks very pleased not to.",
+  "replace": "and looks pleased.",
+  "note": "a no-cook text (RR2_CLOSE) changed past its pinned first sentence"
+ },
+ {
+  "id": "RC5",
+  "file": "js/story/ashfall.js",
+  "find": "owing condolences to the third shelf",
+  "replace": "owing condolences to the shelf",
+  "note": "(ported) roof line after 5 changed past its first words (texts and lines 4-6 not pinned)"
+ },
+ {
+  "id": "RC6",
+  "file": "js/story/act1_blackroot.js",
+  "find": "do: (g) => { markDaily(g, 'bl_cook');",
+  "replace": "do: (g) => { markDaily(g, 'bl_cooked');",
+  "note": "the camp's real Cook and eat. marks another key: every fireside reads no-cook in play (the ML tests mark bl_cook by hand)"
+ }
+]

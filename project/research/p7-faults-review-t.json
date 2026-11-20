@@ -1,0 +1,9 @@
+[
+ { "id": "T1", "file": "js/story/ashfall.js", "find": "She says it into her sleeve, laughing.", "replace": "She says it into her sleeve, shaking.", "note": "Claude's cut on roof 2:4 reverted (laughing back to shaking)" },
+ { "id": "T2", "file": "js/story/ashfall.js", "find": "You sleep in the herb loft like a man with water to carry.", "replace": "You climb to the herb loft and sleep like a man with water to carry.", "note": "Claude's cut on roof 2:4's line after reverted" },
+ { "id": "T3", "file": "js/story/ashfall.js", "find": "You get the mugwort.", "replace": "You get the wormwood.", "note": "a word changed in roof text 5 (texts 4-6 have no whole-text pin)" },
+ { "id": "T4", "file": "js/story/act1_blackroot.js", "find": "You fetch another from Mei Lin's pan.", "replace": "You pass over another.", "note": "RR 3's no-cook end has James serving again" },
+ { "id": "T5", "file": "js/story/ashfall.js", "find": "\"The widow sleeps early. She likes", "replace": "\"My mother sleeps early. She likes", "note": "the neighbour swapped for the mother in roof text 4" },
+ { "id": "T6", "file": "js/story/act1_blackroot.js", "find": "watch the fire you laid instead.", "replace": "watch the pot instead.", "note": "AH 2's no-cook open brings the pot back" },
+ { "id": "T7", "file": "js/story/ashfall.js", "find": "\"She gave no figure. I have", "replace": "\"She gave no figure tonight. I have", "note": "a 'tonight' put back into a new roof text (the cuts took two out)" }
+]
