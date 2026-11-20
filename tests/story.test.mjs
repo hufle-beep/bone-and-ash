@@ -7335,13 +7335,15 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       const g = at(48, 7, { long: true }); againView(g, { id: 'fo_morning', text: t48 }); g.minutes += D; linesOf(g).at = 'fo_ashfall'; const v49 = againView(g, { id: 'fo_morning', text: t49 });
       g.minutes += D; linesOf(g).at = 'fo_ashfall'; const again48 = againView(g, { id: 'fo_morning', text: t48 });
       assert(paras(t48).length === 1 && /days to the Elder/.test(t48) && t48 !== t49 && !v49.fold && again48.fold && again48.split, `${T} (RV1, M1a, TG4): a new day's count shows in full, the same text folds (${t49.slice(0, 50)})`); }
-    // RV1 (TG5): the Blackroot camp (its story and the food stock) still folds by paragraph, never by sentence
+    // RV1 (TG5); v0.11.237 (owner pick P10-A, H-a: HS1): the Blackroot camp folds by its story's sentences, the food stock left out of the fold
+    // and shown under the first sentence; a later day with another stock still folds (the exact key, the stock aside)
     { const b = at(66, 19, { bl_day: 1, bl_n: 1, bl_region: 'rr', ending: 'paid', mei_party: true, ya_party: true }); goTo(b, SCENES, 'bl_camp'); const t = sceneView(b, SCENES).text;
-      againView(b, { id: 'bl_camp', text: t }); b.minutes += D; linesOf(b).at = 'bl_morning'; const f = againView(b, { id: 'bl_camp', text: t });
-      assert(paras(t).length >= 2 && f.fold && !f.split && f.first === paras(t)[0], `${T} (RV1, TG5): bl_camp folds by paragraph (${paras(t).length} paragraphs)`); }
+      againView(b, { id: 'bl_camp', text: t }); b.minutes += D; linesOf(b).at = 'bl_morning'; const [story, stock] = paras(t), t2 = `${story}\n\n${/^In the/.test(stock) ? 'The hammerspace holds no food. Infinite space, zero snacks.' : 'In the hammerspace: 1 Ash-deer venison.'}`;
+      const f = againView(b, { id: 'bl_camp', text: t2 }), ss = A.sentencesOf(story);
+      assert(paras(t).length === 2 && A.STATE_PARA.test(stock) && t2 !== t && ss.length >= 2 && f.fold && f.split && f.first === ss[0] && f.rest === ss.slice(1).join(' ') && f.state === paras(t2)[1], `${T} (RV1, TG5; P10-A HS1): bl_camp folds by sentence, the stock shown (${f.fold}, ${f.split}, ${String(f.state).slice(0, 30)})`); }
     // main.js opens the paragraph whole; the FAQ and What's new say it
     { const src = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
-      assert(src.includes('${all && a.split ? paras(v.text) : paras(a.first)}${all ? (a.split ? \'\' : paras(a.rest))'), `${T}: main.js opens a split fold as one paragraph`);
+      assert(src.includes('${all ? paras(v.text) : `${paras(a.first)}${a.state ? paras(a.state) : \'\'}`}${all ? \'\' : \'<button'), `${T}: main.js opens a fold whole (a split fold as one paragraph); P10-A (HS1): the food stock under the first part`);
       const Fq = await import('../js/core/faq.js'); const h = Fq.FAQ.find(([q]) => q === 'How do I play?')?.[1]; const t = typeof h === 'function' ? h({}) : String(h);
       assert(t.includes('or a one-paragraph scene to its first sentence'), `${T}: the FAQ says it`);
       const Nw = await import('../js/core/news.js'); const n = Nw.NOTES.find(([v]) => v === '0.11.229')?.[1] || '';
@@ -8034,6 +8036,114 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     // C L4: the old calendar camps once a region, at text 1
     for (const region of ['rr', 'ah']) { const g = ensureBars(newGame(99995, { closed: true })); Object.assign(g.flags, { bl_region: region, bl_day: region === 'ah' ? 4 : 2, mei_party: true, ya_party: true, ya_off_done: true }); g.minutes = 60 * D + 18 * 60; goTo(g, SCENES, 'bl_camp');
       assert(BR.blLastDay(g) && sceneView(g, SCENES).text.startsWith(region === 'rr' ? "You camp on the root's broad back" : 'You camp under a black ridge'), `${T} (C L4): the old calendar's ${region} camp is its story night and its first text`); }
+}
+// v0.11.237 (owner pick P10-A, D1, H-a; 2026-11-20 14:21, 15:19): EVk, the quiet night's weeks 2 and 3 a sequence of three each; HS1 the
+// food stock out of the fold, HS2 a redraw where only the stock changed folds (SV by the story paragraphs)
+{
+    const T = 'P10-A';
+    const C = await import('../js/core/calendar.js');
+    const A = await import('../js/story/again.js');
+    const D = 1440;
+    const FORMS = { cat: 0, tiger: 2, human: 7 };
+    const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
+    const mk = (seed, f = 'cat', cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true, ...(cal ? { cal } : {}) })); g.yuki.form = f; g.yuki.realm = FORMS[f]; g.james.realm = FORMS[f]; return g; };
+    const week = (seed, vday, f, cal = C.LONG_CAL, n0 = 6) => { const g = mk(seed, f, cal); const out = []; for (let n = 0; n < n0; n++) { Object.assign(g.flags, { long: !!cal, vday, cal_night: n }); g.minutes = (30 + n) * D + 22 * 60; noteDay(g, SCENES.village_night.dayKey(g)); out.push(tx(g, 'village_night')); } return { g, out }; };
+    const OPEN = { 1: ['The herb loft smells of mint', 'Below the herb loft somebody banks the stove', 'The herb loft is dark'], 2: ["Mei Lin's mother closes the day by reporting it to her husband's tablet", 'You are classifying a bracket fungus', 'Rain comes to Ashfall without ceremony'], 3: ["Mei Lin's mother checks the bar on the door", 'Someone has left a cup of water', 'Ashfall has gone to bed with one ear on the road'] };
+    // EVk: each week its own three in order, round again; week 1 the old three; the first sentence the same in every form, two sentences or more
+    for (const vday of [1, 2, 3]) {
+        const by = Object.fromEntries(Object.keys(FORMS).map((f) => [f, week(99900 + vday, vday, f).out]));
+        for (const [f, out] of Object.entries(by)) {
+            const ok = out.every((t, i) => t.startsWith(OPEN[vday][i % 3])) && new Set(out.slice(0, 3)).size === 3 && out[3] === out[0] && out.every((t) => A.sentencesOf(t).length >= 2);
+            assert(ok, `${T} (EVk): week ${vday}, ${f}: three texts in order, round again (${out.map((t) => t.slice(0, 24)).join(' | ')})`);
+        }
+        const first = (t) => A.sentencesOf(t)[0];
+        assert(by.cat.every((t, i) => first(t) === first(by.tiger[i]) && first(t) === first(by.human[i])), `${T} (EVk): week ${vday}: the folded first sentence names no form`);
+        if (vday > 1) {
+            assert(!/"/.test(by.cat.join(' ') + by.tiger.join(' ')) && by.cat.every((t) => /\*[^*]+\*/.test(t)) && by.human.every((t) => /"[^"]+"/.test(t) && !/\bsends\b/.test(t)), `${T} (EVk): week ${vday}: the bond in italics for the cat and the great form, the woman aloud`);
+            assert(!/\{yuki\}/.test(Object.values(by).flat().join(' ')), `${T} (EVk): week ${vday}: every Yuki slot filled`);
+        }
+    }
+    // the sequences' own day keys; the quiet key still counts every quiet night
+    { const { g } = week(99910, 2, 'cat'); const d = g.lines.d;
+      assert(Array.isArray(d['s:village_night:2']) && d['s:village_night:2'].length === 6 && d['village_night:quiet'].length === 6 && !d['s:village_night:3'], `${T} (EVk): week 2 notes its own key (s:village_night:2) beside village_night:quiet`); }
+    // the old calendar keeps the old three on every village day
+    for (const vday of [1, 3]) { const { out } = week(99920 + vday, vday, 'cat', null, 1); // village day 2's night is the old calendar's arson
+      assert(out[0].startsWith(OPEN[1][0]), `${T} (EVk): the old calendar, village day ${vday}: the old text (${out[0].slice(0, 30)})`); }
+    // week 2's story night is still the arson (no quiet text)
+    { const g = mk(99930); Object.assign(g.flags, { long: true, vday: 2, cal_night: C.LONG_CAL - 1 }); g.minutes = 36 * D + 22 * 60;
+      assert(SCENES.village_night.dayKey(g) === null && !OPEN[2].concat(OPEN[1]).some((o) => tx(g, 'village_night').startsWith(o)), `${T} (EVk): week 2's last night is the story night`); }
+    // D1: Claude's cuts in place
+    { const all = [2, 3].flatMap((v) => Object.keys(FORMS).flatMap((f) => week(99940 + v, v, f).out.slice(0, 3))).join(' ');
+      const back = [/verdict/, /forty drops/, /a woman of sixty/, /audit a plank/, /"Her mother put it there/, /with her back to you/, /at the foot of the ladder/].filter((r) => r.test(all));
+      const kept = [/snores in long, considered sentences/, /within a hundred drops/, /make sure of a plank/, /"Mei Lin's mother put it there,"/, /turned to the wall/, /at the ladder's foot/].filter((r) => !r.test(all));
+      assert(!back.length && !kept.length, `${T} (D1): the cuts in place (back: ${back.join(', ')}; missing: ${kept.join(', ')})`); }
+    // HS1: the stock out of the fold (every fold path); HS2: a redraw that only changed the stock folds, a new story sentence does not
+    { const story = 'Camp one. Camp two. Camp three.', s1 = 'In the hammerspace: 3 Smoked meat.', s2 = 'In the hammerspace: 2 Smoked meat.';
+      const g = mk(99950); g.scene = 'bl_camp'; linesOf(g).at = 'bl_camp';
+      const v0 = A.againView(g, { id: 'bl_camp', text: `${story}\n\n${s1}` });
+      const v1 = A.againView(g, { id: 'bl_camp', text: `${story}\n\n${s2}` }, { id: 'bl_camp', text: `${story}\n\n${s1}` });
+      const v2 = A.againView(g, { id: 'bl_camp', text: `Camp one. Camp four.\n\n${s2}` }, { id: 'bl_camp', text: `${story}\n\n${s2}` });
+      assert(!v0.fold && v1.fold && v1.same && v1.split && v1.first === 'Camp one.' && v1.rest === 'Camp two. Camp three.' && v1.state === s2, `${T} (HS1, HS2): the stock-only redraw folds, the new stock shown (${v1.fold}, ${v1.state})`);
+      assert(!v2.fold, `${T} (HS2): a redraw with a new story sentence shows in full`);
+      const n = A.againView(g, { id: 'night_won', text: 'Alpha one. Beta two.' }, { id: 'night_won', text: 'Alpha one. Beta two.' });
+      assert(n.fold && n.state === '', `${T} (HS1): a text without a stock folds as before, no state`); }
+}
+// v0.11.237 RV2 (owner pick 2026-11-20 16:03; the cold reviews' T M1, M2, L2–L4, L6, C L3 and the test gaps TG-T1–T5, TG-C1–C4): the reviewers'
+// wording, the passages by form word for word, a burned loft, no clock words, the dishes beside the night, the stock on every fold path,
+// a save carried over mid-week 2
+{
+    const T = 'P10-A RV2';
+    const C = await import('../js/core/calendar.js');
+    const A = await import('../js/story/again.js');
+    const { createHash } = await import('node:crypto');
+    const D = 1440;
+    const FORMS = { cat: 0, tiger: 2, human: 7 };
+    const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
+    const mk = (seed, f = 'cat') => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); g.yuki.form = f; g.yuki.realm = FORMS[f]; g.james.realm = FORMS[f]; return g; };
+    const nightAt = (g, vday, n) => { Object.assign(g.flags, { long: true, vday, cal_night: n }); g.minutes = (30 + n + (vday - 2) * 7) * D + 22 * 60; noteDay(g, SCENES.village_night.dayKey(g)); };
+    const week = (seed, vday, f, flags = {}) => { const g = mk(seed, f); Object.assign(g.flags, flags); const out = []; for (let n = 0; n < 3; n++) { nightAt(g, vday, n); out.push(tx(g, 'village_night')); } return out; };
+    const all = Object.fromEntries([2, 3].flatMap((v) => Object.keys(FORMS).map((f) => [`${v}:${f}`, week(99960 + v, v, f)])));
+    // TG-C1: the 18 passages word for word (p10-drafts-rv2.txt as built)
+    { const h = createHash('sha256').update(Object.keys(all).sort().map((k) => all[k].join('\n')).join('\n\n')).digest('hex');
+      assert(h === '7d5e58d6be196689b72a6eb38f8ed70b1875318bedeb60602a7462ff45f5c9a1', `${T} (TG-C1): the six new texts in three forms word for word (sha256 ${h.slice(0, 16)}…)`); }
+    // TG-T2, TG-T3, TG-C2: one word per passage, in its own form only
+    { const W = { 2: [['a mouse in her storeroom', 'the largest thing under her roof', 'carried her water twice'], ['kneading the blanket', 'and rolls over', 'takes the pillow'], ['the dry half of your blanket', 'shakes herself once', 'wringing her hair']],
+                  3: [['from behind your knees', 'across the head of the ladder', 'turned to the wall'], ['washing a whisker', 'regards the cup from above', 'not opening her eyes'], ['I can hear moths', 'onto her forelegs', 'longer than the dog']] };
+      const bad = [];
+      for (const v of [2, 3]) for (let i = 0; i < 3; i++) Object.keys(FORMS).forEach((f, fi) => { const t = all[`${v}:${f}`][i]; W[v][i].forEach((w, wi) => { if (t.includes(w) !== (wi === fi)) bad.push(`${v}.${i + 1} ${f} ${w}`); }); });
+      assert(!bad.length, `${T} (TG-T2, TG-T3, TG-C2): each Yuki passage in its own form only (${bad.join('; ')})`); }
+    // the reviewers' wording (BL, DL, L2–L4, L6) in place, the old gone
+    { const j = Object.values(all).flat().join(' ');
+      const back = [/over the dried herbs/, /The accounts are exact/, /counted it/, /both women/, /nobody in the house admits/, /takes your warm place/, /says into the dark/].filter((r) => r.test(j)).concat((j.match(/crook of your knees/g) || []).length > 1 ? ['crook twice'] : []);
+      const kept = [/You lie in the dark and listen to her make sure of a plank\./, /let every word up\. You come last\./, /\*She checked it twice,\* Yuki sends from behind your knees/, /after everyone below is in bed/, /a cup of water at the ladder's foot\. The lamp/, /and settles against your back\./, /Yuki says, quite awake\./].filter((r) => !r.test(j));
+      assert(!back.length && !kept.length, `${T} (BL, DL, L2–L4, L6): the reviewers' wording in place (back: ${back.join(', ')}; missing: ${kept.join(', ')})`); }
+    // TG-T1: week 3 after the arson was lost: nothing of the loft's herbs
+    { const out = Object.keys(FORMS).flatMap((f) => week(99970, 3, f, { loft_burned: true, arson_lost: true }));
+      assert(out.length === 9 && !out.some((t) => /herbs?\b|mint|ginseng|drying/.test(t)), `${T} (TG-T1): week 3 in a burned loft names no herbs`); }
+    // TG-T4: no clock words in the new texts (shown 19:00–02:00)
+    { const hit = Object.values(all).flat().filter((t) => /\b(midnight|dawn|o'clock|morning|evening|tonight|early|late)\b|\d/i.test(t));
+      assert(!hit.length, `${T} (TG-T4): no clock or day word in the new nights (${hit.map((t) => t.slice(0, 40)).join(' | ')})`); }
+    // TG-T5 (T M2): the dishes' reply and the night under it, the same evening: no list twice, no "count" in both, no shared four-word run
+    { const run4 = (t) => { const w = t.toLowerCase().match(/[a-z']+/g) || []; const o = new Set(); for (let i = 0; i + 4 <= w.length; i++) o.add(w.slice(i, i + 4).join(' ')); return o; };
+      const dish = SCENES.supper.choices.find((c) => /with the dishes/.test(c.text)), bad = [];
+      for (const v of [2, 3]) { const g = mk(99975 + v); for (let n = 0; n < 6; n++) { Object.assign(g.flags, { long: true, vday: v, cal_night: n }); g.minutes = (30 + n + (v - 2) * 7) * D + 20 * 60; g.scene = 'supper'; const r = dish.do(g).join(' '); g.minutes += 2 * 60; noteDay(g, SCENES.village_night.dayKey(g)); const t = tx(g, 'village_night');
+          const R = run4(r), shared = [...run4(t)].filter((x) => R.has(x)); if (shared.length || (/\bcount/.test(r) && /\bcount/.test(t)) || /: [a-z]+ [a-z]+, [a-z]+/.test(t)) bad.push(`${v}.${n}: ${shared.join('; ') || 'count / a list'}`); } }
+      assert(!bad.length, `${T} (TG-T5, T M2): the dishes and the night under them share no list, "count" or run (${bad.join(' | ')})`); }
+    // TG-C3: the stock kept on the same-day return (SD) and on a later Coil's memory fold
+    { const story = 'Camp one. Camp two.', s1 = 'In the hammerspace: 3 Smoked meat.';
+      const g = mk(99980); linesOf(g).at = 'bl_camp'; g.minutes = 60 * D + 19 * 60;
+      A.againView(g, { id: 'bl_camp', text: `${story}\n\n${s1}` }); linesOf(g).at = 'yk_camp'; A.againView(g, { id: 'yk_camp', text: 'Elsewhere. Then back.' });
+      const sd = A.againView(g, { id: 'bl_camp', text: `${story}\n\n${s1}` });
+      const m = mk(99981); A.noteRead(m, `${story}\n\n${s1}`, 1); m.seen = { ...(m.seen || {}), bl_camp: 1 }; m.coil.n = 2;
+      const mem = A.againView(m, { id: 'bl_camp', text: `${story}\n\nThe hammerspace holds no food. Infinite space, zero snacks.` });
+      assert(sd.fold && sd.same && sd.state === s1 && mem.fold && typeof mem.memory === 'string' && /^The hammerspace holds no food/.test(mem.state) && mem.first === 'Camp one.', `${T} (TG-C3): the stock on the same-day and the later-Coil folds (${sd.state} | ${mem.state})`); }
+    // TG-C4: a save carried over mid-week 2 (two week-2 nights on its own key) starts week 3 on its first text
+    { const g = mk(99985); for (let n = 4; n < 6; n++) { nightAt(g, 2, n); tx(g, 'village_night'); }
+      nightAt(g, 3, 0); const t = tx(g, 'village_night');
+      assert(g.lines.d['s:village_night:2'].length === 2 && t.startsWith("Mei Lin's mother checks the bar on the door"), `${T} (TG-C4): week 3 counts on its own key after a week 2 cut short (${t.slice(0, 40)})`); }
+    // CL (C L3): a `$` in a passage stays as written
+    { const src = readFileSync(new URL('../js/story/ashfall.js', import.meta.url), 'utf8');
+      assert(/shared\.split\('\{yuki\}'\)\.join\(y\)/.test(src) && !/shared\.replace\('\{yuki\}'/.test(src), `${T} (CL): quietY fills by split and join`); }
 }
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

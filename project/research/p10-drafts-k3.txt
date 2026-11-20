@@ -1,0 +1,18 @@
+village_night:w3:1 | Mei Lin's mother checks the bar on the door, goes to her bed, and comes back to check it again. She does not hurry, and the bar is the same bar both times. You lie in the dark over the dried herbs and listen to a woman of sixty audit a plank. {yuki} If there is a third inspection, it happens without you.
+village_night:w3:1:y:cat | *She counted it twice,* Yuki sends from the crook of your knees, eyes shut. *I counted it once and I was right. Go to sleep. That door has plenty of people.*
+village_night:w3:1:y:great | Yuki lies across the head of the ladder, which nothing in Ashfall could climb past, one eye open on the dark underneath. *Tell her the door has me,* she sends. *Or don't. She enjoys the bar.*
+village_night:w3:1:y:human | "She has checked it twice," Yuki says, already under the blanket with her back to you. "I checked it once, properly. Between us it is the best-guarded object in Ashfall."
+village_night:w3:2 | Someone has left a cup of water at the foot of the ladder, and nobody in the house admits to it. The lamp downstairs burns on after both women are in bed, an extravagance in this house. You are tired enough to sleep in your shoes, and have set them where a hand can find them. {yuki} The lamp gives up eventually. You miss it.
+village_night:w3:2:y:cat | Yuki goes down, inspects the cup, drinks a third of it on principle, and comes back up. *It's for you,* she sends, washing a whisker. *It was. Some of it still is.*
+village_night:w3:2:y:great | Yuki puts her head over the edge and regards the cup from above; it would not wet her tongue. *Yours,* she sends. *The mother set it down herself. She walked very quietly, for her.*
+village_night:w3:2:y:human | "Her mother put it there," Yuki says, not opening her eyes. "She waited until she thought we were asleep. Drink it and say nothing, or she will have to deny it."
+village_night:w3:3 | Ashfall has gone to bed with one ear on the road, and you can hear it listening. A dog along the lane barks once and is hushed by name. Across the lane a man coughs, waits, and does not cough again. Nothing is on the road; forty houses confirm it one by one. You have held your breath on their behalf, and let it go. {yuki}
+village_night:w3:3:y:cat | Yuki has sat by the ladder facing the door since you lay down. *Empty as far as I can hear,* she sends, *and I can hear moths.* She comes back to bed, satisfied, and takes your warm place.
+village_night:w3:3:y:great | Yuki lifts her head, turns it toward the road and holds it there until even the dog has lost interest. *Nothing,* she sends, and lowers it onto her forelegs. *I'd have told you before the dog knew.*
+village_night:w3:3:y:human | "There is nothing out there," Yuki says into the dark, quite awake. "I have been listening longer than the dog and I am better at it. Sleep. I will tell you if that changes."
+# notes
+- Assumed the ladder to the loft stands inside the house, so a cup can sit at its foot and the door bar can be heard from above; if the ladder is outside, text 2's first sentence and the great form of text 1 need a different spot.
+- Text 2 gives James shoes kept within reach; canon card names only the lab coat and glasses.
+- Text 3 uses "forty houses" (from the morning's forty chimneys) and an unnamed dog and a coughing man in the lane; nobody new enters the house.
+- Text 3 ends on the Yuki passage rather than on a shared closing sentence; a closing line can be added if every text should end in the shared part.
+- "The lamp gives up eventually" (text 2) is the only loose time word; no clock times or day counts used.

@@ -1,0 +1,11 @@
+[
+ {"id": "RT1p", "file": "js/story/ashfall.js", "find": "byForm(g, ...[cat, great, human].map(", "replace": "byForm(g, ...[great, cat, human].map(", "note": "T's RT1 ported (CL changed the line): the cat and the great passages swapped"},
+ {"id": "RT4p", "file": "js/story/ashfall.js", "find": "You lie in the dark and listen to her make sure of a plank.", "replace": "You lie in the dark over the dried herbs and listen to her make sure of a plank.", "note": "T's RT4 ported (BL undone): the herbs back in a loft that may have burned"},
+ {"id": "R1", "file": "js/story/ashfall.js", "find": "let every word up. You come last.", "replace": "let every word up. The accounts are exact: herbs sold, thread borrowed from the weaver, the weather. You come last.", "note": "DL undone: the list back beside the dishes' ledger"},
+ {"id": "R2", "file": "js/story/ashfall.js", "find": "*She checked it twice,* Yuki sends from behind your knees, eyes shut. *I checked it once", "replace": "*She counted it twice,* Yuki sends from the crook of your knees, eyes shut. *I counted it once", "note": "DL and L6 undone in the cat's passage"},
+ {"id": "R3", "file": "js/story/ashfall.js", "find": "after everyone below is in bed", "replace": "after both women are in bed", "note": "L2 undone"},
+ {"id": "R4", "file": "js/story/ashfall.js", "find": "at the ladder's foot. The lamp", "replace": "at the ladder's foot, and nobody in the house admits to it. The lamp", "note": "L3 undone"},
+ {"id": "R5", "file": "js/story/ashfall.js", "find": "satisfied, and settles against your back.", "replace": "satisfied, and takes your warm place.", "note": "L4 undone"},
+ {"id": "R6", "file": "js/story/ashfall.js", "find": "byForm(g, ...[cat, great, human].map((y) => shared.split('{yuki}').join(y)));", "replace": "byForm(g, shared.replace('{yuki}', cat), shared.replace('{yuki}', great), shared.replace('{yuki}', human));", "note": "CL undone: the plain replace back"},
+ {"id": "R7", "file": "js/story/again.js", "find": "const t0 = String(v?.text || ''), k = exact ? `${id}|=${paraKey(stateText(t0) ? storyText(t0) : t0)}`", "replace": "const t0 = String(v?.text || ''), k = exact ? `${id}|=${paraKey(t0)}`", "note": "VF's exact key with the stock in (as F10, after RV2)"}
+]

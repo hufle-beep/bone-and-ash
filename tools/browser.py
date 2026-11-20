@@ -651,6 +651,32 @@ def split_fold(pg, url):
     elif len(p1) != 1 or p1[0].count(o['first']) != 1 or len(p1[0]) <= len(o['first']): fails.append(f'FR (TG2): opened, the paragraph should show whole, once ({p1!r})')
     else: notes.append('FR (TG2): a one-paragraph scene read before folds to its first sentence and opens whole')
 
+def camp_fold(pg, url):
+    """v0.11.237 (owner pick RV2 after P10-A, TG-C5): the Blackroot camp read in an earlier Coil folds to its first sentence with the
+    food stock under it (HS1); Read it all again opens the text whole, the stock once (the owner's 03:07 camp save, food added)."""
+    js = ("import { SCENES } from './js/story/prologue.js'; import { sceneView } from './js/core/story.js';"
+          "import { noteRead, sentencesOf } from './js/story/again.js'; import { migrate, ensureBars, deserialize, serialize } from './js/core/game.js';"
+          "import { readFileSync } from 'node:fs'; import { gunzipSync } from 'node:zlib';"
+          "const raw = readFileSync('saves/2026-11-07-0307-incremental-bl_camp.txt', 'utf8').trim();"
+          "const c = ensureBars(migrate(deserialize(gunzipSync(Buffer.from(raw.slice(5), 'base64')).toString('utf8'))));"
+          "c.inventory.venison = (c.inventory.venison || 0) + 2; c.combat = null; c.scene = 'bl_camp'; c.coil.n = 2; c.seen = { ...(c.seen || {}), bl_camp: 1 }; delete c.lines;"
+          "const t = sceneView(c, SCENES).text; c.read = {}; noteRead(c, t, 1); const ps = t.split(/\\n\\s*\\n/).map((p) => p.trim()).filter(Boolean);"
+          "console.log(JSON.stringify({ save: serialize(c), t, first: sentencesOf(ps[0])[0], stock: ps[1] || '' }));")
+    o = json.loads(subprocess.run(['node', '--input-type=module', '-e', js], cwd=ROOT, capture_output=True, text=True, check=True).stdout)
+    if not o['stock'].startswith('In the hammerspace:'):
+        fails.append(f"HS1 (TG-C5): the camp save should show a food stock ({o['stock'][:40]!r})"); return
+    fresh(pg, url, "a => { localStorage.clear(); localStorage.setItem('boneash.auto', a); }", o['save'])
+    ps = lambda: [e.inner_text().strip() for e in pg.query_selector_all('.prose.again > p:not(.memory):not(.music)')]
+    rd = pg.query_selector('.prose.again button.readall')
+    if not rd:
+        fails.append('HS1 (TG-C5): bl_camp read on Coil 1 should fold on Coil 2, with Read it all again'); return
+    p0 = ps()
+    tap(pg, rd); until(pg, '!document.querySelector("button.readall")', 3000)
+    p1 = ps()
+    if p0 != [o['first'], o['stock']]: fails.append(f'HS1 (TG-C5): folded, the first sentence and the stock should show ({p0!r})')
+    elif len(p1) != 2 or p1[1] != o['stock'] or p1[0].count(o['first']) != 1 or len(p1[0]) <= len(o['first']): fails.append(f'HS1 (TG-C5): opened, the camp text whole and the stock once ({p1!r})')
+    else: notes.append('HS1 (TG-C5): the camp read before folds to its first sentence with the stock under it, and opens whole')
+
 def lp2(pg, url):
     """v0.11.134 (owner pick LP2): QR, a reply already shown this Coil is not shown again (a card that fails twice: "You see what
     went wrong." under the text once, its Intuitive Aptitude gain in Results both times: two forage cards that fail); SV, a scene shown again with the same text
@@ -1274,6 +1300,7 @@ def main(part=0):
                 # 10. a scene read before: the fold, the memory line, the skip (v0.11.35)
                 again(pg, url)
                 split_fold(pg, url)  # v0.11.229 (E2-2, RV1: TG2)
+                camp_fold(pg, url)  # v0.11.237 (RV2 after P10-A: TG-C5)
                 music_line(pg, url)
                 # 13. quiet repeats and the same-visit fold (v0.11.134, LP2)
                 lp2(pg, url)

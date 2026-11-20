@@ -1,0 +1,4 @@
+[
+ {"id": "F5p", "file": "js/story/ashfall.js", "find": "byForm(g, ...[cat, great, human].map(", "replace": "byForm(g, ...[cat, human, great].map(", "note": "Claude's F5 ported (CL changed the line): the great and the human passages swapped"},
+ {"id": "F7p", "file": "js/story/ashfall.js", "find": "byForm(g, ...[cat, great, human].map((y) => shared.split('{yuki}').join(y)));", "replace": "byForm(g, ...[cat, great, human].map((y, i) => (i ? shared.split('{yuki}').join(y) : shared)));", "note": "Claude's F7 ported: the cat's Yuki slot left unfilled"}
+]

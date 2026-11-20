@@ -325,7 +325,7 @@ function proseHtml(v) {
     const muHtml = mu ? `<p class="music">${md(mu.text)}</p>` : '';
     if (!a.fold) return `<div class="prose">${paras(v.text)}${muHtml}</div>`;
     const all = readAllScene === `${g.scene}#${g.coil?.n || 1}`; // per scene and Coil (Fable review)
-    return `<div class="prose again">${a.memory ? `<p class="memory">${md(a.memory)}</p>` : ''}${all && a.split ? paras(v.text) : paras(a.first)}${all ? (a.split ? '' : paras(a.rest)) : '<button class="readall" data-readall="1" aria-expanded="false"><span aria-hidden="true">▸ </span>Read it all again</button>'}${muHtml}</div>`;
+    return `<div class="prose again">${a.memory ? `<p class="memory">${md(a.memory)}</p>` : ''}${all ? paras(v.text) : `${paras(a.first)}${a.state ? paras(a.state) : ''}`}${all ? '' : '<button class="readall" data-readall="1" aria-expanded="false"><span aria-hidden="true">▸ </span>Read it all again</button>'}${muHtml}</div>`;
 }
 function renderCardScreen() {
     const v = sceneView(g, SCENES);

@@ -90,6 +90,9 @@ export const paraKey = (p) => parseInt(fnv1a(p), 16).toString(36);
  *  scenes that fold) changes with every haul: it is neither recorded nor checked, so the scene folds as before FP2. */
 export const STATE_PARA = /^(In the hammerspace:|The hammerspace holds no food)/;
 const storyParas = (t) => parasOf(t).filter((p) => !STATE_PARA.test(p));
+/** v0.11.237 (P10-A, HS1): a text's story paragraphs, and its food-stock paragraphs, each joined as text. */
+const storyText = (t) => storyParas(t).join('\n\n');
+const stateText = (t) => parasOf(t).filter((p) => STATE_PARA.test(p)).join('\n\n');
 /** v0.11.133 (RF1, L2): a usable record is a plain object (not null, not an array). */
 export const isRecord = (r) => !!r && typeof r === 'object' && !Array.isArray(r);
 /** v0.11.133 (FP2): record a text's paragraphs as read on Coil `n` (this Coil by default); the first Coil is kept. */
@@ -187,15 +190,17 @@ export function againView(g, v, prev = null) {
     const fresh = noteVisit(g, id);
     const newVisit = fresh && !(before && META_BACK(before)); // RV1 (L1): back from a meta screen is the same visit for "Read it all again" (L2)
     const sd = sameDayAgain(g, id, v, fresh); // v0.11.152 (owner pick RP1, SD); LB1 (owner 22:30): back from a meta screen or the breakthrough folds too (bots' repeated screens Sitter 1.1% → 0.1%, Cultivator 0.9% → 0.1%)
-    const { ps, split } = foldParts(v?.text || ''); // FR (v0.11.229): a one-paragraph text by its sentences
-    const whole = { fold: false, first: v?.text || '', rest: '', memory: null, same: false, newVisit, split: false };
+    const story = storyText(v?.text || ''), state = stateText(v?.text || ''); // v0.11.237 (P10-A, HS1): the food stock stays out of the fold
+    const { ps, split } = foldParts(story); // FR (v0.11.229): a one-paragraph text by its sentences
+    const whole = { fold: false, first: v?.text || '', rest: '', state: '', memory: null, same: false, newVisit, split: false };
     if (noFold(id) || v?.end || ps.length < 2) return whole;
     const rest = ps.slice(1).join('\n\n'); // a split fold has one rest part (RV1, L3: no join of its own)
+    const f = { fold: true, first: ps[0], rest, state, memory: null, same: true, newVisit, split };
     const variant = g.lastWin && g.lastWin.next === id && g.lastWin.degree >= 2; // a lopsided win's own text (story.js): not the one read before
-    if (seenBefore(g, id) && !variant && readBefore(g, v.text)) return { fold: true, first: ps[0], rest, memory: sceneMemory(g, id) ?? memoryLine(g), same: false, newVisit, split }; // v0.11.184 (S1): the scene's own line first, the pool untouched when it has one
-    if (prev && prev.id === id && prev.text === v.text) return { fold: true, first: ps[0], rest, memory: null, same: true, newVisit, split }; // SV
-    if (sd) return { fold: true, first: ps[0], rest, memory: null, same: true, newVisit, split }; // SD
-    if (laterDayAgain(g, id, v, fresh, split)) return { fold: true, first: ps[0], rest, memory: null, same: true, newVisit, split }; // v0.11.224 (TX2, VF)
+    if (seenBefore(g, id) && !variant && readBefore(g, v.text)) return { ...f, memory: sceneMemory(g, id) ?? memoryLine(g), same: false }; // v0.11.184 (S1): the scene's own line first, the pool untouched when it has one
+    if (prev && prev.id === id && storyText(prev.text || '') === story) return f; // SV; v0.11.237 (P10-A, HS2): the story paragraphs, the stock aside
+    if (sd) return f; // SD
+    if (laterDayAgain(g, id, v, fresh, split)) return f; // v0.11.224 (TX2, VF)
     return whole;
 }
 
@@ -213,7 +218,7 @@ export function laterDayAgain(g, id, v, fresh, exact = false) {
     if (!g || !id || noFold(id) || v?.end) return false;
     const L = linesOf(g);
     if (!isRecord(L.vd)) L.vd = {};
-    const k = exact ? `${id}|=${paraKey(String(v?.text || ''))}` : `${id}|${lineKey(storyParas(String(v?.text || '')).join('\n\n').replace(NUM_WORDS, '#'))}`, day = textDay(g); // RV1 (VK): numbers aside, the food stock left out; v0.11.229 (E2-2, RV1: M1a): `exact` for a split fold, numbers in (the Fallout morning's count to the Elder)
+    const t0 = String(v?.text || ''), k = exact ? `${id}|=${paraKey(stateText(t0) ? storyText(t0) : t0)}` : `${id}|${lineKey(storyParas(t0).join('\n\n').replace(NUM_WORDS, '#'))}`, day = textDay(g); // RV1 (VK): numbers aside, the food stock left out; v0.11.229 (E2-2, RV1: M1a): `exact` for a split fold, numbers in (the Fallout morning's count to the Elder); v0.11.237 (P10-A, HS1): a split fold's exact key leaves the food stock aside too (the camp's text folds by its sentences now)
     if (fresh) {
         const first = L.vd[k];
         L.vfFold = Number.isInteger(first) && first < day ? k : null;

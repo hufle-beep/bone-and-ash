@@ -1,0 +1,15 @@
+[
+ {"id": "F1", "file": "js/story/ashfall.js", "find": "if (!arsonNight(g) && longCal(g) && QUIET_WEEK[vday(g)]) return", "replace": "if (false && !arsonNight(g) && longCal(g) && QUIET_WEEK[vday(g)]) return", "note": "EVk off: weeks 2 and 3 the old three"},
+ {"id": "F2", "file": "js/story/ashfall.js", "find": "return seqText(g, `village_night:${vday(g)}`, QUIET_WEEK[vday(g)]);", "replace": "return seqText(g, 'village_night:2', QUIET_WEEK[vday(g)]);", "note": "week 3 counts on week 2's key"},
+ {"id": "F3", "file": "js/story/ashfall.js", "find": "if (!arsonNight(g) && longCal(g) && QUIET_WEEK[vday(g)]) return", "replace": "if (!arsonNight(g) && QUIET_WEEK[vday(g)]) return", "note": "the old calendar reads the week texts"},
+ {"id": "F4", "file": "js/story/ashfall.js", "find": "if (!arsonNight(g) && longCal(g) && QUIET_WEEK[vday(g)]) return", "replace": "if (longCal(g) && QUIET_WEEK[vday(g)]) return", "note": "the arson night replaced by a quiet text"},
+ {"id": "F5", "file": "js/story/ashfall.js", "find": "(g) => byForm(g, shared.replace('{yuki}', cat), shared.replace('{yuki}', great), shared.replace('{yuki}', human));", "replace": "(g) => byForm(g, shared.replace('{yuki}', cat), shared.replace('{yuki}', human), shared.replace('{yuki}', great));", "note": "the great and the human passages swapped"},
+ {"id": "F6", "file": "js/story/ashfall.js", "find": "return seqText(g, `village_night:${vday(g)}`, QUIET_WEEK[vday(g)]);", "replace": "return byDay(g, QUIET_WEEK[vday(g)], 'village_night:quiet');", "note": "weeks 2 and 3 on the quiet key (no own sequence)"},
+ {"id": "F7", "file": "js/story/ashfall.js", "find": "shared.replace('{yuki}', cat)", "replace": "shared", "note": "the cat's Yuki slot left unfilled"},
+ {"id": "F8", "file": "js/story/again.js", "find": "if (prev && prev.id === id && storyText(prev.text || '') === story) return f;", "replace": "if (prev && prev.id === id && prev.text === v.text) return f;", "note": "HS2 undone: SV by the whole text"},
+ {"id": "F9", "file": "js/story/again.js", "find": "const { ps, split } = foldParts(story);", "replace": "const { ps, split } = foldParts(v?.text || '');", "note": "HS1 undone: the fold by the whole text (stock in rest)"},
+ {"id": "F10", "file": "js/story/again.js", "find": "k = exact ? `${id}|=${paraKey(stateText(t0) ? storyText(t0) : t0)}`", "replace": "k = exact ? `${id}|=${paraKey(t0)}`", "note": "VF's exact key with the stock in: a later day with another stock shows in full"},
+ {"id": "F11", "file": "js/story/again.js", "find": "const f = { fold: true, first: ps[0], rest, state, memory: null", "replace": "const f = { fold: true, first: ps[0], rest, state: '', memory: null", "note": "the stock not handed to main.js"},
+ {"id": "F12", "file": "js/main.js", "find": "`${paras(a.first)}${a.state ? paras(a.state) : ''}`", "replace": "paras(a.first)", "note": "main.js drops the stock under the first part"},
+ {"id": "F13", "file": "js/story/ashfall.js", "find": "a man snores in long, considered sentences.", "replace": "a man snores like a verdict being read.", "note": "D1 VD undone"}
+]

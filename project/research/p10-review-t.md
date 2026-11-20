@@ -1,0 +1,27 @@
+# P10 cold review T (texts), v0.11.237
+
+Read: the diff, the brief, both checklists, the packet; rendered in a scratch copy (`/tmp/rv-t`): weeks 2 and 3, nights 0-6, cat / great / human (realm 0 / 2 / 7), long calendar, with the fold (againView, a screen between nights). Order and round again hold (w2: 1,2,3,1,2,3 then the arson; w3: 1,2,3,1,2,3,1); the fold shows the shared first sentence, the same in every form, on round two. `packet.mjs --check` on the cut drafts: tic 0, run 0, time 6 (all hold), pair 56. Canon checks pass: the tablet (with the supper's shrine shelf and the empty box), the weaver (new, harmless), drying racks, the door bar, the ladder inside the house, rain, forty houses. Tone holds (the mother grave, Mei Lin's sworn word, James deadpan). Claude's six cuts are in and pinned; none orphans a pronoun. **HS1 camp:** all nine first sentences (rr/dw/ah x3) stand alone above the stock; the shortest, "The raft holds.", still reads.
+
+## H
+None.
+
+## M
+**M1 - week 3 after the arson was lost (`loft_burned`).** w3:1's "You lie in the dark over the dried herbs" (a year of them burned, `arson_lost`), and the next screen, every week-3 morning, says "What is left of the loft is still smoking a little." Scenario: the player loses the arson fight. James sleeps in the kitchen that night. On week 3 night 0 he lies over dried herbs, and at breakfast the loft is still smoking. The K3 brief banned the beams, posts and roof; the herbs got through. The bots reached it in 0 of 80 games; any player who loses that fight reaches it. (This push is still an improvement: before it, week 3 showed week 1's "mint and drying ginseng".) Fix (checked: tic 0, run 0): "You lie in the dark and listen to her make sure of a plank." w3:2 and w3:3 need the ladder only, which still works as "patched". The morning's "still smoking" on all seven week-3 mornings is older than this push: open, options later.
+
+**M2 - the dishes reply sits on the same screen as a quiet text.** "Help her mother with the dishes, and listen." draws DR_DISHES (`supper:2`, alternating 0/1) above village_night. On week 2 nights 0 and 3 (the default alignment) that is w2:1. So the mother recites a ledger over the washing water ("what each family owes the Sect" / "which one counts the sacks twice") and in the next paragraph "Mei Lin's mother ... The accounts are exact: herbs sold, thread borrowed...". That is one speaker and the same itemised list twice in a row, which the checklist's two-cycles-in-step rule (v0.11.235) covers. On week 3 nights 0 and 3, DR_DISHES[1]'s "counts the sacks twice" sits above the cat's "*She counted it twice*" / "She has checked it twice". This happens on 2 of the 6 week-2 nights and 2 of the 6 week-3 nights whenever the player picks the dishes. Fix: open, options later (a dishes reply for weeks 2-3, or a w2:1 without the ledger).
+
+## L
+- **L1** Default alignment (supper:5 and village_night:2 both step every night): night 0 is the father's story, then the tablet text (a good pair). Night 1's supper then says "She has not spoken of her husband since the night of the empty box", the morning after James heard her report the day to him through the boards. "Of" against "to" can be read as deliberate. Flagged for the owner's eye.
+- **L2** w3:2 "after both women are in bed": in the human form Yuki is a third woman in the house (she also speaks in the loft in that text). It's a head-count issue. Checked: "after everyone below is in bed".
+- **L3** w3:2 "nobody in the house admits to it" repeats week 1's morning gift ("nobody admits to putting it there", shown on every week-1 morning in all three forms), in the same house, for a gift left by the door. Same joke family.
+- **L4** w3:3 cat: "takes your warm place" while James is still lying in it. Checked: "and settles against your back."
+- **L5** w2:2 fungus: "grey on top, violet beneath", on wood, is Earth's commonest violet-pored bracket (Trichaptum). A mycologist reader sees a textbook species that "nothing you were taught has a name for". His world isn't Earth, so this is low; a less identifiable mark would avoid it.
+- **L6** Habits: "from the crook of your knees" (cat) in w2:1 and w3:1; "on principle" is the game's 7th (one already in the roof's ashfall.js:271); "Yuki says into the blanket / into the dark" in w2:1 and w3:3 (human). A neighbour's night noise appears in both weeks ("a man snores", "a man coughs"). None is on the tic list.
+- **L7** w2:3 rain after "watch the stars come out" on the roof the same evening (the roof every night: night 2 is roof ri 2, then the rain). Possible weather; "without ceremony" half covers it.
+
+## Test gaps (planted through `tools/mutate.mjs`, `p10-faults-review-t.json`, against `story.test.mjs --quick`: 0 of 4 caught)
+- **TG-T1** (RT4 missed) Nothing renders weeks 2-3 with `loft_burned`. Pin "no dried herbs, no smell of the loft's stock" in week 3 under that flag.
+- **TG-T2** (RT1 missed) The cat and great passages can be swapped (both are in italics). Pin one word per passage (for example "crook of your knees" cat only, "largest thing" great only).
+- **TG-T3** (RT3 missed) A cat line in the great form ("curls on your shoulder, small") passes. There is no form-word check on the great or human passages.
+- **TG-T4** (RT2 missed) A clock word ("At midnight the door shuts") passes the story test. The ban lives only in `packet.mjs --check`. I did not measure textlint in the full check (not run, per the brief).
+- **TG-T5** No test reads a lead-in's result line with the text it sits above (M2).

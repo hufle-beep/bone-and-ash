@@ -1,0 +1,6 @@
+[
+ {"id": "RT1", "file": "js/story/ashfall.js", "find": "(g) => byForm(g, shared.replace('{yuki}', cat), shared.replace('{yuki}', great), shared.replace('{yuki}', human));", "replace": "(g) => byForm(g, shared.replace('{yuki}', great), shared.replace('{yuki}', cat), shared.replace('{yuki}', human));", "note": "the cat and the great passages swapped (both in italics): the tiger in the crook of your knees, the cat the largest thing under her roof"},
+ {"id": "RT2", "file": "js/story/ashfall.js", "find": "Then the door shuts, and the eaves drip", "replace": "At midnight the door shuts, and the eaves drip", "note": "a clock word in a text shown 19:00-02:00 (the brief's ban)"},
+ {"id": "RT3", "file": "js/story/ashfall.js", "find": "\"Yuki lies across the head of the ladder, which nothing in Ashfall could climb past, one eye open", "replace": "\"Yuki curls on your shoulder, small and warm, one eye open", "note": "a cat's line in the great form (on your shoulder, small)"},
+ {"id": "RT4", "file": "js/story/ashfall.js", "find": "You lie in the dark over the dried herbs and listen", "replace": "You lie in the dark over the dried herbs, in the loft that never burned, and listen", "note": "week 3 contradicts loft_burned outright"}
+]

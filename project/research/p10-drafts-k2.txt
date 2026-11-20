@@ -1,0 +1,18 @@
+village_night:w2:1 | Mei Lin's mother closes the day by reporting it to her husband's tablet, and the boards let every word up. The accounts are exact: herbs sold, thread borrowed from the weaver, the weather. You come last. The guest, she informs the dead, ate two bowls and thanked the cook correctly, the second time. {yuki} You fall asleep audited and, on balance, approved.
+village_night:w2:1:y:cat | *She left me out,* Yuki sends from the crook of your knees. *I caught a mouse in her storeroom. That is labour, and it should be in the record.*
+village_night:w2:1:y:great | *She left me out,* Yuki sends, with her chin across both your ankles. *I am the largest thing under her roof. An honest record would have mentioned it.*
+village_night:w2:1:y:human | "She left me out," Yuki says into the blanket. "I carried her water twice and was polite about it. That is labour, and it belongs in the record."
+village_night:w2:2 | You are classifying a bracket fungus from the forest edge and getting nowhere. Grey on top, violet beneath, growing on wood that should have killed it; nothing you were taught has a name for it, and your mind keeps offering names regardless. Two houses up the lane a man snores like a verdict being read. {yuki} The fungus stays unnamed, and you sleep anyway.
+village_night:w2:2:y:cat | *Call it the grey one,* Yuki sends, kneading the blanket flat beside your ribs. *You can be wrong about it in daylight, when I am awake to enjoy that.*
+village_night:w2:2:y:great | *Call it the grey one,* Yuki sends, and rolls over, which moves the blanket, the bedding and you. *Be wrong about it after breakfast, when I am awake to watch.*
+village_night:w2:2:y:human | "Call it the grey one," Yuki says, and takes the pillow from under your head for her own use. "Be wrong about it after breakfast, when I am awake to watch."
+village_night:w2:3 | Rain comes to Ashfall without ceremony, and the drying racks are still out in the yard. Below, Mei Lin carries them in at a run and says a word her mother has views on; the views follow, in full, at a murmur. Then the door shuts, and the eaves drip into the water jar, keeping time. {yuki} You are asleep within forty drops.
+village_night:w2:3:y:cat | *I was out in that,* Yuki sends, arriving wet and choosing the dry half of your blanket to stop being wet on. *Nobody ran to carry me in.*
+village_night:w2:3:y:great | *I was out in that,* Yuki sends, and shakes herself once, which rains on everything the roof had kept dry. *Nobody ran to carry me in. I noticed.*
+village_night:w2:3:y:human | "I was out in that," Yuki says, wringing her hair out over the ladder without looking where it lands. "Nobody ran to carry me in. I noticed."
+# notes
+- w2:1 assumes the house keeps a memorial tablet for Mei Lin's father and that her mother speaks to it at night; canon gives only that she is widowed. It also assumes a weaver in Ashfall.
+- w2:1 human: Yuki carrying water assumes the household treats her as a person in that form; swap the chore if not.
+- w2:2: the fungus (grey above, violet beneath) is invented and deliberately left unnamed; "after breakfast" in the great and human passages is a future reference, not a time of the night.
+- w2:3 assumes drying racks in a yard, eaves and a water jar by the door; it has rain, so check it against any weather the same week's day scenes state.
+- Within a text the three Yuki passages share their quoted line on purpose (as the old texts do); no five-word run is shared between texts 1, 2 and 3.
