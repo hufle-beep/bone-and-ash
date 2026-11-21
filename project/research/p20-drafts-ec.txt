@@ -1,0 +1,8 @@
+ec:mei_lin | Mei Lin hasn't given her name yet, and you take some care not to use it. To her you are a stranger out of the trees, unlabelled and possibly a demon. You know which thumb will go to her hairpin's red tassel while she decides whether to believe you. It is the left. It goes there now, and you look politely at the grass.
+ec:ya_meets | Ya has your scent now and is filing it as new. Nothing about her is new to you. You know she stands with her weight on the back foot and the spear grounded by her left heel, and that the tooth nearest her throat is the long one, with two small ones either side. You know what else she will call hers, given a minute. You keep the list to yourself.
+# notes
+- ec:mei_lin assumes she has not said her name aloud by the end of `mei_lin` on any lead-in (the packet's text only names her in narration); if a gao_* lead-in has her give it, the opening sentence needs changing.
+- ec:mei_lin invents one habit (left thumb to the hairpin's tassel while deciding); the hairpin and tassel are from the canon card, the habit is new.
+- ec:ya_meets invents her stance (back foot, spear by the left heel) and the necklace's order (one long tooth at the throat, two small ones either side); it assumes she has the spear in hand on this screen, which the packet doesn't show.
+- "the grass" in ec:mei_lin is the glowing stem she holds out; "now" is used once in each draft as plain present, not as a time of day.
+- Word counts: 65 and 68.

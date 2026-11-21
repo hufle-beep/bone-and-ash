@@ -3,6 +3,7 @@
  * the night the romance resolves (a throuple, one lover, or none), and Outer Elder Shen Qiu at the gate on Day 21.
  * Entry 'rt_start' (Day 19 ~06:00). Ends at 'a1_end'.
  */
+import { FR_TEXT } from './romance_texts.js'; // v0.11.250 (P20-A, FR)
 import { daysWord, sinceDepart, longCal, dayTitle } from '../core/calendar.js'; // v0.11.224 (owner pick TX2, TS6: DN14): the days since the start for the tree
 import { addItem, hasItem, eat, condense, advance, clockParts, jamesQiMax, dayHour, yukiForm, partyCarry } from '../core/game.js';
 import { condensationSatGain } from '../core/formulas.js';
@@ -803,6 +804,7 @@ Shen Qiu inclines his head to the exact depth courtesy requires. "The grove stan
 Yuki, ${byForm(g, 'on your shoulder', 'at your side', 'at your elbow')}, gives him a look of perfect contempt.
 
 ${g.flags.throuple ? 'Mei Lin and Ya come to the edge of the road together, hands locked until the knuckles show white. "We are coming after you," Mei Lin says, formally, before the whole Sect. "Both of us." Ya says nothing. Ya looks at Shen Qiu and smiles, and the nearest disciple steps back.'
+        : ['ya', 'yuki_ya'].includes(g.flags.final_night) ? FR_TEXT.taken_ya // v0.11.250 (P20-A, FR; Fable's): after Ya's night, hers (Mei Lin's named it even then)
         : likesMei(g) || likesYa(g) ? `${likesMei(g) ? 'Mei Lin' : 'Ya'} comes to the edge of the road. "I'm coming after you," ${likesMei(g) ? 'she' : 'she'} says, and does not care who hears. "Don't argue."` : 'Mei Lin bows to you, very formally: the bow owed to a man who will not be coming back. Ya spits on the Sect\'s road and walks into the forest without a backward glance. You suspect you have not seen the last of her.'}
 
 You go down the road between the crimson robes. Behind you, faint under the wind, the grove is singing.`,
@@ -819,7 +821,7 @@ You go down the road between the crimson robes. Behind you, faint under the wind
             const head = o === 'taken'
                 ? `The Sect's road climbs into the mountains for three days. On the second night, from a high switchback, you look back. Far below, in the black sea of the Blackroot, one point of pale light marks where Ashfall is. The grove is growing.
 
-${g.flags.throuple || g.flags.romance || g.flags.ya_romance ? 'Down there, people you love are packing for a journey. You are entirely certain of it. Nothing else is certain at all.' : 'You find that you are not afraid. You are curious. A sect that has been eating a world\'s heart for four centuries is, after all, a very interesting organism.'}`
+${g.flags.final_night === 'yuki' && !likesMei(g) && !likesYa(g) ? FR_TEXT.end_yuki /* v0.11.250 (P20-A, FR; Fable's): Yuki's own night: she is on the road with him; RV-A (FY, T M1): only when neither woman likes him (rt_taken has one at the road then) */ : g.flags.throuple || g.flags.romance || g.flags.ya_romance ? 'Down there, people you love are packing for a journey. You are entirely certain of it. Nothing else is certain at all.' : 'You find that you are not afraid. You are curious. A sect that has been eating a world\'s heart for four centuries is, after all, a very interesting organism.'}`
                 : `${o === 'victory' ? 'The Sect does not return that week, nor the week after. Ashfall works, and waits, and puts an edge on bone.' : o === 'revelation' ? 'The Sect does not return. Once, at dusk, a lone figure in red is seen on the switchbacks, looking down at the grove until the light goes. Then the switchbacks are empty.' : 'Every morning the disciple of the Outer Court sits in the grove with his eyes shut, trying to breathe, and weeps, and could not tell you why.'}
 
 The grove grows. Waist-high, then shoulder-high: seven white trunks in a ring, the song stronger with each night. After dark the children of Ashfall sit inside it and cannot say why they feel as they do. The old people keep well away. Then, one at a time, they stop keeping away.

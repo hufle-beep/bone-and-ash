@@ -1,0 +1,212 @@
+[
+ {
+  "id": "F1",
+  "file": "js/core/week.js",
+  "find": "if (!isRec(p.we) || p.we.c !== c || p.we.sd !== sd) { p.we = { c, sd, d }; return null; }",
+  "replace": "if (!isRec(p.we) || p.we.c !== c || p.we.sd !== sd) { p.we = { c, sd, d }; return qs[0].index; }",
+  "note": "WE: the week's first evening taken the quiet way too"
+ },
+ {
+  "id": "F2",
+  "file": "js/core/week.js",
+  "find": "    if (p.we.d === d) return null; // the same evening, its later screens: still the player's\n",
+  "replace": "",
+  "note": "WE: the free evening's later screens (the supper after the hub) taken the quiet way"
+ },
+ {
+  "id": "F3",
+  "file": "js/core/week.js",
+  "find": "if (qs.length !== 1 || !ways.every((c) => q.quiet.test(lab(c)) || q.also.test(lab(c)))) return null;",
+  "replace": "if (qs.length !== 1) return null;",
+  "note": "WE: an event's evening (another way on) taken the quiet way"
+ },
+ {
+  "id": "F4",
+  "file": "js/core/week.js",
+  "find": "if (!WEEK_EVE.on || !isRec(p) || !longCal(g) || !STAY_DAYS.has(storyDay(g))) return null;\n    const q = QUIET_WAY[g.scene];\n    if (!q || !scenes[g.scene]) return null;",
+  "replace": "if (!WEEK_EVE.on || !isRec(p) || !STAY_DAYS.has(storyDay(g))) return null;\n    const q = QUIET_WAY[g.scene];\n    if (!q || !scenes[g.scene]) return null;",
+  "note": "WE: the old calendar too"
+ },
+ {
+  "id": "F5",
+  "file": "js/core/week.js",
+  "find": "if (!WEEK_EVE.on || !isRec(p) || !longCal(g) || !STAY_DAYS.has(storyDay(g))) return null;\n    const q = QUIET_WAY[g.scene];\n    if (!q || !scenes[g.scene]) return null;",
+  "replace": "if (!isRec(p) || !longCal(g) || !STAY_DAYS.has(storyDay(g))) return null;\n    const q = QUIET_WAY[g.scene];\n    if (!q || !scenes[g.scene]) return null;",
+  "note": "WE: the switch ignored"
+ },
+ {
+  "id": "F6",
+  "file": "js/core/week.js",
+  "find": "        if (!(open.length === 1 && open[0].index < 1000 && plainChoice(scenes[g.scene].choices[open[0].index]))) break;\n",
+  "replace": "        if (!open.length) break;\n",
+  "note": "WE: the quiet walk takes a screen's first choice (a real choice walked past)"
+ },
+ {
+  "id": "F7",
+  "file": "js/core/week.js",
+  "find": "? 'Evenings: it stops for the week\\'s first, and for any evening where something happens;",
+  "replace": "? 'Evenings: it stops for every evening;",
+  "note": "WE: the panel's line wrong"
+ },
+ {
+  "id": "F8",
+  "file": "js/core/week.js",
+  "find": "    supper: { quiet: /^Go up to the loft early\\./,",
+  "replace": "    supper: { quiet: /^Help her mother with the dishes/,",
+  "note": "WE: the supper's quiet way the dishes (WE-d)"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/romance.js",
+  "find": "    ['hand', (g) => !!g.flags.ya_romance && likesYa(g)],\n",
+  "replace": "    ['hand', (g) => !!g.flags.ya_romance && likesYa(g) && !g.flags.dp_roof],\n",
+  "note": "DP: the roof before Ya's hand"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/romance.js",
+  "find": "    ['bond', (g) => !!g.flags.mei_bond && likesMei(g)],",
+  "replace": "    ['bond', (g) => !!g.flags.mei_bond],",
+  "note": "DP: the embers while she no longer likes him"
+ },
+ {
+  "id": "F11",
+  "file": "js/story/romance.js",
+  "find": "wrapDo('supper', /^Climb out onto the roof with Mei Lin/, (g) => { g.flags.dp_roof = true; });",
+  "replace": "wrapDo('supper', /^Climb out onto the roof with Mei Lin/, () => {});",
+  "note": "DP: the roof never noted"
+ },
+ {
+  "id": "F12",
+  "file": "js/story/romance.js",
+  "find": "wrapDo('hot_spring', /^Turn your back and keep watch\\./, (g) => { g.flags.dp_spring = 'watch'; });",
+  "replace": "wrapDo('hot_spring', /^Turn your back and keep watch\\./, (g) => { g.flags.dp_spring = 'in'; });",
+  "note": "DP: keeping watch noted as getting in"
+ },
+ {
+  "id": "F13",
+  "file": "js/story/romance.js",
+  "find": "t.replace(DP_AFTER, `${DP_AFTER}\\n\\n${DP_TEXT[k]}`)",
+  "replace": "`${t}\\n\\n${DP_TEXT[k]}`",
+  "note": "DP: the line at the end of the evening, under who goes where"
+ },
+ {
+  "id": "F14",
+  "file": "js/story/romance.js",
+  "find": "g.seen?.[id] != null && g.seen[id] < (g.coil?.n || 1) && ",
+  "replace": "",
+  "note": "EC: an echo at a meeting never met before"
+ },
+ {
+  "id": "F15",
+  "file": "js/story/romance.js",
+  "find": " && !(g.coil?.ec && g.coil.ec[id]);",
+  "replace": ";",
+  "note": "EC: on every later Coil, not once a save"
+ },
+ {
+  "id": "F16",
+  "file": "js/story/romance.js",
+  "find": "export const EC_COIL = 3;",
+  "replace": "export const EC_COIL = 2;",
+  "note": "EC: from Coil 2"
+ },
+ {
+  "id": "F17",
+  "file": "js/core/game.js",
+  "find": " if (old.ec) g.coil.ec = JSON.parse(JSON.stringify(old.ec)); // v0.11.250 (P20-A, EC): the echoes shown",
+  "replace": "",
+  "note": "EC: the record lost crossing into Act 1"
+ },
+ {
+  "id": "F18",
+  "file": "js/story/act1_return.js",
+  "find": "['ya', 'yuki_ya'].includes(g.flags.final_night) ? FR_TEXT.taken_ya",
+  "replace": "['ya'].includes(g.flags.final_night) ? FR_TEXT.taken_ya",
+  "note": "FR: Yuki and Ya's night reads Mei Lin"
+ },
+ {
+  "id": "F19",
+  "file": "js/story/act1_return.js",
+  "find": "${g.flags.final_night === 'yuki' && !likesMei(g) && !likesYa(g) ? FR_TEXT.end_yuki",
+  "replace": "${false ? FR_TEXT.end_yuki",
+  "note": "FR: Yuki's night: no one down there"
+ },
+ {
+  "id": "F20",
+  "file": "js/story/romance.js",
+  "find": "g.flags[x.flag] > 0 && g.flags[x.flag] === visitOf(g, id));",
+  "replace": "g.flags[x.flag] === g.minutes);",
+  "note": "RV-A VS: a tier beat by the minute again (a choice's time hides it)"
+ },
+ {
+  "id": "F21",
+  "file": "js/story/romance.js",
+  "find": "r.m === visitOf(g, id) ?",
+  "replace": "r.m === g.minutes ?",
+  "note": "RV-A VS: the echo by the minute again"
+ },
+ {
+  "id": "F22",
+  "file": "js/story/romance.js",
+  "find": "g.flags.rl_mei !== visitOf(g, id) ||",
+  "replace": "g.flags.rl_mei !== g.minutes ||",
+  "note": "RV-A VS: the remembered line by the minute again"
+ },
+ {
+  "id": "F23",
+  "file": "js/core/week.js",
+  "find": "    if (romanceNow(g)) return false;\n",
+  "replace": "",
+  "note": "RV-A DS: a screen showing a beat walked past"
+ },
+ {
+  "id": "F24",
+  "file": "js/core/week.js",
+  "find": "        if (c.scene === hub) return romanceMarks(c) === m0;",
+  "replace": "        if (c.scene === hub) return true;",
+  "note": "RV-A DS: a beat on the walk not seen"
+ },
+ {
+  "id": "F25",
+  "file": "js/core/week.js",
+  "find": "        if (!NIGHT_SCENES.has(c.scene)) return false;",
+  "replace": "        if (!NIGHT_SCENES.has(c.scene)) return true;",
+  "note": "RV-A DS: a story screen on the walk taken as safe"
+ },
+ {
+  "id": "F26",
+  "file": "js/core/week.js",
+  "find": "const c = coilKey(g), d = workDay(g), sd = storyDayOf(g, d + 1);",
+  "replace": "const c = coilKey(g), d = workDay(g), sd = storyDay(g);",
+  "note": "RV-A L1: the week keyed by the calendar day"
+ },
+ {
+  "id": "F27",
+  "file": "js/story/act1_return.js",
+  "find": "${g.flags.final_night === 'yuki' && !likesMei(g) && !likesYa(g) ? FR_TEXT.end_yuki",
+  "replace": "${g.flags.final_night === 'yuki' && !likesMei(g) ? FR_TEXT.end_yuki",
+  "note": "RV-A FY: Yuki's road line with Ya liked"
+ },
+ {
+  "id": "F28",
+  "file": "js/core/week.js",
+  "find": "    if (!(i >= 0) || t.evd?.[g.scene] !== storyDayOf(g, workDay(g) + 1) ||",
+  "replace": "    if (!(i >= 0) ||",
+  "note": "YM-A: an earlier week's answer repeated"
+ },
+ {
+  "id": "F29",
+  "file": "js/core/week.js",
+  "find": "                if (ai != null && quietSafe(g, scenes, hub, ai)) {",
+  "replace": "                if (ai != null) {",
+  "note": "YM-A: the repeated answer walked into a story screen or a beat"
+ },
+ {
+  "id": "F30",
+  "file": "js/core/week.js",
+  "find": "t.evd[sceneId] = storyDayOf(g, workDay(g) + 1); }",
+  "replace": "}",
+  "note": "YM-A: the week of the evening's choice not noted"
+ }
+]

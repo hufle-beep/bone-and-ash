@@ -1,0 +1,12 @@
+dp:hand | Under the table Ya's bare foot finds your ankle and stays there, settled as a boundary stone. Above the table she eats two-handed and looks at nobody. Mei Lin passes you the rice with a perfectly even face.
+dp:bond | Mei Lin banks the stove before her mother can ask, and catches your eye over the coals. She has sat up over worse embers than these, in the same company. She keeps quiet about it, which for her is conspicuous.
+dp:spring_in | Mei Lin's mother asks whether the Blackroot offered anywhere decent to wash. "A hot spring," says Ya, with her mouth full. "Room for two." Mei Lin studies her stew, and yours turns out to need your whole attention as well.
+dp:spring_watch | Ya has leaned her spear in the corner behind your seat, not her own. You have stood guard over it before, with your back turned and steam on your neck. Mei Lin notes where it stands and says nothing, approvingly.
+dp:roof | Something shifts in the thatch overhead, a bird or the wind. Mei Lin glances up, then across at you, and returns to her supper a shade too gravely. You know exactly how much weight that roof will hold, and where.
+# notes
+- dp:hand: fits either earlier night (fire or spring), so it names neither; Mei Lin's even face leaves open whether she knows.
+- dp:bond: assumes the house stove is fed during supper; Yuki "takes the stove" only in the next paragraph, so no clash.
+- dp:spring_in: gives the mother one reported question (no quoted line). "Room for two" is the only nod to the spring; if Ya should stay quieter when she no longer likes James, cut her second remark.
+- dp:spring_watch: assumes Ya's spear stood within James's guard at the spring and that she brings it indoors here.
+- dp:roof: assumes the supper room sits under the same thatch as the roof they sat on.
+- All five sit at the table with the mother still up; nobody leaves, nothing is decided.

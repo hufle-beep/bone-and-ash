@@ -256,11 +256,12 @@ function weekHtml() {
     // v0.11.213 (VQ1 + FQ1): every door of the hub; a repeating one every 3rd day (S3), a one-off once
     for (const d of doorCards(g, SCENES)) rows.push(planRow(`door:${d.scene}`, d.label, planCount(g, `door:${d.scene}`), [[doorNote(d), when(`door:${d.scene}`)].filter(Boolean).join(', '), fc.med[`door:${d.scene}`]].filter(Boolean).join(' · '), rk));
     rows.push(planRow('med:rest', 'Rest, hours a day', med.rest || 0, [when('med:rest'), fc.med.rest].filter(Boolean).join(' · '), rk)); // v0.11.213 (VQ1, RS)
+    const eve = fc.eve ? `<p class="note fc">${esc(fc.eve)}</p>` : ''; // v0.11.250 (P20-A, WE)
     const total = fc.total ? `<p class="note fc">${esc(fc.total)}</p>` : '', outlook = fc.outlook ? `<p class="note fc">${esc(fc.outlook)}</p>` : '';
     const stop = p?.stop ? `<p class="note">${esc(p.stop === 'week' ? 'The week is over.' : `Stopped: ${stopText(p.stop)}.`)}</p>` : '';
     const empty = planEmptyShown(g, SCENES, pv) && !planDoorsShown(g, SCENES, pv); // v0.11.219 (RV1, LE): the rows on the screen only; v0.11.225 (LO2, PE): a door or talk row set runs too
     const btn = `<div class="pbtns"><button class="btn primary" data-week="run">${empty ? 'Rest out the week' : 'Run the week'} · to Day ${planEndDay(g, p)}</button>${empty ? '' : '<button class="btn" data-week="clear">Clear</button>'}</div>`;
-    return groupHtml('Plan the week', [`<p class="note">Cards by the week, Meditate by the day. Meals and the day's sit run themselves; it stops for anything that needs you. The box by each row is its place in the order, 1 first, kept here for good.</p>`, ...rows, total, outlook, stop, btn], true);
+    return groupHtml('Plan the week', [`<p class="note">Cards by the week, Meditate by the day. Meals and the day's sit run themselves; it stops for anything that needs you. The box by each row is its place in the order, 1 first, kept here for good.</p>`, ...rows, total, outlook, eve, stop, btn], true);
 }
 
 /* ---------------- task mode: every screen as cards (v0.9.5) ---------------- */

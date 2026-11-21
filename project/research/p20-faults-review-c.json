@@ -1,0 +1,72 @@
+[
+ {
+  "id": "FC1",
+  "file": "js/core/week.js",
+  "find": "if (!isRec(p.we) || p.we.c !== c || p.we.sd !== sd) { p.we = { c, sd, d }; return null; }",
+  "replace": "if (!isRec(p.we) || p.we.c !== c) { p.we = { c, sd, d }; return null; }",
+  "note": "WE: the story-week key dropped: a plan that runs into the next story-week gives it no free evening"
+ },
+ {
+  "id": "FC2",
+  "file": "js/core/week.js",
+  "find": "        noteWalked(g, v);\n",
+  "replace": "",
+  "note": "WE: a night screen the quiet walk said is not noted for the fold (re-anchored: noteWalked)"
+ },
+ {
+  "id": "FC3",
+  "file": "js/core/week.js",
+  "find": "say([String(v.text || '')].filter(Boolean));\n        const from = g.scene, m = g.minutes;",
+  "replace": "const from = g.scene, m = g.minutes;",
+  "note": "WE: the quiet walk no longer says a walked night screen's text"
+ },
+ {
+  "id": "FC4",
+  "file": "js/core/week.js",
+  "find": "if (!TASK_HUBS[g.scene]) say([String(sceneView(g, scenes).text || '')].filter(Boolean));",
+  "replace": "",
+  "note": "WE: the evening screen's own text (the supper's) not said when the plan takes its quiet way"
+ },
+ {
+  "id": "FC5",
+  "file": "js/core/week.js",
+  "find": "for (let k = 0; k < 8 && g.scene !== hub",
+  "replace": "for (let k = 0; k < 1 && g.scene !== hub",
+  "note": "WE: the quiet walk stops after one screen"
+ },
+ {
+  "id": "FC6",
+  "file": "js/core/week.js",
+  "find": "WEEK_EVE.on && weekHub(g) ? 'Evenings",
+  "replace": "WEEK_EVE.on ? 'Evenings",
+  "note": "WE: the panel's evening line off the week hubs (re-anchored after RV-A dropped EVE_HUBS, which equalled WEEK_HUBS)"
+ },
+ {
+  "id": "FC7",
+  "file": "js/story/act1_return.js",
+  "find": "${g.flags.final_night === 'yuki' && !likesMei(g) && !likesYa(g) ? FR_TEXT.end_yuki",
+  "replace": "${g.flags.final_night === 'yuki' || g.flags.final_night === 'yuki_mei' ? FR_TEXT.end_yuki",
+  "note": "FR: Yuki and Mei Lin's night reads 'not looking for anyone' down there"
+ },
+ {
+  "id": "FC8",
+  "file": "js/story/act1_return.js",
+  "find": "['ya', 'yuki_ya'].includes(g.flags.final_night) ? FR_TEXT.taken_ya",
+  "replace": "['ya', 'yuki_ya', 'yuki'].includes(g.flags.final_night) ? FR_TEXT.taken_ya",
+  "note": "FR: Yuki's own night gives Ya's line on the road"
+ },
+ {
+  "id": "FC9",
+  "file": "js/story/romance.js",
+  "find": "g.seen[id] < (g.coil?.n || 1)",
+  "replace": "g.seen[id] <= (g.coil?.n || 1)",
+  "note": "EC: an echo at a first meeting read for the first time this Coil (noteSeen runs before enter)"
+ },
+ {
+  "id": "FC10",
+  "file": "js/story/romance.js",
+  "find": "['hand', (g) => !!g.flags.ya_romance && likesYa(g)],",
+  "replace": "['hand', (g) => !!g.flags.ya_romance],",
+  "note": "DP: Ya's foot under the table while she no longer likes him"
+ }
+]

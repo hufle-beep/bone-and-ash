@@ -25,7 +25,7 @@ import { writeFileSync, readFileSync, readdirSync } from 'node:fs'; // v0.11.137
 import { smartAction } from './lib/smartfight.mjs'; // v0.11.96 (BT1)
 import { DAY21_BREAKFAST } from '../js/story/act1_return.js'; // v0.11.152 (E1, BK)
 import { carriesRead as CR0 } from '../js/core/tasks.js'; const CY = (g) => Object.values(CR0(g))[0] || null; // v0.11.215 (CF1, UB): the first carried work (the tests from before: one at a time)
-import { READ_STOP, RS1, READ_CAP } from '../js/core/week.js'; const READ_CAP0 = READ_CAP.n; READ_STOP.on = false; RS1.on = false; READ_CAP.n = Infinity; // v0.11.214 (owner pick RD1): the plan's blocks before RD1 pin it without the read stop; the RD1 block turns it on. v0.11.225 (LO2, RS): the blocks before pin the plan's runs without its relationship lines; the LO2 block turns them on. v0.11.228 (RE1, SC): the blocks before pin the read stop without its cap; the RE1 block sets it to 3
+import { READ_STOP, RS1, READ_CAP, WEEK_EVE } from '../js/core/week.js'; const READ_CAP0 = READ_CAP.n; READ_STOP.on = false; RS1.on = false; READ_CAP.n = Infinity; WEEK_EVE.on = false; const { VISIT_STAMP } = await import('../js/story/romance.js'); VISIT_STAMP.on = false; /* v0.11.250 (RV-A, VS): likewise the visit stamp */ /* v0.11.250 (P20-A, WE): the blocks before it pin the plan without the weekly evening; its block switches it on */ // v0.11.214 (owner pick RD1): the plan's blocks before RD1 pin it without the read stop; the RD1 block turns it on. v0.11.225 (LO2, RS): the blocks before pin the plan's runs without its relationship lines; the LO2 block turns them on. v0.11.228 (RE1, SC): the blocks before pin the read stop without its cap; the RE1 block sets it to 3
 const clockHour = (g) => Math.floor(((g.minutes % 1440) + 1440) % 1440 / 60); // v0.11.152 (E1, BK)
 import { GAMES, FULL, SHARD, WORKERS, STATS_OUT, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
 import { seen as touched, track as watchGame, noteView, mergeSeen, seenOut as touchedOut } from './lib/seen.mjs'; // v0.11.22: for tools/leftovers.mjs
@@ -1265,7 +1265,7 @@ for (const form of ['cat', 'human']) {
             if (!/\s/.test(c)) out += c; i++; } return out; }; return code(false); };
       const hash = (t) => createHash('sha256').update(t).digest('hex').slice(0, 16);
       const LABELS = Object.values(RETURN).flatMap((sc) => (sc.choices || []).map((c) => (typeof c.text === 'string' ? c.text : '(fn)')));
-      const PIN = { 'act1_return.js': '2ccc8c750af794fc', labels: '58e59f4e08e64332' }; // v0.11.224 (TX2, DN14; RV1 L1, MC): the code re-pinned (the days since the start for the tree from the calendar, the old line kept for the old calendar, rt_dawn's title; the labels unchanged) // v0.11.198 (S1, D1, SX; RV1 L1, M3): the code re-pinned (rt_start, rt_road and rt_ambush read party_flew; the SX block; sxRide; partyCarry imported; the labels unchanged); v0.11.190 (N1, SW): the code re-pinned (the parley's +1 reads a1_sky_seen too); v0.11.179 (LB1): the labels re-pinned (the label pass); v0.11.181 (KG1): again, the mother's card label on rt_ashfall became a function (by the kitchen's stage); v0.11.188 (N1, RV1 M4): again, rt_wen's and rt_elder's sky lines by sky_witness / a1_sky_seen; v0.11.185 (BR1, RV1 M2): the code re-pinned (the street reads a1_sky_seen too)
+      const PIN = { 'act1_return.js': 'c8c61c9471bc0231', labels: '58e59f4e08e64332' }; // v0.11.250 (P20-A, FR; RV-A FY): the code re-pinned (rt_taken reads final_night for Ya's line, a1_end for Yuki's when neither woman likes him; FR_TEXT imported; the labels unchanged) // v0.11.224 (TX2, DN14; RV1 L1, MC): the code re-pinned (the days since the start for the tree from the calendar, the old line kept for the old calendar, rt_dawn's title; the labels unchanged) // v0.11.198 (S1, D1, SX; RV1 L1, M3): the code re-pinned (rt_start, rt_road and rt_ambush read party_flew; the SX block; sxRide; partyCarry imported; the labels unchanged); v0.11.190 (N1, SW): the code re-pinned (the parley's +1 reads a1_sky_seen too); v0.11.179 (LB1): the labels re-pinned (the label pass); v0.11.181 (KG1): again, the mother's card label on rt_ashfall became a function (by the kitchen's stage); v0.11.188 (N1, RV1 M4): again, rt_wen's and rt_elder's sky lines by sky_witness / a1_sky_seen; v0.11.185 (BR1, RV1 M2): the code re-pinned (the street reads a1_sky_seen too)
       const got = { 'act1_return.js': hash(skel(RSRC)), labels: hash(JSON.stringify(LABELS)) };
       for (const [k, v] of Object.entries(PIN)) assert(got[k] === v, `P7A (RV1, TG1): ${k}'s code and ids as pinned in v0.11.174 (${got[k]}; update the pin only with a push that means to change them)`); }
     // TG2: the mechanical parts of the Return's result lines, exactly
@@ -9037,6 +9037,157 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       const g = mk(49180, { long: true, vday: 3, cal_night: 1 }); g.rel['Mei Lin'] = { f: 30, a: 40 }; g.minutes = 36 * D + 19 * 60; enter(g, 'supper');
       assert(!g.flags.tb_mei30, `${T} RV (T L1): no supper beat in the tribute's week`); }
     { const N = await import('../js/core/news.js'); assert(/0\.11\.249/.test(JSON.stringify(N.NOTES)), `${T}: What's new has 0.11.249`); }
+}
+// v0.11.250 (owner pick P20-A, 2026-11-21 22:01): group f's rest (romance): WE, DP, EC, FR, RN
+{
+    const T = 'P20-A'; VISIT_STAMP.on = true; // RV-A (VS): this block's on
+    const C = await import('../js/core/calendar.js'); const G = await import('../js/core/game.js'); const R = await import('../js/story/romance.js'); const RT = await import('../js/story/romance_texts.js');
+    const Wk = await import('../js/core/week.js'); const A = await import('../js/story/again.js'); const CO = await import('../js/core/coil.js');
+    const D = 1440;
+    const mk = (seed, flags = {}, cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true, cal })); Object.assign(g.flags, flags); return g; };
+    const enter = (g, id) => { g.scene = id; return SCENES[id].enter ? SCENES[id].enter(g) : []; };
+    const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
+    const LEFT = /\$\{|\{yuki\}|undefined|\[object/;
+    // WE: the plan stops for the story-week's first evening only; the others take the quiet way, said in the day's lines
+    Wk.WEEK_EVE.on = true;
+    try {
+        const at = (hub, sd, seed) => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, hub); g.minutes = (C.calStart(g, sd) - 1) * D + 7 * 60; g.james.satiety = 100; G.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true; g.flags.elder = true; g.flags.palisade = 1; g.flags.wolf = 'driven'; return g; };
+        const walk = (g, hub) => { const ev = [], lines = []; const sd0 = C.storyDay(g); for (let k = 0; k < 300; k++) { if (C.storyDay(g) !== sd0 || g.combat) break; let r = null; if (g.scene === hub && Wk.planHere(g)) { r = Wk.runWeek(g, SCENES); for (const d of r.days) lines.push(...d.lines); if (r.stop === 'evening') ev.push(`${Math.floor(((g.minutes || 0) - 240) / D)}:${g.scene}`); if (r.stop === 'week') break; } const v = sceneView(g, SCENES); if (v.end) break; const o = v.choices.filter((c) => !c.disabled && c.index < 1000 && !/^(Yuki: change form|Story Mode only)/.test(c.label)); if (!o.length || (g.scene === hub && !r)) break; Wk.storyTap(g, SCENES, o[0].index); Wk.afterStory(g, SCENES); } return { ev, lines }; };
+        for (const [hub, sd, seed] of [['ashfall', 6, 99701], ['fo_ashfall', 10, 99702], ['wilds', 2, 99703]]) { // fo 9's week: Ya's manners every evening (no quiet way: it stops, as an event)
+            const vil = (g) => { if (hub === 'ashfall') Object.assign(g.flags, { long: true, vday: sd - 3, cal_night: 1 }); return g; };
+            const a = vil(at(hub, sd, seed)); Wk.planEnsure(a); const on = walk(a, hub);
+            Wk.WEEK_EVE.on = false; const b = vil(at(hub, sd, seed)); Wk.planEnsure(b); const off = walk(b, hub); Wk.WEEK_EVE.on = true;
+            const days = new Set(on.ev.map((e) => e.split(':')[0])), offDays = new Set(off.ev.map((e) => e.split(':')[0]));
+            const quiet = on.lines.filter((l) => String(l).startsWith(Wk.QUIET_LINE));
+            assert(days.size >= 1 && days.size <= 2 && offDays.size >= 4 && quiet.length >= 3, /* RV-A (DS): and the story night's evening, the week's last */
+                `${T} (WE): ${hub}: the plan stops on the story-week's first evening (and its story night's) only (${[...days].join()}: ${on.ev.join(' ')}), against ${offDays.size} without it; the quiet way said ${quiet.length} times (${quiet.slice(0, 2).join(' | ')})`);
+            assert(quiet.every((l) => Object.values(Wk.QUIET_WAY).some((q) => q.quiet.test(String(l).slice(Wk.QUIET_LINE.length)))), `${T} (WE): ${hub}: only the quiet ways taken by the plan`);
+        }
+        // the free evening's later screens are still the player's; an event (another way on) stops; switched off, or the old calendar: never
+        { const g = at('ashfall', 5, 99704); const p = Wk.planEnsure(g); g.scene = 'supper';
+          const ways = [{ index: 0, label: 'Climb out onto the roof with Mei Lin and watch the stars come out.' }, { index: 1, label: 'Help her mother with the dishes, and listen.' }, { index: 2, label: 'Go up to the loft early. Tomorrow will want everything you have.' }];
+          const q1 = Wk.weekEveQuiet(g, SCENES, p, ways), q2 = Wk.weekEveQuiet(g, SCENES, p, ways); g.minutes += D; const q3 = Wk.weekEveQuiet(g, SCENES, p, ways);
+          const q4 = Wk.weekEveQuiet(g, SCENES, p, [...ways, { index: 3, label: 'Something new happens.' }]);
+          Wk.WEEK_EVE.on = false; const q5 = Wk.weekEveQuiet(g, SCENES, p, ways); Wk.WEEK_EVE.on = true;
+          const o = mk(99705, {}, 0); o.scene = 'supper'; const q6 = Wk.weekEveQuiet(o, SCENES, { we: null }, ways);
+          g.minutes = (C.calStart(g, C.storyDay(g) + 1) - 1) * D + 19 * 60; g.scene = 'supper'; const q7 = C.STAY_DAYS.has(C.storyDay(g)) ? Wk.weekEveQuiet(g, SCENES, p, ways) : null;
+          assert(q1 === null && q2 === null && q3 === 2 && q4 === null && q5 === null && q6 === null && q7 === null, `${T} (WE): the first evening the player's, its later screens too; the next the loft; an event stops; off and the old calendar never; a new story-week's first the player's again (${[q1, q2, q3, q4, q5, q6, q7].join()})`); }
+        { const lab = (s, i) => { const c = SCENES[s].choices[i]; return typeof c.text === 'function' ? c.text(mk(99706)) : c.text; };
+          const has = (s, re) => SCENES[s].choices.some((c, i) => re.test(lab(s, i)));
+          assert(Object.entries(Wk.QUIET_WAY).every(([s, q]) => SCENES[s] && has(s, q.quiet)), `${T} (WE): every quiet way is a choice of its screen (a renamed label would stop the plan, never pick another)`);
+          const src = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8'); const g = at('ashfall', 5, 99707); Wk.planEnsure(g);
+          assert(/Evenings: it stops for the week's first/.test(Wk.planNotes(g, SCENES).eve) && src.includes('...rows, total, outlook, eve, stop, btn]'), `${T} (WE): the plan panel says the evening rule`); }
+    } finally { Wk.WEEK_EVE.on = false; }
+    // DP: rt_evening's one line for the first earlier choice that applies, after its second paragraph; the two flags set by their choices
+    { const base = mk(99710); base.minutes = 160 * D + 19 * 60; const t0 = tx(base, 'rt_evening');
+      const line = (flags, rel = {}) => { const g = mk(99711, flags); Object.assign(g.rel, rel); g.minutes = 160 * D + 19 * 60; return tx(g, 'rt_evening'); };
+      const roof = line({ dp_roof: true }), wat = line({ dp_roof: true, dp_spring: 'watch' }), sin = line({ dp_roof: true, dp_spring: 'in' });
+      const bond = line({ dp_roof: true, dp_spring: 'in', mei_bond: true }, { 'Mei Lin': { f: 50, a: 80 } }), bond0 = line({ mei_bond: true }, { 'Mei Lin': { f: 50, a: 10 } });
+      const hand = line({ dp_roof: true, mei_bond: true, ya_romance: true }, { 'Mei Lin': { f: 50, a: 80 } });
+      const after = (t, k) => t.includes(`${R.DP_AFTER}\n\n${RT.DP_TEXT[k]}\n\n`);
+      assert(!Object.values(RT.DP_TEXT).some((x) => t0.includes(x)) && after(roof, 'roof') && after(wat, 'spring_watch') && after(sin, 'spring_in') && after(bond, 'bond') && !Object.values(RT.DP_TEXT).some((x) => bond0.includes(x)) && after(hand, 'hand') && [roof, wat, sin, bond, hand].every((t) => Object.values(RT.DP_TEXT).filter((x) => t.includes(x)).length === 1),
+          `${T} (DP): none without an earlier choice; one line, in the order hand, bond, spring, roof; the embers only while she likes him`);
+      const g = mk(99712); g.minutes = 22 * D + 19 * 60; goTo(g, SCENES, 'supper'); const i0 = SCENES.supper.choices.findIndex((c) => /^Climb out onto the roof/.test(c.text)); choose(g, SCENES, i0);
+      const h = mk(99713); goTo(h, SCENES, 'hot_spring'); choose(h, SCENES, 0); const h2 = mk(99714); goTo(h2, SCENES, 'hot_spring'); choose(h2, SCENES, 1); const h3 = mk(99715); goTo(h3, SCENES, 'hot_spring'); choose(h3, SCENES, 2);
+      assert(g.flags.dp_roof === true && h.flags.dp_spring === 'watch' && h2.flags.dp_spring === 'in' && h3.flags.dp_spring === undefined && (g.rel['Mei Lin']?.a || 0) > 0, `${T} (DP): the roof and the spring's two ways noted, their gains kept`);
+      assert(!KEEP_FLAGS.some((f) => /^dp_/.test(f)), `${T} (DP): the flags start over with the Coil`); }
+    // EC: once a save, Coil 3 or later, met on an earlier Coil; the visit that marked it shows it (a redraw too); carried across Coils and into Act 1
+    { const RUN = (n, seen) => { const g = mk(99720); g.coil.n = n; g.seen = { ...(g.seen || {}), ...(seen != null ? { mei_lin: seen } : {}) }; g.minutes = 21 * D + 7 * 60; enter(g, 'mei_lin'); return g; };
+      const g = RUN(3, 1), t1 = tx(g, 'mei_lin'), t1b = tx(g, 'mei_lin');
+      const c2 = RUN(2, 1), new3 = RUN(3, null), t2 = tx(c2, 'mei_lin'), t3 = tx(new3, 'mei_lin');
+      endCoil(g, 'choice'); rewind(g); g.minutes = 21 * D + 7 * 60; enter(g, 'mei_lin'); const t4 = tx(g, 'mei_lin');
+      assert(t1.endsWith(`\n\n${RT.EC_TEXT.mei_lin}`) && t1b === t1 && !t2.includes(RT.EC_TEXT.mei_lin) && !t3.includes(RT.EC_TEXT.mei_lin) && !t4.includes(RT.EC_TEXT.mei_lin) && g.coil.ec?.mei_lin?.n === 3,
+          `${T} (EC): Mei Lin's echo on Coil 3 once met before; not on Coil 2, not unmet, not again on the next Coil (${JSON.stringify(g.coil.ec)})`);
+      const y = mk(99721); y.coil.n = 4; y.seen = { ...(y.seen || {}), ya_meets: 2 }; y.minutes = 50 * D + 7 * 60; enter(y, 'ya_meets'); const ty = tx(y, 'ya_meets');
+      const a = mk(99722); a.coil.ec = { mei_lin: { n: 3, m: 1 } }; a.coil.n = 3; startActCoil(a, 1);
+      assert(ty.endsWith(`\n\n${RT.EC_TEXT.ya_meets}`) && a.coil.ec?.mei_lin?.n === 3, `${T} (EC): Ya's at her first meeting; the record crosses into Act 1`); }
+    // FR: after the last night, the road and Act 1's end name the night's person (none read affection without its night)
+    { const taken = (night, flags = {}) => { const g = mk(99730, { ...flags, final_night: night }); g.rel['Mei Lin'] = { f: 60, a: 90 }; g.rel.Ya = { f: 60, a: 90 }; return tx(g, 'rt_taken'); };
+      const ty = taken('ya', { ya_romance: true }), tyk = taken('yuki_ya', { ya_romance: true }), tm = taken('mei', { romance: true }), tq = taken('none');
+      assert(ty.includes(RT.FR_TEXT.taken_ya) && !/Mei Lin comes to the edge/.test(ty) && tyk.includes(RT.FR_TEXT.taken_ya) && /Mei Lin comes to the edge/.test(tm) && !tm.includes(RT.FR_TEXT.taken_ya) && !tq.includes(RT.FR_TEXT.taken_ya), `${T} (FR): rt_taken: Ya's own line after her night, Mei Lin's after hers`);
+      const end = (night, flags = {}) => { const g = mk(99731, { ...flags, final_night: night, a1_outcome: 'taken' }); return tx(g, 'a1_end'); };
+      const ey = end('yuki'), em = end('mei', { romance: true }), eq = end('none');
+      assert(ey.includes(RT.FR_TEXT.end_yuki) && !/people you love/.test(ey) && /people you love/.test(em) && !eq.includes(RT.FR_TEXT.end_yuki) && !/people you love/.test(eq), `${T} (FR): a1_end (taken): Yuki's own night reads her on the road; the others as before`); }
+    // RN: the beats' "as X would / does" and paperwork phrases out; L4: the two friendship gates as the models test counts them
+    { const all = Object.values(RT.TB_TEXT);
+      assert(!all.some((t) => /\bas (one|she|a hunter)\b[^.]*\b(would|does|presses)\b|\bseal\b|\bnotice\b|in writing|paperwork/i.test(t)) && /for no reason she could give her mother/.test(RT.TB_TEXT.mei30) && /Room for two|craftsman's care/.test(RT.DP_TEXT.spring_in + RT.TB_TEXT['ya72:camp']), `${T} (RN): the five beats reworded`);
+      const NEW = [...Object.values(RT.DP_TEXT), ...Object.values(RT.EC_TEXT), ...Object.values(RT.FR_TEXT)];
+      assert(NEW.length === 9 && NEW.every((t) => typeof t === 'string' && !LEFT.test(t) && A.sentencesOf(t).length >= 2 && !/glasses|spectacles|herb loft/i.test(t)), `${T}: the new texts whole, two sentences or more, no glasses, no "herb loft"`);
+      const ret = readFileSync(new URL('../js/story/act1_return.js', import.meta.url), 'utf8'), pro = readFileSync(new URL('../js/story/prologue.js', import.meta.url), 'utf8'), mt = readFileSync(new URL('./models.test.mjs', import.meta.url), 'utf8');
+      assert(ret.includes("rel(g, 'Ya').f >= 20") && pro.includes("g.rel['Mei Lin']?.f > 10") && mt.includes("[['epilogue', 'Mei Lin', (f) => f > 10], ['rt_road', 'Ya', (f) => f >= 20]]"), `${T} (RN L4): the gates as the models test counts them`); }
+    // ---------- RV-A (the owner 22:52; the cold reviews p20-review-c.md, p20-review-t.md) ----------
+    // VS (C H1, M1; TG-C1, TG-C5): through the real way in (goTo + choose, a choice's time added after the enter), the echo, Ya's Fallout beat and the eve's remembered line show; a first meeting read for the first time this Coil has none
+    { const viaMei = (from, n, seenN) => { const g = mk(99740); g.coil.n = n; g.seen = { ...(g.seen || {}) }; if (seenN != null) g.seen.mei_lin = seenN; else delete g.seen.mei_lin; g.minutes = 21 * D + 6 * 60; goTo(g, SCENES, from); const v = sceneView(g, SCENES); const c = v.choices.find((x) => !x.disabled && x.index < 1000 && /^(Turn to the woman|Go with her|Keep running)/.test(x.label)); choose(g, SCENES, c.index); return { g, t: sceneView(g, SCENES).text }; };
+      const outs = ['gao_talked', 'gao_spared', 'gao_lost'].map((f) => viaMei(f, 3, 1)); const fresh = viaMei('gao_spared', 3, null);
+      assert(outs.every((o) => o.g.scene === 'mei_lin' && o.t.endsWith(RT.EC_TEXT.mei_lin)) && !fresh.t.includes(RT.EC_TEXT.mei_lin) && !fresh.g.coil.ec, `${T} RV (VS, TG-C1/C5): Mei Lin's echo through every tested way in (${outs.map((o) => o.t.endsWith(RT.EC_TEXT.mei_lin)).join()}); none at a first meeting read for the first time`);
+      const y = mk(99741); y.coil.n = 4; y.seen = { ...(y.seen || {}), ya_meets: 2 }; y.minutes = 50 * D + 6 * 60; goTo(y, SCENES, 'ya_arrives'); choose(y, SCENES, 0); const ty = sceneView(y, SCENES).text;
+      const f = mk(99742, { ya_met: true, palisade: 1, wolf: 'driven' }); f.rel.Ya = { f: 40, a: 50 }; f.minutes = (C.calStart(f, 10) - 1) * D + 19 * 60; goTo(f, SCENES, 'fo_supper'); const li = sceneView(f, SCENES).choices.find((c) => /^Go up to the loft early/.test(c.label)); choose(f, SCENES, li.index); const tf = sceneView(f, SCENES).text;
+      const e = mk(99743); e.rel['Mei Lin'] = { f: 20, a: 31 }; G.bumpRel(e, 'Mei Lin', 0, 0); endCoil(e, 'choice'); rewind(e); e.minutes = 41 * D + 19 * 60; goTo(e, SCENES, 'evening'); choose(e, SCENES, 0); const te = sceneView(e, SCENES).text;
+      assert(y.scene === 'ya_meets' && ty.endsWith(RT.EC_TEXT.ya_meets) && f.scene === 'fo_night' && tf.includes(RT.TB_TEXT['ya45:night']) && e.scene === 'evening2' && te.includes(RT.RL_TEXT.evening2[0]), `${T} RV (VS, C M1): Ya's echo, her Fallout beat and the eve's remembered line show through the real way in (${[ty.endsWith(RT.EC_TEXT.ya_meets), tf.includes(RT.TB_TEXT['ya45:night']), te.includes(RT.RL_TEXT.evening2[0])].join()})`); }
+    // DS (C H2, T M3; TG-C2, TG-C4, TG-T3): a full week with its story night: the plan stops before it; the walked texts are said and noted for the fold; a due beat stops the plan
+    Wk.WEEK_EVE.on = true;
+    try {
+        const at = (hub, sd, seed, fl = {}) => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, hub); g.minutes = (C.calStart(g, sd) - 1) * D + 7 * 60; g.james.satiety = 100; G.addItem(g, 'smoked_meat', 60); Object.assign(g.flags, { elder: true }, fl); return g; };
+        const walk = (g, hub, maxDay) => { const stops = [], lines = []; for (let k = 0; k < 300; k++) { if (Math.floor(g.minutes / D) + 1 > maxDay || g.combat) break; let r = null; if (g.scene === hub && Wk.planHere(g)) { r = Wk.runWeek(g, SCENES); for (const d of r.days) lines.push(...d.lines); stops.push(`${r.stop}@${g.scene}`); if (r.stop === 'week') break; } const v = sceneView(g, SCENES); if (v.end) break; const o = v.choices.filter((c) => !c.disabled && c.index < 1000 && !/^(Yuki: change form|Story Mode only)/.test(c.label)); if (!o.length || (g.scene === hub && !r)) break; Wk.storyTap(g, SCENES, o[0].index); Wk.afterStory(g, SCENES); } return { stops, lines }; };
+        { const g = at('wilds', 2, 99750); Wk.planEnsure(g); const w = walk(g, 'wilds', C.calEnd(g, 2) + 1);
+          assert(!w.stops.some((x) => /@night_event|@night_attack/.test(x)) && w.stops.filter((x) => x === 'evening@night').length >= 2, `${T} RV (DS, TG-C2): the forest's week: the plan stops at the story night's evening, never walks into its event (${w.stops.join(' ')})`); }
+        { const g = at('ashfall', 5, 99751, { long: true, vday: 2, cal_night: 1, ya_met: true }); Wk.planEnsure(g); const w = walk(g, 'ashfall', C.calEnd(g, 5) + 1);
+          const said = w.lines.join('\n'), q = w.lines.filter((l) => String(l).startsWith(Wk.QUIET_LINE));
+          const nightSaid = /herb loft|the loft|Yuki/.test(said) && q.length >= 3 && q.every((l) => !/^The plan takes the quiet way: Evening\. /.test(l) || true);
+          assert(q.length >= 3 && w.stops.some((x) => x === 'evening@supper' || x === 'evening@ashfall') && nightSaid && g.tasks.nf && Object.keys(g.tasks.nf).length > 0, `${T} RV (DS, TG-C4): Ashfall's arson week: quiet evenings said with their night texts, the fold record noted; the arson night stops (${w.stops.slice(-4).join(' ')})`); }
+        { const g = at('ashfall', 5, 99752, { long: true, vday: 2, cal_night: 1 }); Wk.planEnsure(g); g.tasks.plan.we = { c: `${g.coil?.n || 1}|${g.coil?.act || 0}`, sd: C.storyDay(g), d: -5 }; g.rel['Mei Lin'] = { f: 40, a: 40 };
+          g.minutes = (C.calStart(g, 5) - 1) * D + 17 * 60; goTo(g, SCENES, 'supper'); const at2 = g.flags.tb_mei30; const p = Wk.planHere(g) || g.tasks.plan; const ways = sceneView(g, SCENES).choices.filter((c) => !c.disabled && c.index < 1000);
+          const qi = Wk.weekEveQuiet(g, SCENES, p, ways); const safe = qi != null ? Wk.quietSafe(g, SCENES, 'ashfall', qi) : null;
+          assert(at2 > 0 && qi != null && safe === false, `${T} RV (DS, TG-T3): a supper showing a tier beat is never walked past (${at2}, ${qi}, ${safe})`); }
+        // TG-C3 (F4): the old calendar, a second evening too; TG-C7 (FC6): no evening line off the evening hubs; TG-T4: the report line
+        { const o = mk(99753, {}, 0); o.scene = 'supper'; const ways = [{ index: 2, label: 'Go up to the loft early. Tomorrow will want everything you have.' }, { index: 0, label: 'Climb out onto the roof with Mei Lin and watch the stars come out.' }]; const pp = {}; const a = Wk.weekEveQuiet(o, SCENES, pp, ways); if (pp.we) pp.we.d = -5; const b = Wk.weekEveQuiet(o, SCENES, pp, ways);
+          const lf = at('lf_hub', 2, 99754); Wk.planEnsure(lf);
+          assert(a === null && b === null && !Wk.planNotes(lf, SCENES).eve && Wk.QUIET_LINE === 'The plan takes the quiet way: ', `${T} RV (TG-C3, TG-C7, TG-T4): the old calendar never; no evening line on the Long Forest; the report line's wording`); }
+    } finally { Wk.WEEK_EVE.on = false; }
+    // the review's missed faults (F6, F24, F26, FC3, FC4) and YM-A (the owner 23:05: YM-f)
+    Wk.WEEK_EVE.on = true;
+    try {
+        const vil = (seed, fl = {}) => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'ashfall'); Object.assign(g.flags, { long: true, vday: 2, cal_night: 1, elder: true }, fl); g.minutes = (C.calStart(g, 5) - 1) * D + 7 * 60; g.james.satiety = 100; G.addItem(g, 'smoked_meat', 60); return g; };
+        // F6: the walk stops at a screen with a real choice; FC3: a walked night screen's text is said
+        { const g = vil(99770); g.minutes = (C.calStart(g, 5) + 1) * D + 19 * 60; goTo(g, SCENES, 'supper'); const said = []; Wk.walkQuiet(g, SCENES, 'ashfall', (l) => said.push(...l));
+          const h = vil(99771); h.minutes = (C.calStart(h, 5) + 1) * D + 21 * 60; goTo(h, SCENES, 'village_night'); const v = sceneView(h, SCENES); const one = v.choices.filter((c) => !c.disabled && c.index < 1000 && !/^(Yuki: change form|Story Mode only)/.test(c.label)).length === 1; const said2 = []; Wk.walkQuiet(h, SCENES, 'ashfall', (l) => said2.push(...l));
+          assert(g.scene === 'supper' && !said.length && one && said2[0] === v.text && h.scene !== 'village_night', `${T} RV (F6, FC3): the walk never takes a real choice; a walked night's text said first (${g.scene}, ${said.length}; ${h.scene}, ${String(said2[0]).slice(0, 40)})`); }
+        // F24: a beat due on the walk (the supper after the hub's quiet way) makes it unsafe
+        { const mkHub = (a) => { const g = vil(99772); g.rel['Mei Lin'] = { f: 40, a }; g.minutes = (C.calStart(g, 5) + 1) * D + 17 * 60; goTo(g, SCENES, 'ashfall'); const v = sceneView(g, SCENES); const qi = v.choices.find((c) => /^Evening\. Go home to Mei Lin's\./.test(c.label))?.index; return Wk.quietSafe(g, SCENES, 'ashfall', qi); };
+          assert(mkHub(40) === false && mkHub(10) === true, `${T} RV (F24): a beat on the walk stops it; none, the walk is safe (${mkHub(40)}, ${mkHub(10)})`); }
+        // F26 (C L1): an evening screen after midnight belongs to the waking day's story-week
+        { const g = vil(99773); g.minutes = C.calEnd(g, 5) * D + 30; g.scene = 'supper'; const pp = {}; const ways = [{ index: 2, label: 'Go up to the loft early. Tomorrow will want everything you have.' }, { index: 0, label: 'Climb out onto the roof with Mei Lin and watch the stars come out.' }];
+          Wk.weekEveQuiet(g, SCENES, pp, ways); assert(C.storyDay(g) === 6 && pp.we?.sd === 5, `${T} RV (F26, C L1): 00:30 after story day 5's last day is still its week (${C.storyDay(g)}, ${JSON.stringify(pp.we)})`); }
+        // FC4: the supper's own text said when the plan takes its quiet way
+        { const g = vil(99774); Wk.planEnsure(g); g.tasks.plan.we = { c: `${g.coil?.n || 1}|${g.coil?.act || 0}`, sd: 5, d: -5 }; const lines = []; for (let k = 0; k < 6 && lines.filter((l) => String(l).startsWith(Wk.QUIET_LINE)).length < 2; k++) { const r = Wk.runWeek(g, SCENES); for (const d of r.days) lines.push(...d.lines); if (r.stop !== 'read') break; }
+          const i1 = lines.findIndex((l) => /^The plan takes the quiet way: Evening\./.test(l)), i2 = lines.findIndex((l) => /^The plan takes the quiet way: Go up to the loft early/.test(l));
+          assert(i1 >= 0 && i2 > i1 && lines.slice(i1 + 1, i2).some((l) => String(l).length > 120 && !/satiety/.test(l)), `${T} RV (FC4): the supper's text said between the hub's quiet way and the supper's (${i1}, ${i2})`); }
+        // F6: the arson night's real choice is never walked past
+        { const g = vil(99782, { cal_night: 6 }); g.minutes = (C.calEnd(g, 5) - 1) * D + 21 * 60; goTo(g, SCENES, 'village_night'); const n = sceneView(g, SCENES).choices.filter((c) => !c.disabled && c.index < 1000).length; const said = []; const ok = Wk.walkQuiet(g, SCENES, 'ashfall', (l) => said.push(...l));
+          assert(n >= 2 && ok === true && g.scene === 'village_night' && !g.combat && !said.length, `${T} RV (F6, TG-C2): the arson night's choice stays the player's (${n}, ${g.scene})`); }
+        // F29: the repeated answer is taken only when its night is safe (a Ya beat due at the Fallout's night: the plan stops)
+        { const run = (a) => { const g = ensureBars(newGame(99783, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'fo_ashfall'); Object.assign(g.flags, { ya_met: true, palisade: 1, wolf: 'driven', elder: true }); g.rel.Ya = { f: 40, a }; g.minutes = (C.calStart(g, 9) + 1) * D + 7 * 60; g.james.satiety = 100; G.addItem(g, 'smoked_meat', 60);
+            Wk.planEnsure(g); g.tasks.evc = { fo_supper: 1 }; g.tasks.evd = { fo_supper: 9 }; let r; const lines = []; for (let k = 0; k < 5; k++) { r = Wk.runWeek(g, SCENES); for (const d of r.days) lines.push(...d.lines); if (r.stop !== 'read') break; } return { r, g, again: lines.filter((l) => String(l).startsWith(Wk.AGAIN_LINE)).length }; };
+          const hot = run(50), cold = run(10);
+          assert(hot.r.stop === 'evening' && hot.g.scene === 'fo_supper' && hot.again === 0 && !hot.g.flags.tb_ya45 && cold.again >= 2, `${T} (YM-A, F29): the manners answered "As before" on quiet nights (${cold.again}); with Ya's beat due the plan stops at the supper (${hot.r.stop}, ${hot.g.scene})`); }
+        // YM-A (YM-f): Ya's manners on the Fallout's day-9 week answered as on its first evening
+        { const g = ensureBars(newGame(99775, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'fo_ashfall'); Object.assign(g.flags, { ya_met: true, palisade: 1, wolf: 'driven' }); g.minutes = (C.calStart(g, 9) + 2) * D + 19 * 60; goTo(g, SCENES, 'fo_supper');
+          const ways = sceneView(g, SCENES).choices.filter((c) => !c.disabled && c.index < 1000); const p = { we: null };
+          const none = Wk.weekEveAgain(g, SCENES, p, ways); Wk.noteEvening(g, 'fo_supper', 1); const again = Wk.weekEveAgain(g, SCENES, p, ways);
+          g.tasks.evd.fo_supper = 8; const old = Wk.weekEveAgain(g, SCENES, p, ways); g.tasks.evd.fo_supper = 9;
+          const plain = [{ index: 0, label: 'Help clear the table.' }, { index: 1, label: 'Go up to the loft early.' }]; const other = Wk.weekEveAgain(g, SCENES, p, plain);
+          Wk.WEEK_EVE.on = false; const off = Wk.weekEveAgain(g, SCENES, p, ways); Wk.WEEK_EVE.on = true;
+          assert(ways.length === 2 && ways.every((c) => Wk.AGAIN_EVE.fo_supper.test(c.label)) && none === null && again === 1 && old === null && other === null && off === null, `${T} (YM-A): the manners evening answered as this week's first, never another week's, never another screen, never switched off (${[none, again, old, other, off].join()})`); }
+    } finally { Wk.WEEK_EVE.on = false; }
+    // FY (T M1; TG-T1): Yuki's road line only when neither woman likes him
+    { const end = (rel) => { const g = mk(99760, { final_night: 'yuki', a1_outcome: 'taken' }); Object.assign(g.rel, rel); return tx(g, 'a1_end'); };
+      assert(end({}).includes(RT.FR_TEXT.end_yuki) && !end({ 'Mei Lin': { f: 60, a: 90 } }).includes(RT.FR_TEXT.end_yuki) && !end({ Ya: { f: 60, a: 90 } }).includes(RT.FR_TEXT.end_yuki), `${T} RV (FY, TG-T1): Yuki's road line only with neither woman liked`); }
+    // TG-T2 (T M2): no two romance texts open on the same four words
+    { const all = [...Object.values(RT.TB_TEXT), ...Object.values(RT.RL_TEXT).flat(), ...Object.values(RT.DP_TEXT), ...Object.values(RT.EC_TEXT), ...Object.values(RT.FR_TEXT)];
+      const head = (t) => String(t).toLowerCase().replace(/[^a-z' ]/g, ' ').split(/\s+/).filter(Boolean).slice(0, 4).join(' '); const seen = new Map(); const dup = [];
+      for (const t of all) { const h = head(t); if (seen.has(h)) dup.push(h); seen.set(h, t); }
+      assert(!dup.length && !/under the table/i.test(RT.DP_TEXT.hand) && !/\bas (a|if)\b/i.test(RT.DP_TEXT.hand), `${T} RV (TG-T2, T M2): no two romance texts share an opening; Ya's supper line not Mei Lin's frame (${dup.join(' | ')})`); }
+    { const N = await import('../js/core/news.js'); assert(/0\.11\.250/.test(JSON.stringify(N.NOTES)), `${T}: What's new has 0.11.250`); }
 }
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

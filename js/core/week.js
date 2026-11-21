@@ -134,6 +134,112 @@ export function noteReadTap(g, scenes, id, r = null) {
     if (grp === 'door') { const s = k.slice(5); p.done.doors[s] = (p.done.doors[s] || 0) + 1; if (!doorRepeats(s)) { if (isRec(p.doors)) p.doors[s] = 0; keepTaken(g, p.hub, s); } return; }
     p.done[grp] = (p.done[grp] || 0) + 1; // sit, mer, qi, pres, rest
 }
+/* ---------- v0.11.250 (owner pick P20-A, WE; TS5's weekly evening; `project/research/p20-measure.md` §2) ----------
+ * On a stay of the long calendar the plan stops for the evening once a story-week: the first evening it reaches with a quiet way
+ * (`p.we` = { c: Coil, sd: story day, d: waking day } of that evening; every screen of that evening stays the player's). Every other
+ * evening it takes the quiet way itself, as a tap would: home and the loft early (Ashfall's supper, the Fallout's), the watch (the
+ * forest's night), the camp and its sleep (the Old Tree). Only on an ordinary evening: the screen's ways on are its quiet way and the
+ * usual ones (`also`); any other way (an event, a fight, a new label) stops the plan as before. The screen's text is said in the
+ * day's lines, as a door's walked screen. `WEEK_EVE.on`: the tests from before v0.11.250 pin the plan without it.
+ * Forecast (the options' trial): evening stops 244 / 244 / 103 / 84 → about 24 / 24 / 11 / 10; built with RV-A's DS (below; 10 games, long,
+ * Careful / Sociable / Completionist / Cultivator): 67 / 66 / 43 / 34 (the free evening is two screens at Ashfall; story nights,
+ * beats and Ya's manners on the Fallout's day 9 stop). */
+export const WEEK_EVE = { on: true };
+export const QUIET_WAY = {
+    ashfall: { quiet: /^Evening\. Go home to Mei Lin's\./, also: /^Walk with Mei Lin at sunset\./ },
+    supper: { quiet: /^Go up to the loft early\./, also: /^(Climb out onto the roof with Mei Lin|Help her mother with the dishes)/ },
+    night: { quiet: /^Leave a thread on watch and sleep\./, also: /^Just sleep\./ },
+    fo_supper: { quiet: /^Go up to the loft early\./, also: /^Help clear the table\./ },
+    heart_hub: { quiet: /^Make camp for the night\./, also: /^(Rest an hour\.|Eat something\.)/ },
+    heart_camp: { quiet: /^Sleep\.$/, also: /^(Talk with Mei Lin by the fire\.|Climb up to Ya's ledge\.|Sit up with Yuki and the hearth-log\.)/ },
+};
+/** v0.11.250 (the owner's pick YM-A, 23:05: YM-f): an evening with no quiet way whose choices come back every evening of its week (Ya's
+ *  manners at the Fallout's supper, story day 9): from the week's second such evening the plan answers as the player did on its first,
+ *  said "As before: …" (as a talk's), when the walk after it is safe (`quietSafe`); the first stays the player's. */
+export const AGAIN_EVE = { fo_supper: /^("Ya\. Manners\."|Laugh\. Out loud\.)/ };
+/** YM-f: the answer to repeat here (the player's on this story-week's first such evening, `g.tasks.evc` / `evd`), or null. */
+export function weekEveAgain(g, scenes, p, ways) {
+    if (!WEEK_EVE.on || !isRec(p) || !longCal(g) || !STAY_DAYS.has(storyDay(g))) return null;
+    const re = AGAIN_EVE[g.scene];
+    if (!re || !scenes[g.scene] || !ways.length || !ways.every((c) => c.index < 1000 && re.test(String(c.label)))) return null;
+    const t = g.tasks || {}, i = t.evc?.[g.scene];
+    if (!(i >= 0) || t.evd?.[g.scene] !== storyDayOf(g, workDay(g) + 1) || !ways.some((c) => c.index === i) || !plainChoice(scenes[g.scene].choices[i])) return null;
+    return i;
+}
+export const QUIET_LINE = 'The plan takes the quiet way: '; // RV-A (T L): was 'A quiet evening: ' ("A quiet evening: Evening. Go home…")
+/** WE: the quiet way's choice index to take on this evening screen, or null (the plan stops: the week's free evening, or not an ordinary one).
+ *  Sets `p.we` on the week's free evening. `ways`: the screen's ways on (the hub's stops on a hub). */
+export function weekEveQuiet(g, scenes, p, ways) {
+    if (!WEEK_EVE.on || !isRec(p) || !longCal(g) || !STAY_DAYS.has(storyDay(g))) return null;
+    const q = QUIET_WAY[g.scene];
+    if (!q || !scenes[g.scene]) return null;
+    const lab = (c) => String(c.label);
+    const qs = ways.filter((c) => c.index < 1000 && q.quiet.test(lab(c)));
+    if (qs.length !== 1 || !ways.every((c) => q.quiet.test(lab(c)) || q.also.test(lab(c)))) return null;
+    if (!plainChoice(scenes[g.scene].choices[qs[0].index])) return null;
+    const c = coilKey(g), d = workDay(g), sd = storyDayOf(g, d + 1); // RV-A (C L1): the waking day's story day (the calendar's turns at midnight, the waking day at 04:00)
+    if (!isRec(p.we) || p.we.c !== c || p.we.sd !== sd) { p.we = { c, sd, d }; return null; } // the week's first: the player's evening
+    if (p.we.d === d) return null; // the same evening, its later screens: still the player's
+    return qs[0].index;
+}
+/** WE: after the quiet way, the rest of the quiet evening and night to the hub: the folded screens as the fold walks them, then each
+ *  night screen with one plain way on said (its text) and taken, as a door's walked screen; a screen with a choice, a check or a fight
+ *  stops the walk (the plan's stop as before). Returns false when a fight began. */
+export function walkQuiet(g, scenes, hub, say) {
+    for (let k = 0; k < 8 && g.scene !== hub && !g.combat && NIGHT_SCENES.has(g.scene) && scenes[g.scene]; k++) {
+        const fo = foldNight(g, scenes); say(fo.lines);
+        if (g.combat) return false;
+        if (g.scene === hub || !NIGHT_SCENES.has(g.scene)) break;
+        const v = sceneView(g, scenes);
+        if (v.end) break;
+        const open = v.choices.filter((c) => !c.disabled && !META.test(String(c.label)));
+        if (!(open.length === 1 && open[0].index < 1000 && plainChoice(scenes[g.scene].choices[open[0].index]))) break;
+        if (QUIET_WAY[g.scene]) break; // an evening screen of its own (the next evening's): the plan's step decides it
+        say([String(v.text || '')].filter(Boolean));
+        const from = g.scene, m = g.minutes;
+        noteWalked(g, v);
+        const r = choose(g, scenes, open[0].index); say(r.lines || []);
+        if (r.combat) return false;
+        if (g.scene === from && g.minutes === m) break;
+    }
+    return true;
+}
+/** WE: a screen the quiet walk said: noted as the fold notes one (its text last shown), so the next same night folds (the fold's own
+ *  note is skipped where its guards stop it first: off a stay's days). */
+function noteWalked(g, v) { if (!FOLD_SCENES.has(g.scene)) return; const t = taskState(g); if (!isRec(t.nf)) t.nf = {}; t.nf[g.scene] = hash(v.text); }
+/* RV-A (DS; the cold review's C H2 and T M3): the quiet way is taken only when, on a copy, it walks back to the hub with no story
+ * screen, fight or romance text on the way (a week's story night, the arson, the tribute's eve, Ya's arrival, a tier beat, the
+ * remembered line, an echo): there the plan stops for the player as before. */
+/** The quiet way's index on this screen by its labels alone (no free-evening bookkeeping), or null. */
+function quietIndex(g, scenes, ways) {
+    const q = QUIET_WAY[g.scene]; if (!q || !scenes[g.scene]) return null;
+    const lab = (c) => String(c.label);
+    const qs = ways.filter((c) => c.index < 1000 && q.quiet.test(lab(c)));
+    if (qs.length !== 1 || !ways.every((c) => q.quiet.test(lab(c)) || q.also.test(lab(c))) || !plainChoice(scenes[g.scene].choices[qs[0].index])) return null;
+    return qs[0].index;
+}
+/** The marks romance.js sets when a beat, the remembered line or an echo is shown (the walk would show it). */
+export const ROMANCE_MARKS = ['tb_mei30', 'tb_mei72', 'tb_ya45', 'tb_ya72', 'rl_mei'];
+const romanceMarks = (g) => JSON.stringify([...ROMANCE_MARKS.map((k) => g.flags?.[k] ?? null), g.coil?.ec || null]);
+/** Does this screen show one of them now (its mark is this visit's, romance.js `g.cv`)? */
+const romanceNow = (g) => { const v = g.cv?.[g.scene]; if (v == null) return false; const fl = g.flags || {}; return ROMANCE_MARKS.some((k) => fl[k] > 0 && fl[k] === v) || Object.values(g.coil?.ec || {}).some((r) => r && r.m === v); };
+/** The quiet evening on a copy: true when it walks back to the hub with no story screen, fight or romance text on the way. */
+export function quietSafe(g, scenes, hub, qi) {
+    if (romanceNow(g)) return false;
+    let c; try { c = probeClone(g); } catch { return false; }
+    const m0 = romanceMarks(c);
+    let idx = qi;
+    for (let k = 0; k < 4; k++) {
+        const r = choose(c, scenes, idx);
+        if (r.combat || c.combat || !walkQuiet(c, scenes, hub, () => {})) return false;
+        if (c.scene === hub) return romanceMarks(c) === m0;
+        if (!NIGHT_SCENES.has(c.scene)) return false;
+        idx = quietIndex(c, scenes, TASK_HUBS[c.scene] ? hubStops(c, scenes) : waysOn(c, scenes));
+        if (idx == null) return false;
+    }
+    return false;
+}
+
 /** The stops after which the plan keeps running (it goes on by itself once the story is back on the hub). */
 const GOES_ON = new Set(['evening', 'door']);
 const hash = (t) => fnv1a(String(t || '').replace(/\d+/g, '#').replace(NUM_WORDS, '#')); // the day's numbers ("Day 45. 48 days to the Elder.") don't make a night new; v0.11.224 (RV1, VK): nor in words ("Day fifty-one. Fifty-two days")
@@ -493,6 +599,30 @@ export function runWeek(g, scenes, { max = 600, onStep = null, probe = true, rel
                 const st = hubStops(g, scenes);
                 if (st.length === 1 && !scenes[g.scene].choices[st[0].index]?.combat) { const r = choose(g, scenes, st[0].index); say(r.lines || []); if (r.combat) return end('story'); if (g.scene !== s0 || g.minutes !== m0) continue; }
             }
+            if (NIGHT_SCENES.has(g.scene)) { // v0.11.250 (P20-A, WE): an ordinary evening past the week's first: its quiet way
+                const ways = TASK_HUBS[g.scene] ? hubStops(g, scenes) : waysOn(g, scenes);
+                const qi = weekEveQuiet(g, scenes, p, ways);
+                if (qi != null && quietSafe(g, scenes, hub, qi)) { // RV-A (DS)
+                    if (!TASK_HUBS[g.scene]) say([String(sceneView(g, scenes).text || '')].filter(Boolean));
+                    say([`${QUIET_LINE}${ways.find((c) => c.index === qi).label}`]);
+                    const r = choose(g, scenes, qi); say(r.lines || []);
+                    if (r.combat || !walkQuiet(g, scenes, hub, say)) return end('story');
+                    if (g.scene !== s0 || g.minutes !== m0) continue;
+                    return end('stuck');
+                }
+            }
+            if (NIGHT_SCENES.has(g.scene)) { // v0.11.250 (YM-A, YM-f): the week's repeated event evening answered as on its first
+                const ways = waysOn(g, scenes);
+                const ai = weekEveAgain(g, scenes, p, ways);
+                if (ai != null && quietSafe(g, scenes, hub, ai)) {
+                    say([String(sceneView(g, scenes).text || '')].filter(Boolean));
+                    say([`${AGAIN_LINE}${ways.find((c) => c.index === ai).label}`]);
+                    const r = choose(g, scenes, ai); say(r.lines || []);
+                    if (r.combat || !walkQuiet(g, scenes, hub, say)) return end('story');
+                    if (g.scene !== s0 || g.minutes !== m0) continue;
+                    return end('stuck');
+                }
+            }
             return end(NIGHT_SCENES.has(g.scene) ? 'evening' : 'story');
         }
         p = planHere(g);
@@ -593,6 +723,16 @@ export function runWeek(g, scenes, { max = 600, onStep = null, probe = true, rel
         }
         say(dayMeal(g, hub, scenes)); say(takeSpoilNotes(g)); // the evening's meal before the evening (RV1, M1: and what turned)
         const stops = hubStops(g, scenes);
+        if (stops.length > 1) { // v0.11.250 (P20-A, WE): an ordinary evening past the week's first: the hub's quiet way
+            const qi = weekEveQuiet(g, scenes, p, stops);
+            if (qi != null && quietSafe(g, scenes, hub, qi)) { // RV-A (DS)
+                say([`${QUIET_LINE}${stops.find((c) => c.index === qi).label}`]);
+                const r = choose(g, scenes, qi); say(r.lines || []);
+                if (r.combat || !walkQuiet(g, scenes, hub, say)) return end('story');
+                if (g.minutes === m0 && g.scene === s0) return end('stuck');
+                continue;
+            }
+        }
         if (stops.length !== 1) return end(stops.length ? 'evening' : 'stuck');
         // RV1 (L4, L5): the one way on is taken only when it is the usual evening: not a fight, not the Fallout's farewell, not a new label
         const sc = scenes[g.scene].choices[stops[0].index];
@@ -631,6 +771,7 @@ export function noteEvening(g, sceneId, index) {
     const t = taskState(g);
     if (!isRec(t.evc)) t.evc = {};
     t.evc[sceneId] = index;
+    if (WEEK_EVE.on) { if (!isRec(t.evd)) t.evd = {}; t.evd[sceneId] = storyDayOf(g, workDay(g) + 1); } // v0.11.250 (YM-A): the story-week it was taken in (new, additive)
 }
 /** v0.11.210 (owner pick RV1, L2 as the owner set it, 12:25: "It should take the choice I took before, that's ok, but the first time
  *  should stop, so I can choose. Also, choice resets per coil."; 12:39: "yes, repeat talks should be also answered, unless a new option
@@ -780,5 +921,7 @@ export function planNotes(g, scenes) {
     const total = h ? `Cards ${durText(h.work)}; ${durText(h.left)} left to the evenings this week.` : '';
     const then = fc ? ` Fed ${fc.fed}, HP ${fc.hp}/${fc.hpMax} then.` : '';
     const outlook = !fc ? '' : fc.stop === 'week' ? `Forecast: it runs to the week's end (${whenText(fc.minutes)}).${then}` : `Forecast: it stops ${whenText(fc.minutes)}: ${FORECAST_TEXT[fc.stop] || fc.stop}.${then}`;
-    return { rows, med: mt, total, outlook };
+    // v0.11.250 (P20-A, WE): the plan's evening rule, on a stay hub whose evenings have a quiet way (the long calendar's)
+    const eve = WEEK_EVE.on && weekHub(g) ? 'Evenings: it stops for the week\'s first, and for any evening where something happens; the others take the quiet way (home, the loft early, the watch, sleep).' : '';
+    return { rows, med: mt, total, outlook, eve };
 }

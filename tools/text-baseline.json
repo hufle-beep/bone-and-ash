@@ -329,11 +329,11 @@
    "spacing": 0
   },
   "romance": {
-   "lines": 15,
-   "words": 1073,
+   "lines": 24,
+   "words": 1516,
    "dupes": 0,
    "sceneShared": 0,
-   "tics": 0,
+   "tics": 1,
    "broken": 0,
    "spacing": 0
   },

@@ -1,0 +1,6 @@
+fr:taken_ya | Ya strides out onto the Sect's road and plants her spear in it, in front of every crimson robe. "Keep him fed, red men," she says. "I track what's mine. Scholar, don't get comfortable."
+fr:end_yuki | Down there, Ashfall keeps its one light, and you are not looking for anyone under it. The one you love was never going to be left behind. She is here, and unimpressed by the Sect's hospitality.
+# notes
+- fr:taken_ya: 35 words. If rt_taken ¶4 ("Ya spits on the Sect's road and walks into the forest without a backward glance") still shows after this line, the two read as a sequence (threat, then exit); if it reads doubled, ¶4's Ya sentence may want dropping in this case. The spear planted in the road is assumed to be fine with the Sect not reacting on screen.
+- fr:end_yuki: 39 words. Names no form and gives Yuki no speech, so it needs no {yuki} split. Assumes the surrounding a1_end text (not in my packet for the taken route) has already set the road and Ashfall's light below; "its one light" leans on that.
+- "red men" is Ya's own rude name for the disciples; swap for "robes" if canon wants none coined.

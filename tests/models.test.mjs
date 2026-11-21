@@ -50,7 +50,7 @@ import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTION
 import { INC_ONLY_ACTIONS, actionOpen } from '../js/core/forms.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
 import { isTaskHub, isTaskChoice, taskCards, taskOpen, runTask, taskState, setYuki, yukiLane, weekHub, isCarryTask } from '../js/core/tasks.js';
-import { foldNight, runWeek, planHere, planEnsure, planSet, weekResume, noteReadTap } from '../js/core/week.js'; // v0.11.204 (owner pick W1, B1): the bots plan by the week
+import { foldNight, runWeek, planHere, planEnsure, planSet, weekResume, noteReadTap, noteEvening } from '../js/core/week.js'; // v0.11.204 (owner pick W1, B1): the bots plan by the week
 import { medCards, runMed, canMeditate } from '../js/core/meditate.js';
 import { writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { noFold, OUTCOME_SCENES, againView, noteRead, noteLines } from '../js/story/again.js'; // v0.11.132 (E1, RP); v0.11.133 (FP2): noteRead
@@ -244,7 +244,7 @@ function play(run, model, st, yuki, kept = false) {
     }
     const cn = () => g.coil.n - off;
     let mem = { done: {}, tried: new Set(), tribLost: 0, shenBites: 0, st }; // v0.11.142 (CV1): st for the spare-time count
-    let coilKey = '', deadKey = '', takenKey = '', nightKey = '', crossed = false, bitShen = false;
+    let coilKey = '', deadKey = '', takenKey = '', nightKey = '', crossed = false, bitShen = false; const gateKey = {}; // v0.11.250 (P20-A, RN L4)
     let lastShown = null; // v0.11.134 (LP2, SV)
     const seenTrib = new Set();
     const maxSteps = (model === 'sitter' ? STEPS_SITTER : STEPS) * (kept ? 2 : 1);
@@ -264,6 +264,10 @@ function play(run, model, st, yuki, kept = false) {
         if (g.scene === 'coil_end' && (g.coil.why === 'collapse' || g.coil.why === 'beast') && deadKey !== coilKey) {
             deadKey = coilKey; row.dead++; if (g.coil.why === 'beast') row.beast++; else if (g.james.satiety <= 0) row.starve++;
         }
+        // v0.11.250 (owner pick P20-A, RN: the review's L4, GT1c caps friendship too): the story's two friendship gates, at their screens
+        // (prologue.js `epilogue`: Mei Lin's friendship > 10; act1_return.js `rt_road`: Ya's ≥ 20), once a Coil each; the long calendar's
+        // smart models meet both on every visit (p20-measure.md §6: 40 of 40, lowest 37 and 61)
+        for (const [sc, who, ok] of GATES) if (g.scene === sc && gateKey[sc] !== coilKey) { gateKey[sc] = coilKey; const f = g.rel?.[who]?.f || 0; const gt = st.gates[sc] || (st.gates[sc] = { n: 0, met: 0 }); gt.n++; if (ok(f)) gt.met++; gt.maxNeg = Math.max(gt.maxNeg ?? -Infinity, -f); } // the lowest as -max (shards merge a `max…` by its max)
         // v0.11.130 (owner pick YB1, LN): the last night taken, once a Coil (g.flags.final_night: Act 1's last evening)
         if (g.flags.final_night && nightKey !== coilKey) { nightKey = coilKey; const k = NIGHT_KIND[g.flags.final_night] || 'other'; st.nights[k] = (st.nights[k] || 0) + 1; }
         const tOut = { bluff_win: 'won', collectors_won: 'won', tribute_paid: 'paid', collectors_lost: 'lost' }[g.scene];
@@ -289,7 +293,7 @@ function play(run, model, st, yuki, kept = false) {
             if (!w) { assert(false, `${model}: no whole-game bite at a1_again after a won Act 1 (run ${run})`); return 'stuck'; }
             choose(g, SCENES, w.index); real.keptStart = (real.keptStart || 0) + g.james.realm;
             st = real; mem = { done: {}, tried: mem.tried, tribLost: 0, shenBites: 0, st }; off = g.coil.n - 1;
-            coilKey = ''; deadKey = ''; takenKey = ''; nightKey = ''; crossed = false; bitShen = false; seenTrib.clear(); lastShown = null;
+            coilKey = ''; deadKey = ''; takenKey = ''; nightKey = ''; crossed = false; bitShen = false; seenTrib.clear(); lastShown = null; for (const k of Object.keys(gateKey)) delete gateKey[k];
             continue;
         }
         if (v.end || g.scene === 'a1_end') {
@@ -355,7 +359,7 @@ function play(run, model, st, yuki, kept = false) {
                 continue;
             }
             const i = storyPick(model, g, stops, mem); mem.tried.add(`${g.scene}:${i}`);
-            { const cr = choose(g, SCENES, i); if (CAL) noteLines(g, cr.lines); runCombat(g, cr, st, smart); } st.taps.story++; // v0.11.214 (RD1): the long calendar reads the result
+            { if (CAL) noteEvening(g, g.scene, i); /* v0.11.250 (YM-A): an evening's choice noted, as main.js storyTap */ const cr = choose(g, SCENES, i); if (CAL) noteLines(g, cr.lines); runCombat(g, cr, st, smart); } st.taps.story++; // v0.11.214 (RD1): the long calendar reads the result
             if (CAL && !g.combat) st.taps.fold += foldNight(g, SCENES).steps; // v0.11.204 (W1, R3): as main.js does after a story choice
             continue;
         }
@@ -370,7 +374,7 @@ function play(run, model, st, yuki, kept = false) {
         if (g.scene === 'coil_end' && g.coil.why === 'shen') open = open.filter((c) => /start of Act 1/.test(c.label));
         if (!open.length) { assert(false, `${model}: no choice left at ${g.scene} (run ${run})`); return 'stuck'; }
         const i = storyPick(model, g, open, mem); mem.tried.add(`${g.scene}:${i}`);
-        { const cr = choose(g, SCENES, i); if (CAL) noteLines(g, cr.lines); runCombat(g, cr, st, smart); } st.taps.story++; // v0.11.214 (RD1): the long calendar reads the result
+        { if (CAL) noteEvening(g, g.scene, i); /* v0.11.250 (YM-A): an evening's choice noted, as main.js storyTap */ const cr = choose(g, SCENES, i); if (CAL) noteLines(g, cr.lines); runCombat(g, cr, st, smart); } st.taps.story++; // v0.11.214 (RD1): the long calendar reads the result
         if (CAL && !g.combat) st.taps.fold += foldNight(g, SCENES).steps; // v0.11.204 (W1, R3)
         if (careLike(model) && g.james.satiety < 30 && foodLeft(g)) { // RV1 (HN): the Sociable too; v0.11.163 (owner pick HN1): where, and how low
             st.hungry++; st.hungryAt[g.scene] = (st.hungryAt[g.scene] || 0) + 1;
@@ -388,7 +392,9 @@ const NIGHT_ORDER = ['quiet', 'Mei Lin', 'Ya', 'trio', 'Yuki', 'other'];
 const ENDING_ORDER = ['accord', 'revelation', 'victory', 'taken', 'none']; // v0.11.132 (E1, EB): g.flags.a1_outcome (act1_return.js)
 const CULT_KINDS = ['sit', 'mer', 'qi', 'bt']; // v0.11.142 (CV1)
 const CULT_NAMES = { sit: 'sits', mer: 'meridians', qi: 'gather Qi', bt: 'breakthroughs' };
-const blank = () => ({ taps: { story: 0, card: 0, set: 0, run: 0, fold: 0 }, weekStops: {}, hungryAt: {}, hungryFed: {}, cult: {}, endRealm: {}, spare: 0, nights: {}, games: 0, finished: 0, gaveUp: 0, stuck: 0, cards: 0, work: 0, forced: 0, oneCoil: 0, hungry: 0, cuAhead: 0, deaths: {}, tribute: {}, prologueClear: {}, act1Clear: {}, endings: {}, fights: {} });
+/** v0.11.250 (P20-A, RN L4): the story's friendship gates (scene, person, the test). */
+const GATES = [['epilogue', 'Mei Lin', (f) => f > 10], ['rt_road', 'Ya', (f) => f >= 20]];
+const blank = () => ({ gates: {}, taps: { story: 0, card: 0, set: 0, run: 0, fold: 0 }, weekStops: {}, hungryAt: {}, hungryFed: {}, cult: {}, endRealm: {}, spare: 0, nights: {}, games: 0, finished: 0, gaveUp: 0, stuck: 0, cards: 0, work: 0, forced: 0, oneCoil: 0, hungry: 0, cuAhead: 0, deaths: {}, tribute: {}, prologueClear: {}, act1Clear: {}, endings: {}, fights: {} });
 const all = {};
 const playInto = (st, run, m, yuki, kept = false) => { st.games++; const r = play(run, m, st, yuki, kept); if (r === 'end') st.finished++; else if (r === 'stuck') st.stuck++; };
 for (const m of PLAY) {
@@ -471,6 +477,7 @@ for (const [m, st] of Object.entries(all)) {
     if (CAL) { const t = st.taps, n = Math.max(1, st.games), a = (x) => (x / n).toFixed(0); console.log(`  taps a game: ${a(t.story + t.card + t.set + t.run)} (story ${a(t.story)}, cards ${a(t.card)}, the week's plan ${a(t.set + t.run)}: counts ${a(t.set)}, runs ${a(t.run)}) · quiet-night screens walked ${a(t.fold)} · the plan's stops: ${Object.entries(st.weekStops).sort((x, y) => y[1] - x[1]).map(([k, v]) => `${k} ${a(v)}`).join(', ') || '—'}`); } // v0.11.204 (W1, B1)
     if (st.idle) console.log(`  long calendar: ${(st.idle / Math.max(1, st.games)).toFixed(1)} idle hours a game (nothing fresh left on a task screen before evening)`); // v0.11.203 (T1, TS8)
     console.log(`  days: tribute Day ${st.tribN ? (st.tribDay / st.tribN).toFixed(1) : '—'} (n ${st.tribN || 0}) · Act 1's end Day ${st.endN ? (st.endDay / st.endN).toFixed(1) : '—'} (n ${st.endN || 0})${CAL ? ' · the long calendar' : ''}`); // v0.11.203 (T1, TS8)
+    if (Object.keys(st.gates || {}).length) console.log(`  friendship gates (P20-A, RN L4): ${GATES.filter(([sc]) => st.gates[sc]?.n).map(([sc, who]) => `${sc} ${who} ${st.gates[sc].met} of ${st.gates[sc].n} (lowest ${-st.gates[sc].maxNeg})`).join(' · ')}`);
     console.log(`  last nights: ${nt ? NIGHT_ORDER.filter((k) => k !== 'other' || st.nights.other).map((k) => `${k} ${st.nights[k] || 0}`).join(' / ') + ` (of ${nt} last evenings)` : '—'}`);
 }
 if (JSON_OUT) writeFileSync(JSON_OUT, JSON.stringify(all));
@@ -507,6 +514,7 @@ if (CAL && !SHARD) for (const [m, st] of Object.entries(all)) {
     if (m === 'random' || /:/.test(m) || st.games < 10) continue;
     assert(st.taps.set < st.taps.run, `${m} (--cal 7; v0.11.225, LO2 BK): the kept amounts: fewer count taps than runs (${st.taps.set} / ${st.taps.run}; every week afresh before: Careful 162 / 101 a game)`);
     assert((st.weekStops.week || 0) > 0 && (st.weekStops.breakthrough || 0) > 0, `${m} (--cal 7): the plan's weeks end and it stops for a breakthrough (${JSON.stringify(st.weekStops)})`);
+    for (const [sc, who] of GATES) { const gt = st.gates?.[sc]; if (gt?.n) assert(gt.met === gt.n, `${m} (--cal 7; v0.11.250, P20-A RN L4): ${sc}'s friendship gate for ${who} met on every visit (${gt.met} of ${gt.n}, lowest ${-gt.maxNeg})`); }
     if (['careful', 'sociable', 'completionist'].includes(m)) assert(st.tribN && st.tribDay / st.tribN >= 40, `${m} (--cal 7): the forest's weeks worked, the tribute on Day 40 or later (Day ${st.tribN ? (st.tribDay / st.tribN).toFixed(1) : '—'})`);
 }
 for (const n of notes) console.log(`  NOTE  ${n}`);

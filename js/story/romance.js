@@ -14,13 +14,27 @@
  *     new, so older code ignores them.
  *  AL, the eve's "sleep alone": `fo_last_night`, with both women liking him, gets the fourth way out its other branches have.
  * A beat or line shows on the visit that set its flag: the flag holds the minute of that visit (the scene's enter), and the text
- * reads it, so a redraw keeps it and a later visit does not.
+ * reads it, so a redraw keeps it and a later visit does not. v0.11.250 (RV-A, VS; the cold review's C H1 + M1): against the visit's
+ * minute kept in `g.cv` (carrier → the minute of its last enter; new, additive), not the clock: `choose` adds a choice's default time
+ * after the enter, so before it Ya's echo, the eve's remembered line and Ya's Fallout beats were marked and never shown.
  * Texts by Fable (rule 10), in romance_texts.js.
+ * v0.11.250 (owner pick P20-A; `project/research/p20-measure.md`, `claude/p20-options.md`):
+ *  DP, the decision point remembers: `rt_evening` gets one paragraph, after "Nobody mentions tomorrow.", for the first earlier
+ *     choice that applies (`DP_ORDER`): Ya's night (`ya_romance`, while she likes him), Mei Lin's embers (`mei_bond`, while she likes
+ *     him), the hot spring (the flag `dp_spring`: 'in' or 'watch'), the roof (the flag `dp_roof`). Both flags new, set by the choice
+ *     (story flags: reset with the Coil); older code ignores them.
+ *  EC, the echo scenes: once a save, on Coil 3 or later, the first meeting (`mei_lin`, `ya_meets`) closes on what James knows and she
+ *     does not, when he met her on an earlier Coil (`g.seen`). The record `g.coil.ec` (scene → { n: the Coil, m: the visit's minute })
+ *     is kept across every Coil and into Act 1 (game.js `startActCoil`); new, so older code ignores it.
  */
 import { rel, KISS_MEI, KISS_YA, LIKES_BAR, likesMei, likesYa } from './act1_common.js';
 import { dayIndex } from '../core/lines.js';
 import { byForm } from './common.js';
-import { TB_TEXT, RL_TEXT, AL_TEXT } from './romance_texts.js';
+import { TB_TEXT, RL_TEXT, AL_TEXT, DP_TEXT, EC_TEXT } from './romance_texts.js';
+
+/** v0.11.250 (RV-A, VS): the visit stamp; `on: false` gives v0.11.249's minute stamp (the tests from before pin their runs with it). */
+export const VISIT_STAMP = { on: true };
+const visitOf = (g, id) => (VISIT_STAMP.on ? g.cv?.[id] : g.minutes);
 
 /** The tiers, in story order (the lower first for each person). */
 export const TIERS = [
@@ -67,7 +81,7 @@ const formed = (g, x) => (x && typeof x === 'object' ? byForm(g, x.cat, x.great,
 /** The beat this visit shows at carrier `id` (its text), or ''. */
 export function tierBeat(g, id) {
     if (!TB_CARRIERS[id]) return '';
-    const t = TIERS.find((x) => TB_CARRIERS[id].who.includes(x.who) && g.flags[x.flag] === g.minutes);
+    const t = TIERS.find((x) => TB_CARRIERS[id].who.includes(x.who) && g.flags[x.flag] > 0 && g.flags[x.flag] === visitOf(g, id)); // RV-A (VS; C M1): this visit's, not this minute's (a choice's time is added after the enter)
     return t ? formed(g, TB_TEXT[tbKey(t, id)]) : '';
 }
 
@@ -77,10 +91,29 @@ export const RL_BAR = KISS_MEI;
 /** Is the remembered line due at carrier `id` now? */
 export const rememberDue = (g, id) => RL_CARRIERS.includes(id) && g.coil?.mrl != null && g.coil.mrl < (g.coil.n || 1) && !g.flags.rl_mei; // RV-A (C L5): an earlier Coil's
 export function rememberLine(g, id) {
-    if (!RL_CARRIERS.includes(id) || g.flags.rl_mei !== g.minutes || g.flags.rl_at !== id) return '';
+    if (!RL_CARRIERS.includes(id) || g.flags.rl_mei !== visitOf(g, id) || g.flags.rl_at !== id) return '';
     const L = RL_TEXT[id] || [];
     const n = Math.max(1, Number(g.coil?.rlc?.[id]) || 1);
     return formed(g, L[Math.min(n, L.length) - 1]);
+}
+
+/** DP: the earlier choices, in the order the one line is picked. */
+export const DP_ORDER = [
+    ['hand', (g) => !!g.flags.ya_romance && likesYa(g)],
+    ['bond', (g) => !!g.flags.mei_bond && likesMei(g)],
+    ['spring_in', (g) => g.flags.dp_spring === 'in'],
+    ['spring_watch', (g) => g.flags.dp_spring === 'watch'],
+    ['roof', (g) => !!g.flags.dp_roof],
+];
+export const dpKey = (g) => DP_ORDER.find(([, f]) => f(g))?.[0] || null;
+export const DP_AFTER = 'Nobody mentions tomorrow. Everybody thinks about it.';
+/** EC: the first meetings that carry an echo, and the Coil it starts on. */
+export const EC_SCENES = ['mei_lin', 'ya_meets'];
+export const EC_COIL = 3;
+export const echoDue = (g, id) => EC_SCENES.includes(id) && (g.coil?.n || 1) >= EC_COIL && g.seen?.[id] != null && g.seen[id] < (g.coil?.n || 1) && !(g.coil?.ec && g.coil.ec[id]);
+export function echoLine(g, id) {
+    const r = g.coil?.ec?.[id];
+    return r && r.n === (g.coil?.n || 1) && r.m === visitOf(g, id) ? EC_TEXT[id] || '' : '';
 }
 
 /** Append a closing paragraph to a scene's text, and run `mark` after its enter. */
@@ -88,7 +121,7 @@ function closing(SCENES, id, mark, fn) {
     const s = SCENES[id];
     if (!s) throw new Error(`romance.js: no scene ${id}`);
     const text = s.text, enter = s.enter;
-    s.enter = (g) => { const out = enter ? (enter(g) || []) : []; mark(g); return out; };
+    s.enter = (g) => { const out = enter ? (enter(g) || []) : []; if (VISIT_STAMP.on) { if (!g.cv || typeof g.cv !== 'object') g.cv = {}; g.cv[id] = g.minutes; } mark(g); return out; }; // v0.11.250 (P20-A RV-A, VS): the visit's minute, kept until the next visit
     s.text = (g) => { const t = typeof text === 'function' ? text(g) : text; const b = fn(g); return b ? `${t}\n\n${b}` : t; };
 }
 
@@ -103,6 +136,23 @@ export function installRomance(SCENES) {
             const c = g.coil.rlc && typeof g.coil.rlc === 'object' ? g.coil.rlc : (g.coil.rlc = {});
             c[id] = (Number(c[id]) || 0) + 1;
         }, (g) => rememberLine(g, id));
+    }
+    // DP: the two choices noted (their `do` kept), and the line after the evening's second paragraph
+    const wrapDo = (sc, re, f) => { const c = SCENES[sc]?.choices?.find((x) => re.test(String(typeof x.text === 'function' ? '' : x.text))); if (!c) throw new Error(`romance.js: no choice ${re} on ${sc}`); const d = c.do; c.do = (g) => { f(g); return d ? d(g) : []; }; };
+    wrapDo('supper', /^Climb out onto the roof with Mei Lin/, (g) => { g.flags.dp_roof = true; });
+    wrapDo('hot_spring', /^Get in\./, (g) => { g.flags.dp_spring = 'in'; });
+    wrapDo('hot_spring', /^Turn your back and keep watch\./, (g) => { g.flags.dp_spring = 'watch'; });
+    const ev = SCENES.rt_evening;
+    if (!ev) throw new Error('romance.js: no rt_evening');
+    const evText = ev.text;
+    ev.text = (g) => { const t = typeof evText === 'function' ? evText(g) : evText; const k = dpKey(g); return k && DP_TEXT[k] && t.includes(DP_AFTER) ? t.replace(DP_AFTER, `${DP_AFTER}\n\n${DP_TEXT[k]}`) : t; };
+    // EC
+    for (const id of EC_SCENES) {
+        closing(SCENES, id, (g) => {
+            if (!echoDue(g, id)) return;
+            const e = g.coil.ec && typeof g.coil.ec === 'object' ? g.coil.ec : (g.coil.ec = {});
+            e[id] = { n: g.coil.n || 1, m: g.minutes };
+        }, (g) => echoLine(g, id));
     }
     // AL: last, so saved choice positions keep their lines
     const eve = SCENES.fo_last_night;
