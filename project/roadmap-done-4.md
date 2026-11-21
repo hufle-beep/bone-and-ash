@@ -124,3 +124,11 @@ Started in v0.11.208, when `roadmap-done-3.md` would have passed about 45 KB wit
 ## Moved from `roadmap.md` in v0.11.243 (word for word; section 0's oldest notes, the size rule: under 20,000 bytes)
 
 *(v0.11.236: the rest of e, push 9 done (P9-A + D1 + RV1: CB3, QW, YW; PS).)*
+
+## Closed as accepted in v0.11.244 (word for word; owner pick RO2, 2026-11-21 11:08: KA's (c), nothing left to fix)
+
+- *(from `roadmap-act2.md`'s KA line)* (c) old saves' clears from before v0.11.227 in a pass already restarted are not known (`stats.best` counts 'taken' too), so they start at 0.
+
+## Moved from `roadmap.md` in v0.11.244 (word for word; section 0's oldest notes, the size rule: under 20,000 bytes)
+
+*(v0.11.237: the rest of e, push 10 done (P10-A + D1 + H-a + RV2: EVk, HS1, HS2; CL, SN).)* *(v0.11.238: the rest of e, push 11 done (P11-A + D1 + RV2: CB5, EVn-1, TG; PKs, PKf).)*

@@ -38,6 +38,7 @@ Split out of `roadmap.md` in v0.11.88 (owner pick A, 2026-11-09 02:37, S1): sect
 - *(new in v0.11.65)* **Threads need a new design:** they were planned to work queued tasks; since v0.11.64 there is no queue, so what a thread does (and when it wakes) is an open question for the owner before step 4 is built.
 
 - *(moved in v0.11.220 from `roadmap-time.md`'s v0.11.210 line, word for word; owner pick OR1; with bundle G)* **New in v0.11.210 (open, options later):** the review's L4 (the forecast's redraw 41 → 71 ms with Yuki's row on; slower on a phone), L7 (on a PC the tooltip sits bottom left, under the story column, away from the held card; above 112 rem outside the centred app).
+- *(moved in v0.11.244 from `roadmap-time.md`'s flip line, word for word; owner pick RO2, 2026-11-21 11:08; KR with bundle G)* **Measured, not picked (open, options later):** KR, the row showing the kept amount, "N left this week" as a note; BP, a plan for the Blackroot's camps (15 camp days a game, 130 / 160 / 189 / 375 card taps there; an estimate of 90–275 taps saved, not measured).
 
 ### The copy-over (owner 2026-11-06 15:43 / 15:47)
 From the read-only analysis of Selene (`hufle-beep/Long-patience`) and Rules Engine C (`hufle-beep/Shared-ST`). One push each, in this order; **each gets its own exact list and its own go, and Claude stops after every push** (rule 1, v0.11.6); anything that moves balance shows its numbers first.

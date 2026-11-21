@@ -52,3 +52,10 @@ Open items of section 2, moved word for word in v0.11.178, owner pick U1 (MD: th
 ## Placed here in v0.11.240 (owner pick RA1, 2026-11-20 23:29: from the handover's open items, word for word)
 
 - *(new in v0.11.240; open, options later; beside section 2's "the text day (05:00) against the daily reset (04:00)" in `roadmap.md`)* **p13-measure §10's bug:** From p13's measure: on the old calendar a Fallout supper eaten after midnight reads the next story day's text (the Sociable 10 of 10 games, v0.11.238 too: the scene's day starts at midnight, the day records at 05:00; `p13-measure.md` §10). The old calendar is bots and tests only since the flip (v0.11.226).
+
+## Placed here in v0.11.244 (owner pick RO2, 2026-11-21 11:08: t's and KA's open items, word for word)
+
+- *(from `roadmap-time.md`'s leftovers line)* **Measured, not picked (open, options later):** BD, the bots' daily doors on the plan (with BK: taps 1,010 / 1,084 / 1,049 / 1,266 a game; Careful and the Sociable then sit with Yuki daily, Careful clearing in 2.9 Coils against 3.1).
+- *(from `roadmap-time.md`'s flip line)* **New, open, options later:** the drift guard on the long calendar (`tools/baseline.json`'s 146 numbers and `tools/models-baseline.json` are the old calendar's, which no new game plays since the flip; the long-calendar bots run log only, 40 games each; with TS8 and the retune).
+- *(from `roadmap-time.md`, the v0.11.222 line)* **Measured for the owner (no fault; HN):** the Heart (Days 80–100 now) is three weeks with 31–57 taps and 1–7 cards a pass (the four bots, 40 games each; open, options later).
+- *(from `roadmap-act2.md`'s KA line)* **Open, options later (from its measurements and review):** (a) the bots measure a kept Foundation only (every bot clears at realm 1 or keeps 1 on its second pass; KA1's review L4): kept Core Formation and up (Yuki's forms from 2, XW-a from 7, fights by realm) reach no bot.
