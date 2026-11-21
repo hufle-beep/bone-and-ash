@@ -1,0 +1,24 @@
+night:19 | Upwind of the rise, something is fruiting. The smell reaches you as the dark lands, and it lands hard: cold cellar, split pear, and under both a note you have no name for. You hold a doctorate in precisely this. Whatever it is, it opens only once the light has gone, which strikes you as sound judgement. ¶ {fire} {yuki} ¶ The thread that takes the watch is the one that wanted to go and look. It stands its post facing upwind and drafts a description of the fruiting body, sight unseen.
+night:19:fire | Woodsmoke gets into the smell and spoils the sample, and you find you resent your own fire a little.
+night:19:nofire | No smoke gets between you and the smell, and you breathe it in like a man reading someone else's post.
+night:19:y:cat | Yuki, on your shoulder, sneezes twice and looks at you as the responsible party. *Your field,* arrives over the bond. *Make it stop.*
+night:19:y:great | Yuki, banked up behind you, sneezes twice and looks at you as the responsible party. *Your field,* arrives over the bond. *Make it stop.*
+night:19:y:human | Yuki, tucked in under your arm, sneezes twice and looks at you as the responsible party. "Your field," she says. "Make it stop."
+night:20 | Above the rise there is a gap in the crowns, and the sky keeps to it after the dark has come: the purple of a bruise going yellow at the rim. A few points of light show in it. They are dim, slightly green, and do not twinkle, and you call them stars because nobody is here to object. ¶ {fire} {yuki} ¶ The watch falls to the thread with the tidiest mind. It keeps the rise and, on the side, charts the green points without naming any, in case they are not stars.
+night:20:fire | Firelight gives up a little above your head, well short of the sky, and neither party seems to feel the loss.
+night:20:nofire | With nothing lit down here, the green points are the brightest things in view, a title they do nothing to defend.
+night:20:y:cat | Yuki, upside down in the crook of your arm, studies the gap too. *None of ours,* comes across the bond. *I checked.*
+night:20:y:great | Yuki, coiled round you with her chin tipped skyward, studies the gap too. *None of ours,* comes across the bond. *I checked.*
+night:20:y:human | Yuki, head tipped back on your shoulder, studies the gap too. "None of ours," she says. "I checked."
+night:21 | Somewhere at home a library book is overdue in your name. The thought turns up as the dark does, uninvited and complete, and the black trunks step back out of sight in good order. It was a book on lichens. The fine is growing across a distance no librarian has ever had to chase. ¶ {fire} {yuki} ¶ The thread going on watch takes the fine along for something to do, and works the sum between looks at the trees. You do not ask for the total.
+night:21:fire | You consider, by firelight, whether being in another world counts as a reason, and suspect the form has no box for it.
+night:21:nofire | Sitting in the dark, you draft the letter of apology, and get as far as the return address before it defeats you.
+night:21:y:cat | Yuki, wedged under your chin, has followed the whole thought. *You never finished it,* she points out by way of the bond. *Chapter four.*
+night:21:y:great | Yuki, piled round you with her jaw on your shin, has followed the whole thought. *You never finished it,* she points out by way of the bond. *Chapter four.*
+night:21:y:human | Yuki, propped on your arm, has followed the whole thought. "You never finished it," she says. "Chapter four."
+# notes
+- 19: the smell comes from upwind, so the night has a light wind; text 9 says "There is no wind" on its own night, which does not clash. It stays clear of text 12's "wet stone and cold moss" and text 13's moss-light.
+- 20: the stars are seen through a gap in the crowns and stay there; no tree drinks or puts them away. "None of ours" = none of home's constellations, a light touch of home ahead of 21; cut "I checked" to "Obviously" if that is too much home in two texts running.
+- 21: a library and a lending fine on his world are my invention (canon card is silent); if that is a canon call, the swap is "a borrowed book is overdue" and "the lender" for "librarian". Kept off text 14's word "home" beat and text 15's tea. "Chapter four" is a count, but of a book, not of nights.
+- All three Yuki placements are new to the file (shoulder / banked behind / under the arm; crook of the arm / chin skyward / head on shoulder; under the chin / jaw on shin / propped on arm). None uses the lap, facing out or ears turning.
+- First paragraphs run 55, 59 and 53 words; openers "Upwind of", "Above the", "Somewhere at" match nothing in the file.

@@ -1,0 +1,25 @@
+night:16 | Somewhere beyond the stream, once the dark is down, a knocking starts: wood on hollow wood, three slow blows and a rest, a long way off. It has the patience of a caller at a door who knows the house is occupied. Nothing opens. The knocking takes no offence and goes on. ¶ {fire} {yuki} ¶ A thread with a head for rhythm takes the watch. It logs the knocking as distant and regular and declines, on the evidence, to answer the door.
+night:16:fire | The fire pops once, out of time with the knocking, and you catch yourself frowning at it like a conductor.
+night:16:nofire | With nothing lit, each blow arrives whole, and you find you are keeping time with one finger.
+night:16:y:cat | Yuki, curled in the crook of your arm, opens one eye at the third blow. *Nobody's in,* she offers through the bond, and shuts it.
+night:16:y:great | Yuki, banked along your back, opens one eye at the third blow. *Nobody's in,* she offers through the bond, and shuts it.
+night:16:y:human | Yuki, propped against your ribs, opens one eye at the third blow. "Nobody's in," she says, and shuts it.
+night:17 | Water is the one thing here that does not stop for the dark. The trunks stop, the moss stops, the path you wore to the bank stops three paces out. Below you the stream keeps on downhill, muttering, the only party in this forest with somewhere to be, and no interest in whether you come too. ¶ {fire} {yuki} ¶ One thread stays up for the watch and takes a bearing on the stream, for form's sake. Downhill, it concludes. The other eight had got there unaided.
+night:17:fire | The fire is going nowhere either, and says so in small noises, and you find you side with the fire.
+night:17:nofire | No fire, so you follow the water by ear as far as the bend, and lose it there without regret.
+night:17:y:cat | Yuki, tucked under your chin, listens to it leave. *Let it,* she sends over the bond. *We've only just sat down.*
+night:17:y:great | Yuki, a white bank along your side, listens to it leave. *Let it,* she sends over the bond. *We've only just sat down.*
+night:17:y:human | Yuki, folded up at your shoulder, listens to it leave. "Let it," she says. "We've only just sat down."
+night:18 | Wind gets up as the dark lands, and stays up: it works the tops of the black trees, a hundred feet overhead, and does not once come down to the rise. Down here the air is cold and unmoving, and the damp gets into your collar by its own arrangements. Weather, it seems, is a thing that happens to the canopy. ¶ {fire} {yuki} ¶ The thread that feels the cold least takes the watch. It follows the wind across the canopy from one edge of hearing to the other, and reports the weather still upstairs.
+night:18:fire | The fire leans a little, out of sympathy with the treetops, and warms one side of you exactly.
+night:18:nofire | Fireless, you turn your collar up against a wind that never arrives, and it helps, which is unscientific.
+night:18:y:cat | Yuki has gone inside your coat at the collar, and only her nose is out. *You're welcome,* is all the bond carries.
+night:18:y:great | Yuki has laid her flank along the cold side of you, like a draught excluder with opinions. *You're welcome,* is all the bond carries.
+night:18:y:human | Yuki has pulled half your coat round her own shoulders without discussion. "You're welcome," she says, from inside it.
+# notes
+- Openers: "Somewhere beyond", "Water is", "Wind gets"; none shares its first two words with the fifteen in the file or with each other. First paragraphs run 52, 56 and 60 words (18 sits on the cap; "Weather, it seems, is a thing that happens to the canopy." is the sentence to cut if it must come down, leaving 50).
+- 16: the knocking is wood on wood, slow and regular, kept apart from text 4's clicks (no answer comes, and the watch-thread says so). If it still reads too near, the sound could become a single held note instead.
+- 17: text 10 has "Below the rise the stream", so 17 avoids that run ("Below you the stream"). It keeps off the changed note (10), the water as the sound of quiet (12) and the mist (15).
+- 18: text 9 says "There is no wind"; 18 has wind in the canopy only, none on the rise, so the two do not contradict. The damp is one clause; smell is left to N-b.
+- All three end on a thing that is nothing to do with him (the door, the stream's errand, the weather upstairs). If that is one too many, 17's "and no interest in whether you come too" is the one to trim.
+- Yuki 18 great: "has laid her flank along" sits near the file's "has laid herself round you" (text 2), three words shared, no five-word run.

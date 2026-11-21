@@ -1,0 +1,39 @@
+# Run BF (owner pick P16-A: the firesides): `bl_fireside` the Root Road's texts 4 and 5, the Ashen Hills' texts 4 and 5
+
+You draft story texts for a hand-written text RPG. Read ONLY: this brief, `/tmp/p16/common.md` (tone and rules: they bind you), `/tmp/p16/bf-code.txt` (the code: `FS_RR` the Root Road's texts 2–3, `FS_AH_T` the Ashen Hills' texts 2–3 in parts, `noCook(g, cooked, not)` a line for a day he cooked ("Cook and eat." at the camp) and one for a day he did not (they ate what was carried, raw fruit, cakes, dried meat), `both` / `onlyYa` / `onlyMei` whom James is close to, then `bl_fireside` with each region's first text and the choices), `/tmp/p16/pk-bl_fireside.txt` (the context packet) and `/home/claude/bone-and-ash/project/canon-card.md`. Do not read other repo files.
+
+## The scene
+The evening fireside at the camp, after supper: James, Yuki, Mei Lin and Ya (both women are there in the evening). The trio's evenings: talk, teasing, Ya against civilisation, Mei Lin's propriety slipping, James deadpan. The choices under it stay as in the file (the Root Road: sit beside Mei Lin / beside Ya / between them / sleep; the Ashen Hills: the romance and watch choices / sleep), so nothing in the text decides who sits where.
+
+## The Root Road, texts 4 and 5 (`rr:4`, `rr:5`)
+Each: 90–150 words, three to six paragraphs, as `FS_RR`'s second text: a shared text with ONE `{meal}` sentence (key `cooked`: he cooked a pot or roast at the camp; key `not`: he did not, they ate what they carried) and ONE `{yuki}` passage by form (cat, great root-kin, woman; 10–30 words each). The `{meal}` and `{yuki}` may not be in the first paragraph.
+
+## The Ashen Hills, texts 4 and 5 (`ah:4`, `ah:5`)
+Each in `FS_AH_T`'s three parts, joined by blank lines:
+- `open`: 40–70 words, the blue fire, the ash, the dead tree in the north (not the colour joke, not "nobody looks at it"); give it as `open:cooked` and `open:not` (two versions differing only in the meal sentence; the first sentence the same in both and standing alone).
+- the middle by whom James is close to: `both` (both women), `ya` (Ya only), `mei` (Mei Lin only), `none` (neither): 20–50 words each, a gesture or a line; `none` keeps the three of them friendly and apart.
+- `close`: 20–50 words, the same for all.
+Yuki may appear in `open` or `close` only in a sentence that names no form.
+
+None of the four opens with "Supper is over", "Ya has demanded", "Ya rips", "Up here the ash", "The ash burns blue", "Blue embers" or "The drowned". No chopsticks lesson, leaves in the meat, a story of home's singing trees, blue food, "Can you do red?", the tree's old light.
+
+## Output
+Write `/tmp/p16/drafts-bf.txt`:
+```
+bl_fireside:rr:4 | shared text with {meal} and {yuki}
+bl_fireside:rr:4:meal:cooked | …
+bl_fireside:rr:4:meal:not | …
+bl_fireside:rr:4:y:cat | …
+bl_fireside:rr:4:y:great | …
+bl_fireside:rr:4:y:human | …
+(the same for rr:5)
+bl_fireside:ah:4:open:cooked | …
+bl_fireside:ah:4:open:not | …
+bl_fireside:ah:4:both | …
+bl_fireside:ah:4:ya | …
+bl_fireside:ah:4:mei | …
+bl_fireside:ah:4:none | …
+bl_fireside:ah:4:close | …
+(the same for ah:5)
+```
+then `# notes` as in common.md.

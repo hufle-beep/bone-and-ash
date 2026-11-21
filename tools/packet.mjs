@@ -115,9 +115,17 @@ export const STATES = [
     ...[0, 1].map((k) => ({ base: `the long calendar's village week 2, slopes visit ${k + 1}, her lip split`, on: (id) => id === 'herb_slopes', g: stateOf({ long: true, vday: 2, cal_night: 1, mei_bruised: true }, 29 * DAY + 9 * 60, { k }) })),
     // v0.11.243 (owner picks P15-B, D1; SF: MW): the long calendar's first forest week (`forest_day` 1), so the packet draws its own morning
     { base: "the long calendar's forest week 1", on: (id) => id === 'morning', g: stateOf({ forest_day: 1 }, 1 * DAY + 6 * 60) },
+    // v0.11.246 RV (the cold review's C M2): the first flight by place, the kept dawns, the Wen branch, the party's realm-2 line, the third day's away versions
+    ...[['village', {}], ['fo_ashfall', { mei_party: true, ya_party: true }], ['rr_hub', { mei_party: true, ya_party: true, bl_region: 'rr' }], ['ah_hub', { mei_party: true, ya_party: true, bl_region: 'ah', bl_day: 4 }], ['heart_hub', { mei_party: true, ya_party: true }]].map(([back, f]) => ({ base: `the first flight from ${back}`, on: (id) => id === 'first_flight', g: stateOf({ bt_return: back, ...f }, 14 * DAY + 10 * 60, { form: ['cat', 1] }) })),
+    ...[0, 1].map((act) => ({ base: `a kept realm's first dawn, ${act ? 'Act 1' : 'the prologue'}`, on: (id) => id === 'coil_dawn', g: (() => { const g = stateOf({}, 10 * 60); g.coil = { ...(g.coil || {}), act, kept: 2, n: 3 }; g.stats = { ...(g.stats || {}), clears: 1 }; return g; })() })),
+    { base: "Foundation with Old Wen's lesson and not Mei Lin's word", on: (id) => id === 'breakthrough', g: stateOf({ lore_realms: true, bt_return: 'stream' }, 3 * DAY + 10 * 60, { form: ['cat', 1] }) },
+    { base: 'Core Formation with the party on the road', on: (id) => id === 'breakthrough', g: stateOf({ bt_return: 'rr_hub', mei_party: true, ya_party: true, bl_region: 'rr' }, 66 * DAY + 10 * 60, { form: ['tiger', 2] }) },
+    ...[['ah_hunt', 2], ['ah_hawks_won', 2]].map(([id, k]) => ({ base: `the Ashen Hills' third day, Ya away (${id})`, on: (x) => x === id, g: stateOf({ bl_day: 4, bl_region: 'ah', mei_party: true, ya_party: true }, 73 * DAY + 9 * 60, { k }) })),
+    // v0.11.246 (owner pick P16-A, AH): the Ashen Hills' hunt on its second stay (story day 15) on each of its three days, with Ya and away
+    ...[0, 1, 2].flatMap((k) => [true, false].map((back) => ({ base: `the Ashen Hills' second stay, day ${k + 1}${back ? '' : ', Ya away'}`, on: (id) => id === 'ah_hunt', g: stateOf({ bl_day: 5, bl_region: 'ah', mei_party: true, ya_party: true, ...(back ? { ya_off_done: true } : {}) }, 76 * DAY + 9 * 60, { k }) }))),
     // v0.11.242 (owner pick RV1 after P14-A; the cold review's C M1, TG-C1): the forest night on each of its fifteen texts (`night`'s `byDay` index
     // 0–14), in the three forms, with the fire and without, so the packet draws NF6's six and the old seven to nine (the samples' days 0 and 2 drew two)
-    ...[...Array(15).keys()].flatMap((k) => [true, false].flatMap((fire) => FORMS.map(([f, r, name]) => ({ base: `the forest's night ${k + 1}${fire ? '' : ', no fire'}`, form: name,
+    ...[...Array(21) /* v0.11.246 (P16-A, NF6): twenty-one */.keys()].flatMap((k) => [true, false].flatMap((fire) => FORMS.map(([f, r, name]) => ({ base: `the forest's night ${k + 1}${fire ? '' : ', no fire'}`, form: name,
         on: (id) => id === 'night', g: stateOf({ forest_day: 3, ...(fire ? { fire: true } : {}) }, 15 * DAY + 21 * 60, { k, form: [f, r] }) })))),
 ];
 /** RV1: the states that draw one text, named shortly: a state in all three forms by its name alone, else with its forms. */

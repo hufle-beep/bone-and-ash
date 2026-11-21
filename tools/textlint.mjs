@@ -113,7 +113,7 @@ for (const k of [0, 1, 2, 3, 4, 5]) {
 }
 for (const [region, warm] of [['rr', [[0, 0]]], ['ah', [[80, 80], [0, 80], [80, 0], [0, 0]]]]) for (const [m, y] of warm) for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) {
     if (region === 'ah' && (m || y) && form !== 'cat') continue;
-    for (const k of [1, 2]) for (const cooked of [true, false]) {
+    for (const k of [1, 2, 3, 4] /* v0.11.246 (P16-A, BF): and texts 4–5 */) for (const cooked of [true, false]) {
         const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form;
         Object.assign(g.flags, { bl_day: region === 'ah' ? 4 : 2, bl_region: region, mei_party: true, ya_party: true }); g.rel['Mei Lin'] = { f: 20, a: m }; g.rel.Ya = { f: 20, a: y };
         g.minutes = 70 * 1440 + 20 * 60; onDay(g, k); if (cooked) markDaily(g, 'bl_cook');
@@ -146,10 +146,23 @@ for (const k of [0, 1]) { const g = ensureBars(newGame(1234, { closed: true, cal
 { const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); g.flags.forest_day = 1; g.minutes = 1440 + 6 * 60; SAMPLES.push(g); }
 // v0.11.242 (owner pick RV1 after P14-A; the cold review's C M1, TG-C1): the forest night's later texts (`night`'s `byDay` index 5–14: the first
 // loop reads 0–4), in the three forms with the fire and in the cat without it (the fire line is the same in every form), so NF6's six are linted
-for (const k of [5, 6, 7, 8, 9, 10, 11, 12, 13, 14]) for (const [form, realm, fire] of [['cat', 0, true], ['tiger', 2, true], ['human', 7, true], ['cat', 0, false]]) {
+for (const k of [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20] /* v0.11.246 (P16-A, NF6): and 16–21 */) for (const [form, realm, fire] of [['cat', 0, true], ['tiger', 2, true], ['human', 7, true], ['cat', 0, false]]) {
     const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form;
     Object.assign(g.flags, { forest_day: 3, ...(fire ? { fire: true } : {}) }); g.minutes = 15 * 1440 + 21 * 60;
     SAMPLES.push(onDay(g, k));
+}
+// v0.11.246 (owner pick P16-A, TG): the Ashen Hills' hunt on its second stay (story day 15, `s:ah_hunt:15`) on each day, with Ya and away, by form;
+// a kept realm's first dawn (KA (b)) in both acts; the Foundation breakthrough with Old Wen's lesson and not Mei Lin's word (BYb-t)
+for (const k of [0, 1, 2]) for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) for (const back of [true, false]) {
+    const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form;
+    Object.assign(g.flags, { bl_day: 5, bl_region: 'ah', mei_party: true, ya_party: true, ...(back ? { ya_off_done: true } : {}) }); g.minutes = 76 * 1440 + 9 * 60;
+    SAMPLES.push(onDay(ensureBars(g), k));
+}
+for (const act of [0, 1]) { const g = ensureBars(newGame(1234, { closed: true })); g.coil = { ...(g.coil || {}), act, kept: 2, n: 3 }; g.stats = { ...(g.stats || {}), clears: 1 }; SAMPLES.push(g); }
+{ const g = ensureBars(newGame(1234, { closed: true })); g.james.realm = 1; g.yuki.realm = 1; Object.assign(g.flags, { lore_realms: true, bt_return: 'stream' }); g.minutes = 3 * 1440 + 10 * 60; SAMPLES.push(g); }
+// v0.11.246 RV (the cold review's C M2): the first flight by place (the alone sample is the realm-1 one above)
+for (const [back, f] of [['village', {}], ['rr_hub', { bl_region: 'rr' }], ['ah_hub', { bl_region: 'ah', bl_day: 4 }]]) {
+    const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); g.james.realm = 1; g.yuki.realm = 1; Object.assign(g.flags, { bt_return: back, mei_party: back !== 'village', ya_party: back !== 'village', ...f }); g.minutes = 73 * 1440 + 10 * 60; SAMPLES.push(g);
 }
 const renders = (x) => {
     if (typeof x === 'string') return [x];

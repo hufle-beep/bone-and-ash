@@ -1,0 +1,39 @@
+ah_hunt:3 | The hawks have the wind today and are using it: three ash-grey shapes hung over the ridge without a wingbeat between them, dropping the odd spark onto the slope. Where a spark lands, the ash smokes blue and thinks better of it. ¶ Ya crouches, spear across her knees. "They do not hunt hungry, scholar. They hunt bored. Bored is worse." ¶ {yuki} ¶ In the gullies the hill-hares go about their business, ash-coloured and quick, with the ease of animals nobody is hovering over.
+ah_hunt:3:y:cat | Yuki, on your shoulder, has dug in every claw she owns. *The middle one keeps looking at me,* says the bond. *I should like it to stop having eyes.*
+ah_hunt:3:y:great | Yuki, at your side, yawns up at them with everything she has. The hawks climb a little. *Cowards,* says the bond, with real regret.
+ah_hunt:3:y:human | Yuki, at your elbow, has not blinked in some while. "The one in the middle has chosen me," she says. "I intend to be a disappointing choice."
+ah_hunt:3:away | A cinder hawk's shadow crosses the slope ahead of you, then another, then the third, each with a faint orange edge. You have been walked like this before, by heads of department. ¶ {yuki} ¶ The other choice keeps to the gullies: hill-hares, grey as the ground they run on, and no trouble to anyone but themselves.
+ah_hunt:3:away:y:cat | Yuki, on your shoulder, makes herself narrow against your neck. *They are measuring me,* says the bond. *Tell them I am mostly fur and spite.*
+ah_hunt:3:away:y:great | Yuki, at your side, casts more shadow than all of them together, and the hawks have noticed. *It is you they are measuring,* says the bond, kindly.
+ah_hunt:3:away:y:human | Yuki, at your elbow, tips her head back to watch. "They are deciding which of us to carry off," she says. "I weigh less. It is not a compliment."
+ah_hunt:4 | You come up onto the ridge path and the cinder hawks are already overhead, low enough that you can feel the warmth come off their wings. They no longer bother with height. Height is for prey that might get away. ¶ {yuki} ¶ Ya tests her spear's point on her thumb. "Kill one and the others remember, scholar. Kill all and nobody remembers." She grins. ¶ Or there are the hill-hares, down in the gullies, which have the decency to run away from you instead.
+ah_hunt:4:y:cat | "They know the cat by now," says Ya. "They like her." Yuki, on your shoulder, lets the bond go flat. *I am not liked. I am shopped for.*
+ah_hunt:4:y:great | "See how wide they fly round her," says Ya, pleased. Yuki, at your side, stretches until her claws score the glass. *Good,* says the bond.
+ah_hunt:4:y:human | "They have picked the short one," says Ya. Yuki, at your elbow, turns her head slowly. "I am standing here," she says. "I heard that. So will they."
+ah_hunt:4:away | Something ticks on the black glass by your boot: a spark, orange and dying, and above it the cinder hawk that dropped it, lower than a bird that size has any business flying. Its two friends hold the ridge. ¶ {yuki} ¶ The gullies, meanwhile, are full of hill-hares, and a hare has never yet dropped anything on you.
+ah_hunt:4:away:y:cat | Yuki, on your shoulder, presses flat against your collar. *They used to keep their distance,* says the bond. *I preferred them shy.*
+ah_hunt:4:away:y:great | Yuki, at your side, lifts her head, and the low one remembers an errand further up. *Once I was hunted,* says the bond. *Now I am avoided. One adjusts.*
+ah_hunt:4:away:y:human | Yuki, at your elbow, watches it pass. "It looked at my hair," she says. "Nesting, I expect. I will not be furniture."
+ah_hunt:5 | The ridge wind brings a smell of struck flint, and then the cinder hawks themselves, sliding down it in a line. One of them drops a spark on the path in front of you, and you would swear it aimed. ¶ Ya laughs. "That one likes you, scholar. Now I am jealous. I should set fire to more of your things." ¶ {yuki} ¶ Below, a hill-hare breaks from one gully to the next, a grey streak with no opinion of you whatever.
+ah_hunt:5:y:cat | Yuki, on your shoulder, ignores you both. Her eyes go from bird to bird and round to the start. *I am choosing,* says the bond. *They began it.*
+ah_hunt:5:y:great | Yuki, at your side, lies down in full view and starts to wash. The hawks drift higher. *Nobody ever picks me,* says the bond. *Tragic.*
+ah_hunt:5:y:human | Yuki, at your elbow, smooths her sleeve. "They are settling which of them gets me," she says. "I am settling it too. Mine is the shorter list."
+ah_hunt:5:away | Sparks come down the wind before the birds do: a thin orange sleet off the ridge, winking out on the black glass. Then the cinder hawks, unhurried, taking their usual places over your head. ¶ {yuki} ¶ You could oblige them. Or you could walk down into the gullies and trouble the hill-hares, who have done nothing to deserve it.
+ah_hunt:5:away:y:cat | Yuki, on your shoulder, tracks the nearest without moving her head. *It thinks I would fit in one foot,* says the bond. *Correctly. I resent that.*
+ah_hunt:5:away:y:great | Yuki, at your side, would not fit in six of those feet. She knows it, and so do they. *Go on,* says the bond, to birds that cannot hear. *Try.*
+ah_hunt:5:away:y:human | Yuki, at your elbow, folds her arms. "A bird that size carries off a deer," she says. "I am lighter than a deer, and worse company."
+ah_hunt:6 | Ash lifts off the high ground in long grey veils, and the cinder hawks come through them one after another, wings banked, sparks streaming behind. It would be a fine sight from further off, or from under a roof. ¶ Ya rolls her neck, spear loose in her hand. "Pretty," she says. "I want the feathers. You can have the rest, scholar. I am generous." ¶ {yuki} ¶ The hill-hares, for their part, are down in the gullies being hares. It asks very little of anyone.
+ah_hunt:6:y:cat | Yuki, on your shoulder, is the shape of a dropped glove. *If one comes down,* says the bond, *I shall be inside your coat. Good luck.*
+ah_hunt:6:y:great | Yuki, at your side, licks her chops, loudly. The hawks swing wide of her. *Feathers for Ya,* says the bond. *The rest is spoken for.*
+ah_hunt:6:y:human | Yuki, at your elbow, brushes ash from her collar. "They look at me as I look at fish," she says. "I find I do not care for it."
+ah_hunt:6:away | The cinder hawks have settled, which is new: all three on a spur of black glass above the path, wings half open, the rock under them ticking with heat. They watch you come as landlords watch a tenant. ¶ {yuki} ¶ Past them the gullies run down grey and quiet, and the hill-hares in them want nothing from you but distance.
+ah_hunt:6:away:y:cat | Yuki, on your shoulder, stares at each in turn. *They have stopped pretending,* says the bond. *So have I. Put me down or put them down.*
+ah_hunt:6:away:y:great | Yuki, at your side, stares back, and one of the hawks shuffles along its perch. *Let them sit there until they starve,* says the bond. *Or not that long.*
+ah_hunt:6:away:y:human | Yuki, at your elbow, returns the look with interest. "Three birds and one of me," she says. "I have had worse odds at dinner."
+# notes
+- Word counts hold for every form: each with-Ya text is 80-110 words with any one {yuki} passage, each away text 60-90.
+- Texts 4-6 lean on "already", "no longer", "by now", "usual", "which is new" to show the hawks used to you; none counts days. Cut any that the time-word check dislikes.
+- 3:away assumes James's old world had heads of department (he holds a doctorate); 5 human-away assumes cinder hawks can carry off a deer (Yuki's claim, not shown).
+- 6 has Ya wanting the feathers and the great form answering "Feathers for Ya": no reward is implied; drop both if the fight's loot says otherwise.
+- 4 great and 6 great keep the hawks wide of her without the "looking somewhere else" image of text 2.
+- Hare lines avoid the "not on fire" and "ash on ash" jokes already in the scene.

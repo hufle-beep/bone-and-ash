@@ -12,7 +12,7 @@ export const rootGain = (g) => Math.round((ROOT_SAT / satDiv(g)) * 10) / 10;
 import { hasForm } from '../core/forms.js';
 import { choiceOpen, gives } from '../core/story.js'; // v0.11.161 (PO2): `optionLeft`; RV (GV, Fable's H1): the wrapper carries the card's items
 import { daily, markDaily, eatBest, pantry, foodCount, hour, byForm, byDay, dayReply, dayKey } from './common.js';
-import { noteDay, DAY_REPLIES, coilReply, dayIndex } from '../core/lines.js'; // v0.11.231 (P4-2, AT): dayIndex
+import { noteDay, DAY_REPLIES, coilReply, dayIndex, seqText } from '../core/lines.js'; // v0.11.246 (P16-A, AH): seqText // v0.11.231 (P4-2, AT): dayIndex
 import { storyDay, calMinutes, blSpan, longCal } from '../core/calendar.js'; // v0.11.224 (TX2, TS6): longCal // v0.11.222 (owner pick J2, TS9): blSpan, the camps' days a story day; // v0.11.203 (owner pick T1, TS1): the long calendar (Day 11 is 65, Day 16 is 70) // v0.11.166 (RW1): coilReply, the flirts by Coil
 import { talkBeat } from './remember.js'; // v0.11.184 (S1)
 import { encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil } from './act1_common.js';
@@ -87,7 +87,24 @@ Three again. You shade your eyes. They want the smallest of you. They always wan
 
 Yuki, at your elbow, does not flatten her ears this time. She watches them with the stillness of someone doing sums. "Three," she says. It is not a count. It is an order.
 
-The hill-hares are still in the gullies: still small, still ash-coloured, and still entirely free of fire.`) }],
+The hill-hares are still in the gullies: still small, still ash-coloured, and still entirely free of fire.`) }, { any: (g) => `A cinder hawk's shadow crosses the slope ahead of you, then another, then the third, each with a faint orange edge. You have been walked like this before, by heads of department.
+
+${byForm(g, "Yuki, on your shoulder, makes herself narrow against your neck. *They are measuring me,* says the bond. *Tell them I am mostly fur and spite.*", "Yuki, at your side, casts more shadow than all of them together, and the hawks have noticed. *It is you they are measuring,* says the bond, kindly.", "Yuki, at your elbow, tips her head back to watch. \"They are deciding which of us to carry off,\" she says. \"I weigh less. It is not a compliment.\"")}
+
+Down in the gullies there are hill-hares, grey as the ground they run on, and no trouble to anyone but themselves.` } /* v0.11.246 (P16-A, AH) */],
+    hunt15: [{ any: (g) => `Something ticks on the black glass by your boot: a spark, orange and dying, and above it the cinder hawk that dropped it, lower than a bird that size has any business flying. Its two friends hold the ridge.
+
+${byForm(g, "Yuki, on your shoulder, presses flat against your collar. *Nobody has taught these ones to keep their distance,* says the bond. *I prefer a shy bird.*", "Yuki, at your side, lifts her head, and the low one remembers an errand further up. *Once I was hunted,* says the bond. *Now I am avoided. One adjusts.*", "Yuki, at your elbow, watches it pass. \"It looked at my hair,\" she says. \"Nesting, I expect. I will not be furniture.\"")}
+
+The gullies, meanwhile, are full of hill-hares, and a hare has never yet dropped anything on you.` }, { any: (g) => `Sparks come down the wind before the birds do: a thin orange sleet off the ridge, winking out on the black glass. Then the cinder hawks, unhurried, taking up the places hawks take in these hills: over your head.
+
+${byForm(g, "Yuki, on your shoulder, tracks the nearest without moving her head. *It thinks I would fit in one foot,* says the bond. *Correctly. I resent that.*", "Yuki, at your side, outweighs the whole flight several times over. She knows it, and so do they. *Go on,* says the bond, to birds that cannot hear. *Try.*", "Yuki, at your elbow, folds her arms. \"A bird that size carries off a deer,\" she says. \"I am lighter than a deer, and worse company.\"")}
+
+You could oblige them. Or you could walk down into the gullies and trouble the hill-hares, who have done nothing to deserve it.` }, { any: (g) => `The cinder hawks have settled, which is new: all three on a spur of black glass above the path, wings half open, the rock under them ticking with heat. They watch you come as landlords watch a tenant.
+
+${byForm(g, "Yuki, on your shoulder, stares at each in turn. *They have stopped pretending,* says the bond. *So have I. Put me down or put them down.*", "Yuki, at your side, stares back, and one of the hawks shuffles along its perch. *Let them sit there until they starve,* says the bond. *Or not that long.*", "Yuki, at your elbow, returns the look with interest. \"Three birds and one of me,\" she says. \"I have had worse odds at dinner.\"")}
+
+Past them the gullies run down grey and quiet, and the hill-hares in them want nothing from you but distance.` }], // v0.11.246 (owner pick P16-A, AH; Fable's): the second stay's three, Ya away
     darts_part: [{ any: 'The darts go out flat through the ash haze and most of them hit ash. One hare stops being fast. You walk out and fetch it yourself and hold it up by the ears, considering it. Thin, though you are in no position to say so. Above you the hawks wheel off, unimpressed, trailing sparks.' }, { any: 'The darts go out low under the haze, and the haze keeps most of them. One hare stays where it was. You walk out for it, taking your time, and bring it back by the hind legs, swinging. One. You count it twice, in case that helps. Above you the hawks slide off down the wind, unconvinced, shedding sparks.' }],
     darts_full: [{ any: (g) => byForm(g, 'The darts go out flat through the ash haze and the hares stop being fast. Yuki goes out for them without being asked and drags them in one at a time by the ears, backwards, each hare being most of a cat long. *Small,* says the bond. *But you hit what you aimed at. Mark the day.* Above you the hawks wheel off, disappointed, trailing sparks.', 'The darts go out flat through the ash haze and the hares stop being fast. Yuki pads out for them without being asked and comes back with the lot hanging from her jaws by the ears. *Small,* says the bond. *But you hit what you aimed at. Mark the day.* Above you the hawks wheel off, disappointed, trailing sparks.', 'The darts go out flat through the ash haze and the hares stop being fast. Yuki walks out for them without being asked and comes back holding them up by the ears. "Small," she says. "But you hit what you aimed at. Mark the day." Above you the hawks wheel off, disappointed, trailing sparks.') }, { any: 'The darts go out low under the haze and every one arrives. The hares stop where they are. You walk out for them and come back with one in each fist, turning them over for a fault. Clean. It is oddly annoying to have nothing to correct. Above you the hawks slide off down the wind, put out, shedding sparks.' }],
     hawks_won: [{ any: (g) => byForm(g, `The last hawk comes down in a spray of sparks, and Yuki — who rode out the whole fight on your shoulder, claws sunk in, spitting — jumps down onto it, and sits there, glaring up at the sky in case another one feels like trying.
@@ -102,7 +119,11 @@ The sky has nothing further to offer. She gives it a little longer anyway, to be
 
 The sky has nothing further to offer. She gives it a little longer anyway, to be sure it has understood.`, `The last hawk hits the ash and rolls, trailing smoke, and Yuki — who has spent the fight at your back, ash to the elbows — sets her heel on it, and stays there, looking up, counting an empty sky.
 
-The sky has nothing further to offer. She gives it a little longer anyway, to be sure it has understood.`) }],
+The sky has nothing further to offer. She gives it a little longer anyway, to be sure it has understood.`) }, { any: (g) => `The hawks come down in ones and twos and leave the same sky in pieces; the final one ploughs a furrow in the ash and lies there smoking.
+
+${byForm(g, "It was Yuki they wanted, all of them, and none got her. She hops down off your shoulder onto the warm carcass and sits, washing one paw.", "They gave Yuki the width of the slope and tried for you, which came to the same thing in the end. She pads over from your flank and stretches out along the furrow, chin on the carcass.", "Yuki was the one they dived at, and she let them find out why that was unwise. She walks round you to it and stands with arms folded, ash on her sleeves, satisfied.")}
+
+You say "Well fought." The look you get back says applause was never the point, and that you may keep it coming regardless.` } /* v0.11.246 (P16-A, BW) */],
     hawks_lost: { ya: (g) => byForm(g, `The fight goes to the hawks, and so does part of your coat. The rest of the coat is smouldering, with you in it, face down in the ash, while Mei Lin beats out the sparks with her basket.
 
 "Your coat," she says, counting the holes between blows and enjoying herself, "is getting very holy."
@@ -526,7 +547,27 @@ Mei Lin reaches over and sets Ya's fingers, one by one, with the patience she ke
 
 You pass over another. There are always more; you have learned to cook for an argument.`, `Both turn to you, who only picked it and must therefore answer for it.
 
-You fetch another from Mei Lin's pan. You gathered twice what supper needed, having met these two before.`)}`]; // RV1 (T M1, L2): text 2 after the meal (Fable's run RV); v0.11.234 (P7-A, ML): its end on a day he did not cook
+You fetch another from Mei Lin's pan. You gathered twice what supper needed, having met these two before.`)}`, (g) => `Mei Lin has smoothed a patch of cold ash at the fire's edge and written Ya's name in it with a twig. Ya squats over it, a track she has not met and does not trust.
+
+"What made this?"
+
+"I did. It is you."
+
+"It has too many legs. And it goes nowhere."
+
+${noCook(g, "You scrub out the pot with a fistful of moss and offer no opinion.", "You wrap up the rest of the dried meat and keep well out of it.")} ${byForm(g, "*She has spelt it properly,* Yuki sends, perched on your shoulder. *I would have told you if she hadn't. I might not have told her.*", "*The name is spelt right,* Yuki sends, filling most of the bark behind you. *I looked. Ya would not thank me.*", "\"It's spelt correctly,\" says Yuki, quietly, at your elbow, her tail curled over her feet. \"Don't tell Ya. She is enjoying herself.\"")}
+
+Ya takes the twig in her fist and presses a print into the ash beside the name: the pad, the toes, the claws. "That is me. Yours is my cousin." Mei Lin considers the print for some time, and rubs neither out.`, (g) => `Mei Lin has taken her shoes off. She did it without a word, set them side by side on the bark with the toes pointing home, and put both bare feet up to the fire next to Ya's.
+
+"In Ashfall," she informs the flames, "a woman who shows her feet to a man is either married to him or drowning."
+
+"Which?" says Ya.
+
+"Neither. My mother can't see this far." She wriggles her toes. Ya leans over to inspect them. "Herb girl feet. Soft. Clean. No good for climbing." Mei Lin thanks her gravely.
+
+${noCook(g, "You scour the pot with a handful of moss and keep your eyes strictly above the knee.", "You tie up the food pack, which takes both hands and, tonight, all of your attention.")} ${byForm(g, "Yuki comes down off your shoulder, sniffs one of the shoes and sits in it. *Abandoned property,* she sends.", "Yuki stretches out until four white paws, each as broad as a supper bowl, are nearer the fire than anyone's feet. *Amateurs,* she sends.", "Yuki looks along the row of feet, then down at her own, and stays as she is. \"I am not joining a movement,\" she says.")}
+
+You keep your boots on. Somebody at this fire ought to have standards, and you are surprised to find it is you.`]; /* v0.11.246 (owner pick P16-A, BF; Fable's run BF): texts 4 and 5 */ // RV1 (T M1, L2): text 2 after the meal (Fable's run RV); v0.11.234 (P7-A, ML): its end on a day he did not cook
 const FS_AH_T = { // RV1 (T M2, M3, L1, L2): ah:2's close and `none` (by form), ah:3's `both`, `mei`, `none` (Fable's run RV)
     2: { open: (g) => noCook(g, `The ash burns blue up here, and it lends your stew a colour that nobody mentions. The dead tree has the whole north of the sky, so everyone has chosen to sit facing the pot.`, `Up here the ash burns blue, and it has turned Mei Lin's rice cakes and the meat on Ya's stick a colour that nobody mentions. The dead tree owns the north of the sky, so all of you sit with your backs to it and watch the fire you laid instead.`) /* v0.11.234 (P7-A, ML) */, both: `Ya eats with her bare feet in your lap and her back against Mei Lin, who is combing ash out of Ya's hair with her fingers and scolding her for having any.`, ya: `Ya eats with her bare feet in your lap, daring the hills to object. Across the fire Mei Lin sorts her herb pouch by touch and smiles at the pouch.`, mei: `Mei Lin has tucked herself under your arm with her bowl, as though she had been issued there. Across the fire Ya whets the spear and grins at the pair of you between strokes.`, none: (g) => byForm(g, `Everyone has found a thing to tend: Mei Lin her herbs, Ya the edge of the spear, Yuki one white paw, ${AH2_POT(g)}`, `Everyone has found a thing to tend: Mei Lin her herbs, Ya the edge of the spear, Yuki one paw as broad as the pot lid, ${AH2_POT(g)}`, `Everyone has found a thing to tend: Mei Lin her herbs, Ya the edge of the spear, Yuki the end of her own tail, ${AH2_POT(g)}`), close: `"Blue," says Ya, at last. "I have eaten blue."
 
@@ -540,10 +581,46 @@ const FS_AH_T = { // RV1 (T M2, M3, L1, L2): ah:2's close and `none` (by form), 
 "And now?"
 
 Mei Lin answers for you. "Now it doesn't. Eat your supper, Ya."` },
+    4: { open: (g) => `The fire burns blue and low in its ring of black glass, and the dead tree stands in the north with the stars caught behind it. ${noCook(g, "Your pot sits in the embers on a slab of the glass, eaten down to the scrapings.", "Supper came out of the packs, dried meat and Mei Lin's seed cakes, eaten down to the crumbs.")} The ash lies ankle deep and fine as flour, and whatever is set down in it has to be dug for.`, both: `Ya sits behind you both with a knee against each back, a hunter keeping two hounds from wandering. Mei Lin leans into hers and passes dried plums back over her head without looking. You get every second one.`, ya: `Ya has your arm across her like a pelt she has won, and is teaching your fingers the knots of her spear binding whether they wish to learn or not. Mei Lin, over the flames, mends a sandal strap and hums, off the tune, on purpose.`, mei: `Mei Lin has got inside your coat without your taking it off, which leaves her cold hands in your pockets and her head under your chin. Ya, opposite, lifts her water skin to you both and drinks to it.`, none: `Ya flicks a chip of glass at your boot, then one at Mei Lin's, in strict turn, so that nobody feels left out. Mei Lin flicks one back, misses, and apologises to the hill.`, close: `Mei Lin catches her foot on a lump of black glass and says a word that was not raised in Ashfall.
+
+Ya sits up. "Herb girl. That one is mine."
+
+"You left it lying about."
+
+"Say it again. From the belly." Mei Lin does. You pretend to be asleep, badly.` }, // v0.11.246 (owner pick P16-A, BF; Fable's run BF, Claude's cuts)
+    5: { open: (g) => `The ash is still coming down, hissing where it meets the blue fire, and northward the dead tree is a blacker shape on a dark grey sky. ${noCook(g, "You kept the lid on the pot until the bowls were full, and everyone ate bent over, before the sky could season it.", "Supper was dried meat and fruit out of the packs, and everyone ate bent over, before the sky could season it.")} Mei Lin pushed her cloth up from her mouth to her hair to eat and has left it there; Ya's is still round her wrist, and she is going grey as you watch.`, both: `Mei Lin has drawn her blanket over all three heads against the ash and props up the middle with one fist, a tent pole with opinions. Ya, underneath, has an arm about each of you, and announces that she always wanted a den.`, ya: `Ya has pulled your coat over her head and yours and regards the hills from inside it, an inch from your face, entirely pleased. Mei Lin, under her cloth, tells the fire that certain people grew up in a cave. "A good cave," says Ya.`, mei: `Mei Lin has untied her cloth and spread it over your head as well as hers, which requires sitting very close, as she explains to nobody who asked. Ya, bare-headed and grey, watches you both under it and laughs until she coughs ash.`, none: `Ya unwinds the cloth from her wrist, sniffs it, and ties it to her spear, where it hangs like the flag of a very proper country. Mei Lin salutes it. You are asked for an anthem, and decline with thanks.`, close: `"Scholar. Herb girl says in Ashfall a man hands over a metal disc and walks off with a goat."
+
+"A coin. Yes."
+
+"And the goat agrees?"
+
+"Nobody asks the goat," says Mei Lin.
+
+Ya looks from one of you to the other. "And I am the wild one."` }, // v0.11.246 (owner pick P16-A, BF; Fable's run BF, Claude's cuts)
 };
+/** v0.11.246 (owner pick P16-A, AH; Fable's run AH, Claude's cuts): `ah_hunt` on the Ashen Hills' second stay (story day 15, the long calendar): its own three. */
+const AH15 = [(g) => `You come up onto the ridge path and the cinder hawks are already overhead, low enough that you can feel the warmth come off their wings. They no longer bother with height. Height is for prey that might get away.
+
+${byForm(g, "\"The hawks of these hills know a cat when they see one,\" says Ya. \"They like cats.\" Yuki, on your shoulder, lets the bond go flat. *I am not liked. I am shopped for.*", "\"See how wide they fly round her,\" says Ya, pleased. Yuki, at your side, stretches until her claws score the glass. *Good,* says the bond.", "\"They have picked the short one,\" says Ya. Yuki, at your elbow, turns her head slowly. \"I am standing here,\" she says. \"I heard that. So will they.\"")}
+
+Ya tests her spear's point on her thumb. "Kill one and the others remember, scholar. Kill all and nobody remembers." She grins.
+
+Or there are the hill-hares, down in the gullies, which have the decency to run away from you instead.`, (g) => `The ridge wind brings a smell of struck flint, and then the cinder hawks themselves, sliding down it in a line. One of them drops a spark on the path ahead of you, and you would swear it aimed.
+
+Ya laughs. "That one likes you, scholar. Now I am jealous. I should set fire to more of your things."
+
+${byForm(g, "Yuki, on your shoulder, ignores you both. Her eyes go from bird to bird and round to the start. *I am choosing,* says the bond. *They began it.*", "Yuki, at your side, lies down in full view and starts to wash. The hawks drift higher. *Nobody ever picks me,* says the bond. *Tragic.*", "Yuki, at your elbow, smooths her sleeve. \"They are settling which of them gets me,\" she says. \"I am settling it too. Mine is the shorter list.\"")}
+
+Below, a hill-hare breaks from one gully to the next, a grey streak with no opinion of you whatever.`, (g) => `Ash lifts off the high ground in long grey veils, and the cinder hawks come through them one after another, wings banked, sparks streaming behind. It would be a fine sight from further off, or from under a roof.
+
+Ya rolls her neck, spear loose in her hand. "Pretty," she says. "I want the feathers. You can have the rest, scholar. I am generous."
+
+${byForm(g, "Yuki, on your shoulder, is the shape of a dropped glove. *If one comes down,* says the bond, *I shall be inside your coat. Good luck.*", "Yuki, at your side, licks her chops, loudly. The hawks swing wide of her. *Feathers for Ya,* says the bond. *The rest is spoken for.*", "Yuki, at your elbow, brushes ash from her collar. \"They look at me as I look at fish,\" she says. \"I find I do not care for it.\"")}
+
+The hill-hares, for their part, are down in the gullies being hares. It asks very little of anyone.`];
 const ahPart = (v, g) => (typeof v === 'function' ? v(g) : v);
 const ahFire = (t) => (g) => `${ahPart(t.open, g)}\n\n${ahPart(both(g) ? t.both : onlyYa(g) ? t.ya : onlyMei(g) ? t.mei : t.none, g)}\n\n${t.close}`;
-const FS_AH = [ahFire(FS_AH_T[2]), ahFire(FS_AH_T[3])];
+const FS_AH = [ahFire(FS_AH_T[2]), ahFire(FS_AH_T[3]), ahFire(FS_AH_T[4]), ahFire(FS_AH_T[5])]; // v0.11.246 (P16-A, BF): 4 and 5
 /** Move the clock forward to hour h today (time passes: hunger, regen). */
 function toHour(g, h) {
     const p = clockParts(g.minutes);
@@ -762,7 +839,15 @@ It takes you a while. A bone-elk, head up in the moss between two roots: bigger 
 
 "And I stay behind the root," Mei Lin whispers, "and scream."
 
-"See? She learns."`], 'rr_hunt')),
+"See? She learns."`, `Root-hares scatter across the bark ahead of you, and Ya lets them go without a glance. She is crouched over a gouge in the root where a bone-elk has sharpened its antlers, and she looks pleased.
+
+The elk itself is below, in the hollow under the root's arch, rubbing its spirals against the wood. The bone runs down its neck in white blades, and each scrape sets your teeth humming. Your Convergence leans towards it like a dog at a butcher's door.
+
+"We are above it," Ya whispers. "So. I drop on its back. Scholar puts bone in its legs. Herb girl throws her stinking powder in its face, so it charges blind."
+
+"It is a medicinal powder," Mei Lin whispers.
+
+"It stinks. Throw it well."`], 'rr_hunt')), // v0.11.246 (owner pick P16-A; Fable's, Claude's cuts): BH, a third
         choices: [
             onceADay('rr_elk', { text: 'Take the bone-elk.', combat: elkFight, to: 'rr_elk_won' }),
             onceADay('rr_snare', { text: 'Leave the elk. Snare root-hares instead.', qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 4 }, time: 60, do: (g) => { addItem(g, 'hare_raw', 2); return [`+2 root-hares (as hare). ${DR_SNARE(g)}`]; }, failDo: () => ['Empty snares. Ya will be bringing it up until dark.'], to: 'rr_hub' }),
@@ -782,7 +867,13 @@ You pick up a shed antler-tine. It is warm in your hand, and your Convergence tu
 
 "Once is luck," she says, working. "Twice is a hunter." She looks you over, blood to the wrists, as if pricing you. "A bad hunter. Loud feet. But a hunter."
 
-You take an antler-tine again: a short one, snapped off clean in the fight. Your Convergence weighs it against the memory of the other and finds them different, the way two voices are different. This one is denser. It would hold an edge. It goes into the hammerspace, and Ya watches the air close over it and shakes her head.`], 'rr_elk_won'),
+You take an antler-tine again: a short one, snapped off clean in the fight. Your Convergence weighs it against the memory of the other and finds them different, the way two voices are different. This one is denser. It would hold an edge. It goes into the hammerspace, and Ya watches the air close over it and shakes her head.`, `The bone-elk folds at the knees and goes over sideways, and the root under your boots takes the weight with a groan. Ya has her spear out of it before the antlers stop rattling.
+
+"Hold the leg, scholar," she says. You hold the leg. She works fast and talks faster: where the good meat lies, which cut her people give to the one who struck, and which to the one who stood near and looked clever. You get the second.
+
+A tine has split off against the bark. You pick it up, and your Convergence runs through it like water through limestone, finding every hollow, every seam where the beast grew through a hard winter. It is a record, this bone. A diary of bad years.
+
+You shelve it in the hammerspace, unread past the opening chapter. Ya cleans her knife on a fern and grins at you.`], 'rr_elk_won'), // v0.11.246 (owner pick P16-A; Fable's, Claude's cuts): BW, a third
         choices: [{ text: 'Back to the road.', time: 40, to: 'rr_hub' }],
     },
     rr_elk_lost: {
@@ -926,7 +1017,7 @@ You find a raft of fallen trunks jammed between two trees, high enough and dry e
     },
     dw_hunt: {
         id: 'dw_hunt', title: 'Something Under the Water', art: 'mire_serpent', place: PLACE.dw,
-        text: (g) => (!daily('dw_serpent')(g) ? HUNT_AGAIN.dw : `The drowned branches are full of roosting marsh fowl, dozens of them, fat and loud and without a thought among them. Under them something else is moving: one long wake, drawn across water that has no current to draw it.
+        text: (g) => (!daily('dw_serpent')(g) ? HUNT_AGAIN.dw : byDay(g, [`The drowned branches are full of roosting marsh fowl, dozens of them, fat and loud and without a thought among them. Under them something else is moving: one long wake, drawn across water that has no current to draw it.
 
 "Serpent," says Ya. "Good meat. Bad temper. Like me." Her grin turns on Mei Lin. "Like you."
 
@@ -936,7 +1027,17 @@ You find a raft of fallen trunks jammed between two trees, high enough and dry e
 
 "There was a frog in my bedroll. You put it there."
 
-"A *present*."`),
+"A *present*."`, `Marsh fowl crowd a leaning trunk with their heads under their wings, as trusting as a queue. Below them the still water bulges, slowly, and lies flat.
+
+"It is under the birds," Ya says, low. "It waits for one to fall in. Lazy. I respect it."
+
+"Do they fall in often?" Mei Lin asks.
+
+"If the herb girl sneezes, yes." Ya looks at her hopefully. Mei Lin presses a sleeve to her nose and glares over it. You decide never to have a cold near Ya.`, `A shed skin hangs over a low bough, as long as a raft and thin as wet paper, and the marsh fowl roost all round it like washing on a line. Its former owner is out in the still water, a ridge of scales that shows and sinks.
+
+Mei Lin raises one end of the skin against the grey sky. "This would sell," she says. "Apothecaries pay for slough."
+
+"The meat is better," Ya says. "And the meat is in the new skin." She tests her spear point with a thumb and waits on you, as if the choice were obvious and you were slow.`], 'dw_hunt')), // v0.11.246 (owner pick P16-A; Fable's, Claude's cuts): BH, texts 2 and 3
         choices: [
             onceADay('dw_serpent', { text: 'Go for the serpent.', combat: serpentFight, to: 'dw_serpent_won' }),
             onceADay('dw_fowl', { text: 'Darts at the roosting fowl.', qi: 2, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 5 }, time: 50, do: (g) => { addItem(g, 'fowl_raw', 2); return ['+2 Marsh fowl.']; }, failDo: () => ['A storm of honking and feathers, and not one bird in it for you.'], to: 'dw_hub' }),
@@ -946,11 +1047,15 @@ You find a raft of fallen trunks jammed between two trees, high enough and dry e
     dw_serpent_won: {
         id: 'dw_serpent_won', title: 'Serpent Steaks', art: 'mire_serpent', place: PLACE.dw,
         enter: (g) => { eat(g, 25); addItem(g, 'fowl_raw', 1); return ['Serpent, roasted over a fire of drowned branches: +25 satiety. +1 more to carry (as fowl).']; },
-        text: `It beats the water to foam before it dies. Ya rides it through its last few seconds like a horse, whooping, and comes up soaked, glorious and very taken with herself.
+        text: (g) => byDay(g, [`It beats the water to foam before it dies. Ya rides it through its last few seconds like a horse, whooping, and comes up soaked, glorious and very taken with herself.
 
 Mei Lin, dripping, says, "You're insane," and then, lower, for no ears but possibly yours: "That was beautiful."
 
-You decide you didn't hear it. So does she.`,
+You decide you didn't hear it. So does she.`, `The serpent stops moving coil by coil, and the water goes flat around it as if nothing had happened.
+
+Ya hauls it to the trunks by the tail, with half the Drowned Wood hanging off her. Mei Lin, soaked to the collar, starts picking the weed out of her hair, strand by strand, scolding as she goes; Ya stands still for it, which Ya does for nothing.
+
+You find the farther trunks extremely interesting.`], 'dw_serpent_won'), // v0.11.246 (owner pick P16-A; Fable's, Claude's cuts): BW, a second
         choices: [{ text: 'Back to the trunks.', time: 30, to: 'dw_hub' }],
     },
     dw_serpent_lost: { // v0.11.131 (XB2, FY; Fable's MAIN): taken out of the air when he flies
@@ -1133,10 +1238,10 @@ She doesn't mean a word. All of you can hear that she doesn't, and it helps nobo
             { text: 'Find Mei Lin and Ya. They went for water an hour ago.', show: (g) => bothAway(g), time: 30, to: 'trio_kiss' }, // v0.11.231 (AV): the day only, in the predicate
             { text: 'Forage in the ash.', show: (g) => optionLeft(g, 'ah_forage') && !late(g), time: 15, to: 'ah_forage' },
             { text: 'Hunt.', show: (g) => optionLeft(g, 'ah_hunt') && !late(g), time: 15, to: 'ah_hunt' },
-            { text: 'Climb to the cairn on the high ridge.', show: (g) => !g.flags.ah_cairn && !late(g), time: 40, to: 'ah_scout' },
+            { text: 'Climb to the cairn on the high ridge.', show: Object.assign((g) => !g.flags.ah_cairn && !late(g) && !bothAway(g), { away: bothAway }) /* v0.11.246 (P16-A, LG): not while both are away  (RV, C L1: the `away` mark is a note only; task mode reads it on daily menu cards) */, time: 40, to: 'ah_scout' },
             ...hubChoices('ah_hub'),
             { text: 'Make camp in the lee of a ridge.', show: (g) => (bday(g) <= 4 || !blLastDay(g)) && hour(g) >= 16, time: 20, to: 'bl_camp' },
-            { text: 'Climb to the pass. The rot-ape.', show: (g) => bday(g) >= 5 && blLastDay(g), time: 60, to: 'ah_ridge_end' },
+            { text: 'Climb to the pass. The rot-ape.', show: Object.assign((g) => bday(g) >= 5 && blLastDay(g) && !yaAway(g), { away: yaAway }) /* v0.11.246 (P16-A, LG): Ya's door first (Ya speaks at the pass)  (RV, C L1: the `away` mark is a note only; task mode reads it on daily menu cards) */, time: 60, to: 'ah_ridge_end' },
         ],
     },
     ah_forage: {
@@ -1145,12 +1250,12 @@ She doesn't mean a word. All of you can hear that she doesn't, and it helps nobo
         choices: [
             onceADay('ah_truffle', { text: 'Dig for the ash-truffles.', check: { skill: 'GU', dc: 5, bonus: () => 2 }, time: 60, do: (g) => { addItem(g, 'jade_bracket', 2); eat(g, 10); return [`+2 ash-truffles (as jade bracket), and one eaten on the spot: +10 satiety. ${DR_TRUFFLE(g)}`]; }, failDo: (g) => [awayText(g, `Ash, more ash, and one beetle. The beetle goes to Ya. She eats it live, with a crunch, holding Mei Lin's eye throughout. "Disgusting," says Mei Lin. "You're still looking." "I'm looking so I don't miss it when you *die*."`, AW.truffle_f)], to: 'ah_hub' }),
             onceADay('ah_cinder', { text: 'Cinderberries with Mei Lin.', show: Object.assign((g) => !meiOut(g), { away: meiOut }) /* v0.11.231 (P4-2, AG); v0.11.234 (P7-A, TL): `away` */, check: { skill: 'GU', dc: 3 }, time: 40, do: (g) => { addItem(g, 'crimson_berry', 6); (relToday(g, 'ah_cinder') && bumpRel(g, 'Mei Lin', 2, 2)); return [`+6 cinderberries (as needleberries). ${DR_CINDER(g)}`]; }, failDo: (g) => { addItem(g, 'crimson_berry', 2); return ['Thorns. +2 cinderberries.']; }, to: 'ah_hub' }),
-            { text: 'Eat a fire-beetle. For science.', show: daily('ah_beetle'), do: (g) => { markDaily(g, 'ah_beetle'); eat(g, 6); bumpRel(g, 'Ya', 3, 3); return [`${DR_BEETLE(g)} +6 satiety. ${DR_BEETLE_AFTER(g)}`]; }, to: 'ah_hub' },
+            { text: 'Eat a fire-beetle. For science.', show: daily('ah_beetle'), do: (g) => { markDaily(g, 'ah_beetle'); eat(g, 6); if (!yaOut(g)) bumpRel(g, 'Ya', 3, 3) /* v0.11.246 (P16-A, LG): not while she is away */; return [`${DR_BEETLE(g)} +6 satiety. ${DR_BEETLE_AFTER(g)}`]; }, to: 'ah_hub' },
         ],
     },
     ah_hunt: {
         id: 'ah_hunt', title: 'Hawks', art: 'cinder_hawks', place: PLACE.ah,
-        text: (g) => (!daily('ah_hawks')(g) ? awayText(g, HUNT_AGAIN.ah, AW.hunt_again) : byDay(g, awayList([(g) => `Since you crossed the line into the ash, the cinder hawks have kept you in sight. They are bigger than eagles and ash-grey, and every wingbeat knocks a few faint sparks loose, as though the birds were built of coals that never went all the way out.
+        text: (g) => (!daily('ah_hawks')(g) ? awayText(g, HUNT_AGAIN.ah, AW.hunt_again) : longCal(g) && bday(g) >= 5 /* RV (C L2): the Blackroot's own day, as the hub's text */ ? seqText(g, 'ah_hunt:15', awayList(AH15, AW.hunt15)) : byDay(g, awayList([ /* v0.11.246 (P16-A, AH): the first stay three texts (a third), the second its own three (AH15, by `s:ah_hunt:15`; the long calendar) */(g) => `Since you crossed the line into the ash, the cinder hawks have kept you in sight. They are bigger than eagles and ash-grey, and every wingbeat knocks a few faint sparks loose, as though the birds were built of coals that never went all the way out.
 
 "Threes," says Ya. "Always threes." ${byForm(g, '"It\'s the cat they want."', '"They won\'t go for the cat. Not that cat."', '"They\'ll go for the small one."')}
 
@@ -1162,7 +1267,13 @@ The gullies hold hill-hares as well: small, quick, the colour of the ash. They a
 
 Yuki, ${byForm(g, 'on your shoulder', 'at your side', 'at your elbow')}, does not flatten her ears this time. She watches them with the stillness of someone doing sums. ${byForm(g, '*Three,* says the bond.', '*Three,* says the bond.', '"Three," she says.')} It is not a count. It is an order.
 
-The hill-hares are still in the gullies: still small, still ash-coloured, and still entirely free of fire.`], AW.hunt), 'ah_hunt')),
+The hill-hares are still in the gullies: still small, still ash-coloured, and still entirely free of fire.`, (g) => `The hawks have the wind today and are using it: three ash-grey shapes hung over the ridge without a wingbeat between them, dropping the odd spark onto the slope. Where a spark lands, the ash smokes blue and thinks better of it.
+
+Ya crouches, spear across her knees. "They do not hunt hungry, scholar. They hunt bored. Bored is worse."
+
+${byForm(g, "Yuki has dug every claw she owns into your shoulder. *The middle one keeps looking at me,* says the bond. *I should like it to stop having eyes.*", "Beside you, Yuki yawns up at them with everything she has. The hawks climb a little. *Cowards,* says the bond, with real regret.", "Yuki, by your elbow, has not blinked in some while. \"The one in the middle has chosen me,\" she says. \"I intend to be a disappointing choice.\"")}
+
+In the gullies the hill-hares go about their business, ash-coloured and quick, with the ease of animals nobody is hovering over.`], AW.hunt), 'ah_hunt')),
         choices: [
             onceADay('ah_hawks', { text: (g) => byForm(g, 'Take the hawks before they take Yuki.', 'Take the hawks.', 'Take the hawks before they take Yuki.'), // v0.11.179 (LB1, K4; RV2 R5): the great root-kin is no prey (Ya: "looking somewhere else"); the cat and the woman are ("They want the small one")
                 combat: hawksFight, to: 'ah_hawks_won' }),
@@ -1177,7 +1288,11 @@ The hill-hares are still in the gullies: still small, still ash-coloured, and st
 
 "Little queen," Ya tells her, with enormous respect. Yuki lets the title stand.`, (g) => `The last hawk hits the ash and rolls, trailing smoke, and Yuki — ${byForm(g, 'who has spent the fight on your shoulder with her claws through your coat — is down and on it before it stops, and plants herself there', 'who has spent the fight a pace ahead of you, taking sparks on her fur without seeming to notice — drops a paw on it, and settles there', 'who has spent the fight at your back, ash to the elbows — sets her heel on it, and stays there')}, looking up, counting an empty sky.
 
-"Little queen," Ya says again, and this time she bows: badly, from the waist, with her eyes on the hawk. Yuki considers the bow, and allows it.`], AW.hawks_won), 'ah_hawks_won'),
+"Little queen," Ya says again, and this time she bows: badly, from the waist, with her eyes on the hawk. Yuki considers the bow, and allows it.`, (g) => `The sky empties hawk by hawk, and the final one drops burning into the ash and does not get up.
+
+${byForm(g, "They came for Yuki, every one, and this bird fell an arm's length short of her, the closest any of them got. She quits your shoulder for the ash and paces one tight ring about the bird, inspecting the work.", "Not one of them would come near Yuki; they swung wide of her and stooped at you instead, and met her on the way in. She leaves your flank, tail lashing, and stands over the bird until its embers have the sense to go out.", "Each of them stooped at Yuki and none of them arrived; this one burned out a pace from her feet. She steps out from behind you, ash in her hair, and nudges the bird with one toe. \"Adequate.\"")}
+
+Ya pulls a long cinder-feather from the wreck and offers it across both palms, eyes down. "Yours. I only stabbed." Yuki looks at the feather, then at you. You carry it. That is what you are for.`], AW.hawks_won), 'ah_hawks_won'), // v0.11.246 (owner pick P16-A; Fable's, Claude's cuts): BW, a third (its away version in AW)
         choices: [{ text: 'Back to the ridge.', time: 30, to: 'ah_hub' }],
     },
     ah_hawks_lost: {

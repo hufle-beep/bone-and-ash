@@ -1,0 +1,11 @@
+ka:pro | The flight came with it, unannounced: the Qi takes your weight as a current takes a swimmer, should you care to leave the moss.
+ka:act1 | The hammerspace reports in: what the tribute left you, and not one thing earned since. Your body did better: it kept {realm}, and the air with it. The Qi flows will still carry you where you lean, and leaving the ground stays as plain as walking. The road north, to the tree, it mislaid. Your head has the map, every bend of it.
+byb | The rung you can name, and not the storm over it. Old Wen gave you the ladder and said that every step up is dearer than the one below; he never said who sends the bill, or how. You had assumed herbs, years, somebody else's village. The lightning overhead is keeping to one spot, and you are standing on it. The sky has come to collect.
+cf | "Which rung?" Mei Lin asks. "Core Formation," you say. She sits down on her pack, hard. "That is the rung the Sect's elders stand on. They spent centuries on it. They get carried places." Ya eyes the clearing sky. "Can he beat an elder?" "Ask an elder," you say.
+# notes
+- ka:act1 keeps the paragraph's opening sentence ("The hammerspace reports in: what the tribute left you, and not one thing earned since.") word for word, as the brief's "the hammerspace as before" and as the prologue's two variants share their opening; if the five-word-run check must not see it, a swap: "The hammerspace reports in, and briefly: the tribute's leavings, nothing newer."
+- ka:act1 is 63 words, ka:pro 24, byb 66, the reworded cf sentence 9.
+- ka:act1 says "the tree" and "north" where the original says "the road to the dead tree" (to avoid the six-word run); assumes the dead tree lies north of Ashfall, as the Ashen Hills line in common.md suggests.
+- ka:pro assumes moss underfoot at the prologue dawn (the scene's "Grey moss").
+- byb: "somebody else's village" leans on Old Wen's "the Sect buys its rungs with villages"; it assumes nothing else of the lesson. It ends on "The sky has come to collect." so that "It looks." follows a sentence about the sky.
+- If the unwound paragraph can follow ka:act1 or the kept prologue paragraph (Foundation taken back), the flight sentence would contradict it; assumed kept and unwound never show together.

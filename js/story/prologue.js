@@ -382,7 +382,38 @@ The watch-thread carries the word home off to the rim of the rise and stands gua
 
 ${g.flags.fire ? "The fire makes a kettle's sort of noise, with no kettle, and you miss tea with a precision that surprises you." : "Without a fire you have nothing to tend, and your hands lie idle on your knees and raise no objection."} ${byForm(g, "Yuki, draped over your shoulder, yawns until every tooth she owns is on show, and you catch it from her before you can stop yourself.", "Yuki, heaped at your back, yawns until every tooth she owns is on show, and you catch it from her before you can stop yourself.", "Yuki, slumped against your arm, yawns until every tooth she owns is on show, and you catch it from her before you can stop yourself.")}
 
-The thread on watch keeps one eye on the mist, which stays where it is. It files this under good behaviour and has nothing further to add.`], 'night'),
+The thread on watch keeps one eye on the mist, which stays where it is. It files this under good behaviour and has nothing further to add.`,
+            /* v0.11.246 (owner pick P16-A, NF6; Fable's runs N-a, N-b, Claude's cuts): nights 16–21, past fifteen (a non-social scene; the owner's pick) */
+            (g) => `Somewhere beyond the stream, once the dark is down, a knocking starts: wood on hollow wood, three slow blows and a rest, a long way off. It has the patience of a caller at a door who knows the house is occupied. Nothing opens. The caller takes no offence and goes on.
+
+${g.flags.fire ? "The fire pops once, out of time with the blows, and you catch yourself frowning at it like a conductor." : "With nothing lit, each blow arrives whole, and one of your fingers has started keeping time."} ${byForm(g, "Yuki, a warm knot against your wrist, lifts an eyelid at the third blow. *Nobody's in,* she offers through the bond, and shuts it.", "Yuki, banked along your back, lifts an eyelid at the third blow. *Nobody's in,* she offers through the bond, and shuts it.", "Yuki, propped against your ribs, lifts an eyelid at the third blow. \"Nobody's in,\" she says, and shuts it.")}
+
+A thread with a head for rhythm takes the watch. It logs the knocking as distant and regular and declines, on the evidence, to answer the door.`,
+            (g) => `Water is the only thing here that does not stop for the dark. The trunks stop, the moss stops, the path you wore to the bank stops three paces out. Below you the stream keeps on downhill, muttering, the only party in this forest with somewhere to be, and no interest in whether you come too.
+
+${g.flags.fire ? "The fire is going nowhere either, and says so in small noises, and you find you side with the fire." : "No fire, so you follow the water by ear as far as the bend, and lose it there without regret."} ${byForm(g, "Yuki, tucked under your chin, listens to it leave. *Let it,* she sends over the bond. *We've only just sat down.*", "Yuki, a white bank along your side, listens to it leave. *Let it,* she sends over the bond. *We've only just sat down.*", "Yuki, folded up at your shoulder, listens to it leave. \"Let it,\" she says. \"We've only just sat down.\"")}
+
+One thread stays up for the watch and takes a bearing on the stream, for form's sake. Downhill, it concludes. The other eight had got there unaided.`,
+            (g) => `Wind gets up as the dark lands, and stays up: it works the tops of the black trees, a hundred feet overhead, and does not once come down to the rise. Down here the air is cold and unmoving, and the damp gets into your collar by its own arrangements. Weather, it seems, is a thing that happens to the canopy.
+
+${g.flags.fire ? "The fire leans a little, out of sympathy with the treetops, and warms one side of you exactly." : "Fireless, you turn your collar up against a wind that never arrives, and it helps, which is unscientific."} ${byForm(g, "Yuki has gone inside your coat at the collar, and only her nose is out. *You're welcome,* is all the bond carries.", "Yuki has laid her flank along the cold side of you, like a draught excluder with opinions. *You're welcome,* is all the bond carries.", "Yuki has pulled half your coat round her own shoulders without discussion. \"You're welcome,\" she says, from inside it.")}
+
+The thread that feels the cold least takes the watch. It follows the wind across the canopy from one edge of hearing to the other, and reports the weather still upstairs.`,
+            (g) => `Upwind of the rise, something is fruiting. The smell reaches you with the dark, and it arrives in force: cold cellar, split pear, and under both a note you cannot place. Whatever it is, it opens only once the light has gone, which strikes you as sound judgement.
+
+${g.flags.fire ? "Woodsmoke gets into the smell and spoils the sample, and you find you resent your own fire a little." : "No smoke gets between you and the smell, and you breathe it in like a man reading someone else's post."} ${byForm(g, "Yuki, on your shoulder, sneezes twice and looks at you as the responsible party. *Your field,* arrives over the bond. *Make it stop.*", "Yuki, banked up behind you, sneezes twice and looks at you as the responsible party. *Your field,* arrives over the bond. *Make it stop.*", "Yuki, tucked in under your arm, sneezes twice and looks at you as the responsible party. \"Your field,\" she says. \"Make it stop.\"")}
+
+The thread that takes the watch is the one that wanted to go and look. It stands its post facing upwind and does not go, which it would like noted.`,
+            (g) => `Above the rise there is a gap in the crowns, and once the dark has come it is the only part of the black with anything in it. A few stars show there. They are dim, slightly green, and do not twinkle, and you look at them for want of a ceiling.
+
+${g.flags.fire ? "Firelight gives up a little above your head, well short of the sky, and neither party seems to feel the loss." : "With nothing lit down here, the green points are the brightest things in view, a title they do nothing to defend."} ${byForm(g, "Yuki, upside down across your forearm, studies the gap too. *None of ours,* comes across the bond. *I checked.*", "Yuki, curled about you, chin tipped skyward, studies the gap too. *None of ours,* comes across the bond. *I checked.*", "Yuki, head tipped back on your shoulder, studies the gap too. \"None of ours,\" she says. \"I checked.\"")}
+
+The watch falls to the thread with the tidiest mind. It keeps the rise and, on the side, charts the green stars without naming any, in case they have names already.`,
+            (g) => `Somewhere at home a library book is overdue in your name. The thought turns up as the dark does, uninvited and complete, and the black trunks step back out of sight in good order. It was a book on lichens. The fine is growing across a distance no librarian has ever had to chase.
+
+${g.flags.fire ? "You consider, by firelight, whether being in another world counts as a reason, and suspect the form has no box for it." : "Sitting in the dark, you draft the letter of apology, and get as far as the return address before it defeats you."} ${byForm(g, "Yuki, wedged under your chin, has followed the whole thought. *You never finished it,* she points out by way of the bond. *Chapter four.*", "Yuki, piled round you with her jaw on your shin, has followed the whole thought. *You never finished it,* she points out by way of the bond. *Chapter four.*", "Yuki, propped on your arm, has followed the whole thought. \"You never finished it,\" she says. \"Chapter four.\"")}
+
+The thread going on watch takes the fine along for something to do, and works the sum between looks at the trees. You do not ask for the total.`], 'night'),
         choices: [
             { text: 'Leave a thread on watch and sleep.', do: set('watch'), to: nightNext },
             { text: 'Story Mode only (removed in v0.11.41).', show: () => false, to: nightNext }, // v0.11.41 (D2-a): Story Mode's sit; the place kept (choice indices)
@@ -1012,10 +1043,7 @@ Ya hauls herself onto the lip, puts a bare foot on the scorch and finds it cold.
 const BT_VILLAGE_CLOSER = 'Ashfall watches it go in total silence. Then, one by one, people bow — not to the sky. To you. You would very much prefer they didn\'t.';
 /** v0.11.188 (owner picks N1, RV1, DB1; Fable's, part 2): Foundation at the Ashen Hills while Ya has walked off (M1): Mei Lin
  *  alone saw it. Texts only. */
-export const BT_MEI = {
-    night: `Mei Lin has not moved. In the dark her face is turned up to where the storm was, then down to the scorched thumbprint the one bolt left in the ash by your knee. "I have watched Heaven burn three people," she says. "It never once changed its mind." A short laugh gets out of her. "Ya will call me a liar."
-
-"Tell her it was a scheduling error," you say.`,
+export const BT_MEI = { // v0.11.246 (owner pick P16-A, LG): the night block removed (never shown: Ya is away by day only, `ahDay`)
     day: `Mei Lin has not lowered the arm she threw over her eyes. She looks under it at the empty sky, then at you, who are not on fire. "People die of that," she says. "I have carried what was left of them home." Then she laughs, helplessly. "Ya walked off and missed Heaven losing its nerve. She will never believe me."
 
 "I barely do," you say. "And I was closer."`,
@@ -1025,7 +1053,7 @@ export const BT_MEI = {
  *  M Mei Lin alone at the Ashen Hills while Ya is away, T the Old Tree). Both away: Yuki's line alone, as before. Texts only. */
 export const BT_LATE = {
     P: {
-        A: `"Which rung?" Mei Lin asks. "Core Formation," you say. She sits down on her pack, hard. "The Sect's elders are Core Formation. They spent centuries on it. They get carried places." Ya eyes the clearing sky. "Can he beat an elder?" "Ask an elder," you say.`,
+        A: `"Which rung?" Mei Lin asks. "Core Formation," you say. She sits down on her pack, hard. "That is the rung the Sect's elders stand on. They spent centuries on it. They get carried places." Ya eyes the clearing sky. "Can he beat an elder?" "Ask an elder," you say.`, // v0.11.246 (P16-A, CF; Fable's run SF): Mei Lin's line no longer repeats the rung's name
         B: `"True Core," you report, since neither of them can feel it. Mei Lin sits down where she is and laughs at the sky. "Elders die waiting for that one. Old, and waiting." Ya lowers her spear, disappointed in the lightning. "It patted you down and left. I wanted to watch it try."`,
         C: `"What is it now?" Mei Lin asks you. You tell her. She laughs until the sky has finished leaving. "Sect masters have words like that. It costs them lifetimes, and there are banners." Ya grins. "And they float up like old smoke. You'll go up like a thrown rock, scholar." "Thank you," you say.`,
         D: `"Say the name," Mei Lin says. You say it. She nods slowly. "That one is in the stories the old women tell. The man in it has a beard to his knees and a mountain." Ya looks you over. "You have glasses and a coat. Who would you lose to?" "Paperwork," you say.`,
@@ -1059,7 +1087,7 @@ export const btStep = (realm) => (realm <= 2 ? 'A' : realm === 3 ? 'B' : realm <
 function btParty(g, away, night) {
     if (BT_IN_TREE.includes(g.flags.bt_return)) return BT_PARTY.tree;
     const n = night || (g.flags.bt_return === 'rt_camp' && clockParts(g.minutes).hh >= 19);
-    if (away === 'ya') return n ? BT_MEI.night : BT_MEI.day;
+    if (away === 'ya') return BT_MEI.day; // v0.11.246 (P16-A, LG): Ya is away by day only
     const t = n ? BT_PARTY.night : BT_PARTY.day;
     return g.flags.bt_return === 'ah_hub' ? t.replace('scorched moss', 'scorched ash') : t;
 }
@@ -1098,6 +1126,7 @@ function btText(g) {
         const recognise = knows
             ? `This one you have a name for. Mei Lin described it once, in the tone she keeps for weather: *the sky decides you're impure and tries to burn you clean. Most people it just burns.* A tribulation. Heaven is handing down a verdict, and the name written on it is yours.`
             : `For this you have no word at all. You consult what you know of weather, of atmospheric charge, of the physics of a planet you have been on for under a week, and all of it returns a blank. Its outline you can read anyway. Lightning that drifts does not behave like that. This lightning is *aiming*. Somebody is being judged here, and it is you.`;
+        const recogniseWen = `The rung you can name, and not the storm over it. Old Wen gave you the ladder and said that every step up is dearer than the one below; he never said who sends the bill, or how. You had assumed herbs, years, somebody else's village. The lightning overhead has finished looking, and what it found is you. The sky has come to collect.`; // v0.11.246 (owner pick P16-A, BYb-t; Fable's run SF): Old Wen's lesson heard, Mei Lin's word not (`lore_realms` without `lore1`)
         const witness = a1seen ? BT_A1_WITNESS : seen
             ? `Ashfall saw it. The whole village is out in the street with its faces turned up, and no one is speaking. Somebody's grandmother kneels in the dust with her forehead to the ground, praying in a fast, shaking whisper. The hunters grip their spears as though a spear had a say in this. What frightens them most is that they can't *feel* you. Everyone in Ashfall with any sense for Qi is reaching for you now — it brushes you like a dozen nervous fingertips — and finding what they have always found. Nothing. A mortal, sitting in the dust, while Heaven argues with him and loses.
 
@@ -1118,7 +1147,7 @@ Then the sky notices.
 
 Clouds arrive from nowhere: black and low, piling up over you, humming at a pitch you feel in your back teeth. ${sky} Lightning walks about inside them, looking.
 
-${recognise}
+${knows || !g.flags.lore_realms ? recognise : recogniseWen}
 
 It looks.
 
@@ -1149,6 +1178,16 @@ ${seen || a1seen
     ? BT_VILLAGE_CLOSER
     : night ? 'Yuki does not so much as open an eye. Off in the dark, something large thinks better of coming any closer.' : 'Yuki does not so much as open an eye.'}${late}`;
 }
+/** v0.11.246 (owner pick P16-A, FC with FC-o; Fable's run FC, Claude's cuts): the first flight, once a game: after the first
+ *  Foundation breakthrough's "Get up." (the Coil in which `breakthrough` was first read). Out of sight in Ashfall (only Yuki sees
+ *  it); Mei Lin and Ya see it in the Blackroot (Mei Lin alone while Ya is away). Yuki is the cat at Foundation. */
+export const FF = { open: { alone: "You get up, and the getting up does not stop where it usually does. Your boots clear the earth by the breadth of a palm and stay there. Nobody is about to witness this but Yuki, who has watched you do stupider things on purpose.", village: "You get up carefully, because your heels have stopped agreeing with the street. Ashfall has gone back to staring at the emptied sky, and you use the chance to walk, flat-footed and with great concentration, round the grain store and out behind the last wall. There you stop concentrating, and rise as far as the top course of stones and no further.", party: "You stand. Mei Lin is asking whether you can walk, and stops halfway through a word. Ya's spear has swung round to point at your boots, and at the gap of plain air under them. You look down as well. It seems only polite.", mei: "Mei Lin offers you a hand up. You take it, out of manners, and rise rather further than she pulled. She lets go quickly and studies the space beneath your boots, then you, with the expression of a herbalist handed a plant that is in no book." }, body: `The Qi here runs in currents, and has all along; only now do you have anything to catch it with. You lean into one as a swimmer leans into a river, and it takes your weight without comment. There is no trick to learn. It is walking, with one thing fewer to push against.
+
+You go up as far as seems reasonable, turn on a slow eddy and let a stronger flow carry you a dozen paces sideways. Your people do this from Foundation. Nobody at home would look up.
+
+Yuki steps off your shoulder onto nothing and stays level with your face, tail steering. *Finally,* she says. *All this time, carried about by a pedestrian. Keep up.* She takes the faster current. Naturally.`, close: { alone: "You descend because you choose to, which is the whole difference. Yuki lands on your shoulder and washes one paw. *Adequate,* she says. *You held your arms out. Don't.* You had not noticed the arms.", village: "The top of the wall is as high as you went, and nobody beyond it has looked round; Ashfall is still discussing the sky. You settle onto the earth with the stones between you and the street. *They would build you a shrine,* Yuki says. *You'd hate the upkeep.* You walk back in flat-footed, a man with nothing to report.", party: "Ya whoops, then scowls. \"Scholar. You never said you could do that.\" \"I couldn't, until just now.\" Mei Lin is watching the gap under your boots. \"Sect masters fly,\" she says quietly. \"Golden Core. Slowly, with attendants.\" \"I'll skip the attendants,\" you say, and drift down to them.", mei: "Mei Lin watches you the whole way down. \"Only Golden Core flies,\" she says, quite evenly. \"Old men. They burn incense beforehand.\" \"I didn't have any,\" you say. She laughs, against her better judgement, then checks the sky in case it heard." } };
+export const ffPlace = (g) => (VILLAGE_SCENES.includes(g.flags.bt_return) || BT_ASHFALL_A1.includes(g.flags.bt_return) ? 'village' : ({ P: 'party', T: 'party', M: 'mei' }[btWho(g)] || 'alone'));
+export const firstFlightNow = (g) => g.james.realm === 1 && g.seen?.breakthrough === (g.coil?.n || 1) && g.seen?.first_flight == null;
 SCENES.breakthrough = {
     id: 'breakthrough', title: (g) => realmName(g.james.realm), art: 'tribulation', place: (g) => g.location,
     enter: (g) => {
@@ -1162,11 +1201,17 @@ SCENES.breakthrough = {
     choices: [{ text: 'Get up.', to: (g) => {
         const back = g.flags.bt_return || 'stream';
         g.flags.yuki_return = back;
+        if (firstFlightNow(g)) return 'first_flight'; // v0.11.246 (P16-A, FC): the first flight, once a game
         if (g.james.realm >= 2 && !g.flags.yuki_tiger_seen && SCENES.yuki_tiger_awaken) { g.flags.yuki_tiger_seen = true; return 'yuki_tiger_awaken'; }
         if (g.james.realm >= 7 && !g.flags.yuki_human_seen && SCENES.yuki_human_awaken) { g.flags.yuki_human_seen = true; return 'yuki_human_awaken'; }
         if (ykAskNow(g)) { g.flags.yk_back = back; return 'yk_choice'; } // v0.11.191 (owner pick Y1, AK): a later Coil's human shape: she asks again
         return back;
     } }],
+};
+SCENES.first_flight = {
+    id: 'first_flight', title: "Off the Ground", art: 'tribulation', place: (g) => g.location,
+    text: (g) => `${FF.open[ffPlace(g)]}\n\n${FF.body}\n\n${FF.close[ffPlace(g)]}`,
+    choices: [{ text: "Carry on.", to: (g) => g.flags.yuki_return || 'stream' }],
 };
 for (const id of ['stream', 'wilds', 'camp', 'night', 'village', 'ashfall', 'supper', ...B0, ...B1, ...B2, ...B3, ...B4]) {
     SCENES[id].choices.unshift({ text: 'Story Mode only (removed in v0.11.41).', show: () => false, to: 'breakthrough' }); // v0.11.41 (D2-a): Story Mode's "Break through" (the Meditate card since v0.9.5); the place kept

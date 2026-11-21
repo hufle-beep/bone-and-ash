@@ -1,0 +1,17 @@
+first_flight:title | Off the Ground
+first_flight:open:alone | You get up, and the getting up does not stop where it usually does. Your boots clear the earth by a hand's width and stay there. Nobody is about to witness this but Yuki, who has watched you do stupider things on purpose.
+first_flight:open:village | You get up carefully, because your heels have stopped agreeing with the street. Ashfall is busy staring at the emptied sky, so nobody watches you walk, flat-footed and with great concentration, round the grain store and out behind the last wall. There you stop concentrating.
+first_flight:open:party | You stand. Mei Lin is asking whether you can walk, and stops halfway through a word. Ya's spear has swung round to point at your boots, and at the gap of plain air under them. You look down as well. It seems only polite.
+first_flight:open:mei | Mei Lin offers you a hand up. You take it, out of manners, and rise rather further than she pulled. She lets go quickly and studies the space beneath your boots, then you, with the expression of a herbalist handed a plant that is in no book.
+first_flight:body | The Qi here runs in currents, and has all along; only now do you have anything to catch it with. You lean into one as a swimmer leans into a river, and it takes your weight without comment. There is no trick to learn. It is walking, with one thing fewer to push against. ¶ You go up as far as seems reasonable, then somewhat further, turn on a slow eddy and let a stronger flow carry you a dozen paces sideways. Your people do this from Foundation. Nobody at home would look up. ¶ Yuki steps off your shoulder onto nothing and stays level with your face, tail steering. *Finally,* she says. *I have been carried about by a pedestrian. Keep up.* She takes the faster current. Naturally.
+first_flight:close:alone | You descend because you choose to, which is the whole difference. Yuki lands on your shoulder and washes one paw. *Adequate,* she says. *You held your arms out. Don't.* You had not noticed the arms.
+first_flight:close:village | Behind the wall nobody has looked round; Ashfall is still discussing the sky. You settle onto the earth before anyone comes for water. *They would build you a shrine,* Yuki says. *You'd hate the upkeep.* You walk back in flat-footed, a man with nothing to report.
+first_flight:close:party | Ya whoops, then scowls. "Scholar. You never said you could do that." "I couldn't, until just now." Mei Lin has not moved. "Sect masters fly," she says quietly. "Golden Core. Slowly, with attendants." "I'll skip the attendants," you say, and drift down to them.
+first_flight:close:mei | Mei Lin watches you the whole way down. "Only Golden Core flies," she says, quite evenly. "Old men. They burn incense beforehand." "I didn't have any," you say. She laughs, against her better judgement, then checks the sky in case it heard.
+first_flight:label | Back to earth
+# notes
+- Yuki is the cat throughout (Foundation is her first rung), so no {yuki} split; the body says "shoulder" and "tail", the alone close "paw".
+- Village: I assumed Ashfall has a grain store and an outer wall he can get behind; swap for any back way canon has.
+- open:mei assumes Mei Lin is near enough to give him a hand up after the storm.
+- close:mei: "Old men" for Golden Core fliers is her hearsay, not a canon fact.
+- The label "Back to earth" also fits the two party closes, where he has already come down.

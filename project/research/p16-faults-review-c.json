@@ -1,0 +1,58 @@
+[
+ {
+  "id": "C1",
+  "file": "js/story/prologue.js",
+  "find": "VILLAGE_SCENES.includes(g.flags.bt_return) || BT_ASHFALL_A1.includes(g.flags.bt_return) ? 'village'",
+  "replace": "VILLAGE_SCENES.includes(g.flags.bt_return) ? 'village'",
+  "note": "FC: Act 1's Ashfall (fo_ashfall, rt_ashfall) reads 'alone' (btWho null there): \"Nobody is about\" in the street"
+ },
+ {
+  "id": "C2",
+  "file": "js/story/prologue.js",
+  "find": "{ P: 'party', T: 'party', M: 'mei' }",
+  "replace": "{ P: 'party', M: 'mei' }",
+  "note": "FC: the Old Tree (heart_hub, btWho T) reads 'alone' with Mei Lin and Ya there"
+ },
+ {
+  "id": "C3",
+  "file": "js/story/prologue.js",
+  "find": "to: (g) => g.flags.yuki_return || 'stream' }",
+  "replace": "to: (g) => 'stream' }",
+  "note": "FC: Back to earth always to the forest stream, not to the hub of the breakthrough"
+ },
+ {
+  "id": "C4",
+  "file": "js/story/act1_blackroot.js",
+  "find": "if (!yaOut(g)) bumpRel(g, 'Ya', 3, 3)",
+  "replace": "if (!yaAway(g)) bumpRel(g, 'Ya', 3, 3)",
+  "note": "LG: the beetle pleases Ya while both women are away (bothAway before bl_day 4)"
+ },
+ {
+  "id": "C5",
+  "file": "js/story/act1_blackroot.js",
+  "find": "seqText(g, 'ah_hunt:15', awayList(AH15, AW.hunt15))",
+  "replace": "byDay(g, awayList(AH15, AW.hunt15), 'ah_hunt')",
+  "note": "AH: the second stay's three keyed on the first stay's day count (starts mid-list when a first-stay day had no hunt)"
+ },
+ {
+  "id": "C6",
+  "file": "js/story/act1_blackroot.js",
+  "find": "${noCook(g, \"You scour the pot with a handful of moss and keep your eyes strictly above the knee.\"",
+  "replace": "${noCook(g, \"You tie up the food pack, which takes both hands and, tonight, all of your attention.\"",
+  "note": "BF: FS_RR 5's meal line swapped (the pan on a day he did not cook) (re-aimed by Claude after RV (T M3) redrafted fireside 5: the same swap on the new lines)"
+ },
+ {
+  "id": "C7",
+  "file": "js/story/act1_blackroot.js",
+  "find": "ya: `Ya has pulled your coat over her head",
+  "replace": "yx: `Ya has pulled your coat over her head",
+  "note": "BF: FS_AH_T[5]'s ya branch lost (\"undefined\" when only Ya is close)"
+ },
+ {
+  "id": "C8",
+  "file": "js/story/prologue.js",
+  "find": "${g.flags.fire ? \"The fire pops once, out of time",
+  "replace": "${!g.flags.fire ? \"The fire pops once, out of time",
+  "note": "NF6: night 16's fire line reversed (the fire pops with no fire)"
+ }
+]

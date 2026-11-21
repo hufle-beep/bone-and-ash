@@ -1,0 +1,86 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/act1_blackroot.js",
+  "find": "longCal(g) && bday(g) >= 5 /* RV (C L2): the Blackroot's own day, as the hub's text */ ? seqText(g, 'ah_hunt:15'",
+  "replace": "longCal(g) && bday(g) >= 6 ? seqText(g, 'ah_hunt:15'",
+  "note": "AH: the second stay reads the first stay's list"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/act1_blackroot.js",
+  "find": "longCal(g) && bday(g) >= 5 /* RV (C L2): the Blackroot's own day, as the hub's text */ ? seqText(g, 'ah_hunt:15'",
+  "replace": "bday(g) >= 5 ? seqText(g, 'ah_hunt:15'",
+  "note": "AH: the old calendar's day 15 reads the new texts"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/act1_blackroot.js",
+  "find": "seqText(g, 'ah_hunt:15', awayList(AH15, AW.hunt15))",
+  "replace": "seqText(g, 'ah_hunt:15', AH15)",
+  "note": "AH: the second stay's away versions lost (Ya named while away)"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/act1_blackroot.js",
+  "find": "const FS_AH = [ahFire(FS_AH_T[2]), ahFire(FS_AH_T[3]), ahFire(FS_AH_T[4]), ahFire(FS_AH_T[5])];",
+  "replace": "const FS_AH = [ahFire(FS_AH_T[2]), ahFire(FS_AH_T[3]), ahFire(FS_AH_T[4])];",
+  "note": "BF: the Ashen Hills' fifth fireside dropped"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/act1_blackroot.js",
+  "find": "show: Object.assign((g) => bday(g) >= 5 && blLastDay(g) && !yaAway(g), { away: yaAway })",
+  "replace": "show: (g) => bday(g) >= 5 && blLastDay(g)",
+  "note": "LG: the pass no longer waits for Ya's door"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/act1_blackroot.js",
+  "find": "if (!yaOut(g)) bumpRel(g, 'Ya', 3, 3)",
+  "replace": "bumpRel(g, 'Ya', 3, 3)",
+  "note": "LG: the beetle pleases Ya while she is away"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/act1_blackroot.js",
+  "find": "show: Object.assign((g) => !g.flags.ah_cairn && !late(g) && !bothAway(g), { away: bothAway })",
+  "replace": "show: (g) => !g.flags.ah_cairn && !late(g)",
+  "note": "LG: the cairn while both are away"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/prologue.js",
+  "find": "if (firstFlightNow(g)) return 'first_flight';",
+  "replace": "if (g.james.realm === 1) return 'first_flight';",
+  "note": "FC: the first flight after every Foundation breakthrough"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/prologue.js",
+  "find": "BT_ASHFALL_A1.includes(g.flags.bt_return) ? 'village'",
+  "replace": "BT_ASHFALL_A1.includes(g.flags.bt_return) ? 'party'",
+  "note": "FC: Act 1's Ashfall sees the flight (party text in the village)"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/prologue.js",
+  "find": "${knows || !g.flags.lore_realms ? recognise : recogniseWen}",
+  "replace": "${recognise}",
+  "note": "BYb-t undone"
+ },
+ {
+  "id": "F11",
+  "file": "js/story/coil_scenes.js",
+  "find": "${g.coil.kept ? `Your body did better",
+  "replace": "${g.coil.kept && 0 ? `Your body did better",
+  "note": "KA (b): the Act 1 kept paragraph never shown"
+ },
+ {
+  "id": "F12",
+  "file": "js/story/prologue.js",
+  "find": "g.seen?.first_flight == null",
+  "replace": "true",
+  "note": "FC: shown again in the same Coil after a reload of the breakthrough"
+ }
+]

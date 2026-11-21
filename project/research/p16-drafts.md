@@ -1,0 +1,162 @@
+# v0.11.246 drafts (P16-A), after Claude's cuts
+
+Fable's eight runs; Claude's 34 cuts (five-word runs shared with other texts) applied. `¶` = paragraph break.
+
+
+## dw_hunt
+
+- **dw_hunt:2**: Marsh fowl crowd a leaning trunk with their heads under their wings, as trusting as a queue. Below them the black water bulges, slowly, and lies flat. ¶ "It is under the birds," Ya says, low. "It waits for one to fall in. Lazy. I respect it." ¶ "Do they fall in often?" Mei Lin asks. ¶ "If the herb girl sneezes, yes." Ya looks at her hopefully. Mei Lin presses a sleeve to her nose and glares over it. You decide never to have a cold near Ya.
+- **dw_hunt:3**: A shed skin hangs over a low bough, as long as a raft and thin as wet paper, and the marsh fowl roost all round it like washing on a line. Its former owner is out in the still water, a ridge of scales that shows and sinks. ¶ Mei Lin raises one end of the skin against the grey sky. "This would sell," she says. "Apothecaries pay for slough." ¶ "The meat is better," Ya says. "And the meat is in the new skin." She tests her spear point with a thumb and waits on you, as if the choice were obvious and you were slow.
+
+## rr_hunt
+
+- **rr_hunt:3**: Root-hares scatter across the bark ahead of you, and Ya lets them go without a glance. She is crouched over a gouge in the root where a bone-elk has sharpened its antlers, and she looks pleased. ¶ The elk itself is below, in the hollow under the root's arch, rubbing its spirals against the wood. The bone runs down its neck in white blades, and each scrape sets your teeth humming. Your Convergence leans towards it like a dog at a butcher's door. ¶ "We are above it," Ya whispers. "So. I drop on its back. Scholar puts bone in its legs. Herb girl throws her stinking powder in its face, so it charges blind." ¶ "It is a medicinal powder," Mei Lin whispers. ¶ "It stinks. Throw it well."
+
+## rr_elk_won
+
+- **rr_elk_won:3**: The bone-elk folds at the knees and goes over sideways, and the root under your boots takes the weight with a groan. Ya has her spear out of it before the antlers stop rattling. ¶ "Hold the leg, scholar," she says. You hold the leg. She works fast and talks faster: where the good meat lies, which cut her people give to the one who struck, and which to the one who stood near and looked clever. You get the second. ¶ A tine has split off against the bark. You pick it up, and your Convergence runs through it like water through limestone, finding every hollow, every seam where the beast grew through a hard winter. It is a record, this bone. A diary of bad years. ¶ You shelve it in the hammerspace, unread past the opening chapter. Ya cleans her knife on a fern and grins at you.
+
+## ah_hawks_won
+
+- **ah_hawks_won:3**: The sky empties hawk by hawk, and the final one drops burning into the ash an arm's length short of Yuki, the closest any of them got. ¶ {yuki} ¶ Ya pulls a long cinder-feather from the wreck and offers it across both palms, eyes down. "They came for you. I only stabbed." Yuki looks at the feather, then at you. You carry it. That is what you are for.
+- **ah_hawks_won:3:y:cat**: She quits your shoulder for the ash and paces one tight ring about the bird, inspecting the work.
+- **ah_hawks_won:3:y:great**: She leaves your flank, tail lashing, and stands over the bird until its embers have the sense to go out.
+- **ah_hawks_won:3:y:human**: She steps out from behind you, ash in her hair, and nudges the bird with one toe. "Adequate."
+- **ah_hawks_won:3:away**: The hawks come for Yuki in ones and twos and leave the same sky in pieces; the final one ploughs a furrow in the ash and lies there smoking. ¶ {yuki} ¶ You say "Well fought." The look you get back says applause was never the point, and that you may keep it coming regardless.
+- **ah_hawks_won:3:away:y:cat**: She hops down off your shoulder onto the warm carcass and sits, washing one paw.
+- **ah_hawks_won:3:away:y:great**: She pads over from your flank and stretches out along the furrow, chin on the carcass.
+- **ah_hawks_won:3:away:y:human**: She walks round you to it and stands with arms folded, ash on her sleeves, satisfied.
+
+## dw_serpent_won
+
+- **dw_serpent_won:2**: The serpent stops moving coil by coil, and the black water goes flat around it as if nothing had happened. ¶ Ya hauls it to the trunks by the tail, with half the Drowned Wood hanging off her. Mei Lin, soaked to the collar, starts picking the weed out of her hair, strand by strand, scolding as she goes; Ya stands still for it, which Ya does for nothing. ¶ You find the farther trunks extremely interesting.
+
+## ah_hunt
+
+- **ah_hunt:3**: The hawks have the wind today and are using it: three ash-grey shapes hung over the ridge without a wingbeat between them, dropping the odd spark onto the slope. Where a spark lands, the ash smokes blue and thinks better of it. ¶ Ya crouches, spear across her knees. "They do not hunt hungry, scholar. They hunt bored. Bored is worse." ¶ {yuki} ¶ In the gullies the hill-hares go about their business, ash-coloured and quick, with the ease of animals nobody is hovering over.
+- **ah_hunt:3:y:cat**: Yuki has dug every claw she owns into your shoulder. *The middle one keeps looking at me,* says the bond. *I should like it to stop having eyes.*
+- **ah_hunt:3:y:great**: Beside you, Yuki yawns up at them with everything she has. The hawks climb a little. *Cowards,* says the bond, with real regret.
+- **ah_hunt:3:y:human**: Yuki, by your elbow, has not blinked in some while. "The one in the middle has chosen me," she says. "I intend to be a disappointing choice."
+- **ah_hunt:3:away**: A cinder hawk's shadow crosses the slope ahead of you, then another, then the third, each with a faint orange edge. You have been walked like this before, by heads of department. ¶ {yuki} ¶ The other choice keeps to the gullies: hill-hares, grey as the ground they run on, and no trouble to anyone but themselves.
+- **ah_hunt:3:away:y:cat**: Yuki, on your shoulder, makes herself narrow against your neck. *They are measuring me,* says the bond. *Tell them I am mostly fur and spite.*
+- **ah_hunt:3:away:y:great**: Yuki, at your side, casts more shadow than all of them together, and the hawks have noticed. *It is you they are measuring,* says the bond, kindly.
+- **ah_hunt:3:away:y:human**: Yuki, at your elbow, tips her head back to watch. "They are deciding which of us to carry off," she says. "I weigh less. It is not a compliment."
+- **ah_hunt:4**: You come up onto the ridge path and the cinder hawks are already overhead, low enough that you can feel the warmth come off their wings. They no longer bother with height. Height is for prey that might get away. ¶ {yuki} ¶ Ya tests her spear's point on her thumb. "Kill one and the others remember, scholar. Kill all and nobody remembers." She grins. ¶ Or there are the hill-hares, down in the gullies, which have the decency to run away from you instead.
+- **ah_hunt:4:y:cat**: "They know the cat by now," says Ya. "They like her." Yuki, on your shoulder, lets the bond go flat. *I am not liked. I am shopped for.*
+- **ah_hunt:4:y:great**: "See how wide they fly round her," says Ya, pleased. Yuki, at your side, stretches until her claws score the glass. *Good,* says the bond.
+- **ah_hunt:4:y:human**: "They have picked the short one," says Ya. Yuki, at your elbow, turns her head slowly. "I am standing here," she says. "I heard that. So will they."
+- **ah_hunt:4:away**: Something ticks on the black glass by your boot: a spark, orange and dying, and above it the cinder hawk that dropped it, lower than a bird that size has any business flying. Its two friends hold the ridge. ¶ {yuki} ¶ The gullies, meanwhile, are full of hill-hares, and a hare has never yet dropped anything on you.
+- **ah_hunt:4:away:y:cat**: Yuki, on your shoulder, presses flat against your collar. *They used to keep their distance,* says the bond. *I preferred them shy.*
+- **ah_hunt:4:away:y:great**: Yuki, at your side, lifts her head, and the low one remembers an errand further up. *Once I was hunted,* says the bond. *Now I am avoided. One adjusts.*
+- **ah_hunt:4:away:y:human**: Yuki, at your elbow, watches it pass. "It looked at my hair," she says. "Nesting, I expect. I will not be furniture."
+- **ah_hunt:5**: The ridge wind brings a smell of struck flint, and then the cinder hawks themselves, sliding down it in a line. One of them drops a spark on the path ahead of you, and you would swear it aimed. ¶ Ya laughs. "That one likes you, scholar. Now I am jealous. I should set fire to more of your things." ¶ {yuki} ¶ Below, a hill-hare breaks from one gully to the next, a grey streak with no opinion of you whatever.
+- **ah_hunt:5:y:cat**: Yuki, on your shoulder, ignores you both. Her eyes go from bird to bird and round to the start. *I am choosing,* says the bond. *They began it.*
+- **ah_hunt:5:y:great**: Yuki, at your side, lies down in full view and starts to wash. The hawks drift higher. *Nobody ever picks me,* says the bond. *Tragic.*
+- **ah_hunt:5:y:human**: Yuki, at your elbow, smooths her sleeve. "They are settling which of them gets me," she says. "I am settling it too. Mine is the shorter list."
+- **ah_hunt:5:away**: Sparks come down the wind before the birds do: a thin orange sleet off the ridge, winking out on the black glass. Then the cinder hawks, unhurried, taking their usual places over your head. ¶ {yuki} ¶ You could oblige them. Or you could walk down into the gullies and trouble the hill-hares, who have done nothing to deserve it.
+- **ah_hunt:5:away:y:cat**: Yuki, on your shoulder, tracks the nearest without moving her head. *It thinks I would fit in one foot,* says the bond. *Correctly. I resent that.*
+- **ah_hunt:5:away:y:great**: Yuki, at your side, would not fit in six of those feet. She knows it, and so do they. *Go on,* says the bond, to birds that cannot hear. *Try.*
+- **ah_hunt:5:away:y:human**: Yuki, at your elbow, folds her arms. "A bird that size carries off a deer," she says. "I am lighter than a deer, and worse company."
+- **ah_hunt:6**: Ash lifts off the high ground in long grey veils, and the cinder hawks come through them one after another, wings banked, sparks streaming behind. It would be a fine sight from further off, or from under a roof. ¶ Ya rolls her neck, spear loose in her hand. "Pretty," she says. "I want the feathers. You can have the rest, scholar. I am generous." ¶ {yuki} ¶ The hill-hares, for their part, are down in the gullies being hares. It asks very little of anyone.
+- **ah_hunt:6:y:cat**: Yuki, on your shoulder, is the shape of a dropped glove. *If one comes down,* says the bond, *I shall be inside your coat. Good luck.*
+- **ah_hunt:6:y:great**: Yuki, at your side, licks her chops, loudly. The hawks swing wide of her. *Feathers for Ya,* says the bond. *The rest is spoken for.*
+- **ah_hunt:6:y:human**: Yuki, at your elbow, brushes ash from her collar. "They look at me as I look at fish," she says. "I find I do not care for it."
+- **ah_hunt:6:away**: The cinder hawks have settled, which is new: all three on a spur of black glass above the path, wings half open, the rock under them ticking with heat. They watch you come as landlords watch a tenant. ¶ {yuki} ¶ Past them the gullies run down grey and quiet, and the hill-hares in them want nothing from you but distance.
+- **ah_hunt:6:away:y:cat**: Yuki, on your shoulder, stares at each in turn. *They have stopped pretending,* says the bond. *So have I. Put me down or put them down.*
+- **ah_hunt:6:away:y:great**: Yuki, at your side, stares back, and one of the hawks shuffles along its perch. *Let them sit there until they starve,* says the bond. *Or not that long.*
+- **ah_hunt:6:away:y:human**: Yuki, at your elbow, returns the look with interest. "Three birds and one of me," she says. "I have had worse odds at dinner."
+
+## bl_fireside
+
+- **bl_fireside:rr:4**: Mei Lin has smoothed a patch of cold ash at the fire's edge and written Ya's name in it with a twig. Ya squats over it, a track she has not met and does not trust. ¶ "What made this?" ¶ "I did. It is you." ¶ "It has too many legs. And it goes nowhere." ¶ {meal} {yuki} ¶ Ya takes the twig in her fist and presses a print into the ash beside the name: the pad, the toes, the claws. "That is me. Yours is my cousin." Mei Lin considers the print for some time, and rubs neither out.
+- **bl_fireside:rr:4:meal:cooked**: You scrub out the pot with a fistful of moss and offer no opinion.
+- **bl_fireside:rr:4:meal:not**: You wrap up the rest of the dried meat and keep well out of it.
+- **bl_fireside:rr:4:y:cat**: *She has spelt it properly,* Yuki sends, perched on your shoulder. *I would have told you if she hadn't. I might not have told her.*
+- **bl_fireside:rr:4:y:great**: *The name is spelt right,* Yuki sends, filling most of the bark behind you. *I looked. Ya would not thank me.*
+- **bl_fireside:rr:4:y:human**: "It's spelt correctly," says Yuki, quietly, at your elbow, her tail curled over her feet. "Don't tell Ya. She is enjoying herself."
+- **bl_fireside:rr:5**: Ya has your glasses. She did not ask; she lifted them off your face as one takes a bone from a pup, and now glares through them at the fire. ¶ "Everything is closer and worse," she reports. "Scholar. Is this how you see? No wonder you frown at mushrooms." ¶ "They are his eyes, not a toy," says Mei Lin. She holds a palm out, and when Ya gives them up she puts them straight on. ¶ {meal} {yuki} ¶ Through them, Mei Lin regards Ya and starts to laugh. Ya demands them back to see. You sit in a soft brown blur and wait to learn which smear won.
+- **bl_fireside:rr:5:meal:cooked**: You go on scraping the pan by feel, and find there was still a spoon in it.
+- **bl_fireside:rr:5:meal:not**: You go on wrapping the leftover rice cakes by feel, and wrap a finger in with them.
+- **bl_fireside:rr:5:y:cat**: *I can see perfectly,* Yuki sends, washing a paw. *Mei Lin put them on the wrong way up. I am not helping.*
+- **bl_fireside:rr:5:y:great**: *Shall I describe it?* Yuki sends, the one large pale blur you are sure of. *They are upside down on her. It suits her.*
+- **bl_fireside:rr:5:y:human**: "I could tell you what is happening," says Yuki, a white blur with ears, on your left. "She has them on upside down. I won't."
+- **bl_fireside:ah:4:open:cooked**: The fire burns blue and low in its ring of black glass, and the dead tree stands in the north with the stars caught behind it. Your pot sits in the embers on a slab of the glass, eaten down to the scrapings. The ash lies ankle deep and fine as flour, and whatever is set down in it has to be dug for.
+- **bl_fireside:ah:4:open:not**: The fire burns blue and low in its ring of black glass, and the dead tree stands in the north with the stars caught behind it. Supper came out of the packs, dried meat and Mei Lin's seed cakes, eaten down to the crumbs. The ash lies ankle deep and fine as flour, and whatever is set down in it has to be dug for.
+- **bl_fireside:ah:4:both**: Ya sits behind you both with a knee against each back, a hunter keeping two hounds from wandering. Mei Lin leans into hers and passes dried plums back over her head without looking. You get every second one.
+- **bl_fireside:ah:4:ya**: Ya has your arm across her like a pelt she has won, and is teaching your fingers the knots of her spear binding whether they wish to learn or not. Mei Lin, over the flames, mends a sandal strap and hums, off the tune, on purpose.
+- **bl_fireside:ah:4:mei**: Mei Lin has got inside your coat without your taking it off, which leaves her cold hands in your pockets and her head under your chin. Ya, opposite, lifts her water skin to you both and drinks to it.
+- **bl_fireside:ah:4:none**: Ya flicks a chip of glass at your boot, then one at Mei Lin's, in strict turn, so that nobody feels left out. Mei Lin flicks one back, misses, and apologises to the hill.
+- **bl_fireside:ah:4:close**: Ya has dug a pane of black glass from the ash and is scowling into it. ¶ "Herb girl. My scar is on the wrong side." ¶ "That is a mirror, Ya. It turns you round." ¶ "Then it lies." She keeps it anyway.
+- **bl_fireside:ah:5:open:cooked**: Ash comes down soft as snow, hissing where it meets the blue fire, and northward the dead tree is a blacker shape on a dark grey sky. You kept the lid on the pot until the bowls were full, and everyone ate bent over, before the sky could season it. Mei Lin has knotted a scarf over her hair; Ya has not, and is going grey as you watch.
+- **bl_fireside:ah:5:open:not**: Ash comes down soft as snow, hissing where it meets the blue fire, and northward the dead tree is a blacker shape on a dark grey sky. Supper was dried meat and fruit out of the packs, and everyone ate bent over, before the sky could season it. Mei Lin has knotted a scarf over her hair; Ya has not, and is going grey as you watch.
+- **bl_fireside:ah:5:both**: Mei Lin has drawn her blanket over all three heads against the ash and props up the middle with one fist, a tent pole with opinions. Ya, underneath, has an arm about each of you, and announces that she always wanted a den.
+- **bl_fireside:ah:5:ya**: Ya has pulled your coat over her head and yours and regards the hills from inside it, an inch from your face, entirely pleased. Mei Lin, under her scarf, tells the fire that certain people grew up in a cave. "A good cave," says Ya.
+- **bl_fireside:ah:5:mei**: Mei Lin has untied her scarf and spread it over your head as well as hers, which requires sitting very close, as she explains to nobody who asked. Ya, bare-headed and grey, watches you both under it and laughs until she coughs ash.
+- **bl_fireside:ah:5:none**: Mei Lin has a second scarf and offers it round the fire. You decline with thanks. Ya takes it, sniffs it, and ties it to her spear, where it hangs like the flag of a very proper country. Mei Lin salutes it.
+- **bl_fireside:ah:5:close**: "Scholar. Herb girl says in Ashfall a man hands over a metal disc and walks off with a goat." ¶ "A coin. Yes." ¶ "And the goat agrees?" ¶ "Nobody asks the goat," says Mei Lin. ¶ Ya looks from one of you to the other. "And I am the wild one."
+
+## night
+
+- **night:16**: Somewhere beyond the stream, once the dark is down, a knocking starts: wood on hollow wood, three slow blows and a rest, a long way off. It has the patience of a caller at a door who knows the house is occupied. Nothing opens. The knocking takes no offence and goes on. ¶ {fire} {yuki} ¶ A thread with a head for rhythm takes the watch. It logs the knocking as distant and regular and declines, on the evidence, to answer the door.
+- **night:16:fire**: The fire pops once, out of time with the knocking, and you catch yourself frowning at it like a conductor.
+- **night:16:nofire**: With nothing lit, each blow arrives whole, and one of your fingers has started keeping time.
+- **night:16:y:cat**: Yuki, a warm knot against your wrist, opens one eye at the third blow. *Nobody's in,* she offers through the bond, and shuts it.
+- **night:16:y:great**: Yuki, banked along your back, opens one eye at the third blow. *Nobody's in,* she offers through the bond, and shuts it.
+- **night:16:y:human**: Yuki, propped against your ribs, opens one eye at the third blow. "Nobody's in," she says, and shuts it.
+- **night:17**: Water is the only thing here that does not stop for the dark. The trunks stop, the moss stops, the path you wore to the bank stops three paces out. Below you the stream keeps on downhill, muttering, the only party in this forest with somewhere to be, and no interest in whether you come too. ¶ {fire} {yuki} ¶ One thread stays up for the watch and takes a bearing on the stream, for form's sake. Downhill, it concludes. The other eight had got there unaided.
+- **night:17:fire**: The fire is going nowhere either, and says so in small noises, and you find you side with the fire.
+- **night:17:nofire**: No fire, so you follow the water by ear as far as the bend, and lose it there without regret.
+- **night:17:y:cat**: Yuki, tucked under your chin, listens to it leave. *Let it,* she sends over the bond. *We've only just sat down.*
+- **night:17:y:great**: Yuki, a white bank along your side, listens to it leave. *Let it,* she sends over the bond. *We've only just sat down.*
+- **night:17:y:human**: Yuki, folded up at your shoulder, listens to it leave. "Let it," she says. "We've only just sat down."
+- **night:18**: Wind gets up as the dark lands, and stays up: it works the tops of the black trees, a hundred feet overhead, and does not once come down to the rise. Down here the air is cold and unmoving, and the damp gets into your collar by its own arrangements. Weather, it seems, is a thing that happens to the canopy. ¶ {fire} {yuki} ¶ The thread that feels the cold least takes the watch. It follows the wind across the canopy from one edge of hearing to the other, and reports the weather still upstairs.
+- **night:18:fire**: The fire leans a little, out of sympathy with the treetops, and warms one side of you exactly.
+- **night:18:nofire**: Fireless, you turn your collar up against a wind that never arrives, and it helps, which is unscientific.
+- **night:18:y:cat**: Yuki has gone inside your coat at the collar, and only her nose is out. *You're welcome,* is all the bond carries.
+- **night:18:y:great**: Yuki has laid her flank along the cold side of you, like a draught excluder with opinions. *You're welcome,* is all the bond carries.
+- **night:18:y:human**: Yuki has pulled half your coat round her own shoulders without discussion. "You're welcome," she says, from inside it.
+- **night:19**: Upwind of the rise, something is fruiting. The smell reaches you with the dark, and it arrives in force: cold cellar, split pear, and under both a note you cannot place. You hold a doctorate in precisely this. Whatever it is, it opens only once the light has gone, which strikes you as sound judgement. ¶ {fire} {yuki} ¶ The thread that takes the watch is the one that wanted to go and look. It stands its post facing upwind and drafts a description of the fruiting body, sight unseen.
+- **night:19:fire**: Woodsmoke gets into the smell and spoils the sample, and you find you resent your own fire a little.
+- **night:19:nofire**: No smoke gets between you and the smell, and you breathe it in like a man reading someone else's post.
+- **night:19:y:cat**: Yuki, on your shoulder, sneezes twice and looks at you as the responsible party. *Your field,* arrives over the bond. *Make it stop.*
+- **night:19:y:great**: Yuki, banked up behind you, sneezes twice and looks at you as the responsible party. *Your field,* arrives over the bond. *Make it stop.*
+- **night:19:y:human**: Yuki, tucked in under your arm, sneezes twice and looks at you as the responsible party. "Your field," she says. "Make it stop."
+- **night:20**: Above the rise there is a gap in the crowns, and the sky keeps to it after the dark has come: the purple of a bruise going yellow at the rim. A few points of light show in it. They are dim, slightly green, and do not twinkle, and you call them stars because nobody is here to object. ¶ {fire} {yuki} ¶ The watch falls to the thread with the tidiest mind. It keeps the rise and, on the side, charts the green points without naming any, in case they are not stars.
+- **night:20:fire**: Firelight gives up a little above your head, well short of the sky, and neither party seems to feel the loss.
+- **night:20:nofire**: With nothing lit down here, the green points are the brightest things in view, a title they do nothing to defend.
+- **night:20:y:cat**: Yuki, upside down across your forearm, studies the gap too. *None of ours,* comes across the bond. *I checked.*
+- **night:20:y:great**: Yuki, curled about you, chin tipped skyward, studies the gap too. *None of ours,* comes across the bond. *I checked.*
+- **night:20:y:human**: Yuki, head tipped back on your shoulder, studies the gap too. "None of ours," she says. "I checked."
+- **night:21**: Somewhere at home a library book is overdue in your name. The thought turns up as the dark does, uninvited and complete, and the black trunks step back out of sight in good order. It was a book on lichens. The fine is growing across a distance no librarian has ever had to chase. ¶ {fire} {yuki} ¶ The thread going on watch takes the fine along for something to do, and works the sum between looks at the trees. You do not ask for the total.
+- **night:21:fire**: You consider, by firelight, whether being in another world counts as a reason, and suspect the form has no box for it.
+- **night:21:nofire**: Sitting in the dark, you draft the letter of apology, and get as far as the return address before it defeats you.
+- **night:21:y:cat**: Yuki, wedged under your chin, has followed the whole thought. *You never finished it,* she points out by way of the bond. *Chapter four.*
+- **night:21:y:great**: Yuki, piled round you with her jaw on your shin, has followed the whole thought. *You never finished it,* she points out by way of the bond. *Chapter four.*
+- **night:21:y:human**: Yuki, propped on your arm, has followed the whole thought. "You never finished it," she says. "Chapter four."
+
+## first_flight
+
+- **first_flight:title**: Off the Ground
+- **first_flight:open:alone**: You get up, and the getting up does not stop where it usually does. Your boots clear the earth by a hand's width and stay there. Nobody is about to witness this but Yuki, who has watched you do stupider things on purpose.
+- **first_flight:open:village**: You get up carefully, because your heels have stopped agreeing with the street. Ashfall is busy staring at the emptied sky, so nobody watches you walk, flat-footed and with great concentration, round the grain store and out behind the last wall. There you stop concentrating.
+- **first_flight:open:party**: You stand. Mei Lin is asking whether you can walk, and stops halfway through a word. Ya's spear has swung round to point at your boots, and at the gap of plain air under them. You look down as well. It seems only polite.
+- **first_flight:open:mei**: Mei Lin offers you a hand up. You take it, out of manners, and rise rather further than she pulled. She lets go quickly and studies the space beneath your boots, then you, with the expression of a herbalist handed a plant that is in no book.
+- **first_flight:body**: The Qi here runs in currents, and has all along; only now do you have anything to catch it with. You lean into one as a swimmer leans into a river, and it takes your weight without comment. There is no trick to learn. It is walking, with one thing fewer to push against. ¶ You go up as far as seems reasonable, then somewhat further, turn on a slow eddy and let a stronger flow carry you a dozen paces sideways. Your people do this from Foundation. Nobody at home would look up. ¶ Yuki steps off your shoulder onto nothing and stays level with your face, tail steering. *Finally,* she says. *All this time, carried about by a pedestrian. Keep up.* She takes the faster current. Naturally.
+- **first_flight:close:alone**: You descend because you choose to, which is the whole difference. Yuki lands on your shoulder and washes one paw. *Adequate,* she says. *You held your arms out. Don't.* You had not noticed the arms.
+- **first_flight:close:village**: Behind the wall nobody has looked round; Ashfall is still discussing the sky. You settle onto the earth before anyone comes for water. *They would build you a shrine,* Yuki says. *You'd hate the upkeep.* You walk back in flat-footed, a man with nothing to report.
+- **first_flight:close:party**: Ya whoops, then scowls. "Scholar. You never said you could do that." "I couldn't, until just now." Mei Lin has not moved. "Sect masters fly," she says quietly. "Golden Core. Slowly, with attendants." "I'll skip the attendants," you say, and drift down to them.
+- **first_flight:close:mei**: Mei Lin watches you the whole way down. "Only Golden Core flies," she says, quite evenly. "Old men. They burn incense beforehand." "I didn't have any," you say. She laughs, against her better judgement, then checks the sky in case it heard.
+- **first_flight:label**: Back to earth
+
+## ka
+
+- **ka:pro**: The flight came with it, unannounced: the Qi takes your weight as a current takes a swimmer, should you care to leave the moss.
+- **ka:act1**: The hammerspace reports in: what the tribute left you, and not one thing earned since. Your body did better: it kept {realm}, and the air with it. The Qi flows will still carry you where you lean, and leaving the ground stays as plain as walking. The road north, to the tree, it mislaid. Your head has the map, every bend of it.
+
+## byb
+
+- **byb**: The rung you can name, and not the storm over it. Old Wen gave you the ladder and said that every step up is dearer than the one below; he never said who sends the bill, or how. You had assumed herbs, years, somebody else's village. The lightning overhead is keeping to one spot, and the spot is you. The sky has come to collect.
+
+## cf
+
+- **cf**: "Which rung?" Mei Lin asks. "Core Formation," you say. She sits down on her pack, hard. "That is the rung the Sect's elders stand on. They spent centuries on it. They get carried places." Ya eyes the clearing sky. "Can he beat an elder?" "Ask an elder," you say.
