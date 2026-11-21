@@ -238,6 +238,14 @@ export function laterDayAgain(g, id, v, fresh, exact = false) {
  * was (META_BACK); L2 `newVisit` on the view tells main.js to shut "Read it all again". Measured before (200 games each, Careful / Completionist / Sitter /
  * Cultivator / Random): 1,875 / 1,617 / 1,267 / 2,090 / 3,785 screens shown again in full on their day.
  */
+/** v0.11.248 (owner pick P18-A; NS1, the code review's M1): the text on screen was shown in full on an earlier day of this Coil (VF's record, read
+ *  only), so the plan's night fold (week.js foldNight) can walk a village morning whose sequence came round again. */
+export function shownEarlierDay(g, id, v) {
+    if (!g || !id) return false;
+    const L = linesOf(g); if (!isRecord(L.vd)) return false;
+    const d = L.vd[`${id}|${lineKey(storyParas(String(v?.text || '')).join('\n\n').replace(NUM_WORDS, '#'))}`];
+    return Number.isInteger(d) && d < textDay(g);
+}
 export function sameDayAgain(g, id, v, fresh) {
     if (!g || !id) return false;
     const L = linesOf(g);

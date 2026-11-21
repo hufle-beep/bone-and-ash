@@ -15,14 +15,14 @@
  *    running, stop, bt }.
  */
 import { longCal, storyDay, storyDayOf, calEnd, weekNights, LONG_CAL, STAY_DAYS, NUM_WORDS } from './calendar.js'; // v0.11.224 (RV1, VK): NUM_WORDS
-import { sceneView, choose } from './story.js';
+import { sceneView, choose, seenBefore } from './story.js'; // v0.11.248 (P18-A, NS-b): seenBefore
 import { advance, jamesHpMax, canBreakThrough, clockParts, clockLabel, fnv1a, takeSpoilNotes, wakeDay } from './game.js';
 import { famOf, taskCards, taskOpen, runTask, taskState, taskOutcome, isTaskChoice, sitTaskId, QI_TASK, carryHere, carriesHere, carriesRead, carryTaskId, isCarryTask, weekHub, workDay, workRoom, dayMeal, cardSpeed, NEW_LENGTH, WEEK_MULT } from './tasks.js';
 import { farewellNow } from '../story/act1_fallout.js'; // RV1 (L4)
 import { foodCount, preservable, unspaced, spacedNext, SPACE_DAYS, cardSpaced, cardKey } from '../story/common.js'; // v0.11.213 (FQ1, S3): the spacing
 import { EVENING_HOUR } from '../story/oneoff.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
-import { unreadLines, lineKey } from '../story/again.js'; // v0.11.214 (owner pick RD1): the lines never shown in this game; v0.11.228 (RE1, SC): lineKey
+import { unreadLines, lineKey, shownEarlierDay, readBefore } from '../story/again.js'; // v0.11.214 (owner pick RD1): the lines never shown in this game; v0.11.228 (RE1, SC): lineKey
 import { relLines } from './replies.js'; // v0.11.225 (owner pick LO2, RS): the run's relationship changes
 import { COOK_PLAN } from '../story/kitchen.js'; // v0.11.218 (owner pick RV1, HA): the cook's hold on the pot only while its row is set
 
@@ -161,7 +161,7 @@ export function foldNight(g, scenes, max = 12) {
         if (v.end) break;
         const open = v.choices.filter((c) => !c.disabled && !META.test(String(c.label)));
         const h = hash(v.text);
-        const ok = open.length === 1 && open[0].index < 1000 && plainChoice(scenes[g.scene].choices[open[0].index]) && t.nf[g.scene] === h;
+        const ok = open.length === 1 && open[0].index < 1000 && plainChoice(scenes[g.scene].choices[open[0].index]) && (t.nf[g.scene] === h || (g.scene === 'village_morning' && (shownEarlierDay(g, g.scene, v) || (seenBefore(g, g.scene) && readBefore(g, v.text))))); // v0.11.248 (P18-A, NS1): a village morning read on an earlier day of this Coil (its sequence came round again); NS-b (the owner's pick after PL's NS2): or read on an earlier Coil
         if (!ok) { t.nf[g.scene] = h; break; }
         const from = g.scene;
         const r = choose(g, scenes, open[0].index);

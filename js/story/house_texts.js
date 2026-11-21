@@ -34,13 +34,15 @@ export const HT_CLOSE = {
         "Old Wen turns his cup a quarter turn and says nothing further, which you are learning is how the audience ends.",
         "\"The stranger may come again,\" he says. It is a ruling, not an invitation, and he does not look up.",
         "He hears your thanks out, weighs it, and inclines his head by the width of a tea leaf.",
-        "Old Wen sets the lid back on the pot with both hands. It makes a small sound, and the small sound is addressed to you." // v0.11.152 (owner pick RP1, HT; Fable's): a fourth (four visits an Act 1 Coil)
+        "Old Wen sets the lid back on the pot with both hands. It makes a small sound, and the small sound is addressed to you.", // v0.11.152 (owner pick RP1, HT; Fable's): a fourth (four visits an Act 1 Coil)
+        "Old Wen turns his milky eye on you and keeps the good one for the pot. You gather which of the two he considers worth watching." // v0.11.248 (owner pick P18-A, WT; Fable's): a fifth (past four, the pick)
     ],
     "wen MID": [
         "When you rise, Old Wen rises too. At ninety this takes some time, and you have noticed that he does not spend it on the council.",
         "\"You listen,\" says Old Wen. \"It is rarer than cultivation.\" It is the whole of his praise, and he sees no reason to add to it or to vary it.",
         "He rinses your cup himself and puts it back in its place, on the shelf beside his own and apart from the guests'. Neither of you has ever mentioned it.",
-        "He walks you as far as the doorpost and stands with one hand on it, considering the sky with his good eye. \"Tomorrow the water will be hot at the same hour,\" he says, to the sky." // v0.11.152 (owner pick RP1, HT; Fable's): a fourth (four visits an Act 1 Coil)
+        "He walks you as far as the doorpost and stands with one hand on it, considering the sky with his good eye. \"Tomorrow the water will be hot at the same hour,\" he says, to the sky.", // v0.11.152 (owner pick RP1, HT; Fable's): a fourth (four visits an Act 1 Coil)
+        "Old Wen corrects how you hold the cup, with one finger, and says nothing about it. You take it that in Ashfall a man is corrected only when he is worth the trouble." // v0.11.248 (owner pick P18-A, WT; Fable's): a fifth (past four, the pick)
     ],
     "mother LOW": [
         "She inclines her head a finger's width, which closes the interview. You have been dismissed by universities with less finish.",

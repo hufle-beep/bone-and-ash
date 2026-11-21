@@ -3,14 +3,14 @@
  "totals": {
   "scenes": 332,
   "words": 37663,
-  "variantWords": 160393,
+  "variantWords": 162571,
   "labels": 851,
   "labelWords": 5768,
   "sharedChunks": 767,
   "sharedScenes": 137,
   "reused": 49,
-  "favourites": 44,
-  "tics": 2,
+  "favourites": 46,
+  "tics": 1,
   "broken": 0,
   "spacing": 8,
   "unrendered": 2
@@ -47,13 +47,13 @@
   "ashfall": {
    "scenes": 18,
    "words": 1129,
-   "variantWords": 18216,
+   "variantWords": 19766,
    "labels": 65,
    "labelWords": 476,
    "sharedScenes": 6,
    "reused": 9,
-   "favScenes": 9,
-   "tics": 2,
+   "favScenes": 10,
+   "tics": 1,
    "broken": 0,
    "spacing": 0,
    "unrendered": 0
@@ -75,12 +75,12 @@
   "blackroot": {
    "scenes": 60,
    "words": 6644,
-   "variantWords": 29920,
+   "variantWords": 30548,
    "labels": 185,
    "labelWords": 1067,
    "sharedScenes": 20,
    "reused": 36,
-   "favScenes": 14,
+   "favScenes": 15,
    "tics": 0,
    "broken": 0,
    "spacing": 4,
@@ -108,7 +108,7 @@
    "labelWords": 824,
    "sharedScenes": 26,
    "reused": 0,
-   "favScenes": 5,
+   "favScenes": 6,
    "tics": 0,
    "broken": 0,
    "spacing": 1,
@@ -158,8 +158,8 @@
    "spacing": 0
   },
   "replies": {
-   "lines": 362,
-   "words": 13145,
+   "lines": 368,
+   "words": 13570,
    "dupes": 0,
    "sceneShared": 56,
    "tics": 0,
@@ -167,8 +167,8 @@
    "spacing": 0
   },
   "house": {
-   "lines": 33,
-   "words": 1662,
+   "lines": 35,
+   "words": 1721,
    "dupes": 0,
    "sceneShared": 12,
    "tics": 0,
@@ -185,8 +185,8 @@
    "spacing": 0
   },
   "music": {
-   "lines": 65,
-   "words": 2265,
+   "lines": 66,
+   "words": 2305,
    "dupes": 0,
    "sceneShared": 4,
    "tics": 0,
@@ -194,8 +194,8 @@
    "spacing": 0
   },
   "music_named": {
-   "lines": 65,
-   "words": 1903,
+   "lines": 66,
+   "words": 1935,
    "dupes": 0,
    "sceneShared": 3,
    "tics": 0,
@@ -315,6 +315,15 @@
    "words": 282,
    "dupes": 0,
    "sceneShared": 2,
+   "tics": 0,
+   "broken": 0,
+   "spacing": 0
+  },
+  "burned": {
+   "lines": 7,
+   "words": 255,
+   "dupes": 0,
+   "sceneShared": 0,
    "tics": 0,
    "broken": 0,
    "spacing": 0

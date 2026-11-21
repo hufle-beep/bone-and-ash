@@ -1,0 +1,72 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/ashfall.js",
+  "find": "? (longCal(g) ? seqText(g, 'village_morning:1', [vmW1Old, ...VM_W1.map(vmText)]) : vmW1Old(g))",
+  "replace": "? seqText(g, 'village_morning:1', [vmW1Old, ...VM_W1.map(vmText)])",
+  "note": "VM: the old calendar reads week 1's new mornings"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/ashfall.js",
+  "find": ": longCal(g) && tributeLeft(g) > 1 ? seqText(g, 'village_morning:3'",
+  "replace": ": longCal(g) ? seqText(g, 'village_morning:3'",
+  "note": "VM: the last day loses its old text"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/ashfall.js",
+  "find": "x.t.replace('{yuki}', g.flags.loft_burned && x.b ? x.b : byForm(g, ...x.y))",
+  "replace": "x.t.replace('{yuki}', byForm(g, ...x.y))",
+  "note": "VM / LC1: the burned line never shows"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/ashfall.js",
+  "find": "return [(g.flags.loft_burned && ROOF_BURNED[i]) || ROOF_STAY[3][i]];",
+  "replace": "return [ROOF_STAY[3][i]];",
+  "note": "LC1: the roof's week-3 lines name the herb loft after a burn"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/music.js",
+  "find": "export const lineWords = (g, x) => (x && g?.flags?.loft_burned && x.burned) || x?.text;",
+  "replace": "export const lineWords = (g, x) => x?.text;",
+  "note": "LC1: the loft's music line names the herbs after a burn"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/music.js",
+  "find": "const t = same ? lineText(g, m.s, m.k, m.i) : null;",
+  "replace": "const t = same ? MUSIC_LINES[m.s]?.[m.k]?.[m.i]?.text : null;",
+  "note": "LC1: a redraw of the same visit shows the unburned line"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/ashfall.js",
+  "find": "[vmW3Old, ...VM_W3.map(vmText)]",
+  "replace": "[vmW3Old, ...VM_W3.slice(0, 2).map(vmText)]",
+  "note": "VM: week 3's fourth morning lost"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/act1_blackroot.js",
+  "find": " /* v0.11.248 (owner pick P18-A; Fable's, Claude's cuts): HK, the 4th's and 5th's away versions (no woman named) */],",
+  "replace": " /* x */].slice(0, 3),",
+  "note": "HK: the 4th and 5th win name Ya while she is away"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/house_texts.js",
+  "find": "// v0.11.248 (owner pick P18-A, WT; Fable's): a fifth (past four, the pick)\n    ],\n    \"wen MID\"",
+  "replace": "// v0.11.248 (owner pick P18-A, WT; Fable's): a fifth (past four, the pick)\n    ].slice(0, 4),\n    \"wen MID\"",
+  "note": "WT: Wen's LOW fifth dropped"
+ },
+ {
+  "id": "F10",
+  "file": "tools/textlint.mjs",
+  "find": ".flatMap((x) => [x.text, ...(x.burned ? [x.burned] : [])])",
+  "replace": ".map((x) => x.text)",
+  "note": "LC1: the lint no longer reads the burned music line"
+ }
+]

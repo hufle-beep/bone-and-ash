@@ -1,0 +1,24 @@
+rr_hunt:4 | A bone-elk stands in the middle of the Root Road, drinking from a split in the bark where rainwater has pooled, and it is Mei Lin who sees it, having stopped to pick a burr off her sleeve. ¶ Grey hide, and the bone wound down from its skull in pale coils that click together as it swallows. Your Convergence follows each click, and would like it known that it could do better. Yuki has gone entirely still. ¶ "Mine," Ya breathes. "I go under the root and come up at its belly. Scholar, you nail its feet to the road. Herb girl holds the sheath of my spear." ¶ "Your spear has no sheath," Mei Lin whispers. ¶ "Then your hands are free. Clap when I win."
+hawks1:4 | The cinder hawks lie cooling on the black glass, each in a crater of its own digging, and the ridge smells of singed pillow. ¶ {yuki} ¶ Mei Lin is already plucking one, though it is still hot. "A proper girl never handles game," she says, blowing on her fingers. "Mother was very clear." Ya watches her technique in visible pain.
+hawks1:4:y:cat | They had stooped at Yuki, one after another, and found your darts instead. She leans from your collar to look them over. *Stringy,* she says. *I am doubly insulted.*
+hawks1:4:y:great | The hawks had circled wide of Yuki as ships do a reef, and come at you. She noses the nearest one over. *Cowards cook the same,* she says.
+hawks1:4:y:human | The hawks had stooped at Yuki in turn, and she had leaned aside exactly as far as needed. "Stringy," she says, turning one over with her foot. "I am worth better."
+hawks1:4:away | The cinder hawks are down, strewn along the black glass where each one's dive ended, still ticking as they cool. ¶ {yuki} ¶ You pick up what you have been allotted. It is still hot enough to mind.
+hawks1:4:away:y:cat | Yuki, whom every dive was meant for, drops to the ash and inspects them one at a time. *This one,* she decides. *The rest are yours.*
+hawks1:4:away:y:great | Yuki, whom no dive had dared come near, paces along the row and halts over the fattest. *Mine. It looked at me,* she says. *You may have the others.*
+hawks1:4:away:y:human | Yuki, at whom each of them had aimed, goes down the row with her hands behind her back. "That one is mine," she says. "Divide what remains among yourself."
+hawks1:5 | The fight ends with burning birds falling out of a grey sky, and you stepping politely aside to let them land. ¶ {yuki} ¶ Ya is walking between the birds, stamping out embers with her bare feet and no change of expression. "Hot," she concedes at length, to nobody. Then, to you: "You dodge like a man avoiding work, scholar. I like watching it."
+hawks1:5:y:cat | Yuki, the reason for every one of those dives, has a singed patch behind one ear and is pretending otherwise. *It was like that before,* she says.
+hawks1:5:y:great | Yuki, whom the birds flew round at a respectful distance, shakes ash from her coat over everybody. *They were afraid,* she says. *It is the correct response.*
+hawks1:5:y:human | Yuki, at whom all of that was aimed, has a scorch on one sleeve and has folded her arms over it. "The sleeve was always so," she says.
+hawks1:5:away | The sky above the ridge is clear of cinder hawks, and the ash below it is not. ¶ {yuki} ¶ You do as you are told. It saves time.
+hawks1:5:away:y:cat | Yuki, whom they had wanted so badly, rides your collar down the slope to see what became of them. *Pick up the left one,* she says. *It was the rudest.*
+hawks1:5:away:y:great | Yuki, whom every bird had steered clear of, goes ahead down the slope and lies across the warmest patch. *Bring them here,* she says. *I am not moving.*
+hawks1:5:away:y:human | Yuki, whom they had preferred to you, walks down the slope ahead and points with her chin. "Begin with the left one," she says. "It was the rudest."
+# notes
+- rr_hunt:4 assumes rainwater can pool in a split of the root's bark, and that Ya's spear has no sheath (the joke rests on it).
+- rr_hunt:4: Ya's plan has James "nail its feet to the road" (bone darts through Convergence); cut if that reads as a skill named.
+- hawks1:4 has Mei Lin quoting her mother on proper girls and game; an invented saying, in line with "raised on propriety".
+- hawks1:5 (main) Ya's "I like watching it" is the flirt; the great form's "over everybody" assumes both women there, as the main version does.
+- hawks1:5:away cat and human share "It was the rudest" (four words) on purpose; the great form differs. Change one if the checker counts across forms.
+- Word counts taken with the {yuki} passage included: hawks1:4 about 85, hawks1:5 about 85, the away versions about 60 and 55.

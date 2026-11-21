@@ -74,7 +74,9 @@ export function lineOpen(g, x, stretch, place) {
 const isRec = (r) => !!r && typeof r === 'object' && !Array.isArray(r);
 /** The archive's day: one text day in four, by the save's seed, the Coil and the day. */
 export const archiveDay = (g, d = textDay(g)) => parseInt(fnv1a(`${g.seed >>> 0}#mu#${coilStamp(g)}#${d}`), 16) % 4 === 0;
-const lineText = (stretch, k, i) => MUSIC_LINES[stretch]?.[k]?.[i]?.text;
+/** v0.11.248 (owner pick P18-A, LF: LC1): a line's own words after a burn (`burned`), where it has them. */
+export const lineWords = (g, x) => (x && g?.flags?.loft_burned && x.burned) || x?.text;
+const lineText = (g, stretch, k, i) => lineWords(g, MUSIC_LINES[stretch]?.[k]?.[i]);
 
 /**
  * The line under this screen, or null: { text, key }. `v` the scene view ({ id, text }). Notes the day's pick in the save's
@@ -103,7 +105,7 @@ export function musicLine(g, v, { newVisit = true } = {}) {
     if (m && m.d === d) {
         // the visit that drew it, or (RV1, L1) the same visit back from a form change, a breakthrough or a door card (again.js: newVisit false)
         const same = m.i >= 0 && m.at === id && (L.cur.mu === id || newVisit === false);
-        const t = same ? lineText(m.s, m.k, m.i) : null;
+        const t = same ? lineText(g, m.s, m.k, m.i) : null;
         if (t) L.cur.mu = id;
         return t ? { text: fillRefs(t, MUSIC_REFS), key: `${m.s}.${m.k}.${m.i}` } : null;
     }
@@ -123,7 +125,7 @@ export function musicLine(g, v, { newVisit = true } = {}) {
         if (i < 0) continue;
         L.mu = { d, i, k, s: stretch, at: id };
         L.cur.mu = id;
-        return { text: fillRefs(list[i].text, MUSIC_REFS), key: `${stretch}.${k}.${i}` };
+        return { text: fillRefs(lineWords(g, list[i]), MUSIC_REFS), key: `${stretch}.${k}.${i}` };
     }
     return null;
 }

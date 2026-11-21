@@ -32,7 +32,7 @@ export const MUSIC_LINES = {
         ],
         archive: [
             { key: "ashfall.06", from: 0, place: "any", who: "-", step: "-", text: "The omnitool is holding your place in {ref:dune}, among people who count water as wealth. Ashfall counts barley. You find you can follow the bookkeeping." },
-            { key: "ashfall.07", from: 0, place: "loft", who: "-", step: "-", text: "In the herb loft, off your forearm, you read a chapter of {ref:the_hobbit}. Its hero is far from his own kitchen and being fed by strangers. You stop there, on purpose." },
+            { key: "ashfall.07", from: 0, place: "loft", who: "-", step: "-", text: "In the herb loft, off your forearm, you read a chapter of {ref:the_hobbit}. Its hero is far from his own kitchen and being fed by strangers. You stop there, on purpose.", burned: "In the scorched loft, off your forearm, you read a chapter of {ref:the_hobbit}. Its hero is far from his own kitchen and being fed by strangers. You stop there, on purpose." /* v0.11.248 (owner pick P18-A, LF: LC1; Fable's): after a burn, the loft's herbs gone */ },
         ],
     },
     fallout: {

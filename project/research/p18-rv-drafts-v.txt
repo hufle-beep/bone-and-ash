@@ -1,0 +1,28 @@
+vm:1:2 | Your white coat is on the line in the yard, washed. Mei Lin's mother did it while you ate, and you were not consulted. ¶ What was in its pockets lies in a row along the sill: a pen, two specimen tubes, a boiled sweet of some age. She has arranged them by size and dusted the sweet. ¶ "She has never washed a thing with so many pockets," says Mei Lin from the doorway, enjoying herself. "She counted them. She will count them once more when it's dry, in case one got away." ¶ {yuki}
+vm:1:2:y:cat | *She looked at the tub and then at me,* says Yuki, from the top of the water butt. *I looked back. We have left it there.*
+vm:1:2:y:great | *It drips,* says Yuki, who is lying in the sun directly under the coat and declines to move. *I have had worse from you.*
+vm:1:2:y:human | "She offered to do my dress next," says Yuki, from the bench by the wall. "I declined. She bowed, and I believe she was relieved."
+vm:1:3 | The herb loft has a beam at exactly the height of your forehead. You find it going back up the ladder for your glasses, which you suppose is the explanation, and the house below pauses to listen, then carries on. ¶ {yuki} ¶ Nobody downstairs mentions it. But Mei Lin's mother is waiting at the foot of the ladder with a folded rag and a length of twine, and she climbs past you without a word. When she comes down the beam is padded. In this house, you gather, that is how a thing gets said. ¶ "She did the same for my father," Mei Lin tells you. "He was shorter than you, and he learnt quicker."
+vm:3:2 | A woman from down the lane stands at the door of Mei Lin's house holding a sieve. She borrowed it, she says, the winter Mei Lin was born, and she wishes it known that it has come back. ¶ Mei Lin's mother takes it in both hands and thanks her gravely. Along the lane other things are going home, a hoe, a ladle, a measure of millet carried level. With the collectors coming, nobody in Ashfall means to be counted while owing. {yuki}
+vm:3:2:y:cat | *You have owed me a fish for years,* says Yuki, from your shoulder. *I mention it only because it seems to be the fashion.*
+vm:3:2:y:great | *You have owed me a fish for years,* says Yuki, across the threshold, over whom the sieve had to be handed. *I mention it only because it seems to be the fashion.*
+vm:3:2:y:human | "You have owed me a fish for years," says Yuki, holding the sieve up to the light for flaws. "I mention it only because it seems to be the fashion."
+vm:3:2:burned | Nobody has called about the scorched loft over your head. That debt is not Ashfall's to settle, and the lane knows whose it is.
+vm:3:3 | Mei Lin's house has gone quiet this week. Her mother puts the bowls back on their shelf without a sound, as if the collectors up the road could hear crockery. ¶ Mei Lin, drying the spoons, lets one fall into the pot on purpose. Her mother does not turn round, and the room cools all the same. {yuki}
+vm:3:3:y:cat | Yuki purrs under the table, loudly enough to count as an accomplice, and is excused it, rank having its uses.
+vm:3:3:y:great | Yuki, who does not fit under the table, purrs beside it like a millstone, and is excused it, rank having its uses.
+vm:3:3:y:human | Yuki picks a spoon off the cloth and drops it in after Mei Lin's. It is received as a pronouncement, and the mother inclines her head to it.
+vm:3:3:burned | Soot from the scorched loft has settled along the shelf, and the mother wipes each bowl before it goes up, saying nothing.
+vm:3:4:y:great | *Three men, one gate, nothing wrong with it,* says Yuki, from the middle of the lane, where the repairs go round her. *I approve. It is how I guard you.*
+vm:3:4:burned | The lime does what it can against the smell of the scorched loft overhead, and loses. Char has been in this house longer, and knows the rooms.
+vm:3:old:burned | The scorched loft has gone cold, and you sleep under its charred beams with soot in your hair, which they also note.
+wen:LOW:5 | Old Wen turns his milky eye on you and keeps the good one for the pot. You gather which of the two he considers worth watching.
+wen:MID:5 | Old Wen corrects how you hold the cup, with one finger, and says nothing about it. You take it that in Ashfall a man is corrected only when he is worth the trouble.
+far_won:5 | Ashfall's hunters share out the kill by a rule older than the village, and the rule gives the heart to whoever brought the beast down. The eldest presents it to you on a leaf, with both hands. You thank him. It is warm, and nobody offers to tell you what a guest does next.
+
+# notes
+- vm:1:2 assumes the coat's pockets held a few things on arrival (pen, specimen tubes, a sweet); the card only says the hammerspace arrived empty. Its great form has no size joke; vm:1:3's kept :y:great keeps the one.
+- vm:1:3: the three :y: keys are unchanged and not given. "You find it on rising" became going back up for the glasses (no waking opening). Mei Lin's father is spoken of as gone (the mother is a widow) and as shorter than James: assumed.
+- vm:3:2: Yuki's owed fish is an invented standing joke, no canon behind it. The :burned line points at the debt for the fire without naming anyone.
+- vm:3:3: the spoon moment moved to the clearing-up after the meal; the :y:human key changed to match (she drops a spoon in after Mei Lin's).
+- wen:LOW:5 / MID:5 and far_won:5: I could not see the other closers or far_won 2 and 3, so the moments (the milky eye, the corrected grip, the heart on a leaf) need the script's check against them.

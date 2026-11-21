@@ -1,0 +1,37 @@
+[
+ {
+  "id": "C1",
+  "file": "js/story/ashfall.js",
+  "find": "seqText(g, 'village_morning:3'",
+  "replace": "seqText(g, 'village_morning:1'",
+  "note": "VM: week 3 shares week 1's day record, so its sequence starts where week 1 left off (the old first skipped)"
+ },
+ {
+  "id": "C2",
+  "file": "js/story/music.js",
+  "find": "return { text: fillRefs(lineWords(g, list[i]), MUSIC_REFS), key:",
+  "replace": "return { text: fillRefs(list[i].text, MUSIC_REFS), key:",
+  "note": "LC1: the first draw of the loft line names the herb loft after a burn"
+ },
+ {
+  "id": "C3",
+  "file": "js/story/music_texts.js",
+  "find": "a chapter of {ref:the_hobbit}. Its hero is far from his own kitchen and being fed by strangers. You stop there, on purpose.\" /*",
+  "replace": "a chapter of {ref:the_hobit}. Its hero is far from his own kitchen and being fed by strangers. You stop there, on purpose.\" /*",
+  "note": "LC1: the burned line names a slot that is not in MUSIC_REFS"
+ },
+ {
+  "id": "C4",
+  "file": "js/story/ashfall.js",
+  "find": "g.flags.loft_burned && x.b ? x.b",
+  "replace": "(g.flags.loft_burned || g.flags.night5_done) && x.b ? x.b",
+  "note": "VM: a won arson night (night5_done, no burn) gets the scorched-loft line"
+ },
+ {
+  "id": "C5",
+  "file": "js/story/ashfall.js",
+  "find": "longCal(g) && tributeLeft(g) > 1 ?",
+  "replace": "longCal(g) && tributeLeft(g) > 2 ?",
+  "note": "VM: the day before the last also drops to the old text (off by one)"
+ }
+]

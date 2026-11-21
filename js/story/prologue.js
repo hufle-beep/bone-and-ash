@@ -122,6 +122,23 @@ const yukiMerLu = (g) => { const n = g.yuki.primaries ?? 12; const b = yukiSpot(
  *  breakthrough at the camp that ends after 05:00 doesn't move it a day ahead. */
 const byNight = (g, list) => { const t = list[Math.max(0, Math.min(list.length - 1, (g.flags.forest_day || 1) - 1))]; return typeof t === 'function' ? t(g) : t; };
 
+/** v0.11.248 (owner pick P18-A, LX1: LC1 on the eve; Fable's run LE, Claude's cut): after a burn the loft is the scorched one. */
+const ROMANCE_TEXT = `She kisses like she argues: first, hard, and to win.
+
+Her hands are already pushing the ridiculous coat off your shoulders, then the shirt under it. She stops at your forearms: on the left a serpent closed into a ring, eating its own tail; on the right the inked tree and its raven. "Later you explain those," she says, and makes a small approving sound against your mouth at the rest: the hard, lean body cultivation gives even a man who lives in a lab. You lift her linen shirt over her head. Her skin is warm in the lamplight, scarred in small honest places by herb-knives and thorns, and you kiss each one you can find while she laughs, out of breath, and tows you by the wrist toward the ladder to the herb loft.
+
+The loft smells of dried mint and sun-warm hay. She pushes you down into it and climbs over you, a knee on either side of your hips, the red ribbon gone and her black hair coming loose, and looks down with the sharp, delighted, faintly dangerous expression that you are fairly sure will get you killed one day, and that you would follow straight into a tribulation.
+
+"Slowly," she says. "I told you. I've had wine."
+
+Slowly, then. For a while.
+
+Then not slowly at all.
+
+*
+
+Much later the lamp is out, the hay has got everywhere, and Mei Lin is asleep against you with an arm across your chest, a claim staked. From downstairs the bond delivers Yuki's verdict, short and sour: *finally. Now be quiet.*`;
+const romanceText = (g) => (g.flags.loft_burned ? ROMANCE_TEXT.replace("toward the ladder to the herb loft.\n\nThe loft smells of dried mint and sun-warm hay.", "toward the ladder to the scorched loft.\n\nUnder the charred beams the loft smells of old smoke and, stronger than that, of new hay.") : ROMANCE_TEXT);
 export const SCENES = {
     /* ================= DAY 1 ================= */
     arrival: {
@@ -774,22 +791,8 @@ The lamp gutters. Neither of you gets up to trim it.
         ],
     },
     romance: {
-        id: 'romance', title: 'Not Afraid', art: 'romance', place: 'Ashfall Hamlet — the herb loft',
-        text: `She kisses like she argues: first, hard, and to win.
-
-Her hands are already pushing the ridiculous coat off your shoulders, then the shirt under it. She stops at your forearms: on the left a serpent closed into a ring, eating its own tail; on the right the inked tree and its raven. "Later you explain those," she says, and makes a small approving sound against your mouth at the rest: the hard, lean body cultivation gives even a man who lives in a lab. You lift her linen shirt over her head. Her skin is warm in the lamplight, scarred in small honest places by herb-knives and thorns, and you kiss each one you can find while she laughs, out of breath, and tows you by the wrist toward the ladder to the herb loft.
-
-The loft smells of dried mint and sun-warm hay. She pushes you down into it and climbs over you, a knee on either side of your hips, the red ribbon gone and her black hair coming loose, and looks down with the sharp, delighted, faintly dangerous expression that you are fairly sure will get you killed one day, and that you would follow straight into a tribulation.
-
-"Slowly," she says. "I told you. I've had wine."
-
-Slowly, then. For a while.
-
-Then not slowly at all.
-
-*
-
-Much later the lamp is out, the hay has got everywhere, and Mei Lin is asleep against you with an arm across your chest, a claim staked. From downstairs the bond delivers Yuki's verdict, short and sour: *finally. Now be quiet.*`,
+        id: 'romance', title: 'Not Afraid', art: 'romance', place: (g) => (g.flags.loft_burned ? 'Ashfall Hamlet — the scorched loft' : 'Ashfall Hamlet — the herb loft') /* v0.11.248 (P18-A, LX1) */,
+        text: (g) => romanceText(g),
         choices: [{ text: 'Sleep. For a few hours, the world is just this.', do: (g) => { sleepUntil(g, 5); return ['Slept until 05:00. HP and Qi full.']; }, to: 'tribute' }],
     },
     tribute_dawn_talk: {

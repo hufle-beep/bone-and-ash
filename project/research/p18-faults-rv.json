@@ -1,0 +1,149 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/ashfall.js",
+  "find": "? (longCal(g) ? seqText(g, 'village_morning:1', [vmW1Old, ...VM_W1.map(vmText)]) : vmW1Old(g))",
+  "replace": "? seqText(g, 'village_morning:1', [vmW1Old, ...VM_W1.map(vmText)])",
+  "note": "VM: the old calendar reads week 1's new mornings"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/ashfall.js",
+  "find": ": longCal(g) && tributeLeft(g) > 1 ? seqText(g, 'village_morning:3'",
+  "replace": ": longCal(g) ? seqText(g, 'village_morning:3'",
+  "note": "VM: the last day loses its old text"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/ashfall.js",
+  "find": "x.t.replace('{yuki}', g.flags.loft_burned && x.b ? x.b : byForm(g, ...x.y))",
+  "replace": "x.t.replace('{yuki}', byForm(g, ...x.y))",
+  "note": "VM / LC1: the burned line never shows"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/ashfall.js",
+  "find": "return [(g.flags.loft_burned && ROOF_BURNED[i]) || ROOF_STAY[3][i]];",
+  "replace": "return [ROOF_STAY[3][i]];",
+  "note": "LC1: the roof's week-3 lines name the herb loft after a burn"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/music.js",
+  "find": "export const lineWords = (g, x) => (x && g?.flags?.loft_burned && x.burned) || x?.text;",
+  "replace": "export const lineWords = (g, x) => x?.text;",
+  "note": "LC1: the loft's music line names the herbs after a burn"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/music.js",
+  "find": "const t = same ? lineText(g, m.s, m.k, m.i) : null;",
+  "replace": "const t = same ? MUSIC_LINES[m.s]?.[m.k]?.[m.i]?.text : null;",
+  "note": "LC1: a redraw of the same visit shows the unburned line"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/ashfall.js",
+  "find": "[vmW3Old, ...VM_W3.map(vmText)]",
+  "replace": "[vmW3Old, ...VM_W3.slice(0, 2).map(vmText)]",
+  "note": "VM: week 3's fourth morning lost"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/act1_blackroot.js",
+  "find": " /* v0.11.248 (owner pick P18-A; Fable's, Claude's cuts): HK, the 4th's and 5th's away versions (no woman named) */],",
+  "replace": " /* x */].slice(0, 3),",
+  "note": "HK: the 4th and 5th win name Ya while she is away"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/house_texts.js",
+  "find": "// v0.11.248 (owner pick P18-A, WT; Fable's): a fifth (past four, the pick)\n    ],\n    \"wen MID\"",
+  "replace": "// v0.11.248 (owner pick P18-A, WT; Fable's): a fifth (past four, the pick)\n    ].slice(0, 4),\n    \"wen MID\"",
+  "note": "WT: Wen's LOW fifth dropped"
+ },
+ {
+  "id": "F10",
+  "file": "tools/textlint.mjs",
+  "find": ".flatMap((x) => [x.text, ...(x.burned ? [x.burned] : [])])",
+  "replace": ".map((x) => x.text)",
+  "note": "LC1: the lint no longer reads the burned music line"
+ },
+ {
+  "id": "F11",
+  "file": "js/core/week.js",
+  "find": "(t.nf[g.scene] === h || (g.scene === 'village_morning' && (shownEarlierDay(g, g.scene, v) || (seenBefore(g, g.scene) && readBefore(g, v.text)))))",
+  "replace": "t.nf[g.scene] === h",
+  "note": "NS1: the plan stops again on every village morning of weeks 1 and 3"
+ },
+ {
+  "id": "C1",
+  "file": "js/story/ashfall.js",
+  "find": "seqText(g, 'village_morning:3'",
+  "replace": "seqText(g, 'village_morning:1'",
+  "note": "VM: week 3 shares week 1's day record, so its sequence starts where week 1 left off (the old first skipped)"
+ },
+ {
+  "id": "C2",
+  "file": "js/story/music.js",
+  "find": "return { text: fillRefs(lineWords(g, list[i]), MUSIC_REFS), key:",
+  "replace": "return { text: fillRefs(list[i].text, MUSIC_REFS), key:",
+  "note": "LC1: the first draw of the loft line names the herb loft after a burn"
+ },
+ {
+  "id": "C3",
+  "file": "js/story/music_texts.js",
+  "find": "a chapter of {ref:the_hobbit}. Its hero is far from his own kitchen and being fed by strangers. You stop there, on purpose.\" /*",
+  "replace": "a chapter of {ref:the_hobit}. Its hero is far from his own kitchen and being fed by strangers. You stop there, on purpose.\" /*",
+  "note": "LC1: the burned line names a slot that is not in MUSIC_REFS"
+ },
+ {
+  "id": "C4",
+  "file": "js/story/ashfall.js",
+  "find": "g.flags.loft_burned && x.b ? x.b",
+  "replace": "(g.flags.loft_burned || g.flags.night5_done) && x.b ? x.b",
+  "note": "VM: a won arson night (night5_done, no burn) gets the scorched-loft line"
+ },
+ {
+  "id": "C5",
+  "file": "js/story/ashfall.js",
+  "find": "longCal(g) && tributeLeft(g) > 1 ?",
+  "replace": "longCal(g) && tributeLeft(g) > 2 ?",
+  "note": "VM: the day before the last also drops to the old text (off by one)"
+ },
+ {
+  "id": "F12",
+  "file": "js/story/ashfall.js",
+  "find": "${g.flags.loft_burned ? 'the scorched loft' : 'the herb loft'}",
+  "replace": "the herb loft",
+  "note": "LX1: the night header names the herb loft after a burn"
+ },
+ {
+  "id": "F13",
+  "file": "js/story/prologue.js",
+  "find": "const romanceText = (g) => (g.flags.loft_burned ?",
+  "replace": "const romanceText = (g) => (false ?",
+  "note": "LX1: the eve's loft smells of mint after a burn"
+ },
+ {
+  "id": "F14",
+  "file": "js/story/ashfall.js",
+  "find": "(longCal(g) && dayIndex(g, 's:village_morning:3') > 0 ? VM_W3_COLD",
+  "replace": "(longCal(g) && dayIndex(g, 's:village_morning:3') > 99 ? VM_W3_COLD",
+  "note": "T M4: the old week-3 text's smoke on every burned morning"
+ },
+ {
+  "id": "F15",
+  "file": "js/story/again.js",
+  "find": "return Number.isInteger(d) && d < textDay(g);",
+  "replace": "return Number.isInteger(d) && d <= textDay(g);",
+  "note": "NS1: a text shown today counts as an earlier day's"
+ },
+ {
+  "id": "F16",
+  "file": "js/core/week.js",
+  "find": "(shownEarlierDay(g, g.scene, v) || (seenBefore(g, g.scene) && readBefore(g, v.text)))",
+  "replace": "shownEarlierDay(g, g.scene, v)",
+  "note": "NS-b: a later Coil's village mornings stop the plan again"
+ }
+]

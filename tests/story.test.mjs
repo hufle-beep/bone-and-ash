@@ -1825,7 +1825,7 @@ for (const form of ['cat', 'human']) {
     }
     for (const k of ['wen', 'mother']) {
         assert(HT_SLOTS.every((sl) => typeof HT_BODY[k][sl] === 'string' && HT_BODY[k][sl].length > 200) && Object.keys(HT_BODY[k]).filter((x) => !x.endsWith('-burned') && !x.endsWith('-early')).length === HT_SLOTS.length /* v0.11.224 (TX2, DC11): and 'ashfall:2-early' */ && typeof HT_BODY[k]['ashfall:2-early'] === 'string', `MW1 (MS): ${k}: a text for each of the ${HT_SLOTS.length} slots`);
-        assert(['LOW', 'MID'].every((lv) => HT_CLOSE[`${k} ${lv}`]?.length === 4), `MW1 (MT); v0.11.152 (RP1, HT): ${k}: four closers per level`);
+        assert(['LOW', 'MID'].every((lv) => HT_CLOSE[`${k} ${lv}`]?.length === (k === 'wen' ? 5 : 4)), `MW1 (MT); v0.11.152 (RP1, HT): ${k}: four closers per level (v0.11.248, P18-A WT: Wen's five)`);
     }
     assert(new Set([...Object.values(HT_BODY.wen), ...Object.values(HT_BODY.mother)]).size === 16, 'MW1 (MS): sixteen different texts (MR1: the burned eve; v0.11.224, TX2 DC11: the long calendar\'s three earlier-eve texts)');
     const MW = (seed, hub, day, flags = {}) => {
@@ -3706,17 +3706,18 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     // ET / EK: every slot has a table entry, every entry is used; both editions fill; the general edition shows no name
     const RD = await import('../js/story/reading.js'); // RS1: the reading's slots share the table
     const readAll = [RD.READ.text, ...Object.values(RD.READ.ship), RD.READ.lover];
-    const slots = new Set([...every.map((x) => x.text), ...readAll].flatMap((t) => [...t.matchAll(E.SLOT)].map((m) => m[1])));
+    const wordsOf = (x) => [x.text, ...(x.burned ? [x.burned] : [])]; // v0.11.248 (P18-A, RV: TG-C5): and a line's words after a burn
+    const slots = new Set([...every.flatMap(wordsOf), ...readAll].flatMap((t) => [...t.matchAll(E.SLOT)].map((m) => m[1])));
     assert([...slots].every((id) => M.MUSIC_REFS[id]) && Object.keys(M.MUSIC_REFS).every((id) => slots.has(id)), `CM2 (ET): every slot in the table and every entry used (${slots.size} / ${Object.keys(M.MUSIC_REFS).length})`);
-    const allMusicTexts = (ed) => every.map((x) => E.fillRefs(x.text, M.MUSIC_REFS, ed));
+    const allMusicTexts = (ed) => every.flatMap(wordsOf).map((t) => E.fillRefs(t, M.MUSIC_REFS, ed));
     const named = allMusicTexts('named'), general = allMusicTexts('general');
-    assert(named.length === 65 && general.length === 65 && named.concat(general).every((t) => !/\{|\}/.test(t)), 'CM2 (EK): 65 lines in each edition, every slot filled');
+    assert(named.length === 66 && general.length === 66 /* v0.11.248 (P18-A, LC1): and the loft's line after a burn */ && named.concat(general).every((t) => !/\{|\}/.test(t)), 'CM2 (EK): 65 lines (66 with the burned one) in each edition, every slot filled');
     const NAMES = Object.values(M.MUSIC_REFS).flatMap((r) => r.named.replace(/[*]/g, '').split(/'s |, | of /)).map((n) => n.trim()).filter((n) => n.length > 3 && /^[A-Z]/.test(n));
     for (const t of general) { const hit = NAMES.find((n) => t.includes(n)); assert(!hit, `CM2 (EK): the general edition names no one ("${hit}" in ${t.slice(0, 60)})`); }
     assert(Object.values(M.MUSIC_REFS).every((r) => r.general && !/[A-Z]/.test(r.general.replace(/^\*/, '')[0]) && r.general !== r.named), 'CM2 (ET): each general phrase is its own, starting lower case');
     const RESERVED = /Trøllabundin|Dúrin|Hammerdeep|Dwarven Forge|Music Box of Fate|\bBreathe\b|Eater's Call|Boof Pack|Genesis|Non-Fiction|\bReflect\b|Lyfjaberg|Eivør|Clamavi|Wardruna|Ironmouse|Nyanners|Athelstan|Holoadvent|Holomyth/i;
     assert(named.every((t) => !RESERVED.test(t)) && !RESERVED.test(JSON.stringify(M.MUSIC_REFS)), 'CM2 (SG): the songs and artists kept for push 3 are not used');
-    assert(every.every((x) => !/(^|[.!?]\s+|"\s*)\{ref:/.test(x.text) && !/\{ref:[a-z0-9_]+\}'s/.test(x.text)), 'CM2 (ET): no slot opens a sentence or takes an \'s');
+    assert(every.flatMap(wordsOf).every((t) => !/(^|[.!?]\s+|"\s*)\{ref:/.test(t) && !/\{ref:[a-z0-9_]+\}'s/.test(t)), 'CM2 (ET): no slot opens a sentence or takes an \'s');
     // ML: the screens; the five lines of the game's own count as the day's
     assert(Object.keys(M.MUSIC_SCREENS).length === 18 && Object.keys(M.MUSIC_SCREENS).every((id) => SCENES[id]) && !M.MUSIC_SCREENS.supper && !M.MUSIC_SCREENS.mei_walk && !M.MUSIC_SCREENS.yk_camp, 'CM2 (ML, W1; RV1 M3): 18 evening screens, all real; not the supper or the sunset walk (the roof and the third supper follow them), nor Yuki\'s walk (a romance night)');
     const src = readdirSync(new URL('../js/story/', import.meta.url)).filter((f) => f.endsWith('.js') && !/^music/.test(f)).map((f) => readFileSync(new URL(`../js/story/${f}`, import.meta.url), 'utf8')).join('\n');
@@ -5874,9 +5875,10 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       // same comparison with each pick's `sig` left out too: the same six on both codes)
       // v0.11.243 (P15-B, SF: MW; again for RV1's one word, T L6): the wilds' three re-pinned for the week-1 morning's text only (its hash in the night-fold record `tasks.nf.morning`): with MW switched off
       // the six old pins pass; on v0.11.242's code and this one the wilds run's steps, stops, lines and save but `nf` are the same (`/tmp/p15b/wildspin.mjs`, three switch settings)
-      assert(JSON.stringify(old) === '{"wilds":"70401054","fallout":"48a83427","ashfall":"97eb74f4","cards":"workshop:0,workshop:2,drill:0"}', `${T} (v0.11.215, RV1 TG4): with CF1 switched off the three runs are v0.11.214's exactly (its code, keys sorted: wilds 52a6f20a, the Fallout f17ca92c, Ashfall 97eb74f4), so the new pins below change only by CF1 (${JSON.stringify(old)})`);
-      assert(JSON.stringify(v216) === '{"wilds":"00d4c5f6","fallout":"bbe86a86","ashfall":"c8d8939d","cards":"workshop:0,workshop:2,drill:0"}', `${T} (v0.11.217, PT1): with PT1 switched off the three runs are v0.11.216's exactly (${JSON.stringify(v216)})`);
-      assert(JSON.stringify(out) === '{"wilds":"00d4c5f6","fallout":"8f2cba54","ashfall":"1e4a6b32","cards":"workshop:0,workshop:2,drill:0"}', `${T} (RV1, TG2): none set: the wilds, the Fallout and Ashfall runs as v0.11.217's code runs them (v0.11.217, PT1: the Fallout and Ashfall re-pinned for the pot's meals, the wilds unchanged; re-pinned for CF1 and its RV1: no card waits behind another's work, a card that gives no food pays at its end, a start needs its old length left today and, with no food, its whole work left in the stay; before, for S3 and the rest row; with the spacing off and the rest row taken out they run as v0.11.210's: the VQ1 block) (${JSON.stringify(out)})`); }
+      // v0.11.248 (P18-A, WT): the Fallout's three re-pinned for Wen's fifth closer only (again for RV-V's redrafted closers; his pool of five draws another closer: `lines.p` / `last` under `ht:wen LOW`, `wen_time_close`, the screen's line); on v0.11.247's code and this one the six runs' steps, stops and save are otherwise the same (`/tmp/p18/pindump`, PINDUMP)
+      assert(JSON.stringify(old) === '{"wilds":"70401054","fallout":"ea94f49a","ashfall":"97eb74f4","cards":"workshop:0,workshop:2,drill:0"}', `${T} (v0.11.215, RV1 TG4): with CF1 switched off the three runs are v0.11.214's exactly (its code, keys sorted: wilds 52a6f20a, the Fallout f17ca92c, Ashfall 97eb74f4), so the new pins below change only by CF1 (${JSON.stringify(old)})`);
+      assert(JSON.stringify(v216) === '{"wilds":"00d4c5f6","fallout":"3d72d1a7","ashfall":"c8d8939d","cards":"workshop:0,workshop:2,drill:0"}', `${T} (v0.11.217, PT1): with PT1 switched off the three runs are v0.11.216's exactly (${JSON.stringify(v216)})`);
+      assert(JSON.stringify(out) === '{"wilds":"00d4c5f6","fallout":"7f851a9f","ashfall":"1e4a6b32","cards":"workshop:0,workshop:2,drill:0"}', `${T} (RV1, TG2): none set: the wilds, the Fallout and Ashfall runs as v0.11.217's code runs them (v0.11.217, PT1: the Fallout and Ashfall re-pinned for the pot's meals, the wilds unchanged; re-pinned for CF1 and its RV1: no card waits behind another's work, a card that gives no food pays at its end, a start needs its old length left today and, with no food, its whole work left in the stay; before, for S3 and the rest row; with the spacing off and the rest row taken out they run as v0.11.210's: the VQ1 block) (${JSON.stringify(out)})`); }
     // RV1 (TG3): one row a step: Smoke the catch is seen by the step's watch each day it smokes (a row that ran and let the next one
     // run in the same step hid it, and skipped the step's checks: hurt, hungry)
     { const g = ensureBars(newGame(99502, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'ashfall'); g.minutes = 9 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 30); Gm.addItem(g, 'hare_raw', 2);
@@ -6066,9 +6068,10 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       // same comparison with each pick's `sig` left out too: the same six on both codes)
       // v0.11.243 (P15-B, SF: MW; again for RV1's one word, T L6): the wilds' three re-pinned for the week-1 morning's text only (its hash in the night-fold record `tasks.nf.morning`): with MW switched off
       // the six old pins pass; on v0.11.242's code and this one the wilds run's steps, stops, lines and save but `nf` are the same (`/tmp/p15b/wildspin.mjs`, three switch settings)
-      assert(JSON.stringify(old) === '{"wilds":"e6b4ef54","fallout":"b5422cdf","ashfall":"55bb2cae"}', `${T} (v0.11.215, RV1 TG4): with CF1 switched off, v0.11.214's runs exactly (its code, keys sorted) (${JSON.stringify(old)})`);
-      assert(JSON.stringify(v216) === '{"wilds":"f997b7f1","fallout":"270a69c0","ashfall":"eb5b2dc3"}', `${T} (v0.11.217, PT1): with PT1 switched off, v0.11.216's runs exactly (${JSON.stringify(v216)})`);
-      assert(JSON.stringify(out) === '{"wilds":"f997b7f1","fallout":"61764e76","ashfall":"d853a742"}', `${T} (TG): spacing off, rest row out: v0.11.210's three runs exactly as v0.11.217 runs them (v0.11.217, PT1: the Fallout and Ashfall re-pinned for the pot's meals, the wilds unchanged; re-pinned for CF1: no card waits behind another's work, a card that gives no food pays at its end) (${JSON.stringify(out)})`); }
+      // v0.11.248 (P18-A, WT): the Fallout's three re-pinned for Wen's fifth closer only, as PR2's above
+      assert(JSON.stringify(old) === '{"wilds":"e6b4ef54","fallout":"2600aab2","ashfall":"55bb2cae"}', `${T} (v0.11.215, RV1 TG4): with CF1 switched off, v0.11.214's runs exactly (its code, keys sorted) (${JSON.stringify(old)})`);
+      assert(JSON.stringify(v216) === '{"wilds":"f997b7f1","fallout":"a5a268e1","ashfall":"eb5b2dc3"}', `${T} (v0.11.217, PT1): with PT1 switched off, v0.11.216's runs exactly (${JSON.stringify(v216)})`);
+      assert(JSON.stringify(out) === '{"wilds":"f997b7f1","fallout":"c33f1c41","ashfall":"d853a742"}', `${T} (TG): spacing off, rest row out: v0.11.210's three runs exactly as v0.11.217 runs them (v0.11.217, PT1: the Fallout and Ashfall re-pinned for the pot's meals, the wilds unchanged; re-pinned for CF1: no card waits behind another's work, a card that gives no food pays at its end) (${JSON.stringify(out)})`); }
     // RV1 (TG2, L1): the spring found, its row at 1 and the wash open: one row, the wash's, and the run washes
     { const g = mk('heart_hub', 17); g.flags.spring_found = true; Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', 0); Wk.planSet(g, 'door:heart_spring', 1);
       const rs = Wk.doorCards(g, SCENES).filter((x) => x.scene === 'heart_spring'); const r = Wk.runWeek(g, SCENES);
@@ -7377,13 +7380,13 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     const opens = (l, starts) => starts.every((w, i) => l[i].startsWith(w));
     // FT and RV1 (TG3): three texts a kind in this order, round again, each of two sentences or more
     const HUNT = { wolves: ['The hunters warned you about the ash-wolves', 'The ash-wolves again.', 'Ash-wolves again: a new grey pair'], bull: ['A thornback, and a large one', 'A thornback bull again, standing square', 'Another thornback bull rises out of the bracken'], deer: ['Ash-deer, grey and fast', 'The ash-deer are in the birches again', 'Ash-deer among the birches, at their usual'] };
-    const ok5 = (l) => new Set(l.slice(0, 5)).size === 5 && l[5] === l[0] && l.every((t) => A.sentencesOf(t).length >= 2); // v0.11.247 (P17-A, FH): five a kind
-    const HUNT45 = { wolves: ['Ash-wolves on the slope above the oaks', 'Fresh tracks cross the stream bed'], bull: ['A thornback bull is scraping its spines', 'Something has flattened a path through the bracken'], deer: ['Ash-deer are drinking at the stream', 'The birches past the oak hollow turn out to have legs'] };
-    for (const [k, st] of Object.entries(HUNT)) { const l = seq('far_hunt', `far_hunt:${k}`, 10, { far_kind: k }, 'cat', 6); assert(ok5(l) && opens(l, [...st, ...HUNT45[k]]), `${T} (FT, TG3; P17-A FH): far_hunt ${k} five texts in order, each two sentences or more (${l.map((t) => t.slice(0, 30)).join(' | ')})`); }
+    const okN = (l, n) => new Set(l.slice(0, n)).size === n && l[n] === l[0] && l.every((t) => A.sentencesOf(t).length >= 2); // v0.11.247 (P17-A, FH): five a kind; v0.11.248 (P18-A, FH6): the wolves six
+    const HUNT45 = { wolves: ['Ash-wolves on the slope above the oaks', 'Fresh tracks cross the stream bed', 'Ash-wolves are crossing the fallen oak'], bull: ['A thornback bull is scraping its spines', 'Something has flattened a path through the bracken'], deer: ['Ash-deer are drinking at the stream', 'The birches past the oak hollow turn out to have legs'] };
+    for (const [k, st] of Object.entries(HUNT)) { const n = HUNT45[k].length + 3, l = seq('far_hunt', `far_hunt:${k}`, 10, { far_kind: k }, 'cat', n + 1); assert(okN(l, n) && opens(l, [...st, ...HUNT45[k]]), `${T} (FT, TG3; P17-A FH): far_hunt ${k} ${n} texts in order, each two sentences or more (${l.map((t) => t.slice(0, 30)).join(' | ')})`); }
     // RV1 (H1, TG8): a later day's wolves or bull is another (the one before was usually killed); none claims the same animal
     { const later = ['wolves', 'bull'].flatMap((k) => seq('far_hunt', `far_hunt:${k}`, 10, { far_kind: k }).slice(1, 3));
       assert(!later.some((t) => /the same (grey )?pair|^The thornback bull|recognition|same doe/.test(t)) && /a new grey pair/.test(later[1]) && /^Another thornback bull/.test(later[3]), `${T} (RV1, H1, TG8): the later wolves and bulls are new ones (${later.map((t) => t.slice(0, 40)).join(' | ')})`); }
-    { const l = seq('far_won', 'far_won', 10, { far_kind: 'wolves' }, 'cat', 5); assert(new Set(l.slice(0, 4)).size === 4 && l[4] === l[0] && l.every((t) => A.sentencesOf(t).length >= 2) && opens(l, ['The kill travels to Ashfall folded away', 'It rides home in the hammerspace', 'By now the hunters have a place swept for the kill a bowshot past the oak hollow', 'The kill comes out of the hammerspace onto the swept ground']) /* v0.11.247 (P17-A, FW): four; RV-A (T L5): the swept ground */, `${T} (FT, SF-a, TG3; RV1 L6; P17-A FW): far_won four texts in order (${l.map((t) => t.slice(0, 30)).join(' | ')})`); }
+    { const l = seq('far_won', 'far_won', 10, { far_kind: 'wolves' }, 'cat', 6); assert(new Set(l.slice(0, 5)).size === 5 && l[5] === l[0] /* v0.11.248 (P18-A, FW5): five */ && l.every((t) => A.sentencesOf(t).length >= 2) && opens(l, ['The kill travels to Ashfall folded away', 'It rides home in the hammerspace', 'By now the hunters have a place swept for the kill a bowshot past the oak hollow', 'The kill comes out of the hammerspace onto the swept ground', "Ashfall's hunters share out the kill"]) /* v0.11.247 (P17-A, FW): four; RV-A (T L5): the swept ground */, `${T} (FT, SF-a, TG3; RV1 L6; P17-A FW): far_won four texts in order (${l.map((t) => t.slice(0, 30)).join(' | ')})`); }
     // FT and RV1 (TG2): the quiet night three texts in each form, in order, with the form's own place and voice
     { const PIN = { cat: [/your chest/, /your chest/, /\*Stop thinking,\* Yuki sends from the hollow of your shoulder/], tiger: [/one flank for a pillow/, /settles along the loft by stages/, /\*Stop thinking,\* Yuki sends from most of the floor/], human: [/takes most of the blanket/, /comes up the ladder last/, /"Stop thinking," Yuki says from behind you/] };
       const byF = Object.fromEntries(Object.keys(PIN).map((f) => [f, seq('village_night', 'village_night:quiet', 22, {}, f, 8)])); // v0.11.238 (P11-A, EVn-1): the long calendar's first week six, so seven nights; v0.11.243 (P15-B, SN7): seven, so eight
@@ -8599,8 +8602,8 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     // BH: dw_hunt three, rr_hunt three, each in order and round; the choices' game in each text
     { const dw = days(mk(46000), 'dw_hunt', 70, 4, 9, 'dw_hunt', { bl_region: 'dw' });
       assert(new Set(dw.slice(0, 3)).size === 3 && dw[3] === dw[0] && /^Marsh fowl crowd a leaning trunk/.test(dw[1]) && /^A shed skin hangs over a low bough/.test(dw[2]) && dw.every((t) => /fowl/.test(t) && !LEFT.test(t) && !TIME.test(t)), `${T} (BH): dw_hunt three texts in order, the fowl in each, then round`);
-      const rr = days(mk(46001), 'rr_hunt', 65, 4, 9, 'rr_hunt', { bl_region: 'rr' });
-      assert(new Set(rr.slice(0, 3)).size === 3 && rr[3] === rr[0] && /^Root-hares scatter across the bark/.test(rr[2]) && /elk/.test(rr[2]) && !LEFT.test(rr[2]), `${T} (BH): rr_hunt three texts, the third with the hares and the elk`); }
+      const rr = days(mk(46001), 'rr_hunt', 65, 5, 9, 'rr_hunt', { bl_region: 'rr' }); // v0.11.248 (P18-A, RH): five days, the 4th its own
+      assert(new Set(rr.slice(0, 4)).size === 4 && rr[4] === rr[0] /* v0.11.248 (P18-A, RH): a 4th */ && /^Root-hares scatter across the bark/.test(rr[2]) && /elk/.test(rr[2]) && !LEFT.test(rr[2]), `${T} (BH): rr_hunt three texts, the third with the hares and the elk`); }
     // BW: the elk's third, the serpent's second, the hawks' third by form and Ya away
     { const elk = days(mk(46010), 'rr_elk_won', 65, 4, 10); const sp = days(mk(46011), 'dw_serpent_won', 70, 3, 10);
       assert(new Set(elk.slice(0, 3)).size === 3 && elk[3] === elk[0] && /^The bone-elk folds at the knees/.test(elk[2]) && /hammerspace/.test(elk[2]) && new Set(sp.slice(0, 2)).size === 2 && sp[2] === sp[0] && /^The serpent stops moving coil by coil/.test(sp[1]), `${T} (BW): the elk three, the serpent two, in order and round`);
@@ -8796,6 +8799,102 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     // RV-A (TG-T3): no glasses business in any new text
     assert(NEW.length > 60 && !NEW.some((t) => /glasses|spectacles/i.test(t)), `${T} RV-A (TG-T3): no glasses in the ${NEW.length} new texts rendered`);
     { const N = await import('../js/core/news.js'); assert(/0\.11\.247/.test(JSON.stringify(N.NOTES)), `${T}: What's new has 0.11.247`); }
+}
+// v0.11.248 (owner pick P18-A, 2026-11-21 17:22, with LF's canon call LC1): the end of e: LF (the scorched loft), RH, VM, WT, HK, FW5, FH6, HM
+{
+    const T = 'P18-A';
+    const C = await import('../js/core/calendar.js'); const AF = await import('../js/story/ashfall.js'); const BR = await import('../js/story/act1_blackroot.js'); const M = await import('../js/story/music.js'); const TL = await import('../tools/lib/textlint.mjs');
+    const D = 1440; const FORMS = { cat: 0, tiger: 2, human: 7 };
+    const mk = (seed, flags = {}, f = 'cat') => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); g.yuki.form = f; g.yuki.realm = FORMS[f]; g.james.realm = FORMS[f]; Object.assign(g.flags, flags); return g; };
+    const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
+    const LEFT = /\$\{|\{yuki\}|undefined|\[object/;
+    const NEW = [];
+    // VM: the long calendar's mornings by visit: week 1 three, week 3 four (its last day the old text alone), each then round; by form; the old calendar as before
+    { const morn = (vd, n, f, flags = {}) => { const g = mk(48000 + FORMS[f], { long: true, vday: vd, cal_night: 1, ...flags }, f); const out = []; for (let d = 0; d < n; d++) { g.minutes = ((vd === 1 ? 22 : 36) + d) * D + 7 * 60; out.push(tx(g, 'village_morning')); } return out; };
+      for (const f of Object.keys(FORMS)) {
+          const w1 = morn(1, 4, f), w3 = morn(3, 5, f), b3 = morn(3, 5, f, { loft_burned: true }); NEW.push(...w1.slice(1, 3), ...w3.slice(1, 4), ...b3.slice(1, 4));
+          assert(new Set(w1.slice(0, 3)).size === 3 && w1[3] === w1[0] && /^Morning in the herb loft/.test(w1[0]) && /^Your white coat is on the line in the yard/.test(w1[1]) && /^The herb loft has a beam/.test(w1[2]), `${T} (VM): week 1 three mornings by visit (${f}), then round`);
+          assert(new Set(w3.slice(0, 4)).size === 4 && w3[4] === w3[0] && /^The last week\./.test(w3[0]) && /^A woman from down the lane stands at the door/.test(w3[1]) && /^Mei Lin's house has gone quiet this week/.test(w3[2]) && /^Somebody has limed the tribute post/.test(w3[3]), `${T} (VM): week 3 four mornings by visit (${f}), then round`);
+          assert([...w1, ...w3, ...b3].every((t) => !LEFT.test(t) && t.split('\n\n').length >= 2), `${T} (VM): no slot left, two paragraphs or more (${f})`);
+          // LF (LC1): after a burn the new week-3 mornings give their Yuki passage way to the scorched loft's line, and name no herbs
+          assert(b3.slice(1, 4).every((t, i) => t !== w3[i + 1] && /scorched loft/.test(t) && !/Yuki/.test(t) && !/herb/i.test(t)) && /still smoking a little/.test(b3[0]), `${T} (VM, LC1): week 3's burned mornings (${f})`);
+      }
+      const last = mk(48010, { long: true, vday: 3, cal_night: 6 }); last.minutes = 42 * D + 7 * 60; const lt = C.tributeLeft(last);
+      assert(lt <= 1 && /^The last day\. Tomorrow at sunrise, the collectors\./.test(tx(last, 'village_morning')) && !last.lines?.d?.['s:village_morning:3'], `${T} (VM): the last day keeps the old text alone, unrecorded (${lt})`);
+      // RV (C L1): a guard: on the old calendar `enter` raises vday before the text, so vday 1 never shows there; set by hand, the old text still
+      const o = ensureBars(newGame(48011, { closed: true })); const old = []; for (const vd of [1, 2, 3]) for (let d = 0; d < 3; d++) { o.flags.vday = vd; o.minutes = (2 + d) * D + 7 * 60; old.push(tx(o, 'village_morning')); }
+      assert(old.slice(0, 3).every((t) => /^Morning in the herb loft/.test(t)) && old.slice(6).every((t) => /^The last day\./.test(t)), `${T} (VM): the old calendar reads only the old mornings`); }
+    // RH: the bone-elk's 4th, then round
+    { const g = mk(48020, { bl_region: 'rr' }); const out = []; for (let k = 0; k < 5; k++) { g.minutes = (64 + k) * D + 9 * 60; noteDay(g, 'rr_hunt'); out.push(tx(g, 'rr_hunt')); } NEW.push(out[3]);
+      assert(new Set(out.slice(0, 4)).size === 4 && out[4] === out[0] && /^A bone-elk stands square on the Root Road/.test(out[3]) && /Mei Lin/.test(out[3]) && /\bYa\b/.test(out[3]) && !LEFT.test(out[3]), `${T} (RH): rr_hunt four texts by day, then round`); }
+    // HK: the hawks' ordinary win five by day; by form; Ya away: no woman named, no heads counted; the great root-kin never the hawks' mark
+    { for (const f of Object.keys(FORMS)) for (const away of [false, true]) {
+          const g = mk(48030 + FORMS[f], { bl_region: 'ah', bl_day: 4, mei_party: true, ya_party: true, ...(away ? {} : { ya_off_done: true }) }, f); const out = [];
+          for (let k = 0; k < 6; k++) { g.minutes = (72 + k) * D + 10 * 60; noteDay(g, 'ah_hawks_won'); out.push(tx(g, 'ah_hawks_won')); } const two = out.slice(3, 5); NEW.push(...two);
+          assert(new Set(out.slice(0, 5)).size === 5 && out[5] === out[0] && out.every((t) => !LEFT.test(t)) && (!away || (BR.awayNow(g) === 'ya' && !two.some((t) => /\bYa\b|Mei Lin/.test(t)) && !two.some((t) => /\bnobody\b|\bno one\b|\balone\b|\bboth\b/i.test(t)))) && (away || (/Mei Lin/.test(two[0]) && /\bYa\b/.test(two[1]))) && (f !== 'tiger' || !two.some((t) => /meant for|aimed at|wanted|preferred|the reason for/.test(t))), `${T} (HK): ah_hawks_won five by day (${f}${away ? ', Ya away' : ''}), then round`);
+      } }
+    // WT: Wen's fifth closer at each level
+    assert(HT_CLOSE['wen LOW'][4] === "Old Wen turns his milky eye on you and keeps the good one for the pot. You gather which of the two he considers worth watching." && HT_CLOSE['wen MID'][4] === "Old Wen corrects how you hold the cup, with one finger, and says nothing about it. You take it that in Ashfall a man is corrected only when he is worth the trouble." && HT_CLOSE['mother LOW'].length === 4, `${T} (WT; RV-V, T L2): Wen's fifth closers`);
+    // HM: week 3's hairpin supper: "her mother" once, no tic, in every form
+    { const x = AF.SW3[5]; const r = x.y.map((y) => x.t.replace('{yuki}', y));
+      assert(r.every((t) => (t.match(/her mother/g) || []).length <= 2 && !TL.tics(t).length) && /^Before the bowls are filled/.test(x.t), `${T} (HM; RV, T L1): the hairpin supper: "her mother" at most twice, no tics`); }
+    { const g = mk(48050, { long: true, vday: 2, cal_night: 1 }); g.minutes = 29 * D + 19 * 60; const t = tx(g, 'supper');
+      assert(/^Another supper at Mei Lin's\. Her mother no longer/.test(t) && (t.match(/her mother/gi) || []).length === 2 && /When the telling is done she says/.test(t) && /The mother says it once/.test(t) && !TL.tics(t).length, `${T} (HM; Fable's run HM): the week-2 supper's "her mother" twice, no tics`); }
+    // LF (LC1): week 3's lines after the roof and the loft's music line, after a burn, name no herbs; unburned as before
+    { const stay = (burned) => { const g = mk(48040, { long: true, vday: 3, cal_night: 1, ...(burned ? { loft_burned: true } : {}) }); const out = []; for (let d = 0; d < 6; d++) { g.minutes = (36 + d) * D + 21 * 60; tx(g, 'supper_roof'); out.push(SCENES.supper_roof.choices[0].do(g)[0]); } return out; };
+      const a = stay(false), b = stay(true); NEW.push(...b.slice(0, 3));
+      assert(AF.ROOF_BURNED.length === 3 && b.every((t) => !/herb/i.test(t)) && a.slice(0, 3).every((t) => /herb loft/.test(t)) && a.slice(3).join() === b.slice(3).join() && b.slice(0, 3).every((t, i) => t === AF.ROOF_BURNED[i]), `${T} (LF, LC1): week 3's lines after the roof after a burn: no herbs`);
+      const x = M.MUSIC_LINES.ashfall.archive.find((y) => y.key === 'ashfall.07'); const gb = mk(48041, { loft_burned: true }), gu = mk(48042);
+      assert(/^In the scorched loft/.test(M.lineWords(gb, x)) && M.lineWords(gu, x) === x.text && /^In the herb loft/.test(x.text) && !/herb/i.test(M.lineWords(gb, x)), `${T} (LF, LC1): the loft's music line after a burn`); }
+    // RV (the cold reviews' test gaps): TG-C1 + TG-T3 weeks 1 → 3 walked in one game through `enter`, burned: the keys apart, the old week-3 text's smoke only on its first morning
+    { const g = mk(48060, { long: true, vday: 1, cal_night: 0, loft_burned: false }); const seen = [];
+      for (let k = 0; k < 20; k++) { g.minutes = (22 + k) * D + 6 * 60 + 30; g.scene = 'village_morning'; SCENES.village_morning.enter(g); if (g.flags.vday === 3) g.flags.loft_burned = true; seen.push([g.flags.vday, tx(g, 'village_morning')]); }
+      const w3 = seen.filter(([v]) => v === 3).map(([, t]) => t), w1 = seen.filter(([v]) => v === 1).map(([, t]) => t);
+      const smoke = w3.map((t) => /still smoking/.test(t));
+      assert(w1.length === 6 && new Set(w1.map((t) => t.slice(0, 24))).size === 3 /* the old text's count of days differs by day */ && w3.length === 7 && /^The last week\./.test(w3[0]) && /^The last day\./.test(w3[6]) && smoke[0] && smoke.slice(1).every((x) => !x) && /^The last week\./.test(w3[4]) && w3[4].includes(AF.VM_W3_COLD) && w3[6].includes(AF.VM_W3_COLD) && Array.isArray(g.lines.d['s:village_morning:1']) && Array.isArray(g.lines.d['s:village_morning:3']), `${T} RV (TG-C1, TG-T3; T M4): weeks 1 → 3 in one game: keys apart, the smoke on the first burned morning only (${smoke.join()}; ${w1.length} ${new Set(w1).size} ${w3.length} ${w3.map((t) => t.slice(0, 12)).join('|')} ${Object.keys(g.lines?.d || {}).filter((k) => /village_morning/.test(k))})`); }
+    // TG-C3: an arson won (night5_done, arson_beaten): week 3 unburned; TG-C4: the day before the last still the sequence
+    { const g = mk(48061, { long: true, vday: 3, cal_night: 1, night5_done: true, arson_beaten: true }); const out = []; for (let d = 0; d < 4; d++) { g.minutes = (36 + d) * D + 7 * 60; out.push(tx(g, 'village_morning')); }
+      const e = mk(48062, { long: true, vday: 3, cal_night: 5 }); e.minutes = 41 * D + 7 * 60; const lt = C.tributeLeft(e); const te = tx(e, 'village_morning');
+      assert(!out.some((t) => /scorched/.test(t)) && out.slice(1).every((t, i) => t.includes(AF.VM_W3[i].y[0].slice(0, 20)) || !/\{yuki\}/.test(t)) && lt === 2 && /^The last week\./.test(te) && Array.isArray(e.lines.d['s:village_morning:3']), `${T} RV (TG-C3, TG-C4): a won arson reads no burned line; the day before the last still the sequence (${lt})`); }
+    // TG-T4: no new morning opens on breakfast or waking, nor names the gruel (the screen's line above it has breakfast eaten)
+    assert([...AF.VM_W1, ...AF.VM_W3].every((x) => !/^(Breakfast|You wake)/.test(x.t) && !/gruel|breakfast/i.test(x.t)), `${T} RV (TG-T4; T M5): no morning text opens on breakfast or waking`);
+    // TG-T2: week 1's new mornings do not weigh what the stranger is (the roof's list the night before); week 3's first new morning has no banners (night 5's)
+    assert(AF.VM_W1.every((x) => !/decid|settled what|weigh|physician|ghost|a tax/i.test(x.t + x.y.join(' '))) && !/banner/i.test(AF.VM_W3[0].t), `${T} RV (TG-T2; T M2, M3): no repeated joke family against the night before`);
+    // TG-T5 + T M6: the hawks with both women away; no Yuki passage of the 4th and 5th opens on the hawks' wanting her
+    { const g = mk(48063, { bl_region: 'ah', bl_day: 4, mei_party: true, ya_party: true, trio: 2 }); g.rel['Mei Lin'] = { f: 90, a: 120 }; g.rel.Ya = { f: 90, a: 120 }; const out = [];
+      for (let k = 0; k < 5; k++) { g.minutes = (72 + k) * D + 10 * 60; noteDay(g, 'ah_hawks_won'); out.push(tx(g, 'ah_hawks_won')); }
+      assert(BR.awayNow(g) === 'both' && out.slice(3).every((t) => !/\bYa\b|Mei Lin|\bnobody\b|\bno one\b|\balone\b|\bboth\b/i.test(t)) && new Set(out).size === 5, `${T} RV (TG-T5): the hawks' 4th and 5th with both women away (${BR.awayNow(g)})`); }
+    { const src = readFileSync(new URL('../js/story/act1_blackroot.js', import.meta.url), 'utf8'); const i = src.indexOf('v0.11.248 (owner pick P18-A; Fable\'s, Claude\'s cuts): HK, a 4th');
+      assert(i > 0 && !/whom every|at whom|whom no|whom they|whom the birds|the reason for every/.test(src.slice(src.lastIndexOf('That is what you are for.', i), i)), `${T} RV (T M6): the 4th and 5th wins' Yuki passages don't open on the hawks wanting her`); }
+    // TG-C2 (F6, C2): the loft's music line drawn on a burned week-3 night, first draw and the same visit's redraw
+    { const g = mk(48064, { long: true, vday: 3, cal_night: 1, loft_burned: true }); let r = null;
+      for (let d = 0; d < 400 && !(r && r.key === 'ashfall.archive.1'); d++) { g.minutes = (36 + d) * D + 21 * 60; g.scene = 'village_night'; r = M.musicLine(g, { id: 'village_night', text: '' }); }
+      const again = M.musicLine(g, { id: 'village_night', text: '' }, { newVisit: false });
+      assert(r && r.key === 'ashfall.archive.1' && /^In the scorched loft/.test(r.text) && again && again.key === r.key && /^In the scorched loft/.test(again.text), `${T} RV (TG-C2): the loft's music line after a burn, drawn and redrawn (${r?.key} ${again?.key})`); }
+    // LX1 (TG-T1): after a burn, week 3's night screens and the eve's loft, headers included, name no herbs; unburned as before
+    { const g = mk(48070, { long: true, vday: 3, cal_night: 2, loft_burned: true }, 'cat'); g.minutes = 37 * D + 22 * 60; g.rel['Mei Lin'] = { f: 90, a: 120 };
+      const vn = sceneView(g, SCENES); g.scene = 'village_night'; const v1 = sceneView(g, SCENES); g.scene = 'romance'; const v2 = sceneView(g, SCENES);
+      const u = mk(48071, { long: true, vday: 3, cal_night: 2 }); u.minutes = g.minutes; u.scene = 'village_night'; const u1 = sceneView(u, SCENES); u.scene = 'romance'; const u2 = sceneView(u, SCENES);
+      assert(vn && /scorched loft/.test(v1.place) && /scorched loft/.test(v2.place) && ![v1.place, v2.place, v2.text].some((t) => /herb loft|mint|ginseng|drying/i.test(t)) /* her herb-knives are hers, not the loft's */ && /to the scorched loft\.\n\nUnder the charred beams/.test(v2.text) && /the herb loft/.test(u1.place) && /the herb loft/.test(u2.place) && /dried mint and sun-warm hay/.test(u2.text), `${T} (LX1, TG-T1): after a burn the night header and the eve's loft name no herbs (${v1.place} | ${v2.place})`); }
+    // NS1 (TG-C6): the plan's night fold on 20 village mornings (weeks 1–3, each stop's screen drawn): 9 stops, the sequences' second rounds walked
+    { const W = await import('../js/core/week.js'); const AG = await import('../js/story/again.js');
+      const g = mk(48072, { long: true, vday: 1, cal_night: 0 }); goTo(g, SCENES, 'village_morning'); Object.assign(g.flags, { long: true, vday: 1, cal_night: 0 }); const res = [];
+      for (let k = 0; k < 20; k++) { g.minutes = (22 + k) * D + 6 * 60 + 30; g.scene = 'village_morning'; SCENES.village_morning.enter(g); const f = W.foldNight(g, SCENES); res.push(f.steps ? 'w' : 'S'); if (!f.steps) { if (g.lines) g.lines.at = 'ashfall'; AG.againView(g, sceneView(g, SCENES)); } }
+      const stops = res.filter((x) => x === 'S').length;
+      assert(stops === 9 && res.join('') === 'SSSwwwSwwwwwwSSSSwwS', `${T} (NS1, TG-C6): the plan stops on ${stops} of 20 village mornings (${res.join('')}; v0.11.247: 4, the build before NS1: 14)`); }
+    // NS-b (the owner's pick after PL's NS2): on a later Coil the plan walks past a village morning read on an earlier Coil (each stop's screen drawn and read, as main.js)
+    { const W = await import('../js/core/week.js'); const AG = await import('../js/story/again.js'); const Tk = await import('../js/core/tasks.js');
+      const g = mk(48073, {}); goTo(g, SCENES, 'village_morning');
+      const walk = () => { Object.assign(g.flags, { long: true, vday: 1, cal_night: 0 }); const res = []; for (let k = 0; k < 20; k++) { g.minutes = (22 + k) * D + 6 * 60 + 30; g.scene = 'village_morning'; SCENES.village_morning.enter(g); const f = W.foldNight(g, SCENES); res.push(f.steps ? 'w' : 'S'); if (!f.steps) { if (g.lines) g.lines.at = 'ashfall'; const vv = sceneView(g, SCENES); AG.againView(g, vv); AG.noteRead(g, vv.text); } } return res.join(''); };
+      const c1 = walk(); g.coil.n = (g.coil.n || 1) + 1; Tk.taskState(g).nf = {}; const c2 = walk();
+      assert(c1 === 'SSSwwwSwwwwwwSSSSwwS' && c2 === 'wwwSwwwSwwwwwwwwwwww', `${T} (NS-b): a second Coil's village mornings: the plan stops only on texts not read before (the old texts' day counts) (${c1} | ${c2})`); }
+    // D1: Claude's cuts in, the drafts' phrases out
+    { const src = ['ashfall.js', 'act1_blackroot.js'].map((f) => readFileSync(new URL(`../js/story/${f}`, import.meta.url), 'utf8')).join('\n');
+      const IN = ['A bone-elk stands square on the Root Road', 'and the one who sees it is Mei Lin, stopped', 'with her hands clasped behind her', 'It is the brightest thing in Ashfall', 'The pockets were empty, and she has turned out every one', 'You find it on your way back up the ladder', 'While her mother is at the pot, Mei Lin', '"*Mei Lin.*" The mother says it once', 'When the telling is done she says'];
+      const OUT = ['stands in the middle of the Root Road', 'it is Mei Lin who sees it', 'It is the correct response.', 'the red banners on the tribute post could hear', 'It is the cleanest thing in Ashfall', 'you are fairly sure she measured', 'a tall man in a white coat', 'I have ignored you for forty years', 'and the mother bows, since', 'specimen tubes', 'up the ladder for your glasses', 'The widow says it once', "When Mei Lin's mother rises for the pot", 'Breakfast is a quiet meal', 'Yuki, whom', 'Yuki, at whom'];
+      assert(IN.every((t) => src.includes(t)) && !OUT.some((t) => src.includes(t)), `${T} (D1): Claude's cuts in, the drafts' phrases out (${IN.filter((t) => !src.includes(t)).concat(OUT.filter((t) => src.includes(t))).join(' | ')})`); }
+    assert(NEW.length >= 40 && !NEW.some((t) => /glasses|spectacles/i.test(t)), `${T}: no glasses in the ${NEW.length} new texts rendered`);
+    { const N = await import('../js/core/news.js'); assert(/0\.11\.248/.test(JSON.stringify(N.NOTES)), `${T}: What's new has 0.11.248`); }
 }
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

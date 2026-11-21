@@ -1,0 +1,4 @@
+le:1 | toward the ladder to what is left of the loft.
+le:2 | Under the charred beams the loft smells of old smoke and, stronger than that, of new hay.
+# notes
+le:2 assumes the hay was replaced since the fire ("new hay"); swap to "rescued hay" if canon prefers.

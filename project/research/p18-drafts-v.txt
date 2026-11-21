@@ -1,0 +1,43 @@
+vm:3:2 | The red banners hang on the tribute post, and Ashfall has agreed not to look at them. It does this in plain view, all morning, with buckets. ¶ From the door of Mei Lin's house you watch a man carry one bucket past the post in both directions, eyes front. {yuki}
+vm:3:2:y:cat | *He isn't looking with real conviction,* says Yuki, on your shoulder. *I have ignored you for forty years. He could ask me.*
+vm:3:2:y:great | *He isn't looking with real conviction,* says Yuki, filling the passage behind you. *I have ignored you for forty years. He could ask me.*
+vm:3:2:y:human | "He isn't looking with real conviction," says Yuki, at your elbow. "I have ignored you for forty years. He could ask me."
+vm:3:2:burned | Behind you the scorched loft ticks as its charred beams warm, the one thing in Ashfall that is not pretending.
+vm:3:3 | Breakfast is a quiet meal in Mei Lin's house this week. Her mother sets the bowls down without a sound, as if the red banners on the tribute post could hear crockery. ¶ Mei Lin clinks her spoon on purpose. Nobody's eyes rise, and the room cools. {yuki}
+vm:3:3:y:cat | Yuki purrs under the table, loudly enough to count as an accomplice, and is excused it, rank having its uses.
+vm:3:3:y:great | Yuki, who does not fit under the table, purrs beside it like a millstone, and is excused it, rank having its uses.
+vm:3:3:y:human | Yuki sets her own spoon down with a click. It is received as a pronouncement, and the mother inclines her head to it.
+vm:3:3:burned | Soot from the scorched loft has settled along the table's edge, and the mother wipes it off between mouthfuls, saying nothing.
+vm:3:4 | Somebody has limed the tribute post white under its red banners, and the smell of wet lime comes through the shutters of Mei Lin's house. It is the cleanest thing in Ashfall, and the least loved. ¶ You open the shutters. The lane is full of people repairing things that work. {yuki}
+vm:3:4:y:cat | *Three men, one gate, nothing wrong with it,* says Yuki from the sill. *I approve. It is how I guard you.*
+vm:3:4:y:great | *Three men, one gate, nothing wrong with it,* says Yuki, filling the window beside you. *I approve. It is how I guard you.*
+vm:3:4:y:human | "Three men, one gate, nothing wrong with it," says Yuki, leaning out beside you. "I approve. It is how I guard you."
+vm:3:4:burned | These shutters are the scorched loft's, charred down one edge, and they leave your palm black, as if you had signed something.
+vm:1:2 | You wake in the herb loft with a bundle of drying wormwood an inch from your nose. Mei Lin hung it there, and you are fairly sure she measured. ¶ Below, the house is already up and being quiet at you. Ashfall has not settled what a tall man in a white coat is for; until it does, doors along the lane close a little as you come and open once you have passed. ¶ {yuki}
+vm:1:2:y:cat | *They think you're a physician, a ghost or a tax,* says Yuki, from the rafters. *I told them nothing. I'm a cat.*
+vm:1:2:y:great | *They think you're a physician, a ghost or a tax,* says Yuki, who has the floor, all of it. *I'd settle it, but I'm asleep.*
+vm:1:2:y:human | "They think you're a physician, a ghost or a tax," says Yuki, by the hatch. "I said harmless. They bowed and disbelieved me."
+vm:1:3 | The herb loft has a beam at exactly the height of your forehead. You find it on rising, and the house below pauses to listen, then carries on. ¶ {yuki} ¶ Nobody mentions it over the gruel. Ashfall is like that with you at present. It notes everything and says nothing, and with the tribute still weeks off it can afford to weigh a stranger properly, on both pans.
+vm:1:3:y:cat | *Beam,* says Yuki, who watched you walk into it and held her peace. *I'd have warned you, but I was curious.*
+vm:1:3:y:great | *Beam,* says Yuki, from her half of the loft, which is most of it. *I'd have warned you, but I was curious.*
+vm:1:3:y:human | "Beam," says Yuki, who clears it by a head and watched you go. "I'd have warned you, but I was curious."
+wen:LOW:5 | Old Wen looks at the door before you have thought of it. You find you are standing, bowing, and outside, in that order, and none of it was your idea.
+wen:MID:5 | Old Wen lets the tea go cold between you before he ends the visit. For a man who wastes nothing, it is a considerable expense, and he does not explain it.
+far_won:5 | You set the kill down whole in front of Ashfall's hunters, out of nowhere, and they have given up watching your hands to see how. The eldest holds out his own knife, hilt towards you, for the opening cut. You make it as an anatomist would, and the silence that follows is a professional one.
+far_hunt:wolves:6 | Ash-wolves are crossing the fallen oak past the hollow in single file, grey and careful, like clerks on a plank. The one in front sees you and stops, and the file stops behind it.
+supper_w3:5 | Before the bowls are filled, Mei Lin is made to sit with her back to her mother, and the hairpin comes out. It goes back in bare, and its red tassel lies between the salt and the greens. ¶ "A thing that swings is looked at," the mother says. "This week, nothing in this house is looked at." ¶ "It's a tassel. It's mine." ¶ "Then it will be yours again when they have gone." She serves you, then herself, and her daughter after both, which is not the order of this table. ¶ Mei Lin eats watching the tassel. ¶ {yuki}
+supper_w3:5:y:cat | When the mother rises for the pot, Mei Lin ties the tassel round Yuki's neck. The mother comes back, finds red on a spirit-beast, and rules, after thought, that this lies outside her authority.
+supper_w3:5:y:great | When the mother rises for the pot, Mei Lin knots the tassel into the fur at Yuki's throat, one berry in a snowfield. The mother comes back, finds red on a spirit-beast, and rules, after thought, that this lies outside her authority.
+supper_w3:5:y:human | When the mother rises for the pot, Mei Lin slides the tassel along the table, and Yuki ties it round her own wrist. "Mine," she says, when the mother comes back, and the mother bows, since nobody instructs the honoured one in dress.
+roof_stay:3:0:burned | The cold finds her hands before the rest of her. She takes the rungs with her fingertips, to spare the wood, and leaves a green thumbprint on your cuff anyway, which she studies and does not apologise for. You carry it into the scorched loft, where water makes no impression on it either.
+roof_stay:3:1:burned | When the cold comes she smooths the hollow flat with her palm, as one does a bed, and is first down. On the ladder she says he snored up there, and the whole lane agreed to call it cultivation. You reach the scorched loft feeling calmer and no stronger, which she would say runs in the roof.
+roof_stay:3:2:burned | You stay until the cold has won the argument. On the ladder she remarks, loudly enough for the house, that it looks a settled night, and the house keeps its opinion to itself. Then she bows you goodnight, correctly, and you go up to the loft and its charred beams.
+music:ashfall.07:burned | In the scorched loft, off your forearm, you read a chapter of {ref:the_hobbit}. Its hero is far from his own kitchen and being fed by strangers. You stop there, on purpose.
+# notes
+- vm:3:x shared texts place James at the door, the table and the shutters of "Mei Lin's house" and never name the loft, so they hold after a burn; vm:3:4:burned assumes the loft has shutters (if not, swap in vm:3:2's or vm:3:3's pattern).
+- vm:3:2 Yuki: "forty years" rests on her being born the same day as James (canon card); it is an age, not a day count.
+- vm:3:3 assumes breakfast is eaten at the mother's table with Mei Lin there; "the mother" in the human key and :burned follows the supper text's usage.
+- vm:1:2 assumes Mei Lin hangs the loft's herbs herself (wormwood is my pick of herb) and that the loft has rafters and a hatch; vm:1:3 assumes the great form shares the loft.
+- far_won:5 assumes the hunters butcher on the spot and that offering the opening cut reads as an honour; it names no place, so it does not lean on the swept ground.
+- supper_w3:5: the first "her mother" is kept; the second and the three Yuki openings became "the mother". The human key now has "the mother" three times; "Mei Lin's mother rises" is the alternative for its opening.
+- roof_stay:3:2:burned uses "the loft and its charred beams" to vary from the other two; "the scorched loft" fits as well.
