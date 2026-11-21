@@ -3599,7 +3599,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     noteRead(ab, sceneView(ab, SCENES).text, 1); // v0.11.133 (FP2): read on Coil 1
     { const t = JSON.parse(JSON.stringify(ab)); const r2 = skipRun(t, SCENES); assert((t.coil.act || 0) === 0 && t.scene === 'epilogue' && r2.steps === 1, `P1-a: the skip stops at the prologue's end (the epilogue, an outcome scene), never crossing into Act 1 (${t.scene}, ${r2.steps} steps)`); }
     for (const id of ['epilogue', 'fo_start', 'breakthrough', 'a1_end']) { f.seen[id] = 1; assert(!againView(f, { id, text: 'a\n\nb' }).fold, `P1-a: an outcome scene never folds (${id})`); }
-    f.seen.night_won = 1; f.lastWin = { next: 'night_won', degree: 2, id: 'crows' }; assert(!againView(f, { id: 'night_won', text: 'a\n\nb' }).fold, 'P1-a: a lopsided win\'s own text never folds'); f.lastWin = null;
+    f.seen.night_won = 1; f.lastWin = { next: 'night_won', degree: 2, id: 'crows' }; { const L = linesOf(f); if (L.sda) delete L.sda.night_won; } /* v0.11.247 (P17-A, SDm): 'a\n\nb' was shown earlier today in the loop above, and A→B→A on one day now folds by design; this pin is the earlier Coil's memory fold */ assert(!againView(f, { id: 'night_won', text: 'a\n\nb' }).fold, 'P1-a: a lopsided win\'s own text never folds'); f.lastWin = null;
     if (FULL) assert(skipChecked >= 1000, `v0.11.35: the bot games compared the skip with tapping through often enough (${skipChecked})`);
     else console.log(`  skip = tapping through, checked in the bot games (quick, log only): ${skipChecked}`);
 }

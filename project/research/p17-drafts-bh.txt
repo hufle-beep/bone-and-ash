@@ -1,0 +1,39 @@
+win2:2 | The hawks come in low over the black glass, and you put a dart through each before the sparks they shed have reached the ground. Afterwards the ridge is very quiet. ¶ {yuki} ¶ Ya pulls your darts, wipes each on her thigh, and hands back all but one. That one she knots onto her necklace, among the teeth. "Scholar's tooth," she says. "Now I own a piece of you." You tell her it is closer to a rib, if it is anything.
+win2:2:y:cat | Every stoop had been aimed at Yuki, who watched from your collar without moving. *They took me for lunch,* she says. *I want that noted.*
+win2:2:y:great | The hawks had given Yuki a wide berth all the way down, as sparrows give a barn. *I was not consulted,* she says, and yawns at the sky.
+win2:2:y:human | All three had dived at Yuki, who had not troubled to step aside. "They mistook me for a meal," she says, brushing off a spark. "Write that down."
+win2:2:away | The hawks arrive screaming and leave quietly, a dart apiece, before their sparks have settled on the black glass. You walk out and pull the darts, which come free warm. ¶ {yuki} ¶ The ridge goes back to saying nothing. You wipe the darts on your coat, there being nobody about to object.
+win2:2:away:y:cat | It was Yuki they had wanted. She rides out to the bodies on your collar and inspects them. *Smaller than they sounded,* she says.
+win2:2:away:y:great | They had kept well away from Yuki, and died near you instead. She noses one over. *You may take the compliment,* she says. *I shan't.*
+win2:2:away:y:human | Yuki, the intended prize, walks out beside you and turns one over with her toe. "So much noise," she says, "from so little bird."
+win2:3 | Cinder hawks scream as they stoop, which is a kindness, since it tells you where to send the darts. You send them. The screaming stops in order, nearest to farthest, and the birds finish the journey as luggage. ¶ {yuki} ¶ Ya had her spear back and never threw it. She lowers it, offended. "You could leave one. One." You point out that she is unhurt. "I wanted to be hurt a bit," she says. "It's a hunt, scholar, not a delivery."
+win2:3:y:cat | One drops close enough to Yuki to scatter embers over your collar. She leans out and bats the nearest one dead. *Mine was the fat one,* she says.
+win2:3:y:great | None had come within a spear's length of Yuki; their dives bent round her like water round a rock. *Rude,* she says, and lies down on the warm ash.
+win2:3:y:human | The one that picked Yuki lands at her feet, and she steps over it without looking down. "It chose me on purpose," she says. "I find that I mind."
+win2:3:away | You hear the hawks before you see them, and the darts are in the air before you have quite looked up. What comes down afterwards comes down as embers, harmless, and pats out on the ash. ¶ {yuki} ¶ You gather the birds without comment. It is very peaceful, hunting with nobody to tell you how.
+win2:3:away:y:cat | The nearest falls a pace short of you, which is to say of Yuki. *It had my name on it,* she says. *Misspelt.*
+win2:3:away:y:great | Yuki had not got up. No hawk had asked her to. *Wake me for something with ambition,* she says, and shuts her eyes.
+win2:3:away:y:human | The nearest falls by Yuki's feet, having meant to arrive higher up. "Presumptuous," she says, and moves her hem away from it.
+win3:2 | The hawks fold their wings and drop, and you close a lattice of bone round all three in mid-air. It lands as a cage, quite gently. The hawks inside are on fire and extremely surprised. ¶ {yuki} ¶ Ya crouches at the bars and outstares the nearest bird until it looks away. "Scholar," she says, not turning, "could you make one my size?" You say you could. She smiles with all her teeth. "Good. Now I know to bite you before you try."
+win3:2:y:cat | Yuki climbs down your coat, walks to the bars and sits a claw's reach outside them, washing. The hawks had wanted her. She lets them look.
+win3:2:y:great | Yuki, whom they had so carefully avoided, lies down against the bars. The hawks crowd to the opposite side. *Now they notice me,* she says.
+win3:2:y:human | Yuki, whom they had dived for, puts one finger through the bars and withdraws it unburnt. "They wanted me," she says. "They may continue to want."
+win3:2:away | The hawks stoop out of the haze, and a lattice of bone shuts on them in mid-air like a hand. It sets them down caged, burning, and loud about it. ¶ {yuki} ¶ You draw the cage in a little at a time until the noise stops. Nobody is here to impress, so you are merely efficient.
+win3:2:away:y:cat | Yuki watches from your collar, the prize they did not win. *Closer,* she says, and you carry her to the bars so they can see.
+win3:2:away:y:great | Yuki strolls a slow circle about the cage. The hawks, who had steered so carefully clear, turn on the spot to keep her in view.
+win3:2:away:y:human | Yuki, their intended meal, bends to the bars. "You chose badly," she informs them, without heat, as one corrects a child's sums.
+win3:3 | The hawks dive, and you let them get low before the lattice of bone drops over them like a lid on a pan. It presses all three flat into the ash, sparks leaking out at the edges. ¶ {yuki} ¶ Ya looks from the lattice to her spear. "I sharpened this," she says. "I sang to it." She pushes the point through a gap into the nearest hawk anyway. "There. It helped." You agree that it helped. She is annoyed to find you mean it.
+win3:3:y:cat | Yuki, whom every one of them had picked, walks out along the lattice and sits in the middle of it. *Warm,* she reports. *You may leave it up.*
+win3:3:y:great | Yuki, whom they had flown the long way round, sets one paw on the lattice and leans. Underneath, there is a brief objection. *Thorough,* she says.
+win3:3:y:human | Yuki, the one they had all chosen, crosses the lattice, pausing on each bird. "I wish them to know which of us it was," she says.
+win3:3:away | You string the bone lattice between two ridges of black glass and wait. The hawks, who are fast, find it at speed. They hang in it afterwards like washing, smouldering a little. ¶ {yuki} ¶ You take them down and fold the lattice away to nothing. Tidy work, and no one to say so.
+win3:3:away:y:cat | Their whole flight had been pointed at Yuki. She studies them from your collar. *Leave them up a while,* she says. *I like them there.*
+win3:3:away:y:great | Yuki had sat in plain view beneath it, and every hawk had still gone round her. *Cowards,* she says, fondly. *Correct ones.*
+win3:3:away:y:human | Yuki, their one object, tilts her head at the display. "Leave them a little," she says. "I am enjoying the arrangement."
+# notes
+- win2:2: Ya knots one of James's bone darts onto her tooth necklace ("Scholar's tooth"); assumes the darts are solid and stay (the first text has him collect them). "Closer to a rib, if it is anything" is James being dry, not a claim about where Convergence bone comes from; cut the sentence if canon minds.
+- win3:2 and its away version: the lattice closes round the hawks in mid-air as a cage, and can be drawn in; win3:3: it drops as a lid; win3:3 away: strung between two glass ridges like a net. Assumes Convergence can shape and move a lattice this freely (the first text has it open overhead at a raised finger).
+- Hawk supper: none of these say what happens to the birds afterwards, so the gains stay untouched.
+- Main versions name Ya only (no Mei Lin), so they hold whether or not Mei Lin is there; away versions name no woman.
+- Human form: "her hem" assumes the qipao of the canon card.
+- "Three" appears only as the number of hawks, as in the first texts.

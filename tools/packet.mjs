@@ -111,6 +111,10 @@ export const STATES = [
     ...[[3, 'fourth'], [4, 'fifth']].flatMap(([k, w]) => [
         { base: `the Root Road in the evening, its ${w} camp`, on: inArea(BLACKROOT), g: stateOf({ bl_region: 'rr', bl_day: 2, bl_n: k - 3, mei_party: true, ya_party: true }, campNight(2, k - 3), { k }) },
         { base: `the Ashen Hills in the evening, its ${w} camp`, on: inArea(BLACKROOT), g: stateOf({ ...AH, bl_day: 5, bl_n: k - 3, ya_off_done: true }, campNight(5, k - 3), { k }) }]),
+    // v0.11.247 (owner pick P17-A, TL4, FH): the journey talks' beats 11–14 (neither and both close; RV-A, C L1: on the Ashen Hills' day 4), and the far hunt on each of its five days a quarry
+    ...[11, 12, 13, 14].flatMap((n) => [['neither close', {}], ['both close', BOTH]].map(([w, rel]) => ({ base: `the journey talks at beat ${n}, ${w}`, on: (id) => id === 'talk_mei' || id === 'talk_ya',
+        g: stateOf({ ...AH, ya_off_done: true, mei_talks: n, ya_talks: n }, 70 * DAY + 10 * 60, { rel }) }))), // RV-A (the cold review's C L1): at the Ashen Hills, where a game reaches beats 11–14
+    ...['wolves', 'bull', 'deer'].flatMap((kind) => [0, 1, 2, 3, 4].map((k) => ({ base: `the far hunt, ${kind}, day ${k + 1}`, on: (id) => id === 'far_hunt', g: stateOf({ long: true, vday: 2, far_kind: kind }, 29 * DAY + 10 * 60, { k }) }))),
     // v0.11.243 RV1 (the cold review's TG-C3): the herb slopes' week 2 with Mei Lin's lip split, both texts (the bruise lines)
     ...[0, 1].map((k) => ({ base: `the long calendar's village week 2, slopes visit ${k + 1}, her lip split`, on: (id) => id === 'herb_slopes', g: stateOf({ long: true, vday: 2, cal_night: 1, mei_bruised: true }, 29 * DAY + 9 * 60, { k }) })),
     // v0.11.243 (owner picks P15-B, D1; SF: MW): the long calendar's first forest week (`forest_day` 1), so the packet draws its own morning

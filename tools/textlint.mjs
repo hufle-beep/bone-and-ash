@@ -92,7 +92,7 @@ for (const [day, flags] of [[23, { long: true, vday: 1, cal_night: 1 }], [30, { 
 // v0.11.233 (owner pick RV1 after P6-A, LS; the cold review's C M2): the journey talks past their five beats (5–10: the quiet walk, the two old
 // settled texts and the three new), cold and warm, and Mei Lin's with Ya away; and the prologue camp's first night with the fire lit and food,
 // so the talks' cycle of six and Yuki's cooking line are read too
-for (const n of [5, 6, 7, 8, 9, 10]) for (const a of [0, 80]) for (const [region, day] of [['rr', 2], ['ah', 4]]) {
+for (const n of [5, 6, 7, 8, 9, 10, 11, 12, 13, 14] /* v0.11.247 (P17-A, TL4): and beats 11–14 */) for (const a of [0, 80]) for (const [region, day] of [['rr', 2], ['ah', 4]]) {
     const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); Object.assign(g.flags, { bl_day: day, bl_region: region, mei_talks: n, ya_talks: n, mei_party: true, ya_party: true });
     g.rel['Mei Lin'] = { f: 20, a }; g.rel.Ya = { f: 20, a }; g.minutes = 70 * 1440 + 10 * 60;
     SAMPLES.push(ensureBars(g));
@@ -107,9 +107,14 @@ for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) {
 // he cooked and on one he did not, so both versions of the meal lines (`cookedToday`) and the roof's cycle of six are read
 // (markDaily: imported above)
 const ROOF_SAMPLES = [], ROOF_K = new Map(); // the day index by sample: `dryClone` drops the lines' proxy, so the results loop sets it again
-for (const k of [0, 1, 2, 3, 4, 5]) {
-    const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); Object.assign(g.flags, { long: true, vday: 2, cal_night: 1 }); g.minutes = 29 * 1440 + 21 * 60;
+for (const [vd, ks] of [[2, [0, 1, 2, 3, 4, 5, 6]], [1, [3, 4]], [3, [0, 1, 2, 3, 4, 5, 6]]] /* v0.11.247 (P17-A, SR3): week 2's seventh, week 1's 4–5, week 3's seven */) for (const k of ks) {
+    const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); Object.assign(g.flags, { long: true, vday: vd, cal_night: 1 }); g.minutes = (vd === 1 ? 22 : vd === 2 ? 29 : 36) * 1440 + 21 * 60;
     onDay(g, k); SAMPLES.push(g); ROOF_SAMPLES.push(g); ROOF_K.set(g, k);
+}
+// v0.11.247 (owner pick P17-A, FH; the measure's RD gap): the far hunt on each of its five days a quarry, so its texts are read at all
+for (const kind of ['wolves', 'bull', 'deer']) for (const k of [0, 1, 2, 3, 4]) {
+    const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); Object.assign(g.flags, { long: true, vday: 2, far_kind: kind }); g.minutes = 29 * 1440 + 10 * 60;
+    SAMPLES.push(onDay(g, k));
 }
 for (const [region, warm] of [['rr', [[0, 0]]], ['ah', [[80, 80], [0, 80], [80, 0], [0, 0]]]]) for (const [m, y] of warm) for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) {
     if (region === 'ah' && (m || y) && form !== 'cat') continue;
@@ -253,6 +258,16 @@ for (const s of Object.values(SCENES)) (s.choices || []).forEach((c0, i) => {
     }
 });
 POOLS.results = resultLines;
+// v0.11.247 (owner pick P17-A, BW2): the cinder hawks' and the bone-elk's easy and crushing wins (stomp_act1.js: they replace the win screen), each
+// day's text (1st–3rd) by form, the hawks' with Ya away too, as the pool `stomp`: no sample state reaches them (a `lastWin`)
+{ const { STOMP } = await import(js('story/power.js')); const st = [];
+  for (const id of ['cinder_hawks', 'bone_elk']) for (const d of [2, 3]) for (const k of [0, 1, 2]) for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) for (const away of [false, true]) {
+      if (away && id !== 'cinder_hawks') continue;
+      const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form;
+      Object.assign(g.flags, { bl_day: 4, bl_region: id === 'cinder_hawks' ? 'ah' : 'rr', mei_party: true, ya_party: true, ...(away ? {} : { ya_off_done: true }) }); g.minutes = 73 * 1440 + 10 * 60; onDay(g, k);
+      const w = STOMP[id]?.win?.[d]; const t = typeof w === 'function' ? w(g) : w; if (typeof t === 'string' && !st.includes(t)) st.push(t);
+  }
+  POOLS.stomp = st; }
 // v0.11.239 (owner pick P12-A, RC; p12's measure CR1–CR3): every text, label and pool line the lint reads, as JSON ({ id, t, label }), for the
 // draft check's runs (tools/packet.mjs lintCorpus): a result line by its scene, a pool line as `pool:<name>`; nothing counted or printed
 if (CORPUS) {

@@ -1,0 +1,9 @@
+mei_walk:5:7 | The village geese come home along the field path at sundown, a long white file with a boy behind it, and the path is theirs by right of temper. Mei Lin pulls you off it into the barley by the elbow, and keeps the elbow. ¶ The boy bows to you both in passing, gravely, without taking his eyes off the gander. {yuki} ¶ "That gander bit me when I was six," she says. "Mother made me apologise to it. I did it badly on purpose." ¶ "Did it accept?" ¶ "It bit me again." She still has your elbow, and the path has been clear for some while.
+mei_walk:5:7:y:cat | The gander looks up at Yuki on your shoulder, and Yuki looks down. *I could take him,* she says. *I want it noted that I chose not to.*
+mei_walk:5:7:y:great | The gander finds Yuki standing in the furrow behind you, stops hissing, and marches his file past with every neck held straight. *Sensible bird,* she says.
+mei_walk:5:7:y:human | Yuki, a step behind you in the barley, returns the boy's bow and then, at more length, the gander's stare. "He started it," she says.
+# notes
+- No glasses, nothing of James's world: the evening belongs to the village geese and a grudge of Mei Lin's from childhood.
+- Assumed: Ashfall keeps geese and a boy drives them home by the barley path at sunset (not in the canon card). "At sundown" is the scene's own hour, not a clock time.
+- "when I was six" sits near the soot text's "When I was seven" (the root test); a different event, and no five-word run shared. Change the age if the two read too close.
+- The great form's line is about the geese's manners, not the width of the path.

@@ -243,8 +243,14 @@ export function sameDayAgain(g, id, v, fresh) {
     const L = linesOf(g);
     if (!isRecord(L.sd)) L.sd = {};
     const key = `${textDay(g)}|${paraKey(String(v?.text || ''))}`;
-    if (fresh) L.sdFold = !noFold(id) && !v?.end && L.sd[id] === key ? { id, key } : null;
+    // v0.11.247 (owner pick P17-A, SDm): every text shown today, not only the last (`sda`: scene → [day, key…], up to 8 keys, reset
+    // with the Coil's lines; an older version ignores it): a text read, changed (a form changed on its screen) and back folds too
+    if (!isRecord(L.sda)) L.sda = {};
+    const day = textDay(g), had = Array.isArray(L.sda[id]) && L.sda[id][0] === day ? L.sda[id] : [day];
+    if (fresh) L.sdFold = !noFold(id) && !v?.end && (L.sd[id] === key || had.includes(key, 1)) ? { id, key } : null;
     L.sd[id] = key; // RV1 (M1): the text last shown today, after any change within the visit
+    if (!had.includes(key, 1)) L.sda[id] = [day, ...had.slice(1), key].filter((x, i) => i === 0 || i > had.length - 8);
+    else L.sda[id] = had;
     const f = L.sdFold;
     return !!f && typeof f === 'object' && f.id === id && f.key === key; // RV1 (M1, Fable's review): only while the text is still the one folded
 }

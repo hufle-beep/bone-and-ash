@@ -117,5 +117,13 @@ A boy is given the first stack to carry to the palisade. He is back for the seco
             go: "Take the end piece.",
             result: "Hard flatbread fried in egg and pork fat, eaten off the edge of the pan, while a boy's count of the stack is checked at both ends",
         },
+        { // v0.11.247 (owner pick P17-A; Fable's, Claude's cuts): PC, a 4th repeat (past CK1's three, the pick)
+            label: "Sort the mushrooms for the builders' pot.",
+            text: `The women have a basket of mushrooms from under the oaks and no intention of trusting it to the builders' pot. You go through it at the trestle, cap by cap, and set a few aside. The rest you chop, fry dry on the flat pan and stir into cold barley, then roll by the spoonful in scalded cabbage leaves and pack the parcels seam down into the broth.
+
+A small girl picks up one of the rejected caps and asks what it does. Nothing for half a day, you tell her, and then everything at once, chiefly to the liver. She puts it down, wipes her hand on her sister, and stands guard over the rejects until the cooking is done, arms out. You have had worse laboratory assistants. You have been one.`,
+            go: "Eat a parcel yourself.",
+            result: "Cabbage parcels of barley and mushroom, eaten hot, the doubtful caps under guard",
+        },
     ],
 };

@@ -323,7 +323,7 @@ Ya looks at the black shape behind you, then at the moon. "Late," she tells you.
         text: (g) => (both(g)
             ? `Ya invents a game: each of you confesses the worst thing you ever did. Hers is long and has a bear in it, and a bet, and by the end the bear is dead and Ya is wearing it. Yours has a grant committee in it and is, according to ${byForm(g, 'both women', 'both women', 'Ya and Mei Lin')}, no crime at all, only sad.${byForm(g, '', '', ' Yuki, in her turn, says she has never done anything wrong in her life, and looks at each of you until the subject closes.')}
 
-Mei Lin's: she laughed at Gao Feng. With the whole herb slope looking on. "That is all," she says, glaring round the fire. "That is the worst of me. In Ashfall it nearly got me sold."
+Mei Lin's: she laughed at Gao Feng. With the whole herb slope looking on. "That is all," she says, glaring round the fire. "That is my worst. In Ashfall it nearly got me sold."
 
 Ya stares at her. Then she leans across, takes Mei Lin's face between both hands and kisses her, slowly, in full firelight, with you three feet away.
 
@@ -417,7 +417,7 @@ He puts his cup down with great care.
 
 "I did," says Mei Lin.
 
-"The street says the hand is the least of it. It was not there, and has never let that hinder it." Ya opens her mouth, plainly to supply what the street lacks; one look from Mei Lin's mother, of the kind that turns a charging boar, shuts it again. "I have listened to Ashfall on the subject of you since you were fourteen, daughter. You laugh at the wrong men. You walk with the wrong strangers. You will be the death of this house's name."
+"The street says the hand is the least of it. It was not there, and has never let that hinder it." Ya opens her mouth, plainly to supply what the gossip lacks; one look from Mei Lin's mother, of the kind that turns a charging boar, shuts it again. "I have listened to Ashfall on the subject of you since you were fourteen, daughter. You laugh at the wrong men. You walk with the wrong strangers. You will be the death of this house's name."
 
 Nobody breathes.
 

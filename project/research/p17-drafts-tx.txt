@@ -1,0 +1,17 @@
+tx:herb_girl:slide off | His eyes slide off you the way they'd slide off a fence post, and off Yuki the way they'd slide off a second, larger fence post. => His eyes pass over you the way they'd slide off a fence post, and off Yuki the way they'd slide off a second, larger fence post.
+tx:wen_lesson:a ladder | The realms go up like a ladder into cloud, and each rung costs more than the last. => The realms go up rung by rung into cloud, and each costs more than the last.
+tx:wen_lesson:the forest | The forest is today's lesson. => Today's lesson is the Blackroot.
+tx:rt_fire_talk:the worst | "That is the worst of me. => "That is my worst.
+tx:rt_mother:the street | Ya opens her mouth, plainly to supply what the street lacks; one look from Mei Lin's mother, of the kind that turns a charging boar, shuts it again. => Ya opens her mouth, plainly to supply what the gossip lacks; one look from Mei Lin's mother, of the kind that turns a charging boar, shuts it again.
+tx:yk_night_ya:the grove | says Ya, and Yuki's ears go flat with delight, and nothing said in the grove after that would survive being written down. => says Ya, and Yuki's ears go flat with delight, and nothing said there after that would survive being written down.
+tx:yk_night_fo:the thatch | You follow her out onto the thatch. => You follow her out onto the roof.
+tx:rt_yk_talk:beside you | When you look round, Yuki is walking beside you on two bare feet, hands clasped behind her back, tail keeping her steady on the roots, as if she'd been doing it all morning and you had only now noticed. => When you look round, Yuki is walking at your side on two bare feet, hands clasped behind her back, tail keeping her steady on the roots, as if she'd been doing it all morning and you had only now noticed.
+tx:rt_yk_talk:years of | His Sect has had four hundred years of a heart it cut out of somebody. => For four hundred years his Sect has had a heart it cut out of somebody.
+tx:breakthrough:the ground | Somebody's grandmother kneels in the dust with her forehead to the ground, praying in a fast, shaking whisper. => Somebody's grandmother kneels in the dust with her forehead to the earth, praying in a fast, shaking whisper.
+# notes
+- herb_girl: all three repeats sit in the one sentence; I kept the two fence-post "slide off"s (the joke) and changed only the first verb.
+- wen_lesson "the forest": assumes Old Wen's forest is the Blackroot and that the name isn't already repeated nearby in that text. If either fails, a fallback is "Today's lesson is the trees."
+- wen_lesson "a ladder": the narration keeps the rungs so Wen's "A ladder," still has its set-up; "rung" now occurs once in the sentence instead of once plus "ladder".
+- rt_fire_talk: I couldn't see who speaks the line; "That is my worst." is plain enough for any of them.
+- yk_night_fo / breakthrough / rt_mother: "the roof", "the earth" and "the gossip" are assumed not to repeat elsewhere in their texts (I saw only the listed sentences); packet.mjs --check will tell.
+- rt_yk_talk "years of": kept "four hundred years" so the forty / four hundred echo survives; only the "years of" construction went.

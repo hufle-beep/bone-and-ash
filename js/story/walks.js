@@ -35,7 +35,7 @@ export const WALKS = [
     ['hollow', 2, "Go back. You'll come back he"],
     ['far_hunt', 1, "Back off. Not today."],
     ['far_hunt', 2, "Let them go. Not today."],
-    ['far_won', 0, "Back to the village."],
+    ['far_won', 0, "Leave the hunters to it."], // v0.11.247 RV-A (T L5): the label reworded, the same walk
     ['fo_spy_won', 0, "Back down to Ashfall."],
     ['fo_spy_lost', 0, "Limp home."],
     ['fo_spy_fled', 0, "Back down to Ashfall."],

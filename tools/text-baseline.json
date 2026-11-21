@@ -2,30 +2,30 @@
  "saved": "2026-11-21",
  "totals": {
   "scenes": 332,
-  "words": 37647,
-  "variantWords": 154628,
+  "words": 37663,
+  "variantWords": 160393,
   "labels": 851,
-  "labelWords": 5767,
-  "sharedChunks": 768,
+  "labelWords": 5768,
+  "sharedChunks": 767,
   "sharedScenes": 137,
   "reused": 49,
-  "favourites": 41,
-  "tics": 12,
+  "favourites": 44,
+  "tics": 2,
   "broken": 0,
   "spacing": 8,
-  "unrendered": 3
+  "unrendered": 2
  },
  "areas": {
   "prologue+shared": {
    "scenes": 80,
-   "words": 10962,
-   "variantWords": 39263,
+   "words": 10961,
+   "variantWords": 39910,
    "labels": 167,
    "labelWords": 1211,
    "sharedScenes": 33,
    "reused": 6,
-   "favScenes": 25,
-   "tics": 6,
+   "favScenes": 26,
+   "tics": 0,
    "broken": 0,
    "spacing": 0,
    "unrendered": 0
@@ -38,7 +38,7 @@
    "labelWords": 465,
    "sharedScenes": 4,
    "reused": 18,
-   "favScenes": 3,
+   "favScenes": 4,
    "tics": 0,
    "broken": 0,
    "spacing": 0,
@@ -46,27 +46,27 @@
   },
   "ashfall": {
    "scenes": 18,
-   "words": 1112,
-   "variantWords": 15939,
+   "words": 1129,
+   "variantWords": 18216,
    "labels": 65,
-   "labelWords": 475,
+   "labelWords": 476,
    "sharedScenes": 6,
    "reused": 9,
-   "favScenes": 6,
-   "tics": 4,
+   "favScenes": 9,
+   "tics": 2,
    "broken": 0,
    "spacing": 0,
-   "unrendered": 1
+   "unrendered": 0
   },
   "fallout": {
    "scenes": 41,
    "words": 4905,
-   "variantWords": 31771,
+   "variantWords": 31945,
    "labels": 94,
    "labelWords": 683,
    "sharedScenes": 20,
    "reused": 11,
-   "favScenes": 16,
+   "favScenes": 17,
    "tics": 0,
    "broken": 0,
    "spacing": 2,
@@ -75,12 +75,12 @@
   "blackroot": {
    "scenes": 60,
    "words": 6644,
-   "variantWords": 27251,
+   "variantWords": 29920,
    "labels": 185,
    "labelWords": 1067,
    "sharedScenes": 20,
    "reused": 36,
-   "favScenes": 13,
+   "favScenes": 14,
    "tics": 0,
    "broken": 0,
    "spacing": 4,
@@ -103,13 +103,13 @@
   "return": {
    "scenes": 47,
    "words": 5995,
-   "variantWords": 14001,
+   "variantWords": 13999,
    "labels": 104,
    "labelWords": 824,
    "sharedScenes": 26,
    "reused": 0,
-   "favScenes": 6,
-   "tics": 2,
+   "favScenes": 5,
+   "tics": 0,
    "broken": 0,
    "spacing": 1,
    "unrendered": 0
@@ -158,8 +158,8 @@
    "spacing": 0
   },
   "replies": {
-   "lines": 349,
-   "words": 12219,
+   "lines": 362,
+   "words": 13145,
    "dupes": 0,
    "sceneShared": 56,
    "tics": 0,
@@ -176,8 +176,8 @@
    "spacing": 0
   },
   "kitchen": {
-   "lines": 46,
-   "words": 1888,
+   "lines": 50,
+   "words": 2046,
    "dupes": 0,
    "sceneShared": 2,
    "tics": 1,
@@ -320,14 +320,23 @@
    "spacing": 0
   },
   "results": {
-   "lines": 311,
-   "words": 7102,
+   "lines": 320,
+   "words": 7595,
    "dupes": 0,
    "sceneShared": 15,
    "tics": 0,
    "broken": 0,
    "spacing": 0,
    "cardTics": 0
+  },
+  "stomp": {
+   "lines": 38,
+   "words": 4080,
+   "dupes": 0,
+   "sceneShared": 2,
+   "tics": 0,
+   "broken": 0,
+   "spacing": 0
   }
  }
 }

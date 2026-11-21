@@ -166,7 +166,7 @@ export const ykFormBack = (g) => { if (g.flags.yk_form_before) { g.yuki.form = g
  *  when James chose her (`fo_pick`, set by the choice, cleared at `fo_depart`): the quiet loft, Ya at the window, the three on the roof.
  *  Hidden when Mei Lin is already his lover in the hay (YH: the rule Ya's "Stay." follows), so Fable's lead-in (ii) is not used. */
 const YK_FO_LEAD = {
-    yk: (g) => byForm(g, `Yuki gets up from beside you, goes to the loft window, and looks back at you, once. Forty years have taught you that look. It means *now*, and it means *don't make me ask*. You follow her out onto the thatch.`, `Yuki gets up from beside you, goes to the loft window, considers it, and looks back at you, once. Forty years have taught you that look. It means *now*, and it means *don't make me ask*. She goes through a shoulder at a time, and the frame survives, narrowly. You follow her out onto the thatch.`, `Yuki gets up from beside you, goes to the loft window, and looks back at you, once. Forty years have taught you that look. It means *now*, and it means *don't make me ask*. You follow her out onto the thatch.`), // v0.11.128 (RV2, FO; Fable's MAIN): the great root-kin and the window
+    yk: (g) => byForm(g, `Yuki gets up from beside you, goes to the loft window, and looks back at you, once. Forty years have taught you that look. It means *now*, and it means *don't make me ask*. You follow her out onto the roof.`, `Yuki gets up from beside you, goes to the loft window, considers it, and looks back at you, once. Forty years have taught you that look. It means *now*, and it means *don't make me ask*. She goes through a shoulder at a time, and the frame survives, narrowly. You follow her out onto the roof.`, `Yuki gets up from beside you, goes to the loft window, and looks back at you, once. Forty years have taught you that look. It means *now*, and it means *don't make me ask*. You follow her out onto the roof.`), // v0.11.128 (RV2, FO; Fable's MAIN): the great root-kin and the window
     yk_ya: (g) => `"Not tonight," you say. ${byForm(g, '"Tonight is the cat\'s."', '"Tonight is the cat\'s."', '"Tonight is Yuki\'s."')} Ya looks at Yuki, and Yuki looks at Ya, and something is settled between them that you are not consulted on. ${byForm(g, '"The not-cat,"', '"The not-cat,"', '"The not-woman,"')} Ya says, and grins with every tooth. "Fine. She was first. I can count to one." She goes out by the window, then puts her head back in upside down. "A little offended," she adds, for accuracy, and is gone. ${byForm(g, 'Yuki goes out after her, the other way, up.', 'Yuki goes out after her, a shoulder at a time, and the frame survives, narrowly; then the other way, up.', 'Yuki goes out after her, the other way, up.')} You follow.`, // v0.11.129 (CB1, YA; Fable's MAIN): the great root-kin and the window
     yk_roof: () => `You say nothing, which Ya hears perfectly. She looks at Yuki, who is looking at nothing, very hard, and laughs under her breath. "Come, herb girl. I'll show you how to sleep on a god." "I shall sleep in a bed," says Mei Lin, "like a person," and she goes in at the window with her dignity intact, touching your shoulder once on the way, as she'd touch a doorpost for luck. Ya takes the shrine roof in one jump, and the thatch is yours.`,
 };
@@ -380,7 +380,7 @@ ${byForm(g, '"Your cat," Ya says, without looking round, "is a woman."', '"Your 
 
 "The best spot has always been hers."
 
-"We'll see," says Ya, and Yuki's ears go flat with delight, and nothing said in the grove after that would survive being written down. Ya bites. Yuki, it emerges, bites back. For long stretches you are chiefly furniture, and no furniture was ever happier in its work.
+"We'll see," says Ya, and Yuki's ears go flat with delight, and nothing said there after that would survive being written down. Ya bites. Yuki, it emerges, bites back. For long stretches you are chiefly furniture, and no furniture was ever happier in its work.
 
 *
 
@@ -447,7 +447,7 @@ ${byForm(g, 'You wake in grey light with a small white cat in the hollow of your
     },
     rt_yk_talk: {
         id: 'rt_yk_talk', title: 'Arithmetic', art: 'yuki_human', place: 'Blackroot Wilds — the deer paths',
-        text: (g) => `You let the others draw ahead until the path bends and takes them. Through the bond, you feel her decide something. ${byForm(g, 'When you look round, Yuki is walking beside you on two bare feet, hands clasped behind her back, tail keeping her steady on the roots, as if she\'d been doing it all morning and you had only now noticed.', 'When you look round, Yuki is walking beside you on two bare feet, hands clasped behind her back, tail keeping her steady on the roots, as if she\'d been doing it all morning and you had only now noticed.', 'When you look round, Yuki has dropped back to walk beside you on two bare feet, hands clasped behind her back, tail keeping her steady on the roots, as if she had merely happened to be there and you had only now noticed.')}
+        text: (g) => `You let the others draw ahead until the path bends and takes them. Through the bond, you feel her decide something. ${byForm(g, 'When you look round, Yuki is walking at your side on two bare feet, hands clasped behind her back, tail keeping her steady on the roots, as if she\'d been doing it all morning and you had only now noticed.', 'When you look round, Yuki is walking at your side on two bare feet, hands clasped behind her back, tail keeping her steady on the roots, as if she\'d been doing it all morning and you had only now noticed.', 'When you look round, Yuki has dropped back to walk at your side on two bare feet, hands clasped behind her back, tail keeping her steady on the roots, as if she had merely happened to be there and you had only now noticed.')}
 
 "Forty gardeners," she says. ${byForm(g, '"I was in your lap for the log.', '"I had my head in your lap for the log.', '"I was on the arm of your chair for the log.')} It poured into me as well. Nobody came for them."
 
@@ -457,7 +457,7 @@ ${byForm(g, 'You wake in grey light with a small white cat in the hollow of your
 
 "That was forty years of research."
 
-"That was forty years of me sitting on the research so you'd go to bed." Her ears turn toward the front of the line, and back. "An old man is coming to take you. His Sect has had four hundred years of a heart it cut out of somebody. I've had forty of one nobody had to cut. I like my odds." Very dry. "That was me being frightened, by the way. In case it was hard to tell."
+"That was forty years of me sitting on the research so you'd go to bed." Her ears turn toward the front of the line, and back. "An old man is coming to take you. For four hundred years his Sect has had a heart it cut out of somebody. I've had forty of one nobody had to cut. I like my odds." Very dry. "That was me being frightened, by the way. In case it was hard to tell."
 
 "It was a little hard to tell."
 

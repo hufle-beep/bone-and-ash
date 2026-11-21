@@ -1,0 +1,86 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/ashfall.js",
+  "find": "const roofWeek = (g) => (vday(g) === 1 ? 1 : longCal(g) && vday(g) >= 3 ? 3 : 2);",
+  "replace": "const roofWeek = (g) => (vday(g) === 1 ? 1 : vday(g) >= 3 ? 3 : 2);",
+  "note": "SR3: the old calendar reads week 3's roof list"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/ashfall.js",
+  "find": "return [ROOF_STAY[3][dayIndex(g, `s:${roofKey(g)}`) % ROOF_W3.length]];",
+  "replace": "return [ROOF_STAY[3][0]];",
+  "note": "SR3: week 3's line after always the first"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/act1_blackroot.js",
+  "find": "if (n >= 11 && n <= 14) return TL_MEI[n - 11](g);",
+  "replace": "if (n >= 11 && n <= 13) return TL_MEI[n - 11](g);",
+  "note": "TL4: Mei Lin's beat 14 lost"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/act1_blackroot.js",
+  "find": "if (n >= 11 && n <= 14) return TL_YA[n - 11](g);",
+  "replace": "if (n >= 11 && n <= 14) return TL_YA[(n - 11) % 3](g);",
+  "note": "TL4: Ya's beat 14 repeats beat 11"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/stomp_act1.js",
+  "find": "const i = dayIndex(g, m.key) % 3;",
+  "replace": "const i = dayIndex(g, m.key) % 2;",
+  "note": "BW2: the third win text never reached"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/stomp_act1.js",
+  "find": "const t = (id === 'cinder_hawks' && awayHawks(g, d, i)) || m[d][i - 1];",
+  "replace": "const t = m[d][i - 1];",
+  "note": "BW2: the hawks' away versions lost (Ya named while away)"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/oneoff.js",
+  "find": "(to === 'herb_slopes' && longCal(g) && (g.flags.vday || 1) >= 3 ? 1 : 0)",
+  "replace": "(to === 'herb_slopes' && longCal(g) && (g.flags.vday || 1) >= 2 ? 1 : 0)",
+  "note": "HW: the third slopes visit open from week 2"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/oneoff.js",
+  "find": "(to === 'herb_slopes' && longCal(g) && (g.flags.vday || 1) >= 3 ? 1 : 0)",
+  "replace": "(to === 'herb_slopes' && (g.flags.vday || 1) >= 3 ? 1 : 0)",
+  "note": "HW: the old calendar gets the third visit"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/again.js",
+  "find": "(L.sd[id] === key || had.includes(key, 1))",
+  "replace": "(L.sd[id] === key)",
+  "note": "SDm: A, B, A no longer folds"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/again.js",
+  "find": "i > had.length - 8);",
+  "replace": "i > had.length - 30);",
+  "note": "SDm: the day's record uncapped (30)"
+ },
+ {
+  "id": "F11",
+  "file": "js/story/again.js",
+  "find": "Array.isArray(L.sda[id]) && L.sda[id][0] === day ? L.sda[id] : [day]",
+  "replace": "Array.isArray(L.sda[id]) ? L.sda[id] : [day]",
+  "note": "SDm: yesterday's texts fold today"
+ },
+ {
+  "id": "F12",
+  "file": "js/story/kitchen_texts.js",
+  "find": "until the cooking is done, arms out",
+  "replace": "for the rest of the cooking, arms out",
+  "note": "D1: Claude's cut undone in the Fallout cook's 4th"
+ }
+]

@@ -192,6 +192,23 @@ Yuki stands upwind with a hawk's tail feathers in one fist and a scorched sleeve
     ],
     no_breakfast: { any: 'No breakfast. A grub crosses the ash by your boot, in no hurry. You decline. For now.' },
     /* the hawks' easy wins (stomp_act1.js), by degree */
+    stomp_hawks_more: { 2: [{ any: (g) => `The hawks arrive screaming and leave quietly, a dart apiece, before their sparks have settled on the black glass. You walk out and pull the darts, which come free warm.
+
+${byForm(g, "It was Yuki they had wanted. She rides out to the bodies on your collar and inspects them. *Smaller than they sounded,* she says.", "They had kept well away from Yuki, and died near you instead. She noses one over. *You may take the compliment,* she says. *I shan't.*", "Yuki, the intended prize, walks out beside you and turns one over with her toe. \"So much noise,\" she says, \"from so little bird.\"")}
+
+The ridge goes back to saying nothing. You wipe the darts on your coat, there being nobody about to object.` }, { any: (g) => `You hear the hawks before you see them, and the darts are in the air before you have quite looked up. What comes down afterwards comes down as embers, harmless, and pats out on the ash.
+
+${byForm(g, "The nearest falls a pace short of you, which is to say of Yuki. *It had my name on it,* she says. *Misspelt.*", "Yuki had not got up. No hawk had asked her to. *Wake me for something with ambition,* she says, and shuts her eyes.", "The nearest falls by Yuki's feet, having meant to arrive higher up. \"Presumptuous,\" she says, and moves her hem away from it.")}
+
+You gather the birds without comment. It is very peaceful, hunting with nobody to tell you how.` }], 3: [{ any: (g) => `The hawks stoop out of the haze, and a lattice of bone shuts on them in mid-air like a hand. It sets them down caged, burning, and loud about it.
+
+${byForm(g, "Yuki watches from your collar, the prize they did not win. *Closer,* she says, and you carry her to the bars so they can see.", "Yuki strolls a slow circle about the cage. The hawks, who had steered so carefully clear, turn on the spot to keep her in view.", "Yuki, their intended meal, bends to the bars. \"You chose badly,\" she informs them, without heat, as one corrects a child's sums.")}
+
+You draw the cage in a little at a time until the noise stops. Nobody is here to impress, so you are merely efficient.` }, { any: (g) => `You string the bone lattice between two ridges of black glass and wait. The hawks, who are fast, find it at speed. They hang in it afterwards like washing, smouldering a little.
+
+${byForm(g, "Their whole flight had been pointed at Yuki. She studies them from your collar. *Leave them up a while,* she says. *I like them there.*", "Yuki had sat in plain view beneath it, and every hawk had still gone round her. *Cowards,* she says, fondly. *Correct ones.*", "Yuki, their one object, tilts her head at the display. \"Leave them a little,\" she says. \"I am enjoying the arrangement.\"")}
+
+You take them down and fold the lattice away to nothing. Tidy work, and no one to say so.` }] }, // v0.11.247 (owner pick P17-A; Fable's, Claude's cuts): BW2, the hawks' easy wins' 2nd and 3rd while a woman is away
     stomp_hawks: { 2: { any: (g) => byForm(g, `Three darts, three hawks, three small bursts of sparks on the ash. The third had thought better of it and turned for the haze; you take it regardless, since cinder hawks keep grudges and you would rather not be stooped on all the way to the tree.
 
 Yuki drops from your shoulder onto the last one down, sits, and watches the sky for volunteers.
@@ -233,7 +250,11 @@ An hour has gone by since. The cinder hawks are circling lower.
 const awayTexts = (v) => (v == null ? [] : typeof v === 'string' || typeof v === 'function' ? [v] : Array.isArray(v) ? v.flatMap(awayTexts) : Object.entries(v).filter(([n]) => n !== 'from').flatMap(([, t]) => awayTexts(t)));
 for (const [k, v] of Object.entries(AW)) if (!['dart', 'dart_f', 'needle', 'needle_f', 'beetle_after'].includes(k)) DAY_REPLIES[`away:${k}`] = awayTexts(v); // the text lint reads them (the drills' and the beetle's through awayReply)
 /** v0.11.231 (P4-2, AT): the hawks' easy-win text at `degree` while a woman is away (stomp_act1.js), or null. */
-export const awayHawks = (g, degree) => (awayNow(g) && AW.stomp_hawks[degree] ? awayText(g, null, AW.stomp_hawks[degree]) : null);
+// v0.11.247 RV-A (owner 2026-11-21 16:28; the cold reviews' T H1 / C M2; Fable's run H): the 2nd and 3rd away texts as written are for both women away;
+// with Ya alone away Mei Lin is at the fight, so their `ya` versions close on her (the opening and Yuki's paragraph as they are)
+const HK_YA = { 2: ["Mei Lin holds one hawk up by a wingtip, at arm's length, and asks whether the feathers are worth anything. You tell her they are worth a burnt thumb. \"Then you carry them,\" she says, and wipes her fingers on your coat, where you had meant to wipe the darts.", "Mei Lin gathers the birds into her herb basket, turning each one over as she would a root at market. \"Not a mark on me,\" she says. \"My mother would call that suspicious.\" She gives you the basket to carry, as her mother also would."], 3: ["Mei Lin has her palms pressed to her ears. \"Can you make it smaller?\" she shouts. You can, and do, by degrees, until the ash is quiet. She lowers her hands and regards the cage with new respect, and you with rather less. \"You might have started there.\"", "Mei Lin walks along beneath them, working out on her fingers what each would fetch plucked. \"In Ashfall we peg things out to dry them,\" she says. \"This is cheating.\" You unpeg the hawks into her arms and send the lattice back where it came from. She complains, smiling, that they are still warm."] };
+for (const d of [2, 3]) AW.stomp_hawks_more[d].forEach((a, i) => { const f = a.any; delete a.any; a.both = f; a.ya = (g) => f(g).split('\n\n').slice(0, -1).concat(HK_YA[d][i]).join('\n\n'); });
+export const awayHawks = (g, degree, i = 0) => { const a = i ? AW.stomp_hawks_more[degree]?.[i - 1] : AW.stomp_hawks[degree]; return awayNow(g) && a ? awayText(g, null, a) : null; }; // v0.11.247 (P17-A, BW2): by the day's text `i`
 /** v0.11.231 (P4-2, AT): a reply by day (dayReply) with its away versions (AW), by the same day index. */
 function awayReply(key, list, alt) {
     const f = dayReply(key, list);
@@ -618,6 +639,40 @@ Ya rolls her neck, spear loose in her hand. "Pretty," she says. "I want the feat
 ${byForm(g, "Yuki, on your shoulder, is the shape of a dropped glove. *If one comes down,* says the bond, *I shall be inside your coat. Good luck.*", "Yuki, at your side, licks her chops, loudly. The hawks swing wide of her. *Feathers for Ya,* says the bond. *The rest is spoken for.*", "Yuki, at your elbow, brushes ash from her collar. \"They look at me as I look at fish,\" she says. \"I find I do not care for it.\"")}
 
 The hill-hares, for their part, are down in the gullies being hares. It asks very little of anyone.`];
+/** v0.11.247 (owner pick P17-A; Fable's, Claude's cuts): TL4, the journey talks' beats 11–14 (Mei Lin's name no Ya: she may be away; the warm line by `likesMei` / `likesYa`). */
+/* RV-A (owner 2026-11-21 16:28; the cold review's T M1–M4, L6; Fable's run T, Claude's cuts): beat 12's opening knows the roof's music, beat 13 a new subject (Mei Lin's and Ya's), two of four cold closes on a laugh, Ya's beat 14 by form */
+const TL_MEI = [(g) => `Mei Lin keeps step with you, tying herbs into bundles, and has run out of hands. She holds out the loose end of the twine without a word. You take it, and keep it taut, and for a good stretch of path that is the entire conversation.
+
+She ties; you hold; the bundles go into the basket one by one. There are better tools for this than a mycologist. You do not bring them up. When she does speak, it is to the bundle. "Tighter," she says, and some way further on, "Not that tight. It's a herb, not a prisoner."\n\n${likesMei(g) ? "The twine runs out before the herbs do. She takes the end back from you slowly, her fingers finding yours rather than the string, and takes her time sorting out which is which. The final bundle gets tied a little crooked." : "You offer to tie one yourself. She watches the result come apart in your hand, declares it a knot from another world, and laughs as far as the next bend."}`, (g) => `"That is not the roof's song," Mei Lin says, tilting her chin at your forearm. On the thatch she let the music play; out here, walking, she wants it accounted for. You tell her the arm keeps a different one for roads.
+
+She listens for a dozen paces, head on one side. A man is singing, low, over strings, in no language she has. "Is he in pain?" He is singing about a woman, you say. "Then yes."
+
+She listens further. "It is not correct. Nobody in Ashfall would allow it at a wedding." A few more paces go by under it. "Don't turn it down."\n\n${likesMei(g) ? "She moves round to the side the music is on and walks close, to hear. When the song ends she rests her head briefly against your arm, as if checking it for the next one. There is a next one." : "When the song is over she counts off its faults for you on her fingers: too slow, too sad, no drum, and a man with no shame. One finger she has kept back. \"Is there another like it?\" she asks the path ahead."}`, (g) => `Mei Lin has stopped beside the path over a low plant with grey leaves and a red stem, and she is frowning at it as at a stranger found in her kitchen. She knows every herb on the slope behind Ashfall by name and by use. This one has neither.
+
+You tell her that among your people whoever finds a thing gets to name it. She looks up, scandalised. "Names come down from the dead. Nobody *gives* one. Who would you be to?" The finder, you say. Usually they name it after themselves, in a language nobody speaks.
+
+"That is vanity twice over." She cuts a sprig, smells it, bites a leaf and spits. "Bitter. Stubborn. Grows where nothing asked it to." The sprig goes into the basket by itself, apart from the rest.\n\n${likesMei(g) ? "\"James-wort,\" she says, trying the foreign shape of it with great seriousness, and does not smile until she has turned away. You notice the sprig has gone to the top of the basket, where nothing will crush it." : "\"It can wait for its name,\" she decides. \"A name ought to be earned, and so far this one has only made my tongue numb.\" She walks on working her jaw, with considerable dignity."}`, (g) => `"How old are you?" Mei Lin asks. You say forty. She nods, adding it like a figure to an account that already looked bad. "And no wife. In Ashfall there is always a reason, and the lane knows it before the man does."
+
+You ask which reasons. "Debt, a temper, or his mother." You say you were studying. She asks for how long, and you tell her, and she is silent for several paces out of respect for the dead.
+
+"Among my people forty is hardly out of the house," you say. "Then I have walked into the Blackroot behind a boy," says Mei Lin. "My mother must never learn of it. She was upset enough about the man."\n\n${likesMei(g) ? "She looks you over, top to bottom, with a buyer's care, and takes her time about it. \"A tall boy,\" she allows, and is very busy with the basket directly afterwards, and rather pink." : "You ask what her reason is, at twenty-six. \"Standards,\" she says, too fast, and laughs at herself for it."}`];
+const TL_YA = [(g) => `Ya has gone quiet over a slab of black glass. She crouches in the ash with it tilted to the sky, and the face in it looks back at her, scar and all, sharper than any pool ever gave it.
+
+She does not speak. She shows it her teeth, and it shows them back. She touches the scar under her eye and watches the other hand do the same on the wrong side. You wait. Nobody has asked you to, and with Ya that is the closest thing to an invitation.
+
+When she stands, a splinter of the glass comes with her, wrapped in a scrap of hide.\n\n${likesYa(g) ? "She holds the splinter up so that both your faces are in it, yours above hers, and studies the pair. \"Good,\" she decides. \"Better lying down.\" She tucks it away where, she says, you are welcome to go looking." : "She turns the splinter on you and looks from the face in it to yours and back. \"The glass one is better,\" she says. \"It keeps its mouth shut.\" She walks on, pleased with both of them."}`, (g) => `"This one," says Ya, lifting a tooth on her necklace with one finger, "was a boar. It ran at me. This one was a river thing. I ran at it."
+
+You ask about the little one beside the knot.
+
+"Mine." She shows you the gap, far back, proud of it. "A nut. I was nine. I cried, and my mother laughed, and she strung it so I would remember that nuts fight back." She lets the necklace drop. "Every tooth here tried to eat me or stop me eating. That is all a winter is, scholar. Teeth, and whose."\n\n${likesYa(g) ? "She loops the necklace over your head without asking and stands back to judge it. It hangs badly on a scholar, she says, and leaves it there anyway, and walks close enough afterwards to keep a hand on what is hers." : "She looks at your mouth, then at the cord. \"No room,\" she says. \"And yours have never bitten anything that bit back.\" She clicks her own together, twice, near your ear, to show how it is done."}`, (g) => `"Your feet are blind, scholar," says Ya, looking down at your boots with real pity. "You tie them up in dead hide and then the ground surprises you."
+
+You tell her the ground has surprised you rather less since you put them on. She lifts one bare foot as she walks, hopping without effort, and shows you the sole: grey, cracked, hard as a hoof. "This one knows mud from ash before I look. It knows when something heavy went by. What does yours know?"
+
+Arch support, you say. Ya demands the left boot. You hand it over, since she would take it otherwise. She sniffs inside, recoils with respect, puts it on and walks six steps like a heron in a snare.\n\n${likesYa(g) ? "She gives the boot back by kneeling in the path and putting it on you herself, badly, and her hand stays round your ankle well after the job is done. \"The rest of you had better not be blind, scholar,\" she says, looking up. \"I mean to find out.\"" : "She kicks the boot off into the brush and leaves you to fetch it. \"A foot in a bag,\" she says. \"No wonder your people need so many words. Nothing else on you can feel anything.\""}`, (g) => `${byForm(g, '"Your cat,"', '"Your great cat,"', '"Your cat-woman,"')} says Ya, keeping her voice down, which is not a thing she does for people. "She watches me when I sharpen the spear. Not the spear. Me."
+
+You tell her Yuki watches everyone. Ya shakes her head. A hunter knows when she is being measured, she says, and she has been measured, and there was nothing rude in it. It was one killer being polite to another.
+
+"We have an agreement," she adds. You ask what that is. "I do not know. She has not said." Ya lowers her voice further. "But I am keeping it. You should too, scholar. Whatever it is."\n\n${likesYa(g) ? "\"She let me near you,\" Ya says, and leans in until her mouth is at your jaw. \"So I think that is in the agreement. Tell her I say thank you.\" Her hand finds your hip. \"Tell her after.\"" : "\"She likes me better than you do,\" Ya says, and shoves you a step off the path with the flat of her hand. \"Cats know. You need a book for it, and nobody here has written one.\""}`];
 const ahPart = (v, g) => (typeof v === 'function' ? v(g) : v);
 const ahFire = (t) => (g) => `${ahPart(t.open, g)}\n\n${ahPart(both(g) ? t.both : onlyYa(g) ? t.ya : onlyMei(g) ? t.mei : t.none, g)}\n\n${t.close}`;
 const FS_AH = [ahFire(FS_AH_T[2]), ahFire(FS_AH_T[3]), ahFire(FS_AH_T[4]), ahFire(FS_AH_T[5])]; // v0.11.246 (P16-A, BF): 4 and 5
@@ -1490,6 +1545,7 @@ She takes that in with her knife gone still. "And nobody asks whose daughter she
 "I'm writing it down."
 
 "You would." She walks on a few steps. "When we go home I'm supposed to put it all away again. The noise. Walking where I like." Her chin comes up. "I've decided I'm not going to. I haven't decided how."`;
+            if (n >= 11 && n <= 14) return TL_MEI[n - 11](g); // v0.11.247 (owner pick P17-A; Fable's, Claude's cuts): TL4, the second cycle's beats 11–14 their own (past the social six, the pick)
             if (n >= 5 && (n - 5) % 6) return [(g) => `${awayText(g, `Mei Lin keeps her eyes on the ground as she walks, one hand in the basket, sorting by touch. She holds up a root and asks what it is called among your people. You tell her. She repeats the word, badly, and rules that hers is better. Ahead, Ya stops to smell a tree, moves on, and does not explain. "She does that," Mei Lin says. "I've stopped asking. The answers were worse."`, AW.talk_mei.s1)}
 
 ${likesMei(g) ? 'She tucks a sprig of some bitter-smelling leaf into your coat pocket, for luck, she says, and leaves her hand on the pocket a little longer than the luck needs. Neither of you remarks on it.' : awayText(g, 'You say the tree probably had it coming. She snorts, covers it with a cough, and looks about to see whether the forest means to tell her mother.', AW.talk_mei.s1b)}`, (g) => `You and Mei Lin have dropped to the back, where the talk is. She is counting what the basket holds against what the walking has cost her, and the walking is ahead. She asks whether everybody where you come from wears a white coat into a forest. You say only the ones who did not plan to be in one. She allows that. She says the coat is how she finds you among the trees, and that she would thank you not to let it go grey.
@@ -1564,6 +1620,7 @@ Ya thinks about this with her whole face. "So. Everything I do."
 "Constantly."
 
 Ya walks on for a bit, scowling at the idea. "No wonder they throw things," she says.`;
+            if (n >= 11 && n <= 14) return TL_YA[n - 11](g); // v0.11.247 (owner pick P17-A; Fable's, Claude's cuts): TL4, as talk_mei
             if (n >= 5 && (n - 5) % 6) return [(g) => `Ya has decided that you walk too loudly, and has decided to fix it.
 
 ${likesYa(g) ? 'She walks behind you with a hand flat between your shoulders, steering, and calls out each mistake as you make it. The hand stays after the mistakes run out. When you mention this she says a hunter never leaves a job half done, and moves it lower.' : 'She shows you how to put a foot down, twice, with the patience of a woman teaching a rock. Then she pronounces you hopeless, cheerfully, and trips you to prove it.'}

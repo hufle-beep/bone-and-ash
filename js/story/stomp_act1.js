@@ -7,6 +7,8 @@ import { registerStomp } from './power.js';
 import { longCal } from '../core/calendar.js'; // v0.11.224 (RV1, MF1)
 import { yukiForm } from '../core/game.js';
 import { awayHawks } from './act1_blackroot.js'; // v0.11.231 (P4-2, AT): the hawks' wins while a woman is away
+import { dayIndex } from '../core/lines.js'; // v0.11.247 (P17-A, BW2)
+import { byForm } from './common.js'; // v0.11.247 (P17-A, BW2)
 
 const pick = (d, a, b, c) => (d >= 3 ? c : d === 2 ? b : a);
 const meiOn = (g) => !!g.flags.mei_party;
@@ -15,7 +17,7 @@ const luHere = (g) => g.flags.ending !== 'fought' && !g.flags.a1_militia;
 const yu = (g) => ({ cat: 'Yuki, on your shoulder,', tiger: 'Yuki, the size of a tiger and twice as bored,', human: 'Yuki, in her human form, arms folded,' }[yukiForm(g)]);
 const yuShort = (g) => ({ cat: 'Yuki', tiger: 'Yuki, large, white and in no doubt,', human: 'Yuki' }[yukiForm(g)]);
 
-registerStomp({
+const STOMP_A1 = { // v0.11.247 (P17-A, BW2): named, so the hawks' and the elk's easy wins can be wrapped by day (below)
     /* ============================================================ PART 1 — FALLOUT ======================================= */
     sect_watcher: {
         posture: (g, d) => `The watcher looks up, sets his rice cake down on its lotus leaf, and rises without haste: his senses have gone over you and found nothing there to hurry for. "A mortal," he says, and bows, since the Sect bows even to what it is about to cut. "No root. No Qi. No master. A beggar who has found a trick with bones. I will take your hands, and the Elder will thank me for them."
@@ -515,4 +517,55 @@ Ashfall has declared war on the Crimson Lotus. The whole street knows; nobody sa
         },
         one: () => 'Two fingers on the Elder\'s breastbone. Three hundred years of cultivation sit down in the road, hard.',
     },
-});
+};
+
+/** v0.11.247 (owner pick P17-A; Fable's, Claude's cuts): BW2, the cinder hawks' and the bone-elk's easy wins three a degree, by the win scene's day (`dayIndex`, as its own byDay):
+ *  the day's first text the old one (with the hawks' away version), the 2nd and 3rd these (the hawks' away versions in AW.stomp_hawks_more). */
+/* RV-A (the cold review's T L2, L4; Fable's run H): the cat bats an ember, not a dead hawk; the elk's third wins keep the third hunt's plan */
+const WIN_MORE = {
+    cinder_hawks: { key: 'ah_hawks_won', 2: [(g) => `The hawks come in low over the black glass, and you put a dart through each before the sparks they shed have reached the ground. Afterwards the ridge is very quiet.
+
+${byForm(g, "Every stoop had been aimed at Yuki, who watched from your collar without moving. *They took me for lunch,* she says. *Note it.*", "The hawks had given Yuki a wide berth all the way down, as sparrows give a barn. *I was not consulted,* she says, and yawns at the sky.", "All three had dived at Yuki, who had not troubled to step aside. \"They mistook me for a meal,\" she says, brushing off a spark. \"Write that down.\"")}
+
+Ya pulls your darts, wipes each on her thigh, and hands back all but one. That one she knots onto her necklace, among the teeth. "Scholar's tooth," she says. "Now I own a piece of you." A rib, you tell her, if it resembles anything.`, (g) => `Cinder hawks scream as they stoop, which is a kindness, since it tells you where to send the darts. You send them. The screaming stops in order, nearest to farthest, and the birds finish the journey as luggage.
+
+${byForm(g, "One lands close enough to Yuki to scatter embers over your collar, and she leans out and bats the brightest of them dark. *Mine was the fat one,* she says.", "None had come within a spear's length of Yuki; their dives bent round her like water round a rock. *Rude,* she says, and settles on the warm ash.", "The one that picked Yuki lands at her feet, and she steps over it without looking down. \"It chose me on purpose,\" she says. \"I find that I mind.\"")}
+
+Ya had her spear back and never threw it. She lowers it, offended. "You could leave one. One." You observe that she is unhurt. "I wanted to be hurt a bit," she says. "It's a hunt, scholar, not a delivery."`], 3: [(g) => `The hawks fold their wings and drop, and you close a lattice of bone round all three in mid-air. It lands as a cage, quite gently. The birds inside are on fire and extremely surprised.
+
+${byForm(g, "Yuki climbs down your coat, walks to the bars and sits a claw's reach outside them, washing. The hawks had wanted her. She lets them look.", "Yuki, whom they had so carefully avoided, lies down against the bars. The hawks crowd to the opposite side. *Now they notice me,* she says.", "Yuki, whom they had dived for, puts one finger through the bars and withdraws it unburnt. \"They wanted me,\" she says. \"They may continue to want.\"")}
+
+Ya crouches at the bars and outstares the nearest bird until it looks away. "Scholar," she says, not turning, "could you make one my size?" You say you could. She smiles with all her teeth. "Good. Now I know to bite you before you try."`, (g) => `The hawks dive, and you let them get low before the lattice of bone drops over them like a lid on a pan. It presses all three flat into the ash, sparks leaking out at the edges.
+
+${byForm(g, "Yuki, whom every one of them had picked, walks out along the lattice and sits at its centre. *Warm,* she reports. *You may leave it up.*", "Yuki, whom they had flown the long way round, sets one paw on the lattice and leans. Underneath, there is a brief objection. *Thorough,* she says.", "Yuki, the one they had all chosen, crosses the lattice, pausing on each bird. \"I wish them to know which of us it was,\" she says.")}
+
+Ya looks from the bone to her spear. "I sharpened this," she says. "I sang to it." She pushes the point through a gap into the nearest hawk anyway. "There. It helped." You agree that it helped. She is annoyed to find you mean it.`] },
+    bone_elk: { key: 'rr_elk_won', 2: [`Mid-charge, you ask the left antler to put on weight. It obliges, thickening to millstone heft, and the elk's head tips, and the charge bends into a long helpless curve that ends against a buttress of the root.
+
+Ya's spear settles what is left, one thrust under the ribs, and wastes none of the elk's time.
+
+"It ran *crooked*," she says, wiping the point. "You made it drunk in the horns, scholar. Do me next. No. Do the herb girl."
+
+"I heard that," says Mei Lin, from behind the root. You put a chipped tine away in the hammerspace. It weighs more than the elk ever meant it to.`, `From the root's arch you look down on the elk in its hollow and speak privately to its brow tines. They widen, flatten and close over its eyes like shutters on a shop. The elk stands very still, as anyone would.
+
+Ya drops. She lands astride its shoulders, and the spear is in behind the skull before the beast has chosen a direction to bolt.
+
+Mei Lin comes round the root with the powder pouch open in her hand. "It was meant to charge blind," she says. "I was the blind part."
+
+"Throw it at the scholar," says Ya. "He stole your half."`], 3: [`The elk lowers its rack and comes, and you suggest to the rack that the season has turned. Both antlers let go at the burr and drop into the moss behind it, like a traveller setting down bags.
+
+What reaches you is a bare, astonished forehead. You stop it with the flat of one hand. Ya's spear does the rest from the side, before the beast can work out what it has lost.
+
+"I *said* I wanted the skull," she tells you. "With the horns *on*, scholar."
+
+Mei Lin leans round the root. "He did leave you the face." Ya considers this, and you, and starts to grin.`, `Under the root's arch the elk lifts its head, and at your request every tine on it leans the same way, like reeds in a current. The head follows the tines and the elk follows the head, round the hollow at a walk, indignant, in a ring it cannot leave.
+
+Above it, Ya watches it pass beneath her and does not drop. "It comes back to me," she whispers. "Like a bucket. Where is the hunt in that, scholar?"
+
+She climbs down instead and ends it with one bored thrust. Mei Lin looks at her unthrown powder, shrugs, and throws it over the carcass. Ya sneezes. Mei Lin is delighted.`] },
+};
+for (const [id, m] of Object.entries(WIN_MORE)) for (const d of [2, 3]) {
+    const old = STOMP_A1[id].win[d];
+    STOMP_A1[id].win[d] = (g) => { const i = dayIndex(g, m.key) % 3; if (!i) return typeof old === 'function' ? old(g) : old; const t = (id === 'cinder_hawks' && awayHawks(g, d, i)) || m[d][i - 1]; return typeof t === 'function' ? t(g) : t; };
+}
+registerStomp(STOMP_A1);

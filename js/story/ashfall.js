@@ -21,6 +21,7 @@ const DR_WEN_FOREST = dayReply("wen_lesson:forest", [
 const DR_SLOPES = dayReply("herb_slopes:0", [
     "Mei Lin concedes, with reluctance, that you have hands.",
     "Mei Lin checks your cuts stand by stand, finds no fault, and reports it as if it were bad news.",
+    "Mei Lin goes through your basket for something to throw out, and has to carry her disappointment home with the herbs.", // v0.11.247 RV-A (the cold review's C L2; Fable's): a third, for the slopes' third visit
 ]);
 const DR_CLINIC_F = dayReply("clinic:1:f", [
     "You do what two hands can. The line was longer than that.",
@@ -181,7 +182,15 @@ At the seventh you put your own hand down next to hers, not touching.
 
 She stares at it. "Now it's counted you. You'll owe millet." She does not smile. Not smiling takes her all of the eighth stone and most of the ninth, and you watch her do the work.
 
-"I've eaten its millet all week. The stone is within its rights."`],
+"I've eaten its millet all week. The stone is within its rights."`, (g) => `The village geese come home along the field path at sundown, a long white file with a boy behind it, and the path is theirs by right of temper. Mei Lin pulls you off it into the barley by the elbow, and keeps the elbow.
+
+The boy bows to you both in passing, gravely, without taking his eyes off the gander. ${byForm(g, "The gander looks up at Yuki, high on your shoulder; Yuki looks down. *I could take him,* she says. *I want it noted that I chose not to.*", "The gander finds Yuki standing in the furrow behind you, stops hissing, and marches his file past with every neck held straight. *Sensible bird,* she says.", "Yuki, at your back in the barley, returns the boy's bow and then, at more length, the gander's stare. \"He started it,\" she says.")}
+
+"That gander bit me when I was four," Mei Lin says. "Mother made me apologise to it. I did it badly on purpose."
+
+"Did it accept?"
+
+"It bit me again." She still has your elbow, and the path has been clear for some while.` /* v0.11.247 (owner pick P17-A; Fable's, Claude's cuts): MW7, the seventh walk */],
     6: [(g) => `"Tell me the dullest thing about where you come from," Mei Lin says, her arm hooked through yours and the barley gone grey at your elbow. You give her the committee: eleven people, one room, a morning spent deciding who shall take the notes. She listens as to a tale of immortals.
 
 "And nobody dies of it?"
@@ -208,7 +217,9 @@ She stares at it. "Now it's counted you. You'll owe millet." She does not smile.
 };
 // v0.11.232 (owner picks P5-B, D1; V3b): the roof a sequence of three for the first week and for the later nights on the long calendar (lines.js
 // seqText; the first the old text), each new text with its own line after "Stay until the cold drives you in." (by the same index). Fable's (run R), Claude's cuts.
-const roofKey = (g) => `supper_roof:${vday(g) === 1 ? 1 : 2}`;
+/** v0.11.247 (owner pick P17-A, SR3): the roof's weeks: 1, 2, and week 3 its own (the long calendar). */
+const roofWeek = (g) => (vday(g) === 1 ? 1 : longCal(g) && vday(g) >= 3 ? 3 : 2);
+const roofKey = (g) => `supper_roof:${roofWeek(g)}`;
 const ROOF_NEW = { 1: [`On the roof Mei Lin lists what Ashfall has decided you are.
 
 "A deserter. A struck-off physician. The widow by the well says a fox spirit, but she says that of anyone tall." She counts them off on her fingers, with the stars arriving behind her hand. "Old Wen says a scholar who has lost his way, which is his polite word for all three."
@@ -233,7 +244,25 @@ She considers the arm, then the roof ridge, then the darkening lane. "Are they w
 
 "No. Some of it is merely loud."
 
-"Save that for the collectors."`], 2: [`The plum wine comes up the ladder ahead of her these evenings, and two cups after it.
+"Save that for the collectors."`, `Mei Lin asks, with some formality, what your name means, since in Ashfall a name is expected to mean something.
+
+"It's old. It has come down through so many languages that the edges have worn off." You have to hunt for the rest. "One who takes another's place. A supplanter."
+
+She turns this over gravely, her eyes on the roofs below. "That is not a name. That is an accusation. Whose place did you take?"
+
+"Nobody's, so far. My parents liked the sound."
+
+"They hung a theft on a child because it sounded well." She seems greatly cheered. "Mine is a beautiful forest." She nods towards the black slope above the village, where the grey moss hangs. "You have walked through the forest."
+
+"Then neither of us is as described."
+
+"I am still deciding about you," she says, with great courtesy, to the lane.`, `Mei Lin gives you the local sky, since you plainly arrived without one.
+
+"The Plough. The Broken Plough. The Ox, who broke it." Her finger travels along the dark above the ridge. "Those are the Granary. When the Granary stands over the miller's roof, the millet goes in."
+
+You ask about a bright one, low over the fields. "That is the Tax Collector," she says. "He rises before the harvest and sets after it. The old name was the Lantern. It was explained to the village, some generations back, that this had been an error."
+
+"And the small one next to him?" you ask, and she studies it with real care before she answers. "His clerk. You, I think. You are always writing things down in your arm."`], 2: [`The plum wine comes up the ladder ahead of her these evenings, and two cups after it.
 
 She pours yours fuller than hers and denies it. "What do your people do," she asks, "before a thing they cannot stop?"
 
@@ -302,8 +331,74 @@ She passes the sprigs across one at a time. You get the mugwort. You get the dri
 
 "How much distance?"
 
-"She gave no figure. I have always thought that careless of her."`] };
-const ROOF_STAY = { 1: [`The cold wins, as it does. On the ladder she adds a late entry: the dyer has you down as a tax spy, and has hidden his good vat. You promise to leave the vat alone. She says goodnight to the rungs, and you take the fox spirit up to the loft.`, `She sits up only when the thatch has gone cold under you both. "Tell them it was well played," she says, with a small bow to your arm, and is down the ladder before you can decide whether she was joking. You are in the herb loft and still have not settled it.`], 2: [`The jar goes down the ladder lighter, and she a little less steady, which she blames on the rungs. At the bottom she asks how long the soup takes, exactly, and repeats the answer under her breath as she goes. You reach the loft composing a shopping list for a village with no shops.`, `On the way down she has you bow once more, to the water butt, and passes you, narrowly. "Mute," she reminds you outside her mother's room, a finger laid to her own lips. You carry your silence up into the loft and practise it on the ginseng.`, `The dyer's lamp outlasts you both, and his sums come out no better for the extra oil. On the ladder she tells you where the yoke hangs and which bucket leaks, as a kindness to the defeated. You go in like a man with water to carry.`, `She runs out of sprigs before you run out of wrong answers. You have failed four, every one a plain leaf, and she goes down the ladder naming them at you like a debt. You follow her in, owing condolences to the third shelf.`, `The chestnuts run out before the rules do. There is a fourth, about the ladder after dark, and you break it together, rung by rung. At the bottom she folds the blanket with great correctness, as evidence. You reach the door smelling of chestnut smoke, which is also evidence.`] }; // v0.11.234 (P7-A, RN): the later nights' results 4–6 (RV1 RT: Fable's run RT, T M1: they stop at the door)
+"She gave no figure. I have always thought that careless of her."`, `Mei Lin falls asleep in the middle of an argument she was winning.
+
+It concerned whether a mushroom belongs with the plants. She held that anything picked into a basket is a plant, and that your years of study had been spent avoiding the fact. Then her head came down on your shoulder, mid-clause, with the verdict undelivered.
+
+Your arm goes numb. Nine threads of thought convene on the question of moving it and vote against, unanimously, which they have not managed on any other subject.
+
+A dog in the lane barks at nothing and is satisfied. She wakes all at once, sits up very straight, and sees to her hairpin.
+
+"I was resting my eyes," she says. "And it is a plant."` /* v0.11.247 (owner pick P17-A; Fable's, Claude's cuts): SR3, week 1 texts 4–5 and the later nights' seventh */] };
+/** v0.11.247 (owner pick P17-A; Fable's, Claude's cuts): SR3, the roof's week 3 its own six (the long calendar; `supper_roof:3`; RV-A, the cold review's C M1: week 3 has six suppers, so its seventh, never shown, cut), each with its line after (ROOF_STAY[3]). */
+const ROOF_W3 = [`Mei Lin arrives with both hands stained green to the wrist, and holds them clear of the blanket.
+
+"Mugwort," she says. "It does not wash out. It wears out." She shows you the palms like a ledger. "Old Wen says you can tell a gatherer's season by her hands. Mine say I have been busy, and that nobody should ask why."
+
+You ask instead what the plant is good for.
+
+"Fevers. Boils. Bad temper in oxen." She thinks about it. "Nothing in the person who picks it."
+
+You take one hand and turn it to the starlight, professionally. The stain stops in a neat line where her sleeve was tied.
+
+"Chlorophyll," you report. "Very healthy." You do not give the hand back at once, and she does not send for it.`, `There is a hollow worn in the thatch below the ridge, and Mei Lin tells you whose it was.
+
+"My father's. He had a spirit root, a thin one, and he came up here to cultivate it. He said the Qi was cleaner above the smoke." She tucks her feet under the blanket. "Is it?"
+
+You let your senses out over the roof and bring them back. "The same as in the yard."
+
+"I thought so." She is not disappointed. "He wanted the view, and a reason my mother would accept. He never climbed down any stronger. Only calmer."
+
+"That's most of what it's for."
+
+"Then he was a great master, and the Sect missed it." She pats the hollow you are sitting in. "Mind his place. It took him years."`, `On the roof the weather may be discussed, provided it is done lying down and below the ridge.
+
+"Red, and coming up the road," Mei Lin tells the sky. "It takes what it takes, and afterwards the whole lane agrees how mild it was." She turns her head on the thatch. "What is done about weather in your country?"
+
+"A voice in the house warned us. Then we complained to the voice," you say, and she asks whether it answered. "It apologised. It had excellent manners."
+
+She judges this the saddest thing she has heard of your country, and says so. "Ours has never apologised. My mother says it hears." She lowers her voice until the thatch has most of it. "I have never known it to listen."`, `After dark Ashfall goes on talking, and Mei Lin, flat on her back, tells you who everyone is by ear.
+
+"That is the cooper's door. He oils everything but the hinge." A cough, two roofs over. "Old Wen. He is awake and wants it known."
+
+A dog begins, and a second dog takes the matter up. Somewhere a loom is still going. "She should be asleep," Mei Lin says, and keeps to herself why she isn't.
+
+"And that?" A low, even sawing has started in the house beneath you.
+
+"That is nothing." She is quite firm. "My mother does not snore. Half the village has not heard it for years."
+
+You listen to nothing together until it turns over and settles.`, `The game is called Magistrate, it is Mei Lin's invention as of this evening, and you are losing it.
+
+One of you charges a roof in the lane with an offence. The other must defend it. "The potter's chimney," she says. "Leaning with intent."
+
+"It's deferring to the wind. Respect for elders."
+
+"The wind is not his elder." She weighs it. "Acquitted. Narrowly. Your turn."
+
+You charge the hen-house opposite with keeping irregular hours. She defends it at length, citing a fox, a precedent and the character of the hens, and you are obliged to let it go. "And this roof?" you ask. "Two persons on it, after supper."
+
+"That one I prosecute myself." She draws the blanket to her chin. "Slowly. It could take years."`, `Mei Lin tells you a thing she has never told anyone, and makes you swear on the roof ridge before she does.
+
+"When I was nine I ate the honey cake off the house shrine. The one for the ancestors." She watches the lane while she says it, in case it hears. "I said a rat had it. My mother set traps for a month."
+
+"Did they catch anything?"
+
+"A rat. An innocent one." She pulls her knees up. "I still leave a crumb by the wall at festivals. For his family." You ask whether that is the whole crime.
+
+"It is quite enough. They were my ancestors." She glances at you sideways. "Do not make that face. The one that says it is small."
+
+"It's enormous. I'm barely holding the roof up." She knocks her shoulder against yours, hard, and leaves it there.`];
+const ROOF_STAY = { 1: [`The cold wins, as it does. On the ladder she adds a late entry: the dyer has you down as a tax spy, and has hidden his good vat. You promise to leave the vat alone. She says goodnight to the rungs, and you take the fox spirit up to the loft.`, `She sits up only when the thatch has gone cold under you both. "Tell them it was well played," she says, with a small bow to your arm, and is down the ladder before you can decide whether she was joking. You are in the herb loft and still have not settled it.`, `The cold decides it before she does. On the ladder she tries the meaning aloud as a title, and finds that it suits a lodger rather well. Indoors she wishes the supplanter goodnight, bowing slightly, with an entirely straight face. You climb up and take the place of nobody, among the drying mint.`, `You stay until the Granary has cleared the miller's roof and the thatch has gone cold under you. On the way down she examines you on the Ox and the Broken Plough, passes you without praise, and bows you a correct goodnight in the passage. You go up to the herb loft with a sky that has names in it.`], 2: [`The jar goes down the ladder lighter, and she a little less steady, which she blames on the rungs. At the bottom she asks how long the soup takes, exactly, and repeats the answer under her breath as she goes. You reach the loft composing a shopping list for a village with no shops.`, `On the way down she has you bow once more, to the water butt, and passes you, narrowly. "Mute," she reminds you outside her mother's room, a finger laid to her own lips. You carry your silence up into the loft and practise it on the ginseng.`, `The dyer's lamp outlasts you both, and his sums come out no better for the extra oil. On the ladder she tells you where the yoke hangs and which bucket leaks, as a kindness to the defeated. You go in like a man with water to carry.`, `She runs out of sprigs before you run out of wrong answers. You have failed four, every one a plain leaf, and she goes down the ladder naming them at you like a debt. You follow her in, owing condolences to the third shelf.`, `The chestnuts run out before the rules do. There is a fourth, about the ladder after dark, and you break it together, rung by rung. At the bottom she folds the blanket with great correctness, as evidence. You reach the door smelling of chestnut smoke, which is also evidence.`, `You concede the mushroom on the ladder, your arm being in no state to argue; it hangs off you like borrowed goods. She watches you fumble a rung and says nothing, which from her is an apology. Outside the herb loft she adds that a toadstool counts as well, and is gone before you can appeal.`], 3: [`The cold finds her hands before the rest of her. She takes the rungs with her fingertips, to spare the wood, and leaves a green thumbprint on your cuff anyway, which she studies and does not apologise for. You carry it into the herb loft, where water makes no impression on it either.`, `When the cold comes she smooths the hollow flat with her palm, as one does a bed, and is first down. On the ladder she says he snored up there, and the whole lane agreed to call it cultivation. You reach the herb loft feeling calmer and no stronger, which she would say runs in the roof.`, `You stay until the cold has won the argument. On the ladder she remarks, loudly enough for the house, that it looks a settled night, and the house keeps its opinion to itself. Then she bows you goodnight, correctly, and you go up to the herb loft.`, `The loom is still going when the thatch gives up its warmth. Inside she walks on the edges of the boards, where they keep quiet, and shows you which ones with her toe. The nothing behind her mother's door does not break rhythm. You get to the loft having made no sound she will have to explain.`, `The court rises when neither of its officers can feel their feet. She hears one more case on the ladder, yours, for treading on the judge's hand, and fines you an apology, paid at once. In the house she bows to you as one magistrate to another. You carry the verdict up the ladder and sleep on it.`, `She swears you in afresh on the ladder, in case the roof ridge was not binding. Passing the house shrine she gives it no glance, and it, you notice, has the tact not to look at her. You climb on carrying a dead rat's good name, and you mean to keep it.`] }; // v0.11.234 (P7-A, RN): the later nights' results 4–6 (RV1 RT: Fable's run RT, T M1: they stop at the door)
 
 // v0.11.237 (owner pick P10-A, EVk, D1; 2026-11-20 14:21, 15:19): the quiet night's weeks 2 and 3 on the long calendar a sequence of
 // three each (seqText, `village_night:2` / `village_night:3`), as the supper's story days; week 1 and the old calendar keep the old three
@@ -498,7 +593,7 @@ It is the same millet, greens and fish as every night. You toasted the grain dry
     },
     supper_roof: {
         id: 'supper_roof', title: 'The Roof', art: 'roof', place: `${P} — on Mei Lin's roof`,
-        text: (g) => seqText(g, roofKey(g), [(g) => (vday(g) === 1 // v0.11.232 (P5-B, V3b): the old text first
+        text: (g) => (roofWeek(g) === 3 ? seqText(g, roofKey(g), ROOF_W3) /* v0.11.247 (P17-A, SR3): week 3 its own */ : seqText(g, roofKey(g), [(g) => (vday(g) === 1 // v0.11.232 (P5-B, V3b): the old text first
             ? `The thatch still holds the day's warmth. The stars come out singly, then in a crowd, and every constellation among them is wrong.
 
 "Which one's yours?" Mei Lin asks.
@@ -514,8 +609,8 @@ She gives the patch of dark her full and serious attention. "It looks cold."
 
 She tells you what the tribute costs, in numbers: so many baskets of grass, so many sacks of millet, so many children tested for roots. Which families hid their children last year, and which of those were caught. Her voice is perfectly level through all of it. Her hands are not.
 
-After that she says nothing until the jar is nearly empty. Your forearm has been playing something slow and sad, very low, all evening. "Leave it," she says, when you reach to stop it. "It sounds like you do when you think nobody is watching." Then she lets her shoulder rest against yours, and neither of you mentions it.`), ...ROOF_NEW[vday(g) === 1 ? 1 : 2]]),
-        choices: [{ text: 'Stay until the cold drives you in.', do: (g) => { bumpRel(g, 'Mei Lin', 2, 3); const ri = dayIndex(g, `s:${roofKey(g)}`) % (ROOF_NEW[vday(g) === 1 ? 1 : 2].length + 1); /* v0.11.234 (P7-A, RN): the later nights a cycle of six; RV1 (CL; C L3): the cycle's length from its own list (the old text + ROOF_NEW's), so the line after keeps step with seqText */ return [ri ? ROOF_STAY[vday(g) === 1 ? 1 : 2][ri - 1] : vday(g) === 1 ? `You stay until your fingers stop working and she has run out of ways to hide that she is shivering. "Tell me about the trees again," she says on the way down, and you do, as far as the loft ladder. She does not say it sounds insane. She says goodnight as if the word cost her something.` : `Neither of you mentions it on the way down, either. At the foot of the ladder she takes the empty jar out of your hand, keeps hold of your wrist a little longer than the jar requires, and goes to her mother's room without looking back. You climb to the loft with one shoulder still warm.`]; }, to: 'village_night' }],
+After that she says nothing until the jar is nearly empty. Your forearm has been playing something slow and sad, very low, all evening. "Leave it," she says, when you reach to stop it. "It sounds like you do when you think nobody is watching." Then she lets her shoulder rest against yours, and neither of you mentions it.`), ...ROOF_NEW[vday(g) === 1 ? 1 : 2]])),
+        choices: [{ text: 'Stay until the cold drives you in.', do: (g) => { bumpRel(g, 'Mei Lin', 2, 3); if (roofWeek(g) === 3) return [ROOF_STAY[3][dayIndex(g, `s:${roofKey(g)}`) % ROOF_W3.length]]; /* v0.11.247 (P17-A, SR3) */ const ri = dayIndex(g, `s:${roofKey(g)}`) % (ROOF_NEW[vday(g) === 1 ? 1 : 2].length + 1); /* v0.11.234 (P7-A, RN): the later nights a cycle of six; RV1 (CL; C L3): the cycle's length from its own list (the old text + ROOF_NEW's), so the line after keeps step with seqText */ return [ri ? ROOF_STAY[vday(g) === 1 ? 1 : 2][ri - 1] : vday(g) === 1 ? `You stay until your fingers stop working and she has run out of ways to hide that she is shivering. "Tell me about the trees again," she says on the way down, and you do, as far as the loft ladder. She does not say it sounds insane. She says goodnight as if the word cost her something.` : `Neither of you mentions it on the way down, either. At the foot of the ladder she takes the empty jar out of your hand, keeps hold of your wrist a little longer than the jar requires, and goes to her mother's room without looking back. You climb to the loft with one shoulder still warm.`]; }, to: 'village_night' }],
     },
 
     /* ---------- the night: quiet, or Gao Feng's doing (night 5) ---------- */
@@ -703,8 +798,8 @@ ${g.flags.militia ? 'They are faster than they were, and they stand differently.
         text: (g) => (!g.flags.lore_realms
             ? `Old Wen pours tea and talks of cultivation as an old farmer talks of weather: without hope, without fear, and in exact detail, to the last hailstone.
 
-Mortal Vessel. Foundation. Core Formation. The realms go up like a ladder into cloud, and each rung costs more than the last. The Sect buys its rungs with villages like this one: grass, grain, children. "A ladder," he says, "is only a ladder while somebody holds the bottom."`
-            : byDay(g, [(g) => `The forest is today's lesson. He begins with the Old Tree that stands in the midst of it — "there before the Sect, there before my grandfather's grandfather" — and with what the hunters' tales hold: that it once sang, and the singing made the forest kind.
+Mortal Vessel. Foundation. Core Formation. The realms stand one above another into cloud, and each costs more than the one below it. The Sect buys its rungs with villages like this one: grass, grain, children. "A ladder," he says, "is only a ladder while somebody holds the bottom."`
+            : byDay(g, [(g) => `Today's lesson is the Old Tree, in the midst of the wilds — "there before the Sect, there before my grandfather's grandfather" — and what the hunters' tales hold of it: that it once sang, and the singing made the forest kind.
 
 "Then a day came when it sang no more. And the forest was kind no more." He turns the good eye your way. ${byForm(g, "\"Your cat has been staring toward it since you came.", "\"Your great beast has been staring toward it since you came.", "\"Your companion has been staring toward it since you came.")} So have you."`, (g) => `He comes back to the forest today, as you thought he might. To the Old Tree — "older than the Sect, older than the oldest grave on the hill" — and to what the hunters' grandfathers said of it: that in the years it sang, a child could sleep under any branch in the forest and wake with nothing worse than dew.
 
@@ -719,9 +814,9 @@ Mortal Vessel. Foundation. Core Formation. The realms go up like a ladder into c
         id: 'far_hunt', title: 'Past the Oak Hollow', art: (g) => (g.flags.far_kind === 'wolves' ? 'wolves' : g.flags.far_kind === 'bull' ? 'lizard' : 'herb_slope'), place: 'Blackroot Wilds — past the oak hollow',
         enter: (g) => { markDaily(g, 'far'); const r = d6(g); g.flags.far_kind = r <= 2 ? 'wolves' : r <= 4 ? 'bull' : 'deer'; return []; },
         text: (g) => ({
-            wolves: byDay(g, ['The hunters warned you about the ash-wolves, and you took it for exaggeration. It was not exaggeration.', `The ash-wolves again. They have not got fewer since the hunters warned you, and they have not got politer. The hunters, to be fair, never said they would.`, `Ash-wolves again: a new grey pair under the old oaks, working the ground exactly as the others did. They spread out to either side of you, unhurried, with the air of a trade handed down whole, mistakes included.`], `far_hunt:wolves`),
-            bull: byDay(g, [`A thornback, and a large one: a bull, twice the size of the one that came to your camp. It wears its spines like a hedge somebody has sharpened.`, `A thornback bull again, standing square in the bracken and big as a hay cart. Its spines run down its back like a rack of spears, and it shows no sign of having anywhere else to be.`, `Another thornback bull rises out of the bracken, a stranger, though by now you could draw the spines from memory. It lowers its head a hand's breadth when it sees you, which among thornbacks may be greeting and may be aim.`], `far_hunt:bull`),
-            deer: byDay(g, ['Ash-deer, grey and fast, with bones like reeds. The hunters reckon it ten years since an arrow last brought one down.', `The ash-deer are in the birches again, grey among grey trunks, stepping as if the ground might complain. One lifts its head and looks straight at you from a hundred paces. The hunters say that is as close as anyone gets.`, `Ash-deer among the birches, at their usual hundred paces, a distance they keep to the step. A doe lifts her head before the others and watches you, waiting to learn what sort of day you intend.`], `far_hunt:deer`),
+            wolves: byDay(g, ['The hunters warned you about the ash-wolves, and you took it for exaggeration. It was not exaggeration.', `The ash-wolves again. They have not got fewer since the hunters warned you, and they have not got politer. The hunters, to be fair, never said they would.`, `Ash-wolves again: a new grey pair under the old oaks, working the ground exactly as the others did. They spread out to either side of you, unhurried, with the air of a trade handed down whole, mistakes included.`, "Ash-wolves on the slope above the oaks, grey as the stone they lie on, getting up one at a time as your scent reaches them. The largest yawns at you, and you decide not to take it personally.", "Fresh tracks cross the stream bed past the oak hollow, and the ash-wolves that made them are waiting where they stop, heads low. They have picked their ground properly, bank at their backs, and seem to expect admiration."], `far_hunt:wolves`), // v0.11.247 (owner pick P17-A; Fable's, Claude's cuts): FH, a 4th and 5th (past three, the pick)
+            bull: byDay(g, [`A thornback, and a large one: a bull, twice the size of the one that came to your camp. It wears its spines like a hedge somebody has sharpened.`, `A thornback bull again, standing square in the bracken and big as a hay cart. Its spines run down its back like a rack of spears, and it shows no sign of having anywhere else to be.`, `Another thornback bull rises out of the bracken, a stranger, though by now you could draw the spines from memory. It lowers its head a hand's breadth when it sees you, which among thornbacks may be greeting and may be aim.`, "A thornback bull is scraping its spines against an oak past the hollow, and the oak is losing. It stops when it hears you and turns to look, a piece at a time, bark still hanging off its back.", "Something has flattened a path through the bracken as wide as a doorway, and the thornback bull that made it stands at the end. It looks at you over its spines, chewing, like a man interrupted at dinner."], `far_hunt:bull`), // v0.11.247 (owner pick P17-A; Fable's, Claude's cuts): FH, a 4th and 5th (past three, the pick)
+            deer: byDay(g, ['Ash-deer, grey and fast, with bones like reeds. The hunters reckon it ten years since an arrow last brought one down.', `The ash-deer are in the birches again, grey among grey trunks, stepping as if the ground might complain. One lifts its head and looks straight at you from a hundred paces. The hunters say that is as close as anyone gets.`, `Ash-deer among the birches, at their usual hundred paces, a distance they keep to the step. A doe lifts her head before the others and watches you, waiting to learn what sort of day you intend.`, "Ash-deer are drinking at the stream beyond the birches, grey backs in a row, and one stands apart facing the wrong way on purpose. That one has seen you; its ears say so at a hundred paces.", "The birches past the oak hollow turn out to have legs: ash-deer, so still among the trunks that you find them only when one flicks an ear. The wind is yours and none has looked up."], `far_hunt:deer`), // v0.11.247 (owner pick P17-A; Fable's, Claude's cuts): FH, a 4th and 5th (past three, the pick)
         }[g.flags.far_kind]),
         choices: [
             { text: 'Fight.', show: (g) => g.flags.far_kind !== 'deer', combat: farHunt, to: 'far_won' },
@@ -733,8 +828,8 @@ Mortal Vessel. Foundation. Core Formation. The realms go up like a ladder into c
     far_won: {
         id: 'far_won', title: 'Meat and Cores', art: (g) => (g.flags.far_kind === 'wolves' ? 'wolves' : 'lizard'), place: 'Blackroot Wilds — past the oak hollow',
         enter: (g) => { addItem(g, 'beast_core', 1); addItem(g, g.flags.far_kind === 'wolves' ? 'venison' : 'lizard_egg', 2); bumpRel(g, 'Village', 5, 0); return [`+1 Murky beast core, +2 ${g.flags.far_kind === 'wolves' ? 'wolf meat (as venison)' : 'thornback eggs'}.`]; },
-        text: (g) => byDay(g, [`The kill travels to Ashfall folded away and comes out whole at the hunters' feet. They bow to it without a word, as one bows to a fallen enemy. Then, with equal gravity, to you.`, `It rides home in the hammerspace as far as the oak hollow, and on your shoulders after that, for the look of the thing. This time the hunters meet you at the oak hollow, unasked, and take the weight from you in order of age. Nobody says well done. The eldest looks at the kill, then at you, and inclines his head by the width of a finger, and you understand that you have been promoted.`, `By now the hunters have a place swept for the kill a bowshot past the oak hollow, on the hunting side, and nobody admits to the sweeping. You set it down there; they bow to it, then to you, in the order custom has settled on. One of the younger men bows a breath early and is looked at.`], 'far_won'), // v0.11.230 (P3-2, D1: FT; Fable's): the first without loads (SF-a), a third
-        choices: [{ text: 'Back to the village.', time: 60, to: 'ashfall' }],
+        text: (g) => byDay(g, [`The kill travels to Ashfall folded away and comes out whole at the hunters' feet. They bow to it without a word, as one bows to a fallen enemy. Then, with equal gravity, to you.`, `It rides home in the hammerspace as far as the oak hollow, and on your shoulders after that, for the look of the thing. This time the hunters meet you at the oak hollow, unasked, and take the weight from you in order of age. Nobody says well done. The eldest looks at the kill, then at you, and inclines his head by the width of a finger, and you understand that you have been promoted.`, `By now the hunters have a place swept for the kill a bowshot past the oak hollow, on the hunting side, and nobody admits to the sweeping. You set it down there; they bow to it, then to you, in the order custom has settled on. One of the younger men bows a breath early and is looked at.`, `The kill comes out of the hammerspace onto the swept ground past the oak hollow, still warm, a fact the hunters have stopped remarking on, having never started. The bows are made in their order. Then one man lays a hand on its flank, takes it away, and looks at the sky to judge how long you have been gone. The sum does not come out. He wipes his palm on his jerkin and sends a boy for the knives.`], 'far_won'), // v0.11.247 (owner pick P17-A; Fable's, Claude's cuts): FW, a 4th (past three, the pick; RV-A, the cold review's T L5: Fable's redraft at the swept place); // v0.11.230 (P3-2, D1: FT; Fable's): the first without loads (SF-a), a third
+        choices: [{ text: 'Leave the hunters to it.', time: 60, to: 'ashfall' }] /* RV-A (the cold review's T L5): the texts are set in Ashfall already */,
     },
     far_lost: {
         id: 'far_lost', title: 'Not Today', art: 'herb_slope', place: 'Blackroot Wilds — past the oak hollow',

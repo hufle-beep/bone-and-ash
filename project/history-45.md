@@ -2,6 +2,27 @@
 
 Started 2026-11-21 (v0.11.245), when `history-44.md` would have passed 20 KB with this move (owner pick U1, MD: history parts start at 20 KB, so a push uploads less). Older parts: `history-44.md` … `history.md`.
 
+## Moved from the handover in v0.11.247 (word for word)
+
+*(the version line as it stood)*
+
+**Saved:** 2026-11-21 (Europe/Budapest). **Version:** 0.11.246 (`sw.js` VERSION `bone-ash-0.11.246`): **BB's first bundle, the Blackroot and the forest (P16-A; the owner 2026-11-21 12:20 "P16-a go"):** BH, BW, AH (the hunts and win texts), BF (the firesides 4–5; read as social, Claude's reading: the owner's answer still open), NF6 (the forest night twenty-one: a rule change), FC (the first flight, once a game; FC-o: out of sight in Ashfall), SF (KA (b) the kept dawns' flight, BYb-t the Wen paragraph, CF), LG (the cairn waits for the spring's door while both women are away, the pass for Ya's door, the beetle's Ya +3 not while she is away, `BT_MEI.night` removed); closed as accepted: the night's rules' open part, ME, ST2 degree 3, the hare's CW line. **Next push:** BB's second bundle, the village and the Fallout (measured during this push's final check: `claude/p17-options.md`).
+
+*(the open items' next-push entry as it stood)*
+
+- **NEXT PUSH: the rest of e, BB's second bundle, the village and the Fallout (`roadmap-e.md`; SP1):** measured during v0.11.246's final check (PW): `project/research/p17-measure.md`, the options `claude/p17-options.md` (rule 1's layout): SR3, TL2 / TL4 (the journey talks: Blackroot screens, kept here as the handover listed them), the village's week-3 seventh evening, SNr, CW in part 8, the herb slopes' two visits, `rt_fire_talk`'s tic and the village tics the lint's wider samples found; then LF (a canon call first: where James sleeps after a burn). **BB's first bundle: done in v0.11.246** (P16-A). Waiting on the owner: is the trio's fireside social (BF built as picked, recorded as social)? *(The entry as it stood, word for word, in `history-45.md`.)*
+
+*(the decision entry as it stood)*
+
+- **v0.11.244: RO2 (docs only) (the owner 2026-11-21 11:01 "order any non ordered items to their spot in the roadmap, then send me the current open items list."; the list sent as a file (`open-items.md`, by stage, 8 items marked not ordered); the options: **RO2 🟢 every item moved word for word to its stage, KA (c) closed as accepted (recommended)** / RO2-k 🟡 KA (c) kept open in the retune / RO3 🟠 pointer lines only; 11:08 "RO2 go", with the speed-up request above).** Claude's calls within the pick: KR and BP in one line in section 4 (KR with bundle G); the retune's four under their own heading; v0.11.243's version notes, missed in that push, added here; v0.11.240's and v0.11.241's notes moved.
+
+## v0.11.244 — The unordered open items placed (RO2, docs only)
+
+- **Files:** `project/roadmap-time.md`, `roadmap-act2.md` (pointers), `roadmap-2.md` (section 4: KR, BP), `roadmap-retune.md` ("Placed here in v0.11.244": BD, the drift guard, HN, KA (a)), `roadmap-e.md` (KA (b)), `roadmap-done-4.md` (KA (c) closed; section 0's oldest note), `roadmap.md`, `history-44.md`, `tests/tools.test.mjs` (RO2's pins), `sw.js` (VERSION), the docs. No What's new line (docs only).
+- **What:** see the version line. The game as v0.11.243. Save: none. Balance: none.
+- **Checks:** docs only (rule 2): `tests/tools.test.mjs` 554 passed, 0 failed (the RO2 block new; RO1, TS9, T1 and CL1 pins updated) and `bash tools/check.sh quick`: exit 0 (302 s); `tools/consistency.mjs`: version 0.11.244 everywhere.
+- **Fable:** not used. **Opus:** not used.
+
 ## Moved from the handover in v0.11.246 (word for word)
 
 *(the version line as it stood)*

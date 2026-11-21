@@ -1,0 +1,156 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/ashfall.js",
+  "find": "const roofWeek = (g) => (vday(g) === 1 ? 1 : longCal(g) && vday(g) >= 3 ? 3 : 2);",
+  "replace": "const roofWeek = (g) => (vday(g) === 1 ? 1 : vday(g) >= 3 ? 3 : 2);",
+  "note": "SR3: the old calendar reads week 3's roof list"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/ashfall.js",
+  "find": "return [ROOF_STAY[3][dayIndex(g, `s:${roofKey(g)}`) % ROOF_W3.length]];",
+  "replace": "return [ROOF_STAY[3][0]];",
+  "note": "SR3: week 3's line after always the first"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/act1_blackroot.js",
+  "find": "if (n >= 11 && n <= 14) return TL_MEI[n - 11](g);",
+  "replace": "if (n >= 11 && n <= 13) return TL_MEI[n - 11](g);",
+  "note": "TL4: Mei Lin's beat 14 lost"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/act1_blackroot.js",
+  "find": "if (n >= 11 && n <= 14) return TL_YA[n - 11](g);",
+  "replace": "if (n >= 11 && n <= 14) return TL_YA[(n - 11) % 3](g);",
+  "note": "TL4: Ya's beat 14 repeats beat 11"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/stomp_act1.js",
+  "find": "const i = dayIndex(g, m.key) % 3;",
+  "replace": "const i = dayIndex(g, m.key) % 2;",
+  "note": "BW2: the third win text never reached"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/stomp_act1.js",
+  "find": "const t = (id === 'cinder_hawks' && awayHawks(g, d, i)) || m[d][i - 1];",
+  "replace": "const t = m[d][i - 1];",
+  "note": "BW2: the hawks' away versions lost (Ya named while away)"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/oneoff.js",
+  "find": "(to === 'herb_slopes' && longCal(g) && (g.flags.vday || 1) >= 3 ? 1 : 0)",
+  "replace": "(to === 'herb_slopes' && longCal(g) && (g.flags.vday || 1) >= 2 ? 1 : 0)",
+  "note": "HW: the third slopes visit open from week 2"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/oneoff.js",
+  "find": "(to === 'herb_slopes' && longCal(g) && (g.flags.vday || 1) >= 3 ? 1 : 0)",
+  "replace": "(to === 'herb_slopes' && (g.flags.vday || 1) >= 3 ? 1 : 0)",
+  "note": "HW: the old calendar gets the third visit"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/again.js",
+  "find": "(L.sd[id] === key || had.includes(key, 1))",
+  "replace": "(L.sd[id] === key)",
+  "note": "SDm: A, B, A no longer folds"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/again.js",
+  "find": "i > had.length - 8);",
+  "replace": "i > had.length - 30);",
+  "note": "SDm: the day's record uncapped (30)"
+ },
+ {
+  "id": "F11",
+  "file": "js/story/again.js",
+  "find": "Array.isArray(L.sda[id]) && L.sda[id][0] === day ? L.sda[id] : [day]",
+  "replace": "Array.isArray(L.sda[id]) ? L.sda[id] : [day]",
+  "note": "SDm: yesterday's texts fold today"
+ },
+ {
+  "id": "F12",
+  "file": "js/story/kitchen_texts.js",
+  "find": "until the cooking is done, arms out",
+  "replace": "for the rest of the cooking, arms out",
+  "note": "D1: Claude's cut undone in the Fallout cook's 4th"
+ },
+ {
+  "id": "R1",
+  "file": "js/story/act1_blackroot.js",
+  "find": "\"Don't turn it down.\"\\n\\n${likesMei(g) ?",
+  "replace": "\"Don't turn it down.\"\\n\\n${likesYa(g) ?",
+  "note": "TL4: Mei Lin's beat 12 warm close keyed on Ya's affection (the test sets both women's affection equal)"
+ },
+ {
+  "id": "R2",
+  "file": "js/story/act1_blackroot.js",
+  "find": "return awayNow(g) && a ? awayText(g, null, a) : null; };",
+  "replace": "return (i ? awayNow(g) === 'ya' : awayNow(g)) && a ? awayText(g, null, a) : null; };",
+  "note": "BW2: with both women away the hawks' 2nd and 3rd wins fall back to the texts with Ya in them (only the Ya-away state is tested)"
+ },
+ {
+  "id": "R3",
+  "file": "js/story/again.js",
+  "find": "i > had.length - 8);",
+  "replace": "i > had.length - 2);",
+  "note": "SDm: the day's record capped at 2 keys, not 8 (A, B, C, A no longer folds)"
+ },
+ {
+  "id": "R4",
+  "file": "js/story/again.js",
+  "find": "if (!had.includes(key, 1)) L.sda[id] =",
+  "replace": "if (fresh && !had.includes(key, 1)) L.sda[id] =",
+  "note": "SDm: a text drawn on a redraw (a form changed on its screen) is not recorded"
+ },
+ {
+  "id": "R5",
+  "file": "js/story/stomp_act1.js",
+  "find": "|| m[d][i - 1];",
+  "replace": "|| m[5 - d][i - 1];",
+  "note": "BW2: the easy (degree 2) and crushing (degree 3) day texts swapped"
+ },
+ {
+  "id": "R6",
+  "file": "js/story/oneoff.js",
+  "find": "(to === 'herb_slopes' && longCal(g)",
+  "replace": "((to === 'herb_slopes' || to === 'wen_lesson') && longCal(g)",
+  "note": "HW: Wen's lessons get a third visit too (the test's Wen check has no lessons spent)"
+ },
+ {
+  "id": "TF1",
+  "file": "js/story/act1_blackroot.js",
+  "find": "\"Yuki, their intended meal, bends to the bars.",
+  "replace": "\"Yuki, on your shoulder, bends to the bars.",
+  "note": "BW2: human Yuki on a shoulder (away hawks, degree 3)"
+ },
+ {
+  "id": "TF2",
+  "file": "js/story/ashfall.js",
+  "find": "You take one hand and turn it to the starlight, professionally.",
+  "replace": "You push your glasses up and turn one hand to the starlight, professionally.",
+  "note": "SR3: glasses business in a week-3 roof text"
+ },
+ {
+  "id": "TF3",
+  "file": "js/story/act1_blackroot.js",
+  "find": "for a good stretch of path that is the entire conversation",
+  "replace": "for the rest of the evening that is the entire conversation",
+  "note": "TL4: an evening time word in a by-day talk"
+ },
+ {
+  "id": "TF5",
+  "file": "js/story/act1_blackroot.js",
+  "find": "You wipe the darts on your coat, there being nobody about to object.",
+  "replace": "You wipe the darts on your coat while Mei Lin looks the other way.",
+  "note": "BW2: an away text naming Mei Lin (control: should be caught)"
+ }
+]

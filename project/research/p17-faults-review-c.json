@@ -1,0 +1,44 @@
+[
+ {
+  "id": "R1",
+  "file": "js/story/act1_blackroot.js",
+  "find": "\"Don't turn it down.\"\\n\\n${likesMei(g) ?",
+  "replace": "\"Don't turn it down.\"\\n\\n${likesYa(g) ?",
+  "note": "TL4: Mei Lin's beat 12 warm close keyed on Ya's affection (the test sets both women's affection equal)"
+ },
+ {
+  "id": "R2",
+  "file": "js/story/act1_blackroot.js",
+  "find": "return awayNow(g) && a ? awayText(g, null, a) : null; };",
+  "replace": "return (i ? awayNow(g) === 'ya' : awayNow(g)) && a ? awayText(g, null, a) : null; };",
+  "note": "BW2: with both women away the hawks' 2nd and 3rd wins fall back to the texts with Ya in them (only the Ya-away state is tested)"
+ },
+ {
+  "id": "R3",
+  "file": "js/story/again.js",
+  "find": "i > had.length - 8);",
+  "replace": "i > had.length - 2);",
+  "note": "SDm: the day's record capped at 2 keys, not 8 (A, B, C, A no longer folds)"
+ },
+ {
+  "id": "R4",
+  "file": "js/story/again.js",
+  "find": "if (!had.includes(key, 1)) L.sda[id] =",
+  "replace": "if (fresh && !had.includes(key, 1)) L.sda[id] =",
+  "note": "SDm: a text drawn on a redraw (a form changed on its screen) is not recorded"
+ },
+ {
+  "id": "R5",
+  "file": "js/story/stomp_act1.js",
+  "find": "|| m[d][i - 1];",
+  "replace": "|| m[5 - d][i - 1];",
+  "note": "BW2: the easy (degree 2) and crushing (degree 3) day texts swapped"
+ },
+ {
+  "id": "R6",
+  "file": "js/story/oneoff.js",
+  "find": "(to === 'herb_slopes' && longCal(g)",
+  "replace": "((to === 'herb_slopes' || to === 'wen_lesson') && longCal(g)",
+  "note": "HW: Wen's lessons get a third visit too (the test's Wen check has no lessons spent)"
+ }
+]
