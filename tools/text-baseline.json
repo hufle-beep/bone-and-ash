@@ -1,16 +1,16 @@
 {
- "saved": "2026-11-20",
+ "saved": "2026-11-21",
  "totals": {
   "scenes": 331,
   "words": 37443,
-  "variantWords": 122253,
+  "variantWords": 125089,
   "labels": 850,
   "labelWords": 5765,
   "sharedChunks": 759,
   "sharedScenes": 137,
   "reused": 49,
   "favourites": 34,
-  "tics": 10,
+  "tics": 11,
   "broken": 0,
   "spacing": 8,
   "unrendered": 3
@@ -47,13 +47,13 @@
   "ashfall": {
    "scenes": 18,
    "words": 1112,
-   "variantWords": 11576,
+   "variantWords": 13273,
    "labels": 65,
    "labelWords": 475,
    "sharedScenes": 6,
    "reused": 9,
    "favScenes": 4,
-   "tics": 2,
+   "tics": 3,
    "broken": 0,
    "spacing": 0,
    "unrendered": 1
@@ -61,7 +61,7 @@
   "fallout": {
    "scenes": 41,
    "words": 4905,
-   "variantWords": 27151,
+   "variantWords": 28290,
    "labels": 94,
    "labelWords": 683,
    "sharedScenes": 20,

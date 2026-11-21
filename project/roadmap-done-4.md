@@ -106,6 +106,10 @@ Started in v0.11.208, when `roadmap-done-3.md` would have passed about 45 KB wit
 
 *(v0.11.232: the rest of e, push 5 done (P5-B + D1 + RV1: V3b, CW; PS-a, MR).)* *(v0.11.231: the rest of e, push 4 done (P4-2 + D1 + RV1: AR, AG, AE, AV, AT, BYb-g, FI, ST2 degree 2, SN; PW1 recorded).)*
 
+## Moved from `roadmap.md` in v0.11.241 (word for word; section 0's oldest notes, the size rule: under 20,000 bytes)
+
+*(v0.11.234: the rest of e, push 7 done (P7-A + D1 + RV1: RN, ML, TL; CK, LS).)* *(v0.11.233: the rest of e, push 6 done (P6-A + D1 + RV1: TK, CWx; LS).)*
+
 ## Closed as accepted in v0.11.240 (word for word; owner pick RA1, 2026-11-20 23:29: the handover's save and lint notes)
 
 - an old save mid-week (v0.11.233 C L2, nothing breaks; v0.11.238: a save past the old lists' end reads the new index from there).

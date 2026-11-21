@@ -1,0 +1,44 @@
+# P13-A cold review T (texts), v0.11.241
+
+Opus, cold. Read: both briefs, both checklists, the canon card, the diff, the packet, grep excerpts. Rendered in `/tmp/rv-t`: FS10 (Days 58–64), SW3 (Days 36–42) in all three forms, weeks 1–2 of `supper`, the roof across weeks 2–3, week 3's `village_night`. `packet.mjs --check --games 0` on `p13-drafts-cut.txt`: 27 drafts, tic 0, run 0, time 4 (all harmless). Planted faults: 5 (`p13-faults-review-t.json`, `story.test.mjs --quick`, `--jobs 2`): **0 caught, 5 missed**.
+
+## H
+- **H1: the tassel rule is broken the next evening.** SW3 text 6 shows on night 6 of week 3 (Day 41). In it the mother removes the red tassel: "One does not wear their colour while their banners hang… The colour is theirs." Week 3's story night, the `evening`, comes next (Day 42), and it shows on every long-calendar path: "The white jacket is off, **its red sash** folded on the bench" (prologue.js:686). On the `romance` path it also has "**the red ribbon gone**" from her hair. So the night after the rule, Mei Lin wears red at the same table. Failure scenario: any player who eats all six suppers of week 3. Fix options:
+  - (a) Change the mother's reason from the colour to being looked at (S2 below; checked: 0 tics, 0 runs). The Yuki passages still work as written.
+  - (b) Rewrite text 6 around something that isn't red (Fable).
+  - (c) Change the old `evening` text. This is outside this push's scope.
+
+  I recommend (a).
+
+## M
+- **M1: the banners were already up when James arrived.** The arrival text, `village`, says: "one tall wooden post dressed in red lotus banners" (prologue.js:610). That is three weeks before week 3. SW3 text 2 still treats the banners as new to week 3: "**Since the banners went up**, the Sect is not named at this table" (this is D1's own SN cut) and "The weather's **hung its banners out**". Week 1's supper also has the mother name the Sect at table while those banners hang ("The Sect's measure is larger than ours"). So the SN cut fixed one contradiction by creating another. S1 below ties the rule to the tribute's week instead. Text 6's "while their banners hang" goes with H1's fix.
+- **M2: the dark house "in this season" is contradicted the same week.** W4 (SW3 text 4, Day 39) has the lamp at a bead and the shutters barred, with the reason "Your grandmother ate so, **in this season**". Week 3's own `village_night` text 2 says: "The lamp downstairs burns on after everyone below is in bed, **an extravagance** in this house." It shows on Day 37, and on Day 40 as a fold, the night right after W4. The roof's lamp bet (`supper_roof:2`, which weeks 2–3 share) has the dyer's lamp burning "the extra oil". Text 6 has Mei Lin "watching the tassel" and the next night's `evening` has a lamp that "makes Mei Lin's eyes bright". So a seasonal custom holds for one night only. Fix: make it one night a year, "one night of every tribute" (S3, checked clean).
+- **M3: the bowing lesson is told twice.** On the roof (`supper_roof:2` index 2, the third roof night of weeks 2–3) Mei Lin teaches James to bow for the collectors ("Lower. Eyes on his boots… a mute cousin from the hill farms"). SW3 text 1 then has her mother ask "Do your people bow?", James answer "they nod, mostly", and the lesson again ("Lower."), with a different plan ("behind the potter"). Most roof-goers see the roof one first; on roof index 2 or 8 both fall on Day 36, one label apart. Options: (a) Fable redrafts text 1 around where James stands, without the bow (recommended); (b) drop "You say they nod, mostly".
+- **M4: every FS10 text follows the same formula (checklist v0.11.233).** The F1/F2 briefs prescribe "Mei Lin makes light of it and is not quite managing", and ¶2 of all six has it ("Her voice does it nearly right" … "laughs, and stops"). ¶4 is the mother quietly giving way in 4 of the 6. `fo_mei:10` on Days 58–60 gives Mei Lin the same cracking brave face each afternoon ("I shall cry on this"), so a player who visits her gets it twice an evening. Recommendation: Fable varies ¶2 in two or three texts.
+- **M5: the travel cakes are told twice.** The mother's house card on story day 10 (`HT_BODY.mother["fo_ashfall:3"]`, shown on every day of Days 58–63) has James beside her packing "a bundle… millet cakes, salt, dried fish… each knotted". FS10 text 1 that night opens "Millet cakes **have appeared** on the table". The departure scene hands over "a bundle of millet cakes" too (act1_blackroot.js:637). Fix: "The travel cakes are out of their bundle again" (S4, checked clean). It reads right whether or not James helped her.
+
+## L
+- **L1: FS10's six `away` lines can't be reached in a real game (P12 L2 again).** On story day 9, `fo_morning` offers only "Look." until `ya_meets` sets `ya_met`, and `fo_price` on day 10 needs Ya. Only the test's faked flag shows these lines.
+- **L2: Yuki's only two FS10 lines end on the same tag**: "has an opinion of both rows and is keeping it" and "watched, and is letting it stand". "pickles" also appears in 3 of the 6 texts.
+- **L3: SW3 text 3 against its labels.** The mother sends Mei Lin with the fish to the weaver's "when we have eaten", but the first label takes her up to the roof and the roof text never mentions the errand.
+- **L4: new facts not in the lore.** Mei Lin and river fish "disagree", yet she eats the village's fish every night (ashfall.js:118, :374). Ya's "Mine take something" gives her a people with customs, while she "laughs" at being asked her village and the lore says "raised wild". Ya's "hide shirt" vs `ya_arrives`' "hunter's jacket… patches" (D1 kept this knowingly).
+- **L5:** `DR_DISHES[1]` (the mother naming "the Sect's own people" at the basin) after SW3 text 2's "It hears": away from the table; log only. "the weather" ×4: keep, it's the joke.
+
+**Checked and clean:** the forms (italics for cat and great, aloud for the woman; no Yuki slot in a fold paragraph); the plan, Ya's price and the trip's length (the FG cut holds); the knife; the weaver's girl at seven; James's mother (meridians.js:140); the serving order against the evening's "serves you first now"; no seventh night shows (farewell Day 64, evening Day 42); tone.
+
+## Suggested rewordings (`/tmp/rv-t-sugg.txt`; `--check`: 4 drafts, tic 0, run 0, time 2 harmless "again")
+- **S1** (text 2, ¶1): "In the tribute's week the Sect is not named at this table, so Mei Lin has taken to calling it the weather. "The weather looks very red this week," she says, passing the greens. "I'd call that a sign of rain.""
+- **S2** (text 6): "A thing that swings is looked at," her mother says. "This week, nothing in this house is looked at." / "It's a tassel. It's mine." / "Then it will be yours again when they have gone." The rest is unchanged. (The same theme as W4's "noticed from the road".)
+- **S3** (W4): "Your grandmother ate so, one night of every tribute, and hers before."
+- **S4** (FS10 text 1, opener): "The travel cakes are out of their bundle again, in three stacks on the table, pressed hard, wrapped in leaf and tied with grass."
+
+## Test gaps (planted: RT1–RT5, all missed)
+- **TG-T1 (RT1, RT5):** the checks for form words use a fixed word list. "washing a whisker" in FS10's Yuki line and "laps it up" in SW3's shared text both pass. Suggestion: also ban cat verbs and nouns (whisker, lap, purr, fur, claw, pounce) in text that all three forms share.
+- **TG-T2 (RT2):** the SW3 test builds its expected text from the same data, so deleting `{yuki}` from text 1 hides all three Yuki passages and still passes. Suggestion: pin that every entry with `y` has `{yuki}` exactly once in `t`.
+- **TG-T3 (RT3):** nothing checks time words. "On this last night in Ashfall" on Day 63, the night before the farewell, passes. Suggestion: FS10 has no "last night", "tomorrow" or "tonight we".
+- **TG-T4 (RT4):** the mother can name the Sect at table in week 3 ("the Sect's colour") without failing a test. Suggestion: pin that no SW3 text except text 2's narration contains "Sect".
+- **TG-T5 (H1, M1–M3, M5):** no test reads a new text against the other screens of its evening or week. Once the fixes are in, pin their words (the tassel's reason, "one night of every tribute", "out of their bundle"). A textlint sample of supper, roof, night and the next evening for one week-3 game would catch this kind of fault.
+- **TG-T6 (L1):** the `away` lines are tested only with a faked flag. Either add a walk showing that `ya_met` is set before any story-day-10 supper, or mark the lines unreachable.
+
+## For the checklist (Continuity)
+- **A rule a text sets for the rest of its week:** a custom or ban ("their colour", "in this season", "since the banners went up") must hold on every later screen of that stretch: the same week's night pool, the roof, and the story night's old text (the red sash, the lamp). It must also agree with the first time the place is described (the banners on arrival).

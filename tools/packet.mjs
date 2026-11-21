@@ -88,7 +88,7 @@ export const STATES = [
     // v0.11.239 (owner pick RV1 after P12-A; the cold review's C M2): the Fallout supper's sequences of six (FS6): story day 8 on each of its days in the
     // three forms (FS8 names Yuki by form), story days 9 and 10 on days 4–6 too, and story day 9 without Ya (FS9's `away` lines), so the packet draws them
     ...[0, 1, 2, 3, 4, 5].flatMap((k) => FORMS.map(([f, r, name]) => ({ base: `the long calendar's story day 8, day ${k + 1} of its sequences`, form: name, on: inArea(FALLOUT), g: stateOf({}, 43 * DAY + 12 * 60, { k, form: [f, r] }) }))),
-    ...[0, 1, 2, 3, 4, 5].map((k) => ({ base: `the long calendar's story day 9, day ${k + 1} of its sequences, Ya not met`, on: inArea(FALLOUT), g: stateOf({}, 50 * DAY + 12 * 60, { k }) })),
+    ...[[9, 50], [10, 57]].flatMap(([sd, d]) => [0, 1, 2, 3, 4, 5].map((k) => ({ base: `the long calendar's story day ${sd}, day ${k + 1} of its sequences, Ya not met`, on: inArea(FALLOUT), g: stateOf({}, d * DAY + 12 * 60, { k }) }))), // v0.11.241 RV1 (the cold review's TG-C4): story day 10 without Ya too (FS10's `away` lines)
     { base: 'the Ashen Hills by day, Ya away', on: inArea(BLACKROOT), g: stateOf(AH, 70 * DAY + 10 * 60, { k: 1 }) },
     { base: 'the Ashen Hills by day, both away', on: inArea(BLACKROOT), g: stateOf({ ...AH, trio: 2 }, 70 * DAY + 10 * 60, { k: 1, rel: BOTH }) },
     { base: 'the Ashen Hills by day, both there', on: inArea(BLACKROOT), g: stateOf({ ...AH, ya_off_done: true }, 70 * DAY + 10 * 60, { k: 1 }) },

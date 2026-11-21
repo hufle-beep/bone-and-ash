@@ -7886,7 +7886,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     const order = (out, want) => want.map((w, i) => (out[i].startsWith(w) ? null : `${i + 1}: ${out[i].slice(0, 30)}`)).filter(Boolean);
     { const s4 = run(99800, 'supper', [[1, N7]], 19), s5 = run(99801, 'supper', [[2, N7], [3, [0]]], 19);
       const bad = [...order(s4, S4), ...order(s5, S5)];
-      assert(!bad.length && s4[6].startsWith(S4[0]) && s5[6].startsWith(S5[0]) && s5[7].startsWith(S5[1]) /* the first text's count changes by the night */, `${T} (EVs): each week's suppers six texts in order, then round again; the later weeks one sequence (${bad.join('; ')})`); }
+      assert(!bad.length && s4[6].startsWith(S4[0]) && s5[6].startsWith(S5[0]) && s5[7].startsWith('Between meals your bowl') /* v0.11.241 (P13-A, WK-d): week 3 its own list (SW3) */, `${T} (EVs; P13-A WK-d): each week's suppers six texts in order, then round again; week 3 its own (SW3) (${bad.join('; ')})`); }
     { const w5 = run(99802, 'mei_walk', [[2, N7]], 18), w6 = run(99803, 'mei_walk', [[3, N7]], 18);
       const bad = [...order(w5, W5), ...order(w6, W6)];
       assert(!bad.length && w5[6] === w5[0] && /^The last sunset before the tribute/.test(w6[6]), `${T} (EVw): the walks six texts in order, the second week round again on its seventh, the third week's seventh the last sunset (${bad.join('; ')})`); }
@@ -8273,10 +8273,101 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     // TG-T1, TG-C1: one game walked through story days 9 and 10 with Ya: day 10 goes on with day 9's sequence (7–13), FS9 with Ya on Days 60–62
     { const g = ensureBars(newGame(39151, { closed: true, cal: C.LONG_CAL })); g.flags.ya_met = true; g.yuki.realm = 9; g.scene = 'fo_supper';
       const out = []; for (let d = 51; d <= 64; d++) { g.minutes = (d - 1) * D + 19 * 60; out.push(SCENES.fo_supper.text(g)); }
-      const old = week(51, { ya_met: true }, 'cat', 3);
-      assert(out[7] === old[1] && out[8] === old[2] && out.slice(9, 12).join('|') === FS9.map((x) => x.t).join('|') && out[12] === old[0] && out[13] === old[1], `${T} RV1 (TG-T1, TG-C1): story day 10 goes on with day 9's sequence, FS9 with Ya on Days 60–62 (${out.map((t) => t.slice(0, 12)).join(' | ')})`); }
+      const { FS10 } = await import('../js/story/act1_fallout.js');
+      assert(out.slice(3, 6).join('|') === FS9.map((x) => x.t).join('|') && out.slice(7, 13).join('|') === FS10.map((x) => x.t).join('|'), `${T} RV1 (TG-T1, TG-C1; v0.11.241 P13-A FS10): FS9 with Ya on Days 54–56, story day 10 its own six on Days 58–63 (${out.map((t) => t.slice(0, 12)).join(' | ')})`); }
     // SN: What's new says it
     { const N = await import('../js/core/news.js'); const all = JSON.stringify(N); assert(/0\.11\.239/.test(all), `${T} (SN): What's new has 0.11.239`); }
+}
+// v0.11.241 (owner picks P13-A = FS10 + SPw3, WK-d, D1; 2026-11-20 23:56, 2026-11-21 00:07): FS10 the Fallout supper's story day 10 its own
+// six (Fable's F1, F2), SPw3 the village supper's week 3 its own six (Fable's V1, V2, W4), both the long calendar only; D1 Claude's cuts (RN, SN,
+// FG; WC the coat text redrafted by Fable).
+{
+    const T = 'P13-A';
+    const C = await import('../js/core/calendar.js');
+    const { FS9, FS10 } = await import('../js/story/act1_fallout.js');
+    const { SW3 } = await import('../js/story/ashfall.js');
+    const D = 1440;
+    const paras = (t) => t.split('\n\n');
+    const sw = (x) => (x.y ? x.t.replace('{yuki}', x.y[0]) : x.t); // the cat form
+    const fo = (d0, flags, n = 7, cal = C.LONG_CAL, seed = 41300) => {
+        const g = ensureBars(newGame(seed + d0, { closed: true, cal })); Object.assign(g.flags, flags); g.yuki.realm = 9; g.scene = 'fo_supper';
+        const out = []; for (let k = 0; k < n; k++) { g.minutes = (d0 - 1 + k) * D + 19 * 60; out.push(SCENES.fo_supper.text(g)); } return out;
+    };
+    const vs = (vday, form = 'cat', n = 7, d0 = 36, cal = C.LONG_CAL) => {
+        const g = ensureBars(newGame(41400 + vday, { closed: true, cal })); Object.assign(g.flags, { long: true, vday }); g.yuki.realm = 9; g.yuki.form = form; g.scene = 'supper';
+        const out = []; for (let k = 0; k < n; k++) { g.minutes = (d0 - 1 + k) * D + 19 * 60; out.push(SCENES.supper.text(g)); } return out;
+    };
+    // FS10: story day 10's week (Days 58–63) its own six, in order; the line without Ya when she is not met; a seventh round again
+    { const l = fo(58, { ya_met: true }); assert(l.slice(0, 6).join('|') === FS10.map((x) => x.t).join('|') && new Set(l.slice(0, 6)).size === 6 && l[6] === l[0], `${T} (FS10): story day 10's six with Ya, in order, then round again (${l.map((t) => t.slice(0, 16)).join(' | ')})`); }
+    { const l = fo(58, {}, 6); assert(l.join('|') === FS10.map((x) => x.away).join('|') && l.every((t) => !/\bYa\b/.test(t)), `${T} (FS10): without Ya, the six lines without her`); }
+    // story day 9 keeps its own sequence (FS9 on its nights 4–6), day 10 does not run on with it
+    { const l = fo(51, { ya_met: true }, 6); assert(l.slice(3).join('|') === FS9.map((x) => x.t).join('|') && !l.some((t) => FS10.some((x) => x.t === t)), `${T} (FS10): story day 9 unchanged`); }
+    // the old calendar: no story-day-10 sequence (a day-10 supper, if one ever showed, reads fo_supper:9 as before)
+    { const g = ensureBars(newGame(41390, { closed: true })); g.flags.ya_met = true; g.yuki.realm = 9; g.scene = 'fo_supper'; g.minutes = 9 * D + 19 * 60;
+      const t = SCENES.fo_supper.text(g); assert(g.cal !== C.LONG_CAL && !FS10.some((x) => x.t === t) && /^Ya comes to supper/.test(t), `${T} (FS10): the old calendar's day-10 supper keeps fo_supper:9 (${t.slice(0, 30)})`); }
+    // FS10's shape: three or four paragraphs, the fold reminder its own and not an old opener, no loft, no Yuki form word, Ya's "scholar" once at most a text
+    { const firsts = FS10.map((x) => paras(x.t)[0]);
+      assert(FS10.every((x) => paras(x.t).length >= 3 && paras(x.t).length <= 4 && x.away.startsWith('Supper.') && x.away.split(/\s+/).length <= 16) && new Set(firsts).size === 6 && !firsts.some((f) => /^(Ya comes to supper|Ya is at the table|Supper|Tonight|There is|Nobody)\b/.test(f)), `${T} (FS10): six texts of three or four paragraphs, six own fold reminders, the lines without Ya short`);
+      const all = JSON.stringify(FS10);
+      const yk = FS10.flatMap((x) => x.t.match(/[^.]*\bYuki\b[^.]*\./g) || []);
+      assert(!/loft|supperPot|ladle|north window|plum wine/i.test(all) && yk.length >= 1 && !yk.some((y) => /\b(small|paw|ears|tail|great|woman|stove|shoulder)\b/.test(y)), `${T} (FS10): no loft, pot, north window or farewell wine; Yuki named without a form`); }
+    // SPw3 (WK-d): week 3 its own six (the long calendar), in order, by form; week 2 keeps supper:5
+    for (const [i, form] of ['cat', 'tiger', 'human'].entries()) {
+        const l = vs(3, form);
+        const want = SW3.map((x) => (x.y ? x.t.replace('{yuki}', x.y[i]) : x.t));
+        assert(l.slice(0, 6).join('|') === want.join('|') && new Set(l.slice(0, 6)).size === 6 && l[6] === l[0] && !l.some((t) => t.includes('{yuki}')), `${T} (SPw3): week 3, ${form}: its six in order with its own Yuki passages, then round again (${l.map((t) => t.slice(0, 16)).join(' | ')})`);
+    }
+    { const l = vs(2, 'cat', 6, 29); assert(/^Another supper at Mei Lin's/.test(l[0]) && !l.some((t) => SW3.some((x) => t.startsWith(paras(x.t)[0]))), `${T} (SPw3): week 2 keeps supper:5 (${l[0].slice(0, 24)})`); }
+    { const l = vs(3, 'cat', 1, 36, 0); assert(!SW3.some((x) => l[0].startsWith(paras(x.t)[0])), `${T} (SPw3): no week-3 list off the long calendar (${l[0].slice(0, 24)})`); }
+    // SW3's shape: Yuki's passages by form (italics, italics, aloud), her slot never in the fold's first paragraph, no form word in the shared text
+    { assert(SW3.filter((x) => x.y).every((x) => !paras(x.t)[0].includes('{yuki}') && !/"/.test(x.y[0]) && !/"/.test(x.y[1]) && !/\*/.test(x.y[2]) && x.y.every((y) => /\bYuki\b/.test(y))) && SW3.every((x) => !/\b(paw|tail|ears|stove)\b/.test(x.t.replace('{yuki}', ''))), `${T} (SPw3): Yuki by form (the cat and the great form never aloud, the woman never in italics), not in a fold reminder`);
+      const firsts = SW3.map((x) => paras(x.t)[0]);
+      assert(new Set(firsts).size === 6 && !firsts.some((f) => /^(Supper|Tonight|Another|The mother|Mei Lin's mother|The house|You)\b/.test(f)) && !/loft|ladle|north window/i.test(JSON.stringify(SW3)), `${T} (SPw3): six own fold reminders, none with the old openers; no loft, ladle or north window`); }
+    // D1: Claude's cuts in, the cut phrases out; WC: the coat text gone, Fable's redraft in its place
+    { const all = JSON.stringify([FS10, SW3]);
+      const IN = ['Ya has followed the count closely', 'sets more millet to soak', 'Ya begins on her fingers.', "In the tribute's week the Sect is not named at this table" /* RV1 (T M1): SN reworded */, 'lies between the salt and the greens', 'Mei Lin eats watching the tassel', 'The lamp has been trimmed to a bead'];
+      const OUT = ['Since the banners went up', 'Do your people bow', 'her head on one side', 'puts more millet in', 'and runs out', 'by a rule older than your place', 'on the table between the', 'with her eyes on the', 'White is mourning', 'grey jacket'];
+      assert(IN.every((x) => all.includes(x.replace(/"/g, '\\"'))) && !OUT.some((x) => all.includes(x)), `${T} (D1): RN, SN, FG in, the drafts' phrases out; WC redrafted (${IN.filter((x) => !all.includes(x.replace(/"/g, '\\"'))).join(', ')}${OUT.filter((x) => all.includes(x)).join(', ')})`); }
+    // RV1 (owner pick 2026-11-21 00:52; the cold reviews' T H1, M1–M5, L2–L4, C M1 and the test gaps TG-T1–T6, TG-C1–C5)
+    { const L = await import('../js/core/lines.js');
+      const shared = [...FS10.map((x) => x.t), ...SW3.map((x) => x.t.replace('{yuki}', ''))];
+      // TG-T1: no cat-only word in text all three forms share (FS10's Yuki sentences included)
+      assert(!shared.some((t) => /\b(whiskers?|laps?|lapping|purrs?|purring|fur|claws?|pounces?|paws?|tail|ears)\b/i.test(t)), `${T} RV1 (TG-T1): no cat-only word in the shared texts`);
+      // TG-T2: an entry with passages by form has its slot once, an entry without none
+      assert(SW3.every((x) => (x.y ? x.t.split('{yuki}').length === 2 && x.y.length === 3 : !x.t.includes('{yuki}'))) && FS10.every((x) => !x.t.includes('{yuki}')), `${T} RV1 (TG-T2): {yuki} once where Yuki goes by form, never elsewhere`);
+      // TG-T3: no time word that fails on some night of the week
+      assert(!shared.some((t) => /\b(tomorrow|midnight|dawn|last night|this last|tonight we)\b/i.test(t)) && !FS10.some((x) => /\b(late|tomorrow)\b/i.test(x.away)), `${T} RV1 (TG-T3): no time word that breaks on another night`);
+      // TG-T4: the Sect is named at the village table only in text 2's narration (the tribute's week rule)
+      assert(SW3.every((x, i) => (i === 1) === /\bSect\b/.test(x.t + (x.y || []).join(' '))) && /^In the tribute's week the Sect is not named at this table/.test(SW3[1].t), `${T} RV1 (TG-T4, M1): "Sect" only in text 2, tied to the tribute's week`);
+      // TG-T5: the fixes' words (H1 the tassel's reason, M1, M2 one night a tribute, M5 the cakes out of their bundle, L2, L4)
+      const all = JSON.stringify([FS10, SW3]);
+      assert(SW3[5].t.includes('A thing that swings is looked at') && !/their colour|The colour is theirs|banners hang/.test(all) && SW3[3].t.includes('one night of every tribute') && !/in this season/.test(all)
+          && /^The travel cakes are out of their bundle again/.test(FS10[0].t) && !/have appeared/.test(all) && !/Since the banners went up|hung its banners/.test(all), `${T} RV1 (TG-T5): H1, M1, M2, M5 as the reviewer worded them`);
+      assert(!/river fish|hide shirt|is letting it stand/.test(all) && FS10[3].t.includes('the neck of her patched jacket') && (FS10[3].t.match(/the collar/g) || []).length <= 2 /* C1 (CT): the lint's tic */ && FS10[4].t.includes('anything the guide has found under a log') && FS10.filter((x) => /pickles/.test(x.t)).length <= 2, `${T} RV1 (L2, L4): the river fish, the hide shirt and the second Yuki tag gone; pickles in two texts at most`);
+      // TG-T6: the lines without Ya are never reached in play: story day 9's first morning offers only "Look." until Ya is met
+      { const g = ensureBars(newGame(41501, { closed: true, cal: C.LONG_CAL })); g.yuki.realm = 9; g.scene = 'fo_morning'; g.minutes = 50 * D + 6 * 60;
+        const vis = (h) => SCENES.fo_morning.choices.filter((c) => !c.show || c.show(h)).map((c) => (typeof c.text === 'function' ? c.text(h) : c.text));
+        assert(vis(g).join('|') === 'Look.', `${T} RV1 (TG-T6, L1): story day 9's morning without Ya offers only "Look." (${vis(g).join('|')})`); }
+      // TG-C1: a v0.11.240 save in the middle of story day 10 (its records under fo_supper:9) or of week 3 (under supper:5) reads the new list from its first text
+      { const g = ensureBars(newGame(41510, { closed: true, cal: C.LONG_CAL })); g.flags.ya_met = true; g.yuki.realm = 9; g.scene = 'fo_supper';
+        for (let d = 51; d <= 60; d++) { g.minutes = (d - 1) * D + 19 * 60; L.noteDay(g, 's:fo_supper:9'); }
+        const out = []; for (let d = 61; d <= 63; d++) { g.minutes = (d - 1) * D + 19 * 60; out.push(SCENES.fo_supper.text(g)); }
+        assert(out.join('|') === FS10.slice(0, 3).map((x) => x.t).join('|'), `${T} RV1 (TG-C1): an old save mid story day 10 reads FS10 from its first (${out.map((t) => t.slice(0, 14)).join(' | ')})`); }
+      { const g = ensureBars(newGame(41511, { closed: true, cal: C.LONG_CAL })); Object.assign(g.flags, { long: true, vday: 2 }); g.yuki.realm = 9; g.scene = 'supper';
+        for (let d = 29; d <= 38; d++) { g.minutes = (d - 1) * D + 19 * 60; L.noteDay(g, 's:supper:5'); }
+        g.flags.vday = 3; const out = []; for (let d = 39; d <= 41; d++) { g.minutes = (d - 1) * D + 19 * 60; out.push(SCENES.supper.text(g)); }
+        assert(out.join('|') === SW3.slice(0, 3).map(sw).join('|'), `${T} RV1 (TG-C1): an old save mid week 3 reads SW3 from its first (${out.map((t) => t.slice(0, 14)).join(' | ')})`); }
+      // TG-C2 (C M1): a supper begun after midnight on story day 9's last day is still story day 9's (the day records from 05:00); the next evening, day 10's first
+      { const g = ensureBars(newGame(41512, { closed: true, cal: C.LONG_CAL })); g.flags.ya_met = true; g.yuki.realm = 9; g.scene = 'fo_supper';
+        g.minutes = 57 * D + 21; const t1 = SCENES.fo_supper.text(g);
+        g.flags.fo_plan = true; g.minutes = 57 * D + 19 * 60; const t2 = SCENES.fo_supper.text(g);
+        assert(!FS10.some((x) => x.t === t1) && t2 === FS10[0].t, `${T} RV1 (TG-C2, C M1): Day 57 after midnight no FS10 (${t1.slice(0, 20)}); Day 58 FS10's first (${t2.slice(0, 20)})`); }
+      // TG-C5: the order as picked (the cakes first; the tassel last)
+      const O10 = ['The travel cakes', 'Straw sandals hang', "Mei Lin's basket is on the table", "Mei Lin's mother is sewing", 'The instructions come', 'Between servings'];
+      const O6 = ['Between meals your bowl', "In the tribute's week", 'Halfway down her bowl', 'The lamp has been trimmed', '"Does your mother live?"', 'Before the bowls are filled'];
+      assert(FS10.every((x, i) => x.t.startsWith(O10[i])) && SW3.every((x, i) => x.t.startsWith(O6[i])), `${T} RV1 (TG-C5): both lists in the picked order`); }
+    // SN: What's new says it
+    { const N = await import('../js/core/news.js'); assert(/0\.11\.241/.test(JSON.stringify(N)), `${T} (SN): What's new has 0.11.241`); }
 }
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

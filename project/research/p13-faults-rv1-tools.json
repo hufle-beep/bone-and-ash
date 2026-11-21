@@ -1,0 +1,14 @@
+[
+ {
+  "id": "C9",
+  "file": "tools/textlint.mjs",
+  "find": "for (const ya of (day === 44 ? [true] : [true, false]))",
+  "replace": "for (const ya of (day === 51 ? [true, false] : [true]))"
+ },
+ {
+  "id": "RV1d",
+  "file": "tools/packet.mjs",
+  "find": "...[[9, 50], [10, 57]].flatMap(([sd, d])",
+  "replace": "...[[9, 50]].flatMap(([sd, d])"
+ }
+]

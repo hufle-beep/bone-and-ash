@@ -1,0 +1,37 @@
+[
+ {
+  "id": "RT1",
+  "file": "js/story/act1_fallout.js",
+  "find": "Yuki has an opinion of both rows and is keeping it.",
+  "replace": "Yuki, washing a whisker, has an opinion of both rows and is keeping it.",
+  "note": "a cat-only verb in FS10's form-free Yuki line (the woman washing a whisker); the form-word list misses it"
+ },
+ {
+  "id": "RT2",
+  "file": "js/story/ashfall.js",
+  "find": "your mouth will be shut.\\\"\\n\\n{yuki}\",",
+  "replace": "your mouth will be shut.\\\"\",",
+  "note": "SW3 text 1 loses its {yuki} slot, so Yuki's three passages never show; the test builds its expectation from the same text"
+ },
+ {
+  "id": "RT3",
+  "file": "js/story/act1_fallout.js",
+  "find": "Between servings Mei Lin's mother asks",
+  "replace": "On this last night in Ashfall, between servings, Mei Lin's mother asks",
+  "note": "a time word: FS10 text 6 shows on Day 63; the farewell (Day 64) is the last night"
+ },
+ {
+  "id": "RT4",
+  "file": "js/story/ashfall.js",
+  "find": "\\\"One does not wear their colour while their banners hang,\\\"",
+  "replace": "\\\"One does not wear the Sect's colour while its banners hang,\\\"",
+  "note": "the mother names the Sect at table four nights after SW3 text 2 says it is not named there"
+ },
+ {
+  "id": "RT5",
+  "file": "js/story/ashfall.js",
+  "find": "Yuki, who alone can see her supper, eats it with unkind ease.",
+  "replace": "Yuki, who alone can see her supper, laps it up with unkind ease.",
+  "note": "a cat-only verb in SW3 text 4's shared text (the woman lapping); the shared-text word list misses it"
+ }
+]

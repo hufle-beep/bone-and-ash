@@ -1,0 +1,68 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/act1_fallout.js",
+  "find": "            : longCal(g) && dd(g) === 10 ? seqText(g, 'fo_supper:10', FS10.map(fs9))",
+  "replace": "            : false ? seqText(g, 'fo_supper:10', FS10.map(fs9))"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/act1_fallout.js",
+  "find": "            : longCal(g) && dd(g) === 10 ? seqText(g, 'fo_supper:10', FS10.map(fs9))",
+  "replace": "            : dd(g) === 10 ? seqText(g, 'fo_supper:10', FS10.map(fs9))"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/act1_fallout.js",
+  "find": "seqText(g, 'fo_supper:10', FS10.map(fs9))",
+  "replace": "seqText(g, 'fo_supper:10', FS10.map((x) => () => x.t))"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/act1_fallout.js",
+  "find": "seqText(g, 'fo_supper:10', FS10.map(fs9))",
+  "replace": "seqText(g, 'fo_supper:9', FS10.map(fs9))"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/ashfall.js",
+  "find": "            : longCal(g) && vday(g) >= 3 ? seqText(g, 'supper:6', SW3.map(sw3))",
+  "replace": "            : vday(g) >= 3 ? seqText(g, 'supper:6', SW3.map(sw3))"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/ashfall.js",
+  "find": "            : longCal(g) && vday(g) >= 3 ? seqText(g, 'supper:6', SW3.map(sw3))",
+  "replace": "            : longCal(g) && vday(g) >= 2 ? seqText(g, 'supper:6', SW3.map(sw3))"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/ashfall.js",
+  "find": "const sw3 = (x) => (g) => (x.y ? x.t.replace('{yuki}', byForm(g, ...x.y)) : x.t);",
+  "replace": "const sw3 = (x) => (g) => x.t;"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/ashfall.js",
+  "find": "const sw3 = (x) => (g) => (x.y ? x.t.replace('{yuki}', byForm(g, ...x.y)) : x.t);",
+  "replace": "const sw3 = (x) => (g) => (x.y ? x.t.replace('{yuki}', byForm(g, x.y[1], x.y[0], x.y[2])) : x.t);"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/ashfall.js",
+  "find": "Since the banners went up, the Sect is not named at this table",
+  "replace": "The Sect is not to be named at this table, by a rule older than your place at it"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/act1_fallout.js",
+  "find": "Ya begins on her fingers.\"",
+  "replace": "Ya begins on her fingers, and runs out.\""
+ },
+ {
+  "id": "F11",
+  "file": "js/story/ashfall.js",
+  "find": "its red tassel lies between the salt and the greens.",
+  "replace": "its red tassel lies on the loft ladder between the salt and the greens."
+ }
+]

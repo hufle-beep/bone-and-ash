@@ -135,8 +135,8 @@ for (const [vday, day] of [[1, 23], [2, 30], [3, 37]]) for (const k of [0, 1, 2,
     Object.assign(g.flags, { long: true, vday, cal_night: 1 }); g.minutes = (day - 1) * 1440 + 19 * 60;
     SAMPLES.push(onDay(g, k));
 }
-// v0.11.239 (owner pick P12-A, TG): and the Fallout supper's sequences of six (FS6): story day 8's six in the three forms, day 9's with Ya and without her
-for (const day of [44, 51, 58]) for (const k of [0, 1, 2, 3, 4, 5]) for (const [form, realm] of (day === 44 ? [['cat', 0], ['tiger', 2], ['human', 7]] : [['cat', 0]])) for (const ya of (day === 51 ? [true, false] : [true])) {
+// v0.11.239 (owner pick P12-A, TG): and the Fallout supper's sequences of six (FS6): story day 8's six in the three forms, day 9's with Ya and without her; v0.11.241 (P13-A): day 10's own six (FS10) with Ya and without, the village's week 3 (SW3) in the loop above
+for (const day of [44, 51, 58]) for (const k of [0, 1, 2, 3, 4, 5]) for (const [form, realm] of (day === 44 ? [['cat', 0], ['tiger', 2], ['human', 7]] : [['cat', 0]])) for (const ya of (day === 44 ? [true] : [true, false])) { // v0.11.241 (P13-A, FS10): story day 10's lines without Ya too
     const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; if (ya) g.flags.ya_met = true; g.minutes = (day - 1) * 1440 + 12 * 60;
     SAMPLES.push(onDay(g, k));
 }
