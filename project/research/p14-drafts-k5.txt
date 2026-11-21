@@ -1,0 +1,19 @@
+village_night:3:4 | A pallet is dragged across the floor below, as on every recent evening, and comes to rest between the outer door and Mei Lin's room. By day it is back against the wall and nobody has mentioned it. Mei Lin says goodnight across her mother to the house at large. {yuki} You are asleep before you have decided who is guarding whom.
+village_night:3:4:y:cat | *She sleeps in front of the daughter,* Yuki sends, curled against your collarbone. *I sleep on top of you. It is the same arrangement, and mine needed no furniture.*
+village_night:3:4:y:great | *She sleeps in front of the daughter,* Yuki sends, stretched along the open side of the bedding with you behind her. *It is the same arrangement. Mine needed no furniture. I am the furniture.*
+village_night:3:4:y:human | "She sleeps in front of her daughter," Yuki says, and lies down on the side of you nearest the ladder. "It is a sound arrangement. I thought of it before she did."
+village_night:3:5 | Red cloth on the tribute post snaps in the wind, and the whole lane lies awake to hear that it is only cloth. When the wind drops, Ashfall waits for it to start again and is not reassured when it does. You find you have been lying with one arm outside the blanket, the useful one. {yuki} The wind keeps on. You do not.
+village_night:3:5:y:cat | *I went down and smelt them,* Yuki sends, coming in cold along your ribs. *Cheap dye, new rope, and a knot tied in a hurry. Banners collect nothing. Put the arm away.*
+village_night:3:5:y:great | *I went and smelt them,* Yuki sends, and the cold comes up the ladder with her. *Cheap dye, new rope, a knot tied in a hurry. I could have the whole post down. Put the arm away.*
+village_night:3:5:y:human | "I walked down and looked at them," Yuki says, getting in with the cold still on her. "Cheap dye, new rope, a knot tied in a hurry. They are laundry. Put your arm away."
+village_night:3:6 | Nine threads of thought, and one has taken the night watch without being asked. It has settled what the house is allowed to do in the dark: the ladder may tick, the shutter may knock once, Mei Lin may turn over. Anything else, it wakes you. So far the house has complied. {yuki} You sleep on eight.
+village_night:3:6:y:cat | *Tell it to stand down,* Yuki sends from under your chin. *I have kept this watch since before you could count to nine. It may have the shutter. The rest is mine.*
+village_night:3:6:y:great | *Tell it to stand down,* Yuki sends, and her breath moves your hair. *I have kept this watch since before you could count to nine. It may have the shutter. The rest is mine.*
+village_night:3:6:y:human | "Tell it to stand down," Yuki says, her back to you and her face to the ladder. "I have kept this watch since before you could count to nine. Give it the shutter. I have the rest."
+# notes
+- 3:4 assumes the mother sleeps on a movable pallet and that Mei Lin has a room of her own off the main room; the file's door-bar text says only "her bed". If her bed is fixed, "A pallet" could become a bench or a stool she sits up on.
+- 3:5 assumes the tribute post is near enough for the banners to be heard from the loft in wind, and that Yuki can get out and back in with the door barred (easy as the cat; unexplained for the other two forms). "The useful one" is the forearm the bone comes from; it names nothing.
+- 3:5 "Banners collect nothing" / "They are laundry" lean on the collectors without naming a day.
+- 3:6 uses Parallel Cognition as an instinct that wakes him, never a voice; "nine" is the thread count, not a day count. It avoids the word "list" (RV2's DL cut beside the dishes' ledger).
+- 3:6 "since before you could count to nine" rests on Yuki being bonded from birth.
+- Openers: "A pallet", "Red cloth", "Nine threads". No "last", no clock words; "By day" and "evening" in 3:4 are the only time words.

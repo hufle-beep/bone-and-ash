@@ -6899,8 +6899,8 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       const o = at(false, 5, 19, { long: true, vday: 2 }); assert(/^Second supper at Mei Lin's\./.test(tx(o, 'supper')), `${T} (V3a): the old calendar's supper as before`);
       const w = at(true, 36, 18, { long: true, vday: 3, cal_night: 1 }), we = at(true, 42, 18, { long: true, vday: 3, cal_night: 6 });
       assert(!/last sunset/i.test(tx(w, 'mei_walk')) && /^The last sunset before the tribute\./.test(tx(we, 'mei_walk')), `${T} (V3a): "the last sunset" on the eve only`);
-      const nl = []; const fg = at(true, 4, 21, { forest_day: 1 }); for (let d = 0; d < 10; d++) { fg.minutes = (4 + d - 1) * D + 21 * 60; noteDay(fg, 'night'); nl.push(tx(fg, 'night').slice(0, 25)); }
-      assert(new Set(nl.slice(0, 9)).size === 9 && nl[9] === nl[0], `${T} (V3a): the forest has nine night texts before one comes back (${new Set(nl).size})`); }
+      const nl = []; const fg = at(true, 4, 21, { forest_day: 1 }); for (let d = 0; d < 16; d++) { /* v0.11.242 (P14-A, NF6): fifteen */ fg.minutes = (4 + d - 1) * D + 21 * 60; noteDay(fg, 'night'); nl.push(tx(fg, 'night').slice(0, 25)); }
+      assert(new Set(nl.slice(0, 15)).size === 15 && nl[15] === nl[0], `${T} (V3a; P14-A NF6): the forest has fifteen night texts before one comes back (${new Set(nl).size})`); }
     // VF: a text shown in full on an earlier day of this Coil folds; a new text, a task screen and the first show don't
     { const g = at(true, 30, 10, { long: true, vday: 2 }); const id = 'herb_girl';
       const v0 = againView(g, { id, text: 'Alpha.\n\nBeta.' }); g.minutes += D; linesOf(g).at = 'wilds'; const v1 = againView(g, { id, text: 'Alpha.\n\nBeta.' }); g.minutes += D; linesOf(g).at = 'wilds'; const v2 = againView(g, { id, text: 'Gamma.\n\nDelta.' });
@@ -8048,7 +8048,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
     const mk = (seed, f = 'cat', cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true, ...(cal ? { cal } : {}) })); g.yuki.form = f; g.yuki.realm = FORMS[f]; g.james.realm = FORMS[f]; return g; };
     const week = (seed, vday, f, cal = C.LONG_CAL, n0 = 6) => { const g = mk(seed, f, cal); const out = []; for (let n = 0; n < n0; n++) { Object.assign(g.flags, { long: !!cal, vday, cal_night: n }); g.minutes = (30 + n) * D + 22 * 60; noteDay(g, SCENES.village_night.dayKey(g)); out.push(tx(g, 'village_night')); } return { g, out }; };
-    const OPEN = { 1: ['The herb loft smells of mint', 'Below the herb loft somebody banks the stove', 'The herb loft is dark', 'Your lab coat hangs from a rafter peg', 'The loft has one board that announces you', 'Out past the last house something calls twice'], 2: ["Mei Lin's mother closes the day by reporting it to her husband's tablet", 'You are classifying a bracket fungus', 'Rain comes to Ashfall without ceremony'], 3: ["Mei Lin's mother checks the bar on the door", 'Someone has left a cup of water', 'Ashfall has gone to bed with one ear on the road'] };
+    const OPEN = { 1: ['The herb loft smells of mint', 'Below the herb loft somebody banks the stove', 'The herb loft is dark', 'Your lab coat hangs from a rafter peg', 'The loft has one board that announces you', 'Out past the last house something calls twice'], 2: ["Mei Lin's mother closes the day by reporting it to her husband's tablet", 'You are classifying a bracket fungus', 'Rain comes to Ashfall without ceremony', "Through the boards comes Mei Lin's mother", 'A pinch, as Mei Lin measures it', 'In the next house a husband and wife'], 3: ["Mei Lin's mother checks the bar on the door", 'Someone has left a cup of water', 'Ashfall has gone to bed with one ear on the road', 'A pallet is dragged across the floor below', 'Red cloth on the tribute post snaps', 'Nine threads of thought, and one has taken'] }; // v0.11.242 (P14-A, EVn-23): weeks 2 and 3 six each
     // EVk: each week its own three in order, round again; week 1 the old three; the first sentence the same in every form, two sentences or more
     for (const vday of [1, 2, 3]) {
         const by = Object.fromEntries(Object.keys(FORMS).map((f) => [f, week(99900 + vday, vday, f).out]));
@@ -8368,6 +8368,113 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       assert(FS10.every((x, i) => x.t.startsWith(O10[i])) && SW3.every((x, i) => x.t.startsWith(O6[i])), `${T} RV1 (TG-C5): both lists in the picked order`); }
     // SN: What's new says it
     { const N = await import('../js/core/news.js'); assert(/0\.11\.241/.test(JSON.stringify(N)), `${T} (SN): What's new has 0.11.241`); }
+}
+// v0.11.242 (owner picks P14-A = EVn-23 + NF6, D1; 2026-11-21 01:57, 02:07): EVn-23 the quiet nights' weeks 2 and 3 six each (Fable's K4, K5),
+// NF6 the forest night six more, fifteen (Fable's N2, N3); both past the rule of three for a non-social scene, the owner's pick; D1 Claude's cuts.
+{
+    const T = 'P14-A';
+    const C = await import('../js/core/calendar.js');
+    const A = await import('../js/story/again.js');
+    const D = 1440;
+    const FORMS = { cat: 0, tiger: 2, human: 7 };
+    const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
+    const mk = (seed, f = 'cat', cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true, ...(cal ? { cal } : {}) })); g.yuki.form = f; g.yuki.realm = FORMS[f]; g.james.realm = FORMS[f]; return g; };
+    const week = (seed, vday, f, n0 = 7) => { const g = mk(seed, f); const out = []; for (let n = 0; n < n0; n++) { Object.assign(g.flags, { long: true, vday, cal_night: n }); g.minutes = (30 + n) * D + 22 * 60; noteDay(g, SCENES.village_night.dayKey(g)); out.push(tx(g, 'village_night')); } return out; };
+    const NEW = { 2: ["Through the boards comes Mei Lin's mother", 'A pinch, as Mei Lin measures it', 'In the next house a husband and wife'], 3: ['A pallet is dragged across the floor below', 'Red cloth on the tribute post snaps', 'Nine threads of thought, and one has taken'] };
+    // EVn-23: each week six in order (the three before, then the new three), a seventh round again; in every form, every slot filled
+    for (const vday of [2, 3]) for (const f of ['cat', 'tiger', 'human']) {
+        const out = week(42000 + vday * 10 + FORMS[f], vday, f);
+        const ok = NEW[vday].every((o, i) => out[3 + i].startsWith(o)) && new Set(out.slice(0, 6)).size === 6 && (vday === 2 ? !out.slice(0, 6).includes(out[6]) /* week 2's seventh night is the story night */ : out[6] === out[0]) && !out.some((t) => t.includes('{yuki}'));
+        assert(ok, `${T} (EVn-23): week ${vday}, ${f}: six in order, the new three on nights 4–6, round again (week 3) or the story night (week 2) (${out.map((t) => t.slice(0, 18)).join(' | ')})`);
+        const bond = out.slice(3, 6);
+        assert(f === 'human' ? bond.every((t) => /"[^"]+"/.test(t) && !/\bsends\b/.test(t) && !/\*/.test(t)) : bond.every((t) => /\*[^*]+\*/.test(t) && /\bsends\b/.test(t) && !/"/.test(t)), `${T} (EVn-23): week ${vday}, ${f}: the bond in italics for the cat and the great form, the woman aloud`);
+        assert(bond.every((t) => A.sentencesOf(t).length >= 2), `${T} (EVn-23): week ${vday}, ${f}: two sentences or more`);
+    }
+    // the fold's first sentence: the same in every form, names no form, not an old opener; no time word that breaks on another night; no loft furniture
+    { const by = Object.fromEntries(['cat', 'tiger', 'human'].map((f) => [f, [2, 3].flatMap((v) => week(42100 + v + FORMS[f], v, f, 6).slice(3))]));
+      const first = (t) => A.sentencesOf(t)[0];
+      assert(by.cat.every((t, i) => first(t) === first(by.tiger[i]) && first(t) === first(by.human[i]) && !/\b(small|paw|ears|tail|whiskers?|great)\b/i.test(first(t)) && !/^(Tonight|Someone|Rain|You)\b/.test(t)), `${T} (EVn-23): the folded first sentence the same in every form, no form word, no barred opener`);
+      const all = Object.values(by).flat().join(' ');
+      assert(!/\b(tomorrow|midnight|dawn|last night|the last)\b/i.test(all) && !/\b(rafters?|beams?|herbs? (hang|dry)|ginseng|mint)\b/i.test(all) && !/Mei Lin's room/.test(all), `${T} (EVn-23): no time word that breaks, no loft furniture, D1's room fix`); }
+    // week 1 and the old calendar untouched
+    { const w1 = week(42201, 1, 'cat', 6); assert(!w1.some((t) => Object.values(NEW).flat().some((o) => t.startsWith(o))), `${T} (EVn-23): week 1 reads none of them`);
+      const g = mk(42202, 'cat', 0); Object.assign(g.flags, { vday: 2 }); g.minutes = 5 * D + 22 * 60; const t = tx(g, 'village_night');
+      assert(!Object.values(NEW).flat().some((o) => t.startsWith(o)), `${T} (EVn-23): the old calendar reads none of them (${t.slice(0, 24)})`); }
+    // NF6: the forest night fifteen, in order, with and without the fire, by form; the new six on nights 10–15
+    const FN = [['From the rise the dark seems to come up, not down.', 'The fire\'s smoke goes sideways', 'With nothing burning, your eyes start inventing'], ['Between the stream and the fallen trunk there is a path now', 'The fire sits in its ring of stones', 'The ring of stones is cold'], ['Quiet has a sound here, and it is the water.', 'The fire burns small and steady', 'With no fire to watch, you watch the dark'], ['After the sky goes, the grey moss keeps a little light', 'The fire drowns the moss-light', 'With no fire to drown it'], ['Coming up from the water as the dark drops', 'You bank the fire for the night', 'With no fire to bank'], ['Mist lies along the stream when the dark has come', 'The fire makes a kettle', 'Without a fire you have nothing to tend']];
+    const forest = (f, fire, seed) => { const g = mk(seed, f); g.flags.forest_day = 3; if (fire) g.flags.fire = true; const out = []; for (let d = 0; d < 16; d++) { g.minutes = (4 + d - 1) * D + 21 * 60; noteDay(g, 'night'); out.push(tx(g, 'night')); } return out; };
+    for (const f of ['cat', 'tiger', 'human']) for (const fire of [true, false]) {
+        const out = forest(f, fire, 42300 + FORMS[f] + (fire ? 50 : 0));
+        const paras = out.slice(9, 15).map((t) => t.split('\n\n'));
+        assert(new Set(out.slice(0, 15)).size === 15 && out[15] === out[0] && FN.every(([p1, y, n], i) => out[9 + i].startsWith(p1) && paras[i][1].startsWith(fire ? y : n)), `${T} (NF6): ${f}, ${fire ? 'fire' : 'no fire'}: fifteen in order, the new six on nights 10–15 with their fire line, then round (${out.map((t) => t.slice(0, 10)).join(' | ')})`);
+        assert(paras.every((p) => p.length === 3 && !/\$\{|\{yuki\}|\{fire\}|undefined/.test(p.join(' '))) && paras.every((p) => (f === 'human' ? !/\*/.test(p[1]) : !/"/.test(p[1]))), `${T} (NF6): ${f}: three paragraphs, every slot filled, the bond in italics (cat, great) or aloud (woman)`);
+    }
+    { const out = forest('cat', true, 42390).slice(9, 15); const ps = out.map((t) => t.split('\n\n'));
+      assert(ps.every((p) => !/^(Night|The night|The dark|Dusk|Tonight|You)\b/.test(p[0]) && !/\b(small|paw|ears|tail|great)\b/i.test(p[0] + ' ' + p[2])) && !/\b(tomorrow|midnight|dawn|first night|last night|tenth|a week)\b/i.test(out.join(' ')) && !/\b(Mei Lin|Ya|village|Ashfall)\b/.test(out.join(' ')), `${T} (NF6): the fold's paragraph its own, no form word outside Yuki's line, no time word that breaks, nobody met yet`); }
+    // the old calendar's forest: three nights, nothing from the new six
+    { const g = mk(42399, 'cat', 0); g.flags.forest_day = 1; const out = []; for (let d = 0; d < 3; d++) { g.minutes = d * D + 21 * 60; noteDay(g, 'night'); out.push(tx(g, 'night')); } assert(!out.some((t) => FN.some(([p1]) => t.startsWith(p1))), `${T} (NF6): the old calendar's three nights read none of the new six`); }
+    // D1: Claude's cuts in, the drafts' phrases out
+    { const src = (await import('node:fs')).readFileSync(new URL('../js/story/ashfall.js', import.meta.url), 'utf8') + (await import('node:fs')).readFileSync(new URL('../js/story/prologue.js', import.meta.url), 'utf8');
+      const IN = ['from the stretch of boards she has claimed', 'tucked under your arm', 'her back set against yours', 'Yuki settles on your knee and stares', 'A thread peels off for the watch', 'The watch-thread walks its usual beat', 'A single thread keeps the watch', 'Yuki leans on your arm, combing', 'the room where the women sleep', 'facing the ladder, her back to you', 'tucked against your elbow', 'Without a fire you have nothing to tend', "comes Mei Lin's mother, measuring beans", 'since before you knew there were nine' /* C-a (RW) */];
+      const OUT = ['the count of Mei Lin', 'could count to nine' /* C-a: no "count" under the dishes (P10-A T M2) */, 'the length of floor she has taken', 'from the crook of your arm', 'with her back against yours', 'Yuki sits on your knee and stares', 'One of your nine threads takes the watch', 'her head on your shoulder and is combing', "Mei Lin's room", 'her face to the ladder', 'in the crook of your elbow', 'With no fire there is nothing to tend'];
+      assert(IN.every((x) => src.includes(x)) && !OUT.some((x) => src.includes(x)), `${T} (D1): the cuts in, the drafts' phrases out (${IN.filter((x) => !src.includes(x)).concat(OUT.filter((x) => src.includes(x))).join(', ')})`); }
+    // What's new says it
+    { const N = await import('../js/core/news.js'); assert(/0\.11\.242/.test(JSON.stringify(N.NOTES)), `${T}: What's new has 0.11.242`); }
+}
+// v0.11.242 RV1 (owner pick 2026-11-21 03:02; the cold reviews' T H1, M1, M3, L1, L4, L5, C M1, L2 and the test gaps TG-T1–T3, TG-C2–C5)
+{
+    const T = 'P14-A RV1';
+    const C = await import('../js/core/calendar.js');
+    const D = 1440;
+    const FORMS = { cat: 0, tiger: 2, human: 7 };
+    const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
+    const mk = (seed, f = 'cat') => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); g.yuki.form = f; g.yuki.realm = FORMS[f]; g.james.realm = FORMS[f]; return g; };
+    const pre = (a) => { let i = 0; while (a.every((s) => s[i] !== undefined && s[i] === a[0][i])) i++; return a[0].slice(0, i); };
+    const suf = (a) => { const r = a.map((s) => [...s].reverse().join('')); return [...pre(r)].reverse().join(''); };
+    const split3 = (by) => { const p = pre(by), s = suf(by); return { shared: p + ' ' + s, branch: by.map((t) => t.slice(p.length, t.length - s.length)) }; };
+    const quiet = (vday, n0, f, seed) => { const g = mk(seed, f); const out = []; for (let n = 0; n < n0; n++) { Object.assign(g.flags, { long: true, vday, cal_night: n }); g.minutes = (30 + n) * D + 22 * 60; noteDay(g, SCENES.village_night.dayKey(g)); out.push(tx(g, 'village_night')); } return out; };
+    const forest = (f, fire, seed) => { const g = mk(seed, f); g.flags.forest_day = 3; if (fire) g.flags.fire = true; const out = []; for (let d = 0; d < 15; d++) { g.minutes = (4 + d - 1) * D + 21 * 60; noteDay(g, 'night'); out.push(tx(g, 'night')); } return out.slice(9); };
+    const NO = { cat: /\bgreat\b|\bfingers?\b|fingertip|\bsays\b|"/i, tiger: /\bin your lap\b|\bon your (knee|stomach|chest|shoulder)\b|\bunder your (arm|chin)\b|\bdraped\b|\bfingers?\b|fingertip|collarbone|\bsays\b|"/i, human: /\b(paws?|great|sends|bond)\b|\*/i };
+    const FORMWORD = /\b(small|paws?|ears|tail|whiskers?|great|tiger|woman|fur|claws?|purr\w*)\b/i;
+    const TIME = /\b(tomorrow|midnight|dawn|last night|first night|tenth|a week)\b/i;
+    // village: weeks 2 and 3, texts 4–6, the shared part (TG-T1) and each form's passage (TG-T3, TG-C2)
+    for (const vday of [2, 3]) {
+        const by = Object.fromEntries(Object.keys(FORMS).map((f) => [f, quiet(vday, 6, f, 43000 + vday * 10 + FORMS[f]).slice(3)]));
+        for (let i = 0; i < 3; i++) {
+            const { shared, branch } = split3([by.cat[i], by.tiger[i], by.human[i]]);
+            assert(!FORMWORD.test(shared.replace(/\bYuki\b/g, '')) && !TIME.test(shared) && !/\b(Ya)\b/.test(shared), `${T} (TG-T1): week ${vday} text ${4 + i}: no form word, time word or Ya in the shared part`);
+            assert(new Set(branch).size === 3 && Object.keys(FORMS).every((f, k) => !NO[f].test(branch[k])), `${T} (TG-T3, TG-C2): week ${vday} text ${4 + i}: three different passages, each fit for its form (${branch.map((b) => b.slice(0, 30)).join(' | ')})`);
+        }
+    }
+    // forest: nights 10–15 with and without the fire, every form (TG-T2), the shared paragraphs and the fire line (TG-T1), Yuki's line by form (TG-T3, TG-C2, TG-C3)
+    for (const fire of [true, false]) {
+        const by = Object.fromEntries(Object.keys(FORMS).map((f) => [f, forest(f, fire, 43100 + FORMS[f] + (fire ? 50 : 0))]));
+        for (let i = 0; i < 6; i++) {
+            const ps = Object.keys(FORMS).map((f) => by[f][i].split('\n\n'));
+            const { shared, branch } = split3(ps.map((p) => p[1]));
+            const all = ps.map((p) => p.join(' ')).join(' ');
+            assert(ps.every((p) => p[0] === ps[0][0] && p[2] === ps[0][2]) && !FORMWORD.test((ps[0][0] + ' ' + ps[0][2] + ' ' + shared.replace(/\bYuki\b/g, '')).replace(/\bburns small\b/, '')) /* the fire's own size */, `${T} (TG-T1): forest ${10 + i}${fire ? '' : ', no fire'}: the shared paragraphs and the fire line name no form`);
+            assert(!TIME.test(all) && !/\b(Mei Lin|Ya|Ashfall|village)\b/.test(all), `${T} (TG-T2): forest ${10 + i}${fire ? '' : ', no fire'}, every form: no time word that breaks, nobody met yet`);
+            assert(new Set(branch).size === 3 && Object.keys(FORMS).every((f, k) => !NO[f].test(branch[k])), `${T} (TG-T3, TG-C2, TG-C3): forest ${10 + i}${fire ? '' : ', no fire'}: Yuki's three lines differ, each fit for its form (${branch.map((b) => b.slice(0, 30)).join(' | ')})`);
+        }
+    }
+    // H1: the forest has no dusk; the new texts' light does not "go" (T H1, M2: no bruise under the camp's "bruise to wine")
+    { const all = forest('cat', true, 43199).concat(forest('cat', false, 43198)).join(' ');
+      assert(!/\b(the light go(es|ing)|light leaves|by degrees|after sunset|bruise)/i.test(all), `${T} (H1, M2): no dusk and no bruise in the new forest nights`); }
+    // M1, M3, L1, L4, L5: the reviewers' wording
+    { const src = (await import('node:fs')).readFileSync(new URL('../js/story/ashfall.js', import.meta.url), 'utf8') + (await import('node:fs')).readFileSync(new URL('../js/story/prologue.js', import.meta.url), 'utf8');
+      const IN = ['A pinch, as Mei Lin measures it, is whatever her fingers say it is', 'A child gets less than a hunter.', 'in whispers that keep strictly to procedure', 'Yuki, close at your side, puts one fingertip', 'the one that grows bone.', 'and settles across your legs instead', 'From the rise the dark seems to come up', 'Before the dark is down you have stepped over', 'The dark is slow to finish, for once', 'Coming up from the water as the dark drops', 'Mist lies along the stream when the dark has come'];
+      const OUT = ['as the clinic measures it', 'The old woman got less than her son', 'in low voices and with full formality', 'pressed in under your arm', 'the useful one', 'across the other one instead'];
+      assert(IN.every((x) => src.includes(x)) && !OUT.some((x) => src.includes(x)), `${T} (M1, M3, L1, L4, L5, H1): the reviewers' wording in, the drafts' out (${IN.filter((x) => !src.includes(x)).concat(OUT.filter((x) => src.includes(x))).join(', ')})`); }
+    // TG-C4: weeks 1 → 2 → 3 walked in one game: each week starts at its own text 1 and reads its six in order
+    { const g = mk(43201); const out = {};
+      for (const vday of [1, 2, 3]) { out[vday] = []; for (let n = 0; n < 6; n++) { Object.assign(g.flags, { long: true, vday, cal_night: n }); g.minutes = (22 + (vday - 1) * 7 + n) * D + 22 * 60; noteDay(g, SCENES.village_night.dayKey(g)); out[vday].push(tx(g, 'village_night')); } }
+      assert(out[1][0].startsWith('The herb loft smells of mint') && out[2][0].startsWith("Mei Lin's mother closes the day") && out[2][3].startsWith("Through the boards comes Mei Lin's mother") && out[3][0].startsWith("Mei Lin's mother checks the bar") && out[3][5].startsWith('Nine threads of thought') && [1, 2, 3].every((v) => new Set(out[v]).size === 6),
+        `${T} (TG-C4): one game, weeks 1 → 2 → 3: each its own six from its text 1 (${[1, 2, 3].map((v) => out[v].map((t) => t.slice(0, 10)).join(', ')).join(' / ')})`); }
+    // TG-C5 (C L1, by decision): the index is the nights noted, so a v0.11.241 save four nights into week 2 (texts 1, 2, 3, 1 read) reads text 5 next, not 4
+    { const g = mk(43202); const L = linesOf(g); g.minutes = 34 * D + 22 * 60; Object.assign(g.flags, { long: true, vday: 2, cal_night: 4 });
+      L.d['s:village_night:2'] = [30, 31, 32, 33].map((d) => d); const t = tx(g, 'village_night');
+      assert(t.startsWith('A pinch, as Mei Lin measures it'), `${T} (TG-C5): four nights noted in week 2: text 5 next (a v0.11.241 save skips text 4; by decision) (${t.slice(0, 30)})`); }
 }
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

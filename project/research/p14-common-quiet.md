@@ -1,0 +1,20 @@
+Tone: James and Yuki deadpan; locals overly serious; Mei Lin looser (teases, laughs, gets in trouble for it; an Ashfall herb girl, 26, raised on propriety and sick of it); her mother tiny, fierce, formal, grave about propriety and the Sect, widowed; she does not joke. Second person ("you" = James, 40, a mycologist from another world). British spelling.
+
+## The scene
+`village_night`, the quiet night: Ashfall before the tribute (the Crimson Lotus Sect's collectors come up the road for grain and for children with spirit roots). James lodges in the loft of Mei Lin's mother's house. The text shows when he goes up to sleep, after supper and one of: the roof with Mei Lin, the dishes with her mother, or going up early. The one choice under it is "Sleep." and the next screen is the morning. So each text is him in the loft, settling, with the house and the village around him at night; it ends with him asleep or about to be. Shown between about 19:00 and 02:00: no clock times, no "early", "late", "midnight", "dawn", "tomorrow".
+
+On the long calendar each village story day is a WEEK of seven nights. Weeks 2 and 3 each have their own three texts now (in the file, `QUIET_WEEK`), which show on nights 1–3 and again, folded, on 4–6. This push gives each week six: you write texts **4, 5 and 6** of your week, read on its nights 4–6 after the three in the file. They are not a story: each stands alone, in any order after the others.
+
+Yuki (his root-kin) is in every text, in her three forms: the small white cat (bond-speech in italics, `*like this*`, heard only by James), the great root-kin, tiger-sized (bond-speech in italics), the woman with cat ears and tail (speaks aloud, in quotes). Write each text as a shared part plus ONE Yuki passage (one or two sentences) marked `{yuki}` in the shared part, given in three forms as separate keys. The shared part names no form (no "small", "paw", "ears", "tail", "whisker" there).
+
+Each text: the shared part 45–65 words, each Yuki passage 20–40 words (the texts in the file are the model). A new small moment of the night. Deadpan, quiet, specific.
+
+Rules:
+- **The fold:** a text read before folds to its FIRST SENTENCE with a "Read it all again" link. The first sentence must be in the shared part, stand alone as a reminder of that night, and not open with the same first two words as any text in the file, nor with "Tonight", "Someone", "Rain" or "You". Every text has at least two sentences.
+- **No day counts** ("the fifth night", "a week now") and no promises about a day ("the collectors come in four days").
+- No romance beyond a thought of her; Mei Lin does not come up to the loft. Nobody new enters the house.
+- No Ya (he has not met her yet). No sect men, torches, fire in the lane, or anyone at the window.
+- Don't describe the loft's beams, posts, roof or what hangs or dries in it (in a few games it burned and was patched); the ladder, the boards, the blanket are fine.
+- Don't reuse any moment of the texts in the file (all three weeks and the old three), nor these: the mother reporting to the husband's tablet, an unnamed fungus, the snoring neighbour, the rain and the drying racks, the bar on the door, a cup at the ladder's foot, a lamp left burning, the dog hushed by name, the cough in the lane, the lab coat on a peg, the board that announces you, the broom, the call between a hinge and a question; the banked stove, the talk going out, the ladle, "Stop thinking", "It's loud", mint and ginseng, the house breathing.
+- Don't overlap the evening's other scenes: the supper (upright chopsticks, the cooper's wife and the sieve, the glasses, the hen and the egg, the millet in the wrong tone, the persimmons, the travel cakes, how to bow), the roof (what Ashfall has decided he is, his forearm's music, the plum wine, the tribute's numbers, the wrong stars, the singing trees, a bet on lamps, her mother's three rules), the dishes (the village's debts to the Sect, which families the road has cost a child).
+- Avoid the canon card's tics and any phrase the file's texts use; don't reuse a five-word run between your drafts. No song lyrics, no real names.

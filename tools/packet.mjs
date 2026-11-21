@@ -111,6 +111,10 @@ export const STATES = [
     ...[[3, 'fourth'], [4, 'fifth']].flatMap(([k, w]) => [
         { base: `the Root Road in the evening, its ${w} camp`, on: inArea(BLACKROOT), g: stateOf({ bl_region: 'rr', bl_day: 2, bl_n: k - 3, mei_party: true, ya_party: true }, campNight(2, k - 3), { k }) },
         { base: `the Ashen Hills in the evening, its ${w} camp`, on: inArea(BLACKROOT), g: stateOf({ ...AH, bl_day: 5, bl_n: k - 3, ya_off_done: true }, campNight(5, k - 3), { k }) }]),
+    // v0.11.242 (owner pick RV1 after P14-A; the cold review's C M1, TG-C1): the forest night on each of its fifteen texts (`night`'s `byDay` index
+    // 0–14), in the three forms, with the fire and without, so the packet draws NF6's six and the old seven to nine (the samples' days 0 and 2 drew two)
+    ...[...Array(15).keys()].flatMap((k) => [true, false].flatMap((fire) => FORMS.map(([f, r, name]) => ({ base: `the forest's night ${k + 1}${fire ? '' : ', no fire'}`, form: name,
+        on: (id) => id === 'night', g: stateOf({ forest_day: 3, ...(fire ? { fire: true } : {}) }, 15 * DAY + 21 * 60, { k, form: [f, r] }) })))),
 ];
 /** RV1: the states that draw one text, named shortly: a state in all three forms by its name alone, else with its forms. */
 export function stateNames(states) {

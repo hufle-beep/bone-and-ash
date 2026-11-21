@@ -1,0 +1,19 @@
+village_night:2:4 | Through the boards comes the count of Mei Lin's mother measuring beans to soak, by the handful, aloud. Two for the house. A pause follows, in which a matter is weighed, and a third goes in. You have been the extra handful at other tables, though never one arrived at so gravely. {yuki} The lid goes on the crock, and you sleep provided for.
+village_night:2:4:y:cat | *Three, and none of it mine,* Yuki sends from the dip of your hip. *She expects me to see to my own breakfast. There is a dried fish behind her rice jar that agrees with her.*
+village_night:2:4:y:great | *Three, and none of it mine,* Yuki sends, from the length of floor she has taken as her own. *Sensible. A handful for me would be the whole crock, and then the crock.*
+village_night:2:4:y:human | "Three," Yuki says, turning over and taking the warm part of the bedding with her. "There are four of us. Either she expects me to hunt or one of us is sharing, and I have decided which."
+village_night:2:5 | A pinch, as the clinic measures it, is whatever Mei Lin's fingers say it is, and you are lying in the dark trying to put it in milligrams. Her pinch and yours differ by a third. A thumbnail's worth is worse; thumbnails vary. Nobody here has been poisoned, which is evidence or luck. {yuki} You stop at the unit called enough, and sleep.
+village_night:2:5:y:cat | *She weighs it against the patient,* Yuki sends, eyes shut, from the crook of your arm. *The old woman got less than her son. You were writing down the pinch and never looked at the hand.*
+village_night:2:5:y:great | *She weighs it against the patient,* Yuki sends, and the bedding shifts as she resettles her head on it. *The old woman got less than her son. I would get a basketful. Nobody has offered.*
+village_night:2:5:y:human | "She weighs it against the patient," Yuki says, with her back against yours. "The old woman got less than her son. You were writing down the pinch and never looked at the hand."
+village_night:2:6 | In the next house a husband and wife are deciding whether to sell a goat, in low voices and with full formality. She cites her mother. He cites the season. In Ashfall even a quarrel in bed is conducted as a hearing. The goat, tethered outside, is consulted and abstains. {yuki} The verdict comes after you are asleep, which is evidently the custom.
+village_night:2:6:y:cat | *They will keep it,* Yuki sends, arranging herself on your stomach. *I have met the goat. It bit a child and ate a hat, and they speak of it as people speak of family.*
+village_night:2:6:y:great | *They will keep it,* Yuki sends, without raising her head from the boards. *I have met the goat. It looked at me, all of me, and went on eating. One respects that.*
+village_night:2:6:y:human | "They will keep it," Yuki says, face down in the bedding. "I have met the goat. It ate the end of my sleeve and was not sorry. Those two have earned it, and it them."
+# notes
+- 2:4 assumes the household is two (mother, Mei Lin) plus James, so the third handful is his; the human passage counts Yuki as a fourth person at table. If the house cooks for her in human form, the human passage needs another joke.
+- 2:4 assumes a lidded crock and a dried fish behind a rice jar in the kitchen; neither is from canon.
+- 2:5 assumes "the clinic" is where Mei Lin doses patients by hand and James has been there with her, taking notes; "the old woman and her son" are invented, unnamed patients.
+- 2:5 "milligrams" is his own world's unit, used on purpose; cut if his people would not have it.
+- 2:6 invents a neighbouring couple and their goat (unnamed); the quarrel is in bed, heard across the gap between houses, nobody in the lane.
+- Within a text the three Yuki passages share their opening line, as the file's do; no five-word run is shared between the three texts.

@@ -307,6 +307,7 @@ const ROOF_STAY = { 1: [`The cold wins, as it does. On the ladder she adds a lat
 
 // v0.11.237 (owner pick P10-A, EVk, D1; 2026-11-20 14:21, 15:19): the quiet night's weeks 2 and 3 on the long calendar a sequence of
 // three each (seqText, `village_night:2` / `village_night:3`), as the supper's story days; week 1 and the old calendar keep the old three
+// v0.11.242 (owner pick P14-A, EVn-23): six each (texts 4–6 by Fable, runs K4 and K5; Claude's cuts, D1), a rule change past three for a non-social scene
 // (`village_night:quiet`). Fable's (runs K2 and K3), Claude's cuts (D1: VD, FD, AU, MM, BK, FT). Each a shared text and Yuki's passage by form.
 // RV2 (owner pick 2026-11-20 16:03; the cold reviews' T M1, M2, L2–L4, L6): the reviewers' and Claude's wording (BL: no dried herbs in a loft
 // that may have burned; DL: no list beside the dishes' ledger, "checked" not "counted"; "everyone below"; the cup's opener; "settles against
@@ -326,6 +327,19 @@ const QUIET_WEEK = {
             "*I was out in that,* Yuki sends, arriving wet and choosing the dry half of your blanket to stop being wet on. *Nobody ran to carry me in.*",
             "*I was out in that,* Yuki sends, and shakes herself once, which rains on everything the roof had kept dry. *Nobody ran to carry me in. I noticed.*",
             "\"I was out in that,\" Yuki says, wringing her hair out over the ladder without looking where it lands. \"Nobody ran to carry me in. I noticed.\""),
+        // v0.11.242 (owner pick P14-A, EVn-23, D1; 2026-11-21 01:57, 02:07): texts 4–6, so week 2 reads six before one comes back (Fable's run K4; Claude's cuts, D1)
+        quietY("Through the boards comes Mei Lin's mother, measuring beans to soak, by the handful, aloud. Two for the house. A pause follows, in which a matter is weighed, and a third goes in. You have been the extra handful at other tables, though never one arrived at so gravely. {yuki} The lid goes on the crock, and you sleep provided for.",
+            "*Three, and none of it mine,* Yuki sends from the dip of your hip. *She expects me to see to my own breakfast. There is a dried fish behind her rice jar that agrees with her.*",
+            "*Three, and none of it mine,* Yuki sends, from the stretch of boards she has claimed. *Sensible. A handful for me would be the whole crock, and then the crock.*",
+            "\"Three,\" Yuki says, turning over and taking the warm part of the bedding with her. \"There are four of us. Either she expects me to hunt or one of us is sharing, and I have decided which.\""),
+        quietY("A pinch, as Mei Lin measures it, is whatever her fingers say it is, and you are lying in the dark trying to put it in milligrams. Her pinch and yours differ by a third. A thumbnail's worth is worse; thumbnails vary. Nobody here has been poisoned, which is evidence or luck. {yuki} You stop at the unit called enough, and sleep.",
+            "*She weighs it against the patient,* Yuki sends, eyes shut, tucked under your arm. *A child gets less than a hunter. You were writing down the pinch and never looked at the hand.*",
+            "*She weighs it against the patient,* Yuki sends, and the bedding shifts as she resettles her head on it. *A child gets less than a hunter. I would get a basketful. Nobody has offered.*",
+            "\"She weighs it against the patient,\" Yuki says, her back set against yours. \"A child gets less than a hunter. You were writing down the pinch and never looked at the hand.\""),
+        quietY("In the next house a husband and wife are deciding whether to sell a goat, in whispers that keep strictly to procedure. She cites her mother. He cites the season. In Ashfall even a quarrel in bed is conducted as a hearing. The goat, tethered outside, is consulted and abstains. {yuki} The verdict comes after you are asleep, which is evidently the custom.",
+            "*They will keep it,* Yuki sends, arranging herself on your stomach. *I have met the goat. It bit a child and ate a hat, and they speak of it as people speak of family.*",
+            "*They will keep it,* Yuki sends, without raising her head from the boards. *I have met the goat. It looked at me, all of me, and went on eating. One respects that.*",
+            "\"They will keep it,\" Yuki says, face down in the bedding. \"I have met the goat. It ate the end of my sleeve and was not sorry. Those two have earned it, and it them.\""),
     ],
     3: [
         quietY("Mei Lin's mother checks the bar on the door, goes to her bed, and comes back to check it again. She does not hurry, and the bar is the same bar both times. You lie in the dark and listen to her make sure of a plank. {yuki} If there is a third inspection, it happens without you.",
@@ -340,6 +354,19 @@ const QUIET_WEEK = {
             "Yuki has sat by the ladder facing the door since you lay down. *Empty as far as I can hear,* she sends, *and I can hear moths.* She comes back to bed, satisfied, and settles against your back.",
             "Yuki lifts her head, turns it toward the road and holds it there until even the dog has lost interest. *Nothing,* she sends, and lowers it onto her forelegs. *I'd have told you before the dog knew.*",
             "\"There is nothing out there,\" Yuki says, quite awake. \"I have been listening longer than the dog and I am better at it. Sleep. I will tell you if that changes.\""),
+        // v0.11.242 (owner pick P14-A, EVn-23, D1; 2026-11-21 01:57, 02:07): texts 4–6, so week 3 reads six before one comes back (Fable's run K5; Claude's cuts, D1)
+        quietY("A pallet is dragged across the floor below, as on every recent evening, and comes to rest between the outer door and the room where the women sleep. By day it is back against the wall and nobody has mentioned it. Mei Lin says goodnight across her mother to the house at large. {yuki} You are asleep before you have decided who is guarding whom.",
+            "*She sleeps in front of the daughter,* Yuki sends, curled against your collarbone. *I sleep on top of you. It is the same arrangement, and mine needed no furniture.*",
+            "*She sleeps in front of the daughter,* Yuki sends, stretched along the open side of the bedding with you behind her. *It is the same arrangement. Mine needed no furniture. I am the furniture.*",
+            "\"She sleeps in front of her daughter,\" Yuki says, and lies down on the side of you nearest the ladder. \"It is a sound arrangement. I thought of it before she did.\""),
+        quietY("Red cloth on the tribute post snaps in the wind, and the whole lane lies awake to hear that it is only cloth. When the wind drops, Ashfall waits for it to start again and is not reassured when it does. You find you have been lying with one arm outside the blanket, the one that grows bone. {yuki} The wind keeps on. You do not.",
+            "*I went down and smelt them,* Yuki sends, coming in cold along your ribs. *Cheap dye, new rope, and a knot tied in a hurry. Banners collect nothing. Put the arm away.*",
+            "*I went and smelt them,* Yuki sends, and the cold comes up the ladder with her. *Cheap dye, new rope, a knot tied in a hurry. I could have the whole post down. Put the arm away.*",
+            "\"I walked down and looked at them,\" Yuki says, getting in with the cold still on her. \"Cheap dye, new rope, a knot tied in a hurry. They are laundry. Put your arm away.\""),
+        quietY("Nine threads of thought, and one has taken the night watch without being asked. It has settled what the house is allowed to do in the dark: the ladder may tick, the shutter may knock once, Mei Lin may turn over. Anything else, it wakes you. So far the house has complied. {yuki} You sleep on eight.",
+            "*Tell it to stand down,* Yuki sends from under your chin. *I have kept this watch since before you knew there were nine. It may have the shutter. The rest is mine.*",
+            "*Tell it to stand down,* Yuki sends, and her breath moves your hair. *I have kept this watch since before you knew there were nine. It may have the shutter. The rest is mine.*",
+            "\"Tell it to stand down,\" Yuki says, facing the ladder, her back to you. \"I have kept this watch since before you knew there were nine. Give it the shutter. I have the rest.\""),
     ],
 };
 /** v0.11.230 (P3-2, FT): the quiet night's three old texts (week 1 and the old calendar). */
@@ -480,8 +507,8 @@ After that she says nothing until the jar is nearly empty. Your forearm has been
         enter: (g) => (arsonNight(g) ? nightTo(g, 60) : []), // v0.11.151 (WD1, LN): the slept line
         dayKey: (g) => (arsonNight(g) ? null : 'village_night:quiet'), // v0.11.230 (P3-2, FT): the quiet nights' own count (an arson night is no step)
         text: (g) => {
-            // v0.11.230 (owner picks P3-2, D1: FT; Fable's, Claude's cuts): the quiet night a sequence of three by its own day key (`dayKey` below)
-            if (!arsonNight(g) && longCal(g) && QUIET_WEEK[vday(g)]) return seqText(g, `village_night:${vday(g)}`, QUIET_WEEK[vday(g)]); // v0.11.237 (P10-A, EVk): weeks 2 and 3 their own three
+            // v0.11.230 (owner picks P3-2, D1: FT; Fable's, Claude's cuts): the quiet night a sequence of three by its own day key (`dayKey` below); weeks 2 and 3 six each since v0.11.242 (P14-A)
+            if (!arsonNight(g) && longCal(g) && QUIET_WEEK[vday(g)]) return seqText(g, `village_night:${vday(g)}`, QUIET_WEEK[vday(g)]); // v0.11.237 (P10-A, EVk): weeks 2 and 3 their own three; v0.11.242 (P14-A, EVn-23): six each (RV1, C L2)
             if (!arsonNight(g)) return byDay(g, longCal(g) ? [...QUIET_OLD, ...QUIET_W1] : QUIET_OLD, 'village_night:quiet'); // v0.11.238 (P11-A, EVn-1): the first week six on the long calendar
             if (g.flags.gao_broken) return `It is still dark when Mei Lin's hand on your shoulder wakes you. Her other hand is closed on a twist of cloth, and in the cloth is Gao Feng's jade token: she had it out of his sleeve while he was lying in the herbs with his arm pointing the wrong way.
 

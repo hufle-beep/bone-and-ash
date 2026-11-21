@@ -351,7 +351,38 @@ The watch-thread comes up by itself, a thing done so often that it no longer cou
 
 ${g.flags.fire ? 'The fire has burnt down to a red that asks for nothing. You give it a stick regardless.' : 'With no fire, the dark and the quiet turn out to be one thing, and it is nearly restful.'} ${byForm(g, 'Yuki is half asleep in your lap, one ear still up', 'Yuki is half asleep round you, one ear still up', 'Yuki is half asleep against your side, one cat ear still up')}, which is as far off duty as she goes.
 
-The watch-thread has the quiet to itself, and one of nine is plenty for it. Your shoulders have come down from around your ears. You don't remember telling them to.`], 'night'),
+The watch-thread has the quiet to itself, and one of nine is plenty for it. Your shoulders have come down from around your ears. You don't remember telling them to.`,
+            // v0.11.242 (owner pick P14-A, NF6, D1; 2026-11-21 01:57, 02:07): six more, so the long calendar's forest reads fifteen nights before one comes back (Fable's runs N2, N3; Claude's cuts, D1)
+            (g) => `From the rise the dark seems to come up, not down. It starts among the roots and fills the forest like water filling a basin, and the sky is what goes under at the end. Below the rise the stream has changed its note, as if after dark it ran over different stones.
+
+${g.flags.fire ? "The fire's smoke goes sideways out of the light, in perfectly still air, and you elect not to follow it with your eyes." : "With nothing burning, your eyes start inventing shapes, a service this forest has never needed from anyone."} ${byForm(g, "Yuki settles on your knee and stares at one patch of nothing. *It's fine,* comes down the bond. *Probably.*", "Yuki lies in a ring round you and stares at one patch of nothing. *It's fine,* comes down the bond. *Probably.*", "Yuki has her shoulder against yours and her eyes on one patch of nothing. \"It's fine,\" she says. \"Probably.\"")}
+
+A thread peels off for the watch and starts a list of what is different here after dark. The list is long. It keeps it to itself, which you count as tact.`,
+            (g) => `Between the stream and the fallen trunk there is a path now, and your boots are what made it. Before the dark is down you have stepped over the root that used to trip you, folded your glasses onto the knot in the trunk where they live, and sat. The dark arrives to find it has been expected.
+
+${g.flags.fire ? "The fire sits in its ring of stones, which you straightened earlier for reasons no fire has ever cared about." : "The ring of stones is cold, and you have straightened it all the same, as one makes a bed nobody will inspect."} ${byForm(g, "Yuki, on your chest, looks the camp over like a landlady and finds it in order. *Ours,* she sends along the bond. *Mostly mine.*", "Yuki, laid round you, looks the camp over like a landlady and finds it in order. *Ours,* she sends along the bond. *Mostly mine.*", "Yuki, close against your side, looks the camp over like a landlady and finds it in order. \"Ours,\" she says. \"Mostly mine.\"")}
+
+The watch-thread walks its usual beat: stream, slope, trunk, trees. It has stopped checking where the camp is and only checks that it is still yours.`,
+            (g) => `Quiet has a sound here, and it is the water. The dark is slow to finish, for once, and the black trunks go from shapes to guesses. The air smells of wet stone and cold moss. Nothing out there wants anything from you, and you find you believe it.
+
+${g.flags.fire ? "The fire burns small and steady, and you watch it as people at home watch weather through a window." : "With no fire to watch, you watch the dark instead, and it turns out to be no worse at holding the eye."} ${byForm(g, "Yuki is stretched along your shins, washing one paw slowly and thoroughly, for no audience at all.", "Yuki is stretched out round you, washing one great paw slowly and thoroughly, for no audience at all.", "Yuki leans on your arm, combing her tail through her fingers, slowly and thoroughly, for no audience at all.")}
+
+A single thread keeps the watch and, having little else to do, listens to the water. Now and then it lets you know the stream is still there.`,
+            (g) => `After the sky goes, the grey moss keeps a little light of its own. It is not a glow so much as a refusal to go fully dark, and it lights nothing: not the trunks, not your hands. You are a mycologist. You know eleven ways a living thing makes light, and this is none of them.
+
+${g.flags.fire ? "The fire drowns the moss-light out to the edge of its circle, and you are professionally ashamed of how much you prefer that." : "With no fire to drown it, the moss-light is all there is to see by, and you can see nothing by it."} ${byForm(g, "Yuki, tucked against your elbow, puts one paw to the moss and takes it back. *Not warm,* she tells you through the bond. *Rude.*", "Yuki, stretched round your back, puts one great paw to the moss and takes it back. *Not warm,* she tells you through the bond. *Rude.*", "Yuki, close at your side, puts one fingertip to the moss and takes it back. \"Not warm,\" she says. \"Rude.\"")}
+
+The watch goes to the thread that minds least about the moss. Between sweeps it starts work on a twelfth way, with no samples and no bench, and seems content.`,
+            (g) => `Coming up from the water as the dark drops, you catch yourself thinking the word home, and let it stand for want of a better. The evening has an order now: wash, shake out the coat, boots off with the toes pointing out. Behind you the fallen trunk creaks as it cools, and you no longer turn to look.
+
+${g.flags.fire ? "You bank the fire for the night by a method you never decided on and would now defend in argument." : "With no fire to bank, you check the water, the boots and the coat by touch, a round you never decided to make."} ${byForm(g, "Yuki considers the fold of coat you have left out for her, and settles on your stomach instead, on principle.", "Yuki considers the stretch of ground you have left clear for her, and settles across your legs instead, on principle.", "Yuki considers the length of trunk you have left free for her, and settles on your other side instead, on principle.")}
+
+Nobody hands the watch over. One thread is simply at its post by the time your boots are off, and has views on where you put them.`,
+            (g) => `Mist lies along the stream when the dark has come, level as milk in a dish, and does not climb. Above it the air is mild and the black trunks keep to themselves. The omnitool comes to the end of a piece from home, and you leave the quiet that follows to run on, since it is doing so well.
+
+${g.flags.fire ? "The fire makes a kettle's sort of noise, with no kettle, and you miss tea with a precision that surprises you." : "Without a fire you have nothing to tend, and your hands lie idle on your knees and raise no objection."} ${byForm(g, "Yuki, draped over your shoulder, yawns until every tooth she owns is on show, and you catch it from her before you can stop yourself.", "Yuki, heaped at your back, yawns until every tooth she owns is on show, and you catch it from her before you can stop yourself.", "Yuki, slumped against your arm, yawns until every tooth she owns is on show, and you catch it from her before you can stop yourself.")}
+
+The thread on watch keeps one eye on the mist, which stays where it is. It files this under good behaviour and has nothing further to add.`], 'night'),
         choices: [
             { text: 'Leave a thread on watch and sleep.', do: set('watch'), to: nightNext },
             { text: 'Story Mode only (removed in v0.11.41).', show: () => false, to: nightNext }, // v0.11.41 (D2-a): Story Mode's sit; the place kept (choice indices)

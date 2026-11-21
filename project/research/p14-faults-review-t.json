@@ -1,0 +1,51 @@
+[
+ {
+  "id": "TF1",
+  "file": "js/story/ashfall.js",
+  "find": "The verdict comes after you are asleep, which is evidently the custom.",
+  "replace": "The verdict comes after you and the small white cat are asleep, which is evidently the custom.",
+  "note": "a form word in the shared part after its first sentence (2:6): the great form and the woman read 'the small white cat'"
+ },
+ {
+  "id": "TF2",
+  "file": "js/story/prologue.js",
+  "find": "as one makes a bed nobody will inspect.",
+  "replace": "as one makes a bed Ya will inspect.",
+  "note": "somebody not yet met named in the forest, in a no-fire branch (11)"
+ },
+ {
+  "id": "TF3",
+  "file": "js/story/prologue.js",
+  "find": "\"Yuki considers the stretch of ground you have left clear for her, and settles across your legs instead, on principle.\"",
+  "replace": "\"Yuki considers the fold of coat you have left out for her, and settles on your stomach instead, on principle.\"",
+  "note": "forest 14: the great form reads the cat's line (a tiger on his stomach) (RV1: the find updated to the reworded line)"
+ },
+ {
+  "id": "TF4",
+  "file": "js/story/ashfall.js",
+  "find": "comes Mei Lin's mother, measuring beans to soak",
+  "replace": "comes Mei Lin's mother, counting beans to soak",
+  "note": "C-a undone: 'count' under the dishes' reply (P10-A T M2)"
+ },
+ {
+  "id": "TF5",
+  "file": "js/story/ashfall.js",
+  "find": "\"*I went and smelt them,* Yuki sends, and the cold comes up the ladder with her. *Cheap dye, new rope, a knot tied in a hurry. I could have the whole post down. Put the arm away.*\",",
+  "replace": "\"\\\"I walked down and looked at them,\\\" Yuki says, getting in with the cold still on her. \\\"Cheap dye, new rope, a knot tied in a hurry. They are laundry. Put your arm away.\\\"\",",
+  "note": "3:5: the great form speaks aloud (the woman's line in the great slot)"
+ },
+ {
+  "id": "TF6",
+  "file": "js/story/prologue.js",
+  "find": "With no fire to watch, you watch the dark instead, and it turns out to be no worse at holding the eye.",
+  "replace": "With no fire to watch, you watch the dark instead, and it will be the same tomorrow.",
+  "note": "a time word ('tomorrow') in a no-fire branch (12)"
+ },
+ {
+  "id": "TF7",
+  "file": "js/story/prologue.js",
+  "find": "Yuki is stretched out round you, washing one great paw slowly",
+  "replace": "Yuki is curled in your lap, washing one paw slowly",
+  "note": "forest 12: the great form in his lap (a cat's place)"
+ }
+]

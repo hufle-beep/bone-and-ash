@@ -1,0 +1,26 @@
+night:10 | Here the dark comes up, not down. It starts among the roots and fills the forest like water filling a basin, and the bruise-coloured sky is what goes under at the end. Below the rise the stream has changed its note, as if after sunset it ran over different stones. ¶ {fire} {yuki} ¶ One of your nine threads takes the watch and starts a list of what is different here after dark. The list is long. It keeps it to itself, which you count as tact.
+night:10:fire | The fire's smoke goes sideways out of the light, in perfectly still air, and you elect not to follow it with your eyes.
+night:10:nofire | With nothing burning, your eyes start inventing shapes, a service this forest has never needed from anyone.
+night:10:y:cat | Yuki sits on your knee and stares at one patch of nothing. *It's fine,* comes down the bond. *Probably.*
+night:10:y:great | Yuki lies in a ring round you and stares at one patch of nothing. *It's fine,* comes down the bond. *Probably.*
+night:10:y:human | Yuki has her shoulder against yours and her eyes on one patch of nothing. "It's fine," she says. "Probably."
+night:11 | Between the stream and the fallen trunk there is a path now, and your boots are what made it. Before the light goes you have stepped over the root that used to trip you, folded your glasses onto the knot in the trunk where they live, and sat. The dark arrives to find it has been expected. ¶ {fire} {yuki} ¶ One of your nine threads takes the watch and walks its usual beat: stream, slope, trunk, trees. It has stopped checking where the camp is and only checks that it is still yours.
+night:11:fire | The fire sits in its ring of stones, which you straightened earlier for reasons no fire has ever cared about.
+night:11:nofire | The ring of stones is cold, and you have straightened it all the same, as one makes a bed nobody will inspect.
+night:11:y:cat | Yuki, on your chest, looks the camp over like a landlady and finds it in order. *Ours,* she sends along the bond. *Mostly mine.*
+night:11:y:great | Yuki, laid round you, looks the camp over like a landlady and finds it in order. *Ours,* she sends along the bond. *Mostly mine.*
+night:11:y:human | Yuki, close against your side, looks the camp over like a landlady and finds it in order. "Ours," she says. "Mostly mine."
+night:12 | Quiet has a sound here, and it is the stream. The light leaves the bruise-coloured sky by degrees, with none of its usual hurry, and the black trunks go from shapes to guesses. The air smells of wet stone and cold moss. Nothing out there wants anything from you, and you find you believe it. ¶ {fire} {yuki} ¶ One of your nine threads takes the watch and, having little else to do, listens to the water. Now and then it lets you know the stream is still there.
+night:12:fire | The fire burns small and steady, and you watch it as people at home watch weather through a window.
+night:12:nofire | With no fire to watch, you watch the dark instead, and it turns out to be no worse at holding the eye.
+night:12:y:cat | Yuki is stretched along your shins, washing one paw slowly and thoroughly, for no audience at all.
+night:12:y:great | Yuki is stretched out round you, washing one great paw slowly and thoroughly, for no audience at all.
+night:12:y:human | Yuki has her head on your shoulder and is combing her tail through her fingers, slowly and thoroughly, for no audience at all.
+# notes
+- 10: the dark "coming up" from the roots reverses the file's "comes down"; meant as this night's one strange thing, but it may read as contradicting texts 2, 4 and 6. "After sunset" assumes the sky has a sun to set.
+- 10 fire: smoke going sideways in still air is invented (nothing follows from it); cut if the fire should behave.
+- 11: assumes a ring of stones round the fire place, a root on the way up from the stream, a knot in the fallen trunk, and that he takes his glasses off to sleep. None is in the packet.
+- 11 Yuki: "landlady" and "Ours / Mostly mine" give her one line in all three forms; the cat is on his chest, so he is leaning well back against the trunk.
+- 12: "with none of its usual hurry" lets the light go slowly on this one night, against the file's sudden dark; intended as the quiet night's difference.
+- 12 human: her head on his shoulder while sitting against his side; she is a head shorter, so it fits.
+- The form variants inside one text share their wording on purpose (as the file's do); no five-word run is shared between texts 10, 11 and 12.

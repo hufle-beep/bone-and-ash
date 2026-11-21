@@ -1,0 +1,26 @@
+night:13 | After the sky goes, the grey moss keeps a little light of its own. It is not a glow so much as a refusal to go fully dark, and it lights nothing: not the trunks, not your hands. You are a mycologist. You know eleven ways a living thing makes light, and this is none of them. ¶ {fire} {yuki} ¶ The watch goes to the thread that minds least about the moss. Between sweeps it starts work on a twelfth way, with no samples and no bench, and seems content.
+night:13:fire | The fire drowns the moss-light out to the edge of its circle, and you are professionally ashamed of how much you prefer that.
+night:13:nofire | With no fire to drown it, the moss-light is all there is to see by, and you can see nothing by it.
+night:13:y:cat | Yuki, tucked in the crook of your elbow, puts one paw to the moss and takes it back. *Not warm,* she tells you through the bond. *Rude.*
+night:13:y:great | Yuki, stretched round your back, puts one great paw to the moss and takes it back. *Not warm,* she tells you through the bond. *Rude.*
+night:13:y:human | Yuki, pressed in under your arm, puts one fingertip to the moss and takes it back. "Not warm," she says. "Rude."
+night:14 | Coming up from the stream with the light going, you catch yourself thinking the word home, and let it stand for want of a better. The evening has an order now: wash, shake out the coat, boots off with the toes pointing out. Behind you the fallen trunk creaks as it cools, and you no longer turn to look. ¶ {fire} {yuki} ¶ Nobody hands the watch over. One thread is simply at its post by the time your boots are off, and has views on where you put them.
+night:14:fire | You bank the fire for the night by a method you never decided on and would now defend in argument.
+night:14:nofire | With no fire to bank, you check the water, the boots and the coat by touch, a round you never decided to make.
+night:14:y:cat | Yuki considers the fold of coat you have left out for her, and settles on your stomach instead, on principle.
+night:14:y:great | Yuki considers the stretch of ground you have left clear for her, and settles across the other one instead, on principle.
+night:14:y:human | Yuki considers the length of trunk you have left free for her, and settles on your other side instead, on principle.
+night:15 | Mist lies along the stream as the light goes, level as milk in a dish, and does not climb. Above it the air is mild and the black trunks keep to themselves. The omnitool comes to the end of a piece from home, and you leave the quiet that follows to run on, since it is doing so well. ¶ {fire} {yuki} ¶ The thread on watch keeps one eye on the mist, which stays where it is. It files this under good behaviour and has nothing further to add.
+night:15:fire | The fire makes a kettle's sort of noise, with no kettle, and you miss tea with a precision that surprises you.
+night:15:nofire | With no fire there is nothing to tend, and your hands lie idle on your knees and raise no objection.
+night:15:y:cat | Yuki, draped over your shoulder, yawns until every tooth she owns is on show, and you catch it from her before you can stop yourself.
+night:15:y:great | Yuki, heaped at your back, yawns until every tooth she owns is on show, and you catch it from her before you can stop yourself.
+night:15:y:human | Yuki, slumped against your arm, yawns until every tooth she owns is on show, and you catch it from her before you can stop yourself.
+# notes
+- 13: the grey moss keeping a faint light after dark is invented (canon gives only "grey moss"); nothing follows from it. "Eleven ways" and "a twelfth" are made-up numbers, not night counts. The nofire line says nothing can be seen by the moss-light, so it stays consistent with the file's "you cannot see your own hands".
+- 13 Yuki: she touches the moss; if the moss should be left alone (poisoned Qi), cut to her looking at it.
+- 14: "the word home" is used of the camp on purpose, against "a piece from home" elsewhere meaning his world; cut if home must only mean his world. Assumes he takes his boots off at night, washes at the stream, and keeps water at the camp.
+- 14 watch: the thread "has views" as an instinct, not a voice.
+- 15: mist on the stream is invented weather; it stays below the rise and does nothing. The omnitool's piece ends and he doesn't start another (the file's text 8 has it playing low; no overlap in the image). "Tea" assumes his world has tea and a kettle.
+- 15 Yuki: one line in all three forms, as the file does; the cat is on his shoulder (canon card), not in his lap.
+- All three watch paragraphs avoid opening with "One of your nine threads", which the file and texts 10-12 use.

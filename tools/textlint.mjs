@@ -140,6 +140,13 @@ for (const day of [44, 51, 58]) for (const k of [0, 1, 2, 3, 4, 5]) for (const [
     const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; if (ya) g.flags.ya_met = true; g.minutes = (day - 1) * 1440 + 12 * 60;
     SAMPLES.push(onDay(g, k));
 }
+// v0.11.242 (owner pick RV1 after P14-A; the cold review's C M1, TG-C1): the forest night's later texts (`night`'s `byDay` index 5–14: the first
+// loop reads 0–4), in the three forms with the fire and in the cat without it (the fire line is the same in every form), so NF6's six are linted
+for (const k of [5, 6, 7, 8, 9, 10, 11, 12, 13, 14]) for (const [form, realm, fire] of [['cat', 0, true], ['tiger', 2, true], ['human', 7, true], ['cat', 0, false]]) {
+    const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form;
+    Object.assign(g.flags, { forest_day: 3, ...(fire ? { fire: true } : {}) }); g.minutes = 15 * 1440 + 21 * 60;
+    SAMPLES.push(onDay(g, k));
+}
 const renders = (x) => {
     if (typeof x === 'string') return [x];
     if (typeof x !== 'function') return [];

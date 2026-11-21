@@ -1,0 +1,72 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/ashfall.js",
+  "find": "QUIET_WEEK[vday(g)]); // v0.11.237",
+  "replace": "QUIET_WEEK[vday(g)].slice(0, 3)); // v0.11.237",
+  "note": "EVn-23 undone: weeks 2 and 3 back to three"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/ashfall.js",
+  "find": "return seqText(g, `village_night:${vday(g)}`, QUIET_WEEK[vday(g)])",
+  "replace": "return seqText(g, `village_night:${vday(g)}`, QUIET_WEEK[2])",
+  "note": "week 3 reads week 2's six"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/ashfall.js",
+  "find": "\"\\\"Three,\\\" Yuki says, turning over",
+  "replace": "\"*Three,* Yuki says, turning over",
+  "note": "the woman's line in italics (2:4)"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/prologue.js",
+  "find": "since it is doing so well.",
+  "replace": "since it is doing so well. {fire}",
+  "note": "a stray slot left in forest 15"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/prologue.js",
+  "find": "${g.flags.fire ? \"The fire drowns",
+  "replace": "${!g.flags.fire ? \"The fire drowns",
+  "note": "forest 13's fire split inverted"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/prologue.js",
+  "find": "byForm(g, \"Yuki settles on your knee and stares",
+  "replace": "byForm(g, \"Yuki lies in a ring round you and stares",
+  "note": "forest 10: the cat reads the great form's line"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/ashfall.js",
+  "find": "\"*Tell it to stand down,* Yuki sends from under your chin. *I have kept this watch since before you knew there were nine.",
+  "replace": "\"*Tell it to stand down,* Yuki sends from under your chin. *I have kept this watch since before you could count to nine.",
+  "note": "C-a undone in one form: count under the dishes"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/prologue.js",
+  "find": "`Mist lies along the stream when the dark has come",
+  "replace": "`The night lays mist along the stream when the dark has come",
+  "note": "a barred fold opener (forest 15)"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/ashfall.js",
+  "find": "reassured when it does. You find you have been lying with one arm outside the blanket, the one that grows bone. {yuki} The wind",
+  "replace": "reassured when it does. You find you have been lying with one arm outside the blanket, the useful one. The wind",
+  "note": "3:5's Yuki slot dropped (RV1: the find updated to the reworded line)"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/ashfall.js",
+  "find": "comes to rest between the outer door and the room where the women sleep",
+  "replace": "comes to rest between the outer door and Mei Lin's room",
+  "note": "D1's canon fix undone (3:4)"
+ }
+]

@@ -1,0 +1,44 @@
+[
+ {
+  "id": "C1",
+  "file": "js/story/prologue.js",
+  "find": "Yuki, heaped at your back, yawns",
+  "replace": "Yuki, draped over your shoulder, yawns",
+  "note": "forest 15: the great form reads the cat's 'draped over your shoulder' (a tiger on the shoulder)"
+ },
+ {
+  "id": "C2",
+  "file": "js/story/prologue.js",
+  "find": "\"Yuki is stretched out round you, washing one great paw slowly and thoroughly, for no audience at all.\", \"Yuki leans on your arm, combing her tail through her fingers, slowly and thoroughly, for no audience at all.\"",
+  "replace": "\"Yuki leans on your arm, combing her tail through her fingers, slowly and thoroughly, for no audience at all.\", \"Yuki is stretched out round you, washing one great paw slowly and thoroughly, for no audience at all.\"",
+  "note": "forest 12: byForm great and human swapped (the woman washes a great paw)"
+ },
+ {
+  "id": "C3",
+  "file": "js/story/ashfall.js",
+  "find": "Yuki sends, and the bedding shifts as she resettles her head on it.",
+  "replace": "Yuki sends, eyes shut, tucked under your arm.",
+  "note": "2:5: the great form tucked under James's arm (the cat's line)"
+ },
+ {
+  "id": "C4",
+  "file": "js/story/ashfall.js",
+  "find": "if (!arsonNight(g) && longCal(g) && QUIET_WEEK[vday(g)])",
+  "replace": "if (!arsonNight(g) && QUIET_WEEK[vday(g)])",
+  "note": "the old calendar reads the long weeks' sequences (vday 2: text 1 of week 2, vday 3: text 1 of week 3)"
+ },
+ {
+  "id": "C5",
+  "file": "js/story/prologue.js",
+  "find": "\\\"Ours,\\\" she says. \\\"Mostly mine.\\\"",
+  "replace": "\\\"Ours,\\\" she sends along the bond. \\\"Mostly mine.\\\"",
+  "note": "forest 11: the woman \"sends\" (the bond) though aloud in quotes"
+ },
+ {
+  "id": "C6",
+  "file": "js/story/ashfall.js",
+  "find": "return seqText(g, `village_night:${vday(g)}`, QUIET_WEEK[vday(g)])",
+  "replace": "return byDay(g, QUIET_WEEK[vday(g)], 'village_night:quiet')",
+  "note": "weeks 2 and 3 count on the shared quiet key: in a real game week 2 starts at week 1's count (6 or 7), so it opens on text 1 or 2 and week 3 at about 13"
+ }
+]
