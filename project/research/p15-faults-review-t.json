@@ -1,0 +1,11 @@
+[
+ { "id": "TF1", "file": "js/story/act1_fallout.js", "find": "*Straight-backed, and she kept the bowl level,* she reports. *I have nothing to teach her.*", "replace": "Straight-backed, she says aloud, and she kept the bowl level. I have nothing to teach her.", "note": "FS7.d8 cat speaks aloud, no bond italics" },
+ { "id": "TF2", "file": "js/story/act1_fallout.js", "find": "and does not say on which side.", "replace": "and does not say on which side. Ya, at the door, says the father's.", "note": "Ya on story day 8 (before she is met), in a Yuki passage" },
+ { "id": "TF3", "file": "js/story/ashfall.js", "find": "You learn it by watching Mei Lin's mother look at yours.", "replace": "You learned it yesterday, by watching Mei Lin's mother look at yours.", "note": "a day word ('yesterday') in a seventh text" },
+ { "id": "TF4", "file": "js/story/wilds.js", "find": "Yuki is awake already, and regards you", "replace": "Yuki is awake already, whiskers forward, and regards you", "note": "MW: a cat-only word in the all-forms morning" },
+ { "id": "TF5", "file": "js/story/ashfall.js", "find": "I've run out of sensible reasons. Give me a foolish one.", "replace": "I've run out of sensible reasons. Give me a foolish one. No. Don't. I'd rather not know.", "note": "HS: W2b no longer ends on her question; the label 'Answer her question' contradicts" },
+ { "id": "TF6", "file": "js/story/ashfall.js", "find": "The banners go on doing nothing.", "replace": "The banners stir once, and settle.", "note": "RT 3:5: the banners move again against the hub's 'dead still'" },
+ { "id": "TF7", "file": "js/story/prologue.js", "find": "There is a gap, about four breaths long,", "replace": "There is a gap, while the light goes, about four breaths long,", "note": "forest 11: a dusk again (the forest has none)" },
+ { "id": "TF8", "file": "js/story/act1_fallout.js", "find": "Eat it slow. I was stung", "replace": "Eat it slow. On the road to the Heart there is no honey. I was stung", "note": "story day 9's seventh gives away the Blackroot plan (story day 10)" },
+ { "id": "TF9", "file": "js/story/ashfall.js", "find": "and last the mother's slippers", "replace": "then Mei Lin's feet on the ladder, and last the mother's slippers", "note": "quiet 7: Mei Lin comes up to the loft (she sleeps in her mother's room)" }
+]

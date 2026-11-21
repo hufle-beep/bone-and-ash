@@ -120,3 +120,7 @@ Started in v0.11.208, when `roadmap-done-3.md` would have passed about 45 KB wit
 - *(from v0.11.237's reviews)* a save from mid-Blackroot shows each camp text in full once more, then folds (C L2, once).
 - *(from v0.11.238's build and reviews)* a save that kept the 5-day Blackroot road (`calBl` 1) never sees the wood's fourth camp (C L4, old behaviour).
 - *(from v0.11.238's build and reviews)* the lint's shingle across the wood's fourth camp and its stock line (log only).
+
+## Moved from `roadmap.md` in v0.11.243 (word for word; section 0's oldest notes, the size rule: under 20,000 bytes)
+
+*(v0.11.236: the rest of e, push 9 done (P9-A + D1 + RV1: CB3, QW, YW; PS).)*

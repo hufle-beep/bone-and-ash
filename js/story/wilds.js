@@ -78,6 +78,9 @@ const loot = (lines) => () => lines;
 /* ---------- where the night goes ---------- */
 /** v0.11.203 (owner pick T1, TS1): in the long calendar a forest day is a week: its first six nights are quiet (straight to the morning),
  *  and the story's night (an encounter, or the jackals on the third) comes on the seventh. Leaving the forest still brings the jackals that night. */
+/** v0.11.243 (owner picks P15-B, D1; SF: MW, p15's measure): the long calendar's first forest week its own morning: `forest_day` is still 1 then
+ *  (it rises once a week), and the morning read week 3's text ("The third week in the forest"). Fable's run SF. */
+export const MORNING_W1 = "You wake on the dry rise with a root lodged under one kidney and grey moss printed along your cheek. The ground here was not designed with a spine in mind, and yours has spent the night composing a complaint.\n\nAbove the black trees the sky goes from ink to rust without consulting anyone. The stream is still talking below the camp. Something small and unhurried is eating the bark of the fallen trunk, and it does not stop on your account.\n\nYuki is awake already, and regards you as one regards a kettle that is slow to boil. Your knees are asked. They agree to stand, with conditions.";
 export const nightNext = (g) => (g.flags.leave_forest || ((g.flags.forest_day || 1) >= 3 && storyNight(g)) ? 'night_attack' : storyNight(g) ? 'night_event' : 'morning');
 
 /* ---------- night encounters (grow with the forest days) ---------- */
@@ -203,7 +206,7 @@ Yuki puts herself back in order as if the fight had been someone else's. You sit
             lines.push(out.length ? 'Breakfast. ' + out[0] : 'No breakfast. Your stomach enters it in the record.');
             return lines;
         },
-        text: (g) => `${g.flags.forest_day === 2
+        text: (g) => (longCal(g) && (g.flags.forest_day || 1) === 1 ? MORNING_W1 /* v0.11.243 (P15-B, D1; SF: MW): week 1's own (it read week 3's) */ : `${g.flags.forest_day === 2
             ? `${longCal(g) ? 'Another morning in the forest. A red sun hauls itself up over the black trees, and you lie still and take stock: one Yuki, one omnitool, one lab coat that was white when it got here, one body that aches in places you could now label on a diagram.' : 'The second morning. A red sun hauls itself up over the black trees, and you lie still and take stock: one Yuki, one omnitool, one lab coat that was white yesterday, one body that aches in places you could now label on a diagram.'} Alive, on the evidence.
 
 ${(replayExplore(g) ? MORNING_AGAIN : 'You could go looking for the way out. Or you could face the data: you know nothing about this world, and this forest is the mildest teacher it is likely to offer. So learn it. Eat. Get stronger. *Then* walk out.').replace(/\*Then\* walk out\.$/, canFly(g) ? FW.morningOut : '$&') /* v0.11.195 (F1, D1: MW) */}`
@@ -211,7 +214,7 @@ ${(replayExplore(g) ? MORNING_AGAIN : 'You could go looking for the way out. Or 
 
 This patch of forest is yours by now: the stream's tempers, the reeds where the hares lie up, the reek of the mire when the wind turns west. It has other tenants. ${longCal(g) ? 'For nights now something has circled the camp at a distance, and it has left tracks.' : 'For two nights something has circled the camp at a distance, and it has left tracks.'} Large. More than one set. In no hurry.
 
-${g.flags.saw_lights ? 'And then the lights. Your mind keeps going back to the lights.' : longCal(g) ? 'One of these nights, you suspect, the hurry arrives.' : 'Tonight, you suspect, the hurry arrives.'}`}`,
+${g.flags.saw_lights ? 'And then the lights. Your mind keeps going back to the lights.' : longCal(g) ? 'One of these nights, you suspect, the hurry arrives.' : 'Tonight, you suspect, the hurry arrives.'}`}`),
         choices: [{ text: 'Get up.', to: 'wilds' }],
     },
 

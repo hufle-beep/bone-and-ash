@@ -359,7 +359,7 @@ const QUIET_WEEK = {
             "*She sleeps in front of the daughter,* Yuki sends, curled against your collarbone. *I sleep on top of you. It is the same arrangement, and mine needed no furniture.*",
             "*She sleeps in front of the daughter,* Yuki sends, stretched along the open side of the bedding with you behind her. *It is the same arrangement. Mine needed no furniture. I am the furniture.*",
             "\"She sleeps in front of her daughter,\" Yuki says, and lies down on the side of you nearest the ladder. \"It is a sound arrangement. I thought of it before she did.\""),
-        quietY("Red cloth on the tribute post snaps in the wind, and the whole lane lies awake to hear that it is only cloth. When the wind drops, Ashfall waits for it to start again and is not reassured when it does. You find you have been lying with one arm outside the blanket, the one that grows bone. {yuki} The wind keeps on. You do not.",
+        quietY("There is no wind, and the banners hang from the tribute post as straight as plumb lines. The lane lies awake over them regardless; a thing that does not move can be watched as long as one likes. The arm that grows bone is out on top of the blanket, without your having sent it. {yuki} The banners go on doing nothing. Presently, so do you.", // v0.11.243 (P15-B, D1; SF: RT, p14's review T L2): the banners hang still, as the week-3 hub says
             "*I went down and smelt them,* Yuki sends, coming in cold along your ribs. *Cheap dye, new rope, and a knot tied in a hurry. Banners collect nothing. Put the arm away.*",
             "*I went and smelt them,* Yuki sends, and the cold comes up the ladder with her. *Cheap dye, new rope, a knot tied in a hurry. I could have the whole post down. Put the arm away.*",
             "\"I walked down and looked at them,\" Yuki says, getting in with the cold still on her. \"Cheap dye, new rope, a knot tied in a hurry. They are laundry. Put your arm away.\""),
@@ -389,6 +389,26 @@ const QUIET_W1 = [
             "*A bird,* Yuki sends, one eye opening and closing again. *Brown, no bigger than your fist, and very stupid. It is calling for another one. I could arrange for it to stop.*",
             "\"It is a bird,\" Yuki says, from under her own arm. \"Brown, no bigger than your fist. It wants a mate and has no talent for it. It will be at this until it finds one or I find it.\""),
 ];
+/** v0.11.243 (owner picks P15-B, D1; SN7, the owner's rule: seven a story day): the seventh evening of the long calendar's village weeks 1 and 2
+ *  (`supper:4` / `supper:5`, after the old three and SUPPER_NEW) and week 1's seventh quiet night (`village_night:quiet`, after QUIET_OLD and
+ *  QUIET_W1); each read text 1 again, folded. Fable's run S2, Claude's cuts (D1). The old calendar unchanged (one evening a story day). */
+// v0.11.243 RV1 (T M4, L2; L1 in 3:5): supper4 no longer opens on "in this house" (the quiet seventh, the same evening, does); the mother named as the speaker
+export const SN7 = {
+    supper4: "Fish bones go on the rim of the bowl here, and never on the table. You learn it by watching Mei Lin's mother look at yours.\n\nYou move them, and being what you are, set them out in order, spine first, then the ribs by size.\n\nThe mother studies the result. \"It is not required to rebuild the fish,\" she says.\n\n\"Ask him what it died of,\" says Mei Lin.\n\n\"Smoke,\" you say. \"Some days ago.\"\n\n\"A guest is not asked to examine his supper.\" Then, to you: \"Tidy,\" the mother says, as a clerk notes a weight, and not yet in your favour.\n\nMei Lin gathers the bowls, admiring yours aloud as far as the basin.",
+    supper5: "Age is the question Mei Lin's mother has chosen for this meal: yours. Forty, you tell her. She sets down her bowl to weigh it. \"And a wife?\"\n\n\"None.\"\n\n\"Dead, or never?\"\n\n\"Never. I was at my studies.\"\n\n\"For how long?\"\n\n\"Most of the forty. I passed shortly before I came here.\"\n\n\"A slow scholar,\" she says, \"or a hard examination.\"\n\n\"Both.\"\n\n\"So nobody would have him,\" says Mei Lin, pleased.\n\n\"Mei Lin.\"\n\n\"I am only asking what the lane will ask.\"\n\n\"The lane does not eat here. Pour the guest's water, and be silent while you pour.\"\n\nMei Lin fills your cup until it trembles at the lip, slowly, with her eyes lowered, and you have rarely been told so much by a silence.",
+    quiet: quietY("Bed in this house is taken by rank, lowest first, so the lodger climbs the ladder first. From the bedding you follow the rest through the floor: washing water thrown out, an ivory hairpin laid on a shelf, and last the mother's slippers, making one slow circuit of the room. {yuki} The slippers stop, and soon after them so do you.",
+        "*I was not sent up at all,* Yuki sends, arriving on the bedding of her own accord. *She looked at me, thought about rank, and went to find her slippers. Draw your own conclusions.*",
+        "*I was not sent up at all,* Yuki sends, the ladder complaining under her, rung by rung. *She looked at me, thought about rank, and stood aside. Draw your own conclusions.*",
+        "\"I was not sent up at all,\" Yuki says, coming up at her own pace and sitting down to undo her hair. \"She asked whether the honoured one wished to retire. I said presently. Draw your own conclusions.\""),
+};
+/** v0.11.243 (owner picks P15-B, D1; SF: HS): the herb slopes' week 2 a sequence of two on the long calendar (`seqText` 'herb_slopes:2'): Fable's run SF. */
+const slopesW2a = (g) => `Mei Lin works the slope as a general works a map: this patch, then that one, and never the same root twice in a season. She shows you Ninefold grass: how to cut it so that it grows back, and how to tell a good stand from one that has *gone wrong*, the leaves too red, too eager, the Qi in them curdled like old milk.
+
+"You don't need any of this," she says, without looking at you. "Why are you here?"
+
+${g.flags.mei_bruised ? 'Her split lip has scabbed over. She catches you looking at it, and stares back until you look somewhere else.' : ''}`;
+const slopesW2b = (g) => `${SLOPES_W2.t}${g.flags.mei_bruised ? `\n\n${SLOPES_W2.bruised}` : ''}`;
+const SLOPES_W2 = { t: "On the upper terrace Mei Lin has you on your knees, working a pale root out of the earth with your fingers, because a blade nicks it and a nicked root rots in the jar. She corrects your grip twice. The second time she is plainly enjoying herself.\n\n\"You don't need to sell them and you don't swallow them,\" she says, tamping the hole shut with her heel. \"So it isn't money and it isn't medicine. I've run out of sensible reasons. Give me a foolish one.\"", bruised: "The split in her lip has closed to a thin pale line, which pulls when she grins, and she grins regardless." };
 // v0.11.241 (owner picks P13-A with WK-d, D1; SPw3): the village supper's week 3 its own six on the long calendar (`seqText` 'supper:6'; week 2
 // keeps 'supper:5'): Fable's runs V1, V2 and W4 (the fourth redrafted, D1's WC), Claude's cuts (D1: RN, SN). Yuki by form in `{yuki}` where used.
 export const SW3 = [
@@ -445,7 +465,7 @@ ${byForm(g, `What this house owes the post stands by the door in two sacks, weig
 
 *Tell her I charge less than the Sect,* Yuki sends, and yawns, which is a lot of teeth to show a household at supper.`, `What this house owes the post stands by the door in two sacks, weighed and tied. Mei Lin's mother has weighed them again since morning; the steelyard is still out. "The Sect's measure is larger than ours," she says, serving the fish. "Each year it is a little larger. One does not remark on it." "One remarks on it constantly," says Mei Lin. "One just does it indoors." She glances at the shutter all the same. "Indoors," her mother says, "is where it will stay." Yuki, at the head of the table, has been listening with her ears forward.
 
-"How much larger," she asks. The mother tells her, to the handful. Yuki nods and says no more, and you, who know that nod, eat your fish and feel briefly sorry for the measure.`)}`, ...SUPPER_NEW[4]])
+"How much larger," she asks. The mother tells her, to the handful. Yuki nods and says no more, and you, who know that nod, eat your fish and feel briefly sorry for the measure.`)}`, ...SUPPER_NEW[4], SN7.supper4]) /* v0.11.243 (P15-B, SN7): the seventh */
             : longCal(g) && vday(g) >= 3 ? seqText(g, 'supper:6', SW3.map(sw3)) // v0.11.241 (owner picks P13-A, WK-d): week 3 its own six (the long calendar only)
             : seqText(g, 'supper:5', [(g) => `${longCal(g) ? 'Another supper at Mei Lin\'s.' : 'Second supper at Mei Lin\'s.'} Her mother no longer watches you as she would a fox in the henhouse. She watches you as she would a fox she might find a use for.
 
@@ -469,7 +489,7 @@ It is the same millet, greens and fish as every night. You toasted the grain dry
 
 "Twenty-six years," Mei Lin says to you, filling it, "and she has never once asked me for seconds."
 
-"You have never once toasted the millet," says her mother. Mei Lin opens her mouth, finds nothing in it, and gives you a look that says this is your doing. It is.`, ...SUPPER_NEW[5]])),
+"You have never once toasted the millet," says her mother. Mei Lin opens her mouth, finds nothing in it, and gives you a look that says this is your doing. It is.`, ...SUPPER_NEW[5], SN7.supper5])) /* v0.11.243 (P15-B, SN7): the seventh */,
         choices: [
             { text: 'Climb out onto the roof with Mei Lin and watch the stars come out.', do: (g) => { bumpRel(g, 'Mei Lin', 3, 4); return []; }, time: 60, to: 'supper_roof' },
             { text: 'Help her mother with the dishes, and listen.', do: (g) => { bumpRel(g, 'Village', 3, 0); bumpRel(g, 'Mei Lin', 2, 0); bumpRel(g, 'Mother', 2, 0); return [DR_DISHES(g)]; }, time: 60, to: 'village_night' }, // v0.11.139 (owner pick MW1, MB): Mother +2
@@ -509,7 +529,7 @@ After that she says nothing until the jar is nearly empty. Your forearm has been
         text: (g) => {
             // v0.11.230 (owner picks P3-2, D1: FT; Fable's, Claude's cuts): the quiet night a sequence of three by its own day key (`dayKey` below); weeks 2 and 3 six each since v0.11.242 (P14-A)
             if (!arsonNight(g) && longCal(g) && QUIET_WEEK[vday(g)]) return seqText(g, `village_night:${vday(g)}`, QUIET_WEEK[vday(g)]); // v0.11.237 (P10-A, EVk): weeks 2 and 3 their own three; v0.11.242 (P14-A, EVn-23): six each (RV1, C L2)
-            if (!arsonNight(g)) return byDay(g, longCal(g) ? [...QUIET_OLD, ...QUIET_W1] : QUIET_OLD, 'village_night:quiet'); // v0.11.238 (P11-A, EVn-1): the first week six on the long calendar
+            if (!arsonNight(g)) return byDay(g, longCal(g) ? [...QUIET_OLD, ...QUIET_W1, SN7.quiet] : QUIET_OLD, 'village_night:quiet'); // v0.11.238 (P11-A, EVn-1): the first week six on the long calendar; v0.11.243 (P15-B, SN7): seven
             if (g.flags.gao_broken) return `It is still dark when Mei Lin's hand on your shoulder wakes you. Her other hand is closed on a twist of cloth, and in the cloth is Gao Feng's jade token: she had it out of his sleeve while he was lying in the herbs with his arm pointing the wrong way.
 
 The jade is warm. It *beats*, slow and faint, as if it kept a pulse of its own.
@@ -628,11 +648,7 @@ ${[pantry(g), g.james.satiety < 30 ? 'You are hungry.' : '', g.james.hp < jamesH
         id: 'herb_slopes', title: 'The Herb Slopes', art: 'herb_slope', place: `${P} — the herb slopes`,
         enter: (g) => { markDaily(g, 'slopes'); return []; },
         text: (g) => (vday(g) === 2
-            ? `Mei Lin works the slope as a general works a map: this patch, then that one, and never the same root twice in a season. She shows you Ninefold grass: how to cut it so that it grows back, and how to tell a good stand from one that has *gone wrong*, the leaves too red, too eager, the Qi in them curdled like old milk.
-
-"You don't need any of this," she says, without looking at you. "Why are you here?"
-
-${g.flags.mei_bruised ? 'Her split lip has scabbed over. She catches you looking at it, and stares back until you look somewhere else.' : ''}`
+            ? (longCal(g) ? seqText(g, 'herb_slopes:2', [slopesW2a, slopesW2b]) : slopesW2a(g)) // v0.11.243 (P15-B, SF: HS): week 2 two texts on the long calendar
             : `${tributeLeft(g) <= 1 ? 'It is the last day on the slopes before the tribute. She cuts double what she needs and offers no reason. You ask for none. It needs no saying: should tomorrow go wrong, she will have no next season to cut in.' : 'It is the last week on the slopes before the tribute. She cuts double what she needs and offers no reason. You ask for none. It needs no saying: should the tribute go wrong, she will have no next season to cut in.'} Halfway along the terrace, with her back to you and the knife still working, she asks again what a man who needs none of this is doing up here.
 
 Her father comes up again, briefly. He would walk her up here and get the name of every plant wrong, on purpose, so that she had to put him right.`),

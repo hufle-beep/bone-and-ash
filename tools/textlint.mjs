@@ -130,16 +130,20 @@ for (const [region, day, ks, more] of [['rr', 2, [3, 4], {}], ['dw', 3, [1, 2, 3
 // v0.11.235 (owner pick P8-A, TG; v0.11.234's measure): the supper's and the sunset walk's cycles of six on each of their days, the village's
 // three weeks, in the three forms (two new texts name Yuki by form), and the Fallout's story days 9 and 10 (`fo_mei`, `fo_ya_time`, their
 // labels) on each day of their sequences of three, so the texts v0.11.232–235 added there are read too
-for (const [vday, day] of [[1, 23], [2, 30], [3, 37]]) for (const k of [0, 1, 2, 3, 4, 5]) for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) {
+for (const [vday, day] of [[1, 23], [2, 30], [3, 37]]) for (const k of (vday === 3 ? [0, 1, 2, 3, 4, 5] : [0, 1, 2, 3, 4, 5, 6]) /* v0.11.243 (P15-B, SN7): and the seventh; RV1 (C L3): not week 3's */) for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) {
     const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form;
     Object.assign(g.flags, { long: true, vday, cal_night: 1 }); g.minutes = (day - 1) * 1440 + 19 * 60;
     SAMPLES.push(onDay(g, k));
 }
 // v0.11.239 (owner pick P12-A, TG): and the Fallout supper's sequences of six (FS6): story day 8's six in the three forms, day 9's with Ya and without her; v0.11.241 (P13-A): day 10's own six (FS10) with Ya and without, the village's week 3 (SW3) in the loop above
-for (const day of [44, 51, 58]) for (const k of [0, 1, 2, 3, 4, 5]) for (const [form, realm] of (day === 44 ? [['cat', 0], ['tiger', 2], ['human', 7]] : [['cat', 0]])) for (const ya of (day === 44 ? [true] : [true, false])) { // v0.11.241 (P13-A, FS10): story day 10's lines without Ya too
+for (const day of [44, 51, 58]) for (const k of (day === 58 ? [0, 1, 2, 3, 4, 5] : [0, 1, 2, 3, 4, 5, 6]) /* v0.11.243 (P15-B, SN7); RV1 (C L3): not story day 10's */) for (const [form, realm] of (day === 44 ? [['cat', 0], ['tiger', 2], ['human', 7]] : [['cat', 0]])) for (const ya of (day === 44 ? [true] : [true, false])) { // v0.11.241 (P13-A, FS10): story day 10's lines without Ya too
     const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; if (ya) g.flags.ya_met = true; g.minutes = (day - 1) * 1440 + 12 * 60;
     SAMPLES.push(onDay(g, k));
 }
+// v0.11.243 RV1 (the cold review's TG-C3): the herb slopes' week 2 with Mei Lin's lip split, both texts
+for (const k of [0, 1]) { const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); Object.assign(g.flags, { long: true, vday: 2, cal_night: 1, mei_bruised: true }); g.minutes = 29 * 1440 + 9 * 60; SAMPLES.push(onDay(g, k)); }
+// v0.11.243 (owner picks P15-B, D1; SF: MW): the long calendar's first forest week (`forest_day` 1), so its own morning is linted
+{ const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); g.flags.forest_day = 1; g.minutes = 1440 + 6 * 60; SAMPLES.push(g); }
 // v0.11.242 (owner pick RV1 after P14-A; the cold review's C M1, TG-C1): the forest night's later texts (`night`'s `byDay` index 5–14: the first
 // loop reads 0–4), in the three forms with the fire and in the cat without it (the fire line is the same in every form), so NF6's six are linted
 for (const k of [5, 6, 7, 8, 9, 10, 11, 12, 13, 14]) for (const [form, realm, fire] of [['cat', 0, true], ['tiger', 2, true], ['human', 7, true], ['cat', 0, false]]) {

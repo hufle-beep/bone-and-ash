@@ -1,0 +1,72 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/act1_fallout.js",
+  "find": "...FS8.map(fs8), fs8(FS7.d8)])",
+  "replace": "...FS8.map(fs8)])",
+  "note": "SN7 undone for story day 8: the seventh reads text 1 again"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/act1_fallout.js",
+  "find": "...FS9.map(fs9), fs9(FS7.d9)]))",
+  "replace": "...FS9.map(fs9), fs9(FS9[0])]))",
+  "note": "story day 9's seventh repeats text 4"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/ashfall.js",
+  "find": "...SUPPER_NEW[4], SN7.supper4])",
+  "replace": "...SUPPER_NEW[4], SN7.supper5])",
+  "note": "week 1's seventh supper reads week 2's"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/ashfall.js",
+  "find": "SN7.quiet] : QUIET_OLD,",
+  "replace": "SN7.quiet] : [...QUIET_OLD, SN7.quiet],",
+  "note": "the old calendar's quiet nights take the seventh"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/wilds.js",
+  "find": "(g.flags.forest_day || 1) === 1 ? MORNING_W1",
+  "replace": "(g.flags.forest_day || 1) <= 2 ? MORNING_W1",
+  "note": "week 2's morning reads week 1's"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/wilds.js",
+  "find": "text: (g) => (longCal(g) && (g.flags.forest_day || 1) === 1",
+  "replace": "text: (g) => ((g.flags.forest_day || 1) === 1",
+  "note": "MW on the old calendar too"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/ashfall.js",
+  "find": "seqText(g, 'herb_slopes:2', [slopesW2a, slopesW2b])",
+  "replace": "seqText(g, 'herb_slopes:2', [slopesW2b, slopesW2a])",
+  "note": "HS: the two texts swapped"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/ashfall.js",
+  "find": "${g.flags.mei_bruised ? `\\n\\n${SLOPES_W2.bruised}`",
+  "replace": "${!g.flags.mei_bruised ? `\\n\\n${SLOPES_W2.bruised}`",
+  "note": "HS: the bruise line inverted"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/act1_fallout.js",
+  "find": "not a grain spilled,* she sends.",
+  "replace": "not a grain spilled,* she says.",
+  "note": "D1 undone: the great form 'says'"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/prologue.js",
+  "find": "gets the usual number",
+  "replace": "gets last night's number",
+  "note": "W1 undone"
+ }
+]

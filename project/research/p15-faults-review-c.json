@@ -1,0 +1,51 @@
+[
+ {
+  "id": "R1",
+  "file": "js/story/act1_fallout.js",
+  "find": "*Straight-backed, and she kept the bowl level,* she reports.",
+  "replace": "\\\"Straight-backed, and she kept the bowl level,\\\" she says aloud.",
+  "note": "FS7.d8: the small cat speaks aloud at the table (the bond lost); the test compares the seventh with FS7.d8 itself"
+ },
+ {
+  "id": "R2",
+  "file": "js/story/ashfall.js",
+  "find": "*I was not sent up at all,* Yuki sends, the ladder complaining",
+  "replace": "*I was not sent up at all,* Yuki says, the ladder complaining",
+  "note": "SN7.quiet: the great form 'says' (F9's kind, in the text D1 did not pin)"
+ },
+ {
+  "id": "R3",
+  "file": "js/story/ashfall.js",
+  "find": "which pulls when she grins, and she grins regardless.",
+  "replace": "which pulls when she grins, and she grins regardless, as she did yesterday.",
+  "note": "HS: a time word in the bruise line (neither the lint nor the packet draws it)"
+ },
+ {
+  "id": "R4",
+  "file": "js/story/wilds.js",
+  "find": "text: (g) => (longCal(g) && (g.flags.forest_day || 1) === 1 ? MORNING_W1",
+  "replace": "text: (g) => (longCal(g) && (g.flags.forest_day || 1) === 1 && !replayExplore(g) ? MORNING_W1",
+  "note": "MW on the first Coil only: later Coils read week 3's text again (saw_lights is kept, so 'And then the lights')"
+ },
+ {
+  "id": "R5",
+  "file": "js/story/wilds.js",
+  "find": "with a root filed under one kidney",
+  "replace": "with a root filed under one shoulder",
+  "note": "MORNING_W1's wording changed: only the PR2 / VQ1 pins (nf hash) can see it"
+ },
+ {
+  "id": "R6",
+  "file": "js/story/ashfall.js",
+  "find": "The lane lies awake over them regardless;",
+  "replace": "The lane lies awake over them regardless, as it did last night;",
+  "note": "RT 3:5: a time word in the reworded shared text"
+ },
+ {
+  "id": "R7",
+  "file": "js/story/ashfall.js",
+  "find": "${g.flags.mei_bruised ? `\\n\\n${SLOPES_W2.bruised}`",
+  "replace": "${g.flags.mei_bruised ? ` ${SLOPES_W2.bruised}`",
+  "note": "HS: the bruise line run into the question's paragraph (the text no longer ends on her question as its own paragraph)"
+ }
+]

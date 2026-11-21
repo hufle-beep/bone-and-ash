@@ -82,13 +82,13 @@ const BOTH = { 'Mei Lin': 90, Ya: 90 };
 /** v0.11.238 RV2 (the cold review's C L2): a camp night's clock as the game has it: story day 10 + `bl_day` (`blSpan` days each), its `bl_n`-th night, at 19:00 (`bl_camp`'s hour). */
 const campNight = (bday, n = 0) => (g) => calMinutes(g, 10 + bday, 19) + n * DAY;
 export const STATES = [
-    ...[[1, 23], [2, 30], [3, 37]].flatMap(([v, d]) => [0, 1, 2, 3, 4, 5].flatMap((k) => FORMS.map(([f, r, name]) => ({ base: `the long calendar's village week ${v}, day ${k + 1} of its cycles`, form: name, week: v, // v0.11.238 (P11-A, PKf): `--week v` keeps week v's
+    ...[[1, 23], [2, 30], [3, 37]].flatMap(([v, d]) => (v === 3 ? [0, 1, 2, 3, 4, 5] : [0, 1, 2, 3, 4, 5, 6]).flatMap((k) => /* v0.11.243 (P15-B, SN7): and the seventh day; RV1 (C L3): not week 3's (the tribute evening) */ FORMS.map(([f, r, name]) => ({ base: `the long calendar's village week ${v}, day ${k + 1} of its cycles`, form: name, week: v, // v0.11.238 (P11-A, PKf): `--week v` keeps week v's
         on: (id) => inArea(ASHFALL)(id) && !(v === 1 && id === 'mei_walk'), g: stateOf({ long: true, vday: v, cal_night: 1 }, (d - 1) * DAY + 19 * 60, { k, form: [f, r] }) })))),
-    ...[[9, 51], [10, 58]].flatMap(([sd, d]) => [0, 1, 2, 3, 4, 5].map((k) => ({ base: `the long calendar's story day ${sd}, day ${k + 1} of its sequences`, on: inArea(FALLOUT), g: stateOf({ ya_met: true }, (d - 1) * DAY + 12 * 60, { k }) }))),
+    ...[[9, 51], [10, 58]].flatMap(([sd, d]) => (sd === 10 ? [0, 1, 2, 3, 4, 5] : [0, 1, 2, 3, 4, 5, 6]).map((k) => /* v0.11.243 RV1 (C L3): not story day 10's seventh (the farewell) */ ({ base: `the long calendar's story day ${sd}, day ${k + 1} of its sequences`, on: inArea(FALLOUT), g: stateOf({ ya_met: true }, (d - 1) * DAY + 12 * 60, { k }) }))),
     // v0.11.239 (owner pick RV1 after P12-A; the cold review's C M2): the Fallout supper's sequences of six (FS6): story day 8 on each of its days in the
     // three forms (FS8 names Yuki by form), story days 9 and 10 on days 4–6 too, and story day 9 without Ya (FS9's `away` lines), so the packet draws them
-    ...[0, 1, 2, 3, 4, 5].flatMap((k) => FORMS.map(([f, r, name]) => ({ base: `the long calendar's story day 8, day ${k + 1} of its sequences`, form: name, on: inArea(FALLOUT), g: stateOf({}, 43 * DAY + 12 * 60, { k, form: [f, r] }) }))),
-    ...[[9, 50], [10, 57]].flatMap(([sd, d]) => [0, 1, 2, 3, 4, 5].map((k) => ({ base: `the long calendar's story day ${sd}, day ${k + 1} of its sequences, Ya not met`, on: inArea(FALLOUT), g: stateOf({}, d * DAY + 12 * 60, { k }) }))), // v0.11.241 RV1 (the cold review's TG-C4): story day 10 without Ya too (FS10's `away` lines)
+    ...[0, 1, 2, 3, 4, 5, 6].flatMap((k) => FORMS.map(([f, r, name]) => ({ base: `the long calendar's story day 8, day ${k + 1} of its sequences`, form: name, on: inArea(FALLOUT), g: stateOf({}, 43 * DAY + 12 * 60, { k, form: [f, r] }) }))),
+    ...[[9, 50], [10, 57]].flatMap(([sd, d]) => (sd === 10 ? [0, 1, 2, 3, 4, 5] : [0, 1, 2, 3, 4, 5, 6]).map((k) => ({ base: `the long calendar's story day ${sd}, day ${k + 1} of its sequences, Ya not met`, on: inArea(FALLOUT), g: stateOf({}, d * DAY + 12 * 60, { k }) }))), // v0.11.241 RV1 (the cold review's TG-C4): story day 10 without Ya too (FS10's `away` lines)
     { base: 'the Ashen Hills by day, Ya away', on: inArea(BLACKROOT), g: stateOf(AH, 70 * DAY + 10 * 60, { k: 1 }) },
     { base: 'the Ashen Hills by day, both away', on: inArea(BLACKROOT), g: stateOf({ ...AH, trio: 2 }, 70 * DAY + 10 * 60, { k: 1, rel: BOTH }) },
     { base: 'the Ashen Hills by day, both there', on: inArea(BLACKROOT), g: stateOf({ ...AH, ya_off_done: true }, 70 * DAY + 10 * 60, { k: 1 }) },
@@ -111,6 +111,10 @@ export const STATES = [
     ...[[3, 'fourth'], [4, 'fifth']].flatMap(([k, w]) => [
         { base: `the Root Road in the evening, its ${w} camp`, on: inArea(BLACKROOT), g: stateOf({ bl_region: 'rr', bl_day: 2, bl_n: k - 3, mei_party: true, ya_party: true }, campNight(2, k - 3), { k }) },
         { base: `the Ashen Hills in the evening, its ${w} camp`, on: inArea(BLACKROOT), g: stateOf({ ...AH, bl_day: 5, bl_n: k - 3, ya_off_done: true }, campNight(5, k - 3), { k }) }]),
+    // v0.11.243 RV1 (the cold review's TG-C3): the herb slopes' week 2 with Mei Lin's lip split, both texts (the bruise lines)
+    ...[0, 1].map((k) => ({ base: `the long calendar's village week 2, slopes visit ${k + 1}, her lip split`, on: (id) => id === 'herb_slopes', g: stateOf({ long: true, vday: 2, cal_night: 1, mei_bruised: true }, 29 * DAY + 9 * 60, { k }) })),
+    // v0.11.243 (owner picks P15-B, D1; SF: MW): the long calendar's first forest week (`forest_day` 1), so the packet draws its own morning
+    { base: "the long calendar's forest week 1", on: (id) => id === 'morning', g: stateOf({ forest_day: 1 }, 1 * DAY + 6 * 60) },
     // v0.11.242 (owner pick RV1 after P14-A; the cold review's C M1, TG-C1): the forest night on each of its fifteen texts (`night`'s `byDay` index
     // 0–14), in the three forms, with the fire and without, so the packet draws NF6's six and the old seven to nine (the samples' days 0 and 2 drew two)
     ...[...Array(15).keys()].flatMap((k) => [true, false].flatMap((fire) => FORMS.map(([f, r, name]) => ({ base: `the forest's night ${k + 1}${fire ? '' : ', no fire'}`, form: name,
