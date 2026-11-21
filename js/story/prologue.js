@@ -31,6 +31,7 @@ import { installReading } from './reading.js'; // v0.11.182 (RS1)
 import { installYukiPath, ykAskNow, YK_HERE } from './yuki_path.js'; // v0.11.191 (Y1, AK): ykAskNow; v0.11.193 (N1, HQ): YK_HERE
 import { installCoil } from './coil_scenes.js';
 import { installOnce } from './oneoff.js';
+import { installRomance } from './romance.js'; // v0.11.249 (owner pick P19-A: TB, RL, AL)
 import { markWalks } from './walks.js'; // v0.11.109 (owner pick MW1)
 import { FW, BT_CLOSER } from './flight_texts.js'; // v0.11.195 (owner picks F1, D1): the lines for a James who can fly
 /** v0.11.131 (XB2, FL; RC2, L5): the great root-kin's line in night_attack_forced, both texts (Fable's MAIN). */
@@ -1424,5 +1425,7 @@ installReading(SCENES);
 installSelene(SCENES);
 // v0.11.209 (owner pick TF1, roadmap-time.md TS4): "Smoke the catch." on the four stays, long calendar only, appended last, so no position changes
 for (const [hub, camp] of [['wilds', true], ['ashfall', false], ['fo_ashfall', false], ['heart_hub', true]]) SCENES[hub].choices.push(preserveChoice(hub, { camp }));
+// v0.11.249 (owner pick P19-A): romance's tier beats and remembered line close their carriers' texts (last, so they close them); AL last on fo_last_night
+installRomance(SCENES);
 
 export const START_SCENE = 'arrival';

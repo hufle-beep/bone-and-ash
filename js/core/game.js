@@ -12,7 +12,7 @@ import {
     checkFromTierLevel, skillXpCost, maxHp, qiPoolMax, qiRegenPercent, cycleTimeMinutes,
     realmBonus, realmStepLabel, CONDENSE_SIT_COST, FAIL_XP_FRACTION, realmDr, realmShockHpBonus, dampenMultiplier,
 } from './formulas.js';
-import { calMinutes, calStart, calEnd, LONG_CAL, BL_SPAN, storyDay } from './calendar.js'; // v0.11.222 (J2, SV): BL_SPAN, storyDay (blFill) // v0.11.203 (owner pick T1, TS1): the long calendar (test switch)
+import { calMinutes, calStart, calEnd, LONG_CAL, BL_SPAN, storyDay, longCal, storyDayOf, pinnedStoryDay } from './calendar.js'; // v0.11.222 (J2, SV): BL_SPAN, storyDay (blFill) // v0.11.203 (owner pick T1, TS1): the long calendar (test switch)
 
 export const K = 0.5;
 export const CONVERGENCE_MULTIPLIER = 1.25;
@@ -94,6 +94,7 @@ export function coilSnap(g) {
     delete s.read; // v0.11.133 (RF1, L1): a rewind takes the record from the game itself (coil.js), never from the snapshot
     delete s.readStops; // v0.11.228 (RE1, SC): so do the plan's read stops
     delete s.lines; // v0.11.134 (LP2): the line picker's record is per Coil (js/core/lines.js); a rewind starts a new one
+    delete s.wg; // v0.11.249 (P19-A, GT1): the gains' week record is per Coil too
     return s;
 }
 /** What James is at the start of a Coil (the Coil screen compares against it). */
@@ -114,6 +115,7 @@ export function startActCoil(g, act = 1) {
     g.coil.wake = g.scene;
     if (old) { g.coil.n = old.n || 1; g.coil.known = [...(old.known || [])]; g.stats[`coils${old.act || 0}`] = old.n; // v0.11.26 (owner 11:12, N1): crossing into Act 1 continues the Coil (one count per save)
         if (old.best) g.coil.best = JSON.parse(JSON.stringify(old.best));
+        if (old.mrl != null) g.coil.mrl = old.mrl; if (old.rlc) g.coil.rlc = JSON.parse(JSON.stringify(old.rlc)); // v0.11.249 (P19-A RV, C M2): romance's remembered line carries into Act 1
         if (old.free) g.coil.free = old.free; // v0.11.86 (#53): the Coils ended by choice carry into Act 1 // v0.11.16: best-ever relationships carry into Act 1
         // v0.11.160 (owner pick NX2, CS; Opus's L4 of v0.11.159): the Coil that crosses keeps its Day 1 familiarity, so its Coil screen counts
         // the cards and Yuki's practice from the prologue part too (both carry over every Coil). RV1 (SL, Opus's M1): the realm, GU,
@@ -940,7 +942,37 @@ function catchUp(cur, d, top) {
     const fast = Math.min(top - cur, d * REL_CATCHUP);
     return Math.round(cur + fast + (d - fast / REL_CATCHUP));
 }
+/**
+ * v0.11.249 (owner pick P19-A, GT1; TS5, roadmap group f): on the long calendar a choice's gain to Mei Lin or Ya counts on one day of
+ * its story-week only (the week a story day plays as; the Blackroot's three days): the first day that choice raised that person; on
+ * the other days of the same story day it adds nothing (losses always count). So the nightly walk and the suppers count once a week,
+ * not seven times. RV-A (the owner 20:37; the code review's M3): keyed by the choice (`scene:index`, set by story.js `choose` through
+ * `gainAt`), a scene's `enter` by the scene, so one-off gains that share a scene with a nightly one still count; L2: the day runs
+ * from 05:00 (a choice that ends after midnight is still that evening's); L3: a carried result pinned to an earlier story day never
+ * overwrites a later week's record. The old calendar (one day a story day) is untouched. The save's `wg` record: { c: "act:n",
+ * k: { "key|who": [story day, day] } }, reset with the Coil (a stale or broken record is replaced; older code ignores it).
+ */
+export const GAIN_ONCE = ['Mei Lin', 'Ya'];
+let GAIN_AT = null;
+/** Run `fn` with the gains keyed by `key` (story.js: the choice being taken). */
+export function gainAt(key, fn) { const o = GAIN_AT; GAIN_AT = key; try { return fn(); } finally { GAIN_AT = o; } }
+export function gainCounts(g, who) {
+    if (!longCal(g) || !GAIN_ONCE.includes(who) || typeof g.scene !== 'string') return true;
+    const c = `${g.coil?.act || 0}:${g.coil?.n || 1}`;
+    let W = g.wg;
+    if (!W || typeof W !== 'object' || W.c !== c || !W.k || typeof W.k !== 'object' || Array.isArray(W.k)) W = g.wg = { c, k: {} };
+    const day = Math.floor(((g.minutes || 0) - 300) / 1440) + 1; // the waking day (from 05:00), as lines.js textDay
+    const pin = pinnedStoryDay();
+    const sd = pin != null ? pin : storyDayOf(g, Math.max(1, day));
+    const key = `${GAIN_AT || g.scene}|${who}`;
+    const r = W.k[key];
+    if (Array.isArray(r) && r[0] === sd) return r[1] === day;
+    if (Array.isArray(r) && r[0] > sd) return true; // L3: a late result of an earlier week: it counts, the later week's record stays
+    W.k[key] = [sd, day];
+    return true;
+}
 export function bumpRel(g, who, f = 0, a = 0) {
+    if ((f > 0 || a > 0) && !gainCounts(g, who)) { f = Math.min(f, 0); a = Math.min(a, 0); } // GT1
     const r = g.rel[who] || (g.rel[who] = { f: 0, a: 0 });
     let b = null;
     if (g.coil && who !== 'Yuki') {

@@ -14,7 +14,7 @@
  */
 import { hasForm } from './forms.js';
 import { choose, goTo, choiceOpen, choiceTag, gives, setTimeless, defaultMinutes, movesPlace, wasPicked, isMenuScene, isTimeless, setFamiliar, doorMinutes } from './story.js';
-import { NIGHT_TO, d8, itemCap, yukiForm, advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, takeSpoilNotes, itemNames, addItem, canBreakThrough, btMinutes, realmName, condense, sitMinutes, useSpeed, USE_N, USE_CAP, nightLock, endsLate, sitUseless, jamesQiMax, SATIETY_PER_HOUR, breakAt, coilMult, fmtMult, YUKI_HELD_TEXT } from './game.js';
+import { gainAt, NIGHT_TO, d8, itemCap, yukiForm, advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, takeSpoilNotes, itemNames, addItem, canBreakThrough, btMinutes, realmName, condense, sitMinutes, useSpeed, USE_N, USE_CAP, nightLock, endsLate, sitUseless, jamesQiMax, SATIETY_PER_HOUR, breakAt, coilMult, fmtMult, YUKI_HELD_TEXT } from './game.js';
 import { CONDENSE_SIT_COST } from './formulas.js';
 import { btTarget, MER_LINES, lineWindow, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
@@ -379,7 +379,7 @@ function workResult(g, scenes, hubId, card, id, { lines = [], mins = 0, total = 
         const before = { ...g.inventory };
         if (band === 'double' || hm > 1) setLootMult((band === 'double' ? 2 : 1) * hm);
         let out = [];
-        try { out = asOn(() => c.do(g, roll)) || []; } finally { setLootMult(1); }
+        try { out = asOn(() => gainAt(String(id), () => c.do(g, roll))) || []; } finally { setLootMult(1); } // v0.11.249 (P19-A RV, GT1c): the gains keyed by the card
         lines.push(...(band === 'partial' ? keepReplies(out) : out)); // a partial lists only what it keeps; v0.11.69 (P1): its reply sentences stay
         const gained = Object.keys(g.inventory).map((i) => [i, (g.inventory[i] || 0) - (before[i] || 0)]).filter(([, d]) => d > 0);
         if (band === 'partial') {
@@ -391,7 +391,7 @@ function workResult(g, scenes, hubId, card, id, { lines = [], mins = 0, total = 
         const hp0 = g.james.hp, before = { ...g.inventory };
         if (hm > 1) setLootMult(hm);
         let out = [];
-        try { out = asOn(() => c.failDo(g, roll)) || []; } finally { setLootMult(1); }
+        try { out = asOn(() => gainAt(String(id), () => c.failDo(g, roll))) || []; } finally { setLootMult(1); } // v0.11.249 (P19-A RV, GT1c)
         // a partial never hurts, so its text drops the sentences about HP
         lines.push(...(band === 'partial' ? out.map((l) => l.replace(/[^.!?]*−\d+(?:\.\d+)? HP[^.!?]*[.!?]?/g, '').trim()).filter(Boolean) : out));
         const lost = hp0 - g.james.hp;

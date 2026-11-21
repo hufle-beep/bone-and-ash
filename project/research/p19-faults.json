@@ -1,0 +1,142 @@
+[
+ {
+  "id": "F1",
+  "file": "js/core/game.js",
+  "find": "export const GAIN_ONCE = ['Mei Lin', 'Ya'];",
+  "replace": "export const GAIN_ONCE = ['Mei Lin'];",
+  "note": "GT1: Ya's gains repeat every day"
+ },
+ {
+  "id": "F2",
+  "file": "js/core/game.js",
+  "find": "if (Array.isArray(r) && r[0] === sd) return r[1] === day;",
+  "replace": "if (Array.isArray(r) && r[0] === sd) return false;",
+  "note": "GT1: a scene's second gain the same day is lost"
+ },
+ {
+  "id": "F3",
+  "file": "js/core/game.js",
+  "find": "if (!longCal(g) || !GAIN_ONCE.includes(who) || typeof g.scene !== 'string') return true;",
+  "replace": "if (!GAIN_ONCE.includes(who) || typeof g.scene !== 'string') return true;",
+  "note": "GT1: the old calendar gets the rule (one day a story day: no change in effect, but a record)"
+ },
+ {
+  "id": "F4",
+  "file": "js/core/game.js",
+  "find": "{ f = Math.min(f, 0); a = Math.min(a, 0); } // GT1",
+  "replace": "{ f = 0; a = 0; } // GT1",
+  "note": "GT1: a loss in a blocked gain is dropped too"
+ },
+ {
+  "id": "F5",
+  "file": "js/core/game.js",
+  "find": "    delete s.wg; // v0.11.249 (P19-A, GT1): the gains' week record is per Coil too\n",
+  "replace": "",
+  "note": "GT1: the snapshot carries the record"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/romance.js",
+  "find": "return TIERS.find((t) => c.who.includes(t.who) && !g.flags[t.flag] && rel(g, t.who).a >= t.bar && !!TB_TEXT[tbKey(t, id)]) || null;",
+  "replace": "return TIERS.find((t) => c.who.includes(t.who) && rel(g, t.who).a >= t.bar && !!TB_TEXT[tbKey(t, id)]) || null;",
+  "note": "TB: a beat shows on every carrier, not once"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/romance.js",
+  "find": "const t = TIERS.find((x) => TB_CARRIERS[id].who.includes(x.who) && g.flags[x.flag] === g.minutes);",
+  "replace": "const t = TIERS.find((x) => TB_CARRIERS[id].who.includes(x.who) && !!g.flags[x.flag]);",
+  "note": "TB: a beat sticks to every later visit"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/romance.js",
+  "find": "export const rememberDue = (g, id) => RL_CARRIERS.includes(id) && g.coil?.mrl != null && g.coil.mrl < (g.coil.n || 1) && !g.flags.rl_mei;",
+  "replace": "export const rememberDue = (g, id) => RL_CARRIERS.includes(id) && g.coil?.mrl != null && g.coil.mrl < (g.coil.n || 1);",
+  "note": "RL: more than once a Coil"
+ },
+ {
+  "id": "F9",
+  "file": "js/core/coil.js",
+  "find": "if (base.coil.mrl == null && ((c.peak",
+  "replace": "if (((c.peak",
+  "note": "RL: the record moves to the latest Coil"
+ },
+ {
+  "id": "F10",
+  "file": "js/story/romance.js",
+  "find": "show: (g) => likesMei(g) && likesYa(g), do: () => [AL_TEXT.result]",
+  "replace": "show: () => true, do: () => [AL_TEXT.result]",
+  "note": "AL: offered with nobody"
+ },
+ {
+  "id": "F11",
+  "file": "js/story/romance.js",
+  "find": "fo_night: { who: ['Ya'], at: 'night', when: (g) => !!g.flags.ya_met && !g.flags.romance },",
+  "replace": "fo_night: { who: ['Ya'], at: 'night', when: (g) => !g.flags.romance },",
+  "note": "TB: Ya's night beat before she is met"
+ },
+ {
+  "id": "F12",
+  "file": "js/story/romance.js",
+  "find": "return formed(g, L[Math.min(n, L.length) - 1]);",
+  "replace": "return formed(g, L[0]);",
+  "note": "RL: always the first line"
+ },
+ {
+  "id": "F13",
+  "file": "js/story/romance.js",
+  "find": "    for (const t of TIERS) if (t.bar < LIKES_BAR && !g.flags[t.flag] && ROMANCED[t.who](g)) g.flags[t.flag] = -1;\n",
+  "replace": "",
+  "note": "RV-A (T H1): a first-move beat after the romance"
+ },
+ {
+  "id": "F14",
+  "file": "js/story/romance.js",
+  "find": "bl_camp: { who: ['Mei Lin', 'Ya'], at: 'camp', when: (g) => !campAway(g) },",
+  "replace": "bl_camp: { who: ['Mei Lin', 'Ya'], at: 'camp' },",
+  "note": "RV-A (T M3): a beat under a camp text with Ya away"
+ },
+ {
+  "id": "F15",
+  "file": "js/story/romance.js",
+  "find": "    if (TIERS.some((t) => c.who.includes(t.who) && g.flags[t.flag] > 0 && Math.floor(g.flags[t.flag] / 1440) === today)) return;\n",
+  "replace": "",
+  "note": "RV-A (C M1 + L1): two beats a day, one lost unseen"
+ },
+ {
+  "id": "F16",
+  "file": "js/core/game.js",
+  "find": "        if (old.mrl != null) g.coil.mrl = old.mrl; if (old.rlc) g.coil.rlc = JSON.parse(JSON.stringify(old.rlc)); // v0.11.249 (P19-A RV, C M2): romance's remembered line carries into Act 1\n",
+  "replace": "",
+  "note": "RV-A (C M2): Act 1 drops the record"
+ },
+ {
+  "id": "F17",
+  "file": "js/core/game.js",
+  "find": "const key = `${GAIN_AT || g.scene}|${who}`;",
+  "replace": "const key = `${g.scene}|${who}`;",
+  "note": "RV-A (C M3): GT1 keyed by the scene again"
+ },
+ {
+  "id": "F18",
+  "file": "js/core/game.js",
+  "find": "const day = Math.floor(((g.minutes || 0) - 300) / 1440) + 1;",
+  "replace": "const day = Math.floor((g.minutes || 0) / 1440) + 1;",
+  "note": "RV-A (C L2): the day from midnight"
+ },
+ {
+  "id": "F19",
+  "file": "js/core/game.js",
+  "find": "    if (Array.isArray(r) && r[0] > sd) return true; // L3: a late result of an earlier week: it counts, the later week's record stays\n",
+  "replace": "",
+  "note": "RV-A (C L3): a pinned result overwrites a later week"
+ },
+ {
+  "id": "F20",
+  "file": "js/story/romance.js",
+  "find": "supper: { who: ['Mei Lin'], at: '', when: (g) => (g.flags.vday || 0) < 3 },",
+  "replace": "supper: { who: ['Mei Lin'], at: '' },",
+  "note": "RV-A (T L1): a supper beat in the tribute's week"
+ }
+]

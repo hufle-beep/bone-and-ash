@@ -4,7 +4,7 @@
  *             to | to(g), fail?, do?(g, r) → lines, failDo?(g, r) → lines, combat?: encounter, xp?: false }.
  * A check pays standard XP (25% on a fail) unless xp: false. Pure — no DOM.
  */
-import { rollCheck, awardXp, spendQi, advance, ensureBars, actingCheck, actingName, instantWin, itemFull, takeCapNotes, takeSpoilNotes, itemNames, setLootMult, noDiceDc, checkText, addItem, canFly, flightMinutes, partyCarry, plainFight, useSpeed, USE_CAP } from './game.js';
+import { gainAt, rollCheck, awardXp, spendQi, advance, ensureBars, actingCheck, actingName, instantWin, itemFull, takeCapNotes, takeSpoilNotes, itemNames, setLootMult, noDiceDc, checkText, addItem, canFly, flightMinutes, partyCarry, plainFight, useSpeed, USE_CAP } from './game.js';
 import { STOMP, degreeForChoice } from '../story/power.js';
 import { keepReplies } from './replies.js'; // v0.11.69 (P1)
 import { noteDay } from './lines.js'; // v0.11.135 (NT1, EV1)
@@ -288,7 +288,7 @@ export function choose(g, scenes, index, { task = false, speed = 0 } = {}) { // 
         notePicked(g, s.id, index - ONE_MOVE);
         if (!task && !TIMELESS.has(s.id)) countPick(g, s.id, index - ONE_MOVE); // v0.11.140 (FS); v0.11.141 (FX1, SA): every story choice off the meta screens
         if (onChoose) onChoose(g, s.id, index - ONE_MOVE, c);
-        const pre = c.do ? (c.do(g) || []) : []; // v0.11.161 (owner pick PO2, HO): a fight choice's `do` runs before the fight here too, as below (the hunts' once-a-day mark)
+        const pre = c.do ? (gainAt(`${s.id}:${index - ONE_MOVE}`, () => c.do(g)) || []) : []; // v0.11.249 (P19-A RV, GT1c): the gains keyed by the choice // v0.11.161 (owner pick PO2, HO): a fight choice's `do` runs before the fight here too, as below (the hunts' once-a-day mark)
         const r = instantWin(g, c.combat(g));
         const st = STOMP[r.enc.id];
         const lines = [...pre];
@@ -366,7 +366,7 @@ export function choose(g, scenes, index, { task = false, speed = 0 } = {}) { // 
         const before0 = { ...g.inventory };
         if (crit) setLootMult(2);
         let out = [];
-        try { out = c.do(g, roll) || []; } finally { setLootMult(1); }
+        try { out = gainAt(`${s.id}:${index}`, () => c.do(g, roll)) || []; } finally { setLootMult(1); } // v0.11.249 (P19-A RV, GT1c)
         if (flown) out = []; // v0.11.109 (FL1, C): the flown line replaces the scene's own success text; its effects stay
         if (partial) {
             const gained = Object.keys(g.inventory).map((id) => [id, (g.inventory[id] || 0) - ((before0[id]) || 0)]).filter(([, d]) => d > 0);
@@ -379,7 +379,7 @@ export function choose(g, scenes, index, { task = false, speed = 0 } = {}) { // 
         }
     }
     for (const id of new Set(takeCapNotes())) lines.push(`Hammerspace: ${itemNames[id]?.name || id} is full — the rest stays behind.`);
-    if (!ok && c.failDo) lines.push(...(c.failDo(g, roll) || []));
+    if (!ok && c.failDo) lines.push(...(gainAt(`${s.id}:${index}`, () => c.failDo(g, roll)) || [])); // v0.11.249 (P19-A RV, GT1c)
     if (c.combat && ok) {
         lines.push(...takeSpoilNotes(g)); // v0.11.209 (RV1, H1 + M1): the food that turned while this choice took its time
         return { lines, roll, combat: c.combat };

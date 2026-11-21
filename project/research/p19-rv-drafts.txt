@@ -1,0 +1,7 @@
+tb:ya72:tree | Ya counts what belongs to her, aloud, a finger for each: the spear, the knife, the teeth at her throat, the fire, and then, with a look at you, the scholar. She does it as other people check that a door is barred. You ask where in the list you come. She thinks about it honestly, which is worse. "After the spear. Before the fire," she says. "A fire I can make again." The hall is very large and quite dark, and you find you mind it less than you did.
+rl:evening2:0 | She has forgotten the Coil on which she told you her thumb does this only when she is more frightened than she lets on. It is doing it now. You keep your hand still.
+# notes
+- tb:ya72:tree: names no place for Ya and no movement; she only speaks and looks, so it sits under the ledge watch or the heap. Nobody else is on watch or named. "The fire" is claimed as hers; drop it from the list if the camp fire is canonically James's making.
+- tb:ya72:tree: "the teeth at her throat" is the necklace, named only as a possession (no cord, no mending).
+- rl:evening2:0: assumes an earlier-Coil Mei Lin could have told him this about her thumb; it invents a small habit, nothing else. No pour, no serving, no kiss either way; "forgotten", not "never lived".
+- rl:evening2:1 and :2 in final.json still say "never lived" / "never had"; not in this brief, flagged only.

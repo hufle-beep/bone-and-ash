@@ -2049,7 +2049,7 @@ for (const form of ['cat', 'human']) {
     const sp = SCENES.spring_ya.choices, fo = SCENES.fo_last_night.choices;
     assert(sp[0].text === 'Stay as long as the heat lasts.' && sp[1].text === 'Let the steam close over everything.' && sp[2].text === 'Get out. Get dry. Get back to camp.' && /^Tonight, just Ya/.test(sp[3].text) && sp.length === 4, 'RL1 (TP): spring_ya keeps choices 0–2, the new one last');
     const t2 = LG(53200, {}, [10, 10], 0);
-    assert(/^Stay there, the three of you/.test(fo[0].text) && fo[1].text === '"Stay."' && fo[1].to === 'fo_ya_night' && typeof fo[2].text === 'function' && fo[2].text(t2) === 'Sleep.' && /^Tonight, Ya\./.test(fo[3].text) && /^Tonight, Mei Lin\./.test(fo[4].text) && fo[5].to === 'yk_night_fo' && fo.length === 6, 'RL1 (TP; EQ1): fo_last_night keeps choices 0–4, the new ones last');
+    assert(/^Stay there, the three of you/.test(fo[0].text) && fo[1].text === '"Stay."' && fo[1].to === 'fo_ya_night' && typeof fo[2].text === 'function' && fo[2].text(t2) === 'Sleep.' && /^Tonight, Ya\./.test(fo[3].text) && /^Tonight, Mei Lin\./.test(fo[4].text) && fo[5].to === 'yk_night_fo' && fo.length === 7 && fo[6].to === 'fo_depart' /* v0.11.249 (P19-A, AL): the sleep-alone last */, 'RL1 (TP; EQ1): fo_last_night keeps choices 0–4, the new ones last');
     // T: walks below Nascent Soul over path × entry × hearts (her human scenes hidden, every walk reaches the end)
     let run = 0;
     for (const path of ['sister', 'lover']) for (const entry of ['bl_start', 'rt_start']) for (const mei of [10, 80]) for (const ya of [10, 95]) {
@@ -2865,7 +2865,7 @@ for (const form of ['cat', 'human']) {
     }
     {   // FL: the roof label by her form, at its place (saves keep picks by position); both hosts keep their own label
         const i = SCENES.fo_last_night.choices.findIndex((c) => c.to === 'yk_night_fo'), c = SCENES.fo_last_night.choices[i];
-        assert(i === SCENES.fo_last_night.choices.length - 1 && typeof c?.text === 'function', `OF2 (FL): fo_last_night's roof choice is a label function, last (at ${i})`);
+        assert(i === 5 && SCENES.fo_last_night.choices.length === 7 /* v0.11.249 (P19-A, AL): AL's after it */ && typeof c?.text === 'function', `OF2 (FL): fo_last_night's roof choice is a label function, at its place (at ${i})`);
         if (c) for (const form of ['cat', 'tiger', 'human']) {
             assert(c.text(LPG(62100 + n++, form, {}, [0, 0])) === (form === 'human' ? 'Follow Yuki out onto the roof.' : 'Follow the cat out onto the roof.'), `OF2 (FL): the roof label as ${form}`);
             assert(c.text(LPG(62100 + n++, form, {}, [80, 80])) === 'Tonight, Yuki. Wait until the roof is yours.', `OF2 (FL): both hosts keep their label as ${form}`);
@@ -5869,16 +5869,18 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       // v0.11.224 (owner pick TX2, TS6): the pins below re-pinned for two texts only (measured against v0.11.223's code: the same steps, stops and save
       // but for the texts): the wilds' ring reply (DN20: "…the gaps you left in it.") and the Fallout mother's count (DC12: "{Days}" from the calendar);
       // RV1 (VK): and the night fold's record (week.js hash: numbers in words aside too), the same nights folded
-      const out = build(); Tk.PT1.on = false; let old, v216; try { v216 = build(); Tk.CF1.on = false; old = build(); } finally { Tk.CF1.on = true; Tk.PT1.on = true; } // v0.11.217 (PT1): v0.11.216's runs with PT1 off; v0.11.214's with CF1 off too
+      const out = build(); Tk.PT1.on = false; let old, v216; try { v216 = build(); Tk.CF1.on = false; old = build(); } finally { Tk.CF1.on = true; Tk.PT1.on = true; } const GT0 = Gm.GAIN_ONCE.splice(0); let gtOff; try { gtOff = build(); } finally { Gm.GAIN_ONCE.push(...GT0); } // v0.11.249 (P19-A, GT1): the runs with GT1 switched off, for the pins as they stood // v0.11.217 (PT1): v0.11.216's runs with PT1 off; v0.11.214's with CF1 off too
       // v0.11.232 (P5-B, V3b): the Fallout's three pins re-pinned for the save's day record only (RV1 CL: its new key `s:fo_mei:8`; these runs reach only
       // fo_mei's first, old text): measured on v0.11.231's code and this one with the day record left out, all six runs hash the same (steps, stops, lines, save); RV1 (PS-a): re-pinned again for the plan memo's signature hash only (the
       // same comparison with each pick's `sig` left out too: the same six on both codes)
       // v0.11.243 (P15-B, SF: MW; again for RV1's one word, T L6): the wilds' three re-pinned for the week-1 morning's text only (its hash in the night-fold record `tasks.nf.morning`): with MW switched off
       // the six old pins pass; on v0.11.242's code and this one the wilds run's steps, stops, lines and save but `nf` are the same (`/tmp/p15b/wildspin.mjs`, three switch settings)
       // v0.11.248 (P18-A, WT): the Fallout's three re-pinned for Wen's fifth closer only (again for RV-V's redrafted closers; his pool of five draws another closer: `lines.p` / `last` under `ht:wen LOW`, `wen_time_close`, the screen's line); on v0.11.247's code and this one the six runs' steps, stops and save are otherwise the same (`/tmp/p18/pindump`, PINDUMP)
-      assert(JSON.stringify(old) === '{"wilds":"70401054","fallout":"ea94f49a","ashfall":"97eb74f4","cards":"workshop:0,workshop:2,drill:0"}', `${T} (v0.11.215, RV1 TG4): with CF1 switched off the three runs are v0.11.214's exactly (its code, keys sorted: wilds 52a6f20a, the Fallout f17ca92c, Ashfall 97eb74f4), so the new pins below change only by CF1 (${JSON.stringify(old)})`);
-      assert(JSON.stringify(v216) === '{"wilds":"00d4c5f6","fallout":"3d72d1a7","ashfall":"c8d8939d","cards":"workshop:0,workshop:2,drill:0"}', `${T} (v0.11.217, PT1): with PT1 switched off the three runs are v0.11.216's exactly (${JSON.stringify(v216)})`);
-      assert(JSON.stringify(out) === '{"wilds":"00d4c5f6","fallout":"7f851a9f","ashfall":"1e4a6b32","cards":"workshop:0,workshop:2,drill:0"}', `${T} (RV1, TG2): none set: the wilds, the Fallout and Ashfall runs as v0.11.217's code runs them (v0.11.217, PT1: the Fallout and Ashfall re-pinned for the pot's meals, the wilds unchanged; re-pinned for CF1 and its RV1: no card waits behind another's work, a card that gives no food pays at its end, a start needs its old length left today and, with no food, its whole work left in the stay; before, for S3 and the rest row; with the spacing off and the rest row taken out they run as v0.11.210's: the VQ1 block) (${JSON.stringify(out)})`); }
+      assert(JSON.stringify(old) === '{"wilds":"70401054","fallout":"46f35aab","ashfall":"97eb74f4","cards":"workshop:0,workshop:2,drill:0"}', `${T} (v0.11.215, RV1 TG4): with CF1 switched off the three runs are v0.11.214's exactly (its code, keys sorted: wilds 52a6f20a, the Fallout f17ca92c, Ashfall 97eb74f4), so the new pins below change only by CF1 (${JSON.stringify(old)})`);
+      assert(JSON.stringify(v216) === '{"wilds":"00d4c5f6","fallout":"b3094536","ashfall":"c8d8939d","cards":"workshop:0,workshop:2,drill:0"}', `${T} (v0.11.217, PT1): with PT1 switched off the three runs are v0.11.216's exactly (${JSON.stringify(v216)})`);
+      assert(JSON.stringify(gtOff) === '{"wilds":"00d4c5f6","fallout":"7f851a9f","ashfall":"1e4a6b32","cards":"workshop:0,workshop:2,drill:0"}', `${T} (v0.11.249, P19-A GT1): with GT1 switched off, the runs as v0.11.248 pinned them (${JSON.stringify(gtOff)})`);
+      // v0.11.249 (P19-A, GT1; RV-A's GT1c, keyed by the choice): the Fallout's three re-pinned for GT1 only (Mei Lin's and Ya's repeated gains in the planned Fallout week; GT1 off: the old pins, above)
+      assert(JSON.stringify(out) === '{"wilds":"00d4c5f6","fallout":"b43e605e","ashfall":"1e4a6b32","cards":"workshop:0,workshop:2,drill:0"}', `${T} (RV1, TG2): none set: the wilds, the Fallout and Ashfall runs as v0.11.217's code runs them (v0.11.217, PT1: the Fallout and Ashfall re-pinned for the pot's meals, the wilds unchanged; re-pinned for CF1 and its RV1: no card waits behind another's work, a card that gives no food pays at its end, a start needs its old length left today and, with no food, its whole work left in the stay; before, for S3 and the rest row; with the spacing off and the rest row taken out they run as v0.11.210's: the VQ1 block) (${JSON.stringify(out)})`); }
     // RV1 (TG3): one row a step: Smoke the catch is seen by the step's watch each day it smokes (a row that ran and let the next one
     // run in the same step hid it, and skipped the step's checks: hurt, hungry)
     { const g = ensureBars(newGame(99502, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'ashfall'); g.minutes = 9 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 30); Gm.addItem(g, 'hare_raw', 2);
@@ -6014,7 +6016,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       for (let k = 0; k < 200 && ['evening', 'door'].includes(r.stop); k++) { const v = sceneView(g, SCENES); const o = v.choices.filter((c) => !c.disabled && c.index < 1000 && !/^(Yuki: change form|Story Mode only)/.test(c.label)); if (!o.length || g.combat) break; Wk.storyTap(g, SCENES, o[0].index); if (g.combat) break; if (Wk.afterStory(g, SCENES).resume) r = Wk.runWeek(g, SCENES); }
       const days = (k) => Object.keys(g.flags).filter((f) => f.startsWith(`${k}@`)).map((f) => Number(f.split('@')[1]));
       const gaps = (a) => a.slice(1).map((x, i) => x - a[i]);
-      assert(r.stop === 'week' && ['yk_time', 'wen_time', 'mother_time', 'a1_mei'].every((k) => days(k).length === 3 && gaps(days(k)).every((x) => x === 3)) && g.rel.Yuki.f === 8 && g.rel['Mei Lin'].a === 12, `${T}: a planned Fallout week: 3 visits each, 3 days apart (${['yk_time', 'a1_mei'].map((k) => days(k).join('/')).join(' ; ')}; Yuki ${g.rel.Yuki.f}, Mei Lin's affection ${g.rel['Mei Lin'].a}; was 7 visits)`); }
+      assert(r.stop === 'week' && ['yk_time', 'wen_time', 'mother_time', 'a1_mei'].every((k) => days(k).length === 3 && gaps(days(k)).every((x) => x === 3)) && g.rel.Yuki.f === 8 && g.rel['Mei Lin'].a === 4 /* v0.11.249 (P19-A, GT1): Mei Lin's three visits in one story-week count once (12 before) */, `${T}: a planned Fallout week: 3 visits each, 3 days apart (${['yk_time', 'a1_mei'].map((k) => days(k).join('/')).join(' ; ')}; Yuki ${g.rel.Yuki.f}, Mei Lin's affection ${g.rel['Mei Lin'].a}; was 7 visits)`); }
     // W1: Old Wen's lesson, one way on with a check, walked; GU +12 and Old Wen +4; no stop for it
     { const g = mk('ashfall', 5); Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', 0); Wk.planSet(g, 'door:wen_lesson', 1); const xp = () => JSON.stringify(g.james);
       const j0 = xp(); const r = Wk.runWeek(g, SCENES);
@@ -6062,16 +6064,18 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         return o; });
       // v0.11.224 (owner pick TX2, TS6): the pins below re-pinned for two texts only (measured against v0.11.223's code: the same steps, stops and save
       // but for the texts): the wilds' ring reply (DN20: "…the gaps you left in it.") and the Fallout mother's count (DC12: "{Days}" from the calendar)
-      const out = build(); Tk.PT1.on = false; let old, v216; try { v216 = build(); Tk.CF1.on = false; old = build(); } finally { Tk.CF1.on = true; Tk.PT1.on = true; } // v0.11.217 (PT1): v0.11.216's runs with PT1 off; v0.11.214's with CF1 off too
+      const out = build(); Tk.PT1.on = false; let old, v216; try { v216 = build(); Tk.CF1.on = false; old = build(); } finally { Tk.CF1.on = true; Tk.PT1.on = true; } const GT0 = Gm.GAIN_ONCE.splice(0); let gtOff; try { gtOff = build(); } finally { Gm.GAIN_ONCE.push(...GT0); } // v0.11.249 (P19-A, GT1): the runs with GT1 switched off, for the pins as they stood // v0.11.217 (PT1): v0.11.216's runs with PT1 off; v0.11.214's with CF1 off too
       // v0.11.232 (P5-B, V3b): the Fallout's three pins re-pinned for the save's day record only (RV1 CL: its new key `s:fo_mei:8`; these runs reach only
       // fo_mei's first, old text): measured on v0.11.231's code and this one with the day record left out, all six runs hash the same (steps, stops, lines, save); RV1 (PS-a): re-pinned again for the plan memo's signature hash only (the
       // same comparison with each pick's `sig` left out too: the same six on both codes)
       // v0.11.243 (P15-B, SF: MW; again for RV1's one word, T L6): the wilds' three re-pinned for the week-1 morning's text only (its hash in the night-fold record `tasks.nf.morning`): with MW switched off
       // the six old pins pass; on v0.11.242's code and this one the wilds run's steps, stops, lines and save but `nf` are the same (`/tmp/p15b/wildspin.mjs`, three switch settings)
       // v0.11.248 (P18-A, WT): the Fallout's three re-pinned for Wen's fifth closer only, as PR2's above
-      assert(JSON.stringify(old) === '{"wilds":"e6b4ef54","fallout":"2600aab2","ashfall":"55bb2cae"}', `${T} (v0.11.215, RV1 TG4): with CF1 switched off, v0.11.214's runs exactly (its code, keys sorted) (${JSON.stringify(old)})`);
-      assert(JSON.stringify(v216) === '{"wilds":"f997b7f1","fallout":"a5a268e1","ashfall":"eb5b2dc3"}', `${T} (v0.11.217, PT1): with PT1 switched off, v0.11.216's runs exactly (${JSON.stringify(v216)})`);
-      assert(JSON.stringify(out) === '{"wilds":"f997b7f1","fallout":"c33f1c41","ashfall":"d853a742"}', `${T} (TG): spacing off, rest row out: v0.11.210's three runs exactly as v0.11.217 runs them (v0.11.217, PT1: the Fallout and Ashfall re-pinned for the pot's meals, the wilds unchanged; re-pinned for CF1: no card waits behind another's work, a card that gives no food pays at its end) (${JSON.stringify(out)})`); }
+      assert(JSON.stringify(old) === '{"wilds":"e6b4ef54","fallout":"026a3ad3","ashfall":"55bb2cae"}', `${T} (v0.11.215, RV1 TG4): with CF1 switched off, v0.11.214's runs exactly (its code, keys sorted) (${JSON.stringify(old)})`);
+      assert(JSON.stringify(v216) === '{"wilds":"f997b7f1","fallout":"e3e27378","ashfall":"eb5b2dc3"}', `${T} (v0.11.217, PT1): with PT1 switched off, v0.11.216's runs exactly (${JSON.stringify(v216)})`);
+      assert(JSON.stringify(gtOff) === '{"wilds":"f997b7f1","fallout":"c33f1c41","ashfall":"d853a742"}', `${T} (v0.11.249, P19-A GT1): with GT1 switched off, the runs as v0.11.248 pinned them (${JSON.stringify(gtOff)})`);
+      // v0.11.249 (P19-A, GT1): the Fallout's three re-pinned for GT1 only, as PR2's above
+      assert(JSON.stringify(out) === '{"wilds":"f997b7f1","fallout":"ec0ab198","ashfall":"d853a742"}', `${T} (TG): spacing off, rest row out: v0.11.210's three runs exactly as v0.11.217 runs them (v0.11.217, PT1: the Fallout and Ashfall re-pinned for the pot's meals, the wilds unchanged; re-pinned for CF1: no card waits behind another's work, a card that gives no food pays at its end) (${JSON.stringify(out)})`); }
     // RV1 (TG2, L1): the spring found, its row at 1 and the wash open: one row, the wash's, and the run washes
     { const g = mk('heart_hub', 17); g.flags.spring_found = true; Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', 0); Wk.planSet(g, 'door:heart_spring', 1);
       const rs = Wk.doorCards(g, SCENES).filter((x) => x.scene === 'heart_spring'); const r = Wk.runWeek(g, SCENES);
@@ -8895,6 +8899,144 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       assert(IN.every((t) => src.includes(t)) && !OUT.some((t) => src.includes(t)), `${T} (D1): Claude's cuts in, the drafts' phrases out (${IN.filter((t) => !src.includes(t)).concat(OUT.filter((t) => src.includes(t))).join(' | ')})`); }
     assert(NEW.length >= 40 && !NEW.some((t) => /glasses|spectacles/i.test(t)), `${T}: no glasses in the ${NEW.length} new texts rendered`);
     { const N = await import('../js/core/news.js'); assert(/0\.11\.248/.test(JSON.stringify(N.NOTES)), `${T}: What's new has 0.11.248`); }
+}
+// v0.11.249 (owner pick P19-A, 2026-11-21 19:48): group f's first push (romance): GT1, TB, RL, AL, UE; LN and QI closed in the docs
+{
+    const T = 'P19-A';
+    const C = await import('../js/core/calendar.js'); const G = await import('../js/core/game.js'); const R = await import('../js/story/romance.js'); const RT = await import('../js/story/romance_texts.js');
+    const AC = await import('../js/story/act1_common.js'); const CO = await import('../js/core/coil.js'); const A = await import('../js/story/again.js');
+    const D = 1440; const FORMS = { cat: 0, tiger: 2, human: 7 };
+    const mk = (seed, flags = {}, cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true, cal })); Object.assign(g.flags, flags); return g; };
+    const enter = (g, id) => { g.scene = id; return SCENES[id].enter ? SCENES[id].enter(g) : []; };
+    const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
+    const LEFT = /\$\{|\{yuki\}|undefined|\[object/;
+    // GT1: a scene's gain to Mei Lin or Ya counts on one day of its story-week; the same day again counts; losses always; others untouched; the old calendar untouched
+    { const g = mk(49001); const a = () => g.rel['Mei Lin']?.a || 0; g.coil.best = { 'Mei Lin': { f: -999, a: -999 }, Ya: { f: -999, a: -999 }, Village: { f: -999, a: -999 } }; // no catch-up in the way
+      const at = (day, scene, who, f, aa) => { g.minutes = (day - 1) * D + 20 * 60; g.scene = scene; G.bumpRel(g, who, f, aa); };
+      at(22, 'mei_walk', 'Mei Lin', 2, 5); const a1 = a(); at(22, 'mei_walk', 'Mei Lin', 0, 5); const a2 = a(); at(23, 'mei_walk', 'Mei Lin', 2, 5); const a3 = a();
+      at(23, 'supper', 'Mei Lin', 0, 4); const a4 = a(); at(24, 'mei_walk', 'Mei Lin', 0, -3); const a5 = a(); g.coil.best['Mei Lin'] = { f: -999, a: -999 }; at(29, 'mei_walk', 'Mei Lin', 0, 5); const a6 = a();
+      assert(C.storyDay(g) === 5 && a1 === 5 && a2 === 10 && a3 === 10 && a4 === 14 && a5 === 11 && a6 === 16, `${T} (GT1): the walk counts on its story-week's first day only, the same day twice, another scene apart, a loss always, the next week again (${[a1, a2, a3, a4, a5, a6]})`);
+      const y0 = g.rel.Ya?.a || 0; at(45, 'fo_supper', 'Ya', 0, 6); at(46, 'fo_supper', 'Ya', 0, 6); const y1 = g.rel.Ya.a;
+      const v0 = g.rel.Village?.f || 0, k0 = g.rel.Yuki?.a || 0; at(45, 'supper', 'Village', 3, 0); at(46, 'supper', 'Village', 3, 0); at(45, 'supper', 'Yuki', 0, 2); at(46, 'supper', 'Yuki', 0, 2);
+      assert(y1 - y0 === 6 && g.rel.Village.f - v0 === 6 && g.rel.Yuki.a - k0 === 4 && G.GAIN_ONCE.join() === 'Mei Lin,Ya', `${T} (GT1): Ya the same; the Village and Yuki untouched`);
+      // the Blackroot's story days are three calendar days
+      at(65, 'bl_camp', 'Ya', 0, 3); at(67, 'bl_camp', 'Ya', 0, 3); at(68, 'bl_camp', 'Ya', 0, 3); assert(g.rel.Ya.a - y1 === 6, `${T} (GT1): the Blackroot's camp once in its three days, then again`);
+      // the record: per Coil; a broken one replaced; never in the snapshot
+      assert(g.wg && g.wg.c === `${g.coil.act || 0}:${g.coil.n || 1}`, `${T} (GT1): the record stamped with the Coil`);
+      g.wg = { c: 'x', k: [] }; at(70, 'bl_camp', 'Ya', 0, 1); const ok1 = g.wg.c === `${g.coil.act || 0}:${g.coil.n || 1}` && !Array.isArray(g.wg.k);
+      g.wg = 'junk'; at(71, 'bl_camp', 'Ya', 0, 1); assert(ok1 && typeof g.wg === 'object' && G.coilSnap(g).wg === undefined, `${T} (GT1): a broken record replaced; the snapshot has none`);
+      g.coil.n += 1; const yb = g.rel.Ya.a; at(71, 'bl_camp', 'Ya', 0, 1); assert(g.rel.Ya.a - yb === 1, `${T} (GT1): a new Coil starts a new record`); }
+    { const o = mk(49002, {}, 0); o.coil.best = { 'Mei Lin': { f: -999, a: -999 } }; for (let d = 2; d <= 4; d++) { o.minutes = (d - 1) * D + 20 * 60; o.scene = 'mei_walk'; G.bumpRel(o, 'Mei Lin', 0, 5); }
+      assert(o.rel['Mei Lin'].a === 15 && o.wg === undefined, `${T} (GT1): the old calendar counts every day, no record`); }
+    // TB: the tiers in story order, once a Coil, on the visit that set them (a redraw keeps it; the next visit has none)
+    { const g = mk(49010, { long: true, vday: 2, cal_night: 1 }); g.rel['Mei Lin'] = { f: 50, a: 80 };
+      g.minutes = 29 * D + 18 * 60; enter(g, 'supper'); const s1 = tx(g, 'supper'), s1b = tx(g, 'supper');
+      g.minutes = 30 * D + 18 * 60; enter(g, 'supper'); const s2 = tx(g, 'supper');
+      g.minutes = 31 * D + 18 * 60; enter(g, 'supper'); const s3 = tx(g, 'supper');
+      assert(s1.endsWith(RT.TB_TEXT.mei30) && s1b === s1 && s2.endsWith(RT.TB_TEXT.mei72) && !s3.includes(RT.TB_TEXT.mei30) && !s3.includes(RT.TB_TEXT.mei72) && g.flags.tb_mei30 && g.flags.tb_mei72, `${T} (TB): Mei Lin's two beats on two suppers in order, then none`);
+      const u = mk(49011, { long: true, vday: 2, cal_night: 1 }); u.rel['Mei Lin'] = { f: 10, a: 29 }; u.minutes = 29 * D + 18 * 60; enter(u, 'supper');
+      assert(!u.flags.tb_mei30 && R.tierBeat(u, 'supper') === '', `${T} (TB): under the bar, no beat`); }
+    { const g = mk(49012, { bl_region: 'rr' }); g.rel.Ya = { f: 40, a: 50 }; g.rel['Mei Lin'] = { f: 40, a: 140 }; const cs = []; for (let k = 0; k < 4; k++) { g.minutes = (65 + k) * D + 17 * 60; enter(g, 'bl_camp'); cs.push(tx(g, 'bl_camp')); } const c1 = cs[2];
+      assert(cs[0].endsWith(RT.TB_TEXT['mei30:camp']) && cs[1].endsWith(RT.TB_TEXT['mei72:camp']) && !Object.values(RT.TB_TEXT).some((b) => cs[3].includes(b)), `${T} (TB, MC-A): the camp carries Mei Lin's beats first, one a visit, then Ya's, then none`);
+      const t = mk(49016, { ya_party: true }); t.rel.Ya = { f: 40, a: 80 }; t.flags.tb_ya45 = 1; t.minutes = 85 * D + 19 * 60; enter(t, 'heart_camp'); const tr = tx(t, 'heart_camp');
+      const t2 = mk(49017, {}); t2.rel.Ya = { f: 40, a: 50 }; t2.minutes = 85 * D + 19 * 60; enter(t2, 'heart_camp');
+      assert(tr.endsWith(RT.TB_TEXT['ya72:tree']) && !t2.flags.tb_ya45, `${T} (TB, MC-A): the Old Tree's camp carries Ya's liked; her kiss tier, with no text there, waits for a camp that has one`);
+      const h = mk(49013, { ya_met: true }); h.rel.Ya = { f: 40, a: 75 }; h.minutes = 45 * D + 21 * 60; enter(h, 'fo_night'); const n1 = tx(h, 'fo_night'); h.minutes += D; enter(h, 'fo_night'); const n2 = tx(h, 'fo_night');
+      const k = mk(49014, {}); k.rel.Ya = { f: 40, a: 75 }; k.minutes = 45 * D + 21 * 60; enter(k, 'fo_night');
+      assert(c1.endsWith(RT.TB_TEXT['ya45:camp']) && n1.endsWith(RT.TB_TEXT['ya45:night']) && n2.endsWith(RT.TB_TEXT['ya72:night']) && !k.flags.tb_ya45, `${T} (TB): Ya's beats at the camp and the Fallout night (once she is met)`); }
+    { const g = mk(49015); g.flags.tb_mei30 = 5; g.flags.tb_ya45 = 5; g.rel['Mei Lin'] = { f: 50, a: 50 }; endCoil(g, 'choice'); rewind(g);
+      assert(!g.flags.tb_mei30 && !g.flags.tb_ya45 && !KEEP_FLAGS.some((f) => /^tb_|^rl_/.test(f)), `${T} (TB): the beats' flags start over with the Coil`); }
+    { const all = Object.values(RT.TB_TEXT);
+      assert(Object.keys(RT.TB_TEXT).sort().join() === 'mei30,mei30:camp,mei72,mei72:camp,ya45:camp,ya45:night,ya72:camp,ya72:night,ya72:tree' && all.every((t) => typeof t === 'string' && !LEFT.test(t) && A.sentencesOf(t).length >= 2 && !/glasses|spectacles/i.test(t)) && ![RT.TB_TEXT.mei30, RT.TB_TEXT.mei72].some((t) => /herb|mint|ginseng/i.test(t)), `${T} (TB): nine beats, two sentences or more, slot-free; Mei Lin's name no herbs (a burned loft)`); }
+    // RL: the Coil she first reached the bar is kept; the next Coil's first carrier closes on the remembered line, once a Coil, its texts in order
+    { assert(CO.RL_BAR === AC.KISS_MEI && R.RL_BAR === AC.KISS_MEI, `${T} (RL): the bar is the kiss tier`);
+      const g = mk(49020); g.rel['Mei Lin'] = { f: 20, a: 20 }; endCoil(g, 'choice'); rewind(g); const none = g.coil.mrl;
+      g.rel['Mei Lin'] = { f: 20, a: 31 }; G.bumpRel(g, 'Mei Lin', 0, 0); const n2 = g.coil.n; endCoil(g, 'choice'); rewind(g);
+      g.minutes = 41 * D + 20 * 60; enter(g, 'evening2'); const e1 = tx(g, 'evening2'), e1b = tx(g, 'evening2'); g.minutes = 66 * D + 9 * 60; enter(g, 'talk_mei'); const t1 = tx(g, 'talk_mei');
+      endCoil(g, 'choice'); rewind(g); g.minutes = 41 * D + 20 * 60; enter(g, 'evening2'); const e2 = tx(g, 'evening2');
+      for (let k = 0; k < 3; k++) { endCoil(g, 'choice'); rewind(g); g.minutes = 41 * D + 20 * 60; enter(g, 'evening2'); } const e5 = tx(g, 'evening2');
+      assert(none == null && g.coil.mrl === n2 && e1.endsWith(RT.RL_TEXT.evening2[0]) && e1b === e1 && !RT.RL_TEXT.talk_mei.some((l) => t1.includes(l)) && e2.endsWith(RT.RL_TEXT.evening2[1]) && e5.endsWith(RT.RL_TEXT.evening2[2]) && g.coil.rlc.evening2 === 5,
+          `${T} (RL): kept from the Coil she reached ${AC.KISS_MEI}; once a Coil, the first carrier only; the first, second and third-and-on lines (${g.coil.mrl} / ${n2}, ${JSON.stringify(g.coil.rlc)})`);
+      const h = mk(49021); h.flags.romance = true; endCoil(h, 'choice'); rewind(h); h.minutes = 66 * D + 9 * 60; enter(h, 'talk_mei'); const t2 = tx(h, 'talk_mei');
+      assert(h.coil.mrl === 1 && t2.endsWith(RT.RL_TEXT.talk_mei[0]), `${T} (RL): the kiss alone sets it; an Act 1 Coil's talk carries it`);
+      assert(Object.values(RT.RL_TEXT).every((L) => L.length === 3 && L.every((t) => !LEFT.test(t) && A.sentencesOf(t).length >= 2 && !/glasses|spectacles/i.test(t))), `${T} (RL): three lines a carrier, two sentences or more`); }
+    // AL: the eve with both liking him: a way to sleep alone, last; the other branches and positions as before
+    { const g = mk(49030); g.rel['Mei Lin'] = { f: 90, a: 90 }; g.rel.Ya = { f: 90, a: 90 }; g.scene = 'fo_last_night'; const v = sceneView(g, SCENES); const last = v.choices[v.choices.length - 1];
+      const L = SCENES.fo_last_night.choices; const i = L.length - 1;
+      assert(L.length === 7 && L[i].text === RT.AL_TEXT.label && last.label === RT.AL_TEXT.label && v.choices.length === 4 && L[0].text.startsWith('Stay there, the three of you') && L[4].text.startsWith('Tonight, Mei Lin.'), `${T} (AL): the label last, shown with the three others`);
+      const r = choose(g, SCENES, i); assert(r.lines.includes(RT.AL_TEXT.result) && g.scene === 'fo_depart' && g.rel['Mei Lin'].a === 90 && g.rel.Ya.a === 90 && !g.flags.ya_romance && !(g.flags.trio > 0), `${T} (AL): its result, on to the north path; nothing gained or lost`);
+      const h = mk(49031); h.rel['Mei Lin'] = { f: 90, a: 90 }; h.scene = 'fo_last_night'; assert(!sceneView(h, SCENES).choices.some((c) => c.label === RT.AL_TEXT.label), `${T} (AL): not without both`);
+      assert(!/herb loft/i.test(RT.AL_TEXT.result) && A.sentencesOf(RT.AL_TEXT.result).length >= 2, `${T} (AL): two sentences, no herb loft`); }
+    // UE: the seven romance entries with no affection test of their own: four gated in practice, the hot springs open
+    { const entries = []; for (const s of Object.values(SCENES)) (s.choices || []).forEach((c, i) => { if (['mei_bond', 'rt_trio', 'yk_night_solo', 'hot_spring', 'heart_spring'].includes(c.to)) entries.push([s.id, i, c]); });
+      const cold = mk(49040, { bl_region: 'ah', drowned_done: true, spring_found: true }); cold.rel['Mei Lin'] = { f: 0, a: 0 }; cold.rel.Ya = { f: 0, a: 0 };
+      const gated = entries.filter(([, , c]) => ['mei_bond', 'rt_trio', 'yk_night_solo'].includes(c.to));
+      assert(gated.length === 4 && gated.every(([, , c]) => c.show && !c.show(cold)), `${T} (UE): mei_bond ×2, the trio's night (through rt_trio), Yuki's alone: closed with no affection (${gated.map(([s, i]) => `${s}:${i}`)})`);
+      const warm = mk(49041, { bl_region: 'ah', trio: 3 }); warm.rel['Mei Lin'] = { f: 90, a: 120 }; warm.rel.Ya = { f: 90, a: 100 };
+      const tr = gated.find(([, , c]) => c.to === 'rt_trio'); const mb = gated.filter(([, , c]) => c.to === 'mei_bond');
+      const onlyM = mk(49042, { bl_region: 'ah' }); onlyM.rel['Mei Lin'] = { f: 90, a: 120 }; onlyM.rel.Ya = { f: 0, a: 0 };
+      assert(tr && tr[2].show(warm) && mb.every(([, , c]) => c.show(onlyM)), `${T} (UE): open past their gates (the trio at 3 with both; Mei Lin alone)`);
+      const open = entries.filter(([, , c]) => ['hot_spring', 'heart_spring'].includes(c.to));
+      assert(open.length === 3 && open.every(([, , c]) => !/rel\(|likes|\.a\b|KISS|LIKES/.test(String(c.show))), `${T} (UE): the hot springs read no affection (bathing comedy, no romance beat)`);
+      const q = mk(49043); q.rel['Mei Lin'] = { f: 0, a: 0 }; q.rel.Ya = { f: 0, a: 0 }; q.scene = 'fo_last_night'; const qv = sceneView(q, SCENES);
+      assert(qv.choices.length === 1 && qv.choices[0].label === 'Sleep.' && /north wind/.test(qv.text), `${T} (UE): the eve with nobody: the quiet branch, one way out`); }
+    // RV-A (the owner 20:37; the cold reviews' fixes and test gaps)
+    { // TG-C1 + C M3 (GT1c): through `choose`: the supper's roof choice counts once a story-week; the dishes, the same scene, still count on another day; a choice that ends after midnight is that evening's
+      const g = mk(49100, { long: true, vday: 2, cal_night: 1 }); g.coil.best = { 'Mei Lin': { f: -999, a: -999 }, Village: { f: -999, a: -999 }, Mother: { f: -999, a: -999 } };
+      const sup = (day, i) => { g.minutes = (day - 1) * D + 19 * 60; g.scene = 'supper'; const a0 = g.rel['Mei Lin']?.a || 0, f0 = g.rel['Mei Lin']?.f || 0; choose(g, SCENES, i); return [(g.rel['Mei Lin'].f - f0), (g.rel['Mei Lin'].a - a0)]; };
+      const r1 = sup(29, 1), r2 = sup(30, 1), r3 = sup(31, 2), r4 = sup(36, 1);
+      assert(JSON.stringify([r1, r2, r3, r4]) === '[[3,4],[0,0],[2,0],[3,4]]', `${T} RV (GT1c, TG-C1, TG-C3): the roof once a week (friendship too), the dishes on another day of it, the next week again (${JSON.stringify([r1, r2, r3, r4])})`);
+      const h = mk(49101); h.coil.best = { 'Mei Lin': { f: -999, a: -999 } }; const at = (m) => { h.minutes = m; h.scene = 'mei_walk'; G.gainAt('mei_walk:0', () => G.bumpRel(h, 'Mei Lin', 0, 5)); };
+      at(29 * D + 23 * 60 + 50); at(30 * D + 10); const late = h.rel['Mei Lin'].a; at(30 * D + 20 * 60); // 23:50 and 00:10 one waking day; the next evening another day of the same week
+      assert(late === 10 && h.rel['Mei Lin'].a === 10, `${T} RV (C L2, TG-C1): the waking day runs from 05:00 (${late}, ${h.rel['Mei Lin'].a})`); }
+    { // C L3 (TG-C1): a carried result pinned to an earlier story day counts, and leaves the later week's record as it was; TG-C2: a mixed gain on a blocked day keeps its loss
+      const g = mk(49102); g.coil.best = { Ya: { f: -999, a: -999 } }; const at = (day, fn) => { g.minutes = (day - 1) * D + 12 * 60; g.scene = 'fo_supper'; fn(); };
+      at(51, () => G.bumpRel(g, 'Ya', 0, 3)); const rec = JSON.stringify(g.wg.k['fo_supper|Ya']); at(52, () => C.atStoryDay(8, () => G.bumpRel(g, 'Ya', 0, 3)));
+      const after = JSON.stringify(g.wg.k['fo_supper|Ya']); at(53, () => G.bumpRel(g, 'Ya', 0, 3));
+      const f0 = g.rel.Ya.f; at(54, () => G.bumpRel(g, 'Ya', -2, 2));
+      assert(C.storyDay(g) === 9 && g.rel.Ya.a === 6 && rec === after && g.rel.Ya.f === f0 - 2, `${T} RV (C L3, TG-C2): the pinned week counts once, the later record kept; a blocked day keeps the loss (${g.rel.Ya.a}, ${rec} / ${after})`); }
+    { // TG-C4: exactly at the bars
+      const at = (who, a, id, flags, carrier) => { const g = mk(49110 + a, flags); g.rel[who] = { f: 10, a }; g.minutes = (who === 'Ya' ? 65 : 29) * D + 19 * 60; enter(g, carrier); return R.tierBeat(g, carrier); };
+      assert(at('Mei Lin', 30, 0, { long: true, vday: 2 }, 'supper') === RT.TB_TEXT.mei30 && at('Mei Lin', 29, 0, { long: true, vday: 2 }, 'supper') === '' && at('Ya', 45, 0, { bl_region: 'rr' }, 'bl_camp') === RT.TB_TEXT['ya45:camp'] && at('Ya', 44, 0, { bl_region: 'rr' }, 'bl_camp') === '', `${T} RV (TG-C4): a beat at exactly its bar, none a point under`);
+      const g = mk(49115, { bl_region: 'rr', tb_ya45: 1 }); g.rel.Ya = { f: 10, a: 72 }; g.minutes = 65 * D + 19 * 60; enter(g, 'bl_camp'); assert(R.tierBeat(g, 'bl_camp') === RT.TB_TEXT['ya72:camp'], `${T} RV (TG-C4): liked at 72`); }
+    { // TG-C5: the record from the Coil's peak (its end lower), kept when a later Coil reaches the bar again; TG-C6 (C M2): carried into Act 1
+      const g = mk(49120); g.rel['Mei Lin'] = { f: 10, a: 25 }; G.bumpRel(g, 'Mei Lin', 0, 10); g.rel['Mei Lin'].a = 5; endCoil(g, 'choice'); rewind(g); const m1 = g.coil.mrl;
+      g.rel['Mei Lin'] = { f: 10, a: 60 }; G.bumpRel(g, 'Mei Lin', 0, 1); endCoil(g, 'choice'); rewind(g); const m2 = g.coil.mrl;
+      g.minutes = 41 * D + 20 * 60; enter(g, 'evening2'); G.startActCoil(g, 1); const keep = [g.coil.mrl, g.coil.rlc?.evening2];
+      assert(m1 === 1 && m2 === 1 && JSON.stringify(keep) === '[1,1]', `${T} RV (TG-C5, TG-C6, C M2, C L5): the peak sets it, a later Coil keeps it, Act 1 carries it (${m1}, ${m2}, ${keep})`);
+      const n = mk(49121); n.coil.mrl = n.coil.n; n.minutes = 41 * D + 20 * 60; enter(n, 'evening2'); assert(!n.flags.rl_mei, `${T} RV (C L5): not on the Coil that set it`); }
+    { // TG-C7 (C M1 + L1): a 0-minute round trip and a re-entry the same evening, two tiers due: one beat, shown on both screens of that visit; the next day the next
+      const g = mk(49130, { long: true, vday: 2, cal_night: 1 }); g.rel['Mei Lin'] = { f: 50, a: 80 }; g.minutes = 29 * D + 19 * 60;
+      enter(g, 'supper'); const a = tx(g, 'supper'); enter(g, 'supper'); const b = tx(g, 'supper'); g.minutes += 20; enter(g, 'supper'); const c = tx(g, 'supper');
+      g.minutes += D; enter(g, 'supper'); const d = tx(g, 'supper');
+      assert(a.endsWith(RT.TB_TEXT.mei30) && b === a && !c.includes(RT.TB_TEXT.mei72) && d.endsWith(RT.TB_TEXT.mei72) && g.flags.tb_mei30 !== g.flags.tb_mei72, `${T} RV (TG-C7): one beat a carrier a day; the second tier the next day`); }
+    { // TG-T1 (T H1): a first-move beat is passed over once that romance has happened; liked still shows
+      const g = mk(49140, { bl_region: 'rr', romance: true }); g.rel['Mei Lin'] = { f: 30, a: 45 }; g.minutes = 65 * D + 19 * 60; enter(g, 'bl_camp');
+      const y = mk(49141, { bl_region: 'rr', ya_romance: true }); y.rel.Ya = { f: 30, a: 60 }; y.minutes = 65 * D + 19 * 60; enter(y, 'bl_camp');
+      const p = mk(49142, { bl_region: 'rr', fo_pick: 'ya' }); p.rel.Ya = { f: 30, a: 60 }; p.minutes = 65 * D + 19 * 60; enter(p, 'bl_camp');
+      const l = mk(49143, { bl_region: 'rr', romance: true }); l.rel['Mei Lin'] = { f: 30, a: 80 }; l.minutes = 65 * D + 19 * 60; enter(l, 'bl_camp');
+      assert(g.flags.tb_mei30 === -1 && R.tierBeat(g, 'bl_camp') === '' && y.flags.tb_ya45 === -1 && R.tierBeat(y, 'bl_camp') === '' && p.flags.tb_ya45 === -1 && l.flags.tb_mei30 === -1 && R.tierBeat(l, 'bl_camp') === RT.TB_TEXT['mei72:camp'], `${T} RV (T H1, TG-T1): past the kiss, no first-move beat; liked shows`); }
+    { // TG-T2 (T H2): the Old Tree's beat under Ya's watch and under the heap, by form
+      for (const [flags, rx] of [[{ ya_party: true, mei_party: true }, /Ya .*first watch|gallery ledge/], [{ ya_party: true, mei_party: true, trio: 3 }, /heap|bedrolls|lie down by the fire|middle/]]) for (const f of Object.keys(FORMS)) {
+          const g = mk(49150 + FORMS[f], flags); g.yuki.form = f; g.yuki.realm = FORMS[f]; g.james.realm = FORMS[f]; g.rel.Ya = { f: 40, a: 80 }; g.rel['Mei Lin'] = { f: 40, a: 80 }; g.flags.tb_ya45 = 1; g.minutes = 85 * D + 19 * 60; enter(g, 'heart_camp'); const t = tx(g, 'heart_camp');
+          assert(t.endsWith(RT.TB_TEXT['ya72:tree']) && rx.test(t) && !LEFT.test(t), `${T} RV (TG-T2): the Old Tree's beat under ${flags.trio ? 'the heap' : "Ya's watch"} (${f})`); }
+      assert(!/watch|Mei Lin|ledge|heap|stride|comes back|sits|lies/i.test(RT.TB_TEXT['ya72:tree']), `${T} RV (T H2): the beat places nobody`); }
+    { // TG-T3 (T M3): no camp beat under a camp text that puts Ya away from the fire; those texts still do
+      const BRS = await import('../js/story/act1_blackroot.js'); const Lx = await import('../js/core/lines.js');
+      for (const [r, idx] of Object.entries(R.CAMP_AWAY)) for (const i of idx) {
+          const g = mk(49160 + i, { bl_region: r }); g.rel.Ya = { f: 40, a: 60 }; for (let k = 0; k < i; k++) { g.minutes = (65 + k) * D + 19 * 60; Lx.noteDay(g, `bl_camp:${r}`); }
+          g.minutes = (65 + i) * D + 19 * 60; enter(g, 'bl_camp'); Lx.noteDay(g, `bl_camp:${r}`); const t = tx(g, 'bl_camp');
+          assert(!g.flags.tb_ya45 && /Ya (wades out|walking the edge|washes her feet)/.test(t), `${T} RV (T M3, TG-T3): ${r} camp ${i + 1}: Ya away, no beat`);
+          g.minutes += D; enter(g, 'bl_camp'); assert(g.flags.tb_ya45 > 0, `${T} RV (T M3): ${r}: the beat waits for the next camp`); } }
+    { // TG-T4 (T M2): no Ya beat under the lovers' Fallout night
+      const g = mk(49170, { ya_met: true, romance: true }); g.rel.Ya = { f: 40, a: 50 }; g.minutes = 45 * D + 21 * 60; enter(g, 'fo_night');
+      assert(!g.flags.tb_ya45 && /Mei Lin climbs the ladder|Mei Lin comes up the ladder/.test(tx(g, 'fo_night')), `${T} RV (T M2, TG-T4): the lovers' night carries no Ya beat`); }
+    { // TG-T5 (T M1) and T L1, L2, L4
+      const all = [...Object.values(RT.TB_TEXT), ...Object.values(RT.RL_TEXT).flat(), RT.AL_TEXT.result];
+      assert(!all.some((t) => /lapse of manners|correctly|before her own|never lived|never had/i.test(t)) && !/laughs/.test(RT.AL_TEXT.result), `${T} RV (T M1, L2, L4, TG-T5): no serving order backwards, no "never lived", AL's laugh gone`);
+      const g = mk(49180, { long: true, vday: 3, cal_night: 1 }); g.rel['Mei Lin'] = { f: 30, a: 40 }; g.minutes = 36 * D + 19 * 60; enter(g, 'supper');
+      assert(!g.flags.tb_mei30, `${T} RV (T L1): no supper beat in the tribute's week`); }
+    { const N = await import('../js/core/news.js'); assert(/0\.11\.249/.test(JSON.stringify(N.NOTES)), `${T}: What's new has 0.11.249`); }
 }
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

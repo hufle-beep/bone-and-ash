@@ -1,0 +1,16 @@
+rl:evening2:0 | On another turn of the Coil a Mei Lin took the glasses off your face at this table, put them on, and declared the world improved by blurring. This one has never touched them. You push them up your nose yourself and offer no explanation.
+rl:evening2:1 | She had a name for you, on a Coil she never lived, and used it across this table whenever you were being impossible. Nobody in this house has thought of it. You are careful not to supply it.
+rl:evening2:2 | You already know the story of her hairpin: whose it was, and why the tassel is red. She told you here, on a Coil that never happened to her. She has not told you now, so you keep your eyes off it and ask nothing.
+rl:talk_mei:0 | On another Coil a Mei Lin walked with her hand in your coat pocket, for warmth, she said, in a forest that was not cold. This one has not found the pocket. You leave it empty anyway.
+rl:talk_mei:1 | There was a Mei Lin who knew you snore, and told the whole camp so, with evidence. The Coil took her and the evidence both. This one still thinks well of you on that point, and you let her.
+rl:talk_mei:2 | You know what she said into your sleeve when she believed you were asleep, on a Coil she has no part in now. She would deny every word, and she would be right. You carry it for the two of you; it weighs very little, and you notice it at every step.
+al:label | Tonight, sleep. Say goodnight to them both, and mean it.
+al:result | You say goodnight to them both, evenly, and go in to sleep by yourself. Ya tells the roof that a scholar is a waste of a warm night and that wolves have better manners; Mei Lin laughs and looks, if anything, let off. They are still up there arguing about you, quite amiably, when your eyes close.
+rl:evening2:0b | A Mei Lin who is nowhere now used to fill your cup before her own, and call it a lapse of manners she intended to keep. This one pours hers, then yours, correctly. The tea tastes the same, which is no help.
+rl:evening2:2b | You know which leg of her table is short, because another Mei Lin showed you the folded leaf wedged under it, on an evening this one never had. The leaf is there. You keep your elbows off that corner and don't look down.
+# notes
+- The packet had no text for the three on the thatch in fo_last_night, only the loft text; al:result assumes he leaves the two of them on the roof and goes in below. If they are elsewhere, "the roof" / "up there" need a word changed.
+- rl:evening2:2 assumes the hairpin has a story she can tell (it tells none of it). If canon gives the pin no history, swap for another detail.
+- rl:talk_mei:1 and :2 assume the earlier Coil reached the Blackroot camps (Act 1 loops, so it should). None of the six says whether he kissed her.
+- rl:talk_mei:0 is worded to hold after the "close" variants too (she has not found the pocket; her hands are not said to be elsewhere).
+- al:label uses "Tonight" to match its sibling labels; al:result names no herbs and no "herb loft".

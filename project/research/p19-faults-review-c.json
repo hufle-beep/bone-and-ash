@@ -1,0 +1,44 @@
+[
+ {
+  "id": "R1",
+  "file": "js/core/game.js",
+  "find": "if ((f > 0 || a > 0) && !gainCounts(g, who)) { f = Math.min(f, 0); a = Math.min(a, 0); } // GT1",
+  "replace": "if (a > 0 && !gainCounts(g, who)) { a = Math.min(a, 0); } // GT1",
+  "note": "GT1: friendship gains never capped (only affection)"
+ },
+ {
+  "id": "R2",
+  "file": "js/story/romance.js",
+  "find": "s.enter = (g) => { const out = enter ? (enter(g) || []) : []; mark(g); return out; };",
+  "replace": "s.enter = (g) => { mark(g); const out = enter ? (enter(g) || []) : []; return out; };",
+  "note": "TB/RL: the mark runs before the carrier's own enter (its gains and flags not yet applied)"
+ },
+ {
+  "id": "R3",
+  "file": "js/core/coil.js",
+  "find": "if (base.coil.mrl == null && ((c.peak?.['Mei Lin']?.a || 0) >= RL_BAR || (g.rel",
+  "replace": "if (base.coil.mrl == null && ((g.rel",
+  "note": "RL: only the affection at the Coil's end counts, not the Coil's peak"
+ },
+ {
+  "id": "R4",
+  "file": "js/story/romance.js",
+  "find": "!g.flags[t.flag] && rel(g, t.who).a >= t.bar",
+  "replace": "!g.flags[t.flag] && rel(g, t.who).a > t.bar",
+  "note": "TB: a tier exactly at its bar (30, 45, 72) gets no beat"
+ },
+ {
+  "id": "R5",
+  "file": "js/story/romance.js",
+  "find": "export const rememberDue = (g, id) => RL_CARRIERS.includes(id) && g.coil?.mrl != null && !g.flags.rl_mei;",
+  "replace": "export const rememberDue = (g, id) => RL_CARRIERS.includes(id) && !g.flags.rl_mei;",
+  "note": "RL: the remembered line in the first Coil, before she ever reached the bar"
+ },
+ {
+  "id": "R6",
+  "file": "js/core/game.js",
+  "find": "    if (Array.isArray(r) && r[0] === sd) return r[1] === day;\n    W.k[key] = [sd, day];",
+  "replace": "    if (Array.isArray(r) && r[0] >= sd) return r[1] === day;\n    W.k[key] = [sd, day];",
+  "note": "GT1: a pinned (earlier) story day's gain is read against a later week's record"
+ }
+]

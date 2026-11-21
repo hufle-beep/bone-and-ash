@@ -48,6 +48,8 @@ export function storyDayOf(g, cal) {
 let pinnedDay = null;
 export const storyDay = (g) => (pinnedDay != null && longCal(g) ? pinnedDay : storyDayOf(g, calDayOf(g.minutes)));
 /** v0.11.215 (owner pick RV1, MS): run `fn` as on story day `d` (a week's card's result, read on the day its work started). */
+/** v0.11.249 (P19-A RV, C L3): the pinned story day, or null (game.js `gainCounts`). */
+export const pinnedStoryDay = () => pinnedDay;
 export function atStoryDay(d, fn) { const o = pinnedDay; pinnedDay = d; try { return fn(); } finally { pinnedDay = o; } }
 /** The minute of story day `d`'s first day at `h`:`m` (the old calendar: `(d - 1) * 1440 + h * 60 + m`). */
 export const calMinutes = (g, d, h = 0, m = 0) => (calStart(g, d) - 1) * 1440 + h * 60 + m;

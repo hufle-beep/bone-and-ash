@@ -31,6 +31,8 @@ export const KEEP_FLAGS = ['lore1', 'lore_realms', 'lore_tree', 'saw_lights', 'y
 export const REMEMBER = { roots: 'the roots under the hollow', bone_sung: 'the song in the bone field', gills: 'where the ghost-gills grow', fungus: 'the jade bracket fungus by the stream', ship_found: 'where the seed-ship lies', log_heard: 'what Wren Aldous\'s log said' };
 const KNOW_TEXT = { lore1: 'what the tribute is', lore_realms: 'the realms, from Old Wen', lore_tree: 'the story of the dead tree', saw_lights: 'where the night lights go' };
 export const HEAD_START = 0.25;
+/** v0.11.249 (P19-A, RL): the bar for Mei Lin's remembered line (act1_common.js KISS_MEI; core does not import the story's gates). */
+export const RL_BAR = 30;
 
 const clone = (o) => JSON.parse(JSON.stringify(o));
 const coil = (g) => g.coil;
@@ -202,6 +204,9 @@ export function rewind(g, { to = 'act' } = {}) {
     for (const [who, r] of Object.entries(base.rel)) peak[who] = { f: r.f, a: r.a };
     const free = (c.free || 0) + (c.why === 'choice' ? 1 : 0); // v0.11.86 (#53, C1): a Coil ended by choice counts, but adds no bonus; v0.11.106 (RA1): 'clear' (a won Act 1) adds
     base.coil = { ...c, n, act: whole ? 0 : (c.act || 0), snap: whole ? fresh : c.snap, wake: base.scene, peak, why: null, back: null, skipEnter: false, one: true };
+    // v0.11.249 (owner pick P19-A, RL): the Coil in which Mei Lin's affection first reached the kiss tier (or she kissed him), kept;
+    // from the next Coil on, her remembered line (romance.js) can show. RL_BAR = act1_common.js KISS_MEI (tests pin it).
+    if (base.coil.mrl == null && ((c.peak?.['Mei Lin']?.a || 0) >= RL_BAR || (g.rel?.['Mei Lin']?.a || 0) >= RL_BAR || g.flags?.romance)) base.coil.mrl = c.n;
     if (free) base.coil.free = free;
     delete base.coil.played; delete base.coil.replay; // v0.11.26: "same days again" is gone (older saves keep the fields; nothing reads them)
     for (const k of Object.keys(g)) delete g[k];
