@@ -1,0 +1,21 @@
+net:cat | Lu Han's sword stays level. It is his free hand that moves: a net of grey spirit-cord leaves his sleeve, plucks Yuki off your shoulder and pins her to the dust, weighted at every knot. *Rude,* the bond reports. *Manage without me.*
+net:great | The drawn sword does not move. Lu Han shakes out his other sleeve, and a spirit-beast net lands across Yuki's back and drags her down by its own weight. *Made for bigger game than me,* she remarks, in your head. *Insulting, and effective.*
+net:woman | With the sword held clear in one hand, Lu Han empties his other sleeve at Yuki: a spirit-beast net, which settles on her from hair to hem and draws shut. "I see," she says, sitting down in it. "You're on your own, then."
+win2:out | The disciple who stepped in beside him already sits in the dust holding his wrist, and the two still on their feet look at him, then at the road, and choose the road.
+win2:road:out | and his disciples are far along the road, two of them running and one doing his best
+win3:out | while the disciple you had already put down gets up for the sole purpose of leaving, and the other two drop their weapons and go with him
+coil:end | You do not mean to meet any of the three. You close your teeth on it, and nobody was ever carried anywhere.
+title:lost | Carried
+bluff:open3 | Lu Han sits alone in the dust with his sword in two pieces beside him, his disciples gone, and you do not send him anywhere.
+bluff:bow3 | He bows where he sits, over two arms that will not help him: not deep, exactly deep enough.
+paid:open3 | Lu Han has not got up from the dust when you begin to sing,
+opening:paid | Lu Han comes back alone. ¶ No collectors, no banners, no gong. Only the inner disciple in his deep-red robe, coming down the road at first light at the pace of a man on his way to visit a grave. He holds himself upright, as a man does while bending is still a decision. Doors close ahead of him, very softly, one after another. ¶ He stops at Mei Lin's house, where you are sitting on the step with a bowl of gruel and Yuki. He studies you until the gruel has gone cold. Then, unasked, he sits down on the step beside you, which in this world is roughly equivalent to undressing in the street. ¶ "The hairpin," he says. "I have not slept since you made it."
+letter:paid | "It is not bone," Lu Han says, low. "Not any bone I know. You beat me; that I can account for. This I cannot. With it in my hand my Qi goes *quiet*. Clean, like a window someone has wiped." He turns his palms up and looks into them. "They fed me grass from the age of six. Pills from twelve. I had never been clean, not for one breath of my life, until I held your hairpin." ¶ There is no threat anywhere in him. That is the frightening part. ¶ "I surrendered it to the Outer Hall," he says. "I was bound to. Outer Elder Shen Qiu lifted it from my hands himself. {OnElder}" He lets a breath go by. "He will not ask as I am asking." ¶ He rises, bows lower than any stranger is owed, and goes back up the road by himself.
+# notes
+- net:woman was not asked for: `TT.net.woman` says "before the sword is clear", the same contradiction with the posture's draw. Offered as an extra; drop it if out of scope.
+- opening:paid and letter:paid keep the built wording (shortest change): one new sentence each ("He holds himself upright…"; "You beat me; that I can account for. This I cannot."). Their five-word runs therefore match the texts they replace.
+- letter:paid assumes `{OnElder}` stands for the whole sentence "On the … he comes here, to ask where such a thing comes from." inside the quote, without quotation marks of its own.
+- bluff:open3 / bluff:bow3: `bluffWin`'s second paragraph still says "No mortal put him on his knees"; it reads as a figure of speech after win[3], but it is the one kneeling word left in that case. He bows seated so that "He rises and goes" still holds.
+- "turns his palms up" in letter:paid sits next to win[3]'s two hurt arms; the pin may come weeks later, so I left it.
+- win2:out / win3:out assume the disciple who fought was put down, not badly hurt, and leaves with the other two; "One of them is calling for his mother" still follows win3:out.
+- title:lost "Carried" echoes the posture's "In either case you will be carried."

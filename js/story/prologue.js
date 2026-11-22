@@ -8,7 +8,8 @@ import { addItem, hasItem, eat, bumpRel, sleepUntil, advance, clockParts, breakt
 import { NO_DICE_TUNE } from './nodice_tune.js';
 import { setNoDiceTune, yukiFightSkill } from '../core/game.js'; // v0.11.118 (YK1 review, SB)
 setNoDiceTune(NO_DICE_TUNE);
-import { forestScale, villageScale, grow, NEW_ITEMS, byForm, byDay, preserveChoice } from './common.js';
+import { forestScale, villageScale, grow, NEW_ITEMS, byForm, byDay, preserveChoice, longStep, LONG_STEPS } from './common.js';
+import { TT, withNetFree, bluffWinText, paidText } from './tribute_texts.js'; // v0.11.251 (owner pick P21-E, TX): Fable's texts for the tribute
 import './power.js';
 import './stomp_prologue.js';
 import './stomp_act1.js';
@@ -53,7 +54,7 @@ const jackals = (g) => {
         id: 'jackals', night: true, // v0.11.92 (O1): a night fight costs sleep
         intro: '' /* v0.11.231 (P4-2, FI): never shown, the stomp posture opens it */,
         band: 'standard',
-        enemies: enemies.map((e) => grow(e, s, JACKAL_GROWTH)),
+        enemies: enemies.map((e) => grow(e, s, JACKAL_GROWTH)).map((e) => (longCal(g) ? longStep(e, LONG_STEPS.jackals) : e)), // v0.11.251 (P21-E, JK)
         win: 'jackals_won', lose: 'jackals_lost', flee: 'jackals_fled',
     };
 };
@@ -72,20 +73,50 @@ const gaoFight = (g) => ({
     ].map((e) => grow(e, forestScale(g), GAO_GROWTH)),
     win: 'gao_won', lose: 'gao_lost',
 });
+/** v0.11.251 (owner pick P21-E): GS, a disciple takes Gao Feng's place when he is broken or turned (Gao's numbers): Careful's
+ *  Coil-1 wins came from Gao out of the fight (18 → 0%); LH, Lu Han +1.5 long-calendar steps (common.js LONG_STEPS); RR, he reads
+ *  James's realm by what he sees (lore: no local can sense it): +LU_READS to his DC and attack for each realm above Foundation, long
+ *  calendar only (the Cultivator's Coil-1 wins 98 → 15%); NT, his net holds Yuki for the whole fight (`net`). */
+/** v0.11.251 (MT): the victory's speech, moved word for word from the won screens (collectors_won; STOMP collectors win[2], win[3]). */
+export const SENT = {
+    1: `"Go home," you tell him. "Tell your Sect Master Ashfall has a new neighbour. Tell him the neighbour doesn't eat grass, doesn't eat pills, and doesn't eat people, and would very much like to keep it that way."
+
+He goes. All of Ashfall watches him down the road. Then, slowly, they turn to look at you: the mortal who put a man of Foundation on his knees, which by every rule they were raised on cannot happen. In this world you have just done the one thing more dangerous than kneeling.
+
+You've given people hope.`,
+    2: `"Go home," you say. "Let your Sect Master know that Ashfall has acquired a neighbour. The neighbour eats no grass, no pills and no people, and would like very much to go on that way."
+
+He goes. The whole village sees him off without a word. Then, slowly, every face turns to you, and you see what it is you have actually done. In this world it is more dangerous than kneeling.
+
+You have handed people hope.`,
+    3: `"Home," you tell him. "And tell the Sect Master that Ashfall has a neighbour now. The neighbour eats no grass, no pills and no people, and means to keep it so."
+
+He goes, nursing the worse arm. The whole village watches him go, then turns to look at you, and only then does it arrive: this is the one thing here more dangerous than kneeling. You have handed people hope.`,
+};
+/** The bluff's bonus (moved from `tribute` with v0.11.251's MT, unchanged). */
+const bluffBonus = (g) => (g.flags.healed === true ? 1 : 0) + (g.flags.boar ? 1 : 0) + (g.flags.gao_beaten ? 1 : 0) + (g.flags.scouted ? 1 : 0) + (g.flags.gao_turned || g.flags.gao_warned ? 1 : 0) + (g.flags.token_silenced ? 1 : 0) + ((g.rel.Village?.f || 0) >= 40 ? 1 : 0) - Math.floor((forestScale(g) + villageScale(g)) / 2);
+export const LU_DISCIPLE = { hp: 8, dc: 4, atk: 5, dmg: 4, dr: 1 };
+export const LU_READS = 1.75;
+export const luReads = (g) => (longCal(g) ? Math.max(0, (g.james.realm || 0) - 1) : 0);
 const collectorsFight = (g) => {
     const s = forestScale(g) + villageScale(g);
     const militia = Math.min(2, g.flags.militia || 0) + (g.flags.spears ? 1 : 0);
+    const gaoOut = g.flags.gao_broken || g.flags.gao_turned;
     const enemies = [
         { name: 'Lu Han', hp: 12, dc: 5, atk: 6, dmg: 5, dr: 1 },
-        ...(g.flags.gao_broken || g.flags.gao_turned ? [] : [{ name: 'Gao Feng', hp: g.flags.gao_beaten ? 5 : 8, dc: 4, atk: 5, dmg: 4, dr: 1 }]),
-        
+        gaoOut ? { name: TT.disciple, ...LU_DISCIPLE } : { name: 'Gao Feng', hp: g.flags.gao_beaten ? 5 : 8, dc: 4, atk: 5, dmg: 4, dr: 1 },
     ].map((e) => grow(e, s, LU_GROWTH));
     // the hunters you drilled hold the others off and wear Lu Han down
     if (militia) enemies[0].hp = Math.max(6, enemies[0].hp - 2 * militia);
+    const reads = luReads(g);
+    if (longCal(g)) enemies[0] = longStep(enemies[0], LONG_STEPS.collectors);
+    if (reads) enemies[0] = { ...enemies[0], dc: enemies[0].dc + LU_READS * reads, atk: enemies[0].atk + LU_READS * reads };
     return {
         id: 'collectors',
         intro: '' /* v0.11.231 (P4-2, FI): never shown, the stomp posture opens it */,
         band: 'major',
+        net: true,
+        tail: [byForm(g, TT.net.cat, TT.net.great, TT.net.woman), reads ? TT.read : ''].filter(Boolean).join('\n\n'),
         enemies,
         win: 'collectors_won', lose: 'collectors_lost',
     };
@@ -738,7 +769,7 @@ You are not a doctor. You are a man who has spent fifteen years on the question 
 
 You are still looking for it when it finds you. It has the dimensions of a small car, and it regards your visit as a *personal* matter.`,
         choices: [
-            { text: 'Darts to the eyes, then the blade.', combat: (g) => ({ id: 'boar', intro: '' /* v0.11.231 (P4-2, FI): never shown, the stomp posture opens it */, band: 'challenging', enemies: [grow({ name: 'Ironhide boar', hp: 10, dc: 4, atk: 4, dmg: 5, dr: 1 }, forestScale(g), BOAR_GROWTH)], win: 'boar_won', lose: 'boar_lost', flee: hubOf(g) }), to: 'boar_won' },
+            { text: 'Darts to the eyes, then the blade.', combat: (g) => ({ id: 'boar', intro: '' /* v0.11.231 (P4-2, FI): never shown, the stomp posture opens it */, band: 'challenging', enemies: [grow({ name: 'Ironhide boar', hp: 10, dc: 4, atk: 4, dmg: 5, dr: 1 }, forestScale(g), BOAR_GROWTH)].map((e) => (longCal(g) ? longStep(e, LONG_STEPS.boar) : e)) /* v0.11.251 (P21-E, BR) */, win: 'boar_won', lose: 'boar_lost', flee: hubOf(g) }), to: 'boar_won' },
             { text: 'A pit and a bed of bone spikes. Make it come to you.', qi: 6, check: { skill: 'Convergence Use', dc: 4, bonus: (g) => -Math.floor(forestScale(g) / 2) }, time: 60, to: 'boar_won', fail: 'boar_lost' },
         ],
     },
@@ -821,8 +852,8 @@ ${g.flags.sky_witness ? `${FW.luHanSky}\n\n"Interesting."` : '"Interesting," he 
 "I've been offered worse," you say. "Not recently."`,
         choices: [
             { text: 'Step forward. "I\'m not kneeling, and nobody\'s paying you today."', combat: collectorsFight, to: 'collectors_won' },
-            { text: 'Bluff: a wandering senior of a hidden sect, testing the Crimson Lotus\'s manners. Let a little bone show.', qi: 4, check: { skill: 'GU', dc: 7, bonus: (g) => (g.flags.healed === true ? 1 : 0) + (g.flags.boar ? 1 : 0) + (g.flags.gao_beaten ? 1 : 0) + (g.flags.scouted ? 1 : 0) + (g.flags.gao_turned || g.flags.gao_warned ? 1 : 0) + (g.flags.token_silenced ? 1 : 0) + ((g.rel.Village?.f || 0) >= 40 ? 1 : 0) - Math.floor((forestScale(g) + villageScale(g)) / 2) }, failDo: (g) => { g.flags.tribute_fail = 'bluff'; return []; } /* v0.11.131 (XB2, HP): which offer Lu Han called */, to: 'bluff_win', fail: 'bluff_fail' },
-            { text: 'Offer tribute they\'ve never seen: sing a wraithbone hairpin, flawless, and pay the village\'s due with it.', qi: 8, check: { skill: 'Convergence Use', dc: 5, bonus: (g) => -Math.floor((forestScale(g) + villageScale(g)) / 2) }, do: (g) => { addItem(g, 'hairpin', 1); return []; }, failDo: (g) => { g.flags.tribute_fail = 'hairpin'; return []; } /* v0.11.131 (XB2, HP) */, to: 'tribute_paid', fail: 'bluff_fail' },
+            { show: () => false /* v0.11.251 (owner pick P21-E, MT): after the won fight only (collectors_won); the place kept */, text: 'Bluff: a wandering senior of a hidden sect, testing the Crimson Lotus\'s manners. Let a little bone show.', qi: 4, check: { skill: 'GU', dc: 7, bonus: bluffBonus }, failDo: (g) => { g.flags.tribute_fail = 'bluff'; return []; } /* v0.11.131 (XB2, HP): which offer Lu Han called */, to: 'bluff_win', fail: 'bluff_fail' },
+            { show: () => false /* v0.11.251 (MT): after the won fight only; the place kept */, text: 'Offer tribute they\'ve never seen: sing a wraithbone hairpin, flawless, and pay the village\'s due with it.', qi: 8, check: { skill: 'Convergence Use', dc: 5, bonus: (g) => -Math.floor((forestScale(g) + villageScale(g)) / 2) }, do: (g) => { addItem(g, 'hairpin', 1); return []; }, failDo: (g) => { g.flags.tribute_fail = 'hairpin'; return []; } /* v0.11.131 (XB2, HP) */, to: 'tribute_paid', fail: 'bluff_fail' },
         ],
     },
     bluff_fail: {
@@ -839,58 +870,42 @@ Lu Han does not take it. He looks at it for as long as courtesy requires, the wa
     bluff_win: {
         id: 'bluff_win', title: 'Senior', art: 'collectors', place: 'Ashfall Hamlet — the tribute post',
         enter: (g) => { g.flags.ending = 'bluff'; bumpRel(g, 'Village', 20, 0); return []; },
-        text: `You don't raise your voice. You let a crown of white bone rise from the earth around the tribute post, slow and silent and beautiful, and you let the Qi in it reach Lu Han: clean, utterly clean, with no trace of the death that soaks everything he has ever eaten. Of the man who made it, his senses still tell him nothing, and a Foundation disciple knows one polite reason why they wouldn't.
-
-To a man of this world, it must be like standing beside the sky.
-
-Lu Han goes still. Then — perfectly, precisely — he bows. Not deep. Just enough.
-
-"This one failed to recognise a senior," he says. "The Crimson Lotus asks no tribute of Ashfall this season. My master will wish to… extend an invitation."
-
-"I'll check my calendar."
-
-They go. Gao Feng looks back once. The look does not mean *goodbye*.`,
+        text: bluffWinText, // v0.11.251 (MT): after the won fight (Fable's); RV-A (SM): its degree-3 sentences
         choices: [{ text: 'Breathe out.', to: 'epilogue' }],
     },
     tribute_paid: {
         id: 'tribute_paid', title: 'Heavenly Material', art: 'hairpin', place: 'Ashfall Hamlet — the tribute post',
         enter: (g) => { addItem(g, 'hairpin', -1); g.flags.ending = 'paid'; bumpRel(g, 'Village', 12, 0); return []; },
-        text: `It takes everything you have: a hairpin the length of your hand, white as moonlight, turned in a spiral of leaves so fine that the light goes through them. You have never made anything better. You hand it over as though it were small change.
-
-Lu Han turns it over in his fingers until the men behind him begin to shift. Then he puts it away inside his robe, with great care, over his heart.
-
-"Ashfall's tribute is paid," he says. "In full. For three years." His eyes come back to you. "Whoever you are, Bone-Maker, the Sect will hear of this. Pray that it hears it from me."
-
-The baskets stay where they stand. Nobody in crimson touches one.`,
+        text: paidText, // v0.11.251 (MT): after the won fight (Fable's); RV-A (SM): its degree-3 sentence
         choices: [{ text: 'Breathe out.', to: 'epilogue' }],
     },
     collectors_won: {
         id: 'collectors_won', title: 'Red Snow', art: 'collectors_down', place: 'Ashfall Hamlet — the tribute post',
-        enter: (g) => { g.flags.ending = 'fought'; bumpRel(g, 'Village', 25, 0); addItem(g, 'beast_core', 2); return ['+2 Murky beast cores.']; },
-        text: `When it is over, the white bone lying like snow around the tribute post is speckled red, Lu Han is on his knees with your blade at his throat, and the other collectors are far down the road and have not stopped running.
+        // v0.11.251 (owner pick P21-E, MT): the fight's end only; the speech moved word for word to collectors_sent, the Village's +25 with it;
+        // lu_won keeps how badly he was outclassed (g.lastWin) for that speech
+        enter: (g) => { g.flags.ending = 'fought'; g.flags.lu_won = g.lastWin?.next === 'collectors_won' ? g.lastWin.degree || 1 : 1; g.flags.lu_one = !!(g.lastWin?.next === 'collectors_won' && g.lastWin.one); delete g.flags.lu_fail; addItem(g, 'beast_core', 2); return ['+2 Murky beast cores.']; }, // v0.11.251 (RV-A): lu_one (XO), lu_fail (FL)
+        text: (g) => withNetFree(g, `When it is over, the white bone lying like snow around the tribute post is speckled red, Lu Han is on his knees with your blade at his throat, and the other collectors are far down the road and have not stopped running.
 
-Your hands are shaking. It isn't fear. It is that the thing worked.
-
-"Go home," you tell him. "Tell your Sect Master Ashfall has a new neighbour. Tell him the neighbour doesn't eat grass, doesn't eat pills, and doesn't eat people, and would very much like to keep it that way."
-
-He goes. All of Ashfall watches him down the road. Then, slowly, they turn to look at you: the mortal who put a man of Foundation on his knees, which by every rule they were raised on cannot happen. In this world you have just done the one thing more dangerous than kneeling.
-
-You've given people hope.`,
+Your hands are shaking. It isn't fear. It is that the thing worked.`),
+        choices: [
+            { text: TT.labels.send, to: 'collectors_sent' },
+            { text: TT.labels.bluff, show: (g) => g.flags.tribute_fail !== 'bluff' /* RV-A (OS): an old save's called bluff */, qi: 4, check: { skill: 'GU', dc: 7, bonus: bluffBonus }, failDo: (g) => { g.flags.lu_fail = 'bluff'; return []; } /* RV-A (FL): the line opens collectors_sent */, to: 'bluff_win', fail: 'collectors_sent' },
+            { text: TT.labels.pin, qi: 8, check: { skill: 'Convergence Use', dc: 5, bonus: (g) => -Math.floor((forestScale(g) + villageScale(g)) / 2) }, show: (g) => g.flags.tribute_fail !== 'hairpin' /* RV-A (OS) */, do: (g) => { addItem(g, 'hairpin', 1); return []; }, failDo: (g) => { g.flags.lu_fail = 'pin'; return []; } /* RV-A (FL) */, to: 'tribute_paid', fail: 'collectors_sent' },
+        ],
+    },
+    /** v0.11.251 (MT): the victory's own screen, the old win texts' speech word for word by the degree of the won fight. */
+    collectors_sent: {
+        id: 'collectors_sent', title: TT.sentTitle, art: 'collectors_down', place: 'Ashfall Hamlet — the tribute post',
+        enter: (g) => { if (g.flags.lu_won) bumpRel(g, 'Village', 25, 0); return []; }, // RV-A (OS): an old save's won screen already gave it
+        text: (g) => `${g.flags.lu_fail === 'bluff' ? `${TT.failBluff}\n\n` : g.flags.lu_fail === 'pin' ? `${TT.failPin}\n\n` : ''}${SENT[g.flags.lu_won] || SENT[1]}`, // RV-A (FL)
         choices: [{ text: 'Breathe out.', to: 'epilogue' }],
     },
     collectors_lost: {
-        id: 'collectors_lost', title: 'Kneel', art: 'collectors', place: 'Ashfall Hamlet — the tribute post',
+        id: 'collectors_lost', title: TT.titleLost /* v0.11.251 (RV-A, SM): was 'Kneel' */, art: 'collectors', place: 'Ashfall Hamlet — the tribute post',
         enter: (g) => { g.flags.ending = 'lost'; g.james.hp = 1; return []; },
-        text: (g) => `You hit the ground hard. Lu Han sets a boot on your chest and the point of his blade at your throat, and the look he gives you from up there is one of honest regret.
-
-"A waste," he says. "Flawless by birth, and a fool by conduct."
-
-What saves you is Ashfall, and all of it: the boy's mother, the old hunters, the herb-women, Old Wen with his tea, Mei Lin with her knife. Forty houses of grey people get to their feet together and walk in between the Crimson Lotus and the stranger who refused to kneel.
-
-Lu Han takes his time over them. He counts heads. He counts what a village costs to replace.
-
-"Next season," he says at last, and sheathes the sword, "the tribute doubles. And the Bone-Maker comes with us, or the village burns." His boot lifts from your chest. "Rest well, senior. You have a year."${byForm(g, '', "\n\nThen he flicks two fingers, and the net comes off Yuki: a spirit-beast net, thrown from his sleeve in the first breath of the fight, before he so much as drew. She has been under it since your knees went. She walks over on legs that aren't quite steady and stands across you. Nobody asks her to move.", '')}`, // v0.11.130 (YB1, LL; Fable's MAIN): the great root-kin's line; RB2 (CL): Fable's redraft after the review
-        choices: [{ text: 'Get up.', do: (g) => { advance(g, 120, { resting: true }); return []; }, to: 'epilogue' }],
+        // v0.11.251 (owner pick P21-E, TK; the owner 01:33): Lu Han takes James to the Sect, the Coil ends there (Fable's text)
+        text: (g) => TT.lost.replace('{yuki}', byForm(g, TT.lostYuki.cat, TT.lostYuki.great, TT.lostYuki.woman)),
+        choices: [{ text: 'Get up.', show: (g) => !g.coil /* v0.11.251 (TK): no accepting it while the Coil turns; the place kept */, do: (g) => { advance(g, 120, { resting: true }); return []; }, to: 'epilogue' }],
     },
     epilogue: {
         id: 'epilogue', title: 'The Dead Tree', art: 'ridge', place: 'Blackroot Wilds — the ridge',

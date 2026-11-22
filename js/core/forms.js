@@ -97,7 +97,7 @@ export const STORY_FORMS = [
     [/^A dart, from a hundred paces/, 'dart'],
     [/ring of bone stakes/, 'spikes'],
     [/bed of bone spikes/, 'spikes'],
-    [/^Bone wall between you and them/, 'hedge'],
+    [/^Bone wall between you and them/, 'spikes'], // v0.11.251 (owner pick P21-E, JR): the jackals' run opens with the spikes (T1 L3), was the hedge (T1 L8): no model could run at night 3 on the long calendar
     [/^Spearheads for the hunters/, 'knife'],
     [/bridge of bone from stone to stone/, 'stones'],
     [/wall of bone/, 'slab'],

@@ -30,9 +30,10 @@
  */
 import { skillCheck, combatHooks, noDiceUp, NO_DICE_DC_SHIFT } from '../core/game.js';
 import { HP_TUNE } from './fight_tune.js';
+import { TT } from './tribute_texts.js'; // v0.11.251 (RV-A, SM)
 
 /** Cultivators' realms (for the realm-gap rule; everyone else is realm 0). Locals can't sense James; he can sense them. */
-export const ENEMY_REALM = { 'Outer Elder Shen Qiu': 2, 'Gao Feng': 1, 'Lu Han': 1, 'Fang Wei, Outer Disciple (lapsed)': 1, 'Sect watcher': 1 };
+export const ENEMY_REALM = { 'Outer Elder Shen Qiu': 2, 'Gao Feng': 1, 'Lu Han': 1, 'Fang Wei, Outer Disciple (lapsed)': 1, 'Sect watcher': 1, [TT.disciple]: 1 }; // v0.11.251 (RV-A, SM): the disciple in Gao's place, Foundation as Gao
 /** The skill ceiling (T10 L10 = check 50) applies to enemies too. */
 export const ENEMY_CAP = 50;
 export const DC_CAP = 7;

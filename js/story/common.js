@@ -80,6 +80,20 @@ export function grow(e, s, { hp = GROWTH.hp, dc = GROWTH.dc, atk = GROWTH.atk } 
     return { ...e, hp: Math.round(e.hp * (1 + hp * s)), dc: half(e.dc + dc * s), atk: half(e.atk + atk * s) };
 }
 
+/**
+ * v0.11.251 (owner pick P21-E; the retune's first push): the prologue's three fights on the long calendar, fixed by the days trained
+ * (the story day's growth is capped at 2, while a long-calendar James has trained about three weeks by the jackals and six by the
+ * tribute). A step: HP ×(1 + 0.25 × steps), DC +0.5 and attack +0.75 a step, on top of the fight's own numbers. Never on the old
+ * calendar. Measured (the models, long calendar, 40 games a model, P21-E whole): Coil-1 prologue wins Careful / Sociable /
+ * Completionist / Cultivator 0 / 0 / 25 / 15% (today 18 / 18 / 78 / 98), prologue Coils 4.17 / 4.17 / 1.75 / 1.85.
+ */
+export const LONG_STEP = { hp: 0.25, dc: 0.5, atk: 0.75 };
+export const LONG_STEPS = { collectors: 1.5, jackals: 3, boar: 2.5 }; // LH, JK, BR
+export function longStep(e, steps) {
+    if (!steps) return e;
+    return { ...e, hp: Math.round(e.hp * (1 + LONG_STEP.hp * steps)), dc: e.dc + LONG_STEP.dc * steps, atk: e.atk + LONG_STEP.atk * steps };
+}
+
 /** Food: satiety cooked / raw. */
 export const FOOD = {
     hare_raw: [35, 18],

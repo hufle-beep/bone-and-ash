@@ -3,6 +3,7 @@
  * "Bite the tail" after a lost tribute, "You remember this" on the arrival, breakthrough from 95% in the label.
  * Every new choice checks coilActive (Incremental Mode, the only mode since v0.11.34).
  */
+import { TT } from './tribute_texts.js'; // v0.11.251 (owner pick P21-E, TK)
 import { advance, startActCoil, combatHooks, PEOPLE_FIGHTS, coilMult, coilMultNext, fmtMult, realmName } from '../core/game.js';
 import { setDeathHook, goTo } from '../core/story.js';
 import { coilActive, endCoil, rewind, coilReport, actOf, actWon, willUnwind, noteClear, targetsText, keptRealm, keptAfterClear, keptLine } from '../core/coil.js';
@@ -12,9 +13,7 @@ const WHY = {
     collapse: `Halfway between standing and the dark, the Ouroboros Axiom turns.
 
 This is not the slow wheel of a breakthrough. It is one hard, practical snap: a hand closing on a cup an inch above the floor. This world's poisoned Qi had every intention of keeping you. The loop was not consulted, and disagrees.`,
-    tribute: `Lu Han's boots crunch away down the road, in no hurry. Ashfall stays ringed about the tribute post, silent in strict order of rank. Nobody looks at you. Here that is a verdict, read out in full.
-
-The village can live with this; it has had the practice. Or you can decline to let it have happened.`,
+    tribute: TT.coil, // v0.11.251 (owner pick P21-E, TK): taken to the Sect (Fable's); was Lu Han leaving with the village kneeling
     beast: `Teeth. Then the ground. Then nothing worth describing.
 
 Whatever it was does not pause over your doctorate in mycology, or over a people who live eight hundred years. It has you down as meat, and the evidence is on its side.
@@ -87,7 +86,7 @@ Yuki remembers all of it, through the bond, as she always has. Expect to hear it
             // v0.11.26 (owner 11:07): the prologue wakes at the first dawn only; Act 1 at its start or at the start of the whole game; no "same days again"
             { text: (g) => (actOf(g) === 1 ? 'Bite the tail. Wake at the start of Act 1.' : `Bite the tail. Wake at the first dawn.${willUnwind(g) ? ' (Foundation unwinds.)' : ''}`), do: (g) => bite(g, 'act'), to: 'coil_dawn' },
             { text: 'Bite the tail. Wake at the start of the whole game (Day 1, the arrival).', show: (g) => actOf(g) === 1 && g.coil?.why !== 'choice', do: (g) => bite(g, 'game'), to: 'coil_dawn' }, // v0.11.86 (W1): a bite by choice restarts the act only
-            { text: 'Accept it. Get up.', show: (g) => g.coil?.why === 'tribute', do: (g) => { g.coil.why = null; advance(g, 120, { resting: true }); return []; }, to: 'epilogue' },
+            { text: 'Accept it. Get up.', show: () => false /* v0.11.251 (TK): no accepting a lost tribute; the place kept */, do: (g) => { g.coil.why = null; advance(g, 120, { resting: true }); return []; }, to: 'epilogue' },
             { text: 'Accept it. Walk.', show: (g) => g.coil?.why === 'shen', do: (g) => { g.coil.why = null; return []; }, to: 'a1_end' },
             { text: 'Not yet.', show: (g) => (g.coil?.why === 'choice' || g.coil?.why === 'clear') && !!g.coil.back, do: (g) => { g.coil.why = null; g.coil.skipEnter = true; return []; }, to: (g) => g.coil.back }, // v0.11.106 (RA1): Not yet after a won act's bite too
         ],

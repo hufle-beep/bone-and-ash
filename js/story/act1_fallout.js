@@ -6,6 +6,7 @@
 import { addItem, eat, condense, advance, sleepUntil, jamesHpMax, hasItem, awardYukiFightXp, yukiForm, nightRest, nightTo } from '../core/game.js';
 import { daily, markDaily, hour, day, eatBest, pantry, foodCount, byForm, byDay, dayReply } from './common.js';
 import { encounter, rel, likesMei, likesYa, trioStep, bumpRel, KISS_YA } from './act1_common.js';
+import { TT } from './tribute_texts.js'; // v0.11.251 (RV-A, HL)
 import { textDay, coilStamp, seqText, dayIndex } from '../core/lines.js'; // v0.11.232 (P5-B, V3b): dayIndex // v0.11.224 (TX2, V3a): seqText
 import { longCal, storyDay, storyDayOf, calStart, calEnd, lastOfWeek, blSpan, elderLeft, departLeft, daysWord, DaysWord, dayWord, countsFill, numWord, dayTitle, titleCase } from '../core/calendar.js'; // v0.11.224 (TX2, TS6): the counts // v0.11.203 (owner pick T1, TS1): the long calendar // RV1 (FX); v0.11.188 (N1, L7): coilStamp
 import { potLine } from './kitchen.js'; // v0.11.181 (SP1, PS)
@@ -311,7 +312,7 @@ export const FALLOUT = {
         id: 'fo_start', title: (g) => (longCal(g) ? dayTitle(g) : 'Day Eight'), // RV1 (MC)
         art: (g) => (ending(g) === 'bluff' ? 'envoy' : 'ashfall_dawn'), place: P,
         enter: (g) => { if (g.james.hp < 1) g.james.hp = 1; return []; },
-        text: (g) => `${OPENING[ending(g)]}
+        text: (g) => `${ending(g) === 'paid' && g.flags.lu_won ? TT.openingPaid /* v0.11.251 (RV-A, HL) */ : OPENING[ending(g)]}
 
 ${g.flags.sky_witness ? 'And under all of it, the thing nobody says out loud: they saw the sky come for you, and leave. Children stop playing when you walk past. A grandmother touches your sleeve and then touches her forehead, as if your sleeve were a shrine.' : ''}${g.flags.gao_broken ? ' Somewhere up the mountain, a disciple named Gao Feng is lying in the Sect\'s infirmary with his sword arm in splints and his meridians cracked, telling anyone who will listen that a mortal did it. Nobody believes him. He has started swearing oaths about you in the ancestral hall, which you gather is a big deal.' : g.flags.gao_turned ? ' You think of Gao Feng, limping home with what you told him. You wonder what he told them.' : ''}`,
         choices: [
@@ -347,7 +348,7 @@ ${g.flags.romance ? 'Mei Lin, at the back of the room, says nothing. She has no 
     },
     fo_lu_han: {
         id: 'fo_lu_han', title: 'Lu Han, Alone', art: 'envoy', place: `${P} — Mei Lin's doorstep`,
-        text: (g) => countsFill(g, LETTER.paid),
+        text: (g) => countsFill(g, g.flags.lu_won ? TT.letterPaid : LETTER.paid), // v0.11.251 (owner pick RV-A, HL): he was beaten first (Fable's)
         choices: [
             { text: 'Call after him: "Lu Han. If you want to be clean again, you know where I am."', do: (g) => { g.flags.lu_han_seed = true; return ['He stops, with his back to you, for the length of three breaths. Then he walks on, no faster and no slower.']; }, to: 'fo_elder_named' },
             { text: 'Let him go. A man like that has to come back on his own.', to: 'fo_elder_named' },

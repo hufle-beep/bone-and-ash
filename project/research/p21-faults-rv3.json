@@ -1,0 +1,1 @@
+[{"id":"C2c","file":"js/story/prologue.js","find":"check: { skill: 'GU', dc: 7, bonus: bluffBonus }, failDo: (g) => { g.flags.lu_fail","replace":"check: { skill: 'GU', dc: 5, bonus: bluffBonus }, failDo: (g) => { g.flags.lu_fail","note":"C2 re-anchored: the won screen bluff DC 5"}]

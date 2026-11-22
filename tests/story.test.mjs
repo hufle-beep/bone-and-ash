@@ -2,6 +2,7 @@
 import { deadMenuOk, DEAD_MENUS } from './lib/deadmenus.mjs'; // v0.11.177 (P9A): the emptied menu texts
 // Incremental Mode since v0.11.34 (D1: Story Mode dropped from the game)
 import { SCENES, START_SCENE } from '../js/story/prologue.js';
+import { TT } from '../js/story/tribute_texts.js'; // v0.11.251 (owner pick P21-E)
 import { newGame, ensureBars, startCombat, combatStep, combatFlee, COMBAT_ACTIONS, itemCap, yukiSitsOut, migrate, REL_HIDDEN, REL_MAX, serialize, deserialize, sleepUntil, startActCoil, jamesHpMax, jamesQiMax, clockParts } from '../js/core/game.js'; // v0.11.172 (P5A RV1, TG1): jamesHpMax, jamesQiMax, clockParts; v0.11.166 (RV1, M2): startActCoil // v0.11.127 (LQ2, TG): yukiSitsOut, migrate; v0.11.137 (HV1): REL_HIDDEN, REL_MAX
 import { sceneView, choose, goTo, wasPicked, threatOf } from '../js/core/story.js'; // v0.11.136 (RV2, TG): threatOf
 import { actionOpen } from '../js/core/forms.js';
@@ -160,6 +161,12 @@ for (let run = 0; run < 40; run++) {
     SCENES.collectors_lost.enter(g); seen.add('collectors_lost');
     choose(g, SCENES, SCENES.collectors_lost.choices.findIndex((c) => c.to === 'coil_end')); // half the runs bite the tail
     assert(walkFrom(g, 'coil_end', new Set(['stream', 'fo_start']), 400) === true, `v0.11.21: the Coil screen walks back to Day 1 (run ${run})`);
+}
+// v0.11.251 (owner pick P21-E, TK): a lost tribute no longer goes on to Act 1 (Lu Han takes James), so the random games no longer
+// carry a weak James into Act 1 (325 of 1,000 did, by "Get up."); these walks do: from the epilogue, as fresh as Day 3, to Act 1's end
+for (let run = 0; run < 300; run++) {
+    const g = ensureBars(fresh(run + 31000)); g.minutes = 6 * 1440 + 900; Object.assign(g.flags, { ending: ['fought', 'bluff', 'paid'][run % 3], lu_won: 1, long: true, forest_day: 3, vday: 3 }); // RV-A (TG-C8): every ending, beaten first
+    walkFrom(g, 'epilogue', new Set(['a1_end']), 2500);
 }
 // v0.9.6: the warning before a sealing Foundation, and Act 1's Coil at Shen Qiu
 for (let run = 0; run < 40; run++) {
@@ -1007,7 +1014,7 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
             if (stop) { if (c === '{') depth++; if (c === '}') { if (depth === 0) { i++; return out; } depth--; } }
             if (!/\s/.test(c)) out += c; i++; } return out; }; return code(false); };
         const LABELS = Object.values(HEART).flatMap((sc) => (sc.choices || []).map((c) => (typeof c.text === 'string' ? c.text : '(fn)')));
-        const PIN = { 'act1_heart.js': '9948b2e5b18d7311', /* v0.11.224 (TX2, TS6): re-pinned: ht_start's day from the calendar (dayWord), the watch line's long-calendar version (DN15); */ /* v0.11.213 (FQ1, S3): re-pinned: the spring's and the fireside talks' days spaced (spacedFree); v0.11.203 (T1, TS1): re-pinned for the long calendar (late and the leave by the story's day) */ 'stomp_act1.js': 'fabbc72722edbdc2' /* v0.11.247 (P17-A, BW2): re-pinned: the table named STOMP_A1, the hawks' and the elk's easy wins wrapped by day (WIN_MORE) */ /* v0.11.231 (P4-2, AT; RV1: `??`): re-pinned: the hawks' easy wins read awayHawks (Ya or both away); v0.11.224 (RV1, MF1): Ya's fight opener by the calendar */, 'yuki_time.js': '746d1873838bd5ca', labels: 'f5407fff487a26e2' }; // v0.11.209 (TF1, K): the labels re-pinned ("Smoke the catch." appended on heart_hub); v0.11.182 (RS1, RV1 L6): the labels re-pinned ("Read to Ya from your archive." appended on heart_camp)
+        const PIN = { 'act1_heart.js': '9948b2e5b18d7311', /* v0.11.224 (TX2, TS6): re-pinned: ht_start's day from the calendar (dayWord), the watch line's long-calendar version (DN15); */ /* v0.11.213 (FQ1, S3): re-pinned: the spring's and the fireside talks' days spaced (spacedFree); v0.11.203 (T1, TS1): re-pinned for the long calendar (late and the leave by the story's day) */ 'stomp_act1.js': '5625eeb4e5a8fc05' /* v0.11.251 (RV-A, HL): re-pinned: luHere reads lu_won (Lu Han beaten at the tribute stays away) */ /* v0.11.247 (P17-A, BW2): re-pinned: the table named STOMP_A1, the hawks' and the elk's easy wins wrapped by day (WIN_MORE) */ /* v0.11.231 (P4-2, AT; RV1: `??`): re-pinned: the hawks' easy wins read awayHawks (Ya or both away); v0.11.224 (RV1, MF1): Ya's fight opener by the calendar */, 'yuki_time.js': '746d1873838bd5ca', labels: 'f5407fff487a26e2' }; // v0.11.209 (TF1, K): the labels re-pinned ("Smoke the catch." appended on heart_hub); v0.11.182 (RS1, RV1 L6): the labels re-pinned ("Read to Ya from your archive." appended on heart_camp)
         const hash = (t) => createHash('sha256').update(t).digest('hex').slice(0, 16);
         const got = { labels: hash(JSON.stringify(LABELS)) };
         for (const f of ['act1_heart.js', 'stomp_act1.js', 'yuki_time.js']) got[f] = hash(skel(readFileSync(new URL(`../js/story/${f}`, import.meta.url), 'utf8')));
@@ -1265,7 +1272,7 @@ for (const form of ['cat', 'human']) {
             if (!/\s/.test(c)) out += c; i++; } return out; }; return code(false); };
       const hash = (t) => createHash('sha256').update(t).digest('hex').slice(0, 16);
       const LABELS = Object.values(RETURN).flatMap((sc) => (sc.choices || []).map((c) => (typeof c.text === 'string' ? c.text : '(fn)')));
-      const PIN = { 'act1_return.js': 'c8c61c9471bc0231', labels: '58e59f4e08e64332' }; // v0.11.250 (P20-A, FR; RV-A FY): the code re-pinned (rt_taken reads final_night for Ya's line, a1_end for Yuki's when neither woman likes him; FR_TEXT imported; the labels unchanged) // v0.11.224 (TX2, DN14; RV1 L1, MC): the code re-pinned (the days since the start for the tree from the calendar, the old line kept for the old calendar, rt_dawn's title; the labels unchanged) // v0.11.198 (S1, D1, SX; RV1 L1, M3): the code re-pinned (rt_start, rt_road and rt_ambush read party_flew; the SX block; sxRide; partyCarry imported; the labels unchanged); v0.11.190 (N1, SW): the code re-pinned (the parley's +1 reads a1_sky_seen too); v0.11.179 (LB1): the labels re-pinned (the label pass); v0.11.181 (KG1): again, the mother's card label on rt_ashfall became a function (by the kitchen's stage); v0.11.188 (N1, RV1 M4): again, rt_wen's and rt_elder's sky lines by sky_witness / a1_sky_seen; v0.11.185 (BR1, RV1 M2): the code re-pinned (the street reads a1_sky_seen too)
+      const PIN = { 'act1_return.js': 'f9e84f7a70573a00' /* v0.11.251 (RV-A, HL): luBeaten (Lu Han stays away and the two bled lines once beaten, lu_won) */, labels: '58e59f4e08e64332' }; // v0.11.250 (P20-A, FR; RV-A FY): the code re-pinned (rt_taken reads final_night for Ya's line, a1_end for Yuki's when neither woman likes him; FR_TEXT imported; the labels unchanged) // v0.11.224 (TX2, DN14; RV1 L1, MC): the code re-pinned (the days since the start for the tree from the calendar, the old line kept for the old calendar, rt_dawn's title; the labels unchanged) // v0.11.198 (S1, D1, SX; RV1 L1, M3): the code re-pinned (rt_start, rt_road and rt_ambush read party_flew; the SX block; sxRide; partyCarry imported; the labels unchanged); v0.11.190 (N1, SW): the code re-pinned (the parley's +1 reads a1_sky_seen too); v0.11.179 (LB1): the labels re-pinned (the label pass); v0.11.181 (KG1): again, the mother's card label on rt_ashfall became a function (by the kitchen's stage); v0.11.188 (N1, RV1 M4): again, rt_wen's and rt_elder's sky lines by sky_witness / a1_sky_seen; v0.11.185 (BR1, RV1 M2): the code re-pinned (the street reads a1_sky_seen too)
       const got = { 'act1_return.js': hash(skel(RSRC)), labels: hash(JSON.stringify(LABELS)) };
       for (const [k, v] of Object.entries(PIN)) assert(got[k] === v, `P7A (RV1, TG1): ${k}'s code and ids as pinned in v0.11.174 (${got[k]}; update the pin only with a push that means to change them)`); }
     // TG2: the mechanical parts of the Return's result lines, exactly
@@ -2984,7 +2991,6 @@ for (const form of ['cat', 'human']) {
         ["ape_lost", {}, "\n\nYuki lies along your other side with one foreleg held off the ground. The ape threw her before it hit you, and she came back on three legs, in time to see it go. She is purring, low, the purr that isn't for pleasure.", null, null, "\n\nYuki sits against your other side with one arm held close. The ape threw her before it hit you, and she was back on her feet in time to see it go. She says nothing. Her tail lies across your knees and does not move."], // v0.11.172 (P5A RV1, L5): and the woman's own line (Fable's)
         ["arson_lost", {}, " Yuki has one of them flat in the lane under both forepaws, and it is the wrong one: the torch was in the other man's hand. She keeps him all the same, and when the street has finished with the fire it finds it still has somebody to be grave at.", null, [" Yuki has one of them pinned in the lane with her knee between his shoulders, and it is the wrong one: the other man had the torch. She keeps him all the same, so that when the street has finished with the fire there is still somebody left for it to be grave at.", '']], // v0.11.169 (P3A, YF): and the woman's line // v0.11.131 (XB2, AP): she keeps him
         ["bl_night_lost", {}, " Yuki, who had hold of it until it had hold of her ear, lies across your feet with the ear at half-mast. *Three voices,* says the bond. *I am also telling you off. I am just doing it quietly.*", null, null, " Yuki, who had hold of it until it had hold of her sleeve, sits on your feet. \"Three voices,\" she says. \"I am also telling you off. I am doing it quietly.\""], // v0.11.172 (P5A RV1, L5): and the woman's own line (Fable's)
-        ["collectors_lost", {}, "\n\nThen he flicks two fingers, and the net comes off Yuki: a spirit-beast net, thrown from his sleeve in the first breath of the fight, before he so much as drew. She has been under it since your knees went. She walks over on legs that aren't quite steady and stands across you. Nobody asks her to move."],
         ["dw_serpent_lost", { fly: true }, "\n\nYuki surfaces a moment later with a length of serpent in her mouth that is no longer attached to anything, climbs out, and shakes a tiger's worth of swamp over all three of you. *It let go,* says the bond. *Eventually. You're welcome.*", null, null, "\n\nYuki comes up last, some way off, with her hair plastered flat and a length of serpent in one fist that is attached to nothing any more. She wades out and wrings her tail over all three of you. \"It let go,\" she says. \"Eventually. You're welcome.\""], // v0.11.172 (P5A, FB): and the woman's own line (Fable's)
         ["far_lost", {}, " Yuki comes in behind you on three good legs and lies down across the doorway. Mei Lin steps over her without breaking off, comes back with the salve, and starts on the cat. The lecture now covers you both.", null, [" Yuki comes in behind you holding one arm with the other, and sits on the doorstep without a word. Mei Lin does not break off. She fetches the salve, turns the arm to the light, and starts on it. The lecture now covers you both.", '']], // v0.11.169 (P3A, YF): and the woman's line
         // fo_spy_fled: v0.11.170 (NX2, CA1 FB) its own check below (the cat's and the woman's lines now too)
@@ -3021,14 +3027,19 @@ for (const form of ['cat', 'human']) {
         assert(!/\bthree\b|the rest went round/.test(tiger('fo_wolf_lost', {})) && /the lame one, while the other went round/.test(tiger('fo_wolf_lost', {})), 'RB2 (WC): two wolves');
         for (const f of [{}, { ya_party: false }]) { const t = tiger('ring_lost', f); assert(t.indexOf('drops a shelf') < t.indexOf('Yuki is already out') && !/comes out last/.test(t), `RB2 (RL): she is out before the shelf ${JSON.stringify(f)}`); }
         assert(!/haunch|wing|tail|coil/.test(tiger('bl_night_lost', {}).split('Yuki, who')[1] || 'x') && /had hold of it until it had hold of her ear/.test(tiger('bl_night_lost', {})), 'RB2 (NK): no foe\'s body in her line');
-        for (const f of [{}, { gao_broken: true }, { gao_turned: true }, { militia: true }]) { const t = tiger('collectors_lost', f); assert(/the net comes off Yuki/.test(t) && !/three of them|his disciples/.test(t), `RB2 (CL): no count, no "his disciples" ${JSON.stringify(f)}`); }
+        // v0.11.251 (owner pick P21-E, TK; Fable's): taken to the Sect; her passage under the net in every form, hers alone; no year's grace
+        for (const f of [{}, { gao_broken: true }, { gao_turned: true }, { militia: true }]) {
+            const [c, t, h] = ['cat', 'tiger', 'human'].map((form) => { const g = FM(65800 + n++, form, f); goTo(g, SCENES, 'collectors_lost'); return sceneView(g, SCENES).text; });
+            const ys = [TT.lostYuki.cat, TT.lostYuki.great, TT.lostYuki.woman];
+            assert(c.includes(ys[0]) && t.includes(ys[1]) && h.includes(ys[2]) && c.replace(ys[0], '') === t.replace(ys[1], '') && t.replace(ys[1], '') === h.replace(ys[2], '') && !/next season|You have a year|\{yuki\}/.test(c + t + h) && /road to the Sect/.test(c), `P21-E (TK): collectors_lost by form, taken ${JSON.stringify(f)}`);
+        }
         assert(/with the blanket in her mouth/.test(tiger('night_fled', {})) && !/bedroll/.test(tiger('night_fled', {})), 'RB2 (BR): the blanket');
     }
     {   // the sweep: no lose / flee / fail scene leaves the great root-kin out (gao_dead is a win; bluff_fail names her by the bond)
         // v0.11.131 (owner picks XB2, FQ1; SW): also every choice's fail target and the _forced / _caught / _wake lead-ins; not the
         // fail targets that are no fight (NOT_FIGHT), nor U4: reached only by failing a crossing that is flown from Foundation, so
         // never as the great root-kin (checked: every way in is a flown check, and nothing leads there otherwise)
-        const NOT_FIGHT = ['scan_bad', 'stream', 'ya_found'], U4 = ['roots_caught', 'rt_ambush_forced', 'rt_ford_wake', 'rt_serpent_forced'];
+        const NOT_FIGHT = ['scan_bad', 'stream', 'ya_found', 'collectors_sent' /* v0.11.251 (P21-E): a failed bluff or pin after the won fight, whose screen freed her */], U4 = ['roots_caught', 'rt_ambush_forced', 'rt_ford_wake', 'rt_serpent_forced'];
         const ways = (id) => Object.values(SCENES).flatMap((s) => (Array.isArray(s.choices) ? s.choices : []).filter((c) => c.fail === id || c.to === id));
         for (const id of U4) assert(ways(id).length > 0 && ways(id).every((c) => c.fail === id && c.to !== id && c.check && c.fly), `XB2 (FQ1): ${id} is reached only by failing a flown crossing`);
         const FAILS = Object.values(SCENES).flatMap((s) => (Array.isArray(s.choices) ? s.choices : []).map((c) => c.fail)).filter((f) => typeof f === 'string');
@@ -3085,7 +3096,7 @@ for (const form of ['cat', 'human']) {
         assert(/step through it/.test(view('night_attack_forced', 'tiger')), 'XB2 (FL): night_attack_forced keeps Incremental Mode\'s hedge');
         // HP: each offer marks itself when it fails; both fail to bluff_fail
         const tc = SCENES.tribute.choices;
-        assert(tc[1].fail === 'bluff_fail' && tc[2].fail === 'bluff_fail' && /^Bluff/.test(tc[1].text) && /hairpin/.test(tc[2].text), 'XB2 (HP): the bluff and the hairpin fail to bluff_fail');
+        assert(tc[1].fail === 'bluff_fail' && tc[2].fail === 'bluff_fail' && /^Bluff/.test(tc[1].text) && /hairpin/.test(tc[2].text) && !tc[1].show(FM(67499, 'cat')) && !tc[2].show(FM(67498, 'cat')), 'XB2 (HP): the bluff and the hairpin fail to bluff_fail (v0.11.251, MT: hidden, old saves standing on bluff_fail keep their text)');
         for (const [i, want] of [[1, 'bluff'], [2, 'hairpin']]) { const g = FM(67500 + n++, 'cat'); tc[i].failDo(g); assert(g.flags.tribute_fail === want, `XB2 (HP): a failed ${want} sets tribute_fail`); }
         const T1 = ' Nor does a mortal bargain with a trinket while the true treasure stands at his heel. That one would have paid for thirty years.';
         const T2 = "\n\n*Thirty years,* says the bond, as a tiger's weight of the true treasure gets to its feet beside you. *I'd have said forty. He's rounding down.*"; // RC2 (M2): his own words
@@ -3096,7 +3107,7 @@ for (const form of ['cat', 'human']) {
         // RC2 (TG): through the real picks (a failed bluff, a failed hairpin), then a rewind clears the flag; M1: never folded
         for (const [i, want] of [[1, 'bluff'], [2, 'hairpin']]) {
             const g = ensureBars(fresh(67600 + n++)); g.minutes = 2 * 1440 + 480; goTo(g, SCENES, 'tribute'); g.james.qi = 99;
-            choose(g, SCENES, i);
+            SCENES.tribute.choices[i].failDo(g); goTo(g, SCENES, 'bluff_fail'); // v0.11.251 (MT): the offers are hidden; an old save's way in
             const t = sceneView(g, SCENES).text;
             assert(g.scene === 'bluff_fail' && g.flags.tribute_fail === want && t === (want === 'hairpin' ? hc : view('bluff_fail', 'cat')), `RC2 (TG): a failed ${want} reads its own bluff_fail`);
             g.seen.bluff_fail = 0; g.coil.n = 2; // read in an earlier Coil, maybe by the other offer
@@ -3280,6 +3291,7 @@ const STORY_ONLY = {
     screen: ['meridians'], // the meridian screen (Meditate cards since v0.11.13)
     failed: ['scan_bad', 'first_bone_fail', 'night_attack_forced', 'ring_forced', 'rt_ambush_forced'], // failed checks: possible for a very weak James, never failed in these games (roots_caught is: the sister walk)
     never: ['rt_serpent_won'], // the ford serpent never fights (both ways across always pass)
+    old: ['bluff_fail'], // v0.11.251 (owner pick P21-E, MT): the bluff and the pin come after the won fight; only an old save standing on it
 };
 /** v0.11.151 (owner pick WD1, SO): reached in Incremental Mode now, in some full runs, not all (a weak James's lost fights and
  *  failed checks; the ford's far bank since flight, v0.11.109): not required each run, no note when reached, and still walked
@@ -3782,7 +3794,8 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         for (let n = 0; n < 160; n++) {
             const gameSongs = [];
             const g = ensureBars(fresh(78000 + n)); const per = {};
-            for (let st = 0; st < 3000; st++) {
+            for (let st = 0; st < 6000; st++) { // v0.11.251 (P21-E, TK): 3000 → 6000, a lost tribute now ends the Coil (more Coils before the Fallout)
+                if (g.scene === 'collectors_lost' && n % 4 === 0) { SCENES.collectors_lost.choices[0].do(g); goTo(g, SCENES, 'epilogue'); } // v0.11.251 (P21-E, TK): a quarter of the games go on as an old save's accepted loss did ("Get up.", now hidden), so the low-friendship Fallout lines keep their players
                 const v = sceneView(g, SCENES); if (v.end) break;
                 const av = againView(g, v); // RV1 (TG3): newVisit passed as main.js does
                 const r0 = M.musicLine(g, v, { newVisit: av?.newVisit }); const k = `${coilStamp(g)}|${textDay(g)}`;
@@ -6955,7 +6968,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
           out.push(`${s.id}|${v.title ?? ''}|${v.text}|${v.choices.filter((c) => !c.disabled).map((c) => c.label).join('/')}`);
       }
       const h = Gm.fnv1a(out.join('\n'));
-      assert(h === 'ceae7781' && out.length === 39102, `${T} (H2, TG2): the old calendar's ${out.length} renders of the scenes the counts don't touch exactly as v0.11.223's code (${h}; v0.11.247 (P17-A): 990cb0af → 0211e709, TX's four tic swaps only (wen_lesson, yk_night_ya, yk_night_fo, rt_yk_talk; 126 renders each); RV-A → ceae7781: Wen's two sentences (wen_lesson) and far_won's label (126 renders each), nothing else; v0.11.246 (P16-A): 503ab805 / 38976 → 990cb0af / 39102, the new first_flight screen's 126 renders and 3 ah_hub renders on Day 15 at 08:00 with Ya away (the pass waits for her door, LG); every other render the same; v0.11.231 (P4-2, AG + AT, RV1): 8de296d0 → 503ab805, 57 renders on Days 14–15 at 08:00 with Ya away at the Ashen Hills (her cards hidden, the away lines; 19:00 unchanged, AV); v0.11.230 (P3-2, FT): 5117a3ec → 8de296d0, the new texts of far_hunt, far_won and village_night (the other 38598 renders 8c6f3060 on both codes); v0.11.227: 8ce676b4 / 39060 → 5117a3ec / 38976, the 84 kept-realm renders of yuki_check left out, the hash taken on v0.11.226's code; update only with a push that means to change the old calendar's texts)`);
+      assert(h === 'a44d93ef' && out.length === 39228, `${T} (H2, TG2): the old calendar's ${out.length} renders of the scenes the counts don't touch exactly as v0.11.223's code (${h}; v0.11.251 (P21-E): ceae7781 / 39102 → acba57dd / 39228 → (RV-A, SM: collectors_lost's title) a44d93ef, the tribute's six scenes only (tribute, collectors_won, the new collectors_sent's 126 renders, collectors_lost, bluff_win, tribute_paid; without them fd26ea0d / 38472 on both codes); v0.11.247 (P17-A): 990cb0af → 0211e709, TX's four tic swaps only (wen_lesson, yk_night_ya, yk_night_fo, rt_yk_talk; 126 renders each); RV-A → ceae7781: Wen's two sentences (wen_lesson) and far_won's label (126 renders each), nothing else; v0.11.246 (P16-A): 503ab805 / 38976 → 990cb0af / 39102, the new first_flight screen's 126 renders and 3 ah_hub renders on Day 15 at 08:00 with Ya away (the pass waits for her door, LG); every other render the same; v0.11.231 (P4-2, AG + AT, RV1): 8de296d0 → 503ab805, 57 renders on Days 14–15 at 08:00 with Ya away at the Ashen Hills (her cards hidden, the away lines; 19:00 unchanged, AV); v0.11.230 (P3-2, FT): 5117a3ec → 8de296d0, the new texts of far_hunt, far_won and village_night (the other 38598 renders 8c6f3060 on both codes); v0.11.227: 8ce676b4 / 39060 → 5117a3ec / 38976, the 84 kept-realm renders of yuki_check left out, the hash taken on v0.11.226's code; update only with a push that means to change the old calendar's texts)`);
       const real = [
         [at(false, 6, 19, { long: true, vday: 3 }), 'evening', /^Third supper at Mei Lin's\. Her mother serves you first now/],
         [at(false, 20, 19, {}), 'rt_evening', /"Nine days in the Blackroot," the old woman informs the pot, "and my daughter comes home fatter than she left\."/],
@@ -9188,6 +9201,127 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       for (const t of all) { const h = head(t); if (seen.has(h)) dup.push(h); seen.set(h, t); }
       assert(!dup.length && !/under the table/i.test(RT.DP_TEXT.hand) && !/\bas (a|if)\b/i.test(RT.DP_TEXT.hand), `${T} RV (TG-T2, T M2): no two romance texts share an opening; Ya's supper line not Mei Lin's frame (${dup.join(' | ')})`); }
     { const N = await import('../js/core/news.js'); assert(/0\.11\.250/.test(JSON.stringify(N.NOTES)), `${T}: What's new has 0.11.250`); }
+}
+// v0.11.251 (owner pick P21-E, 2026-11-22 04:54): the retune's first push: the tribute a fight (MT, TK), GS, LH, RR, NT, FM, WP, JK, BR, JR, TX
+{
+    const T = 'P21-E';
+    const C = await import('../js/core/calendar.js'); const G = await import('../js/core/game.js'); const P = await import('../js/story/prologue.js'); const CM = await import('../js/story/common.js');
+    const mk = (seed, flags = {}, cal = C.LONG_CAL, form = 'cat') => { const g = ensureBars(newGame(seed, { closed: true, cal })); Object.assign(g.flags, { forest_day: 3, vday: 3 }, flags); const realm = form === 'human' ? 7 : form === 'tiger' ? 2 : 0; g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; return ensureBars(g); };
+    const lu = (g) => SCENES.tribute.choices[0].combat(g);
+    // MT: the tribute offers the fight only; the bluff and the pin wait on the won screen
+    { const g = mk(99901); goTo(g, SCENES, 'tribute'); g.james.qi = 99; const cs = sceneView(g, SCENES).choices.filter((c) => c.index < 1000);
+      assert(cs.length === 1 && /^Step forward/.test(cs[0].label), `${T} (MT): the tribute offers the fight only (${cs.map((c) => c.label).join(' / ')})`); }
+    // collectors_won: the fight's end, three ways, the net off by form, the cores; the speech and the Village's +25 on collectors_sent
+    for (const form of ['cat', 'tiger', 'human']) {
+        const g = mk(99902, {}, C.LONG_CAL, form); g.james.qi = 99; g.lastWin = { id: 'collectors', degree: 1, next: 'collectors_won' }; const v0 = g.rel.Village?.f || 0;
+        const out = SCENES.collectors_won.enter(g); g.scene = 'collectors_won'; const v = sceneView(g, SCENES);
+        const free = { cat: TT.netFree.cat, tiger: TT.netFree.great, human: TT.netFree.woman }[form];
+        assert(g.flags.ending === 'fought' && g.flags.lu_won === 1 && (g.rel.Village?.f || 0) === v0 && out.includes('+2 Murky beast cores.') && v.text.endsWith(free) && !/Go home|hope/.test(v.text), `${T} (MT): collectors_won ${form}: the fight's end, the net off, no speech, no Village gain yet`);
+        assert(v.choices.map((c) => c.label).join(' | ') === [TT.labels.send, TT.labels.bluff, TT.labels.pin].join(' | '), `${T} (MT): collectors_won's three ways (${form})`);
+    }
+    for (const [deg, re] of [[1, /^"Go home," you tell him\. "Tell your Sect Master/], [2, /^"Go home," you say\. "Let your Sect Master/], [3, /^"Home," you tell him\./]]) {
+        const g = mk(99903 + deg); g.lastWin = { id: 'collectors', degree: deg, next: 'collectors_won' }; SCENES.collectors_won.enter(g); g.scene = 'collectors_won';
+        const won = sceneView(g, SCENES).text;
+        const v0 = g.rel.Village?.f || 0; choose(g, SCENES, 0);
+        const t = sceneView(g, SCENES).text;
+        assert(g.scene === 'collectors_sent' && re.test(t) && t === P.SENT[deg] && /hope\.$/.test(t) && (g.rel.Village.f - v0) === 25 && sceneView(g, SCENES).title === TT.sentTitle && !/"Go home,"|"Home,"/.test(won), `${T} (MT): the victory's speech by degree ${deg}, word for word, Village +25`);
+        if (deg === 2) assert(won.includes(TT.win2Disciples) && !/meet (the cat|the great|the white)/.test(won), `${T} (MT): win[2]'s disciples without Yuki`);
+        choose(g, SCENES, 0); assert(g.scene === 'epilogue', `${T} (MT): the victory goes on to the epilogue`);
+    }
+    // the bluff and the pin after the won fight: success and failure (a failure ends as the victory did, as a failed offer led to the fight)
+    for (const [i, win, ending, gain, fl] of [[1, 'bluff_win', 'bluff', 20, TT.failBluff], [2, 'tribute_paid', 'paid', 12, TT.failPin]]) {
+        const ok = mk(99910 + i, { healed: true, boar: true, gao_beaten: true, scouted: true, gao_turned: true, token_silenced: true }); ok.james.qi = 99; ok.james.gu = { tier: 9, level: 9, xp: 0 }; ok.james.skills['Convergence Use'] = { tier: 9, level: 9, xp: 0 }; ensureBars(ok); ok.james.qi = 99;
+        ok.lastWin = { id: 'collectors', degree: 1, next: 'collectors_won' }; SCENES.collectors_won.enter(ok); ok.scene = 'collectors_won'; const v0 = ok.rel.Village?.f || 0;
+        choose(ok, SCENES, i);
+        assert(ok.scene === win && ok.flags.ending === ending && (ok.rel.Village.f - v0) === gain && sceneView(ok, SCENES).text === (i === 1 ? TT.bluffWin : TT.paid), `${T} (MT): the ${ending} after the won fight, its text, Village +${gain}`);
+        const no = mk(99920 + i); no.james.qi = 99; no.james.gu = { tier: 1, level: 1, xp: 0 }; no.james.skills['Convergence Use'] = { tier: 1, level: 1, xp: 0 }; ensureBars(no); no.james.qi = 99;
+        no.lastWin = { id: 'collectors', degree: 1, next: 'collectors_won' }; SCENES.collectors_won.enter(no); no.scene = 'collectors_won';
+        const r = choose(no, SCENES, i);
+        assert(no.scene === 'collectors_sent' && no.flags.ending === 'fought' && !r.lines.includes(fl) && sceneView(no, SCENES).text.startsWith(`${fl}\n\n"Go home,"`) && !(no.inventory.hairpin > 0), `${T} (MT; RV-A FL): a failed ${ending} ends as the victory, its line opening the screen (${no.scene})`);
+    }
+    // TK: taken; no accepting it; the Coil screen's own opening
+    { const g = mk(99930); goTo(g, SCENES, 'collectors_lost'); const cs = sceneView(g, SCENES).choices;
+      assert(cs.length === 1 && /^Bite the tail/.test(cs[0].label) && g.flags.ending === 'lost', `${T} (TK): collectors_lost: the bite only`);
+      choose(g, SCENES, cs[0].index); const v = sceneView(g, SCENES);
+      assert(g.scene === 'coil_end' && v.text.startsWith(TT.coil) && !v.choices.some((c) => /^Accept/.test(c.label)), `${T} (TK): the Coil screen's text, no Accept`); }
+    // GS, LH, RR: the fight's numbers (the long calendar's steps against the old calendar's)
+    { const old = lu(mk(99931, {}, 0)), lng = lu(mk(99931));
+      const L = CM.LONG_STEPS.collectors;
+      assert(lng.enemies[0].dc === old.enemies[0].dc + 0.5 * L && lng.enemies[0].atk === old.enemies[0].atk + 0.75 * L && lng.enemies[0].hp === Math.round(old.enemies[0].hp * (1 + 0.25 * L)) && lng.enemies[1].name === 'Gao Feng' && lng.enemies[1].hp === old.enemies[1].hp, `${T} (LH): Lu Han +${L} steps on the long calendar only`);
+      for (const f of ['gao_broken', 'gao_turned']) { const e = lu(mk(99932, { [f]: true })).enemies[1]; assert(e.name === TT.disciple && e.dmg === 4 && e.dr === 1 && e.hp === Math.round(8 * 1.2) && e.dc === 5.5 && e.atk === 7, `${T} (GS): a disciple in Gao's place (${f}: ${JSON.stringify(e)})`); }
+      const r3 = mk(99933); r3.james.realm = 3; const e3 = lu(r3), r1 = mk(99933); r1.james.realm = 1; const e1 = lu(r1), o3 = mk(99933, {}, 0); o3.james.realm = 3; const eo = lu(o3);
+      assert(e3.enemies[0].dc === e1.enemies[0].dc + 2 * P.LU_READS && e3.enemies[0].atk === e1.enemies[0].atk + 2 * P.LU_READS && e3.tail.includes(TT.read) && !e1.tail.includes(TT.read) && !eo.tail.includes(TT.read) && eo.enemies[0].dc === old.enemies[0].dc, `${T} (RR): +${P.LU_READS} a realm above Foundation, its line; long calendar only`); }
+    // NT: the net, by form, in the fight's opening; Yuki never strikes and gets no fight XP; the one-move finish shows it too
+    for (const form of ['cat', 'tiger', 'human']) {
+        const g = mk(99940, {}, C.LONG_CAL, form); const enc = lu(g); const net = { cat: TT.net.cat, tiger: TT.net.great, human: TT.net.woman }[form];
+        startCombat(g, enc); assert(g.combat.netted === true && g.combat.log[0].includes(net), `${T} (NT): the net in the opening (${form})`);
+        let ylines = 0; for (let t = 0; t < 60 && g.combat; t++) { const o = combatStep(g, 'blade'); ylines += (o.lines || []).filter((l) => /^Yuki|^Yuki \(great form\)/.test(l)).length; }
+        assert(ylines === 0, `${T} (NT): Yuki never strikes under the net (${form})`);
+    }
+    { const g = mk(99941); g.james.gu = { tier: 9, level: 9, xp: 0 }; ensureBars(g); const y0 = JSON.stringify(g.yuki.fight); startCombat(g, lu(g)); g.combat.enemies.forEach((e) => { e.hp = 1; });
+      let o; for (let t = 0; t < 20 && g.combat; t++) o = combatStep(g, 'blade');
+      assert(o?.done === 'win' && JSON.stringify(g.yuki.fight) === y0, `${T} (NT): no fight XP for Yuki under the net`); }
+    { const g = mk(99942); g.james.gu = { tier: 9, level: 9, xp: 0 }; ensureBars(g); goTo(g, SCENES, 'tribute'); const yf0 = JSON.stringify(g.yuki.fight); const r = choose(g, SCENES, 1000);
+      const v = sceneView(g, SCENES).text; assert(!r.lines.some((l) => l.includes(TT.net.cat)) && JSON.stringify(g.yuki.fight) === yf0 && g.scene === 'collectors_won' && g.flags.lu_one === true && !v.includes(TT.netFree.cat), `${T} (RV-A, XO): the one-move finish: no net, no net-off line, no fight XP for Yuki`); }
+    // WP: against Lu Han the practice counts every 35 rounds; elsewhere every 50
+    { const g = mk(99943); g.stats.weapons = { blade: 35 }; assert(G.weaponMastery(g, 'blade') === 0, `${T} (WP): 35 rounds outside the tribute: nothing`);
+      startCombat(g, lu(g)); assert(G.weaponMastery(g, 'blade') === 0.5 && G.WEAPON_EVERY_OF.collectors === 35, `${T} (WP): 35 rounds against Lu Han: +0.5`);
+      g.combat = null; g.stats.weapons = { blade: 50 }; assert(G.weaponMastery(g, 'blade') === 0.5, `${T} (WP): 50 rounds elsewhere: +0.5`); }
+    // JK, BR: the jackals +3 steps, the boar +2.5, each foe, the long calendar only
+    { const jo = SCENES.night_attack.choices[0].combat(mk(99944, {}, 0)), jl = SCENES.night_attack.choices[0].combat(mk(99944));
+      assert(jl.enemies.length === jo.enemies.length && jl.enemies.every((e, i) => e.dc === jo.enemies[i].dc + 1.5 && e.atk === jo.enemies[i].atk + 2.25 && e.hp === Math.round(jo.enemies[i].hp * 1.75)), `${T} (JK): every jackal +3 steps`);
+      const bo = SCENES.village_hunt.choices[0].combat(mk(99945, {}, 0)).enemies[0], bl = SCENES.village_hunt.choices[0].combat(mk(99945)).enemies[0];
+      assert(bl.dc === bo.dc + 1.25 && bl.atk === bo.atk + 1.875 && bl.hp === Math.round(bo.hp * 1.625), `${T} (BR): the boar +2.5 steps`); }
+    // JR: the jackals' run opens with the spikes (Convergence Use T1 L3), not the hedge (T1 L8)
+    { const run = SCENES.night_attack.choices.find((c) => /run for the water/.test(typeof c.text === 'function' ? c.text(mk(99946)) : c.text));
+      const at = (lv) => { const g = mk(99946); g.james.skills['Convergence Use'] = { tier: 1, level: lv, xp: 0 }; g.james.qi = 30; goTo(g, SCENES, 'night_attack'); return sceneView(g, SCENES).choices.some((c) => /run for the water/.test(c.label)); };
+      assert(run.form === 'spikes' && !at(2) && at(3), `${T} (JR): the run from T1 L3 (${run.form})`); }
+}
+// v0.11.251 (owner pick RV-A, 2026-11-22 06:29): the cold reviews' fixes (HL, XO, FL, NW, W2, CT, SM, FQ, OS, BC) and their test gaps
+{
+    const T = 'P21-E RV-A';
+    const C = await import('../js/core/calendar.js'); const G = await import('../js/core/game.js'); const P = await import('../js/story/prologue.js'); const CM = await import('../js/story/common.js');
+    const R = await import('../js/story/act1_return.js'); const PW = await import('../js/story/power.js'); const F = await import('../js/core/faq.js'); const TX = await import('../js/story/tribute_texts.js');
+    const mk = (seed, flags = {}, cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true, cal })); Object.assign(g.flags, { forest_day: 3, vday: 3 }, flags); return g; };
+    // F9 and the reviewer's missed faults: the numbers pinned, not read from their constants
+    assert(JSON.stringify(CM.LONG_STEPS) === '{"collectors":1.5,"jackals":3,"boar":2.5}' && JSON.stringify(CM.LONG_STEP) === '{"hp":0.25,"dc":0.5,"atk":0.75}' && P.LU_READS === 1.75 && JSON.stringify(G.FOE_MEMORY_OF) === '{"collectors":{"step":1.5,"max":4.5}}' && G.WEAPON_EVERY_OF.collectors === 35 && JSON.stringify(P.LU_DISCIPLE) === '{"hp":8,"dc":4,"atk":5,"dmg":4,"dr":1}' && PW.ENEMY_REALM[TT.disciple] === 1, `${T} (F9, SM): P21-E's numbers pinned; the disciple at Foundation`);
+    // TG-C4: the bluff and the pin as picked (DC, Qi, the bonus's sign)
+    { const cs = SCENES.collectors_won.choices; const b = cs[1], p = cs[2]; const g0 = mk(99950), g1 = mk(99950, { healed: true, boar: true });
+      assert(b.check.skill === 'GU' && b.check.dc === 7 && b.qi === 4 && p.check.skill === 'Convergence Use' && p.check.dc === 5 && p.qi === 8 && b.check.bonus(g1) === b.check.bonus(g0) + 2 && p.check.bonus(g0) === -2 && b.check.bonus(mk(99950, { forest_day: 1, vday: 1 })) === b.check.bonus(g0) + 2, `${T} (TG-C4): the bluff GU 7, 4 Qi, its bonus up by the deeds; the pin CU 5, 8 Qi`); }
+    // TG-C3: a single success pays one hairpin and keeps none
+    { const g = mk(99951); g.james.skills['Convergence Use'] = { tier: 2, level: 1, xp: 0 }; ensureBars(g); g.james.qi = 99; g.lastWin = { id: 'collectors', degree: 1, next: 'collectors_won' }; SCENES.collectors_won.enter(g); g.scene = 'collectors_won';
+      const r = choose(g, SCENES, 2); assert(g.scene === 'tribute_paid' && !(g.inventory.hairpin > 0) && !r.lines.some((l) => /double|Double/.test(l)), `${T} (TG-C3): one hairpin sung and paid (${g.inventory.hairpin || 0} left)`); }
+    // TG-C1 (OS): a save made on the won screen before this build keeps its one +25; TG-T (OS): a called offer isn't offered again
+    { const g = mk(99952); g.scene = 'collectors_won'; g.flags.ending = 'fought'; const v0 = g.rel.Village?.f || 0; choose(g, SCENES, 0);
+      assert(g.scene === 'collectors_sent' && (g.rel.Village?.f || 0) === v0 && sceneView(g, SCENES).text === P.SENT[1], `${T} (OS, TG-C1): an old save's won screen: no second +25, the plain speech`);
+      for (const [f, gone] of [['bluff', 1], ['hairpin', 2]]) { const h = mk(99953, { tribute_fail: f }); h.james.qi = 99; h.scene = 'collectors_won'; const idx = sceneView(h, SCENES).choices.map((c) => c.index); assert(!idx.includes(gone) && idx.includes(0), `${T} (OS): after a called ${f}, not offered again`); } }
+    // XO: a degree-3 win in a fight (not one move) keeps its net-off line; one move has none (the P21-E block)
+    { const g = mk(99954); g.lastWin = { id: 'collectors', degree: 3, next: 'collectors_won' }; SCENES.collectors_won.enter(g); g.scene = 'collectors_won';
+      assert(g.flags.lu_one === false && sceneView(g, SCENES).text.endsWith(TT.netFree.cat), `${T} (XO): a fought degree-3 win frees her`); }
+    // TG-T4 (W2): Gao out: the disciple who fought isn't among the ones who never fought
+    for (const f of [{ gao_broken: true }, { gao_turned: true }, {}]) { const g = mk(99955, f); const w2 = STOMP.collectors.win[2](g), w3 = STOMP.collectors.win[3](g); const out = !!(f.gao_broken || f.gao_turned);
+      assert(out ? (w2.includes(TT.win2Out) && w2.includes(TX.TT.win2RoadOut) && w3.includes(TT.win3Out) && !/three disciples|the other three/.test(w2 + w3)) : (w2.includes(TT.win2Disciples) && /the other three are well down the road/.test(w2) && /while his three disciples throw down their weapons and run\./.test(w3)), `${T} (W2, TG-T4): win[2], win[3] ${JSON.stringify(f)}`); }
+    // TG-T5 (NW): the net comes after the posture's draw, in every form; the cat's line has no carrying
+    assert(Object.values(TT.net).every((t) => !/before (his sword|he has drawn|the sword is clear)/i.test(t)) && !/carr/i.test(TT.net.cat), `${T} (NW, TG-T5): the net after the draw`);
+    // TG-T6 (CT, FQ): the Coil screen offers nothing it lacks; the FAQ says a lost tribute can't be accepted, the net, the numbers
+    { const faq = F.FAQ.map(([, f]) => f(mk(99956))).join(' ');
+      assert(!/arrive/i.test(TT.coil) && /a lost tribute can't be accepted/.test(faq) && /Lu Han's net holds her/.test(faq) && /\+1\.5 a meeting, up to \+4\.5/.test(faq) && /count every 35 instead/.test(faq), `${T} (CT, FQ, TG-T6, TG-C6): the Coil screen and the FAQ`); }
+    // TG-C7: the fight panel's tag
+    assert(readFileSync(new URL('../js/main.js', import.meta.url), 'utf8').includes("c.netted ? ' (under the net)'"), `${T} (TG-C7): the panel's "(under the net)"`);
+    // SM: the title; the degree-3 sentences
+    { const g = mk(99957); goTo(g, SCENES, 'collectors_lost'); const t3 = mk(99958, { lu_won: 3 }), t1 = mk(99958, { lu_won: 1 });
+      assert(sceneView(g, SCENES).title === TT.titleLost && TX.bluffWinText(t3).startsWith(TT.bluffOpen3) && TX.bluffWinText(t3).includes(TT.bluffBow3) && !/kneels/.test(TX.bluffWinText(t3)) && TX.paidText(t3).startsWith(TT.paidOpen3) && TX.bluffWinText(t1) === TT.bluffWin && TX.paidText(t1) === TT.paid, `${T} (SM): the title, the degree-3 sentences`); }
+    // HL (TG-T3): a beaten Lu Han stays away on Day 21 and the two bled lines show; Act 1's paid texts by lu_won; an old save as before
+    for (const [ending, lu, beaten] of [['bluff', 1, true], ['paid', 1, true], ['fought', undefined, true], ['bluff', undefined, false], ['paid', undefined, false]]) {
+        const g = mk(99960, { ending, ...(lu ? { lu_won: lu } : {}) }); g.coil.act = 1;
+        const foes = SCENES.rt_duel ? null : null; const enc = SCENES.rt_parley.choices.find((c) => c.combat)?.combat(g) || SCENES.rt_elder?.choices.find((c) => c.combat)?.combat(g);
+        goTo(g, SCENES, 'rt_parley'); const parley = sceneView(g, SCENES).text;
+        assert(R.luBeaten(g) === beaten && (enc ? enc.enemies.some((e) => e.name === 'Lu Han') === !beaten : true) && parley.includes('He knows you bled his disciples') === beaten, `${T} (HL, TG-T3): ${ending}${lu ? ' after a beating' : ' (an old save)'}: Lu Han ${beaten ? 'away' : 'at Shen Qiu\'s side'}`);
+        if (ending === 'paid') { goTo(g, SCENES, 'fo_lu_han'); const t = sceneView(g, SCENES).text; goTo(g, SCENES, 'fo_start'); const o = sceneView(g, SCENES).text;
+          assert(t.includes('You beat me; that I can account for.') === !!lu && o.includes('as a man does while bending is still a decision') === !!lu && /he comes here, to ask where such a thing comes from/.test(t), `${T} (HL): Act 1's paid texts ${lu ? 'after a beating' : 'as before (an old save)'}`); }
+    }
+    // TG-T7: collectors_lost's "His disciples are thorough." stays: since GS a disciple fills Gao's place, so Lu Han has his three (RB2 CL's guard was for the old text's count)
+    assert(/His disciples are thorough\./.test(TT.lost), `${T} (TG-T7): the disciples in the taken text, recorded`);
 }
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

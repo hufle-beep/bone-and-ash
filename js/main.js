@@ -408,7 +408,7 @@ function renderCombatCards() {
     const flee = c.flee ? `<button class="card" data-flee="1">Run${showChecks ? `<span class="tag">GU ${n1(checkValue(g, 'GU'))} / DC ${noDiceDc(Math.max(...c.enemies.filter((e) => e.hp > 0).map((e) => e.atk)))}</span>` : ''}</button>` : '';
     const yieldCard = c.style ? `<button class="card" data-yield="1">${esc(SPAR_TEXT.yieldLabel)}<span class="tag">${esc(SPAR_TEXT.yieldTag)}</span></button>` : ''; // v0.11.114 (PA2, YD)
     const foes = c.enemies.map((e) => `<div class="foe${e.hp <= 0 ? ' down' : ''}"><span>${esc(e.name)}${e.staggered ? (c.style === 'unarmed' ? ' (down)' : ' (reeling)') : ''}${e.hp > 0 ? foeTraits(e).map((k) => ` <small class="trait">· ${esc(FOE_TRAITS[k].tag)}</small>`).join('') : ''}</span><div class="stroke"><i style="width:${pct(Math.max(0, e.hp), e.hpMax)}"></i></div></div>`).join('');
-    const yuki = `<div class="foe ally"><span>Yuki${c.yukiOut ? ' (watching)' : ''}</span><div class="stroke"><i style="width:${pct(g.yuki.hp, yukiHpMax(g))}"></i></div></div>` // v0.11.210 (owner pick N1, HB): her bar drawn (was var(--bone), defined nowhere)
+    const yuki = `<div class="foe ally"><span>Yuki${c.yukiOut ? ' (watching)' : c.netted ? ' (under the net)' : ''}</span><div class="stroke"><i style="width:${pct(g.yuki.hp, yukiHpMax(g))}"></i></div></div>` // v0.11.210 (owner pick N1, HB): her bar drawn (was var(--bone), defined nowhere)
         + ((c.song || 0) > 0 && c.style !== 'spar' ? `<div class="foe song"><span>${esc(SONG_TEXT.label.replace('{n}', c.song).replace('{max}', SONG_MAX))}</span></div>` : ''); // v0.11.116 (WA2, SG)
     view.innerHTML = `<section>
 ${statusHtml()}

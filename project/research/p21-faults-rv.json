@@ -1,0 +1,79 @@
+[
+ {
+  "id": "C1",
+  "file": "js/main.js",
+  "find": "c.netted ? ' (under the net)' : ''",
+  "replace": "''",
+  "note": "NT UI: the net tag gone from Yuki's bar"
+ },
+ {
+  "id": "C2",
+  "file": "js/story/prologue.js",
+  "find": "{ text: TT.labels.bluff, qi: 4, check: { skill: 'GU', dc: 7, bonus: bluffBonus }",
+  "replace": "{ text: TT.labels.bluff, qi: 4, check: { skill: 'GU', dc: 5, bonus: bluffBonus }",
+  "note": "MT: the bluff's DC 7 -> 5 after the fight"
+ },
+ {
+  "id": "C3",
+  "file": "js/story/prologue.js",
+  "find": "{ text: TT.labels.pin, qi: 8,",
+  "replace": "{ text: TT.labels.pin, qi: 2,",
+  "note": "MT: the pin's Qi 8 -> 2"
+ },
+ {
+  "id": "C4",
+  "file": "js/story/prologue.js",
+  "find": "(g.flags.token_silenced ? 1 : 0) + ((g.rel.Village?.f || 0) >= 40 ? 1 : 0) - Math.floor((forestScale(g) + villageScale(g)) / 2);",
+  "replace": "(g.flags.token_silenced ? 1 : 0) + ((g.rel.Village?.f || 0) >= 40 ? 1 : 0) + Math.floor((forestScale(g) + villageScale(g)) / 2);",
+  "note": "MT: bluffBonus's scale penalty becomes a bonus"
+ },
+ {
+  "id": "C5",
+  "file": "js/core/game.js",
+  "find": "export const weaponEvery = (g) => WEAPON_EVERY_OF[g?.combat?.id] || WEAPON_EVERY;",
+  "replace": "export const weaponEvery = (g) => WEAPON_EVERY_OF[g?.combat?.id] || (g?.combat ? 35 : WEAPON_EVERY);",
+  "note": "WP: 35 in every fight, not only the tribute"
+ },
+ {
+  "id": "C6",
+  "file": "js/core/story.js",
+  "find": "if (r.enc.net && r.enc.tail) lines.push(r.enc.tail);",
+  "replace": "if (r.enc.net && r.enc.tail) lines.push(r.enc.tail.split('\\n\\n').slice(0, 1).join(''), 'x');",
+  "note": "NT: the one-move finish drops RR's reading line and adds a stray line"
+ },
+ {
+  "id": "C7",
+  "file": "js/core/game.js",
+  "find": "...(enc.net ? { netted: true } : {}),",
+  "replace": "...(enc.net || PEOPLE_FIGHTS.has(enc.id) ? { netted: true } : {}),",
+  "note": "NT: every people fight nets Yuki (Gao, arson, Ya's brawl, the elder...)"
+ },
+ {
+  "id": "C8",
+  "file": "js/story/prologue.js",
+  "find": "text: (g) => SENT[g.flags.lu_won] || SENT[1],",
+  "replace": "text: (g) => SENT[g.flags.lu_won],",
+  "note": "MT: an old save on collectors_won (no lu_won) gets an undefined speech"
+ },
+ {
+  "id": "C9",
+  "file": "js/core/faq.js",
+  "find": "at the tribute +${FOE_MEMORY_OF.collectors.step} a meeting",
+  "replace": "at the tribute +${FOE_MEMORY_STEP} a meeting",
+  "note": "FM: the FAQ's tribute step reads the common step (0.5 for 1.5)"
+ },
+ {
+  "id": "C10",
+  "file": "js/story/prologue.js",
+  "find": "do: (g) => { addItem(g, 'hairpin', 1); return []; }, failDo: () => [TT.failPin]",
+  "replace": "do: (g) => { addItem(g, 'hairpin', 2); return []; }, failDo: () => [TT.failPin]",
+  "note": "MT: a hairpin left in the hammerspace after the paid tribute"
+ },
+ {
+  "id": "F9",
+  "file": "js/story/common.js",
+  "find": "export const LONG_STEPS = { collectors: 1.5, jackals: 3, boar: 2.5 };",
+  "replace": "export const LONG_STEPS = { collectors: 1, jackals: 3, boar: 2.5 };",
+  "note": "LH: 1.5 \u2192 1 (the test reads the constant)"
+ }
+]

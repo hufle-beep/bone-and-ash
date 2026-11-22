@@ -12,6 +12,8 @@
 //   node tools/sanity.mjs                                 run both tests itself first (about 50 s)
 // v0.11.21: also a log-only line, the noise-scaled drift (tools/lib/noise.mjs): each number against its own chance
 // wobble (3 × its noise, at least 2 points); it never fails the check.
+// v0.11.251 (owner pick P21-E, DG): --long m.json (the long calendar's models, tests/models.test.mjs --json) compares those numbers with
+// tools/baseline-long.json, log only (40 games a model: most numbers have small n); --update saves it too.
 //   node tools/sanity.mjs --update                        save the current numbers as the new baseline — ONLY after the
 //                                                         owner has seen the numbers of an intended change and said go
 import { spawnSync } from 'node:child_process';
@@ -83,8 +85,24 @@ for (const [c, b] of Object.entries(T.byCoil)) if (+c <= 6) { const t = b.won + 
 for (const [k, f] of Object.entries(T.fights)) put(`fight ${k}`, f.win, f.win + f.lose + f.flee);
 for (const [k, f] of Object.entries(S.fights)) put(`fight story-test:${k}`, f.win, f.win + f.lose + f.flee);
 
+/* ---------- 3. the long calendar's drift (v0.11.251, DG; log only) ---------- */
+const BASE_LONG = path.join(root, 'tools/baseline-long.json');
+const longFile = opt('long');
+const longMetrics = {};
+if (longFile && existsSync(longFile)) {
+    const L = JSON.parse(readFileSync(longFile, 'utf8'));
+    const lput = (name, k, n) => { if (n > 0) longMetrics[name] = { v: Math.round((1000 * k) / n) / 10, n }; };
+    for (const [m, st] of Object.entries(L)) {
+        for (const [act, nm] of [[0, 'prologue'], [1, 'Act 1']]) for (const [c, d] of Object.entries(st.deaths?.[act] || {})) if (+c <= 4) { lput(`${m} ${nm} C${c} dead`, d.dead, d.coils); if (act) lput(`${m} Act 1 C${c} taken`, d.taken, d.coils); }
+        for (const [c, t] of Object.entries(st.tribute || {})) if (+c <= 4) { const n = t.won + t.paid + t.lost; lput(`${m} tribute C${c} won`, t.won, n); lput(`${m} tribute C${c} lost`, t.lost, n); }
+        lput(`${m} prologue cleared on Coil 1`, st.prologueClear?.[1] || 0, st.games); lput(`${m} Act 1 cleared on Coil 1`, st.act1Clear?.[1] || 0, st.games);
+        for (const [k, f] of Object.entries(st.fights || {})) lput(`${m} fight ${k}`, f.win, f.win + f.lose + (f.flee || 0));
+    }
+}
+
 if (update) {
     if (fails) { console.log(`${fails} invariant(s) failed: baseline NOT saved.`); process.exit(1); }
+    if (Object.keys(longMetrics).length) { writeFileSync(BASE_LONG, `${JSON.stringify({ saved: new Date().toISOString().slice(0, 10), note: 'log only (v0.11.251, DG)', metrics: longMetrics }, null, 1)}\n`); console.log(`Long-calendar baseline saved: ${Object.keys(longMetrics).length} numbers → tools/baseline-long.json`); }
     writeFileSync(BASE, `${JSON.stringify({ saved: new Date().toISOString().slice(0, 10), limit: LIMIT, minN: MIN_N, metrics }, null, 1)}\n`);
     console.log(`Baseline saved: ${Object.keys(metrics).length} numbers → tools/baseline.json`);
     process.exit(0);
@@ -110,6 +128,13 @@ for (const [name, m] of Object.entries(metrics)) if (!base[name] && m.n >= MIN_N
 for (const f of flags) console.log(`  DRIFT  ${f}`);
 for (const w of moved) console.log(`  NOTE  moved more than ${NOTE_AT} points (log only)  ${w}`);
 for (const w of wobble) console.log(`  noise-scaled (log only)  ${w}`);
+if (Object.keys(longMetrics).length) { // v0.11.251 (DG): log only, never a flag
+    const lb = existsSync(BASE_LONG) ? JSON.parse(readFileSync(BASE_LONG, 'utf8')).metrics : null;
+    if (!lb) console.log('  long calendar (log only): no tools/baseline-long.json yet (node tools/sanity.mjs --update with --long)');
+    else { let big = 0, lmoved = 0; for (const [name, m] of Object.entries(longMetrics)) { const b = lb[name]; if (m.n >= MIN_N) big++; if (!b) { if (m.n >= 20) console.log(`  NOTE  long calendar (log only)  ${name}: new, ${m.v}% (n ${m.n})`); continue; } const d = Math.round((m.v - b.v) * 10) / 10; if (Math.abs(d) > NOTE_AT && b.n >= 20 && m.n >= 20) { lmoved++; console.log(`  NOTE  long calendar (log only)  ${name}: ${b.v}% → ${m.v}% (${d > 0 ? '+' : ''}${d}; n ${b.n} → ${m.n})`); } }
+        for (const name of Object.keys(lb)) if (!longMetrics[name] && lb[name].n >= 20) console.log(`  NOTE  long calendar (log only)  ${name}: was ${lb[name].v}% (n ${lb[name].n}), now never happens`);
+        console.log(`  long calendar (log only): ${Object.keys(longMetrics).length} numbers, ${big} with n ≥ ${MIN_N}, ${lmoved} moved more than ${NOTE_AT} points (n ≥ 20 both sides)`); }
+}
 console.log(`  noise-scaled drift (log only, ${NOISE_K} × each number's noise, at least ${NOISE_MIN} points, every n): ${wobble.length} would flag; ${small} numbers under n ${MIN_N} are not compared by the ±${LIMIT} rule`);
 const total = fails + flags.length;
 console.log(`${compared} numbers compared (±${LIMIT} points, n ≥ ${MIN_N}): ${flags.length} drifted, ${moved.length} moved more than ${NOTE_AT} (log only), ${fails} invariant(s) failed`);

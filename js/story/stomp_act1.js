@@ -12,7 +12,7 @@ import { byForm } from './common.js'; // v0.11.247 (P17-A, BW2)
 
 const pick = (d, a, b, c) => (d >= 3 ? c : d === 2 ? b : a);
 const meiOn = (g) => !!g.flags.mei_party;
-const luHere = (g) => g.flags.ending !== 'fought' && !g.flags.a1_militia;
+const luHere = (g) => g.flags.ending !== 'fought' && !g.flags.lu_won && !g.flags.a1_militia; // v0.11.251 (RV-A, HL): not after a beating (act1_return.js luBeaten)
 /** Yuki, as she currently is, in a few words. */
 const yu = (g) => ({ cat: 'Yuki, on your shoulder,', tiger: 'Yuki, the size of a tiger and twice as bored,', human: 'Yuki, in her human form, arms folded,' }[yukiForm(g)]);
 const yuShort = (g) => ({ cat: 'Yuki', tiger: 'Yuki, large, white and in no doubt,', human: 'Yuki' }[yukiForm(g)]);

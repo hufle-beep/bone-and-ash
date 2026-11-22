@@ -36,7 +36,9 @@ const BR = 'Blackroot Wilds';
 const seeded = (g) => !!g.flags.seed || hasItem(g, 'seed_sliver');
 const both = (g) => likesMei(g) && likesYa(g);
 const trioReady = (g) => both(g) && trio(g) >= 3;
-const luHanHere = (g) => g.flags.ending !== 'fought';
+/** v0.11.251 (owner pick RV-A, HL): Lu Han was beaten at the tribute (the victory, or since P21-E every bluff and pin, `lu_won`): he stays away on Day 21. */
+export const luBeaten = (g) => g.flags.ending === 'fought' || !!g.flags.lu_won;
+const luHanHere = (g) => !luBeaten(g);
 // v0.11.37: after midnight (24+) the hour has passed. v0.11.47 (N1, the Fable review of v0.11.46): an evening hour is not jumped to
 // before 06:00 (04:00–05:59, or a night pushed through: it is still the night; it used to skip 14–18 h); the mornings (6, 8) as before
 /** v0.11.152 (owner 21:11, pick E1, BK): Day 21 went from the last night straight to Shen Qiu at 08:00 with no breakfast and no
@@ -398,7 +400,7 @@ When you are done he sits unmoving, long enough for the tea to go cold.
 
 He puts his cup down with great care.
 
-"At dusk the hunters saw Sect colours on the switchbacks: a column on foot, a dozen and more. Only an Outer Elder walks with so many." His good eye settles on you. "Shen Qiu. Tomorrow he will be at our gate. He will have heard of ${g.flags.sky_witness || g.flags.a1_sky_seen ? 'the tribulation that refused to fall' : 'the stranger no envoy of theirs could sense'}${g.flags.ending === 'fought' ? ', and of the disciples you sent home bleeding' : ''}. He will want to see with his own eyes what you are."
+"At dusk the hunters saw Sect colours on the switchbacks: a column on foot, a dozen and more. Only an Outer Elder walks with so many." His good eye settles on you. "Shen Qiu. Tomorrow he will be at our gate. He will have heard of ${g.flags.sky_witness || g.flags.a1_sky_seen ? 'the tribulation that refused to fall' : 'the stranger no envoy of theirs could sense'}${luBeaten(g) ? ', and of the disciples you sent home bleeding' : ''}. He will want to see with his own eyes what you are."
 
 "And then?"
 
@@ -692,7 +694,7 @@ Behind you Mei Lin's hand closes on her knife. Ya's lips peel back from her teet
 
 Then you talk. About the Ouroboros Axiom, carefully. About Selene, more carefully still. About the grove, and what clean Qi would be worth to a sect that loses one disciple in thirty to tribulation: no threat in it, only a merchant turning a jewel in the light.
 
-${g.flags.ending === 'bluff' ? 'He has not forgotten the bluff at the tribute post; Lu Han\'s report was thorough. It costs you.' : ''}${g.flags.ending === 'fought' ? 'He knows you bled his disciples. He leaves it unmentioned, which is worse.' : ''}${g.flags.council_unity ? ' At your back stand the elders of Ashfall, all eight in a row, and their silence says everything for them.' : ''}`,
+${g.flags.ending === 'bluff' ? 'He has not forgotten the bluff at the tribute post; Lu Han\'s report was thorough. It costs you.' : ''}${luBeaten(g) ? 'He knows you bled his disciples. He leaves it unmentioned, which is worse.' : ''}${g.flags.council_unity ? ' At your back stand the elders of Ashfall, all eight in a row, and their silence says everything for them.' : ''}`,
         choices: [
             {
                 text: 'Make your offer: the grove stays, Ashfall stays, and the Sect may send one disciple a season to learn what clean cultivation is.',

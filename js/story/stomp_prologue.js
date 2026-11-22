@@ -6,6 +6,9 @@
 import { registerStomp } from './power.js';
 import { yukiForm } from '../core/game.js';
 import { byDay } from '../core/lines.js';
+import { TT, withNetFree } from './tribute_texts.js'; // v0.11.251 (owner pick P21-E)
+/** v0.11.251 (RV-A, W2): Gao Feng out of the tribute fight (broken or turned): a disciple fought in his place. */
+const gaoOut = (g) => !!(g.flags.gao_broken || g.flags.gao_turned);
 
 /** Yuki as she currently is, for a phrase in the middle of a sentence. */
 const yk = (g) => ({ tiger: 'Yuki — currently the size of a Bengal tiger and twice as bored', human: 'Yuki, white hair stirring, ears flat, arms folded', cat: 'Yuki, eleven pounds of white cat' }[yukiForm(g)]);
@@ -89,24 +92,14 @@ The hunters come out of the trees in complete silence. One drops his bow. The el
 
 ${aside(d, 'You decide against being carried.', 'You decide against being carried. You also decide not to enjoy this, and fail.', 'You give honest thought to kneeling, purely to spare him what comes next. Then you think of the baskets, and of the children, and stay standing.')}`,
         win: {
-            2: (g) => `Lu Han is very good. That is his misfortune: he is good enough to know, by the fourth exchange, exactly how badly he is losing. Wherever his sword goes, white bone has got there first. His three disciples meet ${ykShort(g)} and reach, together, the decision to be elsewhere. Gao Feng, whatever part he had meant to take, takes none that matters.
+            2: (g) => withNetFree(g, `Lu Han is very good. That is his misfortune: he is good enough to know, by the fourth exchange, exactly how badly he is losing. Wherever his sword goes, white bone has got there first. ${gaoOut(g) ? TT.win2Out : TT.win2Disciples} Gao Feng, whatever part he had meant to take, takes none that matters.
 
-At the end the white bone lies round the tribute post like snow, with red in it; Lu Han is on his knees under your blade; and the other three are well down the road, still running.
+At the end the white bone lies round the tribute post like snow, with red in it; Lu Han is on his knees under your blade; ${gaoOut(g) ? `${TT.win2RoadOut}.` : 'and the other three are well down the road, still running.'}`), // v0.11.251 (P21-E, MT): the speech moved to collectors_sent (SENT[2]); Yuki under the net (Fable's line)
+            3: (g) => withNetFree(g, `Lu Han attacks with all of it: a sword-form older than he is, Qi burning red down the blade. You catch the blade between two fingers. It stops. Everything stops. Somewhere behind you a grandmother drops a basket of millet.
 
-"Go home," you say. "Let your Sect Master know that Ashfall has acquired a neighbour. The neighbour eats no grass, no pills and no people, and would like very much to go on that way."
+You take the sword from him gently, as scissors are taken from a child, and break it over your knee. Then you put him on the ground, with one arm that will mend in a season and one that will want a year, ${gaoOut(g) ? TT.win3Out : 'while his three disciples throw down their weapons and run'}. One of them is calling for his mother. Gao Feng, whatever he came to do, has stopped doing it.
 
-He goes. The whole village sees him off without a word. Then, slowly, every face turns to you, and you see what it is you have actually done. In this world it is more dangerous than kneeling.
-
-You have handed people hope.`,
-            3: (g) => `Lu Han attacks with all of it: a sword-form older than he is, Qi burning red down the blade. You catch the blade between two fingers. It stops. Everything stops. Somewhere behind you a grandmother drops a basket of millet.
-
-You take the sword from him gently, as scissors are taken from a child, and break it over your knee. Then you put him on the ground, with one arm that will mend in a season and one that will want a year, while his three disciples throw down their weapons and run. One of them is calling for his mother. Gao Feng, whatever he came to do, has stopped doing it.
-
-He looks up at you out of the dust by the tribute post, and the still face cracks at last. "You have no cultivation," he whispers. "I would have *felt* it."
-
-"Home," you tell him. "And tell the Sect Master that Ashfall has a neighbour now. The neighbour eats no grass, no pills and no people, and means to keep it so."
-
-He goes, nursing the worse arm. The whole village watches him go, then turns to look at you, and only then does it arrive: this is the one thing here more dangerous than kneeling. You have handed people hope.`,
+He looks up at you out of the dust by the tribute post, and the still face cracks at last. "You have no cultivation," he whispers. "I would have *felt* it."`), // v0.11.251 (MT): the speech moved to collectors_sent (SENT[3])
         },
         one: (g) => `Lu Han's blade comes down. A wall of white bone comes up to meet it, shuts on it like a hand, and returns it as splinters; the same hand lays Lu Han on his back, firmly. His three disciples have already started running, and Gao Feng's plans, if he brought any, have gone with them.`,
     },

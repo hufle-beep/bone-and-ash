@@ -270,7 +270,7 @@ function play(run, model, st, yuki, kept = false) {
         for (const [sc, who, ok] of GATES) if (g.scene === sc && gateKey[sc] !== coilKey) { gateKey[sc] = coilKey; const f = g.rel?.[who]?.f || 0; const gt = st.gates[sc] || (st.gates[sc] = { n: 0, met: 0 }); gt.n++; if (ok(f)) gt.met++; gt.maxNeg = Math.max(gt.maxNeg ?? -Infinity, -f); } // the lowest as -max (shards merge a `max…` by its max)
         // v0.11.130 (owner pick YB1, LN): the last night taken, once a Coil (g.flags.final_night: Act 1's last evening)
         if (g.flags.final_night && nightKey !== coilKey) { nightKey = coilKey; const k = NIGHT_KIND[g.flags.final_night] || 'other'; st.nights[k] = (st.nights[k] || 0) + 1; }
-        const tOut = { bluff_win: 'won', collectors_won: 'won', tribute_paid: 'paid', collectors_lost: 'lost' }[g.scene];
+        const tOut = { bluff_win: 'won', collectors_sent: 'won', tribute_paid: 'paid', collectors_lost: 'lost' }[g.scene]; // v0.11.251 (RV-A, BC): after the won screen, where the outcome is chosen (was collectors_won, reached first by every win)
         if (tOut && !seenTrib.has(cn())) { seenTrib.add(cn()); if (tOut && act === 0) { st.tribDay = (st.tribDay || 0) + clockParts(g.minutes).day; st.tribN = (st.tribN || 0) + 1; } // v0.11.203 (TS8): the tribute's day
              const b = st.tribute[cn()] || (st.tribute[cn()] = { won: 0, paid: 0, lost: 0 }); b[tOut]++; }
         const v = sceneView(g, SCENES);
@@ -366,7 +366,7 @@ function play(run, model, st, yuki, kept = false) {
         let open = v.choices.filter((c) => !c.disabled);
         if (!open.length) { assert(false, `${model}: dead end at ${g.scene} (run ${run})`); return 'stuck'; }
         if (/^(arrival|clearing)$/.test(g.scene)) open = open.filter((c) => !/Stay lost/.test(c.label)); // no Long Forest
-        if (g.scene === 'collectors_lost') { const bite = model === 'random' ? g.coil.n < 3 : mem.tribLost < 3; open = open.filter((c) => bite === /Bite the tail/.test(c.label)); if (bite) mem.tribLost++; }
+        if (g.scene === 'collectors_lost') { open = open.filter((c) => /Bite the tail/.test(c.label)); } // v0.11.251 (owner pick P21-E, TK): a lost tribute ends the Coil, nothing to accept
         if (g.scene === 'coil_end' && g.coil.why === 'tribute') open = open.filter((c) => /^Bite/.test(c.label));
         if (model === 'random' && g.scene === 'rt_elder' && run % 10 === 0 && act === 1 && !bitShen) { goTo(g, SCENES, 'rt_taken'); continue; } // the tasks test's bot: 1 game in 10 goes with Shen Qiu on purpose
         if (g.scene === 'rt_taken') { const bite = model === 'random' ? run % 5 === 0 && !bitShen : mem.shenBites < 3; open = open.filter((c) => bite === /Bite the tail/.test(c.label)); if (bite) { mem.shenBites++; bitShen = true; } }

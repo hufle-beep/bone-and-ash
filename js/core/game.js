@@ -1062,13 +1062,19 @@ export const unarmedMastery = (g) => Math.min(UNARMED_MAX, Math.floor((g.stats?.
  *  (NO_MEMORY; measured on a scratch copy: Careful's tribute 8.7 → 37.2%, its Coils 3.25 / 3.42 → 2.61 / 2.85). A fight run from or
  *  yielded is not a meeting (MB1, FY; Fable's review, medium 1: yielding a spar at once would farm it). */
 export const FOE_MEMORY_STEP = 0.5, FOE_MEMORY_MAX = 2; // MB1 (CC): also the fight's own learning's cap (ADAPT_FIGHT_MAX)
-export const NO_MEMORY = new Set(['collectors']);
+/** v0.11.251 (owner pick P21-E, FM): the tribute is remembered too, by its own step: +1.5 a meeting up to +4.5, and its own
+ *  in-fight learning keeps its cap of 2 on top (fightAdapt, the learning check). Measured (the models, long calendar, 40 games, the
+ *  rest of P21-E without it): Careful's prologue 5.85 → 4.35 Coils; steps 1.0–3.0 the same. Was NO_MEMORY's one fight. */
+export const FOE_MEMORY_OF = { collectors: { step: 1.5, max: 4.5 } };
+export const NO_MEMORY = new Set(); // v0.11.251 (FM): empty; the tribute is remembered by FOE_MEMORY_OF
 /** Count a meeting with fight `id`; returns the memory bonus from the meetings before it. */
 export function meetFoe(g, id) {
     const foes = g.stats.foes || (g.stats.foes = {});
     const met = foes[id] || 0;
     foes[id] = met + 1;
-    return NO_MEMORY.has(id) ? 0 : Math.min(FOE_MEMORY_MAX, met * FOE_MEMORY_STEP);
+    if (NO_MEMORY.has(id)) return 0;
+    const own = FOE_MEMORY_OF[id];
+    return own ? Math.min(own.max, met * own.step) : Math.min(FOE_MEMORY_MAX, met * FOE_MEMORY_STEP);
 }
 /** MB1 (FY): take a meeting back (a yield, a run that got clear). */
 export const unmeet = (g, id) => { if (g.stats.foes?.[id] > 0) g.stats.foes[id] -= 1; };
@@ -1078,7 +1084,12 @@ export const unmeet = (g, id) => { if (g.stats.foes?.[id] > 0) g.stats.foes[id] 
  *  the fists' mastery). Both, as built (v0.11.115): the fight lab's smart bots 81.3 → 83.3%, random 72.3 → 74.0%; the models'
  *  Coils within 0.06 (Careful 3.25 / 3.43 unchanged). */
 export const WEAPON_EVERY = 50, WEAPON_STEP = 0.5, WEAPON_MAX = 2;
-export const weaponMastery = (g, id) => Math.min(WEAPON_MAX, Math.floor((g.stats?.weapons?.[id] || 0) / WEAPON_EVERY) * WEAPON_STEP);
+/** v0.11.251 (owner pick P21-E, WP): against Lu Han the practice counts every 35 rounds (his sword-form reads like the blade you
+ *  practised). Measured (the models, long calendar, 40 games): the Completionist's Coil-1 tribute 0 → 25% (blade rounds by Day 43:
+ *  Completionist 44, Careful 16, Cultivator 26); every 25 rounds 40%. Only inside that fight; everywhere else WEAPON_EVERY. */
+export const WEAPON_EVERY_OF = { collectors: 35 };
+export const weaponEvery = (g) => WEAPON_EVERY_OF[g?.combat?.id] || WEAPON_EVERY;
+export const weaponMastery = (g, id) => Math.min(WEAPON_MAX, Math.floor((g.stats?.weapons?.[id] || 0) / weaponEvery(g)) * WEAPON_STEP);
 /** v0.11.116 (owner pick WA2, CDB; research.md #64): the rhythm. A sung weapon needs time to sing itself again: after the blade,
  *  the spear, the flail or the Qi blast attacks it waits a round, the needle two (c.wait[id]: the first round it is ready).
  *  Darts, guard, the Qi shield, the spike field (once a fight) and the fists don't wait. Measured (the fight lab, 300 games,
@@ -1111,7 +1122,9 @@ export const SONG_TEXT = {
     holdSpikes: 'The song pays for this one: {n} song and no Qi, and the spikes come up exactly as they would have.', // WB1 (FT; review low 8)
 };
 /** The memory bonus a fight's attack gets now: its own learning plus the memory, within FOE_MEMORY_MAX (both start from 0). */
-export const fightAdapt = (c, key) => Math.min(FOE_MEMORY_MAX, (c.adapt?.[key] || 0) + (c.mem || 0));
+export const fightAdapt = (c, key) => Math.min(FOE_MEMORY_OF[c.id] ? FOE_MEMORY_OF[c.id].max + FOE_MEMORY_MAX : FOE_MEMORY_MAX, (c.adapt?.[key] || 0) + (c.mem || 0)); // v0.11.251 (FM): the tribute's own cap
+/** v0.11.251 (FM): the learning a fight can still add: its own learning alone where the fight has its own memory, else as before. */
+export const learnedSoFar = (c, key) => (FOE_MEMORY_OF[c.id] ? (c.adapt?.[key] || 0) : fightAdapt(c, key));
 /** Task mode (v0.9.7, owner's pick 3a): every beast fight +0.5 DC and attack on top of its no-dice tuning. */
 export const BEAST_UP = 0.5;
 /** v0.11.40 (E1): the no-dice raise to a fight's DC and attack (its tune plus BEAST_UP for a beast), as startCombat applies it. */
@@ -1137,8 +1150,8 @@ export function instantWin(g, enc) {
     meetFoe(g, e.id); // v0.11.115 (MA3, FX): a meeting all the same
     if (e.night) g.flags.night_fight = true; // v0.11.92 (O1): a night fight costs sleep, even one ended in one move
     g.stats.kills += e.enemies.length;
-    const xp = awardFightXp(g, e.style, e.band || 'standard').concat(yukiSitsOut(g, e) ? [] : awardYukiFightXp(g, e.band || 'standard')); // v0.11.82; v0.11.89 (X1) awardFightXp
-    g.lastWin = { id: e.id, degree: e.degree || 3, next: e.win };
+    const xp = awardFightXp(g, e.style, e.band || 'standard').concat(yukiSitsOut(g, e) || e.net ? [] : awardYukiFightXp(g, e.band || 'standard')); // v0.11.251 (RV-A, XO): none for her where the net is the fight's // v0.11.82; v0.11.89 (X1) awardFightXp
+    g.lastWin = { id: e.id, degree: e.degree || 3, next: e.win, one: true }; // v0.11.251 (RV-A, XO): `one`, won in one move
     advance(g, 1);
     return { lines: xp, next: e.win, enc: e };
 }
@@ -1163,6 +1176,7 @@ export function startCombat(g, enc0) {
             return { ...x, hpMax: x.hp, staggered: false, ...(heavy ? { heavy: true } : {}), ...(!heavy && PEOPLE_FIGHTS.has(enc.id) && !NO_POSTURE.has(enc.id) ? { postures: true } : {}) }; // v0.11.113 (DA1, TL); v0.11.114 (PA2, PT)
         }),
         log: [enc.intro || 'Combat!'],
+        ...(enc.net ? { netted: true } : {}), // v0.11.251 (owner pick P21-E, NT): Lu Han's net holds Yuki for the whole fight
     };
     const mem = meetFoe(g, enc.id); // v0.11.115 (MA3, FX)
     if (mem > 0) { g.combat.mem = mem; g.combat.log.push(memoryLine(g.stats.foes[enc.id] - 1, mem)); }
@@ -1324,7 +1338,7 @@ function stepNoDice(g, actionId, targetIdx) {
                 const r = rollCheck(g, act.skill, tg.dc + act.dcMod, a0 + (act.unarmed ? unarmedMastery(g) : w0)); // v0.11.114 (PA2, UM); v0.11.115 (MA3: the memory, FX; the move's familiarity, W50)
                 const band = T >= 10 && r.ratio < 1 && act.id !== 'blast' ? 'full' : bandOf(r.ratio); // v0.11.100 (SB1, T): the T10 no-miss is the constructs' (the sung weapons'), not the Qi blast's
                 lines.push(`${act.label}${targets.length > 1 ? ` → ${tg.name}` : ''}: ${checkText(r)} — ${{ double: 'a clean, deep hit', full: 'hit', glance: 'a glancing blow', miss: 'miss' }[band]}`);
-                if ((band === 'glance' || band === 'miss') && !learned && fightAdapt(c, key) < ADAPT_FIGHT_MAX) { c.adapt[key] = (c.adapt[key] || 0) + ADAPT_FIGHT_STEP; learned = true; lines.push(`  You read the opening better. (+${ADAPT_FIGHT_STEP} to ${kLabel} this fight)`); } // v0.11.115 (MA3, FX): not past the cap the memory shares
+                if ((band === 'glance' || band === 'miss') && !learned && learnedSoFar(c, key) < ADAPT_FIGHT_MAX) { c.adapt[key] = (c.adapt[key] || 0) + ADAPT_FIGHT_STEP; learned = true; lines.push(`  You read the opening better. (+${ADAPT_FIGHT_STEP} to ${kLabel} this fight)`); } // v0.11.115 (MA3, FX): not past the cap the memory shares
                 if (band === 'miss') continue;
                 let dmg = dmgRoll(g, actionDmg(g, act)) * (band === 'double' ? 2 : 1);
                 if (band === 'glance') dmg = Math.floor(dmg / 2);
@@ -1354,7 +1368,7 @@ function stepNoDice(g, actionId, targetIdx) {
     if (ct) { const dmg = Math.round(boneMult(g) * 2); ct.hp -= dmg; lines.push(`Your bone construct strikes ${ct.name}: ${dmg}.`); } // v0.11.104 (GW2): by level
     let shield = !c.style && boneTier(g) >= 8;
     const yt = c.enemies.find((e) => e.hp > 0);
-    if (yt && g.yuki.hp > 0 && !c.yukiOut) { // v0.11.82 (Y1): she watches a spar or a brawl unless human
+    if (yt && g.yuki.hp > 0 && !c.yukiOut && !c.netted) { // v0.11.82 (Y1): she watches a spar or a brawl unless human
         const form = YUKI_FORMS[yukiForm(g)];
         const yv = Math.round((skillCheck(yukiFightSkill(g)) + form.hit + (c.adapt.yuki || 0)) * 10) / 10;
         const d = noDiceDc(yt.dc);
@@ -1488,7 +1502,7 @@ function finishRound(g, lines) {
     const down = c.enemies.every((e) => e.hp <= 0);
     if (down) {
         g.stats.kills += c.enemies.length;
-        const xp = awardFightXp(g, c.style, c.band).concat(c.yukiOut ? [] : awardYukiFightXp(g, c.band)); // v0.11.82; v0.11.89 (X1) awardFightXp
+        const xp = awardFightXp(g, c.style, c.band).concat(c.yukiOut || c.netted ? [] : awardYukiFightXp(g, c.band)); // v0.11.251 (NT): no fight XP for her under the net // v0.11.82; v0.11.89 (X1) awardFightXp
         g.lastWin = { id: c.id, degree: c.degree || 1, next: c.win };
         lines.push('', 'It is over.', ...xp);
         const next = c.win;

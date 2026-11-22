@@ -1,0 +1,30 @@
+[
+ {
+  "id": "C2b",
+  "file": "js/story/prologue.js",
+  "find": "qi: 4, check: { skill: 'GU', dc: 7, bonus: bluffBonus }",
+  "replace": "qi: 4, check: { skill: 'GU', dc: 5, bonus: bluffBonus }",
+  "note": "C2 re-anchored"
+ },
+ {
+  "id": "C4",
+  "file": "js/story/prologue.js",
+  "find": "(g.flags.token_silenced ? 1 : 0) + ((g.rel.Village?.f || 0) >= 40 ? 1 : 0) - Math.floor((forestScale(g) + villageScale(g)) / 2);",
+  "replace": "(g.flags.token_silenced ? 1 : 0) + ((g.rel.Village?.f || 0) >= 40 ? 1 : 0) + Math.floor((forestScale(g) + villageScale(g)) / 2);",
+  "note": "bluffBonus sign"
+ },
+ {
+  "id": "C8b",
+  "file": "js/story/prologue.js",
+  "find": "${SENT[g.flags.lu_won] || SENT[1]}",
+  "replace": "${SENT[g.flags.lu_won]}",
+  "note": "C8 re-anchored"
+ },
+ {
+  "id": "C10b",
+  "file": "js/story/prologue.js",
+  "find": "do: (g) => { addItem(g, 'hairpin', 1); return []; }, failDo: (g) => { g.flags.lu_fail = 'pin'; return []; }",
+  "replace": "do: (g) => { addItem(g, 'hairpin', 2); return []; }, failDo: (g) => { g.flags.lu_fail = 'pin'; return []; }",
+  "note": "C10 re-anchored"
+ }
+]

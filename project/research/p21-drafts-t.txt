@@ -1,0 +1,19 @@
+collectors_lost | The ground comes up and keeps you. Lu Han stands over you with his sword already lowered, and his still face holds an honest regret, the regret of a carpenter over good timber split wrong. ¶ "I said you would be carried," he says. "It gives me no pleasure to be correct. Bind him with care. He is the Sect Master's now, and so is every bruise on him." ¶ His disciples are thorough. Cord at your wrists, cord at your ankles, a carrying pole through both, and you go up between two crimson backs like a boar that argued. You reach for bone and nothing in you answers. ¶ {yuki} ¶ Ashfall watches from beside its baskets. Old Wen lowers his one good eye. Mei Lin does not lower hers, and her mother's hand is shut on her sleeve. ¶ Lu Han bows to the elder, to the correct depth. Then the pole lifts, and the road to the Sect starts passing under your back, grey and uphill, with Ashfall shrinking beyond your feet.
+collectors_lost:yuki:cat | They bring Yuki as she lies, the net gathered shut round her into a bundle that one disciple carries at arm's length. *I am keeping a list,* she tells you. *He is on it in several places.*
+collectors_lost:yuki:great | Two of them haul Yuki after you in the net, which cuts a furrow in the road behind her. *I could walk,* comes down the bond, *if anyone here were worth asking.*
+collectors_lost:yuki:woman | Yuki is marched behind the pole with the net still drawn tight over her head and arms, a disciple holding its cord at a respectful distance. "Mind the hair," she says to him, and he does.
+coil:tribute | A sect's road is well kept. You have leisure to notice it from the pole, along with the grave care the men carrying you take over every rut, since their master is owed you undamaged. Somewhere ahead is a table, and a knife, and an old man's interest. ¶ You can arrive. Or you close your teeth on it, and nobody was ever carried anywhere.
+net:cat | Lu Han's sleeve moves before his sword does. A net of grey spirit-cord plucks Yuki off your shoulder and pins her to the dust, weighted at every knot. *Rude,* the bond reports. *Carry on without me.*
+net:great | Before he has drawn, Lu Han shakes out his sleeve, and a spirit-beast net lands across Yuki's back and drags her down by its own weight. *Made for bigger game than me,* she remarks, in your head. *Insulting, and effective.*
+net:woman | Lu Han empties his sleeve at Yuki before the sword is clear: a spirit-beast net, which settles on her from hair to hem and draws shut. "I see," she says, sitting down in it. "You're on your own, then."
+netfree:cat | With its owner down the net's knots go slack, and Yuki walks out and sits washing, as though the dust were her idea.
+netfree:great | The net loses its weight when Lu Han loses his footing, and Yuki stands up through it and shakes off the cord.
+netfree:woman | The net falls open as Lu Han falls, and Yuki steps out of it, straightens her collar and says, "Finished? Good."
+read | His sense still finds nothing in you. His eyes are better trained: they go to where your weight rests, to how little of you moves when you turn, and he stops measuring his strength for a mortal. The courtesy stays; the gentleness goes.
+disciple | Crimson Lotus outer disciple
+# notes
+- collectors_lost assumes James is spent ("nothing in you answers") and is carried on a pole, to pay off Lu Han's "carried"; "ankles" can go back to a march if the pole is too much.
+- netfree lines are one sentence each as the brief asks; common.md wants two sentences per text, so they rely on being appended to the won screen.
+- The won texts (win 2) still have the three disciples meet Yuki; with the net over her that line needs a look.
+- coil:tribute says "close your teeth on it" to avoid the Shen text's "bite down" run and the word "tail".
+- disciple: shorter alternatives "Crimson Lotus disciple" or "Outer disciple" if the fight screen is narrow.

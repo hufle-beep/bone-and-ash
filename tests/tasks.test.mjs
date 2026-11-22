@@ -948,9 +948,10 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
       const r1 = cStep(g, 'blade'); assert(learn(r1) && fightAdapt(g.combat, 'blade') === FOE_MEMORY_MAX, 'MA3, FX: a miss learns up to the shared cap');
       const r2 = cStep(g, 'blade'); assert(!learn(r2) && fightAdapt(g.combat, 'blade') === FOE_MEMORY_MAX && g.combat.adapt.blade === 0.5, 'MA3, FX: no learning past it');
       const n = mk('test_wolf', [wolf({ dc: 99 })]); for (let i = 0; i < 6; i++) cStep(n, 'blade'); assert(fightAdapt(n.combat, 'blade') === 2 && n.combat.adapt.blade === 2, 'MA3, FX: with no memory the fight learns to +2 as before'); }
-    // not the tribute: counted, but no memory; a one-move finish counts as a meeting
+    // v0.11.251 (owner pick P21-E, FM): the tribute is remembered by its own step (+1.5 a meeting, up to +4.5); a one-move finish counts as a meeting
     { const k = ensureBars(newGame(121, { closed: true })); k.stats.foes = { collectors: 4 };
-      assert(NO_MEMORY.has('collectors') && NO_MEMORY.size === 1 && meetFoe(k, 'collectors') === 0 && k.stats.foes.collectors === 5, 'MA3, FX: the tribute has no memory');
+      assert(NO_MEMORY.size === 0 && meetFoe(k, 'collectors') === 4.5 && k.stats.foes.collectors === 5, 'P21-E (FM): the tribute remembered, capped at +4.5');
+      const k2 = ensureBars(newGame(123, { closed: true })); assert(meetFoe(k2, 'collectors') === 0 && meetFoe(k2, 'collectors') === 1.5 && meetFoe(k2, 'collectors') === 3, 'P21-E (FM): +1.5 a meeting');
       const w = ensureBars(newGame(122, { closed: true })); instantWin(w, { id: 'test_wolf', intro: 'In.', band: 'standard', enemies: [wolf()], win: 'stream', lose: 'stream' });
       assert(w.stats.foes.test_wolf === 1 && !w.combat, 'MA3, FX: a one-move finish is a meeting'); }
     // W50: the 50th round of a move lifts it +0.5 with its line; up to +2; the blast's own line; it reaches the next check
@@ -1001,8 +1002,9 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
       assert(o.done === 'lose' && g.stats.foes.test_wolf === 1, 'MB1, T: a lost fight is a meeting');
       endCoil(g, 'choice', 'stream'); rewind(g); sCombat(g, { id: 'test_wolf', intro: 'In.', band: 'standard', enemies: [wolf()], win: 'stream', lose: 'stream' });
       assert(g.combat.mem === 0.5 && g.combat.log.includes(memoryLine(1, 0.5)), 'MB1, T: next Coil it is remembered'); }
-    // the tribute through startCombat: counted, no memory, no line
-    { const g = mk('collectors', [wolf({ name: 'Lu Han' })], { stats: { foes: { collectors: 3 } } }); assert(!g.combat.mem && !g.combat.log.some(isMem) && g.stats.foes.collectors === 4, 'MB1, T: the tribute shows no memory'); }
+    // v0.11.251 (P21-E, FM): the tribute through startCombat: counted, +4.5 after three meetings, its line; its own learning on top (to +2 more)
+    { const g = mk('collectors', [wolf({ name: 'Lu Han', dc: 99 })], { stats: { foes: { collectors: 3 } } }); assert(g.combat.mem === 4.5 && g.combat.log.includes(memoryLine(3, 4.5)) && g.stats.foes.collectors === 4, 'P21-E (FM): the tribute shows its memory');
+      for (let i = 0; i < 8; i++) cStep(g, 'blade'); assert(g.combat.adapt.blade === 2 && fightAdapt(g.combat, 'blade') === 6.5, `P21-E (FM): the tribute's own learning to +2 on top of its memory (${fightAdapt(g.combat, 'blade')})`); }
     // not counted: Say something, the spike field, a Qi-short round; a closed move in a spar counts as the blade, in a brawl not at all
     { const p = mk('gao', [wolf({ name: 'Gao' })]); cStep(p, 'remark'); assert(!W(p), 'MB1, T: Say something is not an attack');
       const s2 = mk('test_wolf', [wolf()]); if (actionOpen(s2, 'spikes')) { cStep(s2, 'spikes'); assert(!W(s2), 'MB1, T: the spike field is not an attack'); }
@@ -1664,10 +1666,9 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     assert(coilActive(h) && SCENES.collectors_lost.choices.some((c) => c.to === 'coil_end' && c.show(h)), 'lost tribute: Bite the tail offered');
     const k = ensureBars(newGame(23)); k.scene = 'collectors_lost'; k.flags.ending = 'lost';
     choose(k, SCENES, SCENES.collectors_lost.choices.findIndex((c) => c.to === 'coil_end'));
-    const acc = sceneView(k, SCENES).choices.find((c) => /^Accept/.test(c.label));
-    assert(k.scene === 'coil_end' && acc, 'the Coil screen offers Accept after a lost tribute');
-    choose(k, SCENES, acc.index);
-    assert(k.scene === 'epilogue' && k.flags.ending === 'lost' && k.coil.n === 1, 'Accept goes on to the epilogue');
+    // v0.11.251 (owner pick P21-E, TK): no accepting a lost tribute: the Coil screen offers the bite only, collectors_lost no "Get up."
+    assert(k.scene === 'coil_end' && !sceneView(k, SCENES).choices.some((c) => /^Accept/.test(c.label)) && sceneView(k, SCENES).choices.some((c) => /^Bite the tail/.test(c.label)), 'P21-E (TK): the Coil screen offers no Accept after a lost tribute');
+    { const t = ensureBars(newGame(25)); goTo(t, SCENES, 'collectors_lost'); const cs = sceneView(t, SCENES).choices; assert(cs.length === 1 && /^Bite the tail/.test(cs[0].label), 'P21-E (TK): collectors_lost offers the bite only'); }
     const w = ensureBars(newGame(24)); w.scene = 'wilds'; w.flags.long = true; w.inventory.hare_raw = 2;
     endCoil(w, 'choice', 'wilds'); goTo(w, SCENES, 'coil_end');
     const ny = sceneView(w, SCENES).choices.find((c) => c.label === 'Not yet.');
@@ -1768,7 +1769,7 @@ function fight(g, run) {
 const byCoil = {};
 const medStats = { bt: 0, mer: 0, warn: 0, a1bites: 0, a1coils: {} };
 const deaths = { pro: {}, a1: {} }; // v0.9.7: per act and Coil: { coils, early (before Mei Lin), late, beast }
-const TRIBUTE_OUT = { bluff_win: 'won', collectors_won: 'won', tribute_paid: 'paid', collectors_lost: 'lost' };
+const TRIBUTE_OUT = { bluff_win: 'won', collectors_sent: 'won', tribute_paid: 'paid', collectors_lost: 'lost' }; // v0.11.251 (RV-A, BC): after the won screen (was collectors_won)
 const stats = { tasks: { endings: {}, collapses: 0, cards: 0, skipped: 0, games: 0 } }; // v0.11.34 (D1): the classic games gone
 // v0.11.21: bugs the mutation test (20 deliberate bugs) found the suite missing, or caught only by luck (the parent only)
 if (!SHARD && !BOTS_ONLY) {
@@ -1941,7 +1942,7 @@ function play(run, tasks) {
         let open = v.choices.filter((c) => !c.disabled);
         if (!open.length) { assert(false, `dead end at ${g.scene} (run ${run})`); return false; }
         if (tasks && /^(arrival|clearing)$/.test(g.scene)) open = open.filter((c) => !/Stay lost/.test(c.label)); // v0.10.1: the balance bots stay out of the Long Forest
-        if (tasks && g.scene === 'collectors_lost') open = open.filter((c) => (g.coil.n < 3) === /Bite the tail/.test(c.label)); // bots try three Coils
+        if (tasks && g.scene === 'collectors_lost') open = open.filter((c) => /Bite the tail/.test(c.label)); // v0.11.251 (owner pick P21-E, TK): a lost tribute ends the Coil (bots tried three Coils, then accepted)
         if (tasks && g.scene === 'coil_end' && g.coil.why === 'tribute') open = open.filter((c) => /^Bite/.test(c.label));
         if (tasks && g.scene === 'rt_elder' && run % 10 === 0 && g.coil.act === 1 && !bitShen) { goTo(g, SCENES, 'rt_taken'); continue; } // v0.11.4: 1 run in 10 goes with Shen Qiu on purpose, so the Act 1 rewind path is walked however the fights are tuned
         if (tasks && g.scene === 'rt_taken') { const bite = run % 5 === 0 && g.coil.act === 1 && !bitShen; open = open.filter((c) => bite === /Bite the tail/.test(c.label)); if (bite) bitShen = true; } // 1 run in 5 rewinds Act 1 at Shen Qiu once
