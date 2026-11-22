@@ -13,7 +13,7 @@ import { TASK_HUBS } from '../js/story/task_hubs.js'; // v0.11.137 (TR1, YB)
 import { countsFill, LONG_CAL, calMinutes } from '../js/core/calendar.js'; // v0.11.224 (TX2, DC12); v0.11.253 (P23-A, LB): the bots' calendar
 import { HT_HUBS, HT_BODY, HT_CLOSE, HT_LABEL, HT_GAIN, HT_MID, htPool, htSlot } from '../js/story/house_time.js'; // v0.11.139 (MW1)
 import { likesMei, likesYa, rel } from '../js/story/act1_common.js'; // v0.11.123 (EQ1, AB); v0.11.172 (P5A): rel
-import { KEEP_FLAGS, rewind, endCoil } from '../js/core/coil.js'; // v0.11.137 (HV1, Fable L2): rewind on an old save // v0.11.123 (ER1, T3)
+import { KEEP_FLAGS, rewind, endCoil, liftKept } from '../js/core/coil.js'; // v0.11.137 (HV1, Fable L2): rewind on an old save // v0.11.123 (ER1, T3)
 import { againView, noteRead, MEMORY_LINES } from '../js/story/again.js'; // v0.11.167 (CA1): MEMORY_LINES // v0.11.125 (RW1, T); v0.11.133 (FP2): noteRead
 import { STOMP } from '../js/story/power.js'; import { ASHFALL } from '../js/story/ashfall.js'; import { FALLOUT } from '../js/story/act1_fallout.js'; import { BLACKROOT } from '../js/story/act1_blackroot.js'; // v0.11.172 (P5A): BLACKROOT; v0.11.170 (NX2): FALLOUT // v0.11.169 (P3A): ASHFALL // v0.11.126 (NQ1)
 import { coilStamp, dayIndex, textDay, DAY_REPLIES, COIL_SETS, actCoil, noteDay, linesOf, pickLine } from '../js/core/lines.js'; // v0.11.166 (RW1): COIL_SETS, actCoil; // v0.11.135 (NT1, EV1); v0.11.136 (NC1): DAY_REPLIES
@@ -48,7 +48,7 @@ const onStoryDay = (g, d, h = 0, m = 0) => { g.minutes = calMinutes(g, d, h, m);
 const WALK = { hammerspace: 4500, coil: 1800, epilogue: 7000, sister: 4000 };
 const WALK_CAPS = new Set(Object.values(WALK));
 let walkLongest = 0; // the longest walk to its goal under a WALK cap, printed
-const STEP_CAP = 5000; // v0.11.34: Incremental Mode games go round the Coil (one game took 2,512 steps over 19 Act 1 Coils), was 2,500 in Story Mode
+const STEP_CAP = 10000; // v0.11.255 (P25-A, owner pick SC2): about twice the longest random run (5,096: run 49 meets the ape at 11 twice more; 4,480 before); v0.11.34: Incremental Mode games go round the Coil (one game took 2,512 steps over 19 Act 1 Coils), was 2,500 in Story Mode
 
 // static: every literal target exists
 const src = SHARD ? [] : Object.values(SCENES);
@@ -9482,6 +9482,31 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     }
     // LB: the random games and the walks play the long calendar
     assert(freshBot(1).cal === C.LONG_CAL && JSON.stringify(WALK) === '{"hammerspace":4500,"coil":1800,"epilogue":7000,"sister":4000}', `${T} (LB, WB, TG5): the bots' games on the long calendar, four walk families' steps about twice their longest`);
+}
+// v0.11.255 (owner pick P25-A, AW): the rot ape's tune by James's realm: 11 below Core Formation, 1.5 from it; every other Act 1 fight as before
+{
+    const T = 'P25-A';
+    const { TUNE, TUNE_LOW, LOW_REALM, tuneFor } = await import('../js/story/act1_tune.js');
+    const PW = await import('../js/story/power.js'); // the preview's degree (TG2)
+    assert(LOW_REALM === 2 && JSON.stringify(TUNE_LOW) === '{"rot_ape":11}' && TUNE.rot_ape === 1.5, `${T} (AW): the ape 11 below realm 2 (Core Formation), 1.5 from it`);
+    assert([0, 1, undefined].every((r) => tuneFor('rot_ape', r) === 11) && [2, 3, 5, 14].every((r) => tuneFor('rot_ape', r) === 1.5), `${T} (AW): Mortal Vessel and Foundation meet 11, Core Formation and up 1.5`);
+    assert(Object.keys(TUNE).filter((id) => id !== 'rot_ape').every((id) => [0, 1, 2, 5].every((r) => tuneFor(id, r) === TUNE[id])) && tuneFor('no_such_fight', 0) === 0, `${T} (AW): every other fight its old tune at every realm`);
+    const ape = (realm, lured) => { const g = ensureBars(newGame(95500)); g.james.realm = realm; if (lured) g.flags.ape_lured = true; const sc = lured ? 'ape_lured' : 'ah_ridge_end'; const c = SCENES[sc].choices.find((x) => x.combat); return c.combat(g).enemies[0]; };
+    const got = [0, 1, 2, 5].map((r) => [ape(r, false), ape(r, true)].map((e) => `${e.hp}/${e.dc}/${e.atk}`).join(' ')).join(' | ');
+    assert(got === '55/17/18 40/17/18 | 55/17/18 40/17/18 | 30/7.5/8.5 22/7.5/8.5 | 30/7.5/8.5 22/7.5/8.5', `${T} (AW): the ape's HP/DC/attack at realms 0, 1, 2, 5, head-on and lured (${got})`);
+    // the cold review (Opus), TG1–TG3, TG5: James's realm alone, the real tap path and its preview, the Coil's kept realm, allies after the tune
+    const sc = (g, lured) => { g.scene = lured ? 'ape_lured' : 'ah_ridge_end'; g.minutes = 12 * 1440 + 10 * 60; return SCENES[g.scene].choices.findIndex((c) => c.combat); };
+    { const g = ensureBars(newGame(95501)); g.james.realm = 1; g.yuki.realm = 3; const e = SCENES.ah_ridge_end.choices.find((c) => c.combat).combat(g).enemies[0];
+      assert(e.hp === 55 && e.dc === 17, `${T} (TG1): Yuki at True Core beside a James at Foundation: the ape still 11 (${e.hp}/${e.dc})`); }
+    const tap = (realm, lured) => { const g = ensureBars(newGame(95502)); g.james.realm = realm; if (lured) g.flags.ape_lured = true; const i = sc(g, lured);
+        const deg = PW.degreeForChoice(g, SCENES[g.scene].choices[i].combat); const r = choose(g, SCENES, i); const c = startCombat(g, r.combat(g)); const e = c.enemies[0]; return `${e.hp}/${e.dc}/${e.atk}${deg === c.degree ? '' : ` degree ${deg}≠${c.degree}`}`; };
+    const taps = [1, 2].map((r) => `${tap(r, false)} ${tap(r, true)}`).join(' | ');
+    assert(taps === '44/31.5/32.5 32/31.5/32.5 | 24/22/23 18/22/23', `${T} (TG2): the fight James taps into (the no-dice raise and HP_TUNE on top), its preview's degree the same, at Foundation and Core Formation (${taps})`);
+    const coilApe = (clears, keptTop, realm) => { const g = ensureBars(newGame(95503)); g.stats = { ...(g.stats || {}), clears, keptTop }; g.james.realm = realm; liftKept(g); return `${g.james.realm}:${SCENES.ah_ridge_end.choices.find((c) => c.combat).combat(g).enemies[0].dc}`; };
+    const coils = [coilApe(2, 2, 0), coilApe(1, 2, 0), coilApe(0, 0, 1)].join(' ');
+    assert(coils === '2:7.5 1:17 1:17', `${T} (TG3): two won clears keep Core Formation and the ape 1.5; one clear keeps Foundation and 11; none, at Foundation, 11 (${coils})`);
+    { const g = ensureBars(newGame(95504)); g.james.realm = 0; g.flags.mei_party = true; g.flags.ya_party = true; const e = SCENES.ah_ridge_end.choices.find((c) => c.combat).combat(g).enemies[0];
+      assert(e.hp === 51 && e.dc === 17, `${T} (TG5): Mei Lin and Ya in the party take 2 HP each after the tune (55 → 51; ${e.hp})`); }
 }
 if (!SHARD) console.log(`  the walks: the longest to its goal under a raised cap ${walkLongest} steps (caps ${JSON.stringify(WALK)})`); // the P23 review's TG5
 console.log(`\n${pass} passed, ${fail} failed`);

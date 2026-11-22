@@ -24,7 +24,7 @@
  */
 import { clockParts, bumpRel, sleepUntil, yukiForm } from '../core/game.js';
 import { forestScale, villageScale, grow, day, hour } from './common.js';
-import { TUNE } from './act1_tune.js';
+import { tuneFor } from './act1_tune.js';
 
 export { day, hour };
 
@@ -49,7 +49,7 @@ export function encounter(g, { id, intro, enemies, win, lose, flee = null, tier 
     const s = a1Scale(g);
     const growth = { small: { hp: 0.12, dc: 0.4, atk: 0.5 }, region: { hp: 0.12, dc: 0.4, atk: 0.5 }, boss: { hp: 0.1, dc: 0.35, atk: 0.45 }, climax: { hp: 0.08, dc: 0.35, atk: 0.45 } }[tier];
     const band = { small: 'standard', region: 'challenging', boss: 'major', climax: 'major' }[tier];
-    const t = TUNE[id] || 0;
+    const t = tuneFor(id, g.james?.realm); // v0.11.255 (P25-A, AW): the rot ape 11 below Core Formation, 1.5 from it
     const half = (n) => Math.round(n * 2) / 2;
     const list = enemies.map((e) => grow(e, s, growth)).map((e) => (t ? { ...e, hp: Math.round(e.hp * (1 + 0.1 * t)), dc: half(e.dc + t), atk: half(e.atk + t) } : e));
     const a = allies(g);
