@@ -4,7 +4,7 @@
  * corpses of their rivals, and where Heaven answers every breakthrough with lightning. James needs none of it.
  * That is going to be a problem — for them.
  */
-import { addItem, hasItem, eat, bumpRel, sleepUntil, advance, clockParts, breakthrough, realmName, nightTo, nightRest, canFly } from '../core/game.js';
+import { d6, addItem, hasItem, eat, bumpRel, sleepUntil, advance, clockParts, breakthrough, realmName, nightTo, nightRest, canFly } from '../core/game.js';
 import { NO_DICE_TUNE } from './nodice_tune.js';
 import { setNoDiceTune, yukiFightSkill } from '../core/game.js'; // v0.11.118 (YK1 review, SB)
 setNoDiceTune(NO_DICE_TUNE);
@@ -97,7 +97,17 @@ He goes, nursing the worse arm. The whole village watches him go, then turns to 
 const bluffBonus = (g) => (g.flags.healed === true ? 1 : 0) + (g.flags.boar ? 1 : 0) + (g.flags.gao_beaten ? 1 : 0) + (g.flags.scouted ? 1 : 0) + (g.flags.gao_turned || g.flags.gao_warned ? 1 : 0) + (g.flags.token_silenced ? 1 : 0) + ((g.rel.Village?.f || 0) >= 40 ? 1 : 0) - Math.floor((forestScale(g) + villageScale(g)) / 2);
 export const LU_DISCIPLE = { hp: 8, dc: 4, atk: 5, dmg: 4, dr: 1 };
 export const LU_READS = 1.75;
+/** v0.11.252 (owner pick P22-A, TC; RV-A: the d6): the tribute that isn't a cliff. On the long calendar Lu Han's HP, before the long
+ *  step, moves by (d6 − 3.5) × LU_SPREAD: −2.5 … +2.5, one of the save's random numbers drawn when the fight is built (a fresh one each
+ *  Coil, the same on a reload). Unshown. Measured (the models, long calendar): Lu Han raw HP −1 / 0 / +1 moved the Completionist's
+ *  Coil-1 wins 40 / 25 / 0 → 35 / 20 / 7.5%, the Cultivator's 52.5 / 15 / 5 → 50 / 32.5 / 7.5%; with FD + JD at 120 games 16.7 / 27.5%
+ *  (from the seed and the Coil's number instead, as first built: 10.8 / 21.7%). */
+export const LU_SPREAD = 1;
+export const luSpread = (g) => (d6(g) - 3.5) * LU_SPREAD;
 export const luReads = (g) => (longCal(g) ? Math.max(0, (g.james.realm || 0) - 1) : 0);
+/** v0.11.252 (owner pick P22-A, JD): the jackals' run on the long calendar, DC 4 → 3.5 (no dice: 2 → 1.5): Careful's Convergence Use
+ *  at night on Coil 1 is 1.5, so it gets away (its Coil-1 jackal deaths 75 → 0%, its Coil ends at the tribute instead). */
+export const JR_DC_LONG = 3.5;
 const collectorsFight = (g) => {
     const s = forestScale(g) + villageScale(g);
     const militia = Math.min(2, g.flags.militia || 0) + (g.flags.spears ? 1 : 0);
@@ -109,7 +119,7 @@ const collectorsFight = (g) => {
     // the hunters you drilled hold the others off and wear Lu Han down
     if (militia) enemies[0].hp = Math.max(6, enemies[0].hp - 2 * militia);
     const reads = luReads(g);
-    if (longCal(g)) enemies[0] = longStep(enemies[0], LONG_STEPS.collectors);
+    if (longCal(g)) enemies[0] = longStep({ ...enemies[0], hp: enemies[0].hp + luSpread(g) }, LONG_STEPS.collectors); // v0.11.252 (P22-A, TC)
     if (reads) enemies[0] = { ...enemies[0], dc: enemies[0].dc + LU_READS * reads, atk: enemies[0].atk + LU_READS * reads };
     return {
         id: 'collectors',
@@ -479,7 +489,7 @@ ${g.flags.stakes ? 'Something yelps on your bone stakes: one of the visitors is 
 Ashfang jackals. You have never seen one, and you would know them anywhere: they look exactly as this world's Qi tastes.`,
         choices: [
             { text: 'Fight.', combat: jackals, to: 'jackals_won' },
-            { text: 'Bone wall between you and them, then run for the water.', qi: 4, check: { skill: 'Convergence Use', dc: 4 }, to: 'jackals_fled', fail: 'night_attack_forced' },
+            { text: 'Bone wall between you and them, then run for the water.', qi: 4, check: { skill: 'Convergence Use', dc: (g) => (longCal(g) ? JR_DC_LONG : 4) /* v0.11.252 (P22-A, JD) */ }, to: 'jackals_fled', fail: 'night_attack_forced' },
         ],
     },
     night_attack_forced: {
@@ -869,13 +879,13 @@ Lu Han does not take it. He looks at it for as long as courtesy requires, the wa
     },
     bluff_win: {
         id: 'bluff_win', title: 'Senior', art: 'collectors', place: 'Ashfall Hamlet — the tribute post',
-        enter: (g) => { g.flags.ending = 'bluff'; bumpRel(g, 'Village', 20, 0); return []; },
+        enter: (g) => { g.flags.ending = 'bluff'; const fv = longCal(g) ? 25 : 20; bumpRel(g, 'Village', fv, 0); /* v0.11.252 (P22-A, FV; RV-A: long calendar): was 20, the send's +25 */ return []; },
         text: bluffWinText, // v0.11.251 (MT): after the won fight (Fable's); RV-A (SM): its degree-3 sentences
         choices: [{ text: 'Breathe out.', to: 'epilogue' }],
     },
     tribute_paid: {
         id: 'tribute_paid', title: 'Heavenly Material', art: 'hairpin', place: 'Ashfall Hamlet — the tribute post',
-        enter: (g) => { addItem(g, 'hairpin', -1); g.flags.ending = 'paid'; bumpRel(g, 'Village', 12, 0); return []; },
+        enter: (g) => { addItem(g, 'hairpin', -1); g.flags.ending = 'paid'; const fv = longCal(g) ? 25 : 12; bumpRel(g, 'Village', fv, 0); /* v0.11.252 (P22-A, FV; RV-A: long calendar): was 12, the send's +25 */ return []; },
         text: paidText, // v0.11.251 (MT): after the won fight (Fable's); RV-A (SM): its degree-3 sentence
         choices: [{ text: 'Breathe out.', to: 'epilogue' }],
     },
@@ -890,7 +900,7 @@ Your hands are shaking. It isn't fear. It is that the thing worked.`),
         choices: [
             { text: TT.labels.send, to: 'collectors_sent' },
             { text: TT.labels.bluff, show: (g) => g.flags.tribute_fail !== 'bluff' /* RV-A (OS): an old save's called bluff */, qi: 4, check: { skill: 'GU', dc: 7, bonus: bluffBonus }, failDo: (g) => { g.flags.lu_fail = 'bluff'; return []; } /* RV-A (FL): the line opens collectors_sent */, to: 'bluff_win', fail: 'collectors_sent' },
-            { text: TT.labels.pin, qi: 8, check: { skill: 'Convergence Use', dc: 5, bonus: (g) => -Math.floor((forestScale(g) + villageScale(g)) / 2) }, show: (g) => g.flags.tribute_fail !== 'hairpin' /* RV-A (OS) */, do: (g) => { addItem(g, 'hairpin', 1); return []; }, failDo: (g) => { g.flags.lu_fail = 'pin'; return []; } /* RV-A (FL) */, to: 'tribute_paid', fail: 'collectors_sent' },
+            { text: TT.labels.pin, qi: 8, whole: (g) => longCal(g) /* v0.11.252 (P22-A, PN; review C L2; RV-A: long calendar): no thin haul, no double */, check: { skill: 'Convergence Use', dc: 5, bonus: (g) => -Math.floor((forestScale(g) + villageScale(g)) / 2) }, show: (g) => g.flags.tribute_fail !== 'hairpin' /* RV-A (OS) */, do: (g) => { addItem(g, 'hairpin', 1); return []; }, failDo: (g) => { g.flags.lu_fail = 'pin'; return []; } /* RV-A (FL) */, to: 'tribute_paid', fail: 'collectors_sent' },
         ],
     },
     /** v0.11.251 (MT): the victory's own screen, the old win texts' speech word for word by the degree of the won fight. */
@@ -1421,8 +1431,8 @@ SCENES.lf_hub.choices.push({
         c.text = text; // v0.11.41: Incremental Mode's wording only (Story Mode's is gone)
         if (out) { const d = c.do; c.do = (g, r) => (d(g, r) || []).map((l) => (l === out[0] ? out[1] : l)); }
     };
-    reword('night_attack', /^Bone wall between you/, (g) => (canFly(g) ? FW.jackalsRun : 'A hedge of bone spikes between you and them, then run for the water.')); // v0.11.195 (F1, D1: NA, the alt): no flight in the prologue's fights
-    SCENES.night_attack_forced.text = (g) => `The hedge comes up knee-high and mostly gaps. The jackals step through it with professional courtesy. Running is off the table.${byForm(g, '', NA_TIGER, '')}`; /* v0.11.131 (XB2, FL; Fable's MAIN): the great root-kin */
+    reword('night_attack', /^Bone wall between you/, (g) => (canFly(g) ? FW.jackalsRun : 'A pit and a few bone stakes in their path, then run for the water.' /* v0.11.252 (P22-A, JL; review C L7; Fable's): the spikes form, was the hedge */)); // v0.11.195 (F1, D1: NA, the alt): no flight in the prologue's fights
+    SCENES.night_attack_forced.text = (g) => `The pit opens ankle-deep and the stakes come up four in number. The jackals walk round the lot without breaking step. So much for running.${byForm(g, '', NA_TIGER, '')}`; /* v0.11.252 (P22-A, JL; Fable's; RV L4): the spikes, was the hedge */ /* v0.11.131 (XB2, FL; Fable's MAIN): the great root-kin */
     reword('rt_ford', /bridge of bone/, 'Sing stepping-stones of bone from stone to stone.', ['A white bridge rises stone to stone, ribbed like a backbone. Mei Lin walks over it with temple manners, eyes down, feet careful.', 'White stepping-stones rise between the black ones, ribbed like vertebrae. Mei Lin walks over them with temple manners, eyes down, feet careful.']);
     reword('rt_ambush', /wall of bone/, 'A slab of bone between you and them, then down to the river.');
     reword('ring_chambers', /wall of bone/, 'Seal the fourth ring\'s doorway with a slab of bone and leave them to it.', ['A white wall, floor to ceiling. The chewing goes on behind it, disappointed.', 'A white slab, man-high, jammed into the doorway. The chewing goes on behind it, disappointed.']);

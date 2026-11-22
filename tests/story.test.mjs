@@ -3093,7 +3093,7 @@ for (const form of ['cat', 'human']) {
             const [cat, tiger, human] = ['cat', 'tiger', 'human'].map((form) => view(id, form));
             assert(tiger.includes(T) && tiger.replace(T, '') === cat && human.includes(H) && human.replace(H, '') === cat, `XB2 (FL) / NX2 (FB): ${id}: the great root-kin's line and the woman's, each hers alone`);
         }
-        assert(/step through it/.test(view('night_attack_forced', 'tiger')), 'XB2 (FL): night_attack_forced keeps Incremental Mode\'s hedge');
+        assert(/^The pit opens ankle-deep/.test(view('night_attack_forced', 'tiger')), 'XB2 (FL): night_attack_forced keeps Incremental Mode\'s spikes (v0.11.252, JL: was the hedge)');
         // HP: each offer marks itself when it fails; both fail to bluff_fail
         const tc = SCENES.tribute.choices;
         assert(tc[1].fail === 'bluff_fail' && tc[2].fail === 'bluff_fail' && /^Bluff/.test(tc[1].text) && /hairpin/.test(tc[2].text) && !tc[1].show(FM(67499, 'cat')) && !tc[2].show(FM(67498, 'cat')), 'XB2 (HP): the bluff and the hairpin fail to bluff_fail (v0.11.251, MT: hidden, old saves standing on bluff_fail keep their text)');
@@ -4734,7 +4734,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         elderSky: [/watched Heaven come for the man in that chair, and Heaven left with nothing\./, /My sense and my eye cannot both be honest, and I do not know which of them to bury\.$/], elderRung: [/until Heaven declined to stop you/],
         morningOut: [/^\*Then\* fly out\.$/], luHanSky: [/^"A tribulation was reported over this village," he says, to the road in general\./, /a man whom it did not burn/, /All along the post, heads go lower\. Nobody points\. Nobody needs to\.$/], luHanTail: [/^Villages exaggerate\.$/],
         scout: [/switchback/, /a bench under a roof, a shrine with a red lotus cut into the stone/, /because dust can't be read from above/, /The marks in it are fresh\. Somebody has been standing here, watching the village\.$/],
-        jackalsRun: [/^A hedge of bone spikes between you and them, then run for the water\./], dawnNothing: [/You eat nothing, a meal you are getting very good at/, /about to go up/, /when the scream comes\.$/], dawnLeft: [/You eat what's left/, /about to go up/, /when the scream comes\.$/],
+        jackalsRun: [/^A pit and a few bone stakes in their path, then run for the water\./] /* v0.11.252 (JL) */, dawnNothing: [/You eat nothing, a meal you are getting very good at/, /about to go up/, /when the scream comes\.$/], dawnLeft: [/You eat what's left/, /about to go up/, /when the scream comes\.$/],
         streamOutLabel: [/^Enough of the forest\. Fly the stream out, low — today\.$/], streamOut: [/it is your only map/, /The trees draw apart, the stones grow, the stream raises its voice\.$/],
         trunk: [/^Step up off the ground with Yuki/], trunkGreat: [/^Step up off the ground behind Yuki/], ridgeOpen: [/^You come down on the ridge with the lie of the land already in your head:$/],
         ridgeSlope: [/^Below, on the herb slope, a basket lies spilled\. A boulder has blood on it\. Whoever was there has gone\.$/],
@@ -4773,8 +4773,8 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         assert(lbl(m, /before the light goes\.$/) === 'Walk back before the light goes.' && lbl(f, /before the light goes\.$/) === 'Head back before the light goes.', `${T} (BF)`); }
     { const m = at(0, 'stream').v; const f = at(1, 'stream').v;
         assert(lbl(m, /downstream until dark\.$/) === 'Keep walking downstream until dark.' && lbl(f, /downstream until dark\.$/) === 'Keep going downstream until dark.', `${T} (ST)`); }
-    { const c = SCENES.night_attack.choices.find((x) => /hedge of bone spikes/.test(String(x.text)));
-        assert(!!c && c.text(at(0, 'night_attack').g) === 'A hedge of bone spikes between you and them, then run for the water.' && c.text(at(1, 'night_attack').g) === FW.jackalsRun && c.to === 'jackals_fled', `${T} (NA): the label by flight, still into the water`); }
+    { const c = SCENES.night_attack.choices.find((x) => /a few bone stakes/.test(String(x.text))); // v0.11.252 (P22-A, JL)
+        assert(!!c && c.text(at(0, 'night_attack').g) === 'A pit and a few bone stakes in their path, then run for the water.' && c.text(at(1, 'night_attack').g) === FW.jackalsRun && c.to === 'jackals_fled', `${T} (NA): the label by flight, still into the water`); }
     // MW and S4: the second morning's closing words; the third morning names the forest, not the Blackroot
     for (const replay of [false, true]) {
         const mk = (r) => { const x = at(r, 'morning', { forest_day: 2 }); if (replay) { x.g.coil.n = 2; Object.assign(x.g.flags, { v_bone: true }); } return sceneView(x.g, SCENES).text; };
@@ -6968,7 +6968,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
           out.push(`${s.id}|${v.title ?? ''}|${v.text}|${v.choices.filter((c) => !c.disabled).map((c) => c.label).join('/')}`);
       }
       const h = Gm.fnv1a(out.join('\n'));
-      assert(h === 'a44d93ef' && out.length === 39228, `${T} (H2, TG2): the old calendar's ${out.length} renders of the scenes the counts don't touch exactly as v0.11.223's code (${h}; v0.11.251 (P21-E): ceae7781 / 39102 → acba57dd / 39228 → (RV-A, SM: collectors_lost's title) a44d93ef, the tribute's six scenes only (tribute, collectors_won, the new collectors_sent's 126 renders, collectors_lost, bluff_win, tribute_paid; without them fd26ea0d / 38472 on both codes); v0.11.247 (P17-A): 990cb0af → 0211e709, TX's four tic swaps only (wen_lesson, yk_night_ya, yk_night_fo, rt_yk_talk; 126 renders each); RV-A → ceae7781: Wen's two sentences (wen_lesson) and far_won's label (126 renders each), nothing else; v0.11.246 (P16-A): 503ab805 / 38976 → 990cb0af / 39102, the new first_flight screen's 126 renders and 3 ah_hub renders on Day 15 at 08:00 with Ya away (the pass waits for her door, LG); every other render the same; v0.11.231 (P4-2, AG + AT, RV1): 8de296d0 → 503ab805, 57 renders on Days 14–15 at 08:00 with Ya away at the Ashen Hills (her cards hidden, the away lines; 19:00 unchanged, AV); v0.11.230 (P3-2, FT): 5117a3ec → 8de296d0, the new texts of far_hunt, far_won and village_night (the other 38598 renders 8c6f3060 on both codes); v0.11.227: 8ce676b4 / 39060 → 5117a3ec / 38976, the 84 kept-realm renders of yuki_check left out, the hash taken on v0.11.226's code; update only with a push that means to change the old calendar's texts)`);
+      assert(h === 'f60e5a91' && out.length === 39228, `${T} (H2, TG2): the old calendar's ${out.length} renders of the scenes the counts don't touch exactly as v0.11.223's code (${h}; v0.11.252 (P22-A): a44d93ef → f60e5a91 (6585d717 before RV's L3 wording), night_attack_forced's failed run (JL) and bluff_win's Gao paragraph (BT) only, 126 renders each, the rest the same on both codes; v0.11.251 (P21-E): ceae7781 / 39102 → acba57dd / 39228 → (RV-A, SM: collectors_lost's title) a44d93ef, the tribute's six scenes only (tribute, collectors_won, the new collectors_sent's 126 renders, collectors_lost, bluff_win, tribute_paid; without them fd26ea0d / 38472 on both codes); v0.11.247 (P17-A): 990cb0af → 0211e709, TX's four tic swaps only (wen_lesson, yk_night_ya, yk_night_fo, rt_yk_talk; 126 renders each); RV-A → ceae7781: Wen's two sentences (wen_lesson) and far_won's label (126 renders each), nothing else; v0.11.246 (P16-A): 503ab805 / 38976 → 990cb0af / 39102, the new first_flight screen's 126 renders and 3 ah_hub renders on Day 15 at 08:00 with Ya away (the pass waits for her door, LG); every other render the same; v0.11.231 (P4-2, AG + AT, RV1): 8de296d0 → 503ab805, 57 renders on Days 14–15 at 08:00 with Ya away at the Ashen Hills (her cards hidden, the away lines; 19:00 unchanged, AV); v0.11.230 (P3-2, FT): 5117a3ec → 8de296d0, the new texts of far_hunt, far_won and village_night (the other 38598 renders 8c6f3060 on both codes); v0.11.227: 8ce676b4 / 39060 → 5117a3ec / 38976, the 84 kept-realm renders of yuki_check left out, the hash taken on v0.11.226's code; update only with a push that means to change the old calendar's texts)`);
       const real = [
         [at(false, 6, 19, { long: true, vday: 3 }), 'evening', /^Third supper at Mei Lin's\. Her mother serves you first now/],
         [at(false, 20, 19, {}), 'rt_evening', /"Nine days in the Blackroot," the old woman informs the pot, "and my daughter comes home fatter than she left\."/],
@@ -9229,7 +9229,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
         choose(g, SCENES, 0); assert(g.scene === 'epilogue', `${T} (MT): the victory goes on to the epilogue`);
     }
     // the bluff and the pin after the won fight: success and failure (a failure ends as the victory did, as a failed offer led to the fight)
-    for (const [i, win, ending, gain, fl] of [[1, 'bluff_win', 'bluff', 20, TT.failBluff], [2, 'tribute_paid', 'paid', 12, TT.failPin]]) {
+    for (const [i, win, ending, gain, fl] of [[1, 'bluff_win', 'bluff', 25, TT.failBluff], [2, 'tribute_paid', 'paid', 25, TT.failPin]] /* v0.11.252 (P22-A, FV): 20 / 12 → 25 */) {
         const ok = mk(99910 + i, { healed: true, boar: true, gao_beaten: true, scouted: true, gao_turned: true, token_silenced: true }); ok.james.qi = 99; ok.james.gu = { tier: 9, level: 9, xp: 0 }; ok.james.skills['Convergence Use'] = { tier: 9, level: 9, xp: 0 }; ensureBars(ok); ok.james.qi = 99;
         ok.lastWin = { id: 'collectors', degree: 1, next: 'collectors_won' }; SCENES.collectors_won.enter(ok); ok.scene = 'collectors_won'; const v0 = ok.rel.Village?.f || 0;
         choose(ok, SCENES, i);
@@ -9245,9 +9245,9 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       choose(g, SCENES, cs[0].index); const v = sceneView(g, SCENES);
       assert(g.scene === 'coil_end' && v.text.startsWith(TT.coil) && !v.choices.some((c) => /^Accept/.test(c.label)), `${T} (TK): the Coil screen's text, no Accept`); }
     // GS, LH, RR: the fight's numbers (the long calendar's steps against the old calendar's)
-    { const old = lu(mk(99931, {}, 0)), lng = lu(mk(99931));
+    { const old = lu(mk(99931, {}, 0)), g31 = mk(99931), sp = P.luSpread(structuredClone(g31)), lng = lu(g31); // v0.11.252 (TC): the spread drawn as the fight draws it
       const L = CM.LONG_STEPS.collectors;
-      assert(lng.enemies[0].dc === old.enemies[0].dc + 0.5 * L && lng.enemies[0].atk === old.enemies[0].atk + 0.75 * L && lng.enemies[0].hp === Math.round(old.enemies[0].hp * (1 + 0.25 * L)) && lng.enemies[1].name === 'Gao Feng' && lng.enemies[1].hp === old.enemies[1].hp, `${T} (LH): Lu Han +${L} steps on the long calendar only`);
+      assert(lng.enemies[0].dc === old.enemies[0].dc + 0.5 * L && lng.enemies[0].atk === old.enemies[0].atk + 0.75 * L && lng.enemies[0].hp === Math.round((old.enemies[0].hp + sp) * (1 + 0.25 * L)) && lng.enemies[1].name === 'Gao Feng' && lng.enemies[1].hp === old.enemies[1].hp, `${T} (LH): Lu Han +${L} steps on the long calendar only`);
       for (const f of ['gao_broken', 'gao_turned']) { const e = lu(mk(99932, { [f]: true })).enemies[1]; assert(e.name === TT.disciple && e.dmg === 4 && e.dr === 1 && e.hp === Math.round(8 * 1.2) && e.dc === 5.5 && e.atk === 7, `${T} (GS): a disciple in Gao's place (${f}: ${JSON.stringify(e)})`); }
       const r3 = mk(99933); r3.james.realm = 3; const e3 = lu(r3), r1 = mk(99933); r1.james.realm = 1; const e1 = lu(r1), o3 = mk(99933, {}, 0); o3.james.realm = 3; const eo = lu(o3);
       assert(e3.enemies[0].dc === e1.enemies[0].dc + 2 * P.LU_READS && e3.enemies[0].atk === e1.enemies[0].atk + 2 * P.LU_READS && e3.tail.includes(TT.read) && !e1.tail.includes(TT.read) && !eo.tail.includes(TT.read) && eo.enemies[0].dc === old.enemies[0].dc, `${T} (RR): +${P.LU_READS} a realm above Foundation, its line; long calendar only`); }
@@ -9310,7 +9310,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     assert(readFileSync(new URL('../js/main.js', import.meta.url), 'utf8').includes("c.netted ? ' (under the net)'"), `${T} (TG-C7): the panel's "(under the net)"`);
     // SM: the title; the degree-3 sentences
     { const g = mk(99957); goTo(g, SCENES, 'collectors_lost'); const t3 = mk(99958, { lu_won: 3 }), t1 = mk(99958, { lu_won: 1 });
-      assert(sceneView(g, SCENES).title === TT.titleLost && TX.bluffWinText(t3).startsWith(TT.bluffOpen3) && TX.bluffWinText(t3).includes(TT.bluffBow3) && !/kneels/.test(TX.bluffWinText(t3)) && TX.paidText(t3).startsWith(TT.paidOpen3) && TX.bluffWinText(t1) === TT.bluffWin && TX.paidText(t1) === TT.paid, `${T} (SM): the title, the degree-3 sentences`); }
+      assert(sceneView(g, SCENES).title === TT.titleLost && TX.bluffWinText(t3).startsWith(TT.bluffOpen3) && TX.bluffWinText(t3).includes(TT.bluffBow3) && !/kneels/.test(TX.bluffWinText(t3)) && TX.paidText(t3).startsWith(TT.paidOpen3) && TX.bluffWinText(mk(99958, { lu_won: 1, gao_turned: true })) === TT.bluffWin /* v0.11.252 (BT): Gao's look back when he fought */ && TX.paidText(t1) === TT.paid, `${T} (SM): the title, the degree-3 sentences`); }
     // HL (TG-T3): a beaten Lu Han stays away on Day 21 and the two bled lines show; Act 1's paid texts by lu_won; an old save as before
     for (const [ending, lu, beaten] of [['bluff', 1, true], ['paid', 1, true], ['fought', undefined, true], ['bluff', undefined, false], ['paid', undefined, false]]) {
         const g = mk(99960, { ending, ...(lu ? { lu_won: lu } : {}) }); g.coil.act = 1;
@@ -9322,6 +9322,61 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     }
     // TG-T7: collectors_lost's "His disciples are thorough." stays: since GS a disciple fills Gao's place, so Lu Han has his three (RB2 CL's guard was for the old text's count)
     assert(/His disciples are thorough\./.test(TT.lost), `${T} (TG-T7): the disciples in the taken text, recorded`);
+}
+// v0.11.252 (owner pick P22-A): the prologue's rest: FD, JD, TC, FV (above, in RV-A's TG-C4 sibling), PN, BT, JL
+{
+    const T = 'P22-A';
+    const C = await import('../js/core/calendar.js'); const G = await import('../js/core/game.js'); const P = await import('../js/story/prologue.js'); const TX = await import('../js/story/tribute_texts.js');
+    const mk = (seed, flags = {}, cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true, cal })); Object.assign(g.flags, { forest_day: 3, vday: 3 }, flags); return g; };
+    const tribute = (g) => SCENES.tribute.choices.find((c) => c.combat).combat(g);
+    // the numbers pinned
+    assert(JSON.stringify(G.FOE_DEFENCE_OF) === '{"collectors":{"step":0.5,"max":1.5}}' && P.JR_DC_LONG === 3.5 && P.LU_SPREAD === 1, `${T}: FD +0.5 a meeting up to +1.5, JD 3.5, TC ±2.5`);
+    // FD: the defence memory, long calendar only, from the meetings before; the line names it; the defend check carries it
+    for (const [met, cal, want] of [[0, C.LONG_CAL, 0], [1, C.LONG_CAL, 0.5], [2, C.LONG_CAL, 1], [5, C.LONG_CAL, 1.5], [2, 0, 0]]) {
+        const g = mk(99970, {}, cal); g.stats.foes = met ? { collectors: met } : {}; startCombat(g, tribute(g));
+        const line = g.combat.log.find((l) => /You have fought this fight/.test(l)) || '';
+        assert((g.combat.memDef || 0) === want && (want ? line.endsWith(`, +${want} to your defence.`) : !/defence/.test(line)) && (met ? line.length > 0 : line === ''), `${T} (FD): ${met} meetings, cal ${cal}: defence +${want} (${g.combat.memDef}; ${line})`);
+    }
+    { const gu = (met) => { const g = mk(99971); g.stats.foes = { collectors: met }; startCombat(g, tribute(g)); g.combat.enemies.forEach((e) => { e.staggered = false; e.flustered = 0; }); g.combat.round = 1;
+          const out = combatStep(g, 'blast'); const m = (out.lines || []).join(' ').match(/attacks: you defend \(GU ([\d.]+)/); return m ? Number(m[1]) : null; };
+      const a = gu(1), b = gu(3); assert(a !== null && b !== null && Math.abs(b - a - 1) < 1e-9, `${T} (FD): the defend check up by the memory, 1 → 3 meetings before: +0.5 → +1.5 (${a} → ${b})`); }
+    // JD: the run's DC by calendar
+    { const run = SCENES.night_attack.choices.find((c) => c.to === 'jackals_fled'); const dc = (g) => (typeof run.check.dc === 'function' ? run.check.dc(g) : run.check.dc);
+      assert(dc(mk(99972)) === 3.5 && dc(mk(99972, {}, 0)) === 4 && G.noDiceDc(3.5) === 1.5, `${T} (JD): DC 3.5 long (no dice 1.5), 4 old`); }
+    // TC (RV-A: the d6): one of six from the save's random numbers, about even; the same on a reload; fresh as the stream moves; the old calendar flat
+    { const seen = new Set(); let sum = 0, n = 0; const r = { rng: 12345 };
+      for (let k = 0; k < 600; k++) { const v = P.luSpread(r); seen.add(v); sum += v; n++; }
+      assert(seen.size === 6 && [...seen].every((v) => [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5].includes(v)) && Math.abs(sum / n) < 0.3, `${T} (TC): six values, about even (${[...seen]}, mean ${sum / n})`);
+      const lu = (g) => tribute(g).enemies[0].hp;
+      const a = mk(99973), b = deserialize(serialize(a)); const ha = lu(a), hb = lu(b);
+      const hs = [], g = mk(99973); for (let k = 0; k < 8; k++) hs.push(lu(g));
+      const o = mk(99973, {}, 0), r0 = o.rng, ho = [lu(o), lu(o)];
+      assert(ha === hb && a.rng !== r0 && new Set(hs).size > 1 && ho[0] === ho[1] && o.rng === r0, `${T} (TC): the same on a reload (${ha} / ${hb}), fresh as the stream moves (${hs}), old calendar flat and no draw (${ho})`); }
+    // PN (review C L2): the pin is a made thing: below its DC a failure (no thin haul), a crit makes one pin, not two
+    for (const [tier, level, to, label] of [[1, 8, 'collectors_sent', 'fails'], [3, 1, 'tribute_paid', 'passes']]) {
+        const g = mk(99974); g.james.skills['Convergence Use'] = { tier, level, xp: 0 }; g.james.qi = 999; goTo(g, SCENES, 'collectors_won');
+        const pin = sceneView(g, SCENES).choices[2]; const before = g.inventory.hairpin || 0; choose(g, SCENES, 2);
+        assert(g.scene === to && (g.inventory.hairpin || 0) === before && !/partly|A thin haul|double/.test(JSON.stringify(pin)) && !/A thin haul|double!/.test(JSON.stringify(g.log.slice(-3))) /* RV TG2 (L1): no "(double!)" on a pin */, `${T} (PN): CU T${tier} L${level} → ${g.scene}, hairpins ${before} → ${g.inventory.hairpin || 0}`);
+    }
+    // RV-A (TG1): FV and PN are the long calendar's; the old calendar as before (+20 / +12; the pin's partial a thin haul)
+    for (const [i, scene, gain] of [[1, 'bluff_win', 20], [2, 'tribute_paid', 12]]) {
+        const g = mk(99978, {}, 0); g.james.gu = { tier: 9, level: 1, xp: 0 }; g.james.skills['Convergence Use'] = { tier: 9, level: 1, xp: 0 }; g.james.qi = 999; g.inventory.hairpin = 0; goTo(g, SCENES, 'collectors_won');
+        const f0 = g.rel.Village?.f || 0; choose(g, SCENES, i); assert(g.scene === scene && (g.rel.Village?.f || 0) - f0 === gain, `${T} (RV-A TG1): old calendar ${scene} +${gain} (${(g.rel.Village?.f || 0) - f0})`);
+    }
+    { const g = mk(99979, {}, 0); g.james.skills['Convergence Use'] = { tier: 1, level: 8, xp: 0 }; g.james.qi = 999; goTo(g, SCENES, 'collectors_won'); choose(g, SCENES, 2);
+      assert(g.scene === 'tribute_paid' && /A thin haul/.test(JSON.stringify(g.log.slice(-3))), `${T} (RV-A TG1): old calendar, the pin's partial as before (${g.scene})`); }
+    // BT (review T L6): Gao Feng's look back when he fought; the nameless disciple's figure in crimson otherwise; the failed bluff no longer calls it a trick
+    for (const f of [{}, { gao_beaten: true }, { gao_broken: true }, { gao_turned: true }]) for (const lu of [1, 3]) {
+        const t = TX.bluffWinText(mk(99975, { ...f, lu_won: lu })); const gao = !(f.gao_broken || f.gao_turned);
+        assert(t.endsWith(gao ? TT.bluffGao : 'The look does not mean *goodbye*.') && t.includes('Gao Feng stands waiting') === gao && !t.includes('figure in crimson') === gao, `${T} (BT): ${JSON.stringify(f)} lu_won ${lu}: Gao's look ${gao}`);
+    }
+    { const F = await import('../js/core/faq.js'); const faq = F.FAQ.map(([, f]) => f(mk(99977))).join(' ');
+      assert(/\+1\.5 a meeting, up to \+4\.5 \(on the long calendar also \+0\.5 to his defence there, up to \+1\.5\)/.test(faq), `${T} (FD): the FAQ names the defence memory`); }
+    assert(!/trick of bone/.test(TT.failBluff) && /forged seal/.test(TT.failBluff), `${T} (BT): the failed bluff`);
+    // JL (review C L7): the run's label and its failure name the spikes, in every form
+    for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) { const g = mk(99976); g.yuki.form = form; g.yuki.realm = realm; goTo(g, SCENES, 'night_attack_forced'); const t = sceneView(g, SCENES).text; // RV TG4: every form
+      assert(t.startsWith('The pit opens ankle-deep and the stakes come up four in number.') && !/hedge|wall/i.test(t) && /I outweigh them/.test(t) === (form === 'tiger'), `${T} (JL): the failed run, ${form} (${t.slice(0, 40)}…${t.slice(-30)})`); }
+    { const FWm = await import('../js/story/flight_texts.js'); assert(FWm.FW.jackalsRun === 'A pit and a few bone stakes in their path, then run for the water. Flying wants a clearer head.', `${T} (JL): the label when James can fly`); }
 }
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

@@ -1067,6 +1067,11 @@ export const FOE_MEMORY_STEP = 0.5, FOE_MEMORY_MAX = 2; // MB1 (CC): also the fi
  *  rest of P21-E without it): Careful's prologue 5.85 → 4.35 Coils; steps 1.0–3.0 the same. Was NO_MEMORY's one fight. */
 export const FOE_MEMORY_OF = { collectors: { step: 1.5, max: 4.5 } };
 export const NO_MEMORY = new Set(); // v0.11.251 (FM): empty; the tribute is remembered by FOE_MEMORY_OF
+/** v0.11.252 (owner pick P22-A, FD): on the long calendar the tribute is remembered on defence too: +0.5 to James's defence against
+ *  Lu Han and his second a meeting before, up to +1.5 (c.memDef). Measured (the models, long calendar, 40 games, FD alone): Careful's
+ *  prologue 4.17 → 2.77 Coils, Coil 1 untouched (no meeting before); its tribute turned on GU 4.5 against 5 at the second's attack
+ *  9.5 (it lands 3 against half lands 1), and FM's attack memory alone had no effect at steps 1.5–5. */
+export const FOE_DEFENCE_OF = { collectors: { step: 0.5, max: 1.5 } };
 /** Count a meeting with fight `id`; returns the memory bonus from the meetings before it. */
 export function meetFoe(g, id) {
     const foes = g.stats.foes || (g.stats.foes = {});
@@ -1179,7 +1184,9 @@ export function startCombat(g, enc0) {
         ...(enc.net ? { netted: true } : {}), // v0.11.251 (owner pick P21-E, NT): Lu Han's net holds Yuki for the whole fight
     };
     const mem = meetFoe(g, enc.id); // v0.11.115 (MA3, FX)
-    if (mem > 0) { g.combat.mem = mem; g.combat.log.push(memoryLine(g.stats.foes[enc.id] - 1, mem)); }
+    const def = longCal(g) && FOE_DEFENCE_OF[enc.id] ? Math.min(FOE_DEFENCE_OF[enc.id].max, (g.stats.foes[enc.id] - 1) * FOE_DEFENCE_OF[enc.id].step) : 0; // v0.11.252 (P22-A, FD)
+    if (def > 0) g.combat.memDef = def;
+    if (mem > 0) { g.combat.mem = mem; g.combat.log.push(memoryLine(g.stats.foes[enc.id] - 1, mem, def)); }
     g.combat.log.push(...traitLines(g, g.combat.enemies, enc.id)); // v0.11.113 (DA1, TD)
     if (enc.style) {
         Object.assign(g.combat, { style: enc.style, yukiOut: yukiSitsOut(g, enc), ...(enc.opening ? { opening: enc.opening } : {}) }); // v0.11.82
@@ -1264,12 +1271,13 @@ export const SPAR_TEXT = {
 /** v0.11.115 (owner pick MA3; texts Fable's, rule 10): foes remembered (FX), weapon familiarity (W50). */
 export const MEMORY_TEXT = {
     met: 'You have fought this fight {times} before. Nobody else here has: +{b} to your attacks.',
+    metDef: 'You have fought this fight {times} before. Nobody else here has: +{b} to your attacks, +{d} to your defence.', // v0.11.252 (P22-A, FD; Fable's)
     up: '{move}, {n} rounds in. Your hands have stopped consulting you about it: +{b} to hit.',
     upQi: 'Qi blast, {n} rounds in. There is no bone to blame, so it must be you getting better: +{b} to hit.',
 };
 const timesText = (n) => (n === 1 ? 'once' : n === 2 ? 'twice' : `${n} times`);
 /** The memory line at a fight's start: `n` earlier meetings, bonus `b`. */
-export const memoryLine = (n, b) => MEMORY_TEXT.met.replace('{times}', timesText(n)).replace('{b}', b);
+export const memoryLine = (n, b, d = 0) => (d > 0 ? MEMORY_TEXT.metDef.replace('{d}', d) : MEMORY_TEXT.met).replace('{times}', timesText(n)).replace('{b}', b); // v0.11.252 (FD): `d`, the defence
 /** The familiarity line when a move's bonus rises (the Qi blast has its own wording). */
 export const weaponLine = (label, id, n, b) => (id === 'blast' ? MEMORY_TEXT.upQi : MEMORY_TEXT.up).replace('{move}', label).replace('{n}', n).replace('{b}', b);
 /** v0.11.114 (PA2): a foe postures this round (for the Say something card). */
@@ -1400,7 +1408,7 @@ function stepNoDice(g, actionId, targetIdx) {
         if (c.aloft && !e.flies) { lines.push(AIR_TEXT.reach.replace('{foe}', e.name)); continue; } // v0.11.112 (FF1)
         const big = bigBlowDue(c, e); // v0.11.113 (DA1, TL)
         if (big && guard) { lines.push(foeFill(TELL_TEXT.bigAvoided, e.name)); continue; } // DB1 (P): Fable kept it for people too
-        const r = rollCheck(g, 'GU', e.atk, guard ? guardBonus(g) : 0);
+        const r = rollCheck(g, 'GU', e.atk, (guard ? guardBonus(g) : 0) + (c.memDef || 0)); // v0.11.252 (P22-A, FD): the tribute remembered on defence
         if (r.ratio >= 1) { lines.push(`${e.name} attacks: you defend (${checkText(r)}) — avoided.`); continue; }
         let dmg = hitDamage(e.dmg, e.realm, g.james.realm, jamesDr(g));
         const soaked = []; // v0.11.95 (Q1): the Qi shield soaks the blow first (as measured), what gets through is halved as before; its lines after the attack's (review)

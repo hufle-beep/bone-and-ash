@@ -1456,8 +1456,8 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     assert(gated === 18, `18 story choices need a form (${gated})`);
     // the rewordings: Incremental Mode only
     const t = (sc, re) => SCENES[sc].choices.find((c) => re.test(String(typeof c.text === 'function' ? c.text(s) : c.text)));
-    assert(t('night_attack', /^A hedge of bone spikes/) && t('rt_ford', /stepping-stones/) && t('rt_ambush', /slab of bone/) && t('ring_chambers', /slab of bone/), 'four rewordings in Incremental Mode');
-    assert(/hedge/.test(SCENES.night_attack_forced.text), 'the hedge fail text');
+    assert(t('night_attack', /^A pit and a few bone stakes/) /* v0.11.252 (P22-A, JL): the spikes form */ && t('rt_ford', /stepping-stones/) && t('rt_ambush', /slab of bone/) && t('ring_chambers', /slab of bone/), 'four rewordings in Incremental Mode');
+    assert(/^The pit opens ankle-deep/.test(SCENES.night_attack_forced.text(s)), 'the spikes fail text (v0.11.252, JL)');
     const fc = t('rt_ford', /stepping-stones/); const fg = ensureBars(newGame(84)); setCu(fg, 3, 1);
     assert(fc.do(fg).some((l) => /stepping-stones/.test(l)), 'the ford result line');
 }

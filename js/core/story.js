@@ -34,7 +34,7 @@ export function choiceTag(g, c) {
         const v = Math.round((actingCheck(g, c.check.skill) + bonus) * 10) / 10;
         const d = noDiceDc(asText(c.check.dc, g));
         const ratio = v / d;
-        bits.push(`${actingName(g, c.check.skill)} ${v} / DC ${d} → ${ratio >= 1 ? 'passes' : ratio >= 0.5 && gives(c).length ? 'partly' : 'fails'}`);
+        bits.push(`${actingName(g, c.check.skill)} ${v} / DC ${d} → ${ratio >= 1 ? 'passes' : ratio >= 0.5 && gives(c).length && !isWhole(g, c) ? 'partly' : 'fails'}`);
     }
     if (choiceQi(g, c)) bits.push(`${c.qi} Qi`);
     if (c.combat) bits.push('fight');
@@ -44,6 +44,8 @@ export function choiceTag(g, c) {
 /** The common items a choice's `do` adds (read once from its source; quoted ids in addItem(g, …, n > 0) that are real items:
  *  v0.11.25, so a quoted non-item such as yukiForm(g) === 'tiger' inside the call is not taken for one). */
 const givesCache = new WeakMap();
+/** v0.11.252 (P22-A, PN; RV-A): `whole` (or `whole(g)`): a made thing, not a haul: no partial result, no double. */
+export const isWhole = (g, c) => (typeof c.whole === 'function' ? !!c.whole(g) : !!c.whole);
 export function gives(c) {
     if (Array.isArray(c.gives)) return c.gives; // v0.11.71 (Y1): a choice that picks its item at run time lists them
     if (!c.do) return [];
@@ -345,10 +347,10 @@ export function choose(g, scenes, index, { task = false, speed = 0 } = {}) { // 
         roll = rollCheck(g, c.check.skill, asText(c.check.dc, g), c.check.bonus ? c.check.bonus(g) : 0);
         ok = roll.success;
         // a gathering choice between half and full the DC still brings back a thin haul
-        partial = !ok && roll.ratio >= 0.5 && gives(c).length > 0;
+        partial = !ok && roll.ratio >= 0.5 && gives(c).length > 0 && !isWhole(g, c); // v0.11.252 (P22-A, PN): `whole`, a made thing, not a haul
         if (partial) ok = true;
         if (flown) lines.push(asText(c.fly, g)); // no check shown; the roll stays only for its XP, as measured (FL1)
-        else lines.push(`${checkText(roll)} — ${partial ? 'partly' : ok ? 'success' : 'failure'}${roll.crit ? ' (double!)' : ''}`);
+        else lines.push(`${checkText(roll)} — ${partial ? 'partly' : ok ? 'success' : 'failure'}${roll.crit && !isWhole(g, c) ? ' (double!)' : ''}`);
         if (c.xp !== false) lines.push(...awardXp(g, c.check.xpTo || c.check.skill, c.check.band || 'standard', { fail: !ok, factor: partial ? roll.ratio : 1 }));
         if (flown) { ok = true; partial = false; roll = null; }
     }
@@ -361,7 +363,7 @@ export function choose(g, scenes, index, { task = false, speed = 0 } = {}) { // 
     takeCapNotes();
     if (ok && c.do) {
         // a critical hunt or forage (total ≥ 2 × DC): a double haul
-        const crit = roll?.crit && gives(c).length > 0;
+        const crit = roll?.crit && gives(c).length > 0 && !isWhole(g, c); // v0.11.252 (PN)
         const before = crit ? { ...g.inventory } : null;
         const before0 = { ...g.inventory };
         if (crit) setLootMult(2);

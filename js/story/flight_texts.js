@@ -21,7 +21,7 @@ export const FW = {
     /** `scout` ¶1. */
     scout: 'From the air the tribute road is a scar going up toward the mountains, one switchback stitched over another. A waystation sits at the halfway turn: a bench under a roof, a shrine with a red lotus cut into the stone. You come down there, because dust can\'t be read from above, and your threads flag it at once. The marks in it are fresh. Somebody has been standing here, watching the village.',
     /** `night_attack` [1] (alt, D1): no flight in the prologue's fights; the next screen has him in the water. */
-    jackalsRun: 'A hedge of bone spikes between you and them, then run for the water. Flying wants a clearer head.',
+    jackalsRun: 'A pit and a few bone stakes in their path, then run for the water. Flying wants a clearer head.', // v0.11.252 (P22-A, JL; Fable's)
     /** `dawn` ¶1, by food: nothing / what's left. */
     dawnNothing: 'Morning comes up red. You eat nothing, a meal you are getting very good at, and you are about to go up and see which direction counts as *away* when the scream comes.',
     dawnLeft: 'Morning comes up red. You eat what\'s left, and you are about to go up and see which direction counts as *away* when the scream comes.',
