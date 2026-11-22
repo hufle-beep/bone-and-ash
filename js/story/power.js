@@ -81,4 +81,15 @@ export function prepare(g, enc) {
 combatHooks.before = prepare;
 
 /** For the scene runner: the degree a combat choice would start at. */
-export const degreeForChoice = (g, combat) => prepare(g, combat(g)).degree;
+/** v0.11.253 (owner pick RG-A): the fight is built on a copy, so drawing the screen never changes the save: the tribute's builder draws
+ *  Lu Han's spread from the save's random numbers (`prologue.js` `luSpread`; each redraw moved `g.rng` before), the Long Forest's writes
+ *  `flags.lf_last` (`longforest.js` `fight`). The review's M1: a deep copy (the journal left out, the Coil's snapshot shared: both only
+ *  read), as `tasks.js` `dryClone`; a shallow one shared the flags. */
+const previewCopy = (g) => {
+    const { log, coil, ...rest } = g;
+    const c = JSON.parse(JSON.stringify(rest));
+    c.log = [];
+    if (coil) { const { snap, ...cr } = coil; c.coil = JSON.parse(JSON.stringify(cr)); if (snap !== undefined) c.coil.snap = snap; }
+    return c;
+};
+export const degreeForChoice = (g, combat) => { const c = previewCopy(g); return prepare(c, combat(c)).degree; };

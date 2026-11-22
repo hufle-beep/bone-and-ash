@@ -81,12 +81,12 @@ def tap(pg, el, timeout=3000):
     el.click(timeout=timeout)
     if guarded: _pressed[id(pg)] = time.monotonic()
 
-OLD_CAL = "localStorage.setItem('boneash.oldcal', '1')"
+# v0.11.253 (owner pick P23-A, BT): every flow plays the long calendar, as a player's new game: the old-calendar key (main.js
+# OLD_CAL_KEY) is set by nothing now; it stays in main.js with the old calendar's code (open, options later)
 def fresh(pg, url, js, arg=None):
     """v0.11.8: set storage from a non-game page on the same site, then open the game: the game's save-on-close can't write over it."""
     pg.goto(url.replace('index.html', 'art/bg/CREDITS.md'))
     pg.evaluate(js, arg) if arg is not None else pg.evaluate(js)
-    pg.evaluate(OLD_CAL)  # v0.11.226 (FP1, BT): the flows written for the old calendar keep it (main.js OLD_CAL_KEY); flip_ui plays without it
     pg.goto(url); until(pg, '.main-menu', 10000, 'attached')
     enter(pg)
 
@@ -101,9 +101,16 @@ def no_greyed(pg, where):
     """v0.11.17 (owner pick 1a): Incremental Mode shows no greyed-out task, Meditate or fight card (story choices keep their own rule).
     v0.11.68 (owner pick T1): except the cards the game shows locked on purpose, with their reason: a sit short of Qi
     ("needs 10 Qi", v0.11.46 Q1), gather Qi when too hungry, and a card that would end past midnight (v0.11.37 D-a; 00:00 since v0.11.91)."""
+    clk = pg.query_selector('.clock .clk'); today = re.search(r'Day (\d+)', clk.inner_text() if clk else '')
     for g in pg.query_selector_all('button.card[disabled]:not(.story)'):
         t = g.inner_text()
         if re.search(r'needs \d+ Qi \(you have|too hungry: eat first|ends past midnight', t): continue
+        # v0.11.253 (P23-A, BT; the review's L4): and the long calendar's own locks, each its whole tag as main.js cardHtml writes it: a
+        # spaced card opens on a day not before today (the clock's), the week's work at evening, a card too long for the stay, a card busy with the week's work
+        tg = g.query_selector('.tag'); tag = tg.inner_text().strip() if tg else ''
+        sp = re.fullmatch(r'every \d+(?:st|nd|rd|th) day, opens Day (\d+)', tag)
+        if sp and today and int(sp.group(1)) >= int(today.group(1)): continue  # >=: from 00:00 to 04:00 the clock reads the next day while the waking day is still the last (week.js wakeDay)
+        if tag in ("the week's work stops at evening: tomorrow", 'too long for what is left of this stay') or re.fullmatch(r'busy: \S.*', tag): continue
         fails.append(f"{where}: a greyed-out card shows: {t[:80]!r}"); return
 
 def taps(pg, n, rng, where, sel):
@@ -131,7 +138,7 @@ def open_saves(pg):
 
 def main_menu(pg, url):
     """v0.11.10: the menu opens first, without the tab bar or the game's picture; Settings and Saves; Continue enters the game."""
-    pg.goto(url.replace('index.html', 'art/bg/CREDITS.md')); pg.evaluate("localStorage.clear()"); pg.evaluate(OLD_CAL)
+    pg.goto(url.replace('index.html', 'art/bg/CREDITS.md')); pg.evaluate("localStorage.clear()")
     pg.goto(url); until(pg, '.main-menu', 10000, 'attached')
     if not pg.query_selector('.main-menu'): fails.append('menu: the game did not open on the main menu'); return
     if pg.is_visible('#tabs') or pg.query_selector('.plate'): fails.append('menu: the tab bar or the game picture shows behind the menu')
@@ -170,14 +177,14 @@ def news_box(pg, url):
     ver = re.search(r"VERSION = 'bone-ash-([^']+)'", (ROOT / 'sw.js').read_text()).group(1)
     notes_src = (ROOT / 'js/core/news.js').read_text()
     shown = [v for v in re.findall(r"\['(\d+\.\d+\.\d+)', '", notes_src) if tuple(map(int, v.split('.'))) <= tuple(map(int, ver.split('.')))]
-    pg.goto(url.replace('index.html', 'art/bg/CREDITS.md')); pg.evaluate("localStorage.clear()"); pg.evaluate(OLD_CAL)
+    pg.goto(url.replace('index.html', 'art/bg/CREDITS.md')); pg.evaluate("localStorage.clear()")
     pg.goto(url); until(pg, '#menuVer:not(:empty)', 5000, 'attached'); until(pg, "document.getElementById('menuVer')?.textContent !== '…'", 5000)
     label = pg.inner_text('.mver')
     if label != f'Version {ver} · Incremental Mode': fails.append(f'BL1 (LB): the browser menu says {label!r}, not Version {ver} · Incremental Mode')
     until(pg, f"localStorage.getItem('boneash.seen') === '{ver}'", 3000)
     if pg.query_selector('.wnew-box') or pg.evaluate("localStorage.getItem('boneash.seen')") != ver: fails.append('BL1 (WN): a new player saw What\'s new, or the version was not kept')
     save = (ROOT / 'saves/v0.11.7-long-forest-coil2.json').read_text()
-    pg.goto(url.replace('index.html', 'art/bg/CREDITS.md')); pg.evaluate("s => { localStorage.clear(); localStorage.setItem('boneash.oldcal', '1'); localStorage.setItem('boneash.auto', s); localStorage.setItem('boneash.seen', '0.11.140'); }", save)
+    pg.goto(url.replace('index.html', 'art/bg/CREDITS.md')); pg.evaluate("s => { localStorage.clear(); localStorage.setItem('boneash.auto', s); localStorage.setItem('boneash.seen', '0.11.140'); }", save)
     pg.goto(url); until(pg, f"localStorage.getItem('boneash.seen') === '{ver}'", 5000)
     if shown: until(pg, '.wnew-box li', 3000, 'visible')
     got = pg.eval_on_selector_all('.wnew-box li b', 'els => els.map(e => e.textContent)')
@@ -564,8 +571,8 @@ def music_line(pg, url):
     st['scene'] = 'night'; st['combat'] = None; st['minutes'] = 1440 + 21 * 60 + 30
     st['coil']['n'] = 2; st['seen'] = {'night': 1}; st['lines'] = None
     js = ("import { SCENES } from './js/story/prologue.js'; import { sceneView } from './js/core/story.js';"
-          "import { noteRead } from './js/story/again.js'; import { migrate, ensureBars } from './js/core/game.js';"
-          "const st = JSON.parse(process.argv[1]); const c = ensureBars(migrate(JSON.parse(JSON.stringify(st)))); const read = {};"
+          "import { noteRead } from './js/story/again.js'; import { migrate, ensureBars, flipFill } from './js/core/game.js';"
+          "const st = JSON.parse(process.argv[1]); const c = ensureBars(migrate(JSON.parse(JSON.stringify(st)))); flipFill(c); const read = {};"
           "noteRead({ read, coil: { n: 1 } }, sceneView(c, SCENES).text, 1); console.log(JSON.stringify(read));")
     st['read'] = json.loads(subprocess.run(['node', '--input-type=module', '-e', js, json.dumps(st)], cwd=ROOT, capture_output=True, text=True, check=True).stdout)
     fresh(pg, url, "a => { localStorage.clear(); localStorage.setItem('boneash.auto', a); localStorage.setItem('boneash.edition', 'named'); }", json.dumps(st))
@@ -587,8 +594,8 @@ def again(pg, url):
     st['coil']['n'] = 2; st['seen'] = {'night_won': 1, 'morning': 1, 'wilds': 1, 'arrival': 1}
     # v0.11.133 (FP2): a fold needs every paragraph read on an earlier Coil: the record Coil 1 left, from the game's own code
     js = ("import { SCENES } from './js/story/prologue.js'; import { sceneView, choose } from './js/core/story.js';"
-          "import { noteRead } from './js/story/again.js'; import { migrate, ensureBars } from './js/core/game.js';"
-          "const st = JSON.parse(process.argv[1]); const c = ensureBars(migrate(JSON.parse(JSON.stringify(st)))); const read = {};"
+          "import { noteRead } from './js/story/again.js'; import { migrate, ensureBars, flipFill } from './js/core/game.js';"
+          "const st = JSON.parse(process.argv[1]); const c = ensureBars(migrate(JSON.parse(JSON.stringify(st)))); flipFill(c); const read = {};"
           "const g = { read, coil: { n: 1 } };"
           "for (let k = 0; k < 3 && c.scene !== 'wilds'; k++) { noteRead(g, sceneView(c, SCENES).text, 1); choose(c, SCENES, sceneView(c, SCENES).choices.filter((x) => !x.disabled)[0].index); }"
           "console.log(JSON.stringify(read));")
@@ -633,8 +640,8 @@ def split_fold(pg, url):
     st['scene'] = 'far_won'; st['combat'] = None; st['flags'].update({'far_kind': 'wolves'}); st['minutes'] = 1440 + 10 * 60
     st['coil']['n'] = 2; st['seen'] = {'far_won': 1}; st.pop('lines', None)
     js = ("import { SCENES } from './js/story/prologue.js'; import { sceneView } from './js/core/story.js';"
-          "import { noteRead, sentencesOf } from './js/story/again.js'; import { migrate, ensureBars } from './js/core/game.js';"
-          "const st = JSON.parse(process.argv[1]); const c = ensureBars(migrate(JSON.parse(JSON.stringify(st)))); const read = {};"
+          "import { noteRead, sentencesOf } from './js/story/again.js'; import { migrate, ensureBars, flipFill } from './js/core/game.js';"
+          "const st = JSON.parse(process.argv[1]); const c = ensureBars(migrate(JSON.parse(JSON.stringify(st)))); flipFill(c); const read = {};"
           "const t = sceneView(c, SCENES).text; noteRead({ read, coil: { n: 1 } }, t, 1);"
           "console.log(JSON.stringify({ read, t, first: sentencesOf(t)[0] }));")
     o = json.loads(subprocess.run(['node', '--input-type=module', '-e', js, json.dumps(st)], cwd=ROOT, capture_output=True, text=True, check=True).stdout)
@@ -689,6 +696,17 @@ def lp2(pg, url):
     fresh(pg, url, "a => { localStorage.clear(); localStorage.setItem('boneash.groups', JSON.stringify({ Forage: true })); localStorage.setItem('boneash.auto', a); }", json.dumps(st))
     replies, gains = [], []
     for k, cid in enumerate(['wild_forage:1', 'wild_forage:2']):
+        if k:  # v0.11.253 (P23-A, BT): on the long calendar the first card is a week's work that runs to the evening; the second is tapped
+            # the next morning (the save moved a day on, from a page outside the game, and reopened: the Coil's reply record kept)
+            pg.goto(url.replace('index.html', 'art/bg/CREDITS.md'))
+            o2 = json.loads(pg.evaluate("localStorage.getItem('boneash.auto')")); d2 = json.loads(o2['data']) if isinstance(o2.get('data'), str) else o2
+            # the review's L5: the next waking day's 07:00 (00:00-04:00 is still the day before, week.js wakeDay), and the clock checked
+            day0 = d2['minutes'] // 1440 + (0 if d2['minutes'] % 1440 < 4 * 60 else 1)
+            d2['minutes'] = day0 * 1440 + 7 * 60
+            pg.evaluate("a => localStorage.setItem('boneash.auto', a)", json.dumps(d2))
+            pg.goto(url); until(pg, '.main-menu', 10000, 'attached'); enter(pg)
+            clk = pg.query_selector('.clock .clk'); ct = clk.inner_text() if clk else ''
+            if ct != f'Day {day0 + 1}, 07:00': fails.append(f'LP2 (QR): the reopened save should read Day {day0 + 1}, 07:00 ({ct!r})'); return
         el = pg.query_selector(f'button.card:not([disabled])[data-run="{cid}"]')
         if not el: fails.append(f'LP2 (QR): no {cid} card at the wilds (tap {k + 1})'); return
         n0 = len(pg.query_selector_all('.pane.results details.res'))
@@ -1109,7 +1127,7 @@ def n1_ui(b, url):
     ctx = b.new_context(viewport={'width': 1366, 'height': 420}, service_workers='block')
     pg = ctx.new_page(); pg.on('pageerror', lambda e: fails.append(f"page error: {e}"))
     try:
-        pg.goto(url); pg.evaluate("([s, z]) => { localStorage.clear(); localStorage.setItem('boneash.oldcal', '1'); localStorage.setItem('boneash.auto', s); localStorage.setItem('boneash.textsize', z); }", [save, '130']); pg.reload()
+        pg.goto(url); pg.evaluate("([s, z]) => { localStorage.clear(); localStorage.setItem('boneash.auto', s); localStorage.setItem('boneash.textsize', z); }", [save, '130']); pg.reload()
         until(pg, 'button[data-menu="continue"]', 5000, 'visible')
         y = pg.evaluate("() => { scrollTo(0, document.documentElement.scrollHeight); return Math.round(scrollY); }")
         pg.click('button[data-menu="continue"]'); in_game(pg)

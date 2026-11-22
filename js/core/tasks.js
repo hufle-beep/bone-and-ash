@@ -620,8 +620,10 @@ export function taskOutcome(g, scenes, id) {
         let minutes = pre + taskMinutes(g, scenes, id);
         let death = null, deathAt = null;
         // v0.11.225 (RV1, M1): a door the routine closes (no time left after the day's sit) shows the routine's time alone, as the tap does
-        try { const m0 = c.minutes; const r = runTask(c, scenes, id); if (r?.skipped) minutes = Math.max(0, c.minutes - m0); death = outcomeOf(c, c.minutes).death; if (death) deathAt = c.minutes; } catch { death = null; }
-        return { minutes, end: g.minutes + minutes, fed: g.james.satiety, hp: g.james.hp, death, ...(death ? { deathAt } : {}) }; // the card shows the walk's end; the warning the death's clock (the review, R1)
+        let skipped = false;
+        try { const m0 = c.minutes; const r = runTask(c, scenes, id); if (r?.skipped) { minutes = Math.max(0, c.minutes - m0); skipped = true; } death = outcomeOf(c, c.minutes).death; if (death) deathAt = c.minutes; } catch { death = null; }
+        // v0.11.253 (P23 review, L2): a door the routine closes ends after the meal and sit, so its Fed and HP are those after them (the tap's)
+        return { minutes, end: g.minutes + minutes, fed: skipped ? c.james.satiety : g.james.satiety, hp: skipped ? c.james.hp : g.james.hp, death, ...(death ? { deathAt } : {}) }; // the card shows the walk's end; the warning the death's clock (the review, R1)
     }
     const m0 = c.minutes;
     runTask(c, scenes, id);

@@ -8,7 +8,7 @@ import {
     startCombat, combatStep, combatFlee, combatYield, waitLeft, songPays, sungKey, THREAT_TEXT, SONG_TEXT, SONG_COST, SONG_MAX, SAY_TEXT, SPAR_TEXT, postureNow, unarmedMastery, fightAdapt, weaponMastery, COMBAT_ACTIONS, noDiceDc, airStrike, AIR_TEXT, FOE_TRAITS, foeTraits, TELL_TEXT, bigBlowNow, lungeNow, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage, qiShield,
 } from './core/game.js';
 import { sceneView, choose, goTo, gives, choiceQi, threatOf } from './core/story.js'; // v0.11.109 (FQ1): choiceQi
-import { carriesHere, weekHub, cardSpeed, NEW_LENGTH, WEEK_MULT, deadMenuHub, showPicked, isTaskHub, isQueueScreen, isTaskChoice, taskCards, taskLabel, taskMinutes, taskOutcome, dryOutcome, outcomeOf, runTask, FAM, famLine, yukiLane, setYuki, nextStep, YUKI_LANE_TEXT, YUKI_HOURS } from './core/tasks.js';
+import { carriesHere, weekHub, cardSpeed, NEW_LENGTH, WEEK_MULT, deadMenuHub, showPicked, isTaskHub, isQueueScreen, isTaskChoice, taskCards, taskLabel, taskOutcome, dryOutcome, outcomeOf, runTask, FAM, famLine, yukiLane, setYuki, nextStep, YUKI_LANE_TEXT, YUKI_HOURS } from './core/tasks.js';
 import { SCENES, ITEMS } from './story/prologue.js';
 import { TASK_HUBS } from './story/task_hubs.js';
 import { landParts, landReply, noteSaid } from './core/replies.js'; // v0.11.68 (A1 + B2 + C1); v0.11.134 (LP2, QR; RQ1): landReply, noteSaid
@@ -866,7 +866,10 @@ function tipFor(b) {
         card = taskCards(g, SCENES).find((c) => c.id === b.dataset.run);
         const m = /^(.+):(\d+)$/.exec(b.dataset.run);
         if (m) ch = SCENES[m[1]]?.choices?.[Number(m[2])] || null;
-        mins = card && card.status === 'open' ? taskMinutes(g, SCENES, card.id) : card?.minutes || 0;
+        // v0.11.253 (owner pick P23-A, TP): the card's own dry run, as its tag (`cardHtml`): a door card counts the day's meal and sit
+        // that run first (tasks.js `taskOutcome`); `taskMinutes` is the walk alone, so the tip said 2 h where the card said 3 h
+        const out = card && card.status === 'open' ? safeOutcome(() => taskOutcome(g, SCENES, card.id)) : null;
+        mins = out ? out.minutes : card?.minutes || 0;
     } else if (b.dataset.story != null) {
         const i = Number(b.dataset.story);
         ch = i < 1000 ? SCENES[g.scene]?.choices?.[i] || null : null;

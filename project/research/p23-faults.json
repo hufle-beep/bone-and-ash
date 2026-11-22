@@ -1,0 +1,51 @@
+[
+ {
+  "id": "F1",
+  "file": "js/main.js",
+  "find": "        const out = card && card.status === 'open' ? safeOutcome(() => taskOutcome(g, SCENES, card.id)) : null;\n        mins = out ? out.minutes : card?.minutes || 0;",
+  "replace": "        mins = card && card.status === 'open' ? taskMinutes(g, SCENES, card.id) : card?.minutes || 0;",
+  "note": "TP reverted: the tip shows the walk alone"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/power.js",
+  "find": "export const degreeForChoice = (g, combat) => { const c = { ...g }; return prepare(c, combat(c)).degree; };",
+  "replace": "export const degreeForChoice = (g, combat) => prepare(g, combat(g)).degree;",
+  "note": "RG-A reverted: a drawn screen draws a d6"
+ },
+ {
+  "id": "F3",
+  "file": "js/core/tasks.js",
+  "find": "        let minutes = pre + taskMinutes(g, scenes, id);",
+  "replace": "        let minutes = taskMinutes(g, scenes, id);",
+  "note": "a door's dry run without the day's routine (card and tip)"
+ },
+ {
+  "id": "F4",
+  "file": "tools/check.mjs",
+  "find": "'--texts', '--json', path.join(ST, 'models-long.json')), heavy: true },",
+  "replace": "'--texts'), heavy: true },",
+  "note": "DG: the long log loses its numbers"
+ },
+ {
+  "id": "F5",
+  "file": "tools/check.mjs",
+  "find": "after: ['tasks', 'story', 'models'] }]),",
+  "replace": "after: ['tasks', 'story'] }]),",
+  "note": "DG: sanity no longer waits for the models"
+ },
+ {
+  "id": "F6",
+  "file": "tools/browser.py",
+  "find": "        if k:  # v0.11.253 (P23-A, BT)",
+  "replace": "        pg.evaluate(\"localStorage.setItem('boneash.oldcal', '1')\")\n        if k:  # v0.11.253 (P23-A, BT)",
+  "note": "BT: a flow sets the old-calendar key again"
+ },
+ {
+  "id": "F7",
+  "file": "js/core/tasks.js",
+  "find": "export function dayRoutine(g, scenes, hubId = g.scene, kind = '', id = '') {",
+  "replace": "export function dayRoutine(g, scenes, hubId = g.scene, kind = '', id = '') { if (kind === 'door') return [];",
+  "note": "the routine skipped before a door card (the game's time)"
+ }
+]

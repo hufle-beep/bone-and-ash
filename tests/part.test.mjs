@@ -5,6 +5,7 @@ import { deadMenuOk } from './lib/deadmenus.mjs'; // v0.11.177 (P9A): the emptie
 // v0.11.44 (E step 1, owner pick P2): Incremental Mode (no dice), like the game; James's strength comes from the bots' range
 // at each part's entry (BANDS below), plus test-only runs with a weak James, so every failed check and "lost" scene is walked.
 import { newGame, ensureBars, startCombat, combatStep, jamesHpMax, jamesQiMax } from '../js/core/game.js';
+import { LONG_CAL, calMinutes } from '../js/core/calendar.js'; // v0.11.253 (owner pick P23-A, LB): the runs play the long calendar
 import { sceneView, choose, goTo } from '../js/core/story.js';
 import { fillItemNames } from './lib/items.mjs';
 import { smartAction } from './lib/smartfight.mjs'; // v0.11.96 (BT1)
@@ -27,6 +28,10 @@ const BANDS = {
     return: [[3, 2, 2, 1, 1, 3], [3, 5, 2, 5, 1, 8], [3, 10, 2, 9, 2, 10]],
 };
 let pass = 0, fail = 0;
+let longest = 0;
+// v0.11.253 (P23-A, WB): a stay is a week of calendar days (1,500 ran out on every Fallout run); the review's TG5: about twice the
+// longest measured run on the long calendar (Fallout 1,504; Blackroot 736, Heart 535, Return 78 keep the old 1,500)
+const STEPS = part === 'fallout' ? 3000 : 1500;
 const ok = (c, l) => { if (c) pass++; else { fail++; if (fail < 25) console.error('  FAIL', l); } };
 for (const s of Object.values(S)) {
     ok(s.id && S[s.id] === s, `id matches key ${s.id}`);
@@ -36,7 +41,7 @@ for (const s of Object.values(S)) {
 const seen = new Set(); const fights = {};
 let rs = 4242; const rnd = (n) => { rs = (rs * 1103515245 + 12345) >>> 0; return (rs >>> 8) % n; };
 function seedState(g, run) {
-    g.minutes = { fallout: 7, blackroot: 10, heart: 15, return: 18 }[part] * 1440 + 6 * 60;
+    g.minutes = calMinutes(g, { fallout: 8, blackroot: 11, heart: 16, return: 19 }[part], 6); // v0.11.253 (LB): the part's first day, 06:00
     g.flags = { long: true, forest_day: 3, vday: 3, ending: ['fought', 'bluff', 'paid', 'lost'][run % 4], romance: run % 3 === 0, healed: true, boar: run % 2 === 0, sky_witness: run % 5 === 0 ? 1 : 0,
         gao_broken: run % 6 === 1, gao_spared: run % 6 === 2, gao_humiliated: run % 6 > 2, militia: run % 3, mei_party: part !== 'fallout', ya_party: part !== 'fallout' && run % 7 !== 0, ya_met: part !== 'fallout',
         ya_romance: run % 4 === 1, trio: part === 'return' ? run % 5 : part === 'heart' ? run % 4 : 0,
@@ -62,9 +67,10 @@ function seedState(g, run) {
     ensureBars(g); g.james.hp = jamesHpMax(g); g.james.qi = jamesQiMax(g); // full, as the bots arrive (newGame's bars were kept before)
 }
 for (let run = 0; run < 1000; run++) {
-    const g = ensureBars(newGame(run + 7)); seedState(g, run); g.scene = ENTRY; const e = S[ENTRY].enter; if (e) e(g);
+    rs = (4242 + Math.imul(run + 1, 2654435761)) >>> 0; // v0.11.253 (P23-A, WB): each run its own random stream (on the long calendar every run reached fo_letter at the same point of one shared stream, so its second answer, fo_leave_offer, never came)
+    const g = ensureBars(newGame(run + 7, { cal: LONG_CAL })); seedState(g, run); g.scene = ENTRY; const e = S[ENTRY].enter; if (e) e(g);
     let steps = 0;
-    for (; steps < 1500; steps++) {
+    for (; steps < STEPS; steps++) {
         seen.add(g.scene);
         if (EXITS.has(g.scene)) break;
         const v = sceneView(g, S);
@@ -99,10 +105,12 @@ for (let run = 0; run < 1000; run++) {
             if (run % 10 !== 9 && run % 40 !== 18 && run % 40 !== 38) { const k = fights[enc.id] ||= { win: 0, n: 0 }; k.n++; if (out?.done === 'win') k.win++; }
         }
     }
-    ok(steps < 1500, `run ${run} reaches an exit`);
+    ok(steps < STEPS, `run ${run} reaches an exit`);
+    if (steps < STEPS) longest = Math.max(longest, steps); // the P23 review's TG5
 }
 const unreached = Object.keys(S).filter((k) => !seen.has(k) && !EXITS.has(k));
 ok(unreached.length === 0, `every scene reachable (unreached: ${unreached.join(', ')})`);
 console.log('scenes', Object.keys(S).length - EXITS.size, 'fights won (bot-like runs)', Object.fromEntries(Object.entries(fights).map(([k, v]) => [k, `${Math.round(100 * v.win / v.n)}% of ${v.n}`])));
+console.log(`longest run ${longest} steps (cap ${STEPS})`);
 console.log(`${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

@@ -1,0 +1,79 @@
+[
+ {
+  "id": "C1",
+  "file": "js/story/power.js",
+  "find": "const c = previewCopy(g); return prepare(c, combat(c)).degree;",
+  "replace": "const c = g; return prepare(c, combat(c)).degree;",
+  "note": "RG-A reverted: the preview builds the fight on the save; each draw of the tribute moves g.rng (Lu Han's d6) (re-anchored by Claude after the M1 fix: previewCopy)"
+ },
+ {
+  "id": "C2",
+  "file": "js/story/power.js",
+  "find": "const c = previewCopy(g); return prepare(c, combat(c)).degree;",
+  "replace": "const c = previewCopy(g); return prepare(c, combat(g)).degree;",
+  "note": "the copy made but the builder run on the save: luSpread draws from g.rng on every draw (re-anchored by Claude after the M1 fix: previewCopy)"
+ },
+ {
+  "id": "C3",
+  "file": "js/story/power.js",
+  "find": "const c = previewCopy(g); return prepare(c, combat(c)).degree;",
+  "replace": "const c = previewCopy(g); const d = prepare(c, combat(c)).degree; g.rng = c.rng; return d;",
+  "note": "the copy's random number written back: the draw still moves the save's stream (re-anchored by Claude after the M1 fix: previewCopy)"
+ },
+ {
+  "id": "C4",
+  "file": "js/main.js",
+  "find": "if (mins) lines.push(`Takes ${durLabel(mins)}, at once.`);",
+  "replace": "if (mins) lines.push(`Takes ${durLabel(card?.kind === 'door' && card.status === 'open' ? taskMinutes(g, SCENES, card.id) : mins)}, at once.`);",
+  "note": "TP regressed after the source pin's 2,500-character window: a held door card says the walk alone (2 h where the card says 3 h); uses the leftover taskMinutes import. Expected: missed (TG2)"
+ },
+ {
+  "id": "C5",
+  "file": "js/main.js",
+  "find": "const out = card && card.status === 'open' ? safeOutcome(() => taskOutcome(g, SCENES, card.id)) : null;",
+  "replace": "const out = card && card.status === 'open' && card.kind !== 'door' ? safeOutcome(() => taskOutcome(g, SCENES, card.id)) : null;",
+  "note": "the tip skips the dry run for doors (falls back to card.minutes, the walk without the routine)"
+ },
+ {
+  "id": "C6",
+  "file": "js/core/news.js",
+  "find": "the tip used to leave them out (it said 2 h where the card said 3 h, and the walk took 3 h)",
+  "replace": "the tip used to count them twice (it said 4 h where the card said 3 h, and the walk took 3 h)",
+  "note": "the What's new line says the wrong thing about the old tip. Expected: missed (no pin on the line's facts)"
+ },
+ {
+  "id": "C7",
+  "file": "tools/check.mjs",
+  "find": "after: ['tasks', 'story', 'models'] }]",
+  "replace": "after: ['tasks', 'story'] }]",
+  "note": "sanity no longer waits for the models step: the --long log reads a missing or half-written models-long.json (existsSync false: silently empty)"
+ },
+ {
+  "id": "C8",
+  "file": "tools/browser.py",
+  "find": "\"const st = JSON.parse(process.argv[1]); const c = ensureBars(migrate(JSON.parse(JSON.stringify(st)))); flipFill(c); const read = {};\"\n          \"noteRead({ read, coil: { n: 1 } }, sceneView(c, SCENES).text, 1); console.log(JSON.stringify(read));\")",
+  "replace": "\"const st = JSON.parse(process.argv[1]); const c = ensureBars(migrate(JSON.parse(JSON.stringify(st)))); const read = {};\"\n          \"noteRead({ read, coil: { n: 1 } }, sceneView(c, SCENES).text, 1); console.log(JSON.stringify(read));\")",
+  "note": "music_line's read record from the unflipped save (old calendar) while the game loads it flipped; pinned by tests/tools.test.mjs (flipFill(c) 3 times)"
+ },
+ {
+  "id": "C9",
+  "file": "tools/browser.py",
+  "find": "\"noteRead({ read, coil: { n: 1 } }, sceneView(c, SCENES).text, 1); console.log(JSON.stringify(read));\")",
+  "replace": "\"noteRead({ read, coil: { n: 1 } }, sceneView(ensureBars(migrate(JSON.parse(JSON.stringify(st)))), SCENES).text, 1); console.log(JSON.stringify(read));\")",
+  "note": "the read record from an unflipped copy while flipFill(c) stays in the text (the pin counts text, TG6). Browser test only: unmeasured in a mutate copy"
+ },
+ {
+  "id": "C10",
+  "file": "tools/browser.py",
+  "find": "if tag in (\"the week's work stops at evening: tomorrow\", 'too long for what is left of this stay')",
+  "replace": "if tag in (\"the week's work stops at evening: tomorrow\", 'too long for what is left of this stay', 'done for today \u2014 back tomorrow')",
+  "note": "no_greyed also accepts \"done for today\": a card wrongly closed for the day passes every flow. Browser test only: unmeasured in a mutate copy (re-anchored by Claude after the L4 fix)"
+ },
+ {
+  "id": "C11",
+  "file": "js/story/power.js",
+  "find": "const c = previewCopy(g); return prepare(c, combat(c)).degree;",
+  "replace": "const c = { ...g }; return prepare(c, combat(c)).degree;",
+  "note": "M1 as first built: a shallow copy, the Long Forest's builder writes flags.lf_last on every draw (added by Claude)"
+ }
+]

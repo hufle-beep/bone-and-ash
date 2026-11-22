@@ -70,7 +70,7 @@ for (const m of PLAY) if (!MODELS.includes(m)) { console.error(`unknown model ${
 const JSON_OUT = opt('json', null);
 // v0.11.203 (owner pick T1, TS8): --cal 7 plays the long calendar (js/core/calendar.js; the main menu's test switch); log only, never
 // compared with the models baseline. Every model's day of the tribute and of Act 1's end is in its "days" line (both calendars).
-const CAL = Number(opt('cal', 0)) || 0;
+const CAL = Number(opt('cal', LONG_CAL)) || 0; // v0.11.253 (owner pick P23-A, LB): the long calendar by default (every new game since the flip); --cal 0 the old one
 if (CAL && CAL !== LONG_CAL) { console.error(`--cal takes ${LONG_CAL} (the long calendar) or 0 (${CAL})`); process.exit(2); }
 const TEXTS = argv.includes('--texts'); // v0.11.132 (E1, RP)
 // v0.11.227 (owner pick KA1, KM): --kept plays each game on: after a won Act 1 the model goes round again from Day 1 (a1_again, the whole
@@ -492,7 +492,8 @@ function shareTable(all) {
     }
     return out;
 }
-if (!SHARD && !CAL) { // v0.11.203 (TS8): the long calendar is never compared with the saved copy
+if (!SHARD && SAVE_BASE && (!CAL || KEPT)) console.log(`\n  models baseline NOT saved: the saved copy is the long calendar's main run (no --cal 0, no --kept; the P23 review's L6)`);
+if (!SHARD && CAL && !KEPT) { // v0.11.203 (TS8): the long calendar was never compared with the saved copy; v0.11.253 (owner pick P23-A, DG): the long calendar is the models' default and the saved copy's (tools/models-baseline.json re-saved from it); the old calendar (--cal 0) and the realm kept (--kept) are not compared
     const now = shareTable(all);
     if (SAVE_BASE) { writeFileSync(MODELS_BASE, `${JSON.stringify({ saved: new Date().toISOString().slice(0, 10), args: argv.filter((a) => a !== '--save-baseline').join(' '), models: now }, null, 1)}\n`); console.log(`\n  models baseline saved: tools/models-baseline.json`); }
     else if (existsSync(MODELS_BASE)) {
@@ -513,7 +514,10 @@ for (const h of hungryLines) console.log(`  ${h}`); // v0.11.163 (HN1): log only
 if (CAL && !SHARD) for (const [m, st] of Object.entries(all)) {
     if (m === 'random' || /:/.test(m) || st.games < 10) continue;
     assert(st.taps.set < st.taps.run, `${m} (--cal 7; v0.11.225, LO2 BK): the kept amounts: fewer count taps than runs (${st.taps.set} / ${st.taps.run}; every week afresh before: Careful 162 / 101 a game)`);
-    assert((st.weekStops.week || 0) > 0 && (st.weekStops.breakthrough || 0) > 0, `${m} (--cal 7): the plan's weeks end and it stops for a breakthrough (${JSON.stringify(st.weekStops)})`);
+    // v0.11.253 (P23-A, LB): the main run plays the long calendar, so the Rusher (no cultivation) and the Sitter (its own sits) come here
+    // too: their weeks end; the breakthrough stop is the four planning models' (Careful, the Sociable, the Completionist, the Cultivator)
+    const plans = ['careful', 'sociable', 'completionist', 'cultivator'].includes(m);
+    assert((st.weekStops.week || 0) > 0 && (!plans || (st.weekStops.breakthrough || 0) > 0), `${m} (--cal 7): the plan's weeks end${plans ? ' and it stops for a breakthrough' : ''} (${JSON.stringify(st.weekStops)})`);
     for (const [sc, who] of GATES) { const gt = st.gates?.[sc]; if (gt?.n) assert(gt.met === gt.n, `${m} (--cal 7; v0.11.250, P20-A RN L4): ${sc}'s friendship gate for ${who} met on every visit (${gt.met} of ${gt.n}, lowest ${-gt.maxNeg})`); }
     if (['careful', 'sociable', 'completionist'].includes(m)) assert(st.tribN && st.tribDay / st.tribN >= 40, `${m} (--cal 7): the forest's weeks worked, the tribute on Day 40 or later (Day ${st.tribN ? (st.tribDay / st.tribN).toFixed(1) : '—'})`);
 }

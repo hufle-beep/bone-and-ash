@@ -10,7 +10,7 @@ import { btTarget } from '../js/story/meridians.js';
 import { loveLine, YK_QUESTION, ykAskAgain, YK_HERE, YK_LATER_RESULT } from '../js/story/yuki_path.js'; // v0.11.122 (RL1, T); v0.11.137 (TR1, YR; QA2); v0.11.192 (K1, L5): YK_LATER_RESULT
 import { YT_HUBS, YT_BODY, YT_CLOSE, YT_LABEL, YT_GAIN, ytPool } from '../js/story/yuki_time.js'; // v0.11.137 (TR1)
 import { TASK_HUBS } from '../js/story/task_hubs.js'; // v0.11.137 (TR1, YB)
-import { countsFill } from '../js/core/calendar.js'; // v0.11.224 (TX2, DC12)
+import { countsFill, LONG_CAL, calMinutes } from '../js/core/calendar.js'; // v0.11.224 (TX2, DC12); v0.11.253 (P23-A, LB): the bots' calendar
 import { HT_HUBS, HT_BODY, HT_CLOSE, HT_LABEL, HT_GAIN, HT_MID, htPool, htSlot } from '../js/story/house_time.js'; // v0.11.139 (MW1)
 import { likesMei, likesYa, rel } from '../js/story/act1_common.js'; // v0.11.123 (EQ1, AB); v0.11.172 (P5A): rel
 import { KEEP_FLAGS, rewind, endCoil } from '../js/core/coil.js'; // v0.11.137 (HV1, Fable L2): rewind on an old save // v0.11.123 (ER1, T3)
@@ -37,6 +37,17 @@ let pass = 0, fail = 0;
 const assert = (c, l) => { if (c) { pass++; } else { fail++; console.error('  FAIL ', l); } };
 const kids = launch(import.meta.url); // v0.11.1: the random playthroughs in worker processes
 const fresh = (seed) => newGame(seed, { closed: true });
+/** v0.11.253 (owner pick P23-A, LB): the random games and the walks play the long calendar, as every new game since the flip
+ *  (v0.11.226); a walk set on a story day uses `calMinutes` (that day's first calendar day). The hand-built states below keep the
+ *  old calendar where they set the clock by its day (open, options later). */
+const freshBot = (seed) => newGame(seed, { closed: true, cal: LONG_CAL });
+const onStoryDay = (g, d, h = 0, m = 0) => { g.minutes = calMinutes(g, d, h, m); return g; };
+/** WB: a stay is a week of calendar days, so four walk families outgrew their steps (17 of 200 full-hammerspace walks, 10 of 20 from
+ *  yk_sister_talk); the P23 review's TG5: each about twice its longest measured run on the long calendar (v0.11.253: 2,201, 859, 3,353,
+ *  1,953); the others keep their old budgets (longest 318–739 against 1,200–2,500). */
+const WALK = { hammerspace: 4500, coil: 1800, epilogue: 7000, sister: 4000 };
+const WALK_CAPS = new Set(Object.values(WALK));
+let walkLongest = 0; // the longest walk to its goal under a WALK cap, printed
 const STEP_CAP = 5000; // v0.11.34: Incremental Mode games go round the Coil (one game took 2,512 steps over 19 Act 1 Coils), was 2,500 in Story Mode
 
 // static: every literal target exists
@@ -55,9 +66,11 @@ let maxSteps = 0;
 let rs = 12345;
 const rnd = (n) => { rs = (rs * 1103515245 + 12345) >>> 0; return (rs >>> 8) % n; };
 const fights = {};
+const WEAK_AT = new Set(['night_event', 'ya_challenge', 'ya_forced', 'village_night', 'arson_start']); // v0.11.253 (P23-A, LB)
+let weakPicks = 0;
 for (const run of kids ? [] : myRuns()) {
     rs = seedOf(run, 3); // v0.11.1: every game its own random stream
-    const g = ensureBars(fresh(run + 1));
+    const g = ensureBars(freshBot(run + 1));
     let steps = 0;
     for (; steps < STEP_CAP; steps++) {
         seen.add(g.scene);
@@ -71,7 +84,14 @@ for (const run of kids ? [] : myRuns()) {
         const open = v.choices.filter((c) => !c.disabled);
         if (!open.length) { assert(false, `dead end at ${g.scene} (run ${run})`); break; }
         const pick = open[rnd(open.length)];
-        const r = choose(g, SCENES, pick.index);
+        // v0.11.253 (P23-A, LB): on the long calendar the bots arrive stronger, so four outcomes went unreached in 1,000 games (the lizard's
+        // failed retreat, Ya's failed talk, her brawl and the arson lost); 1 run in 20 is a weak James at those four places only (GU and
+        // Convergence T1 L1, HP at most a fifth, for that pick and its fight), as the part test's weak runs; its fights stay out of the win rates
+        const weakHere = run % 20 === 17 && WEAK_AT.has(g.scene) && (pick.index < 1000 && (SCENES[g.scene].choices[pick.index]?.check || SCENES[g.scene].choices[pick.index]?.combat));
+        const held = weakHere ? { gu: g.james.gu, cu: g.james.skills['Convergence Use'] } : null;
+        if (held) { g.james.gu = { tier: 1, level: 1, xp: 0 }; g.james.skills['Convergence Use'] = { tier: 1, level: 1, xp: 0 }; g.james.hp = Math.max(1, Math.min(g.james.hp, Math.round(jamesHpMax(g) / 5))); weakPicks++; }
+        let r;
+        try { r = choose(g, SCENES, pick.index); } finally { if (held && !r?.combat) { g.james.gu = held.gu; g.james.skills['Convergence Use'] = held.cu; } }
         if (r.combat) {
             startCombat(g, r.combat(g));
             for (let t = 0; t < 400 && g.combat; t++) {
@@ -80,8 +100,9 @@ for (const run of kids ? [] : myRuns()) {
                 const smart = run % 2 === 0;
                 const act = smart ? smartAction(g, t) : acts[rnd(acts.length)]; // v0.11.96 (BT1): the shared smart rule
                 const out = (!smart && t % 7 === 6 && g.combat.flee) ? combatFlee(g) : combatStep(g, act);
-                if (out?.done) { const k = `${id}:${smart ? 'smart' : 'random'}`; fights[k] = fights[k] || { win: 0, lose: 0, flee: 0 }; fights[k][out.done] += 1; goTo(g, SCENES, out.next); break; }
+                if (out?.done) { const k = `${id}:${smart ? 'smart' : 'random'}`; if (!held) { fights[k] = fights[k] || { win: 0, lose: 0, flee: 0 }; fights[k][out.done] += 1; } goTo(g, SCENES, out.next); break; }
             }
+            if (held) { g.james.gu = held.gu; g.james.skills['Convergence Use'] = held.cu; }
             assert(!g.combat, `combat ends (${g.scene}, run ${run})`);
         }
         if (!(Number.isFinite(g.james.hp) && g.james.hp >= 0 && Number.isFinite(g.james.qi))) assert(false, `bars finite in ${g.scene}`); else pass++;
@@ -98,7 +119,7 @@ function walkFrom(g, entry, stopAt, budget = 1500, entered = false) { // v0.11.3
     g.scene = entry; const e = SCENES[entry].enter; if (e && !entered) e(g);
     for (let st = 0; st < budget; st++) {
         seen.add(g.scene);
-        if (stopAt.has(g.scene)) return true;
+        if (stopAt.has(g.scene)) { if (WALK_CAPS.has(budget)) walkLongest = Math.max(walkLongest, st); return true; } // the review's TG5
         track(g); // v0.11.22
         const v = sceneView(g, SCENES);
         noteView(g, v);
@@ -112,19 +133,19 @@ function walkFrom(g, entry, stopAt, budget = 1500, entered = false) { // v0.11.3
     return false;
 }
 for (let run = 0; run < 600; run++) {
-    const g = ensureBars(fresh(run + 77777));
+    const g = ensureBars(freshBot(run + 77777));
     const r = run % 8; g.james.realm = r; g.yuki.realm = r; g.james.gu.tier = 1 + (run % 3); g.james.skills['Convergence Use'].tier = 1 + ((run + 1) % 3); g.james.gu.level = 1 + (run % 9); ensureBars(g);
     assert(walkFrom(g, 'lf_enter', new Set(['dawn']), 1200) === true, `v0.11.21: the Long Forest walk reaches dawn (run ${run})`); // was `|| true`: could never fail
 }
 for (let run = 0; run < 300; run++) {
-    const g = ensureBars(fresh(run + 55555)); g.minutes = 10 * 1440 + 360;
+    const g = ensureBars(freshBot(run + 55555)); onStoryDay(g, 11, 6);
     Object.assign(g.flags, { long: true, forest_day: 3, vday: 3, ending: 'bluff', mei_party: true, ya_party: true, ya_met: true });
     g.rel = { 'Mei Lin': { f: 20, a: 5 }, Ya: { f: 40, a: 60 + (run % 40) }, Village: { f: 30, a: 0 } }; g.james.gu.level = 7; g.james.skills['Convergence Use'].level = 5; ensureBars(g);
     assert(walkFrom(g, 'bl_start', new Set(['ht_start']), 1500) === true, `v0.11.21: the Blackroot walk reaches the Heart (run ${run})`);
 }
 // Yuki's path: every last-night arrangement (lover / sister, with Mei Lin and Ya at different heats)
 for (let run = 0; run < 240; run++) {
-    const g = ensureBars(fresh(run + 44444)); g.minutes = 18 * 1440 + 360;
+    const g = ensureBars(freshBot(run + 44444)); onStoryDay(g, 19, 6);
     Object.assign(g.flags, { long: true, forest_day: 3, vday: 3, ending: 'bluff', mei_party: true, ya_party: true, ya_met: true, yk_path: run % 4 === 3 ? 'sister' : 'lover', trio: run % 3, yk_mei: run % 3 });
     g.rel = { 'Mei Lin': { f: 40, a: run % 2 ? 80 : 10 }, Ya: { f: 40, a: (run >> 1) % 2 ? 95 : 10 }, Yuki: { f: 150, a: 150 }, Village: { f: 30, a: 0 } };
     g.james.gu.level = 9; g.james.skills['Convergence Use'].level = 6; if (run % 8 !== 5) g.yuki.realm = 7; ensureBars(g); // v0.11.122 (LG1, YG): her human scenes need her human; 1 in 8 walks with her a cat
@@ -133,7 +154,7 @@ for (let run = 0; run < 240; run++) {
 // v0.11.21: "All of you" (yk_night_all) on purpose: the random walks above reach it only by luck (missed under 4 of 10
 // other seeds), so the scene-coverage check held by chance. Yuki's lover path, Mei Lin and Ya both warm, the trio ready.
 for (let run = 0; run < 20; run++) {
-    const g = ensureBars(fresh(run + 43434)); g.minutes = 18 * 1440 + 360;
+    const g = ensureBars(freshBot(run + 43434)); onStoryDay(g, 19, 6);
     Object.assign(g.flags, { long: true, forest_day: 3, vday: 3, ending: 'bluff', mei_party: true, ya_party: true, ya_met: true, yk_path: 'lover', trio: 3, yk_mei: 2 });
     g.rel = { 'Mei Lin': { f: 40, a: 80 }, Ya: { f: 40, a: 95 }, Yuki: { f: 150, a: 150 }, Village: { f: 30, a: 0 } };
     g.james.gu.level = 9; g.james.skills['Convergence Use'].level = 6; g.yuki.realm = 7; ensureBars(g); // v0.11.122 (LG1, YG): her nights need her human this Coil
@@ -148,31 +169,31 @@ for (let run = 0; run < 20; run++) {
 // a full hammerspace: every common item at its cap — no dead ends from hidden gathering choices
 const COMMON = ['jade_bracket', 'ghost_gill', 'river_cress', 'honeycomb', 'spirit_grass', 'beast_core', 'fowl_raw', 'crow_feather', 'hare_raw', 'bone_meal', 'venison', 'crimson_berry', 'crab_meat', 'lizard_egg'];
 for (let run = 0; run < 200; run++) {
-    const g = ensureBars(fresh(run + 33333));
+    const g = ensureBars(freshBot(run + 33333));
     for (const id of COMMON) g.inventory[id] = itemCap(id);
     const r = run % 8; g.james.realm = r; g.yuki.realm = r; ensureBars(g);
-    assert(walkFrom(g, run % 2 ? 'lf_enter' : 'arrival', new Set(['fo_start']), 1500) === true, `v0.11.21: the full-hammerspace walk reaches Act 1 (run ${run})`);
+    assert(walkFrom(g, run % 2 ? 'lf_enter' : 'arrival', new Set(['fo_start']), WALK.hammerspace) === true, `v0.11.21: the full-hammerspace walk reaches Act 1 (run ${run})`);
     for (const id of COMMON) assert(g.inventory[id] <= itemCap(id) || !g.inventory[id], `cap holds for ${id}`);
 }
 // the Coil (v0.9.4): a lost tribute, the Coil screen, the first dawn again, back into Day 1
 for (let run = 0; run < 40; run++) {
-    const g = ensureBars(fresh(run + 22222)); g.scene = 'collectors_lost'; g.flags.ending = 'lost'; g.flags.long = true;
+    const g = ensureBars(freshBot(run + 22222)); g.scene = 'collectors_lost'; g.flags.ending = 'lost'; g.flags.long = true;
     if (run % 2) { assert(walkFrom(g, 'collectors_lost', new Set(['stream', 'fo_start']), 400) === true, `v0.11.21: a lost tribute walks back to Day 1 (run ${run})`); continue; }
     SCENES.collectors_lost.enter(g); seen.add('collectors_lost');
     choose(g, SCENES, SCENES.collectors_lost.choices.findIndex((c) => c.to === 'coil_end')); // half the runs bite the tail
-    assert(walkFrom(g, 'coil_end', new Set(['stream', 'fo_start']), 400) === true, `v0.11.21: the Coil screen walks back to Day 1 (run ${run})`);
+    assert(walkFrom(g, 'coil_end', new Set(['stream', 'fo_start']), WALK.coil) === true, `v0.11.21: the Coil screen walks back to Day 1 (run ${run})`);
 }
 // v0.11.251 (owner pick P21-E, TK): a lost tribute no longer goes on to Act 1 (Lu Han takes James), so the random games no longer
 // carry a weak James into Act 1 (325 of 1,000 did, by "Get up."); these walks do: from the epilogue, as fresh as Day 3, to Act 1's end
 for (let run = 0; run < 300; run++) {
-    const g = ensureBars(fresh(run + 31000)); g.minutes = 6 * 1440 + 900; Object.assign(g.flags, { ending: ['fought', 'bluff', 'paid'][run % 3], lu_won: 1, long: true, forest_day: 3, vday: 3 }); // RV-A (TG-C8): every ending, beaten first
-    walkFrom(g, 'epilogue', new Set(['a1_end']), 2500);
+    const g = ensureBars(freshBot(run + 31000)); onStoryDay(g, 7, 15); Object.assign(g.flags, { ending: ['fought', 'bluff', 'paid'][run % 3], lu_won: 1, long: true, forest_day: 3, vday: 3 }); // RV-A (TG-C8): every ending, beaten first
+    walkFrom(g, 'epilogue', new Set(['a1_end']), WALK.epilogue);
 }
 // v0.9.6: the warning before a sealing Foundation, and Act 1's Coil at Shen Qiu
 for (let run = 0; run < 40; run++) {
-    const g = ensureBars(newGame(run + 44444, { closed: true })); g.james.primaries = 12; g.james.collaterals = 9 * (run % 3); g.james.saturation = 96; g.flags.bt_return = 'stream';
+    const g = ensureBars(newGame(run + 44444, { closed: true, cal: LONG_CAL })); g.james.primaries = 12; g.james.collaterals = 9 * (run % 3); g.james.saturation = 96; g.flags.bt_return = 'stream';
     assert(walkFrom(g, 'col_warn', new Set(['stream']), 400) === true, `v0.11.21: the seal warning walks back to the stream (run ${run})`);
-    const a = ensureBars(fresh(run + 45454)); a.scene = 'epilogue'; a.flags.ending = 'bluff'; a.minutes = 6 * 1440 + 900;
+    const a = ensureBars(freshBot(run + 45454)); a.scene = 'epilogue'; a.flags.ending = 'bluff'; onStoryDay(a, 7, 15);
     choose(a, SCENES, 0); seen.add('fo_start');
     a.scene = 'rt_taken'; SCENES.rt_taken.enter(a); seen.add('rt_taken');
     choose(a, SCENES, SCENES.rt_taken.choices.findIndex((c) => c.to === 'coil_end'));
@@ -180,7 +201,7 @@ for (let run = 0; run < 40; run++) {
 }
 // v0.11.26: the end of Act 1 goes round again (Incremental Mode): a1_end → a1_again → back to a first dawn, or not yet
 for (let run = 0; run < 10; run++) {
-    const e = ensureBars(fresh(run + 46464)); e.scene = 'epilogue'; e.flags.ending = 'paid'; e.minutes = 6 * 1440 + 900; choose(e, SCENES, 0);
+    const e = ensureBars(freshBot(run + 46464)); e.scene = 'epilogue'; e.flags.ending = 'paid'; onStoryDay(e, 7, 15); choose(e, SCENES, 0);
     e.flags.a1_outcome = ['victory', 'taken', 'revelation'][run % 3]; goTo(e, SCENES, 'a1_end'); seen.add('a1_end');
     const go = sceneView(e, SCENES).choices.find((c) => /Go round again/.test(c.label));
     assert(!!go, `v0.11.26: the end of Act 1 offers Go round again (run ${run})`);
@@ -189,12 +210,12 @@ for (let run = 0; run < 10; run++) {
 }
 // v0.11.34 (D1): two scenes Incremental Mode does reach, which the random walks above miss
 for (let run = 0; run < 20; run++) { // the Nascent Soul warning: realm 6 with the Extraordinary vessels closed, from the Meditate card's breakthrough
-    const g = ensureBars(fresh(run + 47474)); g.james.realm = 6; g.yuki.realm = 6; g.james.extra8 = run % 8; g.james.saturation = 96; g.flags.bt_return = 'stream'; ensureBars(g);
+    const g = ensureBars(freshBot(run + 47474)); g.james.realm = 6; g.yuki.realm = 6; g.james.extra8 = run % 8; g.james.saturation = 96; g.flags.bt_return = 'stream'; ensureBars(g);
     assert(btTarget(g) === 'ns_warn', `v0.11.34: realm 6 with ${run % 8} of 8 vessels open warns first (${btTarget(g)})`);
     assert(walkFrom(g, 'ns_warn', new Set(['stream', 'breakthrough']), 400) === true, `v0.11.34: the Nascent Soul warning walks on (run ${run})`);
 }
 for (let run = 0; run < 20; run++) { // Yuki's sister path: the interrogation at the Blackroot camp
-    const g = ensureBars(fresh(run + 48484)); g.minutes = 18 * 1440 + 1200;
+    const g = ensureBars(freshBot(run + 48484)); onStoryDay(g, 19, 20);
     Object.assign(g.flags, { long: true, forest_day: 3, vday: 3, ending: 'bluff', mei_party: true, ya_party: true, ya_met: true, yk_path: 'sister' });
     g.rel = { 'Mei Lin': { f: 40, a: 10 }, Ya: { f: 40, a: 10 }, Yuki: { f: 150, a: 150 }, Village: { f: 30, a: 0 } }; ensureBars(g);
     goTo(g, SCENES, 'bl_camp'); seen.add('bl_camp');
@@ -203,12 +224,12 @@ for (let run = 0; run < 20; run++) { // Yuki's sister path: the interrogation at
     if (!talk) continue;
     choose(g, SCENES, talk.index);
     assert(g.scene === 'yk_sister_talk', `v0.11.34: it leads to yk_sister_talk (${g.scene})`);
-    assert(walkFrom(g, g.scene, new Set(['a1_end']), 1500, true) === true, `v0.11.34: from yk_sister_talk to the end of Act 1 (run ${run})`);
+    assert(walkFrom(g, g.scene, new Set(['a1_end']), WALK.sister, true) === true, `v0.11.34: from yk_sister_talk to the end of Act 1 (run ${run})`);
 }
 // v0.11.91 (owner pick Y1): Yuki's choice at the Long Forest's last fire (yk_choice) and both answers, on purpose: the random
 // games reached "More." (yk_lover) about once in 1,000, and the new night clock (bed from 21:00, the day's end at 00:00) shifted that
 for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_lover'], [2, /^"Family/, 'yk_sister'], [3, /^"More\."/, 'yk_lover']]) {
-    const g = ensureBars(fresh(run + 49494)); g.minutes = 10 * 1440 + 21 * 60; g.james.realm = 7; g.yuki.realm = 7;
+    const g = ensureBars(freshBot(run + 49494)); onStoryDay(g, 11, 21); g.james.realm = 7; g.yuki.realm = 7;
     Object.assign(g.flags, { long: true, forest_day: 3, vday: 3, ending: 'bluff', mei_party: true, ya_party: true, ya_met: true, yk_back: 'bl_camp', lf_active: true }); // v0.11.137 (QA2): the Long Forest's fire
     g.rel = { 'Mei Lin': { f: 40, a: 10 }, Ya: { f: 40, a: 10 }, Yuki: { f: 150, a: 150 }, Village: { f: 30, a: 0 } }; ensureBars(g);
     goTo(g, SCENES, 'yk_choice'); seen.add('yk_choice');
@@ -218,6 +239,18 @@ for (const [run, re, to] of [[0, /^"Family/, 'yk_sister'], [1, /^"More\."/, 'yk_
     choose(g, SCENES, ans.index);
     assert(g.scene === to && g.flags.yk_path === (to === 'yk_lover' ? 'lover' : 'sister'), `v0.11.91 (Y1): the answer leads to ${to} (${g.scene}, ${g.flags.yk_path})`);
     assert(walkFrom(g, g.scene, new Set(['bl_camp']), 50, true) === true, `v0.11.91 (Y1): from ${to} on to the Blackroot camp (run ${run}, at ${g.scene})`);
+}
+// v0.11.253 (P23-A, LB): the thornback's night with a weak James: backing away fails into night_lizard_forced (the long calendar's random
+// games, stronger and with the forest's night events once a week, reached it in none of 1,000), and the walk goes on to the morning
+for (let run = 0; run < 6; run++) {
+    const g = ensureBars(freshBot(run + 47000)); goTo(g, SCENES, 'wilds'); onStoryDay(g, 2, 22); g.flags.night_ev = 'lizard'; g.scene = 'night_event';
+    g.james.gu = { tier: 1, level: 1, xp: 0 };
+    const k = SCENES.night_event.choices.findIndex((c) => /Back away slowly/.test(String(c.text)));
+    const v = sceneView(g, SCENES).choices.find((c) => c.index === k);
+    if (!v || v.disabled) { assert(false, `P23-A (LB): the thornback's retreat is offered (run ${run})`); continue; }
+    choose(g, SCENES, k);
+    assert(g.scene === 'night_lizard_forced', `P23-A (LB): a failed retreat from the thornback is night_lizard_forced (run ${run}, at ${g.scene})`);
+    assert(walkFrom(g, g.scene, new Set(['morning', 'coil_end', 'wilds']), 400, true) === true, `P23-A (LB): from night_lizard_forced on to the morning (run ${run})`);
 }
 // v0.11.135 (owner picks NT1, EV1): the 27 scenes that repeated across days in a Coil: on each later day a new text (Fable's),
 // every form, the original first; the event scenes per event; the talks' beats follow the day too.
@@ -9378,5 +9411,78 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       assert(t.startsWith('The pit opens ankle-deep and the stakes come up four in number.') && !/hedge|wall/i.test(t) && /I outweigh them/.test(t) === (form === 'tiger'), `${T} (JL): the failed run, ${form} (${t.slice(0, 40)}…${t.slice(-30)})`); }
     { const FWm = await import('../js/story/flight_texts.js'); assert(FWm.FW.jackalsRun === 'A pit and a few bone stakes in their path, then run for the water. Flying wants a clearer head.', `${T} (JL): the label when James can fly`); }
 }
+// v0.11.253 (owner picks P23-A, RG-A): the tests on the long calendar; TP, the held card's tip; RG-A, a drawn screen draws no random number
+{
+    const T = 'P23-A';
+    const C = await import('../js/core/calendar.js'); const TK = await import('../js/core/tasks.js'); const PW = await import('../js/story/power.js'); const GW = await import('../js/core/game.js');
+    const M = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+    // TP: the tip reads the card's own dry run (taskOutcome, as cardHtml's tag), not the walk alone (taskMinutes)
+    // the review's TG2: tipFor's whole body (to the next function), every assignment of the shown time, the "Takes" line
+    const ta = M.indexOf('function tipFor('), tip = M.slice(ta, M.indexOf('\nfunction ', ta + 10));
+    assert(/const out = card && card\.status === 'open' \? safeOutcome\(\(\) => taskOutcome\(g, SCENES, card\.id\)\) : null;\s*mins = out \? out\.minutes : card\?\.minutes \|\| 0;/.test(tip) && !/taskMinutes\(/.test(tip) && !/\btaskMinutes\b/.test(M.split('\n')[10])
+        && JSON.stringify(tip.match(/\bmins = [^;]*;/g)) === JSON.stringify(['mins = 0;', 'mins = out ? out.minutes : card?.minutes || 0;', 'mins = b.disabled ? 0 : storyMinutes(i);', 'mins = mc.minutes || 0;'])
+        && /lines\.push\(`Takes \$\{durLabel\(mins\)\}, at once\.`\)/.test(tip), `${T} (TP, TG2): the tip's time is the card's dry run, and only it is shown`);
+    // TP: a door card on a stay day whose meal and sit are still to come: the dry run is the routine and the walk, the walk alone is less
+    {
+        let found = null;
+        for (let seed = 1; seed < 400 && !found; seed++) {
+            const g = ensureBars(newGame(93000 + seed, { closed: true, cal: C.LONG_CAL }));
+            goTo(g, SCENES, 'wilds'); g.minutes = C.calMinutes(g, 1, 7); ensureBars(g);
+            const door = TK.taskCards(g, SCENES).find((c) => c.kind === 'door' && c.status === 'open');
+            if (!door) continue;
+            const walk = TK.taskMinutes(g, SCENES, door.id), out = TK.taskOutcome(g, SCENES, door.id);
+            const r0 = TK.dryClone(g), m0 = r0.minutes; TK.dayRoutine(r0, SCENES, r0.scene, 'door', door.id); const pre = r0.minutes - m0;
+            if (pre > 0) found = { id: door.id, walk, out: out.minutes, pre };
+        }
+        assert(found && found.out === found.pre + found.walk && found.out > found.walk, `${T} (TP): a door card's dry run counts the day's meal and sit before its walk (${JSON.stringify(found)})`);
+    }
+    // RG-A: the one-move check builds the fight on a copy: drawing the tribute's screen leaves the save's random numbers alone
+    {
+        const g = ensureBars(newGame(93500, { closed: true, cal: C.LONG_CAL })); Object.assign(g.flags, { forest_day: 3, vday: 3 }); goTo(g, SCENES, 'tribute');
+        const rng0 = g.rng, s0 = JSON.stringify({ ...g, lines: 0, log: 0 });
+        sceneView(g, SCENES); sceneView(g, SCENES); sceneView(g, SCENES);
+        assert(g.rng === rng0 && JSON.stringify({ ...g, lines: 0, log: 0 }) === s0, `${T} (RG-A): the tribute drawn three times, the save unchanged (rng ${rng0} → ${g.rng})`);
+        const fight = SCENES.tribute.choices.find((c) => c.combat).combat;
+        const d1 = PW.degreeForChoice(g, fight), d2 = PW.degreeForChoice(g, fight);
+        assert(g.rng === rng0 && d1 === d2, `${T} (RG-A): degreeForChoice draws nothing from the save and gives the same degree twice (${d1}, ${d2})`);
+        const r = choose(g, SCENES, SCENES.tribute.choices.findIndex((c) => c.combat)); r.combat(g);
+        assert(g.rng !== rng0, `${T} (RG-A): the tap still builds the fight on the save (its d6 drawn there)`);
+    }
+    // the review's TG1: every scene with a fight choice, drawn twice on a hand-built long-calendar state (the Long Forest's last fight set to
+    // another): the save unchanged but the line picker's record and the journal (M1: the forest's builder wrote flags.lf_last on a shallow copy)
+    {
+        const fightScenes = Object.values(SCENES).filter((sc) => (sc.choices || []).some((c) => c.combat)).map((sc) => sc.id);
+        let drawn = 0; const changed = [], forest = [];
+        for (const id of fightScenes) {
+            const g = ensureBars(newGame(93600, { closed: true, cal: C.LONG_CAL })); Object.assign(g.flags, { forest_day: 3, vday: 3, lf_last: 'lf_heartless', lf_active: id.startsWith('lf_') });
+            g.scene = id; GW.wakeState(g); const s0 = JSON.stringify({ ...g, lines: 0, log: 0 }); // the waking-day record settled first (game.js wakeState: a draw starts it, by design)
+            try { sceneView(g, SCENES); sceneView(g, SCENES); } catch { continue; }
+            drawn++; if (id.startsWith('lf_')) forest.push(id);
+            if (JSON.stringify({ ...g, lines: 0, log: 0 }) !== s0) changed.push(id);
+        }
+        assert(drawn >= 40 && forest.length >= 4 && fightScenes.includes('tribute') && changed.length === 0, `${T} (RG-A, M1, TG1): ${drawn} of ${fightScenes.length} scenes with a fight drawn twice (${forest.length} in the Long Forest), the save unchanged (changed: ${changed.join(', ') || 'none'})`);
+    }
+    // the review's TG4: the degree the drawn tribute offers (the one-move check) is the degree of the fight the tap builds
+    {
+        const g = ensureBars(newGame(93700, { closed: true, cal: C.LONG_CAL })); Object.assign(g.flags, { forest_day: 3, vday: 3 }); goTo(g, SCENES, 'tribute');
+        const k = SCENES.tribute.choices.findIndex((c) => c.combat), d1 = PW.degreeForChoice(g, SCENES.tribute.choices[k].combat);
+        const r = choose(g, SCENES, k), d2 = PW.prepare(g, r.combat(g)).degree;
+        assert(d1 === d2, `${T} (RG-A, TG4): the offered degree is the started fight's (${d1}, ${d2})`);
+    }
+    // the review's TG3 (L2): a door card the day's meal and sit close: its forecast (time, end, Fed, HP) is the tap's
+    {
+        let hit = null;
+        for (let h = 12; h <= 23 && !hit; h++) for (const id of ['wild_explore:0', 'wild_explore:1']) {
+            const g = ensureBars(newGame(93800, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'wilds'); g.minutes = C.calMinutes(g, 1, h); ensureBars(g);
+            if (!TK.taskOpen(g, SCENES, id)) continue;
+            const oc = TK.taskOutcome(g, SCENES, id), m0 = g.minutes, r = TK.runTask(g, SCENES, id);
+            if (r.skipped && !r.stopped) { hit = { id, h, oc, got: { minutes: g.minutes - m0, end: g.minutes, fed: g.james.satiety, hp: g.james.hp } }; break; }
+        }
+        assert(hit && hit.oc.minutes === hit.got.minutes && hit.oc.end === hit.got.end && hit.oc.fed === hit.got.fed && hit.oc.hp === hit.got.hp, `${T} (L2, TG3): a door the routine closes: its forecast is the tap (${JSON.stringify(hit)})`);
+    }
+    // LB: the random games and the walks play the long calendar
+    assert(freshBot(1).cal === C.LONG_CAL && JSON.stringify(WALK) === '{"hammerspace":4500,"coil":1800,"epilogue":7000,"sister":4000}', `${T} (LB, WB, TG5): the bots' games on the long calendar, four walk families' steps about twice their longest`);
+}
+if (!SHARD) console.log(`  the walks: the longest to its goal under a raised cap ${walkLongest} steps (caps ${JSON.stringify(WALK)})`); // the P23 review's TG5
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

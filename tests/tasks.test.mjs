@@ -10,7 +10,13 @@ import { markDaily, daily, hour } from '../js/story/common.js';
 import { dayEnd, nightLock, dayHour, endsLate, sitUseless } from '../js/core/game.js'; // v0.11.37 (v0.11.91: no push)
 import { pickedMinutes, PICKED_SPEED } from '../js/core/story.js'; // v0.11.37 (F1)
 import { wakeDay, sleepUntil, clockParts } from '../js/core/game.js';
-import { yukiSpeed, yukiSays, setDryClone, dryClone, showPicked } from '../js/core/tasks.js';
+import { yukiSpeed, yukiSays, setDryClone, dryClone, showPicked, carriesHere, dayRoutine } from '../js/core/tasks.js';
+import { LONG_CAL } from '../js/core/calendar.js';
+/** v0.11.253 (owner pick P23-A, LB): the bot games play the long calendar, as every new game since the flip (v0.11.226); the
+ *  hand-built states below keep the old calendar where they set the clock by its day (open, options later). */
+const BOT_CAL = LONG_CAL;
+let viewsPure = 0; // RG-A
+const famLater = { carry: 0, skipped: 0, ended: 0, paid: 0, routine: 0 }; // FX: work cards whose familiarity comes later or not at all
 import { e8Hours, ecHours, jnHours } from '../js/story/meridians.js';
 import { serialize, deserialize } from '../js/core/game.js';
 import { PEOPLE_FIGHTS, combatHooks } from '../js/core/game.js'; // v0.11.81
@@ -1856,12 +1862,13 @@ function skipCheck(g, run) {
     const b = JSON.parse(JSON.stringify(g));
     const r = skipRun(a, SCENES);
     for (let k = 0; k < r.steps; k++) { const o = sceneView(b, SCENES).choices.filter((c) => !c.disabled); choose(b, SCENES, o[0].index); }
+    sceneView(a, SCENES); sceneView(b, SCENES); // v0.11.253 (P23-A, FX): both end on the screen the player then sees (its picked lines recorded, e.g. a long-calendar supper's)
     if (JSON.stringify(a) === JSON.stringify(b)) pass++; else assert(false, `v0.11.35: the skip = tapping through (${g.scene}, run ${run}, ${r.steps} steps)`);
     skipChecked++;
 }
 function play(run, tasks) {
     rs = seedOf(run, tasks ? 1 : 2); // v0.11.1: every game its own random stream
-    const g = ensureBars(newGame(run + 1 + SEED * 100000, { closed: tasks })); // task mode: meridians closed at the start (v0.9.6)
+    const g = ensureBars(newGame(run + 1 + SEED * 100000, { closed: tasks, cal: BOT_CAL })); // task mode: meridians closed at the start (v0.9.6); v0.11.253 (P23-A, LB): the long calendar, as every new game since the flip
     const st = stats.tasks;
     let steps = 0;
     const seenOut = new Set();
@@ -1889,7 +1896,11 @@ function play(run, tasks) {
             if (g.scene === 'meridians' && ((ms = (ms || 0) + 1) > 2 || g.james.satiety < 40)) { ms = 0; choose(g, SCENES, SCENES.meridians.choices.findIndex((c) => c.text === 'Open your eyes.')); continue; }
             if (g.scene !== 'meridians') ms = 0;
         }
+        // v0.11.253 (owner pick RG-A): drawing a screen changes nothing in the save but the line picker's record (`lines`, by design)
+        // and the journal: before, a fight choice's one-move check built the fight on the save, and the tribute's builder drew a d6
+        const pure = run % FC_EVERY === 0 ? JSON.stringify({ ...g, lines: 0, log: 0 }) : null;
         const v = sceneView(g, SCENES);
+        if (pure !== null) { if (JSON.stringify({ ...g, lines: 0, log: 0 }) === pure) { pass++; viewsPure++; } else assert(false, `v0.11.253 (RG-A): drawing ${g.scene} leaves the save as it was (run ${run})`); }
         noteView(g, v);
         if (tasks && !noFold(g.scene) && !v.end) noteRead(g, v.text); // v0.11.133 (FP2, RF1): the bots read what the screen shows, as main.js records it, so the skip check below still runs
         if (v.end) { const e = g.flags.ending || 'none'; st.endings[e] = (st.endings[e] || 0) + 1; st.games++; if (!barsOk(g)) badBars++; return true; }
@@ -1918,16 +1929,24 @@ function play(run, tasks) {
                     const mins = fc1 ? taskMinutes(g, SCENES, id) : 0;
                     const oc = FC ? taskOutcome(g, SCENES, id) : null; // v0.11.64 (A1, B1)
                     const card = taskCards(g, SCENES).find((c) => c.id === id);
+                    // v0.11.253 (P23-A, FX): a door card's dry run counts the day's meal and sit before its walk (v0.11.225, LO2 FD), as its
+                    // card and (TP) its tip show; the routine measured here on its own copy
+                    const pre = FC && oc && card?.kind === 'door' ? (() => { const c = dryClone(g), m = c.minutes; dayRoutine(c, SCENES, c.scene, 'door', id); return c.minutes - m; })() : 0;
                     if (card?.check) bands[card.check.band] = (bands[card.check.band] || 0) + 1;
                     const fam0 = taskState(g).fam[id] || 0;
+                    const cy0 = card?.kind === 'carry' ? carriesHere(g).find((c) => c.id === card.card) : null, cyFam0 = cy0 ? taskState(g).fam[cy0.id] || 0 : 0; // FX
                     const r = runTask(g, SCENES, id);
                     if (DEAD_MENUS.has(g.scene)) assert(false, `v0.11.177 (RV1 TG10): a card left the bot in an emptied menu (${id} → ${g.scene})`); else pass++;
                     if (r.lines.some((l) => /^Yuki (comes|leaves)/.test(l))) yukiRuns++;
-                    if (card?.kind === 'work') { if ((taskState(g).fam[id] || 0) > fam0) pass++; else assert(false, `familiarity grows on ${id}`); } // v0.11.21: the label only on a failure
+                    // v0.11.253 (P23-A, FX): on the long calendar a card that starts a week's work (an unpaid carry) brings its familiarity when the work
+                    // ends (tasks.js: the carry's result); a Coil ended mid-card (HP 0) or a card the day's meal and sit left no time for brings none
+                    if (card?.kind === 'work') { const cy = carriesHere(g).find((c) => c.id === id && !c.paid); if ((taskState(g).fam[id] || 0) > fam0) pass++; else if (cy || r.skipped || (r.stopped && g.scene === 'coil_end')) { famLater[cy ? 'carry' : r.skipped ? 'skipped' : 'ended']++; pass++; } else assert(false, `familiarity grows on ${id}`); } // v0.11.21: the label only on a failure
+                    // v0.11.253 (P23-A, FX): an unpaid week's work brings its familiarity when it is done
+                    if (cy0 && !cy0.paid && !r.stopped && !carriesHere(g).some((c) => c.id === cy0.id)) { famLater.paid = (famLater.paid || 0) + 1; if ((taskState(g).fam[cy0.id] || 0) > cyFam0) pass++; else assert(false, `familiarity grows when ${cy0.id}'s week's work is done`); }
                     st.cards++;
                     if (fc1) { if (g.minutes - m0 === mins || r.stopped) pass++; else assert(false, `dry run predicts ${id} (${mins} vs ${g.minutes - m0})`); }
                     if (!r.stopped) { cardsWhole.add(id); if (fc1) cardsForecast.add(id); }
-                    if (oc) { if (r.stopped && oc.minutes === mins && !oc.death === (g.scene !== 'coil_end') || (!r.stopped && oc.end === g.minutes && oc.fed === g.james.satiety && oc.hp === g.james.hp && !oc.death)) predicted++; else assert(false, `v0.11.64: ${id}'s dry run = what happens (run ${run}: ${JSON.stringify(oc)} vs ${g.minutes}, ${g.scene})`); }
+                    if (oc) { if (pre > 0) famLater.routine = (famLater.routine || 0) + 1; if (r.stopped && oc.minutes === pre + mins && g.minutes - m0 >= oc.minutes && !oc.death === (g.scene !== 'coil_end') || (!r.stopped && oc.end === g.minutes && oc.fed === g.james.satiety && oc.hp === g.james.hp && !oc.death)) predicted++; else assert(false, `v0.11.64: ${id}'s dry run = what happens (run ${run}: ${JSON.stringify(oc)} vs ${g.minutes}, ${g.scene})`); }
                     if (r.lines.some((l) => /Your knees make the decision/.test(l))) st.collapses++;
                     if (Number.isFinite(g.james.hp) && g.james.hp >= 0 && Number.isFinite(g.james.satiety)) pass++; else assert(false, `bars finite after ${id}`);
                 }
@@ -1960,20 +1979,20 @@ let diceInTasks = 0;
 const logBefore = (g) => g.log.length;
 if (kids) { // v0.11.1: merge the workers' numbers
     for (const r of await collect(kids)) {
-        for (const [k, o] of Object.entries({ byCoil, medStats, deaths, stats, bands, fightStats })) mergeInto(o, r[k]);
+        for (const [k, o] of Object.entries({ byCoil, medStats, deaths, stats, bands, fightStats, famLater })) mergeInto(o, r[k]);
         badBars += r.badBars;
         for (const id of r.cardsSeen.__set) cardsSeen.add(id);
         for (const id of r.cardsListed.__set) cardsListed.add(id);
         for (const id of r.cardsForecast.__set) cardsForecast.add(id);
         for (const id of r.cardsWhole.__set) cardsWhole.add(id);
         mergeSeen(r.touched);
-        yukiRuns += r.yukiRuns; predicted += r.predicted; skipChecked += r.skipChecked; diceInTasks += r.diceInTasks; pass += r.pass; fail += r.fail;
+        yukiRuns += r.yukiRuns; viewsPure += r.viewsPure; predicted += r.predicted; skipChecked += r.skipChecked; diceInTasks += r.diceInTasks; pass += r.pass; fail += r.fail;
     }
 } else for (const run of myRuns()) play(run, true); // v0.11.34 (D1): Incremental Mode only (the Story Mode games are gone)
-if (SHARD) emit({ byCoil, medStats, deaths, stats, bands, fightStats, badBars, cardsSeen, cardsListed, cardsForecast, cardsWhole, yukiRuns, predicted, skipChecked, diceInTasks, pass, fail, touched });
+if (SHARD) emit({ byCoil, medStats, deaths, stats, bands, fightStats, famLater, badBars, cardsSeen, cardsListed, cardsForecast, cardsWhole, yukiRuns, viewsPure, predicted, skipChecked, diceInTasks, pass, fail, touched });
 if (BOTS_ONLY) { // v0.11.21: the games' stats only (the same file a full run writes)
     if (STATS_OUT) writeFileSync(STATS_OUT, JSON.stringify({ games: GAMES, deaths, byCoil, fights: fightStats, badBars, seen: touchedOut() }));
-    console.log(`  ${GAMES} bot games, bots only (no rule checks)\n${pass} passed, ${fail} failed`);
+    console.log(`  ${GAMES} bot games, bots only (no rule checks); the long calendar; work cards whose familiarity comes later: ${famLater.carry} a week's work, ${famLater.skipped} skipped, ${famLater.ended} the Coil ended\n${pass} passed, ${fail} failed`);
     process.exit(fail ? 1 : 0);
 }
 rs = 4243; // the checks below draw from their own stream
@@ -1981,7 +2000,7 @@ rs = 4243; // the checks below draw from their own stream
 {
     let die = 0;
     for (let run = 0; run < 200; run++) {
-        const g = ensureBars(newGame(run + 9000));
+        const g = ensureBars(newGame(run + 9000, { cal: BOT_CAL })); // v0.11.253 (P23-A, LB)
         for (let s = 0; s < 3000; s++) {
             const v = sceneView(g, SCENES);
             if (v.end) break;
@@ -4535,7 +4554,10 @@ console.log(`  deaths, prologue (HP 0 or a beast): ${dl(deaths.pro, 'pro')}`);
 console.log(`  deaths, Act 1: ${dl(deaths.a1, 'a1')}`);
 console.log(`  Meditate: ${medStats.mer} meridian screens, ${medStats.bt} breakthroughs, ${medStats.warn} seal warnings; Act 1: ${medStats.a1bites} rewinds at Shen Qiu, ends on ${JSON.stringify(Object.fromEntries(Object.entries(medStats.a1coils).sort(([a], [b]) => a - b)))}`);
 assert(!FULL || medStats.a1bites + shenWalk >= 5, `bots rewind Act 1 and reach its end (${medStats.a1bites} in the bot games + ${shenWalk} walked on purpose, K1 v0.11.92)`);
-console.log(`  ${stats.tasks.cards} cards run, ${stats.tasks.skipped} skipped, ${stats.tasks.collapses} collapses (HP 0), ${predicted} cards predicted by their dry run (1 game in ${FC_EVERY}), ${cardsSeen.size}/${all.size} cards played`);
+console.log(`  ${stats.tasks.cards} cards run, ${stats.tasks.skipped} skipped, ${stats.tasks.collapses} collapses (HP 0), ${predicted} cards predicted by their dry run (1 game in ${FC_EVERY}), ${cardsSeen.size}/${all.size} cards played; the long calendar: familiarity later ${famLater.carry} (a week's work; ${famLater.paid} done, each with its familiarity), none ${famLater.skipped} (skipped) / ${famLater.ended} (the Coil ended)`);
+assert(viewsPure > 1000, `v0.11.253 (RG-A): screens drawn without changing the save (${viewsPure})`);
+assert(famLater.routine > 0, `v0.11.253 (P23-A, FX): door cards with the day's routine first were forecast (${famLater.routine})`);
+assert(famLater.carry > 0 && famLater.paid > 0, `v0.11.253 (P23-A, FX): the bots start week-long work cards and finish them, familiarity at the end (${famLater.carry} started, ${famLater.paid} done)`);
 assert(badBars === 0, `no NaN / Infinity bar at the end of a bot game (${badBars})`);
 if (STATS_OUT) writeFileSync(STATS_OUT, JSON.stringify({ games: GAMES, deaths, byCoil, fights: fightStats, badBars, seen: touchedOut() })); // v0.11.3: for tools/sanity.mjs
 console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FULL ? '' : ' (quick: coverage logged, not checked)'}`);
