@@ -12,9 +12,11 @@ import { pickedMinutes, PICKED_SPEED } from '../js/core/story.js'; // v0.11.37 (
 import { wakeDay, sleepUntil, clockParts } from '../js/core/game.js';
 import { yukiSpeed, yukiSays, setDryClone, dryClone, showPicked, carriesHere, dayRoutine } from '../js/core/tasks.js';
 import { LONG_CAL, calMinutes } from '../js/core/calendar.js'; // v0.11.259 (owner pick OC-A, OC4): calMinutes, the tests' story days on the long calendar
-/** v0.11.253 (owner pick P23-A, LB): the bot games play the long calendar, as every new game since the flip (v0.11.226); the
- *  hand-built states below keep the old calendar where they set the clock by its day (open, options later). */
+/** v0.11.253 (owner pick P23-A, LB): the bot games play the long calendar, as every new game since the flip (v0.11.226). v0.11.259
+ *  (owner pick OC-A, OC4): the hand-built states too (newGame's default; their clock set by story day, `calMinutes`). A check of a rule
+ *  only the old calendar has (its day lengths, its one-a-day menus) builds its state with `cal: OC2_OLD`: it goes with that code (OC2). */
 const BOT_CAL = LONG_CAL;
+const OC2_OLD = 0;
 let viewsPure = 0; // RG-A
 const famLater = { carry: 0, skipped: 0, ended: 0, paid: 0, routine: 0 }; // FX: work cards whose familiarity comes later or not at all
 import { e8Hours, ecHours, jnHours } from '../js/story/meridians.js';
@@ -28,6 +30,8 @@ import { sceneView, choose, goTo, wasPicked, isMenuScene, notePicked, seenBefore
 import { linesOf, pickLine, visitLine, noteVisit, coilStamp, SAID_MAX, noteDay, dayIndex, byDay, textDay, TEXT_DAY_FROM } from '../js/core/lines.js'; // v0.11.134 (LP2: PK); v0.11.135 (NT1): the day record
 import { coilSnap } from '../js/core/game.js'; // v0.11.134 (LP2)
 import { hpRegenPct } from '../js/core/game.js'; // v0.11.143 (RN1, L1)
+import { LONG_SAT_DIV, LONG_MER_MULT, LONG_XP } from '../js/core/game.js'; // v0.11.259 (owner pick OC-A, OC4): the long calendar's pace
+import { NEW_LENGTH } from '../js/core/tasks.js'; // v0.11.259 (OC4): a card's length on the long calendar
 import { replyKey, quietFilter, noteSaid, landReply } from '../js/core/replies.js'; // v0.11.134 (LP2: QR; RQ1)
 /** v0.11.134 (LP2, QR): what main.js does for one action and its screen: filter, then record what was drawn. */
 const quietReplies = (g, reply) => { const out = quietFilter(g, reply); noteSaid(g, out); return out; };
@@ -91,7 +95,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
         assert(z.scene === 'lf_bone_depths', `v0.11.67 (F1): Go deep's first zone opens its scene (${z.scene})`);
     }
     for (const hub of ['rr_hub', 'dw_hub', 'ah_hub']) {
-        const b = ensureBars(newGame(312)); b.scene = hub; b.coil.act = 1; b.minutes = (hub === 'rr_hub' ? 13 : hub === 'dw_hub' ? 15 : 17) * 1440 + 9 * 60; b.james.qi = 30; b.james.satiety = 70; b.flags.ya_joined = true;
+        const b = ensureBars(newGame(312)); b.scene = hub; b.coil.act = 1; b.minutes = calMinutes(b, (hub === 'rr_hub' ? 13 : hub === 'dw_hub' ? 15 : 17) + 1, 9); b.james.qi = 30; b.james.satiety = 70; b.flags.ya_joined = true;
         const pc = taskCards(b, SCENES).filter((c) => c.group === 'Practice' && c.status === 'open');
         assert(pc.length >= 3 && pc.every((c) => c.kind === 'work' && c.id.startsWith('bl_train:')), `v0.11.67 (F1): ${hub}'s Practice group (${pc.map((c) => c.label)})`);
         if (!pc.length) continue;
@@ -101,7 +105,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     // the Fable review (H1, R1): the Practice drills are repeatable work, so drills left never hold "Call it a day" back:
     // with every one-off done, the hub's oneOffLeft is the same with the four drills open or done
     for (const hub of ['rr_hub', 'dw_hub', 'ah_hub']) {
-        const r = ensureBars(newGame(313)); r.scene = hub; r.coil.act = 1; r.minutes = (hub === 'rr_hub' ? 13 : hub === 'dw_hub' ? 15 : 17) * 1440 + 9 * 60; r.flags.ya_joined = true;
+        const r = ensureBars(newGame(313)); r.scene = hub; r.coil.act = 1; r.minutes = calMinutes(r, (hub === 'rr_hub' ? 13 : hub === 'dw_hub' ? 15 : 17) + 1, 9); r.flags.ya_joined = true;
         const scn = SCENES[hub];
         scn.choices.forEach((c, i) => { r.flags[onceKey(hub, i)] = true; });
         for (const m of Object.keys(TASK_HUBS[hub].menus)) SCENES[m].choices.forEach((c, i) => { r.flags[onceKey(m, i)] = true; });
@@ -128,9 +132,11 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     const f = ensureBars(newGame(311)); f.scene = 'fo_ashfall'; f.minutes = calMinutes(f, 9, 9); f.coil = f.coil || {}; f.james.qi = 30; f.james.satiety = 70;
     const fc = taskCards(f, SCENES);
     assert(isTaskHub(f) && ['Palisade', 'Council', 'Militia', 'Clinic'].every((gr) => fc.some((c) => c.group === gr && c.kind === 'work')) && fc.some((c) => c.kind === 'door' && c.group === 'Around Ashfall') && fc.some((c) => c.id === 'fo_ashfall:11'), `v0.11.19: Ashfall (fallout) on Day 9: work, doors, its own sit (${[...new Set(fc.map((c) => c.group))]})`);
-    const pid = fc.find((c) => c.group === 'Palisade').id, fm0 = taskMinutes(f, SCENES, pid), f0 = f.minutes;
+    // OC2: the old calendar's palisade card (its length in one go; the long calendar's week cards: tests/story.test.mjs)
+    { const f = ensureBars(newGame(311, { cal: OC2_OLD })); f.scene = 'fo_ashfall'; f.minutes = calMinutes(f, 9, 9); f.coil = f.coil || {}; f.james.qi = 30; f.james.satiety = 70;
+    const pid = taskCards(f, SCENES).find((c) => c.group === 'Palisade').id, fm0 = taskMinutes(f, SCENES, pid), f0 = f.minutes;
     runTask(f, SCENES, pid);
-    assert(f.scene === 'fo_ashfall' && f.minutes - f0 === fm0 && taskCards(f, SCENES).filter((c) => c.group === 'Palisade').length >= 1 && taskCards(f, SCENES).filter((c) => c.group === 'Palisade').every((c) => c.status === 'open'), 'v0.11.19 (v0.11.156, DM1: no longer done for the day): a palisade card runs as forecast and stays on the screen; the other is still open');
+    assert(f.scene === 'fo_ashfall' && f.minutes - f0 === fm0 && taskCards(f, SCENES).filter((c) => c.group === 'Palisade').length >= 1 && taskCards(f, SCENES).filter((c) => c.group === 'Palisade').every((c) => c.status === 'open'), 'v0.11.19 (v0.11.156, DM1: no longer done for the day): a palisade card runs as forecast and stays on the screen; the other is still open'); }
 }
 // v0.11.156 (owner pick DM1: OF + OS + OA + OM; texts TX1): Act 1's once-a-day menus opened. The Blackroot's Forage repeats the
 // same day (as the Wilds'), Scout's and the Fallout's Palisade, Militia and Clinic cards run more than one a day (each still once a
@@ -139,7 +145,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
 {
     const { DRILL_AGAIN } = await import('../js/story/act1_return.js');
     const { oneOffLeft } = await import('../js/story/oneoff.js');
-    const at = (hub, day, seed) => { const g = ensureBars(newGame(seed)); g.scene = hub; g.coil.act = 1; g.minutes = calMinutes(g, day, 8); g.james.qi = 60; g.james.satiety = 90; g.flags.ya_joined = true; return g; };
+    const at = (hub, day, seed, cal) => { const g = ensureBars(newGame(seed, { cal })); g.scene = hub; g.coil.act = 1; g.minutes = calMinutes(g, day, 8); g.james.qi = 60; g.james.satiety = 90; g.flags.ya_joined = true; return g; };
     const grp = (g, name) => taskCards(g, SCENES).filter((c) => c.group === name);
     for (const [hub, day] of [['rr_hub', 13], ['dw_hub', 15], ['ah_hub', 17]]) {
         const g = at(hub, day, 15601); const f0 = grp(g, 'Forage').filter((c) => c.status === 'open');
@@ -156,7 +162,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
       runTask(g, SCENES, 'rr_scout:1'); const s1 = grp(g, 'Scout');
       assert(!s1.some((c) => c.id === 'rr_scout:1') && s1.find((c) => c.id === 'rr_scout:0')?.status === 'open', `OS: after "You followed me for three nights?" the other scout card is open the same day, the one taken gone for the Coil (${s1.map((c) => `${c.id} ${c.status}`)})`); }
     { for (const [k, name] of ['Palisade', 'Militia', 'Clinic'].entries()) {
-          const g = at('fo_ashfall', 8, 15610 + k);
+          const g = at('fo_ashfall', 8, 15610 + k, OC2_OLD); // OC2: the old calendar's same-day cards (the long one's week cards: tests/story.test.mjs)
           const cs = grp(g, name).filter((c) => c.status === 'open'); assert(cs.length >= 2, `OA: ${name} offers two cards (${cs.map((c) => c.id)})`);
           runTask(g, SCENES, cs[0].id);
           const after = grp(g, name);
@@ -188,7 +194,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
         const [sc, i] = card.split(':'); const c = SCENES[sc].choices[+i];
         c.do(g); const r1 = JSON.stringify(g.rel[who]); c.do(g); (c.failDo || c.do)(g);
         assert(r1 !== r0 && JSON.stringify(g.rel[who]) === r1, `G1: ${card}'s ${who} gain once a day (${r0} → ${r1} → ${JSON.stringify(g.rel[who])})`);
-        g.minutes += 1440; c.do(g); assert(JSON.stringify(g.rel[who]) !== r1, `G1: ${card}'s ${who} gain again the next day`);
+        g.minutes = calMinutes(g, day + 1, 8); c.do(g); assert(JSON.stringify(g.rel[who]) !== r1, `G1: ${card}'s ${who} gain again the next (story) day`); // OC4: the Blackroot's story day is three calendar days
     }
     for (const [hub, day, label] of [['rr_hub', 13, /grub/], ['ah_hub', 17, /beetle/]]) {
         const g = at(hub, day, 15621); g.james.satiety = 40; const c0 = grp(g, 'Forage').find((c) => label.test(c.label));
@@ -198,13 +204,13 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
         g.minutes += 1440; assert(grp(g, 'Forage').find((c) => c.id === c0.id)?.status === 'open', `G1: ${c0.label} open again the next day`);
     }
     { const { onceKey } = await import('../js/story/oneoff.js'); const { markDaily: mark } = await import('../js/story/common.js');
-      const base = () => { const g = at('fo_ashfall', 8, 15622); Object.assign(g.flags, { council_done: true, fo_mother: true, spy: true }); for (const k of ['a1_council', 'a1_mei', 'yk_time', 'wen_time', 'mother_time']) mark(g, k); return g; };
+      const base = (cal) => { const g = at('fo_ashfall', 8, 15622, cal); Object.assign(g.flags, { council_done: true, fo_mother: true, spy: true }); for (const k of ['a1_council', 'a1_mei', 'yk_time', 'wen_time', 'mother_time']) mark(g, k); return g; };
       const allDone = base(); for (const m of ['fo_palisade', 'fo_drill', 'fo_clinic']) SCENES[m].choices.forEach((c, i) => { allDone.flags[onceKey(m, i)] = true; });
       const marked = base(); for (const k of ['a1_palisade', 'a1_drill', 'a1_clinic']) mark(marked, k);
       const unmarked = base();
       assert(oneOffLeft(unmarked, SCENES, 'fo_ashfall') === true, 'CD: with the Fallout\'s once-a-Coil cards open and none taken today, "Call it a day" waits');
       assert(oneOffLeft(allDone, SCENES, 'fo_ashfall') === false && oneOffLeft(marked, SCENES, 'fo_ashfall') === false, `CD: one card from each group today counts as those groups done for the button (${oneOffLeft(marked, SCENES, 'fo_ashfall')} / ${oneOffLeft(allDone, SCENES, 'fo_ashfall')})`);
-      const p = base(); const pid = taskCards(p, SCENES).find((c) => c.group === 'Palisade' && c.status === 'open').id; runTask(p, SCENES, pid);
+      const p = base(OC2_OLD); const pid = taskCards(p, SCENES).find((c) => c.group === 'Palisade' && c.status === 'open').id; runTask(p, SCENES, pid); // OC2: the old calendar's palisade card (the long one's carries on)
       assert(Object.keys(p.flags).some((k) => k.startsWith('a1_palisade@')) && grp(p, 'Palisade').some((c) => c.status === 'open'), 'CD: a palisade card marks the day for the button, and the palisade stays open');
       const r = at('rr_hub', 13, 15623); r.scene = 'rr_hub'; runTask(r, SCENES, 'rr_scout:1');
       assert(r.flags[`rr_scout@${Object.keys(r.flags).find((k) => k.startsWith('rr_scout@'))?.split('@')[1]}`] === true && grp(r, 'Scout').find((c) => c.id === 'rr_scout:0')?.status === 'open', 'CD: the scout card marks the day for the button, and the other card stays open'); }
@@ -236,10 +242,10 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     const { oneOffLeft, onceKey } = await import('../js/story/oneoff.js');
     const { markDaily: mark } = await import('../js/story/common.js');
     const { wakeDay: wd } = await import('../js/core/game.js');
-    const at = (seed) => { const g = ensureBars(newGame(seed, { closed: true })); g.minutes = calMinutes(g, 5, 7); goTo(g, SCENES, 'ashfall'); Object.assign(g.flags, { healed_try: true, elder: true }); g.james.gu = { tier: 3, level: 10, xp: 0 }; g.james.skills['Convergence Use'] = { tier: 3, level: 10, xp: 0 }; g.james.qi = 60; g.james.satiety = 95; g.inventory.jade_bracket = 2; ensureBars(g); g.james.qi = 60; return g; };
+    const at = (seed, cal) => { const g = ensureBars(newGame(seed, { closed: true, cal })); g.minutes = calMinutes(g, 5, 7); goTo(g, SCENES, 'ashfall'); Object.assign(g.flags, { healed_try: true, elder: true }); g.james.gu = { tier: 3, level: 10, xp: 0 }; g.james.skills['Convergence Use'] = { tier: 3, level: 10, xp: 0 }; g.james.qi = 60; g.james.satiety = 95; g.inventory.jade_bracket = 2; ensureBars(g); g.james.qi = 60; return g; };
     const grp = (g, name) => taskCards(g, SCENES).filter((c) => c.group === name);
     for (const [k, [menu, name]] of [['clinic', 'Clinic'], ['workshop', 'Workshop'], ['drill', 'Militia']].entries()) {
-        const g = at(15701 + k);
+        const g = at(15701 + k, OC2_OLD); // OC2: the old calendar's same-day cards (the long one's week cards: tests/story.test.mjs)
         const c0 = grp(g, name).filter((c) => c.status === 'open');
         assert(c0.length >= 2 && c0.every((c) => c.id.startsWith(`${menu}:`)), `PA: ${name} offers its cards on the morning of Day 5 (${c0.map((c) => c.id)})`);
         const first = c0[0].id; const r = runTask(g, SCENES, first);
@@ -265,7 +271,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     // RV1 (Fable's review, L1–L3): a failed try stays open the same day (no once-a-Coil mark; the day marked; a bracket spent), says
     // Fable's lines (FT, no "tonight" / "tomorrow"), and "Call it a day" can show after it while that card is still open
     const { JADE_FAIL, SPEARS_FAIL } = await import('../js/story/ashfall.js');
-    const weak = (seed) => { const w = at(seed); w.james.gu = { tier: 1, level: 1, xp: 0 }; w.james.skills['Convergence Use'] = { tier: 1, level: 1, xp: 0 }; w.james.satiety = 0; w.tasks.fam = {}; ensureBars(w); w.james.qi = 60; return w; };
+    const weak = (seed) => { const w = at(seed, OC2_OLD); /* OC2: the old calendar's failed try in one go (the long one's carries on) */ w.james.gu = { tier: 1, level: 1, xp: 0 }; w.james.skills['Convergence Use'] = { tier: 1, level: 1, xp: 0 }; w.james.satiety = 0; w.tasks.fam = {}; ensureBars(w); w.james.qi = 60; return w; };
     { const w = weak(15712); const ji = SCENES.clinic.choices.findIndex((c) => /jade bracket/.test(c.text)); const b0 = w.inventory.jade_bracket;
       const r = runTask(w, SCENES, `clinic:${ji}`);
       if (r.fail) {
@@ -291,7 +297,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     let same = 0, diff = [];
     for (let i = 0; i < 200; i++) {
         const hub = hubs[i % hubs.length];
-        const g = ensureBars(newGame(400 + i)); g.scene = hub; g.minutes = day0[hub] * 1440 + (7 + (i % 9)) * 60; g.james.qi = 20 + (i % 20); g.james.satiety = 15 + (i * 7) % 80;
+        const g = ensureBars(newGame(400 + i)); g.scene = hub; g.minutes = calMinutes(g, day0[hub] + 1, 7 + (i % 9)); g.james.qi = 20 + (i % 20); g.james.satiety = 15 + (i * 7) % 80;
         Object.assign(g.flags, { long: true, forest_day: 2, vday: 2 });
         for (let k = 0; k < 30; k++) g.log.push({ at: g.minutes, scene: hub, lines: ['filler line to make the log heavy'] });
         const cards = taskCards(g, SCENES).filter((c) => c.status === 'open');
@@ -338,10 +344,10 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
         else { assert(m.length >= 1, `Meditate on ${id}`); medded++; }
     }
     assert(medded === 13 && MED_SCREENS.size === 13 && [...MED_SCREENS].every((id) => SCENES[id]), `v0.11.14: Meditate on the 13 resting places and nowhere else (${medded})`);
-    // a sit off the hubs: an hour (v0.11.2), Saturation +10% at Mortal Vessel on Coil 1, the scene stays
+    // a sit off the hubs: an hour (v0.11.2), Saturation +10% at Mortal Vessel on Coil 1 (÷LONG_SAT_DIV on the long calendar: 2.5%; OC4), the scene stays
     const k = ensureBars(newGame(33)); k.scene = 'rt_camp'; k.james.qi = 30; const k0 = k.minutes;
     const r = runMed(k, SCENES, 'med:sit');
-    assert(k.scene === 'rt_camp' && k.minutes - k0 === 60 && k.james.saturation === 10 && /Condensed/.test(r.lines[0]), `Meditate: a sit keeps the scene (1 h, +10%: ${k.minutes - k0} min, ${k.james.saturation}%)`);
+    assert(k.scene === 'rt_camp' && k.minutes - k0 === 60 && k.james.saturation === 10 / LONG_SAT_DIV && /Condensed/.test(r.lines[0]), `Meditate: a sit keeps the scene (1 h, +10% ÷${LONG_SAT_DIV}: ${k.minutes - k0} min, ${k.james.saturation}%)`);
     // v0.11.13 (E1): no meridian screen from Meditate; at Golden Core (Foundation before v0.11.66, G4) the Extraordinary vessel is a card, run from the scene, which stays
     const e = ensureBars(newGame(34)); e.scene = 'village'; e.james.realm = 4; e.james.qi = 30;
     const before = JSON.stringify(e.inventory);
@@ -351,25 +357,26 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     assert(e.scene === 'village' && !er.moved && e.minutes - e0 === 120 && JSON.stringify(e.inventory) === before && !e.flags.med_back, `the card runs here: 2 h, the scene stays, its enter not run (${e.scene}, ${e.minutes - e0} min)`);
     // v0.11.18 (owner picks B, c2, b): sleep brings the once-a-day things back; Push through the night; Yuki's curve; timed Extraordinary lines
     {
-        const s = ensureBars(newGame(301)); s.scene = 'ashfall'; s.minutes = calMinutes(s, 6, 10); delete s.wake; // an old save: Day 6
+        // OC4: the days-slept counter, the night lock and the sit's time count calendar days on either calendar: these clocks stay by calendar day
+        const s = ensureBars(newGame(301)); s.scene = 'ashfall'; s.minutes = 5 * 1440 + 10 * 60; delete s.wake; // an old save: Day 6
         assert(wakeDay(s) === 6, `an old save's days-slept counter starts at its calendar day (${wakeDay(s)})`);
         markDaily(s, 'clinic'); assert(!daily('clinic')(s), 'the clinic is done today');
         advance(s, 20 * 60); assert(clockParts(s.minutes).day === 7 && !daily('clinic')(s) && wakeDay(s) === 6, 'past midnight and past 04:00 awake: still done (no new day)');
         sleepUntil(s, 6); assert(wakeDay(s) === 7 && daily('clinic')(s), `slept: a new day, the clinic back (${wakeDay(s)})`);
         sleepUntil(s, 6); assert(wakeDay(s) === 8, 'every night slept counts once');
-        const j = ensureBars(newGame(302)); j.minutes = calMinutes(j, 3, 22); wakeDay(j); j.minutes = calMinutes(j, 4, 6); // a scene that sets the clock to morning
+        const j = ensureBars(newGame(302)); j.minutes = 2 * 1440 + 22 * 60; wakeDay(j); j.minutes = 3 * 1440 + 6 * 60; // a scene that sets the clock to morning
         assert(wakeDay(j) === 4, `a scene that moves the clock past a morning counts as sleep (${wakeDay(j)})`);
-        const n0 = ensureBars(newGame(303)); n0.minutes = 1440 + 23 * 60; wakeDay(n0); n0.minutes = calMinutes(n0, 3, 0, 60); sleepUntil(n0, 6);
+        const n0 = ensureBars(newGame(303)); n0.minutes = 1440 + 23 * 60; wakeDay(n0); n0.minutes = 2 * 1440 + 60; sleepUntil(n0, 6);
         assert(wakeDay(n0) === 3, `a night broken after midnight, then slept to 06:00: one new day (${wakeDay(n0)})`);
-        const t5 = ensureBars(newGame(304)); t5.minutes = calMinutes(t5, 6, 22); wakeDay(t5); sleepUntil(t5, 5); assert(wakeDay(t5) === 7, 'sleeping to 05:00 (the tribute) counts');
+        const t5 = ensureBars(newGame(304)); t5.minutes = 5 * 1440 + 22 * 60; wakeDay(t5); sleepUntil(t5, 5); assert(wakeDay(t5) === 7, 'sleeping to 05:00 (the tribute) counts');
         const L = ensureBars(newGame(305)); const l0 = wakeDay(L); advance(L, 90 * 1440); assert(wakeDay(L) === l0 + 90, 'a span of days (a Long Forest season) has its nights in it');
         // v0.11.91 (owner pick B, push 1): Push through the night and Exhaustion are gone: no Push card at any hour, the night
         // locks the day's work, work is never slowed, and an old save's Exhaustion and push marks are dropped when read
-        const p = ensureBars(newGame(306)); p.scene = 'ashfall'; p.minutes = calMinutes(p, 6, 9); wakeDay(p); markDaily(p, 'clinic');
-        for (const hh of [17, 21, 23, 24, 25, 27]) { p.minutes = calMinutes(p, 6, hh); assert(!medCards(p, SCENES).some((c) => c.id === 'med:push' || /Push through/.test(c.label || '')), `v0.11.91: no Push card at ${hh}:00`); }
-        p.minutes = calMinutes(p, 7, 0, 60); assert(nightLock(p) && medCards(p, SCENES).length === 0 && !daily('clinic')(p), 'v0.11.91: at 01:00 the day is over: no Meditate card, the clinic still done');
+        const p = ensureBars(newGame(306)); p.scene = 'ashfall'; p.minutes = 5 * 1440 + 9 * 60; wakeDay(p); markDaily(p, 'clinic');
+        for (const hh of [17, 21, 23, 24, 25, 27]) { p.minutes = 5 * 1440 + hh * 60; assert(!medCards(p, SCENES).some((c) => c.id === 'med:push' || /Push through/.test(c.label || '')), `v0.11.91: no Push card at ${hh}:00`); }
+        p.minutes = 6 * 1440 + 60; assert(nightLock(p) && medCards(p, SCENES).length === 0 && !daily('clinic')(p), 'v0.11.91: at 01:00 the day is over: no Meditate card, the clinic still done');
         let threw = false; try { runMed(p, SCENES, 'med:push'); } catch { threw = true; } assert(threw, 'v0.11.91: med:push is no card any more');
-        const sx = ensureBars(newGame(307)); sx.scene = 'ashfall'; sx.minutes = calMinutes(sx, 6, 10); sx.wake = { n: 6, ex: 2, lastX: 6, slept: 6, push: 5 }; const sm = sitMinutes(sx); const c0 = sx.minutes; sx.james.qi = 30; condense(sx);
+        const sx = ensureBars(newGame(307)); sx.scene = 'ashfall'; sx.minutes = 5 * 1440 + 10 * 60; sx.wake = { n: 6, ex: 2, lastX: 6, slept: 6, push: 5 }; const sm = sitMinutes(sx); const c0 = sx.minutes; sx.james.qi = 30; condense(sx);
         assert(sx.minutes - c0 === sm && !('ex' in sx.wake) && !('push' in sx.wake) && wakeDay(sx) === 6, `v0.11.91: an old save's Exhaustion 2 and push mark are dropped; a sit takes its own time (${sx.minutes - c0} vs ${sm})`);
         const r0 = sx.minutes; advance(sx, 60, { resting: true }); const k0 = sx.minutes; advance(sx, 60); assert(sx.minutes - k0 === 60 && k0 - r0 === 60, 'v0.11.91: work and rest take their own time');
         // Yuki's curve (c2)
@@ -378,7 +385,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
         assert(e8Hours(0) === 4 && e8Hours(7) === 11 && ecHours(0) === 3 && ecHours(27) === 6 && jnHours(0) === 6 && jnHours(9) === 10, 'Extraordinary hours: vessels 4 … 11, collaterals 3 … 6, junctions 6 … 10');
         const x = ensureBars(newGame(310)); x.scene = 'village'; x.james.realm = 4; x.james.qi = 30; // v0.11.66 (G4): from Golden Core
         let sit = 0; while ((x.james.extra8 || 0) < 2 && sit < 20) { x.james.qi = 30; x.james.satiety = 80; runMed(x, SCENES, 'med:mer:e8'); sit++; }
-        assert(x.james.extra8 === 2 && sit >= 3 && sit <= 5 && clockParts(x.minutes).day === 1, `two vessels in one day, no check, by hours (4 h + 5 h; ${sit} sittings)`);
+        assert(x.james.extra8 === 2 && sit >= 8 && sit <= 10 && clockParts(x.minutes).day === 1, `two vessels in one day, no check, by hours (4 h + 5 h, ×${LONG_MER_MULT} on the long calendar, familiarity in; ${sit} sittings; OC4: 3–5 on the old)`);
         x.james.satiety = 10; assert(medCards(x, SCENES).find((c) => c.id === 'med:mer:e8')?.open === false, 'Extraordinary work locks below Fed 20');
     }
     // the hub's own cultivate card is the Meditate sit there (queueable); the old hub doors are hidden in task mode
@@ -394,7 +401,8 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
 
 // v0.9.6: meridians closed at the start (task mode), sessions, the Foundation gate, the seal and its unwinding
 {
-    const open = ensureBars(newGame(40)), g = ensureBars(newGame(40, { closed: true }));
+    // OC2: the old calendar's meridian hours (×1); the long calendar's ×LONG_MER_MULT: tests/story.test.mjs SC2
+    const open = ensureBars(newGame(40)), g = ensureBars(newGame(40, { closed: true, cal: OC2_OLD }));
     assert(open.james.primaries === 12 && open.james.collaterals === 66 && open.yuki.primaries === 12, 'a new game without closed meridians (old saves, older tests): 12 / 66 open');
     assert(g.james.primaries === 0 && g.james.collaterals === 0 && g.yuki.primaries === 0 && g.yuki.collaterals === 0, 'closed new game: 0 / 0, Yuki too');
     assert(jamesQiMax(g) === 25.5 && yukiQiMax(g) === 20.5 && qiRegenPct(g, 0) === 5 && jamesQiMax(open) === 40.5, `closed bars: Qi 25.5, Yuki 20.5, regen 5% (${jamesQiMax(g)}, ${yukiQiMax(g)})`);
@@ -428,7 +436,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     g.james.qi = 20; (g.tasks.use = {}, choose(g, SCENES, wc()));
     assert(g.james.collaterals === 9 && g.yuki.collaterals === 9 && colGroupsOpen(g) === 1 && !g.james.colWork, 'group 1 after 3 h: 9 collaterals, Yuki mirrors');
     // v0.11.15 (B1-b): no Coil bonus on the hours; meridian work speeds up with its own sittings (N 30, up to ×10)
-    const c3 = ensureBars(newGame(46, { closed: true })); c3.coil.n = 3; c3.scene = 'meridians'; c3.james.qi = 20;
+    const c3 = ensureBars(newGame(46, { closed: true, cal: OC2_OLD })); c3.coil.n = 3; /* OC2 */ c3.scene = 'meridians'; c3.james.qi = 20;
     assert(merMinutesOf(c3, 'pri') === 120, `v0.11.15: Coil 3: the first primary still 2 h (${merMinutesOf(c3, 'pri')})`);
     c3.tasks.use = { 'act:mer': 10 }; assert(actSpeed(c3, 'mer') === 4 && merMinutesOf(c3, 'pri') === 30, `v0.11.15: after 10 sittings ×4: 30 min (${merMinutesOf(c3, 'pri')})`);
     c3.tasks.use = { 'act:mer': 30 }; assert(actSpeed(c3, 'mer') === 10 && merMinutesOf(c3, 'pri') === 20, `v0.11.15: after 30 sittings ×10: 20 min (${merMinutesOf(c3, 'pri')})`);
@@ -463,11 +471,12 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     assert(coilMult(g) === 1, 'Coil 1: ×1');
     const xp1 = (h) => { const c = structuredClone(h); const out = awardXp(c, 'Convergence Use', 'standard'); return Number(/\+(\d+) XP/.exec(out[0])[1]); };
     const base = xp1(g);
+    const yb = (h) => { const c = structuredClone(h); c.james.gu.tier = 5; const y0 = c.yuki.fight.xp; awardYukiFightXp(c, 'standard'); return c.yuki.fight.xp - y0; }, yBase = yb(g); // OC4: her Coil 1 award, the long calendar's pace in
     endCoil(g, 'collapse'); rewind(g); endCoil(g, 'beast'); rewind(g); // v0.11.86 (#53): a death adds to the bonus (a bite by choice doesn't)
     assert(g.coil.n === 3 && coilMult(g) === 1.5 && xp1(g) === Math.floor(base * 1.5), `Coil 3: ×1.5 XP (${base} → ${xp1(g)})`);
     // v0.11.118 (YK1, CG): James's GU above her, so she learns; TA (the review's medium 2): the assert on its own line again
     g.james.gu.tier = 5; const y0 = g.yuki.fight.xp; awardYukiFightXp(g, 'standard');
-    assert(g.yuki.fight.xp - y0 === 45 || g.yuki.fight.level > 1, `Yuki's XP ×1.5 too (${g.yuki.fight.xp - y0})`);
+    assert(g.yuki.fight.xp - y0 === Math.floor(yBase * 1.5) && g.yuki.fight.level === 1, `Yuki's XP ×1.5 too (${yBase} → ${g.yuki.fight.xp - y0}; OC4: the long calendar's 12 → 18, the old one's 18 → 27)`);
     // v0.11.41 (D2-a): the meridian DC ÷ the Coil bonus was Story Mode's checked sessions (gone)
     g.james.qi = 40; const s0 = g.james.saturation; const r = condense(g); const one = ensureBars(newGame(93, { closed: true })); one.james.qi = 40; const r1 = condense(one);
     assert(r.ok && Math.abs((g.james.saturation - s0) - r1.gain) < 0.2, `v0.11.15: a sit gives the same Saturation on Coil 3 (${r1.gain} → ${g.james.saturation - s0})`);
@@ -604,7 +613,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     const { readFileSync } = await import('node:fs');
     const setSk = (g, t, l) => { g.james.skills['Convergence Use'] = { tier: t, level: l, xp: 0 }; g.james.gu = { tier: t, level: l, xp: 0 }; };
     const ground = (n) => ({ name: n, hp: 99, dc: 1, atk: 50, dmg: 3 }), hawk = (n) => ({ name: n, hp: 99, dc: 1, atk: 50, dmg: 3, flies: true });
-    const toAct1 = (g) => { g.flags.ending = g.flags.ending || 'victory'; g.minutes = Math.max(g.minutes, 7 * 1440 + 6 * 60); return g; }; // AG1: the air is Act 1's
+    const toAct1 = (g) => { g.flags.ending = g.flags.ending || 'victory'; g.minutes = Math.max(g.minutes, calMinutes(g, 8, 6)); return g; }; // AG1: the air is Act 1's
     const mk = (realm, enemies, extra = {}, act1 = true) => { const g = ensureBars(newGame(95, { closed: true })); if (act1) toAct1(g); setSk(g, 1, 6); g.james.realm = realm; g.james.qi = 40; g.james.hp = jamesHpMax(g);
         sCombat(g, { id: 'jackals', intro: '', band: 'standard', enemies, win: 'stream', lose: 'stream', ...extra }); g.combat.fieldUsed = true; return g; };
     assert([...AIR_STRIKE_ACTIONS].join() === 'dart,blast', 'FF1: darts and the Qi blast only');
@@ -656,7 +665,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     const { AIR_STALL_WARN, AIR_STALL_END, AIR_STALL_TEXT, foeFillAll, TELL_TEXT, combatFlee } = await import('../js/core/game.js');
     const { FAQ } = await import('../js/core/faq.js');
     const { readFileSync } = await import('node:fs');
-    const toAct1 = (g) => { g.flags.ending = g.flags.ending || 'victory'; g.minutes = Math.max(g.minutes, 7 * 1440 + 6 * 60); return g; };
+    const toAct1 = (g) => { g.flags.ending = g.flags.ending || 'victory'; g.minutes = Math.max(g.minutes, calMinutes(g, 8, 6)); return g; };
     const mk = (enemies, realm = 1, extra = {}) => { const g = ensureBars(newGame(96, { closed: true })); toAct1(g);
         g.james.skills['Convergence Use'] = { tier: 1, level: 6, xp: 0 }; g.james.gu = { tier: 1, level: 6, xp: 0 }; g.james.realm = realm; g.james.qi = 200; g.james.hp = jamesHpMax(g);
         sCombat(g, { id: 'jackals', intro: '', band: 'standard', enemies, win: 'stream', lose: 'stream', ...extra }); g.combat.fieldUsed = true; if (!extra.yuki) g.yuki.hp = 0; return g; };
@@ -722,7 +731,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     const { FOE_TRAITS, foeTraits, traitLines, TELL_TEXT, bigBlowDue, moodOf, NO_TELL, HEAVY_DMG, BIG_BLOW, bigBlowNow, lungeNow, combatHooks } = await import('../js/core/game.js');
     const { readFileSync } = await import('node:fs');
     const setSk = (g, t, l) => { g.james.skills['Convergence Use'] = { tier: t, level: l, xp: 0 }; g.james.gu = { tier: t, level: l, xp: 0 }; };
-    const toAct1 = (g) => { g.flags.ending = g.flags.ending || 'victory'; g.minutes = Math.max(g.minutes, 7 * 1440 + 6 * 60); return g; };
+    const toAct1 = (g) => { g.flags.ending = g.flags.ending || 'victory'; g.minutes = Math.max(g.minutes, calMinutes(g, 8, 6)); return g; };
     const mk = (enemies, { act1 = true, id = 'test_da1', extra = {}, realm = 0, yuki = true } = {}) => { const g = ensureBars(newGame(96, { closed: true })); if (act1) toAct1(g); setSk(g, 1, 9); g.james.realm = realm; g.james.qi = 40; g.james.hp = jamesHpMax(g); if (!yuki) g.yuki.hp = 0;
         sCombat(g, { id, intro: 'In.', band: 'standard', enemies, win: 'stream', lose: 'stream', ...extra }); g.combat.fieldUsed = true; return g; };
     const brute = (n = 'Brute', x = {}) => ({ name: n, hp: 999, dc: 1, atk: 60, dmg: HEAVY_DMG, ...x });
@@ -818,7 +827,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
 {
     const G = await import('../js/core/game.js');
     const { SAY_TEXT, SPAR_TEXT, postureDue, postureNow, combatYield, unarmedMastery, NO_POSTURE, SAY_ROUNDS, UNARMED_EVERY, UNARMED_STEP, UNARMED_MAX, FOE_TRAITS, traitLines } = G;
-    const toAct1 = (g) => { g.flags.ending = g.flags.ending || 'victory'; g.minutes = Math.max(g.minutes, 7 * 1440 + 6 * 60); return g; };
+    const toAct1 = (g) => { g.flags.ending = g.flags.ending || 'victory'; g.minutes = Math.max(g.minutes, calMinutes(g, 8, 6)); return g; };
     const mk = (id, enemies, { act1 = false, style = null } = {}) => { const g = ensureBars(newGame(114, { closed: true })); if (act1) toAct1(g); g.james.qi = 40; g.james.hp = jamesHpMax(g); g.yuki.hp = 0;
         sCombat(g, { id, intro: 'In.', band: 'standard', enemies, win: 'stream', lose: 'stream', ...(style ? { style } : {}) }); return g; };
     const man = (n = 'Gao', x = {}) => ({ name: n, hp: 999, dc: 60, atk: 60, dmg: 2, ...x });
@@ -877,7 +886,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
 {
     const G = await import('../js/core/game.js');
     const { SAY_TEXT, SPAR_TEXT, combatYield, unarmedMastery, UNARMED_MAX, airStrike, startActCoil: sac } = G;
-    const toAct1 = (g) => { g.flags.ending = g.flags.ending || 'victory'; g.minutes = Math.max(g.minutes, 7 * 1440 + 6 * 60); return g; };
+    const toAct1 = (g) => { g.flags.ending = g.flags.ending || 'victory'; g.minutes = Math.max(g.minutes, calMinutes(g, 8, 6)); return g; };
     const mk = (id, enemies, { act1 = false, style = null, realm = 0, gu = null } = {}) => { const g = ensureBars(newGame(116, { closed: true })); if (act1) toAct1(g); if (gu) { g.james.gu = { tier: gu[0], level: gu[1], xp: 0 }; g.james.skills['Convergence Use'] = { tier: gu[0], level: gu[1], xp: 0 }; } g.james.realm = realm; ensureBars(g); g.james.qi = 40; g.james.hp = jamesHpMax(g); g.yuki.hp = 0;
         sCombat(g, { id, intro: 'In.', band: 'standard', enemies, win: 'stream', lose: 'stream', ...(style ? { style } : {}) }); return g; };
     const man = (n = 'Gao', x = {}) => ({ name: n, hp: 999, dc: 0.1, atk: 60, dmg: 2, ...x });
@@ -1009,7 +1018,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
       endCoil(g, 'choice', 'stream'); rewind(g); sCombat(g, { id: 'test_wolf', intro: 'In.', band: 'standard', enemies: [wolf()], win: 'stream', lose: 'stream' });
       assert(g.combat.mem === 0.5 && g.combat.log.includes(memoryLine(1, 0.5)), 'MB1, T: next Coil it is remembered'); }
     // v0.11.251 (P21-E, FM): the tribute through startCombat: counted, +4.5 after three meetings, its line; its own learning on top (to +2 more)
-    { const g = mk('collectors', [wolf({ name: 'Lu Han', dc: 99 })], { stats: { foes: { collectors: 3 } } }); assert(g.combat.mem === 4.5 && g.combat.log.includes(memoryLine(3, 4.5)) && g.stats.foes.collectors === 4, 'P21-E (FM): the tribute shows its memory');
+    { const g = mk('collectors', [wolf({ name: 'Lu Han', dc: 99 })], { stats: { foes: { collectors: 3 } } }); assert(g.combat.mem === 4.5 && g.combat.memDef > 0 && g.combat.log.includes(memoryLine(3, 4.5, g.combat.memDef)) && g.stats.foes.collectors === 4, 'P21-E (FM; OC4: with its defence, FD, on the long calendar): the tribute shows its memory');
       for (let i = 0; i < 8; i++) cStep(g, 'blade'); assert(g.combat.adapt.blade === 2 && fightAdapt(g.combat, 'blade') === 6.5, `P21-E (FM): the tribute's own learning to +2 on top of its memory (${fightAdapt(g.combat, 'blade')})`); }
     // not counted: Say something, the spike field, a Qi-short round; a closed move in a spar counts as the blade, in a brawl not at all
     { const p = mk('gao', [wolf({ name: 'Gao' })]); cStep(p, 'remark'); assert(!W(p), 'MB1, T: Say something is not an attack');
@@ -1111,7 +1120,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
 {
     const G = await import('../js/core/game.js');
     const { waitLeft, songPays, sungKey, SONG_TEXT, SONG_COST, AIR_TEXT, SAY_TEXT, SPAR_TEXT, TELL_TEXT, WEAPON_EVERY } = G;
-    const mk = (enemies, { cu = [3, 1], gu = [3, 1], qi = 99, field = true, id = 'test_wb1', act1 = false, realm = 0, ...extra } = {}) => { const g = ensureBars(newGame(128, { closed: true })); if (act1) { g.flags.ending = 'victory'; g.minutes = Math.max(g.minutes, 7 * 1440 + 6 * 60); }
+    const mk = (enemies, { cu = [3, 1], gu = [3, 1], qi = 99, field = true, id = 'test_wb1', act1 = false, realm = 0, ...extra } = {}) => { const g = ensureBars(newGame(128, { closed: true })); if (act1) { g.flags.ending = 'victory'; g.minutes = Math.max(g.minutes, calMinutes(g, 8, 6)); }
         g.james.gu = { tier: gu[0], level: gu[1], xp: 0 }; g.james.skills['Convergence Use'] = { tier: cu[0], level: cu[1], xp: 0 }; g.james.realm = realm; ensureBars(g); g.james.qi = qi; g.james.hp = jamesHpMax(g); g.yuki.hp = 0;
         sCombat(g, { id, intro: 'In.', band: 'standard', enemies, win: 'stream', lose: 'stream', ...extra }); g.combat.fieldUsed = field; return g; };
     const post = (x = {}) => ({ name: 'Post', hp: 999, dc: 0.1, atk: 0.1, dmg: 0, ...x });
@@ -1172,7 +1181,8 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     const G = await import('../js/core/game.js');
     const { yukiHeld, yukiFightSkill, yukiHeldNote, YUKI_HELD_TEXT, d8, d6, skillCheck } = G;
     const { yukiHaul, YUKI_D8, YUKI_LANE_TEXT } = await import('../js/core/tasks.js');
-    const mk = (yt, yl, gt, gl, seed = 1180) => { const g = ensureBars(newGame(seed, { closed: true })); g.yuki.fight = { tier: yt, level: yl, xp: 0 }; g.james.gu = { tier: gt, level: gl, xp: 0 }; return g; };
+    // OC2: the award's numbers at the old calendar's pace (×1); the long calendar's ×LONG_XP on her award: tests/story.test.mjs SC2
+    const mk = (yt, yl, gt, gl, seed = 1180) => { const g = ensureBars(newGame(seed, { closed: true, cal: OC2_OLD })); g.yuki.fight = { tier: yt, level: yl, xp: 0 }; g.james.gu = { tier: gt, level: gl, xp: 0 }; return g; };
     const rk = (n) => 10 * (n.tier - 1) + n.level;
     const HELD22 = YUKI_HELD_TEXT.held.replace('{t}', 2).replace('{l}', 2);
     // CG: level with him, nothing; under him, the usual award; an award that would carry her past him stops at his rank
@@ -1528,7 +1538,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
 {
     const g = ensureBars(newGame(50)); g.scene = 'epilogue'; g.flags.ending = 'bluff'; g.minutes = calMinutes(g, 7, 15); g.coil.n = 3;
     choose(g, SCENES, 0);
-    assert(g.scene === 'fo_start' && g.coil.act === 1 && g.coil.n === 3 && g.coil.snap.scene === 'fo_start' && g.coil.snap.minutes === 7 * 1440 + 360 && g.stats.coils0 === 3, 'Act 1 begins: its rewind point at Day 8 dawn, the same Coil (3) goes on (v0.11.26)');
+    assert(g.scene === 'fo_start' && g.coil.act === 1 && g.coil.n === 3 && g.coil.snap.scene === 'fo_start' && g.coil.snap.minutes === calMinutes(g, 8, 6) && g.stats.coils0 === 3, 'Act 1 begins: its rewind point at Day 8 dawn, the same Coil (3) goes on (v0.11.26)');
     assert(coilActive(g), 'the Coil turns in Act 1');
     const inv0 = JSON.stringify(g.coil.snap.inventory);
     g.inventory.beast_core = 7; g.flags.log_heard = true; g.minutes += 12 * 1440; g.rel['Mei Lin'] = { f: 80, a: 80 };
@@ -1544,7 +1554,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     choose(g, SCENES, v.choices.find((c) => /start of Act 1/.test(c.label)).index);
     assert(g.scene === 'coil_dawn' && /Ashfall/.test(sceneView(g, SCENES).text), 'the start of Act 1 again');
     choose(g, SCENES, 0);
-    assert(g.scene === 'fo_start' && g.coil.act === 1 && g.coil.n === 4 && g.minutes === 7 * 1440 + 360 && JSON.stringify(g.inventory) === inv0 && !g.flags.log_heard && !g.flags.a1_outcome, 'rewound to the start of Act 1: Coil 4 (one count), the world as it was');
+    assert(g.scene === 'fo_start' && g.coil.act === 1 && g.coil.n === 4 && g.minutes === calMinutes(g, 8, 6) && JSON.stringify(g.inventory) === inv0 && !g.flags.log_heard && !g.flags.a1_outcome, 'rewound to the start of Act 1: Coil 4 (one count), the world as it was');
     assert(g.rel['Mei Lin'].a >= 20, `25% head start in Act 1 (${g.rel['Mei Lin'].a})`);
     const a = ensureBars(newGame(51)); a.scene = 'epilogue'; a.flags.ending = 'lost'; a.minutes = calMinutes(a, 7, 15); choose(a, SCENES, 0);
     goTo(a, SCENES, 'rt_taken'); choose(a, SCENES, sceneView(a, SCENES).choices.find((c) => /Bite/.test(c.label)).index);
@@ -1567,7 +1577,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
         assert(e.scene === 'coil_dawn' && e.coil.n === 3 && e.coil.free === (won ? undefined : 1) && coilMult(e) === (won ? 1.5 : 1.25) && !e.flags.a1_outcome && !e.inventory.beast_core, `${outcome} → ${target}: Coil 3 (one count), ×${won ? '1.5 (RA1: a won act adds)' : '1.25 (G1: by choice, no bonus from it)'}, the outcome and the hammerspace gone (×${coilMult(e)}, free ${e.coil.free})`);
         assert(e.tasks.fam['rr_hub:1'] === 7 && e.flags.lore_tree && e.coil.known.includes('ship_found') && e.rel['Mei Lin'].a >= 20, `${outcome} → ${target}: familiarity, knowledge and the head start kept`);
         choose(e, SCENES, 0);
-        if (target === 'act') assert(e.scene === 'fo_start' && e.coil.act === 1 && e.minutes === 7 * 1440 + 360 && e.flags.ending === 'paid', `${outcome} → the start of Act 1 (the prologue's outcome kept)`);
+        if (target === 'act') assert(e.scene === 'fo_start' && e.coil.act === 1 && e.minutes === calMinutes(e, 8, 6) && e.flags.ending === 'paid', `${outcome} → the start of Act 1 (the prologue's outcome kept)`);
         else {
             assert(e.scene === 'arrival' && e.coil.act === 0 && e.minutes === newGame(1).minutes && !e.flags.ending && e.james.primaries === 0 && e.james.realm === 0, `${outcome} → the start of the whole game: Day 1, the arrival, channels shut, no tribute outcome`);
             assert(e.coil.snap.scene === 'arrival' && !e.coil.snap.flags.lore_tree && e.coil.snap.tasks.fam['rr_hub:1'] === undefined, 'the whole game\'s rewind point is a clean arrival');
@@ -1700,13 +1710,14 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
       endCoil(u, 'choice', 'arrival'); rewind(u); assert(u.tasks.use['act:sit'] === 30 && u.coil.n === 2, 'v0.11.15: uses are kept over a rewind');
     }
     const g = ensureBars(newGame(95, { closed: true })); g.james.qi = 40;
-    assert(sitGain(g) === 10 && sitGain(g, 2) === 20, 'Mortal Vessel, Coil 1: +10% a sit, the hollow +20%');
-    g.james.realm = 1; ensureBars(g); assert(sitGain(g) === 6.7, `v0.11.66 (S1): Foundation: +6.7% a sit (${sitGain(g)})`);
-    g.coil.n = 3; assert(sitGain(g) === 6.7, 'v0.11.15: Foundation on Coil 3: still +6.7% (no Coil bonus)');
+    // OC4: the long calendar's sit, ÷LONG_SAT_DIV (the old +10% / +20% / +6.7%: tests/story.test.mjs SC2)
+    assert(sitGain(g) === 2.5 && sitGain(g, 2) === 5, 'Mortal Vessel, Coil 1: +2.5% a sit, the hollow +5% (÷4)');
+    g.james.realm = 1; ensureBars(g); assert(sitGain(g) === 1.7, `v0.11.66 (S1): Foundation: +1.7% a sit (6.7 ÷ 4; ${sitGain(g)})`);
+    g.coil.n = 3; assert(sitGain(g) === 1.7, 'v0.11.15: Foundation on Coil 3: still +1.7% (no Coil bonus)');
     const big = ensureBars(newGame(96)); big.james.qi = 40; const sm = sitGain(big); big.james.primaries = 12; big.james.realm = 0;
-    assert(sm === 10, 'the gain does not depend on Qi Max');
+    assert(sm === 2.5, 'the gain does not depend on Qi Max');
     const t = ensureBars(newGame(97, { closed: true })); t.james.qi = 20; const t0 = t.minutes; const r = condense(t);
-    assert(r.ok && t.minutes - t0 === 60 && t.james.saturation === 10 && 20 - t.james.qi <= 10 && 20 - t.james.qi > 5, 'a sit: 1 h, 10 Qi (some back from regen), +10%');
+    assert(r.ok && t.minutes - t0 === 60 && t.james.saturation === 2.5 && 20 - t.james.qi <= 10 && 20 - t.james.qi > 5, 'a sit: 1 h, 10 Qi (some back from regen), +2.5% (÷4, the long calendar)');
     // the breakthrough: 2 h × (realm + 1) ÷ the bonus
     const b = ensureBars(newGame(98)); b.james.saturation = 96;
     assert(btMinutes(b) === 120, 'to Foundation: 2 h'); b.james.realm = 4; assert(btMinutes(b) === 600, 'realm 4 → 5: 10 h'); b.coil.n = 3; assert(btMinutes(b) === 600, 'v0.11.15: Coil 3: still 10 h'); b.tasks.use = { 'act:bt': 3 }; assert(btMinutes(b) === 109, `v0.11.15: after 3 breakthroughs ×5.5: 109 min (${btMinutes(b)})`); b.tasks.use = { 'act:bt': 6 }; assert(btMinutes(b) === 60, 'v0.11.15: after 6 breakthroughs ×10: 1 h'); b.tasks.use = {};
@@ -2044,7 +2055,7 @@ for (let k = 0; k < SHEN_WALKS; k++) {
     if (!act1) { assert(false, `K1 (v0.11.92): the bite at Shen Qiu leads to the Coil's end with the start of Act 1 (walk ${k}: ${g.scene}, ${g.coil.why})`); continue; }
     choose(g, SCENES, act1.index);
     for (let i = 0; i < 4 && g.scene === 'coil_dawn'; i++) { const c = sceneView(g, SCENES).choices.find((x) => !x.disabled); if (!c) break; choose(g, SCENES, c.index); }
-    const ok = g.coil.act === 1 && coilActive(g) && clockParts(g.minutes).day === 8;
+    const ok = g.coil.act === 1 && coilActive(g) && clockParts(g.minutes).day === calMinutes(g, 8) / 1440 + 1; // OC4: story day 8, Day 44 on the long calendar
     assert(ok, `K1 (v0.11.92): the rewind at Shen Qiu wakes at the start of Act 1 (walk ${k}: act ${g.coil.act}, ${g.scene}, Day ${clockParts(g.minutes).day})`);
     if (ok) shenWalk++;
 }
@@ -2424,7 +2435,8 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
 // v0.11.85 (owner pick D + T1): every XP award ×0.6 after the Coil bonus; the targets 4 / 6
 {
     assert(XP_RATE === 0.6, 'D: the XP rate is 0.6');
-    const fresh = (n, set) => { const g = ensureBars(newGame(8501 + n, { closed: true })); if (set) set(g); return g; };
+    // OC2: the rate's steps at the old calendar's pace (×1); the long calendar's ×LONG_XP after them: tests/story.test.mjs SC2, tests/rules.test.mjs
+    const fresh = (n, set) => { const g = ensureBars(newGame(8501 + n, { closed: true, cal: OC2_OLD })); if (set) set(g); return g; };
     // a standard check on Coil 1, T1: pool 30 × 0.6 = 18, split 9 / 9; Yuki's bond share 9
     { const g = fresh(0); const cu = g.james.skills['Convergence Use'].xp, gu = g.james.gu.xp, y = g.yuki.qiUse.xp; awardXp(g, 'Convergence Use', 'standard');
       assert(g.james.skills['Convergence Use'].xp - cu === 9 && g.james.gu.xp - gu === 9 && g.yuki.qiUse.xp - y === 9, 'D: a standard award on Coil 1 pays 18 (30 × 0.6), split 9 / 9, Yuki 9'); }
@@ -2501,13 +2513,13 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     // the bed rule (owner 09:16): no bed before 21:00 anywhere; an earlier bed spends the evening resting until 21:00, then sleeps
     assert(BED_FROM_HOUR === 21, 'v0.11.91: beds from 21:00');
     { // S1: the Long Forest's seclusion is not a bed: it sleeps from where it is, as before (Fed at the sleeping rate only)
-        const sc = ensureBars(newGame(9191)); sc.minutes = calMinutes(sc, 3, 6); sc.james.satiety = 60; sleepUntil(sc, 6, { bed: false });
+        const sc = ensureBars(newGame(9191)); sc.minutes = 2 * 1440 + 6 * 60; /* OC4: by calendar day (a sleep's clock) */ sc.james.satiety = 60; sleepUntil(sc, 6, { bed: false });
         assert(sc.minutes === 3 * 1440 + 6 * 60 && Math.abs(sc.james.satiety - (60 - (SPH * 24) / 2)) < 0.01, `S1: a rest that isn't a bed (06:00 to 06:00) drains Fed at the sleeping rate only (${sc.james.satiety})`);
         const src = String(SCENES.lf_seclusion.enter);
         assert(/sleepUntil\(g, 6, \{ bed: false \}\)/.test(src), 'S1: the seclusion uses the no-bed sleep');
     }
     for (const [bed, wait] of [[17 * 60, 4 * 60], [20 * 60 + 30, 30], [21 * 60, 0], [23 * 60, 0]]) {
-        const b = ensureBars(newGame(9190)); b.minutes = calMinutes(b, 3, 0, bed); b.james.satiety = 100; const w0 = wakeDay(b); sleepUntil(b, 6);
+        const b = ensureBars(newGame(9190)); b.minutes = 2 * 1440 + bed; /* OC4: by calendar day */ b.james.satiety = 100; const w0 = wakeDay(b); sleepUntil(b, 6);
         const want = 100 - (SPH * wait) / 60 - (SPH * (3 * 1440 + 6 * 60 - (2 * 1440 + bed + wait))) / 60 / 2;
         assert(b.minutes === 3 * 1440 + 6 * 60 && Math.abs(b.james.satiety - want) < 0.01 && b.james.hp === jamesHpMax(b) && wakeDay(b) === w0 + 1, `v0.11.91: a bed at ${bed / 60}h: the evening to 21:00 awake (${wait} min), then asleep to 06:00 (Fed ${b.james.satiety} vs ${want})`);
     }
@@ -2516,7 +2528,7 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
         ['night_attack', null, null, 3], ['bl_night_event', 'bl_ev', 'wolves', 12], ['bl_night_event', 'bl_ev', 'hawks', 14],
     ];
     for (const [sc, flag, kind, d] of cases) for (const bed of [15 * 60, 19 * 60, 21 * 60 + 30, 23 * 60 + 59, 24 * 60]) {
-        const g = ensureBars(newGame(9100 + d)); g.minutes = calMinutes(g, d, 0, bed); g.scene = sc; g.flags.bl_region = 'rr'; g.flags.bl_day = 2;
+        const g = ensureBars(newGame(9100 + d, { cal: OC2_OLD })); g.minutes = calMinutes(g, d, 0, bed); g.scene = sc; /* OC2: the old calendar's night every night (the long one's story night: tests/story.test.mjs TS1) */ g.flags.bl_region = 'rr'; g.flags.bl_day = 2;
         SCENES[sc].enter?.(g); if (flag) g.flags[flag] = kind;
         const night0 = (d - 1) * 1440 + 24 * 60, t0 = g.minutes - night0;
         assert(t0 >= 60 && t0 <= 80, `v0.11.91: ${sc}${kind ? ` (${kind})` : ''} after a bed at ${bed / 60}h starts at ${Math.floor(t0 / 60)}:${String(t0 % 60).padStart(2, '0')}`);
@@ -2815,7 +2827,7 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     const { NO_DICE_ROUND_CAP } = await import('../js/core/game.js');
     const cases = [['village_night', { vday: 2 }, 6, 'arson'], ['village_night', { vday: 2, gao_broken: true }, 6, null], ['village_night', { vday: 2, gao_spared: true }, 6, null], ['fo_wolf', {}, 8, 'palisade_wolf']];
     for (const [sc, fl, d, fight] of cases) for (const bed of [15 * 60, 19 * 60, 21 * 60 + 30, 23 * 60 + 59, 24 * 60]) {
-        const g = ensureBars(newGame(9400 + d)); g.minutes = calMinutes(g, d, 0, bed); g.scene = sc; Object.assign(g.flags, fl);
+        const g = ensureBars(newGame(9400 + d, { cal: OC2_OLD })); g.minutes = calMinutes(g, d, 0, bed); /* OC2: the old calendar's story night every night (the long one's seventh night: tests/story.test.mjs) */ g.scene = sc; Object.assign(g.flags, fl);
         SCENES[sc].enter?.(g);
         const night0 = (d - 1) * 1440 + 24 * 60, t0 = g.minutes - night0, what = `${sc}${fight ? ` (${fight})` : Object.keys(fl).slice(1).join('') ? ` (${Object.keys(fl).slice(1).join('')})` : ''}`;
         assert(t0 === 60, `T-b1: ${what} after a bed at ${bed / 60}h starts at 01:00 (${t0} min after midnight)`);
@@ -2828,15 +2840,15 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
         assert(o?.done && g.minutes < night0 + 120, `T-b1: ${what} is over before 02:00 even at the round cap (${g.minutes - night0} min after midnight)`);
     }
     for (const fl of [{ vday: 1 }, { vday: 2, night5_done: true }, { vday: 3 }]) { // a quiet night: the clock stays where the bed is
-        const q = ensureBars(newGame(9406)); q.minutes = calMinutes(q, 6, 21, 30); Object.assign(q.flags, fl); const m0 = q.minutes;
+        const q = ensureBars(newGame(9406, { cal: OC2_OLD })); q.minutes = calMinutes(q, 6, 21, 30); /* OC2 */ Object.assign(q.flags, fl); const m0 = q.minutes;
         SCENES.village_night.enter(q); assert(q.minutes === m0, `T-b1: a quiet Ashfall night (${JSON.stringify(fl)}) keeps the clock`);
     }
-    { const late = ensureBars(newGame(9407)); late.minutes = calMinutes(late, 7, 0, 150); late.flags.vday = 2; SCENES.village_night.enter(late); assert(late.minutes === 6 * 1440 + 150, 'T-b1: entered after 01:00, the clock never goes back'); }
+    { const late = ensureBars(newGame(9407, { cal: OC2_OLD })); late.minutes = calMinutes(late, 7, 0, 150); /* OC2 */ late.flags.vday = 2; SCENES.village_night.enter(late); assert(late.minutes === 6 * 1440 + 150, 'T-b1: entered after 01:00, the clock never goes back'); }
     // the review (Fable, low 2): end to end through the choices, from supper to the morning: the night at 01:xx, the fight,
     // dawn at 06:00 the next day with the night marked short (half back), the village day moved on
     const { goTo: go2 } = await import('../js/core/story.js');
     for (const [from, idx, d, fl, fightTo, morn] of [['supper', 2, 6, { vday: 2 }, 'arson_won', 'village_morning'], ['fo_night', 0, 8, {}, 'fo_wolf_won', 'fo_morning']]) {
-        const g = ensureBars(newGame(9410 + d)); Object.assign(g.flags, fl); g.minutes = calMinutes(g, d, 20); go2(g, SCENES, from);
+        const g = ensureBars(newGame(9410 + d, { cal: OC2_OLD })); Object.assign(g.flags, fl); g.minutes = calMinutes(g, d, 20); go2(g, SCENES, from); /* OC2: the old calendar's story night every night */
         choose(g, SCENES, idx);
         const night0 = (d - 1) * 1440 + 24 * 60, at = g.minutes - night0;
         assert(at >= 60 && at < 120, `T-b1 (end to end): ${from} → ${g.scene} at ${at} min after midnight`);
@@ -2864,7 +2876,7 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     const half = (v, m) => Math.min(m, Math.ceil(v + (m - v) * NIGHT_FIGHT_HEAL));
     assert(NIGHT_FIGHT_HEAL === 0.5, 'v0.11.92: half the missing bars back after a night fight');
     { // the rule itself, and a full night without the mark (an old save has none)
-        const g = ensureBars(newGame(9201)); g.minutes = calMinutes(g, 3, 0, 90); g.flags.night_fight = true;
+        const g = ensureBars(newGame(9201)); g.minutes = 2 * 1440 + 90; /* OC4: by calendar day (a night's rest) */ g.flags.night_fight = true;
         const hm = jamesHpMax(g), qm = jamesQiMax(g), ym = yukiHpMax(g), yqm = yukiQiMax(g);
         g.james.hp = 3; g.james.qi = 1; g.yuki.hp = 2; g.yuki.qi = 0;
         const line = nightRest(g);
@@ -3106,7 +3118,7 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     assert(!/^You're hungry/.test(nextStep(hub(7202, 'wilds', 2, (x) => { x.james.satiety = 20; }), SCENES)), 'N1: 1 needs food in the hammerspace (R1: the review\'s L5)');
     { const x = hub(7203, 'wilds', 2, (x) => { x.james.saturation = 96; x.james.primaries = 12; }); assert(canBreakThrough(x) && /breakthrough point/.test(nextStep(x, SCENES)), `N1: 2 the breakthrough point (${nextStep(x, SCENES)})`); }
     assert(/^Tap a card/.test(nextStep(hub(7204, 'stream', 1), SCENES)), 'N1: 3 Coil 1, Day 1');
-    { const x = hub(7205, 'wilds', 2); setYuki(x, false); assert(/^Yuki can hunt/.test(nextStep(x, SCENES)), `N1: 4 Yuki's job off (${nextStep(x, SCENES)})`); setYuki(x, true); assert(nextStep(x, SCENES) === 'Day 2 of 7: the Sect\'s tribute comes on Day 7.', `N1: 7 otherwise the day (${nextStep(x, SCENES)})`); }
+    { const x = hub(7205, 'wilds', 2); setYuki(x, false); assert(/^Yuki can hunt/.test(nextStep(x, SCENES)), `N1: 4 Yuki's job off (${nextStep(x, SCENES)})`); setYuki(x, true); assert(nextStep(x, SCENES) === 'Day 8: the Sect\'s tribute comes three weeks after you reach the village (Day 43 at the latest).', `N1: 7 otherwise the day (OC4: the long calendar's line; ${nextStep(x, SCENES)})`); }
     { const x = hub(7206, 'stream', 1); x.coil.n = 3; assert(/^A new Coil: .* you learn ×1\.5 as fast\.$/.test(nextStep(x, SCENES)), `N1: 5 a new Coil's first day, its number (${nextStep(x, SCENES)})`); }
     { const x = hub(7207, 'wilds', 2, (x) => { x.james.qi = jamesQiMax(x); }); setYuki(x, true); assert(/^Qi is nearly full/.test(nextStep(x, SCENES)), `N1: 6 Qi nearly full (${nextStep(x, SCENES)})`); }
     // the review's M1 (R1): the short route (no `long`) has the tribute at the next dawn: no "Day N of 7"
@@ -3192,7 +3204,7 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
 // option once a waking day, a try counted whatever its outcome (as the Wilds'); the Hunt card open while either option is left
 {
     const { onceADay } = await import('../js/story/act1_blackroot.js');
-    const at = (hub, day, seed) => { const g = ensureBars(newGame(seed)); g.scene = hub; g.coil.act = 1; g.minutes = calMinutes(g, day, 8); g.james.qi = 60; g.james.satiety = 90; g.flags.ya_joined = true; return g; };
+    const at = (hub, day, seed, cal) => { const g = ensureBars(newGame(seed, { cal })); g.scene = hub; g.coil.act = 1; g.minutes = calMinutes(g, day, 8); g.james.qi = 60; g.james.satiety = 90; g.flags.ya_joined = true; return g; };
     const FORAGE = { rr_forage: ['rr_bracket', 'rr_sorrel', null], dw_forage: ['dw_gill', 'dw_chestnut', 'dw_frog'], ah_forage: ['ah_truffle', 'ah_cinder', null] };
     const HUNTS = { rr_hunt: ['rr_elk', 'rr_snare', 'rr_hub', 13], dw_hunt: ['dw_serpent', 'dw_fowl', 'dw_hub', 15], ah_hunt: ['ah_hawks', 'ah_hares', 'ah_hub', 17] };
     // every forage card but the grub and the beetle (already once a day), and both options of every hunt, carry their own day key
@@ -3302,7 +3314,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     const hubs = ['camp', 'stream', 'wilds', 'village', 'ashfall', 'fo_ashfall', 'rr_hub', 'dw_hub', 'ah_hub', 'heart_hub', 'rt_camp', 'rt_ashfall'];
     const seen = new Set(), bad = [];
     for (const [i, hub] of hubs.entries()) for (const f of [0, 1.5, 3, 7.9, 9, 20]) {
-        const g = ensureBars(newGame(9100 + i)); g.scene = hub; g.minutes += 8 * 1440 + 9 * 60; g.james.qi = 30; g.james.satiety = 70; Object.assign(g.flags, { long: true, forest_day: 2 });
+        const g = ensureBars(newGame(9100 + i)); g.scene = hub; g.minutes = calMinutes(g, 9, 9); g.james.qi = 30; g.james.satiety = 70; Object.assign(g.flags, { long: true, forest_day: 2 });
         const t = taskState(g);
         for (const c of taskCards(g, SCENES)) if (c.kind === 'work' || c.kind === 'door') t.fam[c.id] = f;
         for (const c of taskCards(g, SCENES)) if (c.kind === 'work' || c.kind === 'door') { seen.add(c.id); const l = famLine(c); if (l !== expect(f)) bad.push(`${c.id} at ${f}: ${l}`); }
@@ -3314,7 +3326,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
 
 // v0.10.0: meridian sessions, a card that would end the Coil, starving 1.5 HP an hour, rest and sleep at once (the queue went in v0.11.64)
 {
-    const g = ensureBars(newGame(70, { closed: true })); g.scene = 'wilds'; g.minutes = 1440 + 8 * 60; Object.assign(g.flags, { long: true, forest_day: 2 });
+    const g = ensureBars(newGame(70, { closed: true, cal: OC2_OLD })); /* OC2: the old calendar's meridian hours (the long one's ×4: tests/story.test.mjs SC2) */ g.scene = 'wilds'; g.minutes = 1440 + 8 * 60; Object.assign(g.flags, { long: true, forest_day: 2 });
     // a meridian session as a card
     assert(merChoice(g, SCENES) === 0 && taskOpen(g, SCENES, MER_TASK), 'a closed start offers the next primary as a card');
     const m0 = g.minutes;
@@ -3325,7 +3337,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     g.james.satiety = 10; assert(!taskOpen(g, SCENES, MER_TASK), 'Fed under 20: no meridian card'); g.james.satiety = 70;
     // v0.11.13 (E1): one card per meridian line; collaterals queueable while primaries are still closed; an old mer:next queue still runs
     {
-        const L = ensureBars(newGame(76, { closed: true })); L.scene = 'stream'; L.james.qi = 25; L.james.satiety = 70; L.james.primaries = 3; L.yuki.primaries = 3;
+        const L = ensureBars(newGame(76, { closed: true, cal: OC2_OLD })); /* OC2 */ L.scene = 'stream'; L.james.qi = 25; L.james.satiety = 70; L.james.primaries = 3; L.yuki.primaries = 3;
         const ids = taskCards(L, SCENES).filter((c) => c.kind === 'mer').map((c) => c.id);
         assert(ids.join() === 'mer:pri,mer:col' && !ids.includes(MER_TASK), `v0.11.13: two meridian cards on the stream (${ids.join()})`);
         assert(medCards(L, SCENES).filter((c) => /^med:mer:/.test(c.id)).map((c) => c.task).join() === 'mer:pri,mer:col', 'v0.11.13: the Meditate cards carry the queue ids');
@@ -3342,7 +3354,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
         // v0.11.14: no Meditate on a story screen; on Act 1's resting places the Meditate cards queue
         const a = ensureBars(newGame(77, { closed: true })); a.scene = 'arrival'; a.james.qi = 25; a.james.satiety = 70;
         assert(!medCards(a, SCENES).length && !isQueueScreen(a, SCENES) && !taskCards(a, SCENES).length, 'v0.11.14: the arrival has no Meditate and no task cards');
-        const rc = ensureBars(newGame(80, { closed: true })); rc.scene = 'rt_camp'; rc.james.qi = 30; rc.james.satiety = 70;
+        const rc = ensureBars(newGame(80, { closed: true, cal: OC2_OLD })); /* OC2 */ rc.scene = 'rt_camp'; rc.james.qi = 30; rc.james.satiety = 70;
         const rm = medCards(rc, SCENES);
         assert(isQueueScreen(rc, SCENES) && rm.find((c) => c.id === 'med:mer:pri')?.task === 'mer:pri' && rm.find((c) => c.id === 'rt_camp:3')?.task === 'rt_camp:3', 'v0.11.19: rt_camp is a task screen: the primary and its own sit card carry queue ids');
         assert(isTaskHub(rc) && taskCards(rc, SCENES).some((c) => c.id === 'rt_camp:3') && taskCards(rc, SCENES).some((c) => c.kind === 'door' && /fire/.test(c.label)) && taskCards(rc, SCENES).some((c) => c.id === 'mer:pri'), 'v0.11.19: rt_camp: its chores, doors and Meditate cards are cards');
@@ -3388,7 +3400,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
             assert(p.sits >= 2 && r.sits === p.sits && r.minutes === p.minutes && r.qi === p.qi && same(x, taps), `C1 (${scene}): the loop = ${p.sits} single taps of ${id}, and the button's numbers are what happens`);
             assert(r.stop === 'qi' && x.james.qi < 10, `C1 (${scene}): from a full bar Qi runs out first (${r.stop}, Qi ${x.james.qi})`);
         }
-        const s1 = mk(94, 'stream', { realm: 1, saturation: 81.6, qi: 999 }); const r1 = sitLoop(s1, SCENES); // v0.11.66 (S1): +6.7% a sit at Foundation
+        const s1 = mk(94, 'stream', { realm: 1, saturation: 91.6, qi: 999 }); const r1 = sitLoop(s1, SCENES); // v0.11.66 (S1): +6.7% a sit at Foundation; OC4: +1.7% on the long calendar (÷4), so 91.6% (was 81.6%)
         assert(r1.stop === 'sat' && s1.james.saturation === 95 && r1.sits === 2, `C1: it stops at the breakthrough point, 95% (${s1.james.saturation}%, ${r1.stop})`);
         const s2 = mk(95, 'stream'); s2.minutes = 1440 + 22 * 60 + 30; const r2 = sitLoop(s2, SCENES); // 22:30: one sit ends 23:30, a second would end past midnight (v0.11.91)
         assert(r2.stop === 'night' && r2.sits === 1 && !nightLock(s2) && s2.minutes <= 2 * 1440, `C1: it stops before a sit that would end past midnight (${r2.sits} sits, ${r2.stop})`);
@@ -3488,12 +3500,12 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
 {
     const { onceOpen, stageOpen, noteOnce, oneOffLeft, ONCE_MENUS, ONCE_STAGES, onceKey } = await import('../js/story/oneoff.js');
     const { wakeDay: wd } = await import('../js/core/game.js');
-    const at5 = () => { const g = ensureBars(newGame(21, { closed: true })); g.minutes = calMinutes(g, 5, 8); goTo(g, SCENES, 'ashfall'); Object.assign(g.flags, { healed_try: true, elder: true }); return g; };
+    const at5 = (cal) => { const g = ensureBars(newGame(21, { closed: true, cal })); g.minutes = calMinutes(g, 5, 8); goTo(g, SCENES, 'ashfall'); Object.assign(g.flags, { healed_try: true, elder: true }); return g; };
     const ids = (g) => taskCards(g, SCENES).map((c) => c.id);
-    const g = at5();
+    const g = at5(OC2_OLD); // OC2: the old calendar's one-off in one go (the long one's week cards carry on: tests/story.test.mjs)
     assert(ids(g).includes('drill:0') && ids(g).includes('drill:1'), 'once: both militia choices open on Day 5');
     // owner 14:05: a failed try can be made again; only a success uses the one-off up
-    const f = at5(); f.james.gu = { tier: 1, level: 1, xp: 0 }; f.james.satiety = 0; f.tasks.fam = {}; ensureBars(f);
+    const f = at5(OC2_OLD); f.james.gu = { tier: 1, level: 1, xp: 0 }; f.james.satiety = 0; f.tasks.fam = {}; ensureBars(f);
     const fr = runTask(f, SCENES, 'drill:0');
     if (/failed/.test(fr.lines.join(' '))) assert(!f.flags[onceKey('drill', 0)] && taskCards(f, SCENES).some((c) => c.id === 'drill:0'), 'once: a failed militia drill stays open (tomorrow)');
     else assert(false, 'once: the weak-James drill was meant to fail (test setup)');
@@ -3528,7 +3540,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     assert(!oneOffLeft(k, SCENES, 'ashfall') && ids(k).includes(`ashfall:${ci}`), 'skip: shown once the one-offs are done, at once');
     assert(!v.choices.some((c) => /^Evening/.test(c.label)), 'skip: the evening exit not yet at 08:00');
     runTask(k, SCENES, `ashfall:${ci}`);
-    assert(k.scene === 'ashfall' && clockParts(k.minutes).day === 5 && clockParts(k.minutes).hh === 16 && clockParts(k.minutes).mm === 0, 'skip: the clock at 16:00 the same day, still on the hub');
+    assert(k.scene === 'ashfall' && clockParts(k.minutes).day === calMinutes(k, 5) / 1440 + 1 && clockParts(k.minutes).hh === 16 && clockParts(k.minutes).mm === 0, 'skip: the clock at 16:00 the same day, still on the hub');
     assert(sceneView(k, SCENES).choices.some((c) => /^Evening/.test(c.label)) && !ids(k).includes(`ashfall:${ci}`), 'skip: the evening exit shows, the skip is gone');
     // after the Fable review: Ashfall's last day (a one-time menu, a checked chore), the Old Tree's story stops, before 04:00
     const r = ensureBars(newGame(22, { closed: true })); r.minutes = calMinutes(r, 20, 8); goTo(r, SCENES, 'rt_ashfall'); Object.assign(r.flags, { council_done: true, ya_village: true });
@@ -3595,7 +3607,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     f.seen.wilds = 1; assert(!againView(f, { id: 'wilds', text: 'a\n\nb' }).fold && noFold('wilds') && noFold('coil_end') && noFold(Object.keys(TASK_HUBS)[0]), 'P1-a: no fold on the task screens, their menus or the Coil\'s screens');
     assert(!againView(f, { id: 'night_won', text: 'one paragraph only' }).fold, 'P1-a: a one-sentence scene does not fold (v0.11.229, FR: a one-paragraph scene of two sentences or more folds to its first)');
     // the skip: night_won → morning → wilds (a task screen), two steps, the same as tapping
-    const s0 = ensureBars(newGame(3507, { closed: true })); s0.flags.long = true; s0.flags.forest_day = 2; s0.minutes += 1440 + 22 * 60; goTo(s0, SCENES, 'night_won'); goTo(s0, SCENES, 'morning'); goTo(s0, SCENES, 'night_won');
+    const s0 = ensureBars(newGame(3507, { closed: true, cal: OC2_OLD })); /* OC2: the old calendar's forest night every night */ s0.flags.long = true; s0.flags.forest_day = 2; s0.minutes += 1440 + 22 * 60; goTo(s0, SCENES, 'night_won'); goTo(s0, SCENES, 'morning'); goTo(s0, SCENES, 'night_won');
     { const r0 = JSON.parse(JSON.stringify(s0)); for (let k = 0; k < 3 && r0.scene !== 'wilds'; k++) { noteRead(s0, sceneView(r0, SCENES).text); choose(r0, SCENES, sceneView(r0, SCENES).choices.filter((c) => !c.disabled)[0].index); } } // v0.11.133 (FP2): Coil 1 read the stretch
     s0.coil.n = 2;
     const pl = skipPlan(s0, SCENES);
@@ -4036,7 +4048,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     for (const [hh, mm, jump] of [[4, 30, false], [5, 50, false], [15, 0, true], [1, 0, false]]) {
         const g = ensureBars(newGame(4605)); g.minutes = calMinutes(g, 13, hh, mm); g.flags.bl_region = 'rr'; const m0 = g.minutes;
         BLACKROOT.bl_camp.enter(g);
-        const want = jump ? 12 * 1440 + 19 * 60 : m0;
+        const want = jump ? calMinutes(g, 13, 19) : m0; // OC4: that story day's 19:00
         assert(g.minutes === want, `bl_camp entered at ${hh}:${String(mm).padStart(2, '0')}: ${jump ? 'to 19:00' : 'the clock stays'} (moved ${g.minutes - m0} min)`);
     }
 }
@@ -4073,7 +4085,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     const camp = Object.values(RETURN).find((x) => x.id === 'rt_camp');
     for (const [hh, mm, jump] of [[4, 30, false], [1, 0, false], [15, 0, true]]) {
         const g = ensureBars(newGame(4702)); g.minutes = calMinutes(g, 20, hh, mm); const m0 = g.minutes; camp.enter(g);
-        assert(g.minutes === (jump ? 19 * 1440 + 19 * 60 : m0), `N1: rt_camp entered at ${hh}:${String(mm).padStart(2, '0')}: ${jump ? 'to 19:00' : 'the clock stays'} (moved ${g.minutes - m0} min)`);
+        assert(g.minutes === (jump ? calMinutes(g, 20, 19) : m0), `N1: rt_camp entered at ${hh}:${String(mm).padStart(2, '0')}: ${jump ? 'to 19:00' : 'the clock stays'} (moved ${g.minutes - m0} min)`);
     }
     const morning = Object.values(RETURN).find((x) => String(x.enter || '').includes('toHour(g, 6)'));
     const mg = ensureBars(newGame(4703)); mg.minutes = calMinutes(mg, 20, 4, 30); morning.enter(mg);
@@ -4095,22 +4107,22 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     const G = await import('../js/core/game.js');
     const T = await import('../js/core/tasks.js');
     // S1: Saturation hours ×1.5 a realm; sits to 95%, a sit's gain rounded to 0.1% as before (Mortal Vessel 10 … Nascent Soul 159)
-    const sits95 = [0, 1, 2, 3, 4, 5, 6, 7].map((r) => { const g = ensureBars(newGame(6601, { closed: true })); g.james.realm = r; return Math.ceil(95 / sitGain(g) - 1e-9); });
+    /* OC2: the sits and a sit's XP at the old calendar's pace (×1); the long calendar's ÷4 / ×0.7: tests/story.test.mjs SC2 */ const sits95 = [0, 1, 2, 3, 4, 5, 6, 7].map((r) => { const g = ensureBars(newGame(6601, { closed: true, cal: OC2_OLD })); g.james.realm = r; return Math.ceil(95 / sitGain(g) - 1e-9); });
     assert(sits95.join() === '10,15,22,32,48,74,106,159', `S1: sits to 95% by realm (${sits95.join(', ')})`);
     assert(Math.abs(SAT_HOURS(7) - 10 * 1.5 ** 7) < 1e-9 && SAT_HOURS(14) > SAT_HOURS(13), 'S1: SAT_HOURS = 10 × 1.5^realm');
     // X1: every sit pays a third of a standard award to Convergence Use and GU, with Yuki's bond share
     const sitXp = (g) => { const c = structuredClone(g); return awardXp(c, 'Convergence Use', 'standard', { factor: 1 / 3 }); };
     {
-        const g = ensureBars(newGame(6602, { closed: true })); g.james.qi = 30;
+        const g = ensureBars(newGame(6602, { closed: true, cal: OC2_OLD })); g.james.qi = 30;
         const cu0 = g.james.skills['Convergence Use'].xp, gu0 = g.james.gu.xp, y0 = g.yuki.qiUse.xp, want = sitXp(g);
         const r = condense(g);
         assert(r.ok && r.xp.length === 3 && JSON.stringify(r.xp) === JSON.stringify(want), `X1: a sit's XP lines (${r.xp.join('; ')})`);
         assert(g.james.skills['Convergence Use'].xp - cu0 === 3 && g.james.gu.xp - gu0 === 3 && g.yuki.qiUse.xp - y0 === 3, 'X1: T1 on Coil 1: Convergence Use +3, GU +3, Yuki Qi Use +3 (a third of 30 is 10, ×0.6 the XP rate since v0.11.85: 6, split)');
         const n = ensureBars(newGame(6603, { closed: true })); n.james.qi = 5; const nx = JSON.stringify([n.james.gu, n.yuki.qiUse]);
         const rn = condense(n); assert(!rn.ok && !rn.xp.length && JSON.stringify([n.james.gu, n.yuki.qiUse]) === nx, 'X1: no sit (short of Qi), no XP');
-        const c3 = ensureBars(newGame(6604, { closed: true })); c3.coil.n = 3; c3.james.qi = 30; const r3 = condense(c3);
+        const c3 = ensureBars(newGame(6604, { closed: true, cal: OC2_OLD })); c3.coil.n = 3; c3.james.qi = 30; const r3 = condense(c3);
         assert(/Convergence Use \+4 XP/.test(r3.xp[0]), `X1: the Coil bonus applies (Coil 3 ×1.5, ×0.6: ${r3.xp[0]})`);
-        const t2 = ensureBars(newGame(6605, { closed: true })); t2.james.skills['Convergence Use'] = { tier: 2, level: 1, xp: 0 }; t2.james.qi = 30;
+        const t2 = ensureBars(newGame(6605, { closed: true, cal: OC2_OLD })); t2.james.skills['Convergence Use'] = { tier: 2, level: 1, xp: 0 }; t2.james.qi = 30;
         assert(/Convergence Use \+6 XP/.test(condense(t2).xp[0]), 'X1: the pool goes by the skill\'s tier (T2: +6 with the XP rate)');
     }
     { // the sit from Meditate and from the task card carry the XP lines
@@ -4136,7 +4148,8 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
         assert(r.sits >= 2 && JSON.stringify([a.james.gu, a.james.skills['Convergence Use'], a.yuki.qiUse]) === JSON.stringify([b.james.gu, b.james.skills['Convergence Use'], b.yuki.qiUse]), `X1: the loop's XP = that many single sits (${r.sits} sits)`);
     }
     // G4: the vessels and their collaterals from Golden Core (realm 4), still sealed at Nascent Soul
-    const at = (realm, e = 0, c = 0) => { const g = ensureBars(newGame(6610)); g.james.realm = realm; g.yuki.realm = realm; g.james.extra8 = e; g.james.extraCollaterals = c; return g; };
+    /* OC2: the extraordinary meridians' hours at the old calendar's pace (×1); the long one's ×4: tests/story.test.mjs SC2 */
+    const at = (realm, e = 0, c = 0) => { const g = ensureBars(newGame(6610, { cal: OC2_OLD })); g.james.realm = realm; g.yuki.realm = realm; g.james.extra8 = e; g.james.extraCollaterals = c; return g; };
     assert([0, 1, 2, 3, 4, 5, 6, 7].map((r) => (MER.canExtra8(at(r)) ? 1 : 0)).join('') === '00001110' && MER.EXTRA_FROM === 4, 'G4: the vessels open at realms 4–6 only');
     assert([0, 1, 2, 3, 4, 5, 6, 7].map((r) => (MER.lineWindow(at(r), 'e8') ? 1 : 0)).join('') === '00001110', 'G4: the vessel card\'s window the same');
     assert(!medCards(Object.assign(at(2), { scene: 'stream' }), SCENES).some((c) => c.id === 'med:mer:e8') && medCards(Object.assign(at(4), { scene: 'stream' }), SCENES).some((c) => c.id === 'med:mer:e8'), 'G4: no vessel card at Core Formation, one at Golden Core');
@@ -4309,7 +4322,9 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
             const h = structuredClone(w); taskState(h).fam[b.id] = 5.4; const sp = cardSpeed(5.4);
             const ei = SCENES.wilds.choices.findIndex((c) => c.to === 'wild_explore'), entry = SCENES.wilds.choices[ei].time || 0, own = SCENES.wild_explore.choices[Number(b.id.split(':')[1])].time || 0;
             assert(Math.abs(sp - 3.7) < 1e-9 && taskMinutes(h, SCENES, b.id) === doorMinutes(entry, sp) + doorMinutes(own, sp) && taskMinutes(h, SCENES, b.id) < tb, `TG: a door at familiarity 5.4 (a share): ÷ ${sp} (${tb} → ${taskMinutes(h, SCENES, b.id)} min)`);
-            assert(taskOutcome(h, SCENES, b.id).minutes === taskMinutes(h, SCENES, b.id), 'TG: a door menu\'s card shows its sped walk (taskOutcome = taskMinutes)');
+            // OC2: on the old calendar the dry run is the walk alone (the long one's adds the day's meal and sit, v0.11.253: tests/story.test.mjs)
+            { const wo = ensureBars(newGame(6630, { closed: true, cal: OC2_OLD })); wo.scene = 'wilds'; wo.location = 'wilds'; wo.minutes = 8 * 60; wo.james.satiety = 90; wo.james.hp = jamesHpMax(wo); taskState(wo).fam[b.id] = 5.4;
+              assert(taskOutcome(wo, SCENES, b.id).minutes === taskMinutes(wo, SCENES, b.id), 'TG: a door menu\'s card shows its sped walk (taskOutcome = taskMinutes)'); }
         }
     }
     // TG: a door that would end past midnight is open once its walk is short enough (the lock reads the sped walk)
@@ -4363,7 +4378,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
         }
         assert(done, 'TG: a fight choice finished in one move');
         // skipPlan on a copy (the P1-a setup: night_won → morning → wilds), then the real skip counts like tapping
-        const s0 = ensureBars(newGame(3507, { closed: true })); s0.flags.long = true; s0.flags.forest_day = 2; s0.minutes += 1440 + 22 * 60; goTo(s0, SCENES, 'night_won'); goTo(s0, SCENES, 'morning'); goTo(s0, SCENES, 'night_won');
+        const s0 = ensureBars(newGame(3507, { closed: true, cal: OC2_OLD })); /* OC2: the old calendar's forest night every night */ s0.flags.long = true; s0.flags.forest_day = 2; s0.minutes += 1440 + 22 * 60; goTo(s0, SCENES, 'night_won'); goTo(s0, SCENES, 'morning'); goTo(s0, SCENES, 'night_won');
         { const r0 = JSON.parse(JSON.stringify(s0)); for (let k = 0; k < 3 && r0.scene !== 'wilds'; k++) { noteRead(s0, sceneView(r0, SCENES).text); choose(r0, SCENES, sceneView(r0, SCENES).choices.filter((c) => !c.disabled)[0].index); } }
         s0.coil.n = 2; const u0 = JSON.stringify(s0.tasks.use || {});
         const pl = skipPlan(s0, SCENES);
@@ -4405,7 +4420,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     const sp = chores.filter(([h, , c]) => choreSpeeds(h, c)), sits = chores.filter(([, , c]) => /condense\(g\)/.test(String(c.do))), rests = chores.filter(([, , c]) => /resting: true/.test(String(c.do)));
     assert(sp.length >= 10 && sits.length >= 9 && rests.length >= 8 && !sits.some(([h, , c]) => choreSpeeds(h, c)) && !rests.some(([h, , c]) => choreSpeeds(h, c)) && SCENES.lf_hub.choices.some((c) => c.noFam && c.time === 120 && !choreSpeeds('lf_hub', c)), `CH: ${sp.length} chores speed (eating, cooking, the camp's fire and stakes); ${sits.length} sits, ${rests.length} rests and the season keep their time`);
     { const r0 = ensureBars(newGame(6641, { closed: true })); r0.scene = 'wilds'; r0.location = 'wilds'; r0.minutes = 1440 + 10 * 60; r0.james.hp = 5; const rid = taskCards(r0, SCENES).find((c) => /^Rest in the shade/.test(c.label))?.id;
-      if (rid) { const a = structuredClone(r0), b = structuredClone(r0); taskState(b).fam[rid] = 18; const ma = a.minutes, mb = b.minutes; runTask(a, SCENES, rid); runTask(b, SCENES, rid); assert(a.minutes - ma === 60 && b.minutes - mb === 60, `CH: a rest keeps its hour at any familiarity (${b.minutes - mb})`); } else assert(false, 'CH: the wilds offer a rest'); }
+      if (rid) { const a = structuredClone(r0), b = structuredClone(r0); taskState(b).fam[rid] = 18; const ma = a.minutes, mb = b.minutes; runTask(a, SCENES, rid); runTask(b, SCENES, rid); assert(a.minutes - ma === 60 * NEW_LENGTH && b.minutes - mb === 60 * NEW_LENGTH, `CH: a rest keeps its hour (×NEW_LENGTH on the long calendar: OC4) at any familiarity (${a.minutes - ma} / ${b.minutes - mb})`); } else assert(false, 'CH: the wilds offer a rest'); }
 }
 // v0.11.141 (owner pick RW1, Fable's review of FX1): M1b the door's scenes end with the day, NF, CL
 {
@@ -4478,7 +4493,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     { const g = low(9443, 18 * 60), c = low(9443, 18 * 60); nightTo(g, 60); eveningTo(c); const mid = bars(c).slice(); advance(c, 240, { resting: true });
       assert(clockParts(g.minutes).hh === 1 && g.james.hp === c.james.hp && g.james.hp > mid[0], `NF1 (L2): a bed at 18:00 waits to 21:00, then sleeps to 01:00 (HP ${g.james.hp.toFixed(2)} = ${c.james.hp.toFixed(2)})`); }
     // every night encounter's scene gets it: a James and Yuki who sat themselves empty meet the night with bars back
-    const scenes = [['night_event', 2, {}], ['night_attack', 3, {}], ['bl_night_event', 12, { bl_region: 'rr', bl_day: 2 }], ['village_night', 5, { vday: 2 }], ['fo_wolf', 8, {}]];
+    const scenes = [['night_event', 2, {}], ['night_attack', 3, {}], ['bl_night_event', 12, { bl_region: 'rr', bl_day: 2 }], ['village_night', 5, { vday: 2, cal_night: 6 }], ['fo_wolf', 8, {}]]; // OC4: the arson comes on the week's seventh night on the long calendar (cal_night 6)
     for (const [sc, d, flags] of scenes) {
         const g = low(9450 + d, (d - 1) * 1440 + 22 * 60); Object.assign(g.flags, flags); g.scene = sc;
         SCENES[sc].enter?.(g);
